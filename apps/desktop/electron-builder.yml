@@ -1,0 +1,10 @@
+appId: kr.sweetwo.app
+productName: sweeTwo
+directories: { output: dist, buildResources: build }
+files: ["out/**"]
+protocols: [{ name: sweeTwo, schemes: [sweetwo] }]
+mac: { category: public.app-category.finance, target: [dmg, zip], hardenedRuntime: true }
+win: { target: [nsis] }
+nsis: { oneClick: true, perMachine: false }
+publish: { provider: generic, url: "https://download.sweetwo.kr/latest" }
+# 서명: macOS는 Developer ID, Windows는 클라우드 HSM OV(SSL.com eSigner) — docs/DEV_GUIDE.md ‘서명과 CI’

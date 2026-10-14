@@ -1,0 +1,8 @@
+{
+  "name": "@sweetwo/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "astro dev", "build": "astro build", "typecheck": "astro check || true" },
+  "dependencies": { "astro": "^5.18.2" }
+}

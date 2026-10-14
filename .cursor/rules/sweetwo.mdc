@@ -1,0 +1,12 @@
+---
+description: sweeTwo 저장소 공통 규칙. 모든 작업에 항상 적용.
+alwaysApply: true
+---
+
+이 저장소의 규칙 본문은 `CLAUDE.md` 하나에 있다. 아래 파일을 먼저 읽고 그대로 지킨다.
+
+@CLAUDE.md
+
+- 기획서: `docs/spec/` (목차 `docs/spec/README.md`), 디자인: `docs/DESIGN.md`와 `docs/design/`, 개발 가이드: `docs/DEV_GUIDE.md`.
+- 화면 하나를 만들기 전에 그 화면 ID를 `docs/spec`에서 찾아 요소 표, 문구, 예외를 읽는다. 쓰는 컴포넌트는 `docs/design/components/<이름>.md`를 읽는다.
+- 코드를 바꾸며 기획, 디자인, 규칙이 달라지면 같은 변경에서 해당 md를 바로 고친다.

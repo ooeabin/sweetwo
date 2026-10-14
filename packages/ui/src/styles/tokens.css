@@ -1,0 +1,230 @@
+/* docs/design/tokens.css에서 복사 (uncommitted). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* sweeTwo — generated from tokens.json */
+:root, [data-theme="light"] {
+  --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
+  --surface-alt: #f7f7f5; /* 사이드바, 보조 패널, 묶음 배경. surface 위 구획용. */
+  --surface-sunk: #fafaf8; /* 표 머리, 입력 대기열 같은 한 단계 가라앉은 영역. */
+  --hairline: #e3e2de; /* 카드 테두리, 구분선. 의미를 싣지 않는 선에만. */
+  --hairline-soft: #efeeea; /* 표 행 구분, 목록 사이 얇은 선. */
+  --border-control: #8f8c85; /* 입력 칸·체크박스·보조 버튼 테두리. surface·surface-alt 위 3:1 이상. */
+  --ink: #1c1b19; /* 제목·본문 기본 글자색, 주 버튼(검정 알약) 바탕. surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
+  --ink-2: #2d2b28; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
+  --slate: #57554f; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
+  --stone: #74716a; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
+  --muted: #a8a59e; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
+  --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
+  --primary-pressed: #3a3835; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
+  --brand: #c8102e; /* sweeTwo 브랜드 색(체리). 작은 점과 글자에만: 워드마크, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면과 버튼에는 쓰지 않음(오류 버튼과 헷갈림). */
+  --brand-soft: #fde8ec; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
+  --brand-ink: #9e0f2c; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
+  --on-brand: #ffffff; /* brand 바탕 위 글자(달성 배지). 라이트는 흰 글자, 다크는 어두운 글자. */
+  --focus: #3d5afe; /* 키보드 포커스 링(2px)과 글자 링크. surface·surface-alt 위 4.5:1 이상. */
+  --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
+  --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
+  --family: #efe7fb; /* ‘양가’ 영역 틴트: 챙길 날의 양가 일정, 양가 비용. */
+  --family-ink: #5b3a9a; /* family 위 라벨·배지 글자. */
+  --goal: #f6eee5; /* 목표 영역 틴트: 목표 카드, 목표자금. 따뜻한 모래색으로 체리 브랜드 색과 구분. */
+  --goal-ink: #6b4a2b; /* goal 위 라벨·배지 글자. */
+  --safety: #d9f4f9; /* 비상금 영역 틴트. */
+  --safety-ink: #0e5d6b; /* safety 위 라벨·배지 글자. */
+  --invest: #dcf5e2; /* 투자·부동산 영역 틴트(평가 손익 줄 포함). */
+  --invest-ink: #1e6b38; /* invest 위 라벨·배지 글자. */
+  --person-1: #ffe0d6; /* 먼저 시작한 사람(찬우)의 Avatar 바탕(연한 코랄). 보는 사람과 상관없이 사람마다 고정. */
+  --person-1-ink: #8f3a22; /* person-1 위 이니셜. */
+  --person-2: #c9d8ff; /* 합류한 사람(예빈)의 Avatar 바탕. */
+  --person-2-ink: #1f3a99; /* person-2 위 이니셜. */
+  --success: #0a7d56; /* 완료·확정 표시(체크, ‘확정’ 배지 바탕). 글자는 on-success. */
+  --on-success: #ffffff; /* success 바탕 위 글자. */
+  --danger: #c2410c; /* 입력 오류·저장 실패에만. 체리 브랜드 색과 구분되게 주황빛 빨강, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
+  --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
+  --scrim: rgba(28,27,25,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
+  --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
+  --chart-together: #e7566b; /* 차트 계열: 우리 둘(공동 생활비). 계열 순서 2. */
+  --chart-safety: #2cbad7; /* 차트 계열: 비상금. 계열 순서 3. 흰 바탕 3:1 미만이라 범례·라벨 필수. */
+  --chart-family: #966cd7; /* 차트 계열: 양가. 계열 순서 4. */
+  --chart-invest: #61cb7c; /* 차트 계열: 투자·부동산. 계열 순서 5. 흰 바탕 3:1 미만이라 범례·라벨 필수. */
+  --chart-area: rgba(28,27,25,0.06); /* 단일 계열 선 차트 아래 면. */
+  --shadow-1: 0px 1px 2px 0px rgba(28,27,25,0.05); /* 누를 수 있는 카드의 쉼 상태. */
+  --shadow-2: 0px 4px 12px 0px rgba(28,27,25,0.07); /* 떠 있는 카드, 드롭다운. */
+  --shadow-3: 0px 16px 40px -8px rgba(28,27,25,0.14); /* 모달, 바텀시트, 토스트. */
+}
+[data-theme="dark"] {
+  --surface: #141312;
+  --surface-alt: #1c1b19;
+  --surface-sunk: #181715;
+  --hairline: #2e2c29;
+  --hairline-soft: #24231f;
+  --border-control: #726e67;
+  --ink: #f2f0eb;
+  --ink-2: #dad7d0;
+  --slate: #b4b0a8;
+  --stone: #9c988f;
+  --muted: #5c5953;
+  --on-ink: #141312;
+  --primary-pressed: #cfcbc3;
+  --brand: #ff5c74;
+  --brand-soft: #3d1820;
+  --brand-ink: #ffb3bf;
+  --on-brand: #1c1b19;
+  --focus: #8a9bff;
+  --together: #3d1f24;
+  --together-ink: #f6b3bd;
+  --family: #2b2340;
+  --family-ink: #cdb9f5;
+  --goal: #2e2620;
+  --goal-ink: #e8cfb2;
+  --safety: #16323a;
+  --safety-ink: #9fe0ec;
+  --invest: #183324;
+  --invest-ink: #a5e2b6;
+  --person-1: #4a2620;
+  --person-1-ink: #ffc2b3;
+  --person-2: #1e2c55;
+  --person-2-ink: #b3c7ff;
+  --success: #34c38f;
+  --on-success: #141312;
+  --danger: #ff8a5c;
+  --on-danger: #141312;
+  --scrim: rgba(0,0,0,0.60);
+  --chart-goal: #be8838;
+  --chart-together: #e04f65;
+  --chart-safety: #00a4c0;
+  --chart-family: #9065d0;
+  --chart-invest: #41ae61;
+  --chart-area: rgba(242,240,235,0.08);
+  --shadow-1: 0px 1px 2px 0px rgba(0,0,0,0.4);
+  --shadow-2: 0px 4px 12px 0px rgba(0,0,0,0.45);
+  --shadow-3: 0px 16px 40px -8px rgba(0,0,0,0.6);
+}
+:root {
+  --space-1: 4px; /* 아이콘과 글자 사이, 배지 안쪽 세로. */
+  --space-2: 8px; /* 칩 사이, 행 안 요소 간격. */
+  --space-3: 12px; /* 입력 칸 안쪽 세로, 목록 행 사이. */
+  --space-4: 16px; /* 카드 안쪽 기본, 좁은 창 좌우 여백. */
+  --space-5: 20px; /* 카드 사이 간격. */
+  --space-6: 24px; /* 카드 안쪽 넓게, 질문 제목과 입력 사이. */
+  --space-8: 32px; /* 섹션 사이, 강조 카드 안쪽. */
+  --space-10: 40px; /* 질문 화면 위 여백. */
+  --space-14: 56px; /* 하단 독 높이, 키패드 키, 목록 행 최소 높이. */
+  --space-16: 64px; /* 큰 구획 사이(데스크톱). */
+  --space-22: 88px; /* 좁은 창 본문 아래 여백(독 56 + 띄움 16 + 16). */
+  --content-max: 720px; /* 본문 최대 너비. */
+  --question-max: 480px; /* 질문 화면 한 열 너비, 입력 칸 최대 너비. */
+  --site-max: 1200px; /* 웹사이트(L 화면) 본문 최대 너비. 넓은 창 2단, 좁은 창(768px 미만) 1단. */
+  --dock-h: 56px; /* 좁은 창 하단 독 높이. */
+  --radius-xs: 4px; /* 작은 표시, 진행 칸 모서리. */
+  --radius-sm: 6px; /* 툴팁, 작은 칩 안 요소. */
+  --radius-md: 8px; /* 입력 칸, 검색. */
+  --radius-lg: 12px; /* 목록 묶음, 토스트. */
+  --radius-xl: 16px; /* 기본 카드. */
+  --radius-2xl: 24px; /* 영역 틴트 강조 카드, 바텀시트 위 모서리. */
+  --radius-full: 9999px; /* 모든 버튼, 칩, 배지(알약 모양). */
+  --bp-narrow: 768px; /* 이 너비 미만 = 좁은 창(하단 독, 바텀시트, 주 버튼 하단 고정). */
+  --bp-wide: 1100px; /* 이 너비 미만이면 보조 패널을 본문 아래로. */
+  --z-topbar: 10; /* 상단 줄, 하단 독, 떠 있는 추가 버튼. */
+  --z-dropdown: 20; /* 드롭다운, 툴팁, 날짜 고르기. */
+  --z-sheet: 30; /* 바텀시트와 그 막. */
+  --z-modal: 40; /* 모달, 명령 팔레트와 그 막. */
+  --z-toast: 50; /* 토스트(항상 맨 위). */
+  --dur-fast: 150ms; /* 색·투명도 바뀜, 토글, 체크. */
+  --dur-base: 200ms; /* 드롭다운·툴팁 나타남, 아코디언. */
+  --dur-slow: 250ms; /* 모달·바텀시트 열고 닫힘. */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1); /* 나타남(들어옴). */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* 사라짐(나감). */
+  --font-sans: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --text-display: 600 40px/48px var(--font-sans); /* 온보딩 결과·순자산 같은 화면의 핵심 숫자 1개. */
+  --text-number-lg: 600 28px/36px var(--font-sans); /* 카드 안 대표 금액. tabular-nums. */
+  --text-title-1: 600 28px/38px var(--font-sans); /* 한 화면 한 질문의 질문 제목. */
+  --text-title-2: 600 22px/30px var(--font-sans); /* 화면 제목, 섹션 제목. */
+  --text-title-3: 600 18px/26px var(--font-sans); /* 카드 제목, 목록 묶음 제목. */
+  --text-body: 400 16px/24px var(--font-sans); /* 기본 본문, 보조 1줄. */
+  --text-body-strong: 600 16px/24px var(--font-sans); /* 목록 행의 핵심 값, 강조 본문. */
+  --text-body-sm: 400 14px/21px var(--font-sans); /* 표 칸, 메타 정보(hg-meta: 이름표 stone + 값 ink-2). */
+  --text-label: 600 14px/20px var(--font-sans); /* 버튼·칩·탭 글자. */
+  --text-caption: 400 13px/18px var(--font-sans); /* 회색 보조 줄, 입력 아래 도움말. 정보 여럿은 hg-meta로 16px 띄움. */
+  --text-micro: 600 12px/16px var(--font-sans); /* 배지·태그·숫자 알약·단축키 글자. 가장 작은 글자(12px 미만 금지). */
+}
+.display {
+  font-family: var(--font-sans);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+}
+.number-lg {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.title-1 {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.title-2 {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+.title-3 {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-strong {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.body-sm {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.label {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.caption {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.micro {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+@font-face {
+  font-family: "SUIT Variable";
+  src: url("fonts/SUIT-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}

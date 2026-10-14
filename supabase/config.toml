@@ -1,0 +1,14 @@
+# supabase start로 로컬 실행. 스테이징 sweetwo-staging, 운영 sweetwo-prod (Pro 플랜, 서울)
+project_id = "sweetwo"
+
+[api]
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://app.sweetwo.kr/auth/callback", "sweetwo://auth"]
