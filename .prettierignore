@@ -1,3 +1,6 @@
 docs/design/*.css
 packages/ui/src/styles/*.css
 pnpm-lock.yaml
+
+# 문서는 손으로 쓴 그대로(표 정렬 등을 바꾸지 않음)
+*.md

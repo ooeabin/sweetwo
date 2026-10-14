@@ -115,14 +115,21 @@ sweetwo/
 
 - Node: 버전은 `.nvmrc`에 고정, `nvm use`
 - pnpm: `corepack enable`로 package.json의 `packageManager` 버전을 씀
-- Docker, Supabase CLI
+- Docker. Supabase CLI는 devDependency라 `pnpm db:*`로 씀
 
 ### 실행
 
-1. `supabase start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket
-2. `pnpm i`
-3. `pnpm dev`: turbo가 web, desktop, functions(`supabase functions serve`)를 같이 띄움
-4. 데이터 초기화: `supabase db reset` (마이그레이션 + seed.sql 다시 실행)
+1. `pnpm i`
+2. `pnpm db:start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket(Docker). 출력의 API URL과 anon key를 `apps/web/.env.local`, `apps/desktop/.env.local`의 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`에
+3. `pnpm dev`: 웹 5173, 어드민 5174. 데스크톱은 `pnpm dev:desktop`
+4. 데이터 초기화: `pnpm db:reset` (마이그레이션 + seed.sql 다시 실행)
+5. 마이그레이션을 바꿨으면 `pnpm db:test`(pgTAP) → `pnpm db:types`(packages/core/src/db.types.ts 다시 만듦, 손으로 고치지 않음)
+6. 컴포넌트 모음: 개발 서버에서 `/dev/ui`(배포 빌드에는 없음)
+
+### 스테이징과 운영 Supabase
+
+- 프로젝트 2개: `sweetwo-staging`, `sweetwo-prod`(서울 리전). 처음 한 번 사람이 만들고 `supabase link --project-ref <ref>`
+- 공개 값(URL, anon key)만 앱 `.env.local`과 GitHub 환경 변수로. service role은 GitHub Secrets와 서버에만
 
 ### 환경 변수와 대체물
 
@@ -294,6 +301,8 @@ sweetwo/
 - 딥링크 수신: macOS는 `open-url`, Windows는 `requestSingleInstanceLock` + `second-instance`의 argv
 - 개발 빌드 등록: `setAsDefaultProtocolClient('sweetwo', process.execPath, [path.resolve(process.argv[1])])`
 - 딥링크 허용 목록: `sweetwo://auth/callback`의 code, state만 받고 나머지는 버림. 초대는 `sweetwo://i/{code}`
+  - 구현: `apps/desktop/src/main/deep-link-parse.ts`(허용 목록), `deep-link.ts`(받기). 로그인 콜백은 main에만 남고, 렌더러에는 초대 코드만 `window.sweetwo.onInvite`로 감
+  - 보안 저장소: `apps/desktop/src/main/secure-store.ts`(main 전용, 렌더러에 노출 안 함)
 - 리다이렉트는 https://app.sweetwo.kr/auth/callback 하나. 이 페이지가 code와 state를 sweetwo://auth/callback 딥링크로 넘김. 루프백(127.0.0.1)은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
 - 토큰 갱신은 main 프로세스만. 렌더러(메인 창, 트레이)는 IPC로 access token만 받음
 - refresh token은 safeStorage로 암호화해 파일에, 30일 슬라이딩
@@ -372,8 +381,8 @@ sweetwo/
 
 ### 그림과 장면 영상
 
-- 목표 그림 21장, 빈 상태 그림 1장, 장면 그림 5장: Illustrations 묶음, 배경을 지운 512px PNG. 모두 앱 아이콘(케이크 조각)과 같은 무광 3D 그림체. `object-fit: contain`
-- 앱 아이콘(체리를 얹은 케이크 조각, 디자인 시스템 Brand 최종 확정): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦. 체리 타르트는 A-02 장면 그림 scene-tart.png(Illustrations, 영상 motion-a02-tart.mp4) 전용
+- 목표 그림 21장, 빈 상태 그림 1장, 장면 그림 5장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 앱 아이콘(케이크 조각)과 같은 무광 3D 그림체. `object-fit: contain`
+- 앱 아이콘(체리를 얹은 케이크 조각, 디자인 시스템 Brand 최종 확정): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦. 체리 타르트는 A-02 장면 그림 scene-tart.webp(Illustrations, 영상 motion-a02-tart.mp4) 전용
 - 장면 영상 5개: Motion 묶음, 480px MP4. W-04, P-11, P-01, H-T1, A-02에만. 영상은 예전 실사 그대로, 3D로 다시 만들기와 P-01, H-T1 잘림 수정은 보류(→ 기획서 출시 준비 4장 체크리스트)
 - 재생: `<video muted playsinline autoplay>`, `loop` 없음, 정지 그림을 `poster`로
 - 다크 모드, ‘동작 줄이기’, 로딩 전과 실패 때는 영상 대신 정지 그림
@@ -381,15 +390,16 @@ sweetwo/
 
 ### 자산 파일 규칙
 
-- 파일 이름: `<종류>-<이름>.png|mp4` (예: `goal-house.png`, `scene-w04-done.mp4`)
-- 크기 상한: 그림 150KB, 영상 1MB. CI가 넘으면 멈춤
+- 파일 이름: `<종류>-<이름>.webp|mp4` (예: `goal-04-home.webp`, `motion-w04-pie.mp4`)
+- 크기 상한: 그림 150KB, 영상 1MB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
+- 그림은 `<Illustration name>`, 빈 상태는 `<EmptyState>`로만 씀. 파일을 직접 import하지 않음
 - 장면 영상은 `<SceneMedia>` 컴포넌트 하나로만: 다크 모드, ‘동작 줄이기’, 로딩 실패 때 정지 그림으로 바꿈
 - 웹 빌드는 파일 이름에 해시(Vite 기본)를 붙여 오래 캐시
 
 ### 디자인 시스템 갱신 절차
 
 1. `docs/design/`(tokens.css, bundle.css, 컴포넌트 md)를 고친 뒤 `pnpm ds:sync`가 packages/ui로 복사하고 파일 머리에 커밋 번호를 주석으로 남김
-2. 컴포넌트 시각 회귀 스크린샷을 돌려 바뀐 곳만 확인
+2. `pnpm --filter @sweetwo/web e2e`로 컴포넌트 모음(/dev/ui)을 라이트, 다크, 좁은 창에서 돌리고 스크린샷(test-results)으로 바뀐 곳 확인
 3. 담당자(디자인 시스템 오너) 승인 후 합침
 
 ## 개발 규칙
@@ -556,7 +566,8 @@ supabase/
 - 테스트마다 DB 초기화(seed 다시 넣기). 테스트끼리 데이터를 나눠 쓰지 않음
 - 음력: fixture를 천문연구원 표와 대조
 - 접근성: 화면마다 axe 검사, ‘동작 줄이기’ 켜고 한 번
-- 디자인 시스템 컴포넌트: 시각 회귀 스크린샷(라이트, 다크)
+- 디자인 시스템 컴포넌트: `/dev/ui` 컴포넌트 모음을 라이트, 다크, 좁은 창(375px)에서 열어 오류 없음, axe 위반 없음, 스크린샷(apps/web/e2e). 기준 이미지 비교는 화면이 안정되면 추가
+- 데스크톱 실행: `apps/desktop/e2e`(빌드 뒤 `xvfb-run -a pnpm --filter @sweetwo/desktop e2e`). 딥링크 허용 목록은 Vitest(`deep-link-parse.test.ts`)
 
 ### 문구
 
@@ -666,7 +677,7 @@ supabase/
 
 ### CI/CD (GitHub Actions)
 
-1. PR: 타입 검사, lint, Vitest, pgTAP(로컬 Supabase), Playwright
+1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright), e2e-desktop(Electron, xvfb), db(로컬 Supabase + pgTAP + DB 타입 비교)
 2. main 합치기: 마이그레이션과 Edge Functions를 스테이징에 배포, 웹을 스테이징 S3에
 3. 태그(v1.2.0): 운영 마이그레이션 → Edge Functions → 웹 → 데스크톱 빌드, 서명, 업데이트 파일 업로드(‘업데이트와 릴리스’)
 
