@@ -3,6 +3,9 @@ on:
   pull_request:
   push:
     branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -18,5 +21,52 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - name: 그림과 영상 크기 상한
+        run: pnpm check:assets
       - name: 비밀 값이 앱 코드에 없는지
         run: "! grep -rnE 'service_role|SUPABASE_SERVICE|AWS_SECRET' apps packages --include=*.ts --include=*.tsx"
+
+  e2e-web:
+    runs-on: ubuntu-latest
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sweetwo/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @sweetwo/web e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: e2e-web, path: apps/web/test-results, if-no-files-found: ignore }
+
+  e2e-desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sweetwo/desktop build
+      - run: xvfb-run -a pnpm --filter @sweetwo/desktop e2e
+
+  db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.120.0 }
+      - name: 로컬 Supabase 시작(마이그레이션 + seed)
+        run: supabase start -x studio,imgproxy,vector,logflare,edge-runtime
+      - name: pgTAP(RLS, DB 함수)
+        run: supabase test db
+      - name: DB 타입 만들기(packages/core/src/db.types.ts와 같아야 함)
+        run: |
+          supabase gen types typescript --local --schema public > db.types.ts
+          if [ -f packages/core/src/db.types.ts ]; then diff -u packages/core/src/db.types.ts db.types.ts; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: db-types, path: db.types.ts, if-no-files-found: ignore }

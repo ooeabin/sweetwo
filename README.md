@@ -14,7 +14,9 @@ cp apps/web/.env.example apps/web/.env.local   # 값 채우기
 pnpm dev            # 웹 5173, 어드민 5174
 pnpm dev:desktop    # 데스크톱 앱
 pnpm dev:site       # 웹사이트
-pnpm test           # core 계산 테스트
+pnpm test           # Vitest(core 계산, 딥링크)
+pnpm db:start       # 로컬 Supabase(Docker)
+pnpm check:assets   # 그림, 영상 크기 상한
 ```
 
 ## 구조

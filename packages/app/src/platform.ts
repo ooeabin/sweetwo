@@ -3,6 +3,8 @@ export type Platform = 'desktop' | 'web';
 
 export interface DesktopBridge {
   version: string;
+  /** 초대 링크(sweetwo://i/{code})를 받는다. 돌려준 함수로 해제. 로그인 콜백은 main만 다룬다. */
+  onInvite: (cb: (code: string) => void) => () => void;
 }
 
 declare global {

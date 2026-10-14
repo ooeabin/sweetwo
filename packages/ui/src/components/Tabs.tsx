@@ -1,0 +1,39 @@
+import { cx } from './cx';
+
+// 알약 탭(hg-tabs)과 세그먼트(hg-seg). docs/design/components/Tabs.md
+export interface TabItem<T extends string> {
+  value: T;
+  label: string;
+}
+
+export function Tabs<T extends string>({
+  items,
+  value,
+  onChange,
+  label,
+  variant = 'tabs',
+}: {
+  items: TabItem<T>[];
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+  variant?: 'tabs' | 'seg';
+}) {
+  const base = variant === 'tabs' ? 'hg-tab' : 'hg-seg__item';
+  return (
+    <div className={variant === 'tabs' ? 'hg-tabs' : 'hg-seg'} role="tablist" aria-label={label}>
+      {items.map((it) => (
+        <button
+          key={it.value}
+          type="button"
+          role="tab"
+          aria-selected={it.value === value}
+          className={cx(base, it.value === value && 'is-active')}
+          onClick={() => onChange(it.value)}
+        >
+          {it.label}
+        </button>
+      ))}
+    </div>
+  );
+}

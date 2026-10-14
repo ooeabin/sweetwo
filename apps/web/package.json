@@ -3,7 +3,26 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "vite", "build": "vite build", "preview": "vite preview", "typecheck": "tsc -p ." },
-  "dependencies": { "@sweetwo/app": "workspace:*", "@sweetwo/ui": "workspace:*", "react": "^18.3.1", "react-dom": "^18.3.1" },
-  "devDependencies": { "@types/react": "^18.3.12", "@types/react-dom": "^18.3.1", "@vitejs/plugin-react": "^4.7.0", "vite": "^6.4.4" }
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p .",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@sweetwo/app": "workspace:*",
+    "@sweetwo/ui": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite": "^6.4.4"
+  }
 }
