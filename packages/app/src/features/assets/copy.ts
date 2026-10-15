@@ -63,6 +63,31 @@ export const copy = {
   highInterest: '금리가 높은 대출이에요. 이 대출부터 갚는 목표를 만들까요?',
   makeGoal: '목표 만들기', // [확인 필요]
 
+  // F-05 월 수입·지출
+  moneyTitle: '월 수입·지출', // [확인 필요] 화면 이름
+  incomeSection: '월 수입',
+  spendSection: '지출',
+  person: (name: string, amount: string) => `${name} ${amount}`,
+  payday: (day: string) => `월급날 ${day}`,
+  baseIncome: '기준 수입',
+  estimatedTag: '추정',
+  allowance: '용돈',
+  allowanceEach: (a: string, b: string) => `${a}, ${b}`,
+  fixed: '고정지출',
+  loan: '대출 상환', // [확인 필요]
+  living: '생활비',
+  saveable: '저축 가능 금액',
+  short: (amount: string) => `${amount} 모자라요`,
+  shortAsk: '어느 항목을 줄여볼까요?',
+  periodChange: '기간 정해서 바꾸기',
+  savedRecalc: '저장했어요. 안 나눈 돈을 다시 계산했어요',
+  savedNoPending: '안 나눈 돈이 없어 월말 정리에서 맞춰요',
+  previewUp: (amount: string) => `저축 가능 금액이 월 ${amount} 늘어요`, // [확인 필요] 기획서는 줄어요만
+  previewDown: (amount: string) => `저축 가능 금액이 월 ${amount} 줄어요`,
+  proposeTo: (name: string) => `${name}님께 제안하기`,
+  proposed: (name: string) => `${name}님에게 제안했어요`,
+  editMoney: '월 수입·지출 수정',
+
   // F-03f~i
   later: '나중에 할게요',
   maturity: '만기일은 언제예요?',

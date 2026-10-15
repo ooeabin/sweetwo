@@ -93,7 +93,12 @@ export function F01Overview() {
               <span className="hg-card__label">{copy.monthCard}</span>
               <span>{monthText}</span>
             </button>
-            <section className="hg-card" aria-label={copy.planCard}>
+            <button
+              type="button"
+              className="hg-card hg-card--raised"
+              aria-label={copy.planCard}
+              onClick={() => nav('/assets/money')}
+            >
               <span className="hg-card__label">{copy.planCard}</span>
               <span className="hg-row" style={{ gap: 'var(--space-6)' }}>
                 <span className="hg-stack" style={{ gap: 0 }}>
@@ -108,7 +113,7 @@ export function F01Overview() {
               <span className="hg-card__meta">
                 {copy.planSaveable(m(Math.max(mv.monthPlan.saveable, 0)))}
               </span>
-            </section>
+            </button>
           </div>
         )}
       </>

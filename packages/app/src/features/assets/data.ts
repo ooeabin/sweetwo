@@ -39,6 +39,7 @@ export function useAssetsData() {
     retry: () => all.forEach((q) => void q.refetch()),
     me: me.data ?? null,
     space: space.data ?? null,
+    partnerProfile: partner.data ?? null,
     couple: c,
     items,
     sums: sums.data ?? [],

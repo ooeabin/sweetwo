@@ -114,7 +114,7 @@ export function H01ThisMonth() {
           <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
             {v.engaged && <WeddingHeader v={v} />}
             {todos}
-            <PlanCard v={v} m={m} />
+            <PlanCard v={v} m={m} onMoney={() => nav('/assets/money')} />
             {v.engaged && <WeddingStatus v={v} m={m} />}
           </div>,
           <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
@@ -217,7 +217,15 @@ function WeddingHeader({ v }: { v: MonthView }) {
 }
 
 /** 월급 플랜(H-03): 플랜 이름 + 임시 + 남은 생활비(또는 남은 나누기) + 통장 4종류 계획액 */
-function PlanCard({ v, m }: { v: MonthView; m: (n: number) => string }) {
+function PlanCard({
+  v,
+  m,
+  onMoney,
+}: {
+  v: MonthView;
+  m: (n: number) => string;
+  onMoney: () => void;
+}) {
   const rows: [string, number][] = [
     [copy.roles.living, v.parts.living],
     [copy.roles.goalFund, v.parts.goalFund],
@@ -245,6 +253,15 @@ function PlanCard({ v, m }: { v: MonthView; m: (n: number) => string }) {
           <ListRow key={label} label={label} value={m(value)} />
         ))}
       </div>
+      {/* H-01 7번 월 수입·지출 수정 → F-05 */}
+      <button
+        type="button"
+        className="hg-btn hg-btn--link"
+        style={{ alignSelf: 'flex-start' }}
+        onClick={onMoney}
+      >
+        {copy.editMoney}
+      </button>
     </section>
   );
 }

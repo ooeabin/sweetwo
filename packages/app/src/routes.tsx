@@ -12,7 +12,14 @@ import {
   RequireAccount,
   paths,
 } from './features/auth';
-import { AssetAddRoute, F01Overview, F02Items, F04Item } from './features/assets';
+import {
+  AssetAddRoute,
+  F01Overview,
+  F02Items,
+  F04Item,
+  F05Edit,
+  F05Money,
+} from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
   G01GoalList,
@@ -143,6 +150,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-02 자산·부채 목록
+      {
+        path: '/assets/money',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F05Money />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-05 월 수입·지출
+      {
+        path: '/assets/money/:field',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F05Edit />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-05a~d 수입, 월급날, 고정지출, 대출 상환, 용돈, 생활비
       {
         path: '/assets/new/:step?',
         element: (
