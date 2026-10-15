@@ -22,7 +22,7 @@ const PUBLIC = new Set<string>([
 // 세션은 있지만 계정(app_user)이 아직 없어도 되는 화면
 const SIGNUP = new Set<string>([paths.email, paths.terms, paths.pinSetup]);
 
-type Phase = 'checking' | 'update' | 'offline' | 'ready';
+type Phase = 'checking' | 'update' | 'offline' | 'error' | 'ready';
 
 const appVersion = () =>
   session.bridge?.appVersion ?? (import.meta.env.VITE_APP_VERSION as string | undefined) ?? '0.0.0';
@@ -80,7 +80,13 @@ export function A01Launch() {
     if (ran.current) return;
     ran.current = true;
     const t = setTimeout(() => setSlow(true), 300);
-    void decide().finally(() => clearTimeout(t));
+    // 판단 중 예상 못 한 오류(설정 누락 등)가 나도 빈 화면으로 멈추지 않게
+    void decide()
+      .catch((e: unknown) => {
+        if (import.meta.env.DEV) console.error('[A-01]', e);
+        setPhase('error');
+      })
+      .finally(() => clearTimeout(t));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 실행할 때 한 번
   }, []);
 
@@ -124,6 +130,19 @@ export function A01Launch() {
           </>
         }
         note={updateFailed ? copy.updateFailed : undefined}
+      />
+    );
+  }
+  if (phase === 'error') {
+    return (
+      <AuthLayout
+        media={<Wordmark />}
+        title={copy.signupFailed}
+        actions={
+          <Button variant="secondary" block onClick={() => window.location.reload()}>
+            {copy.retry}
+          </Button>
+        }
       />
     );
   }
