@@ -27,7 +27,8 @@ const inIds = (url: URL) =>
     .split(',')
     .map((x) => x.replace(/"/g, ''));
 
-export async function mockOnboarding(page: Page): Promise<MemDb> {
+/** now: 화면 시계를 고정한 시각(첫 플랜을 만든 시각으로 씀) */
+export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Promise<MemDb> {
   const db: MemDb = {
     me: {
       id: chanwoo.id,
@@ -231,6 +232,35 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
         for (const r of db.fixed) if (ids.includes(String(r.id))) Object.assign(r, body());
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+    }
+    if (path === '/rest/v1/monthly_plan' && method === 'GET') {
+      const a = db.plans[0]?.args;
+      if (!a) return json(route, null);
+      const lines = ((a.p_lines as Record<string, unknown>[]) ?? []).map((l, i) => ({
+        id: `line-${i + 1}`,
+        account_role: null,
+        goal_id: null,
+        amount_groom: null,
+        amount_bride: null,
+        state: 'pending',
+        deleted_at: null,
+        ...l,
+      }));
+      return json(route, {
+        id: 'plan-1',
+        label_month: a.p_label_month,
+        cycle_start: a.p_cycle_start,
+        cycle_end: a.p_cycle_end,
+        is_partial: true,
+        first_adjust: a.p_first_adjust,
+        merged_close: a.p_merged_close,
+        is_temp: a.p_is_temp,
+        snapshot: a.p_snapshot,
+        status: 'created',
+        created_at: (opts.now ?? new Date()).toISOString(),
+        deleted_at: null,
+        lines,
+      });
     }
     if (path === '/rest/v1/account') {
       if (method === 'GET')

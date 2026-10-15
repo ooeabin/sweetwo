@@ -13,6 +13,8 @@ const axe = async (page: Page) => {
 const heading = (page: Page, name: string | RegExp) =>
   expect(page.getByRole('heading', { name })).toBeVisible();
 const next = (page: Page) => page.getByRole('button', { name: '다음' }).click();
+// 기획서 예시 날짜: 25일 기준, 10월 7일 → 9월 월급 플랜 남은 18일
+const NOW = new Date('2026-10-07T10:00:00+09:00');
 
 async function part0(page: Page) {
   await page.goto('/');
@@ -33,8 +35,8 @@ async function part0(page: Page) {
 
 test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   // 기획서 예시 날짜: 25일 기준, 10월 7일 시작 → 9월 월급 플랜 남은 18일
-  await page.clock.setFixedTime(new Date('2026-10-07T10:00:00+09:00'));
-  const db = await mockOnboarding(page);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
   await part0(page);
 
   await heading(page, '결혼은 하셨나요?');
@@ -202,7 +204,28 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await axe(page);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
 
+  // 이번 달(H-01): 미합류라 월급 나누기 대신 지출 적기, 생활비 55만(O-64에서 줄임)
+  await heading(page, '찬우님, 이번 달 생활비가 55만 원 남았어요');
+  await expect(page.locator('.hg-today__date')).toHaveText('10월 7일 수요일');
   await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
+  await expect(page.getByText('아직 몰라요')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /9월 월급 플랜/ })).toContainText('임시');
+  const planRows: [string, string][] = [
+    ['공동 생활비', '111만 원'],
+    ['목표자금', '150만 원'],
+    ['비상금', '39만 원'],
+    ['용돈', '60만 원'], // 각자 50만 × 18/30
+  ];
+  for (const [label, value] of planRows)
+    await expect(page.locator('.hg-listrow', { hasText: label }).first()).toContainText(value);
+  await expect(page.getByText('9월 월급 플랜 정리할 때예요').first()).toBeVisible();
+  await expect(page.getByText('찬우님 월급날')).toBeVisible();
+  await expect(page.getByRole('img', { name: '내 집 마련 0%' })).toBeVisible();
+  await axe(page);
+  // 금액 가리기
+  await page.getByRole('button', { name: '금액 가리기' }).first().click();
+  await heading(page, '찬우님, 이번 달 생활비가 ••• 남았어요');
+  await expect(page.getByText('111만 원')).toHaveCount(0);
   expect(db.me.onboarding_done_at).toBeTruthy();
   expect(db.accounts.map((a) => [a.role, a.name, a.is_existing, a.start_balance])).toEqual([
     ['living', '생활비 통장', true, 1_200_000],
@@ -288,8 +311,8 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 });
 
 test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-10-07T10:00:00+09:00'));
-  const db = await mockOnboarding(page);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
   await part0(page);
 
   await page.getByRole('radio', { name: /준비 중이에요/ }).click();
@@ -364,7 +387,13 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   await expect(page.getByText('결혼 비용 항목부터 나눠볼까요?')).toBeVisible();
   await page.getByRole('button', { name: '지금 하기' }).click();
 
-  await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
+  // 예비부부 이번 달(H-P): 예식일 미정이라 예정 월 + 추정, 모으기, 결혼 비용 현황
+  await heading(page, /2027년 5월 예정/);
+  await expect(page.getByRole('heading', { name: '이번 달 모으기' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '결혼 비용 현황' })).toBeVisible();
+  await expect(page.locator('.hg-listrow', { hasText: '총예산' })).toContainText('4,000만 원');
+  await expect(page.getByRole('heading', { name: /월급 플랜/ })).toHaveCount(0);
+  await axe(page);
   expect(db.accounts.map((a) => [a.role, a.name])).toEqual([['wedding', '결혼 준비 통장']]);
   expect(db.plans[0]?.args).toMatchObject({
     p_cycle_start: '2026-09-30',

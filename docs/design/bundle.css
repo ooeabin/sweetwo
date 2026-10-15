@@ -1044,6 +1044,10 @@ a.hg-btn { text-decoration: none; }
 .hg-pill-up { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); }
 .hg-body { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: start; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-8); min-width: 0; }
+/* AppFrame 실제 화면(시안 틀 hg-mapp 대신): 회색 바탕, 좁은 창 머리, 독과 + 버튼은 화면 아래 고정 */
+.hg-frame { min-height: 100vh; background: var(--surface-alt); }
+.hg-frame__mhead { display: none; }
+.hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 @media (max-width: 767px) {
   .hg-topnav { display: none; }
   .hg-today__in { padding: var(--space-4); gap: 14px; }
@@ -1051,6 +1055,13 @@ a.hg-btn { text-decoration: none; }
   .hg-today__stats { display: flex; overflow-x: auto; }
   .hg-today__stats .hg-stat { flex: none; width: 150px; }
   .hg-body { padding: var(--space-5) var(--space-4) var(--space-22); gap: var(--space-6); }
+  .hg-frame__mhead { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-5) var(--space-4) 0; background: var(--surface); }
+  .hg-frame__mhead.is-today { background: var(--surface-alt); }
+  .hg-frame .hg-today__date { display: none; } /* 좁은 창은 머리에 날짜 */
+  .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; }
+  .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; }
+  .hg-frame__actions { width: 100%; }
+  .hg-frame__actions .hg-btn--primary { flex: 1; }
 }
 
 

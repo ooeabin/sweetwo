@@ -559,6 +559,15 @@ supabase/
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards(미리보기 `detail`, ‘추정’ `tag`, `disabled`, 한 화면에 여럿이면 `autoFocus`/`shortcuts` 끄기), Q3 AmountInput(한 화면에 여럿이면 `embedded`), Q4 YearInput/DateInput/YearMonthInput/DayChips(1~31 + 말일), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
 - e2e는 `apps/web/e2e/onboarding-mock.ts`의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜가 걸린 화면(O-66)은 `page.clock.setFixedTime`으로 기획서 예시 날짜(10월 7일)에 고정
 
+### 이번 달 구조
+
+- `packages/app/src/features/month`: `view.ts`(답, 목표, 오늘이 든 월 플랜 → 화면 값. 계산은 core `rules/this-month.ts`, `onboarding/cycle.ts`, `allocation.ts`), `pages/h-01-this-month.tsx`(앱 틀 + 오늘 띠 + 두 단)
+- 앱 틀은 ui `AppFrame`(docs/design/components/AppFrame.md). 좁은 창 머리, 하단 독, + 버튼까지 한 컴포넌트
+- 월급 플랜 카드 금액은 플랜을 만들 때 저장한 기준값(`monthly_plan.snapshot`, core `PlanSnapshot` Zod로 읽음). 없으면 지금 답으로 계산
+- 금액 가리기는 `shared/mask.ts`(기기에만 저장, 금액 표기는 `money()`로)
+- 아직 없는 화면으로 가는 버튼(지출 적기, 월급 나누기, 정리 시작, 추가, 목표·우리 자산·캘린더 탭, 검색, 알림, 설정)은 비활성으로 자리만
+- 할 일(H-04)과 배우자 활동(H-08)은 다음 단계
+
 ### 기능 하나 만드는 순서
 
 1. 기획서에서 화면 ID, 요소 표, 문구, 예외를 확인
