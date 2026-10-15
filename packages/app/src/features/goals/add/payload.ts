@@ -26,14 +26,18 @@ export function addPayload(d: AddDraft, connected: boolean) {
   };
 }
 
+/** 가진 자산에서 고른 자산(제안이면 after.asset_ids, 바로 추가면 만든 뒤 연결) */
+export const pickedAssets = (d: AddDraft) => (d.held === 'assets' ? d.assetIds : []);
+
 /** 미리보기 계산용 임시 목표 행 */
 export function previewGoal(
   p: NonNullable<ReturnType<typeof addPayload>>,
-  o: { spaceId: string; me: string; priority: number },
+  o: { spaceId: string; me: string; priority: number; linked: number },
 ): Goal {
   const now = new Date().toISOString();
   return {
     ...p,
+    other_held: p.other_held + o.linked,
     id: 'new',
     space_id: o.spaceId,
     priority: o.priority,

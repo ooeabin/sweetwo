@@ -12,6 +12,7 @@ import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
 import {
   useCurrentPlan,
+  useGoalAssetSums,
   useGoalRecords,
   useGoals,
   useMe,
@@ -23,7 +24,7 @@ import { H04Todos } from '../h-04-todos';
 import { openReceived, useProposals } from '../../proposals';
 import { MainFrame } from '../frame';
 import { closePath, spendPath } from '../paths';
-import { monthView, type MonthView } from '../view';
+import { goalExtra, monthView, type MonthView } from '../view';
 
 // H-01 이번 달(docs/spec/19-this-month.md). 앱 기본 틀 + 오늘 띠(H-01 인사, H-02 맨 위 행동과 숫자 타일)
 // + 왼쪽 단(월급 플랜 H-03 / 예비부부 모으기·결혼 비용) + 오른쪽 단(목표 H-05, 다가오는 일정 H-07).
@@ -36,6 +37,7 @@ export function H01ThisMonth() {
   const partner = usePartner();
   const close = useMonthClose(plan.data?.id);
   const records = useGoalRecords();
+  const linked = useGoalAssetSums();
   const proposals = useProposals();
   const nav = useNavigate();
   const { masked } = useMask();
@@ -55,10 +57,7 @@ export function H01ThisMonth() {
           partner: partner.data ?? null,
           spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
           closeDone: close.data?.status === 'done',
-          goalDeposits: (records.data?.deposits ?? []).reduce<Record<string, number>>(
-            (t, d) => ({ ...t, [d.goalId]: (t[d.goalId] ?? 0) + d.amount }),
-            {},
-          ),
+          goalDeposits: goalExtra(records.data?.deposits ?? [], linked.data ?? []),
         })
       : null;
   const name = me.data?.nickname ?? '';

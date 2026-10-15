@@ -293,8 +293,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           const after = p.after as Record<string, unknown>;
           const goal = db.goals.find((g) => g.id === p.target_id);
           if (p.item === 'goal_add') {
+            const gid = `goal-${db.goals.length + 1}`;
+            for (const a of db.assets)
+              if (((after.asset_ids as string[]) ?? []).includes(String(a.id))) a.goal_id = gid;
             db.goals.push({
-              id: `goal-${db.goals.length + 1}`,
+              id: gid,
               status: 'active',
               priority: Math.max(0, ...db.goals.map((g) => Number(g.priority))) + 1,
               created_by: p.proposer,
@@ -330,6 +333,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
+      if (fn === 'goal_asset_sums') {
+        const t: Record<string, { goal_id: string; n: number; total: number }> = {};
+        for (const a of db.assets) {
+          if (!a.goal_id || a.deleted_at || a.side !== 'asset' || a.visibility === 'private')
+            continue;
+          const k = String(a.goal_id);
+          t[k] ??= { goal_id: k, n: 0, total: 0 };
+          t[k].n += 1;
+          t[k].total += Number(a.principal ?? a.amount);
+        }
+        return json(route, Object.values(t));
+      }
       if (fn === 'create_invite')
         return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
       if (fn === 'delete_minor_account')
@@ -349,6 +364,12 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const r: Record<string, unknown> = {
           id: `asset-${db.assets.length + 1}`,
           principal: null,
+          maturity_date: null,
+          monthly_payment: null,
+          interest_rate: null,
+          paid_count: null,
+          pay_from: null,
+          goal_id: null,
           estimated: false,
           status: 'held',
           created_by: db.me.id,
@@ -366,6 +387,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           recorded_at: now,
         });
         return json(route, { id: r.id }, 201);
+      }
+      if (method === 'PATCH' && url.searchParams.get('id')?.startsWith('in.')) {
+        const ids = inIds(url);
+        for (const a of db.assets) if (ids.includes(String(a.id))) Object.assign(a, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (method === 'PATCH') {
         const a = db.assets.find((x) => x.id === eqId(url));
@@ -439,6 +465,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             ...r,
           });
         }
+        // .select('id').single() → 만든 행 하나
+        if (url.searchParams.get('select'))
+          return json(route, { id: db.goals[db.goals.length - 1]?.id }, 201);
         return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (method === 'PATCH') {

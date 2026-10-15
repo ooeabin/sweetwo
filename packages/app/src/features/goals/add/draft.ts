@@ -7,8 +7,12 @@ export interface AddDraft {
   answers: Answers;
   deadline: YearMonth | null;
   deadlineEstimated: boolean;
-  /** null = 아직 안 고름, 'none' = 없어요, 숫자 = 기타 보유액 */
-  held: number | 'none' | 'new' | null;
+  /** null = 아직 안 고름, 'none' = 없어요, 'assets' = 가진 자산에서 고름, 숫자 = 기타 보유액 */
+  held: number | 'none' | 'new' | 'assets' | null;
+  /** 가진 자산에서 고른 자산 id */
+  assetIds: string[];
+  /** 고른 자산 합계(원금 기준, 미리보기용) */
+  assetTotal: number;
   owner: 'together' | 'me' | 'partner' | null;
 }
 
@@ -19,6 +23,8 @@ const empty: AddDraft = {
   deadline: null,
   deadlineEstimated: false,
   held: null,
+  assetIds: [],
+  assetTotal: 0,
   owner: null,
 };
 const read = (): AddDraft => {

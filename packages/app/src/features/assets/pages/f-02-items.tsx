@@ -11,7 +11,7 @@ const STALE_DAYS = 92; // 3개월 넘게 안 고친 줄 → “금액이 맞나�
 
 // F-02 자산·부채 목록(23 F-02 7~11·13·14번): 자산·부채 전환(탭마다 합계), 묶음(F-03a 그룹) 안 금액 큰 순,
 // 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 배우자 ‘합계만’은 묶음별 한 줄(누를 수 없음).
-// 열 정렬, 투자 묶음 줄(투자 원칙), 통장 역할·목표 배지는 다음 단계.
+// 목표에 연결된 자산은 목표 배지. 열 정렬, 투자 묶음 줄(투자 원칙), 통장 역할 배지는 다음 단계.
 export function F02Items() {
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -33,6 +33,8 @@ export function F02Items() {
   const total = (s: AssetSide) => (s === 'asset' ? d.nw.assets : d.nw.debts);
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 
+  const goalName = (id: string | null) =>
+    id ? (d.goals.find((g) => g.id === id)?.name ?? '') : '';
   const row = (a: Asset) => {
     const o = ownerOf(a, d);
     const mine = a.owner_user_id === d.me?.id;
@@ -46,6 +48,9 @@ export function F02Items() {
             {a.name}
             {mine && a.visibility !== 'all' && <Badge kind="temp">{copy.vis[a.visibility]}</Badge>}
             {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
+            {goalName(a.goal_id) && (
+              <Badge kind="goal">{copy.goalBadge(goalName(a.goal_id))}</Badge>
+            )}
           </span>
         }
         sub={stale ? copy.checkAmount : `${o.name}, ${copy.updated(formatDot(updated))}`}

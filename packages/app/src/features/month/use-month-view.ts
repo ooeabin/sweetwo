@@ -1,5 +1,6 @@
 import {
   useCurrentPlan,
+  useGoalAssetSums,
   useGoalRecords,
   useGoals,
   useMe,
@@ -7,7 +8,7 @@ import {
   usePartner,
   useSpace,
 } from './data';
-import { monthView } from './view';
+import { goalExtra, monthView } from './view';
 
 /** 이번 달 값(H-01과 같은 계산). 다른 메뉴의 ‘이번 달’ 카드에서 씀(우리 자산 F-01 4번) */
 export function useMonthView() {
@@ -18,6 +19,7 @@ export function useMonthView() {
   const partner = usePartner();
   const close = useMonthClose(plan.data?.id);
   const records = useGoalRecords();
+  const linked = useGoalAssetSums();
   if (!me.data || !space.data) return null;
   return monthView({
     me: me.data,
@@ -27,9 +29,6 @@ export function useMonthView() {
     partner: partner.data ?? null,
     spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
     closeDone: close.data?.status === 'done',
-    goalDeposits: (records.data?.deposits ?? []).reduce<Record<string, number>>(
-      (t, d) => ({ ...t, [d.goalId]: (t[d.goalId] ?? 0) + d.amount }),
-      {},
-    ),
+    goalDeposits: goalExtra(records.data?.deposits ?? [], linked.data ?? []),
   });
 }

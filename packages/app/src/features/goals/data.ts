@@ -1,4 +1,5 @@
 import {
+  fetchGoalAssetSums,
   fetchGoalRecords,
   fetchGoals,
   fetchMe,
@@ -20,7 +21,8 @@ export function useGoalsData() {
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const records = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
   const proposals = useProposals();
-  const all = [me, space, partner, goals, records, proposals];
+  const linked = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
+  const all = [me, space, partner, goals, records, proposals, linked];
   const loading = all.some((q) => q.isLoading);
   const failed = [me, space, partner, goals, records].some((q) => q.isError);
   const make = (list: Goal[]) =>
@@ -31,6 +33,7 @@ export function useGoalsData() {
           partner: partner.data ?? null,
           goals: list,
           records: records.data,
+          linked: linked.data ?? [],
         })
       : null;
   const view = goals.data ? make(goals.data) : null;

@@ -13,6 +13,7 @@ export const qk = {
   monthClose: (planId: string) => ['month_close', planId] as const,
   goalRecords: ['goal_records'] as const,
   assets: ['asset'] as const,
+  goalAssetSums: ['goal_asset_sums'] as const,
   partnerAssetSums: ['partner_asset_sums'] as const,
   netWorthHistory: ['net_worth_history'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,

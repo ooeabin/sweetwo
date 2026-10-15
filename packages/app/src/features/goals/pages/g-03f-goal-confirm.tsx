@@ -1,4 +1,4 @@
-import { insertGoals, propose, qk } from '@sweetwo/api';
+import { insertGoal, linkAssets, propose, qk } from '@sweetwo/api';
 import { formatManWon, formatMonthDay, formatYm, proposalApplyOn } from '@sweetwo/core';
 import { QuestionLayout } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import { proposalCopy } from '../../proposals';
 import { copy } from '../copy';
 import { useAddDraft } from '../add/draft';
 import { addPath } from '../add/flow';
-import { addPayload, previewGoal } from '../add/payload';
+import { addPayload, pickedAssets, previewGoal } from '../add/payload';
 import { useAddStep } from '../add/step';
 
 const man = (v: number) => `${formatManWon(v)} 원`;
@@ -28,7 +28,14 @@ export function G03fGoalConfirm() {
   if (d.loading || !d.me) return null;
 
   const priority = Math.max(0, ...d.goals.map((g) => g.priority)) + 1;
-  const after = d.viewAdd(previewGoal(p, { spaceId: d.me.space_id ?? '', me: d.me.id, priority }));
+  const after = d.viewAdd(
+    previewGoal(p, {
+      spaceId: d.me.space_id ?? '',
+      me: d.me.id,
+      priority,
+      linked: s.draft.held === 'assets' ? s.draft.assetTotal : 0,
+    }),
+  );
   const line = after?.lines.find((l) => l.id === 'new');
   const title =
     line && p.kind === 'monthly' && line.alloc > 0
@@ -44,14 +51,23 @@ export function G03fGoalConfirm() {
     setSaving(true);
     try {
       if (d.connected && d.base !== null) {
-        await propose('goal_add', p, proposalApplyOn(d.base));
+        await propose(
+          'goal_add',
+          { ...p, asset_ids: pickedAssets(s.draft) },
+          proposalApplyOn(d.base),
+        );
         toast(copy.proposed(d.couple?.partnerName ?? ''));
       } else {
-        await insertGoals([{ ...p, priority }]);
+        const id = await insertGoal({ ...p, priority });
+        await linkAssets(pickedAssets(s.draft), id);
         toast(copy.added);
       }
       clear();
-      await Promise.all([qk.goals, qk.proposals].map((k) => qc.invalidateQueries({ queryKey: k })));
+      await Promise.all(
+        [qk.goals, qk.proposals, qk.assets, qk.goalAssetSums].map((k) =>
+          qc.invalidateQueries({ queryKey: k }),
+        ),
+      );
       // 바로 추가했는데 저축 가능 금액이 모자라지면 G-04
       nav(!d.connected && shortAfter > 0 ? '/goals/adjust' : '/goals', { replace: true });
     } catch {

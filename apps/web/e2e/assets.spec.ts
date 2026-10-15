@@ -16,6 +16,12 @@ const NOW = new Date('2026-10-07T10:00:00+09:00');
 
 const asset = (o: Record<string, unknown>) => ({
   principal: null,
+  maturity_date: null,
+  monthly_payment: null,
+  interest_rate: null,
+  paid_count: null,
+  pay_from: null,
+  goal_id: null,
   estimated: false,
   owner: 'person',
   visibility: 'all',
@@ -238,10 +244,27 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('button', { name: /내 주식/ })).toBeVisible();
 });
 
-test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 목록과 토스트', async ({ page }) => {
+test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적금 질문 → 목표 연결', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  db.goals.push({
+    id: 'g-trip',
+    template: 'travel',
+    name: '여행',
+    kind: 'once',
+    owner: 'together',
+    priority: 1,
+    target_amount: 3_000_000,
+    other_held: 0,
+    deadline: '2027-12-01',
+    status: 'active',
+    after_marriage: false,
+    details: {},
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    deleted_at: null,
+  });
 
   await page.goto('/assets/items');
   await page.getByRole('button', { name: '+ 추가' }).first().click();
@@ -266,7 +289,21 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 목�
     'true',
   );
   await axe(page);
-  await page.getByRole('button', { name: '추가하기' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  // 적금 유형별 질문(F-03f): 만기일 → 월 납입액 → 빠지는 통장 → 목표 연결
+  await heading(page, '만기일은 언제예요?');
+  await page.getByLabel('년', { exact: true }).fill('2027');
+  await page.getByLabel('월', { exact: true }).fill('9');
+  await page.getByLabel('일', { exact: true }).fill('30');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '월 납입액은요?');
+  await page.getByLabel('월 납입액은요?').fill('300000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '어느 통장에서 빠져나가요?');
+  await page.getByRole('radio', { name: /목표자금 통장/ }).click();
+  await heading(page, '어떤 목표를 위한 돈인가요?');
+  await axe(page);
+  await page.getByRole('radio', { name: /여행/ }).click();
 
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
   await expect(page.getByText('추가했어요. 순자산이 120만 원 늘었어요')).toBeVisible();
@@ -280,7 +317,18 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 목�
     owner: 'person',
     owner_user_id: db.me.id,
     visibility: 'sum',
+    maturity_date: '2027-09-30',
+    monthly_payment: 300_000,
+    pay_from: 'goal_fund',
+    goal_id: 'g-trip',
   });
+  await expect(page.getByRole('button', { name: /여행 적금/ })).toContainText('여행 목표');
+
+  // 목표 보유액에 연결 자산이 들어감
+  await page.goto('/goals/g-trip');
+  await expect(page.locator('.hg-card', { hasText: '기타 보유액' })).toContainText(
+    '연결 자산 120만 원',
+  );
 });
 
 test('추가(합류 전): 배우자 명의는 대신 입력(전체 공개), 부채는 남은 대출금', async ({ page }) => {
@@ -296,6 +344,12 @@ test('추가(합류 전): 배우자 명의는 대신 입력(전체 공개), 부�
   await page.getByLabel('남은 대출금은 얼마예요?').fill('8000000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: /예빈/ }).click();
+  // 부채 유형별 질문(F-03g): 금리 → 월 상환액, 나중에 해도 됨
+  await heading(page, '금리는 몇 %예요?');
+  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '월 상환액은요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
 
   await expect(page.getByText('추가했어요. 순자산이 800만 원 줄었어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /자동차 할부/ })).toContainText('대신 입력');
@@ -304,5 +358,7 @@ test('추가(합류 전): 배우자 명의는 대신 입력(전체 공개), 부�
     owner: 'person',
     owner_user_id: null,
     visibility: 'all',
+    interest_rate: 4.5,
+    monthly_payment: null,
   });
 });

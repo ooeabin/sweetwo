@@ -1,4 +1,5 @@
-import { insertAsset } from '@sweetwo/api';
+import { fetchGoals, insertAsset, qk } from '@sweetwo/api';
+import { useQuery } from '@tanstack/react-query';
 import {
   assetGroup,
   assetGroupsOf,
@@ -6,7 +7,16 @@ import {
   quickChips,
   type AssetSide,
 } from '@sweetwo/core';
-import { AmountInput, ChoiceCards, Chip, QuestionLayout, ShortText, Tabs } from '@sweetwo/ui';
+import {
+  AmountInput,
+  ChoiceCards,
+  Chip,
+  DateInput,
+  Field,
+  QuestionLayout,
+  ShortText,
+  Tabs,
+} from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -30,6 +40,12 @@ export function AssetAddRoute() {
   const [name, setName] = useState<string | null>(null);
   const [dupOk, setDupOk] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [rateText, setRateText] = useState<string | null>(null);
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  // 연결할 수 있는 목표: 진행 중(보류·달성·사용 완료 빼고)
+  const openGoals = (goals.data ?? []).filter(
+    (g) => !['paused', 'achieved', 'used'].includes(g.status),
+  );
 
   // 처음 열면 진입한 탭(자산/부채)으로 새로 시작
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
@@ -37,10 +53,10 @@ export function AssetAddRoute() {
     if (step === 'kind' && !params.get('keep')) reset(startSide);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || !d.couple || !d.space) return null;
+  if (d.loading || goals.isLoading || !d.couple || !d.space) return null;
   const solo = d.space.couple_state === 'solo';
   const joined = d.couple.joined;
-  const steps = assetSteps(draft, solo);
+  const steps = assetSteps(draft, solo, openGoals.length > 0);
   const i = Math.max(steps.indexOf(step), 0);
   if (step !== 'kind' && !draft.kind) return <Navigate to={path('kind')} replace />;
   const progress = { total: steps.length, now: i, fill: 50 };
@@ -48,7 +64,7 @@ export function AssetAddRoute() {
   const go = (next: Partial<typeof draft>) => {
     const nd = { ...draft, ...next };
     set(next);
-    const l = assetSteps(nd, solo);
+    const l = assetSteps(nd, solo, openGoals.length > 0);
     const to = l[l.indexOf(step) + 1];
     if (to) nav(path(to));
     else void save(nd);
@@ -68,6 +84,12 @@ export function AssetAddRoute() {
         owner: owner === 'joint' ? 'joint' : 'person',
         owner_user_id: owner === 'me' ? (d.me?.id ?? null) : null,
         visibility: owner === 'me' && !solo ? x.visibility : 'all',
+        maturity_date: x.maturity,
+        monthly_payment: x.payment,
+        pay_from: x.payFrom,
+        paid_count: x.paidCount,
+        interest_rate: x.rate,
+        goal_id: x.side === 'asset' ? x.goalId : null,
       });
       await refresh();
       const counted = !(owner === 'me' && !solo && x.visibility === 'private');
@@ -226,7 +248,7 @@ export function AssetAddRoute() {
         steps={progress}
         title={copy.visTitle}
         onBack={back}
-        primary={{ label: copy.save, loading: saving }}
+        primary={{ label: steps[i + 1] ? copy.next : copy.save, loading: saving }}
         onSubmit={() => go({})}
       >
         <ChoiceCards<V>
@@ -238,6 +260,136 @@ export function AssetAddRoute() {
             { value: 'all', label: copy.visOptions.all },
             { value: 'sum', label: copy.visOptions.sum },
             { value: 'private', label: copy.visOptions.private },
+          ]}
+        />
+      </QuestionLayout>
+    );
+  }
+
+  // F-03f~i 유형별 질문: 모두 ‘나중에 할게요’로 건너뛸 수 있음
+  const skip = { label: copy.later, onClick: () => go({}) };
+  const lastLabel = steps[i + 1] ? copy.next : copy.save;
+
+  if (step === 'maturity') {
+    const title = draft.kind === 'deposit_money' ? copy.contractEnd : copy.maturity;
+    return (
+      <QuestionLayout
+        steps={progress}
+        title={title}
+        onBack={back}
+        later={skip}
+        primary={{ label: lastLabel, disabled: !draft.maturity, loading: saving }}
+        onSubmit={() => draft.maturity && go({})}
+      >
+        <DateInput
+          label={title}
+          value={draft.maturity}
+          onChange={(maturity) => set({ maturity })}
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'count') {
+    return (
+      <QuestionLayout
+        steps={progress}
+        title={copy.paidCount}
+        onBack={back}
+        later={skip}
+        primary={{ label: lastLabel, disabled: draft.paidCount === null, loading: saving }}
+        onSubmit={() => draft.paidCount !== null && go({})}
+      >
+        <Field
+          label={copy.paidCount}
+          inputMode="numeric"
+          value={draft.paidCount ?? ''}
+          onChange={(e) => {
+            const n = e.target.value.replace(/\D/g, '').slice(0, 4);
+            set({ paidCount: n ? Number(n) : null });
+          }}
+          help={copy.paidCountUnit}
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'rate') {
+    const text = rateText ?? (draft.rate === null ? '' : String(draft.rate));
+    const v = text.trim() === '' ? null : Number(text);
+    const bad = v !== null && (!Number.isFinite(v) || v < 0 || v > 100);
+    return (
+      <QuestionLayout
+        steps={progress}
+        title={copy.rate}
+        onBack={back}
+        later={skip}
+        primary={{ label: lastLabel, disabled: v === null || bad, loading: saving }}
+        onSubmit={() => v !== null && !bad && go({ rate: Math.round(v * 100) / 100 })}
+      >
+        <Field
+          label={copy.rate}
+          inputMode="decimal"
+          value={text}
+          onChange={(e) => setRateText(e.target.value.replace(/[^\d.]/g, '').slice(0, 6))}
+          error={bad ? copy.rateError : undefined}
+          help="%"
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'payment') {
+    const title = draft.side === 'debt' ? copy.repayment : copy.payment;
+    return (
+      <QuestionLayout
+        steps={progress}
+        title={title}
+        onBack={back}
+        later={skip}
+        primary={{ label: lastLabel, disabled: draft.payment === null, loading: saving }}
+        onSubmit={() => draft.payment !== null && go({})}
+      >
+        <AmountInput
+          label={title}
+          value={draft.payment}
+          onChange={(payment) => set({ payment })}
+          quick={quickChips.small}
+          monthly
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'payfrom') {
+    type P = 'goal_fund' | 'personal';
+    return (
+      <QuestionLayout steps={progress} title={copy.payFrom} onBack={back} later={skip}>
+        <ChoiceCards<P>
+          label={copy.payFrom}
+          value={draft.payFrom}
+          onChange={(payFrom) => set({ payFrom })}
+          onPick={(payFrom) => go({ payFrom })}
+          options={[
+            { value: 'goal_fund', label: copy.payFromOptions.goal_fund },
+            { value: 'personal', label: copy.payFromOptions.personal },
+          ]}
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'goal') {
+    return (
+      <QuestionLayout steps={progress} title={copy.goal} onBack={back} later={skip}>
+        <ChoiceCards<string>
+          label={copy.goal}
+          value={draft.goalId ?? (draft.goalId === null ? null : 'none')}
+          onChange={(g) => set({ goalId: g === 'none' ? null : g })}
+          onPick={(g) => go({ goalId: g === 'none' ? null : g })}
+          options={[
+            ...openGoals.map((g) => ({ value: g.id, label: g.name })),
+            { value: 'none', label: copy.noGoal },
           ]}
         />
       </QuestionLayout>

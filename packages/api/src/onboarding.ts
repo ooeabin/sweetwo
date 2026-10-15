@@ -111,6 +111,18 @@ export async function insertGoals(rows: Omit<GoalInsert, 'space_id'>[]) {
   fail(error);
 }
 
+/** 목표 하나 추가하고 id(가진 자산 연결용) */
+export async function insertGoal(row: Omit<GoalInsert, 'space_id'>): Promise<string> {
+  const space_id = await ensureSpace();
+  const { data, error } = await supabase()
+    .from('goal')
+    .insert({ ...row, space_id })
+    .select('id')
+    .single();
+  fail(error);
+  return data?.id ?? '';
+}
+
 export async function updateGoal(id: string, patch: TablesUpdate<'goal'>) {
   const { error } = await supabase().from('goal').update(patch).eq('id', id);
   fail(error);

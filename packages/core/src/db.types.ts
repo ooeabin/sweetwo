@@ -205,6 +205,8 @@ export type Database = {
           name: string
           owner: Database["public"]["Enums"]["asset_owner"]
           owner_user_id: string | null
+          paid_count: number | null
+          pay_from: string | null
           principal: number | null
           realized_gain: number | null
           side: Database["public"]["Enums"]["asset_side"]
@@ -237,6 +239,8 @@ export type Database = {
           name: string
           owner: Database["public"]["Enums"]["asset_owner"]
           owner_user_id?: string | null
+          paid_count?: number | null
+          pay_from?: string | null
           principal?: number | null
           realized_gain?: number | null
           side: Database["public"]["Enums"]["asset_side"]
@@ -265,6 +269,8 @@ export type Database = {
           name?: string
           owner?: Database["public"]["Enums"]["asset_owner"]
           owner_user_id?: string | null
+          paid_count?: number | null
+          pay_from?: string | null
           principal?: number | null
           realized_gain?: number | null
           side?: Database["public"]["Enums"]["asset_side"]
@@ -1488,6 +1494,14 @@ export type Database = {
       }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
+      goal_asset_sums: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          goal_id: string
+          n: number
+          total: number
+        }[]
+      }
       invite_preview: {
         Args: { p_code: string }
         Returns: {

@@ -151,7 +151,7 @@ export function G02GoalDetail() {
                 <span className="hg-card__value">{value}</span>
                 {label === copy.numbers.held && (
                   <span className="hg-card__meta">
-                    {copy.heldFrom(m(g.otherHeld), m(g.deposits))}
+                    {copy.heldFrom(m(g.otherHeld), m(g.linked), m(g.deposits))}
                   </span>
                 )}
               </>
