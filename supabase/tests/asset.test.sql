@@ -56,7 +56,7 @@ select throws_ok(
      select space_id, 'asset', 'cash', 'bank', 'x', 1, 'person' from public.app_user $$,
   '42501', null, '합류 뒤 상대 명의 새로 만들기 불가');
 select is((select count(*)::int from public.asset_history where asset_id = (select id from public.asset where name = '생활비 통장')), 2, '금액이 바뀌면 이력');
-select is((select net from public.net_worth_history(1)), 12500000::bigint, '순자산 = 원금 기준, 비공개 제외');
+select is((select net from public.net_worth_history(1)), 13500000::bigint, '순자산 = 원금 기준(생활비 350 + 주식 원금 800 + 적금 200), 비공개 제외');
 select throws_ok($$ delete from public.asset $$, '42501', null, '지우기는 휴지통만');
 reset role;
 
