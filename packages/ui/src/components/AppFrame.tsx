@@ -23,6 +23,8 @@ export interface AppFrameTab {
   disabled?: boolean;
   /** 받은 제안 수(이번 달 탭) */
   badge?: number;
+  /** 숫자 알약 화면 읽기용 */
+  badgeLabel?: string;
 }
 
 export interface AppFramePerson {
@@ -127,7 +129,7 @@ function TabLink({
       <Icon name={TAB_ICON[t.key]} size={showLabel && className === 'hg-topnav__tab' ? 16 : 20} />
       {showLabel && t.label}
       {t.badge ? (
-        <span className="hg-badge hg-badge--warn" aria-label={`${t.badge}`}>
+        <span className="hg-nav__count" aria-label={t.badgeLabel ?? `${t.badge}`}>
           {t.badge}
         </span>
       ) : null}

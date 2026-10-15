@@ -19,6 +19,8 @@ export interface MemDb {
   partner: Record<string, unknown> | null;
   consents: Record<string, unknown>[];
   shares: Record<string, unknown> | null;
+  /** 제안(08 6장) */
+  proposals: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -70,6 +72,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     partner: null,
     consents: [],
     shares: null,
+    proposals: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -211,11 +214,93 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           }));
         return json(route, shares.length);
       }
+      // 제안: 서버 함수와 같은 규칙만 간단히(항목당 열린 제안 하나, 용돈은 사람마다)
+      if (fn === 'propose') {
+        const b = body();
+        const me = String(db.me.id);
+        const item = String(b.p_item);
+        const cur = db.proposals.find(
+          (p) =>
+            p.status === 'open' && p.item === item && (item !== 'allowance' || p.proposer === me),
+        );
+        if (cur) cur.status = 'superseded';
+        const trips = cur ? Number(cur.round_trips) + (cur.proposer !== me ? 1 : 0) : 0;
+        const at = new Date(Date.now() + db.proposals.length * 1000).toISOString();
+        const row = {
+          id: `prop-${db.proposals.length + 1}`,
+          space_id: 'space-1',
+          item,
+          proposer: me,
+          before:
+            item === 'allowance'
+              ? { allowance: db.me.allowance ?? null }
+              : {
+                  mode: db.space?.split_mode ?? null,
+                  starter_ratio: db.space?.split_ratio ?? null,
+                },
+          after: b.p_after,
+          status: 'open',
+          apply_on: b.p_apply_on,
+          seen_at: null,
+          response: null,
+          responded_at: null,
+          oppose_count: cur?.oppose_count ?? 0,
+          round_trips: trips,
+          together: trips >= 2,
+          replaces: cur?.id ?? null,
+          applied_at: null,
+          created_at: at,
+          updated_at: at,
+          version: 1,
+        };
+        db.proposals.push(row);
+        return json(route, row.id);
+      }
+      if (fn === 'respond_proposal' || fn === 'withdraw_proposal') {
+        const b = body();
+        const p = db.proposals.find((x) => x.id === b.p_id);
+        if (!p) return json(route, { code: '42501', message: 'not_allowed' }, 403);
+        if (p.status !== 'open') return json(route, p.status);
+        if (fn === 'withdraw_proposal') p.status = 'withdrawn';
+        else if (b.p_response === 'oppose') {
+          Object.assign(p, {
+            status: 'held',
+            response: 'oppose',
+            oppose_count: Number(p.oppose_count) + 1,
+          });
+        } else {
+          const after = p.after as Record<string, unknown>;
+          if (p.item === 'allowance') {
+            const who = p.proposer === db.me.id ? db.me : db.partner;
+            if (who) who.allowance = after.allowance;
+          } else if (db.space) {
+            Object.assign(db.space, {
+              split_mode: after.mode,
+              split_ratio: after.starter_ratio ?? null,
+              split_deferred: false,
+            });
+          }
+          Object.assign(p, { status: 'applied', response: 'like', together: false });
+        }
+        return json(route, p.status);
+      }
+      if (fn === 'mark_proposal_seen') {
+        const p = db.proposals.find((x) => x.id === body().p_id);
+        if (p && !p.seen_at) p.seen_at = new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'create_invite')
         return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
       if (fn === 'delete_minor_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
+    }
+    if (path === '/rest/v1/proposal') {
+      return json(
+        route,
+        [...db.proposals].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+      );
     }
     if (path === '/rest/v1/app_user') {
       if (method === 'GET') return json(route, db.me);

@@ -1,6 +1,7 @@
 import type { Won } from '../money';
 import type { BaseDay } from '../onboarding/cycle';
 import { defaultBaseDay } from '../onboarding/cycle';
+import { splitShares, type SplitMode } from '../onboarding/plan';
 
 // 두 사람 기준(docs/spec/18-partner-join.md, 06 3·4장). 화면은 항상 ‘나’와 ‘배우자’로 본다.
 // 합류 전: 배우자 값 = 시작한 사람이 공간에 적은 추정(couple_space.partner_*), 배우자 용돈 = 내 용돈 가정.
@@ -78,3 +79,33 @@ export function coupleOf(me: CoupleUser, sp: CoupleSpace, partner: CoupleUser | 
 /** 기본 기준일 = 두 월급날 중 늦은 날(합류 전은 내 월급날) */
 export const coupleBaseDay = (c: Couple): BaseDay | null =>
   defaultBaseDay(c.joined ? [c.myPayday, c.partnerPayday] : [c.myPayday]);
+
+/** 공간 기준일: 정해 둔 값, 없으면 두 월급날 중 늦은 날(아는 것만) */
+export const spaceBaseDay = (
+  sp: { base_day: number | null; base_day_last: boolean },
+  c: Couple,
+): BaseDay | null =>
+  sp.base_day_last ? 'last' : (sp.base_day ?? defaultBaseDay([c.myPayday, c.partnerPayday]));
+
+/** 안 나눈 통장 줄의 새 분담액(금액은 그대로, 줄마다 06 4장 분담). 합류 완료, 분담 제안 적용 뒤 */
+export function pendingShares(
+  lines: { target: string; state: string; account_role: string | null; amount: Won }[],
+  o: { mode: SplitMode; myRatio: number; myIncome: Won; partnerIncome: Won; iAmGroom: boolean },
+) {
+  return lines
+    .filter((l) => l.target === 'account' && l.state === 'pending' && l.account_role)
+    .map((l) => {
+      const x = splitShares({
+        total: l.amount,
+        mode: o.mode,
+        myRatio: o.myRatio,
+        myIncome: o.myIncome,
+        partnerIncome: o.partnerIncome,
+      });
+      return {
+        account_role: l.account_role as string,
+        amount_groom: o.iAmGroom ? x.me : x.partner,
+        amount_bride: o.iAmGroom ? x.partner : x.me,
+      };
+    });
+}

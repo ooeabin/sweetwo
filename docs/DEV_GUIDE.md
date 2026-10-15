@@ -194,7 +194,7 @@ sweetwo/
 
 ### 지금 있는 테이블과 함수
 
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
@@ -579,10 +579,23 @@ supabase/
 - 초대 링크 `/i/:code`(P-01, features/pairing)는 로그인 전에도 열림(A-01 공개 경로). `invite_preview()`(익명 가능)로 초대한 사람 호칭만 보여 줌
 - ‘합류하기’: 로그인 전이면 `prefs.returnTo = /i/{코드}?go=1`을 남기고 A-02로. 로그인(기존 계정) 또는 가입(A-05) 뒤 그 주소로 돌아와 바로 `join_space()`
 - `join_space()`: 초대 공간에 들어가고 코드를 이 사람 몫으로 잡아 둠(완료 전 이탈하면 같은 코드로 ‘resume’). 시작한 사람이 적은 호칭, 추정 수입이 초기값. 5회 오류면 10분 제한(`invite_attempt`). 혼자 시작한 기록이 있으면 ‘has_records’(옮기기 P-02a는 다음 단계)
-- 합류 화면 `/join/:screen`: P-02b → P-03 → P-04 → P-05(수입) → P-05d(월급날) → P-07 → P-08 → P-11. 각자 관리 예비부부는 P-07, P-08 없음. 멈춘 화면은 `app_user.onboarding_step`(OnboardingGate가 이어 줌)
+- 합류 화면 `/join/:screen`: P-02b → P-03 → P-04 → P-05(수입) → P-05d(월급날) → P-07 → P-08 → P-10 → P-11. 각자 관리 예비부부는 P-07, P-08 없음. 멈춘 화면은 `app_user.onboarding_step`(OnboardingGate가 이어 줌)
 - P-11에 들어오면 `finish_join()`(부부 연결, 코드 사용됨, 온보딩 끝) + `update_pending_shares()`(이번 플랜 안 나눈 줄의 분담액만, 금액은 그대로)
 - 두 사람 기준은 core `rules/couple.ts`(`coupleOf`): 합류 전 배우자 값 = 공간의 추정값, 합류 뒤 = `partner_profile()`. 분담 비율 `split_ratio`는 시작한 사람 몫 %. 기본 기준일 = 두 월급날 중 늦은 날. 아바타 색은 시작한 사람 1, 합류한 사람 2
-- 다음 단계: 제안(P-07 다른 용돈, P-08 ‘다르게 해볼래요’, P-10), O-63~65 다시 보기, P-02a, P-06, P-09, 합류 알림, 기준일이 바뀔 때 사이클 조정
+- P-07 용돈이 초기값(시작한 사람 용돈)과 다르면 용돈은 초기값으로 두고 `propose('allowance')`. P-08 ‘다르게 해볼래요’는 분담 고르기(proposals `SplitPicker`) → `propose('split')`. P-11에 답 기다리는 제안 목록
+- 다음 단계: P-10 목표마다 좋아요·다르게 해볼래요(목표 제안), 합류 전 바로 적용된 변경 목록, O-63~65 다시 보기, P-02a, P-06, P-09, 합류 알림, 기준일이 바뀔 때 사이클 조정
+
+### 제안 구조
+
+- 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
+- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나). 목표, 기준일, 생활비 예산, 월말 정리 묶음은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만)
+- 함수: `propose(항목, 후 값, 적용일)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
+- 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
+- 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`
+- 함께 정하기: 반대 2회 또는 왕복 2회. 이 제안은 적용일이 돼도 적용 안 함
+- 적용일이 지난 제안: 기준일 작업 전까지는 앱을 열 때(H-01) `apply_due_proposals()`. 좋아요나 적용 뒤 이번 플랜 안 나눈 줄 분담을 다시 계산(`update_pending_shares`)
+- 화면: features/proposals. G-08 `/proposals/:id`, 이번 달 할 일 맨 위 받은 제안, ‘이번 달’ 탭 숫자 알약(`hg-nav__count`)
+- 다음 단계: 월 배분 영향(G-08 3번), 되돌리기 제안(8번), 동시 제안 안내 문구(08 6-7), 알림, 기준일 작업에서 적용·만료, 저축 가능 금액 부족 때 보류
 
 ### 기능 하나 만드는 순서
 

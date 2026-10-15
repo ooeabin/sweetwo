@@ -72,6 +72,14 @@ export const copy = {
   split: '같이 쓰는 돈 나누는 방식, 괜찮아요?',
   splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },
   good: '좋아요',
+  differently: '다르게 해볼래요',
+  proposeTo: (name: string) => `${name}님께 제안하기`,
+  applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+
+  // P-10
+  changes: '합류 전에 바뀐 것과 목표예요',
+  noGoals: (starter: string) => `${starter}님이 목표를 정하면 여기에 보여요`,
+  allGood: '모두 좋아요',
 
   // P-11
   done: (amount: string) => `두 분은 한 달에 ${amount}을 모을 수 있어요`,
@@ -79,5 +87,6 @@ export const copy = {
   saveCard: '한 달에 모을 수 있는 돈',
   shareCard: '매달 나눠 넣을 돈',
   before: '이전', // [확인 필요] 화면 읽기용(취소선 값)
+  waiting: '답 기다리는 제안', // [확인 필요] 요소 이름
   planKept: (month: number) => `${month}월 월급 플랜은 그대로, 안 나눈 돈만 다시 계산했어요`,
 };

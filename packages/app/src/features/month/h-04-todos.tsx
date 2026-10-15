@@ -1,8 +1,10 @@
-import { createInvite, insertTodos, qk, updateTodo } from '@sweetwo/api';
+import { createInvite, insertTodos, qk, updateTodo, type Proposal } from '@sweetwo/api';
 import { addDays, todoDefs, visibleTodos, type TodoDef, type TodoState } from '@sweetwo/core';
-import { Button } from '@sweetwo/ui';
+import { Badge, Button } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { describeProposal, proposalCopy, proposerName, type Names } from '../proposals';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useTodos } from './data';
@@ -10,16 +12,21 @@ import { useTodos } from './data';
 const SHOWN = 3;
 
 // H-04 할 일(Checklist 카드). 최대 3개, 첫 주 할 일은 하루 하나씩 열림. ‘내일 할게요’로 미룸.
-// 여는 화면(O-41 등)은 아직 없어서 줄을 눌러 이동하지는 않는다. 초대는 ‘코드 복사’.
+// 받은 제안이 맨 위(19 H-04 순서), 줄을 누르면 G-08. 다른 여는 화면(O-41 등)은 아직 없어서 줄을 눌러 이동하지 않는다. 초대는 ‘코드 복사’.
 export function H04Todos({
   state,
   today,
   partner,
+  received = [],
+  names,
 }: {
   state: TodoState;
   today: string;
   partner: string;
+  received?: Proposal[];
+  names?: Names;
 }) {
+  const nav = useNavigate();
   const todos = useTodos();
   const qc = useQueryClient();
   const defs = todoDefs(state);
@@ -40,7 +47,9 @@ export function H04Todos({
 
   if (!todos.data) return null;
   const visible = visibleTodos(defs, todos.data, today);
-  if (!visible.length) return null; // 모두 끝나면 카드가 사라짐
+  const proposals = names ? received : [];
+  const left = proposals.length + visible.length;
+  if (!left) return null; // 모두 끝나면 카드가 사라짐
 
   const rowOf = (d: TodoDef) => todos.data.find((t) => t.kind === d.kind);
   const snooze = async (d: TodoDef) => {
@@ -69,10 +78,36 @@ export function H04Todos({
     <section className="hg-checklist" style={{ maxWidth: 'none' }} aria-label={copy.todos}>
       <div className="hg-checklist__head">
         <b>{copy.todos}</b>
-        <span>{copy.todosLeft(visible.length)}</span>
+        <span>{copy.todosLeft(left)}</span>
       </div>
       <div className="hg-checklist__list">
-        {visible.slice(0, SHOWN).map((d) => (
+        {names &&
+          proposals.slice(0, SHOWN).map((p) => {
+            const line = describeProposal(p, names);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                className="hg-task"
+                onClick={() => nav(`/proposals/${p.id}`)}
+              >
+                <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
+                <span className="hg-task__text">
+                  <span className="hg-task__title">
+                    {proposalCopy.arrived(
+                      proposerName(names, p.proposer),
+                      proposalCopy.itemObject[p.item as 'allowance' | 'split'] ?? '',
+                    )}
+                  </span>
+                  <span className="hg-task__sub">
+                    {proposalCopy.change(line.before, line.after)}
+                  </span>
+                </span>
+                {p.together && <Badge kind="warn">{proposalCopy.together}</Badge>}
+              </button>
+            );
+          })}
+        {visible.slice(0, Math.max(0, SHOWN - proposals.length)).map((d) => (
           <div key={d.kind} className="hg-task">
             <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
             <span className="hg-task__text">
