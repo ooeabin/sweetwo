@@ -16,6 +16,8 @@ export function proposalApplyOn(base: BaseDay, now = new Date()): string {
 export type ProposalItem =
   | 'allowance'
   | 'split'
+  | 'living_budget'
+  | 'goal_order'
   | 'goal_amount'
   | 'goal_deadline'
   | 'goal_pause'

@@ -106,5 +106,31 @@ export const copy = {
   confirmPosition: '우선순위는 맨 아래예요', // [확인 필요] 위치 고르기는 G-06과 함께
   addDone: '추가하기',
   added: '목표를 추가했어요', // [확인 필요]
-  shortAfterAdd: (amount: string) => `저축 가능 금액보다 월 ${amount} 많아져요`, // [확인 필요] G-04는 다음 단계
+  shortAfterAdd: (amount: string) => `저축 가능 금액보다 월 ${amount} 많아져요`, // [확인 필요]
+
+  // G-06 순서 바꾸기
+  orderTitle: '어떤 것부터 모을까요?',
+  orderOk: '이 순서로 할게요',
+  orderFixed: '비상금은 맨 위에 고정돼요', // [확인 필요]
+  orderPreview: '바뀌는 배분', // [확인 필요]
+  orderUp: (name: string) => `${name} 위로`,
+  orderDown: (name: string) => `${name} 아래로`,
+  orderMoved: (name: string, pos: number, total: number) =>
+    `${name}, ${total}개 중 ${pos}번째로 옮겼어요`,
+  orderHandle: (name: string) => `${name} 끌어서 옮기기`, // [확인 필요]
+  orderSaved: '순서를 바꿨어요',
+
+  // G-04 충돌 조정
+  adjustTitle: (amount: string) => `목표가 저축 가능 금액보다 월 ${amount} 많아요`,
+  adjustLabel: '조정 안', // [확인 필요] 화면 읽기용
+  adjustDeadline: '기한 늘리기',
+  adjustAmount: '금액 줄이기',
+  adjustSpend: '지출 줄이기',
+  adjustLiving: (before: string, after: string) => `생활비 예산 ${before} → ${after}`, // [확인 필요]
+  adjustAllowance: (before: string, after: string) => `내 용돈 ${before} → ${after}`, // [확인 필요]
+  adjustLine: (name: string, before: string, after: string) => `${name} ${before} → ${after}`,
+  adjustNone: '고를 수 있는 안이 없어요. 목표를 고치거나 순서를 바꿔 보세요', // [확인 필요]
+  adjustApply: '이렇게 바꿀게요', // [확인 필요]
+  adjustDone: '바꿨어요', // [확인 필요]
+  close: '닫기',
 };

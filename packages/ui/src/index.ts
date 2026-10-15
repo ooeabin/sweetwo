@@ -27,4 +27,5 @@ export * from './components/AppFrame';
 export * from './components/Meter';
 export * from './components/PageHeader';
 export * from './components/Menu';
+export * from './components/ReorderList';
 export * from './components/question';

@@ -1,7 +1,7 @@
 -- pgTAP: 목표 제안(금액, 기한, 보류·다시 모으기, 삭제). 22 목표 수정, G-02 ⋯
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(15);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -73,6 +73,18 @@ select results_eq(
   $$ select owner::text, created_by::text from public.goal where name = '차' $$,
   $$ values ('me'::text, '22222222-2222-2222-2222-222222222222'::text) $$,
   '추가된 목표: 담당은 제안한 사람 기준');
+reset role;
+
+-- 순서(비상금 빼고), 생활비 예산
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+select throws_ok(format($$ select public.propose('goal_order', jsonb_build_object('order', jsonb_build_array(%L)), current_date + 30) $$, current_setting('test.emergency')), '22023', null, '비상금은 순서에 없음');
+select isnt(public.propose('living_budget', '{"living_budget":500000}', current_date + 30), null, '생활비 예산 제안');
+reset role;
+select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
+set local role authenticated;
+select public.respond_proposal((select id from public.proposal where item = 'living_budget' and status = 'open'), 'like');
+select is((select living_budget from public.couple_space), 500000::bigint, '생활비 예산 적용');
 reset role;
 
 select * from finish();

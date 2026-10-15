@@ -68,6 +68,22 @@ export function describe(
 ) {
   const who = nameOf(n, p.proposer);
   const goal = goals.find((g) => g.id === p.target_id)?.name ?? copy.goalUnknown;
+  if (p.item === 'living_budget') {
+    const v = (j: Json) => {
+      const a = num(j, 'living_budget');
+      return a === null ? copy.unset : readWon(a);
+    };
+    return { label: copy.livingBudget, before: v(p.before), after: v(p.after) };
+  }
+  if (p.item === 'goal_order') {
+    const v = (j: Json) => {
+      const ids = obj(j).order;
+      return Array.isArray(ids)
+        ? ids.map((id) => goals.find((g) => g.id === id)?.name ?? copy.goalUnknown).join(', ')
+        : copy.unset;
+    };
+    return { label: copy.goalOrder, before: v(p.before), after: v(p.after) };
+  }
   if (p.item === 'goal_add') {
     const a = obj(p.after);
     const name = typeof a.name === 'string' ? a.name : copy.goalUnknown;
