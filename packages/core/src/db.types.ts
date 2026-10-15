@@ -39,18 +39,23 @@ export type Database = {
       }
       app_user: {
         Row: {
+          allowance: number | null
           analytics_off: boolean
           birth_year: number | null
           created_at: string
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
+          income_variable: boolean
           is_internal_tester: boolean
+          monthly_income: number | null
           nickname: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
+          payday: number | null
+          payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
@@ -60,18 +65,23 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          allowance?: number | null
           analytics_off?: boolean
           birth_year?: number | null
           created_at?: string
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
           id: string
+          income_variable?: boolean
           is_internal_tester?: boolean
+          monthly_income?: number | null
           nickname?: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
+          payday?: number | null
+          payday_last?: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
@@ -80,18 +90,23 @@ export type Database = {
           version?: number
         }
         Update: {
+          allowance?: number | null
           analytics_off?: boolean
           birth_year?: number | null
           created_at?: string
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
           id?: string
+          income_variable?: boolean
           is_internal_tester?: boolean
+          monthly_income?: number | null
           nickname?: string | null
           notify_email?: string
           notify_email_source?: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
+          payday?: number | null
+          payday_last?: boolean
           provider?: Database["public"]["Enums"]["auth_provider"]
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
@@ -159,13 +174,24 @@ export type Database = {
           family_support: number | null
           family_support_answer: string | null
           family_support_estimated: boolean
+          fixed_total: number | null
+          fixed_total_estimated: boolean
           housing: Database["public"]["Enums"]["housing"] | null
           id: string
+          living_budget: number | null
+          living_budget_estimated: boolean
+          loan_repayment: number | null
           marriage_status: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month: string | null
+          partner_income: number | null
+          partner_income_estimated: boolean
+          partner_income_unknown: boolean
           partner_nickname: string | null
           prep_money_mode: Database["public"]["Enums"]["prep_money_mode"] | null
+          split_deferred: boolean
+          split_mode: Database["public"]["Enums"]["split_mode"] | null
+          split_ratio: number | null
           updated_at: string
           updated_by: string | null
           version: number
@@ -187,13 +213,24 @@ export type Database = {
           family_support?: number | null
           family_support_answer?: string | null
           family_support_estimated?: boolean
+          fixed_total?: number | null
+          fixed_total_estimated?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
+          living_budget?: number | null
+          living_budget_estimated?: boolean
+          loan_repayment?: number | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month?: string | null
+          partner_income?: number | null
+          partner_income_estimated?: boolean
+          partner_income_unknown?: boolean
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          split_deferred?: boolean
+          split_mode?: Database["public"]["Enums"]["split_mode"] | null
+          split_ratio?: number | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -214,13 +251,24 @@ export type Database = {
           family_support?: number | null
           family_support_answer?: string | null
           family_support_estimated?: boolean
+          fixed_total?: number | null
+          fixed_total_estimated?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
+          living_budget?: number | null
+          living_budget_estimated?: boolean
+          loan_repayment?: number | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month?: string | null
+          partner_income?: number | null
+          partner_income_estimated?: boolean
+          partner_income_unknown?: boolean
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          split_deferred?: boolean
+          split_mode?: Database["public"]["Enums"]["split_mode"] | null
+          split_ratio?: number | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -232,6 +280,66 @@ export type Database = {
           wedding_saved?: number | null
         }
         Relationships: []
+      }
+      fixed_expense: {
+        Row: {
+          burden: Database["public"]["Enums"]["expense_burden"]
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          group_key: string
+          id: string
+          monthly_amount: number | null
+          name: string
+          sort: number
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          burden?: Database["public"]["Enums"]["expense_burden"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          group_key: string
+          id?: string
+          monthly_amount?: number | null
+          name: string
+          sort?: number
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          burden?: Database["public"]["Enums"]["expense_burden"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          group_key?: string
+          id?: string
+          monthly_amount?: number | null
+          name?: string
+          sort?: number
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_expense_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       goal: {
         Row: {
@@ -372,18 +480,23 @@ export type Database = {
           p_terms_version: string
         }
         Returns: {
+          allowance: number | null
           analytics_off: boolean
           birth_year: number | null
           created_at: string
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
+          income_variable: boolean
           is_internal_tester: boolean
+          monthly_income: number | null
           nickname: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
+          payday: number | null
+          payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
@@ -435,6 +548,7 @@ export type Database = {
       couple_state: "not_joined" | "connected" | "unlink_pending" | "solo"
       email_source: "provider" | "manual"
       employment: "regular" | "contract" | "freelance" | "resting"
+      expense_burden: "shared" | "personal"
       goal_kind: "once" | "yearly" | "monthly"
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
@@ -442,6 +556,7 @@ export type Database = {
       marriage_status: "married" | "engaged"
       newlywed_home: "have" | "before" | "after" | "parents"
       prep_money_mode: "separate" | "together"
+      split_mode: "half" | "income" | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -581,6 +696,7 @@ export const Constants = {
       couple_state: ["not_joined", "connected", "unlink_pending", "solo"],
       email_source: ["provider", "manual"],
       employment: ["regular", "contract", "freelance", "resting"],
+      expense_burden: ["shared", "personal"],
       goal_kind: ["once", "yearly", "monthly"],
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
@@ -588,6 +704,7 @@ export const Constants = {
       marriage_status: ["married", "engaged"],
       newlywed_home: ["have", "before", "after", "parents"],
       prep_money_mode: ["separate", "together"],
+      split_mode: ["half", "income", "custom"],
     },
   },
 } as const

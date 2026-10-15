@@ -1,11 +1,12 @@
 import type { Page, Route } from '@playwright/test';
 import { chanwoo, fakeJwt, SB } from './supabase-mock';
 
-// 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal). 테스트가 db를 들여다본다.
+// 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense). 테스트가 db를 들여다본다.
 export interface MemDb {
   me: Record<string, unknown>;
   space: Record<string, unknown> | null;
   goals: Record<string, unknown>[];
+  fixed: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -36,9 +37,15 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
       space_id: null,
       onboarding_step: null,
       onboarding_done_at: null,
+      monthly_income: null,
+      income_variable: false,
+      payday: null,
+      payday_last: false,
+      allowance: null,
     },
     space: null,
     goals: [],
+    fixed: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -123,6 +130,17 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
             newlywed_home: null,
             newlywed_home_month: null,
             prep_money_mode: null,
+            partner_income: null,
+            partner_income_estimated: false,
+            partner_income_unknown: false,
+            fixed_total: null,
+            fixed_total_estimated: false,
+            living_budget: null,
+            living_budget_estimated: false,
+            loan_repayment: null,
+            split_mode: null,
+            split_ratio: null,
+            split_deferred: false,
             version: 1,
           };
           db.me.space_id = 'space-1';
@@ -175,6 +193,31 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
       if (method === 'PATCH') {
         const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
         for (const g of db.goals) if (ids.includes(String(g.id))) Object.assign(g, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/fixed_expense') {
+      if (method === 'GET') {
+        return json(
+          route,
+          db.fixed.filter((r) => !r.deleted_at).sort((a, b) => Number(a.sort) - Number(b.sort)),
+        );
+      }
+      if (method === 'POST') {
+        const rows = req.postDataJSON() as Record<string, unknown>[];
+        for (const r of Array.isArray(rows) ? rows : [rows]) {
+          db.fixed.push({
+            id: `fixed-${db.fixed.length + 1}`,
+            monthly_amount: null,
+            deleted_at: null,
+            ...r,
+          });
+        }
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = inIds(url);
+        for (const r of db.fixed) if (ids.includes(String(r.id))) Object.assign(r, body());
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }

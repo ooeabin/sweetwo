@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { cx } from '../cx';
 import { Icon } from '../Icon';
 
@@ -8,6 +8,12 @@ export interface Choice<T extends string> {
   value: T;
   label: string;
   sub?: string;
+  /** 라벨 아래 미리보기(분담액 등). sub보다 진하게 */
+  detail?: ReactNode;
+  /** 라벨 옆 이름표(‘추정’) */
+  tag?: string;
+  /** 고를 수 없음(is-disabled) */
+  disabled?: boolean;
 }
 
 export function ChoiceCards<T extends string>({
@@ -30,6 +36,7 @@ export function ChoiceCards<T extends string>({
   const first = useRef<HTMLButtonElement>(null);
 
   const pick = (v: T) => {
+    if (options.find((o) => o.value === v)?.disabled) return;
     onChange(v);
     if (!autoAdvance || !onPick) return;
     clearTimeout(timer.current);
@@ -73,13 +80,30 @@ export function ChoiceCards<T extends string>({
             type="button"
             role="radio"
             aria-checked={on}
-            className={cx('hg-option', 'hg-option--card', on && 'is-on')}
+            className={cx(
+              'hg-option',
+              'hg-option--card',
+              on && 'is-on',
+              o.disabled && 'is-disabled',
+            )}
             style={{ justifyContent: 'space-between', textAlign: 'left' }}
+            aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
-            <span className="hg-stack" style={{ gap: 0 }}>
-              <span>{o.label}</span>
+            <span
+              className="hg-stack"
+              style={{ gap: 0, padding: o.detail ? 'var(--space-3) 0' : undefined }}
+            >
+              <span>
+                {o.label}
+                {o.tag && (
+                  <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
+                    {o.tag}
+                  </span>
+                )}
+              </span>
               {o.sub && <span className="hg-help">{o.sub}</span>}
+              {o.detail}
             </span>
             {on && <Icon name="check" />}
           </button>

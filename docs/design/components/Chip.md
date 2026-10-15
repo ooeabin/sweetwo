@@ -12,3 +12,8 @@
 - 첫 칩은 “전체”, 하나만 고름(고른 칩 `ink`). 4개를 넘으면 마지막을 `list-filter` 아이콘 + “더 보기”로 BottomSheet.
 - 거른 결과가 없으면 EmptyState 한 줄(“이 날짜엔 없어요”).
 - 터치 좁은 창은 누르는 높이 44px(작은 칩 포함).
+
+## 그룹 칩과 날짜 칩
+
+- 그룹 칩(O-36 고정지출): 40px 칩 3열 격자, 여러 개 고름. 고른 그룹 아래 세부 항목을 `hg-chip--sm` 한 줄(`hg-quick`)로 펼침. 마지막 칸 “직접 추가”는 이름 칸(ShortText) + “추가”.
+- 날짜 칩(O-32 월급날 `DayChips`): `hg-chip--sm` 1~31 + ‘말일’, 하나만 고름. 묶음은 `role="radiogroup"`, 칩은 `role="radio"` + `aria-checked`. 월 칩(`MonthChips`)과 같은 모양.

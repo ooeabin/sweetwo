@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useGoals, useMe, useOnboardingLocal, useSpace } from './data';
-import { nextOf, PART3_START, prevOf, progress, screens, type FlowState } from './flow';
+import { nextOf, PART6_START, prevOf, progress, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
@@ -49,9 +49,9 @@ export function useStep(id: string) {
       };
       const to = ret ?? next?.(fresh) ?? nextOf(id, screens(fresh));
       setSaving(false);
-      if (to === PART3_START) {
-        // 파트 3(소득, 지출)은 다음 단계에서. 지금은 멈춘 화면만 남기고 이번 달로.
-        await saveMe({ onboarding_step: 'O-31' }).catch(() => undefined);
+      if (to === PART6_START) {
+        // 파트 6(결과)은 다음 단계에서. 지금은 멈춘 화면만 남기고 이번 달로.
+        await saveMe({ onboarding_step: 'O-61' }).catch(() => undefined);
         await me.refetch(); // 이어하기 판단(OnboardingGate)이 옛 값을 보지 않게
         nav('/', { replace: true });
         return;
