@@ -194,7 +194,7 @@ sweetwo/
 
 ### 지금 있는 테이블과 함수
 
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
@@ -573,6 +573,16 @@ supabase/
 - 배우자 미합류면 정산은 내 수입, 내 용돈만 센다(“{배우자}님이 합류하기 전이라 {나}님 돈만 셌어요”)
 - 아직 없는 것: 함께 모드와 보기만, W-04h 다음 달 조정과 월말 정리 제안, 꼼꼼 모드(W-04b~f, i), 놓친 달, 정리 고치기, 지난달보다 칩, 생활비 예산 보정 제안, 미달·초과 처리
 - 배우자 활동(H-08)은 다음 단계
+
+### 배우자 합류 구조
+
+- 초대 링크 `/i/:code`(P-01, features/pairing)는 로그인 전에도 열림(A-01 공개 경로). `invite_preview()`(익명 가능)로 초대한 사람 호칭만 보여 줌
+- ‘합류하기’: 로그인 전이면 `prefs.returnTo = /i/{코드}?go=1`을 남기고 A-02로. 로그인(기존 계정) 또는 가입(A-05) 뒤 그 주소로 돌아와 바로 `join_space()`
+- `join_space()`: 초대 공간에 들어가고 코드를 이 사람 몫으로 잡아 둠(완료 전 이탈하면 같은 코드로 ‘resume’). 시작한 사람이 적은 호칭, 추정 수입이 초기값. 5회 오류면 10분 제한(`invite_attempt`). 혼자 시작한 기록이 있으면 ‘has_records’(옮기기 P-02a는 다음 단계)
+- 합류 화면 `/join/:screen`: P-02b → P-03 → P-04 → P-05(수입) → P-05d(월급날) → P-07 → P-08 → P-11. 각자 관리 예비부부는 P-07, P-08 없음. 멈춘 화면은 `app_user.onboarding_step`(OnboardingGate가 이어 줌)
+- P-11에 들어오면 `finish_join()`(부부 연결, 코드 사용됨, 온보딩 끝) + `update_pending_shares()`(이번 플랜 안 나눈 줄의 분담액만, 금액은 그대로)
+- 두 사람 기준은 core `rules/couple.ts`(`coupleOf`): 합류 전 배우자 값 = 공간의 추정값, 합류 뒤 = `partner_profile()`. 분담 비율 `split_ratio`는 시작한 사람 몫 %. 기본 기준일 = 두 월급날 중 늦은 날. 아바타 색은 시작한 사람 1, 합류한 사람 2
+- 다음 단계: 제안(P-07 다른 용돈, P-08 ‘다르게 해볼래요’, P-10), O-63~65 다시 보기, P-02a, P-06, P-09, 합류 알림, 기준일이 바뀔 때 사이클 조정
 
 ### 기능 하나 만드는 순서
 

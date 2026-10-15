@@ -9,3 +9,5 @@ export { A08SessionExpired } from './pages/a-08-session-expired';
 export { AuthCallback } from './pages/auth-callback';
 export { initSession, session } from './session';
 export { paths } from './flow';
+export { prefs } from './prefs';
+export { providerName } from './copy';

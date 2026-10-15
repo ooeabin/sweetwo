@@ -616,6 +616,25 @@ export type Database = {
           },
         ]
       }
+      invite_attempt: {
+        Row: {
+          created_at: string
+          id: number
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          id?: never
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          user_id?: string
+        }
+        Relationships: []
+      }
       month_close: {
         Row: {
           big_none: boolean
@@ -1186,10 +1205,33 @@ export type Database = {
         Returns: undefined
       }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
+      finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
+      invite_preview: {
+        Args: { p_code: string }
+        Returns: {
+          inviter_nickname: string
+          status: string
+        }[]
+      }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
+      join_space: { Args: { p_code: string }; Returns: string }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
+      }
+      partner_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          allowance: number
+          employment: Database["public"]["Enums"]["employment"]
+          id: string
+          income_variable: boolean
+          monthly_income: number
+          nickname: string
+          payday: number
+          payday_last: boolean
+          side: Database["public"]["Enums"]["couple_side"]
+        }[]
       }
       start_first_plan: {
         Args: {
@@ -1203,6 +1245,10 @@ export type Database = {
           p_snapshot: Json
         }
         Returns: string
+      }
+      update_pending_shares: {
+        Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
+        Returns: number
       }
     }
     Enums: {

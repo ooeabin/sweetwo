@@ -43,7 +43,10 @@ export function A05Terms() {
       ) {
         nav(paths.pinSetup, { replace: true });
       } else {
-        nav(paths.home, { replace: true });
+        // 초대 링크(P-01)에서 왔으면 그리로 돌아가 합류를 이어 간다
+        const back = prefs.returnTo();
+        prefs.setReturnTo(null);
+        nav(back ?? paths.home, { replace: true });
       }
     } catch {
       setSaving(false);

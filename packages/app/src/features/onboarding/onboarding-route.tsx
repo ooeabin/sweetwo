@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
+import { isJoinScreen } from '../pairing';
 import { useMe } from './data';
 import { O03MyNickname } from './pages/o-03-my-nickname';
 import { O04Side } from './pages/o-04-side';
@@ -96,6 +97,10 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   const step = me.data?.onboarding_step?.toLowerCase() ?? 'o-03';
   if (me.data && !me.data.onboarding_done_at && isOnboardingScreen(step)) {
     return <Navigate to={`/onboarding/${step}`} replace />;
+  }
+  // 합류 중(P-02b~P-08)이면 그 화면부터
+  if (me.data && !me.data.onboarding_done_at && isJoinScreen(step)) {
+    return <Navigate to={`/join/${step}`} replace />;
   }
   return <>{children}</>;
 }

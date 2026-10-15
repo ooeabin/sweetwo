@@ -10,3 +10,4 @@ export * from './josa';
 export * from './rules/this-month';
 export * from './rules/todo';
 export * from './rules/spend';
+export * from './rules/couple';

@@ -3,11 +3,12 @@ import {
   fetchGoals,
   fetchMe,
   fetchMonthClose,
+  fetchPartner,
   fetchSpace,
   fetchSpendCategories,
   qk,
 } from '@sweetwo/api';
-import { readPlanSnapshot, todayKst } from '@sweetwo/core';
+import { coupleOf, readPlanSnapshot, todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // 월말 정리 데이터. 키는 이번 달과 같은 qk라 캐시를 같이 쓴다.
@@ -21,6 +22,7 @@ export function useCloseData() {
     queryKey: qk.currentPlan(today),
     queryFn: () => fetchCurrentPlan(today),
   });
+  const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const cats = useQuery({ queryKey: qk.spendCategories, queryFn: fetchSpendCategories });
   const planId = plan.data?.id;
   const close = useQuery({
@@ -37,16 +39,20 @@ export function useCloseData() {
     close.isLoading;
 
   const sp = space.data;
-  const joined = sp?.couple_state === 'connected';
-  const solo = sp?.couple_state === 'solo';
+  const c = me.data && sp ? coupleOf(me.data, sp, partner.data ?? null) : null;
+  const joined = !!c?.joined;
+  const solo = !!c?.solo;
   // 정산 기준 = 월급 플랜과 같게(06 7장). 배우자 수입을 모르면(합류 전) 내 돈만
-  const mineOnly = solo || (!joined && !!sp?.partner_income_unknown);
-  const myIncome = me.data?.monthly_income ?? 0;
+  const mineOnly = solo || (!joined && !!c?.partnerUnknown);
+  const myIncome = c?.myIncome ?? 0;
   const snapIncome = readPlanSnapshot(plan.data?.snapshot).income;
   const incomeDefault = mineOnly
     ? myIncome
-    : (snapIncome ?? myIncome + (sp?.partner_income_unknown ? 0 : (sp?.partner_income ?? 0)));
+    : joined
+      ? myIncome + (c?.partnerIncome ?? 0)
+      : (snapIncome ?? myIncome + (c?.partnerIncome ?? 0));
   const myAllowance = me.data?.allowance ?? 0;
+  const partnerAllowance = c?.partnerAllowance ?? myAllowance;
   const month = plan.data ? Number(plan.data.label_month.slice(5, 7)) : Number(today.slice(5, 7));
 
   return {
@@ -67,13 +73,15 @@ export function useCloseData() {
         ? null
         : mineOnly
           ? ('mine' as const)
-          : sp?.partner_income_estimated
+          : c?.partnerEstimated
             ? ('estimated' as const)
             : null, // 배우자 수입을 정확히 넣었으면 문구 없음
     month,
     incomeDefault,
     /** 정산에 넣는 용돈: 내 돈만이면 내 용돈, 아니면 둘(합류 전 배우자 용돈 = 내 용돈 가정) */
-    allowance: mineOnly ? myAllowance : myAllowance * 2,
+    allowance: mineOnly ? myAllowance : myAllowance + partnerAllowance,
+    partnerAllowance,
+    partnerName: c?.partnerName ?? '',
     myAllowance,
     refreshClose: () => qc.invalidateQueries({ queryKey: qk.monthClose(planId ?? '') }),
     refreshCats: () => qc.invalidateQueries({ queryKey: qk.spendCategories }),

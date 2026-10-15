@@ -3,6 +3,7 @@ import {
   fetchGoals,
   fetchMe,
   fetchMonthClose,
+  fetchPartner,
   fetchSpace,
   fetchTodos,
   qk,
@@ -26,3 +27,4 @@ export function useMonthClose(planId: string | undefined) {
     enabled: !!planId,
   });
 }
+export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });

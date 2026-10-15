@@ -15,6 +15,10 @@ export interface MemDb {
   spends: Record<string, unknown>[];
   bigs: Record<string, unknown>[];
   deposits: Record<string, unknown>[];
+  /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
+  partner: Record<string, unknown> | null;
+  consents: Record<string, unknown>[];
+  shares: Record<string, unknown> | null;
   rpc: string[];
 }
 
@@ -63,6 +67,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     spends: [],
     bigs: [],
     deposits: [],
+    partner: null,
+    consents: [],
+    shares: null,
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -170,6 +177,39 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'start_first_plan') {
         if (!db.plans.length) db.plans.push({ args: body() });
         return json(route, 'plan-1');
+      }
+      if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      if (fn === 'join_space') {
+        const sp = db.space ?? {};
+        Object.assign(db.me, {
+          space_id: 'space-1',
+          side: 'bride',
+          nickname: db.me.nickname ?? sp.partner_nickname,
+          monthly_income: db.me.monthly_income ?? sp.partner_income,
+          onboarding_step: sp.partner_income ? 'P-02B' : 'P-03',
+          onboarding_done_at: null,
+        });
+        return json(route, 'joined');
+      }
+      if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
+      if (fn === 'finish_join') {
+        if (db.space) db.space.couple_state = 'connected';
+        Object.assign(db.me, {
+          onboarding_step: 'P-11',
+          onboarding_done_at: new Date().toISOString(),
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'update_pending_shares') {
+        db.shares = body();
+        const a = db.plans[0]?.args;
+        const shares = (db.shares.p_shares ?? []) as Record<string, unknown>[];
+        if (a)
+          a.p_lines = ((a.p_lines as Record<string, unknown>[]) ?? []).map((l) => ({
+            ...l,
+            ...(shares.find((x) => x.account_role === l.account_role) ?? {}),
+          }));
+        return json(route, shares.length);
       }
       if (fn === 'create_invite')
         return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
@@ -280,6 +320,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
       return Array.isArray(b) ? b : [b];
     };
+    if (path === '/rest/v1/consent' && method === 'POST') {
+      db.consents.push(...rowsOf());
+      return ok204();
+    }
     if (path === '/rest/v1/todo') {
       if (method === 'GET') return json(route, db.todos);
       if (method === 'POST') {
