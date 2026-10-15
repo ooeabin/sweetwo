@@ -1,8 +1,16 @@
 import { finishJoin, updatePendingShares } from '@sweetwo/api';
-import { formatManWon, planSummary, readPlanSnapshot, readWon, splitShares } from '@sweetwo/core';
+import {
+  formatManWon,
+  pendingShares,
+  planSummary,
+  readPlanSnapshot,
+  readWon,
+  splitShares,
+} from '@sweetwo/core';
 import { QuestionLayout, SceneMedia } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { openSent, ProposalLines, useProposals } from '../../proposals';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
@@ -13,6 +21,7 @@ export function P11Joined() {
   const s = useJoinStep('p-11');
   const d = s.d;
   const nav = useNavigate();
+  const proposals = useProposals();
   const [finished, setFinished] = useState(false);
   const ran = useRef(false);
 
@@ -26,24 +35,13 @@ export function P11Joined() {
         const c = d.couple;
         if (d.plan && sp && c) {
           // 안 나눈 통장 줄마다 새 분담(금액은 그대로)
-          const mode = sp.split_deferred || !sp.split_mode ? 'half' : sp.split_mode;
-          const groom = d.me?.side !== 'bride';
-          const shares = (d.plan.lines ?? [])
-            .filter((l) => l.target === 'account' && l.state === 'pending' && l.account_role)
-            .map((l) => {
-              const x = splitShares({
-                total: l.amount,
-                mode,
-                myRatio: c.myRatio,
-                myIncome: c.myIncome ?? 0,
-                partnerIncome: c.partnerIncome ?? 0,
-              });
-              return {
-                account_role: l.account_role as string,
-                amount_groom: groom ? x.me : x.partner,
-                amount_bride: groom ? x.partner : x.me,
-              };
-            });
+          const shares = pendingShares(d.plan.lines ?? [], {
+            mode: sp.split_deferred || !sp.split_mode ? 'half' : sp.split_mode,
+            myRatio: c.myRatio,
+            myIncome: c.myIncome ?? 0,
+            partnerIncome: c.partnerIncome ?? 0,
+            iAmGroom: d.me?.side !== 'bride',
+          });
           if (shares.length) await updatePendingShares(d.plan.id, shares, false);
         }
         await d.refetch();
@@ -77,6 +75,7 @@ export function P11Joined() {
   const beforeIncome = snap.income ?? (c.partnerIncome ?? 0) + (sp.partner_income ?? 0);
   const beforeSave = snap.saveable ?? null;
   const mode = sp.split_deferred || !sp.split_mode ? 'half' : sp.split_mode;
+  const waiting = openSent(proposals.data ?? [], d.me.id);
   const month = d.plan ? Number(d.plan.label_month.slice(5, 7)) : null;
   const share = splitShares({
     total: now.commonFund,
@@ -123,6 +122,23 @@ export function P11Joined() {
           </p>
         </div>
       </div>
+      {waiting.length > 0 && (
+        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <h2 className="hg-card__label" style={{ margin: 0 }}>
+            {copy.waiting}
+          </h2>
+          <ProposalLines
+            proposals={waiting}
+            label={copy.waiting}
+            names={{
+              myId: d.me.id,
+              myName: c.myName,
+              partnerName: c.partnerName,
+              starter: c.starter,
+            }}
+          />
+        </section>
+      )}
       {month && <p className="hg-q__help">{copy.planKept(month)}</p>}
     </QuestionLayout>
   );

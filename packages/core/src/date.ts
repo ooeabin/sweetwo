@@ -22,6 +22,12 @@ export function formatDateWeekday(s: string): string {
   return `${m}월 ${d}일 ${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}`;
 }
 
+/** '2026-10-25' → "10월 25일" */
+export function formatMonthDay(s: string): string {
+  const { m, d } = ymd(s);
+  return `${m}월 ${d}일`;
+}
+
 /** '2027-01-09' → "2027년 1월 9일" */
 export function formatDateFull(s: string): string {
   const { y, m, d } = ymd(s);

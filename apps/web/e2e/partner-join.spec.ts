@@ -40,7 +40,9 @@ test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그�
   expect(back).toBe('/i/K7M2QX?go=1');
 });
 
-test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 → P-08 → P-11 → 이번 달', async ({ page }) => {
+test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 다르게 → P-10 → P-11 → 이번 달', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   // 찬우가 만든 공간과 첫 플랜(9월 월급 플랜, 직접 정할게요 60:40)
@@ -143,24 +145,45 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 → P-08 → P-11
 
   await heading(page, '예빈님 용돈은 한 달에 얼마로 할까요?');
   await expect(page.getByLabel('예빈님 용돈은 한 달에 얼마로 할까요?')).toHaveValue(/500,?000/);
+  // 같으면 안내 없음, 다르면 찬우에게 제안(적용일 = 72시간 뒤 첫 기준일, 두 월급날 중 늦은 25일)
+  await expect(page.getByText(/반대 없으면/)).toHaveCount(0);
   await page.getByLabel('예빈님 용돈은 한 달에 얼마로 할까요?').fill('600000');
+  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
   await next(page);
 
-  // P-08: 공동자금 = 고정 130 + 생활비 130 + 모을 돈(620 − 110 − 260 = 250) = 510 → 예빈 40% 204, 찬우 306
+  // P-08: 확정 전 예빈 용돈 = 찬우 용돈. 공동자금 = 고정 130 + 생활비 130 + 모을 돈(620 − 100 − 260 = 260) = 520
+  // → 예빈 40% 208, 찬우 312
   await heading(page, '같이 쓰는 돈 나누는 방식, 괜찮아요?');
   await expect(page.getByText('직접 정할게요')).toBeVisible();
-  await expect(page.getByText('204만 원')).toBeVisible();
-  await expect(page.getByText('306만 원')).toBeVisible();
+  await expect(page.getByText('208만 원')).toBeVisible();
+  await expect(page.getByText('312만 원')).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '좋아요' }).click();
+  await page.getByRole('button', { name: '다르게 해볼래요' }).click();
+  await page.getByRole('radio', { name: /반반/ }).click();
+  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '찬우님께 제안하기' }).click();
+
+  // P-10: 찬우가 아직 목표가 없음
+  await heading(page, '합류 전에 바뀐 것과 목표예요');
+  await expect(page.getByText('찬우님이 목표를 정하면 여기에 보여요')).toBeVisible();
+  await axe(page);
+  await next(page);
 
   // P-11 합류 완료
-  await heading(page, '두 분은 한 달에 250만 원을 모을 수 있어요');
+  await heading(page, '두 분은 한 달에 260만 원을 모을 수 있어요');
   await expect(page.getByText('620만 원')).toBeVisible();
   await expect(page.getByLabel('이전').first()).toHaveText('600만 원');
   await expect(
     page.getByText('9월 월급 플랜은 그대로, 안 나눈 돈만 다시 계산했어요'),
   ).toBeVisible();
+  // 답 기다리는 제안: 전 → 후 + 적용일
+  const waiting = page.getByRole('list', { name: '답 기다리는 제안' });
+  await expect(waiting.getByRole('listitem')).toHaveCount(2);
+  await expect(waiting).toContainText('예빈님 용돈');
+  await expect(waiting).toContainText('50만 원 → 60만 원');
+  await expect(waiting).toContainText('찬우 60%, 예빈 40% → 반반');
+  await expect(waiting).toContainText('10월 25일부터 적용');
   await axe(page);
   await page.getByRole('button', { name: '이번 달로' }).click();
 
@@ -178,9 +201,26 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 → P-08 → P-11
     employment: 'regular',
     monthly_income: 2_700_000,
     payday: 10,
-    allowance: 600_000,
+    allowance: 500_000,
     onboarding_step: 'P-11',
   });
+  // 제안 2건: 용돈 60만, 분담 반반(적용일 10월 25일)
+  expect(db.proposals).toEqual([
+    expect.objectContaining({
+      item: 'allowance',
+      before: { allowance: 500_000 },
+      after: { allowance: 600_000 },
+      apply_on: '2026-10-25',
+      status: 'open',
+    }),
+    expect.objectContaining({
+      item: 'split',
+      before: { mode: 'custom', starter_ratio: 60 },
+      after: { mode: 'half' },
+      apply_on: '2026-10-25',
+      status: 'open',
+    }),
+  ]);
   expect(db.consents).toEqual([
     expect.objectContaining({ kind: 'space_sharing', source: 'prefill_review', agreed: true }),
   ]);

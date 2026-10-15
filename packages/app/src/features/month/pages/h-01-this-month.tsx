@@ -21,6 +21,7 @@ import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPlan, useGoals, useMe, useMonthClose, usePartner, useSpace } from '../data';
 import { H04Todos } from '../h-04-todos';
+import { openReceived, proposalCopy, useApplyDue, useProposals } from '../../proposals';
 import { closePath, spendPath } from '../paths';
 import { monthView, type MonthView } from '../view';
 
@@ -34,6 +35,8 @@ export function H01ThisMonth() {
   const plan = useCurrentPlan();
   const partner = usePartner();
   const close = useMonthClose(plan.data?.id);
+  const proposals = useProposals();
+  useApplyDue();
   const nav = useNavigate();
   const { masked, toggle } = useMask();
 
@@ -55,6 +58,11 @@ export function H01ThisMonth() {
         })
       : null;
   const name = me.data?.nickname ?? '';
+  const received = openReceived(proposals.data ?? [], me.data?.id);
+  const names =
+    v && me.data
+      ? { myId: me.data.id, myName: name, partnerName: v.partnerName, starter: v.starter }
+      : undefined;
 
   let title: ReactNode = '';
   let actions: ReactNode = null;
@@ -81,7 +89,14 @@ export function H01ThisMonth() {
   } else {
     ({ title, actions, stats } = today(v, name, m, (to) => nav(to)));
     const todos = (
-      <H04Todos key="todos" state={v.todoState} today={v.today} partner={v.partnerName} />
+      <H04Todos
+        key="todos"
+        state={v.todoState}
+        today={v.today}
+        partner={v.partnerName}
+        received={received}
+        names={names}
+      />
     );
     columns = v.separate
       ? [
@@ -109,7 +124,13 @@ export function H01ThisMonth() {
     <AppFrame
       current="month"
       tabs={[
-        { key: 'month', label: copy.tabMonth, href: '/' },
+        {
+          key: 'month',
+          label: copy.tabMonth,
+          href: '/',
+          badge: received.length,
+          badgeLabel: proposalCopy.receivedCount(received.length),
+        },
         { key: 'goals', label: copy.tabGoals, disabled: true },
         { key: 'assets', label: copy.tabAssets, disabled: true },
         { key: 'calendar', label: copy.tabCalendar, disabled: true },

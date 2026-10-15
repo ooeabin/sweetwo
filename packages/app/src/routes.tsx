@@ -17,6 +17,7 @@ import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01JoinStart } from './features/pairing';
+import { G08Proposal } from './features/proposals';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
@@ -53,6 +54,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-04a~W-04 끝 월말 정리
+      {
+        path: '/proposals/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G08Proposal />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-08 제안 확인
       {
         path: '/onboarding/:screen', // O-03~O-24 온보딩 ①
         element: (

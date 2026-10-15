@@ -10,7 +10,7 @@ export const joinPath = (id: string) => `/join/${id}`;
 export function joinScreens(d: Pick<JoinData, 'space'>): string[] {
   const separate =
     d.space?.marriage_status === 'engaged' && d.space?.prep_money_mode === 'separate';
-  return ['p-03', 'p-04', 'p-05', 'p-05d', ...(separate ? [] : ['p-07', 'p-08']), 'p-11'];
+  return ['p-03', 'p-04', 'p-05', 'p-05d', ...(separate ? [] : ['p-07', 'p-08']), 'p-10', 'p-11'];
 }
 
 /** 4칸 진행 막대: P-03·04 / P-05 / P-06·07 / P-08~10. P-11은 모두 채움 */
@@ -21,6 +21,7 @@ const PART: Record<string, number> = {
   'p-05d': 1,
   'p-07': 2,
   'p-08': 3,
+  'p-10': 3,
 };
 export const joinProgress = (id: string) =>
   id === 'p-11' ? { total: 4, now: 4 } : { total: 4, now: PART[id] ?? 0, fill: 50 };

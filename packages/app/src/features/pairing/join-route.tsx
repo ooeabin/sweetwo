@@ -7,6 +7,7 @@ import { P05Income } from './pages/p-05-income';
 import { P05dPayday } from './pages/p-05d-payday';
 import { P07Allowance } from './pages/p-07-allowance';
 import { P08Split } from './pages/p-08-split';
+import { P10Changes } from './pages/p-10-changes';
 import { P11Joined } from './pages/p-11-joined';
 
 // /join/:screen → 합류 화면(P-02b~P-11). 화면 id = 기획서 화면 ID(소문자), P-05 월급날은 p-05d.
@@ -18,6 +19,7 @@ const SCREENS: Record<string, () => ReactNode> = {
   'p-05d': () => <P05dPayday />,
   'p-07': () => <P07Allowance />,
   'p-08': () => <P08Split />,
+  'p-10': () => <P10Changes />,
   'p-11': () => <P11Joined />,
 };
 

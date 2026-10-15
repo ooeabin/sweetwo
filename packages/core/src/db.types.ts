@@ -943,6 +943,89 @@ export type Database = {
           },
         ]
       }
+      proposal: {
+        Row: {
+          after: NonNullable<Json>
+          applied_at: string | null
+          apply_on: string
+          before: NonNullable<Json>
+          created_at: string
+          id: string
+          item: string
+          oppose_count: number
+          proposer: string
+          replaces: string | null
+          responded_at: string | null
+          response: Database["public"]["Enums"]["proposal_response"] | null
+          round_trips: number
+          seen_at: string | null
+          space_id: string
+          status: Database["public"]["Enums"]["proposal_status"]
+          together: boolean
+          updated_at: string
+          version: number
+          apply_proposal_values: undefined | null
+        }
+        ComputedFields: "apply_proposal_values"
+        Insert: {
+          after: NonNullable<Json>
+          applied_at?: string | null
+          apply_on: string
+          before: NonNullable<Json>
+          created_at?: string
+          id?: string
+          item: string
+          oppose_count?: number
+          proposer: string
+          replaces?: string | null
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["proposal_response"] | null
+          round_trips?: number
+          seen_at?: string | null
+          space_id: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          together?: boolean
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          after?: NonNullable<Json>
+          applied_at?: string | null
+          apply_on?: string
+          before?: NonNullable<Json>
+          created_at?: string
+          id?: string
+          item?: string
+          oppose_count?: number
+          proposer?: string
+          replaces?: string | null
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["proposal_response"] | null
+          round_trips?: number
+          seen_at?: string | null
+          space_id?: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          together?: boolean
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_replaces_fkey"
+            columns: ["replaces"]
+            isOneToOne: false
+            referencedRelation: "proposal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saving_deposit: {
         Row: {
           amount: number
@@ -1154,6 +1237,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
+      apply_proposal_values: {
+        Args: {
+          p: Omit<
+            Database["public"]["Tables"]["proposal"]["Row"],
+            Database["public"]["Tables"]["proposal"]["ComputedFields"]
+          >
+        }
+        Returns: undefined
+      }
       complete_signup: {
         Args: {
           p_marketing: boolean
@@ -1219,6 +1312,7 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       partner_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1232,6 +1326,18 @@ export type Database = {
           payday_last: boolean
           side: Database["public"]["Enums"]["couple_side"]
         }[]
+      }
+      proposal_space: { Args: Record<PropertyKey, never>; Returns: string }
+      propose: {
+        Args: { p_after: Json; p_apply_on: string; p_item: string }
+        Returns: string
+      }
+      respond_proposal: {
+        Args: {
+          p_id: string
+          p_response: Database["public"]["Enums"]["proposal_response"]
+        }
+        Returns: Database["public"]["Enums"]["proposal_status"]
       }
       start_first_plan: {
         Args: {
@@ -1249,6 +1355,10 @@ export type Database = {
       update_pending_shares: {
         Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
         Returns: number
+      }
+      withdraw_proposal: {
+        Args: { p_id: string }
+        Returns: Database["public"]["Enums"]["proposal_status"]
       }
     }
     Enums: {
@@ -1286,6 +1396,9 @@ export type Database = {
       plan_line_target: "account" | "goal"
       plan_status: "created" | "splitting" | "closing" | "closed" | "skipped"
       prep_money_mode: "separate" | "together"
+      proposal_response: "like" | "oppose" | "differently"
+      proposal_status:
+        "open" | "applied" | "held" | "withdrawn" | "expired" | "reverted" | "superseded"
       split_mode: "half" | "income" | "custom"
       todo_status: "pending" | "snoozed" | "done"
     }
@@ -1443,6 +1556,16 @@ export const Constants = {
       plan_line_target: ["account", "goal"],
       plan_status: ["created", "splitting", "closing", "closed", "skipped"],
       prep_money_mode: ["separate", "together"],
+      proposal_response: ["like", "oppose", "differently"],
+      proposal_status: [
+        "open",
+        "applied",
+        "held",
+        "withdrawn",
+        "expired",
+        "reverted",
+        "superseded",
+      ],
       split_mode: ["half", "income", "custom"],
       todo_status: ["pending", "snoozed", "done"],
     },

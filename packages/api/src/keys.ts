@@ -4,6 +4,7 @@ export const qk = {
   space: ['space'] as const,
   goals: ['goals'] as const,
   partner: ['partner'] as const,
+  proposals: ['proposal'] as const,
   fixedExpenses: ['fixed_expense'] as const,
   accounts: ['account'] as const,
   currentPlan: (today: string) => ['monthly_plan', today] as const,
