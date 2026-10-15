@@ -21,7 +21,7 @@ import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentPlan, useGoals, useMe, useMonthClose, useSpace } from '../data';
 import { H04Todos } from '../h-04-todos';
-import { spendPath } from '../paths';
+import { closePath, spendPath } from '../paths';
 import { monthView, type MonthView } from '../view';
 
 // H-01 이번 달(docs/spec/19-this-month.md). 앱 기본 틀 + 오늘 띠(H-01 인사, H-02 맨 위 행동과 숫자 타일)
@@ -49,6 +49,7 @@ export function H01ThisMonth() {
           goals: goals.data ?? [],
           plan: plan.data ?? null,
           spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
+          closeDone: close.data?.status === 'done',
         })
       : null;
   const name = me.data?.nickname ?? '';
@@ -76,7 +77,7 @@ export function H01ThisMonth() {
   } else if (loading || !v) {
     columns = [<Skeleton key="l" />, <Skeleton key="r" />];
   } else {
-    ({ title, actions, stats } = today(v, name, m, () => nav(spendPath)));
+    ({ title, actions, stats } = today(v, name, m, (to) => nav(to)));
     const todos = (
       <H04Todos
         key="todos"
@@ -145,7 +146,7 @@ export function H01ThisMonth() {
 }
 
 /** 오늘 띠: 인사(H-01) + 맨 위 행동(H-02) + 숫자 타일 3개 */
-function today(v: MonthView, name: string, m: (n: number) => string, onSpend: () => void) {
+function today(v: MonthView, name: string, m: (n: number) => string, go: (to: string) => void) {
   const next = v.events[0];
   const nextTile: AppFrameStat | null = next
     ? { label: copy.nextEvent, value: copy.dday(next.dday), sub: eventLabel(next, v.month) }
@@ -182,9 +183,12 @@ function today(v: MonthView, name: string, m: (n: number) => string, onSpend: ()
       sub: v.living.pct === null ? undefined : `${v.living.pct}%`,
     };
   }
+  // 여는 화면: 지출 적기(W-04j 앞당겨 열기), 정리 시작(W-04a). 월급 나누기(W-02)는 다음 단계
+  const target =
+    primary === copy.spendEntry ? spendPath : primary === copy.closeStart ? closePath : null;
   return {
     title,
-    // 지출 적기(W-04j 앞당겨 열기)만 열림. 월급 나누기(W-02), 정리 시작(W-04), 추가는 다음 단계
+    // 지출 적기, 정리 시작만 열림. 월급 나누기(W-02), 추가는 다음 단계
     actions: (
       <>
         <Button variant="secondary" disabled>
@@ -192,8 +196,8 @@ function today(v: MonthView, name: string, m: (n: number) => string, onSpend: ()
         </Button>
         <Button
           variant="primary"
-          disabled={primary !== copy.spendEntry || !v.planId}
-          onClick={primary === copy.spendEntry ? onSpend : undefined}
+          disabled={!target || !v.planId}
+          onClick={target ? () => go(target) : undefined}
         >
           {primary}
         </Button>
