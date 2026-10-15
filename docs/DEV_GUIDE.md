@@ -129,7 +129,7 @@ sweetwo/
 ### 스테이징과 운영 Supabase
 
 - 프로젝트 2개(서울 리전 ap-northeast-2): `sweetwo-staging`(ref `xxofyzgzrjrcrcxvftpn`), `sweetwo-prod`(ref `rilhxjozsdcxcfshtvta`). 연결은 `pnpm supabase link --project-ref <ref>`
-- DB 타입 파일은 `pnpm db:types`(로컬 Supabase)로 만들고, 생성기 버전에 따라 줄바꿈만 달라지지 않게 prettier 고정 옵션(`--no-config --no-semi --print-width 100`)으로 맞춰 저장한다. CI db 작업이 같은 명령으로 다시 만들어 비교함
+- DB 타입 파일은 `pnpm db:types`(로컬 Supabase)로 만들고, 생성기 버전에 따라 줄바꿈만 달라지지 않게 prettier 고정 옵션(`--no-config --no-semi --print-width 100`)으로 맞춰 저장한다. CI db 작업이 같은 명령으로 다시 만들어 공백과 줄바꿈을 빼고 비교함(다르면 실패, 결과물 db-types를 받아 커밋)
 - 공개 값(URL, anon key)만 앱 `.env.local`과 GitHub 환경 변수로. service role은 GitHub Secrets와 서버에만
 
 ### 환경 변수와 대체물

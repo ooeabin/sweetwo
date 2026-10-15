@@ -1,29 +1,25 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.18"
-  }
   public: {
     Tables: {
       app_config: {
         Row: {
           created_at: string
-          flags: Json
+          flags: NonNullable<Json>
           id: number
-          kill_switches: Json
+          kill_switches: NonNullable<Json>
           min_version_desktop: string
           min_version_web: string
           updated_at: string
           version: number
         }
+        ComputedFields: never
         Insert: {
           created_at?: string
-          flags?: Json
+          flags?: NonNullable<Json>
           id?: number
-          kill_switches?: Json
+          kill_switches?: NonNullable<Json>
           min_version_desktop?: string
           min_version_web?: string
           updated_at?: string
@@ -31,9 +27,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          flags?: Json
+          flags?: NonNullable<Json>
           id?: number
-          kill_switches?: Json
+          kill_switches?: NonNullable<Json>
           min_version_desktop?: string
           min_version_web?: string
           updated_at?: string
@@ -57,6 +53,7 @@ export type Database = {
           updated_at: string
           version: number
         }
+        ComputedFields: never
         Insert: {
           analytics_off?: boolean
           created_at?: string
@@ -99,6 +96,7 @@ export type Database = {
           terms_version: string
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           agreed: boolean
           created_at?: string
