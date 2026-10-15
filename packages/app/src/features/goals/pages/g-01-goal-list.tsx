@@ -8,7 +8,7 @@ import { useGoalsData } from '../data';
 import { GoalCard } from '../goal-card';
 
 // G-01 목표 목록(docs/spec/22-goals.md G-01). 요약 + 진행 중 카드(배분 순서, 비상금 맨 위) + 접힌 목록(보류·달성·사용 완료).
-// 열린 제안이 있는 목표는 “제안 중” 배지(누르면 G-02의 제안 중 카드). 목표 추가(G-03a), 순서 바꾸기(G-06), 조정하기(G-04)는 다음 단계라 자리만.
+// 열린 제안이 있는 목표는 “제안 중” 배지(누르면 G-02의 제안 중 카드). 순서 바꾸기(G-06), 조정하기(G-04)는 다음 단계라 자리만.
 export function G01GoalList() {
   const nav = useNavigate();
   const d = useGoalsData();
@@ -22,7 +22,7 @@ export function G01GoalList() {
       <Button variant="secondary" disabled>
         {copy.reorder}
       </Button>
-      <Button variant="primary" disabled>
+      <Button variant="primary" onClick={() => nav('/goals/new')}>
         {copy.add}
       </Button>
     </>

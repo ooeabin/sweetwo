@@ -41,6 +41,8 @@ export const copy = {
   goalPaused: { true: '보류', false: '모으는 중' }, // [확인 필요]
   goalDeleted: { true: '삭제', false: '있음' }, // [확인 필요]
   goalUnknown: '목표', // [확인 필요] 지운 목표 이름 대신
+  goalAdd: (goal: string) => `${goal} 목표 추가`, // [확인 필요]
+  arrivedAdd: (name: string, goal: string) => `${name}님이 ${goal} 목표를 추가하자고 제안했어요`, // [확인 필요]
   change: (before: string, after: string) => `${before} → ${after}`,
   unset: '없음', // [확인 필요]
   splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },

@@ -1,29 +1,14 @@
 import { updateGoal } from '@sweetwo/api';
-import {
-  bands,
-  quickChips,
-  readWon,
-  templateByKey,
-  ymToDate,
-  type AnnualItem,
-  type Answers,
-  type GoalQuestion,
-} from '@sweetwo/core';
-import {
-  AmountInput,
-  ChoiceCards,
-  emptyRow,
-  ListInput,
-  listReady,
-  MonthChips,
-  PercentSlider,
-  QuestionLayout,
-  ShortText,
-  YearMonthInput,
-  type ListRowValue,
-} from '@sweetwo/ui';
+import { templateByKey, ymToDate, type Answers, type GoalQuestion } from '@sweetwo/core';
+import { QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { GoalChip, useConfirmOnce } from '../confirm';
+import {
+  autoAdvances,
+  currentAnswer,
+  GoalQuestionInput,
+  submitValue,
+} from '../goal-question-input';
 import { copy } from '../copy';
 import { topGoal } from '../flow';
 import { useStep } from '../step';
@@ -43,7 +28,6 @@ export function O23GoalQuestion({ index }: { index: number }) {
   if (!s.ready || !goal || !t || !q) return null;
 
   const total = t.questions.length;
-  const current = val ?? details[q.id];
 
   const save = (answer: Answers[string], est = estimated) =>
     s.done(async () => {
@@ -72,128 +56,43 @@ export function O23GoalQuestion({ index }: { index: number }) {
     });
 
   const head = <GoalChip tag={copy.first} name={goal.name} index={index} total={total} />;
-  const layout = (
-    children: React.ReactNode,
-    primary?: { disabled: boolean; onSubmit: () => void },
-  ) => (
+  const v = currentAnswer(q, val, details);
+  const out = submitValue(q, v);
+  return (
     <QuestionLayout
       steps={s.steps}
       title={q.title}
       onBack={s.onBack}
       primary={
-        primary ? { label: copy.next, disabled: primary.disabled, loading: s.saving } : undefined
+        autoAdvances(q)
+          ? undefined
+          : { label: copy.next, disabled: out === null, loading: s.saving }
       }
-      onSubmit={primary?.onSubmit}
+      onSubmit={
+        autoAdvances(q)
+          ? undefined
+          : () => {
+              if (out === null) return;
+              // 20억 원 이상이면 한 번 확인(금액만)
+              if (q.type === 'amount' && !ok.check((out as number) >= 2_000_000_000)) return;
+              void save(out, q.type === 'amount' ? estimated : false);
+            }
+      }
     >
       {head}
-      {children}
+      <GoalQuestionInput
+        q={q}
+        t={t}
+        value={v}
+        details={details}
+        onChange={(x) => {
+          setVal(x);
+          setEstimated(false);
+          ok.reset();
+        }}
+        onAnswer={(x, est) => void save(x, est)}
+      />
+      {q.type === 'amount' && ok.banner}
     </QuestionLayout>
   );
-
-  switch (q.type) {
-    case 'amount': {
-      const v = typeof current === 'number' ? current : null;
-      return layout(
-        <>
-          <AmountInput
-            label={q.title}
-            value={v}
-            onChange={(x) => {
-              setVal(x ?? undefined);
-              setEstimated(false);
-              ok.reset();
-            }}
-            quick={quickChips[q.quick]}
-            bands={q.band ? bands[q.band] : undefined}
-            unsureLabel={copy.unsure}
-            onBand={(b) => void save(b.value, true)}
-            monthly={t.kind({}) === 'monthly'}
-          />
-          {ok.banner}
-        </>,
-        {
-          disabled: !v || v <= 0,
-          onSubmit: () => v && ok.check(v >= 2_000_000_000) && void save(v),
-        },
-      );
-    }
-    case 'percent': {
-      const p = typeof current === 'number' ? current : q.initial;
-      const price = typeof details.price === 'number' ? details.price : 0;
-      const result = Math.round((price * p) / 100);
-      return layout(
-        <>
-          <PercentSlider label={q.title} value={p} onChange={(x) => setVal(x)} left={`${p}%`} />
-          <p className="hg-q__help" aria-live="polite">
-            {copy.saveRatio(readWon(result))}
-          </p>
-        </>,
-        { disabled: false, onSubmit: () => void save(p, false) },
-      );
-    }
-    case 'text': {
-      const v = typeof current === 'string' ? current : '';
-      return layout(
-        <ShortText label={q.title} value={v} onChange={(x) => setVal(x)} max={q.max} />,
-        {
-          disabled: !v.trim(),
-          onSubmit: () => void save(v.trim(), false),
-        },
-      );
-    }
-    case 'choice':
-      return layout(
-        <ChoiceCards
-          label={q.title}
-          value={typeof current === 'string' ? current : null}
-          onChange={(x) => setVal(x)}
-          onPick={(x) => void save(x, false)}
-          options={q.options}
-        />,
-      );
-    case 'yearMonth': {
-      const v = typeof current === 'string' ? current : null;
-      return layout(
-        <YearMonthInput label={q.title} value={v} onChange={(x) => setVal(x ?? undefined)} />,
-        {
-          disabled: !v,
-          onSubmit: () => v && void save(v, false),
-        },
-      );
-    }
-    case 'month':
-      return layout(
-        <MonthChips
-          label={q.title}
-          value={typeof current === 'number' ? current : null}
-          onChange={(m) => {
-            setVal(m);
-            void save(m, false);
-          }}
-        />,
-      );
-    case 'list': {
-      const rows: ListRowValue[] = Array.isArray(current)
-        ? (current as AnnualItem[]).map((i) => ({ name: i.name, amount: i.amount, month: i.month }))
-        : [emptyRow()];
-      return layout(
-        <ListInput
-          label={q.title}
-          rows={rows}
-          onChange={(r) => setVal(r as unknown as AnnualItem[])}
-          totalLabel={(m) => copy.yearTotal(m)}
-        />,
-        {
-          disabled: !listReady(rows),
-          onSubmit: () =>
-            void save(
-              rows
-                .filter((r) => r.name.trim() && r.amount && r.month)
-                .map((r) => ({ name: r.name.trim(), amount: r.amount ?? 0, month: r.month ?? 1 })),
-              false,
-            ),
-        },
-      );
-    }
-  }
 }

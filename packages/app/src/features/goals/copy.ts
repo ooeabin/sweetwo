@@ -88,4 +88,23 @@ export const copy = {
   impactStatus: (before: string, after: string) => `상태 ${before} → ${after}`, // [확인 필요]
   impactExpected: (before: string, after: string) => `예상 달성 ${before} → ${after}`, // [확인 필요]
   pausedNote: '월 0원으로 배분에서 빠져 있어요',
+
+  // G-03a~f 목표 추가
+  addTitle: '어떤 목표를 추가할까요?',
+  addTabs: '목표 분류', // [확인 필요] 화면 읽기용
+  makeOwn: '+ 직접 만들기',
+  next: '다음',
+  heldTitle: '이미 모아둔 돈이 있나요?',
+  heldNew: '새로 입력할게요',
+  heldNone: '없어요',
+  heldAmount: '얼마 모아뒀어요?', // [확인 필요]
+  ownerTitle: '누가 모을까요?',
+  ownerMe: '나',
+  confirmTitle: (amount: string, ym: string) => `매달 ${amount}씩 모으면 ${ym}에 달성해요`,
+  confirmMonthly: (amount: string) => `매달 ${amount}씩 모아요`, // [확인 필요] 매달 목표
+  confirmUnknown: (name: string) => `${name} 목표를 추가할까요?`, // [확인 필요] 배분 0 또는 금액 미정
+  confirmPosition: '우선순위는 맨 아래예요', // [확인 필요] 위치 고르기는 G-06과 함께
+  addDone: '추가하기',
+  added: '목표를 추가했어요', // [확인 필요]
+  shortAfterAdd: (amount: string) => `저축 가능 금액보다 월 ${amount} 많아져요`, // [확인 필요] G-04는 다음 단계
 };

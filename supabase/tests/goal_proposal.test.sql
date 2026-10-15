@@ -1,7 +1,7 @@
 -- pgTAP: 목표 제안(금액, 기한, 보류·다시 모으기, 삭제). 22 목표 수정, G-02 ⋯
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(12);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -58,6 +58,21 @@ set local role authenticated;
 select public.respond_proposal((select id from public.proposal where item = 'goal_delete' and status = 'open'), 'like');
 select is((select count(*)::int from public.goal where template = 'travel' and deleted_at is null), 0, '삭제 = 휴지통');
 select is((select status::text from public.proposal where item = 'goal_deadline'), 'withdrawn', '지운 목표의 다른 제안은 거둠');
+reset role;
+
+-- 목표 추가 제안: 좋아요면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람
+select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
+set local role authenticated;
+select isnt(public.propose('goal_add', '{"template":"car","name":"차","kind":"once","target_amount":30000000,"owner":"me"}', current_date + 30), null, '목표 추가 제안');
+select throws_ok($$ select public.propose('goal_add', '{"template":"emergency","name":"비상금","kind":"once","owner":"me"}', current_date + 30) $$, '22023', null, '자동 목표는 추가 없음');
+reset role;
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+select public.respond_proposal((select id from public.proposal where item = 'goal_add' and status = 'open'), 'like');
+select results_eq(
+  $$ select owner::text, created_by::text from public.goal where name = '차' $$,
+  $$ values ('me'::text, '22222222-2222-2222-2222-222222222222'::text) $$,
+  '추가된 목표: 담당은 제안한 사람 기준');
 reset role;
 
 select * from finish();
