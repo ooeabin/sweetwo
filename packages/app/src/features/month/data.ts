@@ -1,4 +1,12 @@
-import { fetchCurrentPlan, fetchGoals, fetchMe, fetchSpace, qk } from '@sweetwo/api';
+import {
+  fetchCurrentPlan,
+  fetchGoals,
+  fetchMe,
+  fetchMonthClose,
+  fetchSpace,
+  fetchTodos,
+  qk,
+} from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 
@@ -9,4 +17,12 @@ export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals
 export function useCurrentPlan() {
   const today = todayKst();
   return useQuery({ queryKey: qk.currentPlan(today), queryFn: () => fetchCurrentPlan(today) });
+}
+export const useTodos = () => useQuery({ queryKey: qk.todos, queryFn: fetchTodos });
+export function useMonthClose(planId: string | undefined) {
+  return useQuery({
+    queryKey: qk.monthClose(planId ?? ''),
+    queryFn: () => fetchMonthClose(planId ?? ''),
+    enabled: !!planId,
+  });
 }

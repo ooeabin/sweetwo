@@ -25,11 +25,14 @@ export function AmountCell({
   id,
   value,
   onChange,
+  onCommit,
   label,
 }: {
   id: string;
   value: number | null;
   onChange: (v: number | null) => void;
+  /** 칸을 벗어날 때(자동 저장) */
+  onCommit?: () => void;
   label?: string;
 }) {
   return (
@@ -42,6 +45,7 @@ export function AmountCell({
         placeholder="0"
         value={value === null ? '' : value.toLocaleString('ko-KR')}
         onChange={(e) => onChange(e.target.value === '' ? null : digits(e.target.value))}
+        onBlur={onCommit}
       />
     </span>
   );
@@ -51,6 +55,7 @@ export function SpendItems({
   fixed,
   variable,
   onChangeVariable,
+  onCommitVariable,
   onAddItem,
   onEditFixed,
   fixedVisible = 3,
@@ -58,6 +63,8 @@ export function SpendItems({
   fixed: FixedItem[];
   variable: VariableItem[];
   onChangeVariable: (id: string, amount: number | null) => void;
+  /** 칸을 벗어날 때 저장(draft 자동 저장) */
+  onCommitVariable?: (id: string) => void;
   onAddItem?: () => void;
   onEditFixed?: (id: string) => void;
   fixedVisible?: number;
@@ -100,7 +107,12 @@ export function SpendItems({
                   ) : null}
                 </small>
               </label>
-              <AmountCell id={id} value={v.amount} onChange={(a) => onChangeVariable(v.id, a)} />
+              <AmountCell
+                id={id}
+                value={v.amount}
+                onChange={(a) => onChangeVariable(v.id, a)}
+                onCommit={() => onCommitVariable?.(v.id)}
+              />
             </div>
           );
         })}

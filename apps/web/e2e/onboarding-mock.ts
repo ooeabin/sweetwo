@@ -9,6 +9,10 @@ export interface MemDb {
   fixed: Record<string, unknown>[];
   accounts: Record<string, unknown>[];
   plans: { args: Record<string, unknown> }[];
+  todos: Record<string, unknown>[];
+  categories: Record<string, unknown>[];
+  closes: Record<string, unknown>[];
+  spends: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -51,6 +55,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     fixed: [],
     accounts: [],
     plans: [],
+    todos: [],
+    categories: [],
+    closes: [],
+    spends: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -261,6 +269,72 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         deleted_at: null,
         lines,
       });
+    }
+    const ok204 = () =>
+      route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    const rowsOf = () => {
+      const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+      return Array.isArray(b) ? b : [b];
+    };
+    if (path === '/rest/v1/todo') {
+      if (method === 'GET') return json(route, db.todos);
+      if (method === 'POST') {
+        for (const r of rowsOf())
+          if (!db.todos.some((t) => t.kind === r.kind))
+            db.todos.push({
+              id: `todo-${db.todos.length + 1}`,
+              status: 'pending',
+              snoozed_until: null,
+              deleted_at: null,
+              ...r,
+            });
+        return ok204();
+      }
+      if (method === 'PATCH') {
+        for (const t of db.todos) if (t.id === eqId(url)) Object.assign(t, body());
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/spend_category') {
+      if (method === 'GET')
+        return json(
+          route,
+          [...db.categories].sort((a, b) => Number(a.sort) - Number(b.sort)),
+        );
+      if (method === 'POST') {
+        for (const r of rowsOf())
+          db.categories.push({
+            id: `cat-${db.categories.length + 1}`,
+            enabled: true,
+            deleted_at: null,
+            ...r,
+          });
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/month_close') {
+      if (method === 'GET') {
+        const c = db.closes[0];
+        return json(route, c ? { ...c, spends: db.spends } : null);
+      }
+      if (method === 'POST') {
+        const c = {
+          id: 'close-1',
+          status: 'draft',
+          deleted_at: null,
+          ...(req.postDataJSON() as object),
+        };
+        db.closes.push(c);
+        return json(route, { id: c.id }, 201);
+      }
+    }
+    if (path === '/rest/v1/month_spend' && method === 'POST') {
+      for (const r of rowsOf()) {
+        const cur = db.spends.find((x) => x.category_id === r.category_id);
+        if (cur) Object.assign(cur, r);
+        else db.spends.push({ id: `spend-${db.spends.length + 1}`, deleted_at: null, ...r });
+      }
+      return ok204();
     }
     if (path === '/rest/v1/account') {
       if (method === 'GET')

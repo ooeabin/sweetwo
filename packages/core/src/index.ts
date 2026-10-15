@@ -8,3 +8,5 @@ export * from './version';
 export * from './onboarding';
 export * from './josa';
 export * from './rules/this-month';
+export * from './rules/todo';
+export * from './rules/spend';

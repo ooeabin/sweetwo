@@ -539,6 +539,138 @@ export type Database = {
           },
         ]
       }
+      month_close: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          plan_id: string
+          space_id: string
+          status: Database["public"]["Enums"]["month_close_status"]
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          plan_id: string
+          space_id: string
+          status?: Database["public"]["Enums"]["month_close_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          plan_id?: string
+          space_id?: string
+          status?: Database["public"]["Enums"]["month_close_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "month_close_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_plan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "month_close_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      month_spend: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          month_close_id: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          month_close_id: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          month_close_id?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "month_spend_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "spend_category"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "month_spend_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "month_spend_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_plan: {
         Row: {
           created_at: string
@@ -703,6 +835,138 @@ export type Database = {
           },
         ]
       }
+      spend_category: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_key: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          enabled: boolean
+          id: string
+          name: string
+          sort: number
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_key?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          sort?: number
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_key?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          sort?: number
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_category_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todo: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          done_at: string | null
+          done_by: string | null
+          for_user: string | null
+          id: string
+          kind: string
+          open_on: string
+          screen: string | null
+          snoozed_until: string | null
+          sort: number
+          space_id: string
+          status: Database["public"]["Enums"]["todo_status"]
+          target_id: string | null
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          for_user?: string | null
+          id?: string
+          kind: string
+          open_on?: string
+          screen?: string | null
+          snoozed_until?: string | null
+          sort?: number
+          space_id: string
+          status?: Database["public"]["Enums"]["todo_status"]
+          target_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          for_user?: string | null
+          id?: string
+          kind?: string
+          open_on?: string
+          screen?: string | null
+          snoozed_until?: string | null
+          sort?: number
+          space_id?: string
+          status?: Database["public"]["Enums"]["todo_status"]
+          target_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todo_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -805,6 +1069,7 @@ export type Database = {
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
       marriage_status: "married" | "engaged"
+      month_close_status: "draft" | "done"
       newlywed_home: "have" | "before" | "after" | "parents"
       plan_line_kind: "split" | "emergency_to_living" | "goal_to_living"
       plan_line_state: "pending" | "done"
@@ -812,6 +1077,7 @@ export type Database = {
       plan_status: "created" | "splitting" | "closing" | "closed" | "skipped"
       prep_money_mode: "separate" | "together"
       split_mode: "half" | "income" | "custom"
+      todo_status: "pending" | "snoozed" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -959,6 +1225,7 @@ export const Constants = {
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
       marriage_status: ["married", "engaged"],
+      month_close_status: ["draft", "done"],
       newlywed_home: ["have", "before", "after", "parents"],
       plan_line_kind: ["split", "emergency_to_living", "goal_to_living"],
       plan_line_state: ["pending", "done"],
@@ -966,6 +1233,7 @@ export const Constants = {
       plan_status: ["created", "splitting", "closing", "closed", "skipped"],
       prep_money_mode: ["separate", "together"],
       split_mode: ["half", "income", "custom"],
+      todo_status: ["pending", "snoozed", "done"],
     },
   },
 } as const

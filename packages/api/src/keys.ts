@@ -6,5 +6,7 @@ export const qk = {
   fixedExpenses: ['fixed_expense'] as const,
   accounts: ['account'] as const,
   currentPlan: (today: string) => ['monthly_plan', today] as const,
-  monthClose: (spaceId: string, month: string) => ['month_close', spaceId, month] as const,
+  todos: ['todo'] as const,
+  spendCategories: ['spend_category'] as const,
+  monthClose: (planId: string) => ['month_close', planId] as const,
 };

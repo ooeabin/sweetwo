@@ -18,7 +18,10 @@ import {
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
-import { useCurrentPlan, useGoals, useMe, useSpace } from '../data';
+import { useNavigate } from 'react-router-dom';
+import { useCurrentPlan, useGoals, useMe, useMonthClose, useSpace } from '../data';
+import { H04Todos } from '../h-04-todos';
+import { spendPath } from '../paths';
 import { monthView, type MonthView } from '../view';
 
 // H-01 이번 달(docs/spec/19-this-month.md). 앱 기본 틀 + 오늘 띠(H-01 인사, H-02 맨 위 행동과 숫자 타일)
@@ -29,6 +32,8 @@ export function H01ThisMonth() {
   const space = useSpace();
   const goals = useGoals();
   const plan = useCurrentPlan();
+  const close = useMonthClose(plan.data?.id);
+  const nav = useNavigate();
   const { masked, toggle } = useMask();
 
   const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
@@ -43,6 +48,7 @@ export function H01ThisMonth() {
           space: space.data,
           goals: goals.data ?? [],
           plan: plan.data ?? null,
+          spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
         })
       : null;
   const name = me.data?.nickname ?? '';
@@ -70,21 +76,27 @@ export function H01ThisMonth() {
   } else if (loading || !v) {
     columns = [<Skeleton key="l" />, <Skeleton key="r" />];
   } else {
-    ({ title, actions, stats } = today(v, name, m));
+    ({ title, actions, stats } = today(v, name, m, () => nav(spendPath)));
+    const todos = (
+      <H04Todos
+        key="todos"
+        state={v.todoState}
+        today={v.today}
+        partner={space.data?.partner_nickname ?? ''}
+      />
+    );
     columns = v.separate
       ? [
-          <PrepCards
-            key="l"
-            v={v}
-            name={name}
-            partner={space.data?.partner_nickname ?? ''}
-            m={m}
-          />,
+          <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
+            {todos}
+            <PrepCards v={v} name={name} partner={space.data?.partner_nickname ?? ''} m={m} />
+          </div>,
           <Upcomings key="r" v={v} />,
         ]
       : [
           <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
             {v.engaged && <WeddingHeader v={v} />}
+            {todos}
             <PlanCard v={v} m={m} />
             {v.engaged && <WeddingStatus v={v} m={m} />}
           </div>,
@@ -133,7 +145,7 @@ export function H01ThisMonth() {
 }
 
 /** 오늘 띠: 인사(H-01) + 맨 위 행동(H-02) + 숫자 타일 3개 */
-function today(v: MonthView, name: string, m: (n: number) => string) {
+function today(v: MonthView, name: string, m: (n: number) => string, onSpend: () => void) {
   const next = v.events[0];
   const nextTile: AppFrameStat | null = next
     ? { label: copy.nextEvent, value: copy.dday(next.dday), sub: eventLabel(next, v.month) }
@@ -172,13 +184,17 @@ function today(v: MonthView, name: string, m: (n: number) => string) {
   }
   return {
     title,
-    // 지출 적기(W-04j), 월급 나누기(W-02), 정리 시작(W-04)은 다음 단계
+    // 지출 적기(W-04j 앞당겨 열기)만 열림. 월급 나누기(W-02), 정리 시작(W-04), 추가는 다음 단계
     actions: (
       <>
         <Button variant="secondary" disabled>
           {copy.add}
         </Button>
-        <Button variant="primary" disabled>
+        <Button
+          variant="primary"
+          disabled={primary !== copy.spendEntry || !v.planId}
+          onClick={primary === copy.spendEntry ? onSpend : undefined}
+        >
           {primary}
         </Button>
       </>
