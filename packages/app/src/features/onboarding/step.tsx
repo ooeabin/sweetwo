@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useGoals, useMe, useOnboardingLocal, useSpace } from './data';
-import { nextOf, NOT_YET, prevOf, progress, screens, type FlowState } from './flow';
+import { nextOf, prevOf, progress, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
@@ -25,11 +25,12 @@ export function useStep(id: string) {
   // 멈춘 화면 기록(이어하기). 화면마다 들어올 때 한 번만.
   const marked = useRef<string | null>(null);
   useEffect(() => {
-    if (!ready || !me.data || marked.current === id) return;
+    // 다른 화면에서 고치러 온 길(?return=)은 기록하지 않는다(이어하기는 원래 화면부터)
+    if (!ready || !me.data || marked.current === id || ret) return;
     marked.current = id;
     if (me.data.onboarding_step !== id.toUpperCase())
       void saveMe({ onboarding_step: id.toUpperCase() }).catch(() => undefined);
-  }, [ready, id, me.data]);
+  }, [ready, id, me.data, ret]);
 
   /** save를 마치고 다음 화면으로. next를 주면 그 화면으로(분기). 실패하면 토스트 + 다시 시도 */
   const done = async (
@@ -49,17 +50,28 @@ export function useStep(id: string) {
       };
       const to = ret ?? next?.(fresh) ?? nextOf(id, screens(fresh));
       setSaving(false);
-      if (to === NOT_YET) {
-        // O-66부터는 다음 단계에서. 지금은 멈춘 화면만 남기고 이번 달로.
-        await saveMe({ onboarding_step: NOT_YET.toUpperCase() }).catch(() => undefined);
-        await me.refetch(); // 이어하기 판단(OnboardingGate)이 옛 값을 보지 않게
-        nav('/', { replace: true });
-        return;
-      }
       nav(onboardingPath(to));
     } catch {
       setSaving(false);
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void done(save, next) });
+    }
+  };
+
+  /** 온보딩을 마치고 이번 달로(O-67). 완료 시각을 남기고 이어하기가 옛 값을 보지 않게 다시 읽는다 */
+  const finish = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await saveMe({
+        onboarding_step: id.toUpperCase(),
+        onboarding_done_at: new Date().toISOString(),
+      });
+      await me.refetch();
+      setSaving(false);
+      nav('/', { replace: true });
+    } catch {
+      setSaving(false);
+      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish() });
     }
   };
 
@@ -71,6 +83,7 @@ export function useStep(id: string) {
     list,
     steps: progress(id, list),
     done,
+    finish,
     onBack: back ? () => nav(ret ? onboardingPath(ret) : onboardingPath(back)) : undefined,
   };
 }

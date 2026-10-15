@@ -5,3 +5,4 @@ export * from './expenses';
 export * from './plan';
 export * from './allocation';
 export * from './diagnosis';
+export * from './cycle';

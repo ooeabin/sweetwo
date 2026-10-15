@@ -33,8 +33,11 @@ import { O51Allowance } from './pages/o-51-allowance';
 import { O52Split } from './pages/o-52-split';
 import { O61Analyzing } from './pages/o-61-analyzing';
 import { O62Summary } from './pages/o-62-summary';
+import { O63Accounts } from './pages/o-63-accounts';
 import { O64Goals } from './pages/o-64-goals';
 import { O65Diagnosis } from './pages/o-65-diagnosis';
+import { O66PlanStart } from './pages/o-66-plan-start';
+import { O67FirstMission } from './pages/o-67-first-mission';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
 const SCREENS: Record<string, () => ReactNode> = {
@@ -69,8 +72,11 @@ const SCREENS: Record<string, () => ReactNode> = {
   'o-52': () => <O52Split />,
   'o-61': () => <O61Analyzing />,
   'o-62': () => <O62Summary />,
+  'o-63': () => <O63Accounts />,
   'o-64': () => <O64Goals />,
   'o-65': () => <O65Diagnosis />,
+  'o-66': () => <O66PlanStart />,
+  'o-67': () => <O67FirstMission />,
 };
 
 export const isOnboardingScreen = (id: string) => id in SCREENS || /^o-23-\d+$/.test(id);
@@ -83,7 +89,7 @@ export function OnboardingRoute() {
   return render ? <div key={screen}>{render()}</div> : <Navigate to="/onboarding/o-03" replace />;
 }
 
-/** 온보딩을 마치지 않았으면 멈춘 화면으로(이어하기). 아직 없는 화면(O-66~)이면 그대로 둔다. */
+/** 온보딩을 마치지 않았으면 멈춘 화면으로(이어하기). 모르는 화면 ID면 그대로 둔다. */
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
   if (me.isLoading) return null;

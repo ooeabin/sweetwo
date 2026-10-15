@@ -1,5 +1,6 @@
 import {
   ensureSpace,
+  fetchAccounts,
   fetchFixedExpenses,
   fetchGoals,
   fetchMe,
@@ -7,6 +8,7 @@ import {
   qk,
   updateMe,
   updateSpace,
+  type Account,
   type FixedExpense,
   type Goal,
   type Me,
@@ -32,6 +34,9 @@ export function useGoals() {
   return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 }
 
+export function useAccounts() {
+  return useQuery({ queryKey: qk.accounts, queryFn: fetchAccounts });
+}
 export function useFixedExpenses() {
   return useQuery({ queryKey: qk.fixedExpenses, queryFn: fetchFixedExpenses });
 }
@@ -59,4 +64,4 @@ export const useOnboardingLocal = create<Local>((set) => ({
   setInviteNow: (v) => set({ inviteNow: v }),
 }));
 
-export type { FixedExpense, Goal, Me, Space };
+export type { Account, FixedExpense, Goal, Me, Space };

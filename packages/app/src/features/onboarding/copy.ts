@@ -252,4 +252,57 @@ export const copy = {
     fixed: { label: '고정지출 나누기·생활비 카드', day: '4일째' },
     invest: { label: '투자 원칙 정하기', day: '7일째' },
   },
+
+  // O-63
+  accountMode: '통장을 어떻게 쓰고 있어요?',
+  accountModes: { single: '통장 하나로 써요', roles: '역할별로 나눠 쓸래요' },
+  accounts: '통장을 이렇게 나눠 쓸까요?',
+  accountsHelp: '금액을 누르면 고칠 수 있어요',
+  accountsWedding: '결혼 준비 통장을 하나 정해요',
+  accountsSingle: '한 달에 이렇게 써요', // [확인 필요] 통장 하나 모드 월 금액 묶음 제목
+  roles: {
+    living: '공동 생활비',
+    goal_fund: '목표자금',
+    emergency: '비상금',
+    wedding: '결혼 준비',
+    personal: '용돈',
+  },
+  accountName: (role: string) => `${role} 통장`,
+  whichAccount: '어느 통장으로 쓸까요',
+  existing: '쓰던 통장이 있어요',
+  newAccount: '새로 만들 거예요',
+  fromZero: '0원에서 시작해요',
+  accountNamePlaceholder: '생활비 통장',
+  accountNameLabel: '통장 이름', // [확인 필요] 화면 읽기용
+  balanceLabel: '지금 잔액', // [확인 필요]
+  sameAccount: '공동 생활비와 목표자금은 다른 통장으로 써야 해요',
+  sameAccountOther: '역할마다 다른 통장으로 써야 해요', // [확인 필요] 비상금이 겹칠 때
+  goalFundEmpty: '모을 돈이 생기면 써요',
+  allowanceAccounts: '각자 용돈 통장', // [확인 필요] 묶음 제목
+  assumed: '(가정)',
+  monthlyTransfer: '각자 매달 옮길 돈', // [확인 필요] 묶음 제목
+  baseDayLine: (day: string) => `매달 ${day} 기준`,
+  change: '바꾸기',
+  dayText: (d: number | 'last') => (d === 'last' ? '말일' : `${d}일`),
+
+  // O-66
+  startPlan: '이대로 시작할까요?',
+  invite: (partner: string) => `${partner}님 초대하기`,
+  baseDay: (day: string) => `매달 ${day}`,
+  myPayday: (me: string) => `${me}님 월급날`,
+  planName: (month: number) => `${month}월 월급 플랜`,
+  daysLeft: (n: number) => `${n}일 남음`,
+  planAmountLabel: '이번 달 옮길 수 있는 돈', // [확인 필요] 금액 칸 이름(화면 읽기용)
+  planTooMuch: (amount: string) => `한 달 ${amount}까지 넣을 수 있어요`, // [확인 필요]
+  shortCycle: '이번 달은 기간이 짧아서 다음 달과 합쳐 정리해요',
+  zeroPlan: '이번 달은 옮기지 않고 시작할까요?',
+  linesTitle: '이렇게 옮겨요',
+  total: '합계',
+  start: '시작하기',
+
+  // O-67
+  started: (month: number) => `${month}월 월급 플랜을 시작했어요`,
+  missionMarried: '양가 명절·생신도 미리 챙겨볼까요?',
+  missionEngaged: '결혼 비용 항목부터 나눠볼까요?',
+  doNow: '지금 하기',
 };
