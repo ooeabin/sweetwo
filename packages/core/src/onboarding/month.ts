@@ -30,3 +30,8 @@ export const nextOccurrence = (month: number, now = new Date()): YearMonth => {
 /** DB date(그 달 1일) ↔ YearMonth */
 export const ymToDate = (s: string) => `${s}-01`;
 export const dateToYm = (d: string) => d.slice(0, 7) as YearMonth;
+/** '2027-05' 또는 '2027-05-01' → "2027년 5월" */
+export const formatYm = (s: string) => {
+  const { y, m } = parseYm(s.slice(0, 7));
+  return `${y}년 ${m}월`;
+};

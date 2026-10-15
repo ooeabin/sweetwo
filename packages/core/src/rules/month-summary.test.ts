@@ -17,7 +17,14 @@ describe('monthSummary (계산·배분 7장 예시)', () => {
   });
 
   it('소득이 0이면 비율과 남은 돈을 비운다', () => {
-    const r = monthSummary({ income: 0, fixed: 1, variable: 0, allowance: 0, bigExpense: 0, saved: 0 });
+    const r = monthSummary({
+      income: 0,
+      fixed: 1,
+      variable: 0,
+      allowance: 0,
+      bigExpense: 0,
+      saved: 0,
+    });
     expect(r.usedPct).toBeNull();
     expect(r.left).toBeNull();
   });

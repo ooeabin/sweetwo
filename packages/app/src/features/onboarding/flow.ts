@@ -41,26 +41,32 @@ export function screens(s: FlowState): string[] {
   }
   // 파트 5 분담
   list.push('o-52');
+  // 파트 6 결과(O-63 통장 구조, O-66, O-67은 다음 단계에서)
+  list.push('o-61', 'o-62', 'o-64', 'o-65');
   return list;
 }
 
-/** 파트 6 결과 첫 화면(다음 단계에서 만듦) */
+/** 파트 6 결과 첫 화면 */
 export const PART6_START = 'o-61';
+/** 아직 없는 화면(O-66 월급 플랜 시작). 여기에 닿으면 멈춘 화면만 남기고 이번 달로 */
+export const NOT_YET = 'o-66';
 
 /** 6칸 진행 막대: 파트 0 = 1칸, 1 = 2칸, 2 = 3칸, 3 = 4칸, 5 = 5칸(파트 4 칸 없음) */
 const partOf = (id: string) =>
   id < 'o-10' ? 0 : id < 'o-20' ? 1 : id < 'o-30' ? 2 : id < 'o-50' ? 3 : 4;
 export function progress(id: string, list: string[]) {
+  if (id >= 'o-60') return { total: 6, now: 6 }; // 결과: 6칸 모두 채움
   const part = partOf(id);
   const inPart = list.filter((x) => partOf(x) === part);
   const i = Math.max(inPart.indexOf(id), 0);
   return { total: 6, now: part, fill: Math.round(((i + 1) / (inPart.length + 1)) * 100) };
 }
 
-export const nextOf = (id: string, list: string[]) => list[list.indexOf(id) + 1] ?? PART6_START;
+export const nextOf = (id: string, list: string[]) => list[list.indexOf(id) + 1] ?? NOT_YET;
+/** 뒤로. O-61(분석 중)은 건너뛴다(고치고 오면 O-61 없이 재계산) */
 export const prevOf = (id: string, list: string[]) => {
-  const i = list.indexOf(id);
-  return i > 0 ? list[i - 1] : undefined;
+  const back = list.slice(0, Math.max(list.indexOf(id), 0)).filter((x) => x !== PART6_START);
+  return id === PART6_START ? undefined : back[back.length - 1];
 };
 
 /** 계산 입력(packages/core planSummary). 합류 전 배우자 용돈 = 내 용돈 */
@@ -72,6 +78,7 @@ export const planInput = (s: FlowState) => ({
   fixedTotal: s.space?.fixed_total ?? null,
   loanRepayment: s.space?.loan_repayment ?? null,
   livingBudget: s.space?.living_budget ?? null,
+  mySharePct: s.space?.split_mode === 'custom' ? (s.space.split_ratio ?? 50) : 50,
 });
 /** 이상값 확인용 월 수입 합계(배우자 추정 포함) */
 export const monthIncome = (s: FlowState) =>

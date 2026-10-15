@@ -11,6 +11,7 @@ export function QuestionLayout({
   later,
   onBack,
   onSubmit,
+  wide,
 }: {
   steps?: { total: number; now: number; fill?: number };
   title: ReactNode;
@@ -20,6 +21,8 @@ export function QuestionLayout({
   later?: { label: string; onClick: () => void };
   onBack?: () => void;
   onSubmit?: () => void;
+  /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
+  wide?: boolean;
 }) {
   useEffect(() => {
     if (!onBack) return;
@@ -33,7 +36,7 @@ export function QuestionLayout({
   return (
     <main style={{ padding: '0 var(--space-4)' }}>
       <form
-        className="hg-q"
+        className={wide ? 'hg-q hg-q--wide' : 'hg-q'}
         onSubmit={(e) => {
           e.preventDefault();
           if (!primary?.disabled) onSubmit?.();

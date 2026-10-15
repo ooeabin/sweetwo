@@ -21,6 +21,7 @@ describe('월 수입과 공동자금(06 3·4장)', () => {
       sharedLiving: 260 * M,
       saveable: 240 * M,
       commonFund: 500 * M,
+      basis: 'couple',
     });
   });
   it('배우자 수입을 모르면 내 몫 기준(배우자 수입, 용돈 0)', () => {
@@ -35,6 +36,10 @@ describe('월 수입과 공동자금(06 3·4장)', () => {
     });
     expect(r.income).toBe(350 * M);
     expect(r.allowances).toBe(50 * M);
+    // 350 − 50 − 100 × 50% = 250, 공동자금 = 100 + 250 × 2
+    expect(r.saveable).toBe(250 * M);
+    expect(r.commonFund).toBe(600 * M);
+    expect(r.basis).toBe('mine');
   });
   it('용돈을 안 정했으면 50만 원 가정, 모을 돈이 없으면 공동자금 = 생활비만', () => {
     const r = planSummary({
