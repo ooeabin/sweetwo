@@ -3,6 +3,69 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      account: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          is_existing: boolean
+          name: string
+          owner_user_id: string | null
+          role: Database["public"]["Enums"]["account_role"]
+          sort: number
+          space_id: string
+          start_balance: number | null
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          is_existing?: boolean
+          name: string
+          owner_user_id?: string | null
+          role: Database["public"]["Enums"]["account_role"]
+          sort?: number
+          space_id: string
+          start_balance?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          is_existing?: boolean
+          name?: string
+          owner_user_id?: string | null
+          role?: Database["public"]["Enums"]["account_role"]
+          sort?: number
+          space_id?: string
+          start_balance?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_config: {
         Row: {
           created_at: string
@@ -165,6 +228,9 @@ export type Database = {
       }
       couple_space: {
         Row: {
+          account_mode: Database["public"]["Enums"]["account_mode"] | null
+          base_day: number | null
+          base_day_last: boolean
           child_plan: Database["public"]["Enums"]["child_plan"] | null
           couple_state: Database["public"]["Enums"]["couple_state"]
           created_at: string
@@ -204,6 +270,9 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          account_mode?: Database["public"]["Enums"]["account_mode"] | null
+          base_day?: number | null
+          base_day_last?: boolean
           child_plan?: Database["public"]["Enums"]["child_plan"] | null
           couple_state?: Database["public"]["Enums"]["couple_state"]
           created_at?: string
@@ -242,6 +311,9 @@ export type Database = {
           wedding_saved?: number | null
         }
         Update: {
+          account_mode?: Database["public"]["Enums"]["account_mode"] | null
+          base_day?: number | null
+          base_day_last?: boolean
           child_plan?: Database["public"]["Enums"]["child_plan"] | null
           couple_state?: Database["public"]["Enums"]["couple_state"]
           created_at?: string
@@ -467,6 +539,170 @@ export type Database = {
           },
         ]
       }
+      monthly_plan: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cycle_end: string
+          cycle_start: string
+          deleted_at: string | null
+          deleted_by: string | null
+          first_adjust: number | null
+          id: string
+          is_partial: boolean
+          is_temp: boolean
+          label_month: string
+          merged_close: boolean
+          snapshot: NonNullable<Json>
+          space_id: string
+          status: Database["public"]["Enums"]["plan_status"]
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cycle_end: string
+          cycle_start: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          first_adjust?: number | null
+          id?: string
+          is_partial?: boolean
+          is_temp?: boolean
+          label_month: string
+          merged_close?: boolean
+          snapshot?: NonNullable<Json>
+          space_id: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cycle_end?: string
+          cycle_start?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          first_adjust?: number | null
+          id?: string
+          is_partial?: boolean
+          is_temp?: boolean
+          label_month?: string
+          merged_close?: boolean
+          snapshot?: NonNullable<Json>
+          space_id?: string
+          status?: Database["public"]["Enums"]["plan_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_plan_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_line: {
+        Row: {
+          account_role: Database["public"]["Enums"]["account_role"] | null
+          amount: number
+          amount_bride: number | null
+          amount_groom: number | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          done_amount: number | null
+          goal_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["plan_line_kind"]
+          plan_id: string
+          sort: number
+          space_id: string
+          state: Database["public"]["Enums"]["plan_line_state"]
+          target: Database["public"]["Enums"]["plan_line_target"]
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          account_role?: Database["public"]["Enums"]["account_role"] | null
+          amount: number
+          amount_bride?: number | null
+          amount_groom?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          done_amount?: number | null
+          goal_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["plan_line_kind"]
+          plan_id: string
+          sort?: number
+          space_id: string
+          state?: Database["public"]["Enums"]["plan_line_state"]
+          target: Database["public"]["Enums"]["plan_line_target"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          account_role?: Database["public"]["Enums"]["account_role"] | null
+          amount?: number
+          amount_bride?: number | null
+          amount_groom?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          done_amount?: number | null
+          goal_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["plan_line_kind"]
+          plan_id?: string
+          sort?: number
+          space_id?: string
+          state?: Database["public"]["Enums"]["plan_line_state"]
+          target?: Database["public"]["Enums"]["plan_line_target"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_line_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_line_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_plan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_line_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -528,8 +764,23 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      start_first_plan: {
+        Args: {
+          p_cycle_end: string
+          p_cycle_start: string
+          p_first_adjust: number
+          p_is_temp: boolean
+          p_label_month: string
+          p_lines: Json
+          p_merged_close: boolean
+          p_snapshot: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
+      account_mode: "single" | "roles"
+      account_role: "living" | "goal_fund" | "emergency" | "personal" | "wedding"
       account_status: "active" | "deletion_requested" | "deleted"
       auth_provider: "kakao" | "google" | "apple"
       child_plan: "within_1y" | "in_1_3y" | "after_3y" | "none" | "unsure"
@@ -555,6 +806,10 @@ export type Database = {
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
       marriage_status: "married" | "engaged"
       newlywed_home: "have" | "before" | "after" | "parents"
+      plan_line_kind: "split" | "emergency_to_living" | "goal_to_living"
+      plan_line_state: "pending" | "done"
+      plan_line_target: "account" | "goal"
+      plan_status: "created" | "splitting" | "closing" | "closed" | "skipped"
       prep_money_mode: "separate" | "together"
       split_mode: "half" | "income" | "custom"
     }
@@ -678,6 +933,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_mode: ["single", "roles"],
+      account_role: ["living", "goal_fund", "emergency", "personal", "wedding"],
       account_status: ["active", "deletion_requested", "deleted"],
       auth_provider: ["kakao", "google", "apple"],
       child_plan: ["within_1y", "in_1_3y", "after_3y", "none", "unsure"],
@@ -703,6 +960,10 @@ export const Constants = {
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
       marriage_status: ["married", "engaged"],
       newlywed_home: ["have", "before", "after", "parents"],
+      plan_line_kind: ["split", "emergency_to_living", "goal_to_living"],
+      plan_line_state: ["pending", "done"],
+      plan_line_target: ["account", "goal"],
+      plan_status: ["created", "splitting", "closing", "closed", "skipped"],
       prep_money_mode: ["separate", "together"],
       split_mode: ["half", "income", "custom"],
     },

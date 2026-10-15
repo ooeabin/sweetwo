@@ -1,12 +1,14 @@
 import type { Page, Route } from '@playwright/test';
 import { chanwoo, fakeJwt, SB } from './supabase-mock';
 
-// 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense). 테스트가 db를 들여다본다.
+// 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense, account, 첫 플랜). 테스트가 db를 들여다본다.
 export interface MemDb {
   me: Record<string, unknown>;
   space: Record<string, unknown> | null;
   goals: Record<string, unknown>[];
   fixed: Record<string, unknown>[];
+  accounts: Record<string, unknown>[];
+  plans: { args: Record<string, unknown> }[];
   rpc: string[];
 }
 
@@ -46,6 +48,8 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
     space: null,
     goals: [],
     fixed: [],
+    accounts: [],
+    plans: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -141,11 +145,18 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
             split_mode: null,
             split_ratio: null,
             split_deferred: false,
+            account_mode: null,
+            base_day: null,
+            base_day_last: false,
             version: 1,
           };
           db.me.space_id = 'space-1';
         }
         return json(route, 'space-1');
+      }
+      if (fn === 'start_first_plan') {
+        if (!db.plans.length) db.plans.push({ args: body() });
+        return json(route, 'plan-1');
       }
       if (fn === 'create_invite')
         return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
@@ -218,6 +229,23 @@ export async function mockOnboarding(page: Page): Promise<MemDb> {
       if (method === 'PATCH') {
         const ids = inIds(url);
         for (const r of db.fixed) if (ids.includes(String(r.id))) Object.assign(r, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/account') {
+      if (method === 'GET')
+        return json(
+          route,
+          db.accounts.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const r = req.postDataJSON() as Record<string, unknown>;
+        db.accounts.push({ id: `account-${db.accounts.length + 1}`, deleted_at: null, ...r });
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
+        for (const r of db.accounts) if (ids.includes(String(r.id))) Object.assign(r, body());
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }

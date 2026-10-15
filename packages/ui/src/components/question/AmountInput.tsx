@@ -43,6 +43,7 @@ export function AmountInput({
   monthly,
   placeholder = '0',
   allowZero = false,
+  embedded = false,
 }: {
   label: string;
   value: number | null;
@@ -58,16 +59,18 @@ export function AmountInput({
   monthly?: boolean;
   placeholder?: string;
   allowZero?: boolean;
+  /** 한 화면에 입력이 여럿일 때(O-63 통장 잔액): 처음 포커스와 좁은 창 앱 키패드 없이 기기 숫자 자판 */
+  embedded?: boolean;
 }) {
   const id = useId();
-  const narrow = useNarrow();
+  const narrow = useNarrow() && !embedded;
   const ref = useRef<HTMLInputElement>(null);
   const [showBands, setShowBands] = useState(false);
   const [pasteError, setPasteError] = useState<string>();
 
   useEffect(() => {
-    if (!narrow) ref.current?.focus();
-  }, [narrow]);
+    if (!narrow && !embedded) ref.current?.focus();
+  }, [narrow, embedded]);
 
   const over = value !== null && value > MAX_WON;
   const zero = value === 0 && !allowZero;

@@ -1,11 +1,16 @@
 import { updateGoal } from '@sweetwo/api';
 import {
   allocate,
+  currentCycle,
   dateToYm,
+  defaultBaseDay,
   diagnose,
   emergencyBase,
   planSummary,
   type AllocGoal,
+  type BaseDay,
+  type PlanParts,
+  type SplitMode,
 } from '@sweetwo/core';
 import { copy } from './copy';
 import type { Goal } from './data';
@@ -92,3 +97,53 @@ export function result(s: FlowState) {
     temp: tempReason(s),
   };
 }
+
+/** 기준일: 정해 둔 값, 없으면 두 월급날 중 늦은 날(합류 전은 내 월급날) */
+export function baseDayOf(s: FlowState): BaseDay | null {
+  const sp = s.space;
+  if (sp?.base_day_last) return 'last';
+  if (sp?.base_day) return sp.base_day;
+  const mine: BaseDay | null = s.me?.payday_last ? 'last' : (s.me?.payday ?? null);
+  return defaultBaseDay([mine]);
+}
+export const myPaydayOf = (s: FlowState): BaseDay | null =>
+  s.me?.payday_last ? 'last' : (s.me?.payday ?? null);
+
+export const cycleOf = (s: FlowState, now = new Date()) => {
+  const b = baseDayOf(s);
+  return b === null ? null : currentCycle(b, now);
+};
+
+/** 한 달 통장별 금액(공동 생활비, 목표자금, 비상금). 각자 관리 예비부부는 목표자금 자리에 결혼 비용 */
+export function monthlyParts(s: FlowState): PlanParts {
+  const r = result(s);
+  if (r.separate) {
+    const w = r.alloc.lines.find((l) => l.goal.template === 'wedding');
+    return { living: 0, goalFund: w?.need ?? 0, emergency: 0 };
+  }
+  return { living: r.plan.sharedLiving, goalFund: r.alloc.goals, emergency: r.alloc.emergency };
+}
+
+/** 나누기 방식: 배우자 수입을 모르거나 ‘나중에 할게요’면 반반(17 O-66 표) */
+export function splitOf(s: FlowState) {
+  const sp = s.space;
+  const unknown = !!sp?.partner_income_unknown;
+  let mode: SplitMode = sp?.split_mode ?? 'half';
+  if (sp?.split_deferred || (unknown && mode === 'income')) mode = 'half';
+  return {
+    mode,
+    myRatio: sp?.split_ratio ?? 50,
+    myIncome: s.me?.monthly_income ?? 0,
+    partnerIncome: unknown ? 0 : (sp?.partner_income ?? 0),
+  };
+}
+
+/** 통장별 줄 키 → 통장 역할 */
+export const roleOfPart = (key: keyof PlanParts, separate: boolean) =>
+  key === 'living'
+    ? 'living'
+    : key === 'emergency'
+      ? 'emergency'
+      : separate
+        ? 'wedding'
+        : 'goal_fund';

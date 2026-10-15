@@ -23,6 +23,8 @@ export function ChoiceCards<T extends string>({
   onChange,
   onPick,
   autoAdvance = true,
+  autoFocus = true,
+  shortcuts = true,
 }: {
   label: string;
   options: Choice<T>[];
@@ -31,6 +33,10 @@ export function ChoiceCards<T extends string>({
   /** 고르고 0.3초 뒤(자동 다음) */
   onPick?: (v: T) => void;
   autoAdvance?: boolean;
+  /** 처음에 첫 카드에 포커스(한 화면에 묶음이 여럿이면 하나만) */
+  autoFocus?: boolean;
+  /** 1~9 키로 고르기(한 화면에 묶음이 여럿이면 하나만) */
+  shortcuts?: boolean;
 }) {
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const first = useRef<HTMLButtonElement>(null);
@@ -48,11 +54,12 @@ export function ChoiceCards<T extends string>({
   pickRef.current = pick;
 
   useEffect(() => {
-    first.current?.focus();
+    if (autoFocus) first.current?.focus();
     return () => clearTimeout(timer.current); // 화면을 떠날 때만 자동 다음 취소
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 처음 한 번만
 
   useEffect(() => {
+    if (!shortcuts) return;
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
@@ -62,7 +69,7 @@ export function ChoiceCards<T extends string>({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [options]);
+  }, [options, shortcuts]);
 
   return (
     <div
