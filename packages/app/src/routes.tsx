@@ -16,6 +16,7 @@ import { DevUiGallery } from './features/dev';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
+import { JoinRoute, P01JoinStart } from './features/pairing';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
@@ -57,6 +58,15 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAccount>
             <OnboardingRoute />
+          </RequireAccount>
+        ),
+      },
+      { path: '/i/:code', element: <P01JoinStart /> }, // A-07 초대 링크, P-01 합류 시작(로그인 전에도)
+      {
+        path: '/join/:screen', // P-02b~P-11 배우자 합류
+        element: (
+          <RequireAccount>
+            <JoinRoute />
           </RequireAccount>
         ),
       },

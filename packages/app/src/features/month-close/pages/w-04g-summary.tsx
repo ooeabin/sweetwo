@@ -65,16 +65,16 @@ export function W04gSummary() {
         allowanceNote={
           d.basisNote === 'mine' || d.solo
             ? copy.allowanceNote(me, formatManWon(d.myAllowance))
-            : `${copy.allowanceNote(me, formatManWon(d.myAllowance))}, ${copy.allowanceNote(d.space?.partner_nickname ?? '', formatManWon(d.myAllowance))}`
+            : `${copy.allowanceNote(me, formatManWon(d.myAllowance))}, ${copy.allowanceNote(d.partnerName, formatManWon(d.partnerAllowance))}`
         }
         bigExpense={big}
         bigExpenseNote={c.bigs.map((b) => b.name).join(', ') || undefined}
         saved={saved}
         note={
           d.basisNote === 'estimated'
-            ? copy.partnerEstimated(d.space?.partner_nickname ?? '')
+            ? copy.partnerEstimated(d.partnerName)
             : d.basisNote === 'mine'
-              ? copy.myMoneyOnly(d.space?.partner_nickname ?? '', me)
+              ? copy.myMoneyOnly(d.partnerName, me)
               : undefined
         }
       />

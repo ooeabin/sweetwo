@@ -1,6 +1,8 @@
-import type { Goal, Me, MonthlyPlan, PlanLine, Space } from '@sweetwo/api';
+import type { Goal, Me, MonthlyPlan, PartnerProfile, PlanLine, Space } from '@sweetwo/api';
 import {
   allocate,
+  coupleBaseDay,
+  coupleOf,
   currentCycle,
   dateToYm,
   daysBetween,
@@ -27,6 +29,8 @@ export interface MonthInput {
   space: Space;
   goals: Goal[];
   plan: (MonthlyPlan & { lines: PlanLine[] }) | null;
+  /** 배우자 프로필(합류 뒤) */
+  partner?: PartnerProfile | null;
   /** 이번 달 변동 항목 입력 합계(W-04j, 큰 지출 제외) */
   spentVariable?: number;
   /** 이번 플랜 월말 정리를 끝냄 */
@@ -52,6 +56,7 @@ export function monthView({
   space: sp,
   goals,
   plan,
+  partner = null,
   spentVariable = 0,
   closeDone = false,
   now = new Date(),
@@ -64,8 +69,9 @@ export function monthView({
   // 월급 나누기는 합류했고 통장 역할을 나눈 부부만(각자 관리 예비부부는 결혼 자금 모으기)
   const hasSplit = joined && sp.account_mode === 'roles' && !separate;
 
-  const myPayday: BaseDay | null = me.payday_last ? 'last' : (me.payday ?? null);
-  const base: BaseDay | null = sp.base_day_last ? 'last' : (sp.base_day ?? myPayday);
+  const c = coupleOf(me, sp, partner);
+  const myPayday = c.myPayday;
+  const base: BaseDay | null = sp.base_day_last ? 'last' : (sp.base_day ?? coupleBaseDay(c));
   const computed = base === null ? null : currentCycle(base, now);
   const cycle = plan
     ? {
@@ -80,14 +86,15 @@ export function monthView({
   const closing = !!cycle && !mergedClose && !closeDone && inClosePeriod(today, cycle.end);
 
   const sum = planSummary({
-    myIncome: me.monthly_income,
-    partnerIncome: sp.partner_income,
-    partnerUnknown: sp.partner_income_unknown,
-    myAllowance: me.allowance,
+    myIncome: c.myIncome,
+    partnerIncome: c.partnerIncome,
+    partnerUnknown: c.partnerUnknown,
+    myAllowance: c.myAllowance,
+    partnerAllowance: c.partnerAllowance,
     fixedTotal: sp.fixed_total,
     loanRepayment: sp.loan_repayment,
     livingBudget: sp.living_budget,
-    mySharePct: sp.split_mode === 'custom' ? (sp.split_ratio ?? 50) : 50,
+    mySharePct: sp.split_mode === 'custom' ? c.myRatio : 50,
   });
   const alloc = allocate(sum.saveable, goals.map(toAllocGoal), now);
 
@@ -115,7 +122,10 @@ export function monthView({
 
   const events = upcoming({
     today,
-    paydays: [{ who: me.nickname ?? '', day: myPayday }],
+    paydays: [
+      { who: c.myName, day: myPayday },
+      ...(c.joined ? [{ who: c.partnerName, day: c.partnerPayday }] : []),
+    ],
     cycleEnd: separate ? null : (cycle?.end ?? null),
     mergedClose,
     weddingDate: engaged ? sp.wedding_date : null,
@@ -153,7 +163,7 @@ export function monthView({
   const weddingLine = (plan?.lines ?? []).find((l) => l.account_role === 'wedding');
   const groom = me.side !== 'bride';
   const mode =
-    sp.split_deferred || (sp.partner_income_unknown && sp.split_mode === 'income')
+    sp.split_deferred || (c.partnerUnknown && sp.split_mode === 'income')
       ? 'half'
       : (sp.split_mode ?? 'half');
   const gather = weddingLine
@@ -164,15 +174,15 @@ export function monthView({
     : splitShares({
         total: weddingNeed,
         mode,
-        myRatio: sp.split_ratio ?? 50,
-        myIncome: me.monthly_income ?? 0,
-        partnerIncome: sp.partner_income_unknown ? 0 : (sp.partner_income ?? 0),
+        myRatio: c.myRatio,
+        myIncome: c.myIncome ?? 0,
+        partnerIncome: c.partnerIncome ?? 0,
       });
 
   // 할 일(H-04) 조건
   const estimates =
     [
-      sp.partner_income_estimated,
+      c.partnerEstimated,
       sp.fixed_total_estimated,
       sp.living_budget_estimated,
       sp.wedding_budget_estimated,
@@ -198,6 +208,8 @@ export function monthView({
     month,
     planId: plan?.id ?? null,
     todoState,
+    partnerName: c.partnerName,
+    starter: c.starter,
     cycle,
     closing,
     closeDays: cycle ? daysBetween(today, cycle.end) + 1 : null,

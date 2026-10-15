@@ -38,7 +38,7 @@ export function W04aStart() {
           {d.joined && (
             <>
               <br />
-              {copy.startAlone(d.space?.partner_nickname ?? '')}
+              {copy.startAlone(d.partnerName)}
             </>
           )}
         </>

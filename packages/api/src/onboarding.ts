@@ -258,3 +258,22 @@ export async function fetchCurrentPlan(
   if (!data) return null;
   return { ...data, lines: (data.lines ?? []).filter((l) => !l.deleted_at) };
 }
+
+// 배우자 프로필(같은 공간 다른 사람). 없으면 null
+export type PartnerProfile = {
+  id: string;
+  nickname: string | null;
+  side: 'groom' | 'bride' | null;
+  employment: Me['employment'];
+  monthly_income: number | null;
+  income_variable: boolean;
+  payday: number | null;
+  payday_last: boolean;
+  allowance: number | null;
+};
+export async function fetchPartner(): Promise<PartnerProfile | null> {
+  const { data, error } = await supabase().rpc('partner_profile');
+  fail(error);
+  const row = Array.isArray(data) ? data[0] : null;
+  return (row as PartnerProfile | undefined) ?? null;
+}

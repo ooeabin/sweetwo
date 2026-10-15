@@ -3,6 +3,7 @@ export const qk = {
   me: ['me'] as const,
   space: ['space'] as const,
   goals: ['goals'] as const,
+  partner: ['partner'] as const,
   fixedExpenses: ['fixed_expense'] as const,
   accounts: ['account'] as const,
   currentPlan: (today: string) => ['monthly_plan', today] as const,

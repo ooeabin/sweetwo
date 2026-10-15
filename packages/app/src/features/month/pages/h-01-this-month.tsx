@@ -19,7 +19,7 @@ import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
-import { useCurrentPlan, useGoals, useMe, useMonthClose, useSpace } from '../data';
+import { useCurrentPlan, useGoals, useMe, useMonthClose, usePartner, useSpace } from '../data';
 import { H04Todos } from '../h-04-todos';
 import { closePath, spendPath } from '../paths';
 import { monthView, type MonthView } from '../view';
@@ -32,6 +32,7 @@ export function H01ThisMonth() {
   const space = useSpace();
   const goals = useGoals();
   const plan = useCurrentPlan();
+  const partner = usePartner();
   const close = useMonthClose(plan.data?.id);
   const nav = useNavigate();
   const { masked, toggle } = useMask();
@@ -48,6 +49,7 @@ export function H01ThisMonth() {
           space: space.data,
           goals: goals.data ?? [],
           plan: plan.data ?? null,
+          partner: partner.data ?? null,
           spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
           closeDone: close.data?.status === 'done',
         })
@@ -79,18 +81,13 @@ export function H01ThisMonth() {
   } else {
     ({ title, actions, stats } = today(v, name, m, (to) => nav(to)));
     const todos = (
-      <H04Todos
-        key="todos"
-        state={v.todoState}
-        today={v.today}
-        partner={space.data?.partner_nickname ?? ''}
-      />
+      <H04Todos key="todos" state={v.todoState} today={v.today} partner={v.partnerName} />
     );
     columns = v.separate
       ? [
           <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
             {todos}
-            <PrepCards v={v} name={name} partner={space.data?.partner_nickname ?? ''} m={m} />
+            <PrepCards v={v} name={name} partner={v.partnerName} m={m} />
           </div>,
           <Upcomings key="r" v={v} />,
         ]
@@ -130,14 +127,18 @@ export function H01ThisMonth() {
       }}
       masked={masked}
       onMask={toggle}
-      people={[
-        { name, no: 1 },
-        {
-          name: space.data?.partner_nickname ?? '',
-          no: 2,
-          empty: !v?.joined,
-        },
-      ]}
+      // 사람 색은 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
+      people={
+        v && !v.starter
+          ? [
+              { name: v.partnerName, no: 1 },
+              { name, no: 2 },
+            ]
+          : [
+              { name, no: 1 },
+              { name: v?.partnerName ?? '', no: 2, empty: !v?.joined },
+            ]
+      }
       saveState={copy.saved}
       today={{ date, title, actions, stats }}
       columns={columns}
