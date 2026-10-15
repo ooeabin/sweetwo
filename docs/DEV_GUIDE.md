@@ -694,6 +694,9 @@ supabase/
 
 1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright), e2e-desktop(Electron, xvfb), db(로컬 Supabase + pgTAP + DB 타입 비교)
 2. main 합치기: 마이그레이션과 Edge Functions를 스테이징에 배포, 웹을 스테이징 S3에
+   - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 main에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
+   - 필요한 비밀 값(GitHub Environments → staging): `SUPABASE_ACCESS_TOKEN`(배포 전용 토큰), `SUPABASE_DB_PASSWORD`(staging DB 비밀번호)
+   - staging에 손으로 SQL을 넣지 않는다. 모든 변경은 마이그레이션 파일 → main → 이 작업으로
 3. 태그(v1.2.0): 운영 마이그레이션 → Edge Functions → 웹 → 데스크톱 빌드, 서명, 업데이트 파일 업로드(‘업데이트와 릴리스’)
 
 ### 데스크톱 출시

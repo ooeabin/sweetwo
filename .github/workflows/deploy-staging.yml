@@ -1,0 +1,29 @@
+name: Deploy staging
+# main에 합치면 마이그레이션을 staging Supabase에 올린다(docs/DEV_GUIDE.md ‘CI/CD’).
+# 비밀 값은 GitHub 저장소 Settings → Environments → staging에만 둔다.
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/migrations/**']
+  workflow_dispatch:
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: xxofyzgzrjrcrcxvftpn # sweetwo-staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: 2.120.0 }
+      - name: staging 연결
+        run: supabase link --project-ref "$PROJECT_REF"
+      - name: 올릴 마이그레이션 목록
+        run: supabase migration list
+      - name: 마이그레이션 올리기
+        run: supabase db push
