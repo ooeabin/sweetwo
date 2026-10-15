@@ -13,10 +13,10 @@ import { useNavigate } from 'react-router-dom';
 import { openSent, ProposalLines, useProposals } from '../../proposals';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useJoinStep } from '../join-step';
+import { joinPath, useJoinStep } from '../join-step';
 
 // P-11 합류 완료(O-62 형식). 들어오면 합류 완료(부부 연결, 코드 사용됨) + 이번 플랜의 안 나눈 줄 분담액만 다시 계산.
-// 새 플랜은 다음 기준일부터. O-63~65 다시 보기는 다음 단계라 ‘이번 달로’.
+// 새 플랜은 다음 기준일부터. ‘다음’ → O-63~65 다시 보기(바뀐 값 강조) → 이번 달.
 export function P11Joined() {
   const s = useJoinStep('p-11');
   const d = s.d;
@@ -90,8 +90,8 @@ export function P11Joined() {
       wide
       steps={s.steps}
       title={copy.done(readWon(Math.max(now.saveable, 0)))}
-      primary={{ label: copy.toMonth, disabled: !finished }}
-      onSubmit={() => nav('/', { replace: true })}
+      primary={{ label: copy.next, disabled: !finished }}
+      onSubmit={() => nav(joinPath('o-63'))}
     >
       <SceneMedia scene="P-11" />
       <div className="hg-cards">

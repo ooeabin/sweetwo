@@ -40,7 +40,7 @@ test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그�
   expect(back).toBe('/i/K7M2QX?go=1');
 });
 
-test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 다르게 → P-10 → P-11 → 이번 달', async ({
+test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 다르게 → P-10 → P-11 → O-63~65 → 이번 달', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -76,6 +76,33 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
     payday_last: false,
     allowance: 500_000,
   };
+  const goal = (
+    id: string,
+    template: string,
+    name: string,
+    priority: number,
+    target: number,
+    deadline: string,
+  ) => ({
+    id,
+    template,
+    name,
+    kind: 'once',
+    priority,
+    target_amount: target,
+    other_held: 0,
+    deadline,
+    amount_estimated: false,
+    deadline_estimated: false,
+    after_marriage: false,
+    status: 'active',
+    details: {},
+    deleted_at: null,
+  });
+  db.goals.push(
+    goal('g1', 'emergency', '비상금', 0, 7_800_000, '2027-10-01'),
+    goal('g2', 'home', '내 집 마련', 1, 150_000_000, '2031-10-01'),
+  );
   db.plans.push({
     args: {
       p_label_month: '2026-09-01',
@@ -164,11 +191,14 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
   await axe(page);
   await page.getByRole('button', { name: '찬우님께 제안하기' }).click();
 
-  // P-10: 찬우가 아직 목표가 없음
+  // P-10: 찬우가 정한 목표(우선순위 순)
   await heading(page, '합류 전에 바뀐 것과 목표예요');
-  await expect(page.getByText('찬우님이 목표를 정하면 여기에 보여요')).toBeVisible();
+  const goals = page.getByRole('list', { name: '합류 전에 바뀐 것과 목표예요' });
+  await expect(goals.getByRole('listitem')).toHaveCount(2);
+  await expect(goals.getByRole('listitem').first()).toContainText('비상금');
+  await expect(goals.getByRole('listitem').nth(1)).toContainText('내 집 마련');
   await axe(page);
-  await next(page);
+  await page.getByRole('button', { name: '모두 좋아요' }).click();
 
   // P-11 합류 완료
   await heading(page, '두 분은 한 달에 260만 원을 모을 수 있어요');
@@ -184,6 +214,35 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
   await expect(waiting).toContainText('50만 원 → 60만 원');
   await expect(waiting).toContainText('찬우 60%, 예빈 40% → 반반');
   await expect(waiting).toContainText('10월 25일부터 적용');
+  await axe(page);
+  await next(page);
+
+  // O-63~65 다시 보기: 예빈 실제 수입(270만, 추정 250만)으로 다시 계산, 바뀐 값은 이전 값 취소선
+  await heading(page, '통장을 이렇게 나눠 쓸까요?');
+  await expect(page.locator('.hg-listrow', { hasText: '목표자금' })).toContainText('195만 원/월');
+  await expect(page.locator('.hg-listrow', { hasText: '목표자금' }).getByLabel('이전')).toHaveText(
+    '175만 원/월',
+  );
+  await expect(
+    page.locator('.hg-listrow', { hasText: '공동 생활비' }).getByLabel('이전'),
+  ).toHaveCount(0);
+  await expect(page.getByText('208만 원')).toBeVisible();
+  await expect(page.getByLabel('이전').filter({ hasText: '200만 원' })).toBeVisible();
+  await expect(page.getByText('매달 25일 기준')).toBeVisible();
+  await axe(page);
+  await next(page);
+
+  await heading(page, '목표는 이렇게 모아요');
+  const home = page.locator('.hg-listrow', { hasText: '내 집 마련' });
+  await expect(home).toContainText('195만 원/월');
+  await expect(home.getByLabel('이전')).toHaveText('175만 원/월');
+  await axe(page);
+  await next(page);
+
+  await heading(page, '지금 흐름이 좋아요');
+  await expect(page.locator('.hg-listrow', { hasText: '저축률' }).getByLabel('이전')).toHaveText(
+    '40%',
+  );
   await axe(page);
   await page.getByRole('button', { name: '이번 달로' }).click();
 
