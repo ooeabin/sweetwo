@@ -100,6 +100,7 @@ export function H01ThisMonth() {
         partner={v.partnerName}
         received={received}
         names={names}
+        goals={goals.data ?? []}
       />
     );
     columns = v.separate

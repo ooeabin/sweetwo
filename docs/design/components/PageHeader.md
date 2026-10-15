@@ -8,3 +8,4 @@
 - 오른쪽 동작은 1개만: ⋯(Menu로 수정·지우기) 또는 “수정”. 주 버튼은 두지 않음.
 - AppFrame 상단 줄(날짜 + 큰 제목)은 메뉴 첫 화면용, PageHeader는 그 아래 단계 화면용. 질문 흐름은 QuestionLayout.
 - Esc = 뒤로.
+- React 래퍼 `PageHeader`(packages/ui): `title`, `sub`, `backLabel`, `onBack`, `action`(⋯ `Menu` 등).

@@ -1,6 +1,7 @@
 import {
   applyDueProposals,
   fetchCurrentPlan,
+  fetchGoals,
   fetchMe,
   fetchPartner,
   fetchProposals,
@@ -26,7 +27,9 @@ export const openSent = (list: Proposal[], myId: string | undefined) =>
 /** 값이 바뀐 뒤 다시 읽을 것 */
 export async function refreshAfterChange(qc: QueryClient) {
   await Promise.all(
-    [qk.proposals, qk.me, qk.partner, qk.space].map((k) => qc.invalidateQueries({ queryKey: k })),
+    [qk.proposals, qk.me, qk.partner, qk.space, qk.goals].map((k) =>
+      qc.invalidateQueries({ queryKey: k }),
+    ),
   );
 }
 
@@ -76,13 +79,19 @@ export function useProposalContext() {
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const list = useProposals();
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const today = todayKst();
   const plan = useQuery({
     queryKey: qk.currentPlan(today),
     queryFn: () => fetchCurrentPlan(today),
   });
   const ready =
-    !me.isLoading && !space.isLoading && !partner.isLoading && !list.isLoading && !plan.isLoading;
+    !me.isLoading &&
+    !space.isLoading &&
+    !partner.isLoading &&
+    !list.isLoading &&
+    !plan.isLoading &&
+    !goals.isLoading;
   const couple = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   return {
     ready,
@@ -91,5 +100,6 @@ export function useProposalContext() {
     plan: plan.data ?? null,
     couple,
     list: list.data ?? [],
+    goals: goals.data ?? [],
   };
 }

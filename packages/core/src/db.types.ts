@@ -961,6 +961,7 @@ export type Database = {
           seen_at: string | null
           space_id: string
           status: Database["public"]["Enums"]["proposal_status"]
+          target_id: string | null
           together: boolean
           updated_at: string
           version: number
@@ -984,6 +985,7 @@ export type Database = {
           seen_at?: string | null
           space_id: string
           status?: Database["public"]["Enums"]["proposal_status"]
+          target_id?: string | null
           together?: boolean
           updated_at?: string
           version?: number
@@ -1005,6 +1007,7 @@ export type Database = {
           seen_at?: string | null
           space_id?: string
           status?: Database["public"]["Enums"]["proposal_status"]
+          target_id?: string | null
           together?: boolean
           updated_at?: string
           version?: number
@@ -1022,6 +1025,13 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
             referencedColumns: ["id"]
           },
         ]
@@ -1329,7 +1339,12 @@ export type Database = {
       }
       proposal_space: { Args: Record<PropertyKey, never>; Returns: string }
       propose: {
-        Args: { p_after: Json; p_apply_on: string; p_item: string }
+        Args: {
+          p_after: Json
+          p_apply_on: string
+          p_item: string
+          p_target?: string
+        }
         Returns: string
       }
       respond_proposal: {

@@ -1,4 +1,4 @@
-import type { Json, Tables } from '@sweetwo/core';
+import type { Json, ProposalItem, Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -21,11 +21,13 @@ export async function fetchProposals(): Promise<Proposal[]> {
   return data ?? [];
 }
 
-export async function propose(item: 'allowance' | 'split', after: Json, applyOn: string) {
+/** 제안 보내기. 목표 항목은 target = 목표 id */
+export async function propose(item: ProposalItem, after: Json, applyOn: string, target?: string) {
   const { data, error } = await supabase().rpc('propose', {
     p_item: item,
     p_after: after,
     p_apply_on: applyOn,
+    ...(target ? { p_target: target } : {}),
   });
   fail(error);
   return data as string;

@@ -13,4 +13,12 @@ export function proposalApplyOn(base: BaseDay, now = new Date()): string {
   return nextDayOf(midnight ? day : addDays(day, 1), base);
 }
 
-export type ProposalItem = 'allowance' | 'split';
+export type ProposalItem =
+  | 'allowance'
+  | 'split'
+  | 'goal_amount'
+  | 'goal_deadline'
+  | 'goal_pause'
+  | 'goal_delete';
+/** 목표 항목(target = 목표 id) */
+export const isGoalItem = (item: string) => item.startsWith('goal_');

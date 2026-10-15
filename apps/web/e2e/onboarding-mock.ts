@@ -219,26 +219,38 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const b = body();
         const me = String(db.me.id);
         const item = String(b.p_item);
+        const target = (b.p_target as string | undefined) ?? null;
+        const goal = db.goals.find((g) => g.id === target);
         const cur = db.proposals.find(
           (p) =>
-            p.status === 'open' && p.item === item && (item !== 'allowance' || p.proposer === me),
+            p.status === 'open' &&
+            p.item === item &&
+            (item !== 'allowance' || p.proposer === me) &&
+            (p.target_id ?? null) === target,
         );
         if (cur) cur.status = 'superseded';
         const trips = cur ? Number(cur.round_trips) + (cur.proposer !== me ? 1 : 0) : 0;
         const at = new Date(Date.now() + db.proposals.length * 1000).toISOString();
+        const before =
+          item === 'allowance'
+            ? { allowance: db.me.allowance ?? null }
+            : item === 'split'
+              ? { mode: db.space?.split_mode ?? null, starter_ratio: db.space?.split_ratio ?? null }
+              : item === 'goal_amount'
+                ? { target_amount: goal?.target_amount ?? null }
+                : item === 'goal_deadline'
+                  ? { deadline: goal?.deadline ?? null }
+                  : item === 'goal_pause'
+                    ? { paused: goal?.status === 'paused' }
+                    : { deleted: false };
         const row = {
           id: `prop-${db.proposals.length + 1}`,
           space_id: 'space-1',
           item,
+          target_id: target,
           proposer: me,
-          before:
-            item === 'allowance'
-              ? { allowance: db.me.allowance ?? null }
-              : {
-                  mode: db.space?.split_mode ?? null,
-                  starter_ratio: db.space?.split_ratio ?? null,
-                },
-          after: b.p_after,
+          before,
+          after: item === 'goal_delete' ? { deleted: true } : b.p_after,
           status: 'open',
           apply_on: b.p_apply_on,
           seen_at: null,
@@ -270,7 +282,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           });
         } else {
           const after = p.after as Record<string, unknown>;
-          if (p.item === 'allowance') {
+          const goal = db.goals.find((g) => g.id === p.target_id);
+          if (String(p.item).startsWith('goal_')) {
+            if (goal && p.item === 'goal_amount') goal.target_amount = after.target_amount;
+            if (goal && p.item === 'goal_deadline') goal.deadline = after.deadline;
+            if (goal && p.item === 'goal_pause') goal.status = after.paused ? 'paused' : 'active';
+            if (goal && p.item === 'goal_delete') goal.deleted_at = new Date().toISOString();
+          } else if (p.item === 'allowance') {
             const who = p.proposer === db.me.id ? db.me : db.partner;
             if (who) who.allowance = after.allowance;
           } else if (db.space) {

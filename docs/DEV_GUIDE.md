@@ -591,13 +591,16 @@ supabase/
 - 기획: 22 G-01, G-02, 계산은 06 4·5장. 화면 features/goals: G-01 `/goals`, G-02 `/goals/:id`. 메뉴 첫 화면 틀은 month `MainFrame`(탭, 받은 제안 숫자, 아바타, 금액 가리기). 다른 메뉴는 AppFrame `page`(화면 제목 줄), 상세는 `PageHeader`
 - 보유액 = 기타 보유액(`goal.other_held`) + 월말 정리를 마친 달의 이 목표 납입(`saving_deposit.goal_id`) 누적(core `goalHeld`). 연결 자산, 목표 사용은 우리 자산·목표 사용을 만들 때 더함. 이번 달 H-05도 같은 보유액
 - 달별 기록: api `fetchGoalRecords()`(플랜 목표 줄 계획액, 정리를 마친 달 납입) → core `goalMonths`. 상태 `goalStatus`(지연 = 예상 달성 > 기한 또는 2개월 연속 미달), ‘지금’ 눈금 `goalPace`(만든 달부터 기한까지 고르게), 칩 `paceChip`
-- 다음 단계: 목표 추가(G-03a~f), 목표 수정·⋯ 메뉴(제안), 순서 바꾸기(G-06), 충돌 조정(G-04), 진행 그래프·월별 막대, 보유액 자세히, 목표 사진
+- 목표 수정 `/goals/:id/edit/amount|deadline|name`(G-02 숫자, ⋯ 이름 변경, G-08 ‘다르게 해볼래요’). 금액·기한은 영향 미리보기(`viewWith`로 바꾼 값 다시 계산). 이름은 바로 저장
+- 바꾸기(`goal-change.ts`): 연결된 부부는 `propose('goal_…', 값, 적용일, 목표)`, 미합류·혼자 쓰기는 바로 적용 + Toast(보류·다시 모으기·삭제는 ‘되돌리기’). 다시 모으면 우선순위 맨 아래, 삭제는 휴지통(`deleted_at`), 비상금은 삭제 없음
+- G-02 머리 아래 제안 중 카드(proposals `ProposalInline`: 보낸 사람 보내기 취소·철회, 받은 사람 좋아요·다르게 해볼래요·반대), G-01 카드 “제안 중” 배지
+- 다음 단계: 목표 추가(G-03a~f), 순서 바꾸기(G-06), 충돌 조정(G-04, 저축 가능 금액을 넘는 수정 포함), 진행 그래프·월별 막대, 보유액 자세히, 목표 사진, ⋯ 좁은 창 BottomSheet
 
 ### 제안 구조
 
 - 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
-- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나). 목표, 기준일, 생활비 예산, 월말 정리 묶음은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만)
-- 함수: `propose(항목, 후 값, 적용일)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
+- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표). 기준일, 생활비 예산, 우선순위, 목표 추가, 월말 정리 묶음은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
+- 함수: `propose(항목, 후 값, 적용일, 목표)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
 - 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
 - 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`
 - 함께 정하기: 반대 2회 또는 왕복 2회. 이 제안은 적용일이 돼도 적용 안 함

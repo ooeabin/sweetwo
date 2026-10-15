@@ -2,6 +2,8 @@
 export { G08Proposal } from './pages/g-08-proposal';
 export { SplitPicker, type SplitPick } from './split-picker';
 export { ProposalLines } from './proposal-lines';
+export { ProposalInline } from './proposal-inline';
+export { useProposalActions } from './actions';
 export { copy as proposalCopy } from './copy';
 export {
   openReceived,
@@ -11,4 +13,10 @@ export {
   useApplyDue,
   useProposals,
 } from './data';
-export { describe as describeProposal, nameOf as proposerName, type Names } from './values';
+export {
+  describe as describeProposal,
+  itemObject as proposalObject,
+  nameOf as proposerName,
+  type GoalName,
+  type Names,
+} from './values';

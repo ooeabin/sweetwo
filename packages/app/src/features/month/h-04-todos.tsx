@@ -4,7 +4,14 @@ import { Badge, Button } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { describeProposal, proposalCopy, proposerName, type Names } from '../proposals';
+import {
+  describeProposal,
+  proposalCopy,
+  proposalObject,
+  proposerName,
+  type GoalName,
+  type Names,
+} from '../proposals';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useTodos } from './data';
@@ -19,12 +26,14 @@ export function H04Todos({
   partner,
   received = [],
   names,
+  goals = [],
 }: {
   state: TodoState;
   today: string;
   partner: string;
   received?: Proposal[];
   names?: Names;
+  goals?: GoalName[];
 }) {
   const nav = useNavigate();
   const todos = useTodos();
@@ -83,7 +92,7 @@ export function H04Todos({
       <div className="hg-checklist__list">
         {names &&
           proposals.slice(0, SHOWN).map((p) => {
-            const line = describeProposal(p, names);
+            const line = describeProposal(p, names, goals);
             return (
               <button
                 key={p.id}
@@ -96,7 +105,7 @@ export function H04Todos({
                   <span className="hg-task__title">
                     {proposalCopy.arrived(
                       proposerName(names, p.proposer),
-                      proposalCopy.itemObject[p.item as 'allowance' | 'split'] ?? '',
+                      proposalObject(p, goals),
                     )}
                   </span>
                   <span className="hg-task__sub">
