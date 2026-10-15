@@ -33,15 +33,15 @@ export async function refreshAfterChange(qc: QueryClient) {
   );
 }
 
-/** 좋아요·적용 뒤 이번 사이클 안 나눈 돈 재계산(08 6-2). 금액과 이미 나눈 줄은 그대로 */
-export async function recalcPendingShares() {
+/** 좋아요·적용·사실값 저장 뒤 이번 사이클 안 나눈 돈 재계산(08 6-2, 23 F-05 8번). 금액과 이미 나눈 줄은 그대로. 돌려주는 값 = 다시 나눈 줄 수 */
+export async function recalcPendingShares(): Promise<number> {
   const [me, space, partner, plan] = await Promise.all([
     fetchMe(),
     fetchSpace(),
     fetchPartner(),
     fetchCurrentPlan(todayKst()),
   ]);
-  if (!me || !space || !plan) return;
+  if (!me || !space || !plan) return 0;
   const c = coupleOf(me, space, partner);
   const shares = pendingShares(plan.lines ?? [], {
     mode: space.split_deferred || !space.split_mode ? 'half' : space.split_mode,
@@ -51,6 +51,7 @@ export async function recalcPendingShares() {
     iAmGroom: me.side !== 'bride',
   });
   if (shares.length) await updatePendingShares(plan.id, shares, plan.is_temp);
+  return shares.length;
 }
 
 // 적용일이 지난 제안 적용: 매일 작업 대신 앱을 열 때 한 번(이번 실행 동안)

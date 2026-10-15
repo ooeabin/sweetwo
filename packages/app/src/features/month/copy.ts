@@ -78,6 +78,7 @@ export const copy = {
   retry: '다시 시도',
 
   // H-04 할 일
+  editMoney: '월 수입·지출 수정',
   todos: '할 일',
   todosLeft: (n: number) => `${n}개 남았어요`,
   todoLeftState: '남음',
