@@ -314,3 +314,96 @@ test('목표 수정(합류 전): 바로 저장, 보류·삭제는 되돌리기',
   await expect(page.getByRole('button', { name: /우리 집/ })).toBeVisible();
   expect(db.proposals).toEqual([]);
 });
+
+/** 직접 만들기 → 이름, 금액, 한 번, 기한 2027년 12월, 모아둔 돈 50만 */
+async function addCustom(page: Page) {
+  await page.goto('/goals');
+  await page.getByRole('button', { name: '+ 목표 추가' }).click();
+  await heading(page, '어떤 목표를 추가할까요?');
+  await axe(page);
+  await page.getByRole('button', { name: '+ 직접 만들기' }).click();
+  await heading(page, '무엇을 위한 돈인가요?');
+  await page.getByLabel('무엇을 위한 돈인가요?').fill('캠핑 장비');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '얼마가 필요해요?');
+  await page.getByLabel('얼마가 필요해요?').fill('2400000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '한 번인가요, 매년인가요?');
+  await page.getByRole('radio', { name: /한 번이에요/ }).click();
+  await heading(page, '언제까지 모을까요?');
+  await page.getByLabel('년', { exact: true }).fill('2027');
+  await page.getByRole('radio', { name: '12월' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '이미 모아둔 돈이 있나요?');
+  await page.getByRole('radio', { name: /새로 입력할게요/ }).click();
+  await page.getByLabel('얼마 모아뒀어요?').fill('500000');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+}
+
+test('목표 추가(합류 전): 직접 만들기 → 질문 → 기한 → 모아둔 돈 → 확인 → 바로 추가', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+
+  await addCustom(page);
+  // 담당 질문 없음(합류 전) → 바로 확인
+  await expect(page.getByRole('heading', { name: /달성해요|추가할까요/ })).toBeVisible();
+  await expect(page.getByText('우선순위는 맨 아래예요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '추가하기' }).click();
+
+  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page.getByText('목표를 추가했어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: /캠핑 장비/ })).toBeVisible();
+  expect(db.goals.find((g) => g.name === '캠핑 장비')).toMatchObject({
+    template: 'custom',
+    kind: 'once',
+    target_amount: 2_400_000,
+    deadline: '2027-12-01',
+    other_held: 500_000,
+    owner: 'me',
+    priority: 3,
+  });
+  expect(db.proposals).toEqual([]);
+});
+
+test('목표 추가(연결): 담당 고르고 예빈에게 제안, 예빈이 좋아요하면 생김', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+
+  await addCustom(page);
+  await heading(page, '누가 모을까요?');
+  await page.getByRole('radio', { name: /같이/ }).click();
+  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+
+  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: /캠핑 장비/ })).toHaveCount(0);
+  expect(db.proposals[0]).toMatchObject({
+    item: 'goal_add',
+    target_id: null,
+    after: expect.objectContaining({
+      name: '캠핑 장비',
+      target_amount: 2_400_000,
+      deadline: '2027-12-01',
+      other_held: 500_000,
+      owner: 'together',
+    }),
+  });
+
+  // 예빈 화면(받은 사람): 할 일 → G-08 좋아요 → 목표가 생김
+  db.me.id = 'yebin-me';
+  Object.assign(db.proposals[0] ?? {}, { proposer: 'chanwoo-other' });
+  await page.goto('/');
+  await page.getByRole('button', { name: /캠핑 장비 목표를 추가하자고 제안했어요/ }).click();
+  await expect(page.getByText('캠핑 장비 목표 추가')).toBeVisible();
+  await page.getByRole('button', { name: '좋아요' }).click();
+  await expect(page.getByText('바로 적용했어요')).toBeVisible();
+  expect(db.goals.find((g) => g.name === '캠핑 장비')).toMatchObject({ owner: 'together' });
+});

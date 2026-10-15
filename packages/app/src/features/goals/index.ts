@@ -2,3 +2,4 @@
 export { G01GoalList } from './pages/g-01-goal-list';
 export { G02GoalDetail } from './pages/g-02-goal-detail';
 export { G02GoalEdit } from './pages/g-02-goal-edit';
+export { GoalAddRoute } from './add/route';

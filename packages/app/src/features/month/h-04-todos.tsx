@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   describeProposal,
   proposalCopy,
-  proposalObject,
+  proposalArrived,
   proposerName,
   type GoalName,
   type Names,
@@ -103,10 +103,7 @@ export function H04Todos({
                 <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
                 <span className="hg-task__text">
                   <span className="hg-task__title">
-                    {proposalCopy.arrived(
-                      proposerName(names, p.proposer),
-                      proposalObject(p, goals),
-                    )}
+                    {proposalArrived(p, proposerName(names, p.proposer), goals)}
                   </span>
                   <span className="hg-task__sub">
                     {proposalCopy.change(line.before, line.after)}

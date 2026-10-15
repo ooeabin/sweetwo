@@ -14,6 +14,7 @@ export {
   useProposals,
 } from './data';
 export {
+  arrivedText as proposalArrived,
   describe as describeProposal,
   itemObject as proposalObject,
   nameOf as proposerName,

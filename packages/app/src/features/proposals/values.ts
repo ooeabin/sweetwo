@@ -41,6 +41,19 @@ export interface GoalName {
   name: string;
 }
 
+/** 받은 제안 한 줄(할 일, “{이름}님이 {용돈을} 바꾸자고 제안했어요”) */
+export function arrivedText(
+  p: Pick<Proposal, 'item' | 'target_id' | 'after'>,
+  who: string,
+  goals: GoalName[] = [],
+) {
+  if (p.item === 'goal_add') {
+    const a = obj(p.after);
+    return copy.arrivedAdd(who, typeof a.name === 'string' ? a.name : copy.goalUnknown);
+  }
+  return copy.arrived(who, itemObject(p, goals));
+}
+
 /** 알림 문장 속 목적어(“{이름}님이 {용돈을} 바꾸자고 제안했어요”) */
 export function itemObject(p: Pick<Proposal, 'item' | 'target_id'>, goals: GoalName[] = []) {
   if (p.item.startsWith('goal_'))
@@ -55,6 +68,16 @@ export function describe(
 ) {
   const who = nameOf(n, p.proposer);
   const goal = goals.find((g) => g.id === p.target_id)?.name ?? copy.goalUnknown;
+  if (p.item === 'goal_add') {
+    const a = obj(p.after);
+    const name = typeof a.name === 'string' ? a.name : copy.goalUnknown;
+    const amount = num(p.after, 'target_amount');
+    const d = str(p.after, 'deadline');
+    const value = [amount === null ? null : readWon(amount), d ? formatYm(d) : null]
+      .filter(Boolean)
+      .join(', ');
+    return { label: copy.goalAdd(name), before: copy.unset, after: value || name };
+  }
   if (p.item === 'goal_amount') {
     const v = (j: Json) => {
       const a = num(j, 'target_amount');

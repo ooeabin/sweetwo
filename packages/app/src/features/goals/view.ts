@@ -121,7 +121,7 @@ export function goalsView(i: {
       template: g.template,
       kind: g.kind,
       illustration: t?.illustration ?? null,
-      custom: !t,
+      custom: !t || t.key === 'custom',
       status,
       afterMarriage: g.after_marriage,
       target: a.target,

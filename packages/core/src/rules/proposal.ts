@@ -19,6 +19,7 @@ export type ProposalItem =
   | 'goal_amount'
   | 'goal_deadline'
   | 'goal_pause'
-  | 'goal_delete';
-/** 목표 항목(target = 목표 id) */
+  | 'goal_delete'
+  | 'goal_add';
+/** 목표 항목(goal_add 말고는 target = 목표 id) */
 export const isGoalItem = (item: string) => item.startsWith('goal_');

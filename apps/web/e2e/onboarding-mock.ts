@@ -283,7 +283,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         } else {
           const after = p.after as Record<string, unknown>;
           const goal = db.goals.find((g) => g.id === p.target_id);
-          if (String(p.item).startsWith('goal_')) {
+          if (p.item === 'goal_add') {
+            db.goals.push({
+              id: `goal-${db.goals.length + 1}`,
+              status: 'active',
+              priority: Math.max(0, ...db.goals.map((g) => Number(g.priority))) + 1,
+              created_by: p.proposer,
+              created_at: new Date().toISOString(),
+              after_marriage: false,
+              deleted_at: null,
+              ...after,
+            });
+          } else if (String(p.item).startsWith('goal_')) {
             if (goal && p.item === 'goal_amount') goal.target_amount = after.target_amount;
             if (goal && p.item === 'goal_deadline') goal.deadline = after.deadline;
             if (goal && p.item === 'goal_pause') goal.status = after.paused ? 'paused' : 'active';
@@ -351,6 +362,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             amount_estimated: false,
             deadline_estimated: false,
             after_marriage: false,
+            status: 'active',
+            owner: 'together',
+            created_at: new Date().toISOString(),
+            created_by: db.me.id,
             deleted_at: null,
             ...r,
           });
