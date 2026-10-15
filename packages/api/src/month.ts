@@ -160,3 +160,45 @@ export async function saveMonthSpend(closeId: string, categoryId: string, amount
     );
   fail(error);
 }
+
+export interface GoalRecordRow {
+  goalId: string;
+  month: string;
+  amount: number;
+}
+
+/** 목표 달별 기록(G-02): 플랜마다 목표 줄 계획액, 정리를 마친 달의 이 목표 납입액 */
+export async function fetchGoalRecords(): Promise<{
+  plans: GoalRecordRow[];
+  deposits: GoalRecordRow[];
+}> {
+  const [lines, deps] = await Promise.all([
+    supabase()
+      .from('plan_line')
+      .select('goal_id, amount, monthly_plan!inner(label_month)')
+      .eq('target', 'goal')
+      .is('deleted_at', null)
+      .not('goal_id', 'is', null),
+    supabase()
+      .from('saving_deposit')
+      .select('goal_id, amount, month_close!inner(status, monthly_plan!inner(label_month))')
+      .is('deleted_at', null)
+      .not('goal_id', 'is', null),
+  ]);
+  fail(lines.error);
+  fail(deps.error);
+  return {
+    plans: (lines.data ?? []).map((l) => ({
+      goalId: l.goal_id ?? '',
+      month: l.monthly_plan.label_month,
+      amount: l.amount,
+    })),
+    deposits: (deps.data ?? [])
+      .filter((d) => d.month_close.status === 'done')
+      .map((d) => ({
+        goalId: d.goal_id ?? '',
+        month: d.month_close.monthly_plan.label_month,
+        amount: d.amount,
+      })),
+  };
+}

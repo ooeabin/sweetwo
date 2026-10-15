@@ -13,6 +13,7 @@ import {
   paths,
 } from './features/auth';
 import { DevUiGallery } from './features/dev';
+import { G01GoalList, G02GoalDetail } from './features/goals';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -54,6 +55,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-04a~W-04 끝 월말 정리
+      {
+        path: '/goals',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G01GoalList />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-01 목표 목록
+      {
+        path: '/goals/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02GoalDetail />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-02 목표 상세
       {
         path: '/proposals/:id',
         element: (

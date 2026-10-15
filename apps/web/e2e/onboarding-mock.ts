@@ -484,6 +484,37 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return ok204();
       }
     }
+    // 목표 달별 기록(G-02): 플랜 목표 줄, 정리한 달 납입
+    if (path === '/rest/v1/plan_line' && method === 'GET') {
+      const a = db.plans[0]?.args;
+      const lines = ((a?.p_lines as Record<string, unknown>[]) ?? []).filter(
+        (l) => l.target === 'goal' && l.goal_id,
+      );
+      return json(
+        route,
+        lines.map((l) => ({
+          goal_id: l.goal_id,
+          amount: l.amount,
+          monthly_plan: { label_month: a?.p_label_month },
+        })),
+      );
+    }
+    if (path === '/rest/v1/saving_deposit' && method === 'GET') {
+      const label = db.plans[0]?.args.p_label_month;
+      return json(
+        route,
+        db.deposits
+          .filter((d) => d.goal_id && !d.deleted_at)
+          .map((d) => ({
+            goal_id: d.goal_id,
+            amount: d.amount,
+            month_close: {
+              status: db.closes.find((c) => c.id === d.month_close_id)?.status ?? 'done',
+              monthly_plan: { label_month: d.label_month ?? label },
+            },
+          })),
+      );
+    }
     if (path === '/rest/v1/saving_deposit' && method === 'POST') {
       for (const r of rowsOf()) {
         const cur = db.deposits.find((x) => x.name === r.name);

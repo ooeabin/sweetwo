@@ -6,6 +6,7 @@ import {
   currentCycle,
   dateToYm,
   daysBetween,
+  goalHeld,
   inClosePeriod,
   livingLeft,
   monthsBetween,
@@ -35,17 +36,19 @@ export interface MonthInput {
   spentVariable?: number;
   /** 이번 플랜 월말 정리를 끝냄 */
   closeDone?: boolean;
+  /** 목표별 월말 정리에서 넣은 돈 누적(보유액 = 기타 보유액 + 이것, 06 5-4) */
+  goalDeposits?: Record<string, number>;
   now?: Date;
 }
 
-const toAllocGoal = (g: Goal): AllocGoal => ({
+const toAllocGoal = (g: Goal, deposits = 0): AllocGoal => ({
   id: g.id,
   template: g.template,
   name: g.name,
   kind: g.kind,
   priority: g.priority,
   target: g.target_amount,
-  held: g.other_held,
+  held: goalHeld(g.other_held, deposits),
   deadline: g.deadline ? dateToYm(g.deadline) : null,
   afterMarriage: g.after_marriage,
   paused: g.status === 'paused',
@@ -59,6 +62,7 @@ export function monthView({
   partner = null,
   spentVariable = 0,
   closeDone = false,
+  goalDeposits = {},
   now = new Date(),
 }: MonthInput) {
   const today = todayKst(now);
@@ -96,7 +100,11 @@ export function monthView({
     livingBudget: sp.living_budget,
     mySharePct: sp.split_mode === 'custom' ? c.myRatio : 50,
   });
-  const alloc = allocate(sum.saveable, goals.map(toAllocGoal), now);
+  const alloc = allocate(
+    sum.saveable,
+    goals.map((g) => toAllocGoal(g, goalDeposits[g.id] ?? 0)),
+    now,
+  );
 
   // 월급 플랜 카드(H-03): 플랜을 만들 때 값. 없으면 지금 답으로 계산한 한 달 값
   const snap = readPlanSnapshot(plan?.snapshot);

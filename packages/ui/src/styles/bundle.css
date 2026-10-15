@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (fa50de6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8bf8acf). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -40,6 +40,9 @@
 .hg-card__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
 .hg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-5); align-items: stretch; }
 .hg-card--raised { box-shadow: var(--shadow-1); }
+/* 누를 수 있는 카드를 button·a로 쓸 때: 글자색, 글꼴, 정렬은 카드 그대로 */
+:is(button, a).hg-card { width: 100%; margin: 0; color: var(--ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+:is(button, a).hg-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-card--tint { border: 0; border-radius: var(--radius-2xl); padding: var(--space-6); }
 .hg-card--together { background: var(--together); }
 .hg-card--family { background: var(--family); }
@@ -493,7 +496,7 @@
 
 /* Card 그림 자리 (목표 카드) */
 .hg-card--art { position: relative; }
-.hg-card--art .hg-card__top { padding-right: 64px; }
+.hg-card--art .hg-card__top, .hg-card--art .hg-meter__head { padding-right: 64px; } /* 그림 칸과 겹치지 않게(목표 카드 안 Meter) */
 .hg-card__art { position: absolute; top: var(--space-5); right: var(--space-5); display: grid; place-items: center; width: 56px; height: 56px; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface); color: var(--goal-ink); }
 .hg-card__art img { width: 100%; height: 100%; object-fit: contain; }
 .hg-wg__art { overflow: hidden; }
@@ -1049,7 +1052,12 @@ a.hg-btn { text-decoration: none; }
 .hg-frame { min-height: 100vh; background: var(--surface-alt); }
 .hg-frame__mhead { display: none; }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
+/* 다른 메뉴 첫 화면 제목 줄(오늘 띠 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
+.hg-pagetitle__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 0; display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.hg-pagetitle__title { flex: 1; min-width: 200px; margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.3px; color: var(--ink); }
 @media (max-width: 767px) {
+  .hg-pagetitle__in { padding: var(--space-4) var(--space-4) 0; }
+  .hg-pagetitle__title { display: none; } /* 좁은 창은 머리에 메뉴 이름 */
   .hg-topnav { display: none; }
   .hg-today__in { padding: var(--space-4); gap: 14px; }
   .hg-today__title { font: 600 20px/28px var(--font-sans); }

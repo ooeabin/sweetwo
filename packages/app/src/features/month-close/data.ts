@@ -83,7 +83,12 @@ export function useCloseData() {
     partnerAllowance,
     partnerName: c?.partnerName ?? '',
     myAllowance,
-    refreshClose: () => qc.invalidateQueries({ queryKey: qk.monthClose(planId ?? '') }),
+    // 정리 상태와 납입이 바뀌면 목표 기록(보유액)도 다시 읽음
+    refreshClose: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: qk.monthClose(planId ?? '') }),
+        qc.invalidateQueries({ queryKey: qk.goalRecords }),
+      ]),
     refreshCats: () => qc.invalidateQueries({ queryKey: qk.spendCategories }),
   };
 }
