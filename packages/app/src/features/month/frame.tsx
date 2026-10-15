@@ -9,8 +9,8 @@ import { useMe, usePartner, useSpace } from './data';
 const HREF: Record<AppTab, string | undefined> = {
   month: '/',
   goals: '/goals',
-  assets: undefined, // 우리 자산, 캘린더는 다음 단계
-  calendar: undefined,
+  assets: '/assets',
+  calendar: undefined, // 캘린더는 다음 단계
 };
 
 /**

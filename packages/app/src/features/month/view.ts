@@ -234,6 +234,12 @@ export function monthView({
       amount: pendingSplit.reduce((t, l) => t + l.amount, 0),
     },
     living,
+    /** 이번 달 계획(우리 자산 F-01 15번): 월 수입, 지출(용돈 + 고정지출 + 생활비), 저축 가능 */
+    monthPlan: {
+      income: sum.income,
+      spend: sum.allowances + sum.sharedLiving,
+      saveable: sum.saveable,
+    },
     events,
     goals: separate ? [] : goalLines,
     weddingDday: engaged && sp.wedding_date ? daysBetween(today, sp.wedding_date) : null,

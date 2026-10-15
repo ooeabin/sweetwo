@@ -1,0 +1,70 @@
+import {
+  fetchAssets,
+  fetchMe,
+  fetchNetWorthHistory,
+  fetchPartner,
+  fetchPartnerAssetSums,
+  fetchSpace,
+  qk,
+  type Asset,
+} from '@sweetwo/api';
+import { coupleOf, netWorth } from '@sweetwo/core';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { copy } from './copy';
+
+// 우리 자산 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 배우자 합계만 = 묶음 합계)
+export function useAssetsData() {
+  const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
+  const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
+  const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
+  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
+  const sums = useQuery({ queryKey: qk.partnerAssetSums, queryFn: fetchPartnerAssetSums });
+  const history = useQuery({
+    queryKey: qk.netWorthHistory,
+    queryFn: () => fetchNetWorthHistory(2),
+  });
+  const all = [me, space, partner, assets, sums, history];
+  const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
+  const items = assets.data ?? [];
+  const nw = netWorth(items, sums.data ?? []);
+  // 지난달 대비: 지난달 말 순자산 기록이 있을 때만
+  const h = history.data ?? [];
+  const last = h.length >= 2 ? h[h.length - 2] : undefined;
+  const change = last && last.net !== 0 ? nw.net - last.net : null;
+  return {
+    loading: all.some((q) => q.isLoading),
+    failed: [me, space, assets].some((q) => q.isError),
+    retry: () => all.forEach((q) => void q.refetch()),
+    me: me.data ?? null,
+    space: space.data ?? null,
+    couple: c,
+    items,
+    sums: sums.data ?? [],
+    nw,
+    change,
+  };
+}
+export type AssetsData = ReturnType<typeof useAssetsData>;
+
+export function useRefreshAssets() {
+  const qc = useQueryClient();
+  return () =>
+    Promise.all(
+      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory].map((k) =>
+        qc.invalidateQueries({ queryKey: k }),
+      ),
+    );
+}
+
+/** 명의 이름: 공동 / 나 / 배우자. 합류 전 대신 입력은 배우자 + ‘대신 입력’ */
+export function ownerOf(a: Asset, d: Pick<AssetsData, 'me' | 'couple'>) {
+  if (a.owner === 'joint') return { name: copy.joint, proxy: false };
+  if (a.owner_user_id === d.me?.id) return { name: d.couple?.myName ?? '', proxy: false };
+  return { name: d.couple?.partnerName ?? '', proxy: a.owner_user_id === null };
+}
+
+/** 내가 고칠 수 있는지(서버 규칙과 같음: 공동, 내 명의, 합류 전 내가 대신 입력한 것) */
+export const canEdit = (a: Asset, myId: string | undefined) =>
+  a.owner === 'joint' ||
+  a.owner_user_id === myId ||
+  (a.owner === 'person' && a.owner_user_id === null && a.created_by === myId);

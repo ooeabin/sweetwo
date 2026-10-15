@@ -4,6 +4,8 @@ import { cx } from './cx';
 export interface TabItem<T extends string> {
   value: T;
   label: string;
+  /** 아직 열 수 없는 탭 */
+  disabled?: boolean;
 }
 
 export function Tabs<T extends string>({
@@ -28,6 +30,7 @@ export function Tabs<T extends string>({
           type="button"
           role="tab"
           aria-selected={it.value === value}
+          disabled={it.disabled}
           className={cx(base, it.value === value && 'is-active')}
           onClick={() => onChange(it.value)}
         >

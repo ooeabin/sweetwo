@@ -5,3 +5,4 @@ export * from './onboarding';
 export * from './month';
 export * from './pairing';
 export * from './proposals';
+export * from './assets';

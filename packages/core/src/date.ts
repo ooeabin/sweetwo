@@ -28,6 +28,12 @@ export function formatMonthDay(s: string): string {
   return `${m}월 ${d}일`;
 }
 
+/** '2026-10-24' → "10.24"(기록 줄 날짜) */
+export function formatDot(s: string): string {
+  const { m, d } = ymd(s);
+  return `${m}.${d}`;
+}
+
 /** '2027-01-09' → "2027년 1월 9일" */
 export function formatDateFull(s: string): string {
   const { y, m, d } = ymd(s);
