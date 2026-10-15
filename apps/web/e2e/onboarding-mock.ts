@@ -13,6 +13,8 @@ export interface MemDb {
   categories: Record<string, unknown>[];
   closes: Record<string, unknown>[];
   spends: Record<string, unknown>[];
+  bigs: Record<string, unknown>[];
+  deposits: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -59,6 +61,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     categories: [],
     closes: [],
     spends: [],
+    bigs: [],
+    deposits: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -315,7 +319,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     if (path === '/rest/v1/month_close') {
       if (method === 'GET') {
         const c = db.closes[0];
-        return json(route, c ? { ...c, spends: db.spends } : null);
+        return json(
+          route,
+          c ? { ...c, spends: db.spends, bigs: db.bigs, deposits: db.deposits } : null,
+        );
       }
       if (method === 'POST') {
         const c = {
@@ -327,6 +334,34 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.closes.push(c);
         return json(route, { id: c.id }, 201);
       }
+      if (method === 'PATCH') {
+        for (const c of db.closes) if (c.id === eqId(url)) Object.assign(c, body());
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/big_expense') {
+      if (method === 'POST') {
+        for (const r of rowsOf()) {
+          const cur = db.bigs.find((x) => x.kind === r.kind);
+          if (cur) Object.assign(cur, r);
+          else db.bigs.push({ id: `big-${db.bigs.length + 1}`, ...r });
+        }
+        return ok204();
+      }
+      if (method === 'PATCH') {
+        const kinds = (url.searchParams.get('kind') ?? '').replace(/^in\.\(|\)$/g, '').split(',');
+        for (const b of db.bigs) if (kinds.includes(String(b.kind))) Object.assign(b, body());
+        db.bigs = db.bigs.filter((b) => !b.deleted_at);
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/saving_deposit' && method === 'POST') {
+      for (const r of rowsOf()) {
+        const cur = db.deposits.find((x) => x.name === r.name);
+        if (cur) Object.assign(cur, r);
+        else db.deposits.push({ id: `dep-${db.deposits.length + 1}`, deleted_at: null, ...r });
+      }
+      return ok204();
     }
     if (path === '/rest/v1/month_spend' && method === 'POST') {
       for (const r of rowsOf()) {

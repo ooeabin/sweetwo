@@ -29,6 +29,8 @@ export interface MonthInput {
   plan: (MonthlyPlan & { lines: PlanLine[] }) | null;
   /** 이번 달 변동 항목 입력 합계(W-04j, 큰 지출 제외) */
   spentVariable?: number;
+  /** 이번 플랜 월말 정리를 끝냄 */
+  closeDone?: boolean;
   now?: Date;
 }
 
@@ -51,6 +53,7 @@ export function monthView({
   goals,
   plan,
   spentVariable = 0,
+  closeDone = false,
   now = new Date(),
 }: MonthInput) {
   const today = todayKst(now);
@@ -74,7 +77,7 @@ export function monthView({
     : computed;
   const month = cycle ? Number(cycle.labelMonth.slice(5, 7)) : Number(today.slice(5, 7));
   const mergedClose = plan?.merged_close ?? computed?.short ?? false;
-  const closing = !!cycle && !mergedClose && inClosePeriod(today, cycle.end);
+  const closing = !!cycle && !mergedClose && !closeDone && inClosePeriod(today, cycle.end);
 
   const sum = planSummary({
     myIncome: me.monthly_income,

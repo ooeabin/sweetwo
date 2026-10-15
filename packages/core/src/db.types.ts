@@ -187,6 +187,83 @@ export type Database = {
           },
         ]
       }
+      big_expense: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          goal_id: string | null
+          how: Database["public"]["Enums"]["big_expense_how"]
+          id: string
+          kind: string
+          month_close_id: string
+          name: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id?: string | null
+          how?: Database["public"]["Enums"]["big_expense_how"]
+          id?: string
+          kind: string
+          month_close_id: string
+          name: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id?: string | null
+          how?: Database["public"]["Enums"]["big_expense_how"]
+          id?: string
+          kind?: string
+          month_close_id?: string
+          name?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "big_expense_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "big_expense_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "big_expense_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent: {
         Row: {
           agreed: boolean
@@ -541,6 +618,7 @@ export type Database = {
       }
       month_close: {
         Row: {
+          big_none: boolean
           closed_at: string | null
           closed_by: string | null
           created_at: string
@@ -548,8 +626,11 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           id: string
+          income: number | null
           plan_id: string
           space_id: string
+          started_at: string | null
+          started_by: string | null
           status: Database["public"]["Enums"]["month_close_status"]
           updated_at: string
           updated_by: string | null
@@ -557,6 +638,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          big_none?: boolean
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
@@ -564,14 +646,18 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           id?: string
+          income?: number | null
           plan_id: string
           space_id: string
+          started_at?: string | null
+          started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
           updated_at?: string
           updated_by?: string | null
           version?: number
         }
         Update: {
+          big_none?: boolean
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
@@ -579,8 +665,11 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           id?: string
+          income?: number | null
           plan_id?: string
           space_id?: string
+          started_at?: string | null
+          started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
           updated_at?: string
           updated_by?: string | null
@@ -835,6 +924,80 @@ export type Database = {
           },
         ]
       }
+      saving_deposit: {
+        Row: {
+          amount: number
+          asset_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          goal_id: string | null
+          id: string
+          month_close_id: string
+          name: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id?: string | null
+          id?: string
+          month_close_id: string
+          name: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          amount?: number
+          asset_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id?: string | null
+          id?: string
+          month_close_id?: string
+          name?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saving_deposit_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_deposit_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_deposit_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spend_category: {
         Row: {
           created_at: string
@@ -1047,6 +1210,7 @@ export type Database = {
       account_role: "living" | "goal_fund" | "emergency" | "personal" | "wedding"
       account_status: "active" | "deletion_requested" | "deleted"
       auth_provider: "kakao" | "google" | "apple"
+      big_expense_how: "from_goal" | "exception"
       child_plan: "within_1y" | "in_1_3y" | "after_3y" | "none" | "unsure"
       consent_kind:
         | "terms"
@@ -1203,6 +1367,7 @@ export const Constants = {
       account_role: ["living", "goal_fund", "emergency", "personal", "wedding"],
       account_status: ["active", "deletion_requested", "deleted"],
       auth_provider: ["kakao", "google", "apple"],
+      big_expense_how: ["from_goal", "exception"],
       child_plan: ["within_1y", "in_1_3y", "after_3y", "none", "unsure"],
       consent_kind: [
         "terms",

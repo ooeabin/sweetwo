@@ -14,7 +14,7 @@ import {
 } from './features/auth';
 import { DevUiGallery } from './features/dev';
 import { H01ThisMonth } from './features/month';
-import { W04jSpendEntry } from './features/month-close';
+import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
@@ -42,6 +42,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-04j 지출 적기(앞당겨 열기)
+      {
+        path: '/month/close/:step',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <CloseRoute />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-04a~W-04 끝 월말 정리
       {
         path: '/onboarding/:screen', // O-03~O-24 온보딩 ①
         element: (

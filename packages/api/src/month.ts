@@ -57,18 +57,84 @@ export async function insertSpendCategories(
 
 export type MonthClose = Tables<'month_close'>;
 export type MonthSpend = Tables<'month_spend'>;
-/** 플랜의 월말 정리(초안 포함)와 항목별 지출. 없으면 null */
-export async function fetchMonthClose(
-  planId: string,
-): Promise<(MonthClose & { spends: MonthSpend[] }) | null> {
+export type BigExpenseRow = Tables<'big_expense'>;
+export type SavingDeposit = Tables<'saving_deposit'>;
+export type MonthCloseFull = MonthClose & {
+  spends: MonthSpend[];
+  bigs: BigExpenseRow[];
+  deposits: SavingDeposit[];
+};
+/** 플랜의 월말 정리(초안 포함)와 항목별 지출, 큰 지출, 저축 납입. 없으면 null */
+export async function fetchMonthClose(planId: string): Promise<MonthCloseFull | null> {
   const { data, error } = await supabase()
     .from('month_close')
-    .select('*, spends:month_spend(*)')
+    .select('*, spends:month_spend(*), bigs:big_expense(*), deposits:saving_deposit(*)')
     .eq('plan_id', planId)
     .is('deleted_at', null)
     .maybeSingle();
   fail(error);
-  return data ? { ...data, spends: (data.spends ?? []).filter((x) => !x.deleted_at) } : null;
+  if (!data) return null;
+  const live = <T extends { deleted_at: string | null }>(xs: T[] | null) =>
+    (xs ?? []).filter((x) => !x.deleted_at);
+  return {
+    ...data,
+    spends: live(data.spends),
+    bigs: live(data.bigs),
+    deposits: live(data.deposits),
+  };
+}
+
+export async function updateMonthClose(
+  id: string,
+  patch: Pick<
+    Partial<MonthClose>,
+    'income' | 'big_none' | 'started_by' | 'started_at' | 'status' | 'closed_by' | 'closed_at'
+  >,
+) {
+  const { error } = await supabase().from('month_close').update(patch).eq('id', id);
+  fail(error);
+}
+
+/** 큰 지출 저장: 고른 칩은 저장(다시 고르면 되살림), 뺀 칩은 휴지통 */
+export async function saveBigExpenses(
+  closeId: string,
+  rows: Pick<BigExpenseRow, 'kind' | 'name' | 'amount' | 'how'>[],
+  removedKinds: string[],
+) {
+  const space_id = await ensureSpace();
+  if (rows.length) {
+    const { error } = await supabase()
+      .from('big_expense')
+      .upsert(
+        rows.map((r) => ({ ...r, month_close_id: closeId, space_id, deleted_at: null })),
+        { onConflict: 'month_close_id,kind' },
+      );
+    fail(error);
+  }
+  if (removedKinds.length) {
+    const { error } = await supabase()
+      .from('big_expense')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('month_close_id', closeId)
+      .in('kind', removedKinds);
+    fail(error);
+  }
+}
+
+/** 저축 납입 저장(W-04k). 이름마다 하나 */
+export async function saveDeposits(
+  closeId: string,
+  rows: Pick<SavingDeposit, 'name' | 'goal_id' | 'amount'>[],
+) {
+  if (!rows.length) return;
+  const space_id = await ensureSpace();
+  const { error } = await supabase()
+    .from('saving_deposit')
+    .upsert(
+      rows.map((r) => ({ ...r, month_close_id: closeId, space_id })),
+      { onConflict: 'month_close_id,name' },
+    );
+  fail(error);
 }
 /** 지출 적기를 처음 열면 초안을 만든다(있으면 그것) */
 export async function ensureMonthClose(planId: string): Promise<string> {
