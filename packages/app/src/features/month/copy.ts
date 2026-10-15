@@ -76,4 +76,26 @@ export const copy = {
   // 불러오기 실패
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
+
+  // H-04 할 일
+  todos: '할 일',
+  todosLeft: (n: number) => `${n}개 남았어요`,
+  todoLeftState: '남음',
+  minutes: (n: number) => `${n}분`,
+  tomorrow: '내일 할게요',
+  copyCode: '코드 복사',
+  copied: '복사했어요', // [확인 필요] 온보딩 O-07과 같은 문구
+  inviteFailed: '지금은 코드를 만들 수 없어요',
+  todoLabels: {
+    spend_check: '지출 점검',
+    invite: (partner: string) => `${partner}님을 초대해 주세요`,
+    exact_values: '정확한 값 입력',
+    wedding_date: '예식일 정하기',
+    split_rule: '분담 방식 정하기', // [확인 필요] O-52 ‘나중에 할게요’ 할 일
+    assets: '자산 정리하기',
+    loans: '대출 정리하기',
+    fixed_card: '고정지출 나누기·생활비 카드',
+    rest: '나머지 목표·상여금·다른 수입',
+    invest: '투자 원칙 정하기',
+  },
 };

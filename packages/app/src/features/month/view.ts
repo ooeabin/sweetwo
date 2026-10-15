@@ -17,6 +17,7 @@ import {
   type AllocGoal,
   type BaseDay,
   type PlanParts,
+  type TodoState,
 } from '@sweetwo/core';
 
 // 이번 달 화면에 보일 값(docs/spec/19-this-month.md). 계산 규칙은 core, 여기서는 답과 플랜을 모아 넘기기만.
@@ -26,6 +27,8 @@ export interface MonthInput {
   space: Space;
   goals: Goal[];
   plan: (MonthlyPlan & { lines: PlanLine[] }) | null;
+  /** 이번 달 변동 항목 입력 합계(W-04j, 큰 지출 제외) */
+  spentVariable?: number;
   now?: Date;
 }
 
@@ -42,7 +45,14 @@ const toAllocGoal = (g: Goal): AllocGoal => ({
   paused: g.status === 'paused',
 });
 
-export function monthView({ me, space: sp, goals, plan, now = new Date() }: MonthInput) {
+export function monthView({
+  me,
+  space: sp,
+  goals,
+  plan,
+  spentVariable = 0,
+  now = new Date(),
+}: MonthInput) {
   const today = todayKst(now);
   const joined = sp.couple_state === 'connected';
   const solo = sp.couple_state === 'solo';
@@ -98,7 +108,7 @@ export function monthView({ me, space: sp, goals, plan, now = new Date() }: Mont
   const pendingSplit = (plan?.lines ?? []).filter(
     (l) => l.target === 'account' && l.state === 'pending' && l.amount > 0,
   );
-  const living = livingLeft(sp.living_budget ?? 0, 0); // 변동 지출 입력(W-04j)은 다음 단계
+  const living = livingLeft(sp.living_budget ?? 0, spentVariable);
 
   const events = upcoming({
     today,
@@ -156,9 +166,35 @@ export function monthView({ me, space: sp, goals, plan, now = new Date() }: Mont
         partnerIncome: sp.partner_income_unknown ? 0 : (sp.partner_income ?? 0),
       });
 
+  // 할 일(H-04) 조건
+  const estimates =
+    [
+      sp.partner_income_estimated,
+      sp.fixed_total_estimated,
+      sp.living_budget_estimated,
+      sp.wedding_budget_estimated,
+      sp.wedding_date_estimated,
+      sp.family_support_estimated,
+    ].filter(Boolean).length +
+    goals.filter((g) => g.amount_estimated || g.deadline_estimated).length;
+  const todoState: TodoState = {
+    startedOn: me.onboarding_done_at ? todayKst(new Date(me.onboarding_done_at)) : today,
+    joined,
+    solo,
+    separate,
+    engaged,
+    weddingDateUnknown: engaged && !sp.wedding_date,
+    noLoan: sp.loan_repayment === 0,
+    noSaving: !separate && sum.saveable <= 0,
+    estimates,
+    splitDeferred: sp.split_deferred,
+  };
+
   return {
     today,
     month,
+    planId: plan?.id ?? null,
+    todoState,
     cycle,
     closing,
     closeDays: cycle ? daysBetween(today, cycle.end) + 1 : null,
