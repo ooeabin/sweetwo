@@ -20,3 +20,25 @@ export function formatManWon(value: Won): string {
   const man = Math.round(assertWon(value) / 10_000);
   return `${man.toLocaleString('ko-KR')}만`;
 }
+
+/**
+ * 만 원 단위로 읽어 주기(docs/spec/12-question-pattern.md Q3 ‘읽기 형식’)
+ * 5,000 → "5,000원", 3,200,000 → "320만 원", 3,205,000 → "320만 5,000원",
+ * 120,000,000 → "1억 2,000만 원", 200,000,000 → "2억 원"
+ */
+export function readWon(value: Won): string {
+  const v = assertWon(value);
+  if (v < 0) return `−${readWon(-v)}`;
+  if (v === 0) return '0원';
+  const eok = Math.floor(v / 100_000_000);
+  const man = Math.floor((v % 100_000_000) / 10_000);
+  const won = v % 10_000;
+  const parts: string[] = [];
+  if (eok) parts.push(`${eok.toLocaleString('ko-KR')}억`);
+  if (man) parts.push(`${man.toLocaleString('ko-KR')}만`);
+  if (won) parts.push(`${won.toLocaleString('ko-KR')}원`);
+  return won ? parts.join(' ') : `${parts.join(' ')} 원`;
+}
+
+/** 1만 원 단위 올림(월 필요액, docs/spec/06-calc-allocation.md 5-3) */
+export const ceilTo10k = (v: Won): Won => Math.ceil(assertWon(v) / 10_000) * 10_000;

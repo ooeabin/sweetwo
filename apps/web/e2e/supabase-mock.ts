@@ -67,6 +67,23 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
       o.signup?.(req.postDataJSON() as Record<string, unknown>);
       return json(route, { id: chanwoo.id });
     }
+    // 가입 뒤 온보딩 첫 화면(O-03)까지
+    if (url.pathname === '/rest/v1/app_user') {
+      return json(route, {
+        id: chanwoo.id,
+        provider: 'kakao',
+        nickname: null,
+        side: null,
+        birth_year: null,
+        employment: null,
+        space_id: 'space-1',
+        onboarding_step: null,
+        onboarding_done_at: null,
+      });
+    }
+    if (url.pathname === '/rest/v1/rpc/ensure_my_space') return json(route, 'space-1');
+    if (url.pathname === '/rest/v1/couple_space') return json(route, null);
+    if (url.pathname === '/rest/v1/goal') return json(route, []);
     if (url.pathname === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     return json(route, { message: `e2e: 흉내 내지 않은 요청 ${url.pathname}` }, 404);

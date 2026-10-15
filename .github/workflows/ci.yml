@@ -72,8 +72,8 @@ jobs:
         run: |
           cp packages/core/src/db.types.ts /tmp/committed.ts
           pnpm db:types
-          # 생성기는 같아도 줄바꿈이 입력에 따라 달라질 수 있어 공백과 줄바꿈은 빼고 비교한다
-          if ! diff -q <(tr -d ' \n' < /tmp/committed.ts) <(tr -d ' \n' < packages/core/src/db.types.ts) > /dev/null; then
+          # 줄바꿈 방식에 따라 공백, 줄바꿈, 한 줄로 접힐 때 붙는 ; , 가 달라질 수 있어 이것들은 빼고 비교한다
+          if ! diff -q <(tr -d ' \n;,' < /tmp/committed.ts) <(tr -d ' \n;,' < packages/core/src/db.types.ts) > /dev/null; then
             diff -u /tmp/committed.ts packages/core/src/db.types.ts || true
             echo '::error::db.types.ts가 마이그레이션과 달라요. pnpm db:types로 다시 만들거나 CI 결과물(db-types)을 받아 커밋하세요'
             exit 1

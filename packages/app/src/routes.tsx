@@ -14,6 +14,7 @@ import {
 } from './features/auth';
 import { DevUiGallery } from './features/dev';
 import { H01ThisMonth } from './features/month';
+import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
@@ -24,10 +25,20 @@ export const routes: RouteObject[] = [
         path: paths.home,
         element: (
           <RequireAccount>
-            <H01ThisMonth />
+            <OnboardingGate>
+              <H01ThisMonth />
+            </OnboardingGate>
           </RequireAccount>
         ),
       }, // H-01 이번 달
+      {
+        path: '/onboarding/:screen', // O-03~O-24 온보딩 ①
+        element: (
+          <RequireAccount>
+            <OnboardingRoute />
+          </RequireAccount>
+        ),
+      },
       { path: paths.start, element: <O01Start /> }, // O-01 시작
       { path: paths.login, element: <A02Login /> }, // A-02 로그인 방법
       { path: paths.wait, element: <A03BrowserWait /> }, // A-03 브라우저 로그인 대기
