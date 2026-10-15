@@ -45,7 +45,8 @@ select throws_ok(
   '42501', null, '초대 코드는 직접 못 넣는다');
 reset role;
 
--- 다른 부부 K
+-- 다른 부부 K. 찬우 공간 id는 관리자 권한으로 미리 읽어 둔다(K는 찬우 행을 못 봄)
+select set_config('test.chanwoo_space', (select space_id::text from public.app_user where id = '11111111-1111-1111-1111-111111111111'), true);
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select lives_ok($$ select public.complete_signup('google', null, false, 'v1') $$, 'K 가입');
@@ -53,7 +54,7 @@ select is((select count(*)::int from public.goal), 0, '다른 부부의 목표�
 select is((select count(*)::int from public.invite), 0, '다른 부부의 초대 코드는 안 보인다');
 select throws_ok(
   $$ insert into public.goal (space_id, template, name, kind, priority)
-     select space_id, 'travel', '여행', 'once', 1 from public.app_user where id = '11111111-1111-1111-1111-111111111111' $$,
+     values (current_setting('test.chanwoo_space')::uuid, 'travel', '여행', 'once', 1) $$,
   '42501', null, '다른 부부 공간에 목표를 못 넣는다');
 reset role;
 
