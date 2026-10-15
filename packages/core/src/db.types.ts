@@ -187,6 +187,158 @@ export type Database = {
           },
         ]
       }
+      asset: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          estimated: boolean
+          goal_id: string | null
+          grp: string
+          id: string
+          interest_rate: number | null
+          kind: string
+          maturity_date: string | null
+          monthly_payment: number | null
+          name: string
+          owner: Database["public"]["Enums"]["asset_owner"]
+          owner_user_id: string | null
+          principal: number | null
+          realized_gain: number | null
+          side: Database["public"]["Enums"]["asset_side"]
+          sold_at: string | null
+          space_id: string
+          status: Database["public"]["Enums"]["asset_status"]
+          updated_at: string
+          updated_by: string | null
+          version: number
+          visibility: Database["public"]["Enums"]["asset_visibility"]
+          asset_editable: boolean | null
+          asset_insertable: boolean | null
+          asset_visible: boolean | null
+        }
+        ComputedFields: "asset_editable" | "asset_insertable" | "asset_visible"
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          estimated?: boolean
+          goal_id?: string | null
+          grp: string
+          id?: string
+          interest_rate?: number | null
+          kind: string
+          maturity_date?: string | null
+          monthly_payment?: number | null
+          name: string
+          owner: Database["public"]["Enums"]["asset_owner"]
+          owner_user_id?: string | null
+          principal?: number | null
+          realized_gain?: number | null
+          side: Database["public"]["Enums"]["asset_side"]
+          sold_at?: string | null
+          space_id: string
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          visibility?: Database["public"]["Enums"]["asset_visibility"]
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          estimated?: boolean
+          goal_id?: string | null
+          grp?: string
+          id?: string
+          interest_rate?: number | null
+          kind?: string
+          maturity_date?: string | null
+          monthly_payment?: number | null
+          name?: string
+          owner?: Database["public"]["Enums"]["asset_owner"]
+          owner_user_id?: string | null
+          principal?: number | null
+          realized_gain?: number | null
+          side?: Database["public"]["Enums"]["asset_side"]
+          sold_at?: string | null
+          space_id?: string
+          status?: Database["public"]["Enums"]["asset_status"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          visibility?: Database["public"]["Enums"]["asset_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_history: {
+        Row: {
+          amount: number
+          asset_id: string
+          id: number
+          principal: number | null
+          recorded_at: string
+          source: string
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          asset_id: string
+          id?: never
+          principal?: number | null
+          recorded_at?: string
+          source?: string
+          space_id: string
+        }
+        Update: {
+          amount?: number
+          asset_id?: string
+          id?: never
+          principal?: number | null
+          recorded_at?: string
+          source?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_history_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_history_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       big_expense: {
         Row: {
           amount: number
@@ -1257,6 +1409,33 @@ export type Database = {
         }
         Returns: undefined
       }
+      asset_editable: {
+        Args: {
+          a: Omit<
+            Database["public"]["Tables"]["asset"]["Row"],
+            Database["public"]["Tables"]["asset"]["ComputedFields"]
+          >
+        }
+        Returns: boolean
+      }
+      asset_insertable: {
+        Args: {
+          a: Omit<
+            Database["public"]["Tables"]["asset"]["Row"],
+            Database["public"]["Tables"]["asset"]["ComputedFields"]
+          >
+        }
+        Returns: boolean
+      }
+      asset_visible: {
+        Args: {
+          a: Omit<
+            Database["public"]["Tables"]["asset"]["Row"],
+            Database["public"]["Tables"]["asset"]["ComputedFields"]
+          >
+        }
+        Returns: boolean
+      }
       complete_signup: {
         Args: {
           p_marketing: boolean
@@ -1323,6 +1502,24 @@ export type Database = {
         Returns: Json
       }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
+      net_worth_history: {
+        Args: { p_months?: number }
+        Returns: {
+          expected: number
+          month: string
+          net: number
+        }[]
+      }
+      partner_asset_sums: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          grp: string
+          n: number
+          principal_total: number
+          side: Database["public"]["Enums"]["asset_side"]
+          total: number
+        }[]
+      }
       partner_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1380,6 +1577,10 @@ export type Database = {
       account_mode: "single" | "roles"
       account_role: "living" | "goal_fund" | "emergency" | "personal" | "wedding"
       account_status: "active" | "deletion_requested" | "deleted"
+      asset_owner: "joint" | "person"
+      asset_side: "asset" | "debt"
+      asset_status: "held" | "sold"
+      asset_visibility: "all" | "sum" | "private"
       auth_provider: "kakao" | "google" | "apple"
       big_expense_how: "from_goal" | "exception"
       child_plan: "within_1y" | "in_1_3y" | "after_3y" | "none" | "unsure"
@@ -1540,6 +1741,10 @@ export const Constants = {
       account_mode: ["single", "roles"],
       account_role: ["living", "goal_fund", "emergency", "personal", "wedding"],
       account_status: ["active", "deletion_requested", "deleted"],
+      asset_owner: ["joint", "person"],
+      asset_side: ["asset", "debt"],
+      asset_status: ["held", "sold"],
+      asset_visibility: ["all", "sum", "private"],
       auth_provider: ["kakao", "google", "apple"],
       big_expense_how: ["from_goal", "exception"],
       child_plan: ["within_1y", "in_1_3y", "after_3y", "none", "unsure"],

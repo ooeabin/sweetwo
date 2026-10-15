@@ -12,6 +12,7 @@ import {
   RequireAccount,
   paths,
 } from './features/auth';
+import { AssetAddRoute, F01Overview, F02Items, F04Item } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
   G01GoalList,
@@ -122,6 +123,46 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 목표 수정(금액, 기한, 이름)
+      {
+        path: '/assets',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F01Overview />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-01 우리 자산 한눈에
+      {
+        path: '/assets/items',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F02Items />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-02 자산·부채 목록
+      {
+        path: '/assets/new/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <AssetAddRoute />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-03 항목 추가
+      {
+        path: '/assets/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F04Item />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-04 항목 상세·수정
       {
         path: '/proposals/:id',
         element: (

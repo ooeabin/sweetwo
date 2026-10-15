@@ -1045,6 +1045,7 @@ a.hg-btn { text-decoration: none; }
 .hg-stat__label, .hg-stat__sub { font: 400 13px/18px var(--font-sans); color: var(--stone); display: flex; gap: 6px; align-items: center; }
 .hg-stat__value { font: 600 22px/30px var(--font-sans); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
 .hg-pill-up { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); }
+.hg-pill-down { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--goal); color: var(--goal-ink); } /* 줄어든 변화(살구, 빨강 없음) */
 .hg-body { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: start; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-8); min-width: 0; }
 /* AppFrame 실제 화면(시안 틀 hg-mapp 대신): 회색 바탕, 좁은 창 머리, 독과 + 버튼은 화면 아래 고정 */

@@ -21,6 +21,11 @@ export interface MemDb {
   shares: Record<string, unknown> | null;
   /** 제안(08 6장) */
   proposals: Record<string, unknown>[];
+  /** 우리 자산: 내가 볼 수 있는 행, 이력, 배우자 합계만, 월말 순자산 */
+  assets: Record<string, unknown>[];
+  assetHistory: Record<string, unknown>[];
+  partnerSums: Record<string, unknown>[];
+  netWorth: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -73,6 +78,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     consents: [],
     shares: null,
     proposals: [],
+    assets: [],
+    assetHistory: [],
+    partnerSums: [],
+    netWorth: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -319,11 +328,71 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'apply_due_proposals') return json(route, 0);
+      if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
+      if (fn === 'net_worth_history') return json(route, db.netWorth);
       if (fn === 'create_invite')
         return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
       if (fn === 'delete_minor_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
+    }
+    if (path === '/rest/v1/asset') {
+      if (method === 'GET')
+        return json(
+          route,
+          db.assets
+            .filter((a) => !a.deleted_at && (a.status ?? 'held') === 'held')
+            .sort((a, b) => Number(b.amount) - Number(a.amount)),
+        );
+      if (method === 'POST') {
+        const now = new Date().toISOString();
+        const r: Record<string, unknown> = {
+          id: `asset-${db.assets.length + 1}`,
+          principal: null,
+          estimated: false,
+          status: 'held',
+          created_by: db.me.id,
+          created_at: now,
+          updated_at: now,
+          deleted_at: null,
+          ...(req.postDataJSON() as Record<string, unknown>),
+        };
+        db.assets.push(r);
+        db.assetHistory.push({
+          id: db.assetHistory.length + 1,
+          asset_id: r.id,
+          amount: r.amount,
+          source: 'manual',
+          recorded_at: now,
+        });
+        return json(route, { id: r.id }, 201);
+      }
+      if (method === 'PATCH') {
+        const a = db.assets.find((x) => x.id === eqId(url));
+        const b = body();
+        if (a) {
+          const now = new Date().toISOString();
+          if ('amount' in b && b.amount !== a.amount)
+            db.assetHistory.push({
+              id: db.assetHistory.length + 1,
+              asset_id: a.id,
+              amount: b.amount,
+              source: 'manual',
+              recorded_at: now,
+            });
+          Object.assign(a, b, { updated_at: now });
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/asset_history') {
+      const id = url.searchParams.get('asset_id')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.assetHistory
+          .filter((h) => h.asset_id === id)
+          .sort((a, b) => String(b.recorded_at).localeCompare(String(a.recorded_at))),
+      );
     }
     if (path === '/rest/v1/proposal') {
       return json(

@@ -1,0 +1,198 @@
+import type { Won } from '../money';
+
+// 자산·부채 분류(docs/spec/09-data-items.md 6-5·6-6, 23 F-02 묶음 표). 그룹 칩 → 세부 항목, 모든 그룹에 기타(직접 입력).
+export type AssetSide = 'asset' | 'debt';
+
+export interface AssetKind {
+  key: string;
+  name: string;
+}
+export interface AssetGroup {
+  key: string;
+  side: AssetSide;
+  name: string;
+  kinds: AssetKind[];
+  /** 빠른 칩 종류(보증금은 큰 단위) */
+  big?: boolean;
+}
+
+const other: AssetKind = { key: 'other', name: '기타(직접 입력)' };
+const k = (key: string, name: string): AssetKind => ({ key, name });
+
+export const assetGroups: AssetGroup[] = [
+  {
+    key: 'cash',
+    side: 'asset',
+    name: '현금성',
+    kinds: [
+      k('bank', '입출금 통장'),
+      k('role_account', '목표자금·비상금 통장'),
+      k('parking', '파킹통장·CMA'),
+      k('cash', '현금'),
+      k('foreign', '외화 예금'),
+      other,
+    ],
+  },
+  {
+    key: 'deposit',
+    side: 'asset',
+    name: '예금·적금',
+    kinds: [
+      k('term_deposit', '정기예금'),
+      k('saving', '적금'),
+      k('policy_saving', '정책형 적금'),
+      other,
+    ],
+  },
+  {
+    key: 'subscription',
+    side: 'asset',
+    name: '청약',
+    kinds: [k('housing_subscription', '주택청약종합저축'), other],
+  },
+  {
+    key: 'invest',
+    side: 'asset',
+    name: '투자',
+    kinds: [
+      k('stock_kr', '국내 주식'),
+      k('stock_us', '해외 주식'),
+      k('etf', 'ETF'),
+      k('fund', '펀드'),
+      k('bond', '채권'),
+      k('isa', 'ISA 계좌'),
+      k('gold', '금·실물'),
+      k('crypto', '가상자산'),
+      other,
+    ],
+  },
+  {
+    key: 'pension',
+    side: 'asset',
+    name: '연금',
+    kinds: [
+      k('pension_saving', '연금저축'),
+      k('irp', 'IRP'),
+      k('dc', '퇴직연금(DC형)'),
+      k('pension_insurance', '개인연금보험'),
+      other,
+    ],
+  },
+  {
+    key: 'insurance',
+    side: 'asset',
+    name: '저축성 보험',
+    kinds: [k('saving_insurance', '저축보험'), k('variable_insurance', '변액보험'), other],
+  },
+  {
+    key: 'real_estate',
+    side: 'asset',
+    name: '부동산',
+    big: true,
+    kinds: [
+      k('deposit_money', '전·월세 보증금'),
+      k('house', '보유 주택'),
+      k('presale', '분양권'),
+      other,
+    ],
+  },
+  {
+    key: 'etc',
+    side: 'asset',
+    name: '기타',
+    kinds: [k('car', '자동차'), k('lent', '빌려준 돈'), other],
+  },
+  {
+    key: 'housing_loan',
+    side: 'debt',
+    name: '주택',
+    big: true,
+    kinds: [
+      k('jeonse_loan', '전세자금대출'),
+      k('mortgage', '주택담보대출'),
+      k('interim_loan', '중도금·잔금 대출'),
+      other,
+    ],
+  },
+  {
+    key: 'credit',
+    side: 'debt',
+    name: '신용',
+    kinds: [
+      k('credit_loan', '신용대출'),
+      k('overdraft', '마이너스통장'),
+      k('card_loan', '카드론·현금서비스'),
+      k('revolving', '리볼빙'),
+      other,
+    ],
+  },
+  {
+    key: 'installment',
+    side: 'debt',
+    name: '할부',
+    kinds: [k('car_installment', '자동차 할부'), k('card_installment', '큰 금액 카드 할부'), other],
+  },
+  {
+    key: 'student',
+    side: 'debt',
+    name: '학자금',
+    kinds: [k('student_loan', '학자금 대출'), other],
+  },
+  {
+    key: 'other_loan',
+    side: 'debt',
+    name: '기타 대출',
+    kinds: [k('policy_loan', '보험계약대출'), k('secured_loan', '예적금담보대출'), other],
+  },
+  {
+    key: 'personal',
+    side: 'debt',
+    name: '개인 간',
+    kinds: [k('family_loan', '양가·가족·지인에게 빌린 돈'), other],
+  },
+];
+
+export const assetGroupsOf = (side: AssetSide) => assetGroups.filter((g) => g.side === side);
+export const assetGroup = (key: string) => assetGroups.find((g) => g.key === key);
+/** 원금을 넣을 수 있는 묶음(투자·부동산) */
+export const hasPrincipal = (grp: string) => grp === 'invest' || grp === 'real_estate';
+/** 금리가 높은 대출(카드론·현금서비스·리볼빙) → 고금리 대출 갚기 목표 제안(09 6-6) */
+export const isHighInterestKind = (kind: string) => kind === 'card_loan' || kind === 'revolving';
+
+export interface NetWorthItem {
+  side: AssetSide;
+  amount: Won;
+  principal?: Won | null;
+  visibility?: 'all' | 'sum' | 'private';
+  status?: 'held' | 'sold';
+}
+
+/**
+ * 순자산(06 9장): 자산 − 부채, 원금이 있으면 원금(없으면 평가금액). 예상 순자산 = 평가금액 기준.
+ * 안 판 수익 = 예상 − 순자산. 비공개·판 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
+ */
+export function netWorth(
+  items: NetWorthItem[],
+  partnerSums: { side: AssetSide; total: Won; principal_total: Won }[] = [],
+) {
+  const live = items.filter((i) => i.visibility !== 'private' && i.status !== 'sold');
+  const sum = (side: AssetSide, f: (i: NetWorthItem) => Won) =>
+    live.filter((i) => i.side === side).reduce((t, i) => t + f(i), 0) +
+    partnerSums
+      .filter((p) => p.side === side)
+      .reduce((t, p) => t + (f === byAmount ? p.total : p.principal_total), 0);
+  const byAmount = (i: NetWorthItem) => i.amount;
+  const byPrincipal = (i: NetWorthItem) => i.principal ?? i.amount;
+  const assets = sum('asset', byPrincipal);
+  const debts = sum('debt', byPrincipal);
+  const net = assets - debts;
+  const expected = sum('asset', byAmount) - sum('debt', byAmount);
+  return {
+    /** 자산 합계(평가금액, 목록 표시용) */
+    assets: sum('asset', byAmount),
+    debts: sum('debt', byAmount),
+    net,
+    expected,
+    gain: expected - net,
+  };
+}

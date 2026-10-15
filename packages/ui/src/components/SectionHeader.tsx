@@ -7,7 +7,7 @@ export function SectionHeader({
   more,
 }: {
   title: ReactNode;
-  count?: number;
+  count?: ReactNode;
   more?: { label: string; href: string };
 }) {
   return (

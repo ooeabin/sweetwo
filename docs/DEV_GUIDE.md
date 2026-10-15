@@ -194,7 +194,7 @@ sweetwo/
 
 ### 지금 있는 테이블과 함수
 
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
@@ -598,6 +598,15 @@ supabase/
 - G-06 `/goals/order`: ui `ReorderList`(끌기, 위·아래 버튼, 비상금·보류·달성 목표 빼고) + 바뀌는 배분 미리보기. 연결이면 `goal_order` 제안, 아니면 바로 저장 + ‘되돌리기’
 - G-04 `/goals/adjust`: core `extendDeadlines`, `lowerTargets`, `cutSpending`(O-64와 같은 계산)으로 안 3개, 안마다 바뀌는 값 전 → 후. 연결이면 바뀌는 값마다 제안(목표 기한·금액, 생활비 예산, 내 용돈). 바로 추가·수정했는데 더 모자라지면 G-04로
 - 다음 단계: G-04 직접 조정(목표별 월 배분 고정값, 06 4장), G-03f 위치 고르기, 진행 그래프·월별 막대, 보유액 자세히, 목표 사진, ⋯ 좁은 창 BottomSheet
+
+### 우리 자산 구조
+
+- 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`. 하위 탭은 기기에 기억
+- `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 배우자 명의 대신 입력 = person + `owner_user_id` null(전체 공개만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
+- 공개 범위는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 전체 공개, 내 명의, 내가 대신 입력한 것)만. 배우자 ‘합계만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘비공개’는 아무것도 안 줌. 고치기는 `asset_editable()`(공동, 내 명의, 합류 전 내가 대신 입력한 것)
+- 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀). 월말 정리가 바꾸면 `set_config('sweetwo.asset_source', 'close', true)` 뒤 고침
+- 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 비공개·판 항목 빼고 배우자 합계만 더함). 월말 순자산 `net_worth_history(개월)`(지운·판 항목은 그 뒤 0, 과거는 유지)
+- 다음 단계: F-01 진단 줄·순자산 그래프·월 정산 요약, F-02 열 정렬·투자 묶음 줄·통장 역할·목표 배지, F-03f~i 유형별 질문(만기, 월 납입액, 금리 → 고정지출, 목표 연결), F-04 그래프·팔았어요·시세, 목표 보유액에 연결 자산, G-03d 가진 자산에서 고르기, F-05~F-07
 
 ### 제안 구조
 
