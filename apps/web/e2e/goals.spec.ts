@@ -505,3 +505,51 @@ test('충돌 조정(G-04): 부족 배너 → 조정하기 → 기한 늘리기 �
   expect(db.proposals.map((p) => p.item)).toContain('living_budget');
   expect(db.space?.living_budget).toBe(550_000);
 });
+
+test('목표 추가: 가진 자산에서 고르기 → 만든 목표에 연결, 보유액 = 합계', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+  db.assets.push({
+    id: 'as-1',
+    side: 'asset',
+    grp: 'cash',
+    kind: 'bank',
+    name: '캠핑 통장',
+    amount: 600_000,
+    principal: null,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    goal_id: null,
+    created_by: db.me.id,
+    deleted_at: null,
+  });
+
+  await page.goto('/goals/new');
+  await page.getByRole('button', { name: '+ 직접 만들기' }).click();
+  await page.getByLabel('무엇을 위한 돈인가요?').fill('캠핑 장비');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('얼마가 필요해요?').fill('2400000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: /한 번이에요/ }).click();
+  await page.getByLabel('년', { exact: true }).fill('2027');
+  await page.getByRole('radio', { name: '12월' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '이미 모아둔 돈이 있나요?');
+  await page.getByRole('radio', { name: /가진 자산에서 고르기/ }).click();
+  await page.getByRole('button', { name: /캠핑 통장 60만/ }).click();
+  await expect(page.getByText('보유액 60만 원')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
+
+  await expect(page).toHaveURL(/\/goals$/);
+  const g = db.goals.find((x) => x.name === '캠핑 장비');
+  expect(g).toMatchObject({ other_held: 0 });
+  expect(db.assets.find((a) => a.id === 'as-1')?.goal_id).toBe(g?.id);
+  await expect(page.getByRole('button', { name: /캠핑 장비/ })).toContainText('60만 / 240만 원');
+});

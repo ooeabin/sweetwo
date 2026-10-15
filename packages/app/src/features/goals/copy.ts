@@ -48,8 +48,8 @@ export const copy = {
     expected: '예상 달성',
   },
   nextUse: (ym: string) => `다음 사용 ${ym}`,
-  heldFrom: (other: string, deposits: string) =>
-    `기타 보유액 ${other}, 월말 정리에서 넣은 돈 ${deposits}`, // [확인 필요]
+  heldFrom: (other: string, linked: string, deposits: string) =>
+    `기타 보유액 ${other}, 연결 자산 ${linked}, 월말 정리에서 넣은 돈 ${deposits}`, // [확인 필요]
   records: '월별 기록', // [확인 필요] 요소 이름
   recordPlan: (amount: string) => `계획 ${amount}`,
   recordActual: (amount: string) => `실제 ${amount}`,
@@ -95,6 +95,8 @@ export const copy = {
   makeOwn: '+ 직접 만들기',
   next: '다음',
   heldTitle: '이미 모아둔 돈이 있나요?',
+  heldAssets: '가진 자산에서 고르기',
+  heldAssetsTotal: (amount: string) => `보유액 ${amount}`, // [확인 필요]
   heldNew: '새로 입력할게요',
   heldNone: '없어요',
   heldAmount: '얼마 모아뒀어요?', // [확인 필요]

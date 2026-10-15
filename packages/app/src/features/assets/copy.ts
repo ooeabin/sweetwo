@@ -63,6 +63,21 @@ export const copy = {
   highInterest: '금리가 높은 대출이에요. 이 대출부터 갚는 목표를 만들까요?',
   makeGoal: '목표 만들기', // [확인 필요]
 
+  // F-03f~i
+  later: '나중에 할게요',
+  maturity: '만기일은 언제예요?',
+  contractEnd: '계약 만기일은요?',
+  paidCount: '납입 회차는요?',
+  paidCountUnit: '회', // [확인 필요]
+  payment: '월 납입액은요?',
+  repayment: '월 상환액은요?',
+  payFrom: '어느 통장에서 빠져나가요?',
+  payFromOptions: { goal_fund: '목표자금 통장', personal: '각자 통장' },
+  rate: '금리는 몇 %예요?',
+  rateError: '0~100 사이로 넣어 주세요', // [확인 필요]
+  goal: '어떤 목표를 위한 돈인가요?',
+  noGoal: '없음',
+
   // F-04
   amountLabel: '금액', // [확인 필요]
   visLabel: '공개 범위', // [확인 필요]
@@ -79,4 +94,10 @@ export const copy = {
   fromManual: '직접 수정',
   principal: (amount: string) => `원금 ${amount}`,
   owner: '명의', // [확인 필요]
+  goalLink: '목표', // [확인 필요]
+  maturityLabel: '만기일', // [확인 필요]
+  paymentLabel: '월 납입액', // [확인 필요]
+  repaymentLabel: '월 상환액', // [확인 필요]
+  rateLabel: '금리', // [확인 필요]
+  countLabel: '납입 회차', // [확인 필요]
 };

@@ -1,5 +1,6 @@
 import {
   fetchAssets,
+  fetchGoals,
   fetchMe,
   fetchNetWorthHistory,
   fetchPartner,
@@ -19,6 +20,7 @@ export function useAssetsData() {
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const sums = useQuery({ queryKey: qk.partnerAssetSums, queryFn: fetchPartnerAssetSums });
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const history = useQuery({
     queryKey: qk.netWorthHistory,
     queryFn: () => fetchNetWorthHistory(2),
@@ -40,6 +42,7 @@ export function useAssetsData() {
     couple: c,
     items,
     sums: sums.data ?? [],
+    goals: goals.data ?? [],
     nw,
     change,
   };
@@ -50,7 +53,7 @@ export function useRefreshAssets() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory].map((k) =>
+      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory, qk.goalAssetSums].map((k) =>
         qc.invalidateQueries({ queryKey: k }),
       ),
     );

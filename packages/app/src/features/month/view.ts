@@ -36,9 +36,20 @@ export interface MonthInput {
   spentVariable?: number;
   /** 이번 플랜 월말 정리를 끝냄 */
   closeDone?: boolean;
-  /** 목표별 월말 정리에서 넣은 돈 누적(보유액 = 기타 보유액 + 이것, 06 5-4) */
+  /** 목표별 월말 정리에서 넣은 돈 누적 + 연결 자산(보유액 = 기타 보유액 + 이것, 06 5-4) */
   goalDeposits?: Record<string, number>;
   now?: Date;
+}
+
+/** 목표별 기타 보유액 밖의 보유액: 월말 정리에서 넣은 돈 + 연결 자산(06 5-4) */
+export function goalExtra(
+  deposits: { goalId: string; amount: number }[],
+  linked: { goal_id: string; total: number }[],
+): Record<string, number> {
+  const t: Record<string, number> = {};
+  for (const d of deposits) t[d.goalId] = (t[d.goalId] ?? 0) + d.amount;
+  for (const l of linked) t[l.goal_id] = (t[l.goal_id] ?? 0) + l.total;
+  return t;
 }
 
 const toAllocGoal = (g: Goal, deposits = 0): AllocGoal => ({

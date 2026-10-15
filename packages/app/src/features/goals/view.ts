@@ -33,6 +33,8 @@ export interface GoalLine {
   held: number;
   otherHeld: number;
   deposits: number;
+  /** 연결 자산(원금 기준) */
+  linked: number;
   pct: number;
   pace: number | null;
   chip: ReturnType<typeof paceChip>;
@@ -56,6 +58,8 @@ export function goalsView(i: {
   partner: PartnerProfile | null;
   goals: Goal[];
   records: { plans: GoalRecordRow[]; deposits: GoalRecordRow[] };
+  /** 목표별 연결 자산 합계(서버, 비공개 제외) */
+  linked?: { goal_id: string; total: number }[];
   now?: Date;
 }) {
   const now = i.now ?? new Date();
@@ -72,6 +76,7 @@ export function goalsView(i: {
     livingBudget: sp.living_budget,
     mySharePct: sp.split_mode === 'custom' ? c.myRatio : 50,
   });
+  const linkedOf = (id: string) => i.linked?.find((x) => x.goal_id === id)?.total ?? 0;
   const deposited = (id: string) =>
     i.records.deposits.filter((d) => d.goalId === id).reduce((t, d) => t + d.amount, 0);
   const allocGoals: AllocGoal[] = i.goals.map((g) => ({
@@ -81,7 +86,7 @@ export function goalsView(i: {
     kind: g.kind,
     priority: g.priority,
     target: g.target_amount,
-    held: goalHeld(g.other_held, deposited(g.id)),
+    held: goalHeld(g.other_held, deposited(g.id) + linkedOf(g.id)),
     deadline: g.deadline ? dateToYm(g.deadline) : null,
     afterMarriage: g.after_marriage,
     paused: g.status === 'paused',
@@ -128,6 +133,7 @@ export function goalsView(i: {
       held: a.held,
       otherHeld: g.other_held,
       deposits: deposited(id),
+      linked: linkedOf(id),
       pct,
       pace,
       chip:
