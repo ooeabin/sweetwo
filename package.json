@@ -19,7 +19,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:types": "supabase gen types typescript --local --schema public > packages/core/src/db.types.ts",
+    "db:types": "supabase gen types typescript --local --schema public | prettier --no-config --parser typescript --no-semi --print-width 100 > packages/core/src/db.types.ts",
     "check:assets": "node scripts/check-assets.mjs"
   },
   "devDependencies": {

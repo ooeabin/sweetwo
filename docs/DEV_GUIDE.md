@@ -129,7 +129,7 @@ sweetwo/
 ### 스테이징과 운영 Supabase
 
 - 프로젝트 2개(서울 리전 ap-northeast-2): `sweetwo-staging`(ref `xxofyzgzrjrcrcxvftpn`), `sweetwo-prod`(ref `rilhxjozsdcxcfshtvta`). 연결은 `pnpm supabase link --project-ref <ref>`
-- DB 타입은 staging에서 `pnpm supabase gen types typescript --project-id xxofyzgzrjrcrcxvftpn --schema public > packages/core/src/db.types.ts`로도 만들 수 있음(로컬 `pnpm db:types`와 같은 결과)
+- DB 타입 파일은 `pnpm db:types`(로컬 Supabase)로 만들고, 생성기 버전에 따라 줄바꿈만 달라지지 않게 prettier 고정 옵션(`--no-config --no-semi --print-width 100`)으로 맞춰 저장한다. CI db 작업이 같은 명령으로 다시 만들어 공백과 줄바꿈을 빼고 비교함(다르면 실패, 결과물 db-types를 받아 커밋)
 - 공개 값(URL, anon key)만 앱 `.env.local`과 GitHub 환경 변수로. service role은 GitHub Secrets와 서버에만
 
 ### 환경 변수와 대체물
@@ -316,16 +316,29 @@ sweetwo/
 | 구글 | 개발용 클라이언트 | 스테이징 클라이언트 | 운영 클라이언트 |
 | 애플 | 개발용 Services ID | 스테이징 Services ID | 운영 Services ID |
 
-- Supabase Auth 리다이렉트 허용 목록: 환경마다 `그 환경의 웹 콜백 주소(운영 https://app.sweetwo.kr/auth/callback)만. 데스크톱도 이 주소를 거쳐 딥링크로 돌아옴`
+- 카카오: 이메일은 선택 동의 항목. Supabase 카카오 설정에서 ‘이메일 없는 사용자 허용’을 켜야 거부한 사람이 A-04로 감(로컬은 config.toml `email_optional = true`)
+- Supabase Auth 리다이렉트 허용 목록: 환경마다 그 환경의 웹 콜백 주소 하나. 데스크톱은 쿼리(`?from=desktop&state=…`)를 붙여 같은 주소를 거치므로 끝에 `**`를 붙인다
+  - 운영 `https://app.sweetwo.kr/auth/callback**`, 로컬 `http://localhost:5173/auth/callback**`(스테이징 웹 주소는 정해지면 추가)
+- 데스크톱 흐름(구현): main이 code_verifier와 state를 만들고 `{SUPABASE}/auth/v1/authorize?provider=…&redirect_to={웹}/auth/callback?from=desktop%26state=…&code_challenge=…&code_challenge_method=s256`을 기본 브라우저로 엶 → 웹 콜백 페이지(`packages/app` `auth-callback.tsx`)가 code(취소면 error)와 state를 `sweetwo://auth/callback`으로 넘김 → main이 state를 확인하고 `/auth/v1/token?grant_type=pkce`로 교환
+  - 파일: `apps/desktop/src/main/auth.ts`(로그인, 갱신, 로그아웃), `pkce.ts`(+ 테스트), `ipc.ts`(보낸 창 확인 + Zod), `lock.ts`(A-06)
+  - 렌더러의 supabase-js는 `accessToken` 옵션으로 브리지에서 access token만 받는다(`supabase.auth`는 데스크톱에서 쓰지 않음)
+  - main이 읽는 값: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_WEB_ORIGIN`(apps/desktop/.env.local, 공개 값만)
+- 같은 이메일, 다른 소셜(A-02 ‘자동 합치기 없음’): Supabase는 확인된 같은 이메일의 소셜 계정을 한 사용자로 자동 연결한다. 그래서 로그인 직후 `login_state(누른 제공자)`가 가입한 제공자와 다르면 `provider_conflict`를 돌려주고, 앱은 바로 로그아웃한 뒤 “이미 {카카오}로 가입한 이메일이에요”를 보여 준다. 계정 식별은 가입 때 제공자(`app_user.provider`)
+- 가입: 소셜 로그인만으로는 계정이 아니다. A-05 ‘동의하고 계속하기’의 `complete_signup()`이 `app_user`와 동의 기록(필수 3종 + 마케팅)을 한 번에 만든다. 그 전에 그만두면 auth 사용자만 남음(정리 작업은 예약 작업 단계에서)
 
 ### 웹 세션
 
 - supabase-js 브라우저 저장소 + 엄격한 CSP(인라인 스크립트 금지, 연결 대상은 Supabase, PostHog, Sentry만)
-- ‘로그인 유지’ 끄면 sessionStorage(탭을 닫으면 로그아웃), 켜면 최대 14일
+- ‘로그인 유지’ 끄면 sessionStorage(탭을 닫으면 로그아웃), 켜면 localStorage 최대 14일(로그인 시각 `sweetwo.login-at`, 실행 때 A-01이 확인 → A-08). 구현은 `packages/api` `client.ts`의 저장소
+- 30분 동안 입력이 없으면 로그아웃하고 A-08(‘오래 자리를 비워서 잠갔어요’), 다시 로그인하면 하던 화면으로(`sweetwo.return-to`)
+- 웹 로그인은 지금 리다이렉트만. 넓은 창 팝업은 아직
 
 ### 잠금
 
 - MVP: PIN 6자리 + macOS Touch ID(`systemPreferences.promptTouchID`)
+- PIN은 main에서 scrypt 해시로 safeStorage 저장소에(`app-lock`), 틀린 횟수도 main이 셈. 5회면 PIN 지우고 로그아웃
+- 자동 잠금: 시스템 입력이 5분 없을 때, 화면 잠금, 절전. Ctrl(⌘)+L. 잠금 화면은 앱 전체를 덮어 금액이 보이지 않음
+- safeStorage를 못 쓰는 환경(키체인 없는 Linux 등)에서는 PIN과 refresh token을 저장하지 않는다(다음 실행 때 다시 로그인)
 - Windows Hello는 네이티브 모듈이 필요해 출시 후
 
 ## 예약 작업과 알림
@@ -558,6 +571,7 @@ supabase/
 - core 계산과 포맷: Vitest 단위 테스트. 계산·배분 탭의 예시를 그대로 테스트 케이스로
 - DB 함수와 RLS: pgTAP. ‘배우자가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
 - 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 제안, 월말 정리
+- 웹 e2e는 `vite --mode e2e`(apps/web/.env.e2e, 가짜 Supabase 주소)로 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
 - 테스트 데이터의 예시 이름은 찬우(시작한 사람), 예빈(합류한 사람)
 
 ### 테스트 세부
@@ -645,9 +659,9 @@ supabase/
 ### Electron 보안 체크리스트
 
 - [ ] 모든 창 `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false`
-- [ ] `setWindowOpenHandler`는 막고 허용한 외부 링크만 `shell.openExternal`, `will-navigate` 막음
+- [x] `setWindowOpenHandler`는 막고 허용한 외부 링크만 `shell.openExternal`, `will-navigate` 막음
 - [ ] CSP 헤더, 화면은 `app://` 프로토콜로 불러옴(file:// 안 씀)
-- [ ] IPC 핸들러마다 보낸 창(`event.senderFrame`) 확인, 인자는 Zod로 검사
+- [x] IPC 핸들러마다 보낸 창(`event.senderFrame`) 확인, 인자는 Zod로 검사
 - [ ] Electron Fuses: RunAsNode 끔, asar 무결성 검사 켬, NODE\_OPTIONS 끔
 - [ ] 의존성 감사(`pnpm audit`, Dependabot), Electron은 지원 버전 유지
 

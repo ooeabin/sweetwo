@@ -6,7 +6,7 @@ import { findDeepLink, parseDeepLink, type DeepLink } from './deep-link-parse';
 // 로그인 콜백(code, state)은 main에서만 다룬다(렌더러로 보내지 않음). 초대만 렌더러로.
 export const PROTOCOL = 'sweetwo';
 
-type AuthCallback = Extract<DeepLink, { kind: 'auth' }>;
+type AuthCallback = Exclude<DeepLink, { kind: 'invite' }>;
 
 export function setupDeepLinks(
   getWindow: () => BrowserWindow | null,
@@ -26,7 +26,7 @@ export function setupDeepLinks(
     const link = parseDeepLink(raw);
     if (!link) return; // 허용 목록 밖은 버림
     focus();
-    if (link.kind === 'auth') return onAuthCallback(link);
+    if (link.kind !== 'invite') return onAuthCallback(link);
     const win = getWindow();
     if (!win || win.webContents.isLoading()) pendingInvite = link.code;
     else win.webContents.send(CH.invite, link.code);

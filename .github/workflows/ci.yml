@@ -55,18 +55,29 @@ jobs:
 
   db:
     runs-on: ubuntu-latest
+    defaults:
+      run: { shell: bash }
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-        with: { version: 2.120.0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' }
       - name: 로컬 Supabase 시작(마이그레이션 + seed)
-        run: supabase start -x studio,imgproxy,vector,logflare,edge-runtime
+        run: pnpm supabase start -x studio,imgproxy,vector,logflare,edge-runtime
       - name: pgTAP(RLS, DB 함수)
-        run: supabase test db
-      - name: DB 타입 만들기(packages/core/src/db.types.ts와 같아야 함)
+        run: pnpm db:test
+      - name: DB 타입이 마이그레이션과 같은지(pnpm db:types 결과와 비교)
         run: |
-          supabase gen types typescript --local --schema public > db.types.ts
-          if [ -f packages/core/src/db.types.ts ]; then diff -u packages/core/src/db.types.ts db.types.ts; fi
+          cp packages/core/src/db.types.ts /tmp/committed.ts
+          pnpm db:types
+          # 생성기는 같아도 줄바꿈이 입력에 따라 달라질 수 있어 공백과 줄바꿈은 빼고 비교한다
+          if ! diff -q <(tr -d ' \n' < /tmp/committed.ts) <(tr -d ' \n' < packages/core/src/db.types.ts) > /dev/null; then
+            diff -u /tmp/committed.ts packages/core/src/db.types.ts || true
+            echo '::error::db.types.ts가 마이그레이션과 달라요. pnpm db:types로 다시 만들거나 CI 결과물(db-types)을 받아 커밋하세요'
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
-        if: always()
-        with: { name: db-types, path: db.types.ts, if-no-files-found: ignore }
+        if: failure()
+        with: { name: db-types, path: packages/core/src/db.types.ts }

@@ -2,6 +2,9 @@ import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'node:path';
 import { PROTOCOL, setupDeepLinks } from './deep-link';
 import { createTray } from './tray';
+import { handleAuthCallback } from './auth';
+import { registerIpc } from './ipc';
+import { startAutoLock } from './lock';
 
 // 메인 프로세스: 창, 딥링크(sweetwo://), 단일 인스턴스, 트레이. 보안 저장소는 secure-store.ts(main 전용).
 // 보안 체크리스트는 docs/DEV_GUIDE.md ‘Electron 보안’.
@@ -17,8 +20,7 @@ if (!app.requestSingleInstanceLock()) {
   } else {
     app.setAsDefaultProtocolClient(PROTOCOL);
   }
-  // 로그인 콜백은 로그인 단계(A 탭)에서 code 교환과 토큰 저장(secureStore)을 붙인다. 지금은 받기만.
-  const attachDeepLink = setupDeepLinks(getWindow, () => undefined);
+  const attachDeepLink = setupDeepLinks(getWindow, (link) => void handleAuthCallback(link));
 
   const createWindow = () => {
     win = new BrowserWindow({
@@ -32,6 +34,8 @@ if (!app.requestSingleInstanceLock()) {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
+        // 렌더러가 앱 버전을 알도록(A-01 최소 지원 버전)
+        additionalArguments: [`--sweetwo-app-version=${app.getVersion()}`],
       },
     });
     attachDeepLink(win);
@@ -53,6 +57,8 @@ if (!app.requestSingleInstanceLock()) {
   };
 
   void app.whenReady().then(() => {
+    registerIpc();
+    startAutoLock();
     createWindow();
     if (process.env.SWEETWO_NO_TRAY !== '1') createTray(getWindow, () => app.quit());
   });

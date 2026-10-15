@@ -11,6 +11,14 @@ describe('parseDeepLink', () => {
       state: 'xyz',
     });
   });
+  it('브라우저에서 취소', () => {
+    expect(parseDeepLink('sweetwo://auth/callback?error=access_denied&state=xyz')).toEqual({
+      kind: 'auth_error',
+      error: 'access_denied',
+      state: 'xyz',
+    });
+    expect(parseDeepLink('sweetwo://auth/callback?error=<script>&state=xyz')).toBeNull();
+  });
   it('state가 없으면 버린다', () => {
     expect(parseDeepLink('sweetwo://auth/callback?code=abc')).toBeNull();
   });
