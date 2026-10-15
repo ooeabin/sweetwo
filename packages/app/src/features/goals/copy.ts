@@ -18,6 +18,7 @@ export const copy = {
     paused: '보류',
   },
   afterMarriage: '결혼 후 목표',
+  proposing: '제안 중',
   heldOf: (held: string, target: string) => `${held} / ${target} 원`,
   now: '지금',
   ahead: (pct: number) => `계획보다 ${pct}% 앞서 있어요`,
@@ -60,4 +61,31 @@ export const copy = {
   ownerLabel: '담당',
   together: '같이',
   createdAt: '만든 날',
+
+  // ⋯ 메뉴, 목표 수정
+  menu: '목표 메뉴', // [확인 필요] 화면 읽기용
+  rename: '이름 변경',
+  pause: '보류',
+  resume: '다시 모으기',
+  remove: '삭제',
+  undo: '되돌리기',
+  saved: '저장했어요', // [확인 필요]
+  paused: '보류했어요', // [확인 필요]
+  resumed: '다시 모아요', // [확인 필요]
+  removed: '삭제했어요', // [확인 필요]
+  save: '저장',
+  proposeTo: (name: string) => `${name}님께 제안하기`,
+  proposed: (name: string) => `${name}님에게 제안했어요`,
+  editAmount: '얼마가 필요해요?',
+  editDeadline: '언제까지 모을까요?',
+  editYearly: '매년 몇 월에 써요?',
+  editName: '목표 이름을 알려주세요',
+  notBeforeThisMonth: '이번 달부터 고를 수 있어요', // [확인 필요]
+  nameRequired: '이름을 넣어 주세요',
+  impact: '이렇게 바뀌어요', // [확인 필요] 영향 미리보기 제목
+  impactAlloc: (name: string, before: string, after: string) => `${name} 월 ${before} → ${after}`,
+  impactOther: (name: string, diff: string) => `${name} ${diff}`,
+  impactStatus: (before: string, after: string) => `상태 ${before} → ${after}`, // [확인 필요]
+  impactExpected: (before: string, after: string) => `예상 달성 ${before} → ${after}`, // [확인 필요]
+  pausedNote: '월 0원으로 배분에서 빠져 있어요',
 };

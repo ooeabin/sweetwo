@@ -26,4 +26,5 @@ export * from './components/Wordmark';
 export * from './components/AppFrame';
 export * from './components/Meter';
 export * from './components/PageHeader';
+export * from './components/Menu';
 export * from './components/question';

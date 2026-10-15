@@ -8,3 +8,4 @@
 - 항목은 `button role="menuitem"`.
 - 동작은 4개까지. 좁은 창에서는 BottomSheet로 열림.
 - 키보드: ↑/↓ 이동, Enter 실행, Esc 닫고 여는 버튼으로 포커스.
+- React 래퍼 `Menu`(packages/ui): 여는 버튼 + 동작 목록(`label`, `icon` 선택, `danger`). 아이콘이 없는 동작은 글자만. 좁은 창 BottomSheet는 BottomSheet 래퍼를 만들 때.

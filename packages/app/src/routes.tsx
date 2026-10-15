@@ -13,7 +13,7 @@ import {
   paths,
 } from './features/auth';
 import { DevUiGallery } from './features/dev';
-import { G01GoalList, G02GoalDetail } from './features/goals';
+import { G01GoalList, G02GoalDetail, G02GoalEdit } from './features/goals';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -75,6 +75,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // G-02 목표 상세
+      {
+        path: '/goals/:id/edit/:field',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02GoalEdit />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 목표 수정(금액, 기한, 이름)
       {
         path: '/proposals/:id',
         element: (

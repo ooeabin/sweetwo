@@ -30,7 +30,17 @@ export const copy = {
     allowance: (name: string) => `${name}님 용돈`, // [확인 필요]
     split: '분담 방식', // [확인 필요]
   },
-  itemObject: { allowance: '용돈을', split: '분담 방식을' },
+  itemObject: { allowance: '용돈을', split: '분담 방식을' } as Record<string, string>,
+  goalObject: (goal: string) => `${goal} 목표를`, // [확인 필요] 목표 제안 알림 문장
+  goalItems: {
+    goal_amount: (goal: string) => `${goal} 목표 금액`,
+    goal_deadline: (goal: string) => `${goal} 기한`,
+    goal_pause: (goal: string) => `${goal} 모으기`, // [확인 필요]
+    goal_delete: (goal: string) => `${goal} 목표`, // [확인 필요]
+  },
+  goalPaused: { true: '보류', false: '모으는 중' }, // [확인 필요]
+  goalDeleted: { true: '삭제', false: '있음' }, // [확인 필요]
+  goalUnknown: '목표', // [확인 필요] 지운 목표 이름 대신
   change: (before: string, after: string) => `${before} → ${after}`,
   unset: '없음', // [확인 필요]
   splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },

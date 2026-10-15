@@ -2,23 +2,25 @@ import type { Proposal } from '@sweetwo/api';
 import { formatMonthDay } from '@sweetwo/core';
 import { ListRow } from '@sweetwo/ui';
 import { copy } from './copy';
-import { describe, type Names } from './values';
+import { describe, type GoalName, type Names } from './values';
 
 // 답 기다리는 제안 목록(P-11 6번): “{항목}” / “전 → 후” / 적용일. 함께 정하기면 그 문구
 export function ProposalLines({
   proposals,
   names,
   label,
+  goals = [],
 }: {
   proposals: Proposal[];
   names: Names;
   label: string;
+  goals?: GoalName[];
 }) {
   if (!proposals.length) return null;
   return (
     <div className="hg-list" role="list" aria-label={label}>
       {proposals.map((p) => {
-        const d = describe(p, names);
+        const d = describe(p, names, goals);
         return (
           <div role="listitem" key={p.id}>
             <ListRow

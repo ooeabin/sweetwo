@@ -8,9 +8,10 @@ import type { GoalLine } from './view';
 const tone = (t: string) => (t === 'emergency' ? 'safety' : t === 'invest' ? 'invest' : 'goal');
 
 /** 상태 배지 + 표시(결혼 후 목표, 매년, 매달) */
-export function GoalBadges({ g }: { g: GoalLine }) {
+export function GoalBadges({ g, proposing }: { g: GoalLine; proposing?: boolean }) {
   return (
     <span className="hg-row" style={{ gap: 'var(--space-1)' }}>
+      {proposing && <Badge kind="warn">{copy.proposing}</Badge>}
       {g.status && (
         <Badge
           kind={g.status === 'achieved' ? 'achieved' : g.status === 'delayed' ? 'warn' : 'temp'}
@@ -80,8 +81,10 @@ export function GoalCard({
   masked,
   m,
   onOpen,
+  proposing,
 }: {
   g: GoalLine;
+  proposing?: boolean;
   names: Record<1 | 2, string>;
   masked: boolean;
   m: (v: number) => string;
@@ -94,7 +97,7 @@ export function GoalCard({
       onClick={onOpen}
     >
       <span className="hg-card__top">
-        <GoalBadges g={g} />
+        <GoalBadges g={g} proposing={proposing} />
       </span>
       <GoalArt g={g} />
       <GoalMeter g={g} masked={masked} />

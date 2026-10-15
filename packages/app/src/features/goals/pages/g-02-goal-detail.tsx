@@ -1,5 +1,5 @@
 import { formatDateFull, formatYm } from '@sweetwo/core';
-import { Button, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { Button, ListRow, Menu, PageHeader, SectionHeader, type MenuAction } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -8,17 +8,21 @@ import { copy } from '../copy';
 import { useGoalsData } from '../data';
 import { GoalArt } from '../goal-art';
 import { GoalBadges, GoalMeter, Owners } from '../goal-card';
+import { useGoalChange } from '../goal-change';
+import { ProposalInline } from '../../proposals';
 
 const SHOWN = 12;
 
-// G-02 목표 상세(docs/spec/22-goals.md G-02). 헤더(이름, 상태, 그림) + 진행 + 숫자 블록 + 월별 기록 + 정보.
-// ⋯ 메뉴(이름 변경, 보류, 삭제), 목표 수정, 진행 그래프, 월별 막대, 보유액 자세히는 다음 단계.
+// G-02 목표 상세(docs/spec/22-goals.md G-02). 헤더(이름, 상태, ⋯, 그림) + 제안 중 카드 + 진행 + 숫자 블록 + 월별 기록 + 정보.
+// ⋯ = 이름 변경(바로), 보류·다시 모으기, 삭제(비상금 없음). 목표 금액·기한을 누르면 목표 수정. 연결된 부부는 제안.
+// 진행 그래프, 월별 막대, 보유액 자세히, 목표 사진, 좁은 창 BottomSheet는 다음 단계.
 export function G02GoalDetail() {
   const { id = '' } = useParams();
   const nav = useNavigate();
   const d = useGoalsData();
   const { masked } = useMask();
   const [more, setMore] = useState(false);
+  const change = useGoalChange(d);
   const m = (v: number) => money(v, masked);
   const v = d.view;
   const g = v?.lines.find((x) => x.id === id);
@@ -40,6 +44,41 @@ export function G02GoalDetail() {
       2: v.couple.starter ? v.couple.partnerName : v.couple.myName,
     } as const;
     const once = g.kind === 'once';
+    const row = d.goals.find((x) => x.id === id);
+    const edit = (field: string) => nav(`/goals/${id}/edit/${field}`);
+    const paused = g.status === 'paused';
+    const actions: MenuAction[] = [
+      { label: copy.rename, icon: 'pencil', onSelect: () => edit('name') },
+      {
+        label: paused ? copy.resume : copy.pause,
+        onSelect: () => row && void change.send(row, { item: 'goal_pause', value: !paused }),
+      },
+      ...(g.template === 'emergency'
+        ? []
+        : [
+            {
+              label: copy.remove,
+              icon: 'trash-2' as const,
+              danger: true,
+              onSelect: () =>
+                row &&
+                void change.send(row, { item: 'goal_delete' }).then((ok) => {
+                  if (ok && !d.connected) back();
+                }),
+            },
+          ]),
+    ];
+    const proposals = d.openProposals.filter((p) => p.target_id === id);
+    const pnames = {
+      myId: d.me?.id ?? '',
+      myName: v.couple.myName,
+      partnerName: v.couple.partnerName,
+      starter: v.couple.starter,
+    };
+    const EDIT: Record<string, string> = {
+      [copy.numbers.target]: 'amount',
+      [copy.numbers.deadline]: 'deadline',
+    };
     const numbers: [string, string][] = [
       ...(g.kind !== 'monthly' && g.target !== null
         ? ([
@@ -65,7 +104,38 @@ export function G02GoalDetail() {
     const diff = (n: number) => (n > 0 ? `+${m(n)}` : n < 0 ? `−${m(-n)}` : m(0));
     body = (
       <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-        <PageHeader title={g.name} backLabel={copy.back} onBack={back} />
+        <PageHeader
+          title={g.name}
+          backLabel={copy.back}
+          onBack={back}
+          action={<Menu label={copy.menu} actions={actions} />}
+        />
+        {proposals.map((p) => (
+          <ProposalInline
+            key={p.id}
+            p={p}
+            names={pnames}
+            goals={d.goals}
+            onDifferent={
+              p.item === 'goal_amount' || p.item === 'goal_deadline'
+                ? () => edit(p.item === 'goal_amount' ? 'amount' : 'deadline')
+                : undefined
+            }
+          />
+        ))}
+        {paused && (
+          <div className="hg-banner hg-banner--info">
+            <span>{copy.pausedNote}</span>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={change.busy}
+              onClick={() => row && void change.send(row, { item: 'goal_pause', value: false })}
+            >
+              {copy.resume}
+            </Button>
+          </div>
+        )}
         <section className="hg-card hg-card--art hg-stack" aria-label={g.name}>
           <span className="hg-card__top">
             <GoalBadges g={g} />
@@ -74,15 +144,35 @@ export function G02GoalDetail() {
           {g.kind !== 'monthly' && <GoalMeter g={g} masked={masked} />}
         </section>
         <div className="hg-cards">
-          {numbers.map(([label, value]) => (
-            <div key={label} className="hg-card">
-              <span className="hg-card__label">{label}</span>
-              <p className="hg-card__value">{value}</p>
-              {label === copy.numbers.held && (
-                <p className="hg-card__meta">{copy.heldFrom(m(g.otherHeld), m(g.deposits))}</p>
-              )}
-            </div>
-          ))}
+          {numbers.map(([label, value]) => {
+            const inner = (
+              <>
+                <span className="hg-card__label">{label}</span>
+                <span className="hg-card__value">{value}</span>
+                {label === copy.numbers.held && (
+                  <span className="hg-card__meta">
+                    {copy.heldFrom(m(g.otherHeld), m(g.deposits))}
+                  </span>
+                )}
+              </>
+            );
+            // 목표 금액·기한 → 목표 수정
+            const to = EDIT[label];
+            return to ? (
+              <button
+                key={label}
+                type="button"
+                className="hg-card hg-card--raised"
+                onClick={() => edit(to)}
+              >
+                {inner}
+              </button>
+            ) : (
+              <div key={label} className="hg-card">
+                {inner}
+              </div>
+            );
+          })}
         </div>
         <section className="hg-stack" aria-label={copy.records}>
           <SectionHeader title={copy.records} />

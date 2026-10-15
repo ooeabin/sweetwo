@@ -169,3 +169,148 @@ test('목표 목록 → 상세: 진행, 월 배분, 접힌 목록, 월별 기록
   await page.getByRole('button', { name: '뒤로' }).click();
   await expect(page).toHaveURL(/\/goals$/);
 });
+
+test('목표 수정(연결): 금액은 제안, 영향 미리보기, 제안 중 카드와 배지, ⋯ 보류도 제안', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+
+  await page.goto('/goals/g2');
+  await heading(page, '내 집 마련');
+  await page.getByRole('button', { name: /목표 금액/ }).click();
+  await heading(page, '얼마가 필요해요?');
+  const input = page.getByLabel('얼마가 필요해요?');
+  await expect(input).toHaveValue(/150,?000,?000/);
+  await input.fill('200000000');
+  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
+  await expect(page.getByRole('region', { name: '이렇게 바뀌어요' })).toContainText('예상 달성');
+  await axe(page);
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+
+  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
+  await heading(page, '내 집 마련');
+  const card = page.getByRole('region', { name: '찬우님 제안' });
+  await expect(card).toContainText('내 집 마련 목표 금액 1억 5,000만 원 → 2억 원');
+  await expect(card.getByRole('button', { name: '보내기 취소' })).toBeVisible();
+  // 바뀌기 전 값 그대로
+  await expect(page.getByRole('button', { name: /목표 금액/ })).toContainText('1억 5,000만 원');
+  expect(db.proposals[0]).toMatchObject({
+    item: 'goal_amount',
+    target_id: 'g2',
+    before: { target_amount: 150_000_000 },
+    after: { target_amount: 200_000_000 },
+    apply_on: '2026-10-25',
+  });
+  await axe(page);
+
+  // ⋯ 보류 → 제안(바로 바뀌지 않음)
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await expect(page.getByRole('menuitem')).toHaveText(['이름 변경', '보류', '삭제']);
+  await page.getByRole('menuitem', { name: '보류' }).click();
+  await expect(page.getByRole('region', { name: '찬우님 제안' })).toHaveCount(2);
+  expect(db.goals.find((g) => g.id === 'g2')?.status).toBe('active');
+
+  // 목록: 제안 중 배지
+  await page.goto('/goals');
+  await expect(page.getByRole('button', { name: /내 집 마련/ })).toContainText('제안 중');
+
+  // 비상금은 삭제 없음
+  await page.goto('/goals/g1');
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await expect(page.getByRole('menuitem')).toHaveText(['이름 변경', '보류']);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toHaveCount(0);
+});
+
+test('받은 목표 제안: G-02에서 좋아요, 다르게 해볼래요는 목표 수정으로', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.proposals.push({
+    id: 'prop-y',
+    space_id: 'space-1',
+    item: 'goal_deadline',
+    target_id: 'g2',
+    proposer: 'yebin',
+    before: { deadline: '2031-10-01' },
+    after: { deadline: '2033-12-01' },
+    status: 'open',
+    apply_on: '2026-10-25',
+    seen_at: null,
+    oppose_count: 0,
+    round_trips: 0,
+    together: false,
+    created_at: '2026-10-06T01:00:00Z',
+  });
+
+  // 이번 달 할 일 맨 위
+  await page.goto('/');
+  await expect(
+    page.getByRole('button', { name: /예빈님이 내 집 마련 목표를 바꾸자고 제안했어요/ }),
+  ).toContainText('2031년 10월 → 2033년 12월');
+
+  await page.goto('/goals/g2');
+  const card = page.getByRole('region', { name: '예빈님 제안' });
+  await expect(card).toContainText('내 집 마련 기한 2031년 10월 → 2033년 12월');
+  await expect.poll(() => db.proposals[0]?.seen_at).not.toBeNull();
+  await axe(page);
+
+  // 다르게 해볼래요 → 기한 수정 화면
+  await card.getByRole('button', { name: '다르게 해볼래요' }).click();
+  await heading(page, '언제까지 모을까요?');
+  await page.getByRole('button', { name: '뒤로' }).first().click();
+
+  await page
+    .getByRole('region', { name: '예빈님 제안' })
+    .getByRole('button', { name: '좋아요' })
+    .click();
+  await expect(page.getByText('바로 적용했어요')).toBeVisible();
+  await expect(page.getByRole('region', { name: '예빈님 제안' })).toHaveCount(0);
+  expect(db.goals.find((g) => g.id === 'g2')?.deadline).toBe('2033-12-01');
+  await expect(page.getByRole('button', { name: /기한/ })).toContainText('2033년 12월');
+});
+
+test('목표 수정(합류 전): 바로 저장, 보류·삭제는 되돌리기', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+
+  await page.goto('/goals/g2');
+  await page.getByRole('button', { name: /기한/ }).click();
+  await heading(page, '언제까지 모을까요?');
+  await page.getByLabel('년', { exact: true }).fill('2032');
+  await page.getByRole('radio', { name: '3월' }).click();
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('저장했어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'g2')?.deadline).toBe('2032-03-01');
+
+  // 이름 변경
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '이름 변경' }).click();
+  await heading(page, '목표 이름을 알려주세요');
+  await page.getByLabel('목표 이름을 알려주세요').fill('우리 집');
+  await page.getByRole('button', { name: '저장' }).click();
+  await heading(page, '우리 집');
+
+  // 보류 → 되돌리기
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '보류' }).click();
+  await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'g2')?.status).toBe('paused');
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toHaveCount(0);
+  expect(db.goals.find((g) => g.id === 'g2')?.status).toBe('active');
+
+  // 삭제 → 목록으로, 되돌리기
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '삭제' }).click();
+  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page.getByRole('button', { name: /우리 집/ })).toHaveCount(0);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(page.getByRole('button', { name: /우리 집/ })).toBeVisible();
+  expect(db.proposals).toEqual([]);
+});
