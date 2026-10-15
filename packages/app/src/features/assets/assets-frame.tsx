@@ -5,19 +5,24 @@ import { MainFrame } from '../month';
 import { copy } from './copy';
 
 type Tab = 'overview' | 'items' | 'diagnosis';
-const PATH: Record<Tab, string> = { overview: '/assets', items: '/assets/items', diagnosis: '' };
+const PATH: Record<Tab, string> = {
+  overview: '/assets',
+  items: '/assets/items',
+  diagnosis: '/assets/diagnosis',
+};
 const KEY = 'sweetwo.assets-tab';
 
 /** 마지막 본 하위 탭(F-01 1번). 기기에만 */
 export const lastAssetsTab = () => {
   try {
-    return localStorage.getItem(KEY) === 'items' ? '/assets/items' : '/assets';
+    const t = localStorage.getItem(KEY);
+    return t === 'items' ? '/assets/items' : t === 'diagnosis' ? '/assets/diagnosis' : '/assets';
   } catch {
     return '/assets';
   }
 };
 
-// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채” “재정 진단”(재정 진단 F-06은 다음 단계)
+// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채” “재정 진단”
 export function AssetsFrame({
   tab,
   addSide = 'asset',
@@ -53,7 +58,7 @@ export function AssetsFrame({
             items={[
               { value: 'overview', label: copy.tabs.overview },
               { value: 'items', label: copy.tabs.items },
-              { value: 'diagnosis', label: copy.tabs.diagnosis, disabled: true },
+              { value: 'diagnosis', label: copy.tabs.diagnosis },
             ]}
           />
           {children}

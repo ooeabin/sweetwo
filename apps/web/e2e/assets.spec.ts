@@ -185,7 +185,6 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, �
   const plan = page.getByRole('button', { name: /이번 달 계획/ });
   await expect(plan).toContainText('620만 원');
   await expect(plan).toContainText('저축 가능 금액 월');
-  await expect(page.getByRole('tab', { name: '재정 진단' })).toBeDisabled();
   await axe(page);
 
   await page.getByRole('button', { name: /부채 100만 원/ }).click();
@@ -432,4 +431,54 @@ test('월 수입·지출(합류 전): 용돈은 바로 저장', async ({ page })
   await expect(page).toHaveURL(/\/assets\/money$/);
   expect(db.me.allowance).toBe(400_000);
   expect(db.proposals).toEqual([]);
+});
+
+test('재정 진단(F-06): 요약, 위험·주의 먼저, 비상금 개월, 추정, 바로가기, 한눈에 진단 줄', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.push({
+    id: 'g-e',
+    template: 'emergency',
+    name: '비상금',
+    kind: 'once',
+    owner: 'together',
+    priority: 0,
+    target_amount: 5_550_000,
+    other_held: 3_000_000,
+    deadline: '2027-10-01',
+    status: 'active',
+    after_marriage: false,
+    details: {},
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    deleted_at: null,
+  });
+
+  // 한눈에 진단 줄: 비상금 300 ÷ (고정 130 + 생활비 55) = 1.6개월, 기준 3개월의 54% → 주의
+  await page.goto('/assets');
+  const line = page.getByRole('button', { name: /재정 진단 5개 중 3개 양호/ });
+  await expect(line).toContainText('비상금으로 1.6개월 생활할 수 있어요');
+  await line.click();
+  await expect(page).toHaveURL(/\/assets\/diagnosis$/);
+  await expect(page.getByText('5개 중 3개 양호')).toBeVisible();
+  const cards = page.locator('section.hg-card');
+  await expect(cards.first()).toHaveAttribute('aria-label', '비상금');
+  const em = page.getByRole('region', { name: '비상금' });
+  await expect(em).toContainText('주의');
+  await expect(em).toContainText('3개월분까지 모아봐요');
+  // 월말 정리 전이라 저축률은 계획값(추정)
+  const saving = page.getByRole('region', { name: '저축률' });
+  await expect(saving).toContainText('월 수입의 54%를 저축하고 있어요');
+  await expect(saving).toContainText('추정');
+  await expect(page.getByRole('region', { name: '대출 상환 부담' })).toContainText(
+    '월 수입의 4.8%를 대출 상환에 쓰고 있어요',
+  );
+  await expect(page.getByRole('region', { name: '투자 원칙 합의' })).toContainText('아직 몰라요');
+  await axe(page);
+
+  await em.getByRole('button', { name: '비상금 목표' }).click();
+  await expect(page).toHaveURL(/\/goals\/g-e$/);
 });

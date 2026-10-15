@@ -6,14 +6,17 @@ import { useMonthView } from '../../month';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
+import { useDiagnosis } from '../diagnosis';
+import { indicatorText } from './f-06-diagnosis';
 
 // F-01 한눈에(docs/spec/23-assets.md 2~4·15번): 순자산(원금 기준) + 예상 순자산·안 판 수익 + 지난달 대비,
 // 자산·부채 합계(→ F-02), 이번 달 카드(→ 이번 달), 이번 달 계획(월 수입, 지출, 저축 가능).
-// 진단 줄(F-06), 순자산 그래프, 월 정산 요약은 다음 단계.
+// 진단 줄(→ F-06). 순자산 그래프, 월 정산 요약은 다음 단계.
 export function F01Overview() {
   const nav = useNavigate();
   const d = useAssetsData();
   const mv = useMonthView();
+  const diag = useDiagnosis();
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
 
@@ -87,6 +90,24 @@ export function F01Overview() {
             <span className="hg-card__value">{nw.debts ? m(nw.debts) : readWon(0)}</span>
           </button>
         </div>
+        {diag.result && (
+          // 5번 진단 줄 → F-06. 주의·위험 없으면 문장 없음
+          <button
+            type="button"
+            className="hg-card hg-card--raised"
+            onClick={() => nav('/assets/diagnosis')}
+          >
+            <span>
+              <b>{copy.diagLine(diag.result.summary.good, diag.result.summary.total)}</b>
+            </span>
+            {(() => {
+              const first = diag.result.summary.ordered[0];
+              return first && (first.signal === 'danger' || first.signal === 'caution') ? (
+                <span className="hg-card__meta">{indicatorText(first, diag.result)}</span>
+              ) : null;
+            })()}
+          </button>
+        )}
         {mv && (
           <div className="hg-cards">
             <button type="button" className="hg-card hg-card--raised" onClick={() => nav('/')}>
