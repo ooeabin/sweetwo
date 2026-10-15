@@ -1,4 +1,4 @@
-// 온보딩 ① 문구(docs/spec/16-onboarding-1.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
+// 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   next: '다음',
@@ -136,4 +136,46 @@ export const copy = {
   goalDeadline: '언제까지 모을까요?', // [확인 필요] O-24 질문 문구
   notBeforeThisYear: (y: number) => `${y}년부터 넣어 주세요`, // [확인 필요]
   yearTotal: (manText: string) => `1년에 모두 ${manText} 원`,
+
+  // O-31 (파트 3)
+  income: (me: string) => `${me}님은 한 달에 얼마 받으세요?`,
+  incomeHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  incomeLow: '최근 몇 달 중 가장 적게 번 달은 얼마였어요?',
+  incomeLowHelp: '이 금액이 기준 수입이 돼요',
+  noIncome: '지금은 수입이 없어요',
+
+  // O-32, O-33
+  payday: '월급날은 며칠이에요?',
+  paydayLast: '말일',
+  paydayShortMonth: '짧은 달은 말일로 계산해요', // [확인 필요] 29~31일 안내
+  partnerIncome: (partner: string) => `${partner}님 수입을 대략 알면 골라주세요`,
+
+  // O-36
+  fixedGroups: '매달 꼭 나가는 돈을 골라주세요',
+  fixedGroupsHelp: '대출 상환은 다음에 따로 물어요',
+  addOwn: '직접 추가',
+  addOwnPlaceholder: '예: 정수기 렌탈', // [확인 필요]
+  add: '추가', // [확인 필요]
+  noneApply: '해당 없어요',
+  fixedTotal: '같이 내는 돈은 한 달에 얼마예요?',
+  fixedTotalHelp: '휴대폰처럼 각자 내는 건 빼고요',
+
+  // O-38, O-39
+  living: '식비·생활용품 등에는 한 달에 얼마쯤 쓰세요?',
+  loan: '갚고 있는 대출이 있다면 한 달에 모두 얼마씩 갚아요?',
+
+  // O-51, O-52 (파트 5)
+  later: '나중에 할게요',
+  allowance: (me: string) => `${me}님 용돈은 한 달에 얼마로 할까요?`,
+  allowanceHelp: '각자 자유롭게 쓰는 돈이에요',
+  allowancePlaceholder: '50만 원',
+  allowancePartnerSame: (partner: string) => `${partner}님 용돈도 같은 금액으로 계산해 둘게요`,
+  split: '같이 쓰는 돈은 어떻게 나눌까요?',
+  splitHelp: (amount: string) => `한 달 ${amount}을 두 분이 나눠 넣어요`,
+  splitWedding: '결혼 비용은 어떻게 나눌까요?',
+  splitWeddingHelp: (amount: string) => `한 달 ${amount}을 두 분이 나눠 넣어요`,
+  splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },
+  splitPartnerUnknown: (partner: string) => `${partner}님 수입을 알면 계산돼요`,
+  splitNoSaving: '모을 돈이 남지 않아 생활비만 나눠요',
+  splitPct: (name: string, pct: number) => `${name} ${pct}%`,
 };

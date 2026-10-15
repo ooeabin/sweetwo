@@ -267,12 +267,45 @@ export function MonthChips({
           key={mm}
           small
           role="radio"
+          aria-pressed={undefined} // radio는 aria-checked만
           aria-checked={mm === value}
           selected={mm === value}
           disabled={disabled}
           onClick={() => onChange(mm)}
         >
           {mm}월
+        </Chip>
+      ))}
+    </div>
+  );
+}
+
+/** 날짜 칩 1~31 + ‘말일’(월급날 O-32). 말일이면 onChange('last') */
+export function DayChips({
+  value,
+  onChange,
+  label,
+  lastLabel = '말일',
+}: {
+  value: number | 'last' | null;
+  onChange: (d: number | 'last') => void;
+  label: string;
+  lastLabel?: string;
+}) {
+  const days: (number | 'last')[] = [...Array.from({ length: 31 }, (_, i) => i + 1), 'last'];
+  return (
+    <div className="hg-quick" role="radiogroup" aria-label={label}>
+      {days.map((d) => (
+        <Chip
+          key={d}
+          small
+          role="radio"
+          aria-pressed={undefined} // radio는 aria-checked만
+          aria-checked={d === value}
+          selected={d === value}
+          onClick={() => onChange(d)}
+        >
+          {d === 'last' ? lastLabel : `${d}일`}
         </Chip>
       ))}
     </div>

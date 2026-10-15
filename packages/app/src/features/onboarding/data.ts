@@ -1,11 +1,13 @@
 import {
   ensureSpace,
+  fetchFixedExpenses,
   fetchGoals,
   fetchMe,
   fetchSpace,
   qk,
   updateMe,
   updateSpace,
+  type FixedExpense,
   type Goal,
   type Me,
   type Space,
@@ -28,6 +30,10 @@ export function useSpace() {
 }
 export function useGoals() {
   return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+}
+
+export function useFixedExpenses() {
+  return useQuery({ queryKey: qk.fixedExpenses, queryFn: fetchFixedExpenses });
 }
 
 /** 저장 뒤 캐시 새로 고침 */
@@ -53,4 +59,4 @@ export const useOnboardingLocal = create<Local>((set) => ({
   setInviteNow: (v) => set({ inviteNow: v }),
 }));
 
-export type { Goal, Me, Space };
+export type { FixedExpense, Goal, Me, Space };

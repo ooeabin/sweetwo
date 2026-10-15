@@ -3,5 +3,6 @@ export const qk = {
   me: ['me'] as const,
   space: ['space'] as const,
   goals: ['goals'] as const,
+  fixedExpenses: ['fixed_expense'] as const,
   monthClose: (spaceId: string, month: string) => ['month_close', spaceId, month] as const,
 };

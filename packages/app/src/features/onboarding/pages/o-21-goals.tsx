@@ -11,7 +11,7 @@ import {
 import { Chip, QuestionLayout, Tabs } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
-import { pickedGoals, PART3_START } from '../flow';
+import { pickedGoals } from '../flow';
 import { useStep } from '../step';
 
 // O-21 목표 고르기(Q2 변형). 고른 순서 = 우선순위, 해제하면 당겨짐. 0개여도 진행.
@@ -95,8 +95,7 @@ export function O21Goals() {
         void s.done(save, (fresh) => {
           // 1순위가 그대로이고 이미 답했으면 O-23·O-24를 다시 묻지 않는다
           const top = pickedGoals(fresh.goals)[0];
-          if (top && prevTop && top.id === prevTop.id && top.target_amount !== null)
-            return PART3_START;
+          if (top && prevTop && top.id === prevTop.id && top.target_amount !== null) return 'o-31';
           return undefined;
         })
       }
