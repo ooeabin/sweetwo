@@ -238,3 +238,23 @@ export async function startFirstPlan(p: {
   fail(error);
   return data as string;
 }
+
+// 이번 달: 오늘이 든 월 플랜과 줄(H-01, H-03)
+export type MonthlyPlan = Tables<'monthly_plan'>;
+export type PlanLine = Tables<'plan_line'>;
+export async function fetchCurrentPlan(
+  today: string,
+): Promise<(MonthlyPlan & { lines: PlanLine[] }) | null> {
+  const { data, error } = await supabase()
+    .from('monthly_plan')
+    .select('*, lines:plan_line(*)')
+    .is('deleted_at', null)
+    .lte('cycle_start', today)
+    .gte('cycle_end', today)
+    .order('cycle_start', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  fail(error);
+  if (!data) return null;
+  return { ...data, lines: (data.lines ?? []).filter((l) => !l.deleted_at) };
+}

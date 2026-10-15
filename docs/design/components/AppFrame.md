@@ -25,6 +25,14 @@
 - 추가: 독과 같은 줄 오른쪽 16px에 검정 원 + 버튼(`hg-fab`, 52px, `aria-label="추가"`). 화면별 추가 대상: 이번 달, 목표 = 목표 / 우리 자산 = 자산, 부채 / 캘린더 = 챙길 날. 설정에서는 숨김.
 - 본문 아래 여백 `space-22`(88px), 독에 가리지 않게.
 
+## 실제 화면
+
+- React 래퍼 `AppFrame`(packages/ui). 바깥 `hg-frame`(최소 화면 높이, `surface-alt` 바탕) 안에 상단 메뉴 줄, 좁은 창 머리(`hg-frame__mhead`, 이번 달은 `is-today`로 회색), 오늘 띠, 본문, 독, + 버튼.
+- 좁은 창에서는 날짜를 머리에만(오늘 띠의 날짜 숨김).
+- 좁은 창의 독과 + 버튼은 화면 아래 고정(`position: fixed`). 넓은 창에서는 숨김. 좁은 창 머리는 넓은 창에서 숨김.
+- 오늘 띠의 버튼 묶음(`hg-frame__actions`)은 좁은 창에서 한 줄 꽉 차게, 주 버튼이 남은 폭을 채움.
+- 아직 없는 메뉴·도구는 `aria-disabled`(탭) 또는 `disabled`(버튼)로 자리만.
+
 ## 공통
 
 - 아이콘(현재 탭은 채운 모양): `house`(이번 달), `target`(목표), `wallet`(우리 자산), `calendar`(캘린더), `search`, `eye`, `bell`, `settings`, `plus`.
