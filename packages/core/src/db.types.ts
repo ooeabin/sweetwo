@@ -40,15 +40,20 @@ export type Database = {
       app_user: {
         Row: {
           analytics_off: boolean
+          birth_year: number | null
           created_at: string
           deletion_requested_at: string | null
+          employment: Database["public"]["Enums"]["employment"] | null
           id: string
           is_internal_tester: boolean
+          nickname: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
           provider: Database["public"]["Enums"]["auth_provider"]
+          side: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
@@ -56,35 +61,53 @@ export type Database = {
         ComputedFields: never
         Insert: {
           analytics_off?: boolean
+          birth_year?: number | null
           created_at?: string
           deletion_requested_at?: string | null
+          employment?: Database["public"]["Enums"]["employment"] | null
           id: string
           is_internal_tester?: boolean
+          nickname?: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
           provider: Database["public"]["Enums"]["auth_provider"]
+          side?: Database["public"]["Enums"]["couple_side"] | null
+          space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           version?: number
         }
         Update: {
           analytics_off?: boolean
+          birth_year?: number | null
           created_at?: string
           deletion_requested_at?: string | null
+          employment?: Database["public"]["Enums"]["employment"] | null
           id?: string
           is_internal_tester?: boolean
+          nickname?: string | null
           notify_email?: string
           notify_email_source?: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
           provider?: Database["public"]["Enums"]["auth_provider"]
+          side?: Database["public"]["Enums"]["couple_side"] | null
+          space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_user_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent: {
         Row: {
@@ -125,6 +148,217 @@ export type Database = {
           },
         ]
       }
+      couple_space: {
+        Row: {
+          child_plan: Database["public"]["Enums"]["child_plan"] | null
+          couple_state: Database["public"]["Enums"]["couple_state"]
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          family_support: number | null
+          family_support_answer: string | null
+          family_support_estimated: boolean
+          housing: Database["public"]["Enums"]["housing"] | null
+          id: string
+          marriage_status: Database["public"]["Enums"]["marriage_status"] | null
+          newlywed_home: Database["public"]["Enums"]["newlywed_home"] | null
+          newlywed_home_month: string | null
+          partner_nickname: string | null
+          prep_money_mode: Database["public"]["Enums"]["prep_money_mode"] | null
+          updated_at: string
+          updated_by: string | null
+          version: number
+          wedding_budget: number | null
+          wedding_budget_estimated: boolean
+          wedding_date: string | null
+          wedding_date_estimated: boolean
+          wedding_month: string | null
+          wedding_saved: number | null
+        }
+        ComputedFields: never
+        Insert: {
+          child_plan?: Database["public"]["Enums"]["child_plan"] | null
+          couple_state?: Database["public"]["Enums"]["couple_state"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          family_support?: number | null
+          family_support_answer?: string | null
+          family_support_estimated?: boolean
+          housing?: Database["public"]["Enums"]["housing"] | null
+          id?: string
+          marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
+          newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
+          newlywed_home_month?: string | null
+          partner_nickname?: string | null
+          prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          wedding_budget?: number | null
+          wedding_budget_estimated?: boolean
+          wedding_date?: string | null
+          wedding_date_estimated?: boolean
+          wedding_month?: string | null
+          wedding_saved?: number | null
+        }
+        Update: {
+          child_plan?: Database["public"]["Enums"]["child_plan"] | null
+          couple_state?: Database["public"]["Enums"]["couple_state"]
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          family_support?: number | null
+          family_support_answer?: string | null
+          family_support_estimated?: boolean
+          housing?: Database["public"]["Enums"]["housing"] | null
+          id?: string
+          marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
+          newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
+          newlywed_home_month?: string | null
+          partner_nickname?: string | null
+          prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          wedding_budget?: number | null
+          wedding_budget_estimated?: boolean
+          wedding_date?: string | null
+          wedding_date_estimated?: boolean
+          wedding_month?: string | null
+          wedding_saved?: number | null
+        }
+        Relationships: []
+      }
+      goal: {
+        Row: {
+          after_marriage: boolean
+          amount_estimated: boolean
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          deadline_estimated: boolean
+          deleted_at: string | null
+          deleted_by: string | null
+          details: NonNullable<Json>
+          id: string
+          kind: Database["public"]["Enums"]["goal_kind"]
+          name: string
+          other_held: number
+          owner: Database["public"]["Enums"]["goal_owner"]
+          priority: number
+          space_id: string
+          status: Database["public"]["Enums"]["goal_status"]
+          target_amount: number | null
+          template: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          after_marriage?: boolean
+          amount_estimated?: boolean
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          deadline_estimated?: boolean
+          deleted_at?: string | null
+          deleted_by?: string | null
+          details?: NonNullable<Json>
+          id?: string
+          kind: Database["public"]["Enums"]["goal_kind"]
+          name: string
+          other_held?: number
+          owner?: Database["public"]["Enums"]["goal_owner"]
+          priority: number
+          space_id: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_amount?: number | null
+          template: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          after_marriage?: boolean
+          amount_estimated?: boolean
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          deadline_estimated?: boolean
+          deleted_at?: string | null
+          deleted_by?: string | null
+          details?: NonNullable<Json>
+          id?: string
+          kind?: Database["public"]["Enums"]["goal_kind"]
+          name?: string
+          other_held?: number
+          owner?: Database["public"]["Enums"]["goal_owner"]
+          priority?: number
+          space_id?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_amount?: number | null
+          template?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invite: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          space_id: string
+          used_at: string | null
+          used_by: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          space_id: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          space_id?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -139,15 +373,20 @@ export type Database = {
         }
         Returns: {
           analytics_off: boolean
+          birth_year: number | null
           created_at: string
           deletion_requested_at: string | null
+          employment: Database["public"]["Enums"]["employment"] | null
           id: string
           is_internal_tester: boolean
+          nickname: string | null
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
           provider: Database["public"]["Enums"]["auth_provider"]
+          side: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
@@ -159,6 +398,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_invite: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          code: string
+          expires_at: string
+        }[]
+      }
+      delete_minor_account: {
+        Args: { p_birth_year: number }
+        Returns: undefined
+      }
+      ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
+      is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
@@ -167,6 +419,7 @@ export type Database = {
     Enums: {
       account_status: "active" | "deletion_requested" | "deleted"
       auth_provider: "kakao" | "google" | "apple"
+      child_plan: "within_1y" | "in_1_3y" | "after_3y" | "none" | "unsure"
       consent_kind:
         | "terms"
         | "privacy"
@@ -178,7 +431,17 @@ export type Database = {
         | "peer_stats"
       consent_source:
         "signup" | "prefill_review" | "care_day_first" | "settings" | "peer_stats_page"
+      couple_side: "groom" | "bride"
+      couple_state: "not_joined" | "connected" | "unlink_pending" | "solo"
       email_source: "provider" | "manual"
+      employment: "regular" | "contract" | "freelance" | "resting"
+      goal_kind: "once" | "yearly" | "monthly"
+      goal_owner: "together" | "me" | "partner"
+      goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
+      housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
+      marriage_status: "married" | "engaged"
+      newlywed_home: "have" | "before" | "after" | "parents"
+      prep_money_mode: "separate" | "together"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -302,6 +565,7 @@ export const Constants = {
     Enums: {
       account_status: ["active", "deletion_requested", "deleted"],
       auth_provider: ["kakao", "google", "apple"],
+      child_plan: ["within_1y", "in_1_3y", "after_3y", "none", "unsure"],
       consent_kind: [
         "terms",
         "privacy",
@@ -313,7 +577,17 @@ export const Constants = {
         "peer_stats",
       ],
       consent_source: ["signup", "prefill_review", "care_day_first", "settings", "peer_stats_page"],
+      couple_side: ["groom", "bride"],
+      couple_state: ["not_joined", "connected", "unlink_pending", "solo"],
       email_source: ["provider", "manual"],
+      employment: ["regular", "contract", "freelance", "resting"],
+      goal_kind: ["once", "yearly", "monthly"],
+      goal_owner: ["together", "me", "partner"],
+      goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
+      housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
+      marriage_status: ["married", "engaged"],
+      newlywed_home: ["have", "before", "after", "parents"],
+      prep_money_mode: ["separate", "together"],
     },
   },
 } as const

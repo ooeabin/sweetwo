@@ -1,0 +1,90 @@
+import { useEffect, useRef } from 'react';
+import { cx } from '../cx';
+import { Icon } from '../Icon';
+
+// Q1 단일 선택(docs/spec/12-question-pattern.md Q1, 디자인 Selection ‘hg-option--card’).
+// 고르면 0.3초 뒤 onPick(그 사이 바꾸면 다시 셈). 1~9 키로 n번째 선택.
+export interface Choice<T extends string> {
+  value: T;
+  label: string;
+  sub?: string;
+}
+
+export function ChoiceCards<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  onPick,
+  autoAdvance = true,
+}: {
+  label: string;
+  options: Choice<T>[];
+  value: T | null;
+  onChange: (v: T) => void;
+  /** 고르고 0.3초 뒤(자동 다음) */
+  onPick?: (v: T) => void;
+  autoAdvance?: boolean;
+}) {
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const first = useRef<HTMLButtonElement>(null);
+
+  const pick = (v: T) => {
+    onChange(v);
+    if (!autoAdvance || !onPick) return;
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => onPick(v), 300);
+  };
+
+  // 최신 pick을 키보드 처리에서 쓰도록
+  const pickRef = useRef(pick);
+  pickRef.current = pick;
+
+  useEffect(() => {
+    first.current?.focus();
+    return () => clearTimeout(timer.current); // 화면을 떠날 때만 자동 다음 취소
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+      const n = Number(e.key);
+      const o = Number.isInteger(n) && n >= 1 ? options[n - 1] : undefined;
+      if (o) pickRef.current(o.value);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [options]);
+
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="hg-stack"
+      style={{ gap: 'var(--space-3)' }}
+    >
+      {options.map((o, i) => {
+        const on = o.value === value;
+        return (
+          <button
+            key={o.value}
+            ref={i === 0 ? first : undefined}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            className={cx('hg-option', 'hg-option--card', on && 'is-on')}
+            style={{ justifyContent: 'space-between', textAlign: 'left' }}
+            onClick={() => pick(o.value)}
+          >
+            <span className="hg-stack" style={{ gap: 0 }}>
+              <span>{o.label}</span>
+              {o.sub && <span className="hg-help">{o.sub}</span>}
+            </span>
+            {on && <Icon name="check" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

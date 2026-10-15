@@ -23,3 +23,4 @@ export * from './components/QuestionLayout';
 export * from './components/LockScreen';
 export * from './components/ConsentCard';
 export * from './components/Wordmark';
+export * from './components/question';

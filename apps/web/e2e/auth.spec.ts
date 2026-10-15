@@ -36,7 +36,7 @@ test('A-01: 최소 지원 버전 미만이면 업데이트 안내', async ({ pag
   await expect(page.getByRole('heading', { name: /둘이 처음 합치는 돈/ })).toBeVisible();
 });
 
-test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 이번 달', async ({ page }) => {
+test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-03', async ({ page }) => {
   let signup: Record<string, unknown> | undefined;
   await mockSupabase(page, {
     loginState: { state: 'new', needs_email: true },
@@ -69,7 +69,7 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 이번 달
   await noA11yViolations(page);
   await agree.click();
 
-  await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '뭐라고 부르면 될까요?' })).toBeVisible();
   expect(signup).toMatchObject({
     p_provider: 'kakao',
     p_notify_email: 'chanwoo@mail.com',
