@@ -4,3 +4,6 @@ pnpm-lock.yaml
 
 # 문서는 손으로 쓴 그대로(표 정렬 등을 바꾸지 않음)
 *.md
+
+# supabase gen types 결과(손대지 않음)
+packages/core/src/db.types.ts
