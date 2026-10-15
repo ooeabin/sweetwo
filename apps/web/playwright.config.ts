@@ -6,7 +6,7 @@ export default defineConfig({
   outputDir: 'test-results',
   fullyParallel: true,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
-  use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' },
+  use: { baseURL: 'http://127.0.0.1:5175', trace: 'retain-on-failure' },
   projects: [
     { name: 'light', use: { ...devices['Desktop Chrome'], colorScheme: 'light' } },
     { name: 'dark', use: { ...devices['Desktop Chrome'], colorScheme: 'dark' } },
@@ -15,9 +15,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 800 } },
     },
   ],
+  // Supabase는 가짜 주소(.env.e2e)로 띄우고 테스트가 응답을 흉내 낸다(e2e/supabase-mock.ts)
   webServer: {
-    command: 'pnpm dev --strictPort',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    command: 'pnpm exec vite --mode e2e --host 127.0.0.1 --port 5175 --strictPort',
+    url: 'http://127.0.0.1:5175',
+    reuseExistingServer: false,
   },
 });

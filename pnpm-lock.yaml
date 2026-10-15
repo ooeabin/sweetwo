@@ -81,6 +81,9 @@ importers:
       '@sweetwo/app':
         specifier: workspace:*
         version: link:../../packages/app
+      '@sweetwo/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@sweetwo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -90,6 +93,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: 1.56.1

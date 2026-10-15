@@ -18,3 +18,8 @@ export * from './components/SceneMedia';
 export * from './components/MonthSummary';
 export * from './components/SpendItems';
 export * from './components/BigExpense';
+export * from './components/AuthLayout';
+export * from './components/QuestionLayout';
+export * from './components/LockScreen';
+export * from './components/ConsentCard';
+export * from './components/Wordmark';

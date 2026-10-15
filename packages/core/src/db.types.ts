@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -47,15 +41,146 @@ export type Database = {
         }
         Relationships: []
       }
+      app_user: {
+        Row: {
+          analytics_off: boolean
+          created_at: string
+          deletion_requested_at: string | null
+          id: string
+          is_internal_tester: boolean
+          notify_email: string
+          notify_email_source: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at: string | null
+          onboarding_step: string | null
+          provider: Database["public"]["Enums"]["auth_provider"]
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          analytics_off?: boolean
+          created_at?: string
+          deletion_requested_at?: string | null
+          id: string
+          is_internal_tester?: boolean
+          notify_email: string
+          notify_email_source: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at?: string | null
+          onboarding_step?: string | null
+          provider: Database["public"]["Enums"]["auth_provider"]
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          analytics_off?: boolean
+          created_at?: string
+          deletion_requested_at?: string | null
+          id?: string
+          is_internal_tester?: boolean
+          notify_email?: string
+          notify_email_source?: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at?: string | null
+          onboarding_step?: string | null
+          provider?: Database["public"]["Enums"]["auth_provider"]
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      consent: {
+        Row: {
+          agreed: boolean
+          created_at: string
+          id: number
+          kind: Database["public"]["Enums"]["consent_kind"]
+          source: Database["public"]["Enums"]["consent_source"]
+          terms_version: string
+          user_id: string
+        }
+        Insert: {
+          agreed: boolean
+          created_at?: string
+          id?: never
+          kind: Database["public"]["Enums"]["consent_kind"]
+          source: Database["public"]["Enums"]["consent_source"]
+          terms_version: string
+          user_id: string
+        }
+        Update: {
+          agreed?: boolean
+          created_at?: string
+          id?: never
+          kind?: Database["public"]["Enums"]["consent_kind"]
+          source?: Database["public"]["Enums"]["consent_source"]
+          terms_version?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_signup: {
+        Args: {
+          p_marketing: boolean
+          p_notify_email: string
+          p_provider: Database["public"]["Enums"]["auth_provider"]
+          p_terms_version: string
+        }
+        Returns: {
+          analytics_off: boolean
+          created_at: string
+          deletion_requested_at: string | null
+          id: string
+          is_internal_tester: boolean
+          notify_email: string
+          notify_email_source: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at: string | null
+          onboarding_step: string | null
+          provider: Database["public"]["Enums"]["auth_provider"]
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "app_user"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      login_state: {
+        Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_status: "active" | "deletion_requested" | "deleted"
+      auth_provider: "kakao" | "google" | "apple"
+      consent_kind:
+        | "terms"
+        | "privacy"
+        | "space_sharing"
+        | "family_info"
+        | "photo"
+        | "marketing"
+        | "analytics"
+        | "peer_stats"
+      consent_source:
+        "signup" | "prefill_review" | "care_day_first" | "settings" | "peer_stats_page"
+      email_source: "provider" | "manual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -86,10 +211,8 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -98,8 +221,7 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -123,8 +245,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -148,8 +269,7 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -165,8 +285,7 @@ export type Enums<
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -182,6 +301,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_status: ["active", "deletion_requested", "deleted"],
+      auth_provider: ["kakao", "google", "apple"],
+      consent_kind: [
+        "terms",
+        "privacy",
+        "space_sharing",
+        "family_info",
+        "photo",
+        "marketing",
+        "analytics",
+        "peer_stats",
+      ],
+      consent_source: ["signup", "prefill_review", "care_day_first", "settings", "peer_stats_page"],
+      email_source: ["provider", "manual"],
+    },
   },
 } as const

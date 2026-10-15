@@ -1,2 +1,5 @@
 @import './src/styles/tokens.css';
 @import './src/styles/bundle.css';
+
+/* 앱 바탕(토큰만). 다크 모드는 html[data-theme]를 앱이 붙인다. */
+html, body { margin: 0; background: var(--surface); color: var(--ink); }

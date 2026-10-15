@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (uncommitted). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (89691ac). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1113,3 +1113,22 @@ a.hg-btn { text-decoration: none; }
 .hg-big__how .hg-seg__item { flex: 1; justify-content: center; }
 .hg-big__how p { margin: 0; font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-big__how p b { font-weight: 600; color: var(--ink-2); }
+
+/* 로그인, 가입 화면 틀(AuthLayout: A-01~A-08, O-01). 가운데 한 열, 좁은 창은 버튼 묶음을 아래로 */
+.hg-auth { position: relative; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-6); padding: var(--space-10) var(--space-4) var(--space-8); text-align: center; }
+.hg-auth > * { margin: 0; }
+.hg-auth__back { position: absolute; top: var(--space-4); left: var(--space-4); }
+.hg-auth__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.hg-auth__head > * { margin: 0; }
+.hg-auth__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; white-space: pre-line; }
+.hg-auth__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
+.hg-auth__actions { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 360px; }
+.hg-auth__actions .hg-btn { position: relative; }
+.hg-auth__actions .hg-tag { position: absolute; right: var(--space-3); }
+.hg-auth__note { font: 400 13px/18px var(--font-sans); color: var(--slate); }
+@media (max-width: 767px) {
+  .hg-auth { justify-content: flex-start; }
+  .hg-auth__actions { margin-top: auto; }
+  .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
+  .hg-q__foot .hg-btn--primary { flex: 1; }
+}

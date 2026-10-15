@@ -52,7 +52,7 @@ export function SceneMedia({
   const showVideo = Boolean(src) && !reduce && !dark && !failed;
   return (
     <figure
-      className={cx('hg-scene', tall && 'hg-scene--tall')}
+      className={cx('hg-scene', tall && 'hg-scene--tall', !showVideo && 'is-still')}
       style={width ? { width } : undefined}
     >
       {showVideo ? (
