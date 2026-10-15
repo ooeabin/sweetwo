@@ -45,14 +45,16 @@ export interface AppFrameProps {
   current: AppTab;
   tabs: AppFrameTab[];
   onTab?: (key: AppTab) => void;
-  /** 오늘 띠(이번 달만). 다른 메뉴의 화면 제목 줄은 그 메뉴를 만들 때 */
+  /** 오늘 띠(이번 달만) */
   today?: {
     date: string;
     title: ReactNode;
     actions?: ReactNode;
     stats?: AppFrameStat[];
   };
-  /** 좁은 창 머리의 큰 제목(이번 달은 메뉴 이름) */
+  /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리에 메뉴 이름이 있어 동작만 */
+  page?: { title: ReactNode; actions?: ReactNode };
+  /** 좁은 창 머리의 큰 제목(메뉴 이름) */
   narrowTitle: string;
   date: string;
   labels: {
@@ -246,6 +248,13 @@ export function AppFrame(p: AppFrameProps) {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+      ) : p.page ? (
+        <section className="hg-pagetitle">
+          <div className="hg-pagetitle__in">
+            <h1 className="hg-pagetitle__title">{p.page.title}</h1>
+            {p.page.actions && <div className="hg-row hg-frame__actions">{p.page.actions}</div>}
           </div>
         </section>
       ) : null}

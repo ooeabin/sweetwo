@@ -1,0 +1,149 @@
+import { formatDateFull, formatYm } from '@sweetwo/core';
+import { Button, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { money, useMask } from '../../../shared/mask';
+import { MainFrame } from '../../month';
+import { copy } from '../copy';
+import { useGoalsData } from '../data';
+import { GoalArt } from '../goal-art';
+import { GoalBadges, GoalMeter, Owners } from '../goal-card';
+
+const SHOWN = 12;
+
+// G-02 목표 상세(docs/spec/22-goals.md G-02). 헤더(이름, 상태, 그림) + 진행 + 숫자 블록 + 월별 기록 + 정보.
+// ⋯ 메뉴(이름 변경, 보류, 삭제), 목표 수정, 진행 그래프, 월별 막대, 보유액 자세히는 다음 단계.
+export function G02GoalDetail() {
+  const { id = '' } = useParams();
+  const nav = useNavigate();
+  const d = useGoalsData();
+  const { masked } = useMask();
+  const [more, setMore] = useState(false);
+  const m = (v: number) => money(v, masked);
+  const v = d.view;
+  const g = v?.lines.find((x) => x.id === id);
+  const back = () => nav('/goals');
+
+  let body = <div />;
+  if (d.failed) {
+    body = (
+      <div className="hg-card hg-stack">
+        <p className="hg-card__meta">{copy.loadFailed}</p>
+        <Button variant="primary" onClick={d.retry}>
+          {copy.retry}
+        </Button>
+      </div>
+    );
+  } else if (v && g) {
+    const names = {
+      1: v.couple.starter ? v.couple.myName : v.couple.partnerName,
+      2: v.couple.starter ? v.couple.partnerName : v.couple.myName,
+    } as const;
+    const once = g.kind === 'once';
+    const numbers: [string, string][] = [
+      ...(g.kind !== 'monthly' && g.target !== null
+        ? ([
+            [copy.numbers.target, m(g.target)],
+            [copy.numbers.held, m(g.held)],
+            [copy.numbers.left, m(Math.max(g.target - g.held, 0))],
+          ] as [string, string][])
+        : [[copy.numbers.held, m(g.held)] as [string, string]]),
+      [copy.numbers.alloc, m(g.alloc)],
+      ...(g.kind === 'yearly' && g.nextUse
+        ? ([[copy.numbers.deadline, copy.nextUse(formatYm(g.nextUse))]] as [string, string][])
+        : once && g.deadline
+          ? ([[copy.numbers.deadline, formatYm(g.deadline)]] as [string, string][])
+          : []),
+      ...(once && g.target !== null
+        ? ([[copy.numbers.expected, g.expected ? formatYm(g.expected) : copy.planUnknown]] as [
+            string,
+            string,
+          ][])
+        : []),
+    ];
+    const rows = more ? g.months : g.months.slice(0, SHOWN);
+    const diff = (n: number) => (n > 0 ? `+${m(n)}` : n < 0 ? `−${m(-n)}` : m(0));
+    body = (
+      <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <PageHeader title={g.name} backLabel={copy.back} onBack={back} />
+        <section className="hg-card hg-card--art hg-stack" aria-label={g.name}>
+          <span className="hg-card__top">
+            <GoalBadges g={g} />
+          </span>
+          <GoalArt g={g} />
+          {g.kind !== 'monthly' && <GoalMeter g={g} masked={masked} />}
+        </section>
+        <div className="hg-cards">
+          {numbers.map(([label, value]) => (
+            <div key={label} className="hg-card">
+              <span className="hg-card__label">{label}</span>
+              <p className="hg-card__value">{value}</p>
+              {label === copy.numbers.held && (
+                <p className="hg-card__meta">{copy.heldFrom(m(g.otherHeld), m(g.deposits))}</p>
+              )}
+            </div>
+          ))}
+        </div>
+        <section className="hg-stack" aria-label={copy.records}>
+          <SectionHeader title={copy.records} />
+          {g.months.length ? (
+            <div className="hg-list">
+              {rows.map((r) => (
+                <ListRow
+                  key={r.month}
+                  label={formatYm(r.month)}
+                  sub={copy.recordPlan(m(r.plan))}
+                  value={
+                    r.rested && r.actual === null ? (
+                      copy.rested
+                    ) : r.actual === null ? (
+                      copy.notClosed
+                    ) : (
+                      <>
+                        {copy.recordActual(m(r.actual))}{' '}
+                        <span className="hg-tag">{diff(r.diff ?? 0)}</span>
+                      </>
+                    )
+                  }
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.noRecords}
+            </p>
+          )}
+          {g.months.length > SHOWN && !more && (
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => setMore(true)}
+            >
+              {copy.more}
+            </button>
+          )}
+        </section>
+        <section className="hg-stack" aria-label={copy.info}>
+          <SectionHeader title={copy.info} />
+          <div className="hg-list">
+            <ListRow
+              label={copy.ownerLabel}
+              value={
+                <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                  <Owners g={g} names={names} />
+                  {g.owners.length === 2 ? copy.together : names[g.owners[0] ?? 1]}
+                </span>
+              }
+            />
+            <ListRow label={copy.createdAt} value={formatDateFull(g.createdAt.slice(0, 10))} />
+          </div>
+        </section>
+      </div>
+    );
+  } else if (v) {
+    return <Navigate to="/goals" replace />; // 없는 목표(지웠거나 잘못된 주소)
+  }
+
+  return <MainFrame current="goals" columns={[body]} />;
+}

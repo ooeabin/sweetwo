@@ -5,23 +5,23 @@ import {
   todayKst,
   type Upcoming,
 } from '@sweetwo/core';
-import {
-  AppFrame,
-  Badge,
-  Button,
-  Card,
-  ListRow,
-  Meter,
-  SectionHeader,
-  type AppFrameStat,
-} from '@sweetwo/ui';
+import { Badge, Button, Card, ListRow, Meter, SectionHeader, type AppFrameStat } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
-import { useCurrentPlan, useGoals, useMe, useMonthClose, usePartner, useSpace } from '../data';
+import {
+  useCurrentPlan,
+  useGoalRecords,
+  useGoals,
+  useMe,
+  useMonthClose,
+  usePartner,
+  useSpace,
+} from '../data';
 import { H04Todos } from '../h-04-todos';
-import { openReceived, proposalCopy, useApplyDue, useProposals } from '../../proposals';
+import { openReceived, useProposals } from '../../proposals';
+import { MainFrame } from '../frame';
 import { closePath, spendPath } from '../paths';
 import { monthView, type MonthView } from '../view';
 
@@ -35,10 +35,10 @@ export function H01ThisMonth() {
   const plan = useCurrentPlan();
   const partner = usePartner();
   const close = useMonthClose(plan.data?.id);
+  const records = useGoalRecords();
   const proposals = useProposals();
-  useApplyDue();
   const nav = useNavigate();
-  const { masked, toggle } = useMask();
+  const { masked } = useMask();
 
   const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
   const failed = me.isError || space.isError || goals.isError || plan.isError;
@@ -55,6 +55,10 @@ export function H01ThisMonth() {
           partner: partner.data ?? null,
           spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
           closeDone: close.data?.status === 'done',
+          goalDeposits: (records.data?.deposits ?? []).reduce<Record<string, number>>(
+            (t, d) => ({ ...t, [d.goalId]: (t[d.goalId] ?? 0) + d.amount }),
+            {},
+          ),
         })
       : null;
   const name = me.data?.nickname ?? '';
@@ -120,51 +124,7 @@ export function H01ThisMonth() {
         ];
   }
 
-  return (
-    <AppFrame
-      current="month"
-      tabs={[
-        {
-          key: 'month',
-          label: copy.tabMonth,
-          href: '/',
-          badge: received.length,
-          badgeLabel: proposalCopy.receivedCount(received.length),
-        },
-        { key: 'goals', label: copy.tabGoals, disabled: true },
-        { key: 'assets', label: copy.tabAssets, disabled: true },
-        { key: 'calendar', label: copy.tabCalendar, disabled: true },
-      ]}
-      date={date}
-      narrowTitle={copy.tabMonth}
-      labels={{
-        search: copy.search,
-        mask: copy.mask,
-        noti: copy.noti,
-        settings: copy.settings,
-        add: copy.add,
-        me: copy.me,
-        stats: copy.stats,
-      }}
-      masked={masked}
-      onMask={toggle}
-      // 사람 색은 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
-      people={
-        v && !v.starter
-          ? [
-              { name: v.partnerName, no: 1 },
-              { name, no: 2 },
-            ]
-          : [
-              { name, no: 1 },
-              { name: v?.partnerName ?? '', no: 2, empty: !v?.joined },
-            ]
-      }
-      saveState={copy.saved}
-      today={{ date, title, actions, stats }}
-      columns={columns}
-    />
-  );
+  return <MainFrame current="month" today={{ date, title, actions, stats }} columns={columns} />;
 }
 
 /** 오늘 띠: 인사(H-01) + 맨 위 행동(H-02) + 숫자 타일 3개 */

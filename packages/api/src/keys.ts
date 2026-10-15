@@ -11,4 +11,5 @@ export const qk = {
   todos: ['todo'] as const,
   spendCategories: ['spend_category'] as const,
   monthClose: (planId: string) => ['month_close', planId] as const,
+  goalRecords: ['goal_records'] as const,
 };

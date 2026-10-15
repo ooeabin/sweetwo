@@ -14,7 +14,7 @@
 
 ## 그림 자리 (목표 카드)
 
-- `hg-card--art` + `hg-card__art`: 오른쪽 위 56px(좁은 창 48px) 둥근 칸에 목표 그림 1개. 그림이 있으면 배지는 빼도 됨.
+- `hg-card--art` + `hg-card__art`: 오른쪽 위 56px(좁은 창 48px) 둥근 칸에 목표 그림 1개. 그림이 있으면 배지는 빼도 됨. 상단 줄과 안에 넣은 Meter 머리는 그림 칸만큼 오른쪽을 비움(목표 카드 G-01 = 상단 줄 배지 + Meter + 보조 줄).
 - 그림은 목표마다 1장(README ‘그림’ 규칙). 기본 목표 21종은 3D 그림 고정.
 - 직접 만든 목표: 사진이 없으면 회색 기본 그림 `hg-card__art--custom`(`hairline-soft` 회색 바탕, `stone` 색 `flag-pennant`(깃발) 아이콘). 사진을 올리면 `hg-card__art--photo`로 칸을 꽉 채움(`object-fit: cover`, 정사각형으로 자른 512px). 위젯 `hg-wg__art`, 큰 자리 `hg-art`도 같은 이름의 `--custom`, `--photo`.
 - 그림은 장식이라 `alt=""`. 뜻은 라벨이 전함.
@@ -23,6 +23,6 @@
 
 - 틴트는 뜻대로: `together` 우리 둘, `family` 양가, `goal` 목표, `safety` 비상금, `invest` 투자. 한 화면에 틴트 2가지까지. 틴트 위 보조 줄은 `ink-2`.
 - 카드 바탕에 브랜드 색을 쓰지 않음. 달성한 목표도 기본 카드에 `hg-badge--achieved`(작은 체리 배지)만 붙임.
-- 누를 수 있는 카드는 `hg-card--raised`.
+- 누를 수 있는 카드는 `hg-card--raised`. `button`이나 `a`로 써도 글자색(`ink`), 글꼴, 왼쪽 정렬은 카드 그대로, 포커스 테두리 `focus`.
 
 소비자가 주는 것: 라벨, 배지(선택), 그림(목표 카드, 선택), 값, 보조 줄.

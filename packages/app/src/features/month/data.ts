@@ -1,5 +1,6 @@
 import {
   fetchCurrentPlan,
+  fetchGoalRecords,
   fetchGoals,
   fetchMe,
   fetchMonthClose,
@@ -28,3 +29,5 @@ export function useMonthClose(planId: string | undefined) {
   });
 }
 export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
+export const useGoalRecords = () =>
+  useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
