@@ -407,3 +407,101 @@ test('목표 추가(연결): 담당 고르고 예빈에게 제안, 예빈이 좋
   await expect(page.getByText('바로 적용했어요')).toBeVisible();
   expect(db.goals.find((g) => g.name === '캠핑 장비')).toMatchObject({ owner: 'together' });
 });
+
+test('순서 바꾸기(G-06): 위·아래 버튼, 합류 전은 바로 저장 + 되돌리기, 연결은 제안', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.push(goal('g4', 'travel', '여행', 3, 3_000_000, '2027-06-01'));
+  for (const g of db.goals) g.created_by = db.me.id;
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+
+  await page.goto('/goals');
+  await page.getByRole('button', { name: '순서 바꾸기' }).click();
+  await heading(page, '어떤 것부터 모을까요?');
+  const list = page.getByRole('list', { name: '어떤 것부터 모을까요?' });
+  await expect(list.getByRole('listitem')).toHaveCount(2); // 비상금, 보류 목표 빼고
+  await expect(page.getByRole('button', { name: '내 집 마련 위로' })).toBeDisabled();
+  await page.getByRole('button', { name: '여행 위로' }).click();
+  await expect(list.getByRole('listitem').first()).toContainText('여행');
+  await expect(page.getByRole('button', { name: '여행 아래로' })).toBeFocused();
+  await expect(page.getByText('여행, 2개 중 1번째로 옮겼어요')).toBeAttached();
+  await axe(page);
+  await page.getByRole('button', { name: '이 순서로 할게요' }).click();
+
+  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page.getByText('순서를 바꿨어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'g4')?.priority).toBe(1);
+  expect(db.goals.find((g) => g.id === 'g2')?.priority).toBe(2);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'g4')?.priority).toBe(3);
+
+  // 연결된 부부는 제안
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    side: 'bride',
+    monthly_income: 2_700_000,
+    payday: 10,
+    payday_last: false,
+    allowance: 500_000,
+    employment: 'regular',
+  };
+  await page.goto('/goals/order');
+  await page.getByRole('button', { name: '여행 위로' }).click();
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
+  expect(db.proposals[0]).toMatchObject({ item: 'goal_order', after: { order: ['g4', 'g2'] } });
+});
+
+test('충돌 조정(G-04): 부족 배너 → 조정하기 → 기한 늘리기 바로 적용, 연결이면 지출 줄이기 제안', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  // 내 집 마련 기한을 2028년 10월로 → 월 필요액이 저축 가능 금액보다 큼
+  Object.assign(db.goals.find((g) => g.id === 'g2') ?? {}, { deadline: '2028-10-01' });
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+
+  await page.goto('/goals');
+  await expect(page.getByText(/저축 가능 금액보다 월 .+ 많아요/)).toBeVisible();
+  await page.getByRole('button', { name: '조정하기' }).click();
+  await heading(page, /목표가 저축 가능 금액보다 월 .+ 많아요/);
+  await expect(page.getByRole('radio', { name: /기한 늘리기/ })).toContainText(
+    '내 집 마련 2028년 10월 →',
+  );
+  await axe(page);
+  await page.getByRole('radio', { name: /기한 늘리기/ }).click();
+  await page.getByRole('button', { name: '이렇게 바꿀게요' }).click();
+  await expect(page.getByText('바꿨어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/goals$/);
+  expect(String(db.goals.find((g) => g.id === 'g2')?.deadline) > '2028-10-01').toBe(true);
+  await expect(page.getByRole('button', { name: '조정하기' })).toHaveCount(0);
+
+  // 연결: 조금 모자라면 지출 줄이기 → 생활비 예산 제안
+  Object.assign(db.goals.find((g) => g.id === 'g2') ?? {}, { deadline: '2030-06-01' });
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    side: 'bride',
+    monthly_income: 2_700_000,
+    payday: 10,
+    payday_last: false,
+    allowance: 500_000,
+    employment: 'regular',
+  };
+  await page.goto('/goals/adjust');
+  await page.getByRole('radio', { name: /지출 줄이기/ }).click();
+  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
+  expect(db.proposals.map((p) => p.item)).toContain('living_budget');
+  expect(db.space?.living_budget).toBe(550_000);
+});

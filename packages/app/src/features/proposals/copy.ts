@@ -30,7 +30,14 @@ export const copy = {
     allowance: (name: string) => `${name}님 용돈`, // [확인 필요]
     split: '분담 방식', // [확인 필요]
   },
-  itemObject: { allowance: '용돈을', split: '분담 방식을' } as Record<string, string>,
+  itemObject: {
+    allowance: '용돈을',
+    split: '분담 방식을',
+    living_budget: '생활비 예산을',
+    goal_order: '목표 순서를',
+  } as Record<string, string>,
+  livingBudget: '생활비 예산', // [확인 필요]
+  goalOrder: '목표 순서', // [확인 필요]
   goalObject: (goal: string) => `${goal} 목표를`, // [확인 필요] 목표 제안 알림 문장
   goalItems: {
     goal_amount: (goal: string) => `${goal} 목표 금액`,

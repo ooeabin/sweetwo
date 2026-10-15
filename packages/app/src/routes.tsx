@@ -13,7 +13,14 @@ import {
   paths,
 } from './features/auth';
 import { DevUiGallery } from './features/dev';
-import { G01GoalList, G02GoalDetail, G02GoalEdit, GoalAddRoute } from './features/goals';
+import {
+  G01GoalList,
+  G02GoalDetail,
+  G02GoalEdit,
+  G04GoalAdjust,
+  G06GoalOrder,
+  GoalAddRoute,
+} from './features/goals';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -65,6 +72,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // G-01 목표 목록
+      {
+        path: '/goals/order',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G06GoalOrder />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-06 우선순위 바꾸기
+      {
+        path: '/goals/adjust',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G04GoalAdjust />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-04 충돌 조정
       {
         path: '/goals/new/:step?',
         element: (

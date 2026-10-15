@@ -15,7 +15,7 @@ import { useAddStep } from '../add/step';
 const man = (v: number) => `${formatManWon(v)} 원`;
 
 // G-03f 미리보기(Q7): “매달 25만 원씩 모으면 2028년 3월에 달성해요”. 우선순위는 맨 아래(위치 고르기는 G-06과 함께).
-// 연결된 부부 = “{배우자}님께 제안하기”(goal_add), 아니면 “추가하기”. 저축 가능 금액이 모자라면 안내(G-04는 다음 단계).
+// 연결된 부부 = “{배우자}님께 제안하기”(goal_add), 아니면 “추가하기”. 저축 가능 금액이 모자라지면 안내, 바로 추가했으면 G-04로.
 export function G03fGoalConfirm() {
   const s = useAddStep('confirm');
   const nav = useNavigate();
@@ -52,7 +52,8 @@ export function G03fGoalConfirm() {
       }
       clear();
       await Promise.all([qk.goals, qk.proposals].map((k) => qc.invalidateQueries({ queryKey: k })));
-      nav('/goals', { replace: true });
+      // 바로 추가했는데 저축 가능 금액이 모자라지면 G-04
+      nav(!d.connected && shortAfter > 0 ? '/goals/adjust' : '/goals', { replace: true });
     } catch {
       toast(copy.loadFailed);
     } finally {

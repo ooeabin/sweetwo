@@ -23,7 +23,7 @@ type Field = 'amount' | 'deadline' | 'name';
 // 목표 수정(22 목표 수정): 숫자 한 화면 입력. 목표 금액 Q3, 기한 Q4, 이름 Q5(바로 저장).
 // 금액·기한은 영향 미리보기(월 배분, 상태, 예상 달성 전 → 후, 배분이 바뀌는 다른 목표) 뒤
 // 연결된 부부는 “{배우자}님께 제안하기”(내 열린 제안은 그 값으로 채우고 새 제안이 대체), 아니면 “저장”.
-// 저축 가능 금액을 넘을 때 G-04로 가는 건 G-04를 만들 때.
+// 바로 저장했는데 저축 가능 금액이 더 모자라지면 G-04.
 export function G02GoalEdit() {
   const { id = '', field = 'amount' } = useParams();
   const nav = useNavigate();
@@ -124,7 +124,13 @@ export function G02GoalEdit() {
         ? { item: 'goal_amount', value: curAmount ?? 0 }
         : { item: 'goal_deadline', value: ymToDate(curYm as YearMonth) },
     );
-    if (ok) back();
+    // 바로 바꿨는데 저축 가능 금액이 더 모자라지면 G-04
+    if (ok)
+      nav(
+        !d.connected && (afterView?.shortfall ?? 0) > (d.view?.shortfall ?? 0)
+          ? '/goals/adjust'
+          : `/goals/${id}`,
+      );
   };
 
   const title =

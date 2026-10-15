@@ -151,6 +151,8 @@ export function goalsView(i: {
   const open = lines.filter((l) => !FOLDED.includes(l.status));
   return {
     couple: c,
+    alloc,
+    sum,
     saveable: Math.max(sum.saveable, 0),
     /** 진행 중·지연 목표의 월 배분 합 */
     monthly: open

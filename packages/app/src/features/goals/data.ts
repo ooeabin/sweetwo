@@ -42,6 +42,9 @@ export function useGoalsData() {
     /** 바꾼 값으로 다시 계산(목표 수정 영향 미리보기) */
     viewWith: (id: string, patch: Partial<Goal>) =>
       goals.data ? make(goals.data.map((g) => (g.id === id ? { ...g, ...patch } : g))) : null,
+    /** 목표 목록을 바꿔 다시 계산(순서, 조정 안 미리보기) */
+    viewOf: (list: Goal[]) => make(list),
+    space: space.data ?? null,
     /** 새 목표를 더해 다시 계산(목표 추가 G-03f) */
     viewAdd: (g: Goal) => (goals.data ? make([...goals.data, g]) : null),
     goals: goals.data ?? [],

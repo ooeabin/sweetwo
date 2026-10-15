@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cx } from './cx';
 import { Icon, type IconName } from './Icon';
 
@@ -15,18 +15,13 @@ export interface IconButtonProps extends Omit<
   on?: boolean;
 }
 
-export function IconButton({
-  icon,
-  label,
-  ghost,
-  dot,
-  small,
-  on,
-  className,
-  ...rest
-}: IconButtonProps) {
+export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
+  { icon, label, ghost, dot, small, on, className, ...rest },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={label}
       aria-pressed={on}
@@ -43,4 +38,4 @@ export function IconButton({
       <Icon name={icon} />
     </button>
   );
-}
+});

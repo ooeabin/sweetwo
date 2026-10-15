@@ -9,8 +9,20 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   block?: boolean;
 }
 
-export function Button({ variant = 'secondary', size = 'md', block, className, ...rest }: ButtonProps) {
-  const cls = ['hg-btn', `hg-btn--${variant}`, size === 'sm' && 'hg-btn--sm', block && 'hg-btn--block', className]
+export function Button({
+  variant = 'secondary',
+  size = 'md',
+  block,
+  className,
+  ...rest
+}: ButtonProps) {
+  const cls = [
+    'hg-btn',
+    `hg-btn--${variant}`,
+    size === 'sm' && 'hg-btn--sm',
+    block && 'hg-btn--block',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
   return <button type="button" className={cls} {...rest} />;

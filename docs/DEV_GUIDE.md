@@ -595,12 +595,14 @@ supabase/
 - 바꾸기(`goal-change.ts`): 연결된 부부는 `propose('goal_…', 값, 적용일, 목표)`, 미합류·혼자 쓰기는 바로 적용 + Toast(보류·다시 모으기·삭제는 ‘되돌리기’). 다시 모으면 우선순위 맨 아래, 삭제는 휴지통(`deleted_at`), 비상금은 삭제 없음
 - G-02 머리 아래 제안 중 카드(proposals `ProposalInline`: 보낸 사람 보내기 취소·철회, 받은 사람 좋아요·다르게 해볼래요·반대), G-01 카드 “제안 중” 배지
 - 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿(O-21 탭과 칩) → G-03b 템플릿 질문(`q1`…, onboarding `GoalQuestionInput`을 O-23과 같이 씀) → G-03c 기한(묻는 템플릿만, 매년은 월) → G-03d 모아둔 돈(매달·고금리 대출 빼고, 지금은 기타 보유액) → G-03e 담당(연결만) → G-03f 확인. 입력 중 값은 기기에 저장(`sweetwo.goal-add`, 닫았다 열면 이어서). 연결된 부부는 `propose('goal_add')`, 아니면 바로 추가
-- 다음 단계: 순서 바꾸기(G-06, G-03f 위치 고르기), 충돌 조정(G-04, 저축 가능 금액을 넘는 수정 포함), 진행 그래프·월별 막대, 보유액 자세히, 목표 사진, ⋯ 좁은 창 BottomSheet
+- G-06 `/goals/order`: ui `ReorderList`(끌기, 위·아래 버튼, 비상금·보류·달성 목표 빼고) + 바뀌는 배분 미리보기. 연결이면 `goal_order` 제안, 아니면 바로 저장 + ‘되돌리기’
+- G-04 `/goals/adjust`: core `extendDeadlines`, `lowerTargets`, `cutSpending`(O-64와 같은 계산)으로 안 3개, 안마다 바뀌는 값 전 → 후. 연결이면 바뀌는 값마다 제안(목표 기한·금액, 생활비 예산, 내 용돈). 바로 추가·수정했는데 더 모자라지면 G-04로
+- 다음 단계: G-04 직접 조정(목표별 월 배분 고정값, 06 4장), G-03f 위치 고르기, 진행 그래프·월별 막대, 보유액 자세히, 목표 사진, ⋯ 좁은 창 BottomSheet
 
 ### 제안 구조
 
 - 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
-- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 생활비 예산, 우선순위, 목표 추가, 월말 정리 묶음은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
+- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
 - 함수: `propose(항목, 후 값, 적용일, 목표)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
 - 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
 - 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`
