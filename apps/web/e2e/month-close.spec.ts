@@ -80,7 +80,10 @@ function seed(db: MemDb) {
       p_first_adjust: 3_000_000,
       p_merged_close: false,
       p_is_temp: true,
-      p_snapshot: { parts: { living: 1_110_000, goalFund: 1_500_000, emergency: 390_000 } },
+      p_snapshot: {
+        parts: { living: 1_110_000, goalFund: 1_500_000, emergency: 390_000 },
+        income: 6_000_000,
+      },
       p_lines: [
         { target: 'goal', goal_id: 'g1', amount: 390_000 },
         { target: 'goal', goal_id: 'g2', amount: 1_500_000 },
@@ -103,9 +106,9 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await axe(page);
   await page.getByRole('button', { name: '시작' }).click();
 
-  // W-04j: 소득(미합류라 내 수입), 변동 항목, 큰 지출
+  // W-04j: 소득(미합류라도 월급 플랜 수입, 예빈 추정 포함), 변동 항목, 큰 지출
   await heading(page, '이번 달 쓴 돈을 적어요');
-  await expect(page.getByRole('region', { name: '이번 달 들어온 돈' })).toContainText('350만 원');
+  await expect(page.getByRole('region', { name: '이번 달 들어온 돈' })).toContainText('600만 원');
   await page.getByLabel('외식·배달').fill('410000');
   await page.getByRole('button', { name: '자동차세' }).click();
   await page.getByLabel('자동차세').fill('250000');
@@ -120,10 +123,11 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await axe(page);
   await next(page);
 
-  // W-04g: 199만 모음, 계획 189만의 105%. 쓴 돈 = 고정 130 + 변동 41 + 용돈 50 + 큰 지출 25 = 246 → 소득 350의 70.3%
+  // W-04g: 199만 모음, 계획 189만의 105%. 쓴 돈 = 고정 130 + 변동 41 + 용돈 100(각 50) + 큰 지출 25 = 296 → 소득 600의 49.3%
   await heading(page, '이번 달 199만 원을 모았어요 (계획의 105%)');
-  await expect(page.getByRole('region', { name: '9월 정산' })).toContainText('70.3%');
-  await expect(page.getByText('예빈님이 합류하기 전이라 찬우님 돈만 셌어요')).toBeVisible();
+  await expect(page.getByRole('region', { name: '9월 정산' })).toContainText('49.3%');
+  await expect(page.getByText('예빈님 수입은 추정값으로 셌어요')).toBeVisible();
+  await expect(page.getByText('찬우 50만, 예빈 50만')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '정리 끝내기' }).click();
 
@@ -133,7 +137,7 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
 
   // 정리를 끝내면 이번 달은 다시 남은 생활비(55 − 41)
   await heading(page, '찬우님, 이번 달 생활비가 14만 원 남았어요');
-  expect(db.closes[0]).toMatchObject({ status: 'done', income: 3_500_000, big_none: false });
+  expect(db.closes[0]).toMatchObject({ status: 'done', income: 6_000_000, big_none: false });
   expect(db.bigs).toEqual([
     expect.objectContaining({ kind: 'car_tax', amount: 250_000, how: 'exception' }),
   ]);

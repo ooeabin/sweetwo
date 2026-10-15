@@ -433,3 +433,40 @@ test('만 18세 미만이면 계정을 지우고 시작 화면으로', async ({ 
   await expect(page.getByText('만 18세부터 쓸 수 있어요')).toBeVisible();
   expect(db.rpc).toContain('delete_minor_account');
 });
+
+test('O-33 배우자 수입: 정확히 알면 금액으로, 추정 없이 저장', async ({ page }) => {
+  const db = await mockOnboarding(page);
+  Object.assign(db.me, {
+    nickname: '찬우',
+    side: 'groom',
+    birth_year: 1994,
+    employment: 'regular',
+    monthly_income: 3_500_000,
+    payday: 25,
+    onboarding_step: 'O-33',
+    space_id: 'space-1',
+  });
+  db.space = {
+    id: 'space-1',
+    couple_state: 'not_joined',
+    partner_nickname: '예빈',
+    marriage_status: 'married',
+    partner_income: null,
+    partner_income_estimated: false,
+    partner_income_unknown: false,
+    fixed_total: null,
+  };
+  await page.goto('/onboarding/o-33');
+  await heading(page, '예빈님 수입을 대략 알면 골라주세요');
+  await page.getByRole('radio', { name: '정확히 알아요' }).click();
+  await page.getByLabel('예빈님 한 달 실수령').fill('2730000');
+  await expect(page.getByText('273만 원', { exact: true })).toBeVisible();
+  await axe(page);
+  await next(page);
+  await heading(page, '매달 꼭 나가는 돈을 골라주세요');
+  expect(db.space).toMatchObject({
+    partner_income: 2_730_000,
+    partner_income_estimated: false,
+    partner_income_unknown: false,
+  });
+});
