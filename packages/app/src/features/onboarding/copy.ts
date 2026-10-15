@@ -151,6 +151,8 @@ export const copy = {
   paydayLast: '말일',
   paydayShortMonth: '짧은 달은 말일로 계산해요', // [확인 필요] 29~31일 안내
   partnerIncome: (partner: string) => `${partner}님 수입을 대략 알면 골라주세요`,
+  partnerExact: '정확히 알아요',
+  partnerExactLabel: (partner: string) => `${partner}님 한 달 실수령`, // [확인 필요] 금액 칸 이름(화면 읽기용)
 
   // O-36
   fixedGroups: '매달 꼭 나가는 돈을 골라주세요',

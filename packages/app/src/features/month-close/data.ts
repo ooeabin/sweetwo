@@ -38,11 +38,14 @@ export function useCloseData() {
 
   const sp = space.data;
   const joined = sp?.couple_state === 'connected';
-  // 그달 받은 돈 기본값 = 월급 플랜 수입. 배우자 합류 전은 내 돈만 센다(21 W-04g 예외)
+  const solo = sp?.couple_state === 'solo';
+  // 정산 기준 = 월급 플랜과 같게(06 7장). 배우자 수입을 모르면(합류 전) 내 돈만
+  const mineOnly = solo || (!joined && !!sp?.partner_income_unknown);
+  const myIncome = me.data?.monthly_income ?? 0;
   const snapIncome = readPlanSnapshot(plan.data?.snapshot).income;
-  const incomeDefault = joined
-    ? (snapIncome ?? me.data?.monthly_income ?? 0)
-    : (me.data?.monthly_income ?? 0);
+  const incomeDefault = mineOnly
+    ? myIncome
+    : (snapIncome ?? myIncome + (sp?.partner_income_unknown ? 0 : (sp?.partner_income ?? 0)));
   const myAllowance = me.data?.allowance ?? 0;
   const month = plan.data ? Number(plan.data.label_month.slice(5, 7)) : Number(today.slice(5, 7));
 
@@ -57,10 +60,20 @@ export function useCloseData() {
     cats: cats.data ?? [],
     close: close.data ?? null,
     joined,
+    solo,
+    /** 미합류 + 배우자 수입 추정: 추정값으로 셈 / 미합류 + 모름: 내 돈만 */
+    basisNote:
+      joined || solo
+        ? null
+        : mineOnly
+          ? ('mine' as const)
+          : sp?.partner_income_estimated
+            ? ('estimated' as const)
+            : null, // 배우자 수입을 정확히 넣었으면 문구 없음
     month,
     incomeDefault,
-    /** 정산에 넣는 용돈: 합류 전은 내 용돈만, 합류 뒤는 둘(배우자 값은 합류 때 받음) */
-    allowance: joined ? myAllowance * 2 : myAllowance,
+    /** 정산에 넣는 용돈: 내 돈만이면 내 용돈, 아니면 둘(합류 전 배우자 용돈 = 내 용돈 가정) */
+    allowance: mineOnly ? myAllowance : myAllowance * 2,
     myAllowance,
     refreshClose: () => qc.invalidateQueries({ queryKey: qk.monthClose(planId ?? '') }),
     refreshCats: () => qc.invalidateQueries({ queryKey: qk.spendCategories }),

@@ -62,14 +62,20 @@ export function W04gSummary() {
         fixed={fixed}
         variable={variable}
         allowance={d.allowance}
-        allowanceNote={d.joined ? undefined : copy.allowanceNote(me, formatManWon(d.myAllowance))}
+        allowanceNote={
+          d.basisNote === 'mine' || d.solo
+            ? copy.allowanceNote(me, formatManWon(d.myAllowance))
+            : `${copy.allowanceNote(me, formatManWon(d.myAllowance))}, ${copy.allowanceNote(d.space?.partner_nickname ?? '', formatManWon(d.myAllowance))}`
+        }
         bigExpense={big}
         bigExpenseNote={c.bigs.map((b) => b.name).join(', ') || undefined}
         saved={saved}
         note={
-          d.joined || d.space?.couple_state === 'solo'
-            ? undefined
-            : copy.myMoneyOnly(d.space?.partner_nickname ?? '', me)
+          d.basisNote === 'estimated'
+            ? copy.partnerEstimated(d.space?.partner_nickname ?? '')
+            : d.basisNote === 'mine'
+              ? copy.myMoneyOnly(d.space?.partner_nickname ?? '', me)
+              : undefined
         }
       />
     </QuestionLayout>
