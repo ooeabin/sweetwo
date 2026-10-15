@@ -7,8 +7,10 @@ import {
   diagnose,
   emergencyBase,
   planSummary,
+  splitShares,
   type AllocGoal,
   type BaseDay,
+  type PlanInput,
   type PlanParts,
   type SplitMode,
 } from '@sweetwo/core';
@@ -66,36 +68,64 @@ export function tempReason(s: FlowState): string | null {
   return estimated ? copy.tempEstimates : null;
 }
 
-export function result(s: FlowState) {
-  const sp = s.space;
-  const plan = planSummary(planInput(s));
-  const goals = (s.goals ?? []).map(toAllocGoal);
-  const alloc = allocate(plan.saveable, goals);
-  const fixed = (sp?.fixed_total ?? 0) + (sp?.loan_repayment ?? 0);
-  const base = emergencyTarget(s);
+/** 결과 계산 입력. 온보딩은 답(합류 전 추정), 합류 뒤 다시 보기는 두 사람 실제 값 */
+export interface CalcInput {
+  plan: PlanInput;
+  goals: Goal[];
+  /** 비상금 기준(정규직만이면 3개월) */
+  employments: (string | null | undefined)[];
+  separate: boolean;
+  split: { mode: SplitMode; myRatio: number; myIncome: number; partnerIncome: number };
+}
+
+/** O-62~65 숫자: 플랜 요약, 목표 배분, 진단, 통장별 월 금액, 각자 옮길 돈 */
+export function calc(i: CalcInput) {
+  const plan = planSummary(i.plan);
+  const alloc = allocate(plan.saveable, i.goals.map(toAllocGoal));
+  const fixed = (i.plan.fixedTotal ?? 0) + (i.plan.loanRepayment ?? 0);
+  const base = emergencyBase({
+    fixed,
+    living: i.plan.livingBudget ?? 0,
+    employments: i.employments,
+  });
   const diag = diagnose({
     income: plan.income,
     saving: Math.max(plan.saveable, 0),
     emergencyBalance: null, // 자산은 첫 주 2일째에 받음
     emergencyBase: base.amount,
-    loanRepayment: sp?.loan_repayment ?? 0,
+    loanRepayment: i.plan.loanRepayment ?? 0,
     fixed,
     invest: null, // 투자 원칙은 첫 주 7일째(O-53)
   });
+  // 각자 관리 예비부부는 목표자금 자리에 결혼 비용
+  const wedding = alloc.lines.find((l) => l.goal.template === 'wedding');
+  const parts: PlanParts = i.separate
+    ? { living: 0, goalFund: wedding?.need ?? 0, emergency: 0 }
+    : { living: plan.sharedLiving, goalFund: alloc.goals, emergency: alloc.emergency };
+  const shares = splitShares({
+    total: parts.living + parts.goalFund + parts.emergency,
+    ...i.split,
+  });
+  return { plan, alloc, diag, fixed, parts, shares, separate: i.separate };
+}
+
+/** 온보딩 답 → 계산 입력 */
+export const flowInput = (s: FlowState): CalcInput => ({
+  plan: planInput(s),
+  goals: s.goals ?? [],
+  employments: [s.me?.employment],
+  separate: isSeparate(s),
+  split: splitOf(s),
+});
+
+export function result(s: FlowState) {
+  const sp = s.space;
   const estimated = !!(
     sp?.partner_income_estimated ||
     sp?.fixed_total_estimated ||
     sp?.living_budget_estimated
   );
-  return {
-    plan,
-    alloc,
-    diag,
-    fixed,
-    estimated,
-    separate: isSeparate(s),
-    temp: tempReason(s),
-  };
+  return { ...calc(flowInput(s)), estimated, temp: tempReason(s) };
 }
 
 /** 기준일: 정해 둔 값, 없으면 두 월급날 중 늦은 날(합류 전은 내 월급날) */
@@ -115,14 +145,7 @@ export const cycleOf = (s: FlowState, now = new Date()) => {
 };
 
 /** 한 달 통장별 금액(공동 생활비, 목표자금, 비상금). 각자 관리 예비부부는 목표자금 자리에 결혼 비용 */
-export function monthlyParts(s: FlowState): PlanParts {
-  const r = result(s);
-  if (r.separate) {
-    const w = r.alloc.lines.find((l) => l.goal.template === 'wedding');
-    return { living: 0, goalFund: w?.need ?? 0, emergency: 0 };
-  }
-  return { living: r.plan.sharedLiving, goalFund: r.alloc.goals, emergency: r.alloc.emergency };
-}
+export const monthlyParts = (s: FlowState): PlanParts => calc(flowInput(s)).parts;
 
 /** 나누기 방식: 배우자 수입을 모르거나 ‘나중에 할게요’면 반반(17 O-66 표) */
 export function splitOf(s: FlowState) {

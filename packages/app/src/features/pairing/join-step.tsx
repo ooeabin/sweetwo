@@ -10,10 +10,22 @@ export const joinPath = (id: string) => `/join/${id}`;
 export function joinScreens(d: Pick<JoinData, 'space'>): string[] {
   const separate =
     d.space?.marriage_status === 'engaged' && d.space?.prep_money_mode === 'separate';
-  return ['p-03', 'p-04', 'p-05', 'p-05d', ...(separate ? [] : ['p-07', 'p-08']), 'p-10', 'p-11'];
+  return [
+    'p-03',
+    'p-04',
+    'p-05',
+    'p-05d',
+    ...(separate ? [] : ['p-07', 'p-08']),
+    'p-10',
+    'p-11',
+    ...REVISIT,
+  ];
 }
 
-/** 4칸 진행 막대: P-03·04 / P-05 / P-06·07 / P-08~10. P-11은 모두 채움 */
+/** 합류 완료 뒤 다시 보는 온보딩 ② 결과(바뀐 값 강조) */
+export const REVISIT = ['o-63', 'o-64', 'o-65'];
+
+/** 4칸 진행 막대: P-03·04 / P-05 / P-06·07 / P-08~10. P-11과 다시 보기는 모두 채움 */
 const PART: Record<string, number> = {
   'p-03': 0,
   'p-04': 0,
@@ -24,7 +36,9 @@ const PART: Record<string, number> = {
   'p-10': 3,
 };
 export const joinProgress = (id: string) =>
-  id === 'p-11' ? { total: 4, now: 4 } : { total: 4, now: PART[id] ?? 0, fill: 50 };
+  id === 'p-11' || REVISIT.includes(id)
+    ? { total: 4, now: 4 }
+    : { total: 4, now: PART[id] ?? 0, fill: 50 };
 
 /** 합류 화면 하나: 멈춘 화면 기록, 저장 뒤 다음, 뒤로 */
 export function useJoinStep(id: string) {
@@ -36,7 +50,8 @@ export function useJoinStep(id: string) {
 
   const marked = useRef(false);
   useEffect(() => {
-    if (!d.ready || !d.me || marked.current || id === 'p-11') return;
+    // 합류 완료 뒤(P-11, 다시 보기)는 기록하지 않음
+    if (!d.ready || !d.me || marked.current || id === 'p-11' || REVISIT.includes(id)) return;
     marked.current = true;
     if (d.me.onboarding_step !== id.toUpperCase())
       void saveMe({ onboarding_step: id.toUpperCase() }).catch(() => undefined);
