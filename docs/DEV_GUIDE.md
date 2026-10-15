@@ -128,7 +128,8 @@ sweetwo/
 
 ### 스테이징과 운영 Supabase
 
-- 프로젝트 2개: `sweetwo-staging`, `sweetwo-prod`(서울 리전). 처음 한 번 사람이 만들고 `supabase link --project-ref <ref>`
+- 프로젝트 2개(서울 리전 ap-northeast-2): `sweetwo-staging`(ref `xxofyzgzrjrcrcxvftpn`), `sweetwo-prod`(ref `rilhxjozsdcxcfshtvta`). 연결은 `pnpm supabase link --project-ref <ref>`
+- DB 타입은 staging에서 `pnpm supabase gen types typescript --project-id xxofyzgzrjrcrcxvftpn --schema public > packages/core/src/db.types.ts`로도 만들 수 있음(로컬 `pnpm db:types`와 같은 결과)
 - 공개 값(URL, anon key)만 앱 `.env.local`과 GitHub 환경 변수로. service role은 GitHub Secrets와 서버에만
 
 ### 환경 변수와 대체물
