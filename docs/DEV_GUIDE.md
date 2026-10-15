@@ -548,9 +548,10 @@ supabase/
 
 - `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 파트 0~5. 파트 4는 첫 주 할 일이라 없음. 각자 관리 예비부부는 O-36~39, O-51 건너뜀), `step.tsx`(진행 막대, 뒤로, 저장 뒤 다음, 멈춘 화면 기록), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-03` → 화면, 이어하기 `OnboardingGate`)
 - O-36은 그룹 칩 `o-36`과 합계 `o-36t` 두 경로(한 화면 ID, 두 단계). ‘해당 없어요’면 합계 0원 저장 후 O-38
-- 파트 6 결과(O-61~)는 아직 없어서 O-52를 마치면 멈춘 화면을 `O-61`로 남기고 이번 달로. 파트 5 ‘나중에 할게요’는 `split_deferred` + 반반(`part5.ts`)
+- 파트 6 결과: O-61(분석 중, 비상금 기준 맞춤) → O-62 → O-64 → O-65. 계산은 `result.ts`가 core(`planSummary`, `allocate`, `diagnose`)에 답을 넘겨서만. 결과 화면은 `QuestionLayout wide` + `hg-q__cols` 2열. 뒤로는 O-61을 건너뜀, 계산 근거 줄은 `?return=o-62`로 질문에 갔다 돌아옴
+- O-63 통장 구조, O-66 월급 플랜 시작, O-67 첫 미션은 아직 없어서 O-65를 마치면 멈춘 화면을 `O-66`으로 남기고 이번 달로(`flow.ts` `NOT_YET`). 파트 5 ‘나중에 할게요’는 `split_deferred` + 반반(`part5.ts`)
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 그 화면부터(‘이어서 할까요?’ 확인은 아직 없음)
-- 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값, 고정지출 그룹(`expenses.ts`), 공동자금과 분담액(`plan.ts`)은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
+- 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값, 고정지출 그룹(`expenses.ts`), 공동자금과 분담액(`plan.ts`), 목표 배분과 부족 조정 안(`allocation.ts`), 재정 진단(`diagnosis.ts`)은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards(미리보기 `detail`, ‘추정’ `tag`, `disabled`), Q3 AmountInput, Q4 YearInput/DateInput/YearMonthInput/DayChips(1~31 + 말일), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
 - e2e는 `apps/web/e2e/onboarding-mock.ts`의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인
 

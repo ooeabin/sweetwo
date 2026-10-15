@@ -16,6 +16,8 @@ export interface PlanInput {
   fixedTotal: Won | null;
   loanRepayment: Won | null;
   livingBudget: Won | null;
+  /** 배우자 수입을 모를 때 공동 지출 중 내 몫 %(반반 50, 직접 정한 비율). 07 3장 ‘내 몫’ 기준 */
+  mySharePct?: number;
 }
 
 export interface PlanSummary {
@@ -27,6 +29,8 @@ export interface PlanSummary {
   saveable: Won;
   /** 공동자금 = 공동 생활비 + 목표자금 + 비상금(모을 돈이 없으면 생활비만) */
   commonFund: Won;
+  /** couple = 두 분 합계, mine = 배우자 수입을 몰라 ‘{나}님 몫’ 기준 */
+  basis: 'couple' | 'mine';
 }
 
 export function planSummary(i: PlanInput): PlanSummary {
@@ -37,6 +41,19 @@ export function planSummary(i: PlanInput): PlanSummary {
   const income = mine + partner;
   const allowances = myAllowance + partnerAllowance;
   const sharedLiving = (i.fixedTotal ?? 0) + (i.loanRepayment ?? 0) + (i.livingBudget ?? 0);
+  if (i.partnerUnknown) {
+    // 내 몫 기준 = 내 수입 − 내 용돈 − 공동 지출 × 내 분담 비율(07 3장). 공동자금은 배우자도 같은 몫을 넣는다고 보고 계산
+    const pct = Math.min(Math.max(i.mySharePct ?? 50, 1), 100);
+    const saveable = income - allowances - Math.round((sharedLiving * pct) / 100);
+    return {
+      income,
+      allowances,
+      sharedLiving,
+      saveable,
+      commonFund: sharedLiving + Math.round((Math.max(saveable, 0) * 100) / pct),
+      basis: 'mine',
+    };
+  }
   const saveable = income - allowances - sharedLiving;
   return {
     income,
@@ -44,6 +61,7 @@ export function planSummary(i: PlanInput): PlanSummary {
     sharedLiving,
     saveable,
     commonFund: sharedLiving + Math.max(saveable, 0),
+    basis: 'couple',
   };
 }
 

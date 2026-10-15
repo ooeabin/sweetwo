@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mockOnboarding } from './onboarding-mock';
 
-// 온보딩 파트 0~5(docs/spec/16-onboarding-1.md, 17-onboarding-2.md). 찬우가 처음 시작하고 예빈은 아직 미합류.
+// 온보딩 파트 0~6 결과(O-65까지)(docs/spec/16-onboarding-1.md, 17-onboarding-2.md). 찬우가 처음 시작하고 예빈은 아직 미합류.
 
 const axe = async (page: Page) => {
   const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
@@ -31,7 +31,7 @@ async function part0(page: Page) {
   await page.getByRole('button', { name: '시작할게요' }).click();
 }
 
-test('신혼부부: 호칭부터 같이 쓰는 돈 나누기까지', async ({ page }) => {
+test('신혼부부: 호칭부터 재정 진단까지', async ({ page }) => {
   const db = await mockOnboarding(page);
   await part0(page);
 
@@ -130,12 +130,42 @@ test('신혼부부: 호칭부터 같이 쓰는 돈 나누기까지', async ({ pa
   await expect(page.getByText('300만 원', { exact: true })).toBeVisible();
   await next(page);
 
+  // 파트 6 결과: O-61 분석 중 → O-62 요약(저축 가능 = 600 − 100 − 260 = 240만)
+  await heading(page, '두 분의 돈 흐름을 정리하고 있어요');
+  await heading(page, '두 분은 한 달에 240만 원을 모을 수 있어요');
+  await expect(page.getByText('임시 플랜')).toBeVisible();
+  await expect(page.getByText('예빈님이 합류하면 다시 계산돼요')).toBeVisible();
+  await expect(page.getByText('예빈님이 합류하면 여기서 월급을 나눠요')).toBeVisible();
+  await expect(page.getByText('600만 원은 이렇게 나뉘어요')).toBeVisible();
+  await axe(page);
+  await next(page);
+
+  // O-64: 비상금 = (130 + 130) × 3 = 780만, 12개월 → 65만. 내 집은 250만이 필요한데 175만만 남아 부족
+  await heading(page, '목표는 이렇게 모아요');
+  await expect(page.getByText('65만 원/월')).toBeVisible();
+  await expect(page.getByText('175만 원/월')).toBeVisible();
+  await expect(page.getByText('내 집 마련은 기한까지 조금 부족해요')).toBeVisible();
+  await expect(page.getByText('금액을 정하면 계산돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /지출 줄이기/ }).click();
+  await expect(page.getByText('250만 원/월')).toBeVisible();
+  await expect(page.getByText('내 집 마련은 기한까지 조금 부족해요')).toBeHidden();
+  await next(page);
+
+  // O-65: 저축률 52.5%, 대출 5%, 고정 21.7% 모두 양호. 비상금, 투자 원칙은 아직 몰라요
+  await heading(page, '지금 흐름이 좋아요');
+  await expect(page.getByText('아직 몰라요')).toHaveCount(2);
+  await expect(page.getByText('자산 정리하기')).toBeVisible();
+  await expect(page.getByText('투자 원칙 정하기')).toBeVisible();
+  await axe(page);
+  await next(page);
+
   await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
   const g = (t: string) => db.goals.find((x) => x.template === t && !x.deleted_at);
   expect(g('emergency')).toMatchObject({
     priority: 0,
-    target_amount: 10_000_000,
-    amount_estimated: true,
+    target_amount: 7_800_000, // O-61에서 비상금 기준으로 맞춤
+    amount_estimated: false,
   });
   expect(g('home')).toMatchObject({ priority: 1, target_amount: 150_000_000, kind: 'once' });
   expect(String(g('home')?.deadline)).toMatch(/^20\d\d-\d\d-01$/);
@@ -150,7 +180,7 @@ test('신혼부부: 호칭부터 같이 쓰는 돈 나누기까지', async ({ pa
     payday: 25,
     payday_last: false,
     allowance: 500_000,
-    onboarding_step: 'O-61',
+    onboarding_step: 'O-66',
   });
   expect(db.space).toMatchObject({
     partner_nickname: '예빈',
@@ -161,7 +191,7 @@ test('신혼부부: 호칭부터 같이 쓰는 돈 나누기까지', async ({ pa
     partner_income: 2_500_000,
     partner_income_estimated: true,
     fixed_total: 1_000_000,
-    living_budget: 1_300_000,
+    living_budget: 550_000, // O-64 ‘지출 줄이기’로 75만 줄임
     loan_repayment: 300_000,
     split_mode: 'custom',
     split_ratio: 60,
@@ -227,6 +257,18 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   await expect(byIncome).toContainText('예빈님 수입을 알면 계산돼요');
   await axe(page);
   await page.getByRole('radio', { name: /반반/ }).click();
+
+  // 결과: 결혼 비용 하나만
+  await heading(page, /^결혼 비용으로 한 달에 .+만 원씩 모아요$/);
+  await expect(page.getByText('임시 플랜')).toBeVisible();
+  await axe(page);
+  await next(page);
+  await heading(page, '목표는 이렇게 모아요');
+  await expect(page.getByText('결혼 비용', { exact: true })).toBeVisible();
+  await expect(page.getByText('비상금', { exact: true })).toBeHidden();
+  await next(page);
+  await expect(page.getByText('아직 몰라요').first()).toBeVisible();
+  await next(page);
 
   await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
   const live = db.goals.filter((x) => !x.deleted_at);

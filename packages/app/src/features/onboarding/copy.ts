@@ -1,3 +1,5 @@
+import { topic } from '@sweetwo/core';
+
 // 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
@@ -178,4 +180,76 @@ export const copy = {
   splitPartnerUnknown: (partner: string) => `${partner}님 수입을 알면 계산돼요`,
   splitNoSaving: '모을 돈이 남지 않아 생활비만 나눠요',
   splitPct: (name: string, pct: number) => `${name} ${pct}%`,
+
+  // 결과 공통(O-61~67)
+  tempPlan: '임시 플랜',
+  tempJoin: (partner: string) => `${partner}님이 합류하면 다시 계산돼요`,
+  tempEstimates: '추정값을 정확히 채우면 다시 계산돼요',
+
+  // O-61
+  analyzing: '두 분의 돈 흐름을 정리하고 있어요',
+
+  // O-62
+  canSave: (amount: string) => `두 분은 한 달에 ${amount}을 모을 수 있어요`,
+  canSaveMine: (me: string, amount: string) => `${me}님 몫으로 한 달에 ${amount}을 모을 수 있어요`,
+  canSaveSolo: (amount: string) => `한 달에 ${amount}을 모을 수 있어요`,
+  noSaving: '지금은 모을 돈이 남지 않아요',
+  livingOverIncome: '생활비가 수입보다 많아요',
+  incomeCard: '월 수입',
+  incomeBoth: '두 분 합계',
+  incomeMine: (me: string) => `${me}님 수입`,
+  joinPreview: (partner: string) => `${partner}님이 합류하면 여기서 월급을 나눠요`,
+  saveCard: '한 달에 모을 수 있는 돈',
+  saveGoal: '목표',
+  saveEmergency: '비상금',
+  checkSpending: '지출 점검',
+  checkFixed: '고정지출 다시 보기', // [확인 필요]
+  checkLiving: '생활비 다시 보기', // [확인 필요]
+  flowTitle: (income: string) => `${income}은 이렇게 나뉘어요`,
+  flowAllowance: '용돈',
+  flowShared: '공동 생활비',
+  flowSave: '모을 돈',
+  basisTitle: '이렇게 계산했어요',
+  basisIncome: '수입',
+  basisAllowance: '용돈',
+  basisFixed: '고정지출',
+  basisLiving: '생활비',
+  basisSave: '모을 수 있는 돈', // [확인 필요] 계산 근거 마지막 줄
+  weddingSave: (amount: string) => `결혼 비용으로 한 달에 ${amount}씩 모아요`, // [확인 필요] 각자 관리 예비부부 O-62 결론
+  weddingCard: '결혼 비용 한 달 필요액', // [확인 필요]
+
+  // O-64
+  goalsResult: '목표는 이렇게 모아요',
+  perMonth: (amount: string) => `${amount} 원/월`,
+  expected: (ym: string) => `${ym} 달성 예상`,
+  expectedUnknown: '달성 예상 미정', // [확인 필요] 배분 0이면 ‘미정’
+  goalNoAmount: '금액을 정하면 계산돼요', // [확인 필요] 금액을 아직 안 정한 목표 줄
+  goalShort: (goal: string) => `${topic(goal)} 기한까지 조금 부족해요`,
+  adjustDeadline: '기한 늘리기', // [확인 필요]
+  adjustDeadlineSub: (goal: string, ym: string) => `${goal} ${ym}까지`, // [확인 필요]
+  adjustAmount: '목표 금액 낮추기', // [확인 필요]
+  adjustAmountSub: (goal: string, amount: string) => `${goal} ${amount}`, // [확인 필요]
+  adjustSpend: '지출 줄이기',
+  adjustSpendLiving: (amount: string) => `생활비 ${amount} 줄이기`, // [확인 필요]
+  adjustSpendAllowance: (amount: string) => `내 용돈 ${amount} 줄이기`, // [확인 필요]
+  adjustLabel: '조정 안', // [확인 필요] 조정 안 묶음 이름(화면 읽기용)
+
+  // O-65
+  lookAt: (names: string) => `${names}만 살펴보면 돼요`,
+  allGood: '지금 흐름이 좋아요',
+  indicators: {
+    savingRate: '저축률',
+    emergency: '비상금',
+    loanBurden: '대출 상환 부담',
+    fixedRatio: '고정지출 비율',
+    investPrinciple: '투자 원칙 합의',
+  },
+  signals: { good: '양호', caution: '주의', danger: '위험', unknown: '아직 몰라요' },
+  actionsTitle: '이렇게 해 볼까요', // [확인 필요] 개선 액션 묶음 제목
+  firstWeek: {
+    assets: { label: '자산 정리하기', day: '2일째' },
+    loans: { label: '대출 정리하기', day: '3일째' },
+    fixed: { label: '고정지출 나누기·생활비 카드', day: '4일째' },
+    invest: { label: '투자 원칙 정하기', day: '7일째' },
+  },
 };
