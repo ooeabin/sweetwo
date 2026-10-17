@@ -193,3 +193,23 @@ export function overdueDate(
   const d = recordDate(c, today, recorded);
   return d && d < today && daysBetween(d, today) >= 7 ? d : null;
 }
+
+/**
+ * 같은 분께 2년 안 같은 선물(24 Y-08b, Y-09 “작년에도 드렸어요”): 그 날보다 앞선 730일 안 기록 중
+ * 같은 가족, 같은 선물 이름(앞뒤 공백 무시)
+ */
+export function giftRepeated(
+  records: { member_id: string | null; gift_name: string | null; occurs_on: string }[],
+  g: { member_id: string | null; gift_name: string | null; occurs_on: string },
+): boolean {
+  const name = g.gift_name?.trim();
+  if (!g.member_id || !name) return false;
+  const from = addDays(g.occurs_on, -730);
+  return records.some(
+    (r) =>
+      r.member_id === g.member_id &&
+      r.gift_name?.trim() === name &&
+      r.occurs_on < g.occurs_on &&
+      r.occurs_on >= from,
+  );
+}

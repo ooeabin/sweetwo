@@ -15,6 +15,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
+import { syncFamilyGoal } from '../sync';
 import { useCalendarData } from '../data';
 
 // Y-07 챙길 날 추가(docs/spec/24-calendar.md Y-07, 화면별 정의): a 어떤 날 → b 누구의 날(가족 목록 / 직접 입력)
@@ -101,6 +102,7 @@ export function Y07CareAdd() {
           budget: amount,
         },
       ]);
+      await syncFamilyGoal(qc).catch(() => undefined);
       await qc.invalidateQueries({ queryKey: qk.careDays });
       // 초안은 다음 시작(startCareAdd)에서 비움(여기서 비우면 a로 되돌아감)
       if (record && id) nav(`/calendar/day/${id}/record/a?on=${on}`, { replace: true });

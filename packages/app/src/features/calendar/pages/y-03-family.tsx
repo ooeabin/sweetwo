@@ -15,6 +15,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
+import { syncFamilyGoal } from '../sync';
 import { useCalendarData } from '../data';
 import { badMonthDay, MonthDayFields, type MonthDay } from '../date-fields';
 
@@ -233,6 +234,7 @@ export function Y03Family() {
           budget: c.unitOf(d.extra),
         });
       await insertCareDays(rows);
+      await syncFamilyGoal(qc).catch(() => undefined);
       await Promise.all([qk.family, qk.careDays].map((k) => qc.invalidateQueries({ queryKey: k })));
       toast(editing ? copy.familyEdited : copy.familySaved);
       load(start());
