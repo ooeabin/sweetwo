@@ -617,6 +617,14 @@ supabase/
 - 월급날 앞당기기: core `businessDayOnOrBefore(날짜, 공휴일)`는 주말·공휴일이면 직전 영업일. 캘린더 돈 날짜, W-01 사람 칩, W-02 사람 탭 날짜에 씀. `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로. 기준일·사이클은 안 바뀜. 설정 S-11d 토글은 설정 화면과 함께
 - 다음 단계: 특일 API 받기, 알림에서 서프라이즈 빼기(알림을 만들 때), 연결 해제 때 작성자에게만 남기기, 회차 끝난 뒤 예산 vs 실제, 기록 사진(Y-08c), 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
 
+### 설정 구조
+
+- features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
+- 아직 없는 화면 줄은 자리만(누르지 않음, “준비 중이에요”). 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
+- 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로). 월급 플랜 날짜·분담 방식은 보기만(바꾸기는 제안과 함께)
+- 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만
+- 다음 단계: S-11d 기준일 바꾸기(제안), S-11b 신랑·신부, 프로필 사진(S-11e), S-12 부부 정보·연결 해제, S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
+
 ### 배우자 합류 구조
 
 - 초대 링크 `/i/:code`(P-01, features/pairing)는 로그인 전에도 열림(A-01 공개 경로). `invite_preview()`(익명 가능)로 초대한 사람 호칭만 보여 줌

@@ -15,6 +15,7 @@ export * from './rules/lunar';
 export * from './rules/care';
 export * from './rules/family-cost';
 export * from './rules/notification';
+export * from './rules/noti-prefs';
 export * from './rules/spend';
 export * from './rules/couple';
 export * from './rules/proposal';

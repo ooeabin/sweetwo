@@ -126,6 +126,7 @@ export type Database = {
           is_internal_tester: boolean
           monthly_income: number | null
           nickname: string | null
+          noti_prefs: NonNullable<Json>
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
@@ -134,6 +135,8 @@ export type Database = {
           payday: number | null
           payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          quiet_end: number
+          quiet_start: number
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -156,6 +159,7 @@ export type Database = {
           is_internal_tester?: boolean
           monthly_income?: number | null
           nickname?: string | null
+          noti_prefs?: NonNullable<Json>
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
@@ -164,6 +168,8 @@ export type Database = {
           payday?: number | null
           payday_last?: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          quiet_end?: number
+          quiet_start?: number
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -185,6 +191,7 @@ export type Database = {
           is_internal_tester?: boolean
           monthly_income?: number | null
           nickname?: string | null
+          noti_prefs?: NonNullable<Json>
           notify_email?: string
           notify_email_source?: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
@@ -193,6 +200,8 @@ export type Database = {
           payday?: number | null
           payday_last?: boolean
           provider?: Database["public"]["Enums"]["auth_provider"]
+          quiet_end?: number
+          quiet_start?: number
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -1567,6 +1576,7 @@ export type Database = {
           space_id: string | null
           target: string
           title: string
+          topic: string | null
           user_id: string
         }
         ComputedFields: never
@@ -1584,6 +1594,7 @@ export type Database = {
           space_id?: string | null
           target: string
           title: string
+          topic?: never
           user_id: string
         }
         Update: {
@@ -1600,6 +1611,7 @@ export type Database = {
           space_id?: string | null
           target?: string
           title?: string
+          topic?: never
           user_id?: string
         }
         Relationships: [
@@ -2129,6 +2141,7 @@ export type Database = {
           is_internal_tester: boolean
           monthly_income: number | null
           nickname: string | null
+          noti_prefs: NonNullable<Json>
           notify_email: string
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
@@ -2137,6 +2150,8 @@ export type Database = {
           payday: number | null
           payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          quiet_end: number
+          quiet_start: number
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]

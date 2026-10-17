@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { object, topic } from './josa';
+import { object, topic, withAnd } from './josa';
 
 it('받침에 따라 은/는', () => {
   expect(topic('내 집 마련')).toBe('내 집 마련은');
@@ -14,5 +14,12 @@ describe('을/를', () => {
   it('받침', () => {
     expect(object('안마기')).toBe('안마기를');
     expect(object('꽃다발')).toBe('꽃다발을');
+  });
+});
+
+describe('와/과', () => {
+  it('받침', () => {
+    expect(withAnd('찬우')).toBe('찬우와');
+    expect(withAnd('예빈')).toBe('예빈과');
   });
 });

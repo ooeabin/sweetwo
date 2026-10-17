@@ -49,6 +49,7 @@ export function MainFrame(
         {...p}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
+        onSettings={() => nav('/settings')}
         tabs={keys.map((key) => ({
           key,
           label: label[key],
@@ -63,7 +64,7 @@ export function MainFrame(
           if (to) nav(to);
         }}
         date={formatDateWeekday(todayKst())}
-        narrowTitle={label[p.current]}
+        narrowTitle={p.current ? label[p.current] : copy.settings}
         labels={{
           search: copy.search,
           mask: copy.mask,

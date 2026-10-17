@@ -42,7 +42,8 @@ export interface AppFrameStat {
 }
 
 export interface AppFrameProps {
-  current: AppTab;
+  /** 메뉴가 아닌 화면(설정)은 null */
+  current: AppTab | null;
   tabs: AppFrameTab[];
   onTab?: (key: AppTab) => void;
   /** 오늘 띠(이번 달만) */
@@ -108,7 +109,7 @@ function TabLink({
   showLabel,
 }: {
   t: AppFrameTab;
-  current: AppTab;
+  current: AppTab | null;
   onTab?: (key: AppTab) => void;
   className: string;
   activeClass: string;

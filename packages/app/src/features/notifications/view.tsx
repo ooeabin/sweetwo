@@ -3,6 +3,7 @@ import { maskMoney, notiGroup, notiTime } from '@sweetwo/core';
 import { NotificationPanel, type IconName } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { copy } from './copy';
 import { useNotiList, useNotiPeople, useOpenNotification } from './data';
@@ -22,6 +23,7 @@ const ICON: Record<string, IconName> = {
 /** N-01·N-02 공통 내용: 묶음(오늘·이번 주·이전), 줄, 모두 읽음, 더 불러오기, 실패·오프라인 */
 export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onClose: () => void }) {
   const qc = useQueryClient();
+  const nav = useNavigate();
   const list = useNotiList();
   const person = useNotiPeople();
   const open = useOpenNotification();
@@ -97,8 +99,10 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
         await markNotificationsRead().catch(() => undefined);
         await qc.invalidateQueries({ queryKey: qk.notifications });
       }}
-      // 알림 설정(S-14)은 설정 화면과 함께
-      onSettings={undefined}
+      onSettings={() => {
+        onClose();
+        nav('/settings/notifications');
+      }}
       onClose={onClose}
       onEnd={list.hasNextPage ? () => void list.fetchNextPage() : undefined}
       more={list.isFetchingNextPage}
