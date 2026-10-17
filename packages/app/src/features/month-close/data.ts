@@ -12,17 +12,21 @@ import {
 } from '@sweetwo/api';
 import { coupleOf, readPlanSnapshot, todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCloseTarget } from './target';
 
 // 월말 정리 데이터. 키는 이번 달과 같은 qk라 캐시를 같이 쓴다.
-export function useCloseData() {
+export function useCloseData(useTarget = true) {
   const today = todayKst();
+  const target = useCloseTarget();
+  // 놓친 달 정리면 그 플랜(끝 날짜로 찾음), 아니면 오늘이 든 플랜
+  const day = useTarget && target.day ? target.day : today;
   const qc = useQueryClient();
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const plan = useQuery({
-    queryKey: qk.currentPlan(today),
-    queryFn: () => fetchCurrentPlan(today),
+    queryKey: qk.currentPlan(day),
+    queryFn: () => fetchCurrentPlan(day),
   });
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const cats = useQuery({ queryKey: qk.spendCategories, queryFn: fetchSpendCategories });
@@ -56,11 +60,22 @@ export function useCloseData() {
   const mineOnly = solo || (!joined && !!c?.partnerUnknown);
   const myIncome = c?.myIncome ?? 0;
   const snapIncome = readPlanSnapshot(plan.data?.snapshot).income;
-  const incomeDefault = mineOnly
+  const baseIncome = mineOnly
     ? myIncome
     : joined
       ? myIncome + (c?.partnerIncome ?? 0)
       : (snapIncome ?? myIncome + (c?.partnerIncome ?? 0));
+  // 변동 수입자가 W-04a2에 답했으면 기준 대신 실제(사람마다)
+  const cl = close.data;
+  const side = me.data?.side === 'bride' ? 'bride' : 'groom';
+  const actualOf = (s: 'groom' | 'bride') =>
+    s === 'groom' ? (cl?.income_actual_groom ?? null) : (cl?.income_actual_bride ?? null);
+  const myActual = actualOf(side);
+  const partnerActual = mineOnly ? null : actualOf(side === 'groom' ? 'bride' : 'groom');
+  const incomeDefault =
+    baseIncome +
+    (myActual !== null ? myActual - myIncome : 0) +
+    (partnerActual !== null ? partnerActual - (c?.partnerIncome ?? 0) : 0);
   const cut = living.data?.allowanceCut ?? 0;
   const cutMine = !!cut && (living.data?.allowanceSide ?? me.data?.side) === me.data?.side;
   const baseAllowance = me.data?.allowance ?? 0;
@@ -83,6 +98,11 @@ export function useCloseData() {
     close: close.data ?? null,
     joined,
     solo,
+    /** 놓친 달 정리(다음 기준일이 지난 뒤): 지금 정리하기 / 쉬어가기 */
+    late: day !== today,
+    rest: day !== today && target.mode === 'rest',
+    restPlans: target.plans,
+    clearTarget: target.clear,
     /** 부부 값(coupleOf) */
     couple: c,
     proposals: proposals.data ?? [],

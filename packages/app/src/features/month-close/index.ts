@@ -4,3 +4,4 @@ export { CloseRoute } from './close-route';
 export { useCloseData } from './data';
 export { closeSummaryProps } from './summary';
 export { W04pBundle } from './pages/w-04p-bundle';
+export { W04Missed } from './pages/w-04-missed';

@@ -22,7 +22,7 @@ export function W04aStart() {
       if (!d.close?.started_at)
         await updateMonthClose(id, { started_by: d.me.id, started_at: new Date().toISOString() });
       await d.refreshClose();
-      nav(closePath('w-04j'));
+      nav(closePath(d.me.income_variable ? 'w-04a2' : 'w-04j'));
     } catch {
       setSaving(false);
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void start() });

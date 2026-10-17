@@ -1,5 +1,6 @@
 import {
   fetchInquiries,
+  fetchPastPlans,
   fetchMyUnlink,
   fetchUnlink,
   fetchUnlinkPartnerName,
@@ -11,6 +12,8 @@ import {
   formatMonthDay,
   formatYm,
   inLivingCheckWindow,
+  missedPlans,
+  missedRange,
   todayKst,
   type Upcoming,
 } from '@sweetwo/core';
@@ -62,6 +65,13 @@ export function H01ThisMonth() {
     plan.data.status !== 'closed' &&
     inLivingCheckWindow(todayKst(), plan.data.cycle_start, plan.data.cycle_end);
   const living = useLivingCheck(livingOpen ? (plan.data?.id ?? null) : null);
+  // 놓친 달: 기준일이 지나도 정리하지 않은 지난 플랜
+  const past = useQuery({
+    queryKey: qk.pastPlans(todayKst()),
+    queryFn: () => fetchPastPlans(todayKst()),
+    enabled: !!plan.data,
+  });
+  const missed = missedPlans(past.data ?? []);
   const unlink = useQuery({
     queryKey: qk.unlink,
     queryFn: fetchUnlink,
@@ -103,6 +113,13 @@ export function H01ThisMonth() {
       key: `access-${a.id}`,
       title: copy.accessTodo,
       to: `/settings/help/access/${a.id}`,
+    });
+  if (missed.length)
+    tops.push({
+      key: 'missed',
+      title: copy.missedTodo,
+      sub: copy.missedTodoSub(missedRange(missed)),
+      to: '/month/missed',
     });
   if (livingOpen && living.isSuccess && !living.data)
     tops.push({ key: 'living', title: copy.livingTodo, to: '/plan/living-check' });

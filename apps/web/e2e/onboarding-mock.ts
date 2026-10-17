@@ -694,6 +694,22 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           db.proposals.filter((p) => p.month_close_id === b.p_close && p.status === 'open').length,
         );
       }
+      if (fn === 'answer_actual_income') {
+        const b = body();
+        const amount = Number(b.p_amount);
+        const base = Number(db.me.monthly_income ?? 0);
+        for (const c of db.closes)
+          if (c.id === b.p_close)
+            c[db.me.side === 'bride' ? 'income_actual_bride' : 'income_actual_groom'] = amount;
+        return json(route, amount - base);
+      }
+      if (fn === 'rest_missed_months') {
+        const b = body();
+        for (const p of db.plans)
+          if ((b.p_plans as string[]).includes(String(p.args.id ?? 'plan-1')))
+            p.args.status = 'skipped';
+        return json(route, (b.p_plans as string[]).length);
+      }
       if (fn === 'set_living_check') {
         if (db.space) db.space.living_check = body().p_on;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
@@ -1131,6 +1147,29 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const ends = db.plans.map((p) => String(p.args.p_cycle_end)).sort();
         return json(route, ends.length ? [{ cycle_end: ends[ends.length - 1] }] : []);
       }
+      // 지난 플랜(놓친 달): cycle_end < 오늘, 최근 순 + 그 플랜의 정리
+      const lt = url.searchParams.get('cycle_end');
+      if (lt?.startsWith('lt.')) {
+        const day = lt.slice(3);
+        return json(
+          route,
+          db.plans
+            .map((p) => p.args)
+            .filter((a) => String(a.p_cycle_end) < day)
+            .sort((x, y) => String(y.p_cycle_start).localeCompare(String(x.p_cycle_start)))
+            .map((a) => ({
+              id: a.id ?? 'plan-1',
+              label_month: a.p_label_month,
+              cycle_start: a.p_cycle_start,
+              cycle_end: a.p_cycle_end,
+              status: a.status ?? 'created',
+              merged_close: !!a.p_merged_close,
+              closes: db.closes
+                .filter((c) => c.plan_id === (a.id ?? 'plan-1'))
+                .map((c) => ({ status: c.status, deleted_at: c.deleted_at ?? null })),
+            })),
+        );
+      }
       // 오늘이 든 플랜만(cycle_start ≤ 오늘 ≤ cycle_end)
       const lte = url.searchParams.get('cycle_start')?.replace(/^lte\./, '');
       const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
@@ -1159,7 +1198,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         ...l,
       }));
       return json(route, {
-        id: 'plan-1',
+        id: a.id ?? 'plan-1',
         label_month: a.p_label_month,
         cycle_start: a.p_cycle_start,
         cycle_end: a.p_cycle_end,

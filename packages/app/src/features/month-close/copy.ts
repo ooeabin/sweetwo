@@ -73,6 +73,24 @@ export const copy = {
   noChange: '바뀐 값이 없어요',
   toMonth: '이번 달로', // [확인 필요]
 
+  // W-04a2 실제 수입
+  actualTitle: '이번 달 실제 들어온 돈은 얼마예요?',
+  incomeShortToast: (amount: string) => `다음 달에 비상금에서 생활비로 ${amount}을 채워요`, // [확인 필요]
+  incomeOverTitle: (amount: string) => `기준보다 ${amount} 더 들어왔어요`, // [확인 필요]
+  incomeOverHelp: '더 들어온 돈은 목표나 용돈으로 나눌 수 있어요', // [확인 필요]
+  incomeOverGo: '추가 소득 나누기',
+
+  // 놓친 달
+  missedTitle: (m: string) => `${m} 월급 플랜을 아직 정리하지 않았어요`,
+  missedSub: (m: number) => `${m}월 플랜은 이미 시작했어요`,
+  missedMany: (range: string) => `${range} 정리가 밀렸어요`,
+  missedNow: '지금 정리하기',
+  missedNowSub: '그달 쓴 돈과 넣은 돈을 한 번에 적어요',
+  missedRest: '쉬어가기',
+  missedRestSub: '그달 합계만 적고 넘어가요',
+  missedTodo: '지난달 정리',
+  restDone: '그달 합계를 적었어요', // [확인 필요]
+
   // W-04h 다음 달 조정
   adjustTitle: '다음 달 플랜, 바꿀 게 있을까요?',
   heldBadge: '보류', // [확인 필요]

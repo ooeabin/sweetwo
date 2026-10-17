@@ -28,7 +28,7 @@ import { closePath, closeProgress, useCloseData } from '../data';
 // ‘이번 달만 고치기’(고정지출 줄 고치기)는 항목별 고정지출 금액(O-37)을 받은 뒤에.
 export function W04jSpendEntry({ mode = 'early' }: { mode?: 'early' | 'close' }) {
   const nav = useNavigate();
-  const d = useCloseData();
+  const d = useCloseData(mode === 'close');
   const [amounts, setAmounts] = useState<Record<string, number | null>>({});
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');

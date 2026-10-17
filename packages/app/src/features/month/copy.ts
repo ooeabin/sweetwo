@@ -32,6 +32,8 @@ export const copy = {
   unlinkBandGo: '확인하기',
   unlinkTodo: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   accessTodo: '문의를 확인하려면 동의가 필요해요',
+  missedTodo: '지난달 정리',
+  missedTodoSub: (m: string) => `${m} 월급 플랜을 아직 정리하지 않았어요`,
   livingTodo: '이번 달 생활비, 지금까지 어때요?',
   reconnectTodo: (name: string) => `${name}님이 다시 연결하자고 해요`,
   unlinkTodoSub: (md: string) => `${md}까지`, // [확인 필요] 기한 표시
