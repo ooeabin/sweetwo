@@ -10,7 +10,7 @@ import { startFamilyAdd } from './y-03-family';
 // Y-01 챙길 날 목록(docs/spec/24-calendar.md 4~9·12번): 보기 필터(전체·챙길 날·돈 날짜), 60일 안 돈 날짜는 같은 목록에 작은 줄
 // (누르면 해당 화면). 다음 챙길 날 카드(4번, 준비하기 → Y-05), 60일 안 챙길 날(5번, 행 → Y-05).
 // 기록 없이 7일 지난 날은 맨 위에 ‘기록하기’(→ Y-08). 가족(8번): 찬우 쪽 / 예빈 쪽 두 줄, 호칭 + 다음 생일 D-day(호칭 → Y-03 수정, ‘추가’ → Y-03).
-// 등록 전 빈 상태 + Y-02 처음 등록. 양가 비용(7번), 드린 기록(9번), ‘기록하기’는 다음 단계.
+// 양가 비용(7번) → Y-06. 등록 전 빈 상태 + Y-02 처음 등록. 드린 기록(9번)은 다음 단계.
 export function Y01CareList() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -82,6 +82,25 @@ export function Y01CareList() {
                 </Button>
               </section>
             )}
+            <section className="hg-card hg-stack" aria-label={copy.fcTitle}>
+              <span className="hg-card__label">{copy.fcTitle}</span>
+              <b>
+                {d.familyCost.engaged
+                  ? copy.fcSpentEngaged(m(d.familyCost.total), m(d.familyCost.spent))
+                  : copy.fcSpent(m(d.familyCost.total), m(d.familyCost.spent))}
+              </b>
+              {!d.familyCost.engaged && (
+                <span className="hg-card__meta">{copy.fcHeld(m(d.familyCost.held))}</span>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                style={{ alignSelf: 'flex-start' }}
+                onClick={() => nav('/calendar/family-cost')}
+              >
+                {copy.see}
+              </Button>
+            </section>
             <section className="hg-stack" aria-label={copy.careList}>
               <SectionHeader title={copy.careList} />
               {!soon.length ? (

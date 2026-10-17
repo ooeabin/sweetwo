@@ -1921,6 +1921,10 @@ export type Database = {
         Returns: undefined
       }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
+      apply_family_budget: {
+        Args: { p: Json; sid: string }
+        Returns: undefined
+      }
       apply_proposal_values: {
         Args: {
           p: Omit<
@@ -2020,6 +2024,8 @@ export type Database = {
         Returns: undefined
       }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
+      family_budget_now: { Args: { sid: string }; Returns: Json }
+      family_budget_ok: { Args: { p: Json }; Returns: boolean }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
       goal_asset_sums: {
         Args: Record<PropertyKey, never>
@@ -2117,6 +2123,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      save_family_budget: { Args: { p_after: Json }; Returns: undefined }
       split_line_done: {
         Args: {
           l: Omit<

@@ -7,3 +7,4 @@ export { Y05Budget, Y05CareDay } from './pages/y-05-care-day';
 export { Y03Family } from './pages/y-03-family';
 export { Y07CareAdd } from './pages/y-07-care-add';
 export { Y08Record } from './pages/y-08-record';
+export { Y06Edit, Y06FamilyCost } from './pages/y-06-family-cost';

@@ -239,6 +239,27 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, shares.length);
       }
       // 제안: 서버 함수와 같은 규칙만 간단히(항목당 열린 제안 하나, 용돈은 사람마다)
+      // 양가 비용 예산 바로 저장(혼자): 같은 종류 챙길 날 쓸 돈, 양가 비용 목표 금액
+      if (fn === 'save_family_budget') {
+        const a = body().p_after as Record<string, number>;
+        const parent = (id: unknown) =>
+          db.family.some((f) => f.id === id && f.relation === 'parent');
+        for (const c of db.cares) {
+          if (c.category !== 'family' || c.deleted_at) continue;
+          const key =
+            c.kind === 'seollal' || c.kind === 'chuseok'
+              ? 'holiday'
+              : c.kind === 'birthday' && parent(c.member_id)
+                ? 'birthday'
+                : c.kind === 'parents_day'
+                  ? 'parents_day'
+                  : 'other';
+          if (a[key] !== undefined) c.budget = a[key];
+        }
+        for (const g of db.goals)
+          if (g.template === 'family_cost') g.target_amount = a.target_amount;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'propose') {
         const b = body();
         const me = String(db.me.id);
@@ -266,7 +287,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
                   ? { deadline: goal?.deadline ?? null }
                   : item === 'goal_pause'
                     ? { paused: goal?.status === 'paused' }
-                    : { deleted: false };
+                    : item === 'family_budget'
+                      ? {
+                          target_amount:
+                            db.goals.find((g) => g.template === 'family_cost')?.target_amount ??
+                            null,
+                        }
+                      : { deleted: false };
         const row = {
           id: `prop-${db.proposals.length + 1}`,
           space_id: 'space-1',

@@ -16,7 +16,12 @@ import {
 import {
   careDatesInMonth,
   coupleBaseDay,
+  careRound,
   coupleOf,
+  familyCostSummary,
+  familyRows,
+  monthlyOut,
+  roundOccurrences,
   goalHeld,
   overdueDate,
   recordDate,
@@ -138,6 +143,46 @@ export function useCalendarData() {
     );
   };
   const familyGoal = (goals.data ?? []).find((g) => g.template === 'family_cost') ?? null;
+
+  // 이번 회차 양가 비용(Y-01 7번, Y-06): 결혼기념일 기준 1년, 양가 날만. 예비부부는 오늘부터 1년
+  const engaged = sp?.marriage_status === 'engaged';
+  const round = careRound(engaged ? null : (sp?.wedding_date ?? null), today);
+  const parents = new Set(
+    (family.data ?? []).filter((f) => f.relation === 'parent').map((f) => f.id),
+  );
+  const occ = roundOccurrences(
+    careList.map((x) => ({ ...x, parent: !!x.member_id && parents.has(x.member_id) })),
+    round,
+  );
+  const familyIds = new Set(careList.filter((x) => x.category === 'family').map((x) => x.id));
+  const fcTotal = occ.reduce((t, o) => t + o.care.budget, 0);
+  const fcSpent = recordList
+    .filter(
+      (r) => familyIds.has(r.care_day_id) && r.occurs_on >= round.start && r.occurs_on <= round.end,
+    )
+    .reduce((t, r) => t + r.amount, 0);
+  const fcHeld = familyGoal ? heldOf(familyGoal.id) : 0;
+  const fcNext = occ.find((o) => o.date >= today && !recordedOf(o.care.id)(o.date));
+  const familyCost = {
+    engaged,
+    round,
+    rows: familyRows(occ),
+    total: fcTotal,
+    spent: fcSpent,
+    held: fcHeld,
+    months: monthlyOut(occ, round, today),
+    summary: familyCostSummary({
+      total: fcTotal,
+      spent: fcSpent,
+      held: fcHeld,
+      round,
+      today,
+      next: fcNext ? { date: fcNext.date, budget: fcNext.care.budget } : null,
+    }),
+    /** 열린 양가 비용 예산 제안 */
+    proposal:
+      (proposals.data ?? []).find((p) => p.item === 'family_budget' && p.status === 'open') ?? null,
+  };
   return {
     loading,
     records: recordList,
@@ -145,6 +190,7 @@ export function useCalendarData() {
     overdue,
     heldOf,
     familyGoal,
+    familyCost,
     unitOf,
     monthOf,
     caresOf,
