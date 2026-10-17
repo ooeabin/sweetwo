@@ -14,6 +14,8 @@ export interface CoupleUser {
   payday: number | null;
   payday_last: boolean;
   allowance: Won | null;
+  /** 다른 수입 월 합계(O-35b, 서버 트리거). 월 수입에 더함 */
+  other_income?: Won;
 }
 export interface CoupleSpace {
   created_by: string | null;
@@ -45,6 +47,12 @@ export interface Couple {
   partnerPayday: BaseDay | null;
 }
 
+/** 월 수입 = 월급(실수령) + 다른 수입(09 6-1 부업·월세·지원금). 월급을 모르면 다른 수입만, 둘 다 없으면 null */
+const incomeOf = (u: Pick<CoupleUser, 'monthly_income' | 'other_income'>): Won | null => {
+  const other = u.other_income ?? 0;
+  return u.monthly_income === null ? (other > 0 ? other : null) : u.monthly_income + other;
+};
+
 const payday = (u: Pick<CoupleUser, 'payday' | 'payday_last'> | null): BaseDay | null =>
   !u ? null : u.payday_last ? 'last' : (u.payday ?? null);
 
@@ -60,12 +68,8 @@ export function coupleOf(me: CoupleUser, sp: CoupleSpace, partner: CoupleUser | 
     starter,
     myName: me.nickname ?? '',
     partnerName: real ? (real.nickname ?? '') : (sp.partner_nickname ?? ''),
-    myIncome: me.monthly_income,
-    partnerIncome: real
-      ? real.monthly_income
-      : sp.partner_income_unknown
-        ? null
-        : sp.partner_income,
+    myIncome: incomeOf(me),
+    partnerIncome: real ? incomeOf(real) : sp.partner_income_unknown ? null : sp.partner_income,
     partnerUnknown: real ? real.monthly_income === null : sp.partner_income_unknown,
     partnerEstimated: real ? false : sp.partner_income_estimated,
     myAllowance: me.allowance,

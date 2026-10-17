@@ -163,6 +163,20 @@ export const copy = {
   weekCardNo: '아니요',
   weekFixedDone: '고정지출을 정리했어요', // [확인 필요]
 
+  // 첫 주 상여금·다른 수입(17 O-34, O-35, O-35b)
+  weekBonus: '상여금이나 성과급도 있나요?',
+  weekBonusYes: '있어요',
+  weekBonusNo: '없어요',
+  weekBonusList: '보통 몇 월에 얼마쯤 받아요?',
+  weekBonusTotal: (man: string) => `1년에 ${man} 원 받아요`,
+  weekBonusName: '상여금',
+  weekIncome: '월급 말고 들어오는 돈이 또 있나요?',
+  weekIncomeKinds: { side_job: '부업·N잡', rent: '월세·임대 수입', support: '정부 지원금' },
+  weekIncomeAmount: (name: string) => `${topic(name)} 한 달에 얼마쯤이에요?`, // [확인 필요] 항목별 월 금액
+  weekIncomeLow: '들쭉날쭉하면 적게 벌 때 기준으로 적어 주세요', // [확인 필요] 변동 수입 기준
+  weekRestDone: '들어오는 돈을 정리했어요', // [확인 필요]
+  otherIncomeIn: (amount: string) => `다른 수입 ${amount} 포함`, // [확인 필요] F-05 내 수입 보조 줄
+
   // O-53 투자 원칙
   principleTitle: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
   principleOptions: {

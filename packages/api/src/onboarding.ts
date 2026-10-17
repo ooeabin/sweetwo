@@ -20,6 +20,7 @@ export type Me = Pick<
   | 'payday_last'
   | 'allowance'
   | 'card_main'
+  | 'other_income'
 >;
 export type Space = Tables<'couple_space'>;
 export type Goal = Tables<'goal'>;
@@ -33,7 +34,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main',
+      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income',
     )
     .maybeSingle();
   fail(error);
@@ -289,6 +290,8 @@ export type PartnerProfile = {
   payday: number | null;
   payday_last: boolean;
   allowance: number | null;
+  /** 다른 수입 월 합계(O-35b) */
+  other_income: number;
 };
 export async function fetchPartner(): Promise<PartnerProfile | null> {
   const { data, error } = await supabase().rpc('partner_profile');

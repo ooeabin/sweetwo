@@ -26,6 +26,9 @@ export interface MemDb {
   assetHistory: Record<string, unknown>[];
   partnerSums: Record<string, unknown>[];
   netWorth: Record<string, unknown>[];
+  /** 다른 수입(O-35b), 상여금(O-35) */
+  incomeItems: Record<string, unknown>[];
+  incomeEvents: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -82,6 +85,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     assetHistory: [],
     partnerSums: [],
     netWorth: [],
+    incomeItems: [],
+    incomeEvents: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -481,6 +486,36 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (method === 'PATCH') {
         const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
         for (const g of db.goals) if (ids.includes(String(g.id))) Object.assign(g, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    // 다른 수입·상여금: 내 것 넣기·고치기, 다른 수입 합계는 서버 트리거처럼 app_user.other_income에
+    for (const [tbl, rows] of [
+      ['income_item', db.incomeItems],
+      ['income_event', db.incomeEvents],
+    ] as const) {
+      if (path !== `/rest/v1/${tbl}`) continue;
+      const resum = () => {
+        db.me.other_income = db.incomeItems
+          .filter((r) => !r.deleted_at && r.owner_user_id === db.me.id)
+          .reduce((t, r) => t + Number(r.monthly_amount), 0);
+      };
+      if (method === 'GET')
+        return json(
+          route,
+          rows.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const body = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+        for (const r of Array.isArray(body) ? body : [body])
+          rows.push({ id: `${tbl}-${rows.length + 1}`, deleted_at: null, ...r });
+        resum();
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('eq.') ? [eqId(url)] : inIds(url);
+        for (const r of rows) if (ids.includes(String(r.id))) Object.assign(r, body());
+        resum();
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }

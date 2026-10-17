@@ -18,5 +18,7 @@ export const qk = {
   partnerAssetSums: ['partner_asset_sums'] as const,
   netWorthHistory: ['net_worth_history'] as const,
   investAnswers: ['invest_answers'] as const,
+  incomeItems: ['income_item'] as const,
+  incomeEvents: ['income_event'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

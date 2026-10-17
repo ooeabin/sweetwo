@@ -33,7 +33,11 @@ export function F05Money() {
         <div className="hg-list">
           <ListRow
             label={c.myName}
-            sub={[d.me.income_variable ? copy.baseIncome : '', day(c.myPayday)]
+            sub={[
+              d.me.income_variable ? copy.baseIncome : '',
+              day(c.myPayday),
+              d.me.other_income ? copy.otherIncomeIn(m(d.me.other_income)) : '',
+            ]
               .filter(Boolean)
               .join(', ')}
             value={m(c.myIncome ?? 0)}

@@ -21,6 +21,9 @@ import {
   F05Money,
   F06Diagnosis,
   O53InvestPrinciple,
+  O34Bonus,
+  O35BonusList,
+  O35bOtherIncome,
   O37FixedItems,
   O38bCard,
   O41AssetKinds,
@@ -281,6 +284,46 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // O-38b 생활비 카드 사용
+      {
+        path: '/assets/week/bonus',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O34Bonus />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-34 상여금 여부(첫 주 5일째)
+      {
+        path: '/assets/week/bonus/list',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O35BonusList />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-35 상여금 월·금액
+      {
+        path: '/assets/week/income',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O35bOtherIncome />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-35b 다른 수입
+      {
+        path: '/assets/week/income/:n',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O35bOtherIncome />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-35b 항목별 월 금액
       {
         path: '/assets/money',
         element: (

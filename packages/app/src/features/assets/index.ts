@@ -16,3 +16,6 @@ export { O46LoanRate } from './pages/o-46-loan-rate';
 export { O47LoanPayment } from './pages/o-47-loan-payment';
 export { O37FixedItems } from './pages/o-37-fixed-items';
 export { O38bCard } from './pages/o-38b-card';
+export { O34Bonus } from './pages/o-34-bonus';
+export { O35BonusList } from './pages/o-35-bonus-list';
+export { O35bOtherIncome } from './pages/o-35b-other-income';
