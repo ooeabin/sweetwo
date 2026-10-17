@@ -24,3 +24,4 @@ export * from './rules/goal';
 export * from './rules/asset';
 export * from './rules/unlink';
 export * from './zip';
+export * from './faq';

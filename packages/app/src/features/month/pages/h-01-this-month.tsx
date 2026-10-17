@@ -1,4 +1,10 @@
-import { fetchMyUnlink, fetchUnlink, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import {
+  fetchInquiries,
+  fetchMyUnlink,
+  fetchUnlink,
+  fetchUnlinkPartnerName,
+  qk,
+} from '@sweetwo/api';
 import {
   formatDateFull,
   formatDateWeekday,
@@ -51,6 +57,7 @@ export function H01ThisMonth() {
     queryFn: fetchUnlink,
     enabled: space.data?.couple_state === 'unlink_pending',
   });
+  const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const solo = space.data?.couple_state === 'solo' || space.data?.couple_state === 'not_joined';
   const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
   const reconnectAsk =
@@ -76,6 +83,16 @@ export function H01ThisMonth() {
       title: copy.unlinkTodo(partner.data?.nickname ?? space.data.partner_nickname ?? ''),
       sub: copy.unlinkTodoSub(formatMonthDay(unlink.data.deadline)),
       to: '/settings/couple/unlink/review',
+    });
+  // 관리자 열람 요청(S-19b): 할 일
+  const asks = (inquiries.data ?? []).flatMap((q) =>
+    q.access_request.filter((a) => a.status === 'requested'),
+  );
+  for (const a of asks)
+    tops.push({
+      key: `access-${a.id}`,
+      title: copy.accessTodo,
+      to: `/settings/help/access/${a.id}`,
     });
   if (reconnectAsk)
     tops.push({
