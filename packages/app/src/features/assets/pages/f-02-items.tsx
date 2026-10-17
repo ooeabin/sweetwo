@@ -1,6 +1,23 @@
 import type { Asset } from '@sweetwo/api';
-import { assetGroupsOf, daysBetween, formatDot, todayKst, type AssetSide } from '@sweetwo/core';
-import { Badge, Button, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  assetGroupsOf,
+  daysBetween,
+  formatDot,
+  investSummary,
+  todayKst,
+  type AssetSide,
+} from '@sweetwo/core';
+import {
+  Badge,
+  Button,
+  Chip,
+  Icon,
+  ListRow,
+  SectionHeader,
+  Tabs,
+  type BadgeKind,
+} from '@sweetwo/ui';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { AssetsFrame } from '../assets-frame';
@@ -9,9 +26,49 @@ import { ownerOf, useAssetsData } from '../data';
 
 const STALE_DAYS = 92; // 3개월 넘게 안 고친 줄 → “금액이 맞나요?”
 
+type SortKey = 'name' | 'owner' | 'amount' | 'updated';
+interface Sort {
+  key: SortKey;
+  asc: boolean;
+}
+const SORTS: SortKey[] = ['name', 'owner', 'amount', 'updated'];
+// 처음 누르면: 글자는 가나다순, 금액·수정일은 큰·최근 순
+const FIRST_ASC: Record<SortKey, boolean> = {
+  name: true,
+  owner: true,
+  amount: false,
+  updated: false,
+};
+const SORT_KEY = 'sweetwo.asset-sort';
+const DEFAULT_SORT: Sort = { key: 'amount', asc: false };
+const readSort = (): Sort => {
+  try {
+    const [key, dir] = (localStorage.getItem(SORT_KEY) ?? '').split(':');
+    const k = SORTS.find((x) => x === key);
+    return k ? { key: k, asc: dir === 'asc' } : DEFAULT_SORT;
+  } catch {
+    return DEFAULT_SORT;
+  }
+};
+const saveSort = (s: Sort) => {
+  try {
+    localStorage.setItem(SORT_KEY, `${s.key}:${s.asc ? 'asc' : 'desc'}`);
+  } catch {
+    /* 이번 화면에만 */
+  }
+};
+const ROLE_KIND: Record<string, BadgeKind> = {
+  living: 'together',
+  goal_fund: 'goal',
+  emergency: 'safety',
+  wedding: 'family',
+  personal: 'temp',
+};
+
 // F-02 자산·부채 목록(23 F-02 7~11·13·14번): 자산·부채 전환(탭마다 합계), 묶음(F-03a 그룹) 안 금액 큰 순,
 // 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 배우자 ‘합계만’은 묶음별 한 줄(누를 수 없음).
-// 목표에 연결된 자산은 목표 배지. 열 정렬, 투자 묶음 줄(투자 원칙), 통장 역할 배지는 다음 단계.
+// 배지: 통장 역할(통장과 이어진 자산), 목표 연결. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억.
+// 투자 묶음 줄 = 투자 비중(총자산 대비) + 손익(원금 있는 항목). 투자 원칙 허용 비중(O-53)은 다음 단계.
 export function F02Items() {
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -20,13 +77,35 @@ export function F02Items() {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const today = todayKst();
+  const [sort, setSort] = useState<Sort>(readSort);
+  const pickSort = (key: SortKey) => {
+    const next = { key, asc: sort.key === key ? !sort.asc : FIRST_ASC[key] };
+    setSort(next);
+    saveSort(next);
+  };
+  const ko = new Intl.Collator('ko');
+  const cmp = (a: Asset, b: Asset) => {
+    const v =
+      sort.key === 'name'
+        ? ko.compare(a.name, b.name)
+        : sort.key === 'owner'
+          ? ko.compare(ownerOf(a, d).name, ownerOf(b, d).name)
+          : sort.key === 'amount'
+            ? a.amount - b.amount
+            : a.updated_at.localeCompare(b.updated_at);
+    return (sort.asc ? v : -v) || b.amount - a.amount;
+  };
+  const roleOf = new Map(
+    d.accounts.flatMap((c) => (c.asset_id ? [[c.asset_id, c.role] as const] : [])),
+  );
+  const inv = investSummary(d.items, d.sums);
 
   const items = d.items.filter((a) => a.side === side);
   const sums = d.sums.filter((s) => s.side === side);
   const groups = assetGroupsOf(side)
     .map((g) => ({
       g,
-      rows: items.filter((a) => a.grp === g.key).sort((a, b) => b.amount - a.amount),
+      rows: items.filter((a) => a.grp === g.key).sort(cmp),
       partner: sums.find((s) => s.grp === g.key),
     }))
     .filter((x) => x.rows.length || x.partner);
@@ -48,6 +127,11 @@ export function F02Items() {
             {a.name}
             {mine && a.visibility !== 'all' && <Badge kind="temp">{copy.vis[a.visibility]}</Badge>}
             {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
+            {roleOf.has(a.id) && (
+              <Badge kind={ROLE_KIND[roleOf.get(a.id) ?? ''] ?? 'temp'}>
+                {copy.roles[roleOf.get(a.id) ?? 'personal']}
+              </Badge>
+            )}
             {goalName(a.goal_id) && (
               <Badge kind="goal">{copy.goalBadge(goalName(a.goal_id))}</Badge>
             )}
@@ -84,6 +168,30 @@ export function F02Items() {
           </Button>
         </div>
       )}
+      {groups.length > 0 && (
+        <div
+          className="hg-row"
+          role="group"
+          aria-label={copy.sortLabel}
+          style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}
+        >
+          {SORTS.map((k) => {
+            const on = sort.key === k;
+            return (
+              <Chip
+                key={k}
+                small
+                selected={on}
+                aria-label={on ? copy.sortDir(copy.sorts[k], sort.asc) : copy.sorts[k]}
+                onClick={() => pickSort(k)}
+              >
+                {copy.sorts[k]}
+                {on && <Icon name={sort.asc ? 'chevron-up' : 'chevron-down'} size={16} />}
+              </Chip>
+            );
+          })}
+        </div>
+      )}
       {groups.map(({ g, rows, partner }) => (
         <section key={g.key} className="hg-stack" aria-label={g.name}>
           <SectionHeader
@@ -91,6 +199,20 @@ export function F02Items() {
             count={m(rows.reduce((t, a) => t + a.amount, 0) + (partner?.total ?? 0))}
           />
           <div className="hg-list">
+            {g.key === 'invest' && inv.sharePct !== null && (
+              // 12번 투자 묶음 줄(누를 수 없음)
+              <ListRow
+                label={copy.investShare(inv.sharePct)}
+                value={
+                  inv.gain !== null && inv.gain !== 0
+                    ? copy.investGain(
+                        `${inv.gain > 0 ? '+' : '−'}${m(Math.abs(inv.gain))}`,
+                        inv.gainPct,
+                      )
+                    : undefined
+                }
+              />
+            )}
             {rows.map(row)}
             {partner && (
               <ListRow

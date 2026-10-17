@@ -275,6 +275,58 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('자산·부채 목록: 통장 역할 배지, 투자 묶음 줄, 정렬 칩(묶음 안, 기억)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.assets.push(
+    asset({
+      id: 'a5',
+      side: 'asset',
+      grp: 'cash',
+      kind: 'role_account',
+      name: '가족 비상금',
+      amount: 1_000_000,
+      owner: 'joint',
+      owner_user_id: null,
+      created_by: String(db.me.id),
+      updated_at: '2026-10-05T00:00:00Z',
+    }),
+  );
+  db.accounts.push(
+    { id: 'acc-1', role: 'living', name: '생활비 통장', asset_id: 'a1', deleted_at: null },
+    { id: 'acc-2', role: 'emergency', name: '가족 비상금', asset_id: 'a5', deleted_at: null },
+  );
+
+  await page.goto('/assets/items');
+  const cash = page.getByRole('region', { name: '현금성' });
+  await expect(cash.getByRole('button', { name: /생활비 통장/ })).toContainText('공동 생활비');
+  await expect(cash.getByRole('button', { name: /가족 비상금/ })).toContainText('비상금');
+  // 투자 비중 = (1,000 + 440) ÷ (300 + 100 + 1,000 + 200 + 440) = 71%, 손익 = 1,000 − 800
+  const invest = page.getByRole('region', { name: '투자' });
+  await expect(invest).toContainText('공동자금 투자 비중 71%');
+  await expect(invest).toContainText('+200만 원(+25%)');
+
+  const names = () => cash.getByRole('button').allTextContents();
+  // 기본 = 금액 큰 순
+  expect((await names())[0]).toContain('생활비 통장');
+  const sorts = page.getByRole('group', { name: '정렬' });
+  await expect(sorts.getByRole('button', { name: '금액, 내림차순' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await sorts.getByRole('button', { name: '이름' }).click();
+  await expect(sorts.getByRole('button', { name: '이름, 오름차순' })).toBeVisible();
+  expect((await names())[0]).toContain('가족 비상금');
+  await sorts.getByRole('button', { name: '이름, 오름차순' }).click();
+  expect((await names())[0]).toContain('생활비 통장');
+  await axe(page);
+  await page.reload();
+  await expect(
+    page.getByRole('group', { name: '정렬' }).getByRole('button', { name: '이름, 내림차순' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+});
+
 test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범위, 금액 수정, 삭제 되돌리기', async ({
   page,
 }) => {

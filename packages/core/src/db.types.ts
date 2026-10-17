@@ -5,6 +5,7 @@ export type Database = {
     Tables: {
       account: {
         Row: {
+          asset_id: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -23,6 +24,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          asset_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          asset_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -57,6 +60,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "account_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "asset"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "account_space_id_fkey"
             columns: ["space_id"]

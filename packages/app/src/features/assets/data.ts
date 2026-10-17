@@ -1,4 +1,5 @@
 import {
+  fetchAccounts,
   fetchAssets,
   fetchGoals,
   fetchMe,
@@ -21,6 +22,7 @@ export function useAssetsData() {
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const sums = useQuery({ queryKey: qk.partnerAssetSums, queryFn: fetchPartnerAssetSums });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  const accounts = useQuery({ queryKey: qk.accounts, queryFn: fetchAccounts });
   const history = useQuery({
     queryKey: qk.netWorthHistory,
     queryFn: () => fetchNetWorthHistory(120),
@@ -44,6 +46,7 @@ export function useAssetsData() {
     items,
     sums: sums.data ?? [],
     goals: goals.data ?? [],
+    accounts: accounts.data ?? [],
     nw,
     series,
     change,
