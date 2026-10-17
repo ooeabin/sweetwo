@@ -1563,6 +1563,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_plan: {
+        Args: {
+          p_amount: number
+          p_counter: Database["public"]["Enums"]["account_role"]
+          p_plan: string
+          p_role: Database["public"]["Enums"]["account_role"]
+        }
+        Returns: undefined
+      }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
       apply_proposal_values: {
         Args: {

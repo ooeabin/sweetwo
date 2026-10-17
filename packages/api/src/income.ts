@@ -79,3 +79,25 @@ export async function saveIncomeEvents(rows: { name: string; amount: number; mon
     .insert(rows.map((r) => ({ ...r, owner_user_id: m.id, space_id: m.space_id })));
   fail(error);
 }
+
+/** 들어오는 돈 하나 추가(W-07) */
+export async function insertIncomeEvent(r: {
+  name: string;
+  amount: number;
+  month: number;
+  yearly: boolean;
+}) {
+  const m = await mine();
+  const { error } = await supabase()
+    .from('income_event')
+    .insert({ ...r, owner_user_id: m.id, space_id: m.space_id });
+  fail(error);
+}
+/** 휴지통(되돌리기 = restore) */
+export async function trashIncomeEvent(id: string, restore = false) {
+  const { error } = await supabase()
+    .from('income_event')
+    .update({ deleted_at: restore ? null : new Date().toISOString() })
+    .eq('id', id);
+  fail(error);
+}

@@ -256,3 +256,19 @@ export async function uncheckSplit(lineId: string, side: 'groom' | 'bride') {
   const { error } = await supabase().rpc('uncheck_split', { p_line: lineId, p_side: side });
   fail(error);
 }
+
+/** 이번 달만 바꾸기(W-01a): 줄 금액을 바꾸고 차이는 빠지는 곳 줄이. 되돌리기 = 전 금액으로 다시 */
+export async function adjustPlan(
+  planId: string,
+  role: 'living' | 'goal_fund' | 'emergency',
+  amount: number,
+  counter: 'living' | 'goal_fund' | 'emergency',
+) {
+  const { error } = await supabase().rpc('adjust_plan', {
+    p_plan: planId,
+    p_role: role,
+    p_amount: amount,
+    p_counter: counter,
+  });
+  fail(error);
+}

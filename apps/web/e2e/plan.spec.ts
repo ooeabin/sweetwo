@@ -208,3 +208,76 @@ test('월급 플랜(합류 전): 월급 나누기 없이 미리보기 한 줄', 
   await expect(page.getByText('예빈님이 합류하면 여기서 월급을 나눠요')).toBeVisible();
   await expect(page.getByRole('button', { name: '월급 나누기' })).toHaveCount(0);
 });
+
+test('이번 달만 바꾸기(W-01a): 차이는 목표자금이 받고 미리보기, 되돌리기. 옮긴 줄은 못 바꿈', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/plan');
+  await page.getByRole('button', { name: '공동 생활비 이번 달만 바꾸기' }).click();
+  await heading(page, '공동 생활비에 이번 달 얼마 넣을까요?');
+  await page.getByLabel('공동 생활비에 이번 달 얼마 넣을까요?').fill('2050000');
+  await expect(page.getByText('목표자금 300만 원 → 280만 원')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/plan$/);
+  const lines = db.plans[0]?.args.p_lines as Record<string, unknown>[];
+  expect(lines[0]).toMatchObject({
+    amount: 2_050_000,
+    amount_groom: 1_230_000,
+    amount_bride: 820_000,
+  });
+  expect(lines[1]).toMatchObject({ amount: 2_800_000 });
+  await expect(page.getByRole('region', { name: '계획액' })).toContainText('205만 원');
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(page.getByRole('region', { name: '계획액' })).toContainText('185만 원');
+  expect(lines[1]).toMatchObject({ amount: 3_000_000 });
+
+  // 옮긴 줄은 못 바꿈(빠지는 곳 목표자금을 옮겼으면 공동 생활비도)
+  await page.getByRole('button', { name: '찬우 9.25 180만' }).click();
+  await expect(page.getByRole('button', { name: '찬우 9.25 180만' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: '공동 생활비 이번 달만 바꾸기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '비상금 이번 달만 바꾸기' })).toHaveCount(0);
+});
+
+test('들어오는 돈(W-07): 월별 목록, 추가(이름 → 금액 → 몇 월에), 지우기와 되돌리기', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/plan');
+  await page.getByRole('button', { name: /상여금 200만 원이 들어오는 달이에요/ }).click();
+  await expect(page).toHaveURL(/\/plan\/income$/);
+  await expect(page.getByRole('region', { name: '9월' })).toContainText('상여금');
+  await axe(page);
+
+  await page.getByRole('button', { name: '+ 추가' }).click();
+  await page.getByLabel('어떤 돈이에요?').fill('연말정산 환급');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('얼마예요?').fill('800000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '몇 월에 들어와요?');
+  await page.getByRole('radio', { name: '2월', exact: true }).click();
+  await page.getByRole('radio', { name: '올해만' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/plan\/income$/);
+  await expect(page.getByRole('region', { name: '2월' })).toContainText('80만 원');
+  expect(db.incomeEvents.at(-1)).toMatchObject({
+    name: '연말정산 환급',
+    amount: 800_000,
+    month: 2,
+    yearly: false,
+  });
+
+  await page.getByRole('button', { name: '연말정산 환급 지우기' }).click();
+  await expect(page.getByRole('region', { name: '2월' })).toHaveCount(0);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(page.getByRole('region', { name: '2월' })).toBeVisible();
+});

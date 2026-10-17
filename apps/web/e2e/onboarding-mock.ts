@@ -338,6 +338,34 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
+      // 이번 달만 바꾸기(W-01a): 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 기준값도
+      if (fn === 'adjust_plan') {
+        const a = body();
+        const args = db.plans[0]?.args;
+        const lines = (args?.p_lines as Record<string, unknown>[]) ?? [];
+        const A = lines.find((l) => l.account_role === a.p_role);
+        const B = lines.find((l) => l.account_role === a.p_counter);
+        if (!A || !B) return json(route, { message: 'no_line' }, 400);
+        const diff = Number(a.p_amount) - Number(A.amount);
+        const scale = (l: Record<string, unknown>, amt: number) => {
+          const g =
+            Number(l.amount) > 0
+              ? Math.round((amt * Number(l.amount_groom ?? 0)) / Number(l.amount))
+              : Math.round(amt / 2);
+          Object.assign(l, { amount: amt, amount_groom: g, amount_bride: amt - g });
+        };
+        const bAfter = Number(B.amount) - diff;
+        if (bAfter < 0) return json(route, { message: 'not_enough' }, 400);
+        scale(A, Number(a.p_amount));
+        scale(B, bAfter);
+        const key = (r: unknown) => (r === 'goal_fund' ? 'goalFund' : String(r));
+        const parts = (args?.p_snapshot as { parts?: Record<string, number> } | undefined)?.parts;
+        if (parts) {
+          parts[key(a.p_role)] = Number(a.p_amount);
+          parts[key(a.p_counter)] = bAfter;
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       // 월급 나누기 체크(W-02): 플랜 줄(p_lines)에 바로 기록
       if (fn === 'check_split' || fn === 'uncheck_split') {
         const a = body();

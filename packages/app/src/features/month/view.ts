@@ -145,6 +145,14 @@ export function monthView({
   const partnerSide: Side = mySide === 'groom' ? 'bride' : 'groom';
   const myLeft = splitLeft(lines, mySide);
   const paydayIn = (d: BaseDay | null) => (d === null || !cycle ? null : nextDayOf(cycle.start, d));
+  // 이번 달만 바꾸기(W-01a): 줄이 있고 아직 아무도 안 옮긴 통장 줄만. 연결 해제 대기 중이면 못 바꿈
+  const untouched = (role: string) => {
+    const l = lines.find((x) => x.target === 'account' && x.account_role === role);
+    return !!l && !l.groom_done_at && !l.bride_done_at;
+  };
+  const counterOf = (role: string) => (role === 'goal_fund' ? 'living' : 'goal_fund');
+  const adjustable = (role: string) =>
+    sp.couple_state !== 'unlink_pending' && untouched(role) && untouched(counterOf(role));
   const living = livingLeft(sp.living_budget ?? 0, spentVariable);
 
   const events = upcoming({
@@ -268,6 +276,11 @@ export function monthView({
       myPayday: paydayIn(c.myPayday),
       partnerPayday: paydayIn(c.partnerPayday),
       myName: c.myName,
+    },
+    /** W-01a 이번 달만 바꾸기: 빠지는 곳(목표자금, 목표자금을 바꾸면 공동 생활비)과 바꿀 수 있는지 */
+    adjust: {
+      counterOf,
+      can: (role: string) => !!plan && adjustable(role),
     },
     living,
     /** 이번 달 계획(우리 자산 F-01 15번): 월 수입, 지출(용돈 + 고정지출 + 생활비), 저축 가능 */

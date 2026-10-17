@@ -18,7 +18,7 @@ export const copy = {
     livingOnly: '생활비',
     saving: '저축',
   },
-  incomeMonth: (name: string, amount: string) => `${name} ${amount}이 들어오는 달이에요`,
+  incomeThisMonth: (name: string, amount: string) => `${name} ${amount}이 들어오는 달이에요`,
   plannedLabel: '계획액', // [확인 필요] 섹션 이름
   roles: {
     living: '공동 생활비',
@@ -50,6 +50,34 @@ export const copy = {
   partnerProgress: (name: string, done: number, total: number) => `${name} ${done}/${total}`,
   close: '닫기',
   nothing: '나눌 줄이 없어요', // [확인 필요]
+
+  // W-01a 이번 달만 바꾸기
+  editTitle: (role: string) => `${role}에 이번 달 얼마 넣을까요?`, // [확인 필요]
+  editHelp: '이번 달만 바뀌어요. 매달 기본값은 월 수입·지출에서 바꿔요', // [확인 필요]
+  editFrom: (role: string, before: string, after: string) => `${role} ${before} → ${after}`,
+  editTooMuch: (role: string) => `${role}보다 많이 옮길 수 없어요`, // [확인 필요]
+  editSave: '저장', // [확인 필요]
+  editShort: '이번 달만 바꾸기',
+  editLink: (role: string) => `${role} 이번 달만 바꾸기`,
+  adjusted: '이번 달만 바꿨어요',
+  undo: '되돌리기',
+
+  // W-07 들어오는 돈
+  incomeTitle: '들어오는 돈',
+  incomeHelp: '상여금, 연말정산 환급처럼 들어오는 돈만 적어요. 나가는 돈은 매년 목표로 모아요', // [확인 필요]
+  incomeAdd: '+ 추가',
+  incomeEmpty: '아직 적은 들어오는 돈이 없어요', // [확인 필요]
+  incomeMonth: (m: number) => `${m}월`,
+  incomeYearly: '매년',
+  incomeOnce: '올해만', // [확인 필요]
+  incomeDelete: (name: string) => `${name} 지우기`,
+  incomeDeleted: '지웠어요', // [확인 필요]
+  incomeName: '어떤 돈이에요?', // [확인 필요] 이름
+  incomeAmount: '얼마예요?', // [확인 필요] 금액
+  incomeWhen: '몇 월에 들어와요?', // [확인 필요] 월
+  incomeRepeat: '매년 들어오나요?', // [확인 필요]
+  incomeSaved: '들어오는 돈을 적었어요', // [확인 필요]
+  next: '다음',
 
   // W-02a
   otherTitle: '얼마를 옮겼어요?',
