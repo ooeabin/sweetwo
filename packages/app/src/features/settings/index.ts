@@ -8,6 +8,7 @@ export { S12cUnlinkConfirm } from './pages/s-12c-unlink-confirm';
 export { S12dUnlinkReview } from './pages/s-12d-unlink-review';
 export { S12eUnlinkDifferently } from './pages/s-12e-unlink-differently';
 export { S12fUnlinkCounter } from './pages/s-12f-unlink-counter';
+export { S12gReconnect } from './pages/s-12g-reconnect';
 export { S12hUnlinked } from './pages/s-12h-unlinked';
 export { S11aNickname } from './pages/s-11a-nickname';
 export { S14Notifications } from './pages/s-14-notifications';

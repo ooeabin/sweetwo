@@ -628,6 +628,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.partner = null;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'unlink_partner_name') return json(route, '예빈');
+      if (fn === 'request_reconnect') {
+        const u = db.unlinks.find((x) => x.status === 'confirmed');
+        if (u) Object.assign(u, { reconnect_by: db.me.id, reconnect_answer: null });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_reconnect') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as { p_accept: boolean };
+        const u = db.unlinks.find((x) => x.status === 'confirmed');
+        if (u && !body.p_accept) u.reconnect_answer = 'declined';
+        if (u && body.p_accept) {
+          Object.assign(u, { reconnect_answer: 'accepted', status: 'reconnected' });
+          if (db.space)
+            Object.assign(db.space, { couple_state: 'connected', partner_nickname: '예빈' });
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'start_new_invite') {
+        if (db.space)
+          Object.assign(db.space, { couple_state: 'not_joined', partner_nickname: null });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'my_unlink')
         return json(
           route,

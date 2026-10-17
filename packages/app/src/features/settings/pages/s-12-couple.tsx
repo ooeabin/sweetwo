@@ -3,6 +3,9 @@ import {
   createInvite,
   fetchLatestInvite,
   fetchMyUnlink,
+  fetchUnlinkPartnerName,
+  requestReconnect,
+  startNewInvite,
   fetchUnlink,
   qk,
   renewInvite,
@@ -55,7 +58,12 @@ export function S12Couple() {
   const myUnlink = useQuery({
     queryKey: qk.myUnlink,
     queryFn: fetchMyUnlink,
-    enabled: state === 'solo',
+    enabled: state === 'solo' || state === 'not_joined',
+  });
+  const partnerName = useQuery({
+    queryKey: qk.unlinkPartner,
+    queryFn: fetchUnlinkPartnerName,
+    enabled: !!myUnlink.data,
   });
   const [busy, setBusy] = useState(false);
   if (
@@ -65,7 +73,7 @@ export function S12Couple() {
     !d.space ||
     (state === 'not_joined' && invite.isLoading) ||
     (state === 'unlink_pending' && unlink.isLoading) ||
-    (state === 'solo' && myUnlink.isLoading)
+    ((state === 'solo' || state === 'not_joined') && myUnlink.isLoading)
   )
     return <MainFrame current={null} columns={[null]} />;
   const { c, space: sp } = d;
@@ -148,7 +156,7 @@ export function S12Couple() {
       </div>
     ) : (
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-4)' }}>
-        <p>{copy.inviteFirst(c.partnerName)}</p>
+        <p>{c.partnerName ? copy.inviteFirst(c.partnerName) : copy.inviteFirstAny}</p>
         <div className="hg-row">
           <Button disabled={busy} onClick={() => void make(false)}>
             {copy.inviteMake}
@@ -196,13 +204,75 @@ export function S12Couple() {
     </div>
   ) : null;
 
-  const done = state === 'solo' ? (myUnlink.data ?? null) : null;
+  // 혼자 쓰기(또는 해제 뒤 새로 초대 중): 30일 안 다시 연결, 새로 초대하기
+  const done = state === 'solo' || state === 'not_joined' ? (myUnlink.data ?? null) : null;
   const until = done?.reconnect_until ? todayKst(new Date(done.reconnect_until)) : null;
+  const ex = partnerName.data ?? '';
+  const openReq = done && done.reconnect_by && !done.reconnect_answer ? done.reconnect_by : null;
+  const reconnectAsk = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await requestReconnect();
+      await qc.invalidateQueries({ queryKey: qk.myUnlink });
+      toast(copy.reconnectSent(ex));
+    } catch {
+      toast(copy.failed);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const newInvite = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await startNewInvite();
+      await qc.invalidateQueries({ queryKey: qk.space });
+    } catch {
+      toast(copy.failed);
+    } finally {
+      setBusy(false);
+    }
+  };
   const soloBlock =
     until && until >= today ? (
-      <div className="hg-card hg-stack" style={{ gap: 'var(--space-2)' }}>
-        <p>{copy.reconnectNote}</p>
+      <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
+        {openReq === d.me.id ? (
+          <p>
+            <strong>{copy.pendingWait(ex)}</strong>
+          </p>
+        ) : openReq ? (
+          <p>
+            <strong>{copy.reconnectAsked(ex)}</strong>
+          </p>
+        ) : (
+          <p>{copy.reconnectNote}</p>
+        )}
         <p className="hg-q__help">{copy.reconnectUntil(formatMonthDay(until))}</p>
+        {openReq !== d.me.id && (
+          <div className="hg-row">
+            {openReq ? (
+              <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
+                {copy.seeCounter}
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={busy}
+                onClick={() => void reconnectAsk()}
+              >
+                {copy.reconnect}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    ) : null;
+  const newInviteBlock =
+    state === 'solo' ? (
+      <div className="hg-list">
+        <ListRow label={copy.newInvite} onClick={() => void newInvite()} />
       </div>
     ) : null;
 
@@ -250,6 +320,7 @@ export function S12Couple() {
       {inviteBlock}
       {pendingBlock}
       {soloBlock}
+      {newInviteBlock}
       {state === 'connected' && (
         <div className="hg-list">
           <ListRow label={copy.unlink} onClick={() => nav('/settings/couple/unlink')} />

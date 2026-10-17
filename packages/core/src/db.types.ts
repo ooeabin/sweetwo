@@ -835,7 +835,11 @@ export type Database = {
           partner_id: string | null
           plan: NonNullable<Json>
           ratio: number
+          reconnect_answer: string | null
+          reconnect_at: string | null
+          reconnect_by: string | null
           reconnect_until: string | null
+          reconnected_at: string | null
           requested_at: string
           requested_by: string
           space_id: string
@@ -854,7 +858,11 @@ export type Database = {
           partner_id?: string | null
           plan: NonNullable<Json>
           ratio: number
+          reconnect_answer?: string | null
+          reconnect_at?: string | null
+          reconnect_by?: string | null
           reconnect_until?: string | null
+          reconnected_at?: string | null
           requested_at?: string
           requested_by: string
           space_id: string
@@ -872,7 +880,11 @@ export type Database = {
           partner_id?: string | null
           plan?: NonNullable<Json>
           ratio?: number
+          reconnect_answer?: string | null
+          reconnect_at?: string | null
+          reconnect_by?: string | null
           reconnect_until?: string | null
+          reconnected_at?: string | null
           requested_at?: string
           requested_by?: string
           space_id?: string
@@ -882,6 +894,13 @@ export type Database = {
           {
             foreignKeyName: "couple_unlink_partner_id_fkey"
             columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "couple_unlink_reconnect_by_fkey"
+            columns: ["reconnect_by"]
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["id"]
@@ -2178,6 +2197,7 @@ export type Database = {
         Returns: undefined
       }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
+      answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
       apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
       apply_family_budget: {
@@ -2371,7 +2391,11 @@ export type Database = {
           partner_id: string | null
           plan: NonNullable<Json>
           ratio: number
+          reconnect_answer: string | null
+          reconnect_at: string | null
+          reconnect_by: string | null
           reconnect_until: string | null
+          reconnected_at: string | null
           requested_at: string
           requested_by: string
           space_id: string
@@ -2469,7 +2493,12 @@ export type Database = {
         Returns: string
       }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
+      purge_unlinked_spaces: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       read_won: { Args: { v: number }; Returns: string }
+      reconnect_ok: { Args: { p_id: string }; Returns: boolean }
       record_care: {
         Args: {
           p_amount: number
@@ -2489,6 +2518,10 @@ export type Database = {
           code: string
           expires_at: string
         }[]
+      }
+      request_reconnect: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       request_unlink: {
         Args: { p_confirm: string; p_shares: Json }
@@ -2541,6 +2574,7 @@ export type Database = {
         }
         Returns: string
       }
+      start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
       uncheck_split: {
         Args: {
           p_line: string
@@ -2564,6 +2598,7 @@ export type Database = {
         }
         Returns: string
       }
+      unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
       unlink_ratio: { Args: { sid: string; uid: string }; Returns: number }
       unlink_share: { Args: { amount: number; pct: number }; Returns: number }
       update_pending_shares: {

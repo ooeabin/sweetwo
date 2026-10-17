@@ -1,12 +1,5 @@
 import { createInvite, insertTodos, qk, updateTodo, type Proposal } from '@sweetwo/api';
-import {
-  addDays,
-  formatMonthDay,
-  todoDefs,
-  visibleTodos,
-  type TodoDef,
-  type TodoState,
-} from '@sweetwo/core';
+import { addDays, todoDefs, visibleTodos, type TodoDef, type TodoState } from '@sweetwo/core';
 import { Badge, Button } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -43,10 +36,10 @@ export function H04Todos({
   received = [],
   names,
   goals = [],
-  unlinkFrom = null,
+  tops = [],
 }: {
-  /** 받은 연결 해제 요청(맨 위, S-12d): 요청한 사람 이름, 기한 */
-  unlinkFrom?: { name: string; deadline: string } | null;
+  /** 맨 위 할 일(연결 해제 요청 받음 S-12d > 다시 연결 요청 받음 S-12g) */
+  tops?: { key: string; title: string; sub?: string; to: string }[];
   state: TodoState;
   today: string;
   partner: string;
@@ -76,7 +69,7 @@ export function H04Todos({
   if (!todos.data) return null;
   const visible = visibleTodos(defs, todos.data, today);
   const proposals = names ? received : [];
-  const top = unlinkFrom ? 1 : 0;
+  const top = tops.length;
   const left = top + proposals.length + visible.length;
   if (!left) return null; // 모두 끝나면 카드가 사라짐
 
@@ -110,21 +103,15 @@ export function H04Todos({
         <span>{copy.todosLeft(left)}</span>
       </div>
       <div className="hg-checklist__list">
-        {unlinkFrom && (
-          <button
-            type="button"
-            className="hg-task"
-            onClick={() => nav('/settings/couple/unlink/review')}
-          >
+        {tops.map((t) => (
+          <button key={t.key} type="button" className="hg-task" onClick={() => nav(t.to)}>
             <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
             <span className="hg-task__text">
-              <span className="hg-task__title">{copy.unlinkTodo(unlinkFrom.name)}</span>
-              <span className="hg-task__sub">
-                {copy.unlinkTodoSub(formatMonthDay(unlinkFrom.deadline))}
-              </span>
+              <span className="hg-task__title">{t.title}</span>
+              {t.sub && <span className="hg-task__sub">{t.sub}</span>}
             </span>
           </button>
-        )}
+        ))}
         {names &&
           proposals.slice(0, SHOWN - top).map((p) => {
             const line = describeProposal(p, names, goals);

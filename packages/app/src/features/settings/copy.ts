@@ -78,6 +78,7 @@ export const copy = {
   weddingDone: '결혼일',
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
   inviteFirst: (name: string) => `${name}님을 초대해 주세요`,
+  inviteFirstAny: '배우자를 초대해 주세요', // [확인 필요] 새로 초대(호칭 없음)
   inviteMake: '초대 코드 만들기',
   inviteCode: '초대 코드', // [확인 필요] 줄 이름
   inviteUntil: (md: string) => `${md}까지`,
@@ -132,6 +133,14 @@ export const copy = {
   reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
   reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
   ok: '확인', // [확인 필요]
+  newInvite: '새로 초대하기',
+  reconnect: '다시 연결하기',
+  reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
+  reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
+  reconnectBack: '연결을 끊기 전 공동 목표·통장이 돌아와요',
+  reconnectYes: '다시 연결할게요',
+  reconnectNo: '괜찮아요',
+  reconnectExpired: '다시 연결할 수 있는 기간이 지났어요',
   confirmQ: '확인을 위해 ‘연결 해제’를 입력해 주세요', // [확인 필요]
   confirmWord: '연결 해제',
   send: '보내기', // [확인 필요]
