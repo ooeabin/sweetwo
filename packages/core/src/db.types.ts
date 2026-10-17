@@ -714,6 +714,7 @@ export type Database = {
           split_deferred: boolean
           split_mode: Database["public"]["Enums"]["split_mode"] | null
           split_ratio: number | null
+          unlinked_from: string | null
           updated_at: string
           updated_by: string | null
           version: number
@@ -757,6 +758,7 @@ export type Database = {
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
+          unlinked_from?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -799,6 +801,7 @@ export type Database = {
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
+          unlinked_from?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -809,16 +812,28 @@ export type Database = {
           wedding_month?: string | null
           wedding_saved?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "couple_space_unlinked_from_fkey"
+            columns: ["unlinked_from"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       couple_unlink: {
         Row: {
           cancelled_at: string | null
           confirmed_at: string | null
           deadline: string
+          final_plan: Json | null
+          how: string | null
           id: string
+          partner_id: string | null
           plan: NonNullable<Json>
           ratio: number
+          reconnect_until: string | null
           requested_at: string
           requested_by: string
           space_id: string
@@ -829,9 +844,13 @@ export type Database = {
           cancelled_at?: string | null
           confirmed_at?: string | null
           deadline: string
+          final_plan?: Json | null
+          how?: string | null
           id?: string
+          partner_id?: string | null
           plan: NonNullable<Json>
           ratio: number
+          reconnect_until?: string | null
           requested_at?: string
           requested_by: string
           space_id: string
@@ -841,15 +860,26 @@ export type Database = {
           cancelled_at?: string | null
           confirmed_at?: string | null
           deadline?: string
+          final_plan?: Json | null
+          how?: string | null
           id?: string
+          partner_id?: string | null
           plan?: NonNullable<Json>
           ratio?: number
+          reconnect_until?: string | null
           requested_at?: string
           requested_by?: string
           space_id?: string
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "couple_unlink_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "couple_unlink_requested_by_fkey"
             columns: ["requested_by"]
@@ -2090,6 +2120,39 @@ export type Database = {
           },
         ]
       }
+      unlink_copy: {
+        Row: {
+          new_id: string
+          old_id: string
+          tbl: string
+          unlink_id: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          new_id: string
+          old_id: string
+          tbl: string
+          unlink_id: string
+          user_id: string
+        }
+        Update: {
+          new_id?: string
+          old_id?: string
+          tbl?: string
+          unlink_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlink_copy_unlink_id_fkey"
+            columns: ["unlink_id"]
+            isOneToOne: false
+            referencedRelation: "couple_unlink"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2104,6 +2167,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
       apply_family_budget: {
@@ -2223,6 +2287,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      confirm_unlink: {
+        Args: { p_how: string; p_id: string; p_plan: Json }
+        Returns: undefined
+      }
       create_invite: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2278,6 +2346,31 @@ export type Database = {
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       md_label: { Args: { d: string }; Returns: string }
+      my_unlink: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cancelled_at: string | null
+          confirmed_at: string | null
+          deadline: string
+          final_plan: Json | null
+          how: string | null
+          id: string
+          partner_id: string | null
+          plan: NonNullable<Json>
+          ratio: number
+          reconnect_until: string | null
+          requested_at: string
+          requested_by: string
+          space_id: string
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "couple_unlink"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       net_worth_history: {
         Args: { p_months?: number }
         Returns: {
@@ -2437,6 +2530,18 @@ export type Database = {
           p_side: Database["public"]["Enums"]["couple_side"]
         }
         Returns: undefined
+      }
+      unlink_make_space: {
+        Args: {
+          is_req: boolean
+          plan: Json
+          u: Omit<
+            Database["public"]["Tables"]["couple_unlink"]["Row"],
+            Database["public"]["Tables"]["couple_unlink"]["ComputedFields"]
+          >
+          x: string
+        }
+        Returns: string
       }
       unlink_ratio: { Args: { sid: string; uid: string }; Returns: number }
       unlink_share: { Args: { amount: number; pct: number }; Returns: number }

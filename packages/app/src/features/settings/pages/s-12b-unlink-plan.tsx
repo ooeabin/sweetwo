@@ -12,8 +12,8 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { UnlinkTotals, useJointAssets, useUnlinkDraft } from '../unlink';
 
-// S-12b 자산 정리 안 작성: 기본안 = 분담 비율로 공동 명의 자산마다 내 몫(1만 원 단위 반올림). 내 몫 0 ~ 잔액,
-// 상대 몫 = 잔액 − 내 몫(자동), 합계 바로 갱신. 기한 = 오늘 + 14일. 다음 → S-12c
+// S-12b 자산 정리 안 작성: 기본안 = 분담 비율로 공동 명의 자산·부채마다 내 몫(1만 원 단위 반올림). 내 몫 0 ~ 금액,
+// 상대 몫 = 금액 − 내 몫(자동), 합계 바로 갱신(자산, 부채 따로). 기한 = 오늘 + 14일. 다음 → S-12c
 export function S12bUnlinkPlan() {
   const nav = useNavigate();
   const d = useSettingsData();
@@ -27,13 +27,18 @@ export function S12bUnlinkPlan() {
     return {
       id: a.id,
       name: a.name,
+      side: a.side,
       amount: a.amount,
       mine: v === undefined ? unlinkShare(a.amount, pct) : v,
     };
   });
   const bad = items.some((i) => i.mine === null || i.mine > i.amount);
-  const mine = items.reduce((t, i) => t + Math.min(i.mine ?? 0, i.amount), 0);
-  const all = items.reduce((t, i) => t + i.amount, 0);
+  const sum = (side: 'asset' | 'debt') => {
+    const rows = items.filter((i) => i.side === side);
+    const mine = rows.reduce((t, i) => t + Math.min(i.mine ?? 0, i.amount), 0);
+    return [mine, rows.reduce((t, i) => t + i.amount, 0) - mine] as [number, number];
+  };
+  const hasDebt = items.some((i) => i.side === 'debt');
   return (
     <QuestionLayout
       steps={{ total: 3, now: 1 }}
@@ -47,7 +52,12 @@ export function S12bUnlinkPlan() {
         {items.map((i) => (
           <div key={i.id} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
             <p>
-              <strong>{i.name}</strong> <span className="hg-q__help">{formatManWon(i.amount)}</span>
+              <strong>{i.name}</strong>{' '}
+              <span className="hg-q__help">
+                {i.side === 'debt'
+                  ? copy.debtAmount(formatManWon(i.amount))
+                  : formatManWon(i.amount)}
+              </span>
             </p>
             <AmountInput
               label={copy.myShare(i.name)}
@@ -67,7 +77,18 @@ export function S12bUnlinkPlan() {
             )}
           </div>
         ))}
-        <UnlinkTotals names={[c.myName, c.partnerName]} totals={[mine, all - mine]} />
+        <UnlinkTotals
+          title={hasDebt ? copy.assetsTotal : undefined}
+          names={[c.myName, c.partnerName]}
+          totals={sum('asset')}
+        />
+        {hasDebt && (
+          <UnlinkTotals
+            title={copy.debtsTotal}
+            names={[c.myName, c.partnerName]}
+            totals={sum('debt')}
+          />
+        )}
       </div>
     </QuestionLayout>
   );

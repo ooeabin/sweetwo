@@ -320,6 +320,24 @@ test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “
   seed(db);
   Object.assign(db.space ?? {}, { split_mode: 'income' });
   jointSaving(db);
+  db.assets.push({
+    id: 'a-loan',
+    side: 'debt',
+    grp: 'loan',
+    kind: 'credit',
+    name: '공동 대출',
+    amount: 10_000_000,
+    principal: null,
+    maturity_date: null,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    created_by: db.me.id,
+    created_at: '2026-07-01T00:00:00Z',
+    updated_at: '2026-10-01T00:00:00Z',
+    deleted_at: null,
+  });
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /부부 정보/ }).click();
   await page.getByRole('button', { name: '연결 해제' }).click();
@@ -338,11 +356,15 @@ test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “
   const young = page.getByLabel('청년 적금 내 몫');
   await expect(young).toHaveValue('1,740,000');
   await young.fill('4000000');
-  await expect(page.getByText('통장 잔액보다 많이 넣을 수 없어요')).toBeVisible();
+  await expect(page.getByText('금액보다 많이 넣을 수 없어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await young.fill('1000000');
   await expect(page.getByText('1,492만')).toBeVisible();
   await expect(page.getByText('1,208만')).toBeVisible();
+  // 공동 부채도 정리 안에(분담 비율 기본 580만 : 420만), 합계는 자산, 부채 따로
+  await expect(page.getByLabel('공동 대출 내 몫')).toHaveValue('5,800,000');
+  await expect(page.getByText('예빈님 몫 420만')).toBeVisible();
+  await expect(page.getByText('부채', { exact: true })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
 
@@ -362,6 +384,7 @@ test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “
   expect(plan.map((p) => [p.name, p.mine])).toEqual([
     ['공동 적금', 13_920_000],
     ['청년 적금', 1_000_000],
+    ['공동 대출', 5_800_000],
   ]);
   await axe(page);
 
@@ -380,7 +403,7 @@ test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “
   expect(db.unlinks[0]?.status).toBe('cancelled');
 });
 
-test('연결 해제 요청 받음(S-12, S-12d 보기)', async ({ page }, info) => {
+test('연결 해제 요청 받음(S-12, S-12d) → 동의해요 → 혼자 쓰기(S-12h)', async ({ page }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -408,5 +431,23 @@ test('연결 해제 요청 받음(S-12, S-12d 보기)', async ({ page }, info) =
   await expect(page.getByRole('heading', { name: '분담 비율 42 : 58로 정리했어요' })).toBeVisible();
   await expect(page.getByText('예빈 126만, 찬우 174만')).toBeVisible();
   await expect(page.getByText('10월 19일까지 정하지 않으면 분담 비율로 정리해요')).toBeVisible();
+  await axe(page);
+
+  // 동의해요 → 바로 해제 확정(S-12h)
+  await page.getByRole('button', { name: '동의해요' }).click();
+  await expect(page).toHaveURL(/\/settings\/couple\/unlinked$/);
+  await expect(page.getByRole('heading', { name: '연결이 해제됐어요' })).toBeVisible();
+  await expect(page.getByText('174만 원은 각자 목표로 옮겨요')).toBeVisible();
+  await expect(page.getByText('30일 안에 다시 연결하면 되돌릴 수 있어요')).toBeVisible();
+  expect(db.unlinks[0]?.status).toBe('confirmed');
+  await axe(page);
+  await page.getByRole('button', { name: '확인' }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  // 혼자 쓰기 S-12
+  await page.goto('/settings/couple');
+  await expect(page.getByText('혼자 쓰는 중')).toBeVisible();
+  await expect(page.getByText('11월 6일까지 다시 연결할 수 있어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '연결 해제' })).toHaveCount(0);
   await axe(page);
 });

@@ -3,7 +3,13 @@ import type { UnlinkItem } from '../rules/unlink';
 
 // 연결 해제 자산 정리 안(couple_unlink.plan, 서버 request_unlink가 만듦). mine = 요청한 사람 몫
 const won = z.number().int().nonnegative();
-const PlanRow = z.object({ asset_id: z.string(), name: z.string(), amount: won, mine: won });
+const PlanRow = z.object({
+  asset_id: z.string(),
+  name: z.string(),
+  amount: won,
+  mine: won,
+  side: z.enum(['asset', 'debt']).default('asset'),
+});
 
 /** 깨진 줄은 빼고 읽음 */
 export function readUnlinkPlan(v: unknown): UnlinkItem[] {
@@ -17,6 +23,7 @@ export function readUnlinkPlan(v: unknown): UnlinkItem[] {
         name: r.data.name,
         amount: r.data.amount,
         mine: r.data.mine,
+        side: r.data.side,
       });
   }
   return out;

@@ -78,8 +78,9 @@ export function useNotiRealtime(userId: string | undefined) {
     const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
     const off = subscribeNotifications(userId, (ev) => {
       void qc.invalidateQueries({ queryKey: qk.notifications });
-      // 연결 해제 요청·취소: 부부 상태가 바뀜
-      if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {
+      // 연결 해제 요청·취소: 부부 상태가 바뀜. 확정이면 공간이 바뀌어 전부 다시 읽음
+      if (ev.type === 'insert' && ev.row.kind === 'unlink_confirmed') void qc.invalidateQueries();
+      else if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {
         void qc.invalidateQueries({ queryKey: qk.space });
         void qc.invalidateQueries({ queryKey: qk.unlink });
       }
