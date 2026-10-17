@@ -28,7 +28,7 @@ export function O34Bonus() {
     <QuestionLayout
       steps={{ total: 3, now: 0 }}
       title={copy.weekBonus}
-      onBack={() => nav('/')}
+      onBack={() => nav(-1)}
       later={{ label: copy.weekClose, onClick: () => nav('/') }}
     >
       <ChoiceCards<A>

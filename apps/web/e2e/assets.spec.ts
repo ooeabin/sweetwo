@@ -975,3 +975,88 @@ test('상여금·다른 수입(O-34, O-35, O-35b): 상여금 행마다 기록, �
   const mine = page.getByRole('button', { name: /다른 수입 80만 원 포함/ });
   await expect(mine).toContainText('430만 원');
 });
+
+test('나머지 목표(O-22~25): 순서 → 1순위 모아둔 돈 → 다음 목표 질문·기한·모아둔 돈 → 매달 목표 → 상여금으로', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const me = db.me.id;
+  db.goals.push(
+    goal({ id: 'g-e', template: 'emergency', name: '비상금', priority: 0, created_by: me }),
+    goal({
+      id: 'g-home',
+      template: 'home',
+      name: '내 집 마련',
+      priority: 1,
+      details: { price: 500_000_000, ratio: 30 },
+      target_amount: 150_000_000,
+      deadline: '2031-10-01',
+      created_by: me,
+    }),
+    goal({
+      id: 'g-buy',
+      template: 'big_purchase',
+      name: '명품·큰 물건 구입',
+      priority: 2,
+      target_amount: null,
+      deadline: null,
+      created_by: me,
+    }),
+    goal({
+      id: 'g-old',
+      template: 'retirement',
+      name: '노후·연금',
+      priority: 3,
+      kind: 'monthly',
+      target_amount: null,
+      deadline: null,
+      created_by: me,
+    }),
+  );
+  firstWeekTodos(db, 'rest');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /나머지 목표/ }).click();
+  await heading(page, '어떤 것부터 모을까요?');
+  await axe(page);
+  await page.getByRole('button', { name: '이 순서로 할게요' }).click();
+
+  // 1순위는 질문을 끝냈으니 모아둔 돈만
+  await heading(page, '이 목표에 이미 모아둔 돈이 있나요?');
+  await expect(page.getByText('1순위')).toBeVisible();
+  await page.getByRole('radio', { name: '없어요' }).click();
+
+  await heading(page, '무엇을 사고 싶어요?');
+  await expect(page.getByText('2순위')).toBeVisible();
+  await page.getByLabel('무엇을 사고 싶어요?').fill('노트북');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '얼마예요?');
+  await page.getByLabel('얼마예요?').fill('2000000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '언제까지 모을까요?');
+  await page.getByLabel('언제까지 모을까요?').fill('2027');
+  await expect(page.getByText(/매달 .* 모으면 돼요/)).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '이 목표에 이미 모아둔 돈이 있나요?');
+  await page.getByRole('radio', { name: '가진 자산에서 고르기' }).click();
+  await page.getByRole('button', { name: /생활비 통장/ }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '한 달에 얼마씩 넣을까요?');
+  await page.getByLabel('한 달에 얼마씩 넣을까요?').fill('300000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // 남은 목표가 없으면 상여금(O-34)
+  await heading(page, '상여금이나 성과급도 있나요?');
+  const byId = (id: string) => db.goals.find((g) => g.id === id) as Record<string, unknown>;
+  expect((byId('g-home').details as Record<string, unknown>)._held).toBe(true);
+  expect(byId('g-buy')).toMatchObject({ target_amount: 2_000_000, deadline: '2027-10-01' });
+  expect((byId('g-buy').details as Record<string, unknown>).what).toBe('노트북');
+  expect(db.assets.find((a) => a.id === 'a1')?.goal_id).toBe('g-buy');
+  expect(byId('g-old')).toMatchObject({ kind: 'monthly', target_amount: 300_000 });
+});

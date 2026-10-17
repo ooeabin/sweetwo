@@ -5,3 +5,7 @@ export { G02GoalEdit } from './pages/g-02-goal-edit';
 export { GoalAddRoute } from './add/route';
 export { G04GoalAdjust } from './pages/g-04-goal-adjust';
 export { G06GoalOrder } from './pages/g-06-goal-order';
+export { RestGoalNext } from './week/rest';
+export { O23RestQuestion } from './pages/o-23-rest-question';
+export { O24RestDeadline } from './pages/o-24-rest-deadline';
+export { O25RestHeld } from './pages/o-25-rest-held';

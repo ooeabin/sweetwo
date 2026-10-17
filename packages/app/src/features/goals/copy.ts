@@ -114,6 +114,10 @@ export const copy = {
   orderTitle: '어떤 것부터 모을까요?',
   orderOk: '이 순서로 할게요',
   orderFixed: '비상금은 맨 위에 고정돼요', // [확인 필요]
+  // 첫 주 5일째 나머지 목표(16 O-22~25)
+  weekHeldTitle: '이 목표에 이미 모아둔 돈이 있나요?',
+  weekRank: (n: number) => `${n}순위`,
+  weekClose: '닫기',
   orderPreview: '바뀌는 배분', // [확인 필요]
   orderUp: (name: string) => `${name} 위로`,
   orderDown: (name: string) => `${name} 아래로`,
