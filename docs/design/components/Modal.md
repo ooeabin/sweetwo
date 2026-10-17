@@ -8,3 +8,4 @@
 - `role="alertdialog"` + `aria-modal`, 제목을 `aria-labelledby`로.
 - 다크에서 보이도록 `hairline` 테두리.
 - 뒤 막은 `scrim`. Esc·바깥 누르면 취소. 포커스는 모달 안에 가둠.
+- React 래퍼: `@sweetwo/ui` `Modal`(제목, 본문, 실행·취소 글자, onConfirm, onCancel). 바탕은 `hg-scrim`을 화면 전체에 고정(`position: fixed`).

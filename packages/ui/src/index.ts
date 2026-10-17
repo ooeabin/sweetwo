@@ -32,5 +32,6 @@ export * from './components/Toggle';
 export * from './components/NotificationPanel';
 export * from './components/PageHeader';
 export * from './components/Menu';
+export * from './components/Modal';
 export * from './components/ReorderList';
 export * from './components/question';

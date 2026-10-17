@@ -17,7 +17,7 @@ export const copy = {
   rows: {
     couple: '부부 정보',
     visibility: '공개 범위',
-    visibilityValue: '내 자산 합계만',
+    visibilityValue: (v: string) => `내 자산 ${v}`, // [확인 필요]
     noti: '알림',
     security: '보안',
     answers: '내 답 다시 보기',
@@ -145,6 +145,52 @@ export const copy = {
   confirmWord: '연결 해제',
   send: '보내기', // [확인 필요]
   sent: (name: string) => `${name}님에게 연결 해제를 요청했어요`, // [확인 필요]
+
+  // S-13 공개 범위
+  visTitle: '공개 범위',
+  vis: { all: '전체 공개', sum: '합계만', private: '비공개' } as Record<string, string>,
+  visDefault: '새 항목 기본값',
+  visDefaultSub: '내 자산·내 부채', // [확인 필요]
+  visApplyAll: (n: number) => `이미 있는 항목 ${n}개도 바꿀까요?`,
+  visAll: '모두 바꾸기',
+  visNewOnly: '새 항목만',
+  visFixed: [
+    // [확인 필요] 기획서 “‘수입·용돈 금액 항상 공유’ 등 3줄”
+    '수입·용돈 금액 항상 공유',
+    '공동 명의 항목은 항상 전체 공개',
+    '목표와 양가 일정은 항상 전체 공개',
+  ],
+  visFixedTitle: '항상 함께 보는 것', // [확인 필요]
+  visMine: '내 항목', // [확인 필요]
+  visNone: '내 명의 항목이 없어요',
+  visDebt: '부채', // [확인 필요] 항목 이름표
+  visLabel: (name: string) => `${name} 공개 범위`,
+
+  // S-21 휴지통
+  trash: '휴지통',
+  trashNote: '지운 항목은 30일 뒤 완전히 지워져요',
+  trashKinds: {
+    asset: '자산',
+    debt: '부채',
+    goal: '목표',
+    family: '가족',
+    care_day: '챙길 날',
+  } as Record<string, string>,
+  trashWhen: (md: string) => `${md}에 지웠어요`,
+  trashLeft: (n: number) => `${n}일 남음`,
+  restore: '되살리기',
+  restored: '되살렸어요',
+  restoreProposed: (name: string) => `${name}님에게 되살리자고 제안했어요`, // [확인 필요]
+  undo: '되돌리기',
+  more: '더보기', // [확인 필요] ⋯ 버튼 이름
+  purge: '영구 삭제',
+  purgeQ: '완전히 지울까요?',
+  purgeBody: '되돌릴 수 없어요',
+  purgeYes: '지울게요',
+  emptyTrash: '휴지통 비우기',
+  emptyQ: (n: number) => `${n}개를 완전히 지울까요?`,
+  trashEmpty: '휴지통이 비어 있어요',
+  purged: '완전히 지웠어요', // [확인 필요]
 
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',

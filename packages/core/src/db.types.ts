@@ -117,6 +117,7 @@ export type Database = {
           birth_year: number | null
           card_main: boolean | null
           created_at: string
+          default_visibility: Database["public"]["Enums"]["asset_visibility"]
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
@@ -150,6 +151,7 @@ export type Database = {
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
+          default_visibility?: Database["public"]["Enums"]["asset_visibility"]
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
           id: string
@@ -182,6 +184,7 @@ export type Database = {
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
+          default_visibility?: Database["public"]["Enums"]["asset_visibility"]
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
           id?: string
@@ -2284,6 +2287,7 @@ export type Database = {
           birth_year: number | null
           card_main: boolean | null
           created_at: string
+          default_visibility: Database["public"]["Enums"]["asset_visibility"]
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
@@ -2493,6 +2497,8 @@ export type Database = {
         Returns: string
       }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
+      purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
+      purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
       purge_unlinked_spaces: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2534,6 +2540,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
       run_unlink_deadlines: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2575,6 +2582,17 @@ export type Database = {
         Returns: string
       }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
+      trash_rows: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          deleted_at: string
+          deleted_by: string
+          id: string
+          kind: string
+          name: string
+          sub: string
+        }[]
+      }
       uncheck_split: {
         Args: {
           p_line: string

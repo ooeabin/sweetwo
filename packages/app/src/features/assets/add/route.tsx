@@ -50,7 +50,7 @@ export function AssetAddRoute() {
   // 처음 열면 진입한 탭(자산/부채)으로 새로 시작
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   useEffect(() => {
-    if (step === 'kind' && !params.get('keep')) reset(startSide);
+    if (step === 'kind' && !params.get('keep')) reset(startSide, d.me?.default_visibility);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (d.loading || goals.isLoading || !d.couple || !d.space) return null;

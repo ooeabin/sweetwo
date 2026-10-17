@@ -51,6 +51,10 @@ export function arrivedText(
     const a = obj(p.after);
     return copy.arrivedAdd(who, typeof a.name === 'string' ? a.name : copy.goalUnknown);
   }
+  if (p.item === 'goal_restore') {
+    const a = obj(p.after);
+    return copy.arrivedRestore(who, typeof a.name === 'string' ? a.name : copy.goalUnknown);
+  }
   return copy.arrived(who, itemObject(p, goals));
 }
 
@@ -122,6 +126,15 @@ export function describe(
   if (p.item === 'goal_pause') {
     const v = (j: Json) => copy.goalPaused[bool(j, 'paused') ? 'true' : 'false'];
     return { label: copy.goalItems.goal_pause(goal), before: v(p.before), after: v(p.after) };
+  }
+  if (p.item === 'goal_restore') {
+    const v = (j: Json) => copy.goalDeleted[bool(j, 'deleted') ? 'true' : 'false'];
+    const nm = obj(p.after).name;
+    return {
+      label: copy.goalItems.goal_restore(typeof nm === 'string' ? nm : copy.goalUnknown),
+      before: v(p.before),
+      after: v(p.after),
+    };
   }
   if (p.item === 'goal_delete') {
     const v = (j: Json) => copy.goalDeleted[bool(j, 'deleted') ? 'true' : 'false'];

@@ -81,6 +81,8 @@ import {
   S12eUnlinkDifferently,
   S12fUnlinkCounter,
   S12gReconnect,
+  S13Visibility,
+  S21Trash,
   S12hUnlinked,
   S11aNickname,
   S11bSide,
@@ -620,6 +622,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12g 다시 연결 수락
+      {
+        path: '/settings/visibility',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S13Visibility />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-13 공개 범위
+      {
+        path: '/settings/trash',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S21Trash />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-21 휴지통
       {
         path: '/settings/me/nickname',
         element: (

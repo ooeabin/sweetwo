@@ -37,11 +37,12 @@ const empty: AssetDraft = {
 export const useAssetDraft = create<{
   draft: AssetDraft;
   set: (p: Partial<AssetDraft>) => void;
-  reset: (side: AssetSide) => void;
+  /** visibility = 내 새 항목 기본값(S-13, 없으면 합계만) */
+  reset: (side: AssetSide, visibility?: AssetDraft['visibility']) => void;
 }>((set, get) => ({
   draft: empty,
   set: (p) => set({ draft: { ...get().draft, ...p } }),
-  reset: (side) => set({ draft: { ...empty, side } }),
+  reset: (side, visibility = 'sum') => set({ draft: { ...empty, side, visibility } }),
 }));
 
 const SAVINGS = ['saving', 'policy_saving'];
