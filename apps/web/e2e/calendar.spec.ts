@@ -137,3 +137,111 @@ test('달력(Y-04): 돈 날짜 점, 정리 기간 띠, 고른 날 일정 → 화
   await page.getByRole('button', { name: '챙길 날' }).click();
   await expect(page.getByRole('button', { name: '11월 1일' })).toBeVisible();
 });
+
+test('처음 등록(Y-02) → 목록·달력에 챙길 날 → 상세(Y-05) 챙길 사람·준비 상황·쓸 돈', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  (db.space as Record<string, unknown>).wedding_date = '2025-04-18';
+  (db.space as Record<string, unknown>).couple_state = 'not_joined';
+  db.partner = null;
+
+  await page.goto('/calendar/list');
+  await page.getByRole('button', { name: '양가 부모님 생신부터 챙겨보기' }).click();
+  await expect(page.getByRole('heading', { name: '양가 부모님을 챙겨드릴게요' })).toBeVisible();
+  // 예빈 쪽 아버지는 빼기
+  await page
+    .getByRole('group', { name: '예빈 쪽' })
+    .getByRole('button', { name: '아버지' })
+    .click();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await expect(page.getByRole('heading', { name: '아버지 생신은 언제예요?' })).toBeVisible();
+  await page.getByLabel('월', { exact: true }).fill('10');
+  await page.getByLabel('일', { exact: true }).fill('20');
+  await page.getByRole('button', { name: '다음' }).click();
+  // 찬우 쪽 어머니: 음력 8월 3일
+  await page.getByRole('tab', { name: '음력' }).click();
+  await page.getByLabel('월', { exact: true }).fill('8');
+  await page.getByLabel('일', { exact: true }).fill('3');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  // 예빈 쪽 어머니: 나중에
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+
+  await expect(
+    page.getByRole('heading', { name: '명절에 양가에 얼마쯤 쓸 것 같아요?' }),
+  ).toBeVisible();
+  await page.getByLabel('명절에 양가에 얼마쯤 쓸 것 같아요?').fill('500000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('부모님 생신에는 한 분께 얼마쯤 드릴까요?').fill('300000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // 1년 = 50만 × 2 + 30만 × 3 = 190만, 다음 결혼기념일(2027-04-18)까지 6개월 → 31만 7천
+  await expect(
+    page.getByRole('heading', { name: '1년에 190만 원이에요. 매달 31만 7,000원씩 모아두면 돼요' }),
+  ).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '이대로 하기' }).click();
+  await expect(page).toHaveURL(/\/calendar\/list$/);
+
+  expect(db.family).toHaveLength(3);
+  expect(db.cares.map((c) => c.name)).toEqual([
+    '아버지 생신',
+    '어머니 생신',
+    '어머니 생신',
+    '설날',
+    '추석',
+    '어버이날',
+    '결혼기념일',
+  ]);
+  expect(db.goals.at(-1)).toMatchObject({
+    template: 'family_cost',
+    kind: 'yearly',
+    target_amount: 1_900_000,
+    deadline: '2027-04-18',
+  });
+
+  // 다음 챙길 날: 아버지 생신 10월 20일 D-13
+  const next = page.getByRole('region', { name: '다음 챙길 날' });
+  await expect(next).toContainText('D-13');
+  await expect(next).toContainText('아버지 생신');
+  await expect(next).toContainText('10월 20일, 찬우님이 챙겨요');
+  const soon = page.getByRole('region', { name: '60일 안 챙길 날' });
+  // 음력 8월 3일 생신은 올해 지났고 내년은 60일 밖
+  await expect(soon).toContainText('아버지 생신');
+  await expect(soon).not.toContainText('어머니 생신');
+  await axe(page);
+
+  // 달력: 10월 20일 막대, 고른 날 일정 → 상세
+  await page.getByRole('tab', { name: '달력' }).click();
+  await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
+  await page.getByRole('button', { name: /아버지 생신/ }).click();
+  await expect(page).toHaveURL(/\/calendar\/day\//);
+  await expect(page.getByRole('region', { name: '아버지 생신' })).toContainText('D-13');
+  await page.getByRole('tab', { name: '같이 챙겨요' }).click();
+  await page
+    .getByRole('group', { name: '준비 상황' })
+    .getByRole('button', { name: '준비 중' })
+    .click();
+  await expect(
+    page.getByRole('group', { name: '준비 상황' }).getByRole('button', { name: '준비 중' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  expect(db.cares[0]).toMatchObject({
+    carer: 'together',
+    status: 'preparing',
+    status_on: '2026-10-20',
+  });
+  await axe(page);
+
+  // 음력 생신 상세: (음력 8월 3일)
+  await page.goto('/calendar/day/care_day-2');
+  await expect(page.getByText('(음력 8월 3일)')).toBeVisible();
+  await page.getByRole('button', { name: /쓸 돈/ }).click();
+  await page.getByLabel('얼마쯤 쓸까요?').fill('400000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByRole('button', { name: /쓸 돈/ })).toContainText('40만 원');
+});

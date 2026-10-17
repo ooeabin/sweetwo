@@ -405,6 +405,18 @@ export const goalTemplates: GoalTemplate[] = [
     target: () => null,
     defaultDeadline: blank,
   },
+  {
+    // 캘린더 처음 등록(24 Y-02e)에서 자동 생성. 회차 = 결혼기념일 기준 1년, 목표 금액 = 이번 회차 챙길 날 예산 합계
+    key: 'family_cost',
+    name: '양가 비용',
+    tab: null,
+    illustration: null,
+    questions: [],
+    asksDeadline: never,
+    kind: () => 'yearly',
+    target: () => null,
+    defaultDeadline: blank,
+  },
 ];
 
 export const templateByKey = (key: string) => goalTemplates.find((t) => t.key === key);
@@ -491,10 +503,14 @@ export interface RestGoal {
 }
 
 const RESTING = ['paused', 'achieved', 'used'];
-/** O-22 순서 정하기 대상: 비상금·결혼 비용 빼고 진행 중인 목표, 우선순위 순 */
+/** O-22 순서 정하기 대상: 비상금·결혼 비용·양가 비용(자동 목표) 빼고 진행 중인 목표, 우선순위 순 */
 export const orderableGoals = <G extends RestGoal>(goals: G[]) =>
   goals
-    .filter((g) => !['emergency', 'wedding'].includes(g.template) && !RESTING.includes(g.status))
+    .filter(
+      (g) =>
+        !['emergency', 'wedding', 'family_cost'].includes(g.template) &&
+        !RESTING.includes(g.status),
+    )
     .sort((a, b) => a.priority - b.priority);
 
 /**

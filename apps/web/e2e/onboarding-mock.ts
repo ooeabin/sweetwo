@@ -29,6 +29,9 @@ export interface MemDb {
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
+  /** 캘린더 가족·챙길 날 */
+  family: Record<string, unknown>[];
+  cares: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -87,6 +90,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     netWorth: [],
     incomeItems: [],
     incomeEvents: [],
+    family: [],
+    cares: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -533,6 +538,56 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (method === 'PATCH') {
         const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
         for (const g of db.goals) if (ids.includes(String(g.id))) Object.assign(g, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    // 가족·챙길 날(Y-02, Y-05)
+    for (const [tbl, rows, defaults] of [
+      [
+        'family_member',
+        db.family,
+        { birth_lunar: false, birth_leap: false, korean_age: true, memo: null },
+      ],
+      [
+        'care_day',
+        db.cares,
+        {
+          member_id: null,
+          side: null,
+          month: null,
+          day: null,
+          leap: false,
+          once_on: null,
+          budget: 0,
+          carer: 'together',
+          alerts: [30, 7],
+          status: 'todo',
+          status_on: null,
+          memo: null,
+        },
+      ],
+    ] as const) {
+      if (path !== `/rest/v1/${tbl}`) continue;
+      if (method === 'GET')
+        return json(
+          route,
+          rows.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+        const made = (Array.isArray(b) ? b : [b]).map((r) => {
+          const row = { id: `${tbl}-${rows.length + 1}`, deleted_at: null, ...defaults, ...r };
+          rows.push(row);
+          return row;
+        });
+        return json(
+          route,
+          made.map((r) => ({ id: r.id })),
+          201,
+        );
+      }
+      if (method === 'PATCH') {
+        for (const r of rows) if (r.id === eqId(url)) Object.assign(r, body());
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
