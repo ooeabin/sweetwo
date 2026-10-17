@@ -504,7 +504,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (method === 'PATCH') {
-        const ids = inIds(url);
+        const ids = url.searchParams.get('id')?.startsWith('eq.') ? [eqId(url)] : inIds(url);
         for (const r of db.fixed) if (ids.includes(String(r.id))) Object.assign(r, body());
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
