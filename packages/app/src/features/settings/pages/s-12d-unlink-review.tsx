@@ -4,14 +4,15 @@ import { QuestionLayout } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
-import { UnlinkPlanList, UnlinkTotals } from '../unlink';
+import { daysPending, UnlinkPlanList, UnlinkTotals } from '../unlink';
 
 // S-12d 자산 정리 안 확인: 기본안 문구, 항목별 두 사람 몫, 합계, 기한.
-// 받은 사람은 ‘동의해요’ → 바로 해제 확정 → S-12h. 요청한 사람(이번 달 띠에서)은 보기만.
-// ‘다르게 정리하기’(S-12e, S-12f)는 다음 단계.
+// 받은 사람은 ‘동의해요’ → 바로 해제 확정 → S-12h, ‘다르게 정리하기’(1회) → S-12e.
+// 다르게 정리한 안을 보낸 뒤에는 “다르게 정리한 안을 보냈어요”(원래 안에 동의는 그대로 가능). 요청한 사람은 보기만.
 export function S12dUnlinkReview() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -35,6 +36,11 @@ export function S12dUnlinkReview() {
     setBusy(true);
     try {
       await agreeUnlink();
+      track('unlink_resolved', {
+        path: 'agreed',
+        days_pending: daysPending(req.requested_at),
+        exported_data: false,
+      });
       // 공간이 바뀜: 먼저 S-12h로 옮기고(이 화면은 대기 요청이 없으면 S-12로 돌려보냄) 전부 다시 읽음
       nav('/settings/couple/unlinked', { replace: true });
       void qc.invalidateQueries();
@@ -50,8 +56,18 @@ export function S12dUnlinkReview() {
       onBack={() => nav('/settings/couple')}
       primary={mineIsRequester ? undefined : { label: copy.agree, loading: busy }}
       onSubmit={mineIsRequester ? undefined : () => void agree()}
+      later={
+        mineIsRequester || req.counter
+          ? undefined
+          : { label: copy.differently, onClick: () => nav('/settings/couple/unlink/differently') }
+      }
     >
       <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        {!mineIsRequester && req.counter && (
+          <div className="hg-banner hg-banner--info" role="status">
+            <span>{copy.counterDone}</span>
+          </div>
+        )}
         <UnlinkPlanList items={items} names={names} />
         <UnlinkTotals
           title={debt ? copy.assetsTotal : undefined}

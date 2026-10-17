@@ -70,3 +70,15 @@ export async function fetchMyUnlink(): Promise<Unlink | null> {
   fail(error);
   return (Array.isArray(data) ? data[0] : null) ?? null;
 }
+
+/** S-12e 보내기(받은 사람, 1회). shares = 항목별 내(받은 사람) 몫 */
+export async function counterUnlink(shares: Record<string, number>) {
+  const { error } = await supabase().rpc('counter_unlink', { p_shares: shares });
+  fail(error);
+}
+
+/** S-12f ‘동의해요’(요청한 사람): 다르게 정리한 안으로 해제 확정 */
+export async function acceptCounterUnlink() {
+  const { error } = await supabase().rpc('accept_counter_unlink');
+  fail(error);
+}

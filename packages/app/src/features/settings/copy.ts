@@ -120,6 +120,13 @@ export const copy = {
   debtsTotal: '부채', // [확인 필요]
   debtAmount: (v: string) => `부채 ${v}`, // [확인 필요]
   agree: '동의해요',
+  differently: '다르게 정리하기',
+  counterQ: '어떻게 나눌지 다시 정해 주세요', // [확인 필요] S-12e 제목
+  counterSent: (name: string) => `${name}님에게 다르게 정리한 안을 보냈어요`, // [확인 필요]
+  counterDone: '다르게 정리한 안을 보냈어요', // [확인 필요] 받은 사람 S-12d
+  counterReceived: (name: string) => `${name}님이 자산 정리 안을 다르게 정리했어요`,
+  counterHelp: (md: string) => `동의하면 바로, 아니면 ${md}에 분담 비율로 정리돼요`,
+  seeCounter: '확인하기', // [확인 필요]
   unlinkedTitle: '연결이 해제됐어요', // [확인 필요] S-12h 제목(알림 문구와 같음)
   movedMine: (v: string) => `${v} 원은 각자 목표로 옮겨요`,
   reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',

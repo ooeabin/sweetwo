@@ -27,6 +27,20 @@ export type AnalyticsEvent =
           | 'request_mismatch'
           | 'browser_open_failed';
       };
+    }
+  | {
+      name: 'unlink_requested';
+      props: { split_plan: 'default' | 'custom'; linked_months: number };
+    }
+  | { name: 'unlink_countered'; props: Record<string, never> }
+  | {
+      name: 'unlink_resolved';
+      // timeout(14일 기본안)은 서버가 보냄
+      props: {
+        path: 'agreed' | 'counter_agreed' | 'canceled';
+        days_pending: number;
+        exported_data: boolean;
+      };
     };
 
 type Sink = (e: AnalyticsEvent) => void;

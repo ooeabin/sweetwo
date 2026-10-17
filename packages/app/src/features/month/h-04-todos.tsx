@@ -1,5 +1,12 @@
 import { createInvite, insertTodos, qk, updateTodo, type Proposal } from '@sweetwo/api';
-import { addDays, todoDefs, visibleTodos, type TodoDef, type TodoState } from '@sweetwo/core';
+import {
+  addDays,
+  formatMonthDay,
+  todoDefs,
+  visibleTodos,
+  type TodoDef,
+  type TodoState,
+} from '@sweetwo/core';
 import { Badge, Button } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -36,7 +43,10 @@ export function H04Todos({
   received = [],
   names,
   goals = [],
+  unlinkFrom = null,
 }: {
+  /** 받은 연결 해제 요청(맨 위, S-12d): 요청한 사람 이름, 기한 */
+  unlinkFrom?: { name: string; deadline: string } | null;
   state: TodoState;
   today: string;
   partner: string;
@@ -66,7 +76,8 @@ export function H04Todos({
   if (!todos.data) return null;
   const visible = visibleTodos(defs, todos.data, today);
   const proposals = names ? received : [];
-  const left = proposals.length + visible.length;
+  const top = unlinkFrom ? 1 : 0;
+  const left = top + proposals.length + visible.length;
   if (!left) return null; // 모두 끝나면 카드가 사라짐
 
   const rowOf = (d: TodoDef) => todos.data.find((t) => t.kind === d.kind);
@@ -99,8 +110,23 @@ export function H04Todos({
         <span>{copy.todosLeft(left)}</span>
       </div>
       <div className="hg-checklist__list">
+        {unlinkFrom && (
+          <button
+            type="button"
+            className="hg-task"
+            onClick={() => nav('/settings/couple/unlink/review')}
+          >
+            <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
+            <span className="hg-task__text">
+              <span className="hg-task__title">{copy.unlinkTodo(unlinkFrom.name)}</span>
+              <span className="hg-task__sub">
+                {copy.unlinkTodoSub(formatMonthDay(unlinkFrom.deadline))}
+              </span>
+            </span>
+          </button>
+        )}
         {names &&
-          proposals.slice(0, SHOWN).map((p) => {
+          proposals.slice(0, SHOWN - top).map((p) => {
             const line = describeProposal(p, names, goals);
             return (
               <button
@@ -122,7 +148,7 @@ export function H04Todos({
               </button>
             );
           })}
-        {visible.slice(0, Math.max(0, SHOWN - proposals.length)).map((d) => (
+        {visible.slice(0, Math.max(0, SHOWN - top - proposals.length)).map((d) => (
           <div key={d.kind} className="hg-task">
             <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
             {OPENS[d.kind] ? (

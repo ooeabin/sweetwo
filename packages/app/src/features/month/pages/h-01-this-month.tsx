@@ -115,6 +115,14 @@ export function H01ThisMonth() {
         received={received}
         names={names}
         goals={goals.data ?? []}
+        unlinkFrom={
+          space.data?.couple_state === 'unlink_pending' &&
+          unlink.data &&
+          unlink.data.requested_by !== me.data?.id &&
+          !unlink.data.counter
+            ? { name: v.partnerName, deadline: unlink.data.deadline }
+            : null
+        }
       />
     );
     columns = v.separate
