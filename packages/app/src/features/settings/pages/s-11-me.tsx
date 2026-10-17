@@ -10,9 +10,9 @@ import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-11 내 정보(docs/spec/25-settings.md): 호칭(→ S-11a), 로그인, 알림 이메일(그 자리에서 수정), 월급 플랜 날짜(보기,
-// 바꾸기 S-11d는 제안과 함께 다음 단계), 주말·공휴일 앞당기기(부부 공통, 바로), 분담 방식(보기), 로그아웃.
-// 프로필 사진(S-11e), 신랑·신부(S-11b), 비상금 기준, 남는 돈 넣을 목표, 배우자 대신 입력은 다음 단계.
+// S-11 내 정보(docs/spec/25-settings.md): 호칭(→ S-11a), 신랑·신부(→ S-11b), 로그인, 알림 이메일(그 자리에서 수정),
+// 월급 플랜 날짜(→ S-11d, 합류한 부부만), 주말·공휴일 앞당기기(부부 공통, 바로), 분담 방식(보기), 로그아웃.
+// 프로필 사진(S-11e), 비상금 기준, 남는 돈 넣을 목표, 배우자 대신 입력은 다음 단계.
 export function S11Me() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -59,6 +59,11 @@ export function S11Me() {
           value={c.myName}
           onClick={() => nav('/settings/me/nickname')}
         />
+        <ListRow
+          label={copy.sideRow}
+          value={me.side === 'groom' || me.side === 'bride' ? copy.sides[me.side] : ''}
+          onClick={() => nav('/settings/me/side')}
+        />
         <ListRow label={copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')} chevron={false} />
       </div>
       <form
@@ -84,19 +89,23 @@ export function S11Me() {
         </Button>
       </form>
       <div className="hg-list">
-        <ListRow
-          label={copy.planDay}
-          value={
-            <>
-              {base === null ? '' : base === 'last' ? copy.lastDay : copy.dayN(base)}
-              {later && (
-                <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
-                  {copy.laterPayday}
-                </span>
-              )}
-            </>
-          }
-        />
+        {/* 배우자 미합류·혼자 쓰기면 고를 날이 내 월급날 하나라 줄 숨김(S-11d 예외) */}
+        {c.joined && (
+          <ListRow
+            label={copy.planDay}
+            value={
+              <>
+                {base === null ? '' : base === 'last' ? copy.lastDay : copy.dayN(base)}
+                {later && (
+                  <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
+                    {copy.laterPayday}
+                  </span>
+                )}
+              </>
+            }
+            onClick={() => nav('/settings/me/plan-day')}
+          />
+        )}
         {!c.solo && (
           <ListRow
             label={copy.split}

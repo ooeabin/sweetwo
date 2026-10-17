@@ -70,7 +70,15 @@ import {
   Y09GiftLog,
   YSurprisePartnerBirthday,
 } from './features/calendar';
-import { S10Settings, S11Me, S11aNickname, S14Notifications, S14aQuiet } from './features/settings';
+import {
+  S10Settings,
+  S11Me,
+  S11aNickname,
+  S11bSide,
+  S11dPlanDay,
+  S14Notifications,
+  S14aQuiet,
+} from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
@@ -523,6 +531,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11a 호칭
+      {
+        path: '/settings/me/side',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11bSide />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11b 신랑·신부
+      {
+        path: '/settings/me/plan-day',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11dPlanDay />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11d 월급 플랜 날짜
       {
         path: '/settings/notifications',
         element: (

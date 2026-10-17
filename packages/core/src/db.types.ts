@@ -2049,6 +2049,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
       apply_family_budget: {
         Args: { p: Json; sid: string }
@@ -2090,6 +2091,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
       care_date_in_year: {
         Args: {
@@ -2228,6 +2230,10 @@ export type Database = {
           net: number
         }[]
       }
+      next_base_after: {
+        Args: { d: string; day: number; last: boolean }
+        Returns: string
+      }
       notify: {
         Args: {
           p_actor: string
@@ -2322,6 +2328,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      save_base_day: { Args: { p_after: Json }; Returns: undefined }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
       send_evening_notifications: {
         Args: { p_today?: string }
@@ -2330,6 +2337,10 @@ export type Database = {
       send_morning_notifications: {
         Args: { p_today?: string }
         Returns: number
+      }
+      set_my_side: {
+        Args: { p_side: Database["public"]["Enums"]["couple_side"] }
+        Returns: undefined
       }
       split_line_done: {
         Args: {

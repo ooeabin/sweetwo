@@ -75,6 +75,10 @@ export function describe(
     };
     return { label: copy.livingBudget, before: v(p.before), after: v(p.after) };
   }
+  if (p.item === 'base_day') {
+    const v = (j: Json) => copy.baseDayValue(num(j, 'base_day'), bool(j, 'base_day_last'));
+    return { label: copy.baseDay, before: v(p.before), after: v(p.after) };
+  }
   if (p.item === 'family_budget') {
     const v = (j: Json) => {
       const a = num(j, 'target_amount');

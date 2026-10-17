@@ -619,11 +619,13 @@ supabase/
 
 ### 설정 구조
 
-- features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
+- features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11b `/settings/me/side`, S-11d `/settings/me/plan-day`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
 - 아직 없는 화면 줄은 자리만(누르지 않음, “준비 중이에요”). 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
-- 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로). 월급 플랜 날짜·분담 방식은 보기만(바꾸기는 제안과 함께)
+- 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로). 분담 방식은 보기만
 - 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만
-- 다음 단계: S-11d 기준일 바꾸기(제안), S-11b 신랑·신부, 프로필 사진(S-11e), S-12 부부 정보·연결 해제, S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
+- S-11d 기준일: 합류한 부부만 줄이 보이고, 고를 수 있는 값은 두 사람 월급날. 제안(item `base_day`, `{ base_day, base_day_last }`, 서버 `base_day_ok`가 월급날인지 확인), 미합류·혼자 쓰기는 `save_base_day`. 적용 `apply_base_day`: 기준일 + 지금 사이클 끝 = 새 기준일 전날(`next_base_after`), 15일 미만이면 다음 사이클과 합침(merged_close). 안 나눈 돈을 새 기간에 맞춰 다시 나누기는 월 계획 만들기 작업과 함께
+- S-11b 신랑·신부: `set_my_side` 하나로 나와 배우자 쪽을 같이 바꾸고, 쪽으로 저장한 값(가족 쪽, 챙길 날 쪽·챙길 사람, 플랜 줄의 사람별 몫·체크)도 서로 바꿈. 처음 정할 때(쪽이 없었음)는 저장된 값 그대로
+- 다음 단계: 프로필 사진(S-11e), S-12 부부 정보·연결 해제, S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
 
 ### 배우자 합류 구조
 
@@ -686,7 +688,7 @@ supabase/
 ### 제안 구조
 
 - 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
-- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `family_budget`(양가 비용 예산 `{ holiday, birthday, parents_day, other, target_amount }`, 횟수가 있는 행만, 공간에 하나. 배우자 미합류·혼자 쓰기는 `save_family_budget`으로 바로), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
+- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `base_day`(기준일 `{ base_day, base_day_last }`, 두 사람 월급날만), `family_budget`(양가 비용 예산 `{ holiday, birthday, parents_day, other, target_amount }`, 횟수가 있는 행만, 공간에 하나. 배우자 미합류·혼자 쓰기는 `save_family_budget`으로 바로), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
 - 함수: `propose(항목, 후 값, 적용일, 목표)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
 - 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
 - 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`

@@ -18,6 +18,7 @@ export type ProposalItem =
   | 'split'
   | 'living_budget'
   | 'family_budget'
+  | 'base_day'
   | 'goal_order'
   | 'goal_amount'
   | 'goal_deadline'
