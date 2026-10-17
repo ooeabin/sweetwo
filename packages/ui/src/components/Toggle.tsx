@@ -34,7 +34,7 @@ export function Toggle({
       <button
         type="button"
         role="switch"
-        aria-checked={checked}
+        aria-checked={!!checked}
         disabled={disabled}
         className={cx('hg-toggle', checked && 'is-on')}
         onClick={() => onChange(!checked)}

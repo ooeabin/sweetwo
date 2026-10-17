@@ -307,3 +307,9 @@ export async function fetchPartner(): Promise<PartnerProfile | null> {
   const row = Array.isArray(data) ? data[0] : null;
   return (row as PartnerProfile | undefined) ?? null;
 }
+
+/** 신랑·신부(25 S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 함께 바꿈 */
+export async function setMySide(side: 'groom' | 'bride') {
+  const { error } = await supabase().rpc('set_my_side', { p_side: side });
+  fail(error);
+}

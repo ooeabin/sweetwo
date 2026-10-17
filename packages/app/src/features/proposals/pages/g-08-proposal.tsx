@@ -162,6 +162,15 @@ export function G08Proposal() {
               {copy.differently}
             </Button>
           )}
+          {p.item === 'base_day' && (
+            <Button
+              variant="secondary"
+              disabled={busy}
+              onClick={() => nav('/settings/me/plan-day?differently=1')}
+            >
+              {copy.differently}
+            </Button>
+          )}
           {p.item === 'family_budget' && (
             // 양가 비용 예산 수정(Y-06)에서 고친 안이 이 제안을 대체
             <Button

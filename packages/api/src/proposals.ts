@@ -65,3 +65,9 @@ export async function saveFamilyBudget(after: Json) {
   const { error } = await supabase().rpc('save_family_budget', { p_after: after });
   fail(error);
 }
+
+/** 기준일 바로 저장(배우자 미합류·혼자 쓰기, 25 S-11d) */
+export async function saveBaseDay(after: { base_day: number | null; base_day_last: boolean }) {
+  const { error } = await supabase().rpc('save_base_day', { p_after: after });
+  fail(error);
+}

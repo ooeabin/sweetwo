@@ -191,3 +191,49 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await expect(page).toHaveURL(/\/settings\/notifications$/);
   expect(db.me).toMatchObject({ quiet_start: 23 });
 });
+
+test('신랑·신부(S-11b)는 둘 다 바뀜, 월급 플랜 날짜(S-11d)는 예빈님께 제안', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /찬우와 예빈/ }).click();
+
+  await expect(page.getByRole('button', { name: /신랑·신부/ })).toContainText('신랑');
+  await page.getByRole('button', { name: /신랑·신부/ }).click();
+  await expect(page.getByRole('heading', { name: '신랑·신부 중 누구예요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: '신부' }).click();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  expect(db.me.side).toBe('bride');
+  expect((db.partner as Record<string, unknown>).side).toBe('groom');
+
+  await page.getByRole('button', { name: /월급 플랜 날짜/ }).click();
+  await expect(page.getByRole('heading', { name: '월급 플랜을 언제 세울까요?' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: '찬우 월급날 25일' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(page.getByRole('button', { name: '예빈님께 제안하기' })).toBeDisabled();
+  await page.getByRole('radio', { name: '예빈 월급날 10일' }).click();
+  await expect(page.getByText(/좋아요면 바로, 반대 없으면 .+부터 적용돼요/)).toBeVisible();
+  await expect(
+    page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여줘요' }),
+  ).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  expect(db.proposals.at(-1)).toMatchObject({
+    item: 'base_day',
+    after: { base_day: 10, base_day_last: false },
+    before: { base_day: 25, base_day_last: false },
+  });
+  // 열린 제안이 있으면 고르기 대신 제안 보기
+  await page.getByRole('button', { name: /월급 플랜 날짜/ }).click();
+  await expect(page.getByText('답을 기다리는 제안이 있어요')).toBeVisible();
+  await page.getByRole('button', { name: '제안 보기' }).click();
+  await expect(page).toHaveURL(/\/proposals\//);
+  await expect(page.getByText('25일 → 10일')).toBeVisible();
+});

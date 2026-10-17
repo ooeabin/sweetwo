@@ -57,6 +57,20 @@ export const copy = {
   // S-11a
   nicknameQ: '뭐라고 부르면 될까요?',
 
+  // S-11b
+  sideRow: '신랑·신부', // [확인 필요] 줄 이름
+  sideQ: '신랑·신부 중 누구예요?',
+  sides: { groom: '신랑', bride: '신부' },
+
+  // S-11d
+  planDayQ: '월급 플랜을 언제 세울까요?',
+  paydayOf: (name: string, d: string) => `${name} 월급날 ${d}`,
+  proposeTo: (name: string) => `${name}님께 제안하기`,
+  proposed: (name: string) => `${name}님에게 제안했어요`,
+  applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+  openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
+  seeProposal: '제안 보기', // [확인 필요]
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

@@ -269,6 +269,27 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           if (g.template === 'family_cost') g.target_amount = a.target_amount;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      // 신랑·신부(S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 같이 바꿈
+      if (fn === 'set_my_side') {
+        const side = String(body().p_side);
+        const flip = (v: unknown) => (v === 'groom' ? 'bride' : v === 'bride' ? 'groom' : v);
+        const had = db.me.side;
+        if (had !== side) {
+          db.me.side = side;
+          if (db.partner) (db.partner as Record<string, unknown>).side = flip(side);
+          if (had) {
+            for (const f of db.family) f.side = flip(f.side);
+            for (const c of db.cares)
+              Object.assign(c, { side: flip(c.side), carer: flip(c.carer) });
+          }
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'save_base_day') {
+        const a = body().p_after as { base_day: number | null; base_day_last: boolean };
+        Object.assign(db.space ?? {}, a);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'propose') {
         const b = body();
         const me = String(db.me.id);
@@ -296,13 +317,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
                   ? { deadline: goal?.deadline ?? null }
                   : item === 'goal_pause'
                     ? { paused: goal?.status === 'paused' }
-                    : item === 'family_budget'
+                    : item === 'base_day'
                       ? {
-                          target_amount:
-                            db.goals.find((g) => g.template === 'family_cost')?.target_amount ??
-                            null,
+                          base_day: db.space?.base_day ?? null,
+                          base_day_last: !!db.space?.base_day_last,
                         }
-                      : { deleted: false };
+                      : item === 'family_budget'
+                        ? {
+                            target_amount:
+                              db.goals.find((g) => g.template === 'family_cost')?.target_amount ??
+                              null,
+                          }
+                        : { deleted: false };
         const row = {
           id: `prop-${db.proposals.length + 1}`,
           space_id: 'space-1',
