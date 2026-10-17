@@ -19,7 +19,7 @@ import {
   spreadMonthly,
   type PlanRow,
 } from '@sweetwo/core';
-import { ChoiceCards, MonthSummary, QuestionLayout } from '@sweetwo/ui';
+import { Button, ChoiceCards, MonthSummary, QuestionLayout } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -226,6 +226,9 @@ export function W04gSummary() {
           onChange={setChoice}
         />
       )}
+      <Button variant="secondary" onClick={() => nav(closePath('w-04b'))}>
+        {copy.detailed}
+      </Button>
     </QuestionLayout>
   );
 }

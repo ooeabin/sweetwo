@@ -28,3 +28,4 @@ export * from './faq';
 export * from './device';
 export * from './rules/living-check';
 export * from './rules/close-review';
+export * from './rules/close-detail';

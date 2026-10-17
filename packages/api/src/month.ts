@@ -110,6 +110,9 @@ export async function updateMonthClose(
     | 'gap_choice'
     | 'gap_goal_id'
     | 'budget_fix'
+    | 'detailed_at'
+    | 'emergency_used'
+    | 'emergency_reason'
   >,
 ) {
   const { error } = await supabase().from('month_close').update(patch).eq('id', id);
@@ -290,4 +293,72 @@ export async function adjustPlan(
     p_counter: counter,
   });
   fail(error);
+}
+
+// ── 꼼꼼 모드(21 W-04b~f) ─────────────────────────────────────────────
+export type CloseBalance = Tables<'close_balance'>;
+/** 정리마다 남긴 공동 통장 잔액 전부(지난 정리 잔액 = 예상 잔액 기준선) */
+export async function fetchCloseBalances(): Promise<CloseBalance[]> {
+  const { data, error } = await supabase()
+    .from('close_balance')
+    .select('*')
+    .is('deleted_at', null);
+  fail(error);
+  return data ?? [];
+}
+/** W-04b 잔액 저장. 통장마다 하나 */
+export async function saveCloseBalances(
+  closeId: string,
+  rows: Pick<CloseBalance, 'account_id' | 'amount' | 'expected'>[],
+) {
+  if (!rows.length) return;
+  const space_id = await ensureSpace();
+  const { error } = await supabase()
+    .from('close_balance')
+    .upsert(
+      rows.map((r) => ({ ...r, month_close_id: closeId, space_id })),
+      { onConflict: 'month_close_id,account_id' },
+    );
+  fail(error);
+}
+/** W-04c 차액 답: 고른 목표에서 차감, null이면 ‘목표에서 쓴 돈이 아니에요’ */
+export async function answerGoalGap(closeId: string, amount: number, goalId: string | null) {
+  const { error } = await supabase().rpc('answer_goal_gap', {
+    p_close: closeId,
+    p_amount: amount,
+    ...(goalId ? { p_goal: goalId } : {}),
+  });
+  fail(error);
+}
+export interface CycleGoalUse {
+  id: string;
+  goalId: string;
+  amount: number;
+  usedOn: string;
+  paidFrom: string;
+  source: string;
+  closeId: string | null;
+  /** 챙길 날 기록이면 그날 이름 */
+  careName: string | null;
+}
+/** W-04c 이번 사이클 목표 사용 기록(챙길 날, 결혼 비용, 매년 목표) */
+export async function fetchCycleGoalUses(start: string, end: string): Promise<CycleGoalUse[]> {
+  const { data, error } = await supabase()
+    .from('goal_use')
+    .select('id, goal_id, amount, used_on, paid_from, source, month_close_id, care:care_record(day:care_day(name))')
+    .is('deleted_at', null)
+    .gte('used_on', start)
+    .lte('used_on', end)
+    .order('used_on');
+  fail(error);
+  return (data ?? []).map((u) => ({
+    id: u.id,
+    goalId: u.goal_id,
+    amount: u.amount,
+    usedOn: u.used_on,
+    paidFrom: u.paid_from,
+    source: u.source,
+    closeId: u.month_close_id,
+    careName: u.care?.day?.name ?? null,
+  }));
 }
