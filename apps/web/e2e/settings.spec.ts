@@ -851,3 +851,35 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test('통장 방식(S-10a) → 다음 사이클 플랜이 생길 때 바뀜(기준일 지난 뒤 처음 열면 플랜 만들기)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { account_mode: 'single' });
+  // 지난 사이클 플랜만 있음(8월 25일 ~ 9월 24일)
+  db.plans.push({
+    args: {
+      p_label_month: '2026-08-01',
+      p_cycle_start: '2026-08-25',
+      p_cycle_end: '2026-09-24',
+      p_is_temp: false,
+      p_snapshot: {},
+      p_lines: [],
+    },
+  });
+  await page.goto('/settings/account-mode');
+  await expect(page.getByRole('heading', { name: '통장을 어떻게 쓸까요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: '역할별로 나눠 쓸래요' }).click();
+  await expect(page.getByText('다음 월급 플랜부터 바뀌어요')).toBeVisible();
+  // 설정 홈을 열 때(MainFrame) 다음 사이클 플랜을 만들고, 그때 통장 방식이 바뀜
+  await expect.poll(() => db.plans[0]?.args.p_cycle_start).toBe('2026-09-25');
+  const a = db.plans[0]?.args ?? {};
+  expect([a.p_label_month, a.p_cycle_end]).toEqual(['2026-09-01', '2026-10-24']);
+  const lines = a.p_lines as { target: string; account_role?: string; amount: number }[];
+  expect(lines.some((l) => l.target === 'account' && l.account_role === 'living')).toBe(true);
+  expect(db.space?.account_mode).toBe('roles');
+});

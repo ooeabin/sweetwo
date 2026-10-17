@@ -231,6 +231,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (!db.plans.length) db.plans.push({ args: body() });
         return json(route, 'plan-1');
       }
+      if (fn === 'create_cycle_plan') {
+        // 서버 흉내: 같은 사이클이면 그대로, 통장 방식 예약 적용, 새 플랜이 맨 앞
+        const b = body();
+        if (!db.plans.some((p) => p.args.p_cycle_start === b.p_cycle_start)) {
+          db.plans.unshift({ args: b });
+          if (db.space?.account_mode_next) {
+            db.space.account_mode = db.space.account_mode_next;
+            db.space.account_mode_next = null;
+          }
+        }
+        return json(route, 'plan-1');
+      }
       if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
       if (fn === 'join_space') {
         const sp = db.space ?? {};
@@ -1048,7 +1060,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
     }
     if (path === '/rest/v1/monthly_plan' && method === 'GET') {
-      const a = db.plans[0]?.args;
+      // 가장 최근 플랜 끝(다음 사이클 플랜 만들기)
+      if (url.searchParams.get('select') === 'cycle_end') {
+        const ends = db.plans.map((p) => String(p.args.p_cycle_end)).sort();
+        return json(route, ends.length ? [{ cycle_end: ends[ends.length - 1] }] : []);
+      }
+      // 오늘이 든 플랜만(cycle_start ≤ 오늘 ≤ cycle_end)
+      const lte = url.searchParams.get('cycle_start')?.replace(/^lte\./, '');
+      const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
+      const a = db.plans.find(
+        (p) =>
+          (!lte || String(p.args.p_cycle_start) <= lte) &&
+          (!gte || String(p.args.p_cycle_end) >= gte),
+      )?.args;
       if (!a) return json(route, null);
       const lines = ((a.p_lines as Record<string, unknown>[]) ?? []).map((l, i) => ({
         id: `line-${i + 1}`,
