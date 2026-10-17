@@ -68,6 +68,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       noti_prefs: {},
       quiet_start: 22,
       quiet_end: 8,
+      default_visibility: 'sum',
       nickname: null,
       side: null,
       birth_year: null,
@@ -627,6 +628,56 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'trash_rows') {
+        // 서버 trash_rows 흉내: 지운 자산(내 명의·공동), 목표
+        const rows = [
+          ...db.assets
+            .filter((a) => a.deleted_at && (a.owner === 'joint' || a.owner_user_id === db.me.id))
+            .map((a) => ({
+              kind: 'asset',
+              id: a.id,
+              name: a.name,
+              sub: a.side,
+              deleted_at: a.deleted_at,
+              deleted_by: a.deleted_by ?? db.me.id,
+            })),
+          ...db.goals
+            .filter((g) => g.deleted_at)
+            .map((g) => ({
+              kind: 'goal',
+              id: g.id,
+              name: g.name,
+              sub: null,
+              deleted_at: g.deleted_at,
+              deleted_by: g.deleted_by ?? db.me.id,
+            })),
+        ].sort((a, b) => String(b.deleted_at).localeCompare(String(a.deleted_at)));
+        return json(route, rows);
+      }
+      if (fn === 'restore_trash') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_kind: string;
+          p_id: string;
+        };
+        const list = body.p_kind === 'goal' ? db.goals : db.assets;
+        if (body.p_kind === 'goal' && db.space?.couple_state === 'connected')
+          return json(route, { message: 'needs_proposal' }, 400);
+        const r = list.find((x) => x.id === body.p_id);
+        if (r) r.deleted_at = null;
+        return json(route, 'restored');
+      }
+      if (fn === 'purge_trash') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_kind?: string;
+          p_id?: string;
+        };
+        const before = db.assets.length + db.goals.length;
+        const keep = (x: Record<string, unknown>) =>
+          !x.deleted_at || (body.p_id !== undefined && x.id !== body.p_id);
+        db.assets = db.assets.filter(keep);
+        db.goals = db.goals.filter(keep);
+        return json(route, before - db.assets.length - db.goals.length);
       }
       if (fn === 'unlink_partner_name') return json(route, '예빈');
       if (fn === 'request_reconnect') {

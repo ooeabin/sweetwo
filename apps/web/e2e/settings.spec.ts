@@ -593,3 +593,105 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page).toHaveURL(/\/$/);
   expect(db.unlinks[0]?.status).toBe('reconnected');
 });
+
+const myStock = (db: MemDb, extra: Record<string, unknown> = {}) =>
+  db.assets.push({
+    id: 'a-stock',
+    side: 'asset',
+    grp: 'invest',
+    kind: 'stock',
+    name: '찬우 주식',
+    amount: 2_000_000,
+    principal: null,
+    maturity_date: null,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    visibility: 'sum',
+    status: 'held',
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-10-01T00:00:00Z',
+    deleted_at: null,
+    ...extra,
+  });
+
+test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸기, 항목별', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  myStock(db);
+  await open(page, info.project.name === 'narrow');
+  const row = page.getByRole('button', { name: /공개 범위/ });
+  await expect(row).toContainText('내 자산 합계만');
+  await row.click();
+  await expect(page).toHaveURL(/\/settings\/visibility$/);
+  await expect(page.getByText('수입·용돈 금액 항상 공유')).toBeVisible();
+  await axe(page);
+
+  await page.getByLabel('새 항목 기본값').selectOption('private');
+  await expect(page.getByText('이미 있는 항목 1개도 바꿀까요?')).toBeVisible();
+  await page.getByRole('button', { name: '모두 바꾸기' }).click();
+  await expect.poll(() => db.me.default_visibility).toBe('private');
+  await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.visibility).toBe('private');
+
+  await page.getByLabel('찬우 주식 공개 범위').selectOption('all');
+  await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.visibility).toBe('all');
+  await axe(page);
+});
+
+test('휴지통(S-21): 되살리기, 연결된 부부 목표는 제안, 영구 삭제', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  myStock(db, { deleted_at: '2026-10-03T01:00:00Z' });
+  db.assets.push({
+    id: 'a-old',
+    side: 'debt',
+    grp: 'loan',
+    kind: 'credit',
+    name: '옛 대출',
+    amount: 1_000_000,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    created_by: db.me.id,
+    created_at: '2026-08-01T00:00:00Z',
+    deleted_at: '2026-10-01T01:00:00Z',
+  });
+  db.goals.push({
+    id: 'g-trip',
+    space_id: 'space-1',
+    template: 'travel',
+    name: '여행',
+    kind: 'once',
+    priority: 2,
+    status: 'active',
+    target_amount: 3_000_000,
+    deleted_at: '2026-10-05T01:00:00Z',
+  });
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /데이터/ }).click();
+  await expect(page).toHaveURL(/\/settings\/trash$/);
+  await expect(page.getByText('지운 항목은 30일 뒤 완전히 지워져요')).toBeVisible();
+  await expect(page.getByText('10월 3일에 지웠어요')).toBeVisible();
+  await expect(page.getByText('26일 남음')).toBeVisible();
+  await axe(page);
+
+  const rowOf = (name: string) => page.locator('.hg-listrow').filter({ hasText: name });
+  await rowOf('찬우 주식').getByRole('button', { name: '되살리기' }).click();
+  await expect(page.getByText('되살렸어요')).toBeVisible();
+  await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.deleted_at).toBeNull();
+
+  await rowOf('여행').getByRole('button', { name: '되살리기' }).click();
+  await expect(page.getByText('예빈님에게 되살리자고 제안했어요')).toBeVisible();
+  expect(db.proposals.some((p) => p.item === 'goal_restore')).toBe(true);
+
+  await rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' }).click();
+  await page.getByRole('menuitem', { name: '영구 삭제' }).click();
+  await expect(page.getByRole('alertdialog', { name: '완전히 지울까요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '지울게요' }).click();
+  await expect(page.getByText('완전히 지웠어요')).toBeVisible();
+  expect(db.assets.some((a) => a.id === 'a-old')).toBe(false);
+});

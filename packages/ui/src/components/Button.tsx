@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 
 // 디자인 Button(docs/design/components/Button.md). 클래스 이름은 디자인 시스템 그대로.
-type Variant = 'primary' | 'secondary' | 'ghost' | 'link';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'link' | 'danger';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;

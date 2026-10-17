@@ -9,7 +9,7 @@ import { useSettingsData } from '../data';
 
 // S-12g 다시 연결 수락(받은 사람, Q7): Avatar 2개 + “찬우님이 다시 연결하자고 해요”,
 // “연결을 끊기 전 공동 목표·통장이 돌아와요”, ‘다시 연결할게요’ → 연결 복구 → 이번 달, ‘괜찮아요’ → 혼자 쓰기 유지.
-// 30일이 지났으면 “다시 연결할 수 있는 기간이 지났어요”, 버튼 숨김. 공개 범위 한 번 확인(S-13)은 S-13과 함께.
+// 30일이 지났으면 “다시 연결할 수 있는 기간이 지났어요”, 버튼 숨김. 다시 연결하면 공개 범위(S-13)를 한 번 확인하고 이번 달로.
 export function S12gReconnect() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -30,7 +30,8 @@ export function S12gReconnect() {
     try {
       await answerReconnect(accept);
       if (accept) {
-        nav('/', { replace: true });
+        // 다시 연결 뒤 공개 범위 한 번 확인(S-13) → 이번 달
+        nav('/settings/visibility?next=/', { replace: true });
         void qc.invalidateQueries();
       } else {
         await qc.invalidateQueries({ queryKey: qk.myUnlink });

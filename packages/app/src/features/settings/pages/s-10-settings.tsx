@@ -46,7 +46,11 @@ export function S10Settings() {
       </div>
       <div className="hg-list">
         {c.joined && (
-          <ListRow label={copy.rows.visibility} value={copy.rows.visibilityValue} sub={later} />
+          <ListRow
+            label={copy.rows.visibility}
+            value={copy.rows.visibilityValue(copy.vis[d.me.default_visibility] ?? '')}
+            onClick={() => nav('/settings/visibility')}
+          />
         )}
         <ListRow
           label={copy.rows.noti}
@@ -64,7 +68,11 @@ export function S10Settings() {
       </div>
       <div className="hg-list">
         <ListRow label={copy.rows.help} sub={later} />
-        <ListRow label={copy.rows.data} sub={copy.rows.dataSub} />
+        <ListRow
+          label={copy.rows.data}
+          sub={copy.rows.dataSub}
+          onClick={() => nav('/settings/trash')}
+        />
         <ListRow
           label={copy.rows.about}
           value={desktop ? (window.sweetwo?.appVersion ?? '') : undefined}

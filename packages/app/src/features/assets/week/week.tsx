@@ -61,8 +61,8 @@ export function useWeek(side: 'assets' | 'loans') {
       amount: cur.amount,
       owner: owner === 'joint' ? ('joint' as const) : ('person' as const),
       owner_user_id: owner === 'me' ? d.me.id : null,
-      // 내 명의 기본 = 합계만(F-03과 같음), 공동·대신 입력은 전체 공개
-      visibility: owner === 'me' && !solo ? ('sum' as const) : ('all' as const),
+      // 내 명의 기본 = 내 새 항목 기본값(S-13, F-03과 같음), 공동·대신 입력은 전체 공개
+      visibility: owner === 'me' && !solo ? d.me.default_visibility : ('all' as const),
       paid_count: cur.paidCount,
       interest_rate: cur.rate,
       rate_estimated: cur.rateEstimated,
