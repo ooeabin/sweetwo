@@ -55,6 +55,10 @@ export const copy = {
   timeout: '로그인이 끝나지 않았어요. 다시 시도해 주세요',
   cancelled: '로그인을 취소했어요',
   relogin: '다시 로그인해 주세요',
+  restoreTitle: '계정 삭제를 취소할까요?',
+  restoreYes: '취소하고 계속 쓰기',
+  restoreNo: '그대로 두기',
+  restoreHelp: '복구하면 혼자 쓰기로 돌아와요', // [확인 필요]
   browserFailed: '브라우저를 열지 못했어요',
 
   // A-04

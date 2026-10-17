@@ -10,6 +10,8 @@ export { S12eUnlinkDifferently } from './pages/s-12e-unlink-differently';
 export { S12fUnlinkCounter } from './pages/s-12f-unlink-counter';
 export { S12gReconnect } from './pages/s-12g-reconnect';
 export { S13Visibility } from './pages/s-13-visibility';
+export { S18Data } from './pages/s-18-data';
+export { S18bDelete } from './pages/s-18b-delete';
 export { S21Trash } from './pages/s-21-trash';
 export { S12hUnlinked } from './pages/s-12h-unlinked';
 export { S11aNickname } from './pages/s-11a-nickname';

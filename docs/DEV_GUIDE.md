@@ -632,7 +632,9 @@ supabase/
 - 다시 연결(S-12g): 해제 확정 뒤 30일 안, 두 사람이 모두 해제로 만든 공간에 혼자 있을 때(`reconnect_ok`). `request_reconnect` → 상대 알림·할 일 → `answer_reconnect(true)`면 원래 공간으로 돌아가고 해제 뒤 바뀐 내 명의 항목(자산·부채와 기록, 개인 통장, 수입)과 알림만 옮김, 새 공간(사본)은 지운 표시. `false`면 요청만 닫힘(알림 없음, 다시 요청 가능). 혼자 쓰기 ‘새로 초대하기’ `start_new_invite`(미합류로). 매일 `purge_unlinked_spaces`가 30일 지난 원래 공간을 지움(분리 확정). 해제 뒤 상대 호칭은 `unlink_partner_name()`. 행 타입 하나만 받는 SQL 함수는 PostgREST가 계산 열로 보여서 타입이 깨지므로 id로 받음
 - 공개 범위(S-13 `/settings/visibility`): `app_user.default_visibility`(내 자산·부채 새 항목 기본값, 기본 합계만)를 F-03·첫 주 자산 입력이 씀. 바꿀 때 기본값과 다른 내 명의 항목이 있으면 “이미 있는 항목 n개도 바꿀까요?”. 다시 연결하면 `?next=/`로 한 번 열고 ‘확인’
 - 휴지통(S-21 `/settings/trash`, 지금은 S-10 ‘데이터’ 줄에서): `trash_rows()`(자산·부채, 목표, 가족, 챙길 날. 30일 안, 배우자 명의·남의 서프라이즈 빼고), `restore_trash`(같이 지워진 것도 함께: 부모와 10초 안에 지운 자식), 연결된 부부의 목표는 `needs_proposal` → 제안 `goal_restore`. `purge_trash`(하나 또는 비우기), 매일 `purge_old_trash`. 확인은 ui `Modal`(영구 삭제만), Button `danger`
-- 다음 단계: 프로필 사진(S-11e), 예식일 수정(H-P1)·결혼했어요(H-T1), S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
+- 데이터(S-18 `/settings/data`): 내보내기는 앱에서 만듦(api `fetchExportData` → `features/settings/export.ts` → core `toCsv`(BOM, CRLF), `makeZip`(압축 없는 zip)). 범위 내 데이터 / 공동 데이터, 배우자 항목은 RLS가 거른 뒤 ‘합계만’은 합계 한 줄. 파일 이름은 영문(`sweetwo-joint-20261018.zip`). 본인 확인: 데스크톱 PIN(있으면), 웹은 `reauthenticate(returnTo)`로 가입 소셜 다시 로그인 → `?export=범위`로 돌아와 이어서. 사용 기록 보내기 = `app_user.analytics_off`
+- 계정 삭제(S-18b `/settings/data/delete`): `request_account_deletion`은 다시 로그인한 지 10분 안에만(`reauth_required`면 `reauthenticate('/settings/data/delete?go=1')`). 바로 이용 중지(status). 연결·해제 대기면 연결 해제처럼 나눔(`confirm_unlink` how `deleted`, 공동 항목 전부 상대, 상대 알림 `partner_deleted`). 30일 안 다시 로그인하면 A-02 `/account/restore` “계정 삭제를 취소할까요?” → `cancel_account_deletion`(혼자 쓰기, 그때부터 30일 다시 연결, 상대 알림 `partner_restored`). 매일 `purge_deleted_accounts`
+- 다음 단계: 프로필 사진(S-11e), 내보내기 PDF 요약 3종, 예식일 수정(H-P1)·결혼했어요(H-T1), S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
 
 ### 배우자 합류 구조
 

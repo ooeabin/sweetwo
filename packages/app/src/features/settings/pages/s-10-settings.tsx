@@ -71,7 +71,7 @@ export function S10Settings() {
         <ListRow
           label={copy.rows.data}
           sub={copy.rows.dataSub}
-          onClick={() => nav('/settings/trash')}
+          onClick={() => nav('/settings/data')}
         />
         <ListRow
           label={copy.rows.about}
