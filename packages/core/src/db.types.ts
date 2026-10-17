@@ -447,6 +447,106 @@ export type Database = {
           },
         ]
       }
+      care_day: {
+        Row: {
+          alerts: number[]
+          budget: number
+          carer: Database["public"]["Enums"]["care_carer"]
+          category: Database["public"]["Enums"]["care_category"]
+          created_at: string
+          created_by: string | null
+          date_rule: Database["public"]["Enums"]["care_date_rule"]
+          day: number | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          kind: string
+          leap: boolean
+          member_id: string | null
+          memo: string | null
+          month: number | null
+          name: string
+          once_on: string | null
+          side: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string
+          status: Database["public"]["Enums"]["care_status"]
+          status_on: string | null
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          alerts?: number[]
+          budget?: number
+          carer?: Database["public"]["Enums"]["care_carer"]
+          category: Database["public"]["Enums"]["care_category"]
+          created_at?: string
+          created_by?: string | null
+          date_rule: Database["public"]["Enums"]["care_date_rule"]
+          day?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          kind: string
+          leap?: boolean
+          member_id?: string | null
+          memo?: string | null
+          month?: number | null
+          name: string
+          once_on?: string | null
+          side?: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string
+          status?: Database["public"]["Enums"]["care_status"]
+          status_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          alerts?: number[]
+          budget?: number
+          carer?: Database["public"]["Enums"]["care_carer"]
+          category?: Database["public"]["Enums"]["care_category"]
+          created_at?: string
+          created_by?: string | null
+          date_rule?: Database["public"]["Enums"]["care_date_rule"]
+          day?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          kind?: string
+          leap?: boolean
+          member_id?: string | null
+          memo?: string | null
+          month?: number | null
+          name?: string
+          once_on?: string | null
+          side?: Database["public"]["Enums"]["couple_side"] | null
+          space_id?: string
+          status?: Database["public"]["Enums"]["care_status"]
+          status_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_day_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "family_member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_day_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent: {
         Row: {
           agreed: boolean
@@ -612,6 +712,84 @@ export type Database = {
           wedding_saved?: number | null
         }
         Relationships: []
+      }
+      family_member: {
+        Row: {
+          birth_day: number | null
+          birth_leap: boolean
+          birth_lunar: boolean
+          birth_month: number | null
+          birth_year: number | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          korean_age: boolean
+          memo: string | null
+          relation: Database["public"]["Enums"]["family_relation"]
+          side: Database["public"]["Enums"]["couple_side"]
+          sort: number
+          space_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          birth_day?: number | null
+          birth_leap?: boolean
+          birth_lunar?: boolean
+          birth_month?: number | null
+          birth_year?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          korean_age?: boolean
+          memo?: string | null
+          relation: Database["public"]["Enums"]["family_relation"]
+          side: Database["public"]["Enums"]["couple_side"]
+          sort?: number
+          space_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          birth_day?: number | null
+          birth_leap?: boolean
+          birth_lunar?: boolean
+          birth_month?: number | null
+          birth_year?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          korean_age?: boolean
+          memo?: string | null
+          relation?: Database["public"]["Enums"]["family_relation"]
+          side?: Database["public"]["Enums"]["couple_side"]
+          sort?: number
+          space_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_member_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fixed_expense: {
         Row: {
@@ -1804,6 +1982,10 @@ export type Database = {
       asset_visibility: "all" | "sum" | "private"
       auth_provider: "kakao" | "google" | "apple"
       big_expense_how: "from_goal" | "exception"
+      care_carer: "groom" | "bride" | "together"
+      care_category: "family" | "couple" | "wedding"
+      care_date_rule: "solar_yearly" | "lunar_yearly" | "once"
+      care_status: "todo" | "preparing" | "done"
       child_plan: "within_1y" | "in_1_3y" | "after_3y" | "none" | "unsure"
       consent_kind:
         | "terms"
@@ -1821,6 +2003,7 @@ export type Database = {
       email_source: "provider" | "manual"
       employment: "regular" | "contract" | "freelance" | "resting"
       expense_burden: "shared" | "personal"
+      family_relation: "parent" | "grandparent" | "sibling" | "sibling_spouse" | "nephew" | "other"
       goal_kind: "once" | "yearly" | "monthly"
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
@@ -1970,6 +2153,10 @@ export const Constants = {
       asset_visibility: ["all", "sum", "private"],
       auth_provider: ["kakao", "google", "apple"],
       big_expense_how: ["from_goal", "exception"],
+      care_carer: ["groom", "bride", "together"],
+      care_category: ["family", "couple", "wedding"],
+      care_date_rule: ["solar_yearly", "lunar_yearly", "once"],
+      care_status: ["todo", "preparing", "done"],
       child_plan: ["within_1y", "in_1_3y", "after_3y", "none", "unsure"],
       consent_kind: [
         "terms",
@@ -1987,6 +2174,7 @@ export const Constants = {
       email_source: ["provider", "manual"],
       employment: ["regular", "contract", "freelance", "resting"],
       expense_burden: ["shared", "personal"],
+      family_relation: ["parent", "grandparent", "sibling", "sibling_spouse", "nephew", "other"],
       goal_kind: ["once", "yearly", "monthly"],
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
