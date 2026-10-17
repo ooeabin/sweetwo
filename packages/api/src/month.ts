@@ -299,10 +299,7 @@ export async function adjustPlan(
 export type CloseBalance = Tables<'close_balance'>;
 /** 정리마다 남긴 공동 통장 잔액 전부(지난 정리 잔액 = 예상 잔액 기준선) */
 export async function fetchCloseBalances(): Promise<CloseBalance[]> {
-  const { data, error } = await supabase()
-    .from('close_balance')
-    .select('*')
-    .is('deleted_at', null);
+  const { data, error } = await supabase().from('close_balance').select('*').is('deleted_at', null);
   fail(error);
   return data ?? [];
 }
@@ -345,7 +342,9 @@ export interface CycleGoalUse {
 export async function fetchCycleGoalUses(start: string, end: string): Promise<CycleGoalUse[]> {
   const { data, error } = await supabase()
     .from('goal_use')
-    .select('id, goal_id, amount, used_on, paid_from, source, month_close_id, care:care_record(day:care_day(name))')
+    .select(
+      'id, goal_id, amount, used_on, paid_from, source, month_close_id, care:care_record(day:care_day(name))',
+    )
     .is('deleted_at', null)
     .gte('used_on', start)
     .lte('used_on', end)

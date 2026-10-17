@@ -103,7 +103,7 @@ import {
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01ThisMonth } from './features/month';
-import { CloseRoute, W04jSpendEntry } from './features/month-close';
+import { CloseRoute, W04jSpendEntry, W04pBundle } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01JoinStart } from './features/pairing';
 import { G08Proposal } from './features/proposals';
@@ -143,6 +143,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-04a~W-04 끝 월말 정리
+      {
+        path: '/month/close/w-04p/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W04pBundle />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-04p 월말 정리 제안 응답
       {
         path: '/goals',
         element: (

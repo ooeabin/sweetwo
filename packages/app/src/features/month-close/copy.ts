@@ -73,6 +73,28 @@ export const copy = {
   noChange: '바뀐 값이 없어요',
   toMonth: '이번 달로', // [확인 필요]
 
+  // W-04h 다음 달 조정
+  adjustTitle: '다음 달 플랜, 바꿀 게 있을까요?',
+  heldBadge: '보류', // [확인 필요]
+  heldNote: '반대해서 보류됐어요',
+  togetherAlone: (partner: string) => `${partner}님도 좋아요를 눌러야 바뀌어요`,
+  livingBudget: '생활비 예산', // [확인 필요]
+  allocTitle: '목표 배분', // [확인 필요]
+  allocTotal: (total: string, saveable: string) => `합계 ${total} 원 / 저축 가능 ${saveable} 원`,
+
+  // W-04 끝(혼자: 제안 묶음)
+  sentTitle: (n: number, partner: string) => `바뀐 값 ${n}개를 ${partner}님께 제안으로 보냈어요`,
+  doneConfirmed: (n: number) => `바뀐 값 ${n}개를 확정했어요`,
+  pending: '제안 중',
+  applyFrom: (date: string) => `반대 없으면 ${date}부터 적용돼요`,
+  seeSent: '보낸 제안 보기',
+
+  // W-04p 월말 정리 제안 응답
+  bundleTitle: (who: string, m: number) => `${who}님이 ${m}월 월급 플랜을 정리했어요`,
+  allLike: '모두 좋아요',
+  restLike: (n: number) => `나머지 ${n}개 좋아요`,
+  bundleDone: '모두 답했어요', // [확인 필요]
+
   // 꼼꼼 모드
   // W-04b 통장 잔액
   balanceTitle: '지금 통장 잔액을 알려주세요',

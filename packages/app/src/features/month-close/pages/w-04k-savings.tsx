@@ -50,7 +50,7 @@ export function W04kSavings() {
       );
       await d.refreshClose();
       setSaving(false);
-      nav(closePath('w-04g'));
+      nav(closePath(d.adjust ? 'w-04h' : 'w-04g'));
     } catch {
       setSaving(false);
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void next() });
@@ -59,7 +59,7 @@ export function W04kSavings() {
 
   return (
     <QuestionLayout
-      steps={closeProgress('w-04k')}
+      steps={closeProgress('w-04k', d.adjust)}
       title={copy.savingsTitle}
       help={copy.savingsHelp}
       onBack={() => nav(closePath('w-04j'))}

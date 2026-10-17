@@ -132,7 +132,7 @@ export function W04jSpendEntry({ mode = 'early' }: { mode?: 'early' | 'close' })
   const close = mode === 'close';
   return (
     <QuestionLayout
-      steps={close ? closeProgress('w-04j') : undefined}
+      steps={close ? closeProgress('w-04j', d.adjust) : undefined}
       title={copy.spendTitle}
       help={planId ? copy.spendHelp : copy.noPlan}
       onBack={close ? () => nav(closePath('w-04a')) : () => void leave()}

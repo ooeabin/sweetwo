@@ -5,6 +5,7 @@ import {
   fetchMe,
   fetchMonthClose,
   fetchPartner,
+  fetchProposals,
   fetchSpace,
   fetchSpendCategories,
   qk,
@@ -37,7 +38,9 @@ export function useCloseData() {
     queryFn: () => fetchLivingCheck(planId ?? ''),
     enabled: !!planId && !!space.data?.living_check,
   });
+  const proposals = useQuery({ queryKey: qk.proposals, queryFn: fetchProposals });
   const loading =
+    proposals.isLoading ||
     me.isLoading ||
     space.isLoading ||
     goals.isLoading ||
@@ -82,6 +85,17 @@ export function useCloseData() {
     solo,
     /** 부부 값(coupleOf) */
     couple: c,
+    proposals: proposals.data ?? [],
+    /** W-04h 다음 달 조정이 나오는지: 연결된 부부(해제 대기 아님)에게 받은 제안, 보류 제안, 함께 정하기가 있을 때 */
+    adjust:
+      joined &&
+      !solo &&
+      sp?.couple_state === 'connected' &&
+      (proposals.data ?? []).some(
+        (p) =>
+          ((p.status === 'open' || p.status === 'held') && p.proposer !== me.data?.id) ||
+          (p.status === 'open' && p.together),
+      ),
     /** 미합류 + 배우자 수입 추정: 추정값으로 셈 / 미합류 + 모름: 내 돈만 */
     basisNote:
       joined || solo
@@ -110,10 +124,10 @@ export function useCloseData() {
 }
 export type CloseData = ReturnType<typeof useCloseData>;
 
-/** 월말 정리 단계(기본 3단계, 시작·끝 제외). 진행 막대 칸 = 3 */
-export const CLOSE_STEPS = ['w-04j', 'w-04k', 'w-04g'] as const;
+/** 월말 정리 단계(기본 3단계 + 조건 W-04h, 시작·끝 제외). 진행 막대 칸 = 이번 정리에 나오는 단계 수 */
+export const CLOSE_STEPS = ['w-04j', 'w-04k', 'w-04h', 'w-04g'] as const;
 export const closePath = (step: string) => `/month/close/${step}`;
-export const closeProgress = (step: (typeof CLOSE_STEPS)[number]) => ({
-  total: CLOSE_STEPS.length,
-  now: CLOSE_STEPS.indexOf(step),
-});
+export const closeProgress = (step: (typeof CLOSE_STEPS)[number], adjust = false) => {
+  const steps = CLOSE_STEPS.filter((s) => adjust || s !== 'w-04h');
+  return { total: steps.length, now: steps.indexOf(step as never) };
+};

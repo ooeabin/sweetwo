@@ -195,3 +195,84 @@ test('받은 제안: 반대하면 보류, 함께 정하기 표시', async ({ pag
   expect(db.proposals[0]).toMatchObject({ status: 'held', oppose_count: 1 });
   expect(db.partner?.allowance).toBe(500_000);
 });
+
+test('월말 정리(연결, 혼자 정리): W-04h 받은 제안, 보정 제안은 묶음으로 → W-04 끝 “제안으로 보냈어요”', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-23T20:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  db.categories.push({
+    id: 'cat-eat',
+    name: '외식·배달',
+    sort: 1,
+    enabled: true,
+    deleted_at: null,
+  });
+  const old = (id: string, month: string, eat: number) => ({
+    id,
+    plan_id: `old-${id}`,
+    status: 'done',
+    deleted_at: null,
+    income: 6_000_000,
+    closed_at: `${month.slice(0, 7)}-26T01:00:00Z`,
+    label_month: month,
+    spends: [{ category_id: 'cat-eat', amount: eat, deleted_at: null }],
+    bigs: [],
+    deposits: [],
+  });
+  db.closes.push(old('c8', '2026-07-01', 700_000), old('c9', '2026-08-01', 760_000));
+
+  await page.goto('/month/close/w-04a');
+  await expect(page.getByText('바꾼 값은 끝에서 예빈님께 제안으로 가요')).toBeVisible();
+  await page.getByRole('button', { name: '시작' }).click();
+  await page.getByLabel('외식·배달').fill('800000');
+  await page.getByRole('button', { name: '없어요' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // W-04h: 받은 제안 2건(좋아요 / 다르게 해볼래요 / 반대), 생활비 예산은 읽기만
+  await heading(page, '다음 달 플랜, 바꿀 게 있을까요?');
+  await expect(page.getByText('예빈님 용돈 50만 원 → 60만 원')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다르게 해볼래요' })).toHaveCount(1);
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // W-04g: 보정 제안 맞추기 = 묶음 제안(하나씩 알리지 않음)
+  await page.getByRole('button', { name: '맞추기' }).click();
+  await expect
+    .poll(() => db.proposals.find((p) => p.item === 'living_budget')?.month_close_id)
+    .toBe('close-1');
+  expect(db.space?.living_budget).toBe(550_000);
+  await page.getByRole('button', { name: '정리 끝내기' }).click();
+
+  await heading(page, '9월 월급 플랜 정리 끝!');
+  await expect(page.getByText('바뀐 값 1개를 예빈님께 제안으로 보냈어요')).toBeVisible();
+  await expect(page.getByText('생활비 예산 55만 원 → 75만 원')).toBeVisible();
+  await expect(page.getByText('제안 중')).toBeVisible();
+  expect(db.rpc).toContain('send_close_bundle');
+  await axe(page);
+});
+
+test('월말 정리 제안 응답(W-04p): 하나 반대하면 “나머지 1개 좋아요”', async ({ page }) => {
+  const now = new Date('2026-10-23T21:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  for (const p of db.proposals) p.month_close_id = 'close-9';
+  await page.goto('/month/close/w-04p/close-9');
+  await heading(page, '예빈님이 9월 월급 플랜을 정리했어요');
+  await expect(page.getByText('반대 없으면 10월 25일부터 적용돼요').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: '모두 좋아요' })).toBeVisible();
+  await axe(page);
+  await page
+    .getByRole('region', { name: '예빈님 제안' })
+    .last()
+    .getByRole('button', { name: '반대' })
+    .click();
+  await expect(page.getByRole('button', { name: '나머지 1개 좋아요' })).toBeVisible();
+  await page.getByRole('button', { name: '나머지 1개 좋아요' }).click();
+  await expect(page.getByText('모두 답했어요')).toBeVisible();
+  expect(db.proposals.map((p) => p.status).sort()).toEqual(['applied', 'held']);
+});

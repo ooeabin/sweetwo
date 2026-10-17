@@ -2196,6 +2196,7 @@ export type Database = {
           created_at: string
           id: string
           item: string
+          month_close_id: string | null
           oppose_count: number
           proposer: string
           replaces: string | null
@@ -2221,6 +2222,7 @@ export type Database = {
           created_at?: string
           id?: string
           item: string
+          month_close_id?: string | null
           oppose_count?: number
           proposer: string
           replaces?: string | null
@@ -2243,6 +2245,7 @@ export type Database = {
           created_at?: string
           id?: string
           item?: string
+          month_close_id?: string | null
           oppose_count?: number
           proposer?: string
           replaces?: string | null
@@ -2258,6 +2261,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "proposal_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "proposal_replaces_fkey"
             columns: ["replaces"]
@@ -2895,6 +2905,16 @@ export type Database = {
         }
         Returns: string
       }
+      propose_in_close: {
+        Args: {
+          p_after: Json
+          p_apply_on: string
+          p_close: string
+          p_item: string
+          p_target?: string
+        }
+        Returns: string
+      }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2958,6 +2978,7 @@ export type Database = {
       }
       save_base_day: { Args: { p_after: Json }; Returns: undefined }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
+      send_close_bundle: { Args: { p_close: string }; Returns: number }
       send_evening_notifications: {
         Args: { p_today?: string }
         Returns: number
