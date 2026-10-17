@@ -39,6 +39,7 @@ export interface MemDb {
   holidays: { date: string; name: string; kind: string }[];
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
+  invites: { code: string; expires_at: string; used_at: string | null }[];
   rpc: string[];
 }
 
@@ -106,6 +107,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     goalUses: [],
     holidays: [],
     notifications: [],
+    invites: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -534,8 +536,20 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return json(route, Object.values(t));
       }
-      if (fn === 'create_invite')
-        return json(route, [{ code: 'K7M2QX', expires_at: '2026-10-22T00:00:00Z' }]);
+      if (fn === 'create_invite' || fn === 'renew_invite') {
+        // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
+        const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';
+        const open = db.invites.find((i) => !i.used_at && !past(i));
+        if (fn === 'create_invite' && open) return json(route, [open]);
+        if (open) open.expires_at = '2026-10-01T00:00:00Z';
+        const row = {
+          code: db.invites.length ? `R${db.invites.length}NEWX`.slice(0, 6) : 'K7M2QX',
+          expires_at: '2026-10-22T00:00:00Z',
+          used_at: null,
+        };
+        db.invites.unshift(row);
+        return json(route, [row]);
+      }
       if (fn === 'delete_minor_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
@@ -946,6 +960,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
     // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {
       const rows = [...db.notifications].sort((a, b) =>

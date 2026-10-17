@@ -26,5 +26,6 @@ export const qk = {
   notifications: ['notification'] as const,
   hasUnread: ['notification', 'unread'] as const,
   holidays: ['holiday'] as const,
+  latestInvite: ['invite', 'latest'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };
