@@ -1,7 +1,7 @@
 -- pgTAP: 이번 달만 바꾸기(W-01a). 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 되돌리기, 옮긴 줄·다른 부부 막기
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(7);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -33,7 +33,7 @@ select throws_ok(format($$ select public.adjust_plan(%L, 'living', 9000000, 'goa
   '22023', 'not_enough', '빠지는 곳보다 많이는 못 바꿈');
 select public.adjust_plan(current_setting('test.p')::uuid, 'living', 1850000, 'goal_fund');
 select is((select amount from public.plan_line where account_role = 'goal_fund'), 3000000::bigint, '되돌리기');
-select public.check_split((select id from public.plan_line where account_role = 'living'), 'groom');
+select is(public.check_split((select id from public.plan_line where account_role = 'living'), 'groom'), 'ok', '공동 생활비 내 몫 옮김');
 select throws_ok(format($$ select public.adjust_plan(%L, 'living', 1, 'goal_fund') $$, current_setting('test.p')),
   '22023', 'already_split', '옮긴 줄은 못 바꿈');
 reset role;
