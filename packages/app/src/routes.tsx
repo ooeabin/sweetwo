@@ -41,6 +41,10 @@ import {
   G02GoalEdit,
   G04GoalAdjust,
   G06GoalOrder,
+  O23RestQuestion,
+  O24RestDeadline,
+  O25RestHeld,
+  RestGoalNext,
   GoalAddRoute,
 } from './features/goals';
 import { H01ThisMonth } from './features/month';
@@ -284,6 +288,56 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // O-38b 생활비 카드 사용
+      {
+        path: '/goals/week',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G06GoalOrder week />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-22 나머지 목표 순서(첫 주 5일째)
+      {
+        path: '/goals/week/next',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <RestGoalNext />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 첫 주 5일째 남은 화면으로
+      {
+        path: '/goals/week/:id/q/:i',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O23RestQuestion />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-23 나머지 목표 금액 질문
+      {
+        path: '/goals/week/:id/deadline',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O24RestDeadline />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-24 나머지 목표 기한
+      {
+        path: '/goals/week/:id/held',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O25RestHeld />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-25 이미 모아둔 돈
       {
         path: '/assets/week/bonus',
         element: (

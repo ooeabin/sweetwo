@@ -4,7 +4,10 @@ import {
   babyDeadline,
   isMinorBirthYear,
   monthlyNeed,
+  orderableGoals,
   recommendedGoals,
+  restGoalScreens,
+  type RestGoal,
   skipsTopGoalQuestions,
   templateByKey,
   unsureDeadline,
@@ -139,5 +142,54 @@ describe('온보딩 분기', () => {
       1000, 2500, 4000, 7500, 10000,
     ]);
     expect(bands.goalAmount.map((b) => b.value / 10_000)).toEqual([500, 2000, 6500, 20000, 30000]);
+  });
+});
+
+describe('첫 주 5일째 남은 목표 화면(O-22~25)', () => {
+  const g = (o: Partial<RestGoal> & { id: string; template: string }) => ({
+    priority: 1,
+    status: 'active',
+    deadline: null,
+    details: {},
+    ...o,
+  });
+  it('묻지 않은 질문 → 기한 → 모아둔 돈, 우선순위 순. 비상금·결혼 비용·고금리 대출·매달 목표 규칙', () => {
+    const home = templateByKey('home');
+    const answeredHome = Object.fromEntries((home?.questions ?? []).map((q) => [q.id, 1]));
+    const list = restGoalScreens(
+      [
+        g({ id: 'e', template: 'emergency', priority: 0 }),
+        g({
+          id: 'h',
+          template: 'home',
+          priority: 1,
+          details: answeredHome,
+          deadline: '2031-10-01',
+        }),
+        g({ id: 'r', template: 'retirement', priority: 3 }),
+        g({ id: 'l', template: 'high_interest_loan', priority: 4 }),
+        g({ id: 'b', template: 'big_purchase', priority: 2 }),
+      ],
+      false,
+    );
+    expect(list).toEqual([
+      { goalId: 'h', screen: 'held' },
+      { goalId: 'b', screen: 'q', index: 1 },
+      { goalId: 'b', screen: 'q', index: 2 },
+      { goalId: 'r', screen: 'q', index: 1 },
+    ]);
+    // 질문을 다 답하면 기한(빈 칸) → 모아둔 돈. 매달 목표(노후)는 모아둔 돈 없음
+    const r2 = restGoalScreens(
+      [
+        g({ id: 'b', template: 'big_purchase', details: { what: '노트북', amount: 2_000_000 } }),
+        g({ id: 'r', template: 'retirement', priority: 2, details: { amount: 300_000 } }),
+      ],
+      false,
+    );
+    expect(r2.map((x) => `${x.goalId}:${x.screen}`)).toEqual(['b:deadline', 'b:held']);
+    expect(restGoalScreens([g({ id: 'b', template: 'big_purchase' })], true)).toEqual([]);
+    expect(
+      orderableGoals([g({ id: 'w', template: 'wedding' }), g({ id: 'x', template: 'pet' })]),
+    ).toHaveLength(1);
   });
 });
