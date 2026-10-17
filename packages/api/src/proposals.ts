@@ -59,3 +59,9 @@ export async function applyDueProposals() {
   fail(error);
   return (data as number | null) ?? 0;
 }
+
+/** 양가 비용 예산 바로 저장(배우자 미합류·혼자 쓰기, 24 Y-06 예외) */
+export async function saveFamilyBudget(after: Json) {
+  const { error } = await supabase().rpc('save_family_budget', { p_after: after });
+  fail(error);
+}

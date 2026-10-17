@@ -34,9 +34,12 @@ export const copy = {
     allowance: '용돈을',
     split: '분담 방식을',
     living_budget: '생활비 예산을',
+    family_budget: '양가 비용 예산을',
     goal_order: '목표 순서를',
   } as Record<string, string>,
   livingBudget: '생활비 예산', // [확인 필요]
+  familyBudget: '양가 비용 예산', // [확인 필요]
+  familyBudgetValue: (total: string) => `1년 ${total}`,
   goalOrder: '목표 순서', // [확인 필요]
   goalObject: (goal: string) => `${goal} 목표를`, // [확인 필요] 목표 제안 알림 문장
   goalItems: {

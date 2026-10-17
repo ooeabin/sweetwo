@@ -75,6 +75,13 @@ export function describe(
     };
     return { label: copy.livingBudget, before: v(p.before), after: v(p.after) };
   }
+  if (p.item === 'family_budget') {
+    const v = (j: Json) => {
+      const a = num(j, 'target_amount');
+      return a === null ? copy.unset : copy.familyBudgetValue(readWon(a));
+    };
+    return { label: copy.familyBudget, before: v(p.before), after: v(p.after) };
+  }
   if (p.item === 'goal_order') {
     const v = (j: Json) => {
       const ids = obj(j).order;

@@ -17,6 +17,7 @@ export type ProposalItem =
   | 'allowance'
   | 'split'
   | 'living_budget'
+  | 'family_budget'
   | 'goal_order'
   | 'goal_amount'
   | 'goal_deadline'

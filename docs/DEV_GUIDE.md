@@ -604,7 +604,8 @@ supabase/
 - 목표 보유액은 `goal_use`를 뺌(`fetchGoalRecords().uses`, 목표 화면·이번 달·비상금 진단). `update_pending_shares`, `adjust_plan`은 월급에서 나누는 줄(kind `split`)만 건드림
 - 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate` → Y-01 맨 위 ‘기록하기’, Y-05 ‘지남’ + ‘기록하기’. Y-07에서 지난 날짜는 ‘기록으로 남기기’로 만들고 바로 Y-08
 - Y-05 작년에는: 그 챙길 날의 지난 회차 기록(선물 이름, 없으면 현금·식사)
-- 다음 단계: 양가 비용 Y-06(회차 쓴 돈·모아둔 돈·항목 단가 수정 → 제안), 드린 기록 Y-09, 기록 사진(Y-08c), 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
+- Y-06 `/calendar/family-cost`(+ `/edit`): 회차 = 결혼기념일 기준 1년(core `careRound`, 예비부부·결혼일 모름은 오늘부터 1년), 양가 날(category family)만. core `roundOccurrences`, `familyRows`(설·추석 / 부모님 생신 / 어버이날 / 그 밖의 날, 그 밖의 날 단가는 평균), `monthlyOut`, `familyCostSummary`(매달 = (예산 − 쓴 돈 − 모아둔 돈) ÷ 남은 달, 1천 원 올림, 다음 챙길 날 쓸 돈보다 모아둔 돈이 적으면 더 모을 돈). 쓴 돈 = 회차 안 양가 날 기록 합계, 모아둔 돈 = ‘양가 비용’ 보유액. 적용은 서버 `apply_family_budget`(같은 종류 쓸 돈을 단가로, 그 밖의 날은 매년 날과 오늘 이후 한 번인 날만, 목표 금액 = 합계). 열린 제안이 있으면 ‘수정’ 대신 G-08, G-08 ‘다르게 해볼래요’ → 수정 화면
+- 다음 단계: 드린 기록 Y-09, 챙길 날 쓸 돈을 고치면 ‘양가 비용’ 목표 금액 자동 맞춤, 회차 끝난 뒤 예산 vs 실제, 기록 사진(Y-08c), 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
 
 ### 배우자 합류 구조
 
@@ -667,7 +668,7 @@ supabase/
 ### 제안 구조
 
 - 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
-- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
+- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `family_budget`(양가 비용 예산 `{ holiday, birthday, parents_day, other, target_amount }`, 횟수가 있는 행만, 공간에 하나. 배우자 미합류·혼자 쓰기는 `save_family_budget`으로 바로), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
 - 함수: `propose(항목, 후 값, 적용일, 목표)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
 - 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
 - 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`

@@ -197,6 +197,36 @@ export const copy = {
   see: '보기',
   close: '닫기',
 
+  // Y-06 이번 회차 양가 비용
+  fcTitle: '이번 회차 양가 비용',
+  fcRange: (a: string, b: string) => `${a} ~ ${b}`,
+  fcSpent: (total: string, spent: string) => `${total} 중 ${spent} 썼어요`,
+  fcSpentEngaged: (total: string, spent: string) => `양가 비용 예산 ${total} 중 ${spent} 썼어요`,
+  fcEnough: (held: string) => `모아둔 돈 ${held}으로 다음 챙길 날까지 충분해요`,
+  fcShort: (extra: string) => `다음 달부터 ${extra}씩 더 모아요`,
+  fcHeld: (held: string) => `모아둔 돈 ${held}`,
+  fcMonths: '달마다 나갈 돈', // [확인 필요] 섹션 이름
+  fcMonthly: (m: string) => `매달 ${m}씩 모으면 돼요`,
+  fcLeft: (left: string, n: number) => `아직 안 쓴 ${left}을 남은 ${n}개월에 나눠서요`,
+  fcItems: '항목', // [확인 필요] 섹션 이름
+  fcRows: {
+    holiday: '설·추석',
+    birthday: '부모님 생신',
+    parents_day: '어버이날',
+    other: '그 밖의 날',
+  },
+  fcTimes: (unit: string, n: number) => `${unit} × ${n}번`, // [확인 필요]
+  fcEditTitle: '양가 비용 예산', // [확인 필요] 수정 레이어 제목
+  fcChanged: (a: string, b: string) => `${a} → ${b}`,
+  fcYear: (t: string) => `1년 ${t}`,
+  fcMonthlyChange: (a: string, b: string) => `매달 ${a} → ${b}`,
+  fcPropose: (name: string) => `${name}님께 제안하기`,
+  fcApplyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+  fcProposed: (name: string) => `${name}님에게 제안했어요`,
+  fcSaved: '양가 비용 예산을 바꿨어요', // [확인 필요]
+  fcOpen: '답을 기다리는 제안이 있어요', // [확인 필요] 열린 제안이 있으면 수정 대신
+  fcSeeProposal: '제안 보기', // [확인 필요]
+
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 };
 export const DOW = ['일', '월', '화', '수', '목', '금', '토'];

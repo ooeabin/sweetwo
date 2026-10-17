@@ -567,3 +567,161 @@ test('다녀온 뒤 기록(Y-08): 생활비로 내면 나누기 줄, 7일 지난
   });
   expect(db.goalUses).toHaveLength(1);
 });
+
+function seedFamilyCost(db: MemDb) {
+  seedFamily(db);
+  (db.space as Record<string, unknown>).wedding_date = '2025-04-18';
+  const base = db.cares[0] as Record<string, unknown>;
+  const day = (p: Record<string, unknown>) =>
+    db.cares.push({ ...base, member_id: null, side: null, carer: 'together', ...p });
+  day({
+    id: 'c-s',
+    kind: 'seollal',
+    name: '설날',
+    date_rule: 'lunar_yearly',
+    month: 1,
+    day: 1,
+    budget: 500_000,
+  });
+  day({
+    id: 'c-c',
+    kind: 'chuseok',
+    name: '추석',
+    date_rule: 'lunar_yearly',
+    month: 8,
+    day: 15,
+    budget: 500_000,
+  });
+  day({ id: 'c-p', kind: 'parents_day', name: '어버이날', month: 5, day: 8, budget: 200_000 });
+  day({
+    id: 'c-w',
+    kind: 'wedding',
+    name: '사촌 결혼식',
+    date_rule: 'once',
+    month: null,
+    day: null,
+    once_on: '2026-12-05',
+    budget: 180_000,
+  });
+  db.careRecords.push(
+    {
+      id: 'r1',
+      care_day_id: 'c-c',
+      member_id: null,
+      occurs_on: '2026-09-25',
+      amount: 450_000,
+      paid_from: 'goal_fund',
+      gifts: ['cash'],
+      gift_name: null,
+      memo: null,
+      deleted_at: null,
+    },
+    {
+      id: 'r2',
+      care_day_id: 'c-p',
+      member_id: null,
+      occurs_on: '2026-05-08',
+      amount: 200_000,
+      paid_from: 'goal_fund',
+      gifts: ['cash'],
+      gift_name: null,
+      memo: null,
+      deleted_at: null,
+    },
+  );
+  db.goals.push({
+    id: 'g-family',
+    template: 'family_cost',
+    name: '양가 비용',
+    kind: 'yearly',
+    owner: 'together',
+    priority: 1,
+    target_amount: 1_680_000,
+    other_held: 600_000,
+    deadline: '2027-04-18',
+    amount_estimated: false,
+    deadline_estimated: false,
+    after_marriage: false,
+    status: 'active',
+    details: {},
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    deleted_at: null,
+  });
+}
+
+test('양가 비용(Y-06): 회차 쓴 돈·모아둔 돈·매달 모을 돈·항목, 단가 고치면 예빈님께 제안', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedFamilyCost(db);
+
+  await page.goto('/calendar/list');
+  const card = page.getByRole('region', { name: '이번 회차 양가 비용' });
+  await expect(card).toContainText('168만 원 중 65만 원 썼어요');
+  await expect(card).toContainText('모아둔 돈 60만 원');
+  await card.getByRole('button', { name: '보기' }).click();
+
+  await expect(page).toHaveURL(/\/calendar\/family-cost$/);
+  const top = page.getByRole('region', { name: '이번 회차 양가 비용' });
+  await expect(top).toContainText('2026년 4월 18일 ~ 2027년 4월 17일');
+  await expect(top).toContainText('모아둔 돈 60만 원으로 다음 챙길 날까지 충분해요');
+  // (168만 − 65만 − 60만) ÷ 6개월 = 7만 1,667 → 1천 원 올림
+  await expect(page.getByText('매달 7만 2,000원씩 모으면 돼요')).toBeVisible();
+  await expect(page.getByText('아직 안 쓴 103만 원을 남은 6개월에 나눠서요')).toBeVisible();
+  const months = page.getByRole('region', { name: '달마다 나갈 돈' });
+  await expect(months).toContainText('12월');
+  const items = page.getByRole('region', { name: '항목' });
+  await expect(items).toContainText('설·추석');
+  await expect(items).toContainText('50만 원 × 2번');
+  await expect(items).toContainText('부모님 생신');
+  await axe(page);
+
+  await items.getByRole('button', { name: '수정' }).click();
+  await expect(page).toHaveURL(/\/calendar\/family-cost\/edit$/);
+  await page.getByLabel('부모님 생신').fill('250000');
+  await expect(page.getByText('30만 원 → 25만 원')).toBeVisible();
+  await expect(page.getByText('1년 163만 원')).toBeVisible();
+  await expect(page.getByText('매달 7만 2,000원 → 6만 4,000원')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+  await expect(page).toHaveURL(/\/calendar\/family-cost$/);
+  expect(db.proposals.at(-1)).toMatchObject({
+    item: 'family_budget',
+    after: {
+      target_amount: 1_630_000,
+      holiday: 500_000,
+      birthday: 250_000,
+      parents_day: 200_000,
+      other: 180_000,
+    },
+  });
+  expect(db.cares[0]).toMatchObject({ budget: 300_000 });
+  await expect(page.getByText('답을 기다리는 제안이 있어요')).toBeVisible();
+  await page.getByRole('button', { name: '제안 보기' }).click();
+  await expect(page).toHaveURL(/\/proposals\/prop-/);
+  await expect(page.getByText('1년 168만 원 → 1년 163만 원')).toBeVisible();
+});
+
+test('양가 비용(Y-06): 배우자 미합류면 바로 저장', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedFamilyCost(db);
+  (db.space as Record<string, unknown>).couple_state = 'not_joined';
+  db.partner = null;
+
+  await page.goto('/calendar/family-cost/edit');
+  await page.getByLabel('설·추석').fill('400000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/calendar\/family-cost$/);
+  expect(
+    db.cares.filter((c) => c.kind === 'seollal' || c.kind === 'chuseok').map((c) => c.budget),
+  ).toEqual([400_000, 400_000]);
+  expect(db.goals.find((g) => g.id === 'g-family')).toMatchObject({ target_amount: 1_480_000 });
+  await expect(page.getByRole('region', { name: '이번 회차 양가 비용' })).toContainText(
+    '148만 원 중 65만 원 썼어요',
+  );
+});
