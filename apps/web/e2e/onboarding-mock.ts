@@ -325,7 +325,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         Object.assign(db.space ?? {}, a);
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
-      if (fn === 'propose') {
+      if (fn === 'propose' || fn === 'propose_in_close') {
         const b = body();
         const me = String(db.me.id);
         const item = String(b.p_item);
@@ -363,7 +363,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
                               db.goals.find((g) => g.template === 'family_cost')?.target_amount ??
                               null,
                           }
-                        : { deleted: false };
+                        : item === 'living_budget'
+                          ? { living_budget: db.space?.living_budget ?? null }
+                          : { deleted: false };
         const row = {
           id: `prop-${db.proposals.length + 1}`,
           space_id: 'space-1',
@@ -381,6 +383,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           round_trips: trips,
           together: trips >= 2,
           replaces: cur?.id ?? null,
+          month_close_id: (b.p_close as string | undefined) ?? null,
           applied_at: null,
           created_at: at,
           updated_at: at,
@@ -683,6 +686,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
               goal_gap_not_goal: !b.p_goal,
             });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'send_close_bundle') {
+        const b = body();
+        return json(
+          route,
+          db.proposals.filter((p) => p.month_close_id === b.p_close && p.status === 'open').length,
+        );
       }
       if (fn === 'set_living_check') {
         if (db.space) db.space.living_check = body().p_on;

@@ -9,6 +9,7 @@ import { W04eInvest } from './pages/w-04e-invest';
 import { W04fLoan } from './pages/w-04f-loan';
 import { W04iTalk } from './pages/w-04i-talk';
 import { W04gSummary } from './pages/w-04g-summary';
+import { W04hAdjust } from './pages/w-04h-adjust';
 import { W04jSpendEntry } from './pages/w-04j-spend-entry';
 import { W04kSavings } from './pages/w-04k-savings';
 
@@ -17,6 +18,7 @@ const STEPS: Record<string, () => ReactNode> = {
   'w-04a': () => <W04aStart />,
   'w-04j': () => <W04jSpendEntry mode="close" />,
   'w-04k': () => <W04kSavings />,
+  'w-04h': () => <W04hAdjust />,
   'w-04g': () => <W04gSummary />,
   // 꼼꼼 모드(‘더 꼼꼼히 정리하기’)
   'w-04b': () => <W04bBalance />,

@@ -87,6 +87,8 @@ export function useNotiRealtime(userId: string | undefined) {
       else if (ev.type === 'insert' && /^(access|inquiry)_/.test(ev.row.kind))
         void qc.invalidateQueries({ queryKey: qk.inquiries });
       // 생활비 체크 ‘내 용돈에서’(상대가 답함): 카드가 사라지고 이번 달 용돈이 바뀜
+      else if (ev.type === 'insert' && ev.row.kind === 'close_bundle')
+        void qc.invalidateQueries({ queryKey: qk.proposals });
       else if (ev.type === 'insert' && ev.row.kind === 'living_allowance')
         void qc.invalidateQueries({ queryKey: ['living_check'] });
       else if (ev.type === 'insert' && ev.row.kind === 'reconnect_requested')

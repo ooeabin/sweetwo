@@ -21,6 +21,31 @@ export async function fetchProposals(): Promise<Proposal[]> {
   return data ?? [];
 }
 
+/** 월말 정리 제안 묶음에 넣기(혼자 정리, 21 W-04 끝). 하나씩 알리지 않고 끝낼 때 한 번 */
+export async function proposeInClose(
+  closeId: string,
+  item: ProposalItem,
+  after: Json,
+  applyOn: string,
+  target?: string,
+) {
+  const { data, error } = await supabase().rpc('propose_in_close', {
+    p_close: closeId,
+    p_item: item,
+    p_after: after,
+    p_apply_on: applyOn,
+    ...(target ? { p_target: target } : {}),
+  });
+  fail(error);
+  return data as string;
+}
+/** 정리를 끝낼 때 묶음 알림(배우자에게 한 번). 돌려주는 값 = 묶음 제안 수 */
+export async function sendCloseBundle(closeId: string): Promise<number> {
+  const { data, error } = await supabase().rpc('send_close_bundle', { p_close: closeId });
+  fail(error);
+  return data ?? 0;
+}
+
 /** 제안 보내기. 목표 항목은 target = 목표 id */
 export async function propose(item: ProposalItem, after: Json, applyOn: string, target?: string) {
   const { data, error } = await supabase().rpc('propose', {

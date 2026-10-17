@@ -1,7 +1,8 @@
 import {
   ensureMonthClose,
   fetchRecentCloses,
-  propose,
+  proposeInClose,
+  sendCloseBundle,
   qk,
   updateMonthClose,
   updateSpace,
@@ -72,7 +73,12 @@ export function W04gSummary() {
       if (apply) {
         const base = d.couple ? spaceBaseDay(space, d.couple) : null;
         if (proposal && base !== null)
-          await propose('living_budget', { living_budget: fix.avg }, proposalApplyOn(base));
+          await proposeInClose(
+            c.id,
+            'living_budget',
+            { living_budget: fix.avg },
+            proposalApplyOn(base),
+          );
         else await updateSpace({ living_budget: fix.avg, living_budget_estimated: false });
       }
       await updateMonthClose(c.id, { budget_fix: apply ? 'applied' : 'kept' });
@@ -133,6 +139,8 @@ export function W04gSummary() {
               : null,
         gap_goal_id: gap.kind === 'over' ? picked : null,
       });
+      // 혼자 정리하며 바꾼 값은 배우자에게 한 번에 알림(월말 정리 제안 묶음)
+      if (proposal) await sendCloseBundle(id);
       await d.refreshClose();
       setSaving(false);
       nav(closePath('w-04-end'), { replace: true });
@@ -144,13 +152,13 @@ export function W04gSummary() {
 
   return (
     <QuestionLayout
-      steps={closeProgress('w-04g')}
+      steps={closeProgress('w-04g', d.adjust)}
       title={
         planSaving > 0
           ? copy.saved(readWon(saved), Math.round((saved * 100) / planSaving))
           : copy.summary(d.month)
       }
-      onBack={() => nav(closePath('w-04k'))}
+      onBack={() => nav(closePath(d.adjust ? 'w-04h' : 'w-04k'))}
       primary={{ label: copy.finish, loading: saving, disabled: needPick && !picked }}
       onSubmit={() => void finish()}
     >
