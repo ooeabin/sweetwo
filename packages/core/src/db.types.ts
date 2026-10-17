@@ -2321,6 +2321,13 @@ export type Database = {
         }
         Returns: Json
       }
+      renew_invite: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          code: string
+          expires_at: string
+        }[]
+      }
       respond_proposal: {
         Args: {
           p_id: string

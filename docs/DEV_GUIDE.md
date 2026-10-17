@@ -619,13 +619,14 @@ supabase/
 
 ### 설정 구조
 
-- features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11b `/settings/me/side`, S-11d `/settings/me/plan-day`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
+- features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11b `/settings/me/side`, S-11d `/settings/me/plan-day`, S-12 `/settings/couple`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
 - 아직 없는 화면 줄은 자리만(누르지 않음, “준비 중이에요”). 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
 - 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로). 분담 방식은 보기만
 - 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만
 - S-11d 기준일: 합류한 부부만 줄이 보이고, 고를 수 있는 값은 두 사람 월급날. 제안(item `base_day`, `{ base_day, base_day_last }`, 서버 `base_day_ok`가 월급날인지 확인), 미합류·혼자 쓰기는 `save_base_day`. 적용 `apply_base_day`: 기준일 + 지금 사이클 끝 = 새 기준일 전날(`next_base_after`), 15일 미만이면 다음 사이클과 합침(merged_close). 안 나눈 돈을 새 기간에 맞춰 다시 나누기는 월 계획 만들기 작업과 함께
 - S-11b 신랑·신부: `set_my_side` 하나로 나와 배우자 쪽을 같이 바꾸고, 쪽으로 저장한 값(가족 쪽, 챙길 날 쪽·챙길 사람, 플랜 줄의 사람별 몫·체크)도 서로 바꿈. 처음 정할 때(쪽이 없었음)는 저장된 값 그대로
-- 다음 단계: 프로필 사진(S-11e), S-12 부부 정보·연결 해제, S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
+- S-12 부부 정보: 이름 + 상태(연결됨, 초대 중, 연결 해제 대기 중, 혼자 쓰는 중), 결혼 예정일(예비부부, D-day 알약)·결혼일(신혼, 보기만). 미합류면 가장 최근 초대 코드(api `fetchLatestInvite`, `invite` 테이블을 부부 공간 사람만 읽음)로 초대 전(“초대 코드 만들기” → `create_invite`) / 초대 중(코드 3+3자리, “10월 22일까지”, 코드 복사, 링크 복사, 새 코드 받기) / 만료를 나눔. 새 코드 받기 `renew_invite`는 쓸 수 있는 코드를 모두 지금 만료로 바꾸고 새로 만듦
+- 다음 단계: 프로필 사진(S-11e), 연결 해제(S-12a~h)·새로 초대하기·다시 연결하기, 예식일 수정(H-P1)·결혼했어요(H-T1), S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
 
 ### 배우자 합류 구조
 

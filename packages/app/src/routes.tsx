@@ -73,6 +73,7 @@ import {
 import {
   S10Settings,
   S11Me,
+  S12Couple,
   S11aNickname,
   S11bSide,
   S11dPlanDay,
@@ -521,6 +522,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11 내 정보
+      {
+        path: '/settings/couple',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12Couple />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12 부부 정보
       {
         path: '/settings/me/nickname',
         element: (

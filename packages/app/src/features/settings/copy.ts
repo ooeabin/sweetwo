@@ -71,6 +71,23 @@ export const copy = {
   openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
   seeProposal: '제안 보기', // [확인 필요]
 
+  // S-12 부부 정보
+  coupleTitle: '부부 정보',
+  connected: '연결됨',
+  weddingPlanned: '결혼 예정일',
+  weddingDone: '결혼일',
+  dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
+  inviteFirst: (name: string) => `${name}님을 초대해 주세요`,
+  inviteMake: '초대 코드 만들기',
+  inviteCode: '초대 코드', // [확인 필요] 줄 이름
+  inviteUntil: (md: string) => `${md}까지`,
+  inviteExpired: '초대가 만료됐어요',
+  copyCode: '코드 복사',
+  copyLink: '링크 복사',
+  newCode: '새 코드 받기',
+  copied: '복사했어요', // [확인 필요] O-07과 같음
+  newCodeDone: '새 코드를 받았어요. 이전 코드는 이제 못 써요', // [확인 필요]
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

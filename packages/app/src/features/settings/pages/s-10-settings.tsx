@@ -7,7 +7,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
-// 지금 있는 화면: 내 정보(S-11), 알림(S-14). 나머지 줄은 자리만(누르지 않음, “준비 중이에요”).
+// 지금 있는 화면: 내 정보(S-11), 부부 정보(S-12), 알림(S-14). 나머지 줄은 자리만(누르지 않음, “준비 중이에요”).
 // 공개 범위 줄은 배우자 미합류·혼자 쓰기면 숨김, 위젯 줄은 데스크톱만.
 export function S10Settings() {
   const nav = useNavigate();
@@ -41,7 +41,7 @@ export function S10Settings() {
         <ListRow
           label={copy.rows.couple}
           value={state === 'connected' ? copy.state.connected(c.partnerName) : copy.state[state]}
-          sub={later}
+          onClick={() => nav('/settings/couple')}
         />
       </div>
       <div className="hg-list">

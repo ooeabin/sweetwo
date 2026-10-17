@@ -237,3 +237,57 @@ test('신랑·신부(S-11b)는 둘 다 바뀜, 월급 플랜 날짜(S-11d)는 �
   await expect(page).toHaveURL(/\/proposals\//);
   await expect(page.getByText('25일 → 10일')).toBeVisible();
 });
+
+test('부부 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-01-09' });
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
+  await expect(page.getByText('찬우 예빈')).toBeVisible();
+  await expect(page.getByText('연결됨', { exact: true })).toBeVisible();
+  await expect(page.getByText('결혼 예정일')).toBeVisible();
+  await expect(page.getByText('2027년 1월 9일')).toBeVisible();
+  await expect(page.getByText('D-94')).toBeVisible();
+  await expect(page.getByText('초대 코드')).toHaveCount(0);
+  await axe(page);
+});
+
+test('부부 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기, 만료', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+  await open(page, info.project.name === 'narrow');
+  await expect(page.getByRole('button', { name: /부부 정보/ })).toContainText('초대 중');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+
+  // 초대 전
+  await expect(page.getByText('예빈님을 초대해 주세요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '초대 코드 만들기' }).click();
+  await expect(page.getByText('K7M 2QX')).toBeVisible();
+  await expect(page.getByText('10월 22일까지')).toBeVisible();
+  await axe(page);
+
+  // 새 코드 받기: 이전 코드는 바로 만료
+  await page.getByRole('button', { name: '새 코드 받기' }).click();
+  await expect(page.getByText('새 코드를 받았어요. 이전 코드는 이제 못 써요')).toBeVisible();
+  await expect(page.getByText('K7M 2QX')).toHaveCount(0);
+  await expect(page.getByText('R1N EWX')).toBeVisible();
+  expect(db.invites.map((i) => i.code)).toEqual(['R1NEWX', 'K7M2QX']);
+  expect(db.invites[1]?.expires_at).toBe('2026-10-01T00:00:00Z');
+
+  // 만료
+  const last = db.invites[0];
+  if (last) last.expires_at = '2026-10-05T00:00:00Z';
+  await page.reload();
+  await expect(page.getByText('초대가 만료됐어요')).toBeVisible();
+  await page.getByRole('button', { name: '새 코드 받기' }).click();
+  await expect(page.getByText('초대가 만료됐어요')).toHaveCount(0);
+  await expect(page.getByText('10월 22일까지')).toBeVisible();
+  await axe(page);
+});
