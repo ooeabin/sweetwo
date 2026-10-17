@@ -280,6 +280,7 @@ function seedFamily(db: MemDb) {
     status: 'todo',
     status_on: null,
     memo: null,
+    created_at: '2026-09-01T00:00:00Z',
     updated_at: '2026-10-01T00:00:00Z',
     deleted_at: null,
   });
@@ -311,7 +312,7 @@ test('가족(Y-03): 추가하면 생신·환갑·칠순·팔순·제사, 호칭 
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '세는 나이' }).click();
   await page.getByRole('radio', { name: '제사' }).click();
-  await expect(page.getByRole('heading', { name: '장모님 제사은 언제예요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '장모님 제사는 언제예요?' })).toBeVisible();
   await page.getByRole('tab', { name: '음력' }).click();
   await page.getByLabel('월', { exact: true }).fill('3');
   await page.getByLabel('일', { exact: true }).fill('5');
@@ -411,4 +412,158 @@ test('챙길 날 추가(Y-07): 직접 입력, 지난 날 안내, 달력에서 �
     once_on: '2026-10-30',
     budget: 0,
   });
+});
+
+test('다녀온 뒤 기록(Y-08): 생활비로 내면 나누기 줄, 7일 지난 날 기록하기, 작년에는', async ({
+  page,
+}) => {
+  const DAY = new Date('2026-10-14T20:00:00+09:00');
+  await page.clock.setFixedTime(DAY);
+  const db = await mockOnboarding(page, { now: DAY });
+  seed(db);
+  seedFamily(db);
+  db.goals.push({
+    id: 'g-family',
+    template: 'family_cost',
+    name: '양가 비용',
+    kind: 'yearly',
+    owner: 'together',
+    priority: 1,
+    target_amount: 1_900_000,
+    other_held: 250_000,
+    deadline: '2027-04-18',
+    amount_estimated: false,
+    deadline_estimated: false,
+    after_marriage: false,
+    status: 'active',
+    details: {},
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    deleted_at: null,
+  });
+  db.cares.push({
+    ...db.cares[0],
+    id: 'c-wed',
+    category: 'couple',
+    kind: 'wedding',
+    name: '민지 결혼식',
+    member_id: null,
+    side: null,
+    date_rule: 'once',
+    month: null,
+    day: null,
+    once_on: '2026-10-05',
+    budget: 100_000,
+    carer: 'together',
+  });
+  db.plans.push({
+    args: {
+      p_label_month: '2026-09-01',
+      p_cycle_start: '2026-09-25',
+      p_cycle_end: '2026-10-24',
+      p_first_adjust: null,
+      p_merged_close: false,
+      p_is_temp: false,
+      p_snapshot: { parts: { living: 1_850_000, goalFund: 3_000_000, emergency: 220_000 } },
+      p_lines: [
+        {
+          target: 'account',
+          account_role: 'living',
+          amount: 1_850_000,
+          amount_groom: 1_110_000,
+          amount_bride: 740_000,
+        },
+        {
+          target: 'account',
+          account_role: 'goal_fund',
+          amount: 3_000_000,
+          amount_groom: 1_800_000,
+          amount_bride: 1_200_000,
+        },
+      ],
+    },
+  });
+
+  // 작년 기록
+  db.careRecords.push({
+    id: 'rec-old',
+    care_day_id: 'c-mom',
+    member_id: 'f-mom',
+    occurs_on: '2025-10-14',
+    amount: 250_000,
+    paid_from: 'goal_fund',
+    gifts: ['gift'],
+    gift_name: '안마기',
+    memo: null,
+    deleted_at: null,
+  });
+
+  // 7일 지난 결혼식: 목록 맨 위 ‘기록하기’
+  await page.goto('/calendar/list');
+  const overdue = page.getByRole('region', { name: '기록하기' });
+  await expect(overdue).toContainText('민지 결혼식');
+  await axe(page);
+
+  // 오늘 어머니 생신: 상세 → 다녀왔어요 → 쓴 돈(쓸 돈 채움) → 생활비 통장·카드 → 선물 → 메모
+  await page.goto('/calendar/day/c-mom');
+  await expect(page.getByText('작년엔 안마기를 드렸어요 (25만 원)')).toBeVisible();
+  await page
+    .getByRole('group', { name: '준비 상황' })
+    .getByRole('button', { name: '다녀왔어요' })
+    .click();
+  await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
+  await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('300,000');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('radio', { name: /목표자금 통장/ })).toContainText(
+    '양가 비용 모은 돈에서 빠져요',
+  );
+  await axe(page);
+  await page.getByRole('radio', { name: /생활비 통장·카드/ }).click();
+  await expect(page.getByRole('heading', { name: '무엇을 드렸어요?' })).toBeVisible();
+  await page.getByRole('button', { name: '선물' }).click();
+  await page.getByLabel('어떤 선물이에요?').fill('안마기');
+  await expect(page.getByRole('status').filter({ hasText: '작년에도 드렸어요' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('메모').fill('좋아하셨음');
+  await page.getByRole('button', { name: '저장' }).click();
+
+  // 보유액 25만 원만큼 줄
+  await expect(
+    page.getByText('이번 달 월급 나누기에 ‘목표자금 → 공동 생활비 25만 원’을 넣었어요'),
+  ).toBeVisible();
+  await axe(page);
+  expect(db.careRecords[1]).toMatchObject({
+    care_day_id: 'c-mom',
+    occurs_on: '2026-10-14',
+    amount: 300_000,
+    paid_from: 'living',
+    gifts: ['gift'],
+    gift_name: '안마기',
+    memo: '좋아하셨음',
+  });
+  expect(db.goalUses).toEqual([expect.objectContaining({ goal_id: 'g-family', amount: 300_000 })]);
+  expect(db.cares[0]).toMatchObject({ status: 'done', status_on: '2026-10-14' });
+  await page.getByRole('button', { name: '보기' }).click();
+  await expect(page).toHaveURL(/\/plan\/split$/);
+
+  // 7일 지난 결혼식: 우리 둘이라 낸 곳 없이 각자 돈
+  await page.goto('/calendar/list');
+  await overdue.getByRole('button', { name: /민지 결혼식/ }).click();
+  await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('100,000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '무엇을 드렸어요?' })).toBeVisible();
+  await page.getByRole('button', { name: '현금' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await expect(page).toHaveURL(/\/calendar\/day\/c-wed$/);
+  expect(db.careRecords[2]).toMatchObject({
+    care_day_id: 'c-wed',
+    occurs_on: '2026-10-05',
+    paid_from: 'personal',
+    gifts: ['cash'],
+    memo: null,
+  });
+  expect(db.goalUses).toHaveLength(1);
 });

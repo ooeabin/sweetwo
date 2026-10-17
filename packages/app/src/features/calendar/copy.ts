@@ -1,3 +1,5 @@
+import { object, topic } from '@sweetwo/core';
+
 // 캘린더 문구(docs/spec/24-calendar.md Y-01, Y-04, 캘린더 범위). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
@@ -38,7 +40,7 @@ export const copy = {
   agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
   agendaEmpty: '이 날짜엔 없어요',
   listMoney: '돈 날짜', // [확인 필요] 목록 섹션 이름
-  dday: (n: number) => (n === 0 ? '오늘' : `D-${n}`),
+  dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
   // 구분(6번)
   side: (name: string) => `${name} 쪽`,
@@ -136,7 +138,7 @@ export const copy = {
   ageIntl: '만 나이',
   extraQ: '또 챙겨야 할 날이 있나요?',
   extras: { parents_anniversary: '결혼기념일', jesa: '제사', none: '없어요' },
-  extraDateQ: (title: string, what: string) => `${title} ${what}은 언제예요?`, // [확인 필요]
+  extraDateQ: (title: string, what: string) => `${title} ${topic(what)} 언제예요?`, // [확인 필요]
   memoQ: '좋아하시는 것, 필요하다고 하신 게 있나요?',
   skip: '건너뛰기',
   familySaved: '가족을 넣어뒀어요', // [확인 필요]
@@ -159,6 +161,41 @@ export const copy = {
   pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
   addOk: '추가하기',
   addOnDay: '이 날에 챙길 날 추가', // [확인 필요] 달력 고른 날 → Y-07
+  recordPast: '기록으로 남기기', // [확인 필요] 지난 날짜 → Y-08
+
+  // Y-05 지남, 작년에는
+  overdue: '지남',
+  recordNow: '기록하기',
+  lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
+  overdueList: '기록하기', // [확인 필요] 목록 맨 위 섹션 이름
+
+  // Y-08 다녀온 뒤 기록
+  spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
+  paidQ: '어디서 냈어요?', // [확인 필요] 기획서 Y-08a2 질문 문구 없음
+  paid: {
+    goal_fund: '목표자금 통장',
+    living: '생활비 통장·카드',
+    personal: '각자 돈',
+    wedding_account: '결혼 준비 통장',
+    personal_support: '각자 돈·양가 지원',
+  },
+  paidSub: {
+    goal_fund: '양가 비용 모은 돈에서 빠져요',
+    living: '목표자금에서 생활비로 옮길 줄이 생겨요',
+    personal: '기록만 해요',
+    wedding_account: '결혼 비용 모은 돈에서 빠져요', // [확인 필요]
+    personal_support: '기록만 해요',
+  },
+  giftQ: '무엇을 드렸어요?',
+  gifts: { cash: '현금', gift: '선물', meal: '식사' },
+  giftName: '어떤 선물이에요?', // [확인 필요]
+  giftAgain: '작년에도 드렸어요',
+  rememberQ: '기억하고 싶은 게 있나요?',
+  recorded: '기록했어요', // [확인 필요]
+  lineAdded: (amount: string) =>
+    `이번 달 월급 나누기에 ‘목표자금 → 공동 생활비 ${amount}’을 넣었어요`,
+  see: '보기',
+  close: '닫기',
 
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 };

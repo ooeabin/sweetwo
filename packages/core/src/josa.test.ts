@@ -1,5 +1,5 @@
-import { expect, it } from 'vitest';
-import { topic } from './josa';
+import { describe, expect, it } from 'vitest';
+import { object, topic } from './josa';
 
 it('받침에 따라 은/는', () => {
   expect(topic('내 집 마련')).toBe('내 집 마련은');
@@ -8,4 +8,11 @@ it('받침에 따라 은/는', () => {
   expect(topic('결혼 비용')).toBe('결혼 비용은');
   expect(topic('자동차')).toBe('자동차는');
   expect(topic('iPad')).toBe('iPad는');
+});
+
+describe('을/를', () => {
+  it('받침', () => {
+    expect(object('안마기')).toBe('안마기를');
+    expect(object('꽃다발')).toBe('꽃다발을');
+  });
 });

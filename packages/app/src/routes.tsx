@@ -64,6 +64,7 @@ import {
   Y05CareDay,
   Y03Family,
   Y07CareAdd,
+  Y08Record,
 } from './features/calendar';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
@@ -426,6 +427,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-05 쓸 돈 수정
+      {
+        path: '/calendar/day/:id/record/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y08Record />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-08 다녀온 뒤 기록
       {
         path: '/calendar/add/:step?',
         element: (

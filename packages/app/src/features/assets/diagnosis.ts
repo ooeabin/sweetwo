@@ -38,7 +38,10 @@ export function useDiagnosis() {
         .filter((x) => x.goalId === eg.id)
         .reduce((t, x) => t + x.amount, 0)
     : 0;
-  const balance = eg ? goalHeld(eg.other_held, linkedTotal + deposited) : null;
+  const used = eg
+    ? (records.data?.uses ?? []).filter((x) => x.goalId === eg.id).reduce((t, x) => t + x.amount, 0)
+    : 0;
+  const balance = eg ? goalHeld(eg.other_held, linkedTotal + deposited - used) : null;
   const last = close.data?.[0];
   const real =
     last && last.income !== null

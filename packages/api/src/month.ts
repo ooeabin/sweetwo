@@ -177,12 +177,13 @@ export interface GoalRecordRow {
   amount: number;
 }
 
-/** 목표 달별 기록(G-02): 플랜마다 목표 줄 계획액, 정리를 마친 달의 이 목표 납입액 */
+/** 목표 달별 기록(G-02): 플랜마다 목표 줄 계획액, 정리를 마친 달의 이 목표 납입액, 목표 사용(보유액에서 뺌) */
 export async function fetchGoalRecords(): Promise<{
   plans: GoalRecordRow[];
   deposits: GoalRecordRow[];
+  uses: GoalRecordRow[];
 }> {
-  const [lines, deps] = await Promise.all([
+  const [lines, deps, uses] = await Promise.all([
     supabase()
       .from('plan_line')
       .select('goal_id, amount, monthly_plan!inner(label_month)')
@@ -194,9 +195,11 @@ export async function fetchGoalRecords(): Promise<{
       .select('goal_id, amount, month_close!inner(status, monthly_plan!inner(label_month))')
       .is('deleted_at', null)
       .not('goal_id', 'is', null),
+    supabase().from('goal_use').select('goal_id, amount, used_on').is('deleted_at', null),
   ]);
   fail(lines.error);
   fail(deps.error);
+  fail(uses.error);
   return {
     plans: (lines.data ?? []).map((l) => ({
       goalId: l.goal_id ?? '',
@@ -210,6 +213,11 @@ export async function fetchGoalRecords(): Promise<{
         month: d.month_close.monthly_plan.label_month,
         amount: d.amount,
       })),
+    uses: (uses.data ?? []).map((u) => ({
+      goalId: u.goal_id,
+      month: u.used_on.slice(0, 7) + '-01',
+      amount: u.amount,
+    })),
   };
 }
 

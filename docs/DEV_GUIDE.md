@@ -600,7 +600,11 @@ supabase/
 - Y-03 `/calendar/family/new/:step`(a 쪽 → b 관계 → c 호칭 칩 → d 생일 + 태어난 해 → d2 칠순·팔순 세는 방식 → e 또 챙길 날 → e2 날짜 → f 메모), 수정 `/calendar/family/:id/:step`(c, d, d2, f). 저장하면 생일(생신), 태어난 해가 있으면 환갑·칠순·팔순(core `milestones`, 한 번), 조카는 돌(core `firstBirthday`), 결혼기념일·제사(매년). 이미 있는 자동 챙길 날은 다시 만들지 않고 생일만 날짜·이름을 고침
 - Y-07 `/calendar/add/:step`(a 종류 → b 누구 → c 날짜 → d 쓸 돈 → ‘추가하기’). 모두 ‘한 번’, 가족을 고르면 그 쪽 양가, 직접 입력은 ‘우리 둘’. 쓸 돈은 같은 종류 최근 예산(`unitOf`)으로 채움. 지난 날짜는 안내만. ‘+ 추가’와 달력 고른 날의 ‘이 날에 챙길 날 추가’(날짜 채움)에서 시작
 - 생일·기념일 월·일 입력은 `date-fields.tsx` `MonthDayFields`(Y-02, Y-03 공통)
-- 다음 단계: 기록 Y-08(지난 날 → 기록), 양가 비용 Y-06, 드린 기록 Y-09, 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
+- Y-08 `/calendar/day/:id/record/:step?on=`(a 쓴 돈 → a2 낸 곳 → b 드린 것 → c 메모). 저장은 RPC `record_care` 하나: `care_record`(회차 기록, 챙길 날·회차 날짜당 하나) + 다녀왔어요 + `goal_use`(목표자금 통장·생활비 통장·카드 = ‘양가 비용’, 결혼 준비 통장 = 결혼 비용) + 생활비로 냈으면 이번 사이클(정리를 마쳤으면 다음 사이클) 플랜에 `plan_line`(kind `goal_to_living`, 계좌 living, 담당 = 기록한 사람 몫, 통장 역할 모드만). 줄 금액은 화면이 ‘양가 비용’ 보유액만큼으로 자름. 우리 둘 날은 낸 곳 없이 각자 돈
+- 목표 보유액은 `goal_use`를 뺌(`fetchGoalRecords().uses`, 목표 화면·이번 달·비상금 진단). `update_pending_shares`, `adjust_plan`은 월급에서 나누는 줄(kind `split`)만 건드림
+- 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate` → Y-01 맨 위 ‘기록하기’, Y-05 ‘지남’ + ‘기록하기’. Y-07에서 지난 날짜는 ‘기록으로 남기기’로 만들고 바로 Y-08
+- Y-05 작년에는: 그 챙길 날의 지난 회차 기록(선물 이름, 없으면 현금·식사)
+- 다음 단계: 양가 비용 Y-06(회차 쓴 돈·모아둔 돈·항목 단가 수정 → 제안), 드린 기록 Y-09, 기록 사진(Y-08c), 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
 
 ### 배우자 합류 구조
 
@@ -617,7 +621,7 @@ supabase/
 ### 목표 구조
 
 - 기획: 22 G-01, G-02, 계산은 06 4·5장. 화면 features/goals: G-01 `/goals`, G-02 `/goals/:id`. 메뉴 첫 화면 틀은 month `MainFrame`(탭, 받은 제안 숫자, 아바타, 금액 가리기). 다른 메뉴는 AppFrame `page`(화면 제목 줄), 상세는 `PageHeader`
-- 보유액 = 기타 보유액(`goal.other_held`) + 월말 정리를 마친 달의 이 목표 납입(`saving_deposit.goal_id`) 누적(core `goalHeld`). 연결 자산, 목표 사용은 우리 자산·목표 사용을 만들 때 더함. 이번 달 H-05도 같은 보유액
+- 보유액 = 기타 보유액(`goal.other_held`) + 월말 정리를 마친 달의 이 목표 납입(`saving_deposit.goal_id`) 누적(core `goalHeld`). 연결 자산 합계를 더하고 목표 사용(`goal_use`, 챙길 날 기록 등)은 뺌(0 아래로는 안 감). 이번 달 H-05도 같은 보유액
 - 달별 기록: api `fetchGoalRecords()`(플랜 목표 줄 계획액, 정리를 마친 달 납입) → core `goalMonths`. 상태 `goalStatus`(지연 = 예상 달성 > 기한 또는 2개월 연속 미달), ‘지금’ 눈금 `goalPace`(만든 달부터 기한까지 고르게), 칩 `paceChip`
 - 목표 수정 `/goals/:id/edit/amount|deadline|name`(G-02 숫자, ⋯ 이름 변경, G-08 ‘다르게 해볼래요’). 금액·기한은 영향 미리보기(`viewWith`로 바꾼 값 다시 계산). 이름은 바로 저장
 - 바꾸기(`goal-change.ts`): 연결된 부부는 `propose('goal_…', 값, 적용일, 목표)`, 미합류·혼자 쓰기는 바로 적용 + Toast(보류·다시 모으기·삭제는 ‘되돌리기’). 다시 모으면 우선순위 맨 아래, 삭제는 휴지통(`deleted_at`), 비상금은 삭제 없음

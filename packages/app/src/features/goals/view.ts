@@ -57,7 +57,7 @@ export function goalsView(i: {
   space: Space;
   partner: PartnerProfile | null;
   goals: Goal[];
-  records: { plans: GoalRecordRow[]; deposits: GoalRecordRow[] };
+  records: { plans: GoalRecordRow[]; deposits: GoalRecordRow[]; uses?: GoalRecordRow[] };
   /** 목표별 연결 자산 합계(서버, 비공개 제외) */
   linked?: { goal_id: string; total: number }[];
   now?: Date;
@@ -79,6 +79,9 @@ export function goalsView(i: {
   const linkedOf = (id: string) => i.linked?.find((x) => x.goal_id === id)?.total ?? 0;
   const deposited = (id: string) =>
     i.records.deposits.filter((d) => d.goalId === id).reduce((t, d) => t + d.amount, 0);
+  // 목표 사용(챙길 날 기록 등)은 그 목표 보유액에서만 뺌(06 6장)
+  const usedOf = (id: string) =>
+    (i.records.uses ?? []).filter((d) => d.goalId === id).reduce((t, d) => t + d.amount, 0);
   const allocGoals: AllocGoal[] = i.goals.map((g) => ({
     id: g.id,
     template: g.template,
@@ -86,7 +89,7 @@ export function goalsView(i: {
     kind: g.kind,
     priority: g.priority,
     target: g.target_amount,
-    held: goalHeld(g.other_held, deposited(g.id) + linkedOf(g.id)),
+    held: goalHeld(g.other_held, deposited(g.id) + linkedOf(g.id) - usedOf(g.id)),
     deadline: g.deadline ? dateToYm(g.deadline) : null,
     afterMarriage: g.after_marriage,
     paused: g.status === 'paused',

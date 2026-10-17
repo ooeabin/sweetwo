@@ -5,3 +5,11 @@ export function topic(word: string): string {
   if (code < 0 || code > 11171) return `${word}는`;
   return `${word}${code % 28 ? '은' : '는'}`;
 }
+
+/** 목적격(을/를). 받침이 있으면 ‘을’, 없으면 ‘를’. 한글이 아니면 ‘를’ */
+export function object(word: string): string {
+  const last = word.trim().slice(-1);
+  const code = last.charCodeAt(0) - 0xac00;
+  if (code < 0 || code > 11171) return `${word}를`;
+  return `${word}${code % 28 ? '을' : '를'}`;
+}

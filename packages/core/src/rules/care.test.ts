@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   firstBirthday,
+  overdueDate,
+  prevCareDate,
+  recordDate,
   milestones,
   careDatesInMonth,
   familyCostMonthly,
@@ -90,5 +93,35 @@ describe('환갑·칠순·팔순, 돌', () => {
     };
     expect(firstBirthday(baby, '2026-10-07')).toBe('2027-03-09');
     expect(firstBirthday({ ...baby, birth_year: 2024 }, '2026-10-07')).toBeNull();
+  });
+});
+
+describe('기록할 회차, 7일 지남', () => {
+  const mom = {
+    date_rule: 'solar_yearly' as const,
+    month: 10,
+    day: 1,
+    leap: false,
+    once_on: null,
+    created_at: '2026-09-01T00:00:00Z',
+  };
+  const none = () => false;
+  it('지난 날이 60일 안이고 기록이 없으면 그 날', () => {
+    expect(prevCareDate(mom, '2026-10-07')).toBe('2026-10-01');
+    expect(recordDate(mom, '2026-10-07', none)).toBe('2026-10-01');
+    expect(overdueDate(mom, '2026-10-07', none)).toBeNull();
+    expect(overdueDate(mom, '2026-10-08', none)).toBe('2026-10-01');
+  });
+  it('기록했거나 만든 날 전이면 다음 날', () => {
+    expect(recordDate(mom, '2026-10-08', (d) => d === '2026-10-01')).toBe('2027-10-01');
+    expect(recordDate({ ...mom, created_at: '2026-10-05T00:00:00Z' }, '2026-10-08', none)).toBe(
+      '2027-10-01',
+    );
+    expect(overdueDate(mom, '2026-10-08', (d) => d === '2026-10-01')).toBeNull();
+  });
+  it('한 번인 날', () => {
+    const w = { ...mom, date_rule: 'once' as const, once_on: '2026-09-20' };
+    expect(prevCareDate(w, '2026-09-19')).toBeNull();
+    expect(overdueDate(w, '2026-10-07', none)).toBe('2026-09-20');
   });
 });

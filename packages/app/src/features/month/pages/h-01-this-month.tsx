@@ -57,7 +57,11 @@ export function H01ThisMonth() {
           partner: partner.data ?? null,
           spentVariable: (close.data?.spends ?? []).reduce((t, x) => t + x.amount, 0),
           closeDone: close.data?.status === 'done',
-          goalDeposits: goalExtra(records.data?.deposits ?? [], linked.data ?? []),
+          goalDeposits: goalExtra(
+            records.data?.deposits ?? [],
+            linked.data ?? [],
+            records.data?.uses ?? [],
+          ),
         })
       : null;
   const name = me.data?.nickname ?? '';
