@@ -1,0 +1,73 @@
+import type { Tables } from '@sweetwo/core';
+import { AuthCallError } from './auth';
+import { supabase } from './client';
+
+// 알림 센터(14 N-01~N-03). 내 알림만(RLS), 읽음 처리만 함수로. 새 알림은 Realtime으로 받음
+const fail = (e: { message?: string } | null) => {
+  if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
+};
+
+export type Notification = Tables<'notification'>;
+export const NOTI_PAGE = 30;
+
+/** 최신순 30개. before = 그보다 오래된 것(더 불러오기) */
+export async function fetchNotifications(before?: string): Promise<Notification[]> {
+  let q = supabase()
+    .from('notification')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(NOTI_PAGE);
+  if (before) q = q.lt('created_at', before);
+  const { data, error } = await q;
+  fail(error);
+  return data ?? [];
+}
+
+/** 읽지 않은 알림이 있는지(종 아이콘 점) */
+export async function fetchHasUnread(): Promise<boolean> {
+  const { data, error } = await supabase()
+    .from('notification')
+    .select('id')
+    .is('read_at', null)
+    .limit(1);
+  fail(error);
+  return (data ?? []).length > 0;
+}
+
+/** 읽음. ids가 없으면 모두 */
+export async function markNotificationsRead(ids?: string[]) {
+  const { error } = await supabase().rpc('mark_notifications_read', ids ? { p_ids: ids } : {});
+  fail(error);
+}
+
+/** 새 알림(INSERT)·읽음(UPDATE) 받기. 돌려준 함수로 끊음 */
+export function subscribeNotifications(
+  userId: string,
+  on: (ev: { type: 'insert' | 'update'; row: Notification }) => void,
+) {
+  const ch = supabase()
+    .channel(`notification:${userId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'notification', filter: `user_id=eq.${userId}` },
+      (p) => {
+        if (p.eventType === 'INSERT') on({ type: 'insert', row: p.new as Notification });
+        else if (p.eventType === 'UPDATE') on({ type: 'update', row: p.new as Notification });
+      },
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
+/** 알림 하나(OS 알림을 눌렀을 때 갈 화면 찾기) */
+export async function fetchNotification(id: string): Promise<Notification | null> {
+  const { data, error } = await supabase()
+    .from('notification')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  fail(error);
+  return data;
+}

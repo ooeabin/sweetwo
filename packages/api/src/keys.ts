@@ -23,6 +23,8 @@ export const qk = {
   family: ['family_member'] as const,
   careDays: ['care_day'] as const,
   careRecords: ['care_record'] as const,
+  notifications: ['notification'] as const,
+  hasUnread: ['notification', 'unread'] as const,
   holidays: ['holiday'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

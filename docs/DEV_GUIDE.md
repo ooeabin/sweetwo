@@ -355,28 +355,33 @@ sweetwo/
 
 ## 예약 작업과 알림
 
-예약 작업은 pg\_cron(UTC)이 Edge Function을 부르고, 실행마다 job\_run에 기록함. 시각은 초안.
+예약 작업은 pg\_cron(UTC)이 부름. DB 안에서 끝나는 작업(알림 만들기, 보관 기간 정리)은 SQL 함수를 바로 부르고, 바깥 서비스(메일 SES, 특일 API)가 필요한 작업만 Edge Function. 시각은 초안.
 
 ### 예약 작업
 
 | 작업 | KST | cron(UTC) | 함수 |
 | --- | --- | --- | --- |
 | 기준일 시작: 적용일이 된 제안 적용·만료 → 월 계획 만들기를 한 작업으로(그날 주기가 시작하는 space만) | 매일 00:00 | `0 15 * * *` | `create-monthly-plans` |
-| 날짜 알림(챙길 날, 만기, 결혼 준비 결제일, 지원금·전세 만기, 초대 코드, 제안 적용 예정, 연결 해제 기본안 적용 예정, 연말정산 등 오전 9시 알림) | 매일 09:00 | `0 0 * * *` | `send-due-notifications` |
-| 기준일·월급날 알림(알림을 켜 둔 사람만): 월급 나누기를 쓰면 월급날 “오늘은 월급 나누는 날이에요”, 안 쓰면 기준일 “이번 달 월급 플랜이 나왔어요”, 예비부부(H-P3)는 월급날 “오늘은 결혼 자금 모으는 날이에요” | 매일 09:00 | `0 0 * * *` | `send-payday-reminders` |
-| 저녁 알림: 생활비 체크(중간일, 켠 부부만), 월말 정리(기준일 3일 전), 리마인드(전날, 정리 전일 때만), 예비부부 월말 확인 | 매일 20:00 | 0 11 \* \* \* | send-evening-reminders |
+| 오전 알림(지금: 챙길 날 D-30·D-14·D-7·당일, 월급날(나누기를 쓰는 사람), 월급 플랜(그 밖, 사이클 시작일). 다음: 만기, 결혼 준비 결제일, 지원금·전세 만기, 초대 코드, 제안 적용 예정, 연결 해제 기본안, 연말정산, 결혼 자금 모으는 날) | 매일 09:00 | `0 0 * * *` | SQL `send_morning_notifications()` |
+| 저녁 알림(지금: 월말 정리(기준일 3일 전), 리마인드(전날, 정리 전일 때만), 예비부부 월말 확인. 다음: 생활비 체크) | 매일 20:00 | `0 11 * * *` | SQL `send_evening_notifications()` |
 | 연결 해제 기본안 적용(요청 + 14일이 지나도 동의·합의가 없을 때) | 매일 00:00 | 0 15 \* \* \* | apply-unlink-defaults |
 | 주간 요약 메일 | 월 09:00 | `0 0 * * 1` | `send-weekly-summary` |
 | 공휴일 받기 | 월 03:00 | `0 18 * * 0` | `sync-holidays` |
-| 보관 기간 정리 | 매일 04:00 | `0 19 * * *` | `purge-expired` |
+| 보관 기간 정리(지금: 알림 90일) | 매일 04:00 | `0 19 * * *` | SQL `purge_notifications()`(휴지통·이력 등은 `purge-expired`와 함께) |
 
 - 재시도: 함수 안에서 space 단위로 3회 지수 백오프. 끝내 실패하면 job\_run에 남기고 알림(‘운영 절차’)
 - space마다 `pg_try_advisory_xact_lock`으로 중복 실행 막음. 작업은 멱등하게(두 번 돌아도 결과 같음)
 - job\_run: 작업, 시작, 끝, 처리한 space 수, 실패 목록
-- 다시 실행: 어드민 또는 `supabase functions invoke <이름> --body '{"date":"YYYY-MM-DD","spaceId":"…"}'`
+- 다시 실행: 어드민 또는 `supabase functions invoke <이름> --body '{"date":"YYYY-MM-DD","spaceId":"…"}'`. 알림 SQL 함수는 `select public.send_morning_notifications('YYYY-MM-DD')`(같은 알림은 `dedupe` 키로 한 번만이라 다시 돌려도 됨)
 
 ### 알림
 
+- 테이블 `notification`(받는 사람, 종류, 문구, OS 알림 문구·숨김, 갈 화면, 아이콘, 한 사람, dedupe, 읽음). 앱은 내 것만 읽고 `mark_notifications_read`로 읽음만. 쓰기는 서버(트리거·예약 작업)만
+- 바로 만드는 알림은 트리거: 제안 도착(`proposal` INSERT), 제안 응답 결과(response 좋아요·반대), 배우자 합류(`couple_space` not_joined → connected)
+- 챙길 날 날짜는 서버도 앱과 같게: 음력은 `lunar_date` 표(2025~2050년, korean-lunar-calendar로 만든 행, 윤달 행이 없으면 평달), `care_date_in_year`·`care_next_date`. 월급날 앞당기기는 `business_day_on_or_before`(holiday 표)
+- 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
+- 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
+- 아직: 메일(SES), 방해 금지 끝나는 시각에 다시 보내기, 알림 설정 S-14, 위 표의 ‘다음’ 알림들
 - 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시. 서버 푸시 없음
 - ‘앱 꺼짐’ = 최근 10분간 데스크톱 presence 신호 없음 → 규칙에 따라 메일로 대신
 - 앱 안 알림센터에는 항상 기록

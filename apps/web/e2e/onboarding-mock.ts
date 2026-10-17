@@ -37,6 +37,8 @@ export interface MemDb {
   goalUses: Record<string, unknown>[];
   /** 공휴일(읽기만) */
   holidays: { date: string; name: string; kind: string }[];
+  /** 알림 센터(내 알림) */
+  notifications: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -100,6 +102,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     careRecords: [],
     goalUses: [],
     holidays: [],
+    notifications: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -472,6 +475,16 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           } else line = 0;
         }
         return json(route, { record: rid, line });
+      }
+      if (fn === 'mark_notifications_read') {
+        const ids = (body().p_ids as string[] | undefined) ?? null;
+        let n = 0;
+        for (const r of db.notifications)
+          if (!r.read_at && (!ids || ids.includes(String(r.id)))) {
+            r.read_at = new Date().toISOString();
+            n++;
+          }
+        return json(route, n);
       }
       if (fn === 'invest_answers')
         return json(route, [
@@ -904,6 +917,20 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
+    if (path === '/rest/v1/notification') {
+      const rows = [...db.notifications].sort((a, b) =>
+        String(a.created_at) < String(b.created_at) ? 1 : -1,
+      );
+      if (method === 'GET') {
+        if (url.searchParams.get('read_at') === 'is.null')
+          return json(route, rows.filter((r) => !r.read_at).slice(0, 1));
+        if (url.searchParams.get('id')?.startsWith('eq.'))
+          return json(route, rows.find((r) => r.id === eqId(url)) ?? null);
+        const lt = url.searchParams.get('created_at')?.replace(/^lt\./, '');
+        return json(route, rows.filter((r) => !lt || String(r.created_at) < lt).slice(0, 30));
+      }
+    }
     if (path === '/rest/v1/saving_deposit' && method === 'GET') {
       const label = db.plans[0]?.args.p_label_month;
       return json(

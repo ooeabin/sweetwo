@@ -57,7 +57,7 @@ if (!app.requestSingleInstanceLock()) {
   };
 
   void app.whenReady().then(() => {
-    registerIpc();
+    registerIpc(getWindow);
     startAutoLock();
     createWindow();
     if (process.env.SWEETWO_NO_TRAY !== '1') createTray(getWindow, () => app.quit());

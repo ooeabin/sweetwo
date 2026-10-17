@@ -70,6 +70,7 @@ import {
   Y09GiftLog,
   YSurprisePartnerBirthday,
 } from './features/calendar';
+import { N02Notifications } from './features/notifications';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -481,6 +482,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 서프라이즈 배우자 생일
+      {
+        path: '/notifications',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <N02Notifications />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // N-02 알림 화면(좁은 창)
       {
         path: '/calendar/add/:step?',
         element: (

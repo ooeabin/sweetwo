@@ -1311,6 +1311,31 @@ export type Database = {
         }
         Relationships: []
       }
+      lunar_date: {
+        Row: {
+          day: number
+          leap: boolean
+          lunar_year: number
+          month: number
+          solar: string
+        }
+        ComputedFields: never
+        Insert: {
+          day: number
+          leap: boolean
+          lunar_year: number
+          month: number
+          solar: string
+        }
+        Update: {
+          day?: number
+          leap?: boolean
+          lunar_year?: number
+          month?: number
+          solar?: string
+        }
+        Relationships: []
+      }
       month_close: {
         Row: {
           big_none: boolean
@@ -1527,6 +1552,66 @@ export type Database = {
           },
         ]
       }
+      notification: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          dedupe: string
+          icon: string | null
+          id: string
+          kind: string
+          push_hidden: boolean
+          push_title: string | null
+          read_at: string | null
+          space_id: string | null
+          target: string
+          title: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          dedupe: string
+          icon?: string | null
+          id?: string
+          kind: string
+          push_hidden?: boolean
+          push_title?: string | null
+          read_at?: string | null
+          space_id?: string | null
+          target: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          dedupe?: string
+          icon?: string | null
+          id?: string
+          kind?: string
+          push_hidden?: boolean
+          push_title?: string | null
+          read_at?: string | null
+          space_id?: string | null
+          target?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_line: {
         Row: {
           account_role: Database["public"]["Enums"]["account_role"] | null
@@ -1661,8 +1746,9 @@ export type Database = {
           updated_at: string
           version: number
           apply_proposal_values: undefined | null
+          proposal_item_noun: string | null
         }
-        ComputedFields: "apply_proposal_values"
+        ComputedFields: "apply_proposal_values" | "proposal_item_noun"
         Insert: {
           after: NonNullable<Json>
           applied_at?: string | null
@@ -1992,6 +2078,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      business_day_on_or_before: { Args: { d: string }; Returns: string }
+      care_date_in_year: {
+        Args: {
+          c: Omit<
+            Database["public"]["Tables"]["care_day"]["Row"],
+            Database["public"]["Tables"]["care_day"]["ComputedFields"]
+          >
+          y: number
+        }
+        Returns: string
+      }
+      care_next_date: {
+        Args: {
+          c: Omit<
+            Database["public"]["Tables"]["care_day"]["Row"],
+            Database["public"]["Tables"]["care_day"]["ComputedFields"]
+          >
+          today: string
+        }
+        Returns: string
+      }
       check_split: {
         Args: {
           p_amount?: number
@@ -2086,11 +2193,18 @@ export type Database = {
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_space: { Args: { p_code: string }; Returns: string }
+      ko_batchim: { Args: { w: string }; Returns: boolean }
+      ko_is: { Args: { w: string }; Returns: string }
+      ko_obj: { Args: { w: string }; Returns: string }
+      ko_subj: { Args: { w: string }; Returns: string }
+      kst_today: { Args: Record<PropertyKey, never>; Returns: string }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
+      md_label: { Args: { d: string }; Returns: string }
       net_worth_history: {
         Args: { p_months?: number }
         Returns: {
@@ -2098,6 +2212,22 @@ export type Database = {
           month: string
           net: number
         }[]
+      }
+      notify: {
+        Args: {
+          p_actor: string
+          p_body: string
+          p_dedupe: string
+          p_icon: string
+          p_kind: string
+          p_push_hidden?: boolean
+          p_push_title?: string
+          p_space: string
+          p_target: string
+          p_title: string
+          p_user: string
+        }
+        Returns: undefined
       }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>
@@ -2124,6 +2254,27 @@ export type Database = {
           side: Database["public"]["Enums"]["couple_side"]
         }[]
       }
+      payday_in: {
+        Args: {
+          m: number
+          shift: boolean
+          u: Omit<
+            Database["public"]["Tables"]["app_user"]["Row"],
+            Database["public"]["Tables"]["app_user"]["ComputedFields"]
+          >
+          y: number
+        }
+        Returns: string
+      }
+      proposal_item_noun: {
+        Args: {
+          p: Omit<
+            Database["public"]["Tables"]["proposal"]["Row"],
+            Database["public"]["Tables"]["proposal"]["ComputedFields"]
+          >
+        }
+        Returns: string
+      }
       proposal_space: { Args: Record<PropertyKey, never>; Returns: string }
       propose: {
         Args: {
@@ -2134,6 +2285,8 @@ export type Database = {
         }
         Returns: string
       }
+      purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
+      read_won: { Args: { v: number }; Returns: string }
       record_care: {
         Args: {
           p_amount: number
@@ -2155,6 +2308,14 @@ export type Database = {
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
+      send_evening_notifications: {
+        Args: { p_today?: string }
+        Returns: number
+      }
+      send_morning_notifications: {
+        Args: { p_today?: string }
+        Returns: number
+      }
       split_line_done: {
         Args: {
           l: Omit<
