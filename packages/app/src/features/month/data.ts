@@ -4,6 +4,7 @@ import {
   fetchGoalRecords,
   fetchGoals,
   fetchHolidays,
+  fetchLivingCheck,
   fetchMe,
   fetchMonthClose,
   fetchPartner,
@@ -38,3 +39,11 @@ export const useGoalAssetSums = () =>
 /** 공휴일(월급날 앞당겨 표시) */
 export const useHolidays = () =>
   useQuery({ queryKey: qk.holidays, queryFn: fetchHolidays, staleTime: 24 * 3_600_000 });
+/** 이 플랜의 생활비 체크 답(W-03, 한 명이 답하면 둘 다 끝) */
+export function useLivingCheck(planId: string | null) {
+  return useQuery({
+    queryKey: qk.livingCheck(planId ?? ''),
+    queryFn: () => fetchLivingCheck(planId ?? ''),
+    enabled: !!planId,
+  });
+}

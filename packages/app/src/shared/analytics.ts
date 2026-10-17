@@ -1,4 +1,4 @@
-import type { AuthProvider } from '@sweetwo/core';
+import type { AmountBand, AuthProvider } from '@sweetwo/core';
 
 // 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
@@ -33,6 +33,14 @@ export type AnalyticsEvent =
       props: { split_plan: 'default' | 'custom'; linked_months: number };
     }
   | { name: 'unlink_countered'; props: Record<string, never> }
+  | {
+      name: 'living_check_answered';
+      props: {
+        answer: 'enough' | 'just' | 'over';
+        cover_from?: 'goal' | 'allowance' | 'next_month';
+        over_band?: AmountBand;
+      };
+    }
   | {
       name: 'unlink_resolved';
       // timeout(14일 기본안)은 서버가 보냄

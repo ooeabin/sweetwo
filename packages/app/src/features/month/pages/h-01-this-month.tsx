@@ -10,6 +10,7 @@ import {
   formatDateWeekday,
   formatMonthDay,
   formatYm,
+  inLivingCheckWindow,
   todayKst,
   type Upcoming,
 } from '@sweetwo/core';
@@ -27,6 +28,7 @@ import {
   useMe,
   useMonthClose,
   useHolidays,
+  useLivingCheck,
   usePartner,
   useSpace,
 } from '../data';
@@ -52,6 +54,14 @@ export function H01ThisMonth() {
   const proposals = useProposals();
   const nav = useNavigate();
   const { masked } = useMask();
+  // 생활비 체크(W-03): 켠 부부, 결혼 전 예비부부 아님, 체크일 전후 2일, 아직 아무도 답 안 함
+  const livingOpen =
+    !!space.data?.living_check &&
+    space.data.marriage_status !== 'engaged' &&
+    !!plan.data &&
+    plan.data.status !== 'closed' &&
+    inLivingCheckWindow(todayKst(), plan.data.cycle_start, plan.data.cycle_end);
+  const living = useLivingCheck(livingOpen ? (plan.data?.id ?? null) : null);
   const unlink = useQuery({
     queryKey: qk.unlink,
     queryFn: fetchUnlink,
@@ -94,6 +104,8 @@ export function H01ThisMonth() {
       title: copy.accessTodo,
       to: `/settings/help/access/${a.id}`,
     });
+  if (livingOpen && living.isSuccess && !living.data)
+    tops.push({ key: 'living', title: copy.livingTodo, to: '/plan/living-check' });
   if (reconnectAsk)
     tops.push({
       key: 'reconnect',

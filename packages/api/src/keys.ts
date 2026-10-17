@@ -34,5 +34,6 @@ export const qk = {
   inquiries: ['inquiry'] as const,
   sessions: ['sessions'] as const,
   lastPlanEnd: ['monthly_plan', 'last'] as const,
+  livingCheck: (planId: string) => ['living_check', planId] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

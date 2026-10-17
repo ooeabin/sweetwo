@@ -363,7 +363,8 @@ sweetwo/
 | --- | --- | --- | --- |
 | 기준일 시작: 적용일이 된 제안 적용·만료 → 월 계획 만들기를 한 작업으로(그날 주기가 시작하는 space만) | 매일 00:00 | `0 15 * * *` | `create-monthly-plans` |
 | 오전 알림(지금: 챙길 날 D-30·D-14·D-7·당일, 월급날(나누기를 쓰는 사람), 월급 플랜(그 밖, 사이클 시작일). 다음: 만기, 결혼 준비 결제일, 지원금·전세 만기, 초대 코드, 제안 적용 예정, 연결 해제 기본안, 연말정산, 결혼 자금 모으는 날) | 매일 09:00 | `0 0 * * *` | SQL `send_morning_notifications()` |
-| 저녁 알림(지금: 월말 정리(기준일 3일 전), 리마인드(전날, 정리 전일 때만), 예비부부 월말 확인. 다음: 생활비 체크) | 매일 20:00 | `0 11 * * *` | SQL `send_evening_notifications()` |
+| 저녁 알림(지금: 월말 정리(기준일 3일 전), 리마인드(전날, 정리 전일 때만), 예비부부 월말 확인) | 매일 20:00 | `0 11 * * *` | SQL `send_evening_notifications()` |
+| 생활비 체크(켠 부부, 체크일 = 기준일 + 사이클 길이 절반(반올림), 아직 답 없음, 결혼 전 예비부부 제외) | 매일 20:00 | `0 11 * * *` | SQL `send_living_check_notifications()` |
 | 연결 해제 기본안 적용(요청 + 14일이 지나도 동의·합의가 없을 때) | 매일 00:00 | 0 15 \* \* \* | apply-unlink-defaults |
 | 주간 요약 메일 | 월 09:00 | `0 0 * * 1` | `send-weekly-summary` |
 | 공휴일 받기 | 월 03:00 | `0 18 * * 0` | `sync-holidays` |
@@ -636,6 +637,7 @@ supabase/
 - 계정 삭제(S-18b `/settings/data/delete`): `request_account_deletion`은 다시 로그인한 지 10분 안에만(`reauth_required`면 `reauthenticate('/settings/data/delete?go=1')`). 바로 이용 중지(status). 연결·해제 대기면 연결 해제처럼 나눔(`confirm_unlink` how `deleted`, 공동 항목 전부 상대, 상대 알림 `partner_deleted`). 30일 안 다시 로그인하면 A-02 `/account/restore` “계정 삭제를 취소할까요?” → `cancel_account_deletion`(혼자 쓰기, 그때부터 30일 다시 연결, 상대 알림 `partner_restored`). 매일 `purge_deleted_accounts`
 - 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 배우자 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
 - 보안(S-15 `/settings/security`): 데스크톱 앱 잠금(브리지 lock: `clear`는 1분 안에 `verify`가 통과했을 때만, `setAutoLock` 0·1·5·15분, 기본 5분), PIN 바꾸기 = 현재 PIN 확인 → A-06 `?next=/settings/security`. 로그인된 기기 = `my_sessions()`(auth.sessions, 지금 기기 = 토큰의 session_id), `end_sessions(id)` / `end_sessions()`(이 기기 빼고 모두). 기기 이름은 core `deviceLabel(user_agent)`, 데스크톱 main은 토큰 요청에 `sweeTwo/버전 Electron` User-Agent
+- 생활비 체크(20 W-03 `/plan/living-check`, 07 3-2장): 켜기는 부부 단위 `couple_space.living_check`(S-14 토글 → `set_living_check`), 결혼 전 예비부부는 없음. 답은 플랜마다 하나(`living_check`, 한 명이 답하면 둘 다 끝) → `answer_living_check(plan, answer, over, cover)`. 체크일은 core `livingCheckDay` = SQL `living_check_day`, H-01 맨 위 할 일은 체크일 전후 2일(`inLivingCheckWindow`). ‘내 용돈에서’는 내 용돈보다 많으면 거절(`over_allowance`), 즉시 적용 = `allowance_cut`을 월말 정리 용돈(그 사람 몫)에서 뺌 + 상대 알림 `living_allowance`, 토스트 ‘되돌리기’ = `undo_living_check`(답한 사람, 10분 안). ‘목표 배분에서’·‘다음 달에 메울게요’는 기록만(월말 정리 반영은 W-04 꼼꼼 모드와 함께). 결과는 생활비 예산 보정에 쓰지 않음
 - 다음 사이클 플랜(07 3장): 금액 계산이 core 규칙이라 서버 예약 작업 대신 앱이 만듦. MainFrame의 `useEnsurePlan`(features/month/ensure-plan.ts)이 오늘이 든 플랜이 없고 지난 플랜이 이번 사이클 전에 끝났으면, O-66과 같은 계산(`calc` → 통장별 금액 → 분담)으로 줄을 만들어 `create_cycle_plan` 호출. 서버는 같은 사이클 한 번만, 미래 사이클 거절, 해제 대기면 지난 플랜 연장, `account_mode_next`(S-10a 통장 방식 `/settings/account-mode`)를 이때 적용. 아무도 앱을 열지 않으면 플랜은 다음에 열 때 생김(알림 9시 문구는 그대로)
 - 다음 단계: 프로필 사진(S-11e), 내보내기 PDF 요약 3종, 예식일 수정(H-P1)·결혼했어요(H-T1), S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
 

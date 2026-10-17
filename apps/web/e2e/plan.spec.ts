@@ -282,3 +282,61 @@ test('들어오는 돈(W-07): 월별 목록, 추가(이름 → 금액 → 몇 �
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('region', { name: '2월' })).toBeVisible();
 });
+
+test('생활비 체크(W-03): 체크일 전후 카드, 넘칠 것 같아요 → 금액 → 내 용돈에서(즉시 적용, 되돌리기), S-14 부부 단위 켜기', async ({
+  page,
+}) => {
+  // 9.25 ~ 10.24(30일) → 체크일 10.10, 카드는 10.8 ~ 10.12
+  const now = new Date('2026-10-09T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+
+  // 꺼져 있으면 카드 없음. S-14에서 켬(켜면 예빈님도 함께 받아요)
+  await page.goto('/');
+  await expect(page.getByText('이번 달 생활비, 지금까지 어때요?')).toHaveCount(0);
+  await page.goto('/settings/notifications');
+  await expect(page.getByText('켜면 예빈님도 함께 받아요')).toBeVisible();
+  await page.getByRole('switch', { name: '생활비 체크' }).click();
+  await expect.poll(() => db.space?.living_check).toBe(true);
+
+  await page.goto('/');
+  await page.getByText('이번 달 생활비, 지금까지 어때요?').click();
+  await heading(page, '이번 달 생활비, 지금까지 어때요?');
+  await expect(page.getByRole('button', { name: '나중에 할게요' })).toBeVisible();
+  await axe(page);
+  await page.getByText('넘칠 것 같아요').click();
+  await heading(page, '얼마쯤 더 들 것 같아요?');
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  // 내 용돈(50만 원)보다 많으면 ‘내 용돈에서’는 고를 수 없음
+  await page.getByLabel('얼마쯤 더 들 것 같아요?').fill('600000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '더 드는 돈은 어디서 채울까요?');
+  await expect(page.getByRole('radio', { name: /내 용돈에서/ })).toBeDisabled();
+  await page.getByRole('button', { name: /뒤로/ }).click();
+  await page.getByLabel('얼마쯤 더 들 것 같아요?').fill('200000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByText('우선순위 낮은 목표부터')).toBeVisible();
+  await expect(page.getByText('이번 달 내 용돈 50만 → 30만 원')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /내 용돈에서/ }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.livingChecks[0]).toMatchObject({
+    answer: 'over',
+    over_amount: 200_000,
+    cover_from: 'allowance',
+    allowance_cut: 200_000,
+  });
+  await expect(page.getByText('이번 달 생활비, 지금까지 어때요?')).toHaveCount(0);
+  // 되돌리기 → 카드가 다시
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(page.getByText('이번 달 생활비, 지금까지 어때요?')).toBeVisible();
+  expect(db.livingChecks).toHaveLength(0);
+
+  // 딱 맞아요는 바로 끝
+  await page.getByText('이번 달 생활비, 지금까지 어때요?').click();
+  await page.getByText('딱 맞아요').click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.livingChecks[0]).toMatchObject({ answer: 'just', cover_from: null });
+  await expect(page.getByText('이번 달 생활비, 지금까지 어때요?')).toHaveCount(0);
+});

@@ -20,6 +20,7 @@ import {
   splitShares,
   thisMonth,
   todayKst,
+  inLivingCheckWindow,
   upcoming,
   weddingStatus,
   type AllocGoal,
@@ -255,6 +256,9 @@ export function monthView({
     today,
     month,
     planId: plan?.id ?? null,
+    /** 생활비 체크(W-03): 켠 부부, 결혼 전 예비부부 아님, 플랜 있음. 카드 시기 = 체크일 전후 2일 */
+    livingCheckOn: !!sp.living_check && !engaged && !!plan,
+    livingCheckWindow: !!cycle && inLivingCheckWindow(today, cycle.start, cycle.end),
     todoState,
     partnerName: c.partnerName,
     starter: c.starter,

@@ -84,4 +84,20 @@ export const copy = {
   less: (amount: string) => `계획보다 ${amount} 적어요`,
   more: (amount: string) => `계획보다 ${amount} 많아요`,
   confirm: '확인',
+
+  // W-03 생활비 체크
+  living: {
+    title: '이번 달 생활비, 지금까지 어때요?',
+    later: '나중에 할게요',
+    answers: { enough: '여유 있어요', just: '딱 맞아요', over: '넘칠 것 같아요' } as Record<
+      'enough' | 'just' | 'over',
+      string
+    >,
+    overTitle: '얼마쯤 더 들 것 같아요?',
+    coverTitle: '더 드는 돈은 어디서 채울까요?',
+    cover: { goal: '목표 배분에서', allowance: '내 용돈에서', next_month: '다음 달에 메울게요' },
+    coverGoalSub: '우선순위 낮은 목표부터',
+    coverAllowanceSub: (before: string, after: string) => `이번 달 내 용돈 ${before} → ${after}`,
+    coverAllowanceNo: (allowance: string) => `내 용돈 ${allowance}보다 많아요`, // [확인 필요]
+  },
 };

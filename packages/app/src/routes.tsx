@@ -51,6 +51,7 @@ import {
 import {
   W01SalaryPlan,
   W01aAdjust,
+  W03LivingCheck,
   W02Split,
   W02aOtherAmount,
   W07Income,
@@ -382,6 +383,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-01a 이번 달만 바꾸기
+      {
+        path: '/plan/living-check',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W03LivingCheck />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-03 생활비 체크
       {
         path: '/plan/income',
         element: (

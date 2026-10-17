@@ -1,6 +1,7 @@
 import {
   fetchCurrentPlan,
   fetchGoals,
+  fetchLivingCheck,
   fetchMe,
   fetchMonthClose,
   fetchPartner,
@@ -30,6 +31,12 @@ export function useCloseData() {
     queryFn: () => fetchMonthClose(planId ?? ''),
     enabled: !!planId,
   });
+  // 생활비 체크 ‘내 용돈에서’(W-03c)는 이번 달 그 사람 용돈에서 뺌(즉시 적용)
+  const living = useQuery({
+    queryKey: qk.livingCheck(planId ?? ''),
+    queryFn: () => fetchLivingCheck(planId ?? ''),
+    enabled: !!planId && !!space.data?.living_check,
+  });
   const loading =
     me.isLoading ||
     space.isLoading ||
@@ -51,8 +58,14 @@ export function useCloseData() {
     : joined
       ? myIncome + (c?.partnerIncome ?? 0)
       : (snapIncome ?? myIncome + (c?.partnerIncome ?? 0));
-  const myAllowance = me.data?.allowance ?? 0;
-  const partnerAllowance = c?.partnerAllowance ?? myAllowance;
+  const cut = living.data?.allowanceCut ?? 0;
+  const cutMine = !!cut && (living.data?.allowanceSide ?? me.data?.side) === me.data?.side;
+  const baseAllowance = me.data?.allowance ?? 0;
+  const myAllowance = Math.max(0, baseAllowance - (cutMine ? cut : 0));
+  const partnerAllowance = Math.max(
+    0,
+    (c?.partnerAllowance ?? baseAllowance) - (cut && !cutMine ? cut : 0),
+  );
   const month = plan.data ? Number(plan.data.label_month.slice(5, 7)) : Number(today.slice(5, 7));
 
   return {
