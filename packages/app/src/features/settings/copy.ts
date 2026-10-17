@@ -401,6 +401,8 @@ export const copy = {
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',
   email: '이메일',
+  livingCheck: '생활비 체크',
+  livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
     plan: '월급 플랜·월말 정리',
     proposal: '제안',

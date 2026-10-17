@@ -763,6 +763,7 @@ export type Database = {
           id: string
           living_budget: number | null
           living_budget_estimated: boolean
+          living_check: boolean
           loan_repayment: number | null
           marriage_status: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home: Database["public"]["Enums"]["newlywed_home"] | null
@@ -808,6 +809,7 @@ export type Database = {
           id?: string
           living_budget?: number | null
           living_budget_estimated?: boolean
+          living_check?: boolean
           loan_repayment?: number | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
@@ -852,6 +854,7 @@ export type Database = {
           id?: string
           living_budget?: number | null
           living_budget_estimated?: boolean
+          living_check?: boolean
           loan_repayment?: number | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
@@ -1585,6 +1588,61 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      living_check: {
+        Row: {
+          allowance_cut: number | null
+          allowance_side: Database["public"]["Enums"]["couple_side"] | null
+          answer: string
+          answered_by: string | null
+          cover_from: string | null
+          created_at: string
+          id: string
+          over_amount: number | null
+          plan_id: string
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          allowance_cut?: number | null
+          allowance_side?: Database["public"]["Enums"]["couple_side"] | null
+          answer: string
+          answered_by?: string | null
+          cover_from?: string | null
+          created_at?: string
+          id?: string
+          over_amount?: number | null
+          plan_id: string
+          space_id: string
+        }
+        Update: {
+          allowance_cut?: number | null
+          allowance_side?: Database["public"]["Enums"]["couple_side"] | null
+          answer?: string
+          answered_by?: string | null
+          cover_from?: string | null
+          created_at?: string
+          id?: string
+          over_amount?: number | null
+          plan_id?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "living_check_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_plan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "living_check_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lunar_date: {
         Row: {
@@ -2361,6 +2419,15 @@ export type Database = {
         Args: { p_accept: boolean; p_id: string }
         Returns: undefined
       }
+      answer_living_check: {
+        Args: {
+          p_answer: string
+          p_cover?: string
+          p_over?: number
+          p_plan: string
+        }
+        Returns: string
+      }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
       apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
@@ -2560,6 +2627,10 @@ export type Database = {
       ko_obj: { Args: { w: string }; Returns: string }
       ko_subj: { Args: { w: string }; Returns: string }
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
+      living_check_day: {
+        Args: { p_end: string; p_start: string }
+        Returns: string
+      }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
@@ -2759,10 +2830,15 @@ export type Database = {
         Args: { p_today?: string }
         Returns: number
       }
+      send_living_check_notifications: {
+        Args: { p_today?: string }
+        Returns: number
+      }
       send_morning_notifications: {
         Args: { p_today?: string }
         Returns: number
       }
+      set_living_check: { Args: { p_on: boolean }; Returns: undefined }
       set_my_side: {
         Args: { p_side: Database["public"]["Enums"]["couple_side"] }
         Returns: undefined
@@ -2809,6 +2885,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      undo_living_check: { Args: { p_id: string }; Returns: undefined }
       unlink_default_plan: {
         Args: { p_plan: Json; p_ratio: number }
         Returns: Json

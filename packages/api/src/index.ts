@@ -14,3 +14,4 @@ export * from './trash';
 export * from './account';
 export * from './inquiry';
 export * from './security';
+export * from './living';

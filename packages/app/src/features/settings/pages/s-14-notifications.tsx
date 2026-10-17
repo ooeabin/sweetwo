@@ -1,4 +1,4 @@
-import { qk, updateMe, type Me } from '@sweetwo/api';
+import { qk, setLivingCheck, updateMe, type Me, type Space } from '@sweetwo/api';
 import { notiPrefs, type NotiPrefs, type NotiTopic } from '@sweetwo/core';
 import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import { useSettingsData } from '../data';
 // S-14 알림(docs/spec/25-settings.md): 메일 상한 안내, 묶음별 OS 알림·이메일(웹은 이메일만), 챙길 날은 시점마다,
 // 받는 방법(둘 다 끄면 “알림을 받을 방법이 없어요” 확인), 방해 금지 시간(→ S-14a). 바뀌면 바로 저장.
 // 센터 기록은 설정과 상관없이 남음. 끌 수 없는 종류(보안·결정 기한)는 목록에 없음.
-// 생활비 체크(W-03), 마케팅 정보 받기(동의 기록 함수)는 그 기능과 함께.
+// 생활비 체크(W-03)는 부부 단위(한 명이 켜면 둘 다), 결혼 전 예비부부는 없음. 마케팅 정보 받기(동의 기록 함수)는 그 기능과 함께.
 const CARE: NotiTopic[] = ['care_30', 'care_14', 'care_7', 'care_0'];
 
 export function S14Notifications() {
@@ -35,6 +35,16 @@ export function S14Notifications() {
       toast(copy.failed);
     } finally {
       await qc.invalidateQueries({ queryKey: qk.me });
+    }
+  };
+  const setLiving = async (on: boolean) => {
+    qc.setQueryData<Space | null>(qk.space, (s) => (s ? { ...s, living_check: on } : s));
+    try {
+      await setLivingCheck(on);
+    } catch {
+      toast(copy.failed);
+    } finally {
+      await qc.invalidateQueries({ queryKey: qk.space });
     }
   };
   const setTopic = (t: NotiTopic, ch: 'push' | 'email', on: boolean) =>
@@ -120,6 +130,20 @@ export function S14Notifications() {
       {pair('proposal', copy.groups.proposal)}
       {d.c.joined &&
         pair('partner_change', copy.groups.partner_change(d.c.partnerName), copy.partnerChangeSub)}
+      {d.space && d.space.marriage_status !== 'engaged' && (
+        <section
+          className="hg-stack"
+          aria-label={copy.livingCheck}
+          style={{ gap: 'var(--space-1)' }}
+        >
+          <Toggle
+            label={copy.livingCheck}
+            checked={!!d.space.living_check}
+            onChange={(on) => void setLiving(on)}
+          />
+          {d.c.joined && <span className="hg-help">{copy.livingCheckSub(d.c.partnerName)}</span>}
+        </section>
+      )}
       <section className="hg-stack" aria-label={copy.groups.care} style={{ gap: 'var(--space-3)' }}>
         <span className="hg-card__label">{copy.groups.care}</span>
         {CARE.map((t) =>

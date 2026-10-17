@@ -43,6 +43,8 @@ export interface MemDb {
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
+  /** 생활비 체크 답(W-03) */
+  livingChecks: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -114,6 +116,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     invites: [],
     unlinks: [],
     inquiries: [],
+    livingChecks: [],
     sessions: [
       {
         id: 's-this',
@@ -654,6 +657,32 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
+      if (fn === 'set_living_check') {
+        if (db.space) db.space.living_check = body().p_on;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_living_check') {
+        const b = body();
+        if (db.livingChecks.some((x) => x.plan_id === b.p_plan))
+          return json(route, { message: 'already_answered', code: 'P0001' }, 400);
+        const id = `living-${db.livingChecks.length + 1}`;
+        db.livingChecks.push({
+          id,
+          plan_id: b.p_plan,
+          answer: b.p_answer,
+          over_amount: b.p_over ?? null,
+          cover_from: b.p_cover ?? null,
+          allowance_side: b.p_cover === 'allowance' ? (db.me.side ?? null) : null,
+          allowance_cut: b.p_cover === 'allowance' ? b.p_over : null,
+          answered_by: db.me.id,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_living_check') {
+        const b = body();
+        db.livingChecks = db.livingChecks.filter((x) => x.id !== b.p_id);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'end_sessions') {
         const b = body();
         const before = db.sessions.length;
@@ -1237,6 +1266,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
     if (path === '/rest/v1/inquiry' && method === 'GET') return json(route, db.inquiries);
+    if (path === '/rest/v1/living_check' && method === 'GET') {
+      const plan = url.searchParams.get('plan_id')?.replace(/^eq\./, '');
+      return json(route, db.livingChecks.find((x) => x.plan_id === plan) ?? null);
+    }
     if (path === '/rest/v1/couple_unlink' && method === 'GET')
       return json(
         route,
