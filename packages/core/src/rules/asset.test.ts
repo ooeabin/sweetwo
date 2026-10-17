@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   assetGroupsOf,
+  investSummary,
   netWorth,
   netWorthSeries,
   periodEnabled,
@@ -81,4 +82,20 @@ it('기간 탭: 데이터보다 긴 기간은 비활성, 1년 미만이면 전�
   expect(startPeriod(8, 36)).toBeNull();
   expect(startPeriod(8, 6)).toBe(6);
   expect(periodSlice([1, 2, 3, 4, 5, 6, 7], 6)).toEqual([2, 3, 4, 5, 6, 7]);
+});
+
+it('투자 묶음 줄: 비중은 총자산(평가금액) 대비, 손익은 원금 있는 항목만', () => {
+  const r = investSummary(
+    [
+      { side: 'asset', grp: 'cash', amount: 6_000_000 },
+      { side: 'asset', grp: 'invest', amount: 11_200_000, principal: 10_000_000 },
+      { side: 'asset', grp: 'invest', amount: 800_000 },
+      { side: 'asset', grp: 'invest', amount: 5_000_000, visibility: 'private' },
+      { side: 'debt', grp: 'credit', amount: 9_000_000 },
+    ],
+    [{ side: 'asset', grp: 'invest', total: 2_000_000 }],
+  );
+  // (1,120 + 80 + 200) ÷ (600 + 1,120 + 80 + 200) = 70%
+  expect(r).toEqual({ sharePct: 70, gain: 1_200_000, gainPct: 12 });
+  expect(investSummary([{ side: 'asset', grp: 'invest', amount: 1 }]).gain).toBeNull();
 });

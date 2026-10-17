@@ -237,3 +237,31 @@ export function startPeriod(points: number, remembered?: NetWorthPeriod): NetWor
 
 export const periodSlice = <T>(rows: T[], p: NetWorthPeriod) =>
   p === null ? rows : rows.slice(-p);
+
+/**
+ * 투자 묶음 줄(23 F-02 12번, 06 8장). 투자 비중 = 투자 자산 합계 ÷ 총자산(부채 빼기 전, 평가금액, 반올림 %).
+ * 손익 = 원금 있는 투자 항목의 평가금액 − 원금 합(원금 있는 항목이 없으면 null). 비공개·판 항목 제외,
+ * 배우자 ‘합계만’은 비중에만 더함(원금을 따로 알 수 없음).
+ */
+export function investSummary(
+  items: (NetWorthItem & { grp: string })[],
+  partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
+) {
+  const live = items.filter(
+    (i) => i.side === 'asset' && i.visibility !== 'private' && i.status !== 'sold',
+  );
+  const partner = partnerSums.filter((p) => p.side === 'asset');
+  const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);
+  const inv = live.filter((i) => i.grp === 'invest');
+  const invest =
+    inv.reduce((t, i) => t + i.amount, 0) +
+    partner.filter((p) => p.grp === 'invest').reduce((t, p) => t + p.total, 0);
+  const withP = inv.filter((i) => i.principal !== null && i.principal !== undefined);
+  const principal = withP.reduce((t, i) => t + (i.principal ?? 0), 0);
+  const gain = withP.length ? withP.reduce((t, i) => t + i.amount, 0) - principal : null;
+  return {
+    sharePct: total > 0 ? Math.round((invest * 100) / total) : null,
+    gain,
+    gainPct: gain !== null && principal > 0 ? Math.round((gain * 100) / principal) : null,
+  };
+}

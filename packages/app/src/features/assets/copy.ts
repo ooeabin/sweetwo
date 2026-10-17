@@ -48,6 +48,19 @@ export const copy = {
   checkAmount: '금액이 맞나요?',
   updated: (date: string) => `${date} 수정`, // [확인 필요]
   goalBadge: (name: string) => `${name} 목표`, // [확인 필요]
+  roles: {
+    living: '공동 생활비',
+    goal_fund: '목표자금',
+    emergency: '비상금',
+    wedding: '결혼 준비',
+    personal: '개인',
+  },
+  sortLabel: '정렬', // [확인 필요] 화면 읽기용
+  sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
+  sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
+  investShare: (pct: number) => `공동자금 투자 비중 ${pct}%`,
+  investGain: (amount: string, pct: number | null) =>
+    pct === null ? amount : `${amount}(${pct > 0 ? '+' : pct < 0 ? '−' : ''}${Math.abs(pct)}%)`,
 
   // F-03
   addTitle: '무엇을 추가할까요?', // [확인 필요] 화면 목록의 이름
