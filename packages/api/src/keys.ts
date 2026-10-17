@@ -33,5 +33,6 @@ export const qk = {
   trash: ['trash'] as const,
   inquiries: ['inquiry'] as const,
   sessions: ['sessions'] as const,
+  lastPlanEnd: ['monthly_plan', 'last'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

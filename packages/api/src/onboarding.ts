@@ -271,6 +271,39 @@ export async function startFirstPlan(p: {
   return data as string;
 }
 
+/** 다음 사이클 플랜(07 3장). 기준일이 지나 처음 앱을 연 사람이 만듦. 같은 사이클이면 있던 것 */
+export async function createCyclePlan(p: {
+  labelMonth: string;
+  cycleStart: string;
+  cycleEnd: string;
+  isTemp: boolean;
+  snapshot: Json;
+  lines: FirstPlanLine[];
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('create_cycle_plan', {
+    p_label_month: p.labelMonth,
+    p_cycle_start: p.cycleStart,
+    p_cycle_end: p.cycleEnd,
+    p_is_temp: p.isTemp,
+    p_snapshot: p.snapshot,
+    p_lines: p.lines as unknown as Json,
+  });
+  fail(error);
+  return data as string;
+}
+
+/** 가장 최근 플랜의 끝 날(없으면 null = 첫 플랜 전) */
+export async function fetchLastPlanEnd(): Promise<string | null> {
+  const { data, error } = await supabase()
+    .from('monthly_plan')
+    .select('cycle_end')
+    .is('deleted_at', null)
+    .order('cycle_end', { ascending: false })
+    .limit(1);
+  fail(error);
+  return Array.isArray(data) ? (data[0]?.cycle_end ?? null) : null;
+}
+
 // 이번 달: 오늘이 든 월 플랜과 줄(H-01, H-03)
 export type MonthlyPlan = Tables<'monthly_plan'>;
 export type PlanLine = Tables<'plan_line'>;

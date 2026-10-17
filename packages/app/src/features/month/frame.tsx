@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { N01Panel, useHasUnread, useNotiPanel, useNotiRealtime } from '../notifications';
 import { openReceived, proposalCopy, useApplyDue, useProposals } from '../proposals';
+import { useEnsurePlan } from './ensure-plan';
 import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
 
@@ -27,6 +28,8 @@ export function MainFrame(
   const partner = usePartner();
   const proposals = useProposals();
   useApplyDue();
+  // 기준일이 지났으면 다음 사이클 플랜(07 3장)
+  useEnsurePlan();
   // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime(데스크톱 OS 알림)
   useNotiRealtime(me.data?.id);
   const unread = useHasUnread();

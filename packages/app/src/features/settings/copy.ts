@@ -371,6 +371,16 @@ export const copy = {
   faqSearch: '자주 묻는 질문에서 찾기', // [확인 필요] 검색 칸
   faqNone: '찾는 답이 없어요',
 
+  // S-10a 통장 방식
+  accountMode: '통장 방식',
+  accountModeQ: '통장을 어떻게 쓸까요?', // [확인 필요] 질문 문구
+  accountModes: { single: '통장 하나로 써요', roles: '역할별로 나눠 쓸래요' } as Record<
+    string,
+    string
+  >,
+  accountModeNext: '다음 월급 플랜부터 바뀌어요', // [확인 필요]
+  accountModeValue: (now: string, next: string | null) => (next ? `${now} → ${next}` : now),
+
   // S-15 보안
   security: '보안',
   appLock: '앱 잠금',

@@ -53,6 +53,16 @@ export function S10Settings() {
           />
         )}
         <ListRow
+          label={copy.accountMode}
+          value={copy.accountModeValue(
+            copy.accountModes[d.space?.account_mode ?? 'single'] ?? '',
+            d.space?.account_mode_next
+              ? (copy.accountModes[d.space.account_mode_next] ?? null)
+              : null,
+          )}
+          onClick={() => nav('/settings/account-mode')}
+        />
+        <ListRow
           label={copy.rows.noti}
           value={copy.channelsOn(
             [desktop && prefs.push ? copy.push : null, prefs.email ? copy.email : null].filter(

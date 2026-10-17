@@ -744,6 +744,7 @@ export type Database = {
       couple_space: {
         Row: {
           account_mode: Database["public"]["Enums"]["account_mode"] | null
+          account_mode_next: Database["public"]["Enums"]["account_mode"] | null
           base_day: number | null
           base_day_last: boolean
           child_plan: Database["public"]["Enums"]["child_plan"] | null
@@ -788,6 +789,7 @@ export type Database = {
         ComputedFields: never
         Insert: {
           account_mode?: Database["public"]["Enums"]["account_mode"] | null
+          account_mode_next?: Database["public"]["Enums"]["account_mode"] | null
           base_day?: number | null
           base_day_last?: boolean
           child_plan?: Database["public"]["Enums"]["child_plan"] | null
@@ -831,6 +833,7 @@ export type Database = {
         }
         Update: {
           account_mode?: Database["public"]["Enums"]["account_mode"] | null
+          account_mode_next?: Database["public"]["Enums"]["account_mode"] | null
           base_day?: number | null
           base_day_last?: boolean
           child_plan?: Database["public"]["Enums"]["child_plan"] | null
@@ -2488,6 +2491,17 @@ export type Database = {
         Returns: undefined
       }
       counter_unlink: { Args: { p_shares: Json }; Returns: undefined }
+      create_cycle_plan: {
+        Args: {
+          p_cycle_end: string
+          p_cycle_start: string
+          p_is_temp: boolean
+          p_label_month: string
+          p_lines: Json
+          p_snapshot: Json
+        }
+        Returns: string
+      }
       create_inquiry: {
         Args: {
           p_attach?: Json

@@ -1,5 +1,6 @@
 // settings 기능. 밖으로 내보낼 것만 여기서 export.
 export { S10Settings } from './pages/s-10-settings';
+export { S10aAccountMode } from './pages/s-10a-account-mode';
 export { S11Me } from './pages/s-11-me';
 export { S12Couple } from './pages/s-12-couple';
 export { S12aUnlinkIntro } from './pages/s-12a-unlink-intro';

@@ -73,6 +73,7 @@ import {
 } from './features/calendar';
 import {
   S10Settings,
+  S10aAccountMode,
   S11Me,
   S12Couple,
   S12aUnlinkIntro,
@@ -531,6 +532,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-10 설정 홈
+      {
+        path: '/settings/account-mode',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S10aAccountMode />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-10a 통장 방식
       {
         path: '/settings/me',
         element: (
