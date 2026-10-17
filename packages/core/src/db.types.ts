@@ -826,6 +826,8 @@ export type Database = {
         Row: {
           cancelled_at: string | null
           confirmed_at: string | null
+          counter: Json | null
+          counter_at: string | null
           deadline: string
           final_plan: Json | null
           how: string | null
@@ -843,6 +845,8 @@ export type Database = {
         Insert: {
           cancelled_at?: string | null
           confirmed_at?: string | null
+          counter?: Json | null
+          counter_at?: string | null
           deadline: string
           final_plan?: Json | null
           how?: string | null
@@ -859,6 +863,8 @@ export type Database = {
         Update: {
           cancelled_at?: string | null
           confirmed_at?: string | null
+          counter?: Json | null
+          counter_at?: string | null
           deadline?: string
           final_plan?: Json | null
           how?: string | null
@@ -2158,6 +2164,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_counter_unlink: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       adjust_plan: {
         Args: {
           p_amount: number
@@ -2291,6 +2301,7 @@ export type Database = {
         Args: { p_how: string; p_id: string; p_plan: Json }
         Returns: undefined
       }
+      counter_unlink: { Args: { p_shares: Json }; Returns: undefined }
       create_invite: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2351,6 +2362,8 @@ export type Database = {
         Returns: {
           cancelled_at: string | null
           confirmed_at: string | null
+          counter: Json | null
+          counter_at: string | null
           deadline: string
           final_plan: Json | null
           how: string | null
@@ -2488,6 +2501,10 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      run_unlink_deadlines: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       save_base_day: { Args: { p_after: Json }; Returns: undefined }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
       send_evening_notifications: {
@@ -2530,6 +2547,10 @@ export type Database = {
           p_side: Database["public"]["Enums"]["couple_side"]
         }
         Returns: undefined
+      }
+      unlink_default_plan: {
+        Args: { p_plan: Json; p_ratio: number }
+        Returns: Json
       }
       unlink_make_space: {
         Args: {

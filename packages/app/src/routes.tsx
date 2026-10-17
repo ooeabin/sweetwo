@@ -78,6 +78,8 @@ import {
   S12bUnlinkPlan,
   S12cUnlinkConfirm,
   S12dUnlinkReview,
+  S12eUnlinkDifferently,
+  S12fUnlinkCounter,
   S12hUnlinked,
   S11aNickname,
   S11bSide,
@@ -577,6 +579,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12d 자산 정리 안 확인, 동의
+      {
+        path: '/settings/couple/unlink/differently',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12eUnlinkDifferently />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12e 다르게 정리하기
+      {
+        path: '/settings/couple/unlink/counter',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12fUnlinkCounter />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12f 다르게 정리한 안 확인
       {
         path: '/settings/couple/unlinked',
         element: (

@@ -599,6 +599,35 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.partner = null;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'counter_unlink') {
+        // 받은 사람 몫 → counter의 mine(요청한 사람 몫) = 금액 − 받은 사람 몫
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_shares: Record<string, number>;
+        };
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u) {
+          const plan = u.plan as { asset_id: string; amount: number; mine: number }[];
+          u.counter = plan.map((e) => {
+            const theirs = body.p_shares[e.asset_id];
+            return theirs === undefined ? e : { ...e, mine: e.amount - theirs };
+          });
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'accept_counter_unlink') {
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u)
+          Object.assign(u, {
+            status: 'confirmed',
+            how: 'counter',
+            final_plan: u.counter,
+            confirmed_at: '2026-10-07T01:00:00Z',
+            reconnect_until: '2026-11-06T01:00:00Z',
+          });
+        if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
+        db.partner = null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'my_unlink')
         return json(
           route,

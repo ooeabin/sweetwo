@@ -1,6 +1,6 @@
 import { fetchAssets, qk } from '@sweetwo/api';
-import { formatManWon, type UnlinkItem } from '@sweetwo/core';
-import { ListRow } from '@sweetwo/ui';
+import { daysBetween, formatManWon, todayKst, type UnlinkItem } from '@sweetwo/core';
+import { AmountInput, ListRow } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { copy } from './copy';
@@ -70,4 +70,82 @@ export function UnlinkPlanList({ items, names }: { items: UnlinkItem[]; names: [
       ))}
     </div>
   );
+}
+
+export type ShareRow = {
+  id: string;
+  name: string;
+  side: 'asset' | 'debt';
+  amount: number;
+  /** 고치기 전 내 몫 */
+  base: number;
+};
+
+/** 항목마다 지금 내 몫(초안 반영). null = 빈 칸 */
+export function sharesOf(rows: ShareRow[], draft: Record<string, number | null>) {
+  return rows.map((r) => ({ ...r, mine: r.id in draft ? (draft[r.id] ?? null) : r.base }));
+}
+
+/** 하나라도 비었거나 금액보다 크면 보낼 수 없음 */
+export const sharesBad = (rows: ReturnType<typeof sharesOf>) =>
+  rows.some((i) => i.mine === null || i.mine > i.amount);
+
+/** S-12b·S-12e 몫 편집: 항목마다 내 몫 금액 칸(0 ~ 금액), 상대 몫 자동, 합계(자산, 부채 따로) 바로 갱신 */
+export function ShareEditor({
+  rows,
+  names,
+  onChange,
+}: {
+  rows: ReturnType<typeof sharesOf>;
+  names: [string, string];
+  onChange: (id: string, v: number | null) => void;
+}) {
+  const sum = (side: 'asset' | 'debt'): [number, number] => {
+    const xs = rows.filter((i) => i.side === side);
+    const mine = xs.reduce((t, i) => t + Math.min(i.mine ?? 0, i.amount), 0);
+    return [mine, xs.reduce((t, i) => t + i.amount, 0) - mine];
+  };
+  const hasDebt = rows.some((i) => i.side === 'debt');
+  return (
+    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+      {rows.map((i) => (
+        <div key={i.id} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <p>
+            <strong>{i.name}</strong>{' '}
+            <span className="hg-q__help">
+              {i.side === 'debt' ? copy.debtAmount(formatManWon(i.amount)) : formatManWon(i.amount)}
+            </span>
+          </p>
+          <AmountInput
+            label={copy.myShare(i.name)}
+            value={i.mine}
+            onChange={(v) => onChange(i.id, v)}
+            allowZero
+            embedded
+          />
+          {i.mine !== null && i.mine > i.amount ? (
+            <p className="hg-help is-error" role="alert">
+              {copy.shareOver}
+            </p>
+          ) : (
+            <p className="hg-q__help">
+              {copy.theirShare(names[1], formatManWon(i.amount - (i.mine ?? 0)))}
+            </p>
+          )}
+        </div>
+      ))}
+      <UnlinkTotals
+        title={hasDebt ? copy.assetsTotal : undefined}
+        names={names}
+        totals={sum('asset')}
+      />
+      {hasDebt && <UnlinkTotals title={copy.debtsTotal} names={names} totals={sum('debt')} />}
+    </div>
+  );
+}
+
+/** 요청부터 오늘까지 날 수(분석 days_pending). 값이 깨졌으면 0 */
+export function daysPending(requestedAt: string): number {
+  const t = Date.parse(requestedAt);
+  return Number.isNaN(t) ? 0 : Math.max(0, daysBetween(todayKst(new Date(t)), todayKst()));
 }
