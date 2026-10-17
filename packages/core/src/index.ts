@@ -27,3 +27,4 @@ export * from './zip';
 export * from './faq';
 export * from './device';
 export * from './rules/living-check';
+export * from './rules/close-review';

@@ -98,7 +98,18 @@ export async function updateMonthClose(
   id: string,
   patch: Pick<
     Partial<MonthClose>,
-    'income' | 'big_none' | 'started_by' | 'started_at' | 'status' | 'closed_by' | 'closed_at'
+    | 'income'
+    | 'big_none'
+    | 'started_by'
+    | 'started_at'
+    | 'status'
+    | 'closed_by'
+    | 'closed_at'
+    | 'gap_kind'
+    | 'gap_amount'
+    | 'gap_choice'
+    | 'gap_goal_id'
+    | 'budget_fix'
   >,
 ) {
   const { error } = await supabase().from('month_close').update(patch).eq('id', id);

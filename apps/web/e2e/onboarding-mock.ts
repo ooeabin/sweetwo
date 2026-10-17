@@ -1206,7 +1206,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         );
       }
       if (method === 'GET') {
-        const c = db.closes[0];
+        // 이 플랜의 정리(지난 정리를 심어 둔 테스트는 plan_id가 다름)
+        const pid = url.searchParams.get('plan_id')?.replace(/^eq\./, '');
+        const c =
+          db.closes.find((x) => pid && x.plan_id === pid) ??
+          db.closes.find((x) => !x.plan_id || x.plan_id === pid);
         return json(
           route,
           c ? { ...c, spends: db.spends, bigs: db.bigs, deposits: db.deposits } : null,

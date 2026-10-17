@@ -80,6 +80,8 @@ export function useCloseData() {
     close: close.data ?? null,
     joined,
     solo,
+    /** 부부 값(coupleOf) */
+    couple: c,
     /** 미합류 + 배우자 수입 추정: 추정값으로 셈 / 미합류 + 모름: 내 돈만 */
     basisNote:
       joined || solo

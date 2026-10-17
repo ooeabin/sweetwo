@@ -52,6 +52,21 @@ export const copy = {
     `${partner}님이 합류하기 전이라 ${me}님 돈만 셌어요`,
   allowanceNote: (me: string, amount: string) => `${me} ${amount}`,
   finish: '정리 끝내기', // [확인 필요]
+  fixText: (avg: string) => `최근 3개월 평균 ${avg} 원을 썼어요. 예산을 맞출까요?`,
+  fixApplied: '생활비 예산을 맞췄어요', // [확인 필요]
+  fixProposed: (partner: string) => `${partner}님께 제안을 보냈어요`, // [확인 필요]
+  good: (amount: string) => `생활비를 계획보다 ${amount} 아꼈어요`,
+  planTable: '계획 대비', // [확인 필요] 표 이름
+  planCol: { name: '목표', planned: '계획', saved: '넣은 돈', diff: '차이' }, // [확인 필요]
+  shortTitle: (amount: string) => `계획보다 ${amount} 덜 모았어요. 어떻게 채울까요?`, // [확인 필요]
+  short: {
+    spread_3m: '3개월에 나눠 채우기',
+    extend: '기한 늘리기',
+    skip_this_month: '이번 달만 넘어가기',
+  },
+  spreadSub: (amount: string) => `다음 3개월 동안 ${amount}씩 더 넣어요`, // [확인 필요]
+  overTitle: (amount: string) => `계획보다 ${amount} 더 모았어요. 어느 목표에 더 넣을까요?`, // [확인 필요]
+  detailed: '더 꼼꼼히 정리하기',
 
   // W-04 끝
   doneTitle: (m: number) => `${m}월 월급 플랜 정리 끝!`,

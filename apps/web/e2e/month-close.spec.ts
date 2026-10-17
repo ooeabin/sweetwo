@@ -128,7 +128,14 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await expect(page.getByRole('region', { name: '9월 정산' })).toContainText('49.3%');
   await expect(page.getByText('예빈님 수입은 추정값으로 셌어요')).toBeVisible();
   await expect(page.getByText('찬우 50만, 예빈 50만')).toBeVisible();
+  // 잘한 점(예산 55 − 변동 41), 계획 대비 표, 초과 10만 → 더 넣을 목표
+  await expect(page.getByText('생활비를 계획보다 14만 원 아꼈어요')).toBeVisible();
+  const table = page.getByRole('table', { name: '계획 대비' });
+  await expect(table.getByRole('row', { name: /내 집 마련/ })).toContainText('150만');
+  await expect(table.getByRole('row', { name: /기타 저축/ })).toContainText('+10만');
+  await expect(page.getByRole('button', { name: '정리 끝내기' })).toBeDisabled();
   await axe(page);
+  await page.getByRole('radio', { name: '내 집 마련' }).click();
   await page.getByRole('button', { name: '정리 끝내기' }).click();
 
   await heading(page, '9월 월급 플랜 정리 끝!');
@@ -137,7 +144,15 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
 
   // 정리를 끝내면 이번 달은 다시 남은 생활비(55 − 41)
   await heading(page, '찬우님, 이번 달 생활비가 14만 원 남았어요');
-  expect(db.closes[0]).toMatchObject({ status: 'done', income: 6_000_000, big_none: false });
+  expect(db.closes[0]).toMatchObject({
+    status: 'done',
+    income: 6_000_000,
+    big_none: false,
+    gap_kind: 'over',
+    gap_amount: 100_000,
+    gap_choice: 'extra_goal',
+    gap_goal_id: 'g2',
+  });
   expect(db.bigs).toEqual([
     expect.objectContaining({ kind: 'car_tax', amount: 250_000, how: 'exception' }),
   ]);
@@ -146,4 +161,65 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
     ['내 집 마련', 1_500_000],
     ['기타 저축', 100_000],
   ]);
+});
+
+test('정산 요약(W-04g): 지난달보다 칩, 생활비 예산 보정 제안(미합류는 바로 맞춤), 미달이면 채우는 방법', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-23T20:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  db.categories.push({
+    id: 'cat-eat',
+    name: '외식·배달',
+    sort: 1,
+    enabled: true,
+    deleted_at: null,
+  });
+  const old = (id: string, month: string, eat: number) => ({
+    id,
+    plan_id: `old-${id}`,
+    status: 'done',
+    deleted_at: null,
+    income: 6_000_000,
+    closed_at: `${month.slice(0, 7)}-26T01:00:00Z`,
+    label_month: month,
+    spends: [{ category_id: 'cat-eat', amount: eat, deleted_at: null }],
+    bigs: [],
+    deposits: [],
+  });
+  db.closes.push(old('c8', '2026-07-01', 700_000), old('c9', '2026-08-01', 760_000));
+  await page.goto('/month/close/w-04a');
+  await page.getByRole('button', { name: '시작' }).click();
+  await page.getByLabel('외식·배달').fill('800000');
+  await page.getByRole('button', { name: '없어요' }).click();
+  await next(page);
+  // 내 집 마련 150만 계획인데 100만만 넣음 → 50만 미달
+  await page.getByLabel('내 집 마련').fill('1000000');
+  await next(page);
+
+  const sum = page.getByRole('region', { name: '9월 정산' });
+  await expect(sum.getByText('지난달보다')).toBeVisible();
+  await expect(sum).toContainText('외식·배달+4만');
+  // 최근 3개월 평균(80, 76, 70) = 75만, 예산 55만과 10% 넘게 다름
+  await expect(sum.getByText('최근 3개월 평균 75만 원을 썼어요. 예산을 맞출까요?')).toBeVisible();
+  await sum.getByRole('button', { name: '맞추기' }).click();
+  await expect.poll(() => db.space?.living_budget).toBe(750_000);
+  await expect(sum.getByText(/예산을 맞출까요/)).toHaveCount(0);
+
+  await expect(
+    page.getByRole('radiogroup', { name: '계획보다 50만 원 덜 모았어요. 어떻게 채울까요?' }),
+  ).toBeVisible();
+  await expect(page.getByText('다음 3개월 동안 17만 원씩 더 넣어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: '이번 달만 넘어가기' }).click();
+  await page.getByRole('button', { name: '정리 끝내기' }).click();
+  await heading(page, '9월 월급 플랜 정리 끝!');
+  expect(db.closes.find((c) => c.id === 'close-1')).toMatchObject({
+    budget_fix: 'applied',
+    gap_kind: 'short',
+    gap_amount: 500_000,
+    gap_choice: 'skip_this_month',
+  });
 });

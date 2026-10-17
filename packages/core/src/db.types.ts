@@ -1672,12 +1672,17 @@ export type Database = {
       month_close: {
         Row: {
           big_none: boolean
+          budget_fix: string | null
           closed_at: string | null
           closed_by: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
           deleted_by: string | null
+          gap_amount: number | null
+          gap_choice: string | null
+          gap_goal_id: string | null
+          gap_kind: string | null
           id: string
           income: number | null
           plan_id: string
@@ -1692,12 +1697,17 @@ export type Database = {
         ComputedFields: never
         Insert: {
           big_none?: boolean
+          budget_fix?: string | null
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          gap_amount?: number | null
+          gap_choice?: string | null
+          gap_goal_id?: string | null
+          gap_kind?: string | null
           id?: string
           income?: number | null
           plan_id: string
@@ -1711,12 +1721,17 @@ export type Database = {
         }
         Update: {
           big_none?: boolean
+          budget_fix?: string | null
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          gap_amount?: number | null
+          gap_choice?: string | null
+          gap_goal_id?: string | null
+          gap_kind?: string | null
           id?: string
           income?: number | null
           plan_id?: string
@@ -1729,6 +1744,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "month_close_gap_goal_id_fkey"
+            columns: ["gap_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "month_close_plan_id_fkey"
             columns: ["plan_id"]
