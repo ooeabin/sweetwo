@@ -553,11 +553,12 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             ? Math.round((mine * 100) / (mine + theirs))
             : 50;
         const plan = db.assets
-          .filter(
-            (a) =>
-              a.owner === 'joint' && a.side === 'asset' && !a.deleted_at && Number(a.amount) > 0,
+          .filter((a) => a.owner === 'joint' && !a.deleted_at && Number(a.amount) > 0)
+          .sort(
+            (a, b) =>
+              String(a.side).localeCompare(String(b.side)) ||
+              String(a.created_at).localeCompare(String(b.created_at)),
           )
-          .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
           .map((a) => {
             const amount = Number(a.amount);
             const given = body.p_shares[String(a.id)];
@@ -565,7 +566,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
               Math.max(Math.round((amount * pct) / 1_000_000) * 10_000, 0),
               amount,
             );
-            return { asset_id: a.id, name: a.name, amount, mine: given ?? def };
+            return { asset_id: a.id, name: a.name, amount, mine: given ?? def, side: a.side };
           });
         const row = {
           id: `unlink-${db.unlinks.length + 1}`,
@@ -583,6 +584,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (db.space) db.space.couple_state = 'unlink_pending';
         return json(route, row.id);
       }
+      if (fn === 'agree_unlink') {
+        // 서버 confirm_unlink 흉내: 확정, 혼자 쓰기(새 공간 대신 같은 공간 상태만), 30일 다시 연결
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u)
+          Object.assign(u, {
+            status: 'confirmed',
+            how: 'agreed',
+            final_plan: u.plan,
+            confirmed_at: '2026-10-07T01:00:00Z',
+            reconnect_until: '2026-11-06T01:00:00Z',
+          });
+        if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
+        db.partner = null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_unlink')
+        return json(
+          route,
+          db.space?.couple_state === 'solo'
+            ? db.unlinks.filter((x) => x.status === 'confirmed')
+            : [],
+        );
       if (fn === 'cancel_unlink') {
         const u = db.unlinks.find((x) => x.status === 'pending');
         if (u) u.status = 'cancelled';

@@ -115,8 +115,16 @@ export const copy = {
   planTitle: (a: number, b: number) => `분담 비율 ${a} : ${b}로 정리했어요`,
   myShare: (name: string) => `${name} 내 몫`, // [확인 필요] 금액 칸 이름(화면 읽기)
   theirShare: (name: string, v: string) => `${name}님 몫 ${v}`, // [확인 필요]
-  shareOver: '통장 잔액보다 많이 넣을 수 없어요', // [확인 필요]
-  total: '합계', // [확인 필요]
+  shareOver: '금액보다 많이 넣을 수 없어요', // [확인 필요]
+  assetsTotal: '자산', // [확인 필요] 합계 줄 이름
+  debtsTotal: '부채', // [확인 필요]
+  debtAmount: (v: string) => `부채 ${v}`, // [확인 필요]
+  agree: '동의해요',
+  unlinkedTitle: '연결이 해제됐어요', // [확인 필요] S-12h 제목(알림 문구와 같음)
+  movedMine: (v: string) => `${v} 원은 각자 목표로 옮겨요`,
+  reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
+  reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
+  ok: '확인', // [확인 필요]
   confirmQ: '확인을 위해 ‘연결 해제’를 입력해 주세요', // [확인 필요]
   confirmWord: '연결 해제',
   send: '보내기', // [확인 필요]

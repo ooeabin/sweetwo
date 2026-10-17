@@ -22,13 +22,23 @@ export function unlinkShare(amount: number, pct: number): number {
   return Math.min(Math.max(Math.round((amount * pct) / 1_000_000) * 10_000, 0), amount);
 }
 
-export type UnlinkItem = { assetId: string; name: string; amount: number; mine: number };
+export type UnlinkItem = {
+  assetId: string;
+  name: string;
+  amount: number;
+  mine: number;
+  side: 'asset' | 'debt';
+};
 
-/** 합계(요청자, 상대) */
-export function unlinkTotals(items: UnlinkItem[]): { mine: number; theirs: number } {
+/** 합계(요청자, 상대). side를 주면 그 쪽(자산 또는 부채)만 */
+export function unlinkTotals(
+  items: UnlinkItem[],
+  side?: 'asset' | 'debt',
+): { mine: number; theirs: number } {
   let mine = 0;
   let theirs = 0;
   for (const i of items) {
+    if (side && i.side !== side) continue;
     mine += i.mine;
     theirs += i.amount - i.mine;
   }

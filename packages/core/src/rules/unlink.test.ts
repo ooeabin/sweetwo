@@ -19,10 +19,14 @@ describe('연결 해제 자산 정리 안', () => {
   });
   it('합계', () => {
     expect(
-      unlinkTotals([
-        { assetId: 'a', name: '공동 적금', amount: 24_000_000, mine: 13_920_000 },
-        { assetId: 'b', name: '비상금 통장', amount: 3_000_000, mine: 1_000_000 },
-      ]),
+      unlinkTotals(
+        [
+          { assetId: 'a', name: '공동 적금', amount: 24_000_000, mine: 13_920_000, side: 'asset' },
+          { assetId: 'b', name: '비상금 통장', amount: 3_000_000, mine: 1_000_000, side: 'asset' },
+          { assetId: 'c', name: '공동 대출', amount: 10_000_000, mine: 5_800_000, side: 'debt' },
+        ],
+        'asset',
+      ),
     ).toEqual({ mine: 14_920_000, theirs: 12_080_000 });
   });
 });
@@ -33,11 +37,15 @@ describe('자산 정리 안 읽기', () => {
     expect(
       readUnlinkPlan([
         { asset_id: 'a', name: '공동 적금', amount: 100, mine: 50 },
+        { asset_id: 'd', name: '공동 대출', amount: 100, mine: 40, side: 'debt' },
         { asset_id: 'b', name: '이상', amount: 100, mine: 200 },
         { asset_id: 'c', name: '소수', amount: 1.5, mine: 0 },
         null,
       ]),
-    ).toEqual([{ assetId: 'a', name: '공동 적금', amount: 100, mine: 50 }]);
+    ).toEqual([
+      { assetId: 'a', name: '공동 적금', amount: 100, mine: 50, side: 'asset' },
+      { assetId: 'd', name: '공동 대출', amount: 100, mine: 40, side: 'debt' },
+    ]);
     expect(readUnlinkPlan(null)).toEqual([]);
   });
 });

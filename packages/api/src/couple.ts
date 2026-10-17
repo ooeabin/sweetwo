@@ -57,3 +57,16 @@ export async function cancelUnlink() {
   const { error } = await supabase().rpc('cancel_unlink');
   fail(error);
 }
+
+/** S-12d ‘동의해요’(받은 사람): 요청한 자산 정리 안대로 바로 해제 확정 */
+export async function agreeUnlink() {
+  const { error } = await supabase().rpc('agree_unlink');
+  fail(error);
+}
+
+/** 지금 공간이 해제로 만든 공간이면 그 해제(S-12h, 혼자 쓰기) */
+export async function fetchMyUnlink(): Promise<Unlink | null> {
+  const { data, error } = await supabase().rpc('my_unlink');
+  fail(error);
+  return (Array.isArray(data) ? data[0] : null) ?? null;
+}

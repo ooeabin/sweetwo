@@ -78,6 +78,7 @@ import {
   S12bUnlinkPlan,
   S12cUnlinkConfirm,
   S12dUnlinkReview,
+  S12hUnlinked,
   S11aNickname,
   S11bSide,
   S11dPlanDay,
@@ -575,7 +576,17 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-12d 자산 정리 안 확인(보기만)
+      }, // S-12d 자산 정리 안 확인, 동의
+      {
+        path: '/settings/couple/unlinked',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12hUnlinked />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12h 혼자 쓰기 전환
       {
         path: '/settings/me/nickname',
         element: (
