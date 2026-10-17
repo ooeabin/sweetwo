@@ -37,3 +37,5 @@ export * from './components/Accordion';
 export * from './components/Search';
 export * from './components/ReorderList';
 export * from './components/question';
+export * from './components/AdminFrame';
+export * from './components/DataTable';

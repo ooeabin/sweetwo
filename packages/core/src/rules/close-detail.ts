@@ -58,5 +58,4 @@ export const emergencyDecreased = (expected: Won | null, actual: Won | null) =>
   expected !== null && actual !== null && actual < expected;
 
 /** W-04f: 이번 달 상환 뒤 대출 잔액(월 상환액만큼 차감, 0 밑으로 안 내려감) */
-export const loanAfter = (amount: Won, monthly: Won | null) =>
-  Math.max(0, amount - (monthly ?? 0));
+export const loanAfter = (amount: Won, monthly: Won | null) => Math.max(0, amount - (monthly ?? 0));

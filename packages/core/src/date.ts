@@ -46,3 +46,13 @@ export const daysBetween = (from: string, to: string) => dayNumber(to) - dayNumb
 /** 날짜 + n일 'YYYY-MM-DD' */
 export const addDays = (s: string, n: number) =>
   new Date((dayNumber(s) + n) * 86_400_000).toISOString().slice(0, 10);
+
+/** 시각(ISO) → KST "2026-10-18 14:05"(어드민 표, 감사 로그) */
+export function formatKstDateTime(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString();
+  return `${d.slice(0, 10)} ${d.slice(11, 16)}`;
+}
+
+/** 두 시각 사이 시간(시간 단위 내림) */
+export const hoursBetween = (fromIso: string, to: Date = new Date()) =>
+  Math.max(0, Math.floor((to.getTime() - new Date(fromIso).getTime()) / 3_600_000));
