@@ -10,8 +10,12 @@ import {
   inClosePeriod,
   livingLeft,
   monthsBetween,
+  nextDayOf,
   planSummary,
   readPlanSnapshot,
+  splitLeft,
+  splitProgress,
+  splitRows,
   splitShares,
   thisMonth,
   todayKst,
@@ -20,6 +24,7 @@ import {
   type AllocGoal,
   type BaseDay,
   type PlanParts,
+  type Side,
   type TodoState,
 } from '@sweetwo/core';
 
@@ -134,9 +139,12 @@ export function monthView({
       ? Math.round((sum.allowances * daysAtStart) / cycle.days / 10_000) * 10_000
       : sum.allowances;
 
-  const pendingSplit = (plan?.lines ?? []).filter(
-    (l) => l.target === 'account' && l.state === 'pending' && l.amount > 0,
-  );
+  // 월급 나누기(W-01·W-02): 사람 몫마다 체크. 남은 나누기 = 내 몫(H-01 맨 위)
+  const lines = plan?.lines ?? [];
+  const mySide: Side = me.side === 'bride' ? 'bride' : 'groom';
+  const partnerSide: Side = mySide === 'groom' ? 'bride' : 'groom';
+  const myLeft = splitLeft(lines, mySide);
+  const paydayIn = (d: BaseDay | null) => (d === null || !cycle ? null : nextDayOf(cycle.start, d));
   const living = livingLeft(sp.living_budget ?? 0, spentVariable);
 
   const events = upcoming({
@@ -238,11 +246,28 @@ export function monthView({
     separate,
     hasSplit,
     temp: plan?.is_temp ?? (!joined && !solo),
+    /** 첫 사이클(남은 기간 플랜) */
+    partial: plan?.is_partial ?? false,
+    /** 통장 역할을 나눠 씀(‘통장 하나로 써요’가 아님) */
+    roles: sp.account_mode === 'roles',
+    /** 월급 플랜 4칸 막대(W-01 4번, 월급 나누기가 없을 때): 고정지출(대출 상환 포함), 생활비 예산 */
+    budget: {
+      income: sum.income,
+      fixed: (sp.fixed_total ?? 0) + (sp.loan_repayment ?? 0),
+      living: sp.living_budget ?? 0,
+    },
     parts,
     allowance,
-    pendingSplit: {
-      count: pendingSplit.length,
-      amount: pendingSplit.reduce((t, l) => t + l.amount, 0),
+    pendingSplit: myLeft,
+    split: {
+      mySide,
+      partnerSide,
+      mine: splitRows(lines, mySide),
+      partner: splitRows(lines, partnerSide),
+      progress: splitProgress(lines),
+      myPayday: paydayIn(c.myPayday),
+      partnerPayday: paydayIn(c.partnerPayday),
+      myName: c.myName,
     },
     living,
     /** 이번 달 계획(우리 자산 F-01 15번): 월 수입, 지출(용돈 + 고정지출 + 생활비), 저축 가능 */

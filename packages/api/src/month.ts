@@ -237,3 +237,22 @@ export async function fetchRecentCloses(n = 2): Promise<ClosedMonth[]> {
     deposits: live(c.deposits),
   }));
 }
+
+/** 월급 나누기 ‘옮겼어요’(W-02). 금액을 주면 다른 금액(W-02a). 먼저 체크한 사람이 있으면 'already' */
+export async function checkSplit(
+  lineId: string,
+  side: 'groom' | 'bride',
+  amount?: number,
+): Promise<'ok' | 'already'> {
+  const { data, error } = await supabase().rpc('check_split', {
+    p_line: lineId,
+    p_side: side,
+    ...(amount === undefined ? {} : { p_amount: amount }),
+  });
+  fail(error);
+  return data === 'already' ? 'already' : 'ok';
+}
+export async function uncheckSplit(lineId: string, side: 'groom' | 'bride') {
+  const { error } = await supabase().rpc('uncheck_split', { p_line: lineId, p_side: side });
+  fail(error);
+}

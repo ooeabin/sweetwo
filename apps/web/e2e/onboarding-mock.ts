@@ -338,6 +338,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
+      // 월급 나누기 체크(W-02): 플랜 줄(p_lines)에 바로 기록
+      if (fn === 'check_split' || fn === 'uncheck_split') {
+        const a = body();
+        const lines = (db.plans[0]?.args.p_lines as Record<string, unknown>[]) ?? [];
+        const l = lines[Number(String(a.p_line).replace('line-', '')) - 1];
+        const side = String(a.p_side);
+        if (!l) return json(route, { message: 'not_member' }, 400);
+        if (fn === 'uncheck_split') {
+          l[`${side}_done_at`] = null;
+          l[`${side}_done_by`] = null;
+          l[`${side}_done_amount`] = null;
+          return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+        }
+        if (l[`${side}_done_at`] && a.p_amount === undefined) return json(route, 'already');
+        l[`${side}_done_at`] ??= new Date().toISOString();
+        l[`${side}_done_by`] ??= db.me.id;
+        l[`${side}_done_amount`] = a.p_amount ?? l[`amount_${side}`];
+        return json(route, 'ok');
+      }
       if (fn === 'invest_answers')
         return json(route, [
           {
@@ -551,6 +570,14 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         id: `line-${i + 1}`,
         account_role: null,
         goal_id: null,
+        kind: 'split',
+        sort: i,
+        groom_done_at: null,
+        groom_done_by: null,
+        groom_done_amount: null,
+        bride_done_at: null,
+        bride_done_by: null,
+        bride_done_amount: null,
         amount_groom: null,
         amount_bride: null,
         state: 'pending',

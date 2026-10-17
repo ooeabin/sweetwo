@@ -565,7 +565,7 @@ supabase/
 - 앱 틀은 ui `AppFrame`(docs/design/components/AppFrame.md). 좁은 창 머리, 하단 독, + 버튼까지 한 컴포넌트
 - 월급 플랜 카드 금액은 플랜을 만들 때 저장한 기준값(`monthly_plan.snapshot`, core `PlanSnapshot` Zod로 읽음). 없으면 지금 답으로 계산
 - 금액 가리기는 `shared/mask.ts`(기기에만 저장, 금액 표기는 `money()`로)
-- 아직 없는 화면으로 가는 버튼(지출 적기, 월급 나누기, 정리 시작, 추가, 목표·우리 자산·캘린더 탭, 검색, 알림, 설정)은 비활성으로 자리만
+- 아직 없는 화면으로 가는 버튼(추가, 목표·우리 자산·캘린더 탭, 검색, 알림, 설정)은 비활성으로 자리만
 - 할 일(H-04): 있어야 할 할 일은 core `rules/todo.ts`(`todoDefs`, 첫 주 할 일은 하루 하나씩 `open_on`), 홈을 열 때 없는 종류만 `todo`에 넣고 상태(미룸, 끝냄)는 표에서. 여는 화면(O-41 등)은 아직 없어 ‘내일 할게요’와 초대 ‘코드 복사’만
 - 지출 적기(W-04j 앞당겨 열기, `/month/spend`, features/month-close): 처음 열면 기본 지출 항목(core `rules/spend.ts`)을 `spend_category`에 넣고, 칸을 벗어날 때 이번 플랜의 `month_close` 초안에 `month_spend`로 저장. 홈의 남은 생활비 = 생활비 예산 − 변동 항목 합계
 - 월말 정리(`/month/close/:step`, features/month-close `close-route.tsx`): W-04a 시작(정리자 기록) → W-04j(앞당겨 연 화면과 같은 파일, `mode="close"`면 소득 확인과 큰 지출 추가, ‘다음’에 모두 저장) → W-04k(목표마다 이번 달 넣은 돈, 플랜 목표 줄 금액을 채워 둠 + 기타 저축) → W-04g(MonthSummary, core `monthSummary`) → W-04 끝(`month_close.status = done`). 진행 막대는 3칸(시작, 끝 제외)
@@ -573,6 +573,16 @@ supabase/
 - 배우자 미합류면 정산은 내 수입, 내 용돈만 센다(“{배우자}님이 합류하기 전이라 {나}님 돈만 셌어요”)
 - 아직 없는 것: 함께 모드와 보기만, W-04h 다음 달 조정과 월말 정리 제안, 꼼꼼 모드(W-04b~f, i), 놓친 달, 정리 고치기, 지난달보다 칩, 생활비 예산 보정 제안, 미달·초과 처리
 - 배우자 활동(H-08)은 다음 단계
+
+### 월급 플랜·월급 나누기 구조
+
+- features/plan: W-01 `/plan`(이번 달 월급 플랜 카드의 ‘월급 플랜 보기’), W-02 `/plan/split`(이번 달 맨 위 ‘월급 나누기’, W-01 주 버튼), W-02a `/plan/split/:lineId?side=`
+- 값은 month `useMonthView()`의 `split`(core `rules/split.ts`: `splitRows`, `splitProgress`, `splitLeft`). 줄 하나(`plan_line`, target account, 개인 통장 제외)에 신랑·신부 몫(`amount_groom`, `amount_bride`)이 따로 있고 사람 몫마다 체크
+- 체크는 RPC만(`check_split`, `uncheck_split`, 직접 수정 불가): 몫마다 `{side}_done_at`, `_by`(대신 체크면 체크한 사람), `_amount`(다른 금액). 몫 있는 쪽이 다 끝나면 줄 `state = done`, `done_amount` = 합. 이미 체크된 몫을 새로 체크하면 ‘already’ → “{배우자}님이 먼저 체크했어요”
+- `update_pending_shares()`는 아직 안 옮긴 몫만 다시 계산(이미 옮긴 몫은 그대로)
+- 진행 “{n}곳 중 {m}곳 나눴어요” = 두 사람 몫 전체. 이번 달 맨 위 “월급 나누기가 {n}곳 남았어요” = 내 몫
+- W-01 돈 흐름 막대(월 수입 대비, `hg-stackbar` + `hg-breakdown`): 통장 역할을 나눈 부부는 용돈, 공동 생활비, 목표자금, 비상금, 아니면 용돈, 고정, 생활비, 저축. 특이사항 = 이번 플랜 달에 들어오는 돈(`income_event`, 최대 3개). 계획액 줄 아래 사람마다 담당·월급날 칩(내 칩 누르면 바로 옮겼어요, 배우자 칩은 보기만)
+- 다음 단계: W-01 월 넘기기(지난 달 읽기 전용), W-01a 이번 달만 바꾸기, 자동 나누기 줄 만들기(Y-08, G-07, W-04a2), 사실값 바뀐 직후 안내, W-03 생활비 체크(S-14 켜기), 배우자 활동에 대신 체크 표시
 
 ### 배우자 합류 구조
 

@@ -23,6 +23,7 @@ export const copy = {
 
   // H-02 오늘 띠 버튼과 타일
   splitNow: '월급 나누기',
+  seePlan: '월급 플랜 보기', // [확인 필요] H-03 → W-01
   spendEntry: '지출 적기',
   closeStart: '정리 시작',
   livingLeft: '이번 달 남은 생활비',
