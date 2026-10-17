@@ -71,3 +71,23 @@ export async function fetchNotification(id: string): Promise<Notification | null
   fail(error);
   return data;
 }
+
+// ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것만(RLS) ─────────────────────
+export type ActiveNotice = {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  importance: 'normal' | 'must';
+  platforms: string[];
+};
+export async function fetchActiveNotices(platform: 'desktop' | 'web'): Promise<ActiveNotice[]> {
+  const { data, error } = await supabase()
+    .from('notice')
+    .select('id, kind, title, body, importance, platforms')
+    .order('starts_at', { ascending: false });
+  if (error) return [];
+  return (data ?? [])
+    .filter((n) => n.platforms.includes(platform))
+    .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
+}

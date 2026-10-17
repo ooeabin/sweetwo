@@ -45,6 +45,8 @@ export interface MemDb {
   sessions: Record<string, unknown>[];
   /** 생활비 체크 답(W-03) */
   livingChecks: Record<string, unknown>[];
+  /** 앱 안 공지(AD-10, 게시된 것) */
+  notices: Record<string, unknown>[];
   /** 꼼꼼 모드 통장 잔액(W-04b) */
   balances: Record<string, unknown>[];
   rpc: string[];
@@ -120,6 +122,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     inquiries: [],
     livingChecks: [],
     balances: [],
+    notices: [],
     sessions: [
       {
         id: 's-this',
@@ -1344,6 +1347,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
+    if (path === '/rest/v1/notice' && method === 'GET') return json(route, db.notices);
     if (path === '/rest/v1/close_balance') {
       if (method === 'GET') return json(route, db.balances);
       if (method === 'POST') {

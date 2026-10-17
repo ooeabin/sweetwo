@@ -36,6 +36,21 @@ test('A-01: 최소 지원 버전 미만이면 업데이트 안내', async ({ pag
   await expect(page.getByRole('heading', { name: /둘이 처음 합치는 돈/ })).toBeVisible();
 });
 
+test('A-01: 점검 시간이면 점검 안내, 끝나는 시각', async ({ page }) => {
+  const now = Date.now();
+  await mockSupabase(page, {
+    maintenance: {
+      starts: new Date(now - 3_600_000).toISOString(),
+      ends: '2099-01-01T06:00:00Z',
+    },
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '지금 점검 중이에요' })).toBeVisible();
+  await expect(page.getByText('15:00에 끝나요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
+  await noA11yViolations(page);
+});
+
 test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-03', async ({ page }) => {
   let signup: Record<string, unknown> | undefined;
   await mockSupabase(page, {

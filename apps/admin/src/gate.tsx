@@ -1,5 +1,6 @@
 import {
   AdminError,
+  adminBootstrap,
   adminMfaEnroll,
   adminMfaState,
   adminMfaVerify,
@@ -34,8 +35,11 @@ async function resolve(): Promise<{ step: Step; me: AdminMe | null }> {
   try {
     return { step: 'ready', me: await fetchAdminMe() };
   } catch (e) {
-    if (e instanceof AdminError && e.code === 'not_admin') return { step: 'denied', me: null };
-    throw e;
+    if (!(e instanceof AdminError && e.code === 'not_admin')) throw e;
+    // 관리자가 아무도 없으면 회사 도메인 첫 로그인이 최고 관리자(서버가 확인)
+    if (await adminBootstrap().catch(() => false))
+      return { step: 'ready', me: await fetchAdminMe() };
+    return { step: 'denied', me: null };
   }
 }
 

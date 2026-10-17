@@ -36,6 +36,7 @@ export const qk = {
   lastPlanEnd: ['monthly_plan', 'last'] as const,
   livingCheck: (planId: string) => ['living_check', planId] as const,
   closeBalances: ['close_balance'] as const,
+  notices: ['notice'] as const,
   pastPlans: (today: string) => ['monthly_plan', 'past', today] as const,
   recentClosesLong: ['recent_closes', 'long'] as const,
   cycleGoalUses: (start: string, end: string) => ['goal_use', start, end] as const,

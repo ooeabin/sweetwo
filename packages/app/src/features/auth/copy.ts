@@ -10,6 +10,8 @@ export const providerName: Record<AuthProvider, string> = {
 
 export const copy = {
   // A-01
+  maintenanceTitle: '지금 점검 중이에요',
+  maintenanceEnds: (time: string) => `${time}에 끝나요`,
   updateTitle: '새 버전으로 업데이트해 주세요',
   updateSub: '지금 버전으로는 저장할 수 없어요',
   updateNow: '지금 업데이트',

@@ -67,6 +67,32 @@ export const webAuth = {
   },
 };
 
+/** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
+export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
+  min: string;
+  maintenance: { starts: string; ends: string; message: string | null } | null;
+}> {
+  const { data, error } = await supabase()
+    .from('app_config')
+    .select(
+      'min_version_desktop, min_version_web, maintenance_starts_at, maintenance_ends_at, maintenance_message',
+    )
+    .eq('id', 1)
+    .single();
+  if (error) throw toError(error.message);
+  return {
+    min: platform === 'desktop' ? data.min_version_desktop : data.min_version_web,
+    maintenance:
+      data.maintenance_starts_at && data.maintenance_ends_at
+        ? {
+            starts: data.maintenance_starts_at,
+            ends: data.maintenance_ends_at,
+            message: data.maintenance_message ?? null,
+          }
+        : null,
+  };
+}
+
 /** A-01: 최소 지원 버전(로그인 전에도 읽을 수 있음) */
 export async function fetchMinVersion(platform: 'desktop' | 'web'): Promise<string> {
   const { data, error } = await supabase()

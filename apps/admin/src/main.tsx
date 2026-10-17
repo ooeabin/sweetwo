@@ -11,7 +11,12 @@ import { AD02Members } from './pages/ad-02-members';
 import { AD03Member } from './pages/ad-03-member';
 import { AD06Inquiries } from './pages/ad-06-inquiries';
 import { AD06Inquiry } from './pages/ad-06-inquiry';
+import { AD10Notices } from './pages/ad-10-notices';
+import { AD14Content } from './pages/ad-14-content';
+import { AD16App } from './pages/ad-16-app';
 import { AD17Audit } from './pages/ad-17-audit';
+import { AD18Admins } from './pages/ad-18-admins';
+import { AD18Approvals } from './pages/ad-18-approvals';
 import { AD20Docs } from './pages/ad-20-docs';
 
 // 어드민(ops.sweetwo.kr, 27 어드민 화면). 데스크톱 웹만, 기준 폭 1440·최소 1280.
@@ -65,13 +70,55 @@ function App() {
           }
         />
         <Route
-          path="/audit"
+          path="/notices"
+          element={
+            <Allow menu="send">
+              <AD10Notices />
+            </Allow>
+          }
+        />
+        <Route
+          path="/content"
+          element={
+            <Allow menu="content">
+              <AD14Content />
+            </Allow>
+          }
+        />
+        <Route path="/system" element={<Navigate to="/system/approvals" replace />} />
+        <Route
+          path="/system/approvals"
+          element={
+            <Allow menu="system">
+              <AD18Approvals />
+            </Allow>
+          }
+        />
+        <Route
+          path="/system/app"
+          element={
+            <Allow menu="system">
+              <AD16App />
+            </Allow>
+          }
+        />
+        <Route
+          path="/system/admins"
+          element={
+            <Allow menu="system">
+              <AD18Admins />
+            </Allow>
+          }
+        />
+        <Route
+          path="/system/audit"
           element={
             <Allow menu="system">
               <AD17Audit />
             </Allow>
           }
         />
+        <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
         <Route path="/docs" element={<AD20Docs />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

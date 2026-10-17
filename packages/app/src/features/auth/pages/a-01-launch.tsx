@@ -1,5 +1,5 @@
-import { fetchMinVersion } from '@sweetwo/api';
-import { isBelowMin, WEB_IDLE_LOCK_MS } from '@sweetwo/core';
+import { fetchLaunchConfig } from '@sweetwo/api';
+import { formatKstDateTime, isBelowMin, WEB_IDLE_LOCK_MS } from '@sweetwo/core';
 import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -22,7 +22,7 @@ const PUBLIC = new Set<string>([
 // 세션은 있지만 계정(app_user)이 아직 없어도 되는 화면
 const SIGNUP = new Set<string>([paths.email, paths.terms, paths.pinSetup]);
 
-type Phase = 'checking' | 'update' | 'offline' | 'error' | 'ready';
+type Phase = 'checking' | 'update' | 'maintenance' | 'offline' | 'error' | 'ready';
 
 const appVersion = () =>
   session.bridge?.appVersion ?? (import.meta.env.VITE_APP_VERSION as string | undefined) ?? '0.0.0';
@@ -35,6 +35,7 @@ export function A01Launch() {
   const [slow, setSlow] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [updateFailed, setUpdateFailed] = useState(false);
+  const [maintenanceEnds, setMaintenanceEnds] = useState<string | null>(null);
   const setReadOnly = useAuthStore((s) => s.setReadOnly);
   const ran = useRef(false);
 
@@ -45,8 +46,15 @@ export function A01Launch() {
     const online = navigator.onLine;
     if (online && !skipVersion) {
       try {
-        const min = await fetchMinVersion(session.platform);
-        if (isBelowMin(appVersion(), min)) return setPhase('update');
+        const cfg = await fetchLaunchConfig(session.platform);
+        if (isBelowMin(appVersion(), cfg.min)) return setPhase('update');
+        // 점검 중(AD-16): 13 공통 상태 13번
+        const now = Date.now();
+        const m = cfg.maintenance;
+        if (m && Date.parse(m.starts) <= now && now < Date.parse(m.ends)) {
+          setMaintenanceEnds(m.ends);
+          return setPhase('maintenance');
+        }
       } catch {
         /* 설정을 못 읽으면 막지 않는다 */
       }
@@ -104,6 +112,25 @@ export function A01Launch() {
   }, [nav]);
 
   useWebIdleLock(signedIn && phase === 'ready');
+
+  if (phase === 'maintenance') {
+    return (
+      <AuthLayout
+        media={<Wordmark />}
+        title={copy.maintenanceTitle}
+        help={
+          maintenanceEnds
+            ? copy.maintenanceEnds(formatKstDateTime(maintenanceEnds).slice(11))
+            : undefined
+        }
+        actions={
+          <Button variant="primary" block onClick={() => void decide()}>
+            {copy.retry}
+          </Button>
+        }
+      />
+    );
+  }
 
   if (phase === 'update') {
     return (

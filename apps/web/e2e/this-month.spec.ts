@@ -126,3 +126,48 @@ test('지출 적기: 항목별로 적으면 칸을 벗어날 때 저장, 남은 
     page.getByRole('heading', { name: '찬우님, 이번 달 생활비가 14만 원 남았어요' }),
   ).toBeVisible();
 });
+
+test('공지 띠(AD-10): 필독이 먼저, 보기로 펼침, 일반 공지는 닫으면 다시 안 보임', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-07T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  db.notices.push(
+    {
+      id: 'n1',
+      kind: 'info',
+      title: '새 기능이 나왔어요',
+      body: '',
+      importance: 'normal',
+      platforms: ['web'],
+    },
+    {
+      id: 'n2',
+      kind: 'maintenance',
+      title: '10월 20일 새벽 점검',
+      body: '오전 2시부터 4시까지 저장이 안 돼요',
+      importance: 'must',
+      platforms: ['desktop', 'web'],
+    },
+  );
+  await page.goto('/');
+  await expect(page.getByText('10월 20일 새벽 점검')).toBeVisible();
+  await expect(page.locator('.hg-body__banner').getByRole('button', { name: '닫기' })).toHaveCount(
+    0,
+  );
+  const band = page.locator('.hg-body__banner');
+  await band.getByRole('button', { name: '보기' }).click();
+  await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
+  await axe(page);
+
+  db.notices.splice(1, 1);
+  await page.reload();
+  await expect(page.getByText('새 기능이 나왔어요')).toBeVisible();
+  await page.locator('.hg-body__banner').getByRole('button', { name: '닫기' }).click();
+  await expect(page.getByText('새 기능이 나왔어요')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText('이번 달')).not.toHaveCount(0);
+  await expect(page.getByText('새 기능이 나왔어요')).toHaveCount(0);
+});
