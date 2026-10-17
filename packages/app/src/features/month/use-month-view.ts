@@ -5,6 +5,7 @@ import {
   useGoals,
   useMe,
   useMonthClose,
+  useHolidays,
   usePartner,
   useSpace,
 } from './data';
@@ -20,6 +21,7 @@ export function useMonthView() {
   const close = useMonthClose(plan.data?.id);
   const records = useGoalRecords();
   const linked = useGoalAssetSums();
+  const holidays = useHolidays();
   if (!me.data || !space.data) return null;
   return monthView({
     me: me.data,
@@ -34,5 +36,6 @@ export function useMonthView() {
       linked.data ?? [],
       records.data?.uses ?? [],
     ),
+    holidays: new Set((holidays.data ?? []).map((h) => h.date)),
   });
 }

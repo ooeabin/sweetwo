@@ -22,6 +22,7 @@
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
   --family: #efe7fb; /* ‘양가’ 영역 틴트: 챙길 날의 양가 일정, 양가 비용. */
   --family-ink: #5b3a9a; /* family 위 라벨·배지 글자. */
+  --holiday-ink: #c42f26; /* 캘린더 공휴일 숫자·이름만. 오류 danger, 체리 브랜드와 따로 둠. surface·family 위 4.5:1 이상. */
   --goal: #f6eee5; /* 목표 영역 틴트: 목표 카드, 목표자금. 따뜻한 모래색으로 체리 브랜드 색과 구분. */
   --goal-ink: #6b4a2b; /* goal 위 라벨·배지 글자. */
   --safety: #d9f4f9; /* 비상금 영역 틴트. */
@@ -70,6 +71,7 @@
   --together-ink: #f6b3bd;
   --family: #2b2340;
   --family-ink: #cdb9f5;
+  --holiday-ink: #ff8a80;
   --goal: #2e2620;
   --goal-ink: #e8cfb2;
   --safety: #16323a;

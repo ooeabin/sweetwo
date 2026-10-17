@@ -4,6 +4,7 @@ import { IconButton } from './IconButton';
 
 // 캘린더 달력(docs/design/components/Calendar.md): 머리(월·연도, 이전·다음) → 요일 → 6주 칸 → 아래 일정 목록(children).
 // 칸: 숫자 + 일정 막대(챙길 날, 영역색 최대 3개) + 돈 날짜 점(ink). 오늘 brand-soft, 고른 날 ink 원, 정리 기간 띠.
+// 공휴일은 숫자 holiday-ink(막대가 없으면 이름 작게), 설·추석 연휴는 family 띠.
 export type CalMark = 'family' | 'together' | 'goal';
 export interface CalDay {
   date: string;
@@ -12,6 +13,10 @@ export interface CalDay {
   marks?: CalMark[];
   money?: boolean;
   band?: boolean;
+  /** 공휴일 이름(숫자 빨간 글자, 막대가 없으면 이름 작게) */
+  holiday?: string;
+  /** 설·추석 연휴 띠 */
+  festive?: boolean;
   /** 화면 읽기용(“10월 25일, 일정 2개”) */
   label: string;
 }
@@ -78,6 +83,8 @@ export function Calendar({
               'hg-cal__day',
               d.muted && 'is-muted',
               d.band && 'is-band',
+              d.festive && 'is-festive',
+              d.holiday && 'is-holiday',
               d.date === today && 'is-today',
               d.date === selected && 'is-selected',
             )}
@@ -87,12 +94,18 @@ export function Calendar({
             onClick={() => onSelect(d.date)}
           >
             <span className="hg-cal__num">{d.day}</span>
-            <span className="hg-cal__marks" aria-hidden="true">
-              {(d.marks ?? []).slice(0, 3).map((k, i) => (
-                <i key={i} className={cx('hg-cal__mark', `hg-mark--${k}`)} />
-              ))}
-              {d.money && <i className="hg-cal__dot" />}
-            </span>
+            {d.holiday && !d.marks?.length && !d.money ? (
+              <span className="hg-cal__hol" aria-hidden="true">
+                {d.holiday}
+              </span>
+            ) : (
+              <span className="hg-cal__marks" aria-hidden="true">
+                {(d.marks ?? []).slice(0, 3).map((k, i) => (
+                  <i key={i} className={cx('hg-cal__mark', `hg-mark--${k}`)} />
+                ))}
+                {d.money && <i className="hg-cal__dot" />}
+              </span>
+            )}
           </button>
         ))}
       </div>
