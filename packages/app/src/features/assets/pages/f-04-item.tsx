@@ -158,7 +158,19 @@ export function F04Item() {
           <ListRow label={copy.countLabel} value={`${a.paid_count}${copy.paidCountUnit}`} />
         )}
         {a.interest_rate !== null && (
-          <ListRow label={copy.rateLabel} value={`${a.interest_rate}%`} />
+          <ListRow
+            label={
+              a.rate_estimated ? (
+                <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                  {copy.rateLabel}
+                  <Badge kind="temp">{copy.estimatedTag}</Badge>
+                </span>
+              ) : (
+                copy.rateLabel
+              )
+            }
+            value={`${a.interest_rate}%`}
+          />
         )}
         {a.monthly_payment !== null && (
           <ListRow

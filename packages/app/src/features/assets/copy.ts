@@ -1,3 +1,5 @@
+import { topic } from '@sweetwo/core';
+
 // 우리 자산 문구(docs/spec/23-assets.md F-01~F-04). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
@@ -128,6 +130,28 @@ export const copy = {
     limit === 0
       ? '공동자금은 원금을 지키기로 했어요'
       : `공동자금은 ${limit}%까지 투자하기로 했어요`, // [확인 필요]
+
+  // 첫 주 자산·대출 정리(17 O-41~47)
+  weekAssets: '지금 가진 돈을 골라주세요',
+  weekAccountsIn: (n: number) => `쓰던 통장 ${n}개는 이미 넣어뒀어요`,
+  weekAssetAmount: (name: string) => `${topic(name)} 얼마예요?`,
+  weekLumpGoal: '이 돈을 어느 목표에 넣을까요?',
+  weekLumpNone: '아직 정하지 않았어요',
+  weekRecommend: '추천',
+  weekLoans: '갚고 있는 대출이 있나요?',
+  weekNoLoan: '없어요',
+  weekNoLoanCheck: (amount: string) =>
+    `처음에 대출 상환이 월 ${amount}이라고 했어요. 대출이 정말 없나요?`, // [확인 필요] O-39 확인 1회
+  weekLoanAmount: (name: string) => `${name} 남은 돈은요?`,
+  weekRateUnknown: '잘 모르겠어요',
+  weekRateAvg: (rate: number) => `평균 금리 ${rate}%로 셀게요`, // [확인 필요]
+  weekPayment: '한 달에 얼마씩 갚아요?',
+  weekCount: (name: string, i: number, n: number) => `${name} ${i}/${n}`,
+  weekClose: '닫기',
+  weekOwner: '누구 돈이에요?', // [확인 필요] 소유자 토글 이름(화면 읽기용)
+  weekTogether: '같이',
+  weekAssetsDone: '자산을 정리했어요', // [확인 필요]
+  weekLoansDone: '대출을 정리했어요', // [확인 필요]
 
   // O-53 투자 원칙
   principleTitle: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',

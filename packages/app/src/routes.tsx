@@ -21,6 +21,13 @@ import {
   F05Money,
   F06Diagnosis,
   O53InvestPrinciple,
+  O41AssetKinds,
+  O42AssetAmount,
+  O43LumpGoal,
+  O44LoanKinds,
+  O45LoanAmount,
+  O46LoanRate,
+  O47LoanPayment,
 } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
@@ -172,6 +179,76 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // O-53 투자 원칙(첫 주 7일째, 재정 진단 ‘지금 정하기’)
+      {
+        path: '/assets/week/assets',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O41AssetKinds />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-41 가진 돈 종류(첫 주 2일째 자산 정리하기)
+      {
+        path: '/assets/week/assets/:n',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O42AssetAmount />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-42 자산 금액(고른 것마다)
+      {
+        path: '/assets/week/lump',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O43LumpGoal />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-43 목돈 넣을 목표
+      {
+        path: '/assets/week/loans',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O44LoanKinds />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-44 대출 종류(첫 주 3일째 대출 정리하기)
+      {
+        path: '/assets/week/loans/:n/amount',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O45LoanAmount />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-45 대출 남은 돈
+      {
+        path: '/assets/week/loans/:n/rate',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O46LoanRate />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-46 금리
+      {
+        path: '/assets/week/loans/:n/pay',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O47LoanPayment />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-47 대출 월 상환
       {
         path: '/assets/money',
         element: (

@@ -16,6 +16,7 @@ const NOW = new Date('2026-10-07T10:00:00+09:00');
 
 const asset = (o: Record<string, unknown>) => ({
   principal: null,
+  rate_estimated: false,
   maturity_date: null,
   monthly_payment: null,
   interest_rate: null,
@@ -671,4 +672,181 @@ test('투자 원칙(O-53): 할 일에서 열고, 보수적인 쪽 허용 비중,
   await expect(page.getByRole('region', { name: '투자' })).toContainText(
     '공동자금 투자 비중 74% / 허용 30%',
   );
+});
+
+const goal = (o: Record<string, unknown>) => ({
+  kind: 'once',
+  owner: 'together',
+  target_amount: 10_000_000,
+  other_held: 0,
+  deadline: '2028-12-01',
+  status: 'active',
+  after_marriage: false,
+  details: {},
+  created_at: '2026-09-01T00:00:00Z',
+  deleted_at: null,
+  ...o,
+});
+const firstWeekTodos = (db: MemDb, open: string) => {
+  for (const kind of [
+    'assets',
+    'loans',
+    'fixed_card',
+    'rest',
+    'invest',
+    'spend_check',
+    'exact_values',
+  ])
+    db.todos.push({
+      id: `todo-${kind}`,
+      kind,
+      screen: 'O-41',
+      open_on: '2026-08-21',
+      status: kind === open ? 'pending' : 'done',
+      snoozed_until: null,
+      deleted_at: null,
+    });
+};
+
+test('자산 정리하기(O-41~43): 쓰던 통장 안내, 전세면 부동산 미리 선택, 고른 것마다 금액, 목돈은 목표로', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db, false);
+  (db.space as Record<string, unknown>).housing = 'jeonse';
+  db.accounts.push({
+    id: 'acc-1',
+    role: 'living',
+    name: '생활비 통장',
+    asset_id: 'a1',
+    deleted_at: null,
+  });
+  db.goals.push(
+    goal({ id: 'g-home', template: 'home', name: '집', priority: 1, created_by: db.me.id }),
+    goal({ id: 'g-e', template: 'emergency', name: '비상금', priority: 2, created_by: db.me.id }),
+  );
+  firstWeekTodos(db, 'assets');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /자산 정리하기/ }).click();
+  await heading(page, '지금 가진 돈을 골라주세요');
+  await expect(page.getByText('쓰던 통장 1개는 이미 넣어뒀어요')).toBeVisible();
+  const chips = page.getByRole('group', { name: '지금 가진 돈을 골라주세요' });
+  await expect(chips.getByRole('button', { name: '부동산' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await chips.getByRole('button', { name: '청약' }).click();
+  await chips.getByRole('button', { name: '결혼 후 남은 목돈' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // 칩 순서: 청약 → 부동산 → 결혼 후 남은 목돈
+  await heading(page, '청약은 얼마예요?');
+  await expect(page.getByText('청약 1/3')).toBeVisible();
+  await page.getByLabel('청약은 얼마예요?').fill('5000000');
+  await page.getByLabel('납입 회차는요?').fill('24');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '부동산은 얼마예요?');
+  await page.getByRole('tab', { name: '같이' }).click();
+  await page.getByLabel('부동산은 얼마예요?').fill('100000000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '결혼 후 남은 목돈은 얼마예요?');
+  await page.getByRole('tab', { name: '예빈' }).click();
+  await page.getByLabel('결혼 후 남은 목돈은 얼마예요?').fill('8000000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '이 돈을 어느 목표에 넣을까요?');
+  await expect(page.getByRole('radio', { name: /비상금/ })).toContainText('추천');
+  await page.getByRole('radio', { name: /비상금/ }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  const byName = (n: string) => db.assets.find((a) => a.name === n);
+  expect(byName('청약')).toMatchObject({
+    grp: 'subscription',
+    amount: 5_000_000,
+    paid_count: 24,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    visibility: 'sum',
+  });
+  expect(byName('부동산')).toMatchObject({ grp: 'real_estate', owner: 'joint', visibility: 'all' });
+  expect(byName('결혼 후 남은 목돈')).toMatchObject({
+    grp: 'cash',
+    owner: 'person',
+    owner_user_id: null,
+    goal_id: 'g-e',
+  });
+  expect(db.todos.find((t) => t.kind === 'assets')?.status).toBe('done');
+});
+
+test('대출 정리하기(O-44~47): 대출마다 남은 돈, 금리(모르면 평균 추정), 월 상환 → 합계가 대출 상환을 대신', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  firstWeekTodos(db, 'loans');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /대출 정리하기/ }).click();
+  await heading(page, '갚고 있는 대출이 있나요?');
+  const chips = page.getByRole('group', { name: '갚고 있는 대출이 있나요?' });
+  // 없어요는 단독, 대출 상환 합계가 있었으면 확인
+  await chips.getByRole('button', { name: '없어요' }).click();
+  await expect(page.getByText('처음에 대출 상환이 월 30만 원이라고 했어요')).toBeVisible();
+  await chips.getByRole('button', { name: '주택' }).click();
+  await expect(chips.getByRole('button', { name: '없어요' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+  await chips.getByRole('button', { name: '학자금' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '주택 남은 돈은요?');
+  await expect(page.getByText('주택 1/2')).toBeVisible();
+  // 합류 뒤라 배우자 명의는 없음
+  await expect(page.getByRole('tab', { name: '예빈' })).toHaveCount(0);
+  await page.getByRole('tab', { name: '같이' }).click();
+  await page.getByLabel('주택 남은 돈은요?').fill('150000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '금리는 몇 %예요?');
+  await page.getByRole('button', { name: '잘 모르겠어요' }).click();
+  await heading(page, '한 달에 얼마씩 갚아요?');
+  await page.getByLabel('한 달에 얼마씩 갚아요?').fill('700000');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '학자금 남은 돈은요?');
+  await page.getByLabel('학자금 남은 돈은요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('금리는 몇 %예요?').fill('1.7');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('한 달에 얼마씩 갚아요?').fill('200000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  expect(db.assets.find((a) => a.name === '주택')).toMatchObject({
+    side: 'debt',
+    grp: 'housing_loan',
+    kind: 'jeonse_loan',
+    owner: 'joint',
+    amount: 150_000_000,
+    interest_rate: 4,
+    rate_estimated: true,
+    monthly_payment: 700_000,
+  });
+  expect(db.assets.find((a) => a.name === '학자금')).toMatchObject({
+    interest_rate: 1.7,
+    rate_estimated: false,
+    monthly_payment: 200_000,
+  });
+  // 기존 신용대출(월 상환 없음) + 70만 + 20만
+  expect(db.space?.loan_repayment).toBe(900_000);
+  expect(db.todos.find((t) => t.kind === 'loans')?.status).toBe('done');
 });

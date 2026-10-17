@@ -1,6 +1,10 @@
 import { expect, it } from 'vitest';
 import { investPrinciple } from '../onboarding/diagnosis';
 import {
+  QUICK_ASSETS,
+  QUICK_LOANS,
+  assetGroup,
+  avgRate,
   assetGroupsOf,
   investSummary,
   netWorth,
@@ -108,4 +112,16 @@ it('투자 원칙: 보수적인 쪽 허용 비중, 한 명만이면 one, 혼자 
   expect(investPrinciple('active', 'some')).toEqual({ state: 'both', limit: 30 });
   expect(investPrinciple('unsure', 'active')).toEqual({ state: 'both', limit: 0 });
   expect(investPrinciple('some', null, true)).toEqual({ state: 'both', limit: 30 });
+});
+
+it('첫 주 정리 칩: 묶음과 세부 항목이 분류에 있고, 금리 평균은 06 4장 초기값', () => {
+  for (const q of [...QUICK_ASSETS, ...QUICK_LOANS]) {
+    const g = assetGroup(q.grp);
+    expect(g?.kinds.some((k) => k.key === q.kind)).toBe(true);
+    expect(q.name.length).toBeLessThanOrEqual(20);
+  }
+  expect([avgRate('jeonse_loan'), avgRate('credit_loan'), avgRate('student_loan')]).toEqual([
+    4, 6, 2,
+  ]);
+  expect(avgRate('family_loan')).toBeNull();
 });
