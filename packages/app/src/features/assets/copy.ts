@@ -88,6 +88,26 @@ export const copy = {
   proposed: (name: string) => `${name}님에게 제안했어요`,
   editMoney: '월 수입·지출 수정',
 
+  // F-06 재정 진단
+  diagTitle: '재정 진단',
+  diagSummary: (good: number, total: number) => `${total}개 중 ${good}개 양호`,
+  diagLine: (good: number, total: number) => `재정 진단 ${total}개 중 ${good}개 양호`,
+  diagSaving: (pct: number) => `월 수입의 ${pct}%를 저축하고 있어요`,
+  diagSavingUnknown: '월말 정리를 하면 계산해요', // [확인 필요]
+  diagEmergency: (months: number) => `비상금으로 ${months}개월 생활할 수 있어요`,
+  diagEmergencyMore: (months: number) => `${months}개월분까지 모아봐요`,
+  diagEmergencyUnknown: '비상금 목표에 모아둔 돈을 적으면 계산해요', // [확인 필요]
+  diagLoan: (pct: number) => `월 수입의 ${pct}%를 대출 상환에 쓰고 있어요`,
+  diagNoLoan: '대출이 없어요',
+  diagFixed: (pct: number) => `월 수입의 ${pct}%가 고정지출이에요`,
+  diagInvestNone: '아직 정하지 않았어요',
+  diagPrivate: '비공개 항목은 계산에서 빠졌어요',
+  diagGoEmergency: '비상금 목표',
+  diagGoDebt: '부채 목록',
+  diagGoMoney: '월 수입·지출',
+  diagGoInvest: '지금 정하기',
+  diagIncomeUnknown: '월 수입을 적으면 계산해요', // [확인 필요]
+
   // F-03f~i
   later: '나중에 할게요',
   maturity: '만기일은 언제예요?',

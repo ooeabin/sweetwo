@@ -19,6 +19,7 @@ import {
   F04Item,
   F05Edit,
   F05Money,
+  F06Diagnosis,
 } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
@@ -150,6 +151,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-02 자산·부채 목록
+      {
+        path: '/assets/diagnosis',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F06Diagnosis />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-06 재정 진단
       {
         path: '/assets/money',
         element: (

@@ -89,3 +89,19 @@ export function diagnose(o: {
 /** 살펴볼 지표(주의·위험). ‘아직 몰라요’는 빼고 판단 */
 export const needsLook = (xs: Indicator[]) =>
   xs.filter((x) => x.signal === 'caution' || x.signal === 'danger');
+
+/** 비상금으로 몇 개월 생활(잔액 ÷ (고정지출 + 생활비 예산)), 소수 첫째 자리. 계산할 수 없으면 null */
+export function emergencyMonths(balance: Won | null, monthly: Won): number | null {
+  if (balance === null || monthly <= 0) return null;
+  return Math.floor((balance * 10) / monthly) / 10;
+}
+
+/** 진단 요약: 양호 개수, 위험 → 주의 → 양호 → 아직 몰라요 순서 */
+export function diagnosisSummary(list: Indicator[]) {
+  const rank: Record<Signal, number> = { danger: 0, caution: 1, good: 2, unknown: 3 };
+  return {
+    good: list.filter((x) => x.signal === 'good').length,
+    total: list.length,
+    ordered: [...list].sort((a, b) => rank[a.signal] - rank[b.signal]),
+  };
+}

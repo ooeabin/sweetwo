@@ -202,3 +202,21 @@ export async function fetchGoalRecords(): Promise<{
       })),
   };
 }
+
+/** 가장 최근에 마친 월말 정리의 소득과 이번 달 넣은 돈(재정 진단 저축률, 06 8장). 없으면 null */
+export async function fetchLatestClose(): Promise<{ income: number; saving: number } | null> {
+  const { data, error } = await supabase()
+    .from('month_close')
+    .select('income, closed_at, deposits:saving_deposit(amount, deleted_at)')
+    .eq('status', 'done')
+    .is('deleted_at', null)
+    .order('closed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  fail(error);
+  if (!data || data.income === null) return null;
+  return {
+    income: data.income,
+    saving: (data.deposits ?? []).filter((d) => !d.deleted_at).reduce((t, d) => t + d.amount, 0),
+  };
+}

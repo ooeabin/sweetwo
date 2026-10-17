@@ -12,6 +12,7 @@ export const qk = {
   spendCategories: ['spend_category'] as const,
   monthClose: (planId: string) => ['month_close', planId] as const,
   goalRecords: ['goal_records'] as const,
+  latestClose: ['latest_close'] as const,
   assets: ['asset'] as const,
   goalAssetSums: ['goal_asset_sums'] as const,
   partnerAssetSums: ['partner_asset_sums'] as const,
