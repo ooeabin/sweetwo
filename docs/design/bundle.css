@@ -961,7 +961,7 @@ a.hg-btn { text-decoration: none; }
 .hg-chart .hg-chart__delta i.is-up { background: var(--invest); color: var(--invest-ink); }
 .hg-chart .hg-chart__delta i.is-down { background: var(--goal); color: var(--goal-ink); }
 .hg-chart__value--lg { font: 600 34px/42px var(--font-sans); letter-spacing: -0.6px; }
-.hg-chart--bleed { padding: 0; gap: 0; overflow: hidden; box-shadow: var(--shadow-1); }
+.hg-chart--bleed { max-width: none; padding: 0; gap: 0; overflow: hidden; box-shadow: var(--shadow-1); }
 .hg-chart--bleed .hg-chart__kpi { padding: var(--space-6) var(--space-6) 0; }
 .hg-chart__plot { position: relative; height: 200px; cursor: crosshair; }
 .hg-chart__plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -980,6 +980,8 @@ a.hg-btn { text-decoration: none; }
 .hg-chart__tabs button { min-height: 32px; border: 0; border-radius: var(--radius-full); background: none; font: 600 13px/18px var(--font-sans); color: var(--stone); cursor: pointer; }
 .hg-chart__tabs button.is-active { background: var(--ink); color: var(--on-ink); }
 .hg-chart__tabs button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-chart__tabs button:disabled { opacity: .4; cursor: default; }
+.hg-chart__plot:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 
 /* Distribution: 종 모양 곡선, 10% 칸 */
 .hg-dist { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }

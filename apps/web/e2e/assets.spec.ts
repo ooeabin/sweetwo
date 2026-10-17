@@ -185,11 +185,94 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, �
   const plan = page.getByRole('button', { name: /이번 달 계획/ });
   await expect(plan).toContainText('620만 원');
   await expect(plan).toContainText('저축 가능 금액 월');
+  await expect(page.getByRole('region', { name: '월 정산 요약' })).toContainText(
+    '첫 월말 정리 뒤에 보여드려요',
+  );
   await axe(page);
 
   await page.getByRole('button', { name: /부채 100만 원/ }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=debt/);
   await expect(page.getByRole('button', { name: /신용대출/ })).toContainText('금액이 맞나요?');
+});
+
+test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 요약과 지난달보다', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  // 2025년 9월부터 14달(앞의 빈 달은 그래프에서 뺌)
+  db.netWorth = [
+    { month: '2025-07-01', net: 0, expected: 0 },
+    ...Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(Date.UTC(2025, 8 + i, 1)).toISOString().slice(0, 10);
+      return { month: d, net: 10_000_000 + i * 300_000, expected: 10_000_000 + i * 400_000 };
+    }),
+  ];
+  db.categories.push(
+    { id: 'cat-eat', name: '외식·배달', sort: 1, enabled: true, deleted_at: null },
+    { id: 'cat-shop', name: '쇼핑', sort: 2, enabled: true, deleted_at: null },
+  );
+  db.closes.push(
+    {
+      id: 'close-8',
+      status: 'done',
+      deleted_at: null,
+      income: 6_000_000,
+      closed_at: '2026-08-26T01:00:00Z',
+      label_month: '2026-08-01',
+      spends: [
+        { category_id: 'cat-eat', amount: 400_000, deleted_at: null },
+        { category_id: 'cat-shop', amount: 250_000, deleted_at: null },
+      ],
+      bigs: [],
+      deposits: [],
+    },
+    {
+      id: 'close-9',
+      status: 'done',
+      deleted_at: null,
+      income: 6_000_000,
+      closed_at: '2026-09-26T01:00:00Z',
+      label_month: '2026-09-01',
+      spends: [
+        { category_id: 'cat-eat', amount: 480_000, deleted_at: null },
+        { category_id: 'cat-shop', amount: 200_000, deleted_at: null },
+      ],
+      bigs: [],
+      deposits: [{ name: '주택청약', amount: 1_000_000, deleted_at: null }],
+    },
+  );
+
+  await page.goto('/assets');
+  const plot = page.getByRole('slider', { name: '순자산 그래프' });
+  // 처음엔 마지막 달(이번 달 = 지금 값)
+  await expect(plot).toHaveAttribute('aria-valuetext', '2026년 10월, 1,600만 원, 예상 1,840만 원');
+  const tabs = page.getByRole('group', { name: '기간' });
+  // 14달: 1년으로 시작, 3년은 비활성
+  await expect(tabs.getByRole('button', { name: '1년' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(tabs.getByRole('button', { name: '3년' })).toBeDisabled();
+  await plot.focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(plot).toHaveAttribute('aria-valuetext', '2026년 9월, 1,360만 원, 예상 1,480만 원');
+  await page.keyboard.press('Home');
+  await expect(plot).toHaveAttribute('aria-valuetext', /^2025년 11월/);
+  await tabs.getByRole('button', { name: '6개월' }).click();
+  await expect(plot).toHaveAttribute('aria-valuetext', /^2026년 10월/);
+  await plot.focus();
+  await page.keyboard.press('Home');
+  await expect(plot).toHaveAttribute('aria-valuetext', /^2026년 5월/);
+
+  // 월 정산 요약 = 가장 최근 정리(9월), 지난달보다 = 8월과 항목별 차이
+  const sum = page.getByRole('region', { name: '9월 정산' });
+  await expect(sum).toContainText('소득의');
+  await expect(sum).toContainText('외식·배달+8만');
+  await expect(sum).toContainText('쇼핑−5만');
+  await axe(page);
+
+  // 기간 탭은 기억
+  await page.reload();
+  await expect(
+    page.getByRole('group', { name: '기간' }).getByRole('button', { name: '6개월' }),
+  ).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범위, 금액 수정, 삭제 되돌리기', async ({

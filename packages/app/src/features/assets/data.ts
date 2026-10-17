@@ -9,7 +9,7 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import { coupleOf, netWorth } from '@sweetwo/core';
+import { coupleOf, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { copy } from './copy';
 
@@ -23,15 +23,15 @@ export function useAssetsData() {
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const history = useQuery({
     queryKey: qk.netWorthHistory,
-    queryFn: () => fetchNetWorthHistory(2),
+    queryFn: () => fetchNetWorthHistory(120),
   });
   const all = [me, space, partner, assets, sums, history];
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const items = assets.data ?? [];
   const nw = netWorth(items, sums.data ?? []);
-  // 지난달 대비: 지난달 말 순자산 기록이 있을 때만
-  const h = history.data ?? [];
-  const last = h.length >= 2 ? h[h.length - 2] : undefined;
+  // 그래프(F-01 6번): 월말 기록 + 이번 달은 지금 값. 지난달 대비는 지난달 말 기록이 있을 때만
+  const series = netWorthSeries(history.data ?? [], nw, `${todayKst().slice(0, 7)}-01`);
+  const last = series.length >= 2 ? series[series.length - 2] : undefined;
   const change = last && last.net !== 0 ? nw.net - last.net : null;
   return {
     loading: all.some((q) => q.isLoading),
@@ -45,6 +45,7 @@ export function useAssetsData() {
     sums: sums.data ?? [],
     goals: goals.data ?? [],
     nw,
+    series,
     change,
   };
 }

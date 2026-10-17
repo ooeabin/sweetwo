@@ -1,4 +1,4 @@
-import { fetchGoalAssetSums, fetchGoalRecords, fetchLatestClose, qk } from '@sweetwo/api';
+import { fetchGoalAssetSums, fetchGoalRecords, fetchRecentCloses, qk } from '@sweetwo/api';
 import {
   diagnose,
   diagnosisSummary,
@@ -15,7 +15,7 @@ import { moneyPlan } from './money';
 // 비상금 잔액 = 비상금 목표 보유액(기타 보유액 + 연결 자산 + 넣은 돈, 비공개 제외). 투자 원칙은 O-53을 만든 뒤.
 export function useDiagnosis() {
   const d = useAssetsData();
-  const close = useQuery({ queryKey: qk.latestClose, queryFn: fetchLatestClose });
+  const close = useQuery({ queryKey: qk.recentCloses, queryFn: () => fetchRecentCloses(2) });
   const linked = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
   const records = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
   const loading = d.loading || close.isLoading || linked.isLoading || records.isLoading;
@@ -38,7 +38,11 @@ export function useDiagnosis() {
         .reduce((t, x) => t + x.amount, 0)
     : 0;
   const balance = eg ? goalHeld(eg.other_held, linkedTotal + deposited) : null;
-  const real = close.data;
+  const last = close.data?.[0];
+  const real =
+    last && last.income !== null
+      ? { income: last.income, saving: last.deposits.reduce((t, x) => t + x.amount, 0) }
+      : null;
   const list: Indicator[] = diagnose({
     income: real?.income ?? p.sum.income,
     saving: real ? real.saving : Math.max(p.sum.saveable, 0),
