@@ -82,6 +82,10 @@ export const copy = {
     parentsDay: '어버이날',
     anniversary: '결혼기념일',
     birthday: (title: string) => `${title} 생신`,
+    birthdayPlain: (title: string) => `${title} 생일`,
+    milestone: { hwangap: '환갑', chilsun: '칠순', palsun: '팔순' },
+    dol: (title: string) => `${title} 돌`,
+    of: (who: string, what: string) => (who ? `${who} ${what}` : what),
   },
   familyCost: '양가 비용',
 
@@ -103,6 +107,59 @@ export const copy = {
   budgetQ: '얼마쯤 쓸까요?',
   save: '저장', // [확인 필요]
   back: '뒤로',
+
+  // Y-01 8번 가족
+  familyTitle: '가족',
+  familyAdd: '추가',
+  familyEmpty: '아직 넣은 가족이 없어요', // [확인 필요]
+  familyItem: (title: string, dd: string | null) => (dd ? `${title} ${dd}` : title),
+
+  // Y-03 가족 추가·수정
+  familySideQ: '어느 쪽 가족이에요?',
+  familyWhoQ: '누구예요?',
+  relations: {
+    parent: '부모님',
+    grandparent: '조부모님',
+    sibling: '형제·자매',
+    sibling_spouse: '형제의 배우자',
+    nephew: '조카',
+    other: '기타',
+  },
+  titleQ: '뭐라고 부르세요?',
+  titleLabel: '호칭', // [확인 필요] 화면 읽기용
+  birthdayQ3: '생일은 언제예요?',
+  birthYear: '태어난 해(선택)', // [확인 필요]
+  yearError: '태어난 해를 다시 확인해 주세요', // [확인 필요]
+  notApplicable: '해당 없어요',
+  ageQ: '칠순·팔순은 어떤 나이로 세요?',
+  ageKorean: '세는 나이',
+  ageIntl: '만 나이',
+  extraQ: '또 챙겨야 할 날이 있나요?',
+  extras: { parents_anniversary: '결혼기념일', jesa: '제사', none: '없어요' },
+  extraDateQ: (title: string, what: string) => `${title} ${what}은 언제예요?`, // [확인 필요]
+  memoQ: '좋아하시는 것, 필요하다고 하신 게 있나요?',
+  skip: '건너뛰기',
+  familySaved: '가족을 넣어뒀어요', // [확인 필요]
+  familyEdited: '고쳤어요', // [확인 필요]
+
+  // Y-07 챙길 날 추가
+  addKindQ: '어떤 날이에요?',
+  kinds: {
+    dol: '돌·백일',
+    school: '입학·졸업',
+    wedding: '결혼식',
+    visit: '병문안',
+    funeral: '장례',
+    housewarming: '집들이',
+    other: '기타',
+  },
+  addWhoQ: '누구의 날이에요?',
+  direct: '직접 입력',
+  addDateQ: '언제예요?', // [확인 필요] 기획서 Y-07c 질문 문구 없음
+  pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
+  addOk: '추가하기',
+  addOnDay: '이 날에 챙길 날 추가', // [확인 필요] 달력 고른 날 → Y-07
+
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 };
 export const DOW = ['일', '월', '화', '수', '목', '금', '토'];

@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MainFrame } from '../month';
 import { copy } from './copy';
+import { startCareAdd } from './pages/y-07-care-add';
 
 export type CalView = 'list' | 'month';
 export type CalFilter = 'all' | 'care' | 'money';
@@ -63,7 +64,7 @@ export function FilterChips({
   );
 }
 
-// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07, 다음 단계) + 보기 전환 “목록” / “달력”
+// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 보기 전환 “목록” / “달력”
 export function CalendarFrame({ view, children }: { view: CalView; children: ReactNode }) {
   const nav = useNavigate();
   write(VIEW_KEY, view);
@@ -73,7 +74,13 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
       page={{
         title: copy.title,
         actions: (
-          <Button variant="primary" disabled>
+          <Button
+            variant="primary"
+            onClick={() => {
+              startCareAdd();
+              nav('/calendar/add/a');
+            }}
+          >
             {copy.add}
           </Button>
         ),

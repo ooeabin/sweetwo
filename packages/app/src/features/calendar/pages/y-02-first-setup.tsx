@@ -8,7 +8,7 @@ import {
   readWon,
   spaceBaseDay,
 } from '@sweetwo/core';
-import { AmountInput, Chip, Field, QuestionLayout, Tabs } from '@sweetwo/ui';
+import { AmountInput, Chip, QuestionLayout } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -16,6 +16,7 @@ import { create } from 'zustand';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
+import { badMonthDay, MonthDayFields } from '../date-fields';
 
 // Y-02 처음 등록(docs/spec/24-calendar.md 화면별 정의): a 양가 부모님 4분(체크) → b 체크한 분마다 생신(월·일, 양력/음력)
 // → c 명절 양가 합계 → d 생신 한 분 단가 → e “1년에 {금액}이에요. 매달 {월 적립}씩 모아두면 돼요” + ‘이대로 하기’.
@@ -119,13 +120,7 @@ export function Y02FirstSetup() {
   if (step.startsWith('b-')) {
     const p = d.parents.find((x) => `b-${x.key}` === step);
     if (!p) return <Navigate to="/calendar/setup/a" replace />;
-    const bad =
-      (p.month !== null && (p.month < 1 || p.month > 12)) ||
-      (p.day !== null && (p.day < 1 || p.day > (p.lunar ? 30 : 31)));
-    const num = (v: string) => {
-      const n = v.replace(/\D/g, '').slice(0, 2);
-      return n ? Number(n) : null;
-    };
+    const bad = badMonthDay(p);
     return (
       <QuestionLayout
         steps={progress}
@@ -142,36 +137,11 @@ export function Y02FirstSetup() {
         primary={{ label: copy.nextStep, disabled: p.month === null || p.day === null || bad }}
         onSubmit={() => p.month !== null && p.day !== null && !bad && go(i + 1)}
       >
-        <Tabs<'solar' | 'lunar'>
-          variant="seg"
+        <MonthDayFields
           label={copy.birthdayOf(p.title)}
-          value={p.lunar ? 'lunar' : 'solar'}
-          onChange={(v) => setParent(p.key, { lunar: v === 'lunar', leap: false })}
-          items={[
-            { value: 'solar', label: copy.solar },
-            { value: 'lunar', label: copy.lunar },
-          ]}
+          value={p}
+          onChange={(x) => setParent(p.key, x)}
         />
-        <div className="hg-fields">
-          <Field
-            label={copy.month}
-            inputMode="numeric"
-            value={p.month ?? ''}
-            onChange={(e) => setParent(p.key, { month: num(e.target.value) })}
-          />
-          <Field
-            label={copy.day}
-            inputMode="numeric"
-            value={p.day ?? ''}
-            onChange={(e) => setParent(p.key, { day: num(e.target.value) })}
-            error={bad ? copy.dateError : undefined}
-          />
-        </div>
-        {p.lunar && (
-          <Chip small selected={p.leap} onClick={() => setParent(p.key, { leap: !p.leap })}>
-            {copy.leapMonth}
-          </Chip>
-        )}
       </QuestionLayout>
     );
   }

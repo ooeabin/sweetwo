@@ -51,3 +51,7 @@ export async function updateCareDay(id: string, patch: TablesUpdate<'care_day'>)
   const { error } = await supabase().from('care_day').update(patch).eq('id', id);
   fail(error);
 }
+export async function updateFamily(id: string, patch: TablesUpdate<'family_member'>) {
+  const { error } = await supabase().from('family_member').update(patch).eq('id', id);
+  fail(error);
+}
