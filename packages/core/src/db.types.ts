@@ -702,6 +702,77 @@ export type Database = {
           },
         ]
       }
+      close_balance: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          expected: number | null
+          id: string
+          month_close_id: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          expected?: number | null
+          id?: string
+          month_close_id: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          expected?: number | null
+          id?: string
+          month_close_id?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "close_balance_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "account"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "close_balance_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "close_balance_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent: {
         Row: {
           agreed: boolean
@@ -1219,6 +1290,7 @@ export type Database = {
           deleted_by: string | null
           goal_id: string
           id: string
+          month_close_id: string | null
           paid_from: Database["public"]["Enums"]["paid_from"]
           plan_line_id: string | null
           source: Database["public"]["Enums"]["goal_use_source"]
@@ -1238,6 +1310,7 @@ export type Database = {
           deleted_by?: string | null
           goal_id: string
           id?: string
+          month_close_id?: string | null
           paid_from: Database["public"]["Enums"]["paid_from"]
           plan_line_id?: string | null
           source: Database["public"]["Enums"]["goal_use_source"]
@@ -1256,6 +1329,7 @@ export type Database = {
           deleted_by?: string | null
           goal_id?: string
           id?: string
+          month_close_id?: string | null
           paid_from?: Database["public"]["Enums"]["paid_from"]
           plan_line_id?: string | null
           source?: Database["public"]["Enums"]["goal_use_source"]
@@ -1278,6 +1352,13 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_month_close_id_fkey"
+            columns: ["month_close_id"]
+            isOneToOne: false
+            referencedRelation: "month_close"
             referencedColumns: ["id"]
           },
           {
@@ -1679,10 +1760,16 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           deleted_by: string | null
+          detailed_at: string | null
+          emergency_reason: string | null
+          emergency_used: boolean | null
           gap_amount: number | null
           gap_choice: string | null
           gap_goal_id: string | null
           gap_kind: string | null
+          goal_gap_amount: number | null
+          goal_gap_goal_id: string | null
+          goal_gap_not_goal: boolean | null
           id: string
           income: number | null
           plan_id: string
@@ -1704,10 +1791,16 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          detailed_at?: string | null
+          emergency_reason?: string | null
+          emergency_used?: boolean | null
           gap_amount?: number | null
           gap_choice?: string | null
           gap_goal_id?: string | null
           gap_kind?: string | null
+          goal_gap_amount?: number | null
+          goal_gap_goal_id?: string | null
+          goal_gap_not_goal?: boolean | null
           id?: string
           income?: number | null
           plan_id: string
@@ -1728,10 +1821,16 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          detailed_at?: string | null
+          emergency_reason?: string | null
+          emergency_used?: boolean | null
           gap_amount?: number | null
           gap_choice?: string | null
           gap_goal_id?: string | null
           gap_kind?: string | null
+          goal_gap_amount?: number | null
+          goal_gap_goal_id?: string | null
+          goal_gap_not_goal?: boolean | null
           id?: string
           income?: number | null
           plan_id?: string
@@ -1747,6 +1846,13 @@ export type Database = {
           {
             foreignKeyName: "month_close_gap_goal_id_fkey"
             columns: ["gap_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "month_close_goal_gap_goal_id_fkey"
+            columns: ["goal_gap_goal_id"]
             isOneToOne: false
             referencedRelation: "goal"
             referencedColumns: ["id"]
@@ -2439,6 +2545,10 @@ export type Database = {
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
+        Returns: undefined
+      }
+      answer_goal_gap: {
+        Args: { p_amount: number; p_close: string; p_goal?: string }
         Returns: undefined
       }
       answer_living_check: {

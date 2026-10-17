@@ -45,6 +45,8 @@ export interface MemDb {
   sessions: Record<string, unknown>[];
   /** 생활비 체크 답(W-03) */
   livingChecks: Record<string, unknown>[];
+  /** 꼼꼼 모드 통장 잔액(W-04b) */
+  balances: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -117,6 +119,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     unlinks: [],
     inquiries: [],
     livingChecks: [],
+    balances: [],
     sessions: [
       {
         id: 's-this',
@@ -657,6 +660,30 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
+      if (fn === 'answer_goal_gap') {
+        const b = body();
+        db.goalUses = db.goalUses.filter((u) => u.month_close_id !== b.p_close);
+        if (b.p_goal)
+          db.goalUses.push({
+            id: `use-close-${db.goalUses.length + 1}`,
+            goal_id: b.p_goal,
+            amount: b.p_amount,
+            used_on: '2026-10-24',
+            paid_from: 'goal_fund',
+            source: 'close',
+            month_close_id: b.p_close,
+            care: null,
+            deleted_at: null,
+          });
+        for (const c of db.closes)
+          if (c.id === b.p_close)
+            Object.assign(c, {
+              goal_gap_amount: b.p_amount,
+              goal_gap_goal_id: b.p_goal ?? null,
+              goal_gap_not_goal: !b.p_goal,
+            });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'set_living_check') {
         if (db.space) db.space.living_check = body().p_on;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
@@ -1268,6 +1295,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
+    if (path === '/rest/v1/close_balance') {
+      if (method === 'GET') return json(route, db.balances);
+      if (method === 'POST') {
+        for (const r of rowsOf()) {
+          const cur = db.balances.find(
+            (x) => x.month_close_id === r.month_close_id && x.account_id === r.account_id,
+          );
+          if (cur) Object.assign(cur, r);
+          else db.balances.push({ id: `bal-${db.balances.length + 1}`, deleted_at: null, ...r });
+        }
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
     if (path === '/rest/v1/inquiry' && method === 'GET') return json(route, db.inquiries);
     if (path === '/rest/v1/living_check' && method === 'GET') {

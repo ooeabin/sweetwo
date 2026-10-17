@@ -72,4 +72,63 @@ export const copy = {
   doneTitle: (m: number) => `${m}월 월급 플랜 정리 끝!`,
   noChange: '바뀐 값이 없어요',
   toMonth: '이번 달로', // [확인 필요]
+
+  // 꼼꼼 모드
+  // W-04b 통장 잔액
+  balanceTitle: '지금 통장 잔액을 알려주세요',
+  asPlanned: (amount: string) => `계획대로라면 ${amount}`,
+  balanceLess: (amount: string) => `계획보다 ${amount} 적어요`,
+  balanceMore: (amount: string) => `계획보다 ${amount} 많아요`,
+  balanceSame: '계획대로예요',
+  balanceTotal: (amount: string) => `통장 잔액 모두 ${amount}`,
+  balanceOdd: '입력한 값이 맞나요?',
+  // W-04c 목표에서 쓴 돈
+  usesTitle: '이번 달 목표에서 쓴 돈, 이렇게 기록돼 있어요',
+  paidFrom: {
+    goal_fund: (a: string) => `목표자금 통장에서 ${a}`,
+    living: (a: string) => `생활비 카드로 ${a}`,
+    wedding_account: (a: string) => `결혼 준비 통장에서 ${a}`, // [확인 필요]
+    personal: (a: string) => `내 돈으로 ${a}`, // [확인 필요]
+    personal_support: (a: string) => `내 돈으로 ${a}`, // [확인 필요]
+  } as Record<string, (a: string) => string>,
+  usesRight: '맞아요',
+  gapTitle: (amount: string) => `나머지 ${amount}은 어느 목표에서 썼어요?`,
+  gapHelp: (amount: string) => `목표자금 통장이 기록보다 ${amount} 더 줄었어요`,
+  achieved: '달성',
+  notGoal: '목표에서 쓴 돈이 아니에요',
+  // W-04d 비상금
+  emergencyTitle: '이번 달 비상금을 쓴 일이 있었나요?',
+  emergencyNo: '없어요',
+  emergencyYes: '있어요',
+  emergencyWhy: '어디에 썼어요?', // [확인 필요]
+  emergencyReasons: {
+    hospital: '병원',
+    repair: '수리',
+    family_event: '경조사',
+    living_short: '생활비 부족',
+    etc: '기타',
+  } as Record<'hospital' | 'repair' | 'family_event' | 'living_short' | 'etc', string>,
+  // W-04e 투자
+  investTitle: '투자 평가액이 바뀌었나요?',
+  investSame: '그대로예요',
+  // W-04f 대출
+  loanTitle: '대출 잔액이 줄었죠?',
+  loanHelp: (amount: string) => `월 상환액 ${amount}을 뺐어요`, // [확인 필요]
+  // W-04i 대화 카드
+  cardsTitle: '이번 달 이야기해 볼까요?', // [확인 필요]
+  cardNext: '넘기기',
+  cardSkip: '건너뛰기',
+  cardCount: (n: number, total: number) => `${n} / ${total}`,
+  // 대화 카드(주제별 질문 묶음: 빚, 용돈, 투자, 양가). 첫 문장만 기획서 예시, 나머지는 [확인 필요]
+  cards: [
+    '이번 달 가장 만족스러운 지출은 뭐였어요?',
+    '용돈이 모자라거나 남은 적이 있었나요?',
+    '다음 달에 꼭 쓰고 싶은 돈이 있나요?',
+    '갚고 있는 돈 중에 먼저 줄이고 싶은 게 있나요?',
+    '투자에 대해 요즘 어떻게 생각해요?',
+    '양가에 드리는 돈, 지금 정도가 괜찮나요?',
+    '이번 달 아끼느라 힘들었던 게 있었나요?',
+    '올해 안에 같이 해 보고 싶은 게 있나요?',
+    '비상금은 어느 정도면 마음이 편할 것 같아요?',
+  ],
 };

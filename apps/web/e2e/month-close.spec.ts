@@ -223,3 +223,139 @@ test('정산 요약(W-04g): 지난달보다 칩, 생활비 예산 보정 제안(
     gap_choice: 'skip_this_month',
   });
 });
+
+test('더 꼼꼼히 정리하기: 통장 잔액(W-04b) → 목표에서 쓴 돈(W-04c) → 비상금(W-04d) → 투자(W-04e) → 대출(W-04f) → 대화 카드(W-04i)', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-23T20:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  const lines = db.plans[0]?.args.p_lines as Record<string, unknown>[];
+  lines.push(
+    { target: 'account', account_role: 'living', amount: 1_110_000 },
+    { target: 'account', account_role: 'goal_fund', amount: 1_500_000 },
+    { target: 'account', account_role: 'emergency', amount: 390_000 },
+  );
+  const acc = (id: string, role: string, name: string, start: number) => ({
+    id,
+    role,
+    name,
+    start_balance: start,
+    asset_id: null,
+    sort: 0,
+    deleted_at: null,
+  });
+  db.accounts.push(
+    acc('a-living', 'living', '공동 생활비', 500_000),
+    acc('a-goal', 'goal_fund', '목표자금', 10_000_000),
+    acc('a-em', 'emergency', '비상금', 5_000_000),
+  );
+  db.goalUses.push({
+    id: 'use-1',
+    goal_id: 'g2',
+    amount: 100_000,
+    used_on: '2026-10-03',
+    paid_from: 'goal_fund',
+    source: 'care',
+    month_close_id: null,
+    care: { day: { name: '어머니 생신' } },
+    deleted_at: null,
+  });
+  const asset = (
+    id: string,
+    side: string,
+    grp: string,
+    name: string,
+    amount: number,
+    monthly: number | null,
+  ) => ({
+    id,
+    side,
+    grp,
+    kind: grp === 'invest' ? 'stock' : 'jeonse_loan',
+    name,
+    amount,
+    monthly_payment: monthly,
+    owner: 'joint',
+    visibility: 'shared',
+    status: 'held',
+    deleted_at: null,
+  });
+  db.assets.push(
+    asset('inv', 'asset', 'invest', '주식', 3_000_000, null),
+    asset('loan', 'debt', 'loan', '전세대출', 100_000_000, 1_200_000),
+  );
+
+  await page.goto('/month/close/w-04a');
+  await page.getByRole('button', { name: '시작' }).click();
+  await page.getByRole('button', { name: '없어요' }).click();
+  await next(page);
+  await next(page);
+  await page.getByRole('button', { name: '더 꼼꼼히 정리하기' }).click();
+
+  // W-04b: 예상 = O-63 잔액 + 이번 나누기
+  await heading(page, '지금 통장 잔액을 알려주세요');
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await page.getByRole('button', { name: '계획대로라면 161만 원' }).click();
+  await expect(page.getByText('계획대로예요')).toBeVisible();
+  await page.getByLabel('목표자금').fill('11250000');
+  await expect(page.getByText('계획보다 25만 원 적어요')).toBeVisible();
+  await page.getByLabel('비상금').fill('5000000');
+  await expect(page.getByText('통장 잔액 모두 1,786만 원')).toBeVisible();
+  await axe(page);
+  await next(page);
+
+  // W-04c: 기록 확인 → 차액(25만 − 기록 10만 = 15만) 1질문
+  await heading(page, '이번 달 목표에서 쓴 돈, 이렇게 기록돼 있어요');
+  await expect(page.getByText('어머니 생신')).toBeVisible();
+  await expect(page.getByText('목표자금 통장에서 10만 원')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '맞아요' }).click();
+  await heading(page, '나머지 15만 원은 어느 목표에서 썼어요?');
+  await expect(page.getByText('목표자금 통장이 기록보다 15만 원 더 줄었어요')).toBeVisible();
+  await page.getByRole('radio', { name: '내 집 마련' }).click();
+
+  // W-04d: 비상금이 예상(539만)보다 줄었음
+  await heading(page, '이번 달 비상금을 쓴 일이 있었나요?');
+  await page.getByRole('radio', { name: '있어요' }).click();
+  await page.getByRole('radio', { name: '병원' }).click();
+
+  // W-04e: 투자 평가액
+  await heading(page, '투자 평가액이 바뀌었나요?');
+  await page.getByLabel('주식').fill('3200000');
+  await next(page);
+
+  // W-04f: 월 상환액만큼 뺀 값
+  await heading(page, '대출 잔액이 줄었죠?');
+  await expect(page.getByLabel('전세대출')).toHaveValue('98,800,000');
+  await page.getByRole('button', { name: '맞아요' }).click();
+
+  // W-04i: 대화 카드 3장
+  await heading(page, '이번 달 이야기해 볼까요?');
+  await axe(page);
+  await page.getByRole('button', { name: '넘기기' }).click();
+  await page.getByRole('button', { name: '넘기기' }).click();
+  await next(page);
+  await expect(page.getByRole('button', { name: '정리 끝내기' })).toBeVisible();
+
+  const close = db.closes.find((c) => c.id === 'close-1');
+  expect(close).toMatchObject({
+    emergency_used: true,
+    emergency_reason: 'hospital',
+    goal_gap_amount: 150_000,
+    goal_gap_goal_id: 'g2',
+  });
+  expect(close?.detailed_at).toBeTruthy();
+  expect(db.balances.map((b) => [b.account_id, b.amount, b.expected])).toEqual([
+    ['a-living', 1_610_000, 1_610_000],
+    ['a-goal', 11_250_000, 11_500_000],
+    ['a-em', 5_000_000, 5_390_000],
+  ]);
+  expect(db.goalUses.find((u) => u.source === 'close')).toMatchObject({
+    goal_id: 'g2',
+    amount: 150_000,
+  });
+  expect(db.assets.find((a) => a.id === 'inv')?.amount).toBe(3_200_000);
+  expect(db.assets.find((a) => a.id === 'loan')?.amount).toBe(98_800_000);
+});
