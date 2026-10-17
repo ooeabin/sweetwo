@@ -467,6 +467,7 @@ export type Database = {
           month: number | null
           name: string
           once_on: string | null
+          secret: boolean
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string
           status: Database["public"]["Enums"]["care_status"]
@@ -495,6 +496,7 @@ export type Database = {
           month?: number | null
           name: string
           once_on?: string | null
+          secret?: boolean
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id: string
           status?: Database["public"]["Enums"]["care_status"]
@@ -522,6 +524,7 @@ export type Database = {
           month?: number | null
           name?: string
           once_on?: string | null
+          secret?: boolean
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string
           status?: Database["public"]["Enums"]["care_status"]

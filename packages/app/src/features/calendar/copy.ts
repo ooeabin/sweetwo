@@ -227,6 +227,17 @@ export const copy = {
   fcOpen: '답을 기다리는 제안이 있어요', // [확인 필요] 열린 제안이 있으면 수정 대신
   fcSeeProposal: '제안 보기', // [확인 필요]
 
+  // 서프라이즈 일정
+  partnerBirthdayQ: (name: string) => `${name}님 생일은 언제예요?`,
+  hideFrom: (name: string) => `${name}님에게 숨기기`,
+  secret: '비밀',
+  onlyMe: (name: string) => `${name}님만`,
+  showConfirm: (name: string) => `${name}님에게 보여요. 그동안 기록도 함께 보여요`,
+  showOk: '보여주기', // [확인 필요]
+  cancel: '취소',
+  partnerBirthday: (name: string) => `${name} 생일`,
+  askPartnerBirthday: '생일을 알려주세요', // [확인 필요] Y-01 묻기 카드 버튼
+
   // Y-09 드린 기록
   gifted: '드린 기록',
   giftedViews: { family: '가족별', year: '연도별' },

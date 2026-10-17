@@ -8,6 +8,7 @@ import {
   QuestionLayout,
   ShortText,
   Tabs,
+  Toggle,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -22,11 +23,12 @@ import { useCalendarData } from '../data';
 // → c 날짜(년·월·일 + 양력/음력, 달력에서 열면 채워짐) → d 얼마쯤(종류별 양가 예산 단가 채움, 0원 허용) → ‘추가하기’ 바로 저장 → Y-01.
 // 고르는 날은 모두 행사라 반복 ‘한 번’, 미리 알림 D-30 + D-7, 챙길 사람 ‘같이’(Y-05에서 바꿈).
 // 지난 날짜는 “이미 지난 날이에요. 기록으로 남길까요?” + ‘기록으로 남기기’(쓸 돈 0원으로 만들고 → Y-08).
-// ‘결혼 준비 결제’(예비부부, G-07a)와 배우자 생일 서프라이즈는 다음 단계.
+// 배우자의 날이면 “{배우자}님에게 숨기기”(기본 켜짐, 서프라이즈). ‘결혼 준비 결제’(예비부부, G-07a)는 다음 단계.
 
 type Kind = keyof typeof copy.kinds;
 const KINDS = Object.keys(copy.kinds) as Kind[];
 const DIRECT = 'direct';
+const PARTNER = 'partner';
 interface Draft {
   kind: Kind | null;
   who: string | null; // 가족 id 또는 DIRECT
@@ -35,6 +37,8 @@ interface Draft {
   lunar: boolean;
   leap: boolean;
   budget: number | null;
+  /** 배우자의 날이면 숨기기(기본 켜짐) */
+  hide: boolean;
 }
 const start = (date: string | null = null): Draft => ({
   kind: null,
@@ -44,6 +48,7 @@ const start = (date: string | null = null): Draft => ({
   lunar: false,
   leap: false,
   budget: null,
+  hide: true,
 });
 const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, get) => ({
   d: start(),
@@ -67,6 +72,9 @@ export function Y07CareAdd() {
   const go = (n: number) => nav(`/calendar/add/${STEPS[n] ?? 'a'}`);
   const back = () => (i > 0 ? go(i - 1) : nav(-1));
   const member = c.family.find((m) => m.id === d.who);
+  // 배우자(혼자 쓰기 아님): 서프라이즈 토글
+  const partner = c.couple && !c.couple.solo ? c.couple.partnerName : null;
+  const forPartner = d.who === PARTNER && !!partner;
   const sideName = (s: 'groom' | 'bride') =>
     copy.side(s === 'groom' ? c.names.groom : c.names.bride);
   // 음력이면 그 해 음력 날짜의 양력
@@ -84,7 +92,7 @@ export function Y07CareAdd() {
 
   const kind = d.kind ?? 'other';
   const budget = d.budget ?? c.unitOf(kind);
-  const who = member?.title ?? d.name.trim();
+  const who = member?.title ?? (forPartner ? (partner ?? '') : d.name.trim());
   /** 저장. 지난 날이면 바로 기록(Y-08)으로 */
   const save = async (on: string, amount: number, record = false) => {
     if (saving) return;
@@ -100,6 +108,12 @@ export function Y07CareAdd() {
           date_rule: 'once',
           once_on: on,
           budget: amount,
+          ...(forPartner && d.hide
+            ? {
+                secret: true,
+                carer: c.me?.side === 'bride' ? ('bride' as const) : ('groom' as const),
+              }
+            : {}),
         },
       ]);
       await syncFamilyGoal(qc).catch(() => undefined);
@@ -147,6 +161,7 @@ export function Y07CareAdd() {
           onPick={(who) => who !== DIRECT && go(2)}
           options={[
             ...c.family.map((m) => ({ value: m.id, label: m.title, sub: sideName(m.side) })),
+            ...(partner ? [{ value: PARTNER, label: partner }] : []),
             { value: DIRECT, label: copy.direct },
           ]}
         />
@@ -219,6 +234,13 @@ export function Y07CareAdd() {
         quick={quickChips.small}
         allowZero
       />
+      {forPartner && partner && (
+        <Toggle
+          label={copy.hideFrom(partner)}
+          checked={d.hide}
+          onChange={(hide) => set({ hide })}
+        />
+      )}
     </QuestionLayout>
   );
 }

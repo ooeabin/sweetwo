@@ -61,7 +61,8 @@ export function Y08Record() {
 
   const engaged = c.space?.marriage_status === 'engaged';
   // 낸 곳: 양가 날만(우리 둘은 각자 돈)
-  const asksPaid = engaged || care.category === 'family';
+  // 서프라이즈는 낸 곳 없이 각자 돈
+  const asksPaid = !care.secret && (engaged || care.category === 'family');
   const steps = ['a', ...(asksPaid ? ['a2'] : []), 'b', 'c'];
   const i = Math.max(steps.indexOf(step), 0);
   const progress = { total: steps.length, now: i };

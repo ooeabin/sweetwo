@@ -237,10 +237,10 @@ export function moneyLine(d: MoneyDate) {
 
 /** 구분 이름표(6번): 찬우 쪽 / 예빈 쪽 / 양가 / 우리 둘 */
 export function sideLabel(
-  c: Pick<CareDay, 'category' | 'side'>,
+  c: Pick<CareDay, 'category' | 'side' | 'secret'>,
   names: { groom: string; bride: string },
 ) {
-  if (c.category === 'couple') return copy.couple;
+  if (c.category === 'couple') return c.secret ? `${copy.couple}, ${copy.secret}` : copy.couple;
   if (!c.side) return copy.both;
   return copy.side(c.side === 'groom' ? names.groom : names.bride);
 }
