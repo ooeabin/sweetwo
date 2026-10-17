@@ -67,6 +67,7 @@ import {
   Y08Record,
   Y06Edit,
   Y06FamilyCost,
+  Y09GiftLog,
 } from './features/calendar';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
@@ -459,6 +460,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-06 양가 비용 예산 수정
+      {
+        path: '/calendar/gifts',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y09GiftLog />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-09 드린 기록
       {
         path: '/calendar/add/:step?',
         element: (

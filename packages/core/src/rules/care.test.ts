@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   firstBirthday,
+  giftRepeated,
   overdueDate,
   prevCareDate,
   recordDate,
@@ -123,5 +124,28 @@ describe('기록할 회차, 7일 지남', () => {
     const w = { ...mom, date_rule: 'once' as const, once_on: '2026-09-20' };
     expect(prevCareDate(w, '2026-09-19')).toBeNull();
     expect(overdueDate(w, '2026-10-07', none)).toBe('2026-09-20');
+  });
+});
+
+describe('작년에도 드렸어요', () => {
+  const rec = [{ member_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }];
+  it('같은 분, 같은 선물, 2년 안', () => {
+    expect(
+      giftRepeated(rec, { member_id: 'm', gift_name: ' 안마기 ', occurs_on: '2026-10-14' }),
+    ).toBe(true);
+  });
+  it('다른 분, 다른 선물, 2년 넘음, 같은 날은 아님', () => {
+    expect(
+      giftRepeated(rec, { member_id: 'x', gift_name: '안마기', occurs_on: '2026-10-14' }),
+    ).toBe(false);
+    expect(giftRepeated(rec, { member_id: 'm', gift_name: '꽃', occurs_on: '2026-10-14' })).toBe(
+      false,
+    );
+    expect(
+      giftRepeated(rec, { member_id: 'm', gift_name: '안마기', occurs_on: '2027-10-15' }),
+    ).toBe(false);
+    expect(
+      giftRepeated(rec, { member_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }),
+    ).toBe(false);
   });
 });

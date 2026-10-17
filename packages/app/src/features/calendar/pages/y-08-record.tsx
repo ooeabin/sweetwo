@@ -1,5 +1,5 @@
 import { qk, recordCare, type PaidFrom } from '@sweetwo/api';
-import { addDays, formatMonthDay, quickChips } from '@sweetwo/core';
+import { formatMonthDay, giftRepeated, quickChips } from '@sweetwo/core';
 import { AmountInput, Button, Chip, ChoiceCards, QuestionLayout, ShortText } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -172,16 +172,11 @@ export function Y08Record() {
   if (step === 'b') {
     const name = d.giftName.trim();
     // 같은 분께 2년 안 같은 선물
-    const again =
-      !!name &&
-      !!care.member_id &&
-      c.records.some(
-        (r) =>
-          r.member_id === care.member_id &&
-          r.gift_name === name &&
-          r.occurs_on >= addDays(on, -730) &&
-          !(r.care_day_id === care.id && r.occurs_on === on),
-      );
+    const again = giftRepeated(c.records, {
+      member_id: care.member_id,
+      gift_name: name,
+      occurs_on: on,
+    });
     const toggle = (g: Gift) =>
       set({ gifts: d.gifts.includes(g) ? d.gifts.filter((x) => x !== g) : [...d.gifts, g] });
     return (

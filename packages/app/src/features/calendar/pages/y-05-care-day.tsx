@@ -17,6 +17,7 @@ import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../month';
 import { copy } from '../copy';
+import { syncFamilyGoal } from '../sync';
 import { carerLabel, sideLabel, useCalendarData } from '../data';
 
 const ALERTS = [30, 14, 7, 0];
@@ -207,6 +208,7 @@ export function Y05Budget() {
         setSaving(true);
         try {
           await updateCareDay(care.id, { budget: v });
+          await syncFamilyGoal(qc).catch(() => undefined);
           await qc.invalidateQueries({ queryKey: qk.careDays });
           nav(`/calendar/day/${care.id}`, { replace: true });
         } catch {

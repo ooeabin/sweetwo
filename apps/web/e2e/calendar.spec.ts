@@ -725,3 +725,51 @@ test('양가 비용(Y-06): 배우자 미합류면 바로 저장', async ({ page 
     '148만 원 중 65만 원 썼어요',
   );
 });
+
+test('드린 기록(Y-09): 가족별·연도별, 작년에도 드렸어요 / 쓸 돈 고치면 양가 비용 목표 금액 맞춤', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedFamilyCost(db);
+  const gift = (id: string, on: string, amount: number) => ({
+    id,
+    care_day_id: 'c-mom',
+    member_id: 'f-mom',
+    occurs_on: on,
+    amount,
+    paid_from: 'goal_fund',
+    gifts: ['gift', 'meal'],
+    gift_name: '안마기',
+    memo: null,
+    deleted_at: null,
+  });
+  db.careRecords.push(gift('r3', '2025-10-14', 250_000), gift('r4', '2024-10-14', 200_000));
+
+  await page.goto('/calendar/list');
+  await page.getByRole('button', { name: '드린 기록' }).click();
+  await expect(page).toHaveURL(/\/calendar\/gifts$/);
+  const mom = page.getByRole('region', { name: '어머니, 찬우 쪽' });
+  await expect(mom).toContainText('모두 45만 원');
+  await expect(mom.getByRole('button').first()).toContainText(
+    '2025년 10월 14일, 안마기, 식사, 작년에도 드렸어요',
+  );
+  await expect(mom.getByRole('button').nth(1)).not.toContainText('작년에도');
+  await expect(page.getByRole('region', { name: '그 밖의 날' })).toContainText('추석');
+  await axe(page);
+
+  await page.getByRole('tab', { name: '연도별' }).click();
+  await expect(page.getByRole('region', { name: '2026년' })).toContainText('모두 65만 원');
+  await expect(page.getByRole('region', { name: '2024년' })).toContainText('어머니 생신');
+  await axe(page);
+  await page.getByRole('region', { name: '2025년' }).getByRole('button').first().click();
+  await expect(page).toHaveURL(/\/calendar\/day\/c-mom$/);
+
+  // 쓸 돈 30만 → 40만: ‘양가 비용’ 목표 금액 168만 → 178만
+  await page.goto('/calendar/day/c-mom/budget');
+  await page.getByLabel('얼마쯤 쓸까요?').fill('400000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/calendar\/day\/c-mom$/);
+  await expect.poll(() => db.goals.find((g) => g.id === 'g-family')?.target_amount).toBe(1_780_000);
+});

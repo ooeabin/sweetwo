@@ -227,6 +227,16 @@ export const copy = {
   fcOpen: '답을 기다리는 제안이 있어요', // [확인 필요] 열린 제안이 있으면 수정 대신
   fcSeeProposal: '제안 보기', // [확인 필요]
 
+  // Y-09 드린 기록
+  gifted: '드린 기록',
+  giftedViews: { family: '가족별', year: '연도별' },
+  giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
+  giftedEmpty: '아직 드린 기록이 없어요', // [확인 필요]
+  giftedOthers: '그 밖의 날', // [확인 필요] 가족이 아닌 날 묶음
+  giftedYear: (y: number) => `${y}년`,
+  giftedWhat: (items: string[]) => items.join(', '),
+  giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]
+
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 };
 export const DOW = ['일', '월', '화', '수', '목', '금', '토'];
