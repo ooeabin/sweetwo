@@ -46,7 +46,8 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select public.finish_join();
-select is((select count(*)::int from public.account c join public.asset a on a.id = c.asset_id), 1,
+select is((select count(*)::int from public.account c join public.asset a on a.id = c.asset_id
+  where c.deleted_at is null and a.deleted_at is null), 1,
   '배우자도 통장 자산을 봄');
 select throws_ok(
   $$ update public.account set asset_id = gen_random_uuid() where role = 'emergency' $$,
