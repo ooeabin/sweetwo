@@ -213,6 +213,7 @@ sweetwo/
 - 정책은 `is_space_member(space_id)`만 씀. 이 함수는 `STABLE SECURITY DEFINER`, `SET search_path = ''`
 - 공개 범위 뷰는 반드시 `WITH (security_invoker = true)`
 - pgTAP: 테이블마다 본인, 배우자, 다른 부부, 익명 × 읽기, 추가, 수정, 삭제
+- pgTAP 파일 안에서 `'ok'`·`'not ok'`로 시작하는 값을 돌려주는 함수를 맨 select로 부르지 않음(TAP 줄로 읽혀 계획 개수가 어긋남). `is(...)`로 감싸서 단언으로
 - 스키마 제거는 최소 지원 버전이 예전 앱을 넘어선 뒤에만
 
 ### 금액과 날짜
