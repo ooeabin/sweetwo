@@ -22,3 +22,4 @@
 
 - Toggle은 `button role="switch"` + `aria-checked`, 라벨 `label`로 감쌈. Checkbox·Radio는 줄에 `role="checkbox"`/`role="radio"` + `aria-checked`, 카드 묶음은 `role="radiogroup"`.
 - 바뀌면 바로 적용, 저장 버튼 없음. `dur-fast`.
+- React 래퍼: `Toggle`(`packages/ui`, 라벨 + 작은 도움말).

@@ -644,6 +644,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           status: 'todo',
           status_on: null,
           memo: null,
+          secret: false,
+          created_by: db.me.id,
         },
       ],
     ] as const) {

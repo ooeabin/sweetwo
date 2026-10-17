@@ -773,3 +773,88 @@ test('드린 기록(Y-09): 가족별·연도별, 작년에도 드렸어요 / 쓸
   await expect(page).toHaveURL(/\/calendar\/day\/c-mom$/);
   await expect.poll(() => db.goals.find((g) => g.id === 'g-family')?.target_amount).toBe(1_780_000);
 });
+
+test('서프라이즈: 배우자 생일 숨기기, 비밀 표시, 낸 곳 없이 기록, 숨기기 끄기 확인, Y-07 배우자 날', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedFamily(db);
+
+  await page.goto('/calendar/list');
+  const ask = page.getByRole('region', { name: '예빈님 생일은 언제예요?' });
+  await ask.getByRole('button', { name: '생일을 알려주세요' }).click();
+  await expect(page.getByRole('heading', { name: '예빈님 생일은 언제예요?' })).toBeVisible();
+  await expect(page.getByRole('switch', { name: '예빈님에게 숨기기' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await page.getByLabel('월', { exact: true }).fill('10');
+  await page.getByLabel('일', { exact: true }).fill('9');
+  await axe(page);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/calendar\/list$/);
+  const bd = db.cares.at(-1);
+  expect(bd).toMatchObject({
+    category: 'couple',
+    kind: 'partner_birthday',
+    name: '예빈 생일',
+    month: 10,
+    day: 9,
+    secret: true,
+    carer: 'groom',
+  });
+  await expect(page.getByRole('region', { name: '예빈님 생일은 언제예요?' })).toHaveCount(0);
+
+  // 상세: 우리 둘, 비밀 + 찬우님만
+  await page.goto(`/calendar/day/${String(bd?.id)}`);
+  await expect(page.getByRole('region', { name: '예빈 생일' })).toContainText('우리 둘, 비밀');
+  await expect(page.getByRole('region', { name: '미리 알림' })).toContainText('찬우님만');
+  await axe(page);
+
+  // 기록: 낸 곳 없이 각자 돈
+  await page
+    .getByRole('group', { name: '준비 상황' })
+    .getByRole('button', { name: '다녀왔어요' })
+    .click();
+  await page.getByLabel('얼마 썼어요?').fill('150000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '무엇을 드렸어요?' })).toBeVisible();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  expect(db.careRecords.at(-1)).toMatchObject({ care_day_id: bd?.id, paid_from: 'personal' });
+
+  // 숨기기 끄기: 한 번 확인
+  const sw = page.getByRole('switch', { name: '예빈님에게 숨기기' });
+  await sw.click();
+  await expect(page.getByText('예빈님에게 보여요. 그동안 기록도 함께 보여요')).toBeVisible();
+  await page.getByRole('button', { name: '취소' }).click();
+  expect(bd).toMatchObject({ secret: true });
+  await sw.click();
+  await page.getByRole('button', { name: '보여주기' }).click();
+  await expect(sw).toHaveAttribute('aria-checked', 'false');
+  expect(bd).toMatchObject({ secret: false });
+
+  // Y-07: 배우자의 날이면 숨기기 기본 켜짐
+  await page.goto('/calendar/list');
+  await page.getByRole('button', { name: '+ 추가' }).click();
+  await page.getByRole('radio', { name: '기타' }).click();
+  await page.getByRole('radio', { name: '예빈', exact: true }).click();
+  await page.getByLabel('년').fill('2026');
+  await page.getByLabel('월').fill('12');
+  await page.getByLabel('일').fill('24');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('switch', { name: '예빈님에게 숨기기' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page).toHaveURL(/\/calendar\/list$/);
+  expect(db.cares.at(-1)).toMatchObject({
+    name: '예빈',
+    category: 'couple',
+    secret: true,
+    carer: 'groom',
+  });
+});

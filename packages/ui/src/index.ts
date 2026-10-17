@@ -28,6 +28,7 @@ export * from './components/ConsentCard';
 export * from './components/Wordmark';
 export * from './components/AppFrame';
 export * from './components/Meter';
+export * from './components/Toggle';
 export * from './components/PageHeader';
 export * from './components/Menu';
 export * from './components/ReorderList';

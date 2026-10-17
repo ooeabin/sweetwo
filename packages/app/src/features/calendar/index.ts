@@ -9,3 +9,4 @@ export { Y07CareAdd } from './pages/y-07-care-add';
 export { Y08Record } from './pages/y-08-record';
 export { Y06Edit, Y06FamilyCost } from './pages/y-06-family-cost';
 export { Y09GiftLog } from './pages/y-09-gift-log';
+export { YSurprisePartnerBirthday } from './pages/y-surprise-partner-birthday';

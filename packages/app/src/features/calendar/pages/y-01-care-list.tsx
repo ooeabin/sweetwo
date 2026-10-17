@@ -6,6 +6,7 @@ import { copy } from '../copy';
 import { carerLabel, moneyLine, sideLabel, useCalendarData } from '../data';
 import { CalendarFrame, FilterChips, useCalFilter } from '../frame';
 import { startFamilyAdd } from './y-03-family';
+import { partnerBirthdayDismissed } from './y-surprise-partner-birthday';
 
 // Y-01 챙길 날 목록(docs/spec/24-calendar.md 4~9·12번): 보기 필터(전체·챙길 날·돈 날짜), 60일 안 돈 날짜는 같은 목록에 작은 줄
 // (누르면 해당 화면). 다음 챙길 날 카드(4번, 준비하기 → Y-05), 60일 안 챙길 날(5번, 행 → Y-05).
@@ -30,6 +31,12 @@ export function Y01CareList() {
   const thisMonth = d.monthOf(y, mo).dates;
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
+  // 서프라이즈 1번: 배우자 생일을 아직 안 넣었으면 한 번 물음(‘나중에 할게요’면 안 보임)
+  const askPartner =
+    !!d.couple &&
+    !d.couple.solo &&
+    !partnerBirthdayDismissed() &&
+    !d.cares.some((x) => x.kind === 'partner_birthday' && x.created_by === d.me?.id);
   const birthdayOf = (id: string) =>
     d.upcoming.find((x) => x.care.member_id === id && x.care.kind === 'birthday')?.date ?? null;
 
@@ -79,6 +86,22 @@ export function Y01CareList() {
                   onClick={() => nav(`/calendar/day/${next.care.id}`)}
                 >
                   {copy.prepare}
+                </Button>
+              </section>
+            )}
+            {askPartner && d.couple && (
+              <section
+                className="hg-card hg-stack"
+                aria-label={copy.partnerBirthdayQ(d.couple.partnerName)}
+              >
+                <b>{copy.partnerBirthdayQ(d.couple.partnerName)}</b>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  style={{ alignSelf: 'flex-start' }}
+                  onClick={() => nav('/calendar/partner-birthday')}
+                >
+                  {copy.askPartnerBirthday}
                 </Button>
               </section>
             )}
