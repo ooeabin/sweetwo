@@ -47,7 +47,14 @@ import {
   RestGoalNext,
   GoalAddRoute,
 } from './features/goals';
-import { W01SalaryPlan, W02Split, W02aOtherAmount } from './features/plan';
+import {
+  W01SalaryPlan,
+  W01aAdjust,
+  W02Split,
+  W02aOtherAmount,
+  W07Income,
+  W07IncomeAdd,
+} from './features/plan';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -319,6 +326,36 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-02a 다른 금액
+      {
+        path: '/plan/edit/:role',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W01aAdjust />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-01a 이번 달만 바꾸기
+      {
+        path: '/plan/income',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W07Income />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-07 들어오는 돈
+      {
+        path: '/plan/income/new/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W07IncomeAdd />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-07 들어오는 돈 추가
       {
         path: '/goals/week',
         element: (

@@ -2,3 +2,5 @@
 export { W01SalaryPlan } from './pages/w-01-salary-plan';
 export { W02Split } from './pages/w-02-split';
 export { W02aOtherAmount } from './pages/w-02a-other-amount';
+export { W01aAdjust } from './pages/w-01a-adjust';
+export { W07Income, W07IncomeAdd } from './pages/w-07-income';

@@ -12,7 +12,7 @@ const ROLE_KEYS = ['living', 'goal_fund', 'emergency'] as const;
 
 // W-01 월급 플랜(docs/spec/20-salary-plan.md): 이름(첫 사이클은 남은 기간) + 기간 + 임시, 진행 문구, 돈 흐름 막대,
 // 특이사항(들어오는 돈), 통장별 계획액 + 사람마다 담당·월급날 칩(내 칩 = 바로 옮겼어요), ‘월급 나누기’ → W-02.
-// 월 넘기기(지난 달 읽기 전용), 이번 달만 바꾸기(W-01a), 자동 나누기 줄 표시는 다음 단계.
+// 계획액 줄 탭 → W-01a 이번 달만 바꾸기, 특이사항·‘들어오는 돈’ → W-07. 월 넘기기, 자동 나누기 줄 표시는 다음 단계.
 export function W01SalaryPlan() {
   const nav = useNavigate();
   const v = useMonthView();
@@ -59,7 +59,7 @@ export function W01SalaryPlan() {
   const notes = (events.data ?? [])
     .filter((e) => e.month === v.month)
     .slice(0, 3)
-    .map((e) => copy.incomeMonth(e.name, m(e.amount)));
+    .map((e) => copy.incomeThisMonth(e.name, m(e.amount)));
 
   const plan: Record<(typeof ROLE_KEYS)[number], number> = {
     living: v.parts.living,
@@ -135,9 +135,15 @@ export function W01SalaryPlan() {
         </div>
       </section>
       {notes.map((t) => (
-        <p key={t} className="hg-banner hg-banner--info" style={{ margin: 0 }}>
+        // 5번 특이사항(들어오는 돈) → W-07
+        <button
+          key={t}
+          type="button"
+          className="hg-card hg-card--raised"
+          onClick={() => nav('/plan/income')}
+        >
           <span>{t}</span>
-        </p>
+        </button>
       ))}
       <section className="hg-stack" aria-label={copy.plannedLabel}>
         <SectionHeader title={copy.plannedLabel} />
@@ -146,7 +152,22 @@ export function W01SalaryPlan() {
             <ListRow
               key={role}
               label={copy.roles[role] ?? role}
-              sub={chips(role)}
+              sub={
+                <span className="hg-row" style={{ gap: 'var(--space-3)' }}>
+                  {chips(role)}
+                  {/* 6번 금액 → W-01a 이번 달만 바꾸기(이미 옮긴 줄은 못 바꿈). 칩이 버튼이라 줄 전체를 버튼으로 두지 않음 */}
+                  {v.adjust.can(role) && (
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      aria-label={copy.editLink(copy.roles[role] ?? role)}
+                      onClick={() => nav(`/plan/edit/${role}`)}
+                    >
+                      {copy.editShort}
+                    </button>
+                  )}
+                </span>
+              }
               value={m(plan[role])}
             />
           ))}
@@ -161,6 +182,9 @@ export function W01SalaryPlan() {
         )}
         <button type="button" className="hg-btn hg-btn--link" onClick={() => nav('/assets/money')}>
           {copy.editMoney}
+        </button>
+        <button type="button" className="hg-btn hg-btn--link" onClick={() => nav('/plan/income')}>
+          {copy.incomeTitle}
         </button>
       </div>
     </div>

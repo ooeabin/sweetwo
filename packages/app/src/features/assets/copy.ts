@@ -175,6 +175,7 @@ export const copy = {
   weekIncomeAmount: (name: string) => `${topic(name)} 한 달에 얼마쯤이에요?`, // [확인 필요] 항목별 월 금액
   weekIncomeLow: '들쭉날쭉하면 적게 벌 때 기준으로 적어 주세요', // [확인 필요] 변동 수입 기준
   weekRestDone: '들어오는 돈을 정리했어요', // [확인 필요]
+  incomeEvents: '들어오는 돈', // W-07
   otherIncomeIn: (amount: string) => `다른 수입 ${amount} 포함`, // [확인 필요] F-05 내 수입 보조 줄
 
   // O-53 투자 원칙

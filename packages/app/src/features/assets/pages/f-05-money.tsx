@@ -56,6 +56,14 @@ export function F05Money() {
             />
           )}
         </div>
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav('/plan/income')}
+        >
+          {copy.incomeEvents}
+        </button>
       </section>
       <section className="hg-stack" aria-label={copy.spendSection}>
         <SectionHeader title={copy.spendSection} count={m(p.sum.allowances + p.sum.sharedLiving)} />
