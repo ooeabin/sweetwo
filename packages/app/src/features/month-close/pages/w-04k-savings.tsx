@@ -1,4 +1,4 @@
-import { ensureMonthClose, saveDeposits } from '@sweetwo/api';
+import { ensureMonthClose, restMissedMonths, saveDeposits, updateMonthClose } from '@sweetwo/api';
 import { formatManWon, readWon } from '@sweetwo/core';
 import { AmountCell, QuestionLayout } from '@sweetwo/ui';
 import { useId, useState } from 'react';
@@ -48,6 +48,20 @@ export function W04kSavings() {
           .filter((r) => (value(r) ?? 0) > 0 || r.name in saved)
           .map((r) => ({ name: r.name, goal_id: r.goalId, amount: value(r) ?? 0 })),
       );
+      if (d.rest && d.me) {
+        // 쉬어가기: 그달 합계만 적고 끝(정산 요약·미달 처리 없음)
+        await updateMonthClose(closeId, {
+          status: 'done',
+          closed_by: d.me.id,
+          closed_at: new Date().toISOString(),
+          late: true,
+          rested: true,
+        });
+        await restMissedMonths(d.restPlans);
+        await d.refreshClose();
+        setSaving(false);
+        return nav(closePath('w-04-end'), { replace: true });
+      }
       await d.refreshClose();
       setSaving(false);
       nav(closePath(d.adjust ? 'w-04h' : 'w-04g'));

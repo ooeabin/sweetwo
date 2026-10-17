@@ -113,6 +113,8 @@ export async function updateMonthClose(
     | 'detailed_at'
     | 'emergency_used'
     | 'emergency_reason'
+    | 'late'
+    | 'rested'
   >,
 ) {
   const { error } = await supabase().from('month_close').update(patch).eq('id', id);
@@ -360,4 +362,52 @@ export async function fetchCycleGoalUses(start: string, end: string): Promise<Cy
     closeId: u.month_close_id,
     careName: u.care?.day?.name ?? null,
   }));
+}
+
+// ── 놓친 달(21, 07 5장) ──────────────────────────────────────────────
+export interface PastPlan {
+  id: string;
+  labelMonth: string;
+  cycleStart: string;
+  cycleEnd: string;
+  status: string;
+  mergedClose: boolean;
+  closed: boolean;
+}
+/** 오늘 전에 끝난 플랜(최근 순, n개)과 정리를 마쳤는지 */
+export async function fetchPastPlans(today: string, n = 4): Promise<PastPlan[]> {
+  const { data, error } = await supabase()
+    .from('monthly_plan')
+    .select(
+      'id, label_month, cycle_start, cycle_end, status, merged_close, closes:month_close(status, deleted_at)',
+    )
+    .is('deleted_at', null)
+    .lt('cycle_end', today)
+    .order('cycle_start', { ascending: false })
+    .limit(n);
+  fail(error);
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    labelMonth: p.label_month,
+    cycleStart: p.cycle_start,
+    cycleEnd: p.cycle_end,
+    status: p.status,
+    mergedClose: p.merged_close,
+    closed: (p.closes ?? []).some((c) => c.status === 'done' && !c.deleted_at),
+  }));
+}
+/** 쉬어가기: 고른 지난 플랜을 쉬어감으로 */
+export async function restMissedMonths(planIds: string[]) {
+  const { error } = await supabase().rpc('rest_missed_months', { p_plans: planIds });
+  fail(error);
+}
+
+/** W-04a2 변동 수입 실제(수입 당사자만). 돌려주는 값 = 실제 − 기준(적으면 다음 사이클 보충 줄, 많으면 W-07) */
+export async function answerActualIncome(closeId: string, amount: number): Promise<number> {
+  const { data, error } = await supabase().rpc('answer_actual_income', {
+    p_close: closeId,
+    p_amount: amount,
+  });
+  fail(error);
+  return data ?? 0;
 }

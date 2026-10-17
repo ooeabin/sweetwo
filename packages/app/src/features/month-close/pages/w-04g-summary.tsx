@@ -45,6 +45,8 @@ export function W04gSummary() {
 
   const c = d.close;
   const before = (closes.data ?? []).filter((x) => x.id !== c.id);
+  // 늦게 정리한 달은 생활비 평균에서 뺌
+  const onTime = before.filter((x) => !x.late);
   const variable = c.spends.reduce((t, x) => t + x.amount, 0);
 
   // 지난달보다: 변동 항목별, 최대 4개
@@ -59,12 +61,13 @@ export function W04gSummary() {
 
   // 생활비 예산 보정 제안(이번 달 + 지난 정리 2개)
   const budget = d.space?.living_budget ?? 0;
-  const fix = !c.budget_fix
-    ? livingBudgetFix(budget, [
-        variable,
-        ...before.slice(0, 2).map((x) => x.spends.reduce((t, s) => t + s.amount, 0)),
-      ])
-    : null;
+  const fix =
+    !c.budget_fix && !d.late
+      ? livingBudgetFix(budget, [
+          variable,
+          ...onTime.slice(0, 2).map((x) => x.spends.reduce((t, s) => t + s.amount, 0)),
+        ])
+      : null;
   const space = d.space;
   const proposal = d.joined && !d.solo;
   const answerFix = async (apply: boolean) => {
@@ -138,6 +141,7 @@ export function W04gSummary() {
               ? 'extra_goal'
               : null,
         gap_goal_id: gap.kind === 'over' ? picked : null,
+        late: d.late,
       });
       // 혼자 정리하며 바꾼 값은 배우자에게 한 번에 알림(월말 정리 제안 묶음)
       if (proposal) await sendCloseBundle(id);

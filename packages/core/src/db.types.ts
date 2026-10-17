@@ -1772,11 +1772,18 @@ export type Database = {
           goal_gap_not_goal: boolean | null
           id: string
           income: number | null
+          income_actual_bride: number | null
+          income_actual_groom: number | null
+          income_short: number | null
+          income_short_side: Database["public"]["Enums"]["couple_side"] | null
+          late: boolean
           plan_id: string
+          rested: boolean
           space_id: string
           started_at: string | null
           started_by: string | null
           status: Database["public"]["Enums"]["month_close_status"]
+          supplement_line_id: string | null
           updated_at: string
           updated_by: string | null
           version: number
@@ -1803,11 +1810,18 @@ export type Database = {
           goal_gap_not_goal?: boolean | null
           id?: string
           income?: number | null
+          income_actual_bride?: number | null
+          income_actual_groom?: number | null
+          income_short?: number | null
+          income_short_side?: Database["public"]["Enums"]["couple_side"] | null
+          late?: boolean
           plan_id: string
+          rested?: boolean
           space_id: string
           started_at?: string | null
           started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
+          supplement_line_id?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -1833,11 +1847,18 @@ export type Database = {
           goal_gap_not_goal?: boolean | null
           id?: string
           income?: number | null
+          income_actual_bride?: number | null
+          income_actual_groom?: number | null
+          income_short?: number | null
+          income_short_side?: Database["public"]["Enums"]["couple_side"] | null
+          late?: boolean
           plan_id?: string
+          rested?: boolean
           space_id?: string
           started_at?: string | null
           started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
+          supplement_line_id?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -1869,6 +1890,13 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "month_close_supplement_line_id_fkey"
+            columns: ["supplement_line_id"]
+            isOneToOne: false
+            referencedRelation: "plan_line"
             referencedColumns: ["id"]
           },
         ]
@@ -2539,6 +2567,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      add_income_supplement: { Args: { p_close: string }; Returns: string }
       add_inquiry_message: {
         Args: { p_body: string; p_inquiry: string }
         Returns: undefined
@@ -2556,6 +2585,10 @@ export type Database = {
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
         Returns: undefined
+      }
+      answer_actual_income: {
+        Args: { p_amount: number; p_close: string }
+        Returns: number
       }
       answer_goal_gap: {
         Args: { p_amount: number; p_close: string; p_goal?: string }
@@ -2967,6 +3000,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      rest_missed_months: { Args: { p_plans: string[] }; Returns: number }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
       run_access_expiry: {
         Args: Record<PropertyKey, never>

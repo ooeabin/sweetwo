@@ -359,3 +359,117 @@ test('더 꼼꼼히 정리하기: 통장 잔액(W-04b) → 목표에서 쓴 돈(
   expect(db.assets.find((a) => a.id === 'inv')?.amount).toBe(3_200_000);
   expect(db.assets.find((a) => a.id === 'loan')?.amount).toBe(98_800_000);
 });
+
+test('놓친 달: 이번 달 맨 위 ‘지난달 정리’ → 지금 정리하기(그 플랜으로 정리, 늦은 정리)', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-27T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  const sep = (db.plans[0] as { args: Record<string, unknown> }).args;
+  sep.id = 'plan-9';
+  db.plans.unshift({
+    args: {
+      ...sep,
+      id: 'plan-10',
+      p_label_month: '2026-10-01',
+      p_cycle_start: '2026-10-25',
+      p_cycle_end: '2026-11-24',
+      p_lines: [],
+    },
+  });
+  await page.goto('/');
+  await page.getByText('지난달 정리').click();
+  await heading(page, '9월 월급 플랜을 아직 정리하지 않았어요');
+  await expect(page.getByText('10월 플랜은 이미 시작했어요')).toBeVisible();
+  await expect(page.getByText('그달 쓴 돈과 넣은 돈을 한 번에 적어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /지금 정리하기/ }).click();
+
+  await heading(page, '9월 월급 플랜 정리를 시작할게요');
+  await page.getByRole('button', { name: '시작' }).click();
+  await page.getByRole('button', { name: '없어요' }).click();
+  await next(page);
+  await next(page);
+  await expect(page.getByText(/예산을 맞출까요/)).toHaveCount(0);
+  await page.getByRole('button', { name: '정리 끝내기' }).click();
+  await heading(page, '9월 월급 플랜 정리 끝!');
+  expect(db.closes.find((c) => c.plan_id === 'plan-9')).toMatchObject({
+    status: 'done',
+    late: true,
+  });
+  await page.getByRole('button', { name: '이번 달로' }).click();
+  await expect(page.getByText('지난달 정리')).toHaveCount(0);
+});
+
+test('놓친 달: 2개월 이상 밀리면 쉬어가기만, 그달 합계만 적고 끝', async ({ page }) => {
+  const now = new Date('2026-10-27T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  const sep = (db.plans[0] as { args: Record<string, unknown> }).args;
+  sep.id = 'plan-9';
+  db.plans.unshift({
+    args: {
+      ...sep,
+      id: 'plan-10',
+      p_label_month: '2026-10-01',
+      p_cycle_start: '2026-10-25',
+      p_cycle_end: '2026-11-24',
+      p_lines: [],
+    },
+  });
+  db.plans.push({
+    args: {
+      ...sep,
+      id: 'plan-8',
+      p_label_month: '2026-08-01',
+      p_cycle_start: '2026-08-25',
+      p_cycle_end: '2026-09-24',
+      p_lines: [],
+    },
+  });
+  await page.goto('/month/missed');
+  await heading(page, '8~9월 정리가 밀렸어요');
+  await expect(page.getByRole('radio', { name: /지금 정리하기/ })).toHaveCount(0);
+  await page.getByRole('radio', { name: /쉬어가기/ }).click();
+  await page.getByRole('button', { name: '시작' }).click();
+  await page.getByRole('button', { name: '없어요' }).click();
+  await next(page);
+  await next(page);
+  await heading(page, '9월 월급 플랜 정리 끝!');
+  await expect(page.getByText('그달 합계를 적었어요')).toBeVisible();
+  expect(db.closes.find((c) => c.plan_id === 'plan-9')).toMatchObject({
+    status: 'done',
+    late: true,
+    rested: true,
+  });
+  expect(db.plans.map((p) => p.args.status ?? 'created')).toEqual([
+    'created',
+    'skipped',
+    'skipped',
+  ]);
+});
+
+test('실제 수입(W-04a2): 변동 수입자만, 기준보다 적으면 다음 달 보충 안내, 소득 확인에 반영', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-23T20:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  db.me.income_variable = true;
+  await page.goto('/month/close/w-04a');
+  await page.getByRole('button', { name: '시작' }).click();
+  await heading(page, '이번 달 실제 들어온 돈은 얼마예요?');
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await axe(page);
+  await page.getByLabel('이번 달 실제 들어온 돈은 얼마예요?').fill('3000000');
+  await next(page);
+  await expect(page.getByText('다음 달에 비상금에서 생활비로 50만 원을 채워요')).toBeVisible();
+  await heading(page, '이번 달 쓴 돈을 적어요');
+  // 소득 = 플랜 수입 600만 − (기준 350 − 실제 300)
+  await expect(page.getByRole('region', { name: '이번 달 들어온 돈' })).toContainText('550만 원');
+  expect(db.rpc).toContain('answer_actual_income');
+});

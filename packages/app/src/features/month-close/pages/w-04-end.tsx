@@ -24,10 +24,17 @@ export function W04End() {
     <QuestionLayout
       title={copy.doneTitle(d.month)}
       help={
-        bundle.length && names ? copy.sentTitle(bundle.length, names.partnerName) : copy.noChange
+        d.rest
+          ? copy.restDone
+          : bundle.length && names
+            ? copy.sentTitle(bundle.length, names.partnerName)
+            : copy.noChange
       }
       primary={{ label: copy.toMonth }}
-      onSubmit={() => nav('/', { replace: true })}
+      onSubmit={() => {
+        d.clearTarget();
+        nav('/', { replace: true });
+      }}
     >
       <SceneMedia scene="W-04" />
       {bundle.length > 0 && names && (
