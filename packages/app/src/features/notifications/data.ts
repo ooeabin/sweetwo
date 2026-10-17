@@ -8,9 +8,10 @@ import {
   markNotificationsRead,
   qk,
   subscribeNotifications,
+  type Me,
   type Notification,
 } from '@sweetwo/api';
-import { coupleOf } from '@sweetwo/core';
+import { coupleOf, notiPrefs, pushAllowed } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -50,11 +51,8 @@ export function useNotiPeople() {
   };
 }
 
-/** 방해 금지(밤 10시~아침 8시, 한국 시간): OS 알림은 안 띄우고 센터에만 */
-export const quietNow = (now = new Date()) => {
-  const h = (now.getUTCHours() + 9) % 24;
-  return h >= 22 || h < 8;
-};
+/** 지금 한국 시간 시(0~23) */
+export const kstHour = (now = new Date()) => (now.getUTCHours() + 9) % 24;
 
 /** 누르면: 읽음 + 그 화면 */
 export function useOpenNotification() {
@@ -80,8 +78,16 @@ export function useNotiRealtime(userId: string | undefined) {
     const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
     const off = subscribeNotifications(userId, (ev) => {
       void qc.invalidateQueries({ queryKey: qk.notifications });
-      if (ev.type !== 'insert' || !bridge?.notify || quietNow()) return;
+      if (ev.type !== 'insert' || !bridge?.notify) return;
       const n = ev.row;
+      // S-14 설정: 받는 방법·묶음 토글·방해 금지(그때는 센터에만)
+      const me = qc.getQueryData<Me | null>(qk.me);
+      const ok = pushAllowed(notiPrefs(me?.noti_prefs), n.topic, {
+        hour: kstHour(),
+        start: me?.quiet_start ?? 22,
+        end: me?.quiet_end ?? 8,
+      });
+      if (!ok) return;
       void bridge.notify.show({
         id: n.id,
         title: n.push_title ?? n.title,

@@ -21,6 +21,10 @@ export type Me = Pick<
   | 'allowance'
   | 'card_main'
   | 'other_income'
+  | 'notify_email'
+  | 'noti_prefs'
+  | 'quiet_start'
+  | 'quiet_end'
 >;
 export type Space = Tables<'couple_space'>;
 export type Goal = Tables<'goal'>;
@@ -34,7 +38,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income',
+      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end',
     )
     .maybeSingle();
   fail(error);
@@ -56,6 +60,10 @@ export async function updateMe(
     | 'payday_last'
     | 'allowance'
     | 'card_main'
+    | 'notify_email'
+    | 'noti_prefs'
+    | 'quiet_start'
+    | 'quiet_end'
   >,
 ) {
   const me = await fetchMe();

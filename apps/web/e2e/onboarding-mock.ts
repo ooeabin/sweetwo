@@ -63,6 +63,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     me: {
       id: chanwoo.id,
       provider: 'kakao',
+      noti_prefs: {},
+      quiet_start: 22,
+      quiet_end: 8,
       nickname: null,
       side: null,
       birth_year: null,

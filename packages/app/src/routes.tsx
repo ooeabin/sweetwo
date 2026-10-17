@@ -70,6 +70,7 @@ import {
   Y09GiftLog,
   YSurprisePartnerBirthday,
 } from './features/calendar';
+import { S10Settings, S11Me, S11aNickname, S14Notifications, S14aQuiet } from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
@@ -492,6 +493,56 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // N-02 알림 화면(좁은 창)
+      {
+        path: '/settings',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S10Settings />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-10 설정 홈
+      {
+        path: '/settings/me',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11Me />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11 내 정보
+      {
+        path: '/settings/me/nickname',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11aNickname />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11a 호칭
+      {
+        path: '/settings/notifications',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S14Notifications />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-14 알림
+      {
+        path: '/settings/notifications/quiet',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S14aQuiet />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-14a 방해 금지 시간
       {
         path: '/calendar/add/:step?',
         element: (
