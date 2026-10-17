@@ -20,6 +20,7 @@ import {
   F05Edit,
   F05Money,
   F06Diagnosis,
+  O53InvestPrinciple,
 } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
@@ -161,6 +162,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-06 재정 진단
+      {
+        path: '/assets/principle',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O53InvestPrinciple />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-53 투자 원칙(첫 주 7일째, 재정 진단 ‘지금 정하기’)
       {
         path: '/assets/money',
         element: (

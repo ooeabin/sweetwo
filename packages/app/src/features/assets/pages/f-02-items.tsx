@@ -68,7 +68,7 @@ const ROLE_KIND: Record<string, BadgeKind> = {
 // F-02 자산·부채 목록(23 F-02 7~11·13·14번): 자산·부채 전환(탭마다 합계), 묶음(F-03a 그룹) 안 금액 큰 순,
 // 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 배우자 ‘합계만’은 묶음별 한 줄(누를 수 없음).
 // 배지: 통장 역할(통장과 이어진 자산), 목표 연결. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억.
-// 투자 묶음 줄 = 투자 비중(총자산 대비) + 손익(원금 있는 항목). 투자 원칙 허용 비중(O-53)은 다음 단계.
+// 투자 묶음 줄 = 투자 비중(총자산 대비) / 허용 비중(투자 원칙 O-53, 답이 있을 때) + 손익(원금 있는 항목).
 export function F02Items() {
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -202,7 +202,7 @@ export function F02Items() {
             {g.key === 'invest' && inv.sharePct !== null && (
               // 12번 투자 묶음 줄(누를 수 없음)
               <ListRow
-                label={copy.investShare(inv.sharePct)}
+                label={copy.investShare(inv.sharePct, d.invest.limit)}
                 value={
                   inv.gain !== null && inv.gain !== 0
                     ? copy.investGain(

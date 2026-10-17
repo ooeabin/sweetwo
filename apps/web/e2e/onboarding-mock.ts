@@ -333,6 +333,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
+      if (fn === 'invest_answers')
+        return json(route, [
+          {
+            mine: db.me.invest_answer ?? null,
+            partner: (db.partner as Record<string, unknown> | null)?.invest_answer ?? null,
+          },
+        ]);
       if (fn === 'goal_asset_sums') {
         const t: Record<string, { goal_id: string; n: number; total: number }> = {};
         for (const a of db.assets) {
@@ -555,7 +562,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return ok204();
       }
       if (method === 'PATCH') {
-        for (const t of db.todos) if (t.id === eqId(url)) Object.assign(t, body());
+        const kind = url.searchParams.get('kind')?.replace(/^eq\./, '');
+        for (const t of db.todos)
+          if (kind ? t.kind === kind && t.status !== 'done' : t.id === eqId(url))
+            Object.assign(t, body());
         return ok204();
       }
     }

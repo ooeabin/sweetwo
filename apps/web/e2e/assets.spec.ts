@@ -617,3 +617,58 @@ test('재정 진단(F-06): 요약, 위험·주의 먼저, 비상금 개월, 추�
   await em.getByRole('button', { name: '비상금 목표' }).click();
   await expect(page).toHaveURL(/\/goals\/g-e$/);
 });
+
+test('투자 원칙(O-53): 할 일에서 열고, 보수적인 쪽 허용 비중, 진단 양호, 목록 허용 비중', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  (db.partner as Record<string, unknown>).invest_answer = 'active';
+  // 첫 주 다른 할 일은 끝냄 → 7일째 투자 원칙이 보임
+  for (const kind of ['assets', 'loans', 'fixed_card', 'rest', 'spend_check', 'exact_values'])
+    db.todos.push({
+      id: `todo-${kind}`,
+      kind,
+      status: 'done',
+      snoozed_until: null,
+      deleted_at: null,
+    });
+  db.todos.push({
+    id: 'todo-invest',
+    kind: 'invest',
+    screen: 'O-53',
+    open_on: '2026-08-26',
+    status: 'pending',
+    snoozed_until: null,
+    deleted_at: null,
+  });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /투자 원칙 정하기/ }).click();
+  await expect(page).toHaveURL(/\/assets\/principle$/);
+  await page.goBack();
+
+  await page.goto('/assets/diagnosis');
+  const card = page.getByRole('region', { name: '투자 원칙 합의' });
+  await expect(card).toContainText('주의');
+  await expect(card).toContainText('내 답을 기다려요');
+  await card.getByRole('button', { name: '지금 정하기' }).click();
+
+  await heading(page, '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?');
+  await expect(page.getByText('예빈님은 ‘일부는 적극적으로’를 골랐어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /조금은 괜찮아요/ }).click();
+  await expect(page).toHaveURL(/\/assets\/diagnosis$/);
+  expect(db.me.invest_answer).toBe('some');
+  expect(db.todos.find((t) => t.kind === 'invest')?.status).toBe('done');
+  const done = page.getByRole('region', { name: '투자 원칙 합의' });
+  await expect(done).toContainText('양호');
+  await expect(done).toContainText('공동자금은 30%까지 투자하기로 했어요');
+  await expect(done.getByRole('button', { name: '지금 정하기' })).toHaveCount(0);
+
+  await page.goto('/assets/items');
+  await expect(page.getByRole('region', { name: '투자' })).toContainText(
+    '공동자금 투자 비중 74% / 허용 30%',
+  );
+});

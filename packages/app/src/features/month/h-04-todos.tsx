@@ -17,9 +17,12 @@ import { copy } from './copy';
 import { useTodos } from './data';
 
 const SHOWN = 3;
+/** 여는 화면이 만들어진 할 일 → 경로 */
+const OPENS: Partial<Record<TodoDef['kind'], string>> = { invest: '/assets/principle' };
 
 // H-04 할 일(Checklist 카드). 최대 3개, 첫 주 할 일은 하루 하나씩 열림. ‘내일 할게요’로 미룸.
-// 받은 제안이 맨 위(19 H-04 순서), 줄을 누르면 G-08. 다른 여는 화면(O-41 등)은 아직 없어서 줄을 눌러 이동하지 않는다. 초대는 ‘코드 복사’.
+// 받은 제안이 맨 위(19 H-04 순서), 줄을 누르면 G-08. 여는 화면이 있는 할 일(투자 원칙 O-53)은 글자를 누르면 그 화면.
+// 나머지(O-41 등)는 화면이 아직 없어 이동하지 않는다. 초대는 ‘코드 복사’.
 export function H04Todos({
   state,
   today,
@@ -116,12 +119,26 @@ export function H04Todos({
         {visible.slice(0, Math.max(0, SHOWN - proposals.length)).map((d) => (
           <div key={d.kind} className="hg-task">
             <span className="hg-check" role="img" aria-label={copy.todoLeftState} />
-            <span className="hg-task__text">
-              <span className="hg-task__title">{label(d)}</span>
-              {d.minutes !== undefined && (
-                <span className="hg-task__sub">{copy.minutes(d.minutes)}</span>
-              )}
-            </span>
+            {OPENS[d.kind] ? (
+              // 여는 화면이 있는 할 일: 글자 부분이 버튼(옆 ‘내일 할게요’와 겹치지 않게)
+              <button
+                type="button"
+                className="hg-task__text"
+                onClick={() => nav(OPENS[d.kind] ?? '/')}
+              >
+                <span className="hg-task__title">{label(d)}</span>
+                {d.minutes !== undefined && (
+                  <span className="hg-task__sub">{copy.minutes(d.minutes)}</span>
+                )}
+              </button>
+            ) : (
+              <span className="hg-task__text">
+                <span className="hg-task__title">{label(d)}</span>
+                {d.minutes !== undefined && (
+                  <span className="hg-task__sub">{copy.minutes(d.minutes)}</span>
+                )}
+              </span>
+            )}
             {d.kind === 'invite' ? (
               <Button variant="secondary" size="sm" onClick={() => void copyCode()}>
                 {copy.copyCode}

@@ -58,7 +58,8 @@ export const copy = {
   sortLabel: '정렬', // [확인 필요] 화면 읽기용
   sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
   sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
-  investShare: (pct: number) => `공동자금 투자 비중 ${pct}%`,
+  investShare: (pct: number, limit: number | null) =>
+    limit === null ? `공동자금 투자 비중 ${pct}%` : `공동자금 투자 비중 ${pct}% / 허용 ${limit}%`,
   investGain: (amount: string, pct: number | null) =>
     pct === null ? amount : `${amount}(${pct > 0 ? '+' : pct < 0 ? '−' : ''}${Math.abs(pct)}%)`,
 
@@ -121,6 +122,25 @@ export const copy = {
   diagNoLoan: '대출이 없어요',
   diagFixed: (pct: number) => `월 수입의 ${pct}%가 고정지출이에요`,
   diagInvestNone: '아직 정하지 않았어요',
+  diagInvestWait: (partner: string) => `${partner}님 답을 기다려요`,
+  diagInvestMine: '내 답을 기다려요', // [확인 필요] 배우자만 답했을 때
+  diagInvestBoth: (limit: number) =>
+    limit === 0
+      ? '공동자금은 원금을 지키기로 했어요'
+      : `공동자금은 ${limit}%까지 투자하기로 했어요`, // [확인 필요]
+
+  // O-53 투자 원칙
+  principleTitle: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
+  principleOptions: {
+    keep: '원금은 지켜야 해요',
+    some: '조금은 괜찮아요',
+    active: '일부는 적극적으로',
+    unsure: '잘 모르겠어요',
+  },
+  principleLimit: (limit: number) => (limit === 0 ? '투자하지 않아요' : `공동자금의 ${limit}%까지`), // [확인 필요] 선택지 보조 줄
+  principlePartner: (partner: string, answer: string) =>
+    `${partner}님은 ‘${answer}’를 골랐어요. 다르면 더 조심스러운 쪽으로 정해요`, // [확인 필요]
+  principleSaved: '투자 원칙을 정했어요', // [확인 필요]
   diagPrivate: '비공개 항목은 계산에서 빠졌어요',
   diagGoEmergency: '비상금 목표',
   diagGoDebt: '부채 목록',

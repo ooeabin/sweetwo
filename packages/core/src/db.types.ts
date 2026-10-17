@@ -120,6 +120,8 @@ export type Database = {
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
           income_variable: boolean
+          invest_answer: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at: string | null
           is_internal_tester: boolean
           monthly_income: number | null
           nickname: string | null
@@ -146,6 +148,8 @@ export type Database = {
           employment?: Database["public"]["Enums"]["employment"] | null
           id: string
           income_variable?: boolean
+          invest_answer?: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at?: string | null
           is_internal_tester?: boolean
           monthly_income?: number | null
           nickname?: string | null
@@ -171,6 +175,8 @@ export type Database = {
           employment?: Database["public"]["Enums"]["employment"] | null
           id?: string
           income_variable?: boolean
+          invest_answer?: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at?: string | null
           is_internal_tester?: boolean
           monthly_income?: number | null
           nickname?: string | null
@@ -1468,6 +1474,8 @@ export type Database = {
           employment: Database["public"]["Enums"]["employment"] | null
           id: string
           income_variable: boolean
+          invest_answer: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at: string | null
           is_internal_tester: boolean
           monthly_income: number | null
           nickname: string | null
@@ -1510,6 +1518,13 @@ export type Database = {
           goal_id: string
           n: number
           total: number
+        }[]
+      }
+      invest_answers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          mine: Database["public"]["Enums"]["invest_answer"]
+          partner: Database["public"]["Enums"]["invest_answer"]
         }[]
       }
       invite_preview: {
@@ -1628,6 +1643,7 @@ export type Database = {
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
+      invest_answer: "keep" | "some" | "active" | "unsure"
       marriage_status: "married" | "engaged"
       month_close_status: "draft" | "done"
       newlywed_home: "have" | "before" | "after" | "parents"
@@ -1792,6 +1808,7 @@ export const Constants = {
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
+      invest_answer: ["keep", "some", "active", "unsure"],
       marriage_status: ["married", "engaged"],
       month_close_status: ["draft", "done"],
       newlywed_home: ["have", "before", "after", "parents"],

@@ -1,12 +1,12 @@
-/* docs/design/bundle.css에서 복사 (7fd47e5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e56ec58). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
-:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-check, .hg-result) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 /* 키보드 포커스: 2px focus 링, 바깥 2px */
-:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-key, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-fab):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-key, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-fab):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* 잘리는 묶음 안의 줄은 안쪽 링 */
 :is(.hg-menu__item, .hg-cmd__item, .hg-listrow, .hg-result):focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 /* 터치 화면 좁은 창: 누르는 대상 44px */

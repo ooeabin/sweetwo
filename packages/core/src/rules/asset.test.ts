@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { investPrinciple } from '../onboarding/diagnosis';
 import {
   assetGroupsOf,
   investSummary,
@@ -98,4 +99,13 @@ it('투자 묶음 줄: 비중은 총자산(평가금액) 대비, 손익은 원�
   // (1,120 + 80 + 200) ÷ (600 + 1,120 + 80 + 200) = 70%
   expect(r).toEqual({ sharePct: 70, gain: 1_200_000, gainPct: 12 });
   expect(investSummary([{ side: 'asset', grp: 'invest', amount: 1 }]).gain).toBeNull();
+});
+
+it('투자 원칙: 보수적인 쪽 허용 비중, 한 명만이면 one, 혼자 쓰기는 내 답으로 both', () => {
+  expect(investPrinciple(null, null)).toEqual({ state: null, limit: null });
+  expect(investPrinciple('active', null)).toEqual({ state: 'one', limit: 60 });
+  expect(investPrinciple(null, 'some')).toEqual({ state: 'one', limit: 30 });
+  expect(investPrinciple('active', 'some')).toEqual({ state: 'both', limit: 30 });
+  expect(investPrinciple('unsure', 'active')).toEqual({ state: 'both', limit: 0 });
+  expect(investPrinciple('some', null, true)).toEqual({ state: 'both', limit: 30 });
 });

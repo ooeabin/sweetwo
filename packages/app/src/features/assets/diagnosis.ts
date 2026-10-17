@@ -12,7 +12,8 @@ import { useAssetsData } from './data';
 import { moneyPlan } from './money';
 
 // 재정 진단(23 F-06, 06 8장). 저축률 = 가장 최근 월말 정리(W-04k 넣은 돈 ÷ 그달 소득), 없으면 계획값(‘추정’).
-// 비상금 잔액 = 비상금 목표 보유액(기타 보유액 + 연결 자산 + 넣은 돈, 비공개 제외). 투자 원칙은 O-53을 만든 뒤.
+// 비상금 잔액 = 비상금 목표 보유액(기타 보유액 + 연결 자산 + 넣은 돈, 비공개 제외).
+// 투자 원칙 = O-53 두 사람 답(둘 다 양호, 한 명만 주의, 아무도 아직 몰라요).
 export function useDiagnosis() {
   const d = useAssetsData();
   const close = useQuery({ queryKey: qk.recentCloses, queryFn: () => fetchRecentCloses(2) });
@@ -50,7 +51,7 @@ export function useDiagnosis() {
     emergencyBase: base.amount,
     loanRepayment: sp.loan_repayment ?? 0,
     fixed,
-    invest: null,
+    invest: d.invest.state,
   });
   const estimated = {
     savingRate: !real,
@@ -69,6 +70,9 @@ export function useDiagnosis() {
       noLoan: (sp.loan_repayment ?? 0) === 0,
       estimated,
       hasPrivate: d.items.some((a) => a.visibility === 'private'),
+      invest: d.invest,
+      investMine: d.answers.mine,
+      partnerName: d.couple?.partnerName ?? '',
     },
   };
 }
