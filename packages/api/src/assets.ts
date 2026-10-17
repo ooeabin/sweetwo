@@ -1,7 +1,7 @@
-import type { Tables, TablesInsert, TablesUpdate } from '@sweetwo/core';
+import type { InvestAnswer, Tables, TablesInsert, TablesUpdate } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
-import { ensureSpace } from './onboarding';
+import { ensureSpace, fetchMe } from './onboarding';
 
 // 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 배우자 ‘합계만’은 묶음 합계로.
 const fail = (e: { message?: string } | null) => {
@@ -88,5 +88,26 @@ export async function fetchGoalAssetSums(): Promise<
 export async function linkAssets(ids: string[], goalId: string | null) {
   if (!ids.length) return;
   const { error } = await supabase().from('asset').update({ goal_id: goalId }).in('id', ids);
+  fail(error);
+}
+
+/** 투자 원칙 답(O-53): 내 답과 배우자 답 */
+export async function fetchInvestAnswers(): Promise<{
+  mine: InvestAnswer | null;
+  partner: InvestAnswer | null;
+}> {
+  const { data, error } = await supabase().rpc('invest_answers');
+  fail(error);
+  const row = Array.isArray(data) ? data[0] : null;
+  return { mine: row?.mine ?? null, partner: row?.partner ?? null };
+}
+export async function saveInvestAnswer(answer: InvestAnswer) {
+  const me = await fetchMe();
+  if (!me) throw new AuthCallError('unknown');
+  const id = me.id;
+  const { error } = await supabase()
+    .from('app_user')
+    .update({ invest_answer: answer, invest_answered_at: new Date().toISOString() })
+    .eq('id', id);
   fail(error);
 }

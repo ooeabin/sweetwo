@@ -24,12 +24,18 @@ export function indicatorText(x: Indicator, r: Diagnosis): string {
     case 'fixedRatio':
       return x.pct === null ? copy.diagIncomeUnknown : copy.diagFixed(x.pct);
     case 'investPrinciple':
-      return copy.diagInvestNone;
+      return r.invest.state === 'both'
+        ? copy.diagInvestBoth(r.invest.limit ?? 0)
+        : r.invest.state === 'one'
+          ? r.investMine
+            ? copy.diagInvestWait(r.partnerName)
+            : copy.diagInvestMine
+          : copy.diagInvestNone;
   }
 }
 
 // F-06 재정 진단(23 F-06): 요약 “5개 중 n개 양호” + 지표 카드(위험 → 주의 → 양호 순) + 바로가기, 비공개 안내.
-// 추정값으로 계산한 지표는 ‘추정’. 분기 비교(2번)와 투자 원칙(O-53)은 다음 단계.
+// 추정값으로 계산한 지표는 ‘추정’. 분기 비교(2번)는 다음 단계.
 export function F06Diagnosis() {
   const nav = useNavigate();
   const { result: r } = useDiagnosis();
@@ -42,7 +48,10 @@ export function F06Diagnosis() {
     },
     loanBurden: { label: copy.diagGoDebt, to: '/assets/items?side=debt' },
     fixedRatio: { label: copy.diagGoMoney, to: '/assets/money' },
-    investPrinciple: { label: copy.diagGoInvest, to: null },
+    // 내 답이 없을 때만 ‘지금 정하기’ → O-53
+    ...(r.investMine
+      ? {}
+      : { investPrinciple: { label: copy.diagGoInvest, to: '/assets/principle' } }),
   };
   const est = (k: Indicator['key']) =>
     (k === 'savingRate' && r.estimated.savingRate) ||

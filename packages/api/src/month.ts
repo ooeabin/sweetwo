@@ -34,6 +34,16 @@ export async function updateTodo(
   fail(error);
 }
 
+/** 그 할 일을 연 화면에서 끝냈을 때(O-53 등). 이미 끝냈으면 그대로 */
+export async function completeTodoKind(kind: Todo['kind'], by: string) {
+  const { error } = await supabase()
+    .from('todo')
+    .update({ status: 'done', done_by: by, done_at: new Date().toISOString() })
+    .eq('kind', kind)
+    .neq('status', 'done');
+  fail(error);
+}
+
 export type SpendCategory = Tables<'spend_category'>;
 export async function fetchSpendCategories(): Promise<SpendCategory[]> {
   const { data, error } = await supabase()

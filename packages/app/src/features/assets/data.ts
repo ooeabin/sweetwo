@@ -2,6 +2,7 @@ import {
   fetchAccounts,
   fetchAssets,
   fetchGoals,
+  fetchInvestAnswers,
   fetchMe,
   fetchNetWorthHistory,
   fetchPartner,
@@ -10,7 +11,7 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import { coupleOf, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
+import { coupleOf, investPrinciple, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { copy } from './copy';
 
@@ -23,11 +24,12 @@ export function useAssetsData() {
   const sums = useQuery({ queryKey: qk.partnerAssetSums, queryFn: fetchPartnerAssetSums });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const accounts = useQuery({ queryKey: qk.accounts, queryFn: fetchAccounts });
+  const answers = useQuery({ queryKey: qk.investAnswers, queryFn: fetchInvestAnswers });
   const history = useQuery({
     queryKey: qk.netWorthHistory,
     queryFn: () => fetchNetWorthHistory(120),
   });
-  const all = [me, space, partner, assets, sums, history];
+  const all = [me, space, partner, assets, sums, history, answers];
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const items = assets.data ?? [];
   const nw = netWorth(items, sums.data ?? []);
@@ -47,6 +49,9 @@ export function useAssetsData() {
     sums: sums.data ?? [],
     goals: goals.data ?? [],
     accounts: accounts.data ?? [],
+    /** 투자 원칙(O-53): 내 답, 배우자 답, 합의 상태와 허용 비중(보수적인 쪽) */
+    answers: answers.data ?? { mine: null, partner: null },
+    invest: investPrinciple(answers.data?.mine ?? null, answers.data?.partner ?? null, !!c?.solo),
     nw,
     series,
     change,
