@@ -88,6 +88,40 @@ export const copy = {
   copied: '복사했어요', // [확인 필요] O-07과 같음
   newCodeDone: '새 코드를 받았어요. 이전 코드는 이제 못 써요', // [확인 필요]
 
+  unlink: '연결 해제',
+  pendingWait: (name: string) => `${name}님 답을 기다리고 있어요`,
+  pendingReceived: (name: string) => `${name}님이 연결 해제를 요청했어요`,
+  seePlan: '자산 정리 안 보기',
+  proposalsRow: '제안', // [확인 필요] 줄 이름
+  frozen: '해제 전까지 멈춤',
+  cancelRequest: '요청 취소',
+  cancelled: '연결 해제 요청을 취소했어요', // [확인 필요]
+  deadline: (md: string) => `${md}까지 정하지 않으면 분담 비율로 정리해요`,
+
+  // S-12a~c 연결 해제 요청
+  unlinkQ: '연결을 해제할까요?', // [확인 필요]
+  unlinkHow: [
+    // [확인 필요] 정리되는 방식(31 보안·개인정보 4장을 해요체로)
+    '내 명의 자산, 수입, 용돈은 나에게 남아요',
+    '공동 목표와 통장 몫은 자산 정리 안대로 나눠요',
+    '월 플랜, 월말 정리, 제안 기록은 해제할 때까지의 사본이 둘 다에게 남아요',
+    '양가 가족 정보는 그 가족 쪽 사람에게 남아요',
+  ],
+  unlinkWedding: '결혼 비용은 각자 낸 돈 기준 요약을 둘 다에게 남겨요', // [확인 필요] 예비부부만
+  unlinkWhen: (name: string) => `${name}님이 동의하면 바로, 아니면 14일 뒤에 해제돼요`, // [확인 필요]
+  closeFirst: (month: number) => `${month}월 월급 플랜 정리부터 할까요?`,
+  closeStart: '정리 시작',
+  next: '다음',
+  planTitle: (a: number, b: number) => `분담 비율 ${a} : ${b}로 정리했어요`,
+  myShare: (name: string) => `${name} 내 몫`, // [확인 필요] 금액 칸 이름(화면 읽기)
+  theirShare: (name: string, v: string) => `${name}님 몫 ${v}`, // [확인 필요]
+  shareOver: '통장 잔액보다 많이 넣을 수 없어요', // [확인 필요]
+  total: '합계', // [확인 필요]
+  confirmQ: '확인을 위해 ‘연결 해제’를 입력해 주세요', // [확인 필요]
+  confirmWord: '연결 해제',
+  send: '보내기', // [확인 필요]
+  sent: (name: string) => `${name}님에게 연결 해제를 요청했어요`, // [확인 필요]
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

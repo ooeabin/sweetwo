@@ -811,6 +811,61 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_unlink: {
+        Row: {
+          cancelled_at: string | null
+          confirmed_at: string | null
+          deadline: string
+          id: string
+          plan: NonNullable<Json>
+          ratio: number
+          requested_at: string
+          requested_by: string
+          space_id: string
+          status: string
+        }
+        ComputedFields: never
+        Insert: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          deadline: string
+          id?: string
+          plan: NonNullable<Json>
+          ratio: number
+          requested_at?: string
+          requested_by: string
+          space_id: string
+          status?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          deadline?: string
+          id?: string
+          plan?: NonNullable<Json>
+          ratio?: number
+          requested_at?: string
+          requested_by?: string
+          space_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_unlink_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "couple_unlink_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       family_member: {
         Row: {
           birth_day: number | null
@@ -2093,6 +2148,7 @@ export type Database = {
       }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
+      cancel_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       care_date_in_year: {
         Args: {
           c: Omit<
@@ -2328,6 +2384,10 @@ export type Database = {
           expires_at: string
         }[]
       }
+      request_unlink: {
+        Args: { p_confirm: string; p_shares: Json }
+        Returns: string
+      }
       respond_proposal: {
         Args: {
           p_id: string
@@ -2378,6 +2438,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      unlink_ratio: { Args: { sid: string; uid: string }; Returns: number }
+      unlink_share: { Args: { amount: number; pct: number }; Returns: number }
       update_pending_shares: {
         Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
         Returns: number

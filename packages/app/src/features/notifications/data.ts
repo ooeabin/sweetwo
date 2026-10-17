@@ -78,6 +78,11 @@ export function useNotiRealtime(userId: string | undefined) {
     const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
     const off = subscribeNotifications(userId, (ev) => {
       void qc.invalidateQueries({ queryKey: qk.notifications });
+      // 연결 해제 요청·취소: 부부 상태가 바뀜
+      if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {
+        void qc.invalidateQueries({ queryKey: qk.space });
+        void qc.invalidateQueries({ queryKey: qk.unlink });
+      }
       if (ev.type !== 'insert' || !bridge?.notify) return;
       const n = ev.row;
       // S-14 설정: 받는 방법·묶음 토글·방해 금지(그때는 센터에만)

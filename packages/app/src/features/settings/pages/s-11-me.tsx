@@ -1,5 +1,5 @@
 import { qk, updateMe, updateSpace } from '@sweetwo/api';
-import { coupleBaseDay, NotifyEmail, spaceBaseDay } from '@sweetwo/core';
+import { coupleBaseDay, NotifyEmail, spaceBaseDay, splitPercent } from '@sweetwo/core';
 import { Button, Field, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -26,14 +26,8 @@ export function S11Me() {
   const changed = parsed.success && parsed.data !== me.notify_email;
   const base = spaceBaseDay(sp, c);
   const later = base !== null && base === coupleBaseDay(c) && c.joined;
-  const ratio = (() => {
-    if (sp.split_mode === 'income' && c.myIncome && c.partnerIncome) {
-      const mine = Math.round((c.myIncome * 100) / (c.myIncome + c.partnerIncome));
-      return [mine, 100 - mine] as const;
-    }
-    if (sp.split_mode === 'custom') return [c.myRatio, 100 - c.myRatio] as const;
-    return [50, 50] as const;
-  })();
+  const pct = splitPercent(sp.split_mode, c.myIncome, c.partnerIncome, c.myRatio);
+  const ratio = [pct, 100 - pct] as const;
 
   const saveEmail = async () => {
     if (!parsed.success || saving) return;

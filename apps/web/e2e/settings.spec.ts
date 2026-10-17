@@ -291,3 +291,122 @@ test('부부 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기,
   await expect(page.getByText('10월 22일까지')).toBeVisible();
   await axe(page);
 });
+
+const jointSaving = (db: MemDb) =>
+  db.assets.push({
+    id: 'a-joint',
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'saving',
+    name: '공동 적금',
+    amount: 24_000_000,
+    principal: null,
+    maturity_date: null,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    created_by: db.me.id,
+    created_at: '2026-08-01T00:00:00Z',
+    updated_at: '2026-10-01T00:00:00Z',
+    deleted_at: null,
+  });
+
+test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “연결 해제” 입력, 대기 띠, 요청 취소', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { split_mode: 'income' });
+  jointSaving(db);
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await page.getByRole('button', { name: '연결 해제' }).click();
+
+  // S-12a 안내
+  await expect(page.getByRole('heading', { name: '연결을 해제할까요?' })).toBeVisible();
+  await expect(page.getByText('예빈님이 동의하면 바로, 아니면 14일 뒤에 해제돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // S-12b 자산 정리 안: 버는 만큼 350만 : 250만 → 58 : 42
+  await expect(page.getByRole('heading', { name: '분담 비율 58 : 42로 정리했어요' })).toBeVisible();
+  await expect(page.getByText('10월 21일까지 정하지 않으면 분담 비율로 정리해요')).toBeVisible();
+  await expect(page.getByLabel('공동 적금 내 몫')).toHaveValue('13,920,000');
+  await expect(page.getByText('예빈님 몫 1,008만')).toBeVisible();
+  const young = page.getByLabel('청년 적금 내 몫');
+  await expect(young).toHaveValue('1,740,000');
+  await young.fill('4000000');
+  await expect(page.getByText('통장 잔액보다 많이 넣을 수 없어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await young.fill('1000000');
+  await expect(page.getByText('1,492만')).toBeVisible();
+  await expect(page.getByText('1,208만')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // S-12c 입력 후 보내기
+  const send = page.getByRole('button', { name: '보내기' });
+  await expect(send).toBeDisabled();
+  await page.getByLabel('연결 해제').fill('연결해제');
+  await expect(send).toBeDisabled();
+  await page.getByLabel('연결 해제').fill('연결 해제');
+  await axe(page);
+  await send.click();
+  await expect(page.getByText('예빈님에게 연결 해제를 요청했어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
+  await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
+  await expect(page.getByText('해제 전까지 멈춤')).toBeVisible();
+  const plan = db.unlinks[0]?.plan as { name: string; mine: number }[];
+  expect(plan.map((p) => [p.name, p.mine])).toEqual([
+    ['공동 적금', 13_920_000],
+    ['청년 적금', 1_000_000],
+  ]);
+  await axe(page);
+
+  // 이번 달: 해제 대기 띠 → 확인하기 → S-12
+  await page.goto('/');
+  await expect(page.getByText('연결 해제를 기다리고 있어요')).toBeVisible();
+  await expect(page.getByText('10월 21일에 분담 비율대로 정리돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '확인하기' }).click();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
+
+  // 요청 취소 → 연결
+  await page.getByRole('button', { name: '요청 취소' }).click();
+  await expect(page.getByText('연결 해제 요청을 취소했어요')).toBeVisible();
+  await expect(page.getByText('연결됨', { exact: true })).toBeVisible();
+  expect(db.unlinks[0]?.status).toBe('cancelled');
+});
+
+test('연결 해제 요청 받음(S-12, S-12d 보기)', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  db.unlinks.push({
+    id: 'u1',
+    space_id: 'space-1',
+    requested_by: 'yebin',
+    requested_at: '2026-10-05T01:00:00Z',
+    deadline: '2026-10-19',
+    ratio: 42,
+    plan: [{ asset_id: 'a-sav', name: '청년 적금', amount: 3_000_000, mine: 1_260_000 }],
+    status: 'pending',
+    cancelled_at: null,
+    confirmed_at: null,
+  });
+  await open(page, info.project.name === 'narrow');
+  await expect(page.getByRole('button', { name: /부부 정보/ })).toContainText('연결 해제 대기 중');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '요청 취소' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '연결 해제' })).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '자산 정리 안 보기' }).click();
+  await expect(page.getByRole('heading', { name: '분담 비율 42 : 58로 정리했어요' })).toBeVisible();
+  await expect(page.getByText('예빈 126만, 찬우 174만')).toBeVisible();
+  await expect(page.getByText('10월 19일까지 정하지 않으면 분담 비율로 정리해요')).toBeVisible();
+  await axe(page);
+});

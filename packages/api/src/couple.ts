@@ -1,3 +1,4 @@
+import type { Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -27,4 +28,32 @@ export async function renewInvite(): Promise<{ code: string; expiresAt: string }
   const row = Array.isArray(data) ? data[0] : null;
   if (!row) throw new AuthCallError('unknown');
   return { code: row.code, expiresAt: row.expires_at };
+}
+
+export type Unlink = Tables<'couple_unlink'>;
+
+/** 진행 중인 연결 해제 요청(없으면 null) */
+export async function fetchUnlink(): Promise<Unlink | null> {
+  const { data, error } = await supabase()
+    .from('couple_unlink')
+    .select('*')
+    .eq('status', 'pending')
+    .limit(1);
+  fail(error);
+  return data?.[0] ?? null;
+}
+
+/** S-12c 보내기. shares = 공동 자산별 내 몫(빠진 항목은 서버가 기본 몫) */
+export async function requestUnlink(shares: Record<string, number>, confirm: string) {
+  const { error } = await supabase().rpc('request_unlink', {
+    p_shares: shares,
+    p_confirm: confirm,
+  });
+  fail(error);
+}
+
+/** 요청 취소(요청한 사람, 상대 응답 전) */
+export async function cancelUnlink() {
+  const { error } = await supabase().rpc('cancel_unlink');
+  fail(error);
 }
