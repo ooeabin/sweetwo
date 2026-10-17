@@ -19,6 +19,10 @@ export const CH = {
   lockTouchId: 'sweetwo:lock-touch-id',
   /** main → 렌더러: 잠김 */
   lockEvent: 'sweetwo:lock-event',
+  // 알림(14): 렌더러가 Realtime으로 받은 새 알림을 OS 알림으로, 누르면 그 알림 id를 렌더러로
+  notifyShow: 'sweetwo:notify-show',
+  /** main → 렌더러: 누른 알림 id */
+  notifyOpen: 'sweetwo:notify-open',
 } as const;
 
 export type AuthProviderName = 'kakao' | 'google' | 'apple';
@@ -41,5 +45,10 @@ export interface LockStatus {
   locked: boolean;
   touchIdAvailable: boolean;
   touchIdEnabled: boolean;
+}
+export interface OsNotice {
+  id: string;
+  title: string;
+  body?: string;
 }
 export type VerifyResult = { ok: true } | { ok: false; failed: number; signedOut: boolean };

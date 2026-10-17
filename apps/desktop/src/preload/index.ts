@@ -4,6 +4,7 @@ import {
   type AuthEvent,
   type AuthProviderName,
   type LockStatus,
+  type OsNotice,
   type VerifyResult,
 } from '../shared/channels';
 
@@ -43,5 +44,9 @@ contextBridge.exposeInMainWorld('sweetwo', {
     setTouchId: (on: boolean) => ipcRenderer.invoke(CH.lockSetTouchId, on) as Promise<boolean>,
     unlockWithTouchId: () => ipcRenderer.invoke(CH.lockTouchId) as Promise<boolean>,
     onLock: (cb: () => void) => listen(CH.lockEvent, cb),
+  },
+  notify: {
+    show: (n: OsNotice) => ipcRenderer.invoke(CH.notifyShow, n) as Promise<void>,
+    onOpen: (cb: (id: string) => void) => listen(CH.notifyOpen, cb),
   },
 });

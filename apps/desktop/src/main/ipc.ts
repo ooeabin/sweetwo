@@ -1,4 +1,4 @@
-import { ipcMain, type IpcMainInvokeEvent } from 'electron';
+import { ipcMain, type BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import { z } from 'zod';
 import { CH } from '../shared/channels';
 import { cancelLogin, getAccessToken, reopenLogin, signOut, startLogin } from './auth';
@@ -11,6 +11,7 @@ import {
   unlockWithTouchId,
   verifyPin,
 } from './lock';
+import { showNotice } from './notify';
 
 // IPC 핸들러. 보낸 창이 우리 화면인지 확인하고, 인자는 Zod로 검사한다(docs/DEV_GUIDE.md ‘Electron 보안 체크리스트’).
 function trusted(e: IpcMainInvokeEvent) {
@@ -29,7 +30,13 @@ function handle<A extends z.ZodTypeAny>(channel: string, args: A, fn: (a: z.infe
 const none = z.tuple([]);
 const Provider = z.enum(['kakao', 'google', 'apple']);
 
-export function registerIpc() {
+const Notice = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).max(120),
+  body: z.string().max(200).optional(),
+});
+
+export function registerIpc(getWindow: () => BrowserWindow | null) {
   handle(CH.authStart, z.tuple([Provider]), ([p]) => startLogin(p));
   handle(CH.authReopen, none, () => reopenLogin());
   handle(CH.authCancel, none, () => cancelLogin());
@@ -45,4 +52,5 @@ export function registerIpc() {
   handle(CH.lockNow, none, () => lockNow());
   handle(CH.lockSetTouchId, z.tuple([z.boolean()]), ([on]) => setTouchId(on));
   handle(CH.lockTouchId, none, () => unlockWithTouchId());
+  handle(CH.notifyShow, z.tuple([Notice]), ([n]) => showNotice(n, getWindow));
 }

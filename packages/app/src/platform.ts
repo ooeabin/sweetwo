@@ -53,6 +53,11 @@ export interface DesktopBridge {
     unlockWithTouchId: () => Promise<boolean>;
     onLock: (cb: () => void) => () => void;
   };
+  /** OS 알림(14). 누르면 그 알림 id */
+  notify: {
+    show: (n: { id: string; title: string; body?: string }) => Promise<void>;
+    onOpen: (cb: (id: string) => void) => () => void;
+  };
 }
 
 declare global {
