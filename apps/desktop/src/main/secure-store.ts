@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 // main 프로세스 전용 보안 저장소. refresh token 같은 값을 OS 키체인(safeStorage)으로 암호화해 파일에 둔다.
 // 렌더러에는 노출하지 않는다(docs/DEV_GUIDE.md ‘데스크톱 로그인과 딥링크’). 로그인 단계에서 토큰 갱신이 이걸 쓴다.
-export type SecureKey = 'refresh-token' | 'app-lock';
+export type SecureKey = 'refresh-token' | 'app-lock' | 'app-lock-auto';
 
 type Store = Partial<Record<SecureKey, string>>; // key → base64(암호문)
 const file = () => join(app.getPath('userData'), 'secure-store.json');

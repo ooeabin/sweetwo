@@ -61,7 +61,7 @@ export function S10Settings() {
           )}
           onClick={() => nav('/settings/notifications')}
         />
-        <ListRow label={copy.rows.security} sub={later} />
+        <ListRow label={copy.rows.security} onClick={() => nav('/settings/security')} />
         <ListRow label={copy.rows.answers} sub={later} />
         <ListRow label={copy.rows.guide} sub={later} />
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />

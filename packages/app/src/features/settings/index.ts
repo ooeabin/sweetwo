@@ -10,6 +10,7 @@ export { S12eUnlinkDifferently } from './pages/s-12e-unlink-differently';
 export { S12fUnlinkCounter } from './pages/s-12f-unlink-counter';
 export { S12gReconnect } from './pages/s-12g-reconnect';
 export { S13Visibility } from './pages/s-13-visibility';
+export { S15Security } from './pages/s-15-security';
 export { S18Data } from './pages/s-18-data';
 export { S18bDelete } from './pages/s-18b-delete';
 export { S19About } from './pages/s-19-about';

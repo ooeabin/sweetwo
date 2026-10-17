@@ -42,6 +42,7 @@ export interface MemDb {
   invites: { code: string; expires_at: string; used_at: string | null }[];
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
+  sessions: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -113,6 +114,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     invites: [],
     unlinks: [],
     inquiries: [],
+    sessions: [
+      {
+        id: 's-this',
+        user_agent: 'Mozilla/5.0 (Macintosh) Chrome/130 Safari/537',
+        created_at: '2026-10-01T00:00:00Z',
+        last_used_at: '2026-10-07T00:00:00Z',
+        current: true,
+      },
+    ],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -630,6 +640,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_sessions') return json(route, db.sessions);
+      if (fn === 'end_sessions') {
+        const b = body();
+        const before = db.sessions.length;
+        db.sessions = db.sessions.filter((x) => (b.p_id ? x.id !== b.p_id : x.current));
+        return json(route, before - db.sessions.length);
       }
       if (fn === 'create_inquiry') {
         const b = body();

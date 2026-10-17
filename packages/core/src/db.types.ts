@@ -2508,6 +2508,7 @@ export type Database = {
         Returns: undefined
       }
       end_access: { Args: { p_id: string }; Returns: undefined }
+      end_sessions: { Args: { p_id?: string }; Returns: number }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
@@ -2552,6 +2553,16 @@ export type Database = {
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       md_label: { Args: { d: string }; Returns: string }
+      my_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          current: boolean
+          id: string
+          last_used_at: string
+          user_agent: string
+        }[]
+      }
       my_unlink: {
         Args: Record<PropertyKey, never>
         Returns: {

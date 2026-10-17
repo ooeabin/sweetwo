@@ -371,6 +371,22 @@ export const copy = {
   faqSearch: '자주 묻는 질문에서 찾기', // [확인 필요] 검색 칸
   faqNone: '찾는 답이 없어요',
 
+  // S-15 보안
+  security: '보안',
+  appLock: '앱 잠금',
+  appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
+  changePin: 'PIN 바꾸기',
+  touchId: 'Touch ID로 풀기', // [확인 필요]
+  autoLock: '자동 잠금',
+  autoLockOptions: { 1: '1분', 5: '5분', 15: '15분', 0: '사용 안 함' } as Record<number, string>,
+  currentPin: '지금 PIN을 입력해 주세요', // [확인 필요]
+  devices: '로그인된 기기',
+  thisDevice: '지금 이 기기',
+  lastUsed: (md: string) => `${md}에 마지막으로 썼어요`, // [확인 필요]
+  logoutDevice: '로그아웃',
+  logoutAll: '모든 기기에서 로그아웃',
+  loggedOutDevice: '그 기기에서 로그아웃했어요', // [확인 필요]
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

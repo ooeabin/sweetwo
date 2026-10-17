@@ -1,7 +1,7 @@
 import { isWeakPin, pinRemainingNotice } from '@sweetwo/core';
 import { AuthLayout, Button, LockScreen } from '@sweetwo/ui';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths } from '../flow';
 import { prefs } from '../prefs';
@@ -11,9 +11,11 @@ const Center = ({ children }: { children: ReactNode }) => (
   <main className="hg-auth">{children}</main>
 );
 
-// A-06 앱 잠금 설정(데스크톱, 이 기기에 PIN이 없을 때 첫 로그인 직후 1회)
+// A-06 앱 잠금 설정(데스크톱, 이 기기에 PIN이 없을 때 첫 로그인 직후 1회). S-15에서 열면 ?next=/settings/security
 export function A06LockSetup() {
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  const next = params.get('next');
   const bridge = session.bridge;
   const [step, setStep] = useState<'enter' | 'confirm' | 'touch'>('enter');
   const [first, setFirst] = useState('');
@@ -22,7 +24,7 @@ export function A06LockSetup() {
 
   const finish = () => {
     prefs.setPinAsked(true);
-    nav(paths.home, { replace: true });
+    nav(next?.startsWith('/') ? next : paths.home, { replace: true });
   };
   if (!bridge) return null;
 

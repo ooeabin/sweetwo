@@ -9,6 +9,8 @@ import {
   setPin,
   setTouchId,
   unlockWithTouchId,
+  clearPinVerified,
+  setAutoLock,
   verifyPin,
 } from './lock';
 import { showNotice } from './notify';
@@ -52,5 +54,7 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
   handle(CH.lockNow, none, () => lockNow());
   handle(CH.lockSetTouchId, z.tuple([z.boolean()]), ([on]) => setTouchId(on));
   handle(CH.lockTouchId, none, () => unlockWithTouchId());
+  handle(CH.lockClear, none, () => clearPinVerified());
+  handle(CH.lockSetAuto, z.tuple([z.number().int()]), ([m]) => setAutoLock(m));
   handle(CH.notifyShow, z.tuple([Notice]), ([n]) => showNotice(n, getWindow));
 }

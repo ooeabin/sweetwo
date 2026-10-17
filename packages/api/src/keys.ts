@@ -32,5 +32,6 @@ export const qk = {
   unlinkPartner: ['couple_unlink', 'partner'] as const,
   trash: ['trash'] as const,
   inquiries: ['inquiry'] as const,
+  sessions: ['sessions'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

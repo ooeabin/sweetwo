@@ -22,6 +22,8 @@ export interface LockStatus {
   locked: boolean;
   touchIdAvailable: boolean;
   touchIdEnabled: boolean;
+  /** 자동 잠금(분). 0 = 사용 안 함 */
+  autoLockMin: number;
 }
 export type VerifyResult = { ok: true } | { ok: false; failed: number; signedOut: boolean };
 
@@ -51,6 +53,10 @@ export interface DesktopBridge {
     lockNow: () => Promise<void>;
     setTouchId: (on: boolean) => Promise<boolean>;
     unlockWithTouchId: () => Promise<boolean>;
+    /** S-15 잠금 끄기(1분 안에 verify한 뒤만) */
+    clear: () => Promise<boolean>;
+    /** 자동 잠금 분: 0·1·5·15 */
+    setAutoLock: (min: number) => Promise<boolean>;
     onLock: (cb: () => void) => () => void;
   };
   /** OS 알림(14). 누르면 그 알림 id */

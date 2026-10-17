@@ -43,6 +43,8 @@ contextBridge.exposeInMainWorld('sweetwo', {
     lockNow: () => ipcRenderer.invoke(CH.lockNow) as Promise<void>,
     setTouchId: (on: boolean) => ipcRenderer.invoke(CH.lockSetTouchId, on) as Promise<boolean>,
     unlockWithTouchId: () => ipcRenderer.invoke(CH.lockTouchId) as Promise<boolean>,
+    clear: () => ipcRenderer.invoke(CH.lockClear) as Promise<boolean>,
+    setAutoLock: (min: number) => ipcRenderer.invoke(CH.lockSetAuto, min) as Promise<boolean>,
     onLock: (cb: () => void) => listen(CH.lockEvent, cb),
   },
   notify: {

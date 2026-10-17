@@ -17,6 +17,9 @@ export const CH = {
   lockNow: 'sweetwo:lock-now',
   lockSetTouchId: 'sweetwo:lock-set-touch-id',
   lockTouchId: 'sweetwo:lock-touch-id',
+  /** S-15: 잠금 끄기(방금 PIN 확인한 뒤만), 자동 잠금 분(0 = 사용 안 함) */
+  lockClear: 'sweetwo:lock-clear',
+  lockSetAuto: 'sweetwo:lock-set-auto',
   /** main → 렌더러: 잠김 */
   lockEvent: 'sweetwo:lock-event',
   // 알림(14): 렌더러가 Realtime으로 받은 새 알림을 OS 알림으로, 누르면 그 알림 id를 렌더러로
@@ -45,6 +48,8 @@ export interface LockStatus {
   locked: boolean;
   touchIdAvailable: boolean;
   touchIdEnabled: boolean;
+  /** 자동 잠금(분). 0 = 사용 안 함 */
+  autoLockMin: number;
 }
 export interface OsNotice {
   id: string;
