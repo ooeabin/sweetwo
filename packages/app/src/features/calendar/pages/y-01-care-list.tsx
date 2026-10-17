@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { carerLabel, moneyLine, sideLabel, useCalendarData } from '../data';
 import { CalendarFrame, FilterChips, useCalFilter } from '../frame';
+import { startFamilyAdd } from './y-03-family';
 
 // Y-01 챙길 날 목록(docs/spec/24-calendar.md 4~9·12번): 보기 필터(전체·챙길 날·돈 날짜), 60일 안 돈 날짜는 같은 목록에 작은 줄
 // (누르면 해당 화면). 다음 챙길 날 카드(4번, 준비하기 → Y-05), 60일 안 챙길 날(5번, 행 → Y-05).
-// 등록 전 빈 상태 + Y-02 처음 등록. 양가 비용(7번), 가족(8번), 드린 기록(9번), ‘기록하기’는 다음 단계.
+// 가족(8번): 찬우 쪽 / 예빈 쪽 두 줄, 호칭 + 다음 생일 D-day(호칭 → Y-03 수정, ‘추가’ → Y-03).
+// 등록 전 빈 상태 + Y-02 처음 등록. 양가 비용(7번), 드린 기록(9번), ‘기록하기’는 다음 단계.
 export function Y01CareList() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -28,6 +30,8 @@ export function Y01CareList() {
   const thisMonth = d.monthOf(y, mo).dates;
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
+  const birthdayOf = (id: string) =>
+    d.upcoming.find((x) => x.care.member_id === id && x.care.kind === 'birthday')?.date ?? null;
 
   return (
     <CalendarFrame view="list">
@@ -81,6 +85,52 @@ export function Y01CareList() {
                   ))}
                 </div>
               )}
+            </section>
+            <section className="hg-stack" aria-label={copy.familyTitle}>
+              <div className="hg-row" style={{ justifyContent: 'space-between' }}>
+                <SectionHeader title={copy.familyTitle} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    startFamilyAdd();
+                    nav('/calendar/family/new/a');
+                  }}
+                >
+                  {copy.familyAdd}
+                </Button>
+              </div>
+              <div className="hg-card hg-stack">
+                {(['groom', 'bride'] as const).map((side) => {
+                  const people = d.family.filter((f) => f.side === side);
+                  return (
+                    <div key={side} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+                      <span className="hg-card__label">
+                        {copy.side(side === 'groom' ? d.names.groom : d.names.bride)}
+                      </span>
+                      {!people.length ? (
+                        <span className="hg-help">{copy.familyEmpty}</span>
+                      ) : (
+                        <div className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                          {people.map((f) => {
+                            const b = birthdayOf(f.id);
+                            return (
+                              <Button
+                                key={f.id}
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => nav(`/calendar/family/${f.id}/c`)}
+                              >
+                                {copy.familyItem(f.title, b ? copy.dday(dday(d.today, b)) : null)}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           </>
         ))}

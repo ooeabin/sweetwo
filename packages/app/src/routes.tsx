@@ -62,6 +62,8 @@ import {
   Y04Calendar,
   Y05Budget,
   Y05CareDay,
+  Y03Family,
+  Y07CareAdd,
 } from './features/calendar';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
@@ -424,6 +426,36 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-05 쓸 돈 수정
+      {
+        path: '/calendar/add/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y07CareAdd />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-07 챙길 날 추가
+      {
+        path: '/calendar/family/new/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y03Family />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-03 가족 추가
+      {
+        path: '/calendar/family/:id/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y03Family />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-03 가족 수정
       {
         path: '/goals/week',
         element: (

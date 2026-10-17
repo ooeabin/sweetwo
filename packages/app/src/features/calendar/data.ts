@@ -90,8 +90,14 @@ export function useCalendarData() {
     groom: (iAmBride ? c?.partnerName : c?.myName) ?? '',
     bride: (iAmBride ? c?.myName : c?.partnerName) ?? '',
   };
+  /** 종류별 양가 예산 단가(Y-07d): 같은 종류 챙길 날 중 가장 최근에 정한 쓸 돈 */
+  const unitOf = (kind: string) =>
+    [...careList]
+      .filter((x) => x.kind === kind && x.budget > 0)
+      .sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1))[0]?.budget ?? 0;
   return {
     loading,
+    unitOf,
     monthOf,
     caresOf,
     names,

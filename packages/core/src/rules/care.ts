@@ -82,3 +82,72 @@ export function monthsUntil(today: string, date: string) {
   const b = Number(date.slice(0, 4)) * 12 + Number(date.slice(5, 7));
   return Math.max(b - a, 1);
 }
+
+/** 그 해의 생일(양력 날짜). 음력이면 그 음력 해의 양력 날짜 */
+export function birthdayInYear(
+  b: { month: number; day: number; lunar: boolean; leap: boolean },
+  year: number,
+) {
+  return careDateInYear(
+    {
+      date_rule: b.lunar ? 'lunar_yearly' : 'solar_yearly',
+      month: b.month,
+      day: b.day,
+      leap: b.leap,
+      once_on: null,
+    },
+    year,
+  );
+}
+
+export type MilestoneKind = 'hwangap' | 'chilsun' | 'palsun';
+/**
+ * 환갑·칠순·팔순(24 참고 ‘챙길 날 전체 목록’): 태어난 해 기준, 오늘 이후만.
+ * 환갑 = 만 60세 생일. 칠순·팔순은 가족 방식: 세는 나이(기본) 70·80 = 만 69·79, 만 나이면 만 70·80
+ */
+export function milestones(
+  m: {
+    birth_year: number | null;
+    birth_month: number | null;
+    birth_day: number | null;
+    birth_lunar: boolean;
+    birth_leap: boolean;
+    korean_age: boolean;
+  },
+  today: string,
+): { kind: MilestoneKind; date: string }[] {
+  if (m.birth_year === null || m.birth_month === null || m.birth_day === null) return [];
+  const b = { month: m.birth_month, day: m.birth_day, lunar: m.birth_lunar, leap: m.birth_leap };
+  const k = m.korean_age ? 1 : 0;
+  return (
+    [
+      ['hwangap', 60],
+      ['chilsun', 70 - k],
+      ['palsun', 80 - k],
+    ] as const
+  ).flatMap(([kind, age]) => {
+    const date = birthdayInYear(b, (m.birth_year ?? 0) + age);
+    return date && date >= today ? [{ kind, date }] : [];
+  });
+}
+
+/** 조카 돌(24 Y-03b): 태어난 날(양력으로) + 1년. 태어난 해가 없거나 지났으면 null */
+export function firstBirthday(
+  m: {
+    birth_year: number | null;
+    birth_month: number | null;
+    birth_day: number | null;
+    birth_lunar: boolean;
+    birth_leap: boolean;
+  },
+  today: string,
+): string | null {
+  if (m.birth_year === null || m.birth_month === null || m.birth_day === null) return null;
+  const born = m.birth_lunar
+    ? lunarToSolar(m.birth_year, m.birth_month, m.birth_day, m.birth_leap)
+    : `${m.birth_year}-${pad(m.birth_month)}-${pad(m.birth_day)}`;
+  if (!born) return null;
+  const [y = 0, mo = 1, d = 1] = born.split('-').map(Number);
+  const date = `${y + 1}-${pad(mo)}-${pad(Math.min(d, lastDay(y + 1, mo)))}`;
+  return date >= today ? date : null;
+}

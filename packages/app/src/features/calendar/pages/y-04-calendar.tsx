@@ -1,17 +1,18 @@
 import { monthGrid } from '@sweetwo/core';
-import { Calendar, Icon } from '@sweetwo/ui';
+import { Button, Calendar, Icon } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
 import { markOf, moneyLine, useCalendarData } from '../data';
 import { money as won, useMask } from '../../../shared/mask';
 import { CalendarFrame, FilterChips, useCalFilter } from '../frame';
+import { startCareAdd } from './y-07-care-add';
 
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
 
 // Y-04 달력(월 보기, docs/spec/24-calendar.md 10~13번): 돈 날짜는 검정 점 + 고른 날 일정 목록에서 흐린 글자 + 갈 화면(읽기 전용),
 // 월말 정리 기간 띠, 챙길 날 막대(양가 family, 우리 둘 together). 날짜를 누르면 그날 일정, 챙길 날 → Y-05.
-// 날짜 → Y-07, 공휴일·설·추석 연휴 띠는 다음 단계.
+// 고른 날 아래 ‘이 날에 챙길 날 추가’ → Y-07(날짜 채움). 공휴일·설·추석 연휴 띠는 다음 단계.
 export function Y04Calendar() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -112,6 +113,19 @@ export function Y04Calendar() {
               </button>
             );
           })}
+          {selected >= d.today && (
+            <Button
+              variant="ghost"
+              size="sm"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => {
+                startCareAdd(selected);
+                nav('/calendar/add/a');
+              }}
+            >
+              {copy.addOnDay}
+            </Button>
+          )}
         </div>
       </Calendar>
     </CalendarFrame>
