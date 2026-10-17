@@ -1,4 +1,4 @@
-import { monthGrid } from '@sweetwo/core';
+import { isFestive, monthGrid } from '@sweetwo/core';
 import { Button, Calendar, Icon } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
 
 // Y-04 달력(월 보기, docs/spec/24-calendar.md 10~13번): 돈 날짜는 검정 점 + 고른 날 일정 목록에서 흐린 글자 + 갈 화면(읽기 전용),
 // 월말 정리 기간 띠, 챙길 날 막대(양가 family, 우리 둘 together). 날짜를 누르면 그날 일정, 챙길 날 → Y-05.
-// 고른 날 아래 ‘이 날에 챙길 날 추가’ → Y-07(날짜 채움). 공휴일·설·추석 연휴 띠는 다음 단계.
+// 고른 날 아래 ‘이 날에 챙길 날 추가’ → Y-07(날짜 채움). 공휴일은 빨간 숫자 + 이름(고른 날 목록 맨 위), 설·추석 연휴 띠.
 export function Y04Calendar() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -32,12 +32,16 @@ export function Y04Calendar() {
     const cs = cares.filter((x) => x.date === c.date);
     const n = shown.filter((x) => x.date === c.date).length + cs.length;
     const [, cm, cd] = ymd(c.date);
+    const hol = d.holidayOf(c.date);
     return {
       ...c,
       money: shown.some((x) => x.date === c.date),
       marks: cs.map((x) => markOf(x.care)),
       band: inBand(c.date),
-      label: copy.dayLabel(cm, cd, n),
+      // 칸에는 짧게(대체공휴일(개천절) → 대체공휴일), 전체 이름은 화면 읽기와 아래 목록
+      holiday: hol?.name.replace(/\(.*\)$/, ''),
+      festive: !!hol && isFestive(hol.name),
+      label: copy.dayLabel(cm, cd, n, hol?.name),
     };
   });
   const move = (n: number) => {
@@ -47,6 +51,7 @@ export function Y04Calendar() {
   const [, sm, sd] = ymd(selected);
   const dow = DOW[new Date(`${selected}T00:00:00Z`).getUTCDay()] ?? '';
   const today = shown.filter((x) => x.date === selected);
+  const selHoliday = d.holidayOf(selected);
   // 고른 날이 보이는 달 밖이면 그 달 챙길 날을 따로 계산
   const [sy, smo] = ymd(selected);
   const dayCares = (
@@ -82,7 +87,15 @@ export function Y04Calendar() {
         </div>
         <div className="hg-cal__agenda" aria-live="polite">
           <span className="hg-cal__date">{copy.agendaDate(sm, sd, dow)}</span>
-          {!today.length && !dayCares.length && <span className="hg-help">{copy.agendaEmpty}</span>}
+          {selHoliday && (
+            <div className="hg-cal__event is-holiday">
+              <i />
+              <span>{selHoliday.name}</span>
+            </div>
+          )}
+          {!today.length && !dayCares.length && !selHoliday && (
+            <span className="hg-help">{copy.agendaEmpty}</span>
+          )}
           {dayCares.map((x) => (
             <button
               key={x.care.id}

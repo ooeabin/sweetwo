@@ -35,8 +35,8 @@ export const copy = {
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',
   next: '다음 달',
-  dayLabel: (m: number, d: number, n: number) =>
-    n ? `${m}월 ${d}일, 일정 ${n}개` : `${m}월 ${d}일`,
+  dayLabel: (m: number, d: number, n: number, holiday?: string) =>
+    [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
   agendaEmpty: '이 날짜엔 없어요',
   listMoney: '돈 날짜', // [확인 필요] 목록 섹션 이름

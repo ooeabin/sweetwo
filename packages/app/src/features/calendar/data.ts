@@ -2,6 +2,7 @@ import {
   fetchAssets,
   fetchCareDays,
   fetchCareRecords,
+  fetchHolidays,
   fetchGoalAssetSums,
   fetchGoalRecords,
   fetchFamily,
@@ -50,6 +51,11 @@ export function useCalendarData() {
   const records = useQuery({ queryKey: qk.careRecords, queryFn: fetchCareRecords });
   const goalRecords = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
   const goalSums = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
+  const holidays = useQuery({
+    queryKey: qk.holidays,
+    queryFn: fetchHolidays,
+    staleTime: 24 * 3_600_000,
+  });
   const loading = [
     me,
     space,
@@ -63,6 +69,7 @@ export function useCalendarData() {
     records,
     goalRecords,
     goalSums,
+    holidays,
   ].some((q) => q.isLoading);
   const sp = space.data;
   const c = me.data && sp ? coupleOf(me.data, sp, partner.data ?? null) : null;
@@ -72,8 +79,14 @@ export function useCalendarData() {
       ? 'last'
       : (sp.base_day ?? (c ? coupleBaseDay(c) : null));
 
+  const holidayList = holidays.data ?? [];
+  const holidaySet = new Set(holidayList.map((h) => h.date));
+  /** 그 날 공휴일 */
+  const holidayOf = (date: string) => holidayList.find((h) => h.date === date) ?? null;
   const monthOf = (y: number, m: number) =>
     moneyDates(y, m, {
+      holidays: holidaySet,
+      shift: sp?.holiday_shift ?? true,
       paydays: c
         ? [
             { name: c.myName, day: c.myPayday },
@@ -185,6 +198,7 @@ export function useCalendarData() {
   };
   return {
     loading,
+    holidayOf,
     records: recordList,
     recordOn,
     overdue,

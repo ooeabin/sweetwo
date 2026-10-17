@@ -98,3 +98,11 @@ export async function recordCare(a: {
   const r = data as { line?: number } | null;
   return Number(r?.line ?? 0);
 }
+
+export type Holiday = Tables<'holiday'>;
+/** 공휴일(앱은 읽기만) */
+export async function fetchHolidays(): Promise<Holiday[]> {
+  const { data, error } = await supabase().from('holiday').select('*').order('date');
+  fail(error);
+  return data ?? [];
+}

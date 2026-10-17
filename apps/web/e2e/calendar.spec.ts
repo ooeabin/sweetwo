@@ -858,3 +858,50 @@ test('서프라이즈: 배우자 생일 숨기기, 비밀 표시, 낸 곳 없이
     carer: 'groom',
   });
 });
+
+test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 쉬는 날이면 직전 영업일(끄면 그대로)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.holidays.push(
+    { date: '2026-09-24', name: '추석 연휴', kind: 'holiday' },
+    { date: '2026-09-25', name: '추석', kind: 'holiday' },
+    { date: '2026-09-26', name: '추석 연휴', kind: 'holiday' },
+    { date: '2026-10-03', name: '개천절', kind: 'holiday' },
+    { date: '2026-10-05', name: '대체공휴일(개천절)', kind: 'substitute' },
+    { date: '2026-10-09', name: '한글날', kind: 'holiday' },
+  );
+
+  await page.goto('/calendar/month');
+  const hangul = page.getByRole('button', { name: '10월 9일, 한글날' });
+  await expect(hangul).toHaveClass(/is-holiday/);
+  await expect(hangul).toContainText('한글날');
+  await expect(page.getByRole('button', { name: '10월 5일, 대체공휴일(개천절)' })).toHaveClass(
+    /is-holiday/,
+  );
+  await expect(page.getByRole('button', { name: /^10월 6일/ })).not.toHaveClass(/is-holiday/);
+  // 예빈 월급날 10일(토) → 9일 한글날 → 8일(목)
+  await page.getByRole('button', { name: '10월 8일, 일정 1개' }).click();
+  await expect(page.getByRole('button', { name: /예빈 월급날/ })).toBeVisible();
+  await axe(page);
+
+  // 9월: 추석 연휴 띠, 고른 날 목록 맨 위에 이름
+  await page.getByRole('button', { name: '이전 달' }).click();
+  const chuseok = page.getByRole('button', { name: /^9월 25일, 추석/ });
+  await expect(chuseok).toHaveClass(/is-festive/);
+  await expect(page.getByRole('button', { name: /^9월 24일, 추석 연휴/ })).toHaveClass(
+    /is-festive/,
+  );
+  await expect(page.getByRole('button', { name: /^9월 27일/ })).not.toHaveClass(/is-festive/);
+  await chuseok.click();
+  await expect(page.locator('.hg-cal__event.is-holiday')).toHaveText('추석');
+  await axe(page);
+
+  // 앞당기기 끄면 10일 그대로
+  (db.space as Record<string, unknown>).holiday_shift = false;
+  await page.reload();
+  await page.getByRole('tab', { name: '목록' }).click();
+  await expect(page.getByRole('region', { name: '돈 날짜' })).toContainText('예빈 월급날10월 10일');
+});

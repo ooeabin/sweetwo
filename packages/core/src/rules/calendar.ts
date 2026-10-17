@@ -3,7 +3,7 @@ import { baseDateIn } from '../onboarding/cycle';
 import type { BaseDay } from '../onboarding/cycle';
 
 // 캘린더 돈 날짜(docs/spec/24-calendar.md ‘캘린더 범위’). 읽기 전용이고 누르면 해당 화면.
-// 월급날(주말이면 직전 금요일), 월말 정리 기간 띠(기준일 3일 전 ~ 전날), 자산·대출 만기, 제안 적용일,
+// 월급날(주말·공휴일이면 직전 영업일, 부부가 끄면 그대로), 월말 정리 기간 띠(기준일 3일 전 ~ 전날), 자산·대출 만기, 제안 적용일,
 // 들어오는 돈(그 달 1일), 매년 목표 쓰는 달(그 달 1일).
 
 export type MoneyKind = 'payday' | 'close' | 'maturity' | 'proposal' | 'income' | 'goal';
@@ -23,11 +23,19 @@ const weekday = (s: string) => {
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 };
 
-/** 주말이면 직전 금요일(공휴일 표는 다음 단계) */
-export function businessDayOnOrBefore(s: string) {
-  const w = weekday(s);
-  return w === 0 ? addDays(s, -2) : w === 6 ? addDays(s, -1) : s;
+/** 주말·공휴일이면 직전 영업일(07 1장, 표시만 바뀌고 기준일·사이클은 그대로) */
+export function businessDayOnOrBefore(s: string, holidays: ReadonlySet<string> = new Set()) {
+  let d = s;
+  for (let i = 0; i < 14; i++) {
+    const w = weekday(d);
+    if (w !== 0 && w !== 6 && !holidays.has(d)) return d;
+    d = addDays(d, -1);
+  }
+  return d;
 }
+
+/** 설·추석 연휴 띠(24 Y-04 10번): 설날·추석과 그 연휴, 그 대체공휴일 */
+export const isFestive = (name: string) => name.includes('설날') || name.includes('추석');
 
 /** 달력 칸 6주 × 7일(일요일 시작). 다른 달 날짜는 muted */
 export function monthGrid(y: number, m: number) {
@@ -41,6 +49,10 @@ export function monthGrid(y: number, m: number) {
 
 export interface MoneyInput {
   paydays: { name: string; day: BaseDay | null }[];
+  /** 공휴일 날짜. 월급날 앞당기기에 씀 */
+  holidays?: ReadonlySet<string>;
+  /** 월급날 주말·공휴일 앞당겨 표시(기본 켜짐) */
+  shift?: boolean;
   /** 사이클 기준일(월말 정리 기간 계산). 없으면 정리 띠 없음 */
   baseDay: BaseDay | null;
   maturities: { id: string; name: string; date: string }[];
@@ -59,7 +71,10 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
   for (const p of o.paydays) {
     if (p.day === null) continue;
     out.push({
-      date: businessDayOnOrBefore(baseDateIn(y, m, p.day)),
+      date:
+        o.shift === false
+          ? baseDateIn(y, m, p.day)
+          : businessDayOnOrBefore(baseDateIn(y, m, p.day), o.holidays),
       kind: 'payday',
       name: p.name,
     });

@@ -17,6 +17,7 @@ import {
   useGoals,
   useMe,
   useMonthClose,
+  useHolidays,
   usePartner,
   useSpace,
 } from '../data';
@@ -38,6 +39,7 @@ export function H01ThisMonth() {
   const close = useMonthClose(plan.data?.id);
   const records = useGoalRecords();
   const linked = useGoalAssetSums();
+  const holidays = useHolidays();
   const proposals = useProposals();
   const nav = useNavigate();
   const { masked } = useMask();
@@ -62,6 +64,7 @@ export function H01ThisMonth() {
             linked.data ?? [],
             records.data?.uses ?? [],
           ),
+          holidays: new Set((holidays.data ?? []).map((h) => h.date)),
         })
       : null;
   const name = me.data?.nickname ?? '';

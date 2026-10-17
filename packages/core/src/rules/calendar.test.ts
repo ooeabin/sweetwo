@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { businessDayOnOrBefore, monthGrid, moneyDates } from './calendar';
+import { businessDayOnOrBefore, isFestive, monthGrid, moneyDates } from './calendar';
 
 it('달력 칸: 일요일 시작 6주, 다른 달은 muted', () => {
   const g = monthGrid(2026, 10);
@@ -53,4 +53,39 @@ it('돈 날짜: 월급날, 정리 띠, 만기, 제안, 들어오는 돈(한 번�
       yearlyGoals: [],
     }).dates,
   ).toHaveLength(1);
+});
+
+it('공휴일이면 직전 영업일(주말 넘어서까지)', () => {
+  // 2026-10-05 대체공휴일(월) → 10-03 토, 10-04 일 지나 10-02 금
+  expect(businessDayOnOrBefore('2026-10-05', new Set(['2026-10-03', '2026-10-05']))).toBe(
+    '2026-10-02',
+  );
+  // 2026-09-25 추석(금), 24 연휴(목) → 23 수
+  expect(businessDayOnOrBefore('2026-09-25', new Set(['2026-09-24', '2026-09-25']))).toBe(
+    '2026-09-23',
+  );
+});
+it('설·추석 연휴 띠', () => {
+  expect(['설날', '설날 연휴', '대체공휴일(설날)', '추석 연휴', '개천절'].map(isFestive)).toEqual([
+    true,
+    true,
+    true,
+    true,
+    false,
+  ]);
+});
+it('앞당기기를 끄면 월급날 그대로', () => {
+  const o = {
+    paydays: [{ name: '찬우', day: 25 as const }],
+    baseDay: null,
+    maturities: [],
+    proposals: [],
+    income: [],
+    yearlyGoals: [],
+  };
+  expect(moneyDates(2026, 10, o).dates[0]?.date).toBe('2026-10-23');
+  expect(moneyDates(2026, 10, { ...o, shift: false }).dates[0]?.date).toBe('2026-10-25');
+  expect(
+    moneyDates(2026, 9, { ...o, holidays: new Set(['2026-09-24', '2026-09-25']) }).dates[0]?.date,
+  ).toBe('2026-09-23'); // 추석 25일, 연휴 24일 → 23일
 });

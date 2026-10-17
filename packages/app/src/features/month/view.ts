@@ -1,6 +1,7 @@
 import type { Goal, Me, MonthlyPlan, PartnerProfile, PlanLine, Space } from '@sweetwo/api';
 import {
   allocate,
+  businessDayOnOrBefore,
   coupleBaseDay,
   coupleOf,
   currentCycle,
@@ -43,6 +44,8 @@ export interface MonthInput {
   closeDone?: boolean;
   /** 목표별 월말 정리에서 넣은 돈 누적 + 연결 자산(보유액 = 기타 보유액 + 이것, 06 5-4) */
   goalDeposits?: Record<string, number>;
+  /** 공휴일 날짜(월급날이 쉬는 날이면 직전 영업일로 표시, 07 1장) */
+  holidays?: ReadonlySet<string>;
   now?: Date;
 }
 
@@ -81,6 +84,7 @@ export function monthView({
   spentVariable = 0,
   closeDone = false,
   goalDeposits = {},
+  holidays,
   now = new Date(),
 }: MonthInput) {
   const today = todayKst(now);
@@ -146,7 +150,12 @@ export function monthView({
   const mySide: Side = me.side === 'bride' ? 'bride' : 'groom';
   const partnerSide: Side = mySide === 'groom' ? 'bride' : 'groom';
   const myLeft = splitLeft(lines, mySide);
-  const paydayIn = (d: BaseDay | null) => (d === null || !cycle ? null : nextDayOf(cycle.start, d));
+  // 각자 월급날(이번 사이클). 쉬는 날이면 직전 영업일로 표시(부부가 끄면 그대로)
+  const paydayIn = (d: BaseDay | null) => {
+    if (d === null || !cycle) return null;
+    const day = nextDayOf(cycle.start, d);
+    return sp.holiday_shift === false ? day : businessDayOnOrBefore(day, holidays);
+  };
   // 이번 달만 바꾸기(W-01a): 줄이 있고 아직 아무도 안 옮긴 통장 줄만. 연결 해제 대기 중이면 못 바꿈
   const untouched = (role: string) => {
     const l = lines.find(

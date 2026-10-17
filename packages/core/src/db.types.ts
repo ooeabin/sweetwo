@@ -688,6 +688,7 @@ export type Database = {
           family_support_estimated: boolean
           fixed_total: number | null
           fixed_total_estimated: boolean
+          holiday_shift: boolean
           housing: Database["public"]["Enums"]["housing"] | null
           id: string
           living_budget: number | null
@@ -730,6 +731,7 @@ export type Database = {
           family_support_estimated?: boolean
           fixed_total?: number | null
           fixed_total_estimated?: boolean
+          holiday_shift?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
           living_budget?: number | null
@@ -771,6 +773,7 @@ export type Database = {
           family_support_estimated?: boolean
           fixed_total?: number | null
           fixed_total_estimated?: boolean
+          holiday_shift?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
           living_budget?: number | null
@@ -1107,6 +1110,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      holiday: {
+        Row: {
+          date: string
+          fetched_at: string
+          kind: Database["public"]["Enums"]["holiday_kind"]
+          name: string
+          source: Database["public"]["Enums"]["holiday_source"]
+        }
+        ComputedFields: never
+        Insert: {
+          date: string
+          fetched_at?: string
+          kind?: Database["public"]["Enums"]["holiday_kind"]
+          name: string
+          source?: Database["public"]["Enums"]["holiday_source"]
+        }
+        Update: {
+          date?: string
+          fetched_at?: string
+          kind?: Database["public"]["Enums"]["holiday_kind"]
+          name?: string
+          source?: Database["public"]["Enums"]["holiday_source"]
+        }
+        Relationships: []
       }
       income_event: {
         Row: {
@@ -2201,6 +2229,8 @@ export type Database = {
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
       goal_use_source: "care" | "wedding" | "yearly" | "close"
+      holiday_kind: "holiday" | "substitute" | "temporary"
+      holiday_source: "api" | "admin"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
       income_kind: "side_job" | "rent" | "support"
       invest_answer: "keep" | "some" | "active" | "unsure"
@@ -2374,6 +2404,8 @@ export const Constants = {
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
       goal_use_source: ["care", "wedding", "yearly", "close"],
+      holiday_kind: ["holiday", "substitute", "temporary"],
+      holiday_source: ["api", "admin"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
       income_kind: ["side_job", "rent", "support"],
       invest_answer: ["keep", "some", "active", "unsure"],

@@ -3,6 +3,7 @@ import {
   fetchGoalAssetSums,
   fetchGoalRecords,
   fetchGoals,
+  fetchHolidays,
   fetchMe,
   fetchMonthClose,
   fetchPartner,
@@ -34,3 +35,6 @@ export const useGoalRecords = () =>
   useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
 export const useGoalAssetSums = () =>
   useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
+/** 공휴일(월급날 앞당겨 표시) */
+export const useHolidays = () =>
+  useQuery({ queryKey: qk.holidays, queryFn: fetchHolidays, staleTime: 24 * 3_600_000 });

@@ -35,6 +35,8 @@ export interface MemDb {
   /** 다녀온 뒤 기록(Y-08), 목표 사용 */
   careRecords: Record<string, unknown>[];
   goalUses: Record<string, unknown>[];
+  /** 공휴일(읽기만) */
+  holidays: { date: string; name: string; kind: string }[];
   rpc: string[];
 }
 
@@ -97,6 +99,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     cares: [],
     careRecords: [],
     goalUses: [],
+    holidays: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -900,6 +903,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
+    if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
     if (path === '/rest/v1/saving_deposit' && method === 'GET') {
       const label = db.plans[0]?.args.p_label_month;
       return json(

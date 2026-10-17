@@ -130,7 +130,8 @@ test('월급 플랜(W-01): 진행 문구, 돈 흐름, 들어오는 돈, 계획�
     'true',
   );
   await expect(page.getByText('5곳 중 1곳 나눴어요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '예빈 10.10 74만' })).toBeDisabled();
+  // 예빈 월급날 10일(토) → 직전 영업일 9일(금)로 표시
+  await expect(page.getByRole('button', { name: '예빈 10.9 74만' })).toBeDisabled();
 });
 
 test('월급 나누기(W-02): 옮겼어요·취소, 다른 금액(W-02a), 대신 체크, 먼저 체크 알림, 다 끝나면 끝 화면', async ({
