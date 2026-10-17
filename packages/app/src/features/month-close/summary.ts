@@ -17,6 +17,7 @@ export function closeSummaryProps(
     income: c.income ?? 0,
     fixed: (d.space?.fixed_total ?? 0) + (d.space?.loan_repayment ?? 0),
     variable: c.spends.reduce((t, x) => t + x.amount, 0),
+    variableNote: d.me?.card_main ? copy.cardNote : undefined,
     allowance: d.allowance,
     allowanceNote:
       d.basisNote === 'mine' || d.solo

@@ -23,6 +23,9 @@ export const weekPath = {
   lump: '/assets/week/lump',
   loans: '/assets/week/loans',
   loan: (n: number, f: 'amount' | 'rate' | 'pay') => `/assets/week/loans/${n}/${f}`,
+  fixedStart: '/assets/week/fixed',
+  fixed: (n: number) => `/assets/week/fixed/${n}`,
+  card: '/assets/week/card',
 };
 export const LUMP = 'wedding_left';
 export const pickOf = (side: 'assets' | 'loans', key: string): QuickPick | undefined =>

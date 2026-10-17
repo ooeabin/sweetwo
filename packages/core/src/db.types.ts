@@ -115,6 +115,7 @@ export type Database = {
           allowance: number | null
           analytics_off: boolean
           birth_year: number | null
+          card_main: boolean | null
           created_at: string
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null
@@ -143,6 +144,7 @@ export type Database = {
           allowance?: number | null
           analytics_off?: boolean
           birth_year?: number | null
+          card_main?: boolean | null
           created_at?: string
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
@@ -170,6 +172,7 @@ export type Database = {
           allowance?: number | null
           analytics_off?: boolean
           birth_year?: number | null
+          card_main?: boolean | null
           created_at?: string
           deletion_requested_at?: string | null
           employment?: Database["public"]["Enums"]["employment"] | null
@@ -1472,6 +1475,7 @@ export type Database = {
           allowance: number | null
           analytics_off: boolean
           birth_year: number | null
+          card_main: boolean | null
           created_at: string
           deletion_requested_at: string | null
           employment: Database["public"]["Enums"]["employment"] | null

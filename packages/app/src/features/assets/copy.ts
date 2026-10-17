@@ -153,6 +153,16 @@ export const copy = {
   weekAssetsDone: '자산을 정리했어요', // [확인 필요]
   weekLoansDone: '대출을 정리했어요', // [확인 필요]
 
+  // 첫 주 고정지출 나누기·생활비 카드(17 O-37, O-38b)
+  weekFixedPick: '어디에 나가는 돈이에요?', // [확인 필요] O-37 세부 항목 고르기
+  weekFixedPickHelp: '고른 항목마다 금액을 물어요', // [확인 필요]
+  weekFixedAmount: (name: string) => `${name}에 한 달에 얼마 나가요?`,
+  weekFixedNone: '같이 내는 고정지출이 없어요', // [확인 필요] 물을 항목이 없을 때
+  weekCard: '생활비는 주로 신용카드로 쓰나요?',
+  weekCardYes: '네',
+  weekCardNo: '아니요',
+  weekFixedDone: '고정지출을 정리했어요', // [확인 필요]
+
   // O-53 투자 원칙
   principleTitle: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
   principleOptions: {

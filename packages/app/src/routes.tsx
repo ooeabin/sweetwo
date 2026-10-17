@@ -21,6 +21,8 @@ import {
   F05Money,
   F06Diagnosis,
   O53InvestPrinciple,
+  O37FixedItems,
+  O38bCard,
   O41AssetKinds,
   O42AssetAmount,
   O43LumpGoal,
@@ -249,6 +251,36 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // O-47 대출 월 상환
+      {
+        path: '/assets/week/fixed',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O37FixedItems />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-37 세부 항목 고르기(첫 주 4일째)
+      {
+        path: '/assets/week/fixed/:n',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O37FixedItems />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-37 항목별 고정지출
+      {
+        path: '/assets/week/card',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <O38bCard />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // O-38b 생활비 카드 사용
       {
         path: '/assets/money',
         element: (

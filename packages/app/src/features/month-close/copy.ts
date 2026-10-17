@@ -45,6 +45,7 @@ export const copy = {
 
   // W-04g 정산 요약
   summary: (m: number) => `${m}월 정산`,
+  cardNote: '지난달 카드 사용분',
   saved: (amount: string, pct: number) => `이번 달 ${amount}을 모았어요 (계획의 ${pct}%)`,
   partnerEstimated: (partner: string) => `${partner}님 수입은 추정값으로 셌어요`,
   myMoneyOnly: (partner: string, me: string) =>

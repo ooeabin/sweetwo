@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 export interface MonthSummaryProps extends MonthSummaryInput {
   monthLabel: string; // "10월 정산"
   allowanceNote?: string; // "각 30만"
+  variableNote?: string; // 신용카드 주사용(O-38b) “지난달 카드 사용분”
   bigExpenseNote?: string; // "자동차보험"
   savedNote?: ReactNode; // "저축: 주택청약 20만, …"
   changes?: { name: string; diff: number }[]; // 지난달보다, 최대 4개
@@ -53,7 +54,7 @@ export function MonthSummary(p: MonthSummaryProps) {
       </div>
       <div className="hg-sum__rows" aria-label="쓴 돈 나눠 보기">
         <Row name="고정지출" value={p.fixed} />
-        <Row name="변동 지출" value={p.variable} />
+        <Row name="변동 지출" value={p.variable} note={p.variableNote} />
         <Row name="용돈" value={p.allowance} note={p.allowanceNote} />
         {p.bigExpense > 0 && <Row name="큰 지출" value={p.bigExpense} note={p.bigExpenseNote} />}
         {p.savedNote && <Row sub name={p.savedNote} value={p.saved} />}

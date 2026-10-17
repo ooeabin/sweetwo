@@ -19,6 +19,7 @@ export type Me = Pick<
   | 'payday'
   | 'payday_last'
   | 'allowance'
+  | 'card_main'
 >;
 export type Space = Tables<'couple_space'>;
 export type Goal = Tables<'goal'>;
@@ -32,7 +33,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance',
+      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main',
     )
     .maybeSingle();
   fail(error);
@@ -53,6 +54,7 @@ export async function updateMe(
     | 'payday'
     | 'payday_last'
     | 'allowance'
+    | 'card_main'
   >,
 ) {
   const me = await fetchMe();
@@ -172,6 +174,11 @@ export async function insertFixedExpenses(
   const { error } = await supabase()
     .from('fixed_expense')
     .insert(rows.map((r) => ({ ...r, space_id })));
+  fail(error);
+}
+/** O-37 항목별 금액 */
+export async function updateFixedExpense(id: string, patch: Pick<FixedExpense, 'monthly_amount'>) {
+  const { error } = await supabase().from('fixed_expense').update(patch).eq('id', id);
   fail(error);
 }
 export async function trashFixedExpenses(ids: string[]) {

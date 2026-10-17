@@ -208,6 +208,7 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 
       return { month: d, net: 10_000_000 + i * 300_000, expected: 10_000_000 + i * 400_000 };
     }),
   ];
+  db.me.card_main = true;
   db.categories.push(
     { id: 'cat-eat', name: '외식·배달', sort: 1, enabled: true, deleted_at: null },
     { id: 'cat-shop', name: '쇼핑', sort: 2, enabled: true, deleted_at: null },
@@ -267,6 +268,8 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 
   await expect(sum).toContainText('소득의');
   await expect(sum).toContainText('외식·배달+8만');
   await expect(sum).toContainText('쇼핑−5만');
+  // 신용카드 주사용(O-38b)이면 변동 지출에 라벨
+  await expect(sum).toContainText('지난달 카드 사용분');
   await axe(page);
 
   // 기간 탭은 기억
@@ -849,4 +852,71 @@ test('대출 정리하기(O-44~47): 대출마다 남은 돈, 금리(모르면 �
   // 기존 신용대출(월 상환 없음) + 70만 + 20만
   expect(db.space?.loan_repayment).toBe(900_000);
   expect(db.todos.find((t) => t.kind === 'loans')?.status).toBe('done');
+});
+
+test('고정지출 나누기·생활비 카드(O-37, O-38b): 그룹만 고른 건 세부 항목부터, 같이 내는 항목 합계가 고정지출 합계를 대신', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.fixed.push(
+    {
+      id: 'f1',
+      group_key: 'housing',
+      name: '주거',
+      burden: 'shared',
+      sort: 0,
+      monthly_amount: null,
+      deleted_at: null,
+    },
+    {
+      id: 'f2',
+      group_key: 'telecom',
+      name: '휴대폰',
+      burden: 'personal',
+      sort: 1,
+      monthly_amount: null,
+      deleted_at: null,
+    },
+    {
+      id: 'f3',
+      group_key: 'telecom',
+      name: '인터넷·TV',
+      burden: 'shared',
+      sort: 2,
+      monthly_amount: null,
+      deleted_at: null,
+    },
+  );
+  firstWeekTodos(db, 'fixed_card');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /고정지출 나누기/ }).click();
+  await heading(page, '어디에 나가는 돈이에요?');
+  await page.getByRole('group', { name: '주거' }).getByRole('button', { name: '월세' }).click();
+  await page.getByRole('group', { name: '주거' }).getByRole('button', { name: '관리비' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // 같이 내는 항목만: 인터넷·TV, 월세, 관리비(휴대폰은 각자)
+  await heading(page, '인터넷·TV에 한 달에 얼마 나가요?');
+  await expect(page.getByText('인터넷·TV 1/3')).toBeVisible();
+  await page.getByLabel('인터넷·TV에 한 달에 얼마 나가요?').fill('30000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '월세에 한 달에 얼마 나가요?');
+  await page.getByLabel('월세에 한 달에 얼마 나가요?').fill('600000');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('관리비에 한 달에 얼마 나가요?').fill('150000');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '생활비는 주로 신용카드로 쓰나요?');
+  expect(db.space?.fixed_total).toBe(780_000);
+  expect(db.fixed.find((r) => r.id === 'f1')?.deleted_at).toBeTruthy();
+  await axe(page);
+  await page.getByRole('radio', { name: '네' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.me.card_main).toBe(true);
+  expect(db.todos.find((t) => t.kind === 'fixed_card')?.status).toBe('done');
 });

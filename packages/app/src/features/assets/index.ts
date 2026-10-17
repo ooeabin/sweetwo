@@ -14,3 +14,5 @@ export { O44LoanKinds } from './pages/o-44-loan-kinds';
 export { O45LoanAmount } from './pages/o-45-loan-amount';
 export { O46LoanRate } from './pages/o-46-loan-rate';
 export { O47LoanPayment } from './pages/o-47-loan-payment';
+export { O37FixedItems } from './pages/o-37-fixed-items';
+export { O38bCard } from './pages/o-38b-card';
