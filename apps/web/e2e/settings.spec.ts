@@ -451,3 +451,82 @@ test('연결 해제 요청 받음(S-12, S-12d) → 동의해요 → 혼자 쓰�
   await expect(page.getByRole('button', { name: '연결 해제' })).toHaveCount(0);
   await axe(page);
 });
+
+const pendingFromYebin = (db: MemDb, counter: unknown = null, requestedBy = 'yebin') =>
+  db.unlinks.push({
+    id: 'u1',
+    space_id: 'space-1',
+    requested_by: requestedBy,
+    requested_at: '2026-10-05T01:00:00Z',
+    deadline: '2026-10-19',
+    ratio: 42,
+    plan: [
+      { asset_id: 'a-sav', name: '청년 적금', amount: 3_000_000, mine: 1_260_000, side: 'asset' },
+    ],
+    counter,
+    status: 'pending',
+    cancelled_at: null,
+    confirmed_at: null,
+  });
+
+test('연결 해제 받은 사람: 할 일 맨 위 → 다르게 정리하기(S-12e)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  pendingFromYebin(db);
+  await page.goto('/');
+  const todo = page.getByRole('button', { name: /예빈님이 연결 해제를 요청했어요/ });
+  await expect(todo).toContainText('10월 19일까지');
+  await axe(page);
+  await todo.click();
+  await expect(page).toHaveURL(/\/settings\/couple\/unlink\/review$/);
+  await page.getByRole('button', { name: '다르게 정리하기' }).click();
+
+  await expect(page.getByRole('heading', { name: '어떻게 나눌지 다시 정해 주세요' })).toBeVisible();
+  const mine = page.getByLabel('청년 적금 내 몫');
+  await expect(mine).toHaveValue('1,740,000');
+  await mine.fill('2000000');
+  await expect(page.getByText('예빈님 몫 100만')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '보내기' }).click();
+  await expect(page.getByText('예빈님에게 다르게 정리한 안을 보냈어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
+  await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
+  expect((db.unlinks[0]?.counter as { mine: number }[])[0]?.mine).toBe(1_000_000);
+
+  // 다시 보면: 보낸 안내, 다르게 정리하기는 한 번만
+  await page.goto('/settings/couple/unlink/review');
+  await expect(page.getByText('다르게 정리한 안을 보냈어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다르게 정리하기' })).toHaveCount(0);
+});
+
+test('연결 해제 요청한 사람: 다르게 정리한 안 확인(S-12f) → 동의해요', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  // 찬우가 요청(58%), 예빈이 다르게: 찬우 100만, 예빈 200만
+  pendingFromYebin(
+    db,
+    [{ asset_id: 'a-sav', name: '청년 적금', amount: 3_000_000, mine: 1_000_000, side: 'asset' }],
+    String(db.me.id),
+  );
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page.getByText('예빈님이 자산 정리 안을 다르게 정리했어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '요청 취소' })).toHaveCount(0);
+  await page.getByRole('button', { name: '확인하기' }).click();
+  await expect(
+    page.getByRole('heading', { name: '예빈님이 자산 정리 안을 다르게 정리했어요' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('동의하면 바로, 아니면 10월 19일에 분담 비율로 정리돼요'),
+  ).toBeVisible();
+  await expect(page.getByText('찬우 100만, 예빈 200만')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '동의해요' }).click();
+  await expect(page).toHaveURL(/\/settings\/couple\/unlinked$/);
+  await expect(page.getByText('100만 원은 각자 목표로 옮겨요')).toBeVisible();
+  expect(db.unlinks[0]?.how).toBe('counter');
+});

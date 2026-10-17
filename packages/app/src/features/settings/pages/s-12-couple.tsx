@@ -12,11 +12,13 @@ import { Badge, Button, ListRow, PageHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../month';
 import { inviteLink } from '../../onboarding';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { daysPending } from '../unlink';
 
 async function copyText(t: string) {
   try {
@@ -74,6 +76,12 @@ export function S12Couple() {
     setBusy(true);
     try {
       await cancelUnlink();
+      if (unlink.data)
+        track('unlink_resolved', {
+          path: 'canceled',
+          days_pending: daysPending(unlink.data.requested_at),
+          exported_data: false,
+        });
       await Promise.all([qk.space, qk.unlink].map((k) => qc.invalidateQueries({ queryKey: k })));
       toast(copy.cancelled);
     } catch {
@@ -156,12 +164,22 @@ export function S12Couple() {
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
         <p>
           <strong>
-            {mine ? copy.pendingWait(c.partnerName) : copy.pendingReceived(c.partnerName)}
+            {mine
+              ? req.counter
+                ? copy.counterReceived(c.partnerName)
+                : copy.pendingWait(c.partnerName)
+              : req.counter
+                ? copy.pendingWait(c.partnerName)
+                : copy.pendingReceived(c.partnerName)}
           </strong>
         </p>
         <p className="hg-q__help">{copy.deadline(formatMonthDay(req.deadline))}</p>
         <div className="hg-row" style={{ flexWrap: 'wrap' }}>
-          {mine ? (
+          {mine && req.counter ? (
+            <Button size="sm" onClick={() => nav('/settings/couple/unlink/counter')}>
+              {copy.seeCounter}
+            </Button>
+          ) : mine ? (
             <Button variant="secondary" size="sm" disabled={busy} onClick={() => void cancel()}>
               {copy.cancelRequest}
             </Button>
