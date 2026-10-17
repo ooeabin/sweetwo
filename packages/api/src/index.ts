@@ -12,3 +12,4 @@ export * from './notifications';
 export * from './couple';
 export * from './trash';
 export * from './account';
+export * from './inquiry';

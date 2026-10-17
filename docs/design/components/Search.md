@@ -8,3 +8,4 @@
 - 결과: 묶음 이름(`micro` `stone`) 아래 48px 줄. 맞은 글자만 굵게(`mark`), 오른쪽 종류는 `hg-tag`. 결과 목록 `role="listbox"`.
 - 결과 없음: EmptyState 2줄 “찾는 게 없어요” + “다른 말로 찾아보세요”. 버튼 없음.
 - 금액 가리기가 켜져 있으면 결과의 금액도 “•••”.
+- React 래퍼: `@sweetwo/ui` `Search`(라벨, 값, onChange). 검색 결과 목록은 화면이 그림.

@@ -761,3 +761,64 @@ test('삭제 요청한 계정으로 다시 로그인: 계정 삭제를 취소할
   await expect(page).toHaveURL(/\/$/);
   expect(db.me.status).toBe('active');
 });
+
+test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동의(S-19b)', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /도움말/ }).click();
+  await expect(page).toHaveURL(/\/settings\/help$/);
+  await expect(page.getByRole('heading', { name: '시작하기' })).toBeVisible();
+  await page.getByRole('button', { name: '계좌를 연결하지 않나요?' }).click();
+  await expect(page.getByText(/계좌·카드 연동 없이 직접 입력해요/)).toBeVisible();
+  await axe(page);
+  const search = page.getByRole('searchbox', { name: '자주 묻는 질문에서 찾기' });
+  await search.fill('초대 코드');
+  await expect(page.getByRole('button', { name: '배우자는 어떻게 초대하나요?' })).toBeVisible();
+  await search.fill('우주선');
+  await expect(page.getByText('찾는 답이 없어요')).toBeVisible();
+  await page.getByRole('button', { name: '문의하기' }).first().click();
+
+  // 문의하기
+  await expect(page).toHaveURL(/\/settings\/help\/inquiry$/);
+  await page.getByLabel('분류').selectOption('couple');
+  await page.getByLabel('내용').fill('예빈이 합류 코드를 넣었는데 연결이 안 돼요');
+  await axe(page);
+  await page.getByRole('button', { name: '보내기' }).click();
+  await expect(page.getByText('문의 #A-10001를 받았어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/settings\/help\/inquiries$/);
+  expect(db.inquiries[0]?.attach).toMatchObject({ couple_state: 'connected', platform: 'web' });
+
+  // 운영자 답변과 열람 요청이 왔다고 치고
+  Object.assign(db.inquiries[0] ?? {}, {
+    status: 'waiting_user',
+    access_request: [
+      {
+        id: 'ar-1',
+        status: 'requested',
+        scope: ['income_spend'],
+        raw_amount: false,
+        expires_at: null,
+      },
+    ],
+  });
+  (db.inquiries[0]?.inquiry_message as unknown[]).push({
+    id: 'm-admin',
+    author: 'admin',
+    body: '확인해 볼게요',
+    created_at: '2026-10-07T03:00:00Z',
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /문의 #A-10001/ }).click();
+  await expect(page.getByText('확인해 볼게요')).toBeVisible();
+  await page.getByRole('button', { name: '확인하기' }).click();
+  await expect(page.getByText('동의하면 24시간만 봐요')).toBeVisible();
+  await expect(page.getByText('월 수입·지출 화면')).toBeVisible();
+  await expect(page.getByText('금액은 구간으로')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '동의해요' }).click();
+  await expect(page.getByText('상담원이 확인 중이에요')).toBeVisible();
+  await page.getByRole('button', { name: '지금 그만 보게 하기' }).click();
+  await expect(page.getByText('이제 운영자는 볼 수 없어요')).toBeVisible();
+});

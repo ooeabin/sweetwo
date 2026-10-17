@@ -41,6 +41,7 @@ export interface MemDb {
   notifications: Record<string, unknown>[];
   invites: { code: string; expires_at: string; used_at: string | null }[];
   unlinks: Record<string, unknown>[];
+  inquiries: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -111,6 +112,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     notifications: [],
     invites: [],
     unlinks: [],
+    inquiries: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -627,6 +629,53 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           });
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'create_inquiry') {
+        const b = body();
+        const no = `A-${10001 + db.inquiries.length}`;
+        const id = `inq-${db.inquiries.length + 1}`;
+        db.inquiries.unshift({
+          id,
+          no,
+          category: b.p_category,
+          body: b.p_body,
+          attach: b.p_attach ?? null,
+          status: 'received',
+          created_at: '2026-10-07T01:00:00Z',
+          done_at: null,
+          inquiry_message: [
+            { id: `${id}-m1`, author: 'user', body: b.p_body, created_at: '2026-10-07T01:00:00Z' },
+          ],
+          access_request: [],
+        });
+        return json(route, no);
+      }
+      if (fn === 'add_inquiry_message') {
+        const b = body();
+        const q = db.inquiries.find((x) => x.id === b.p_inquiry);
+        if (q)
+          (q.inquiry_message as unknown[]).push({
+            id: `m-${Date.now()}`,
+            author: 'user',
+            body: b.p_body,
+            created_at: '2026-10-07T02:00:00Z',
+          });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_access_request' || fn === 'stop_access') {
+        const b = body();
+        for (const q of db.inquiries)
+          for (const a of q.access_request as Record<string, unknown>[])
+            if (a.id === b.p_id)
+              Object.assign(
+                a,
+                fn === 'stop_access'
+                  ? { status: 'done' }
+                  : b.p_accept
+                    ? { status: 'approved', expires_at: '2026-10-08T01:00:00Z' }
+                    : { status: 'declined' },
+              );
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'request_account_deletion') {
@@ -1146,6 +1195,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    if (path === '/rest/v1/inquiry' && method === 'GET') return json(route, db.inquiries);
     if (path === '/rest/v1/couple_unlink' && method === 'GET')
       return json(
         route,

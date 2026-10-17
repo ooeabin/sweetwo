@@ -85,6 +85,11 @@ import {
   S13Visibility,
   S18Data,
   S18bDelete,
+  S19About,
+  S19aInquiry,
+  S19aInquiries,
+  S19bAccess,
+  S20Help,
   S21Trash,
   S12hUnlinked,
   S11aNickname,
@@ -645,6 +650,66 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-21 휴지통
+      {
+        path: '/settings/about',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S19About />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-19 앱 정보
+      {
+        path: '/settings/help',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S20Help />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-20 도움말
+      {
+        path: '/settings/help/inquiry',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S19aInquiry />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-19a 문의하기
+      {
+        path: '/settings/help/inquiries',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S19aInquiries />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-19a 내 문의
+      {
+        path: '/settings/help/inquiries/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S19aInquiries />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-19a 문의 상세
+      {
+        path: '/settings/help/access/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S19bAccess />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-19b 관리자 열람 동의
       {
         path: '/settings/data',
         element: (

@@ -3,6 +3,63 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      access_request: {
+        Row: {
+          admin_id: string | null
+          answered_at: string | null
+          created_at: string
+          ended_at: string | null
+          expires_at: string | null
+          id: string
+          inquiry_id: string
+          partner_notified_at: string | null
+          raw_amount: boolean
+          reason: string | null
+          scope: string[]
+          status: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          admin_id?: string | null
+          answered_at?: string | null
+          created_at?: string
+          ended_at?: string | null
+          expires_at?: string | null
+          id?: string
+          inquiry_id: string
+          partner_notified_at?: string | null
+          raw_amount?: boolean
+          reason?: string | null
+          scope: string[]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          answered_at?: string | null
+          created_at?: string
+          ended_at?: string | null
+          expires_at?: string | null
+          id?: string
+          inquiry_id?: string
+          partner_notified_at?: string | null
+          raw_amount?: boolean
+          reason?: string | null
+          scope?: string[]
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_request_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       account: {
         Row: {
           asset_id: string | null
@@ -1372,6 +1429,99 @@ export type Database = {
           },
         ]
       }
+      inquiry: {
+        Row: {
+          attach: Json | null
+          body: string
+          category: Database["public"]["Enums"]["inquiry_category"]
+          channel: string
+          created_at: string
+          done_at: string | null
+          id: string
+          mail_copied_at: string | null
+          no: string
+          space_id: string | null
+          status: Database["public"]["Enums"]["inquiry_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          attach?: Json | null
+          body: string
+          category: Database["public"]["Enums"]["inquiry_category"]
+          channel?: string
+          created_at?: string
+          done_at?: string | null
+          id?: string
+          mail_copied_at?: string | null
+          no?: string
+          space_id?: string | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attach?: Json | null
+          body?: string
+          category?: Database["public"]["Enums"]["inquiry_category"]
+          channel?: string
+          created_at?: string
+          done_at?: string | null
+          id?: string
+          mail_copied_at?: string | null
+          no?: string
+          space_id?: string | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiry_message: {
+        Row: {
+          admin_id: string | null
+          author: string
+          body: string
+          created_at: string
+          id: string
+          inquiry_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          admin_id?: string | null
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          inquiry_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          inquiry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_message_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite: {
         Row: {
           code: string
@@ -2190,6 +2340,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      add_inquiry_message: {
+        Args: { p_body: string; p_inquiry: string }
+        Returns: undefined
+      }
       adjust_plan: {
         Args: {
           p_amount: number
@@ -2200,6 +2354,10 @@ export type Database = {
         Returns: undefined
       }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
+      answer_access_request: {
+        Args: { p_accept: boolean; p_id: string }
+        Returns: undefined
+      }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
       apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
       apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
@@ -2330,6 +2488,14 @@ export type Database = {
         Returns: undefined
       }
       counter_unlink: { Args: { p_shares: Json }; Returns: undefined }
+      create_inquiry: {
+        Args: {
+          p_attach?: Json
+          p_body: string
+          p_category: Database["public"]["Enums"]["inquiry_category"]
+        }
+        Returns: string
+      }
       create_invite: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2341,6 +2507,7 @@ export type Database = {
         Args: { p_birth_year: number }
         Returns: undefined
       }
+      end_access: { Args: { p_id: string }; Returns: undefined }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
@@ -2553,6 +2720,10 @@ export type Database = {
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
+      run_access_expiry: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       run_unlink_deadlines: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2594,6 +2765,7 @@ export type Database = {
         Returns: string
       }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
+      stop_access: { Args: { p_id: string }; Returns: undefined }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2680,6 +2852,8 @@ export type Database = {
       holiday_source: "api" | "admin"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
       income_kind: "side_job" | "rent" | "support"
+      inquiry_category: "account" | "couple" | "calc" | "sync" | "billing" | "privacy" | "etc"
+      inquiry_status: "received" | "in_progress" | "waiting_user" | "done"
       invest_answer: "keep" | "some" | "active" | "unsure"
       marriage_status: "married" | "engaged"
       month_close_status: "draft" | "done"
@@ -2855,6 +3029,8 @@ export const Constants = {
       holiday_source: ["api", "admin"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
       income_kind: ["side_job", "rent", "support"],
+      inquiry_category: ["account", "couple", "calc", "sync", "billing", "privacy", "etc"],
+      inquiry_status: ["received", "in_progress", "waiting_user", "done"],
       invest_answer: ["keep", "some", "active", "unsure"],
       marriage_status: ["married", "engaged"],
       month_close_status: ["draft", "done"],

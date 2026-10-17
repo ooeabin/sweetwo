@@ -296,6 +296,81 @@ export const copy = {
   deletedNotice: (md: string) =>
     `계정 삭제 요청을 받았어요. ${md}까지 다시 로그인하면 취소할 수 있어요`,
 
+  // S-19 앱 정보
+  about: '앱 정보',
+  version: '버전',
+  whatsNew: '새 기능 보기',
+  checkUpdate: '업데이트 확인',
+  terms: '이용약관',
+  privacy: '개인정보 처리방침',
+  contact: '문의하기',
+  myInquiries: '내 문의',
+  siteUrl: 'https://sweetwo.kr', // 웹사이트(L-03, L-05, L-06)
+
+  // S-19a 문의하기·내 문의
+  categoryLabel: '분류', // [확인 필요]
+  categories: {
+    account: '계정·로그인',
+    couple: '부부 연결',
+    calc: '계산·플랜',
+    sync: '동기화',
+    billing: '결제·환불',
+    privacy: '개인정보',
+    etc: '기타',
+  } as Record<string, string>,
+  bodyLabel: '내용',
+  bodyHelp: '금액이나 계좌번호는 적지 않아도 돼요', // [확인 필요]
+  attachApp: '앱 정보 함께 보내기',
+  attachAppSub: '앱 버전, OS, 부부 상태. 금액과 메모는 보내지 않아요', // [확인 필요]
+  sendInquiry: '보내기',
+  inquirySent: (no: string) => `문의 #${no}를 받았어요`,
+  inquiryStatus: {
+    received: '접수',
+    in_progress: '처리 중',
+    waiting_user: '답변 도착', // [확인 필요] 사용자 쪽 이름
+    done: '완료',
+  } as Record<string, string>,
+  noInquiries: '보낸 문의가 없어요', // [확인 필요]
+  inquiryNo: (no: string) => `문의 #${no}`,
+  me2: '나', // [확인 필요] 대화의 내 쪽 이름
+  agent: '상담원', // [확인 필요]
+  reply: '덧붙이기', // [확인 필요]
+  replyLabel: '더 알려 줄 내용', // [확인 필요]
+  replySent: '보냈어요', // [확인 필요]
+  closedNote: '완료된 지 7일이 지나 새 문의로 보내 주세요', // [확인 필요]
+  accessAsk: '문의를 확인하려면 동의가 필요해요',
+  accessSee: '확인하기', // [확인 필요]
+  accessOn: '상담원이 확인 중이에요',
+  accessLeft: (h: number) => `${h}시간 남았어요`,
+  accessStop: '지금 그만 보게 하기',
+  accessStopped: '이제 운영자는 볼 수 없어요',
+
+  // S-19b 관리자 열람 동의
+  access24: '동의하면 24시간만 봐요',
+  accessCan: '볼 수 있어요', // [확인 필요] 섹션 이름
+  accessCannot: '보지 않아요', // [확인 필요]
+  accessRange: '금액은 구간으로',
+  accessRaw: '금액이 그대로 보여요',
+  accessNever: ['메모', '가족 정보', '사진', '비공개 항목', '용돈 내역'],
+  accessScopes: {
+    month: '이번 달 화면',
+    plan: '월급 플랜 화면',
+    close: '월말 정리 화면',
+    goals: '목표 화면',
+    assets: '우리 자산 화면',
+    income_spend: '월 수입·지출 화면',
+    calendar: '캘린더 화면',
+  } as Record<string, string>,
+  accessYes: '동의해요',
+  accessNo: '거절할게요',
+  accessDeclined: '거절했어요. 다른 방법으로 도와드릴게요', // [확인 필요]
+
+  // S-20 도움말
+  help: '도움말',
+  faq: '자주 묻는 질문',
+  faqSearch: '자주 묻는 질문에서 찾기', // [확인 필요] 검색 칸
+  faqNone: '찾는 답이 없어요',
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

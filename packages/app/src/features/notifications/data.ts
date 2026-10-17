@@ -84,6 +84,8 @@ export function useNotiRealtime(userId: string | undefined) {
         (ev.row.kind === 'unlink_confirmed' || ev.row.kind === 'reconnected')
       )
         void qc.invalidateQueries();
+      else if (ev.type === 'insert' && /^(access|inquiry)_/.test(ev.row.kind))
+        void qc.invalidateQueries({ queryKey: qk.inquiries });
       else if (ev.type === 'insert' && ev.row.kind === 'reconnect_requested')
         void qc.invalidateQueries({ queryKey: qk.myUnlink });
       else if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {

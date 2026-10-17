@@ -67,7 +67,7 @@ export function S10Settings() {
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
       </div>
       <div className="hg-list">
-        <ListRow label={copy.rows.help} sub={later} />
+        <ListRow label={copy.rows.help} onClick={() => nav('/settings/help')} />
         <ListRow
           label={copy.rows.data}
           sub={copy.rows.dataSub}
@@ -76,7 +76,7 @@ export function S10Settings() {
         <ListRow
           label={copy.rows.about}
           value={desktop ? (window.sweetwo?.appVersion ?? '') : undefined}
-          sub={later}
+          onClick={() => nav('/settings/about')}
         />
         {desktop && <ListRow label={copy.rows.widget} sub={copy.rows.widgetSub} />}
       </div>
