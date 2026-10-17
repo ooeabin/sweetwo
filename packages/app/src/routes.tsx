@@ -55,6 +55,7 @@ import {
   W07Income,
   W07IncomeAdd,
 } from './features/plan';
+import { CalendarHome, Y01CareList, Y04Calendar } from './features/calendar';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -356,6 +357,36 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // W-07 들어오는 돈 추가
+      {
+        path: '/calendar',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <CalendarHome />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 캘린더: 마지막 보기
+      {
+        path: '/calendar/list',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y01CareList />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-01 챙길 날 목록
+      {
+        path: '/calendar/month',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <Y04Calendar />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // Y-04 달력
       {
         path: '/goals/week',
         element: (
