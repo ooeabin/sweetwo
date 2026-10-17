@@ -18,6 +18,7 @@ export * from './components/SceneMedia';
 export * from './components/MonthSummary';
 export * from './components/LineChart';
 export * from './components/TransferRow';
+export * from './components/Calendar';
 export * from './components/SpendItems';
 export * from './components/BigExpense';
 export * from './components/AuthLayout';

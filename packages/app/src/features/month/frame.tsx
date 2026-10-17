@@ -10,7 +10,7 @@ const HREF: Record<AppTab, string | undefined> = {
   month: '/',
   goals: '/goals',
   assets: '/assets',
-  calendar: undefined, // 캘린더는 다음 단계
+  calendar: '/calendar',
 };
 
 /**
