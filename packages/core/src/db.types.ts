@@ -130,6 +130,7 @@ export type Database = {
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
+          other_income: number
           payday: number | null
           payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
@@ -159,6 +160,7 @@ export type Database = {
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
+          other_income?: number
           payday?: number | null
           payday_last?: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
@@ -187,6 +189,7 @@ export type Database = {
           notify_email_source?: Database["public"]["Enums"]["email_source"]
           onboarding_done_at?: string | null
           onboarding_step?: string | null
+          other_income?: number
           payday?: number | null
           payday_last?: boolean
           provider?: Database["public"]["Enums"]["auth_provider"]
@@ -747,6 +750,120 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "goal_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      income_event: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          month: number
+          name: string
+          owner_user_id: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+          yearly: boolean
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          month: number
+          name: string
+          owner_user_id: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          yearly?: boolean
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          month?: number
+          name?: string
+          owner_user_id?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          yearly?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_event_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      income_item: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          kind: Database["public"]["Enums"]["income_kind"]
+          monthly_amount: number
+          owner_user_id: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["income_kind"]
+          monthly_amount: number
+          owner_user_id: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["income_kind"]
+          monthly_amount?: number
+          owner_user_id?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_item_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
@@ -1490,6 +1607,7 @@ export type Database = {
           notify_email_source: Database["public"]["Enums"]["email_source"]
           onboarding_done_at: string | null
           onboarding_step: string | null
+          other_income: number
           payday: number | null
           payday_last: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
@@ -1541,6 +1659,10 @@ export type Database = {
           status: string
         }[]
       }
+      is_own_space_row: {
+        Args: { p_owner: string; p_space_id: string }
+        Returns: boolean
+      }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_space: { Args: { p_code: string }; Returns: string }
       login_state: {
@@ -1575,6 +1697,7 @@ export type Database = {
           income_variable: boolean
           monthly_income: number
           nickname: string
+          other_income: number
           payday: number
           payday_last: boolean
           side: Database["public"]["Enums"]["couple_side"]
@@ -1650,6 +1773,7 @@ export type Database = {
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
+      income_kind: "side_job" | "rent" | "support"
       invest_answer: "keep" | "some" | "active" | "unsure"
       marriage_status: "married" | "engaged"
       month_close_status: "draft" | "done"
@@ -1815,6 +1939,7 @@ export const Constants = {
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
+      income_kind: ["side_job", "rent", "support"],
       invest_answer: ["keep", "some", "active", "unsure"],
       marriage_status: ["married", "engaged"],
       month_close_status: ["draft", "done"],

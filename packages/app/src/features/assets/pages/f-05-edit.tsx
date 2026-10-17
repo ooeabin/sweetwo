@@ -55,7 +55,7 @@ export function F05Edit() {
   const v = value === undefined ? current[f] : value;
   const patchOf = (x: number): MoneyPatch =>
     f === 'income'
-      ? { myIncome: x }
+      ? { myIncome: x + (me.other_income ?? 0) } // 다른 수입(O-35b)은 따로 더함
       : f === 'fixed'
         ? { fixedTotal: x }
         : f === 'loan'

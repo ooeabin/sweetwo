@@ -71,3 +71,28 @@ describe('두 사람 기준(18 예시값)', () => {
     expect(coupleBaseDay(c)).toBe('last');
   });
 });
+
+it('월 수입 = 월급 + 다른 수입(O-35b), 월급을 모르면 다른 수입만', () => {
+  const sp = {
+    created_by: 'c',
+    couple_state: 'connected' as const,
+    partner_nickname: '예빈',
+    partner_income: null,
+    partner_income_unknown: false,
+    partner_income_estimated: false,
+    split_ratio: null,
+  };
+  const u = (id: string, monthly_income: number | null, other_income?: number) => ({
+    id,
+    nickname: id,
+    monthly_income,
+    payday: 25,
+    payday_last: false,
+    allowance: null,
+    other_income,
+  });
+  const c = coupleOf(u('c', 3_500_000, 300_000), sp, u('y', null, 500_000));
+  expect(c.myIncome).toBe(3_800_000);
+  expect(c.partnerIncome).toBe(500_000);
+  expect(coupleOf(u('c', null), sp, null).myIncome).toBeNull();
+});

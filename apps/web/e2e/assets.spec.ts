@@ -920,3 +920,58 @@ test('고정지출 나누기·생활비 카드(O-37, O-38b): 그룹만 고른 �
   expect(db.me.card_main).toBe(true);
   expect(db.todos.find((t) => t.kind === 'fixed_card')?.status).toBe('done');
 });
+
+test('상여금·다른 수입(O-34, O-35, O-35b): 상여금 행마다 기록, 다른 수입은 월 수입에 더함', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  firstWeekTodos(db, 'rest');
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /나머지 목표/ }).click();
+  await heading(page, '상여금이나 성과급도 있나요?');
+  await axe(page);
+  await page.getByRole('radio', { name: '있어요' }).click();
+
+  await heading(page, '보통 몇 월에 얼마쯤 받아요?');
+  await page.getByLabel('1번째 월').selectOption('12');
+  await page
+    .getByRole('group', { name: '보통 몇 월에 얼마쯤 받아요?' })
+    .getByRole('textbox')
+    .nth(1)
+    .fill('2000000');
+  await expect(page.getByText('1년에 200만 원 받아요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '월급 말고 들어오는 돈이 또 있나요?');
+  const chips = page.getByRole('group', { name: '월급 말고 들어오는 돈이 또 있나요?' });
+  await chips.getByRole('button', { name: '부업·N잡' }).click();
+  await chips.getByRole('button', { name: '월세·임대 수입' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+
+  await heading(page, '부업·N잡은 한 달에 얼마쯤이에요?');
+  await expect(page.getByText('들쭉날쭉하면 적게 벌 때 기준으로 적어 주세요')).toBeVisible();
+  await page.getByLabel('부업·N잡은 한 달에 얼마쯤이에요?').fill('300000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '월세·임대 수입은 한 달에 얼마쯤이에요?');
+  await page.getByLabel('월세·임대 수입은 한 달에 얼마쯤이에요?').fill('500000');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  expect(db.incomeEvents).toMatchObject([{ name: '상여금', amount: 2_000_000, month: 12 }]);
+  expect(db.incomeItems.map((r) => [r.kind, r.monthly_amount])).toEqual([
+    ['side_job', 300_000],
+    ['rent', 500_000],
+  ]);
+  expect(db.me.other_income).toBe(800_000);
+  expect(db.todos.find((t) => t.kind === 'rest')?.status).toBe('done');
+
+  // 월 수입에 더해짐: 찬우 350만 + 다른 수입 80만
+  await page.goto('/assets/money');
+  const mine = page.getByRole('button', { name: /다른 수입 80만 원 포함/ });
+  await expect(mine).toContainText('430만 원');
+});
