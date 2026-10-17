@@ -15,6 +15,7 @@ export const paths = {
   pinSetup: '/lock/setup', // A-06 설정
   expired: '/session-expired', // A-08
   callback: '/auth/callback',
+  restore: '/account/restore', // A-02 ‘계정 삭제를 취소할까요?’
   home: '/', // 이번 달(온보딩이 생기면 멈춘 화면부터)
 } as const;
 
@@ -45,7 +46,9 @@ export async function routeAfterLogin(
     useAuthStore.getState().startSignup(p);
     return { to: s.needs_email ? paths.email : paths.terms };
   }
-  // existing, deletion_requested(삭제 취소 묻기는 계정 삭제 단계에서)
+  // 삭제 요청 30일 안 계정: “계정 삭제를 취소할까요?”
+  if (s.state === 'deletion_requested') return { to: paths.restore };
+  // existing
   if (session.platform === 'desktop' && session.bridge) {
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };

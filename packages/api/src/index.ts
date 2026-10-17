@@ -11,3 +11,4 @@ export * from './care';
 export * from './notifications';
 export * from './couple';
 export * from './trash';
+export * from './account';

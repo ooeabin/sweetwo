@@ -165,7 +165,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       return json(route, { min_version_desktop: '0.0.0', min_version_web: '0.0.0' });
     if (path === '/rest/v1/rpc/login_state') {
       return json(route, {
-        state: 'existing',
+        state: db.me.status === 'deletion_requested' ? 'deletion_requested' : 'existing',
         provider: 'kakao',
         onboarding_done: !!db.me.onboarding_done_at,
         onboarding_step: db.me.onboarding_step,
@@ -627,6 +627,14 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           });
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'request_account_deletion') {
+        db.me.status = 'deletion_requested';
+        return json(route, '2026-11-06');
+      }
+      if (fn === 'cancel_account_deletion') {
+        db.me.status = 'active';
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'trash_rows') {

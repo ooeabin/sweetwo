@@ -672,6 +672,8 @@ test('휴지통(S-21): 되살리기, 연결된 부부 목표는 제안, 영구 �
   });
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /데이터/ }).click();
+  await expect(page).toHaveURL(/\/settings\/data$/);
+  await page.getByRole('button', { name: /휴지통/ }).click();
   await expect(page).toHaveURL(/\/settings\/trash$/);
   await expect(page.getByText('지운 항목은 30일 뒤 완전히 지워져요')).toBeVisible();
   await expect(page.getByText('10월 3일에 지웠어요')).toBeVisible();
@@ -694,4 +696,68 @@ test('휴지통(S-21): 되살리기, 연결된 부부 목표는 제안, 영구 �
   await page.getByRole('button', { name: '지울게요' }).click();
   await expect(page.getByText('완전히 지웠어요')).toBeVisible();
   expect(db.assets.some((a) => a.id === 'a-old')).toBe(false);
+});
+
+test('데이터(S-18): 내보내기 zip, 사용 기록 보내기, 휴지통 개수', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  myStock(db, { visibility: 'all' });
+  await page.goto('/settings/data');
+  await expect(page.getByRole('button', { name: /휴지통/ })).toContainText('0개');
+  await expect(page.getByText(/사진은 내보내기에 들어가지 않아요/)).toBeVisible();
+  await axe(page);
+  const toggle = page.getByRole('switch', { name: '사용 기록 보내기' });
+  await expect(toggle).toHaveAttribute('aria-checked', 'true');
+  await toggle.click();
+  await expect.poll(() => db.me.analytics_off).toBe(true);
+
+  // 웹 본인 확인(다시 로그인) 뒤 돌아온 것처럼 ?export=mine
+  const dl = page.waitForEvent('download');
+  await page.goto('/settings/data?export=mine');
+  const file = await dl;
+  expect(file.suggestedFilename()).toBe('sweetwo-mine-20261007.zip');
+  const path = await file.path();
+  const bytes = (await import('node:fs')).readFileSync(path);
+  const text = bytes.toString('utf8');
+  expect(text).toContain('자산.csv');
+  expect(text).toContain('찬우 주식');
+  expect(text).not.toContain('청년 적금'); // 공동 항목은 ‘공동 데이터’에
+});
+
+test('계정 삭제(S-18b) → 로그아웃, 다시 로그인하면 삭제 취소', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  myStock(db);
+  await page.goto('/settings/data');
+  await page.getByRole('button', { name: /계정 삭제/ }).click();
+  await expect(page).toHaveURL(/\/settings\/data\/delete$/);
+  await expect(page.getByText('내 명의 항목 1개는 지워져요')).toBeVisible();
+  await expect(page.getByText('공동 항목은 예빈님에게 남아요')).toBeVisible();
+  await expect(page.getByText('30일 안에 다시 로그인하면 복구돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '카카오로 확인하고 삭제' }).click();
+  const dialog = page.getByRole('alertdialog', { name: '계정을 삭제할까요?' });
+  await expect(dialog).toBeVisible();
+  await axe(page);
+  await dialog.getByRole('button', { name: '카카오로 확인하고 삭제' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(
+    page.getByText('계정 삭제 요청을 받았어요. 11월 6일까지 다시 로그인하면 취소할 수 있어요'),
+  ).toBeVisible();
+  expect(db.me.status).toBe('deletion_requested');
+});
+
+test('삭제 요청한 계정으로 다시 로그인: 계정 삭제를 취소할까요?', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.status = 'deletion_requested';
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '계정 삭제를 취소할까요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '취소하고 계속 쓰기' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.me.status).toBe('active');
 });

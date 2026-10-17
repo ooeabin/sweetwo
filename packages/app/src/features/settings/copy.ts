@@ -192,6 +192,110 @@ export const copy = {
   trashEmpty: '휴지통이 비어 있어요',
   purged: '완전히 지웠어요', // [확인 필요]
 
+  // S-18 데이터
+  data: '데이터',
+  exportTitle: '내보내기',
+  scope: { mine: '내 데이터', joint: '공동 데이터' } as Record<string, string>,
+  scopeLabel: '범위', // [확인 필요]
+  formatCsv: '엑셀(CSV)',
+  noPhotos: '사진은 내보내기에 들어가지 않아요',
+  doExport: '내보내기',
+  exporting: '파일을 만들고 있어요',
+  exportFailed: '파일을 만들지 못했어요',
+  retry: '다시 시도',
+  exported: '파일을 저장했어요', // [확인 필요]
+  pinQ: 'PIN을 입력해 주세요', // [확인 필요] 내보내기 본인 확인
+  pinWrong: 'PIN이 맞지 않아요', // [확인 필요]
+  confirmMe: '확인', // [확인 필요]
+  trashCount: (n: number) => `${n}개`,
+  analytics: '사용 기록 보내기',
+  analyticsSub: '앱을 고치는 데만 써요',
+  deleteAccount: '계정 삭제',
+  // 파일에 생성일. 이름은 영문(일부 브라우저가 한글·띄어쓰기 이름을 버림)
+  fileName: (scope: string, date: string) => `sweetwo-${scope}-${date}.zip`,
+  ex: {
+    joint: '공동',
+    partnerSum: (name: string) => `${name}님 합계`,
+    files: {
+      assets: '자산.csv',
+      debts: '부채.csv',
+      goals: '목표.csv',
+      plans: '월급 플랜.csv',
+      closes: '월말 정리.csv',
+      care: '챙길 날.csv',
+      proposals: '제안.csv',
+    },
+    heads: {
+      assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
+      debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
+      goals: ['이름', '형태', '목표 금액', '보유액', '기한', '우선순위', '상태', '월 배분액'],
+      plans: (a: string, b: string) => [
+        '플랜(월)',
+        '통장·목표',
+        '계획액',
+        `${a} 몫`,
+        `${b} 몫`,
+        '나누기 상태',
+        '실제 나눈 금액',
+      ],
+      closes: ['플랜(월)', '실제 저축액', '실제 수입', '상태', '정리한 사람', '정리한 날'],
+      care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
+      proposals: ['날짜', '종류', '전 → 후', '응답', '상태'],
+    },
+    goalKinds: { once: '한 번', yearly: '매년', monthly: '매달' } as Record<string, string>,
+    goalStatus: {
+      active: '진행 중',
+      delayed: '지연',
+      achieved: '달성',
+      used: '사용 완료',
+      paused: '보류',
+      wrapping_up: '마무리 중',
+    } as Record<string, string>,
+    roles: {
+      living: '공동 생활비',
+      goal_fund: '목표자금',
+      emergency: '비상금',
+      personal: '개인 통장',
+      wedding: '결혼 준비',
+    } as Record<string, string>,
+    lineState: { pending: '나누기 전', done: '나눴어요' } as Record<string, string>,
+    closeStatus: { draft: '정리 중', done: '정리 끝' } as Record<string, string>,
+    careCats: { family: '양가', couple: '부부', wedding: '결혼' } as Record<string, string>,
+    paidFrom: {
+      goal_fund: '목표자금',
+      living: '생활비',
+      personal: '각자 돈',
+      wedding_account: '결혼 준비 통장',
+      personal_support: '각자 돈(지원)',
+    } as Record<string, string>,
+    responses: { like: '좋아요', oppose: '반대', differently: '다르게 해볼래요' } as Record<
+      string,
+      string
+    >,
+    proposalStatus: {
+      open: '제안 중',
+      applied: '적용',
+      held: '보류',
+      withdrawn: '철회',
+      expired: '만료',
+      reverted: '되돌림',
+      superseded: '바뀜',
+    } as Record<string, string>,
+  },
+
+  // S-18b 계정 삭제
+  deleteMine: (n: number) => `내 명의 항목 ${n}개는 지워져요`,
+  deleteJointStays: (name: string) => `공동 항목은 ${name}님에게 남아요`,
+  deleteWholeSpace: '부부 공간 전체 삭제',
+  deletePendingNote: (name: string) =>
+    `자산 정리 안이 적용되지 않고 공동 항목은 ${name}님에게 남아요`,
+  deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
+  exportFirst: '먼저 내보내기',
+  deleteWith: (p: string) => `${p}로 확인하고 삭제`,
+  deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목
+  deletedNotice: (md: string) =>
+    `계정 삭제 요청을 받았어요. ${md}까지 다시 로그인하면 취소할 수 있어요`,
+
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
   push: 'OS 알림',

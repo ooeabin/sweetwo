@@ -7,6 +7,7 @@ import {
   A05Terms,
   A06LockSetup,
   A08SessionExpired,
+  A02Restore,
   AuthCallback,
   O01Start,
   RequireAccount,
@@ -82,6 +83,8 @@ import {
   S12fUnlinkCounter,
   S12gReconnect,
   S13Visibility,
+  S18Data,
+  S18bDelete,
   S21Trash,
   S12hUnlinked,
   S11aNickname,
@@ -643,6 +646,26 @@ export const routes: RouteObject[] = [
         ),
       }, // S-21 휴지통
       {
+        path: '/settings/data',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S18Data />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-18 데이터
+      {
+        path: '/settings/data/delete',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S18bDelete />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-18b 계정 삭제
+      {
         path: '/settings/me/nickname',
         element: (
           <RequireAccount>
@@ -886,6 +909,7 @@ export const routes: RouteObject[] = [
       { path: paths.terms, element: <A05Terms /> }, // A-05 약관 동의
       { path: paths.pinSetup, element: <A06LockSetup /> }, // A-06 PIN 정하기
       { path: paths.expired, element: <A08SessionExpired /> }, // A-08 세션 만료
+      { path: paths.restore, element: <A02Restore /> }, // A-02 계정 삭제 취소
       { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 데스크톱 복귀 페이지)
     ],
   },

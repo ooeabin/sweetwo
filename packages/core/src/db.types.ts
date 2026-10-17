@@ -2245,6 +2245,10 @@ export type Database = {
       }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
+      cancel_account_deletion: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cancel_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       care_date_in_year: {
         Args: {
@@ -2496,6 +2500,10 @@ export type Database = {
         }
         Returns: string
       }
+      purge_deleted_accounts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
@@ -2524,6 +2532,10 @@ export type Database = {
           code: string
           expires_at: string
         }[]
+      }
+      request_account_deletion: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       request_reconnect: {
         Args: Record<PropertyKey, never>

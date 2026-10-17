@@ -11,3 +11,5 @@ export { initSession, session } from './session';
 export { paths } from './flow';
 export { prefs } from './prefs';
 export { providerName } from './copy';
+export { A02Restore } from './pages/a-02-restore';
+export { reauthenticate } from './reauth';
