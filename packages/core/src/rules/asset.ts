@@ -265,3 +265,43 @@ export function investSummary(
     gainPct: gain !== null && principal > 0 ? Math.round((gain * 100) / principal) : null,
   };
 }
+
+/**
+ * 금리를 모를 때 쓰는 유형별 평균 금리(06 4장 초기값, 나중에 어드민 설정값).
+ * 주택담보·전세 4%, 신용 6%, 학자금 2%, 카드론·현금서비스 15%. 없는 유형은 null(금리 비움)
+ */
+export const AVG_RATE: Record<string, number> = {
+  jeonse_loan: 4,
+  mortgage: 4,
+  credit_loan: 6,
+  student_loan: 2,
+  card_loan: 15,
+};
+export const avgRate = (kind: string): number | null => AVG_RATE[kind] ?? null;
+
+/** 첫 주 자산·대출 정리(17 O-41, O-44) 칩 하나 = 묶음 + 기본 세부 항목. 이름은 칩 이름(F-04에서 고침) */
+export interface QuickPick {
+  key: string;
+  grp: string;
+  kind: string;
+  name: string;
+}
+export const QUICK_ASSETS: QuickPick[] = [
+  { key: 'cash', grp: 'cash', kind: 'bank', name: '현금성' },
+  { key: 'deposit', grp: 'deposit', kind: 'term_deposit', name: '예금·적금' },
+  { key: 'subscription', grp: 'subscription', kind: 'housing_subscription', name: '청약' },
+  { key: 'invest', grp: 'invest', kind: 'other', name: '투자' },
+  { key: 'pension', grp: 'pension', kind: 'other', name: '연금' },
+  { key: 'insurance', grp: 'insurance', kind: 'saving_insurance', name: '저축성 보험' },
+  { key: 'real_estate', grp: 'real_estate', kind: 'deposit_money', name: '부동산' },
+  { key: 'wedding_left', grp: 'cash', kind: 'other', name: '결혼 후 남은 목돈' },
+  { key: 'etc', grp: 'etc', kind: 'other', name: '기타' },
+];
+export const QUICK_LOANS: QuickPick[] = [
+  { key: 'housing_loan', grp: 'housing_loan', kind: 'jeonse_loan', name: '주택' },
+  { key: 'credit', grp: 'credit', kind: 'credit_loan', name: '신용' },
+  { key: 'installment', grp: 'installment', kind: 'other', name: '할부' },
+  { key: 'student', grp: 'student', kind: 'student_loan', name: '학자금' },
+  { key: 'other_loan', grp: 'other_loan', kind: 'other', name: '기타 대출' },
+  { key: 'personal', grp: 'personal', kind: 'family_loan', name: '가족·지인에게 빌린 돈' },
+];

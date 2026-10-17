@@ -18,10 +18,14 @@ import { useTodos } from './data';
 
 const SHOWN = 3;
 /** 여는 화면이 만들어진 할 일 → 경로 */
-const OPENS: Partial<Record<TodoDef['kind'], string>> = { invest: '/assets/principle' };
+const OPENS: Partial<Record<TodoDef['kind'], string>> = {
+  assets: '/assets/week/assets',
+  loans: '/assets/week/loans',
+  invest: '/assets/principle',
+};
 
 // H-04 할 일(Checklist 카드). 최대 3개, 첫 주 할 일은 하루 하나씩 열림. ‘내일 할게요’로 미룸.
-// 받은 제안이 맨 위(19 H-04 순서), 줄을 누르면 G-08. 여는 화면이 있는 할 일(투자 원칙 O-53)은 글자를 누르면 그 화면.
+// 받은 제안이 맨 위(19 H-04 순서), 줄을 누르면 G-08. 여는 화면이 있는 할 일(자산 정리 O-41, 대출 정리 O-44, 투자 원칙 O-53)은 글자를 누르면 그 화면.
 // 나머지(O-41 등)는 화면이 아직 없어 이동하지 않는다. 초대는 ‘코드 복사’.
 export function H04Todos({
   state,

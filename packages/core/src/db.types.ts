@@ -224,6 +224,7 @@ export type Database = {
           paid_count: number | null
           pay_from: string | null
           principal: number | null
+          rate_estimated: boolean
           realized_gain: number | null
           side: Database["public"]["Enums"]["asset_side"]
           sold_at: string | null
@@ -258,6 +259,7 @@ export type Database = {
           paid_count?: number | null
           pay_from?: string | null
           principal?: number | null
+          rate_estimated?: boolean
           realized_gain?: number | null
           side: Database["public"]["Enums"]["asset_side"]
           sold_at?: string | null
@@ -288,6 +290,7 @@ export type Database = {
           paid_count?: number | null
           pay_from?: string | null
           principal?: number | null
+          rate_estimated?: boolean
           realized_gain?: number | null
           side?: Database["public"]["Enums"]["asset_side"]
           sold_at?: string | null

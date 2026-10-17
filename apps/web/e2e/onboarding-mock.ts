@@ -374,6 +374,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           maturity_date: null,
           monthly_payment: null,
           interest_rate: null,
+          rate_estimated: false,
           paid_count: null,
           pay_from: null,
           goal_id: null,
