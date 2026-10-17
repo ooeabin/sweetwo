@@ -1,4 +1,4 @@
-import { fetchUnlink, qk } from '@sweetwo/api';
+import { fetchMyUnlink, fetchUnlink, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
 import {
   formatDateFull,
   formatDateWeekday,
@@ -51,6 +51,38 @@ export function H01ThisMonth() {
     queryFn: fetchUnlink,
     enabled: space.data?.couple_state === 'unlink_pending',
   });
+  const solo = space.data?.couple_state === 'solo' || space.data?.couple_state === 'not_joined';
+  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
+  const reconnectAsk =
+    solo &&
+    myUnlink.data?.reconnect_by &&
+    !myUnlink.data.reconnect_answer &&
+    myUnlink.data.reconnect_by !== me.data?.id;
+  const exName = useQuery({
+    queryKey: qk.unlinkPartner,
+    queryFn: fetchUnlinkPartnerName,
+    enabled: !!reconnectAsk,
+  });
+  // 맨 위 할 일: 연결 해제 요청 받음(다르게 정리하기 전까지) > 다시 연결 요청 받음
+  const tops: { key: string; title: string; sub?: string; to: string }[] = [];
+  if (
+    space.data?.couple_state === 'unlink_pending' &&
+    unlink.data &&
+    unlink.data.requested_by !== me.data?.id &&
+    !unlink.data.counter
+  )
+    tops.push({
+      key: 'unlink',
+      title: copy.unlinkTodo(partner.data?.nickname ?? space.data.partner_nickname ?? ''),
+      sub: copy.unlinkTodoSub(formatMonthDay(unlink.data.deadline)),
+      to: '/settings/couple/unlink/review',
+    });
+  if (reconnectAsk)
+    tops.push({
+      key: 'reconnect',
+      title: copy.reconnectTodo(exName.data ?? ''),
+      to: '/settings/couple/reconnect',
+    });
 
   const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
   const failed = me.isError || space.isError || goals.isError || plan.isError;
@@ -115,14 +147,7 @@ export function H01ThisMonth() {
         received={received}
         names={names}
         goals={goals.data ?? []}
-        unlinkFrom={
-          space.data?.couple_state === 'unlink_pending' &&
-          unlink.data &&
-          unlink.data.requested_by !== me.data?.id &&
-          !unlink.data.counter
-            ? { name: v.partnerName, deadline: unlink.data.deadline }
-            : null
-        }
+        tops={tops}
       />
     );
     columns = v.separate

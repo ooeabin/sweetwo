@@ -31,6 +31,7 @@ export const copy = {
   unlinkBandSub: (md: string) => `${md}에 분담 비율대로 정리돼요`,
   unlinkBandGo: '확인하기',
   unlinkTodo: (name: string) => `${name}님이 연결 해제를 요청했어요`,
+  reconnectTodo: (name: string) => `${name}님이 다시 연결하자고 해요`,
   unlinkTodoSub: (md: string) => `${md}까지`, // [확인 필요] 기한 표시
   livingLeft: '이번 달 남은 생활비',
   livingOver: (amount: string) => `${amount} 넘었어요`,

@@ -530,3 +530,66 @@ test('연결 해제 요청한 사람: 다르게 정리한 안 확인(S-12f) → 
   await expect(page.getByText('100만 원은 각자 목표로 옮겨요')).toBeVisible();
   expect(db.unlinks[0]?.how).toBe('counter');
 });
+
+const soloAfterUnlink = (db: MemDb, reconnectBy: string | null = null) => {
+  Object.assign(db.space ?? {}, { couple_state: 'solo', partner_nickname: null });
+  db.partner = null;
+  db.unlinks.push({
+    id: 'u1',
+    space_id: 'space-old',
+    requested_by: db.me.id,
+    partner_id: 'yebin',
+    requested_at: '2026-09-20T01:00:00Z',
+    deadline: '2026-10-04',
+    ratio: 58,
+    plan: [
+      { asset_id: 'a-sav', name: '청년 적금', amount: 3_000_000, mine: 1_740_000, side: 'asset' },
+    ],
+    final_plan: [
+      { asset_id: 'a-sav', name: '청년 적금', amount: 3_000_000, mine: 1_740_000, side: 'asset' },
+    ],
+    status: 'confirmed',
+    how: 'agreed',
+    confirmed_at: '2026-10-01T01:00:00Z',
+    reconnect_until: '2026-10-31T01:00:00Z',
+    reconnect_by: reconnectBy,
+    reconnect_answer: null,
+  });
+};
+
+test('혼자 쓰기(S-12): 다시 연결하기, 새로 초대하기', async ({ page }, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  soloAfterUnlink(db);
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page.getByText('혼자 쓰는 중')).toBeVisible();
+  await expect(page.getByText('10월 31일까지 다시 연결할 수 있어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다시 연결하기' }).click();
+  await expect(page.getByText('예빈님에게 다시 연결하자고 했어요')).toBeVisible();
+  await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다시 연결하기' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: '새로 초대하기' }).click();
+  await expect(page.getByText('배우자를 초대해 주세요')).toBeVisible();
+  expect(db.space?.couple_state).toBe('not_joined');
+  await axe(page);
+});
+
+test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  soloAfterUnlink(db, 'yebin');
+  await page.goto('/');
+  await page.getByRole('button', { name: /예빈님이 다시 연결하자고 해요/ }).click();
+  await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
+  await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
+  await expect(page.getByText('연결을 끊기 전 공동 목표·통장이 돌아와요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다시 연결할게요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.unlinks[0]?.status).toBe('reconnected');
+});

@@ -29,5 +29,6 @@ export const qk = {
   latestInvite: ['invite', 'latest'] as const,
   unlink: ['couple_unlink'] as const,
   myUnlink: ['couple_unlink', 'mine'] as const,
+  unlinkPartner: ['couple_unlink', 'partner'] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
 };

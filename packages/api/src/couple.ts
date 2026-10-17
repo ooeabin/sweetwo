@@ -82,3 +82,28 @@ export async function acceptCounterUnlink() {
   const { error } = await supabase().rpc('accept_counter_unlink');
   fail(error);
 }
+
+/** S-12 “다시 연결하기”(해제 확정 뒤 30일 안) */
+export async function requestReconnect() {
+  const { error } = await supabase().rpc('request_reconnect');
+  fail(error);
+}
+
+/** S-12g 답: true = 다시 연결할게요, false = 괜찮아요 */
+export async function answerReconnect(accept: boolean) {
+  const { error } = await supabase().rpc('answer_reconnect', { p_accept: accept });
+  fail(error);
+}
+
+/** 혼자 쓰기 → 새로 초대하기(미합류로) */
+export async function startNewInvite() {
+  const { error } = await supabase().rpc('start_new_invite');
+  fail(error);
+}
+
+/** 해제 뒤 상대 호칭 */
+export async function fetchUnlinkPartnerName(): Promise<string> {
+  const { data, error } = await supabase().rpc('unlink_partner_name');
+  fail(error);
+  return typeof data === 'string' ? data : '';
+}

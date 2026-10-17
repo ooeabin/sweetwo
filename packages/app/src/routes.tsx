@@ -80,6 +80,7 @@ import {
   S12dUnlinkReview,
   S12eUnlinkDifferently,
   S12fUnlinkCounter,
+  S12gReconnect,
   S12hUnlinked,
   S11aNickname,
   S11bSide,
@@ -609,6 +610,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12h 혼자 쓰기 전환
+      {
+        path: '/settings/couple/reconnect',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12gReconnect />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12g 다시 연결 수락
       {
         path: '/settings/me/nickname',
         element: (
