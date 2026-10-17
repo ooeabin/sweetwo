@@ -88,6 +88,7 @@ export function useCloseData() {
       Promise.all([
         qc.invalidateQueries({ queryKey: qk.monthClose(planId ?? '') }),
         qc.invalidateQueries({ queryKey: qk.goalRecords }),
+        qc.invalidateQueries({ queryKey: qk.recentCloses }),
       ]),
     refreshCats: () => qc.invalidateQueries({ queryKey: qk.spendCategories }),
   };

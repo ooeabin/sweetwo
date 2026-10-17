@@ -29,6 +29,13 @@ export const copy = {
   planSpend: '지출',
   planSaveable: (amount: string) => `저축 가능 금액 월 ${amount}`,
   empty: '자산을 하나씩 적어볼까요?',
+  graphLabel: '순자산 그래프', // [확인 필요] 화면 읽기용
+  periodsLabel: '기간', // [확인 필요] 화면 읽기용
+  periods: ['6개월', '1년', '3년', '전체'],
+  expectedName: '예상 순자산',
+  expectedShort: (amount: string) => `예상 ${amount}`,
+  summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
+  summaryName: '월 정산 요약', // [확인 필요] 화면 읽기용
   addAsset: '자산 추가',
 
   // F-02

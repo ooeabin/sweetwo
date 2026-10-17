@@ -196,3 +196,44 @@ export function netWorth(
     gain: expected - net,
   };
 }
+
+export interface NetWorthPoint {
+  /** 그달 1일(YYYY-MM-01) */
+  month: string;
+  net: Won;
+  expected: Won;
+}
+
+/**
+ * 순자산 그래프 값(23 F-01 6번). 서버 월말 기록에서 이번 달은 지금 값으로 바꾸고,
+ * 아무것도 없던 앞쪽 달(둘 다 0)은 뺀다. 이번 달 하나는 늘 남음.
+ */
+export function netWorthSeries(
+  history: NetWorthPoint[],
+  now: { net: Won; expected: Won },
+  thisMonth: string,
+): NetWorthPoint[] {
+  const rows = history
+    .filter((h) => h.month < thisMonth)
+    .sort((a, b) => (a.month < b.month ? -1 : 1))
+    .map(({ month, net, expected }) => ({ month, net, expected }));
+  rows.push({ month: thisMonth, net: now.net, expected: now.expected });
+  const first = rows.findIndex((r) => r.net !== 0 || r.expected !== 0);
+  return rows.slice(first < 0 ? rows.length - 1 : first);
+}
+
+/** 기간 탭 “6개월” “1년” “3년” “전체”(null) */
+export const NET_WORTH_PERIODS = [6, 12, 36, null] as const;
+export type NetWorthPeriod = (typeof NET_WORTH_PERIODS)[number];
+
+/** 데이터보다 긴 기간은 비활성(전체는 늘 가능) */
+export const periodEnabled = (p: NetWorthPeriod, points: number) => p === null || p <= points;
+
+/** 처음 고를 기간: 기억한 탭이 쓸 수 있으면 그것, 아니면 1년(쓴 지 1년 미만이면 전체) */
+export function startPeriod(points: number, remembered?: NetWorthPeriod): NetWorthPeriod {
+  if (remembered !== undefined && periodEnabled(remembered, points)) return remembered;
+  return periodEnabled(12, points) ? 12 : null;
+}
+
+export const periodSlice = <T>(rows: T[], p: NetWorthPeriod) =>
+  p === null ? rows : rows.slice(-p);

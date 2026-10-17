@@ -4,14 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { useMonthView } from '../../month';
 import { AssetsFrame } from '../assets-frame';
+import { MonthSummaryCard } from '../month-summary-card';
+import { NetWorthChart } from '../net-worth-chart';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
 import { useDiagnosis } from '../diagnosis';
 import { indicatorText } from './f-06-diagnosis';
 
-// F-01 한눈에(docs/spec/23-assets.md 2~4·15번): 순자산(원금 기준) + 예상 순자산·안 판 수익 + 지난달 대비,
-// 자산·부채 합계(→ F-02), 이번 달 카드(→ 이번 달), 이번 달 계획(월 수입, 지출, 저축 가능).
-// 진단 줄(→ F-06). 순자산 그래프, 월 정산 요약은 다음 단계.
+// F-01 한눈에(docs/spec/23-assets.md 2~6·15·17번): 순자산(원금 기준) + 예상 순자산·안 판 수익 + 지난달 대비와
+// 순자산 그래프(LineChart), 자산·부채 합계(→ F-02), 진단 줄(→ F-06), 이번 달 카드(→ 이번 달),
+// 이번 달 계획(→ F-05), 월 정산 요약(최근 월말 정리 실제값).
 export function F01Overview() {
   const nav = useNavigate();
   const d = useAssetsData();
@@ -54,24 +56,7 @@ export function F01Overview() {
         : copy.monthLiving(mv.month, m(Math.max(mv.living.left, 0)));
     body = (
       <>
-        <section className="hg-card hg-stack" aria-label={copy.netWorth}>
-          <span className="hg-networth__label">{copy.netWorth}</span>
-          <span className="hg-networth__value">{m(nw.net)}</span>
-          {nw.gain !== 0 && (
-            <span className="hg-networth__expected">
-              {copy.expected(m(nw.expected))}
-              {', '}
-              {copy.gain(`${nw.gain > 0 ? '+' : '−'}${m(Math.abs(nw.gain))}`)}
-            </span>
-          )}
-          {d.change !== null && d.change !== 0 && (
-            <span>
-              <em className={d.change > 0 ? 'hg-pill-up' : 'hg-pill-down'}>
-                {d.change > 0 ? copy.up(m(d.change)) : copy.down(m(-d.change))}
-              </em>
-            </span>
-          )}
-        </section>
+        <NetWorthChart d={d} />
         <div className="hg-cards">
           <button
             type="button"
@@ -137,6 +122,7 @@ export function F01Overview() {
             </button>
           </div>
         )}
+        <MonthSummaryCard />
       </>
     );
   }

@@ -1,11 +1,12 @@
 import { ensureMonthClose, updateMonthClose } from '@sweetwo/api';
-import { formatManWon, readPlanSnapshot, readWon } from '@sweetwo/core';
+import { readPlanSnapshot, readWon } from '@sweetwo/core';
 import { MonthSummary, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { closePath, closeProgress, useCloseData } from '../data';
+import { closeSummaryProps } from '../summary';
 
 // W-04g 정산 요약(docs/spec/21-month-close.md, MonthSummary). 계산은 core monthSummary.
 // 지난달보다 칩, 생활비 예산 보정 제안, 미달·초과 처리는 정리한 달이 쌓인 뒤(두 번째 정리부터).
@@ -16,14 +17,10 @@ export function W04gSummary() {
   if (d.loading || !d.close) return null;
 
   const c = d.close;
-  const fixed = (d.space?.fixed_total ?? 0) + (d.space?.loan_repayment ?? 0);
-  const variable = c.spends.reduce((t, x) => t + x.amount, 0);
-  const big = c.bigs.reduce((t, x) => t + x.amount, 0);
   const saved = c.deposits.reduce((t, x) => t + x.amount, 0);
   // 계획 = 이번 플랜의 목표자금 + 비상금
   const parts = readPlanSnapshot(d.plan?.snapshot).parts;
   const planSaving = parts ? parts.goalFund + parts.emergency : 0;
-  const me = d.me?.nickname ?? '';
 
   const finish = async () => {
     if (!d.planId || !d.me || saving) return;
@@ -56,28 +53,7 @@ export function W04gSummary() {
       primary={{ label: copy.finish, loading: saving }}
       onSubmit={() => void finish()}
     >
-      <MonthSummary
-        monthLabel={copy.summary(d.month)}
-        income={c.income ?? 0}
-        fixed={fixed}
-        variable={variable}
-        allowance={d.allowance}
-        allowanceNote={
-          d.basisNote === 'mine' || d.solo
-            ? copy.allowanceNote(me, formatManWon(d.myAllowance))
-            : `${copy.allowanceNote(me, formatManWon(d.myAllowance))}, ${copy.allowanceNote(d.partnerName, formatManWon(d.partnerAllowance))}`
-        }
-        bigExpense={big}
-        bigExpenseNote={c.bigs.map((b) => b.name).join(', ') || undefined}
-        saved={saved}
-        note={
-          d.basisNote === 'estimated'
-            ? copy.partnerEstimated(d.partnerName)
-            : d.basisNote === 'mine'
-              ? copy.myMoneyOnly(d.partnerName, me)
-              : undefined
-        }
-      />
+      <MonthSummary {...closeSummaryProps(c, d, d.month)} />
     </QuestionLayout>
   );
 }

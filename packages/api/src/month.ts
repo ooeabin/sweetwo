@@ -204,19 +204,26 @@ export async function fetchGoalRecords(): Promise<{
 }
 
 /** 가장 최근에 마친 월말 정리의 소득과 이번 달 넣은 돈(재정 진단 저축률, 06 8장). 없으면 null */
-export async function fetchLatestClose(): Promise<{ income: number; saving: number } | null> {
+/** 끝낸 월말 정리, 최근 순(F-01 월 정산 요약과 지난달보다, F-06 저축률). 그달 = 플랜 label_month */
+export type ClosedMonth = MonthCloseFull & { label_month: string };
+export async function fetchRecentCloses(n = 2): Promise<ClosedMonth[]> {
   const { data, error } = await supabase()
     .from('month_close')
-    .select('income, closed_at, deposits:saving_deposit(amount, deleted_at)')
+    .select(
+      '*, plan:monthly_plan(label_month), spends:month_spend(*), bigs:big_expense(*), deposits:saving_deposit(*)',
+    )
     .eq('status', 'done')
     .is('deleted_at', null)
     .order('closed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(n);
   fail(error);
-  if (!data || data.income === null) return null;
-  return {
-    income: data.income,
-    saving: (data.deposits ?? []).filter((d) => !d.deleted_at).reduce((t, d) => t + d.amount, 0),
-  };
+  const live = <T extends { deleted_at: string | null }>(xs: T[] | null) =>
+    (xs ?? []).filter((x) => !x.deleted_at);
+  return (data ?? []).map(({ plan, ...c }) => ({
+    ...c,
+    label_month: plan?.label_month ?? '',
+    spends: live(c.spends),
+    bigs: live(c.bigs),
+    deposits: live(c.deposits),
+  }));
 }

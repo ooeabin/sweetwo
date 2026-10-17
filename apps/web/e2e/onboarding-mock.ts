@@ -577,6 +577,24 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
     }
     if (path === '/rest/v1/month_close') {
+      // 끝낸 정리 최근 순(F-01 월 정산 요약, F-06): 정리마다 spends/bigs/deposits를 따로 가질 수 있음
+      if (method === 'GET' && url.searchParams.get('status') === 'eq.done') {
+        const live = (xs: unknown) =>
+          ((xs as { deleted_at?: string | null }[] | undefined) ?? []).filter((x) => !x.deleted_at);
+        return json(
+          route,
+          db.closes
+            .filter((c) => c.status === 'done' && !c.deleted_at)
+            .sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at)))
+            .map((c) => ({
+              ...c,
+              plan: { label_month: c.label_month ?? db.plans[0]?.args.p_label_month },
+              spends: live(c.spends ?? db.spends),
+              bigs: live(c.bigs ?? db.bigs),
+              deposits: live(c.deposits ?? db.deposits),
+            })),
+        );
+      }
       if (method === 'GET') {
         const c = db.closes[0];
         return json(
