@@ -32,6 +32,9 @@ export interface MemDb {
   /** 캘린더 가족·챙길 날 */
   family: Record<string, unknown>[];
   cares: Record<string, unknown>[];
+  /** 다녀온 뒤 기록(Y-08), 목표 사용 */
+  careRecords: Record<string, unknown>[];
+  goalUses: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -92,6 +95,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     incomeEvents: [],
     family: [],
     cares: [],
+    careRecords: [],
+    goalUses: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -390,6 +395,54 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         l[`${side}_done_amount`] = a.p_amount ?? l[`amount_${side}`];
         return json(route, 'ok');
       }
+      // 다녀온 뒤 기록(Y-08): 기록, 다녀왔어요, 목표 사용, 생활비로 냈으면 ‘목표자금 → 공동 생활비’ 줄
+      if (fn === 'record_care') {
+        const a = body();
+        const care = db.cares.find((c) => c.id === a.p_care);
+        if (!care) return json(route, { message: 'not_member' }, 400);
+        const rid = `rec-${db.careRecords.length + 1}`;
+        db.careRecords.push({
+          id: rid,
+          care_day_id: care.id,
+          member_id: care.member_id ?? null,
+          occurs_on: a.p_on,
+          amount: a.p_amount,
+          paid_from: a.p_paid_from,
+          gifts: a.p_gifts,
+          gift_name: a.p_gift_name || null,
+          memo: a.p_memo || null,
+          deleted_at: null,
+        });
+        Object.assign(care, { status: 'done', status_on: a.p_on });
+        const goal =
+          ['goal_fund', 'living'].includes(String(a.p_paid_from)) && care.category === 'family'
+            ? db.goals.find((g) => g.template === 'family_cost')
+            : undefined;
+        let line = 0;
+        if (goal && Number(a.p_amount) > 0) {
+          db.goalUses.push({
+            goal_id: goal.id,
+            amount: a.p_amount,
+            used_on: a.p_on,
+            deleted_at: null,
+          });
+          const lines = db.plans[0]?.args.p_lines as Record<string, unknown>[] | undefined;
+          line = Math.min(Number(a.p_move ?? 0), Number(a.p_amount));
+          if (a.p_paid_from === 'living' && lines && line > 0) {
+            const bride = db.me.side === 'bride';
+            lines.push({
+              target: 'account',
+              account_role: 'living',
+              goal_id: goal.id,
+              kind: 'goal_to_living',
+              amount: line,
+              amount_groom: bride ? 0 : line,
+              amount_bride: bride ? line : 0,
+            });
+          } else line = 0;
+        }
+        return json(route, { record: rid, line });
+      }
       if (fn === 'invest_answers')
         return json(route, [
           {
@@ -576,7 +629,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (method === 'POST') {
         const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
         const made = (Array.isArray(b) ? b : [b]).map((r) => {
-          const row = { id: `${tbl}-${rows.length + 1}`, deleted_at: null, ...defaults, ...r };
+          const at = (opts.now ?? new Date()).toISOString();
+          const row = {
+            id: `${tbl}-${rows.length + 1}`,
+            deleted_at: null,
+            created_at: at,
+            updated_at: at,
+            ...defaults,
+            ...r,
+          };
           rows.push(row);
           return row;
         });
@@ -804,6 +865,12 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         })),
       );
     }
+    if (path === '/rest/v1/care_record' && method === 'GET')
+      return json(
+        route,
+        [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
+      );
+    if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/saving_deposit' && method === 'GET') {
       const label = db.plans[0]?.args.p_label_month;
       return json(

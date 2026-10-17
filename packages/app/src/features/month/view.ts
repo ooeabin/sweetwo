@@ -50,10 +50,12 @@ export interface MonthInput {
 export function goalExtra(
   deposits: { goalId: string; amount: number }[],
   linked: { goal_id: string; total: number }[],
+  uses: { goalId: string; amount: number }[] = [],
 ): Record<string, number> {
   const t: Record<string, number> = {};
   for (const d of deposits) t[d.goalId] = (t[d.goalId] ?? 0) + d.amount;
   for (const l of linked) t[l.goal_id] = (t[l.goal_id] ?? 0) + l.total;
+  for (const u of uses) t[u.goalId] = (t[u.goalId] ?? 0) - u.amount;
   return t;
 }
 
@@ -147,7 +149,9 @@ export function monthView({
   const paydayIn = (d: BaseDay | null) => (d === null || !cycle ? null : nextDayOf(cycle.start, d));
   // 이번 달만 바꾸기(W-01a): 줄이 있고 아직 아무도 안 옮긴 통장 줄만. 연결 해제 대기 중이면 못 바꿈
   const untouched = (role: string) => {
-    const l = lines.find((x) => x.target === 'account' && x.account_role === role);
+    const l = lines.find(
+      (x) => x.target === 'account' && x.kind === 'split' && x.account_role === role,
+    );
     return !!l && !l.groom_done_at && !l.bride_done_at;
   };
   const counterOf = (role: string) => (role === 'goal_fund' ? 'living' : 'goal_fund');

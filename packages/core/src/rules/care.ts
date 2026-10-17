@@ -151,3 +151,45 @@ export function firstBirthday(
   const date = `${y + 1}-${pad(mo)}-${pad(Math.min(d, lastDay(y + 1, mo)))}`;
   return date >= today ? date : null;
 }
+
+/** 오늘(포함) 전 가장 최근 날. 한 번이면 그 날이 지났을 때만 */
+export function prevCareDate(c: CareRule, today: string): string | null {
+  if (c.date_rule === 'once') return c.once_on && c.once_on <= today ? c.once_on : null;
+  const y = Number(today.slice(0, 4));
+  let best: string | null = null;
+  for (const yy of [y - 2, y - 1, y]) {
+    const d = careDateInYear(c, yy);
+    if (d && d <= today && (!best || d > best)) best = d;
+  }
+  return best;
+}
+
+/**
+ * 기록할 회차(24 Y-05 5번 ‘다녀왔어요’, Y-08): 지난 60일 안에 기록 없는 날이 있으면 그 날, 아니면 다음 날.
+ * 만든 날보다 앞선 회차는 기록 대상이 아님
+ */
+export function recordDate(
+  c: CareRule & { created_at: string },
+  today: string,
+  recorded: (date: string) => boolean,
+): string | null {
+  const prev = prevCareDate(c, today);
+  if (
+    prev &&
+    prev >= c.created_at.slice(0, 10) &&
+    daysBetween(prev, today) <= 60 &&
+    !recorded(prev)
+  )
+    return prev;
+  return nextCareDate(c, today);
+}
+
+/** 기록 없이 7일 지남(24 Y-01 5번, Y-05 예외): 그 날짜, 아니면 null */
+export function overdueDate(
+  c: CareRule & { created_at: string },
+  today: string,
+  recorded: (date: string) => boolean,
+): string | null {
+  const d = recordDate(c, today, recorded);
+  return d && d < today && daysBetween(d, today) >= 7 ? d : null;
+}

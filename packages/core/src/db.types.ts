@@ -547,6 +547,89 @@ export type Database = {
           },
         ]
       }
+      care_record: {
+        Row: {
+          amount: number
+          care_day_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          gift_name: string | null
+          gifts: string[]
+          id: string
+          member_id: string | null
+          memo: string | null
+          occurs_on: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          care_day_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          gift_name?: string | null
+          gifts?: string[]
+          id?: string
+          member_id?: string | null
+          memo?: string | null
+          occurs_on: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          amount?: number
+          care_day_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          gift_name?: string | null
+          gifts?: string[]
+          id?: string
+          member_id?: string | null
+          memo?: string | null
+          occurs_on?: string
+          paid_from?: Database["public"]["Enums"]["paid_from"]
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_record_care_day_id_fkey"
+            columns: ["care_day_id"]
+            isOneToOne: false
+            referencedRelation: "care_day"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_record_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "family_member"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_record_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent: {
         Row: {
           agreed: boolean
@@ -928,6 +1011,93 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "goal_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_use: {
+        Row: {
+          amount: number
+          care_record_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          goal_id: string
+          id: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          plan_line_id: string | null
+          source: Database["public"]["Enums"]["goal_use_source"]
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          used_on: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          care_record_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id: string
+          id?: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          plan_line_id?: string | null
+          source: Database["public"]["Enums"]["goal_use_source"]
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          used_on: string
+          version?: number
+        }
+        Update: {
+          amount?: number
+          care_record_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_id?: string
+          id?: string
+          paid_from?: Database["public"]["Enums"]["paid_from"]
+          plan_line_id?: string | null
+          source?: Database["public"]["Enums"]["goal_use_source"]
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          used_on?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_use_care_record_id_fkey"
+            columns: ["care_record_id"]
+            isOneToOne: false
+            referencedRelation: "care_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_plan_line_id_fkey"
+            columns: ["plan_line_id"]
+            isOneToOne: false
+            referencedRelation: "plan_line"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
@@ -1927,6 +2097,19 @@ export type Database = {
         }
         Returns: string
       }
+      record_care: {
+        Args: {
+          p_amount: number
+          p_care: string
+          p_gift_name: string
+          p_gifts: string[]
+          p_memo: string
+          p_move: number
+          p_on: string
+          p_paid_from: Database["public"]["Enums"]["paid_from"]
+        }
+        Returns: Json
+      }
       respond_proposal: {
         Args: {
           p_id: string
@@ -2007,12 +2190,14 @@ export type Database = {
       goal_kind: "once" | "yearly" | "monthly"
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
+      goal_use_source: "care" | "wedding" | "yearly" | "close"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
       income_kind: "side_job" | "rent" | "support"
       invest_answer: "keep" | "some" | "active" | "unsure"
       marriage_status: "married" | "engaged"
       month_close_status: "draft" | "done"
       newlywed_home: "have" | "before" | "after" | "parents"
+      paid_from: "goal_fund" | "living" | "personal" | "wedding_account" | "personal_support"
       plan_line_kind: "split" | "emergency_to_living" | "goal_to_living"
       plan_line_state: "pending" | "done"
       plan_line_target: "account" | "goal"
@@ -2178,12 +2363,14 @@ export const Constants = {
       goal_kind: ["once", "yearly", "monthly"],
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
+      goal_use_source: ["care", "wedding", "yearly", "close"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],
       income_kind: ["side_job", "rent", "support"],
       invest_answer: ["keep", "some", "active", "unsure"],
       marriage_status: ["married", "engaged"],
       month_close_status: ["draft", "done"],
       newlywed_home: ["have", "before", "after", "parents"],
+      paid_from: ["goal_fund", "living", "personal", "wedding_account", "personal_support"],
       plan_line_kind: ["split", "emergency_to_living", "goal_to_living"],
       plan_line_state: ["pending", "done"],
       plan_line_target: ["account", "goal"],

@@ -20,7 +20,7 @@ import { useCalendarData } from '../data';
 // Y-07 챙길 날 추가(docs/spec/24-calendar.md Y-07, 화면별 정의): a 어떤 날 → b 누구의 날(가족 목록 / 직접 입력)
 // → c 날짜(년·월·일 + 양력/음력, 달력에서 열면 채워짐) → d 얼마쯤(종류별 양가 예산 단가 채움, 0원 허용) → ‘추가하기’ 바로 저장 → Y-01.
 // 고르는 날은 모두 행사라 반복 ‘한 번’, 미리 알림 D-30 + D-7, 챙길 사람 ‘같이’(Y-05에서 바꿈).
-// 지난 날짜는 “이미 지난 날이에요. 기록으로 남길까요?”(기록 Y-08은 다음 단계라 넘어가지 않음).
+// 지난 날짜는 “이미 지난 날이에요. 기록으로 남길까요?” + ‘기록으로 남기기’(쓸 돈 0원으로 만들고 → Y-08).
 // ‘결혼 준비 결제’(예비부부, G-07a)와 배우자 생일 서프라이즈는 다음 단계.
 
 type Kind = keyof typeof copy.kinds;
@@ -81,6 +81,40 @@ export function Y07CareAdd() {
 
   if (step !== 'a' && !d.kind) return <Navigate to="/calendar/add/a" replace />;
 
+  const kind = d.kind ?? 'other';
+  const budget = d.budget ?? c.unitOf(kind);
+  const who = member?.title ?? d.name.trim();
+  /** 저장. 지난 날이면 바로 기록(Y-08)으로 */
+  const save = async (on: string, amount: number, record = false) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const [id] = await insertCareDays([
+        {
+          category: member ? 'family' : 'couple',
+          kind,
+          name: kind === 'other' && who ? who : copy.names.of(who, copy.kinds[kind]),
+          member_id: member?.id ?? null,
+          side: member?.side ?? null,
+          date_rule: 'once',
+          once_on: on,
+          budget: amount,
+        },
+      ]);
+      await qc.invalidateQueries({ queryKey: qk.careDays });
+      // 초안은 다음 시작(startCareAdd)에서 비움(여기서 비우면 a로 되돌아감)
+      if (record && id) nav(`/calendar/day/${id}/record/a?on=${on}`, { replace: true });
+      else {
+        toast(copy.saved);
+        nav('/calendar/list', { replace: true });
+      }
+    } catch {
+      toast(copy.loadFailed);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (step === 'a')
     return (
       <QuestionLayout steps={progress} title={copy.addKindQ} onBack={back}>
@@ -134,6 +168,11 @@ export function Y07CareAdd() {
         steps={progress}
         title={copy.addDateQ}
         onBack={back}
+        later={
+          past && solar
+            ? { label: copy.recordPast, onClick: () => void save(solar, 0, true) }
+            : undefined
+        }
         primary={{ label: copy.nextStep, disabled: !ok }}
         onSubmit={() => ok && go(3)}
       >
@@ -163,42 +202,13 @@ export function Y07CareAdd() {
   }
 
   // d: 얼마쯤 + 추가하기
-  const kind = d.kind ?? 'other';
-  const budget = d.budget ?? c.unitOf(kind);
-  const who = member?.title ?? d.name.trim();
-  const save = async () => {
-    if (saving || !solar) return;
-    setSaving(true);
-    try {
-      await insertCareDays([
-        {
-          category: member ? 'family' : 'couple',
-          kind,
-          name: kind === 'other' && who ? who : copy.names.of(who, copy.kinds[kind]),
-          member_id: member?.id ?? null,
-          side: member?.side ?? null,
-          date_rule: 'once',
-          once_on: solar,
-          budget,
-        },
-      ]);
-      await qc.invalidateQueries({ queryKey: qk.careDays });
-      // 초안은 다음 시작(startCareAdd)에서 비움(여기서 비우면 a로 되돌아감)
-      toast(copy.saved);
-      nav('/calendar/list', { replace: true });
-    } catch {
-      toast(copy.loadFailed);
-    } finally {
-      setSaving(false);
-    }
-  };
   return (
     <QuestionLayout
       steps={progress}
       title={copy.budgetQ}
       onBack={back}
       primary={{ label: copy.addOk, loading: saving }}
-      onSubmit={() => void save()}
+      onSubmit={() => solar && void save(solar, budget)}
     >
       <AmountInput
         label={copy.budgetQ}

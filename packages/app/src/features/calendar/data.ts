@@ -1,6 +1,9 @@
 import {
   fetchAssets,
   fetchCareDays,
+  fetchCareRecords,
+  fetchGoalAssetSums,
+  fetchGoalRecords,
   fetchFamily,
   fetchGoals,
   fetchIncomeEvents,
@@ -14,6 +17,9 @@ import {
   careDatesInMonth,
   coupleBaseDay,
   coupleOf,
+  goalHeld,
+  overdueDate,
+  recordDate,
   moneyDates,
   nextCareDate,
   todayKst,
@@ -36,9 +42,23 @@ export function useCalendarData() {
   const income = useQuery({ queryKey: qk.incomeEvents, queryFn: fetchIncomeEvents });
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
   const family = useQuery({ queryKey: qk.family, queryFn: fetchFamily });
-  const loading = [me, space, partner, assets, goals, proposals, income, cares, family].some(
-    (q) => q.isLoading,
-  );
+  const records = useQuery({ queryKey: qk.careRecords, queryFn: fetchCareRecords });
+  const goalRecords = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
+  const goalSums = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
+  const loading = [
+    me,
+    space,
+    partner,
+    assets,
+    goals,
+    proposals,
+    income,
+    cares,
+    family,
+    records,
+    goalRecords,
+    goalSums,
+  ].some((q) => q.isLoading);
   const sp = space.data;
   const c = me.data && sp ? coupleOf(me.data, sp, partner.data ?? null) : null;
   const base: BaseDay | null = !sp
@@ -95,8 +115,36 @@ export function useCalendarData() {
     [...careList]
       .filter((x) => x.kind === kind && x.budget > 0)
       .sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1))[0]?.budget ?? 0;
+  const recordList = records.data ?? [];
+  const recordedOf = (careId: string) => (date: string) =>
+    recordList.some((r) => r.care_day_id === careId && r.occurs_on === date);
+  /** 기록할 회차(‘다녀왔어요’ → Y-08) */
+  const recordOn = (c: CareDay) => recordDate(c, today, recordedOf(c.id));
+  /** 기록 없이 7일 지난 날(Y-01 맨 위, Y-05 ‘지남’) */
+  const overdue = careList
+    .map((c) => ({ care: c, date: overdueDate(c, today, recordedOf(c.id)) }))
+    .filter((x): x is { care: CareDay; date: string } => x.date !== null)
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+  /** 목표 보유액(기타 보유액 + 넣은 돈 + 연결 자산 − 쓴 돈, 06 5-4) */
+  const heldOf = (goalId: string) => {
+    const g = (goals.data ?? []).find((x) => x.id === goalId);
+    if (!g) return 0;
+    const sum = (rows: { goalId: string; amount: number }[] | undefined) =>
+      (rows ?? []).filter((x) => x.goalId === goalId).reduce((t, x) => t + x.amount, 0);
+    const linked = (goalSums.data ?? []).find((x) => x.goal_id === goalId)?.total ?? 0;
+    return goalHeld(
+      g.other_held,
+      sum(goalRecords.data?.deposits) + linked - sum(goalRecords.data?.uses),
+    );
+  };
+  const familyGoal = (goals.data ?? []).find((g) => g.template === 'family_cost') ?? null;
   return {
     loading,
+    records: recordList,
+    recordOn,
+    overdue,
+    heldOf,
+    familyGoal,
     unitOf,
     monthOf,
     caresOf,

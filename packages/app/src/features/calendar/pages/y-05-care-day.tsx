@@ -1,6 +1,15 @@
 import { qk, updateCareDay, type CareDay } from '@sweetwo/api';
 import { dday, formatMonthDay, nextCareDate, quickChips, solarToLunar } from '@sweetwo/core';
-import { AmountInput, Chip, Field, ListRow, PageHeader, QuestionLayout, Tabs } from '@sweetwo/ui';
+import {
+  AmountInput,
+  Button,
+  Chip,
+  Field,
+  ListRow,
+  PageHeader,
+  QuestionLayout,
+  Tabs,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -17,8 +26,8 @@ const statusOf = (c: CareDay, date: string | null) =>
   c.status_on && date && c.status_on === date ? c.status : 'todo';
 
 // Y-05 챙길 날 상세(docs/spec/24-calendar.md): 제목 + 구분, 날짜(음력이면 “(음력 8월 3일)”), D-day, 쓸 돈(수정 → Q3),
-// 챙길 사람, 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요), 미리 알림 칩, 메모. ‘다녀왔어요’ 뒤 기록(Y-08), 이름·날짜 수정,
-// 작년에는, 명절 할 일 목록, 알림 보내기는 다음 단계.
+// 챙길 사람, 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요 → Y-08), 기록 없이 7일 지나면 ‘지남’ + ‘기록하기’,
+// 작년에는(지난 회차 기록), 미리 알림 칩, 메모. 이름·날짜 수정, 명절 할 일 목록, 알림 보내기는 다음 단계.
 export function Y05CareDay() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -33,6 +42,18 @@ export function Y05CareDay() {
   const date = nextCareDate(care, c.today);
   const lunar = care.date_rule === 'lunar_yearly' && date ? solarToLunar(date) : null;
   const st = statusOf(care, date);
+  const overdue = c.overdue.find((x) => x.care.id === care.id)?.date ?? null;
+  const record = (on?: string) => nav(`/calendar/day/${care.id}/record/a${on ? `?on=${on}` : ''}`);
+  // 작년에는(7번): 지난 회차 기록
+  const last = c.records.find((r) => r.care_day_id === care.id && (!date || r.occurs_on < date));
+  const lastGift = last
+    ? (last.gift_name ??
+      (last.gifts.includes('cash')
+        ? copy.gifts.cash
+        : last.gifts.includes('meal')
+          ? copy.gifts.meal
+          : null))
+    : null;
 
   const patch = async (p: Parameters<typeof updateCareDay>[1]) => {
     try {
@@ -84,24 +105,42 @@ export function Y05CareDay() {
       </section>
       <section className="hg-stack" aria-label={copy.status}>
         <span className="hg-card__label">{copy.status}</span>
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.status}
-          style={{ gap: 'var(--space-2)' }}
-        >
-          {(['todo', 'preparing', 'done'] as const).map((s) => (
-            <Chip
-              key={s}
-              small
-              selected={st === s}
-              onClick={() => void patch({ status: s, status_on: date })}
-            >
-              {copy.statuses[s]}
-            </Chip>
-          ))}
-        </div>
+        {overdue ? (
+          <div className="hg-row" style={{ gap: 'var(--space-3)', alignItems: 'center' }}>
+            <span className="hg-help">
+              {copy.overdue}, {formatMonthDay(overdue)}
+            </span>
+            <Button variant="primary" size="sm" onClick={() => record(overdue)}>
+              {copy.recordNow}
+            </Button>
+          </div>
+        ) : (
+          <div
+            className="hg-row"
+            role="group"
+            aria-label={copy.status}
+            style={{ gap: 'var(--space-2)' }}
+          >
+            {(['todo', 'preparing', 'done'] as const).map((s) => (
+              <Chip
+                key={s}
+                small
+                selected={st === s}
+                onClick={() =>
+                  s === 'done' ? record() : void patch({ status: s, status_on: date })
+                }
+              >
+                {copy.statuses[s]}
+              </Chip>
+            ))}
+          </div>
+        )}
       </section>
+      {last && lastGift && (
+        <p className="hg-help" style={{ margin: 0 }}>
+          {copy.lastYear(lastGift, m(last.amount))}
+        </p>
+      )}
       <section className="hg-stack" aria-label={copy.alerts}>
         <span className="hg-card__label">{copy.alerts}</span>
         <div
