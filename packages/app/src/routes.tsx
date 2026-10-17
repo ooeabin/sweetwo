@@ -47,6 +47,7 @@ import {
   RestGoalNext,
   GoalAddRoute,
 } from './features/goals';
+import { W01SalaryPlan, W02Split, W02aOtherAmount } from './features/plan';
 import { H01ThisMonth } from './features/month';
 import { CloseRoute, W04jSpendEntry } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -288,6 +289,36 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // O-38b 생활비 카드 사용
+      {
+        path: '/plan',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W01SalaryPlan />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-01 월급 플랜
+      {
+        path: '/plan/split',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W02Split />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-02 월급 나누기
+      {
+        path: '/plan/split/:lineId',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <W02aOtherAmount />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // W-02a 다른 금액
       {
         path: '/goals/week',
         element: (

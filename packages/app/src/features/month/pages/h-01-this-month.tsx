@@ -28,7 +28,7 @@ import { goalExtra, monthView, type MonthView } from '../view';
 
 // H-01 이번 달(docs/spec/19-this-month.md). 앱 기본 틀 + 오늘 띠(H-01 인사, H-02 맨 위 행동과 숫자 타일)
 // + 왼쪽 단(월급 플랜 H-03 / 예비부부 모으기·결혼 비용) + 오른쪽 단(목표 H-05, 다가오는 일정 H-07).
-// 할 일(H-04), 지출 적기(W-04j), 월급 나누기(W-02), 월말 정리(W-04)는 다음 단계. 버튼은 자리만.
+// 맨 위 행동: 지출 적기(W-04j), 월급 나누기(W-02), 월말 정리(W-04). ‘추가’는 다음 단계.
 export function H01ThisMonth() {
   const me = useMe();
   const space = useSpace();
@@ -114,7 +114,12 @@ export function H01ThisMonth() {
           <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
             {v.engaged && <WeddingHeader v={v} />}
             {todos}
-            <PlanCard v={v} m={m} onMoney={() => nav('/assets/money')} />
+            <PlanCard
+              v={v}
+              m={m}
+              onMoney={() => nav('/assets/money')}
+              onPlan={() => nav('/plan')}
+            />
             {v.engaged && <WeddingStatus v={v} m={m} />}
           </div>,
           <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
@@ -165,12 +170,18 @@ function today(v: MonthView, name: string, m: (n: number) => string, go: (to: st
       sub: v.living.pct === null ? undefined : `${v.living.pct}%`,
     };
   }
-  // 여는 화면: 지출 적기(W-04j 앞당겨 열기), 정리 시작(W-04a). 월급 나누기(W-02)는 다음 단계
+  // 여는 화면: 지출 적기(W-04j 앞당겨 열기), 정리 시작(W-04a), 월급 나누기(W-02)
   const target =
-    primary === copy.spendEntry ? spendPath : primary === copy.closeStart ? closePath : null;
+    primary === copy.spendEntry
+      ? spendPath
+      : primary === copy.closeStart
+        ? closePath
+        : primary === copy.splitNow
+          ? '/plan/split'
+          : null;
   return {
     title,
-    // 지출 적기, 정리 시작만 열림. 월급 나누기(W-02), 추가는 다음 단계
+    // ‘추가’는 다음 단계
     actions: (
       <>
         <Button variant="secondary" disabled>
@@ -221,10 +232,12 @@ function PlanCard({
   v,
   m,
   onMoney,
+  onPlan,
 }: {
   v: MonthView;
   m: (n: number) => string;
   onMoney: () => void;
+  onPlan: () => void;
 }) {
   const rows: [string, number][] = [
     [copy.roles.living, v.parts.living],
@@ -253,15 +266,16 @@ function PlanCard({
           <ListRow key={label} label={label} value={m(value)} />
         ))}
       </div>
-      {/* H-01 7번 월 수입·지출 수정 → F-05 */}
-      <button
-        type="button"
-        className="hg-btn hg-btn--link"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={onMoney}
-      >
-        {copy.editMoney}
-      </button>
+      <div className="hg-row" style={{ gap: 'var(--space-3)' }}>
+        {/* H-03 → W-01 월급 플랜 */}
+        <button type="button" className="hg-btn hg-btn--link" onClick={onPlan}>
+          {copy.seePlan}
+        </button>
+        {/* H-01 7번 월 수입·지출 수정 → F-05 */}
+        <button type="button" className="hg-btn hg-btn--link" onClick={onMoney}>
+          {copy.editMoney}
+        </button>
+      </div>
     </section>
   );
 }

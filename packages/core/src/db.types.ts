@@ -1154,12 +1154,18 @@ export type Database = {
           amount: number
           amount_bride: number | null
           amount_groom: number | null
+          bride_done_amount: number | null
+          bride_done_at: string | null
+          bride_done_by: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
           deleted_by: string | null
           done_amount: number | null
           goal_id: string | null
+          groom_done_amount: number | null
+          groom_done_at: string | null
+          groom_done_by: string | null
           id: string
           kind: Database["public"]["Enums"]["plan_line_kind"]
           plan_id: string
@@ -1170,19 +1176,26 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           version: number
+          split_line_done: boolean | null
         }
-        ComputedFields: never
+        ComputedFields: "split_line_done"
         Insert: {
           account_role?: Database["public"]["Enums"]["account_role"] | null
           amount: number
           amount_bride?: number | null
           amount_groom?: number | null
+          bride_done_amount?: number | null
+          bride_done_at?: string | null
+          bride_done_by?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           done_amount?: number | null
           goal_id?: string | null
+          groom_done_amount?: number | null
+          groom_done_at?: string | null
+          groom_done_by?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["plan_line_kind"]
           plan_id: string
@@ -1199,12 +1212,18 @@ export type Database = {
           amount?: number
           amount_bride?: number | null
           amount_groom?: number | null
+          bride_done_amount?: number | null
+          bride_done_at?: string | null
+          bride_done_by?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           done_amount?: number | null
           goal_id?: string | null
+          groom_done_amount?: number | null
+          groom_done_at?: string | null
+          groom_done_by?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["plan_line_kind"]
           plan_id?: string
@@ -1581,6 +1600,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_split: {
+        Args: {
+          p_amount?: number
+          p_line: string
+          p_side: Database["public"]["Enums"]["couple_side"]
+        }
+        Returns: string
+      }
       complete_signup: {
         Args: {
           p_marketing: boolean
@@ -1720,6 +1747,15 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      split_line_done: {
+        Args: {
+          l: Omit<
+            Database["public"]["Tables"]["plan_line"]["Row"],
+            Database["public"]["Tables"]["plan_line"]["ComputedFields"]
+          >
+        }
+        Returns: boolean
+      }
       start_first_plan: {
         Args: {
           p_cycle_end: string
@@ -1732,6 +1768,13 @@ export type Database = {
           p_snapshot: Json
         }
         Returns: string
+      }
+      uncheck_split: {
+        Args: {
+          p_line: string
+          p_side: Database["public"]["Enums"]["couple_side"]
+        }
+        Returns: undefined
       }
       update_pending_shares: {
         Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
