@@ -26,6 +26,10 @@ export const copy = {
   seePlan: '월급 플랜 보기', // [확인 필요] H-03 → W-01
   spendEntry: '지출 적기',
   closeStart: '정리 시작',
+  // 해제 대기 띠
+  unlinkBand: '연결 해제를 기다리고 있어요',
+  unlinkBandSub: (md: string) => `${md}에 분담 비율대로 정리돼요`,
+  unlinkBandGo: '확인하기',
   livingLeft: '이번 달 남은 생활비',
   livingOver: (amount: string) => `${amount} 넘었어요`,
   unsplit: '안 나눈 돈',

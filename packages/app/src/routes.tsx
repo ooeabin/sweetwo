@@ -74,6 +74,10 @@ import {
   S10Settings,
   S11Me,
   S12Couple,
+  S12aUnlinkIntro,
+  S12bUnlinkPlan,
+  S12cUnlinkConfirm,
+  S12dUnlinkReview,
   S11aNickname,
   S11bSide,
   S11dPlanDay,
@@ -532,6 +536,46 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12 부부 정보
+      {
+        path: '/settings/couple/unlink',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12aUnlinkIntro />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12a 연결 해제 안내
+      {
+        path: '/settings/couple/unlink/plan',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12bUnlinkPlan />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12b 자산 정리 안
+      {
+        path: '/settings/couple/unlink/confirm',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12cUnlinkConfirm />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12c 입력 후 보내기
+      {
+        path: '/settings/couple/unlink/review',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S12dUnlinkReview />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-12d 자산 정리 안 확인(보기만)
       {
         path: '/settings/me/nickname',
         element: (

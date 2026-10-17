@@ -2,6 +2,10 @@
 export { S10Settings } from './pages/s-10-settings';
 export { S11Me } from './pages/s-11-me';
 export { S12Couple } from './pages/s-12-couple';
+export { S12aUnlinkIntro } from './pages/s-12a-unlink-intro';
+export { S12bUnlinkPlan } from './pages/s-12b-unlink-plan';
+export { S12cUnlinkConfirm } from './pages/s-12c-unlink-confirm';
+export { S12dUnlinkReview } from './pages/s-12d-unlink-review';
 export { S11aNickname } from './pages/s-11a-nickname';
 export { S14Notifications } from './pages/s-14-notifications';
 export { S14aQuiet } from './pages/s-14a-quiet';

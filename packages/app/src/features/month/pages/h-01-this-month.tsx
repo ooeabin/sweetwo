@@ -1,11 +1,14 @@
+import { fetchUnlink, qk } from '@sweetwo/api';
 import {
   formatDateFull,
   formatDateWeekday,
+  formatMonthDay,
   formatYm,
   todayKst,
   type Upcoming,
 } from '@sweetwo/core';
 import { Badge, Button, Card, ListRow, Meter, SectionHeader, type AppFrameStat } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
@@ -43,6 +46,11 @@ export function H01ThisMonth() {
   const proposals = useProposals();
   const nav = useNavigate();
   const { masked } = useMask();
+  const unlink = useQuery({
+    queryKey: qk.unlink,
+    queryFn: fetchUnlink,
+    enabled: space.data?.couple_state === 'unlink_pending',
+  });
 
   const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
   const failed = me.isError || space.isError || goals.isError || plan.isError;
@@ -136,7 +144,36 @@ export function H01ThisMonth() {
         ];
   }
 
-  return <MainFrame current="month" today={{ date, title, actions, stats }} columns={columns} />;
+  // 해제 대기 띠(19 이번 달 5번): 두 사람 모두, 닫기 없음. 확인하기 → 요청한 사람 S-12, 받은 사람 S-12d
+  const req = space.data?.couple_state === 'unlink_pending' ? unlink.data : null;
+  const banner = req ? (
+    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+      <span>
+        <strong>{copy.unlinkBand}</strong> {copy.unlinkBandSub(formatMonthDay(req.deadline))}
+      </span>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() =>
+          nav(
+            req.requested_by === me.data?.id
+              ? '/settings/couple'
+              : '/settings/couple/unlink/review',
+          )
+        }
+      >
+        {copy.unlinkBandGo}
+      </Button>
+    </div>
+  ) : null;
+  return (
+    <MainFrame
+      current="month"
+      today={{ date, title, actions, stats }}
+      banner={banner}
+      columns={columns}
+    />
+  );
 }
 
 /** 오늘 띠: 인사(H-01) + 맨 위 행동(H-02) + 숫자 타일 3개 */

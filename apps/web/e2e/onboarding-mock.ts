@@ -40,6 +40,7 @@ export interface MemDb {
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
   invites: { code: string; expires_at: string; used_at: string | null }[];
+  unlinks: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -108,6 +109,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     holidays: [],
     notifications: [],
     invites: [],
+    unlinks: [],
     rpc: [],
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
@@ -536,6 +538,57 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return json(route, Object.values(t));
       }
+      if (fn === 'request_unlink') {
+        // 서버 request_unlink 흉내: 공동 명의 자산마다 몫(없으면 분담 비율 기본 몫), 해제 대기
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_shares: Record<string, number>;
+          p_confirm: string;
+        };
+        if (body.p_confirm !== '연결 해제')
+          return json(route, { message: 'confirm_mismatch' }, 400);
+        const mine = Number(db.me.monthly_income ?? 0);
+        const theirs = Number((db.partner as Record<string, unknown> | null)?.monthly_income ?? 0);
+        const pct =
+          db.space?.split_mode === 'income' && mine > 0 && theirs > 0
+            ? Math.round((mine * 100) / (mine + theirs))
+            : 50;
+        const plan = db.assets
+          .filter(
+            (a) =>
+              a.owner === 'joint' && a.side === 'asset' && !a.deleted_at && Number(a.amount) > 0,
+          )
+          .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+          .map((a) => {
+            const amount = Number(a.amount);
+            const given = body.p_shares[String(a.id)];
+            const def = Math.min(
+              Math.max(Math.round((amount * pct) / 1_000_000) * 10_000, 0),
+              amount,
+            );
+            return { asset_id: a.id, name: a.name, amount, mine: given ?? def };
+          });
+        const row = {
+          id: `unlink-${db.unlinks.length + 1}`,
+          space_id: 'space-1',
+          requested_by: db.me.id,
+          requested_at: new Date().toISOString(),
+          deadline: '2026-10-21',
+          ratio: pct,
+          plan,
+          status: 'pending',
+          cancelled_at: null,
+          confirmed_at: null,
+        };
+        db.unlinks.push(row);
+        if (db.space) db.space.couple_state = 'unlink_pending';
+        return json(route, row.id);
+      }
+      if (fn === 'cancel_unlink') {
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u) u.status = 'cancelled';
+        if (db.space) db.space.couple_state = 'connected';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'create_invite' || fn === 'renew_invite') {
         // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
         const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';
@@ -960,6 +1013,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    if (path === '/rest/v1/couple_unlink' && method === 'GET')
+      return json(
+        route,
+        db.unlinks.filter((u) => u.status === 'pending'),
+      );
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
     // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {
