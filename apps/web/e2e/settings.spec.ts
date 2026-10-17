@@ -822,3 +822,32 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await page.getByRole('button', { name: '지금 그만 보게 하기' }).click();
   await expect(page.getByText('이제 운영자는 볼 수 없어요')).toBeVisible();
 });
+
+test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기기에서 로그아웃', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.sessions.push({
+    id: 's-win',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537',
+    created_at: '2026-09-01T00:00:00Z',
+    last_used_at: '2026-10-03T00:00:00Z',
+    current: false,
+  });
+  await open(page, info.project.name === 'narrow');
+  await page.getByRole('button', { name: /보안/ }).click();
+  await expect(page).toHaveURL(/\/settings\/security$/);
+  await expect(page.getByText('지금 이 기기')).toBeVisible();
+  await expect(page.getByText('Chrome(Windows)')).toBeVisible();
+  await expect(page.getByText('10월 3일에 마지막으로 썼어요')).toBeVisible();
+  // 웹은 기기 목록만(앱 잠금 없음)
+  await expect(page.getByRole('switch', { name: '앱 잠금' })).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '로그아웃', exact: true }).click();
+  await expect(page.getByText('그 기기에서 로그아웃했어요')).toBeVisible();
+  await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
+  await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+});

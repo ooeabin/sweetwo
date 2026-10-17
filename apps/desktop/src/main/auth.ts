@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { DESKTOP_LOGIN_TIMEOUT_MS } from '@sweetwo/core';
 import { z } from 'zod';
 import { CH, type AuthEvent, type AuthProviderName, type SignOutReason } from '../shared/channels';
@@ -53,7 +53,12 @@ async function tokenRequest(
   const { url, key } = requireEnv();
   const res = await fetch(`${url}/auth/v1/token?grant_type=${grant}`, {
     method: 'POST',
-    headers: { apikey: key, 'Content-Type': 'application/json' },
+    headers: {
+      apikey: key,
+      'Content-Type': 'application/json',
+      // S-15 로그인된 기기 이름(core deviceLabel): 세션에 남는 브라우저 정보
+      'User-Agent': `sweeTwo/${app.getVersion()} Electron (${process.platform === 'darwin' ? 'Macintosh' : process.platform === 'win32' ? 'Windows' : 'Linux'})`,
+    },
     body: JSON.stringify(body),
   });
   if (res.status >= 400 && res.status < 500) return 'rejected';

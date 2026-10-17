@@ -83,6 +83,7 @@ import {
   S12fUnlinkCounter,
   S12gReconnect,
   S13Visibility,
+  S15Security,
   S18Data,
   S18bDelete,
   S19About,
@@ -720,6 +721,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-18 데이터
+      {
+        path: '/settings/security',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S15Security />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-15 보안
       {
         path: '/settings/data/delete',
         element: (

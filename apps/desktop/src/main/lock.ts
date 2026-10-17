@@ -22,6 +22,14 @@ const hashPin = (pin: string, salt: string) =>
   scryptSync(pin, Buffer.from(salt, 'base64'), 32).toString('base64');
 
 let locked = false;
+/** 방금 PIN을 확인한 시각(잠금 끄기·PIN 바꾸기 전 현재 PIN 확인, S-15) */
+let verifiedAt = 0;
+const AUTO_KEY = 'app-lock-auto';
+/** 자동 잠금 분: 1·5·15, 0 = 사용 안 함(기본 5분) */
+const autoMin = () => {
+  const v = Number(secureStore.get(AUTO_KEY) ?? AUTO_LOCK_MS / 60_000);
+  return [0, 1, 5, 15].includes(v) ? v : AUTO_LOCK_MS / 60_000;
+};
 const emitLocked = () => {
   for (const w of BrowserWindow.getAllWindows()) w.webContents.send(CH.lockEvent, { locked: true });
 };
@@ -36,6 +44,7 @@ export function lockStatus(): LockStatus {
     locked: s !== null && locked,
     touchIdAvailable: touchIdAvailable(),
     touchIdEnabled: !!s?.touchId && touchIdAvailable(),
+    autoLockMin: autoMin(),
   };
 }
 
@@ -56,6 +65,7 @@ export async function verifyPin(pin: string): Promise<VerifyResult> {
   if (ok) {
     write({ ...s, failed: 0 });
     locked = false;
+    verifiedAt = Date.now();
     return { ok: true };
   }
   const failed = s.failed + 1;
@@ -67,6 +77,19 @@ export async function verifyPin(pin: string): Promise<VerifyResult> {
   }
   write({ ...s, failed });
   return { ok: false, failed, signedOut: false };
+}
+
+/** S-15 잠금 끄기: 1분 안에 현재 PIN을 확인했을 때만 */
+export function clearPinVerified(): boolean {
+  if (Date.now() - verifiedAt > 60_000) return false;
+  clearPin();
+  verifiedAt = 0;
+  return true;
+}
+
+export function setAutoLock(min: number): boolean {
+  if (![0, 1, 5, 15].includes(min)) return false;
+  return secureStore.set(AUTO_KEY, String(min));
 }
 
 export function clearPin() {
@@ -99,11 +122,12 @@ export async function unlockWithTouchId(): Promise<boolean> {
   }
 }
 
-/** 실행 시 잠금 + 자리를 비우면(기본 5분) 잠금, 화면 잠금 때도 잠금 */
+/** 실행 시 잠금 + 자리를 비우면(S-15 설정, 기본 5분) 잠금, 화면 잠금 때도 잠금 */
 export function startAutoLock() {
   if (read()) locked = true;
   setInterval(() => {
-    if (!locked && powerMonitor.getSystemIdleTime() * 1000 >= AUTO_LOCK_MS) lockNow();
+    const min = autoMin();
+    if (!locked && min > 0 && powerMonitor.getSystemIdleTime() >= min * 60) lockNow();
   }, 15_000).unref();
   powerMonitor.on('lock-screen', lockNow);
   powerMonitor.on('suspend', lockNow);
