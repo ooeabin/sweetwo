@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { copy } from '../copy';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
+import { SysTabs } from '../sys-tabs';
 
 const ACTIONS = ['search', 'view', 'reveal', 'request', 'execute', 'approve', 'download', 'edit'];
 
@@ -34,6 +35,7 @@ export function AD17Audit() {
 
   return (
     <Frame menu="system" title={copy.auditTitle}>
+      <SysTabs current="audit" />
       <form
         className="hg-row"
         style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}

@@ -133,6 +133,43 @@ export type Database = {
           },
         ]
       }
+      admin_approval: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          kind: string
+          payload: NonNullable<Json>
+          requested_at: string
+          requested_by: string
+          status: string
+          summary: string
+        }
+        ComputedFields: never
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          kind: string
+          payload: NonNullable<Json>
+          requested_at?: string
+          requested_by: string
+          status?: string
+          summary: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          kind?: string
+          payload?: NonNullable<Json>
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          summary?: string
+        }
+        Relationships: []
+      }
       admin_audit: {
         Row: {
           action: string
@@ -176,6 +213,28 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_review: {
+        Row: {
+          at: string
+          by_id: string | null
+          id: number
+          note: string
+        }
+        ComputedFields: never
+        Insert: {
+          at?: string
+          by_id?: string | null
+          id?: never
+          note: string
+        }
+        Update: {
+          at?: string
+          by_id?: string | null
+          id?: never
+          note?: string
+        }
+        Relationships: []
+      }
       admin_user: {
         Row: {
           created_at: string
@@ -216,6 +275,10 @@ export type Database = {
           flags: NonNullable<Json>
           id: number
           kill_switches: NonNullable<Json>
+          latest_version_desktop: string
+          maintenance_ends_at: string | null
+          maintenance_message: string | null
+          maintenance_starts_at: string | null
           min_version_desktop: string
           min_version_web: string
           updated_at: string
@@ -227,6 +290,10 @@ export type Database = {
           flags?: NonNullable<Json>
           id?: number
           kill_switches?: NonNullable<Json>
+          latest_version_desktop?: string
+          maintenance_ends_at?: string | null
+          maintenance_message?: string | null
+          maintenance_starts_at?: string | null
           min_version_desktop?: string
           min_version_web?: string
           updated_at?: string
@@ -237,6 +304,10 @@ export type Database = {
           flags?: NonNullable<Json>
           id?: number
           kill_switches?: NonNullable<Json>
+          latest_version_desktop?: string
+          maintenance_ends_at?: string | null
+          maintenance_message?: string | null
+          maintenance_starts_at?: string | null
           min_version_desktop?: string
           min_version_web?: string
           updated_at?: string
@@ -888,6 +959,43 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_version: {
+        Row: {
+          checked_on: string
+          created_at: string
+          created_by: string | null
+          effective_on: string
+          id: string
+          key: string
+          kind: string
+          note: string | null
+          version: string
+        }
+        ComputedFields: never
+        Insert: {
+          checked_on: string
+          created_at?: string
+          created_by?: string | null
+          effective_on: string
+          id?: string
+          key: string
+          kind: string
+          note?: string | null
+          version: string
+        }
+        Update: {
+          checked_on?: string
+          created_at?: string
+          created_by?: string | null
+          effective_on?: string
+          id?: string
+          key?: string
+          kind?: string
+          note?: string | null
+          version?: string
+        }
+        Relationships: []
       }
       couple_space: {
         Row: {
@@ -1833,6 +1941,31 @@ export type Database = {
           },
         ]
       }
+      loan_rate: {
+        Row: {
+          applied_on: string
+          kind: string
+          rate_bp: number
+          updated_at: string
+          updated_by: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          applied_on: string
+          kind: string
+          rate_bp: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          applied_on?: string
+          kind?: string
+          rate_bp?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       lunar_date: {
         Row: {
           day: number
@@ -2148,6 +2281,52 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notice: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          id: string
+          importance: string
+          kind: string
+          platforms: string[]
+          published_at: string | null
+          starts_at: string
+          status: string
+          title: string
+        }
+        ComputedFields: never
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at: string
+          id?: string
+          importance?: string
+          kind?: string
+          platforms?: string[]
+          published_at?: string | null
+          starts_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string
+          id?: string
+          importance?: string
+          kind?: string
+          platforms?: string[]
+          published_at?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       notification: {
         Row: {
@@ -2558,6 +2737,46 @@ export type Database = {
           },
         ]
       }
+      terms_version: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          created_by: string | null
+          effective_on: string
+          id: string
+          kind: string
+          legal_checked: boolean
+          reconsent: boolean
+          status: string
+          version: string
+        }
+        ComputedFields: never
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_on: string
+          id?: string
+          kind: string
+          legal_checked?: boolean
+          reconsent?: boolean
+          status?: string
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_on?: string
+          id?: string
+          kind?: string
+          legal_checked?: boolean
+          reconsent?: boolean
+          status?: string
+          version?: string
+        }
+        Relationships: []
+      }
       todo: {
         Row: {
           created_at: string
@@ -2699,6 +2918,28 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_add_content_version: {
+        Args: {
+          p_checked: string
+          p_effective: string
+          p_key: string
+          p_kind: string
+          p_note: string
+          p_version: string
+        }
+        Returns: undefined
+      }
+      admin_add_review: { Args: { p_note: string }; Returns: undefined }
+      admin_add_terms_version: {
+        Args: {
+          p_effective: string
+          p_kind: string
+          p_legal_checked: boolean
+          p_reconsent: boolean
+          p_version: string
+        }
+        Returns: string
+      }
       admin_answer_inquiry: {
         Args: {
           p_body: string
@@ -2706,6 +2947,21 @@ export type Database = {
           p_status?: Database["public"]["Enums"]["inquiry_status"]
         }
         Returns: undefined
+      }
+      admin_app_config: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_approvals: {
+        Args: { p_status?: string }
+        Returns: {
+          decided_at: string
+          decided_by: string
+          id: string
+          kind: string
+          payload: Json
+          requested_at: string
+          requested_by: string
+          status: string
+          summary: string
+        }[]
       }
       admin_audit_rows: {
         Args: {
@@ -2736,7 +2992,33 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_bootstrap: { Args: Record<PropertyKey, never>; Returns: boolean }
+      admin_content_versions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          checked_on: string
+          created_at: string
+          created_by: string | null
+          effective_on: string
+          id: string
+          key: string
+          kind: string
+          note: string | null
+          version: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content_version"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_dashboard: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_decide: {
+        Args: { p_decision: string; p_id: string }
+        Returns: undefined
+      }
+      admin_end_notice: { Args: { p_id: string }; Returns: undefined }
       admin_inquiries: {
         Args: { p_status: Database["public"]["Enums"]["inquiry_status"] }
         Returns: {
@@ -2768,12 +3050,56 @@ export type Database = {
         Returns: undefined
       }
       admin_me: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_notices: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          body: string
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          id: string
+          importance: string
+          kind: string
+          platforms: string[]
+          published_at: string | null
+          starts_at: string
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notice"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_request_access: {
         Args: {
           p_inquiry: string
           p_raw: boolean
           p_reason: string
           p_scopes: string[]
+        }
+        Returns: string
+      }
+      admin_request_app_config: { Args: { p: Json }; Returns: string }
+      admin_request_approval: {
+        Args: {
+          a: Omit<
+            Database["public"]["Tables"]["admin_user"]["Row"],
+            Database["public"]["Tables"]["admin_user"]["ComputedFields"]
+          >
+          p_kind: string
+          p_payload: Json
+          p_summary: string
+        }
+        Returns: string
+      }
+      admin_request_user: {
+        Args: {
+          p_email: string
+          p_name: string
+          p_roles: Database["public"]["Enums"]["admin_role"][]
         }
         Returns: string
       }
@@ -2805,6 +3131,28 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_reviews: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          at: string
+          by_email: string
+          note: string
+        }[]
+      }
+      admin_save_notice: {
+        Args: {
+          p_body: string
+          p_ends_at: string
+          p_id: string
+          p_importance: string
+          p_kind: string
+          p_platforms: string[]
+          p_request: boolean
+          p_starts_at: string
+          p_title: string
+        }
+        Returns: string
+      }
       admin_search: {
         Args: { p_q: string }
         Returns: {
@@ -2815,6 +3163,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_set_holiday: {
+        Args: {
+          p_date: string
+          p_delete?: boolean
+          p_kind: Database["public"]["Enums"]["holiday_kind"]
+          p_name: string
+        }
+        Returns: undefined
+      }
       admin_set_inquiry_status: {
         Args: {
           p_id: string
@@ -2822,7 +3179,40 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_loan_rate: {
+        Args: { p_applied: string; p_kind: string; p_rate_bp: number }
+        Returns: undefined
+      }
+      admin_set_lock: {
+        Args: { p_email: string; p_locked: boolean }
+        Returns: undefined
+      }
+      admin_terms_versions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          agreed: number
+          effective_on: string
+          id: string
+          kind: string
+          legal_checked: boolean
+          reconsent: boolean
+          status: string
+          version: string
+        }[]
+      }
       admin_user_detail: { Args: { p_user: string }; Returns: Json }
+      admin_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          last_seen_at: string
+          linked: boolean
+          locked: boolean
+          mfa: boolean
+          name: string
+          roles: Database["public"]["Enums"]["admin_role"][]
+        }[]
+      }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
@@ -3049,6 +3439,7 @@ export type Database = {
         Args: { p_end: string; p_start: string }
         Returns: string
       }
+      lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json

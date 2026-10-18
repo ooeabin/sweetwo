@@ -36,6 +36,7 @@ import {
   useSpace,
 } from '../data';
 import { H04Todos } from '../h-04-todos';
+import { useNoticeBand } from '../notice-band';
 import { openReceived, useProposals } from '../../proposals';
 import { MainFrame } from '../frame';
 import { closePath, spendPath } from '../paths';
@@ -57,6 +58,7 @@ export function H01ThisMonth() {
   const proposals = useProposals();
   const nav = useNavigate();
   const { masked } = useMask();
+  const noticeBand = useNoticeBand();
   // 생활비 체크(W-03): 켠 부부, 결혼 전 예비부부 아님, 체크일 전후 2일, 아직 아무도 답 안 함
   const livingOpen =
     !!space.data?.living_check &&
@@ -244,7 +246,9 @@ export function H01ThisMonth() {
         {copy.unlinkBandGo}
       </Button>
     </div>
-  ) : null;
+  ) : (
+    noticeBand
+  );
   return (
     <MainFrame
       current="month"

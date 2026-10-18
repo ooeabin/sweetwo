@@ -5,6 +5,8 @@ import {
   AdminMe,
   AdminReveal,
   AdminUserDetail,
+  type AdminRole,
+  type Json,
   type Tables,
 } from '@sweetwo/core';
 import { supabase } from './client';
@@ -27,6 +29,11 @@ const KNOWN = [
   'not_allowed',
   'bad_body',
   'bad_action',
+  'self_approval',
+  'quiet_hours',
+  'legal_check_required',
+  'bad_value',
+  'self_lock',
 ];
 const fail = (e: { message?: string } | null) => {
   if (!e) return;
@@ -89,6 +96,12 @@ export async function adminMfaVerify(factorId: string, code: string) {
 }
 
 // ── 관리자, 대시보드, 회원 ────────────────────────────────────────────
+/** 관리자가 아무도 없을 때 회사 도메인 이메일이면 첫 최고 관리자(서버가 확인) */
+export async function adminBootstrap(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('admin_bootstrap');
+  fail(error);
+  return !!data;
+}
 export async function fetchAdminMe(): Promise<AdminMe> {
   const { data, error } = await supabase().rpc('admin_me');
   fail(error);
@@ -234,4 +247,210 @@ export async function fetchAdminAudit(f: {
   });
   fail(error);
   return data ?? [];
+}
+
+// ── 2인 승인 ─────────────────────────────────────────────────────────
+export type ApprovalStatus = 'requested' | 'approved' | 'rejected' | 'cancelled';
+export type AdminApprovalRow = {
+  id: string;
+  kind: string;
+  summary: string;
+  payload: Json;
+  requested_by: string | null;
+  requested_at: string;
+  status: string;
+  decided_by: string | null;
+  decided_at: string | null;
+};
+export async function fetchAdminApprovals(status: ApprovalStatus): Promise<AdminApprovalRow[]> {
+  const { data, error } = await supabase().rpc('admin_approvals', { p_status: status });
+  fail(error);
+  return data ?? [];
+}
+export async function adminDecide(id: string, decision: 'approve' | 'reject' | 'cancel') {
+  const { error } = await supabase().rpc('admin_decide', { p_id: id, p_decision: decision });
+  fail(error);
+}
+
+// ── AD-10 공지 ───────────────────────────────────────────────────────
+export type Notice = Tables<'notice'>;
+export async function fetchAdminNotices(): Promise<Notice[]> {
+  const { data, error } = await supabase().rpc('admin_notices');
+  fail(error);
+  return data ?? [];
+}
+export async function adminSaveNotice(n: {
+  id: string | null;
+  kind: string;
+  title: string;
+  body: string;
+  importance: 'normal' | 'must';
+  platforms: ('desktop' | 'web')[];
+  startsAt: string;
+  endsAt: string;
+  request: boolean;
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('admin_save_notice', {
+    // 새 공지는 p_id = null(PostgREST는 null 그대로 넘김)
+    p_id: n.id as string,
+    p_kind: n.kind,
+    p_title: n.title,
+    p_body: n.body,
+    p_importance: n.importance,
+    p_platforms: n.platforms,
+    p_starts_at: n.startsAt,
+    p_ends_at: n.endsAt,
+    p_request: n.request,
+  });
+  fail(error);
+  return data as string;
+}
+export async function adminEndNotice(id: string) {
+  const { error } = await supabase().rpc('admin_end_notice', { p_id: id });
+  fail(error);
+}
+
+// ── AD-14·15 버전 ────────────────────────────────────────────────────
+export type ContentVersion = Tables<'content_version'>;
+export async function fetchContentVersions(): Promise<ContentVersion[]> {
+  const { data, error } = await supabase().rpc('admin_content_versions');
+  fail(error);
+  return data ?? [];
+}
+export async function adminAddContentVersion(v: {
+  kind: 'guide' | 'checklist' | 'faq';
+  key: string;
+  version: string;
+  effective: string;
+  checked: string;
+  note: string;
+}) {
+  const { error } = await supabase().rpc('admin_add_content_version', {
+    p_kind: v.kind,
+    p_key: v.key,
+    p_version: v.version,
+    p_effective: v.effective,
+    p_checked: v.checked,
+    p_note: v.note,
+  });
+  fail(error);
+}
+export type TermsVersionRow = {
+  id: string;
+  kind: string;
+  version: string;
+  effective_on: string;
+  reconsent: boolean;
+  legal_checked: boolean;
+  status: string;
+  agreed: number;
+};
+export async function fetchTermsVersions(): Promise<TermsVersionRow[]> {
+  const { data, error } = await supabase().rpc('admin_terms_versions');
+  fail(error);
+  return data ?? [];
+}
+export async function adminAddTermsVersion(v: {
+  kind: 'terms' | 'privacy';
+  version: string;
+  effective: string;
+  reconsent: boolean;
+  legalChecked: boolean;
+}) {
+  const { error } = await supabase().rpc('admin_add_terms_version', {
+    p_kind: v.kind,
+    p_version: v.version,
+    p_effective: v.effective,
+    p_reconsent: v.reconsent,
+    p_legal_checked: v.legalChecked,
+  });
+  fail(error);
+}
+
+// ── AD-16 앱 버전·점검 ───────────────────────────────────────────────
+export type AppConfigRow = {
+  min_version_desktop: string;
+  min_version_web: string;
+  latest_version_desktop: string;
+  maintenance_starts_at: string | null;
+  maintenance_ends_at: string | null;
+  maintenance_message: string | null;
+};
+export async function fetchAdminAppConfig(): Promise<AppConfigRow> {
+  const { data, error } = await supabase().rpc('admin_app_config');
+  fail(error);
+  return data as unknown as AppConfigRow;
+}
+export async function adminRequestAppConfig(p: Partial<AppConfigRow>) {
+  const { error } = await supabase().rpc('admin_request_app_config', { p: p as Json });
+  fail(error);
+}
+
+// ── AD-18 관리자 계정 ────────────────────────────────────────────────
+export type AdminUserRow = {
+  email: string;
+  name: string;
+  roles: AdminRole[];
+  locked: boolean;
+  last_seen_at: string | null;
+  linked: boolean;
+  mfa: boolean;
+};
+export async function fetchAdminUsers(): Promise<AdminUserRow[]> {
+  const { data, error } = await supabase().rpc('admin_users');
+  fail(error);
+  return (data ?? []) as AdminUserRow[];
+}
+export async function adminRequestUser(email: string, name: string, roles: AdminRole[]) {
+  const { error } = await supabase().rpc('admin_request_user', {
+    p_email: email,
+    p_name: name,
+    p_roles: roles,
+  });
+  fail(error);
+}
+export async function adminSetLock(email: string, locked: boolean) {
+  const { error } = await supabase().rpc('admin_set_lock', { p_email: email, p_locked: locked });
+  fail(error);
+}
+export async function fetchAdminReviews(): Promise<
+  { at: string; by_email: string | null; note: string }[]
+> {
+  const { data, error } = await supabase().rpc('admin_reviews');
+  fail(error);
+  return data ?? [];
+}
+export async function adminAddReview(note: string) {
+  const { error } = await supabase().rpc('admin_add_review', { p_note: note });
+  fail(error);
+}
+
+// ── AD-19 기준 데이터 ────────────────────────────────────────────────
+export type LoanRate = Tables<'loan_rate'>;
+export async function fetchLoanRates(): Promise<LoanRate[]> {
+  const { data, error } = await supabase().from('loan_rate').select('*').order('kind');
+  fail(error);
+  return data ?? [];
+}
+export async function adminSetLoanRate(kind: string, rateBp: number, applied: string) {
+  const { error } = await supabase().rpc('admin_set_loan_rate', {
+    p_kind: kind,
+    p_rate_bp: rateBp,
+    p_applied: applied,
+  });
+  fail(error);
+}
+export async function adminSetHoliday(
+  date: string,
+  name: string,
+  kind: 'holiday' | 'substitute' | 'temporary',
+  del = false,
+) {
+  const { error } = await supabase().rpc('admin_set_holiday', {
+    p_date: date,
+    p_name: name,
+    p_kind: kind,
+    p_delete: del,
+  });
+  fail(error);
 }

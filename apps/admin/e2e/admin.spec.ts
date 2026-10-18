@@ -57,6 +57,18 @@ interface Db {
   roles: string[];
   inquiryStatus: string;
   messages: { author: string; body: string; created_at: string }[];
+  notices: Record<string, unknown>[];
+  approvals: {
+    id: string;
+    kind: string;
+    summary: string;
+    payload: object;
+    requested_by: string;
+    requested_at: string;
+    status: string;
+    decided_by: string | null;
+    decided_at: string | null;
+  }[];
 }
 
 const json = (route: Route, body: unknown, status = 200) =>
@@ -73,6 +85,20 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
     roles: o.roles ?? ['cs'],
     inquiryStatus: 'received',
     messages: [{ author: 'user', body: '연결이 안 돼요', created_at: '2026-10-17T01:00:00Z' }],
+    notices: [],
+    approvals: [
+      {
+        id: 'ap0',
+        kind: 'admin_add',
+        summary: '관리자 추가: cs02@sweetwo.kr',
+        payload: {},
+        requested_by: 'boss2@sweetwo.kr',
+        requested_at: '2026-10-17T00:00:00Z',
+        status: 'requested',
+        decided_by: null,
+        decided_at: null,
+      },
+    ],
   };
   const aal = o.aal === undefined ? 'aal2' : o.aal;
   if (aal) {
@@ -109,6 +135,25 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
     }
     if (p === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    if (p === '/rest/v1/loan_rate')
+      return json(route, [
+        {
+          kind: 'credit',
+          rate_bp: 600,
+          applied_on: '2026-10-01',
+          updated_by: null,
+          updated_at: '2026-10-01T00:00:00Z',
+        },
+        {
+          kind: 'mortgage',
+          rate_bp: 400,
+          applied_on: '2026-10-01',
+          updated_by: null,
+          updated_at: '2026-10-01T00:00:00Z',
+        },
+      ]);
+    if (p === '/rest/v1/holiday')
+      return json(route, [{ date: '2026-12-25', name: '성탄절', kind: 'holiday' }]);
     if (!p.startsWith('/rest/v1/rpc/')) return json(route, { message: `e2e: ${p}` }, 404);
     const fn = p.slice('/rest/v1/rpc/'.length);
     db.rpc.push({ fn, body: body() });
@@ -251,6 +296,124 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
             ip: '10.0.0.1',
           },
         ]);
+      case 'admin_notices':
+        return json(route, db.notices);
+      case 'admin_save_notice': {
+        const b = body();
+        db.notices.push({
+          id: `n${db.notices.length + 1}`,
+          kind: b.p_kind,
+          title: b.p_title,
+          body: b.p_body,
+          importance: b.p_importance,
+          platforms: b.p_platforms,
+          starts_at: b.p_starts_at,
+          ends_at: b.p_ends_at,
+          status: b.p_request ? 'requested' : 'draft',
+          created_by: ADMIN.id,
+          created_at: '2026-10-18T00:00:00Z',
+          published_at: null,
+        });
+        if (b.p_request)
+          db.approvals.push({
+            id: `ap${db.approvals.length + 1}`,
+            kind: 'notice_publish',
+            summary: `공지 게시: ${String(b.p_title)}`,
+            payload: {},
+            requested_by: ADMIN.email,
+            requested_at: '2026-10-18T00:00:00Z',
+            status: 'requested',
+            decided_by: null,
+            decided_at: null,
+          });
+        return json(route, 'n1');
+      }
+      case 'admin_approvals':
+        return json(
+          route,
+          db.approvals.filter((a) => a.status === body().p_status),
+        );
+      case 'admin_decide': {
+        const a = db.approvals.find((x) => x.id === body().p_id);
+        if (a && a.requested_by === ADMIN.email && body().p_decision !== 'cancel')
+          return json(route, { message: 'self_approval' }, 403);
+        if (a)
+          a.status =
+            body().p_decision === 'approve'
+              ? 'approved'
+              : body().p_decision === 'reject'
+                ? 'rejected'
+                : 'cancelled';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      case 'admin_content_versions':
+        return json(route, [
+          {
+            id: 'cv1',
+            kind: 'faq',
+            key: 'couple',
+            version: '1.0',
+            effective_on: '2026-01-01',
+            checked_on: '2026-01-01',
+            note: null,
+            created_by: null,
+            created_at: '2026-01-01T00:00:00Z',
+          },
+        ]);
+      case 'admin_terms_versions':
+        return json(route, [
+          {
+            id: 't1',
+            kind: 'terms',
+            version: 'v1',
+            effective_on: '2026-10-01',
+            reconsent: false,
+            legal_checked: true,
+            status: 'approved',
+            agreed: 1234,
+          },
+        ]);
+      case 'admin_add_terms_version':
+        return json(route, 't2');
+      case 'admin_set_loan_rate':
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      case 'admin_app_config':
+        return json(route, {
+          min_version_desktop: '1.0.0',
+          min_version_web: '1.0.0',
+          latest_version_desktop: '1.1.0',
+          maintenance_starts_at: null,
+          maintenance_ends_at: null,
+          maintenance_message: null,
+        });
+      case 'admin_request_app_config':
+        return json(route, 'ap9');
+      case 'admin_users':
+        return json(route, [
+          {
+            email: ADMIN.email,
+            name: 'cs01',
+            roles: db.roles,
+            locked: false,
+            last_seen_at: '2026-10-18T00:00:00Z',
+            linked: true,
+            mfa: true,
+          },
+          {
+            email: 'ops01@sweetwo.kr',
+            name: '운영1',
+            roles: ['ops'],
+            locked: false,
+            last_seen_at: null,
+            linked: false,
+            mfa: false,
+          },
+        ]);
+      case 'admin_reviews':
+        return json(route, []);
+      case 'admin_set_lock':
+      case 'admin_request_user':
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       default:
         return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
     }
@@ -369,4 +532,79 @@ test('운영 역할: 회원 상세에 열람·조치 버튼 없음', async ({ pa
   await heading(page, '회원 상세');
   await expect(page.getByRole('button', { name: '개인정보 보기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '계정 조치' })).toHaveCount(0);
+});
+
+test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저장', async ({ page }) => {
+  const db = await mock(page, { roles: ['ops'] });
+  await page.goto('/notices');
+  await heading(page, '공지');
+  await page.getByRole('button', { name: '새 공지' }).click();
+  const form = page.getByRole('region', { name: '새 공지' });
+  await form.getByLabel('종류').selectOption('maintenance');
+  await form.getByLabel('제목').fill('저장 기능 점검');
+  await form.getByLabel('시작').fill('2026-10-20T14:00');
+  await form.getByLabel('끝').fill('2026-10-20T16:00');
+  await expect(form.getByRole('button', { name: '필독' })).toBeVisible();
+  await axe(page);
+  await form.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByRole('row', { name: /저장 기능 점검/ })).toContainText('승인 대기');
+  expect(db.rpc.find((r) => r.fn === 'admin_save_notice')?.body).toMatchObject({
+    p_kind: 'maintenance',
+    p_request: true,
+    p_starts_at: '2026-10-20T05:00:00.000Z',
+  });
+});
+
+test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요청), 평균 금리', async ({ page }) => {
+  const db = await mock(page, { roles: ['ops'] });
+  await page.goto('/content');
+  await heading(page, '콘텐츠');
+  await expect(page.getByRole('row', { name: /couple/ })).toContainText('재검토');
+  await page.getByRole('tab', { name: '약관·개인정보 처리방침' }).click();
+  await expect(page.getByRole('row', { name: /v1/ })).toContainText('1,234');
+  const add = page.getByRole('region', { name: '버전 추가' });
+  await add.getByLabel('버전').fill('v2');
+  await expect(add.getByRole('button', { name: '승인 요청' })).toBeDisabled();
+  await add.getByLabel('법률 검토 확인').check();
+  await add.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByText('승인을 요청했어요')).toBeVisible();
+  await page.getByRole('tab', { name: '계산·기준 데이터' }).click();
+  await page.getByLabel('신용 연 금리').fill('6.5');
+  await page.getByRole('row', { name: /신용/ }).getByRole('button', { name: '저장' }).click();
+  await expect
+    .poll(() => db.rpc.find((r) => r.fn === 'admin_set_loan_rate')?.body.p_rate_bp)
+    .toBe(650);
+  await axe(page);
+});
+
+test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버전·점검은 승인 요청, 관리자 계정', async ({
+  page,
+}) => {
+  const db = await mock(page, { roles: ['super', 'ops'] });
+  await page.goto('/system');
+  await heading(page, '시스템');
+  const row = page.getByRole('row', { name: /cs02@sweetwo.kr/ });
+  await axe(page);
+  await row.getByRole('button', { name: '승인' }).click();
+  await expect(page.getByRole('row', { name: /cs02@sweetwo.kr/ })).toHaveCount(0);
+  expect(db.approvals[0]?.status).toBe('approved');
+
+  await page.getByRole('tab', { name: '앱 버전·점검' }).click();
+  await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
+  await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
+  await page.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByText('승인을 요청했어요')).toBeVisible();
+  expect(db.rpc.find((r) => r.fn === 'admin_request_app_config')?.body.p).toMatchObject({
+    min_version_desktop: '1.1.0',
+    maintenance_starts_at: null,
+  });
+
+  await page.getByRole('tab', { name: '관리자 계정' }).click();
+  await expect(page.getByRole('row', { name: /ops01@sweetwo.kr/ })).toContainText('첫 로그인 전');
+  await page
+    .getByRole('row', { name: /ops01@sweetwo.kr/ })
+    .getByRole('button', { name: '잠그기' })
+    .click();
+  await expect(page.getByText('저장했어요')).toBeVisible();
+  await axe(page);
 });

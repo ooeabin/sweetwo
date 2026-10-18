@@ -32,10 +32,24 @@ const MENUS: (AdminMenu & { roles: AdminRole[] })[] = [
     roles: ['super', 'ops', 'cs'],
   },
   {
+    key: 'send',
+    label: copy.menus.send,
+    icon: 'bell',
+    href: '/notices',
+    roles: ['super', 'ops', 'cs', 'analyst'],
+  },
+  {
+    key: 'content',
+    label: copy.menus.content,
+    icon: 'image',
+    href: '/content',
+    roles: ['super', 'ops', 'cs'],
+  },
+  {
     key: 'system',
     label: copy.menus.system,
     icon: 'settings',
-    href: '/audit',
+    href: '/system',
     roles: ['super', 'ops', 'cs'],
   },
   {
