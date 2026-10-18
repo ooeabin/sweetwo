@@ -19,6 +19,10 @@ import {
   F02Items,
   F04Item,
   F05Edit,
+  F05fPeriod,
+  F07aReplan,
+  F07bReplanQuestion,
+  F07cReplanCompare,
   F05Money,
   F06Diagnosis,
   O53InvestPrinciple,
@@ -1044,6 +1048,46 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-05 월 수입·지출
+      {
+        path: '/assets/money/period/:step',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F05fPeriod />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-05f·g 기간 수입 변경
+      {
+        path: '/assets/replan',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F07aReplan />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-07a 계획 다시 세우기
+      {
+        path: '/assets/replan/q/:q',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F07bReplanQuestion />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-07b 바뀐 부분 다시 묻기
+      {
+        path: '/assets/replan/compare/:mode',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F07cReplanCompare />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-07c 비교·적용
       {
         path: '/assets/money/:field',
         element: (

@@ -40,6 +40,7 @@ export const qk = {
   closeBalances: ['close_balance'] as const,
   notices: ['notice'] as const,
   weddingItems: ['wedding_item'] as const,
+  incomePeriods: ['income_period'] as const,
   weddingPayments: ['wedding_payment'] as const,
   pastPlans: (today: string) => ['monthly_plan', 'past', today] as const,
   recentClosesLong: ['recent_closes', 'long'] as const,

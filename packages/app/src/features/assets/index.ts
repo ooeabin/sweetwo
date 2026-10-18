@@ -20,3 +20,7 @@ export { O34Bonus } from './pages/o-34-bonus';
 export { O35BonusList } from './pages/o-35-bonus-list';
 export { O35bOtherIncome } from './pages/o-35b-other-income';
 export { setWeekBack, weekPath } from './week/week';
+export { F05fPeriod } from './pages/f-05f-period';
+export { F07aReplan } from './pages/f-07a-replan';
+export { F07bReplanQuestion } from './pages/f-07b-replan-question';
+export { F07cReplanCompare } from './pages/f-07c-replan-compare';

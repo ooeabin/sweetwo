@@ -1,7 +1,14 @@
-import { createCyclePlan, fetchLastPlanEnd, qk, type FirstPlanLine } from '@sweetwo/api';
+import {
+  createCyclePlan,
+  fetchIncomePeriods,
+  fetchLastPlanEnd,
+  qk,
+  type FirstPlanLine,
+} from '@sweetwo/api';
 import {
   coupleOf,
   currentCycle,
+  periodIncome,
   spaceBaseDay,
   splitLines,
   todayKst,
@@ -34,17 +41,34 @@ export function useEnsurePlan() {
   const goals = useGoals();
   const plan = useCurrentPlan();
   const last = useQuery({ queryKey: qk.lastPlanEnd, queryFn: fetchLastPlanEnd });
+  const periods = useQuery({ queryKey: qk.incomePeriods, queryFn: fetchIncomePeriods });
   const tried = useRef<string | null>(null);
 
   useEffect(() => {
     const sp = space.data;
     const m = me.data;
-    if (!sp || !m || !goals.data || plan.isLoading || plan.data || last.isLoading) return;
+    if (
+      !sp ||
+      !m ||
+      !goals.data ||
+      plan.isLoading ||
+      plan.data ||
+      last.isLoading ||
+      periods.isLoading
+    )
+      return;
     if (!last.data || !m.onboarding_done_at) return; // 첫 플랜 전
-    const c = coupleOf(m, sp, partner.data ?? null);
-    const base = spaceBaseDay(sp, c);
+    const c0 = coupleOf(m, sp, partner.data ?? null);
+    const base = spaceBaseDay(sp, c0);
     if (base === null) return;
     const cycle = currentCycle(base);
+    // 기간 수입 변경(F-05f): 그 달이 든 기간이 있으면 그 수입으로 계산(보충 줄은 서버가 넣음)
+    const ps = periods.data ?? [];
+    const myIncome = periodIncome(m.id, c0.myIncome, ps, cycle.labelMonth);
+    const partnerIncome = partner.data
+      ? periodIncome(partner.data.id, c0.partnerIncome, ps, cycle.labelMonth)
+      : c0.partnerIncome;
+    const c = { ...c0, myIncome, partnerIncome };
     if (last.data >= cycle.start || tried.current === cycle.start) return;
     tried.current = cycle.start;
 
@@ -138,5 +162,7 @@ export function useEnsurePlan() {
     plan.isLoading,
     last.data,
     last.isLoading,
+    periods.data,
+    periods.isLoading,
   ]); // eslint-disable-line react-hooks/exhaustive-deps
 }

@@ -17,3 +17,4 @@ export { G07Wedding } from './pages/g-07-wedding';
 export { G07aWeddingItem } from './pages/g-07a-wedding-item';
 export { G07WeddingPay } from './pages/g-07-wedding-pay';
 export { G07WeddingBudget } from './pages/g-07-wedding-budget';
+export { useGoalsData } from './data';

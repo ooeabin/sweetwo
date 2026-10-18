@@ -4,6 +4,7 @@ import { money, useMask } from '../../../shared/mask';
 import { MainFrame } from '../../month';
 import { onboardingCopy } from '../../onboarding';
 import { copy } from '../copy';
+import { replanPath, useReplan } from '../replan/draft';
 import { useAssetsData } from '../data';
 import { moneyPlan } from '../money';
 
@@ -11,7 +12,7 @@ const editPath = (f: string) => `/assets/money/${f}`;
 
 // F-05 월 수입·지출(23 F-05 1·2·4·5번): 내 수입·월급날(→ F-05a·b, 사실값 바로), 배우자 수입(보기만),
 // 지출 줄 용돈(→ F-05d), 고정지출·대출 상환(→ F-05c, 바로), 생활비(→ F-05d), 저축 가능 금액.
-// 연결된 부부의 용돈·생활비 예산은 제안. 기간 정해서 바꾸기(F-05f), 들어오는 돈(W-07), 고정지출 항목별·변동 항목 예산은 다음 단계.
+// 연결된 부부의 용돈·생활비 예산은 제안. 고정지출 항목별·변동 항목 예산은 다음 단계.
 export function F05Money() {
   const nav = useNavigate();
   const d = useAssetsData();
@@ -63,6 +64,18 @@ export function F05Money() {
           onClick={() => nav('/plan/income')}
         >
           {copy.incomeEvents}
+        </button>
+        {/* 3번 기간 정해서 바꾸기(F-05f), 내 수입만 */}
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => {
+            useReplan.getState().reset();
+            nav(replanPath.period('start'));
+          }}
+        >
+          {copy.periodChange}
         </button>
       </section>
       <section className="hg-stack" aria-label={copy.spendSection}>

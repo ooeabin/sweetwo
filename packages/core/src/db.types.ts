@@ -1727,6 +1727,85 @@ export type Database = {
           },
         ]
       }
+      income_period: {
+        Row: {
+          amount: number
+          base_income: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          end_month: string
+          ended_at: string | null
+          id: string
+          space_id: string
+          split_before: Json | null
+          split_proposal_id: string | null
+          start_month: string
+          supplement: number
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          base_income: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_month: string
+          ended_at?: string | null
+          id?: string
+          space_id: string
+          split_before?: Json | null
+          split_proposal_id?: string | null
+          start_month: string
+          supplement?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+          version?: number
+        }
+        Update: {
+          amount?: number
+          base_income?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          end_month?: string
+          ended_at?: string | null
+          id?: string
+          space_id?: string
+          split_before?: Json | null
+          split_proposal_id?: string | null
+          start_month?: string
+          supplement?: number
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_period_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "income_period_split_proposal_id_fkey"
+            columns: ["split_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inquiry: {
         Row: {
           attach: Json | null
@@ -2436,6 +2515,7 @@ export type Database = {
           groom_done_at: string | null
           groom_done_by: string | null
           id: string
+          income_period_id: string | null
           kind: Database["public"]["Enums"]["plan_line_kind"]
           plan_id: string
           sort: number
@@ -2466,6 +2546,7 @@ export type Database = {
           groom_done_at?: string | null
           groom_done_by?: string | null
           id?: string
+          income_period_id?: string | null
           kind?: Database["public"]["Enums"]["plan_line_kind"]
           plan_id: string
           sort?: number
@@ -2494,6 +2575,7 @@ export type Database = {
           groom_done_at?: string | null
           groom_done_by?: string | null
           id?: string
+          income_period_id?: string | null
           kind?: Database["public"]["Enums"]["plan_line_kind"]
           plan_id?: string
           sort?: number
@@ -2510,6 +2592,13 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_line_income_period_id_fkey"
+            columns: ["income_period_id"]
+            isOneToOne: false
+            referencedRelation: "income_period"
             referencedColumns: ["id"]
           },
           {
@@ -3085,6 +3174,10 @@ export type Database = {
         Args: { p_body: string; p_inquiry: string }
         Returns: undefined
       }
+      add_period_supplement: {
+        Args: { p_period: string; p_plan: string }
+        Returns: undefined
+      }
       adjust_plan: {
         Args: {
           p_amount: number
@@ -3586,6 +3679,7 @@ export type Database = {
         Returns: undefined
       }
       end_access: { Args: { p_id: string }; Returns: undefined }
+      end_income_periods: { Args: Record<PropertyKey, never>; Returns: number }
       end_sessions: { Args: { p_id?: string }; Returns: number }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       family_budget_now: { Args: { sid: string }; Returns: Json }
@@ -3879,6 +3973,16 @@ export type Database = {
       send_morning_notifications: {
         Args: { p_today?: string }
         Returns: number
+      }
+      set_income_period: {
+        Args: {
+          p_amount: number
+          p_end: string
+          p_split_apply_on?: string
+          p_start: string
+          p_supplement: number
+        }
+        Returns: string
       }
       set_living_check: { Args: { p_on: boolean }; Returns: undefined }
       set_my_side: {
