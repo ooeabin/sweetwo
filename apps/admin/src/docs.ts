@@ -1,5 +1,9 @@
 // AD-20 문서: 저장소 docs/의 md를 빌드에 포함한다(읽기 전용).
-const files = import.meta.glob('../../../docs/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const files = import.meta.glob('../../../docs/**/*.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
 
 export interface DocEntry {
   path: string;

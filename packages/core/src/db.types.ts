@@ -133,6 +133,83 @@ export type Database = {
           },
         ]
       }
+      admin_audit: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          approver: string | null
+          at: string
+          detail: NonNullable<Json>
+          id: number
+          ip: string | null
+          reason: string | null
+          screen: string
+          target: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          approver?: string | null
+          at?: string
+          detail?: NonNullable<Json>
+          id?: never
+          ip?: string | null
+          reason?: string | null
+          screen: string
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          approver?: string | null
+          at?: string
+          detail?: NonNullable<Json>
+          id?: never
+          ip?: string | null
+          reason?: string | null
+          screen?: string
+          target?: string | null
+        }
+        Relationships: []
+      }
+      admin_user: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string | null
+          last_seen_at: string | null
+          locked: boolean
+          name: string
+          roles: Database["public"]["Enums"]["admin_role"][]
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string | null
+          last_seen_at?: string | null
+          locked?: boolean
+          name: string
+          roles: Database["public"]["Enums"]["admin_role"][]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string | null
+          last_seen_at?: string | null
+          locked?: boolean
+          name?: string
+          roles?: Database["public"]["Enums"]["admin_role"][]
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           created_at: string
@@ -1670,6 +1747,37 @@ export type Database = {
         }
         Relationships: []
       }
+      job_run: {
+        Row: {
+          failed: NonNullable<Json>
+          finished_at: string | null
+          id: number
+          job: string
+          ok: boolean | null
+          spaces: number | null
+          started_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          failed?: NonNullable<Json>
+          finished_at?: string | null
+          id?: never
+          job: string
+          ok?: boolean | null
+          spaces?: number | null
+          started_at?: string
+        }
+        Update: {
+          failed?: NonNullable<Json>
+          finished_at?: string | null
+          id?: never
+          job?: string
+          ok?: boolean | null
+          spaces?: number | null
+          started_at?: string
+        }
+        Relationships: []
+      }
       living_check: {
         Row: {
           allowance_cut: number | null
@@ -2581,6 +2689,140 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_access_data: { Args: { p_access: string }; Returns: Json }
+      admin_account_action: {
+        Args: {
+          p_action: string
+          p_inquiry_no: string
+          p_note: string
+          p_user: string
+        }
+        Returns: undefined
+      }
+      admin_answer_inquiry: {
+        Args: {
+          p_body: string
+          p_id: string
+          p_status?: Database["public"]["Enums"]["inquiry_status"]
+        }
+        Returns: undefined
+      }
+      admin_audit_rows: {
+        Args: {
+          p_action?: string
+          p_admin?: string
+          p_from?: string
+          p_limit?: number
+          p_target?: string
+          p_to?: string
+        }
+        Returns: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          approver: string | null
+          at: string
+          detail: NonNullable<Json>
+          id: number
+          ip: string | null
+          reason: string | null
+          screen: string
+          target: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "admin_audit"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_dashboard: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_inquiries: {
+        Args: { p_status: Database["public"]["Enums"]["inquiry_status"] }
+        Returns: {
+          category: string
+          channel: string
+          created_at: string
+          id: string
+          no: string
+          status: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      admin_inquiry: { Args: { p_id: string }; Returns: Json }
+      admin_inquiry_counts: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_log: {
+        Args: {
+          a: Omit<
+            Database["public"]["Tables"]["admin_user"]["Row"],
+            Database["public"]["Tables"]["admin_user"]["ComputedFields"]
+          >
+          p_action: string
+          p_approver?: string
+          p_detail?: Json
+          p_reason?: string
+          p_screen: string
+          p_target: string
+        }
+        Returns: undefined
+      }
+      admin_me: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_request_access: {
+        Args: {
+          p_inquiry: string
+          p_raw: boolean
+          p_reason: string
+          p_scopes: string[]
+        }
+        Returns: string
+      }
+      admin_require: {
+        Args: { p_roles: Database["public"]["Enums"]["admin_role"][] }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string | null
+          last_seen_at: string | null
+          locked: boolean
+          name: string
+          roles: Database["public"]["Enums"]["admin_role"][]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_user"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_reveal: {
+        Args: {
+          p_inquiry_no: string
+          p_reason: string
+          p_scopes: string[]
+          p_user: string
+        }
+        Returns: Json
+      }
+      admin_search: {
+        Args: { p_q: string }
+        Returns: {
+          couple_state: string
+          created_at: string
+          email_masked: string
+          subscription: string
+          user_id: string
+        }[]
+      }
+      admin_set_inquiry_status: {
+        Args: {
+          p_id: string
+          p_status: Database["public"]["Enums"]["inquiry_status"]
+        }
+        Returns: undefined
+      }
+      admin_user_detail: { Args: { p_user: string }; Returns: Json }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
@@ -2797,6 +3039,7 @@ export type Database = {
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_space: { Args: { p_code: string }; Returns: string }
+      jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
       ko_batchim: { Args: { w: string }; Returns: boolean }
       ko_is: { Args: { w: string }; Returns: string }
       ko_obj: { Args: { w: string }; Returns: string }
@@ -2812,6 +3055,7 @@ export type Database = {
       }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
+      mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
       my_sessions: {
         Args: Record<PropertyKey, never>
@@ -3100,11 +3344,13 @@ export type Database = {
         Args: { p_id: string }
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
+      won_band: { Args: { v: number }; Returns: string }
     }
     Enums: {
       account_mode: "single" | "roles"
       account_role: "living" | "goal_fund" | "emergency" | "personal" | "wedding"
       account_status: "active" | "deletion_requested" | "deleted"
+      admin_role: "super" | "ops" | "cs" | "analyst"
       asset_owner: "joint" | "person"
       asset_side: "asset" | "debt"
       asset_status: "held" | "sold"
@@ -3282,6 +3528,7 @@ export const Constants = {
       account_mode: ["single", "roles"],
       account_role: ["living", "goal_fund", "emergency", "personal", "wedding"],
       account_status: ["active", "deletion_requested", "deleted"],
+      admin_role: ["super", "ops", "cs", "analyst"],
       asset_owner: ["joint", "person"],
       asset_side: ["asset", "debt"],
       asset_status: ["held", "sold"],
