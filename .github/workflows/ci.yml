@@ -39,12 +39,16 @@ jobs:
       - run: pnpm --filter @sweetwo/web exec playwright install --with-deps chromium
       - run: pnpm --filter @sweetwo/web e2e
       - run: pnpm --filter @sweetwo/admin e2e
+      - run: pnpm --filter @sweetwo/site e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-web, path: apps/web/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-admin, path: apps/admin/test-results, if-no-files-found: ignore }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: e2e-site, path: apps/site/test-results, if-no-files-found: ignore }
 
   e2e-desktop:
     runs-on: ubuntu-latest

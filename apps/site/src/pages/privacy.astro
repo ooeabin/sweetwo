@@ -1,0 +1,10 @@
+---
+// L-05 개인정보처리방침(/privacy)
+import Policy from '../components/Policy.astro';
+import Site from '../layouts/Site.astro';
+import { t } from '../lib/site';
+const files = import.meta.glob<import('astro').MarkdownInstance<{ version: string; effective: string }>>('../content/privacy/*.md', { eager: true });
+---
+<Site title={t.title(t.foot.privacy)} description={t.foot.privacy}>
+  <Policy name={t.foot.privacy} path="/privacy" files={files} />
+</Site>

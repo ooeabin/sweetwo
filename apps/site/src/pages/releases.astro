@@ -1,0 +1,38 @@
+---
+// L-03 릴리스 노트(/releases). 최신순, 버전마다 바로가기(/releases#1.2.0), 묶음 ‘새 기능’ ‘고친 것’. 원본 src/content/releases.md
+import { formatDateFull } from '@sweetwo/core';
+import md from '../content/releases.md?raw';
+import Site from '../layouts/Site.astro';
+import { t } from '../lib/site';
+
+type Release = { version: string; date: string; groups: { title: string; items: string[] }[] };
+const releases: Release[] = [];
+for (const raw of md.replace(/<!--[\s\S]*?-->/g, '').split('\n')) {
+  const line = raw.trim();
+  const v = /^## (\d+\.\d+\.\d+) \((\d{4}-\d{2}-\d{2})\)$/.exec(line);
+  const g = /^### (.+)$/.exec(line);
+  const i = /^- (.+)$/.exec(line);
+  if (v?.[1] && v[2]) releases.push({ version: v[1], date: v[2], groups: [] });
+  else if (g?.[1]) releases[releases.length - 1]?.groups.push({ title: g[1], items: [] });
+  else if (i?.[1]) releases[releases.length - 1]?.groups.at(-1)?.items.push(i[1]);
+}
+---
+<Site title={t.title(t.releasesPage)} description={t.releasesTitle}>
+  <section class="hg-site__sec" style="border-top: 0;">
+    <h1 class="hg-site__h2">{t.releasesTitle}</h1>
+    {releases.map((r) => (
+      <article class="hg-release" id={r.version}>
+        <div class="hg-release__head">
+          <a class="hg-release__ver" href={`#${r.version}`}>{r.version}</a>
+          <span class="hg-release__date">{formatDateFull(r.date)}</span>
+        </div>
+        {r.groups.map((g) => (
+          <>
+            <h4>{g.title}</h4>
+            <ul>{g.items.map((x) => <li>{x}</li>)}</ul>
+          </>
+        ))}
+      </article>
+    ))}
+  </section>
+</Site>

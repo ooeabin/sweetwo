@@ -1,0 +1,44 @@
+---
+// L-06 고객센터(/help): 검색 + 묶음별 자주 묻는 질문(원본 src/content/faq.md) + “찾는 답이 없어요”(help@ 메일).
+import { parseFaq } from '@sweetwo/core';
+import Faq from '../components/Faq.astro';
+import faqMd from '../content/faq.md?raw';
+import Site from '../layouts/Site.astro';
+import { URLS, t } from '../lib/site';
+const groups = parseFaq(faqMd);
+---
+<Site title={t.title(t.helpPage)} description={t.faq}>
+  <section class="hg-site__sec" style="border-top: 0;">
+    <h1 class="hg-site__h2">{t.helpPage}</h1>
+    <input class="hg-input" type="search" aria-label={t.searchPlaceholder} placeholder={t.searchPlaceholder} data-faq-search />
+    <p data-no-result hidden>
+      {t.noResult} <a href={URLS.help}>help@sweetwo.kr</a>
+    </p>
+    {groups.map((g) => (
+      <section class="hg-stack" data-faq-group aria-label={g.title}>
+        <h2 class="hg-site__h2">{g.title}</h2>
+        <Faq items={g.items} label={g.title} />
+      </section>
+    ))}
+    <a class="hg-btn hg-btn--secondary" href={URLS.help}>{t.noAnswer}</a>
+  </section>
+  <script>
+    // 검색: 질문과 답에 낱말이 모두 들어간 것만 보임(core searchFaq와 같은 규칙)
+    const input = document.querySelector<HTMLInputElement>('[data-faq-search]');
+    const none = document.querySelector<HTMLElement>('[data-no-result]');
+    input?.addEventListener('input', () => {
+      const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      document.querySelectorAll<HTMLElement>('[data-faq-item]').forEach((el) => {
+        const text = (el.dataset.search ?? '').toLowerCase();
+        const ok = words.every((w) => text.includes(w));
+        el.hidden = !ok;
+        if (ok) shown += 1;
+      });
+      document.querySelectorAll<HTMLElement>('[data-faq-group]').forEach((g) => {
+        g.hidden = ![...g.querySelectorAll<HTMLElement>('[data-faq-item]')].some((x) => !x.hidden);
+      });
+      if (none) none.hidden = shown > 0;
+    });
+  </script>
+</Site>

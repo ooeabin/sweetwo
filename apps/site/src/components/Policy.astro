@@ -1,0 +1,53 @@
+---
+// L-05 약관과 개인정보처리방침: 제목 + “시행일 {날짜}” → 본문 → “이전 버전” 목록(시행일). ?v={시행일}이면 그 본문 + “지금 버전 보기”.
+// 원본은 src/content/{terms,privacy}/{시행일}.md 하나씩(앱 가입 화면·S-19가 같은 원본).
+import { formatDateFull, todayKst } from '@sweetwo/core';
+import type { MarkdownInstance } from 'astro';
+import { t } from '../lib/site';
+
+interface Props {
+  name: string;
+  path: string;
+  files: Record<string, MarkdownInstance<{ version: string; effective: string }>>;
+}
+const { name, path, files } = Astro.props;
+const today = todayKst();
+const all = Object.values(files)
+  .map((m) => ({ ...m, effective: String(m.frontmatter.effective) }))
+  .sort((a, b) => b.effective.localeCompare(a.effective));
+// 지금 시행 중 = 시행일이 오늘 이전인 것 중 가장 최근(없으면 가장 이른 것)
+const current = all.find((m) => m.effective <= today) ?? all[all.length - 1];
+const older = all.filter((m) => m !== current && m.effective < (current?.effective ?? ''));
+---
+<section class="hg-site__sec" style="border-top: 0;" data-policy>
+  <a class="hg-btn hg-btn--link" href={path} data-current-link hidden>{t.currentVersion}</a>
+  {all.map((m) => (
+    <article class="hg-stack" data-version={m.effective} hidden={m !== current}>
+      <h1 class="hg-site__h2">{name}</h1>
+      <p class="hg-help">{t.effective(formatDateFull(m.effective))}</p>
+      <div class="hg-stack hg-policy"><m.Content /></div>
+    </article>
+  ))}
+  {older.length > 0 && (
+    <nav class="hg-stack" aria-label={t.prevVersions}>
+      <h2 class="hg-site__h2">{t.prevVersions}</h2>
+      <div class="hg-list">
+        {older.map((m) => (
+          <a class="hg-listrow" href={`${path}?v=${m.effective}`}>
+            <span class="hg-listrow__text"><span class="hg-listrow__label">{formatDateFull(m.effective)}</span></span>
+            <span class="hg-chevron" aria-hidden="true"></span>
+          </a>
+        ))}
+      </div>
+    </nav>
+  )}
+</section>
+<script>
+  const v = new URLSearchParams(location.search).get('v');
+  const target = v && document.querySelector<HTMLElement>(`[data-version="${CSS.escape(v)}"]`);
+  if (target) {
+    document.querySelectorAll<HTMLElement>('[data-version]').forEach((e) => (e.hidden = e !== target));
+    const link = document.querySelector<HTMLElement>('[data-current-link]');
+    if (link) link.hidden = false;
+  }
+</script>

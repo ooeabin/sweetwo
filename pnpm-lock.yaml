@@ -145,9 +145,22 @@ importers:
 
   apps/site:
     dependencies:
+      '@sweetwo/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       astro:
         specifier: ^5.18.2
         version: 5.18.2(@types/node@22.20.5)(jiti@2.7.0)(rollup@4.64.6)(typescript@5.9.3)
+    devDependencies:
+      '@axe-core/playwright':
+        specifier: 4.10.2
+        version: 4.10.2(playwright-core@1.56.1)
+      '@playwright/test':
+        specifier: 1.56.1
+        version: 1.56.1
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
 
   apps/web:
     dependencies:

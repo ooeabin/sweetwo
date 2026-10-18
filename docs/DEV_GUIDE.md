@@ -979,6 +979,15 @@ supabase/
 - 분기마다 별도 프로젝트에 복구 훈련. 암호화 필드가 풀리는지(KMS 접근) 같이 확인
 - 가용성 99.5%는 Supabase 플랜의 SLA가 밑바닥
 
+### 웹사이트(apps/site)
+
+- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(OS별 다운로드 버튼, 다른 OS용 받기, 접기, UTM을 웹 앱 링크에 이어 붙이기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). OS 판정은 core `detectSiteOs`·`installOs`(Vitest)
+- L-02 `/download?os=`: 보이지 않는 iframe으로 고정 주소(download.sweetwo.kr/latest/mac|win)를 받음(페이지를 떠나지 않음), 한 번 받은 뒤 주소에 `started=1`(새로고침해도 다시 받지 않음), 이 브라우저에 `sweetwo-app-seen`·`sweetwo-download-id` 저장. download_id를 앱 첫 실행으로 넘기는 방법(다른 도메인)은 기획 확인 뒤
+- 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective, 지금 시행 중 = 시행일이 오늘 이전 중 최근, `?v={시행일}`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
+- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(CloudFront 오류 페이지로 지정)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없거나 휴대폰이면 웹 앱 P-01로 바로
+- 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 찬우·예빈 예시)는 웹 앱 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 3D 그림(scene-pie)과 심볼
+- e2e `apps/site/e2e`(빌드 + 미리보기, Mac·Windows·Windows 7·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이
+
 ### 어드민 인증
 
 - 주소 ops.sweetwo.kr. CloudFront WAF IP 허용 목록과 2단계 인증 필수

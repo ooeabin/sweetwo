@@ -1,0 +1,17 @@
+---
+// 없는 주소. 초대 링크(/i/{코드})는 정적 파일이 없어 여기로 오므로 초대 화면을 보여 줌(CloudFront 오류 페이지 = 이 페이지).
+import Invite from '../components/Invite.astro';
+import Site from '../layouts/Site.astro';
+import { t } from '../lib/site';
+---
+<Site title={t.title(t.notFound)} description={t.notFound}>
+  <section class="hg-site__sec" style="border-top: 0;" data-not-found>
+    <h1 class="hg-site__h2">{t.notFound}</h1>
+    <a class="hg-btn hg-btn--secondary" href="/">{t.home}</a>
+  </section>
+  <Invite />
+  <script>
+    const nf = document.querySelector<HTMLElement>('[data-not-found]');
+    if (nf && location.pathname.startsWith('/i/')) nf.hidden = true;
+  </script>
+</Site>
