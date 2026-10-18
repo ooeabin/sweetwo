@@ -25,6 +25,8 @@ export const qk = {
   careRecords: ['care_record'] as const,
   notifications: ['notification'] as const,
   hasUnread: ['notification', 'unread'] as const,
+  /** 배우자 활동(H-08). 알림 키 아래라 새 알림이 오면 같이 새로 받음 */
+  partnerActivity: ['notification', 'activity'] as const,
   holidays: ['holiday'] as const,
   latestInvite: ['invite', 'latest'] as const,
   unlink: ['couple_unlink'] as const,

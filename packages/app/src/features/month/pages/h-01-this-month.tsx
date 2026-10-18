@@ -32,9 +32,14 @@ import {
   useMonthClose,
   useHolidays,
   useLivingCheck,
+  useNetWorth,
   usePartner,
+  usePartnerActivity,
   useSpace,
+  type NetWorthView,
 } from '../data';
+import { H06NetWorth } from '../h-06-net-worth';
+import { H08Activity } from '../h-08-activity';
 import { H04Todos } from '../h-04-todos';
 import { useNoticeBand } from '../notice-band';
 import { openReceived, useProposals } from '../../proposals';
@@ -80,6 +85,14 @@ export function H01ThisMonth() {
     enabled: space.data?.couple_state === 'unlink_pending',
   });
   const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
+  // H-08 배우자 활동: 연결된 부부만(미합류는 초대 할 일, 혼자 쓰기는 카드 없음)
+  const connected =
+    space.data?.couple_state === 'connected' || space.data?.couple_state === 'unlink_pending';
+  const activity = usePartnerActivity(connected);
+  // H-06 순자산: 예비부부 각자 관리는 없음
+  const separate =
+    space.data?.marriage_status === 'engaged' && space.data.prep_money_mode === 'separate';
+  const netWorth = useNetWorth(!!space.data && !separate);
   const solo = space.data?.couple_state === 'solo' || space.data?.couple_state === 'not_joined';
   const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
   const reconnectAsk =
@@ -185,7 +198,7 @@ export function H01ThisMonth() {
   } else if (loading || !v) {
     columns = [<Skeleton key="l" />, <Skeleton key="r" />];
   } else {
-    ({ title, actions, stats } = today(v, name, m, (to) => nav(to)));
+    ({ title, actions, stats } = today(v, name, m, (to) => nav(to), netWorth));
     const todos = (
       <H04Todos
         key="todos"
@@ -217,10 +230,14 @@ export function H01ThisMonth() {
               onPlan={() => nav('/plan')}
             />
             {v.engaged && <WeddingStatus v={v} m={m} />}
+            {netWorth && <H06NetWorth n={netWorth} onOpen={() => nav('/assets')} />}
           </div>,
           <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
             <Goals v={v} m={m} />
             <Upcomings v={v} />
+            {connected && activity.data && (
+              <H08Activity items={activity.data} partner={v.partnerName} onOpen={(to) => nav(to)} />
+            )}
           </div>,
         ];
   }
@@ -260,12 +277,21 @@ export function H01ThisMonth() {
 }
 
 /** 오늘 띠: 인사(H-01) + 맨 위 행동(H-02) + 숫자 타일 3개 */
-function today(v: MonthView, name: string, m: (n: number) => string, go: (to: string) => void) {
+function today(
+  v: MonthView,
+  name: string,
+  m: (n: number) => string,
+  go: (to: string) => void,
+  nw: NetWorthView | null,
+) {
   const next = v.events[0];
   const nextTile: AppFrameStat | null = next
     ? { label: copy.nextEvent, value: copy.dday(next.dday), sub: eventLabel(next, v.month) }
     : null;
-  const netWorth: AppFrameStat = { label: copy.netWorth, value: copy.unknown };
+  const netWorth: AppFrameStat = {
+    label: copy.netWorth,
+    value: nw && !nw.empty ? m(nw.nw.net) : copy.unknown,
+  };
 
   // 예비부부 각자 관리: D-day 헤더(H-P1)가 맨 위
   if (v.separate) {

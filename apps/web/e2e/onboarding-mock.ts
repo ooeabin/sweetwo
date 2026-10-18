@@ -26,6 +26,8 @@ export interface MemDb {
   assetHistory: Record<string, unknown>[];
   partnerSums: Record<string, unknown>[];
   netWorth: Record<string, unknown>[];
+  /** 배우자 활동(H-08) rpc 결과 */
+  activity: Record<string, unknown>[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -109,6 +111,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     assetHistory: [],
     partnerSums: [],
     netWorth: [],
+    activity: [],
     incomeItems: [],
     incomeEvents: [],
     family: [],
@@ -451,6 +454,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'apply_due_proposals') return json(route, 0);
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
+      if (fn === 'partner_activity') return json(route, db.activity);
       // 이번 달만 바꾸기(W-01a): 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 기준값도
       if (fn === 'adjust_plan') {
         const a = body();

@@ -31,12 +31,17 @@ interface WeekDraft {
   loans: Side;
   setPicks: (side: 'assets' | 'loans', picks: string[]) => void;
   setItem: (side: 'assets' | 'loans', key: string, p: Partial<WeekItem>) => void;
+  /** 끝나거나 닫으면 돌아갈 곳(합류 P-06에서 열었을 때). 없으면 이번 달 */
+  back: string | null;
+  setBack: (back: string | null) => void;
 }
 const emptySide = (): Side => ({ picks: [], items: {} });
 
 export const useWeekDraft = create<WeekDraft>((set, get) => ({
   assets: emptySide(),
   loans: emptySide(),
+  back: null,
+  setBack: (back) => set({ back }),
   setPicks: (side, picks) => set({ [side]: { ...get()[side], picks } }),
   setItem: (side, key, p) => {
     const cur = get()[side];

@@ -6,7 +6,7 @@ import { saveMe, useJoinData, type JoinData } from './data';
 
 export const joinPath = (id: string) => `/join/${id}`;
 
-/** 합류 화면 순서(18 흐름 요약). 각자 관리 예비부부는 용돈(P-07), 분담(P-08) 없음 */
+/** 합류 화면 순서(18 흐름 요약). P-06 추가 질문 뒤 쿼리 ?more=1. 각자 관리 예비부부는 용돈(P-07), 분담(P-08) 없음 */
 export function joinScreens(d: Pick<JoinData, 'space'>): string[] {
   const separate =
     d.space?.marriage_status === 'engaged' && d.space?.prep_money_mode === 'separate';
@@ -15,7 +15,9 @@ export function joinScreens(d: Pick<JoinData, 'space'>): string[] {
     'p-04',
     'p-05',
     'p-05d',
+    'p-06',
     ...(separate ? [] : ['p-07', 'p-08']),
+    'p-09',
     'p-10',
     'p-11',
     ...REVISIT,
@@ -31,8 +33,10 @@ const PART: Record<string, number> = {
   'p-04': 0,
   'p-05': 1,
   'p-05d': 1,
+  'p-06': 2,
   'p-07': 2,
   'p-08': 3,
+  'p-09': 3,
   'p-10': 3,
 };
 export const joinProgress = (id: string) =>

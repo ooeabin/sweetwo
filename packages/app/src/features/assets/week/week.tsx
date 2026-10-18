@@ -43,6 +43,7 @@ export function useWeek(side: 'assets' | 'loans') {
   const draft = useWeekDraft((x) => x[side]);
   const setPicks = useWeekDraft((x) => x.setPicks);
   const setItem = useWeekDraft((x) => x.setItem);
+  const back = useWeekDraft((x) => x.back);
   const solo = !!d.couple?.solo;
   const joined = !!d.couple?.joined;
   // 배우자 명의는 합류 전 대신 입력만(합류 뒤에는 상대 명의를 새로 못 만듦)
@@ -132,6 +133,11 @@ export function useWeek(side: 'assets' | 'loans') {
     save,
     finish,
     toggle,
-    close: () => nav('/'),
+    close: () => nav(back ?? '/'),
+    /** 끝난 뒤: 이번 달(합류 중이면 P-06으로) */
+    exit: () => nav(back ?? '/', { replace: true }),
   };
 }
+
+/** 다른 흐름(합류 P-06)에서 첫 주 정리를 열 때 돌아올 곳. null = 이번 달 */
+export const setWeekBack = (back: string | null) => useWeekDraft.getState().setBack(back);
