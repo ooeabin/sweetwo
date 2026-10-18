@@ -1,0 +1,36 @@
+---
+// 초대 링크 화면(28 공통 ‘초대 링크’). /i/{코드}는 정적 파일이 없어 404 페이지(CloudFront 오류 페이지)와 /i/가 이 컴포넌트를 씀.
+import { URLS, t } from '../lib/site';
+---
+
+  <section class="hg-site__sec" style="border-top: 0;" data-invite hidden>
+    <h1 class="hg-site__h2">{t.openInApp}</h1>
+    <a class="hg-btn hg-btn--primary" data-open-app href="sweetwo://i/">{t.openApp}</a>
+    <a class="hg-btn hg-btn--link" data-web-invite href={`${URLS.app}/i/`}>{t.webContinueInvite}</a>
+  </section>
+  <script>
+    import { detectSiteOs } from '@sweetwo/core';
+    import { APP_SEEN } from '../lib/client';
+    import { URLS } from '../lib/site';
+    const isInvite = location.pathname.startsWith('/i/');
+    const code = (location.pathname.split('/i/')[1] ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
+    const web = `${URLS.app}/i/${code}`;
+    let seen = false;
+    try {
+      seen = localStorage.getItem(APP_SEEN) === '1';
+    } catch {
+      seen = false;
+    }
+    if (!isInvite) {
+      /* 초대 주소가 아니면 아무것도 안 함 */
+    } else if (!seen || detectSiteOs(navigator.userAgent) === 'mobile') {
+      location.replace(web);
+    } else {
+      const app = document.querySelector<HTMLAnchorElement>('[data-open-app]');
+      const cont = document.querySelector<HTMLAnchorElement>('[data-web-invite]');
+      const box = document.querySelector<HTMLElement>('[data-invite]');
+      if (app) app.href = `sweetwo://i/${code}`;
+      if (cont) cont.href = web;
+      if (box) box.hidden = false;
+    }
+  </script>

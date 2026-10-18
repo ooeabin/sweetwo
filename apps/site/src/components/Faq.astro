@@ -1,0 +1,20 @@
+---
+// 자주 묻는 질문 접기(hg-acc). 원본 src/content/faq.md(FAQ 탭 문구 그대로), 펼칠 때 site_faq_opened.
+import type { FaqItem } from '@sweetwo/core';
+interface Props {
+  items: FaqItem[];
+  label: string;
+}
+const { items, label } = Astro.props;
+---
+<div class="hg-acc" role="list" aria-label={label} style="max-width: none;">
+  {items.map((f) => (
+    <div class="hg-acc__item" role="listitem" data-faq-item data-search={`${f.q} ${f.a}`}>
+      <button type="button" class="hg-acc__q" aria-expanded="false" aria-controls={`faq-${f.n}`} data-faq={f.n}>
+        <span>{f.q}</span>
+        <span class="hg-ico hg-ico--chevron-right" aria-hidden="true"></span>
+      </button>
+      <div id={`faq-${f.n}`} class="hg-acc__a" hidden>{f.a}</div>
+    </div>
+  ))}
+</div>

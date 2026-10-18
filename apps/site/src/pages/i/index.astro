@@ -1,0 +1,9 @@
+---
+// 초대 링크(sweetwo.kr/i/{코드}). 코드가 붙은 주소는 404 페이지가 같은 화면을 보여 줌.
+import Invite from '../../components/Invite.astro';
+import Site from '../../layouts/Site.astro';
+import { t } from '../../lib/site';
+---
+<Site title={t.title(t.openInApp)} description={t.openInApp}>
+  <Invite />
+</Site>

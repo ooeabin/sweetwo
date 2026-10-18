@@ -1,16 +1,72 @@
 ---
-// L-01 랜딩 (docs/spec/28-website.md). 스타일은 디자인 토큰과 hg- 클래스.
-import '../styles.css';
+// L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 3개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 다운로드.
+import { parseFaq } from '@sweetwo/core';
+import symbol from '../../../../packages/ui/src/assets/brand/symbol.png';
+import pie from '../../../../packages/ui/src/assets/illustrations/scene-pie.webp';
+import Download from '../components/Download.astro';
+import Faq from '../components/Faq.astro';
+import faqMd from '../content/faq.md?raw';
+import Site from '../layouts/Site.astro';
+import { CATCH, t } from '../lib/site';
+
+// 랜딩 자주 묻는 질문: FAQ 탭 1, 2, 4, 5, 10번
+const all = parseFaq(faqMd).flatMap((g) => g.items);
+const pick = [1, 2, 4, 5, 10].flatMap((n) => all.filter((f) => f.n === n));
 ---
-<html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>sweeTwo</title>
-  </head>
-  <body class="hg-root">
-    <main class="hg-site__wrap">
-      <h1 class="hg-site__h1">함께 구워 더 달콤한 자산파이</h1>
-    </main>
-  </body>
-</html>
+<Site title={t.landingTitle} description={t.landingDesc}>
+  <section class="hg-site__hero">
+    <div class="hg-site__text">
+      <h1 class="hg-site__h1">{CATCH}</h1>
+      <p class="hg-site__lead">{t.heroLead}</p>
+      <Download placement="hero" />
+    </div>
+    <div class="hg-card" style="background: var(--surface); display: grid; place-items: center; gap: var(--space-4);">
+      <img src={pie.src} alt="" width="320" height="320" loading="eager" />
+      <img src={symbol.src} alt="" width="64" height="64" />
+    </div>
+  </section>
+
+  <section class="hg-site__sec" aria-labelledby="features">
+    <h2 id="features" class="hg-site__h2">{t.featuresTitle}</h2>
+    <div class="hg-site__cols">
+      {t.features.map((f) => (
+        <div class="hg-site__feature">
+          <b>{f.title}</b>
+          <p>{f.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="hg-site__sec" aria-labelledby="how">
+    <h2 id="how" class="hg-site__h2">{t.howTitle}</h2>
+    <ol class="hg-site__steps">{t.how.map((s) => <li>{s}</li>)}</ol>
+  </section>
+
+  <section class="hg-site__sec" aria-labelledby="safe">
+    <h2 id="safe" class="hg-site__h2">{t.safeTitle}</h2>
+    <ul class="hg-site__safe">
+      {t.safe.map((s) => (
+        <li>
+          <span class={`hg-ico hg-ico--${s.icon}`} aria-hidden="true"></span>
+          {s.text}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="hg-site__sec" aria-labelledby="faq">
+    <h2 id="faq" class="hg-site__h2">{t.faq}</h2>
+    <Faq items={pick} label={t.faq} />
+    <a class="hg-btn hg-btn--link" href="/help">{t.seeAll}</a>
+  </section>
+
+  <section class="hg-site__sec" aria-labelledby="last">
+    <h2 id="last" class="hg-site__h2">{CATCH}</h2>
+    <Download placement="bottom" />
+  </section>
+  <script>
+    import { track } from '../lib/client';
+    track('site_landing_viewed');
+  </script>
+</Site>

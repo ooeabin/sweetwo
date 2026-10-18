@@ -1,0 +1,91 @@
+---
+// L-02 설치 안내(/download?os=mac 또는 win). 들어오면 OS에 맞는 파일 받기를 바로 시작(새로고침하면 다시 시작하지 않음, 다시 받기로만).
+// os 값이 없거나 틀리면 접속 OS, 그래도 모르면 두 버튼. 휴대폰·지원 안 하는 OS는 자동 받기 없이 L-01과 같은 안내.
+import Site from '../layouts/Site.astro';
+import { URLS, t } from '../lib/site';
+---
+<Site title={t.title(t.installPage)} description={t.started}>
+  <section class="hg-site__sec" style="border-top: 0;" data-install>
+    <div class="hg-site__text" data-state="start" hidden>
+      <h1 class="hg-site__h2">{t.started}</h1>
+      <p class="hg-site__lead">{t.startedSub}</p>
+      <button type="button" class="hg-btn hg-btn--secondary hg-btn--sm" data-again>{t.again}</button>
+    </div>
+    {(['mac', 'win'] as const).map((os) => (
+      <div class="hg-stack" data-install-os={os} hidden>
+        <ol class="hg-site__steps hg-site__steps--col">{t.steps[os].map((s) => <li>{s}</li>)}</ol>
+        <div class="hg-acc" style="max-width: none;">
+          <div class="hg-acc__item">
+            <button type="button" class="hg-acc__q" aria-expanded="false" aria-controls={`warn-${os}`}>
+              <span>{t.warnQ}</span>
+              <span class="hg-ico hg-ico--chevron-right" aria-hidden="true"></span>
+            </button>
+            <div id={`warn-${os}`} class="hg-acc__a" hidden>
+              <p>{t.warn[os]}</p>
+              <p>{t.signed}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+    <div class="hg-site__text" data-state="choose" hidden>
+      <h1 class="hg-site__h2">{t.chooseOs}</h1>
+      <div class="hg-row" style="gap: var(--space-2); flex-wrap: wrap;">
+        <a class="hg-btn hg-btn--primary" href="/download?os=mac"><span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.macDownload}</a>
+        <a class="hg-btn hg-btn--secondary" href="/download?os=win"><span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}</a>
+      </div>
+    </div>
+    <div class="hg-site__text" data-state="web" hidden>
+      <h1 class="hg-site__h2" data-web-msg></h1>
+    </div>
+    <p data-state-after hidden>{t.after}</p>
+    <a class="hg-btn hg-btn--link" href={URLS.app} data-web-start data-placement="install">{t.webContinue}</a>
+  </section>
+  <script>
+    import { detectSiteOs, installOs } from '@sweetwo/core';
+    import { APP_SEEN, track } from '../lib/client';
+    import { t, URLS } from '../lib/site';
+
+    const q = new URLSearchParams(location.search);
+    const ua = navigator.userAgent;
+    const here = detectSiteOs(ua);
+    const show = (sel: string) => document.querySelectorAll<HTMLElement>(sel).forEach((e) => (e.hidden = false));
+    const os = here === 'mobile' || here === 'unsupported' ? null : installOs(q.get('os'), ua);
+    if (here === 'mobile' || here === 'unsupported') {
+      const msg = document.querySelector<HTMLElement>('[data-web-msg]');
+      if (msg) msg.textContent = here === 'mobile' ? t.mobile : t.unsupported;
+      show('[data-state="web"]');
+    } else if (!os) {
+      show('[data-state="choose"]');
+    } else {
+      show('[data-state="start"]');
+      show(`[data-install-os="${os}"]`);
+      show('[data-state-after]');
+      track('site_install_guide_viewed', { os });
+      const file = os === 'mac' ? URLS.mac : URLS.win;
+      const get = () => {
+        try {
+          localStorage.setItem(APP_SEEN, '1');
+          // 설치 출처: download_id를 이 브라우저에 저장(28 ‘측정과 쿠키’)
+          if (!localStorage.getItem('sweetwo-download-id'))
+            localStorage.setItem('sweetwo-download-id', crypto.randomUUID());
+        } catch {
+          /* 저장소를 못 쓰면 출처 없이 */
+        }
+        // 페이지를 떠나지 않게 보이지 않는 틀에서 받기(고정 주소가 파일로 보냄)
+        const f = document.createElement('iframe');
+        f.hidden = true;
+        f.title = 'download';
+        f.src = file;
+        document.body.appendChild(f);
+      };
+      document.querySelector('[data-again]')?.addEventListener('click', get);
+      // 새로고침하면 다시 시작하지 않음: 한 번 받은 뒤 주소에 표시
+      if (q.get('started') !== '1') {
+        q.set('started', '1');
+        history.replaceState(null, '', `${location.pathname}?${q.toString()}`);
+        get();
+      }
+    }
+  </script>
+</Site>

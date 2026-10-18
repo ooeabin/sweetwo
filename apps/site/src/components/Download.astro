@@ -1,0 +1,33 @@
+---
+// 다운로드 버튼(L-01 2·7번): OS를 알아서 하나만. Mac, Windows = 다운로드(→ L-02가 받기 시작), 휴대폰·모름 = 웹에서 시작하기,
+// 지원 안 함 = 안내 + 웹에서 시작하기. ‘다른 OS용 받기’를 누르면 두 OS 버튼을 펼침. 스크립트 전에는 ‘모름’ 모양.
+import { URLS, t } from '../lib/site';
+interface Props {
+  placement: 'hero' | 'bottom';
+}
+const { placement } = Astro.props;
+const id = `both-${placement}`;
+---
+<div class="hg-site__text" data-download>
+  <a class="hg-btn hg-btn--primary" data-os="mac" hidden href="/download?os=mac" data-dl="mac" data-placement={placement}>
+    <span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.macDownload}
+  </a>
+  <a class="hg-btn hg-btn--primary" data-os="win" hidden href="/download?os=win" data-dl="win" data-placement={placement}>
+    <span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}
+  </a>
+  <p data-os="unsupported" hidden>{t.unsupported}</p>
+  <a class="hg-btn hg-btn--primary" data-os="mobile unknown unsupported" href={URLS.app} data-web-start data-placement={placement}>{t.webStart}</a>
+  <p data-os="mobile" hidden class="hg-site__lead">{t.mobile}</p>
+  <div class="hg-site__os">
+    <button type="button" class="hg-btn hg-btn--link" data-other-os aria-expanded="false" aria-controls={id}>{t.otherOs}</button>
+    <span>{t.supported}</span>
+  </div>
+  <div id={id} data-both hidden class="hg-row" style="gap: var(--space-2); flex-wrap: wrap;">
+    <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/download?os=mac" data-dl="mac" data-placement={placement}>
+      <span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.macDownload}
+    </a>
+    <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/download?os=win" data-dl="win" data-placement={placement}>
+      <span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}
+    </a>
+  </div>
+</div>

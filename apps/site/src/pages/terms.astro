@@ -1,0 +1,10 @@
+---
+// L-05 이용약관(/terms)
+import Policy from '../components/Policy.astro';
+import Site from '../layouts/Site.astro';
+import { t } from '../lib/site';
+const files = import.meta.glob<import('astro').MarkdownInstance<{ version: string; effective: string }>>('../content/terms/*.md', { eager: true });
+---
+<Site title={t.title(t.foot.terms)} description={t.foot.terms}>
+  <Policy name={t.foot.terms} path="/terms" files={files} />
+</Site>

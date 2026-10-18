@@ -1,0 +1,60 @@
+---
+// 웹사이트 틀(docs/design/components/SiteLayout.md): 상단 바, 본문, 하단. 앱 메뉴 줄 없이 같은 토큰과 hg- 클래스.
+import logo from '../../../../packages/ui/src/assets/brand/logo-cherry.svg';
+import '../styles.css';
+import { URLS, t } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** 하단 다운로드처럼 페이지가 고유 스크립트를 쓰면 */
+  bare?: boolean;
+}
+const { title, description } = Astro.props;
+const og = new URL('/og.png', Astro.site).toString();
+---
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" />
+  </head>
+  <body class="hg-root hg-site">
+    <header class="hg-site__wrap">
+      <nav class="hg-site__bar" aria-label="sweeTwo">
+        <a href="/" class="hg-wordmark" aria-label="sweeTwo 처음으로"><img src={logo.src} alt="sweeTwo" height="32" /></a>
+        <a class="hg-btn hg-btn--ghost hg-site__faq" href="/help">{t.faq}</a>
+        <a class="hg-btn hg-btn--secondary hg-btn--sm" href={URLS.app} data-web-start data-placement="top">{t.webStart}</a>
+      </nav>
+    </header>
+    <main class="hg-site__wrap">
+      <slot />
+    </main>
+    <footer class="hg-site__wrap">
+      <div class="hg-site__foot">
+        <div class="hg-site__links">
+          <a href="/terms">{t.foot.terms}</a>
+          <a href="/privacy" class="is-strong">{t.foot.privacy}</a>
+          <a href="/help">{t.foot.help}</a>
+          <a href={URLS.status} rel="noopener">{t.foot.status}</a>
+        </div>
+        <p><a href={URLS.help}>{t.foot.contact}</a></p>
+        <p><a href={URLS.privacyMail}>{t.foot.privacyOfficer}</a></p>
+        <p>{t.foot.business.map(([k, v]) => <span class="hg-meta">{k} {v} </span>)}</p>
+        <p>{t.foot.notAdvice}</p>
+      </div>
+    </footer>
+    <script>
+      import { boot } from '../lib/client';
+      boot();
+    </script>
+  </body>
+</html>
