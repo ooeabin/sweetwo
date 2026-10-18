@@ -28,6 +28,8 @@ export interface MemDb {
   netWorth: Record<string, unknown>[];
   /** 배우자 활동(H-08) rpc 결과 */
   activity: Record<string, unknown>[];
+  /** 달성 축하 문장 재료(goal_story) */
+  goalStory: { months: number; together: number };
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -112,6 +114,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     partnerSums: [],
     netWorth: [],
     activity: [],
+    goalStory: { months: 0, together: 0 },
     incomeItems: [],
     incomeEvents: [],
     family: [],
@@ -455,6 +458,71 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
       if (fn === 'net_worth_history') return json(route, db.netWorth);
       if (fn === 'partner_activity') return json(route, db.activity);
+      // G-05 달성: 축하는 사람마다 한 번
+      if (fn === 'achieve_goal') {
+        const g = db.goals.find((x) => x.id === body().p_goal);
+        const seen = (g?.achieved_seen as string[] | undefined) ?? [];
+        if (g && (g.status === 'active' || g.status === 'delayed')) {
+          Object.assign(g, { status: 'achieved', achieved_seen: [db.me.id] });
+          return json(route, true);
+        }
+        if (g && g.status === 'achieved' && !seen.includes(String(db.me.id))) {
+          g.achieved_seen = [...seen, db.me.id];
+          return json(route, true);
+        }
+        return json(route, false);
+      }
+      if (fn === 'goal_story') return json(route, [db.goalStory]);
+      if (fn === 'use_goal') {
+        const b = body();
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g) return json(route, { message: 'not_found' }, 400);
+        if (g.status === 'used') return json(route, { message: 'already_used' }, 400);
+        const held = Number(b.p_held);
+        const personal = b.p_paid_from === 'personal';
+        const cut = b.p_kind === 'moved' ? held : personal ? 0 : Math.min(Number(b.p_amount), held);
+        const today = new Date().toISOString().slice(0, 10);
+        db.goalUses.push({
+          id: `use-${db.goalUses.length + 1}`,
+          goal_id: g.id,
+          amount: b.p_kind === 'moved' ? held : personal ? Number(b.p_amount) : cut,
+          used_on: today,
+          paid_from: b.p_paid_from,
+          source: b.p_kind === 'moved' ? 'move' : 'achieved',
+          deleted_at: null,
+        });
+        g.status = 'used';
+        const rest = Math.max(held - cut, 0);
+        const target = db.goals.find((x) => x.template === 'emergency' && x.id !== g.id);
+        let use: string | null = null;
+        if (rest > 0 && target) {
+          use = `use-${db.goalUses.length + 1}`;
+          db.goalUses.push({
+            id: use,
+            goal_id: g.id,
+            amount: rest,
+            used_on: today,
+            source: 'move',
+            moved_goal_id: target.id,
+            deleted_at: null,
+          });
+          target.other_held = Number(target.other_held ?? 0) + rest;
+        }
+        const line = b.p_paid_from === 'living' && b.p_kind === 'spent' ? cut : 0;
+        return json(route, { line, rest: target ? rest : 0, rest_goal: target?.id ?? null, use });
+      }
+      if (fn === 'move_goal_rest') {
+        const b = body();
+        const w = db.goalUses.find((u) => u.id === b.p_use);
+        const from = db.goals.find((x) => x.id === w?.moved_goal_id);
+        const to = db.goals.find((x) => x.id === b.p_goal);
+        if (w && from && to) {
+          from.other_held = Math.max(Number(from.other_held ?? 0) - Number(w.amount), 0);
+          to.other_held = Number(to.other_held ?? 0) + Number(w.amount);
+          w.moved_goal_id = to.id;
+        }
+        return json(route, null);
+      }
       // 이번 달만 바꾸기(W-01a): 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 기준값도
       if (fn === 'adjust_plan') {
         const a = body();

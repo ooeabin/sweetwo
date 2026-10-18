@@ -9,3 +9,7 @@ export { RestGoalNext } from './week/rest';
 export { O23RestQuestion } from './pages/o-23-rest-question';
 export { O24RestDeadline } from './pages/o-24-rest-deadline';
 export { O25RestHeld } from './pages/o-25-rest-held';
+export { AchieveWatch } from './achieve';
+export { G05Achieved } from './pages/g-05-achieved';
+export { G05Send } from './pages/g-05-send';
+export { G05Use } from './pages/g-05-use';

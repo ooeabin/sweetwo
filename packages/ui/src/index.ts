@@ -13,6 +13,7 @@ export * from './components/SectionHeader';
 export * from './components/Tabs';
 export * from './components/Toast';
 export * from './components/Illustration';
+export * from './components/Celebration';
 export * from './components/EmptyState';
 export * from './components/SceneMedia';
 export * from './components/MonthSummary';

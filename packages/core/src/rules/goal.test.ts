@@ -1,5 +1,13 @@
 import { expect, it } from 'vitest';
-import { goalHeld, goalMonths, goalPace, goalStatus, paceChip } from './goal';
+import {
+  celebrationStory,
+  goalHeld,
+  goalMonths,
+  goalPace,
+  goalRest,
+  goalStatus,
+  paceChip,
+} from './goal';
 
 const kst = (s: string) => new Date(`${s}T12:00:00+09:00`);
 
@@ -76,4 +84,18 @@ it('지금 눈금과 칩', () => {
     months: 2,
   });
   expect(paceChip({ pct: 40, pace: 50, expected: '2027-12', deadline: '2028-01' })).toBeNull();
+});
+
+it('달성 축하 문장: 매달 함께, 일부 함께, 혼자', () => {
+  expect(celebrationStory(16, 16, false)).toEqual({ kind: 'all', months: 16, together: 16 });
+  expect(celebrationStory(16, 14, false)).toEqual({ kind: 'some', months: 16, together: 14 });
+  expect(celebrationStory(16, 0, false)).toEqual({ kind: 'solo', months: 16, together: 0 });
+  expect(celebrationStory(16, 14, true)).toEqual({ kind: 'solo', months: 16, together: 0 });
+  expect(celebrationStory(0, 0, false)).toBeNull();
+});
+
+it('사용 기록 뒤 남은 보유액: 400만 중 380만 → 20만, 각자 돈은 그대로, 넘치면 0', () => {
+  expect(goalRest(4_000_000, 3_800_000, 'living')).toBe(200_000);
+  expect(goalRest(4_000_000, 3_800_000, 'personal')).toBe(4_000_000);
+  expect(goalRest(4_000_000, 4_500_000, 'goal_fund')).toBe(0);
 });

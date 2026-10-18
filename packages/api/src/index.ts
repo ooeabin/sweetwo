@@ -16,3 +16,4 @@ export * from './inquiry';
 export * from './security';
 export * from './living';
 export * from './admin';
+export * from './goal-achieve';
