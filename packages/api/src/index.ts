@@ -21,3 +21,4 @@ export * from './wedding';
 export * from './income-period';
 export * from './guides';
 export * from './avatar';
+export * from './close-together';

@@ -20,15 +20,21 @@ export function W04End() {
       : null;
   const goals = d.goals.map((g) => ({ id: g.id, name: g.name }));
   const applyOn = bundle.map((p) => p.apply_on).sort()[0];
+  // 함께 모드로 정리했으면 바뀐 값은 확정(제안 아님)
+  const confirmed = bundle.filter((p) => p.status === 'applied');
+  const together = confirmed.length > 0 && confirmed.length === bundle.length;
+  const nextMonth = (d.month % 12) + 1;
   return (
     <QuestionLayout
       title={copy.doneTitle(d.month)}
       help={
         d.rest
           ? copy.restDone
-          : bundle.length && names
-            ? copy.sentTitle(bundle.length, names.partnerName)
-            : copy.noChange
+          : together
+            ? copy.confirmedTitle(confirmed.length)
+            : bundle.length && names
+              ? copy.sentTitle(bundle.length, names.partnerName)
+              : copy.noChange
       }
       primary={{ label: copy.toMonth }}
       onSubmit={() => {
@@ -46,14 +52,26 @@ export function W04End() {
                 <span>
                   {line.label} {proposalCopy.change(line.before, line.after)}
                 </span>
-                <Badge kind="temp">{copy.pending}</Badge>
+                <Badge kind="temp">{p.status === 'applied' ? copy.confirmed : copy.pending}</Badge>
               </div>
             );
           })}
-          {applyOn && <p className="hg-card__meta">{copy.applyFrom(formatMonthDay(applyOn))}</p>}
-          <Button variant="secondary" size="sm" onClick={() => nav(`/proposals/${bundle[0]?.id}`)}>
-            {copy.seeSent}
-          </Button>
+          {together ? (
+            <p className="hg-card__meta">{copy.applyNext(nextMonth)}</p>
+          ) : (
+            <>
+              {applyOn && (
+                <p className="hg-card__meta">{copy.applyFrom(formatMonthDay(applyOn))}</p>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => nav(`/proposals/${bundle[0]?.id}`)}
+              >
+                {copy.seeSent}
+              </Button>
+            </>
+          )}
         </section>
       )}
     </QuestionLayout>

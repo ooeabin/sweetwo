@@ -1,10 +1,14 @@
 import { formatManWon } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { confirmTogether, qk } from '@sweetwo/api';
+import { Button, QuestionLayout } from '@sweetwo/ui';
+import { useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useMonthView } from '../../month';
 import { ProposalInline, describeProposal, proposalCopy } from '../../proposals';
 import { copy } from '../copy';
 import { closePath, closeProgress, useCloseData } from '../data';
+import { useTogetherActive } from '../together';
+import { toast } from '../../../shared/toast';
 
 // W-04h 다음 달 조정(docs/spec/21-month-close.md): 받은 제안·보류 제안·함께 정하기가 있을 때만(연결된 부부, 해제 대기 아님).
 // 받은 제안은 좋아요(즉시 확정) / 다르게 해볼래요(G-08) / 반대, 보류 제안과 함께 정하기는 배지와 지금 값.
@@ -13,6 +17,8 @@ export function W04hAdjust() {
   const nav = useNavigate();
   const d = useCloseData();
   const v = useMonthView();
+  const qc = useQueryClient();
+  const active = useTogetherActive();
   if (d.loading || !v) return null;
   if (!d.adjust || !d.couple || !d.me || !d.space)
     return <Navigate to={closePath('w-04g')} replace />;
@@ -45,7 +51,7 @@ export function W04hAdjust() {
       wide
       steps={closeProgress('w-04h', true)}
       title={copy.adjustTitle}
-      help={copy.startAlone(c.partnerName)}
+      help={active ? copy.togetherNow : copy.startAlone(c.partnerName)}
       onBack={() => nav(closePath('w-04k'))}
       primary={{ label: copy.next }}
       onSubmit={() => nav(closePath('w-04g'))}
@@ -71,9 +77,27 @@ export function W04hAdjust() {
                 {line.label} {proposalCopy.change(line.before, line.after)}
               </b>
             </p>
-            <p className="hg-card__meta">
-              {p.status === 'held' ? copy.heldNote : copy.togetherAlone(c.partnerName)}
-            </p>
+            {active && d.close ? (
+              <>
+                <p className="hg-card__meta">{copy.togetherConfirm}</p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    d.close &&
+                    void confirmTogether(d.close.id, p.id)
+                      .then(() => qc.invalidateQueries({ queryKey: qk.proposals }))
+                      .catch(() => toast(copy.saveFailed))
+                  }
+                >
+                  {copy.setThis}
+                </Button>
+              </>
+            ) : (
+              <p className="hg-card__meta">
+                {p.status === 'held' ? copy.heldNote : copy.togetherAlone(c.partnerName)}
+              </p>
+            )}
           </section>
         );
       })}

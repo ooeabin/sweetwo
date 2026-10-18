@@ -2166,11 +2166,15 @@ export type Database = {
           started_by: string | null
           status: Database["public"]["Enums"]["month_close_status"]
           supplement_line_id: string | null
+          together_at: string | null
+          together_by: string | null
+          together_left_at: string | null
           updated_at: string
           updated_by: string | null
           version: number
+          close_together_active: boolean | null
         }
-        ComputedFields: never
+        ComputedFields: "close_together_active"
         Insert: {
           big_none?: boolean
           budget_fix?: string | null
@@ -2204,6 +2208,9 @@ export type Database = {
           started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
           supplement_line_id?: string | null
+          together_at?: string | null
+          together_by?: string | null
+          together_left_at?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -2241,6 +2248,9 @@ export type Database = {
           started_by?: string | null
           status?: Database["public"]["Enums"]["month_close_status"]
           supplement_line_id?: string | null
+          together_at?: string | null
+          together_by?: string | null
+          together_left_at?: string | null
           updated_at?: string
           updated_by?: string | null
           version?: number
@@ -3632,6 +3642,15 @@ export type Database = {
         }
         Returns: string
       }
+      close_together_active: {
+        Args: {
+          c: Omit<
+            Database["public"]["Tables"]["month_close"]["Row"],
+            Database["public"]["Tables"]["month_close"]["ComputedFields"]
+          >
+        }
+        Returns: boolean
+      }
       complete_signup: {
         Args: {
           p_marketing: boolean
@@ -3680,6 +3699,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      confirm_together: {
+        Args: { p_close: string; p_id: string }
+        Returns: undefined
       }
       confirm_unlink: {
         Args: { p_how: string; p_id: string; p_plan: Json }
@@ -3757,6 +3780,7 @@ export type Database = {
         Returns: boolean
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
+      join_close_together: { Args: { p_close: string }; Returns: undefined }
       join_space: { Args: { p_code: string }; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
       ko_batchim: { Args: { w: string }; Returns: boolean }
@@ -3764,6 +3788,7 @@ export type Database = {
       ko_obj: { Args: { w: string }; Returns: string }
       ko_subj: { Args: { w: string }; Returns: string }
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
+      leave_close_together: { Args: { p_close: string }; Returns: undefined }
       living_check_day: {
         Args: { p_end: string; p_start: string }
         Returns: string
