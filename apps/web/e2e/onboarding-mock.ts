@@ -33,6 +33,8 @@ export interface MemDb {
   /** 결혼 비용 항목·결제(G-07) */
   weddingItems: Record<string, unknown>[];
   weddingPayments: Record<string, unknown>[];
+  /** 기간 수입 변경(F-05f) */
+  incomePeriods: Record<string, unknown>[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -120,6 +122,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     goalStory: { months: 0, together: 0 },
     weddingItems: [],
     weddingPayments: [],
+    incomePeriods: [],
     incomeItems: [],
     incomeEvents: [],
     family: [],
@@ -505,6 +508,40 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (it) it.budget = b.p_budget;
         else if (db.space) db.space.wedding_budget = b.p_budget;
         return json(route, 'applied');
+      }
+      if (fn === 'set_income_period') {
+        const b = body();
+        const id = `ip-${db.incomePeriods.length + 1}`;
+        db.incomePeriods.push({
+          id,
+          user_id: db.me.id,
+          start_month: b.p_start,
+          end_month: b.p_end,
+          amount: b.p_amount,
+          base_income: db.me.monthly_income,
+          supplement: b.p_supplement,
+          split_apply_on: b.p_split_apply_on ?? null,
+          ended_at: null,
+          deleted_at: null,
+        });
+        if (b.p_split_apply_on)
+          db.proposals.push({
+            id: `p-${db.proposals.length + 1}`,
+            space_id: db.space?.id,
+            item: 'split',
+            target_id: null,
+            proposer: db.me.id,
+            before: { mode: db.space?.split_mode, starter_ratio: db.space?.split_ratio },
+            after: { mode: 'income' },
+            apply_on: b.p_split_apply_on,
+            status: 'open',
+            response: null,
+            round_trips: 0,
+            oppose_count: 0,
+            together: false,
+            created_at: new Date().toISOString(),
+          });
+        return json(route, id);
       }
       if (fn === 'record_wedding_payment') {
         const b = body();
@@ -1147,6 +1184,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
+    if (path === '/rest/v1/income_period' && method === 'GET') return json(route, db.incomePeriods);
     if (path === '/rest/v1/wedding_payment' && method === 'GET')
       return json(
         route,

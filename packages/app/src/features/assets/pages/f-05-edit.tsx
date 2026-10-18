@@ -15,6 +15,7 @@ import { toast } from '../../../shared/toast';
 import { onboardingCopy as oc } from '../../onboarding';
 import { proposalCopy, recalcPendingShares } from '../../proposals';
 import { copy } from '../copy';
+import { useReplan } from '../replan/draft';
 import { useAssetsData } from '../data';
 import { moneyPlan, type MoneyPatch } from '../money';
 
@@ -109,6 +110,19 @@ export function F05Edit() {
       if (f === 'living') await updateSpace({ living_budget: v, living_budget_estimated: false });
       // 사실값 저장 직후 이번 사이클 안 나눈 돈 재계산(분담)
       const n = await recalcPendingShares();
+      // 수입이 20% 이상 바뀌면 “계획을 다시 세워볼까요?”(F-07a)
+      const was = me.monthly_income ?? 0;
+      if (f === 'income' && was > 0 && Math.abs(v - was) * 5 >= was) {
+        await done(copy.replanAsk);
+        toast(copy.replanAsk, {
+          label: copy.replanGo,
+          onClick: () => {
+            useReplan.getState().reset();
+            nav('/assets/replan');
+          },
+        });
+        return;
+      }
       await done(n ? copy.savedRecalc : copy.savedNoPending);
     } catch {
       toast(copy.loadFailed);

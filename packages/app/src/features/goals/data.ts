@@ -7,6 +7,8 @@ import {
   fetchSpace,
   qk,
   type Goal,
+  type Me,
+  type Space,
 } from '@sweetwo/api';
 import { coupleOf, spaceBaseDay } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
@@ -25,11 +27,11 @@ export function useGoalsData() {
   const all = [me, space, partner, goals, records, proposals, linked];
   const loading = all.some((q) => q.isLoading);
   const failed = [me, space, partner, goals, records].some((q) => q.isError);
-  const make = (list: Goal[]) =>
+  const make = (list: Goal[], over?: { me?: Me; space?: Space }) =>
     me.data && space.data && records.data
       ? goalsView({
-          me: me.data,
-          space: space.data,
+          me: over?.me ?? me.data,
+          space: over?.space ?? space.data,
           partner: partner.data ?? null,
           goals: list,
           records: records.data,
@@ -47,6 +49,8 @@ export function useGoalsData() {
       goals.data ? make(goals.data.map((g) => (g.id === id ? { ...g, ...patch } : g))) : null,
     /** 목표 목록을 바꿔 다시 계산(순서, 조정 안 미리보기) */
     viewOf: (list: Goal[]) => make(list),
+    /** 내 정보·공간 값을 바꿔 다시 계산(계획 다시 세우기 F-07c 비교) */
+    viewFor: (over: { me?: Me; space?: Space }) => (goals.data ? make(goals.data, over) : null),
     space: space.data ?? null,
     /** 새 목표를 더해 다시 계산(목표 추가 G-03f) */
     viewAdd: (g: Goal) => (goals.data ? make([...goals.data, g]) : null),

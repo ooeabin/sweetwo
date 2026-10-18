@@ -234,4 +234,45 @@ export const copy = {
   repaymentLabel: '월 상환액', // [확인 필요]
   rateLabel: '금리', // [확인 필요]
   countLabel: '납입 회차', // [확인 필요]
+
+  // F-05f·F-05g 기간 수입 변경
+  periodStart: '언제부터 바뀌어요?', // [확인 필요] 기간 시작 질문
+  periodEnd: '언제까지예요?', // [확인 필요] 기간 끝 질문
+  periodEndBefore: '시작한 달 뒤로 골라 주세요', // [확인 필요]
+  periodPast: '이번 달부터 고를 수 있어요', // [확인 필요]
+  periodAmount: '그 기간 월 수입은 얼마예요?',
+  periodNoIncome: '수입이 없어요',
+  // F-07a·b 계획 다시 세우기
+  replanAsk: '계획을 다시 세워볼까요?',
+  replanGo: '다시 세우기', // [확인 필요] 토스트 버튼
+  replanWhat: '어떤 게 바뀌었나요?',
+  replanKinds: { move: '이사', baby: '출산', job: '이직·수입 변화', goals: '목표 변화' },
+  replanIncome: (name: string) => `${name}님 한 달 수입은 얼마예요?`, // [확인 필요] O-31과 같은 질문
+  replanFixed: '고정지출은 한 달에 얼마예요?', // [확인 필요] 이사: O-36과 같은 질문
+  replanLiving: '생활비는 한 달에 얼마로 할까요?', // [확인 필요] 출산: O-37과 같은 질문
+  // F-07c 비교·적용
+  compareTitle: '바뀌는 점을 확인해 주세요', // [확인 필요] 화면 제목
+  compareNow: '지금',
+  compareAfter: '변경 후', // [확인 필요] 열 이름(일반)
+  comparePeriod: (range: string) => range,
+  compareRows: {
+    income: '월 수입',
+    supplement: '비상금에서 보충',
+    saveable: '저축 가능 금액',
+    emergency: '비상금 잔액',
+    split: '분담',
+    allowance: '용돈',
+  },
+  goalWhen: (name: string) => `${name} 달성`, // [확인 필요] 목표 달성 시기 줄
+  tagNow: '바로 반영',
+  tagPropose: '제안',
+  perMonth: (amount: string) => `월 ${amount}`,
+  emergencyShort: (amount: string) => `비상금이 ${amount} 모자라요`,
+  splitIncome: (a: number, b: number) => `버는 만큼 ${a}:${b}`,
+  apply: '적용하기',
+  applied: '적용했어요',
+  appliedSplit: (name: string) => `적용했어요. 분담은 ${name}님에게 제안했어요`,
+  overlap: '이미 바꾼 기간과 겹쳐요', // [확인 필요]
+  noChange: '바뀌는 점이 없어요', // [확인 필요]
+  unknown: '아직 몰라요',
 };
