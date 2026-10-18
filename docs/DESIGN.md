@@ -15,7 +15,7 @@ sweeTwo(스위투). “함께 구워 더 달콤한 자산파이.” 예비·신�
 
 - 흰 바탕(`surface`) + 검정 알약 주 버튼(`ink`)이 기본. 한 화면에 주 버튼은 1개.
 - 브랜드 색은 아껴 씀. 화면의 기본은 `ink`와 무채색, 브랜드 분홍은 점처럼 한두 곳만.
-- `brand`(케이크 분홍 #D92B4A, 다크 #FF6B85)는 작은 점과 글자에만: 워드마크, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면과 모든 버튼(오류 버튼과 헷갈림), 숫자 알약(`ink`), 진행 막대(`ink`)에는 쓰지 않음.
+- `brand`(브랜드 분홍 #D92B4A, 다크 #FF6B85)는 작은 점과 글자에만: 워드마크, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면과 모든 버튼(오류 버튼과 헷갈림), 숫자 알약(`ink`), 진행 막대(`ink`)에는 쓰지 않음.
 - `brand-soft`는 달력의 오늘 날짜 칸에만. 월말 정리 띠, 제안 카드 머리, 변화 알약은 `surface-alt`.
 - 영역 틴트는 뜻이 정해져 있음: `together` 우리 둘(공동), `family` 양가, `goal` 목표, `safety` 비상금, `invest` 투자·부동산. 뜻 없이 장식으로 쓰지 않음.
 - 모든 버튼·칩·배지는 알약(`radius-full`). 카드는 `radius-xl`, 영역 틴트 강조 카드는 `radius-2xl`.
@@ -111,12 +111,12 @@ sweeTwo(스위투). “함께 구워 더 달콤한 자산파이.” 예비·신�
 
 ## 그림(앱 아이콘 3D)
 
-- 목표 카드 그림, 목표 달성 화면, 온보딩 결과, 빈 상태, 장면 그림은 모두 앱 아이콘(케이크 조각)과 같은 그림체.
+- 목표 카드 그림, 목표 달성 화면, 온보딩 결과, 빈 상태, 장면 그림은 모두 지금 목표 그림과 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름).
 - 부드러운 무광 3D, 단순하고 통통한 둥근 모양, 은은한 그라데이션, 디테일 최소. 물건 1개, 흰 바탕, 가운데 정렬과 넉넉한 여백. 사람 얼굴·글자·로고 없음(달력의 연도 숫자만 예외).
 - 색은 3~4가지로 적게. 체리색을 포인트로, 나머지는 크림, 흰색, 모래색 같은 밝은 중간색. 물건 고유색이 분명한 것(금반지, 하늘색 금고, 베이지 머그잔 등)은 그 색.
 - 목표 종류마다 1장(내 집, 신혼여행, 차, 결혼 준비, 아이, 비상금 등), 사용자가 고르지 않음.
 - 1:1, 1024px로 만들고 바탕을 지운 512px PNG로 배포. 56px·48px에서도 물건이 알아보이게 단순한 물건을 고름.
-- 한 세트처럼: 힉스필드에서 앱 아이콘 케이크 그림을 그림체 참고로 넣고, 같은 프롬프트 틀(부록)에 물건 이름만 바꿔 생성.
+- 한 세트처럼: 힉스필드에서 기존 목표 그림 한 장을 그림체 참고로 넣고, 같은 프롬프트 틀(부록)에 물건 이름만 바꿔 생성.
 - 확정 그림은 Illustrations 묶음(목표 21장, 빈 상태 1장, 장면 5장). 직접 만든 목표는 회색 기본 그림(`flag-pennant`(깃발) 아이콘)으로 시작하고, 사용자가 올린 사진으로 바꿀 수 있음(Card ‘그림 자리’).
 - 실사 사진, 반짝이는 유광, 플랫 일러스트는 쓰지 않음.
 
@@ -156,12 +156,12 @@ sweeTwo(스위투). “함께 구워 더 달콤한 자산파이.” 예비·신�
 ## 브랜드
 
 - 이름: sweeTwo(스위투), sweet + two. T는 늘 대문자.
-- 워드마크: 둥근 붓 필기체 “sweeTwo”(Damion 바탕, 글자 이음과 굵기를 다듬음). 기본 색 `brand`(케이크 분홍), 분홍 바탕 위에는 흰색. T와 w 사이는 다른 글자 사이와 같은 간격.
-- 브랜드 상징: 체리를 얹은 케이크 조각(3D). 앱 아이콘, 심볼, 파비콘이 모두 이 그림.
-- 앱 아이콘: 체리를 얹은 케이크 조각(3D). 비스듬히 본 케이크 조각에 연분홍 크림 층 두 줄, 흘러내린 크림 한 방울, 꼭지 짧은 체리 한 알. 케이크는 체리 계열 그라데이션, 바탕 흰색, 그림자 없음, 케이크는 정가운데, 긴 쪽이 아이콘의 약 78%. ‘함께 구워 더 달콤한 자산파이’의 한 조각.
+- 워드마크: 둥근 붓 필기체 “sweeTwo”(Damion 바탕, 글자 이음과 굵기를 다듬음). 기본 색 `brand`(브랜드 분홍), 분홍 바탕 위에는 흰색. T와 w 사이는 다른 글자 사이와 같은 간격.
+- 브랜드 상징: 파이 차트(원 고리 + 빠져나온 파이 조각, 평면). 앱 아이콘, 심볼, 파비콘이 모두 이 그림.
+- 앱 아이콘: 평면 파이 차트: 두꺼운 원 고리(`brand` #D92B4A)와 오른쪽 아래로 빠져나온 파이 조각 하나. 조각은 끝이 원 가운데를 향한 삼각형 몸통(연분홍 #F59AAB)과 얇은 틈 뒤 둥근 크러스트 띠(진분홍 #A81C38). 그라데이션, 그림자, 입체감, 글자 없음. 바탕 흰색, 그림은 정가운데, 긴 쪽이 아이콘의 약 78%. ‘함께 구워 더 달콤한 자산파이’에서 떼어 낸 한 조각.
   - `app-icon.png`(1024px, 꽉 찬 정사각형, iPhone·Android가 모서리를 깎음), `app-icon-macos.png`(Mac 독용, 둥근 사각형과 여백·그림자를 파일에 넣음).
   - 다시 그리거나 색을 바꾸지 않음. 설치 파일용 .icns/.ico는 개발할 때 만듦.
-- 심볼과 파비콘: 같은 케이크 조각을 바탕 없이 씀(`symbol.png`, `favicon-32.png`, `favicon-48.png`, `apple-touch-icon.png`). 트레이, 알림, SNS 공유 이미지, L-01 랜딩도 이 심볼.
+- 심볼과 파비콘: 같은 파이 차트를 바탕 없이 씀(`symbol.png`, `favicon-32.png`, `favicon-48.png`, `apple-touch-icon.png`). 트레이, 알림, SNS 공유 이미지, L-01 랜딩도 이 심볼.
 - 체리 타르트: A-02 로그인 첫 화면 장면 그림 전용(Illustrations `scene-tart`, Motion `motion-a02-tart.mp4`).
 - 화면에서는 `hg-wordmark`(워드마크 모양 마스크, `brand` 칠). 작게 둠: 기본 높이 24px, 큰 자리 40px, 트레이 20px. 최소 높이 16px.
 - 워드마크는 `brand`. 한 화면에 워드마크 하나.
@@ -235,6 +235,6 @@ sweeTwo(스위투). “함께 구워 더 달콤한 자산파이.” 예비·신�
 
 ## 부록: 그림 프롬프트 틀
 
-참고 그림: 앱 아이콘 케이크 조각(`app-icon` 원본, role image_references). 모델 gpt_image_2_5, 1:1.
+참고 그림: 기존 목표 그림 한 장(예: `goal-01-emergency`, role image_references). 심볼은 평면이라 그림체 참고로 쓰지 않음. 모델 gpt_image_2_5, 1:1.
 
-“Use the reference image ONLY for its style: soft matte 3D, simplified chunky rounded shapes, smooth gentle gradients, minimal detail, clean modern app-icon illustration, pure white background, centered, generous margins. Subject (do not copy the reference cake slice): {물건}, limited palette of 3 to 4 colors with cherry red (#c8102e) accent. No text.”
+“Use the reference image ONLY for its style: soft matte 3D, simplified chunky rounded shapes, smooth gentle gradients, minimal detail, clean modern app-icon illustration, pure white background, centered, generous margins. Subject (do not copy the reference object): {물건}, limited palette of 3 to 4 colors with cherry red (#c8102e) accent. No text.”

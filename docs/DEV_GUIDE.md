@@ -407,14 +407,14 @@ sweetwo/
 
 ### 지킬 것
 
-- 브랜드 색(케이크 분홍)은 워드마크, 달성 배지, 새 알림 점에만(순자산 차트 끝점은 없음). 버튼과 카드 바탕에 쓰지 않음
+- 브랜드 색(분홍)은 워드마크, 달성 배지, 새 알림 점에만(순자산 차트 끝점은 없음). 버튼과 카드 바탕에 쓰지 않음
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
 ### 그림과 장면 영상
 
-- 목표 그림 21장, 빈 상태 그림 1장, 장면 그림 5장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 앱 아이콘(케이크 조각)과 같은 무광 3D 그림체. `object-fit: contain`
-- 앱 아이콘(체리를 얹은 케이크 조각, 디자인 시스템 Brand 최종 확정): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦. 체리 타르트는 A-02 장면 그림 scene-tart.webp(Illustrations, 영상 motion-a02-tart.mp4) 전용
+- 목표 그림 21장, 빈 상태 그림 1장, 장면 그림 5장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
+- 앱 아이콘(평면 파이 차트, 2026-10-18 교체): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦. 체리 타르트는 A-02 장면 그림 scene-tart.webp(Illustrations, 영상 motion-a02-tart.mp4) 전용
 - 장면 영상 5개: Motion 묶음, 480px MP4. W-04, P-11, P-01, H-T1, A-02에만. 영상은 예전 실사 그대로, 3D로 다시 만들기와 P-01, H-T1 잘림 수정은 보류(→ 기획서 출시 준비 4장 체크리스트)
 - 재생: `<video muted playsinline autoplay>`, `loop` 없음, 정지 그림을 `poster`로
 - 다크 모드, ‘동작 줄이기’, 로딩 전과 실패 때는 영상 대신 정지 그림
