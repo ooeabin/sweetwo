@@ -14,6 +14,7 @@
 /* Button */
 .hg-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 48px; padding: 0 var(--space-6); border-radius: var(--radius-full); border: 1px solid transparent; font: 600 14px/20px var(--font-sans); cursor: pointer; white-space: nowrap; }
 .hg-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-btn__mark { width: 20px; height: 20px; flex: none; }
 .hg-btn--primary { background: var(--ink); color: var(--on-ink); }
 .hg-btn--primary:active, .hg-btn--primary.is-pressed { background: var(--primary-pressed); }
 .hg-btn--secondary { background: transparent; color: var(--ink); border-color: var(--border-control); }
@@ -23,6 +24,9 @@
 .hg-btn--block { width: 100%; }
 .hg-btn--danger { background: var(--danger); color: var(--on-danger); border-color: transparent; }
 .hg-btn--danger:active, .hg-btn--danger.is-pressed { background: color-mix(in srgb, var(--danger) 85%, var(--ink)); }
+/* 카카오 브랜드 버튼: 제공자 공식색 예외(토큰 아님). 라이트·다크 모두 노랑 유지 */
+.hg-btn--kakao { background: #fee500; color: rgba(0, 0, 0, 0.85); border-color: transparent; }
+.hg-btn--kakao:active, .hg-btn--kakao.is-pressed { background: #efd900; }
 .hg-btn:disabled, .hg-btn.is-disabled { background: var(--hairline); color: var(--stone); border-color: transparent; cursor: not-allowed; }
 
 /* Chip */
@@ -544,6 +548,7 @@
 .hg-btn.is-loading { position: relative; color: transparent; pointer-events: none; }
 .hg-btn.is-loading::after { content: ""; position: absolute; width: 20px; height: 20px; border-radius: var(--radius-full); border: 2px solid var(--on-ink); border-right-color: transparent; animation: hg-spin .8s linear infinite; }
 .hg-btn--secondary.is-loading::after, .hg-btn--ghost.is-loading::after, .hg-btn--link.is-loading::after { border-color: var(--ink); border-right-color: transparent; }
+.hg-btn--kakao.is-loading::after { border-color: rgba(0, 0, 0, 0.85); border-right-color: transparent; }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .hg-btn.is-loading::after { animation-duration: 2.4s; } }
 
