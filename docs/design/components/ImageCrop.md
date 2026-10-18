@@ -13,3 +13,5 @@
 - 사진 지우기는 S-11 Menu의 “사진 지우기”, 지우면 이름 첫 글자 Avatar.
 
 쓰는 곳: 설정 S-11 내 정보 → S-11e 사진 바꾸기. 좁은 창은 BottomSheet, 데스크톱은 Modal 안.
+
+- React 래퍼 `ImageCrop`(packages/ui): `src`(object URL), `labels`, `size`(기본 512), `onCancel`, `onSave(jpeg)`. 올리기 칸(`hg-drop`)은 화면(S-11e)이 그림.

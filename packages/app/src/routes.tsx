@@ -109,6 +109,7 @@ import {
   S12hUnlinked,
   S11aNickname,
   S11bSide,
+  S11ePhoto,
   S01Guides,
   S01Talk,
   S02ChecklistItem,
@@ -885,6 +886,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11a 호칭
+      {
+        path: '/settings/me/photo',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11ePhoto />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11e 프로필 사진
       {
         path: '/settings/me/side',
         element: (

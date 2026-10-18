@@ -319,6 +319,8 @@ export type Database = {
         Row: {
           allowance: number | null
           analytics_off: boolean
+          avatar_path: string | null
+          avatar_updated_at: string | null
           birth_year: number | null
           card_main: boolean | null
           created_at: string
@@ -353,6 +355,8 @@ export type Database = {
         Insert: {
           allowance?: number | null
           analytics_off?: boolean
+          avatar_path?: string | null
+          avatar_updated_at?: string | null
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
@@ -386,6 +390,8 @@ export type Database = {
         Update: {
           allowance?: number | null
           analytics_off?: boolean
+          avatar_path?: string | null
+          avatar_updated_at?: string | null
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
@@ -3636,6 +3642,8 @@ export type Database = {
         Returns: {
           allowance: number | null
           analytics_off: boolean
+          avatar_path: string | null
+          avatar_updated_at: string | null
           birth_year: number | null
           card_main: boolean | null
           created_at: string
@@ -4004,6 +4012,7 @@ export type Database = {
         Args: { p_today?: string }
         Returns: number
       }
+      set_avatar: { Args: { p_path?: string }; Returns: undefined }
       set_checklist_done: {
         Args: { p_done: boolean; p_key: string }
         Returns: undefined
@@ -4022,6 +4031,14 @@ export type Database = {
       set_my_side: {
         Args: { p_side: Database["public"]["Enums"]["couple_side"] }
         Returns: undefined
+      }
+      space_avatars: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          path: string
+          updated_at: string
+          user_id: string
+        }[]
       }
       split_line_done: {
         Args: {
