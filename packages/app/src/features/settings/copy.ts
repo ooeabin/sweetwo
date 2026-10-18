@@ -426,6 +426,76 @@ export const copy = {
   quietQ: '알림을 받지 않을 시간을 정해 주세요',
   quietStart: '시작', // [확인 필요]
   quietEnd: '끝', // [확인 필요]
+  // S-01~S-03 가이드
+  guidesTitle: '가이드 모아보기',
+  checklistProgress: (done: number, total: number) => `체크리스트 ${done}/${total}`,
+  checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
+  forUs: '우리 상황에 맞는 글', // [확인 필요] 요소 이름
+  topics: '주제별 가이드', // [확인 필요] 요소 이름
+  talkCards: '부부 대화 카드 다시 보기',
+  steps: '해야 할 일', // [확인 필요] 요소 이름
+  sources: '출처', // [확인 필요] 요소 이름
+  checked: (date: string) => `확인일 ${date}`,
+  doneBy: (name: string) => `${name}님이 완료했어요`,
+  markDone: '완료했어요',
+  applyToUs: '우리에게 적용하기',
+  notAdvice: '투자·금융 자문이 아니에요. 제도와 개념만 설명해요', // [확인 필요] 고지 문구
+  noStage: '지금 단계의 체크리스트가 없어요', // [확인 필요]
+  // S-17 내 답 다시 보기
+  answersTitle: '내 답 다시 보기',
+  parts: {
+    p0: '우리', // [확인 필요] 파트 이름
+    p1: '우리 상황',
+    p2: '목표',
+    p3: '수입과 지출',
+    p4: '자산과 부채',
+    p5: '용돈과 분담',
+  },
+  reanswer: '다시 답하기',
+  replan: '계획 다시 세우기',
+  answerRows: {
+    nickname: '내 호칭',
+    side: '신랑·신부',
+    marriage: '결혼 상태',
+    housing: '사는 집',
+    employment: '일하는 방식',
+    child: '아이 계획',
+    goals: '고른 목표',
+    income: '월 수입',
+    fixed: '고정지출',
+    living: '생활비',
+    assets: '자산과 부채',
+    allowance: '내 용돈',
+    split: '분담 방식',
+  },
+  goalsCount: (n: number) => `${n}개`,
+  marriageState: { married: '결혼했어요', engaged: '준비 중이에요' } as Record<string, string>,
+  housingOptions: {
+    jeonse: '전세',
+    monthly_rent: '반전세·월세',
+    own: '자가',
+    parents: '부모님 집',
+    none: '아직 안 구했어요',
+  },
+  employmentOptions: {
+    regular: '정규직',
+    contract: '계약직',
+    freelance: '프리랜서·사업자',
+    resting: '쉬는 중',
+  },
+  childOptions: {
+    within_1y: '1년 안',
+    in_1_3y: '1~3년',
+    after_3y: '3년 뒤',
+    none: '없어요',
+    unsure: '아직 모르겠어요',
+  },
+  askHousing: '지금 어떤 집에 사세요?',
+  askEmployment: (name: string) => `${name}님은 어떻게 일하고 계세요?`,
+  askChild: '아이 계획이 있으세요?',
+  askSplit: '같이 쓰는 돈 나누는 방식, 괜찮아요?',
+  savedAnswer: '바꿨어요',
+  proposedTo: (name: string) => `${name}님에게 제안했어요`,
 };
 
 /** 시각 이름(“밤 10시”, “아침 8시”) [확인 필요] 0~5시 새벽, 6~11시 아침, 12시 낮, 13~17시 오후, 18~20시 저녁, 21~23시 밤 */

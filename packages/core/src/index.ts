@@ -34,3 +34,4 @@ export * from './schemas/admin';
 export * from './rules/site-os';
 export * from './rules/wedding';
 export * from './rules/income-period';
+export * from './rules/guides';

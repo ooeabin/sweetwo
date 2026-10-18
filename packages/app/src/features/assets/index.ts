@@ -24,3 +24,4 @@ export { F05fPeriod } from './pages/f-05f-period';
 export { F07aReplan } from './pages/f-07a-replan';
 export { F07bReplanQuestion } from './pages/f-07b-replan-question';
 export { F07cReplanCompare } from './pages/f-07c-replan-compare';
+export { replanPath, useReplan } from './replan/draft';

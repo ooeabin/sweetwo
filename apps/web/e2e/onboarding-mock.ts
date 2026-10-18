@@ -35,6 +35,8 @@ export interface MemDb {
   weddingPayments: Record<string, unknown>[];
   /** 기간 수입 변경(F-05f) */
   incomePeriods: Record<string, unknown>[];
+  /** 체크리스트 완료(S-02). 없으면 404(이번 달 체크리스트 할 일 숨김) */
+  checklistDone?: Record<string, unknown>[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -508,6 +510,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (it) it.budget = b.p_budget;
         else if (db.space) db.space.wedding_budget = b.p_budget;
         return json(route, 'applied');
+      }
+      if (fn === 'set_checklist_done') {
+        const b = body();
+        db.checklistDone = (db.checklistDone ?? []).filter((x) => x.key !== b.p_key);
+        if (b.p_done)
+          db.checklistDone.push({
+            space_id: db.space?.id,
+            key: b.p_key,
+            done_by: db.me.id,
+            done_at: new Date().toISOString(),
+          });
+        return json(route, null);
       }
       if (fn === 'set_income_period') {
         const b = body();
@@ -1185,6 +1199,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
     }
     if (path === '/rest/v1/income_period' && method === 'GET') return json(route, db.incomePeriods);
+    if (path === '/rest/v1/checklist_done' && method === 'GET')
+      return db.checklistDone
+        ? json(route, db.checklistDone)
+        : json(route, { message: 'off' }, 404);
     if (path === '/rest/v1/wedding_payment' && method === 'GET')
       return json(
         route,

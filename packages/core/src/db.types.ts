@@ -850,6 +850,36 @@ export type Database = {
           },
         ]
       }
+      checklist_done: {
+        Row: {
+          done_at: string
+          done_by: string | null
+          key: string
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          done_at?: string
+          done_by?: string | null
+          key: string
+          space_id: string
+        }
+        Update: {
+          done_at?: string
+          done_by?: string | null
+          key?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_done_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       close_balance: {
         Row: {
           account_id: string
@@ -3973,6 +4003,10 @@ export type Database = {
       send_morning_notifications: {
         Args: { p_today?: string }
         Returns: number
+      }
+      set_checklist_done: {
+        Args: { p_done: boolean; p_key: string }
+        Returns: undefined
       }
       set_income_period: {
         Args: {
