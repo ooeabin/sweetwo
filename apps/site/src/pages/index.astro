@@ -2,7 +2,6 @@
 // L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 3개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 다운로드.
 import { parseFaq } from '@sweetwo/core';
 import symbol from '../../../../packages/ui/src/assets/brand/symbol.png';
-import pie from '../../../../packages/ui/src/assets/illustrations/scene-pie.webp';
 import Download from '../components/Download.astro';
 import Faq from '../components/Faq.astro';
 import faqMd from '../content/faq.md?raw';
@@ -21,8 +20,7 @@ const pick = [1, 2, 4, 5, 10].flatMap((n) => all.filter((f) => f.n === n));
       <Download placement="hero" />
     </div>
     <div class="hg-card" style="background: var(--surface); display: grid; place-items: center; gap: var(--space-4);">
-      <img src={pie.src} alt="" width="320" height="320" loading="eager" />
-      <img src={symbol.src} alt="" width="64" height="64" />
+      <img src={symbol.src} alt="" width="320" height="320" loading="eager" />
     </div>
   </section>
 
