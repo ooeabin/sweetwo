@@ -1,6 +1,6 @@
 import { keepLogin, webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
-import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
+import { AuthLayout, Button, ProviderMark, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -73,12 +73,13 @@ export function A02Login() {
           {authProviders.map((p) => (
             <Button
               key={p}
-              variant={st.conflict === p ? 'primary' : 'secondary'}
+              variant={p === 'kakao' ? 'kakao' : st.conflict === p ? 'primary' : 'secondary'}
               block
               disabled={!online || busy !== null}
               className={busy === p ? 'is-loading' : undefined}
               onClick={() => void start(p)}
             >
+              <ProviderMark provider={p} />
               {copy.continueWith[p]}
               {recent === p && <span className="hg-tag">{copy.recent}</span>}
             </Button>
