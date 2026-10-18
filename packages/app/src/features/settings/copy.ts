@@ -514,6 +514,15 @@ export const copy = {
   photoAgain: '다시 고르기',
   photoSave: '저장할게요',
   photoSaved: '사진을 바꿨어요',
+  // S-22 위젯
+  widgetTitle: '위젯',
+  widgetTray: '트레이 아이콘',
+  widgetTrayHelp: '앱 창을 닫아도 트레이에 남아요',
+  widgetAmounts: '위젯에 금액 보이기',
+  widgetGoal: '목표 위젯에 보일 목표',
+  widgetNoGoal: '목표 없음',
+  widgetTrayOn: '트레이 켜짐',
+  widgetTrayOff: '트레이 꺼짐', // [확인 필요]
 };
 
 /** 시각 이름(“밤 10시”, “아침 8시”) [확인 필요] 0~5시 새벽, 6~11시 아침, 12시 낮, 13~17시 오후, 18~20시 저녁, 21~23시 밤 */

@@ -39,6 +39,7 @@ import {
   O46LoanRate,
   O47LoanPayment,
 } from './features/assets';
+import { TrayWidget } from './features/widget';
 import { DevUiGallery } from './features/dev';
 import {
   AchieveWatch,
@@ -110,6 +111,7 @@ import {
   S11aNickname,
   S11bSide,
   S11ePhoto,
+  S22Widget,
   S01Guides,
   S01Talk,
   S02ChecklistItem,
@@ -987,6 +989,16 @@ export const routes: RouteObject[] = [
         ),
       }, // S-03 가이드 글
       {
+        path: '/settings/widget/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S22Widget />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-22 위젯
+      {
         path: '/settings/notifications',
         element: (
           <RequireAccount>
@@ -1244,6 +1256,8 @@ export const routes: RouteObject[] = [
       { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 데스크톱 복귀 페이지)
     ],
   },
+  // 트레이 위젯 창(데스크톱, 26). 앱 틀·로그인 확인 없이 브리지 값만 그림
+  { path: '/widget/tray', element: <TrayWidget /> },
   // 개발 전용: 컴포넌트 모음. 배포 빌드에서는 import.meta.env.DEV가 false라 빠진다.
   ...(import.meta.env.DEV ? [{ path: '/dev/ui', element: <DevUiGallery /> }] : []),
 ];

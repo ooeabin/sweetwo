@@ -14,6 +14,15 @@ import {
   verifyPin,
 } from './lock';
 import { showNotice } from './notify';
+import { TraySnapshot, WidgetSettings } from '@sweetwo/core';
+import {
+  clearSnapshot,
+  hideWidget,
+  setWidgetSettings,
+  trayState,
+  updateSnapshot,
+  widgetSettings,
+} from './widget';
 
 // IPC 핸들러. 보낸 창이 우리 화면인지 확인하고, 인자는 Zod로 검사한다(docs/DEV_GUIDE.md ‘Electron 보안 체크리스트’).
 function trusted(e: IpcMainInvokeEvent) {
@@ -38,7 +47,15 @@ const Notice = z.object({
   body: z.string().max(200).optional(),
 });
 
-export function registerIpc(getWindow: () => BrowserWindow | null) {
+const Path = z
+  .string()
+  .regex(/^\/[A-Za-z0-9/_\-?=&.]*$/)
+  .max(200);
+
+export function registerIpc(
+  getWindow: () => BrowserWindow | null,
+  w: { open: (path?: string) => void; setTray: (on: boolean) => void },
+) {
   handle(CH.authStart, z.tuple([Provider]), ([p]) => startLogin(p));
   handle(CH.authReopen, none, () => reopenLogin());
   handle(CH.authCancel, none, () => cancelLogin());
@@ -46,6 +63,7 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
   // 로그아웃하면 이 기기 PIN도 지운다(다음 로그인 때 새로 만들기)
   handle(CH.authSignOut, none, async () => {
     clearPin();
+    clearSnapshot();
     await signOut('user');
   });
   handle(CH.lockStatus, none, () => lockStatus());
@@ -57,4 +75,16 @@ export function registerIpc(getWindow: () => BrowserWindow | null) {
   handle(CH.lockClear, none, () => clearPinVerified());
   handle(CH.lockSetAuto, z.tuple([z.number().int()]), ([m]) => setAutoLock(m));
   handle(CH.notifyShow, z.tuple([Notice]), ([n]) => showNotice(n, getWindow));
+  // 트레이 위젯(26), 위젯 설정(S-22)
+  handle(CH.widgetUpdate, z.tuple([TraySnapshot]), ([s]) => updateSnapshot(s));
+  handle(CH.widgetState, none, () => trayState());
+  handle(CH.widgetOpen, z.tuple([Path]), ([p]) => {
+    hideWidget();
+    w.open(p);
+  });
+  handle(CH.widgetHide, none, () => hideWidget());
+  handle(CH.widgetSettings, none, () => widgetSettings());
+  handle(CH.widgetSetSettings, z.tuple([WidgetSettings.partial()]), ([p]) =>
+    setWidgetSettings(p, w.setTray),
+  );
 }

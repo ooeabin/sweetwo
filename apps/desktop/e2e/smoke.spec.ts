@@ -9,7 +9,31 @@ test('데스크톱 실행', async () => {
   const win = await app.firstWindow();
   await expect(win.locator('.hg-root')).toBeVisible();
   const bridge = await win.evaluate(() => Object.keys(window.sweetwo ?? {}).sort());
-  expect(bridge).toEqual(['appVersion', 'auth', 'lock', 'notify', 'onInvite', 'version']);
+  expect(bridge).toEqual([
+    'appVersion',
+    'auth',
+    'lock',
+    'notify',
+    'onInvite',
+    'onNavigate',
+    'version',
+    'widget',
+  ]);
+  // 트레이 위젯(26): 로그인 전에는 값 없음, 설정 기본값(트레이 켜짐, 금액 가림)
+  const state = await win.evaluate(() => window.sweetwo?.widget.state());
+  expect(state).toMatchObject({
+    signedIn: false,
+    snapshot: null,
+    settings: { tray: true, showAmounts: false, goalId: null },
+  });
+  // 브리지로 받은 값은 검사(형식이 틀리면 거절)
+  const bad = await win.evaluate(() =>
+    window.sweetwo?.widget.update({ kind: 'x' }).then(
+      () => 'ok',
+      () => 'rejected',
+    ),
+  );
+  expect(bad).toBe('rejected');
   // 토큰과 콜백 code는 렌더러에 없다
   const authKeys = await win.evaluate(() => Object.keys(window.sweetwo?.auth ?? {}).sort());
   expect(authKeys).toEqual(['cancel', 'getAccessToken', 'onEvent', 'reopen', 'signOut', 'start']);

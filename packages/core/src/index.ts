@@ -5,6 +5,7 @@ export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './db.ty
 export * from './schemas/auth';
 export * from './schemas/plan';
 export * from './schemas/unlink';
+export * from './schemas/widget';
 export * from './version';
 export * from './onboarding';
 export * from './josa';

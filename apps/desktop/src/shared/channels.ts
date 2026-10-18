@@ -26,6 +26,20 @@ export const CH = {
   notifyShow: 'sweetwo:notify-show',
   /** main → 렌더러: 누른 알림 id */
   notifyOpen: 'sweetwo:notify-open',
+  // 트레이 위젯(26)·위젯 설정(S-22)
+  /** 앱 창 → main: 새 위젯 값 */
+  widgetUpdate: 'sweetwo:widget-update',
+  /** 위젯 창 → main: 지금 상태(로그인, 잠김, 값, 설정) */
+  widgetState: 'sweetwo:widget-state',
+  /** main → 위젯 창: 상태가 바뀜 */
+  widgetChanged: 'sweetwo:widget-changed',
+  /** 위젯 창 → main: 앱 창을 앞으로 + 그 화면 */
+  widgetOpen: 'sweetwo:widget-open',
+  /** main → 앱 창: 이 화면으로 */
+  navigate: 'sweetwo:navigate',
+  widgetHide: 'sweetwo:widget-hide',
+  widgetSettings: 'sweetwo:widget-settings',
+  widgetSetSettings: 'sweetwo:widget-set-settings',
 } as const;
 
 export type AuthProviderName = 'kakao' | 'google' | 'apple';

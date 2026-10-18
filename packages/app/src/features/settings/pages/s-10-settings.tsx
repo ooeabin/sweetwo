@@ -6,6 +6,7 @@ import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
+import { useWidgetSettings } from '../widget-settings';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
 // 지금 있는 화면: 내 정보(S-11), 부부 정보(S-12), 알림(S-14). 나머지 줄은 자리만(누르지 않음, “준비 중이에요”).
@@ -14,6 +15,7 @@ export function S10Settings() {
   const nav = useNavigate();
   const d = useSettingsData();
   const ck = useChecklist(d.space);
+  const widget = useWidgetSettings();
   if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
   const desktop = detectPlatform() === 'desktop';
   const c = d.c;
@@ -93,7 +95,13 @@ export function S10Settings() {
           value={desktop ? (window.sweetwo?.appVersion ?? '') : undefined}
           onClick={() => nav('/settings/about')}
         />
-        {desktop && <ListRow label={copy.rows.widget} sub={copy.rows.widgetSub} />}
+        {desktop && (
+          <ListRow
+            label={copy.rows.widget}
+            sub={widget.settings?.tray === false ? copy.widgetTrayOff : copy.widgetTrayOn}
+            onClick={() => nav('/settings/widget')}
+          />
+        )}
       </div>
     </div>
   );

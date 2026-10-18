@@ -27,6 +27,8 @@ export function App({ platform }: { platform: Platform }) {
     platform === 'desktop' ? createHashRouter(routes) : createBrowserRouter(routes),
   );
   useSystemTheme();
+  // 데스크톱: 트레이 위젯·트레이 메뉴가 고른 화면으로(main → 앱 창)
+  useEffect(() => window.sweetwo?.onNavigate?.((path) => void router.navigate(path)), [router]);
   return (
     <QueryClientProvider client={queryClient}>
       <div className="hg-root" data-platform={platform}>

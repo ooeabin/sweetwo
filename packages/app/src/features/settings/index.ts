@@ -34,3 +34,4 @@ export { S17Answers } from './pages/s-17-answers';
 export { S17aAnswer } from './pages/s-17a-answer';
 export { S17bSplit } from './pages/s-17b-split';
 export { S11ePhoto } from './pages/s-11e-photo';
+export { S22Widget } from './pages/s-22-widget';
