@@ -171,3 +171,87 @@ test('공지 띠(AD-10): 필독이 먼저, 보기로 펼침, 일반 공지는 �
   await expect(page.getByText('이번 달')).not.toHaveCount(0);
   await expect(page.getByText('새 기능이 나왔어요')).toHaveCount(0);
 });
+
+test('순자산(H-06)과 배우자 활동(H-08): 숫자 타일, 6개월 그래프, 최근 활동 → 관련 화면', async ({
+  page,
+}) => {
+  const now = new Date('2026-10-07T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    side: 'bride',
+    employment: 'regular',
+    monthly_income: 2_700_000,
+    income_variable: false,
+    payday: 10,
+    payday_last: false,
+    allowance: 500_000,
+  };
+  const asset = (id: string, name: string, amount: number, principal: number | null) => ({
+    id,
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'deposit',
+    name,
+    amount,
+    principal,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    deleted_at: null,
+  });
+  // 원금 기준 순자산 1,000 + 2,000 = 3,000만, 평가 3,120만(안 판 수익 120만). 지난달 말 2,790만
+  db.assets.push(
+    asset('a1', '공동 예금', 10_000_000, null),
+    asset('a2', '공동 펀드', 21_200_000, 20_000_000),
+  );
+  db.netWorth.push(
+    { month: '2026-08-01', net: 26_000_000, expected: 26_000_000 },
+    { month: '2026-09-01', net: 27_900_000, expected: 28_500_000 },
+  );
+  db.activity.push(
+    {
+      at: '2026-10-07T00:30:00Z',
+      kind: 'split_done',
+      name: 'living',
+      ref: 'l1',
+      target: '/plan/split',
+    },
+    { at: '2026-10-06T09:00:00Z', kind: 'asset_changed', name: null, ref: 'a9', target: '/assets' },
+    {
+      at: '2026-10-03T09:00:00Z',
+      kind: 'asset_added',
+      name: '공동 펀드',
+      ref: 'a2',
+      target: '/assets/a2',
+    },
+  );
+  await page.goto('/');
+  await expect(page.locator('.hg-stat', { hasText: '순자산' })).toContainText('3,000만 원');
+  const chart = page.getByRole('region', { name: '순자산' });
+  await expect(chart).toContainText('예상 3,120만 원, 안 판 수익 +120만 원');
+  await expect(chart).toContainText('지난달보다 +210만 원');
+  const act = page.getByRole('region', { name: '예빈님 활동' });
+  await expect(act).toContainText('예빈님이 공동 생활비 나누기를 끝냈어요');
+  await expect(act).toContainText('개인 자산 금액이 바뀌었어요');
+  await expect(act).toContainText('예빈님이 공동 펀드 항목을 추가했어요');
+  await axe(page);
+  await act.getByRole('button', { name: /공동 펀드/ }).click();
+  await expect(page).toHaveURL(/\/assets\/a2$/);
+});
+
+test('배우자 미합류면 활동 카드 없음', async ({ page }) => {
+  const now = new Date('2026-10-07T10:00:00+09:00');
+  await page.clock.setFixedTime(now);
+  const db = await mockOnboarding(page, { now });
+  seed(db);
+  await page.goto('/');
+  await expect(page.getByText('이번 달')).not.toHaveCount(0);
+  await expect(page.getByRole('region', { name: '예빈님 활동' })).toHaveCount(0);
+  await expect(page.locator('.hg-stat', { hasText: '순자산' })).toContainText('아직 몰라요');
+});

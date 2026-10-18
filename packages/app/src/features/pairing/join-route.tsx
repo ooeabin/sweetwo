@@ -8,8 +8,10 @@ import { P03Nickname } from './pages/p-03-nickname';
 import { P04Profile } from './pages/p-04-profile';
 import { P05Income } from './pages/p-05-income';
 import { P05dPayday } from './pages/p-05d-payday';
+import { P06OwnItems } from './pages/p-06-own-items';
 import { P07Allowance } from './pages/p-07-allowance';
 import { P08Split } from './pages/p-08-split';
+import { P09Invest } from './pages/p-09-invest';
 import { P10Changes } from './pages/p-10-changes';
 import { P11Joined } from './pages/p-11-joined';
 
@@ -20,8 +22,10 @@ const SCREENS: Record<string, () => ReactNode> = {
   'p-04': () => <P04Profile />,
   'p-05': () => <P05Income />,
   'p-05d': () => <P05dPayday />,
+  'p-06': () => <P06OwnItems />,
   'p-07': () => <P07Allowance />,
   'p-08': () => <P08Split />,
+  'p-09': () => <P09Invest />,
   'p-10': () => <P10Changes />,
   'p-11': () => <P11Joined />,
   'o-63': () => <O63Revisit />,

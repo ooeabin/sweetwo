@@ -40,7 +40,7 @@ test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그�
   expect(back).toBe('/i/K7M2QX?go=1');
 });
 
-test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 다르게 → P-10 → P-11 → O-63~65 → 이번 달', async ({
+test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 제안 → P-08 다르게 → P-09 → P-10 → P-11 → O-63~65 → 이번 달', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -103,6 +103,22 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
     goal('g1', 'emergency', '비상금', 0, 7_800_000, '2027-10-01'),
     goal('g2', 'home', '내 집 마련', 1, 150_000_000, '2031-10-01'),
   );
+  // 찬우가 대신 적은 예빈 명의 예금(합류 때 예빈 명의로 바뀜)
+  db.assets.push({
+    id: 'a-yb',
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'deposit',
+    name: '예금',
+    amount: 10_000_000,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    visibility: 'all',
+    estimated: true,
+    status: 'held',
+    created_by: 'starter',
+    deleted_at: null,
+  });
   db.plans.push({
     args: {
       p_label_month: '2026-09-01',
@@ -170,6 +186,19 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
   await page.getByRole('radio', { name: '10일' }).click();
   await next(page);
 
+  // P-06 찬우가 적은 예빈 명의 항목: 고치고 공개 범위(기본 합계만, 대신 입력은 전체였음) → 더 있나요? ‘없어요’
+  await heading(page, '찬우님이 적은 예빈님 명의 항목이에요. 맞나요?');
+  const dep = page.getByRole('listitem', { name: '예금' });
+  await expect(dep).toContainText('10,000,000원 추정');
+  await dep.getByRole('button', { name: '고칠게요' }).click();
+  await dep.getByLabel('예금', { exact: true }).fill('12000000');
+  await dep.getByRole('tab', { name: '합계만' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '맞아요' }).click();
+  await heading(page, '더 있는 돈이나 대출이 있나요?');
+  await axe(page);
+  await page.getByRole('radio', { name: '없어요' }).click();
+
   await heading(page, '예빈님 용돈은 한 달에 얼마로 할까요?');
   await expect(page.getByLabel('예빈님 용돈은 한 달에 얼마로 할까요?')).toHaveValue(/500,?000/);
   // 같으면 안내 없음, 다르면 찬우에게 제안(적용일 = 72시간 뒤 첫 기준일, 두 월급날 중 늦은 25일)
@@ -190,6 +219,12 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
   await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '찬우님께 제안하기' }).click();
+
+  // P-09 투자 성향(O-53과 같음): 고르면 바로 다음
+  await heading(page, '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?');
+  await expect(page.getByRole('button', { name: '건너뛰기' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /조금은 괜찮아요/ }).click();
 
   // P-10: 찬우가 정한 목표(우선순위 순)
   await heading(page, '합류 전에 바뀐 것과 목표예요');
@@ -262,6 +297,12 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-07 제안 → P-08 �
     payday: 10,
     allowance: 500_000,
     onboarding_step: 'P-11',
+    invest_answer: 'some',
+  });
+  expect(db.assets.find((a) => a.id === 'a-yb')).toMatchObject({
+    amount: 12_000_000,
+    visibility: 'sum',
+    estimated: false,
   });
   // 제안 2건: 용돈 60만, 분담 반반(적용일 10월 25일)
   expect(db.proposals).toEqual([

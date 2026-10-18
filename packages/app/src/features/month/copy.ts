@@ -45,6 +45,22 @@ export const copy = {
   unsplit: '안 나눈 돈',
   closeTile: '월말 정리',
   netWorth: '순자산',
+  // H-06 순자산(F-01과 같은 표기)
+  netWorthExpected: (amount: string) => `예상 ${amount}`,
+  netWorthExpectedName: '예상 순자산',
+  netWorthGain: (amount: string) => `안 판 수익 ${amount}`,
+  netWorthChange: (amount: string) => `지난달보다 ${amount}`,
+  netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
+  netWorthEmpty: '자산을 적으면 여기에 보여요', // [확인 필요]
+  netWorthSee: '우리 자산 보기', // [확인 필요]
+  // H-08 배우자 활동
+  activity: (partner: string) => `${partner}님 활동`, // [확인 필요] 카드 제목
+  activityEmpty: '아직 활동이 없어요', // [확인 필요]
+  activitySplit: (partner: string, line: string) => `${partner}님이 ${line} 나누기를 끝냈어요`,
+  activitySplitAny: (partner: string) => `${partner}님이 월급 나누기를 끝냈어요`, // [확인 필요]
+  activityAdded: (partner: string, name: string) => `${partner}님이 ${name} 항목을 추가했어요`, // [확인 필요]
+  activityChanged: (partner: string, name: string) => `${partner}님이 ${name} 금액을 바꿨어요`, // [확인 필요]
+  activitySum: '개인 자산 금액이 바뀌었어요',
   unknown: '아직 몰라요',
   nextEvent: '다음 일정',
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요] 당일 표기

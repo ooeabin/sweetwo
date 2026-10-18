@@ -34,7 +34,7 @@ export function useLoanStep(f: LoanField) {
       else {
         await w.finish();
         toast(copy.weekLoansDone);
-        w.nav('/', { replace: true });
+        w.exit();
       }
     } catch {
       toast(copy.loadFailed);

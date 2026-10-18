@@ -48,7 +48,7 @@ export function O44LoanKinds() {
       }
       await w.finish();
       toast(copy.weekLoansDone);
-      w.nav('/', { replace: true });
+      w.exit();
     } catch {
       toast(copy.loadFailed);
     } finally {

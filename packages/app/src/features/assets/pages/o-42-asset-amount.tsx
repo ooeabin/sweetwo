@@ -32,7 +32,7 @@ export function O42AssetAmount() {
       else {
         await w.finish();
         toast(copy.weekAssetsDone);
-        w.nav('/', { replace: true });
+        w.exit();
       }
     } catch {
       toast(copy.loadFailed);

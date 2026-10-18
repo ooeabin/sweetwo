@@ -3517,6 +3517,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      partner_activity: {
+        Args: { p_limit?: number }
+        Returns: {
+          at: string
+          kind: string
+          name: string
+          ref: string
+          target: string
+        }[]
+      }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {

@@ -67,6 +67,16 @@ export const copy = {
   paydayShortMonth: '짧은 달은 말일로 계산해요', // [확인 필요] O-32와 같음
   checkValue: '입력한 값이 맞나요?',
 
+  // P-06
+  ownItems: (starter: string, me: string) => `${starter}님이 적은 ${me}님 명의 항목이에요. 맞나요?`,
+  more: '더 있는 돈이나 대출이 있나요?',
+  moreAssets: '돈이 더 있어요', // [확인 필요] 선택지 문구
+  moreLoans: '대출이 있어요', // [확인 필요] 선택지 문구
+  none: '없어요',
+  visLabel: '공개 범위', // [확인 필요] 화면 읽기용
+  vis: { all: '전체', sum: '합계만' },
+  estimatedTag: '추정',
+
   // P-07, P-08
   allowance: (me: string) => `${me}님 용돈은 한 달에 얼마로 할까요?`,
   split: '같이 쓰는 돈 나누는 방식, 괜찮아요?',
@@ -75,6 +85,19 @@ export const copy = {
   differently: '다르게 해볼래요',
   proposeTo: (name: string) => `${name}님께 제안하기`,
   applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+
+  // P-09
+  invest: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
+  investOptions: {
+    keep: '원금은 지켜야 해요',
+    some: '조금은 괜찮아요',
+    active: '일부는 적극적으로',
+    unsure: '잘 모르겠어요',
+  },
+  investLimit: (limit: number) => (limit === 0 ? '투자하지 않아요' : `공동자금의 ${limit}%까지`), // [확인 필요] O-53과 같음
+  investPartner: (partner: string, answer: string) =>
+    `${partner}님은 ‘${answer}’를 골랐어요. 다르면 더 조심스러운 쪽으로 정해요`, // [확인 필요] O-53과 같음
+  skip: '건너뛰기',
 
   // P-10
   changes: '합류 전에 바뀐 것과 목표예요',
