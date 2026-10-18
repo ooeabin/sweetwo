@@ -13,3 +13,7 @@ export { AchieveWatch } from './achieve';
 export { G05Achieved } from './pages/g-05-achieved';
 export { G05Send } from './pages/g-05-send';
 export { G05Use } from './pages/g-05-use';
+export { G07Wedding } from './pages/g-07-wedding';
+export { G07aWeddingItem } from './pages/g-07a-wedding-item';
+export { G07WeddingPay } from './pages/g-07-wedding-pay';
+export { G07WeddingBudget } from './pages/g-07-wedding-budget';

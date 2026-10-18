@@ -43,6 +43,10 @@ import {
   G05Achieved,
   G05Send,
   G05Use,
+  G07Wedding,
+  G07WeddingBudget,
+  G07WeddingPay,
+  G07aWeddingItem,
   G02GoalEdit,
   G04GoalAdjust,
   G06GoalOrder,
@@ -209,6 +213,46 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // G-03a~f 목표 추가
+      {
+        path: '/goals/wedding',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G07Wedding />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-07 결혼 비용 상세
+      {
+        path: '/goals/wedding/budget',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G07WeddingBudget />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-07 총예산
+      {
+        path: '/goals/wedding/item/:id/:step',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G07aWeddingItem />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-07a~d 결혼 비용 항목
+      {
+        path: '/goals/wedding/pay/:id/:part',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G07WeddingPay />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-07 결제 기록
       {
         path: '/goals/:id',
         element: (

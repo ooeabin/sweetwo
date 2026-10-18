@@ -30,6 +30,9 @@ export interface MemDb {
   activity: Record<string, unknown>[];
   /** 달성 축하 문장 재료(goal_story) */
   goalStory: { months: number; together: number };
+  /** 결혼 비용 항목·결제(G-07) */
+  weddingItems: Record<string, unknown>[];
+  weddingPayments: Record<string, unknown>[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -115,6 +118,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     netWorth: [],
     activity: [],
     goalStory: { months: 0, together: 0 },
+    weddingItems: [],
+    weddingPayments: [],
     incomeItems: [],
     incomeEvents: [],
     family: [],
@@ -473,6 +478,66 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, false);
       }
       if (fn === 'goal_story') return json(route, [db.goalStory]);
+      // G-07 예산 바꾸기: 연결된 부부는 제안, 아니면 바로
+      if (fn === 'change_wedding_budget') {
+        const b = body();
+        const it = db.weddingItems.find((x) => x.id === b.p_item);
+        if (db.space?.couple_state === 'connected') {
+          db.proposals.push({
+            id: `p-${db.proposals.length + 1}`,
+            space_id: db.space.id,
+            item: it ? 'wedding_item_budget' : 'wedding_budget',
+            target_id: null,
+            wedding_item_id: it?.id ?? null,
+            proposer: db.me.id,
+            before: { budget: it ? it.budget : db.space.wedding_budget },
+            after: { budget: b.p_budget },
+            apply_on: b.p_apply_on,
+            status: 'open',
+            response: null,
+            round_trips: 0,
+            oppose_count: 0,
+            together: false,
+            created_at: new Date().toISOString(),
+          });
+          return json(route, 'proposed');
+        }
+        if (it) it.budget = b.p_budget;
+        else if (db.space) db.space.wedding_budget = b.p_budget;
+        return json(route, 'applied');
+      }
+      if (fn === 'record_wedding_payment') {
+        const b = body();
+        const it = db.weddingItems.find((x) => x.id === b.p_item);
+        if (!it) return json(route, { message: 'not_found' }, 400);
+        db.weddingPayments = db.weddingPayments.filter(
+          (x) => !(x.item_id === it.id && x.part === b.p_part),
+        );
+        db.weddingPayments.push({
+          id: `wp-${db.weddingPayments.length + 1}`,
+          item_id: it.id,
+          part: b.p_part,
+          amount: b.p_amount,
+          paid_on: new Date().toISOString().slice(0, 10),
+          paid_from: b.p_paid_from,
+          deleted_at: null,
+        });
+        const paid = (part: string, plan: unknown) =>
+          Number(
+            db.weddingPayments.find((x) => x.item_id === it.id && x.part === part)?.amount ??
+              plan ??
+              0,
+          );
+        return json(
+          route,
+          Math.max(
+            paid('deposit', it.deposit_amount) +
+              paid('balance', it.balance_amount) -
+              Number(it.budget),
+            0,
+          ),
+        );
+      }
       if (fn === 'use_goal') {
         const b = body();
         const g = db.goals.find((x) => x.id === b.p_goal);
@@ -1056,6 +1121,37 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (method === 'PATCH') Object.assign(db.me, body());
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
+    if (path === '/rest/v1/wedding_item') {
+      if (method === 'GET')
+        return json(
+          route,
+          db.weddingItems.filter((x) => !x.deleted_at),
+        );
+      if (method === 'POST') {
+        const r: Record<string, unknown> = {
+          id: `wi-${db.weddingItems.length + 1}`,
+          deposit_amount: null,
+          deposit_on: null,
+          balance_amount: null,
+          balance_on: null,
+          deleted_at: null,
+          created_at: new Date().toISOString(),
+          ...body(),
+        };
+        db.weddingItems.push(r);
+        return json(route, { id: r.id }, 201);
+      }
+      if (method === 'PATCH') {
+        const it = db.weddingItems.find((x) => x.id === eqId(url));
+        if (it) Object.assign(it, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/wedding_payment' && method === 'GET')
+      return json(
+        route,
+        db.weddingPayments.filter((x) => !x.deleted_at),
+      );
     if (path === '/rest/v1/couple_space') {
       if (method === 'GET') return json(route, db.space);
       if (method === 'PATCH' && db.space) Object.assign(db.space, body());

@@ -25,6 +25,8 @@ export type ProposalItem =
   | 'goal_pause'
   | 'goal_delete'
   | 'goal_add'
-  | 'goal_restore';
+  | 'goal_restore'
+  | 'wedding_budget'
+  | 'wedding_item_budget';
 /** 목표 항목(goal_add 말고는 target = 목표 id) */
 export const isGoalItem = (item: string) => item.startsWith('goal_');

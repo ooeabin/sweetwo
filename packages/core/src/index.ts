@@ -32,3 +32,4 @@ export * from './rules/close-detail';
 export * from './rules/missed';
 export * from './schemas/admin';
 export * from './rules/site-os';
+export * from './rules/wedding';
