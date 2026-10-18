@@ -411,21 +411,19 @@ sweetwo/
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
-### 그림과 장면 영상
+### 그림과 장면 자리
 
-- 목표 그림 21장, 빈 상태 그림 1장, 장면 그림 5장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
-- 앱 아이콘(평면 파이 차트, 2026-10-18 교체): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦. 체리 타르트는 A-02 장면 그림 scene-tart.webp(Illustrations, 영상 motion-a02-tart.mp4) 전용
-- 장면 영상 5개: Motion 묶음, 480px MP4. W-04, P-11, P-01, H-T1, A-02에만. 영상은 예전 실사 그대로, 3D로 다시 만들기와 P-01, H-T1 잘림 수정은 보류(→ 기획서 출시 준비 4장 체크리스트)
-- 재생: `<video muted playsinline autoplay>`, `loop` 없음, 정지 그림을 `poster`로
-- 다크 모드, ‘동작 줄이기’, 로딩 전과 실패 때는 영상 대신 정지 그림
-- 그림과 영상은 앱에 포함해 배포(네트워크 없이도 보이게). 웹은 CloudFront에서 오래 캐시
+- 목표 그림 21장, 빈 상태 그림 1장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
+- 앱 아이콘(평면 파이 차트, 2026-10-18 교체): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦
+- 장면 그림 5장과 장면 영상 5개는 없앰(2026-10-19). W-04, P-11, P-01, H-T1, A-02의 장면 자리는 그림 없이 비워 둠
+- 그림은 앱에 포함해 배포(네트워크 없이도 보이게). 웹은 CloudFront에서 오래 캐시
 
 ### 자산 파일 규칙
 
-- 파일 이름: `<종류>-<이름>.webp|mp4` (예: `goal-04-home.webp`, `motion-w04-pie.mp4`)
-- 크기 상한: 그림 150KB, 영상 1MB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
+- 파일 이름: `<종류>-<이름>.webp` (예: `goal-04-home.webp`)
+- 크기 상한: 그림 150KB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
 - 그림은 `<Illustration name>`, 빈 상태는 `<EmptyState>`로만 씀. 파일을 직접 import하지 않음
-- 장면 영상은 `<SceneMedia>` 컴포넌트 하나로만: 다크 모드, ‘동작 줄이기’, 로딩 실패 때 정지 그림으로 바꿈
+- 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 지금은 그림 없이 영역만 잡아 비워 둠
 - 웹 빌드는 파일 이름에 해시(Vite 기본)를 붙여 오래 캐시
 
 ### 디자인 시스템 갱신 절차
@@ -520,8 +518,7 @@ packages/ui/src/
   styles/tokens.css       디자인 시스템에서 복사 (손대지 않음)
   styles/bundle.css       디자인 시스템에서 복사 (손대지 않음)
   components/Button.tsx   컴포넌트마다 파일 하나, 디자인 시스템 이름 그대로
-  assets/illustrations/   목표, 빈 상태, 장면 그림
-  assets/motion/          장면 영상
+  assets/illustrations/   목표, 빈 상태 그림
 
 supabase/
   migrations/20261020093000_create_goal.sql
@@ -987,7 +984,7 @@ supabase/
 - L-02 `/download?os=`: 보이지 않는 iframe으로 고정 주소(download.sweetwo.kr/latest/mac|win)를 받음(페이지를 떠나지 않음), 한 번 받은 뒤 주소에 `started=1`(새로고침해도 다시 받지 않음), 이 브라우저에 `sweetwo-app-seen`·`sweetwo-download-id` 저장. download_id를 앱 첫 실행으로 넘기는 방법(다른 도메인)은 기획 확인 뒤
 - 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective, 지금 시행 중 = 시행일이 오늘 이전 중 최근, `?v={시행일}`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
 - 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(CloudFront 오류 페이지로 지정)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없거나 휴대폰이면 웹 앱 P-01로 바로
-- 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 찬우·예빈 예시)는 웹 앱 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 3D 그림(scene-pie)과 심볼
+- 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 찬우·예빈 예시)는 웹 앱 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 심볼과 워드마크
 - e2e `apps/site/e2e`(빌드 + 미리보기, Mac·Windows·Windows 7·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이
 
 ### 어드민 인증
@@ -1096,7 +1093,7 @@ supabase/
 - [x] 구현 기준 화면 그림 갱신: W-04 j·k·g, 보정 카드, 지출 적기 홈, W-01 6번, F-01 16·17, 앱 기본 틀(기획서 출시 준비 4장)
 - [x] 놓친 달 와이어프레임 문구를 기본 모드(j·k) 기준으로 갱신
 - [x] W-04h 와이어프레임의 생활비 예산 줄 갱신(지금은 W-04g 보정 제안)
-- [ ] 장면 영상 3D 재제작과 P-01, H-T1 잘림 수정(보류)
+- [x] 장면 그림·영상 제거, 장면 자리는 비워 둠(2026-10-19)
 
 ### 확정된 결정(10월 14일)
 

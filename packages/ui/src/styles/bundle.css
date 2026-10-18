@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ffed1bd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (b37e9c8). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -780,16 +780,9 @@
 
 /* Distribution: F-08 분포 그림. 글자는 글자 토큰만, brand 쓰지 않음 */
 
-/* SceneMedia: 장면 영상 칸. 흰 바탕(#ffffff) 영상이라 라이트 surface 위에만 */
-.hg-scene { position: relative; box-sizing: border-box; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0; overflow: hidden; background: var(--surface); }
+/* SceneMedia: 장면 자리. 지금은 그림 없이 영역만 잡아 비워 둠 */
+.hg-scene { box-sizing: border-box; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0; }
 .hg-scene--tall { aspect-ratio: 3 / 4; }
-.hg-scene video, .hg-scene__still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.hg-scene__still { display: none; }
-.hg-scene.is-still video { display: none; }
-.hg-scene.is-still .hg-scene__still { display: block; }
-[data-theme="dark"] .hg-scene video { display: none; }
-[data-theme="dark"] .hg-scene .hg-scene__still { display: block; }
-@media (prefers-reduced-motion: reduce) { .hg-scene video { display: none; } .hg-scene .hg-scene__still { display: block; } }
 
 /* Consent: 동의 묶음, 한 건 동의 카드 */
 .hg-consent { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: 480px; padding: 0 var(--space-4); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }

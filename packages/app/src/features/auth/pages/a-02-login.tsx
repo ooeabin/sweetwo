@@ -1,6 +1,6 @@
 import { keepLogin, webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
-import { AuthLayout, Button, SceneMedia } from '@sweetwo/ui';
+import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -64,7 +64,7 @@ export function A02Login() {
 
   return (
     <AuthLayout
-      media={<SceneMedia scene="A-02" width={240} />}
+      media={<Wordmark height={40} />}
       title={copy.loginTitle}
       help={copy.loginHelp}
       onBack={st.fromStart ? () => nav(-1) : undefined}

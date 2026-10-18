@@ -1,10 +1,10 @@
-// 그림과 영상 크기 상한 검사(docs/DEV_GUIDE.md ‘에셋’). CI에서 돈다.
-// 그림(webp) 150KB, 영상(mp4) 1MB. 넘으면 실패.
+// 그림 크기 상한 검사(docs/DEV_GUIDE.md ‘에셋’). CI에서 돈다.
+// 그림(webp) 150KB. 넘으면 실패.
 import { readdirSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
-const LIMITS = { '.webp': 150 * 1024, '.png': 150 * 1024, '.mp4': 1024 * 1024 };
-const DIRS = ['packages/ui/src/assets/illustrations', 'packages/ui/src/assets/motion'];
+const LIMITS = { '.webp': 150 * 1024, '.png': 150 * 1024 };
+const DIRS = ['packages/ui/src/assets/illustrations'];
 
 const bad = [];
 let count = 0;

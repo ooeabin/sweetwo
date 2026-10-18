@@ -93,7 +93,7 @@ export function P11Joined() {
       primary={{ label: copy.next, disabled: !finished }}
       onSubmit={() => nav(joinPath('o-63'))}
     >
-      <SceneMedia scene="P-11" />
+      <SceneMedia />
       <div className="hg-cards">
         <div className="hg-card">
           <span className="hg-card__label">{copy.incomeCard}</span>

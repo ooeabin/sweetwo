@@ -42,7 +42,7 @@ export function W04End() {
         nav('/', { replace: true });
       }}
     >
-      <SceneMedia scene="W-04" />
+      <SceneMedia />
       {bundle.length > 0 && names && (
         <section className="hg-card hg-stack" aria-label={copy.pending}>
           {bundle.map((p) => {

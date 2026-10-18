@@ -81,7 +81,7 @@ export function P01JoinStart() {
 
   return (
     <AuthLayout
-      media={<SceneMedia scene="P-01" tall />}
+      media={<SceneMedia tall />}
       title={p?.inviter ? copy.invited(p.inviter) : copy.join}
       help={blocked ? copy.errors[blocked] : copy.invitedHelp}
       actions={

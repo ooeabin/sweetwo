@@ -24,7 +24,7 @@
 | [Banner](Banner.md) | Feedback | 화면 위 안내 띠 |
 | [Celebration](Celebration.md) | Feedback | 목표 달성 화면 |
 | [EmptyState](EmptyState.md) | Feedback | 내용이 없을 때의 화면 |
-| [SceneMedia](SceneMedia.md) | Feedback | 장면 영상 칸 |
+| [SceneMedia](SceneMedia.md) | Feedback | 비워 둔 장면 자리 |
 | [Skeleton](Skeleton.md) | Feedback | 불러오는 동안 자리를 잡는 회색 틀 |
 | [Toast](Toast.md) | Feedback | 잠깐 떴다 사라지는 알림 |
 | [Tooltip](Tooltip.md) | Feedback | 용어·아이콘 짧은 설명 |

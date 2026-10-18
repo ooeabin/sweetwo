@@ -133,7 +133,7 @@ export function DevUiGallery() {
       />
       <EmptyState title="아직 정산한 달이 없어요" body="첫 월말 정리 뒤에 보여드려요" />
       <SectionHeader title={`그림 ${Object.keys(illustrations).length}개`} />
-      <SceneMedia scene="W-04" />
+      <SceneMedia />
       <Toast message="저장했어요" />
     </main>
   );
