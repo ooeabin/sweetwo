@@ -45,6 +45,7 @@ export const copy = {
   unsplit: '안 나눈 돈',
   closeTile: '월말 정리',
   netWorth: '순자산',
+  checklistTodo: '체크리스트', // [확인 필요] 할 일 보조 줄
   // H-06 순자산(F-01과 같은 표기)
   netWorthExpected: (amount: string) => `예상 ${amount}`,
   netWorthExpectedName: '예상 순자산',

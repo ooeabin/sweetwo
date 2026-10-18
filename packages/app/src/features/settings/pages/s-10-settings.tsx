@@ -5,6 +5,7 @@ import { detectPlatform } from '../../../platform';
 import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { useChecklist } from '../guides';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
 // 지금 있는 화면: 내 정보(S-11), 부부 정보(S-12), 알림(S-14). 나머지 줄은 자리만(누르지 않음, “준비 중이에요”).
@@ -12,12 +13,12 @@ import { useSettingsData } from '../data';
 export function S10Settings() {
   const nav = useNavigate();
   const d = useSettingsData();
+  const ck = useChecklist(d.space);
   if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
   const desktop = detectPlatform() === 'desktop';
   const c = d.c;
   const state = d.space?.couple_state ?? 'not_joined';
   const prefs = notiPrefs(d.me.noti_prefs);
-  const later = copy.later;
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <div className="hg-list">
@@ -72,8 +73,12 @@ export function S10Settings() {
           onClick={() => nav('/settings/notifications')}
         />
         <ListRow label={copy.rows.security} onClick={() => nav('/settings/security')} />
-        <ListRow label={copy.rows.answers} sub={later} />
-        <ListRow label={copy.rows.guide} sub={later} />
+        <ListRow label={copy.rows.answers} onClick={() => nav('/settings/answers')} />
+        <ListRow
+          label={copy.rows.guide}
+          value={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}
+          onClick={() => nav('/settings/guides')}
+        />
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
       </div>
       <div className="hg-list">

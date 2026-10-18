@@ -109,6 +109,13 @@ import {
   S12hUnlinked,
   S11aNickname,
   S11bSide,
+  S01Guides,
+  S01Talk,
+  S02ChecklistItem,
+  S03Guide,
+  S17Answers,
+  S17aAnswer,
+  S17bSplit,
   S11dPlanDay,
   S14Notifications,
   S14aQuiet,
@@ -898,6 +905,76 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11d 월급 플랜 날짜
+      {
+        path: '/settings/answers',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S17Answers />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-17 내 답 다시 보기
+      {
+        path: '/settings/answers/split',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S17bSplit />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-17 분담 다시 답하기
+      {
+        path: '/settings/answers/:field',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S17aAnswer />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-17 파트 1 다시 답하기
+      {
+        path: '/settings/guides',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S01Guides />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-01 가이드 모아보기
+      {
+        path: '/settings/guides/talk',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S01Talk />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-01 부부 대화 카드
+      {
+        path: '/settings/guides/check/:key',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S02ChecklistItem />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-02 체크리스트 항목
+      {
+        path: '/settings/guides/read/:key',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S03Guide />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-03 가이드 글
       {
         path: '/settings/notifications',
         element: (

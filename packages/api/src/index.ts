@@ -19,3 +19,4 @@ export * from './admin';
 export * from './goal-achieve';
 export * from './wedding';
 export * from './income-period';
+export * from './guides';

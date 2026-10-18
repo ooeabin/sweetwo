@@ -1,4 +1,5 @@
 import {
+  fetchChecklistDone,
   fetchInquiries,
   fetchPastPlans,
   fetchMyUnlink,
@@ -14,6 +15,8 @@ import {
   inLivingCheckWindow,
   missedPlans,
   missedRange,
+  parseChecklist,
+  weddingStage,
   todayKst,
   type Upcoming,
 } from '@sweetwo/core';
@@ -23,6 +26,7 @@ import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { useNavigate } from 'react-router-dom';
+import checklistMd from '../../../content/checklist.md?raw';
 import {
   useCurrentPlan,
   useGoalAssetSums,
@@ -46,6 +50,8 @@ import { openReceived, useProposals } from '../../proposals';
 import { MainFrame } from '../frame';
 import { closePath, spendPath } from '../paths';
 import { goalExtra, monthView, type MonthView } from '../view';
+
+const CHECKLIST = parseChecklist(checklistMd);
 
 // H-01 이번 달(docs/spec/19-this-month.md). 앱 기본 틀 + 오늘 띠(H-01 인사, H-02 맨 위 행동과 숫자 타일)
 // + 왼쪽 단(월급 플랜 H-03 / 예비부부 모으기·결혼 비용) + 오른쪽 단(목표 H-05, 다가오는 일정 H-07).
@@ -85,6 +91,7 @@ export function H01ThisMonth() {
     enabled: space.data?.couple_state === 'unlink_pending',
   });
   const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
+  const checks = useQuery({ queryKey: qk.checklistDone, queryFn: fetchChecklistDone });
   // H-08 배우자 활동: 연결된 부부만(미합류는 초대 할 일, 혼자 쓰기는 카드 없음)
   const connected =
     space.data?.couple_state === 'connected' || space.data?.couple_state === 'unlink_pending';
@@ -143,6 +150,20 @@ export function H01ThisMonth() {
       key: 'reconnect',
       title: copy.reconnectTodo(exName.data ?? ''),
       to: '/settings/couple/reconnect',
+    });
+  // 단계별 체크리스트(24): 지금 단계에서 아직 안 한 첫 항목 하나 → S-02(완료는 여기서만)
+  const stage = space.data ? weddingStage(todayKst(), space.data) : null;
+  const nextCheck = checks.isSuccess
+    ? CHECKLIST.find((x) => x.key === stage)?.items.find(
+        (i) => !(checks.data ?? []).some((d) => d.key === i.key),
+      )
+    : undefined;
+  if (nextCheck)
+    tops.push({
+      key: `check-${nextCheck.key}`,
+      title: nextCheck.title,
+      sub: copy.checklistTodo,
+      to: `/settings/guides/check/${nextCheck.key}?from=todo`,
     });
 
   const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
