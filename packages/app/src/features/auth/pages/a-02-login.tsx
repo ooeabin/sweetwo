@@ -73,7 +73,7 @@ export function A02Login() {
           {authProviders.map((p) => (
             <Button
               key={p}
-              variant={p === 'kakao' ? 'kakao' : st.conflict === p ? 'primary' : 'secondary'}
+              variant={st.conflict === p ? 'primary' : p === 'kakao' ? 'kakao' : 'secondary'}
               block
               disabled={!online || busy !== null}
               className={busy === p ? 'is-loading' : undefined}
