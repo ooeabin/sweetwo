@@ -171,4 +171,29 @@ export const copy = {
     '올해 안에 같이 해 보고 싶은 게 있나요?',
     '비상금은 어느 정도면 마음이 편할 것 같아요?',
   ],
+
+  // 함께 모드(W-04a 4~8번, W-04 끝 6~8번, 함께 정하기 3번)
+  closing: (name: string) => `${name}님이 정리 중이에요`,
+  closingHelp: '같이 하면 바꾼 값이 바로 확정돼요',
+  closingStep: (step: string) => `지금 ${step}`, // [확인 필요] 단계 이름 줄
+  joinTogether: '같이 하기',
+  viewOnly: '보기만',
+  togetherNow: '함께 정리 중',
+  viewing: '보기만 하는 중이에요',
+  typing: (name: string) => `${name}님이 입력 중`,
+  partnerLeft: (name: string) => `${name}님이 나갔어요. 이제부터 바꾸는 값은 제안으로 보내요`,
+  confirmedTitle: (n: number) => `바뀐 값 ${n}개를 확정했어요`,
+  confirmed: '확정',
+  applyNext: (m: number) => `${m}월 월급 플랜부터 적용돼요`,
+  togetherConfirm: '같이 정하면 바로 확정돼요',
+  setThis: '이 값으로 정하기',
+  stepNames: {
+    'w-04a': '시작',
+    'w-04a2': '이번 달 수입',
+    'w-04j': '지출 입력',
+    'w-04k': '저축 확인',
+    'w-04h': '다음 달 조정',
+    'w-04g': '정산 요약',
+    'w-04-end': '정리 끝',
+  } as Record<string, string>,
 };

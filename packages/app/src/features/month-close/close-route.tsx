@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
+import { CloseLive } from './together';
 import { W04End } from './pages/w-04-end';
 import { W04aStart } from './pages/w-04a-start';
 import { W04a2Income } from './pages/w-04a2-income';
@@ -35,5 +36,11 @@ const STEPS: Record<string, () => ReactNode> = {
 export function CloseRoute() {
   const { step = 'w-04a' } = useParams();
   const render = STEPS[step];
-  return render ? <div key={step}>{render()}</div> : <Navigate to="/month/close/w-04a" replace />;
+  return render ? (
+    <CloseLive>
+      <div key={step}>{render()}</div>
+    </CloseLive>
+  ) : (
+    <Navigate to="/month/close/w-04a" replace />
+  );
 }

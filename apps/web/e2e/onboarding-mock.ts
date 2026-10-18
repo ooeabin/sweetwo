@@ -564,6 +564,23 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         });
         return json(route, null);
       }
+      // 함께 모드(W-04a): 같이 하기·나감·함께 정하기 확정
+      if (fn === 'join_close_together' || fn === 'leave_close_together') {
+        const c = db.closes.find((x) => x.id === body().p_close);
+        if (c && fn === 'join_close_together')
+          Object.assign(c, {
+            together_by: db.me.id,
+            together_at: c.together_at ?? new Date().toISOString(),
+            together_left_at: null,
+          });
+        if (c && fn === 'leave_close_together') c.together_left_at = new Date().toISOString();
+        return json(route, null);
+      }
+      if (fn === 'confirm_together') {
+        const p = db.proposals.find((x) => x.id === body().p_id);
+        if (p) Object.assign(p, { status: 'applied', response: 'like', together: false });
+        return json(route, null);
+      }
       if (fn === 'set_checklist_done') {
         const b = body();
         db.checklistDone = (db.checklistDone ?? []).filter((x) => x.key !== b.p_key);
