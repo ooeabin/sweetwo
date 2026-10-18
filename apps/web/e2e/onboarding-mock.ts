@@ -37,6 +37,8 @@ export interface MemDb {
   incomePeriods: Record<string, unknown>[];
   /** 체크리스트 완료(S-02). 없으면 404(이번 달 체크리스트 할 일 숨김) */
   checklistDone?: Record<string, unknown>[];
+  /** 저장소에 올린 파일 경로 */
+  storage?: string[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -197,6 +199,38 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     const url = new URL(req.url());
     const path = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
+    // 저장소(S-11e 프로필 사진): 올리기, 서명 주소, 사진 받기, 지우기
+    if (path.startsWith('/storage/v1/')) {
+      const cors = { 'Access-Control-Allow-Origin': '*' };
+      if (path.startsWith('/storage/v1/object/sign/') && method === 'POST') {
+        const b = body() as { paths?: string[] };
+        return json(
+          route,
+          (b.paths ?? []).map((p) => ({
+            path: p,
+            signedURL: `/object/sign/avatars/${p}?token=t`,
+            error: null,
+          })),
+        );
+      }
+      if (path.startsWith('/storage/v1/object/sign/'))
+        return route.fulfill({
+          status: 200,
+          headers: { ...cors, 'Content-Type': 'image/png' },
+          body: Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            'base64',
+          ),
+        });
+      if (method === 'POST' || method === 'PUT') {
+        db.storage = [...(db.storage ?? []).filter((x) => x !== path), path];
+        return json(route, { Key: path.replace('/storage/v1/object/', '') });
+      }
+      if (method === 'DELETE') {
+        db.storage = [];
+        return json(route, []);
+      }
+    }
 
     if (path === '/rest/v1/app_config')
       return json(route, { min_version_desktop: '0.0.0', min_version_web: '0.0.0' });
@@ -510,6 +544,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (it) it.budget = b.p_budget;
         else if (db.space) db.space.wedding_budget = b.p_budget;
         return json(route, 'applied');
+      }
+      if (fn === 'space_avatars')
+        return json(
+          route,
+          [db.me, db.partner]
+            .filter((u): u is Record<string, unknown> => !!u)
+            .map((u) => ({
+              user_id: u.id,
+              path: u.avatar_path ?? null,
+              updated_at: u.avatar_updated_at ?? null,
+            })),
+        );
+      if (fn === 'set_avatar') {
+        const b = body();
+        Object.assign(db.me, {
+          avatar_path: b.p_path ?? null,
+          avatar_updated_at: new Date().toISOString(),
+        });
+        return json(route, null);
       }
       if (fn === 'set_checklist_done') {
         const b = body();

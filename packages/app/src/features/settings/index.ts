@@ -33,3 +33,4 @@ export { S03Guide } from './pages/s-03-guide';
 export { S17Answers } from './pages/s-17-answers';
 export { S17aAnswer } from './pages/s-17a-answer';
 export { S17bSplit } from './pages/s-17b-split';
+export { S11ePhoto } from './pages/s-11e-photo';

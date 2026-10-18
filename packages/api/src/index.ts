@@ -20,3 +20,4 @@ export * from './goal-achieve';
 export * from './wedding';
 export * from './income-period';
 export * from './guides';
+export * from './avatar';
