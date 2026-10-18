@@ -31,7 +31,9 @@ export function planLine(g: GoalLine, m: (v: number) => string): string {
   if (g.kind === 'monthly') return copy.monthlyHeld(m(g.held));
   if (g.target === null) return copy.noAmount;
   if (g.kind === 'yearly') return g.nextUse ? copy.yearlyUse(formatYm(g.nextUse)) : '';
-  if (g.status === 'achieved' || g.status === 'used' || g.status === 'paused') return '';
+  if (g.status === 'achieved') return copy.achievedHeld(m(g.held));
+  if (g.status === 'used') return copy.usedSpent(m(g.spent));
+  if (g.status === 'paused') return '';
   return g.alloc > 0 && g.expected ? copy.plan(m(g.alloc), formatYm(g.expected)) : copy.planUnknown;
 }
 

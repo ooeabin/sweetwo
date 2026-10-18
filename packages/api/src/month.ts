@@ -191,6 +191,8 @@ export interface GoalRecordRow {
   goalId: string;
   month: string;
   amount: number;
+  /** 목표 사용만: 'care' | 'wedding' | 'yearly' | 'close' | 'achieved'(G-05 썼어요) | 'move'(옮김) */
+  source?: string;
 }
 
 /** 목표 달별 기록(G-02): 플랜마다 목표 줄 계획액, 정리를 마친 달의 이 목표 납입액, 목표 사용(보유액에서 뺌) */
@@ -211,7 +213,7 @@ export async function fetchGoalRecords(): Promise<{
       .select('goal_id, amount, month_close!inner(status, monthly_plan!inner(label_month))')
       .is('deleted_at', null)
       .not('goal_id', 'is', null),
-    supabase().from('goal_use').select('goal_id, amount, used_on').is('deleted_at', null),
+    supabase().from('goal_use').select('goal_id, amount, used_on, source').is('deleted_at', null),
   ]);
   fail(lines.error);
   fail(deps.error);
@@ -233,6 +235,7 @@ export async function fetchGoalRecords(): Promise<{
       goalId: u.goal_id,
       month: u.used_on.slice(0, 7) + '-01',
       amount: u.amount,
+      source: u.source,
     })),
   };
 }

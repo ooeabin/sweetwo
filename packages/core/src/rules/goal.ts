@@ -83,7 +83,8 @@ export function goalStatus(
 
 /** 계획상 지금 위치 %(만든 달부터 기한까지 고르게). 기한이 없으면 null */
 export function goalPace(createdAt: string, deadline: YearMonth | null, now = new Date()) {
-  if (!deadline) return null;
+  // 만든 날을 모르면(옛 기록·불완전한 행) 계획 위치 없음
+  if (!deadline || !createdAt) return null;
   const start = dateToYm(createdAt);
   const total = monthsBetween(start, deadline);
   if (total <= 0) return 100;
@@ -103,4 +104,25 @@ export function paceChip(o: {
   if (o.pace === null) return null;
   const ahead = Math.round(Math.min(o.pct, 100) - o.pace);
   return ahead > 0 ? { kind: 'ahead', pct: ahead } : null;
+}
+
+/**
+ * 달성 축하 문장(22 G-05 축하): 모든 달 함께 → 'all'(“16개월 동안 매달 둘이 함께 모았어요”),
+ * 일부 → 'some'(“16개월 중 14번은 둘이 함께 모았어요”), 한 사람만 또는 혼자 쓰기 → 'solo'(“16개월 만에 모았어요”).
+ * 모은 달이 없으면(기타 보유액만으로 달성) 문장 없음(null).
+ */
+export function celebrationStory(
+  months: number,
+  together: number,
+  solo: boolean,
+): { kind: 'all' | 'some' | 'solo'; months: number; together: number } | null {
+  if (months <= 0) return null;
+  if (solo || together <= 0) return { kind: 'solo', months, together: 0 };
+  if (together >= months) return { kind: 'all', months, together: months };
+  return { kind: 'some', months, together };
+}
+
+/** 사용 기록 뒤 남은 보유액(10번): 각자 돈은 차감 없음, 쓴 돈 > 보유액이면 0 */
+export function goalRest(held: Won, spent: Won, paidFrom: 'goal_fund' | 'living' | 'personal') {
+  return paidFrom === 'personal' ? held : Math.max(held - spent, 0);
 }

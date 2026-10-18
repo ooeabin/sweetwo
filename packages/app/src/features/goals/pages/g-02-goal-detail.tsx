@@ -6,6 +6,7 @@ import { money, useMask } from '../../../shared/mask';
 import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
+import { canAchieve, goalUsePath } from '../achieve';
 import { GoalArt } from '../goal-art';
 import { GoalBadges, GoalMeter, Owners } from '../goal-card';
 import { useGoalChange } from '../goal-change';
@@ -123,6 +124,19 @@ export function G02GoalDetail() {
             }
           />
         ))}
+        {g.status === 'achieved' && canAchieve(g) && (
+          <div className="hg-banner hg-banner--info">
+            <span>{copy.achievedHeld(m(g.held))}</span>
+            <Button variant="secondary" size="sm" onClick={() => nav(goalUsePath(id))}>
+              {copy.usedAsk}
+            </Button>
+          </div>
+        )}
+        {g.status === 'used' && (
+          <div className="hg-banner hg-banner--info">
+            <span>{copy.usedSpent(m(g.spent))}</span>
+          </div>
+        )}
         {paused && (
           <div className="hg-banner hg-banner--info">
             <span>{copy.pausedNote}</span>

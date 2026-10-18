@@ -1383,6 +1383,8 @@ export type Database = {
       }
       goal: {
         Row: {
+          achieved_at: string | null
+          achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
           created_at: string
@@ -1408,6 +1410,8 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          achieved_at?: string | null
+          achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
           created_at?: string
@@ -1432,6 +1436,8 @@ export type Database = {
           version?: number
         }
         Update: {
+          achieved_at?: string | null
+          achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
           created_at?: string
@@ -1476,6 +1482,8 @@ export type Database = {
           goal_id: string
           id: string
           month_close_id: string | null
+          moved_asset_id: string | null
+          moved_goal_id: string | null
           paid_from: Database["public"]["Enums"]["paid_from"]
           plan_line_id: string | null
           source: Database["public"]["Enums"]["goal_use_source"]
@@ -1496,6 +1504,8 @@ export type Database = {
           goal_id: string
           id?: string
           month_close_id?: string | null
+          moved_asset_id?: string | null
+          moved_goal_id?: string | null
           paid_from: Database["public"]["Enums"]["paid_from"]
           plan_line_id?: string | null
           source: Database["public"]["Enums"]["goal_use_source"]
@@ -1515,6 +1525,8 @@ export type Database = {
           goal_id?: string
           id?: string
           month_close_id?: string | null
+          moved_asset_id?: string | null
+          moved_goal_id?: string | null
           paid_from?: Database["public"]["Enums"]["paid_from"]
           plan_line_id?: string | null
           source?: Database["public"]["Enums"]["goal_use_source"]
@@ -1544,6 +1556,20 @@ export type Database = {
             columns: ["month_close_id"]
             isOneToOne: false
             referencedRelation: "month_close"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_moved_asset_id_fkey"
+            columns: ["moved_asset_id"]
+            isOneToOne: false
+            referencedRelation: "asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_use_moved_goal_id_fkey"
+            columns: ["moved_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
             referencedColumns: ["id"]
           },
           {
@@ -2894,6 +2920,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      achieve_goal: { Args: { p_goal: string }; Returns: boolean }
       add_income_supplement: { Args: { p_close: string }; Returns: string }
       add_inquiry_message: {
         Args: { p_body: string; p_inquiry: string }
@@ -3409,6 +3436,13 @@ export type Database = {
           total: number
         }[]
       }
+      goal_story: {
+        Args: { p_goal: string }
+        Returns: {
+          months: number
+          together: number
+        }[]
+      }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3448,6 +3482,10 @@ export type Database = {
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
+      move_goal_rest: {
+        Args: { p_goal: string; p_use: string }
+        Returns: undefined
+      }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3741,6 +3779,18 @@ export type Database = {
         Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
         Returns: number
       }
+      use_goal: {
+        Args: {
+          p_amount: number
+          p_asset?: string
+          p_goal: string
+          p_held: number
+          p_kind: string
+          p_paid_from: Database["public"]["Enums"]["paid_from"]
+          p_rest_goal?: string
+        }
+        Returns: Json
+      }
       withdraw_proposal: {
         Args: { p_id: string }
         Returns: Database["public"]["Enums"]["proposal_status"]
@@ -3783,7 +3833,7 @@ export type Database = {
       goal_kind: "once" | "yearly" | "monthly"
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
-      goal_use_source: "care" | "wedding" | "yearly" | "close"
+      goal_use_source: "care" | "wedding" | "yearly" | "close" | "achieved" | "move"
       holiday_kind: "holiday" | "substitute" | "temporary"
       holiday_source: "api" | "admin"
       housing: "jeonse" | "monthly_rent" | "own" | "parents" | "none"
@@ -3961,7 +4011,7 @@ export const Constants = {
       goal_kind: ["once", "yearly", "monthly"],
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
-      goal_use_source: ["care", "wedding", "yearly", "close"],
+      goal_use_source: ["care", "wedding", "yearly", "close", "achieved", "move"],
       holiday_kind: ["holiday", "substitute", "temporary"],
       holiday_source: ["api", "admin"],
       housing: ["jeonse", "monthly_rent", "own", "parents", "none"],

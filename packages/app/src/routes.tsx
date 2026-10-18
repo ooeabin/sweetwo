@@ -37,8 +37,12 @@ import {
 } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
+  AchieveWatch,
   G01GoalList,
   G02GoalDetail,
+  G05Achieved,
+  G05Send,
+  G05Use,
   G02GoalEdit,
   G04GoalAdjust,
   G06GoalOrder,
@@ -119,6 +123,7 @@ export const routes: RouteObject[] = [
           <RequireAccount>
             <OnboardingGate>
               <H01ThisMonth />
+              <AchieveWatch />
             </OnboardingGate>
           </RequireAccount>
         ),
@@ -169,6 +174,7 @@ export const routes: RouteObject[] = [
           <RequireAccount>
             <OnboardingGate>
               <G01GoalList />
+              <AchieveWatch />
             </OnboardingGate>
           </RequireAccount>
         ),
@@ -209,10 +215,41 @@ export const routes: RouteObject[] = [
           <RequireAccount>
             <OnboardingGate>
               <G02GoalDetail />
+              <AchieveWatch />
             </OnboardingGate>
           </RequireAccount>
         ),
       }, // G-02 목표 상세
+      {
+        path: '/goals/:id/achieved',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G05Achieved />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-05 달성 축하
+      {
+        path: '/goals/:id/achieved/send',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G05Send />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-05 보낼 곳
+      {
+        path: '/goals/:id/use',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G05Use />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-05 사용 기록
       {
         path: '/goals/:id/edit/:field',
         element: (

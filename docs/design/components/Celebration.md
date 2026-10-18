@@ -12,3 +12,5 @@
 - 강조는 한 번만: 그림이 아래에서 8px 올라오며 0.96 → 1 크기 + 투명도로 `dur-slow` `ease-out`. 폭죽, 소리, 숫자 굴리기 없음. `prefers-reduced-motion`이면 바로 나타남.
 - 목표당 한 번만 보여 줌. 다시 열면 목표 카드의 ‘달성’ 배지로만.
 - 말투는 사실만, 감탄사, 이모지 없음.
+
+- React 래퍼 `Celebration`(packages/ui): `art`, `eyebrow`, `title`, `value`, `story`, 버튼은 `children`. 기획서 G-05 축하 문구가 이 문서의 예시 문장보다 우선(제목 = 목표 이름).

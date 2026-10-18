@@ -35,6 +35,8 @@ export interface GoalLine {
   deposits: number;
   /** 연결 자산(원금 기준) */
   linked: number;
+  /** G-05에서 썼다고 기록한 돈(사용 완료 카드) */
+  spent: number;
   pct: number;
   pace: number | null;
   chip: ReturnType<typeof paceChip>;
@@ -137,6 +139,9 @@ export function goalsView(i: {
       otherHeld: g.other_held,
       deposits: deposited(id),
       linked: linkedOf(id),
+      spent: (i.records.uses ?? [])
+        .filter((u) => u.goalId === id && u.source === 'achieved')
+        .reduce((t, u) => t + u.amount, 0),
       pct,
       pace,
       chip:
