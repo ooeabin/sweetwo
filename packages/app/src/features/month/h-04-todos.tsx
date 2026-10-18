@@ -18,7 +18,7 @@ import { useTodos } from './data';
 
 const SHOWN = 3;
 /** 여는 화면이 만들어진 할 일 → 경로 */
-const OPENS: Partial<Record<TodoDef['kind'], string>> = {
+export const OPENS: Partial<Record<TodoDef['kind'], string>> = {
   assets: '/assets/week/assets',
   loans: '/assets/week/loans',
   fixed_card: '/assets/week/fixed',

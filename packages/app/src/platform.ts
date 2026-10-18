@@ -64,6 +64,18 @@ export interface DesktopBridge {
     show: (n: { id: string; title: string; body?: string }) => Promise<void>;
     onOpen: (cb: (id: string) => void) => () => void;
   };
+  /** main이 앱 창에 이 화면으로 가라고 할 때(트레이 위젯, 위젯 설정 메뉴) */
+  onNavigate: (cb: (path: string) => void) => () => void;
+  /** 트레이 위젯(26)·위젯 설정(S-22). 값은 core TraySnapshot·TrayState·WidgetSettings로 검사해서 씀 */
+  widget: {
+    update: (s: unknown) => Promise<void>;
+    state: () => Promise<unknown>;
+    onChange: (cb: (s: unknown) => void) => () => void;
+    open: (path: string) => Promise<void>;
+    hide: () => Promise<void>;
+    settings: () => Promise<unknown>;
+    setSettings: (p: unknown) => Promise<unknown>;
+  };
 }
 
 declare global {
