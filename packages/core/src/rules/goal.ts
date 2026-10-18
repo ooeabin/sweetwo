@@ -83,7 +83,8 @@ export function goalStatus(
 
 /** 계획상 지금 위치 %(만든 달부터 기한까지 고르게). 기한이 없으면 null */
 export function goalPace(createdAt: string, deadline: YearMonth | null, now = new Date()) {
-  if (!deadline) return null;
+  // 만든 날을 모르면(옛 기록·불완전한 행) 계획 위치 없음
+  if (!deadline || !createdAt) return null;
   const start = dateToYm(createdAt);
   const total = monthsBetween(start, deadline);
   if (total <= 0) return 100;
