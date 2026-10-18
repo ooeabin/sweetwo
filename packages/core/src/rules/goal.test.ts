@@ -99,3 +99,7 @@ it('사용 기록 뒤 남은 보유액: 400만 중 380만 → 20만, 각자 돈�
   expect(goalRest(4_000_000, 3_800_000, 'personal')).toBe(4_000_000);
   expect(goalRest(4_000_000, 4_500_000, 'goal_fund')).toBe(0);
 });
+
+it('계획 위치: 만든 날을 모르면 없음(화면이 멈추지 않게)', () => {
+  expect(goalPace('', '2027-10')).toBeNull();
+});
