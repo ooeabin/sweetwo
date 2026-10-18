@@ -37,7 +37,11 @@ export const copy = {
     family_budget: '양가 비용 예산을',
     base_day: '월급 플랜 날짜를',
     goal_order: '목표 순서를',
+    wedding_budget: '결혼 비용 예산을',
+    wedding_item_budget: '결혼 비용 항목 예산을',
   } as Record<string, string>,
+  weddingBudget: '결혼 비용 예산', // [확인 필요]
+  weddingItemBudget: '결혼 비용 항목 예산', // [확인 필요]
   livingBudget: '생활비 예산', // [확인 필요]
   familyBudget: '양가 비용 예산', // [확인 필요]
   baseDay: '월급 플랜 날짜', // [확인 필요]

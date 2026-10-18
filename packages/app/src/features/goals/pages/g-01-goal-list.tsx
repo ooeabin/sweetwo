@@ -51,7 +51,7 @@ export function G01GoalList() {
         masked={masked}
         m={m}
         proposing={d.openProposals.some((p) => p.target_id === g.id)}
-        onOpen={() => nav(`/goals/${g.id}`)}
+        onOpen={() => nav(g.template === 'wedding' ? '/goals/wedding' : `/goals/${g.id}`)}
       />
     );
     const half = Math.ceil(v.open.length / 2);

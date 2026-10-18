@@ -171,4 +171,55 @@ export const copy = {
   ok: '확인', // [확인 필요]
   partnerRecorded: (name: string) => `${name}님이 기록했어요`,
   seeRecord: '기록 보기',
+
+  // G-07 결혼 비용 상세
+  wedding: '결혼 비용',
+  estimated: '추정',
+  weddingPlanned: (ym: string) => `${ym} 예정`,
+  weddingSummary: {
+    budget: '총예산',
+    paid: '결제 완료',
+    remaining: '남은 결제',
+    saved: '모아둔 돈',
+    support: '양가 지원',
+  },
+  weddingShort: (amount: string) => `예식 전까지 ${amount}이 부족해요`,
+  weddingSurplus: (amount: string) => `여유 ${amount}`,
+  weddingCols: { name: '항목', budget: '예산', deposit: '계약금', balance: '잔금', payer: '누가' },
+  payers: { us: '우리', groom: '', bride: '', family: '양가 지원' },
+  paidMark: (md: string) => `${md} ✓`,
+  paidNow: '결제했어요',
+  addItem: '+ 항목 추가',
+  weddingTable: '결혼 비용 항목', // [확인 필요] 화면 읽기용
+  weddingMonths: '월별 나갈 돈과 모일 돈', // [확인 필요] 요소 이름
+  monthOut: (amount: string) => `나갈 돈 ${amount}`,
+  monthIn: (amount: string) => `모일 돈 ${amount}`,
+  monthShort: (amount: string) => `${amount} 모자라요`,
+  noItems: '항목을 추가하면 여기에 보여요', // [확인 필요]
+  budgetEdit: '총예산은 얼마예요?', // [확인 필요] 총예산 Q3 질문
+  applied: '바꿨어요',
+  // G-07a~d
+  itemKind: '어떤 항목이에요?',
+  itemCustom: '직접 입력',
+  itemName: '항목 이름을 알려주세요', // [확인 필요]
+  itemBudget: '예산은 얼마예요?',
+  itemDates: '계약금과 잔금 날짜가 정해졌나요?',
+  itemDatesOptions: { later: '아직이에요', set: '정해졌어요' },
+  depositAmount: '계약금',
+  depositOn: '계약금 날짜', // [확인 필요]
+  balanceAmount: '잔금',
+  balanceOn: '잔금 날짜', // [확인 필요]
+  itemPayer: '누가 내나요?',
+  payerOptions: { us: '우리(결혼 준비 통장)', me: '나', partner: '', family: '양가 지원' },
+  itemSaved: '저장했어요', // [확인 필요]
+  removeItem: '항목 숨기기', // [확인 필요]
+  // G-07 결제 기록
+  payAsk: (item: string, part: string) => `${item} ${part}, 실제로 얼마 냈어요?`,
+  payBudget: (amount: string) => `예산 ${amount}`,
+  payFrom: (amount: string) => `${amount}, 어디서 냈어요?`,
+  payFromOptions: { wedding_account: '결혼 준비 통장', personal_support: '각자 돈·양가 지원' },
+  payOver: (item: string, amount: string) => `${item}이 예산보다 ${amount} 넘었어요`,
+  payOverOptions: { cut: '다른 항목에서 줄이기', raise: '총예산 늘리기' },
+  payCutWhich: '어느 항목에서 줄일까요?', // [확인 필요]
+  payDone: '결제를 기록했어요', // [확인 필요]
 };

@@ -140,6 +140,17 @@ export function describe(
     const v = (j: Json) => copy.goalDeleted[bool(j, 'deleted') ? 'true' : 'false'];
     return { label: copy.goalItems.goal_delete(goal), before: v(p.before), after: v(p.after) };
   }
+  if (p.item === 'wedding_budget' || p.item === 'wedding_item_budget') {
+    const v = (j: Json) => {
+      const a = num(j, 'budget');
+      return a === null ? copy.unset : readWon(a);
+    };
+    return {
+      label: p.item === 'wedding_budget' ? copy.weddingBudget : copy.weddingItemBudget,
+      before: v(p.before),
+      after: v(p.after),
+    };
+  }
   if (p.item === 'allowance') {
     const v = (j: Json) => {
       const a = num(j, 'allowance');

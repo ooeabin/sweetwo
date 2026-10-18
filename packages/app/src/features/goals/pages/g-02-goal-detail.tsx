@@ -28,6 +28,8 @@ export function G02GoalDetail() {
   const v = d.view;
   const g = v?.lines.find((x) => x.id === id);
   const back = () => nav('/goals');
+  // 결혼 비용 목표는 G-07
+  if (g?.template === 'wedding') return <Navigate to="/goals/wedding" replace />;
 
   let body = <div />;
   if (d.failed) {

@@ -2551,6 +2551,7 @@ export type Database = {
           together: boolean
           updated_at: string
           version: number
+          wedding_item_id: string | null
           apply_proposal_values: undefined | null
           proposal_item_noun: string | null
         }
@@ -2577,6 +2578,7 @@ export type Database = {
           together?: boolean
           updated_at?: string
           version?: number
+          wedding_item_id?: string | null
         }
         Update: {
           after?: NonNullable<Json>
@@ -2600,6 +2602,7 @@ export type Database = {
           together?: boolean
           updated_at?: string
           version?: number
+          wedding_item_id?: string | null
         }
         Relationships: [
           {
@@ -2628,6 +2631,13 @@ export type Database = {
             columns: ["target_id"]
             isOneToOne: false
             referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_wedding_item_id_fkey"
+            columns: ["wedding_item_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_item"
             referencedColumns: ["id"]
           },
         ]
@@ -2907,6 +2917,155 @@ export type Database = {
             columns: ["unlink_id"]
             isOneToOne: false
             referencedRelation: "couple_unlink"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_item: {
+        Row: {
+          balance_amount: number | null
+          balance_on: string | null
+          budget: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deposit_amount: number | null
+          deposit_on: string | null
+          id: string
+          key: string
+          name: string
+          payer: Database["public"]["Enums"]["wedding_payer"]
+          sort: number
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          balance_amount?: number | null
+          balance_on?: string | null
+          budget?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deposit_amount?: number | null
+          deposit_on?: string | null
+          id?: string
+          key: string
+          name: string
+          payer?: Database["public"]["Enums"]["wedding_payer"]
+          sort?: number
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          balance_amount?: number | null
+          balance_on?: string | null
+          budget?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deposit_amount?: number | null
+          deposit_on?: string | null
+          id?: string
+          key?: string
+          name?: string
+          payer?: Database["public"]["Enums"]["wedding_payer"]
+          sort?: number
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_item_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_payment: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          goal_use_id: string | null
+          id: string
+          item_id: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          paid_on: string
+          part: string
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_use_id?: string | null
+          id?: string
+          item_id: string
+          paid_from: Database["public"]["Enums"]["paid_from"]
+          paid_on: string
+          part: string
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          goal_use_id?: string | null
+          id?: string
+          item_id?: string
+          paid_from?: Database["public"]["Enums"]["paid_from"]
+          paid_on?: string
+          part?: string
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_payment_goal_use_id_fkey"
+            columns: ["goal_use_id"]
+            isOneToOne: false
+            referencedRelation: "goal_use"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_payment_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_payment_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
             referencedColumns: ["id"]
           },
         ]
@@ -3332,6 +3491,10 @@ export type Database = {
         }
         Returns: string
       }
+      change_wedding_budget: {
+        Args: { p_apply_on: string; p_budget: number; p_item?: string }
+        Returns: string
+      }
       check_split: {
         Args: {
           p_amount?: number
@@ -3657,6 +3820,15 @@ export type Database = {
         }
         Returns: Json
       }
+      record_wedding_payment: {
+        Args: {
+          p_amount: number
+          p_item: string
+          p_paid_from: Database["public"]["Enums"]["paid_from"]
+          p_part: string
+        }
+        Returns: number
+      }
       renew_invite: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3855,6 +4027,7 @@ export type Database = {
         "open" | "applied" | "held" | "withdrawn" | "expired" | "reverted" | "superseded"
       split_mode: "half" | "income" | "custom"
       todo_status: "pending" | "snoozed" | "done"
+      wedding_payer: "us" | "groom" | "bride" | "family"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4040,6 +4213,7 @@ export const Constants = {
       ],
       split_mode: ["half", "income", "custom"],
       todo_status: ["pending", "snoozed", "done"],
+      wedding_payer: ["us", "groom", "bride", "family"],
     },
   },
 } as const
