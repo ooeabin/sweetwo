@@ -64,9 +64,9 @@ export function A02Login() {
 
   return (
     <AuthLayout
-      media={<Wordmark height={40} />}
-      title={copy.loginTitle}
-      help={copy.loginHelp}
+      className="hg-auth--hero hg-auth--login"
+      media={<Wordmark height={56} />}
+      title={copy.catchphrase}
       onBack={st.fromStart ? () => nav(-1) : undefined}
       actions={
         <>
@@ -81,7 +81,7 @@ export function A02Login() {
             >
               <ProviderMark provider={p} />
               {copy.continueWith[p]}
-              {recent === p && <span className="hg-tag">{copy.recent}</span>}
+              {recent === p && <span className="hg-auth__recent">{copy.recent}</span>}
             </Button>
           ))}
           {!desktop && (

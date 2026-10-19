@@ -10,6 +10,7 @@ export function AuthLayout({
   note,
   onBack,
   children,
+  className,
 }: {
   media?: ReactNode;
   title: ReactNode;
@@ -18,9 +19,10 @@ export function AuthLayout({
   note?: ReactNode;
   onBack?: () => void;
   children?: ReactNode;
+  className?: string;
 }) {
   return (
-    <main className="hg-auth">
+    <main className={className ? `hg-auth ${className}` : 'hg-auth'}>
       {onBack && (
         <div className="hg-auth__back">
           <IconButton icon="arrow-left" label="뒤로" ghost onClick={onBack} />

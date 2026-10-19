@@ -20,19 +20,19 @@ export const copy = {
   offlineNoSession: '인터넷에 연결하면 로그인할 수 있어요',
   retry: '다시 시도',
 
+  // O-01·A-02 공용 히어로 캐치프레이즈(04-brand.md 슬로건). 하나만 쓰고 새 표어를 만들지 않는다
+  catchphrase: '함께 구워 더 달콤한 자산파이',
+
   // O-01
-  startTitle: '둘이 처음 합치는 돈,\n순서대로 같이 정리해요',
   start: '시작하기',
   invited: '초대받았어요',
 
   // A-02
-  loginTitle: '시작하려면 로그인해 주세요',
-  loginHelp: '처음이면 바로 가입돼요',
   recent: '최근 사용',
   continueWith: {
-    kakao: '카카오로 계속하기',
-    google: '구글로 계속하기',
-    apple: '애플로 계속하기',
+    kakao: '카카오로 3초 만에 시작하기',
+    google: 'Google로 시작하기',
+    apple: 'Apple로 시작하기',
   } satisfies Record<AuthProvider, string>,
   keepLogin: '이 기기에서 로그인 유지',
   emailConflict: (p: AuthProvider) => `이미 ${providerName[p]}로 가입한 이메일이에요`,

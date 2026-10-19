@@ -1167,9 +1167,26 @@ a.hg-btn { text-decoration: none; }
 .hg-auth__actions .hg-btn { position: relative; }
 .hg-auth__actions .hg-tag { position: absolute; right: var(--space-3); }
 .hg-auth__note { font: 400 13px/18px var(--font-sans); color: var(--slate); }
+/* 히어로 배치(hg-auth--hero): 워드마크 + 캐치프레이즈(태그라인 18px). O-01 시작·A-02 로그인 공용 */
+.hg-auth--hero .hg-auth__title { font-size: 18px; line-height: 26px; }
+/* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
+.hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
+.hg-auth--login .hg-auth__actions .hg-btn__mark { position: absolute; left: var(--space-6); top: 50%; transform: translateY(-50%); }
+.hg-auth--login .hg-btn--kakao .hg-btn__mark { width: 24px; height: 24px; }
+.hg-auth--login .hg-consent__label { font-size: 13px; line-height: 18px; color: var(--slate); }
+.hg-auth--login .hg-checkbox { width: 18px; height: 18px; }
+.hg-auth--login .hg-auth__recent { position: absolute; right: var(--space-4); bottom: calc(100% - var(--space-2)); z-index: 1; padding: 2px 8px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 11px/16px var(--font-sans); white-space: nowrap; pointer-events: none; }
+.hg-auth--login .hg-auth__recent::after { content: ""; position: absolute; top: 100%; right: 14px; border: 5px solid transparent; border-bottom: 0; border-top-color: var(--ink); }
+@media (min-width: 768px) {
+  .hg-auth--hero .hg-auth__actions { margin-top: var(--space-6); }
+}
 @media (max-width: 767px) {
   .hg-auth { justify-content: flex-start; }
-  .hg-auth__actions { margin-top: auto; }
+  .hg-auth__head { margin-top: auto; }     /* 제목을 세로 가운데로 */
+  .hg-auth__actions { margin-top: auto; }  /* 버튼 묶음은 아래 끝 기준 */
+  /* 히어로(O-01·A-02)는 워드마크+캐치프레이즈를 묶어 함께 세로 가운데로 */
+  .hg-auth--hero > img { margin-top: auto; }
+  .hg-auth--hero .hg-auth__head { margin-top: 0; }
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
   .hg-q__foot .hg-btn--primary { flex: 1; }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
