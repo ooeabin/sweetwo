@@ -196,7 +196,7 @@ test('받은 제안: 반대하면 보류, 함께 정하기 표시', async ({ pag
   expect(db.partner?.allowance).toBe(500_000);
 });
 
-test('월말 정리(연결, 혼자 정리): W-04h 받은 제안, 보정 제안은 묶음으로 → W-04 끝 “제안으로 보냈어요”', async ({
+test('월말 정리(연결, 혼자 정리): W-04h 받은 제안, 보정 제안은 묶음으로 → W-04 끝 “예빈님께 보냈어요”', async ({
   page,
 }) => {
   const now = new Date('2026-10-23T20:00:00+09:00');
@@ -247,8 +247,8 @@ test('월말 정리(연결, 혼자 정리): W-04h 받은 제안, 보정 제안�
   expect(db.space?.living_budget).toBe(550_000);
   await page.getByRole('button', { name: '정리 끝내기' }).click();
 
-  await heading(page, '9월 월급 플랜 정리 끝!');
-  await expect(page.getByText('바뀐 값 1개를 예빈님께 제안으로 보냈어요')).toBeVisible();
+  await heading(page, '9월 정리를 마쳤어요');
+  await expect(page.getByText('바꾼 값 1개를 예빈님께 보냈어요')).toBeVisible();
   await expect(page.getByText('생활비 예산 55만 원 → 75만 원')).toBeVisible();
   await expect(page.getByText('제안 중')).toBeVisible();
   expect(db.rpc).toContain('send_close_bundle');

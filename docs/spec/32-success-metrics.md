@@ -113,7 +113,7 @@
 | month\_close\_started | W-04a ‘시작’ | entry(`home_card` / `notification` / `missed_month`), mode(`solo` / `together`), late |
 | month\_close\_step\_completed | W-04a2·j·k·h·g, 꼼꼼 모드 W-04b\~f·i 각 단계 완료 | step, duration\_sec, used\_expected\_button(W-04b), skipped(W-04i) |
 | month\_close\_detailed\_chosen | W-04g ‘더 꼼꼼히 정리하기’ | mode, late, cycles\_closed |
-| month\_close\_completed | W-04 끝 “{월}월 월급 플랜 정리 끝!” | mode, close\_mode(basic / detailed), late, duration\_sec, achievement\_band(계획 대비 `<80` / `80-99` / `100` / `>100`%), shortfall\_choice(`spread_3m` / `extend` / `skip_this_month`), surplus\_allocated, changes\_count, bundle\_created |
+| month\_close\_completed | W-04 끝 “{월}월 정리를 마쳤어요” | mode, close\_mode(basic / detailed), late, duration\_sec, achievement\_band(계획 대비 `<80` / `80-99` / `100` / `>100`%), shortfall\_choice(`spread_3m` / `extend` / `skip_this_month`), surplus\_allocated, changes\_count, bundle\_created |
 | month\_close\_edited | ‘정리 고치기’ (완료 후 7일 안) | days\_after |
 | variable\_income\_answered | W-04a2, 또는 H-02 1문항 카드 | vs\_base(`above` / `equal` / `below` / `zero`), answered\_by(`self` / `timeout`) |
 | missed\_month\_shown | H-02 ‘지난달 정리’ 카드 표시 | months\_behind |

@@ -17,7 +17,7 @@ export const copy = {
   next: '다음',
 
   // W-04a 시작
-  startTitle: (m: number) => `${m}월 월급 플랜 정리를 시작할게요`,
+  startTitle: (m: number) => `${m}월 월급 플랜을 정리해 볼까요?`,
   startHelp: '5~10분이면 돼요',
   startAlone: (partner: string) => `바꾼 값은 끝에서 ${partner}님께 제안으로 가요`,
   start: '시작',
@@ -69,7 +69,7 @@ export const copy = {
   detailed: '더 꼼꼼히 정리하기',
 
   // W-04 끝
-  doneTitle: (m: number) => `${m}월 월급 플랜 정리 끝!`,
+  doneTitle: (m: number) => `${m}월 정리를 마쳤어요`,
   noChange: '바뀐 값이 없어요',
   toMonth: '이번 달로', // [확인 필요]
 
@@ -81,7 +81,7 @@ export const copy = {
   incomeOverGo: '추가 소득 나누기',
 
   // 놓친 달
-  missedTitle: (m: string) => `${m} 월급 플랜을 아직 정리하지 않았어요`,
+  missedTitle: (m: string) => `${m} 정리가 아직 남았어요`,
   missedSub: (m: number) => `${m}월 플랜은 이미 시작했어요`,
   missedMany: (range: string) => `${range} 정리가 밀렸어요`,
   missedNow: '지금 정리하기',
@@ -101,7 +101,7 @@ export const copy = {
   allocTotal: (total: string, saveable: string) => `합계 ${total} 원 / 저축 가능 ${saveable} 원`,
 
   // W-04 끝(혼자: 제안 묶음)
-  sentTitle: (n: number, partner: string) => `바뀐 값 ${n}개를 ${partner}님께 제안으로 보냈어요`,
+  sentTitle: (n: number, partner: string) => `바꾼 값 ${n}개를 ${partner}님께 보냈어요`,
   doneConfirmed: (n: number) => `바뀐 값 ${n}개를 확정했어요`,
   pending: '제안 중',
   applyFrom: (date: string) => `반대 없으면 ${date}부터 적용돼요`,
@@ -115,15 +115,15 @@ export const copy = {
 
   // 꼼꼼 모드
   // W-04b 통장 잔액
-  balanceTitle: '지금 통장 잔액을 알려주세요',
+  balanceTitle: '지금 통장에 얼마 있나요?',
   asPlanned: (amount: string) => `계획대로라면 ${amount}`,
   balanceLess: (amount: string) => `계획보다 ${amount} 적어요`,
   balanceMore: (amount: string) => `계획보다 ${amount} 많아요`,
   balanceSame: '계획대로예요',
-  balanceTotal: (amount: string) => `통장 잔액 모두 ${amount}`,
+  balanceTotal: (amount: string) => `모두 ${amount}이에요`,
   balanceOdd: '입력한 값이 맞나요?',
   // W-04c 목표에서 쓴 돈
-  usesTitle: '이번 달 목표에서 쓴 돈, 이렇게 기록돼 있어요',
+  usesTitle: '이번 달 목표에서 이만큼 썼어요',
   paidFrom: {
     goal_fund: (a: string) => `목표자금 통장에서 ${a}`,
     living: (a: string) => `생활비 카드로 ${a}`,
