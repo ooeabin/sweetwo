@@ -51,7 +51,7 @@ Electron + React 18 + TypeScript + Vite, TanStack Query + Zustand, React Router,
 
 - 디자인 시스템의 토큰과 컴포넌트(hg- 클래스)로만 만든다. hex 색, 임의 px 간격을 쓰지 않는다.
 - 컴포넌트 React 래퍼 이름은 디자인 시스템 이름 그대로(`MonthSummary`, `SpendItems`, `BigExpense`, `Button` …). 클래스 이름을 바꾸지 않는다.
-- 브랜드 색(분홍)은 워드마크, 달성 배지, 새 알림 점에만. 버튼과 카드 바탕에 쓰지 않는다.
+- 브랜드 색(분홍)은 워드마크, 주 버튼, 달성 배지, 새 알림 점에만. 카드 바탕과 보조 버튼에 쓰지 않는다.
 - 다크 모드는 토큰이 처리한다. 화면마다 따로 처리하지 않는다.
 - 그림은 Illustrations(512px, 무광 3D), 아이콘은 Phosphor. 그림을 다시 그리거나 색을 바꾸지 않는다.
 - 다크 모드, 좁은 창(768px 미만), ‘동작 줄이기’, 키보드만으로 쓰기를 화면마다 확인한다.

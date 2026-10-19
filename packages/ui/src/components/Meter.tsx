@@ -13,6 +13,7 @@ export function Meter({
   chip,
   tone = 'goal',
   badge,
+  lead,
 }: {
   name: string;
   /** 이름 아래 금액 줄(“390만 / 780만 원”) */
@@ -26,11 +27,14 @@ export function Meter({
   tone?: MeterTone;
   /** 이름 옆 배지(‘지연’ 등) */
   badge?: ReactNode;
+  /** 이름 앞 아이콘 칸(Lead, 목표 3D 그림) */
+  lead?: ReactNode;
 }) {
   const p = Math.min(Math.max(pct, 0), 100);
   return (
     <div className={cx('hg-meter', tone !== 'goal' && `hg-meter--${tone}`)}>
       <div className="hg-meter__head">
+        {lead}
         <div className="hg-meter__name">
           <b>
             {name} {badge}

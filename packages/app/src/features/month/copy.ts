@@ -36,7 +36,7 @@ export const copy = {
   noticeFold: '접기', // [확인 필요]
   noticeClose: '닫기', // [확인 필요]
   missedTodo: '지난달 정리',
-  missedTodoSub: (m: string) => `${m} 월급 플랜을 아직 정리하지 않았어요`,
+  missedTodoSub: (m: string) => `${m} 정리가 아직 남았어요`,
   livingTodo: '이번 달 생활비, 지금까지 어때요?',
   reconnectTodo: (name: string) => `${name}님이 다시 연결하자고 해요`,
   unlinkTodoSub: (md: string) => `${md}까지`, // [확인 필요] 기한 표시
