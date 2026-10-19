@@ -1,23 +1,26 @@
-/* docs/design/tokens.css에서 복사 (4eeeeb1). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (4b050a7). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
-  --surface-alt: #f7f7f5; /* 사이드바, 보조 패널, 묶음 배경. surface 위 구획용. */
+  --surface-alt: #efeeea; /* 채움: 보조 버튼, 아이콘 칸, 검색 칸, 묶음 배경. */
+  --canvas: #ffffff; /* 화면 바탕(앱 틀, 오늘 띠). 흰색 기준. */
+  --card: #f7f7f5; /* 카드, 목록 묶음, 숫자 타일 바탕. 흰 바탕 위 테두리 없는 옅은 회색 판. */
   --surface-sunk: #fafaf8; /* 표 머리, 입력 대기열 같은 한 단계 가라앉은 영역. */
   --hairline: #e3e2de; /* 카드 테두리, 구분선. 의미를 싣지 않는 선에만. */
   --hairline-soft: #efeeea; /* 표 행 구분, 목록 사이 얇은 선. */
   --border-control: #8f8c85; /* 입력 칸·체크박스·보조 버튼 테두리. surface·surface-alt 위 3:1 이상. */
-  --ink: #1c1b19; /* 제목·본문 기본 글자색, 주 버튼(검정 알약) 바탕. surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
+  --ink: #1c1b19; /* 제목·본문 기본 글자색, 주 버튼이 아닌 강한 요소(현재 탭 알약 등). surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
   --ink-2: #2d2b28; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
   --slate: #57554f; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
   --stone: #74716a; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
   --muted: #a8a59e; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #3a3835; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
-  --brand: #d92b4a; /* sweeTwo 브랜드 색(분홍, 심볼 원 고리 색). 작은 점과 글자에만: 워드마크, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면과 버튼에는 쓰지 않음(오류 버튼과 헷갈림). */
+  --brand: #d92b4a; /* sweeTwo 브랜드 색(분홍, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. */
   --brand-soft: #fde8ec; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
   --brand-ink: #9e0f2c; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
-  --on-brand: #ffffff; /* brand 바탕 위 글자(달성 배지). 라이트는 흰 글자, 다크는 어두운 글자. */
+  --brand-pressed: #c22340; /* 주 버튼 누름 상태 바탕. */
+  --on-brand: #ffffff; /* brand 바탕 위 글자(주 버튼, 달성 배지). 라이트는 흰 글자, 다크는 어두운 글자. */
   --focus: #3d5afe; /* 키보드 포커스 링(2px)과 글자 링크. surface·surface-alt 위 4.5:1 이상. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
@@ -51,7 +54,9 @@
 }
 [data-theme="dark"] {
   --surface: #141312;
-  --surface-alt: #1c1b19;
+  --surface-alt: #2a2826;
+  --canvas: #141312;
+  --card: #1c1b19;
   --surface-sunk: #181715;
   --hairline: #2e2c29;
   --hairline-soft: #24231f;
@@ -66,6 +71,7 @@
   --brand: #ff6b85;
   --brand-soft: #3d1820;
   --brand-ink: #ffb3bf;
+  --brand-pressed: #ff8a9e;
   --on-brand: #1c1b19;
   --focus: #8a9bff;
   --together: #3d1f24;
@@ -118,9 +124,11 @@
   --radius-sm: 6px; /* 툴팁, 작은 칩 안 요소. */
   --radius-md: 8px; /* 입력 칸, 검색. */
   --radius-lg: 12px; /* 목록 묶음, 토스트. */
-  --radius-xl: 16px; /* 기본 카드. */
-  --radius-2xl: 24px; /* 영역 틴트 강조 카드, 바텀시트 위 모서리. */
-  --radius-full: 9999px; /* 모든 버튼, 칩, 배지(알약 모양). */
+  --radius-xl: 20px; /* 기본 카드, 목록 묶음. */
+  --radius-2xl: 28px; /* 영역 틴트 강조 카드, 바텀시트 위 모서리. */
+  --radius-btn: 14px; /* 버튼(둥근 사각형). */
+  --radius-btn-sm: 10px; /* 작은 버튼. */
+  --radius-full: 9999px; /* 칩, 배지, 탭(알약 모양). */
   --bp-narrow: 768px; /* 이 너비 미만 = 좁은 창(하단 독, 바텀시트, 주 버튼 하단 고정). */
   --bp-wide: 1100px; /* 이 너비 미만이면 보조 패널을 본문 아래로. */
   --z-topbar: 10; /* 상단 줄, 하단 독, 떠 있는 추가 버튼. */
@@ -134,10 +142,10 @@
   --ease-out: cubic-bezier(0.2, 0, 0, 1); /* 나타남(들어옴). */
   --ease-in: cubic-bezier(0.4, 0, 1, 1); /* 사라짐(나감). */
   --font-sans: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --text-display: 600 40px/48px var(--font-sans); /* 온보딩 결과·순자산 같은 화면의 핵심 숫자 1개. */
-  --text-number-lg: 600 28px/36px var(--font-sans); /* 카드 안 대표 금액. tabular-nums. */
-  --text-title-1: 600 28px/38px var(--font-sans); /* 한 화면 한 질문의 질문 제목. */
-  --text-title-2: 600 22px/30px var(--font-sans); /* 화면 제목, 섹션 제목. */
+  --text-display: 700 40px/48px var(--font-sans); /* 온보딩 결과·순자산 같은 화면의 핵심 숫자 1개. */
+  --text-number-lg: 700 28px/36px var(--font-sans); /* 카드 안 대표 금액. tabular-nums. */
+  --text-title-1: 700 28px/38px var(--font-sans); /* 한 화면 한 질문의 질문 제목. */
+  --text-title-2: 700 22px/30px var(--font-sans); /* 화면 제목, 섹션 제목. */
   --text-title-3: 600 18px/26px var(--font-sans); /* 카드 제목, 목록 묶음 제목. */
   --text-body: 400 16px/24px var(--font-sans); /* 기본 본문, 보조 1줄. */
   --text-body-strong: 600 16px/24px var(--font-sans); /* 목록 행의 핵심 값, 강조 본문. */
@@ -150,28 +158,28 @@
   font-family: var(--font-sans);
   font-size: 40px;
   line-height: 48px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.8px;
 }
 .number-lg {
   font-family: var(--font-sans);
   font-size: 28px;
   line-height: 36px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.4px;
 }
 .title-1 {
   font-family: var(--font-sans);
   font-size: 28px;
   line-height: 38px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.4px;
 }
 .title-2 {
   font-family: var(--font-sans);
   font-size: 22px;
   line-height: 30px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.2px;
 }
 .title-3 {
