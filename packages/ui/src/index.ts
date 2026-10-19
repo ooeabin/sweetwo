@@ -4,6 +4,7 @@ export * from './components/cx';
 export * from './components/Icon';
 export * from './components/Button';
 export * from './components/ProviderMark';
+export * from './components/ProviderButton';
 export * from './components/IconButton';
 export * from './components/Card';
 export * from './components/Badge';

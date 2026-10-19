@@ -1,6 +1,6 @@
 import { keepLogin, webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
-import { AuthLayout, Button, ProviderMark, Wordmark } from '@sweetwo/ui';
+import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -64,25 +64,25 @@ export function A02Login() {
 
   return (
     <AuthLayout
-      media={<Wordmark height={40} />}
-      title={copy.loginTitle}
-      help={copy.loginHelp}
+      className="hg-auth--hero hg-auth--login"
+      media={<Wordmark height={56} />}
+      title={copy.catchphrase}
       onBack={st.fromStart ? () => nav(-1) : undefined}
       actions={
         <>
           {authProviders.map((p) => (
-            <Button
+            <ProviderButton
               key={p}
-              variant={st.conflict === p ? 'primary' : p === 'kakao' ? 'kakao' : 'secondary'}
-              block
+              provider={p}
+              variant={st.conflict === p ? 'primary' : undefined}
+              recent={recent === p}
+              recentLabel={copy.recent}
               disabled={!online || busy !== null}
               className={busy === p ? 'is-loading' : undefined}
               onClick={() => void start(p)}
             >
-              <ProviderMark provider={p} />
               {copy.continueWith[p]}
-              {recent === p && <span className="hg-tag">{copy.recent}</span>}
-            </Button>
+            </ProviderButton>
           ))}
           {!desktop && (
             <button
