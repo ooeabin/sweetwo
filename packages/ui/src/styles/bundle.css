@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (689d86b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (d27826d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -20,7 +20,7 @@
 .hg-btn--primary:active, .hg-btn--primary.is-pressed { background: var(--brand-pressed); }
 .hg-btn--secondary { background: var(--surface-alt); color: var(--ink); border-color: transparent; }
 /* 카드 안 보조 버튼은 옅은 분홍 바탕 + 진한 분홍 글자 */
-:is(.hg-card, .hg-list, .hg-stat, .hg-checklist, .hg-proposal, .hg-sum) .hg-btn--secondary { background: var(--brand-soft); color: var(--brand-ink); }
+:is(.hg-card, .hg-list, .hg-checklist, .hg-proposal, .hg-sum) .hg-btn--secondary { background: var(--brand-soft); color: var(--brand-ink); }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
 .hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--focus); font-weight: 600; }
 .hg-btn--sm { height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-btn-sm); }
@@ -41,6 +41,8 @@
 
 /* Card */
 .hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-6); }
+/* 회색 판 카드: 안내, 빈 상태, 요약처럼 가볍게 둘 내용. 테두리 없음 */
+.hg-card--fill { background: var(--plate); border-color: transparent; }
 .hg-card > * { margin: 0; }
 .hg-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 24px; }
 .hg-card__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
@@ -1063,7 +1065,7 @@ a.hg-btn { text-decoration: none; }
 .hg-today__date { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-today__title { margin: 0; font: 700 30px/40px var(--font-sans); letter-spacing: -0.6px; word-break: keep-all; }
 .hg-today__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); }
-.hg-stat { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--surface); border: 1px solid var(--hairline-soft); }
+.hg-stat { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--plate); border: 0; }
 .hg-stat__label, .hg-stat__sub { font: 400 13px/18px var(--font-sans); color: var(--stone); display: flex; gap: 6px; align-items: center; }
 .hg-stat__value { font: 600 22px/30px var(--font-sans); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
 .hg-pill-up { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); }
@@ -1184,9 +1186,10 @@ a.hg-btn { text-decoration: none; }
   .hg-body { gap: 0; padding-top: 0; }
   .hg-body__col { gap: 0; }
   .hg-body__col > * { margin-inline: calc(-1 * var(--space-4)); padding: var(--space-6) var(--space-4); border-top: 12px solid var(--band); }
-  .hg-body__col > :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum),
-  .hg-body__col > * :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum) { border-width: 0; border-radius: 0; background: transparent; padding-inline: 0; }
-  .hg-body__col > :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum) { border-top: 12px solid var(--band); padding-inline: var(--space-4); }
+  .hg-body__col > :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum):not(.hg-card--fill),
+  .hg-body__col > * :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum):not(.hg-card--fill) { border-width: 0; border-radius: 0; background: transparent; padding-inline: 0; }
+  .hg-body__col > :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-proposal, .hg-sum):not(.hg-card--fill) { border-top: 12px solid var(--band); padding-inline: var(--space-4); }
+  .hg-body__col > .hg-card--fill { margin: var(--space-4) 0; padding: var(--space-5); border-top: 0; }
 }
 /* 행 앞 아이콘 칸: 3D 그림(목표) 또는 영역 색 원 */
 .hg-lead { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); overflow: hidden; }

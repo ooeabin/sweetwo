@@ -513,7 +513,7 @@ function Upcomings({ v }: { v: MonthView }) {
           ))}
         </div>
       ) : (
-        <div className="hg-card">
+        <div className="hg-card hg-card--fill">
           <p className="hg-card__meta">{copy.noUpcoming}</p>
         </div>
       )}

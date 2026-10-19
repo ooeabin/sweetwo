@@ -1,20 +1,21 @@
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
-  --surface-alt: #efeeea; /* 채움: 보조 버튼, 아이콘 칸, 검색 칸, 묶음 배경. */
+  --surface-alt: #edeef0; /* 채움: 보조 버튼, 아이콘 칸, 검색 칸, 묶음 배경. */
   --canvas: #ffffff; /* 화면 바탕(앱 틀, 오늘 띠). 흰색 기준. */
-  --band: #f2f1ee; /* 좁은 창에서 본문 묶음 사이 회색 띠(12px). */
-  --surface-sunk: #fafaf8; /* 표 머리, 입력 대기열 같은 한 단계 가라앉은 영역. */
-  --hairline: #e3e2de; /* 카드 테두리, 구분선. 의미를 싣지 않는 선에만. */
-  --hairline-soft: #efeeea; /* 표 행 구분, 목록 사이 얇은 선. */
-  --border-control: #8f8c85; /* 입력 칸·체크박스·보조 버튼 테두리. surface·surface-alt 위 3:1 이상. */
-  --ink: #1c1b19; /* 제목·본문 기본 글자색, 주 버튼이 아닌 강한 요소(현재 탭 알약 등). surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
-  --ink-2: #2d2b28; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
-  --slate: #57554f; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
-  --stone: #74716a; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
-  --muted: #a8a59e; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
+  --plate: #f6f7f8; /* 회색 판: 숫자 타일, 안내·빈 상태 카드(hg-card--fill), 카드 안 요약 칸. 테두리 없음. */
+  --band: #f0f1f3; /* 좁은 창에서 본문 묶음 사이 회색 띠(12px). */
+  --surface-sunk: #f9fafc; /* 표 머리, 입력 대기열 같은 한 단계 가라앉은 영역. */
+  --hairline: #e1e2e4; /* 카드 테두리, 구분선. 의미를 싣지 않는 선에만. */
+  --hairline-soft: #edeef0; /* 표 행 구분, 목록 사이 얇은 선. */
+  --border-control: #8b8c8e; /* 입력 칸·체크박스·보조 버튼 테두리. surface·surface-alt 위 3:1 이상. */
+  --ink: #1a1b1c; /* 제목·본문 기본 글자색, 주 버튼이 아닌 강한 요소(현재 탭 알약 등). surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
+  --ink-2: #2a2b2d; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
+  --slate: #545557; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
+  --stone: #707173; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
+  --muted: #a4a5a7; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
-  --primary-pressed: #3a3835; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
+  --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
   --brand: #d92b4a; /* sweeTwo 브랜드 색(분홍, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. */
   --brand-soft: #fde8ec; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
   --brand-ink: #9e0f2c; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
@@ -40,33 +41,34 @@
   --on-success: #ffffff; /* success 바탕 위 글자. */
   --danger: #b91c1c; /* 입력 오류·저장 실패에만. 브랜드 분홍보다 짙은 빨강으로 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
-  --scrim: rgba(28,27,25,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
+  --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
   --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
   --chart-together: #e7566b; /* 차트 계열: 우리 둘(공동 생활비). 계열 순서 2. */
   --chart-safety: #2cbad7; /* 차트 계열: 비상금. 계열 순서 3. 흰 바탕 3:1 미만이라 범례·라벨 필수. */
   --chart-family: #966cd7; /* 차트 계열: 양가. 계열 순서 4. */
   --chart-invest: #61cb7c; /* 차트 계열: 투자·부동산. 계열 순서 5. 흰 바탕 3:1 미만이라 범례·라벨 필수. */
-  --chart-area: rgba(28,27,25,0.06); /* 단일 계열 선 차트 아래 면. */
-  --shadow-1: 0px 1px 2px 0px rgba(28,27,25,0.05); /* 누를 수 있는 카드의 쉼 상태. */
-  --shadow-2: 0px 4px 12px 0px rgba(28,27,25,0.07); /* 떠 있는 카드, 드롭다운. */
-  --shadow-3: 0px 16px 40px -8px rgba(28,27,25,0.14); /* 모달, 바텀시트, 토스트. */
+  --chart-area: rgba(26,27,28,0.06); /* 단일 계열 선 차트 아래 면. */
+  --shadow-1: 0px 1px 2px 0px rgba(26,27,28,0.05); /* 누를 수 있는 카드의 쉼 상태. */
+  --shadow-2: 0px 4px 12px 0px rgba(26,27,28,0.07); /* 떠 있는 카드, 드롭다운. */
+  --shadow-3: 0px 16px 40px -8px rgba(26,27,28,0.14); /* 모달, 바텀시트, 토스트. */
 }
 [data-theme="dark"] {
-  --surface: #141312;
-  --surface-alt: #2a2826;
-  --canvas: #141312;
-  --band: #0b0a09;
-  --surface-sunk: #181715;
-  --hairline: #2e2c29;
-  --hairline-soft: #24231f;
-  --border-control: #726e67;
-  --ink: #f2f0eb;
-  --ink-2: #dad7d0;
-  --slate: #b4b0a8;
-  --stone: #9c988f;
-  --muted: #5c5953;
-  --on-ink: #141312;
-  --primary-pressed: #cfcbc3;
+  --surface: #121315;
+  --surface-alt: #28282a;
+  --canvas: #121315;
+  --plate: #1b1c1e;
+  --band: #0a0a0b;
+  --surface-sunk: #161718;
+  --hairline: #2b2c2e;
+  --hairline-soft: #222324;
+  --border-control: #6d6f70;
+  --ink: #eff0f2;
+  --ink-2: #d6d7d9;
+  --slate: #afb0b2;
+  --stone: #97989a;
+  --muted: #58595b;
+  --on-ink: #121315;
+  --primary-pressed: #cacbcd;
   --brand: #ff6b85;
   --brand-soft: #3d1820;
   --brand-ink: #ffb3bf;

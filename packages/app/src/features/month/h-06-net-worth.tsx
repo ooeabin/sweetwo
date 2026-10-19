@@ -13,7 +13,7 @@ export function H06NetWorth({ n, onOpen }: { n: NetWorthView; onOpen: () => void
   const m = (v: number) => money(v, masked);
   if (n.empty)
     return (
-      <section className="hg-card hg-stack" aria-label={copy.netWorth}>
+      <section className="hg-card hg-card--fill hg-stack" aria-label={copy.netWorth}>
         <p className="hg-card__meta">{copy.netWorthEmpty}</p>
         <button type="button" className="hg-btn hg-btn--link" onClick={onOpen}>
           {copy.netWorthSee}
