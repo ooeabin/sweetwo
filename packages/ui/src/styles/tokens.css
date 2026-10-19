@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (d27826d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (2d54c86). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -13,7 +13,7 @@
   --ink: #1a1b1c; /* 제목·본문 기본 글자색, 주 버튼이 아닌 강한 요소(현재 탭 알약 등). surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
   --ink-2: #2a2b2d; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
   --slate: #545557; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
-  --stone: #707173; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
+  --stone: #68696b; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
   --muted: #a4a5a7; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
