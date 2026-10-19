@@ -48,6 +48,24 @@ export function ListRow({
   );
 }
 
+/** 행 앞 아이콘 칸(hg-lead): 영역 색 원 + 아이콘, 또는 3D 그림 */
+export function Lead({
+  tone,
+  icon,
+  art,
+}: {
+  tone?: 'together' | 'family' | 'goal' | 'safety' | 'invest';
+  icon?: IconName;
+  /** 3D 그림(Illustration 등) */
+  art?: ReactNode;
+}) {
+  return (
+    <span className={tone ? `hg-lead hg-lead--${tone}` : 'hg-lead'} aria-hidden="true">
+      {art ?? (icon ? <Icon name={icon} /> : null)}
+    </span>
+  );
+}
+
 export function List({ label, children }: { label?: string; children: ReactNode }) {
   return (
     <div className="hg-list" aria-label={label}>

@@ -2,7 +2,7 @@
 
 | 이름 | 묶음 | 한 줄 |
 | --- | --- | --- |
-| [Button](Button.md) | Actions | 알약 모양 버튼 |
+| [Button](Button.md) | Actions | 둥근 사각형 버튼 |
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
