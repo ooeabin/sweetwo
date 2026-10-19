@@ -19,8 +19,20 @@ import {
   weddingStage,
   todayKst,
   type Upcoming,
+  templateByKey,
 } from '@sweetwo/core';
-import { Badge, Button, Card, ListRow, Meter, SectionHeader, type AppFrameStat } from '@sweetwo/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Illustration,
+  Lead,
+  ListRow,
+  Meter,
+  SectionHeader,
+  type AppFrameStat,
+  type IconName,
+} from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
@@ -413,11 +425,12 @@ function PlanCard({
   onMoney: () => void;
   onPlan: () => void;
 }) {
-  const rows: [string, number][] = [
-    [copy.roles.living, v.parts.living],
-    [copy.roles.goalFund, v.parts.goalFund],
-    [copy.roles.emergency, v.parts.emergency],
-    [copy.roles.allowance, v.allowance],
+  // 통장 역할마다 영역 색 원 아이콘(공동 생활비 = 우리 둘, 목표자금 = 목표, 비상금 = 비상금)
+  const rows: [string, number, Parameters<typeof Lead>[0]][] = [
+    [copy.roles.living, v.parts.living, { tone: 'together', icon: 'wallet' }],
+    [copy.roles.goalFund, v.parts.goalFund, { tone: 'goal', icon: 'target' }],
+    [copy.roles.emergency, v.parts.emergency, { tone: 'safety', icon: 'piggy-bank' }],
+    [copy.roles.allowance, v.allowance, { icon: 'user' satisfies IconName }],
   ];
   return (
     <section className="hg-stack">
@@ -436,8 +449,8 @@ function PlanCard({
             )}
       </p>
       <div className="hg-list">
-        {rows.map(([label, value]) => (
-          <ListRow key={label} label={label} value={m(value)} />
+        {rows.map(([label, value, lead]) => (
+          <ListRow key={label} lead={<Lead {...lead} />} label={label} value={m(value)} />
         ))}
       </div>
       <div className="hg-row" style={{ gap: 'var(--space-3)' }}>
@@ -469,11 +482,18 @@ function Goals({ v, m }: { v: MonthView; m: (n: number) => string }) {
             pct={g.pct}
             sub={g.target ? copy.goalAmount(m(g.held), m(g.target)) : copy.noGoalAmount}
             badge={g.delayed ? <Badge kind="warn">{copy.delayed}</Badge> : undefined}
+            lead={<GoalLead template={g.template} />}
           />
         ))}
       </div>
     </section>
   );
+}
+
+/** 목표 행 앞 3D 그림(템플릿 그림, 직접 만든 목표는 깃발) */
+function GoalLead({ template }: { template: string | null }) {
+  const art = template ? templateByKey(template)?.illustration : undefined;
+  return art ? <Lead art={<Illustration name={art} />} /> : <Lead icon="flag-pennant" />;
 }
 
 /** 다가오는 일정(H-07, 예비부부 H-P6) */

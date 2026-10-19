@@ -5,7 +5,7 @@
 - 소비자가 주는 것: 글자, 변형 클래스, `disabled` 여부.
 - `hg-btn--primary`: 화면의 주 행동. `brand` 바탕 + `on-brand`, 누름 `brand-pressed`.
 - 축하 순간에도 같은 주 버튼. 분홍은 주 버튼에만, 보조 버튼에는 쓰지 않음.
-- `hg-btn--secondary`: 보조 행동. `surface-alt` 바탕, 테두리 없음(회색 카드 안에서는 `surface`)(“다르게 해볼래요”, “나중에 할게요” 버튼형).
+- `hg-btn--secondary`: 보조 행동. `surface-alt` 바탕, 테두리 없음(카드 안에서는 옅은 분홍 `brand-soft` 바탕 + `brand-ink` 글자)(“다르게 해볼래요”, “나중에 할게요” 버튼형).
 - `hg-btn--ghost`(알약, 36px), `hg-btn--link`: 덜 중요한 행동, 글자 링크.
 - `hg-btn--danger`(`danger` 바탕 + `on-danger` 글자): 확인 Modal의 되돌릴 수 없는 실행 버튼에만. 옆 취소는 `secondary`.
 - 좁은 창 질문 화면의 주 버튼은 `hg-btn--block`으로 하단 고정.
