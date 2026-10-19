@@ -102,7 +102,7 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await heading(page, '9월 월급 플랜 정리할 때예요');
   await page.getByRole('button', { name: '정리 시작' }).click();
 
-  await heading(page, '9월 월급 플랜 정리를 시작할게요');
+  await heading(page, '9월 월급 플랜을 정리해 볼까요?');
   await axe(page);
   await page.getByRole('button', { name: '시작' }).click();
 
@@ -138,7 +138,7 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await page.getByRole('radio', { name: '내 집 마련' }).click();
   await page.getByRole('button', { name: '정리 끝내기' }).click();
 
-  await heading(page, '9월 월급 플랜 정리 끝!');
+  await heading(page, '9월 정리를 마쳤어요');
   await expect(page.getByText('바뀐 값이 없어요')).toBeVisible();
   await page.getByRole('button', { name: '이번 달로' }).click();
 
@@ -215,7 +215,7 @@ test('정산 요약(W-04g): 지난달보다 칩, 생활비 예산 보정 제안(
   await axe(page);
   await page.getByRole('radio', { name: '이번 달만 넘어가기' }).click();
   await page.getByRole('button', { name: '정리 끝내기' }).click();
-  await heading(page, '9월 월급 플랜 정리 끝!');
+  await heading(page, '9월 정리를 마쳤어요');
   expect(db.closes.find((c) => c.id === 'close-1')).toMatchObject({
     budget_fix: 'applied',
     gap_kind: 'short',
@@ -295,19 +295,19 @@ test('더 꼼꼼히 정리하기: 통장 잔액(W-04b) → 목표에서 쓴 돈(
   await page.getByRole('button', { name: '더 꼼꼼히 정리하기' }).click();
 
   // W-04b: 예상 = O-63 잔액 + 이번 나누기
-  await heading(page, '지금 통장 잔액을 알려주세요');
+  await heading(page, '지금 통장에 얼마 있나요?');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await page.getByRole('button', { name: '계획대로라면 161만 원' }).click();
   await expect(page.getByText('계획대로예요')).toBeVisible();
   await page.getByLabel('목표자금').fill('11250000');
   await expect(page.getByText('계획보다 25만 원 적어요')).toBeVisible();
   await page.getByLabel('비상금').fill('5000000');
-  await expect(page.getByText('통장 잔액 모두 1,786만 원')).toBeVisible();
+  await expect(page.getByText('모두 1,786만 원이에요')).toBeVisible();
   await axe(page);
   await next(page);
 
   // W-04c: 기록 확인 → 차액(25만 − 기록 10만 = 15만) 1질문
-  await heading(page, '이번 달 목표에서 쓴 돈, 이렇게 기록돼 있어요');
+  await heading(page, '이번 달 목표에서 이만큼 썼어요');
   await expect(page.getByText('어머니 생신')).toBeVisible();
   await expect(page.getByText('목표자금 통장에서 10만 원')).toBeVisible();
   await axe(page);
@@ -381,20 +381,20 @@ test('놓친 달: 이번 달 맨 위 ‘지난달 정리’ → 지금 정리하
   });
   await page.goto('/');
   await page.getByText('지난달 정리').click();
-  await heading(page, '9월 월급 플랜을 아직 정리하지 않았어요');
+  await heading(page, '9월 정리가 아직 남았어요');
   await expect(page.getByText('10월 플랜은 이미 시작했어요')).toBeVisible();
   await expect(page.getByText('그달 쓴 돈과 넣은 돈을 한 번에 적어요')).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: /지금 정리하기/ }).click();
 
-  await heading(page, '9월 월급 플랜 정리를 시작할게요');
+  await heading(page, '9월 월급 플랜을 정리해 볼까요?');
   await page.getByRole('button', { name: '시작' }).click();
   await page.getByRole('button', { name: '없어요' }).click();
   await next(page);
   await next(page);
   await expect(page.getByText(/예산을 맞출까요/)).toHaveCount(0);
   await page.getByRole('button', { name: '정리 끝내기' }).click();
-  await heading(page, '9월 월급 플랜 정리 끝!');
+  await heading(page, '9월 정리를 마쳤어요');
   expect(db.closes.find((c) => c.plan_id === 'plan-9')).toMatchObject({
     status: 'done',
     late: true,
@@ -438,7 +438,7 @@ test('놓친 달: 2개월 이상 밀리면 쉬어가기만, 그달 합계만 적
   await page.getByRole('button', { name: '없어요' }).click();
   await next(page);
   await next(page);
-  await heading(page, '9월 월급 플랜 정리 끝!');
+  await heading(page, '9월 정리를 마쳤어요');
   await expect(page.getByText('그달 합계를 적었어요')).toBeVisible();
   expect(db.closes.find((c) => c.plan_id === 'plan-9')).toMatchObject({
     status: 'done',
