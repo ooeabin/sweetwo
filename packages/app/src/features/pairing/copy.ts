@@ -9,7 +9,10 @@ export const copy = {
   // P-01 / A-07
   invited: (inviter: string) => `${inviter}님이 초대했어요`,
   invitedHelp: '둘이 같이 쓰는 공간에 합류해요',
-  codeLabel: '초대 코드', // [확인 필요] 화면 읽기용
+  codeLabel: '초대 코드',
+  // P-01 코드 직접 입력(O-01 ‘초대받았어요’)
+  codeTitle: '받은 초대 코드를 넣어 주세요',
+  codeHelp: '배우자가 보낸 6자리 코드예요',
   joinAs: (provider: string) => `${provider} 계정으로 합류해요`,
   otherAccount: '다른 계정',
   join: '합류하기',

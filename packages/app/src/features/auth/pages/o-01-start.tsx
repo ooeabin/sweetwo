@@ -9,8 +9,8 @@ export function O01Start() {
   const nav = useNavigate();
   const go = (entry: 'first_run' | 'invite') => {
     prefs.setStarted();
-    // ‘초대받았어요’는 P-01 코드 입력으로 가야 한다. 합류 단계(P 탭)에서 경로를 붙일 때까지 A-02로.
-    nav(paths.login, { state: { fromStart: true, entry } });
+    // ‘초대받았어요’는 P-01 코드 직접 입력 → 합류하기 → A-02(초대 문구)
+    nav(entry === 'invite' ? paths.joinCode : paths.login, { state: { fromStart: true, entry } });
   };
   return (
     <AuthLayout

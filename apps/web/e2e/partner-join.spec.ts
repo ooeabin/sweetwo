@@ -16,11 +16,8 @@ const heading = (page: Page, name: string | RegExp) =>
 const next = (page: Page) => page.getByRole('button', { name: '다음' }).click();
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그인 뒤 돌아올 자리 기억', async ({
-  page,
-}) => {
-  await mockSupabase(page);
-  await page.route(`${SB}/rest/v1/rpc/invite_preview`, (route) =>
+const mockPreview = (page: Page) =>
+  page.route(`${SB}/rest/v1/rpc/invite_preview`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -28,16 +25,50 @@ test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그�
       headers: { 'Access-Control-Allow-Origin': '*' },
     }),
   );
+
+test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그인 뒤 돌아올 자리 기억', async ({
+  page,
+}) => {
+  await mockSupabase(page);
+  await mockPreview(page);
   await page.goto('/i/K7M2QX');
   await heading(page, '찬우님이 초대했어요');
   await expect(page.getByText('둘이 같이 쓰는 공간에 합류해요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '합류하기' }).click();
-  await heading(page, '시작하려면 로그인해 주세요');
+  await heading(page, '찬우님 공간에 합류할 계정을 골라요');
+  await axe(page);
   const back = await page.evaluate(
     () => localStorage.getItem('sweetwo.return-to') ?? sessionStorage.getItem('sweetwo.return-to'),
   );
   expect(back).toBe('/i/K7M2QX?go=1');
+});
+
+test('O-01 ‘초대받았어요’ → P-01 코드 입력 → 초대 확인 → 합류하기 → A-02 초대 문구', async ({
+  page,
+}) => {
+  await mockSupabase(page);
+  await mockPreview(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: '초대받았어요' }).click();
+  await heading(page, '받은 초대 코드를 넣어 주세요');
+  await expect(page.getByText('배우자가 보낸 6자리 코드예요')).toBeVisible();
+  const next = page.getByRole('button', { name: '다음' });
+  const input = page.getByLabel('초대 코드');
+  await expect(next).toBeDisabled();
+  await input.fill('k7m2q1'); // 1은 코드에 안 쓰는 글자
+  await expect(input).toHaveValue('K7M2Q1');
+  await expect(page.getByText('코드를 다시 확인해 주세요')).toBeVisible();
+  await expect(next).toBeDisabled();
+  await axe(page);
+  await input.fill('k7m2qx');
+  await input.press('Enter');
+  await expect(page).toHaveURL(/\/i\/K7M2QX$/);
+  await heading(page, '찬우님이 초대했어요');
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await heading(page, '찬우님 공간에 합류할 계정을 골라요');
+  await page.getByRole('button', { name: '뒤로' }).click();
+  await heading(page, '찬우님이 초대했어요');
 });
 
 test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 제안 → P-08 다르게 → P-09 → P-10 → P-11 → O-63~65 → 이번 달', async ({

@@ -29,6 +29,8 @@ export const copy = {
 
   // A-02
   recent: '최근 사용',
+  // 초대로 들어왔을 때(P-01 ‘합류하기’ → A-02). 캐치프레이즈 대신
+  joinTitle: (inviter: string) => `${inviter}님 공간에 합류할 계정을 골라요`,
   continueWith: {
     kakao: '카카오로 3초 만에 시작하기',
     google: 'Google로 시작하기',
