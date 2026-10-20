@@ -69,7 +69,7 @@ export function A01Launch() {
     if (!has) {
       if (!online) return setPhase('offline');
       setPhase('ready');
-      if (PUBLIC.has(here) || here.startsWith('/i/')) return; // 초대 링크(P-01)는 로그인 전에도
+      if (PUBLIC.has(here) || here === '/i' || here.startsWith('/i/')) return; // 초대 코드 입력, 초대 링크(P-01)는 로그인 전에도
       if (here !== paths.home) prefs.setReturnTo(here + loc.search);
       return nav(prefs.started() ? paths.login : paths.start, { replace: true }); // O-01은 첫 실행에만
     }

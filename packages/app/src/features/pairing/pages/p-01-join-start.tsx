@@ -29,7 +29,9 @@ export function P01JoinStart() {
     if (busy) return;
     if (!signedIn.data || !me.data) {
       prefs.setReturnTo(`/i/${code}?go=1`); // 로그인, 가입이 끝나면 여기로 돌아와 바로 합류
-      nav(paths.login);
+      nav(paths.login, {
+        state: { fromStart: true, entry: 'invite', inviter: preview.data?.inviter },
+      });
       return;
     }
     setBusy(true);

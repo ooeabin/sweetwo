@@ -30,7 +30,11 @@ function useOnline() {
 export function A02Login() {
   const nav = useNavigate();
   const loc = useLocation();
-  const st = (loc.state ?? {}) as LoginNotice & { fromStart?: boolean; entry?: Entry };
+  const st = (loc.state ?? {}) as LoginNotice & {
+    fromStart?: boolean;
+    entry?: Entry;
+    inviter?: string;
+  };
   const online = useOnline();
   const recent = prefs.lastProvider();
   const [keep, setKeep] = useState(() => keepLogin.get());
@@ -64,9 +68,18 @@ export function A02Login() {
 
   return (
     <AuthLayout
-      className="hg-auth--hero hg-auth--login"
-      media={<Wordmark height={56} />}
-      title={copy.catchphrase}
+      className={st.inviter ? 'hg-auth--login' : 'hg-auth--hero hg-auth--login'}
+      media={
+        st.inviter ? (
+          // 초대한 사람 아바타(사진 없음: 찬우 = person-1). 글자는 제목이 읽어 주니 화면 읽기에서 숨김
+          <span className="hg-avatar hg-avatar--p1 hg-avatar--xl" aria-hidden="true">
+            {st.inviter.slice(0, 1)}
+          </span>
+        ) : (
+          <Wordmark height={56} />
+        )
+      }
+      title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}
       onBack={st.fromStart ? () => nav(-1) : undefined}
       actions={
         <>

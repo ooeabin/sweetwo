@@ -9,6 +9,7 @@ import { useAuthStore } from './store';
 export const paths = {
   start: '/start', // O-01
   login: '/login', // A-02
+  joinCode: '/i', // P-01 코드 직접 입력
   wait: '/login/wait', // A-03
   email: '/signup/email', // A-04
   terms: '/signup/terms', // A-05
