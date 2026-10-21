@@ -4,6 +4,7 @@ import {
   fetchFixedExpenses,
   fetchGoals,
   fetchMe,
+  fetchPartner,
   fetchSpace,
   qk,
   updateMe,
@@ -29,6 +30,10 @@ export function useSpace() {
       return fetchSpace();
     },
   });
+}
+/** 합류한 배우자(합류 전 null). 시작한 사람이 온보딩 중에 배우자가 먼저 합류할 수 있음 */
+export function usePartner() {
+  return useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
 }
 export function useGoals() {
   return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });

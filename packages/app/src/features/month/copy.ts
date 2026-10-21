@@ -107,6 +107,10 @@ export const copy = {
 
   // 불러오기 실패
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  // 합류했는데 시작한 사람이 첫 플랜 전(18 P-11 대기)
+  waitPlan: (starter: string) => `${starter}님이 플랜을 만들고 있어요`,
+  waitPlanTitle: '아직 이번 달 플랜이 없어요',
+  waitPlanBody: (starter: string) => `${starter}님이 플랜을 마치면 알려 드릴게요`,
   retry: '다시 시도',
 
   // H-04 할 일

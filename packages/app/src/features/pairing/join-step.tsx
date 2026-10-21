@@ -6,10 +6,13 @@ import { saveMe, useJoinData, type JoinData } from './data';
 
 export const joinPath = (id: string) => `/join/${id}`;
 
-/** 합류 화면 순서(18 흐름 요약). P-06 추가 질문 뒤 쿼리 ?more=1. 각자 관리 예비부부는 용돈(P-07), 분담(P-08) 없음 */
-export function joinScreens(d: Pick<JoinData, 'space'>): string[] {
+/** 합류 화면 순서(18 흐름 요약). P-06 추가 질문 뒤 쿼리 ?more=1. 각자 관리 예비부부는 용돈(P-07), 분담(P-08) 없음.
+ * 시작한 사람이 첫 플랜 전(waiting)이면 내 정보(P-03~07)와 투자 성향(P-09)까지만 답하고 P-11 대기로. 분담, 바뀐 것, 다시 보기 없음 */
+export function joinScreens(d: Pick<JoinData, 'space' | 'waiting'>): string[] {
   const separate =
     d.space?.marriage_status === 'engaged' && d.space?.prep_money_mode === 'separate';
+  if (d.waiting)
+    return ['p-03', 'p-04', 'p-05', 'p-05d', 'p-06', ...(separate ? [] : ['p-07']), 'p-09', 'p-11'];
   return [
     'p-03',
     'p-04',

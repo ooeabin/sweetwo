@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
-import { saveMe, useGoals, useMe, useOnboardingLocal, useSpace } from './data';
-import { nextOf, prevOf, progress, screens, type FlowState } from './flow';
+import { saveMe, useGoals, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
+import { joinedSpace, nextOf, prevOf, progress, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
@@ -18,9 +18,17 @@ export function useStep(id: string) {
   const inviteNow = useOnboardingLocal((s) => s.inviteNow);
   const [saving, setSaving] = useState(false);
 
-  const state: FlowState = { me: me.data, space: space.data, goals: goals.data, inviteNow };
-  const ready = !me.isLoading && !space.isLoading && !goals.isLoading;
-  const list = useMemo(() => screens(state), [state.me, state.space, state.goals, state.inviteNow]); // eslint-disable-line react-hooks/exhaustive-deps
+  const partner = usePartner();
+  const state: FlowState = {
+    me: me.data,
+    space: joinedSpace(space.data, partner.data),
+    partner: partner.data,
+    goals: goals.data,
+    inviteNow,
+  };
+  const ready = !me.isLoading && !space.isLoading && !goals.isLoading && !partner.isLoading;
+  const list = screens(state);
+
 
   // 멈춘 화면 기록(이어하기). 화면마다 들어올 때 한 번만.
   const marked = useRef<string | null>(null);
@@ -44,7 +52,8 @@ export function useStep(id: string) {
       const [m, s, g] = await Promise.all([me.refetch(), space.refetch(), goals.refetch()]);
       const fresh: FlowState = {
         me: m.data,
-        space: s.data,
+        space: joinedSpace(s.data, partner.data),
+        partner: partner.data,
         goals: g.data,
         inviteNow: useOnboardingLocal.getState().inviteNow,
       };

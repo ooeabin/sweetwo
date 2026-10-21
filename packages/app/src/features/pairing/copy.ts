@@ -114,5 +114,8 @@ export const copy = {
   shareCard: '매달 나눠 넣을 돈',
   before: '이전', // [확인 필요] 화면 읽기용(취소선 값)
   waiting: '답 기다리는 제안', // [확인 필요] 요소 이름
+  // P-11 대기(시작한 사람이 첫 플랜 전)
+  waitTitle: (starter: string) => `${starter}님 공간에 합류했어요`,
+  waitHelp: (starter: string) => `${starter}님이 플랜을 마치면 같이 볼 수 있어요`,
   planKept: (month: number) => `${month}월 월급 플랜은 그대로, 안 나눈 돈만 다시 계산했어요`,
 };

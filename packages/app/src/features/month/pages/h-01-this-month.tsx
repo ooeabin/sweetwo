@@ -1,6 +1,7 @@
 import {
   fetchChecklistDone,
   fetchInquiries,
+  fetchLastPlanEnd,
   fetchPastPlans,
   fetchMyUnlink,
   fetchUnlink,
@@ -25,6 +26,7 @@ import {
   Badge,
   Button,
   Card,
+  EmptyState,
   Illustration,
   Lead,
   ListRow,
@@ -97,6 +99,8 @@ export function H01ThisMonth() {
     enabled: !!plan.data,
   });
   const missed = missedPlans(past.data ?? []);
+  // 합류한 사람인데 공간에 플랜이 아직 없음 = 시작한 사람이 온보딩 중(18 P-11 대기)
+  const last = useQuery({ queryKey: qk.lastPlanEnd, queryFn: fetchLastPlanEnd });
   const unlink = useQuery({
     queryKey: qk.unlink,
     queryFn: fetchUnlink,
@@ -178,7 +182,8 @@ export function H01ThisMonth() {
       to: `/settings/guides/check/${nextCheck.key}?from=todo`,
     });
 
-  const loading = me.isLoading || space.isLoading || goals.isLoading || plan.isLoading;
+  const loading =
+    me.isLoading || space.isLoading || goals.isLoading || plan.isLoading || last.isLoading;
   const failed = me.isError || space.isError || goals.isError || plan.isError;
   const date = formatDateWeekday(todayKst());
   const m = (v: number) => money(v, masked);
@@ -230,6 +235,14 @@ export function H01ThisMonth() {
     );
   } else if (loading || !v) {
     columns = [<Skeleton key="l" />, <Skeleton key="r" />];
+  } else if (!v.starter && !last.data) {
+    title = copy.waitPlan(v.partnerName);
+    columns = [
+      <div key="l" className="hg-card hg-card--fill">
+        <EmptyState title={copy.waitPlanTitle} body={copy.waitPlanBody(v.partnerName)} />
+      </div>,
+      <Upcomings key="r" v={v} />,
+    ];
   } else {
     ({ title, actions, stats } = today(v, name, m, (to) => nav(to), netWorth));
     const todos = (
