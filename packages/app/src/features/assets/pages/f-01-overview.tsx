@@ -9,6 +9,7 @@ import { NetWorthChart } from '../net-worth-chart';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
 import { useDiagnosis } from '../diagnosis';
+import { EmergencyCard } from '../emergency-card';
 import { indicatorText } from './f-06-diagnosis';
 
 // F-01 한눈에(docs/spec/23-assets.md 2~6·15·17번): 순자산(원금 기준) + 예상 순자산·안 판 수익 + 지난달 대비와
@@ -56,6 +57,7 @@ export function F01Overview() {
         : copy.monthLiving(mv.month, m(Math.max(mv.living.left, 0)));
     body = (
       <>
+        <EmergencyCard />
         <NetWorthChart d={d} />
         <div className="hg-cards">
           <button

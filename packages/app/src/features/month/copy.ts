@@ -62,6 +62,10 @@ export const copy = {
   activityAdded: (partner: string, name: string) => `${partner}님이 ${name} 항목을 추가했어요`, // [확인 필요]
   activityChanged: (partner: string, name: string) => `${partner}님이 ${name} 금액을 바꿨어요`, // [확인 필요]
   activitySum: '개인 자산 금액이 바뀌었어요',
+  activityEmergency: (partner: string, isIn: boolean, amount: string) =>
+    isIn
+      ? `${partner}님이 비상금에 ${amount}을 넣었어요`
+      : `${partner}님이 비상금에서 ${amount}을 꺼냈어요`,
   unknown: '아직 몰라요',
   nextEvent: '다음 일정',
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요] 당일 표기

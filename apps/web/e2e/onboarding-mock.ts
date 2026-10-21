@@ -17,6 +17,8 @@ export interface MemDb {
   deposits: Record<string, unknown>[];
   /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
   partner: Record<string, unknown> | null;
+  /** 비상금 넣기, 꺼내기(emergency_move) */
+  emergencyMoves: Record<string, unknown>[];
   /** 배우자 생일(partner_birthday) */
   partnerBirthday?: { month: number; day: number } | null;
   consents: Record<string, unknown>[];
@@ -135,6 +137,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     cares: [],
     careRecords: [],
     goalUses: [],
+    emergencyMoves: [],
     holidays: [],
     notifications: [],
     invites: [],
@@ -1159,6 +1162,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.invites.unshift(row);
         return json(route, [row]);
       }
+      if (fn === 'move_emergency') {
+        const a = body();
+        const id = `em-${db.emergencyMoves.length + 1}`;
+        db.emergencyMoves.unshift({
+          id,
+          kind: a.p_kind,
+          amount: a.p_amount,
+          reason: a.p_reason ?? null,
+          moved_on: '2026-10-07',
+          created_by: db.me.id,
+          deleted_at: null,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_emergency_move') {
+        const m = db.emergencyMoves.find((x) => x.id === body().p_id);
+        if (m) m.deleted_at = 'now';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'partner_birthday') return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
       if (fn === 'delete_minor_account' || fn === 'delete_underage_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
@@ -1644,6 +1666,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
+    if (path === '/rest/v1/emergency_move' && method === 'GET')
+      return json(route, db.emergencyMoves.filter((x) => !x.deleted_at));
     if (path === '/rest/v1/notice' && method === 'GET') return json(route, db.notices);
     if (path === '/rest/v1/close_balance') {
       if (method === 'GET') return json(route, db.balances);

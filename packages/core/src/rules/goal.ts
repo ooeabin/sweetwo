@@ -29,6 +29,10 @@ export interface GoalMonth {
 /** 보유액 = 기타 보유액 + 넣은 돈 누적, 0 하한(5-4) */
 export const goalHeld = (otherHeld: Won, deposits: Won) => Math.max(otherHeld + deposits, 0);
 
+/** 비상금 잔액 = 비상금 목표 보유액 + 넣기 − 꺼내기(23 F-09, 0 아래로 안 내려감) */
+export const emergencyBalance = (held: Won, moves: { kind: 'in' | 'out'; amount: Won }[]) =>
+  Math.max(held + moves.reduce((t, m) => t + (m.kind === 'in' ? m.amount : -m.amount), 0), 0);
+
 /** 달별 기록(새 달부터). 계획은 플랜 줄, 실제는 정리를 마친 달의 납입 */
 export function goalMonths(
   goalId: string,

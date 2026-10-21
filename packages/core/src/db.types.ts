@@ -1285,6 +1285,51 @@ export type Database = {
           },
         ]
       }
+      emergency_move: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          kind: string
+          moved_on: string
+          reason: string | null
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind: string
+          moved_on?: string
+          reason?: string | null
+          space_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          moved_on?: string
+          reason?: string | null
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_move_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       family_member: {
         Row: {
           birth_day: number | null
@@ -3751,6 +3796,10 @@ export type Database = {
         Args: { p_birth_date: string }
         Returns: undefined
       }
+      emergency_asset_add: {
+        Args: { d: number; p_space: string }
+        Returns: undefined
+      }
       end_access: { Args: { p_id: string }; Returns: undefined }
       end_income_periods: { Args: Record<PropertyKey, never>; Returns: number }
       end_sessions: { Args: { p_id?: string }; Returns: number }
@@ -3814,6 +3863,10 @@ export type Database = {
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
+      move_emergency: {
+        Args: { p_amount: number; p_kind: string; p_reason?: string }
+        Returns: string
+      }
       move_goal_rest: {
         Args: { p_goal: string; p_use: string }
         Returns: undefined
@@ -4126,6 +4179,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      undo_emergency_move: { Args: { p_id: string }; Returns: undefined }
       undo_living_check: { Args: { p_id: string }; Returns: undefined }
       unlink_default_plan: {
         Args: { p_plan: Json; p_ratio: number }

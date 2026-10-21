@@ -618,8 +618,67 @@ test('재정 진단(F-06): 요약, 위험·주의 먼저, 비상금 개월, 추�
   await expect(page.getByRole('region', { name: '투자 원칙 합의' })).toContainText('아직 몰라요');
   await axe(page);
 
-  await em.getByRole('button', { name: '비상금 목표' }).click();
-  await expect(page).toHaveURL(/\/goals\/g-e$/);
+  // 비상금은 목표가 아니라 우리 자산 비상금 카드로
+  await em.getByRole('button', { name: '비상금 보기' }).click();
+  await expect(page).toHaveURL(/\/assets$/);
+  await expect(page.getByRole('region', { name: '비상금' })).toContainText('300만 원');
+});
+
+test('비상금 카드(F-01): 넣기는 바로 잔액에, 꺼내기는 잔액까지만 + 사유, 되돌리기', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.push({
+    id: 'g-e',
+    template: 'emergency',
+    name: '비상금',
+    kind: 'once',
+    owner: 'together',
+    priority: 0,
+    target_amount: 5_550_000,
+    other_held: 3_000_000,
+    deadline: '2027-10-01',
+    status: 'active',
+    after_marriage: false,
+    details: {},
+    created_by: db.me.id,
+    created_at: '2026-09-01T00:00:00Z',
+    deleted_at: null,
+  });
+  await page.goto('/assets');
+  const card = page.getByRole('region', { name: '비상금' });
+  await expect(card).toContainText('300만 원');
+  await expect(card).toContainText('비상금으로 1.6개월 생활할 수 있어요');
+  await axe(page);
+
+  // 넣기: 바로 반영 + 토스트
+  await card.getByRole('button', { name: '+ 넣기' }).click();
+  await expect(page.getByRole('heading', { name: '비상금에 얼마 넣었어요?' })).toBeVisible();
+  await page.getByLabel('비상금에 얼마 넣었어요?').fill('500000');
+  await page.getByRole('button', { name: '넣기', exact: true }).click();
+  await expect(page.getByText('비상금에 50만 원을 넣었어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/assets$/);
+  await expect(card).toContainText('350만 원');
+
+  // 꺼내기: 잔액(350만)보다 많으면 못 넘어감 → 사유
+  await card.getByRole('button', { name: '- 꺼내기' }).click();
+  await expect(page.getByText('지금 비상금은 350만 원이에요')).toBeVisible();
+  await page.getByLabel('비상금에서 얼마 꺼냈어요?').fill('4000000');
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await page.getByLabel('비상금에서 얼마 꺼냈어요?').fill('1000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '어디에 썼어요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: '병원' }).click();
+  await expect(card).toContainText('250만 원');
+  expect(db.emergencyMoves.map((m) => [m.kind, m.amount, m.reason])).toEqual([
+    ['out', 1_000_000, 'hospital'],
+    ['in', 500_000, null],
+  ]);
+
+  // 되돌리기
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect(card).toContainText('350만 원');
 });
 
 test('투자 원칙(O-53): 할 일에서 열고, 보수적인 쪽 허용 비중, 진단 양호, 목록 허용 비중', async ({

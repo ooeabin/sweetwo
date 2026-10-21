@@ -6,6 +6,8 @@ export { AssetAddRoute } from './add/route';
 export { F05Money } from './pages/f-05-money';
 export { F05Edit } from './pages/f-05-edit';
 export { F06Diagnosis } from './pages/f-06-diagnosis';
+export { F09EmergencyMove } from './pages/f-09-emergency-move';
+export { EmergencyCard } from './emergency-card';
 export { O53InvestPrinciple } from './pages/o-53-invest-principle';
 export { O41AssetKinds } from './pages/o-41-asset-kinds';
 export { O42AssetAmount } from './pages/o-42-asset-amount';

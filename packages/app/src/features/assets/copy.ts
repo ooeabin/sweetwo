@@ -117,6 +117,26 @@ export const copy = {
   diagLine: (good: number, total: number) => `재정 진단 ${total}개 중 ${good}개 양호`,
   diagSaving: (pct: number) => `월 수입의 ${pct}%를 저축하고 있어요`,
   diagSavingUnknown: '월말 정리를 하면 계산해요', // [확인 필요]
+  // 비상금 카드, F-09 넣기·꺼내기 [확인 필요]
+  emergencyTitle: '비상금',
+  emergencyOf: (held: string, base: string) => `${held} / 기준 ${base}`,
+  emergencyIn: '+ 넣기',
+  emergencyInBtn: '넣기',
+  emergencyOut: '- 꺼내기',
+  emergencyInQ: '비상금에 얼마 넣었어요?',
+  emergencyOutQ: '비상금에서 얼마 꺼냈어요?',
+  emergencyWhy: '어디에 썼어요?',
+  emergencyReasons: {
+    hospital: '병원',
+    repair: '수리',
+    family_event: '경조사',
+    living_short: '생활비 부족',
+    etc: '기타',
+  },
+  emergencySkipWhy: '건너뛰기',
+  emergencyMoved: (kind: 'in' | 'out', amount: string) =>
+    kind === 'in' ? `비상금에 ${amount}을 넣었어요` : `비상금에서 ${amount}을 꺼냈어요`,
+  emergencyOver: (balance: string) => `지금 비상금은 ${balance}이에요`,
   diagEmergency: (months: number) => `비상금으로 ${months}개월 생활할 수 있어요`,
   diagEmergencyMore: (months: number) => `${months}개월분까지 모아봐요`,
   diagEmergencyUnknown: '비상금 목표에 모아둔 돈을 적으면 계산해요', // [확인 필요]
@@ -191,7 +211,7 @@ export const copy = {
     `${partner}님은 ‘${answer}’를 골랐어요. 다르면 더 조심스러운 쪽으로 정해요`, // [확인 필요]
   principleSaved: '투자 원칙을 정했어요', // [확인 필요]
   diagPrivate: '비공개 항목은 계산에서 빠졌어요',
-  diagGoEmergency: '비상금 목표',
+  diagGoEmergency: '비상금 보기', // [확인 필요] 비상금이 목표에서 빠짐
   diagGoDebt: '부채 목록',
   diagGoMoney: '월 수입·지출',
   diagGoInvest: '지금 정하기',
