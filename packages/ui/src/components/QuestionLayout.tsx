@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { Children, useEffect, type ReactNode } from 'react';
 import { Icon } from './Icon';
 
 // 한 화면 한 질문 틀(docs/design/components/QuestionLayout.md). Enter = 다음(폼 제출), Esc = 뒤로.
@@ -12,6 +12,7 @@ export function QuestionLayout({
   onBack,
   onSubmit,
   wide,
+  center,
 }: {
   steps?: { total: number; now: number; fill?: number };
   title: ReactNode;
@@ -23,7 +24,10 @@ export function QuestionLayout({
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
   wide?: boolean;
+  /** 안내 화면: 제목 가운데 정렬 + 세로 가운데(O-01, A-02와 같은 배치). 입력 영역이 없으면 기본으로 켬 */
+  center?: boolean;
 }) {
+  const centered = center ?? Children.toArray(children).length === 0;
   useEffect(() => {
     if (!onBack) return;
     const onKey = (e: KeyboardEvent) => {
@@ -36,7 +40,9 @@ export function QuestionLayout({
   return (
     <main style={{ padding: '0 var(--space-4)' }}>
       <form
-        className={wide ? 'hg-q hg-q--wide' : 'hg-q'}
+        className={['hg-q', wide && 'hg-q--wide', centered && 'hg-q--center']
+          .filter(Boolean)
+          .join(' ')}
         onSubmit={(e) => {
           e.preventDefault();
           if (!primary?.disabled) onSubmit?.();

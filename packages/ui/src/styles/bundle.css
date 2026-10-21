@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (c31f3cf). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (aa31263). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -167,7 +167,7 @@
 .hg-dock__item.is-active { padding: 0 var(--space-4) 0 var(--space-3); background: var(--ink); color: var(--on-ink); }
 
 /* QuestionLayout */
-.hg-q { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-6); width: 100%; max-width: 480px; margin: 0 auto; padding: var(--space-6) 0; }
+.hg-q { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-6); width: 100%; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: var(--space-6) 0; }
 .hg-q > * { margin: 0; }
 .hg-q__nav { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
@@ -175,9 +175,14 @@
 .hg-q__back:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
-.hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; }
+.hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
 .hg-q__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 .hg-q__foot { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-4); padding-top: var(--space-4); }
+.hg-q__foot .hg-btn--primary { flex: 1; }  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
+/* 안내 화면(입력 없음, hg-q--center): 제목을 가운데 정렬하고 세로 가운데로. O-01 시작, A-02 로그인과 같은 배치 */
+.hg-q--center .hg-q__head { align-items: center; text-align: center; margin-top: auto; }
+.hg-q--center .hg-q__help { word-break: keep-all; }
+.hg-q--center > :last-child { margin-bottom: auto; }
 .hg-q--wide { max-width: 960px; }
 .hg-q__cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
 .hg-q__cols > * { min-width: 0; }
@@ -1198,8 +1203,9 @@ a.hg-btn { text-decoration: none; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-avatar { margin-top: auto; }
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
-  .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
-  .hg-q__foot .hg-btn--primary { flex: 1; }
+  /* 좁은 창: 주 버튼은 화면 아래 끝(내용이 짧아도), 길면 따라 내려오다 아래에 붙음 */
+  .hg-q__foot { position: sticky; bottom: 0; margin-top: auto; padding-bottom: var(--space-4); background: var(--surface); }
+  .hg-q--center > .hg-q__foot:last-child { margin-bottom: 0; }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
 }
 
