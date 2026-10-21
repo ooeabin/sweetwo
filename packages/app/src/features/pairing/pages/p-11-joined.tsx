@@ -7,7 +7,7 @@ import {
   readWon,
   splitShares,
 } from '@sweetwo/core';
-import { QuestionLayout, SceneMedia } from '@sweetwo/ui';
+import { QuestionLayout, ResultCard } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { openSent, ProposalLines, useProposals } from '../../proposals';
@@ -104,35 +104,42 @@ export function P11Joined() {
       primary={{ label: copy.next, disabled: !finished }}
       onSubmit={() => nav(joinPath('o-63'))}
     >
-      <SceneMedia />
-      <div className="hg-cards">
-        <div className="hg-card">
-          <span className="hg-card__label">{copy.incomeCard}</span>
-          <p className="hg-card__value">{readWon(now.income)}</p>
-          {beforeIncome !== now.income && (
-            <p className="hg-card__meta">
-              <s aria-label={copy.before}>{readWon(beforeIncome)}</s>
-            </p>
-          )}
-        </div>
-        <div className="hg-card">
-          <span className="hg-card__label">{copy.saveCard}</span>
-          <p className="hg-card__value">{readWon(Math.max(now.saveable, 0))}</p>
-          {beforeSave !== null && beforeSave !== now.saveable && (
-            <p className="hg-card__meta">
-              <s aria-label={copy.before}>{readWon(Math.max(beforeSave, 0))}</s>
-            </p>
-          )}
-        </div>
-        <div className="hg-card">
-          <span className="hg-card__label">{copy.shareCard}</span>
-          <p className="hg-card__meta">{copy.splitModes[mode]}</p>
-          <p style={{ margin: 0 }}>
-            <span className="hg-help">{c.myName}</span> <b>{formatManWon(share.me)} 원</b>{' '}
-            <span className="hg-help">{c.partnerName}</span> <b>{formatManWon(share.partner)} 원</b>
-          </p>
-        </div>
-      </div>
+      <ResultCard
+        label={copy.saveCard}
+        value={readWon(Math.max(now.saveable, 0))}
+        meta={
+          beforeSave !== null && beforeSave !== now.saveable ? (
+            <s aria-label={copy.before}>{readWon(Math.max(beforeSave, 0))}</s>
+          ) : undefined
+        }
+        items={[
+          {
+            label: copy.incomeCard,
+            value: (
+              <>
+                <span>{readWon(now.income)}</span>
+                {beforeIncome !== now.income && (
+                  <>
+                    {' '}
+                    <s className="hg-card__meta" aria-label={copy.before}>
+                      {readWon(beforeIncome)}
+                    </s>
+                  </>
+                )}
+              </>
+            ),
+          },
+          { label: copy.shareMode, value: copy.splitModes[mode] },
+          {
+            label: copy.shareOf(c.myName),
+            value: `${formatManWon(share.me)} 원`,
+          },
+          {
+            label: copy.shareOf(c.partnerName),
+            value: `${formatManWon(share.partner)} 원`,
+          },
+        ]}
+      />
       {waiting.length > 0 && (
         <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
           <h2 className="hg-card__label" style={{ margin: 0 }}>

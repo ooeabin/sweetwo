@@ -120,5 +120,8 @@ export const copy = {
   // P-11 대기(시작한 사람이 첫 플랜 전)
   waitTitle: (starter: string) => `${starter}님 공간에 합류했어요`,
   waitHelp: (starter: string) => `${starter}님이 플랜을 마치면 같이 볼 수 있어요`,
+  // P-11 결과 카드 체크 줄 [확인 필요]
+  shareMode: '나누는 방식',
+  shareOf: (name: string) => `${name}님이 매달 넣을 돈`,
   planKept: (month: number) => `${month}월 월급 플랜은 그대로, 안 나눈 돈만 다시 계산했어요`,
 };

@@ -14,7 +14,7 @@ export function O01Start() {
   };
   return (
     <AuthLayout
-      className="hg-auth--hero"
+      className="hg-auth--hero hg-auth--start"
       media={<Wordmark height={56} />}
       title={copy.catchphrase}
       actions={

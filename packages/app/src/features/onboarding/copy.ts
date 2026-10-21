@@ -203,6 +203,10 @@ export const copy = {
   incomeMine: (me: string) => `${me}님 수입`,
   joinPreview: (partner: string) => `${partner}님이 합류하면 여기서 월급을 나눠요`,
   saveCard: '한 달에 모을 수 있는 돈',
+  // 결과 카드 금액 아래 한 줄 [확인 필요]
+  resultMeta: (who: string, income: string) => `${who} 월 수입 ${income} 중`,
+  whoBoth: '두 분',
+  whoMine: (me: string) => `${me}님`,
   saveGoal: '목표',
   saveEmergency: '비상금',
   checkSpending: '지출 점검',
