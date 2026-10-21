@@ -33,6 +33,7 @@
 | [BigExpense](BigExpense.md) | Inputs | 이번 달 큰 지출 |
 | [Chip](Chip.md) | Inputs | 선택 칩 |
 | [ResultCard](ResultCard.md) | Data | 결과 요약 카드(큰 금액 + 체크 줄) |
+| [InfoPlate](InfoPlate.md) | Data | 조건 요약 판(이름–값 두 열), 완료 표시 DoneMark |
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
 | [CopyField](CopyField.md) | Inputs | 초대 코드·링크를 보여 주고 복사 |
 | [DatePicker](DatePicker.md) | Inputs | 날짜 입력(결혼식 날짜 묻기 등) |

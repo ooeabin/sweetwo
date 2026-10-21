@@ -7,7 +7,7 @@ import {
   readWon,
   splitShares,
 } from '@sweetwo/core';
-import { QuestionLayout, ResultCard } from '@sweetwo/ui';
+import { DoneMark, InfoPlate, QuestionLayout, ResultCard } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { openSent, ProposalLines, useProposals } from '../../proposals';
@@ -56,7 +56,8 @@ export function P11Joined() {
   }, [d.ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!d.ready || !d.space || !d.couple || !d.me) return null;
-  if (d.waiting)
+  if (d.waiting) {
+    const me = d.me;
     return (
       <QuestionLayout
         steps={s.steps}
@@ -64,8 +65,28 @@ export function P11Joined() {
         help={copy.waitHelp(d.couple.partnerName)}
         primary={{ label: copy.toMonth, disabled: !finished }}
         onSubmit={() => nav('/', { replace: true })}
-      />
+      >
+        <DoneMark />
+        <InfoPlate
+          title={copy.waitPlate}
+          rows={[
+            {
+              label: copy.incomeCard,
+              value: me.monthly_income !== null ? readWon(me.monthly_income) : '-',
+            },
+            {
+              label: copy.waitPayday,
+              value: me.payday_last ? copy.paydayLast : me.payday ? `${me.payday}일` : '-',
+            },
+            {
+              label: copy.waitAllowance,
+              value: me.allowance !== null ? readWon(me.allowance) : '-',
+            },
+          ]}
+        />
+      </QuestionLayout>
     );
+  }
   const sp = d.space;
   const c = d.couple;
   const inputs = {

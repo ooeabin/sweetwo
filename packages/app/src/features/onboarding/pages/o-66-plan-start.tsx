@@ -2,6 +2,7 @@ import { startFirstPlan, type FirstPlanLine } from '@sweetwo/api';
 import {
   adjustParts,
   formatManWon,
+  formatMonthDay,
   parseYm,
   prorate,
   quickChips,
@@ -9,7 +10,7 @@ import {
   splitLines,
   type PlanParts,
 } from '@sweetwo/core';
-import { AmountInput, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, InfoPlate, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfirmOnce } from '../confirm';
@@ -212,12 +213,22 @@ export function O66PlanStart() {
               </table>
             </>
           ) : (
-            !solo &&
-            !joined && (
-              <p className="hg-help" style={{ margin: 0 }}>
-                {copy.joinPreview(partnerName)}
-              </p>
-            )
+            <InfoPlate
+              title={copy.startPlate}
+              rows={[
+                {
+                  label: copy.plateCycle,
+                  value: `${formatMonthDay(cycle.start)} ~ ${formatMonthDay(cycle.end)}`,
+                },
+                ...lines
+                  .filter((l) => l.amount > 0)
+                  .map((l) => ({
+                    label: copy.roles[roleOfPart(l.key, r.separate)],
+                    value: readWon(l.amount),
+                  })),
+              ]}
+              note={!solo && !joined ? copy.joinPreview(partnerName) : undefined}
+            />
           )}
         </section>
       </div>

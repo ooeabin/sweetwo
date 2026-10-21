@@ -76,6 +76,8 @@ export const copy = {
   // A-05
   termsTitle: '약관에 동의해 주세요', // [확인 필요] A-05 제목 문구
   agreeAll: '모두 동의해요',
+  requiredAll: '[필수] 서비스 이용에 동의해요', // [확인 필요] 필수 약관 묶음
+  foldRequired: '필수 약관 펼치기',
   terms: '[필수] 이용약관',
   privacy: '[필수] 개인정보 수집·이용',
   spaceSharing: '[필수] 배우자와 부부 공간 공유',

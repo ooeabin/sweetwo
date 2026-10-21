@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (db3bc09). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (6c1ff3e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -61,6 +61,22 @@
 .hg-card--tint .hg-card__meta { color: var(--ink-2); }
 .hg-card--tint .hg-badge { background: var(--surface); color: var(--ink); }
 .hg-card__title { font: 600 18px/26px var(--font-sans); margin: 0; }
+/* 조건 요약 판(InfoPlate): 회색 판 위 이름–값 두 열. 줄 사이 선 없음. 결론 문장 아래 조건, 완료 화면 요약 */
+.hg-kv { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: var(--space-5); background: var(--plate); border-radius: var(--radius-xl); }
+.hg-kv__title { margin: 0 0 var(--space-1); font: 600 14px/20px var(--font-sans); color: var(--slate); }
+.hg-kv__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-3); margin: 0; }
+.hg-kv__row dt { font: 400 15px/22px var(--font-sans); color: var(--slate); }
+.hg-kv__row dd { margin: 0; font: 600 15px/22px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+.hg-kv__row dd .hg-btn--link { margin-left: var(--space-2); font-size: 14px; }
+.hg-kv__row.is-sub dt { padding-left: var(--space-3); font-size: 14px; }
+.hg-kv__row.is-sub dd { font-weight: 400; font-size: 14px; color: var(--ink-2); }
+.hg-kv__note { margin: 0; font: 400 13px/18px var(--font-sans); color: var(--stone); }
+/* 완료 표시(DoneMark): 완료 화면 제목 아래 큰 체크. 옅은 분홍 원 + 분홍 체크(결과 카드 체크와 같은 짝) */
+.hg-donemark .hg-ico { width: 36px; height: 36px; }
+.hg-q > .hg-donemark { margin: var(--space-4) auto; align-self: center; }
+.hg-donemark { display: grid; place-items: center; width: 72px; height: 72px; margin: var(--space-4) auto; border-radius: var(--radius-full); background: var(--brand-soft); color: var(--brand); }
+@media (prefers-reduced-motion: no-preference) { .hg-donemark { animation: hg-pop .32s ease-out both; } }
+@keyframes hg-pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 /* 결과 요약 카드(ResultCard): 흰 카드 안 큰 금액 하나 + 체크 목록. 체크 동그라미만 브랜드 색(옅은 분홍 + 분홍 체크) */
 .hg-resultcard { gap: var(--space-3); }
 .hg-resultcard__value { margin: 0; font: 700 36px/44px var(--font-sans); letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }
@@ -843,6 +859,20 @@
 .hg-consent__row--all .hg-consent__label { font: 600 16px/24px var(--font-sans); }
 .hg-consent__label b { font-weight: 600; color: var(--slate); }
 .hg-consent__label b.is-optional { font-weight: 400; color: var(--stone); }
+/* 약관 묶음(카카오뱅크식): 동그라미 체크, ‘모두 동의’는 회색 판, 필수 묶음은 펼쳐서 하위 약관(작은 체크 표시) */
+.hg-consent .hg-checkbox { width: 24px; height: 24px; border-radius: var(--radius-full); }
+.hg-consent__row--all { margin: var(--space-3) calc(var(--space-4) * -1 + var(--space-2)) var(--space-2); padding: 0 var(--space-3); border-bottom: 0; border-radius: var(--radius-lg); background: var(--plate); }
+.hg-consent__group { display: flex; flex-direction: column; }
+.hg-consent__fold { display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--slate); border-radius: var(--radius-md); cursor: pointer; }
+.hg-consent__fold[aria-expanded="true"] .hg-ico { transform: rotate(180deg); }
+.hg-consent__fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-consent__sub { padding-left: var(--space-8); }
+.hg-consent__sub .hg-consent__row { min-height: 40px; }
+.hg-consent__sub .hg-checkbox { width: 18px; height: 18px; border: 0; background: none; }
+.hg-consent__sub .hg-checkbox::after { content: ""; width: 9px; height: 5px; border-left: 2px solid var(--border-control); border-bottom: 2px solid var(--border-control); transform: rotate(-45deg) translate(1px, -1px); }
+.hg-consent__sub .hg-checkbox.is-on { background: none; }
+.hg-consent__sub .hg-checkbox.is-on::after { border-color: var(--ink); }
+.hg-consent__sub .hg-consent__label { font-size: 13px; color: var(--slate); }
 .hg-consent__row .hg-btn--link { font-size: 13px; }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-consent-card > * { margin: 0; }
@@ -1156,9 +1186,8 @@ a.hg-btn { text-decoration: none; }
 .hg-sum__kpi > span { display: flex; align-items: center; gap: 6px; font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-sum__kpi > span i { width: 8px; height: 8px; border-radius: var(--radius-full); }
 .hg-sum__kpi b { font: 600 18px/26px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.hg-sum__rows { display: flex; flex-direction: column; }
-.hg-sum__row { display: grid; grid-template-columns: 1fr auto 104px; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--hairline-soft); font: 400 15px/22px var(--font-sans); color: var(--ink-2); }
-.hg-sum__row:last-child { border-bottom: 0; }
+.hg-sum__rows { display: flex; flex-direction: column; padding: var(--space-2) var(--space-5); background: var(--plate); border-radius: var(--radius-xl); }  /* 조건 요약 판과 같은 회색 판, 줄 사이 선 없음 */
+.hg-sum__row { display: grid; grid-template-columns: 1fr auto 104px; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; font: 400 15px/22px var(--font-sans); color: var(--ink-2); }
 .hg-sum__row b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
 .hg-sum__row em { white-space: nowrap; font-style: normal; font: 400 13px/18px var(--font-sans); color: var(--stone); text-align: right; font-variant-numeric: tabular-nums; }
 .hg-sum__row.is-sub { padding-left: var(--space-4); font-size: 14px; color: var(--slate); }
