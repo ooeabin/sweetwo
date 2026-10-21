@@ -43,11 +43,14 @@ export const copy = {
   nameRequired: '이름을 넣어 주세요',
 
   // P-04
-  profileTitle: '출생연도와 일하는 방식이 맞나요?',
-  profileAsk: '출생연도와 일하는 방식을 알려주세요', // [확인 필요] 비어 있을 때
+  profileTitle: '생일과 일하는 방식이 맞나요?', // [확인 필요] 생년월일로 바꾸며 고침
+  profileAsk: '생일과 일하는 방식을 알려주세요', // [확인 필요] 비어 있을 때
   profileLine: (year: number, work: string) => `${year}년생 ${work}`,
+  profileLineFull: (y: number, m: number, d: number, work: string) =>
+    `${y}년 ${m}월 ${d}일생 ${work}`,
   fix: '고칠게요',
-  birthYearLabel: '출생연도', // [확인 필요]
+  birthYearLabel: '생일', // [확인 필요]
+  age: (n: number) => `만 ${n}세`,
   workLabel: '일하는 방식', // [확인 필요]
   works: {
     regular: '정규직',

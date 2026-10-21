@@ -17,6 +17,8 @@ export interface MemDb {
   deposits: Record<string, unknown>[];
   /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
   partner: Record<string, unknown> | null;
+  /** 배우자 생일(partner_birthday) */
+  partnerBirthday?: { month: number; day: number } | null;
   consents: Record<string, unknown>[];
   shares: Record<string, unknown> | null;
   /** 제안(08 6장) */
@@ -1157,7 +1159,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.invites.unshift(row);
         return json(route, [row]);
       }
-      if (fn === 'delete_minor_account')
+      if (fn === 'partner_birthday') return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
+      if (fn === 'delete_minor_account' || fn === 'delete_underage_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
     }

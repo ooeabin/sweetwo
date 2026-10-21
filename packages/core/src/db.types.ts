@@ -321,6 +321,8 @@ export type Database = {
           analytics_off: boolean
           avatar_path: string | null
           avatar_updated_at: string | null
+          birth_day: number | null
+          birth_month: number | null
           birth_year: number | null
           card_main: boolean | null
           created_at: string
@@ -357,6 +359,8 @@ export type Database = {
           analytics_off?: boolean
           avatar_path?: string | null
           avatar_updated_at?: string | null
+          birth_day?: number | null
+          birth_month?: number | null
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
@@ -392,6 +396,8 @@ export type Database = {
           analytics_off?: boolean
           avatar_path?: string | null
           avatar_updated_at?: string | null
+          birth_day?: number | null
+          birth_month?: number | null
           birth_year?: number | null
           card_main?: boolean | null
           created_at?: string
@@ -3663,6 +3669,8 @@ export type Database = {
           analytics_off: boolean
           avatar_path: string | null
           avatar_updated_at: string | null
+          birth_day: number | null
+          birth_month: number | null
           birth_year: number | null
           card_main: boolean | null
           created_at: string
@@ -3737,6 +3745,10 @@ export type Database = {
       }
       delete_minor_account: {
         Args: { p_birth_year: number }
+        Returns: undefined
+      }
+      delete_underage_account: {
+        Args: { p_birth_date: string }
         Returns: undefined
       }
       end_access: { Args: { p_id: string }; Returns: undefined }
@@ -3893,6 +3905,13 @@ export type Database = {
           principal_total: number
           side: Database["public"]["Enums"]["asset_side"]
           total: number
+        }[]
+      }
+      partner_birthday: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          day: number
+          month: number
         }[]
       }
       partner_profile: {

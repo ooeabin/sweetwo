@@ -280,7 +280,8 @@ export function MonthChips({
   );
 }
 
-/** 날짜 칩 1~31 + ‘말일’(월급날 O-32). 말일이면 onChange('last') */
+/** 월급날(O-32, P-05d, F-05): 회색 판 위 1~31 7칸 숫자 판 + 아래 ‘말일’. 하나만 고름(radiogroup).
+ * 화살표 ←→ 하루, ↑↓ 일주일, Home/End 처음/끝(말일). 고른 칸만 탭 순서에 들어감 */
 export function DayChips({
   value,
   onChange,
@@ -293,21 +294,60 @@ export function DayChips({
   lastLabel?: string;
 }) {
   const days: (number | 'last')[] = [...Array.from({ length: 31 }, (_, i) => i + 1), 'last'];
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const at = value === null ? -1 : days.indexOf(value);
+  const move = (from: number, step: number) => {
+    const to = Math.min(Math.max(from + step, 0), days.length - 1);
+    const d = days[to];
+    if (d === undefined) return;
+    onChange(d);
+    refs.current[to]?.focus();
+  };
+  const onKey = (e: React.KeyboardEvent, i: number) => {
+    const step =
+      e.key === 'ArrowRight'
+        ? 1
+        : e.key === 'ArrowLeft'
+          ? -1
+          : e.key === 'ArrowDown'
+            ? i === 31
+              ? 0
+              : Math.min(7, 31 - i)
+            : e.key === 'ArrowUp'
+              ? i === 31
+                ? -4
+                : -7
+              : e.key === 'Home'
+                ? -i
+                : e.key === 'End'
+                  ? days.length - 1 - i
+                  : null;
+    if (step === null) return;
+    e.preventDefault();
+    move(i, step);
+  };
+  const cell = (d: number | 'last', i: number) => (
+    <button
+      key={d}
+      ref={(el) => {
+        refs.current[i] = el;
+      }}
+      type="button"
+      role="radio"
+      aria-checked={d === value}
+      aria-label={d === 'last' ? lastLabel : `${d}일`}
+      tabIndex={d === value || (at === -1 && i === 0) ? 0 : -1}
+      className={cx(d === 'last' ? 'hg-daygrid__last' : 'hg-daygrid__day', d === value && 'is-on')}
+      onClick={() => onChange(d)}
+      onKeyDown={(e) => onKey(e, i)}
+    >
+      {d === 'last' ? lastLabel : d}
+    </button>
+  );
   return (
-    <div className="hg-quick" role="radiogroup" aria-label={label}>
-      {days.map((d) => (
-        <Chip
-          key={d}
-          small
-          role="radio"
-          aria-pressed={undefined} // radio는 aria-checked만
-          aria-checked={d === value}
-          selected={d === value}
-          onClick={() => onChange(d)}
-        >
-          {d === 'last' ? lastLabel : `${d}일`}
-        </Chip>
-      ))}
+    <div className="hg-daygrid" role="radiogroup" aria-label={label}>
+      <div className="hg-daygrid__days">{days.slice(0, 31).map((d, i) => cell(d, i))}</div>
+      {cell('last', 31)}
     </div>
   );
 }

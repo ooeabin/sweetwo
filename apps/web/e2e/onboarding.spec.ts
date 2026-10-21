@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { setWheel } from './wheel';
 import { mockOnboarding } from './onboarding-mock';
 
 // 온보딩 처음부터 끝까지(docs/spec/16-onboarding-1.md, 17-onboarding-2.md). 찬우가 처음 시작하고 예빈은 아직 미합류.
@@ -46,8 +47,11 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByLabel('월', { exact: true }).fill('05');
   await page.getByLabel('일', { exact: true }).fill('17');
   await next(page);
-  await heading(page, '찬우님은 몇 년생이세요?');
-  await page.getByLabel('찬우님은 몇 년생이세요?').fill('1994'); // 4자리면 자동 다음
+  await heading(page, '찬우님 생일은 언제예요?');
+  await setWheel(page, '찬우님 생일은 언제예요?', 1994, 2, 18);
+  await expect(page.getByText(/^만 3\d세$/)).toBeVisible();
+  await axe(page);
+  await next(page);
   await heading(page, '지금 어떤 집에 사세요?');
   await page.getByRole('radio', { name: '전세', exact: true }).click();
   await heading(page, '찬우님은 어떻게 일하고 계세요?');
@@ -322,7 +326,8 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   await page.getByLabel('년', { exact: true }).fill(String(new Date().getFullYear() + 1));
   await page.getByRole('radio', { name: '5월' }).click();
   await next(page);
-  await page.getByLabel('찬우님은 몇 년생이세요?').fill('1995');
+  await setWheel(page, '찬우님 생일은 언제예요?', 1995, 7, 1);
+  await next(page);
   await page.getByRole('radio', { name: '부모님 집' }).click();
   await page.getByRole('radio', { name: '계약직' }).click();
   await page.getByRole('radio', { name: '아직 모르겠어요' }).click();
@@ -421,7 +426,7 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   expect(db.fixed).toEqual([]);
 });
 
-test('만 18세 미만이면 계정을 지우고 시작 화면으로', async ({ page }) => {
+test('만 18세 미만(생일 전)이면 계정을 지우고 시작 화면으로', async ({ page }) => {
   const db = await mockOnboarding(page);
   await part0(page);
   await page.getByRole('radio', { name: '했어요' }).click();
@@ -429,9 +434,11 @@ test('만 18세 미만이면 계정을 지우고 시작 화면으로', async ({ 
   await page.getByLabel('월', { exact: true }).fill('1');
   await page.getByLabel('일', { exact: true }).fill('10');
   await next(page);
-  await page.getByLabel('찬우님은 몇 년생이세요?').fill(String(new Date().getFullYear() - 10));
+  // 범위 끝 해(올해 − 18)의 12월 31일생은 아직 만 18세 전
+  await setWheel(page, '찬우님 생일은 언제예요?', new Date().getFullYear() - 18, 12, 31);
+  await next(page);
   await expect(page.getByText('만 18세부터 쓸 수 있어요')).toBeVisible();
-  expect(db.rpc).toContain('delete_minor_account');
+  expect(db.rpc).toContain('delete_underage_account');
 });
 
 test('O-32: 예빈이 먼저 합류했으면 O-33 없이 예빈이 답한 수입으로', async ({ page }) => {
