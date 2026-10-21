@@ -110,8 +110,8 @@ test('찬우가 온보딩 중: 내 정보까지만 답하고 P-11 대기 → 이
   await page.getByRole('button', { name: '합류하기' }).click();
   await heading(page, '‘예빈’이 맞나요?');
   await page.getByRole('button', { name: '맞아요' }).click();
-  await heading(page, '출생연도와 일하는 방식을 알려주세요');
-  await page.getByLabel('출생연도').fill('1996');
+  await heading(page, '생일과 일하는 방식을 알려주세요');
+  await setWheel(page, '생일', 1996, 10, 3);
   await page.getByRole('radio', { name: '정규직' }).click();
   await next(page);
   await heading(page, '한 달에 얼마 받으세요?');
