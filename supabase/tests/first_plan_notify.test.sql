@@ -37,7 +37,8 @@ reset role;
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 update public.app_user set monthly_income = 3500000, payday = 25, allowance = 500000;
-select public.start_first_plan('2026-10-01', '2026-10-25', '2026-11-24', null, false, false, '{}', '[]');
+select public.start_first_plan(date_trunc('month', current_date - 60)::date, current_date - 60, current_date - 31,
+  null, false, false, '{}', '[]');
 select is((select count(*)::int from public.notification where kind = 'plan_ready'), 0, '만든 사람에게는 없음');
 reset role;
 
@@ -53,7 +54,8 @@ reset role;
 -- 다음 사이클 플랜은 첫 플랜이 아니라 이 알림 없음
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.create_cycle_plan('2026-11-01', '2026-11-25', '2026-12-24', false, '{}', '[]');
+-- 다음 사이클은 오늘 이전에 시작해야 만들 수 있음
+select public.create_cycle_plan(date_trunc('month', current_date - 30)::date, current_date - 30, current_date, false, '{}', '[]');
 reset role;
 select is((select count(*)::int from public.notification where dedupe like 'first_plan:%'), 1, '첫 플랜에만 한 번');
 
