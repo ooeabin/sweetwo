@@ -1,5 +1,5 @@
 import type { PartnerActivity } from '@sweetwo/api';
-import { maskMoney, notiTime } from '@sweetwo/core';
+import { maskMoney, notiTime, readWon } from '@sweetwo/core';
 import { ListRow, SectionHeader } from '@sweetwo/ui';
 import { useMask } from '../../shared/mask';
 import { copy } from './copy';
@@ -18,6 +18,8 @@ export function activityText(a: PartnerActivity, partner: string): string {
     const line = a.name ? LINES[a.name] : undefined;
     return line ? copy.activitySplit(partner, line) : copy.activitySplitAny(partner);
   }
+  if (a.kind === 'emergency_in' || a.kind === 'emergency_out')
+    return copy.activityEmergency(partner, a.kind === 'emergency_in', readWon(Number(a.name ?? 0)));
   if (a.name === null) return copy.activitySum;
   return a.kind === 'asset_added'
     ? copy.activityAdded(partner, a.name)

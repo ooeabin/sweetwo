@@ -55,42 +55,43 @@ export function G01GoalList() {
       />
     );
     const half = Math.ceil(v.open.length / 2);
-    columns = !v.lines.length
-      ? [<EmptyState key="e" title={copy.empty} />]
-      : [
-          <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-            <section className="hg-card" aria-label={copy.summary(m(v.monthly))}>
-              <p style={{ margin: 0 }}>
-                <b>{copy.summary(m(v.monthly))}</b>
-              </p>
-              <p className="hg-card__meta">{copy.saveable(m(v.saveable))}</p>
-            </section>
-            {v.shortfall > 0 && (
-              <div className="hg-banner hg-banner--info">
-                <span>{copy.short(m(v.shortfall))}</span>
-                <Button variant="secondary" size="sm" onClick={() => nav('/goals/adjust')}>
-                  {copy.adjust}
-                </Button>
-              </div>
-            )}
-            {v.open.slice(0, half).map(card)}
-          </div>,
-          <div key="r" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-            {v.open.slice(half).map(card)}
-            {v.folded.length > 0 && (
-              <button
-                type="button"
-                className="hg-btn hg-btn--link"
-                style={{ alignSelf: 'flex-start' }}
-                aria-expanded={unfold}
-                onClick={() => setUnfold((x) => !x)}
-              >
-                {copy.folded(v.folded.length)}
-              </button>
-            )}
-            {unfold && v.folded.map(card)}
-          </div>,
-        ];
+    columns =
+      !v.open.length && !v.folded.length
+        ? [<EmptyState key="e" title={copy.empty} />]
+        : [
+            <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+              <section className="hg-card" aria-label={copy.summary(m(v.monthly))}>
+                <p style={{ margin: 0 }}>
+                  <b>{copy.summary(m(v.monthly))}</b>
+                </p>
+                <p className="hg-card__meta">{copy.saveable(m(v.saveable))}</p>
+              </section>
+              {v.shortfall > 0 && (
+                <div className="hg-banner hg-banner--info">
+                  <span>{copy.short(m(v.shortfall))}</span>
+                  <Button variant="secondary" size="sm" onClick={() => nav('/goals/adjust')}>
+                    {copy.adjust}
+                  </Button>
+                </div>
+              )}
+              {v.open.slice(0, half).map(card)}
+            </div>,
+            <div key="r" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+              {v.open.slice(half).map(card)}
+              {v.folded.length > 0 && (
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link"
+                  style={{ alignSelf: 'flex-start' }}
+                  aria-expanded={unfold}
+                  onClick={() => setUnfold((x) => !x)}
+                >
+                  {copy.folded(v.folded.length)}
+                </button>
+              )}
+              {unfold && v.folded.map(card)}
+            </div>,
+          ];
   }
 
   return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={columns} />;

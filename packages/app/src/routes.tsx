@@ -25,6 +25,7 @@ import {
   F07cReplanCompare,
   F05Money,
   F06Diagnosis,
+  F09EmergencyMove,
   O53InvestPrinciple,
   O34Bonus,
   O35BonusList,
@@ -328,6 +329,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-01 우리 자산 한눈에
+      {
+        path: '/assets/emergency/:kind',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F09EmergencyMove />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-09 비상금 넣기·꺼내기
       {
         path: '/assets/items',
         element: (

@@ -62,6 +62,7 @@ import { H04Todos } from '../h-04-todos';
 import { useNoticeBand } from '../notice-band';
 import { openReceived, useProposals } from '../../proposals';
 import { MainFrame } from '../frame';
+import { EmergencyCard } from '../../assets';
 import { closePath, spendPath } from '../paths';
 import { goalExtra, monthView, type MonthView } from '../view';
 
@@ -279,6 +280,7 @@ export function H01ThisMonth() {
             {netWorth && <H06NetWorth n={netWorth} onOpen={() => nav('/assets')} />}
           </div>,
           <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
+            <EmergencyCard compact />
             <Goals v={v} m={m} />
             <Upcomings v={v} />
             {connected && activity.data && (
@@ -482,16 +484,18 @@ function PlanCard({
 
 /** 목표(H-05) 상위 3개 */
 function Goals({ v, m }: { v: MonthView; m: (n: number) => string }) {
-  if (!v.goals.length) return null;
+  // 비상금은 목표가 아님(비상금 카드에서)
+  const goals = v.goals.filter((g) => g.template !== 'emergency');
+  if (!goals.length) return null;
   return (
     <section className="hg-stack">
       <SectionHeader title={copy.goals} />
       <div className="hg-card">
-        {v.goals.map((g) => (
+        {goals.map((g) => (
           <Meter
             key={g.id}
             name={g.name}
-            tone={g.template === 'emergency' ? 'safety' : 'goal'}
+            tone="goal"
             pct={g.pct}
             sub={g.target ? copy.goalAmount(m(g.held), m(g.target)) : copy.noGoalAmount}
             badge={g.delayed ? <Badge kind="warn">{copy.delayed}</Badge> : undefined}

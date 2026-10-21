@@ -1,7 +1,14 @@
-import { fetchGoalAssetSums, fetchGoalRecords, fetchRecentCloses, qk } from '@sweetwo/api';
+import {
+  fetchEmergencyMoves,
+  fetchGoalAssetSums,
+  fetchGoalRecords,
+  fetchRecentCloses,
+  qk,
+} from '@sweetwo/api';
 import {
   diagnose,
   diagnosisSummary,
+  emergencyBalance,
   emergencyBase,
   emergencyMonths,
   goalHeld,
@@ -19,7 +26,9 @@ export function useDiagnosis() {
   const close = useQuery({ queryKey: qk.recentCloses, queryFn: () => fetchRecentCloses(2) });
   const linked = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
   const records = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
-  const loading = d.loading || close.isLoading || linked.isLoading || records.isLoading;
+  const moves = useQuery({ queryKey: qk.emergencyMoves, queryFn: fetchEmergencyMoves });
+  const loading =
+    d.loading || close.isLoading || linked.isLoading || records.isLoading || moves.isLoading;
   if (loading || !d.me || !d.space) return { loading, d, result: null };
 
   const sp = d.space;
@@ -41,7 +50,9 @@ export function useDiagnosis() {
   const used = eg
     ? (records.data?.uses ?? []).filter((x) => x.goalId === eg.id).reduce((t, x) => t + x.amount, 0)
     : 0;
-  const balance = eg ? goalHeld(eg.other_held, linkedTotal + deposited - used) : null;
+  // 넣기, 꺼내기(F-09)까지 더한 잔액. 비상금 목표가 없어도(예비부부 각자 관리 등) 넣기 기록이 있으면 그만큼
+  const held = eg ? goalHeld(eg.other_held, linkedTotal + deposited - used) : 0;
+  const balance = eg || moves.data?.length ? emergencyBalance(held, moves.data ?? []) : null;
   const last = close.data?.[0];
   const real =
     last && last.income !== null
@@ -69,6 +80,7 @@ export function useDiagnosis() {
       summary: diagnosisSummary(list),
       months: emergencyMonths(balance, monthly),
       baseMonths: base.months,
+      emergency: { balance: balance ?? 0, base: base.amount, moves: moves.data ?? [] },
       emergencyGoalId: eg?.id ?? null,
       noLoan: (sp.loan_repayment ?? 0) === 0,
       estimated,

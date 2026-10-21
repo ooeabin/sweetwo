@@ -44,7 +44,7 @@ export function F06Diagnosis() {
   const go: Partial<Record<Indicator['key'], { label: string; to: string | null }>> = {
     emergency: {
       label: copy.diagGoEmergency,
-      to: r.emergencyGoalId ? `/goals/${r.emergencyGoalId}` : null,
+      to: '/assets', // 비상금 카드(목표가 아님)
     },
     loanBurden: { label: copy.diagGoDebt, to: '/assets/items?side=debt' },
     fixedRatio: { label: copy.diagGoMoney, to: '/assets/money' },

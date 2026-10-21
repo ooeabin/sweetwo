@@ -133,11 +133,8 @@ test('목표 목록 → 상세: 진행, 월 배분, 접힌 목록, 월별 기록
   await expect(page.getByText('매달 목표에 335만 원씩 모으고 있어요')).toBeVisible();
   await expect(page.getByText('저축 가능 335만 원')).toBeVisible();
 
-  // 비상금: 보유 100 + 넣은 돈 35 = 135 / 555
-  const emergency = page.getByRole('button', { name: /비상금/ });
-  await expect(emergency).toContainText('135만 / 555만 원');
-  await expect(emergency).toContainText('진행 중');
-  await expect(emergency.getByRole('img', { name: '담당 찬우, 예빈' })).toBeVisible();
+  // 비상금은 목표 목록에 없음(우리 자산, 이번 달 비상금 카드)
+  await expect(page.getByRole('button', { name: /비상금/ })).toHaveCount(0);
   const home = page.getByRole('button', { name: /내 집 마련/ });
   await expect(home).toContainText('250만 / 15,000만 원');
   await expect(home.getByRole('img', { name: '담당 찬우' })).toBeVisible();

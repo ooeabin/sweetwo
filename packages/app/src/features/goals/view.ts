@@ -162,19 +162,25 @@ export function goalsView(i: {
     };
   });
 
-  const open = lines.filter((l) => !FOLDED.includes(l.status));
+  // 비상금은 목표 목록에서 빠짐(우리 자산, 이번 달 비상금 카드). 배분 합계(monthly)에는 그대로
+  const open = lines.filter((l) => !FOLDED.includes(l.status) && l.template !== 'emergency');
+  const emergencyAlloc = lines
+    .filter((l) => l.template === 'emergency' && !FOLDED.includes(l.status))
+    .reduce((t, l) => t + l.alloc, 0);
   return {
     couple: c,
     alloc,
     sum,
     saveable: Math.max(sum.saveable, 0),
     /** 진행 중·지연 목표의 월 배분 합 */
-    monthly: open
-      .filter((l) => l.status === 'active' || l.status === 'delayed' || l.status === null)
-      .reduce((t, l) => t + l.alloc, 0),
+    monthly:
+      emergencyAlloc +
+      open
+        .filter((l) => l.status === 'active' || l.status === 'delayed' || l.status === null)
+        .reduce((t, l) => t + l.alloc, 0),
     shortfall: alloc.short ? alloc.shortfall : 0,
     open,
-    folded: lines.filter((l) => FOLDED.includes(l.status)),
+    folded: lines.filter((l) => FOLDED.includes(l.status) && l.template !== 'emergency'),
     lines,
   };
 }
