@@ -434,6 +434,49 @@ test('만 18세 미만이면 계정을 지우고 시작 화면으로', async ({ 
   expect(db.rpc).toContain('delete_minor_account');
 });
 
+test('O-32: 예빈이 먼저 합류했으면 O-33 없이 예빈이 답한 수입으로', async ({ page }) => {
+  const db = await mockOnboarding(page);
+  Object.assign(db.me, {
+    nickname: '찬우',
+    side: 'groom',
+    birth_year: 1994,
+    employment: 'regular',
+    monthly_income: 3_500_000,
+    payday: null,
+    onboarding_step: 'O-32',
+    space_id: 'space-1',
+  });
+  db.space = {
+    id: 'space-1',
+    created_by: db.me.id,
+    couple_state: 'connected',
+    partner_nickname: '예빈',
+    marriage_status: 'married',
+    partner_income: null,
+    partner_income_estimated: false,
+    partner_income_unknown: false,
+    fixed_total: null,
+  };
+  db.partner = {
+    id: 'joiner',
+    nickname: '예빈',
+    side: 'bride',
+    employment: 'regular',
+    monthly_income: 2_700_000,
+    income_variable: false,
+    payday: 10,
+    payday_last: false,
+    allowance: 500_000,
+    other_income: 0,
+  };
+  await page.goto('/onboarding/o-32');
+  await heading(page, '월급날은 며칠이에요?');
+  await page.getByRole('radio', { name: '25일' }).click();
+  await next(page);
+  await heading(page, '매달 꼭 나가는 돈을 골라주세요');
+  expect(db.space).toMatchObject({ partner_income: null });
+});
+
 test('O-33 배우자 수입: 정확히 알면 금액으로, 추정 없이 저장', async ({ page }) => {
   const db = await mockOnboarding(page);
   Object.assign(db.me, {

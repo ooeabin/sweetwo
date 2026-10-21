@@ -71,6 +71,80 @@ test('O-01 ‘초대받았어요’ → P-01 코드 입력 → 초대 확인 →
   await heading(page, '찬우님이 초대했어요');
 });
 
+test('찬우가 온보딩 중: 내 정보까지만 답하고 P-11 대기 → 이번 달 대기', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  // 찬우는 O-07에서 초대만 보냄: 호칭, 신랑만 있고 수입, 지출, 분담, 목표, 플랜 없음
+  db.space = {
+    id: 'space-1',
+    created_by: 'starter',
+    couple_state: 'not_joined',
+    partner_nickname: '예빈',
+    marriage_status: null,
+    partner_income: null,
+    partner_income_estimated: false,
+    partner_income_unknown: false,
+    fixed_total: null,
+    living_budget: null,
+    loan_repayment: null,
+    split_mode: null,
+    split_ratio: null,
+    split_deferred: false,
+    account_mode: null,
+    base_day: null,
+    base_day_last: false,
+  };
+  db.partner = {
+    id: 'starter',
+    nickname: '찬우',
+    side: 'groom',
+    employment: null,
+    monthly_income: null,
+    income_variable: false,
+    payday: null,
+    payday_last: false,
+    allowance: null,
+  };
+  await page.goto('/i/K7M2QX');
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await heading(page, '‘예빈’이 맞나요?');
+  await page.getByRole('button', { name: '맞아요' }).click();
+  await heading(page, '출생연도와 일하는 방식을 알려주세요');
+  await page.getByLabel('출생연도').fill('1996');
+  await page.getByRole('radio', { name: '정규직' }).click();
+  await next(page);
+  await heading(page, '한 달에 얼마 받으세요?');
+  await page.getByLabel('한 달에 얼마 받으세요?').fill('2700000');
+  await next(page);
+  await heading(page, '월급날은 며칠이에요?');
+  await page.getByRole('radio', { name: '10일' }).click();
+  await next(page);
+  await heading(page, '더 있는 돈이나 대출이 있나요?');
+  await page.getByRole('radio', { name: '없어요' }).click();
+  // 찬우 용돈이 없으면 빈 칸, 제안 없이 내 용돈으로
+  await heading(page, '예빈님 용돈은 한 달에 얼마로 할까요?');
+  await page.getByLabel('예빈님 용돈은 한 달에 얼마로 할까요?').fill('600000');
+  await expect(page.getByText(/반대 없으면/)).toHaveCount(0);
+  await next(page);
+  // P-08 분담, P-10 바뀐 것은 없음
+  await heading(page, '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?');
+  await page.getByRole('radio', { name: /조금은 괜찮아요/ }).click();
+  await heading(page, '찬우님 공간에 합류했어요');
+  await expect(page.getByText('찬우님이 플랜을 마치면 같이 볼 수 있어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '이번 달로' }).click();
+  // 이번 달 대기: 0원 숫자 대신 안내
+  await heading(page, '찬우님이 플랜을 만들고 있어요');
+  await expect(page.getByText('아직 이번 달 플랜이 없어요')).toBeVisible();
+  await expect(page.getByText('찬우님이 플랜을 마치면 알려 드릴게요')).toBeVisible();
+  await expect(page.getByText(/생활비가 .*남았어요/)).toHaveCount(0);
+  await axe(page);
+  expect(db.space).toMatchObject({ couple_state: 'connected' });
+  expect(db.me).toMatchObject({ monthly_income: 2_700_000, payday: 10, allowance: 600_000 });
+  expect(db.proposals).toEqual([]);
+  expect(db.plans).toEqual([]);
+});
+
 test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 제안 → P-08 다르게 → P-09 → P-10 → P-11 → O-63~65 → 이번 달', async ({
   page,
 }) => {

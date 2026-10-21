@@ -8,6 +8,8 @@ export const AUTO_GOALS = ['emergency', 'wedding'];
 export interface FlowState {
   me: Me | null | undefined;
   space: Space | null | undefined;
+  /** 합류한 배우자(합류 전 null) */
+  partner?: { monthly_income: number | null; allowance: number | null } | null;
   goals: Goal[] | undefined;
   inviteNow: 'now' | 'later' | null;
 }
@@ -18,6 +20,20 @@ export const isSeparate = (s: FlowState) => isEngaged(s) && s.space?.prep_money_
 export const pickedGoals = (goals: Goal[] | undefined) =>
   (goals ?? []).filter((g) => !AUTO_GOALS.includes(g.template));
 export const topGoal = (goals: Goal[] | undefined) => pickedGoals(goals)[0];
+
+/** 시작한 사람이 온보딩 중에 배우자가 먼저 합류했으면 배우자 수입은 추정값 대신 배우자가 직접 답한 값(18 P-11 대기) */
+export function joinedSpace(
+  sp: Space | null | undefined,
+  partner: FlowState['partner'],
+): Space | null | undefined {
+  if (!sp || sp.couple_state !== 'connected' || !partner) return sp;
+  return {
+    ...sp,
+    partner_income: partner.monthly_income,
+    partner_income_estimated: false,
+    partner_income_unknown: partner.monthly_income === null,
+  };
+}
 
 /** 파트 0~5 화면 목록(파트 4는 첫 주 할 일이라 없음) */
 export function screens(s: FlowState): string[] {
@@ -33,7 +49,8 @@ export function screens(s: FlowState): string[] {
     if (t?.asksDeadline((top.details ?? {}) as Record<string, never>)) list.push('o-24');
   }
   // 파트 3 소득·지출(docs/spec/17-onboarding-2.md 흐름 요약). 각자 관리 예비부부는 O-36~39, O-51 건너뜀.
-  list.push('o-31', 'o-32', 'o-33');
+  list.push('o-31', 'o-32');
+  if (!partnerJoined(s)) list.push('o-33'); // 배우자가 이미 합류했으면 배우자 수입은 배우자가 답함
   if (!isSeparate(s)) {
     list.push('o-36');
     if (s.space?.fixed_total !== 0) list.push('o-36t'); // ‘해당 없어요’면 합계 질문 없음
@@ -76,6 +93,8 @@ export const planInput = (s: FlowState) => ({
   partnerIncome: s.space?.partner_income ?? null,
   partnerUnknown: s.space?.partner_income_unknown ?? false,
   myAllowance: s.me?.allowance ?? null,
+  // 합류 전에는 배우자 용돈 = 내 용돈, 합류했으면 배우자가 정한 용돈
+  partnerAllowance: partnerJoined(s) ? (s.partner?.allowance ?? null) : undefined,
   fixedTotal: s.space?.fixed_total ?? null,
   loanRepayment: s.space?.loan_repayment ?? null,
   livingBudget: s.space?.living_budget ?? null,

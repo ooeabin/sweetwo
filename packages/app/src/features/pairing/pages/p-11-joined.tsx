@@ -32,6 +32,7 @@ export function P11Joined() {
       try {
         await finishJoin();
         const sp = d.space;
+        // 첫 플랜 전(대기)이면 다시 나눌 줄이 없음
         const c = d.couple;
         if (d.plan && sp && c) {
           // 안 나눈 통장 줄마다 새 분담(금액은 그대로)
@@ -55,6 +56,16 @@ export function P11Joined() {
   }, [d.ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!d.ready || !d.space || !d.couple || !d.me) return null;
+  if (d.waiting)
+    return (
+      <QuestionLayout
+        steps={s.steps}
+        title={copy.waitTitle(d.couple.partnerName)}
+        help={copy.waitHelp(d.couple.partnerName)}
+        primary={{ label: copy.toMonth, disabled: !finished }}
+        onSubmit={() => nav('/', { replace: true })}
+      />
+    );
   const sp = d.space;
   const c = d.couple;
   const inputs = {
