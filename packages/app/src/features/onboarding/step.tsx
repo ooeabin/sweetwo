@@ -18,7 +18,7 @@ export function useStep(id: string) {
   const inviteNow = useOnboardingLocal((s) => s.inviteNow);
   const [saving, setSaving] = useState(false);
 
-  const partner = usePartner();
+  const partner = usePartner(space.data?.couple_state === 'connected');
   const state: FlowState = {
     me: me.data,
     space: joinedSpace(space.data, partner.data),
@@ -28,7 +28,6 @@ export function useStep(id: string) {
   };
   const ready = !me.isLoading && !space.isLoading && !goals.isLoading && !partner.isLoading;
   const list = screens(state);
-
 
   // 멈춘 화면 기록(이어하기). 화면마다 들어올 때 한 번만.
   const marked = useRef<string | null>(null);

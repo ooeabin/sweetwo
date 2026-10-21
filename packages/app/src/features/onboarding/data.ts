@@ -32,8 +32,9 @@ export function useSpace() {
   });
 }
 /** 합류한 배우자(합류 전 null). 시작한 사람이 온보딩 중에 배우자가 먼저 합류할 수 있음 */
-export function usePartner() {
-  return useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
+export function usePartner(joined: boolean) {
+  // 합류 전에는 부르지 않음(배우자 없음)
+  return useQuery({ queryKey: qk.partner, queryFn: fetchPartner, enabled: joined });
 }
 export function useGoals() {
   return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
