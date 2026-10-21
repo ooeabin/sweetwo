@@ -3,6 +3,8 @@ import { bands } from './bands';
 import {
   babyDeadline,
   isMinorBirthYear,
+  isUnderage,
+  manAge,
   monthlyNeed,
   orderableGoals,
   recommendedGoals,
@@ -132,6 +134,13 @@ describe('온보딩 분기', () => {
     expect(
       weddingGoal({ budget: 30_000_000, support: 20_000_000, saved: 15_000_000 }).surplus,
     ).toBe(5_000_000);
+  });
+  it('만 나이: 생일 전이면 한 살 적게(KST)', () => {
+    const d = new Date('2026-10-21T00:00:00+09:00');
+    expect(manAge({ y: 1996, m: 10, d: 21 }, d)).toBe(30);
+    expect(manAge({ y: 1996, m: 10, d: 22 }, d)).toBe(29);
+    expect(isUnderage({ y: 2008, m: 10, d: 21 }, d)).toBe(false);
+    expect(isUnderage({ y: 2008, m: 10, d: 22 }, d)).toBe(true);
   });
   it('만 18세 미만(2026년 기준 2008년생까지 가능)', () => {
     expect(isMinorBirthYear(2008, now)).toBe(false);

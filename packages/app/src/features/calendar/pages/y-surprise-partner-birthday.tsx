@@ -1,6 +1,6 @@
-import { insertCareDays, qk } from '@sweetwo/api';
+import { fetchPartnerBirthday, insertCareDays, qk } from '@sweetwo/api';
 import { QuestionLayout, Toggle } from '@sweetwo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
@@ -25,10 +25,22 @@ export function YSurprisePartnerBirthday() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const c = useCalendarData();
-  const [v, setV] = useState<MonthDay>({ month: null, day: null, lunar: false, leap: false });
+  // 배우자가 O-13, P-04에서 답한 생일(월, 일)이 있으면 미리 채움(양력). 음력으로 쇠면 바꾸면 됨
+  const known = useQuery({
+    queryKey: qk.partnerBirthday,
+    queryFn: fetchPartnerBirthday,
+    enabled: !!c.couple?.joined,
+  });
+  const [picked, setV] = useState<MonthDay | null>(null);
+  const v: MonthDay = picked ?? {
+    month: known.data?.month ?? null,
+    day: known.data?.day ?? null,
+    lunar: false,
+    leap: false,
+  };
   const [hide, setHide] = useState(true);
   const [saving, setSaving] = useState(false);
-  if (c.loading) return null;
+  if (c.loading || known.isLoading) return null;
   const partner = c.couple?.partnerName ?? '';
   if (!c.couple || c.couple.solo || !c.me) return <Navigate to="/calendar/list" replace />;
   const ok = v.month !== null && v.day !== null && !badMonthDay(v);
@@ -79,7 +91,7 @@ export function YSurprisePartnerBirthday() {
       primary={{ label: copy.save, disabled: !ok, loading: saving }}
       onSubmit={() => void save()}
     >
-      <MonthDayFields label={title} value={v} onChange={(p) => setV((x) => ({ ...x, ...p }))} />
+      <MonthDayFields label={title} value={v} onChange={(p) => setV({ ...v, ...p })} />
       <Toggle label={copy.hideFrom(partner)} checked={hide} onChange={setHide} />
     </QuestionLayout>
   );

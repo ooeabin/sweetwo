@@ -1,3 +1,4 @@
+import { todayKst } from '../date';
 import { ceilTo10k, type Won } from '../money';
 import type { BandKind, QuickKind } from './bands';
 import { addYears, monthsBetween, nextOccurrence, thisMonth, type YearMonth } from './month';
@@ -486,6 +487,23 @@ export function weddingGoal(o: { budget: Won; support: Won; saved: Won }) {
 /** O-13 만 18세 미만인지(KST 올해 기준) */
 export const isMinorBirthYear = (birthYear: number, now = new Date()) =>
   birthYear > Number(thisMonth(now).slice(0, 4)) - 18;
+
+/** 만 나이(KST 오늘 기준). 생일이 아직 안 지났으면 한 살 적게 */
+export function manAge(b: { y: number; m: number; d: number }, now = new Date()): number {
+  const [ty = 0, tm = 1, td = 1] = todayKst(now).split('-').map(Number);
+  return ty - b.y - (tm < b.m || (tm === b.m && td < b.d) ? 1 : 0);
+}
+/** 생년월일 휠 범위: 1950년 ~ (올해 − 18)년(O-13, P-04) */
+export const birthYearRange = (now = new Date()) => ({
+  min: 1950,
+  max: Number(todayKst(now).slice(0, 4)) - 18,
+});
+/** {y,m,d} → 'YYYY-MM-DD' */
+export const ymdText = (b: { y: number; m: number; d: number }) =>
+  `${b.y}-${String(b.m).padStart(2, '0')}-${String(b.d).padStart(2, '0')}`;
+/** 만 18세 미만(O-13, P-04 생년월일). 서버 delete_underage_account와 같은 기준 */
+export const isUnderage = (b: { y: number; m: number; d: number }, now = new Date()) =>
+  manAge(b, now) < 18;
 
 /** 첫 주 5일째(16 O-22~25) 남은 화면 하나 */
 export type RestGoalScreen =

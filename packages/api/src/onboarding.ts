@@ -10,6 +10,8 @@ export type Me = Pick<
   | 'nickname'
   | 'side'
   | 'birth_year'
+  | 'birth_month'
+  | 'birth_day'
   | 'employment'
   | 'space_id'
   | 'onboarding_step'
@@ -40,7 +42,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off',
+      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off',
     )
     .maybeSingle();
   fail(error);
@@ -53,6 +55,8 @@ export async function updateMe(
     | 'nickname'
     | 'side'
     | 'birth_year'
+    | 'birth_month'
+    | 'birth_day'
     | 'employment'
     | 'onboarding_step'
     | 'onboarding_done_at'
@@ -160,6 +164,19 @@ export async function createInvite(): Promise<{ code: string; expiresAt: string 
   const row = Array.isArray(data) ? data[0] : null;
   if (!row) throw new AuthCallError('unknown');
   return { code: row.code, expiresAt: row.expires_at };
+}
+
+/** O-13, P-04 만 18세 미만(생년월일 'YYYY-MM-DD'): 계정 즉시 삭제 */
+export async function deleteUnderageAccount(birthDate: string) {
+  const { error } = await supabase().rpc('delete_underage_account', { p_birth_date: birthDate });
+  fail(error);
+}
+
+/** 배우자 생일(월, 일). 없으면 null. 캘린더 서프라이즈 생일 미리 채움 */
+export async function fetchPartnerBirthday(): Promise<{ month: number; day: number } | null> {
+  const { data, error } = await supabase().rpc('partner_birthday');
+  fail(error);
+  return Array.isArray(data) ? (data[0] ?? null) : null;
 }
 
 /** O-13 만 18세 미만: 계정 즉시 삭제 */

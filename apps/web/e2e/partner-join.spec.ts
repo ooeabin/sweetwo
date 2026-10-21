@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mockOnboarding } from './onboarding-mock';
+import { setWheel } from './wheel';
 import { mockSupabase, SB } from './supabase-mock';
 
 // 배우자 합류(docs/spec/18-partner-join.md). 예빈이 찬우의 초대 링크로 합류한다.
@@ -277,8 +278,8 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 �
   await heading(page, '‘예빈’이 맞나요?');
   await page.getByRole('button', { name: '맞아요' }).click();
 
-  await heading(page, '출생연도와 일하는 방식을 알려주세요');
-  await page.getByLabel('출생연도').fill('1996');
+  await heading(page, '생일과 일하는 방식을 알려주세요');
+  await setWheel(page, '생일', 1996, 10, 3);
   await page.getByRole('radio', { name: '정규직' }).click();
   await axe(page);
   await next(page);
@@ -397,6 +398,8 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 �
     nickname: '예빈',
     side: 'bride',
     birth_year: 1996,
+    birth_month: 10,
+    birth_day: 3,
     employment: 'regular',
     monthly_income: 2_700_000,
     payday: 10,

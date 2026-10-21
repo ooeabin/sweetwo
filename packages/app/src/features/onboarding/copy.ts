@@ -62,7 +62,8 @@ export const copy = {
   futureOnly: '내일부터의 날짜를 넣어 주세요', // [확인 필요]
 
   // O-13
-  birthYear: (me: string) => `${me}님은 몇 년생이세요?`,
+  birthYear: (me: string) => `${me}님 생일은 언제예요?`, // [확인 필요] 생년월일 휠로 바꾸며 새로 씀
+  age: (n: number) => `만 ${n}세`,
   from1950: '1950년부터 입력해 주세요',
   adultsOnly: '만 18세부터 쓸 수 있어요',
 

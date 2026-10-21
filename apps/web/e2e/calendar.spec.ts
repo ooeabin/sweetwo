@@ -781,6 +781,8 @@ test('서프라이즈: 배우자 생일 숨기기, 비밀 표시, 낸 곳 없이
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   seedFamily(db);
+  // 예빈이 P-04에서 답한 생일(10월 3일)이 미리 채워짐
+  db.partnerBirthday = { month: 10, day: 3 };
 
   await page.goto('/calendar/list');
   const ask = page.getByRole('region', { name: '예빈님 생일은 언제예요?' });
@@ -790,7 +792,8 @@ test('서프라이즈: 배우자 생일 숨기기, 비밀 표시, 낸 곳 없이
     'aria-checked',
     'true',
   );
-  await page.getByLabel('월', { exact: true }).fill('10');
+  await expect(page.getByLabel('월', { exact: true })).toHaveValue('10');
+  await expect(page.getByLabel('일', { exact: true })).toHaveValue('3');
   await page.getByLabel('일', { exact: true }).fill('9');
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();

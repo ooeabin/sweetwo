@@ -555,6 +555,26 @@
 
 /* AmountInput: 빠른 추가 + 숫자 키패드 */
 .hg-amountin { display: flex; flex-direction: column; gap: var(--space-4); max-width: 360px; }
+/* 월급날 숫자 판(DayChips): 회색 판 위 1~31 7칸, 테두리 없는 숫자, 고른 날만 검정 동그라미. ‘말일’은 판 아래 한 줄 */
+.hg-daygrid { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); background: var(--plate); border-radius: var(--radius-xl); }
+.hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); justify-items: center; }
+.hg-daygrid__day, .hg-daygrid__last { display: inline-grid; place-items: center; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 500 16px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
+.hg-daygrid__day { width: 44px; max-width: 100%; aspect-ratio: 1; border-radius: var(--radius-full); }
+.hg-daygrid__last { height: 44px; border-radius: var(--radius-full); }
+.hg-daygrid__day:hover, .hg-daygrid__last:hover { background: var(--surface-alt); }
+.hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
+.hg-daygrid__day:focus-visible, .hg-daygrid__last:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
+.hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
+.hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
+.hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); }
+.hg-wheel__col::-webkit-scrollbar { display: none; }
+.hg-wheel__col:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
+.hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
+.hg-wheel__unit { font-size: 15px; }
+.hg-wheel__age { margin: 0; text-align: center; font: 400 15px/22px var(--font-sans); color: var(--slate); }
+@media (prefers-reduced-motion: reduce) { .hg-wheel__col { scroll-behavior: auto; } }
 .hg-quick { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .hg-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); }
 .hg-key { display: grid; place-items: center; height: 56px; border: 0; border-radius: var(--radius-lg); background: transparent; color: var(--ink); font: 600 24px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
