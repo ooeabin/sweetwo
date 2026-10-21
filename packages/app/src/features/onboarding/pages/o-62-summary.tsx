@@ -1,5 +1,5 @@
-import { formatManWon, readWon } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { readWon } from '@sweetwo/core';
+import { QuestionLayout, ResultCard } from '@sweetwo/ui';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
@@ -112,22 +112,25 @@ export function O62Summary() {
       )}
       <div className="hg-q__cols">
         <section className="hg-stack">
-          <div className="hg-cards">
-            <IncomeCard s={s.state} r={r} me={me} />
-            {saving ? (
-              <div className="hg-card">
-                <div className="hg-card__top">
-                  <span className="hg-card__label">{copy.saveCard}</span>
-                  <EstTag show={r.estimated} />
-                </div>
-                <p className="hg-card__value">{readWon(plan.saveable)}</p>
-                <p className="hg-card__meta">
-                  <span>{copy.saveGoal}</span> <b>{formatManWon(alloc.goals)}</b>{' '}
-                  <span style={{ marginLeft: 'var(--space-2)' }}>{copy.saveEmergency}</span>{' '}
-                  <b>{formatManWon(alloc.emergency)}</b>
-                </p>
-              </div>
-            ) : (
+          {saving ? (
+            <ResultCard
+              label={copy.saveCard}
+              value={readWon(plan.saveable)}
+              tag={<EstTag show={r.estimated} />}
+              meta={copy.resultMeta(
+                plan.basis === 'mine' || sp.couple_state === 'solo'
+                  ? copy.whoMine(me)
+                  : copy.whoBoth,
+                readWon(plan.income),
+              )}
+              items={[
+                { label: copy.saveGoal, value: readWon(alloc.goals) },
+                { label: copy.saveEmergency, value: readWon(alloc.emergency) },
+              ]}
+            />
+          ) : (
+            <div className="hg-cards">
+              <IncomeCard s={s.state} r={r} me={me} />
               <div className="hg-card">
                 <span className="hg-card__label">{copy.checkSpending}</span>
                 <div className="hg-row" style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}>
@@ -147,8 +150,8 @@ export function O62Summary() {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
           {!partnerJoined(s.state) && sp.couple_state !== 'solo' && (
             <p className="hg-help" style={{ margin: 0 }}>
               {copy.joinPreview(partner)}
