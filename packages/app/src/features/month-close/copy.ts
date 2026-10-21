@@ -71,6 +71,11 @@ export const copy = {
   // W-04 끝
   doneTitle: (m: number) => `${m}월 정리를 마쳤어요`,
   noChange: '바뀐 값이 없어요',
+  // W-04 끝 완료 요약 판(W-04g MonthSummary와 같은 이름)
+  endIncome: '소득',
+  endSpent: '쓴 돈',
+  endSaved: '저축',
+  endLeft: '남은 돈',
   toMonth: '이번 달로', // [확인 필요]
 
   // W-04a2 실제 수입

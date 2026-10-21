@@ -8,6 +8,7 @@ export * from './components/ProviderButton';
 export * from './components/IconButton';
 export * from './components/Card';
 export * from './components/ResultCard';
+export * from './components/InfoPlate';
 export * from './components/Badge';
 export * from './components/Chip';
 export * from './components/Field';

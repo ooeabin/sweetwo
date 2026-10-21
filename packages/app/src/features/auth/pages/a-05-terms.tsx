@@ -65,6 +65,8 @@ export function A05Terms() {
         checked={checked}
         onChange={setChecked}
         viewLabel={copy.view}
+        requiredLabel={copy.requiredAll}
+        foldLabel={copy.foldRequired}
         items={[
           { key: 'terms', label: copy.terms, required: true, onView: view(copy.termsUrl.terms) },
           {

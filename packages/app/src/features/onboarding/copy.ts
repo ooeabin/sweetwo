@@ -304,6 +304,9 @@ export const copy = {
   shortCycle: '이번 달은 기간이 짧아서 다음 달과 합쳐 정리해요',
   zeroPlan: '이번 달은 옮기지 않고 시작할까요?',
   linesTitle: '이렇게 옮겨요',
+  // O-66 조건 요약 판 [확인 필요]
+  startPlate: '이렇게 시작해요',
+  plateCycle: '기간',
   total: '합계',
   start: '시작하기',
 

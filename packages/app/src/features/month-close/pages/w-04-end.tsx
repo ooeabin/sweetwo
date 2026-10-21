@@ -1,9 +1,10 @@
-import { formatMonthDay } from '@sweetwo/core';
-import { Badge, Button, QuestionLayout, SceneMedia } from '@sweetwo/ui';
+import { formatMonthDay, readWon } from '@sweetwo/core';
+import { Badge, Button, DoneMark, InfoPlate, QuestionLayout } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { describeProposal, proposalCopy } from '../../proposals';
 import { copy } from '../copy';
 import { useCloseData } from '../data';
+import { closeSummaryProps } from '../summary';
 
 // W-04 끝(docs/spec/21-month-close.md). 혼자 정리: 이 정리에서 바꾼 값(묶음 제안) 목록 + “제안 중”,
 // “반대 없으면 {날짜}부터 적용돼요”, ‘보낸 제안 보기’. 바뀐 값이 없으면 “바뀐 값이 없어요”.
@@ -24,6 +25,9 @@ export function W04End() {
   const confirmed = bundle.filter((p) => p.status === 'applied');
   const together = confirmed.length > 0 && confirmed.length === bundle.length;
   const nextMonth = (d.month % 12) + 1;
+  // 완료 요약(정산 요약 W-04g와 같은 값): 소득, 쓴 돈, 저축, 남은 돈
+  const sum = d.close && !d.rest ? closeSummaryProps(d.close, d, d.month) : null;
+  const spent = sum ? sum.fixed + sum.variable + sum.allowance + sum.bigExpense : 0;
   return (
     <QuestionLayout
       title={copy.doneTitle(d.month)}
@@ -42,7 +46,18 @@ export function W04End() {
         nav('/', { replace: true });
       }}
     >
-      <SceneMedia />
+      <DoneMark />
+      {sum && (
+        <InfoPlate
+          label={copy.summary(d.month)}
+          rows={[
+            { label: copy.endIncome, value: readWon(sum.income) },
+            { label: copy.endSpent, value: readWon(spent) },
+            { label: copy.endSaved, value: readWon(sum.saved) },
+            { label: copy.endLeft, value: readWon(sum.income - spent - sum.saved) },
+          ]}
+        />
+      )}
       {bundle.length > 0 && names && (
         <section className="hg-card hg-stack" aria-label={copy.pending}>
           {bundle.map((p) => {
