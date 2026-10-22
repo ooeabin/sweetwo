@@ -78,7 +78,7 @@ export function GoalQuestionInput({
           onChange={(x) => onChange(x ?? undefined)}
           quick={quickChips[q.quick]}
           bands={q.band ? bands[q.band] : undefined}
-          unsureLabel={copy.unsure}
+          unsureLabel={copy.unsureLater}
           onBand={(b) => onAnswer(b.value, true)}
           monthly={t.kind({}) === 'monthly'}
         />

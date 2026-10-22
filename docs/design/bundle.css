@@ -93,7 +93,7 @@
 .hg-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); align-items: start; max-width: 480px; }
 .hg-input { box-sizing: border-box; width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 400 16px/24px var(--font-sans); }
 .hg-input::placeholder { color: var(--stone); }
-.hg-input:focus { outline: 2px solid var(--focus); outline-offset: 0; border-color: transparent; }
+.hg-input:focus { outline: 2px solid var(--ink); outline-offset: 0; border-color: transparent; }  /* 입력 칸 포커스는 ink(분홍은 오류 빨강과 헷갈림, 파랑은 키보드 링과 글자 링크에만) */
 .hg-input.is-error { border-color: var(--danger); }
 .hg-amount { display: flex; align-items: baseline; gap: 2px; border-bottom: 2px solid var(--ink); padding-bottom: var(--space-2); }
 .hg-amount__value { font: 600 28px/36px var(--font-sans); letter-spacing: -0.4px; }
@@ -211,6 +211,13 @@
 .hg-chapters__text { display: flex; flex-direction: column; min-width: 0; }
 .hg-chapters__name { font: 600 16px/24px var(--font-sans); color: var(--ink); }
 .hg-chapters__desc { font: 400 14px/20px var(--font-sans); color: var(--slate); word-break: keep-all; }
+/* 챕터 시작 안내(O-20·O-30·O-50): 끝난 챕터 ink 원 + 체크, 지금 챕터 ink 테두리 원, 남은 챕터 흐리게 */
+.hg-chapters__item.is-done .hg-chapters__num { background: var(--ink); color: var(--on-ink); }
+.hg-chapters__num .hg-ico { width: 16px; height: 16px; }
+.hg-chapters__item.is-now .hg-chapters__num { box-shadow: inset 0 0 0 2px var(--ink); }
+.hg-chapters__item.is-done .hg-chapters__name { color: var(--slate); font-weight: 400; }
+.hg-chapters__item.is-next .hg-chapters__name { color: var(--stone); font-weight: 400; }
+.hg-chapters__item.is-next .hg-chapters__num { color: var(--stone); }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
 .hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
@@ -679,7 +686,7 @@
 
 /* Search: 알약 검색 칸 + 결과 */
 .hg-search { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-1) 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); color: var(--stone); }
-.hg-search:focus-within { outline: 2px solid var(--focus); outline-offset: 0; border-color: transparent; }
+.hg-search:focus-within { outline: 2px solid var(--ink); outline-offset: 0; border-color: transparent; }
 .hg-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; outline: 0; color: var(--ink); font: 400 16px/24px var(--font-sans); }
 .hg-search input::placeholder { color: var(--stone); }
 .hg-results { display: flex; flex-direction: column; }

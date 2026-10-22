@@ -24,6 +24,11 @@ async function part0(page: Page) {
   const chapters = page.getByRole('list', { name: '이렇게 4단계로 물어볼게요' });
   await expect(chapters.getByRole('listitem')).toHaveCount(4);
   await expect(chapters).toContainText('나누기와 플랜');
+  await expect(
+    page.getByText(
+      '입력하신 내용은 나중에 언제든 자유롭게 수정할 수 있으니, 편하게 작성해 주세요!',
+    ),
+  ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
   await heading(page, '뭐라고 부르면 될까요?');
@@ -67,6 +72,10 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 
   await heading(page, '이제 둘의 목표를 정해요');
   await expect(page.getByText('2/4 목표')).toBeVisible();
+  // 챕터 시작 안내: 끝난 챕터 체크, 지금 챕터 표시
+  const chapterList = page.getByRole('list', { name: '이렇게 4단계로 물어볼게요' });
+  await expect(chapterList.getByRole('listitem').first()).toContainText('우리 소개 끝남');
+  await expect(chapterList.locator('[aria-current="step"]')).toContainText('목표');
   await expect(page.getByText('2025년 5월 17일')).toBeVisible();
   await expect(page.getByText('전세', { exact: true })).toBeVisible();
   await axe(page);
@@ -96,6 +105,9 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 
   // 챕터 3 수입과 지출(기획서 예시값: 찬우 350만, 25일, 예빈 추정 250만, 고정 100만 + 대출 30만, 생활비 130만)
   await heading(page, '이제 수입과 지출을 알려 주세요');
+  await expect(
+    page.getByRole('list', { name: '이렇게 4단계로 물어볼게요' }).locator('[aria-current="step"]'),
+  ).toContainText('수입과 지출');
   await expect(page.getByRole('progressbar', { name: '수입과 지출 진행' })).toHaveAttribute(
     'aria-valuenow',
     '0',
@@ -114,6 +126,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByRole('radio', { name: '200~300만' }).click();
 
   await heading(page, '매달 꼭 나가는 돈을 골라주세요');
+  await expect(page.getByText('다음 화면에서 합계만 한 번 물어볼게요')).toBeVisible();
   await page.getByRole('button', { name: '주거', exact: true }).click();
   await page.getByRole('button', { name: '관리비' }).click();
   await page.getByRole('button', { name: '공과금' }).click();
@@ -158,6 +171,9 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   // 파트 6 결과: O-61 분석 중 → O-62 요약(저축 가능 = 600 − 100 − 260 = 240만)
   await heading(page, '두 분의 돈 흐름을 정리하고 있어요');
   await heading(page, '두 분은 한 달에 240만 원을 모을 수 있어요');
+  // 결과 화면은 막대 없이 “4/4 나누기와 플랜”만
+  await expect(page.getByText('4/4 나누기와 플랜')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: '나누기와 플랜 진행' })).toHaveCount(0);
   await expect(page.getByText('임시 플랜')).toBeVisible();
   await expect(page.getByText('예빈님이 합류하면 다시 계산돼요')).toBeVisible();
   await expect(page.getByText('예빈님이 합류하면 여기서 월급을 나눠요')).toBeVisible();
@@ -350,7 +366,7 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   await page.getByRole('radio', { name: '아직 모르겠어요' }).click();
 
   await heading(page, '결혼 준비에 총 얼마를 생각하세요?');
-  await page.getByRole('button', { name: '잘 모르겠어요' }).click();
+  await page.getByRole('button', { name: '잘 모르겠어요, 나중에 적을게요' }).click();
   await page.getByRole('button', { name: '3~5천' }).click();
   await heading(page, '양가에서 도움을 받기로 했나요?');
   await page.getByRole('radio', { name: '네' }).click();

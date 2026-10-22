@@ -38,7 +38,7 @@ export function O19aWeddingBudget() {
         }}
         quick={quickChips.big}
         bands={bands.weddingBudget}
-        unsureLabel={copy.unsure}
+        unsureLabel={copy.unsureLater}
         onBand={(b) => void save(b.value, true)}
       />
       {ok.banner}
