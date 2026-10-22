@@ -6,9 +6,11 @@
 
 ## 한눈에 보기
 
-MVP는 데스크톱 앱(Windows, macOS)과 반응형 웹을 Electron + React + TypeScript 한 코드로 만들고, 서버는 Supabase(서울 리전) 하나로 운영함. 모바일 앱과 OS 위젯은 2단계.
+MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React + TypeScript 한 화면 코드로 만들고(데스크톱은 Electron, 모바일은 Capacitor로 감쌈), 서버는 Supabase(서울 리전) 하나로 운영함. 웹 앱은 없음(ADR 0001). OS 위젯은 2단계.
 
-- 만들 것: 데스크톱 앱, 반응형 웹(온보딩과 핵심 설정 포함 일부 기능, app.sweetwo.kr), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
+> 전환 중: `apps/web` → `apps/mobile` 이름 바꾸기와 Capacitor, 모바일 로그인·잠금·푸시·앱 링크, 로그인 콜백을 sweetwo.kr로 옮기기는 아직 코드에 없음. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
+
+- 만들 것: 데스크톱 앱, 모바일 앱(App Store, Google Play), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
 - 데이터: 모두 직접 입력. 계좌 연동, 마이데이터, 스크래핑 없음
 - 사용자: 부부 2명이 한 공간을 같이 씀. 한국어, 원(KRW), KST만 지원
 - 기준 문서: 기획서 ‘기술·운영’, ‘동기화’, ‘보안·개인정보’ 탭과 디자인 시스템 sweeTwo
@@ -40,9 +42,10 @@ MVP는 데스크톱 앱(Windows, macOS)과 반응형 웹을 Electron + React + T
 ### 클라이언트
 
 - Electron: 데스크톱 앱과 트레이 위젯. 보안 기본값 contextIsolation 켬, nodeIntegration 끔, preload로 필요한 기능만 열어 줌
-- 로그인: 시스템 브라우저 OAuth(PKCE) → https://app.sweetwo.kr/auth/callback → 딥링크(sweetwo://)로 복귀. refresh token은 main 프로세스가 safeStorage로 암호화해 보관(세부는 ‘인증과 세션’)
+- 로그인: 시스템 브라우저 OAuth(PKCE) → https://sweetwo.kr/auth/callback(웹사이트의 정적 복귀 페이지, (전환 전) app.sweetwo.kr) → 딥링크(sweetwo://)로 복귀. 모바일은 같은 주소가 앱 링크라 앱이 바로 받음. refresh token은 main 프로세스가 safeStorage로 암호화해 보관(세부는 ‘인증과 세션’)
 - 로컬 저장: 위젯 캐시와 오프라인 큐는 암호화, 키는 safeStorage
-- 웹: 같은 React 앱을 웹 빌드로 배포(S3 + CloudFront). 웹에 없는 기능은 플랫폼 플래그로 숨김
+- Capacitor: 모바일 앱. `apps/mobile`(Vite 빌드 + iOS·Android 프로젝트)이 packages/app을 감쌈. 모바일 전용 기능(로그인, 보안 저장소, 잠금·생체 인증, 푸시, 앱 링크)은 데스크톱과 같은 모양의 브리지(`window.sweetwo`)로만 열어 줌. 플랫폼 값은 `desktop` / `ios` / `android`, 데스크톱 전용(트레이, 단축키)은 플랫폼 플래그로 숨김
+- 같은 Vite 화면을 브라우저로 띄우는 건 개발과 e2e(흉내 Supabase)용뿐, 배포하지 않음
 - 서버 데이터: TanStack Query 캐시 + Realtime 변경 신호로 무효화. 끊기면 30초 폴링
 - 화면 상태: Zustand(잠금, 금액 가리기, 월말 정리 진행 단계 등 기기 안 상태)
 
@@ -52,7 +55,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 반응형 웹을 Electron + React + T
 - 합계와 배분 계산: Postgres 함수. 클라이언트는 미리보기만 계산하고 저장 값은 서버 값
 - 예약 작업: pg\_cron + Edge Functions (기준일 시작: 제안 적용 → 월 계획 만들기, 알림 발송, 연결 해제 기한, 보관 기간 정리)
 - 필드 암호화: 메모와 가족 정보는 Edge Function에서 AES-256-GCM, 키는 AWS KMS
-- 알림: 데스크톱 로컬 알림(앱이나 트레이가 켜져 있을 때 Realtime을 받아 Electron Notification으로 표시), 앱 안 알림센터, 이메일(SES). 모바일 푸시는 2단계
+- 알림: 데스크톱 로컬 알림(앱이나 트레이가 켜져 있을 때 Realtime을 받아 Electron Notification으로 표시), 앱 안 알림센터, 이메일(SES), 모바일 푸시(APNs·FCM, Edge Function이 보냄, 기기 토큰은 `push_device` 테이블 예정)
 
 ### 외부 데이터
 
@@ -78,12 +81,12 @@ MVP는 데스크톱 앱(Windows, macOS)과 반응형 웹을 Electron + React + T
 sweetwo/
   apps/
     desktop/      Electron main, preload, 트레이 위젯
-    web/          웹 빌드 (desktop과 같은 화면 코드)
+    mobile/       Capacitor 모바일 앱(iOS, Android) + 개발·e2e용 브라우저 실행 ((전환 전) apps/web)
     admin/        어드민 웹
     site/         웹사이트 L-01~L-03, L-05, L-06 (랜딩, 설치 안내, 릴리스 노트, 약관, 고객센터)
   packages/
     ui/           디자인 시스템 토큰, 컴포넌트, 그림
-    app/          화면(페이지)과 화면 흐름, desktop과 web이 같이 씀
+    app/          화면(페이지)과 화면 흐름, desktop과 mobile이 같이 씀
     core/         타입, Zod 스키마, 금액과 날짜 포맷, 계산 미리보기
     api/          Supabase 클라이언트, 쿼리 훅, Realtime 구독
   supabase/
@@ -120,8 +123,8 @@ sweetwo/
 ### 실행
 
 1. `pnpm i`
-2. `pnpm db:start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket(Docker). 출력의 API URL과 anon key를 `apps/web/.env.local`, `apps/desktop/.env.local`의 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`에
-3. `pnpm dev`: 웹 5173, 어드민 5174. 데스크톱은 `pnpm dev:desktop`
+2. `pnpm db:start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket(Docker). 출력의 API URL과 anon key를 `apps/mobile/.env.local`((전환 전) apps/web), `apps/desktop/.env.local`의 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`에
+3. `pnpm dev`: 모바일 화면을 브라우저로 5173(개발용), 어드민 5174. 데스크톱은 `pnpm dev:desktop`. 휴대폰·에뮬레이터는 `pnpm --filter @sweetwo/mobile cap:ios` / `cap:android`(Xcode, Android Studio 필요)
 4. 데이터 초기화: `pnpm db:reset` (마이그레이션 + seed.sql 다시 실행)
 5. 마이그레이션을 바꿨으면 `pnpm db:test`(pgTAP) → `pnpm db:types`(packages/core/src/db.types.ts 다시 만듦, 손으로 고치지 않음)
 6. 컴포넌트 모음: 개발 서버에서 `/dev/ui`(배포 빌드에는 없음)
@@ -134,7 +137,7 @@ sweetwo/
 
 ### 환경 변수와 대체물
 
-- `.env.example`은 앱마다 하나: apps/desktop, apps/web, apps/admin, apps/site, supabase/functions
+- `.env.example`은 앱마다 하나: apps/desktop, apps/mobile, apps/admin, apps/site, supabase/functions
 - 로컬 대체물: 메일 → Supabase Inbucket, KMS → 로컬 키 어댑터, 공휴일 → fixture 파일
 - seed.sql: auth 사용자 찬우, 예빈, 연결된 부부 공간, 이번 달 월 계획
 - 이메일, 비밀번호 테스트 로그인: 로컬과 스테이징에서만 켬(E2E용). 운영은 소셜 로그인만
@@ -188,7 +191,7 @@ sweetwo/
 
 - consent 종류: 이용약관, 개인정보 처리, 배우자와 부부 공간 공유, 가족 정보, 사진(챙길 날), 마케팅 수신, 분석 수집, 통계 참여
 - consent 행에는 종류, 약관 버전, 동의 여부, 시각. 철회도 새 행으로 추가
-- 문의: 앱, 웹에서 inquiry 테이블에 저장 + help@sweetwo.kr로 사본 메일
+- 문의: 데스크톱·모바일 앱에서 inquiry 테이블에 저장 + help@sweetwo.kr로 사본 메일
 - 답변: 어드민 AD-06에서 작성 → 앱 ‘내 문의’와 메일로 전달
 - 문의 때문에 데이터를 봐야 하면 문의한 사람의 동의(admin\_view\_request)를 받고, 배우자에게 알림. 열람은 audit\_log에 기록
 
@@ -198,7 +201,7 @@ sweetwo/
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
-- 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://app.sweetwo.kr/i/{코드}`, 앱은 `sweetwo://i/{코드}`
+- 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://sweetwo.kr/i/{코드}`(모바일은 앱 링크로 앱이 바로 엶, (전환 전) app.sweetwo.kr), 데스크톱 딥링크는 `sweetwo://i/{코드}`
 - 월 플랜과 플랜 줄은 앱이 직접 못 만들고 못 고친다(읽기만). 첫 플랜은 `start_first_plan()`(O-66, 같은 사이클이면 있는 플랜 id), 이후 플랜은 기준일 작업이 만든다. 줄의 분담액은 신랑, 신부 쪽(`amount_groom`, `amount_bride`)으로 저장
 - 기준일은 `couple_space.base_day`(말일은 `base_day_last`), 없으면 두 월급날 중 늦은 날. 통장 방식은 `couple_space.account_mode`
 - 만 18세 미만(O-13): `delete_minor_account(출생연도)`가 서버에서 나이를 다시 확인하고 auth 사용자째 지움
@@ -287,7 +290,7 @@ sweetwo/
 - 데스크톱: main 프로세스에 큐. safeStorage로 암호화한 파일 또는 SQLite
 - 입력 순서대로 보내고, 실패하면 지수 백오프로 재시도. 같은 `mutation_id`라 중복 반영 없음
 - 계속 실패하거나 서버가 거부하면 ‘보내지 못한 입력’ 상태로 보여 주고 다시 보내기, 버리기 선택
-- 웹: 탭 안 메모리 큐만. 탭을 닫으면 사라짐을 안내
+- 모바일: 데스크톱과 같은 규칙. SQLite(암호화) 큐, 키는 Keychain·Keystore
 - 로컬 캐시 스키마가 바뀌어 옮기기가 실패하면 큐는 남기고 캐시만 비운 뒤 서버에서 다시 받음
 
 ### 충돌
@@ -316,7 +319,7 @@ sweetwo/
 - 딥링크 허용 목록: `sweetwo://auth/callback`의 code, state만 받고 나머지는 버림. 초대는 `sweetwo://i/{code}`
   - 구현: `apps/desktop/src/main/deep-link-parse.ts`(허용 목록), `deep-link.ts`(받기). 로그인 콜백은 main에만 남고, 렌더러에는 초대 코드만 `window.sweetwo.onInvite`로 감
   - 보안 저장소: `apps/desktop/src/main/secure-store.ts`(main 전용, 렌더러에 노출 안 함)
-- 리다이렉트는 https://app.sweetwo.kr/auth/callback 하나. 이 페이지가 code와 state를 sweetwo://auth/callback 딥링크로 넘김. 루프백(127.0.0.1)은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
+- 리다이렉트는 https://sweetwo.kr/auth/callback 하나((전환 전) app.sweetwo.kr). 데스크톱은 이 정적 페이지가 code와 state를 sweetwo://auth/callback 딥링크로 넘기고, 모바일은 같은 주소를 앱 링크로 앱이 바로 받음. 루프백(127.0.0.1)은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
 - 토큰 갱신은 main 프로세스만. 렌더러(메인 창, 트레이)는 IPC로 access token만 받음
 - refresh token은 safeStorage로 암호화해 파일에, 30일 슬라이딩
 
@@ -329,21 +332,21 @@ sweetwo/
 | 애플 | 개발용 Services ID | 스테이징 Services ID | 운영 Services ID |
 
 - 카카오: 이메일은 선택 동의 항목. Supabase 카카오 설정에서 ‘이메일 없는 사용자 허용’을 켜야 거부한 사람이 A-04로 감(로컬은 config.toml `email_optional = true`)
-- Supabase Auth 리다이렉트 허용 목록: 환경마다 그 환경의 웹 콜백 주소 하나. 데스크톱은 쿼리(`?from=desktop&state=…`)를 붙여 같은 주소를 거치므로 끝에 `**`를 붙인다
-  - 운영 `https://app.sweetwo.kr/auth/callback**`, 로컬 `http://localhost:5173/auth/callback**`(스테이징 웹 주소는 정해지면 추가)
-- 데스크톱 흐름(구현): main이 code_verifier와 state를 만들고 `{SUPABASE}/auth/v1/authorize?provider=…&redirect_to={웹}/auth/callback?from=desktop%26state=…&code_challenge=…&code_challenge_method=s256`을 기본 브라우저로 엶 → 웹 콜백 페이지(`packages/app` `auth-callback.tsx`)가 code(취소면 error)와 state를 `sweetwo://auth/callback`으로 넘김 → main이 state를 확인하고 `/auth/v1/token?grant_type=pkce`로 교환
+- Supabase Auth 리다이렉트 허용 목록: 환경마다 그 환경의 콜백 주소 하나. 쿼리(`?from=desktop&state=…`)를 붙여 같은 주소를 거치므로 끝에 `**`를 붙인다
+  - 운영 `https://sweetwo.kr/auth/callback**`((전환 전) app.sweetwo.kr), 로컬 `http://localhost:5173/auth/callback**`(스테이징 사이트 주소는 정해지면 추가)
+- 데스크톱 흐름(구현): main이 code_verifier와 state를 만들고 `{SUPABASE}/auth/v1/authorize?provider=…&redirect_to={사이트}/auth/callback?from=desktop%26state=…&code_challenge=…&code_challenge_method=s256`을 기본 브라우저로 엶 → 콜백 페이지(웹사이트 `apps/site`, (전환 전) `packages/app` `auth-callback.tsx`)가 code(취소면 error)와 state를 `sweetwo://auth/callback`으로 넘김 → main이 state를 확인하고 `/auth/v1/token?grant_type=pkce`로 교환
   - 파일: `apps/desktop/src/main/auth.ts`(로그인, 갱신, 로그아웃), `pkce.ts`(+ 테스트), `ipc.ts`(보낸 창 확인 + Zod), `lock.ts`(A-06)
   - 렌더러의 supabase-js는 `accessToken` 옵션으로 브리지에서 access token만 받는다(`supabase.auth`는 데스크톱에서 쓰지 않음)
-  - main이 읽는 값: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_WEB_ORIGIN`(apps/desktop/.env.local, 공개 값만)
+  - main이 읽는 값: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_WEB_ORIGIN`(콜백 페이지 주소의 출처, apps/desktop/.env.local, 공개 값만)
 - 같은 이메일, 다른 소셜(A-02 ‘자동 합치기 없음’): Supabase는 확인된 같은 이메일의 소셜 계정을 한 사용자로 자동 연결한다. 그래서 로그인 직후 `login_state(누른 제공자)`가 가입한 제공자와 다르면 `provider_conflict`를 돌려주고, 앱은 바로 로그아웃한 뒤 “이미 {카카오}로 가입한 이메일이에요”를 보여 준다. 계정 식별은 가입 때 제공자(`app_user.provider`)
 - 가입: 소셜 로그인만으로는 계정이 아니다. A-05 ‘동의하고 계속하기’의 `complete_signup()`이 `app_user`와 동의 기록(필수 3종 + 마케팅)을 한 번에 만든다. 그 전에 그만두면 auth 사용자만 남음(정리 작업은 예약 작업 단계에서)
 
-### 웹 세션
+### 모바일 세션
 
-- supabase-js 브라우저 저장소 + 엄격한 CSP(인라인 스크립트 금지, 연결 대상은 Supabase, PostHog, Sentry만)
-- ‘로그인 유지’ 끄면 sessionStorage(탭을 닫으면 로그아웃), 켜면 localStorage 최대 14일(로그인 시각 `sweetwo.login-at`, 실행 때 A-01이 확인 → A-08). 구현은 `packages/api` `client.ts`의 저장소
-- 30분 동안 입력이 없으면 로그아웃하고 A-08(‘오래 자리를 비워서 잠갔어요’), 다시 로그인하면 하던 화면으로(`sweetwo.return-to`)
-- 웹 로그인은 지금 리다이렉트만. 넓은 창 팝업은 아직
+- 데스크톱과 같은 흐름: 시스템 로그인 창(iOS ASWebAuthenticationSession, Android Custom Tabs, Capacitor 플러그인)으로 authorize → https://sweetwo.kr/auth/callback 앱 링크로 앱 복귀 → state 확인 → `grant_type=pkce` 교환
+- refresh token은 Keychain(iOS)·Keystore(Android)에, 30일 슬라이딩. 렌더러(웹뷰)의 supabase-js는 데스크톱처럼 `accessToken` 옵션으로 브리지에서 access token만 받음
+- 웹뷰 안 CSP는 데스크톱과 같음(인라인 스크립트 금지, 연결 대상은 Supabase, PostHog, Sentry만). 원격 화면 코드를 내려받지 않음(코드 바꿔 넣기 업데이트 안 씀)
+- 앱 링크 확인 파일: sweetwo.kr/.well-known/apple-app-site-association, assetlinks.json(apps/site/public). 경로는 /i/*, /auth/callback, 알림 메일 링크만
 
 ### 잠금
 
@@ -352,6 +355,7 @@ sweetwo/
 - 자동 잠금: 시스템 입력이 5분 없을 때, 화면 잠금, 절전. Ctrl(⌘)+L. 잠금 화면은 앱 전체를 덮어 금액이 보이지 않음
 - safeStorage를 못 쓰는 환경(키체인 없는 Linux 등)에서는 PIN과 refresh token을 저장하지 않는다(다음 실행 때 다시 로그인)
 - Windows Hello는 네이티브 모듈이 필요해 출시 후
+- 모바일: PIN 해시와 틀린 횟수는 Keychain·Keystore, 생체 인증은 Face ID·Touch ID(iOS LocalAuthentication), BiometricPrompt(Android). 자동 잠금은 앱이 뒤로 간 지 5분. 최근 앱 화면에는 가림 화면을 띄움(iOS 앱 전환 스냅숏, Android FLAG_SECURE 대신 가림 화면)
 
 ## 예약 작업과 알림
 
@@ -383,10 +387,11 @@ sweetwo/
 - 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
 - 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
 - 아직: 메일(SES), 방해 금지 끝나는 시각에 다시 보내기, 알림 설정 S-14, 위 표의 ‘다음’ 알림들
-- 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시. 서버 푸시 없음
-- ‘앱 꺼짐’ = 최근 10분간 데스크톱 presence 신호 없음 → 규칙에 따라 메일로 대신
+- 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시
+- 모바일 푸시는 서버: notification 행이 생기면 Edge Function이 그 사람의 기기 토큰으로 APNs·FCM에 보냄(방해 금지·종류별 끄기 반영). 앱이 화면에 떠 있으면 OS 알림 대신 앱 안 토스트
+- 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때
 - 앱 안 알림센터에는 항상 기록
-- 상한은 메일만 계정마다 월 6회. 데스크톱 로컬 알림과 알림센터는 상한 없음. 주간 요약 메일과 웹만 쓰는 사람의 핵심 알림 메일은 상한 밖
+- 상한은 메일만 계정마다 월 6회. 푸시(모바일 푸시, 데스크톱 로컬 알림)와 알림센터는 상한 없음. 주간 요약 메일과 푸시를 받을 수 없는 사람의 핵심 알림 메일은 상한 밖
 - 마케팅 메일은 월 1회, 수신 동의한 사람만
 - 방해 금지 22\~08시(KST): 끝나는 08시에 보냄
 - 상한이나 방해 금지에 걸려 못 보낸 것은 알림센터에만
@@ -416,7 +421,7 @@ sweetwo/
 - 목표 그림 21장, 빈 상태 그림 1장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
 - 앱 아이콘(평면 파이 차트, 2026-10-18 교체): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦
 - 장면 그림 5장과 장면 영상 5개는 없앰(2026-10-19). W-04, P-11, P-01, H-T1, A-02의 장면 자리는 그림 없이 비워 둠
-- 그림은 앱에 포함해 배포(네트워크 없이도 보이게). 웹은 CloudFront에서 오래 캐시
+- 그림은 앱에 포함해 배포(네트워크 없이도 보이게). 데스크톱·모바일 모두 앱 묶음 안에
 
 ### 자산 파일 규칙
 
@@ -424,12 +429,11 @@ sweetwo/
 - 크기 상한: 그림 150KB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
 - 그림은 `<Illustration name>`, 빈 상태는 `<EmptyState>`로만 씀. 파일을 직접 import하지 않음
 - 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 지금은 그림 없이 영역만 잡아 비워 둠
-- 웹 빌드는 파일 이름에 해시(Vite 기본)를 붙여 오래 캐시
 
 ### 디자인 시스템 갱신 절차
 
 1. `docs/design/`(tokens.css, bundle.css, 컴포넌트 md)를 고친 뒤 `pnpm ds:sync`가 packages/ui로 복사하고 파일 머리에 커밋 번호를 주석으로 남김
-2. `pnpm --filter @sweetwo/web e2e`로 컴포넌트 모음(/dev/ui)을 라이트, 다크, 좁은 창에서 돌리고 스크린샷(test-results)으로 바뀐 곳 확인
+2. `pnpm --filter @sweetwo/mobile e2e`((전환 전) @sweetwo/web)로 컴포넌트 모음(/dev/ui)을 라이트, 다크, 좁은 창에서 돌리고 스크린샷(test-results)으로 바뀐 곳 확인
 3. 담당자(디자인 시스템 오너) 승인 후 합침
 
 ## 개발 규칙
@@ -457,9 +461,12 @@ apps/desktop/
   electron.vite.config.ts
   electron-builder.yml
 
-apps/web/
-  src/main.tsx            packages/app의 <App platform="web"/>
+apps/mobile/              ((전환 전) apps/web)
+  src/main.tsx            packages/app의 <App platform="ios"|"android"/>, 브라우저 개발·e2e는 흉내 브리지
   vite.config.ts
+  capacitor.config.ts
+  ios/, android/          Capacitor 네이티브 프로젝트(Xcode, Gradle)
+  e2e/                    Playwright(흉내 Supabase), /dev/ui 스크린샷
 
 apps/site/                Astro 정적 사이트, S3 + CloudFront
   src/pages/
@@ -468,14 +475,16 @@ apps/site/                Astro 정적 사이트, S3 + CloudFront
     releases.astro        L-03 릴리스 노트
     terms.astro, privacy.astro   L-05 약관과 처리방침
     help.astro            L-06 고객센터
-    i/[code].astro        초대 링크 (앱 열기 또는 웹 앱 P-01)
+    i/[code].astro        초대 링크 (앱 열기, 앱이 없으면 코드 + 스토어·다운로드)
+    auth/callback.astro   로그인 복귀 페이지(code, state → sweetwo:// 딥링크)
+  public/.well-known/     apple-app-site-association, assetlinks.json
   src/lib/os.ts           OS 인식, 다운로드 주소
   src/content/            릴리스 노트, 약관, FAQ 원본 (마크다운)
 
 packages/app/src/
   app.tsx                 라우터, 쿼리 클라이언트, 테마
   routes.tsx              경로 표 (화면 ID 주석)
-  platform.ts             desktop/web 차이 (브리지 있으면 desktop)
+  platform.ts             desktop/ios/android 차이 (브리지가 알려 줌)
   features/
     auth/                 A 화면
     onboarding/           O 화면
@@ -561,7 +570,7 @@ supabase/
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 그 화면부터(‘이어서 할까요?’ 확인은 아직 없음)
 - 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값, 고정지출 그룹(`expenses.ts`), 공동자금과 분담액(`plan.ts`), 목표 배분과 부족 조정 안(`allocation.ts`), 재정 진단(`diagnosis.ts`), 월 사이클과 첫 플랜(`cycle.ts`)은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards(미리보기 `detail`, ‘추정’ `tag`, `disabled`, 한 화면에 여럿이면 `autoFocus`/`shortcuts` 끄기), Q3 AmountInput(한 화면에 여럿이면 `embedded`), Q4 YearInput/DateInput/YearMonthInput/DayChips(1~31 + 말일), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
-- e2e는 `apps/web/e2e/onboarding-mock.ts`의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜가 걸린 화면(O-66)은 `page.clock.setFixedTime`으로 기획서 예시 날짜(10월 7일)에 고정
+- e2e는 `apps/mobile/e2e/onboarding-mock.ts`((전환 전) apps/web)의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜가 걸린 화면(O-66)은 `page.clock.setFixedTime`으로 기획서 예시 날짜(10월 7일)에 고정
 
 ### 이번 달 구조
 
@@ -754,7 +763,7 @@ supabase/
 - core 계산과 포맷: Vitest 단위 테스트. 계산·배분 탭의 예시를 그대로 테스트 케이스로
 - DB 함수와 RLS: pgTAP. ‘배우자가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
 - 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 제안, 월말 정리
-- 웹 e2e는 `vite --mode e2e`(apps/web/.env.e2e, 가짜 Supabase 주소)로 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
+- 화면 e2e는 `vite --mode e2e`(apps/mobile/.env.e2e, 가짜 Supabase 주소)로 브라우저에 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
 - 테스트 데이터의 예시 이름은 찬우(시작한 사람), 예빈(합류한 사람)
 
 ### 테스트 세부
@@ -764,7 +773,7 @@ supabase/
 - 테스트마다 DB 초기화(seed 다시 넣기). 테스트끼리 데이터를 나눠 쓰지 않음
 - 음력: fixture를 천문연구원 표와 대조
 - 접근성: 화면마다 axe 검사, ‘동작 줄이기’ 켜고 한 번
-- 디자인 시스템 컴포넌트: `/dev/ui` 컴포넌트 모음을 라이트, 다크, 좁은 창(375px)에서 열어 오류 없음, axe 위반 없음, 스크린샷(apps/web/e2e). 기준 이미지 비교는 화면이 안정되면 추가
+- 디자인 시스템 컴포넌트: `/dev/ui` 컴포넌트 모음을 라이트, 다크, 좁은 창(375px)에서 열어 오류 없음, axe 위반 없음, 스크린샷(apps/mobile/e2e). 기준 이미지 비교는 화면이 안정되면 추가
 - 데스크톱 실행: `apps/desktop/e2e`(빌드 뒤 `xvfb-run -a pnpm --filter @sweetwo/desktop e2e`). 딥링크 허용 목록은 Vitest(`deep-link-parse.test.ts`)
 
 ### 문구
@@ -775,15 +784,15 @@ supabase/
 
 ### 단축키
 
-기준은 기획서 공통 4장(아래 표와 다르면 기획서가 우선). 웹은 브라우저 단축키(Ctrl+L, Ctrl+N, Ctrl+1\~4)와 겹치지 않게 따로 둠.
+기준은 기획서 공통 4장(아래 표와 다르면 기획서가 우선). 모바일 앱은 단축키 없음(외부 키보드는 Esc와 질문 화면 키만).
 
-| 동작 | 데스크톱 | 웹 |
-| --- | --- | --- |
-| 명령 창(검색 + ‘바로 하기’) | ⌘K / Ctrl+K | ⌘K / Ctrl+K |
-| 탭 이동 | ⌘1\~4 / Ctrl+1\~4 | Alt+1\~4 |
-| 새로 입력 | ⌘N / Ctrl+N | N(입력 칸 밖에서) |
-| 잠그기 | ⌘L / Ctrl+L | 명령 창에서 |
-| 금액 가리기 | ⌘⇧H / Ctrl+Shift+H | 명령 창에서 |
+| 동작 | 데스크톱 |
+| --- | --- |
+| 명령 창(검색 + ‘바로 하기’) | ⌘K / Ctrl+K |
+| 탭 이동 | ⌘1\~4 / Ctrl+1\~4 |
+| 새로 입력 | ⌘N / Ctrl+N |
+| 잠그기 | ⌘L / Ctrl+L |
+| 금액 가리기 | ⌘⇧H / Ctrl+Shift+H |
 
 - 단축키 표는 packages/app/src/shared/shortcuts.ts 한 곳에, platform으로 나눔
 
@@ -818,8 +827,8 @@ supabase/
 - 모으지 않음: 계좌번호, 카드번호, 주민등록번호. 입력 칸에 들어오면 저장 전에 막음
 - 국내 보관: Supabase, Storage, SES, S3 모두 서울. PostHog와 Sentry는 직접 운영
 - 암호화: DB 전체 암호화 + 메모와 가족 정보는 Edge Function에서 AES-256-GCM, 키는 AWS KMS
-- 토큰: access token은 짧게, refresh token은 기기별. 데스크톱은 main 프로세스의 safeStorage, 웹은 supabase-js 브라우저 저장소 + 엄격한 CSP(‘인증과 세션’)
-- 잠금: 데스크톱 PIN 6자리 또는 macOS Touch ID(Windows Hello는 출시 후), 5분 뒤 자동 잠금. 웹은 30분
+- 토큰: access token은 짧게, refresh token은 기기별. 데스크톱은 main 프로세스의 safeStorage, 모바일은 Keychain·Keystore. 두 앱 모두 엄격한 CSP(‘인증과 세션’)
+- 잠금: PIN 6자리 + 생체 인증(macOS Touch ID, iPhone Face ID·Touch ID, Android 지문. Windows Hello는 출시 후), 5분 뒤 자동 잠금
 - 로그: 금액, 메모, 이름을 남기지 않음. Sentry는 보내기 전에 걸러내기(beforeSend), PostHog는 금액을 구간으로만
 - 비밀 값: 코드와 저장소에 두지 않음. Supabase 비밀 값과 GitHub Actions secrets만. service role 키는 서버 밖으로 나가지 않음
 - 보관 기간: 휴지통 30일, 알림 90일, 변경 이력 13개월, 결제 기록 5년, 접속 기록 3개월. pg\_cron이 정리
@@ -835,7 +844,7 @@ supabase/
 
 - Sentry: `beforeSend`, `beforeBreadcrumb`에서 키 이름으로 지움(amount, memo, name, email, token 들어간 키 전부), URL 쿼리도 지움
 - Edge Functions 로그: 함수 이름, space\_id, 오류 코드, 걸린 시간만. 요청 본문과 복호화 값은 남기지 않음
-- PostHog 공통 속성: platform(desktop, web), app\_version, os, couple\_state. 사람은 익명 id로만
+- PostHog 공통 속성: platform(desktop, ios, android), app\_version, os, couple\_state. 사람은 익명 id로만
 - 금액은 구간으로만: 월 수입·생활비·고정지출·결혼 총예산·목표 금액·여행 경비는 기획서 데이터 항목 구간, 그 밖의 금액은 10만 미만 / 10\~50만 / 50\~100만 / 100\~300만 / 300\~1000만 / 1000만 이상(기획서 성공 지표 5장)
 - ‘분석 수집’ 동의를 끄면 `analytics_off`: 기기에서 이벤트를 만들지도 보내지도 않음
 
@@ -866,7 +875,9 @@ supabase/
 | OAuth 앱 | 개발용 | 스테이징용 | 운영용 |
 | KMS 키 | 로컬 키 어댑터 | staging 키 | prod 키 |
 | SES | Inbucket | 샌드박스, 허용 주소만 | 발송 제한 해제 |
-| S3 버킷 | 없음 | web, site, 업데이트 | web, site, 다운로드, 업데이트 |
+| S3 버킷 | 없음 | site, 업데이트 | site, 다운로드, 업데이트 |
+| 스토어 | 없음 | TestFlight, Google Play 내부 테스트 | App Store, Google Play |
+| 푸시 | 없음 | APNs 개발 환경, FCM 스테이징 프로젝트 | APNs 운영, FCM 운영 프로젝트 |
 | Sentry 프로젝트 | 끔 | 환경 태그 staging | 환경 태그 production |
 
 - GitHub Environments: staging, production. production은 승인자 1명이 승인해야 배포
@@ -875,12 +886,12 @@ supabase/
 
 ### CI/CD (GitHub Actions)
 
-1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright), e2e-desktop(Electron, xvfb), db(로컬 Supabase + pgTAP + DB 타입 비교)
-2. main 합치기: 마이그레이션과 Edge Functions를 스테이징에 배포, 웹을 스테이징 S3에
+1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, (전환 뒤) e2e-mobile), e2e-desktop(Electron, xvfb), mobile-build(iOS 시뮬레이터용 빌드는 macos 러너, Android 디버그 빌드, (전환 뒤) 추가), db(로컬 Supabase + pgTAP + DB 타입 비교)
+2. main 합치기: 마이그레이션과 Edge Functions를 스테이징에 배포, 웹사이트를 스테이징 S3에
    - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 main에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
    - 필요한 비밀 값(GitHub Environments → staging): `SUPABASE_ACCESS_TOKEN`(배포 전용 토큰), `SUPABASE_DB_PASSWORD`(staging DB 비밀번호)
    - staging에 손으로 SQL을 넣지 않는다. 모든 변경은 마이그레이션 파일 → main → 이 작업으로
-3. 태그(v1.2.0): 운영 마이그레이션 → Edge Functions → 웹 → 데스크톱 빌드, 서명, 업데이트 파일 업로드(‘업데이트와 릴리스’)
+3. 태그(v1.2.0): 운영 마이그레이션 → Edge Functions → 웹사이트 → 데스크톱 빌드, 서명, 업데이트 파일 업로드 → 모바일 빌드를 TestFlight·Google Play 내부 테스트로(심사 제출은 사람이)(‘업데이트와 릴리스’)
 
 ### 데스크톱 출시
 
@@ -889,6 +900,15 @@ supabase/
 - electron-updater: 채널 하나. 첫 출시는 전체 공개, 이후 업데이트만 단계 배포(‘업데이트와 릴리스’)
 - 최소 지원 버전을 서버에 두고, 낮은 버전은 업데이트 안내
 - Mac App Store, Microsoft Store는 출시 후 검토
+
+### 모바일 출시
+
+- iOS 16 이상, Android 8(API 26) 이상 [확인 필요]. Capacitor가 Vite 빌드(`dist`)를 앱에 넣음(`npx cap sync`)
+- iOS: Apple 개발자 계정(법인), App Store Connect API 키로 CI가 TestFlight 업로드. 서명은 Xcode 자동 관리 대신 CI용 인증서·프로비저닝(Environments production에만)
+- Android: Google Play 앱 서명, 업로드 키는 Environments production에만. AAB로 올림
+- 업데이트는 스토어만. 코드 바꿔 넣기(라이브 업데이트) 쓰지 않음(심사 규정, 보안)
+- 단계 출시: App Store 단계적 출시(7일), Google Play 비율 출시 10% → 50% → 100%
+- 심사: 첫 제출은 출시 2주 전. 심사용 계정과 흉내 데이터 공간, 개인정보 라벨·데이터 보안 양식
 
 ### 서명과 CI
 
@@ -912,10 +932,11 @@ supabase/
 
 1. DB 마이그레이션(추가만이라 예전 앱이 그대로 동작)
 2. Edge Functions
-3. 웹(app.sweetwo.kr)
+3. 웹사이트(sweetwo.kr)
 4. 데스크톱 빌드, 서명, 업데이트 파일 업로드
+5. 모바일 빌드 업로드 → 심사 → 출시(스토어 일정에 따라 데스크톱보다 늦을 수 있어 서버·데이터는 늘 두 버전 호환)
 
-- 되돌림: 함수와 웹은 이전 버전 재배포, 데스크톱은 `stagingPercentage`를 0으로 두고 고친 버전을 새로 냄. 마이그레이션은 되돌리지 않고 고침 마이그레이션을 앞으로
+- 되돌림: 함수와 웹사이트는 이전 버전 재배포, 모바일은 단계 출시 중지 + 고친 버전 긴급 심사, 데스크톱은 `stagingPercentage`를 0으로 두고 고친 버전을 새로 냄. 마이그레이션은 되돌리지 않고 고침 마이그레이션을 앞으로
 - 되돌릴 때: 크래시 없는 세션 99% 미만, 동기화 p95 3초 초과가 30분 이상, 데이터 손상 의심
 
 릴리스 노트와 약관
@@ -926,14 +947,14 @@ supabase/
 
 ### 기능 플래그와 최소 버전
 
-- app\_config 테이블 하나: `min_version`\_desktop, min\_version\_web, `flags`(jsonb), 기능별 끄기 스위치(kill switch)
+- app\_config 테이블 하나: `min_version`\_desktop, min\_version\_ios·android(추가 예정, min\_version\_web은 쓰지 않음), `flags`(jsonb), 기능별 끄기 스위치(kill switch)
 - 앱 시작과 재연결 때 확인
 - 최소 버전보다 낮으면 동기화를 멈추고 업데이트 안내. 오프라인 큐는 지우지 않고 업데이트 후 보냄
-- 웹은 `version.json`을 주기적으로 읽어 새 버전이면 ‘새로고침’ 안내, min\_version\_web보다 낮으면 동기화를 멈추고 새로고침
+- 모바일은 최소 버전보다 낮으면 업데이트 안내 → 스토어. 최소 버전은 새 버전이 스토어에 공개된 뒤에만 올림
 
 ### 모니터링
 
-- 오류: Sentry (앱, 웹, Edge Functions)
+- 오류: Sentry (데스크톱, 모바일, Edge Functions)
 - 가용성과 상태 페이지: Better Stack. 목표 99.5%
 - 제품 지표: PostHog. North Star는 월말 정리를 마친 부부 수
 - 백업: 매일, 30일 보관, 분기마다 복구 훈련. RPO 24시간, RTO 4시간
@@ -980,11 +1001,11 @@ supabase/
 
 ### 웹사이트(apps/site)
 
-- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(OS별 다운로드 버튼, 다른 OS용 받기, 접기, UTM을 웹 앱 링크에 이어 붙이기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). OS 판정은 core `detectSiteOs`·`installOs`(Vitest)
+- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(OS별 다운로드·스토어 버튼, 다른 OS용 받기, 접기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). OS 판정은 core `detectSiteOs`·`installOs`(Vitest)
 - L-02 `/download?os=`: 보이지 않는 iframe으로 고정 주소(download.sweetwo.kr/latest/mac|win)를 받음(페이지를 떠나지 않음), 한 번 받은 뒤 주소에 `started=1`(새로고침해도 다시 받지 않음), 이 브라우저에 `sweetwo-app-seen`·`sweetwo-download-id` 저장. download_id를 앱 첫 실행으로 넘기는 방법(다른 도메인)은 기획 확인 뒤
 - 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective, 지금 시행 중 = 시행일이 오늘 이전 중 최근, `?v={시행일}`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
-- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(CloudFront 오류 페이지로 지정)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없거나 휴대폰이면 웹 앱 P-01로 바로
-- 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 찬우·예빈 예시)는 웹 앱 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 심볼과 워드마크
+- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(CloudFront 오류 페이지로 지정)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱이 깔린 휴대폰은 앱 링크로 이 페이지까지 오지 않음. 데스크톱 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없으면 코드 + 스토어·다운로드 버튼((전환 전) 웹 앱 P-01로 보냄)
+- 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 찬우·예빈 예시)는 모바일 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 심볼과 워드마크
 - e2e `apps/site/e2e`(빌드 + 미리보기, Mac·Windows·Windows 7·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이
 
 ### 어드민 인증
@@ -1007,7 +1028,7 @@ supabase/
 
 두 사람이 같이 쓰는 흐름이 핵심이라, 부부 연결과 동기화를 먼저 만들고 그 위에 기능을 올림. 단계별 기간은 인원이 정해지면 채움.
 
-1. 기반: 모노레포, CI, 디자인 시스템 패키지, Electron 껍데기와 웹 빌드, Supabase 환경 3개
+1. 기반: 모노레포, CI, 디자인 시스템 패키지, Electron 껍데기와 Capacitor 껍데기, Supabase 환경 3개
 2. 로그인과 부부 연결: 소셜 로그인 3종, 딥링크, 잠금, 초대 링크와 6자리 코드, 합류 (A, P 화면)
 3. 동기화 뼈대: change\_log, Realtime 구독, 델타 동기화, 충돌 규칙, 휴지통
 4. 자산과 목표: 자산, 부채, 통장 역할(통장 하나 모드 포함), 목표 21종과 그림, 공개 범위
@@ -1053,10 +1074,10 @@ supabase/
 
 ### 기술 준비
 
-- [ ] GitHub 조직과 저장소, pnpm 워크스페이스 + Turborepo 골격(apps/desktop·web·admin·site, packages/ui·app·core·api, supabase/)
+- [ ] GitHub 조직과 저장소, pnpm 워크스페이스 + Turborepo 골격(apps/desktop·mobile·admin·site, packages/ui·app·core·api, supabase/)
 - [ ] .nvmrc, packageManager 버전, lint-staged, eslint-plugin-boundaries import 규칙
 - [ ] PR 템플릿, ADR 템플릿(docs/adr), CODEOWNERS(supabase/ 리뷰 2명, packages/ui는 디자인 시스템 오너)
-- [ ] .env.example 5개(apps/desktop, apps/web, apps/admin, apps/site, supabase/functions), 비밀 값 담당자와 교체 주기(docs/secrets.md)
+- [ ] .env.example 5개(apps/desktop, apps/mobile, apps/admin, apps/site, supabase/functions), 비밀 값 담당자와 교체 주기(docs/secrets.md)
 - [ ] Supabase 프로젝트 sweetwo-staging, sweetwo-prod(서울, Pro 플랜), GitHub Environments staging, production(승인자 1명)
 - [ ] AWS: KMS 키(staging, prod), SES 발송 도메인 인증과 발송 제한 해제, S3 + CloudFront, 최소 권한 IAM 사용자
 - [ ] OAuth 앱 3종 × 3환경(카카오, 구글, 애플), Supabase Auth 리다이렉트 허용 목록
@@ -1071,7 +1092,7 @@ supabase/
 - [ ] 테스트 벡터: core/rules/vectors/\*.json에 계산·배분 예시(W-04g 정산 요약 예시 포함)를 넣어 Vitest와 pgTAP이 같이 읽음
 - [ ] 오류 코드 표(docs/errors.md)와 기획서 ‘공통 상태’ 문구 연결
 - [ ] 음력 fixture(천문연구원 표 대조), 공휴일 fixture
-- [ ] app\_config: min\_version\_desktop, min\_version\_web, flags
+- [ ] app\_config: min\_version\_desktop, min\_version\_ios·android, flags
 
 ### 디자인 연결
 
@@ -1098,7 +1119,7 @@ supabase/
 ### 확정된 결정(10월 14일)
 
 - 결제 회사: MVP 밖, 유료화 때 토스페이먼츠 우선 검토
-- 데스크톱 로그인: 시스템 브라우저 → https://app.sweetwo.kr/auth/callback → sweetwo:// 딥링크. 루프백은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
+- 로그인: 시스템 브라우저(모바일은 시스템 로그인 창) → https://sweetwo.kr/auth/callback → 데스크톱은 sweetwo:// 딥링크, 모바일은 앱 링크. 루프백은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
 - 어드민 권한: 같은 Supabase 프로젝트, 관리자 role claim + RLS, 2단계 인증과 WAF IP 허용 필수
 - 어드민 도메인: ops.sweetwo.kr
 - Windows 서명: 클라우드 HSM OV 서명(SSL.com eSigner 우선, 대안 DigiCert KeyLocker). Azure Trusted Signing은 신규 가입이 미국·캐나다 법인만이라 제외. 법인 확인 1\~2주라 기반 단계에서 신청
