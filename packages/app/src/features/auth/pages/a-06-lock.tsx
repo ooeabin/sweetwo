@@ -148,7 +148,16 @@ export function LockGate({ active }: { active: boolean }) {
   if (!bridge || !active || !locked) return null;
 
   const verify = async (pin: string) => {
-    const r = await bridge.lock.verify(pin);
+    let r: Awaited<ReturnType<typeof bridge.lock.verify>>;
+    try {
+      r = await bridge.lock.verify(pin);
+    } catch (e) {
+      // 확인이 막히면(IPC 오류 등) 멈춘 듯 보이지 않게 비우고 알린다
+      if (import.meta.env.DEV) console.error('[A-06] verify', e);
+      setValue('');
+      setError(copy.pinWrong);
+      return;
+    }
     setValue('');
     if (r.ok) {
       setLocked(false);
