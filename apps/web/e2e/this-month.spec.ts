@@ -99,7 +99,7 @@ test('지출 적기: 항목별로 적으면 칸을 벗어날 때 저장, 남은 
   await page.goto('/');
 
   await expect(
-    page.getByRole('heading', { name: '찬우님, 이번 달 생활비가 55만 원 남았어요' }),
+    page.getByRole('heading', { name: '찬우님, 이번 달 생활비 55만 원 더 쓸 수 있어요' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '지출 적기' }).click();
 
@@ -123,7 +123,7 @@ test('지출 적기: 항목별로 적으면 칸을 벗어날 때 저장, 남은 
 
   await page.getByRole('button', { name: '다 적었어요' }).click();
   await expect(
-    page.getByRole('heading', { name: '찬우님, 이번 달 생활비가 14만 원 남았어요' }),
+    page.getByRole('heading', { name: '찬우님, 이번 달 생활비 14만 원 더 쓸 수 있어요' }),
   ).toBeVisible();
 });
 

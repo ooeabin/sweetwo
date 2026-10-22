@@ -7,7 +7,7 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-11a 호칭(Q5): “뭐라고 부르면 될까요?”, O-03 규칙(10자). 바꾸면 배우자 화면 호칭도 바뀜 → S-11
+// S-11a 호칭(Q5): “내 이름이나 애칭을 알려 주세요”, O-03 규칙(10자). 바꾸면 배우자 화면 호칭도 바뀜 → S-11
 export function S11aNickname() {
   const nav = useNavigate();
   const qc = useQueryClient();

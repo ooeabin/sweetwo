@@ -342,7 +342,7 @@ test('예빈 합류: P-02b → P-03 → P-04 → P-05 → P-06 확인 → P-07 �
   await page.getByRole('button', { name: '모두 좋아요' }).click();
 
   // P-11 합류 완료
-  await heading(page, '두 분은 한 달에 260만 원을 모을 수 있어요');
+  await heading(page, '두 분이 함께하면 한 달에 260만 원을 모을 수 있어요');
   await expect(page.getByText('620만 원')).toBeVisible();
   await expect(page.getByLabel('이전').filter({ hasText: '600만 원' })).toBeVisible();
   await expect(

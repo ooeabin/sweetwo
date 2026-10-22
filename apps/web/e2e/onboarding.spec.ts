@@ -31,10 +31,10 @@ async function part0(page: Page) {
   ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
-  await heading(page, '뭐라고 부르면 될까요?');
+  await heading(page, '내 이름이나 애칭을 알려 주세요');
   await expect(page.getByText('1/4 우리 소개')).toBeVisible();
   await axe(page);
-  await page.getByLabel('뭐라고 부르면 될까요?').fill('찬우');
+  await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
   await next(page);
   await heading(page, '어느 쪽이세요?');
   await page.getByRole('radio', { name: '신랑' }).click();
@@ -122,7 +122,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByRole('radio', { name: '25일' }).click();
   await axe(page);
   await next(page);
-  await heading(page, '예빈님 수입을 대략 알면 골라주세요');
+  await heading(page, '예빈님 수입은 한 달에 어느 정도예요?');
   await page.getByRole('radio', { name: '200~300만' }).click();
 
   await heading(page, '매달 꼭 나가는 돈을 골라주세요');
@@ -170,7 +170,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 
   // 파트 6 결과: O-61 분석 중 → O-62 요약(저축 가능 = 600 − 100 − 260 = 240만)
   await heading(page, '두 분의 돈 흐름을 정리하고 있어요');
-  await heading(page, '두 분은 한 달에 240만 원을 모을 수 있어요');
+  await heading(page, '두 분이 함께하면 한 달에 240만 원을 모을 수 있어요');
   // 결과 화면은 막대 없이 “4/4 나누기와 플랜”만
   await expect(page.getByText('4/4 나누기와 플랜')).toBeVisible();
   await expect(page.getByRole('progressbar', { name: '나누기와 플랜 진행' })).toHaveCount(0);
@@ -224,7 +224,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await next(page);
 
   // O-66: 생활비 185만(100 + 30 + 55), 목표 250만, 비상금 65만 × 18/30 → 111 + 150 + 39 = 300만
-  await heading(page, '이대로 시작할까요?');
+  await heading(page, '이 플랜으로 시작할까요?');
   await expect(page.getByText('매달 25일')).toBeVisible();
   await expect(page.getByText('찬우님 월급날')).toBeVisible();
   await expect(page.getByText('9월 월급 플랜')).toBeVisible();
@@ -242,7 +242,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByRole('button', { name: '나중에 할게요' }).click();
 
   // 이번 달(H-01): 미합류라 월급 나누기 대신 지출 적기, 생활비 55만(O-64에서 줄임)
-  await heading(page, '찬우님, 이번 달 생활비가 55만 원 남았어요');
+  await heading(page, '찬우님, 이번 달 생활비 55만 원 더 쓸 수 있어요');
   await expect(page.locator('.hg-today__date')).toHaveText('10월 7일 수요일');
   await expect(page.getByRole('button', { name: '지출 적기' })).toBeVisible();
   await expect(page.getByText('아직 몰라요')).toBeVisible();
@@ -261,7 +261,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await axe(page);
   // 금액 가리기
   await page.getByRole('button', { name: '금액 가리기' }).first().click();
-  await heading(page, '찬우님, 이번 달 생활비가 ••• 남았어요');
+  await heading(page, '찬우님, 이번 달 생활비 ••• 더 쓸 수 있어요');
   await expect(page.getByText('111만 원')).toHaveCount(0);
   expect(db.me.onboarding_done_at).toBeTruthy();
   expect(db.accounts.map((a) => [a.role, a.name, a.is_existing, a.start_balance])).toEqual([
@@ -423,7 +423,7 @@ test('예비부부 각자 관리: 결혼 비용 목표만, 비상금 없음', as
   await next(page);
   await expect(page.getByText('아직 몰라요').first()).toBeVisible();
   await next(page);
-  await heading(page, '이대로 시작할까요?');
+  await heading(page, '이 플랜으로 시작할까요?');
   await expect(page.getByText('매달 말일')).toBeVisible();
   await page.getByRole('button', { name: '시작하기' }).click();
   await heading(page, '9월 월급 플랜을 시작했어요');
@@ -545,7 +545,7 @@ test('O-33 배우자 수입: 정확히 알면 금액으로, 추정 없이 저장
     fixed_total: null,
   };
   await page.goto('/onboarding/o-33');
-  await heading(page, '예빈님 수입을 대략 알면 골라주세요');
+  await heading(page, '예빈님 수입은 한 달에 어느 정도예요?');
   await page.getByRole('radio', { name: '정확히 알아요' }).click();
   await page.getByLabel('예빈님 한 달 실수령').fill('2730000');
   await expect(page.getByText('273만 원', { exact: true })).toBeVisible();

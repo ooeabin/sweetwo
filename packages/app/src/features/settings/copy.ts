@@ -55,7 +55,7 @@ export const copy = {
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 
   // S-11a
-  nicknameQ: '뭐라고 부르면 될까요?',
+  nicknameQ: '내 이름이나 애칭을 알려 주세요',
 
   // S-11b
   sideRow: '신랑·신부', // [확인 필요] 줄 이름
