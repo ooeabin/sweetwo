@@ -96,6 +96,7 @@ export function W01SalaryPlan() {
       <PageHeader
         title={v.partial ? copy.firstTitle : copy.planTitle(v.month)}
         backLabel={copy.back}
+        backTo={copy.backHome}
         onBack={() => nav('/')}
       />
       <div className="hg-row" style={{ gap: 'var(--space-2)' }}>

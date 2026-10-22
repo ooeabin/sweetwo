@@ -28,7 +28,12 @@ export function F05Money() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.moneyTitle} backLabel={copy.back} onBack={() => nav('/assets')} />
+      <PageHeader
+        title={copy.moneyTitle}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/assets')}
+      />
       <section className="hg-stack" aria-label={copy.incomeSection}>
         <SectionHeader title={copy.incomeSection} count={m(p.sum.income)} />
         <div className="hg-list">

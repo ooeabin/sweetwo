@@ -25,7 +25,12 @@ export function S01Guides() {
   const guide = (key: string) => GUIDES.find((g) => g.key === key);
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.guidesTitle} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.guidesTitle}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       <section className="hg-stack">
         <SectionHeader
           title={ck.stage ? copy.checklistStage(ck.stage.name) : copy.noStage}

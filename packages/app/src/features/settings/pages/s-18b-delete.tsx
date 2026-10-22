@@ -73,6 +73,7 @@ export function S18bDelete() {
       <PageHeader
         title={copy.deleteAccount}
         backLabel={copy.back}
+        backTo={copy.data}
         onBack={() => nav('/settings/data')}
       />
       <ul className="hg-stack" style={{ gap: 'var(--space-2)', paddingLeft: 'var(--space-5)' }}>

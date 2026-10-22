@@ -278,7 +278,12 @@ export function S12Couple() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.coupleTitle} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.coupleTitle}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       <div className="hg-list">
         <ListRow
           lead={

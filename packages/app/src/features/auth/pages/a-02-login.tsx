@@ -81,6 +81,7 @@ export function A02Login() {
       }
       title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}
       onBack={st.fromStart ? () => nav(-1) : undefined}
+      backLabel={st.inviter ? undefined : copy.toStart}
       actions={
         <>
           {authProviders.map((p) => (

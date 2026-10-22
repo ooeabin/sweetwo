@@ -60,7 +60,12 @@ export function S19aInquiry() {
         void send();
       }}
     >
-      <PageHeader title={copy.contact} backLabel={copy.back} onBack={() => nav('/settings/help')} />
+      <PageHeader
+        title={copy.contact}
+        backLabel={copy.back}
+        backTo={copy.help}
+        onBack={() => nav('/settings/help')}
+      />
       <div className="hg-field">
         <label className="hg-field__label" htmlFor={id}>
           {copy.categoryLabel}

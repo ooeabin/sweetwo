@@ -76,7 +76,12 @@ export function S21Trash() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.trash} backLabel={copy.back} onBack={() => nav('/settings/data')} />
+      <PageHeader
+        title={copy.trash}
+        backLabel={copy.back}
+        backTo={copy.data}
+        onBack={() => nav('/settings/data')}
+      />
       {rows.length === 0 ? (
         <EmptyState title={copy.trashEmpty} />
       ) : (

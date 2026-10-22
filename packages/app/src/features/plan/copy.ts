@@ -1,6 +1,8 @@
 // 월급 플랜·월급 나누기 문구(docs/spec/20-salary-plan.md W-01, W-02). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  backHome: '이번 달',
+  backPlan: '월급 플랜',
   planTitle: (month: number) => `${month}월 월급 플랜`,
   firstTitle: '이번 달 남은 기간 플랜',
   period: (start: string, end: string) => `${start} ~ ${end}`,

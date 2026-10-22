@@ -1,5 +1,6 @@
 import { Children, useEffect, type ReactNode } from 'react';
 import { Icon } from './Icon';
+import { Wordmark } from './Wordmark';
 
 export interface ChapterProgress {
   /** 1부터 */
@@ -8,6 +9,69 @@ export interface ChapterProgress {
   name: string;
   /** 챕터 안 진행 0~100. null이면 막대 없이 글자만(온보딩 결과 O-61~67) */
   fill: number | null;
+  /** 넓은 창 칸 막대(Meetup식): 챕터 안 질문 수와 지금까지 연 질문 수 */
+  steps?: { total: number; done: number };
+}
+
+/** 넓은 창 위 바 가운데: 챕터면 “2/4 목표” + 칸 막대(brand), 아니면 ProgressSteps */
+function BarProgress({
+  chapter,
+  steps,
+}: {
+  chapter?: ChapterProgress;
+  steps?: { total: number; now: number; fill?: number };
+}) {
+  if (chapter) {
+    const s = chapter.fill === null ? undefined : chapter.steps;
+    return (
+      <div className="hg-qbar__mid">
+        <p className="hg-qbar__label">
+          <span className="hg-chapterbar__num">
+            {chapter.index}/{chapter.total}
+          </span>{' '}
+          {chapter.name}
+        </p>
+        {s && s.total > 0 && (
+          <div
+            className="hg-segs"
+            role="progressbar"
+            aria-label={`${chapter.name} 진행`}
+            aria-valuemin={0}
+            aria-valuemax={s.total}
+            aria-valuenow={s.done}
+          >
+            {Array.from({ length: s.total }, (_, i) => (
+              <span key={i} className={`hg-segs__seg${i < s.done ? ' is-on' : ''}`} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (!steps) return <span />;
+  return (
+    <div className="hg-qbar__mid">
+      <StepsBar steps={steps} />
+    </div>
+  );
+}
+
+function StepsBar({ steps }: { steps: { total: number; now: number; fill?: number } }) {
+  return (
+    <div className="hg-steps" aria-hidden="true">
+      {Array.from({ length: steps.total }, (_, i) => (
+        <span
+          key={i}
+          className={`hg-steps__seg${i < steps.now ? ' is-done' : i === steps.now ? ' is-now' : ''}`}
+          style={
+            i === steps.now
+              ? ({ '--fill': `${steps.fill ?? 50}%` } as React.CSSProperties)
+              : undefined
+          }
+        />
+      ))}
+    </div>
+  );
 }
 
 /** 온보딩 챕터 진행(docs/design/components/ChapterBar.md). 뒤로 + 가운데 “2/4 목표” + 챕터 안 막대(brand) */
@@ -126,8 +190,14 @@ export function QuestionLayout({
     return () => window.removeEventListener('keydown', onKey);
   }, [onBack]);
 
+  const backOnly = !primary && !later;
   return (
     <main style={{ padding: '0 var(--space-4)' }}>
+      <div className="hg-qbar">
+        <Wordmark height={24} />
+        <BarProgress chapter={chapter} steps={steps} />
+        <span />
+      </div>
       <form
         className={['hg-q', wide && 'hg-q--wide', centered && 'hg-q--center']
           .filter(Boolean)
@@ -144,21 +214,7 @@ export function QuestionLayout({
         ) : (
           (steps || onBack) && (
             <div className="hg-q__nav">
-              {steps && (
-                <div className="hg-steps" aria-hidden="true">
-                  {Array.from({ length: steps.total }, (_, i) => (
-                    <span
-                      key={i}
-                      className={`hg-steps__seg${i < steps.now ? ' is-done' : i === steps.now ? ' is-now' : ''}`}
-                      style={
-                        i === steps.now
-                          ? ({ '--fill': `${steps.fill ?? 50}%` } as React.CSSProperties)
-                          : undefined
-                      }
-                    />
-                  ))}
-                </div>
-              )}
+              {steps && <StepsBar steps={steps} />}
               {onBack && (
                 <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
                   <Icon name="chevron-left" size={24} />
@@ -172,13 +228,20 @@ export function QuestionLayout({
           {help && <p className="hg-q__help">{help}</p>}
         </div>
         {children}
-        {(primary || later) && (
-          <div className="hg-q__foot">
+        {(primary || later || onBack) && (
+          <div className={`hg-q__foot${backOnly ? ' is-backonly' : ''}`}>
+            {onBack && (
+              <button type="button" className="hg-btn hg-btn--ghost hg-q__prev" onClick={onBack}>
+                <Icon name="chevron-left" size={16} />
+                이전
+              </button>
+            )}
             {later && (
               <button type="button" className="hg-btn hg-btn--link" onClick={later.onClick}>
                 {later.label}
               </button>
             )}
+            {primary && <span className="hg-q__hint">Enter 키를 눌러도 돼요</span>}
             {primary && (
               <button
                 type="submit"

@@ -32,7 +32,7 @@ async function part0(page: Page) {
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
   await heading(page, '내 이름이나 애칭을 알려 주세요');
-  await expect(page.getByText('1/4 우리 소개')).toBeVisible();
+  await expect(page.getByText('1/4 우리 소개').filter({ visible: true }).first()).toBeVisible();
   await axe(page);
   await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
   await next(page);
@@ -71,7 +71,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByRole('radio', { name: '1~3년' }).click();
 
   await heading(page, '이제 둘의 목표를 정해요');
-  await expect(page.getByText('2/4 목표')).toBeVisible();
+  await expect(page.getByText('2/4 목표').filter({ visible: true }).first()).toBeVisible();
   // 챕터 시작 안내: 끝난 챕터 체크, 지금 챕터 표시
   const chapterList = page.getByRole('list', { name: '이렇게 4단계로 물어볼게요' });
   await expect(chapterList.getByRole('listitem').first()).toContainText('우리 소개 끝남');
@@ -146,7 +146,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 
   // 챕터 4 용돈·분담(용돈 각자 50만 → 공동자금 500만, 버는 만큼 292만 : 208만)
   await heading(page, '마지막으로 용돈과 분담을 정해요');
-  await expect(page.getByText('4/4 나누기와 플랜')).toBeVisible();
+  await expect(page.getByText('4/4 나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
   await page.getByRole('button', { name: '시작할게요' }).click();
   await heading(page, '찬우님 용돈은 한 달에 얼마로 할까요?');
   await expect(page.getByText('예빈님 용돈도 같은 금액으로 계산해 둘게요')).toBeVisible();
@@ -172,7 +172,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await heading(page, '두 분의 돈 흐름을 정리하고 있어요');
   await heading(page, '두 분이 함께하면 한 달에 240만 원을 모을 수 있어요');
   // 결과 화면은 막대 없이 “4/4 나누기와 플랜”만
-  await expect(page.getByText('4/4 나누기와 플랜')).toBeVisible();
+  await expect(page.getByText('4/4 나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByRole('progressbar', { name: '나누기와 플랜 진행' })).toHaveCount(0);
   await expect(page.getByText('임시 플랜')).toBeVisible();
   await expect(page.getByText('예빈님이 합류하면 다시 계산돼요')).toBeVisible();
@@ -237,7 +237,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   // O-67 첫 미션 → 이번 달
   await heading(page, '9월 월급 플랜을 시작했어요');
   await expect(page.getByText('양가 명절·생신도 미리 챙겨볼까요?')).toBeVisible();
-  await expect(page.getByRole('button', { name: '뒤로' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^(뒤로|이전)/ })).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
 

@@ -110,6 +110,7 @@ export function G02GoalDetail() {
         <PageHeader
           title={g.name}
           backLabel={copy.back}
+          backTo={copy.title}
           onBack={back}
           action={<Menu label={copy.menu} actions={actions} />}
         />

@@ -46,6 +46,7 @@ export function S19aInquiries() {
       <PageHeader
         title={copy.myInquiries}
         backLabel={copy.back}
+        backTo={copy.help}
         onBack={() => nav('/settings/help')}
       />
       {rows.length === 0 ? (
@@ -88,6 +89,7 @@ export function S19aInquiries() {
       <PageHeader
         title={copy.inquiryNo(q.no)}
         backLabel={copy.back}
+        backTo={copy.myInquiries}
         onBack={() => nav('/settings/help/inquiries')}
       />
       {on && (
