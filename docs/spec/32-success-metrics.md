@@ -22,12 +22,12 @@
 | 첫 주 할 일 완료율 | 7일 안에 완료한 첫 주 할 일 카드 수 ÷ 해당 부부의 카드 수 | 50% | 미룬 질문(자산·대출·고정지출 세부)이 채워져 ‘추정’이 풀리는지 |
 | 배우자 초대율 | 온보딩 완료 후 7일 안에 초대 발급(O-07·설정 S-12 ‘부부 정보’)한 사용자 ÷ 온보딩 완료 사용자 | 70% | 부부 공동 사용이 핵심 차별점 |
 | 배우자 합류율 | 초대 발급 후 7일 안에 P-11 도달 ÷ 초대 발급 (재발급은 첫 발급 기준) | 50% | 초대 유효기간 7일과 일치. 합류해야 제안·함께 정리가 작동 |
-| 합류 소요 시간 | `invite_sent` → `partner_joined` 중앙값 | 24시간 이내 | 짧은 온보딩(P-01\~11, 2\~3분)·웹 합류 동선 검증 |
+| 합류 소요 시간 | `invite_sent` → `partner_joined` 중앙값 | 24시간 이내 | 짧은 온보딩(P-01\~11, 2\~3분)·휴대폰 초대 → 앱 설치 → 합류 동선 검증 |
 | 첫 사이클 월급 나누기 체크율 | 첫 플랜에서 W-02 나누기 줄을 1줄 이상 체크한 부부 ÷ 첫 플랜 생성 부부 중 W-02 대상(배우자 합류 + 통장 역할을 나눈 부부) | 70% | 플랜이 실제 월급 나누기 행동으로 이어지는지 |
 | 첫 월말 정리 완료율 | 첫 정리 대상 사이클에서 정리 완료한 부부 ÷ 첫 정리 기간에 도달한 부부 (늦은 정리 포함, 다음 기준일 + 7일까지) | 50% | 습관 형성의 첫 관문 |
 | M1 유지 | 첫 정리 완료 부부 중 바로 다음 사이클도 정리 완료 비율 | 60% | 첫 정리가 일회성인지 |
 | M3 유지 | 첫 정리 완료 부부 중 3번째 사이클에 정리 완료 비율 | 40% | 첫 분기(3사이클)까지 남는지 |
-| 함께 모드 비율 | 정리 완료 중 mode=together 비율 (연결 부부만) | 30% | 데스크톱 넓은 화면·웹 동시 접속으로 둘이 같이 보는지 |
+| 함께 모드 비율 | 정리 완료 중 mode=together 비율 (연결 부부만) | 30% | 데스크톱·모바일 동시 접속으로 둘이 같이 보는지 |
 | 제안 응답률 | 적용일 전에 좋아요·반대·다르게 해볼래요 중 응답한 제안 ÷ 생성 제안 (철회 제외) | 70% | 무응답 적용에 기대면 합의가 아니라 통보 |
 | 제안 응답 시간 | `proposal_created` → 첫 `proposal_responded` 중앙값 | 24시간 이내 | 72시간 규칙 안에서 실제로 대화하는지 |
 | 함께 정하기 비율 | ‘함께 정하기’로 넘어간 제안 ÷ 생성 제안 | 10% 이하 (상한) | 갈등 신호. 높으면 제안 문구·G-08 전·후 비교 점검 |
@@ -49,7 +49,7 @@
 | 연결 해제 | 월 `unlink_requested` 부부 ÷ 연결 부부, 14일 기본안 적용 비율 | 월 1% 초과 | 직전 60일 반대·함께 정하기 횟수와 교차 확인 (사유는 묻지 않음) |
 | 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 부부 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선, 임시 플랜 장기화 |
 | 알림 피로 | 알림 종류별 열람률, 월 상한(메일 6회) 도달 사용자 비율, 종류별 알림 끄기 수(S-14) | 열람률 10% 미만 또는 상한 도달 30% 초과 | 급하지 않은 알림 우선순위 조정 |
-| 브라우저 로그인 이탈 | 데스크톱 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
+| 브라우저 로그인 이탈 | 데스크톱·모바일 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
 
 ## 4. 이벤트 정의
 
@@ -70,22 +70,22 @@
 | role | `starter`(먼저 시작) / `partner`(초대받아 합류) |  |
 | couple\_state | `unjoined` 미합류 / `linked` 연결 / `unlink_pending` 해제 대기 / `solo` 혼자 쓰기 | → 핵심 규칙 › 부부·제안·권한 |
 | couple\_stage | `pre_wedding` / `newlywed_y1` / `y2_3` / `after` | 부부 공간 단계 |
-| platform | `desktop` / `web` | 모바일 앱 출시 시 `ios` / `android` 추가. 웹사이트 이벤트는 site |
-| os | `windows` / `macos` / 웹은 브라우저 계열 |  |
-| app\_version | 앱·웹 빌드 버전 |  |
+| platform | `desktop` / `ios` / `android` | 웹사이트 이벤트는 site |
+| os | `windows` / `macos` / `ios` / `android` |  |
+| app\_version | 앱 빌드 버전 |  |
 | cycle\_id | 사이클 ID (couple\_id + 기준일) | 첫 사이클은 `cycle_partial=true` |
 | plan\_tier | `free` / `premium` | 부부 단위 |
 | client\_time / server\_time | 기기 시각 / 수신 시각 | 오프라인 저장 후 동기화 전송 대비 |
 | source | `client` / `server` |  |
-| utm\_source, utm\_medium, utm\_campaign | 웹사이트 유입 UTM 값 | 웹사이트 이벤트에 붙이고, “웹에서 시작하기”로 app.sweetwo.kr에 넘길 때 주소에 이어 붙여 가입 이벤트까지 남김. 데스크톱 설치 경로는 이어지지 않음. source(client / server)와는 다른 속성 |
+| utm\_source, utm\_medium, utm\_campaign | 웹사이트 유입 UTM 값 | 웹사이트 이벤트에만 붙임. 스토어·데스크톱 설치 경로는 가입 이벤트까지 이어지지 않음(스토어 캠페인 값은 각 스토어 콘솔에서 봄). source(client / server)와는 다른 속성 |
 
 ### 4-3. 로그인·온보딩·합류
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| app\_first\_launch | 설치 후 데스크톱 앱 첫 실행(A-01), 첫 로그인 딥링크 도착 때 전송 | download\_id(L-02가 발급해 브라우저 로그인 딥링크로 넘긴 값, 없으면 null), os, app\_version |
-| login\_started | A-02 소셜 버튼 | method(kakao / google / apple), entry(first\_run / revisit / invite / session\_expired), flow(browser / popup / redirect) |
-| login\_completed | 제공자 로그인 후 앱 복귀(A-03 딥링크 / 웹 팝업·리다이렉트) (서버) | method, is\_new\_account, wait\_sec(데스크톱 브라우저 대기 시간), reopened(A-03 ‘다시 열기’ 사용) |
+| app\_first\_launch | 설치 후 앱 첫 실행(A-01). 데스크톱은 첫 로그인 딥링크 도착 때, 모바일은 첫 실행 때 전송 | download\_id(L-02가 발급해 브라우저 로그인 딥링크로 넘긴 값, 없으면 null), os, app\_version |
+| login\_started | A-02 소셜 버튼 | method(kakao / google / apple), entry(first\_run / revisit / invite / session\_expired), flow(browser) |
+| login\_completed | 제공자 로그인 후 앱 복귀(A-03 딥링크·앱 링크) (서버) | method, is\_new\_account, wait\_sec(브라우저 로그인 대기 시간), reopened(A-03 ‘다시 열기’ 사용) |
 | login\_failed | A-02·A-03 예외 | method, reason(cancelled / timeout / provider\_error / email\_conflict / request\_mismatch / browser\_open\_failed) |
 | signup\_completed | A-05 ‘동의하고 계속하기’ 계정 생성 (서버) | method, email\_source(provider / manual: A-04 직접 입력), marketing\_opt\_in, role |
 | onboarding\_started | O-01 ‘시작하기’ | entry(`direct` / `invite_link`) |
@@ -98,7 +98,7 @@
 | first\_week\_task\_completed | 이번 달 할 일 카드 | task(`invite` / `assets` / `loans` / `fixed_costs` / `goals_income` / `invest`), day\_index, postponed\_count |
 | invite\_sent | O-07, 설정 S-12 ‘부부 정보’ | channel(`code` / `link` / `kakao`), issue\_seq(재발급 회차) |
 | invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
-| invite\_link\_opened | sweetwo.kr/i/{코드} 열림(웹사이트 ‘초대 링크’) | choice(open\_app / continue\_web / direct\_web), has\_app\_history |
+| invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
 | partner\_joined | P-11 도달 | hours\_since\_invite, mid\_cycle, base\_day\_changed, proposals\_created(P-07·P-08·P-10에서 만든 제안 수) |
 
 ### 4-4. 월 사이클·월말 정리
@@ -172,14 +172,14 @@
 
 ### 4-8. 웹사이트
 
-화면 → 화면 설계 › 웹사이트. 쿠키 없는 측정이라 방문자 ID를 남기지 않고, 가입과 이어지는 값은 UTM뿐(4-2). platform = site.
+화면 → 화면 설계 › 웹사이트. 쿠키 없는 측정이라 방문자 ID를 남기지 않음. UTM은 웹사이트 이벤트에만(4-2). platform = site.
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | `site_landing_viewed` | L-01 열림 | os, utm\_source, utm\_medium, utm\_campaign |
 | `site_download_clicked` | L-01 2번, 7번, L-02 “다시 받기” | os(`mac` / `win`), placement(`hero` / `bottom` / `install_guide`) |
-| `site_web_start_clicked` | L-01 상단 바, 2번(휴대폰과 기타), 7번, L-02 5번 | placement(`topbar` / `hero` / bottom / `install_guide`), os |
-| `site_install_guide_viewed` | L-02 열림 | os, entry(`landing` / `web_app`) |
+| `site_store_clicked` | L-01 상단 바, 2번(휴대폰), 7번, L-02 5번 | store(`app_store` / `google_play`), placement(`topbar` / `hero` / `bottom` / `install_guide`), os |
+| `site_install_guide_viewed` | L-02 열림 | os, entry(`landing` / `app`) |
 | `site_faq_opened` | L-01 6번, L-06 질문 펼침 | faq\_no(FAQ 탭 번호), page(`landing` / `help`) |
 
 ## 5. 수집 원칙
@@ -201,5 +201,5 @@
 | 월간 (사이클 종료 7일 뒤, 늦은 정리 반영 후) | 핵심 지표 월 추이, 가입 주차 코호트별 첫 월말 정리 완료율·M1·M3, 함께 모드 비율, 놓친 달·쉬어가기, 함께 정하기, 연결 해제, 유료·페이월 전환 | 기능 개선·알림 정책 조정 |
 | 분기 | 목표치(가설) 재설정, 지표·이벤트 정의 점검 | 다음 분기 목표 |
 
-- 기본 분해: couple\_state, couple\_stage(예비 / 신혼), platform(desktop / web), 변동 수입 여부, 가입 경로(starter / partner)
+- 기본 분해: couple\_state, couple\_stage(예비 / 신혼), platform(desktop / ios / android), 변동 수입 여부, 가입 경로(starter / partner)
 - 코호트 단위: 온보딩 완료 주차. 유지율은 연결·혼자 쓰기·미합류로 나눠서도 표시

@@ -1,17 +1,17 @@
 # 기술·운영
 
-클라이언트는 Electron + React 데스크톱 앱과 같은 코드의 반응형 웹, 서버는 Supabase(Postgres + Auth + Realtime) 서울 리전 하나로 계정·DB·실시간 동기화를 처리함. 개인정보를 다루는 서버·도구는 모두 서울 리전, 국외 이전 없음. 보안 기준은 → 보안·개인정보, 충돌·오프라인 규칙은 → 동기화.
+클라이언트는 Electron + React 데스크톱 앱과 같은 React 코드를 Capacitor로 감싼 모바일 앱(iOS·Android, ADR 0001), 서버는 Supabase(Postgres + Auth + Realtime) 서울 리전 하나로 계정·DB·실시간 동기화를 처리함. 개인정보를 다루는 서버·도구는 모두 서울 리전, 국외 이전 없음. 보안 기준은 → 보안·개인정보, 충돌·오프라인 규칙은 → 동기화.
 
 ## 1. 스택
 
 | 영역 | 선택 | 용도 |
 | --- | --- | --- |
-| 클라이언트 | Electron + React + TypeScript. 반응형 웹은 같은 React 코드 | 화면·계산 패키지 공용 |
-| 빌드 | electron-vite | 데스크톱 앱 개발 서버와 빌드. 반응형 웹은 같은 Vite 설정 |
+| 클라이언트 | React + TypeScript 화면 하나를 데스크톱은 Electron, 모바일은 Capacitor로 감쌈 | 화면·계산 패키지 공용 |
+| 빌드 | electron-vite, Vite + Capacitor | 데스크톱 앱 개발 서버와 빌드. 모바일은 Vite로 만든 화면 묶음을 Capacitor가 iOS·Android 앱에 넣음(Xcode, Android Studio·Gradle) |
 | 상태·데이터 | TanStack Query + Zustand | 서버 데이터 캐시·다시 불러오기는 TanStack Query, 화면 상태는 Zustand |
-| 화면 이동 | React Router | 메뉴·화면 이동. 웹은 같은 경로를 주소로 사용 |
+| 화면 이동 | React Router | 메뉴·화면 이동. 앱 안 경로(데스크톱 해시 주소, 모바일은 앱 링크로 같은 경로를 엶) |
 | 입력·검증 | React Hook Form + Zod | 질문 화면 입력과 값 검증 |
-| 저장소 구조 | pnpm + Turborepo | 데스크톱 앱, 웹, 공용 패키지를 한 저장소에서 관리·빌드 |
+| 저장소 구조 | pnpm + Turborepo | 데스크톱 앱, 모바일 앱, 공용 패키지를 한 저장소에서 관리·빌드 |
 | 테스트 | Vitest, Playwright, pgTAP | 계산 함수 단위 테스트, 화면 흐름 E2E, DB 함수·RLS 테스트 |
 | CI/CD | GitHub Actions | 테스트·빌드·배포 자동 실행 |
 | 서버(DB·인증·실시간) | Supabase: Postgres + Auth + Realtime + Edge Functions, 서울 리전(ap-northeast-2) | 부부 공간·항목·제안·이력 저장. 행 단위 보안(RLS)으로 공개 범위 필터를 서버에서 적용, Realtime으로 상대 변경 1\~2초 수신. DB 전체 암호화(저장·백업), 금액 합계·배분은 DB 함수가 계산 |
@@ -26,21 +26,22 @@
 | 공휴일 | 공공데이터포털 ‘한국천문연구원 특일 정보’ API | 서버가 매년 12월에 다음 해를 받고 매주 1회 다시 받아 임시공휴일 반영, holiday 테이블에 저장. 앱은 테이블만 읽음. 어드민 AD-19에서 직접 추가·수정 |
 | 결제 | 결제대행사 미정(→ 사업 계획 9장 ‘결정 필요’) | 프리미엄 구독 결제·갱신·해지. 카드 정보는 결제대행사에만 저장 |
 | 분석 | PostHog 자체 운영(서울 리전 서버) | 퍼널·코호트(→ 성공 지표). 금액 원값 없음 |
-| 에러 수집 | Sentry 자체 운영(서울 리전 서버), Electron·React SDK | 크래시·오류 코드. 금액·메모 제거 후 전송 |
+| 에러 수집 | Sentry 자체 운영(서울 리전 서버), Electron·React·Capacitor SDK | 크래시·오류 코드. 금액·메모 제거 후 전송 |
 | 모니터링·상태 페이지 | Better Stack | 외부 가동 확인 1분 간격 + 상태 페이지(status.sweetwo.kr). 개인정보 없음 |
-| 웹·업데이트 파일 | S3 서울 + CloudFront | 웹 앱과 웹사이트 정적 파일, 설치 파일, 자동 업데이트(electron-updater). 개인정보 없음 |
+| 웹사이트·업데이트 파일 | S3 서울 + CloudFront | 웹사이트 정적 파일, 데스크톱 설치 파일, 자동 업데이트(electron-updater). 개인정보 없음 |
+| 모바일 푸시 | APNs(iOS), FCM(Android). 보내는 쪽은 Edge Functions | 알림 제목과 앞부분만(서프라이즈는 본문 숨김 → 알림), 금액 원값은 넣지 않음 [확인 필요]. 기기 토큰은 서버에 기기별 저장 |
 
 폴더 구조, 코드 규칙, 테스트·배포 절차 → 개발 가이드(별도 문서)
 
-- 코드 관리: 모노레포(데스크톱·웹·공용 패키지·DB 마이그레이션·Edge Functions, 웹사이트는 apps/site Astro 정적 사이트)
+- 코드 관리: 모노레포(데스크톱·모바일·공용 패키지·DB 마이그레이션·Edge Functions, 웹사이트는 apps/site Astro 정적 사이트)
 
 **주소 구조**
 
 | 주소 | 용도 |
 | --- | --- |
 | sweetwo.kr | 웹사이트(→ 화면 설계 › 웹사이트 L-01\~L-03, L-05, L-06). Astro 정적 사이트, S3 + CloudFront(서울) |
-| sweetwo.kr/i/{코드} | 초대 링크. 이 브라우저에 앱 기록이 있으면 “앱으로 열기”(sweetwo:// 딥링크), 없으면 웹 앱 P-01로 바로 |
-| app.sweetwo.kr | 웹 앱(반응형) |
+| sweetwo.kr/i/{코드} | 초대 링크. 앱이 있으면 앱이 바로 엶(유니버설 링크·앱 링크, 데스크톱은 sweetwo://), 없으면 웹사이트 초대 페이지(코드 + 스토어·다운로드) → 화면 설계 › 웹사이트 |
+| sweetwo.kr/.well-known/apple-app-site-association, /.well-known/assetlinks.json | iOS 유니버설 링크·Android 앱 링크 확인 파일(/i/*, 로그인 복귀, 알림 메일 링크 경로만) |
 | download.sweetwo.kr/latest/mac, /latest/win | 다운로드 고정 주소. CloudFront가 최신 정식 파일로 보냄(Mac universal dmg 1개, Windows x64) |
 | status.sweetwo.kr | 상태 페이지(Better Stack) |
 | 어드민 | 별도 도메인(→ 어드민) |
@@ -143,16 +144,17 @@
 
 | 항목 | 기준 |
 | --- | --- |
-| 다운로드 채널 | 공식 웹사이트(L-01, L-02) 직접 배포, 고정 주소 download.sweetwo.kr/latest/mac, /latest/win. Mac App Store·Microsoft Store는 출시 뒤 검토 |
-| 최소 OS | macOS 12 이상(Apple Silicon·Intel 유니버설 빌드), Windows 10 64비트 이상 |
+| 다운로드 채널 | 데스크톱: 공식 웹사이트(L-01, L-02) 직접 배포, 고정 주소 download.sweetwo.kr/latest/mac, /latest/win. Mac App Store·Microsoft Store는 출시 뒤 검토. 모바일: App Store, Google Play |
+| 최소 OS | macOS 12 이상(Apple Silicon·Intel 유니버설 빌드), Windows 10 64비트 이상, iOS 16 이상, Android 8(API 26) 이상 [확인 필요] |
 | 설치 파일 | macOS universal dmg 1개, Windows x64 설치 프로그램(NSIS). Windows ARM은 이후 |
-| 코드 서명·공증 | macOS Developer ID 서명 + Apple 공증, Windows 코드 서명 인증서(SmartScreen 경고 줄이려 EV 검토) |
-| 자동 업데이트 | electron-updater. 백그라운드 다운로드 → 서명 검증 → 다음 실행 때 적용. 최소 지원 버전 미만은 업데이트 화면만(→ 동기화 6장) |
+| 코드 서명·공증 | macOS Developer ID 서명 + Apple 공증, Windows 코드 서명 인증서(SmartScreen 경고 줄이려 EV 검토). iOS·Android는 스토어 서명(Apple 개발자 계정, Google Play 앱 서명) |
+| 스토어 심사 | 출시 2주 전 첫 제출(금융 범주 심사 지연 대비). 심사용 데모 계정은 흉내 데이터 공간으로 [확인 필요]. 개인정보 라벨(App Store), 데이터 보안 양식(Google Play) |
+| 자동 업데이트 | 모바일은 스토어 업데이트(코드 바꿔 넣기 업데이트는 쓰지 않음). 데스크톱은 electron-updater. 백그라운드 다운로드 → 서명 검증 → 다음 실행 때 적용. 최소 지원 버전 미만은 업데이트 화면만(→ 동기화 6장) |
 | 단계 배포 | 업데이트 채널은 하나. 첫 출시는 바로 전체 공개, 단계 배포는 업데이트부터: 10% → 50% → 100%(24시간 간격, 크래시 없는 세션 99% 이상일 때 다음 단계). 출시 승인 기준 99.5%(출시 준비 3장)보다 낮은 것은 의도된 차이: 승인은 출시 품질 기준, 단계 배포는 멈추는 선 |
-| 롤백 | 데스크톱: 단계 배포 중지 + 이전 코드를 더 높은 버전 번호로 재배포(앱은 아래 버전으로 내리지 않음). 웹: 이전 빌드로 즉시 전환. 서버: DB 변경은 추가형이라 코드만 되돌림 |
+| 롤백 | 데스크톱: 단계 배포 중지 + 이전 코드를 더 높은 버전 번호로 재배포(앱은 아래 버전으로 내리지 않음). 모바일: 스토어 단계 출시 중지(App Store 단계적 출시, Google Play 비율 출시) + 고친 버전 긴급 심사. 서버: DB 변경은 추가형이라 코드만 되돌림 |
 | 버전 표기 | 주.부.수(예: 1.2.3), S-19에 표시 |
 | 릴리스 노트 | 버전마다 웹사이트 L-03에 ‘새 기능’ ‘고친 것’ 게시. 이전 버전 다운로드는 두지 않음 |
-| 웹 지원 브라우저 | Chrome·Edge·Safari·Firefox 최신 2개 버전. 좁은 창: iOS Safari 16 이상, Android Chrome·삼성 인터넷 최신 2개 버전. 그 외 “이 브라우저는 지원하지 않아요” + 지원 목록 |
+| 웹사이트 지원 브라우저 | Chrome·Edge·Safari·Firefox 최신 2개 버전, iOS Safari 16 이상, Android Chrome·삼성 인터넷 최신 2개 버전 |
 
 ## 6. 위젯
 

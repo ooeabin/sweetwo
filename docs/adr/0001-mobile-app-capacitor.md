@@ -1,7 +1,7 @@
 # ADR 0001: 1차 출시를 데스크톱 앱 + 모바일 앱(Capacitor)으로, 반응형 웹 앱은 내지 않음
 
 - 날짜: 2026-10-22
-- 상태: 제안
+- 상태: 확정
 
 ## 맥락
 
@@ -13,8 +13,9 @@
 ## 결정
 
 - 1차 출시: 데스크톱 앱(Windows, macOS) + 모바일 앱(iOS, Android). 같은 Supabase 계정으로 두 앱에서 같은 데이터를 봄.
-- 모바일 앱은 Capacitor로 지금 React 화면(packages/app)을 그대로 감쌈. 새 앱 `apps/mobile`(Vite + Capacitor, iOS·Android 프로젝트 포함).
-- 반응형 웹 앱(app.sweetwo.kr)은 내지 않음. `apps/web`은 배포하지 않고 e2e 흉내 실행과 `/dev/ui` 확인용으로만 둠(이후 `apps/mobile`과 합칠지 따로 결정).
+- 모바일 앱은 Capacitor로 지금 React 화면(packages/app)을 그대로 감쌈.
+- 반응형 웹 앱(app.sweetwo.kr)은 내지 않음. `apps/web`(packages/app을 브라우저에 띄우는 Vite 껍데기)은 `apps/mobile`로 이름을 바꾸고 Capacitor(iOS·Android 프로젝트)를 얹음. 같은 Vite 서버로 e2e(Playwright, 흉내 Supabase)와 `/dev/ui`를 계속 돌림. 배포하는 웹은 없고 결과물은 스토어 앱뿐.
+- 앱 폴더: `apps/desktop`, `apps/mobile`, `apps/site`, `apps/admin`.
 - 모바일 전용은 `window.sweetwo` 같은 플랫폼 브리지로만(packages/app은 Capacitor를 모름). 데스크톱 브리지와 같은 모양에서 필요한 것만:
   - 소셜 로그인: 시스템 브라우저(인앱 브라우저) + 앱 링크로 돌아오기(A-03과 같은 흐름)
   - 앱 잠금: PIN + Face ID·지문(데스크톱 Touch ID 자리)
@@ -33,5 +34,5 @@
 
 - 좋은 점: 휴대폰 초대 → 앱 설치 → 합류 → 데스크톱과 같은 계정, 한 길로 정리. 화면과 로직은 그대로 재사용.
 - 나쁜 점: 설치 없이 써 보는 길이 없어짐. 스토어 계정, 심사(금융 앱 1~2주 가능), iOS·Android 기기 테스트, 푸시 인증서가 1차 일정에 들어옴.
-- 고칠 문서: 기획서 01, 02, 03, 04, 08, 11, 14, 15, 18, 25, 26, 28, 29, 30, 32, 34 / DEV_GUIDE / CLAUDE.md(스택, 구조) / design SiteLayout.
-- 고칠 코드: apps/site(다운로드, 초대 페이지), auth-callback(웹 로그인 경로), O-07 초대 문구, CI(모바일 빌드), 배포(app.sweetwo.kr 제거).
+- 고친 문서: 기획서 01, 02, 03, 04, 08, 11, 13, 14, 15, 18, 19, 20, 25, 26, 28, 29, 30, 31, 32, 34, 36 / DEV_GUIDE / CLAUDE.md(스택, 구조) / design SiteLayout, AuthLayout / apps/site FAQ 원본.
+- 고칠 코드: apps/web → apps/mobile 이름 바꾸기 + Capacitor, apps/site(다운로드, 초대 페이지), auth-callback(웹 로그인 경로), O-07 초대 문구, CI(모바일 빌드), 배포(app.sweetwo.kr 제거).
