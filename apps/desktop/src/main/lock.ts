@@ -59,9 +59,11 @@ export function setPin(pin: string): boolean {
 export async function verifyPin(pin: string): Promise<VerifyResult> {
   const s = read();
   if (!s) return { ok: true };
+  const given = Buffer.from(hashPin(pin, s.salt), 'base64');
+  const stored = Buffer.from(s.hash, 'base64');
+  // timingSafeEqual은 길이가 다르면 던진다(옛 빌드·깨진 저장값). 길이부터 맞춰 본다.
   const ok =
-    /^\d{6}$/.test(pin) &&
-    timingSafeEqual(Buffer.from(hashPin(pin, s.salt), 'base64'), Buffer.from(s.hash, 'base64'));
+    /^\d{6}$/.test(pin) && given.length === stored.length && timingSafeEqual(given, stored);
   if (ok) {
     write({ ...s, failed: 0 });
     locked = false;
