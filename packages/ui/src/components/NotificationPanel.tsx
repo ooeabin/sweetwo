@@ -117,7 +117,7 @@ export function NotificationPanel(p: {
     >
       <div className="hg-noti__head">
         {p.variant === 'page' && (
-          <IconButton icon="arrow-left" label={p.labels.back} ghost small onClick={p.onClose} />
+          <IconButton icon="chevron-left" label={p.labels.back} ghost small onClick={p.onClose} />
         )}
         <h2 className="hg-noti__title">{p.labels.title}</h2>
         <Button variant="ghost" size="sm" disabled={!unread} onClick={p.onReadAll}>

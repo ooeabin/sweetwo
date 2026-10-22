@@ -9,7 +9,7 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 - 아이콘만으로 뜻을 전하지 않음: 라벨 또는 `aria-label`을 같이 둠.
 - 필요한 아이콘이 여기 없으면 같은 Phosphor 세트에서 bold와 fill을 함께 추가. 새 아이콘은 클래스 이름을 Phosphor 이름 그대로 씀.
 - 클래스 이름은 지금 것을 그대로 씀(바꾸지 않음). 아래 표가 클래스와 Phosphor 원래 이름의 짝.
-- 뒤로는 상세 화면 `arrow-left`, 질문 흐름 `chevron-left`. 화면 모드는 `sun`, `moon`.
+- 뒤로는 모든 화면 `chevron-left`(꺾쇠 <). `arrow-left`는 뒤로에 쓰지 않음. 화면 모드는 `sun`, `moon`.
 - `apple-logo`, `windows-logo`는 웹사이트 다운로드 버튼과 OS 표시에만. 브랜드 로고라 모양을 바꾸지 않음.
 - 빈 상태, 카테고리, 축하 같은 큰 자리 그림은 이 아이콘이 아니라 실사 제품 사진(README ‘그림’ 장).
 

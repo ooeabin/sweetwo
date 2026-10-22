@@ -67,7 +67,7 @@ export function QuestionLayout({
             )}
             {onBack && (
               <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
-                <Icon name="arrow-left" size={24} />
+                <Icon name="chevron-left" size={24} />
               </button>
             )}
           </div>
