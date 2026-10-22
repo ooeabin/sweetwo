@@ -25,7 +25,9 @@ async function part0(page: Page) {
   await expect(chapters.getByRole('listitem')).toHaveCount(4);
   await expect(chapters).toContainText('나누기와 플랜');
   await expect(
-    page.getByText('입력하신 내용은 나중에 언제든 자유롭게 수정할 수 있으니, 편하게 작성해 주세요!'),
+    page.getByText(
+      '입력하신 내용은 나중에 언제든 자유롭게 수정할 수 있으니, 편하게 작성해 주세요!',
+    ),
   ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
