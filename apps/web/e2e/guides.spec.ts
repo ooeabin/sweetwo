@@ -81,7 +81,7 @@ test('체크리스트: 이번 달 할 일 → S-02 완료했어요 → 다음 �
   await heading(page, '보험 수익자 변경, 중복 보장 점검');
   await expect(page.getByRole('button', { name: '완료했어요' })).toHaveCount(0);
   await expect(page.getByText(/확인일 2026년 10월 18일/)).toBeVisible();
-  await page.getByRole('button', { name: '뒤로' }).click();
+  await page.getByRole('button', { name: /^(뒤로|이전)/ }).click();
   await page
     .getByRole('button', { name: /비상금은 왜 먼저일까요/ })
     .first()

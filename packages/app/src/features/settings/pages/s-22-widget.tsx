@@ -39,7 +39,12 @@ export function S22Widget() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.widgetTitle} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.widgetTitle}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
         <Toggle
           label={copy.widgetTray}

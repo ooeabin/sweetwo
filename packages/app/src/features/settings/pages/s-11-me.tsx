@@ -59,7 +59,12 @@ export function S11Me() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.me} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.me}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       {/* 1번 프로필 사진: 사진 있으면 사진, 없으면 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로 */}
       <div className="hg-row" style={{ gap: 'var(--space-4)', alignItems: 'center' }}>
         <span className="hg-avatar-edit">

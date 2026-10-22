@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 
 // 로그인, 가입 화면 틀(docs/design/components/AuthLayout.md)
@@ -9,6 +10,7 @@ export function AuthLayout({
   actions,
   note,
   onBack,
+  backLabel = '이전',
   children,
   className,
 }: {
@@ -18,6 +20,8 @@ export function AuthLayout({
   actions?: ReactNode;
   note?: ReactNode;
   onBack?: () => void;
+  /** 넓은 창에 보이는 뒤로 글자(꺾쇠 아이콘 대신) */
+  backLabel?: string;
   children?: ReactNode;
   className?: string;
 }) {
@@ -26,6 +30,10 @@ export function AuthLayout({
       {onBack && (
         <div className="hg-auth__back">
           <IconButton icon="chevron-left" label="뒤로" ghost onClick={onBack} />
+          <button type="button" className="hg-btn hg-btn--ghost hg-auth__backtext" onClick={onBack}>
+            <Icon name="chevron-left" size={16} />
+            {backLabel}
+          </button>
         </div>
       )}
       {media}

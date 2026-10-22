@@ -85,6 +85,7 @@ export function S13Visibility() {
       <PageHeader
         title={copy.visTitle}
         backLabel={copy.back}
+        backTo={next ? undefined : copy.title}
         onBack={() => nav(next ?? '/settings')}
       />
       <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>

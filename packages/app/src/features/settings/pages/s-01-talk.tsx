@@ -10,7 +10,12 @@ export function S01Talk() {
   const nav = useNavigate();
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-      <PageHeader title={copy.talkCards} backLabel={copy.back} onBack={() => nav(guidesPath)} />
+      <PageHeader
+        title={copy.talkCards}
+        backLabel={copy.back}
+        backTo={copy.guidesTitle}
+        onBack={() => nav(guidesPath)}
+      />
       {TALK_CARDS.map((c) => (
         <div key={c} className="hg-card">
           <p className="hg-card__title" style={{ margin: 0 }}>

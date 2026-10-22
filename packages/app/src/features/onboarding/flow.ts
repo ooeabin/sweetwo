@@ -71,6 +71,7 @@ export const PART6_START = 'o-61';
 export const LAST = 'o-67';
 
 /** 챕터 4개(docs/spec/16-onboarding-1.md 흐름 요약). 챕터 시작 = O-{n}0(챕터 1은 O-10 전체 안내가 대신) */
+const INTROS = ['o-10', 'o-20', 'o-30', 'o-50'];
 export const CHAPTERS = ['우리 소개', '목표', '수입과 지출', '나누기와 플랜'] as const;
 /** 화면 → 챕터(0부터). O-03~O-19e 우리 소개, O-20~O-24 목표, O-30~O-39 수입과 지출, O-50 이후 나누기와 플랜 */
 export const chapterOf = (id: string) => (id < 'o-20' ? 0 : id < 'o-30' ? 1 : id < 'o-50' ? 2 : 3);
@@ -82,7 +83,10 @@ export function chapterProgress(id: string, list: string[]) {
   if (id >= 'o-60') return { ...base, fill: null }; // 결과 7장은 막대 없이 글자만
   const inCh = list.filter((x) => chapterOf(x) === ch && x < 'o-60');
   const i = Math.max(inCh.indexOf(id), 0);
-  return { ...base, fill: inCh.length ? (i / inCh.length) * 100 : 0 };
+  // 넓은 창 칸 막대: 챕터 시작 안내(O-10·O-20·O-30·O-50)는 칸에 넣지 않음, 연 질문까지 채움
+  const qs = inCh.filter((x) => !INTROS.includes(x));
+  const steps = { total: qs.length, done: INTROS.includes(id) ? 0 : qs.indexOf(id) + 1 };
+  return { ...base, fill: inCh.length ? (i / inCh.length) * 100 : 0, steps };
 }
 
 export const nextOf = (id: string, list: string[]) => list[list.indexOf(id) + 1] ?? LAST;

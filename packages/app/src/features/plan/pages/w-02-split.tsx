@@ -37,7 +37,12 @@ export function W02Split() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.splitTitle} backLabel={copy.back} onBack={() => nav('/plan')} />
+      <PageHeader
+        title={copy.splitTitle}
+        backLabel={copy.back}
+        backTo={copy.backPlan}
+        onBack={() => nav('/plan')}
+      />
       {who === 'me' && myDone && (
         <section className="hg-card hg-stack" aria-label={copy.allDone}>
           <b>{copy.allDone}</b>

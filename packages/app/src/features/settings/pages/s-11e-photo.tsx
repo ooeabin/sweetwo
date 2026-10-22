@@ -61,7 +61,7 @@ export function S11ePhoto() {
   };
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.photo} backLabel={copy.back} onBack={back} />
+      <PageHeader title={copy.photo} backLabel={copy.back} backTo={copy.me} onBack={back} />
       {src ? (
         <ImageCrop
           src={src}

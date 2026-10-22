@@ -42,7 +42,12 @@ export function S02ChecklistItem() {
   };
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={item.title} backLabel={copy.back} onBack={back} />
+      <PageHeader
+        title={item.title}
+        backLabel={copy.back}
+        backTo={fromTodo ? undefined : copy.guidesTitle}
+        onBack={back}
+      />
       <p style={{ margin: 0 }}>{item.desc}</p>
       {item.steps.length > 0 && (
         <section className="hg-stack">

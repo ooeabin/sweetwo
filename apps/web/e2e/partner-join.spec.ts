@@ -68,7 +68,7 @@ test('O-01 ‘초대받았어요’ → P-01 코드 입력 → 초대 확인 →
   await heading(page, '찬우님이 초대했어요');
   await page.getByRole('button', { name: '합류하기' }).click();
   await heading(page, '찬우님 공간에 합류할 계정을 골라요');
-  await page.getByRole('button', { name: '뒤로' }).click();
+  await page.getByRole('button', { name: /^(뒤로|이전)/ }).click();
   await heading(page, '찬우님이 초대했어요');
 });
 

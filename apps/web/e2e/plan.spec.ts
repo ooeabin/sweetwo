@@ -313,7 +313,7 @@ test('생활비 체크(W-03): 체크일 전후 카드, 넘칠 것 같아요 → 
   await page.getByRole('button', { name: '다음' }).click();
   await heading(page, '더 드는 돈은 어디서 채울까요?');
   await expect(page.getByRole('radio', { name: /내 용돈에서/ })).toBeDisabled();
-  await page.getByRole('button', { name: /뒤로/ }).click();
+  await page.getByRole('button', { name: /^(뒤로|이전)/ }).click();
   await page.getByLabel('얼마쯤 더 들 것 같아요?').fill('200000');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByText('우선순위 낮은 목표부터')).toBeVisible();

@@ -9,6 +9,7 @@ export const providerName: Record<AuthProvider, string> = {
 };
 
 export const copy = {
+  toStart: '처음으로', // [확인 필요] 넓은 창 A-02 뒤로 글자
   // A-01
   maintenanceTitle: '지금 점검 중이에요',
   maintenanceEnds: (time: string) => `${time}에 끝나요`,

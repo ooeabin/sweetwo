@@ -5,7 +5,7 @@
 - 소비자가 주는 것: 장면 자리(선택, SceneMedia, 지금은 비어 있음), 제목, 보조 1줄(선택), 버튼 묶음, 뒤로(선택), 아래 안내 1줄(선택).
 - 가운데 한 열, 글자 가운데 정렬. 제목 `hg-auth__title`(28px, 줄바꿈 `\n` 그대로, 낱말 중간에서 끊지 않음 `keep-all`), 보조 `hg-auth__help`.
 - 버튼 묶음 `hg-auth__actions`: 세로로 쌓고 최대 360px. 버튼은 꽉 차게(`hg-btn--block`). ‘최근 사용’ 배지는 버튼 안 오른쪽 `hg-tag`.
-- 뒤로 `hg-auth__back`: 왼쪽 위, IconButton `chevron-left`.
+- 뒤로 `hg-auth__back`: 왼쪽 위. 좁은 창은 IconButton `chevron-left`, 넓은 창은 고스트 버튼 “‹ 이전”(`backLabel`, A-02는 “‹ 처음으로”).
 - 좁은 창(768px 미만): 제목(히어로)은 세로 가운데, 버튼 묶음은 아래 끝으로. 머리 자리에 아바타(`hg-avatar`)를 두면 아바타+제목을 묶어 세로 가운데로(A-02 초대로 들어왔을 때).
 - 입력이 있는 화면(P-01 코드 직접 입력)은 입력 칸(`hg-field`)과 주 버튼을 함께 버튼 묶음 안에 둔다(좁은 창에서 같이 아래로).
 - 소셜 버튼 왼쪽에 제공자 마크 `ProviderMark`(`hg-btn__mark`, 20px)를 글자 앞에 둔다.

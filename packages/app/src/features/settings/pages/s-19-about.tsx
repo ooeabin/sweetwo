@@ -16,7 +16,12 @@ export function S19About() {
   const version = desktop ? (window.sweetwo?.appVersion ?? '') : 'web';
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.about} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.about}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       <div className="hg-list">
         <ListRow label={copy.version} value={version} chevron={false} />
         <ListRow label={copy.whatsNew} onClick={() => openSite('/releases')} />

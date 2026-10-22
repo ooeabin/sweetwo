@@ -77,7 +77,12 @@ export function S15Security() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.security} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.security}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       {bridge && lock && (
         <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <Toggle

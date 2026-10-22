@@ -12,7 +12,12 @@ export function S03Guide() {
   if (!g) return <Navigate to={guidesPath} replace />;
   const body = (
     <article className="hg-stack" style={{ gap: 'var(--space-4)', maxWidth: 'var(--content-max)' }}>
-      <PageHeader title={g.title} backLabel={copy.back} onBack={() => nav(guidesPath)} />
+      <PageHeader
+        title={g.title}
+        backLabel={copy.back}
+        backTo={copy.guidesTitle}
+        onBack={() => nav(guidesPath)}
+      />
       {g.paragraphs.map((p) => (
         <p key={p} style={{ margin: 0 }}>
           {p}

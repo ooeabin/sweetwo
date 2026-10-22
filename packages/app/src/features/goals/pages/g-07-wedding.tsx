@@ -51,7 +51,12 @@ export function G07Wedding() {
         : null;
     body = (
       <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-        <PageHeader title={copy.wedding} backLabel={copy.back} onBack={() => nav('/goals')} />
+        <PageHeader
+          title={copy.wedding}
+          backLabel={copy.back}
+          backTo={copy.title}
+          onBack={() => nav('/goals')}
+        />
         <div className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
           {w.goal && <GoalBadges g={w.goal} />}
           {w.dday !== null && w.dday >= 0 && <Badge kind="goal">{`D-${w.dday}`}</Badge>}

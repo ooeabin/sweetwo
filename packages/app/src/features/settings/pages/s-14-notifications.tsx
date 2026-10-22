@@ -79,7 +79,12 @@ export function S14Notifications() {
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.rows.noti} backLabel={copy.back} onBack={() => nav('/settings')} />
+      <PageHeader
+        title={copy.rows.noti}
+        backLabel={copy.back}
+        backTo={copy.title}
+        onBack={() => nav('/settings')}
+      />
       <p className="hg-help" style={{ margin: 0 }}>
         {copy.cap}
       </p>
