@@ -17,7 +17,7 @@ export function PageHeader({
 }) {
   return (
     <header className="hg-pagehead">
-      <IconButton icon="arrow-left" label={backLabel} ghost onClick={onBack} />
+      <IconButton icon="chevron-left" label={backLabel} ghost onClick={onBack} />
       <div className="hg-pagehead__text">
         <h1 className="hg-pagehead__title">{title}</h1>
         {sub && <span className="hg-pagehead__sub">{sub}</span>}
