@@ -43,7 +43,7 @@ export function O11Marriage() {
     });
 
   return (
-    <QuestionLayout steps={s.steps} title={copy.married} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={copy.married} onBack={s.onBack}>
       <ChoiceCards<Status>
         label={copy.married}
         value={sp?.marriage_status ?? null}

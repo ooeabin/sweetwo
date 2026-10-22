@@ -407,7 +407,7 @@ sweetwo/
 
 ### 지킬 것
 
-- 브랜드 색(분홍)은 워드마크, 주 버튼, 달성 배지, 새 알림 점, 결과 카드(ResultCard) 체크에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 분홍(`brand-soft`)은 카드 안과 O-01 ‘초대받았어요’에만
+- 브랜드 색(분홍)은 워드마크, 주 버튼, 달성 배지, 새 알림 점, 결과 카드(ResultCard) 체크, 온보딩 챕터 진행 막대(ChapterBar)에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 분홍(`brand-soft`)은 카드 안과 O-01 ‘초대받았어요’에만
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -552,7 +552,7 @@ supabase/
 
 ### 온보딩 구조
 
-- `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 파트 0~5. 파트 4는 첫 주 할 일이라 없음. 각자 관리 예비부부는 O-36~39, O-51 건너뜀), `step.tsx`(진행 막대, 뒤로, 저장 뒤 다음, 멈춘 화면 기록), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-03` → 화면, 이어하기 `OnboardingGate`)
+- `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 파트 0~5. 파트 4는 첫 주 할 일이라 없음. 각자 관리 예비부부는 O-36~39, O-51 건너뜀. 챕터 4개 `CHAPTERS`, `chapterOf`: O-10 시작 → 우리 소개, O-20 목표, O-30 수입과 지출, O-50 나누기와 플랜), `step.tsx`(챕터 진행 `chapter`, 뒤로, 저장 뒤 다음, 멈춘 화면 기록), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 첫 화면 O-10, 이어하기 `OnboardingGate`)
 - O-36은 그룹 칩 `o-36`과 합계 `o-36t` 두 경로(한 화면 ID, 두 단계). ‘해당 없어요’면 합계 0원 저장 후 O-38
 - 파트 6 결과: O-61(분석 중, 비상금 기준 맞춤) → O-62 → O-63 → O-64 → O-65 → O-66 → O-67. 계산은 `result.ts`가 core(`planSummary`, `allocate`, `diagnose`)에 답을 넘겨서만. 결과 화면은 `QuestionLayout wide` + `hg-q__cols` 2열. 뒤로는 O-61을 건너뜀, 계산 근거 줄은 `?return=o-62`로 질문에 갔다 돌아옴
 - O-66 ‘시작하기’로 첫 월급 플랜(남은 기간)을 만들고 O-67에서 `onboarding_done_at`을 남긴 뒤 이번 달로(`useStep().finish`). O-67부터는 뒤로 없음. 사이클과 첫 플랜 금액은 core `cycle.ts`

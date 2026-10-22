@@ -169,7 +169,7 @@ export function O63Accounts() {
   return (
     <QuestionLayout
       wide
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       help={curMode === 'roles' ? copy.accountsHelp : undefined}
       onBack={s.onBack}

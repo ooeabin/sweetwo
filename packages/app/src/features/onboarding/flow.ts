@@ -2,7 +2,7 @@ import { skipsTopGoalQuestions, templateByKey } from '@sweetwo/core';
 import type { Goal, Me, Space } from './data';
 
 // 온보딩 ① 화면 순서(docs/spec/16-onboarding-1.md 흐름 요약). 답에 따라 목록이 바뀐다.
-// 화면 id는 경로에 그대로: /onboarding/o-03, O-23은 질문마다 o-23-1, o-23-2 …
+// 화면 id는 경로에 그대로: /onboarding/o-10, O-23은 질문마다 o-23-1, o-23-2 …
 export const AUTO_GOALS = ['emergency', 'wedding'];
 
 export interface FlowState {
@@ -35,11 +35,11 @@ export function joinedSpace(
   };
 }
 
-/** 파트 0~5 화면 목록(파트 4는 첫 주 할 일이라 없음) */
+/** 파트 0~5 화면 목록(파트 4는 첫 주 할 일이라 없음). 맨 앞 O-10은 챕터 4개 안내 */
 export function screens(s: FlowState): string[] {
-  const list = ['o-03', 'o-04', 'o-05', 'o-06'];
+  const list = ['o-10', 'o-03', 'o-04', 'o-05', 'o-06'];
   if (s.inviteNow === 'now') list.push('o-07');
-  list.push('o-10', 'o-11', 'o-12', 'o-13', 'o-15', 'o-16', 'o-18');
+  list.push('o-11', 'o-12', 'o-13', 'o-15', 'o-16', 'o-18');
   if (isEngaged(s)) list.push('o-19a', 'o-19b', 'o-19c', 'o-19d', 'o-19e');
   list.push('o-20', 'o-21');
   const top = topGoal(s.goals);
@@ -49,14 +49,16 @@ export function screens(s: FlowState): string[] {
     if (t?.asksDeadline((top.details ?? {}) as Record<string, never>)) list.push('o-24');
   }
   // 파트 3 소득·지출(docs/spec/17-onboarding-2.md 흐름 요약). 각자 관리 예비부부는 O-36~39, O-51 건너뜀.
-  list.push('o-31', 'o-32');
+  list.push('o-30', 'o-31', 'o-32');
   if (!partnerJoined(s)) list.push('o-33'); // 배우자가 이미 합류했으면 배우자 수입은 배우자가 답함
   if (!isSeparate(s)) {
     list.push('o-36');
     if (s.space?.fixed_total !== 0) list.push('o-36t'); // ‘해당 없어요’면 합계 질문 없음
-    list.push('o-38', 'o-39', 'o-51');
+    list.push('o-38', 'o-39');
   }
-  // 파트 5 분담
+  // 챕터 4 나누기와 플랜: 용돈(각자 관리 예비부부 없음), 분담, 결과
+  list.push('o-50');
+  if (!isSeparate(s)) list.push('o-51');
   list.push('o-52');
   // 파트 6 결과 → 이번 달
   list.push('o-61', 'o-62', 'o-63', 'o-64', 'o-65', 'o-66', 'o-67');
@@ -68,15 +70,19 @@ export const PART6_START = 'o-61';
 /** 마지막 화면(O-67 첫 미션). 여기서 온보딩을 마친다 */
 export const LAST = 'o-67';
 
-/** 6칸 진행 막대: 파트 0 = 1칸, 1 = 2칸, 2 = 3칸, 3 = 4칸, 5 = 5칸(파트 4 칸 없음) */
-const partOf = (id: string) =>
-  id < 'o-10' ? 0 : id < 'o-20' ? 1 : id < 'o-30' ? 2 : id < 'o-50' ? 3 : 4;
-export function progress(id: string, list: string[]) {
-  if (id >= 'o-60') return { total: 6, now: 6 }; // 결과: 6칸 모두 채움
-  const part = partOf(id);
-  const inPart = list.filter((x) => partOf(x) === part);
-  const i = Math.max(inPart.indexOf(id), 0);
-  return { total: 6, now: part, fill: Math.round(((i + 1) / (inPart.length + 1)) * 100) };
+/** 챕터 4개(docs/spec/16-onboarding-1.md 흐름 요약). 챕터 시작 = O-{n}0(챕터 1은 O-10 전체 안내가 대신) */
+export const CHAPTERS = ['우리 소개', '목표', '수입과 지출', '나누기와 플랜'] as const;
+/** 화면 → 챕터(0부터). O-03~O-19e 우리 소개, O-20~O-24 목표, O-30~O-39 수입과 지출, O-50 이후 나누기와 플랜 */
+export const chapterOf = (id: string) => (id < 'o-20' ? 0 : id < 'o-30' ? 1 : id < 'o-50' ? 2 : 3);
+/** 챕터 진행: 챕터 안에서만 차는 막대. 챕터 시작 0%, 결과(O-61~)는 4/4 모두 채움. O-10은 막대 없음 */
+export function chapterProgress(id: string, list: string[]) {
+  if (id === 'o-10') return undefined;
+  const ch = chapterOf(id);
+  const base = { index: ch + 1, total: CHAPTERS.length, name: CHAPTERS[ch] ?? '' };
+  if (id >= 'o-60') return { ...base, fill: 100 };
+  const inCh = list.filter((x) => chapterOf(x) === ch && x < 'o-60');
+  const i = Math.max(inCh.indexOf(id), 0);
+  return { ...base, fill: inCh.length ? (i / inCh.length) * 100 : 0 };
 }
 
 export const nextOf = (id: string, list: string[]) => list[list.indexOf(id) + 1] ?? LAST;

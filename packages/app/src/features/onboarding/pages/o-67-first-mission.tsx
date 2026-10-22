@@ -14,7 +14,7 @@ export function O67FirstMission() {
   const engaged = s.state.space?.marriage_status === 'engaged';
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.started(month)}
       help={engaged ? copy.missionEngaged : copy.missionMarried}
       later={{ label: copy.later, onClick: () => void s.finish() }}

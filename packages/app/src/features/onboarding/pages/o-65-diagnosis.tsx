@@ -36,7 +36,7 @@ export function O65Diagnosis() {
   return (
     <QuestionLayout
       wide
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       onBack={s.onBack}
       primary={{ label: copy.next, loading: s.saving }}

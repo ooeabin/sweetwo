@@ -21,7 +21,7 @@ export function O38LivingBudget() {
     s.done(() => saveSpace({ living_budget: amount, living_budget_estimated: estimated }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.living}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || value <= 0, loading: s.saving }}

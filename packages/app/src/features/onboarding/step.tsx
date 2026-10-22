@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useGoals, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
-import { joinedSpace, nextOf, prevOf, progress, screens, type FlowState } from './flow';
+import { chapterProgress, joinedSpace, nextOf, prevOf, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
-/** 화면 하나의 흐름: 진행 막대, 뒤로, 저장 뒤 다음(또는 O-20 ‘수정’에서 왔으면 O-20으로) */
+/** 화면 하나의 흐름: 챕터 진행, 뒤로, 저장 뒤 다음(또는 O-20 ‘수정’에서 왔으면 O-20으로) */
 export function useStep(id: string) {
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -89,7 +89,7 @@ export function useStep(id: string) {
     ready,
     saving,
     list,
-    steps: progress(id, list),
+    chapter: chapterProgress(id, list),
     done,
     finish,
     onBack: back ? () => nav(ret ? onboardingPath(ret) : onboardingPath(back)) : undefined,

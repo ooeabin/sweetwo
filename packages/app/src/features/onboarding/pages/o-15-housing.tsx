@@ -11,7 +11,7 @@ export function O15Housing() {
   if (!s.ready) return null;
   const title = copy.housing;
   return (
-    <QuestionLayout steps={s.steps} title={title} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={title} onBack={s.onBack}>
       <ChoiceCards<V>
         label={title}
         value={s.state.space?.housing ?? null}

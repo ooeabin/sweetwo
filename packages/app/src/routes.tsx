@@ -1240,7 +1240,7 @@ export const routes: RouteObject[] = [
         ),
       }, // G-08 제안 확인
       {
-        path: '/onboarding/:screen', // O-03~O-24 온보딩 ①
+        path: '/onboarding/:screen', // O-10~O-67 온보딩
         element: (
           <RequireAccount>
             <OnboardingRoute />

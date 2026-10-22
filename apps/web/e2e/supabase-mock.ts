@@ -72,7 +72,7 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
       o.signup?.(req.postDataJSON() as Record<string, unknown>);
       return json(route, { id: chanwoo.id });
     }
-    // 가입 뒤 온보딩 첫 화면(O-03)까지
+    // 가입 뒤 온보딩 첫 화면(O-10)까지
     if (url.pathname === '/rest/v1/app_user') {
       return json(route, {
         id: chanwoo.id,

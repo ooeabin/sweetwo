@@ -85,7 +85,7 @@ export function O52Split() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       help={help}
       onBack={s.onBack}
