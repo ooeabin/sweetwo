@@ -37,7 +37,7 @@ export function O38LivingBudget() {
         quick={quickChips.small}
         monthly
         bands={bands.livingCost}
-        unsureLabel={copy.unsure}
+        unsureLabel={copy.unsureLater}
         onBand={(b) => void save(b.value, true)}
       />
       {ok.banner}

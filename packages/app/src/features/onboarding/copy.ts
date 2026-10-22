@@ -5,6 +5,7 @@ import { topic } from '@sweetwo/core';
 export const copy = {
   next: '다음',
   unsure: '잘 모르겠어요',
+  unsureLater: '잘 모르겠어요, 나중에 적을게요', // [확인 필요] 금액 칸 보조 링크(구간 골라 추정 + 할 일)
   checkValue: '입력한 값이 맞나요?',
   saveFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
@@ -36,6 +37,7 @@ export const copy = {
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
   overviewTitle: '몇 가지만 여쭤보고 우리의 첫 플랜을 만들어 드릴게요',
   overviewHelp: '약 8분이면 충분해요', // [확인 필요]
+  overviewEditable: '입력하신 내용은 나중에 언제든 자유롭게 수정할 수 있으니, 편하게 작성해 주세요!',
   overviewList: '이렇게 4단계로 물어볼게요', // [확인 필요] 챕터 목록 이름(화면 읽기)
   chapterDescs: [
     '호칭, 결혼, 집과 일, 아이 계획을 알려 주세요', // [확인 필요]
@@ -170,7 +172,7 @@ export const copy = {
 
   // O-36
   fixedGroups: '매달 꼭 나가는 돈을 골라주세요',
-  fixedGroupsHelp: '대출 상환은 다음에 따로 물어요',
+  fixedGroupsHelp: '다음 화면에서 합계만 한 번 물어볼게요', // [확인 필요] 항목별 금액은 첫 주 할 일
   addOwn: '직접 추가',
   addOwnPlaceholder: '예: 정수기 렌탈', // [확인 필요]
   add: '추가', // [확인 필요]

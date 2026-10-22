@@ -1,4 +1,5 @@
 import { QuestionLayout } from '@sweetwo/ui';
+import { OnboardingChapters } from '../chapters';
 import { copy } from '../copy';
 import { isSeparate } from '../flow';
 import { useStep } from '../step';
@@ -15,6 +16,8 @@ export function O50SplitIntro() {
       onBack={s.onBack}
       primary={{ label: copy.chapterStart, loading: s.saving }}
       onSubmit={() => void s.done()}
-    />
+    >
+      <OnboardingChapters now={3} />
+    </QuestionLayout>
   );
 }

@@ -1,6 +1,7 @@
 import { readWon } from '@sweetwo/core';
 import { QuestionLayout } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
+import { OnboardingChapters } from '../chapters';
 import { copy } from '../copy';
 import { onboardingPath, useStep } from '../step';
 
@@ -55,6 +56,7 @@ export function O20Part2Intro() {
       primary={{ label: copy.part2Cta }}
       onSubmit={() => void s.done()}
     >
+      <OnboardingChapters now={1} />
       <section
         className="hg-stack"
         aria-label={copy.summaryTitle}

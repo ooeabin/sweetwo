@@ -6,13 +6,13 @@ export interface ChapterProgress {
   index: number;
   total: number;
   name: string;
-  /** 챕터 안 진행 0~100 */
-  fill: number;
+  /** 챕터 안 진행 0~100. null이면 막대 없이 글자만(온보딩 결과 O-61~67) */
+  fill: number | null;
 }
 
 /** 온보딩 챕터 진행(docs/design/components/ChapterBar.md). 뒤로 + 가운데 “2/4 목표” + 챕터 안 막대(brand) */
 export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBack?: () => void }) {
-  const fill = Math.min(Math.max(Math.round(chapter.fill), 0), 100);
+  const fill = chapter.fill === null ? null : Math.min(Math.max(Math.round(chapter.fill), 0), 100);
   return (
     <div className="hg-chapterbar">
       <div className="hg-chapterbar__top">
@@ -28,44 +28,61 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
           {chapter.name}
         </p>
       </div>
-      <div
-        className="hg-chapterbar__track"
-        role="progressbar"
-        aria-label={`${chapter.name} 진행`}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={fill}
-      >
-        <span
-          className="hg-chapterbar__fill"
-          style={{ '--fill': `${fill}%` } as React.CSSProperties}
-        />
-      </div>
+      {fill !== null && (
+        <div
+          className="hg-chapterbar__track"
+          role="progressbar"
+          aria-label={`${chapter.name} 진행`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={fill}
+        >
+          <span
+            className="hg-chapterbar__fill"
+            style={{ '--fill': `${fill}%` } as React.CSSProperties}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
-/** 온보딩 첫 화면(O-10) 챕터 목록(ChapterBar.md › ChapterList) */
+/** 챕터 목록(ChapterBar.md › ChapterList). O-10은 상태 없이, 챕터 시작 안내(O-20·O-30·O-50)는 끝남·지금·남음 */
 export function ChapterList({
   label,
   items,
+  now,
 }: {
   label: string;
   items: { name: string; desc: string }[];
+  /** 지금 챕터 순서(0부터). 주면 앞은 끝남(체크), 뒤는 흐리게, 설명은 지금 챕터만 */
+  now?: number;
 }) {
   return (
     <ol className="hg-chapters" aria-label={label}>
-      {items.map((c, i) => (
-        <li key={c.name} className="hg-chapters__item">
-          <span className="hg-chapters__num" aria-hidden="true">
-            {i + 1}
-          </span>
-          <span className="hg-chapters__text">
-            <span className="hg-chapters__name">{c.name}</span>
-            <span className="hg-chapters__desc">{c.desc}</span>
-          </span>
-        </li>
-      ))}
+      {items.map((c, i) => {
+        const state = now === undefined ? undefined : i < now ? 'done' : i === now ? 'now' : 'next';
+        return (
+          <li
+            key={c.name}
+            className={`hg-chapters__item${state ? ` is-${state}` : ''}`}
+            aria-current={state === 'now' ? 'step' : undefined}
+          >
+            <span className="hg-chapters__num" aria-hidden="true">
+              {state === 'done' ? <Icon name="check" size={16} /> : i + 1}
+            </span>
+            <span className="hg-chapters__text">
+              <span className="hg-chapters__name">
+                {c.name}
+                {state === 'done' && <span className="hg-sr"> 끝남</span>}
+              </span>
+              {(state === undefined || state === 'now') && (
+                <span className="hg-chapters__desc">{c.desc}</span>
+              )}
+            </span>
+          </li>
+        );
+      })}
     </ol>
   );
 }
