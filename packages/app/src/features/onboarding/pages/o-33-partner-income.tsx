@@ -41,7 +41,7 @@ export function O33PartnerIncome() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       onBack={s.onBack}
       primary={exact ? { label: copy.next, disabled: !exactValue, loading: s.saving } : undefined}

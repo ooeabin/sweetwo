@@ -20,7 +20,7 @@ export function O19aWeddingBudget() {
     s.done(() => saveSpace({ wedding_budget: amount, wedding_budget_estimated: e }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.weddingBudget}
       help={copy.weddingBudgetHelp}
       onBack={s.onBack}

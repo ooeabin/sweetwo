@@ -2,7 +2,6 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
-
 const axe = async (page: Page) => {
   const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(

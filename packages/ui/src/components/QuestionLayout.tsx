@@ -1,9 +1,79 @@
 import { Children, useEffect, type ReactNode } from 'react';
 import { Icon } from './Icon';
 
+export interface ChapterProgress {
+  /** 1부터 */
+  index: number;
+  total: number;
+  name: string;
+  /** 챕터 안 진행 0~100 */
+  fill: number;
+}
+
+/** 온보딩 챕터 진행(docs/design/components/ChapterBar.md). 뒤로 + 가운데 “2/4 목표” + 챕터 안 막대(brand) */
+export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBack?: () => void }) {
+  const fill = Math.min(Math.max(Math.round(chapter.fill), 0), 100);
+  return (
+    <div className="hg-chapterbar">
+      <div className="hg-chapterbar__top">
+        {onBack && (
+          <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+            <Icon name="chevron-left" size={24} />
+          </button>
+        )}
+        <p className="hg-chapterbar__label">
+          <span className="hg-chapterbar__num">
+            {chapter.index}/{chapter.total}
+          </span>{' '}
+          {chapter.name}
+        </p>
+      </div>
+      <div
+        className="hg-chapterbar__track"
+        role="progressbar"
+        aria-label={`${chapter.name} 진행`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={fill}
+      >
+        <span
+          className="hg-chapterbar__fill"
+          style={{ '--fill': `${fill}%` } as React.CSSProperties}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** 온보딩 첫 화면(O-10) 챕터 목록(ChapterBar.md › ChapterList) */
+export function ChapterList({
+  label,
+  items,
+}: {
+  label: string;
+  items: { name: string; desc: string }[];
+}) {
+  return (
+    <ol className="hg-chapters" aria-label={label}>
+      {items.map((c, i) => (
+        <li key={c.name} className="hg-chapters__item">
+          <span className="hg-chapters__num" aria-hidden="true">
+            {i + 1}
+          </span>
+          <span className="hg-chapters__text">
+            <span className="hg-chapters__name">{c.name}</span>
+            <span className="hg-chapters__desc">{c.desc}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 // 한 화면 한 질문 틀(docs/design/components/QuestionLayout.md). Enter = 다음(폼 제출), Esc = 뒤로.
 export function QuestionLayout({
   steps,
+  chapter,
   title,
   help,
   children,
@@ -15,6 +85,8 @@ export function QuestionLayout({
   center,
 }: {
   steps?: { total: number; now: number; fill?: number };
+  /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “2/4 목표” + 챕터 안 막대 */
+  chapter?: ChapterProgress;
   title: ReactNode;
   help?: ReactNode;
   children?: ReactNode;
@@ -48,29 +120,35 @@ export function QuestionLayout({
           if (!primary?.disabled) onSubmit?.();
         }}
       >
-        {(steps || onBack) && (
+        {chapter ? (
           <div className="hg-q__nav">
-            {steps && (
-              <div className="hg-steps" aria-hidden="true">
-                {Array.from({ length: steps.total }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`hg-steps__seg${i < steps.now ? ' is-done' : i === steps.now ? ' is-now' : ''}`}
-                    style={
-                      i === steps.now
-                        ? ({ '--fill': `${steps.fill ?? 50}%` } as React.CSSProperties)
-                        : undefined
-                    }
-                  />
-                ))}
-              </div>
-            )}
-            {onBack && (
-              <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
-                <Icon name="chevron-left" size={24} />
-              </button>
-            )}
+            <ChapterBar chapter={chapter} onBack={onBack} />
           </div>
+        ) : (
+          (steps || onBack) && (
+            <div className="hg-q__nav">
+              {steps && (
+                <div className="hg-steps" aria-hidden="true">
+                  {Array.from({ length: steps.total }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`hg-steps__seg${i < steps.now ? ' is-done' : i === steps.now ? ' is-now' : ''}`}
+                      style={
+                        i === steps.now
+                          ? ({ '--fill': `${steps.fill ?? 50}%` } as React.CSSProperties)
+                          : undefined
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+              {onBack && (
+                <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+                  <Icon name="chevron-left" size={24} />
+                </button>
+              )}
+            </div>
+          )
         )}
         <div className="hg-q__head">
           <h1 className="hg-q__title">{title}</h1>

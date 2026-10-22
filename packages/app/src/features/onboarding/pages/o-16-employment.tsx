@@ -11,7 +11,7 @@ export function O16Employment() {
   if (!s.ready) return null;
   const title = copy.employment(s.state.me?.nickname ?? '');
   return (
-    <QuestionLayout steps={s.steps} title={title} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={title} onBack={s.onBack}>
       <ChoiceCards<V>
         label={title}
         value={s.state.me?.employment ?? null}

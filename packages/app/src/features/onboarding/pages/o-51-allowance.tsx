@@ -17,7 +17,7 @@ export function O51Allowance() {
   const title = copy.allowance(me?.nickname ?? '');
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       help={copy.allowanceHelp}
       onBack={s.onBack}

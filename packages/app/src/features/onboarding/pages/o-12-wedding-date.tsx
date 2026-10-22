@@ -45,7 +45,7 @@ export function O12WeddingDate() {
   if (isUndecided) {
     return (
       <QuestionLayout
-        steps={s.steps}
+        chapter={s.chapter}
         title={copy.whenPlanned}
         onBack={() => setUndecided(false)}
         primary={{ label: copy.next, disabled: !m || !!monthError, loading: s.saving }}
@@ -65,7 +65,7 @@ export function O12WeddingDate() {
   }
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={engaged ? copy.weddingPlanned : copy.weddingDone}
       help={engaged ? copy.weddingPlannedHelp : undefined}
       onBack={s.onBack}

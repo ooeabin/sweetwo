@@ -51,7 +51,7 @@ test('A-01: 점검 시간이면 점검 안내, 끝나는 시각', async ({ page 
   await noA11yViolations(page);
 });
 
-test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-03', async ({ page }) => {
+test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-10', async ({ page }) => {
   let signup: Record<string, unknown> | undefined;
   await mockSupabase(page, {
     loginState: { state: 'new', needs_email: true },
@@ -84,7 +84,9 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await noA11yViolations(page);
   await agree.click();
 
-  await expect(page.getByRole('heading', { name: '뭐라고 부르면 될까요?' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '몇 가지만 여쭤보고 우리의 첫 플랜을 만들어 드릴게요' }),
+  ).toBeVisible();
   expect(signup).toMatchObject({
     p_provider: 'kakao',
     p_notify_email: 'chanwoo@mail.com',

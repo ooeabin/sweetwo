@@ -48,7 +48,7 @@ export function O20Part2Intro() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.part2Title}
       help={copy.part2Help}
       onBack={s.onBack}

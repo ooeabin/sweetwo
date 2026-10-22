@@ -39,7 +39,7 @@ export function O62Summary() {
     return (
       <QuestionLayout
         wide
-        steps={s.steps}
+        chapter={s.chapter}
         title={copy.weddingSave(readWon(need))}
         onBack={s.onBack}
         primary={{ label: copy.next, loading: s.saving }}
@@ -98,7 +98,7 @@ export function O62Summary() {
   return (
     <QuestionLayout
       wide
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       onBack={s.onBack}
       primary={{ label: copy.next, loading: s.saving }}

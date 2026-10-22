@@ -91,7 +91,7 @@ export function O36FixedGroups() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.fixedGroups}
       help={copy.fixedGroupsHelp}
       onBack={s.onBack}

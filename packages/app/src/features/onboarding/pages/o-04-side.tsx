@@ -10,7 +10,7 @@ export function O04Side() {
   const s = useStep('o-04');
   if (!s.ready) return null;
   return (
-    <QuestionLayout steps={s.steps} title={copy.side} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={copy.side} onBack={s.onBack}>
       <ChoiceCards<Side>
         label={copy.side}
         value={s.state.me?.side ?? null}

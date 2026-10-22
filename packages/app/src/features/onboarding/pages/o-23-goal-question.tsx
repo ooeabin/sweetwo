@@ -60,7 +60,7 @@ export function O23GoalQuestion({ index }: { index: number }) {
   const out = submitValue(q, v);
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={q.title}
       onBack={s.onBack}
       primary={

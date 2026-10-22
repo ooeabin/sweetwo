@@ -119,7 +119,7 @@ export function O66PlanStart() {
   return (
     <QuestionLayout
       wide
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.startPlan}
       onBack={s.onBack}
       primary={{ label: copy.start, disabled: value === null || tooMuch, loading: s.saving }}

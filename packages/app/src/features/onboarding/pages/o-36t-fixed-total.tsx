@@ -22,7 +22,7 @@ export function O36tFixedTotal() {
     s.done(() => saveSpace({ fixed_total: amount, fixed_total_estimated: estimated }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.fixedTotal}
       help={copy.fixedTotalHelp}
       onBack={s.onBack}

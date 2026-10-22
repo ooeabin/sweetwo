@@ -97,7 +97,7 @@ export function O64Goals() {
   return (
     <QuestionLayout
       wide
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.goalsResult}
       onBack={s.onBack}
       primary={{ label: copy.next, loading: s.saving || busy }}

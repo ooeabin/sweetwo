@@ -624,7 +624,9 @@ test('재정 진단(F-06): 요약, 위험·주의 먼저, 비상금 개월, 추�
   await expect(page.getByRole('region', { name: '비상금' })).toContainText('300만 원');
 });
 
-test('비상금 카드(F-01): 넣기는 바로 잔액에, 꺼내기는 잔액까지만 + 사유, 되돌리기', async ({ page }) => {
+test('비상금 카드(F-01): 넣기는 바로 잔액에, 꺼내기는 잔액까지만 + 사유, 되돌리기', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);

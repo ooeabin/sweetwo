@@ -34,7 +34,7 @@ export function O61Analyzing() {
 
   if (!s.ready) return null;
   return (
-    <QuestionLayout steps={s.steps} title={copy.analyzing} center>
+    <QuestionLayout chapter={s.chapter} title={copy.analyzing} center>
       <div
         className="hg-stackbar"
         role="progressbar"

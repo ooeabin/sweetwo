@@ -23,7 +23,7 @@ export function O31Income() {
     s.done(() => saveMe({ monthly_income: amount, income_variable: variable }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       help={variable ? copy.incomeLowHelp : copy.incomeHelp}
       onBack={s.onBack}

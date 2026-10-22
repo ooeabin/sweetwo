@@ -40,7 +40,7 @@ export function O13BirthYear() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !b, loading: s.saving }}

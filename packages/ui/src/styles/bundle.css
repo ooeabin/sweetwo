@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (32a0b2e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8085a8c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -197,6 +197,21 @@
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
 .hg-q__back { display: inline-flex; align-items: center; justify-content: flex-start; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: var(--radius-md); }
 .hg-q__back:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* 온보딩 챕터 진행(ChapterBar): 뒤로 + 가운데 “2/4 목표” + 챕터 안에서만 차는 얇은 막대(brand). 챕터가 바뀌면 처음부터 */
+.hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
+.hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
+.hg-chapterbar__label { grid-column: 2; margin: 0; text-align: center; font: 600 15px/22px var(--font-sans); color: var(--ink); }
+.hg-chapterbar__num { color: var(--brand); font-variant-numeric: tabular-nums; }
+.hg-chapterbar__track { position: relative; height: 4px; border-radius: var(--radius-full); background: var(--hairline); overflow: hidden; }
+.hg-chapterbar__fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: var(--radius-full); background: var(--brand); transition: width var(--dur-base) var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .hg-chapterbar__fill { transition: none; } }
+/* 온보딩 첫 화면(O-10) 챕터 목록(ChapterList): 회색 판 위 번호 원 + 챕터 이름 + 한 줄 */
+.hg-chapters { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: var(--space-5); list-style: none; background: var(--plate); border-radius: var(--radius-xl); }
+.hg-chapters__item { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: var(--space-3); margin: 0; }
+.hg-chapters__num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); font: 600 14px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-chapters__text { display: flex; flex-direction: column; min-width: 0; }
+.hg-chapters__name { font: 600 16px/24px var(--font-sans); color: var(--ink); }
+.hg-chapters__desc { font: 400 14px/20px var(--font-sans); color: var(--slate); word-break: keep-all; }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
 .hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }

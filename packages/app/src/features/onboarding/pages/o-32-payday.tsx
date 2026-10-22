@@ -16,7 +16,7 @@ export function O32Payday() {
   const value = v === undefined ? saved : v;
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.payday}
       help={typeof value === 'number' && value >= 29 ? copy.paydayShortMonth : undefined}
       onBack={s.onBack}

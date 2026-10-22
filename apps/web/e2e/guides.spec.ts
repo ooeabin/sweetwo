@@ -82,7 +82,10 @@ test('체크리스트: 이번 달 할 일 → S-02 완료했어요 → 다음 �
   await expect(page.getByRole('button', { name: '완료했어요' })).toHaveCount(0);
   await expect(page.getByText(/확인일 2026년 10월 18일/)).toBeVisible();
   await page.getByRole('button', { name: '뒤로' }).click();
-  await page.getByRole('button', { name: /비상금은 왜 먼저일까요/ }).first().click();
+  await page
+    .getByRole('button', { name: /비상금은 왜 먼저일까요/ })
+    .first()
+    .click();
   await heading(page, '비상금은 왜 먼저일까요');
   await expect(page.getByText('투자·금융 자문이 아니에요. 제도와 개념만 설명해요')).toBeVisible();
   await axe(page);

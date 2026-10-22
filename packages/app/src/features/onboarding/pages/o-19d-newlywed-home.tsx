@@ -22,7 +22,7 @@ export function O19dNewlywedHome() {
   if (pick === 'before' || pick === 'after') {
     return (
       <QuestionLayout
-        steps={s.steps}
+        chapter={s.chapter}
         title={copy.newlywedWhen}
         onBack={() => setPick(null)}
         primary={{ label: copy.next, disabled: !m, loading: s.saving }}
@@ -35,7 +35,7 @@ export function O19dNewlywedHome() {
     );
   }
   return (
-    <QuestionLayout steps={s.steps} title={copy.newlywedHome} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={copy.newlywedHome} onBack={s.onBack}>
       <ChoiceCards<H>
         label={copy.newlywedHome}
         value={p}

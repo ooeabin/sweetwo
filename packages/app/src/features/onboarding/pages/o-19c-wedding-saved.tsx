@@ -40,7 +40,7 @@ export function O19cWeddingSaved() {
     });
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.weddingSaved}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || value <= 0, loading: s.saving }}

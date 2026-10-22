@@ -60,6 +60,7 @@
 | [TransferRow](TransferRow.md) | Lists | 월급 플랜의 이체 줄 한 행 |
 | [CycleStepper](CycleStepper.md) | Navigation | 월 사이클의 지금 위치: 월급 플랜 → 이체 → 생활비 체크 → 월말 정리 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |
+| [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(“2/4 목표” + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |
 | [Tabs](Tabs.md) | Navigation | 같은 화면 안에서 묶음을 바꾸는 알약 탭(hg-tabs)과, 보기 방식을 바꾸는 세그먼트(hg-seg) |
 | [BottomSheet](BottomSheet.md) | Overlays | 좁은 창(768px 미만)에서 아래에서 올라오는 시트 |
 | [CommandPalette](CommandPalette.md) | Overlays | Ctrl/⌘+K로 여는 검색, 빠른 실행 |

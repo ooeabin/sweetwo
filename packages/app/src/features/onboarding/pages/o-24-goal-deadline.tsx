@@ -47,7 +47,7 @@ export function O24GoalDeadline() {
 
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.goalDeadline}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || !!error, loading: s.saving }}

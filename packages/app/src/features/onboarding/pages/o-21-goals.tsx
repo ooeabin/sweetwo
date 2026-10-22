@@ -86,7 +86,7 @@ export function O21Goals() {
   const prevTop = saved[0];
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.goalsTitle}
       help={separate ? copy.goalsHelpSeparate : copy.goalsHelp}
       onBack={s.onBack}

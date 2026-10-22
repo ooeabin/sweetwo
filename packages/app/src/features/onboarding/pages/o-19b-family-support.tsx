@@ -31,7 +31,7 @@ export function O19bFamilySupport() {
   if (a === 'yes') {
     return (
       <QuestionLayout
-        steps={s.steps}
+        chapter={s.chapter}
         title={copy.familySupportAmount}
         onBack={() => setAnswer(null)}
         primary={{ label: copy.next, disabled: !value || value <= 0, loading: s.saving }}
@@ -49,7 +49,7 @@ export function O19bFamilySupport() {
     );
   }
   return (
-    <QuestionLayout steps={s.steps} title={copy.familySupport} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={copy.familySupport} onBack={s.onBack}>
       <GoalChip name={copy.weddingGoalChip} index={2} total={3} />
       <ChoiceCards<A>
         label={copy.familySupport}

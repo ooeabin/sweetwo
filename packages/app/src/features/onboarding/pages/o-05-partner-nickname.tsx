@@ -15,7 +15,7 @@ export function O05PartnerNickname() {
   const save = () => s.done(() => saveSpace({ partner_nickname: trimmed }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.partnerNickname}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !trimmed, loading: s.saving }}

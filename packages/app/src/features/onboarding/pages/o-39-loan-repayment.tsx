@@ -21,7 +21,7 @@ export function O39LoanRepayment() {
   const save = (amount: number) => s.done(() => saveSpace({ loan_repayment: amount }));
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.loan}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || value <= 0, loading: s.saving }}

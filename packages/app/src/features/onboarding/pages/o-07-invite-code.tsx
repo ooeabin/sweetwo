@@ -25,7 +25,7 @@ export function O07InviteCode() {
   const code = invite.data?.code;
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.inviteTitle}
       onBack={s.onBack}
       primary={{ label: copy.next }}

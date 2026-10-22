@@ -10,7 +10,7 @@ export function O19ePrepMode() {
   const s = useStep('o-19e');
   if (!s.ready) return null;
   return (
-    <QuestionLayout steps={s.steps} title={copy.prepMode} onBack={s.onBack}>
+    <QuestionLayout chapter={s.chapter} title={copy.prepMode} onBack={s.onBack}>
       <ChoiceCards<M>
         label={copy.prepMode}
         value={(s.state.space?.prep_money_mode as M | null) ?? null}
