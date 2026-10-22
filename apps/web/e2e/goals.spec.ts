@@ -257,7 +257,10 @@ test('받은 목표 제안: G-02에서 좋아요, 다르게 해볼래요는 목�
   // 다르게 해볼래요 → 기한 수정 화면
   await card.getByRole('button', { name: '다르게 해볼래요' }).click();
   await heading(page, '언제까지 모을까요?');
-  await page.getByRole('button', { name: /^(뒤로|이전)/ }).first().click();
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)/ })
+    .first()
+    .click();
 
   await page
     .getByRole('region', { name: '예빈님 제안' })
