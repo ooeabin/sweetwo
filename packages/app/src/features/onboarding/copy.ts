@@ -15,8 +15,8 @@ export const copy = {
   myNickname: '내 이름이나 애칭을 알려 주세요',
   myNicknameHelp: '배우자에게도 이 이름으로 보여요',
   partnerNickname: '배우자는 뭐라고 부를까요?',
-  nicknamePlaceholder: '예: 찬우',
-  partnerPlaceholder: '예: 예빈',
+  nicknamePlaceholder: '이름이나 애칭',
+  partnerPlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
   sameNickname: '두 분 호칭이 같아요. 그대로 쓸까요?',
 
