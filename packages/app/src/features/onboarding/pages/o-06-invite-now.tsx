@@ -11,7 +11,12 @@ export function O06InviteNow() {
   const { inviteNow, setInviteNow } = useOnboardingLocal();
   if (!s.ready) return null;
   return (
-    <QuestionLayout chapter={s.chapter} title={copy.inviteNow} onBack={s.onBack}>
+    <QuestionLayout
+      chapter={s.chapter}
+      title={copy.inviteNow}
+      help={copy.inviteNowHelp}
+      onBack={s.onBack}
+    >
       <ChoiceCards<Choice>
         label={copy.inviteNow}
         value={inviteNow}

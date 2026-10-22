@@ -18,7 +18,7 @@ export const copy = {
   greetingSplit: (name: string, month: number, n: number) =>
     `${name}님, ${month}월 월급 나누기가 ${n}곳 남았어요`,
   greetingNoSplit: (name: string, amount: string) =>
-    `${name}님, 이번 달 생활비가 ${amount} 남았어요`,
+    `${name}님, 이번 달 생활비 ${amount} 더 쓸 수 있어요`,
   greetingOver: (name: string, amount: string) => `${name}님, 생활비를 ${amount} 넘게 썼어요`,
 
   // H-02 오늘 띠 버튼과 타일

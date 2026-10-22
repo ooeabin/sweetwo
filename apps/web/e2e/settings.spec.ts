@@ -128,7 +128,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 호칭, 알림 이메일, 앞당기
 
   // 호칭(S-11a)
   await page.getByRole('button', { name: /호칭/ }).click();
-  await expect(page.getByRole('heading', { name: '뭐라고 부르면 될까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
   await page.getByLabel('호칭').fill('찬우씨');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);

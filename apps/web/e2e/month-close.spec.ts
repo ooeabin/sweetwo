@@ -143,7 +143,7 @@ test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async (
   await page.getByRole('button', { name: '이번 달로' }).click();
 
   // 정리를 끝내면 이번 달은 다시 남은 생활비(55 − 41)
-  await heading(page, '찬우님, 이번 달 생활비가 14만 원 남았어요');
+  await heading(page, '찬우님, 이번 달 생활비 14만 원 더 쓸 수 있어요');
   expect(db.closes[0]).toMatchObject({
     status: 'done',
     income: 6_000_000,

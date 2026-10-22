@@ -111,7 +111,7 @@ export const copy = {
   allGood: '모두 좋아요',
 
   // P-11
-  done: (amount: string) => `두 분은 한 달에 ${amount}을 모을 수 있어요`,
+  done: (amount: string) => `두 분이 함께하면 한 달에 ${amount}을 모을 수 있어요`,
   incomeCard: '월 수입',
   saveCard: '한 달에 모을 수 있는 돈',
   shareCard: '매달 나눠 넣을 돈',

@@ -12,7 +12,7 @@ export const copy = {
   estimated: '추정',
 
   // O-03, O-05 (Q5)
-  myNickname: '뭐라고 부르면 될까요?',
+  myNickname: '내 이름이나 애칭을 알려 주세요',
   myNicknameHelp: '배우자에게도 이 이름으로 보여요',
   partnerNickname: '배우자는 뭐라고 부를까요?',
   nicknamePlaceholder: '예: 찬우',
@@ -26,6 +26,7 @@ export const copy = {
 
   // O-06, O-07
   inviteNow: '배우자도 지금 초대할까요?',
+  inviteNowHelp: '나중에 초대해도 언제든 같이 맞출 수 있어요', // [확인 필요]
   inviteChoices: { now: '지금 초대', later: '나 먼저 할게요' },
   inviteTitle: '이 코드를 보내주세요',
   inviteValid: '7일 동안 쓸 수 있어요',
@@ -167,7 +168,8 @@ export const copy = {
   payday: '월급날은 며칠이에요?',
   paydayLast: '말일',
   paydayShortMonth: '짧은 달은 말일로 계산해요', // [확인 필요] 29~31일 안내
-  partnerIncome: (partner: string) => `${partner}님 수입을 대략 알면 골라주세요`,
+  partnerIncome: (partner: string) => `${partner}님 수입은 한 달에 어느 정도예요?`,
+  partnerIncomeHelp: '대략만 알아도 괜찮아요', // [확인 필요]
   partnerExact: '정확히 알아요',
   partnerExactLabel: (partner: string) => `${partner}님 한 달 실수령`, // [확인 필요] 금액 칸 이름(화면 읽기용)
 
@@ -209,7 +211,7 @@ export const copy = {
   analyzing: '두 분의 돈 흐름을 정리하고 있어요',
 
   // O-62
-  canSave: (amount: string) => `두 분은 한 달에 ${amount}을 모을 수 있어요`,
+  canSave: (amount: string) => `두 분이 함께하면 한 달에 ${amount}을 모을 수 있어요`,
   canSaveMine: (me: string, amount: string) => `${me}님 몫으로 한 달에 ${amount}을 모을 수 있어요`,
   canSaveSolo: (amount: string) => `한 달에 ${amount}을 모을 수 있어요`,
   noSaving: '지금은 모을 돈이 남지 않아요',
@@ -309,7 +311,7 @@ export const copy = {
   dayText: (d: number | 'last') => (d === 'last' ? '말일' : `${d}일`),
 
   // O-66
-  startPlan: '이대로 시작할까요?',
+  startPlan: '이 플랜으로 시작할까요?',
   invite: (partner: string) => `${partner}님 초대하기`,
   baseDay: (day: string) => `매달 ${day}`,
   myPayday: (me: string) => `${me}님 월급날`,
