@@ -48,7 +48,7 @@
 
 **구현**
 
-- Astro 정적 사이트(확정), 저장소 apps/site, Cloudflare Pages(ADR 0002) → 기술·운영 1장
+- Astro 정적 사이트(확정), 저장소 apps/site, Cloudflare Workers 정적 자산(ADR 0002) → 기술·운영 1장
 - 공유 이미지 1200×630(흰 바탕, 워드마크 + 심볼 symbol.png(파이 차트)) → 브랜드 4장
 
 ## L-01 랜딩 (/)

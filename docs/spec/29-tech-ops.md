@@ -21,8 +21,8 @@
 | 사진 | Supabase Storage 서울. 서버 저장·저장 시 암호화, 부부 공간 권한(두 사람만 열람) | 챙길 날 기록, 프로필 사진(→ 설정 S-11e) |
 | 메일 발송 | Amazon SES 서울 리전 | 알림·주간 요약·초대 메일 |
 | 고객 메일 수신 | 네이버웍스 | help@sweetwo.kr(고객센터, S-19a 문의 포함), privacy@sweetwo.kr(개인정보 보호책임자) 수신, 같은 주소로 답장. 구성원 1명(관리자), help@와 privacy@는 그룹 메일 주소로 받음. SPF는 TXT 한 줄에 네이버웍스와 Amazon SES를 함께 넣음(SPF 레코드는 하나만). DKIM은 네이버웍스와 SES 각각, DMARC는 p=none으로 시작 |
-| 웹사이트 | Astro 정적 사이트(확정) | apps/site, Cloudflare Pages(→ 화면 설계 › 웹사이트, ADR 0002) |
-| 정적 배포·개발 서버 | Cloudflare Pages + Cloudflare Access | 웹사이트, 어드민, 개발 확인용 앱 화면. develop = 개발 서버(스테이징 Supabase), main = 운영. 개인정보 없음(ADR 0002) |
+| 웹사이트 | Astro 정적 사이트(확정) | apps/site, Cloudflare Workers 정적 자산(→ 화면 설계 › 웹사이트, ADR 0002) |
+| 정적 배포·개발 서버 | Cloudflare Workers 정적 자산 + Cloudflare Access | 웹사이트, 어드민, 개발 확인용 앱 화면. develop = 개발 서버(스테이징 Supabase), main = 운영. 개인정보 없음(ADR 0002) |
 | 음력 변환 | korean-lunar-calendar(npm, MIT, 한국천문연구원 기준표) | core 패키지에서 클라이언트와 서버가 같은 계산. 양력 2050년 12월 31일까지, 그 뒤는 지원 범위 밖. 천문연구원 자료와 대조 테스트 |
 | 공휴일 | 공공데이터포털 ‘한국천문연구원 특일 정보’ API | 서버가 매년 12월에 다음 해를 받고 매주 1회 다시 받아 임시공휴일 반영, holiday 테이블에 저장. 앱은 테이블만 읽음. 어드민 AD-19에서 직접 추가·수정 |
 | 결제 | 결제대행사 미정(→ 사업 계획 9장 ‘결정 필요’) | 프리미엄 구독 결제·갱신·해지. 카드 정보는 결제대행사에만 저장 |
@@ -40,7 +40,7 @@
 
 | 주소 | 용도 |
 | --- | --- |
-| sweetwo.kr | 웹사이트(→ 화면 설계 › 웹사이트 L-01\~L-03, L-05, L-06). Astro 정적 사이트, Cloudflare Pages |
+| sweetwo.kr | 웹사이트(→ 화면 설계 › 웹사이트 L-01\~L-03, L-05, L-06). Astro 정적 사이트, Cloudflare Workers 정적 자산 |
 | sweetwo.kr/i/{코드} | 초대 링크. 앱이 있으면 앱이 바로 엶(유니버설 링크·앱 링크, 데스크톱은 sweetwo://), 없으면 웹사이트 초대 페이지(코드 + 스토어·다운로드) → 화면 설계 › 웹사이트 |
 | sweetwo.kr/.well-known/apple-app-site-association, /.well-known/assetlinks.json | iOS 유니버설 링크·Android 앱 링크 확인 파일(/i/*, 로그인 복귀, 알림 메일 링크 경로만) |
 | download.sweetwo.kr/latest/mac, /latest/win | 다운로드 고정 주소. CloudFront가 최신 정식 파일로 보냄(Mac universal dmg 1개, Windows x64) |

@@ -1,4 +1,4 @@
-# ADR 0002: develop 브랜치 개발 서버, 정적 배포는 Cloudflare Pages
+# ADR 0002: develop 브랜치 개발 서버, 정적 배포는 Cloudflare(Workers 정적 자산)
 
 - 날짜: 2026-10-23
 - 상태: 확정
@@ -25,6 +25,8 @@
 - Vercel Pro: 같은 기능, 사람당 월 20달러. 무료(Hobby)는 상업 이용 불가. 강점(Next.js 서버 렌더링)을 우리는 안 씀.
 - AWS S3 + CloudFront: 서울 리전, 쓴 만큼 요금. 브랜치·PR 미리보기와 접근 보호를 직접 만들어야 함.
 - Netlify: 무료도 상업 가능, 접근 보호는 유료. Firebase Hosting: 접근 보호 없음.
+
+- 갱신(2026-10-23): Cloudflare 대시보드가 Git 연결을 Workers Builds로 안내해 Pages 대신 Workers 정적 자산으로 배포(`apps/{web,admin,site}/wrangler.jsonc`). 무료, 정적 파일 요청은 요금·횟수 제한 없음. 브랜치 미리보기(`wrangler versions upload`)와 Access 보호도 같음. 아래 ‘Pages’는 이 방식으로 읽음.
 
 ## 결과
 
