@@ -145,7 +145,10 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 화면 주소(라우팅): 앱·어드민은 `not_found_handling: single-page-application`(모든 경로에 index.html), 웹사이트는 `404-page`(404.html이 초대 링크 `/i/{코드}`를 맡음)
 - 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 앱마다 1개(sweetwo-app, sweetwo-admin, sweetwo-site). 도메인 `sweetwo-app.yeabin0909.workers.dev`(미리보기까지 막으려면 `*-sweetwo-app.yeabin0909.workers.dev`도). 정책 Allow + Include Emails(허용 이메일). Identity 탭에서 ‘Select all’을 지우고 One-time PIN만, Apply instant authentication 켬. One-time PIN이 목록에 없으면 Zero Trust → Settings → Authentication → Login methods에서 먼저 추가. Cloudflare 계정 로그인은 쓰지 않음(동의 단계에서 ‘Application authorization failed’)
 - 스테이징 Supabase → Authentication → URL Configuration: Site URL `https://sweetwo-app.yeabin0909.workers.dev`, Redirect URLs `https://sweetwo-app.yeabin0909.workers.dev/**`, `https://*-sweetwo-app.yeabin0909.workers.dev/**`, `https://sweetwo-admin.yeabin0909.workers.dev/**`, `https://*-sweetwo-admin.yeabin0909.workers.dev/**`
-- 스테이징 소셜 로그인: Supabase → Authentication → Providers에서 카카오·구글·애플을 켜고, 각 콘솔의 스테이징 앱에 콜백 `https://xxofyzgzrjrcrcxvftpn.supabase.co/auth/v1/callback` 등록(애플은 Services ID + 도메인 확인)
+- 스테이징 소셜 로그인: Supabase → Authentication → Providers에서 켜고, 각 콘솔 앱에 콜백 `https://xxofyzgzrjrcrcxvftpn.supabase.co/auth/v1/callback` 등록
+  - 구글: 켜짐(2026-10-23). Google Cloud 프로젝트 sweetwo-staging, 웹 애플리케이션 클라이언트, 자바스크립트 원본 `https://sweetwo-app.yeabin0909.workers.dev`. 동의 화면이 ‘테스트 중’이라 로그인할 계정은 대상 → 테스트 사용자에 넣어야 함
+  - 카카오: 켜짐(2026-10-23). 로컬과 같은 카카오 앱(Redirect URI에 로컬·스테이징 콜백 둘 다), 이메일 선택 동의, Supabase ‘Allow users without an email’ 켬(거부하면 A-04)
+  - 애플: 아직. 사업자 등록 → D-U-N-S → Apple Developer 조직 명의 가입 뒤(기획서 34 4장). 그때까지 개발 서버의 ‘Apple로 시작하기’는 오류
 
 ## 로컬 개발 환경
 
