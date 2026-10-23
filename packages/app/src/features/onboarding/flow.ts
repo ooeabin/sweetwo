@@ -75,7 +75,7 @@ const INTROS = ['o-10', 'o-20', 'o-30', 'o-50'];
 export const CHAPTERS = ['우리 소개', '목표', '수입과 지출', '나누기와 플랜'] as const;
 /** 화면 → 챕터(0부터). O-03~O-19e 우리 소개, O-20~O-24 목표, O-30~O-39 수입과 지출, O-50 이후 나누기와 플랜 */
 export const chapterOf = (id: string) => (id < 'o-20' ? 0 : id < 'o-30' ? 1 : id < 'o-50' ? 2 : 3);
-/** 챕터 진행: 챕터 안에서만 차는 막대. 챕터 시작 0%, 결과(O-61~)는 막대 없이 “4/4 나누기와 플랜”만. O-10은 표시 없음 */
+/** 챕터 진행: 챕터 안에서만 차는 막대. 챕터 시작 0%, 결과(O-61~)는 막대 없이 “나누기와 플랜”만. O-10은 표시 없음 */
 export function chapterProgress(id: string, list: string[]) {
   if (id === 'o-10') return undefined;
   const ch = chapterOf(id);
