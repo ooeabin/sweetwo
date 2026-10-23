@@ -13,7 +13,7 @@ export interface ChapterProgress {
   steps?: { total: number; done: number };
 }
 
-/** 넓은 창 위 바 가운데: 챕터면 “2/4 목표” + 칸 막대(brand), 아니면 ProgressSteps */
+/** 넓은 창 위 바 가운데: 챕터면 “목표” + 칸 막대(brand), 아니면 ProgressSteps */
 function BarProgress({
   chapter,
   steps,
@@ -25,12 +25,7 @@ function BarProgress({
     const s = chapter.fill === null ? undefined : chapter.steps;
     return (
       <div className="hg-qbar__mid">
-        <p className="hg-qbar__label">
-          <span className="hg-chapterbar__num">
-            {chapter.index}/{chapter.total}
-          </span>{' '}
-          {chapter.name}
-        </p>
+        <p className="hg-qbar__label">{chapter.name}</p>
         {s && s.total > 0 && (
           <div
             className="hg-segs"
@@ -74,7 +69,7 @@ function StepsBar({ steps }: { steps: { total: number; now: number; fill?: numbe
   );
 }
 
-/** 온보딩 챕터 진행(docs/design/components/ChapterBar.md). 뒤로 + 가운데 “2/4 목표” + 챕터 안 막대(brand) */
+/** 온보딩 챕터 진행(docs/design/components/ChapterBar.md). 뒤로 + 가운데 “목표” + 챕터 안 막대(brand) */
 export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBack?: () => void }) {
   const fill = chapter.fill === null ? null : Math.min(Math.max(Math.round(chapter.fill), 0), 100);
   return (
@@ -85,12 +80,7 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
             <Icon name="chevron-left" size={24} />
           </button>
         )}
-        <p className="hg-chapterbar__label">
-          <span className="hg-chapterbar__num">
-            {chapter.index}/{chapter.total}
-          </span>{' '}
-          {chapter.name}
-        </p>
+        <p className="hg-chapterbar__label">{chapter.name}</p>
       </div>
       {fill !== null && (
         <div
@@ -166,7 +156,7 @@ export function QuestionLayout({
   center,
 }: {
   steps?: { total: number; now: number; fill?: number };
-  /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “2/4 목표” + 챕터 안 막대 */
+  /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
   chapter?: ChapterProgress;
   title: ReactNode;
   help?: ReactNode;

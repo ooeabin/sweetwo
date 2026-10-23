@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3beeac8). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (d9ea650). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -201,7 +201,6 @@
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
 .hg-chapterbar__label { grid-column: 2; margin: 0; text-align: center; font: 600 15px/22px var(--font-sans); color: var(--ink); }
-.hg-chapterbar__num { color: var(--brand); font-variant-numeric: tabular-nums; }
 .hg-chapterbar__track { position: relative; height: 4px; border-radius: var(--radius-full); background: var(--hairline); overflow: hidden; }
 .hg-chapterbar__fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: var(--radius-full); background: var(--brand); transition: width var(--dur-base) var(--ease-out); }
 @media (prefers-reduced-motion: reduce) { .hg-chapterbar__fill { transition: none; } }

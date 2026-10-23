@@ -32,7 +32,7 @@ async function part0(page: Page) {
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
   await heading(page, '내 이름이나 애칭을 알려 주세요');
-  await expect(page.getByText('1/4 우리 소개').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText('우리 소개').filter({ visible: true }).first()).toBeVisible();
   await axe(page);
   await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
   await next(page);
@@ -46,6 +46,7 @@ async function part0(page: Page) {
 }
 
 test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
+  test.setTimeout(90_000); // 첫 화면부터 이번 달까지 40화면 가까이 돌아 기본 30초를 넘김
   // 기획서 예시 날짜: 25일 기준, 10월 7일 시작 → 9월 월급 플랜 남은 18일
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -71,7 +72,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   await page.getByRole('radio', { name: '1~3년' }).click();
 
   await heading(page, '이제 둘의 목표를 정해요');
-  await expect(page.getByText('2/4 목표').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText('목표').filter({ visible: true }).first()).toBeVisible();
   // 챕터 시작 안내: 끝난 챕터 체크, 지금 챕터 표시
   const chapterList = page.getByRole('list', { name: '이렇게 4단계로 물어볼게요' });
   await expect(chapterList.getByRole('listitem').first()).toContainText('우리 소개 끝남');
@@ -146,7 +147,7 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
 
   // 챕터 4 용돈·분담(용돈 각자 50만 → 공동자금 500만, 버는 만큼 292만 : 208만)
   await heading(page, '마지막으로 용돈과 분담을 정해요');
-  await expect(page.getByText('4/4 나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText('나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
   await page.getByRole('button', { name: '시작할게요' }).click();
   await heading(page, '찬우님 용돈은 한 달에 얼마로 할까요?');
   await expect(page.getByText('예빈님 용돈도 같은 금액으로 계산해 둘게요')).toBeVisible();
@@ -171,8 +172,8 @@ test('신혼부부: 호칭부터 첫 월급 플랜까지', async ({ page }) => {
   // 파트 6 결과: O-61 분석 중 → O-62 요약(저축 가능 = 600 − 100 − 260 = 240만)
   await heading(page, '두 분의 돈 흐름을 정리하고 있어요');
   await heading(page, '두 분이 함께하면 한 달에 240만 원을 모을 수 있어요');
-  // 결과 화면은 막대 없이 “4/4 나누기와 플랜”만
-  await expect(page.getByText('4/4 나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
+  // 결과 화면은 막대 없이 “나누기와 플랜”만
+  await expect(page.getByText('나누기와 플랜').filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByRole('progressbar', { name: '나누기와 플랜 진행' })).toHaveCount(0);
   await expect(page.getByText('임시 플랜')).toBeVisible();
   await expect(page.getByText('예빈님이 합류하면 다시 계산돼요')).toBeVisible();
