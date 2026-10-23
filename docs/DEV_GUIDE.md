@@ -25,7 +25,8 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 | 스타일 | 디자인 시스템 tokens.css + 컴포넌트 CSS(hg- 클래스) |
 | 서버 | Supabase: Postgres, Auth, Realtime, Edge Functions, Storage, pg\_cron |
 | 권한 | Postgres RLS |
-| 암호화와 파일 | AWS KMS, S3 + CloudFront (서울) |
+| 암호화와 파일 | AWS KMS, S3 + CloudFront (서울, 데스크톱 설치·업데이트 파일) |
+| 정적 배포·개발 서버 | Cloudflare Pages + Access(웹사이트, 어드민, 개발 확인용 앱 화면, ADR 0002) |
 | 메일 | 보내기 Amazon SES(서울), 받기 네이버웍스 |
 | 분석, 오류, 모니터링 | PostHog(직접 운영), Sentry(직접 운영), Better Stack |
 | 업데이트 | electron-updater, 채널 하나 + 단계 배포 |
@@ -110,7 +111,43 @@ sweetwo/
 3. 서버가 change\_log에 기록하고 Realtime으로 변경 신호를 보냄
 4. 배우자 기기는 마지막으로 받은 변경 번호 이후만 다시 받음(델타 동기화), 목표 1\~2초
 
+## 개발 서버 (develop, Cloudflare Pages)
+
+로컬에서 아무것도 띄우지 않고 브라우저로 확인(ADR 0002). 작업 브랜치 → PR(CI + Pages 미리보기 주소) → develop 합치기 → 개발 서버에서 확인 → 사람이 정하면 main.
+
+| 무엇 | 주소 | 붙는 곳 |
+| --- | --- | --- |
+| 앱 화면(확인용, 넓은 창·좁은 창) | https://sweetwo-app.pages.dev | 스테이징 Supabase, 실제 소셜 로그인 |
+| 어드민 | https://sweetwo-admin.pages.dev | 스테이징 Supabase |
+| 웹사이트 | https://sweetwo-site.pages.dev | — |
+| DB | `sweetwo-staging`(Supabase 서울) | develop 합치기 때 마이그레이션 자동 적용 |
+
+- PR마다 `https://{브랜치}.sweetwo-app.pages.dev` 같은 미리보기 주소가 생김
+- 데스크톱 전용(트레이, PIN, 딥링크)과 모바일 전용(푸시, Face ID)은 여기서 확인 못 함. 그 부분은 e2e(흉내 브리지)와 기기 빌드로
+- 개발 서버 데이터는 실제로 가입해서 만듦. 부부 기능은 계정 두 개로 가입 → 초대 코드로 연결
+
+Cloudflare Pages 프로젝트 3개(대시보드 → Workers & Pages → Create → Pages → Connect to Git → `ooeabin/sweetwo`). 출시 전까지 셋 다 운영 브랜치 = `develop`, 출시 준비 때 어드민·웹사이트만 `main` + 운영 Supabase 값으로 바꿈.
+
+| 설정 | sweetwo-app | sweetwo-admin | sweetwo-site |
+| --- | --- | --- | --- |
+| Production branch | develop | develop | develop |
+| Preview branches | 모든 PR 브랜치 | 모든 PR 브랜치 | 모든 PR 브랜치 |
+| Framework preset | None | None | None (Astro도 None으로, 명령은 아래) |
+| Root directory | (비움, 저장소 루트) | (비움) | (비움) |
+| Build command | `pnpm --filter @sweetwo/web build` ((전환 뒤) @sweetwo/mobile) | `pnpm --filter @sweetwo/admin build` | `pnpm --filter @sweetwo/site build` |
+| Build output | `apps/web/dist` ((전환 뒤) apps/mobile/dist) | `apps/admin/dist` | `apps/site/dist` |
+| Build watch paths(포함) | `apps/web/*`, `packages/*` | `apps/admin/*`, `packages/*` | `apps/site/*`, `packages/core/*` |
+
+- 환경 변수(세 프로젝트 공통, Production·Preview 둘 다): `NODE_VERSION=22`, `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`
+- 앱·어드민: `VITE_SUPABASE_URL=https://xxofyzgzrjrcrcxvftpn.supabase.co`, `VITE_SUPABASE_ANON_KEY`(스테이징 anon key, 공개 값. Supabase → Project Settings → API). service role은 넣지 않음
+- 화면 주소(라우팅): 앱·어드민은 404.html이 없어 Pages가 한 페이지 앱으로 보고 모든 경로에 index.html을 줌. 웹사이트는 404.html이 초대 링크 `/i/{코드}`를 맡음
+- 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 도메인 `sweetwo-app.pages.dev`와 `*.sweetwo-app.pages.dev`(어드민, 웹사이트도 같은 방식). 정책 Allow + 허용 이메일. 로그인 방법 One-time PIN
+- 스테이징 Supabase → Authentication → URL Configuration: Site URL `https://sweetwo-app.pages.dev`, Redirect URLs `https://sweetwo-app.pages.dev/**`, `https://*.sweetwo-app.pages.dev/**`, `https://sweetwo-admin.pages.dev/**`, `https://*.sweetwo-admin.pages.dev/**`
+- 스테이징 소셜 로그인: Supabase → Authentication → Providers에서 카카오·구글·애플을 켜고, 각 콘솔의 스테이징 앱에 콜백 `https://xxofyzgzrjrcrcxvftpn.supabase.co/auth/v1/callback` 등록(애플은 Services ID + 도메인 확인)
+
 ## 로컬 개발 환경
+
+필요할 때만. 개발 서버로 확인하면 로컬 실행은 없어도 됨.
 
 명령 3개(`supabase start` → `pnpm i` → `pnpm dev`)로 찬우, 예빈 부부 데이터가 든 앱이 뜨게 함.
 
@@ -468,7 +505,7 @@ apps/mobile/              ((전환 전) apps/web)
   ios/, android/          Capacitor 네이티브 프로젝트(Xcode, Gradle)
   e2e/                    Playwright(흉내 Supabase), /dev/ui 스크린샷
 
-apps/site/                Astro 정적 사이트, S3 + CloudFront
+apps/site/                Astro 정적 사이트, Cloudflare Pages
   src/pages/
     index.astro           L-01 랜딩
     download.astro        L-02 설치 안내 (?os=mac|win)
@@ -875,7 +912,8 @@ supabase/
 | OAuth 앱 | 개발용 | 스테이징용 | 운영용 |
 | KMS 키 | 로컬 키 어댑터 | staging 키 | prod 키 |
 | SES | Inbucket | 샌드박스, 허용 주소만 | 발송 제한 해제 |
-| S3 버킷 | 없음 | site, 업데이트 | site, 다운로드, 업데이트 |
+| 정적 배포 | 없음 | Cloudflare Pages(develop): 앱 화면, 어드민, 웹사이트 | Cloudflare Pages(main): 어드민, 웹사이트 |
+| S3 버킷 | 없음 | 업데이트 | 다운로드, 업데이트 |
 | 스토어 | 없음 | TestFlight, Google Play 내부 테스트 | App Store, Google Play |
 | 푸시 | 없음 | APNs 개발 환경, FCM 스테이징 프로젝트 | APNs 운영, FCM 운영 프로젝트 |
 | Sentry 프로젝트 | 끔 | 환경 태그 staging | 환경 태그 production |
@@ -887,10 +925,12 @@ supabase/
 ### CI/CD (GitHub Actions)
 
 1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, (전환 뒤) e2e-mobile), e2e-desktop(Electron, xvfb), mobile-build(iOS 시뮬레이터용 빌드는 macos 러너, Android 디버그 빌드, (전환 뒤) 추가), db(로컬 Supabase + pgTAP + DB 타입 비교)
-2. main 합치기: 마이그레이션과 Edge Functions를 스테이징에 배포, 웹사이트를 스테이징 S3에
-   - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 main에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
+2. develop 합치기(개발 서버, ADR 0002): 마이그레이션(나중에 Edge Functions)을 스테이징 Supabase에, 앱 화면·어드민·웹사이트는 Cloudflare Pages가 GitHub 연결로 빌드해 개발 서버 주소에(→ ‘개발 서버’)
+   - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 develop에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
+   - GitHub Environments → staging에 배포 브랜치 제한이 있으면 develop을 허용해야 함
    - 필요한 비밀 값(GitHub Environments → staging): `SUPABASE_ACCESS_TOKEN`(배포 전용 토큰), `SUPABASE_DB_PASSWORD`(staging DB 비밀번호)
-   - staging에 손으로 SQL을 넣지 않는다. 모든 변경은 마이그레이션 파일 → main → 이 작업으로
+   - staging에 손으로 SQL을 넣지 않는다. 모든 변경은 마이그레이션 파일 → develop → 이 작업으로
+   - main 합치기: 개발 서버에서 확인한 것만 사람이 정해서 develop → main. 출시 전까지 main은 배포 없음(태그 배포는 아래 3)
 3. 태그(v1.2.0): 운영 마이그레이션 → Edge Functions → 웹사이트 → 데스크톱 빌드, 서명, 업데이트 파일 업로드 → 모바일 빌드를 TestFlight·Google Play 내부 테스트로(심사 제출은 사람이)(‘업데이트와 릴리스’)
 
 ### 데스크톱 출시
@@ -1004,7 +1044,7 @@ supabase/
 - Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(OS별 다운로드·스토어 버튼, 다른 OS용 받기, 접기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). OS 판정은 core `detectSiteOs`·`installOs`(Vitest)
 - L-02 `/download?os=`: 보이지 않는 iframe으로 고정 주소(download.sweetwo.kr/latest/mac|win)를 받음(페이지를 떠나지 않음), 한 번 받은 뒤 주소에 `started=1`(새로고침해도 다시 받지 않음), 이 브라우저에 `sweetwo-app-seen`·`sweetwo-download-id` 저장. download_id를 앱 첫 실행으로 넘기는 방법(다른 도메인)은 기획 확인 뒤
 - 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective, 지금 시행 중 = 시행일이 오늘 이전 중 최근, `?v={시행일}`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
-- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(CloudFront 오류 페이지로 지정)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱이 깔린 휴대폰은 앱 링크로 이 페이지까지 오지 않음. 데스크톱 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없으면 코드 + 스토어·다운로드 버튼((전환 전) 웹 앱 P-01로 보냄)
+- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(Cloudflare Pages가 404.html을 줌)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱이 깔린 휴대폰은 앱 링크로 이 페이지까지 오지 않음. 데스크톱 앱 기록이 있으면 “sweeTwo 앱으로 열까요?”, 없으면 코드 + 스토어·다운로드 버튼((전환 전) 웹 앱 P-01로 보냄)
 - 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 캡처용 흔한 이름 한 쌍, 기획서 28)는 모바일 e2e 흉내로 찍어 넣는 것이 다음 단계, 지금은 심볼과 워드마크
 - e2e `apps/site/e2e`(빌드 + 미리보기, Mac·Windows·Windows 7·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이
 

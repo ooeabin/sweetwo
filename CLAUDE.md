@@ -84,6 +84,11 @@ Electron(데스크톱) + Capacitor(iOS, Android) + React 18 + TypeScript + Vite,
 5. app: `copy.ts` → 화면 파일 → `routes.tsx`
 6. 분석 이벤트, Playwright 흐름(찬우와 예빈 두 계정), 다크 모드와 좁은 창 확인
 
+## 브랜치와 확인 (ADR 0002)
+
+- 작업 브랜치 → PR(base `develop`) → CI 통과 → `develop`에 합침 → 개발 서버(Cloudflare Pages, 스테이징 Supabase)에서 확인.
+- `main`에는 사람이 정할 때만 `develop`을 합친다. 스테이징 DB에 손으로 SQL을 넣지 않는다.
+
 ## 합치기 전 (Definition of Done)
 
 - [ ] 타입 검사, lint, Vitest, Playwright 통과. RLS를 건드렸으면 pgTAP
