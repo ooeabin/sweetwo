@@ -6,7 +6,7 @@ import globals from 'globals';
 
 // import 방향: apps → app → (api, ui, core), api → core, ui → core (docs/DEV_GUIDE.md ‘import 규칙’)
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/out/**', '**/.astro/**', '**/node_modules/**', 'docs/**', 'supabase/functions/**'] },
+  { ignores: ['**/dist/**', '**/out/**', '**/.astro/**', '**/node_modules/**', 'docs/**', 'supabase/functions/**', 'apps/mobile/android/**', 'apps/mobile/ios/**'] },
   js.configs.recommended,
   { files: ['**/*.mjs', '**/*.cjs'], languageOptions: { globals: globals.node } },
   ...tseslint.configs.strict,

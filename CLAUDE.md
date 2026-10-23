@@ -31,7 +31,7 @@ Electron(데스크톱) + Capacitor(iOS, Android) + React 18 + TypeScript + Vite,
 
 ## 구조
 
-- 한 저장소(pnpm + Turborepo 모노레포): `apps/desktop`, `apps/mobile`(전환 전 `apps/web`), `apps/admin`, `apps/site`, `packages/app`, `packages/api`, `packages/core`, `packages/ui`, `supabase/`, `docs/`.
+- 한 저장소(pnpm + Turborepo 모노레포): `apps/desktop`, `apps/mobile`, `apps/admin`, `apps/site`, `packages/app`, `packages/api`, `packages/core`, `packages/ui`, `supabase/`, `docs/`.
 - import 방향은 한쪽만: apps → app → (api, ui, core), api → core, ui → core. 거꾸로 가면 안 된다.
 - 기능 폴더끼리는 서로의 `index.ts`로만 부른다.
 - `packages/app`은 Electron과 Capacitor를 모른다. 데스크톱, 모바일 전용은 `window.sweetwo` 브리지로만.
