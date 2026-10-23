@@ -10,8 +10,8 @@
 ```bash
 corepack enable
 pnpm install
-cp apps/web/.env.example apps/web/.env.local   # 값 채우기
-pnpm dev            # 웹 5173, 어드민 5174
+cp apps/mobile/.env.example apps/mobile/.env.local   # 값 채우기
+pnpm dev            # 모바일 화면(브라우저) 5173, 어드민 5174
 pnpm dev:desktop    # 데스크톱 앱
 pnpm dev:site       # 웹사이트
 pnpm test           # Vitest(core 계산, 딥링크)
@@ -24,10 +24,10 @@ pnpm check:assets   # 그림, 영상 크기 상한
 | 폴더 | 무엇 |
 | --- | --- |
 | apps/desktop | Electron 데스크톱 앱 (Windows, macOS) |
-| apps/web | 반응형 웹 앱 (app.sweetwo.kr) |
+| apps/mobile | 모바일 앱 (iOS, Android, Capacitor). 개발·e2e는 브라우저로 |
 | apps/admin | 어드민 (ops.sweetwo.kr), AD-20 문서 메뉴 |
 | apps/site | 웹사이트 (sweetwo.kr, Astro) |
-| packages/app | 화면과 기능 (데스크톱, 웹 공용) |
+| packages/app | 화면과 기능 (데스크톱, 모바일 공용) |
 | packages/api | Supabase 클라이언트, 쿼리 |
 | packages/core | 금액, 날짜, 계산 규칙, 스키마 |
 | packages/ui | 디자인 토큰, 컴포넌트, 그림 |

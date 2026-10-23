@@ -8,7 +8,7 @@
 
 MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React + TypeScript 한 화면 코드로 만들고(데스크톱은 Electron, 모바일은 Capacitor로 감쌈), 서버는 Supabase(서울 리전) 하나로 운영함. 웹 앱은 없음(ADR 0001). OS 위젯은 2단계.
 
-> 전환 중: `apps/web` → `apps/mobile` 이름 바꾸기와 Capacitor, 모바일 로그인·잠금·푸시·앱 링크, 로그인 콜백을 sweetwo.kr로 옮기기는 아직 코드에 없음. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
+> 전환 중: `apps/mobile`(Capacitor iOS·Android 뼈대)은 있음. 모바일 로그인·잠금·푸시·앱 링크, 로그인 콜백을 sweetwo.kr로 옮기기는 아직 코드에 없음. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
 
 - 만들 것: 데스크톱 앱, 모바일 앱(App Store, Google Play), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
 - 데이터: 모두 직접 입력. 계좌 연동, 마이데이터, 스크래핑 없음
@@ -82,7 +82,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 sweetwo/
   apps/
     desktop/      Electron main, preload, 트레이 위젯
-    mobile/       Capacitor 모바일 앱(iOS, Android) + 개발·e2e용 브라우저 실행 ((전환 전) apps/web)
+    mobile/       Capacitor 모바일 앱(iOS, Android) + 개발·e2e용 브라우저 실행
     admin/        어드민 웹
     site/         웹사이트 L-01~L-03, L-05, L-06 (랜딩, 설치 안내, 릴리스 노트, 약관, 고객센터)
   packages/
@@ -133,12 +133,12 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 설정 | sweetwo-app | sweetwo-admin | sweetwo-site |
 | --- | --- | --- | --- |
 | Project(Worker) name | sweetwo-app | sweetwo-admin | sweetwo-site |
-| Build command | `pnpm --filter @sweetwo/web build` ((전환 뒤) @sweetwo/mobile) | `pnpm --filter @sweetwo/admin build` | `pnpm --filter @sweetwo/site build` |
-| Deploy command | `npx wrangler deploy --config apps/web/wrangler.jsonc` | `npx wrangler deploy --config apps/admin/wrangler.jsonc` | `npx wrangler deploy --config apps/site/wrangler.jsonc` |
+| Build command | `pnpm --filter @sweetwo/mobile build` | `pnpm --filter @sweetwo/admin build` | `pnpm --filter @sweetwo/site build` |
+| Deploy command | `npx wrangler deploy --config apps/mobile/wrangler.jsonc` | `npx wrangler deploy --config apps/admin/wrangler.jsonc` | `npx wrangler deploy --config apps/site/wrangler.jsonc` |
 | Root directory | `/` | `/` | `/` |
 | Production branch(Branch control) | develop | develop | develop |
-| Non-production branch builds | 켬, deploy command `npx wrangler versions upload --config apps/web/wrangler.jsonc` | 켬(같은 방식, admin) | 켬(같은 방식, site) |
-| Build watch paths(포함) | `apps/web/*`, `packages/*` | `apps/admin/*`, `packages/*` | `apps/site/*`, `packages/core/*` |
+| Non-production branch builds | 켬, deploy command `npx wrangler versions upload --config apps/mobile/wrangler.jsonc` | 켬(같은 방식, admin) | 켬(같은 방식, site) |
+| Build watch paths(포함) | `apps/mobile/*`, `packages/*` | `apps/admin/*`, `packages/*` | `apps/site/*`, `packages/core/*` |
 
 - Build variables(세 Worker 공통): `NODE_VERSION=22.20.0`(22만 쓰면 최신판을 골라 설치에 실패할 수 있음), `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. 화면 값은 빌드 때 들어가므로 Runtime variables가 아니라 Build variables에
 - 앱·어드민 Build variables: `VITE_SUPABASE_URL=https://xxofyzgzrjrcrcxvftpn.supabase.co`, `VITE_SUPABASE_ANON_KEY`(스테이징 anon key, 공개 값. Supabase → Project Settings → API). service role은 넣지 않음
@@ -162,7 +162,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 실행
 
 1. `pnpm i`
-2. `pnpm db:start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket(Docker). 출력의 API URL과 anon key를 `apps/mobile/.env.local`((전환 전) apps/web), `apps/desktop/.env.local`의 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`에
+2. `pnpm db:start`: 로컬 Postgres, Auth, Realtime, Storage, Inbucket(Docker). 출력의 API URL과 anon key를 `apps/mobile/.env.local`, `apps/desktop/.env.local`의 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`에
 3. `pnpm dev`: 모바일 화면을 브라우저로 5173(개발용), 어드민 5174. 데스크톱은 `pnpm dev:desktop`. 휴대폰·에뮬레이터는 `pnpm --filter @sweetwo/mobile cap:ios` / `cap:android`(Xcode, Android Studio 필요)
 4. 데이터 초기화: `pnpm db:reset` (마이그레이션 + seed.sql 다시 실행)
 5. 마이그레이션을 바꿨으면 `pnpm db:test`(pgTAP) → `pnpm db:types`(packages/core/src/db.types.ts 다시 만듦, 손으로 고치지 않음)
@@ -472,7 +472,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 디자인 시스템 갱신 절차
 
 1. `docs/design/`(tokens.css, bundle.css, 컴포넌트 md)를 고친 뒤 `pnpm ds:sync`가 packages/ui로 복사하고 파일 머리에 커밋 번호를 주석으로 남김
-2. `pnpm --filter @sweetwo/mobile e2e`((전환 전) @sweetwo/web)로 컴포넌트 모음(/dev/ui)을 라이트, 다크, 좁은 창에서 돌리고 스크린샷(test-results)으로 바뀐 곳 확인
+2. `pnpm --filter @sweetwo/mobile e2e`로 컴포넌트 모음(/dev/ui)을 라이트, 다크, 좁은 창에서 돌리고 스크린샷(test-results)으로 바뀐 곳 확인
 3. 담당자(디자인 시스템 오너) 승인 후 합침
 
 ## 개발 규칙
@@ -500,7 +500,7 @@ apps/desktop/
   electron.vite.config.ts
   electron-builder.yml
 
-apps/mobile/              ((전환 전) apps/web)
+apps/mobile/
   src/main.tsx            packages/app의 <App platform="ios"|"android"/>, 브라우저 개발·e2e는 흉내 브리지
   vite.config.ts
   capacitor.config.ts
@@ -609,7 +609,7 @@ supabase/
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 그 화면부터(‘이어서 할까요?’ 확인은 아직 없음)
 - 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값, 고정지출 그룹(`expenses.ts`), 공동자금과 분담액(`plan.ts`), 목표 배분과 부족 조정 안(`allocation.ts`), 재정 진단(`diagnosis.ts`), 월 사이클과 첫 플랜(`cycle.ts`)은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards(미리보기 `detail`, ‘추정’ `tag`, `disabled`, 한 화면에 여럿이면 `autoFocus`/`shortcuts` 끄기), Q3 AmountInput(한 화면에 여럿이면 `embedded`), Q4 YearInput/DateInput/YearMonthInput/DayChips(1~31 + 말일), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
-- e2e는 `apps/mobile/e2e/onboarding-mock.ts`((전환 전) apps/web)의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜가 걸린 화면(O-66)은 `page.clock.setFixedTime`으로 기획서 예시 날짜(10월 7일)에 고정
+- e2e는 `apps/mobile/e2e/onboarding-mock.ts`의 메모리 DB로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜가 걸린 화면(O-66)은 `page.clock.setFixedTime`으로 기획서 예시 날짜(10월 7일)에 고정
 
 ### 이번 달 구조
 
@@ -926,7 +926,7 @@ supabase/
 
 ### CI/CD (GitHub Actions)
 
-1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, (전환 뒤) e2e-mobile), e2e-desktop(Electron, xvfb), mobile-build(iOS 시뮬레이터용 빌드는 macos 러너, Android 디버그 빌드, (전환 뒤) 추가), db(로컬 Supabase + pgTAP + DB 타입 비교)
+1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, apps/mobile 화면을 브라우저로), e2e-desktop(Electron, xvfb), mobile-android(`cap sync android` + Gradle 디버그 빌드. iOS 시뮬레이터 빌드는 macos 러너로 나중에 추가), db(로컬 Supabase + pgTAP + DB 타입 비교)
 2. develop 합치기(개발 서버, ADR 0002): 마이그레이션(나중에 Edge Functions)을 스테이징 Supabase에, 앱 화면·어드민·웹사이트는 Cloudflare Workers Builds가 GitHub 연결로 빌드해 개발 서버 주소에(→ ‘개발 서버’)
    - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 develop에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
    - GitHub Environments → staging에 배포 브랜치 제한이 있으면 develop을 허용해야 함
@@ -945,7 +945,7 @@ supabase/
 
 ### 모바일 출시
 
-- iOS 16 이상, Android 8(API 26) 이상 [확인 필요]. Capacitor가 Vite 빌드(`dist`)를 앱에 넣음(`npx cap sync`)
+- iOS 16 이상, Android 8(API 26) 이상 [확인 필요]. 지금 뼈대는 Capacitor 기본값(iOS 15, Android API 24, compile·target 36)이라 정하면 `ios/App` 배포 대상과 `android/variables.gradle`을 맞춤. Capacitor가 Vite 빌드(`dist`)를 앱에 넣음(`npx cap sync`)
 - iOS: Apple 개발자 계정(법인), App Store Connect API 키로 CI가 TestFlight 업로드. 서명은 Xcode 자동 관리 대신 CI용 인증서·프로비저닝(Environments production에만)
 - Android: Google Play 앱 서명, 업로드 키는 Environments production에만. AAB로 올림
 - 업데이트는 스토어만. 코드 바꿔 넣기(라이브 업데이트) 쓰지 않음(심사 규정, 보안)

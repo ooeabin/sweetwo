@@ -36,19 +36,37 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sweetwo/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @sweetwo/web e2e
+      - run: pnpm --filter @sweetwo/mobile exec playwright install --with-deps chromium
+      - run: pnpm --filter @sweetwo/mobile e2e
       - run: pnpm --filter @sweetwo/admin e2e
       - run: pnpm --filter @sweetwo/site e2e
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: e2e-web, path: apps/web/test-results, if-no-files-found: ignore }
+        with: { name: e2e-web, path: apps/mobile/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-admin, path: apps/admin/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-site, path: apps/site/test-results, if-no-files-found: ignore }
+
+  mobile-android:
+    runs-on: ubuntu-latest
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: pnpm install --frozen-lockfile
+      - name: 화면 묶음 → Android 프로젝트(cap sync)
+        run: pnpm --filter @sweetwo/mobile build && pnpm --filter @sweetwo/mobile exec cap sync android
+      - name: Android 디버그 빌드
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
 
   e2e-desktop:
     runs-on: ubuntu-latest
