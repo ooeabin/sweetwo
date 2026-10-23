@@ -1,5 +1,6 @@
 // Cloudflare Workers 정적 자산 배포(개발 서버, ADR 0002). 대시보드 Worker 이름과 같아야 함
 // 빌드는 저장소 루트에서 pnpm --filter, 배포는 npx wrangler deploy --config apps/web/wrangler.jsonc
+// 운영 브랜치는 develop(대시보드 Settings → Build → Branch control). 설정을 바꾼 뒤에는 develop에 새 커밋이 들어와야 그 브랜치로 빌드됨
 {
   "name": "sweetwo-app",
   "compatibility_date": "2026-10-01",
