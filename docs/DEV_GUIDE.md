@@ -117,13 +117,14 @@ sweetwo/
 
 | 무엇 | 주소 | 붙는 곳 |
 | --- | --- | --- |
-| 앱 화면(확인용, 넓은 창·좁은 창) | `https://sweetwo-app.{계정}.workers.dev` | 스테이징 Supabase, 실제 소셜 로그인 |
-| 어드민 | `https://sweetwo-admin.{계정}.workers.dev` | 스테이징 Supabase |
-| 웹사이트 | `https://sweetwo-site.{계정}.workers.dev` | — |
+| 앱 화면(확인용, 넓은 창·좁은 창) | `https://sweetwo-app.yeabin0909.workers.dev` | 스테이징 Supabase, 실제 소셜 로그인 |
+| 어드민 | `https://sweetwo-admin.yeabin0909.workers.dev` | 스테이징 Supabase |
+| 웹사이트 | `https://sweetwo-site.yeabin0909.workers.dev` | — |
 | DB | `sweetwo-staging`(Supabase 서울) | develop 합치기 때 마이그레이션 자동 적용 |
 
-- `{계정}`은 Cloudflare 계정의 workers.dev 하위 주소(Workers & Pages 첫 화면 오른쪽에 보임)
-- PR 브랜치는 `https://{브랜치}-sweetwo-app.{계정}.workers.dev` 미리보기 주소가 생김
+- PR 브랜치는 `https://{브랜치}-sweetwo-app.yeabin0909.workers.dev` 미리보기 주소가 생김
+- 빌드가 Node 설치 단계에서 실패하면 한 번 더 Retry, 그래도 실패하면 Settings → Build → Build cache → Clear cache 뒤 Retry
+- 운영 브랜치를 바꾼 뒤에는 그 브랜치에 새 커밋이 들어와야 그 브랜치로 빌드됨(Retry는 원래 브랜치로 다시 돎)
 - 데스크톱 전용(트레이, PIN, 딥링크)과 모바일 전용(푸시, Face ID)은 여기서 확인 못 함. 그 부분은 e2e(흉내 브리지)와 기기 빌드로
 - 개발 서버 데이터는 실제로 가입해서 만듦. 부부 기능은 계정 두 개로 가입 → 초대 코드로 연결
 
@@ -142,8 +143,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - Build variables(세 Worker 공통): `NODE_VERSION=22.20.0`(22만 쓰면 최신판을 골라 설치에 실패할 수 있음), `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. 화면 값은 빌드 때 들어가므로 Runtime variables가 아니라 Build variables에
 - 앱·어드민 Build variables: `VITE_SUPABASE_URL=https://xxofyzgzrjrcrcxvftpn.supabase.co`, `VITE_SUPABASE_ANON_KEY`(스테이징 anon key, 공개 값. Supabase → Project Settings → API). service role은 넣지 않음
 - 화면 주소(라우팅): 앱·어드민은 `not_found_handling: single-page-application`(모든 경로에 index.html), 웹사이트는 `404-page`(404.html이 초대 링크 `/i/{코드}`를 맡음)
-- 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 도메인 `sweetwo-app.{계정}.workers.dev`와 `*-sweetwo-app.{계정}.workers.dev`(어드민, 웹사이트도 같은 방식). 정책 Allow + 허용 이메일. 로그인 방법 One-time PIN. 또는 Worker → Settings → Domains & Routes에서 workers.dev의 Cloudflare Access 켜기
-- 스테이징 Supabase → Authentication → URL Configuration: Site URL `https://sweetwo-app.{계정}.workers.dev`, Redirect URLs `https://sweetwo-app.{계정}.workers.dev/**`, `https://*-sweetwo-app.{계정}.workers.dev/**`, `https://sweetwo-admin.{계정}.workers.dev/**`, `https://*-sweetwo-admin.{계정}.workers.dev/**`
+- 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 앱마다 1개(sweetwo-app, sweetwo-admin, sweetwo-site). 도메인 `sweetwo-app.yeabin0909.workers.dev`(미리보기까지 막으려면 `*-sweetwo-app.yeabin0909.workers.dev`도). 정책 Allow + Include Emails(허용 이메일). Identity 탭에서 ‘Select all’을 지우고 One-time PIN만, Apply instant authentication 켬. One-time PIN이 목록에 없으면 Zero Trust → Settings → Authentication → Login methods에서 먼저 추가. Cloudflare 계정 로그인은 쓰지 않음(동의 단계에서 ‘Application authorization failed’)
+- 스테이징 Supabase → Authentication → URL Configuration: Site URL `https://sweetwo-app.yeabin0909.workers.dev`, Redirect URLs `https://sweetwo-app.yeabin0909.workers.dev/**`, `https://*-sweetwo-app.yeabin0909.workers.dev/**`, `https://sweetwo-admin.yeabin0909.workers.dev/**`, `https://*-sweetwo-admin.yeabin0909.workers.dev/**`
 - 스테이징 소셜 로그인: Supabase → Authentication → Providers에서 카카오·구글·애플을 켜고, 각 콘솔의 스테이징 앱에 콜백 `https://xxofyzgzrjrcrcxvftpn.supabase.co/auth/v1/callback` 등록(애플은 Services ID + 도메인 확인)
 
 ## 로컬 개발 환경
