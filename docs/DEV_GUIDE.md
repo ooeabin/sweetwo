@@ -139,7 +139,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | Non-production branch builds | 켬, deploy command `npx wrangler versions upload --config apps/web/wrangler.jsonc` | 켬(같은 방식, admin) | 켬(같은 방식, site) |
 | Build watch paths(포함) | `apps/web/*`, `packages/*` | `apps/admin/*`, `packages/*` | `apps/site/*`, `packages/core/*` |
 
-- Build variables(세 Worker 공통): `NODE_VERSION=22`, `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. 화면 값은 빌드 때 들어가므로 Runtime variables가 아니라 Build variables에
+- Build variables(세 Worker 공통): `NODE_VERSION=22.20.0`(22만 쓰면 최신판을 골라 설치에 실패할 수 있음), `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. 화면 값은 빌드 때 들어가므로 Runtime variables가 아니라 Build variables에
 - 앱·어드민 Build variables: `VITE_SUPABASE_URL=https://xxofyzgzrjrcrcxvftpn.supabase.co`, `VITE_SUPABASE_ANON_KEY`(스테이징 anon key, 공개 값. Supabase → Project Settings → API). service role은 넣지 않음
 - 화면 주소(라우팅): 앱·어드민은 `not_found_handling: single-page-application`(모든 경로에 index.html), 웹사이트는 `404-page`(404.html이 초대 링크 `/i/{코드}`를 맡음)
 - 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 도메인 `sweetwo-app.{계정}.workers.dev`와 `*-sweetwo-app.{계정}.workers.dev`(어드민, 웹사이트도 같은 방식). 정책 Allow + 허용 이메일. 로그인 방법 One-time PIN. 또는 Worker → Settings → Domains & Routes에서 workers.dev의 Cloudflare Access 켜기
