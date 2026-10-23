@@ -25,6 +25,25 @@ jobs:
         run: pnpm check:assets
       - name: 비밀 값이 앱 코드에 없는지
         run: "! grep -rnE 'service_role|SUPABASE_SERVICE|AWS_SECRET' apps packages --include=*.ts --include=*.tsx"
+      - name: 커밋된 .env에 공개 키만 있는지(sb_secret_, service_role 토큰 금지)
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path");
+            let bad = 0;
+            for (const app of fs.readdirSync("apps")) {
+              const dir = path.join("apps", app);
+              if (!fs.statSync(dir).isDirectory()) continue;
+              for (const f of fs.readdirSync(dir).filter((n) => n.startsWith(".env"))) {
+                const text = fs.readFileSync(path.join(dir, f), "utf8");
+                if (/sb_secret_/.test(text)) { console.error(`${dir}/${f}: sb_secret_ 키`); bad++; }
+                for (const jwt of text.match(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g) ?? []) {
+                  const role = JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString()).role;
+                  if (role !== "anon") { console.error(`${dir}/${f}: role=${role} 토큰`); bad++; }
+                }
+              }
+            }
+            process.exit(bad ? 1 : 0);
+          '
 
   e2e-web:
     runs-on: ubuntu-latest

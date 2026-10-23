@@ -1,6 +1,6 @@
 # sweeTwo
 
-함께 구워 더 달콤한 자산파이. 부부 자산관리 앱(데스크톱, 웹, 어드민, 웹사이트)을 한 저장소에서 만든다.
+함께 구워 더 달콤한 자산파이. 부부 자산관리 앱(데스크톱, 모바일, 어드민, 웹사이트)을 한 저장소에서 만든다.
 
 - 먼저 읽기: `CLAUDE.md`(규칙), `docs/DEV_GUIDE.md`(개발 가이드), `docs/spec/README.md`(기획서), `docs/DESIGN.md`(디자인)
 - Cursor는 `CURSOR.md` 참고
@@ -10,12 +10,11 @@
 ```bash
 corepack enable
 pnpm install
-cp apps/mobile/.env.example apps/mobile/.env.local   # 값 채우기
-pnpm dev            # 모바일 화면(브라우저) 5173, 어드민 5174
+pnpm dev            # 모바일 화면(브라우저) 5173, 어드민 5174. 스테이징 DB를 바라봄(.env.development)
 pnpm dev:desktop    # 데스크톱 앱
 pnpm dev:site       # 웹사이트
 pnpm test           # Vitest(core 계산, 딥링크)
-pnpm db:start       # 로컬 Supabase(Docker)
+pnpm db:start       # 로컬 Supabase(Docker), 마이그레이션 만들 때만. docs/DEV_GUIDE.md ‘로컬 개발 환경’
 pnpm check:assets   # 그림, 영상 크기 상한
 ```
 
