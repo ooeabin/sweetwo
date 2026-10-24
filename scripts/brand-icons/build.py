@@ -75,7 +75,7 @@ def main():
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}"><title>sweeTwo</title>{paths}</svg>')
     # og: 왼쪽 심볼 자리만 3D 심볼로(워드마크는 그대로)
     og = Image.open(p('apps/site/public/og.png')).convert('RGBA')
-    ImageDraw.Draw(og).rectangle((215, 175, 480, 455), fill=(255, 255, 255, 255))
+    ImageDraw.Draw(og).rectangle((190, 150, 505, 500), fill=(255, 255, 255, 255))
     s3 = sym3d(420, 0.60)
     og.alpha_composite(s3, (347 - 210, 315 - 210)); og.convert('RGB').save(p('apps/site/public/og.png'), optimize=True)
 
