@@ -31,6 +31,7 @@ def flat(size, frac, ss=8):
 
 MASTER = os.path.join(os.path.dirname(__file__), '3d-master.png')   # 심볼 폭 = 캔버스의 62%, 투명 바탕
 MASTER_FRAC = 0.62
+ICON_FRAC = 0.72   # 앱 아이콘 안 심볼 폭(Android 적응형 전경은 안전 영역 때문에 따로 62%)
 
 def sym3d(size, frac):
     """3D 원본을 심볼 폭이 size*frac가 되게 줄여 size×size 투명 캔버스 가운데에"""
@@ -50,14 +51,14 @@ def main():
     if '--render' in sys.argv or not os.path.exists(MASTER):
         import subprocess
         subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), 'blender_scene.py'), MASTER], check=True)
-    icon = on_white(sym3d(1024, 0.62))
+    icon = on_white(sym3d(1024, ICON_FRAC))
     icon.save(os.path.join(B, 'app-icon.png'), optimize=True)
     icon.save(p('apps/desktop/build/icon.png'), optimize=True)
     icon.resize((180, 180), Image.LANCZOS).save(os.path.join(B, 'apple-touch-icon.png'), optimize=True)
     # Mac: 흰 둥근 사각 판(824px, 그림자 포함)은 기존 파일 그대로, 가운데 심볼만 바꿈
     mac = Image.open(os.path.join(B, 'app-icon-macos.png')).convert('RGBA')
     ImageDraw.Draw(mac).rectangle((200, 180, 830, 850), fill=(255, 255, 255, 255))
-    sym = sym3d(1024, 0.62 * 824 / 1024)
+    sym = sym3d(1024, ICON_FRAC * 824 / 1024)
     mac.alpha_composite(sym); mac.save(os.path.join(B, 'app-icon-macos.png'), optimize=True)
     sym3d(512, 0.84).save(os.path.join(B, 'symbol.png'), optimize=True)
     for n in (32, 48):
