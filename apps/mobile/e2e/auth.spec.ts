@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe } from './axe';
 import { asReturningFromProvider, mockSupabase } from './supabase-mock';
 
 // 로그인, 가입 흐름(docs/spec/15-login-signup.md). Supabase 응답은 흉내 낸다.
 
 const noA11yViolations = async (page: import('@playwright/test').Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await axe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

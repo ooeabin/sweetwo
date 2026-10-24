@@ -30,7 +30,7 @@ export function InfoPlate({
   );
 }
 
-/** 완료 표시: 완료 화면 제목 아래 큰 체크(옅은 분홍 원 + 분홍 체크) */
+/** 완료 표시: 완료 화면 제목 아래 큰 체크(옅은 오렌지 원 + 오렌지 체크) */
 export function DoneMark() {
   return (
     <span className="hg-donemark" aria-hidden="true">

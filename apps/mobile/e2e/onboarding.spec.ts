@@ -1,12 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { setWheel } from './wheel';
 import { mockOnboarding } from './onboarding-mock';
 
 // 온보딩 처음부터 끝까지(docs/spec/16-onboarding-1.md, 17-onboarding-2.md). 찬우가 처음 시작하고 예빈은 아직 미합류.
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

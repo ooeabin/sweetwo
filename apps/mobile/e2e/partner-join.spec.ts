@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { mockOnboarding } from './onboarding-mock';
 import { setWheel } from './wheel';
 import { mockSupabase, SB } from './supabase-mock';
@@ -7,7 +7,7 @@ import { mockSupabase, SB } from './supabase-mock';
 // 배우자 합류(docs/spec/18-partner-join.md). 예빈이 찬우의 초대 링크로 합류한다.
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

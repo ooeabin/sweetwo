@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 
 // 어드민(27 어드민 화면): 매직 링크 + 인증 앱, 대시보드, 회원 검색·상세(L0·L1), 문의 답변·동의 요청, 감사 로그, 문서.
 // 가짜 Supabase(http://127.0.0.1:54399). 관리자 cs01(CS), ops01(운영).
@@ -44,7 +44,7 @@ const session = (aal: 'aal1' | 'aal2') => ({
 });
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

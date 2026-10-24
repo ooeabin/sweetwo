@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (d9ea650). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (b5b3092). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -17,18 +17,18 @@
   --muted: #a4a5a7; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
-  --brand: #d92b4a; /* sweeTwo 브랜드 색(분홍, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. */
-  --brand-soft: #fde8ec; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
-  --brand-ink: #9e0f2c; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
-  --brand-pressed: #c22340; /* 주 버튼 누름 상태 바탕. */
+  --brand: #ff7716; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. 흰 글자 대비 2.7:1로 WCAG AA 미달을 알고 씀(주 버튼, 달성 배지만 axe color-contrast 예외). */
+  --brand-soft: #fff2e8; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
+  --brand-ink: #b33f00; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
+  --brand-pressed: #ec6a08; /* 주 버튼 누름 상태 바탕. */
   --on-brand: #ffffff; /* brand 바탕 위 글자(주 버튼, 달성 배지). 라이트는 흰 글자, 다크는 어두운 글자. */
   --focus: #3d5afe; /* 키보드 포커스 링(2px)과 글자 링크. surface·surface-alt 위 4.5:1 이상. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
   --family: #efe7fb; /* ‘양가’ 영역 틴트: 챙길 날의 양가 일정, 양가 비용. */
   --family-ink: #5b3a9a; /* family 위 라벨·배지 글자. */
-  --holiday-ink: #c42f26; /* 캘린더 공휴일 숫자·이름만. 오류 danger, 분홍 브랜드와 따로 둠. surface·family 위 4.5:1 이상. */
-  --goal: #f6eee5; /* 목표 영역 틴트: 목표 카드, 목표자금. 따뜻한 모래색으로 분홍 브랜드 색과 구분. */
+  --holiday-ink: #c42f26; /* 캘린더 공휴일 숫자·이름만. 오류 danger, 오렌지 브랜드와 따로 둠. surface·family 위 4.5:1 이상. */
+  --goal: #f6eee5; /* 목표 영역 틴트: 목표 카드, 목표자금. 따뜻한 모래색으로 오렌지 브랜드 색과 구분. */
   --goal-ink: #6b4a2b; /* goal 위 라벨·배지 글자. */
   --safety: #d9f4f9; /* 비상금 영역 틴트. */
   --safety-ink: #0e5d6b; /* safety 위 라벨·배지 글자. */
@@ -40,7 +40,7 @@
   --person-2-ink: #1f3a99; /* person-2 위 이니셜. */
   --success: #0a7d56; /* 완료·확정 표시(체크, ‘확정’ 배지 바탕). 글자는 on-success. */
   --on-success: #ffffff; /* success 바탕 위 글자. */
-  --danger: #b91c1c; /* 입력 오류·저장 실패에만. 브랜드 분홍보다 짙은 빨강으로 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
+  --danger: #dc2626; /* 입력 오류·저장 실패에만. 기본 빨강(흰 바탕 4.8:1)으로 브랜드 오렌지와 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
   --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
   --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
@@ -70,10 +70,10 @@
   --muted: #58595b;
   --on-ink: #121315;
   --primary-pressed: #cacbcd;
-  --brand: #ff6b85;
-  --brand-soft: #3d1820;
-  --brand-ink: #ffb3bf;
-  --brand-pressed: #ff8a9e;
+  --brand: #ff9045;
+  --brand-soft: #3a2214;
+  --brand-ink: #ffc29a;
+  --brand-pressed: #ffa86e;
   --on-brand: #1c1b19;
   --focus: #8a9bff;
   --together: #3d1f24;
