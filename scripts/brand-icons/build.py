@@ -3,7 +3,7 @@
 python3 scripts/brand-icons/build.py   (numpy, scipy, pillow 필요)
 - 앱 아이콘 계열(app-icon, app-icon-macos, apple-touch, symbol.png, og): Blender로 렌더링한 말랑 점토 3D(blender_scene.py).
   3D 원본은 한 번만 렌더링(약 5분)하고 3d-master.png로 둠. 형상이나 재질을 바꿨으면 --render로 다시.
-- 작은 자리(favicon-32/48)와 symbol.svg: 같은 형상의 평면 한 색
+- 파비콘(favicon-32/48)도 3D 원본을 줄임. symbol.svg만 같은 형상의 평면 한 색
 형상 값을 바꾸면 docs/design/assets/Brand.md도 같이 고침.
 """
 import os, sys
@@ -62,9 +62,10 @@ def main():
     mac.alpha_composite(sym); mac.save(os.path.join(B, 'app-icon-macos.png'), optimize=True)
     sym3d(512, 0.84).save(os.path.join(B, 'symbol.png'), optimize=True)
     for n in (32, 48):
-        f = flat(n, 0.92); f.save(os.path.join(B, f'favicon-{n}.png'), optimize=True)
-    flat(32, 0.92).save(p('apps/site/public/favicon-32.png'), optimize=True)
-    flat(32, 0.92).save(p('apps/mobile/public/favicon-32.png'), optimize=True)
+        # 파비콘도 3D 원본을 줄여 씀(평면 한 색은 앱 아이콘보다 짙어 보여서)
+        f = sym3d(n * 8, 0.92).resize((n, n), Image.LANCZOS); f.save(os.path.join(B, f'favicon-{n}.png'), optimize=True)
+    for q in ('apps/site/public/favicon-32.png', 'apps/mobile/public/favicon-32.png'):
+        Image.open(os.path.join(B, 'favicon-32.png')).save(p(q), optimize=True)
     # symbol.svg(평면 원본)
     geo = pieces(**GEO)
     allp = [q for k in geo for q in geo[k]]
