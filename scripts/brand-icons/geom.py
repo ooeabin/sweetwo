@@ -25,8 +25,11 @@ def _arc(R, a_from, a_to, n=200):
 
 def ang(p): return math.degrees(math.atan2(p[1], p[0]))
 
-def pieces(gap=40.0, crust_gap=44.0, crust_t=122.0):
+def pieces(gap=40.0, crust_gap=44.0, crust_t=122.0, ring_out=None, ring_in=None):
+    """ring_out='crust'면 고리 바깥이 크러스트 바깥까지 커져 조각과 크러스트를 감쌈"""
     P = params(gap, crust_gap, crust_t); g = P['g']
+    ro = P['co'] if ring_out == 'crust' else (ring_out or R_OUT)
+    ri = ring_in or (R_IN * ro / R_OUT)
     # 오프셋 직선: 쐐기 경계 A1, A2를 g만큼 평행 이동
     def off(a, side): n = _n(a, side); return (n[0]*g, n[1]*g)
     # 조각: 쐐기 안쪽으로 g씩 들어간 두 직선, 반지름 rs
@@ -42,11 +45,11 @@ def pieces(gap=40.0, crust_gap=44.0, crust_t=122.0):
     q1 = off(A1, -1); q2 = off(A2, +1)
     def seg(o, d, R):  # 직선 o + t d 와 원 R 교점
         return _line_circle(o, d, R) if True else None
-    r1o = _line_circle(q1, d1, R_OUT); r1i = _line_circle(q1, d1, R_IN)
-    r2o = _line_circle(q2, d2, R_OUT); r2i = _line_circle(q2, d2, R_IN)
+    r1o = _line_circle(q1, d1, ro); r1i = _line_circle(q1, d1, ri)
+    r2o = _line_circle(q2, d2, ro); r2i = _line_circle(q2, d2, ri)
     a2o, a1o = ang(r2o), ang(r1o) + 360
     a1i, a2i = ang(r1i) + 360, ang(r2i)
-    ring = _arc(R_OUT, a2o, a1o, 400) + _arc(R_IN, a1i, a2i, 300)
+    ring = _arc(ro, a2o, a1o, 400) + _arc(ri, a1i, a2i, 300)
     # 크러스트: 조각과 같은 두 직선 사이, 반지름 ci~co
     c1i = _line_circle(o1, d1, P['ci']); c1o = _line_circle(o1, d1, P['co'])
     c2i = _line_circle(o2, d2, P['ci']); c2o = _line_circle(o2, d2, P['co'])

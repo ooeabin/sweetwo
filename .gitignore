@@ -18,3 +18,5 @@ playwright-report/
 
 # Claude Code 로컬 설정(개인·머신 전용)
 .claude/settings.local.json
+scripts/brand-icons/__pycache__/
+scripts/brand-icons/3d-master.png
