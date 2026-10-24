@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 
-// 브랜드 오렌지(#FF6F0F) 위 흰 글자는 대비 2.8:1로 WCAG AA 미달을 알고 씀(DESIGN.md 색).
+// 브랜드 오렌지(#FF7716) 위 흰 글자는 대비 2.7:1로 WCAG AA 미달을 알고 씀(DESIGN.md 색).
 // 그래서 주 버튼과 달성 배지의 color-contrast만 예외로 빼고, 나머지 규칙은 그대로 검사함.
 const BRAND_FILL = /hg-btn--primary|hg-badge--achieved/;
 

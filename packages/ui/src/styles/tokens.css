@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (55d32fa). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (676d6c5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -17,10 +17,10 @@
   --muted: #a4a5a7; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
-  --brand: #ff6f0f; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. 흰 글자 대비 2.8:1로 WCAG AA 미달을 알고 씀(주 버튼, 달성 배지만 axe color-contrast 예외). */
-  --brand-soft: #fff0e6; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
+  --brand: #ff7716; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. 흰 글자 대비 2.7:1로 WCAG AA 미달을 알고 씀(주 버튼, 달성 배지만 axe color-contrast 예외). */
+  --brand-soft: #fff2e8; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
   --brand-ink: #b33f00; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
-  --brand-pressed: #e85f00; /* 주 버튼 누름 상태 바탕. */
+  --brand-pressed: #ec6a08; /* 주 버튼 누름 상태 바탕. */
   --on-brand: #ffffff; /* brand 바탕 위 글자(주 버튼, 달성 배지). 라이트는 흰 글자, 다크는 어두운 글자. */
   --focus: #3d5afe; /* 키보드 포커스 링(2px)과 글자 링크. surface·surface-alt 위 4.5:1 이상. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
@@ -70,10 +70,10 @@
   --muted: #58595b;
   --on-ink: #121315;
   --primary-pressed: #cacbcd;
-  --brand: #ff8a3d;
+  --brand: #ff9045;
   --brand-soft: #3a2214;
   --brand-ink: #ffc29a;
-  --brand-pressed: #ffa366;
+  --brand-pressed: #ffa86e;
   --on-brand: #1c1b19;
   --focus: #8a9bff;
   --together: #3d1f24;

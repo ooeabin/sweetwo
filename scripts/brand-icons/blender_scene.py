@@ -1,7 +1,7 @@
 """앱 아이콘 3D 원본을 Blender(bpy)로 렌더링.
 
 형상은 geom.py 수치 → 높이 지도(둥근 단면) → 격자 메시. 재질은 '말랑 점토'.
-그늘은 브랜드 색(#FF6F0F)을 발광으로 깔아 그 아래로 어두워지지 않고, 빛 받는 곳만 밝아짐.
+그늘은 브랜드 색(#FF7716)을 발광으로 깔아 그 아래로 어두워지지 않고, 빛 받는 곳만 밝아짐.
 바닥 그림자 없음, 투명 바탕. 결과: 심볼 폭이 캔버스의 62%인 정사각 PNG.
 pip install bpy (Blender 5.2) 필요.
 """
@@ -13,7 +13,7 @@ import bpy
 sys.path.insert(0, os.path.dirname(__file__))
 from geom import pieces
 
-BRAND, LIT = '#FF6F0F', '#FFA060'
+BRAND, LIT = '#FF7716', '#FFA868'
 FRAC = 0.62
 
 def srgb(h):

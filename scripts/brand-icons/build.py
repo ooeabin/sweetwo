@@ -15,7 +15,7 @@ from geom import pieces, svg_paths
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 B = os.path.join(ROOT, 'packages/ui/src/assets/brand')
 GEO = dict(gap=80, crust_gap=80, crust_t=170)   # 원본 대비 틈 2배, 크러스트 1.4배
-BRAND = '#FF6F0F'
+BRAND = '#FF7716'
 
 def flat(size, frac, ss=8):
     geo = pieces(**GEO)
