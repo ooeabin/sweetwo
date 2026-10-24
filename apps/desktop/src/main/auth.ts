@@ -41,7 +41,7 @@ const emit = (ev: AuthEvent) => {
 function requireEnv() {
   if (!env.url || !env.key)
     throw new Error(
-      'VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY가 필요해요(apps/desktop/.env.local)',
+      'VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY가 필요해요(apps/desktop/.env.development)',
     );
   return { url: env.url, key: env.key };
 }
