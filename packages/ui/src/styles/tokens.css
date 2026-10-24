@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (676d6c5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (b5b3092). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -40,7 +40,7 @@
   --person-2-ink: #1f3a99; /* person-2 위 이니셜. */
   --success: #0a7d56; /* 완료·확정 표시(체크, ‘확정’ 배지 바탕). 글자는 on-success. */
   --on-success: #ffffff; /* success 바탕 위 글자. */
-  --danger: #b91c1c; /* 입력 오류·저장 실패에만. 브랜드 오렌지와 다른 짙은 빨강으로 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
+  --danger: #dc2626; /* 입력 오류·저장 실패에만. 기본 빨강(흰 바탕 4.8:1)으로 브랜드 오렌지와 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
   --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
   --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
