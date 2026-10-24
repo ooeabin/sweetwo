@@ -1,11 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
 // 이번 달 H-04 할 일과 W-04j 지출 적기(docs/spec/19-this-month.md, 21-month-close.md). 찬우, 예빈 미합류.
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

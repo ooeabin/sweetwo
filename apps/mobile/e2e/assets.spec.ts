@@ -1,11 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
 // 우리 자산 F-01 한눈에, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

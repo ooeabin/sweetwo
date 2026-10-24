@@ -1181,7 +1181,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (m) m.deleted_at = 'now';
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
-      if (fn === 'partner_birthday') return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
+      if (fn === 'partner_birthday')
+        return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
       if (fn === 'delete_minor_account' || fn === 'delete_underage_account')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
@@ -1667,7 +1668,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       );
     if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
     if (path === '/rest/v1/emergency_move' && method === 'GET')
-      return json(route, db.emergencyMoves.filter((x) => !x.deleted_at));
+      return json(
+        route,
+        db.emergencyMoves.filter((x) => !x.deleted_at),
+      );
     if (path === '/rest/v1/notice' && method === 'GET') return json(route, db.notices);
     if (path === '/rest/v1/close_balance') {
       if (method === 'GET') return json(route, db.balances);

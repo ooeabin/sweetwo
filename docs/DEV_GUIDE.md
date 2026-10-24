@@ -454,7 +454,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지킬 것
 
-- 브랜드 색(분홍)은 워드마크, 주 버튼, 달성 배지, 새 알림 점, 결과 카드(ResultCard) 체크, 온보딩 챕터 진행 막대(ChapterBar)에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 분홍(`brand-soft`)은 카드 안과 O-01 ‘초대받았어요’에만
+- 브랜드 색(오렌지)은 워드마크, 주 버튼, 달성 배지, 새 알림 점, 결과 카드(ResultCard) 체크, 온보딩 챕터 진행 막대(ChapterBar)에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안과 O-01 ‘초대받았어요’에만
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -814,7 +814,7 @@ supabase/
 - 데스크톱: Playwright `_electron`으로 실제 앱 실행(딥링크, 트레이, 잠금)
 - 테스트마다 DB 초기화(seed 다시 넣기). 테스트끼리 데이터를 나눠 쓰지 않음
 - 음력: fixture를 천문연구원 표와 대조
-- 접근성: 화면마다 axe 검사, ‘동작 줄이기’ 켜고 한 번
+- 접근성: 화면마다 axe 검사(`e2e/axe.ts`의 `axe(page)`로. 브랜드 오렌지 위 흰 글자의 color-contrast만 예외), ‘동작 줄이기’ 켜고 한 번
 - 디자인 시스템 컴포넌트: `/dev/ui` 컴포넌트 모음을 라이트, 다크, 좁은 창(375px)에서 열어 오류 없음, axe 위반 없음, 스크린샷(apps/mobile/e2e). 기준 이미지 비교는 화면이 안정되면 추가
 - 데스크톱 실행: `apps/desktop/e2e`(빌드 뒤 `xvfb-run -a pnpm --filter @sweetwo/desktop e2e`). 딥링크 허용 목록은 Vitest(`deep-link-parse.test.ts`)
 

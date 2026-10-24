@@ -1,10 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
 // 함께 모드(docs/spec/21-month-close.md W-04a 4~8번, W-04 끝 6~8번, 함께 정하기 3번). 예빈 화면, 찬우가 정리 시작.
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);

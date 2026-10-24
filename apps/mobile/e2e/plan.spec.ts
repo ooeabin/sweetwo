@@ -1,11 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
 // 월급 플랜 W-01과 월급 나누기 W-02·W-02a(docs/spec/20-salary-plan.md). 찬우(신랑)와 합류한 예빈, 통장 역할을 나눔.
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
