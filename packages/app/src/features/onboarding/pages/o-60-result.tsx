@@ -6,7 +6,7 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSplits } from '../data';
 import { topGoal } from '../flow';
-import { toAllocGoal } from '../split-draft';
+import { toAllocGoal } from '../../salary';
 import { useStep } from '../step';
 
 /** 늦은 기간: “n년 m개월”, 딱 떨어지면 “n년”, 1년 미만은 “m개월” */

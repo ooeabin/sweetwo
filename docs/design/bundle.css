@@ -1151,7 +1151,7 @@ a.hg-btn { text-decoration: none; }
 .hg-meter__name { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .hg-meter__head > .hg-lead { align-self: center; }
 .hg-meter__name b { font: 600 16px/24px var(--font-sans); }
-.hg-meter__name span { font: 400 13px/18px var(--font-sans); color: var(--stone); }
+.hg-meter__name > span { font: 400 13px/18px var(--font-sans); color: var(--stone); }  /* 금액 줄만(이름 옆 Badge는 제 색) */
 .hg-meter__pct { font: 600 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
 .hg-meter__pct small { font-size: 15px; }
 .hg-meter__segs { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 26px; }

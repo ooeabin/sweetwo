@@ -5,7 +5,7 @@ import {
   type AllocGoal,
   type SplitLineDraft,
 } from '@sweetwo/core';
-import type { Goal, Me } from './data';
+import type { Goal, Me } from '@sweetwo/api';
 
 // 월급 분배표 초안(O-50, 17 온보딩 ②). W-01도 같은 규칙을 쓴다.
 

@@ -54,3 +54,27 @@ export async function fetchCurrentChecklists(today: string): Promise<PayChecklis
   fail(error);
   return (data ?? []) as PayChecklist[];
 }
+
+/** 줄 체크(checked), 풀기(wait), 이번 달은 못 했어요(skipped). 다른 금액은 actual(0이면 못 함) */
+export async function checkPayLine(
+  line: string,
+  state: 'checked' | 'wait' | 'skipped',
+  actual?: number,
+): Promise<'ok' | 'already_checked' | 'closed'> {
+  const { error } = await supabase().rpc('check_pay_line', {
+    p_line: line,
+    p_state: state,
+    p_actual: actual,
+  });
+  if (error?.message?.includes('already_checked')) return 'already_checked';
+  if (error?.message?.includes('closed')) return 'closed';
+  fail(error);
+  return 'ok';
+}
+
+/** 목표별 체크한 저금 합(모은 돈 계산용) */
+export async function fetchGoalCheckedSums(): Promise<Record<string, number>> {
+  const { data, error } = await supabase().rpc('goal_checked_sums');
+  fail(error);
+  return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.amount]));
+}
