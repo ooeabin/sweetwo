@@ -79,7 +79,10 @@ const json = (route: Route, body: unknown, status = 200) =>
     headers: { 'Access-Control-Allow-Origin': '*' },
   });
 
-async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: string[] } = {}) {
+async function mock(
+  page: Page,
+  o: { aal?: 'aal1' | 'aal2' | null; roles?: string[]; otpError?: string } = {},
+) {
   const db: Db = {
     rpc: [],
     roles: o.roles ?? ['cs'],
@@ -124,7 +127,18 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
     const url = new URL(req.url());
     const p = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
-    if (p === '/auth/v1/otp') return json(route, {});
+    if (p === '/auth/v1/otp')
+      return o.otpError
+        ? json(
+            route,
+            {
+              code: 429,
+              error_code: o.otpError,
+              msg: 'For security purposes, you can only request this after 10 seconds.',
+            },
+            429,
+          )
+        : json(route, {});
     if (p === '/auth/v1/user') return json(route, user);
     if (p === '/auth/v1/factors/f1/challenge')
       return json(route, { id: 'c1', type: 'totp', expires_at: 9999999999 });
@@ -429,7 +443,19 @@ test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
   await axe(page);
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
   await expect(page.getByText('메일함에서 링크를 눌러 주세요')).toBeVisible();
+  await expect(page.getByText(/초 뒤에 다시 받을 수 있어요/)).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
   expect(db.rpc).toEqual([]);
+});
+
+test('로그인: 너무 자주 누르면 조금 뒤에 다시', async ({ page }) => {
+  await mock(page, { aal: null, otpError: 'over_email_send_rate_limit' });
+  await page.goto('/');
+  await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
+  await page.getByRole('button', { name: '로그인 링크 받기' }).click();
+  await expect(page.getByText('조금 뒤에 다시 눌러 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
+  await axe(page);
 });
 
 test('2단계 인증: 인증 앱 숫자를 넣어야 들어감', async ({ page }) => {
