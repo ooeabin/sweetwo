@@ -34,10 +34,13 @@ const KNOWN = [
   'legal_check_required',
   'bad_value',
   'self_lock',
+  // 로그인 링크(Supabase Auth 오류 코드)
+  'over_email_send_rate_limit',
+  'email_address_not_authorized',
 ];
-const fail = (e: { message?: string } | null) => {
+const fail = (e: { message?: string; code?: string } | null) => {
   if (!e) return;
-  const code = KNOWN.find((k) => e.message?.includes(k));
+  const code = KNOWN.find((k) => e.code === k || e.message?.includes(k));
   throw new AdminError(code ?? (e.message?.includes('fetch') ? 'network' : 'unknown'));
 };
 
