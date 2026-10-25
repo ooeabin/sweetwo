@@ -1,5 +1,5 @@
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, DayChips, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, DayChips, QuestionLayout, SectionHeader } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useConfirmOnce } from '../confirm';
 import { copy } from '../copy';
@@ -52,6 +52,7 @@ export function O31Salary() {
         }}
         quick={quickChips.small.slice(1)}
         monthly
+        embedded
         zeroLink={{ label: copy.noSalary, onClick: () => void save(0, null) }}
       />
       {ok.banner}
@@ -65,6 +66,7 @@ export function O31Salary() {
         <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
         <span className="hg-consent__label">{copy.salaryVariable}</span>
       </button>
+      <SectionHeader title={copy.payday} />
       <DayChips label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.paydayLast} />
     </QuestionLayout>
   );

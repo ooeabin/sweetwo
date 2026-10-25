@@ -106,7 +106,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ p
   await page.getByRole('button', { name: '이대로 할게요' }).click();
 
   await heading(page, '매달 95만 원씩 모으면 2039년 12월에 내 집 마련을 이뤄요');
-  await expect(page.getByText(/목표 기한보다 8년 늦어요/)).toBeVisible();
+  await expect(page.getByText(/목표 기한보다 8년 2개월 늦어요/)).toBeVisible();
   await expect(page.getByText('월급날(25일)에 분배표대로 보내고 체크해 주세요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();

@@ -7,7 +7,15 @@ import {
   ymToDate,
   type SplitLineDraft,
 } from '@sweetwo/core';
-import { AmountInput, Button, List, ListRow, QuestionLayout, SectionHeader, ShortText } from '@sweetwo/ui';
+import {
+  AmountInput,
+  Button,
+  List,
+  ListRow,
+  QuestionLayout,
+  SectionHeader,
+  ShortText,
+} from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { useSplits } from '../data';
@@ -75,7 +83,9 @@ export function O50Split() {
   if (edit) {
     const isAdd = 'add' in edit;
     const line = isAdd ? undefined : lines[edit.index];
-    const title = isAdd ? copy.addLine.replace('+ ', '') : copy.lineAmount(line ? nameOf(line) : '');
+    const title = isAdd
+      ? copy.addLine.replace('+ ', '')
+      : copy.lineAmount(line ? nameOf(line) : '');
     const v = amount ?? line?.amount ?? null;
     const valid = v !== null && v % 10_000 === 0 && (!isAdd || name.trim().length > 0);
     const close = () => {
@@ -108,13 +118,7 @@ export function O50Split() {
             placeholder={copy.newLinePlaceholder}
           />
         )}
-        <AmountInput
-          label={title}
-          value={v}
-          onChange={setAmount}
-          monthly
-          allowZero
-        />
+        <AmountInput label={title} value={v} onChange={setAmount} monthly allowZero />
         {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
         {!isAdd && line?.kind === 'custom' && (
           <Button
@@ -161,6 +165,12 @@ export function O50Split() {
       onBack={s.onBack}
       primary={{ label: copy.splitDone, loading: s.saving }}
       onSubmit={() => void save()}
+      summary={
+        <>
+          <span>{left >= 0 ? copy.leftover(readWon(left)) : copy.short(readWon(-left))}</span>
+          {left < 0 && <span className="hg-help">{copy.shortHelp}</span>}
+        </>
+      }
     >
       <List>
         <ListRow label={copy.splitIncome(readWon(income))} value={payday} chevron={false} />
@@ -184,10 +194,6 @@ export function O50Split() {
           {copy.addLine}
         </Button>
       )}
-      <div className="hg-stack" style={{ gap: 'var(--space-1)' }} aria-live="polite">
-        <b>{left >= 0 ? copy.leftover(readWon(left)) : copy.short(readWon(-left))}</b>
-        {left < 0 && <span className="hg-help">{copy.shortHelp}</span>}
-      </div>
     </QuestionLayout>
   );
 }

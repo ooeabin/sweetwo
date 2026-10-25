@@ -154,6 +154,7 @@ export function QuestionLayout({
   onSubmit,
   wide,
   center,
+  summary,
 }: {
   steps?: { total: number; now: number; fill?: number };
   /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
@@ -169,6 +170,8 @@ export function QuestionLayout({
   wide?: boolean;
   /** 안내 화면: 제목 가운데 정렬 + 세로 가운데(O-01, A-02와 같은 배치). 입력 영역이 없으면 기본으로 켬 */
   center?: boolean;
+  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
+  summary?: ReactNode;
 }) {
   const centered = center ?? Children.toArray(children).length === 0;
   useEffect(() => {
@@ -219,7 +222,14 @@ export function QuestionLayout({
         </div>
         {children}
         {(primary || later || onBack) && (
-          <div className={`hg-q__foot${backOnly ? ' is-backonly' : ''}`}>
+          <div
+            className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}`}
+          >
+            {summary && (
+              <div className="hg-q__sum" aria-live="polite">
+                {summary}
+              </div>
+            )}
             {onBack && (
               <button type="button" className="hg-btn hg-btn--ghost hg-q__prev" onClick={onBack}>
                 <Icon name="chevron-left" size={16} />

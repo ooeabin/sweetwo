@@ -1,5 +1,11 @@
 import { insertGoals, trashGoals, updateGoal } from '@sweetwo/api';
-import { goalTabs, pickableGoals, recommendedGoals, templateByKey, type GoalTab } from '@sweetwo/core';
+import {
+  goalTabs,
+  pickableGoals,
+  recommendedGoals,
+  templateByKey,
+  type GoalTab,
+} from '@sweetwo/core';
 import { Chip, QuestionLayout, Tabs } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
@@ -32,9 +38,7 @@ export function O21Goals() {
     const keepIds = new Set(list.map((p) => p.id).filter(Boolean));
     await trashGoals(saved.filter((g) => !keepIds.has(g.id)).map((g) => g.id));
     await Promise.all(
-      list.map((p, i) =>
-        p.id ? updateGoal(p.id, { priority: i + 1 }) : Promise.resolve(),
-      ),
+      list.map((p, i) => (p.id ? updateGoal(p.id, { priority: i + 1 }) : Promise.resolve())),
     );
     await insertGoals(
       list.flatMap((p, i) => {

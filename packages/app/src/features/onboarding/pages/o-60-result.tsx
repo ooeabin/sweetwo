@@ -9,9 +9,13 @@ import { topGoal } from '../flow';
 import { toAllocGoal } from '../split-draft';
 import { useStep } from '../step';
 
-/** 늦은 기간: 12개월 이상이면 “n년”, 아니면 “n개월” */
-const lateText = (months: number) =>
-  months >= 12 ? copy.years(Math.floor(months / 12)) : copy.months(months);
+/** 늦은 기간: “n년 m개월”, 딱 떨어지면 “n년”, 1년 미만은 “m개월” */
+const lateText = (months: number) => {
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  if (!y) return copy.months(m);
+  return m ? `${copy.years(y)} ${copy.months(m)}` : copy.years(y);
+};
 
 // O-60 결과(17 온보딩 ②). 1순위 목표(없으면 비상금)를 매달 저금 줄 금액으로 언제 이루는지.
 // ‘시작할게요’ → 첫 체크리스트를 바로 만들고(지금이 든 사이클) 온보딩을 마치고 홈으로.

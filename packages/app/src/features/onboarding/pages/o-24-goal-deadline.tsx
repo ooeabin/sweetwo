@@ -51,9 +51,7 @@ export function O24GoalDeadline() {
       title={copy.goalDeadline}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || !!error, loading: s.saving }}
-      onSubmit={() =>
-        value && void save(value, picked === undefined && !saved && def.estimated)
-      }
+      onSubmit={() => value && void save(value, picked === undefined && !saved && def.estimated)}
     >
       <GoalChip tag={copy.first} name={goal.name} />
       {t.deadlineYearMonth ? (

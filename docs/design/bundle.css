@@ -226,6 +226,9 @@
 .hg-q .hg-amountin, .hg-q .hg-field { max-width: none; }
 .hg-q__foot { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-4); margin-top: auto; padding-top: var(--space-4); }  /* 주 버튼은 틀 아래 끝 */
 .hg-q__foot .hg-btn--primary { flex: 1; }  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
+.hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 남는 돈) */
+.hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: 600 16px/24px var(--font-sans); color: var(--ink); }
+.hg-q__sum .hg-help { font-weight: 400; }
 /* 안내 화면(입력 없음, hg-q--center): 제목을 가운데 정렬하고 세로 가운데로. O-01 시작, A-02 로그인과 같은 배치 */
 .hg-q--center .hg-q__head { align-items: center; text-align: center; margin-top: auto; }
 .hg-q--center .hg-q__help { word-break: keep-all; }
@@ -631,6 +634,8 @@
 .hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); }
 .hg-wheel__col::-webkit-scrollbar { display: none; }
 .hg-wheel__col:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
+.hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
 .hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
 .hg-wheel__unit { font-size: 15px; }

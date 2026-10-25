@@ -148,7 +148,11 @@ export function DateWheel({
   };
 
   return (
-    <div className={cx('hg-wheel', className)} role="group" aria-label={label}>
+    <div
+      className={cx('hg-wheel', yearOnly && 'hg-wheel--year', className)}
+      role="group"
+      aria-label={label}
+    >
       <span className="hg-wheel__band" aria-hidden="true" />
       <Column
         label="년"
@@ -161,14 +165,21 @@ export function DateWheel({
       {!yearOnly && (
         <>
           <Column
-        label="월"
-        items={months}
-        value={v.m}
-        unit="월"
-        page={3}
-        onChange={(m) => set({ m })}
-      />
-          <Column label="일" items={days} value={v.d} unit="일" page={3} onChange={(d) => set({ d })} />
+            label="월"
+            items={months}
+            value={v.m}
+            unit="월"
+            page={3}
+            onChange={(m) => set({ m })}
+          />
+          <Column
+            label="일"
+            items={days}
+            value={v.d}
+            unit="일"
+            page={3}
+            onChange={(d) => set({ d })}
+          />
         </>
       )}
     </div>
