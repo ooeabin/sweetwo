@@ -23,3 +23,4 @@ export * from './guides';
 export * from './avatar';
 export * from './close-together';
 export * from './emergency';
+export * from './salary';

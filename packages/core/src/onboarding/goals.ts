@@ -73,12 +73,14 @@ const amountQ = (
   title: string,
   quick: QuickKind = 'small',
   band: BandKind = 'goalAmount',
+  extra: { help?: string; zero?: string } = {},
 ): GoalQuestion => ({
   id,
   type: 'amount',
   title,
   quick,
   band,
+  ...extra,
 });
 const textQ = (id: string, title: string): GoalQuestion => ({ id, type: 'text', title, max: 20 });
 const yearsLater =
@@ -414,8 +416,10 @@ export const goalTemplates: GoalTemplate[] = [
     tab: 'family',
     illustration: 'goal-21-wedding',
     questions: [
-      { ...amountQ('total', '결혼 준비에 총 얼마를 생각하세요?', 'big'), help: '둘이 합한 금액이에요' },
-      { ...amountQ('saved', '지금까지 모아둔 돈이 있나요?'), zero: '없어요' },
+      amountQ('total', '결혼 준비에 총 얼마를 생각하세요?', 'big', 'weddingBudget', {
+        help: '둘이 합한 금액이에요',
+      }),
+      amountQ('saved', '지금까지 모아둔 돈이 있나요?', 'small', 'goalAmount', { zero: '없어요' }),
     ],
     asksDeadline: always,
     deadlineYearMonth: true,

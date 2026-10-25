@@ -25,12 +25,12 @@ function BarProgress({
     const s = chapter.fill === null ? undefined : chapter.steps;
     return (
       <div className="hg-qbar__mid">
-        <p className="hg-qbar__label">{chapter.name}</p>
+        {chapter.name && <p className="hg-qbar__label">{chapter.name}</p>}
         {s && s.total > 0 && (
           <div
             className="hg-segs"
             role="progressbar"
-            aria-label={`${chapter.name} 진행`}
+            aria-label={`${chapter.name || '온보딩'} 진행`}
             aria-valuemin={0}
             aria-valuemax={s.total}
             aria-valuenow={s.done}
@@ -80,13 +80,13 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
             <Icon name="chevron-left" size={24} />
           </button>
         )}
-        <p className="hg-chapterbar__label">{chapter.name}</p>
+        {chapter.name && <p className="hg-chapterbar__label">{chapter.name}</p>}
       </div>
       {fill !== null && (
         <div
           className="hg-chapterbar__track"
           role="progressbar"
-          aria-label={`${chapter.name} 진행`}
+          aria-label={`${chapter.name || '온보딩'} 진행`}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={fill}

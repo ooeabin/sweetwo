@@ -4351,7 +4351,7 @@ export type Database = {
       save_base_day: { Args: { p_after: Json }; Returns: undefined }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
       save_split: {
-        Args: { p_lines: Json; p_owner: string }
+        Args: { p_lines: Json; p_owner?: string }
         Returns: string
       }
       send_close_bundle: { Args: { p_close: string }; Returns: number }
@@ -4404,7 +4404,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      start_checklist: { Args: { p_owner: string }; Returns: string }
+      start_checklist: { Args: { p_owner?: string }; Returns: string }
       start_first_plan: {
         Args: {
           p_cycle_end: string

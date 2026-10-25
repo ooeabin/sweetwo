@@ -111,7 +111,7 @@ function Column({
   );
 }
 
-/** 생년월일 3열 휠. value가 없으면 initial(기본 올해 − 30년 1월 1일)에서 시작하고 그 값을 바로 알려 줌 */
+/** 날짜 휠(연·월·일 3열, yearOnly면 연도만). value가 없으면 initial(기본 올해 − 30년 1월 1일)에서 시작하고 그 값을 바로 알려 줌 */
 export function DateWheel({
   label,
   value,
@@ -120,6 +120,7 @@ export function DateWheel({
   maxYear,
   initial,
   className,
+  yearOnly,
 }: {
   label: string;
   value: YMD | null;
@@ -128,6 +129,8 @@ export function DateWheel({
   maxYear: number;
   initial?: YMD;
   className?: string;
+  /** 연도만 1열(O-13, P-03a 출생연도). 값의 월·일은 1 */
+  yearOnly?: boolean;
 }) {
   const start = initial ?? { y: maxYear - 12, m: 1, d: 1 };
   const v = value ?? start;
@@ -155,7 +158,9 @@ export function DateWheel({
         page={10}
         onChange={(y) => set({ y })}
       />
-      <Column
+      {!yearOnly && (
+        <>
+          <Column
         label="월"
         items={months}
         value={v.m}
@@ -163,7 +168,9 @@ export function DateWheel({
         page={3}
         onChange={(m) => set({ m })}
       />
-      <Column label="일" items={days} value={v.d} unit="일" page={3} onChange={(d) => set({ d })} />
+          <Column label="일" items={days} value={v.d} unit="일" page={3} onChange={(d) => set({ d })} />
+        </>
+      )}
     </div>
   );
 }

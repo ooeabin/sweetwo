@@ -58,9 +58,9 @@ create policy split_line_delete on public.split_line for delete to authenticated
 revoke insert, update, delete on public.split_line from authenticated, anon;
 
 -- 분배표 저장(O-50, W-01): 그 주인의 분배표 줄을 통째로 바꿈. 줄 순서 = 배열 순서.
--- p_owner: 각자면 사람 id(나 또는 같은 공간 배우자), 합쳐서면 null.
 -- p_lines: [{kind, amount, goal_id?, user_id?, name?}]
-create or replace function public.save_split(p_owner uuid, p_lines jsonb)
+-- p_owner: 각자면 사람 id(나 또는 같은 공간 배우자), 합쳐서면 null(생략).
+create or replace function public.save_split(p_lines jsonb, p_owner uuid default null)
 returns uuid
 language plpgsql
 volatile
@@ -134,8 +134,8 @@ begin
   return split;
 end;
 $$;
-revoke all on function public.save_split(uuid, jsonb) from public, anon;
-grant execute on function public.save_split(uuid, jsonb) to authenticated;
+revoke all on function public.save_split(jsonb, uuid) from public, anon;
+grant execute on function public.save_split(jsonb, uuid) to authenticated;
 
 -- ── 이번 달 월급 체크리스트 ────────────────────────────────────────────────────
 create table public.pay_checklist (
@@ -216,7 +216,7 @@ $$;
 
 -- 그 분배표로 지금 사이클 체크리스트를 만듦(이미 있으면 그것). 첫 사이클은 O-60 직후(17 O-60):
 -- 오늘 이전 가장 가까운 기준일 ~ 다음 기준일 전날. 0원 줄과 남는 돈은 넣지 않음. 월급이 없으면 null
-create or replace function public.start_checklist(p_owner uuid)
+create or replace function public.start_checklist(p_owner uuid default null)
 returns uuid
 language plpgsql
 volatile

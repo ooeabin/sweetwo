@@ -30,7 +30,7 @@ export function O24GoalDeadline() {
   const details = (goal.details ?? {}) as Answers;
   const def = t.defaultDeadline(details, {
     childPlan: s.state.space?.child_plan,
-    weddingDate: s.state.space?.wedding_date ?? null,
+    weddingDate: s.state.space?.wedding_date ?? s.state.space?.wedding_month ?? null,
   });
   const saved = goal.deadline ? (goal.deadline.slice(0, 7) as YearMonth) : null;
   const value = picked === undefined ? (saved ?? def.value) : picked;
@@ -51,7 +51,9 @@ export function O24GoalDeadline() {
       title={copy.goalDeadline}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !value || !!error, loading: s.saving }}
-      onSubmit={() => value && void save(value, false)}
+      onSubmit={() =>
+        value && void save(value, picked === undefined && !saved && def.estimated)
+      }
     >
       <GoalChip tag={copy.first} name={goal.name} />
       {t.deadlineYearMonth ? (
