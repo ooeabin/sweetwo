@@ -57,7 +57,7 @@
 
 - 공통 필드: id uuid, space\_id uuid(FK), created\_by·updated\_by uuid, created\_at·updated\_at timestamptz, version int(충돌 판정), deleted\_at timestamptz·deleted\_by uuid(휴지통, 30일 뒤 자동 영구 삭제)
 - 타입: 금액 bigint(원, 평문 컬럼. DB 전체 암호화 + RLS로 보호, 합계·배분은 DB가 계산), 날짜 date(한국 시간), 선택지 enum, 필드 암호화 값 bytea(메모·가족 정보만, 아래 표에서 ‘암호’), 명의 = owner\_user\_id(null이면 공동)
-- 공개 범위: RLS + 배우자용 뷰(합계만 = 합계 한 줄, 비공개 = 제외)
+- 공개 범위: RLS + 배우자용 뷰(금액만 보여 주기 = 합계 한 줄, 숨기기 = 제외)
 
 | 테이블 | 핵심 필드·타입 | 관계 |
 | --- | --- | --- |
@@ -68,7 +68,7 @@
 | asset 자산 | kind enum(통장/투자/부동산 등), name text, amount bigint, owner\_user\_id, visibility enum, maturity\_date, monthly\_payment bigint, principal bigint, status enum(보유/매도 완료), realized\_pl bigint, estimated bool, entered\_by uuid(대신 입력) | 1 : N 금액 이력 |
 | debt 부채 | kind enum, name, balance bigint, rate numeric(5,3), monthly\_payment bigint, maturity\_date, owner\_user\_id, entered\_by uuid, visibility enum | 1 : N 금액 이력 |
 | annual\_event 연간 이벤트 | name, amount bigint, month smallint, repeat bool | N : 1 부부 공간 |
-| goal 목표 | category enum, template\_id, name, shape enum(한 번/매년/매달), target\_amount bigint(null이면 ‘금액 정하기’), target\_estimated bool, due date, priority smallint(주인 묶음마다 따로), owner\_user\_id(null = 우리 목표, 사용자 id = 그 사람의 내 목표) [확인 필요], visibility enum(내 목표만: 전체 공개/합계만), status enum, round smallint, carryover bigint, initial\_saved bigint(이미 모은 돈) [확인 필요], photo\_path text(직접 만든 목표의 사진 Storage 경로, null이면 회색 기본 그림 goal-custom, 기본 목표는 항상 null). 모은 돈 = initial\_saved + 체크한 저금 줄 + 직접 넣은 돈 − 꺼내 쓴 돈(DB 함수 계산, → 목표). 없앤 필드: post\_wedding. vehicle\_asset\_id·other\_holding은 남길지 [확인 필요] | 1 : N 넣기·꺼내 쓰기, 0\~N 분배표 저금 줄 |
+| goal 목표 | category enum, template\_id, name, shape enum(한 번/매년/매달), target\_amount bigint(null이면 ‘금액 정하기’), target\_estimated bool, due date, priority smallint(주인 묶음마다 따로), owner\_user\_id(null = 우리 목표, 사용자 id = 그 사람의 내 목표) [확인 필요], visibility enum(내 목표만: 모두 보여 주기/금액만 보여 주기), status enum, round smallint, carryover bigint, initial\_saved bigint(이미 모은 돈) [확인 필요], photo\_path text(직접 만든 목표의 사진 Storage 경로, null이면 회색 기본 그림 goal-custom, 기본 목표는 항상 null). 모은 돈 = initial\_saved + 체크한 저금 줄 + 직접 넣은 돈 − 꺼내 쓴 돈(DB 함수 계산, → 목표). 없앤 필드: post\_wedding. vehicle\_asset\_id·other\_holding은 남길지 [확인 필요] | 1 : N 넣기·꺼내 쓰기, 0\~N 분배표 저금 줄 |
 | salary\_split 월급 분배표 (W-01, O-50) | owner\_user\_id(각자 = 그 사람, 합쳐서 = null 공동), income bigint(합쳐서면 두 사람 실수령 합, 서버 계산), updated\_by. 남는 돈 = income − 줄 합계(저장 안 함, 계산) [확인 필요] | 각자 = 사람마다 1, 합쳐서 = 부부 공간에 1. 1 : N 분배표 줄 |
 | split\_line 분배표 줄 | split\_id, kind enum(저금/고정지출/생활비/용돈/직접 추가), goal\_id(저금 줄만), user\_id(용돈 줄만, 합쳐서면 사람마다 1줄), name text(직접 추가 줄, 최대 10줄), amount bigint(1만 원 단위, 0 가능), sort smallint [확인 필요] | N : 1 분배표, N : 0\~1 목표 |
 | pay\_checklist 이번 달 월급 체크리스트 (W-02) | split\_id, owner\_user\_id(null이면 합쳐서 공동), cycle\_start·cycle\_end date, label text(‘10월 월급’), state enum(진행 중/다 했어요/끝남). 기준일 0시 서버 작업이 분배표를 복사해 만듦, 첫 사이클은 O-60 직후 [확인 필요] | 1 : N 체크 줄 |
@@ -145,7 +145,7 @@
 | 코드 서명·공증 | macOS Developer ID 서명 + Apple 공증, Windows 코드 서명 인증서(SmartScreen 경고 줄이려 EV 검토). iOS·Android는 스토어 서명(Apple 개발자 계정, Google Play 앱 서명) |
 | 스토어 심사 | 출시 2주 전 첫 제출(금융 범주 심사 지연 대비). 심사용 데모 계정은 흉내 데이터 공간으로 [확인 필요]. 개인정보 라벨(App Store), 데이터 보안 양식(Google Play) |
 | 자동 업데이트 | 모바일은 스토어 업데이트(코드 바꿔 넣기 업데이트는 쓰지 않음). 데스크톱은 electron-updater. 백그라운드 다운로드 → 서명 검증 → 다음 실행 때 적용. 최소 지원 버전 미만은 업데이트 화면만(→ 동기화 6장) |
-| 단계 배포 | 업데이트 채널은 하나. 첫 출시는 바로 전체 공개, 단계 배포는 업데이트부터: 10% → 50% → 100%(24시간 간격, 크래시 없는 세션 99% 이상일 때 다음 단계). 출시 승인 기준 99.5%(출시 준비 3장)보다 낮은 것은 의도된 차이: 승인은 출시 품질 기준, 단계 배포는 멈추는 선 |
+| 단계 배포 | 업데이트 채널은 하나. 첫 출시는 바로 모두 보여 주기, 단계 배포는 업데이트부터: 10% → 50% → 100%(24시간 간격, 크래시 없는 세션 99% 이상일 때 다음 단계). 출시 승인 기준 99.5%(출시 준비 3장)보다 낮은 것은 의도된 차이: 승인은 출시 품질 기준, 단계 배포는 멈추는 선 |
 | 롤백 | 데스크톱: 단계 배포 중지 + 이전 코드를 더 높은 버전 번호로 재배포(앱은 아래 버전으로 내리지 않음). 모바일: 스토어 단계 출시 중지(App Store 단계적 출시, Google Play 비율 출시) + 고친 버전 긴급 심사. 서버: DB 변경은 추가형이라 코드만 되돌림 |
 | 버전 표기 | 주.부.수(예: 1.2.3), S-19에 표시 |
 | 릴리스 노트 | 버전마다 웹사이트 L-03에 ‘새 기능’ ‘고친 것’ 게시. 이전 버전 다운로드는 두지 않음 |
