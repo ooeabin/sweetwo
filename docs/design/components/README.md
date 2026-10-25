@@ -37,7 +37,7 @@
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
 | [CopyField](CopyField.md) | Inputs | 초대 코드·링크를 보여 주고 복사 |
 | [DatePicker](DatePicker.md) | Inputs | 날짜 입력(결혼식 날짜 묻기 등) |
-| [DateWheel](DateWheel.md) | Inputs | 생년월일 3열 휠(O-13, P-04) |
+| [DateWheel](DateWheel.md) | Inputs | 날짜·연도 휠, 지금은 연도만(O-13, P-03a) |
 | [DayChips](DayChips.md) | Inputs | 월급날 숫자 판(1~31 + 말일) |
 | [FileAttach](FileAttach.md) | Inputs | 파일 첨부 칸 |
 | [ImageCrop](ImageCrop.md) | Inputs | 프로필 사진 올리기와 자르기(S-11e) |
