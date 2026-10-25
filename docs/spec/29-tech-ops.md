@@ -15,7 +15,7 @@
 | 테스트 | Vitest, Playwright, pgTAP | 계산 함수 단위 테스트, 화면 흐름 E2E, DB 함수·RLS 테스트 |
 | CI/CD | GitHub Actions | 테스트·빌드·배포 자동 실행 |
 | 서버(DB·인증·실시간) | Supabase: Postgres + Auth + Realtime + Edge Functions, 서울 리전(ap-northeast-2) | 부부 공간·항목·분배표·체크리스트·이력 저장. 행 단위 보안(RLS)으로 공개 범위 필터를 서버에서 적용, Realtime으로 상대 변경 1\~2초 수신. DB 전체 암호화(저장·백업), 금액 합계·남는 돈·목표 모은 돈은 DB 함수가 계산 |
-| 서버 작업 | Postgres 함수(버전 판정·충돌 규칙) + pg\_cron + Edge Functions | 월급날(기준일) 0시 체크리스트 생성과 지난 체크리스트 닫기(체크 안 한 줄 ‘못 함’), 알림 예약(월급날 오전 9시, 다음 월급날 3일 전 오후 8시)(→ 동기화 5장, 핵심 규칙 › 월 사이클), 비교 통계 월 1회 계산(출시 후, 기준 다시 정함 [확인 필요]), 공휴일 받기(매년 12월 다음 해, 매주 1회 다시) |
+| 서버 작업 | Postgres 함수(버전 판정·충돌 규칙) + pg\_cron + Edge Functions | 월급날(기준일) 0시 체크리스트 생성과 지난 체크리스트 닫기(체크 안 한 줄 ‘못 함’), 알림 예약(월급날 오전 9시, 다음 월급날 3일 전 오후 8시)(→ 동기화 5장, 핵심 규칙 › 월 사이클), 비교 통계 월 1회 계산(출시 후, 기준 다시 정함 [확인 필요]), 공휴일 받기(매년 12월 다음 해, 매주 1회 다시), 연결 해제(요청 + 14일 지나면 확정하고 부부 공간 데이터를 보관본으로 옮김, 확정 + 30일 지나면 보관본 영구 삭제 → 보안·개인정보 4장) |
 | 로그인 | Supabase Auth. 카카오·구글·애플 모두 기본 제공 공급자 사용 | 기준 → 보안·개인정보 2장 ‘로그인’ |
 | 필드 암호화 | Edge Functions에서 AES-256-GCM, 키 = AWS KMS 서울. 메모·가족 정보만 | 범위 → 보안·개인정보 2장 |
 | 사진 | Supabase Storage 서울. 서버 저장·저장 시 암호화, 부부 공간 권한(두 사람만 열람) | 챙길 날 기록, 프로필 사진(→ 설정 S-11e) |
@@ -91,7 +91,7 @@
 | subscription 구독 | plan enum(월/연), state enum(무료/프리미엄/해지 예정/만료), payer\_user\_id, started\_at, next\_billing\_on date, canceled\_at | 1 : 1 부부 공간, 1 : N 결제 |
 | payment 결제 | subscription\_id, payer\_user\_id, amount bigint, paid\_at, result enum, pg\_tx\_id text | N : 1 구독 |
 | consent 동의 기록 | user\_id, kind enum(이용약관/개인정보 처리/배우자와 부부 공간 공유/가족 정보/사진(챙길 날)/마케팅 수신/분석 수집/통계 참여, 8종), terms\_version text, agreed bool, at timestamptz, via enum(가입/P-02b/설정/F-08) | N : 1 사용자 |
-| unlink\_request 연결 해제 | requester\_id, requested\_at, split\_plan jsonb, response enum, agree\_by timestamptz(요청 + 14일), state enum(대기/취소/확정), confirmed\_at, restore\_until timestamptz(확정 + 30일), snapshot\_id uuid, rejoin\_requester\_id, rejoin\_requested\_at, rejoin\_state enum(요청/수락/거절/만료), rejoin\_responded\_at | N : 1 부부 공간 |
+| unlink\_request 연결 해제 | requester\_id, requested\_at, confirm\_by timestamptz(요청 + 14일, 지나면 서버가 확정), acknowledged\_at(상대 확인), state enum(대기/취소/확정), confirmed\_at, confirm\_path enum(상대 확인/기한), restore\_until timestamptz(확정 + 30일, 지나면 보관본 영구 삭제), snapshot\_id uuid(지운 부부 공간 데이터 보관본). 없앤 필드: split\_plan, response, agree\_by(2026-10-26, 자산을 나누지 않음), rejoin\_requester\_id, rejoin\_requested\_at, rejoin\_state enum(요청/수락/거절/만료), rejoin\_responded\_at | N : 1 부부 공간 |
 | inquiry 문의 | inquiry\_no text(unique, 서버 발급 문의 번호), user\_id, kind enum, body text, attachment\_ids uuid\[\], auto\_info jsonb(앱 버전·OS 등), state enum(접수/처리 중/사용자 답변 대기/완료), answer text, answered\_by(admin\_user), answered\_at, mail\_copied\_at(help@ 사본 메일). AD-01 미처리 문의 수는 이 테이블에서 집계 | N : 1 사용자 |
 | admin\_view\_request 관리자 열람 요청 | inquiry\_id, admin\_id, reason text, scope jsonb, consent\_at timestamptz(문의한 본인 동의), spouse\_notified\_at timestamptz(배우자 열람 알림), expires\_at, view\_log jsonb, state enum(요청/동의/거절/만료/완료) | N : 1 문의 (S-19b·AD-04) |
 | peer\_stat 비교 통계 (출시 후) | stat\_month date, source enum(공공 통계/앱), group\_level enum(필터/연령대×단계/연령대/전체), age\_band enum(20대 후반/30대 초반/30대 후반/40대 이상, 1단계 공공 통계는 10세 구간), stage enum(예비/신혼 첫해/2\~3년차/이후), income\_band enum(null), metric enum(순자산/월 저금액/저금 비율/부채 비율), couple\_count int, p10\~p90 numeric(10% 단위), median numeric | 관계 없음. 연령대 = 두 사람 birth\_year 평균 나이, 결혼 단계 = marriage\_state·wedding\_date로 계산(→ 계산·배분 7-1). housing, dual\_income 필터는 없앰. 개별 부부 값·ID 없음, pg\_cron 월 1회 갱신(→ 핵심 규칙 › 계산·배분 7장) |

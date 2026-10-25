@@ -45,7 +45,7 @@
 | 저금 ‘못 함’ | 사이클이 끝날 때 ‘못 함’인 저금 줄 ÷ 전체 저금 줄 | 30% 초과 [확인 필요] | 분배표 저금이 과한지(남는 돈 음수 비율과 교차), W-02a 다른 금액 사용률 |
 | 분배표 모자람 | 남는 돈이 음수인 분배표 비율 | 20% 초과 [확인 필요] | O-50 추천값(고정지출·생활비 25%, 용돈 10%) 맞는지, “30만 원이 모자라요” 뒤 행동 |
 | 되돌리기 | 상대가 고친 분배표·목표 값을 7일 안에 되돌린 비율 | 15% 초과 [확인 필요] | 갈등 신호. 변경 알림 문구, 고친 항목 종류. 연결 해제와 교차 확인 |
-| 연결 해제 | 월 `unlink_requested` 부부 ÷ 연결 부부, 14일 기본안 적용 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
+| 연결 해제 | 월 `unlink_requested` 부부 ÷ 연결 부부, 14일 기한으로 확정된 비율, 30일 안 다시 연결한 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
 | 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 부부 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선(O-06 ‘나중에 할게요’ 비율, 홈 H-06 초대 한 줄 닫기 비율) |
 | 알림 피로 | 알림 종류별 열람률, 월 상한(메일 6회) 도달 사용자 비율, 종류별 알림 끄기 수(S-14) | 열람률 10% 미만 또는 상한 도달 30% 초과 | 급하지 않은 알림 우선순위 조정 |
 | 브라우저 로그인 이탈 | 데스크톱·모바일 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
@@ -139,9 +139,8 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| unlink\_requested | S-12 자산 정리 안 전송 | split\_plan(`default` / `custom`), linked\_months |
-| unlink\_countered | S-12 상대 ‘다르게 정리하기’ | — |
-| unlink\_resolved | 상대 동의 / 다르게 정리하기 합의 / 14일 기본안(서버) / 요청자 취소 | path(`agreed` / `counter_agreed` / `timeout` / `canceled`), days\_pending, exported\_data |
+| unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data |
+| unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`), days\_pending, exported\_data |
 | notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월말 확인), 배우자가 고침, 챙길 날, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
 | notification\_opened | 알림 클릭 → 진입 | type, channel, minutes\_to\_open, landing\_screen |
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |

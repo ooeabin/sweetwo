@@ -681,6 +681,8 @@ supabase/
 
 ### 설정 구조
 
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 특히 연결 해제(자산 정리 안, 다르게 정리하기, 기본안, 사본 나누기, S-12b·e·f)는 2026-10-26 결정(ADR 0003 11장: 나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)으로 기획서에서 없앰. 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
+
 - features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11b `/settings/me/side`, S-11d `/settings/me/plan-day`, S-12 `/settings/couple`, S-12a~d `/settings/couple/unlink`(`/plan`, `/confirm`, `/review`), S-12e `/settings/couple/unlink/differently`, S-12f `/settings/couple/unlink/counter`, S-12h `/settings/couple/unlinked`, S-12g `/settings/couple/reconnect`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}`
 - 아직 없는 화면 줄은 자리만(누르지 않음, “준비 중이에요”). 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
 - 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로). 분담 방식은 보기만
