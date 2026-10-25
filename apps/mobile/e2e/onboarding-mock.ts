@@ -324,12 +324,20 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             (x) => x.state !== 'wait',
           );
           const same = (a: Record<string, unknown>, b: Record<string, unknown>) =>
-            a.kind === b.kind && (a.goal_id ?? null) === (b.goal_id ?? null) && (a.name ?? null) === (b.name ?? null);
+            a.kind === b.kind &&
+            (a.goal_id ?? null) === (b.goal_id ?? null) &&
+            (a.name ?? null) === (b.name ?? null);
           cl.pay_check_line = [
             ...kept,
             ...sp.split_line
               .filter((l) => Number(l.amount) > 0 && !kept.some((k) => same(k, l)))
-              .map((l) => ({ ...l, id: `${l.id}-c`, planned: l.amount, actual: null, state: 'wait' })),
+              .map((l): Record<string, unknown> => ({
+                ...l,
+                id: `${String(l.id)}-c`,
+                planned: l.amount,
+                actual: null,
+                state: 'wait',
+              })),
           ].sort((a, b) => Number(a.sort) - Number(b.sort));
         }
         return json(route, sp.id);

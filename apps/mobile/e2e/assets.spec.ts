@@ -173,7 +173,7 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, �
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('link', { name: '우리 자산' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/assets$/);
   // 자산(원금 기준) 3 + 8 + 2 + 배우자 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
@@ -709,7 +709,7 @@ test('투자 원칙(O-53): 할 일에서 열고, 보수적인 쪽 허용 비중,
     deleted_at: null,
   });
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /투자 원칙 정하기/ }).click();
   await expect(page).toHaveURL(/\/assets\/principle$/);
   await page.goBack();
@@ -792,7 +792,7 @@ test('자산 정리하기(O-41~43): 쓰던 통장 안내, 전세면 부동산 �
   );
   firstWeekTodos(db, 'assets');
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /자산 정리하기/ }).click();
   await heading(page, '지금 가진 돈을 골라주세요');
   await expect(page.getByText('쓰던 통장 1개는 이미 넣어뒀어요')).toBeVisible();
@@ -856,7 +856,7 @@ test('대출 정리하기(O-44~47): 대출마다 남은 돈, 금리(모르면 �
   seed(db);
   firstWeekTodos(db, 'loans');
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /대출 정리하기/ }).click();
   await heading(page, '갚고 있는 대출이 있나요?');
   const chips = page.getByRole('group', { name: '갚고 있는 대출이 있나요?' });
@@ -952,7 +952,7 @@ test('고정지출 나누기·생활비 카드(O-37, O-38b): 그룹만 고른 �
   );
   firstWeekTodos(db, 'fixed_card');
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /고정지출 나누기/ }).click();
   await heading(page, '어디에 나가는 돈이에요?');
   await page.getByRole('group', { name: '주거' }).getByRole('button', { name: '월세' }).click();
@@ -990,7 +990,7 @@ test('상여금·다른 수입(O-34, O-35, O-35b): 상여금 행마다 기록, �
   seed(db);
   firstWeekTodos(db, 'rest');
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /나머지 목표/ }).click();
   await heading(page, '상여금이나 성과급도 있나요?');
   await axe(page);
@@ -1078,7 +1078,7 @@ test('나머지 목표(O-22~25): 순서 → 1순위 모아둔 돈 → 다음 목
   );
   firstWeekTodos(db, 'rest');
 
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /나머지 목표/ }).click();
   await heading(page, '어떤 것부터 모을까요?');
   await axe(page);

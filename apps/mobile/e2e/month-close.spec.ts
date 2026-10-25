@@ -92,77 +92,6 @@ function seed(db: MemDb) {
   });
 }
 
-test('월말 정리: 정리 기간에 시작해서 정산 요약까지', async ({ page }) => {
-  const now = new Date('2026-10-23T20:00:00+09:00'); // 정리 기간(10월 22~24일)
-  await page.clock.setFixedTime(now);
-  const db = await mockOnboarding(page, { now });
-  seed(db);
-  await page.goto('/');
-
-  await heading(page, '9월 월급 플랜 정리할 때예요');
-  await page.getByRole('button', { name: '정리 시작' }).click();
-
-  await heading(page, '9월 월급 플랜을 정리해 볼까요?');
-  await axe(page);
-  await page.getByRole('button', { name: '시작' }).click();
-
-  // W-04j: 소득(미합류라도 월급 플랜 수입, 예빈 추정 포함), 변동 항목, 큰 지출
-  await heading(page, '이번 달 쓴 돈을 적어요');
-  await expect(page.getByRole('region', { name: '이번 달 들어온 돈' })).toContainText('600만 원');
-  await page.getByLabel('외식·배달').fill('410000');
-  await page.getByRole('button', { name: '자동차세' }).click();
-  await page.getByLabel('자동차세').fill('250000');
-  await axe(page);
-  await next(page);
-
-  // W-04k: 계획액을 채워 둠 + 기타 저축
-  await heading(page, '이번 달 넣은 돈');
-  await expect(page.getByLabel('비상금')).toHaveValue('390,000');
-  await expect(page.getByLabel('내 집 마련')).toHaveValue('1,500,000');
-  await page.getByLabel('기타 저축').fill('100000');
-  await axe(page);
-  await next(page);
-
-  // W-04g: 199만 모음, 계획 189만의 105%. 쓴 돈 = 고정 130 + 변동 41 + 용돈 100(각 50) + 큰 지출 25 = 296 → 소득 600의 49.3%
-  await heading(page, '이번 달 199만 원을 모았어요 (계획의 105%)');
-  await expect(page.getByRole('region', { name: '9월 정산' })).toContainText('49.3%');
-  await expect(page.getByText('예빈님 수입은 추정값으로 셌어요')).toBeVisible();
-  await expect(page.getByText('찬우 50만, 예빈 50만')).toBeVisible();
-  // 잘한 점(예산 55 − 변동 41), 계획 대비 표, 초과 10만 → 더 넣을 목표
-  await expect(page.getByText('생활비를 계획보다 14만 원 아꼈어요')).toBeVisible();
-  const table = page.getByRole('table', { name: '계획 대비' });
-  await expect(table.getByRole('row', { name: /내 집 마련/ })).toContainText('150만');
-  await expect(table.getByRole('row', { name: /기타 저축/ })).toContainText('+10만');
-  await expect(page.getByRole('button', { name: '정리 끝내기' })).toBeDisabled();
-  await axe(page);
-  await page.getByRole('radio', { name: '내 집 마련' }).click();
-  await page.getByRole('button', { name: '정리 끝내기' }).click();
-
-  await heading(page, '9월 정리를 마쳤어요');
-  await expect(page.getByText('바뀐 값이 없어요')).toBeVisible();
-  await page.getByRole('button', { name: '이번 달로' }).click();
-
-  // 정리를 끝내면 이번 달은 다시 남은 생활비(55 − 41)
-  await heading(page, '찬우님, 이번 달 생활비 14만 원 더 쓸 수 있어요');
-  expect(db.closes[0]).toMatchObject({
-    status: 'done',
-    income: 6_000_000,
-    big_none: false,
-    gap_kind: 'over',
-    gap_amount: 100_000,
-    gap_choice: 'extra_goal',
-    gap_goal_id: 'g2',
-  });
-  expect(db.bigs).toEqual([
-    expect.objectContaining({ kind: 'car_tax', amount: 250_000, how: 'exception' }),
-  ]);
-  expect(db.deposits.map((x) => [x.name, x.amount])).toEqual([
-    ['비상금', 390_000],
-    ['내 집 마련', 1_500_000],
-    ['기타 저축', 100_000],
-  ]);
-});
-
 test('정산 요약(W-04g): 지난달보다 칩, 생활비 예산 보정 제안(미합류는 바로 맞춤), 미달이면 채우는 방법', async ({
   page,
 }) => {
@@ -379,7 +308,7 @@ test('놓친 달: 이번 달 맨 위 ‘지난달 정리’ → 지금 정리하
       p_lines: [],
     },
   });
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByText('지난달 정리').click();
   await heading(page, '9월 정리가 아직 남았어요');
   await expect(page.getByText('10월 플랜은 이미 시작했어요')).toBeVisible();

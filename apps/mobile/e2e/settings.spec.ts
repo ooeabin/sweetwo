@@ -389,7 +389,7 @@ test('연결 해제 요청(S-12a~c): 분담 비율 기본안, 몫 고치기, “
   await axe(page);
 
   // 이번 달: 해제 대기 띠 → 확인하기 → S-12
-  await page.goto('/');
+  await page.goto('/month');
   await expect(page.getByText('연결 해제를 기다리고 있어요')).toBeVisible();
   await expect(page.getByText('10월 21일에 분담 비율대로 정리돼요')).toBeVisible();
   await axe(page);
@@ -475,7 +475,7 @@ test('연결 해제 받은 사람: 할 일 맨 위 → 다르게 정리하기(S-
   seed(db);
   Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
   pendingFromYebin(db);
-  await page.goto('/');
+  await page.goto('/month');
   const todo = page.getByRole('button', { name: /예빈님이 연결 해제를 요청했어요/ });
   await expect(todo).toContainText('10월 19일까지');
   await axe(page);
@@ -583,7 +583,7 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   soloAfterUnlink(db, 'yebin');
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /예빈님이 다시 연결하자고 해요/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
@@ -754,7 +754,7 @@ test('삭제 요청한 계정으로 다시 로그인: 계정 삭제를 취소할
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   db.me.status = 'deletion_requested';
-  await page.goto('/');
+  await page.goto('/month');
   await expect(page.getByRole('heading', { name: '계정 삭제를 취소할까요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '취소하고 계속 쓰기' }).click();

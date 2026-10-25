@@ -126,6 +126,7 @@ import {
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01Home } from './features/home';
+import { H01ThisMonth } from './features/month';
 import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
 import { CloseRoute, W04Missed, W04jSpendEntry, W04pBundle } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
@@ -148,6 +149,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 홈 H-01~06
+      {
+        path: '/month',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <H01ThisMonth />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 옛 이번 달(재기획 전, 지울 대상: 월말 정리·월급 플랜·제안 화면이 여기서 열림)
       ...(
         [
           ['/salary/split', <W01Split key="w01" />], // W-01 월급 분배표

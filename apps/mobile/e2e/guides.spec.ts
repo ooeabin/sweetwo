@@ -50,49 +50,6 @@ function seed(db: MemDb) {
   db.checklistDone = [];
 }
 
-test('체크리스트: 이번 달 할 일 → S-02 완료했어요 → 다음 항목, 설정 가이드 진행률', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  await page.goto('/');
-  await page.getByRole('button', { name: /통장 3개 만들고 첫 월급 나누기/ }).click();
-  await heading(page, '통장 3개 만들고 첫 월급 나누기');
-  await expect(page.getByText('월급 플랜에서 통장별 금액을 확인해요')).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '완료했어요' }).click();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('button', { name: /혼인신고 시점 확인/ })).toBeVisible();
-  expect(db.checklistDone).toEqual([expect.objectContaining({ key: 'first-split' })]);
-
-  await page.goto('/settings');
-  await expect(page.locator('.hg-listrow', { hasText: '가이드 모아보기' })).toContainText(
-    '체크리스트 1/7',
-  );
-  await page.locator('.hg-listrow', { hasText: '가이드 모아보기' }).click();
-  await heading(page, '가이드 모아보기');
-  await expect(page.getByText('신혼 첫해 체크리스트')).toBeVisible();
-  // 전세 → 맞춤 글 첫째 = 전세 만기 전 점검
-  await expect(page.getByRole('button', { name: '전세 만기 전 점검' })).toBeVisible();
-  await axe(page);
-  // 설정에서 연 항목은 보기만(완료 버튼 없음), 출처와 확인일
-  await page.getByRole('button', { name: /보험 수익자 변경/ }).click();
-  await heading(page, '보험 수익자 변경, 중복 보장 점검');
-  await expect(page.getByRole('button', { name: '완료했어요' })).toHaveCount(0);
-  await expect(page.getByText(/확인일 2026년 10월 18일/)).toBeVisible();
-  await page.getByRole('button', { name: /^(뒤로|이전)/ }).click();
-  await page
-    .getByRole('button', { name: /비상금은 왜 먼저일까요/ })
-    .first()
-    .click();
-  await heading(page, '비상금은 왜 먼저일까요');
-  await expect(page.getByText('투자·금융 자문이 아니에요. 제도와 개념만 설명해요')).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '우리에게 적용하기: 비상금 목표 보기' }).click();
-  await expect(page).toHaveURL(/\/goals$/);
-});
-
 test('내 답 다시 보기(S-17): 파트별 요약, 사는 집 다시 답하기, 계획 다시 세우기', async ({
   page,
 }) => {

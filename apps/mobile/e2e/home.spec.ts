@@ -154,7 +154,10 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
   const living = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
-  expect(living.find((l) => l.kind === 'living')).toMatchObject({ state: 'checked', actual: 780_000 });
+  expect(living.find((l) => l.kind === 'living')).toMatchObject({
+    state: 'checked',
+    actual: 780_000,
+  });
 
   // W-01: 고정지출 88만 → 90만, 저장 → Toast, 체크 안 한 고정지출 줄만 새 금액
   await page.getByRole('button', { name: '분배표 고치기' }).click();
@@ -169,7 +172,10 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   await expect(page.getByText('분배표를 바꿨어요')).toBeVisible();
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   expect(lines.find((l) => l.kind === 'fixed')).toMatchObject({ planned: 900_000, state: 'wait' });
-  expect(lines.find((l) => l.kind === 'living')).toMatchObject({ state: 'checked', actual: 780_000 });
+  expect(lines.find((l) => l.kind === 'living')).toMatchObject({
+    state: 'checked',
+    actual: 780_000,
+  });
   // 비상금 목표 금액 = (90만 + 88만) × 3
   expect(db.goals.find((g) => g.template === 'emergency')?.target_amount).toBe(5_340_000);
 });
@@ -196,4 +202,53 @@ test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → �
   expect(lines.find((l) => l.goal_id === 'goal-h')?.state).toBe('checked');
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page).toHaveURL(/\/$/);
+});
+
+test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 할 일 한 줄 위', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const asset = (id: string, name: string, amount: number, principal: number | null) => ({
+    id,
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'deposit',
+    name,
+    amount,
+    principal,
+    owner: 'joint',
+    owner_user_id: null,
+    visibility: 'all',
+    status: 'held',
+    deleted_at: null,
+  });
+  // 원금 기준 순자산 1,000 + 2,000 = 3,000만, 평가 3,120만. 지난달 말 2,790만
+  db.assets.push(
+    asset('a1', '공동 예금', 10_000_000, null),
+    asset('a2', '공동 펀드', 21_200_000, 20_000_000),
+  );
+  db.netWorth.push(
+    { month: '2026-08-01', net: 26_000_000, expected: 26_000_000 },
+    { month: '2026-09-01', net: 27_900_000, expected: 28_500_000 },
+  );
+  db.notices.push({
+    id: 'n2',
+    kind: 'maintenance',
+    title: '10월 20일 새벽 점검',
+    body: '오전 2시부터 4시까지 저장이 안 돼요',
+    importance: 'must',
+    platforms: ['desktop', 'web'],
+  });
+  await page.goto('/');
+  const chart = page.getByRole('region', { name: '순자산' });
+  await expect(chart).toContainText('예상 3,120만 원, 안 판 수익 +120만 원');
+  await expect(chart).toContainText('지난달보다 +210만 원');
+  const bands = page.locator('.hg-body__banner');
+  await expect(bands.first()).toContainText('10월 20일 새벽 점검');
+  await expect(bands.nth(1)).toContainText('같이 쓸 사람을 초대해 주세요');
+  await bands.first().getByRole('button', { name: '보기' }).click();
+  await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '자세히', exact: false }).first().click();
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
 });

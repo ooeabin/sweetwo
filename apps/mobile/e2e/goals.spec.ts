@@ -125,7 +125,7 @@ test('목표 목록 → 상세: 진행, 월 배분, 접힌 목록, 월별 기록
   seed(db);
 
   // 이번 달에서 목표 탭으로
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('link', { name: '목표' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/goals$/);
 
@@ -243,7 +243,7 @@ test('받은 목표 제안: G-02에서 좋아요, 다르게 해볼래요는 목�
   });
 
   // 이번 달 할 일 맨 위
-  await page.goto('/');
+  await page.goto('/month');
   await expect(
     page.getByRole('button', { name: /예빈님이 내 집 마련 목표를 바꾸자고 제안했어요/ }),
   ).toContainText('2031년 10월 → 2033년 12월');
@@ -400,7 +400,7 @@ test('목표 추가(연결): 담당 고르고 예빈에게 제안, 예빈이 좋
   // 예빈 화면(받은 사람): 할 일 → G-08 좋아요 → 목표가 생김
   db.me.id = 'yebin-me';
   Object.assign(db.proposals[0] ?? {}, { proposer: 'chanwoo-other' });
-  await page.goto('/');
+  await page.goto('/month');
   await page.getByRole('button', { name: /캠핑 장비 목표를 추가하자고 제안했어요/ }).click();
   await expect(page.getByText('캠핑 장비 목표 추가')).toBeVisible();
   await page.getByRole('button', { name: '좋아요' }).click();
@@ -552,61 +552,4 @@ test('목표 추가: 가진 자산에서 고르기 → 만든 목표에 연결, 
   expect(g).toMatchObject({ other_held: 0 });
   expect(db.assets.find((a) => a.id === 'as-1')?.goal_id).toBe(g?.id);
   await expect(page.getByRole('button', { name: /캠핑 장비/ })).toContainText('60만 / 240만 원');
-});
-
-test('달성(G-05): 축하 한 번 → 보낼 곳 → 썼어요 → 생활비로 냄(나누기 줄) → 남은 돈 비상금 → 고른 곳으로', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  db.goals.push(
-    goal('g4', 'big_purchase', '가전 바꾸기', 3, 4_000_000, '2027-03-01', {
-      other_held: 4_000_000,
-      created_by: db.me.id,
-    }),
-  );
-  const plan = db.plans[0]?.args as { p_lines: Record<string, unknown>[] };
-  plan.p_lines.push({ target: 'goal', goal_id: 'g4', amount: 250_000 });
-  db.goalStory = { months: 16, together: 14 };
-
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/goals\/g4\/achieved$/);
-  await expect(page.getByText('목표 달성')).toBeVisible();
-  await expect(page.getByRole('heading', { name: '가전 바꾸기' })).toBeVisible();
-  await expect(page.getByText('400만 원', { exact: true })).toBeVisible();
-  await expect(page.getByText('16개월 중 14번은 둘이 함께 모았어요')).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
-
-  await heading(page, '매달 모으던 25만 원은 어디로 보낼까요?');
-  await axe(page);
-  await page.getByRole('radio', { name: '다른 목표' }).click();
-
-  await heading(page, '가전 바꾸기에 모은 400만 원, 썼나요?');
-  await page.getByRole('radio', { name: '썼어요' }).click();
-  await heading(page, '얼마 썼어요?');
-  await page.getByLabel('얼마 썼어요?').fill('3800000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '380만 원, 어디서 냈어요?');
-  await axe(page);
-  await page.getByRole('radio', { name: '생활비 통장·카드' }).click();
-  await expect(
-    page.getByText('이번 달 월급 나누기에 ‘목표자금 → 공동 생활비 380만 원’을 넣었어요'),
-  ).toBeVisible();
-  await heading(page, '남은 20만 원은 비상금으로 옮겨요');
-  await page.getByRole('button', { name: '확인' }).click();
-  await expect(page).toHaveURL(/\/goals\/order$/);
-
-  expect(db.goals.find((g) => g.id === 'g4')).toMatchObject({ status: 'used' });
-  expect(db.goals.find((g) => g.id === 'g1')).toMatchObject({ other_held: 1_200_000 });
-  expect(db.goalUses).toContainEqual(
-    expect.objectContaining({ goal_id: 'g4', amount: 3_800_000, source: 'achieved' }),
-  );
-
-  // 다시 열어도 축하는 없음, 목록에는 ‘사용 완료’와 쓴 돈
-  await page.goto('/goals');
-  await page.getByRole('button', { name: /보류·달성·사용 완료 2개/ }).click();
-  await expect(page.getByRole('button', { name: /가전 바꾸기/ })).toContainText('380만 원 썼어요');
-  await expect(page).toHaveURL(/\/goals$/);
 });

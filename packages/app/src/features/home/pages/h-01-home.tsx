@@ -11,7 +11,7 @@ import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { H06NetWorth, MainFrame, useNetWorth } from '../../month';
+import { H06NetWorth, MainFrame, useNetWorth, useNoticeBand } from '../../month';
 import {
   myChecklist,
   savedOf,
@@ -48,6 +48,8 @@ export function H01Home() {
   const nw = useNetWorth(true);
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
   const [inviteClosed, setInviteClosed] = useState(readClosed);
+  // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
+  const notice = useNoticeBand();
   if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
 
   const today = todayKst();
@@ -108,7 +110,7 @@ export function H01Home() {
       : noAmount
         ? { text: copy.todoAmount(noAmount.name), to: `/goals/${noAmount.id}/edit/amount` }
         : null;
-  const banner = todo ? (
+  const todoBand = todo ? (
     <div className="hg-banner hg-banner--info hg-body__banner" role="status">
       <span>{todo.text}</span>
       <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
@@ -121,6 +123,13 @@ export function H01Home() {
       )}
     </div>
   ) : undefined;
+  const banner =
+    notice || todoBand ? (
+      <>
+        {notice}
+        {todoBand}
+      </>
+    ) : undefined;
 
   // H-05 다가오는 일정
   const within = (d: string | null) =>
