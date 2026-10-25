@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (8c0b514). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (7bf7275). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1326,6 +1326,7 @@ a.hg-btn { text-decoration: none; }
   .hg-auth > .hg-avatar { margin-top: auto; }
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
   /* 좁은 창: 주 버튼은 화면 아래 끝(내용이 짧아도), 길면 따라 내려오다 아래에 붙음 */
+  .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
 }

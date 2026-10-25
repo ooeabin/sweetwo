@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (8c0b514). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (7bf7275). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
