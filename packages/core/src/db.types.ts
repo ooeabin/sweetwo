@@ -3931,6 +3931,10 @@ export type Database = {
         Args: { p_apply_on: string; p_budget: number; p_item?: string }
         Returns: string
       }
+      check_pay_line: {
+        Args: { p_actual?: number; p_line: string; p_state: string }
+        Returns: undefined
+      }
       check_split: {
         Args: {
           p_amount?: number
@@ -4067,6 +4071,13 @@ export type Database = {
           goal_id: string
           n: number
           total: number
+        }[]
+      }
+      goal_checked_sums: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          amount: number
+          goal_id: string
         }[]
       }
       goal_story: {
@@ -4420,6 +4431,7 @@ export type Database = {
       }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
       stop_access: { Args: { p_id: string }; Returns: undefined }
+      sync_checklist: { Args: { p_split: string }; Returns: undefined }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {
