@@ -9,7 +9,16 @@ export type GoalKind = 'once' | 'yearly' | 'monthly';
 export type GoalTab = 'repay' | 'housing' | 'family' | 'fun' | 'life' | 'future';
 
 export type GoalQuestion =
-  | { id: string; type: 'amount'; title: string; quick: QuickKind; band?: BandKind; help?: string }
+  | {
+      id: string;
+      type: 'amount';
+      title: string;
+      quick: QuickKind;
+      band?: BandKind;
+      help?: string;
+      /** 0원으로 답하는 글자 링크(결혼 비용 ‘없어요’) */
+      zero?: string;
+    }
   | { id: string; type: 'percent'; title: string; initial: number }
   | { id: string; type: 'text'; title: string; max: 20 }
   | { id: string; type: 'choice'; title: string; options: { value: string; label: string }[] }
@@ -50,6 +59,8 @@ export interface GoalTemplate {
   kind: (a: Answers) => GoalKind;
   /** 목표 금액(매달형은 월 납입액). 답이 모자라면 null */
   target: (a: Answers) => Won | null;
+  /** 이미 모은 돈(goal.other_held). 없으면 묻지 않음 */
+  held?: (a: Answers) => Won | null;
   defaultDeadline: (a: Answers, c: GoalContext) => DefaultDeadline;
 }
 
@@ -110,14 +121,15 @@ export const goalTemplates: GoalTemplate[] = [
     defaultDeadline: yearsLater(1),
   },
   {
+    // 16 O-23: “갚을 대출이 얼마 남았어요?” 기한은 빈 칸(O-24)
     key: 'high_interest_loan',
     name: '고금리 대출 갚기',
     tab: 'repay',
     illustration: 'goal-02-high-interest-loan',
-    questions: [],
-    asksDeadline: never,
+    questions: [amountQ('amount', '갚을 대출이 얼마 남았어요?')],
+    asksDeadline: always,
     kind: once,
-    target: () => null,
+    target: (a) => num(a, 'amount'),
     defaultDeadline: blank,
   },
   {
@@ -396,15 +408,24 @@ export const goalTemplates: GoalTemplate[] = [
     defaultDeadline: blank,
   },
   {
+    // 16 O-23 목표별 표: ① 총 얼마(둘이 합한 금액) → ② 모아둔 돈(‘없어요’ = 0). 기한 = O-12 예정일의 연·월
     key: 'wedding',
     name: '결혼 비용',
-    tab: null,
+    tab: 'family',
     illustration: 'goal-21-wedding',
-    questions: [],
-    asksDeadline: never,
+    questions: [
+      { ...amountQ('total', '결혼 준비에 총 얼마를 생각하세요?', 'big'), help: '둘이 합한 금액이에요' },
+      { ...amountQ('saved', '지금까지 모아둔 돈이 있나요?'), zero: '없어요' },
+    ],
+    asksDeadline: always,
+    deadlineYearMonth: true,
     kind: once,
-    target: () => null,
-    defaultDeadline: blank,
+    target: (a) => num(a, 'total'),
+    held: (a) => num(a, 'saved'),
+    defaultDeadline: (_a, c) =>
+      c.weddingDate
+        ? { value: c.weddingDate.slice(0, 7) as YearMonth, estimated: false }
+        : { value: addYears(thisMonth(c.now), 1), estimated: true },
   },
   {
     // 캘린더 처음 등록(24 Y-02e)에서 자동 생성. 회차 = 결혼기념일 기준 1년, 목표 금액 = 이번 회차 챙길 날 예산 합계
@@ -433,25 +454,24 @@ export const goalTabs: { key: GoalTab | 'popular'; label: string }[] = [
   { key: 'future', label: '미래' },
 ];
 export const popularGoals = ['home', 'travel', 'baby', 'car', 'high_interest_loan', 'retirement'];
-export const pickableGoals = (tab: GoalTab | 'popular') =>
-  tab === 'popular'
-    ? popularGoals.map((k) => templateByKey(k)).filter((t): t is GoalTemplate => !!t)
-    : goalTemplates.filter((t) => t.tab === tab);
+/** 결혼 준비 중이면 결혼 비용이 ‘자주 고르는’과 가족 탭 맨 앞(16 O-21) */
+export const pickableGoals = (tab: GoalTab | 'popular', engaged = false) => {
+  const list =
+    tab === 'popular'
+      ? (engaged ? ['wedding', ...popularGoals] : popularGoals)
+          .map((k) => templateByKey(k))
+          .filter((t): t is GoalTemplate => !!t)
+      : goalTemplates.filter((t) => t.tab === tab);
+  return tab === 'family'
+    ? [...list.filter((t) => t.key === 'wedding'), ...list.filter((t) => t.key !== 'wedding')]
+    : list;
+};
 
-/** O-21 추천 배지: 자가 외 → 내 집 마련, 아이 계획 ‘없어요’ 외 → 출산 준비 */
-export function recommendedGoals(
-  housing: string | null | undefined,
-  childPlan: string | null | undefined,
-) {
-  const r: string[] = [];
-  if (housing && housing !== 'own') r.push('home');
-  if (childPlan && childPlan !== 'none') r.push('baby');
-  return r;
-}
+/** O-21 추천 배지: 결혼 준비 중 → 결혼 비용(미리 선택 안 함) */
+export const recommendedGoals = (engaged: boolean) => (engaged ? ['wedding'] : []);
 
-/** O-23·O-24를 묻지 않는 경우: 1순위가 고금리 대출 갚기, 또는 예비 각자 관리 */
-export const skipsTopGoalQuestions = (top: string | undefined, separate: boolean) =>
-  !top || separate || top === 'high_interest_loan';
+/** O-23·O-24를 묻지 않는 경우: 고른 목표가 없음(비상금만) */
+export const skipsTopGoalQuestions = (top: string | undefined) => !top;
 
 /**
  * 월 필요액(06 5-3): (목표 금액 − 보유액) ÷ 남은 개월, 1만 원 단위 올림.

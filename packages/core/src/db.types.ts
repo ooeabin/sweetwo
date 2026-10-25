@@ -1059,6 +1059,7 @@ export type Database = {
           holiday_shift: boolean
           housing: Database["public"]["Enums"]["housing"] | null
           id: string
+          joint_cycle_day: number | null
           living_budget: number | null
           living_budget_estimated: boolean
           living_check: boolean
@@ -1071,6 +1072,7 @@ export type Database = {
           partner_income_unknown: boolean
           partner_nickname: string | null
           prep_money_mode: Database["public"]["Enums"]["prep_money_mode"] | null
+          salary_mode: Database["public"]["Enums"]["salary_mode"]
           split_deferred: boolean
           split_mode: Database["public"]["Enums"]["split_mode"] | null
           split_ratio: number | null
@@ -1105,6 +1107,7 @@ export type Database = {
           holiday_shift?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
+          joint_cycle_day?: number | null
           living_budget?: number | null
           living_budget_estimated?: boolean
           living_check?: boolean
@@ -1117,6 +1120,7 @@ export type Database = {
           partner_income_unknown?: boolean
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          salary_mode?: Database["public"]["Enums"]["salary_mode"]
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
@@ -1150,6 +1154,7 @@ export type Database = {
           holiday_shift?: boolean
           housing?: Database["public"]["Enums"]["housing"] | null
           id?: string
+          joint_cycle_day?: number | null
           living_budget?: number | null
           living_budget_estimated?: boolean
           living_check?: boolean
@@ -1162,6 +1167,7 @@ export type Database = {
           partner_income_unknown?: boolean
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
+          salary_mode?: Database["public"]["Enums"]["salary_mode"]
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
@@ -1486,6 +1492,7 @@ export type Database = {
           name: string
           other_held: number
           owner: Database["public"]["Enums"]["goal_owner"]
+          owner_user_id: string | null
           priority: number
           space_id: string
           status: Database["public"]["Enums"]["goal_status"]
@@ -1494,6 +1501,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           version: number
+          visibility: string
         }
         ComputedFields: never
         Insert: {
@@ -1513,6 +1521,7 @@ export type Database = {
           name: string
           other_held?: number
           owner?: Database["public"]["Enums"]["goal_owner"]
+          owner_user_id?: string | null
           priority: number
           space_id: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -1521,6 +1530,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           version?: number
+          visibility?: string
         }
         Update: {
           achieved_at?: string | null
@@ -1539,6 +1549,7 @@ export type Database = {
           name?: string
           other_held?: number
           owner?: Database["public"]["Enums"]["goal_owner"]
+          owner_user_id?: string | null
           priority?: number
           space_id?: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -1547,6 +1558,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           version?: number
+          visibility?: string
         }
         Relationships: [
           {
@@ -2593,6 +2605,142 @@ export type Database = {
           },
         ]
       }
+      pay_check_line: {
+        Row: {
+          actual: number | null
+          checked_at: string | null
+          checked_by: string | null
+          checklist_id: string
+          goal_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["split_line_kind"]
+          name: string | null
+          on_behalf: boolean
+          planned: number
+          sort: number
+          space_id: string
+          split_line_id: string | null
+          state: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          actual?: number | null
+          checked_at?: string | null
+          checked_by?: string | null
+          checklist_id: string
+          goal_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["split_line_kind"]
+          name?: string | null
+          on_behalf?: boolean
+          planned: number
+          sort: number
+          space_id: string
+          split_line_id?: string | null
+          state?: string
+          user_id?: string | null
+        }
+        Update: {
+          actual?: number | null
+          checked_at?: string | null
+          checked_by?: string | null
+          checklist_id?: string
+          goal_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["split_line_kind"]
+          name?: string | null
+          on_behalf?: boolean
+          planned?: number
+          sort?: number
+          space_id?: string
+          split_line_id?: string | null
+          state?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_check_line_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "pay_checklist"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_check_line_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_check_line_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_check_line_split_line_id_fkey"
+            columns: ["split_line_id"]
+            isOneToOne: false
+            referencedRelation: "split_line"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_checklist: {
+        Row: {
+          created_at: string
+          cycle_end: string
+          cycle_start: string
+          id: string
+          label: string
+          owner_user_id: string | null
+          space_id: string
+          split_id: string | null
+          state: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          cycle_end: string
+          cycle_start: string
+          id?: string
+          label: string
+          owner_user_id?: string | null
+          space_id: string
+          split_id?: string | null
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_end?: string
+          cycle_start?: string
+          id?: string
+          label?: string
+          owner_user_id?: string | null
+          space_id?: string
+          split_id?: string | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_checklist_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_checklist_split_id_fkey"
+            columns: ["split_id"]
+            isOneToOne: false
+            referencedRelation: "salary_split"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_line: {
         Row: {
           account_role: Database["public"]["Enums"]["account_role"] | null
@@ -2828,6 +2976,45 @@ export type Database = {
           },
         ]
       }
+      salary_split: {
+        Row: {
+          created_at: string
+          id: string
+          owner_user_id: string | null
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_user_id?: string | null
+          space_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_user_id?: string | null
+          space_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_split_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saving_deposit: {
         Row: {
           amount: number
@@ -2955,6 +3142,65 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      split_line: {
+        Row: {
+          amount: number
+          goal_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["split_line_kind"]
+          name: string | null
+          sort: number
+          space_id: string
+          split_id: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          goal_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["split_line_kind"]
+          name?: string | null
+          sort: number
+          space_id: string
+          split_id: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          goal_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["split_line_kind"]
+          name?: string | null
+          sort?: number
+          space_id?: string
+          split_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "split_line_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "split_line_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "split_line_split_id_fkey"
+            columns: ["split_id"]
+            isOneToOne: false
+            referencedRelation: "salary_split"
             referencedColumns: ["id"]
           },
         ]
@@ -3788,6 +4034,14 @@ export type Database = {
           expires_at: string
         }[]
       }
+      cycle_date: {
+        Args: { m: number; p_day: number; y: number }
+        Returns: string
+      }
+      cycle_day: {
+        Args: { p_owner: string; p_space: string }
+        Returns: number
+      }
       delete_minor_account: {
         Args: { p_birth_year: number }
         Returns: undefined
@@ -4096,6 +4350,10 @@ export type Database = {
       }
       save_base_day: { Args: { p_after: Json }; Returns: undefined }
       save_family_budget: { Args: { p_after: Json }; Returns: undefined }
+      save_split: {
+        Args: { p_lines: Json; p_owner: string }
+        Returns: string
+      }
       send_close_bundle: { Args: { p_close: string }; Returns: number }
       send_evening_notifications: {
         Args: { p_today?: string }
@@ -4146,6 +4404,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      start_checklist: { Args: { p_owner: string }; Returns: string }
       start_first_plan: {
         Args: {
           p_cycle_end: string
@@ -4278,6 +4537,8 @@ export type Database = {
       proposal_response: "like" | "oppose" | "differently"
       proposal_status:
         "open" | "applied" | "held" | "withdrawn" | "expired" | "reverted" | "superseded"
+      salary_mode: "separate" | "joint"
+      split_line_kind: "saving" | "fixed" | "living" | "allowance" | "custom"
       split_mode: "half" | "income" | "custom"
       todo_status: "pending" | "snoozed" | "done"
       wedding_payer: "us" | "groom" | "bride" | "family"
@@ -4464,6 +4725,8 @@ export const Constants = {
         "reverted",
         "superseded",
       ],
+      salary_mode: ["separate", "joint"],
+      split_line_kind: ["saving", "fixed", "living", "allowance", "custom"],
       split_mode: ["half", "income", "custom"],
       todo_status: ["pending", "snoozed", "done"],
       wedding_payer: ["us", "groom", "bride", "family"],

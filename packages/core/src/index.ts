@@ -12,6 +12,7 @@ export * from './josa';
 export * from './rules/this-month';
 export * from './rules/todo';
 export * from './rules/split';
+export * from './rules/salary-split';
 export * from './rules/calendar';
 export * from './rules/lunar';
 export * from './rules/care';
