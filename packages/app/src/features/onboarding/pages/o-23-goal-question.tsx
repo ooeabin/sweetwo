@@ -44,10 +44,11 @@ export function O23GoalQuestion({ index }: { index: number }) {
         ),
       };
       if (t.key === 'custom' && q.id === 'name' && typeof answer === 'string') patch.name = answer;
+      if (t.held) patch.other_held = t.held(next) ?? 0; // 이미 모은 돈(결혼 비용 ②)
       if (last && !t.asksDeadline(next)) {
         const d = t.defaultDeadline(next, {
           childPlan: s.state.space?.child_plan,
-          weddingDate: s.state.space?.wedding_date ?? null,
+          weddingDate: s.state.space?.wedding_date ?? s.state.space?.wedding_month ?? null,
         });
         patch.deadline = d.value ? ymToDate(d.value) : null;
         patch.deadline_estimated = d.estimated;
@@ -62,6 +63,7 @@ export function O23GoalQuestion({ index }: { index: number }) {
     <QuestionLayout
       chapter={s.chapter}
       title={q.title}
+      help={q.type === 'amount' ? q.help : undefined}
       onBack={s.onBack}
       primary={
         autoAdvances(q)

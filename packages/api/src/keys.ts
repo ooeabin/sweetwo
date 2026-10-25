@@ -50,4 +50,6 @@ export const qk = {
   recentClosesLong: ['recent_closes', 'long'] as const,
   cycleGoalUses: (start: string, end: string) => ['goal_use', start, end] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
+  splits: ['salary_split'] as const,
+  checklists: (today: string) => ['pay_checklist', today] as const,
 };

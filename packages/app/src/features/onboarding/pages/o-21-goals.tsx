@@ -1,11 +1,9 @@
 import { insertGoals, trashGoals, updateGoal } from '@sweetwo/api';
 import {
-  addMonths,
   goalTabs,
   pickableGoals,
   recommendedGoals,
   templateByKey,
-  thisMonth,
   type GoalTab,
 } from '@sweetwo/core';
 import { Chip, QuestionLayout, Tabs } from '@sweetwo/ui';
@@ -15,6 +13,7 @@ import { pickedGoals } from '../flow';
 import { useStep } from '../step';
 
 // O-21 목표 고르기(Q2 변형). 고른 순서 = 우선순위, 해제하면 당겨짐. 0개여도 진행.
+// 고른 목표는 모두 우리 목표(owner_user_id null). 비상금은 자동(금액·기한은 O-50 분배표에서 정함).
 // 디자인: 목표 고르기는 Chip(순번 hg-chip__order) + 알약 탭(docs/design/components/Chip.md, Tabs.md)
 type Pick = { key: string; id?: string }; // id = 이미 저장된 목표
 
@@ -25,29 +24,21 @@ export function O21Goals() {
   if (!s.ready) return null;
   const sp = s.state.space;
   const engaged = sp?.marriage_status === 'engaged';
-  const separate = engaged && sp?.prep_money_mode === 'separate';
   const saved = pickedGoals(s.state.goals);
   const list: Pick[] = picks ?? saved.map((g) => ({ key: g.template, id: g.id }));
-  const rec = recommendedGoals(sp?.housing, sp?.child_plan);
+  const rec = recommendedGoals(engaged);
   const order = (key: string) => list.findIndex((p) => p.key === key) + 1 || undefined;
   const toggle = (key: string) =>
     setPicks(order(key) ? list.filter((p) => p.key !== key) : [...list, { key }]);
 
-  const autoLine = separate
-    ? copy.autoWedding
-    : engaged
-      ? copy.autoWeddingEmergency
-      : copy.autoEmergency;
-  const primary = list.length ? copy.next : separate ? copy.onlyWedding : copy.onlyEmergency;
+  const primary = list.length ? copy.next : copy.onlyEmergency;
 
   const save = async () => {
     // 고른 목표: 남길 것은 순서만 바꾸고, 뺀 것은 휴지통, 새로 고른 것은 추가
     const keepIds = new Set(list.map((p) => p.id).filter(Boolean));
     await trashGoals(saved.filter((g) => !keepIds.has(g.id)).map((g) => g.id));
     await Promise.all(
-      list.map((p, i) =>
-        p.id ? updateGoal(p.id, { priority: i + 1, after_marriage: separate }) : Promise.resolve(),
-      ),
+      list.map((p, i) => (p.id ? updateGoal(p.id, { priority: i + 1 }) : Promise.resolve())),
     );
     await insertGoals(
       list.flatMap((p, i) => {
@@ -60,27 +51,14 @@ export function O21Goals() {
             name: t.name,
             kind: t.kind({}),
             priority: i + 1,
-            after_marriage: separate,
           },
         ];
       }),
     );
-    // 자동 목표: 비상금(예비 각자 관리는 없음). 결혼 비용은 O-19c에서 만듦.
-    const emergency = (s.state.goals ?? []).find((g) => g.template === 'emergency');
-    if (!separate && !emergency) {
-      await insertGoals([
-        {
-          template: 'emergency',
-          name: '비상금',
-          kind: 'once',
-          priority: 0,
-          target_amount: 10_000_000,
-          amount_estimated: true,
-          deadline: `${addMonths(thisMonth(), 12)}-01`,
-        },
-      ]);
+    // 자동 목표: 비상금(우리 목표, 금액은 O-50에서 (고정지출 + 생활비) × 3)
+    if (!(s.state.goals ?? []).some((g) => g.template === 'emergency')) {
+      await insertGoals([{ template: 'emergency', name: '비상금', kind: 'once', priority: 0 }]);
     }
-    if (separate && emergency) await trashGoals([emergency.id]);
   };
 
   const prevTop = saved[0];
@@ -88,20 +66,20 @@ export function O21Goals() {
     <QuestionLayout
       chapter={s.chapter}
       title={copy.goalsTitle}
-      help={separate ? copy.goalsHelpSeparate : copy.goalsHelp}
+      help={copy.goalsHelp}
       onBack={s.onBack}
       primary={{ label: primary, loading: s.saving }}
       onSubmit={() =>
         void s.done(save, (fresh) => {
           // 1순위가 그대로이고 이미 답했으면 O-23·O-24를 다시 묻지 않는다
           const top = pickedGoals(fresh.goals)[0];
-          if (top && prevTop && top.id === prevTop.id && top.target_amount !== null) return 'o-31';
+          if (top && prevTop && top.id === prevTop.id && top.target_amount !== null) return 'o-30';
           return undefined;
         })
       }
     >
       <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
-        <span>{autoLine}</span>
+        <span>{copy.autoEmergency}</span>
       </p>
       <Tabs
         label={copy.goalTabsLabel}
@@ -110,7 +88,7 @@ export function O21Goals() {
         items={goalTabs.map((t) => ({ value: t.key, label: t.label }))}
       />
       <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        {pickableGoals(tab).map((t) => (
+        {pickableGoals(tab, engaged).map((t) => (
           <Chip
             key={t.key}
             selected={!!order(t.key)}

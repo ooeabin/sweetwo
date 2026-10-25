@@ -116,14 +116,13 @@ describe('기한', () => {
 
 describe('온보딩 분기', () => {
   it('추천 배지', () => {
-    expect(recommendedGoals('jeonse', 'none')).toEqual(['home']);
-    expect(recommendedGoals('own', 'unsure')).toEqual(['baby']);
+    expect(recommendedGoals(true)).toEqual(['wedding']);
+    expect(recommendedGoals(false)).toEqual([]);
   });
   it('1순위 질문 생략', () => {
-    expect(skipsTopGoalQuestions('high_interest_loan', false)).toBe(true);
-    expect(skipsTopGoalQuestions('home', true)).toBe(true);
-    expect(skipsTopGoalQuestions(undefined, false)).toBe(true);
-    expect(skipsTopGoalQuestions('home', false)).toBe(false);
+    expect(skipsTopGoalQuestions(undefined)).toBe(true);
+    expect(skipsTopGoalQuestions('high_interest_loan')).toBe(false);
+    expect(skipsTopGoalQuestions('home')).toBe(false);
   });
   it('결혼 비용: 목표 = 총예산 − 양가 지원, 보유액 = 모아둔 돈, 넘치면 여유', () => {
     expect(weddingGoal({ budget: 30_000_000, support: 10_000_000, saved: 5_000_000 })).toEqual({

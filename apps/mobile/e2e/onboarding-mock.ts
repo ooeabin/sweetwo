@@ -66,6 +66,9 @@ export interface MemDb {
   notices: Record<string, unknown>[];
   /** 꼼꼼 모드 통장 잔액(W-04b) */
   balances: Record<string, unknown>[];
+  /** 월급 분배표(save_split)와 이번 달 월급 체크리스트(start_checklist) */
+  splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
+  checklists: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -145,6 +148,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     inquiries: [],
     livingChecks: [],
     balances: [],
+    splits: [],
+    checklists: [],
     notices: [],
     sessions: [
       {
@@ -283,6 +288,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             split_ratio: null,
             split_deferred: false,
             account_mode: null,
+            salary_mode: 'separate',
+            joint_cycle_day: null,
             base_day: null,
             base_day_last: false,
             version: 1,
@@ -290,6 +297,44 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           db.me.space_id = 'space-1';
         }
         return json(route, 'space-1');
+      }
+      if (fn === 'save_split') {
+        // 서버 흉내: 주인의 분배표 줄을 통째로 교체
+        const b = body() as unknown as { p_lines: Record<string, unknown>[]; p_owner?: string };
+        const owner = b.p_owner ?? null;
+        let sp = db.splits.find((x) => x.owner_user_id === owner);
+        if (!sp) {
+          sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
+          db.splits.push(sp);
+        }
+        sp.split_line = b.p_lines.map((l, i) => ({
+          id: `${sp.id}-line-${i}`,
+          split_id: sp.id,
+          kind: l.kind,
+          goal_id: l.goal_id ?? null,
+          user_id: l.kind === 'allowance' ? (l.user_id ?? owner ?? db.me.id) : null,
+          name: l.name ?? null,
+          amount: l.amount,
+          sort: i,
+        }));
+        return json(route, sp.id);
+      }
+      if (fn === 'start_checklist') {
+        const b = body() as unknown as { p_owner?: string };
+        const sp = db.splits.find((x) => x.owner_user_id === (b.p_owner ?? null));
+        if (!sp) return json(route, { message: 'no_split' }, 400);
+        if (!db.me.payday && !db.me.payday_last) return json(route, null);
+        const id = `checklist-${db.checklists.length + 1}`;
+        if (!db.checklists.some((c) => c.owner_user_id === sp.owner_user_id))
+          db.checklists.push({
+            id,
+            split_id: sp.id,
+            owner_user_id: sp.owner_user_id,
+            pay_check_line: sp.split_line
+              .filter((l) => Number(l.amount) > 0)
+              .map((l) => ({ ...l, planned: l.amount, state: 'wait' })),
+          });
+        return json(route, id);
       }
       if (fn === 'start_first_plan') {
         if (!db.plans.length) db.plans.push({ args: body() });
@@ -1304,6 +1349,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         route,
         db.weddingPayments.filter((x) => !x.deleted_at),
       );
+    if (path === '/rest/v1/salary_split' && method === 'GET') return json(route, db.splits);
+    if (path === '/rest/v1/pay_checklist' && method === 'GET') return json(route, db.checklists);
     if (path === '/rest/v1/couple_space') {
       if (method === 'GET') return json(route, db.space);
       if (method === 'PATCH' && db.space) Object.assign(db.space, body());
@@ -1332,6 +1379,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             after_marriage: false,
             status: 'active',
             owner: 'together',
+            owner_user_id: null,
+            visibility: 'all',
             created_at: new Date().toISOString(),
             created_by: db.me.id,
             deleted_at: null,

@@ -85,7 +85,7 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await agree.click();
 
   await expect(
-    page.getByRole('heading', { name: '몇 가지만 여쭤보고 우리의 첫 플랜을 만들어 드릴게요' }),
+    page.getByRole('heading', { name: '2분이면 우리의 첫 목표가 생겨요' }),
   ).toBeVisible();
   expect(signup).toMatchObject({
     p_provider: 'kakao',
