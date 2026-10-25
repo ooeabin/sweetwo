@@ -246,6 +246,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지금 있는 테이블과 함수
 
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 기획서는 새 모델(목표, 분배표, 체크리스트, 제안 없음)로 바뀌었고 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
+
 - `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
@@ -411,6 +413,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 예약 작업은 pg\_cron(UTC)이 부름. DB 안에서 끝나는 작업(알림 만들기, 보관 기간 정리)은 SQL 함수를 바로 부르고, 바깥 서비스(메일 SES, 특일 API)가 필요한 작업만 Edge Function. 시각은 초안.
 
 ### 예약 작업
+
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 기획서는 새 모델(목표, 분배표, 체크리스트, 제안 없음)로 바뀌었고 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
 
 | 작업 | KST | cron(UTC) | 함수 |
 | --- | --- | --- | --- |
@@ -609,6 +613,8 @@ supabase/
 - packages/app은 Electron을 모름. desktop 전용 기능은 platform.ts의 `window.sweetwo` 브리지로만
 
 ### 온보딩 구조
+
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 기획서는 새 모델(목표, 분배표, 체크리스트, 제안 없음)로 바뀌었고 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
 
 - `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 파트 0~5. 파트 4는 첫 주 할 일이라 없음. 각자 관리 예비부부는 O-36~39, O-51 건너뜀. 챕터 4개 `CHAPTERS`, `chapterOf`: O-10 시작 → 우리 소개, O-20 목표, O-30 수입과 지출, O-50 나누기와 플랜), `step.tsx`(챕터 진행 `chapter`, 뒤로, 저장 뒤 다음, 멈춘 화면 기록), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 첫 화면 O-10, 이어하기 `OnboardingGate`)
 - O-36은 그룹 칩 `o-36`과 합계 `o-36t` 두 경로(한 화면 ID, 두 단계). ‘해당 없어요’면 합계 0원 저장 후 O-38
@@ -811,7 +817,7 @@ supabase/
 
 - core 계산과 포맷: Vitest 단위 테스트. 계산·배분 탭의 예시를 그대로 테스트 케이스로
 - DB 함수와 RLS: pgTAP. ‘배우자가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
-- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 제안, 월말 정리
+- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 월급 체크, 대신 체크
 - 화면 e2e는 `vite --mode e2e`(apps/mobile/.env.e2e, 가짜 Supabase 주소)로 브라우저에 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
 - 테스트 데이터의 예시 이름은 찬우(시작한 사람), 예빈(합류한 사람)
 
@@ -1008,7 +1014,7 @@ supabase/
 
 - 오류: Sentry (데스크톱, 모바일, Edge Functions)
 - 가용성과 상태 페이지: Better Stack. 목표 99.5%
-- 제품 지표: PostHog. North Star는 월말 정리를 마친 부부 수
+- 제품 지표: PostHog. North Star는 월급 체크를 한 부부 수(→ 기획서 성공 지표)
 - 백업: 매일, 30일 보관, 분기마다 복구 훈련. RPO 24시간, RTO 4시간
 - 성능 목표: 앱 시작 2초, 화면 전환 0.3초, 동기화 p95 3초
 

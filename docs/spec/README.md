@@ -2,9 +2,10 @@
 
 저장소에서 고치는 기획서 정본이에요(2026-10-14부터). 개발 중 바뀐 기획은 코드와 같은 PR에서 이 파일들을 바로 고쳐요.
 
-- 화면 ID(A-02, W-04j 등)로 검색하면 정의를 찾을 수 있어요.
+- 화면 ID(A-02, W-02a 등)로 검색하면 정의를 찾을 수 있어요.
 - 계산식과 화면 문구는 이 폴더가 기준이에요. 생김새는 `docs/DESIGN.md`, 코드 규칙은 `docs/DEV_GUIDE.md`.
-- 페이지 사본(그림 포함): https://claude.ai/artifact/SScTBJAdLvP7tFJz3RwJWe
+- 페이지 사본(그림 포함): https://claude.ai/artifact/SScTBJAdLvP7tFJz3RwJWe (2026-10-25 재기획 전 내용)
+- 2026-10-25 재기획: 목표 중심, 월급 체크리스트, 9화면 온보딩 → `docs/adr/0003-replan-goal-checklist.md`
 
 | 파일 | 내용 |
 | --- | --- |
@@ -15,7 +16,7 @@
 | [05-core-rules.md](05-core-rules.md) | 핵심 규칙 |
 | [06-calc-allocation.md](06-calc-allocation.md) | 계산·배분 |
 | [07-month-cycle.md](07-month-cycle.md) | 월 사이클 |
-| [08-couple-proposal-permission.md](08-couple-proposal-permission.md) | 부부·제안·권한 |
+| [08-couple-proposal-permission.md](08-couple-proposal-permission.md) | 부부·권한 |
 | [09-data-items.md](09-data-items.md) | 데이터 항목 |
 | [10-screen-design.md](10-screen-design.md) | 화면 설계 |
 | [11-common.md](11-common.md) | 공통 |
@@ -23,12 +24,12 @@
 | [13-common-states.md](13-common-states.md) | 공통 상태 |
 | [14-notifications.md](14-notifications.md) | 알림 |
 | [15-login-signup.md](15-login-signup.md) | 로그인·가입 |
-| [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 파트 0~2 |
-| [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 파트 3~6 |
+| [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 흐름과 목표 |
+| [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 월급과 분배표 |
 | [18-partner-join.md](18-partner-join.md) | 배우자 합류 |
-| [19-this-month.md](19-this-month.md) | 이번 달 |
-| [20-salary-plan.md](20-salary-plan.md) | 월급 플랜 |
-| [21-month-close.md](21-month-close.md) | 월말 정리 |
+| [19-this-month.md](19-this-month.md) | 홈 |
+| [20-salary-plan.md](20-salary-plan.md) | 월급 체크리스트 |
+| [21-month-close.md](21-month-close.md) | 월말 확인 |
 | [22-goals.md](22-goals.md) | 목표 |
 | [23-assets.md](23-assets.md) | 우리 자산 |
 | [24-calendar.md](24-calendar.md) | 캘린더 |
