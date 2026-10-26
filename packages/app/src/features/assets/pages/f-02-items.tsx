@@ -109,7 +109,13 @@ export function F02Items() {
             {a.estimated && <Badge kind="temp">{copy.estimatedTag}</Badge>}
           </span>
         }
-        sub={stale ? copy.checkAmount : `${o.name}, ${copy.updated(formatDot(updated))}`}
+        sub={
+          stale
+            ? copy.checkAmount
+            : a.side === 'debt' && a.monthly_payment
+              ? `${copy.monthlyRepay(m(a.monthly_payment))}, ${o.name}`
+              : `${o.name}, ${copy.updated(formatDot(updated))}`
+        }
         value={m(a.amount)}
         onClick={() => nav(`/assets/${a.id}`)}
       />

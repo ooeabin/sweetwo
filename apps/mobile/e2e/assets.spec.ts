@@ -521,3 +521,26 @@ test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 
   const row = page.getByRole('button', { name: /^적금/ });
   await expect(row).toContainText('추정');
 });
+
+test('주택 대출(F-03g): 월 상환액을 먼저 묻고 금리는 다음, 목록 줄에 “매달”', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db, false);
+
+  await page.goto('/assets/new?side=debt');
+  await page.getByRole('button', { name: '주택' }).click();
+  await page.getByRole('button', { name: '주택담보대출' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '남은 대출금은 얼마예요?');
+  await page.getByLabel('남은 대출금은 얼마예요?').fill('200000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: /예빈/ }).click();
+  await heading(page, '월 상환액은요?');
+  await page.getByLabel('월 상환액은요?').fill('1200000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '금리는 몇 %예요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+
+  await expect(page.getByRole('button', { name: /주택담보대출/ })).toContainText('매달 120만 원');
+  expect(db.assets.at(-1)).toMatchObject({ monthly_payment: 1_200_000, interest_rate: null });
+});

@@ -289,6 +289,22 @@ export function F04Item() {
           />
         )}
         {field === 'paid_count' && editor}
+        {/* 매달 나가는 돈이 금리보다 먼저(23 F-03g) */}
+        {a.monthly_payment !== null && (
+          <ListRow
+            label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
+            value={m(a.monthly_payment)}
+            onClick={
+              editable
+                ? () => {
+                    setDraftAmount(a.monthly_payment);
+                    open('monthly_payment', '');
+                  }
+                : undefined
+            }
+          />
+        )}
+        {field === 'monthly_payment' && editor}
         {a.interest_rate !== null && (
           <ListRow
             label={
@@ -306,21 +322,6 @@ export function F04Item() {
           />
         )}
         {field === 'interest_rate' && editor}
-        {a.monthly_payment !== null && (
-          <ListRow
-            label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
-            value={m(a.monthly_payment)}
-            onClick={
-              editable
-                ? () => {
-                    setDraftAmount(a.monthly_payment);
-                    open('monthly_payment', '');
-                  }
-                : undefined
-            }
-          />
-        )}
-        {field === 'monthly_payment' && editor}
         {mine && (
           <ListRow
             label={copy.visLabel}
