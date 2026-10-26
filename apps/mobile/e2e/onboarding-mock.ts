@@ -45,6 +45,8 @@ export interface MemDb {
   checklistDone?: Record<string, unknown>[];
   /** 저장소에 올린 파일 경로 */
   storage?: string[];
+  /** 붙인 사진(목표·기록) */
+  photos?: { goal_id?: string; care_record_id?: string; path: string; sort: number }[];
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
@@ -1097,6 +1099,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'ok');
       }
       // 다녀온 뒤 기록(Y-08): 기록, 다녀왔어요, 목표 사용, 생활비로 냈으면 ‘목표자금 → 공동 생활비’ 줄
+      // 사진(22 목표 사진, 24 Y-08c): 올린 파일만 붙임
+      if (fn === 'set_goal_photo') {
+        const a = body();
+        const g = db.goals.find((x) => x.id === a.p_goal);
+        if (!g) return json(route, { message: 'not_found' }, 400);
+        db.photos = (db.photos ?? []).filter((x) => x.goal_id !== g.id);
+        if (a.p_path) db.photos.push({ goal_id: String(g.id), path: String(a.p_path), sort: 0 });
+        g.photo_path = a.p_path ?? null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'add_care_photo') {
+        const a = body();
+        const path = String(a.p_path);
+        if (!(db.storage ?? []).some((x) => x.endsWith(path)))
+          return json(route, { message: 'bad_path' }, 400);
+        const n = (db.photos ?? []).filter((x) => x.care_record_id === a.p_record).length;
+        db.photos = [...(db.photos ?? []), { care_record_id: String(a.p_record), path, sort: n }];
+        return json(route, `photo-${db.photos.length}`);
+      }
       if (fn === 'record_care') {
         const a = body();
         const care = db.cares.find((c) => c.id === a.p_care);
@@ -1922,6 +1943,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
       return Array.isArray(b) ? b : [b];
     };
+    if (path === '/rest/v1/photo' && method === 'GET')
+      return json(
+        route,
+        (db.photos ?? []).filter((x) => x.care_record_id),
+      );
     if (path === '/rest/v1/consent' && method === 'POST') {
       db.consents.push(...rowsOf().map((r) => ({ created_at: new Date().toISOString(), ...r })));
       return ok204();

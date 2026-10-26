@@ -1,8 +1,11 @@
 import { formatDateFull, giftRepeated } from '@sweetwo/core';
 import { EmptyState, ListRow, PageHeader, SectionHeader, Tabs } from '@sweetwo/ui';
+import { fetchCarePhotos, qk } from '@sweetwo/api';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
+import { usePhotoUrls } from '../../../shared/photo';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
@@ -18,13 +21,19 @@ const readView = (): View => {
 };
 
 // Y-09 드린 기록(24 Y-09, 재기획): 무엇을, 언제, 얼마 드렸는지. 챙길 날별 / 연도별 보기(기기에 기억).
-// 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 챙길 날 상세(Y-05). 사진은 기록 사진(Y-08c)과 함께 다음 단계.
+// 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 챙길 날 상세(Y-05).
+// 사진(Y-08c)이 있으면 행 앞에 첫 사진 미리보기 + “사진 3장” [확인 필요]
 export function Y09GiftLog() {
   const nav = useNavigate();
   const c = useCalendarData();
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [view, setView] = useState<View>(readView);
+  const photos = useQuery({ queryKey: qk.carePhotos, queryFn: fetchCarePhotos }).data ?? [];
+  const firstOf = (id: string) => photos.find((p) => p.care_record_id === id);
+  const urls = usePhotoUrls(
+    [...new Set(photos.map((p) => p.care_record_id))].map((id) => firstOf(id)?.path),
+  );
   if (c.loading) return <MainFrame current="calendar" columns={[null]} />;
 
   const careOf = (id: string) => c.cares.find((x) => x.id === id);
@@ -83,11 +92,25 @@ export function Y09GiftLog() {
               {g.items.map((r) => {
                 const care = careOf(r.care_day_id);
                 const again = giftRepeated(c.records, r);
+                const count = photos.filter((p) => p.care_record_id === r.id).length;
+                const thumb = urls[firstOf(r.id)?.path ?? ''];
                 return (
                   <ListRow
                     key={r.id}
+                    lead={
+                      thumb ? (
+                        <span className="hg-thumb" aria-hidden="true">
+                          <img src={thumb} alt="" />
+                        </span>
+                      ) : undefined
+                    }
                     label={care?.name ?? ''}
-                    sub={[formatDateFull(r.occurs_on), what(r), again ? copy.giftAgain : null]
+                    sub={[
+                      formatDateFull(r.occurs_on),
+                      what(r),
+                      again ? copy.giftAgain : null,
+                      count ? copy.giftedPhotos(count) : null,
+                    ]
                       .filter(Boolean)
                       .join(', ')}
                     value={m(r.amount)}

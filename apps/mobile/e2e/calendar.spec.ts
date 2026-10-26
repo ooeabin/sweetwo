@@ -11,6 +11,10 @@ const axe = async (page: Page) => {
   ).toEqual([]);
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
 
 function seed(db: MemDb) {
   Object.assign(db.me, {
@@ -365,6 +369,65 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기, 목표 고르�
   await expect(page.getByText('휴지통으로 옮겼어요')).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('region', { name: '다음 챙길 날' })).toContainText('엄마 생신');
+});
+
+test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 → 저장하면 기록 + 사진, 드린 기록(Y-09)에 미리보기', async ({
+  page,
+}) => {
+  const DAY = new Date('2026-10-14T20:00:00+09:00');
+  await page.clock.setFixedTime(DAY);
+  const db = await mockOnboarding(page, { now: DAY });
+  seed(db);
+  db.cares.push(care({ id: 'c-mom', month: 10, day: 14 }));
+  await page.goto('/calendar/day/c-mom/record/c?on=2026-10-14');
+  await expect(page.getByRole('heading', { name: '기억하고 싶은 게 있나요?' })).toBeVisible();
+  await expect(page.getByText('사진 10장까지, 한 장에 10MB 이하')).toBeVisible();
+  const input = page.locator('.hg-attach input[type="file"]');
+  await input.setInputFiles({ name: 'cake.png', mimeType: 'image/png', buffer: PNG });
+  const consent = page.getByRole('region', { name: '사진을 저장해도 될까요?' });
+  await expect(consent).toContainText('기록을 지우면 사진도 함께 지워져요');
+  await axe(page);
+  await consent.getByRole('button', { name: '동의할게요' }).click();
+  expect(db.consents.at(-1)).toMatchObject({
+    kind: 'photo',
+    agreed: true,
+    source: 'care_day_first',
+  });
+  await expect(page.getByRole('button', { name: 'cake.png 빼기' })).toBeVisible();
+
+  await input.setInputFiles({
+    name: 'big.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.alloc(11 * 1024 * 1024),
+  });
+  await expect(page.getByRole('alert')).toHaveText('10MB 이하 사진만 올릴 수 있어요');
+  await input.setInputFiles({ name: 'a.gif', mimeType: 'image/gif', buffer: PNG });
+  await expect(page.getByRole('alert')).toHaveText('이 형식은 올릴 수 없어요');
+  await input.setInputFiles(
+    Array.from({ length: 10 }, (_, i) => ({
+      name: `p${i}.png`,
+      mimeType: 'image/png',
+      buffer: PNG,
+    })),
+  );
+  await expect(page.getByRole('alert')).toHaveText('사진은 10장까지 올릴 수 있어요');
+  await expect(page.locator('.hg-file')).toHaveCount(10);
+  await page.getByRole('button', { name: 'cake.png 빼기' }).click();
+  await expect(page.locator('.hg-file')).toHaveCount(9);
+  await axe(page);
+
+  await page.getByLabel('메모').fill('케이크 맛있었어요');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/calendar\/day\/c-mom$/);
+  expect(db.careRecords.at(-1)).toMatchObject({ care_day_id: 'c-mom', memo: '케이크 맛있었어요' });
+  const rid = String(db.careRecords.at(-1)?.id);
+  expect((db.photos ?? []).filter((p) => p.care_record_id === rid)).toHaveLength(9);
+  expect((db.photos ?? []).every((p) => /^r\/[0-9a-f-]{36}\.jpg$/.test(p.path))).toBe(true);
+
+  await page.goto('/calendar/gifts');
+  await expect(page.getByText(/사진 9장/)).toBeVisible();
+  await expect(page.locator('.hg-thumb img')).toBeVisible();
+  await axe(page);
 });
 
 test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 쉬는 날이면 직전 영업일(끄면 그대로)', async ({

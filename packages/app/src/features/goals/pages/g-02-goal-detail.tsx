@@ -3,6 +3,7 @@ import {
   fetchGoalMoves,
   qk,
   restoreTrash,
+  setGoalPhoto,
   trashGoals,
   updateGoal,
   type Goal,
@@ -90,6 +91,16 @@ export function G02GoalDetail() {
         onClick: () => void updateGoal(g.id, before).then(refresh),
       });
       after?.();
+    } catch {
+      toast(copy.loadFailed);
+    }
+  };
+  // 목표 사진 지우기 → 회색 기본 그림(프로필 사진처럼 되돌리기 없음)
+  const clearPhoto = async () => {
+    try {
+      await setGoalPhoto(g.id, null);
+      await qc.invalidateQueries({ queryKey: qk.goals });
+      toast(copy.photoRemoved);
     } catch {
       toast(copy.loadFailed);
     }
@@ -303,6 +314,18 @@ export function G02GoalDetail() {
           </span>
         </span>
         <GoalArt g={i} />
+        {i.custom && i.canEdit && (
+          <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+            <Button variant="ghost" size="sm" onClick={() => nav(`/goals/${id}/photo`)}>
+              {copy.photoChange}
+            </Button>
+            {g.photo_path && (
+              <Button variant="ghost" size="sm" onClick={() => void clearPhoto()}>
+                {copy.photoRemove}
+              </Button>
+            )}
+          </span>
+        )}
         {g.kind !== 'monthly' && (
           <Meter
             name={g.name}

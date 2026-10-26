@@ -18,7 +18,7 @@
 | 서버 작업 | Postgres 함수(버전 판정·충돌 규칙) + pg\_cron + Edge Functions | 월급날(기준일) 0시 체크리스트 생성과 지난 체크리스트 닫기(체크 안 한 줄 ‘못 함’), 알림 예약(월급날 오전 9시, 다음 월급날 3일 전 오후 8시)(→ 동기화 5장, 핵심 규칙 › 월 사이클), 비교 통계 월 1회 계산(출시 후, 기준 다시 정함 [확인 필요]), 공휴일 받기(매년 12월 다음 해, 매주 1회 다시), 연결 해제(요청 + 14일 지나면 확정하고 부부 공간 데이터를 보관본으로 옮김, 확정 + 30일 지나면 보관본 영구 삭제 → 보안·개인정보 4장) |
 | 로그인 | Supabase Auth. 카카오·구글·애플 모두 기본 제공 공급자 사용 | 기준 → 보안·개인정보 2장 ‘로그인’ |
 | 필드 암호화 | Edge Functions에서 AES-256-GCM, 키 = AWS KMS 서울. 메모·가족 정보만 | 범위 → 보안·개인정보 2장 |
-| 사진 | Supabase Storage 서울. 서버 저장·저장 시 암호화, 부부 공간 권한(두 사람만 열람) | 챙길 날 기록, 프로필 사진(→ 설정 S-11e) |
+| 사진 | Supabase Storage 서울. 서버 저장·저장 시 암호화, 부부 공간 권한(두 사람만 열람). 지울 때는 지울 목록에 쌓고 서버 함수가 10분마다 Storage에서 지움(하루 넘게 붙지 않은 파일 포함) | 챙길 날 기록, 목표 사진(직접 만든 목표), 프로필 사진(→ 설정 S-11e) |
 | 메일 발송 | Amazon SES 서울 리전 | 알림·주간 요약·초대 메일 |
 | 고객 메일 수신 | 네이버웍스 | help@sweetwo.kr(고객센터, S-19a 문의 포함), privacy@sweetwo.kr(개인정보 보호책임자) 수신, 같은 주소로 답장. 구성원 1명(관리자), help@와 privacy@는 그룹 메일 주소로 받음. SPF는 TXT 한 줄에 네이버웍스와 Amazon SES를 함께 넣음(SPF 레코드는 하나만). DKIM은 네이버웍스와 SES 각각, DMARC는 p=none으로 시작 |
 | 웹사이트 | Astro 정적 사이트(확정) | apps/site, Cloudflare Workers 정적 자산(→ 화면 설계 › 웹사이트, ADR 0002) |
@@ -87,7 +87,7 @@
 | device\_session 로그인 기기 | user\_id, device\_name, os, last\_seen, refresh\_token\_hash | N : 1 사용자 |
 | widget\_setting 위젯 설정 | 기기별: device\_session\_id, tray\_enabled bool, show\_amounts bool(기본 false). 계정별: user\_id, wg02\_goal\_id uuid(null 가능) | 기기별 1 : 1 로그인 기기, 계정별 1 : 1 사용자 |
 | todo 할 일(홈 H-06 할 일 한 줄) | user\_id(null이면 둘 다), source\_screen text(출처 화면 ID), target\_id uuid, state enum(대기/닫음/완료), sort\_order int, dismissed\_until date(닫기, 할 일마다 기간 다름 → 홈 H-06), done\_by, done\_at [확인 필요] | N : 1 부부 공간 |
-| photo 사진 | care\_round\_id, storage\_path text, uploader\_id, mime enum(JPG/PNG/HEIC/WebP), size\_bytes int(줄인 뒤), taken\_on date. 원본 10MB 이하, 긴 변 1600px로 줄여 저장, 회차당 10장 | N : 1 챙길 날 회차. 파일은 Storage(서버 저장·암호화), 부부 공간 권한 |
+| photo 사진 | space\_id, goal\_id 또는 care\_record\_id(둘 중 하나), path text(Storage `photos/g|r/{무작위}.jpg`), size\_bytes int(줄인 뒤), sort smallint, created\_by. 모두 JPEG로 다시 그려 저장(EXIF 위치 정보 없음): 목표는 정사각 512px 1장, 기록은 원본 10MB 이하·긴 변 1600px·회차당 10장. 행을 볼 수 있는 사람만 파일을 읽음 | N : 1 챙길 날 기록, 0\~1 : 1 목표. 행이 지워지면 storage\_purge(지울 파일 목록)에 쌓임 |
 | subscription 구독 | plan enum(월/연), state enum(무료/프리미엄/해지 예정/만료), payer\_user\_id, started\_at, next\_billing\_on date, canceled\_at | 1 : 1 부부 공간, 1 : N 결제 |
 | payment 결제 | subscription\_id, payer\_user\_id, amount bigint, paid\_at, result enum, pg\_tx\_id text | N : 1 구독 |
 | consent 동의 기록 | user\_id, kind enum(이용약관/개인정보 처리/배우자와 부부 공간 공유/가족 정보/사진(챙길 날)/마케팅 수신/분석 수집/통계 참여, 8종), terms\_version text, agreed bool, at timestamptz, via enum(가입/P-02b/설정/F-08) | N : 1 사용자 |

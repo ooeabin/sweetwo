@@ -2,6 +2,7 @@
 export { G01GoalList } from './pages/g-01-goal-list';
 export { G02GoalDetail } from './pages/g-02-goal-detail';
 export { G02GoalEdit } from './pages/g-02-goal-edit';
+export { G02pGoalPhoto } from './pages/g-02p-goal-photo';
 export { GoalAddRoute } from './add/route';
 export { G06GoalOrder } from './pages/g-06-goal-order';
 export { AchieveWatch } from './achieve';
