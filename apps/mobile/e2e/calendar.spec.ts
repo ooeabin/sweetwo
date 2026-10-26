@@ -95,6 +95,8 @@ function seed(db: MemDb) {
       other_held: 1_000_000,
       deadline: '2026-10-20',
       status: 'achieved',
+      // 축하는 이미 봄(목표 화면에서 축하로 넘어가지 않게)
+      achieved_seen: [db.me.id],
       owner_user_id: null,
       details: {},
       created_by: db.me.id,
