@@ -2521,6 +2521,7 @@ export type Database = {
           p_terms_version: string
         }
         Returns: {
+          adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
           avatar_path: string | null
