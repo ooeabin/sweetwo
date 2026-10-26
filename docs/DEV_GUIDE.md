@@ -1147,6 +1147,13 @@ supabase/
 - [x] W-04h 와이어프레임의 생활비 예산 줄 갱신(지금은 W-04g 보정 제안)
 - [x] 장면 그림·영상 제거, 장면 자리는 비워 둠(2026-10-19)
 
+### 사람이 할 일(대시보드, 값은 코드·채팅에 넣지 않음)
+
+- [ ] 메일 1단계(스테이징, AWS 없이 연결만): `openssl rand -hex 32`로 값 하나 → Edge Function Secrets `MAIL_CRON_SECRET`, Vault `mail_function_url`(`https://xxofyzgzrjrcrcxvftpn.supabase.co/functions/v1/send-mail`)·`mail_cron_secret`(같은 값). `MAIL_DRIVER`는 비워 둠(로그만). 확인: Edge Functions → send-mail → Logs (→ ‘CI/CD’ 2)
+- [ ] 메일 2단계(실제 발송): AWS SES 서울 리전 sweetwo.kr 도메인 인증, 샌드박스 해제, SES Send만 되는 IAM 사용자 → `MAIL_DRIVER`=`ses`, `MAIL_FROM`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- [ ] 배포 토큰 만료 전 교체: Supabase 토큰 `github-actions-sweetwo-staging`(2026-10-26 새로 만듦) → GitHub Environments staging `SUPABASE_ACCESS_TOKEN`. 토큰이 무효면 Deploy staging이 ‘staging 연결’에서 “Invalid access token”으로 멈춤(2026-10-25~26에 그랬음)
+- [ ] 운영 준비 때: Supabase 토큰 `github-actions-sweetwo-prod`(sweetwo-prod만) → GitHub Environments production(승인자 1명), `deploy-prod.yml`
+
 ### 확정된 결정(10월 14일)
 
 - 결제 회사: MVP 밖, 유료화 때 토스페이먼츠 우선 검토
