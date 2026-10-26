@@ -1144,9 +1144,7 @@ supabase/
 
 | 화면 | 컴포넌트 |
 | --- | --- |
-| W-04g 맨 위, F-01 17번 | MonthSummary(hg-sum) |
-| W-04j, 이번 달 ‘지출 적기’ | SpendItems(hg-spend) |
-| W-04j 맨 아래 | BigExpense(hg-big) |
+| W-02, H-03, W-05 체크리스트 줄 | TransferRow(hg-transfer) |
 | F-01 16번, W-01 6번, O-63 통장 목록 | ListRow |
 | 검색(⌘K, 좁은 창 검색) | CommandPalette |
 | 알림 센터 N-01·N-02 항목 | Avatar |

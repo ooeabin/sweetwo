@@ -19,9 +19,7 @@
 | [Checklist](Checklist.md) | Data | 첫 주 할 일처럼 끝내야 할 일 목록 카드 |
 | [DataTable](DataTable.md) | Data | 어드민·내보내기용 표 |
 | [Meta](Meta.md) | Data | 한 줄에 정보 여럿을 두는 방법과 작은 표시 |
-| [MonthSummary](MonthSummary.md) | Data | 월 정산 요약 |
 | [NetWorth](NetWorth.md) | Data | 순자산 2줄 표시 |
-| [ProposalCard](ProposalCard.md) | Data | 상대가 보낸 제안 묶음 |
 | [Banner](Banner.md) | Feedback | 화면 위 안내 띠 |
 | [Celebration](Celebration.md) | Feedback | 목표 달성 화면 |
 | [EmptyState](EmptyState.md) | Feedback | 내용이 없을 때의 화면 |
@@ -30,7 +28,6 @@
 | [Toast](Toast.md) | Feedback | 잠깐 떴다 사라지는 알림 |
 | [Tooltip](Tooltip.md) | Feedback | 용어·아이콘 짧은 설명 |
 | [AmountInput](AmountInput.md) | Inputs | 금액 넣기 |
-| [BigExpense](BigExpense.md) | Inputs | 이번 달 큰 지출 |
 | [Chip](Chip.md) | Inputs | 선택 칩 |
 | [ResultCard](ResultCard.md) | Data | 결과 요약 카드(큰 금액 + 체크 줄) |
 | [InfoPlate](InfoPlate.md) | Data | 조건 요약 판(이름–값 두 열), 완료 표시 DoneMark |
@@ -46,7 +43,6 @@
 | [Select](Select.md) | Inputs | 목록에서 하나 고르기 |
 | [Selection](Selection.md) | Inputs | 켜기·끄기(Toggle), 여러 개 고르기(Checkbox), 하나 고르기(Radio) |
 | [Slider](Slider.md) | Inputs | 둘 사이 비율 나누기(분담, 자동차 현금 비율) |
-| [SpendItems](SpendItems.md) | Inputs | 항목별 지출 입력 |
 | [AdminFrame](AdminFrame.md) | Layout | 어드민 틀 |
 | [AppFrame](AppFrame.md) | Layout | 앱 화면 틀 |
 | [AuthLayout](AuthLayout.md) | Layout | 로그인, 가입 화면 틀 |
@@ -57,8 +53,7 @@
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |
 | [ListRow](ListRow.md) | Lists | 목록 한 줄 |
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |
-| [TransferRow](TransferRow.md) | Lists | 월급 플랜의 이체 줄 한 행 |
-| [CycleStepper](CycleStepper.md) | Navigation | 월 사이클의 지금 위치: 월급 플랜 → 이체 → 생활비 체크 → 월말 정리 |
+| [TransferRow](TransferRow.md) | Lists | 월급 체크리스트 줄 한 행 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |
 | [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(“목표” + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |
 | [Tabs](Tabs.md) | Navigation | 같은 화면 안에서 묶음을 바꾸는 알약 탭(hg-tabs)과, 보기 방식을 바꾸는 세그먼트(hg-seg) |
@@ -67,5 +62,4 @@
 | [Modal](Modal.md) | Overlays | 되돌릴 수 없는 행동 앞의 확인 대화상자 |
 | [NotificationPanel](NotificationPanel.md) | Overlays | 알림 패널(N-01) |
 | [Badge](Badge.md) | Status | 상태·영역을 짧게 알리는 알약 |
-| [PresenceBar](PresenceBar.md) | Status | 함께 모드 표시(W-04) |
 | [Widget](Widget.md) | Widgets | 앱 밖에서 보는 요약 |
