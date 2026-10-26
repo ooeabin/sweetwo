@@ -3037,6 +3037,7 @@ export type Database = {
         Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
         Returns: number
       }
+      send_desktop_link: { Args: Record<PropertyKey, never>; Returns: boolean }
       send_evening_notifications: {
         Args: { p_today?: string }
         Returns: number

@@ -1251,6 +1251,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
       if (fn === 'my_mail_bounced') return json(route, db.mailBounced);
+      if (fn === 'send_desktop_link') return json(route, true);
       if (fn === 'agree_terms') {
         const b = body();
         const n = db.pendingTerms.filter(
