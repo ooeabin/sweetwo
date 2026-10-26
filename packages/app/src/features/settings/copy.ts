@@ -223,6 +223,8 @@ export const copy = {
   scope: { mine: '내 데이터', joint: '공동 데이터' } as Record<string, string>,
   scopeLabel: '범위', // [확인 필요]
   formatCsv: '엑셀(CSV)',
+  formatPdf: 'PDF 요약',
+  formatLabel: '형식', // [확인 필요]
   noPhotos: '사진은 내보내기에 들어가지 않아요',
   doExport: '내보내기',
   exporting: '파일을 만들고 있어요',
@@ -238,6 +240,27 @@ export const copy = {
   deleteAccount: '계정 삭제',
   // 파일에 생성일. 이름은 영문(일부 브라우저가 한글·띄어쓰기 이름을 버림)
   fileName: (scope: string, date: string) => `sweetwo-${scope}-${date}.zip`,
+  pdfName: (scope: string, date: string) => `sweetwo-${scope}-${date}.pdf`,
+  // PDF 요약(25 S-18 ‘내보내기 명세’): ① 우리 자산 요약 ② 연간 요약, A4 세로, 맨 아래 생성일
+  pdf: {
+    assetsTitle: '우리 자산 요약',
+    myAssetsTitle: '내 자산 요약', // [확인 필요] 내 데이터
+    net: '순자산',
+    assets: '자산 합계', // [확인 필요]
+    debts: '부채 합계', // [확인 필요]
+    trend: '최근 12개월 순자산', // [확인 필요]
+    yearTitle: (y: number) => `${y}년 연간 요약`, // [확인 필요]
+    yearSaved: '올해 목표에 넣은 돈', // [확인 필요]
+    monthly: '월별 목표에 넣은 돈',
+    month: (m: number) => `${m}월`,
+    goals: '목표별 진행', // [확인 필요]
+    noGoals: '목표가 없어요', // [확인 필요]
+    savedOf: (saved: string, target: string) => `${saved} / ${target}`,
+    eta: (ym: string) => `${ym} 달성 예정`,
+    achieved: '달성', // [확인 필요]
+    paused: '보류',
+    made: (date: string) => `만든 날 ${date}`, // [확인 필요]
+  },
   ex: {
     joint: '공동',
     partnerSum: (name: string) => `${name}님 합계`,

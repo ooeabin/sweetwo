@@ -153,7 +153,7 @@
 | profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’ | action(set / remove) |
 | account\_delete\_requested | S-18b 삭제 확인 | couple\_state, exported\_before |
 | account\_restored | 유예 중 재로그인 ‘취소하고 계속 쓰기’ (서버) | days\_pending, was\_linked |
-| data\_exported | S-18 내보내기 끝 | format(csv / pdf\_yearly) [확인 필요], scope(mine / joint), result(done / failed / async) |
+| data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |
 | trash\_restored | S-21 되살리기, 되돌리기 토스트 | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
 | rejoin\_requested | S-12 “다시 연결하기” | days\_since\_unlink |
 | rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |

@@ -612,6 +612,28 @@ test('데이터(S-18): 내보내기 zip, 사용 기록 보내기, 휴지통 개�
   expect(text).not.toContain('청년 적금'); // 공동 항목은 ‘공동 데이터’에
 });
 
+test('데이터(S-18): PDF 요약(자산 요약 + 연간 요약)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  myStock(db, { visibility: 'all' });
+  await page.goto('/settings/data');
+  await page.getByRole('radio', { name: 'PDF 요약' }).click();
+  await expect(page.getByRole('radio', { name: 'PDF 요약' })).toBeChecked();
+  await axe(page);
+  // 웹 본인 확인(다시 로그인) 뒤 돌아온 것처럼
+  const dl = page.waitForEvent('download');
+  await page.goto('/settings/data?export=joint&format=pdf');
+  const file = await dl;
+  expect(file.suggestedFilename()).toBe('sweetwo-joint-20261007.pdf');
+  const bytes = (await import('node:fs')).readFileSync(await file.path());
+  expect(bytes.subarray(0, 5).toString()).toBe('%PDF-');
+  expect(bytes.length).toBeGreaterThan(100_000); // 글꼴 포함
+  if (process.env.E2E_PDF_OUT)
+    (await import('node:fs')).writeFileSync(process.env.E2E_PDF_OUT, bytes);
+  await expect(page.getByText('파일을 저장했어요')).toBeVisible();
+});
+
 test('계정 삭제(S-18b) → 로그아웃, 다시 로그인하면 삭제 취소', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });

@@ -41,6 +41,14 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'data_exported';
+      props: {
+        format: 'csv' | 'pdf';
+        scope: 'mine' | 'joint';
+        result: 'done' | 'failed' | 'async';
+      };
+    }
+  | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {
