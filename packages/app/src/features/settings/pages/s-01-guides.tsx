@@ -3,7 +3,7 @@ import { pickGuides } from '@sweetwo/core';
 import { ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { GUIDES, TOPIC_KEYS, checkPath, readPath, useChecklist } from '../guides';

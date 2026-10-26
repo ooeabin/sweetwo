@@ -23,7 +23,7 @@ type Then = 'goal' | 'add' | 'allowance';
 const THEN: Record<Then, string> = {
   goal: '/goals/order',
   add: '/goals/new',
-  allowance: '/assets/money/allowance',
+  allowance: '/salary/split',
 };
 
 // G-05 사용 기록(22 G-05 사용 기록): “가전 바꾸기에 모은 400만 원, 썼나요?”
@@ -89,7 +89,7 @@ export function G05Use() {
       );
       await qc.invalidateQueries({ queryKey: ['monthly_plan'] });
       if (r.line > 0)
-        toast(copy.useLine(m(r.line)), { label: copy.seeSplit, onClick: () => nav('/plan/split') });
+        toast(copy.useLine(m(r.line)), { label: copy.seeSplit, onClick: () => nav('/salary/split') });
       if (r.rest <= 0) finish();
     } catch (e) {
       if (e instanceof GoalUsedError) {

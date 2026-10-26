@@ -17,7 +17,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { inviteLink } from '../../onboarding';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';

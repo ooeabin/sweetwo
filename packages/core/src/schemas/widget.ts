@@ -4,19 +4,19 @@ import { z } from 'zod';
 export const TraySnapshot = z.object({
   /** 만든 시각(ISO). 오프라인이면 “오전 10:30 기준” */
   at: z.string(),
-  /** split = 월급 나누기 남은 몫, living = 이번 달 남은 생활비, gather = 결혼 자금 모으기, no_plan = 온보딩 전 */
-  kind: z.enum(['split', 'living', 'gather', 'no_plan']),
-  amount: z.number().int(),
-  over: z.boolean(),
-  /** 가림일 때 큰 숫자: 나눈 비율 또는 생활비 남은 %(없으면 null) */
-  pct: z.number().int().nullable(),
-  done: z.number().int(),
-  total: z.number().int(),
-  /** 다음 내 월급날 일(1~31) */
-  payday: z.number().int().nullable(),
-  /** 월말 정리 기간이면 D-n */
-  closeDays: z.number().int().nullable(),
+  /** 이번 달 월급(WG-01): none = 온보딩 전, no_salary = 월급 없음, progress·review(월말 확인 기간)·done */
+  salary: z.object({
+    state: z.enum(['none', 'no_salary', 'progress', 'review', 'done']),
+    label: z.string(),
+    done: z.number().int(),
+    total: z.number().int(),
+    left: z.number().int(),
+    /** 다음 월급날(YYYY-MM-DD) */
+    payday: z.string().nullable(),
+  }),
+  /** 다음 할 일(홈 H-06과 같음) */
   task: z.object({ title: z.string(), to: z.string() }).nullable(),
+  /** 다가오는 날(WG-03) 가까운 3개 */
   days: z
     .array(
       z.object({
@@ -28,9 +28,6 @@ export const TraySnapshot = z.object({
       }),
     )
     .max(3),
-  /** 누르면 갈 곳(이번 달 줄) */
-  to: z.string(),
-  unlink: z.boolean(),
 });
 export type TraySnapshot = z.infer<typeof TraySnapshot>;
 

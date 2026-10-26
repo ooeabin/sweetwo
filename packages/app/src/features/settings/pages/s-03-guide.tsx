@@ -1,6 +1,6 @@
 import { Button, PageHeader } from '@sweetwo/ui';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { GUIDES, guidesPath } from '../guides';
 

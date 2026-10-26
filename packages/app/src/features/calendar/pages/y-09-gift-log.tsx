@@ -3,7 +3,7 @@ import { EmptyState, ListRow, PageHeader, SectionHeader, Tabs } from '@sweetwo/u
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 

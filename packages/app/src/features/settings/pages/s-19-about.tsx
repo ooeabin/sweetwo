@@ -1,7 +1,7 @@
 import { ListRow, PageHeader } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 
 /** 웹사이트 페이지를 새 창으로(데스크톱은 기본 브라우저) */

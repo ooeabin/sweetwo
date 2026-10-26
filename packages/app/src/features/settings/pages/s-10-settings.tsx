@@ -2,7 +2,7 @@ import { notiPrefs } from '@sweetwo/core';
 import { ListRow } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';

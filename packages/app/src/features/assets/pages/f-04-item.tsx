@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { lastAssetsTab } from '../assets-frame';
 import { copy } from '../copy';
 import { canEdit, ownerOf, useAssetsData, useRefreshAssets } from '../data';

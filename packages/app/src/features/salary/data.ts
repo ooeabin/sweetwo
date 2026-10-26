@@ -1,6 +1,6 @@
 import {
   checkPayLine,
-  fetchCurrentChecklists,
+  fetchChecklistsEnsured,
   fetchGoalCheckedSums,
   fetchGoalSaved,
   fetchGoals,
@@ -9,7 +9,6 @@ import {
   fetchSpace,
   fetchSplits,
   qk,
-  startChecklist,
   type Goal,
   type PayChecklist,
   type PayCheckLine,
@@ -36,13 +35,7 @@ export function useChecklists() {
   const today = todayKst();
   return useQuery({
     queryKey: qk.checklists(today),
-    queryFn: async () => {
-      const splits = await fetchSplits();
-      await Promise.all(
-        splits.map((s) => startChecklist(s.owner_user_id ?? undefined).catch(() => null)),
-      );
-      return fetchCurrentChecklists(today);
-    },
+    queryFn: () => fetchChecklistsEnsured(today),
   });
 }
 

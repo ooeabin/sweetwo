@@ -46,7 +46,7 @@ test('O-01 ‘초대받았어요’ → P-01 코드 입력 → 초대 확인 →
 }) => {
   await mockSupabase(page);
   await mockPreview(page);
-  await page.goto('/month');
+  await page.goto('/');
   await page.getByRole('button', { name: '초대받았어요' }).click();
   await heading(page, '받은 초대 코드를 넣어 주세요');
   await expect(page.getByText('배우자가 보낸 6자리 코드예요')).toBeVisible();

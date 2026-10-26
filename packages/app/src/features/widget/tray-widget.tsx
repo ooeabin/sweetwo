@@ -1,4 +1,4 @@
-import { formatKstDateTime, readWon, TrayState, type TraySnapshot } from '@sweetwo/core';
+import { formatKstDateTime, TrayState, type TraySnapshot } from '@sweetwo/core';
 import { Button, Icon, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { copy } from './copy';
@@ -15,14 +15,6 @@ const bare = {
   cursor: 'pointer',
 } as const;
 
-const maskedInApp = () => {
-  try {
-    return localStorage.getItem('sweetwo.masked') === '1';
-  } catch {
-    return false;
-  }
-};
-
 /** 오전·오후 시각(‘오전 10:30 기준’) */
 const clock = (iso: string) => {
   const t = formatKstDateTime(iso).slice(11, 16);
@@ -30,9 +22,9 @@ const clock = (iso: string) => {
   return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}:${t.slice(3)}`;
 };
 
-// 트레이 위젯 창(26 트레이 위젯 창, 디자인 Widget 트레이): 이번 달(WG-01) → 다음 할 일 1개 → 다가오는 날 2줄 → 아래 업데이트 시각 + ‘앱 열기’.
+// 트레이 위젯 창(26 트레이 위젯 창, 디자인 Widget 트레이): 이번 달 월급(WG-01) → 다음 할 일 1개 → 다가오는 날 2줄 → 아래 업데이트 시각 + ‘앱 열기’.
 // 진행 막대 없음. 값은 앱 창이 보낸 마지막 값(오프라인이면 그 시각 기준). 로그인 전·잠김이면 내용 없이 안내 + 앱 열기.
-// 금액은 설정 S-22 ‘위젯에 금액 보이기’를 켜고 앱 금액 가리기가 꺼져 있을 때만. 누르면 앱 창이 앞으로 + 그 화면. Esc로 닫힘.
+// 트레이 창에는 금액이 없어 금액 가림과 상관없음. 누르면 앱 창이 앞으로 + 그 화면. Esc로 닫힘.
 export function TrayWidget() {
   const bridge = typeof window !== 'undefined' ? window.sweetwo?.widget : undefined;
   const [st, setSt] = useState<TrayState | null>(null);
@@ -68,13 +60,12 @@ export function TrayWidget() {
     );
 
   const s = st.snapshot;
-  const masked = !st.settings.showAmounts || maskedInApp();
   return (
     <div className="hg-wg-tray" style={{ border: 0 }}>
       <div className="hg-wg-tray__head">
         <Wordmark height={24} />
       </div>
-      {s ? <Sum s={s} masked={masked} open={open} /> : <p className="hg-wg__note">{copy.noPlan}</p>}
+      {s ? <Sum s={s} open={open} /> : <p className="hg-wg__note">{copy.noPlan}</p>}
       {s?.task && (
         <button type="button" className="hg-wg-tray__task" onClick={() => open(s.task?.to ?? '/')}>
           <span>
@@ -129,49 +120,39 @@ export function TrayWidget() {
   );
 }
 
-function Sum({ s, masked, open }: { s: TraySnapshot; masked: boolean; open: (p: string) => void }) {
-  if (s.kind === 'no_plan')
+function Sum({ s, open }: { s: TraySnapshot; open: (p: string) => void }) {
+  const m = s.salary;
+  if (m.state === 'none' || m.state === 'no_salary')
     return (
-      <button type="button" className="hg-wg-tray__sum hg-btn--link" onClick={() => open('/')}>
-        <p className="hg-wg__note">{copy.noPlan}</p>
+      <button
+        type="button"
+        className="hg-wg-tray__sum"
+        style={bare}
+        onClick={() => open(m.state === 'no_salary' ? '/settings/me/salary' : '/')}
+      >
+        <p className="hg-wg__note">{m.state === 'no_salary' ? copy.noSalary : copy.noPlan}</p>
       </button>
     );
-  const allDone = s.kind === 'split' && s.total > 0 && s.done === s.total;
-  const label =
-    s.kind === 'split'
-      ? masked
-        ? copy.splitMasked
-        : copy.split
-      : s.kind === 'gather'
-        ? copy.gather
-        : copy.living;
-  let value: string;
-  let note: string | null = null;
-  if (allDone) value = copy.splitAllDone;
-  else if (!masked) value = s.over ? copy.livingOver(readWon(s.amount)) : readWon(s.amount);
-  else if (s.kind === 'split') {
-    value = `${s.pct ?? 0}%`;
-    note = copy.splitCount(s.total, s.done);
-  } else if (s.kind === 'living' && s.pct !== null) value = copy.livingMasked(s.pct);
-  else value = copy.hidden;
+  // WG-01: “10월 월급” / “2개” / “5개 중 2개 했어요”, 다 하면 “10월 월급을 다 나눴어요”.
+  // 아래 줄은 다음 월급날, 월말 확인 기간이면 “체크 안 한 게 2개 있어요”(→ W-05). 금액이 없어 가림과 상관없음
+  const done = m.state === 'done';
+  const value = done ? copy.allDone(m.label) : copy.count(m.done);
+  const note = done ? null : copy.progress(m.total, m.done);
   const meta =
-    s.closeDays !== null
-      ? copy.close(s.closeDays)
-      : s.payday !== null
-        ? copy.payday(s.payday)
+    m.state === 'review'
+      ? copy.review(m.left)
+      : m.payday
+        ? copy.payday(Number(m.payday.slice(8, 10)))
         : null;
   return (
     <button
       type="button"
       className="hg-wg-tray__sum"
       style={bare}
-      onClick={() => open(s.to)}
-      aria-label={`${label}, ${masked ? copy.hidden : value}${meta ? `, ${meta}` : ''}`}
+      onClick={() => open(m.state === 'review' ? '/salary/review' : '/salary')}
+      aria-label={[m.label, value, note, meta].filter(Boolean).join(', ')}
     >
-      <span className="hg-wg__label">
-        {label}
-        {masked && <Icon name="eye-off" className="hg-wg__hidden" />}
-      </span>
+      <span className="hg-wg__label">{m.label}</span>
       <span className="hg-wg__value">{value}</span>
       {note && <span className="hg-wg__note">{note}</span>}
       {meta && <span className="hg-wg__meta">{meta}</span>}

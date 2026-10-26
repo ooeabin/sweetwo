@@ -1,7 +1,7 @@
 import { Button, Chip, Tabs } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { MainFrame } from '../month';
+import { MainFrame } from '../frame';
 import { copy } from './copy';
 import { startCareAdd } from './pages/y-07-care-add';
 

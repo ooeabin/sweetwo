@@ -1,13 +1,13 @@
 import type { ExportData } from '@sweetwo/api';
 import { assetGroup, formatDot, toCsv, todayKst } from '@sweetwo/core';
-import { describeProposal, type Names } from '../proposals';
 import { copy } from './copy';
 
-// S-18 내보내기(엑셀 CSV, zip 하나에 시트별). 범위: 내 데이터(내 명의 항목 + 내가 쓴 기록) / 공동 데이터
-// (공동 항목·목표·월 플랜·월말 정리·챙길 날·제안 + 배우자 항목은 공개 범위대로: 전체 공개는 행, 합계만은 합계 한 줄).
+// S-18 내보내기(엑셀 CSV, zip 하나에 시트별, 25 S-18). 범위: 내 데이터(내 명의 항목, 내 분배표·체크리스트, 내가 쓴 기록)
+// / 공동 데이터(공동 항목·목표·분배표·체크리스트·챙길 날 + 배우자 항목은 공개 범위대로: 전체 공개는 행, 합계만은 합계 한 줄).
 // 서프라이즈·비공개는 서버(RLS)가 이미 거름. 사진은 빠짐.
 
 export type Scope = 'mine' | 'joint';
+export type Names = { myId: string; myName: string; partnerName: string };
 
 const kindName = (grp: string, kind: string) => {
   const g = assetGroup(grp);
@@ -17,7 +17,7 @@ const kindName = (grp: string, kind: string) => {
 export function buildExport(
   d: ExportData,
   scope: Scope,
-  n: Names & { mySide: 'groom' | 'bride' | null },
+  n: Names,
 ): { name: string; text: string }[] {
   const owner = (a: ExportData['assets'][number]) =>
     a.owner === 'joint' ? copy.ex.joint : a.owner_user_id === n.myId ? n.myName : n.partnerName;
@@ -82,6 +82,53 @@ export function buildExport(
     { name: copy.ex.files.assets, text: toCsv(copy.ex.heads.assets, assetRows) },
     { name: copy.ex.files.debts, text: toCsv(copy.ex.heads.debts, debtRows) },
   ];
+  const whoName = (id: string | null) => (id === n.myId ? n.myName : id ? n.partnerName : '');
+  const goalName = (id: string | null) => d.goals.find((g) => g.id === id)?.name ?? '';
+  const lineName = (l: {
+    kind: string;
+    goal_id: string | null;
+    name: string | null;
+    user_id: string | null;
+  }) =>
+    l.kind === 'saving'
+      ? goalName(l.goal_id)
+      : l.kind === 'custom'
+        ? (l.name ?? '')
+        : l.kind === 'allowance' && l.user_id
+          ? `${copy.ex.lineKinds.allowance}(${whoName(l.user_id)})`
+          : (copy.ex.lineKinds[l.kind] ?? l.kind);
+  const mine = (owner: string | null) => scope === 'joint' || owner === n.myId;
+  const splitRows = d.splits
+    .filter((x) => mine(x.owner_user_id))
+    .flatMap((x) =>
+      [...x.split_line]
+        .sort((a, b) => a.sort - b.sort)
+        .map((l) => [
+          x.owner_user_id ? whoName(x.owner_user_id) : copy.ex.joint,
+          copy.ex.lineKinds[l.kind] ?? l.kind,
+          lineName(l),
+          l.amount,
+        ]),
+    );
+  const checkRows = d.checklists
+    .filter((c) => mine(c.owner_user_id))
+    .flatMap((c) =>
+      [...c.pay_check_line]
+        .sort((a, b) => a.sort - b.sort)
+        .map((l) => [
+          c.label,
+          c.owner_user_id ? whoName(c.owner_user_id) : copy.ex.joint,
+          lineName(l),
+          l.actual ?? l.planned,
+          copy.ex.checkState[l.state] ?? l.state,
+          whoName(l.checked_by),
+          l.checked_at ? formatDot(todayKst(new Date(l.checked_at))) : '',
+        ]),
+    );
+  files.push(
+    { name: copy.ex.files.splits, text: toCsv(copy.ex.heads.splits, splitRows) },
+    { name: copy.ex.files.checklists, text: toCsv(copy.ex.heads.checklists, checkRows) },
+  );
   if (scope === 'mine') {
     const mineRecords = d.careRecords.filter((r) => r.created_by === n.myId);
     files.push({
@@ -91,14 +138,12 @@ export function buildExport(
     return files;
   }
 
-  // 공동: 목표, 월급 플랜, 월말 정리, 챙길 날, 제안
-  const lastPlan = d.plans[d.plans.length - 1];
-  const doneClose = new Set(d.closes.filter((c) => c.status === 'done').map((c) => c.id));
-  const held = (gid: string, other: number) =>
-    other +
-    d.deposits
-      .filter((x) => x.goal_id === gid && doneClose.has(x.month_close_id))
-      .reduce((t, x) => t + x.amount, 0);
+  // 공동: 목표(모은 돈, 분배표 저금 금액 = 보이는 분배표의 그 목표 줄 합), 챙길 날
+  const monthly = (gid: string) =>
+    d.splits
+      .flatMap((x) => x.split_line)
+      .filter((l) => l.kind === 'saving' && l.goal_id === gid)
+      .reduce((t, l) => t + l.amount, 0);
   files.push({
     name: copy.ex.files.goals,
     text: toCsv(
@@ -107,82 +152,17 @@ export function buildExport(
         g.name,
         copy.ex.goalKinds[g.kind] ?? g.kind,
         g.target_amount,
-        held(g.id, g.other_held),
+        d.saved[g.id] ?? g.other_held,
         g.deadline,
         g.priority,
         copy.ex.goalStatus[g.status] ?? g.status,
-        lastPlan?.plan_line.find((l) => l.goal_id === g.id)?.amount ?? null,
-      ]),
-    ),
-  });
-  const mineCol = (l: ExportData['plans'][number]['plan_line'][number], who: 'me' | 'partner') => {
-    const side =
-      who === 'me'
-        ? n.mySide
-        : n.mySide === 'groom'
-          ? 'bride'
-          : n.mySide === 'bride'
-            ? 'groom'
-            : null;
-    return side === 'groom' ? l.amount_groom : side === 'bride' ? l.amount_bride : null;
-  };
-  const goalName = (id: string | null) => d.goals.find((g) => g.id === id)?.name ?? '';
-  files.push({
-    name: copy.ex.files.plans,
-    text: toCsv(
-      copy.ex.heads.plans(n.myName, n.partnerName),
-      d.plans.flatMap((p) =>
-        p.plan_line
-          .filter((l) => !l.deleted_at)
-          .sort((a, b) => a.sort - b.sort)
-          .map((l) => [
-            p.label_month.slice(0, 7),
-            l.target === 'goal' ? goalName(l.goal_id) : (copy.ex.roles[l.account_role ?? ''] ?? ''),
-            l.amount,
-            mineCol(l, 'me'),
-            mineCol(l, 'partner'),
-            copy.ex.lineState[l.state] ?? l.state,
-            l.done_amount,
-          ]),
-      ),
-    ),
-  });
-  const planMonth = (id: string) => d.plans.find((p) => p.id === id)?.label_month.slice(0, 7) ?? '';
-  const whoName = (id: string | null) => (id === n.myId ? n.myName : id ? n.partnerName : '');
-  files.push({
-    name: copy.ex.files.closes,
-    text: toCsv(
-      copy.ex.heads.closes,
-      d.closes.map((c) => [
-        planMonth(c.plan_id),
-        d.deposits.filter((x) => x.month_close_id === c.id).reduce((t, x) => t + x.amount, 0),
-        c.income,
-        copy.ex.closeStatus[c.status] ?? c.status,
-        whoName(c.closed_by),
-        c.closed_at ? formatDot(todayKst(new Date(c.closed_at))) : '',
+        monthly(g.id),
       ]),
     ),
   });
   files.push({
     name: copy.ex.files.care,
     text: toCsv(copy.ex.heads.care, careRows(d, d.careRecords)),
-  });
-  const goalsForNames = d.goals.map((g) => ({ id: g.id, name: g.name }));
-  files.push({
-    name: copy.ex.files.proposals,
-    text: toCsv(
-      copy.ex.heads.proposals,
-      d.proposals.map((p) => {
-        const line = describeProposal(p, n, goalsForNames);
-        return [
-          formatDot(todayKst(new Date(p.created_at))),
-          line.label,
-          `${line.before} → ${line.after}`,
-          p.response ? (copy.ex.responses[p.response] ?? p.response) : '',
-          copy.ex.proposalStatus[p.status] ?? p.status,
-        ];
-      }),
-    ),
   });
   return files;
 }

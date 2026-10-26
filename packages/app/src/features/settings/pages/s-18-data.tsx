@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { reauthenticate, session } from '../../auth';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { buildExport, type Scope } from '../export';
@@ -56,8 +56,6 @@ export function S18Data() {
         myId: d.me.id,
         myName: d.c.myName,
         partnerName: d.c.partnerName,
-        starter: d.c.starter,
-        mySide: d.me.side === 'groom' || d.me.side === 'bride' ? d.me.side : null,
       });
       saveFile(copy.fileName(s, todayKst().replace(/-/g, '')), makeZip(files));
       setState('idle');

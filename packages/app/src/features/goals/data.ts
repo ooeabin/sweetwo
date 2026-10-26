@@ -10,9 +10,8 @@ import {
   type Me,
   type Space,
 } from '@sweetwo/api';
-import { coupleOf, spaceBaseDay } from '@sweetwo/core';
+import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
-import { useProposals } from '../proposals';
 import { goalsView } from './view';
 
 // 목표 화면 데이터. 키는 다른 기능과 같은 qk.
@@ -22,9 +21,8 @@ export function useGoalsData() {
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const records = useQuery({ queryKey: qk.goalRecords, queryFn: fetchGoalRecords });
-  const proposals = useProposals();
   const linked = useQuery({ queryKey: qk.goalAssetSums, queryFn: fetchGoalAssetSums });
-  const all = [me, space, partner, goals, records, proposals, linked];
+  const all = [me, space, partner, goals, records, linked];
   const loading = all.some((q) => q.isLoading);
   const failed = [me, space, partner, goals, records].some((q) => q.isError);
   const make = (list: Goal[], over?: { me?: Me; space?: Space }) =>
@@ -47,21 +45,13 @@ export function useGoalsData() {
     /** 바꾼 값으로 다시 계산(목표 수정 영향 미리보기) */
     viewWith: (id: string, patch: Partial<Goal>) =>
       goals.data ? make(goals.data.map((g) => (g.id === id ? { ...g, ...patch } : g))) : null,
-    /** 목표 목록을 바꿔 다시 계산(순서, 조정 안 미리보기) */
-    viewOf: (list: Goal[]) => make(list),
-    /** 내 정보·공간 값을 바꿔 다시 계산(계획 다시 세우기 F-07c 비교) */
-    viewFor: (over: { me?: Me; space?: Space }) => (goals.data ? make(goals.data, over) : null),
     space: space.data ?? null,
     /** 새 목표를 더해 다시 계산(목표 추가 G-03f) */
     viewAdd: (g: Goal) => (goals.data ? make([...goals.data, g]) : null),
     goals: goals.data ?? [],
     me: me.data ?? null,
     couple: c,
-    /** 연결된 부부: 배분 결정은 제안(08 6장) */
     connected: space.data?.couple_state === 'connected',
-    base: space.data && c ? spaceBaseDay(space.data, c) : null,
-    /** 열린 목표 제안 */
-    openProposals: (proposals.data ?? []).filter((p) => p.status === 'open' && p.target_id),
     retry: () => all.forEach((q) => void q.refetch()),
   };
 }

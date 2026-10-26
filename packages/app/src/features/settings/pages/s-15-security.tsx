@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { LockStatus } from '../../../platform';
 import { toast } from '../../../shared/toast';
 import { paths, prefs, session } from '../../auth';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 
 type PinFor = 'off' | 'change';
