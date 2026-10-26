@@ -2,7 +2,7 @@ import { qk, uploadAvatar } from '@sweetwo/api';
 import { Button, Icon, ImageCrop, PageHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type DragEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
@@ -31,6 +31,14 @@ export function S11ePhoto() {
   const [over, setOver] = useState(false);
   const [saving, setSaving] = useState(false);
   useEffect(() => () => void (src && URL.revokeObjectURL(src)), [src]);
+  // S-11에서 Avatar에 끌어 놓은 사진이면 바로 받음
+  const dropped = (useLocation().state as { file?: unknown } | null)?.file;
+  useEffect(() => {
+    if (!(dropped instanceof File)) return;
+    const e = photoError(dropped);
+    setError(e);
+    if (!e) setSrc(URL.createObjectURL(dropped));
+  }, [dropped]);
   if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
   const me = d.me;
   const back = () => nav('/settings/me');
