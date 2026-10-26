@@ -54,7 +54,7 @@ export async function fetchCareRecords(): Promise<CareRecord[]> {
   return data ?? [];
 }
 
-/** Y-08 저장. 돌려줌: 넣은 ‘목표자금 → 공동 생활비’ 줄 금액(없으면 0) */
+/** Y-08 저장. 돌려줌: 기록 id(사진 붙일 때), 넣은 ‘목표자금 → 공동 생활비’ 줄 금액(없으면 0) */
 export async function recordCare(a: {
   careId: string;
   on: string;
@@ -64,7 +64,7 @@ export async function recordCare(a: {
   giftName: string | null;
   memo: string | null;
   move: number;
-}): Promise<number> {
+}): Promise<{ record: string; line: number }> {
   const { data, error } = await supabase().rpc('record_care', {
     p_care: a.careId,
     p_on: a.on,
@@ -76,8 +76,8 @@ export async function recordCare(a: {
     p_move: a.move,
   });
   fail(error);
-  const r = data as { line?: number } | null;
-  return Number(r?.line ?? 0);
+  const r = data as { record?: string; line?: number } | null;
+  return { record: String(r?.record ?? ''), line: Number(r?.line ?? 0) };
 }
 
 export type Holiday = Tables<'holiday'>;

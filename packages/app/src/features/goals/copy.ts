@@ -342,4 +342,23 @@ export const copy = {
   whoOurs: '우리 둘', // [확인 필요]
   whoMine: '나', // [확인 필요]
   confirmZeroLine: '분배표에 이 목표 줄을 0원으로 만들어 둘게요. 금액은 분배표에서 정해요', // [확인 필요]
+
+  // 목표 사진(22 G-02 ‘목표 사진’, 직접 만든 목표만). 올리기 규칙·문구는 프로필 사진(25 S-11e)과 같음
+  photoTitle: '목표 사진', // [확인 필요]
+  photoChange: '사진 바꾸기',
+  photoRemove: '사진 지우기',
+  photoRemoved: '사진을 지웠어요', // [확인 필요]
+  photoSaved: '사진을 바꿨어요',
+  photoDrop: '사진을 끌어 놓거나 골라 주세요',
+  photoPick: '사진 고르기',
+  photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
+  photoNotice: (partner: string) => `올린 사진은 ${partner}님과 나만 볼 수 있어요`,
+  photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
+  photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
+  photoBadType: '이 형식은 올릴 수 없어요',
+  photoStage: '사진 위치, 화살표로 옮겨요',
+  photoZoom: '확대', // [확인 필요] 화면 읽기용
+  photoPreview: '미리보기', // [확인 필요] 화면 읽기용
+  photoAgain: '다시 고르기',
+  photoSave: '저장할게요',
 };

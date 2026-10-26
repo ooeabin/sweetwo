@@ -33,6 +33,7 @@ import {
   G05Send,
   G05Use,
   G02GoalEdit,
+  G02pGoalPhoto,
   G06GoalOrder,
   G02aGoalMove,
   G02bGoalUse,
@@ -221,6 +222,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 목표 수정(금액, 기한, 이름)
+      {
+        path: '/goals/:id/photo',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02pGoalPhoto />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 목표 사진 바꾸기(직접 만든 목표만)
       {
         path: '/assets',
         element: (

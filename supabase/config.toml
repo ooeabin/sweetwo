@@ -446,3 +446,7 @@ verify_jwt = false
 # 모바일 푸시 보내기(DB kick_push가 pg_net으로 부름). JWT 대신 x-push-secret(PUSH_CRON_SECRET)로 확인
 [functions.send-push]
 verify_jwt = false
+
+# 사진 파일 지우기(DB kick_purge가 pg_net으로 부름). JWT 대신 x-purge-secret(PURGE_CRON_SECRET)로 확인
+[functions.purge-storage]
+verify_jwt = false

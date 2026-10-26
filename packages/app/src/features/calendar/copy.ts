@@ -113,6 +113,28 @@ export const copy = {
   giftName: '어떤 선물이에요?', // [확인 필요]
   giftAgain: '작년에도 드렸어요',
   rememberQ: '기억하고 싶은 게 있나요?',
+  // Y-08c 사진(24 Y-08c). 올린 사진은 서버에 저장 시 암호화, 부부 둘만 봄
+  photos: '사진',
+  photoDrop: '사진을 끌어 놓거나',
+  photoPick: '골라 주세요',
+  photoHelp: '사진 10장까지, 한 장에 10MB 이하', // [확인 필요]
+  photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
+  photoBadType: '이 형식은 올릴 수 없어요',
+  photoTooMany: '사진은 10장까지 올릴 수 있어요',
+  photoFailed: '사진을 올리지 못했어요',
+  photoRetry: '다시 시도',
+  photoUploading: '올리는 중',
+  photoRemove: (name: string) => `${name} 빼기`,
+  photoAlt: (n: number) => `사진 ${n}`, // [확인 필요] 화면 읽기용
+  giftedPhotos: (n: number) => `사진 ${n}장`, // [확인 필요] Y-09 행
+  // 사진(챙길 날) 동의: 처음 사진 추가 시(31 동의 8종)
+  photoConsentTitle: '사진을 저장해도 될까요?', // [확인 필요]
+  photoConsentBody: '기억하고 싶은 사진을 기록과 함께 보관해요', // [확인 필요]
+  photoNotice: (partner: string) => `올린 사진은 ${partner}님과 나만 볼 수 있어요`,
+  photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
+  photoGoesWith: '기록을 지우면 사진도 함께 지워져요', // [확인 필요]
+  photoConsentLater: '나중에 할게요', // [확인 필요]
+  photoConsentOk: '동의할게요', // [확인 필요]
   recorded: '기록했어요', // [확인 필요]
 
   // Y-09 드린 기록

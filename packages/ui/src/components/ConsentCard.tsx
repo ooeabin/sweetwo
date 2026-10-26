@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { cx } from './cx';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
+import { Button } from './Button';
 
 // 동의 묶음(docs/design/components/ConsentCard.md ‘동의 묶음’). 전체 동의 + 줄마다 체크 + ‘보기’.
 export interface ConsentItem {
@@ -114,5 +115,50 @@ export function ConsentGroup({
         items.map(row)
       )}
     </div>
+  );
+}
+
+// 한 건 동의 카드(ConsentCard.md ‘한 건 동의 카드’): 아이콘 + 제목 → 설명 1줄 → 알아 둘 것 2~3줄 → 버튼 2개(보조 + 주, 같은 크기).
+export function ConsentCard(p: {
+  icon: IconName;
+  title: string;
+  body: string;
+  items: string[];
+  laterLabel: string;
+  okLabel: string;
+  onLater: () => void;
+  onOk: () => void;
+  busy?: boolean;
+}) {
+  return (
+    <section className="hg-consent-card" aria-label={p.title}>
+      <div className="hg-consent-card__head">
+        <Icon name={p.icon} />
+        <h2 className="hg-consent-card__title">{p.title}</h2>
+      </div>
+      <p className="hg-consent-card__body">{p.body}</p>
+      <ul className="hg-consent-card__list">
+        {p.items.map((t) => (
+          <li key={t}>
+            <Icon name="check" />
+            {t}
+          </li>
+        ))}
+      </ul>
+      <div className="hg-consent-card__actions">
+        <Button variant="secondary" size="sm" onClick={p.onLater} disabled={p.busy}>
+          {p.laterLabel}
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          className={cx(p.busy && 'is-loading')}
+          onClick={p.onOk}
+          disabled={p.busy}
+        >
+          {p.okLabel}
+        </Button>
+      </div>
+    </section>
   );
 }

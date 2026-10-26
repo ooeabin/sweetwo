@@ -12,6 +12,10 @@ const axe = async (page: Page) => {
   ).toEqual([]);
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+);
 
 test('G-01 목표 목록: 우리 목표 묶음, 매달·예상, 기한보다 늦어요, 이번 달', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
@@ -414,4 +418,58 @@ test('G-02 정보·도움말·월별 기록, 삭제 되돌리기, 매년 목표 
   await expect(page.getByText('삭제했어요')).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-t')?.deleted_at ?? null).toBeNull();
+});
+
+test('목표 사진(22 G-02): 직접 만든 목표만 “사진 바꾸기” → 자르기 → 저장 → 카드 그림, 지우기, 기본 목표는 없음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.push({
+    id: 'goal-camp',
+    template: 'custom',
+    name: '캠핑카',
+    kind: 'once',
+    priority: 3,
+    target_amount: 30_000_000,
+    other_held: 0,
+    deadline: '2029-12-01',
+    status: 'active',
+    achieved_seen: [],
+    freed_lines: {},
+    owner_user_id: null,
+    photo_path: null,
+    details: {},
+    deleted_at: null,
+    created_at: '2026-06-01T00:00:00Z',
+  });
+  await page.goto('/goals/goal-h');
+  await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '사진 바꾸기' })).toHaveCount(0);
+
+  await page.goto('/goals/goal-camp');
+  await expect(page.locator('.hg-card__art--custom')).toBeVisible();
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
+  await expect(page.getByRole('heading', { name: '목표 사진' }).first()).toBeVisible();
+  await expect(page.getByText(/님과 나만 볼 수 있어요$/)).toBeVisible();
+  await axe(page);
+  await page
+    .getByLabel('사진 고르기', { exact: true })
+    .setInputFiles({ name: 'car.png', mimeType: 'image/png', buffer: PNG });
+  await page.getByRole('button', { name: '저장할게요' }).click();
+  await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/goals\/goal-camp$/);
+  const path = String(db.goals.find((g) => g.id === 'goal-camp')?.photo_path);
+  expect(path).toMatch(/^g\/[0-9a-f-]{36}\.jpg$/);
+  expect(db.storage).toEqual([`/storage/v1/object/photos/${path}`]);
+  await expect(page.locator('.hg-card__art--photo img')).toBeVisible();
+  await page.goto('/goals');
+  await expect(page.locator('.hg-card__art--photo img')).toHaveCount(1);
+
+  await page.goto('/goals/goal-camp');
+  await page.getByRole('button', { name: '사진 지우기' }).click();
+  await expect(page.getByText('사진을 지웠어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'goal-camp')?.photo_path).toBeNull();
+  await expect(page.locator('.hg-card__art--custom')).toBeVisible();
 });

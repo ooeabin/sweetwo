@@ -15,4 +15,5 @@ export * from './admin';
 export * from './goal-achieve';
 export * from './guides';
 export * from './avatar';
+export * from './photos';
 export * from './salary';

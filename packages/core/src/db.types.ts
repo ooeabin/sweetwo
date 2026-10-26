@@ -1230,6 +1230,7 @@ export type Database = {
           other_held: number
           owner: Database["public"]["Enums"]["goal_owner"]
           owner_user_id: string | null
+          photo_path: string | null
           priority: number
           space_id: string
           status: Database["public"]["Enums"]["goal_status"]
@@ -1260,6 +1261,7 @@ export type Database = {
           other_held?: number
           owner?: Database["public"]["Enums"]["goal_owner"]
           owner_user_id?: string | null
+          photo_path?: string | null
           priority: number
           space_id: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -1289,6 +1291,7 @@ export type Database = {
           other_held?: number
           owner?: Database["public"]["Enums"]["goal_owner"]
           owner_user_id?: string | null
+          photo_path?: string | null
           priority?: number
           space_id?: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -2006,6 +2009,65 @@ export type Database = {
           },
         ]
       }
+      photo: {
+        Row: {
+          care_record_id: string | null
+          created_at: string
+          created_by: string | null
+          goal_id: string | null
+          id: string
+          path: string
+          size_bytes: number
+          sort: number
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          care_record_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          goal_id?: string | null
+          id?: string
+          path: string
+          size_bytes: number
+          sort?: number
+          space_id: string
+        }
+        Update: {
+          care_record_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          goal_id?: string | null
+          id?: string
+          path?: string
+          size_bytes?: number
+          sort?: number
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_care_record_id_fkey"
+            columns: ["care_record_id"]
+            isOneToOne: false
+            referencedRelation: "care_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_device: {
         Row: {
           app_version: string | null
@@ -2135,6 +2197,34 @@ export type Database = {
           },
         ]
       }
+      storage_purge: {
+        Row: {
+          attempts: number
+          bucket: string
+          created_at: string
+          done_at: string | null
+          id: number
+          path: string
+        }
+        ComputedFields: never
+        Insert: {
+          attempts?: number
+          bucket: string
+          created_at?: string
+          done_at?: string | null
+          id?: never
+          path: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          done_at?: string | null
+          id?: never
+          path?: string
+        }
+        Relationships: []
+      }
       terms_version: {
         Row: {
           approved_at: string | null
@@ -2181,6 +2271,10 @@ export type Database = {
     }
     Functions: {
       achieve_goal: { Args: { p_goal: string }; Returns: boolean }
+      add_care_photo: {
+        Args: { p_path: string; p_record: string; p_size: number }
+        Returns: string
+      }
       add_inquiry_message: {
         Args: { p_body: string; p_inquiry: string }
         Returns: undefined
@@ -2526,6 +2620,7 @@ export type Database = {
       }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
+      can_read_photo: { Args: { p_name: string }; Returns: boolean }
       cancel_account_deletion: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2590,6 +2685,14 @@ export type Database = {
           target: string
           title: string
           token: string
+        }[]
+      }
+      claim_storage_purge: {
+        Args: { p_limit?: number }
+        Returns: {
+          bucket: string
+          id: number
+          path: string
         }[]
       }
       complete_join: {
@@ -2677,6 +2780,7 @@ export type Database = {
         Returns: number
       }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
+      done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
       emergency_asset_add: {
         Args: { d: number; p_space: string }
@@ -2766,6 +2870,7 @@ export type Database = {
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
       kick_mail: { Args: Record<PropertyKey, never>; Returns: boolean }
+      kick_purge: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_push: { Args: Record<PropertyKey, never>; Returns: boolean }
       ko_batchim: { Args: { w: string }; Returns: boolean }
       ko_is: { Args: { w: string }; Returns: string }
@@ -2851,6 +2956,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      my_uploaded_photo: { Args: { p_path: string }; Returns: boolean }
       net_worth_history: {
         Args: { p_months?: number }
         Returns: {
@@ -3052,6 +3158,10 @@ export type Database = {
         Args: { p_done: boolean; p_key: string }
         Returns: undefined
       }
+      set_goal_photo: {
+        Args: { p_goal: string; p_path?: string; p_size?: number }
+        Returns: undefined
+      }
       set_join_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
@@ -3094,6 +3204,7 @@ export type Database = {
           other_held: number
           owner: Database["public"]["Enums"]["goal_owner"]
           owner_user_id: string | null
+          photo_path: string | null
           priority: number
           space_id: string
           status: Database["public"]["Enums"]["goal_status"]
