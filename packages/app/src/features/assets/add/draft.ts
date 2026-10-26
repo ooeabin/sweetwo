@@ -63,7 +63,9 @@ export function assetSteps(d: AssetDraft, solo: boolean) {
     ...(!solo && d.owner === 'me' ? ['visibility'] : []),
     ...(saving || k === 'deposit_money' ? ['maturity'] : []),
     ...(sub ? ['count'] : []),
-    ...(d.side === 'debt' ? ['rate'] : []),
-    ...(saving || sub || d.side === 'debt' ? ['payment'] : []),
+    // 주택 대출은 매달 나가는 돈이 먼저(23 F-03g): 월 상환액 → 금리
+    ...(d.grp === 'housing_loan' ? ['payment', 'rate'] : []),
+    ...(d.side === 'debt' && d.grp !== 'housing_loan' ? ['rate'] : []),
+    ...((saving || sub || d.side === 'debt') && d.grp !== 'housing_loan' ? ['payment'] : []),
   ];
 }

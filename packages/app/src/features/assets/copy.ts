@@ -255,6 +255,7 @@ export const copy = {
   maturityLabel: '만기일', // [확인 필요]
   paymentLabel: '월 납입액', // [확인 필요]
   repaymentLabel: '월 상환액', // [확인 필요]
+  monthlyRepay: (v: string) => `매달 ${v}`, // [확인 필요] F-02 부채 줄 보조
   rateLabel: '금리', // [확인 필요]
   countLabel: '납입 회차', // [확인 필요]
 
