@@ -361,6 +361,7 @@ export function G02GoalDetail() {
             label: formatYm(p.ym),
             value: p.actual,
             expected: p.plan,
+            mark: p.milestone,
           }))}
           format={m}
           name={copy.graphActual}

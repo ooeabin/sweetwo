@@ -1,8 +1,16 @@
-import { createInvite, fetchMailBounced, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import {
+  createInvite,
+  fetchMailBounced,
+  fetchUnlinkPartnerName,
+  qk,
+  sendDesktopLink,
+} from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { detectPlatform, isMobile } from '../../../platform';
 import {
   LoadingFrame,
   AddMenu,
@@ -31,6 +39,22 @@ import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts
 
 // 홈(19): 오늘 띠(인사 H-01 + ‘월급 체크하기’) → 할 일 한 줄(H-06) → 왼쪽 목표(H-02)·이번 달 월급(H-03),
 // 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 배우자 활동은 알림 센터.
+const PC_BAND = 'sweetwo.pcBandDone';
+const pcBandDone = () => {
+  try {
+    return localStorage.getItem(PC_BAND) === '1';
+  } catch {
+    return true;
+  }
+};
+const markPcBand = () => {
+  try {
+    localStorage.setItem(PC_BAND, '1');
+  } catch {
+    /* 기억 못 하면 다음에 한 번 더 보일 수 있음 */
+  }
+};
+
 export function H01Home() {
   const nav = useNavigate();
   const me = useMe();
@@ -52,6 +76,8 @@ export function H01Home() {
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
+  // 18 ‘합류 뒤’: 모바일 앱으로 합류한 사람의 첫 홈 띠 1회(PC에서도)
+  const [pcBand, setPcBand] = useState(() => isMobile(detectPlatform()) && !pcBandDone());
   if (!me.data || !space.data || !goals.data || lists.isLoading)
     return <LoadingFrame current="month" />;
 
@@ -182,13 +208,39 @@ export function H01Home() {
       </Button>
     </div>
   ) : undefined;
+  const closePc = () => {
+    markPcBand();
+    setPcBand(false);
+  };
+  const pcBandEl =
+    pcBand && space.data.created_by && space.data.created_by !== me.data.id ? (
+      <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+        <span>{copy.pcAlso}</span>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            void sendDesktopLink()
+              .then(() => toast(copy.pcSent))
+              .catch(() => toast(copy.pcFailed))
+              .finally(closePc)
+          }
+        >
+          {copy.pcSend}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={closePc}>
+          {copy.close}
+        </Button>
+      </div>
+    ) : undefined;
   const banner =
-    notice || todoBand || unlinkBand || bounceBand ? (
+    notice || todoBand || unlinkBand || bounceBand || pcBandEl ? (
       <>
         {unlinkBand}
         {notice}
         {bounceBand}
         {todoBand}
+        {pcBandEl}
       </>
     ) : undefined;
 

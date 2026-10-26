@@ -159,3 +159,10 @@ export async function unregisterPushDevice(token: string) {
   const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
   if (error) throw new Error(error.message);
 }
+
+/** 18 ‘합류 뒤’: 데스크톱 앱 받기 링크를 알림 이메일로(하루 한 번) */
+export async function sendDesktopLink(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('send_desktop_link');
+  if (error) throw new Error(error.message);
+  return data === true;
+}

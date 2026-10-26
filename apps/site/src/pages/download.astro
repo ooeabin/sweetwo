@@ -1,8 +1,10 @@
 ---
 // L-02 설치 안내(/download?os=mac 또는 win). 들어오면 OS에 맞는 파일 받기를 바로 시작(새로고침하면 다시 시작하지 않음, 다시 받기로만).
-// os 값이 없거나 틀리면 접속 OS, 그래도 모르면 두 버튼. 휴대폰·지원 안 하는 OS는 자동 받기 없이 L-01과 같은 안내.
+// os 값이 없거나 틀리면 접속 OS, 그래도 모르면 두 버튼. 휴대폰·지원 안 하는 OS는 자동 받기 없이 L-01과 같은 안내 + 스토어 버튼.
+// 아래 “휴대폰 앱도 있어요” + 스토어 2개(5번).
+import StoreBadges from '../components/StoreBadges.astro';
 import Site from '../layouts/Site.astro';
-import { URLS, t } from '../lib/site';
+import { t } from '../lib/site';
 ---
 <Site title={t.title(t.installPage)} description={t.started}>
   <section class="hg-site__sec" style="border-top: 0;" data-install>
@@ -35,14 +37,18 @@ import { URLS, t } from '../lib/site';
         <a class="hg-btn hg-btn--secondary" href="/download?os=win"><span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}</a>
       </div>
     </div>
-    <div class="hg-site__text" data-state="web" hidden>
-      <h1 class="hg-site__h2" data-web-msg></h1>
+    <div class="hg-site__text" data-state="phone" hidden>
+      <h1 class="hg-site__h2" data-phone-msg></h1>
+      <StoreBadges placement="install" primary />
     </div>
     <p data-state-after hidden>{t.after}</p>
-    <a class="hg-btn hg-btn--link" href={URLS.app} data-web-start data-placement="install">{t.webContinue}</a>
+    <div class="hg-stack" data-state-store style="gap: var(--space-2);">
+      <span class="hg-site__lead">{t.mobileToo}</span>
+      <StoreBadges placement="install" small />
+    </div>
   </section>
   <script>
-    import { detectSiteOs, installOs } from '@sweetwo/core';
+    import { detectSiteOs, installOs, isPhoneOs } from '@sweetwo/core';
     import { APP_SEEN, track } from '../lib/client';
     import { t, URLS } from '../lib/site';
 
@@ -50,11 +56,13 @@ import { URLS, t } from '../lib/site';
     const ua = navigator.userAgent;
     const here = detectSiteOs(ua);
     const show = (sel: string) => document.querySelectorAll<HTMLElement>(sel).forEach((e) => (e.hidden = false));
-    const os = here === 'mobile' || here === 'unsupported' ? null : installOs(q.get('os'), ua);
-    if (here === 'mobile' || here === 'unsupported') {
-      const msg = document.querySelector<HTMLElement>('[data-web-msg]');
-      if (msg) msg.textContent = here === 'mobile' ? t.mobile : t.unsupported;
-      show('[data-state="web"]');
+    const phoneOrOld = isPhoneOs(here) || here === 'unsupported';
+    const os = phoneOrOld ? null : installOs(q.get('os'), ua);
+    if (phoneOrOld) {
+      const msg = document.querySelector<HTMLElement>('[data-phone-msg]');
+      if (msg) msg.textContent = here === 'unsupported' ? t.unsupported : t.phoneAlso;
+      show('[data-state="phone"]');
+      document.querySelector<HTMLElement>('[data-state-store]')?.setAttribute('hidden', '');
     } else if (!os) {
       show('[data-state="choose"]');
     } else {

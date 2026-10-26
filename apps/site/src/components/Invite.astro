@@ -1,36 +1,58 @@
 ---
-// 초대 링크 화면(28 공통 ‘초대 링크’). /i/{코드}는 정적 파일이 없어 404 페이지(CloudFront 오류 페이지)와 /i/가 이 컴포넌트를 씀.
-import { URLS, t } from '../lib/site';
+// 초대 링크 화면(28 공통 ‘초대 링크’). /i/{코드}는 정적 파일이 없어 404 페이지와 /i/가 이 컴포넌트를 씀.
+// 앱이 깔린 휴대폰은 앱 링크로 앱이 바로 열려 이 화면을 보지 않음.
+// - 앱이 없는 휴대폰: “sweeTwo에 초대받았어요” + 코드(크게, ‘복사’) + 그 기기 스토어 버튼
+// - PC: 같은 초대 화면 + 다운로드 버튼 + “휴대폰 앱도 있어요”. 이 브라우저에 앱 기록(L-02에서 받았거나 앱으로 연 적)이 있으면
+//   위에 “sweeTwo 앱으로 열까요?” + ‘앱으로 열기’(sweetwo://i/{코드})
+// 코드가 유효한지는 확인하지 않음(로그인 없이 검증하지 않음, 만료·사용은 앱 P-01 규칙)
+import Download from './Download.astro';
+import { t } from '../lib/site';
 ---
 
-  <section class="hg-site__sec" style="border-top: 0;" data-invite hidden>
-    <h1 class="hg-site__h2">{t.openInApp}</h1>
+<div data-invite hidden>
+  <section class="hg-site__sec" style="border-top: 0;" data-open-box hidden>
+    <h2 class="hg-site__h2">{t.openInApp}</h2>
     <a class="hg-btn hg-btn--primary" data-open-app href="sweetwo://i/">{t.openApp}</a>
-    <a class="hg-btn hg-btn--link" data-web-invite href={`${URLS.app}/i/`}>{t.webContinueInvite}</a>
   </section>
-  <script>
-    import { detectSiteOs } from '@sweetwo/core';
-    import { APP_SEEN } from '../lib/client';
-    import { URLS } from '../lib/site';
-    const isInvite = location.pathname.startsWith('/i/');
-    const code = (location.pathname.split('/i/')[1] ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
-    const web = `${URLS.app}/i/${code}`;
+  <section class="hg-site__sec" style="border-top: 0;">
+    <h1 class="hg-site__h2">{t.invited}</h1>
+    <p class="hg-site__lead">{t.invitedSub}</p>
+    <div class="hg-row" style="gap: var(--space-3); align-items: center;">
+      <b class="hg-site__h2" style="letter-spacing: var(--space-1);" data-code></b>
+      <button type="button" class="hg-btn hg-btn--secondary hg-btn--sm" data-copy>{t.copyCode}</button>
+      <span class="hg-help" role="status" data-copied></span>
+    </div>
+    <Download placement="invite" />
+  </section>
+</div>
+<script>
+  import { APP_SEEN } from '../lib/client';
+  import { t } from '../lib/site';
+  import { detectSiteOs, isPhoneOs } from '@sweetwo/core';
+  const isInvite = location.pathname.startsWith('/i/');
+  const code = (location.pathname.split('/i/')[1] ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
+  const box = document.querySelector<HTMLElement>('[data-invite]');
+  if (isInvite && code && box) {
     let seen = false;
     try {
       seen = localStorage.getItem(APP_SEEN) === '1';
     } catch {
       seen = false;
     }
-    if (!isInvite) {
-      /* 초대 주소가 아니면 아무것도 안 함 */
-    } else if (!seen || detectSiteOs(navigator.userAgent) === 'mobile') {
-      location.replace(web);
-    } else {
-      const app = document.querySelector<HTMLAnchorElement>('[data-open-app]');
-      const cont = document.querySelector<HTMLAnchorElement>('[data-web-invite]');
-      const box = document.querySelector<HTMLElement>('[data-invite]');
-      if (app) app.href = `sweetwo://i/${code}`;
-      if (cont) cont.href = web;
-      if (box) box.hidden = false;
+    box.hidden = false;
+    const c = document.querySelector<HTMLElement>('[data-code]');
+    if (c) c.textContent = code;
+    document.querySelector('[data-copy]')?.addEventListener('click', () => {
+      void navigator.clipboard?.writeText(code).then(() => {
+        const s = document.querySelector<HTMLElement>('[data-copied]');
+        if (s) s.textContent = t.copied;
+      });
+    });
+    if (seen && !isPhoneOs(detectSiteOs(navigator.userAgent))) {
+      const open = document.querySelector<HTMLElement>('[data-open-box]');
+      const a = document.querySelector<HTMLAnchorElement>('[data-open-app]');
+      if (a) a.href = `sweetwo://i/${code}`;
+      if (open) open.hidden = false;
     }
-  </script>
+  }
+</script>

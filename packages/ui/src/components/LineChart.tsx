@@ -17,6 +17,8 @@ export interface LineChartPoint {
   value: number;
   /** 비교 계열(예상 순자산). 값과 모두 같으면 점선을 그리지 않음 */
   expected?: number;
+  /** 마일스톤 점(예: 목표를 만든 지 1년마다). 선 위 작은 점 */
+  mark?: boolean;
 }
 
 export interface LineChartProps {
@@ -225,6 +227,16 @@ export function LineChart(p: LineChartProps) {
               <path className="line" d={line} />
               <line className="xhair" x1={cx0} y1={0} x2={cx0} y2={H} />
             </svg>
+            {p.points.map((x, k) =>
+              x.mark ? (
+                <span
+                  key={k}
+                  className="hg-chart__mark"
+                  style={{ left: xs[k], top: ys[k] }}
+                  aria-hidden="true"
+                />
+              ) : null,
+            )}
             <span className="hg-chart__dot" style={{ left: cx0, top: cy0 }} />
             <div
               ref={bubble}

@@ -50,4 +50,9 @@ export const copy = {
   mailBounced: '알림 메일이 전달되지 않았어요',
   mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
   mailCheck: '확인하기', // [확인 필요]
+  // 18 ‘합류 뒤’ 모바일 첫 홈 띠 [확인 필요]
+  pcAlso: 'PC에서도 같은 계정으로 쓸 수 있어요',
+  pcSend: '데스크톱 앱 받기 링크 보내기',
+  pcSent: '알림 이메일로 링크를 보냈어요',
+  pcFailed: '지금은 보낼 수 없어요. 잠시 뒤 다시 해 주세요',
 };

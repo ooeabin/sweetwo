@@ -6,7 +6,7 @@
 - 너비: 본문 최대 `site-max` 1200px(`hg-site__wrap`), 좌우 여백 `space-6`(좁은 창 `space-4`). 넓은 창 2단(`hg-site__hero`, `hg-site__two`), 768px 미만 1단. 3열 기능, 4칸 안심도 좁은 창에서 1열.
 - 상단 바(`hg-site__bar`, 64px): 왼쪽 워드마크(`hg-wordmark`, 누르면 맨 위) → 오른쪽 “자주 묻는 질문”(`hg-btn--ghost`, L-06) + “앱 받기”(`hg-btn--secondary hg-btn--sm`, PC는 마지막 다운로드 구획으로, 휴대폰은 스토어). 좁은 창은 워드마크와 “앱 받기”만.
 - 첫 화면(`hg-site__hero`): 왼쪽 큰 제목(`hg-site__h1`, 40px, 좁은 창 28px)에 캐치프레이즈 “함께 구워 더 달콤한 자산파이” → (보조 1줄 `hg-site__lead`는 필요할 때만, 기능 설명 문장) → 다운로드 주 버튼 1개 → 글자 링크 “다른 OS용 받기” + “macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요”(`hg-site__os`). 오른쪽(좁은 창은 아래) 앱 화면 이미지(라이트 캡처, 흰 카드 위).
-- 다운로드 버튼은 OS를 알아서 하나만: Mac “Mac용 다운로드”(`apple-logo`), Windows “Windows용 다운로드”(`windows-logo`), iPhone App Store 배지, Android Google Play 배지, 모름 두 배지. PC 버튼 아래 “휴대폰 앱도 있어요” + 작은 배지 2개. 지원하지 않는 컴퓨터는 버튼 대신 “이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요” + 배지 2개. 스토어 배지는 각 스토어 공식 이미지 그대로(색, 비율을 바꾸지 않음). “다른 OS용 받기”를 누르면 두 OS 버튼(보조)을 펼침.
+- 다운로드 버튼은 OS를 알아서 하나만: Mac “Mac용 다운로드”(`apple-logo`), Windows “Windows용 다운로드”(`windows-logo`), iPhone App Store 배지, Android Google Play 배지, 모름 두 배지. PC 버튼 아래 “휴대폰 앱도 있어요” + 작은 배지 2개. 지원하지 않는 컴퓨터는 버튼 대신 “이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요” + 배지 2개. 스토어 배지는 각 스토어 공식 이미지 그대로(색, 비율을 바꾸지 않음). 공식 배지 이미지를 `docs/design/assets`에 넣기 전까지는 같은 자리에 보조 버튼 “App Store에서 받기”(`apple-logo`), “Google Play에서 받기”(`StoreBadges.astro`). “다른 OS용 받기”를 누르면 두 OS 버튼(보조)을 펼침.
 - 한 페이지에 주 버튼(`brand`)은 첫 화면 하나와 같은 내용의 마지막 다운로드 하나. 나머지는 보조나 글자 링크.
 - 구획(`hg-site__sec`): 제목(`hg-site__h2`, 28px) → 내용. 구획 사이 `space-16`(좁은 창 `space-10`) + `hairline-soft` 선.
   - 기능 3개(`hg-site__cols` + `hg-site__feature`): 제목 1줄 + 설명 1줄.

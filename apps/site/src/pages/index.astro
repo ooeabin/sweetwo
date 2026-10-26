@@ -1,5 +1,5 @@
 ---
-// L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 3개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 다운로드.
+// L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 4개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 다운로드(#get).
 import { parseFaq } from '@sweetwo/core';
 import symbol from '../../../../packages/ui/src/assets/brand/symbol.png';
 import Download from '../components/Download.astro';
@@ -8,9 +8,9 @@ import faqMd from '../content/faq.md?raw';
 import Site from '../layouts/Site.astro';
 import { CATCH, t } from '../lib/site';
 
-// 랜딩 자주 묻는 질문: FAQ 탭 1, 2, 4, 5, 10번
+// 랜딩 자주 묻는 질문: FAQ 탭 1, 2, 22, 4, 10번
 const all = parseFaq(faqMd).flatMap((g) => g.items);
-const pick = [1, 2, 4, 5, 10].flatMap((n) => all.filter((f) => f.n === n));
+const pick = [1, 2, 22, 4, 10].flatMap((n) => all.filter((f) => f.n === n));
 ---
 <Site title={t.landingTitle} description={t.landingDesc}>
   <section class="hg-site__hero">
@@ -59,7 +59,7 @@ const pick = [1, 2, 4, 5, 10].flatMap((n) => all.filter((f) => f.n === n));
     <a class="hg-btn hg-btn--link" href="/help">{t.seeAll}</a>
   </section>
 
-  <section class="hg-site__sec" aria-labelledby="last">
+  <section class="hg-site__sec" aria-labelledby="last" id="get">
     <h2 id="last" class="hg-site__h2">{CATCH}</h2>
     <Download placement="bottom" />
   </section>

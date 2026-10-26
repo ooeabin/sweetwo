@@ -168,3 +168,21 @@ test('모바일 푸시(S-14): 켜면 OS 허용 → 기기 등록, 푸시를 누�
   );
   await expect(page).toHaveURL(/\/goals$/);
 });
+
+test('모바일로 합류한 사람의 첫 홈: “PC에서도” 띠 1회 → 링크 메일 보내기', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  if (db.space) db.space.created_by = 'starter-other';
+  await fakeIosBridge(page, true);
+  await page.goto('/');
+  const band = page.getByText('PC에서도 같은 계정으로 쓸 수 있어요');
+  await expect(band).toBeVisible();
+  await page.getByRole('button', { name: '데스크톱 앱 받기 링크 보내기' }).click();
+  await expect(page.getByText('알림 이메일로 링크를 보냈어요')).toBeVisible();
+  expect(db.rpc).toContain('send_desktop_link');
+  await expect(band).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+  await expect(band).toHaveCount(0);
+});
