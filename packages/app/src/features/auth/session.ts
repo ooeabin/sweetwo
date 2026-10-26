@@ -1,4 +1,4 @@
-import { configureSupabase, webAuth } from '@sweetwo/api';
+import { configureSupabase, unregisterPushDevice, webAuth } from '@sweetwo/api';
 import { isApp, type DesktopBridge, type Platform } from '../../platform';
 
 // 세션은 플랫폼마다 다르다. 화면은 이 파일만 부른다.
@@ -28,6 +28,9 @@ export const session = {
     return webAuth.hasSession();
   },
   async signOut() {
+    // 모바일: 이 기기로 푸시가 더 가지 않게 토큰부터 지움(실패해도 로그아웃)
+    const t = await bridge?.push?.token().catch(() => null);
+    if (t) await unregisterPushDevice(t).catch(() => undefined);
     if (bridge) await bridge.auth.signOut();
     else await webAuth.signOut();
   },

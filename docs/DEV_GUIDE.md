@@ -8,7 +8,7 @@
 
 MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React + TypeScript 한 화면 코드로 만들고(데스크톱은 Electron, 모바일은 Capacitor로 감쌈), 서버는 Supabase(서울 리전) 하나로 운영함. 웹 앱은 없음(ADR 0001). OS 위젯은 2단계.
 
-> 전환 중: 모바일 로그인·잠금·앱 링크와 웹사이트 로그인 복귀 페이지(`apps/site` /auth/callback)는 코드에 있음(20261104090000). 모바일 푸시는 아직. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
+> 전환 중: 모바일 로그인·잠금·앱 링크, 웹사이트 로그인 복귀 페이지(`apps/site` /auth/callback, 20261104090000), 모바일 푸시(20261104120000)는 코드에 있음. 실제 발송은 APNs·Firebase 키를 넣은 뒤. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
 
 - 만들 것: 데스크톱 앱, 모바일 앱(App Store, Google Play), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
 - 데이터: 모두 직접 입력. 계좌 연동, 마이데이터, 스크래핑 없음
@@ -460,8 +460,9 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 반송·수신 거부(20261103180000): SES 구성 세트(`SES_CONFIGURATION_SET`) 이벤트 Bounce·Complaint → SNS 주제 → Edge Function `mail-events`(HTTPS 구독, 주소 `?token=` = `MAIL_EVENTS_SECRET`, `TopicArn` = `MAIL_EVENTS_TOPIC_ARN`, 구독 확인은 sns.*.amazonaws.com 주소만 엶). 영구 반송·신고만 `note_mail_event` → `mail_suppress`(주소마다 반송 수, 신고). 2번 반송이거나 신고면 `mail_outbox`에 넣지 않음(트리거). 반송마다 그 주소를 쓰는 사람에게 인앱 알림 `mail_bounced`(메일로 다시 보내지 않음) + 홈 띠(`my_mail_bounced()`, 주소를 바꾸면 사라짐)
 - 아직: 핵심 알림 메일(연결 해제 등)과 ‘푸시를 받을 수 없는 사람’ 판단, 방해 금지 끝나는 시각에 다시 보내기, 묶음 알림의 바뀐 것 목록 화면, 모바일 앱 링크(AASA·assetlinks)
 - 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시
-- 모바일 푸시는 서버: notification 행이 생기면 Edge Function이 그 사람의 기기 토큰으로 APNs·FCM에 보냄(방해 금지·종류별 끄기 반영). 앱이 화면에 떠 있으면 OS 알림 대신 앱 안 토스트
-- 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때
+- 모바일 푸시는 서버(20261104120000): 기기 토큰은 `push_device`(앱이 `register_push_device`로 등록, 로그아웃 때 `unregister_push_device`, 같은 토큰은 마지막 등록한 사람 것). `kick_push()`(pg_cron `kick-push` 1분마다, 보낼 것이 있을 때만 pg_net, Vault `push_function_url`·`push_cron_secret`) → Edge Function `send-push`가 `claim_push`(12시간 안, `push_wanted` = S-14 받는 방법·묶음, 인앱만(silent) 빼고, 방해 금지는 끝날 때까지 미룸, 보안·계정은 바로, 꺼낼 때 `notification.pushed_at`) → iOS APNs HTTP/2(.p8 토큰, `_shared/push.ts`), Android FCM HTTP v1(서비스 계정 OAuth) → 410·UNREGISTERED 토큰은 `drop_push_tokens`. `PUSH_DRIVER`=`send`일 때만 보냄(그 밖은 로그만). 서프라이즈는 `push_title`과 본문 숨김 그대로
+  - 앱: 브리지 `push`(`apps/mobile/src/native/push.ts`, `@capacitor/push-notifications`). 로그인한 뒤 허용돼 있으면 토큰 등록(`usePushRegistration`), 허용 묻기는 합류 직후 1회(P-11)와 S-14 ‘푸시 알림’ 켤 때. 앱이 화면에 떠 있으면 OS 알림 없이(capacitor.config `presentationOptions: []`) 앱 안 토스트, 누르면 그 알림 읽음 + 그 화면
+- 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때(`mail_missed_notifications`가 `push_device`를 봄)
 - 앱 안 알림센터에는 항상 기록
 - 상한은 메일만 계정마다 월 6회. 푸시(모바일 푸시, 데스크톱 로컬 알림)와 알림센터는 상한 없음. 주간 요약 메일과 푸시를 받을 수 없는 사람의 핵심 알림 메일은 상한 밖
 - 마케팅 메일은 월 1회, 수신 동의한 사람만
@@ -697,7 +698,7 @@ supabase/
 - 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만 묶음은 plan(“월급 체크리스트”), partner_change, care_30/14/7/0, money, goal, invite(제안·생활비 체크 토글은 재기획으로 없앰)
 - 약관 재동의(A-05r, 20261103150000): `pending_terms()`(terms·privacy는 재동의 필요 승인 버전이 KST로 시행됐고 그 버전 동의가 없을 때, marketing은 마지막 기록이 받기이고 2년 지남), `agree_terms(p_marketing)`(consent_source `reconsent`). 앱은 `RequireAccount`가 남은 게 있으면 `/terms/update`로 보냄(못 읽으면 막지 않음).
 - 배우자가 고친 목표(G-01, 20261103120000): `recent_goal_changes()`가 나에게 온 partner_change(goal, goal_meta, 30일 안) 중 목표마다 마지막 하나. 본 시각은 localStorage `sweetwo.goalsSeenAt`.
-- 알림 채널(20261102180000): 데스크톱 앱이 켜져 있는 동안 5분마다 `touch_app()`(`app_user.app_seen_at`). `mail_missed_notifications()`(pg_cron `mail-missed-notifications` 10분마다): 푸시로 갈 알림인데 만들어진 뒤 10분 안에 접속 신호가 없으면 메일 한 통(`noti_mail_body`, 상한 6회, 월말 확인은 상한 밖), 보안·계정·문의(`noti_always_mail`: 연결 해제 요청·완료, 상대 계정 삭제·복구, 관리자 열람, 문의 답변, 새 기기 로그인)는 접속과 상관없이 바로(상한 밖). 방해 금지 시간에는 미뤘다가 끝나면. 보낸 알림은 `notification.mailed_at`. 모바일 푸시(APNs·FCM)는 아직 없음
+- 알림 채널(20261102180000): 앱(데스크톱, 모바일)이 켜져 있는 동안 5분마다 `touch_app()`(`app_user.app_seen_at`). `mail_missed_notifications()`(pg_cron `mail-missed-notifications` 10분마다): 푸시로 갈 알림인데 만들어진 뒤 10분 안에 접속 신호가 없으면 메일 한 통(`noti_mail_body`, 상한 6회, 월말 확인은 상한 밖), 보안·계정·문의(`noti_always_mail`: 연결 해제 요청·완료, 상대 계정 삭제·복구, 관리자 열람, 문의 답변, 새 기기 로그인)는 접속과 상관없이 바로(상한 밖). 방해 금지 시간에는 미뤘다가 끝나면. 보낸 알림은 `notification.mailed_at`.
 - 데스크톱 OS 알림: 방해 금지 시간에 온 알림은 미뤄 두고 끝나면 띄움(1분마다 확인, 앱이 켜져 있는 동안)
 - 계정 삭제 접수 메일(트리거 `deletion_mail`)·완료 메일(`purge_deleted_accounts`가 지우기 직전, `user_id` 없이) 상한 밖. 새 기기 로그인: 로그인 뒤 `note_login()`이 다른 세션이 있으면 본인에게 ‘새 기기에서 로그인했어요’ → S-15(메일도). A-08 ‘나예요 / 내가 아니에요’ 화면은 아직 없음 알림 링크는 `/new-device/{새 세션 id}`(A-08 `a-08-new-device.tsx`, 20261103090000): ‘나예요’ → 홈, ‘내가 아니에요’ → `end_sessions(그 세션)` → S-15 + Toast “{제공자} 계정 보안도 확인해 주세요”.
 - 아직 없는 알림: 약관 개정 고지(AD-10 필독 공지와 메일), 마케팅 수신 동의 재확인 알림(재확인 화면은 A-05r)
@@ -1174,6 +1175,7 @@ supabase/
 - [ ] 배포 토큰 만료 전 교체: Supabase 토큰 `github-actions-sweetwo-staging`(2026-10-26 새로 만듦) → GitHub Environments staging `SUPABASE_ACCESS_TOKEN`. 토큰이 무효면 Deploy staging이 ‘staging 연결’에서 “Invalid access token”으로 멈춤(2026-10-25~26에 그랬음)
 - [ ] 메일 3단계(반송·수신 거부): `openssl rand -hex 32`로 값 하나 → Edge Function Secrets `MAIL_EVENTS_SECRET`. SNS 주제(서울) 만들기 → ARN을 `MAIL_EVENTS_TOPIC_ARN`. SES 구성 세트 만들기 → 이벤트 대상 SNS(그 주제, Bounce·Complaint) → 이름을 `SES_CONFIGURATION_SET`. SNS 구독 HTTPS `https://<프로젝트>.supabase.co/functions/v1/mail-events?token=<같은 값>`(구독 확인은 함수가 자동). 메일 2단계 뒤에
 - [ ] 모바일 앱 링크·로그인(기기 빌드 전): Apple Developer 팀 ID → 웹사이트 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`(공개 값), Xcode → App 타깃 → Signing & Capabilities → Associated Domains `applinks:sweetwo.kr`. Android 서명 인증서 SHA-256(Play Console 앱 서명 키, 업로드 키) → `PUBLIC_ANDROID_CERT_SHA256`(쉼표로). appId `kr.sweetwo.app`은 스토어 등록 전에 확정
+- [ ] 모바일 푸시: Apple Developer → Keys에서 APNs 키(.p8) → Edge Function Secrets `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`, `APNS_TOPIC`(kr.sweetwo.app), 개발 설치면 `APNS_ENV`=`sandbox`. Xcode → Signing & Capabilities → Push Notifications. Firebase 프로젝트에 Android 앱(kr.sweetwo.app) 추가 → `google-services.json`을 `apps/mobile/android/app/`에(커밋하지 않음, CI 빌드는 없어도 됨), 서비스 계정 키 JSON → `FCM_SERVICE_ACCOUNT`. `openssl rand -hex 32` → `PUSH_CRON_SECRET`, Vault `push_function_url`(…/functions/v1/send-push)·`push_cron_secret`(같은 값). 다 넣은 뒤 `PUSH_DRIVER`=`send`
 - [ ] 운영 준비 때: Supabase 토큰 `github-actions-sweetwo-prod`(sweetwo-prod만) → GitHub Environments production(승인자 1명), `deploy-prod.yml`
 
 ### 확정된 결정(10월 14일)

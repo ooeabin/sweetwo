@@ -1,4 +1,11 @@
-import { fetchMarketing, qk, setMarketing, updateMe, type Me } from '@sweetwo/api';
+import {
+  fetchMarketing,
+  qk,
+  registerPushDevice,
+  setMarketing,
+  updateMe,
+  type Me,
+} from '@sweetwo/api';
 import {
   formatDateFull,
   notiPrefs,
@@ -11,7 +18,7 @@ import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { detectPlatform } from '../../../platform';
+import { detectPlatform, isApp } from '../../../platform';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { copy, hourLabel } from '../copy';
@@ -30,7 +37,8 @@ export function S14Notifications() {
   const [confirm, setConfirm] = useState<'push' | 'email' | null>(null);
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
   if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
-  const desktop = detectPlatform() === 'desktop';
+  // 받는 방법 ‘OS 알림’은 앱(데스크톱 로컬 알림, 모바일 푸시)만
+  const desktop = isApp(detectPlatform());
   const prefs = notiPrefs(d.me.noti_prefs);
   const me = d.me;
 
@@ -48,9 +56,18 @@ export function S14Notifications() {
   const setTopic = (t: NotiTopic, ch: 'push' | 'email', on: boolean) =>
     void save({ ...prefs, topics: { ...prefs.topics, [t]: { ...prefs.topics[t], [ch]: on } } });
   // 받는 방법: 마지막 하나를 끄면 확인
-  const setChannel = (ch: 'push' | 'email', on: boolean) => {
+  const setChannel = async (ch: 'push' | 'email', on: boolean) => {
     const other = ch === 'push' ? prefs.email : desktop && prefs.push;
     if (!on && !other) return setConfirm(ch);
+    // 모바일: 푸시를 켜면 OS 허용부터(거절했으면 휴대폰 설정에서)
+    const push = window.sweetwo?.push;
+    if (ch === 'push' && on && push && (await push.status()) !== 'granted') {
+      if (!(await push.request())) return toast(copy.pushDenied);
+      const t = await push.token();
+      const pf = window.sweetwo?.platform;
+      if (t && (pf === 'ios' || pf === 'android'))
+        await registerPushDevice(pf, t, window.sweetwo?.appVersion ?? '').catch(() => undefined);
+    }
     void save({ ...prefs, [ch]: on });
   };
 
@@ -92,13 +109,13 @@ export function S14Notifications() {
           <Toggle
             label={copy.push}
             checked={prefs.push}
-            onChange={(on) => setChannel('push', on)}
+            onChange={(on) => void setChannel('push', on)}
           />
         )}
         <Toggle
           label={copy.email}
           checked={prefs.email}
-          onChange={(on) => setChannel('email', on)}
+          onChange={(on) => void setChannel('email', on)}
         />
         {confirm && (
           <div className="hg-stack" role="alertdialog" aria-label={copy.noChannel}>

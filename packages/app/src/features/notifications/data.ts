@@ -11,6 +11,7 @@ import {
   fetchTrash,
   markNotificationsRead,
   qk,
+  registerPushDevice,
   subscribeNotifications,
   type Me,
   type Notification,
@@ -151,12 +152,35 @@ export function useNotiRealtime(userId: string | undefined) {
     const offOpen = bridge?.notify?.onOpen((id) => {
       void fetchNotification(id).then((n) => n && open(n));
     });
+    // 모바일 푸시를 눌러 들어옴: 그 알림을 읽음 + 그 화면(알림이 없으면 받은 경로로)
+    const offPushOpen = bridge?.push?.onOpen((p) => {
+      void fetchNotification(p.id)
+        .catch(() => null)
+        .then((n) => (n ? open(n) : open({ id: p.id, target: p.target, read_at: 'x' })));
+    });
+    // 앱이 떠 있을 때 온 푸시: OS 알림 대신 앱 안 토스트
+    const offPushIn = bridge?.push?.onReceive((p) => p.title && toast(p.title));
     return () => {
       off();
       offOpen?.();
+      offPushOpen?.();
+      offPushIn?.();
       clearInterval(tick);
     };
     // open은 매 렌더 새로 만들어지지만 구독은 사람마다 한 번
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, qc]);
+}
+
+/** 모바일 푸시 기기 등록(로그인한 뒤 한 번, 허용돼 있을 때만). 허용 묻기는 합류 직후(P-11 뒤)와 S-14 토글 */
+export function usePushRegistration(userId: string | undefined) {
+  useEffect(() => {
+    const b = typeof window !== 'undefined' ? window.sweetwo : undefined;
+    const platform = b?.platform;
+    if (!userId || !b?.push || (platform !== 'ios' && platform !== 'android')) return;
+    void b.push
+      .token()
+      .then((t) => (t ? registerPushDevice(platform, t, b.appVersion) : undefined))
+      .catch(() => undefined);
+  }, [userId]);
 }

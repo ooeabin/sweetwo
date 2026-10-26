@@ -72,6 +72,17 @@ export interface DesktopBridge {
     show: (n: { id: string; title: string; body?: string }) => Promise<void>;
     onOpen: (cb: (id: string) => void) => () => void;
   };
+  /** 모바일 푸시(14). 토큰은 앱이 서버에 등록(register_push_device), 누르면 그 알림 화면 */
+  push?: {
+    status: () => Promise<'granted' | 'denied' | 'prompt'>;
+    /** 허용 묻기(OS 창). 허용되면 true */
+    request: () => Promise<boolean>;
+    /** 허용돼 있으면 기기 토큰, 아니면 null */
+    token: () => Promise<string | null>;
+    onOpen: (cb: (n: { id: string; target: string }) => void) => () => void;
+    /** 앱이 화면에 떠 있을 때 온 푸시(OS 알림 대신 앱 안 토스트) */
+    onReceive: (cb: (n: { title: string; body: string | null }) => void) => () => void;
+  };
   /** 웹사이트 열기(A-01 업데이트 → 다운로드·스토어 안내). 모바일만, sweetwo.kr 주소만 */
   openUrl?: (url: string) => Promise<void>;
   /** main이 앱 창에 이 화면으로 가라고 할 때(트레이 위젯, 위젯 설정 메뉴) */

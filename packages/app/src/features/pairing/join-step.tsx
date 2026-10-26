@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useJoinData, type JoinData } from './data';
+import { shouldAskPush } from './pages/p-11-push';
 
 export const joinPath = (id: string) => `/join/${id}`;
 
@@ -49,7 +50,9 @@ export function useJoinStep(id: string) {
       await d.refetch();
       setSaving(false);
       const to = next ?? list[i + 1];
-      nav(to ? joinPath(to) : '/', { replace: !to });
+      // 합류를 마치면 홈(모바일 앱이고 처음이면 푸시 허용을 한 번 묻고, P-11)
+      if (!to && (await shouldAskPush())) nav(joinPath('p-11'), { replace: true });
+      else nav(to ? joinPath(to) : '/', { replace: !to });
     } catch {
       setSaving(false);
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void done(save, next) });

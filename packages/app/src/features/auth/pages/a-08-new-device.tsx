@@ -24,7 +24,8 @@ export function A08NewDevice() {
     setBusy(true);
     try {
       if (s && !s.current) await endSessions(s.id);
-      await qc.invalidateQueries({ queryKey: qk.sessions });
+      // S-15가 지운 기기를 다시 보이지 않게 새로 읽음
+      qc.removeQueries({ queryKey: qk.sessions });
       const p = prefs.lastProvider();
       toast(p ? copy.checkProvider(providerName[p]) : copy.checkAccount);
       nav('/settings/security', { replace: true });
