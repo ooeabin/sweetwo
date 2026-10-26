@@ -1,4 +1,12 @@
-import { fetchGoals, fetchMe, fetchPartner, fetchSpace, qk, updateMe, updateSpace } from '@sweetwo/api';
+import {
+  fetchGoals,
+  fetchMe,
+  fetchPartner,
+  fetchSpace,
+  qk,
+  updateMe,
+  updateSpace,
+} from '@sweetwo/api';
 import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSplits } from '../salary';

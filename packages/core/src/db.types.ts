@@ -2681,6 +2681,10 @@ export type Database = {
         Returns: boolean
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
+      join_moving_records: {
+        Args: { p_code: string; p_vis?: Json }
+        Returns: string
+      }
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
@@ -2864,6 +2868,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      purge_left_spaces: { Args: Record<PropertyKey, never>; Returns: number }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }

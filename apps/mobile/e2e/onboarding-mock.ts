@@ -262,6 +262,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     const url = new URL(req.url());
     const path = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
+    // 개수만 읽기(HEAD, count=exact): P-02a ‘안 옮겨요’
+    if (method === 'HEAD') {
+      const n =
+        path === '/rest/v1/goal'
+          ? db.goals.filter((g) => !g.deleted_at && g.template !== 'emergency').length
+          : path === '/rest/v1/salary_split'
+            ? db.splits.length
+            : path === '/rest/v1/pay_checklist'
+              ? db.checklists.length
+              : 0;
+      return route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Expose-Headers': 'Content-Range',
+          'Content-Range': `*/${n}`,
+        },
+      });
+    }
     // 저장소(S-11e 프로필 사진): 올리기, 서명 주소, 사진 받기, 지우기
     if (path.startsWith('/storage/v1/')) {
       const cors = { 'Access-Control-Allow-Origin': '*' };
@@ -515,6 +534,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'plan-1');
       }
       if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      if (fn === 'join_space' && db.me.onboarding_done_at && db.me.space_id === 'space-solo')
+        return json(route, 'has_records'); // 혼자 시작한 기록 있음(A-07 6번)
+      if (fn === 'join_moving_records') {
+        // P-02a: 내 명의 자산만 옮기고 합류
+        const vis = (body().p_vis ?? {}) as Record<string, string>;
+        for (const a of db.assets)
+          if (a.owner === 'person' && a.owner_user_id === db.me.id)
+            Object.assign(a, { space_id: 'space-1', visibility: vis[String(a.id)] ?? 'sum' });
+        Object.assign(db.me, {
+          space_id: 'space-1',
+          onboarding_step: 'P-03',
+          onboarding_done_at: null,
+        });
+        return json(route, 'joined');
+      }
       if (fn === 'join_space') {
         const sp = db.space ?? {};
         Object.assign(db.me, {

@@ -38,6 +38,39 @@ export async function joinSpace(code: string): Promise<JoinResult> {
   return data as JoinResult;
 }
 
+/** P-02a ‘안 옮겨요’ 개수: 목표(비상금 빼고), 분배표, 체크리스트 */
+export async function fetchRecordCounts(): Promise<{
+  goals: number;
+  splits: number;
+  lists: number;
+}> {
+  const db = supabase();
+  const [g, sp, l] = await Promise.all([
+    db
+      .from('goal')
+      .select('id', { count: 'exact', head: true })
+      .is('deleted_at', null)
+      .neq('template', 'emergency'),
+    db.from('salary_split').select('id', { count: 'exact', head: true }),
+    db.from('pay_checklist').select('id', { count: 'exact', head: true }),
+  ]);
+  fail(g.error ?? sp.error ?? l.error);
+  return { goals: g.count ?? 0, splits: sp.count ?? 0, lists: l.count ?? 0 };
+}
+
+/** P-02a 혼자 쓰던 기록 옮기기 + 합류. vis = 내 명의 자산 id → 공개 범위(기본 금액만) */
+export async function joinMovingRecords(
+  code: string,
+  vis: Record<string, 'all' | 'sum'>,
+): Promise<JoinResult> {
+  const { data, error } = await supabase().rpc('join_moving_records', {
+    p_code: code,
+    p_vis: vis,
+  });
+  fail(error);
+  return data as JoinResult;
+}
+
 /**
  * 합류 완료(18): P-06 분배표 저장 + 첫 체크리스트 + 연결 + 코드 사용됨. lines 없으면 대기(시작한 사람이 아직 온보딩 중, P-05).
  * version = P-06을 열 때 공동 분배표 버전(합쳐서). 그 사이 바뀌었으면 'split_changed'
@@ -84,4 +117,3 @@ export async function discardPrefill() {
   const { error } = await supabase().rpc('discard_prefill');
   fail(error);
 }
-
