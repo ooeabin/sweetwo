@@ -425,12 +425,12 @@ begin
   for r in
     with o as (
       select (x->>'kind')::public.split_line_kind as kind, (x->>'goal_id')::uuid as goal_id, (x->>'user_id')::uuid as user_id,
-        x->>'name' as name, sum((x->>'amount')::bigint) as amount
+        x->>'name' as name, sum((x->>'amount')::bigint)::bigint as amount
       from jsonb_array_elements(coalesce(p_old, '[]'::jsonb)) x
       group by 1, 2, 3, 4
     ),
     n as (
-      select kind, goal_id, user_id, name, sum(amount) as amount
+      select kind, goal_id, user_id, name, sum(amount)::bigint as amount
       from public.split_line where split_id = p_split group by 1, 2, 3, 4
     )
     select coalesce(n.kind, o.kind) as kind, coalesce(n.goal_id, o.goal_id) as goal_id,
