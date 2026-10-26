@@ -288,7 +288,7 @@ export async function adminSaveNotice(n: {
   title: string;
   body: string;
   importance: 'normal' | 'must';
-  platforms: ('desktop' | 'web')[];
+  platforms: ('desktop' | 'mobile' | 'web')[];
   startsAt: string;
   endsAt: string;
   request: boolean;
@@ -374,6 +374,8 @@ export async function adminAddTermsVersion(v: {
 export type AppConfigRow = {
   min_version_desktop: string;
   min_version_web: string;
+  min_version_ios: string;
+  min_version_android: string;
   latest_version_desktop: string;
   maintenance_starts_at: string | null;
   maintenance_ends_at: string | null;

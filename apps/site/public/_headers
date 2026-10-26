@@ -1,0 +1,3 @@
+# Cloudflare 정적 자산 헤더. iOS 앱 링크 확인 파일은 확장자가 없어 JSON으로 알려 줌
+/.well-known/apple-app-site-association
+  Content-Type: application/json

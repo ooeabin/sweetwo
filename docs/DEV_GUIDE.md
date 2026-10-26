@@ -8,7 +8,7 @@
 
 MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React + TypeScript 한 화면 코드로 만들고(데스크톱은 Electron, 모바일은 Capacitor로 감쌈), 서버는 Supabase(서울 리전) 하나로 운영함. 웹 앱은 없음(ADR 0001). OS 위젯은 2단계.
 
-> 전환 중: `apps/mobile`(Capacitor iOS·Android 뼈대)은 있음. 모바일 로그인·잠금·푸시·앱 링크, 로그인 콜백을 sweetwo.kr로 옮기기는 아직 코드에 없음. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
+> 전환 중: 모바일 로그인·잠금·앱 링크와 웹사이트 로그인 복귀 페이지(`apps/site` /auth/callback)는 코드에 있음(20261104090000). 모바일 푸시는 아직. 이 문서는 바뀐 뒤 모습 기준이고, 아직 안 바뀐 곳은 ‘(전환 전)’으로 표시함.
 
 - 만들 것: 데스크톱 앱, 모바일 앱(App Store, Google Play), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
 - 데이터: 모두 직접 입력. 계좌 연동, 마이데이터, 스크래핑 없음
@@ -387,7 +387,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - 카카오: 이메일은 선택 동의 항목. Supabase 카카오 설정에서 ‘이메일 없는 사용자 허용’을 켜야 거부한 사람이 A-04로 감(로컬은 config.toml `email_optional = true`)
 - Supabase Auth 리다이렉트 허용 목록: 환경마다 그 환경의 콜백 주소 하나. 쿼리(`?from=desktop&state=…`)를 붙여 같은 주소를 거치므로 끝에 `**`를 붙인다
-  - 운영 `https://sweetwo.kr/auth/callback**`((전환 전) app.sweetwo.kr), 로컬 `http://localhost:5173/auth/callback**`(스테이징 사이트 주소는 정해지면 추가)
+  - 운영 `https://sweetwo.kr/auth/callback**`(웹사이트 `apps/site/src/pages/auth/callback.astro`, from=desktop·app만 sweetwo://로 넘김), 스테이징 `https://dev-app.sweetwo.kr/**`(앱 묶음의 같은 복귀 화면), 로컬 `http://localhost:5173/auth/callback**`
 - 데스크톱 흐름(구현): main이 code_verifier와 state를 만들고 `{SUPABASE}/auth/v1/authorize?provider=…&redirect_to={사이트}/auth/callback?from=desktop%26state=…&code_challenge=…&code_challenge_method=s256`을 기본 브라우저로 엶 → 콜백 페이지(웹사이트 `apps/site`, (전환 전) `packages/app` `auth-callback.tsx`)가 code(취소면 error)와 state를 `sweetwo://auth/callback`으로 넘김 → main이 state를 확인하고 `/auth/v1/token?grant_type=pkce`로 교환
   - 파일: `apps/desktop/src/main/auth.ts`(로그인, 갱신, 로그아웃), `pkce.ts`(+ 테스트), `ipc.ts`(보낸 창 확인 + Zod), `lock.ts`(A-06)
   - 렌더러의 supabase-js는 `accessToken` 옵션으로 브리지에서 access token만 받는다(`supabase.auth`는 데스크톱에서 쓰지 않음)
@@ -397,10 +397,17 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 모바일 세션
 
-- 데스크톱과 같은 흐름: 시스템 로그인 창(iOS ASWebAuthenticationSession, Android Custom Tabs, Capacitor 플러그인)으로 authorize → https://sweetwo.kr/auth/callback 앱 링크로 앱 복귀 → state 확인 → `grant_type=pkce` 교환
-- refresh token은 Keychain(iOS)·Keystore(Android)에, 30일 슬라이딩. 렌더러(웹뷰)의 supabase-js는 데스크톱처럼 `accessToken` 옵션으로 브리지에서 access token만 받음
+- 데스크톱과 같은 흐름: 시스템 로그인 창으로 authorize(redirect_to = `{VITE_WEB_ORIGIN}/auth/callback?from=app&state=…`) → 웹 콜백 페이지가 code와 state만 `sweetwo://auth/callback`으로 넘김 → state 확인 → `grant_type=pkce` 교환
+  - iOS: ASWebAuthenticationSession(앱 안 플러그인 `WebAuthPlugin`, `ios/App/App/SceneDelegate.swift`의 `MainViewController`가 붙임). 창이 sweetwo://를 받자마자 닫히며 결과를 줌
+  - Android: Custom Tabs(`@capacitor/browser`) + `sweetwo` 스킴 intent-filter(`appUrlOpen`). 창을 그냥 닫으면 1.5초 뒤 취소로
+  - 파일: `apps/mobile/src/native/`(`bridge.ts` 브리지 조립, `auth.ts` 로그인·토큰, `pkce.ts`, `lock.ts`, `store.ts` 보안 저장소). 화면 코드(packages/app)는 `window.sweetwo`만 봄(플랫폼 `ios`·`android`, 데스크톱과 같은 모양에 위젯·OS 알림만 없음)
+  - 링크 허용 목록은 데스크톱과 같은 `packages/core/src/deep-link.ts`(sweetwo://와 모바일 앱 링크 https://sweetwo.kr/i/*, /n, /n/settings)
+- refresh token은 Keychain(iOS)·Keystore(Android)에(`@aparajita/capacitor-secure-storage`, 이 기기에만), 30일 슬라이딩. 렌더러(웹뷰)의 supabase-js는 데스크톱처럼 `accessToken` 옵션으로 브리지에서 access token만 받음
+- 로그인된 기기 이름: 웹뷰 User-Agent에 `sweeTwo`(capacitor.config `appendUserAgent`) → S-15 “휴대폰 앱(iOS)”
 - 웹뷰 안 CSP는 데스크톱과 같음(인라인 스크립트 금지, 연결 대상은 Supabase, PostHog, Sentry만). 원격 화면 코드를 내려받지 않음(코드 바꿔 넣기 업데이트 안 씀)
-- 앱 링크 확인 파일: sweetwo.kr/.well-known/apple-app-site-association, assetlinks.json(apps/site/public). 경로는 /i/*, /auth/callback, 알림 메일 링크만
+- 앱 링크 확인 파일: sweetwo.kr/.well-known/apple-app-site-association, assetlinks.json(`apps/site/src/pages/.well-known/`, 값은 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`, `PUBLIC_ANDROID_CERT_SHA256`, 없으면 빈 목록). 경로는 /i/*와 알림 메일 링크(/n, /n/settings)만. 로그인 복귀는 sweetwo://로만
+- 최소 지원 버전: `app_config.min_version_ios`·`min_version_android`(AD-16 승인 시 반영). 미만이면 A-01 ‘지금 업데이트’ → 웹사이트 /download(스토어 안내). 공지 대상 플랫폼 `mobile`(AD-10)
+- 개발: `pnpm --filter @sweetwo/mobile cap:sync` 뒤 Xcode·Android Studio. `.env.development`의 `VITE_WEB_ORIGIN`(스테이징 dev-app.sweetwo.kr, Cloudflare Access 뒤라 로그인 창 브라우저에서 Access를 먼저 통과해야 함)
 
 ### 잠금
 
@@ -409,7 +416,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 자동 잠금: 시스템 입력이 5분 없을 때, 화면 잠금, 절전. Ctrl(⌘)+L. 잠금 화면은 앱 전체를 덮어 금액이 보이지 않음
 - safeStorage를 못 쓰는 환경(키체인 없는 Linux 등)에서는 PIN과 refresh token을 저장하지 않는다(다음 실행 때 다시 로그인)
 - Windows Hello는 네이티브 모듈이 필요해 출시 후
-- 모바일: PIN 해시와 틀린 횟수는 Keychain·Keystore, 생체 인증은 Face ID·Touch ID(iOS LocalAuthentication), BiometricPrompt(Android). 자동 잠금은 앱이 뒤로 간 지 5분. 최근 앱 화면에는 가림 화면을 띄움(iOS 앱 전환 스냅숏, Android FLAG_SECURE 대신 가림 화면)
+- 모바일(`apps/mobile/src/native/lock.ts`): PIN은 PBKDF2(SHA-256, 21만 번) 해시로 Keychain·Keystore에, 틀린 횟수도 같이(5회면 PIN 지우고 로그아웃). 생체 인증은 `@aparajita/capacitor-biometric-auth`(iPhone Face ID·Touch ID, Android BiometricPrompt, 문구는 `LockStatus.bioKind`로 “Face ID로 풀기”, “지문으로 풀기”). 자동 잠금은 앱이 뒤로 간 지 N분(S-15, 기본 5분). 최근 앱 화면에는 가림 화면(`@capacitor/privacy-screen`: iOS 흐림, Android 스플래시)
 
 ## 예약 작업과 알림
 
@@ -1166,6 +1173,7 @@ supabase/
 - [ ] 메일 2단계(실제 발송): AWS SES 서울 리전 sweetwo.kr 도메인 인증, 샌드박스 해제, SES Send만 되는 IAM 사용자 → `MAIL_DRIVER`=`ses`, `MAIL_FROM`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
 - [ ] 배포 토큰 만료 전 교체: Supabase 토큰 `github-actions-sweetwo-staging`(2026-10-26 새로 만듦) → GitHub Environments staging `SUPABASE_ACCESS_TOKEN`. 토큰이 무효면 Deploy staging이 ‘staging 연결’에서 “Invalid access token”으로 멈춤(2026-10-25~26에 그랬음)
 - [ ] 메일 3단계(반송·수신 거부): `openssl rand -hex 32`로 값 하나 → Edge Function Secrets `MAIL_EVENTS_SECRET`. SNS 주제(서울) 만들기 → ARN을 `MAIL_EVENTS_TOPIC_ARN`. SES 구성 세트 만들기 → 이벤트 대상 SNS(그 주제, Bounce·Complaint) → 이름을 `SES_CONFIGURATION_SET`. SNS 구독 HTTPS `https://<프로젝트>.supabase.co/functions/v1/mail-events?token=<같은 값>`(구독 확인은 함수가 자동). 메일 2단계 뒤에
+- [ ] 모바일 앱 링크·로그인(기기 빌드 전): Apple Developer 팀 ID → 웹사이트 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`(공개 값), Xcode → App 타깃 → Signing & Capabilities → Associated Domains `applinks:sweetwo.kr`. Android 서명 인증서 SHA-256(Play Console 앱 서명 키, 업로드 키) → `PUBLIC_ANDROID_CERT_SHA256`(쉼표로). appId `kr.sweetwo.app`은 스토어 등록 전에 확정
 - [ ] 운영 준비 때: Supabase 토큰 `github-actions-sweetwo-prod`(sweetwo-prod만) → GitHub Environments production(승인자 1명), `deploy-prod.yml`
 
 ### 확정된 결정(10월 14일)

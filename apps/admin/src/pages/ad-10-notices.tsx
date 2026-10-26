@@ -13,7 +13,7 @@ import { copy, ops } from '../copy';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 
-type Platform = 'desktop' | 'web';
+type Platform = 'desktop' | 'mobile' | 'web';
 const KINDS = ['info', 'maintenance', 'incident', 'terms'];
 // datetime-local(KST로 넣음) ↔ ISO
 const toIso = (local: string) => (local ? new Date(`${local}:00+09:00`).toISOString() : '');
@@ -95,7 +95,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
     (n?.importance as 'normal' | 'must' | undefined) ?? 'normal',
   );
   const [platforms, setPlatforms] = useState<Platform[]>(
-    (n?.platforms as Platform[] | undefined) ?? ['desktop', 'web'],
+    (n?.platforms as Platform[] | undefined) ?? ['desktop', 'mobile'],
   );
   const [starts, setStarts] = useState(local(n?.starts_at));
   const [ends, setEnds] = useState(local(n?.ends_at));
@@ -189,7 +189,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
         role="group"
         aria-label={ops.field.platforms}
       >
-        {(['desktop', 'web'] as const).map((p) => (
+        {(['desktop', 'mobile', 'web'] as const).map((p) => (
           <Chip
             key={p}
             small

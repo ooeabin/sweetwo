@@ -26,12 +26,11 @@ export function A02Login() {
   const [busy, setBusy] = useState<AuthProvider | null>(null);
   const [notice, setNotice] = useState(st.notice);
   const entry: Entry = st.entry ?? (recent ? 'revisit' : 'first_run');
-  const desktop = session.platform === 'desktop';
 
   const start = async (p: AuthProvider) => {
     setBusy(p);
     setNotice(undefined);
-    if (desktop && session.bridge) {
+    if (session.bridge) {
       track('login_started', { method: p, entry, flow: 'browser' });
       const r = await session.bridge.auth.start(p);
       if (!r.ok) track('login_failed', { method: p, reason: 'browser_open_failed' });

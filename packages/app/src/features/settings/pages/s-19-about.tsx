@@ -1,6 +1,6 @@
 import { ListRow, PageHeader } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
-import { detectPlatform } from '../../../platform';
+import { detectPlatform, isApp } from '../../../platform';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 
@@ -12,8 +12,7 @@ export const openSite = (path: string) =>
 // ‘업데이트 확인’은 데스크톱 자동 업데이트와 함께(웹은 늘 최신).
 export function S19About() {
   const nav = useNavigate();
-  const desktop = detectPlatform() === 'desktop';
-  const version = desktop ? (window.sweetwo?.appVersion ?? '') : 'web';
+  const version = isApp(detectPlatform()) ? (window.sweetwo?.appVersion ?? '') : 'web';
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader

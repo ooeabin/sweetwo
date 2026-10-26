@@ -81,14 +81,18 @@ export type ActiveNotice = {
   importance: 'normal' | 'must';
   platforms: string[];
 };
-export async function fetchActiveNotices(platform: 'desktop' | 'web'): Promise<ActiveNotice[]> {
+export async function fetchActiveNotices(
+  platform: 'desktop' | 'ios' | 'android' | 'web',
+): Promise<ActiveNotice[]> {
+  // 공지 대상(AD-10): 데스크톱 앱 / 모바일 앱(iOS·Android) / 웹
+  const target = platform === 'ios' || platform === 'android' ? 'mobile' : platform;
   const { data, error } = await supabase()
     .from('notice')
     .select('id, kind, title, body, importance, platforms')
     .order('starts_at', { ascending: false });
   if (error) return [];
   return (data ?? [])
-    .filter((n) => n.platforms.includes(platform))
+    .filter((n) => n.platforms.includes(target))
     .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
 }
 

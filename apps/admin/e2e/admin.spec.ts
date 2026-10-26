@@ -395,6 +395,8 @@ async function mock(
         return json(route, {
           min_version_desktop: '1.0.0',
           min_version_web: '1.0.0',
+          min_version_ios: '1.0.0',
+          min_version_android: '1.0.0',
           latest_version_desktop: '1.1.0',
           maintenance_starts_at: null,
           maintenance_ends_at: null,

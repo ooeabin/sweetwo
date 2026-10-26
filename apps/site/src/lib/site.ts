@@ -107,5 +107,9 @@ export const t = {
 
   // 알림 메일 링크(14 ‘센터와 푸시·메일’): 앱이 없으면 안내 + 앱 받기
   openInSweetwo: 'sweeTwo 앱에서 열어 주세요',
+  // 로그인 복귀 페이지(15 A-03 5번)
+  loginDone: '로그인을 마쳤어요',
+  backToApp: 'sweeTwo 앱으로 돌아가요',
+  openSweetwo: 'sweeTwo 열기',
   getApp: '앱 받기',
 };

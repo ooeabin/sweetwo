@@ -279,7 +279,9 @@ export type Database = {
           maintenance_ends_at: string | null
           maintenance_message: string | null
           maintenance_starts_at: string | null
+          min_version_android: string
           min_version_desktop: string
+          min_version_ios: string
           min_version_web: string
           updated_at: string
           version: number
@@ -294,7 +296,9 @@ export type Database = {
           maintenance_ends_at?: string | null
           maintenance_message?: string | null
           maintenance_starts_at?: string | null
+          min_version_android?: string
           min_version_desktop?: string
+          min_version_ios?: string
           min_version_web?: string
           updated_at?: string
           version?: number
@@ -308,7 +312,9 @@ export type Database = {
           maintenance_ends_at?: string | null
           maintenance_message?: string | null
           maintenance_starts_at?: string | null
+          min_version_android?: string
           min_version_desktop?: string
+          min_version_ios?: string
           min_version_web?: string
           updated_at?: string
           version?: number

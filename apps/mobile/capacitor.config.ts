@@ -6,6 +6,8 @@ const config: CapacitorConfig = {
   appId: 'kr.sweetwo.app',
   appName: 'sweeTwo',
   webDir: 'dist',
+  // 로그인된 기기 이름(S-15 ‘휴대폰 앱(iOS)’, core deviceLabel)이 앱인지 알 수 있게
+  appendUserAgent: 'sweeTwo',
 };
 
 export default config;

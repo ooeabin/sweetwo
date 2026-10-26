@@ -36,12 +36,7 @@ export function A05Terms() {
       });
       clearSignup();
       // 데스크톱은 이 기기 PIN 정하기(A-06), 웹은 온보딩 O-10(온보딩 단계에서 붙임)
-      if (
-        session.platform === 'desktop' &&
-        session.bridge &&
-        !(await session.bridge.lock.status()).hasPin &&
-        !prefs.pinAsked()
-      ) {
+      if (session.bridge && !(await session.bridge.lock.status()).hasPin && !prefs.pinAsked()) {
         nav(paths.pinSetup, { replace: true });
       } else {
         // 초대 링크(P-01)에서 왔으면 그리로 돌아가 합류를 이어 간다

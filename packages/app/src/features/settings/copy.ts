@@ -395,7 +395,8 @@ export const copy = {
   appLock: '앱 잠금',
   appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
   changePin: 'PIN 바꾸기',
-  touchId: 'Touch ID로 풀기', // [확인 필요]
+  touchId: (kind: 'touch' | 'face' | 'fingerprint') =>
+    kind === 'fingerprint' ? '지문으로 풀기' : `${kind === 'face' ? 'Face ID' : 'Touch ID'}로 풀기`, // [확인 필요]
   autoLock: '자동 잠금',
   autoLockOptions: { 1: '1분', 5: '5분', 15: '15분', 0: '사용 안 함' } as Record<number, string>,
   currentPin: '지금 PIN을 입력해 주세요', // [확인 필요]

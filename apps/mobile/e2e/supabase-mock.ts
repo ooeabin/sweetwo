@@ -19,6 +19,7 @@ const json = (route: Route, body: unknown, status = 200) =>
 
 export interface MockOptions {
   minVersionWeb?: string;
+  minVersionIos?: string;
   /** 점검 시간(AD-16) */
   maintenance?: { starts: string; ends: string; message?: string };
   loginState?: unknown;
@@ -43,6 +44,8 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
       return json(route, {
         min_version_desktop: '0.0.0',
         min_version_web: o.minVersionWeb ?? '0.0.0',
+        min_version_ios: o.minVersionIos ?? '0.0.0',
+        min_version_android: '0.0.0',
         maintenance_starts_at: o.maintenance?.starts ?? null,
         maintenance_ends_at: o.maintenance?.ends ?? null,
         maintenance_message: o.maintenance?.message ?? null,
