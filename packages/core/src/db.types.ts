@@ -4326,6 +4326,14 @@ export type Database = {
           side: Database["public"]["Enums"]["couple_side"]
         }[]
       }
+      pay_line_noun: {
+        Args: {
+          p_goal: string
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_name: string
+        }
+        Returns: string
+      }
       payday_in: {
         Args: {
           m: number
@@ -4335,14 +4343,6 @@ export type Database = {
             Database["public"]["Tables"]["app_user"]["ComputedFields"]
           >
           y: number
-        }
-        Returns: string
-      }
-      pay_line_noun: {
-        Args: {
-          p_goal: string
-          p_kind: Database["public"]["Enums"]["split_line_kind"]
-          p_name: string
         }
         Returns: string
       }
