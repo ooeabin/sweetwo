@@ -186,3 +186,46 @@ test('모바일로 합류한 사람의 첫 홈: “PC에서도” 띠 1회 → �
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   await expect(band).toHaveCount(0);
 });
+
+test('앱 정보(S-19): 업데이트 확인 → 받는 중 → 다 받으면 “다시 시작”(자동 업데이트가 있는 앱)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  // 데스크톱 자동 업데이트 브리지 흉내(main updater.ts가 보내는 상태)
+  await page.addInitScript(() => {
+    const w = window as unknown as {
+      sweetwo: Record<string, unknown>;
+      __update: { cb: ((s: unknown) => void) | null; installed: number };
+    };
+    w.__update = { cb: null, installed: 0 };
+    w.sweetwo.update = {
+      state: async () => ({ status: 'latest' }),
+      check: async () => {
+        setTimeout(() => w.__update.cb?.({ status: 'ready', version: '1.2.0' }), 50);
+        return { status: 'downloading', version: '1.2.0', percent: 42 };
+      },
+      install: async () => void w.__update.installed++,
+      onState: (cb: (s: unknown) => void) => {
+        w.__update.cb = cb;
+        return () => undefined;
+      },
+    };
+  });
+  await page.goto('/settings/about');
+  const row = page.getByRole('button', { name: /업데이트 확인/ });
+  await expect(row).toContainText('최신 버전이에요');
+  await row.click();
+  await expect(page.getByText('1.2.0 버전을 받았어요. 다시 시작하면 바뀌어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다시 시작' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __update: { installed: number } }).__update.installed,
+      ),
+    )
+    .toBe(1);
+});

@@ -6,5 +6,6 @@ protocols: [{ name: sweeTwo, schemes: [sweetwo] }]
 mac: { category: public.app-category.finance, target: [dmg, zip], hardenedRuntime: true }
 win: { target: [nsis] }
 nsis: { oneClick: true, perMachine: false }
-publish: { provider: generic, url: "https://download.sweetwo.kr/latest" }
+# 자동 업데이트 피드(S3 updates/{mac|win}/latest*.yml). 앱은 main/updater.ts에서 같은 주소를 씀
+publish: { provider: generic, url: "https://download.sweetwo.kr/updates/${os}" }
 # 서명: macOS는 Developer ID, Windows는 클라우드 HSM OV(SSL.com eSigner) — docs/DEV_GUIDE.md ‘서명과 CI’

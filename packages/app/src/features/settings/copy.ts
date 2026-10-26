@@ -331,8 +331,16 @@ export const copy = {
   // S-19 앱 정보
   about: '앱 정보',
   version: '버전',
-  whatsNew: '새 기능 보기',
   checkUpdate: '업데이트 확인',
+  update: {
+    checking: '확인하고 있어요', // [확인 필요]
+    latest: '최신 버전이에요', // [확인 필요]
+    downloading: (p: number) => `새 버전을 받고 있어요 ${p}%`, // [확인 필요]
+    ready: (v: string) => `${v} 버전을 받았어요. 다시 시작하면 바뀌어요`, // [확인 필요]
+    restart: '다시 시작', // [확인 필요]
+    error: '확인하지 못했어요. 잠시 뒤 다시 해 주세요', // [확인 필요]
+  },
+  whatsNew: '새 기능 보기',
   terms: '이용약관',
   privacy: '개인정보 처리방침',
   contact: '문의하기',

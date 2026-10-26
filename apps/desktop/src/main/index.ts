@@ -1,4 +1,5 @@
 import { app, BrowserWindow, shell } from 'electron';
+import electronUpdater from 'electron-updater';
 import { join } from 'node:path';
 import { PROTOCOL, setupDeepLinks } from './deep-link';
 import { createTray, destroyTray, hasTray } from './tray';
@@ -6,10 +7,12 @@ import { handleAuthCallback } from './auth';
 import { registerIpc } from './ipc';
 import { startAutoLock } from './lock';
 import { CH } from '../shared/channels';
+import { createUpdater } from './updater';
 import { widgetSettings } from './widget';
 
 // 메인 프로세스: 창, 딥링크(sweetwo://), 단일 인스턴스, 트레이. 보안 저장소는 secure-store.ts(main 전용).
 // 보안 체크리스트는 docs/DEV_GUIDE.md ‘Electron 보안’.
+const { autoUpdater } = electronUpdater;
 let win: BrowserWindow | null = null;
 const getWindow = () => win;
 let quitting = false;
@@ -85,7 +88,13 @@ if (!app.requestSingleInstanceLock()) {
   app.on('before-quit', () => (quitting = true));
 
   void app.whenReady().then(() => {
-    registerIpc(getWindow, { open, setTray });
+    // 설치한 앱만 자동 업데이트(개발 실행·e2e 제외)
+    const updater =
+      app.isPackaged && process.env.SWEETWO_NO_UPDATE !== '1'
+        ? createUpdater(autoUpdater, getWindow)
+        : null;
+    registerIpc(getWindow, { open, setTray }, updater);
+    updater?.start();
     startAutoLock();
     createWindow();
     setTray(widgetSettings().tray);
