@@ -7,6 +7,7 @@ export {
   savedOf,
   useChecklists,
   useGoalCheckedSums,
+  useGoalSaved,
   useSplits,
   waiting,
 } from './data';

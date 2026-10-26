@@ -65,7 +65,7 @@ export function G03dGoalHeld() {
         onChange={setPick}
         onPick={(v) => v === 'none' && s.next({ held: 'none', assetIds: [], assetTotal: 0 })}
         options={[
-          ...(pickable.length ? [{ value: 'assets' as const, label: copy.heldAssets }] : []),
+          // 재기획: 자산과 연결하지 않음(22 G-03d)
           { value: 'new', label: copy.heldNew },
           { value: 'none', label: copy.heldNone },
         ]}

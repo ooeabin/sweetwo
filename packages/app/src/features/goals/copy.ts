@@ -58,7 +58,6 @@ export const copy = {
   noRecords: '월말 정리를 하면 여기에 쌓여요', // [확인 필요]
   more: '더보기',
   info: '정보', // [확인 필요] 요소 이름
-  ownerLabel: '담당',
   together: '같이',
   createdAt: '만든 날',
 
@@ -94,15 +93,15 @@ export const copy = {
   addTabs: '목표 분류', // [확인 필요] 화면 읽기용
   makeOwn: '+ 직접 만들기',
   next: '다음',
-  heldTitle: '이미 모아둔 돈이 있나요?',
+  heldTitle: '이 목표로 이미 모은 돈이 있나요?', // [확인 필요]
   heldAssets: '가진 자산에서 고르기',
   heldAssetsTotal: (amount: string) => `보유액 ${amount}`, // [확인 필요]
-  heldNew: '새로 입력할게요',
+  heldNew: '있어요',
   heldNone: '없어요',
   heldAmount: '얼마 모아뒀어요?', // [확인 필요]
   ownerTitle: '누가 모을까요?',
   ownerMe: '나',
-  confirmTitle: (amount: string, ym: string) => `매달 ${amount}씩 모으면 ${ym}에 달성해요`,
+  confirmTitle: (amount: string, ym: string) => `매달 ${amount}씩 모으면 ${ym}에 이뤄요`, // [확인 필요]
   confirmMonthly: (amount: string) => `매달 ${amount}씩 모아요`, // [확인 필요] 매달 목표
   confirmUnknown: (name: string) => `${name} 목표를 추가할까요?`, // [확인 필요] 배분 0 또는 금액 미정
   confirmPosition: '우선순위는 맨 아래예요', // [확인 필요] 위치 고르기는 G-06과 함께
@@ -222,4 +221,71 @@ export const copy = {
   payOverOptions: { cut: '다른 항목에서 줄이기', raise: '총예산 늘리기' },
   payCutWhich: '어느 항목에서 줄일까요?', // [확인 필요]
   payDone: '결제를 기록했어요', // [확인 필요]
+  // 재기획(22, ADR 0003) 목표 종류, 모은 돈, 넣기·빼기, 꺼내 쓰기
+  groups: { ours: '우리 목표', mine: '내 목표' }, // [확인 필요]
+  partnerGroup: (name: string) => `${name}님 목표`, // [확인 필요]
+  monthlySummary: (amount: string) => `매달 목표에 ${amount}씩 모으고 있어요`, // [확인 필요]
+  noSplit: '분배표에서 저금을 정해 주세요', // [확인 필요]
+  editSplit: '분배표 고치기',
+  planNew: (amount: string, ym: string) => `매달 ${amount}씩, ${ym} 달성 예정`,
+  setAmount: '금액 정하기',
+  lateLine: (n: string) => `기한보다 ${n} 늦어요`,
+  moreSaving: '분배표에서 저금 늘리기', // [확인 필요]
+  thisMonthDone: (amount: string) => `이번 달 ${amount} 넣었어요`,
+  thisMonthTodo: (amount: string) => `이번 달 ${amount} 넣을 차례예요`,
+  thisMonthSkipped: '이번 달은 못 했어요', // [확인 필요]
+  foldedNew: (n: number) => `보류, 달성, 다 쓴 목표 ${n}개`, // [확인 필요]
+  onlyEmergency: '다른 목표 추가하기',
+  years: (n: number) => `${n}년`,
+  months: (n: number) => `${n}개월`,
+  // G-02
+  kindOurs: '우리 목표', // [확인 필요]
+  kindMine: '내 목표', // [확인 필요]
+  kindPartner: (name: string) => `${name}님 목표`, // [확인 필요]
+  numTarget: '목표 금액',
+  numSaved: '모은 돈',
+  numLeft: '남은 금액',
+  numMonthly: '매달 넣는 돈',
+  numDeadline: '기한',
+  numExpected: '예상 달성',
+  perPerson: (parts: string) => parts, // “찬우 60만 + 예빈 35만”
+  noDeadline: '없음', // [확인 필요]
+  expectUnknown: '예상 미정',
+  addHeld: '이미 모은 돈 넣기',
+  changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
+  inOut: '넣기·빼기', // [확인 필요]
+  use: '꺼내 쓰기',
+  onTime: '기한 안에 이뤄요',
+  lateHelp: '분배표에서 저금을 늘리면 앞당길 수 있어요',
+  toOurs: '우리 목표로 바꾸기', // [확인 필요]
+  toMine: '내 목표로 바꾸기', // [확인 필요]
+  cantToMine: (name: string) => `${name}님도 모으고 있어서 바꿀 수 없어요`, // [확인 필요]
+  changedKind: '목표 종류를 바꿨어요', // [확인 필요]
+  history: '모은 돈 기록', // [확인 필요]
+  historyHeld: '이미 모은 돈',
+  historyChecked: (label: string) => `${label} 저금`,
+  historyIn: '넣었어요',
+  historyOut: '뺐어요',
+  historyUse: '꺼내 썼어요',
+  historySkipped: '못 했어요',
+  noHistory: '아직 기록이 없어요', // [확인 필요]
+  viewOnly: '보기만 할 수 있어요', // [확인 필요] 배우자 내 목표
+  // G-02a 넣기·빼기, G-02b 꺼내 쓰기
+  moveTitle: '모은 돈을 어떻게 고칠까요?', // [확인 필요]
+  moveIn: '넣을게요',
+  moveOut: '뺄게요',
+  moveInAmount: '얼마를 넣을까요?', // [확인 필요]
+  moveOutAmount: '얼마를 뺄까요?', // [확인 필요]
+  useTitle: (goal: string) => `${goal}에서 얼마를 꺼내 썼어요?`, // [확인 필요]
+  useHelp: (saved: string) => `지금 모은 돈은 ${saved}이에요`,
+  tooMuch: '모은 돈보다 많아요', // [확인 필요]
+  movedIn: (goal: string, amount: string) => `${goal}에 ${amount} 넣었어요`,
+  movedOut: (goal: string, amount: string) => `${goal}에서 ${amount} 뺐어요`, // [확인 필요]
+  used: (goal: string, amount: string) => `${goal}에서 ${amount} 꺼내 썼어요`, // [확인 필요]
+  heldAsk: '이 목표로 이미 모은 돈이 있나요?', // [확인 필요]
+  // G-03e 누구 목표
+  whoTitle: '누구 목표예요?', // [확인 필요]
+  whoOurs: '우리 둘', // [확인 필요]
+  whoMine: '나', // [확인 필요]
+  confirmZeroLine: '분배표에 이 목표 줄을 0원으로 만들어 둘게요. 금액은 분배표에서 정해요', // [확인 필요]
 };

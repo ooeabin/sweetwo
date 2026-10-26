@@ -2,6 +2,7 @@ import {
   checkPayLine,
   fetchCurrentChecklists,
   fetchGoalCheckedSums,
+  fetchGoalSaved,
   fetchGoals,
   fetchMe,
   fetchPartner,
@@ -24,6 +25,8 @@ export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchP
 export const useSplits = () => useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
 export const useGoalCheckedSums = () =>
   useQuery({ queryKey: qk.goalCheckedSums, queryFn: fetchGoalCheckedSums });
+/** 목표별 모은 돈(이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기) */
+export const useGoalSaved = () => useQuery({ queryKey: qk.goalSaved, queryFn: fetchGoalSaved });
 
 /**
  * 지금 사이클 체크리스트들(각자 = 사람마다, 합쳐서 = 하나). 기준일이 지나 처음 열면
@@ -56,14 +59,15 @@ export function useCheck() {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
       qc.invalidateQueries({ queryKey: qk.goalCheckedSums }),
+      qc.invalidateQueries({ queryKey: qk.goalSaved }),
     ]);
     return r;
   };
 }
 
-/** 모은 돈 = 이미 모은 돈 + 체크한 저금(06 4장). 직접 넣기·빼기·꺼내 쓰기는 목표 단계에서 */
-export const savedOf = (g: Goal, sums: Record<string, number> | undefined) =>
-  g.other_held + (sums?.[g.id] ?? 0);
+/** 모은 돈(서버 goal_saved_sums, 아직 못 읽었으면 이미 모은 돈) */
+export const savedOf = (g: Goal, saved: Record<string, number> | undefined) =>
+  saved?.[g.id] ?? g.other_held;
 
 /** 내 체크리스트: 각자면 내 것, 합쳐서면 공동 */
 export const myChecklist = (list: PayChecklist[] | undefined, meId: string | undefined) =>

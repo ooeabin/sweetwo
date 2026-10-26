@@ -56,6 +56,8 @@ import {
   G02GoalEdit,
   G04GoalAdjust,
   G06GoalOrder,
+  G02aGoalMove,
+  G02bGoalUse,
   O23RestQuestion,
   O24RestDeadline,
   O25RestHeld,
@@ -336,6 +338,26 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // G-05 사용 기록
+      {
+        path: '/goals/:id/move/:kind?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02aGoalMove />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-02a 넣기·빼기, 이미 모은 돈 넣기
+      {
+        path: '/goals/:id/spend',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02bGoalUse />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-02b 꺼내 쓰기
       {
         path: '/goals/:id/edit/:field',
         element: (

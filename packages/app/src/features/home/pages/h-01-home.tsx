@@ -17,7 +17,7 @@ import {
   savedOf,
   salaryPaths,
   useChecklists,
-  useGoalCheckedSums,
+  useGoalSaved,
   useSplits,
   waiting,
 } from '../../salary';
@@ -44,7 +44,7 @@ export function H01Home() {
   const goals = useGoals();
   const lists = useChecklists();
   const splits = useSplits();
-  const sums = useGoalCheckedSums();
+  const sums = useGoalSaved();
   const nw = useNetWorth(true);
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
   const [inviteClosed, setInviteClosed] = useState(readClosed);

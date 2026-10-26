@@ -1,124 +1,104 @@
-import { propose, qk, updateGoal, type Goal } from '@sweetwo/api';
-import { formatManWon, formatMonthDay, orderableGoals, proposalApplyOn } from '@sweetwo/core';
-import { QuestionLayout, ReorderList } from '@sweetwo/ui';
+import { qk, saveSplit, updateGoal } from '@sweetwo/api';
+import { QuestionLayout, ReorderList, SectionHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { proposalCopy } from '../../proposals';
+import { toDraft, useSplits } from '../../salary';
 import { copy } from '../copy';
-import { useGoalsData } from '../data';
+import { useGoalsModel } from '../model';
 
-const man = (v: number) => `${formatManWon(v)} 원`;
-
-// G-06 우선순위 바꾸기(O-22 화면): 끌기, ↑↓, 비상금 맨 위 고정. 아래에 바뀌는 배분 미리보기.
-// 연결된 부부 = goal_order 제안, 아니면 바로 저장 + Toast “순서를 바꿨어요” + ‘되돌리기’.
-// 보류·달성·사용 완료 목표는 배분에 없어 목록에서 뺌.
-// week = 첫 주 5일째 O-22(비상금·결혼 비용 빼고, 2개 이상일 때만): 저장 뒤 남은 목표의 O-23~25로, 순서가 그대로면 그냥 다음
+// G-06 우선순위 바꾸기(22): 끌기, ↑↓, 비상금 맨 위 고정. 묶음(우리 목표 / 내 목표)마다 따로, 묶음을 넘어 옮기지 않음.
+// 저장 = 바로 반영 + 내 분배표 저금 줄 순서도 같이 + Toast ‘되돌리기’. 상대 분배표 줄 순서·상대 알림은 부부 단계에서.
 export function G06GoalOrder({ week = false }: { week?: boolean }) {
   const nav = useNavigate();
   const qc = useQueryClient();
-  const d = useGoalsData();
-  const [order, setOrder] = useState<string[] | null>(null);
+  const d = useGoalsModel();
+  const splits = useSplits();
+  const [ours, setOurs] = useState<string[] | null>(null);
+  const [mine, setMine] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.view) return null;
+  if (!d.ready || !splits.data) return null;
+  void week;
 
-  const movable = week
-    ? orderableGoals(d.goals)
-    : d.goals
-        .filter(
-          (g) => g.template !== 'emergency' && !['paused', 'achieved', 'used'].includes(g.status),
-        )
-        .sort((a, b) => a.priority - b.priority);
-  const done = week ? '/goals/week/next' : '/goals';
-  if (week && movable.length < 2) return <Navigate to={done} replace />;
-  const ids = order ?? movable.map((g) => g.id);
-  const reordered = (list: Goal[]) =>
-    list.map((g) => (ids.includes(g.id) ? { ...g, priority: ids.indexOf(g.id) + 1 } : g));
-  const after = d.viewOf(reordered(d.goals));
-  const changed = ids.some((id, i) => movable[i]?.id !== id);
-  const preview = (after?.lines ?? []).flatMap((l) => {
-    const b = d.view?.lines.find((x) => x.id === l.id);
-    return b && b.alloc !== l.alloc
-      ? [copy.impactAlloc(l.name, formatManWon(b.alloc), man(l.alloc))]
-      : [];
-  });
-  const lineOf = (id: string) => d.view?.lines.find((l) => l.id === id);
+  const movable = (list: typeof d.groups.ours) =>
+    list.filter((i) => i.goal.template !== 'emergency');
+  const oursIds = ours ?? movable(d.groups.ours).map((i) => i.goal.id);
+  const mineIds = mine ?? d.groups.mine.map((i) => i.goal.id);
+  const all = [...movable(d.groups.ours), ...d.groups.mine];
+  const name = (id: string) => all.find((i) => i.goal.id === id)?.goal.name ?? '';
+  const changed = ours !== null || mine !== null;
+  const labels = {
+    up: copy.orderUp,
+    down: copy.orderDown,
+    moved: copy.orderMoved,
+    handle: copy.orderHandle,
+  };
 
+  const apply = async (o: string[], m: string[]) => {
+    const prio = new Map([
+      ...o.map((id, i) => [id, i + 1] as const),
+      ...m.map((id, i) => [id, i + 1] as const),
+    ]);
+    await Promise.all([...prio].map(([id, p]) => updateGoal(id, { priority: p })));
+    // 내 분배표(합쳐서면 공동) 저금 줄 순서: 비상금 → 우리 목표 → 내 목표
+    const split = splits.data.find((s) => s.owner_user_id === (d.joint ? null : d.meId));
+    if (split) {
+      const lines = toDraft(split.split_line);
+      const rank = (gid?: string) => {
+        const g = all.find((i) => i.goal.id === gid)?.goal;
+        if (!g) return 0;
+        return (g.owner_user_id === null ? 1000 : 2000) + (prio.get(g.id) ?? 0);
+      };
+      const saving = lines
+        .filter((l) => l.kind === 'saving')
+        .sort((a, b) => rank(a.goalId) - rank(b.goalId));
+      await saveSplit(
+        [...saving, ...lines.filter((l) => l.kind !== 'saving')],
+        split.owner_user_id ?? undefined,
+      );
+    }
+    await Promise.all([qk.goals, qk.splits].map((k) => qc.invalidateQueries({ queryKey: k })));
+  };
   const save = async () => {
-    if (!changed) return nav(done);
     if (saving) return;
     setSaving(true);
+    const before = [
+      movable(d.groups.ours).map((i) => i.goal.id),
+      d.groups.mine.map((i) => i.goal.id),
+    ] as const;
     try {
-      if (d.connected && d.base !== null) {
-        await propose('goal_order', { order: ids }, proposalApplyOn(d.base));
-        toast(copy.proposed(d.couple?.partnerName ?? ''));
-      } else {
-        const before = movable.map((g) => ({ id: g.id, priority: g.priority }));
-        await Promise.all(ids.map((id, i) => updateGoal(id, { priority: i + 1 })));
-        toast(copy.orderSaved, {
-          label: copy.undo,
-          onClick: () =>
-            void Promise.all(before.map((b) => updateGoal(b.id, { priority: b.priority }))).then(
-              () => qc.invalidateQueries({ queryKey: qk.goals }),
-            ),
-        });
-      }
-      await Promise.all([qk.goals, qk.proposals].map((k) => qc.invalidateQueries({ queryKey: k })));
-      nav(done);
+      await apply(oursIds, mineIds);
+      toast(copy.orderSaved, { label: copy.undo, onClick: () => void apply(before[0], before[1]) });
+      nav('/goals');
     } catch {
       toast(copy.loadFailed);
     } finally {
       setSaving(false);
     }
   };
-
+  const list = (ids: string[], set: (x: string[]) => void, title: string) =>
+    ids.length > 0 && (
+      <section className="hg-stack" aria-label={title}>
+        {!d.solo && <SectionHeader title={title} />}
+        <ReorderList
+          label={title}
+          items={ids.map((id) => ({ id, label: name(id) }))}
+          onChange={set}
+          labels={labels}
+        />
+      </section>
+    );
   return (
     <QuestionLayout
       title={copy.orderTitle}
-      help={
-        d.connected && changed && d.base !== null
-          ? proposalCopy.applyNote(formatMonthDay(proposalApplyOn(d.base)))
-          : undefined
-      }
-      onBack={() => nav(week ? '/' : '/goals')}
-      later={week ? { label: copy.weekClose, onClick: () => nav('/') } : undefined}
-      primary={{
-        label:
-          d.connected && (!week || changed)
-            ? copy.proposeTo(d.couple?.partnerName ?? '')
-            : copy.orderOk,
-        disabled: !week && d.connected && !changed,
-        loading: saving,
-      }}
+      help={copy.orderFixed}
+      onBack={() => nav('/goals')}
+      primary={{ label: copy.orderOk, disabled: !changed, loading: saving }}
       onSubmit={() => void save()}
     >
-      <p className="hg-help" style={{ margin: 0 }}>
-        {copy.orderFixed}
-      </p>
-      <ReorderList
-        label={copy.orderTitle}
-        items={ids.map((id) => {
-          const g = movable.find((x) => x.id === id);
-          const l = lineOf(id);
-          return { id, label: g?.name ?? '', sub: l ? man(l.alloc) : undefined };
-        })}
-        onChange={setOrder}
-        labels={{
-          up: copy.orderUp,
-          down: copy.orderDown,
-          moved: copy.orderMoved,
-          handle: copy.orderHandle,
-        }}
-      />
-      {preview.length > 0 && (
-        <section className="hg-card hg-stack" aria-live="polite" aria-label={copy.orderPreview}>
-          <span className="hg-card__label">{copy.orderPreview}</span>
-          {preview.map((t) => (
-            <span key={t}>{t}</span>
-          ))}
-        </section>
-      )}
+      {list(oursIds, setOurs, copy.groups.ours)}
+      {list(mineIds, setMine, copy.groups.mine)}
     </QuestionLayout>
   );
 }

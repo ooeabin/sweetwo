@@ -78,3 +78,57 @@ export async function fetchGoalCheckedSums(): Promise<Record<string, number>> {
   fail(error);
   return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.amount]));
 }
+
+/** 목표별 모은 돈 = 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기(06 4장) */
+export async function fetchGoalSaved(): Promise<Record<string, number>> {
+  const { data, error } = await supabase().rpc('goal_saved_sums');
+  fail(error);
+  return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.saved]));
+}
+
+export type GoalMove = Tables<'goal_move'>;
+/** 목표 넣기·빼기·꺼내 쓰기 기록(되돌린 것 빼고) */
+export async function fetchGoalMoves(goal: string): Promise<GoalMove[]> {
+  const { data, error } = await supabase()
+    .from('goal_move')
+    .select('*')
+    .eq('goal_id', goal)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+  fail(error);
+  return data ?? [];
+}
+
+/** 넣기(in)·빼기(out)·꺼내 쓰기(use). 모은 돈보다 많이 빼면 'too_much' */
+export async function moveGoal(
+  goal: string,
+  kind: 'in' | 'out' | 'use',
+  amount: number,
+): Promise<{ id: string } | 'too_much'> {
+  const { data, error } = await supabase().rpc('move_goal', {
+    p_goal: goal,
+    p_kind: kind,
+    p_amount: amount,
+  });
+  if (error?.message?.includes('too_much')) return 'too_much';
+  fail(error);
+  return { id: data as string };
+}
+
+export async function undoGoalMove(id: string) {
+  const { error } = await supabase().rpc('undo_goal_move', { p_id: id });
+  fail(error);
+}
+
+/** 한 목표의 지난 체크 줄(월별 기록, G-02 10번) */
+export async function fetchGoalLines(
+  goal: string,
+): Promise<(PayCheckLine & { pay_checklist: { label: string; cycle_start: string } | null })[]> {
+  const { data, error } = await supabase()
+    .from('pay_check_line')
+    .select('*, pay_checklist(label, cycle_start)')
+    .eq('goal_id', goal)
+    .order('checked_at', { ascending: false });
+  fail(error);
+  return (data ?? []) as never;
+}

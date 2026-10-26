@@ -1570,6 +1570,55 @@ export type Database = {
           },
         ]
       }
+      goal_move: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          goal_id: string
+          id: string
+          kind: string
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          goal_id: string
+          id?: string
+          kind: string
+          space_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          goal_id?: string
+          id?: string
+          kind?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_move_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_use: {
         Row: {
           amount: number
@@ -4080,6 +4129,15 @@ export type Database = {
           goal_id: string
         }[]
       }
+      goal_lines_sync: { Args: { p_goal: string }; Returns: undefined }
+      goal_saved: { Args: { p_goal: string }; Returns: number }
+      goal_saved_sums: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          goal_id: string
+          saved: number
+        }[]
+      }
       goal_story: {
         Args: { p_goal: string }
         Returns: {
@@ -4130,6 +4188,10 @@ export type Database = {
       md_label: { Args: { d: string }; Returns: string }
       move_emergency: {
         Args: { p_amount: number; p_kind: string; p_reason?: string }
+        Returns: string
+      }
+      move_goal: {
+        Args: { p_amount: number; p_goal: string; p_kind: string }
         Returns: string
       }
       move_goal_rest: {
@@ -4451,6 +4513,7 @@ export type Database = {
         Returns: undefined
       }
       undo_emergency_move: { Args: { p_id: string }; Returns: undefined }
+      undo_goal_move: { Args: { p_id: string }; Returns: undefined }
       undo_living_check: { Args: { p_id: string }; Returns: undefined }
       unlink_default_plan: {
         Args: { p_plan: Json; p_ratio: number }

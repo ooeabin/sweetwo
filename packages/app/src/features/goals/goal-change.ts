@@ -1,5 +1,4 @@
-import { propose, qk, trashGoals, updateGoal, type Goal } from '@sweetwo/api';
-import { proposalApplyOn, type ProposalItem } from '@sweetwo/core';
+import { qk, trashGoals, updateGoal, type Goal } from '@sweetwo/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from '../../shared/toast';
@@ -12,23 +11,36 @@ export type GoalChange =
   | { item: 'goal_pause'; value: boolean }
   | { item: 'goal_delete' };
 
-// 목표 바꾸기(22 목표 수정, G-02 ⋯). 연결된 부부 = 제안(확인 없이 바로 보냄), 미합류·혼자 쓰기 = 바로 적용 + Toast(보류·삭제는 ‘되돌리기’)
+// 목표 바꾸기(22 목표 수정, G-02 ⋯). 재기획(ADR 0003): 제안 없이 늘 바로 적용 + Toast ‘되돌리기’. 상대 알림은 부부 단계에서
 export function useGoalChange(d: GoalsData) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const refresh = () =>
     Promise.all(
-      [qk.goals, qk.proposals, qk.goalRecords].map((k) => qc.invalidateQueries({ queryKey: k })),
+      [qk.goals, qk.goalRecords, qk.splits, qk.goalSaved].map((k) =>
+        qc.invalidateQueries({ queryKey: k }),
+      ),
     );
 
   const direct = async (g: Goal, c: GoalChange) => {
     if (c.item === 'goal_amount') {
       await updateGoal(g.id, { target_amount: c.value, amount_estimated: false });
-      return { text: copy.saved };
+      return {
+        text: copy.saved,
+        undo: () =>
+          updateGoal(g.id, {
+            target_amount: g.target_amount,
+            amount_estimated: g.amount_estimated,
+          }),
+      };
     }
     if (c.item === 'goal_deadline') {
       await updateGoal(g.id, { deadline: c.value, deadline_estimated: false });
-      return { text: copy.saved };
+      return {
+        text: copy.saved,
+        undo: () =>
+          updateGoal(g.id, { deadline: g.deadline, deadline_estimated: g.deadline_estimated }),
+      };
     }
     if (c.item === 'goal_pause' && c.value) {
       await updateGoal(g.id, { status: 'paused' });
@@ -52,29 +64,16 @@ export function useGoalChange(d: GoalsData) {
     if (busy) return false;
     setBusy(true);
     try {
-      if (d.connected && d.base !== null) {
-        const after =
-          c.item === 'goal_amount'
-            ? { target_amount: c.value }
-            : c.item === 'goal_deadline'
-              ? { deadline: c.value }
-              : c.item === 'goal_pause'
-                ? { paused: c.value }
-                : {};
-        await propose(c.item as ProposalItem, after, proposalApplyOn(d.base), g.id);
-        toast(copy.proposed(d.couple?.partnerName ?? ''));
-      } else {
-        const r = await direct(g, c);
-        toast(
-          r.text,
-          r.undo
-            ? {
-                label: copy.undo,
-                onClick: () => void r.undo().then(refresh),
-              }
-            : undefined,
-        );
-      }
+      const r = await direct(g, c);
+      toast(
+        r.text,
+        r.undo
+          ? {
+              label: copy.undo,
+              onClick: () => void r.undo().then(refresh),
+            }
+          : undefined,
+      );
       await refresh();
       return true;
     } catch {

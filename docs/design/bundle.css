@@ -1188,6 +1188,13 @@ a.hg-btn { text-decoration: none; }
 .hg-stat { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--plate); border: 0; }
 .hg-stat__label, .hg-stat__sub { font: 400 13px/18px var(--font-sans); color: var(--stone); display: flex; gap: 6px; align-items: center; }
 .hg-stat__value { font: 600 22px/30px var(--font-sans); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
+/* 숫자 칸 묶음(목표 상세 숫자 블록 등): 좁은 창에서도 2열. 누를 수 있는 칸은 button.hg-stat */
+.hg-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.hg-stats .hg-stat__value { white-space: nowrap; }
+@media (max-width: 767px) { .hg-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hg-stats .hg-stat { padding: var(--space-4); } .hg-stats .hg-stat__value { font-size: 18px; line-height: 26px; } }
+button.hg-stat { font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+button.hg-stat:hover { background: var(--hairline-soft); }
+button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-pill-up { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); }
 .hg-pill-down { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--goal); color: var(--goal-ink); } /* 줄어든 변화(살구, 빨강 없음) */
 .hg-body { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 48px; display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 40px; align-items: start; }  /* 단 수는 AppFrame이 --cols로(맨 위 띠가 있어도 단 너비가 같게) */
