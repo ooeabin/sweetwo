@@ -238,7 +238,6 @@ test('앱 정보(S-19): 업데이트 확인 → 받는 중 → 다 받으면 “
 
 test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기에 두고, 인터넷이 끊겨도 홈을 보여 줌 + “오프라인”', async ({
   page,
-  context,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -246,20 +245,30 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
   await fakeIosBridge(page, true);
   await page.goto('/');
   await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  // 홈이 쓰는 데이터(목표, 체크리스트)가 모두 기기에 들어간 뒤
   await expect
-    .poll(() => page.evaluate(() => localStorage.getItem('e2e-cache')?.length ?? 0), {
-      timeout: 10_000,
-    })
-    .toBeGreaterThan(100);
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const c = localStorage.getItem('e2e-cache') ?? '';
+          return c.includes('내 집 마련') && c.includes('pay_checklist');
+        }),
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+  // 마지막으로 받은 것까지 저장되게 한 번 더 기다림(3초 모아서 저장)
+  await page.waitForTimeout(3500);
   // 서버에 닿지 않음
   await page.unrouteAll({ behavior: 'ignoreErrors' });
   await page.route('**/rest/v1/**', (r) => r.abort('internetdisconnected'));
   await page.route('**/auth/v1/**', (r) => r.abort('internetdisconnected'));
+  // 인터넷 없음으로 다시 켬(개발 서버는 닿아야 해서 브라우저 오프라인 대신 onLine만 끔)
+  await page.addInitScript(() =>
+    Object.defineProperty(Navigator.prototype, 'onLine', { get: () => false }),
+  );
   await page.reload();
-  await context.setOffline(true);
   await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toContainText(
     /마지막 저장 10월 7일 \d{2}:\d{2}/,
   );
-  await context.setOffline(false);
 });
