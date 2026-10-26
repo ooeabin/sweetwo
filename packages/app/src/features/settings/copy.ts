@@ -182,6 +182,8 @@ export const copy = {
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
   visNone: '내 명의 항목이 없어요',
+  visGoals: '내 목표',
+  goalVis: { all: '모두 보여 주기', amount: '금액만 보여 주기' } as Record<string, string>,
   visDebt: '부채', // [확인 필요] 항목 이름표
   visLabel: (name: string) => `${name} 공개 범위`,
 
@@ -245,7 +247,16 @@ export const copy = {
     heads: {
       assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
       debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
-      goals: ['이름', '형태', '목표 금액', '모은 돈', '기한', '우선순위', '상태', '분배표 저금 금액'],
+      goals: [
+        '이름',
+        '형태',
+        '목표 금액',
+        '모은 돈',
+        '기한',
+        '우선순위',
+        '상태',
+        '분배표 저금 금액',
+      ],
       splits: ['사람', '줄 종류', '줄 이름·목표', '금액'],
       checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
       care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
@@ -265,7 +276,10 @@ export const copy = {
       allowance: '용돈',
       custom: '직접 추가',
     } as Record<string, string>,
-    checkState: { checked: '체크함', skipped: '못 함', wait: '체크 안 함' } as Record<string, string>,
+    checkState: { checked: '체크함', skipped: '못 함', wait: '체크 안 함' } as Record<
+      string,
+      string
+    >,
     careCats: { family: '양가', couple: '부부', wedding: '결혼' } as Record<string, string>,
     paidFrom: {
       goal_fund: '목표자금',

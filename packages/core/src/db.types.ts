@@ -317,6 +317,7 @@ export type Database = {
       }
       app_user: {
         Row: {
+          adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
           avatar_path: string | null
@@ -355,6 +356,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
           avatar_path?: string | null
@@ -392,6 +394,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
           avatar_path?: string | null
@@ -2942,6 +2945,44 @@ export type Database = {
           updated_at: string
           user_id: string
         }[]
+      }
+      space_goals: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          achieved_at: string | null
+          achieved_seen: string[]
+          after_marriage: boolean
+          amount_estimated: boolean
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          deadline_estimated: boolean
+          deleted_at: string | null
+          deleted_by: string | null
+          details: NonNullable<Json>
+          freed_lines: NonNullable<Json>
+          id: string
+          kind: Database["public"]["Enums"]["goal_kind"]
+          name: string
+          other_held: number
+          owner: Database["public"]["Enums"]["goal_owner"]
+          owner_user_id: string | null
+          priority: number
+          space_id: string
+          status: Database["public"]["Enums"]["goal_status"]
+          target_amount: number | null
+          template: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+          visibility: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "goal"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }

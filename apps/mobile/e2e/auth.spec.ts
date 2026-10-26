@@ -21,10 +21,7 @@ test('첫 방문: O-01 → A-02', async ({ page }) => {
   for (const name of ['카카오로 3초 만에 시작하기', 'Google로 시작하기', 'Apple로 시작하기']) {
     await expect(page.getByRole('button', { name })).toBeEnabled();
   }
-  await expect(page.getByRole('checkbox', { name: '이 기기에서 로그인 유지' })).toHaveAttribute(
-    'aria-checked',
-    'false',
-  );
+  await expect(page.getByRole('checkbox', { name: '이 기기에서 로그인 유지' })).toHaveCount(0);
   await noA11yViolations(page);
 });
 
@@ -77,6 +74,8 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await page.getByRole('checkbox', { name: '[필수] 개인정보 수집·이용' }).click();
   await expect(agree).toBeDisabled();
   await page.getByRole('checkbox', { name: '[필수] 배우자와 부부 공간 공유' }).click();
+  await expect(agree).toBeDisabled(); // 만 18세 확인도 필수(A-05 2a)
+  await page.getByRole('checkbox', { name: '[필수] 만 18세 이상이에요' }).click();
   await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toHaveAttribute(
     'aria-checked',
     'false',

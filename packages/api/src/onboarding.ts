@@ -111,10 +111,10 @@ export async function updateSpace(patch: SpacePatch) {
   fail(error);
 }
 
+// 서버 space_goals(): 배우자 내 목표가 ‘금액만 보여 주기’면 이름 대신 “개인 목표”(22 공개, 25 S-13)
 export async function fetchGoals(): Promise<Goal[]> {
   const { data, error } = await supabase()
-    .from('goal')
-    .select('*')
+    .rpc('space_goals')
     .is('deleted_at', null)
     .order('priority');
   fail(error);
@@ -166,25 +166,6 @@ export async function createInvite(): Promise<{ code: string; expiresAt: string 
   return { code: row.code, expiresAt: row.expires_at };
 }
 
-/** O-13, P-04 만 18세 미만(생년월일 'YYYY-MM-DD'): 계정 즉시 삭제 */
-export async function deleteUnderageAccount(birthDate: string) {
-  const { error } = await supabase().rpc('delete_underage_account', { p_birth_date: birthDate });
-  fail(error);
-}
-
-/** 배우자 생일(월, 일). 없으면 null. 캘린더 서프라이즈 생일 미리 채움 */
-export async function fetchPartnerBirthday(): Promise<{ month: number; day: number } | null> {
-  const { data, error } = await supabase().rpc('partner_birthday');
-  fail(error);
-  return Array.isArray(data) ? (data[0] ?? null) : null;
-}
-
-/** O-13 만 18세 미만: 계정 즉시 삭제 */
-export async function deleteMinorAccount(birthYear: number) {
-  const { error } = await supabase().rpc('delete_minor_account', { p_birth_year: birthYear });
-  fail(error);
-}
-
 // 고정지출 항목(O-36)
 export type FixedExpense = Tables<'fixed_expense'>;
 export async function fetchFixedExpenses(): Promise<FixedExpense[]> {
@@ -195,29 +176,6 @@ export async function fetchFixedExpenses(): Promise<FixedExpense[]> {
     .order('sort');
   fail(error);
   return data ?? [];
-}
-export async function insertFixedExpenses(
-  rows: Pick<FixedExpense, 'group_key' | 'name' | 'burden' | 'sort'>[],
-) {
-  if (!rows.length) return;
-  const space_id = await ensureSpace();
-  const { error } = await supabase()
-    .from('fixed_expense')
-    .insert(rows.map((r) => ({ ...r, space_id })));
-  fail(error);
-}
-/** O-37 항목별 금액 */
-export async function updateFixedExpense(id: string, patch: Pick<FixedExpense, 'monthly_amount'>) {
-  const { error } = await supabase().from('fixed_expense').update(patch).eq('id', id);
-  fail(error);
-}
-export async function trashFixedExpenses(ids: string[]) {
-  if (!ids.length) return;
-  const { error } = await supabase()
-    .from('fixed_expense')
-    .update({ deleted_at: new Date().toISOString() })
-    .in('id', ids);
-  fail(error);
 }
 
 // 통장(O-63)
@@ -231,28 +189,6 @@ export async function fetchAccounts(): Promise<Account[]> {
     .order('sort');
   fail(error);
   return data ?? [];
-}
-type AccountPatch = Pick<Account, 'role' | 'name' | 'is_existing' | 'start_balance' | 'sort'>;
-/** 역할마다 하나: 있으면 고치고 없으면 추가 */
-export async function saveAccounts(rows: AccountPatch[], existing: Account[]) {
-  const space_id = await ensureSpace();
-  for (const r of rows) {
-    const cur = existing.find((a) => a.role === r.role);
-    const { error } = cur
-      ? await supabase().from('account').update(r).eq('id', cur.id)
-      : await supabase()
-          .from('account')
-          .insert({ ...r, space_id });
-    fail(error);
-  }
-}
-export async function trashAccounts(ids: string[]) {
-  if (!ids.length) return;
-  const { error } = await supabase()
-    .from('account')
-    .update({ deleted_at: new Date().toISOString() })
-    .in('id', ids);
-  fail(error);
 }
 
 // 배우자 프로필(같은 공간 다른 사람). 없으면 null
@@ -275,4 +211,3 @@ export async function fetchPartner(): Promise<PartnerProfile | null> {
   const row = Array.isArray(data) ? data[0] : null;
   return (row as PartnerProfile | undefined) ?? null;
 }
-

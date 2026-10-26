@@ -89,6 +89,7 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
     if (url.pathname === '/rest/v1/rpc/ensure_my_space') return json(route, 'space-1');
     if (url.pathname === '/rest/v1/couple_space') return json(route, null);
     if (url.pathname === '/rest/v1/goal') return json(route, []);
+    if (url.pathname === '/rest/v1/rpc/space_goals') return json(route, []);
     if (url.pathname === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     return json(route, { message: `e2e: 흉내 내지 않은 요청 ${url.pathname}` }, 404);
@@ -99,7 +100,7 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
 export async function asReturningFromProvider(page: Page, provider: 'kakao' | 'google' | 'apple') {
   await page.addInitScript((p) => {
     sessionStorage.setItem('sweetwo.pending-provider', p);
-    sessionStorage.setItem('sb-session-code-verifier', JSON.stringify('e2e-verifier'));
+    localStorage.setItem('sb-session-code-verifier', JSON.stringify('e2e-verifier'));
     localStorage.setItem('sweetwo.started', '1');
   }, provider);
 }

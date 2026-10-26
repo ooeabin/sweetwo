@@ -499,81 +499,8 @@ export const unsureDeadline = (now?: Date): DefaultDeadline => ({
   estimated: true,
 });
 
-/** 결혼 비용 목표(O-19a~c, 06 11장): 목표 = 총예산 − 양가 지원, 보유액 = 모아둔 돈 */
-export function weddingGoal(o: { budget: Won; support: Won; saved: Won }) {
-  return {
-    target: Math.max(o.budget - o.support, 0),
-    held: o.saved,
-    surplus: Math.max(o.support + o.saved - o.budget, 0),
-  };
-}
-
-/** O-13 만 18세 미만인지(KST 올해 기준) */
-export const isMinorBirthYear = (birthYear: number, now = new Date()) =>
-  birthYear > Number(thisMonth(now).slice(0, 4)) - 18;
-
-/** 만 나이(KST 오늘 기준). 생일이 아직 안 지났으면 한 살 적게 */
-export function manAge(b: { y: number; m: number; d: number }, now = new Date()): number {
-  const [ty = 0, tm = 1, td = 1] = todayKst(now).split('-').map(Number);
-  return ty - b.y - (tm < b.m || (tm === b.m && td < b.d) ? 1 : 0);
-}
 /** 생년월일 휠 범위: 1950년 ~ (올해 − 18)년(O-13, P-04) */
 export const birthYearRange = (now = new Date()) => ({
   min: 1950,
   max: Number(todayKst(now).slice(0, 4)) - 18,
 });
-/** {y,m,d} → 'YYYY-MM-DD' */
-export const ymdText = (b: { y: number; m: number; d: number }) =>
-  `${b.y}-${String(b.m).padStart(2, '0')}-${String(b.d).padStart(2, '0')}`;
-/** 만 18세 미만(O-13, P-04 생년월일). 서버 delete_underage_account와 같은 기준 */
-export const isUnderage = (b: { y: number; m: number; d: number }, now = new Date()) =>
-  manAge(b, now) < 18;
-
-/** 첫 주 5일째(16 O-22~25) 남은 화면 하나 */
-export type RestGoalScreen =
-  | { goalId: string; screen: 'q'; index: number }
-  | { goalId: string; screen: 'deadline' }
-  | { goalId: string; screen: 'held' };
-
-export interface RestGoal {
-  id: string;
-  template: string;
-  priority: number;
-  status: string;
-  deadline: string | null;
-  details: unknown;
-}
-
-const RESTING = ['paused', 'achieved', 'used'];
-/** O-22 순서 정하기 대상: 비상금·결혼 비용·양가 비용(자동 목표) 빼고 진행 중인 목표, 우선순위 순 */
-export const orderableGoals = <G extends RestGoal>(goals: G[]) =>
-  goals
-    .filter(
-      (g) =>
-        !['emergency', 'wedding', 'family_cost'].includes(g.template) &&
-        !RESTING.includes(g.status),
-    )
-    .sort((a, b) => a.priority - b.priority);
-
-/**
- * 아직 묻지 않은 O-23(질문마다) → O-24(기한을 묻는 목표인데 비어 있으면) → O-25(모아둔 돈, 매달 목표 빼고) 화면, 우선순위 순.
- * 고금리 대출 갚기는 묻지 않음, 각자 관리 예비부부는 결혼일 전환에서 물어 비움. O-25를 물었으면 details._held = true
- */
-export function restGoalScreens(goals: RestGoal[], separate: boolean): RestGoalScreen[] {
-  if (separate) return [];
-  const out: RestGoalScreen[] = [];
-  for (const g of orderableGoals(goals)) {
-    const t = templateByKey(g.template);
-    if (!t || g.template === 'high_interest_loan') continue;
-    const a = (g.details ?? {}) as Answers;
-    t.questions.forEach((q, i) => {
-      if (a[q.id] === undefined) out.push({ goalId: g.id, screen: 'q', index: i + 1 });
-    });
-    const answered = t.questions.every((q) => a[q.id] !== undefined);
-    if (answered && t.asksDeadline(a) && !g.deadline)
-      out.push({ goalId: g.id, screen: 'deadline' });
-    if (answered && t.kind(a) !== 'monthly' && a._held !== true)
-      out.push({ goalId: g.id, screen: 'held' });
-  }
-  return out;
-}

@@ -1,4 +1,4 @@
-import { keepLogin, webAuth } from '@sweetwo/api';
+import { webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
 import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
@@ -37,7 +37,6 @@ export function A02Login() {
   };
   const online = useOnline();
   const recent = prefs.lastProvider();
-  const [keep, setKeep] = useState(() => keepLogin.get());
   const [busy, setBusy] = useState<AuthProvider | null>(null);
   const [notice, setNotice] = useState(st.notice);
   const entry: Entry = st.entry ?? (recent ? 'revisit' : 'first_run');
@@ -55,7 +54,6 @@ export function A02Login() {
     }
     // 웹: 지금은 리다이렉트만(넓은 창 팝업은 아직)
     track('login_started', { method: p, entry, flow: 'redirect' });
-    keepLogin.set(keep);
     prefs.setPendingProvider(p);
     try {
       await webAuth.start(p, `${window.location.origin}${paths.callback}`);
@@ -98,19 +96,6 @@ export function A02Login() {
               {copy.continueWith[p]}
             </ProviderButton>
           ))}
-          {!desktop && (
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={keep}
-              className="hg-consent__check"
-              style={{ justifyContent: 'center' }}
-              onClick={() => setKeep(!keep)}
-            >
-              <span className={keep ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
-              <span className="hg-consent__label">{copy.keepLogin}</span>
-            </button>
-          )}
         </>
       }
       note={!online ? copy.offline : notice}

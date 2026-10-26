@@ -108,6 +108,7 @@ export function W02Checklist() {
   const total = list.pay_check_line.length;
   const done = doneCount(list);
   const readOnly = isPast(list.cycle_end);
+  const partnerTab = !joint && tab !== meId;
   const row = (l: PayCheckLine) => (
     <CheckLine
       key={l.id}
@@ -116,7 +117,8 @@ export function W02Checklist() {
       personName={personName}
       meId={meId}
       readOnly={readOnly}
-      onOther={() => setOther(l)}
+      // 배우자 탭은 보기 + 대신 체크만(20 W-02 2번): ‘다른 금액’ 없음
+      onOther={partnerTab ? undefined : () => setOther(l)}
     />
   );
   return (

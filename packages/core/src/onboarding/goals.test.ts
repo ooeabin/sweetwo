@@ -2,18 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { bands } from './bands';
 import {
   babyDeadline,
-  isMinorBirthYear,
-  isUnderage,
-  manAge,
   monthlyNeed,
-  orderableGoals,
   recommendedGoals,
-  restGoalScreens,
-  type RestGoal,
   skipsTopGoalQuestions,
   templateByKey,
   unsureDeadline,
-  weddingGoal,
 } from './goals';
 import { addYears, nextOccurrence, thisMonth } from './month';
 
@@ -124,80 +117,11 @@ describe('온보딩 분기', () => {
     expect(skipsTopGoalQuestions('high_interest_loan')).toBe(false);
     expect(skipsTopGoalQuestions('home')).toBe(false);
   });
-  it('결혼 비용: 목표 = 총예산 − 양가 지원, 보유액 = 모아둔 돈, 넘치면 여유', () => {
-    expect(weddingGoal({ budget: 30_000_000, support: 10_000_000, saved: 5_000_000 })).toEqual({
-      target: 20_000_000,
-      held: 5_000_000,
-      surplus: 0,
-    });
-    expect(
-      weddingGoal({ budget: 30_000_000, support: 20_000_000, saved: 15_000_000 }).surplus,
-    ).toBe(5_000_000);
-  });
-  it('만 나이: 생일 전이면 한 살 적게(KST)', () => {
-    const d = new Date('2026-10-21T00:00:00+09:00');
-    expect(manAge({ y: 1996, m: 10, d: 21 }, d)).toBe(30);
-    expect(manAge({ y: 1996, m: 10, d: 22 }, d)).toBe(29);
-    expect(isUnderage({ y: 2008, m: 10, d: 21 }, d)).toBe(false);
-    expect(isUnderage({ y: 2008, m: 10, d: 22 }, d)).toBe(true);
-  });
-  it('만 18세 미만(2026년 기준 2008년생까지 가능)', () => {
-    expect(isMinorBirthYear(2008, now)).toBe(false);
-    expect(isMinorBirthYear(2009, now)).toBe(true);
-  });
+
   it('구간 중간값(첫 구간 = 상한의 1/2, 끝 구간 = 하한)', () => {
     expect(bands.weddingBudget.map((b) => b.value / 10_000)).toEqual([
       1000, 2500, 4000, 7500, 10000,
     ]);
     expect(bands.goalAmount.map((b) => b.value / 10_000)).toEqual([500, 2000, 6500, 20000, 30000]);
-  });
-});
-
-describe('첫 주 5일째 남은 목표 화면(O-22~25)', () => {
-  const g = (o: Partial<RestGoal> & { id: string; template: string }) => ({
-    priority: 1,
-    status: 'active',
-    deadline: null,
-    details: {},
-    ...o,
-  });
-  it('묻지 않은 질문 → 기한 → 모아둔 돈, 우선순위 순. 비상금·결혼 비용·고금리 대출·매달 목표 규칙', () => {
-    const home = templateByKey('home');
-    const answeredHome = Object.fromEntries((home?.questions ?? []).map((q) => [q.id, 1]));
-    const list = restGoalScreens(
-      [
-        g({ id: 'e', template: 'emergency', priority: 0 }),
-        g({
-          id: 'h',
-          template: 'home',
-          priority: 1,
-          details: answeredHome,
-          deadline: '2031-10-01',
-        }),
-        g({ id: 'r', template: 'retirement', priority: 3 }),
-        g({ id: 'l', template: 'high_interest_loan', priority: 4 }),
-        g({ id: 'b', template: 'big_purchase', priority: 2 }),
-      ],
-      false,
-    );
-    expect(list).toEqual([
-      { goalId: 'h', screen: 'held' },
-      { goalId: 'b', screen: 'q', index: 1 },
-      { goalId: 'b', screen: 'q', index: 2 },
-      { goalId: 'r', screen: 'q', index: 1 },
-    ]);
-    // 질문을 다 답하면 기한(빈 칸) → 모아둔 돈. 매달 목표(노후)는 모아둔 돈 없음
-    const r2 = restGoalScreens(
-      [
-        g({ id: 'b', template: 'big_purchase', details: { what: '노트북', amount: 2_000_000 } }),
-        g({ id: 'r', template: 'retirement', priority: 2, details: { amount: 300_000 } }),
-      ],
-      false,
-    );
-    expect(r2.map((x) => `${x.goalId}:${x.screen}`)).toEqual(['b:deadline', 'b:held']);
-    expect(restGoalScreens([g({ id: 'b', template: 'big_purchase' })], true)).toEqual([]);
-    expect(
-      orderableGoals([g({ id: 'w', template: 'wedding' }), g({ id: 'x', template: 'pet' })]),
-    ).toHaveLength(1);
   });
 });

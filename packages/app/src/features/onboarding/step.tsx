@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useGoals, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
-import { joinedSpace, nextOf, prevOf, progressOf, screens, type FlowState } from './flow';
+import { nextOf, prevOf, progressOf, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
@@ -21,7 +21,7 @@ export function useStep(id: string) {
   const partner = usePartner(space.data?.couple_state === 'connected');
   const state: FlowState = {
     me: me.data,
-    space: joinedSpace(space.data, partner.data),
+    space: space.data,
     partner: partner.data,
     goals: goals.data,
     inviteNow,
@@ -51,7 +51,7 @@ export function useStep(id: string) {
       const [m, s, g] = await Promise.all([me.refetch(), space.refetch(), goals.refetch()]);
       const fresh: FlowState = {
         me: m.data,
-        space: joinedSpace(s.data, partner.data),
+        space: s.data,
         partner: partner.data,
         goals: g.data,
         inviteNow: useOnboardingLocal.getState().inviteNow,

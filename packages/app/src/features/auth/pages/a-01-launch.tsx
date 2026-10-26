@@ -1,5 +1,5 @@
 import { fetchLaunchConfig } from '@sweetwo/api';
-import { formatKstDateTime, isBelowMin, WEB_IDLE_LOCK_MS } from '@sweetwo/core';
+import { formatKstDateTime, isBelowMin } from '@sweetwo/core';
 import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -59,11 +59,6 @@ export function A01Launch() {
         /* 설정을 못 읽으면 막지 않는다 */
       }
     }
-    if (session.webKeepExpired()) {
-      await session.signOut();
-      setPhase('ready');
-      return nav(paths.expired, { replace: true, state: { reason: 'days14' } });
-    }
     const has = await session.has();
     setSignedIn(has);
     if (!has) {
@@ -110,8 +105,6 @@ export function A01Launch() {
       }
     });
   }, [nav]);
-
-  useWebIdleLock(signedIn && phase === 'ready');
 
   if (phase === 'maintenance') {
     return (
@@ -227,30 +220,4 @@ export function RequireAccount({ children }: { children: React.ReactNode }) {
   }, [loc.pathname]);
   if (ok === null) return null;
   return ok ? <>{children}</> : <Navigate to={paths.login} replace />;
-}
-
-/** 웹: 30분 동안 아무 입력이 없으면 A-08(‘오래 자리를 비워서 잠갔어요’) */
-function useWebIdleLock(active: boolean) {
-  const nav = useNavigate();
-  const loc = useLocation();
-  const here = useRef(loc.pathname);
-  here.current = loc.pathname + loc.search;
-  useEffect(() => {
-    if (!active || session.platform !== 'web') return;
-    let last = Date.now();
-    const bump = () => (last = Date.now());
-    const evs = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
-    evs.forEach((e) => window.addEventListener(e, bump, { passive: true }));
-    const t = setInterval(() => {
-      if (Date.now() - last < WEB_IDLE_LOCK_MS) return;
-      prefs.setReturnTo(here.current);
-      void session
-        .signOut()
-        .then(() => nav(paths.expired, { replace: true, state: { reason: 'idle' } }));
-    }, 30_000);
-    return () => {
-      evs.forEach((e) => window.removeEventListener(e, bump));
-      clearInterval(t);
-    };
-  }, [active, nav]);
 }
