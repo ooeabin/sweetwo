@@ -2250,6 +2250,61 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_outbox: {
+        Row: {
+          attempts: number
+          body_html: string
+          body_text: string
+          capped: boolean
+          claimed_at: string | null
+          created_at: string
+          dedupe: string
+          id: string
+          kind: string
+          last_error: string | null
+          message_id: string | null
+          sent_at: string | null
+          subject: string
+          to_email: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          attempts?: number
+          body_html: string
+          body_text: string
+          capped: boolean
+          claimed_at?: string | null
+          created_at?: string
+          dedupe: string
+          id?: string
+          kind: string
+          last_error?: string | null
+          message_id?: string | null
+          sent_at?: string | null
+          subject: string
+          to_email: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          body_html?: string
+          body_text?: string
+          capped?: boolean
+          claimed_at?: string | null
+          created_at?: string
+          dedupe?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          message_id?: string | null
+          sent_at?: string | null
+          subject?: string
+          to_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       month_close: {
         Row: {
           big_none: boolean
@@ -4058,6 +4113,32 @@ export type Database = {
         }
         Returns: string
       }
+      claim_mail: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          body_html: string
+          body_text: string
+          capped: boolean
+          claimed_at: string | null
+          created_at: string
+          dedupe: string
+          id: string
+          kind: string
+          last_error: string | null
+          message_id: string | null
+          sent_at: string | null
+          subject: string
+          to_email: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mail_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       close_together_active: {
         Args: {
           c: Omit<
@@ -4181,10 +4262,27 @@ export type Database = {
       end_access: { Args: { p_id: string }; Returns: undefined }
       end_income_periods: { Args: Record<PropertyKey, never>; Returns: number }
       end_sessions: { Args: { p_id?: string }; Returns: number }
+      enqueue_mail: {
+        Args: {
+          p_capped: boolean
+          p_dedupe: string
+          p_html: string
+          p_kind: string
+          p_subject: string
+          p_text: string
+          p_topic: string
+          p_user: string
+        }
+        Returns: boolean
+      }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
+      finish_mail: {
+        Args: { p_error?: string; p_id: string; p_message_id?: string }
+        Returns: undefined
+      }
       finish_unlink: { Args: { p_how: string; p_id: string }; Returns: undefined }
       flush_partner_changes: { Args: { p_now?: string }; Returns: number }
       goal_asset_sums: {
@@ -4218,6 +4316,7 @@ export type Database = {
           together: number
         }[]
       }
+      html_esc: { Args: { t: string }; Returns: string }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4241,6 +4340,7 @@ export type Database = {
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
+      kick_mail: { Args: Record<PropertyKey, never>; Returns: boolean }
       ko_batchim: { Args: { w: string }; Returns: boolean }
       ko_is: { Args: { w: string }; Returns: string }
       ko_obj: { Args: { w: string }; Returns: string }
@@ -4681,6 +4781,13 @@ export type Database = {
           p_rest_goal?: string
         }
         Returns: Json
+      }
+      weekly_mail_body: {
+        Args: { p_actor: string; p_receiver: string; p_today: string }
+        Returns: {
+          body_html: string
+          body_text: string
+        }[]
       }
       withdraw_proposal: {
         Args: { p_id: string }

@@ -3,16 +3,17 @@ import { CH } from '../shared/channels';
 import { findDeepLink, parseDeepLink, type DeepLink } from './deep-link-parse';
 
 // sweetwo:// 링크를 받는다. macOS는 open-url, Windows와 Linux는 두 번째 실행의 argv로 온다.
-// 로그인 콜백(code, state)은 main에서만 다룬다(렌더러로 보내지 않음). 초대만 렌더러로.
+// 로그인 콜백(code, state)은 main에서만 다룬다(렌더러로 보내지 않음). 초대와 알림 메일 링크(정한 화면)만 렌더러로.
 export const PROTOCOL = 'sweetwo';
 
-type AuthCallback = Exclude<DeepLink, { kind: 'invite' }>;
+type AuthCallback = Exclude<DeepLink, { kind: 'invite' } | { kind: 'open' }>;
 
 export function setupDeepLinks(
   getWindow: () => BrowserWindow | null,
   onAuthCallback: (cb: AuthCallback) => void,
 ) {
   let pendingInvite: string | undefined;
+  let pendingPath: string | undefined;
 
   const focus = () => {
     const win = getWindow();
@@ -26,8 +27,13 @@ export function setupDeepLinks(
     const link = parseDeepLink(raw);
     if (!link) return; // 허용 목록 밖은 버림
     focus();
-    if (link.kind !== 'invite') return onAuthCallback(link);
     const win = getWindow();
+    if (link.kind === 'open') {
+      if (!win || win.webContents.isLoading()) pendingPath = link.path;
+      else win.webContents.send(CH.navigate, link.path);
+      return;
+    }
+    if (link.kind !== 'invite') return onAuthCallback(link);
     if (!win || win.webContents.isLoading()) pendingInvite = link.code;
     else win.webContents.send(CH.invite, link.code);
   };
@@ -49,6 +55,10 @@ export function setupDeepLinks(
       if (pendingInvite) {
         win.webContents.send(CH.invite, pendingInvite);
         pendingInvite = undefined;
+      }
+      if (pendingPath) {
+        win.webContents.send(CH.navigate, pendingPath);
+        pendingPath = undefined;
       }
     });
   };

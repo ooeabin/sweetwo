@@ -2,11 +2,19 @@
 // - sweetwo://auth/callback?code=…&state=… : code, state만 받는다
 // - sweetwo://auth/callback?error=…&state=… : 브라우저에서 취소, 동의 거부(error는 영문 소문자와 _만)
 // - sweetwo://i/{code} : 초대
+// - sweetwo://n, sweetwo://n/settings : 알림 메일 링크(알림 센터, 알림 설정). 정한 화면만
 // 나머지는 모두 버린다(null).
 export type DeepLink =
   | { kind: 'auth'; code: string; state: string }
   | { kind: 'auth_error'; error: string; state: string }
-  | { kind: 'invite'; code: string };
+  | { kind: 'invite'; code: string }
+  | { kind: 'open'; path: string };
+
+/** 알림 메일 링크(sweetwo.kr/n…) → 앱 화면. 여기 없는 것은 버림 */
+const OPEN: Record<string, string> = {
+  n: '/notifications',
+  'n/settings': '/settings/notifications',
+};
 
 const TOKEN = /^[A-Za-z0-9._~-]{1,512}$/;
 const INVITE = /^[A-Za-z0-9]{4,32}$/;
@@ -29,6 +37,8 @@ export function parseDeepLink(raw: string): DeepLink | null {
     if (error) return ERROR.test(error) ? { kind: 'auth_error', error, state } : null;
     return TOKEN.test(code) ? { kind: 'auth', code, state } : null;
   }
+  const open = OPEN[path];
+  if (open && !url.search) return { kind: 'open', path: open };
   const m = /^i\/([^/]+)$/.exec(path);
   if (m?.[1] && INVITE.test(m[1])) return { kind: 'invite', code: m[1] };
   return null;

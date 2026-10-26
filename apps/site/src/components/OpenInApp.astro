@@ -1,0 +1,23 @@
+---
+// 알림 메일 링크(sweetwo.kr/n, /n/settings, 14 ‘센터와 푸시·메일’). 앱(sweetwo://n…)으로 열기를 한 번 시도하고,
+// 앱이 없으면 “sweeTwo 앱에서 열어 주세요” + 앱 받기. 앱 안에서는 정한 화면만 염(데스크톱 deep-link-parse.ts).
+import { t } from '../lib/site';
+
+interface Props {
+  path: 'n' | 'n/settings';
+}
+const { path } = Astro.props;
+---
+
+<section class="hg-site__sec" style="border-top: 0;" data-open-in-app={path}>
+  <h1 class="hg-site__h2">{t.openInSweetwo}</h1>
+  <div class="hg-row" style="gap: var(--space-2); flex-wrap: wrap;">
+    <a class="hg-btn hg-btn--primary" href={`sweetwo://${path}`}>{t.openApp}</a>
+    <a class="hg-btn hg-btn--secondary" href="/download">{t.getApp}</a>
+  </div>
+</section>
+<script>
+  const box = document.querySelector<HTMLElement>('[data-open-in-app]');
+  const path = box?.dataset.openInApp;
+  if (path === 'n' || path === 'n/settings') location.href = `sweetwo://${path}`;
+</script>

@@ -1,10 +1,10 @@
 name: Deploy staging
-# develop에 합치면 마이그레이션을 staging Supabase에 올린다(개발 서버, docs/DEV_GUIDE.md ‘CI/CD’, ADR 0002).
+# develop에 합치면 마이그레이션과 Edge Function을 staging Supabase에 올린다(개발 서버, docs/DEV_GUIDE.md ‘CI/CD’, ADR 0002).
 # 비밀 값은 GitHub 저장소 Settings → Environments → staging에만 둔다.
 on:
   push:
     branches: [develop]
-    paths: ['supabase/migrations/**']
+    paths: ['supabase/migrations/**', 'supabase/functions/**', 'supabase/config.toml']
   workflow_dispatch:
 concurrency:
   group: deploy-staging
@@ -27,3 +27,5 @@ jobs:
         run: supabase migration list
       - name: 마이그레이션 올리기
         run: supabase db push
+      - name: Edge Function 올리기(send-mail, 비밀 값은 대시보드에서 따로 넣음)
+        run: supabase functions deploy send-mail --project-ref "$PROJECT_REF"

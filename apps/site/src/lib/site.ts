@@ -104,4 +104,8 @@ export const t = {
   openInApp: 'sweeTwo 앱으로 열까요?',
   openApp: '앱으로 열기',
   webContinueInvite: '웹에서 계속하기',
+
+  // 알림 메일 링크(14 ‘센터와 푸시·메일’): 앱이 없으면 안내 + 앱 받기
+  openInSweetwo: 'sweeTwo 앱에서 열어 주세요',
+  getApp: '앱 받기',
 };
