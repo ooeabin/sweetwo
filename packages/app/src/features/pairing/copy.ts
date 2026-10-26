@@ -29,6 +29,18 @@ export const copy = {
   },
   hasRecords: '이미 시작한 기록이 있어요',
   hasRecordsHelp: '수입·자산 같은 내 정보만 옮겨요',
+  // P-02a 혼자 쓰던 기록 옮기기
+  moveTitle: '내 정보만 옮겨요',
+  paydayDay: (d: number) => `${d}일`,
+  moveSalary: (amount: string, day: string) => `월급 ${amount}, 월급날 ${day}`,
+  moveVisLabel: (name: string) => `${name} 공개 범위`,
+  moveVis: { all: '모두 보여 주기', sum: '금액만 보여 주기' } as Record<string, string>,
+  moveNone: '옮길 정보가 없어요',
+  moveSkip: '안 옮겨요',
+  moveSkipCounts: (goals: number, splits: number, lists: number) =>
+    `목표 ${goals}개, 분배표 ${splits}개, 체크리스트 ${lists}개`, // [확인 필요]
+  moveKeep: '30일 보관 후 지워져요',
+  moveCopy: '사본 내려받기',
 
   // P-02b
   prefillTitle: (starter: string) => `${starter}님이 미리 적어 둔 내 정보가 있어요`,

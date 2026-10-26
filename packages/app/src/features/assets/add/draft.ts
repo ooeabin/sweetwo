@@ -8,6 +8,8 @@ export interface AssetDraft {
   kind: string | null;
   name: string | null;
   amount: number | null;
+  /** ‘잘 모르겠어요’ 구간 중간값으로 정함(F-03 6번) */
+  estimated: boolean;
   owner: 'me' | 'partner' | 'joint' | null;
   visibility: 'all' | 'sum' | 'private';
   /** F-03f~i 유형별 질문(나중에 해도 됨) */
@@ -22,6 +24,7 @@ const empty: AssetDraft = {
   kind: null,
   name: null,
   amount: null,
+  estimated: false,
   owner: null,
   visibility: 'sum', // 기본 = 금액만 보여 주기
   maturity: null,

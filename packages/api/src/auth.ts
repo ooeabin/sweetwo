@@ -67,6 +67,17 @@ export const webAuth = {
   },
 };
 
+/** O-03: 소셜 로그인이 알려 준 이름(미리 채움, 최대 10자). 없으면 null */
+export async function fetchSocialName(): Promise<string | null> {
+  const { data } = await supabase().auth.getSession();
+  const m: Record<string, unknown> = data.session?.user.user_metadata ?? {};
+  for (const k of ['name', 'full_name', 'nickname', 'preferred_username', 'user_name']) {
+    const v = m[k];
+    if (typeof v === 'string' && v.trim()) return [...v.trim()].slice(0, 10).join('');
+  }
+  return null;
+}
+
 /** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
 export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
   min: string;

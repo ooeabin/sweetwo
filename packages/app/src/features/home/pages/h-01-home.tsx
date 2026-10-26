@@ -1,9 +1,11 @@
-import { fetchUnlinkPartnerName, qk } from '@sweetwo/api';
-import { formatDateWeekday, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
+import { createInvite, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
+  LoadingFrame,
+  AddMenu,
   H06NetWorth,
   MainFrame,
   todoText,
@@ -13,6 +15,7 @@ import {
   useNoticeBand,
 } from '../../frame';
 import {
+  goalLineName,
   myChecklist,
   savedOf,
   salaryPaths,
@@ -21,6 +24,7 @@ import {
   useSplits,
   waiting,
 } from '../../salary';
+import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
@@ -47,7 +51,8 @@ export function H01Home() {
   });
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
-  if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
+  if (!me.data || !space.data || !goals.data || lists.isLoading)
+    return <LoadingFrame current="month" />;
 
   // 연결 해제 확정 뒤 처음 열면 해제 안내(25 S-12h)
   if (me.data.onboarding_step === 'S-12H')
@@ -79,9 +84,9 @@ export function H01Home() {
   const partnerList =
     !joint && joined ? lists.data?.find((c) => c.owner_user_id === partner.data?.id) : undefined;
   const left = list ? waiting(list).length : 0;
-  const goalName = (id: string | null) => goals.data.find((g) => g.id === id)?.name ?? '';
   const personName = (id: string | null) =>
     id === meId ? myName : (partner.data?.nickname ?? null);
+  const goalName = goalLineName(goals.data, personName, joint);
   const saved = (g: (typeof goals.data)[number]) => savedOf(g, sums.data);
   const split = splits.data?.find((x) => x.owner_user_id === (joint ? null : meId));
   const monthly = (g: { id: string }) =>
@@ -103,7 +108,9 @@ export function H01Home() {
         : copy.hi(myName);
 
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
-  const t = h.input ? homeTodo(h.input) : null;
+  const t0 = h.input ? homeTodo(h.input) : null;
+  // 해제 대기 띠가 있으면 같은 할 일 줄은 빼고 띠만
+  const t = t0?.kind === 'unlink' && h.unlink ? null : t0;
   const todo = t
     ? {
         text: todoText(t, { partner: partner.data?.nickname ?? '', exPartner: exName.data ?? '' }),
@@ -111,7 +118,10 @@ export function H01Home() {
         close:
           t.kind === 'invite'
             ? h.closeInvite
-            : t.kind === 'matured' || t.kind === 'care'
+            : t.kind === 'matured' ||
+                t.kind === 'care' ||
+                t.kind === 'review' ||
+                t.kind === 'amount'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -119,9 +129,25 @@ export function H01Home() {
   const todoBand = todo ? (
     <div className="hg-banner hg-banner--info hg-body__banner" role="status">
       <span>{todo.text}</span>
-      <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
-        {copy.open}
-      </Button>
+      {t?.kind === 'invite' ? (
+        // H-06 초대: ‘코드 복사’(코드를 만들거나 지금 코드를 그대로 복사). 코드 화면은 S-12
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            void createInvite()
+              .then((r) => navigator.clipboard.writeText(r.code))
+              .then(() => toast(copy.codeCopied))
+              .catch(() => nav(todo.to))
+          }
+        >
+          {copy.copyCode}
+        </Button>
+      ) : (
+        <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
+          {copy.open}
+        </Button>
+      )}
       {todo.close && (
         <Button variant="ghost" size="sm" onClick={todo.close}>
           {copy.close}
@@ -129,9 +155,25 @@ export function H01Home() {
       )}
     </div>
   ) : undefined;
+  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
+  const unlinkBand = h.unlink ? (
+    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+      <span>
+        <b>{copy.unlinkWait}</b> {copy.unlinkOn(formatMonthDay(h.unlink.deadline))}
+      </span>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => nav(h.unlink?.mine ? '/settings/couple' : '/settings/couple/unlink/review')}
+      >
+        {copy.unlinkCheck}
+      </Button>
+    </div>
+  ) : undefined;
   const banner =
-    notice || todoBand ? (
+    notice || todoBand || unlinkBand ? (
       <>
+        {unlinkBand}
         {notice}
         {todoBand}
       </>
@@ -166,9 +208,7 @@ export function H01Home() {
         title,
         actions: (
           <>
-            <Button variant="secondary" onClick={() => nav('/goals/new')}>
-              {copy.add}
-            </Button>
+            <AddMenu />
             {left > 0 && (
               <Button variant="primary" onClick={() => nav(salaryPaths.checklist)}>
                 {copy.check}
@@ -187,6 +227,8 @@ export function H01Home() {
             list={list}
             personName={personName}
             meId={meId}
+            joined={joined}
+            solo={space.data.couple_state === 'solo'}
             go={go}
           />
           <SalaryCard

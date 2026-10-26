@@ -12,6 +12,7 @@ import {
 } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { copy } from './copy';
+import { goalLineName } from './check-line';
 import { toAllocGoal } from './split-draft';
 
 const MAX_CUSTOM = 10;
@@ -44,6 +45,9 @@ export function SplitEditor({
   steps,
   noteOf,
   incomeSub,
+  onIncome,
+  notice,
+  readOnly,
 }: {
   lines: SplitLineDraft[];
   onChange: (lines: SplitLineDraft[]) => void;
@@ -71,6 +75,12 @@ export function SplitEditor({
   noteOf?: (l: SplitLineDraft) => string | undefined;
   /** 수입 줄 아래 회색 글(합쳐서 “찬우 350만 원, 예빈 270만 원”) */
   incomeSub?: string;
+  /** 수입 줄을 누르면(W-01 2번 → 설정 내 월급 S-11) */
+  onIncome?: () => void;
+  /** 목록 위 안내 한 줄(해제 대기 등) */
+  notice?: ReactNode;
+  /** 모든 줄 고치기 막음(연결 해제 대기, 20 예외) */
+  readOnly?: boolean;
 }) {
   const [edit, setEdit] = useState<Edit>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -79,9 +89,10 @@ export function SplitEditor({
   const sum = (k: SplitLineDraft['kind']) =>
     lines.filter((l) => l.kind === k).reduce((s, l) => s + l.amount, 0);
   const goalOf = (id?: string) => goals.find((g) => g.id === id);
+  const goalName = goalLineName(goals, (id) => personName(id ?? undefined), joint);
   const nameOf = (l: SplitLineDraft) =>
     l.kind === 'saving'
-      ? (goalOf(l.goalId)?.name ?? '')
+      ? goalName(l.goalId)
       : l.kind === 'custom'
         ? (l.name ?? '')
         : l.kind === 'allowance' && joint
@@ -101,7 +112,10 @@ export function SplitEditor({
     const line = isAdd ? undefined : lines[edit.index];
     const head = isAdd ? copy.addLineTitle : copy.lineAmount(line ? nameOf(line) : '');
     const v = amount ?? line?.amount ?? null;
-    const valid = v !== null && v % 10_000 === 0 && (!isAdd || name.trim().length > 0);
+    const renaming = !isAdd && line?.kind === 'custom';
+    const newName = isAdd || renaming ? name : '';
+    const valid =
+      v !== null && v % 10_000 === 0 && (!(isAdd || renaming) || newName.trim().length > 0);
     const close = () => {
       setEdit(null);
       setAmount(null);
@@ -119,12 +133,16 @@ export function SplitEditor({
           onChange(
             isAdd
               ? [...lines, { kind: 'custom', name: name.trim(), amount: v }]
-              : lines.map((l, i) => (i === edit.index ? { ...l, amount: v } : l)),
+              : lines.map((l, i) =>
+                  i === edit.index
+                    ? { ...l, amount: v, ...(renaming ? { name: newName.trim() } : {}) }
+                    : l,
+                ),
           );
           close();
         }}
       >
-        {isAdd && (
+        {(isAdd || renaming) && (
           <ShortText
             label={copy.newLineName}
             value={name}
@@ -160,14 +178,21 @@ export function SplitEditor({
           : need
             ? copy.needPerMonth(readWon(need))
             : undefined;
-    const fixed = locked?.(l);
+    const fixed = readOnly || locked?.(l);
     return (
       <ListRow
         key={`${l.kind}-${l.goalId ?? l.userId ?? l.name ?? i}`}
         label={nameOf(l)}
         sub={noteOf?.(l) ?? sub}
         value={readWon(l.amount)}
-        onClick={fixed ? undefined : () => setEdit({ index: i })}
+        onClick={
+          fixed
+            ? undefined
+            : () => {
+                setEdit({ index: i });
+                if (l.kind === 'custom') setName(l.name ?? '');
+              }
+        }
       />
     );
   };
@@ -189,12 +214,14 @@ export function SplitEditor({
         </>
       }
     >
+      {notice}
       <List>
         <ListRow
           label={copy.splitIncome(readWon(income))}
           sub={incomeSub}
           value={paydayText}
-          chevron={false}
+          chevron={!!onIncome}
+          onClick={onIncome}
         />
       </List>
       <SectionHeader title={copy.savingGroup} />
@@ -205,7 +232,7 @@ export function SplitEditor({
       <List label={copy.spendGroup}>
         {indexed.filter(({ l }) => l.kind !== 'saving').map(({ l, i }) => row(l, i))}
       </List>
-      {customs < MAX_CUSTOM && (
+      {!readOnly && customs < MAX_CUSTOM && (
         <Button
           variant="ghost"
           onClick={() => {

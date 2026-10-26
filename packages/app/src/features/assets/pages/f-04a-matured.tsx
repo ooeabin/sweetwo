@@ -26,7 +26,8 @@ export function F04aMatured() {
   const a = d.items.find((x) => x.id === id);
   if (!a || !canEdit(a, d.me?.id) || a.side !== 'asset') return <Navigate to="/assets" replace />;
   const today = todayKst();
-  if (!a.maturity_date || a.maturity_date > today) return <Navigate to={`/assets/${a.id}`} replace />;
+  if (!a.maturity_date || a.maturity_date > today)
+    return <Navigate to={`/assets/${a.id}`} replace />;
   const save = async (how: { to: string } | { newDate: string }) => {
     if (busy) return;
     setBusy(true);

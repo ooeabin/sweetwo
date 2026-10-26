@@ -158,3 +158,48 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월�
   await page.reload();
   await expect(page).toHaveURL(/\/join\/p-04$/);
 });
+
+test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류하기 → 내 정보만(자산 공개 범위) → 다음 → P-03', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.me, {
+    nickname: '예빈',
+    space_id: 'space-solo',
+    monthly_income: 2_700_000,
+    payday: 10,
+    onboarding_done_at: '2026-10-01T00:00:00Z',
+  });
+  db.assets.push({
+    id: 'a-y',
+    space_id: 'space-solo',
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'saving',
+    name: '예빈 적금',
+    amount: 5_000_000,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    visibility: 'all',
+    deleted_at: null,
+  });
+  await page.goto('/i/K7M2QX');
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(page.getByRole('heading', { name: '이미 시작한 기록이 있어요' })).toBeVisible();
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(page.getByRole('heading', { name: '내 정보만 옮겨요' })).toBeVisible();
+  await expect(page.getByText('월급 270만 원, 월급날 10일')).toBeVisible();
+  const pick = page.getByRole('combobox', { name: '예빈 적금 공개 범위' });
+  await expect(pick).toHaveValue('sum');
+  await pick.selectOption('all');
+  await expect(page.getByText(/30일 보관 후 지워져요/)).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  expect(db.assets.find((a) => a.id === 'a-y')).toMatchObject({
+    space_id: 'space-1',
+    visibility: 'all',
+  });
+});

@@ -8,6 +8,24 @@ import { useCheck } from './data';
 
 const LINE_NAMES = { fixed: '고정지출', living: '생활비', allowance: '용돈' } as const;
 
+/**
+ * 저금 줄 목표 이름. 합쳐서 모드에서 내 목표 줄은 앞에 주인 이름(“찬우 자기계발”, 20 W-01 3번).
+ * 배우자 내 목표가 ‘금액만 보여 주기’면 서버가 이미 “개인 목표”로 줌(space_goals)
+ */
+export const goalLineName =
+  (
+    goals: { id: string; name: string; owner_user_id: string | null }[],
+    personName: (id: string | null) => string | null,
+    joint: boolean,
+  ) =>
+  (id: string | null | undefined) => {
+    const g = goals.find((x) => x.id === id);
+    if (!g) return '';
+    return joint && g.owner_user_id
+      ? `${personName(g.owner_user_id) ?? ''} ${g.name}`.trim()
+      : g.name;
+  };
+
 /** 줄 이름: 저금은 목표 이름, 용돈은 “{이름} 용돈”(합쳐서), 직접 추가 줄은 그 이름 */
 export function lineName(
   l: Pick<PayCheckLine, 'kind' | 'goal_id' | 'user_id' | 'name'>,

@@ -320,6 +320,7 @@ export type Database = {
           adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
+          app_seen_at: string | null
           avatar_path: string | null
           avatar_updated_at: string | null
           birth_day: number | null
@@ -359,6 +360,7 @@ export type Database = {
           adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
+          app_seen_at?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
@@ -397,6 +399,7 @@ export type Database = {
           adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
+          app_seen_at?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
@@ -563,6 +566,7 @@ export type Database = {
           id: number
           principal: number | null
           recorded_at: string
+          recorded_by: string | null
           source: string
           space_id: string
         }
@@ -573,6 +577,7 @@ export type Database = {
           id?: never
           principal?: number | null
           recorded_at?: string
+          recorded_by?: string | null
           source?: string
           space_id: string
         }
@@ -582,6 +587,7 @@ export type Database = {
           id?: never
           principal?: number | null
           recorded_at?: string
+          recorded_by?: string | null
           source?: string
           space_id?: string
         }
@@ -1716,6 +1722,7 @@ export type Database = {
           icon: string | null
           id: string
           kind: string
+          mailed_at: string | null
           push_hidden: boolean
           push_title: string | null
           read_at: string | null
@@ -1734,6 +1741,7 @@ export type Database = {
           icon?: string | null
           id?: string
           kind: string
+          mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
           read_at?: string | null
@@ -1751,6 +1759,7 @@ export type Database = {
           icon?: string | null
           id?: string
           kind?: string
+          mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
           read_at?: string | null
@@ -2524,6 +2533,7 @@ export type Database = {
           adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
+          app_seen_at: string | null
           avatar_path: string | null
           avatar_updated_at: string | null
           birth_day: number | null
@@ -2579,6 +2589,10 @@ export type Database = {
           code: string
           expires_at: string
         }[]
+      }
+      cut_cycle: {
+        Args: { p_day: number; p_owner: string; p_space: string }
+        Returns: undefined
       }
       cycle_date: {
         Args: { m: number; p_day: number; y: number }
@@ -2677,6 +2691,10 @@ export type Database = {
         Returns: boolean
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
+      join_moving_records: {
+        Args: { p_code: string; p_vis?: Json }
+        Returns: string
+      }
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
@@ -2709,6 +2727,7 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mail_missed_notifications: { Args: { p_now?: string }; Returns: number }
       make_checklist: {
         Args: { p_owner: string; p_space: string; p_today?: string }
         Returns: string
@@ -2773,6 +2792,15 @@ export type Database = {
       next_base_after: {
         Args: { d: string; day: number; last: boolean }
         Returns: string
+      }
+      note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
+      noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
+      noti_mail_body: {
+        Args: { p_body: string; p_title: string }
+        Returns: {
+          body_html: string
+          body_text: string
+        }[]
       }
       notify: {
         Args: {
@@ -2860,6 +2888,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      purge_left_spaces: { Args: Record<PropertyKey, never>; Returns: number }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
@@ -2911,6 +2940,10 @@ export type Database = {
       save_split: {
         Args: { p_lines: Json; p_owner?: string }
         Returns: string
+      }
+      sell_asset: {
+        Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
+        Returns: number
       }
       send_evening_notifications: {
         Args: { p_today?: string }
@@ -2991,6 +3024,7 @@ export type Database = {
       stop_access: { Args: { p_id: string }; Returns: undefined }
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
       sync_wedding_care: { Args: { p_space: string }; Returns: undefined }
+      touch_app: { Args: Record<PropertyKey, never>; Returns: undefined }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {

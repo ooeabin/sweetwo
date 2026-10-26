@@ -78,7 +78,6 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
         close: copy.close,
         back: copy.back,
         emptyTitle: copy.empty,
-        emptySub: copy.emptySub,
         unread: copy.unread,
       }}
       groups={groups}

@@ -99,3 +99,43 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
     0,
   );
 });
+
+test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 고친 기록에 고친 사람', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedAssets(db);
+  const bank = db.assets.find((a) => a.id === 'a-bank') as Record<string, unknown>;
+  db.assets.push({
+    ...bank,
+    id: 'a-stock',
+    grp: 'invest',
+    kind: 'stock',
+    name: '찬우 주식',
+    amount: 10_000_000,
+    principal: 8_000_000,
+    monthly_payment: null,
+    interest_rate: null,
+    paid_count: null,
+    created_at: '2026-01-10T00:00:00Z',
+  });
+  await page.goto('/assets/a-stock');
+  await expect(page.getByRole('heading', { name: '찬우 주식' })).toBeVisible();
+  await page.getByRole('button', { name: '팔았어요' }).click();
+  await expect(page.getByRole('heading', { name: '받은 금액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('받은 금액은 얼마예요?').fill('5000000');
+  await page.getByRole('switch', { name: '일부만 팔았어요' }).click();
+  await page.getByLabel('남은 평가금액은요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
+  await expect(page.getByText('실현 손익 +100만 원')).toBeVisible();
+  await axe(page);
+  expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(8_000_000);
+  expect(db.assets.find((a) => a.id === 'a-stock')).toMatchObject({
+    amount: 5_000_000,
+    status: 'held',
+  });
+});

@@ -354,7 +354,8 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('region', { name: '금액' })).toContainText(
     '+200만 원, 원금 800만 원',
   );
-  await expect(page.getByRole('region', { name: '월별 기록' })).toContainText('월말 정리');
+  // 고친 기록은 직접 고친 것만(23 F-04 5번)
+  await expect(page.getByRole('region', { name: '월별 기록' })).not.toContainText('월말 정리');
   await axe(page);
   await page.getByRole('button', { name: '수정' }).click();
   await page.getByRole('textbox', { name: '금액' }).fill('12000000');
@@ -451,7 +452,9 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   expect(db.assets.at(-1)?.goal_id ?? null).toBeNull();
 });
 
-test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({ page }) => {
+test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db, false);
@@ -483,3 +486,28 @@ test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기
   });
 });
 
+test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 목록에 추정 알약', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/assets/items');
+  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await page.getByRole('button', { name: '예금·적금' }).click();
+  await page.getByRole('button', { name: '적금', exact: true }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '현재 금액은 얼마예요?');
+  await page.getByRole('button', { name: '잘 모르겠어요' }).click();
+  await page.getByRole('button', { name: '1~3천' }).click();
+  await heading(page, '누구 명의예요?');
+  await page.getByRole('radio', { name: /^나/ }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '만기일은 언제예요?');
+  // 유형별 질문은 나중에(F-03f)
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await heading(page, '월 납입액은요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
+  expect(db.assets.at(-1)).toMatchObject({ amount: 20_000_000, estimated: true });
+  const row = page.getByRole('button', { name: /^적금/ });
+  await expect(row).toContainText('추정');
+});

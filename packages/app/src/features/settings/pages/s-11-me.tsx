@@ -86,7 +86,16 @@ export function S11Me() {
       />
       {/* 1번 프로필 사진: 사진 있으면 사진, 없으면 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로 */}
       <div className="hg-row" style={{ gap: 'var(--space-4)', alignItems: 'center' }}>
-        <span className="hg-avatar-edit">
+        <span
+          className="hg-avatar-edit"
+          // 1번: Avatar 자리에 사진을 끌어 놓으면 그 사진으로 S-11e(자르기)
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) nav('/settings/me/photo', { state: { file } });
+          }}
+        >
           {photo ? (
             <span className="hg-avatar hg-avatar--xl hg-avatar--photo">
               <img src={photo} alt={c.myName} />

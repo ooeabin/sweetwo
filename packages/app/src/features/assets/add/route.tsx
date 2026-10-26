@@ -2,6 +2,7 @@ import { insertAsset } from '@sweetwo/api';
 import {
   assetGroup,
   assetGroupsOf,
+  bands,
   isHighInterestKind,
   quickChips,
   type AssetSide,
@@ -75,6 +76,7 @@ export function AssetAddRoute() {
         kind: x.kind,
         name: x.name.trim(),
         amount: x.amount,
+        estimated: x.estimated,
         owner: owner === 'joint' ? 'joint' : 'person',
         owner_user_id: owner === 'me' ? (d.me?.id ?? null) : null,
         visibility: owner === 'me' && !solo ? x.visibility : 'all',
@@ -205,9 +207,13 @@ export function AssetAddRoute() {
         <AmountInput
           label={title}
           value={draft.amount}
-          onChange={(amount) => set({ amount })}
+          onChange={(amount) => set({ amount, estimated: false })}
           quick={big ? quickChips.big : quickChips.small}
           allowZero
+          // 잘 모르겠어요 → 구간 칩, 중간값을 ‘추정’으로 저장(F-03 6번)
+          bands={bands.goalAmount}
+          unsureLabel={copy.unsure}
+          onBand={(b) => go({ amount: b.value, estimated: true })}
         />
       </QuestionLayout>
     );

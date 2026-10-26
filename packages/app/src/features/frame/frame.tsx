@@ -1,8 +1,12 @@
 import { coupleOf, formatDateWeekday, todayKst } from '@sweetwo/core';
 import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
+import { touchApp } from '@sweetwo/api';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
+import { useOnline } from '../../shared/online';
 import { N01Panel, useHasUnread, useNotiPanel, useNotiRealtime } from '../notifications';
+import { addFor, FrameCommands } from './command';
 import { copy } from './copy';
 import { useTraySync } from './tray-sync';
 import { useMe, usePartner, useSpace } from './data';
@@ -42,10 +46,42 @@ export function MainFrame(
     calendar: copy.tabCalendar,
   };
   const keys: AppTab[] = ['month', 'goals', 'assets', 'calendar'];
+  const [palette, setPalette] = useState(false);
+  // 데스크톱 앱 접속 신호(14 규칙: 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄)
+  const signedIn = !!me.data;
+  useEffect(() => {
+    if (!signedIn || !window.sweetwo) return;
+    void touchApp().catch(() => undefined);
+    const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
+    return () => clearInterval(t);
+  }, [signedIn]);
+  const online = useOnline();
+  const offline = !online && (
+    <div className="hg-banner hg-banner--info" role="status">
+      <b>{copy.offlineTitle}</b>
+      <span>{copy.offlineBody}</span>
+    </div>
+  );
   return (
-    <>
+    <FrameCommands
+      current={p.current}
+      narrow={narrow}
+      paletteOpen={palette}
+      setPaletteOpen={setPalette}
+    >
       <AppFrame
         {...p}
+        banner={
+          offline || p.banner ? (
+            <>
+              {offline}
+              {p.banner}
+            </>
+          ) : undefined
+        }
+        onSearch={() => setPalette(true)}
+        // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
+        onAdd={p.current ? () => nav(addFor(p.current)) : undefined}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
@@ -87,6 +123,6 @@ export function MainFrame(
         saveState={copy.saved}
       />
       <N01Panel />
-    </>
+    </FrameCommands>
   );
 }

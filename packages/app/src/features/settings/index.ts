@@ -31,3 +31,4 @@ export { S02ChecklistItem } from './pages/s-02-checklist-item';
 export { S03Guide } from './pages/s-03-guide';
 export { S11ePhoto } from './pages/s-11e-photo';
 export { S22Widget } from './pages/s-22-widget';
+export { checkPath, GUIDES, readPath } from './guides';

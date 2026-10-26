@@ -51,7 +51,15 @@ export function G01GoalList() {
           key={i.goal.id}
           i={i}
           masked={masked}
-          onOpen={() => nav(`/goals/${i.goal.id}`)}
+          onOpen={() =>
+            // 금액 없는 목표는 “금액 정하기” → G-03b(목표 금액)
+            nav(
+              i.goal.target_amount === null && i.canEdit && i.goal.kind !== 'monthly'
+                ? `/goals/${i.goal.id}/edit/amount`
+                : `/goals/${i.goal.id}`,
+            )
+          }
+          onLate={i.canEdit ? () => nav('/salary/split') : undefined}
         />
       ))}
     </div>

@@ -39,7 +39,12 @@ export function G05Use() {
   const item = model.ready ? model.byId(id) : undefined;
   const row = d.goals.find((x) => x.id === id);
   if (!item || !row) return <Navigate to="/goals" replace />;
-  const g = { name: row.name, held: item.saved, illustration: item.illustration, custom: item.custom };
+  const g = {
+    name: row.name,
+    held: item.saved,
+    illustration: item.illustration,
+    custom: item.custom,
+  };
   const m = (v: number) => money(v, masked);
   const detail = `/goals/${id}`;
   const then = params.get('then') as Then | null;

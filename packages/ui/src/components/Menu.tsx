@@ -12,9 +12,31 @@ export interface MenuAction {
 
 // ⋯ 동작 목록(docs/design/components/Menu.md). 4개까지, 지우기는 맨 아래.
 // 키보드: ↑/↓ 이동, Enter 실행, Esc 닫고 여는 버튼으로. 바깥을 누르면 닫힘. 좁은 창 BottomSheet는 BottomSheet를 만들 때.
-export function Menu({ label, actions }: { label: string; actions: MenuAction[] }) {
-  const [open, setOpen] = useState(false);
+export function Menu({
+  label,
+  actions,
+  button,
+  open: openProp,
+  onOpenChange,
+}: {
+  label: string;
+  actions: MenuAction[];
+  /** 글자 버튼으로 열기(보조 버튼, 예: 오늘 띠 ‘추가’). 없으면 ⋯ */
+  button?: string;
+  /** 밖에서 열고 닫기(Ctrl+N 등) */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [own, setOwn] = useState(false);
+  const open = openProp ?? own;
+  const setOpen = (v: boolean | ((o: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(open) : v;
+    setOwn(next);
+    onOpenChange?.(next);
+  };
   const wrap = useRef<HTMLSpanElement>(null);
+  const change = useRef(onOpenChange);
+  change.current = onOpenChange;
   const items = useRef<(HTMLButtonElement | null)[]>([]);
   const plain = actions.filter((a) => !a.danger);
   const danger = actions.filter((a) => a.danger);
@@ -24,7 +46,9 @@ export function Menu({ label, actions }: { label: string; actions: MenuAction[] 
     if (!open) return;
     items.current[0]?.focus();
     const off = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+      if (wrap.current?.contains(e.target as Node)) return;
+      setOwn(false);
+      change.current?.(false);
     };
     document.addEventListener('mousedown', off);
     return () => document.removeEventListener('mousedown', off);
@@ -66,15 +90,27 @@ export function Menu({ label, actions }: { label: string; actions: MenuAction[] 
 
   return (
     <span ref={wrap} style={{ position: 'relative', display: 'inline-flex' }}>
-      <IconButton
-        icon="ellipsis"
-        label={label}
-        ghost
-        className={open ? 'is-on' : undefined}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      />
+      {button ? (
+        <button
+          type="button"
+          className="hg-btn hg-btn--secondary"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          {button}
+        </button>
+      ) : (
+        <IconButton
+          icon="ellipsis"
+          label={label}
+          ghost
+          className={open ? 'is-on' : undefined}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        />
+      )}
       {open && (
         <div
           className="hg-menu hg-menu--actions"

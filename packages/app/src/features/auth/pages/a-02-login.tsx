@@ -1,30 +1,16 @@
 import { webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
 import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { copy } from '../copy';
 import { paths, type LoginNotice } from '../flow';
 import { prefs } from '../prefs';
+import { useOnline } from '../../../shared/online';
 import { session } from '../session';
 
 type Entry = 'first_run' | 'revisit' | 'invite' | 'session_expired';
-
-function useOnline() {
-  const [online, setOnline] = useState(() => navigator.onLine);
-  useEffect(() => {
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
-    };
-  }, []);
-  return online;
-}
 
 // A-02 로그인 방법 선택(로그인과 가입 한 화면)
 export function A02Login() {

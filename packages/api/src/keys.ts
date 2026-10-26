@@ -51,6 +51,8 @@ export const qk = {
   assetHistory: (id: string) => ['asset_history', id] as const,
   splits: ['salary_split'] as const,
   checklists: (today: string) => ['pay_checklist', today] as const,
+  pastChecklists: (owner: string | null, before: string) =>
+    ['pay_checklist', 'past', owner ?? 'joint', before] as const,
   goalCheckedSums: ['goal_checked_sums'] as const,
   goalSaved: ['goal_saved'] as const,
   goalMoves: (id: string) => ['goal_move', id] as const,

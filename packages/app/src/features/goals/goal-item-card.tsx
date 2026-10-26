@@ -47,15 +47,18 @@ export function GoalItemCard({
   i,
   masked,
   onOpen,
+  onLate,
 }: {
   i: GoalItem;
   masked: boolean;
   onOpen: () => void;
+  /** 4a ‘분배표에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
+  onLate?: () => void;
 }) {
   const g = i.goal;
   const late = i.lateMonths !== null && i.lateMonths > 0;
   const month = thisMonthText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`));
-  return (
+  const card = (
     <button
       type="button"
       className="hg-card hg-card--art hg-card--raised hg-stack"
@@ -87,5 +90,19 @@ export function GoalItemCard({
       )}
       {month && <span className="hg-card__meta">{month}</span>}
     </button>
+  );
+  if (!late || !onLate) return card;
+  return (
+    <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+      {card}
+      <button
+        type="button"
+        className="hg-btn hg-btn--link"
+        style={{ alignSelf: 'flex-start' }}
+        onClick={onLate}
+      >
+        {copy.lateLink}
+      </button>
+    </div>
   );
 }

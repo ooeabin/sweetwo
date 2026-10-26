@@ -198,6 +198,13 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
+  // 마케팅 정보 받기(기본 꺼짐) → 켜면 동의 기록 + “{날짜} 동의”
+  const mk = page.getByRole('switch', { name: '마케팅 정보 받기' });
+  await expect(mk).toHaveAttribute('aria-checked', 'false');
+  await mk.click();
+  await expect(mk).toHaveAttribute('aria-checked', 'true');
+  expect(db.consents.at(-1)).toMatchObject({ kind: 'marketing', agreed: true, source: 'settings' });
+  await expect(page.getByText(/동의$/)).toBeVisible();
   expect(db.me).toMatchObject({ quiet_start: 23 });
 });
 
@@ -465,7 +472,9 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
-    page.getByText('연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요. 해제 뒤 새로 적은 내용은 지워져요'),
+    page.getByText(
+      '연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
+    ),
   ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다시 연결할게요' }).click();
@@ -728,4 +737,30 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
   await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
   await expect(page).toHaveURL(/\/login$/);
+});
+
+test('새 기기 알림(A-08): 나예요 → 홈, 내가 아니에요 → 그 기기 로그아웃 → S-15', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.sessions.push({
+    id: 's-new',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537',
+    created_at: '2026-10-07T01:00:00Z',
+    last_used_at: '2026-10-07T01:00:00Z',
+    current: false,
+  });
+  await page.goto('/new-device/s-new');
+  await expect(page.getByRole('heading', { name: '새 기기에서 로그인했어요' })).toBeVisible();
+  await expect(page.getByText(/Chrome\(Windows\)/)).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '나예요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/new-device/s-new');
+  await page.getByRole('button', { name: '내가 아니에요' }).click();
+  await expect(page).toHaveURL(/\/settings\/security$/);
+  await expect(page.getByText(/보안도 확인해 주세요/)).toBeVisible();
+  await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
 });

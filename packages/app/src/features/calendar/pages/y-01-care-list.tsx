@@ -82,14 +82,25 @@ export function Y01CareList() {
                 <b>{next.care.name}</b>
                 <span className="hg-card__meta">{formatMonthDay(next.date)}</span>
                 {next.care.budget > 0 && <span>{copy.memoAmount(m(next.care.budget))}</span>}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  style={{ alignSelf: 'flex-start' }}
-                  onClick={() => nav(`/calendar/day/${next.care.id}`)}
-                >
-                  {copy.prepare}
-                </Button>
+                <div className="hg-row">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => nav(`/calendar/day/${next.care.id}`)}
+                  >
+                    {copy.prepare}
+                  </Button>
+                  {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+                  {next.date <= d.today && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
+                    >
+                      {copy.statuses.done}
+                    </Button>
+                  )}
+                </div>
               </section>
             )}
             <section className="hg-stack" aria-label={copy.careList}>

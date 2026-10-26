@@ -1,6 +1,6 @@
 export { SplitEditor, toDraft } from './split-editor';
 export { emergencyGoalTarget, recommendedDraft, savingGoals, toAllocGoal } from './split-draft';
-export { CheckLine, lineName, periodText } from './check-line';
+export { CheckLine, goalLineName, lineName, periodText } from './check-line';
 export {
   doneCount,
   myChecklist,

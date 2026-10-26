@@ -20,6 +20,9 @@ export const copy = {
     visibilityValue: (v: string) => `내 자산 ${v}`, // [확인 필요]
     noti: '알림',
     security: '보안',
+    lockOn: '앱 잠금 켜짐',
+    lockOff: '앱 잠금 꺼짐', // [확인 필요]
+    asking: (n: number) => `확인 요청 ${n}`,
     answers: '내 답 다시 보기',
     guide: '가이드 모아보기',
     screen: '화면',
@@ -202,6 +205,8 @@ export const copy = {
   restored: '되살렸어요',
   restoreProposed: (name: string) => `${name}님에게 되살리자고 제안했어요`, // [확인 필요]
   undo: '되돌리기',
+  marketing: '마케팅 정보 받기',
+  marketingAt: (date: string) => `${date} 동의`,
   more: '더보기', // [확인 필요] ⋯ 버튼 이름
   purge: '영구 삭제',
   purgeQ: '완전히 지울까요?',

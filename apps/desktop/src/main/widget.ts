@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, type Tray } from 'electron';
+import { app, BrowserWindow, safeStorage, screen, type Tray } from 'electron';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -13,10 +13,20 @@ import { getAccessToken } from './auth';
 import { lockStatus } from './lock';
 
 // 트레이 위젯(26 트레이 위젯 창)과 위젯 설정(S-22, 기기마다). 앱 창이 보낸 마지막 값은 파일에 남겨 앱을 다시 켜도 보여 줌(오프라인).
+// 마지막 값(금액이 들어 있음)은 OS 키체인(safeStorage)으로 암호화해 남김(26 34줄, DEV_GUIDE ‘로컬 저장’). 암호화를 못 쓰면 남기지 않음.
 // 위젯 창 = 작은 창, 같은 화면(렌더러)의 #/widget/tray. 아이콘 아래에 붙어 열리고 바깥을 누르거나 Esc로 닫힘.
 const W = 340;
 const H = 440;
 const file = () => join(app.getPath('userData'), 'widget.json');
+
+const decrypt = (v: unknown): unknown => {
+  if (typeof v !== 'string' || !safeStorage.isEncryptionAvailable()) return null;
+  try {
+    return JSON.parse(safeStorage.decryptString(Buffer.from(v, 'base64')));
+  } catch {
+    return null;
+  }
+};
 
 interface Saved {
   settings: WidgetSettings;
@@ -29,7 +39,7 @@ const load = (): Saved => {
     if (existsSync(file())) {
       const raw = JSON.parse(readFileSync(file(), 'utf8')) as Record<string, unknown>;
       const s = WidgetSettings.safeParse(raw.settings);
-      const p = TraySnapshot.safeParse(raw.snapshot);
+      const p = TraySnapshot.safeParse(decrypt(raw.snapshotEnc));
       saved = {
         settings: s.success ? s.data : WIDGET_DEFAULTS,
         snapshot: p.success ? p.data : null,
@@ -45,7 +55,12 @@ const load = (): Saved => {
 const persist = () => {
   try {
     mkdirSync(app.getPath('userData'), { recursive: true });
-    writeFileSync(file(), JSON.stringify(load()));
+    const { settings, snapshot } = load();
+    const snapshotEnc =
+      snapshot && safeStorage.isEncryptionAvailable()
+        ? safeStorage.encryptString(JSON.stringify(snapshot)).toString('base64')
+        : null;
+    writeFileSync(file(), JSON.stringify({ settings, snapshotEnc }), { mode: 0o600 });
   } catch {
     /* 못 남겨도 이번 실행에는 적용 */
   }

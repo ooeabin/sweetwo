@@ -21,9 +21,13 @@ export const topGoal = (goals: Goal[] | undefined) => pickedGoals(goals)[0];
 
 /** O-10 → O-03 → O-06 (→ O-07) → O-11 → O-12 → O-13 → O-21 → O-23 → O-24 → O-30 → O-31 → O-50 → O-60 */
 export function screens(s: FlowState): string[] {
-  const list = ['o-10', 'o-03', 'o-06'];
-  if (s.inviteNow === 'now') list.push('o-07');
-  list.push('o-11', 'o-12', 'o-13', 'o-21');
+  // 연결 해제 뒤 다시(16 흐름 요약): O-11부터, O-10·O-03·O-06 건너뜀, O-13 출생연도는 남아 있으면 건너뜀
+  const afterUnlink = !!s.space?.unlinked_from;
+  const list = afterUnlink ? [] : ['o-10', 'o-03', 'o-06'];
+  if (!afterUnlink && s.inviteNow === 'now') list.push('o-07');
+  list.push('o-11', 'o-12');
+  if (!(afterUnlink && s.me?.birth_year)) list.push('o-13');
+  list.push('o-21');
   const top = topGoal(s.goals);
   if (top && !skipsTopGoalQuestions(top.template)) {
     const t = templateByKey(top.template);
@@ -52,9 +56,9 @@ export function progressOf(id: string, list: string[]) {
 }
 
 export const nextOf = (id: string, list: string[]) => list[list.indexOf(id) + 1] ?? LAST;
-/** 뒤로. O-10, O-60은 뒤로 없음 */
+/** 뒤로. O-10, O-60, 목록 첫 화면(연결 해제 뒤 O-11)은 뒤로 없음 */
 export const prevOf = (id: string, list: string[]) => {
-  if (id === 'o-10' || id === LAST) return undefined;
+  if (id === 'o-10' || id === LAST || list.indexOf(id) <= 0) return undefined;
   return list[list.indexOf(id) - 1];
 };
 

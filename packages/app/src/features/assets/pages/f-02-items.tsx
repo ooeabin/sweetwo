@@ -106,6 +106,7 @@ export function F02Items() {
             {a.name}
             {mine && a.visibility !== 'all' && <Badge kind="temp">{copy.vis[a.visibility]}</Badge>}
             {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
+            {a.estimated && <Badge kind="temp">{copy.estimatedTag}</Badge>}
           </span>
         }
         sub={stale ? copy.checkAmount : `${o.name}, ${copy.updated(formatDot(updated))}`}

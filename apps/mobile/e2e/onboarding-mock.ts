@@ -262,6 +262,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     const url = new URL(req.url());
     const path = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
+    // 개수만 읽기(HEAD, count=exact): P-02a ‘안 옮겨요’
+    if (method === 'HEAD') {
+      const n =
+        path === '/rest/v1/goal'
+          ? db.goals.filter((g) => !g.deleted_at && g.template !== 'emergency').length
+          : path === '/rest/v1/salary_split'
+            ? db.splits.length
+            : path === '/rest/v1/pay_checklist'
+              ? db.checklists.length
+              : 0;
+      return route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Expose-Headers': 'Content-Range',
+          'Content-Range': `*/${n}`,
+        },
+      });
+    }
     // 저장소(S-11e 프로필 사진): 올리기, 서명 주소, 사진 받기, 지우기
     if (path.startsWith('/storage/v1/')) {
       const cors = { 'Access-Control-Allow-Origin': '*' };
@@ -413,6 +432,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'touch_app')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (fn === 'note_login') return json(route, false);
       if (fn === 'space_goals') {
         // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
         return json(
@@ -515,6 +537,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'plan-1');
       }
       if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      if (fn === 'join_space' && db.me.onboarding_done_at && db.me.space_id === 'space-solo')
+        return json(route, 'has_records'); // 혼자 시작한 기록 있음(A-07 6번)
+      if (fn === 'join_moving_records') {
+        // P-02a: 내 명의 자산만 옮기고 합류
+        const vis = (body().p_vis ?? {}) as Record<string, string>;
+        for (const a of db.assets)
+          if (a.owner === 'person' && a.owner_user_id === db.me.id)
+            Object.assign(a, { space_id: 'space-1', visibility: vis[String(a.id)] ?? 'sum' });
+        Object.assign(db.me, {
+          space_id: 'space-1',
+          onboarding_step: 'P-03',
+          onboarding_done_at: null,
+        });
+        return json(route, 'joined');
+      }
       if (fn === 'join_space') {
         const sp = db.space ?? {};
         Object.assign(db.me, {
@@ -773,6 +810,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'partner_activity') return json(route, db.activity);
       // G-05 달성: 축하는 사람마다 한 번
       // F-04a 만기된 돈 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
+      if (fn === 'sell_asset') {
+        // F-04b~d: 받은 금액을 통장에, 일부만이면 남은 평가금액, 다 팔면 매도 완료. 실현 손익 = 받은 금액 − 원금
+        const b = body();
+        const a = db.assets.find((x) => x.id === b.p_asset);
+        const t = db.assets.find((x) => x.id === b.p_to);
+        if (t) t.amount = Number(t.amount) + Number(b.p_received);
+        const p0 = a?.principal === null || a?.principal === undefined ? null : Number(a.principal);
+        const amt = Number(a?.amount ?? 0);
+        // 일부만: 판 만큼의 원금 = 원금 × 판 비율
+        const sold =
+          p0 === null
+            ? null
+            : b.p_remain === undefined
+              ? p0
+              : Math.round((p0 * (amt - Number(b.p_remain))) / (amt || 1));
+        if (a && b.p_remain === undefined) a.status = 'sold';
+        else if (a) a.amount = Number(b.p_remain);
+        return json(route, sold === null ? null : Number(b.p_received) - sold);
+      }
       if (fn === 'settle_matured') {
         const b = body();
         const a = db.assets.find((x) => x.id === b.p_asset);
@@ -1576,7 +1632,31 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         ),
       );
     }
-    if (path === '/rest/v1/pay_checklist' && method === 'GET') return json(route, db.checklists);
+    if (path === '/rest/v1/pay_checklist' && method === 'GET') {
+      // 지난 체크리스트(W-02 ‹ ›): cycle_end < before, 주인, 최근 것부터
+      const lt = url.searchParams.get('cycle_end')?.replace(/^lt\./, '');
+      if (url.searchParams.get('cycle_end')?.startsWith('lt.') && lt) {
+        const own = url.searchParams.get('owner_user_id') ?? '';
+        return json(
+          route,
+          (db.checklists as Record<string, unknown>[])
+            .filter((c) => String(c.cycle_end) < lt)
+            .filter((c) =>
+              own === 'is.null'
+                ? c.owner_user_id === null
+                : `eq.${String(c.owner_user_id)}` === own,
+            )
+            .sort((a, b) => (String(a.cycle_start) < String(b.cycle_start) ? 1 : -1)),
+        );
+      }
+      const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
+      return json(
+        route,
+        gte
+          ? (db.checklists as Record<string, unknown>[]).filter((c) => String(c.cycle_end) >= gte)
+          : db.checklists,
+      );
+    }
     if (path === '/rest/v1/couple_space') {
       if (method === 'GET') return json(route, db.space);
       if (method === 'PATCH' && db.space) Object.assign(db.space, body());
@@ -1825,8 +1905,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       return Array.isArray(b) ? b : [b];
     };
     if (path === '/rest/v1/consent' && method === 'POST') {
-      db.consents.push(...rowsOf());
+      db.consents.push(...rowsOf().map((r) => ({ created_at: new Date().toISOString(), ...r })));
       return ok204();
+    }
+    if (path === '/rest/v1/consent' && method === 'GET') {
+      const kind = url.searchParams.get('kind')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.consents
+          .filter((c) => !kind || c.kind === kind)
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+      );
     }
     if (path === '/rest/v1/todo') {
       if (method === 'GET') return json(route, db.todos);

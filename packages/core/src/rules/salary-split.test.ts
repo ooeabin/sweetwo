@@ -90,6 +90,33 @@ describe('recommendSplit', () => {
   });
 });
 
+describe('W-01 추천값으로 다시 채우기(20 W-01 6번)', () => {
+  it('각자: 우리 목표 줄은 필요액에서 상대 줄을 뺀 만큼(0원 아래 없음)', () => {
+    const l = recommendSplit({
+      income: 3_500_000,
+      people: [{ userId: 'chanwoo', income: 3_500_000 }],
+      goals: [emergency, home],
+      others: { h: 1_070_000, e: 600_000 },
+      now,
+    });
+    // 내 집 250만 − 예빈 107만 = 143만이지만 남은 139만 − 비상금 0원 → 139만
+    expect(l.find((x) => x.goalId === 'e')?.amount).toBe(0);
+    expect(l.find((x) => x.goalId === 'h')?.amount).toBe(1_390_000);
+  });
+  it('배우자 탭: 배우자 내 목표 줄은 그대로 두고 그만큼 빼고 채움', () => {
+    const camera = goal({ id: 'c', template: 'hobby', priority: 1, target: 2_000_000 });
+    const l = recommendSplit({
+      income: 2_700_000,
+      people: [{ userId: 'yebin', income: 2_700_000 }],
+      goals: [emergency, home, camera],
+      keep: { c: 300_000 },
+      now,
+    });
+    expect(l.find((x) => x.goalId === 'c')?.amount).toBe(300_000);
+    expect(leftover(2_700_000, l)).toBeGreaterThanOrEqual(0);
+  });
+});
+
 describe('비상금', () => {
   it('(88 + 88) × 3 ÷ 12 = 44만', () => expect(emergencyMonthly(880_000, 880_000)).toBe(440_000));
   it('1만 원 반올림', () => expect(round10k(875_000)).toBe(880_000));

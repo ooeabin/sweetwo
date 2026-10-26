@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
 
-// 월급 나누기 줄(docs/design/components/TransferRow.md). 은행 앱에서 옮긴 뒤 체크하면 나눈 것으로 기록.
-// 체크 = button role="checkbox" + aria-checked, aria-label “{받는 곳} 옮겼어요”. 옮긴 줄은 글자를 stone으로.
+// 월급 체크리스트 줄(docs/design/components/TransferRow.md). 은행 앱에서 보낸 뒤 체크하면 한 것으로 기록.
+// 체크 = button role="checkbox" + aria-checked, aria-label “{줄 이름} 체크”. 체크한 줄은 글자를 stone으로.
 export function TransferRow({
   label,
   meta,

@@ -7,6 +7,7 @@ export const copy = {
   save: '저장',
   saved: '분배표를 바꿨어요',
   undo: '되돌리기',
+  splitPending: '연결 해제 대기 중에는 분배표를 고칠 수 없어요', // [확인 필요]
   refill: '추천값으로 다시 채우기',
   refillTitle: '추천값으로 다시 채울까요?', // [확인 필요]
   refillBody: '지금 적은 금액은 추천값으로 바뀌어요', // [확인 필요]
@@ -16,6 +17,11 @@ export const copy = {
   cycleTitle: (label: string) => label,
   period: (start: string, end: string) => `${start} ~ ${end}`,
   progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`,
+  close: '닫기',
+  prevMonth: '지난 달 보기', // [확인 필요]
+  nextMonth: '다음 달 보기', // [확인 필요]
+  partnerChangedSplit: (name: string) =>
+    `${name}님이 분배표를 바꿔서 체크 안 한 줄을 다시 계산했어요`,
   allDone: '다 보냈어요',
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
