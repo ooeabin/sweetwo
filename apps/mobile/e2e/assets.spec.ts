@@ -485,3 +485,29 @@ test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기
     monthly_payment: null,
   });
 });
+
+test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 목록에 추정 알약', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/assets/items');
+  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await page.getByRole('button', { name: '예금·적금' }).click();
+  await page.getByRole('button', { name: '적금', exact: true }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '현재 금액은 얼마예요?');
+  await page.getByRole('button', { name: '잘 모르겠어요' }).click();
+  await page.getByRole('button', { name: '1~3천' }).click();
+  await heading(page, '누구 명의예요?');
+  await page.getByRole('radio', { name: /^나/ }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '만기일은 언제예요?');
+  // 유형별 질문은 나중에(F-03f)
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await heading(page, '월 납입액은요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
+  expect(db.assets.at(-1)).toMatchObject({ amount: 20_000_000, estimated: true });
+  const row = page.getByRole('button', { name: /^적금/ });
+  await expect(row).toContainText('추정');
+});

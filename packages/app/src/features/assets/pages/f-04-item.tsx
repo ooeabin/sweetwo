@@ -110,7 +110,9 @@ export function F04Item() {
         </p>
       )}
       <section className="hg-card hg-stack" aria-label={copy.amountLabel}>
-        <span className="hg-card__label">{copy.amountLabel}</span>
+        <span className="hg-card__label">
+          {copy.amountLabel} {a.estimated && <Badge kind="temp">{copy.estimatedTag}</Badge>}
+        </span>
         {editAmount !== undefined ? (
           <div
             className="hg-stack"

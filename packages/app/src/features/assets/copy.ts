@@ -219,6 +219,7 @@ export const copy = {
   maturedNoAccount: '옮길 통장이 없어요. 먼저 통장을 추가해 주세요', // [확인 필요]
   // F-04b~d 팔았어요
   sold: '팔았어요',
+  unsure: '잘 모르겠어요',
   marketEdit: '시세 바꾸기',
   soldAmount: '받은 금액은 얼마예요?',
   soldPart: '일부만 팔았어요',
