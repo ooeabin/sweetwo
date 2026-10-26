@@ -1514,8 +1514,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (fn === 'partner_birthday')
         return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
-      if (fn === 'delete_minor_account' || fn === 'delete_underage_account')
-        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
     }
     if (path === '/rest/v1/asset') {

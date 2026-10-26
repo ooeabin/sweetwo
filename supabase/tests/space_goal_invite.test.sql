@@ -2,7 +2,7 @@
 -- 찬우(공간 있음), 다른 부부 K, 예빈(미성년 삭제 시험)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -57,16 +57,6 @@ select throws_ok(
      values (current_setting('test.chanwoo_space')::uuid, 'travel', '여행', 'once', 1) $$,
   '42501', null, '다른 부부 공간에 목표를 못 넣는다');
 reset role;
-
--- 예빈: 만 18세 미만이면 계정과 혼자 쓰던 공간을 지운다
-select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
-set local role authenticated;
-select public.complete_signup('kakao', 'yebin@example.com', false, 'v1');
-select public.ensure_my_space();
-select throws_ok($$ select public.delete_minor_account(1995::smallint) $$, 'P0001', 'not_minor', '만 18세 이상은 지우지 않는다');
-select public.delete_minor_account((extract(year from now())::int - 17)::smallint);
-reset role;
-select is((select count(*)::int from auth.users where id = '22222222-2222-2222-2222-222222222222'), 0, '미성년 계정 삭제');
 
 select * from finish();
 rollback;

@@ -2625,14 +2625,6 @@ export type Database = {
         Args: { p_owner: string; p_space: string }
         Returns: number
       }
-      delete_minor_account: {
-        Args: { p_birth_year: number }
-        Returns: undefined
-      }
-      delete_underage_account: {
-        Args: { p_birth_date: string }
-        Returns: undefined
-      }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
       emergency_asset_add: {
         Args: { d: number; p_space: string }

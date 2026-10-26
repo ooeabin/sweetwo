@@ -258,7 +258,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://sweetwo.kr/i/{코드}`(모바일은 앱 링크로 앱이 바로 엶, (전환 전) app.sweetwo.kr), 데스크톱 딥링크는 `sweetwo://i/{코드}`
 - 월 플랜과 플랜 줄은 앱이 직접 못 만들고 못 고친다(읽기만). 첫 플랜은 `start_first_plan()`(O-66, 같은 사이클이면 있는 플랜 id), 이후 플랜은 기준일 작업이 만든다. 줄의 분담액은 신랑, 신부 쪽(`amount_groom`, `amount_bride`)으로 저장
 - 기준일은 `couple_space.base_day`(말일은 `base_day_last`), 없으면 두 월급날 중 늦은 날. 통장 방식은 `couple_space.account_mode`
-- 만 18세 미만(O-13): `delete_minor_account(출생연도)`가 서버에서 나이를 다시 확인하고 auth 사용자째 지움
+- 만 18세 미만: 가입 때 A-05 ‘만 18세 이상이에요’ 체크로만 확인하고 가입 뒤 나이로 계정을 지우지 않음. 옛 `delete_minor_account`·`delete_underage_account`는 20261103210000에서 지움
 
 ### 마이그레이션과 RLS 규칙
 
@@ -393,7 +393,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
   - 렌더러의 supabase-js는 `accessToken` 옵션으로 브리지에서 access token만 받는다(`supabase.auth`는 데스크톱에서 쓰지 않음)
   - main이 읽는 값: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_WEB_ORIGIN`(콜백 페이지 주소의 출처, apps/desktop/.env.development, 공개 값만)
 - 같은 이메일, 다른 소셜(A-02 ‘자동 합치기 없음’): Supabase는 확인된 같은 이메일의 소셜 계정을 한 사용자로 자동 연결한다. 그래서 로그인 직후 `login_state(누른 제공자)`가 가입한 제공자와 다르면 `provider_conflict`를 돌려주고, 앱은 바로 로그아웃한 뒤 “이미 {카카오}로 가입한 이메일이에요”를 보여 준다. 계정 식별은 가입 때 제공자(`app_user.provider`)
-- 가입: 소셜 로그인만으로는 계정이 아니다. A-05 ‘동의하고 계속하기’의 `complete_signup()`이 `app_user`와 동의 기록(필수 3종 + 마케팅)을 한 번에 만든다. 필수 ‘만 18세 이상이에요’ 체크는 동의 종류가 아니라 확인 기록 `app_user.adult_confirmed_at`(가입 시각, 20261101230000). 나이로 가입 뒤 계정을 지우지 않음(옛 `delete_underage_account`·`delete_minor_account`는 앱이 안 씀, 다음 단계에서 DB에서 지움). 웹(개발·e2e)도 앱처럼 로그인을 유지(localStorage, ‘이 기기에서 로그인 유지’·14일·30분 잠금 없음) 그 전에 그만두면 auth 사용자만 남음(정리 작업은 예약 작업 단계에서)
+- 가입: 소셜 로그인만으로는 계정이 아니다. A-05 ‘동의하고 계속하기’의 `complete_signup()`이 `app_user`와 동의 기록(필수 3종 + 마케팅)을 한 번에 만든다. 필수 ‘만 18세 이상이에요’ 체크는 동의 종류가 아니라 확인 기록 `app_user.adult_confirmed_at`(가입 시각, 20261101230000). 나이로 가입 뒤 계정을 지우지 않음(옛 `delete_underage_account`·`delete_minor_account`는 20261103210000에서 지움). 웹(개발·e2e)도 앱처럼 로그인을 유지(localStorage, ‘이 기기에서 로그인 유지’·14일·30분 잠금 없음) 그 전에 그만두면 auth 사용자만 남음(정리 작업은 예약 작업 단계에서)
 
 ### 모바일 세션
 
