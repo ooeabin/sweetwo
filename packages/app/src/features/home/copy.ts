@@ -41,4 +41,7 @@ export const copy = {
   // H-06 할 일 한 줄(19 ‘할 일 한 줄 순서’)
   open: '열기', // [확인 필요] 할 일 이동 버튼
   close: '닫기',
+  unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
+  unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
+  unlinkCheck: '확인하기',
 };

@@ -1,5 +1,11 @@
 import { fetchUnlinkPartnerName, qk } from '@sweetwo/api';
-import { formatMonthDay, homeTodo, homeUpcoming, salaryState, type TraySnapshot } from '@sweetwo/core';
+import {
+  formatMonthDay,
+  homeTodo,
+  homeUpcoming,
+  salaryState,
+  type TraySnapshot,
+} from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { detectPlatform } from '../../platform';
@@ -31,7 +37,14 @@ export function useTraySync() {
     const snap: Omit<TraySnapshot, 'at'> = {
       salary:
         s.state === 'none'
-          ? { state: noSalary ? 'no_salary' : 'none', label: '', done: 0, total: 0, left: 0, payday: null }
+          ? {
+              state: noSalary ? 'no_salary' : 'none',
+              label: '',
+              done: 0,
+              total: 0,
+              left: 0,
+              payday: null,
+            }
           : {
               state: s.state,
               label: s.label,

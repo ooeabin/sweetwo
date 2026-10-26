@@ -26,4 +26,21 @@ export const copy = {
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
   netWorthEmpty: '자산을 적으면 여기에 보여요', // [확인 필요]
   netWorthSee: '우리 자산 보기', // [확인 필요]
+  addGoal: '목표',
+  addAsset: '가진 돈·대출',
+  addCare: '챙길 날',
+  cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
+  cmdEmpty: '찾는 게 없어요',
+  cmdQuick: '바로 하기',
+  cmdCheck: '월급 체크하기',
+  cmdGoal: '목표 추가',
+  cmdAsset: '가진 돈 추가',
+  cmdMask: '금액 가리기',
+  cmdUnmask: '금액 보이기',
+  cmdLock: '잠그기',
+  cmdGoals: '목표',
+  cmdAssets: '가진 돈·대출',
+  cmdCares: '챙길 날',
+  offlineTitle: '연결이 끊겼어요',
+  offlineBody: '다시 연결되면 이어서 볼 수 있어요',
 };

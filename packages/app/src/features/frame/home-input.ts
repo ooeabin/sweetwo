@@ -77,19 +77,18 @@ export function useHomeInput(on = true) {
             lines: c.pay_check_line,
           })),
           goals: goals.data,
-          cares: (cares.data ?? []).map(
-            (c): HomeCare => ({
-              id: c.id,
-              name: c.name,
-              date_rule: c.date_rule as HomeCare['date_rule'],
-              month: c.month,
-              day: c.day,
-              leap: c.leap,
-              once_on: c.once_on,
-            }),
-          ),
+          cares: (cares.data ?? []).map((c): HomeCare => ({
+            id: c.id,
+            name: c.name,
+            date_rule: c.date_rule as HomeCare['date_rule'],
+            month: c.month,
+            day: c.day,
+            leap: c.leap,
+            once_on: c.once_on,
+          })),
           assets: assets.data ?? [],
-          unlinkRequestedBy: state === 'unlink_pending' ? (unlink.data?.requested_by ?? null) : null,
+          unlinkRequestedBy:
+            state === 'unlink_pending' ? (unlink.data?.requested_by ?? null) : null,
           reconnectFrom:
             solo && myUnlink.data?.reconnect_by && !myUnlink.data.reconnect_answer
               ? myUnlink.data.reconnect_by
@@ -100,6 +99,11 @@ export function useHomeInput(on = true) {
       : null;
   return {
     input,
+    /** 연결 해제 대기(19 홈 상태 3번 띠): 확정 날짜, 내가 요청했는지 */
+    unlink:
+      state === 'unlink_pending' && unlink.data
+        ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
+        : null,
     /** 만기·챙길 날 할 일 닫기(그 항목·날짜만) */
     closeTodo: (key: string) => {
       const next = [...closed.slice(-30), key];

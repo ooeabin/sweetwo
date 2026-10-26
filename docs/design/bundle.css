@@ -565,6 +565,9 @@
 .hg-cmd__item > span:not(.hg-ico) { flex: 1; }
 .hg-cmd__item em { font-style: normal; font-size: 13px; color: var(--stone); }
 .hg-cmd__item.is-active { background: var(--surface-alt); }
+.hg-cmd__input input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; color: inherit; }
+.hg-cmd__empty { padding: var(--space-6) var(--space-3); font: 400 15px/22px var(--font-sans); color: var(--stone); text-align: center; }
+.hg-scrim--top { align-items: start; padding-top: var(--space-16); }
 
 /* DatePicker */
 .hg-datepicker { display: flex; flex-direction: column; gap: var(--space-2); max-width: 460px; }

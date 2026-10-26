@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { CheckLine } from '../../salary';
 import { checkPath, GUIDES, readPath } from '../../settings';
 import { copy } from '../copy';
@@ -58,7 +58,7 @@ export function G02GoalDetail() {
   const [all, setAll] = useState(false);
   const m = (v: number) => money(v, masked);
   const back = () => nav('/goals');
-  if (!d.ready) return <MainFrame current="goals" columns={[<div key="l" />]} />;
+  if (!d.ready) return <LoadingFrame current="goals" />;
   const i = d.byId(id);
   if (!i) return <Navigate to="/goals" replace />;
   const g = i.goal;

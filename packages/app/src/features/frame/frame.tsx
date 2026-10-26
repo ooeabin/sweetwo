@@ -1,8 +1,11 @@
 import { coupleOf, formatDateWeekday, todayKst } from '@sweetwo/core';
 import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
+import { useOnline } from '../../shared/online';
 import { N01Panel, useHasUnread, useNotiPanel, useNotiRealtime } from '../notifications';
+import { addFor, FrameCommands } from './command';
 import { copy } from './copy';
 import { useTraySync } from './tray-sync';
 import { useMe, usePartner, useSpace } from './data';
@@ -42,10 +45,34 @@ export function MainFrame(
     calendar: copy.tabCalendar,
   };
   const keys: AppTab[] = ['month', 'goals', 'assets', 'calendar'];
+  const [palette, setPalette] = useState(false);
+  const online = useOnline();
+  const offline = !online && (
+    <div className="hg-banner hg-banner--info" role="status">
+      <b>{copy.offlineTitle}</b>
+      <span>{copy.offlineBody}</span>
+    </div>
+  );
   return (
-    <>
+    <FrameCommands
+      current={p.current}
+      narrow={narrow}
+      paletteOpen={palette}
+      setPaletteOpen={setPalette}
+    >
       <AppFrame
         {...p}
+        banner={
+          offline || p.banner ? (
+            <>
+              {offline}
+              {p.banner}
+            </>
+          ) : undefined
+        }
+        onSearch={() => setPalette(true)}
+        // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
+        onAdd={p.current ? () => nav(addFor(p.current)) : undefined}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
@@ -87,6 +114,6 @@ export function MainFrame(
         saveState={copy.saved}
       />
       <N01Panel />
-    </>
+    </FrameCommands>
   );
 }

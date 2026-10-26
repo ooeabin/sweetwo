@@ -45,3 +45,4 @@ export * from './components/ReorderList';
 export * from './components/question';
 export * from './components/AdminFrame';
 export * from './components/DataTable';
+export * from './components/CommandPalette';
