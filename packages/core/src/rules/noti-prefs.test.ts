@@ -31,6 +31,7 @@ describe('알림 설정', () => {
     const p = notiPrefs({});
     expect(pushAllowed(p, 'plan', q)).toBe(true);
     expect(pushAllowed(p, 'care_14', q)).toBe(false);
+    expect(pushAllowed(p, 'silent', q)).toBe(false);
     expect(pushAllowed(p, 'other', q)).toBe(true);
     expect(pushAllowed({ ...p, push: false }, 'plan', q)).toBe(false);
     expect(pushAllowed(p, 'plan', { ...q, hour: 23 })).toBe(false);
