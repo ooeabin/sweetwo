@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (9efdc8e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (bb70ecb). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1058,6 +1058,7 @@ a.hg-btn { text-decoration: none; }
 .hg-chart--bleed .area-top { stop-color: var(--ink); stop-opacity: .12; }
 .hg-chart--bleed .area-bot { stop-color: var(--ink); stop-opacity: .01; }
 .hg-chart__dot { position: absolute; width: 10px; height: 10px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); pointer-events: none; }
+.hg-chart__mark { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }
 .hg-chart__bubble { position: absolute; z-index: 1; transform: translate(-50%, calc(-100% - 14px)); display: flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 10px; background: var(--ink); color: var(--on-ink); white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; }
 .hg-chart__bubble i { font: 400 11px/15px var(--font-sans); font-style: normal; opacity: .72; }
 .hg-chart__bubble b { font: 600 14px/20px var(--font-sans); }

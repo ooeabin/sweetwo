@@ -1057,6 +1057,7 @@ a.hg-btn { text-decoration: none; }
 .hg-chart--bleed .area-top { stop-color: var(--ink); stop-opacity: .12; }
 .hg-chart--bleed .area-bot { stop-color: var(--ink); stop-opacity: .01; }
 .hg-chart__dot { position: absolute; width: 10px; height: 10px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); pointer-events: none; }
+.hg-chart__mark { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); pointer-events: none; }
 .hg-chart__bubble { position: absolute; z-index: 1; transform: translate(-50%, calc(-100% - 14px)); display: flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 10px; background: var(--ink); color: var(--on-ink); white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; }
 .hg-chart__bubble i { font: 400 11px/15px var(--font-sans); font-style: normal; opacity: .72; }
 .hg-chart__bubble b { font: 600 14px/20px var(--font-sans); }

@@ -16,9 +16,9 @@ describe('goalProgress(22 G-02 9번)', () => {
       ],
     });
     expect(r).toEqual([
-      { ym: '2026-08', plan: 1_500_000, actual: 1_500_000 },
-      { ym: '2026-09', plan: 2_000_000, actual: 1_800_000 },
-      { ym: '2026-10', plan: 2_500_000, actual: 2_200_000 },
+      { ym: '2026-08', plan: 1_500_000, actual: 1_500_000, milestone: false },
+      { ym: '2026-09', plan: 2_000_000, actual: 1_800_000, milestone: false },
+      { ym: '2026-10', plan: 2_500_000, actual: 2_200_000, milestone: false },
     ]);
   });
   it('만든 달보다 앞선 기록은 첫 달에, 이번 달에 만든 목표는 한 점', () => {
@@ -29,7 +29,17 @@ describe('goalProgress(22 G-02 9번)', () => {
       monthly: 100_000,
       flows: [{ ym: '2026-09', amount: 50_000 }],
     });
-    expect(r).toEqual([{ ym: '2026-10', plan: 100_000, actual: 50_000 }]);
+    expect(r).toEqual([{ ym: '2026-10', plan: 100_000, actual: 50_000, milestone: false }]);
+  });
+  it('연 마일스톤 점: 만든 달에서 12개월, 24개월 되는 달', () => {
+    const r = goalProgress({
+      start: '2024-03-05',
+      now: '2026-10-26',
+      held: 0,
+      monthly: 10_000,
+      flows: [],
+    });
+    expect(r.filter((x) => x.milestone).map((x) => x.ym)).toEqual(['2025-03', '2026-03']);
   });
 });
 

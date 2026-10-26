@@ -2,6 +2,7 @@ import { addMonths, monthsBetween, parseYm, type YearMonth } from '../onboarding
 
 // 목표 상세 진행 그래프(22 G-02 9번)와 월별 저금 막대(10a번).
 // - 계획 = 이미 모은 돈 + 매달 넣는 돈 × (만든 달부터 센 달 수). 실제 = 이미 모은 돈 + 그달까지 더한 돈(체크한 저금, 넣기 − 빼기 − 꺼내 쓰기)
+// - 연 마일스톤 점: 만든 달에서 12개월, 24개월 … 되는 달
 // - 막대: 최근 6개월(기록이 짧으면 있는 달만), 그달 저금 줄 금액 대비 실제로 넣은 돈의 차이. 이번 달이 마지막
 
 /** 그달에 모은 돈이 바뀐 것(체크한 저금 +, 넣기 +, 빼기·꺼내 쓰기 −) */
@@ -19,6 +20,8 @@ export interface GoalProgressPoint {
   ym: YearMonth;
   plan: number;
   actual: number;
+  /** 연 마일스톤: 만든 달부터 12개월마다(첫 달 제외) */
+  milestone: boolean;
 }
 
 export function goalProgress(p: {
@@ -40,7 +43,7 @@ export function goalProgress(p: {
   for (let i = 0; i <= n; i++) {
     const ym = addMonths(p.start.slice(0, 7), i);
     actual += by.get(ym) ?? 0;
-    out.push({ ym, plan: p.held + p.monthly * (i + 1), actual });
+    out.push({ ym, plan: p.held + p.monthly * (i + 1), actual, milestone: i > 0 && i % 12 === 0 });
   }
   return out;
 }
