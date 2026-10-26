@@ -177,3 +177,60 @@ test('알림 메일 반송(14): 홈 상단 띠 → S-14', async ({ page }) => {
   await page.getByRole('button', { name: '확인하기' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
 });
+
+/** 인터넷 끊김·연결을 흉내(개발 서버는 닿게 navigator.onLine만) */
+async function fakeNetwork(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __offline: boolean };
+    w.__offline = false;
+    Object.defineProperty(Navigator.prototype, 'onLine', { get: () => !w.__offline });
+  });
+  return (offline: boolean) =>
+    page.evaluate((off) => {
+      (window as unknown as { __offline: boolean }).__offline = off;
+      window.dispatchEvent(new Event(off ? 'offline' : 'online'));
+    }, offline);
+}
+
+test('오프라인 입력(30 동기화 4장): 끊긴 동안 체크 → 대기 1건 → 연결되면 보냄, 지난 체크리스트는 ‘보내지 못한 입력’', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const setOffline = await fakeNetwork(page);
+  await page.goto('/');
+  await expect(salaryCard(page)).toBeVisible();
+  await setOffline(true);
+  await salaryCard(page).getByRole('checkbox', { name: '내 집 마련 체크' }).click();
+  await expect(page.getByText('연결되면 자동으로 저장돼요')).toBeVisible();
+  await expect(salaryCard(page).getByRole('checkbox', { name: '내 집 마련 체크' })).toBeChecked();
+  await expect(page.getByRole('status').filter({ hasText: '대기 1건' })).toBeVisible();
+  expect(db.rpc.filter((x) => x === 'check_pay_line')).toHaveLength(0);
+  await axe(page);
+  await setOffline(false);
+  await expect.poll(() => db.rpc.filter((x) => x === 'check_pay_line').length).toBe(1);
+  await expect(page.getByText('대기 1건')).toHaveCount(0);
+
+  // 서버가 거절(지난 체크리스트) → 보내지 못한 입력 → 버리기
+  await setOffline(true);
+  await salaryCard(page).getByRole('checkbox', { name: '비상금 체크' }).click();
+  await page.route('**/rest/v1/rpc/check_pay_line', (r) =>
+    r.fulfill({
+      status: 400,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: 'closed' }),
+    }),
+  );
+  await setOffline(false);
+  const rejected = page.getByRole('status').filter({ hasText: '보내지 못한 입력 1건' });
+  await expect(rejected).toBeVisible();
+  await rejected.getByRole('button', { name: '보기' }).click();
+  const list = page.getByRole('list', { name: '보내지 못한 입력 1건' });
+  await expect(list).toContainText('비상금 체크');
+  await expect(list).toContainText('지난 체크리스트라 바꿀 수 없어요');
+  await axe(page);
+  await list.getByRole('button', { name: '버리기' }).click();
+  await expect(rejected).toHaveCount(0);
+});

@@ -37,4 +37,15 @@ describe('conflictDecision(30 동기화 2장)', () => {
       'same',
     );
   });
+  it('오프라인 대기 입력은 배우자가 그 뒤에 바꿨으면 오래전이어도 고르기', () => {
+    expect(
+      conflictDecision(
+        row({ updated_at: '2026-10-20T09:00:00Z' }),
+        { target_amount: 1 },
+        'chanwoo',
+        NOW,
+        { queued: true },
+      ),
+    ).toBe('choose');
+  });
 });

@@ -5,6 +5,8 @@ import { topic } from '@sweetwo/core';
 export const copy = {
   // 충돌 선택(13 공통 상태 11번)
   conflictQ: '어느 쪽으로 할까요?',
+  savedOffline: '연결되면 자동으로 저장돼요',
+  queuedAmount: (name: string) => `${name} 금액`, // [확인 필요] 보내지 못한 입력 목록 이름
   conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,
   conflictMine: '내 값',
   conflictTheirs: (partner: string) => `${partner}님 값`,
