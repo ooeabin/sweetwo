@@ -1,7 +1,7 @@
 import { coupleOf, formatDateWeekday, todayKst } from '@sweetwo/core';
 import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
-import { touchApp } from '@sweetwo/api';
-import { useEffect, useState } from 'react';
+import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { useOnline } from '../../shared/online';
@@ -37,6 +37,8 @@ export function MainFrame(
   const panel = useNotiPanel();
   const narrow = useNarrow();
   const { masked, toggle } = useMask();
+  // 6번 툴팁: 쓰기가 진행 중이면 “저장 중”
+  const saving = useSyncExternalStore(subscribeSaving, isSaving);
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const name = c?.myName ?? '';
   const label: Record<AppTab, string> = {
@@ -120,7 +122,7 @@ export function MainFrame(
                 { name: c?.partnerName ?? '', no: 2, empty: !c?.joined },
               ]
         }
-        saveState={copy.saved}
+        saveState={saving ? copy.saving : copy.saved}
       />
       <N01Panel />
     </FrameCommands>
