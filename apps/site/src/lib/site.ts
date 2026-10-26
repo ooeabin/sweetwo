@@ -1,7 +1,12 @@
 // 웹사이트 주소와 문구(docs/spec/28-website.md). 기획서 “ ” 안 문장을 그대로, 해요체.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const URLS = {
-  app: (import.meta.env.PUBLIC_APP_URL as string | undefined) ?? 'https://app.sweetwo.kr',
+  // 스토어 앱 페이지(28 공통 ‘주소’). App Store 주소는 앱을 등록해야 정해져 빌드 환경 변수로 [확인 필요]
+  appStore:
+    (import.meta.env.PUBLIC_APP_STORE_URL as string | undefined) ?? 'https://apps.apple.com/kr/',
+  playStore:
+    (import.meta.env.PUBLIC_PLAY_STORE_URL as string | undefined) ??
+    'https://play.google.com/store/apps/details?id=kr.sweetwo.app',
   mac: 'https://download.sweetwo.kr/latest/mac',
   win: 'https://download.sweetwo.kr/latest/win',
   status: 'https://status.sweetwo.kr',
@@ -14,24 +19,33 @@ export const CATCH = '함께 구워 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 월급날 어디에 얼마씩 쓸지 같이 정하고, 월말에 함께 정산하는 부부 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크하는 부부 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
-  webStart: '웹에서 시작하기',
-  heroLead: '월급날 어디에 얼마씩 쓸지 같이 정하고, 월말에 함께 정산해요',
+  getApp: '앱 받기',
+  heroLead: '둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크해요', // [확인 필요]
   macDownload: 'Mac용 다운로드',
   winDownload: 'Windows용 다운로드',
   otherOs: '다른 OS용 받기',
   supported: 'macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요',
-  unsupported: '이 기기에서는 앱을 쓸 수 없어요. 웹에서 시작할 수 있어요',
-  mobile: 'Mac이나 Windows에서 설치할 수 있어요',
+  unsupported: '이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요', // [확인 필요]
+  phoneAlso: 'Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요', // [확인 필요]
+  mobileToo: '휴대폰 앱도 있어요',
+  // 스토어 배지 자리(공식 배지 이미지를 넣기 전까지 글자 버튼)
+  appStore: 'App Store에서 받기',
+  googlePlay: 'Google Play에서 받기',
+  // [확인 필요] 기능 4개(28 L-01 3번)
   features: [
-    { title: '월급 플랜과 월급 나누기', body: '월급날 어디에 얼마씩 쓸지 같이 정해요' },
-    { title: '월말 정리와 제안', body: '달마다 같이 돌아보고, 바꾸고 싶은 건 제안으로 정해요' },
-    { title: '양가 챙길 날', body: '양가 생신과 명절을 미리 알려 드리고 예산도 같이 챙겨요' },
+    { title: '우리 목표', body: '내 집 마련, 여행, 비상금까지 얼마나 모았는지 한눈에 봐요' },
+    {
+      title: '월급 분배표와 체크리스트',
+      body: '월급을 어디에 얼마씩 보낼지 한 번 정하고, 월급날 보냈는지 체크만 해요',
+    },
+    { title: '한눈에 순자산', body: '통장, 투자, 집, 대출을 적으면 우리 순자산을 보여 드려요' },
+    { title: '둘이 같이', body: '초대 코드 하나로 같이 쓰고, 누가 고쳐도 서로 바로 알 수 있어요' },
   ],
   featuresTitle: '이렇게 써요', // [확인 필요] 구획 제목
   howTitle: '둘이 쓰는 법', // [확인 필요] 구획 제목
-  how: ['한 사람이 시작해요', '초대 코드로 합류해요', '월말에 같이 정리해요'],
+  how: ['한 사람이 시작해요', '초대 코드로 합류해요', '월급날 같이 체크해요'], // [확인 필요]
   safeTitle: '안심하고 써요', // [확인 필요] 구획 제목
   safe: [
     { icon: 'pencil', text: '직접 입력해요, 계좌를 연결하지 않아요' },
@@ -76,8 +90,7 @@ export const t = {
     win: 'SmartScreen 창이 뜨면 ‘추가 정보’를 누른 뒤 ‘실행’을 눌러 주세요',
   },
   signed: 'sweeTwo는 서명과 공증을 마친 앱이라 보통은 이 경고가 뜨지 않아요',
-  after: '앱에서 로그인하면 웹에서 쓰던 기록이 그대로 있어요',
-  webContinue: '설치 없이 웹에서 계속하기',
+  after: '휴대폰 앱과 같은 계정으로 로그인하면 기록이 그대로 있어요', // [확인 필요]
   chooseOs: '받을 파일을 골라 주세요', // [확인 필요] OS를 모를 때
 
   // L-03
@@ -103,7 +116,11 @@ export const t = {
   // 초대 링크
   openInApp: 'sweeTwo 앱으로 열까요?',
   openApp: '앱으로 열기',
-  webContinueInvite: '웹에서 계속하기',
+  // [확인 필요] 초대 페이지(28 공통 ‘초대 링크’)
+  invited: 'sweeTwo에 초대받았어요',
+  invitedSub: '앱을 설치한 뒤 이 코드를 입력해 주세요',
+  copyCode: '복사',
+  copied: '복사했어요',
 
   // 알림 메일 링크(14 ‘센터와 푸시·메일’): 앱이 없으면 안내 + 앱 받기
   openInSweetwo: 'sweeTwo 앱에서 열어 주세요',
@@ -111,5 +128,4 @@ export const t = {
   loginDone: '로그인을 마쳤어요',
   backToApp: 'sweeTwo 앱으로 돌아가요',
   openSweetwo: 'sweeTwo 열기',
-  getApp: '앱 받기',
 };
