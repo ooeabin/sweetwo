@@ -1,8 +1,8 @@
 // 알림 설정(docs/spec/25-settings.md S-14, 14 알림). 센터 기록은 늘 남고, 이 설정은 OS 알림·메일을 보낼지에만 씀.
 
+/** 묶음(25 S-14): plan = 월급 체크리스트(월급날, 월말 확인), partner_change = 배우자가 바꾼 값 … (제안은 재기획으로 없앰) */
 export type NotiTopic =
   | 'plan'
-  | 'proposal'
   | 'partner_change'
   | 'care_30'
   | 'care_14'
@@ -13,7 +13,6 @@ export type NotiTopic =
   | 'invite';
 export const NOTI_TOPICS: NotiTopic[] = [
   'plan',
-  'proposal',
   'partner_change',
   'care_30',
   'care_14',

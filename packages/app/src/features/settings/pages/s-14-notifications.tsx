@@ -1,4 +1,4 @@
-import { qk, setLivingCheck, updateMe, type Me, type Space } from '@sweetwo/api';
+import { qk, updateMe, type Me } from '@sweetwo/api';
 import { notiPrefs, type NotiPrefs, type NotiTopic } from '@sweetwo/core';
 import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,16 +35,6 @@ export function S14Notifications() {
       toast(copy.failed);
     } finally {
       await qc.invalidateQueries({ queryKey: qk.me });
-    }
-  };
-  const setLiving = async (on: boolean) => {
-    qc.setQueryData<Space | null>(qk.space, (s) => (s ? { ...s, living_check: on } : s));
-    try {
-      await setLivingCheck(on);
-    } catch {
-      toast(copy.failed);
-    } finally {
-      await qc.invalidateQueries({ queryKey: qk.space });
     }
   };
   const setTopic = (t: NotiTopic, ch: 'push' | 'email', on: boolean) =>
@@ -132,23 +122,8 @@ export function S14Notifications() {
         />
       </div>
       {pair('plan', copy.groups.plan)}
-      {pair('proposal', copy.groups.proposal)}
       {d.c.joined &&
         pair('partner_change', copy.groups.partner_change(d.c.partnerName), copy.partnerChangeSub)}
-      {d.space && d.space.marriage_status !== 'engaged' && (
-        <section
-          className="hg-stack"
-          aria-label={copy.livingCheck}
-          style={{ gap: 'var(--space-1)' }}
-        >
-          <Toggle
-            label={copy.livingCheck}
-            checked={!!d.space.living_check}
-            onChange={(on) => void setLiving(on)}
-          />
-          {d.c.joined && <span className="hg-help">{copy.livingCheckSub(d.c.partnerName)}</span>}
-        </section>
-      )}
       <section className="hg-stack" aria-label={copy.groups.care} style={{ gap: 'var(--space-3)' }}>
         <span className="hg-card__label">{copy.groups.care}</span>
         {CARE.map((t) =>

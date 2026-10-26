@@ -515,6 +515,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
       // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 분배표 또는 대기), 사전 입력 지우기
+      // 설정 S-11f·S-11d(서버가 분배표를 합치거나 나눔: 여기서는 방식만)
+      if (fn === 'set_salary_mode') {
+        if (db.space) db.space.salary_mode = body().p_mode;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_joint_cycle_day') {
+        if (db.space) db.space.joint_cycle_day = body().p_day;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'set_join_salary_mode') {
         const mode = body().p_mode;
         const starter = (db.partner?.id as string | undefined) ?? null;
@@ -1337,8 +1346,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         };
         const list =
           body.p_kind === 'goal' ? db.goals : body.p_kind === 'care_day' ? db.cares : db.assets;
-        if (body.p_kind === 'goal' && db.space?.couple_state === 'connected')
-          return json(route, { message: 'needs_proposal' }, 400);
         const r = list.find((x) => x.id === body.p_id);
         if (r) r.deleted_at = null;
         return json(route, 'restored');

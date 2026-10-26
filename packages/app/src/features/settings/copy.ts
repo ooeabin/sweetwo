@@ -33,41 +33,73 @@ export const copy = {
   },
   later: '준비 중이에요', // [확인 필요] 아직 없는 화면 줄
 
-  // S-11 내 정보
+  // S-11 내 정보와 월급
   me: '내 정보',
-  nickname: '호칭', // [확인 필요] 줄 이름
+  nickname: '이름',
   notifyEmail: '알림 이메일',
   emailError: '이메일 주소를 다시 확인해 주세요',
   save: '저장',
   saved: '저장했어요', // [확인 필요]
-  planDay: '월급 플랜 날짜',
-  planDayValue: (d: string) => d,
+  marriage: '결혼 상태',
+  marriageValue: { married: '했어요', engaged: '준비 중이에요' },
+  weddingDay: { married: '결혼한 날', engaged: '결혼 예정일' }, // [확인 필요]
+  weddingPlannedMonth: (y: number, m: number) => `${y}년 ${m}월 예정`, // [확인 필요]
+  undecidedValue: '미정', // [확인 필요]
+  birthYearRow: '출생연도',
+  birthYearValue: (y: number) => `${y}년생`, // [확인 필요]
+  salaryGroup: '월급',
+  mySalary: '내 월급',
+  salaryValue: (amount: string, day: string) => `${amount}, ${day}`,
+  variable: '매달 달라요',
+  partnerSalary: (name: string, amount: string, day: string) => `${name} ${amount}, ${day}`, // [확인 필요]
+  salaryMode: '월급 관리 방식',
+  salaryModeValue: { separate: '각자 관리해요', joint: '합쳐서 관리해요' }, // [확인 필요]
+  planDay: '체크리스트 만드는 날',
   lastDay: '말일',
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
   holidayShift: '월급날이 쉬는 날이면 앞당겨 보여줘요',
   holidayShiftLabel: '주말·공휴일 앞당기기', // [확인 필요] 줄 이름
-  split: '분담 방식',
-  splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },
-  splitValue: (mode: string, a: number, b: number) => `${mode} ${a} : ${b}`,
+  openSplit: '월급 분배표 열기',
   logout: '로그아웃',
   loggedOut: '로그아웃했어요',
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  unlinkPendingLocked: '연결 해제 대기 중에는 바꿀 수 없어요', // [확인 필요]
 
   // S-11a
   nicknameQ: '내 이름이나 애칭을 알려 주세요',
 
-  // S-11b
-  sideRow: '신랑·신부', // [확인 필요] 줄 이름
-  sideQ: '신랑·신부 중 누구예요?',
-  sides: { groom: '신랑', bride: '신부' },
+  // S-11c 내 월급(O-31과 같음)
+  salaryQ: '한 달에 월급이 얼마 들어와요?',
+  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
+  noSalary: '지금은 월급이 없어요',
+  payday: '월급날',
+  salarySaved: '월급을 바꿨어요', // [확인 필요]
 
-  // S-11d
-  planDayQ: '월급 플랜을 언제 세울까요?',
+  // S-11d 체크리스트 만드는 날
+  planDayQ: '체크리스트를 언제 만들까요?', // [확인 필요]
   paydayOf: (name: string, d: string) => `${name} 월급날 ${d}`,
-  proposeTo: (name: string) => `${name}님께 제안하기`,
-  proposed: (name: string) => `${name}님에게 제안했어요`,
-  applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+  planDaySaved: '체크리스트 만드는 날을 바꿨어요', // [확인 필요]
+
+  // S-11f 월급 관리 방식
+  salaryModeQ: '월급을 어떻게 관리해요?',
+  salaryModeHelp: '바꾸면 두 분 모두에게 적용되고, 체크리스트는 다음 월급날부터 바뀌어요', // [확인 필요]
+  salaryModes: {
+    separate: '각자 월급을 따로 관리해요',
+    joint: '합쳐서 같이 관리해요',
+  },
+  salaryModeSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
+
+  // S-11g·h·i
+  marriageQ: '결혼은 하셨나요?',
+  weddingDoneQ: '결혼한 날은 언제예요?',
+  weddingPlannedQ: '결혼 예정일은 언제예요?',
+  whenPlanned: '언제쯤 예정이에요?',
+  undecided: '아직 미정이에요',
+  pastOnly: '오늘까지의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
+  futureOnly: '내일부터의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
+  birthYearQ: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
   openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
   seeProposal: '제안 보기', // [확인 필요]
 
@@ -148,17 +180,17 @@ export const copy = {
 
   // S-13 공개 범위
   visTitle: '공개 범위',
-  vis: { all: '전체 공개', sum: '합계만', private: '비공개' } as Record<string, string>,
+  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<string, string>,
   visDefault: '새 항목 기본값',
   visDefaultSub: '내 자산·내 부채', // [확인 필요]
   visApplyAll: (n: number) => `이미 있는 항목 ${n}개도 바꿀까요?`,
   visAll: '모두 바꾸기',
   visNewOnly: '새 항목만',
   visFixed: [
-    // [확인 필요] 기획서 “‘수입·용돈 금액 항상 공유’ 등 3줄”
-    '수입·용돈 금액 항상 공유',
-    '공동 명의 항목은 항상 전체 공개',
-    '목표와 양가 일정은 항상 전체 공개',
+    // [확인 필요] 기획서 25 S-13 2번 “월급과 분배표는 늘 같이 봐요” 등
+    '월급과 분배표는 늘 같이 봐요',
+    '우리 목표와 공동 명의 항목은 늘 같이 봐요',
+    '챙길 날은 늘 같이 봐요',
   ],
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
@@ -399,20 +431,19 @@ export const copy = {
 
   // S-14 알림
   cap: '이메일은 한 달에 6번까지만 보내요',
-  push: 'OS 알림',
+  push: '푸시 알림',
   email: '이메일',
   livingCheck: '생활비 체크',
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
-    plan: '월급 플랜·월말 정리',
-    proposal: '제안',
+    plan: '월급 체크리스트',
     partner_change: (name: string) => `${name}님이 바꾼 값`,
     care: '챙길 날',
     money: '돈 날짜',
     goal: '목표',
     invite: '배우자 초대',
   },
-  partnerChangeSub: '주 1회 모아서, 수입 변경은 바로 알려요',
+  partnerChangeSub: '분배표·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: 'D-30', care_14: 'D-14', care_7: 'D-7', care_0: '당일' },
   channels: '받는 방법',
   noChannel: '알림을 받을 방법이 없어요',

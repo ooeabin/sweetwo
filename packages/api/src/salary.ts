@@ -132,3 +132,17 @@ export async function fetchGoalLines(
   fail(error);
   return (data ?? []) as never;
 }
+
+/** S-11f 월급 관리 방식 바꾸기(분배표 합치기·나누기는 서버, 체크리스트는 다음 월급날부터). 해제 대기 중이면 'unlink_pending' */
+export async function setSalaryMode(mode: 'separate' | 'joint'): Promise<'ok' | 'unlink_pending'> {
+  const { error } = await supabase().rpc('set_salary_mode', { p_mode: mode });
+  if (error?.message?.includes('unlink_pending')) return 'unlink_pending';
+  fail(error);
+  return 'ok';
+}
+
+/** S-11d 체크리스트 만드는 날(합쳐서 + 합류): 두 사람 월급날 중 하나(말일 = 31) */
+export async function setJointCycleDay(day: number) {
+  const { error } = await supabase().rpc('set_joint_cycle_day', { p_day: day });
+  fail(error);
+}

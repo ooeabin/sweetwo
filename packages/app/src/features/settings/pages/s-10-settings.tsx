@@ -56,16 +56,6 @@ export function S10Settings() {
           />
         )}
         <ListRow
-          label={copy.accountMode}
-          value={copy.accountModeValue(
-            copy.accountModes[d.space?.account_mode ?? 'single'] ?? '',
-            d.space?.account_mode_next
-              ? (copy.accountModes[d.space.account_mode_next] ?? null)
-              : null,
-          )}
-          onClick={() => nav('/settings/account-mode')}
-        />
-        <ListRow
           label={copy.rows.noti}
           value={copy.channelsOn(
             [desktop && prefs.push ? copy.push : null, prefs.email ? copy.email : null].filter(
@@ -75,7 +65,6 @@ export function S10Settings() {
           onClick={() => nav('/settings/notifications')}
         />
         <ListRow label={copy.rows.security} onClick={() => nav('/settings/security')} />
-        <ListRow label={copy.rows.answers} onClick={() => nav('/settings/answers')} />
         <ListRow
           label={copy.rows.guide}
           value={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}

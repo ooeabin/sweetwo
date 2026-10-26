@@ -84,7 +84,6 @@ import {
 } from './features/calendar';
 import {
   S10Settings,
-  S10aAccountMode,
   S11Me,
   S12Couple,
   S12aUnlinkIntro,
@@ -106,17 +105,18 @@ import {
   S21Trash,
   S12hUnlinked,
   S11aNickname,
-  S11bSide,
   S11ePhoto,
   S22Widget,
   S01Guides,
   S01Talk,
   S02ChecklistItem,
   S03Guide,
-  S17Answers,
-  S17aAnswer,
-  S17bSplit,
   S11dPlanDay,
+  S11cSalary,
+  S11fSalaryMode,
+  S11gMarriage,
+  S11hWeddingDate,
+  S11iBirthYear,
   S14Notifications,
   S14aQuiet,
 } from './features/settings';
@@ -663,16 +663,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-10 설정 홈
       {
-        path: '/settings/account-mode',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S10aAccountMode />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-10a 통장 방식
-      {
         path: '/settings/me',
         element: (
           <RequireAccount>
@@ -903,16 +893,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-11e 프로필 사진
       {
-        path: '/settings/me/side',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S11bSide />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-11b 신랑·신부
-      {
         path: '/settings/me/plan-day',
         element: (
           <RequireAccount>
@@ -921,37 +901,57 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-11d 월급 플랜 날짜
+      }, // S-11d 체크리스트 만드는 날
       {
-        path: '/settings/answers',
+        path: '/settings/me/salary',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17Answers />
+              <S11cSalary />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 내 답 다시 보기
+      }, // S-11c 내 월급
       {
-        path: '/settings/answers/split',
+        path: '/settings/me/salary-mode',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17bSplit />
+              <S11fSalaryMode />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 분담 다시 답하기
+      }, // S-11f 월급 관리 방식
       {
-        path: '/settings/answers/:field',
+        path: '/settings/me/marriage',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17aAnswer />
+              <S11gMarriage />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 파트 1 다시 답하기
+      }, // S-11g 결혼 상태
+      {
+        path: '/settings/me/wedding',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11hWeddingDate />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11h 결혼한 날·예정일
+      {
+        path: '/settings/me/birth-year',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11iBirthYear />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11i 출생연도
       {
         path: '/settings/guides',
         element: (
