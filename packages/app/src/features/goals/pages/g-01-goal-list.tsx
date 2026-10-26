@@ -16,11 +16,18 @@ export function G01GoalList() {
   const [unfold, setUnfold] = useState(false);
   const m = (v: number) => money(v, masked);
 
+  // 순서 바꾸기는 한 묶음에 옮길 목표가 2개 이상일 때만(비상금은 고정)
+  const canOrder =
+    d.ready &&
+    (d.groups.ours.filter((i) => i.goal.template !== 'emergency').length > 1 ||
+      d.groups.mine.length > 1);
   const actions = (
     <>
-      <Button variant="secondary" onClick={() => nav('/goals/order')}>
-        {copy.reorder}
-      </Button>
+      {canOrder && (
+        <Button variant="secondary" onClick={() => nav('/goals/order')}>
+          {copy.reorder}
+        </Button>
+      )}
       <Button variant="primary" onClick={() => nav('/goals/new')}>
         {copy.add}
       </Button>

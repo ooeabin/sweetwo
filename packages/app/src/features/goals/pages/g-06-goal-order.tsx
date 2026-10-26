@@ -78,7 +78,7 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
     }
   };
   const list = (ids: string[], set: (x: string[]) => void, title: string) =>
-    ids.length > 1 && (
+    ids.length > 0 && (
       <section className="hg-stack" aria-label={title}>
         {!d.solo && <SectionHeader title={title} />}
         <ReorderList

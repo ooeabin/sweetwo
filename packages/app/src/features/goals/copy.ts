@@ -58,7 +58,6 @@ export const copy = {
   noRecords: '월말 정리를 하면 여기에 쌓여요', // [확인 필요]
   more: '더보기',
   info: '정보', // [확인 필요] 요소 이름
-  ownerLabel: '담당',
   together: '같이',
   createdAt: '만든 날',
 

@@ -1,8 +1,12 @@
 import { formatManWon, formatYm } from '@sweetwo/core';
 import { Badge, Meter } from '@sweetwo/ui';
+import { money } from '../../shared/mask';
 import { copy } from './copy';
 import { GoalArt } from './goal-art';
 import type { GoalItem } from './model';
+
+/** Meter 아래 “2,700만 / 1억 5,000만 원”의 금액(0원은 “0”) */
+export const heldMan = (v: number, masked: boolean) => money(v, masked).replace(/\s?원$/, '');
 
 const tone = (t: string) => (t === 'emergency' ? 'safety' : t === 'invest' ? 'invest' : 'goal');
 
@@ -48,7 +52,6 @@ export function GoalItemCard({
   masked: boolean;
   onOpen: () => void;
 }) {
-  const m = (v: number) => (masked ? '•••' : formatManWon(v));
   const g = i.goal;
   const late = i.lateMonths !== null && i.lateMonths > 0;
   const month = thisMonthText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`));
@@ -68,7 +71,11 @@ export function GoalItemCard({
       <GoalArt g={i} />
       <Meter
         name={g.name}
-        sub={g.target_amount ? copy.heldOf(m(i.saved), m(g.target_amount)) : undefined}
+        sub={
+          g.target_amount
+            ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
+            : undefined
+        }
         pct={g.kind === 'monthly' ? 0 : i.pct}
         tone={tone(g.template)}
       />

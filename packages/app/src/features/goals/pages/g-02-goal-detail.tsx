@@ -25,7 +25,7 @@ import { MainFrame } from '../../month';
 import { CheckLine } from '../../salary';
 import { copy } from '../copy';
 import { GoalArt } from '../goal-art';
-import { lateText } from '../goal-item-card';
+import { heldMan, lateText } from '../goal-item-card';
 import { useGoalsModel } from '../model';
 
 const tone = (t: string) => (t === 'emergency' ? 'safety' : t === 'invest' ? 'invest' : 'goal');
@@ -219,20 +219,24 @@ export function G02GoalDetail() {
         {g.kind !== 'monthly' && (
           <Meter
             name={g.name}
-            sub={g.target_amount ? copy.heldOf(m(i.saved), m(g.target_amount)) : undefined}
+            sub={
+              g.target_amount
+                ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
+                : undefined
+            }
             pct={i.pct}
             tone={tone(g.template)}
           />
         )}
       </section>
-      <div className="hg-cards">
+      <div className="hg-stats">
         {numbers.map(([label, value, field]) => {
           const inner = (
             <>
-              <span className="hg-card__label">{label}</span>
-              <span className="hg-card__value">{value}</span>
+              <span className="hg-stat__label">{label}</span>
+              <span className="hg-stat__value">{value}</span>
               {label === copy.numMonthly && perPerson && (
-                <span className="hg-card__meta">{perPerson}</span>
+                <span className="hg-stat__sub">{perPerson}</span>
               )}
             </>
           );
@@ -240,13 +244,13 @@ export function G02GoalDetail() {
             <button
               key={label}
               type="button"
-              className="hg-card hg-card--raised"
+              className="hg-stat"
               onClick={() => nav(`/goals/${id}/edit/${field}`)}
             >
               {inner}
             </button>
           ) : (
-            <div key={label} className="hg-card">
+            <div key={label} className="hg-stat">
               {inner}
             </div>
           );
@@ -325,7 +329,6 @@ export function G02GoalDetail() {
         <SectionHeader title={copy.info} />
         <div className="hg-list">
           <ListRow label={copy.createdAt} value={formatDateFull(g.created_at.slice(0, 10))} />
-          {g.owner_user_id && <ListRow label={copy.ownerLabel} value={d.nameOf(g.owner_user_id)} />}
         </div>
       </section>
     </div>
