@@ -1,4 +1,4 @@
-import { insertGoal, qk } from '@sweetwo/api';
+import { fetchSplits, insertGoal, qk } from '@sweetwo/api';
 import { formatManWon, formatYm, goalNeed } from '@sweetwo/core';
 import { QuestionLayout } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +11,7 @@ import { useAddDraft } from '../add/draft';
 import { addPath } from '../add/flow';
 import { addPayload, previewGoal } from '../add/payload';
 import { useAddStep } from '../add/step';
+import { addToGoalLine, mySplit, takeFreed } from '../freed';
 
 const man = (v: number) => `${formatManWon(v)} 원`;
 
@@ -48,6 +49,16 @@ export function G03fGoalConfirm() {
     setSaving(true);
     try {
       const id = await insertGoal({ ...p, priority });
+      // G-05 매달 넣던 돈으로 만든 목표면 그 금액을 이 목표 저금 줄에(서버가 만든 0원 줄)
+      const freed = takeFreed();
+      if (freed > 0) {
+        const split = mySplit(
+          await fetchSplits(),
+          meId ?? undefined,
+          d.space?.salary_mode === 'joint',
+        );
+        if (split?.split_line.some((l) => l.goal_id === id)) await addToGoalLine(split, id, freed);
+      }
       toast(copy.added);
       clear();
       await Promise.all(

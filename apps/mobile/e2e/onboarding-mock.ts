@@ -925,55 +925,53 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           ),
         );
       }
-      if (fn === 'use_goal') {
+      // G-05 사용 기록: 쓴 돈만큼 꺼내 쓰기 + 사용 완료, 남은 돈 / 남은 돈 다른 목표로
+      if (fn === 'finish_goal_use') {
         const b = body();
         const g = db.goals.find((x) => x.id === b.p_goal);
-        if (!g) return json(route, { message: 'not_found' }, 400);
-        if (g.status === 'used') return json(route, { message: 'already_used' }, 400);
-        const held = Number(b.p_held);
-        const personal = b.p_paid_from === 'personal';
-        const cut = b.p_kind === 'moved' ? held : personal ? 0 : Math.min(Number(b.p_amount), held);
-        const today = new Date().toISOString().slice(0, 10);
-        db.goalUses.push({
-          id: `use-${db.goalUses.length + 1}`,
-          goal_id: g.id,
-          amount: b.p_kind === 'moved' ? held : personal ? Number(b.p_amount) : cut,
-          used_on: today,
-          paid_from: b.p_paid_from,
-          source: b.p_kind === 'moved' ? 'move' : 'achieved',
-          deleted_at: null,
-        });
-        g.status = 'used';
-        const rest = Math.max(held - cut, 0);
-        const target = db.goals.find((x) => x.template === 'emergency' && x.id !== g.id);
-        let use: string | null = null;
-        if (rest > 0 && target) {
-          use = `use-${db.goalUses.length + 1}`;
-          db.goalUses.push({
-            id: use,
+        if (!g) return json(route, { message: 'no_goal' }, 400);
+        if (g.status === 'used') return json(route, { message: 'goal_used', code: '40001' }, 400);
+        const saved = goalSaved(String(g.id));
+        const use = Math.min(Number(b.p_spent), saved);
+        if (use > 0)
+          db.goalMoves.push({
+            id: `move-${db.goalMoves.length + 1}`,
             goal_id: g.id,
-            amount: rest,
-            used_on: today,
-            source: 'move',
-            moved_goal_id: target.id,
+            kind: 'use',
+            amount: use,
+            created_by: db.me.id,
+            created_at: new Date().toISOString(),
             deleted_at: null,
           });
-          target.other_held = Number(target.other_held ?? 0) + rest;
-        }
-        const line = b.p_paid_from === 'living' && b.p_kind === 'spent' ? cut : 0;
-        return json(route, { line, rest: target ? rest : 0, rest_goal: target?.id ?? null, use });
+        g.status = 'used';
+        return json(route, saved - use);
       }
-      if (fn === 'move_goal_rest') {
+      if (fn === 'move_goal_saved') {
         const b = body();
-        const w = db.goalUses.find((u) => u.id === b.p_use);
-        const from = db.goals.find((x) => x.id === w?.moved_goal_id);
-        const to = db.goals.find((x) => x.id === b.p_goal);
-        if (w && from && to) {
-          from.other_held = Math.max(Number(from.other_held ?? 0) - Number(w.amount), 0);
-          to.other_held = Number(to.other_held ?? 0) + Number(w.amount);
-          w.moved_goal_id = to.id;
-        }
-        return json(route, null);
+        const amt = goalSaved(String(b.p_goal));
+        const at = new Date().toISOString();
+        if (amt > 0)
+          db.goalMoves.push(
+            {
+              id: `move-${db.goalMoves.length + 1}`,
+              goal_id: b.p_goal,
+              kind: 'out',
+              amount: amt,
+              created_by: db.me.id,
+              created_at: at,
+              deleted_at: null,
+            },
+            {
+              id: `move-${db.goalMoves.length + 2}`,
+              goal_id: b.p_to,
+              kind: 'in',
+              amount: amt,
+              created_by: db.me.id,
+              created_at: at,
+              deleted_at: null,
+            },
+          );
+        return json(route, amt);
       }
       // 이번 달만 바꾸기(W-01a): 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 기준값도
       if (fn === 'adjust_plan') {

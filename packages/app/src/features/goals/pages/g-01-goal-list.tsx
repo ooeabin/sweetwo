@@ -51,9 +51,7 @@ export function G01GoalList() {
           key={i.goal.id}
           i={i}
           masked={masked}
-          onOpen={() =>
-            nav(`/goals/${i.goal.id}`)
-          }
+          onOpen={() => nav(`/goals/${i.goal.id}`)}
         />
       ))}
     </div>
