@@ -2660,6 +2660,66 @@ export type Database = {
           },
         ]
       }
+      partner_change: {
+        Row: {
+          actor_id: string
+          after_v: string | null
+          before_v: string | null
+          created_at: string
+          field: string
+          id: number
+          noun: string
+          receiver_id: string
+          ref_id: string | null
+          sent_at: string | null
+          space_id: string
+          target: string
+          topic: string
+          urgent: boolean
+        }
+        ComputedFields: never
+        Insert: {
+          actor_id: string
+          after_v?: string | null
+          before_v?: string | null
+          created_at?: string
+          field: string
+          id?: never
+          noun: string
+          receiver_id: string
+          ref_id?: string | null
+          sent_at?: string | null
+          space_id: string
+          target: string
+          topic: string
+          urgent: boolean
+        }
+        Update: {
+          actor_id?: string
+          after_v?: string | null
+          before_v?: string | null
+          created_at?: string
+          field?: string
+          id?: never
+          noun?: string
+          receiver_id?: string
+          ref_id?: string | null
+          sent_at?: string | null
+          space_id?: string
+          target?: string
+          topic?: string
+          urgent?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_change_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pay_check_line: {
         Row: {
           actual: number | null
@@ -4126,6 +4186,7 @@ export type Database = {
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
       finish_unlink: { Args: { p_how: string; p_id: string }; Returns: undefined }
+      flush_partner_changes: { Args: { p_now?: string }; Returns: number }
       goal_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4191,6 +4252,24 @@ export type Database = {
         Returns: string
       }
       lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
+      log_partner_change: {
+        Args: {
+          p_after: string
+          p_before: string
+          p_field: string
+          p_noun: string
+          p_ref: string
+          p_space: string
+          p_target: string
+          p_topic: string
+          p_urgent: boolean
+        }
+        Returns: undefined
+      }
+      log_split_changes: {
+        Args: { p_old: Json; p_split: string }
+        Returns: undefined
+      }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
@@ -4310,6 +4389,20 @@ export type Database = {
           day: number
           month: number
         }[]
+      }
+      partner_change_line: {
+        Args: {
+          p_after: string
+          p_before: string
+          p_field: string
+          p_noun: string
+          p_topic: string
+        }
+        Returns: string
+      }
+      partner_change_title: {
+        Args: { p_noun: string; p_topic: string; who: string }
+        Returns: string
       }
       partner_profile: {
         Args: Record<PropertyKey, never>
@@ -4463,6 +4556,7 @@ export type Database = {
         Args: { p_today?: string }
         Returns: number
       }
+      send_weekly_summary: { Args: { p_today?: string }; Returns: number }
       set_avatar: { Args: { p_path?: string }; Returns: undefined }
       set_checklist_done: {
         Args: { p_done: boolean; p_key: string }
@@ -4589,6 +4683,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["proposal_status"]
       }
       won_band: { Args: { v: number }; Returns: string }
+      ym_label: { Args: { d: string }; Returns: string }
     }
     Enums: {
       account_mode: "single" | "roles"
