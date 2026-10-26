@@ -134,8 +134,17 @@ export function A01Launch() {
         help={copy.updateSub}
         actions={
           <>
-            {/* 다운로드, 서명 검증, 설치는 배포 단계(자동 업데이트)에서 붙인다. 그 전까지는 실패 안내. */}
-            <Button variant="primary" block onClick={() => setUpdateFailed(true)}>
+            {/* 모바일: 스토어로(웹사이트 다운로드 페이지가 기기에 맞는 스토어로 보냄).
+                데스크톱: 다운로드, 서명 검증, 설치는 자동 업데이트 단계에서 붙인다. 그 전까지는 실패 안내. */}
+            <Button
+              variant="primary"
+              block
+              onClick={() =>
+                session.bridge?.openUrl
+                  ? void session.bridge.openUrl(copy.downloadUrl).catch(() => setUpdateFailed(true))
+                  : setUpdateFailed(true)
+              }
+            >
               {updateFailed ? copy.retry : copy.updateNow}
             </Button>
             <button
@@ -181,8 +190,8 @@ export function A01Launch() {
     );
   }
   if (phase === 'checking') {
-    // 데스크톱: 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
-    return session.platform === 'desktop' ? (
+    // 앱(데스크톱·모바일): 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
+    return session.bridge ? (
       <main className="hg-auth" aria-busy="true">
         <Wordmark height={40} />
         {slow && (

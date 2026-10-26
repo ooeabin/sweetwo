@@ -20,7 +20,7 @@ test('데스크톱 실행', async () => {
     'widget',
   ]);
   // 트레이 위젯(26): 로그인 전에는 값 없음, 설정 기본값(트레이 켜짐, 금액 가림)
-  const state = await win.evaluate(() => window.sweetwo?.widget.state());
+  const state = await win.evaluate(() => window.sweetwo?.widget?.state());
   expect(state).toMatchObject({
     signedIn: false,
     snapshot: null,
@@ -28,7 +28,7 @@ test('데스크톱 실행', async () => {
   });
   // 브리지로 받은 값은 검사(형식이 틀리면 거절)
   const bad = await win.evaluate(() =>
-    window.sweetwo?.widget.update({ kind: 'x' }).then(
+    window.sweetwo?.widget?.update({ kind: 'x' }).then(
       () => 'ok',
       () => 'rejected',
     ),

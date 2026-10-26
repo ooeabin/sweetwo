@@ -8,6 +8,11 @@ export const providerName: Record<AuthProvider, string> = {
   apple: '애플',
 };
 
+type Bio = 'touch' | 'face' | 'fingerprint';
+/** “Touch ID로”, “Face ID로”, “지문으로” */
+const bioObj = (kind: Bio) =>
+  kind === 'fingerprint' ? '지문으' : kind === 'face' ? 'Face ID' : 'Touch ID';
+
 export const copy = {
   toStart: '처음으로', // [확인 필요] 넓은 창 A-02 뒤로 글자
   // A-01
@@ -16,6 +21,7 @@ export const copy = {
   updateTitle: '새 버전으로 업데이트해 주세요',
   updateSub: '지금 버전으로는 저장할 수 없어요',
   updateNow: '지금 업데이트',
+  downloadUrl: 'https://sweetwo.kr/download',
   viewOnly: '업데이트 없이 보기만 할게요',
   updateFailed: '업데이트를 받지 못했어요',
   offlineNoSession: '인터넷에 연결하면 로그인할 수 있어요',
@@ -101,11 +107,13 @@ export const copy = {
   pinConfirm: '한 번 더 입력해 주세요',
   pinMismatch: 'PIN이 서로 달라요',
   pinWeak: '같은 숫자나 이어지는 숫자는 쓸 수 없어요', // [확인 필요] 기획서는 규칙만 있음
-  touchIdAsk: 'Touch ID로도 풀까요?',
-  touchIdYes: 'Touch ID 켜기', // [확인 필요] 버튼 문구
+  // 생체 인증 이름(15 A-06 1·5번): Mac·iPhone Touch ID, iPhone Face ID, Android 지문
+  bioName: { touch: 'Touch ID', face: 'Face ID', fingerprint: '지문' } as const,
+  touchIdAsk: (kind: Bio) => `${bioObj(kind)}로도 풀까요?`,
+  touchIdYes: (kind: Bio) => `${copy.bioName[kind]} 켜기`, // [확인 필요] 버튼 문구
   later: '나중에 할게요',
   pinUnlockTitle: 'PIN을 입력해 주세요',
-  touchIdUnlock: 'Touch ID로 풀기',
+  touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,
   forgotPin: 'PIN을 잊었어요',
   pinWrong: 'PIN이 맞지 않아요',
   pinRemaining: (n: number) => `${n}번 더 틀리면 다시 로그인해야 해요`,

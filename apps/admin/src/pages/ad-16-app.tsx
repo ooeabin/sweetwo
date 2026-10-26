@@ -11,20 +11,29 @@ import { SysTabs } from '../sys-tabs';
 const toIso = (local: string) => (local ? new Date(`${local}:00+09:00`).toISOString() : null);
 const local = (iso: string | null) => (iso ? formatKstDateTime(iso).replace(' ', 'T') : '');
 
-// AD-16 앱 버전·점검: 최신·최소 지원 버전, 점검 예약(시작·끝·문구). 저장 = 승인 요청(최고 관리자).
+// AD-16 앱 버전·점검: 최신·최소 지원 버전(데스크톱, iOS, Android. 웹은 설정 없음), 점검 예약(시작·끝·문구). 저장 = 승인 요청(최고 관리자).
 // 앱은 최소 버전 미만이면 강제 업데이트(A-01), 점검 시간 안이면 ‘점검’ 화면(13 13번). 미만 기기 수는 기기 접속 기록이 쌓인 뒤.
 export function AD16App() {
   const me = useAdmin();
   const canEdit = me.roles.includes('ops');
   const q = useQuery({ queryKey: ['admin', 'app-config'], queryFn: fetchAdminAppConfig });
-  const [f, setF] = useState({ latest: '', minD: '', minW: '', starts: '', ends: '', message: '' });
+  const [f, setF] = useState({
+    latest: '',
+    minD: '',
+    minI: '',
+    minA: '',
+    starts: '',
+    ends: '',
+    message: '',
+  });
   const [msg, setMsg] = useState<string | null>(null);
   useEffect(() => {
     if (!q.data) return;
     setF({
       latest: q.data.latest_version_desktop,
       minD: q.data.min_version_desktop,
-      minW: q.data.min_version_web,
+      minI: q.data.min_version_ios,
+      minA: q.data.min_version_android,
       starts: local(q.data.maintenance_starts_at),
       ends: local(q.data.maintenance_ends_at),
       message: q.data.maintenance_message ?? '',
@@ -34,7 +43,8 @@ export function AD16App() {
   const ready =
     ver.test(f.latest) &&
     ver.test(f.minD) &&
-    ver.test(f.minW) &&
+    ver.test(f.minI) &&
+    ver.test(f.minA) &&
     (!f.starts || (!!f.ends && f.ends > f.starts));
   const save = async () => {
     setMsg(null);
@@ -42,7 +52,8 @@ export function AD16App() {
       await adminRequestAppConfig({
         latest_version_desktop: f.latest,
         min_version_desktop: f.minD,
-        min_version_web: f.minW,
+        min_version_ios: f.minI,
+        min_version_android: f.minA,
         maintenance_starts_at: toIso(f.starts),
         maintenance_ends_at: f.starts ? toIso(f.ends) : null,
         maintenance_message: f.starts ? f.message || null : null,
@@ -70,7 +81,8 @@ export function AD16App() {
       <section className="hg-card hg-stack" aria-label={ops.sysTabs.app} style={{ maxWidth: 520 }}>
         {field(ops.appCols.latest, 'latest')}
         {field(ops.appCols.minDesktop, 'minD')}
-        {field(ops.appCols.minWeb, 'minW')}
+        {field(ops.appCols.minIos, 'minI')}
+        {field(ops.appCols.minAndroid, 'minA')}
         <span className="hg-card__label">{ops.maintenance}</span>
         {field(ops.field.starts, 'starts', 'datetime-local')}
         {field(ops.field.ends, 'ends', 'datetime-local')}

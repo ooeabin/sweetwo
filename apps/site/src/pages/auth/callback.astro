@@ -1,0 +1,40 @@
+---
+// 소셜 로그인 복귀 페이지(15 A-03 5번, DEV_GUIDE ‘데스크톱 로그인과 딥링크’, ‘모바일 세션’).
+// from=desktop(데스크톱), from=app(모바일 로그인 창): code(또는 error)와 state만 sweetwo://auth/callback으로 넘김.
+// 모바일은 로그인 창이 sweetwo://를 받자마자 닫혀 이 화면이 거의 보이지 않음. 값은 형식을 확인하고 넘기며 저장하지 않음.
+import Site from '../../layouts/Site.astro';
+import { t } from '../../lib/site';
+---
+<Site title={t.title(t.loginDone)} description={t.loginDone}>
+  <section class="hg-site__sec" style="border-top: 0;" data-auth-done>
+    <h1 class="hg-site__h2">{t.loginDone}</h1>
+    <p class="hg-site__lead">{t.backToApp}</p>
+    <a class="hg-btn hg-btn--primary" data-open-app href="sweetwo://" hidden>{t.openSweetwo}</a>
+  </section>
+</Site>
+<script>
+  const TOKEN = /^[A-Za-z0-9._~-]{1,512}$/;
+  const ERROR = /^[a-z_]{1,64}$/;
+  const q = new URLSearchParams(location.search);
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const pick = (k: string) => q.get(k) ?? h.get(k) ?? '';
+  const from = pick('from');
+  const state = pick('state');
+  const code = pick('code');
+  const error = pick('error');
+  if ((from === 'desktop' || from === 'app') && TOKEN.test(state)) {
+    const u = new URL('sweetwo://auth/callback');
+    u.searchParams.set('state', state);
+    if (error && ERROR.test(error)) u.searchParams.set('error', error);
+    else if (TOKEN.test(code)) u.searchParams.set('code', code);
+    const link = u.toString();
+    const a = document.querySelector<HTMLAnchorElement>('[data-open-app]');
+    if (a) {
+      a.href = link;
+      a.hidden = false;
+    }
+    // 주소창에 code가 남지 않게 지우고 앱으로(e2e는 앱이 없어 자동 열기만 건너뜀)
+    history.replaceState(null, '', '/auth/callback');
+    if (!('__sweetwoE2E' in window)) location.href = link;
+  }
+</script>

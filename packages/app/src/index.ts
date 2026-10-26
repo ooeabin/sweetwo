@@ -1,3 +1,3 @@
 export { App } from './app';
-export { detectPlatform, type Platform } from './platform';
-export type { DesktopBridge } from './platform';
+export { detectPlatform, isApp, isMobile, type Platform } from './platform';
+export type { AuthEvent, DesktopBridge, LockStatus, VerifyResult } from './platform';

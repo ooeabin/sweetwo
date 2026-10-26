@@ -78,7 +78,7 @@ export function S18Data() {
 
   const start = async () => {
     const bridge = session.bridge;
-    if (session.platform === 'desktop' && bridge) {
+    if (bridge) {
       const lock = await bridge.lock.status();
       if (lock.hasPin) {
         setPin('');

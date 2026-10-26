@@ -110,7 +110,7 @@ export function S15Security() {
               </div>
               {lock.touchIdAvailable && (
                 <Toggle
-                  label={copy.touchId}
+                  label={copy.touchId(lock.bioKind ?? 'touch')}
                   checked={lock.touchIdEnabled}
                   onChange={(on) => void bridge.lock.setTouchId(on).then(refreshLock)}
                 />

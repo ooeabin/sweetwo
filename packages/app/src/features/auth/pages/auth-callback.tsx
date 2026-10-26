@@ -8,7 +8,8 @@ import { paths, routeAfterLogin } from '../flow';
 import { prefs } from '../prefs';
 
 // /auth/callback: 소셜 로그인에서 돌아오는 웹 페이지(https://app.sweetwo.kr/auth/callback)
-// - from=desktop: code(또는 error)와 state를 sweetwo:// 딥링크로 넘긴다(A-03 5번 ‘복귀 페이지’)
+// - from=desktop(데스크톱), from=app(모바일 로그인 창): code(또는 error)와 state를 sweetwo:// 딥링크로 넘긴다(A-03 5번 ‘복귀 페이지’).
+//   모바일은 로그인 창이 sweetwo://를 받자마자 닫혀 이 화면이 거의 보이지 않음
 // - 웹: code를 세션으로 바꾸고 다음 화면으로
 function readParams() {
   const q = new URLSearchParams(window.location.search);
@@ -23,7 +24,7 @@ export function AuthCallback() {
   const done = useRef(false);
 
   const deepLink = useMemo(() => {
-    if (p.from !== 'desktop' || !p.state) return null;
+    if ((p.from !== 'desktop' && p.from !== 'app') || !p.state) return null;
     const u = new URL('sweetwo://auth/callback');
     u.searchParams.set('state', p.state);
     if (p.error) u.searchParams.set('error', p.error);

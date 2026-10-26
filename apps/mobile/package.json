@@ -14,22 +14,29 @@
     "cap:ios": "cap open ios"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "10.0.0",
+    "@aparajita/capacitor-secure-storage": "8.0.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/privacy-screen": "2.0.1",
     "@sweetwo/app": "workspace:*",
+    "@sweetwo/core": "workspace:*",
     "@sweetwo/ui": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@capacitor/core": "^8.5.3",
-    "@capacitor/android": "^8.5.3",
-    "@capacitor/ios": "^8.5.3"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",
+    "@capacitor/cli": "^8.5.3",
     "@playwright/test": "1.56.1",
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
-    "vite": "^6.4.4",
-    "@capacitor/cli": "^8.5.3"
+    "vite": "^6.4.4"
   }
 }

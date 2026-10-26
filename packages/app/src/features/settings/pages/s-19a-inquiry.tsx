@@ -31,13 +31,17 @@ export function S19aInquiry() {
       const platform = detectPlatform();
       const info = attach
         ? {
-            app_version: platform === 'desktop' ? (window.sweetwo?.appVersion ?? '') : 'web',
+            app_version: platform !== 'web' ? (window.sweetwo?.appVersion ?? '') : 'web',
             platform,
-            os: navigator.userAgent.includes('Mac')
-              ? 'mac'
-              : navigator.userAgent.includes('Win')
-                ? 'windows'
-                : 'other',
+            os: /iPhone|iPad/.test(navigator.userAgent)
+              ? 'ios'
+              : navigator.userAgent.includes('Android')
+                ? 'android'
+                : navigator.userAgent.includes('Mac')
+                  ? 'mac'
+                  : navigator.userAgent.includes('Win')
+                    ? 'windows'
+                    : 'other',
             couple_state: d.space?.couple_state ?? '',
             sync: navigator.onLine ? 'online' : 'offline',
           }

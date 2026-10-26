@@ -229,7 +229,7 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', web: '웹' } as Record<string, string>, // [확인 필요]
+  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱', web: '웹' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',
@@ -317,6 +317,8 @@ export const ops = {
     latest: '최신 버전(데스크톱)',
     minDesktop: '최소 지원 버전(데스크톱)',
     minWeb: '최소 지원 버전(웹)',
+    minIos: '최소 지원 버전(iOS)',
+    minAndroid: '최소 지원 버전(Android)',
   }, // [확인 필요]
   maintenance: '점검 예약', // [확인 필요]
   maintenanceMsg: '점검 문구', // [확인 필요]

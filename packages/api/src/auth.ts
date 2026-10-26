@@ -94,20 +94,27 @@ export async function fetchSocialName(): Promise<string | null> {
 }
 
 /** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
-export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
+export async function fetchLaunchConfig(platform: 'desktop' | 'ios' | 'android' | 'web'): Promise<{
   min: string;
   maintenance: { starts: string; ends: string; message: string | null } | null;
 }> {
   const { data, error } = await supabase()
     .from('app_config')
     .select(
-      'min_version_desktop, min_version_web, maintenance_starts_at, maintenance_ends_at, maintenance_message',
+      'min_version_desktop, min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
     )
     .eq('id', 1)
     .single();
   if (error) throw toError(error.message);
   return {
-    min: platform === 'desktop' ? data.min_version_desktop : data.min_version_web,
+    min:
+      platform === 'desktop'
+        ? data.min_version_desktop
+        : platform === 'ios'
+          ? data.min_version_ios
+          : platform === 'android'
+            ? data.min_version_android
+            : data.min_version_web,
     maintenance:
       data.maintenance_starts_at && data.maintenance_ends_at
         ? {
@@ -117,15 +124,4 @@ export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
           }
         : null,
   };
-}
-
-/** A-01: 최소 지원 버전(로그인 전에도 읽을 수 있음) */
-export async function fetchMinVersion(platform: 'desktop' | 'web'): Promise<string> {
-  const { data, error } = await supabase()
-    .from('app_config')
-    .select('min_version_desktop, min_version_web')
-    .eq('id', 1)
-    .single();
-  if (error) throw toError(error.message);
-  return platform === 'desktop' ? data.min_version_desktop : data.min_version_web;
 }

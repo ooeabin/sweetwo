@@ -3,7 +3,7 @@ import { notiPrefs } from '@sweetwo/core';
 import { Badge, ListRow } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { detectPlatform } from '../../../platform';
+import { detectPlatform, isApp } from '../../../platform';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -18,11 +18,13 @@ export function S10Settings() {
   const d = useSettingsData();
   const ck = useChecklist(d.space);
   const widget = useWidgetSettings();
-  const desktop = detectPlatform() === 'desktop';
+  const platform = detectPlatform();
+  const desktop = platform === 'desktop';
+  const app = isApp(platform);
   const lock = useQuery({
     queryKey: ['lock-status'],
     queryFn: () => window.sweetwo?.lock.status() ?? Promise.resolve(null),
-    enabled: desktop,
+    enabled: app,
   });
   const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const asking = (inquiries.data ?? []).filter((q) =>
@@ -78,11 +80,7 @@ export function S10Settings() {
         <ListRow
           label={copy.rows.security}
           value={
-            desktop && lock.data
-              ? lock.data.hasPin
-                ? copy.rows.lockOn
-                : copy.rows.lockOff
-              : undefined
+            app && lock.data ? (lock.data.hasPin ? copy.rows.lockOn : copy.rows.lockOff) : undefined
           }
           onClick={() => nav('/settings/security')}
         />
@@ -111,7 +109,7 @@ export function S10Settings() {
               copy.rows.about
             )
           }
-          value={desktop ? (window.sweetwo?.appVersion ?? '') : undefined}
+          value={app ? (window.sweetwo?.appVersion ?? '') : undefined}
           onClick={() => nav(asking ? '/settings/help/inquiries' : '/settings/about')}
         />
         {desktop && (

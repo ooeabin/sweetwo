@@ -179,3 +179,17 @@ test('L-03 릴리스 노트, L-05 약관(시행일), L-06 고객센터 검색', 
   await expect(page.getByText('찾는 답이 없어요. 메일로 물어봐 주세요')).toBeVisible();
   await axe(page);
 });
+
+test('로그인 복귀 페이지(A-03 5번): 앱이면 code와 state만 sweetwo://로, 주소창에 code가 남지 않음', async ({
+  page,
+}) => {
+  await page.addInitScript(() => Object.assign(window, { __sweetwoE2E: true }));
+  await page.goto('/auth/callback?from=app&state=st_1&code=co-2&next=https://evil.example');
+  await expect(page.getByRole('heading', { name: '로그인을 마쳤어요' })).toBeVisible();
+  const open = page.getByRole('link', { name: 'sweeTwo 열기' });
+  await expect(open).toHaveAttribute('href', 'sweetwo://auth/callback?state=st_1&code=co-2');
+  expect(page.url()).not.toContain('code=');
+  await axe(page);
+  await page.goto('/auth/callback?from=app&state=<x>&code=a');
+  await expect(page.getByRole('link', { name: 'sweeTwo 열기' })).toBeHidden();
+});

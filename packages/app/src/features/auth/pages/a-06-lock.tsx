@@ -21,6 +21,7 @@ export function A06LockSetup() {
   const [first, setFirst] = useState('');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string>();
+  const [bioKind, setBioKind] = useState<'touch' | 'face' | 'fingerprint'>('touch');
 
   const finish = () => {
     prefs.setPinAsked(true);
@@ -31,7 +32,7 @@ export function A06LockSetup() {
   if (step === 'touch') {
     return (
       <AuthLayout
-        title={copy.touchIdAsk}
+        title={copy.touchIdAsk(bioKind)}
         actions={
           <>
             <Button
@@ -39,7 +40,7 @@ export function A06LockSetup() {
               block
               onClick={() => void bridge.lock.setTouchId(true).then(finish)}
             >
-              {copy.touchIdYes}
+              {copy.touchIdYes(bioKind)}
             </Button>
             <Button variant="ghost" block onClick={finish}>
               {copy.later}
@@ -73,6 +74,7 @@ export function A06LockSetup() {
     }
     await bridge.lock.setPin(pin);
     const s = await bridge.lock.status();
+    setBioKind(s.bioKind ?? 'touch');
     if (s.touchIdAvailable) setStep('touch');
     else finish();
   };
@@ -106,6 +108,7 @@ export function LockGate({ active }: { active: boolean }) {
   const bridge = session.bridge;
   const [locked, setLocked] = useState(false);
   const [touchId, setTouchId] = useState(false);
+  const [bioKind, setBioKind] = useState<'touch' | 'face' | 'fingerprint'>('touch');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
@@ -120,6 +123,7 @@ export function LockGate({ active }: { active: boolean }) {
     void bridge.lock.status().then((s) => {
       setLocked(s.locked);
       setTouchId(s.touchIdEnabled);
+      setBioKind(s.bioKind ?? 'touch');
       if (s.locked && s.touchIdEnabled) void tryTouchId();
     });
     const off = bridge.lock.onLock(() => {
@@ -203,7 +207,9 @@ export function LockGate({ active }: { active: boolean }) {
         error={error}
         notice={notice}
         touchId={
-          touchId ? { label: copy.touchIdUnlock, onClick: () => void tryTouchId() } : undefined
+          touchId
+            ? { label: copy.touchIdUnlock(bioKind), onClick: () => void tryTouchId() }
+            : undefined
         }
         footer={
           <button type="button" className="hg-btn hg-btn--link" onClick={() => void forgot()}>
