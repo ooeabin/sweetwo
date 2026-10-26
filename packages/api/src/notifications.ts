@@ -129,3 +129,10 @@ export async function setMarketing(userId: string, on: boolean, version: string)
   });
   if (error) throw new Error(error.message);
 }
+
+/** 홈 띠: 내 알림 이메일로 보낸 메일이 반송됐는지(14 ‘알림 메일 반송’). 주소를 바꾸면 사라짐 */
+export async function fetchMailBounced(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('my_mail_bounced');
+  if (error) return false;
+  return data === true;
+}

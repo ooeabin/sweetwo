@@ -1667,6 +1667,28 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_suppress: {
+        Row: {
+          bounces: number
+          complaint: boolean
+          email: string
+          last_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          bounces?: number
+          complaint?: boolean
+          email: string
+          last_at?: string
+        }
+        Update: {
+          bounces?: number
+          complaint?: boolean
+          email?: string
+          last_at?: string
+        }
+        Relationships: []
+      }
       notice: {
         Row: {
           body: string
@@ -2728,6 +2750,7 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mail_blocked: { Args: { p_email: string }; Returns: boolean }
       mail_missed_notifications: { Args: { p_now?: string }; Returns: number }
       make_checklist: {
         Args: { p_owner: string; p_space: string; p_today?: string }
@@ -2741,6 +2764,7 @@ export type Database = {
         Returns: string
       }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
+      my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2795,6 +2819,7 @@ export type Database = {
         Returns: string
       }
       note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
+      note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
       noti_mail_body: {
         Args: { p_body: string; p_title: string }

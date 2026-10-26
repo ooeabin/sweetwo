@@ -166,3 +166,14 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   await page.getByRole('button', { name: '자세히', exact: false }).first().click();
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
 });
+
+test('알림 메일 반송(14): 홈 상단 띠 → S-14', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.mailBounced = true;
+  await page.goto('/');
+  await expect(page.getByText('알림 메일이 전달되지 않았어요')).toBeVisible();
+  await page.getByRole('button', { name: '확인하기' }).click();
+  await expect(page).toHaveURL(/\/settings\/notifications$/);
+});

@@ -47,4 +47,7 @@ export const copy = {
   mineMark: '나', // [확인 필요]
   copyCode: '코드 복사',
   codeCopied: '코드를 복사했어요', // [확인 필요]
+  mailBounced: '알림 메일이 전달되지 않았어요',
+  mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
+  mailCheck: '확인하기', // [확인 필요]
 };

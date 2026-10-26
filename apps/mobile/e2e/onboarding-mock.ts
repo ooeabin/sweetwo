@@ -64,6 +64,7 @@ export interface MemDb {
   sessions: Record<string, unknown>[];
   goalChanges: Record<string, unknown>[];
   pendingTerms: { kind: string; version: string }[];
+  mailBounced: boolean;
   /** 생활비 체크 답(W-03) */
   livingChecks: Record<string, unknown>[];
   /** 앱 안 공지(AD-10, 게시된 것) */
@@ -161,6 +162,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     notices: [],
     goalChanges: [],
     pendingTerms: [],
+    mailBounced: false,
     sessions: [
       {
         id: 's-this',
@@ -1248,6 +1250,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'my_sessions') return json(route, db.sessions);
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
+      if (fn === 'my_mail_bounced') return json(route, db.mailBounced);
       if (fn === 'agree_terms') {
         const b = body();
         const n = db.pendingTerms.filter(
