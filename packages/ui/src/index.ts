@@ -23,6 +23,7 @@ export * from './components/EmptyState';
 export * from './components/SceneMedia';
 export * from './components/LineChart';
 export * from './components/BarChart';
+export * from './components/GoalPick';
 export * from './components/TransferRow';
 export * from './components/Calendar';
 export * from './components/AuthLayout';

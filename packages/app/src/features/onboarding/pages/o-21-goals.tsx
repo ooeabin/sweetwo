@@ -6,7 +6,7 @@ import {
   templateByKey,
   type GoalTab,
 } from '@sweetwo/core';
-import { Chip, QuestionLayout, Tabs } from '@sweetwo/ui';
+import { GoalPick, QuestionLayout, Tabs } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { pickedGoals } from '../flow';
@@ -14,7 +14,7 @@ import { useStep } from '../step';
 
 // O-21 목표 고르기(Q2 변형). 고른 순서 = 우선순위, 해제하면 당겨짐. 0개여도 진행.
 // 고른 목표는 모두 우리 목표(owner_user_id null). 비상금은 자동(금액·기한은 O-50 분배표에서 정함).
-// 디자인: 목표 고르기는 Chip(순번 hg-chip__order) + 알약 탭(docs/design/components/Chip.md, Tabs.md)
+// 디자인: 그림 카드 GoalPick(3열, 좁은 창 2열, 순번 원) + 알약 탭(docs/design/components/GoalPick.md, Tabs.md)
 type Pick = { key: string; id?: string }; // id = 이미 저장된 목표
 
 export function O21Goals() {
@@ -87,22 +87,19 @@ export function O21Goals() {
         onChange={setTab}
         items={goalTabs.map((t) => ({ value: t.key, label: t.label }))}
       />
-      <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        {pickableGoals(tab, engaged).map((t) => (
-          <Chip
-            key={t.key}
-            selected={!!order(t.key)}
-            order={order(t.key)}
-            onClick={() => toggle(t.key)}
-          >
-            {t.name}
-            {rec.includes(t.key) && <span className="hg-tag">{copy.recommended}</span>}
-          </Chip>
-        ))}
-        <Chip selected={!!order('custom')} order={order('custom')} onClick={() => toggle('custom')}>
-          {copy.makeOwn}
-        </Chip>
-      </div>
+      <GoalPick
+        items={pickableGoals(tab, engaged).map((t) => ({
+          key: t.key,
+          name: t.name,
+          illustration: t.illustration,
+          recommended: rec.includes(t.key),
+        }))}
+        order={order}
+        onToggle={toggle}
+        customKey="custom"
+        customLabel={copy.makeOwn}
+        recommendedLabel={copy.recommended}
+      />
       <p className="hg-q__help" aria-live="polite">
         {list.length ? copy.picked(list.length) : ''}
       </p>

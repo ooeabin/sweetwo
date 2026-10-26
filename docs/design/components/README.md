@@ -29,6 +29,7 @@
 | [Tooltip](Tooltip.md) | Feedback | 용어·아이콘 짧은 설명 |
 | [AmountInput](AmountInput.md) | Inputs | 금액 넣기 |
 | [Chip](Chip.md) | Inputs | 선택 칩 |
+| [GoalPick](GoalPick.md) | Inputs | 그림 카드로 목표 고르기(O-21, 순번 = 우선순위) |
 | [ResultCard](ResultCard.md) | Data | 결과 요약 카드(큰 금액 + 체크 줄) |
 | [InfoPlate](InfoPlate.md) | Data | 조건 요약 판(이름–값 두 열), 완료 표시 DoneMark |
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
