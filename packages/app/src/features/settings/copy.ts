@@ -278,10 +278,8 @@ export const copy = {
 
   // S-18b 계정 삭제
   deleteMine: (n: number) => `내 명의 항목 ${n}개는 지워져요`,
-  deleteJointStays: (name: string) => `공동 항목은 ${name}님에게 남아요`,
+  deleteSharedGone: '같이 쓰던 데이터도 모두 지워져요',
   deleteWholeSpace: '부부 공간 전체 삭제',
-  deletePendingNote: (name: string) =>
-    `연결 해제 요청은 그대로 두고 공동 항목은 ${name}님에게 남아요`, // [확인 필요]
   deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
   deleteWith: (p: string) => `${p}로 확인하고 삭제`,
   deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목

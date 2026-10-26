@@ -612,7 +612,7 @@ test('계정 삭제(S-18b) → 로그아웃, 다시 로그인하면 삭제 취�
   await page.getByRole('button', { name: /계정 삭제/ }).click();
   await expect(page).toHaveURL(/\/settings\/data\/delete$/);
   await expect(page.getByText('내 명의 항목 1개는 지워져요')).toBeVisible();
-  await expect(page.getByText('공동 항목은 예빈님에게 남아요')).toBeVisible();
+  await expect(page.getByText('같이 쓰던 데이터도 모두 지워져요')).toBeVisible();
   await expect(page.getByText('30일 안에 다시 로그인하면 복구돼요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '카카오로 확인하고 삭제' }).click();
