@@ -3,7 +3,7 @@ import { readWon } from '@sweetwo/core';
 import { AmountInput, ChoiceCards, QuestionLayout } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoalsModel } from '../model';
@@ -12,6 +12,7 @@ type Kind = 'in' | 'out' | 'use' | 'held';
 
 // G-02a 넣기·빼기(Q1 → Q3), G-02b 꺼내 쓰기(Q3), ‘이미 모은 돈 넣기’(G-02 3a, Q3 → goal.other_held).
 // 빼기·꺼내 쓰기는 모은 돈보다 많으면 저장 꺼짐. 저장 = 바로 반영 + Toast + 되돌리기.
+// ?amount= 로 금액을 채워 열 수 있음(캘린더 Y-08 ‘목표 고르기’).
 export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
   const { id = '', kind } = useParams();
   const nav = useNavigate();
@@ -20,7 +21,11 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
   const [pick, setPick] = useState<Kind | null>(
     spend ? 'use' : ((kind as Kind | undefined) ?? null),
   );
-  const [amount, setAmount] = useState<number | null>(null);
+  const [params] = useSearchParams();
+  const [amount, setAmount] = useState<number | null>(() => {
+    const v = Number(params.get('amount') ?? '');
+    return Number.isInteger(v) && v > 0 ? v : null;
+  });
   const [busy, setBusy] = useState(false);
   if (!d.ready) return null;
   const i = d.byId(id);

@@ -128,24 +128,24 @@ describe('기록할 회차, 7일 지남', () => {
 });
 
 describe('작년에도 드렸어요', () => {
-  const rec = [{ member_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }];
-  it('같은 분, 같은 선물, 2년 안', () => {
+  const rec = [{ care_day_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }];
+  it('같은 챙길 날, 같은 선물, 2년 안', () => {
     expect(
-      giftRepeated(rec, { member_id: 'm', gift_name: ' 안마기 ', occurs_on: '2026-10-14' }),
+      giftRepeated(rec, { care_day_id: 'm', gift_name: ' 안마기 ', occurs_on: '2026-10-14' }),
     ).toBe(true);
   });
-  it('다른 분, 다른 선물, 2년 넘음, 같은 날은 아님', () => {
+  it('다른 챙길 날, 다른 선물, 2년 넘음, 같은 날은 아님', () => {
     expect(
-      giftRepeated(rec, { member_id: 'x', gift_name: '안마기', occurs_on: '2026-10-14' }),
+      giftRepeated(rec, { care_day_id: 'x', gift_name: '안마기', occurs_on: '2026-10-14' }),
     ).toBe(false);
-    expect(giftRepeated(rec, { member_id: 'm', gift_name: '꽃', occurs_on: '2026-10-14' })).toBe(
+    expect(giftRepeated(rec, { care_day_id: 'm', gift_name: '꽃', occurs_on: '2026-10-14' })).toBe(
       false,
     );
     expect(
-      giftRepeated(rec, { member_id: 'm', gift_name: '안마기', occurs_on: '2027-10-15' }),
+      giftRepeated(rec, { care_day_id: 'm', gift_name: '안마기', occurs_on: '2027-10-15' }),
     ).toBe(false);
     expect(
-      giftRepeated(rec, { member_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }),
+      giftRepeated(rec, { care_day_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }),
     ).toBe(false);
   });
 });

@@ -1284,7 +1284,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           p_kind: string;
           p_id: string;
         };
-        const list = body.p_kind === 'goal' ? db.goals : db.assets;
+        const list =
+          body.p_kind === 'goal' ? db.goals : body.p_kind === 'care_day' ? db.cares : db.assets;
         if (body.p_kind === 'goal' && db.space?.couple_state === 'connected')
           return json(route, { message: 'needs_proposal' }, 400);
         const r = list.find((x) => x.id === body.p_id);
@@ -1587,6 +1588,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           status_on: null,
           memo: null,
           secret: false,
+          auto: null,
+          auto_moves: true,
           created_by: db.me.id,
         },
       ],

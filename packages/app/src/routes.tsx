@@ -75,17 +75,12 @@ import {
 import {
   CalendarHome,
   Y01CareList,
-  Y02FirstSetup,
   Y04Calendar,
   Y05Budget,
   Y05CareDay,
-  Y03Family,
   Y07CareAdd,
   Y08Record,
-  Y06Edit,
-  Y06FamilyCost,
   Y09GiftLog,
-  YSurprisePartnerBirthday,
 } from './features/calendar';
 import {
   S10Settings,
@@ -608,16 +603,6 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-04 달력
       {
-        path: '/calendar/setup/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y02FirstSetup />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-02 처음 등록
-      {
         path: '/calendar/day/:id',
         element: (
           <RequireAccount>
@@ -648,26 +633,6 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-08 다녀온 뒤 기록
       {
-        path: '/calendar/family-cost',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y06FamilyCost />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-06 이번 회차 양가 비용
-      {
-        path: '/calendar/family-cost/edit',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y06Edit />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-06 양가 비용 예산 수정
-      {
         path: '/calendar/gifts',
         element: (
           <RequireAccount>
@@ -677,16 +642,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-09 드린 기록
-      {
-        path: '/calendar/partner-birthday',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <YSurprisePartnerBirthday />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 서프라이즈 배우자 생일
       {
         path: '/notifications',
         element: (
@@ -1077,26 +1032,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-07 챙길 날 추가
-      {
-        path: '/calendar/family/new/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y03Family />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-03 가족 추가
-      {
-        path: '/calendar/family/:id/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y03Family />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-03 가족 수정
       {
         path: '/goals/week',
         element: (

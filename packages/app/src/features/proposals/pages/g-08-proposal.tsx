@@ -176,7 +176,7 @@ export function G08Proposal() {
             <Button
               variant="secondary"
               disabled={busy}
-              onClick={() => nav('/calendar/family-cost/edit?differently=1')}
+              onClick={() => nav('/calendar')}
             >
               {copy.differently}
             </Button>

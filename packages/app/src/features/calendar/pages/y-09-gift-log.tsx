@@ -7,18 +7,18 @@ import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
-type View = 'family' | 'year';
+type View = 'care' | 'year';
 const VIEW_KEY = 'sweetwo.gift-view';
 const readView = (): View => {
   try {
-    return localStorage.getItem(VIEW_KEY) === 'year' ? 'year' : 'family';
+    return localStorage.getItem(VIEW_KEY) === 'year' ? 'year' : 'care';
   } catch {
-    return 'family';
+    return 'care';
   }
 };
 
-// Y-09 드린 기록(docs/spec/24-calendar.md Y-09): 누구에게, 언제, 무엇을, 얼마 드렸는지. 가족별 / 연도별 보기(기기에 기억).
-// 같은 분께 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 챙길 날 상세(Y-05). 사진은 기록 사진(Y-08c)과 함께 다음 단계.
+// Y-09 드린 기록(24 Y-09, 재기획): 무엇을, 언제, 얼마 드렸는지. 챙길 날별 / 연도별 보기(기기에 기억).
+// 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 챙길 날 상세(Y-05). 사진은 기록 사진(Y-08c)과 함께 다음 단계.
 export function Y09GiftLog() {
   const nav = useNavigate();
   const c = useCalendarData();
@@ -28,7 +28,6 @@ export function Y09GiftLog() {
   if (c.loading) return <MainFrame current="calendar" columns={[null]} />;
 
   const careOf = (id: string) => c.cares.find((x) => x.id === id);
-  const memberOf = (id: string | null) => c.family.find((f) => f.id === id);
   const rows = c.records
     .filter((r) => careOf(r.care_day_id))
     .sort((a, b) => (a.occurs_on < b.occurs_on ? 1 : -1));
@@ -39,27 +38,17 @@ export function Y09GiftLog() {
         .map((g) => (g === 'gift' && r.gift_name ? r.gift_name : copy.gifts[g])),
     );
 
-  // 묶음: 가족별(찬우 쪽 → 예빈 쪽 순, 가족이 아닌 날은 맨 뒤) / 연도별(최근 해부터)
+  // 묶음: 챙길 날별(가장 최근 기록 순) / 연도별(최근 해부터)
   const groups: { key: string; title: string; items: typeof rows }[] = [];
   const push = (key: string, title: string, r: (typeof rows)[number]) => {
     const g = groups.find((x) => x.key === key);
     if (g) g.items.push(r);
     else groups.push({ key, title, items: [r] });
   };
-  if (view === 'year')
-    for (const r of rows)
+  for (const r of rows)
+    if (view === 'year')
       push(r.occurs_on.slice(0, 4), copy.giftedYear(Number(r.occurs_on.slice(0, 4))), r);
-  else {
-    for (const f of c.family)
-      for (const r of rows.filter((x) => x.member_id === f.id))
-        push(
-          f.id,
-          `${f.title}, ${copy.side(f.side === 'groom' ? c.names.groom : c.names.bride)}`,
-          r,
-        );
-    for (const r of rows.filter((x) => !memberOf(x.member_id)))
-      push('others', copy.giftedOthers, r);
-  }
+    else push(r.care_day_id, careOf(r.care_day_id)?.name ?? '', r);
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
@@ -77,7 +66,7 @@ export function Y09GiftLog() {
           }
         }}
         items={[
-          { value: 'family', label: copy.giftedViews.family },
+          { value: 'care', label: copy.giftedViews.care },
           { value: 'year', label: copy.giftedViews.year },
         ]}
       />

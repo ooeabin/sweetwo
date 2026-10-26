@@ -250,6 +250,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - 재기획 새 테이블(20261029090000): `salary_split`·`split_line`(월급 분배표, 쓰기는 `save_split`만), `pay_checklist`·`pay_check_line`(이번 달 월급 체크리스트, 만들기는 `start_checklist`만, 사이클은 `cycle_day`·`cycle_date`), `couple_space.salary_mode`·`joint_cycle_day`, `goal.owner_user_id`(null = 우리 목표)·`visibility`
 - 목표 돈 움직임(20261029150000): `goal_move`(넣기·빼기·꺼내 쓰기, 쓰기는 `move_goal`·`undo_goal_move`만), 모은 돈 `goal_saved_sums()`, 목표 ↔ 분배표 저금 줄 트리거 `goal_lines`
+- 자동 결혼기념일(20261029180000): `care_day.auto`·`auto_moves`, `couple_space` 트리거 → `sync_wedding_care(공간)`
 - `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
@@ -676,28 +677,21 @@ supabase/
 
 ### 캘린더 구조
 
-- features/calendar: `/calendar`(마지막 보기로, 기기에 기억), Y-01 `/calendar/list`, Y-04 `/calendar/month`. 보기 필터 “전체” “챙길 날” “돈 날짜”는 목록·달력 공통, 기기에 기억
-- 돈 날짜(읽기 전용, 누르면 해당 화면)는 core `rules/calendar.ts` `moneyDates(연, 월, 재료)`: 두 사람 월급날(주말이면 직전 금요일), 월말 정리 띠(기준일 3일 전 ~ 전날, 첫날 “정리 시작”), 자산·대출 만기(서버가 공개 범위로 거른 행), 열린 제안 적용일, 들어오는 돈(그 달 1일, 한 번이면 처음 오는 그 달), 매년 목표 쓰는 달(기한의 달 1일)
-- 달력 칸은 ui `Calendar`(일요일 시작 6주, `monthGrid`). 돈 날짜 = 검정 점, 정리 기간 = `is-band`
-- 목록은 다음 챙길 날 카드(D-day, 챙길 사람, 쓸 돈, ‘준비하기’) + 60일 안 챙길 날 + 돈 날짜 작은 줄. 챙길 날이 없으면 빈 상태 → Y-02
-- 테이블: `family_member`(편, 관계, 호칭, 생일 월·일·음력·윤달), `care_day`(종류 family/couple/wedding, 날짜 규칙 solar_yearly/lunar_yearly/once, 쓸 돈, 챙길 사람 groom/bride/together, 알림 일수 배열, 준비 상황 + `status_on` = 그 해 날짜). 공간 구성원 RLS, 지우기는 휴지통만
+- 기획: 24(재기획 2026-10-25). features/calendar: `/calendar`(마지막 보기로, 기기에 기억), Y-01 `/calendar/list`, Y-04 `/calendar/month`. 보기 필터 “전체” “챙길 날” “돈 일정”은 목록·달력 공통, 기기에 기억
+- 돈 일정(읽기 전용, 누르면 해당 화면)은 core `rules/calendar.ts` `moneyDates(연, 월, 재료)`: 월급날(각자 = 사람마다 “찬우 월급날”, 합쳐서 = `joint_cycle_day` 하나 “월급날”, 주말·공휴일이면 직전 영업일) → W-02, 월말 확인 띠(다음 월급날 3일 전 ~ 전날, 각자 = 내 월급날 기준, 첫날 “월급 확인”) → W-05, 목표 기한(한 번 목표, 진행 중만) → G-02, 매년 목표 쓰는 달 → G-02, 자산·대출 만기(서버가 공개 범위로 거른 행) → F-04
+- 달력 칸은 ui `Calendar`(일요일 시작 6주, `monthGrid`). 돈 일정 = 검정 점, 월말 확인 = `is-band`, 챙길 날 = `together` 점 한 가지. 고른 날이 띠 안이면 “{n}월 월급, 빠진 게 있는지 확인할 때예요” 줄(→ W-05, 목록은 오늘이 띠 안일 때 맨 위)
+- 목록: 기록 없이 7일 지난 날(맨 위 ‘기록하기’) → 다음 챙길 날 카드(D-day, 날짜, 금액 메모 “30만 원 생각해 뒀어요”, ‘준비하기’) → 60일 안 챙길 날 → 돈 일정 작은 줄 → 드린 기록. 챙길 날이 없으면 빈 상태 + ‘챙길 날 추가’(돈 일정은 그대로)
+- 챙길 날은 한 종류(`care_day`, 새로 만드는 것은 category `couple`). 금액(`budget`)은 메모일 뿐 계산에 안 들어감. 가족 목록, 양가·우리 둘 구분, 챙길 사람, 서프라이즈(`secret`), 양가 비용(Y-06)·낸 곳은 재기획으로 없앰(열은 남기고 새로 안 씀)
 - 날짜 계산은 core `rules/care.ts`(`careDateInYear`, `nextCareDate`, `careDatesInMonth`, `dday`). 음력은 `rules/lunar.ts`(`lunarToSolar`: 윤달이 없으면 평달, 30일이 없으면 29일)
-- Y-02 `/calendar/setup/:step`: 양가 부모님 4분 → 생신 → 명절 합계 → 생신 한 분 → 요약. 저장하면 가족, 생신(챙길 사람 = 그 편), 설·추석(음력 1/1, 8/15, 명절 합계), 어버이날·결혼기념일(0원), 신혼이면 ‘양가 비용’ 매년 목표(기한 = 다음 결혼기념일, 연결된 부부는 제안). 매달 금액은 `familyCostMonthly`(1천 원 올림)
-- Y-05 `/calendar/day/:id`(+ `/budget`): 챙길 사람, 준비 상황(그 해 날짜에만), 알림 일수, 메모를 바로 저장
-- Y-03 `/calendar/family/new/:step`(a 쪽 → b 관계 → c 호칭 칩 → d 생일 + 태어난 해 → d2 칠순·팔순 세는 방식 → e 또 챙길 날 → e2 날짜 → f 메모), 수정 `/calendar/family/:id/:step`(c, d, d2, f). 저장하면 생일(생신), 태어난 해가 있으면 환갑·칠순·팔순(core `milestones`, 한 번), 조카는 돌(core `firstBirthday`), 결혼기념일·제사(매년). 이미 있는 자동 챙길 날은 다시 만들지 않고 생일만 날짜·이름을 고침
-- Y-07 `/calendar/add/:step`(a 종류 → b 누구 → c 날짜 → d 쓸 돈 → ‘추가하기’). 모두 ‘한 번’, 가족을 고르면 그 쪽 양가, 직접 입력은 ‘우리 둘’. 쓸 돈은 같은 종류 최근 예산(`unitOf`)으로 채움. 지난 날짜는 안내만. ‘+ 추가’와 달력 고른 날의 ‘이 날에 챙길 날 추가’(날짜 채움)에서 시작
-- 생일·기념일 월·일 입력은 `date-fields.tsx` `MonthDayFields`(Y-02, Y-03 공통)
-- Y-08 `/calendar/day/:id/record/:step?on=`(a 쓴 돈 → a2 낸 곳 → b 드린 것 → c 메모). 저장은 RPC `record_care` 하나: `care_record`(회차 기록, 챙길 날·회차 날짜당 하나) + 다녀왔어요 + `goal_use`(목표자금 통장·생활비 통장·카드 = ‘양가 비용’, 결혼 준비 통장 = 결혼 비용) + 생활비로 냈으면 이번 사이클(정리를 마쳤으면 다음 사이클) 플랜에 `plan_line`(kind `goal_to_living`, 계좌 living, 담당 = 기록한 사람 몫, 통장 역할 모드만). 줄 금액은 화면이 ‘양가 비용’ 보유액만큼으로 자름. 우리 둘 날은 낸 곳 없이 각자 돈
-- 목표 보유액은 `goal_use`를 뺌(`fetchGoalRecords().uses`, 목표 화면·이번 달·비상금 진단). `update_pending_shares`, `adjust_plan`은 월급에서 나누는 줄(kind `split`)만 건드림
-- 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate` → Y-01 맨 위 ‘기록하기’, Y-05 ‘지남’ + ‘기록하기’. Y-07에서 지난 날짜는 ‘기록으로 남기기’로 만들고 바로 Y-08
-- Y-05 작년에는: 그 챙길 날의 지난 회차 기록(선물 이름, 없으면 현금·식사)
-- Y-06 `/calendar/family-cost`(+ `/edit`): 회차 = 결혼기념일 기준 1년(core `careRound`, 예비부부·결혼일 모름은 오늘부터 1년), 양가 날(category family)만. core `roundOccurrences`, `familyRows`(설·추석 / 부모님 생신 / 어버이날 / 그 밖의 날, 그 밖의 날 단가는 평균), `monthlyOut`, `familyCostSummary`(매달 = (예산 − 쓴 돈 − 모아둔 돈) ÷ 남은 달, 1천 원 올림, 다음 챙길 날 쓸 돈보다 모아둔 돈이 적으면 더 모을 돈). 쓴 돈 = 회차 안 양가 날 기록 합계, 모아둔 돈 = ‘양가 비용’ 보유액. 적용은 서버 `apply_family_budget`(같은 종류 쓸 돈을 단가로, 그 밖의 날은 매년 날과 오늘 이후 한 번인 날만, 목표 금액 = 합계). 열린 제안이 있으면 ‘수정’ 대신 G-08, G-08 ‘다르게 해볼래요’ → 수정 화면
-- ‘양가 비용’ 목표 금액은 회차 양가 날 쓸 돈 합계로 자동(`sync.ts` `syncFamilyGoal`). 음력 날짜를 core에서 계산하므로 서버 트리거 대신 Y-03·Y-05 쓸 돈·Y-07 저장 뒤 화면이 맞추고, 바뀌면 안 나눈 몫 다시 계산
-- Y-09 `/calendar/gifts`: 가족별(가족 순, 가족이 아닌 날은 ‘그 밖의 날’) / 연도별 보기(기기에 기억), 묶음마다 합계, 같은 분께 2년 안 같은 선물이면 “작년에도 드렸어요”(core `giftRepeated`, Y-08b도 같은 규칙). 행 → Y-05
-- 서프라이즈: `care_day.secret`(‘우리 둘’만). RLS가 만든 사람에게만 날과 그 기록(`care_record`)을 보내고, 고치기·숨기기 끄기도 만든 사람만. `record_care`는 비밀 날을 만든 사람만 기록하고 낸 곳을 각자 돈으로 고정. 배우자 생일은 `/calendar/partner-birthday`(Y-01 묻기 카드, ‘나중에 할게요’는 기기에 기억)에서 kind `partner_birthday`, 숨기기 기본 켜짐. Y-07에서 대상이 배우자면 같은 토글. Y-05는 내가 만든 ‘우리 둘’ 날에 “{배우자}님에게 숨기기”, 끌 때 한 번 확인. 켜고 끄는 토글은 ui `Toggle`(DS Selection `hg-toggle`)
-- 공휴일: `holiday` 테이블(날짜, 이름, 공휴일·대체·임시, 출처). 앱은 읽기만(`fetchHolidays`, 하루 캐시). 2026·2027년은 마이그레이션에 넣었고, 특일 정보 API 받기(매년 12월 다음 해, 매주 1회)는 API 키를 Supabase 비밀 값에 넣은 뒤 Edge Function + pg_cron으로 붙임(AD-19 직접 수정도 그때). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름, 막대가 있으면 이름은 고른 날 목록 맨 위), 이름에 설날·추석이 들면 `festive` 띠(core `isFestive`)
-- 월급날 앞당기기: core `businessDayOnOrBefore(날짜, 공휴일)`는 주말·공휴일이면 직전 영업일. 캘린더 돈 날짜, W-01 사람 칩, W-02 사람 탭 날짜에 씀. `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로. 기준일·사이클은 안 바뀜. 설정 S-11d 토글은 설정 화면과 함께
-- 다음 단계: 특일 API 받기, 알림에서 서프라이즈 빼기(알림을 만들 때), 연결 해제 때 작성자에게만 남기기, 회차 끝난 뒤 예산 vs 실제, 기록 사진(Y-08c), 결혼 준비 결제(G-07a), 환갑 2년 전 목표 제안, 설·추석 연휴 띠·공휴일, 서프라이즈, 이름·날짜 수정(Y-05), 알림 보내기
+- Y-07 `/calendar/add/:step`: a 이름(최대 20자) + 이름 칩(생일, 결혼기념일, 설날, 추석, 어버이날, 행사, 직접 쓰기 = 이름·날짜·반복 기본값만, `kind`로 저장) → c 날짜 + 양력/음력(+ 윤달) + “매년 돌아와요”(행사만 기본 꺼짐, 설날·추석·어버이날은 건너뜀) → d 금액 메모(건너뛰기) → ‘추가하기’(알림 D-30 + D-7). 한 번인 지난 날은 ‘기록으로 남기기’ → Y-08. 같은 이름·날짜면 한 번 확인. ‘+ 추가’, 달력 고른 날(날짜 채움)에서 시작. 수정(Y-05 ⋯ ‘수정’, `startCareEdit`)은 같은 a → c에서 이름·날짜만 ‘저장’
+- Y-05 `/calendar/day/:id`(+ `/budget` 금액 메모 Q3): 제목·날짜(음력이면 음력 함께)·D-day, 금액 메모, 반복, 준비 상황(그 해 날짜에만), 알림 일수, 작년에는, 메모, ⋯ 수정·지우기(휴지통 `trashCareDay` + ‘되돌리기’ = `restore_trash`)
+- Y-08 `/calendar/day/:id/record/:step?on=`(a 쓴 돈 + 목표 돈을 썼다면 ‘목표 고르기’ → b 드린 것 → c 메모, 모두 건너뛸 수 있음). 저장은 RPC `record_care`(낸 곳 = `personal`, 줄 0)로 기록만. 목표를 골랐으면 저장 뒤 G-02b `/goals/:id/spend?amount=`(금액 채움)
+- 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate`. 다음 챙길 날은 오늘 이후만
+- Y-09 `/calendar/gifts`: 챙길 날별 / 연도별(기기에 기억), 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”(core `giftRepeated`, Y-08b도 같은 규칙)
+- 자동 결혼기념일(마이그레이션 20261029180000): `couple_space` 트리거가 결혼했고(married) 결혼한 날이 있으면 `sync_wedding_care`로 챙길 날 “결혼기념일”(매년 양력, `auto = 'wedding'`) 하나를 만듦. 공간마다 하나(지운 것도 셈, 지우면 다시 안 만듦). 결혼한 날이 바뀌면 날짜를 옮기되 사람이 날짜를 고쳤으면(`auto_moves = false`, 트리거가 표시) 그대로. 예정일(engaged)은 만들지 않음
+- 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function + pg_cron으로 나중에
+- 월급날 앞당기기: core `businessDayOnOrBefore`, `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로
+- 다음 단계: 미리 알림·상대 알림, 기록 사진(Y-08c), 특일 API, 옛 테이블(`family_member`, 양가 비용 목표·`apply_family_budget`) 2단계 지우기
 
 ### 설정 구조
 

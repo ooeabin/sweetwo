@@ -1,36 +1,35 @@
-import { object, topic } from '@sweetwo/core';
+import { object } from '@sweetwo/core';
 
-// 캘린더 문구(docs/spec/24-calendar.md Y-01, Y-04, 캘린더 범위). 기획서 “ ” 안 문장을 그대로.
-// [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
+// 캘린더 문구(docs/spec/24-calendar.md, 재기획 2026-10-25). 기획서 “ ” 안 문장을 그대로.
+// [확인 필요] 표시는 기획서에 문구가 없거나 [확인 필요]로 둔 것.
 export const copy = {
   title: '캘린더',
   add: '+ 추가',
   views: { list: '목록', month: '달력' },
   viewsLabel: '보기', // [확인 필요] 화면 읽기용
-  filters: { all: '전체', care: '챙길 날', money: '돈 날짜' },
+  filters: { all: '전체', care: '챙길 날', money: '돈 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
-  empty: '양가 부모님 생신부터 챙겨볼까요?',
-  noMoneyThisMonth: '이번 달은 돈 날짜가 없어요',
+  empty: '생일, 기념일, 명절을 적어 두면 미리 알려 드려요', // [확인 필요]
+  emptyAdd: '챙길 날 추가',
+  noMoneyThisMonth: '이번 달은 돈 일정이 없어요', // [확인 필요]
   none60: '60일 안에는 챙길 날이 없어요',
   money: {
-    payday: (name: string) => `${name} 월급날`,
-    close: '정리 시작',
-    maturity: (name: string) => `${name} 만기`,
-    proposal: '제안 적용',
-    income: (name: string) => `${name} 들어오는 날`,
+    payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
+    review: '월급 확인', // [확인 필요]
+    deadline: (name: string) => `${name} 기한`,
     goal: (name: string) => `${name} 쓰는 달`,
+    maturity: (name: string) => `${name} 만기`,
   },
   go: {
-    payday: '월급 플랜',
-    close: '월말 정리',
-    maturity: '자산',
-    proposal: '제안',
-    income: '들어오는 돈',
+    payday: '체크리스트', // [확인 필요]
+    review: '월말 확인', // [확인 필요]
+    deadline: '목표',
     goal: '목표',
+    maturity: '자산',
   },
+  reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
   legendCare: '챙길 날',
-  legendMoney: '돈 날짜',
-  legendClose: '월말 정리 기간', // [확인 필요]
+  legendMoney: '돈 일정',
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',
@@ -39,64 +38,59 @@ export const copy = {
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
   agendaEmpty: '이 날짜엔 없어요',
-  listMoney: '돈 날짜', // [확인 필요] 목록 섹션 이름
+  listMoney: '돈 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
-  // 구분(6번)
-  side: (name: string) => `${name} 쪽`,
-  both: '양가', // [확인 필요] 명절·어버이날처럼 양가 공통
-  couple: '우리 둘',
-  carer: (name: string) => `${name}님이 챙겨요`,
-  together: '같이 챙겨요', // [확인 필요]
-  budget: (amount: string) => `예산 ${amount}`,
+  // Y-01
+  memoAmount: (amount: string) => `${amount} 생각해 뒀어요`, // [확인 필요]
   prepare: '준비하기',
   nextCare: '다음 챙길 날', // [확인 필요] 화면 읽기용
   careList: '60일 안 챙길 날', // [확인 필요] 섹션 이름
-  startSetup: '양가 부모님 생신부터 챙겨보기', // [확인 필요] 빈 상태 버튼
+  gifted: '드린 기록',
+  overdue: '지남',
+  recordNow: '기록하기',
+  overdueList: '기록하기', // [확인 필요] 목록 맨 위 섹션 이름
 
-  // Y-02 처음 등록
-  setupParents: '양가 부모님을 챙겨드릴게요',
-  father: '아버지', // [확인 필요] 기본 호칭
-  mother: '어머니', // [확인 필요]
-  birthdayOf: (title: string) => `${title} 생신은 언제예요?`,
-  month: '월',
-  day: '일',
+  // Y-07 챙길 날 추가
+  nameQ: '어떤 날이에요?',
+  namePlaceholder: '예: 어머니 생신', // [확인 필요]
+  chips: {
+    birthday: '생일',
+    anniversary: '결혼기념일',
+    seollal: '설날',
+    chuseok: '추석',
+    parents_day: '어버이날',
+    event: '행사',
+    custom: '직접 쓰기',
+  },
+  chipsLabel: '이름 고르기', // [확인 필요] 화면 읽기용
+  dateQ: '언제예요?', // [확인 필요]
   solar: '양력',
   lunar: '음력',
   leapMonth: '윤달',
+  yearly: '매년 돌아와요', // [확인 필요]
   dateError: '날짜를 다시 확인해 주세요', // [확인 필요]
-  later: '나중에 할게요',
-  holidayQ: '명절에 양가에 얼마쯤 쓸 것 같아요?',
-  holidayHelp: '용돈, 선물, 교통비, 조카 세뱃돈까지 양가 합계로요', // [확인 필요]
-  birthdayQ: '부모님 생신에는 한 분께 얼마쯤 드릴까요?',
-  unsure: '잘 모르겠어요',
-  summary: (total: string, monthly: string) =>
-    `1년에 ${total}이에요. 매달 ${monthly}씩 모아두면 돼요`,
-  summaryEngaged: (total: string) => `1년에 ${total}이에요. 결혼 뒤부터 매달 모아두면 돼요`,
-  summaryHelp: '설·추석, 부모님 생신, 어버이날을 달력에 넣어둘게요', // [확인 필요]
-  ok: '이대로 하기',
+  pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
+  recordPast: '기록으로 남기기', // [확인 필요] 지난 날짜 → Y-08
+  amountQ: '쓸 돈을 메모해 둘까요?', // [확인 필요]
+  skip: '건너뛰기',
+  sameDay: '같은 날이 있어요. 그래도 추가할까요?', // [확인 필요]
+  addOk: '추가하기',
+  addOnDay: '이 날에 챙길 날 추가', // [확인 필요] 달력 고른 날 → Y-07
   nextStep: '다음',
   saved: '챙길 날을 넣어뒀어요', // [확인 필요]
-  proposedFamily: (partner: string) => `${partner}님께 양가 비용을 제안했어요`, // [확인 필요]
-  names: {
-    seollal: '설날',
-    chuseok: '추석',
-    parentsDay: '어버이날',
-    anniversary: '결혼기념일',
-    birthday: (title: string) => `${title} 생신`,
-    birthdayPlain: (title: string) => `${title} 생일`,
-    milestone: { hwangap: '환갑', chilsun: '칠순', palsun: '팔순' },
-    dol: (title: string) => `${title} 돌`,
-    of: (who: string, what: string) => (who ? `${who} ${what}` : what),
-  },
-  familyCost: '양가 비용',
+  edited: '고쳤어요', // [확인 필요]
 
   // Y-05 상세
   lunarOf: (m: number, d: number, leap: boolean) => `(음력 ${leap ? '윤' : ''}${m}월 ${d}일)`,
   noDate: '날짜를 아직 몰라요', // [확인 필요]
-  spend: '쓸 돈',
+  amountMemo: '금액 메모', // [확인 필요] 줄 이름
+  noAmount: '비어 있어요', // [확인 필요]
   edit: '수정',
-  carerLabel: '챙길 사람',
+  menu: '챙길 날 메뉴', // [확인 필요] 화면 읽기용
+  remove: '지우기',
+  removed: '휴지통으로 옮겼어요',
+  undo: '되돌리기',
   repeat: '반복',
   repeatYearly: '매년',
   repeatOnce: '한 번',
@@ -105,145 +99,26 @@ export const copy = {
   alerts: '미리 알림',
   alertChip: (n: number) => (n === 0 ? '당일' : `D-${n}`),
   memo: '메모',
-  zeroBudget: '금액을 정해 주세요',
-  budgetQ: '얼마쯤 쓸까요?',
+  lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
   save: '저장', // [확인 필요]
   back: '뒤로',
 
-  // Y-01 8번 가족
-  familyTitle: '가족',
-  familyAdd: '추가',
-  familyEmpty: '아직 넣은 가족이 없어요', // [확인 필요]
-  familyItem: (title: string, dd: string | null) => (dd ? `${title} ${dd}` : title),
-
-  // Y-03 가족 추가·수정
-  familySideQ: '어느 쪽 가족이에요?',
-  familyWhoQ: '누구예요?',
-  relations: {
-    parent: '부모님',
-    grandparent: '조부모님',
-    sibling: '형제·자매',
-    sibling_spouse: '형제의 배우자',
-    nephew: '조카',
-    other: '기타',
-  },
-  titleQ: '뭐라고 부르세요?',
-  titleLabel: '호칭', // [확인 필요] 화면 읽기용
-  birthdayQ3: '생일은 언제예요?',
-  birthYear: '태어난 해(선택)', // [확인 필요]
-  yearError: '태어난 해를 다시 확인해 주세요', // [확인 필요]
-  notApplicable: '해당 없어요',
-  ageQ: '칠순·팔순은 어떤 나이로 세요?',
-  ageKorean: '세는 나이',
-  ageIntl: '만 나이',
-  extraQ: '또 챙겨야 할 날이 있나요?',
-  extras: { parents_anniversary: '결혼기념일', jesa: '제사', none: '없어요' },
-  extraDateQ: (title: string, what: string) => `${title} ${topic(what)} 언제예요?`, // [확인 필요]
-  memoQ: '좋아하시는 것, 필요하다고 하신 게 있나요?',
-  skip: '건너뛰기',
-  familySaved: '가족을 넣어뒀어요', // [확인 필요]
-  familyEdited: '고쳤어요', // [확인 필요]
-
-  // Y-07 챙길 날 추가
-  addKindQ: '어떤 날이에요?',
-  kinds: {
-    dol: '돌·백일',
-    school: '입학·졸업',
-    wedding: '결혼식',
-    visit: '병문안',
-    funeral: '장례',
-    housewarming: '집들이',
-    other: '기타',
-  },
-  addWhoQ: '누구의 날이에요?',
-  direct: '직접 입력',
-  addDateQ: '언제예요?', // [확인 필요] 기획서 Y-07c 질문 문구 없음
-  pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
-  addOk: '추가하기',
-  addOnDay: '이 날에 챙길 날 추가', // [확인 필요] 달력 고른 날 → Y-07
-  recordPast: '기록으로 남기기', // [확인 필요] 지난 날짜 → Y-08
-
-  // Y-05 지남, 작년에는
-  overdue: '지남',
-  recordNow: '기록하기',
-  lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
-  overdueList: '기록하기', // [확인 필요] 목록 맨 위 섹션 이름
-
   // Y-08 다녀온 뒤 기록
   spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
-  paidQ: '어디서 냈어요?', // [확인 필요] 기획서 Y-08a2 질문 문구 없음
-  paid: {
-    goal_fund: '목표자금 통장',
-    living: '생활비 통장·카드',
-    personal: '각자 돈',
-    wedding_account: '결혼 준비 통장',
-    personal_support: '각자 돈·양가 지원',
-  },
-  paidSub: {
-    goal_fund: '양가 비용 모은 돈에서 빠져요',
-    living: '목표자금에서 생활비로 옮길 줄이 생겨요',
-    personal: '기록만 해요',
-    wedding_account: '결혼 비용 모은 돈에서 빠져요', // [확인 필요]
-    personal_support: '기록만 해요',
-  },
+  goalHelp: '목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요', // [확인 필요]
+  pickGoal: '목표 고르기',
+  pickGoalQ: '어느 목표에서 꺼내 썼어요?', // [확인 필요]
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },
   giftName: '어떤 선물이에요?', // [확인 필요]
   giftAgain: '작년에도 드렸어요',
   rememberQ: '기억하고 싶은 게 있나요?',
   recorded: '기록했어요', // [확인 필요]
-  lineAdded: (amount: string) =>
-    `이번 달 월급 나누기에 ‘목표자금 → 공동 생활비 ${amount}’을 넣었어요`,
-  see: '보기',
-  close: '닫기',
-
-  // Y-06 이번 회차 양가 비용
-  fcTitle: '이번 회차 양가 비용',
-  fcRange: (a: string, b: string) => `${a} ~ ${b}`,
-  fcSpent: (total: string, spent: string) => `${total} 중 ${spent} 썼어요`,
-  fcSpentEngaged: (total: string, spent: string) => `양가 비용 예산 ${total} 중 ${spent} 썼어요`,
-  fcEnough: (held: string) => `모아둔 돈 ${held}으로 다음 챙길 날까지 충분해요`,
-  fcShort: (extra: string) => `다음 달부터 ${extra}씩 더 모아요`,
-  fcHeld: (held: string) => `모아둔 돈 ${held}`,
-  fcMonths: '달마다 나갈 돈', // [확인 필요] 섹션 이름
-  fcMonthly: (m: string) => `매달 ${m}씩 모으면 돼요`,
-  fcLeft: (left: string, n: number) => `아직 안 쓴 ${left}을 남은 ${n}개월에 나눠서요`,
-  fcItems: '항목', // [확인 필요] 섹션 이름
-  fcRows: {
-    holiday: '설·추석',
-    birthday: '부모님 생신',
-    parents_day: '어버이날',
-    other: '그 밖의 날',
-  },
-  fcTimes: (unit: string, n: number) => `${unit} × ${n}번`, // [확인 필요]
-  fcEditTitle: '양가 비용 예산', // [확인 필요] 수정 레이어 제목
-  fcChanged: (a: string, b: string) => `${a} → ${b}`,
-  fcYear: (t: string) => `1년 ${t}`,
-  fcMonthlyChange: (a: string, b: string) => `매달 ${a} → ${b}`,
-  fcPropose: (name: string) => `${name}님께 제안하기`,
-  fcApplyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
-  fcProposed: (name: string) => `${name}님에게 제안했어요`,
-  fcSaved: '양가 비용 예산을 바꿨어요', // [확인 필요]
-  fcOpen: '답을 기다리는 제안이 있어요', // [확인 필요] 열린 제안이 있으면 수정 대신
-  fcSeeProposal: '제안 보기', // [확인 필요]
-
-  // 서프라이즈 일정
-  partnerBirthdayQ: (name: string) => `${name}님 생일은 언제예요?`,
-  hideFrom: (name: string) => `${name}님에게 숨기기`,
-  secret: '비밀',
-  onlyMe: (name: string) => `${name}님만`,
-  showConfirm: (name: string) => `${name}님에게 보여요. 그동안 기록도 함께 보여요`,
-  showOk: '보여주기', // [확인 필요]
-  cancel: '취소',
-  partnerBirthday: (name: string) => `${name} 생일`,
-  askPartnerBirthday: '생일을 알려주세요', // [확인 필요] Y-01 묻기 카드 버튼
 
   // Y-09 드린 기록
-  gifted: '드린 기록',
-  giftedViews: { family: '가족별', year: '연도별' },
+  giftedViews: { care: '챙길 날별', year: '연도별' },
   giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
   giftedEmpty: '아직 드린 기록이 없어요', // [확인 필요]
-  giftedOthers: '그 밖의 날', // [확인 필요] 가족이 아닌 날 묶음
   giftedYear: (y: number) => `${y}년`,
   giftedWhat: (items: string[]) => items.join(', '),
   giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]
