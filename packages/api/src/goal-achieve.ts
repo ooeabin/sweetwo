@@ -30,47 +30,17 @@ export class GoalUsedError extends Error {
   }
 }
 
-export type GoalPaidFrom = 'goal_fund' | 'living' | 'personal';
-export interface GoalUseResult {
-  /** 넣은 나누기 줄 금액(생활비로 냈을 때) */
-  line: number;
-  /** 옮긴 남은 돈 */
-  rest: number;
-  restGoal: string | null;
-  /** 남은 돈 옮김 기록(‘다른 목표로’에 씀) */
-  use: string | null;
+/** 사용 기록(G-05): 쓴 돈만큼 꺼내 쓰기 + 사용 완료. 남은 돈(모은 돈 − 쓴 돈)을 돌려줌 */
+export async function finishGoalUse(goalId: string, spent: number): Promise<number> {
+  const { data, error } = await supabase().rpc('finish_goal_use', { p_goal: goalId, p_spent: spent });
+  if (error?.message?.includes('goal_used')) throw new GoalUsedError();
+  fail(error);
+  return typeof data === 'number' ? data : 0;
 }
 
-/** 사용 기록: 썼어요(낸 곳) / 다른 자산으로 옮겼어요. held = 화면이 본 보유액 */
-export async function recordGoalUse(p: {
-  goalId: string;
-  kind: 'spent' | 'moved';
-  amount: number;
-  paidFrom: GoalPaidFrom;
-  assetId: string | null;
-  held: number;
-}): Promise<GoalUseResult> {
-  const { data, error } = await supabase().rpc('use_goal', {
-    p_goal: p.goalId,
-    p_kind: p.kind,
-    p_amount: p.amount,
-    p_paid_from: p.paidFrom,
-    p_held: p.held,
-    ...(p.assetId ? { p_asset: p.assetId } : {}),
-  });
-  if (error?.message?.includes('already_used')) throw new GoalUsedError();
+/** 남은 돈을 다른 목표(비상금 포함)로 모두 옮김. 옮긴 금액 */
+export async function moveGoalSaved(goalId: string, to: string): Promise<number> {
+  const { data, error } = await supabase().rpc('move_goal_saved', { p_goal: goalId, p_to: to });
   fail(error);
-  const r = (data ?? {}) as Record<string, unknown>;
-  return {
-    line: Number(r.line ?? 0),
-    rest: Number(r.rest ?? 0),
-    restGoal: typeof r.rest_goal === 'string' ? r.rest_goal : null,
-    use: typeof r.use === 'string' ? r.use : null,
-  };
-}
-
-/** 남은 돈을 다른 목표로 */
-export async function moveGoalRest(useId: string, goalId: string) {
-  const { error } = await supabase().rpc('move_goal_rest', { p_use: useId, p_goal: goalId });
-  fail(error);
+  return typeof data === 'number' ? data : 0;
 }

@@ -205,7 +205,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - app\_user.is\_internal\_tester bool: 내부 테스트 계정 표시, 기본 false. 공개 출시 직전 삭제 대상을 고를 때 씀(→ 운영 절차)
 - 통장 하나 모드(couple\_space.account\_mode): account.role과 saving\_deposit.asset\_id는 null 가능. saving\_deposit.goal\_id uuid(null), 연결 자산이 목표에 묶이면 그 목표로 셈
 - month\_close.status(초안/완료), step, mode(기본/꼼꼼), party(함께/혼자), locked\_by: 미리 적은 값은 초안으로 저장, 진행 잠금은 locked\_by. 저축 합계는 deposit\_total(W-04k), 꼼꼼 모드 잔액 기준 저축은 balance\_saving
-- 함께 모은 달(G-05 축하 문장): 목표별로 월말 정리 W-04k에서 확정된 납입 기록(saving\_deposit)만 집계, 그 달에 두 사람 모두 1원 이상 넣은 달만 셈. 모으기 시작 달부터 달성 달까지가 분모
+- 함께 모은 달(G-05 축하 문장, 20261101150000 `goal_story`): 그 목표 저금 줄을 체크한 체크리스트 달(‘9월 월급’) 수, 그중 각자 모드 우리 목표에서 두 사람 체크리스트 모두 체크한 달 수. 합쳐서·혼자 쓰기·내 목표는 “n개월 만에 모았어요”
 - 순자산 기간 탭의 마지막 선택: 기기별 로컬 저장(서버에 저장하지 않음), 값이 없으면 기본 1년(쓴 지 1년 미만이면 전체)
 
 ### 테이블 묶음
@@ -729,7 +729,8 @@ supabase/
 - 목표 수정 `/goals/:id/edit/amount|deadline|name`: 기한은 늘리기·줄이기 모두(이번 달 이전만 안 됨), 영향 미리보기는 이 목표만(예상 달성, 상태, 월 필요액 전 → 후), 배우자의 내 목표는 G-02로 돌려보냄
 - 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿 → G-03e 누구 목표(혼자 쓰기 빼고) → G-03b 질문 → G-03c 기한 → G-03d 이미 모은 돈(매달·고금리 대출·템플릿이 묻는 것 빼고) → G-03f 확인 → 만든 목표 상세. 입력 중 값은 기기에 저장(`sweetwo.goal-add`)
 - G-06 `/goals/order`: 우리 목표와 내 목표 각각 `ReorderList`, 저장하면 우선순위 + 내 분배표 저금 줄 순서를 같이 바꿈
-- 다음 단계: G-05 달성 흐름 새 모델로, 우리 → 내 목표 막기 서버 확인, G-06에서 배우자 분배표 순서, 상대 알림·활동 기록, 진행 그래프, 목표 사진
+- G-05 달성(20261101150000): `AchieveWatch`가 축하 `/goals/:id/achieved`(사람마다 한 번)를 엶. 달성하면 `goal_lines_sync`가 저금 줄을 빼며 그 금액을 `goal.freed_lines`(분배표마다)에 남김 → 내 분배표 금액이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?” `/goals/:id/achieved/send`(다른 목표 / 새 목표 만들기 / 분배표에서 정할게요) → 사용 기록 `/goals/:id/use`(아직이에요 / 썼어요 → 얼마 → `finish_goal_use`(꺼내 쓰기 + 사용 완료, 남은 돈) → 남은 돈 비상금·다른 목표 `move_goal_saved` / 그대로) → 고른 곳: 다른 목표면 목표 고르기 후 내 분배표 그 저금 줄 + 금액(`save_split`, Toast ‘되돌리기’), 새 목표면 G-03a `?freed=`(추가하면 그 줄에), 분배표면 W-01. 옛 `use_goal`·`move_goal_rest`·`goal_use`는 2단계로 지움
+- 다음 단계: 우리 → 내 목표 막기 서버 확인, G-06에서 배우자 분배표 순서, 상대 알림·활동 기록, 진행 그래프, 목표 사진
 - 재기획으로 지운 화면(2026-10-26): G-04 충돌 조정, G-07 결혼 비용 전용 화면(결혼 비용은 보통 목표), G-08 제안, 첫 주 나머지 목표 `/goals/week`. 남은 옛 계산: 연결 자산 보유액(`goal_asset_sums`), `goals/view.ts`의 옛 배분(`allocate`)
 
 ### 우리 자산 구조

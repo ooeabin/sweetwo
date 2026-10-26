@@ -7,9 +7,9 @@ import { copy } from '../copy';
 
 type Send = keyof typeof copy.sendOptions;
 
-// G-05 보낼 곳(22 화면별 정의): “매달 모으던 25만 원은 어디로 보낼까요?” 다른 목표 / 새 목표 만들기 / 용돈 늘리기.
-// 다른 목표 → G-06 순서(먼저 모을 목표), 새 목표 → G-03a, 용돈 늘리기 → 월 수입·지출 고치기(F-05, 연결된 부부는 제안).
-// 고른 곳으로 가기 전에 사용 기록(이어서)을 먼저 엶: 사용 기록 끝에서 이 선택으로 감.
+// G-05 매달 넣던 돈(22 화면별 정의): “매달 넣던 25만 원은 어디로 보낼까요?” 다른 목표 / 새 목표 만들기 / 분배표에서 정할게요.
+// 고른 뒤 사용 기록을 먼저 묻고(G-05 사용), 끝나면 고른 곳으로: 다른 목표 → 목표 고르기 → 그 저금 줄에 더함,
+// 새 목표 → G-03a(만든 목표 줄에 그 금액), 분배표에서 정할게요 → 남는 돈으로 두고 W-01.
 export function G05Send() {
   const { id = '' } = useParams();
   const [params] = useSearchParams();
@@ -24,7 +24,7 @@ export function G05Send() {
         label={title}
         value={v}
         onChange={setV}
-        onPick={(s) => nav(`${goalUsePath(id)}?then=${s}`, { replace: true })}
+        onPick={(s) => nav(`${goalUsePath(id)}?then=${s}&m=${monthly}`, { replace: true })}
         options={(Object.keys(copy.sendOptions) as Send[]).map((k) => ({
           value: k,
           label: copy.sendOptions[k],

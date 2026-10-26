@@ -202,3 +202,58 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
     owner_user_id: null,
   });
 });
+
+test('G-05 달성: 축하 → 매달 넣던 돈 다른 목표 → 썼어요(얼마) → 남은 돈 비상금 → 고른 목표 저금 줄에 더함', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.push({
+    id: 'goal-tv',
+    template: 'appliance',
+    name: '가전 바꾸기',
+    kind: 'once',
+    priority: 2,
+    target_amount: 1_000_000,
+    other_held: 1_000_000,
+    deadline: '2027-03-01',
+    status: 'achieved',
+    achieved_seen: [],
+    freed_lines: { 'split-1': 300_000 },
+    owner_user_id: null,
+    details: {},
+    deleted_at: null,
+    created_at: '2026-06-01T00:00:00Z',
+  });
+  db.goalStory = { months: 4, together: 0 };
+  await page.goto('/goals');
+  await expect(page).toHaveURL(/\/goals\/goal-tv\/achieved$/);
+  await expect(page.getByText('4개월 만에 모았어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(
+    page.getByRole('heading', { name: '매달 넣던 30만 원은 어디로 보낼까요?' }),
+  ).toBeVisible();
+  await page.getByRole('radio', { name: '다른 목표' }).click();
+  await expect(
+    page.getByRole('heading', { name: '가전 바꾸기에 모은 100만 원, 썼나요?' }),
+  ).toBeVisible();
+  await page.getByRole('radio', { name: '썼어요' }).click();
+  await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
+  await page.getByLabel('얼마 썼어요?').fill('800000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '남은 20만 원은 어떻게 할까요?' })).toBeVisible();
+  await page.getByRole('radio', { name: '비상금에 넣기' }).click();
+  await expect(page.getByRole('heading', { name: '어느 목표에 더할까요?' })).toBeVisible();
+  await page.getByRole('radio', { name: '내 집 마련' }).click();
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  await expect(page.getByText('내 집 마련 저금 줄에 30만 원을 더했어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('used');
+  const line = db.splits[0]?.split_line.find((l) => l.goal_id === 'goal-h');
+  expect(line?.amount).toBe(1_250_000);
+  // 남은 20만 원은 비상금으로(빼기 + 넣기)
+  expect(db.goalMoves.filter((m) => m.goal_id === 'goal-e').map((m) => m.amount)).toEqual([
+    200_000,
+  ]);
+});

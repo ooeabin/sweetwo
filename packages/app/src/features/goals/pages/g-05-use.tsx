@@ -1,64 +1,69 @@
-import {
-  fetchAssets,
-  GoalUsedError,
-  moveGoalRest,
-  qk,
-  recordGoalUse,
-  type GoalPaidFrom,
-  type GoalUseResult,
-} from '@sweetwo/api';
+import { finishGoalUse, GoalUsedError, moveGoalSaved, qk } from '@sweetwo/api';
 import { AmountInput, Button, ChoiceCards, QuestionLayout } from '@sweetwo/ui';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
+import { useSplits } from '../../salary';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
+import { addToGoalLine, mySplit } from '../freed';
 
-type Step = 'ask' | 'amount' | 'from' | 'asset' | 'rest' | 'pick';
+type Step = 'ask' | 'amount' | 'rest' | 'restPick' | 'sendPick';
 type Ask = keyof typeof copy.useOptions;
-const FROM: GoalPaidFrom[] = ['goal_fund', 'living', 'personal'];
-type Then = 'goal' | 'add' | 'allowance';
-const THEN: Record<Then, string> = {
-  goal: '/goals/order',
-  add: '/goals/new',
-  allowance: '/salary/split',
-};
+type Rest = keyof typeof copy.restOptions;
+type Then = 'goal' | 'add' | 'split';
 
 // G-05 사용 기록(22 G-05 사용 기록): “가전 바꾸기에 모은 400만 원, 썼나요?”
-// 아직이에요 → 달성 유지 / 썼어요 → 얼마(보유액 채움) → 낸 곳(목표자금 통장, 생활비 통장·카드, 각자 돈) / 다른 자산으로 옮겼어요 → 자산 고르기.
-// 생활비로 냈으면 이번 달 월급 나누기에 ‘목표자금 → 공동 생활비’ 줄(5초 안내 + 월급 나누기 보기). 남은 보유액은 비상금으로(‘다른 목표로’).
-// 배우자가 먼저 기록했으면 “예빈님이 기록했어요” + 기록 보기. 보낼 곳(?then=)을 골랐으면 끝난 뒤 그곳으로.
+// 아직이에요 → 달성 유지 / 썼어요 → “얼마 썼어요?”(모은 돈 채움) → 모은 돈에서 꺼내 쓰기 + 사용 완료.
+// 쓴 돈 < 모은 돈이면 “남은 20만 원은 어떻게 할까요?” 비상금에 넣기 / 다른 목표에 넣기 / 그대로 두기.
+// 배우자가 먼저 기록했으면 “예빈님이 기록했어요” + 기록 보기. 매달 넣던 돈(?then=, ?m=)을 골랐으면 끝난 뒤 그곳으로.
 export function G05Use() {
   const { id = '' } = useParams();
   const [params] = useSearchParams();
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useGoalsData();
+  const splits = useSplits();
   const { masked } = useMask();
-  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const [step, setStep] = useState<Step>('ask');
   const [ask, setAsk] = useState<Ask | null>(null);
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
-  const [from, setFrom] = useState<GoalPaidFrom | null>(null);
-  const [asset, setAsset] = useState<string | null>(null);
-  const [restTo, setRestTo] = useState<string | null>(null);
-  const [result, setResult] = useState<GoalUseResult | null>(null);
+  const [rest, setRest] = useState(0);
+  const [pick, setPick] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || assets.isLoading) return null;
+  if (d.loading || splits.isLoading) return null;
   const g = d.view?.lines.find((x) => x.id === id);
   const row = d.goals.find((x) => x.id === id);
   if (!g || !row) return <Navigate to="/goals" replace />;
   const m = (v: number) => money(v, masked);
   const detail = `/goals/${id}`;
   const then = params.get('then') as Then | null;
-  const finish = () => nav(then && then in THEN ? THEN[then] : detail, { replace: true });
+  const monthly = Number(params.get('m') ?? '0');
   const spent = amount === undefined ? g.held : amount;
-  const goalName = (gid: string | null) => d.goals.find((x) => x.id === gid)?.name ?? '';
+  const refresh = () =>
+    Promise.all(
+      [qk.goals, qk.goalRecords, qk.goalSaved, qk.splits].map((k) =>
+        qc.invalidateQueries({ queryKey: k }),
+      ),
+    );
+  // 매달 넣던 돈으로 갈 다른 목표: 모으는 중인 목표(이 목표 빼고), 배우자 내 목표 빼고
+  const targets = d.goals.filter(
+    (x) =>
+      x.id !== id &&
+      ['active', 'delayed'].includes(x.status) &&
+      (x.owner_user_id === null || x.owner_user_id === d.me?.id),
+  );
+  const finish = () => {
+    if (then === 'goal' && monthly > 0) return setStep('sendPick');
+    if (then === 'add' && monthly > 0) return nav(`/goals/new?freed=${monthly}`, { replace: true });
+    if (then === 'split') return nav('/salary/split', { replace: true });
+    nav(detail, { replace: true });
+  };
 
   // 이미 사용 완료(먼저 기록한 사람이 있음)
-  if (row.status === 'used' && !result)
+  if (row.status === 'used' && step === 'ask')
     return (
       <QuestionLayout
         title={copy.partnerRecorded(d.couple?.partnerName ?? '')}
@@ -70,72 +75,93 @@ export function G05Use() {
       </QuestionLayout>
     );
 
-  const save = async (kind: 'spent' | 'moved', paidFrom: GoalPaidFrom, assetId: string | null) => {
+  const run = async (act: () => Promise<void>) => {
     if (saving) return;
     setSaving(true);
     try {
-      const r = await recordGoalUse({
-        goalId: id,
-        kind,
-        amount: kind === 'spent' ? (spent ?? 0) : g.held,
-        paidFrom,
-        assetId,
-        held: g.held,
-      });
-      setResult(r);
-      if (r.rest > 0) setStep('rest');
-      await Promise.all(
-        [qk.goals, qk.goalRecords, qk.todos].map((k) => qc.invalidateQueries({ queryKey: k })),
-      );
-      await qc.invalidateQueries({ queryKey: ['monthly_plan'] });
-      if (r.line > 0)
-        toast(copy.useLine(m(r.line)), { label: copy.seeSplit, onClick: () => nav('/salary/split') });
-      if (r.rest <= 0) finish();
+      await act();
     } catch (e) {
-      if (e instanceof GoalUsedError) {
-        await qc.invalidateQueries({ queryKey: qk.goals });
-        return;
-      }
-      toast(copy.loadFailed);
+      if (e instanceof GoalUsedError) await refresh();
+      else toast(copy.loadFailed);
     } finally {
       setSaving(false);
     }
   };
 
-  if (step === 'rest' && result)
+  if (step === 'sendPick')
     return (
-      <QuestionLayout
-        title={copy.restMoved(m(result.rest), goalName(result.restGoal))}
-        primary={{ label: copy.ok }}
-        onSubmit={finish}
-      >
-        <Button variant="secondary" onClick={() => setStep('pick')}>
-          {copy.restOther}
-        </Button>
+      <QuestionLayout title={copy.sendPick} onBack={() => nav(detail, { replace: true })}>
+        <ChoiceCards<string>
+          label={copy.sendPick}
+          value={pick}
+          onChange={setPick}
+          onPick={(gid) =>
+            void run(async () => {
+              const split = mySplit(splits.data, d.me?.id, d.space?.salary_mode === 'joint');
+              if (!split) return nav(detail, { replace: true });
+              const undo = await addToGoalLine(split, gid, monthly);
+              await refresh();
+              const name = d.goals.find((x) => x.id === gid)?.name ?? '';
+              toast(copy.sendDone(name, m(monthly)), {
+                label: copy.undo,
+                onClick: () => void undo().then(refresh),
+              });
+              nav(`/goals/${gid}`, { replace: true });
+            })
+          }
+          options={targets.map((x) => ({ value: x.id, label: x.name }))}
+        />
       </QuestionLayout>
     );
 
-  if (step === 'pick' && result) {
-    const others = d.goals.filter(
-      (x) => x.id !== id && x.id !== result.restGoal && !['used', 'achieved'].includes(x.status),
-    );
+  if (step === 'restPick')
     return (
       <QuestionLayout title={copy.restPick} onBack={() => setStep('rest')}>
         <ChoiceCards<string>
           label={copy.restPick}
-          value={restTo}
-          onChange={setRestTo}
+          value={pick}
+          onChange={setPick}
           onPick={(gid) =>
-            result.use &&
-            void moveGoalRest(result.use, gid)
-              .then(() => qc.invalidateQueries({ queryKey: qk.goals }))
-              .then(() => {
-                toast(copy.restDone);
-                finish();
-              })
-              .catch(() => toast(copy.loadFailed))
+            void run(async () => {
+              await moveGoalSaved(id, gid);
+              await refresh();
+              toast(copy.restDone);
+              finish();
+            })
           }
-          options={others.map((x) => ({ value: x.id, label: x.name }))}
+          options={d.goals
+            .filter((x) => x.id !== id && ['active', 'delayed', 'paused'].includes(x.status))
+            .filter((x) => x.owner_user_id === null || x.owner_user_id === d.me?.id)
+            .map((x) => ({ value: x.id, label: x.name }))}
+        />
+      </QuestionLayout>
+    );
+
+  if (step === 'rest') {
+    const title = copy.restTitle(m(rest));
+    const emergency = d.goals.find((x) => x.template === 'emergency' && x.id !== id);
+    return (
+      <QuestionLayout title={title}>
+        <ChoiceCards<Rest>
+          label={title}
+          value={null}
+          onChange={() => undefined}
+          onPick={(r) =>
+            r === 'keep'
+              ? finish()
+              : r === 'goal' || !emergency
+                ? setStep('restPick')
+                : void run(async () => {
+                    await moveGoalSaved(id, emergency.id);
+                    await refresh();
+                    toast(copy.restDone);
+                    finish();
+                  })
+          }
+          options={(Object.keys(copy.restOptions) as Rest[]).map((k) => ({
+            value: k,
+            label: copy.restOptions[k],
+          }))}
         />
       </QuestionLayout>
     );
@@ -146,46 +172,22 @@ export function G05Use() {
       <QuestionLayout
         title={copy.useAmount}
         onBack={() => setStep('ask')}
-        primary={{ label: copy.next, disabled: !spent }}
-        onSubmit={() => spent && setStep('from')}
+        primary={{ label: copy.next, disabled: !spent, loading: saving }}
+        onSubmit={() =>
+          spent &&
+          void run(async () => {
+            const left = await finishGoalUse(id, spent);
+            await refresh();
+            if (left > 0) {
+              setRest(left);
+              setStep('rest');
+            } else finish();
+          })
+        }
       >
         <AmountInput label={copy.useAmount} value={spent} onChange={setAmount} />
       </QuestionLayout>
     );
-
-  if (step === 'from') {
-    const title = copy.useFrom(m(spent ?? 0));
-    return (
-      <QuestionLayout title={title} onBack={() => setStep('amount')}>
-        <ChoiceCards<GoalPaidFrom>
-          label={title}
-          value={from}
-          onChange={setFrom}
-          onPick={(f) => void save('spent', f, null)}
-          options={FROM.map((f) => ({ value: f, label: copy.paidFrom[f] }))}
-        />
-      </QuestionLayout>
-    );
-  }
-
-  if (step === 'asset') {
-    const list = (assets.data ?? []).filter((a) => a.side === 'asset' && a.goal_id !== id);
-    return (
-      <QuestionLayout title={copy.useAsset} onBack={() => setStep('ask')}>
-        {list.length === 0 ? (
-          <p className="hg-q__help">{copy.noAssets}</p>
-        ) : (
-          <ChoiceCards<string>
-            label={copy.useAsset}
-            value={asset}
-            onChange={setAsset}
-            onPick={(a) => void save('moved', 'goal_fund', a)}
-            options={list.map((a) => ({ value: a.id, label: a.name, sub: m(a.amount) }))}
-          />
-        )}
-      </QuestionLayout>
-    );
-  }
 
   const title = copy.useAsk(g.name, m(g.held));
   return (
@@ -194,7 +196,7 @@ export function G05Use() {
         label={title}
         value={ask}
         onChange={setAsk}
-        onPick={(a) => (a === 'later' ? finish() : setStep(a === 'spent' ? 'amount' : 'asset'))}
+        onPick={(a) => (a === 'later' ? finish() : setStep('amount'))}
         options={(Object.keys(copy.useOptions) as Ask[]).map((k) => ({
           value: k,
           label: copy.useOptions[k],

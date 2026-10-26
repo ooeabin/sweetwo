@@ -152,24 +152,18 @@ export const copy = {
   storySome: (n: number, m: number) => `${n}개월 중 ${m}번은 둘이 함께 모았어요`,
   storySolo: (n: number) => `${n}개월 만에 모았어요`,
   // G-05 보낼 곳
-  sendTitle: (amount: string) => `매달 모으던 ${amount}은 어디로 보낼까요?`,
-  sendOptions: { goal: '다른 목표', add: '새 목표 만들기', allowance: '용돈 늘리기' },
+  sendTitle: (amount: string) => `매달 넣던 ${amount}은 어디로 보낼까요?`,
+  sendOptions: { goal: '다른 목표', add: '새 목표 만들기', split: '분배표에서 정할게요' }, // [확인 필요]
+  sendPick: '어느 목표에 더할까요?', // [확인 필요]
+  sendDone: (goal: string, amount: string) => `${goal} 저금 줄에 ${amount}을 더했어요`, // [확인 필요]
   // G-05 사용 기록
   useAsk: (name: string, amount: string) => `${name}에 모은 ${amount}, 썼나요?`,
-  useOptions: { later: '아직이에요', spent: '썼어요', moved: '다른 자산으로 옮겼어요' },
+  useOptions: { later: '아직이에요', spent: '썼어요' },
   useAmount: '얼마 썼어요?',
-  useFrom: (amount: string) => `${amount}, 어디서 냈어요?`,
-  paidFrom: { goal_fund: '목표자금 통장', living: '생활비 통장·카드', personal: '각자 돈' },
-  useAsset: '어느 자산으로 옮겼어요?', // [확인 필요] 옮긴 자산 선택 질문
-  noAssets: '옮길 자산이 없어요. 우리 자산에서 먼저 추가해 주세요', // [확인 필요]
-  useLine: (amount: string) =>
-    `이번 달 월급 나누기에 ‘목표자금 → 공동 생활비 ${amount}’을 넣었어요`,
-  seeSplit: '월급 나누기 보기',
-  restMoved: (amount: string, goal: string) => `남은 ${amount}은 ${goal}으로 옮겨요`,
-  restOther: '다른 목표로',
-  restPick: '어느 목표로 옮길까요?', // [확인 필요]
-  restDone: '옮겼어요', // [확인 필요]
-  ok: '확인', // [확인 필요]
+  restTitle: (amount: string) => `남은 ${amount}은 어떻게 할까요?`, // [확인 필요]
+  restOptions: { emergency: '비상금에 넣기', goal: '다른 목표에 넣기', keep: '그대로 두기' }, // [확인 필요]
+  restPick: '어느 목표에 넣을까요?', // [확인 필요]
+  restDone: '넣었어요', // [확인 필요]
   partnerRecorded: (name: string) => `${name}님이 기록했어요`,
   seeRecord: '기록 보기',
 

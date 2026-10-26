@@ -1493,6 +1493,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           details: NonNullable<Json>
+          freed_lines: NonNullable<Json>
           id: string
           kind: Database["public"]["Enums"]["goal_kind"]
           name: string
@@ -1522,6 +1523,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           details?: NonNullable<Json>
+          freed_lines?: NonNullable<Json>
           id?: string
           kind: Database["public"]["Enums"]["goal_kind"]
           name: string
@@ -1550,6 +1552,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           details?: NonNullable<Json>
+          freed_lines?: NonNullable<Json>
           id?: string
           kind?: Database["public"]["Enums"]["goal_kind"]
           name?: string
@@ -4278,6 +4281,7 @@ export type Database = {
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
       family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
+      finish_goal_use: { Args: { p_goal: string; p_spent: number }; Returns: number }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
       finish_mail: {
         Args: { p_error?: string; p_id: string; p_message_id?: string }
@@ -4394,6 +4398,7 @@ export type Database = {
         Args: { p_goal: string; p_use: string }
         Returns: undefined
       }
+      move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
