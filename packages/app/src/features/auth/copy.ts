@@ -37,7 +37,6 @@ export const copy = {
     google: 'Google로 시작하기',
     apple: 'Apple로 시작하기',
   } satisfies Record<AuthProvider, string>,
-  keepLogin: '이 기기에서 로그인 유지',
   emailConflict: (p: AuthProvider) => `이미 ${providerName[p]}로 가입한 이메일이에요`,
   providerError: (p: AuthProvider) =>
     `${providerName[p]} 로그인에 문제가 생겼어요. 다른 방법으로 해볼까요?`,
@@ -79,6 +78,7 @@ export const copy = {
   agreeAll: '모두 동의해요',
   requiredAll: '[필수] 서비스 이용에 동의해요', // [확인 필요] 필수 약관 묶음
   foldRequired: '필수 약관 펼치기',
+  adult: '[필수] 만 18세 이상이에요',
   terms: '[필수] 이용약관',
   privacy: '[필수] 개인정보 수집·이용',
   spaceSharing: '[필수] 배우자와 부부 공간 공유',
@@ -105,8 +105,6 @@ export const copy = {
   // A-08
   expiredTitle: '다시 로그인해 주세요',
   expiredReason: {
-    days14: '로그인한 지 14일이 지났어요',
-    idle: '오래 자리를 비워서 잠갔어요',
     otherDevice: '다른 기기에서 로그아웃했어요',
   },
   loginAgain: '로그인하기',

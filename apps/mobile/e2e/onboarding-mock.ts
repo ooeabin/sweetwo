@@ -215,11 +215,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
     }
   };
-  // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
+  // 로그인된 세션(localStorage)
   await page.addInitScript(
     ({ token, user }) => {
       const now = Math.floor(Date.now() / 1000);
-      sessionStorage.setItem(
+      localStorage.setItem(
         'sb-session',
         JSON.stringify({
           access_token: token,
@@ -412,6 +412,20 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'space_goals') {
+        // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
+        return json(
+          route,
+          db.goals
+            .filter((g) => !g.deleted_at)
+            .sort((a, b) => Number(a.priority) - Number(b.priority))
+            .map((g) =>
+              g.owner_user_id && g.owner_user_id !== db.me.id && g.visibility === 'amount'
+                ? { ...g, name: '개인 목표', template: 'custom', details: {} }
+                : g,
+            ),
+        );
       }
       if (fn === 'goal_saved_sums') {
         return json(

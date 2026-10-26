@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient, type SupportedStorage } from '@supab
 import type { Database } from '@sweetwo/core';
 
 // Supabase 클라이언트는 하나만. 앱에는 공개돼도 되는 값(VITE_)만 들어간다.
-// - 웹: supabase-js가 세션을 브라우저 저장소에(‘로그인 유지’ 켜면 localStorage 최대 14일, 끄면 sessionStorage)
+// - 웹(개발·e2e)과 모바일: supabase-js가 세션을 localStorage에. 앱은 로그인을 유지하고 앱 잠금(A-06)으로 보호(15 A-02 6번)
 // - 데스크톱: 토큰은 main 프로세스만. 렌더러는 access token을 브리지에서 받아 쓴다(supabase.auth는 쓰지 않음).
 export type Db = SupabaseClient<Database>;
 
@@ -16,7 +16,6 @@ export function configureSupabase(m: Mode) {
   mode = m;
 }
 
-const KEEP_KEY = 'sweetwo.keep-login';
 const safe = <T>(f: () => T, fallback: T): T => {
   try {
     return f();
@@ -24,33 +23,10 @@ const safe = <T>(f: () => T, fallback: T): T => {
     return fallback;
   }
 };
-export const keepLogin = {
-  get: () => safe(() => localStorage.getItem(KEEP_KEY) === '1', false),
-  set: (on: boolean) =>
-    safe(
-      () => (on ? localStorage.setItem(KEEP_KEY, '1') : localStorage.removeItem(KEEP_KEY)),
-      undefined,
-    ),
-};
-
-// ‘로그인 유지’에 따라 저장소를 고른다. 바꿀 때는 다른 쪽 값을 지운다.
 const webStorage: SupportedStorage = {
-  getItem: (k) => safe(() => (keepLogin.get() ? localStorage : sessionStorage).getItem(k), null),
-  setItem: (k, v) => {
-    safe(() => {
-      const [use, other] = keepLogin.get()
-        ? [localStorage, sessionStorage]
-        : [sessionStorage, localStorage];
-      use.setItem(k, v);
-      other.removeItem(k);
-    }, undefined);
-  },
-  removeItem: (k) => {
-    safe(() => {
-      localStorage.removeItem(k);
-      sessionStorage.removeItem(k);
-    }, undefined);
-  },
+  getItem: (k) => safe(() => localStorage.getItem(k), null),
+  setItem: (k, v) => safe(() => localStorage.setItem(k, v), undefined),
+  removeItem: (k) => safe(() => localStorage.removeItem(k), undefined),
 };
 
 export function supabase(): Db {

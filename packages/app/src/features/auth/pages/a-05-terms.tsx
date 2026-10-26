@@ -9,7 +9,8 @@ import { prefs } from '../prefs';
 import { session } from '../session';
 import { useAuthStore } from '../store';
 
-const REQUIRED = ['terms', 'privacy', 'spaceSharing'] as const;
+// 필수 4개: 만 18세 확인(보기 없음, 묶음 맨 위) + 약관 3개(15 A-05 2a, 4번)
+const REQUIRED = ['adult', 'terms', 'privacy', 'spaceSharing'] as const;
 
 // 약관 보기: 웹사이트 L-05. 앱 안 보기(BottomSheet, Modal)는 웹사이트가 생기면 붙인다. 지금은 새 창.
 const view = (url: string) => () => window.open(url, '_blank', 'noopener,noreferrer');
@@ -68,6 +69,7 @@ export function A05Terms() {
         requiredLabel={copy.requiredAll}
         foldLabel={copy.foldRequired}
         items={[
+          { key: 'adult', label: copy.adult, required: true },
           { key: 'terms', label: copy.terms, required: true, onView: view(copy.termsUrl.terms) },
           {
             key: 'privacy',

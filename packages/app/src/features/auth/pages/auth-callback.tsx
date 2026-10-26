@@ -1,4 +1,4 @@
-import { keepLogin, webAuth } from '@sweetwo/api';
+import { webAuth } from '@sweetwo/api';
 import { AuthLayout } from '@sweetwo/ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -58,10 +58,7 @@ export function AuthCallback() {
     }
     void webAuth
       .exchange(p.code)
-      .then(() => {
-        if (keepLogin.get()) prefs.setLoginAt(Date.now());
-        return routeAfterLogin(provider);
-      })
+      .then(() => routeAfterLogin(provider))
       .then((r) => nav(r.to, { replace: true, state: r.state }))
       .catch(() => {
         track('login_failed', { method: provider, reason: 'request_mismatch' });

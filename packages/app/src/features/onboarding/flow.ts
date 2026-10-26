@@ -14,26 +14,10 @@ export interface FlowState {
   inviteNow: 'now' | 'later' | null;
 }
 
-export const isEngaged = (s: FlowState) => s.space?.marriage_status === 'engaged';
-export const isSeparate = (s: FlowState) => isEngaged(s) && s.space?.prep_money_mode === 'separate';
 /** 고른 목표(자동 목표 제외), 우선순위 순 */
 export const pickedGoals = (goals: Goal[] | undefined) =>
   (goals ?? []).filter((g) => !AUTO_GOALS.includes(g.template));
 export const topGoal = (goals: Goal[] | undefined) => pickedGoals(goals)[0];
-
-/** 시작한 사람이 온보딩 중에 배우자가 먼저 합류했으면 배우자 수입은 추정값 대신 배우자가 직접 답한 값(18 P-11 대기) */
-export function joinedSpace(
-  sp: Space | null | undefined,
-  partner: FlowState['partner'],
-): Space | null | undefined {
-  if (!sp || sp.couple_state !== 'connected' || !partner) return sp;
-  return {
-    ...sp,
-    partner_income: partner.monthly_income,
-    partner_income_estimated: false,
-    partner_income_unknown: partner.monthly_income === null,
-  };
-}
 
 /** O-10 → O-03 → O-06 (→ O-07) → O-11 → O-12 → O-13 → O-21 → O-23 → O-24 → O-30 → O-31 → O-50 → O-60 */
 export function screens(s: FlowState): string[] {
@@ -73,24 +57,6 @@ export const prevOf = (id: string, list: string[]) => {
   if (id === 'o-10' || id === LAST) return undefined;
   return list[list.indexOf(id) - 1];
 };
-
-/** 계산 입력(packages/core planSummary). 합류 전 배우자 용돈 = 내 용돈 */
-export const planInput = (s: FlowState) => ({
-  myIncome: s.me?.monthly_income ?? null,
-  partnerIncome: s.space?.partner_income ?? null,
-  partnerUnknown: s.space?.partner_income_unknown ?? false,
-  myAllowance: s.me?.allowance ?? null,
-  // 합류 전에는 배우자 용돈 = 내 용돈, 합류했으면 배우자가 정한 용돈
-  partnerAllowance: partnerJoined(s) ? (s.partner?.allowance ?? null) : undefined,
-  fixedTotal: s.space?.fixed_total ?? null,
-  loanRepayment: s.space?.loan_repayment ?? null,
-  livingBudget: s.space?.living_budget ?? null,
-  mySharePct: s.space?.split_mode === 'custom' ? (s.space.split_ratio ?? 50) : 50,
-});
-/** 이상값 확인용 월 수입 합계(배우자 추정 포함) */
-export const monthIncome = (s: FlowState) =>
-  (s.me?.monthly_income ?? 0) +
-  (s.space?.partner_income_unknown ? 0 : (s.space?.partner_income ?? 0));
 
 /** 배우자가 합류했는지 */
 export const partnerJoined = (s: FlowState) => s.space?.couple_state === 'connected';

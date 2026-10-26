@@ -282,3 +282,55 @@ test('달성 지켜보기: 모은 돈(이미 모은 돈 + 체크한 저금 + 넣
   await expect(page).toHaveURL(/\/goals\/goal-h\/achieved$/);
   expect(db.goals.find((g) => g.id === 'goal-h')?.status).toBe('achieved');
 });
+
+test('배우자 내 목표 ‘금액만 보여 주기’: G-01 배우자 묶음에 이름 대신 개인 목표, S-13 내 목표 공개 범위', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    side: 'bride',
+    employment: 'regular',
+    monthly_income: 2_500_000,
+    payday: 10,
+    payday_last: false,
+    allowance: 500_000,
+  };
+  const base = db.goals.find((g) => g.id === 'goal-h') as Record<string, unknown>;
+  db.goals.push(
+    {
+      ...base,
+      id: 'goal-y',
+      name: '예빈 카메라',
+      template: 'hobby',
+      priority: 1,
+      owner_user_id: 'yebin',
+      visibility: 'amount',
+      target_amount: 2_000_000,
+    },
+    {
+      ...base,
+      id: 'goal-c',
+      name: '찬우 자전거',
+      template: 'hobby',
+      priority: 1,
+      owner_user_id: chanwoo.id,
+      visibility: 'all',
+      target_amount: 1_000_000,
+    },
+  );
+  await page.goto('/goals');
+  const theirs = page.getByRole('region', { name: /예빈님 목표/ });
+  await expect(theirs.getByRole('button', { name: /개인 목표/ })).toBeVisible();
+  await expect(page.getByText('예빈 카메라')).toHaveCount(0);
+  await page.goto('/settings/visibility');
+  const pick = page.getByRole('combobox', { name: '찬우 자전거 공개 범위' });
+  await expect(pick).toHaveValue('all');
+  await pick.selectOption('amount');
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-c')?.visibility).toBe('amount');
+  await axe(page);
+});

@@ -37,7 +37,7 @@ export async function fetchExportData(): Promise<ExportData> {
   const s = supabase();
   const [assets, goals, saved, splits, checklists, careDays, careRecords] = await Promise.all([
     s.from('asset').select('*').is('deleted_at', null).order('created_at'),
-    s.from('goal').select('*').is('deleted_at', null).order('priority'),
+    s.rpc('space_goals').is('deleted_at', null).order('priority'),
     s.rpc('goal_saved_sums'),
     s.from('salary_split').select('*, split_line(*)'),
     s.from('pay_checklist').select('*, pay_check_line(*)').order('cycle_start'),

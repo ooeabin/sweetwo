@@ -1,7 +1,7 @@
 import type { InvestAnswer, Tables, TablesInsert, TablesUpdate } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
-import { ensureSpace, fetchMe } from './onboarding';
+import { ensureSpace } from './onboarding';
 
 // 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 배우자 ‘합계만’은 묶음 합계로.
 const fail = (e: { message?: string } | null) => {
@@ -84,16 +84,6 @@ export async function fetchInvestAnswers(): Promise<{
   fail(error);
   const row = Array.isArray(data) ? data[0] : null;
   return { mine: row?.mine ?? null, partner: row?.partner ?? null };
-}
-export async function saveInvestAnswer(answer: InvestAnswer) {
-  const me = await fetchMe();
-  if (!me) throw new AuthCallError('unknown');
-  const id = me.id;
-  const { error } = await supabase()
-    .from('app_user')
-    .update({ invest_answer: answer, invest_answered_at: new Date().toISOString() })
-    .eq('id', id);
-  fail(error);
 }
 
 /** F-04a 만기된 돈 정리: 다른 통장으로(그 통장 + 만기 금액, 이 항목은 만기 완료) 또는 다시 가입(새 만기일) */

@@ -48,9 +48,6 @@ export const prefs = {
   /** A-06 PIN 정하기는 이 기기에서 첫 로그인 직후 1회 */
   pinAsked: () => get('sweetwo.pin-asked') === '1',
   setPinAsked: (on: boolean) => set('sweetwo.pin-asked', on ? '1' : null),
-  /** 웹 ‘로그인 유지’ 14일 기준 시각 */
-  loginAt: () => Number(get('sweetwo.login-at') ?? 0),
-  setLoginAt: (t: number | null) => set('sweetwo.login-at', t === null ? null : String(t)),
   /** 웹: 리다이렉트 동안 누른 제공자와 돌아갈 화면(탭 안에서만) */
   pendingProvider: () => {
     const v = sget('sweetwo.pending-provider');
