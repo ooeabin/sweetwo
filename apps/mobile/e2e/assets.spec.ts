@@ -544,3 +544,31 @@ test('주택 대출(F-03g): 월 상환액을 먼저 묻고 금리는 다음, 목
   await expect(page.getByRole('button', { name: /주택담보대출/ })).toContainText('매달 120만 원');
   expect(db.assets.at(-1)).toMatchObject({ monthly_payment: 1_200_000, interest_rate: null });
 });
+
+test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금액을 바꿨으면 고르기 → 예빈님 값이면 그대로', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/assets/a1');
+  await heading(page, '생활비 통장');
+  await page.getByRole('button', { name: '수정' }).click();
+  const a1 = db.assets.find((a) => a.id === 'a1');
+  if (!a1) throw new Error('seed');
+  Object.assign(a1, {
+    amount: 3_500_000,
+    updated_by: 'yebin',
+    updated_at: new Date(NOW.getTime() - 20_000).toISOString(),
+  });
+  await page.getByRole('textbox', { name: '금액' }).fill('2800000');
+  await page.getByRole('button', { name: '저장' }).click();
+  const choice = page.getByRole('group', { name: '어느 쪽으로 할까요?' });
+  await expect(choice).toContainText('예빈님이 방금 이 값을 바꿨어요');
+  await expect(choice.getByRole('button', { name: /예빈님 값/ })).toContainText('350만 원');
+  await axe(page);
+  await choice.getByRole('button', { name: /예빈님 값/ }).click();
+  await expect(choice).toHaveCount(0);
+  expect(a1.amount).toBe(3_500_000);
+  await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
+});

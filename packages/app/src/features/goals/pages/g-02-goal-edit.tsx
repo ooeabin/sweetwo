@@ -1,14 +1,22 @@
+import type { Goal } from '@sweetwo/api';
 import {
   formatManWon,
   formatYm,
+  readWon,
   goalEta,
   goalNeed,
   thisMonth,
   ymToDate,
   type YearMonth,
 } from '@sweetwo/core';
-import { AmountInput, QuestionLayout, ShortText, YearMonthInput } from '@sweetwo/ui';
-import { useState } from 'react';
+import {
+  AmountInput,
+  ConflictChoice,
+  QuestionLayout,
+  ShortText,
+  YearMonthInput,
+} from '@sweetwo/ui';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { copy } from '../copy';
 import { toAllocGoal } from '../../salary';
@@ -21,6 +29,8 @@ type Field = 'amount' | 'deadline' | 'name';
 // 목표 수정(22 목표 수정): 숫자 한 화면 입력. 목표 금액 Q3, 기한 Q4(늘리기·줄이기 모두, 이번 달 이전만 안 됨), 이름 Q5.
 // 영향 미리보기(예상 달성, 상태, 월 필요액 전 → 후. 매달 넣는 돈은 그대로라 이 목표만 바뀜).
 // ‘저장’ = 바로 반영 + Toast “기한을 바꿨어요” + ‘되돌리기’. 우리 목표면 상대 알림·활동 기록(서버). 저장 → G-02
+// 배우자가 1분 안에 같은 칸을 바꿨으면 저장 대신 충돌 선택(ConflictChoice, 30 동기화 2장): 내 값 → 덮어 저장, 배우자 값 → 그대로.
+// 비교 기준은 이 화면을 열 때의 목표(opened). 그 뒤 배우자 값이 화면에 새로 와도 기준은 그대로
 export function G02GoalEdit() {
   const { id = '', field = 'amount' } = useParams();
   const nav = useNavigate();
@@ -31,9 +41,14 @@ export function G02GoalEdit() {
   const [ym, setYm] = useState<YearMonth | null | undefined>(undefined);
   const [name, setName] = useState<string | undefined>(undefined);
   const back = () => nav(`/goals/${id}`);
+  const live = d.goals.find((x) => x.id === id);
+  const [opened, setOpened] = useState<Goal | null>(null);
+  useEffect(() => {
+    if (live && !opened) setOpened(live);
+  }, [live, opened]);
 
   if (d.loading || model.loading) return null;
-  const g = d.goals.find((x) => x.id === id);
+  const g = opened ?? live;
   const f = field as Field;
   if (!g || !['amount', 'deadline', 'name'].includes(f)) return <Navigate to="/goals" replace />;
   // 내 목표는 주인만(22 ‘목표 종류’)
@@ -98,6 +113,18 @@ export function G02GoalEdit() {
     );
     if (ok) back();
   };
+  const conflict = change.conflict;
+  const partner = d.couple?.partnerName ?? '';
+  const show = (x: Goal) =>
+    f === 'amount'
+      ? x.target_amount === null
+        ? '-'
+        : readWon(x.target_amount)
+      : f === 'deadline'
+        ? x.deadline
+          ? formatYm(x.deadline)
+          : '-'
+        : x.name;
 
   const title =
     f === 'amount'
@@ -139,6 +166,17 @@ export function G02GoalEdit() {
           onChange={setName}
           max={20}
           error={curName.trim() ? undefined : copy.nameRequired}
+        />
+      )}
+      {conflict && (
+        <ConflictChoice
+          title={copy.conflictQ}
+          body={copy.conflictBody(partner)}
+          mine={{ label: copy.conflictMine, value: show({ ...g, ...patch, name: curName.trim() }) }}
+          theirs={{ label: copy.conflictTheirs(partner), value: show(conflict.current) }}
+          busy={change.busy}
+          onMine={() => void change.resolve(true).then((ok) => ok && back())}
+          onTheirs={() => void change.resolve(false).then(() => back())}
         />
       )}
       {impact.length > 0 && (

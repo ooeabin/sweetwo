@@ -90,6 +90,18 @@ const json = (route: Route, body: unknown, status = 200) =>
   });
 
 const eqId = (url: URL) => url.searchParams.get('id')?.replace(/^eq\./, '');
+
+/** PATCH·GET 조건(열=eq.값, 열=is.null)이 행과 맞는지(id·select·order·limit 빼고) */
+function matchesFilters(row: Record<string, unknown>, url: URL) {
+  for (const [k, v] of url.searchParams) {
+    if (['id', 'select', 'order', 'limit', 'offset'].includes(k)) continue;
+    if (
+      v === 'is.null' ? row[k] != null : v.startsWith('eq.') && String(row[k] ?? '') !== v.slice(3)
+    )
+      return false;
+  }
+  return true;
+}
 const inIds = (url: URL) =>
   (url.searchParams.get('id') ?? '')
     .replace(/^in\.\(|\)$/g, '')
@@ -1539,6 +1551,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
     }
     if (path === '/rest/v1/asset') {
+      if (method === 'GET' && url.searchParams.get('id'))
+        return json(
+          route,
+          db.assets.filter((a) => a.id === eqId(url)),
+        );
       if (method === 'GET')
         return json(
           route,
@@ -1584,6 +1601,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (method === 'PATCH') {
         const a = db.assets.find((x) => x.id === eqId(url));
         const b = body();
+        // 열 때 값이 그대로일 때만(updateIfUnchanged): 안 맞으면 0행
+        if (a && !matchesFilters(a, url)) return json(route, []);
         if (a) {
           const now = new Date().toISOString();
           if ('amount' in b && b.amount !== a.amount)
@@ -1594,8 +1613,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
               source: 'manual',
               recorded_at: now,
             });
-          Object.assign(a, b, { updated_at: now });
+          Object.assign(a, b, { updated_at: now, updated_by: db.me.id });
         }
+        if (url.searchParams.get('select')) return json(route, a ? [{ id: a.id }] : []);
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
@@ -1702,6 +1722,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
     if (path === '/rest/v1/goal') {
+      if (method === 'GET' && url.searchParams.get('id'))
+        return json(
+          route,
+          db.goals.filter((g) => g.id === eqId(url)),
+        );
       if (method === 'GET') {
         return json(
           route,
@@ -1740,11 +1765,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (method === 'PATCH') {
         const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
+        const hit: string[] = [];
         for (const g of db.goals)
-          if (ids.includes(String(g.id))) {
-            Object.assign(g, body());
+          if (ids.includes(String(g.id)) && matchesFilters(g, url)) {
+            Object.assign(g, body(), {
+              updated_at: new Date().toISOString(),
+              updated_by: db.me.id,
+            });
             goalLinesSync(g);
+            hit.push(String(g.id));
           }
+        if (url.searchParams.get('select'))
+          return json(
+            route,
+            hit.map((id) => ({ id })),
+          );
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }

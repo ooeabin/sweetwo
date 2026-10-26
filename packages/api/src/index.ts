@@ -16,4 +16,5 @@ export * from './goal-achieve';
 export * from './guides';
 export * from './avatar';
 export * from './photos';
+export * from './guarded';
 export * from './salary';

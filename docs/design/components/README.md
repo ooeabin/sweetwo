@@ -21,6 +21,7 @@
 | [Meta](Meta.md) | Data | 한 줄에 정보 여럿을 두는 방법과 작은 표시 |
 | [NetWorth](NetWorth.md) | Data | 순자산 2줄 표시 |
 | [Banner](Banner.md) | Feedback | 화면 위 안내 띠 |
+| [ConflictChoice](ConflictChoice.md) | Feedback | 같은 칸 충돌 때 “어느 쪽으로 할까요?” |
 | [Celebration](Celebration.md) | Feedback | 목표 달성 화면 |
 | [EmptyState](EmptyState.md) | Feedback | 내용이 없을 때의 화면 |
 | [SceneMedia](SceneMedia.md) | Feedback | 비워 둔 장면 자리 |

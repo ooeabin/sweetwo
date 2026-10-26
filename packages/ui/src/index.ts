@@ -25,6 +25,7 @@ export * from './components/LineChart';
 export * from './components/BarChart';
 export * from './components/GoalPick';
 export * from './components/FileAttach';
+export * from './components/ConflictChoice';
 export * from './components/TransferRow';
 export * from './components/Calendar';
 export * from './components/AuthLayout';

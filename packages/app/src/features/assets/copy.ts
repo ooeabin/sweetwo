@@ -3,6 +3,11 @@ import { topic } from '@sweetwo/core';
 // 우리 자산 문구(docs/spec/23-assets.md F-01~F-04). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  // 충돌 선택(13 공통 상태 11번)
+  conflictQ: '어느 쪽으로 할까요?',
+  conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,
+  conflictMine: '내 값',
+  conflictTheirs: (partner: string) => `${partner}님 값`,
   title: '우리 자산',
   add: '+ 추가',
   retry: '다시 시도',

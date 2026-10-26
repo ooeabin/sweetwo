@@ -3,6 +3,12 @@
 export const copy = {
   title: '목표',
   retry: '다시 시도',
+  saveFailed: '저장하지 못했어요',
+  // 충돌 선택(13 공통 상태 11번)
+  conflictQ: '어느 쪽으로 할까요?',
+  conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,
+  conflictMine: '내 값',
+  conflictTheirs: (partner: string) => `${partner}님 값`,
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   back: '뒤로',
 

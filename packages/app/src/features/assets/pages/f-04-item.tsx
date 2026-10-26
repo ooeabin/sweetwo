@@ -1,6 +1,14 @@
-import { fetchAssetHistory, qk, restoreAsset, trashAsset, updateAsset } from '@sweetwo/api';
+import {
+  fetchAssetHistory,
+  qk,
+  restoreAsset,
+  trashAsset,
+  updateAsset,
+  updateIfUnchanged,
+} from '@sweetwo/api';
 import {
   assetGroup,
+  conflictDecision,
   formatDateFull,
   formatDot,
   formatYm,
@@ -13,6 +21,7 @@ import {
   Badge,
   Button,
   ChoiceCards,
+  ConflictChoice,
   LineChart,
   ListRow,
   PageHeader,
@@ -46,7 +55,19 @@ export function F04Item() {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
-  const [editAmount, setEditAmount] = useState<number | null | undefined>(undefined);
+  const [editAmount, setEditAmountRaw] = useState<number | null | undefined>(undefined);
+  // 금액 고치기를 열 때의 값(30 동기화 2장 충돌 판정 기준)과 충돌(배우자가 1분 안에 바꿈)
+  const [openedAmount, setOpenedAmount] = useState<number | null>(null);
+  const [conflict, setConflict] = useState<{ mine: number; theirs: number } | null>(null);
+  const setEditAmount = (v: number | null | undefined) => {
+    if (v === undefined) setConflict(null);
+    setEditAmountRaw(v);
+  };
+  const startEdit = (v: number) => {
+    setOpenedAmount(v);
+    setConflict(null);
+    setEditAmountRaw(v);
+  };
   const [editVis, setEditVis] = useState(false);
   // 3번 값 수정: 고르고 있는 값과 입력 중인 글자(월 납입·상환액은 금액 칸)
   const [field, setField] = useState<ValueField | null>(null);
@@ -76,12 +97,33 @@ export function F04Item() {
       setBusy(false);
     }
   };
-  const saveAmount = () =>
-    editAmount !== undefined &&
-    editAmount !== null &&
-    void run(() => updateAsset(a.id, { amount: editAmount, estimated: false }), copy.saved).then(
-      () => setEditAmount(undefined),
-    );
+  // 금액 저장: 열 때 값이 서버에 그대로일 때만. 배우자가 1분 안에 바꿨으면 충돌 선택, 그 밖은 마지막 저장 우선
+  const saveAmount = (force = false) => {
+    if (editAmount === undefined || editAmount === null) return;
+    const patch = { amount: editAmount, estimated: false };
+    let saved = false;
+    void run(async () => {
+      if (!force) {
+        const r = await updateIfUnchanged('asset', a.id, patch, {
+          amount: openedAmount ?? a.amount,
+        });
+        const dec = r.ok
+          ? 'same'
+          : conflictDecision(r.current, { amount: editAmount }, d.me?.id ?? '');
+        if (!r.ok && dec === 'choose') {
+          setConflict({ mine: editAmount, theirs: r.current.amount });
+          return;
+        }
+        if (dec === 'same') return void (saved = true);
+      }
+      await updateAsset(a.id, patch);
+      saved = true;
+    }).then(() => {
+      if (!saved) return;
+      toast(copy.saved);
+      setEditAmount(undefined);
+    });
+  };
   const remove = () =>
     void run(async () => {
       await trashAsset(a.id);
@@ -214,7 +256,7 @@ export function F04Item() {
                 variant="primary"
                 size="sm"
                 disabled={busy || editAmount === null}
-                onClick={saveAmount}
+                onClick={() => saveAmount()}
               >
                 {copy.saveEdit}
               </Button>
@@ -222,6 +264,20 @@ export function F04Item() {
                 {copy.cancel}
               </Button>
             </span>
+            {conflict && (
+              <ConflictChoice
+                title={copy.conflictQ}
+                body={copy.conflictBody(nameOf(a.updated_by))}
+                mine={{ label: copy.conflictMine, value: m(conflict.mine) }}
+                theirs={{
+                  label: copy.conflictTheirs(nameOf(a.updated_by)),
+                  value: m(conflict.theirs),
+                }}
+                busy={busy}
+                onMine={() => saveAmount(true)}
+                onTheirs={() => setEditAmount(undefined)}
+              />
+            )}
           </div>
         ) : (
           <span className="hg-row" style={{ gap: 'var(--space-3)', alignItems: 'baseline' }}>
@@ -230,7 +286,7 @@ export function F04Item() {
               <button
                 type="button"
                 className="hg-btn hg-btn--link"
-                onClick={() => setEditAmount(a.amount)}
+                onClick={() => startEdit(a.amount)}
               >
                 {copy.edit}
               </button>
@@ -244,7 +300,7 @@ export function F04Item() {
         )}
         {market && editAmount === undefined && (
           <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <Button variant="secondary" size="sm" onClick={() => setEditAmount(a.amount)}>
+            <Button variant="secondary" size="sm" onClick={() => startEdit(a.amount)}>
               {copy.marketEdit}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => nav(`/assets/${a.id}/sold`)}>
