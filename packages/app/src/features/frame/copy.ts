@@ -44,4 +44,6 @@ export const copy = {
   cmdCares: '챙길 날',
   offlineTitle: '연결이 끊겼어요',
   offlineBody: '다시 연결되면 이어서 볼 수 있어요',
+  offlineCached: '오프라인',
+  lastSaved: (at: string) => `마지막 저장 ${at}`,
 };

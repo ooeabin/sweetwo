@@ -53,6 +53,12 @@ export function formatKstDateTime(iso: string): string {
   return `${d.slice(0, 10)} ${d.slice(11, 16)}`;
 }
 
+/** 시각(ISO) → KST "10월 27일 15:05"(오프라인 띠 ‘마지막 저장’) */
+export function formatKstMonthDayTime(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString();
+  return `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일 ${d.slice(11, 16)}`;
+}
+
 /** 두 시각 사이 시간(시간 단위 내림) */
 export const hoursBetween = (fromIso: string, to: Date = new Date()) =>
   Math.max(0, Math.floor((to.getTime() - new Date(fromIso).getTime()) / 3_600_000));

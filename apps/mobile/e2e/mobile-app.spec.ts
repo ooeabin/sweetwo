@@ -73,6 +73,12 @@ async function fakeIosBridge(page: Page, signedIn = false) {
             return () => undefined;
           },
         },
+        // 오프라인 캐시: 다시 불러와도 남게 localStorage에(실제 앱은 Keychain 키 + 암호 파일)
+        cache: {
+          load: async () => localStorage.getItem('e2e-cache'),
+          save: async (t: string) => (localStorage.setItem('e2e-cache', t), true),
+          clear: async () => localStorage.removeItem('e2e-cache'),
+        },
         lock: {
           status: async () => ({
             hasPin: f.pinSet !== null,
@@ -228,4 +234,32 @@ test('앱 정보(S-19): 업데이트 확인 → 받는 중 → 다 받으면 “
       ),
     )
     .toBe(1);
+});
+
+test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기에 두고, 인터넷이 끊겨도 홈을 보여 줌 + “오프라인”', async ({
+  page,
+  context,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('e2e-cache')?.length ?? 0), {
+      timeout: 10_000,
+    })
+    .toBeGreaterThan(100);
+  // 서버에 닿지 않음
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  await page.route('**/rest/v1/**', (r) => r.abort('internetdisconnected'));
+  await page.route('**/auth/v1/**', (r) => r.abort('internetdisconnected'));
+  await page.reload();
+  await context.setOffline(true);
+  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toContainText(
+    /마지막 저장 10월 7일 \d{2}:\d{2}/,
+  );
+  await context.setOffline(false);
 });

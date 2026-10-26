@@ -53,6 +53,11 @@ contextBridge.exposeInMainWorld('sweetwo', {
     onOpen: (cb: (id: string) => void) => listen(CH.notifyOpen, cb),
   },
   onNavigate: (cb: (path: string) => void) => listen(CH.navigate, cb),
+  cache: {
+    load: () => ipcRenderer.invoke(CH.cacheLoad) as Promise<string | null>,
+    save: (text: string) => ipcRenderer.invoke(CH.cacheSave, text) as Promise<boolean>,
+    clear: () => ipcRenderer.invoke(CH.cacheClear) as Promise<void>,
+  },
   update: {
     state: () => ipcRenderer.invoke(CH.updateState) as Promise<UpdateState>,
     check: () => ipcRenderer.invoke(CH.updateCheck) as Promise<UpdateState>,

@@ -12,6 +12,7 @@ test('데스크톱 실행', async () => {
   expect(bridge).toEqual([
     'appVersion',
     'auth',
+    'cache',
     'lock',
     'notify',
     'onInvite',
