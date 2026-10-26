@@ -212,12 +212,11 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 | 묶음 | 테이블 |
 | --- | --- |
-| 부부와 사용자 | couple\_space, app\_user, invite, income\_period, device\_session, consent |
+| 부부와 사용자 | couple\_space, app\_user, invite, device\_session, consent, couple\_unlink |
 | 자산 | account, asset, debt, fixed\_expense, annual\_event, amount\_history |
-| 목표와 계획 | goal, goal\_use, wedding\_cost\_item, monthly\_plan, plan\_line, month\_close, spend\_category, month\_spend, big\_expense, saving\_deposit, conversation\_card\_log, checklist\_item, checklist\_done |
-| 가족 | family(암호화), care\_day, care\_round, family\_budget |
-| 협업 | proposal, unlink\_request |
-| 기록과 알림 | change\_log, notification, todo, widget\_setting, photo |
+| 목표와 월급 | goal, goal\_move, salary\_split, split\_line, pay\_checklist, pay\_check\_line |
+| 챙길 날 | care\_day, care\_record |
+| 기록과 알림 | partner\_change, notification, mail\_outbox, widget\_setting, photo |
 | 결제와 문의 | subscription, payment, inquiry(답변 포함), admin\_view\_request |
 | 운영과 어드민 | holiday, notice, maintenance, app\_config, admin\_setting, item\_catalog(항목 이름 목록, 어드민에서 수정), admin\_user, audit\_log, job\_run(예약 작업 실행 기록), peer\_stat(출시 후) |
 
@@ -225,7 +224,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - RLS 기본값은 막힘. 테이블마다 ‘같은 space의 구성원’만 읽고 씀
 - 공개 범위 3단계(전체 공개, 합계만, 비공개)는 RLS와 security\_invoker = true 뷰로 걸러냄(이 옵션 없는 뷰는 소유자 권한으로 RLS를 건너뜀). 클라이언트에서 숨기지 않음
-- 배분 결정(목표 금액, 나눔 방식 등)은 테이블을 바로 못 바꿈. proposal을 만들고 DB 함수가 적용
+- 제안·승인 없음(ADR 0003). 누구나 바로 고치고 상대에게 알림(partner\_change 묶음) + 고친 사람에게 Toast ‘되돌리기’
 - 사실 값(잔액 등)은 마지막 쓰기가 이김. 배우자가 1분 안에 같은 필드를 바꿨으면 선택 화면
 - 기록(change\_log, amount\_history)은 추가만. 수정과 삭제 권한 없음
 - 어드민은 service role을 쓰지 않고 별도 함수로만 읽음. 문의한 사람의 동의(admin\_view\_request)가 있을 때만, 배우자에게 알림, 열람 기록 1년 보관
@@ -233,7 +232,6 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 상태가 있는 것
 
 - couple\_state: 미합류, 연결, 해제 대기, 혼자 쓰기
-- proposal: 제안 중, 적용, 보류, 철회, 만료, 되돌림. 대상 하나에 열린 제안 1개
 - 상태는 enum으로 두고, 바꾸는 것은 DB 함수만. 허용되지 않은 전환은 함수가 거부
 
 ### 동의와 문의
@@ -246,14 +244,14 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지금 있는 테이블과 함수
 
-> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 기획서는 새 모델(목표, 분배표, 체크리스트, 제안 없음)로 바뀌었고 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 옛 모델 표·함수는 2단계로 지움: 앱이 더는 안 씀(#122, #123) → DB에서 지움(마이그레이션 20261101180000 `drop_legacy`). 지운 표: proposal, monthly\_plan, plan\_line, month\_close, month\_spend, spend\_category, big\_expense, saving\_deposit, close\_balance, goal\_use, emergency\_move, living\_check, income\_event, income\_item, income\_period, wedding\_item, wedding\_payment, todo, family\_member, unlink\_copy와 그 함수·예약 작업. 열거형과 남는 표의 옛 열(`care_day.member_id`, `asset.goal_id`·`pay_from` 등)은 그대로 두고 새로 쓰지 않음
 
 - 재기획 새 테이블(20261029090000): `salary_split`·`split_line`(월급 분배표, 쓰기는 `save_split`만), `pay_checklist`·`pay_check_line`(이번 달 월급 체크리스트, 만들기는 `start_checklist`만, 사이클은 `cycle_day`·`cycle_date`), `couple_space.salary_mode`·`joint_cycle_day`, `goal.owner_user_id`(null = 우리 목표)·`visibility`
 - 목표 돈 움직임(20261029150000): `goal_move`(넣기·빼기·꺼내 쓰기, 쓰기는 `move_goal`·`undo_goal_move`만), 모은 돈 `goal_saved_sums()`, 목표 ↔ 분배표 저금 줄 트리거 `goal_lines`
 - 자동 결혼기념일(20261029180000): `care_day.auto`·`auto_moves`, `couple_space` 트리거 → `sync_wedding_care(공간)`
 - 배우자 합류(20261030090000): `complete_join`, `set_join_salary_mode`, `discard_prefill`, `joining_space`(내부), `app_user` 트리거 `notify_first_goal`
 - 관리 방식(20261030120000): `set_salary_mode`, `set_joint_cycle_day`, `start_checklist`(방식을 바꾼 달은 옛 체크리스트 유지). 휴지통(20261030150000): `trash_rows`, `restore_trash` 제안 없이
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안), `asset`·`asset_history`(자산·부채와 금액 이력)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `invite_attempt`(초대 코드 오류 횟수), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
@@ -672,11 +670,11 @@ supabase/
 - 자동 결혼기념일(마이그레이션 20261029180000): `couple_space` 트리거가 결혼했고(married) 결혼한 날이 있으면 `sync_wedding_care`로 챙길 날 “결혼기념일”(매년 양력, `auto = 'wedding'`) 하나를 만듦. 공간마다 하나(지운 것도 셈, 지우면 다시 안 만듦). 결혼한 날이 바뀌면 날짜를 옮기되 사람이 날짜를 고쳤으면(`auto_moves = false`, 트리거가 표시) 그대로. 예정일(engaged)은 만들지 않음
 - 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function + pg_cron으로 나중에
 - 월급날 앞당기기: core `businessDayOnOrBefore`, `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로
-- 다음 단계: 미리 알림·상대 알림, 기록 사진(Y-08c), 특일 API, 옛 테이블(`family_member`, 양가 비용 목표·`apply_family_budget`) 2단계 지우기
+- 다음 단계: 미리 알림·상대 알림, 기록 사진(Y-08c), 특일 API(옛 `family_member`·`apply_family_budget`는 20261101180000에서 지움). 다녀온 뒤 기록 `record_care`는 기록만(목표 돈을 썼으면 G-02b 꺼내 쓰기)
 
 ### 설정 구조
 
-> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 연결 해제는 ADR 0003 11장(나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)대로 다시 씀(마이그레이션 20261030180000). 계정 삭제(S-18b)는 아직 옛 `confirm_unlink`를 씀.
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 연결 해제는 ADR 0003 11장(나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)대로 다시 씀(마이그레이션 20261030180000). 계정 삭제(S-18b, 20261101180000 `request_account_deletion`): 공동 항목은 상대에게 남고 상대는 원래 공간에서 혼자 쓰기, 내 명의 항목(자산, 내 목표, 내 분배표·체크리스트)은 나와 함께 새 공간(`unlinked_from` = 원래 공간)으로, `couple_unlink`에 `how = 'deleted'` 확정 행. 취소하면(`cancel_account_deletion`) 그때부터 30일 안 다시 연결 가능, `answer_reconnect`가 내 항목을 원래 공간으로 되돌림(해제 재연결은 새 데이터를 버림).
 
 - features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11c·d·f·g·h·i `/settings/me/…`, S-12 `/settings/couple`, S-12a·c·d `/settings/couple/unlink`(`/confirm`, `/review`), S-12h `/settings/couple/unlinked`, S-12g `/settings/couple/reconnect`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}` (재기획으로 S-10a 통장 방식, S-11b 신랑·신부, S-17 내 답 다시 보기, 연결 해제 S-12b 자산 정리·S-12e 다르게 정리하기·S-12f 다른 안은 지움)
 - 아직 없는 화면 줄은 자리만(누르지 않음, “준비 중이에요”). 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
@@ -690,7 +688,7 @@ supabase/
 - 연결 해제 확정 `finish_unlink(id, how)`(내부): S-12d 받은 사람 ‘확인했어요’ → `agree_unlink`(how `agreed`), 또는 매일 오전 9시 `run_unlink_deadlines`가 기한 날 대기 요청을(how `deadline`, 2일 전 알림은 없앰). 같이 쓰던 데이터는 나누지 않음: 두 사람이 각자 빈 새 공간(혼자 쓰기, `unlinked_from` = 원래 공간)으로, `onboarding_step = 'S-12H'`, 원래 공간은 지운 표시로 30일 보관(구성원이 없어 아무도 못 봄), 원래 공간의 알림 기록은 지움. 알림 `unlink_confirmed`. 홈은 S-12H면 S-12h `/settings/couple/unlinked`로, ‘시작하기’ `start_after_unlink()` → 온보딩 O-11부터(이름·로그인은 남김). 분석 `unlink_requested`(`linked_months`), `unlink_resolved`(agreed, canceled. deadline은 서버)
 - 다시 연결(S-12g): 확정 뒤 30일 안, 두 사람이 모두 해제로 만든 공간에 혼자 있을 때(`reconnect_ok`). `request_reconnect` → 상대 알림 → `answer_reconnect(true)`면 원래 공간으로 돌아가고(`onboarding_step = 'O-60'`) 해제 뒤 새 공간에 만든 데이터는 버림(새 공간 지움), `false`면 요청만 닫힘. 혼자 쓰기 ‘새로 초대하기’ `start_new_invite`. 매일 `purge_unlinked_spaces`가 30일 지난 원래 공간을 지움. 해제 뒤 상대 호칭은 `unlink_partner_name()`. 행 타입 하나만 받는 SQL 함수는 PostgREST가 계산 열로 보여서 타입이 깨지므로 id로 받음
 - 공개 범위(S-13 `/settings/visibility`): `app_user.default_visibility`(내 자산·부채 새 항목 기본값, 기본 금액만 보여 주기)를 F-03·첫 주 자산 입력이 씀. 바꿀 때 기본값과 다른 내 명의 항목이 있으면 “이미 있는 항목 n개도 바꿀까요?”. 다시 연결하면 `?next=/`로 한 번 열고 ‘확인’ 이름은 “모두 보여 주기 / 금액만 보여 주기 / 숨기기”(값 all / sum / private), 고정 줄 “월급과 분배표는 늘 같이 봐요” 등
-- 휴지통(S-21 `/settings/trash`, 지금은 S-10 ‘데이터’ 줄에서): `trash_rows()`(자산·부채, 목표, 가족, 챙길 날. 30일 안, 배우자 명의·남의 서프라이즈 빼고), `restore_trash`(같이 지워진 것도 함께: 부모와 10초 안에 지운 자식), 연결된 부부의 목표는 `needs_proposal` → 제안 `goal_restore`. `purge_trash`(하나 또는 비우기), 매일 `purge_old_trash`. 확인은 ui `Modal`(영구 삭제만), Button `danger` 재기획(20261030150000): 연결된 부부의 목표도 제안 없이 바로 되살림, 배우자의 내 목표는 휴지통에 안 보임
+- 휴지통(S-21 `/settings/trash`, 지금은 S-10 ‘데이터’ 줄에서): `trash_rows()`(자산·부채, 목표, 챙길 날.(가족은 20261101180000에서 지움) 30일 안, 배우자 명의·남의 서프라이즈 빼고), `restore_trash`(같이 지워진 것도 함께: 부모와 10초 안에 지운 자식), 연결된 부부의 목표는 `needs_proposal` → 제안 `goal_restore`. `purge_trash`(하나 또는 비우기), 매일 `purge_old_trash`. 확인은 ui `Modal`(영구 삭제만), Button `danger` 재기획(20261030150000): 연결된 부부의 목표도 제안 없이 바로 되살림, 배우자의 내 목표는 휴지통에 안 보임
 - 데이터(S-18 `/settings/data`): 내보내기는 앱에서 만듦(api `fetchExportData` → `features/settings/export.ts` → core `toCsv`(BOM, CRLF), `makeZip`(압축 없는 zip)). 범위 내 데이터 / 공동 데이터, 배우자 항목은 RLS가 거른 뒤 ‘합계만’은 합계 한 줄. 파일 이름은 영문(`sweetwo-joint-20261018.zip`). 본인 확인: 데스크톱 PIN(있으면), 웹은 `reauthenticate(returnTo)`로 가입 소셜 다시 로그인 → `?export=범위`로 돌아와 이어서. 사용 기록 보내기 = `app_user.analytics_off`
 - 계정 삭제(S-18b `/settings/data/delete`): `request_account_deletion`은 다시 로그인한 지 10분 안에만(`reauth_required`면 `reauthenticate('/settings/data/delete?go=1')`). 바로 이용 중지(status). 연결·해제 대기면 연결 해제처럼 나눔(`confirm_unlink` how `deleted`, 공동 항목 전부 상대, 상대 알림 `partner_deleted`). 30일 안 다시 로그인하면 A-02 `/account/restore` “계정 삭제를 취소할까요?” → `cancel_account_deletion`(혼자 쓰기, 그때부터 30일 다시 연결, 상대 알림 `partner_restored`). 매일 `purge_deleted_accounts`
 - 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 배우자 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
@@ -713,7 +711,7 @@ supabase/
 - 합류 완료 = `complete_join(줄, 버전)`: 각자 = 내 분배표 + 첫 체크리스트, 합쳐서 = 공동 분배표 저장(열 때 버전과 다르면 `split_changed` → “찬우님이 방금 분배표를 바꿨어요” 후 다시 계산) + 이번 체크리스트 맞춤. 부부 연결, 코드 사용됨, 대신 입력 항목 소유 넘김, 시작한 사람에게 “예빈님이 합류했어요 / 이제 목표와 월급을 같이 봐요”
 - 시작한 사람이 아직 온보딩 중(공간에 분배표 없음): P-03 → P-03a → P-05 저장 = `complete_join()`(줄 없음, `onboarding_step = 'P-WAIT'`) → 홈 대기(“{찬우}님이 시작하고 있어요”). 시작한 사람이 온보딩을 마치면 트리거가 “{찬우}님이 첫 목표를 정했어요”(`first_goal`, → `/join/p-04`), 홈은 분배표가 생기면 P-04 → P-06으로(합쳐서면 확인만)
 - 다음 단계: P-02a 혼자 쓰던 기록 옮기기, 합류 직후 푸시 허용 묻기, ‘PC에서도’ 띠, 합쳐서 기준일이 바뀔 때 사이클 끝 조정
-- 재기획 전 코드(지울 대상): `finish_join`, `update_pending_shares`(옛 이번 달·첫 주 화면이 `recalcPendingShares`로 부름), `notify_first_plan`
+- 재기획 전 코드: `update_pending_shares`, `notify_first_plan`은 20261101180000에서 지움. `finish_join`은 앱이 안 쓰지만(합류는 `complete_join`) pgTAP 준비용으로 남김
 
 ### 목표 구조
 
@@ -729,7 +727,7 @@ supabase/
 - 목표 수정 `/goals/:id/edit/amount|deadline|name`: 기한은 늘리기·줄이기 모두(이번 달 이전만 안 됨), 영향 미리보기는 이 목표만(예상 달성, 상태, 월 필요액 전 → 후), 배우자의 내 목표는 G-02로 돌려보냄
 - 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿 → G-03e 누구 목표(혼자 쓰기 빼고) → G-03b 질문 → G-03c 기한 → G-03d 이미 모은 돈(매달·고금리 대출·템플릿이 묻는 것 빼고) → G-03f 확인 → 만든 목표 상세. 입력 중 값은 기기에 저장(`sweetwo.goal-add`)
 - G-06 `/goals/order`: 우리 목표와 내 목표 각각 `ReorderList`, 저장하면 우선순위 + 내 분배표 저금 줄 순서를 같이 바꿈
-- G-05 달성(20261101150000): `AchieveWatch`가 model의 모은 돈(서버 `goal_saved_sums`) ≥ 목표 금액이면 `achieve_goal` 후 축하 `/goals/:id/achieved`(사람마다 한 번)를 엶. 달성하면 `goal_lines_sync`가 저금 줄을 빼며 그 금액을 `goal.freed_lines`(분배표마다)에 남김 → 내 분배표 금액이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?” `/goals/:id/achieved/send`(다른 목표 / 새 목표 만들기 / 분배표에서 정할게요) → 사용 기록 `/goals/:id/use`(아직이에요 / 썼어요 → 얼마 → `finish_goal_use`(꺼내 쓰기 + 사용 완료, 남은 돈) → 남은 돈 비상금·다른 목표 `move_goal_saved` / 그대로) → 고른 곳: 다른 목표면 목표 고르기 후 내 분배표 그 저금 줄 + 금액(`save_split`, Toast ‘되돌리기’), 새 목표면 G-03a `?freed=`(추가하면 그 줄에), 분배표면 W-01. 옛 `use_goal`·`move_goal_rest`·`goal_use`는 2단계로 지움
+- G-05 달성(20261101150000): `AchieveWatch`가 model의 모은 돈(서버 `goal_saved_sums`) ≥ 목표 금액이면 `achieve_goal` 후 축하 `/goals/:id/achieved`(사람마다 한 번)를 엶. 달성하면 `goal_lines_sync`가 저금 줄을 빼며 그 금액을 `goal.freed_lines`(분배표마다)에 남김 → 내 분배표 금액이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?” `/goals/:id/achieved/send`(다른 목표 / 새 목표 만들기 / 분배표에서 정할게요) → 사용 기록 `/goals/:id/use`(아직이에요 / 썼어요 → 얼마 → `finish_goal_use`(꺼내 쓰기 + 사용 완료, 남은 돈) → 남은 돈 비상금·다른 목표 `move_goal_saved` / 그대로) → 고른 곳: 다른 목표면 목표 고르기 후 내 분배표 그 저금 줄 + 금액(`save_split`, Toast ‘되돌리기’), 새 목표면 G-03a `?freed=`(추가하면 그 줄에), 분배표면 W-01. 옛 `use_goal`·`move_goal_rest`·`goal_use`는 20261101180000에서 지움
 - 다음 단계: 우리 → 내 목표 막기 서버 확인, G-06에서 배우자 분배표 순서, 상대 알림·활동 기록, 진행 그래프, 목표 사진
 - 재기획으로 지운 화면(2026-10-26): G-04 충돌 조정, G-07 결혼 비용 전용 화면(결혼 비용은 보통 목표), G-08 제안, 첫 주 나머지 목표 `/goals/week`.
 
