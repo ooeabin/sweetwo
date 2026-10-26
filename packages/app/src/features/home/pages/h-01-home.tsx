@@ -1,4 +1,4 @@
-import { fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import { createInvite, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -24,6 +24,7 @@ import {
   useSplits,
   waiting,
 } from '../../salary';
+import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
@@ -117,7 +118,10 @@ export function H01Home() {
         close:
           t.kind === 'invite'
             ? h.closeInvite
-            : t.kind === 'matured' || t.kind === 'care'
+            : t.kind === 'matured' ||
+                t.kind === 'care' ||
+                t.kind === 'review' ||
+                t.kind === 'amount'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -125,9 +129,25 @@ export function H01Home() {
   const todoBand = todo ? (
     <div className="hg-banner hg-banner--info hg-body__banner" role="status">
       <span>{todo.text}</span>
-      <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
-        {copy.open}
-      </Button>
+      {t?.kind === 'invite' ? (
+        // H-06 초대: ‘코드 복사’(코드를 만들거나 지금 코드를 그대로 복사). 코드 화면은 S-12
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            void createInvite()
+              .then((r) => navigator.clipboard.writeText(r.code))
+              .then(() => toast(copy.codeCopied))
+              .catch(() => nav(todo.to))
+          }
+        >
+          {copy.copyCode}
+        </Button>
+      ) : (
+        <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
+          {copy.open}
+        </Button>
+      )}
       {todo.close && (
         <Button variant="ghost" size="sm" onClick={todo.close}>
           {copy.close}
@@ -207,6 +227,8 @@ export function H01Home() {
             list={list}
             personName={personName}
             meId={meId}
+            joined={joined}
+            solo={space.data.couple_state === 'solo'}
             go={go}
           />
           <SalaryCard

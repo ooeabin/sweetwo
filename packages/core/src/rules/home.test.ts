@@ -78,16 +78,28 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   });
   expect(homeTodo(all)?.kind).toBe('unlink');
   expect(homeTodo({ ...all, unlinkRequestedBy: 'c' })?.kind).toBe('reconnect');
-  expect(homeTodo({ ...all, unlinkRequestedBy: null, reconnectFrom: null })).toMatchObject({
-    kind: 'review',
-    left: 2,
+  const review = homeTodo({ ...all, unlinkRequestedBy: null, reconnectFrom: null });
+  expect(review).toMatchObject({ kind: 'review', left: 2 });
+  // 월말 확인은 닫으면 이번 달만 안 보임
+  const closedReview = homeTodo({
+    ...all,
+    unlinkRequestedBy: null,
+    reconnectFrom: null,
+    closed: [review?.kind === 'review' ? review.key : ''],
   });
+  expect(closedReview?.kind).toBe('invite');
   const noReview = { ...all, unlinkRequestedBy: null, reconnectFrom: null, today: '2026-10-07' };
   expect(homeTodo(noReview)?.kind).toBe('invite');
-  expect(homeTodo({ ...noReview, inviteClosedOn: '2026-10-05' })).toMatchObject({
-    kind: 'amount',
-    goal: '여행',
-  });
+  const amount = homeTodo({ ...noReview, inviteClosedOn: '2026-10-05' });
+  expect(amount).toMatchObject({ kind: 'amount', goal: '여행' });
+  // 목표 금액 정하기도 닫을 수 있음
+  expect(
+    homeTodo({
+      ...noReview,
+      inviteClosedOn: '2026-10-05',
+      closed: [amount?.kind === 'amount' ? amount.key : ''],
+    })?.kind,
+  ).toBe('matured');
   const noGoal = { ...noReview, inviteClosedOn: '2026-10-05', goals: [] };
   expect(homeTodo(noGoal)).toMatchObject({ kind: 'matured', to: '/assets/a/matured' });
   expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07'] })).toMatchObject({

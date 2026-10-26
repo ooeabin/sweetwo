@@ -44,4 +44,7 @@ export const copy = {
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
   unlinkCheck: '확인하기',
+  mineMark: '나', // [확인 필요]
+  copyCode: '코드 복사',
+  codeCopied: '코드를 복사했어요', // [확인 필요]
 };

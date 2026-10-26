@@ -48,16 +48,16 @@ export interface HomeInput {
   reconnectFrom: string | null;
   /** 초대 할 일을 닫은 날(7일 동안 안 보임) */
   inviteClosedOn: string | null;
-  /** 닫은 만기·챙길 날 할 일(‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
+  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘amount:{목표 id}’, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
   closed: string[];
 }
 
 export type HomeTodo =
   | { kind: 'unlink'; to: string }
   | { kind: 'reconnect'; to: string }
-  | { kind: 'review'; label: string; left: number; to: string }
+  | { kind: 'review'; label: string; left: number; key: string; to: string }
   | { kind: 'invite'; to: string }
-  | { kind: 'amount'; goal: string; to: string }
+  | { kind: 'amount'; goal: string; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
   | { kind: 'care'; name: string; date: string; key: string; to: string };
 
@@ -114,8 +114,14 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   if (i.reconnectFrom && i.reconnectFrom !== i.meId)
     return { kind: 'reconnect', to: '/settings/couple/reconnect' };
   const s = salaryState(i);
-  if (s.state === 'review')
-    return { kind: 'review', label: s.label, left: s.left, to: PATHS.review };
+  if (s.state === 'review' && !i.closed.includes(`review:${s.label}:${s.nextPayday}`))
+    return {
+      kind: 'review',
+      label: s.label,
+      left: s.left,
+      key: `review:${s.label}:${s.nextPayday}`,
+      to: PATHS.review,
+    };
   if (
     i.coupleState === 'not_joined' &&
     (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)
@@ -127,17 +133,24 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
         g.template !== 'emergency' &&
         g.status === 'active' &&
         g.target_amount === null &&
-        !g.owner_user_id,
+        !g.owner_user_id &&
+        !i.closed.includes(`amount:${g.id}`),
     ) ??
     i.goals.find(
       (g) =>
         g.template !== 'emergency' &&
         g.status === 'active' &&
         g.target_amount === null &&
-        g.owner_user_id === i.meId,
+        g.owner_user_id === i.meId &&
+        !i.closed.includes(`amount:${g.id}`),
     );
   if (noAmount)
-    return { kind: 'amount', goal: noAmount.name, to: `/goals/${noAmount.id}/edit/amount` };
+    return {
+      kind: 'amount',
+      goal: noAmount.name,
+      key: `amount:${noAmount.id}`,
+      to: `/goals/${noAmount.id}/edit/amount`,
+    };
   const matured = i.assets.find(
     (a) =>
       a.side === 'asset' &&
@@ -178,7 +191,8 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;
   const out: HomeUpcoming[] = [];
-  const add = (u: Omit<HomeUpcoming, 'dday'>) => out.push({ ...u, dday: daysBetween(i.today, u.date) });
+  const add = (u: Omit<HomeUpcoming, 'dday'>) =>
+    out.push({ ...u, dday: daysBetween(i.today, u.date) });
   const s = salaryState(i);
   if (s.state !== 'none') {
     if (within(s.nextPayday))

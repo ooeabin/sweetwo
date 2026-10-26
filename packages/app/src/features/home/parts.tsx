@@ -25,7 +25,8 @@ const pctOf = (saved: number, target: number | null) =>
 
 /**
  * H-02 목표: 1순위 큰 카드(그림, 모은 돈 / 목표 금액, Meter, 예상, 이번 달 줄 체크) + 나머지 2~4순위 작은 줄 + 목표 더보기.
- * 1순위 = 우리 목표 1순위(비상금 다음), 없으면 비상금. 금액 없는 목표는 % 대신 ‘금액 정하기’.
+ * 1순위 = 우리 목표 1순위(비상금 다음), 없으면 비상금. 배우자 미합류·혼자 쓰기면 우리 목표 → 내 목표 → 비상금.
+ * 내 목표 줄에는 작은 “나”(혼자 쓰기는 없음). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
  */
 export function GoalsCard({
   goals,
@@ -34,6 +35,8 @@ export function GoalsCard({
   list,
   personName,
   meId,
+  joined = true,
+  solo = false,
   go,
 }: {
   goals: Goal[];
@@ -43,6 +46,9 @@ export function GoalsCard({
   list: PayChecklist | undefined;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
+  /** 배우자가 합류했는지(미합류·혼자 쓰기면 1순위를 내 목표까지 봄) */
+  joined?: boolean;
+  solo?: boolean;
   go: (to: string) => void;
 }) {
   const { masked } = useMask();
@@ -51,12 +57,10 @@ export function GoalsCard({
   const ours = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === null);
   const mine = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === meId);
   const emergency = live.find((g) => g.template === 'emergency');
-  const top = ours[0] ?? emergency;
-  const rest = [
-    ...ours.slice(1),
-    ...(top === emergency ? [] : emergency ? [emergency] : []),
-    ...mine,
-  ].slice(0, 3);
+  const top = joined ? (ours[0] ?? emergency) : (ours[0] ?? mine[0] ?? emergency);
+  const rest = [...ours, ...(emergency ? [emergency] : []), ...mine]
+    .filter((g) => g !== top)
+    .slice(0, 3);
   if (!top) return null;
   const saved = savedOf(top);
   const eta = goalEta(toAllocGoal({ ...top, other_held: saved }), monthly(top));
@@ -82,9 +86,11 @@ export function GoalsCard({
           type="button"
           className="hg-btn hg-btn--link"
           style={{ alignSelf: 'flex-start' }}
-          onClick={() => go(`/goals/${top.id}`)}
+          onClick={() =>
+            go(top.target_amount ? `/goals/${top.id}` : `/goals/${top.id}/edit/amount`)
+          }
         >
-          {copy.seeGoal}
+          {top.target_amount ? copy.seeGoal : copy.setAmount}
         </button>
         {line && (
           <CheckLine
@@ -105,14 +111,23 @@ export function GoalsCard({
             <ListRow
               key={g.id}
               lead={<GoalLead template={g.template} />}
-              label={g.name}
+              label={
+                g.owner_user_id === meId && !solo ? (
+                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                    {g.name}
+                    <Badge kind="temp">{copy.mineMark}</Badge>
+                  </span>
+                ) : (
+                  g.name
+                )
+              }
               value={g.target_amount ? `${pctOf(savedOf(g), g.target_amount)}%` : copy.setAmount}
               onClick={() => go(g.target_amount ? `/goals/${g.id}` : `/goals/${g.id}/edit/amount`)}
             />
           ))}
         </div>
       )}
-      {!ours.length && (
+      {!ours.length && !mine.length && (
         <Button variant="secondary" onClick={() => go('/goals/new')}>
           {copy.addGoal}
         </Button>
@@ -198,7 +213,11 @@ export function SalaryCard({
           </button>
         )}
         {partnerList && (
-          <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary')}>
+          <button
+            type="button"
+            className="hg-btn hg-btn--link"
+            onClick={() => go(`/salary?who=${partnerList.owner_user_id ?? ''}`)}
+          >
             {copy.partnerProgress(
               partnerName,
               partnerList.pay_check_line.length,
@@ -226,7 +245,10 @@ export interface UpcomingItem {
 export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {
   return (
     <section className="hg-stack" aria-label={copy.upcoming}>
-      <SectionHeader title={copy.upcoming} more={{ label: copy.upcoming, href: '/calendar' }} />
+      <SectionHeader
+        title={copy.upcoming}
+        more={{ label: copy.upcoming, href: '/calendar/list' }}
+      />
       {items.length ? (
         <div className="hg-list">
           {items.map((e) => (
