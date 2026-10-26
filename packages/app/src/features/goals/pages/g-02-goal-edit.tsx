@@ -1,9 +1,19 @@
-import { formatManWon, formatYm, thisMonth, ymToDate, type YearMonth } from '@sweetwo/core';
+import {
+  formatManWon,
+  formatYm,
+  goalEta,
+  goalNeed,
+  thisMonth,
+  ymToDate,
+  type YearMonth,
+} from '@sweetwo/core';
 import { AmountInput, QuestionLayout, ShortText, YearMonthInput } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { copy } from '../copy';
+import { toAllocGoal } from '../../salary';
 import { useGoalsData } from '../data';
+import { useGoalsModel } from '../model';
 import { useGoalChange } from '../goal-change';
 
 type Field = 'amount' | 'deadline' | 'name';
@@ -15,13 +25,14 @@ export function G02GoalEdit() {
   const { id = '', field = 'amount' } = useParams();
   const nav = useNavigate();
   const d = useGoalsData();
+  const model = useGoalsModel();
   const change = useGoalChange(d);
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [ym, setYm] = useState<YearMonth | null | undefined>(undefined);
   const [name, setName] = useState<string | undefined>(undefined);
   const back = () => nav(`/goals/${id}`);
 
-  if (d.loading) return null;
+  if (d.loading || model.loading) return null;
   const g = d.goals.find((x) => x.id === id);
   const f = field as Field;
   if (!g || !['amount', 'deadline', 'name'].includes(f)) return <Navigate to="/goals" replace />;
@@ -49,16 +60,23 @@ export function G02GoalEdit() {
         ? !!curYm && ymToDate(curYm) !== g.deadline?.slice(0, 10)
         : !!curName.trim() && curName.trim() !== g.name;
 
-  // 영향 미리보기: 이 목표만
-  const before = d.view?.lines.find((l) => l.id === id);
-  const after = f === 'name' ? null : d.viewWith(id, patch)?.lines.find((l) => l.id === id);
+  // 영향 미리보기: 이 목표만(매달 넣는 돈은 그대로, 모은 돈은 서버 값)
+  const item = model.ready ? model.byId(id) : undefined;
+  const calc = (goal: typeof g) => {
+    const a = toAllocGoal({ ...goal, other_held: item?.saved ?? goal.other_held });
+    const eta = goalEta(a, item?.monthly ?? 0);
+    const late = eta.lateMonths !== null && eta.lateMonths > 0;
+    return { expected: eta.expected, status: late ? 'delayed' : 'active', need: goalNeed(a) } as const;
+  };
+  const before = f === 'name' ? null : calc(g);
+  const after = f === 'name' ? null : calc({ ...g, ...patch });
   const man = (v: number) => `${formatManWon(v)} 원`;
   const impact: string[] = [];
-  if (before && after && changed) {
+  if (before && after && changed && (g.status === 'active' || g.status === 'delayed')) {
     const ex = (v: YearMonth | null) => (v ? formatYm(v) : copy.planUnknown);
     if (before.expected !== after.expected)
       impact.push(copy.impactExpected(ex(before.expected), ex(after.expected)));
-    if (before.status !== after.status && before.status && after.status)
+    if (before.status !== after.status)
       impact.push(copy.impactStatus(copy.status[before.status], copy.status[after.status]));
     if (before.need !== after.need && before.need !== null && after.need !== null)
       impact.push(copy.impactNeed(formatManWon(before.need), man(after.need)));

@@ -8,6 +8,7 @@ import { useSplits } from '../../salary';
 import { AchieveArt, goalUsePath, sendPath } from '../achieve';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
+import { useGoalsModel } from '../model';
 import { freedAmount, mySplit } from '../freed';
 
 // G-05 축하(22 G-05 축하): 큰 그림 → “목표 달성” → 목표 이름 → 모은 금액 → 함께 모은 달 문장 → “다음”.
@@ -17,13 +18,15 @@ export function G05Achieved() {
   const { id = '' } = useParams();
   const nav = useNavigate();
   const d = useGoalsData();
+  const model = useGoalsModel();
   const splits = useSplits();
   const { masked } = useMask();
   const story = useQuery({ queryKey: ['goal_story', id], queryFn: () => fetchGoalStory(id) });
-  if (d.loading || story.isLoading || splits.isLoading) return null;
-  const g = d.view?.lines.find((x) => x.id === id);
+  if (d.loading || model.loading || story.isLoading || splits.isLoading) return null;
+  const item = model.ready ? model.byId(id) : undefined;
   const row = d.goals.find((x) => x.id === id);
-  if (!g || !row) return <Navigate to="/goals" replace />;
+  if (!item || !row) return <Navigate to="/goals" replace />;
+  const g = { name: row.name, held: item.saved, illustration: item.illustration, custom: item.custom };
   const joint = d.space?.salary_mode === 'joint';
   const freed = freedAmount(row.freed_lines, mySplit(splits.data, d.me?.id, joint));
   const solo = !d.couple?.joined || joint || row.owner_user_id !== null;

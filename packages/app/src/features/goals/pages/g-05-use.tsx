@@ -8,6 +8,7 @@ import { toast } from '../../../shared/toast';
 import { useSplits } from '../../salary';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
+import { useGoalsModel } from '../model';
 import { addToGoalLine, mySplit } from '../freed';
 
 type Step = 'ask' | 'amount' | 'rest' | 'restPick' | 'sendPick';
@@ -25,6 +26,7 @@ export function G05Use() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useGoalsData();
+  const model = useGoalsModel();
   const splits = useSplits();
   const { masked } = useMask();
   const [step, setStep] = useState<Step>('ask');
@@ -33,10 +35,11 @@ export function G05Use() {
   const [rest, setRest] = useState(0);
   const [pick, setPick] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || splits.isLoading) return null;
-  const g = d.view?.lines.find((x) => x.id === id);
+  if (d.loading || model.loading || splits.isLoading) return null;
+  const item = model.ready ? model.byId(id) : undefined;
   const row = d.goals.find((x) => x.id === id);
-  if (!g || !row) return <Navigate to="/goals" replace />;
+  if (!item || !row) return <Navigate to="/goals" replace />;
+  const g = { name: row.name, held: item.saved, illustration: item.illustration, custom: item.custom };
   const m = (v: number) => money(v, masked);
   const detail = `/goals/${id}`;
   const then = params.get('then') as Then | null;

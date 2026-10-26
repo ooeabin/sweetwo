@@ -257,3 +257,28 @@ test('G-05 달성: 축하 → 매달 넣던 돈 다른 목표 → 썼어요(얼�
     200_000,
   ]);
 });
+
+test('달성 지켜보기: 모은 돈(이미 모은 돈 + 체크한 저금 + 넣기)이 목표 금액이 되면 축하로', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const h = db.goals.find((g) => g.id === 'goal-h');
+  if (h) h.other_held = 149_500_000;
+  await page.goto('/goals/goal-h');
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  // 넣기 50만 원 → 1억 5,000만 원
+  db.goalMoves.push({
+    id: 'mv-1',
+    goal_id: 'goal-h',
+    kind: 'in',
+    amount: 500_000,
+    created_by: db.me.id,
+    created_at: NOW.toISOString(),
+    deleted_at: null,
+  });
+  await page.goto('/goals');
+  await expect(page).toHaveURL(/\/goals\/goal-h\/achieved$/);
+  expect(db.goals.find((g) => g.id === 'goal-h')?.status).toBe('achieved');
+});
