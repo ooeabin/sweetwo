@@ -679,6 +679,8 @@ export type Database = {
       care_day: {
         Row: {
           alerts: number[]
+          auto: string | null
+          auto_moves: boolean
           budget: number
           carer: Database["public"]["Enums"]["care_carer"]
           category: Database["public"]["Enums"]["care_category"]
@@ -708,6 +710,8 @@ export type Database = {
         ComputedFields: never
         Insert: {
           alerts?: number[]
+          auto?: string | null
+          auto_moves?: boolean
           budget?: number
           carer?: Database["public"]["Enums"]["care_carer"]
           category: Database["public"]["Enums"]["care_category"]
@@ -736,6 +740,8 @@ export type Database = {
         }
         Update: {
           alerts?: number[]
+          auto?: string | null
+          auto_moves?: boolean
           budget?: number
           carer?: Database["public"]["Enums"]["care_carer"]
           category?: Database["public"]["Enums"]["care_category"]
@@ -4494,6 +4500,7 @@ export type Database = {
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
       stop_access: { Args: { p_id: string }; Returns: undefined }
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
+      sync_wedding_care: { Args: { p_space: string }; Returns: undefined }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {

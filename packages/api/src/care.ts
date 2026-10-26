@@ -58,6 +58,14 @@ export async function updateCareDay(id: string, patch: TablesUpdate<'care_day'>)
   const { error } = await supabase().from('care_day').update(patch).eq('id', id);
   fail(error);
 }
+/** 챙길 날 지우기(휴지통, Y-05 8번). 되살리기는 restoreTrash('care_day', id) */
+export async function trashCareDay(id: string) {
+  const { error } = await supabase()
+    .from('care_day')
+    .update({ deleted_at: new Date().toISOString() }) // 지운 사람은 DB 트리거가 기록
+    .eq('id', id);
+  fail(error);
+}
 export async function updateFamily(id: string, patch: TablesUpdate<'family_member'>) {
   const { error } = await supabase().from('family_member').update(patch).eq('id', id);
   fail(error);
