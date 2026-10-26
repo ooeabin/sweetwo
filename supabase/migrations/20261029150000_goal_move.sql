@@ -71,9 +71,9 @@ as $$
 declare
   uid uuid := auth.uid();
   g public.goal;
-  id uuid;
+  v_id uuid;
 begin
-  select * into g from public.goal where id = p_goal and deleted_at is null;
+  select * into g from public.goal where goal.id = p_goal and deleted_at is null;
   if g.id is null or not public.is_space_member(g.space_id) then
     raise exception 'no_goal' using errcode = '42501';
   end if;
@@ -87,8 +87,8 @@ begin
     raise exception 'too_much' using errcode = '22023';
   end if;
   insert into public.goal_move (space_id, goal_id, kind, amount, created_by)
-    values (g.space_id, g.id, p_kind, p_amount, uid) returning goal_move.id into id;
-  return id;
+    values (g.space_id, g.id, p_kind, p_amount, uid) returning goal_move.id into v_id;
+  return v_id;
 end;
 $$;
 revoke all on function public.move_goal(uuid, text, bigint) from public, anon;

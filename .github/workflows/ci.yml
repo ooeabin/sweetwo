@@ -112,7 +112,13 @@ jobs:
       - name: 로컬 Supabase 시작(마이그레이션 + seed)
         run: pnpm supabase start -x studio,imgproxy,vector,logflare,edge-runtime
       - name: pgTAP(RLS, DB 함수)
-        run: pnpm db:test
+        # 실패한 테스트 줄을 주석(annotation)으로도 남겨, 로그를 못 받는 곳에서도 API로 볼 수 있게
+        run: |
+          set -o pipefail
+          if ! pnpm db:test 2>&1 | tee /tmp/pgtap.txt; then
+            grep -E 'not ok|# +(Failed|have|want|Looks)|ERROR|Dubious' /tmp/pgtap.txt | head -10 | sed 's/^/::error::/'
+            exit 1
+          fi
       - name: DB 타입이 마이그레이션과 같은지(pnpm db:types 결과와 비교)
         run: |
           cp packages/core/src/db.types.ts /tmp/committed.ts
