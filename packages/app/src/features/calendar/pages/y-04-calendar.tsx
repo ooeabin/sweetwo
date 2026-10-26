@@ -1,6 +1,6 @@
 import { isFestive, monthGrid } from '@sweetwo/core';
 import { Button, Calendar, Icon } from '@sweetwo/ui';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
 import { moneyLine, reviewMonth, useCalendarData } from '../data';
@@ -114,16 +114,28 @@ export function Y04Calendar() {
             <span className="hg-help">{copy.agendaEmpty}</span>
           )}
           {dayCares.map((x) => (
-            <button
-              key={x.care.id}
-              type="button"
-              className="hg-cal__event"
-              onClick={() => nav(`/calendar/day/${x.care.id}`)}
-            >
-              <i className="hg-mark--together" />
-              <span>{x.care.name}</span>
-              {x.care.budget > 0 && <b>{won(x.care.budget, masked)}</b>}
-            </button>
+            <Fragment key={x.care.id}>
+              <button
+                type="button"
+                className="hg-cal__event"
+                onClick={() => nav(`/calendar/day/${x.care.id}`)}
+              >
+                <i className="hg-mark--together" />
+                <span>{x.care.name}</span>
+                {x.care.budget > 0 && <b>{won(x.care.budget, masked)}</b>}
+              </button>
+              {/* 그날이 된 챙길 날은 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+              {x.date <= d.today && !(x.care.status === 'done' && x.care.status_on === x.date) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  style={{ alignSelf: 'flex-start' }}
+                  onClick={() => nav(`/calendar/day/${x.care.id}/record/a?on=${x.date}`)}
+                >
+                  {copy.statuses.done}
+                </Button>
+              )}
+            </Fragment>
           ))}
           {today.map((x, i) => {
             const l = moneyLine(x);
