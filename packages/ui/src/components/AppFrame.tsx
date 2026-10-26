@@ -260,7 +260,10 @@ export function AppFrame(p: AppFrameProps) {
         </section>
       ) : null}
 
-      <main className="hg-body">
+      <main
+        className="hg-body"
+        style={{ '--cols': p.columns.length } as React.CSSProperties}
+      >
         {p.banner}
         {p.columns.map((c, i) => (
           <div key={i} className="hg-body__col">

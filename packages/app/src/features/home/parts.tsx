@@ -173,13 +173,11 @@ export function SalaryCard({
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
       <div className="hg-card hg-stack">
-        {finished ? (
+        {finished && (
           <p className="hg-card__meta">
             <Icon name="check" size={16} /> {copy.allDone(list.label)}.{' '}
             {savedSum > 0 && copy.savedThisMonth(money(savedSum, masked))}
           </p>
-        ) : (
-          <p className="hg-card__meta">{copy.progress(total, done)}</p>
         )}
         {(!finished || open) && (
           <div className="hg-checklist__list">

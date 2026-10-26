@@ -39,3 +39,4 @@
 - 아이콘(현재 탭은 채운 모양): `house`(이번 달), `target`(목표), `wallet`(우리 자산), `calendar`(캘린더), `search`, `eye`, `bell`, `settings`, `plus`.
 - 설정은 메뉴 탭에 두지 않음. 넓은 창은 아바타, 좁은 창은 톱니.
 - 사이드바(`hg-side`, `hg-nav`)는 앱 틀에서 쓰지 않음(어드민 틀 AdminFrame만).
+- 본문 단 수는 넘긴 `columns` 개수(`--cols`). 1100px 미만은 한 단. 맨 위 띠(`banner`)가 있어도 단 너비는 같음
