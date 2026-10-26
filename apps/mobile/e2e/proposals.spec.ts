@@ -13,7 +13,6 @@ const axe = async (page: Page) => {
 const heading = (page: Page, name: string | RegExp) =>
   expect(page.getByRole('heading', { name })).toBeVisible();
 const NOW = new Date('2026-10-07T10:00:00+09:00');
-const count = (page: Page) => page.locator('.hg-nav__count:visible');
 
 /** 연결된 신혼부부: 찬우(시작, 25일), 예빈(합류, 10일). 예빈이 합류할 때 보낸 제안 2건 */
 function seed(db: MemDb) {
@@ -112,69 +111,6 @@ function seed(db: MemDb) {
     },
   );
 }
-
-test('받은 제안: 할 일 맨 위와 탭 숫자 → G-08 좋아요, 분담은 다르게 해볼래요', async ({ page }) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-
-  await page.goto('/');
-  await expect(count(page)).toHaveText('2');
-  await expect(count(page)).toHaveAttribute('aria-label', '받은 제안 2개');
-  const allowanceRow = page.getByRole('button', { name: /예빈님이 용돈을 바꾸자고 제안했어요/ });
-  await expect(allowanceRow).toContainText('50만 원 → 60만 원');
-  await expect(
-    page.getByRole('button', { name: /예빈님이 분담 방식을 바꾸자고 제안했어요/ }),
-  ).toContainText('찬우 60%, 예빈 40% → 반반');
-  await axe(page);
-
-  // 용돈 제안: 좋아요 / 반대만
-  await allowanceRow.click();
-  await heading(page, '예빈님 제안');
-  await expect(page.getByText('예빈님 용돈')).toBeVisible();
-  await expect(page.getByText('50만 원 → 60만 원')).toBeVisible();
-  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 25일부터 적용돼요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '다르게 해볼래요' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '반대' })).toBeVisible();
-  await axe(page);
-  await expect.poll(() => db.proposals[0]?.seen_at).not.toBeNull();
-  await page.getByRole('button', { name: '좋아요' }).click();
-
-  await expect(count(page)).toHaveText('1');
-  expect(db.proposals[0]).toMatchObject({ status: 'applied', response: 'like' });
-  expect(db.partner?.allowance).toBe(600_000);
-
-  // 분담 제안: 다르게 해볼래요 → 버는 만큼으로 다시 제안(이전 제안 대체)
-  await page.getByRole('button', { name: /예빈님이 분담 방식을 바꾸자고 제안했어요/ }).click();
-  await heading(page, '예빈님 제안');
-  await page.getByRole('button', { name: '다르게 해볼래요' }).click();
-  await heading(page, '다르게 해볼래요');
-  await page.getByRole('radio', { name: /버는 만큼/ }).click();
-  await axe(page);
-  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
-
-  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
-  await expect(count(page)).toHaveCount(0);
-  expect(db.proposals[1]).toMatchObject({ status: 'superseded' });
-  expect(db.proposals[2]).toMatchObject({
-    item: 'split',
-    proposer: db.me.id,
-    after: { mode: 'income' },
-    apply_on: '2026-10-25',
-    round_trips: 1,
-    replaces: 'prop-2',
-    status: 'open',
-  });
-
-  // 보낸 제안: 예빈이 열기 전이면 ‘보내기 취소’
-  await page.goto('/proposals/prop-3');
-  await heading(page, '찬우님 제안');
-  await expect(page.getByRole('button', { name: '좋아요' })).toHaveCount(0);
-  await axe(page);
-  await page.getByRole('button', { name: '보내기 취소' }).click();
-  await expect(page.getByText('제안을 거둬들였어요')).toBeVisible();
-  expect(db.proposals[2]).toMatchObject({ status: 'withdrawn' });
-});
 
 test('받은 제안: 반대하면 보류, 함께 정하기 표시', async ({ page }) => {
   await page.clock.setFixedTime(NOW);

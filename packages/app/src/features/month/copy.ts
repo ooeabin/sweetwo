@@ -1,7 +1,7 @@
 // H 화면 문구 (docs/spec/19-this-month.md). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
-  tabMonth: '이번 달',
+  tabMonth: '홈', // [확인 필요] 재기획 탭 이름(19 앱 기본 틀 3번)
   tabGoals: '목표',
   tabAssets: '우리 자산',
   tabCalendar: '캘린더',

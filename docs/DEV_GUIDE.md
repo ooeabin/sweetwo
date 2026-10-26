@@ -630,7 +630,21 @@ supabase/
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards, Q3 AmountInput, Q4 YearInput/DateInput/YearMonthInput/DayChips/DateWheel(`yearOnly`), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
 - e2e는 `apps/mobile/e2e/onboarding-mock.ts`의 메모리 DB(`save_split`, `start_checklist` 흉내 포함)로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜는 `page.clock.setFixedTime`으로 10월 7일에 고정
 
-### 이번 달 구조
+### 홈과 월급 체크리스트 구조
+
+재기획(ADR 0003) 홈과 W 화면. 기획 → 19 홈, 20 월급 체크리스트, 07 월 사이클.
+
+- `packages/app/src/features/home`: `pages/h-01-home.tsx`(앱 틀 `MainFrame` + 오늘 띠(인사 H-01, ‘월급 체크하기’) + 할 일 한 줄 H-06(월말 확인 → 초대(7일 닫기, 기기 저장) → 목표 금액 정하기) + 두 단(목표 H-02, 이번 달 월급 H-03 / 우리 자산 H-04, 다가오는 일정 H-05)), `parts.tsx`(카드들). 순자산은 month의 `useNetWorth`·`H06NetWorth`를 그대로 씀
+- `packages/app/src/features/salary`: `split-editor.tsx`(O-50·W-01 같은 목록 틀 `SplitEditor`, 줄을 누르면 같은 틀이 금액 입력, 남는 돈은 QuestionLayout `summary`), `split-draft.ts`(추천값 순서·변환), `check-line.tsx`(체크 줄 `CheckLine` = ui `TransferRow`, 체크하면 Toast + 되돌리기), `pages/w-01-split.tsx`, `w-02-checklist.tsx`(W-02a 다른 금액은 같은 화면 모드), `w-02-done.tsx`, `w-05-review.tsx`. 경로 `/salary`, `/salary/split`, `/salary/done`, `/salary/review`
+- 체크리스트는 `useChecklists`가 읽을 때 분배표마다 `start_checklist`를 불러 이번 사이클 것을 만듦(같은 사이클이면 서버가 그대로, 새 사이클이면 지난 것은 끝남 + 체크 안 한 줄 ‘못 함’). 기준일 0시 예약 작업은 다음 단계
+- 체크는 RPC `check_pay_line(줄, checked|wait|skipped, 다른 금액)`. 먼저 저장된 체크 유지(`already_checked`), 지난 사이클은 읽기 전용(`closed`)
+- 목표 모은 돈 = `goal.other_held`(이미 모은 돈) + `goal_checked_sums()`(체크한 저금 줄 합). 직접 넣기·빼기·꺼내 쓰기는 목표 단계
+- 분배표 저장(`save_split`)은 서버 `sync_checklist`로 이번 사이클 체크 안 한 줄만 새 금액(체크한 줄, 못 함 줄은 그대로)
+- 아직 없는 것: 배우자 탭에서 배우자 분배표 고치기·상대 알림, 지난 달 체크리스트 보기(‹ ›), 오늘 띠 ‘추가’ 메뉴(지금은 목표 추가로), 해제 대기 띠, 월급날 알림
+
+### 이번 달 구조(재기획 전)
+
+> 재기획 전 구현 기록. 홈은 `features/home`으로 바뀌었고 아래 화면(옛 이번 달, 월말 정리, 지출 적기)은 지울 대상.
 
 - `packages/app/src/features/month`: `view.ts`(답, 목표, 오늘이 든 월 플랜 → 화면 값. 계산은 core `rules/this-month.ts`, `onboarding/cycle.ts`, `allocation.ts`), `pages/h-01-this-month.tsx`(앱 틀 + 오늘 띠 + 두 단)
 - 앱 틀은 ui `AppFrame`(docs/design/components/AppFrame.md). 좁은 창 머리, 하단 독, + 버튼까지 한 컴포넌트
@@ -645,7 +659,9 @@ supabase/
 - 아직 없는 것: 함께 모드와 보기만, W-04h 다음 달 조정과 월말 정리 제안, 꼼꼼 모드(W-04b~f, i), 놓친 달, 정리 고치기, 지난달보다 칩, 생활비 예산 보정 제안, 미달·초과 처리
 - 배우자 활동(H-08)은 다음 단계
 
-### 월급 플랜·월급 나누기 구조
+### 월급 플랜·월급 나누기 구조(재기획 전)
+
+> 재기획 전 구현 기록. 월급 분배표·체크리스트(`features/salary`)로 바뀌었고 지울 대상.
 
 - features/plan: W-01 `/plan`(이번 달 월급 플랜 카드의 ‘월급 플랜 보기’), W-02 `/plan/split`(이번 달 맨 위 ‘월급 나누기’, W-01 주 버튼), W-02a `/plan/split/:lineId?side=`
 - 값은 month `useMonthView()`의 `split`(core `rules/split.ts`: `splitRows`, `splitProgress`, `splitLeft`). 줄 하나(`plan_line`, target account, 개인 통장 제외)에 신랑·신부 몫(`amount_groom`, `amount_bride`)이 따로 있고 사람 몫마다 체크

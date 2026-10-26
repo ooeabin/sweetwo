@@ -125,7 +125,9 @@ import {
   S14aQuiet,
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
+import { H01Home } from './features/home';
 import { H01ThisMonth } from './features/month';
+import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
 import { CloseRoute, W04Missed, W04jSpendEntry, W04pBundle } from './features/month-close';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
@@ -141,12 +143,37 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <H01ThisMonth />
+              <H01Home />
               <AchieveWatch />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // H-01 이번 달
+      }, // 홈 H-01~06
+      {
+        path: '/month',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <H01ThisMonth />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 옛 이번 달(재기획 전, 지울 대상: 월말 정리·월급 플랜·제안 화면이 여기서 열림)
+      ...(
+        [
+          ['/salary/split', <W01Split key="w01" />], // W-01 월급 분배표
+          ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
+          ['/salary/done', <W02Done key="w02e" />], // W-02 끝
+          ['/salary/review', <W05Review key="w05" />], // W-05 월말 확인
+        ] as const
+      ).map(([path, el]) => ({
+        path,
+        element: (
+          <RequireAccount>
+            <OnboardingGate>{el}</OnboardingGate>
+          </RequireAccount>
+        ),
+      })),
       {
         path: '/month/spend',
         element: (

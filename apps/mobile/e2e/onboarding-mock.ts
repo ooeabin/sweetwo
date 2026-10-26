@@ -317,7 +317,60 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           amount: l.amount,
           sort: i,
         }));
+        // 이번 사이클 체크 안 한 줄만 새 금액(sync_checklist 흉내)
+        const cl = db.checklists.find((c) => c.owner_user_id === owner);
+        if (cl) {
+          const kept = (cl.pay_check_line as Record<string, unknown>[]).filter(
+            (x) => x.state !== 'wait',
+          );
+          const same = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+            a.kind === b.kind &&
+            (a.goal_id ?? null) === (b.goal_id ?? null) &&
+            (a.name ?? null) === (b.name ?? null);
+          cl.pay_check_line = [
+            ...kept,
+            ...sp.split_line
+              .filter((l) => Number(l.amount) > 0 && !kept.some((k) => same(k, l)))
+              .map((l): Record<string, unknown> => ({
+                ...l,
+                id: `${String(l.id)}-c`,
+                planned: l.amount,
+                actual: null,
+                state: 'wait',
+              })),
+          ].sort((a, b) => Number(a.sort) - Number(b.sort));
+        }
         return json(route, sp.id);
+      }
+      if (fn === 'check_pay_line') {
+        // 서버 흉내: 줄 상태, 다른 금액(0이면 못 함), 체크리스트 상태
+        const b = body() as unknown as { p_line: string; p_state: string; p_actual?: number };
+        for (const c of db.checklists) {
+          const lines = c.pay_check_line as Record<string, unknown>[];
+          const l = lines.find((x) => x.id === b.p_line);
+          if (!l) continue;
+          if (b.p_state === 'checked' && l.state === 'checked' && l.checked_by !== db.me.id)
+            return json(route, { message: 'already_checked', code: '40001' }, 409);
+          const zero = b.p_state === 'checked' && b.p_actual === 0;
+          l.state = zero ? 'skipped' : b.p_state;
+          l.actual = b.p_state === 'checked' && b.p_actual ? b.p_actual : null;
+          l.checked_by = b.p_state === 'wait' ? null : db.me.id;
+          l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
+          c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'goal_checked_sums') {
+        const sums: Record<string, number> = {};
+        for (const c of db.checklists)
+          for (const l of c.pay_check_line as Record<string, unknown>[])
+            if (l.kind === 'saving' && l.state === 'checked' && l.goal_id)
+              sums[String(l.goal_id)] =
+                (sums[String(l.goal_id)] ?? 0) + Number(l.actual ?? l.planned);
+        return json(
+          route,
+          Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
+        );
       }
       if (fn === 'start_checklist') {
         const b = body() as unknown as { p_owner?: string };
@@ -330,9 +383,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             id,
             split_id: sp.id,
             owner_user_id: sp.owner_user_id,
+            label: '9월 월급',
+            cycle_start: '2026-09-25',
+            cycle_end: '2026-10-24',
+            state: 'open',
             pay_check_line: sp.split_line
               .filter((l) => Number(l.amount) > 0)
-              .map((l) => ({ ...l, planned: l.amount, state: 'wait' })),
+              .map((l) => ({
+                ...l,
+                id: `${l.id}-c`,
+                planned: l.amount,
+                actual: null,
+                state: 'wait',
+                checked_by: null,
+                checked_at: null,
+              })),
           });
         return json(route, id);
       }
