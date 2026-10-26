@@ -7,10 +7,19 @@ import {
   updateGoal,
   type Goal,
 } from '@sweetwo/api';
-import { formatDateFull, formatMonthDay, formatYm } from '@sweetwo/core';
+import {
+  formatDateFull,
+  formatMonthDay,
+  formatYm,
+  goalBars,
+  goalProgress,
+  todayKst,
+} from '@sweetwo/core';
 import {
   Badge,
+  BarChart,
   Button,
+  LineChart,
   ListRow,
   Menu,
   Meter,
@@ -164,6 +173,42 @@ export function G02GoalDetail() {
     .sort((a, b) =>
       (a.pay_checklist?.cycle_start ?? '') < (b.pay_checklist?.cycle_start ?? '') ? 1 : -1,
     );
+  // 9번 진행 그래프(계획 점선, 실제 실선)와 10a번 월별 저금 막대(최근 6개월)
+  const today = todayKst();
+  const kst = (iso: string) => todayKst(new Date(iso));
+  const progress =
+    g.kind === 'once'
+      ? goalProgress({
+          start: kst(g.created_at),
+          now: today,
+          held: g.other_held,
+          monthly: i.monthly,
+          flows: [
+            ...(lines.data ?? [])
+              .filter((l) => l.state === 'checked' && l.pay_checklist)
+              .map((l) => ({
+                ym: l.pay_checklist?.cycle_start.slice(0, 7) ?? '',
+                amount: l.actual ?? l.planned,
+              })),
+            ...(moves.data ?? []).map((x) => ({
+              ym: kst(x.created_at).slice(0, 7),
+              amount: x.kind === 'in' ? x.amount : -x.amount,
+            })),
+          ],
+        })
+      : [];
+  const bars = goalBars(
+    records.map((l) => ({
+      ym: l.pay_checklist?.cycle_start.slice(0, 7) ?? '',
+      planned: l.planned,
+      actual: l.state === 'checked' ? (l.actual ?? l.planned) : 0,
+    })),
+    today,
+  );
+  const man = (v: number) => Math.round(v / 10_000);
+  const barPlanned = bars.reduce((a, b) => a + b.planned, 0);
+  const barActual = bars.reduce((a, b) => a + b.actual, 0);
+  const barPct = barPlanned ? Math.floor((barActual * 100) / barPlanned) : 100;
   const numbers: [string, string, string?][] = [
     ...(g.kind !== 'monthly' && g.target_amount !== null
       ? ([
@@ -308,6 +353,22 @@ export function G02GoalDetail() {
           );
         })}
       </div>
+      {progress.length > 1 && (
+        <LineChart
+          label={copy.graphTitle}
+          value={m(i.saved)}
+          points={progress.map((p) => ({
+            label: formatYm(p.ym),
+            value: p.actual,
+            expected: p.plan,
+          }))}
+          format={m}
+          name={copy.graphActual}
+          expectedName={copy.graphPlan}
+          expectedText={copy.graphPlanText}
+          plotLabel={copy.graphTitle}
+        />
+      )}
       {i.canEdit && history.length === 0 && (
         <button
           type="button"
@@ -388,6 +449,23 @@ export function G02GoalDetail() {
           </p>
         )}
       </section>
+      {bars.length > 0 && (
+        <BarChart
+          label={copy.barsTitle}
+          value={m(Math.round(barActual / bars.length))}
+          delta={{ dir: barPct >= 100 ? 'up' : 'down', text: copy.barsPct(barPct) }}
+          note={copy.barsNote(man(i.monthly))}
+          plotLabel={copy.barsTitle}
+          bars={bars.map((b) => ({
+            key: b.ym,
+            label: copy.monthLabel(b.month),
+            diff: b.diff,
+            diffText: b.diff > 0 ? `+${man(b.diff)}` : b.diff < 0 ? `−${man(-b.diff)}` : '0',
+            tip: copy.barTip(b.month, m(b.actual), b.diff, m(Math.abs(b.diff))),
+            now: b.now,
+          }))}
+        />
+      )}
       {records.length > 0 && (
         <section className="hg-stack" aria-label={copy.records}>
           <SectionHeader title={copy.records} />

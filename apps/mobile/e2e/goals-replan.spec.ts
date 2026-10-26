@@ -355,6 +355,10 @@ test('G-02 정보·도움말·월별 기록, 삭제 되돌리기, 매년 목표 
   const records = page.getByRole('region', { name: '월별 기록' });
   await expect(records.getByRole('cell', { name: '9월 월급' })).toBeVisible();
   await expect(records.getByRole('cell', { name: '넣었어요' })).toBeVisible();
+  // 10a번 월별 저금 막대: 계획대로 넣은 달은 0, 계획 대비 알약
+  const bars = page.getByRole('region', { name: '한 달 평균 저금' });
+  await expect(bars.getByText('계획의 100%')).toBeVisible();
+  await expect(bars.getByRole('img', { name: '한 달 평균 저금' })).toBeVisible();
   await expect(page.getByRole('button', { name: /청약·정책대출 체크리스트/ })).toBeVisible();
   await axe(page);
 
