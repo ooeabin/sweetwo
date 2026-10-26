@@ -13,10 +13,8 @@ export interface AssetDraft {
   /** F-03f~i 유형별 질문(나중에 해도 됨) */
   maturity: string | null;
   payment: number | null;
-  payFrom: 'goal_fund' | 'personal' | null;
   paidCount: number | null;
   rate: number | null;
-  goalId: string | null;
 }
 const empty: AssetDraft = {
   side: 'asset',
@@ -25,13 +23,11 @@ const empty: AssetDraft = {
   name: null,
   amount: null,
   owner: null,
-  visibility: 'sum', // 기본 = 합계만 공개
+  visibility: 'sum', // 기본 = 금액만 보여 주기
   maturity: null,
   payment: null,
-  payFrom: null,
   paidCount: null,
   rate: null,
-  goalId: null,
 };
 
 export const useAssetDraft = create<{
@@ -49,10 +45,10 @@ const SAVINGS = ['saving', 'policy_saving'];
 
 /**
  * 화면 순서: 유형 → 이름 → 금액 → 명의(혼자 쓰기면 없음) → 공개 범위(내 명의만) → 유형별(F-03f~i):
- * 적금 = 만기일 → 월 납입액 → 빠지는 통장, 청약 = 납입 회차 → 월 납입액 → 빠지는 통장, 보증금 = 계약 만기일,
- * 부채 = 금리 → 월 상환액, 자산 = 목표 연결(진행 중 목표가 있을 때)
+ * 적금 = 만기일 → 월 납입액, 청약 = 납입 회차 → 월 납입액, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액.
+ * 월 납입액·상환액은 기록만(분배표와 연결하지 않음). 통장 역할, 목표 연결은 재기획으로 없앰
  */
-export function assetSteps(d: AssetDraft, solo: boolean, hasGoals = false) {
+export function assetSteps(d: AssetDraft, solo: boolean) {
   const k = d.kind ?? '';
   const saving = SAVINGS.includes(k);
   const sub = k === 'housing_subscription';
@@ -66,7 +62,5 @@ export function assetSteps(d: AssetDraft, solo: boolean, hasGoals = false) {
     ...(sub ? ['count'] : []),
     ...(d.side === 'debt' ? ['rate'] : []),
     ...(saving || sub || d.side === 'debt' ? ['payment'] : []),
-    ...((saving || sub) && (d.payment ?? 0) > 0 ? ['payfrom'] : []),
-    ...(d.side === 'asset' && hasGoals ? ['goal'] : []),
   ];
 }

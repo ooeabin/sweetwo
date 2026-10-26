@@ -1,5 +1,4 @@
-import { fetchGoals, insertAsset, qk } from '@sweetwo/api';
-import { useQuery } from '@tanstack/react-query';
+import { insertAsset } from '@sweetwo/api';
 import {
   assetGroup,
   assetGroupsOf,
@@ -27,8 +26,8 @@ import { assetSteps, useAssetDraft } from './draft';
 
 const path = (step: string) => `/assets/new/${step}`;
 
-// F-03 항목 추가: a 유형(자산·부채 + 그룹 칩 + 세부 항목) → b 이름 → c 금액 → d 명의 → e 공개 범위(내 명의만).
-// 유형별 추가 질문(F-03f~i: 만기일, 월 납입액, 금리, 목표 연결)은 다음 단계.
+// F-03 항목 추가: a 유형(자산·부채 + 그룹 칩 + 세부 항목) → b 이름 → c 금액 → d 명의 → e 공개 범위(내 명의만)
+// → 유형별 추가 질문(F-03f~h: 만기일, 납입 회차, 금리, 월 납입·상환액, 모두 ‘나중에 할게요’ 가능).
 export function AssetAddRoute() {
   const { step = 'kind' } = useParams();
   const [params] = useSearchParams();
@@ -41,11 +40,6 @@ export function AssetAddRoute() {
   const [dupOk, setDupOk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rateText, setRateText] = useState<string | null>(null);
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
-  // 연결할 수 있는 목표: 진행 중(보류·달성·사용 완료 빼고)
-  const openGoals = (goals.data ?? []).filter(
-    (g) => !['paused', 'achieved', 'used'].includes(g.status),
-  );
 
   // 처음 열면 진입한 탭(자산/부채)으로 새로 시작
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
@@ -53,10 +47,10 @@ export function AssetAddRoute() {
     if (step === 'kind' && !params.get('keep')) reset(startSide, d.me?.default_visibility);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || goals.isLoading || !d.couple || !d.space) return null;
+  if (d.loading || !d.couple || !d.space) return null;
   const solo = d.space.couple_state === 'solo';
   const joined = d.couple.joined;
-  const steps = assetSteps(draft, solo, openGoals.length > 0);
+  const steps = assetSteps(draft, solo);
   const i = Math.max(steps.indexOf(step), 0);
   if (step !== 'kind' && !draft.kind) return <Navigate to={path('kind')} replace />;
   const progress = { total: steps.length, now: i, fill: 50 };
@@ -64,7 +58,7 @@ export function AssetAddRoute() {
   const go = (next: Partial<typeof draft>) => {
     const nd = { ...draft, ...next };
     set(next);
-    const l = assetSteps(nd, solo, openGoals.length > 0);
+    const l = assetSteps(nd, solo);
     const to = l[l.indexOf(step) + 1];
     if (to) nav(path(to));
     else void save(nd);
@@ -86,10 +80,8 @@ export function AssetAddRoute() {
         visibility: owner === 'me' && !solo ? x.visibility : 'all',
         maturity_date: x.maturity,
         monthly_payment: x.payment,
-        pay_from: x.payFrom,
         paid_count: x.paidCount,
         interest_rate: x.rate,
-        goal_id: x.side === 'asset' ? x.goalId : null,
       });
       await refresh();
       const counted = !(owner === 'me' && !solo && x.visibility === 'private');
@@ -361,39 +353,5 @@ export function AssetAddRoute() {
     );
   }
 
-  if (step === 'payfrom') {
-    type P = 'goal_fund' | 'personal';
-    return (
-      <QuestionLayout steps={progress} title={copy.payFrom} onBack={back} later={skip}>
-        <ChoiceCards<P>
-          label={copy.payFrom}
-          value={draft.payFrom}
-          onChange={(payFrom) => set({ payFrom })}
-          onPick={(payFrom) => go({ payFrom })}
-          options={[
-            { value: 'goal_fund', label: copy.payFromOptions.goal_fund },
-            { value: 'personal', label: copy.payFromOptions.personal },
-          ]}
-        />
-      </QuestionLayout>
-    );
-  }
-
-  if (step === 'goal') {
-    return (
-      <QuestionLayout steps={progress} title={copy.goal} onBack={back} later={skip}>
-        <ChoiceCards<string>
-          label={copy.goal}
-          value={draft.goalId ?? (draft.goalId === null ? null : 'none')}
-          onChange={(g) => set({ goalId: g === 'none' ? null : g })}
-          onPick={(g) => go({ goalId: g === 'none' ? null : g })}
-          options={[
-            ...openGoals.map((g) => ({ value: g.id, label: g.name })),
-            { value: 'none', label: copy.noGoal },
-          ]}
-        />
-      </QuestionLayout>
-    );
-  }
   return <Navigate to={path('kind')} replace />;
 }

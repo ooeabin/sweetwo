@@ -764,33 +764,18 @@ supabase/
 
 ### 우리 자산 구조
 
-- 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`. 하위 탭은 기기에 기억
-- `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 배우자 명의 대신 입력 = person + `owner_user_id` null(전체 공개만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
-- 공개 범위는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 전체 공개, 내 명의, 내가 대신 입력한 것)만. 배우자 ‘합계만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘비공개’는 아무것도 안 줌. 고치기는 `asset_editable()`(공동, 내 명의, 합류 전 내가 대신 입력한 것)
-- 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀). 월말 정리가 바꾸면 `set_config('sweetwo.asset_source', 'close', true)` 뒤 고침
-- 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 비공개·판 항목 빼고 배우자 합계만 더함). 월말 순자산 `net_worth_history(개월)`(지운·판 항목은 그 뒤 0, 과거는 유지)
-- 유형별 질문(F-03f~i, 모두 ‘나중에 할게요’ 가능): 적금 = 만기일 → 월 납입액 → 빠지는 통장(`pay_from`), 청약 = 납입 회차(`paid_count`) → 월 납입액 → 빠지는 통장, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액, 자산 = 목표 연결(`goal_id`). F-04에서 목표 연결을 바꿀 수 있음
-- 목표 보유액(06 5-4) = 기타 보유액 + 연결 자산(`goal_asset_sums()`, 원금 기준, 비공개 빼고 배우자 합계만 포함이라 두 사람이 같은 값) + 월말 정리에서 넣은 돈. 목표 화면과 이번 달 H-05 같음(month `goalExtra`). G-03d ‘가진 자산에서 고르기’는 내가 고칠 수 있고 목표에 없는 자산, 바로 추가면 만든 뒤 연결, 제안이면 `after.asset_ids`(적용할 때 제안한 사람이 고칠 수 있는 자산만 연결)
-- F-05 `/assets/money`(한눈에 ‘이번 달 계획’, 이번 달 ‘월 수입·지출 수정’에서): 내 수입·월급날, 배우자 수입(보기만), 용돈, 고정지출 합계, 대출 상환 합계, 생활비, 저축 가능 금액(assets `moneyPlan` = core planSummary). 고치기 `/assets/money/income|fixed|loan|allowance|living`: 사실값(수입·월급날·고정지출·대출 상환)은 바로 저장 + `recalcPendingShares()`, 배분 결정(내 용돈·생활비 예산)은 연결이면 제안. 입력하는 동안 저축 가능 금액 변화 미리보기
-- F-06 `/assets/diagnosis`(재정 진단 탭, 한눈에 진단 줄 ‘재정 진단 5개 중 n개 양호’ + 첫 위험·주의 문장): 지표 다섯 개는 온보딩 O-65와 같은 core `diagnose()`, 요약과 순서(위험 → 주의 → 양호 → 아직 몰라요)는 `diagnosisSummary()`. 값은 실제 자산으로(assets `useDiagnosis`)
-  - 저축률 = 가장 최근 끝낸 월말 정리(`fetchRecentCloses`, 소득과 넣은 돈). 정리 기록이 없으면 이번 달 계획의 저축 가능 금액으로 ‘추정’
-  - 비상금 = 비상금 목표 보유액(기타 보유액 + 연결 자산 + 넣은 돈) ÷ 월 생활비(고정지출 + 대출 상환 + 생활비), 0.1개월 내림(`emergencyMonths`). 기준 개월은 두 사람 고용 형태로
-  - 대출 상환 부담, 고정지출 비율 = 월 수입 기준. 배우자 수입이 추정이면 ‘추정’. 투자 원칙 합의(O-53)는 아직 ‘아직 몰라요’(지금 정하기 비활성)
-  - 내 비공개 항목이 있으면 진단에서 뺐다는 안내
-- F-01 순자산 그래프(6번, ui `LineChart`): 서버 `net_worth_history(120)` + 이번 달은 지금 값(core `netWorthSeries`, 앞쪽 빈 달은 뺌). 기간 탭 6개월, 1년, 3년, 전체(`NET_WORTH_PERIODS`): 데이터보다 긴 기간은 비활성, 1년 미만이면 전체로 시작(`startPeriod`), 고른 탭은 기기에 기억(`sweetwo.networth-period`). 말풍선은 원금 기준 순자산 + 예상 순자산
-- F-01 월 정산 요약(17번): 가장 최근 끝낸 월말 정리(`fetchRecentCloses(2)`, 키 `qk.recentCloses`, 월말 정리를 끝내면 무효화). 값은 W-04g와 같은 month-close `closeSummaryProps`. 지난달보다 = 그 전 정리와 변동 항목별 차이 큰 순 4개(core `spendChanges`). 정리 기록이 없으면 “첫 월말 정리 뒤에 보여드려요”
-- 통장 ↔ 자산: `account.asset_id`. 통장을 만들면 트리거(`account_make_asset`)가 같은 이름의 현금성 자산을 만들어 이음(금액 = 시작 잔액, 공동 역할은 공동 명의, 목표자금·비상금·결혼 준비는 `role_account`). O-63에서 이름·시작 잔액을 고치거나 통장을 지우면 만든 그대로인 자산만 따라감(`account_sync_asset`, 사람이 고친 자산은 그대로). 휴지통 자산은 연결 없음으로 봄
-- F-02 배지: 통장 역할(공동 생활비 together, 목표자금 goal, 비상금 safety, 결혼 준비 family, 개인 temp), 목표 연결. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억(`sweetwo.asset-sort`). 투자 묶음 줄 = core `investSummary`(비중 = 투자 ÷ 총자산 평가금액, 배우자 합계만 포함 / 손익 = 원금 있는 내 투자 항목)
-- 투자 원칙 O-53 `/assets/principle`(첫 주 7일째 할 일 글자를 누르거나 F-06 ‘지금 정하기’, 내 답이 없을 때만): 사람마다 `app_user.invest_answer`(keep, some, active, unsure), 배우자 답은 `invest_answers()`로만. core `investPrinciple`: 둘 다 답함 = 양호(혼자 쓰기는 내 답만으로), 한 명만 = 주의, 아무도 = 아직 몰라요. 허용 비중 = 답한 사람 중 보수적인 쪽(`INVEST_LIMIT` 0, 30, 60, 잘 모르겠어요 = 0). 고르면 할 일 ‘투자 원칙 정하기’도 끝냄(`completeTodoKind`). F-02 투자 묶음 줄에 “/ 허용 {n}%”
-- 첫 주 자산·대출 정리(17 O-41~47, 할 일 글자를 누르면 열림): O-41 `/assets/week/assets` → O-42 `/assets/week/assets/:n`(고른 칩마다) → O-43 `/assets/week/lump`(‘결혼 후 남은 목돈’ 골랐을 때 목표 연결, 비상금 → 주거 순 ‘추천’), O-44 `/assets/week/loans` → 대출마다 O-45 `/assets/week/loans/:n/amount` → O-46 `rate` → O-47 `pay`. 칩 하나 = 묶음 + 기본 세부 항목(core `QUICK_ASSETS`, `QUICK_LOANS`), 이름은 칩 이름(F-04에서 고침). 소유자 토글 나 / 배우자(합류 전만, 대신 입력) / 같이, 내 명의는 합계만 공개
-  - 넘길 때마다 바로 저장(뒤로 와서 고치면 같은 항목 수정), ‘닫기’ = 답은 남고 할 일 유지. 끝까지 가면 할 일 끝냄
-  - O-46 ‘잘 모르겠어요’ = 유형별 평균 금리(core `AVG_RATE`, 06 4장 초기값) + `asset.rate_estimated`(F-04 ‘추정’), 평균이 없는 유형은 비움
-  - 대출 끝: 보이는 부채 월 상환액 합계가 `loan_repayment`(O-39)를 대신 + `recalcPendingShares()`. ‘없어요’면 O-39 금액이 있었을 때 한 번 확인하고 0
-- 첫 주 고정지출 나누기·생활비 카드(4일째): O-37 `/assets/week/fixed`(O-36에서 그룹만 고른 줄이 있으면 세부 항목 고르기 → 고른 그룹은 그룹 줄 대신 항목 줄) → `/assets/week/fixed/:n`(같이 내는 항목마다 금액, 각자 내는 휴대폰 등은 묻지 않음) → 같이 내는 항목 합계가 `fixed_total`(O-36)을 대신 + `recalcPendingShares()` → O-38b `/assets/week/card`(`app_user.card_main`, 네면 MonthSummary 변동 지출에 ‘지난달 카드 사용분’) → 할 일 끝
-- 첫 주 상여금·다른 수입(5일째, 할 일 화면 O-34): O-34 `/assets/week/bonus` → 있어요면 O-35 `/assets/week/bonus/list`(Q6 이름·금액·월, 행마다 `income_event` = 연간 이벤트, 들어오는 돈 전용, W-07에서 나눔) → O-35b `/assets/week/income` → 항목마다 `/assets/week/income/:n`(`income_item` 부업·N잡 / 월세·임대 / 정부 지원금, 사람마다 종류 하나) → 안 나눈 돈 다시 셈 → 할 일 끝
-  - 다른 수입 월 합계는 트리거가 `app_user.other_income`에 모으고 `partner_profile()`도 돌려줌. core `coupleOf` 월 수입 = 월급 + 다른 수입(월급 플랜, 분담, 정산 소득 기본값). F-05 내 수입 줄에 “다른 수입 {n} 포함”, 내 수입 고치기는 월급만
-  - 넣기·고치기는 내 것만(RLS `is_own_space_row`)
-- 다음 단계: 정부 지원금 종료월·알림, W-07 들어오는 돈, 카드 사용자 예산 보정(월 사이클), 평균 금리 어드민 설정, P-09(합류 때 투자 원칙), 투자 원칙 비중 바꾸기(부부가 변경), 허용 위험 수준, 통장 자산을 지웠을 때 할 일 “이 통장의 자산을 골라 주세요”, 월말 정리 잔액(W-04b)으로 통장 자산 금액 갱신, F-01 월 정산 요약 누르면 그달 W-04g(지난 달 보기 화면), 금액 가리기 때 MonthSummary 가리기, F-06 분기 비교·투자 원칙 정하기(O-53)·진단 알림 F-05 고정지출 항목별(F-05c 추가)·변동 항목 예산·기간 바꾸기(F-05f~F-07c)·들어오는 돈(W-07)·수입 20% 변화 뒤 F-07a, 부채 월 상환액 → 고정지출(O-39 대출 상환 합계와 겹치지 않게), 주택 대출 금리 유형·상환 방식, F-04 그래프·팔았어요·시세·유형별 값 수정, 납입액이 연결 자산으로 갈 때 이중 계산(saving_deposit.asset_id), F-05~F-07
+- 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`. 하위 탭은 “한눈에” “자산·부채” 2개, 기기에 기억
+- `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 배우자 명의 대신 입력 = person + `owner_user_id` null(모두 보여 주기만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
+- 공개 범위(`visibility` all / sum / private = “모두 보여 주기” / “금액만 보여 주기” / “숨기기”, 새 내 항목 기본 = 금액만)는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 모두 보여 주기, 내 명의, 내가 대신 입력한 것)만. 배우자 ‘금액만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘숨기기’는 아무것도 안 줌. 고치기는 `asset_editable()`
+- 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀)
+- 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 숨기기·판 항목 빼고 배우자 금액만 더함). 목표 모은 돈은 더하지 않음. 월말 순자산 `net_worth_history(개월)`
+- F-01: 순자산 그래프(ui `LineChart`, 서버 `net_worth_history(120)` + 이번 달 지금 값, core `netWorthSeries`. 기간 탭 6개월·1년·3년·전체, 데이터보다 긴 기간 비활성, 고른 탭 기억 `sweetwo.networth-period`) + 자산·부채 합계(→ F-02)
+- F-02: 묶음(F-03a 그룹) 안 정렬 칩(이름, 명의, 금액, 수정일, 기억 `sweetwo.asset-sort`), 줄 배지는 공개 범위(내 항목)와 ‘대신 입력’만, 배우자 금액만 줄(알약 ‘금액만’), 투자 묶음 줄 core `investSummary`
+- F-03 유형별 질문(F-03f~h, 모두 ‘나중에 할게요’ 가능): 적금 = 만기일 → 월 납입액, 청약 = 납입 회차(`paid_count`) → 월 납입액, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액. 월 납입·상환액은 기록만(분배표와 연결 없음). 카드론·현금서비스·리볼빙은 끝나고 ‘목표 만들기’ Toast
+- F-04: 금액·값 수정, 공개 범위(내 명의만), 삭제는 휴지통 + 되돌리기. 배우자 명의는 보기만
+- 재기획으로 화면에서 뺀 것: 통장 역할 배지, 목표 연결(F-03f2 빠지는 통장 `pay_from`, F-03i·F-04 `goal_id`), F-01 비상금 카드·이번 달 카드·이번 달 계획·월 정산 요약, F-06 재정 진단 탭. `asset.pay_from`·`goal_id` 열은 남겨 두고(스키마는 2단계로 지움) 새로 쓰지 않음
+- 재기획 전 코드(지울 대상, 옛 `/month`·첫 주 할 일·설정 S-17이 아직 부름): F-05 `/assets/money*`, F-05f, F-07 `/assets/replan*`, F-09 `/assets/emergency/:kind`와 `EmergencyCard`·`diagnosis.ts`, O-53 `/assets/principle`, 첫 주 O-34~47 `/assets/week/*`, 통장 ↔ 자산(`account.asset_id`, `account_make_asset`), `goal_asset_sums()`
+- 다음 단계: F-04 그래프·팔았어요(F-04b~d)·시세 바꾸기, F-04a 만기된 돈 정리, 상대 알림, 주택 대출 금리 유형·상환 방식, F-08(출시 후)
 
 ### 제안 구조
 

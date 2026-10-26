@@ -22,14 +22,6 @@ export const copy = {
   debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  monthSplit: (month: number, n: number) => `${month}월 월급 플랜, 월급 나누기 ${n}곳 남았어요`,
-  monthSplitDone: '이번 달 월급을 다 나눴어요',
-  monthLiving: (month: number, amount: string) => `${month}월 월급 플랜, 생활비 ${amount} 남았어요`,
-  monthCard: '이번 달', // [확인 필요] 카드 이름
-  planCard: '이번 달 계획', // [확인 필요] 카드 이름
-  planIncome: '월 수입',
-  planSpend: '지출',
-  planSaveable: (amount: string) => `저축 가능 금액 월 ${amount}`,
   empty: '자산을 하나씩 적어볼까요?',
   graphLabel: '순자산 그래프', // [확인 필요] 화면 읽기용
   periodsLabel: '기간', // [확인 필요] 화면 읽기용
@@ -37,7 +29,6 @@ export const copy = {
   expectedName: '예상 순자산',
   expectedShort: (amount: string) => `예상 ${amount}`,
   summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
-  summaryName: '월 정산 요약', // [확인 필요] 화면 읽기용
   addAsset: '자산 추가',
 
   // F-02
@@ -45,18 +36,11 @@ export const copy = {
   addDebt: '+ 부채 추가',
   joint: '공동',
   proxy: '대신 입력',
-  vis: { all: '전체 공개', sum: '합계만', private: '비공개' },
+  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
+  partnerPill: '금액만', // [확인 필요]
   partnerSum: (name: string, side: string, n: number) => `${name}님 ${side} ${n}개`,
   checkAmount: '금액이 맞나요?',
   updated: (date: string) => `${date} 수정`, // [확인 필요]
-  goalBadge: (name: string) => `${name} 목표`, // [확인 필요]
-  roles: {
-    living: '공동 생활비',
-    goal_fund: '목표자금',
-    emergency: '비상금',
-    wedding: '결혼 준비',
-    personal: '개인',
-  },
   sortLabel: '정렬', // [확인 필요] 화면 읽기용
   sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
   sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
@@ -76,13 +60,13 @@ export const copy = {
   ownerTitle: '누구 명의예요?',
   ownerMe: '나',
   visTitle: '배우자에게 공개할까요?',
-  visOptions: { all: '전체 공개', sum: '합계만 공개', private: '비공개' },
+  visOptions: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
   next: '다음',
   save: '추가하기', // [확인 필요]
   sameName: '같은 이름이 있어요. 그래도 추가할까요?',
   addedUp: (amount: string) => `추가했어요. 순자산이 ${amount} 늘었어요`,
   addedDown: (amount: string) => `추가했어요. 순자산이 ${amount} 줄었어요`, // [확인 필요] 부채
-  added: '추가했어요', // [확인 필요] 비공개는 합계에 없음
+  added: '추가했어요', // [확인 필요] 숨기기는 합계에 없음
   highInterest: '금리가 높은 대출이에요. 이 대출부터 갚는 목표를 만들까요?',
   makeGoal: '목표 만들기', // [확인 필요]
 
@@ -114,7 +98,6 @@ export const copy = {
   // F-06 재정 진단
   diagTitle: '재정 진단',
   diagSummary: (good: number, total: number) => `${total}개 중 ${good}개 양호`,
-  diagLine: (good: number, total: number) => `재정 진단 ${total}개 중 ${good}개 양호`,
   diagSaving: (pct: number) => `월 수입의 ${pct}%를 저축하고 있어요`,
   diagSavingUnknown: '월말 정리를 하면 계산해요', // [확인 필요]
   // 비상금 카드, F-09 넣기·꺼내기 [확인 필요]
@@ -225,12 +208,8 @@ export const copy = {
   paidCountUnit: '회', // [확인 필요]
   payment: '월 납입액은요?',
   repayment: '월 상환액은요?',
-  payFrom: '어느 통장에서 빠져나가요?',
-  payFromOptions: { goal_fund: '목표자금 통장', personal: '각자 통장' },
   rate: '금리는 몇 %예요?',
   rateError: '0~100 사이로 넣어 주세요', // [확인 필요]
-  goal: '어떤 목표를 위한 돈인가요?',
-  noGoal: '없음',
 
   // F-04
   amountLabel: '금액', // [확인 필요]
@@ -248,7 +227,6 @@ export const copy = {
   fromManual: '직접 수정',
   principal: (amount: string) => `원금 ${amount}`,
   owner: '명의', // [확인 필요]
-  goalLink: '목표', // [확인 필요]
   maturityLabel: '만기일', // [확인 필요]
   paymentLabel: '월 납입액', // [확인 필요]
   repaymentLabel: '월 상환액', // [확인 필요]
