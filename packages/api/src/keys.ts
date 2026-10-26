@@ -53,4 +53,7 @@ export const qk = {
   splits: ['salary_split'] as const,
   checklists: (today: string) => ['pay_checklist', today] as const,
   goalCheckedSums: ['goal_checked_sums'] as const,
+  goalSaved: ['goal_saved'] as const,
+  goalMoves: (id: string) => ['goal_move', id] as const,
+  goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };

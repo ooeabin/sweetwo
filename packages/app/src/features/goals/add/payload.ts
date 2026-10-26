@@ -3,8 +3,8 @@ import { templateByKey, ymToDate, type Json } from '@sweetwo/core';
 import type { AddDraft } from './draft';
 import { draftName } from './flow';
 
-/** 추가할 목표 값(바로 추가, goal_add 제안 공통). 우선순위는 맨 아래 */
-export function addPayload(d: AddDraft, connected: boolean) {
+/** 추가할 목표 값. 내 목표면 주인 = 나(owner_user_id), 우리 목표는 null */
+export function addPayload(d: AddDraft, meId: string | null) {
   const t = d.template ? templateByKey(d.template) : undefined;
   if (!t) return null;
   const a = d.answers;
@@ -21,7 +21,7 @@ export function addPayload(d: AddDraft, connected: boolean) {
     deadline_estimated: deadlineEstimated,
     amount_estimated: Object.entries(a).some(([k, v]) => k.endsWith('_estimated') && v === true),
     other_held: typeof d.held === 'number' ? d.held : 0,
-    owner: connected ? (d.owner ?? 'together') : ('me' as const),
+    owner_user_id: d.owner === 'me' ? meId : null,
     details: a as NonNullable<Json>,
   };
 }

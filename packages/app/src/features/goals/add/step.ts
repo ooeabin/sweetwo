@@ -8,7 +8,9 @@ export function useAddStep(step: string) {
   const nav = useNavigate();
   const data = useGoalsData();
   const { draft, set } = useAddDraft();
-  const list = addSteps(draft, data.connected);
+  // 누구 목표(G-03e)는 혼자 쓰기가 아니면 늘 물음(미합류여도)
+  const askOwner = data.space?.couple_state !== 'solo';
+  const list = addSteps(draft, askOwner);
   const i = Math.max(list.indexOf(step), 0);
   const go = (to: string) => nav(to === 'g-03a' ? addPath() : addPath(to));
   return {
@@ -21,7 +23,7 @@ export function useAddStep(step: string) {
     next: (patch?: Partial<AddDraft>) => {
       const d = patch ? { ...draft, ...patch } : draft;
       if (patch) set(patch);
-      const l = addSteps(d, data.connected);
+      const l = addSteps(d, askOwner);
       go(l[l.indexOf(step) + 1] ?? 'confirm');
     },
   };

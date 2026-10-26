@@ -18,3 +18,4 @@ export { G07aWeddingItem } from './pages/g-07a-wedding-item';
 export { G07WeddingPay } from './pages/g-07-wedding-pay';
 export { G07WeddingBudget } from './pages/g-07-wedding-budget';
 export { useGoalsData } from './data';
+export { G02aGoalMove, G02bGoalUse } from './pages/g-02a-goal-move';

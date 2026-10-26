@@ -69,6 +69,8 @@ export interface MemDb {
   /** 월급 분배표(save_split)와 이번 달 월급 체크리스트(start_checklist) */
   splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
   checklists: Record<string, unknown>[];
+  /** 목표 넣기·빼기·꺼내 쓰기(goal_move) */
+  goalMoves: Record<string, unknown>[];
   rpc: string[];
 }
 
@@ -150,6 +152,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     balances: [],
     splits: [],
     checklists: [],
+    goalMoves: [],
     notices: [],
     sessions: [
       {
@@ -161,6 +164,53 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       },
     ],
     rpc: [],
+  };
+  // 서버 goal_saved 흉내: 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기
+  const goalSaved = (id: string) => {
+    const g = db.goals.find((x) => x.id === id);
+    let v = Number(g?.other_held ?? 0);
+    for (const c of db.checklists)
+      for (const l of c.pay_check_line as Record<string, unknown>[])
+        if (l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
+          v += Number(l.actual ?? l.planned);
+    for (const mv of db.goalMoves)
+      if (mv.goal_id === id && !mv.deleted_at)
+        v += mv.kind === 'in' ? Number(mv.amount) : -Number(mv.amount);
+    return Math.max(v, 0);
+  };
+  // 서버 goal_lines_sync 흉내: 모으는 목표만 분배표 저금 줄(각자: 우리 목표는 모든 분배표, 내 목표는 주인 것)
+  const goalLinesSync = (g: Record<string, unknown>) => {
+    const want = (sp: (typeof db.splits)[number]) =>
+      !g.deleted_at &&
+      ['active', 'delayed'].includes(String(g.status ?? 'active')) &&
+      (g.owner_user_id == null || g.owner_user_id === sp.owner_user_id);
+    for (const sp of db.splits) {
+      const has = sp.split_line.some((l) => l.goal_id === g.id);
+      if (want(sp) && !has) {
+        const last = Math.max(
+          -1,
+          ...sp.split_line.filter((l) => l.kind === 'saving').map((l) => Number(l.sort)),
+        );
+        for (const l of sp.split_line) if (Number(l.sort) > last) l.sort = Number(l.sort) + 1;
+        sp.split_line.push({
+          id: `${sp.id}-g-${String(g.id)}`,
+          split_id: sp.id,
+          kind: 'saving',
+          goal_id: g.id,
+          user_id: null,
+          name: null,
+          amount: 0,
+          sort: last + 1,
+        });
+        sp.split_line.sort((a, b) => Number(a.sort) - Number(b.sort));
+      } else if (!want(sp) && has) {
+        sp.split_line = sp.split_line.filter((l) => l.goal_id !== g.id);
+        for (const c of db.checklists)
+          c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
+            (l) => !(l.goal_id === g.id && l.state === 'wait'),
+          );
+      }
+    }
   };
   // 로그인된 세션(웹, 로그인 유지 끔 → sessionStorage)
   await page.addInitScript(
@@ -358,6 +408,36 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
           c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
         }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'goal_saved_sums') {
+        return json(
+          route,
+          db.goals
+            .filter((g) => !g.deleted_at)
+            .map((g) => ({ goal_id: g.id, saved: goalSaved(String(g.id)) })),
+        );
+      }
+      if (fn === 'move_goal') {
+        const b = body() as unknown as { p_goal: string; p_kind: string; p_amount: number };
+        if (b.p_kind !== 'in' && b.p_amount > goalSaved(b.p_goal))
+          return json(route, { message: 'too_much', code: '22023' }, 400);
+        const id = `move-${db.goalMoves.length + 1}`;
+        db.goalMoves.push({
+          id,
+          goal_id: b.p_goal,
+          kind: b.p_kind,
+          amount: b.p_amount,
+          created_by: db.me.id,
+          created_at: new Date().toISOString(),
+          deleted_at: null,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_goal_move') {
+        const b = body() as unknown as { p_id: string };
+        const mv = db.goalMoves.find((x) => x.id === b.p_id);
+        if (mv) mv.deleted_at = new Date().toISOString();
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'goal_checked_sums') {
@@ -1415,6 +1495,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.weddingPayments.filter((x) => !x.deleted_at),
       );
     if (path === '/rest/v1/salary_split' && method === 'GET') return json(route, db.splits);
+    if (path === '/rest/v1/goal_move' && method === 'GET') {
+      const gid = url.searchParams.get('goal_id')?.replace(/^eq\./, '');
+      return json(route, db.goalMoves.filter((x) => x.goal_id === gid && !x.deleted_at).reverse());
+    }
+    if (path === '/rest/v1/pay_check_line' && method === 'GET') {
+      const gid = url.searchParams.get('goal_id')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.checklists.flatMap((c) =>
+          (c.pay_check_line as Record<string, unknown>[])
+            .filter((l) => l.goal_id === gid)
+            .map((l) => ({ ...l, pay_checklist: { label: c.label, cycle_start: c.cycle_start } })),
+        ),
+      );
+    }
     if (path === '/rest/v1/pay_checklist' && method === 'GET') return json(route, db.checklists);
     if (path === '/rest/v1/couple_space') {
       if (method === 'GET') return json(route, db.space);
@@ -1452,6 +1547,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             ...r,
           });
         }
+        goalLinesSync(db.goals[db.goals.length - 1] as Record<string, unknown>);
         // .select('id').single() → 만든 행 하나
         if (url.searchParams.get('select'))
           return json(route, { id: db.goals[db.goals.length - 1]?.id }, 201);
@@ -1459,7 +1555,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (method === 'PATCH') {
         const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
-        for (const g of db.goals) if (ids.includes(String(g.id))) Object.assign(g, body());
+        for (const g of db.goals)
+          if (ids.includes(String(g.id))) {
+            Object.assign(g, body());
+            goalLinesSync(g);
+          }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }

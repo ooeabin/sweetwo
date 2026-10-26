@@ -249,6 +249,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 > 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 전 구현 기록. 기획서는 새 모델(목표, 분배표, 체크리스트, 제안 없음)로 바뀌었고 코드는 아직 옛 모델. 기능을 새 기획대로 고치는 PR에서 이 절도 같이 다시 쓴다.
 
 - 재기획 새 테이블(20261029090000): `salary_split`·`split_line`(월급 분배표, 쓰기는 `save_split`만), `pay_checklist`·`pay_check_line`(이번 달 월급 체크리스트, 만들기는 `start_checklist`만, 사이클은 `cycle_day`·`cycle_date`), `couple_space.salary_mode`·`joint_cycle_day`, `goal.owner_user_id`(null = 우리 목표)·`visibility`
+- 목표 돈 움직임(20261029150000): `goal_move`(넣기·빼기·꺼내 쓰기, 쓰기는 `move_goal`·`undo_goal_move`만), 모은 돈 `goal_saved_sums()`, 목표 ↔ 분배표 저금 줄 트리거 `goal_lines`
 - `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `monthly_plan`·`plan_line`(월급 플랜과 나누기 줄), `todo`(할 일), `spend_category`·`month_close`·`month_spend`(지출 항목, 월말 정리, 항목별 지출), `big_expense`(큰 지출), `saving_deposit`(이번 달 넣은 돈), `invite_attempt`(초대 코드 오류 횟수), `proposal`(제안), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
@@ -747,19 +748,19 @@ supabase/
 
 ### 목표 구조
 
-- 기획: 22 G-01, G-02, 계산은 06 4·5장. 화면 features/goals: G-01 `/goals`, G-02 `/goals/:id`. 메뉴 첫 화면 틀은 month `MainFrame`(탭, 받은 제안 숫자, 아바타, 금액 가리기). 다른 메뉴는 AppFrame `page`(화면 제목 줄), 상세는 `PageHeader`
-- 보유액 = 기타 보유액(`goal.other_held`) + 월말 정리를 마친 달의 이 목표 납입(`saving_deposit.goal_id`) 누적(core `goalHeld`). 연결 자산 합계를 더하고 목표 사용(`goal_use`, 챙길 날 기록 등)은 뺌(0 아래로는 안 감). 이번 달 H-05도 같은 보유액
-- 달별 기록: api `fetchGoalRecords()`(플랜 목표 줄 계획액, 정리를 마친 달 납입) → core `goalMonths`. 상태 `goalStatus`(지연 = 예상 달성 > 기한 또는 2개월 연속 미달), ‘지금’ 눈금 `goalPace`(만든 달부터 기한까지 고르게), 칩 `paceChip`
-- 목표 수정 `/goals/:id/edit/amount|deadline|name`(G-02 숫자, ⋯ 이름 변경, G-08 ‘다르게 해볼래요’). 금액·기한은 영향 미리보기(`viewWith`로 바꾼 값 다시 계산). 이름은 바로 저장
-- 바꾸기(`goal-change.ts`): 연결된 부부는 `propose('goal_…', 값, 적용일, 목표)`, 미합류·혼자 쓰기는 바로 적용 + Toast(보류·다시 모으기·삭제는 ‘되돌리기’). 다시 모으면 우선순위 맨 아래, 삭제는 휴지통(`deleted_at`), 비상금은 삭제 없음
-- G-02 머리 아래 제안 중 카드(proposals `ProposalInline`: 보낸 사람 보내기 취소·철회, 받은 사람 좋아요·다르게 해볼래요·반대), G-01 카드 “제안 중” 배지
-- 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿(O-21 탭과 칩) → G-03b 템플릿 질문(`q1`…, onboarding `GoalQuestionInput`을 O-23과 같이 씀) → G-03c 기한(묻는 템플릿만, 매년은 월) → G-03d 모아둔 돈(매달·고금리 대출 빼고, 지금은 기타 보유액) → G-03e 담당(연결만) → G-03f 확인. 입력 중 값은 기기에 저장(`sweetwo.goal-add`, 닫았다 열면 이어서). 연결된 부부는 `propose('goal_add')`, 아니면 바로 추가
-- G-06 `/goals/order`: ui `ReorderList`(끌기, 위·아래 버튼, 비상금·보류·달성 목표 빼고) + 바뀌는 배분 미리보기. 연결이면 `goal_order` 제안, 아니면 바로 저장 + ‘되돌리기’
-- G-04 `/goals/adjust`: core `extendDeadlines`, `lowerTargets`, `cutSpending`(O-64와 같은 계산)으로 안 3개, 안마다 바뀌는 값 전 → 후. 연결이면 바뀌는 값마다 제안(목표 기한·금액, 생활비 예산, 내 용돈). 바로 추가·수정했는데 더 모자라지면 G-04로
-- 첫 주 5일째 나머지 목표(16 O-22~25, 할 일 글자를 누르면 `/goals/week`): O-22 = G-06 `week`(비상금·결혼 비용 빼고 2개 이상일 때만, 저장 뒤 다음) → `/goals/week/next`가 서버 값으로 남은 화면을 다시 세서 엶(core `restGoalScreens`: 목표마다 묻지 않은 O-23 질문 → 기한을 묻는 목표인데 비었으면 O-24 → 매달 목표 빼고 O-25, 고금리 대출 갚기·각자 관리 예비부부 제외) → 없으면 상여금 O-34
-  - O-23·O-24는 온보딩 1순위와 같은 입력과 저장(GoalQuestionInput, 기본 기한), O-25는 G-03d와 같은 선택(자산 연결 / 기타 보유액 / 없어요), 답하면 `details._held = true`
-  - 연결된 부부여도 첫 주 답은 바로 저장(순서만 G-06처럼 바꿨을 때 제안)
-- 다음 단계: G-04 직접 조정(목표별 월 배분 고정값, 06 4장), G-03f 위치 고르기, 진행 그래프·월별 막대, 보유액 자세히, 목표 사진, ⋯ 좁은 창 BottomSheet
+- 기획: 22 G-01~G-06, 계산은 06. 화면 features/goals: G-01 `/goals`, G-02 `/goals/:id`. 메뉴 첫 화면 틀은 month `MainFrame`, 상세는 `PageHeader`
+- 목표 종류: 우리 목표(`goal.owner_user_id` null, 둘 다 고침) / 내 목표(주인 user id, 주인만 고침, 배우자는 보기만). RLS `goal_update`가 주인만 허용. 혼자 쓰기는 종류 없이 한 목록
+- 화면 값은 goals `model.ts`(`useGoalsModel`) 한 곳: 모은 돈(서버 `goal_saved_sums()`), 매달 넣는 돈(보이는 분배표의 이 목표 저금 줄 합, 각자 + 합류면 사람별), 예상 달성·늦어지는 달(core `goalEta`), 이번 달(이번 사이클 체크 줄), 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위), 접힌 목록(보류, 달성, 다 쓴 목표)
+- 모은 돈 = 이미 모은 돈(`other_held`) + 체크한 저금 줄 + 넣기 − 빼기 − 꺼내 쓰기, 0 아래로 안 감. 서버 `goal_saved(목표)`가 정본, 두 사람이 같은 값
+- 넣기·빼기·꺼내 쓰기(`goal_move` 표, 쓰기는 `move_goal(목표, in|out|use, 금액)`만, 모은 돈보다 많으면 `too_much`, 배우자 내 목표면 `not_owner`). G-02a `/goals/:id/move/:kind?`(넣을게요·뺄게요, `held`면 이미 모은 돈 고치기), G-02b `/goals/:id/spend`(꺼내 쓰기). 저장하면 Toast + ‘되돌리기’(`undo_goal_move`)
+- 목표와 분배표 저금 줄은 DB 트리거(`goal_lines` → `goal_lines_sync`)가 맞춤: 진행 중 목표를 만들면 보이는 분배표마다 저금 묶음 맨 아래 0원 줄, 보류·달성·삭제하면 줄을 뺌, 다시 모으면 0원 줄. 우리 목표는 각자면 두 사람 분배표 모두, 내 목표는 주인 분배표만. 매달 넣는 돈은 분배표(W-01)에서만 고침
+- G-02: 종류 이름표, ⋯(이름 변경, 보류·다시 모으기, 우리 목표 ↔ 내 목표, 삭제. 비상금은 보류·삭제·종류 없음), 숫자 카드(목표 금액·기한은 `/goals/:id/edit/amount|deadline`), 이번 달 저금 줄(salary `CheckLine`), 넣기·빼기 / 꺼내 쓰기 / 매달 넣을 돈 바꾸기, 기한 비교, 모은 돈 기록(체크 줄 + `goal_move` + 이미 모은 돈)
+  - 우리 → 내 목표는 배우자가 넣은 돈(체크 줄, `goal_move`)이 있으면 막음(지금은 앱에서만 확인)
+- 바꾸기(`goal-change.ts`): 제안 없이 모두 바로 저장 + Toast(금액·기한·보류·다시 모으기는 ‘되돌리기’). 삭제는 휴지통(`deleted_at`)
+- 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿 → G-03e 누구 목표(혼자 쓰기 빼고) → G-03b 질문 → G-03c 기한 → G-03d 이미 모은 돈(매달·고금리 대출·템플릿이 묻는 것 빼고) → G-03f 확인 → 만든 목표 상세. 입력 중 값은 기기에 저장(`sweetwo.goal-add`)
+- G-06 `/goals/order`: 우리 목표와 내 목표 각각 `ReorderList`, 저장하면 우선순위 + 내 분배표 저금 줄 순서를 같이 바꿈
+- 다음 단계: G-05 달성 흐름 새 모델로, 우리 → 내 목표 막기 서버 확인, G-06에서 배우자 분배표 순서, 상대 알림·활동 기록, 진행 그래프, 목표 사진
+- 재기획 전 코드(지울 대상): G-04 `/goals/adjust`, 첫 주 나머지 목표 `/goals/week`(G-06 `week`), 연결 자산 보유액(`goal_asset_sums`)
 
 ### 우리 자산 구조
 
