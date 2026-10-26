@@ -27,4 +27,5 @@ export * from './rules/wedding';
 export * from './rules/guides';
 export * from './rules/goal-progress';
 export * from './rules/year-summary';
+export * from './rules/conflict';
 export * from './deep-link';

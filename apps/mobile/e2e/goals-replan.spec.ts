@@ -473,3 +473,46 @@ test('목표 사진(22 G-02): 직접 만든 목표만 “사진 바꾸기” →
   expect(db.goals.find((g) => g.id === 'goal-camp')?.photo_path).toBeNull();
   await expect(page.locator('.hg-card__art--custom')).toBeVisible();
 });
+
+test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 바꿨으면 “어느 쪽으로 할까요?”, 1분 넘었으면 덮음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  if (db.space) db.space.partner_nickname = '예빈';
+  const home = db.goals.find((g) => g.id === 'goal-h');
+  if (!home) throw new Error('seed');
+  await page.goto('/goals/goal-h/edit/amount');
+  await expect(page.getByRole('textbox').first()).toBeVisible();
+  // 화면을 연 뒤 배우자가 30초 전에 1억 2,000만 원으로 바꿈
+  Object.assign(home, {
+    target_amount: 120_000_000,
+    updated_by: 'yebin-id',
+    updated_at: new Date(NOW.getTime() - 30_000).toISOString(),
+  });
+  await page.getByRole('textbox').first().fill('130000000');
+  await page.getByRole('button', { name: '저장' }).click();
+  const choice = page.getByRole('group', { name: '어느 쪽으로 할까요?' });
+  await expect(choice).toContainText('예빈님이 방금 이 값을 바꿨어요');
+  await expect(choice.getByRole('button', { name: /내 값/ })).toContainText('1억 3,000만 원');
+  await expect(choice.getByRole('button', { name: /예빈님 값/ })).toContainText('1억 2,000만 원');
+  expect(home.target_amount).toBe(120_000_000);
+  await axe(page);
+  await choice.getByRole('button', { name: /내 값/ }).click();
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  expect(home.target_amount).toBe(130_000_000);
+
+  // 1분 넘게 지난 배우자 변경은 마지막 저장 우선(묻지 않고 덮음)
+  await page.goto('/goals/goal-h/edit/amount');
+  await expect(page.getByRole('textbox').first()).toBeVisible();
+  Object.assign(home, {
+    target_amount: 110_000_000,
+    updated_by: 'yebin-id',
+    updated_at: new Date(NOW.getTime() - 120_000).toISOString(),
+  });
+  await page.getByRole('textbox').first().fill('140000000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  expect(home.target_amount).toBe(140_000_000);
+});
