@@ -1,7 +1,7 @@
 -- pgTAP: 메일로 대신(데스크톱 접속 신호 없음), 상한 밖은 바로, 방해 금지는 미룸, 계정 삭제 접수 메일, 새 기기 로그인(14)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(7);
+select plan(8);
 
 insert into auth.users (id, email, last_sign_in_at) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com', now());
@@ -56,6 +56,8 @@ select set_config('request.jwt.claims', json_build_object('sub', '11111111-1111-
 set local role authenticated;
 select is(public.note_login(), true, '새 기기 로그인 알림');
 reset role;
+select is((select target from public.notification where kind = 'new_device'),
+  '/new-device/aaaaaaaa-0000-0000-0000-000000000002', '새 기기 알림은 나예요 / 내가 아니에요 화면으로');
 
 select * from finish();
 rollback;

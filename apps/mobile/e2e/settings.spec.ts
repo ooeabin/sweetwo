@@ -738,3 +738,29 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test('새 기기 알림(A-08): 나예요 → 홈, 내가 아니에요 → 그 기기 로그아웃 → S-15', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.sessions.push({
+    id: 's-new',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537',
+    created_at: '2026-10-07T01:00:00Z',
+    last_used_at: '2026-10-07T01:00:00Z',
+    current: false,
+  });
+  await page.goto('/new-device/s-new');
+  await expect(page.getByRole('heading', { name: '새 기기에서 로그인했어요' })).toBeVisible();
+  await expect(page.getByText(/Chrome\(Windows\)/)).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '나예요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/new-device/s-new');
+  await page.getByRole('button', { name: '내가 아니에요' }).click();
+  await expect(page).toHaveURL(/\/settings\/security$/);
+  await expect(page.getByText(/보안도 확인해 주세요/)).toBeVisible();
+  await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
+});

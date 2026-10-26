@@ -15,6 +15,7 @@ export const paths = {
   terms: '/signup/terms', // A-05
   pinSetup: '/lock/setup', // A-06 설정
   expired: '/session-expired', // A-08
+  newDevice: '/new-device', // A-08 새 기기 알림(/new-device/:session)
   callback: '/auth/callback',
   restore: '/account/restore', // A-02 ‘계정 삭제를 취소할까요?’
   home: '/', // 이번 달(온보딩이 생기면 멈춘 화면부터)

@@ -109,6 +109,16 @@ export const copy = {
   },
   loginAgain: '로그인하기',
   otherAccount: '다른 계정으로 로그인',
+  // A-08 4·5번 새 기기 알림
+  newDeviceTitle: '새 기기에서 로그인했어요',
+  newDeviceHelp: '본인이 아니면 바로 로그아웃해 주세요',
+  newDeviceAt: (device: string, at: string) => `${device}, ${at}`,
+  newDeviceGone: '이미 로그아웃된 기기예요', // [확인 필요]
+  itsMe: '나예요',
+  notMe: '내가 아니에요',
+  checkProvider: (p: string) => `${p} 계정 보안도 확인해 주세요`,
+  checkAccount: '로그인한 계정의 보안도 확인해 주세요', // [확인 필요]
+  newDeviceFailed: '지금은 로그아웃할 수 없어요. 잠시 뒤 다시 해 주세요', // [확인 필요]
 
   // 약관 보기(L-05). 웹사이트가 생기면 앱 안 보기로 연다.
   termsUrl: {

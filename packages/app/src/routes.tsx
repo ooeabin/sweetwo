@@ -7,6 +7,7 @@ import {
   A05Terms,
   A06LockSetup,
   A08SessionExpired,
+  A08NewDevice,
   A02Restore,
   AuthCallback,
   O01Start,
@@ -489,6 +490,14 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-18 데이터
+      {
+        path: `${paths.newDevice}/:session`,
+        element: (
+          <RequireAccount>
+            <A08NewDevice />
+          </RequireAccount>
+        ),
+      }, // A-08 새 기기 알림(나예요 / 내가 아니에요)
       {
         path: '/settings/security',
         element: (
