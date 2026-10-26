@@ -429,7 +429,9 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 연결 해제 확정(`unlink-deadlines`, 요청 + 14일) | 매일 09:00 | `0 0 * * *` | `run_unlink_deadlines()` |
 | 보관 기간 정리: 알림 90일, 해제한 원래 공간 30일, 삭제 계정 30일, 휴지통 30일 | 매일 04:00~04:45 | `0 19 * * *`부터 15분 간격 | `purge_notifications()`, `purge_unlinked_spaces()`, `purge_deleted_accounts()`, `purge_old_trash()` |
 | 어드민 잠금, 열람 기간 끝 | 매일 04:50, 매시 5분 | `50 19 * * *`, `5 * * * *` | `lock_idle_admins()`, `run_access_expiry()` |
-| 다음 단계: 배우자 변경 10분 묶기, 주간 요약(월 09:00), 공휴일 받기(월 03:00), 만기된 돈 정리(F-04a와 함께), 연말정산 준비 | | | |
+| 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
+| 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
+| 다음 단계: 공휴일 받기(월 03:00), 만기된 돈 정리(F-04a와 함께), 연말정산 준비, 주간 요약 메일 | | | |
 
 - (다음 단계) 재시도: 함수 안에서 space 단위로 3회 지수 백오프. 끝내 실패하면 job\_run에 남기고 알림(‘운영 절차’)
 - space마다 `pg_try_advisory_xact_lock`으로 중복 실행 막음. 작업은 멱등하게(두 번 돌아도 결과 같음)
@@ -439,12 +441,14 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 알림
 
 - 테이블 `notification`(받는 사람, 종류, 문구, OS 알림 문구·숨김, 갈 화면, 아이콘, 한 사람, dedupe, 읽음). 앱은 내 것만 읽고 `mark_notifications_read`로 읽음만. 쓰기는 서버(트리거·예약 작업)만
-- 바로 만드는 알림: 배우자 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식·만드는 날(`set_salary_mode`·`set_joint_cycle_day`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 배우자 대신 체크 → 주인(`behalf_checked`, 줄마다 한 번, “{줄}에 {금액}”, 줄 이름은 `pay_line_noun`), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
-- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(대신 체크, 분배표, 관리 방식, 만드는 날, 목표 변경), money(만기, 전세 만기), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
+- 바로 만드는 알림: 배우자 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식(`set_salary_mode`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 배우자 대신 체크 → 주인(`behalf_checked`, 줄마다 한 번, “{줄}에 {금액}”, 줄 이름은 `pay_line_noun`), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
+- 배우자 변경(20261031120000): 바로 알리지 않고 `partner_change`(고친 사람, 받는 사람, 항목, 전 → 후 문구 값, 바로/주간)에 쌓음. 기록은 `log_partner_change`(연결·해제 대기, 고친 사람 = auth.uid(), 같은 값이면 안 남김). 쌓는 곳: 우리 목표 트리거(금액·기한·삭제 = 바로, 이름·순서·형태·보류·추가·되살리기 = 주간), 목표 넣기·빼기·꺼내 쓰기(`goal_move`, 되돌리기 = 빈 값), 자산 트리거(주간, 비공개 개인 항목 빼고, 합계만 보여 주는 개인 항목은 “개인 자산 금액이 바뀌었어요”), 챙길 날 추가·메모(주간), 월급 금액(바로), `save_split`(줄마다 전·후 비교 `log_split_changes`, 처음 만들 때는 빼고), `set_joint_cycle_day`(주간). 내 목표는 남기지 않음
+- 묶어 보내기 `flush_partner_changes()`(pg_cron `flush-partner-changes` 매분): (고친 사람, 받는 사람)마다 첫 변경부터 10분 지난 묶음을 같은 항목끼리 처음 전 값 → 마지막 후 값으로 합치고 같으면(되돌리기) 버림. 바로 알림은 `partner_change` 하나(여럿이면 “{이름}님이 n가지를 바꿨어요”), 주간은 `partner_activity`(silent) 하나. 월요일 09:00 `send_weekly_summary()`(`send-weekly-summary`): 지난 7일 합친 변경 수 “이번 주 {이름}님이 바꾼 게 n개 있어요” → `/notifications`. 메일은 다음 단계
+- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(대신 체크, 배우자 변경 묶음, 관리 방식, 주간 요약), silent에는 배우자 활동 기록(`partner_activity`)도, money(만기, 전세 만기), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false: 배우자 체크 다 함, 활동 기록), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
 - 챙길 날 날짜는 서버도 앱과 같게: 음력은 `lunar_date` 표(2025~2050년, korean-lunar-calendar로 만든 행, 윤달 행이 없으면 평달), `care_date_in_year`·`care_next_date`. 월급날 앞당기기는 `business_day_on_or_before`(holiday 표)
 - 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
 - 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
-- 아직: 메일(SES), 방해 금지 끝나는 시각에 다시 보내기, 배우자 변경 10분 묶기(분배표·목표 변경 알림)와 주간 요약, 위 표의 ‘다음 단계’ 알림들
+- 아직: 메일(SES, 주간 요약 메일 포함), 방해 금지 끝나는 시각에 다시 보내기, 묶음 알림의 바뀐 것 목록 화면, 위 표의 ‘다음 단계’ 알림들
 - 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시
 - 모바일 푸시는 서버: notification 행이 생기면 Edge Function이 그 사람의 기기 토큰으로 APNs·FCM에 보냄(방해 금지·종류별 끄기 반영). 앱이 화면에 떠 있으면 OS 알림 대신 앱 안 토스트
 - 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때
@@ -704,7 +708,7 @@ supabase/
 - 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로)
 - S-11 내 정보와 월급(재기획): 이름 S-11a, 결혼 상태 S-11g `/settings/me/marriage`(바꾸면 S-11h에서 상태와 날짜를 함께 저장), 결혼한 날·예정일 S-11h `/settings/me/wedding`(O-12 규칙, 결혼기념일 챙길 날은 서버 `sync_wedding_care`), 출생연도 S-11i `/settings/me/birth-year`. 월급 묶음: 내 월급 S-11c `/settings/me/salary`(합류 뒤 배우자 값 보기만, Toast ‘되돌리기’), 관리 방식 S-11f `/settings/me/salary-mode`(혼자 쓰기면 숨김), 체크리스트 만드는 날 S-11d `/settings/me/plan-day`(합쳐서 + 합류만), 앞당기기 토글, ‘월급 분배표 열기’ → W-01. 연결 해제 대기 중엔 관리 방식·만드는 날 비활성
 - 관리 방식 바꾸기 `set_salary_mode(mode)`(마이그레이션 20261030120000): 각자 → 합쳐서 = 같은 우리 목표 줄 더함, 고정지출·생활비 더해 1줄씩, 용돈은 사람마다, 내 목표·직접 추가 줄 그대로. 합쳐서 → 각자 = 우리 목표·고정지출·생활비·직접 추가 줄을 두 사람 수입 비율로(1만 원 단위, 남는 차이는 기준일 사람), 용돈·내 목표 줄은 주인에게. 체크리스트는 다음 월급날부터 새 방식(`start_checklist`가 옛 방식 체크리스트가 이번 사이클이면 새로 안 만들고, 끝나면 닫음). 배우자 알림 `salary_mode`, 해제 대기면 `unlink_pending`
-- 체크리스트 만드는 날 `set_joint_cycle_day(일)`: 두 사람 월급날 중 하나(말일 = 31)만, 이번 공동 체크리스트 끝 = 새 기준일 전날, 배우자 알림 `cycle_day`
+- 체크리스트 만드는 날 `set_joint_cycle_day(일)`: 두 사람 월급날 중 하나(말일 = 31)만, 이번 공동 체크리스트 끝 = 새 기준일 전날, 배우자에게는 주간 요약(활동 기록)만(20261031120000)
 - 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만 묶음은 plan(“월급 체크리스트”), partner_change, care_30/14/7/0, money, goal, invite(제안·생활비 체크 토글은 재기획으로 없앰)
 - S-12 부부 정보: 이름 + 상태(연결됨, 초대 중, 연결 해제 대기 중, 혼자 쓰는 중), 결혼 예정일(예비부부, D-day 알약)·결혼일(신혼, 보기만). 미합류면 가장 최근 초대 코드(api `fetchLatestInvite`, `invite` 테이블을 부부 공간 사람만 읽음)로 초대 전(“초대 코드 만들기” → `create_invite`) / 초대 중(코드 3+3자리, “10월 22일까지”, 코드 복사, 링크 복사, 새 코드 받기) / 만료를 나눔. 새 코드 받기 `renew_invite`는 쓸 수 있는 코드를 모두 지금 만료로 바꾸고 새로 만듦
 - 연결 해제 요청(S-12a → S-12c): `couple_unlink`(공간당 대기 1개, 쓰기는 함수로만). S-12a는 지울 것 목록과 ‘먼저 내보내기’(S-18), S-12c는 “연결 해제” 입력이 맞아야 버튼이 켜짐. `request_unlink('연결 해제')`가 기한(오늘 + 14일)과 함께 저장하고 해제 대기로 바꾼 뒤 상대 알림 `unlink_requested`(→ S-12d). 자산 몫·정리 안 없음(`plan` = `[]`). `cancel_unlink`는 요청한 사람만. 대기 중엔 `save_split`·`set_salary_mode`·`set_joint_cycle_day`가 `unlink_pending`으로 거절, S-12 대기 묶음(“{날짜}에 해제돼요”, 요청 보기)
