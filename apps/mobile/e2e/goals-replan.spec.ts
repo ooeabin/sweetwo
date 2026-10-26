@@ -29,6 +29,28 @@ test('G-01 목표 목록: 우리 목표 묶음, 매달·예상, 기한보다 늦
   await axe(page);
 });
 
+test('G-01 배우자가 방금 고친 목표: 카드 아래 “예빈님이 기한을 바꿨어요”, 다음에 열면 사라짐', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goalChanges = [
+    {
+      goal_id: 'goal-h',
+      field: 'deadline',
+      actor_id: 'partner-1',
+      created_at: '2026-10-07T00:30:00Z',
+    },
+  ];
+  await page.goto('/goals');
+  const line = page.getByText(/님이 기한을 바꿨어요/);
+  await expect(line).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('매달 목표에 139만 원씩 모으고 있어요')).toBeVisible();
+  await expect(line).toHaveCount(0);
+});
+
 test('G-02 넣기·빼기, 꺼내 쓰기(모은 돈보다 많으면 저장 꺼짐), 모은 돈 기록', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });

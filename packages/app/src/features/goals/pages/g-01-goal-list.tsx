@@ -1,5 +1,7 @@
+import { fetchRecentGoalChanges, qk } from '@sweetwo/api';
 import { Button, SectionHeader } from '@sweetwo/ui';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { MainFrame } from '../../frame';
@@ -9,11 +11,35 @@ import { useGoalsModel, type GoalItem } from '../model';
 
 // G-01 목표 목록(22). 상단 요약(매달 목표에 모으는 돈) → 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위)
 // → 접힌 목록(보류, 달성, 다 쓴 목표). 혼자 쓰기면 묶음 제목 없이 한 목록. 데스크톱 2열(hg-cards), 좁은 창 1열.
+const SEEN = 'sweetwo.goalsSeenAt';
+const readSeen = () => {
+  try {
+    return localStorage.getItem(SEEN) ?? '';
+  } catch {
+    return '';
+  }
+};
+const writeSeen = (v: string) => {
+  try {
+    localStorage.setItem(SEEN, v);
+  } catch {
+    /* 저장을 못 하면 다음에도 보임 */
+  }
+};
+
 export function G01GoalList() {
   const nav = useNavigate();
   const d = useGoalsModel();
   const { masked } = useMask();
   const [unfold, setUnfold] = useState(false);
+  // 배우자가 고친 목표: 지난번에 G-01을 연 뒤 생긴 것만 보이고, 다음에 열면 사라짐(본 시각은 기기에 기억)
+  const changes = useQuery({ queryKey: qk.goalChanges, queryFn: fetchRecentGoalChanges });
+  const [seenAt] = useState(readSeen);
+  useEffect(() => writeSeen(new Date().toISOString()), []);
+  const changedOf = (id: string) => {
+    const c = changes.data?.find((x) => x.goalId === id && x.at > seenAt);
+    return c ? copy.partnerChanged(d.partnerName ?? '', c.field) : undefined;
+  };
   const m = (v: number) => money(v, masked);
 
   // 순서 바꾸기는 한 묶음에 옮길 목표가 2개 이상일 때만(비상금은 고정)
@@ -60,6 +86,7 @@ export function G01GoalList() {
             )
           }
           onLate={i.canEdit ? () => nav('/salary/split') : undefined}
+          changed={changedOf(i.goal.id)}
         />
       ))}
     </div>

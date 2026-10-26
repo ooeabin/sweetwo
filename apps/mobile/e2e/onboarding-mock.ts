@@ -62,6 +62,7 @@ export interface MemDb {
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
+  goalChanges: Record<string, unknown>[];
   /** 생활비 체크 답(W-03) */
   livingChecks: Record<string, unknown>[];
   /** 앱 안 공지(AD-10, 게시된 것) */
@@ -157,6 +158,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     checklists: [],
     goalMoves: [],
     notices: [],
+    goalChanges: [],
     sessions: [
       {
         id: 's-this',
@@ -1242,6 +1244,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
+      if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'answer_goal_gap') {
         const b = body();
         db.goalUses = db.goalUses.filter((u) => u.month_close_id !== b.p_close);
