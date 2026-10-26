@@ -85,6 +85,8 @@ export interface DesktopBridge {
   };
   /** 웹사이트 열기(A-01 업데이트 → 다운로드·스토어 안내). 모바일만, sweetwo.kr 주소만 */
   openUrl?: (url: string) => Promise<void>;
+  /** 모바일: 만든 파일을 OS 공유 창으로(‘파일에 저장’ 등 저장 위치는 사람이 고름). 데스크톱은 없음(내려받기 창) */
+  saveFile?: (f: { name: string; base64: string; mime: string }) => Promise<'saved' | 'cancelled'>;
   /** main이 앱 창에 이 화면으로 가라고 할 때(트레이 위젯, 위젯 설정 메뉴) */
   onNavigate: (cb: (path: string) => void) => () => void;
   /** 트레이 위젯(26)·위젯 설정(S-22). 값은 core TraySnapshot·TrayState·WidgetSettings로 검사해서 씀 */

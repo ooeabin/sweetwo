@@ -1,6 +1,8 @@
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import type { DesktopBridge } from '@sweetwo/app';
 import { parseDeepLink } from '@sweetwo/core';
 import {
@@ -113,6 +115,25 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       // 웹사이트(다운로드·약관)만 앱 안 브라우저로
       if (!/^https:\/\/(www\.)?sweetwo\.kr(\/|$)/.test(url)) return;
       await Browser.open({ url });
+    },
+    // 내보내기(S-18): 앱 캐시에 쓰고 공유 창으로. 공유가 끝나면 캐시 파일은 지움
+    saveFile: async (f) => {
+      const name = f.name.replace(/[^\w.-]/g, '_');
+      const w = await Filesystem.writeFile({
+        path: name,
+        data: f.base64,
+        directory: Directory.Cache,
+      });
+      try {
+        await Share.share({ title: name, files: [w.uri] });
+        return 'saved';
+      } catch {
+        return 'cancelled';
+      } finally {
+        await Filesystem.deleteFile({ path: name, directory: Directory.Cache }).catch(
+          () => undefined,
+        );
+      }
     },
   };
   window.sweetwo = bridge;
