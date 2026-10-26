@@ -26,7 +26,8 @@ export function NotificationPanel(p: {
     close: string;
     back: string;
     emptyTitle: string;
-    emptySub: string;
+    /** N-03 빈 상태는 제목 한 줄(13 공통 상태): 없으면 보조 문구 없음 */
+    emptySub?: string;
     /** 새 알림 점(화면 읽기) */
     unread: string;
   };
@@ -152,7 +153,7 @@ export function NotificationPanel(p: {
           <div className="hg-noti__empty">
             <Icon name="bell" />
             <b>{p.labels.emptyTitle}</b>
-            <span>{p.labels.emptySub}</span>
+            {p.labels.emptySub && <span>{p.labels.emptySub}</span>}
           </div>
         ) : (
           <>

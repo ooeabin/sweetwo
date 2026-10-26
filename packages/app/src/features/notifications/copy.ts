@@ -7,7 +7,8 @@ export const copy = {
   close: '닫기', // [확인 필요] 화면 읽기용
   back: '뒤로',
   empty: '새 알림이 없어요',
-  emptySub: '제안과 챙길 날 소식이 여기에 와요',
+  targetDeleted: '지워진 항목이에요',
+  targetHidden: '지금은 볼 수 없는 항목이에요',
   groups: { today: '오늘', week: '이번 주', earlier: '이전' },
   loadFailed: '알림을 불러오지 못했어요',
   retry: '다시 시도',

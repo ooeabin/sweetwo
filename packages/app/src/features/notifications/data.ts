@@ -1,10 +1,14 @@
 import {
+  fetchAssets,
+  fetchCareDays,
+  fetchGoals,
   fetchHasUnread,
   fetchMe,
   fetchNotification,
   fetchNotifications,
   fetchPartner,
   fetchSpace,
+  fetchTrash,
   markNotificationsRead,
   qk,
   subscribeNotifications,
@@ -16,6 +20,8 @@ import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
+import { toast } from '../../shared/toast';
+import { copy } from './copy';
 
 // 알림 센터 데이터: 목록(30개씩), 읽지 않음 점, Realtime(새 알림 → 목록·점, 데스크톱이면 OS 알림), 누르면 읽음 + 그 화면.
 
@@ -54,6 +60,25 @@ export function useNotiPeople() {
 /** 지금 한국 시간 시(0~23) */
 export const kstHour = (now = new Date()) => (now.getUTCHours() + 9) % 24;
 
+/** 알림 대상(목표·자산·챙길 날)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
+async function targetGone(
+  target: string,
+  qc: ReturnType<typeof useQueryClient>,
+): Promise<'deleted' | 'hidden' | null> {
+  const m = /^\/(goals|assets|calendar\/day)\/([0-9a-f-]{36})(?:[/?]|$)/.exec(target);
+  if (!m) return null;
+  const [, kind, id] = m;
+  const rows: { id: string }[] =
+    kind === 'goals'
+      ? await qc.fetchQuery({ queryKey: qk.goals, queryFn: fetchGoals })
+      : kind === 'assets'
+        ? await qc.fetchQuery({ queryKey: qk.assets, queryFn: fetchAssets })
+        : await qc.fetchQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
+  if (rows.some((r) => r.id === id && !(r as { deleted_at?: string | null }).deleted_at)) return null;
+  const trash = await qc.fetchQuery({ queryKey: qk.trash, queryFn: fetchTrash });
+  return trash.some((t) => t.id === id) ? 'deleted' : 'hidden';
+}
+
 /** 누르면: 읽음 + 그 화면 */
 export function useOpenNotification() {
   const nav = useNavigate();
@@ -61,7 +86,10 @@ export function useOpenNotification() {
   const close = useNotiPanel((s) => s.set);
   return async (n: Pick<Notification, 'id' | 'target' | 'read_at'>) => {
     close(false);
-    nav(n.target);
+    // 대상 항목이 지워졌거나 볼 수 없으면 이동 없이 Toast(14 N-01 예외)
+    const gone = await targetGone(n.target, qc).catch(() => null);
+    if (gone) toast(gone === 'deleted' ? copy.targetDeleted : copy.targetHidden);
+    else nav(n.target);
     if (!n.read_at) {
       await markNotificationsRead([n.id]).catch(() => undefined);
       await qc.invalidateQueries({ queryKey: qk.notifications });
