@@ -14,6 +14,7 @@ import {
   verifyPin,
 } from './lock';
 import { showNotice } from './notify';
+import type { Updater } from './updater';
 import { TraySnapshot, WidgetSettings } from '@sweetwo/core';
 import {
   clearSnapshot,
@@ -55,6 +56,7 @@ const Path = z
 export function registerIpc(
   getWindow: () => BrowserWindow | null,
   w: { open: (path?: string) => void; setTray: (on: boolean) => void },
+  updater: Updater | null,
 ) {
   handle(CH.authStart, z.tuple([Provider]), ([p]) => startLogin(p));
   handle(CH.authReopen, none, () => reopenLogin());
@@ -87,4 +89,8 @@ export function registerIpc(
   handle(CH.widgetSetSettings, z.tuple([WidgetSettings.partial()]), ([p]) =>
     setWidgetSettings(p, w.setTray),
   );
+  // 자동 업데이트(S-19). 개발 실행·e2e는 업데이트 없음(idle 그대로)
+  handle(CH.updateState, none, () => updater?.state() ?? { status: 'idle' });
+  handle(CH.updateCheck, none, () => updater?.check() ?? { status: 'idle' });
+  handle(CH.updateInstall, none, () => updater?.install());
 }

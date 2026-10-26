@@ -714,7 +714,7 @@ supabase/
 - 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 배우자 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
 - 보안(S-15 `/settings/security`): 데스크톱 앱 잠금(브리지 lock: `clear`는 1분 안에 `verify`가 통과했을 때만, `setAutoLock` 0·1·5·15분, 기본 5분), PIN 바꾸기 = 현재 PIN 확인 → A-06 `?next=/settings/security`. 로그인된 기기 = `my_sessions()`(auth.sessions, 지금 기기 = 토큰의 session_id), `end_sessions(id)` / `end_sessions()`(이 기기 빼고 모두). 기기 이름은 core `deviceLabel(user_agent)`, 데스크톱 main은 토큰 요청에 `sweeTwo/버전 Electron` User-Agent
 - 트레이 위젯(26, S-22): 앱 창의 `useTraySync`(frame)가 홈과 같은 계산(core `homeTodo`·`homeUpcoming`·`salaryState`)으로 core `TraySnapshot`(이번 달 월급 상태·체크 개수·다음 월급날, 다음 할 일, 다가오는 날 3개)을 만들어 브리지 `widget.update`로 보냄. 위젯 창 `/widget/tray`(features/widget)는 WG-01 “9월 월급” / “2개” / “5개 중 2개 했어요”, 월말 확인 기간이면 “체크 안 한 게 n개 있어요” → W-05. 트레이 창에는 금액이 없어 가림과 상관없음. 설정(트레이 켜기, 금액 보이기, 목표)은 S-22
-- 다음 단계: 예식일 수정(H-P1)·결혼했어요(H-T1), 마케팅 정보 받기 토글, S-19 업데이트 확인, 결혼 상태·예식일 바꿈 상대 알림
+- 다음 단계: 예식일 수정(H-P1)·결혼했어요(H-T1), 마케팅 정보 받기 토글, 결혼 상태·예식일 바꿈 상대 알림
 
 ### 배우자 합류 구조
 
@@ -978,6 +978,7 @@ supabase/
 - 단계 배포: latest.yml의 `stagingPercentage`를 10 → 50 → 100으로 올림(24시간 간격). 올리는 사람은 릴리스 담당자
 - 다음 단계 조건: Sentry release health의 크래시 없는 세션 99% 이상. 출시 승인 기준은 99.5%
 - 주소: 업데이트 피드는 S3 `updates/{mac|win}/latest*.yml`, 다운로드는 고정 주소 `download.sweetwo.kr/latest/mac|win`(최신 파일로 리다이렉트)
+- 앱(`apps/desktop/src/main/updater.ts`): 설치한 앱만(`app.isPackaged`, `SWEETWO_NO_UPDATE=1`이면 끔). 켤 때 10초 뒤와 6시간마다 확인 → 자동으로 받음 → 끌 때 설치(다음 실행 때 적용). 서명 검증은 electron-updater가 함(mac 코드 서명, win `publisherName`). 상태는 IPC `update-*`로 렌더러에(브리지 `update`), S-19 ‘업데이트 확인’은 바로 확인, 다 받았으면 “다시 시작” = `quitAndInstall`. 피드 `https://download.sweetwo.kr/updates/{mac|win}`(electron-builder `publish` `${os}`)
 
 태그 배포 순서
 
