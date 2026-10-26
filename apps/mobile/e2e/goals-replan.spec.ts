@@ -29,6 +29,28 @@ test('G-01 목표 목록: 우리 목표 묶음, 매달·예상, 기한보다 늦
   await axe(page);
 });
 
+test('G-01 배우자가 방금 고친 목표: 카드 아래 “예빈님이 기한을 바꿨어요”, 다음에 열면 사라짐', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goalChanges = [
+    {
+      goal_id: 'goal-h',
+      field: 'deadline',
+      actor_id: 'partner-1',
+      created_at: '2026-10-07T00:30:00Z',
+    },
+  ];
+  await page.goto('/goals');
+  const line = page.getByText(/님이 기한을 바꿨어요/);
+  await expect(line).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('매달 목표에 139만 원씩 모으고 있어요')).toBeVisible();
+  await expect(line).toHaveCount(0);
+});
+
 test('G-02 넣기·빼기, 꺼내 쓰기(모은 돈보다 많으면 저장 꺼짐), 모은 돈 기록', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -355,6 +377,10 @@ test('G-02 정보·도움말·월별 기록, 삭제 되돌리기, 매년 목표 
   const records = page.getByRole('region', { name: '월별 기록' });
   await expect(records.getByRole('cell', { name: '9월 월급' })).toBeVisible();
   await expect(records.getByRole('cell', { name: '넣었어요' })).toBeVisible();
+  // 10a번 월별 저금 막대: 계획대로 넣은 달은 0, 계획 대비 알약
+  const bars = page.getByRole('region', { name: '한 달 평균 저금' });
+  await expect(bars.getByText('계획의 100%')).toBeVisible();
+  await expect(bars.getByRole('img', { name: '한 달 평균 저금' })).toBeVisible();
   await expect(page.getByRole('button', { name: /청약·정책대출 체크리스트/ })).toBeVisible();
   await axe(page);
 

@@ -2897,6 +2897,15 @@ export type Database = {
         Returns: undefined
       }
       read_won: { Args: { v: number }; Returns: string }
+      recent_goal_changes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          actor_id: string
+          created_at: string
+          field: string
+          goal_id: string
+        }[]
+      }
       reconnect_ok: { Args: { p_id: string }; Returns: boolean }
       record_care: {
         Args: {

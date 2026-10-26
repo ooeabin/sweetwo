@@ -51,6 +51,31 @@ export const copy = {
   heldFrom: (other: string, linked: string, deposits: string) =>
     `기타 보유액 ${other}, 연결 자산 ${linked}, 월말 정리에서 넣은 돈 ${deposits}`, // [확인 필요]
   records: '월별 기록', // [확인 필요] 요소 이름
+  // G-01 예외: 배우자가 방금 고친 목표 [확인 필요]
+  partnerChanged: (name: string, field: string) =>
+    `${name}님이 ${
+      field === 'deadline'
+        ? '기한을'
+        : field === 'amount'
+          ? '목표 금액을'
+          : field === 'name'
+            ? '이름을'
+            : '목표를'
+    } 바꿨어요`,
+  // G-02 9번 진행 그래프, 10a번 월별 저금 막대 [확인 필요]
+  graphTitle: '모은 돈 흐름',
+  graphActual: '모은 돈',
+  graphPlan: '계획',
+  graphPlanText: (v: string) => `계획 ${v}`,
+  barsTitle: '한 달 평균 저금',
+  barsPct: (p: number) => `계획의 ${p}%`,
+  barsNote: (plan: number) =>
+    `가운데 선이 계획 ${plan}만 원. 더 넣은 만큼 위, 덜 넣은 만큼 아래(만 원)`,
+  monthLabel: (m: number) => `${m}월`,
+  barTip: (month: number, put: string, diff: number, gap: string) =>
+    diff === 0
+      ? `${month}월 ${put}, 계획대로`
+      : `${month}월 ${put}, 계획보다 ${gap} ${diff > 0 ? '더' : '덜'}`,
   recordPlan: (amount: string) => `계획 ${amount}`,
   recordActual: (amount: string) => `실제 ${amount}`,
   rested: '쉬어감',

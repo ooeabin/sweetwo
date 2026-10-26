@@ -113,6 +113,19 @@ export async function fetchGoalSaved(): Promise<Record<string, number>> {
   return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.saved]));
 }
 
+/** 배우자가 고친 목표(22 G-01 예외): 목표마다 마지막 변경 하나, 30일 안 */
+export type GoalChange = { goalId: string; field: string; actorId: string; at: string };
+export async function fetchRecentGoalChanges(): Promise<GoalChange[]> {
+  const { data, error } = await supabase().rpc('recent_goal_changes');
+  fail(error);
+  return (data ?? []).map((r) => ({
+    goalId: r.goal_id,
+    field: r.field,
+    actorId: r.actor_id,
+    at: r.created_at,
+  }));
+}
+
 export type GoalMove = Tables<'goal_move'>;
 /** 목표 넣기·빼기·꺼내 쓰기 기록(되돌린 것 빼고) */
 export async function fetchGoalMoves(goal: string): Promise<GoalMove[]> {

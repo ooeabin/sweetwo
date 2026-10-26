@@ -9,7 +9,12 @@ export interface FlowState {
   me: Me | null | undefined;
   space: Space | null | undefined;
   /** 합류한 배우자(합류 전 null) */
-  partner?: { monthly_income: number | null; allowance: number | null } | null;
+  partner?: {
+    id: string;
+    nickname: string | null;
+    monthly_income: number | null;
+    allowance: number | null;
+  } | null;
   goals: Goal[] | undefined;
   inviteNow: 'now' | 'later' | null;
 }

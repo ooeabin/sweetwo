@@ -48,12 +48,15 @@ export function GoalItemCard({
   masked,
   onOpen,
   onLate,
+  changed,
 }: {
   i: GoalItem;
   masked: boolean;
   onOpen: () => void;
   /** 4a ‘분배표에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
   onLate?: () => void;
+  /** 배우자가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
+  changed?: string;
 }) {
   const g = i.goal;
   const late = i.lateMonths !== null && i.lateMonths > 0;
@@ -91,18 +94,22 @@ export function GoalItemCard({
       {month && <span className="hg-card__meta">{month}</span>}
     </button>
   );
-  if (!late || !onLate) return card;
+  const lateLink = late && onLate;
+  if (!lateLink && !changed) return card;
   return (
     <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
       {card}
-      <button
-        type="button"
-        className="hg-btn hg-btn--link"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={onLate}
-      >
-        {copy.lateLink}
-      </button>
+      {changed && <span className="hg-help">{changed}</span>}
+      {lateLink && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={onLate}
+        >
+          {copy.lateLink}
+        </button>
+      )}
     </div>
   );
 }

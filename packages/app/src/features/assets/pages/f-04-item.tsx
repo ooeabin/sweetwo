@@ -9,6 +9,7 @@ import {
 } from '@sweetwo/core';
 import {
   AmountInput,
+  Field,
   Badge,
   Button,
   ChoiceCards,
@@ -31,9 +32,12 @@ type Vis = 'all' | 'sum' | 'private';
 
 // F-04 항목 상세·수정(23 F-04 1·2·3·5·6·7번): 금액(누르면 그 자리에서 수정, Esc 취소), 공개 범위(내 명의만),
 // 안 판 수익(원금 있는 투자·부동산), 월별 기록(월말 정리 / 직접 수정), 삭제(휴지통 + 되돌리기).
-// 유형별 값(만기일, 납입 회차, 금리, 월 납입·상환액)은 보기만, 목표 연결은 고칠 수 있음(F-03i).
+// 유형별 값(만기일, 납입 회차, 금리, 월 납입·상환액)도 누르면 그 자리에서 입력칸 + ‘저장’(3번, Esc 취소).
 // 배우자 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
-// 고친 기록은 직접 고친 것만, 날짜와 고친 사람. 유형별 값(만기일 등) 수정은 다음 단계.
+// 고친 기록은 직접 고친 것만, 날짜와 고친 사람.
+type ValueField = 'maturity_date' | 'paid_count' | 'interest_rate' | 'monthly_payment';
+const RATE = /^\d{1,2}(\.\d{1,2})?$/;
+
 export function F04Item() {
   const { id = '' } = useParams();
   const nav = useNavigate();
@@ -44,6 +48,10 @@ export function F04Item() {
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
   const [editAmount, setEditAmount] = useState<number | null | undefined>(undefined);
   const [editVis, setEditVis] = useState(false);
+  // 3번 값 수정: 고르고 있는 값과 입력 중인 글자(월 납입·상환액은 금액 칸)
+  const [field, setField] = useState<ValueField | null>(null);
+  const [draft, setDraft] = useState('');
+  const [draftAmount, setDraftAmount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
   if (d.loading) return null;
@@ -96,6 +104,79 @@ export function F04Item() {
     byMonth.set(todayKst(new Date(h.recorded_at)).slice(0, 7), h.amount);
   const points = [...byMonth].map(([ym, v]) => ({ label: formatYm(`${ym}-01`), value: v }));
   const manual = (history.data ?? []).filter((h) => h.source === 'manual');
+  const open = (f: ValueField, v: string) => {
+    setField(f);
+    setDraft(v);
+  };
+  const valueError =
+    field === 'interest_rate' && draft !== '' && !(RATE.test(draft) && Number(draft) <= 30)
+      ? copy.rateInvalid
+      : field === 'paid_count' && draft !== '' && !/^\d{1,3}$/.test(draft)
+        ? copy.countInvalid
+        : undefined;
+  const valueOk = field === 'monthly_payment' ? draftAmount !== null : draft !== '' && !valueError;
+  const saveValue = () => {
+    if (!field || !valueOk || busy) return;
+    const patch =
+      field === 'maturity_date'
+        ? { maturity_date: draft }
+        : field === 'paid_count'
+          ? { paid_count: Number(draft) }
+          : field === 'interest_rate'
+            ? { interest_rate: Number(draft), rate_estimated: false }
+            : { monthly_payment: draftAmount };
+    void run(() => updateAsset(a.id, patch), copy.saved).then(() => setField(null));
+  };
+  const fieldLabel =
+    field === 'maturity_date'
+      ? copy.maturityLabel
+      : field === 'paid_count'
+        ? copy.countLabel
+        : field === 'interest_rate'
+          ? copy.rateLabel
+          : a.side === 'debt'
+            ? copy.repaymentLabel
+            : copy.paymentLabel;
+  const editor = (
+    <div
+      className="hg-stack"
+      style={{ padding: 'var(--space-3) var(--space-4)' }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') setField(null);
+        if (e.key === 'Enter') saveValue();
+      }}
+    >
+      {field === 'monthly_payment' ? (
+        <AmountInput
+          label={fieldLabel}
+          value={draftAmount}
+          onChange={setDraftAmount}
+          allowZero
+          embedded
+        />
+      ) : (
+        <Field
+          label={fieldLabel}
+          type={field === 'maturity_date' ? 'date' : 'text'}
+          inputMode={
+            field === 'interest_rate' ? 'decimal' : field === 'paid_count' ? 'numeric' : undefined
+          }
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.trim())}
+          error={valueError}
+          autoFocus
+        />
+      )}
+      <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+        <Button variant="primary" size="sm" disabled={busy || !valueOk} onClick={saveValue}>
+          {copy.saveEdit}
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => setField(null)}>
+          {copy.cancel}
+        </Button>
+      </span>
+    </div>
+  );
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader
@@ -192,12 +273,22 @@ export function F04Item() {
             </span>
           }
         />
-        {a.maturity_date && (
-          <ListRow label={copy.maturityLabel} value={formatDateFull(a.maturity_date)} />
+        {a.maturity_date !== null && (
+          <ListRow
+            label={copy.maturityLabel}
+            value={formatDateFull(a.maturity_date)}
+            onClick={editable ? () => open('maturity_date', a.maturity_date ?? '') : undefined}
+          />
         )}
+        {field === 'maturity_date' && editor}
         {a.paid_count !== null && (
-          <ListRow label={copy.countLabel} value={`${a.paid_count}${copy.paidCountUnit}`} />
+          <ListRow
+            label={copy.countLabel}
+            value={`${a.paid_count}${copy.paidCountUnit}`}
+            onClick={editable ? () => open('paid_count', String(a.paid_count)) : undefined}
+          />
         )}
+        {field === 'paid_count' && editor}
         {a.interest_rate !== null && (
           <ListRow
             label={
@@ -211,14 +302,25 @@ export function F04Item() {
               )
             }
             value={`${a.interest_rate}%`}
+            onClick={editable ? () => open('interest_rate', String(a.interest_rate)) : undefined}
           />
         )}
+        {field === 'interest_rate' && editor}
         {a.monthly_payment !== null && (
           <ListRow
             label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
             value={m(a.monthly_payment)}
+            onClick={
+              editable
+                ? () => {
+                    setDraftAmount(a.monthly_payment);
+                    open('monthly_payment', '');
+                  }
+                : undefined
+            }
           />
         )}
+        {field === 'monthly_payment' && editor}
         {mine && (
           <ListRow
             label={copy.visLabel}

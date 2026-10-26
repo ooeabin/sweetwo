@@ -47,6 +47,8 @@ export const copy = {
   // W-02 끝
   doneTitle: '이번 달 월급을 다 나눴어요', // [확인 필요]
   doneSaved: (amount: string) => `이번 달 목표에 ${amount} 모았어요`,
+  partnerProgress: (name: string, total: number, done: number) =>
+    `${name}님 ${total}개 중 ${done}개`,
   ok: '확인',
   // W-05 월말 확인
   reviewTitle: (label: string) => `${label}, 빠진 게 있나요?`,

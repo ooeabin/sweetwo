@@ -32,7 +32,10 @@ export class GoalUsedError extends Error {
 
 /** 사용 기록(G-05): 쓴 돈만큼 꺼내 쓰기 + 사용 완료. 남은 돈(모은 돈 − 쓴 돈)을 돌려줌 */
 export async function finishGoalUse(goalId: string, spent: number): Promise<number> {
-  const { data, error } = await supabase().rpc('finish_goal_use', { p_goal: goalId, p_spent: spent });
+  const { data, error } = await supabase().rpc('finish_goal_use', {
+    p_goal: goalId,
+    p_spent: spent,
+  });
   if (error?.message?.includes('goal_used')) throw new GoalUsedError();
   fail(error);
   return typeof data === 'number' ? data : 0;

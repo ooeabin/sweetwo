@@ -56,5 +56,6 @@ export const qk = {
   goalCheckedSums: ['goal_checked_sums'] as const,
   goalSaved: ['goal_saved'] as const,
   goalMoves: (id: string) => ['goal_move', id] as const,
+  goalChanges: ['goal_changes'] as const,
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };
