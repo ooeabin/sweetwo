@@ -1,37 +1,16 @@
-import {
-  fetchCurrentPlan,
-  fetchGoals,
-  fetchLastPlanEnd,
-  fetchMe,
-  fetchPartner,
-  fetchSpace,
-  qk,
-  updateMe,
-  updateSpace,
-} from '@sweetwo/api';
-import { coupleOf, todayKst } from '@sweetwo/core';
+import { fetchGoals, fetchMe, fetchPartner, fetchSpace, qk, updateMe, updateSpace } from '@sweetwo/api';
+import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
+import { useSplits } from '../salary';
 
-// 합류 흐름 데이터. 키는 다른 기능과 같은 qk.
+// 합류 흐름 데이터(18). 키는 다른 기능과 같은 qk.
 export function useJoinData() {
-  const today = todayKst();
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
-  const plan = useQuery({
-    queryKey: qk.currentPlan(today),
-    queryFn: () => fetchCurrentPlan(today),
-  });
-  // 공간에 플랜이 하나도 없으면 시작한 사람이 아직 온보딩 중(첫 플랜 전)
-  const last = useQuery({ queryKey: qk.lastPlanEnd, queryFn: fetchLastPlanEnd });
-  const ready =
-    !me.isLoading &&
-    !space.isLoading &&
-    !partner.isLoading &&
-    !goals.isLoading &&
-    !plan.isLoading &&
-    !last.isLoading;
+  const splits = useSplits();
+  const ready = [me, space, partner, goals, splits].every((q) => !q.isLoading);
   const couple = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   return {
     ready,
@@ -39,11 +18,14 @@ export function useJoinData() {
     space: space.data ?? null,
     partner: partner.data ?? null,
     goals: goals.data ?? [],
-    plan: plan.data ?? null,
-    /** 시작한 사람이 첫 플랜을 만들기 전: 내 정보까지만 답하고 기다림(18 P-11 대기) */
-    waiting: !last.isLoading && !last.data,
+    splits: splits.data ?? [],
+    /** 시작한 사람이 아직 온보딩 중(분배표가 없음): P-03 → P-03a → P-05 → 홈 대기 */
+    waiting: !splits.isLoading && !(splits.data ?? []).length,
+    /** 대기 뒤 이어서(P-04 → P-06) */
+    resumed: me.data?.onboarding_step === 'P-WAIT',
     couple,
-    refetch: () => Promise.all([me.refetch(), space.refetch(), partner.refetch()]),
+    refetch: () =>
+      Promise.all([me.refetch(), space.refetch(), partner.refetch(), splits.refetch()]),
   };
 }
 export type JoinData = ReturnType<typeof useJoinData>;

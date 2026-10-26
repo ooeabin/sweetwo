@@ -10,7 +10,7 @@ import {
 import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { H06NetWorth, MainFrame, useNetWorth, useNoticeBand } from '../../month';
 import {
   myChecklist,
@@ -51,6 +51,24 @@ export function H01Home() {
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
+
+  // 합류했는데 시작한 사람이 아직 온보딩 중(18 ‘시작한 사람이 아직 온보딩 중’): 분배표가 생기면 P-04 → P-06, 그 전엔 홈 대기(상태 변형 4)
+  if (me.data.onboarding_step === 'P-WAIT') {
+    if (splits.isLoading) return null;
+    if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
+    const starter = partner.data?.nickname ?? space.data.partner_nickname ?? '';
+    return (
+      <MainFrame
+        current="month"
+        columns={[
+          <section key="w" className="hg-card hg-stack" aria-label={copy.waitTitle(starter)}>
+            <b>{copy.waitTitle(starter)}</b>
+            <span className="hg-card__meta">{copy.waitCard(starter)}</span>
+          </section>,
+        ]}
+      />
+    );
+  }
 
   const today = todayKst();
   const meId = me.data.id;

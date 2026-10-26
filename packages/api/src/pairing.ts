@@ -1,4 +1,4 @@
-import { TERMS_VERSION } from '@sweetwo/core';
+import { TERMS_VERSION, type Json, type SplitLineDraft } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -38,23 +38,32 @@ export async function joinSpace(code: string): Promise<JoinResult> {
   return data as JoinResult;
 }
 
-/** 합류 완료(P-11): 부부 연결, 코드 사용됨 */
-export async function finishJoin() {
-  const { error } = await supabase().rpc('finish_join');
+/**
+ * 합류 완료(18): P-06 분배표 저장 + 첫 체크리스트 + 연결 + 코드 사용됨. lines 없으면 대기(시작한 사람이 아직 온보딩 중, P-05).
+ * version = P-06을 열 때 공동 분배표 버전(합쳐서). 그 사이 바뀌었으면 'split_changed'
+ */
+export async function completeJoin(
+  lines?: SplitLineDraft[],
+  version?: number,
+): Promise<'ok' | 'split_changed'> {
+  const p_lines = lines
+    ? (lines.map((l) => ({
+        kind: l.kind,
+        amount: l.amount,
+        goal_id: l.goalId ?? null,
+        user_id: l.userId ?? null,
+        name: l.name ?? null,
+      })) as unknown as Json)
+    : undefined;
+  const { error } = await supabase().rpc('complete_join', { p_lines, p_version: version });
+  if (error?.message?.includes('split_changed')) return 'split_changed';
   fail(error);
+  return 'ok';
 }
 
-/** 이번 플랜의 안 나눈 줄 분담액만 다시(P-11) */
-export async function updatePendingShares(
-  planId: string,
-  shares: { account_role: string; amount_groom: number; amount_bride: number }[],
-  isTemp: boolean,
-) {
-  const { error } = await supabase().rpc('update_pending_shares', {
-    p_plan_id: planId,
-    p_shares: shares,
-    p_is_temp: isTemp,
-  });
+/** P-04: 합류 중 관리 방식 바꾸기(바로 적용, 시작한 사람 알림) */
+export async function setJoinSalaryMode(mode: 'separate' | 'joint') {
+  const { error } = await supabase().rpc('set_join_salary_mode', { p_mode: mode });
   fail(error);
 }
 
@@ -66,6 +75,26 @@ export async function recordPrefillConsent(userId: string) {
     terms_version: TERMS_VERSION,
     agreed: true,
     source: 'prefill_review',
+  });
+  fail(error);
+}
+
+/** P-02b ‘지우고 새로 입력할게요’: 시작한 사람이 대신 입력한 내 명의 항목을 휴지통으로 */
+export async function discardPrefill() {
+  const { error } = await supabase().rpc('discard_prefill');
+  fail(error);
+}
+
+/** (재기획 전, 지울 대상) 이번 플랜의 안 나눈 줄 분담액만 다시. 옛 이번 달·첫 주 화면이 아직 부름 */
+export async function updatePendingShares(
+  planId: string,
+  shares: { account_role: string; amount_groom: number; amount_bride: number }[],
+  isTemp: boolean,
+) {
+  const { error } = await supabase().rpc('update_pending_shares', {
+    p_plan_id: planId,
+    p_shares: shares,
+    p_is_temp: isTemp,
   });
   fail(error);
 }

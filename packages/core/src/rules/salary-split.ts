@@ -88,3 +88,75 @@ export function goalEta(g: AllocGoal, monthly: Won, now = new Date()): GoalEta {
   if (!expected || !g.deadline) return { expected, lateMonths: null };
   return { expected, lateMonths: Math.max(monthsBetween(g.deadline, expected), 0) };
 }
+
+export interface JoinerSplitInput {
+  /** 합류한 사람 실수령과 id */
+  income: Won;
+  userId: string;
+  /** 우리 목표만, 저금 줄 순서대로(비상금 → 우선순위) */
+  goals: AllocGoal[];
+  /** 시작한 사람 분배표의 목표별 저금 줄 금액 */
+  others: Record<string, Won>;
+  now?: Date;
+}
+
+/**
+ * 각자: 합류한 사람 분배표 추천값(18 P-06 각자). 고정지출·생활비 = 실수령 × 25%, 용돈 = × 10%,
+ * 남은 금액을 우리 목표 우선순위대로 ‘아직 안 채운 월 필요액’(= 월 필요액 − 시작한 사람 저금 줄, 0 아래는 0)만큼.
+ * 비상금 목표 금액은 그대로(월 필요액을 모르면 시작한 사람 줄을 필요액으로 봐서 0원). 금액이 없는 목표는 0원.
+ */
+export function joinerSplit(o: JoinerSplitInput): SplitLineDraft[] {
+  const income = Math.max(o.income, 0);
+  const fixed = round10k(income * FIXED_RATE);
+  const living = round10k(income * LIVING_RATE);
+  const allowance = round10k(income * ALLOWANCE_RATE);
+  let left = income - fixed - living - allowance;
+  const savings: SplitLineDraft[] = o.goals.map((g) => {
+    const other = o.others[g.id] ?? 0;
+    const need = goalNeed(g, o.now) ?? (g.template === 'emergency' ? other : null);
+    const open = need === null ? 0 : Math.max(need - other, 0);
+    const amount = Math.max(Math.min(open, floor10k(left)), 0);
+    left -= amount;
+    return { kind: 'saving', goalId: g.id, amount, need };
+  });
+  return [
+    ...savings,
+    { kind: 'fixed', amount: fixed },
+    { kind: 'living', amount: living },
+    { kind: 'allowance', userId: o.userId, amount: allowance },
+  ];
+}
+
+export interface JointRefillInput {
+  /** 지금 공동 분배표 줄(시작한 사람이 정한 값) */
+  lines: SplitLineDraft[];
+  /** 합류한 사람 실수령과 id */
+  income: Won;
+  userId: string;
+  /** 저금 줄의 목표들(월 필요액 계산) */
+  goals: AllocGoal[];
+  now?: Date;
+}
+
+/**
+ * 합쳐서: 공동 분배표 다시 채우기(18 P-06 합쳐서). 있던 줄은 줄이지 않음. 합류한 사람 용돈 줄(실수령 × 10%)을 더하고,
+ * 늘어난 수입 − 그 용돈을 저금 줄 순서대로(비상금 → 우리 목표 → 내 목표) 각 목표 월 필요액까지 더함. 남으면 남는 돈.
+ */
+export function jointRefill(o: JointRefillInput): SplitLineDraft[] {
+  const income = Math.max(o.income, 0);
+  const allowance = round10k(income * ALLOWANCE_RATE);
+  let extra = income - allowance;
+  const goalOf = (id?: string) => o.goals.find((g) => g.id === id);
+  const lines = o.lines.map((l) => {
+    if (l.kind !== 'saving') return l;
+    const g = goalOf(l.goalId);
+    const need = g ? goalNeed(g, o.now) : null;
+    const add = need === null ? 0 : Math.max(Math.min(need - l.amount, floor10k(extra)), 0);
+    extra -= add;
+    return { ...l, amount: l.amount + add };
+  });
+  const has = lines.some((l) => l.kind === 'allowance' && l.userId === o.userId);
+  return has
+    ? lines
+    : [...lines, { kind: 'allowance' as const, userId: o.userId, amount: allowance }];
+}

@@ -41,6 +41,9 @@ export function SplitEditor({
   onSave,
   extra,
   locked,
+  steps,
+  noteOf,
+  incomeSub,
 }: {
   lines: SplitLineDraft[];
   onChange: (lines: SplitLineDraft[]) => void;
@@ -62,6 +65,12 @@ export function SplitEditor({
   extra?: ReactNode;
   /** 고칠 수 없는 줄(배우자 내 목표 줄) */
   locked?: (l: SplitLineDraft) => boolean;
+  /** 칸 막대(합류 P-06 5칸 등) */
+  steps?: { total: number; now: number; fill?: number };
+  /** 줄 오른쪽 회색 글(있으면 기본 보조 글 대신, 합류 P-06 “찬우님이 매달 95만 원 넣어요”, “95만 원 → 250만 원”) */
+  noteOf?: (l: SplitLineDraft) => string | undefined;
+  /** 수입 줄 아래 회색 글(합쳐서 “찬우 350만 원, 예빈 270만 원”) */
+  incomeSub?: string;
 }) {
   const [edit, setEdit] = useState<Edit>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -101,6 +110,7 @@ export function SplitEditor({
     return (
       <QuestionLayout
         chapter={progress}
+        steps={steps}
         title={head}
         onBack={close}
         primary={{ label: copy.next, disabled: !valid }}
@@ -155,7 +165,7 @@ export function SplitEditor({
       <ListRow
         key={`${l.kind}-${l.goalId ?? l.userId ?? l.name ?? i}`}
         label={nameOf(l)}
-        sub={sub}
+        sub={noteOf?.(l) ?? sub}
         value={readWon(l.amount)}
         onClick={fixed ? undefined : () => setEdit({ index: i })}
       />
@@ -166,6 +176,7 @@ export function SplitEditor({
   return (
     <QuestionLayout
       chapter={progress}
+      steps={steps}
       title={title}
       help={help}
       onBack={onBack}
@@ -179,7 +190,12 @@ export function SplitEditor({
       }
     >
       <List>
-        <ListRow label={copy.splitIncome(readWon(income))} value={paydayText} chevron={false} />
+        <ListRow
+          label={copy.splitIncome(readWon(income))}
+          sub={incomeSub}
+          value={paydayText}
+          chevron={false}
+        />
       </List>
       <SectionHeader title={copy.savingGroup} />
       <List label={copy.savingGroup}>
