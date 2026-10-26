@@ -16,6 +16,7 @@ import {
   watchBrowserClosed,
 } from './auth';
 import { emitter } from './events';
+import { offlineCache } from './offline-cache';
 import {
   pushOpens,
   pushReceives,
@@ -115,6 +116,11 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       // 웹사이트(다운로드·약관)만 앱 안 브라우저로
       if (!/^https:\/\/(www\.)?sweetwo\.kr(\/|$)/.test(url)) return;
       await Browser.open({ url });
+    },
+    cache: {
+      load: () => offlineCache.load(),
+      save: (text) => offlineCache.save(text),
+      clear: () => offlineCache.clear(),
     },
     // 내보내기(S-18): 앱 캐시에 쓰고 공유 창으로. 공유가 끝나면 캐시 파일은 지움
     saveFile: async (f) => {

@@ -3,6 +3,7 @@ import { DESKTOP_LOGIN_TIMEOUT_MS } from '@sweetwo/core';
 import { z } from 'zod';
 import { CH, type AuthEvent, type AuthProviderName, type SignOutReason } from '../shared/channels';
 import { authorizeUrl, randomToken } from './pkce';
+import { offlineCache } from './offline-cache';
 import { secureStore } from './secure-store';
 
 // 데스크톱 로그인(docs/DEV_GUIDE.md ‘데스크톱 로그인과 딥링크’, 기획서 A-02, A-03)
@@ -189,6 +190,8 @@ export async function signOut(reason: SignOutReason, o: { remote: boolean } = { 
   const s = session;
   session = null;
   secureStore.remove('refresh-token');
+  // 로그아웃(직접, 만료, 다른 기기, PIN 실패)이면 기기 캐시도 지움
+  offlineCache.clear();
   if (o.remote && s && env.url && env.key) {
     // 이 기기 세션만 끊는다. 실패해도 로컬은 지운다.
     await fetch(`${env.url}/auth/v1/logout?scope=local`, {

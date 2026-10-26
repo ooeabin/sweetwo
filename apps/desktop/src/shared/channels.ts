@@ -40,6 +40,10 @@ export const CH = {
   widgetHide: 'sweetwo:widget-hide',
   widgetSettings: 'sweetwo:widget-settings',
   widgetSetSettings: 'sweetwo:widget-set-settings',
+  // 오프라인 조회 캐시(30 동기화 4장): 암호화 파일 하나
+  cacheLoad: 'sweetwo:cache-load',
+  cacheSave: 'sweetwo:cache-save',
+  cacheClear: 'sweetwo:cache-clear',
   // 자동 업데이트(S-19 ‘업데이트 확인’)
   updateState: 'sweetwo:update-state',
   updateCheck: 'sweetwo:update-check',

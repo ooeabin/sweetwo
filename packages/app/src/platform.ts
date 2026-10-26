@@ -91,6 +91,12 @@ export interface DesktopBridge {
   };
   /** 웹사이트 열기(A-01 업데이트 → 다운로드·스토어 안내). 모바일만, sweetwo.kr 주소만 */
   openUrl?: (url: string) => Promise<void>;
+  /** 오프라인 조회 캐시(30 동기화 4장): 기기에 암호화해 둔 마지막 화면 데이터(JSON 글). 로그아웃하면 기기가 지움 */
+  cache?: {
+    load: () => Promise<string | null>;
+    save: (text: string) => Promise<boolean>;
+    clear: () => Promise<void>;
+  };
   /** 데스크톱 자동 업데이트(S-19 ‘업데이트 확인’). 모바일은 스토어 업데이트라 없음 */
   update?: {
     state: () => Promise<UpdateState>;

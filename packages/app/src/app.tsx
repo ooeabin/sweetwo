@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createHashRouter, createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { initSession } from './features/auth';
+import { restoreCache, startCacheSaver } from './shared/offline-cache';
 import type { Platform } from './platform';
 import { routes } from './routes';
 
@@ -27,8 +28,21 @@ export function App({ platform }: { platform: Platform }) {
     platform === 'desktop' ? createHashRouter(routes) : createBrowserRouter(routes),
   );
   useSystemTheme();
+  // 앱: 기기에 둔 마지막 데이터를 먼저 채우고(오프라인 조회) 그린 뒤, 받은 데이터를 계속 기기에 둠
+  const [restored, setRestored] = useState(() => !window.sweetwo?.cache);
+  useEffect(() => {
+    const bridge = window.sweetwo;
+    if (!bridge?.cache) return;
+    let stop: () => void = () => undefined;
+    void restoreCache(queryClient, bridge).finally(() => {
+      setRestored(true);
+      stop = startCacheSaver(queryClient, bridge);
+    });
+    return () => stop();
+  }, [queryClient]);
   // 데스크톱: 트레이 위젯·트레이 메뉴가 고른 화면으로(main → 앱 창)
   useEffect(() => window.sweetwo?.onNavigate?.((path) => void router.navigate(path)), [router]);
+  if (!restored) return null;
   return (
     <QueryClientProvider client={queryClient}>
       <div className="hg-root" data-platform={platform}>

@@ -1,9 +1,10 @@
-import { coupleOf, formatDateWeekday, todayKst } from '@sweetwo/core';
+import { coupleOf, formatDateWeekday, formatKstMonthDayTime, todayKst } from '@sweetwo/core';
 import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
 import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
+import { useCacheInfo } from '../../shared/offline-cache';
 import { useOnline } from '../../shared/online';
 import {
   N01Panel,
@@ -65,10 +66,12 @@ export function MainFrame(
     return () => clearInterval(t);
   }, [signedIn]);
   const online = useOnline();
+  // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”
+  const savedAt = useCacheInfo((s) => s.savedAt);
   const offline = !online && (
     <div className="hg-banner hg-banner--info" role="status">
-      <b>{copy.offlineTitle}</b>
-      <span>{copy.offlineBody}</span>
+      <b>{savedAt ? copy.offlineCached : copy.offlineTitle}</b>
+      <span>{savedAt ? copy.lastSaved(formatKstMonthDayTime(savedAt)) : copy.offlineBody}</span>
     </div>
   );
   return (
