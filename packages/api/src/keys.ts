@@ -57,5 +57,6 @@ export const qk = {
   goalSaved: ['goal_saved'] as const,
   goalMoves: (id: string) => ['goal_move', id] as const,
   goalChanges: ['goal_changes'] as const,
+  pendingTerms: ['pending_terms'] as const,
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };

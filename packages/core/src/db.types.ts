@@ -2428,6 +2428,7 @@ export type Database = {
           roles: Database["public"]["Enums"]["admin_role"][]
         }[]
       }
+      agree_terms: { Args: { p_marketing?: boolean }; Returns: number }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
@@ -2884,6 +2885,13 @@ export type Database = {
         }
         Returns: string
       }
+      pending_terms: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          kind: string
+          version: string
+        }[]
+      }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -3083,7 +3091,12 @@ export type Database = {
         | "analytics"
         | "peer_stats"
       consent_source:
-        "signup" | "prefill_review" | "care_day_first" | "settings" | "peer_stats_page"
+        | "signup"
+        | "prefill_review"
+        | "care_day_first"
+        | "settings"
+        | "peer_stats_page"
+        | "reconsent"
       couple_side: "groom" | "bride"
       couple_state: "not_joined" | "connected" | "unlink_pending" | "solo"
       email_source: "provider" | "manual"
@@ -3264,7 +3277,14 @@ export const Constants = {
         "analytics",
         "peer_stats",
       ],
-      consent_source: ["signup", "prefill_review", "care_day_first", "settings", "peer_stats_page"],
+      consent_source: [
+        "signup",
+        "prefill_review",
+        "care_day_first",
+        "settings",
+        "peer_stats_page",
+        "reconsent",
+      ],
       couple_side: ["groom", "bride"],
       couple_state: ["not_joined", "connected", "unlink_pending", "solo"],
       email_source: ["provider", "manual"],

@@ -1,6 +1,7 @@
-import { fetchLaunchConfig } from '@sweetwo/api';
+import { fetchLaunchConfig, fetchPendingTerms, qk } from '@sweetwo/api';
 import { formatKstDateTime, isBelowMin } from '@sweetwo/core';
 import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ToastHost } from '../../../shared/toast';
@@ -218,6 +219,17 @@ export function RequireAccount({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void session.has().then(setOk);
   }, [loc.pathname]);
+  // 약관 개정 재동의·마케팅 재확인(A-05r): 남은 게 있으면 먼저. 못 읽으면 막지 않음
+  const pending = useQuery({
+    queryKey: qk.pendingTerms,
+    queryFn: fetchPendingTerms,
+    enabled: ok === true,
+    retry: false,
+    staleTime: 10 * 60_000,
+  });
   if (ok === null) return null;
-  return ok ? <>{children}</> : <Navigate to={paths.login} replace />;
+  if (!ok) return <Navigate to={paths.login} replace />;
+  if (pending.data?.length && loc.pathname !== paths.reconsent)
+    return <Navigate to={paths.reconsent} replace state={{ back: loc.pathname + loc.search }} />;
+  return <>{children}</>;
 }

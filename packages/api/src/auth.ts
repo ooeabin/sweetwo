@@ -31,6 +31,21 @@ export async function fetchLoginState(provider?: AuthProvider): Promise<LoginSta
   return LoginState.parse(data);
 }
 
+/** A-05r 약관 개정 재동의·마케팅 2년 재확인: 다시 물어볼 것(terms, privacy, marketing) */
+export async function fetchPendingTerms(): Promise<{ kind: string; version: string }[]> {
+  const { data, error } = await supabase().rpc('pending_terms');
+  if (error) throw toError(error.message);
+  return data ?? [];
+}
+/** 다시 동의(남은 필수 항목 모두 + 마케팅은 물어본 경우만) */
+export async function agreeTerms(marketing: boolean | null) {
+  const { error } = await supabase().rpc(
+    'agree_terms',
+    marketing === null ? {} : { p_marketing: marketing },
+  );
+  if (error) throw toError(error.message);
+}
+
 /** A-05: 계정 생성 + 동의 기록 */
 export async function completeSignup(input: {
   provider: AuthProvider;

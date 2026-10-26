@@ -63,6 +63,7 @@ export interface MemDb {
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
   goalChanges: Record<string, unknown>[];
+  pendingTerms: { kind: string; version: string }[];
   /** 생활비 체크 답(W-03) */
   livingChecks: Record<string, unknown>[];
   /** 앱 안 공지(AD-10, 게시된 것) */
@@ -159,6 +160,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     goalMoves: [],
     notices: [],
     goalChanges: [],
+    pendingTerms: [],
     sessions: [
       {
         id: 's-this',
@@ -1245,6 +1247,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
+      if (fn === 'pending_terms') return json(route, db.pendingTerms);
+      if (fn === 'agree_terms') {
+        const b = body();
+        const n = db.pendingTerms.filter(
+          (p) => p.kind !== 'marketing' || 'p_marketing' in b,
+        ).length;
+        db.pendingTerms = db.pendingTerms.filter(
+          (p) => p.kind === 'marketing' && !('p_marketing' in b),
+        );
+        return json(route, n);
+      }
       if (fn === 'answer_goal_gap') {
         const b = body();
         db.goalUses = db.goalUses.filter((u) => u.month_close_id !== b.p_close);
