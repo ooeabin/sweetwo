@@ -438,3 +438,7 @@ enabled = true
 # 메일 보내기(DB kick_mail이 pg_net으로 부름). JWT 대신 x-mail-secret(MAIL_CRON_SECRET)로 확인
 [functions.send-mail]
 verify_jwt = false
+
+# 메일 반송·수신 거부 받기(SES → SNS HTTPS 구독). JWT 대신 주소의 ?token=(MAIL_EVENTS_SECRET)과 주제 ARN으로 확인
+[functions.mail-events]
+verify_jwt = false

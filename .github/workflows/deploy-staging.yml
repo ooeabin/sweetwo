@@ -27,5 +27,7 @@ jobs:
         run: supabase migration list
       - name: 마이그레이션 올리기
         run: supabase db push
-      - name: Edge Function 올리기(send-mail, 비밀 값은 대시보드에서 따로 넣음)
-        run: supabase functions deploy send-mail --project-ref "$PROJECT_REF"
+      - name: Edge Function 올리기(send-mail, mail-events. 비밀 값은 대시보드에서 따로 넣음)
+        run: |
+          supabase functions deploy send-mail --project-ref "$PROJECT_REF"
+          supabase functions deploy mail-events --project-ref "$PROJECT_REF"

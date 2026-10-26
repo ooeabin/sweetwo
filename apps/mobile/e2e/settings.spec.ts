@@ -764,3 +764,36 @@ test('새 기기 알림(A-08): 나예요 → 홈, 내가 아니에요 → 그 �
   await expect(page.getByText(/보안도 확인해 주세요/)).toBeVisible();
   await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
 });
+
+test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려던 화면으로, 마케팅 2년 재확인', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.pendingTerms = [
+    { kind: 'terms', version: 'v2' },
+    { kind: 'marketing', version: '' },
+  ];
+  await page.goto('/settings/security');
+  await expect(page).toHaveURL(/\/terms\/update$/);
+  await expect(page.getByRole('heading', { name: '바뀐 약관을 확인해 주세요' })).toBeVisible();
+  await expect(page.getByText('[필수] 개인정보 수집·이용')).toHaveCount(0);
+  await axe(page);
+  const go = page.getByRole('button', { name: '동의하고 계속하기' });
+  await expect(go).toBeDisabled();
+  await page
+    .getByRole('checkbox', { name: /이용약관/ })
+    .first()
+    .click();
+  await go.click();
+  await expect(page).toHaveURL(/\/settings\/security$/);
+  expect(db.pendingTerms).toEqual([]);
+
+  // 마케팅만 남은 경우
+  db.pendingTerms = [{ kind: 'marketing', version: '' }];
+  await page.goto('/goals');
+  await expect(page.getByRole('heading', { name: '마케팅 정보를 계속 받을까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '그만 받을게요' }).click();
+  await expect(page).toHaveURL(/\/goals$/);
+});

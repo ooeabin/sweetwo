@@ -85,6 +85,14 @@ export const copy = {
   marketing: '[선택] 마케팅 정보 받기',
   view: '보기',
   agreeContinue: '동의하고 계속하기',
+  // A-05r 약관 개정 재동의(바뀐 필수 항목만)·마케팅 2년 재확인 [확인 필요]
+  reconsentTitle: '바뀐 약관을 확인해 주세요',
+  reconsentHelp: '바뀐 항목만 다시 동의하면 이어서 쓸 수 있어요',
+  marketingAgainTitle: '마케팅 정보를 계속 받을까요?',
+  marketingAgainHelp: '동의한 지 2년이 지나 다시 여쭤봐요',
+  marketingKeep: '계속 받을게요',
+  marketingStop: '그만 받을게요',
+  reconsentFailed: '저장하지 못했어요. 다시 시도해 주세요',
   signupFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 
   // A-06

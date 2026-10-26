@@ -1,4 +1,4 @@
-import { createInvite, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import { createInvite, fetchMailBounced, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -51,6 +51,7 @@ export function H01Home() {
   });
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
+  const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
   if (!me.data || !space.data || !goals.data || lists.isLoading)
     return <LoadingFrame current="month" />;
 
@@ -170,11 +171,23 @@ export function H01Home() {
       </Button>
     </div>
   ) : undefined;
+  // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-14
+  const bounceBand = bounced.data ? (
+    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+      <span>
+        <b>{copy.mailBounced}</b> {copy.mailBouncedSub}
+      </span>
+      <Button variant="secondary" size="sm" onClick={() => nav('/settings/notifications')}>
+        {copy.mailCheck}
+      </Button>
+    </div>
+  ) : undefined;
   const banner =
-    notice || todoBand || unlinkBand ? (
+    notice || todoBand || unlinkBand || bounceBand ? (
       <>
         {unlinkBand}
         {notice}
+        {bounceBand}
         {todoBand}
       </>
     ) : undefined;

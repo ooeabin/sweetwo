@@ -1667,6 +1667,28 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_suppress: {
+        Row: {
+          bounces: number
+          complaint: boolean
+          email: string
+          last_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          bounces?: number
+          complaint?: boolean
+          email: string
+          last_at?: string
+        }
+        Update: {
+          bounces?: number
+          complaint?: boolean
+          email?: string
+          last_at?: string
+        }
+        Relationships: []
+      }
       notice: {
         Row: {
           body: string
@@ -2428,6 +2450,7 @@ export type Database = {
           roles: Database["public"]["Enums"]["admin_role"][]
         }[]
       }
+      agree_terms: { Args: { p_marketing?: boolean }; Returns: number }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       answer_access_request: {
         Args: { p_accept: boolean; p_id: string }
@@ -2602,14 +2625,6 @@ export type Database = {
         Args: { p_owner: string; p_space: string }
         Returns: number
       }
-      delete_minor_account: {
-        Args: { p_birth_year: number }
-        Returns: undefined
-      }
-      delete_underage_account: {
-        Args: { p_birth_date: string }
-        Returns: undefined
-      }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
       emergency_asset_add: {
         Args: { d: number; p_space: string }
@@ -2727,6 +2742,7 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mail_blocked: { Args: { p_email: string }; Returns: boolean }
       mail_missed_notifications: { Args: { p_now?: string }; Returns: number }
       make_checklist: {
         Args: { p_owner: string; p_space: string; p_today?: string }
@@ -2740,6 +2756,7 @@ export type Database = {
         Returns: string
       }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
+      my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2794,6 +2811,7 @@ export type Database = {
         Returns: string
       }
       note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
+      note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
       noti_mail_body: {
         Args: { p_body: string; p_title: string }
@@ -2883,6 +2901,13 @@ export type Database = {
           y: number
         }
         Returns: string
+      }
+      pending_terms: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          kind: string
+          version: string
+        }[]
       }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
@@ -3083,7 +3108,12 @@ export type Database = {
         | "analytics"
         | "peer_stats"
       consent_source:
-        "signup" | "prefill_review" | "care_day_first" | "settings" | "peer_stats_page"
+        | "signup"
+        | "prefill_review"
+        | "care_day_first"
+        | "settings"
+        | "peer_stats_page"
+        | "reconsent"
       couple_side: "groom" | "bride"
       couple_state: "not_joined" | "connected" | "unlink_pending" | "solo"
       email_source: "provider" | "manual"
@@ -3264,7 +3294,14 @@ export const Constants = {
         "analytics",
         "peer_stats",
       ],
-      consent_source: ["signup", "prefill_review", "care_day_first", "settings", "peer_stats_page"],
+      consent_source: [
+        "signup",
+        "prefill_review",
+        "care_day_first",
+        "settings",
+        "peer_stats_page",
+        "reconsent",
+      ],
       couple_side: ["groom", "bride"],
       couple_state: ["not_joined", "connected", "unlink_pending", "solo"],
       email_source: ["provider", "manual"],

@@ -29,6 +29,29 @@ const webStorage: SupportedStorage = {
   removeItem: (k) => safe(() => localStorage.removeItem(k), undefined),
 };
 
+// 앱 기본 틀 6번 툴팁 “모두 저장됨” / “저장 중”: 서버로 가는 쓰기(POST·PATCH·PUT·DELETE)가 진행 중인지
+let writing = 0;
+const savingListeners = new Set<() => void>();
+const emitSaving = () => savingListeners.forEach((f) => f());
+export const isSaving = () => writing > 0;
+export function subscribeSaving(f: () => void) {
+  savingListeners.add(f);
+  return () => void savingListeners.delete(f);
+}
+const trackedFetch: typeof fetch = async (input, init) => {
+  const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
+  const write = method !== 'GET' && method !== 'HEAD';
+  if (!write) return fetch(input, init);
+  writing++;
+  emitSaving();
+  try {
+    return await fetch(input, init);
+  } finally {
+    writing--;
+    emitSaving();
+  }
+};
+
 export function supabase(): Db {
   if (client) return client;
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -38,7 +61,10 @@ export function supabase(): Db {
   }
   client =
     mode.kind === 'desktop'
-      ? createClient<Database>(url, anonKey, { accessToken: mode.getAccessToken })
+      ? createClient<Database>(url, anonKey, {
+          accessToken: mode.getAccessToken,
+          global: { fetch: trackedFetch },
+        })
       : createClient<Database>(url, anonKey, {
           auth: {
             persistSession: true,
@@ -47,6 +73,7 @@ export function supabase(): Db {
             storage: webStorage,
             detectSessionInUrl: false,
           },
+          global: { fetch: trackedFetch },
         });
   return client;
 }
