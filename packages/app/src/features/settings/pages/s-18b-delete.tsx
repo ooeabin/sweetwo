@@ -55,15 +55,14 @@ export function S18bDelete() {
 
   if (d.loading || !d.me || !d.c || !d.space || assets.isLoading)
     return <MainFrame current={null} columns={[null]} />;
-  const { me, c, space } = d;
+  const { me, space } = d;
   const n = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && a.owner_user_id === me.id,
   ).length;
   const joined = space.couple_state === 'connected' || space.couple_state === 'unlink_pending';
   const lines = [
     copy.deleteMine(n),
-    joined ? copy.deleteJointStays(c.partnerName) : copy.deleteWholeSpace,
-    ...(space.couple_state === 'unlink_pending' ? [copy.deletePendingNote(c.partnerName)] : []),
+    joined ? copy.deleteSharedGone : copy.deleteWholeSpace,
     copy.deleteRestore,
   ];
   const provider = me.provider ? providerName[me.provider] : '';

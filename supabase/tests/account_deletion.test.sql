@@ -47,7 +47,7 @@ select is((select status::text from public.app_user where nickname = '찬우'), 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select couple_state::text from public.couple_space), 'solo', '예빈은 혼자 쓰기');
-select results_eq($$ select name, amount from public.asset $$, $$ values ('공동 적금', 24000000::bigint) $$, '공동 항목은 예빈에게, 찬우 명의는 찬우 새 공간으로');
+select is((select count(*)::int from public.asset), 0, '같이 쓰던 데이터는 예빈에게도 안 보임(빈 새 공간)');
 select is((select title from public.notification where kind = 'partner_deleted'), '찬우님이 계정을 삭제했어요', '상대 알림');
 reset role;
 
@@ -71,7 +71,7 @@ select results_eq(
   $$ select (select couple_state::text from public.couple_space where id = current_setting('test.s')::uuid),
             (select count(*)::int from public.asset where space_id = current_setting('test.s')::uuid),
             (select count(*)::int from public.app_user where space_id = current_setting('test.s')::uuid) $$,
-  $$ values ('connected', 2, 2) $$, '다시 연결: 원래 공간에 두 사람, 찬우 통장도 돌아옴');
+  $$ values ('connected', 2, 2) $$, '다시 연결: 원래 공간과 데이터가 돌아옴');
 
 -- 혼자 쓰는 K: 삭제 → 30일 뒤 공간과 계정까지 지움
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
