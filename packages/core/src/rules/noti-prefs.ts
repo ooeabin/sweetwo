@@ -54,13 +54,14 @@ export function inQuiet(hour: number, start: number, end: number) {
   return start < end ? hour >= start && hour < end : hour >= start || hour < end;
 }
 
-/** OS 알림을 띄울지: 받는 방법 OS 알림 켜짐 + 그 묶음 켜짐 + 방해 금지 밖. 설정에 없는 묶음(끌 수 없는 것)은 켜짐 */
+/** OS 알림을 띄울지: 받는 방법 OS 알림 켜짐 + 그 묶음 켜짐 + 방해 금지 밖. 설정에 없는 묶음(끌 수 없는 것)은 켜짐.
+ *  silent(인앱만, 예: 배우자 체크 다 함)는 늘 띄우지 않음 */
 export function pushAllowed(
   prefs: NotiPrefs,
   topic: string | null,
   quiet: { hour: number; start: number; end: number },
 ) {
-  if (!prefs.push || inQuiet(quiet.hour, quiet.start, quiet.end)) return false;
+  if (topic === 'silent' || !prefs.push || inQuiet(quiet.hour, quiet.start, quiet.end)) return false;
   const t = prefs.topics[topic as NotiTopic];
   return t ? t.push : true;
 }

@@ -2,7 +2,7 @@ import type { PayChecklist, PayCheckLine } from '@sweetwo/api';
 import { readWon } from '@sweetwo/core';
 import { AmountInput, QuestionLayout, SectionHeader, Tabs } from '@sweetwo/ui';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { CheckLine, isPast, lineName, periodText } from '../check-line';
 import { copy } from '../copy';
@@ -20,7 +20,7 @@ import { salaryPaths } from '../paths';
 
 // W-02 이번 달 월급(20). 디자인 시스템 Checklist 틀(TransferRow 줄). 저금 줄 먼저, 쓰는 돈 다음.
 // 각자 모드 + 배우자 합류면 사람 탭(배우자 탭은 보기 + 대신 체크). 줄 ⋯ ‘다른 금액으로 보냈어요’ → W-02a.
-// 마지막 줄을 체크하면 W-02 끝. 지난 달 보기(‹ ›)는 다음 단계.
+// `?who=사람 id`면 그 사람 탭으로 엶(배우자 체크 다 함 알림). 마지막 줄을 체크하면 W-02 끝. 지난 달 보기(‹ ›)는 다음 단계.
 export function W02Checklist() {
   const nav = useNavigate();
   const me = useMe();
@@ -29,7 +29,8 @@ export function W02Checklist() {
   const partner = usePartner();
   const lists = useChecklists();
   const check = useCheck();
-  const [who, setWho] = useState<string | null>(null);
+  const [params] = useSearchParams();
+  const [who, setWho] = useState<string | null>(() => params.get('who'));
   const [other, setOther] = useState<PayCheckLine | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const prevLeft = useRef<number | null>(null);

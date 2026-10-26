@@ -4195,6 +4195,10 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      make_checklist: {
+        Args: { p_owner: string; p_space: string; p_today?: string }
+        Returns: string
+      }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
@@ -4334,6 +4338,14 @@ export type Database = {
         }
         Returns: string
       }
+      pay_line_noun: {
+        Args: {
+          p_goal: string
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_name: string
+        }
+        Returns: string
+      }
       proposal_item_noun: {
         Args: {
           p: Omit<
@@ -4427,6 +4439,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
       run_unlink_deadlines: {
         Args: Record<PropertyKey, never>
         Returns: undefined

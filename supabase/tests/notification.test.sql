@@ -1,8 +1,8 @@
--- pgTAP: 알림. 내 알림만 보고 읽음 처리, 제안 도착·응답·합류는 바로, 챙길 날(음력·서프라이즈)·월급날·월말 정리는 예약 작업으로,
+-- pgTAP: 알림. 내 알림만 보고 읽음 처리, 제안 도착·응답·합류는 바로, 챙길 날(음력·서프라이즈)은 예약 작업으로,
 -- 같은 알림은 한 번만
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(14);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -74,15 +74,7 @@ select results_eq(
             ('22222222-2222-2222-2222-222222222222'::uuid, '추석이 일주일 남았어요', null::text, false) $$,
   '음력 날짜, 서프라이즈는 만든 사람만 + OS 알림 숨김, 다시 돌려도 한 번');
 
--- 월말 정리: 플랜 사이클 끝 3일 전(2026-10-22), 전날 리마인드는 정리 전일 때만
-select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
-set local role authenticated;
-select public.start_first_plan('2026-09-01', '2026-09-25', '2026-10-24', null, false, false, '{}',
-  '[{"target":"account","account_role":"living","amount":870000,"amount_groom":520000,"amount_bride":350000}]');
-reset role;
-select is(public.send_evening_notifications('2026-10-22'), 2, '월말 정리 둘 다');
-select is((select title from public.notification where kind = 'close_start' limit 1),
-  '9월 월급 플랜을 정리할 차례예요', '월말 정리 문구');
+-- 월급날·월말 확인은 체크리스트 기준(checklist_cron_noti.test.sql)
 
 select * from finish();
 rollback;
