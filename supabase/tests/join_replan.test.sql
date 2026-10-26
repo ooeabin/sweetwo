@@ -1,7 +1,7 @@
 -- pgTAP: 배우자 합류 재기획(18). 관리 방식 바꾸기(P-04), 합류 완료(P-06, 대기), 첫 목표 알림. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(12);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
