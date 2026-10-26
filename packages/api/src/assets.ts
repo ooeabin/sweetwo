@@ -111,3 +111,15 @@ export async function saveInvestAnswer(answer: InvestAnswer) {
     .eq('id', id);
   fail(error);
 }
+
+/** F-04a 만기된 돈 정리: 다른 통장으로(그 통장 + 만기 금액, 이 항목은 만기 완료) 또는 다시 가입(새 만기일) */
+export async function settleMatured(
+  id: string,
+  how: { to: string } | { newDate: string },
+): Promise<void> {
+  const { error } = await supabase().rpc(
+    'settle_matured',
+    'to' in how ? { p_asset: id, p_to: how.to } : { p_asset: id, p_new_date: how.newDate },
+  );
+  fail(error);
+}

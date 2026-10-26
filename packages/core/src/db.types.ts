@@ -4586,6 +4586,10 @@ export type Database = {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
       }
+      settle_matured: {
+        Args: { p_asset: string; p_new_date?: string; p_to?: string }
+        Returns: undefined
+      }
       space_avatars: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4692,7 +4696,7 @@ export type Database = {
       admin_role: "super" | "ops" | "cs" | "analyst"
       asset_owner: "joint" | "person"
       asset_side: "asset" | "debt"
-      asset_status: "held" | "sold"
+      asset_status: "held" | "sold" | "matured"
       asset_visibility: "all" | "sum" | "private"
       auth_provider: "kakao" | "google" | "apple"
       big_expense_how: "from_goal" | "exception"
@@ -4873,7 +4877,7 @@ export const Constants = {
       admin_role: ["super", "ops", "cs", "analyst"],
       asset_owner: ["joint", "person"],
       asset_side: ["asset", "debt"],
-      asset_status: ["held", "sold"],
+      asset_status: ["held", "sold", "matured"],
       asset_visibility: ["all", "sum", "private"],
       auth_provider: ["kakao", "google", "apple"],
       big_expense_how: ["from_goal", "exception"],

@@ -758,6 +758,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'net_worth_history') return json(route, db.netWorth);
       if (fn === 'partner_activity') return json(route, db.activity);
       // G-05 달성: 축하는 사람마다 한 번
+      // F-04a 만기된 돈 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
+      if (fn === 'settle_matured') {
+        const b = body();
+        const a = db.assets.find((x) => x.id === b.p_asset);
+        if (a && b.p_to) {
+          const t = db.assets.find((x) => x.id === b.p_to);
+          if (t) t.amount = Number(t.amount) + Number(a.amount);
+          a.status = 'matured';
+        } else if (a) a.maturity_date = b.p_new_date;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'achieve_goal') {
         const g = db.goals.find((x) => x.id === body().p_goal);
         const seen = (g?.achieved_seen as string[] | undefined) ?? [];

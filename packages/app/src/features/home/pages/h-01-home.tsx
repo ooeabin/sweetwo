@@ -1,8 +1,16 @@
-import { fetchCareDays, qk } from '@sweetwo/api';
+import {
+  fetchAssets,
+  fetchCareDays,
+  fetchMyUnlink,
+  fetchUnlink,
+  fetchUnlinkPartnerName,
+  qk,
+} from '@sweetwo/api';
 import {
   addDays,
   daysBetween,
   formatDateWeekday,
+  formatMonthDay,
   nextCareDate,
   todayKst,
   type CareRule,
@@ -26,11 +34,20 @@ import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
 
 const INVITE_KEY = 'sweetwo:home:invite-closed'; // 초대 할 일 닫은 날(7일 동안 안 보임)
+const TODO_KEY = 'sweetwo:home:todo-closed'; // 닫은 만기·챙길 날 할 일(항목 + 날짜)
 const readClosed = () => {
   try {
     return localStorage.getItem(INVITE_KEY);
   } catch {
     return null;
+  }
+};
+const readTodoClosed = (): string[] => {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(TODO_KEY) ?? '[]');
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
   }
 };
 
@@ -47,7 +64,17 @@ export function H01Home() {
   const sums = useGoalSaved();
   const nw = useNetWorth(true);
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
+  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
+  const unlink = useQuery({ queryKey: qk.unlink, queryFn: fetchUnlink });
+  const solo = space.data?.couple_state === 'solo';
+  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
+  const exName = useQuery({
+    queryKey: qk.unlinkPartner,
+    queryFn: fetchUnlinkPartnerName,
+    enabled: solo && !!myUnlink.data,
+  });
   const [inviteClosed, setInviteClosed] = useState(readClosed);
+  const [todoClosed, setTodoClosed] = useState(readTodoClosed);
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
@@ -105,7 +132,8 @@ export function H01Home() {
         ? copy.hiGoal(myName, top.name, pct)
         : copy.hi(myName);
 
-  // H-06 할 일 한 줄(맨 앞 하나): 월말 확인 → 초대 → 목표 금액 정하기
+  // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’): 연결 해제 요청 받음 → 다시 연결 요청 받음 → 월말 확인
+  // → 초대 → 목표 금액 정하기 → 만기(F-04a)·챙길 날(7일 안). 닫은 만기·챙길 날은 그 날짜 동안 안 보임
   const reviewOpen = list && left > 0 && today >= addDays(list.cycle_end, -2);
   const noAmount = goals.data.find(
     (g) => g.template !== 'emergency' && g.status === 'active' && g.target_amount === null,
@@ -113,31 +141,82 @@ export function H01Home() {
   const inviteVisible =
     space.data.couple_state === 'not_joined' &&
     (!inviteClosed || daysBetween(inviteClosed, today) >= 7);
-  const todo = reviewOpen
-    ? { text: copy.todoReview(list.label, left), to: salaryPaths.review }
-    : inviteVisible
-      ? {
-          text: copy.todoInvite,
-          to: '/settings/couple',
-          close: () => {
-            try {
-              localStorage.setItem(INVITE_KEY, today);
-            } catch {
-              /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
+  const partnerName = partner.data?.nickname ?? '';
+  const unlinkIn = unlink.data && unlink.data.requested_by !== meId ? unlink.data : null;
+  const reconnectIn =
+    solo && myUnlink.data?.reconnect_by && myUnlink.data.reconnect_by !== meId
+      ? !myUnlink.data.reconnect_answer
+      : false;
+  const closeTodo = (key: string) => () => {
+    const next = [...todoClosed.slice(-30), key];
+    try {
+      localStorage.setItem(TODO_KEY, JSON.stringify(next));
+    } catch {
+      /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
+    }
+    setTodoClosed(next);
+  };
+  const matured = (assets.data ?? []).find(
+    (a) =>
+      a.side === 'asset' &&
+      a.kind !== 'deposit_money' &&
+      !!a.maturity_date &&
+      a.maturity_date <= today &&
+      (a.owner === 'joint' || a.owner_user_id === meId) &&
+      !todoClosed.includes(`matured:${a.id}:${a.maturity_date}`),
+  );
+  const careSoon = (cares.data ?? [])
+    .map((c) => ({ c, d: nextCareDate(c as unknown as CareRule, today) }))
+    .filter(
+      (x): x is { c: (typeof x)['c']; d: string } =>
+        !!x.d &&
+        daysBetween(today, x.d) >= 0 &&
+        daysBetween(today, x.d) <= 7 &&
+        !todoClosed.includes(`care:${x.c.id}:${x.d}`),
+    )
+    .sort((a, b) => (a.d < b.d ? -1 : 1))[0];
+  type Todo = { text: string; to: string; close?: () => void };
+  const todo: Todo | null = unlinkIn
+    ? { text: copy.todoUnlink(partnerName), to: '/settings/couple/unlink/review' }
+    : reconnectIn
+      ? { text: copy.todoReconnect(exName.data ?? ''), to: '/settings/couple/reconnect' }
+      : reviewOpen
+        ? { text: copy.todoReview(list.label, left), to: salaryPaths.review }
+        : inviteVisible
+          ? {
+              text: copy.todoInvite,
+              to: '/settings/couple',
+              close: () => {
+                try {
+                  localStorage.setItem(INVITE_KEY, today);
+                } catch {
+                  /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
+                }
+                setInviteClosed(today);
+              },
             }
-            setInviteClosed(today);
-          },
-        }
-      : noAmount
-        ? { text: copy.todoAmount(noAmount.name), to: `/goals/${noAmount.id}/edit/amount` }
-        : null;
+          : noAmount
+            ? { text: copy.todoAmount(noAmount.name), to: `/goals/${noAmount.id}/edit/amount` }
+            : matured
+              ? {
+                  text: copy.todoMatured(matured.name),
+                  to: `/assets/${matured.id}/matured`,
+                  close: closeTodo(`matured:${matured.id}:${matured.maturity_date ?? ''}`),
+                }
+              : careSoon
+                ? {
+                    text: copy.todoCare(formatMonthDay(careSoon.d), careSoon.c.name),
+                    to: `/calendar/day/${careSoon.c.id}`,
+                    close: closeTodo(`care:${careSoon.c.id}:${careSoon.d}`),
+                  }
+                : null;
   const todoBand = todo ? (
     <div className="hg-banner hg-banner--info hg-body__banner" role="status">
       <span>{todo.text}</span>
       <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
         {copy.open}
       </Button>
-      {'close' in todo && todo.close && (
+      {todo.close && (
         <Button variant="ghost" size="sm" onClick={todo.close}>
           {copy.close}
         </Button>
@@ -180,7 +259,17 @@ export function H01Home() {
         date: d,
         label: c.name,
         dday: daysBetween(today, d),
-        to: '/calendar',
+        to: `/calendar/day/${c.id}`,
+      });
+  }
+  for (const a of assets.data ?? []) {
+    if (a.side === 'asset' && a.maturity_date && within(a.maturity_date))
+      items.push({
+        key: `asset-${a.id}`,
+        date: a.maturity_date,
+        label: copy.maturity(a.name),
+        dday: daysBetween(today, a.maturity_date),
+        to: `/assets/${a.id}`,
       });
   }
   for (const g of goals.data) {
@@ -196,7 +285,7 @@ export function H01Home() {
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
   const go = (to: string) => nav(to);
-  const assets =
+  const assetsCard =
     nw && !nw.empty ? (
       <H06NetWorth n={nw} onOpen={() => nav('/assets')} />
     ) : (
@@ -250,7 +339,7 @@ export function H01Home() {
           />
         </div>,
         <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
-          {assets}
+          {assetsCard}
           <UpcomingCard items={items.slice(0, 3)} go={go} />
         </div>,
       ]}
