@@ -78,6 +78,7 @@ export function CheckLine({
       if (r === 'already_checked')
         return toast(copy.alreadyChecked(personName(line.checked_by) ?? ''));
       if (r === 'closed') return toast(copy.closed);
+      if (r === 'queued') return; // 오프라인: “연결되면 자동으로 저장돼요”는 이미 띄움
       if (done || skipped) return;
       const undo = { label: copy.undo, onClick: () => void check(line, 'wait') };
       toast(line.kind === 'saving' ? copy.addedToGoal(name, amount) : copy.checked, undo);

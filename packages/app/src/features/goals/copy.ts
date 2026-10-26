@@ -4,6 +4,9 @@ export const copy = {
   title: '목표',
   retry: '다시 시도',
   saveFailed: '저장하지 못했어요',
+  savedOffline: '연결되면 자동으로 저장돼요',
+  queuedGoal: (name: string, what: 'amount' | 'deadline' | 'name') =>
+    `${name} ${what === 'amount' ? '목표 금액' : what === 'deadline' ? '기한' : '이름'}`, // [확인 필요] 보내지 못한 입력 목록 이름
   // 충돌 선택(13 공통 상태 11번)
   conflictQ: '어느 쪽으로 할까요?',
   conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,

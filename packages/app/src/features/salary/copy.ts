@@ -1,6 +1,9 @@
 // 월급 체크리스트 문구(docs/spec/20-salary-plan.md, 홈 19-this-month.md H-03). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  // 오프라인 입력(30 동기화 4장, 13 공통 상태 9번)
+  savedOffline: '연결되면 자동으로 저장돼요',
+  queuedCheck: (name: string) => (name ? `${name} 체크` : '체크'), // [확인 필요] 보내지 못한 입력 목록 이름
   // W-01 월급 분배표
   splitTitle: '월급 분배표',
   splitHelp: '금액을 눌러 바꿀 수 있어요', // [확인 필요]

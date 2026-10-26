@@ -5,6 +5,7 @@ import {
   trashAsset,
   updateAsset,
   updateIfUnchanged,
+  type Asset,
 } from '@sweetwo/api';
 import {
   assetGroup,
@@ -27,10 +28,11 @@ import {
   PageHeader,
   SectionHeader,
 } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
+import { enqueue, isOfflineError } from '../../../shared/outbox';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { lastAssetsTab } from '../assets-frame';
@@ -52,6 +54,7 @@ export function F04Item() {
   const nav = useNavigate();
   const d = useAssetsData();
   const refresh = useRefreshAssets();
+  const qc = useQueryClient();
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
@@ -101,8 +104,25 @@ export function F04Item() {
   const saveAmount = (force = false) => {
     if (editAmount === undefined || editAmount === null) return;
     const patch = { amount: editAmount, estimated: false };
+    // 오프라인: 대기열 + 화면 값 바로 바꿈(30 동기화 4장). 보낼 때 같은 규칙으로 다시 판정
+    const queue = () => {
+      enqueue({
+        kind: 'asset',
+        rowId: a.id,
+        patch,
+        base: { amount: openedAmount ?? a.amount },
+        label: copy.queuedAmount(a.name),
+      });
+      qc.setQueryData<Asset[]>(qk.assets, (old) =>
+        old?.map((x) => (x.id === a.id ? { ...x, ...patch } : x)),
+      );
+      toast(copy.savedOffline);
+      setEditAmount(undefined);
+    };
+    if (!force && !navigator.onLine) return queue();
     let saved = false;
-    void run(async () => {
+    let queued = false;
+    const act = async () => {
       if (!force) {
         const r = await updateIfUnchanged('asset', a.id, patch, {
           amount: openedAmount ?? a.amount,
@@ -111,14 +131,23 @@ export function F04Item() {
           ? 'same'
           : conflictDecision(r.current, { amount: editAmount }, d.me?.id ?? '');
         if (!r.ok && dec === 'choose') {
-          setConflict({ mine: editAmount, theirs: r.current.amount });
+          setConflict({ mine: editAmount ?? 0, theirs: r.current.amount });
           return;
         }
         if (dec === 'same') return void (saved = true);
       }
       await updateAsset(a.id, patch);
       saved = true;
+    };
+    void run(async () => {
+      try {
+        await act();
+      } catch (e) {
+        if (!isOfflineError(e)) throw e;
+        queued = true;
+      }
     }).then(() => {
+      if (queued) return queue();
       if (!saved) return;
       toast(copy.saved);
       setEditAmount(undefined);
