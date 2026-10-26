@@ -74,7 +74,8 @@ async function targetGone(
       : kind === 'assets'
         ? await qc.fetchQuery({ queryKey: qk.assets, queryFn: fetchAssets })
         : await qc.fetchQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
-  if (rows.some((r) => r.id === id && !(r as { deleted_at?: string | null }).deleted_at)) return null;
+  if (rows.some((r) => r.id === id && !(r as { deleted_at?: string | null }).deleted_at))
+    return null;
   const trash = await qc.fetchQuery({ queryKey: qk.trash, queryFn: fetchTrash });
   return trash.some((t) => t.id === id) ? 'deleted' : 'hidden';
 }
