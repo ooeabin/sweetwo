@@ -44,7 +44,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 
 - Electron: 데스크톱 앱과 트레이 위젯. 보안 기본값 contextIsolation 켬, nodeIntegration 끔, preload로 필요한 기능만 열어 줌
 - 로그인: 시스템 브라우저 OAuth(PKCE) → https://sweetwo.kr/auth/callback(웹사이트의 정적 복귀 페이지, (전환 전) app.sweetwo.kr) → 딥링크(sweetwo://)로 복귀. 모바일은 같은 주소가 앱 링크라 앱이 바로 받음. refresh token은 main 프로세스가 safeStorage로 암호화해 보관(세부는 ‘인증과 세션’)
-- 로컬 저장: 위젯 캐시와 오프라인 큐는 암호화, 키는 safeStorage(지금 트레이 위젯 캐시는 아직 평문 JSON, 오프라인 큐는 없음)
+- 로컬 저장: 위젯 캐시와 오프라인 큐는 암호화, 키는 safeStorage(트레이 위젯 마지막 값은 `widget.json`의 `snapshotEnc`로 암호화, 암호화를 못 쓰면 남기지 않음. 오프라인 큐는 아직 없음). 트레이 값은 앱 창이 30분마다 새로 읽어 고침
 - Capacitor: 모바일 앱. `apps/mobile`(Vite 빌드 + iOS·Android 프로젝트)이 packages/app을 감쌈. 모바일 전용 기능(로그인, 보안 저장소, 잠금·생체 인증, 푸시, 앱 링크)은 데스크톱과 같은 모양의 브리지(`window.sweetwo`)로만 열어 줌. 플랫폼 값은 `desktop` / `ios` / `android`, 데스크톱 전용(트레이, 단축키)은 플랫폼 플래그로 숨김
 - 같은 Vite 화면을 브라우저로 띄우는 건 개발과 e2e(흉내 Supabase)용뿐, 배포하지 않음
 - 서버 데이터: TanStack Query 캐시 + Realtime 변경 신호로 무효화. 끊기면 30초 폴링

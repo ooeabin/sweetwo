@@ -6,7 +6,7 @@ import {
   salaryState,
   type TraySnapshot,
 } from '@sweetwo/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { detectPlatform } from '../../platform';
 import { useMe, usePartner } from './data';
@@ -28,6 +28,21 @@ export function useTraySync() {
   });
   const last = useRef('');
   const i = h.input;
+  // 30분마다 새로 읽어 트레이 값을 고침(26 32줄, 날짜가 바뀌는 할 일·다가오는 날)
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!desktop) return;
+    const t = setInterval(
+      () =>
+        void Promise.all(
+          [['pay_checklist'], qk.goals, qk.careDays, qk.assets].map((k) =>
+            qc.invalidateQueries({ queryKey: k }),
+          ),
+        ),
+      30 * 60_000,
+    );
+    return () => clearInterval(t);
+  }, [desktop, qc]);
   useEffect(() => {
     const bridge = window.sweetwo?.widget;
     if (!desktop || !bridge || !i || !me.data) return;
