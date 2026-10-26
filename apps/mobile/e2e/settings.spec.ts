@@ -472,7 +472,9 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
-    page.getByText('연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요. 해제 뒤 새로 적은 내용은 지워져요'),
+    page.getByText(
+      '연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
+    ),
   ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다시 연결할게요' }).click();
