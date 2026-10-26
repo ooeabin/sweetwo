@@ -1,6 +1,5 @@
 // settings 기능. 밖으로 내보낼 것만 여기서 export.
 export { S10Settings } from './pages/s-10-settings';
-export { S10aAccountMode } from './pages/s-10a-account-mode';
 export { S11Me } from './pages/s-11-me';
 export { S12Couple } from './pages/s-12-couple';
 export { S12aUnlinkIntro } from './pages/s-12a-unlink-intro';
@@ -24,14 +23,15 @@ export { S12hUnlinked } from './pages/s-12h-unlinked';
 export { S11aNickname } from './pages/s-11a-nickname';
 export { S14Notifications } from './pages/s-14-notifications';
 export { S14aQuiet } from './pages/s-14a-quiet';
-export { S11bSide } from './pages/s-11b-side';
 export { S11dPlanDay } from './pages/s-11d-plan-day';
+export { S11cSalary } from './pages/s-11c-salary';
+export { S11fSalaryMode } from './pages/s-11f-salary-mode';
+export { S11gMarriage } from './pages/s-11g-marriage';
+export { S11hWeddingDate } from './pages/s-11h-wedding-date';
+export { S11iBirthYear } from './pages/s-11i-birth-year';
 export { S01Guides } from './pages/s-01-guides';
 export { S01Talk } from './pages/s-01-talk';
 export { S02ChecklistItem } from './pages/s-02-checklist-item';
 export { S03Guide } from './pages/s-03-guide';
-export { S17Answers } from './pages/s-17-answers';
-export { S17aAnswer } from './pages/s-17a-answer';
-export { S17bSplit } from './pages/s-17b-split';
 export { S11ePhoto } from './pages/s-11e-photo';
 export { S22Widget } from './pages/s-22-widget';

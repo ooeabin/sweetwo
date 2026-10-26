@@ -4471,9 +4471,14 @@ export type Database = {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
       }
+      set_joint_cycle_day: { Args: { p_day: number }; Returns: undefined }
       set_living_check: { Args: { p_on: boolean }; Returns: undefined }
       set_my_side: {
         Args: { p_side: Database["public"]["Enums"]["couple_side"] }
+        Returns: undefined
+      }
+      set_salary_mode: {
+        Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
       }
       space_avatars: {

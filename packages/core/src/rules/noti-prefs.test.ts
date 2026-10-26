@@ -29,10 +29,10 @@ describe('알림 설정', () => {
   it('OS 알림을 띄울지', () => {
     const q = { hour: 9, start: 22, end: 8 };
     const p = notiPrefs({});
-    expect(pushAllowed(p, 'proposal', q)).toBe(true);
+    expect(pushAllowed(p, 'plan', q)).toBe(true);
     expect(pushAllowed(p, 'care_14', q)).toBe(false);
     expect(pushAllowed(p, 'other', q)).toBe(true);
-    expect(pushAllowed({ ...p, push: false }, 'proposal', q)).toBe(false);
-    expect(pushAllowed(p, 'proposal', { ...q, hour: 23 })).toBe(false);
+    expect(pushAllowed({ ...p, push: false }, 'plan', q)).toBe(false);
+    expect(pushAllowed(p, 'plan', { ...q, hour: 23 })).toBe(false);
   });
 });

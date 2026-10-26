@@ -1,11 +1,5 @@
-import { fetchTrash, propose, purgeTrash, qk, restoreTrash, type TrashRow } from '@sweetwo/api';
-import {
-  daysBetween,
-  formatMonthDay,
-  proposalApplyOn,
-  spaceBaseDay,
-  todayKst,
-} from '@sweetwo/core';
+import { fetchTrash, purgeTrash, qk, restoreTrash, type TrashRow } from '@sweetwo/api';
+import { daysBetween, formatMonthDay, todayKst } from '@sweetwo/core';
 import { Badge, Button, EmptyState, Menu, Modal, PageHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -16,7 +10,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-21 휴지통(docs/spec/25-settings.md): 지운 지 30일 안의 내 명의·공동 항목(자산·부채, 목표, 가족, 챙길 날), 최근 지운 순.
-// 되살리기는 묻지 않고 + Toast “되살렸어요”(같이 지워진 것도 함께, 서버). 연결된 부부의 목표는 제안으로.
+// 되살리기는 묻지 않고 바로 + Toast “되살렸어요”(같이 지워진 것도 함께, 서버). 배우자의 내 목표는 안 보임.
 // 영구 삭제(⋯)와 비우기만 Modal. 30일 지나면 서버가 매일 자동 영구 삭제.
 export function S21Trash() {
   const nav = useNavigate();
@@ -30,10 +24,9 @@ export function S21Trash() {
   const rows = list.data ?? [];
   const today = todayKst();
   const c = d.c;
-  const base = spaceBaseDay(d.space, c);
   const refresh = () =>
     Promise.all(
-      [qk.trash, qk.assets, qk.goals, qk.family, qk.careDays, qk.proposals].map((k) =>
+      [qk.trash, qk.assets, qk.goals, qk.family, qk.careDays, qk.splits].map((k) =>
         qc.invalidateQueries({ queryKey: k }),
       ),
     );
@@ -41,13 +34,8 @@ export function S21Trash() {
     if (busy) return;
     setBusy(true);
     try {
-      const res = await restoreTrash(r.kind, r.id);
-      if (res === 'needs_proposal' && base !== null) {
-        await propose('goal_restore', {}, proposalApplyOn(base), r.id);
-        toast(copy.restoreProposed(c.partnerName));
-      } else {
-        toast(copy.restored);
-      }
+      await restoreTrash(r.kind, r.id);
+      toast(copy.restored);
       await refresh();
     } catch {
       toast(copy.failed);

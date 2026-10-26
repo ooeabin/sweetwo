@@ -1,7 +1,7 @@
 -- pgTAP: 휴지통(S-21)과 공개 범위 기본값(S-13). 찬우(시작), 예빈(합류)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -57,16 +57,12 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select is((select count(*)::int from public.trash_rows() where kind = 'asset'), 0, '배우자 명의는 내 휴지통에 없음');
 update public.goal set deleted_at = now();
-select throws_ok($$ select public.restore_trash('goal', (select id from public.goal)) $$, 'P0001', 'needs_proposal',
-  '연결된 부부의 목표는 제안으로');
-select isnt(public.propose('goal_restore', '{}', current_date + 4, (select id from public.goal)), null, '되살리기 제안');
+select is(public.restore_trash('goal', (select id from public.goal)), 'restored', '연결된 부부도 제안 없이 바로 되살림');
+select is((select count(*)::int from public.goal where deleted_at is null), 1, '목표가 되살아남');
 reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select title from public.notification where kind = 'proposal_arrived'), '찬우님이 여행 목표를 되살리자고 제안했어요', '제안 알림 문구');
-select is(public.respond_proposal((select id from public.proposal where status = 'open'), 'like')::text, 'applied', '좋아요');
-select is((select count(*)::int from public.goal where deleted_at is null), 1, '목표가 되살아남');
 select is(public.purge_trash(), 1, '휴지통 비우기(예빈 통장)');
 reset role;
 

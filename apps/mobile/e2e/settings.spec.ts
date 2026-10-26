@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { setWheel } from './wheel';
 
 // 설정(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 찬우(시작, 25일)와 합류한 예빈(10일), 웹
 
@@ -29,6 +30,8 @@ function seed(db: MemDb) {
     id: 'space-1',
     created_by: db.me.id,
     couple_state: 'connected',
+    salary_mode: 'separate',
+    joint_cycle_day: null,
     partner_nickname: '예빈',
     marriage_status: 'married',
     partner_income: 2_500_000,
@@ -89,7 +92,7 @@ const open = async (page: Page, narrow: boolean) => {
   await expect(page).toHaveURL(/\/settings$/);
 };
 
-test('설정 홈(S-10) → 내 정보(S-11): 호칭, 알림 이메일, 앞당기기, 분담 방식, 로그아웃', async ({
+test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·출생연도, 월급 묶음, 앞당기기, 로그아웃', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -107,10 +110,14 @@ test('설정 홈(S-10) → 내 정보(S-11): 호칭, 알림 이메일, 앞당기
   await me.click();
 
   await expect(page).toHaveURL(/\/settings\/me$/);
-  await expect(page.getByRole('button', { name: /호칭/ })).toContainText('찬우');
-  // 월급 플랜 날짜 25일(늦은 월급날), 버는 만큼 350만 : 250만 → 58 : 42
-  await expect(page.getByText('늦은 월급날')).toBeVisible();
-  await expect(page.getByText('버는 만큼 58 : 42')).toBeVisible();
+  await expect(page.getByRole('button', { name: /이름/ })).toContainText('찬우');
+  await expect(page.getByRole('button', { name: /결혼 상태/ })).toContainText('했어요');
+  // 내 월급 + 예빈 값 보기만, 관리 방식(각자면 체크리스트 만드는 날 없음)
+  const salary = page.getByRole('button', { name: /내 월급/ });
+  await expect(salary).toContainText('350만 원, 25일');
+  await expect(salary).toContainText('예빈 250만 원, 10일');
+  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 관리해요');
+  await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toHaveCount(0);
   // 알림 이메일: 형식 오류면 저장 안 됨
   const email = page.getByLabel('알림 이메일');
   await email.fill('chanwoo@');
@@ -126,10 +133,10 @@ test('설정 홈(S-10) → 내 정보(S-11): 호칭, 알림 이메일, 앞당기
   await expect.poll(() => db.space?.holiday_shift).toBe(false);
   await axe(page);
 
-  // 호칭(S-11a)
-  await page.getByRole('button', { name: /호칭/ }).click();
+  // 이름(S-11a)
+  await page.getByRole('button', { name: /이름/ }).click();
   await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
-  await page.getByLabel('호칭').fill('찬우씨');
+  await page.getByLabel('이름').fill('찬우씨');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.me.nickname).toBe('찬우씨');
@@ -163,8 +170,10 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
     )
     .toBe(true);
   await expect(page.getByRole('region', { name: '예빈님이 바꾼 값' })).toContainText(
-    '주 1회 모아서, 수입 변경은 바로 알려요',
+    '분배표·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요',
   );
+  await expect(page.getByRole('region', { name: '월급 체크리스트' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '제안' })).toHaveCount(0);
   await axe(page);
 
   // 받는 방법: 웹은 이메일 하나라 끄면 확인
@@ -192,7 +201,7 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   expect(db.me).toMatchObject({ quiet_start: 23 });
 });
 
-test('신랑·신부(S-11b)는 둘 다 바뀜, 월급 플랜 날짜(S-11d)는 예빈님께 제안', async ({
+test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 날(S-11d), 결혼 상태·날짜(S-11g·h), 출생연도(S-11i)', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -201,41 +210,58 @@ test('신랑·신부(S-11b)는 둘 다 바뀜, 월급 플랜 날짜(S-11d)는 �
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /찬우와 예빈/ }).click();
 
-  await expect(page.getByRole('button', { name: /신랑·신부/ })).toContainText('신랑');
-  await page.getByRole('button', { name: /신랑·신부/ }).click();
-  await expect(page.getByRole('heading', { name: '신랑·신부 중 누구예요?' })).toBeVisible();
+  // 내 월급
+  await page.getByRole('button', { name: /내 월급/ }).click();
+  await expect(page.getByRole('heading', { name: '한 달에 월급이 얼마 들어와요?' })).toBeVisible();
+  await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('3800000');
   await axe(page);
-  await page.getByRole('radio', { name: '신부' }).click();
-  await expect(page).toHaveURL(/\/settings\/me$/);
-  expect(db.me.side).toBe('bride');
-  expect((db.partner as Record<string, unknown>).side).toBe('groom');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
+  expect(db.me.monthly_income).toBe(3_800_000);
 
-  await page.getByRole('button', { name: /월급 플랜 날짜/ }).click();
-  await expect(page.getByRole('heading', { name: '월급 플랜을 언제 세울까요?' })).toBeVisible();
+  // 관리 방식: 합쳐서로 → 서버가 분배표를 합치고 W-01로
+  await page.getByRole('button', { name: /월급 관리 방식/ }).click();
+  await expect(page.getByRole('heading', { name: '월급을 어떻게 관리해요?' })).toBeVisible();
+  await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
+  await axe(page);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/salary\/split$/);
+  expect(db.space?.salary_mode).toBe('joint');
+
+  // 체크리스트 만드는 날(합쳐서 + 합류): 늦은 월급날이 기본
+  await page.goto('/settings/me');
+  await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toContainText(
+    '늦은 월급날',
+  );
+  await page.getByRole('button', { name: /체크리스트 만드는 날/ }).click();
+  await expect(page.getByRole('heading', { name: '체크리스트를 언제 만들까요?' })).toBeVisible();
   await expect(page.getByRole('radio', { name: '찬우 월급날 25일' })).toHaveAttribute(
     'aria-checked',
     'true',
   );
-  await expect(page.getByRole('button', { name: '예빈님께 제안하기' })).toBeDisabled();
   await page.getByRole('radio', { name: '예빈 월급날 10일' }).click();
-  await expect(page.getByText(/좋아요면 바로, 반대 없으면 .+부터 적용돼요/)).toBeVisible();
-  await expect(
-    page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여줘요' }),
-  ).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
+  await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
-  expect(db.proposals.at(-1)).toMatchObject({
-    item: 'base_day',
-    after: { base_day: 10, base_day_last: false },
-    before: { base_day: 25, base_day_last: false },
-  });
-  // 열린 제안이 있으면 고르기 대신 제안 보기
-  await page.getByRole('button', { name: /월급 플랜 날짜/ }).click();
-  await expect(page.getByText('답을 기다리는 제안이 있어요')).toBeVisible();
-  await page.getByRole('button', { name: '제안 보기' }).click();
-  await expect(page).toHaveURL(/\/proposals\//);
-  await expect(page.getByText('25일 → 10일')).toBeVisible();
+  expect(db.space?.joint_cycle_day).toBe(10);
+
+  // 결혼 상태 준비 중 → 예정일
+  await page.getByRole('button', { name: /결혼 상태/ }).click();
+  await page.getByRole('radio', { name: '준비 중이에요' }).click();
+  await expect(page.getByRole('heading', { name: '결혼 예정일은 언제예요?' })).toBeVisible();
+  await page.getByLabel('년', { exact: true }).fill('2027');
+  await page.getByLabel('월', { exact: true }).fill('5');
+  await page.getByLabel('일', { exact: true }).fill('15');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  expect(db.space).toMatchObject({ marriage_status: 'engaged', wedding_date: '2027-05-15' });
+  await expect(page.getByRole('button', { name: /결혼 예정일/ })).toContainText('2027년 5월 15일');
+
+  // 출생연도
+  await page.getByRole('button', { name: /출생연도/ }).click();
+  await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  expect(db.me.birth_year).toBe(1993);
 });
 
 test('부부 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', async ({ page }, info) => {
@@ -622,10 +648,10 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   myStock(db);
   await open(page, info.project.name === 'narrow');
   const row = page.getByRole('button', { name: /공개 범위/ });
-  await expect(row).toContainText('내 자산 합계만');
+  await expect(row).toContainText('내 자산 금액만 보여 주기');
   await row.click();
   await expect(page).toHaveURL(/\/settings\/visibility$/);
-  await expect(page.getByText('수입·용돈 금액 항상 공유')).toBeVisible();
+  await expect(page.getByText('월급과 분배표는 늘 같이 봐요')).toBeVisible();
   await axe(page);
 
   await page.getByLabel('새 항목 기본값').selectOption('private');
@@ -639,7 +665,7 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   await axe(page);
 });
 
-test('휴지통(S-21): 되살리기, 연결된 부부 목표는 제안, 영구 삭제', async ({ page }, info) => {
+test('휴지통(S-21): 되살리기(연결된 부부 목표도 바로), 영구 삭제', async ({ page }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -686,8 +712,7 @@ test('휴지통(S-21): 되살리기, 연결된 부부 목표는 제안, 영구 �
   await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.deleted_at).toBeNull();
 
   await rowOf('여행').getByRole('button', { name: '되살리기' }).click();
-  await expect(page.getByText('예빈님에게 되살리자고 제안했어요')).toBeVisible();
-  expect(db.proposals.some((p) => p.item === 'goal_restore')).toBe(true);
+  await expect.poll(() => db.goals.find((g) => g.id === 'g-trip')?.deleted_at).toBeNull();
 
   await rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' }).click();
   await page.getByRole('menuitem', { name: '영구 삭제' }).click();
@@ -850,36 +875,4 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
   await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
   await expect(page).toHaveURL(/\/login$/);
-});
-
-test('통장 방식(S-10a) → 다음 사이클 플랜이 생길 때 바뀜(기준일 지난 뒤 처음 열면 플랜 만들기)', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  Object.assign(db.space ?? {}, { account_mode: 'single' });
-  // 지난 사이클 플랜만 있음(8월 25일 ~ 9월 24일)
-  db.plans.push({
-    args: {
-      p_label_month: '2026-08-01',
-      p_cycle_start: '2026-08-25',
-      p_cycle_end: '2026-09-24',
-      p_is_temp: false,
-      p_snapshot: {},
-      p_lines: [],
-    },
-  });
-  await page.goto('/settings/account-mode');
-  await expect(page.getByRole('heading', { name: '통장을 어떻게 쓸까요?' })).toBeVisible();
-  await axe(page);
-  await page.getByRole('radio', { name: '역할별로 나눠 쓸래요' }).click();
-  await expect(page.getByText('다음 월급 플랜부터 바뀌어요')).toBeVisible();
-  // 설정 홈을 열 때(MainFrame) 다음 사이클 플랜을 만들고, 그때 통장 방식이 바뀜
-  await expect.poll(() => db.plans[0]?.args.p_cycle_start).toBe('2026-09-25');
-  const a = db.plans[0]?.args ?? {};
-  expect([a.p_label_month, a.p_cycle_end]).toEqual(['2026-09-01', '2026-10-24']);
-  const lines = a.p_lines as { target: string; account_role?: string; amount: number }[];
-  expect(lines.some((l) => l.target === 'account' && l.account_role === 'living')).toBe(true);
-  expect(db.space?.account_mode).toBe('roles');
 });

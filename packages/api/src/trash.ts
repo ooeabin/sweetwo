@@ -30,13 +30,9 @@ export async function fetchTrash(): Promise<TrashRow[]> {
   }));
 }
 
-/** 되살리기. 연결된 부부의 목표면 'needs_proposal'(제안으로 보냄) */
-export async function restoreTrash(
-  kind: TrashKind,
-  id: string,
-): Promise<'restored' | 'needs_proposal'> {
+/** 되살리기(제안 없이 바로) */
+export async function restoreTrash(kind: TrashKind, id: string): Promise<'restored'> {
   const { error } = await supabase().rpc('restore_trash', { p_kind: kind, p_id: id });
-  if (error?.message?.includes('needs_proposal')) return 'needs_proposal';
   fail(error);
   return 'restored';
 }
