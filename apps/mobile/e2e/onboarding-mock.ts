@@ -432,6 +432,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'touch_app')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (fn === 'note_login') return json(route, false);
       if (fn === 'space_goals') {
         // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
         return json(

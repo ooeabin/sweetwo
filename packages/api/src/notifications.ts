@@ -92,3 +92,15 @@ export async function fetchActiveNotices(platform: 'desktop' | 'web'): Promise<A
     .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
 }
 
+/** 새 기기 로그인 확인(로그인 뒤 한 번): 다른 세션이 있으면 서버가 본인에게 알림 + 메일 */
+export async function noteLogin(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('note_login');
+  if (error) throw new Error(error.message);
+  return data === true;
+}
+
+/** 데스크톱 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄 */
+export async function touchApp(): Promise<void> {
+  const { error } = await supabase().rpc('touch_app');
+  if (error) throw new Error(error.message);
+}

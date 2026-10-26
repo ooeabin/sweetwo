@@ -1,4 +1,4 @@
-import { fetchLoginState } from '@sweetwo/api';
+import { fetchLoginState, noteLogin } from '@sweetwo/api';
 import type { AuthProvider } from '@sweetwo/core';
 import { track } from '../../shared/analytics';
 import { copy } from './copy';
@@ -49,7 +49,8 @@ export async function routeAfterLogin(
   }
   // 삭제 요청 30일 안 계정: “계정 삭제를 취소할까요?”
   if (s.state === 'deletion_requested') return { to: paths.restore };
-  // existing
+  // existing: 다른 기기에 로그인돼 있으면 서버가 ‘새 기기에서 로그인했어요’ 알림·메일(15 A-08 4번)
+  void noteLogin().catch(() => undefined);
   if (session.platform === 'desktop' && session.bridge) {
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };

@@ -11,7 +11,7 @@ import {
   type Me,
   type Notification,
 } from '@sweetwo/api';
-import { coupleOf, notiPrefs, pushAllowed } from '@sweetwo/core';
+import { coupleOf, inQuiet, notiPrefs, pushAllowed } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -86,11 +86,6 @@ export function useNotiRealtime(userId: string | undefined) {
         void qc.invalidateQueries();
       else if (ev.type === 'insert' && /^(access|inquiry)_/.test(ev.row.kind))
         void qc.invalidateQueries({ queryKey: qk.inquiries });
-      // 생활비 체크 ‘내 용돈에서’(상대가 답함): 카드가 사라지고 이번 달 용돈이 바뀜
-      else if (ev.type === 'insert' && ev.row.kind === 'close_bundle')
-        void qc.invalidateQueries({ queryKey: qk.proposals });
-      else if (ev.type === 'insert' && ev.row.kind === 'living_allowance')
-        void qc.invalidateQueries({ queryKey: ['living_check'] });
       else if (ev.type === 'insert' && ev.row.kind === 'reconnect_requested')
         void qc.invalidateQueries({ queryKey: qk.myUnlink });
       else if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {
@@ -101,24 +96,36 @@ export function useNotiRealtime(userId: string | undefined) {
       const n = ev.row;
       // S-14 설정: 받는 방법·묶음 토글·방해 금지(그때는 센터에만)
       const me = qc.getQueryData<Me | null>(qk.me);
-      const ok = pushAllowed(notiPrefs(me?.noti_prefs), n.topic, {
-        hour: kstHour(),
-        start: me?.quiet_start ?? 22,
-        end: me?.quiet_end ?? 8,
-      });
-      if (!ok) return;
-      void bridge.notify.show({
+      const prefs = notiPrefs(me?.noti_prefs);
+      // 방해 금지만 아니면 띄울 알림은 끝나는 시각에(14 규칙): 미뤄 두고 1분마다 확인
+      if (!pushAllowed(prefs, n.topic, { hour: 0, start: 0, end: 0 })) return;
+      const quiet = { hour: kstHour(), start: me?.quiet_start ?? 22, end: me?.quiet_end ?? 8 };
+      if (!pushAllowed(prefs, n.topic, quiet)) {
+        deferred.push(n);
+        return;
+      }
+      show(n);
+    });
+    const show = (n: Notification) =>
+      void bridge?.notify?.show({
         id: n.id,
         title: n.push_title ?? n.title,
         ...(n.push_hidden || !n.body ? {} : { body: n.body }),
       });
-    });
+    const deferred: Notification[] = [];
+    const tick = setInterval(() => {
+      if (!deferred.length) return;
+      const me = qc.getQueryData<Me | null>(qk.me);
+      if (inQuiet(kstHour(), me?.quiet_start ?? 22, me?.quiet_end ?? 8)) return;
+      deferred.splice(0).forEach(show);
+    }, 60_000);
     const offOpen = bridge?.notify?.onOpen((id) => {
       void fetchNotification(id).then((n) => n && open(n));
     });
     return () => {
       off();
       offOpen?.();
+      clearInterval(tick);
     };
     // open은 매 렌더 새로 만들어지지만 구독은 사람마다 한 번
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,6 +1,7 @@
 import { coupleOf, formatDateWeekday, todayKst } from '@sweetwo/core';
 import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
-import { useState } from 'react';
+import { touchApp } from '@sweetwo/api';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { useOnline } from '../../shared/online';
@@ -46,6 +47,14 @@ export function MainFrame(
   };
   const keys: AppTab[] = ['month', 'goals', 'assets', 'calendar'];
   const [palette, setPalette] = useState(false);
+  // 데스크톱 앱 접속 신호(14 규칙: 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄)
+  const signedIn = !!me.data;
+  useEffect(() => {
+    if (!signedIn || !window.sweetwo) return;
+    void touchApp().catch(() => undefined);
+    const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
+    return () => clearInterval(t);
+  }, [signedIn]);
   const online = useOnline();
   const offline = !online && (
     <div className="hg-banner hg-banner--info" role="status">

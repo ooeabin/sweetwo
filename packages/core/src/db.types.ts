@@ -320,6 +320,7 @@ export type Database = {
           adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
+          app_seen_at: string | null
           avatar_path: string | null
           avatar_updated_at: string | null
           birth_day: number | null
@@ -359,6 +360,7 @@ export type Database = {
           adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
+          app_seen_at?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
@@ -397,6 +399,7 @@ export type Database = {
           adult_confirmed_at?: string | null
           allowance?: number | null
           analytics_off?: boolean
+          app_seen_at?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
@@ -1716,6 +1719,7 @@ export type Database = {
           icon: string | null
           id: string
           kind: string
+          mailed_at: string | null
           push_hidden: boolean
           push_title: string | null
           read_at: string | null
@@ -1734,6 +1738,7 @@ export type Database = {
           icon?: string | null
           id?: string
           kind: string
+          mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
           read_at?: string | null
@@ -1751,6 +1756,7 @@ export type Database = {
           icon?: string | null
           id?: string
           kind?: string
+          mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
           read_at?: string | null
@@ -2717,6 +2723,7 @@ export type Database = {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
       }
+      mail_missed_notifications: { Args: { p_now?: string }; Returns: number }
       make_checklist: {
         Args: { p_owner: string; p_space: string; p_today?: string }
         Returns: string
@@ -2781,6 +2788,15 @@ export type Database = {
       next_base_after: {
         Args: { d: string; day: number; last: boolean }
         Returns: string
+      }
+      note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
+      noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
+      noti_mail_body: {
+        Args: { p_body: string; p_title: string }
+        Returns: {
+          body_html: string
+          body_text: string
+        }[]
       }
       notify: {
         Args: {
@@ -3000,6 +3016,7 @@ export type Database = {
       stop_access: { Args: { p_id: string }; Returns: undefined }
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
       sync_wedding_care: { Args: { p_space: string }; Returns: undefined }
+      touch_app: { Args: Record<PropertyKey, never>; Returns: undefined }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {
