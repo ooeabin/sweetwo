@@ -35,14 +35,18 @@ export function S11Me() {
   const later = coupleBaseDay(c);
   const base: BaseDay | null =
     sp.joint_cycle_day === null ? later : sp.joint_cycle_day === 31 ? 'last' : sp.joint_cycle_day;
-  const dayText = (x: BaseDay | null) => (x === null ? '' : x === 'last' ? copy.lastDay : copy.dayN(x));
+  const dayText = (x: BaseDay | null) =>
+    x === null ? '' : x === 'last' ? copy.lastDay : copy.dayN(x);
   const man = (v: number | null) => (v === null ? '' : `${formatManWon(v)} 원`);
   const locked = sp.couple_state === 'unlink_pending';
   const married = sp.marriage_status === 'married';
   const weddingText = sp.wedding_date
     ? formatDateFull(sp.wedding_date)
     : sp.wedding_month
-      ? copy.weddingPlannedMonth(Number(sp.wedding_month.slice(0, 4)), Number(sp.wedding_month.slice(5, 7)))
+      ? copy.weddingPlannedMonth(
+          Number(sp.wedding_month.slice(0, 4)),
+          Number(sp.wedding_month.slice(5, 7)),
+        )
       : copy.undecidedValue;
 
   const photo = avatars.data?.[me.id] ?? null;

@@ -1,5 +1,5 @@
 import { agreeUnlink, fetchUnlink, qk } from '@sweetwo/api';
-import { formatMonthDay, readUnlinkPlan, unlinkTotals } from '@sweetwo/core';
+import { formatMonthDay } from '@sweetwo/core';
 import { QuestionLayout } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -8,11 +8,10 @@ import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
-import { daysPending, UnlinkPlanList, UnlinkTotals } from '../unlink';
+import { daysPending, UnlinkDeleted } from '../unlink';
 
-// S-12d 자산 정리 안 확인: 기본안 문구, 항목별 두 사람 몫, 합계, 기한.
-// 받은 사람은 ‘동의해요’ → 바로 해제 확정 → S-12h, ‘다르게 정리하기’(1회) → S-12e.
-// 다르게 정리한 안을 보낸 뒤에는 “다르게 정리한 안을 보냈어요”(원래 안에 동의는 그대로 가능). 요청한 사람은 보기만.
+// S-12d 연결 해제 요청 확인(받은 사람): “찬우님이 연결 해제를 요청했어요”, 지워지는 것, 기한 “11월 7일에 해제돼요”,
+// ‘먼저 내보내기’(→ S-18), ‘확인했어요’ = 바로 확정 → S-12h. 거절 없음, 닫으면 대기 유지. 요청한 사람은 S-12로.
 export function S12dUnlinkReview() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -21,18 +20,9 @@ export function S12dUnlinkReview() {
   const [busy, setBusy] = useState(false);
   if (d.loading || !d.c || !d.me || u.isLoading) return null;
   const req = u.data;
-  if (!req) return <Navigate to="/settings/couple" replace />;
-  const c = d.c;
-  const items = readUnlinkPlan(req.plan);
-  const mineIsRequester = req.requested_by === d.me.id;
-  // 요청한 사람 몫(mine)을 먼저: 받은 사람에게는 상대 이름이 먼저
-  const names: [string, string] = mineIsRequester
-    ? [c.myName, c.partnerName]
-    : [c.partnerName, c.myName];
-  const a = unlinkTotals(items, 'asset');
-  const debt = items.some((i) => i.side === 'debt') ? unlinkTotals(items, 'debt') : null;
+  if (!req || req.requested_by === d.me.id) return <Navigate to="/settings/couple" replace />;
   const agree = async () => {
-    if (busy || mineIsRequester) return;
+    if (busy) return;
     setBusy(true);
     try {
       await agreeUnlink();
@@ -41,7 +31,7 @@ export function S12dUnlinkReview() {
         days_pending: daysPending(req.requested_at),
         exported_data: false,
       });
-      // 공간이 바뀜: 먼저 S-12h로 옮기고(이 화면은 대기 요청이 없으면 S-12로 돌려보냄) 전부 다시 읽음
+      // 공간이 바뀜: 먼저 S-12h로 옮기고 전부 다시 읽음
       nav('/settings/couple/unlinked', { replace: true });
       void qc.invalidateQueries();
     } catch {
@@ -51,33 +41,14 @@ export function S12dUnlinkReview() {
   };
   return (
     <QuestionLayout
-      title={copy.planTitle(req.ratio, 100 - req.ratio)}
-      help={copy.deadline(formatMonthDay(req.deadline))}
+      title={copy.requestedBy(d.c.partnerName)}
+      help={copy.unlinkOn(formatMonthDay(req.deadline))}
       onBack={() => nav('/settings/couple')}
-      primary={mineIsRequester ? undefined : { label: copy.agree, loading: busy }}
-      onSubmit={mineIsRequester ? undefined : () => void agree()}
-      later={
-        mineIsRequester || req.counter
-          ? undefined
-          : { label: copy.differently, onClick: () => nav('/settings/couple/unlink/differently') }
-      }
+      primary={{ label: copy.acknowledge, loading: busy }}
+      onSubmit={() => void agree()}
+      later={{ label: copy.exportFirst, onClick: () => nav('/settings/data') }}
     >
-      <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-        {!mineIsRequester && req.counter && (
-          <div className="hg-banner hg-banner--info" role="status">
-            <span>{copy.counterDone}</span>
-          </div>
-        )}
-        <UnlinkPlanList items={items} names={names} />
-        <UnlinkTotals
-          title={debt ? copy.assetsTotal : undefined}
-          names={names}
-          totals={[a.mine, a.theirs]}
-        />
-        {debt && (
-          <UnlinkTotals title={copy.debtsTotal} names={names} totals={[debt.mine, debt.theirs]} />
-        )}
-      </div>
+      <UnlinkDeleted />
     </QuestionLayout>
   );
 }

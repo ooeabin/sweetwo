@@ -52,6 +52,9 @@ export function H01Home() {
   const notice = useNoticeBand();
   if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
 
+  // 연결 해제 확정 뒤 처음 열면 해제 안내(25 S-12h)
+  if (me.data.onboarding_step === 'S-12H')
+    return <Navigate to="/settings/couple/unlinked" replace />;
   // 합류했는데 시작한 사람이 아직 온보딩 중(18 ‘시작한 사람이 아직 온보딩 중’): 분배표가 생기면 P-04 → P-06, 그 전엔 홈 대기(상태 변형 4)
   if (me.data.onboarding_step === 'P-WAIT') {
     if (splits.isLoading) return null;

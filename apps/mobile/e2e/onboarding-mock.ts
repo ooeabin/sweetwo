@@ -1089,43 +1089,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, Object.values(t));
       }
       if (fn === 'request_unlink') {
-        // 서버 request_unlink 흉내: 공동 명의 자산마다 몫(없으면 분담 비율 기본 몫), 해제 대기
-        const body = JSON.parse(route.request().postData() ?? '{}') as {
-          p_shares: Record<string, number>;
-          p_confirm: string;
-        };
+        // 서버 request_unlink 흉내(재기획): 나누지 않고 해제 대기만, 기한 + 14일
+        const body = JSON.parse(route.request().postData() ?? '{}') as { p_confirm: string };
         if (body.p_confirm !== '연결 해제')
           return json(route, { message: 'confirm_mismatch' }, 400);
-        const mine = Number(db.me.monthly_income ?? 0);
-        const theirs = Number((db.partner as Record<string, unknown> | null)?.monthly_income ?? 0);
-        const pct =
-          db.space?.split_mode === 'income' && mine > 0 && theirs > 0
-            ? Math.round((mine * 100) / (mine + theirs))
-            : 50;
-        const plan = db.assets
-          .filter((a) => a.owner === 'joint' && !a.deleted_at && Number(a.amount) > 0)
-          .sort(
-            (a, b) =>
-              String(a.side).localeCompare(String(b.side)) ||
-              String(a.created_at).localeCompare(String(b.created_at)),
-          )
-          .map((a) => {
-            const amount = Number(a.amount);
-            const given = body.p_shares[String(a.id)];
-            const def = Math.min(
-              Math.max(Math.round((amount * pct) / 1_000_000) * 10_000, 0),
-              amount,
-            );
-            return { asset_id: a.id, name: a.name, amount, mine: given ?? def, side: a.side };
-          });
         const row = {
           id: `unlink-${db.unlinks.length + 1}`,
           space_id: 'space-1',
           requested_by: db.me.id,
           requested_at: new Date().toISOString(),
           deadline: '2026-10-21',
-          ratio: pct,
-          plan,
+          ratio: 50,
+          plan: [],
           status: 'pending',
           cancelled_at: null,
           confirmed_at: null,
@@ -1147,6 +1122,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           });
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
+        // 같이 쓰던 데이터는 모두 지움, 해제 안내(S-12h)부터
+        db.goals.length = 0;
+        db.splits.length = 0;
+        db.checklists.length = 0;
+        db.me.onboarding_step = 'S-12H';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'start_after_unlink') {
+        Object.assign(db.me, { onboarding_step: 'O-11', onboarding_done_at: null });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'counter_unlink') {

@@ -87,11 +87,8 @@ import {
   S11Me,
   S12Couple,
   S12aUnlinkIntro,
-  S12bUnlinkPlan,
   S12cUnlinkConfirm,
   S12dUnlinkReview,
-  S12eUnlinkDifferently,
-  S12fUnlinkCounter,
   S12gReconnect,
   S13Visibility,
   S15Security,
@@ -693,16 +690,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-12a 연결 해제 안내
       {
-        path: '/settings/couple/unlink/plan',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12bUnlinkPlan />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12b 자산 정리 안
-      {
         path: '/settings/couple/unlink/confirm',
         element: (
           <RequireAccount>
@@ -722,26 +709,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12d 자산 정리 안 확인, 동의
-      {
-        path: '/settings/couple/unlink/differently',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12eUnlinkDifferently />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12e 다르게 정리하기
-      {
-        path: '/settings/couple/unlink/counter',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12fUnlinkCounter />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12f 다르게 정리한 안 확인
       {
         path: '/settings/couple/unlinked',
         element: (
