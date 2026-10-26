@@ -27,7 +27,6 @@ export { S11gMarriage } from './pages/s-11g-marriage';
 export { S11hWeddingDate } from './pages/s-11h-wedding-date';
 export { S11iBirthYear } from './pages/s-11i-birth-year';
 export { S01Guides } from './pages/s-01-guides';
-export { S01Talk } from './pages/s-01-talk';
 export { S02ChecklistItem } from './pages/s-02-checklist-item';
 export { S03Guide } from './pages/s-03-guide';
 export { S11ePhoto } from './pages/s-11e-photo';

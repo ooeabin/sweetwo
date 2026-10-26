@@ -1,7 +1,7 @@
 import { Button, Tabs } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../month';
+import { MainFrame } from '../frame';
 import { copy } from './copy';
 
 type Tab = 'overview' | 'items';

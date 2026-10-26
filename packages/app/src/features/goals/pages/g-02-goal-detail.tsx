@@ -21,7 +21,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { CheckLine } from '../../salary';
 import { copy } from '../copy';
 import { GoalArt } from '../goal-art';

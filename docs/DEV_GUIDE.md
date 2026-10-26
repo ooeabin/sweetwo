@@ -555,12 +555,12 @@ packages/app/src/
     auth/                 A 화면
     onboarding/           O 화면
     pairing/              P 화면 (초대, 합류, 해제)
-    month/                H 화면, W-01~03 (이번 달, 월급 나누기)
-    month-close/          W-04~, W-07 (월말 정리)
+    frame/                앱 기본 틀(MainFrame), 순자산 카드, 공지 띠, 트레이 위젯 값, 홈·트레이 공통 할 일·일정 재료
+    home/                 H 화면 (홈)
+    salary/               W 화면 (월급 분배표, 체크리스트, 월말 확인)
     goals/                G 화면
     assets/               F 화면
     calendar/             Y 화면
-    proposals/            제안
     notifications/        N 화면
     settings/             S 화면 (프로필 사진 S-11e 포함)
     widget/               WG 화면 (트레이 위젯)
@@ -608,7 +608,7 @@ supabase/
 | 대상 | 규칙 | 예 |
 | --- | --- | --- |
 | 파일, 폴더 | kebab-case | `use-goal-form.ts` |
-| 화면 파일 | 화면 ID + 이름 | `w-04-month-close-done.tsx` |
+| 화면 파일 | 화면 ID + 이름 | `w-02-checklist.tsx` |
 | React 컴포넌트 | PascalCase, 화면은 ID 붙임 | `GoalListPage`, `W04MonthCloseDone` |
 | 훅 | use + 동사나 명사 | `useGoals`, `useApplyProposal` |
 | DB 테이블, 컬럼 | snake\_case, 단수 | `monthly_plan.apply_on` |
@@ -652,38 +652,9 @@ supabase/
 - 체크는 RPC `check_pay_line(줄, checked|wait|skipped, 다른 금액)`. 먼저 저장된 체크 유지(`already_checked`), 지난 사이클은 읽기 전용(`closed`)
 - 목표 모은 돈 = `goal.other_held`(이미 모은 돈) + `goal_checked_sums()`(체크한 저금 줄 합). 직접 넣기·빼기·꺼내 쓰기는 목표 단계
 - 분배표 저장(`save_split`)은 서버 `sync_checklist`로 이번 사이클 체크 안 한 줄만 새 금액(체크한 줄, 못 함 줄은 그대로)
-- 아직 없는 것: 배우자 탭에서 배우자 분배표 고치기·상대 알림, 지난 달 체크리스트 보기(‹ ›), 오늘 띠 ‘추가’ 메뉴(지금은 목표 추가로), 해제 대기 띠, 월급날 알림
-
-### 이번 달 구조(재기획 전)
-
-> 재기획 전 구현 기록. 홈은 `features/home`으로 바뀌었고 아래 화면(옛 이번 달, 월말 정리, 지출 적기)은 지울 대상.
-
-- `packages/app/src/features/month`: `view.ts`(답, 목표, 오늘이 든 월 플랜 → 화면 값. 계산은 core `rules/this-month.ts`, `onboarding/cycle.ts`, `allocation.ts`), `pages/h-01-this-month.tsx`(앱 틀 + 오늘 띠 + 두 단)
-- 앱 틀은 ui `AppFrame`(docs/design/components/AppFrame.md). 좁은 창 머리, 하단 독, + 버튼까지 한 컴포넌트
-- 월급 플랜 카드 금액은 플랜을 만들 때 저장한 기준값(`monthly_plan.snapshot`, core `PlanSnapshot` Zod로 읽음). 없으면 지금 답으로 계산
-- 금액 가리기는 `shared/mask.ts`(기기에만 저장, 금액 표기는 `money()`로)
-- 아직 없는 화면으로 가는 버튼(추가, 목표·우리 자산·캘린더 탭, 검색, 알림, 설정)은 비활성으로 자리만
-- 할 일(H-04): 있어야 할 할 일은 core `rules/todo.ts`(`todoDefs`, 첫 주 할 일은 하루 하나씩 `open_on`), 홈을 열 때 없는 종류만 `todo`에 넣고 상태(미룸, 끝냄)는 표에서. 여는 화면(O-41 등)은 아직 없어 ‘내일 할게요’와 초대 ‘코드 복사’만
-- 지출 적기(W-04j 앞당겨 열기, `/month/spend`, features/month-close): 처음 열면 기본 지출 항목(core `rules/spend.ts`)을 `spend_category`에 넣고, 칸을 벗어날 때 이번 플랜의 `month_close` 초안에 `month_spend`로 저장. 홈의 남은 생활비 = 생활비 예산 − 변동 항목 합계
-- 월말 정리(`/month/close/:step`, features/month-close `close-route.tsx`): W-04a 시작(정리자 기록) → W-04j(앞당겨 연 화면과 같은 파일, `mode="close"`면 소득 확인과 큰 지출 추가, ‘다음’에 모두 저장) → W-04k(목표마다 이번 달 넣은 돈, 플랜 목표 줄 금액을 채워 둠 + 기타 저축) → W-04g(MonthSummary, core `monthSummary`) → W-04 끝(`month_close.status = done`). 진행 막대는 3칸(시작, 끝 제외)
-- 이번 달 ‘정리 시작’은 정리 기간(다음 기준일 3일 전 ~ 전날)에만, 정리를 끝내면 다시 남은 생활비
-- 배우자 미합류면 정산은 내 수입, 내 용돈만 센다(“{배우자}님이 합류하기 전이라 {나}님 돈만 셌어요”)
-- 아직 없는 것: 함께 모드와 보기만, W-04h 다음 달 조정과 월말 정리 제안, 꼼꼼 모드(W-04b~f, i), 놓친 달, 정리 고치기, 지난달보다 칩, 생활비 예산 보정 제안, 미달·초과 처리
-- 배우자 활동(H-08)은 다음 단계
-
-### 월급 플랜·월급 나누기 구조(재기획 전)
-
-> 재기획 전 구현 기록. 월급 분배표·체크리스트(`features/salary`)로 바뀌었고 지울 대상.
-
-- features/plan: W-01 `/plan`(이번 달 월급 플랜 카드의 ‘월급 플랜 보기’), W-02 `/plan/split`(이번 달 맨 위 ‘월급 나누기’, W-01 주 버튼), W-02a `/plan/split/:lineId?side=`
-- 값은 month `useMonthView()`의 `split`(core `rules/split.ts`: `splitRows`, `splitProgress`, `splitLeft`). 줄 하나(`plan_line`, target account, 개인 통장 제외)에 신랑·신부 몫(`amount_groom`, `amount_bride`)이 따로 있고 사람 몫마다 체크
-- 체크는 RPC만(`check_split`, `uncheck_split`, 직접 수정 불가): 몫마다 `{side}_done_at`, `_by`(대신 체크면 체크한 사람), `_amount`(다른 금액). 몫 있는 쪽이 다 끝나면 줄 `state = done`, `done_amount` = 합. 이미 체크된 몫을 새로 체크하면 ‘already’ → “{배우자}님이 먼저 체크했어요”
-- `update_pending_shares()`는 아직 안 옮긴 몫만 다시 계산(이미 옮긴 몫은 그대로)
-- 진행 “{n}곳 중 {m}곳 나눴어요” = 두 사람 몫 전체. 이번 달 맨 위 “월급 나누기가 {n}곳 남았어요” = 내 몫
-- W-01 돈 흐름 막대(월 수입 대비, `hg-stackbar` + `hg-breakdown`): 통장 역할을 나눈 부부는 용돈, 공동 생활비, 목표자금, 비상금, 아니면 용돈, 고정, 생활비, 저축. 특이사항 = 이번 플랜 달에 들어오는 돈(`income_event`, 최대 3개). 계획액 줄 아래 사람마다 담당·월급날 칩(내 칩 누르면 바로 옮겼어요, 배우자 칩은 보기만)
-- W-01a 이번 달만 바꾸기 `/plan/edit/:role`(계획액 줄 아래 ‘이번 달만 바꾸기’): `adjust_plan()` RPC가 그 통장 줄 금액을 바꾸고 차이는 빠지는 곳 줄(목표자금, 목표자금을 바꾸면 공동 생활비)이 받음. 몫은 지금 몫 비율대로, `snapshot.parts`도 맞춤. 둘 중 한 줄이라도 누가 옮겼으면 못 바꿈, 연결 해제 대기 중이면 못 바꿈. 제안 아님, 토스트 ‘되돌리기’ = 전 금액으로 다시 부름
-- W-07 들어오는 돈 `/plan/income`(W-01 특이사항, W-01 아래 링크, F-05 수입 아래 링크): `income_event` 월별 목록, 추가 `/plan/income/new/:step`(이름 → 금액 → 몇 월에 + 매년/올해만), 내 것만 지우기 + 되돌리기
-- 다음 단계: W-01 월 넘기기(지난 달 읽기 전용), W-01 ‘추가 소득 나누기’ 카드(목표 / 용돈 비율), 이번 달만 바꾸기 상대 알림, 자동 나누기 줄 만들기(Y-08, G-07, W-04a2), 사실값 바뀐 직후 안내, W-03 생활비 체크(S-14 켜기), 배우자 활동에 대신 체크 표시
+- 할 일 한 줄·다가오는 일정·이번 달 월급 상태는 core `rules/home.ts`(`homeTodo`, `homeUpcoming`, `salaryState`)가 계산하고, 재료는 frame `useHomeInput()`(같은 qk 캐시, 닫은 할 일은 기기 저장), 문구는 frame `todoText`·`upcomingName`. 홈과 트레이 위젯이 같은 결과를 씀
+- 앱 기본 틀은 `features/frame`(ui `AppFrame`, 금액 가리기 `shared/mask.ts`). 트레이 위젯 값(26 트레이 위젯 창 = WG-01 이번 달 월급 + 다음 할 일 + 다가오는 날)은 데스크톱에서만 `useTraySync`가 만들어 브리지로 보냄(core `TraySnapshot`)
+- 아직 없는 것: 배우자 탭에서 배우자 분배표 고치기, 지난 달 체크리스트 보기(‹ ›), 오늘 띠 ‘추가’ 메뉴(지금은 목표 추가로), 해제 대기 띠
 
 ### 캘린더 구조
 
@@ -724,18 +695,7 @@ supabase/
 - 계정 삭제(S-18b `/settings/data/delete`): `request_account_deletion`은 다시 로그인한 지 10분 안에만(`reauth_required`면 `reauthenticate('/settings/data/delete?go=1')`). 바로 이용 중지(status). 연결·해제 대기면 연결 해제처럼 나눔(`confirm_unlink` how `deleted`, 공동 항목 전부 상대, 상대 알림 `partner_deleted`). 30일 안 다시 로그인하면 A-02 `/account/restore` “계정 삭제를 취소할까요?” → `cancel_account_deletion`(혼자 쓰기, 그때부터 30일 다시 연결, 상대 알림 `partner_restored`). 매일 `purge_deleted_accounts`
 - 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 배우자 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
 - 보안(S-15 `/settings/security`): 데스크톱 앱 잠금(브리지 lock: `clear`는 1분 안에 `verify`가 통과했을 때만, `setAutoLock` 0·1·5·15분, 기본 5분), PIN 바꾸기 = 현재 PIN 확인 → A-06 `?next=/settings/security`. 로그인된 기기 = `my_sessions()`(auth.sessions, 지금 기기 = 토큰의 session_id), `end_sessions(id)` / `end_sessions()`(이 기기 빼고 모두). 기기 이름은 core `deviceLabel(user_agent)`, 데스크톱 main은 토큰 요청에 `sweeTwo/버전 Electron` User-Agent
-- 함께 모드(21 W-04a): `join_close_together`·`leave_close_together`·`confirm_together`, `propose_in_close`는 함께 모드면 바로 적용. 앱 `CloseLive`(month-close)가 Realtime 채널 `close:{id}`에 접속 표시(사람, 단계, 입력 칸)와 단계 알림을 보냄. 보기만은 화면을 `inert`로 감쌈
-- 트레이 위젯(26, S-22): 앱 창의 `useTraySync`(앱 기본 틀)가 이번 달 값을 core `TraySnapshot`으로 만들어 브리지 `widget.update`로 보냄. main(`apps/desktop/src/main/widget.ts`)이 검사해 `userData/widget.json`에 마지막 값과 설정(트레이, 금액 보이기, 목표)을 남기고, 트레이 아이콘을 누르면 작은 창(같은 렌더러 `#/widget/tray`)을 아이콘 옆에 엶. 위젯 창은 `widget.state`·`onChange`만 읽고, 누르면 `widget.open(경로)` → main이 앱 창을 앞으로 + `onNavigate`. 트레이를 켜 두면 앱 창을 닫아도 트레이에 남음
-- 생활비 체크(20 W-03 `/plan/living-check`, 07 3-2장): 켜기는 부부 단위 `couple_space.living_check`(S-14 토글 → `set_living_check`), 결혼 전 예비부부는 없음. 답은 플랜마다 하나(`living_check`, 한 명이 답하면 둘 다 끝) → `answer_living_check(plan, answer, over, cover)`. 체크일은 core `livingCheckDay` = SQL `living_check_day`, H-01 맨 위 할 일은 체크일 전후 2일(`inLivingCheckWindow`). ‘내 용돈에서’는 내 용돈보다 많으면 거절(`over_allowance`), 즉시 적용 = `allowance_cut`을 월말 정리 용돈(그 사람 몫)에서 뺌 + 상대 알림 `living_allowance`, 토스트 ‘되돌리기’ = `undo_living_check`(답한 사람, 10분 안). ‘목표 배분에서’·‘다음 달에 메울게요’는 기록만(월말 정리 반영은 W-04 꼼꼼 모드와 함께). 결과는 생활비 예산 보정에 쓰지 않음
-- 정산 요약 아래(21 W-04g, core `rules/close-review.ts`): 지난달보다 칩(`spendChanges`, 1만 원 반올림), 생활비 예산 보정 제안(`livingBudgetFix`: 이번 달 + 지난 정리 2개 변동 합계 평균, 10% 넘게 다를 때, 답은 `month_close.budget_fix`. ‘맞추기’는 연결된 부부면 `living_budget` 제안, 아니면 바로 저장), 잘한 점(`livingSaved`), 계획 대비 표(목표별 플랜 `goal` 줄 ↔ W-04k 넣은 돈), 미달·초과(`planGap`) 처리 선택은 `month_close.gap_kind/gap_amount/gap_choice/gap_goal_id`에 기록. 고른 처리(3개월에 나눠 채우기, 기한 늘리기, 더 넣을 목표)를 다음 플랜 배분에 반영하는 계산은 기획 확인 뒤
-- 다음 달 조정과 제안 묶음(21 W-04h·W-04 끝·W-04p): W-04h는 연결된 부부(해제 대기 아님)에게 받은 제안·보류 제안·함께 정하기가 있을 때만 W-04k 다음에(`useCloseData().adjust`, 진행 막대 칸도 그때 4). 받은 제안은 G-02와 같은 `ProposalInline`, 다르게 해볼래요는 G-08. 혼자 정리하며 바꾼 값(지금은 W-04g 보정 ‘맞추기’)은 `propose_in_close`로 `proposal.month_close_id`에 묶고 하나씩 알리지 않음(`sweetwo.close_bundle` 설정을 `notify_proposal`이 봄). 정리를 끝낼 때 `send_close_bundle` → 배우자 알림 1회 `close_bundle` → W-04p `/month/close/w-04p/:closeId`(항목별 응답, ‘모두 좋아요’/‘나머지 {n}개 좋아요’). W-04h 3번 다음 달 일정 칩, 목표 배분 수정(G-04)과 함께 모드는 다음 단계
-- 놓친 달(21 ‘놓친 달’, 07 5장, `/month/missed`): H-01 맨 위 할 일 ‘지난달 정리’ = 오늘 전에 끝난 플랜 중 정리 안 한 것(core `missedPlans`, 첫 사이클을 합친 플랜 제외). 고르면 `month-close/target.ts`(세션 저장)에 그 플랜 끝 날짜를 두고 같은 월말 정리 화면이 그 플랜으로 열림(`useCloseData(useTarget)`, 앞당긴 지출 적기와 F-01은 `false`). 지금 정리하기 = 평소 흐름 + `month_close.late`(생활비 평균에서 뺌, 보정 제안 없음). 쉬어가기 = W-04j·W-04k 뒤 바로 끝(`rested`, `rest_missed_months`로 밀린 플랜 모두 ‘쉬어감’). 2개월 이상이면 쉬어가기만. W-04b ‘이번 사이클에 옮긴 돈 빼기’, W-04h ‘이번 플랜 조정’ 이름은 다음 단계
-- 변동 수입 실제(21 W-04a2): `app_user.income_variable`이면 W-04a 다음에. `answer_actual_income` → `month_close.income_actual_groom/bride`(W-04j 소득 기본값에 반영). 기준(`monthly_income`)보다 적으면 `income_short` + 다음 플랜에 ‘비상금 → 공동 생활비’ 줄(`add_income_supplement`, 다음 플랜이 아직 없으면 `monthly_plan` 생성 트리거가 넣음) + 상대 알림 `income_short`. 많으면 W-07 추가 소득 나누기 안내. 배우자가 정리할 때 1문항 카드는 다음 단계
-- 꼼꼼 모드(21 W-04b~f·i, `/month/close/w-04b` …, W-04g ‘더 꼼꼼히 정리하기’): 데이터는 `month-close/detail.ts`의 `useDetailData`. 단계는 순서(b → c → d → e → f → i)대로 가고 조건이 안 맞는 단계는 그 화면이 바로 다음으로 넘김(`skip`/`nextOf`/`prevOf`), 끝나면 W-04g로 돌아옴
-  - W-04b `close_balance`(정리마다 공동 통장 잔액 + 그때 예상): 예상 = 지난 정리 잔액(없으면 O-63 `start_balance`) + 이번 나누기(core `expectedBalance`, 옮긴 금액 우선, ‘목표자금·비상금 → 공동 생활비’ 줄은 옮긴 것만). 이상값 `balanceOdd`는 한 번 묻고 막지 않음. 연결 자산이 있으면 금액도 바꿈. 처음 들어오면 `month_close.detailed_at`
-  - W-04c 이번 사이클 `goal_use`(챙길 날 이름은 care_record → care_day) 확인 + 차액(`goalGapAmount`) 1질문 → `answer_goal_gap`(고른 목표면 `goal_use` source `close`, `month_close_id`로 하나만. ‘목표에서 쓴 돈이 아니에요’는 기록만, 나눈 비율대로 전 목표 몫에서 빼는 계산은 기획 확인 뒤)
-  - W-04d 비상금이 예상보다 줄었을 때 `month_close.emergency_used/emergency_reason`. W-04e 투자(`grp = invest`), W-04f 월 상환액이 있는 대출은 `asset.amount`를 바로 고침. W-04i 대화 카드는 `copy.cards`에서 달마다 3장
-- 다음 사이클 플랜(07 3장): 금액 계산이 core 규칙이라 서버 예약 작업 대신 앱이 만듦. MainFrame의 `useEnsurePlan`(features/month/ensure-plan.ts)이 오늘이 든 플랜이 없고 지난 플랜이 이번 사이클 전에 끝났으면, O-66과 같은 계산(`calc` → 통장별 금액 → 분담)으로 줄을 만들어 `create_cycle_plan` 호출. 서버는 같은 사이클 한 번만, 미래 사이클 거절, 해제 대기면 지난 플랜 연장, `account_mode_next`(S-10a 통장 방식 `/settings/account-mode`)를 이때 적용. 아무도 앱을 열지 않으면 플랜은 다음에 열 때 생김(알림 9시 문구는 그대로)
+- 트레이 위젯(26, S-22): 앱 창의 `useTraySync`(frame)가 홈과 같은 계산(core `homeTodo`·`homeUpcoming`·`salaryState`)으로 core `TraySnapshot`(이번 달 월급 상태·체크 개수·다음 월급날, 다음 할 일, 다가오는 날 3개)을 만들어 브리지 `widget.update`로 보냄. 위젯 창 `/widget/tray`(features/widget)는 WG-01 “9월 월급” / “2개” / “5개 중 2개 했어요”, 월말 확인 기간이면 “체크 안 한 게 n개 있어요” → W-05. 트레이 창에는 금액이 없어 가림과 상관없음. 설정(트레이 켜기, 금액 보이기, 목표)은 S-22
 - 다음 단계: 프로필 사진(S-11e), 내보내기 PDF 요약 3종, 예식일 수정(H-P1)·결혼했어요(H-T1), S-15 보안, S-18 데이터·계정 삭제, S-19 앱 정보·문의, 생활비 체크·마케팅 정보 받기 토글
 
 ### 배우자 합류 구조
@@ -770,7 +730,7 @@ supabase/
 - 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿 → G-03e 누구 목표(혼자 쓰기 빼고) → G-03b 질문 → G-03c 기한 → G-03d 이미 모은 돈(매달·고금리 대출·템플릿이 묻는 것 빼고) → G-03f 확인 → 만든 목표 상세. 입력 중 값은 기기에 저장(`sweetwo.goal-add`)
 - G-06 `/goals/order`: 우리 목표와 내 목표 각각 `ReorderList`, 저장하면 우선순위 + 내 분배표 저금 줄 순서를 같이 바꿈
 - 다음 단계: G-05 달성 흐름 새 모델로, 우리 → 내 목표 막기 서버 확인, G-06에서 배우자 분배표 순서, 상대 알림·활동 기록, 진행 그래프, 목표 사진
-- 재기획 전 코드(지울 대상): G-04 `/goals/adjust`, 첫 주 나머지 목표 `/goals/week`(G-06 `week`), 연결 자산 보유액(`goal_asset_sums`)
+- 재기획으로 지운 화면(2026-10-26): G-04 충돌 조정, G-07 결혼 비용 전용 화면(결혼 비용은 보통 목표), G-08 제안, 첫 주 나머지 목표 `/goals/week`. 남은 옛 계산: 연결 자산 보유액(`goal_asset_sums`), `goals/view.ts`의 옛 배분(`allocate`)
 
 ### 우리 자산 구조
 
@@ -785,20 +745,8 @@ supabase/
 - F-04: 금액·값 수정, 공개 범위(내 명의만), 삭제는 휴지통 + 되돌리기. 배우자 명의는 보기만
 - F-04a 만기된 돈 정리(20261101090000): 만기일이 지난(오늘 포함) 내가 고칠 수 있는 자산(전세 보증금 빼고). a “만기된 돈은 어디로 옮겼어요?” 다른 통장으로 → 통장 고르기(현금성·예금·적금 중 내가 고칠 수 있는 것, 고르면 바로) / 다시 가입했어요 → 새 만기일(오늘 뒤). 서버 `settle_matured(항목, 통장 | 새 만기일)`: 통장 금액 + 만기 금액, 항목은 `asset_status` ‘matured’(만기 완료, `fetchAssets`·core `netWorth`에서 빠지고 지난 순자산 기록은 그대로)
 - 재기획으로 화면에서 뺀 것: 통장 역할 배지, 목표 연결(F-03f2 빠지는 통장 `pay_from`, F-03i·F-04 `goal_id`), F-01 비상금 카드·이번 달 카드·이번 달 계획·월 정산 요약, F-06 재정 진단 탭. `asset.pay_from`·`goal_id` 열은 남겨 두고(스키마는 2단계로 지움) 새로 쓰지 않음
-- 재기획 전 코드(지울 대상, 옛 `/month`·첫 주 할 일·설정 S-17이 아직 부름): F-05 `/assets/money*`, F-05f, F-07 `/assets/replan*`, F-09 `/assets/emergency/:kind`와 `EmergencyCard`·`diagnosis.ts`, O-53 `/assets/principle`, 첫 주 O-34~47 `/assets/week/*`, 통장 ↔ 자산(`account.asset_id`, `account_make_asset`), `goal_asset_sums()`
+- 재기획으로 지운 화면(2026-10-26): F-05 월 수입·지출, F-05f 기간 수입, F-07 계획 다시 세우기, F-09 비상금 넣기·꺼내기, O-53 투자 원칙, 첫 주 O-34~47. 남은 옛 계산: `diagnosis.ts`(재정 진단, 온보딩 결과가 씀), 통장(`account`) 읽기
 - 다음 단계: F-04 그래프·팔았어요(F-04b~d)·시세 바꾸기, 주택 대출 금리 유형·상환 방식, F-08(출시 후)
-
-### 제안 구조
-
-- 기획: 08 6장(보내기, 응답, 적용일, 함께 정하기, 상태), 22 G-08. 테이블 `proposal`(항목, 제안한 사람, 전·후 값 jsonb, 상태, 적용일, 연 시각, 반대 횟수, 왕복 횟수, 함께 정하기, 대체한 제안). 앱은 읽기만, 바꾸기는 함수로만
-- 항목(`item`): `allowance`(내 용돈, 사람마다 하나), `split`(분담 방식, 공간에 하나), `living_budget`(생활비 예산), `base_day`(기준일 `{ base_day, base_day_last }`, 두 사람 월급날만), `family_budget`(양가 비용 예산 `{ holiday, birthday, parents_day, other, target_amount }`, 횟수가 있는 행만, 공간에 하나. 배우자 미합류·혼자 쓰기는 `save_family_budget`으로 바로), `goal_order`(목표 순서 `{ order: [목표 id] }`, 비상금 빼고, 공간에 하나), 목표 항목 `goal_amount`·`goal_deadline`·`goal_pause`·`goal_delete`(목표마다 하나, `target_id` = 목표), `goal_add`(새 목표 값 전체, 여러 개 열림, 적용하면 맨 아래 우선순위로 생기고 만든 사람 = 제안한 사람). 기준일, 월말 정리 묶음, 배분 고정값(G-04 직접 조정)은 그 화면과 함께 추가. 분담 값은 `{ mode, starter_ratio }`(시작한 사람 몫 %, 직접 정할 때만), 목표 값은 `{ target_amount }`, `{ deadline: 'YYYY-MM-01' }`, `{ paused }`, `{ deleted }`
-- 함수: `propose(항목, 후 값, 적용일, 목표)`(전 값은 서버가 읽음, 같은 항목 열린 제안은 ‘superseded’로 대체, 상대 것을 대체하면 왕복 +1), `respond_proposal(id, like|oppose)`(좋아요 = 바로 적용, 반대 = 보류), `withdraw_proposal(id)`, `mark_proposal_seen(id)`, `apply_due_proposals()`
-- 제안할 수 있는 때: 공간에 두 사람이 있을 때(합류 중 포함). 혼자, 합류 전, 해제 대기는 거절(그때는 바로 적용)
-- 적용일 = 72시간이 지난 첫 기준일. 앱이 core `proposalApplyOn(기준일)`로 계산해 넘기고, 서버는 72시간이 지났는지만 확인. 기준일은 core `spaceBaseDay`
-- 함께 정하기: 반대 2회 또는 왕복 2회. 이 제안은 적용일이 돼도 적용 안 함
-- 적용일이 지난 제안: 기준일 작업 전까지는 앱을 열 때(H-01) `apply_due_proposals()`. 좋아요나 적용 뒤 이번 플랜 안 나눈 줄 분담을 다시 계산(`update_pending_shares`)
-- 화면: features/proposals. G-08 `/proposals/:id`, 이번 달 할 일 맨 위 받은 제안, ‘이번 달’ 탭 숫자 알약(`hg-nav__count`)
-- 다음 단계: 월 배분 영향(G-08 3번), 되돌리기 제안(8번), 동시 제안 안내 문구(08 6-7), 알림, 기준일 작업에서 적용·만료, 저축 가능 금액 부족 때 보류
 
 ### 기능 하나 만드는 순서
 

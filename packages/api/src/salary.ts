@@ -22,6 +22,15 @@ export async function fetchSplits(): Promise<SalarySplit[]> {
   return (data ?? []) as SalarySplit[];
 }
 
+/** 이번 사이클 체크리스트(분배표마다 서버가 없으면 만듦, 예약 작업 전에 앱을 열어도 같게) */
+export async function fetchChecklistsEnsured(today: string): Promise<PayChecklist[]> {
+  const splits = await fetchSplits();
+  await Promise.all(
+    splits.map((s) => startChecklist(s.owner_user_id ?? undefined).catch(() => null)),
+  );
+  return fetchCurrentChecklists(today);
+}
+
 /** 분배표 저장(줄 통째로 교체). owner: 각자면 사람 id, 합쳐서면 생략 */
 export async function saveSplit(lines: SplitLineDraft[], owner?: string): Promise<string> {
   const p_lines = lines.map((l) => ({

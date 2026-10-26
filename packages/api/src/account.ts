@@ -24,39 +24,35 @@ export async function cancelAccountDeletion() {
 export type ExportData = {
   assets: Tables<'asset'>[];
   goals: Tables<'goal'>[];
-  plans: (Tables<'monthly_plan'> & { plan_line: Tables<'plan_line'>[] })[];
-  closes: Tables<'month_close'>[];
-  deposits: Tables<'saving_deposit'>[];
+  /** 목표별 모은 돈 */
+  saved: Record<string, number>;
+  splits: (Tables<'salary_split'> & { split_line: Tables<'split_line'>[] })[];
+  checklists: (Tables<'pay_checklist'> & { pay_check_line: Tables<'pay_check_line'>[] })[];
   careDays: Tables<'care_day'>[];
   careRecords: Tables<'care_record'>[];
-  proposals: Tables<'proposal'>[];
 };
 
 /** 내보내기에 쓰는 행들(RLS가 공개 범위·서프라이즈를 거름) */
 export async function fetchExportData(): Promise<ExportData> {
   const s = supabase();
-  const [assets, goals, plans, closes, deposits, careDays, careRecords, proposals] =
-    await Promise.all([
-      s.from('asset').select('*').is('deleted_at', null).order('created_at'),
-      s.from('goal').select('*').is('deleted_at', null).order('priority'),
-      s.from('monthly_plan').select('*, plan_line(*)').is('deleted_at', null).order('label_month'),
-      s.from('month_close').select('*').is('deleted_at', null),
-      s.from('saving_deposit').select('*').is('deleted_at', null),
-      s.from('care_day').select('*').is('deleted_at', null),
-      s.from('care_record').select('*').is('deleted_at', null).order('occurs_on'),
-      s.from('proposal').select('*').order('created_at'),
-    ]);
-  for (const r of [assets, goals, plans, closes, deposits, careDays, careRecords, proposals])
-    fail(r.error);
+  const [assets, goals, saved, splits, checklists, careDays, careRecords] = await Promise.all([
+    s.from('asset').select('*').is('deleted_at', null).order('created_at'),
+    s.from('goal').select('*').is('deleted_at', null).order('priority'),
+    s.rpc('goal_saved_sums'),
+    s.from('salary_split').select('*, split_line(*)'),
+    s.from('pay_checklist').select('*, pay_check_line(*)').order('cycle_start'),
+    s.from('care_day').select('*').is('deleted_at', null),
+    s.from('care_record').select('*').is('deleted_at', null).order('occurs_on'),
+  ]);
+  for (const r of [assets, goals, saved, splits, checklists, careDays, careRecords]) fail(r.error);
   const arr = <T>(x: T[] | null): T[] => (Array.isArray(x) ? x : []);
   return {
     assets: arr(assets.data),
     goals: arr(goals.data),
-    plans: arr(plans.data) as ExportData['plans'],
-    closes: arr(closes.data),
-    deposits: arr(deposits.data),
+    saved: Object.fromEntries(arr(saved.data).map((r) => [r.goal_id, r.saved])),
+    splits: arr(splits.data) as ExportData['splits'],
+    checklists: arr(checklists.data) as ExportData['checklists'],
     careDays: arr(careDays.data),
     careRecords: arr(careRecords.data),
-    proposals: arr(proposals.data),
   };
 }

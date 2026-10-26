@@ -457,8 +457,11 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   soloAfterUnlink(db, 'yebin');
-  await page.goto('/month');
-  await page.getByRole('button', { name: /예빈님이 다시 연결하자고 해요/ }).click();
+  await page.goto('/');
+  await page
+    .locator('.hg-body__banner', { hasText: '예빈님이 다시 연결하자고 했어요' })
+    .getByRole('button', { name: '열기' })
+    .click();
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
@@ -629,7 +632,7 @@ test('삭제 요청한 계정으로 다시 로그인: 계정 삭제를 취소할
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   db.me.status = 'deletion_requested';
-  await page.goto('/month');
+  await page.goto('/');
   await expect(page.getByRole('heading', { name: '계정 삭제를 취소할까요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '취소하고 계속 쓰기' }).click();

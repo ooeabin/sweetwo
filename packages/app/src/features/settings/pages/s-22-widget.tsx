@@ -2,7 +2,7 @@ import { fetchGoals, qk } from '@sweetwo/api';
 import { ChoiceCards, ListRow, PageHeader, QuestionLayout, Toggle } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useWidgetSettings } from '../widget-settings';
 

@@ -2,7 +2,7 @@ import { Button, SectionHeader } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { GoalItemCard } from '../goal-item-card';
 import { useGoalsModel, type GoalItem } from '../model';
@@ -52,7 +52,7 @@ export function G01GoalList() {
           i={i}
           masked={masked}
           onOpen={() =>
-            nav(i.goal.template === 'wedding' ? '/goals/wedding' : `/goals/${i.goal.id}`)
+            nav(`/goals/${i.goal.id}`)
           }
         />
       ))}
