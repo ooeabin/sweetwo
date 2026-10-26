@@ -60,6 +60,39 @@ export const copy = {
   info: '정보', // [확인 필요] 요소 이름
   together: '같이',
   createdAt: '만든 날',
+  createdBy: '만든 사람',
+  ownerOf: '주인', // [확인 필요]
+  help: '도움말',
+  positionLabel: '어디에 넣을까요?', // [확인 필요] 우선순위 위치
+  positionBefore: (name: string) => `${name} 앞`,
+  positionLast: '맨 아래',
+  lateLink: '분배표에서 저금 늘리기', // [확인 필요]
+  nextYearQ: (name: string, amount: string) => `내년 ${name}도 ${amount}으로 할까요?`,
+  nextYearKeep: '그대로',
+  nextYearChange: '바꿀래요',
+  nextYearAmount: '내년에는 얼마가 필요해요?', // [확인 필요]
+  nextYearDone: '내년 금액을 바꿨어요', // [확인 필요]
+  helpLabels: {
+    home: '청약·정책대출 체크리스트',
+    baby: '출산 준비 체크리스트', // [확인 필요]
+    wedding: '결혼 예산 체크리스트', // [확인 필요]
+  },
+  recordStateTitle: '상태',
+  recordMonth: '월',
+  recordPlanned: '저금 줄',
+  recordPut: '넣은 돈',
+  recordState: {
+    checked: '넣었어요',
+    other: '다른 금액',
+    skipped: '못 함',
+    wait: '아직',
+  } as Record<string, string>,
+  savedAll: (amount: string) => `${amount} 모았어요`,
+  usedQ: '이 돈을 썼나요?',
+  numNextUse: '다음에 쓰는 달',
+  numRound: '회차',
+  round: (n: number) => `${n}회차`,
+  byWho: (date: string, name: string) => `${date}, ${name}`,
 
   // ⋯ 메뉴, 목표 수정
   menu: '목표 메뉴', // [확인 필요] 화면 읽기용
@@ -106,7 +139,7 @@ export const copy = {
   confirmTitle: (amount: string, ym: string) => `매달 ${amount}씩 모으면 ${ym}에 이뤄요`, // [확인 필요]
   confirmMonthly: (amount: string) => `매달 ${amount}씩 모아요`, // [확인 필요] 매달 목표
   confirmUnknown: (name: string) => `${name} 목표를 추가할까요?`, // [확인 필요] 배분 0 또는 금액 미정
-  confirmPosition: '우선순위는 맨 아래예요', // [확인 필요] 위치 고르기는 G-06과 함께
+  confirmPosition: '우선순위는 맨 아래예요', // [확인 필요]
   addDone: '추가하기',
   added: '목표를 추가했어요', // [확인 필요]
   shortAfterAdd: (amount: string) => `저축 가능 금액보다 월 ${amount} 많아져요`, // [확인 필요]

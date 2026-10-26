@@ -66,7 +66,11 @@ export function G02GoalEdit() {
     const a = toAllocGoal({ ...goal, other_held: item?.saved ?? goal.other_held });
     const eta = goalEta(a, item?.monthly ?? 0);
     const late = eta.lateMonths !== null && eta.lateMonths > 0;
-    return { expected: eta.expected, status: late ? 'delayed' : 'active', need: goalNeed(a) } as const;
+    return {
+      expected: eta.expected,
+      status: late ? 'delayed' : 'active',
+      need: goalNeed(a),
+    } as const;
   };
   const before = f === 'name' ? null : calc(g);
   const after = f === 'name' ? null : calc({ ...g, ...patch });

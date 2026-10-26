@@ -334,3 +334,58 @@ test('배우자 내 목표 ‘금액만 보여 주기’: G-01 배우자 묶음�
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-c')?.visibility).toBe('amount');
   await axe(page);
 });
+
+test('G-02 정보·도움말·월별 기록, 삭제 되돌리기, 매년 목표 내년 금액', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const home = db.goals.find((g) => g.id === 'goal-h') as Record<string, unknown>;
+  home.created_by = db.me.id;
+  const line = (db.checklists[0]?.pay_check_line as Record<string, unknown>[]).find(
+    (l) => l.goal_id === 'goal-h',
+  ) as Record<string, unknown>;
+  Object.assign(line, {
+    state: 'checked',
+    actual: 950_000,
+    checked_by: db.me.id,
+    checked_at: '2026-09-26T01:00:00Z',
+  });
+  await page.goto('/goals/goal-h');
+  await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
+  const records = page.getByRole('region', { name: '월별 기록' });
+  await expect(records.getByRole('cell', { name: '9월 월급' })).toBeVisible();
+  await expect(records.getByRole('cell', { name: '넣었어요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /청약·정책대출 체크리스트/ })).toBeVisible();
+  await axe(page);
+
+  // 매년 목표: 쓰는 달(10월)에 꺼내 쓰면 내년 금액을 한 번 물음
+  db.goals.push({
+    ...home,
+    id: 'goal-t',
+    name: '여행',
+    template: 'travel',
+    kind: 'yearly',
+    priority: 2,
+    target_amount: 3_000_000,
+    other_held: 3_000_000,
+    deadline: '2026-10-01',
+  });
+  await page.goto('/goals/goal-t/spend');
+  await page.getByLabel(/여행에서 얼마를/).fill('2500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(
+    page.getByRole('heading', { name: '내년 여행도 300만 원으로 할까요?' }),
+  ).toBeVisible();
+  await page.getByRole('radio', { name: '바꿀래요' }).click();
+  await page.getByLabel('내년에는 얼마가 필요해요?').fill('3500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-t')?.target_amount).toBe(3_500_000);
+
+  // 삭제 → Toast 되돌리기
+  await page.goto('/goals/goal-t');
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '삭제' }).click();
+  await expect(page.getByText('삭제했어요')).toBeVisible();
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-t')?.deleted_at ?? null).toBeNull();
+});

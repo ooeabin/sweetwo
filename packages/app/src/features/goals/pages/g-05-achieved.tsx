@@ -26,7 +26,12 @@ export function G05Achieved() {
   const item = model.ready ? model.byId(id) : undefined;
   const row = d.goals.find((x) => x.id === id);
   if (!item || !row) return <Navigate to="/goals" replace />;
-  const g = { name: row.name, held: item.saved, illustration: item.illustration, custom: item.custom };
+  const g = {
+    name: row.name,
+    held: item.saved,
+    illustration: item.illustration,
+    custom: item.custom,
+  };
   const joint = d.space?.salary_mode === 'joint';
   const freed = freedAmount(row.freed_lines, mySplit(splits.data, d.me?.id, joint));
   const solo = !d.couple?.joined || joint || row.owner_user_id !== null;

@@ -41,22 +41,24 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
       ...m.map((id, i) => [id, i + 1] as const),
     ]);
     await Promise.all([...prio].map(([id, p]) => updateGoal(id, { priority: p })));
-    // 내 분배표(합쳐서면 공동) 저금 줄 순서: 비상금 → 우리 목표 → 내 목표
-    const split = splits.data.find((s) => s.owner_user_id === (d.joint ? null : d.meId));
-    if (split) {
+    // 분배표 저금 줄 순서: 비상금 → 우리 목표 → 내 목표. 합쳐서면 공동 하나, 각자면 두 사람 분배표 모두(22 G-06)
+    const targets = splits.data.filter((s) =>
+      d.joint ? s.owner_user_id === null : s.owner_user_id !== null,
+    );
+    for (const split of targets) {
       const lines = toDraft(split.split_line);
       const rank = (gid?: string) => {
-        const g = all.find((i) => i.goal.id === gid)?.goal;
+        const g = d.byId(gid ?? '')?.goal;
         if (!g) return 0;
-        return (g.owner_user_id === null ? 1000 : 2000) + (prio.get(g.id) ?? 0);
+        if (g.template === 'emergency') return 0;
+        return (g.owner_user_id === null ? 1000 : 2000) + (prio.get(g.id) ?? g.priority);
       };
       const saving = lines
         .filter((l) => l.kind === 'saving')
         .sort((a, b) => rank(a.goalId) - rank(b.goalId));
-      await saveSplit(
-        [...saving, ...lines.filter((l) => l.kind !== 'saving')],
-        split.owner_user_id ?? undefined,
-      );
+      const next = [...saving, ...lines.filter((l) => l.kind !== 'saving')];
+      if (next.every((l, i) => l === lines[i])) continue;
+      await saveSplit(next, split.owner_user_id ?? undefined);
     }
     await Promise.all([qk.goals, qk.splits].map((k) => qc.invalidateQueries({ queryKey: k })));
   };
