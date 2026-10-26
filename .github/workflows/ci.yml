@@ -99,6 +99,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      # 캐시에서 되살린 electron에 실행 파일이 빠져 있으면 다시 받음(‘Electron failed to install correctly’)
+      - name: Electron 실행 파일 확인
+        run: test -f apps/desktop/node_modules/electron/path.txt || node apps/desktop/node_modules/electron/install.js
       - run: pnpm --filter @sweetwo/desktop build
       - run: xvfb-run -a pnpm --filter @sweetwo/desktop e2e
 
