@@ -23,6 +23,10 @@ jobs:
       - run: pnpm build
       - name: 그림과 영상 크기 상한
         run: pnpm check:assets
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - name: Edge Function 시험(Deno)
+        run: deno test --no-config --no-lock supabase/functions/
       - name: 비밀 값이 앱 코드에 없는지
         run: "! grep -rnE 'service_role|SUPABASE_SERVICE|AWS_SECRET' apps packages --include=*.ts --include=*.tsx"
       - name: 커밋된 .env에 공개 키만 있는지(sb_secret_, service_role 토큰 금지)

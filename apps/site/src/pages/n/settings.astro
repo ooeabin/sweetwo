@@ -1,0 +1,9 @@
+---
+// 알림 메일 맨 아래 ‘알림 설정’ → 앱 S-14
+import OpenInApp from '../../components/OpenInApp.astro';
+import Site from '../../layouts/Site.astro';
+import { t } from '../../lib/site';
+---
+<Site title={t.title(t.openInSweetwo)} description={t.openInSweetwo}>
+  <OpenInApp path="n/settings" />
+</Site>

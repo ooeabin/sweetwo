@@ -27,6 +27,13 @@ describe('parseDeepLink', () => {
   });
   it('허용 목록 밖은 버린다', () => {
     expect(parseDeepLink('sweetwo://settings/delete')).toBeNull();
+    expect(parseDeepLink('sweetwo://n')).toEqual({ kind: 'open', path: '/notifications' });
+    expect(parseDeepLink('sweetwo://n/settings')).toEqual({
+      kind: 'open',
+      path: '/settings/notifications',
+    });
+    expect(parseDeepLink('sweetwo://n/settings/delete')).toBeNull();
+    expect(parseDeepLink('sweetwo://n?to=/settings/delete')).toBeNull();
     expect(parseDeepLink('https://app.sweetwo.kr/auth/callback?code=a&state=b')).toBeNull();
     expect(parseDeepLink('sweetwo://i/../../x')).toBeNull();
     expect(parseDeepLink('이상한 값')).toBeNull();

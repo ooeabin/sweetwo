@@ -431,7 +431,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 어드민 잠금, 열람 기간 끝 | 매일 04:50, 매시 5분 | `50 19 * * *`, `5 * * * *` | `lock_idle_admins()`, `run_access_expiry()` |
 | 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
 | 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
-| 다음 단계: 공휴일 받기(월 03:00), 주간 요약 메일 | | | |
+| 메일 깨우기(`kick-mail`): 보낼 메일이 있으면 pg_net으로 `send-mail` | 매분 | `* * * * *` | `kick_mail()` |
+| 다음 단계: 공휴일 받기(월 03:00) | | | |
 
 - (다음 단계) 재시도: 함수 안에서 space 단위로 3회 지수 백오프. 끝내 실패하면 job\_run에 남기고 알림(‘운영 절차’)
 - space마다 `pg_try_advisory_xact_lock`으로 중복 실행 막음. 작업은 멱등하게(두 번 돌아도 결과 같음)
@@ -448,7 +449,10 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 챙길 날 날짜는 서버도 앱과 같게: 음력은 `lunar_date` 표(2025~2050년, korean-lunar-calendar로 만든 행, 윤달 행이 없으면 평달), `care_date_in_year`·`care_next_date`. 월급날 앞당기기는 `business_day_on_or_before`(holiday 표)
 - 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
 - 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
-- 아직: 메일(SES, 주간 요약 메일 포함), 방해 금지 끝나는 시각에 다시 보내기, 묶음 알림의 바뀐 것 목록 화면, 위 표의 ‘다음 단계’ 알림들
+- 메일(20261101120000): DB가 `mail_outbox`에 쌓고(`enqueue_mail(사람, 종류, 묶음, 제목, 글, HTML, 상한에 셈, dedupe)`: 받는 방법 이메일·그 묶음 이메일이 켜져 있고 월 6회 상한 안일 때만) → 1분마다 `kick_mail()`이 보낼 메일이 있으면 pg_net으로 Edge Function `send-mail` 호출 → 함수가 `claim_mail`로 꺼내 SES API v2 SendEmail(서명 v4는 `_shared/sigv4.ts`, AWS 서명 시험 get-vanilla로 확인)로 보내고 `finish_mail`(실패는 3번까지 다시). 지금 보내는 메일은 배우자 변경 주간 요약(상한 밖, 본문 `weekly_mail_body`: 바뀐 것 전 → 후 최대 20줄, 이번 달 월급 “n개 중 m개 했어요” [확인 필요], 남은 할 일(월말 확인), 앱에서 보기 `https://sweetwo.kr/n`, 알림 설정 `https://sweetwo.kr/n/settings`)
+- 알림 메일 링크: 웹사이트 `/n`, `/n/settings`가 `sweetwo://n`, `sweetwo://n/settings`로 앱을 열고(데스크톱 `deep-link-parse.ts` 허용 목록, 알림 센터·S-14만), 앱이 없으면 “sweeTwo 앱에서 열어 주세요” + ‘앱 받기’(→ /download)
+- 함수 드라이버 `MAIL_DRIVER`: `ses`면 보냄, 그 밖(기본)은 보내지 않고 보낸 것으로만 표시(로컬·스테이징에서 실수로 보내지 않게). 시험은 `deno test --no-config --no-lock supabase/functions/`(CI check)
+- 아직: 핵심 알림 메일(연결 해제 등)과 ‘푸시를 받을 수 없는 사람’ 판단, 반송·수신 거부(SNS), 방해 금지 끝나는 시각에 다시 보내기, 묶음 알림의 바뀐 것 목록 화면, 모바일 앱 링크(AASA·assetlinks)
 - 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시
 - 모바일 푸시는 서버: notification 행이 생기면 Edge Function이 그 사람의 기기 토큰으로 APNs·FCM에 보냄(방해 금지·종류별 끄기 반영). 앱이 화면에 떠 있으면 OS 알림 대신 앱 안 토스트
 - 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때
@@ -458,7 +462,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 방해 금지 22\~08시(KST): 끝나는 08시에 보냄
 - 상한이나 방해 금지에 걸려 못 보낸 것은 알림센터에만
 - 깜짝 선물 등 비밀 항목은 알림 본문을 가림
-- SES 템플릿은 supabase/functions/\_shared/mail-templates/에. 모든 메일에 수신 거부 링크(필수 안내 메일 제외)
+- 메일 본문은 DB 함수가 만듦(`weekly_mail_body`). 모든 메일 맨 아래 알림 설정 링크(수신 거부, 필수 안내 메일 제외)
 - 반송과 수신 거부 신고는 SNS → Edge Function이 받아 발송 중단 + 앱 배너 “이메일을 확인해 주세요”
 
 ## 디자인 시스템 쓰는 법
@@ -956,8 +960,12 @@ supabase/
 ### CI/CD (GitHub Actions)
 
 1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, apps/mobile 화면을 브라우저로), e2e-desktop(Electron, xvfb), mobile-android(`cap sync android` + Gradle 디버그 빌드. iOS 시뮬레이터 빌드는 macos 러너로 나중에 추가), db(로컬 Supabase + pgTAP + DB 타입 비교. pgTAP이 실패하면 실패한 줄을 주석(annotation)으로도 남겨 `gh api .../check-runs/{id}/annotations`로 볼 수 있음)
-2. develop 합치기(개발 서버, ADR 0002): 마이그레이션(나중에 Edge Functions)을 스테이징 Supabase에, 앱 화면·어드민·웹사이트는 Cloudflare Workers Builds가 GitHub 연결로 빌드해 개발 서버 주소에(→ ‘개발 서버’)
-   - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션만). `supabase/migrations`가 바뀐 채로 develop에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
+2. develop 합치기(개발 서버, ADR 0002): 마이그레이션과 Edge Functions를 스테이징 Supabase에, 앱 화면·어드민·웹사이트는 Cloudflare Workers Builds가 GitHub 연결로 빌드해 개발 서버 주소에(→ ‘개발 서버’)
+   - 지금 있는 것: `.github/workflows/deploy-staging.yml`(마이그레이션 + Edge Function `send-mail`). `supabase/migrations`, `supabase/functions`, `supabase/config.toml`이 바뀐 채로 develop에 합쳐지면 돌고, Actions 탭에서 손으로도 돌릴 수 있음
+   - 메일을 실제로 보내려면 사람이 대시보드에서 넣는 값(코드·채팅에 넣지 않음):
+     - Edge Function 비밀 값(공식 문서 ‘Environment Variables’: 대시보드 Edge Function Secrets 화면, `SUPABASE_`로 시작하는 이름은 못 씀): `MAIL_CRON_SECRET`(긴 무작위 값), `MAIL_DRIVER`(`ses`일 때만 보냄), `MAIL_FROM`(SES에서 확인된 주소), `AWS_REGION`(`ap-northeast-2`), `AWS_ACCESS_KEY_ID`·`AWS_SECRET_ACCESS_KEY`(SES Send만 되는 IAM 사용자), 필요하면 `SES_CONFIGURATION_SET`. 서버 키는 함수 기본 값(`SUPABASE_SECRET_KEYS`의 `default`, 없으면 옛 `SUPABASE_SERVICE_ROLE_KEY`)을 씀
+     - Vault 비밀 값 2개(공식 문서 ‘Vault’: 대시보드에서 이름과 값을 넣고 저장): `mail_function_url` = `https://{project-ref}.supabase.co/functions/v1/send-mail`, `mail_cron_secret` = 위 `MAIL_CRON_SECRET`과 같은 값. 둘 중 하나라도 없으면 `kick_mail`은 아무것도 안 함
+     - pg_net은 요청이 끝날 때까지 헤더를 `net.http_request_queue`에 남기므로(공식 문서 ‘Scheduling Edge Functions’) 서버 키가 아니라 메일 전용 `MAIL_CRON_SECRET`만 보냄
    - GitHub Environments → staging에 배포 브랜치 제한이 있으면 develop을 허용해야 함
    - 필요한 비밀 값(GitHub Environments → staging): `SUPABASE_ACCESS_TOKEN`(배포 전용 토큰), `SUPABASE_DB_PASSWORD`(staging DB 비밀번호)
    - staging에 손으로 SQL을 넣지 않는다. 모든 변경은 마이그레이션 파일 → develop → 이 작업으로
