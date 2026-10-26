@@ -1,4 +1,13 @@
-import { fetchTrash, purgeTrash, qk, restoreTrash, type TrashRow } from '@sweetwo/api';
+import {
+  fetchTrash,
+  purgeTrash,
+  qk,
+  restoreTrash,
+  trashAsset,
+  trashCareDay,
+  trashGoals,
+  type TrashRow,
+} from '@sweetwo/api';
 import { daysBetween, formatMonthDay, todayKst } from '@sweetwo/core';
 import { Badge, Button, EmptyState, Menu, Modal, PageHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -35,8 +44,19 @@ export function S21Trash() {
     setBusy(true);
     try {
       await restoreTrash(r.kind, r.id);
-      toast(copy.restored);
       await refresh();
+      // 되살리기 Toast ‘되돌리기’ = 다시 휴지통으로(25 S-21 3번)
+      toast(copy.restored, {
+        label: copy.undo,
+        onClick: () =>
+          void (
+            r.kind === 'asset'
+              ? trashAsset(r.id)
+              : r.kind === 'goal'
+                ? trashGoals([r.id])
+                : trashCareDay(r.id)
+          ).then(refresh),
+      });
     } catch {
       toast(copy.failed);
     } finally {

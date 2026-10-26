@@ -1905,8 +1905,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       return Array.isArray(b) ? b : [b];
     };
     if (path === '/rest/v1/consent' && method === 'POST') {
-      db.consents.push(...rowsOf());
+      db.consents.push(...rowsOf().map((r) => ({ created_at: new Date().toISOString(), ...r })));
       return ok204();
+    }
+    if (path === '/rest/v1/consent' && method === 'GET') {
+      const kind = url.searchParams.get('kind')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.consents
+          .filter((c) => !kind || c.kind === kind)
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+      );
     }
     if (path === '/rest/v1/todo') {
       if (method === 'GET') return json(route, db.todos);

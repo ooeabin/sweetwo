@@ -1,7 +1,7 @@
--- pgTAP: 우리 ↔ 내 목표 바꾸기는 상대에게 알림(22 G-02 ⋯ 종류 바꾸기)
+-- pgTAP: 우리 ↔ 내 목표 바꾸기, 결혼한 날 바꾸기는 상대에게 알림(22 G-02 ⋯, 25 S-11h)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(2);
+select plan(3);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -40,6 +40,15 @@ select results_eq(
   '우리 → 내: 예빈에게 알림');
 select is(public.partner_change_line('goal', 'owner', '여행', '우리 목표', '내 목표'), '종류 우리 목표 → 내 목표',
   '알림 줄 이름');
+
+delete from public.partner_change;
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+update public.couple_space set wedding_date = '2025-05-17';
+reset role;
+select results_eq(
+  $$ select field, after_v from public.partner_change where topic = 'couple' $$,
+  $$ values ('wedding_date', '5월 17일') $$, '결혼한 날: 예빈에게 알림');
 
 select * from finish();
 rollback;

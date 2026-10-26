@@ -1,6 +1,7 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { QuestionLayout } from '@sweetwo/ui';
-import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { CheckLine, goalLineName, lineName } from '../check-line';
 import { copy } from '../copy';
@@ -25,6 +26,8 @@ export function W05Review() {
   const partner = usePartner();
   const lists = useChecklists();
   const check = useCheck();
+  // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월말 확인’, 홈·트레이도 같음)
+  const empty = useRef<boolean | null>(null);
   if (!me.data || !space.data || !goals.data || !lists.data) return null;
   const list = myChecklist(lists.data, me.data.id);
   const meId = me.data.id;
@@ -33,6 +36,8 @@ export function W05Review() {
   const joint = space.data.salary_mode === 'joint';
   const goalName = goalLineName(goals.data, personName, joint);
   const left = list ? waiting(list) : [];
+  if (empty.current === null) empty.current = !!list && left.length === 0;
+  if (empty.current) return <Navigate to="/salary" replace />;
   const skip = (l: PayCheckLine) => void check(l, 'skipped').catch(() => toast(copy.failed));
   return (
     <QuestionLayout

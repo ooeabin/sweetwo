@@ -104,3 +104,28 @@ export async function touchApp(): Promise<void> {
   const { error } = await supabase().rpc('touch_app');
   if (error) throw new Error(error.message);
 }
+
+/** S-14 마케팅 정보 받기: 가장 최근 동의 기록(없으면 null = 꺼짐) */
+export async function fetchMarketing(): Promise<{ agreed: boolean; at: string } | null> {
+  const { data, error } = await supabase()
+    .from('consent')
+    .select('agreed, created_at')
+    .eq('kind', 'marketing')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) throw new Error(error.message);
+  const r = data?.[0];
+  return r ? { agreed: r.agreed, at: r.created_at } : null;
+}
+
+/** S-14 마케팅 정보 받기 켜기·끄기(동의 기록은 추가만) */
+export async function setMarketing(userId: string, on: boolean, version: string): Promise<void> {
+  const { error } = await supabase().from('consent').insert({
+    user_id: userId,
+    kind: 'marketing',
+    terms_version: version,
+    agreed: on,
+    source: 'settings',
+  });
+  if (error) throw new Error(error.message);
+}

@@ -1,7 +1,14 @@
-import { qk, updateMe, type Me } from '@sweetwo/api';
-import { notiPrefs, type NotiPrefs, type NotiTopic } from '@sweetwo/core';
+import { fetchMarketing, qk, setMarketing, updateMe, type Me } from '@sweetwo/api';
+import {
+  formatDateFull,
+  notiPrefs,
+  TERMS_VERSION,
+  todayKst,
+  type NotiPrefs,
+  type NotiTopic,
+} from '@sweetwo/core';
 import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
@@ -13,7 +20,7 @@ import { useSettingsData } from '../data';
 // S-14 알림(docs/spec/25-settings.md): 메일 상한 안내, 묶음별 OS 알림·이메일(웹은 이메일만), 챙길 날은 시점마다,
 // 받는 방법(둘 다 끄면 “알림을 받을 방법이 없어요” 확인), 방해 금지 시간(→ S-14a). 바뀌면 바로 저장.
 // 센터 기록은 설정과 상관없이 남음. 끌 수 없는 종류(보안·결정 기한)는 목록에 없음.
-// 생활비 체크(W-03)는 부부 단위(한 명이 켜면 둘 다), 결혼 전 예비부부는 없음. 마케팅 정보 받기(동의 기록 함수)는 그 기능과 함께.
+// 마케팅 정보 받기(기본 꺼짐): 켜고 끌 때마다 동의 기록(consent, 추가만), 켜면 “{날짜} 동의”.
 const CARE: NotiTopic[] = ['care_30', 'care_14', 'care_7', 'care_0'];
 
 export function S14Notifications() {
@@ -21,6 +28,7 @@ export function S14Notifications() {
   const qc = useQueryClient();
   const d = useSettingsData();
   const [confirm, setConfirm] = useState<'push' | 'email' | null>(null);
+  const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
   if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
   const desktop = detectPlatform() === 'desktop';
   const prefs = notiPrefs(d.me.noti_prefs);
@@ -138,6 +146,21 @@ export function S14Notifications() {
       {pair('money', copy.groups.money)}
       {pair('goal', copy.groups.goal)}
       {pair('invite', copy.groups.invite)}
+      {/* 5번 마케팅 정보 받기(기본 꺼짐, 켜면 “{날짜} 동의”) */}
+      <Toggle
+        label={copy.marketing}
+        checked={!!marketing.data?.agreed}
+        help={
+          marketing.data?.agreed
+            ? copy.marketingAt(formatDateFull(todayKst(new Date(marketing.data.at))))
+            : undefined
+        }
+        onChange={(on) =>
+          void setMarketing(me.id, on, TERMS_VERSION)
+            .then(() => qc.invalidateQueries({ queryKey: ['consent', 'marketing'] }))
+            .catch(() => toast(copy.failed))
+        }
+      />
     </div>
   );
   return <MainFrame current={null} columns={[body]} />;

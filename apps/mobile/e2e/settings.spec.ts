@@ -198,6 +198,13 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
+  // 마케팅 정보 받기(기본 꺼짐) → 켜면 동의 기록 + “{날짜} 동의”
+  const mk = page.getByRole('switch', { name: '마케팅 정보 받기' });
+  await expect(mk).toHaveAttribute('aria-checked', 'false');
+  await mk.click();
+  await expect(mk).toHaveAttribute('aria-checked', 'true');
+  expect(db.consents.at(-1)).toMatchObject({ kind: 'marketing', agreed: true, source: 'settings' });
+  await expect(page.getByText(/동의$/)).toBeVisible();
   expect(db.me).toMatchObject({ quiet_start: 23 });
 });
 

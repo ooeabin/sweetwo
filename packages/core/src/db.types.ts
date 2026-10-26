@@ -2533,6 +2533,7 @@ export type Database = {
           adult_confirmed_at: string | null
           allowance: number | null
           analytics_off: boolean
+          app_seen_at: string | null
           avatar_path: string | null
           avatar_updated_at: string | null
           birth_day: number | null

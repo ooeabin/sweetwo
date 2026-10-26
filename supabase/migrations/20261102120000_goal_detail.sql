@@ -1,4 +1,5 @@
 -- G-02 목표 상세 빠진 것(22): 우리 ↔ 내 목표 바꾸기 상대 알림(goal_partner_change에 'owner'), 알림 줄 이름 ‘종류’.
+-- S-11g·h 결혼 상태·결혼한 날을 바꾸면 상대 알림(25 S-11g·h, couple_partner_change).
 
 create or replace function public.partner_change_line(p_topic text, p_field text, p_noun text, p_before text, p_after text)
 returns text
@@ -26,6 +27,9 @@ as $$
     when p_topic = 'care' and p_field = 'added' then p_noun || ' 추가' -- [확인 필요]
     when p_topic = 'care' then p_noun || ' 메모' -- [확인 필요]
     when p_topic = 'cycle_day' then '체크리스트 만드는 날 ' || p_before || ' → ' || p_after -- [확인 필요]
+    when p_topic = 'couple' then
+      case p_field when 'marriage' then '결혼 상태' else '결혼한 날' end
+      || ' ' || coalesce(p_before, '없음') || ' → ' || coalesce(p_after, '없음') -- [확인 필요]
     else p_noun
   end;
 $$;
@@ -95,3 +99,45 @@ begin
 end;
 $$;
 
+create or replace function public.partner_change_title(p_topic text, p_noun text, who text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select who || '님이 ' || case
+    when p_topic = 'split' then '분배표를 바꿨어요'
+    when p_topic = 'income' then '월급을 바꿨어요' -- [확인 필요]
+    when p_topic in ('goal', 'goal_meta', 'goal_move') then p_noun || ' 목표를 바꿨어요'
+    when p_topic = 'asset' then '우리 자산을 바꿨어요'
+    when p_topic = 'care' then '챙길 날을 바꿨어요' -- [확인 필요]
+    when p_topic = 'cycle_day' then '체크리스트 만드는 날을 바꿨어요'
+    when p_topic = 'couple' then '결혼 정보를 바꿨어요' -- [확인 필요]
+    else '바꿨어요' end;
+$$;
+
+-- S-11g·h: 결혼 상태·결혼한 날 바꾸면 상대에게 바로 알림
+create or replace function public.couple_partner_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.marriage_status is distinct from old.marriage_status then
+    perform public.log_partner_change(new.id, 'couple', new.id, 'marriage', '',
+      case old.marriage_status when 'married' then '했어요' when 'engaged' then '준비 중' end,
+      case new.marriage_status when 'married' then '했어요' when 'engaged' then '준비 중' end, true, '/settings/me');
+  end if;
+  if new.wedding_date is distinct from old.wedding_date then
+    perform public.log_partner_change(new.id, 'couple', new.id, 'wedding_date', '',
+      case when old.wedding_date is not null then public.md_label(old.wedding_date) end,
+      case when new.wedding_date is not null then public.md_label(new.wedding_date) end, true, '/settings/me');
+  end if;
+  return null;
+end;
+$$;
+revoke all on function public.couple_partner_change() from public, anon, authenticated;
+drop trigger if exists couple_partner_change on public.couple_space;
+create trigger couple_partner_change after update of marriage_status, wedding_date on public.couple_space
+  for each row execute function public.couple_partner_change();
