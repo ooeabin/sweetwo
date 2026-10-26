@@ -19,8 +19,11 @@ export function O50Split() {
 
   const mine = splits.data?.find((x) => x.owner_user_id === me.id || x.owner_user_id === null);
   const saved = mine?.split_line.length ? toDraft(mine.split_line) : null;
-  const lines = draft ?? saved ?? recommendedDraft(me, goals);
   const joint = s.state.space?.salary_mode === 'joint';
+  // 합쳐서 + 배우자 합류 뒤: 수입 = 두 사람 합, 용돈은 사람마다 1줄(17 O-50 2·4번)
+  const partner = joint ? (s.state.partner ?? null) : null;
+  const lines = draft ?? saved ?? recommendedDraft(me, goals, { partner, joint });
+  const income = (me.monthly_income ?? 0) + (partner?.monthly_income ?? 0);
 
   const save = () =>
     s.done(async () => {
@@ -41,10 +44,12 @@ export function O50Split() {
     <SplitEditor
       lines={lines}
       onChange={setDraft}
-      income={me.monthly_income ?? 0}
+      income={income}
       payday={me.payday_last ? 'last' : me.payday}
       goals={goals}
-      personName={() => me.nickname ?? ''}
+      personName={(id) =>
+        id && id === partner?.id ? (partner.nickname ?? '') : (me.nickname ?? '')
+      }
       joint={joint}
       title={copy.splitTitle}
       help={copy.splitTableHelp}
