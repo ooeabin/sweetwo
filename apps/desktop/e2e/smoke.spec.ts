@@ -16,9 +16,12 @@ test('데스크톱 실행', async () => {
     'notify',
     'onInvite',
     'onNavigate',
+    'update',
     'version',
     'widget',
   ]);
+  // 자동 업데이트(S-19): 설치하지 않고 실행하면 꺼져 있음
+  expect(await win.evaluate(() => window.sweetwo?.update?.check())).toEqual({ status: 'idle' });
   // 트레이 위젯(26): 로그인 전에는 값 없음, 설정 기본값(트레이 켜짐, 금액 가림)
   const state = await win.evaluate(() => window.sweetwo?.widget?.state());
   expect(state).toMatchObject({
