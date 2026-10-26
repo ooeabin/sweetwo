@@ -5,7 +5,13 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { useOnline } from '../../shared/online';
-import { N01Panel, useHasUnread, useNotiPanel, useNotiRealtime } from '../notifications';
+import {
+  N01Panel,
+  useHasUnread,
+  useNotiPanel,
+  useNotiRealtime,
+  usePushRegistration,
+} from '../notifications';
 import { addFor, FrameCommands } from './command';
 import { copy } from './copy';
 import { useTraySync } from './tray-sync';
@@ -33,6 +39,7 @@ export function MainFrame(
   useTraySync();
   // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime(데스크톱 OS 알림)
   useNotiRealtime(me.data?.id);
+  usePushRegistration(me.data?.id);
   const unread = useHasUnread();
   const panel = useNotiPanel();
   const narrow = useNarrow();

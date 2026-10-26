@@ -1,6 +1,11 @@
 // 배우자 합류 문구(docs/spec/18-partner-join.md, 15 A-07). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  // P-11 합류 직후 푸시 허용(모바일, 1회) [확인 필요] 문구
+  pushTitle: '알림을 받을까요?',
+  pushHelp: '배우자가 체크하거나 바꾸면 바로 알려 드려요',
+  pushAllow: '알림 받기',
+  later: '나중에 할게요',
   next: '다음',
   retry: '다시 시도',
   saveFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',

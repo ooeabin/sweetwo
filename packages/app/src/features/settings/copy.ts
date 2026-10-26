@@ -395,6 +395,7 @@ export const copy = {
   appLock: '앱 잠금',
   appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
   changePin: 'PIN 바꾸기',
+  pushDenied: '휴대폰 설정에서 sweeTwo 알림을 켜 주세요', // [확인 필요]
   touchId: (kind: 'touch' | 'face' | 'fingerprint') =>
     kind === 'fingerprint' ? '지문으로 풀기' : `${kind === 'face' ? 'Face ID' : 'Touch ID'}로 풀기`, // [확인 필요]
   autoLock: '자동 잠금',

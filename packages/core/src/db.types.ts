@@ -1753,6 +1753,7 @@ export type Database = {
           mailed_at: string | null
           push_hidden: boolean
           push_title: string | null
+          pushed_at: string | null
           read_at: string | null
           space_id: string | null
           target: string
@@ -1772,6 +1773,7 @@ export type Database = {
           mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
+          pushed_at?: string | null
           read_at?: string | null
           space_id?: string | null
           target: string
@@ -1790,6 +1792,7 @@ export type Database = {
           mailed_at?: string | null
           push_hidden?: boolean
           push_title?: string | null
+          pushed_at?: string | null
           read_at?: string | null
           space_id?: string | null
           target?: string
@@ -2002,6 +2005,37 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_device: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       salary_split: {
         Row: {
@@ -2547,6 +2581,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_push: {
+        Args: { p_limit?: number; p_now?: string }
+        Returns: {
+          body: string
+          notification_id: string
+          platform: string
+          target: string
+          title: string
+          token: string
+        }[]
+      }
       complete_join: {
         Args: { p_lines?: Json; p_version?: number }
         Returns: undefined
@@ -2632,6 +2677,7 @@ export type Database = {
         Returns: number
       }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
+      drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
       emergency_asset_add: {
         Args: { d: number; p_space: string }
         Returns: undefined
@@ -2720,6 +2766,7 @@ export type Database = {
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
       kick_mail: { Args: Record<PropertyKey, never>; Returns: boolean }
+      kick_push: { Args: Record<PropertyKey, never>; Returns: boolean }
       ko_batchim: { Args: { w: string }; Returns: boolean }
       ko_is: { Args: { w: string }; Returns: string }
       ko_obj: { Args: { w: string }; Returns: string }
@@ -2927,6 +2974,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
       read_won: { Args: { v: number }; Returns: string }
       recent_goal_changes: {
         Args: Record<PropertyKey, never>
@@ -2950,6 +2998,10 @@ export type Database = {
           p_paid_from: Database["public"]["Enums"]["paid_from"]
         }
         Returns: Json
+      }
+      register_push_device: {
+        Args: { p_app_version?: string; p_platform: string; p_token: string }
+        Returns: undefined
       }
       renew_invite: {
         Args: Record<PropertyKey, never>
@@ -3078,6 +3130,7 @@ export type Database = {
       }
       undo_goal_move: { Args: { p_id: string }; Returns: undefined }
       unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
+      unregister_push_device: { Args: { p_token: string }; Returns: undefined }
       weekly_mail_body: {
         Args: { p_actor: string; p_receiver: string; p_today: string }
         Returns: {

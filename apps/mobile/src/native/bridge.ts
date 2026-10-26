@@ -15,6 +15,15 @@ import {
 } from './auth';
 import { emitter } from './events';
 import {
+  pushOpens,
+  pushReceives,
+  pushStatus,
+  pushToken,
+  requestPush,
+  startPush,
+  takePendingOpen,
+} from './push';
+import {
   clearPinVerified,
   lockEvents,
   lockNow,
@@ -49,6 +58,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
     }
   });
   watchBrowserClosed();
+  startPush();
   await startAutoLock();
 
   const bridge: DesktopBridge = {
@@ -87,6 +97,17 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         pendingPath = null;
       }
       return navigates.on(cb);
+    },
+    push: {
+      status: () => pushStatus(),
+      request: () => requestPush(),
+      token: () => pushToken(),
+      onOpen: (cb) => {
+        const p = takePendingOpen();
+        if (p) cb(p);
+        return pushOpens.on(cb);
+      },
+      onReceive: (cb) => pushReceives.on(cb),
     },
     openUrl: async (url) => {
       // 웹사이트(다운로드·약관)만 앱 안 브라우저로

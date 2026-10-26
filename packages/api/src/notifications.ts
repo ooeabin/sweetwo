@@ -140,3 +140,22 @@ export async function fetchMailBounced(): Promise<boolean> {
   if (error) return false;
   return data === true;
 }
+
+/** 모바일 푸시 기기 등록(로그인한 사람, 같은 토큰은 마지막 등록한 사람 것) */
+export async function registerPushDevice(
+  platform: 'ios' | 'android',
+  token: string,
+  appVersion: string,
+) {
+  const { error } = await supabase().rpc('register_push_device', {
+    p_platform: platform,
+    p_token: token,
+    p_app_version: /^\d+\.\d+\.\d+$/.test(appVersion) ? appVersion : undefined,
+  });
+  if (error) throw new Error(error.message);
+}
+/** 로그아웃 전에 이 기기 토큰을 지움(실패해도 로그아웃은 함) */
+export async function unregisterPushDevice(token: string) {
+  const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
+  if (error) throw new Error(error.message);
+}
