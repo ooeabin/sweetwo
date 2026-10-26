@@ -88,7 +88,8 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   expect(db.assets.find((a) => a.id === 'a-sav')?.maturity_date).toBe('2027-10-07');
 
   // 닫기
-  db.assets.find((a) => a.id === 'a-sav')!.maturity_date = '2026-10-07';
+  const sav = db.assets.find((a) => a.id === 'a-sav');
+  if (sav) sav.maturity_date = '2026-10-07';
   await page.goto('/');
   const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
   await band.getByRole('button', { name: '닫기' }).click();
