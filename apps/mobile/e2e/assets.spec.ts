@@ -354,7 +354,8 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('region', { name: '금액' })).toContainText(
     '+200만 원, 원금 800만 원',
   );
-  await expect(page.getByRole('region', { name: '월별 기록' })).toContainText('월말 정리');
+  // 고친 기록은 직접 고친 것만(23 F-04 5번)
+  await expect(page.getByRole('region', { name: '월별 기록' })).not.toContainText('월말 정리');
   await axe(page);
   await page.getByRole('button', { name: '수정' }).click();
   await page.getByRole('textbox', { name: '금액' }).fill('12000000');
@@ -451,7 +452,9 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   expect(db.assets.at(-1)?.goal_id ?? null).toBeNull();
 });
 
-test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({ page }) => {
+test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db, false);
@@ -482,4 +485,3 @@ test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기
     monthly_payment: null,
   });
 });
-

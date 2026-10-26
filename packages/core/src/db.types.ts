@@ -566,6 +566,7 @@ export type Database = {
           id: number
           principal: number | null
           recorded_at: string
+          recorded_by: string | null
           source: string
           space_id: string
         }
@@ -576,6 +577,7 @@ export type Database = {
           id?: never
           principal?: number | null
           recorded_at?: string
+          recorded_by?: string | null
           source?: string
           space_id: string
         }
@@ -585,6 +587,7 @@ export type Database = {
           id?: never
           principal?: number | null
           recorded_at?: string
+          recorded_by?: string | null
           source?: string
           space_id?: string
         }
@@ -2936,6 +2939,10 @@ export type Database = {
       save_split: {
         Args: { p_lines: Json; p_owner?: string }
         Returns: string
+      }
+      sell_asset: {
+        Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
+        Returns: number
       }
       send_evening_notifications: {
         Args: { p_today?: string }

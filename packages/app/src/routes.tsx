@@ -13,7 +13,14 @@ import {
   RequireAccount,
   paths,
 } from './features/auth';
-import { AssetAddRoute, F01Overview, F02Items, F04Item, F04aMatured } from './features/assets';
+import {
+  AssetAddRoute,
+  F01Overview,
+  F02Items,
+  F04Item,
+  F04aMatured,
+  F04bSold,
+} from './features/assets';
 import { TrayWidget } from './features/widget';
 import { DevUiGallery } from './features/dev';
 import {
@@ -682,6 +689,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-04a 만기된 돈 정리
+      {
+        path: '/assets/:id/sold',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F04bSold />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-04b~d 팔았어요
       {
         path: '/onboarding/:screen', // O-10~O-67 온보딩
         element: (

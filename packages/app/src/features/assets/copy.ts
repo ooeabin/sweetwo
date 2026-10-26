@@ -217,6 +217,19 @@ export const copy = {
   maturedRejoin: '다시 가입했어요', // [확인 필요]
   maturedPick: '어느 통장으로 옮겼어요?', // [확인 필요]
   maturedNoAccount: '옮길 통장이 없어요. 먼저 통장을 추가해 주세요', // [확인 필요]
+  // F-04b~d 팔았어요
+  sold: '팔았어요',
+  marketEdit: '시세 바꾸기',
+  soldAmount: '받은 금액은 얼마예요?',
+  soldPart: '일부만 팔았어요',
+  soldRemain: '남은 평가금액은요?',
+  soldTo_q: '받은 돈은 어느 통장에 들어왔어요?', // [확인 필요]
+  soldDone: '팔았어요', // [확인 필요] 결과 제목
+  soldTo: (name: string, amount: string) => `${name} +${amount}`,
+  soldGain: (v: string) => `실현 손익 ${v}`,
+  ok: '확인',
+  graph: '금액 그래프', // [확인 필요] 요소 이름
+  editedBy: (date: string, name: string) => `${date} ${name}`,
   maturedDone: '정리했어요', // [확인 필요]
   maturedDateError: '오늘 뒤 날짜를 넣어 주세요', // [확인 필요]
 

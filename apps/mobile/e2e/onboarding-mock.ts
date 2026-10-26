@@ -810,6 +810,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'partner_activity') return json(route, db.activity);
       // G-05 달성: 축하는 사람마다 한 번
       // F-04a 만기된 돈 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
+      if (fn === 'sell_asset') {
+        // F-04b~d: 받은 금액을 통장에, 일부만이면 남은 평가금액, 다 팔면 매도 완료. 실현 손익 = 받은 금액 − 원금
+        const b = body();
+        const a = db.assets.find((x) => x.id === b.p_asset);
+        const t = db.assets.find((x) => x.id === b.p_to);
+        if (t) t.amount = Number(t.amount) + Number(b.p_received);
+        const p0 = a?.principal === null || a?.principal === undefined ? null : Number(a.principal);
+        const amt = Number(a?.amount ?? 0);
+        // 일부만: 판 만큼의 원금 = 원금 × 판 비율
+        const sold =
+          p0 === null
+            ? null
+            : b.p_remain === undefined
+              ? p0
+              : Math.round((p0 * (amt - Number(b.p_remain))) / (amt || 1));
+        if (a && b.p_remain === undefined) a.status = 'sold';
+        else if (a) a.amount = Number(b.p_remain);
+        return json(route, sold === null ? null : Number(b.p_received) - sold);
+      }
       if (fn === 'settle_matured') {
         const b = body();
         const a = db.assets.find((x) => x.id === b.p_asset);
