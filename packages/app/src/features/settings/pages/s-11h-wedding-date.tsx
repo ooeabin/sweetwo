@@ -37,9 +37,14 @@ export function S11hWeddingDate() {
         ? sp.wedding_month.slice(0, 7)
         : null
       : month;
-  const isUndecided = engaged && (undecided ?? (!changedStatus && !!sp.wedding_month && !sp.wedding_date));
+  const isUndecided =
+    engaged && (undecided ?? (!changedStatus && !!sp.wedding_month && !sp.wedding_date));
   const rangeError =
-    dv && (engaged ? dv <= today : dv > today) ? (engaged ? copy.futureOnly : copy.pastOnly) : undefined;
+    dv && (engaged ? dv <= today : dv > today)
+      ? engaged
+        ? copy.futureOnly
+        : copy.pastOnly
+      : undefined;
   const monthError = mv && mv < today.slice(0, 7) ? copy.futureOnly : undefined;
   const title = engaged ? copy.weddingPlannedQ : copy.weddingDoneQ;
 
@@ -58,9 +63,7 @@ export function S11hWeddingDate() {
     setSaving(true);
     try {
       await updateSpace({ marriage_status: status, ...patch });
-      await Promise.all(
-        [qk.space, qk.careDays].map((k) => qc.invalidateQueries({ queryKey: k })),
-      );
+      await Promise.all([qk.space, qk.careDays].map((k) => qc.invalidateQueries({ queryKey: k })));
       toast(copy.saved, {
         label: copy.undo,
         onClick: () =>
@@ -85,7 +88,12 @@ export function S11hWeddingDate() {
           void save({ wedding_date: null, wedding_month: `${mv}-01`, wedding_date_estimated: true })
         }
       >
-        <YearMonthInput label={copy.whenPlanned} value={mv} onChange={setMonth} error={monthError} />
+        <YearMonthInput
+          label={copy.whenPlanned}
+          value={mv}
+          onChange={setMonth}
+          error={monthError}
+        />
       </QuestionLayout>
     );
   return (

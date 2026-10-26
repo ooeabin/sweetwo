@@ -30,9 +30,8 @@ export type AnalyticsEvent =
     }
   | {
       name: 'unlink_requested';
-      props: { split_plan: 'default' | 'custom'; linked_months: number };
+      props: { linked_months: number };
     }
-  | { name: 'unlink_countered'; props: Record<string, never> }
   | {
       name: 'living_check_answered';
       props: {
@@ -43,9 +42,9 @@ export type AnalyticsEvent =
     }
   | {
       name: 'unlink_resolved';
-      // timeout(14일 기본안)은 서버가 보냄
+      // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {
-        path: 'agreed' | 'counter_agreed' | 'canceled';
+        path: 'agreed' | 'canceled';
         days_pending: number;
         exported_data: boolean;
       };

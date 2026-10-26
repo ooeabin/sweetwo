@@ -4125,6 +4125,7 @@ export type Database = {
       family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
+      finish_unlink: { Args: { p_how: string; p_id: string }; Returns: undefined }
       goal_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4412,10 +4413,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      request_unlink: {
-        Args: { p_confirm: string; p_shares: Json }
-        Returns: string
-      }
+      request_unlink: { Args: { p_confirm: string }; Returns: string }
       respond_proposal: {
         Args: {
           p_id: string
@@ -4498,6 +4496,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }
       start_first_plan: {
         Args: {

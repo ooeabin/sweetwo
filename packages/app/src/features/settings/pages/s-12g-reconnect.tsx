@@ -57,7 +57,7 @@ export function S12gReconnect() {
   return (
     <QuestionLayout
       title={copy.reconnectAsked(partner)}
-      help={copy.reconnectBack}
+      help={`${copy.reconnectBack}. ${copy.reconnectDiscard}`}
       onBack={() => nav('/settings/couple')}
       primary={{ label: copy.reconnectYes, loading: busy }}
       onSubmit={() => void answer(true)}

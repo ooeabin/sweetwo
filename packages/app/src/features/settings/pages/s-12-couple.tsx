@@ -172,34 +172,26 @@ export function S12Couple() {
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
         <p>
           <strong>
-            {mine
-              ? req.counter
-                ? copy.counterReceived(c.partnerName)
-                : copy.pendingWait(c.partnerName)
-              : req.counter
-                ? copy.pendingWait(c.partnerName)
-                : copy.pendingReceived(c.partnerName)}
+            {mine ? copy.pendingWait(c.partnerName) : copy.pendingReceived(c.partnerName)}
           </strong>
         </p>
-        <p className="hg-q__help">{copy.deadline(formatMonthDay(req.deadline))}</p>
+        <p className="hg-q__help">
+          {copy.pendingWhen(c.partnerName, formatMonthDay(req.deadline))}
+        </p>
         <div className="hg-row" style={{ flexWrap: 'wrap' }}>
-          {mine && req.counter ? (
-            <Button size="sm" onClick={() => nav('/settings/couple/unlink/counter')}>
-              {copy.seeCounter}
-            </Button>
-          ) : mine ? (
+          {mine ? (
             <Button variant="secondary" size="sm" disabled={busy} onClick={() => void cancel()}>
               {copy.cancelRequest}
             </Button>
           ) : (
             <Button size="sm" onClick={() => nav('/settings/couple/unlink/review')}>
-              {copy.seePlan}
+              {copy.seeRequest}
             </Button>
           )}
         </div>
       </div>
       <div className="hg-list">
-        <ListRow label={copy.proposalsRow} value={copy.frozen} chevron={false} />
+        <ListRow label={copy.frozen} chevron={false} />
       </div>
     </div>
   ) : null;
@@ -253,7 +245,7 @@ export function S12Couple() {
           <div className="hg-row">
             {openReq ? (
               <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
-                {copy.seeCounter}
+                {copy.seeRequest}
               </Button>
             ) : (
               <Button

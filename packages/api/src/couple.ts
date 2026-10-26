@@ -43,12 +43,9 @@ export async function fetchUnlink(): Promise<Unlink | null> {
   return data?.[0] ?? null;
 }
 
-/** S-12c 보내기. shares = 공동 자산별 내 몫(빠진 항목은 서버가 기본 몫) */
-export async function requestUnlink(shares: Record<string, number>, confirm: string) {
-  const { error } = await supabase().rpc('request_unlink', {
-    p_shares: shares,
-    p_confirm: confirm,
-  });
+/** S-12c 연결 해제 요청(같이 쓰던 데이터는 나누지 않고 확정 때 모두 지움). confirm = “연결 해제” */
+export async function requestUnlink(confirm: string) {
+  const { error } = await supabase().rpc('request_unlink', { p_confirm: confirm });
   fail(error);
 }
 
@@ -58,7 +55,7 @@ export async function cancelUnlink() {
   fail(error);
 }
 
-/** S-12d ‘동의해요’(받은 사람): 요청한 자산 정리 안대로 바로 해제 확정 */
+/** S-12d ‘확인했어요’(받은 사람): 바로 해제 확정 */
 export async function agreeUnlink() {
   const { error } = await supabase().rpc('agree_unlink');
   fail(error);
@@ -71,15 +68,9 @@ export async function fetchMyUnlink(): Promise<Unlink | null> {
   return (Array.isArray(data) ? data[0] : null) ?? null;
 }
 
-/** S-12e 보내기(받은 사람, 1회). shares = 항목별 내(받은 사람) 몫 */
-export async function counterUnlink(shares: Record<string, number>) {
-  const { error } = await supabase().rpc('counter_unlink', { p_shares: shares });
-  fail(error);
-}
-
-/** S-12f ‘동의해요’(요청한 사람): 다르게 정리한 안으로 해제 확정 */
-export async function acceptCounterUnlink() {
-  const { error } = await supabase().rpc('accept_counter_unlink');
+/** S-12h ‘시작하기’: 혼자 쓰기 온보딩 O-11부터 */
+export async function startAfterUnlink() {
+  const { error } = await supabase().rpc('start_after_unlink');
   fail(error);
 }
 

@@ -124,44 +124,27 @@ export const copy = {
   unlink: '연결 해제',
   pendingWait: (name: string) => `${name}님 답을 기다리고 있어요`,
   pendingReceived: (name: string) => `${name}님이 연결 해제를 요청했어요`,
-  seePlan: '자산 정리 안 보기',
+  seeRequest: '확인하기', // [확인 필요]
   proposalsRow: '제안', // [확인 필요] 줄 이름
-  frozen: '해제 전까지 멈춤',
+  frozen: '해제 전까지 분배표를 고칠 수 없어요', // [확인 필요]
   cancelRequest: '요청 취소',
   cancelled: '연결 해제 요청을 취소했어요', // [확인 필요]
-  deadline: (md: string) => `${md}까지 정하지 않으면 분담 비율로 정리해요`,
+  pendingWhen: (name: string, md: string) => `${name}님이 확인하거나 ${md}이 되면 해제돼요`, // [확인 필요]
 
-  // S-12a~c 연결 해제 요청
+  // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
-  unlinkHow: [
-    // [확인 필요] 정리되는 방식(31 보안·개인정보 4장을 해요체로)
-    '내 명의 자산, 수입, 용돈은 나에게 남아요',
-    '공동 목표와 통장 몫은 자산 정리 안대로 나눠요',
-    '월 플랜, 월말 정리, 제안 기록은 해제할 때까지의 사본이 둘 다에게 남아요',
-    '양가 가족 정보는 그 가족 쪽 사람에게 남아요',
-  ],
-  unlinkWedding: '결혼 비용은 각자 낸 돈 기준 요약을 둘 다에게 남겨요', // [확인 필요] 예비부부만
-  unlinkWhen: (name: string) => `${name}님이 동의하면 바로, 아니면 14일 뒤에 해제돼요`, // [확인 필요]
-  closeFirst: (month: number) => `${month}월 월급 플랜 정리부터 할까요?`,
-  closeStart: '정리 시작',
+  unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
+  unlinkList: ['목표', '월급 분배표와 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
+  unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
+  unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
+  exportFirst: '먼저 내보내기',
   next: '다음',
-  planTitle: (a: number, b: number) => `분담 비율 ${a} : ${b}로 정리했어요`,
-  myShare: (name: string) => `${name} 내 몫`, // [확인 필요] 금액 칸 이름(화면 읽기)
-  theirShare: (name: string, v: string) => `${name}님 몫 ${v}`, // [확인 필요]
-  shareOver: '금액보다 많이 넣을 수 없어요', // [확인 필요]
-  assetsTotal: '자산', // [확인 필요] 합계 줄 이름
-  debtsTotal: '부채', // [확인 필요]
-  debtAmount: (v: string) => `부채 ${v}`, // [확인 필요]
-  agree: '동의해요',
-  differently: '다르게 정리하기',
-  counterQ: '어떻게 나눌지 다시 정해 주세요', // [확인 필요] S-12e 제목
-  counterSent: (name: string) => `${name}님에게 다르게 정리한 안을 보냈어요`, // [확인 필요]
-  counterDone: '다르게 정리한 안을 보냈어요', // [확인 필요] 받은 사람 S-12d
-  counterReceived: (name: string) => `${name}님이 자산 정리 안을 다르게 정리했어요`,
-  counterHelp: (md: string) => `동의하면 바로, 아니면 ${md}에 분담 비율로 정리돼요`,
-  seeCounter: '확인하기', // [확인 필요]
-  unlinkedTitle: '연결이 해제됐어요', // [확인 필요] S-12h 제목(알림 문구와 같음)
-  movedMine: (v: string) => `${v} 원은 각자 목표로 옮겨요`,
+  requestedBy: (name: string) => `${name}님이 연결 해제를 요청했어요`,
+  unlinkOn: (md: string) => `${md}에 해제돼요`, // [확인 필요]
+  acknowledge: '확인했어요', // [확인 필요]
+  unlinkedTitle: '연결이 해제됐어요', // [확인 필요]
+  unlinkedHelp: '같이 쓰던 데이터는 지웠어요. 혼자 쓰기로 처음부터 시작해요', // [확인 필요]
+  startSolo: '시작하기', // [확인 필요]
   reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
   reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
   ok: '확인', // [확인 필요]
@@ -169,18 +152,22 @@ export const copy = {
   reconnect: '다시 연결하기',
   reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
   reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
-  reconnectBack: '연결을 끊기 전 공동 목표·통장이 돌아와요',
+  reconnectBack: '연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요', // [확인 필요]
+  reconnectDiscard: '해제 뒤 새로 적은 내용은 지워져요', // [확인 필요]
   reconnectYes: '다시 연결할게요',
   reconnectNo: '괜찮아요',
   reconnectExpired: '다시 연결할 수 있는 기간이 지났어요',
-  confirmQ: '확인을 위해 ‘연결 해제’를 입력해 주세요', // [확인 필요]
+  confirmQ: '확인을 위해 ‘연결 해제’라고 적어 주세요', // [확인 필요]
   confirmWord: '연결 해제',
-  send: '보내기', // [확인 필요]
+  send: '연결 해제 요청하기', // [확인 필요]
   sent: (name: string) => `${name}님에게 연결 해제를 요청했어요`, // [확인 필요]
 
   // S-13 공개 범위
   visTitle: '공개 범위',
-  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<string, string>,
+  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<
+    string,
+    string
+  >,
   visDefault: '새 항목 기본값',
   visDefaultSub: '내 자산·내 부채', // [확인 필요]
   visApplyAll: (n: number) => `이미 있는 항목 ${n}개도 바꿀까요?`,
@@ -320,9 +307,8 @@ export const copy = {
   deleteJointStays: (name: string) => `공동 항목은 ${name}님에게 남아요`,
   deleteWholeSpace: '부부 공간 전체 삭제',
   deletePendingNote: (name: string) =>
-    `자산 정리 안이 적용되지 않고 공동 항목은 ${name}님에게 남아요`,
+    `연결 해제 요청은 그대로 두고 공동 항목은 ${name}님에게 남아요`, // [확인 필요]
   deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
-  exportFirst: '먼저 내보내기',
   deleteWith: (p: string) => `${p}로 확인하고 삭제`,
   deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목
   deletedNotice: (md: string) =>

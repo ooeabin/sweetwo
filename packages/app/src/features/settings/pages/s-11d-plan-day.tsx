@@ -22,7 +22,11 @@ export function S11dPlanDay() {
   if (d.loading || !d.c || !d.space) return null;
   const { c, space: sp } = d;
   const current: BaseDay | null =
-    sp.joint_cycle_day === null ? coupleBaseDay(c) : sp.joint_cycle_day === 31 ? 'last' : sp.joint_cycle_day;
+    sp.joint_cycle_day === null
+      ? coupleBaseDay(c)
+      : sp.joint_cycle_day === 31
+        ? 'last'
+        : sp.joint_cycle_day;
   const days = [
     c.myPayday !== null ? { day: c.myPayday, name: c.myName } : null,
     c.partnerPayday !== null ? { day: c.partnerPayday, name: c.partnerName } : null,
