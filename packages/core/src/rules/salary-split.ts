@@ -39,6 +39,10 @@ export interface RecommendInput {
   people: { userId: string; income: Won }[];
   /** 저금 줄 순서대로(비상금 → 우리 목표 → 내 목표, 묶음 안은 우선순위). 비상금은 template 'emergency' */
   goals: AllocGoal[];
+  /** 각자 모드 우리 목표: 상대 분배표의 같은 목표 줄 금액. 월 필요액에서 빼고 채움(0원 아래로 안 감, 20 W-01 6번) */
+  others?: Record<string, Won>;
+  /** 금액을 그대로 두는 저금 줄(배우자 탭의 배우자 내 목표 줄, 20 W-01 6번) */
+  keep?: Record<string, Won>;
   now?: Date;
 }
 
@@ -56,10 +60,15 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     userId: p.userId,
     amount: round10k(Math.max(p.income, 0) * ALLOWANCE_RATE),
   }));
-  let left = income - fixed - living - allowances.reduce((s, a) => s + a.amount, 0);
+  // 그대로 둘 줄 금액은 먼저 떼어 둠
+  const kept = Object.values(o.keep ?? {}).reduce((s, v) => s + v, 0);
+  let left = income - fixed - living - allowances.reduce((s, a) => s + a.amount, 0) - kept;
   const savings: SplitLineDraft[] = o.goals.map((g) => {
     const need = g.template === 'emergency' ? emergencyMonthly(fixed, living) : goalNeed(g, o.now);
-    const amount = need === null ? 0 : Math.max(Math.min(need, floor10k(left)), 0);
+    const keep = o.keep?.[g.id];
+    if (keep !== undefined) return { kind: 'saving', goalId: g.id, amount: keep, need };
+    const open = need === null ? null : Math.max(need - (o.others?.[g.id] ?? 0), 0);
+    const amount = open === null ? 0 : Math.max(Math.min(open, floor10k(left)), 0);
     left -= amount;
     return { kind: 'saving', goalId: g.id, amount, need };
   });

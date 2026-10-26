@@ -13,6 +13,7 @@ import {
   useNoticeBand,
 } from '../../frame';
 import {
+  goalLineName,
   myChecklist,
   savedOf,
   salaryPaths,
@@ -79,9 +80,9 @@ export function H01Home() {
   const partnerList =
     !joint && joined ? lists.data?.find((c) => c.owner_user_id === partner.data?.id) : undefined;
   const left = list ? waiting(list).length : 0;
-  const goalName = (id: string | null) => goals.data.find((g) => g.id === id)?.name ?? '';
   const personName = (id: string | null) =>
     id === meId ? myName : (partner.data?.nickname ?? null);
+  const goalName = goalLineName(goals.data, personName, joint);
   const saved = (g: (typeof goals.data)[number]) => savedOf(g, sums.data);
   const split = splits.data?.find((x) => x.owner_user_id === (joint ? null : meId));
   const monthly = (g: { id: string }) =>

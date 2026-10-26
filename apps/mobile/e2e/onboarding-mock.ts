@@ -1576,7 +1576,31 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         ),
       );
     }
-    if (path === '/rest/v1/pay_checklist' && method === 'GET') return json(route, db.checklists);
+    if (path === '/rest/v1/pay_checklist' && method === 'GET') {
+      // 지난 체크리스트(W-02 ‹ ›): cycle_end < before, 주인, 최근 것부터
+      const lt = url.searchParams.get('cycle_end')?.replace(/^lt\./, '');
+      if (url.searchParams.get('cycle_end')?.startsWith('lt.') && lt) {
+        const own = url.searchParams.get('owner_user_id') ?? '';
+        return json(
+          route,
+          (db.checklists as Record<string, unknown>[])
+            .filter((c) => String(c.cycle_end) < lt)
+            .filter((c) =>
+              own === 'is.null'
+                ? c.owner_user_id === null
+                : `eq.${String(c.owner_user_id)}` === own,
+            )
+            .sort((a, b) => (String(a.cycle_start) < String(b.cycle_start) ? 1 : -1)),
+        );
+      }
+      const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
+      return json(
+        route,
+        gte
+          ? (db.checklists as Record<string, unknown>[]).filter((c) => String(c.cycle_end) >= gte)
+          : db.checklists,
+      );
+    }
     if (path === '/rest/v1/couple_space') {
       if (method === 'GET') return json(route, db.space);
       if (method === 'PATCH' && db.space) Object.assign(db.space, body());

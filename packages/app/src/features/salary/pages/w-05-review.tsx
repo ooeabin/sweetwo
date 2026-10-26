@@ -2,7 +2,7 @@ import type { PayCheckLine } from '@sweetwo/api';
 import { QuestionLayout } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { CheckLine, lineName } from '../check-line';
+import { CheckLine, goalLineName, lineName } from '../check-line';
 import { copy } from '../copy';
 import {
   myChecklist,
@@ -28,10 +28,10 @@ export function W05Review() {
   if (!me.data || !space.data || !goals.data || !lists.data) return null;
   const list = myChecklist(lists.data, me.data.id);
   const meId = me.data.id;
-  const goalName = (id: string | null) => goals.data.find((g) => g.id === id)?.name ?? '';
   const personName = (id: string | null) =>
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const joint = space.data.salary_mode === 'joint';
+  const goalName = goalLineName(goals.data, personName, joint);
   const left = list ? waiting(list) : [];
   const skip = (l: PayCheckLine) => void check(l, 'skipped').catch(() => toast(copy.failed));
   return (

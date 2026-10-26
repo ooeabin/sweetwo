@@ -2580,6 +2580,10 @@ export type Database = {
           expires_at: string
         }[]
       }
+      cut_cycle: {
+        Args: { p_day: number; p_owner: string; p_space: string }
+        Returns: undefined
+      }
       cycle_date: {
         Args: { m: number; p_day: number; y: number }
         Returns: string

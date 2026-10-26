@@ -64,6 +64,24 @@ export async function fetchCurrentChecklists(today: string): Promise<PayChecklis
   return (data ?? []) as PayChecklist[];
 }
 
+/** 지난 체크리스트(W-02 ‹ › 지난 달 보기, 읽기 전용). owner null = 합쳐서 공동. 최근 것부터 24개 */
+export async function fetchPastChecklists(
+  owner: string | null,
+  before: string,
+): Promise<PayChecklist[]> {
+  let q = supabase()
+    .from('pay_checklist')
+    .select('*, pay_check_line(*)')
+    .lt('cycle_end', before)
+    .order('cycle_start', { ascending: false })
+    .order('sort', { referencedTable: 'pay_check_line', ascending: true })
+    .limit(24);
+  q = owner === null ? q.is('owner_user_id', null) : q.eq('owner_user_id', owner);
+  const { data, error } = await q;
+  fail(error);
+  return (data ?? []) as PayChecklist[];
+}
+
 /** 줄 체크(checked), 풀기(wait), 이번 달은 못 했어요(skipped). 다른 금액은 actual(0이면 못 함) */
 export async function checkPayLine(
   line: string,
