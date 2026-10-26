@@ -21,13 +21,14 @@ it('분류: 자산 8묶음, 부채 6묶음, 모두 기타(직접 입력)', () =>
     expect(g.kinds.at(-1)?.key).toBe('other');
 });
 
-it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항목 빼고 배우자 합계만 더함', () => {
+it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항목·만기 완료 항목 빼고 배우자 합계만 더함', () => {
   const n = netWorth(
     [
       { side: 'asset', amount: 3_000_000 },
       { side: 'asset', amount: 10_000_000, principal: 8_000_000 },
       { side: 'asset', amount: 500_000, visibility: 'private' },
       { side: 'asset', amount: 9_000_000, status: 'sold' },
+      { side: 'asset', amount: 5_000_000, status: 'matured' },
       { side: 'debt', amount: 1_000_000 },
     ],
     [{ side: 'asset', total: 4_400_000, principal_total: 4_000_000 }],

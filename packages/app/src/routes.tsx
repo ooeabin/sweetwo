@@ -18,6 +18,7 @@ import {
   F01Overview,
   F02Items,
   F04Item,
+  F04aMatured,
   F05Edit,
   F05fPeriod,
   F07aReplan,
@@ -1169,6 +1170,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-04 항목 상세·수정
+      {
+        path: '/assets/:id/matured/:step?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F04aMatured />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-04a 만기된 돈 정리
       {
         path: '/proposals/:id',
         element: (

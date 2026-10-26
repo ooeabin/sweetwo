@@ -211,6 +211,15 @@ export const copy = {
   rate: '금리는 몇 %예요?',
   rateError: '0~100 사이로 넣어 주세요', // [확인 필요]
 
+  // F-04a 만기된 돈 정리
+  maturedTitle: '만기된 돈은 어디로 옮겼어요?',
+  maturedMoved: '다른 통장으로', // [확인 필요]
+  maturedRejoin: '다시 가입했어요', // [확인 필요]
+  maturedPick: '어느 통장으로 옮겼어요?', // [확인 필요]
+  maturedNoAccount: '옮길 통장이 없어요. 먼저 통장을 추가해 주세요', // [확인 필요]
+  maturedDone: '정리했어요', // [확인 필요]
+  maturedDateError: '오늘 뒤 날짜를 넣어 주세요', // [확인 필요]
+
   // F-04
   amountLabel: '금액', // [확인 필요]
   visLabel: '공개 범위', // [확인 필요]

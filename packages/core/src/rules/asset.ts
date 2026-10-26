@@ -164,18 +164,18 @@ export interface NetWorthItem {
   amount: Won;
   principal?: Won | null;
   visibility?: 'all' | 'sum' | 'private';
-  status?: 'held' | 'sold';
+  status?: 'held' | 'sold' | 'matured';
 }
 
 /**
  * 순자산(06 9장): 자산 − 부채, 원금이 있으면 원금(없으면 평가금액). 예상 순자산 = 평가금액 기준.
- * 안 판 수익 = 예상 − 순자산. 비공개·판 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
+ * 안 판 수익 = 예상 − 순자산. 비공개·판 항목·만기 완료 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
  */
 export function netWorth(
   items: NetWorthItem[],
   partnerSums: { side: AssetSide; total: Won; principal_total: Won }[] = [],
 ) {
-  const live = items.filter((i) => i.visibility !== 'private' && i.status !== 'sold');
+  const live = items.filter((i) => i.visibility !== 'private' && (i.status ?? 'held') === 'held');
   const sum = (side: AssetSide, f: (i: NetWorthItem) => Won) =>
     live.filter((i) => i.side === side).reduce((t, i) => t + f(i), 0) +
     partnerSums
@@ -248,7 +248,7 @@ export function investSummary(
   partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
 ) {
   const live = items.filter(
-    (i) => i.side === 'asset' && i.visibility !== 'private' && i.status !== 'sold',
+    (i) => i.side === 'asset' && i.visibility !== 'private' && (i.status ?? 'held') === 'held',
   );
   const partner = partnerSums.filter((p) => p.side === 'asset');
   const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);

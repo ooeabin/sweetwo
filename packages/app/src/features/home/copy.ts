@@ -1,3 +1,5 @@
+import { isWord, subject } from '@sweetwo/core';
+
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
   // H-01 인사
@@ -40,8 +42,13 @@ export const copy = {
   payday: (who: string) => `${who}님 월급날`, // [확인 필요]
   review: '월말 확인',
   deadline: (goal: string) => `${goal} 기한`, // [확인 필요]
+  maturity: (name: string) => `${name} 만기`, // 캘린더 돈 일정과 같음
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
-  // H-06 할 일 한 줄
+  // H-06 할 일 한 줄(19 ‘할 일 한 줄 순서’)
+  todoUnlink: (name: string) => `${name}님이 연결 해제를 요청했어요`,
+  todoReconnect: (name: string) => `${name}님이 다시 연결하자고 했어요`,
+  todoMatured: (name: string) => `${subject(name)} 만기됐어요`, // [확인 필요] 알림 문구와 같게
+  todoCare: (date: string, name: string) => `${date} ${isWord(name)}`,
   todoReview: (label: string, n: number) => `${label}에서 체크 안 한 게 ${n}개 있어요`,
   todoInvite: '같이 쓸 사람을 초대해 주세요',
   todoAmount: (goal: string) => `${goal} 목표 금액을 정해 주세요`,
