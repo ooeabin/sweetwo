@@ -1,6 +1,11 @@
 -- G-02 목표 상세 빠진 것(22): 우리 ↔ 내 목표 바꾸기 상대 알림(goal_partner_change에 'owner'), 알림 줄 이름 ‘종류’.
 -- S-11g·h 결혼 상태·결혼한 날을 바꾸면 상대 알림(25 S-11g·h, couple_partner_change).
 
+-- 결혼 정보 바꿈을 묶을 topic 'couple' 추가(넓히기만)
+alter table public.partner_change drop constraint partner_change_topic_check;
+alter table public.partner_change add constraint partner_change_topic_check
+  check (topic in ('split', 'income', 'goal', 'goal_move', 'asset', 'goal_meta', 'care', 'cycle_day', 'couple'));
+
 create or replace function public.partner_change_line(p_topic text, p_field text, p_noun text, p_before text, p_after text)
 returns text
 language sql
