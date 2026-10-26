@@ -8,10 +8,11 @@ import type { GoalsData } from './data';
 export type GoalChange =
   | { item: 'goal_amount'; value: number }
   | { item: 'goal_deadline'; value: string }
+  | { item: 'goal_name'; value: string }
   | { item: 'goal_pause'; value: boolean }
   | { item: 'goal_delete' };
 
-// 목표 바꾸기(22 목표 수정, G-02 ⋯). 재기획(ADR 0003): 제안 없이 늘 바로 적용 + Toast ‘되돌리기’. 상대 알림은 부부 단계에서
+// 목표 바꾸기(22 목표 수정, G-02 ⋯). 재기획(ADR 0003): 제안 없이 늘 바로 적용 + Toast ‘되돌리기’. 상대 알림·활동 기록은 서버 `partner_change`(우리 목표만)
 export function useGoalChange(d: GoalsData) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -26,7 +27,7 @@ export function useGoalChange(d: GoalsData) {
     if (c.item === 'goal_amount') {
       await updateGoal(g.id, { target_amount: c.value, amount_estimated: false });
       return {
-        text: copy.saved,
+        text: copy.amountChanged,
         undo: () =>
           updateGoal(g.id, {
             target_amount: g.target_amount,
@@ -37,10 +38,14 @@ export function useGoalChange(d: GoalsData) {
     if (c.item === 'goal_deadline') {
       await updateGoal(g.id, { deadline: c.value, deadline_estimated: false });
       return {
-        text: copy.saved,
+        text: copy.deadlineChanged,
         undo: () =>
           updateGoal(g.id, { deadline: g.deadline, deadline_estimated: g.deadline_estimated }),
       };
+    }
+    if (c.item === 'goal_name') {
+      await updateGoal(g.id, { name: c.value });
+      return { text: copy.nameChanged, undo: () => updateGoal(g.id, { name: g.name }) };
     }
     if (c.item === 'goal_pause' && c.value) {
       await updateGoal(g.id, { status: 'paused' });
