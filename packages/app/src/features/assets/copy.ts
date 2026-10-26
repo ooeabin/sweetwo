@@ -239,6 +239,8 @@ export const copy = {
   visLabel: '공개 범위', // [확인 필요]
   edit: '수정',
   cancel: '취소',
+  rateInvalid: '0~30% 사이로 적어 주세요', // [확인 필요]
+  countInvalid: '숫자만 적어 주세요', // [확인 필요]
   saveEdit: '저장',
   remove: '삭제',
   removed: '휴지통으로 옮겼어요',

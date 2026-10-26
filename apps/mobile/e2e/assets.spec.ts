@@ -484,6 +484,16 @@ test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기
     interest_rate: 4.5,
     monthly_payment: null,
   });
+  // F-04 3번: 금리도 그 자리에서 고침(입력칸 + 저장, 범위 밖이면 안내)
+  await page.getByRole('button', { name: /자동차 할부/ }).click();
+  await page.getByRole('button', { name: /금리/ }).click();
+  const rate = page.getByRole('textbox', { name: '금리' });
+  await rate.fill('45');
+  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await rate.fill('4.2');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByRole('button', { name: /금리/ })).toContainText('4.2%');
+  expect(db.assets.at(-1)).toMatchObject({ interest_rate: 4.2, rate_estimated: false });
 });
 
 test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 목록에 추정 알약', async ({ page }) => {
