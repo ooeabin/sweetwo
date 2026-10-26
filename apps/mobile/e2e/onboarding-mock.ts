@@ -17,6 +17,8 @@ export interface MemDb {
   deposits: Record<string, unknown>[];
   /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
   partner: Record<string, unknown> | null;
+  /** 합류 서버 함수 호출 기록 */
+  joinCalls: Record<string, unknown>[];
   /** 비상금 넣기, 꺼내기(emergency_move) */
   emergencyMoves: Record<string, unknown>[];
   /** 배우자 생일(partner_birthday) */
@@ -140,6 +142,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     incomeEvents: [],
     family: [],
     cares: [],
+    joinCalls: [],
     careRecords: [],
     goalUses: [],
     emergencyMoves: [],
@@ -511,6 +514,52 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'joined');
       }
       if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
+      // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 분배표 또는 대기), 사전 입력 지우기
+      if (fn === 'set_join_salary_mode') {
+        const mode = body().p_mode;
+        const starter = db.partner?.id ?? null;
+        if (db.space) db.space.salary_mode = mode;
+        for (const sp of db.splits)
+          if (mode === 'joint' && sp.owner_user_id === starter) sp.owner_user_id = null;
+          else if (mode === 'separate' && sp.owner_user_id === null) sp.owner_user_id = starter;
+        db.joinCalls.push({ fn, ...body() });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'complete_join') {
+        const b = body();
+        db.joinCalls.push({ fn, ...b });
+        const lines = b.p_lines as Record<string, unknown>[] | undefined;
+        if (lines) {
+          const owner = db.space?.salary_mode === 'joint' ? null : db.me.id;
+          let sp = db.splits.find((x) => x.owner_user_id === owner);
+          if (!sp) {
+            sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
+            db.splits.push(sp);
+          }
+          sp.split_line = lines.map((l, i) => ({
+            id: `${String(sp?.id)}-line-${i}`,
+            split_id: sp?.id,
+            kind: l.kind,
+            goal_id: l.goal_id ?? null,
+            user_id: l.kind === 'allowance' ? (l.user_id ?? owner ?? db.me.id) : null,
+            name: l.name ?? null,
+            amount: l.amount,
+            sort: i,
+          }));
+        }
+        if (db.space) db.space.couple_state = 'connected';
+        Object.assign(db.me, {
+          onboarding_step: lines ? 'P-06' : 'P-WAIT',
+          onboarding_done_at: new Date().toISOString(),
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'discard_prefill') {
+        for (const a of db.assets)
+          if (a.owner === 'person' && a.owner_user_id === null && a.created_by !== db.me.id)
+            a.deleted_at = new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'finish_join') {
         if (db.space) db.space.couple_state = 'connected';
         Object.assign(db.me, {

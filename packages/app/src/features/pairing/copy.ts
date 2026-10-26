@@ -36,95 +36,42 @@ export const copy = {
   prefillOk: '확인하고 이어 쓸게요',
   prefillClear: '지우고 새로 입력할게요',
 
-  // P-03
-  nicknameOk: (name: string) => `‘${name}’이 맞나요?`,
-  nicknameLabel: '호칭', // [확인 필요] 화면 읽기용
-  right: '맞아요',
+  // P-03 내 이름
+  nameTitle: '내 이름이나 애칭을 알려 주세요',
+  nameHelp: '배우자에게도 이 이름으로 보여요',
+  namePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
 
-  // P-04
-  profileTitle: '생일과 일하는 방식이 맞나요?', // [확인 필요] 생년월일로 바꾸며 고침
-  profileAsk: '생일과 일하는 방식을 알려주세요', // [확인 필요] 비어 있을 때
-  profileLine: (year: number, work: string) => `${year}년생 ${work}`,
-  profileLineFull: (y: number, m: number, d: number, work: string) =>
-    `${y}년 ${m}월 ${d}일생 ${work}`,
-  fix: '고칠게요',
-  birthYearLabel: '생일', // [확인 필요]
-  age: (n: number) => `만 ${n}세`,
-  workLabel: '일하는 방식', // [확인 필요]
-  works: {
-    regular: '정규직',
-    contract: '계약직',
-    freelance: '프리랜서·사업자',
-    resting: '쉬는 중',
-  },
-  from1950: '1950년부터 입력해 주세요',
-  adultsOnly: '만 18세부터 쓸 수 있어요',
+  // P-03a 출생연도
+  birthYear: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
 
-  // P-05
-  income: '한 달에 얼마 받으세요?',
-  incomeFromStarter: (starter: string) => `${starter}님이 적어 둔 값이에요`,
-  incomeHelp: '세금 떼고 통장에 들어오는 돈이에요',
-  incomeLow: '최근 몇 달 중 가장 적게 번 달은 얼마였어요?',
-  incomeLowHelp: '이 금액이 기준 수입이 돼요',
-  noIncome: '지금은 수입이 없어요',
-  payday: '월급날은 며칠이에요?',
+  // P-04 관리 방식 확인
+  modeTitle: (starter: string) => `${starter}님이 고른 월급 관리 방식이에요`, // [확인 필요]
+  modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]
+  modes: {
+    separate: { label: '각자 월급을 따로 관리해요', sub: '분배표와 체크리스트가 사람마다 있어요' }, // [확인 필요]
+    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 분배표로 나눠요' }, // [확인 필요]
+  },
+
+  // P-05 내 월급(O-31과 같음)
+  salary: '한 달에 월급이 얼마 들어와요?',
+  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryVariable: '매달 금액이 달라요',
+  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
+  noSalary: '지금은 월급이 없어요',
+  payday: '월급날',
   paydayLast: '말일',
-  paydayShortMonth: '짧은 달은 말일로 계산해요', // [확인 필요] O-32와 같음
   checkValue: '입력한 값이 맞나요?',
 
-  // P-06
-  ownItems: (starter: string, me: string) => `${starter}님이 적은 ${me}님 명의 항목이에요. 맞나요?`,
-  more: '더 있는 돈이나 대출이 있나요?',
-  moreAssets: '돈이 더 있어요', // [확인 필요] 선택지 문구
-  moreLoans: '대출이 있어요', // [확인 필요] 선택지 문구
-  none: '없어요',
-  visLabel: '공개 범위', // [확인 필요] 화면 읽기용
-  vis: { all: '전체', sum: '합계만' },
-  estimatedTag: '추정',
-
-  // P-07, P-08
-  allowance: (me: string) => `${me}님 용돈은 한 달에 얼마로 할까요?`,
-  split: '같이 쓰는 돈 나누는 방식, 괜찮아요?',
-  splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },
-  good: '좋아요',
-  differently: '다르게 해볼래요',
-  proposeTo: (name: string) => `${name}님께 제안하기`,
-  applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
-
-  // P-09
-  invest: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
-  investOptions: {
-    keep: '원금은 지켜야 해요',
-    some: '조금은 괜찮아요',
-    active: '일부는 적극적으로',
-    unsure: '잘 모르겠어요',
-  },
-  investLimit: (limit: number) => (limit === 0 ? '투자하지 않아요' : `공동자금의 ${limit}%까지`), // [확인 필요] O-53과 같음
-  investPartner: (partner: string, answer: string) =>
-    `${partner}님은 ‘${answer}’를 골랐어요. 다르면 더 조심스러운 쪽으로 정해요`, // [확인 필요] O-53과 같음
-  skip: '건너뛰기',
-
-  // P-10
-  changes: '합류 전에 바뀐 것과 목표예요',
-  noGoals: (starter: string) => `${starter}님이 목표를 정하면 여기에 보여요`,
-  allGood: '모두 좋아요',
-
-  // P-11
-  done: (amount: string) => `두 분이 함께하면 한 달에 ${amount}을 모을 수 있어요`,
-  incomeCard: '월 수입',
-  saveCard: '한 달에 모을 수 있는 돈',
-  shareCard: '매달 나눠 넣을 돈',
-  before: '이전', // [확인 필요] 화면 읽기용(취소선 값)
-  waiting: '답 기다리는 제안', // [확인 필요] 요소 이름
-  // P-11 대기(시작한 사람이 첫 플랜 전)
-  waitTitle: (starter: string) => `${starter}님 공간에 합류했어요`,
-  waitPlate: '내가 답한 것', // [확인 필요]
-  waitPayday: '월급날',
-  waitAllowance: '내 용돈',
-  waitHelp: (starter: string) => `${starter}님이 플랜을 마치면 같이 볼 수 있어요`,
-  // P-11 결과 카드 체크 줄 [확인 필요]
-  shareMode: '나누는 방식',
-  shareOf: (name: string) => `${name}님이 매달 넣을 돈`,
-  planKept: (month: number) => `${month}월 월급 플랜은 그대로, 안 나눈 돈만 다시 계산했어요`,
+  // P-06 월급 분배표
+  splitTitle: '내 월급을 이렇게 나눠 볼까요?', // [확인 필요]
+  splitJointTitle: '같이 쓰는 분배표예요', // [확인 필요]
+  splitHelp: '금액을 눌러 바꿀 수 있어요',
+  splitJointHelp: (me: string) => `${me}님 월급을 더해 다시 채웠어요`, // [확인 필요]
+  splitDone: '이대로 할게요',
+  partnerPuts: (starter: string, amount: string) => `${starter}님이 매달 ${amount} 넣어요`, // [확인 필요]
+  incomes: (a: string, b: string) => `${a}, ${b}`, // [확인 필요] 합쳐서 수입 줄 아래
+  personIncome: (name: string, amount: string) => `${name} ${amount}`,
+  changed: (before: string, after: string) => `${before} → ${after}`,
+  splitChanged: (starter: string) => `${starter}님이 방금 분배표를 바꿨어요`, // [확인 필요]
 };

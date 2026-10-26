@@ -4007,6 +4007,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      complete_join: {
+        Args: { p_lines?: Json; p_version?: number }
+        Returns: undefined
+      }
       complete_signup: {
         Args: {
           p_marketing: boolean
@@ -4109,6 +4113,7 @@ export type Database = {
         Args: { p_birth_date: string }
         Returns: undefined
       }
+      discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
       emergency_asset_add: {
         Args: { d: number; p_space: string }
         Returns: undefined
@@ -4172,6 +4177,7 @@ export type Database = {
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_close_together: { Args: { p_close: string }; Returns: undefined }
       join_space: { Args: { p_code: string }; Returns: string }
+      joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
       ko_batchim: { Args: { w: string }; Returns: boolean }
       ko_is: { Args: { w: string }; Returns: string }
@@ -4460,6 +4466,10 @@ export type Database = {
           p_supplement: number
         }
         Returns: string
+      }
+      set_join_salary_mode: {
+        Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
+        Returns: undefined
       }
       set_living_check: { Args: { p_on: boolean }; Returns: undefined }
       set_my_side: {

@@ -3,6 +3,8 @@ export const copy = {
   // H-01 인사
   hiLeft: (name: string, n: number) => `${name}님, 이번 달 월급 체크가 ${n}개 남았어요`, // [확인 필요]
   hiGoal: (name: string, goal: string, pct: number) => `${name}님, ${goal}까지 ${pct}% 왔어요`, // [확인 필요]
+  waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
+  waitCard: (starter: string) => `${starter}님이 첫 목표를 정하면 알려 드릴게요`,
   hi: (name: string) => `${name}님, 반가워요`, // [확인 필요] 목표 금액이 없을 때
   // 오늘 띠
   add: '추가',
