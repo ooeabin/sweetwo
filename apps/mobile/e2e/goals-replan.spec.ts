@@ -135,6 +135,35 @@ test('G-02 수정은 바로 저장: 기한, 이름, 보류·삭제는 되돌리�
   await expect(page.getByRole('button', { name: /우리 집/ })).toHaveCount(0);
 });
 
+test('G-02 기한 줄이기·늘리기(연결된 부부): 제안 없이 ‘저장’, Toast ‘되돌리기’, 이번 달 이전은 안 됨', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+  await page.goto('/goals/goal-h/edit/deadline');
+  await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
+  // 줄이기: 2031년 10월 → 2029년 6월
+  await page.getByRole('textbox', { name: '년' }).fill('2029');
+  await page.getByRole('radio', { name: '6월' }).click();
+  await expect(page.getByRole('button', { name: /제안하기/ })).toHaveCount(0);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('기한을 바꿨어요')).toBeVisible();
+  expect(db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2029-06-01');
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2031-10-01');
+  // 늘리기: 2035년 1월. 이번 달 이전은 저장 꺼짐
+  await page.goto('/goals/goal-h/edit/deadline');
+  await page.getByRole('textbox', { name: '년' }).fill('2025');
+  await page.getByRole('radio', { name: '1월', exact: true }).click();
+  await expect(page.getByText('이번 달부터 고를 수 있어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await page.getByRole('textbox', { name: '년' }).fill('2035');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2035-01-01');
+});
+
 test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미 모은 돈 → 상세', async ({
   page,
 }) => {

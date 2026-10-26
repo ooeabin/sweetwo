@@ -69,6 +69,9 @@ export const copy = {
   remove: '삭제',
   undo: '되돌리기',
   saved: '저장했어요', // [확인 필요]
+  amountChanged: '목표 금액을 바꿨어요', // [확인 필요] 08 4장 “{무엇}을 바꿨어요”
+  deadlineChanged: '기한을 바꿨어요',
+  nameChanged: '이름을 바꿨어요', // [확인 필요]
   paused: '보류했어요', // [확인 필요]
   resumed: '다시 모아요', // [확인 필요]
   removed: '삭제했어요', // [확인 필요]
@@ -82,8 +85,7 @@ export const copy = {
   notBeforeThisMonth: '이번 달부터 고를 수 있어요', // [확인 필요]
   nameRequired: '이름을 넣어 주세요',
   impact: '이렇게 바뀌어요', // [확인 필요] 영향 미리보기 제목
-  impactAlloc: (name: string, before: string, after: string) => `${name} 월 ${before} → ${after}`,
-  impactOther: (name: string, diff: string) => `${name} ${diff}`,
+  impactNeed: (before: string, after: string) => `월 필요액 ${before} → ${after}`, // [확인 필요]
   impactStatus: (before: string, after: string) => `상태 ${before} → ${after}`, // [확인 필요]
   impactExpected: (before: string, after: string) => `예상 달성 ${before} → ${after}`, // [확인 필요]
   pausedNote: '월 0원으로 배분에서 빠져 있어요',
