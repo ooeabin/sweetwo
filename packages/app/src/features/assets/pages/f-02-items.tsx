@@ -7,16 +7,7 @@ import {
   todayKst,
   type AssetSide,
 } from '@sweetwo/core';
-import {
-  Badge,
-  Button,
-  Chip,
-  Icon,
-  ListRow,
-  SectionHeader,
-  Tabs,
-  type BadgeKind,
-} from '@sweetwo/ui';
+import { Badge, Button, Chip, Icon, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -57,17 +48,10 @@ const saveSort = (s: Sort) => {
     /* 이번 화면에만 */
   }
 };
-const ROLE_KIND: Record<string, BadgeKind> = {
-  living: 'together',
-  goal_fund: 'goal',
-  emergency: 'safety',
-  wedding: 'family',
-  personal: 'temp',
-};
 
 // F-02 자산·부채 목록(23 F-02 7~11·13·14번): 자산·부채 전환(탭마다 합계), 묶음(F-03a 그룹) 안 금액 큰 순,
 // 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 배우자 ‘합계만’은 묶음별 한 줄(누를 수 없음).
-// 배지: 통장 역할(통장과 이어진 자산), 목표 연결. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억.
+// 배지: 공개 범위(내 항목), 대신 입력. 통장 역할·목표 연결은 재기획으로 없앰. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억.
 // 투자 묶음 줄 = 투자 비중(총자산 대비) / 허용 비중(투자 원칙 O-53, 답이 있을 때) + 손익(원금 있는 항목).
 export function F02Items() {
   const nav = useNavigate();
@@ -95,9 +79,6 @@ export function F02Items() {
             : a.updated_at.localeCompare(b.updated_at);
     return (sort.asc ? v : -v) || b.amount - a.amount;
   };
-  const roleOf = new Map(
-    d.accounts.flatMap((c) => (c.asset_id ? [[c.asset_id, c.role] as const] : [])),
-  );
   const inv = investSummary(d.items, d.sums);
 
   const items = d.items.filter((a) => a.side === side);
@@ -112,8 +93,6 @@ export function F02Items() {
   const total = (s: AssetSide) => (s === 'asset' ? d.nw.assets : d.nw.debts);
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 
-  const goalName = (id: string | null) =>
-    id ? (d.goals.find((g) => g.id === id)?.name ?? '') : '';
   const row = (a: Asset) => {
     const o = ownerOf(a, d);
     const mine = a.owner_user_id === d.me?.id;
@@ -127,14 +106,6 @@ export function F02Items() {
             {a.name}
             {mine && a.visibility !== 'all' && <Badge kind="temp">{copy.vis[a.visibility]}</Badge>}
             {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
-            {roleOf.has(a.id) && (
-              <Badge kind={ROLE_KIND[roleOf.get(a.id) ?? ''] ?? 'temp'}>
-                {copy.roles[roleOf.get(a.id) ?? 'personal']}
-              </Badge>
-            )}
-            {goalName(a.goal_id) && (
-              <Badge kind="goal">{copy.goalBadge(goalName(a.goal_id))}</Badge>
-            )}
           </span>
         }
         sub={stale ? copy.checkAmount : `${o.name}, ${copy.updated(formatDot(updated))}`}
@@ -219,7 +190,7 @@ export function F02Items() {
                 label={
                   <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
                     {copy.partnerSum(d.couple?.partnerName ?? '', sideName, partner.n)}
-                    <Badge kind="temp">{copy.vis.sum}</Badge>
+                    <Badge kind="temp">{copy.partnerPill}</Badge>
                   </span>
                 }
                 value={m(partner.total)}

@@ -35,7 +35,6 @@ export function F04Item() {
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
   const [editAmount, setEditAmount] = useState<number | null | undefined>(undefined);
   const [editVis, setEditVis] = useState(false);
-  const [editGoal, setEditGoal] = useState(false);
   const [busy, setBusy] = useState(false);
 
   if (d.loading) return null;
@@ -178,13 +177,6 @@ export function F04Item() {
             value={m(a.monthly_payment)}
           />
         )}
-        {a.side === 'asset' && (
-          <ListRow
-            label={copy.goalLink}
-            value={d.goals.find((g) => g.id === a.goal_id)?.name ?? copy.noGoal}
-            onClick={editable ? () => setEditGoal((x) => !x) : undefined}
-          />
-        )}
         {mine && (
           <ListRow
             label={copy.visLabel}
@@ -193,23 +185,6 @@ export function F04Item() {
           />
         )}
       </div>
-      {editable && editGoal && (
-        <ChoiceCards<string>
-          label={copy.goal}
-          value={a.goal_id ?? 'none'}
-          onChange={(g) => {
-            setEditGoal(false);
-            void run(() => updateAsset(a.id, { goal_id: g === 'none' ? null : g }), copy.saved);
-          }}
-          autoAdvance={false}
-          options={[
-            ...d.goals
-              .filter((g) => !['paused', 'achieved', 'used'].includes(g.status))
-              .map((g) => ({ value: g.id, label: g.name })),
-            { value: 'none', label: copy.noGoal },
-          ]}
-        />
-      )}
       {mine && editVis && (
         <ChoiceCards<Vis>
           label={copy.visTitle}

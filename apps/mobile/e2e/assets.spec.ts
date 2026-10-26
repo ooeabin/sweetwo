@@ -168,7 +168,9 @@ function seed(db: MemDb, joined = true) {
   });
 }
 
-test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, 이번 달 계획', async ({ page }) => {
+test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -183,12 +185,8 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, �
   await expect(nw).toContainText('지난달보다 180만 원 늘었어요');
   await expect(page.getByRole('button', { name: /자산 1,940만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /부채 100만 원/ })).toBeVisible();
-  const plan = page.getByRole('button', { name: /이번 달 계획/ });
-  await expect(plan).toContainText('620만 원');
-  await expect(plan).toContainText('저축 가능 금액 월');
-  await expect(page.getByRole('region', { name: '월 정산 요약' })).toContainText(
-    '첫 월말 정리 뒤에 보여드려요',
-  );
+  await expect(page.getByRole('button', { name: /이번 달 계획/ })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: '재정 진단' })).toHaveCount(0);
   await axe(page);
 
   await page.getByRole('button', { name: /부채 100만 원/ }).click();
@@ -196,7 +194,7 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계, �
   await expect(page.getByRole('button', { name: /신용대출/ })).toContainText('금액이 맞나요?');
 });
 
-test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 요약과 지난달보다', async ({ page }) => {
+test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -263,13 +261,6 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 
   await page.keyboard.press('Home');
   await expect(plot).toHaveAttribute('aria-valuetext', /^2026년 5월/);
 
-  // 월 정산 요약 = 가장 최근 정리(9월), 지난달보다 = 8월과 항목별 차이
-  const sum = page.getByRole('region', { name: '9월 정산' });
-  await expect(sum).toContainText('소득의');
-  await expect(sum).toContainText('외식·배달+8만');
-  await expect(sum).toContainText('쇼핑−5만');
-  // 신용카드 주사용(O-38b)이면 변동 지출에 라벨
-  await expect(sum).toContainText('지난달 카드 사용분');
   await axe(page);
 
   // 기간 탭은 기억
@@ -279,7 +270,9 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억, 월 정산 
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('자산·부채 목록: 통장 역할 배지, 투자 묶음 줄, 정렬 칩(묶음 안, 기억)', async ({ page }) => {
+test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정렬 칩(묶음 안, 기억)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -304,8 +297,8 @@ test('자산·부채 목록: 통장 역할 배지, 투자 묶음 줄, 정렬 칩
 
   await page.goto('/assets/items');
   const cash = page.getByRole('region', { name: '현금성' });
-  await expect(cash.getByRole('button', { name: /생활비 통장/ })).toContainText('공동 생활비');
-  await expect(cash.getByRole('button', { name: /가족 비상금/ })).toContainText('비상금');
+  // 통장 역할 배지는 재기획으로 없앰
+  await expect(cash.getByRole('button', { name: /생활비 통장/ })).not.toContainText('공동 생활비');
   // 투자 비중 = (1,000 + 440) ÷ (300 + 100 + 1,000 + 200 + 440) = 71%, 손익 = 1,000 − 800
   const invest = page.getByRole('region', { name: '투자' });
   await expect(invest).toContainText('공동자금 투자 비중 71%');
@@ -344,7 +337,7 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
     'true',
   );
   const invest = page.getByRole('region', { name: '투자' });
-  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('합계만');
+  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('금액만 보여 주기');
   await expect(invest).toContainText('예빈님 자산 2개');
   await expect(invest).toContainText('440만 원');
   await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('공동');
@@ -371,7 +364,7 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('region', { name: '월별 기록' })).toContainText('1,200만 원');
 
   await page.getByRole('button', { name: /공개 범위/ }).click();
-  await page.getByRole('radio', { name: /비공개/ }).click();
+  await page.getByRole('radio', { name: /숨기기/ }).click();
   await expect.poll(() => db.assets.find((a) => a.id === 'a2')?.visibility).toBe('private');
 
   await page.getByRole('button', { name: '삭제' }).click();
@@ -382,7 +375,9 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('button', { name: /내 주식/ })).toBeVisible();
 });
 
-test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적금 질문 → 목표 연결', async ({ page }) => {
+test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적금 질문(통장·목표 연결 없음)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -422,13 +417,13 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await expect(page.getByRole('radio', { name: /예빈/ })).toHaveCount(0);
   await page.getByRole('radio', { name: /^나/ }).click();
   await heading(page, '배우자에게 공개할까요?');
-  await expect(page.getByRole('radio', { name: /합계만 공개/ })).toHaveAttribute(
+  await expect(page.getByRole('radio', { name: /금액만 보여 주기/ })).toHaveAttribute(
     'aria-checked',
     'true',
   );
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  // 적금 유형별 질문(F-03f): 만기일 → 월 납입액 → 빠지는 통장 → 목표 연결
+  // 적금 유형별 질문(F-03f): 만기일 → 월 납입액 → 끝
   await heading(page, '만기일은 언제예요?');
   await page.getByLabel('년', { exact: true }).fill('2027');
   await page.getByLabel('월', { exact: true }).fill('9');
@@ -436,12 +431,7 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await page.getByRole('button', { name: '다음' }).click();
   await heading(page, '월 납입액은요?');
   await page.getByLabel('월 납입액은요?').fill('300000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '어느 통장에서 빠져나가요?');
-  await page.getByRole('radio', { name: /목표자금 통장/ }).click();
-  await heading(page, '어떤 목표를 위한 돈인가요?');
-  await axe(page);
-  await page.getByRole('radio', { name: /여행/ }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
 
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
   await expect(page.getByText('추가했어요. 순자산이 120만 원 늘었어요')).toBeVisible();
@@ -457,13 +447,11 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
     visibility: 'sum',
     maturity_date: '2027-09-30',
     monthly_payment: 300_000,
-    pay_from: 'goal_fund',
-    goal_id: 'g-trip',
   });
-  await expect(page.getByRole('button', { name: /여행 적금/ })).toContainText('여행 목표');
+  expect(db.assets.at(-1)?.goal_id ?? null).toBeNull();
 });
 
-test('추가(합류 전): 배우자 명의는 대신 입력(전체 공개), 부채는 남은 대출금', async ({ page }) => {
+test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db, false);
@@ -493,243 +481,6 @@ test('추가(합류 전): 배우자 명의는 대신 입력(전체 공개), 부�
     interest_rate: 4.5,
     monthly_payment: null,
   });
-});
-
-test('월 수입·지출(F-05): 내 수입·월급날은 바로, 고정지출은 바로, 생활비는 제안', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-
-  await page.goto('/assets');
-  await page.getByRole('button', { name: /이번 달 계획/ }).click();
-  await expect(page).toHaveURL(/\/assets\/money$/);
-  await heading(page, '월 수입·지출');
-  const income = page.getByRole('region', { name: '월 수입' });
-  await expect(income.getByRole('button', { name: /찬우/ })).toContainText('월급날 25일');
-  await expect(income.getByRole('button', { name: /찬우/ })).toContainText('350만 원');
-  await expect(income).toContainText('예빈');
-  await expect(income.getByRole('button', { name: /예빈/ })).toHaveCount(0); // 배우자 수입은 보기만
-  await expect(page.getByRole('region', { name: '저축 가능 금액' })).toContainText('335만 원');
-  await axe(page);
-
-  // 내 수입 → 월급날(사실값, 바로)
-  await income.getByRole('button', { name: /찬우/ }).click();
-  await heading(page, '찬우님은 한 달에 얼마 받으세요?');
-  await page.getByLabel('찬우님은 한 달에 얼마 받으세요?').fill('4000000');
-  await expect(page.getByText('저축 가능 금액이 월 50만 원 늘어요')).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '월급날은 며칠이에요?');
-  await expect(page.getByRole('radio', { name: '25일' })).toHaveAttribute('aria-checked', 'true');
-  await page.getByRole('radio', { name: '말일' }).click();
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('안 나눈 돈이 없어 월말 정리에서 맞춰요')).toBeVisible();
-  expect(db.me).toMatchObject({ monthly_income: 4_000_000, payday: null, payday_last: true });
-
-  // 고정지출(바로)
-  await page.getByRole('button', { name: /고정지출/ }).click();
-  await heading(page, '같이 내는 돈은 한 달에 얼마예요?');
-  await page.getByLabel('같이 내는 돈은 한 달에 얼마예요?').fill('1200000');
-  await expect(page.getByText('저축 가능 금액이 월 20만 원 줄어요')).toBeVisible();
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect.poll(() => db.space?.fixed_total).toBe(1_200_000);
-
-  // 생활비 예산(배분 결정: 연결이면 제안)
-  await page.getByRole('button', { name: /생활비/ }).click();
-  await heading(page, '식비·생활용품 등에는 한 달에 얼마쯤 쓰세요?');
-  await page.getByLabel('식비·생활용품 등에는 한 달에 얼마쯤 쓰세요?').fill('500000');
-  // 월급날을 말일로 바꿔서 기준일(두 월급날 중 늦은 날)도 말일
-  await expect(page.getByText('좋아요면 바로, 반대 없으면 10월 31일부터 적용돼요')).toBeVisible();
-  await page.getByRole('button', { name: '예빈님께 제안하기' }).click();
-  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
-  expect(db.proposals.at(-1)).toMatchObject({
-    item: 'living_budget',
-    after: { living_budget: 500_000 },
-  });
-  expect(db.space?.living_budget).toBe(550_000);
-});
-
-test('월 수입·지출(합류 전): 용돈은 바로 저장', async ({ page }) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db, false);
-
-  await page.goto('/assets/money');
-  await page.getByRole('button', { name: /용돈/ }).click();
-  await heading(page, '찬우님 용돈은 한 달에 얼마로 할까요?');
-  await page.getByLabel('찬우님 용돈은 한 달에 얼마로 할까요?').fill('400000');
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect(page).toHaveURL(/\/assets\/money$/);
-  expect(db.me.allowance).toBe(400_000);
-  expect(db.proposals).toEqual([]);
-});
-
-test('재정 진단(F-06): 요약, 위험·주의 먼저, 비상금 개월, 추정, 바로가기, 한눈에 진단 줄', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  db.goals.push({
-    id: 'g-e',
-    template: 'emergency',
-    name: '비상금',
-    kind: 'once',
-    owner: 'together',
-    priority: 0,
-    target_amount: 5_550_000,
-    other_held: 3_000_000,
-    deadline: '2027-10-01',
-    status: 'active',
-    after_marriage: false,
-    details: {},
-    created_by: db.me.id,
-    created_at: '2026-09-01T00:00:00Z',
-    deleted_at: null,
-  });
-
-  // 한눈에 진단 줄: 비상금 300 ÷ (고정 130 + 생활비 55) = 1.6개월, 기준 3개월의 54% → 주의
-  await page.goto('/assets');
-  const line = page.getByRole('button', { name: /재정 진단 5개 중 3개 양호/ });
-  await expect(line).toContainText('비상금으로 1.6개월 생활할 수 있어요');
-  await line.click();
-  await expect(page).toHaveURL(/\/assets\/diagnosis$/);
-  await expect(page.getByText('5개 중 3개 양호')).toBeVisible();
-  const cards = page.locator('section.hg-card');
-  await expect(cards.first()).toHaveAttribute('aria-label', '비상금');
-  const em = page.getByRole('region', { name: '비상금' });
-  await expect(em).toContainText('주의');
-  await expect(em).toContainText('3개월분까지 모아봐요');
-  // 월말 정리 전이라 저축률은 계획값(추정)
-  const saving = page.getByRole('region', { name: '저축률' });
-  await expect(saving).toContainText('월 수입의 54%를 저축하고 있어요');
-  await expect(saving).toContainText('추정');
-  await expect(page.getByRole('region', { name: '대출 상환 부담' })).toContainText(
-    '월 수입의 4.8%를 대출 상환에 쓰고 있어요',
-  );
-  await expect(page.getByRole('region', { name: '투자 원칙 합의' })).toContainText('아직 몰라요');
-  await axe(page);
-
-  // 비상금은 목표가 아니라 우리 자산 비상금 카드로
-  await em.getByRole('button', { name: '비상금 보기' }).click();
-  await expect(page).toHaveURL(/\/assets$/);
-  await expect(page.getByRole('region', { name: '비상금' })).toContainText('300만 원');
-});
-
-test('비상금 카드(F-01): 넣기는 바로 잔액에, 꺼내기는 잔액까지만 + 사유, 되돌리기', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  db.goals.push({
-    id: 'g-e',
-    template: 'emergency',
-    name: '비상금',
-    kind: 'once',
-    owner: 'together',
-    priority: 0,
-    target_amount: 5_550_000,
-    other_held: 3_000_000,
-    deadline: '2027-10-01',
-    status: 'active',
-    after_marriage: false,
-    details: {},
-    created_by: db.me.id,
-    created_at: '2026-09-01T00:00:00Z',
-    deleted_at: null,
-  });
-  await page.goto('/assets');
-  const card = page.getByRole('region', { name: '비상금' });
-  await expect(card).toContainText('300만 원');
-  await expect(card).toContainText('비상금으로 1.6개월 생활할 수 있어요');
-  await axe(page);
-
-  // 넣기: 바로 반영 + 토스트
-  await card.getByRole('button', { name: '+ 넣기' }).click();
-  await expect(page.getByRole('heading', { name: '비상금에 얼마 넣었어요?' })).toBeVisible();
-  await page.getByLabel('비상금에 얼마 넣었어요?').fill('500000');
-  await page.getByRole('button', { name: '넣기', exact: true }).click();
-  await expect(page.getByText('비상금에 50만 원을 넣었어요')).toBeVisible();
-  await expect(page).toHaveURL(/\/assets$/);
-  await expect(card).toContainText('350만 원');
-
-  // 꺼내기: 잔액(350만)보다 많으면 못 넘어감 → 사유
-  await card.getByRole('button', { name: '- 꺼내기' }).click();
-  await expect(page.getByText('지금 비상금은 350만 원이에요')).toBeVisible();
-  await page.getByLabel('비상금에서 얼마 꺼냈어요?').fill('4000000');
-  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await page.getByLabel('비상금에서 얼마 꺼냈어요?').fill('1000000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '어디에 썼어요?' })).toBeVisible();
-  await axe(page);
-  await page.getByRole('radio', { name: '병원' }).click();
-  await expect(card).toContainText('250만 원');
-  expect(db.emergencyMoves.map((m) => [m.kind, m.amount, m.reason])).toEqual([
-    ['out', 1_000_000, 'hospital'],
-    ['in', 500_000, null],
-  ]);
-
-  // 되돌리기
-  await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(card).toContainText('350만 원');
-});
-
-test('투자 원칙(O-53): 할 일에서 열고, 보수적인 쪽 허용 비중, 진단 양호, 목록 허용 비중', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  (db.partner as Record<string, unknown>).invest_answer = 'active';
-  // 첫 주 다른 할 일은 끝냄 → 7일째 투자 원칙이 보임
-  for (const kind of ['assets', 'loans', 'fixed_card', 'rest', 'spend_check', 'exact_values'])
-    db.todos.push({
-      id: `todo-${kind}`,
-      kind,
-      status: 'done',
-      snoozed_until: null,
-      deleted_at: null,
-    });
-  db.todos.push({
-    id: 'todo-invest',
-    kind: 'invest',
-    screen: 'O-53',
-    open_on: '2026-08-26',
-    status: 'pending',
-    snoozed_until: null,
-    deleted_at: null,
-  });
-
-  await page.goto('/month');
-  await page.getByRole('button', { name: /투자 원칙 정하기/ }).click();
-  await expect(page).toHaveURL(/\/assets\/principle$/);
-  await page.goBack();
-
-  await page.goto('/assets/diagnosis');
-  const card = page.getByRole('region', { name: '투자 원칙 합의' });
-  await expect(card).toContainText('주의');
-  await expect(card).toContainText('내 답을 기다려요');
-  await card.getByRole('button', { name: '지금 정하기' }).click();
-
-  await heading(page, '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?');
-  await expect(page.getByText('예빈님은 ‘일부는 적극적으로’를 골랐어요')).toBeVisible();
-  await axe(page);
-  await page.getByRole('radio', { name: /조금은 괜찮아요/ }).click();
-  await expect(page).toHaveURL(/\/assets\/diagnosis$/);
-  expect(db.me.invest_answer).toBe('some');
-  expect(db.todos.find((t) => t.kind === 'invest')?.status).toBe('done');
-  const done = page.getByRole('region', { name: '투자 원칙 합의' });
-  await expect(done).toContainText('양호');
-  await expect(done).toContainText('공동자금은 30%까지 투자하기로 했어요');
-  await expect(done.getByRole('button', { name: '지금 정하기' })).toHaveCount(0);
-
-  await page.goto('/assets/items');
-  await expect(page.getByRole('region', { name: '투자' })).toContainText(
-    '공동자금 투자 비중 74% / 허용 30%',
-  );
 });
 
 const goal = (o: Record<string, unknown>) => ({

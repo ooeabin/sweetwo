@@ -32,7 +32,7 @@ export function O53InvestPrinciple() {
         [qk.investAnswers, qk.todos].map((k) => qc.invalidateQueries({ queryKey: k })),
       );
       toast(copy.principleSaved);
-      nav('/assets/diagnosis', { replace: true });
+      nav('/assets', { replace: true });
     } catch {
       toast(copy.loadFailed);
     } finally {
