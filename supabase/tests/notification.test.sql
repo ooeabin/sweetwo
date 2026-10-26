@@ -1,8 +1,8 @@
--- pgTAP: 알림. 내 알림만 보고 읽음 처리, 제안 도착·응답·합류는 바로, 챙길 날(음력·서프라이즈)은 예약 작업으로,
+-- pgTAP: 알림. 내 알림만 보고 읽음 처리, 합류는 바로, 챙길 날(음력·서프라이즈)은 예약 작업으로,
 -- 같은 알림은 한 번만
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(9);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -34,30 +34,22 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', side = 'bride', payday = 25, allowance = 500000;
 select public.finish_join();
-select isnt(public.propose('allowance', '{"allowance":600000}', current_date + 30), null, '예빈 용돈 제안');
-select is((select count(*)::int from public.notification), 0, '내가 보낸 제안은 내 센터에 없음');
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select results_eq(
   $$ select kind, title from public.notification order by created_at, kind $$,
-  $$ values ('partner_joined', '예빈님이 합류했어요'),
-            ('proposal_arrived', '예빈님이 용돈을 바꾸자고 제안했어요') $$,
-  '찬우: 합류, 제안 도착');
-select is((select actor_id from public.notification where kind = 'proposal_arrived'),
-  '22222222-2222-2222-2222-222222222222'::uuid, '보낸 사람 Avatar');
-select is(public.respond_proposal((select id from public.proposal where status = 'open'), 'like')::text, 'applied', '좋아요');
+  $$ values ('partner_joined', '예빈님이 합류했어요') $$,
+  '찬우: 합류');
 select throws_ok($$ insert into public.notification (user_id, kind, title, target, dedupe)
   values (auth.uid(), 'x_y', 'x', '/', 'x') $$, '42501', null, '앱에서 알림을 못 넣음');
-select is(public.mark_notifications_read(null), 2, '모두 읽음');
+select is(public.mark_notifications_read(null), 1, '모두 읽음');
 select is((select count(*)::int from public.notification where read_at is null), 0, '읽지 않은 알림 없음');
 reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select title || ' / ' || body from public.notification where kind = 'proposal_answered'),
-  '찬우님이 용돈 제안에 좋아요를 눌렀어요 / 바로 적용했어요', '예빈: 응답 결과');
 -- 챙길 날: 음력 8월 15일(2026 추석 = 9월 25일) D-7 같이, 서프라이즈는 만든 사람만
 insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer)
   select space_id, 'family', 'chuseok', '추석', 'lunar_yearly', 8, 15, 500000, 'together' from public.app_user;

@@ -85,16 +85,3 @@ export async function discardPrefill() {
   fail(error);
 }
 
-/** (재기획 전, 지울 대상) 이번 플랜의 안 나눈 줄 분담액만 다시. 옛 이번 달·첫 주 화면이 아직 부름 */
-export async function updatePendingShares(
-  planId: string,
-  shares: { account_role: string; amount_groom: number; amount_bride: number }[],
-  isTemp: boolean,
-) {
-  const { error } = await supabase().rpc('update_pending_shares', {
-    p_plan_id: planId,
-    p_shares: shares,
-    p_is_temp: isTemp,
-  });
-  fail(error);
-}

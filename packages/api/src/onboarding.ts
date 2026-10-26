@@ -1,4 +1,4 @@
-import type { Database, Json, Tables, TablesUpdate } from '@sweetwo/core';
+import type { Database, Tables, TablesUpdate } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -255,92 +255,6 @@ export async function trashAccounts(ids: string[]) {
   fail(error);
 }
 
-// 첫 월급 플랜(O-66). 같은 사이클이면 서버가 이미 있는 플랜 id를 돌려준다.
-export interface FirstPlanLine {
-  target: 'account' | 'goal';
-  account_role?: AccountRole;
-  goal_id?: string;
-  amount: number;
-  amount_groom?: number;
-  amount_bride?: number;
-}
-export async function startFirstPlan(p: {
-  labelMonth: string;
-  cycleStart: string;
-  cycleEnd: string;
-  firstAdjust: number;
-  mergedClose: boolean;
-  isTemp: boolean;
-  snapshot: Json;
-  lines: FirstPlanLine[];
-}): Promise<string> {
-  const { data, error } = await supabase().rpc('start_first_plan', {
-    p_label_month: p.labelMonth,
-    p_cycle_start: p.cycleStart,
-    p_cycle_end: p.cycleEnd,
-    p_first_adjust: p.firstAdjust,
-    p_merged_close: p.mergedClose,
-    p_is_temp: p.isTemp,
-    p_snapshot: p.snapshot,
-    p_lines: p.lines as unknown as Json,
-  });
-  fail(error);
-  return data as string;
-}
-
-/** 다음 사이클 플랜(07 3장). 기준일이 지나 처음 앱을 연 사람이 만듦. 같은 사이클이면 있던 것 */
-export async function createCyclePlan(p: {
-  labelMonth: string;
-  cycleStart: string;
-  cycleEnd: string;
-  isTemp: boolean;
-  snapshot: Json;
-  lines: FirstPlanLine[];
-}): Promise<string> {
-  const { data, error } = await supabase().rpc('create_cycle_plan', {
-    p_label_month: p.labelMonth,
-    p_cycle_start: p.cycleStart,
-    p_cycle_end: p.cycleEnd,
-    p_is_temp: p.isTemp,
-    p_snapshot: p.snapshot,
-    p_lines: p.lines as unknown as Json,
-  });
-  fail(error);
-  return data as string;
-}
-
-/** 가장 최근 플랜의 끝 날(없으면 null = 첫 플랜 전) */
-export async function fetchLastPlanEnd(): Promise<string | null> {
-  const { data, error } = await supabase()
-    .from('monthly_plan')
-    .select('cycle_end')
-    .is('deleted_at', null)
-    .order('cycle_end', { ascending: false })
-    .limit(1);
-  fail(error);
-  return Array.isArray(data) ? (data[0]?.cycle_end ?? null) : null;
-}
-
-// 이번 달: 오늘이 든 월 플랜과 줄(H-01, H-03)
-export type MonthlyPlan = Tables<'monthly_plan'>;
-export type PlanLine = Tables<'plan_line'>;
-export async function fetchCurrentPlan(
-  today: string,
-): Promise<(MonthlyPlan & { lines: PlanLine[] }) | null> {
-  const { data, error } = await supabase()
-    .from('monthly_plan')
-    .select('*, lines:plan_line(*)')
-    .is('deleted_at', null)
-    .lte('cycle_start', today)
-    .gte('cycle_end', today)
-    .order('cycle_start', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  fail(error);
-  if (!data) return null;
-  return { ...data, lines: (data.lines ?? []).filter((l) => !l.deleted_at) };
-}
-
 // 배우자 프로필(같은 공간 다른 사람). 없으면 null
 export type PartnerProfile = {
   id: string;
@@ -362,8 +276,3 @@ export async function fetchPartner(): Promise<PartnerProfile | null> {
   return (row as PartnerProfile | undefined) ?? null;
 }
 
-/** 신랑·신부(25 S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 함께 바꿈 */
-export async function setMySide(side: 'groom' | 'bride') {
-  const { error } = await supabase().rpc('set_my_side', { p_side: side });
-  fail(error);
-}

@@ -92,29 +92,3 @@ export async function fetchActiveNotices(platform: 'desktop' | 'web'): Promise<A
     .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
 }
 
-/** 배우자 활동(19 H-08) 한 건: 알림(notice) / 월급 나누기 끝(split_done) / 자산 추가·바꿈. name이 null이면 ‘합계만’ 항목 */
-const KINDS = [
-  'notice',
-  'split_done',
-  'asset_added',
-  'asset_changed',
-  'emergency_in',
-  'emergency_out',
-] as const;
-export interface PartnerActivity {
-  at: string;
-  kind: (typeof KINDS)[number];
-  name: string | null;
-  ref: string;
-  target: string;
-}
-
-/** 최근 90일, 상대가 한 일 최근 5건(부부가 연결돼 있을 때만) */
-export async function fetchPartnerActivity(limit = 5): Promise<PartnerActivity[]> {
-  const { data, error } = await supabase().rpc('partner_activity', { p_limit: limit });
-  fail(error);
-  return (data ?? []).flatMap((r) => {
-    const kind = KINDS.find((k) => k === r.kind);
-    return kind ? [{ at: r.at, kind, name: r.name, ref: r.ref, target: r.target }] : [];
-  });
-}

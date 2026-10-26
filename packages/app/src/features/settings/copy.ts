@@ -192,7 +192,6 @@ export const copy = {
     asset: '자산',
     debt: '부채',
     goal: '목표',
-    family: '가족',
     care_day: '챙길 날',
   } as Record<string, string>,
   trashWhen: (md: string) => `${md}에 지웠어요`,

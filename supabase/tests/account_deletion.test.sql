@@ -1,7 +1,7 @@
 -- pgTAP: 계정 삭제(S-18b), 삭제 취소, 30일 뒤 지우기. 찬우(삭제), 예빈(배우자), 혼자 쓰는 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(15);
+select plan(17);
 
 insert into auth.users (id, email, last_sign_in_at) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com', now()),
@@ -33,6 +33,9 @@ reset role;
 select set_config('test.s', (select space_id::text from public.app_user where nickname = '찬우'), true);
 insert into public.asset (space_id, side, grp, kind, name, amount, owner)
   values (current_setting('test.s')::uuid, 'asset', 'cash', 'bank', '공동 적금', 24000000, 'joint');
+insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id)
+  values (current_setting('test.s')::uuid, 'asset', 'cash', 'bank', '찬우 통장', 1000000, 'person',
+    '11111111-1111-1111-1111-111111111111');
 
 -- 연결된 찬우가 삭제
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -44,7 +47,7 @@ select is((select status::text from public.app_user where nickname = '찬우'), 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select couple_state::text from public.couple_space), 'solo', '예빈은 혼자 쓰기');
-select results_eq($$ select name, amount from public.asset $$, $$ values ('공동 적금', 24000000::bigint) $$, '공동 항목은 예빈에게 전부');
+select results_eq($$ select name, amount from public.asset $$, $$ values ('공동 적금', 24000000::bigint) $$, '공동 항목은 예빈에게, 찬우 명의는 찬우 새 공간으로');
 select is((select title from public.notification where kind = 'partner_deleted'), '찬우님이 계정을 삭제했어요', '상대 알림');
 reset role;
 
@@ -60,6 +63,15 @@ set local role authenticated;
 select is((select title from public.notification where kind = 'partner_restored'), '찬우님이 계정 삭제를 취소했어요', '계정 복구 알림');
 select lives_ok($$ select public.request_reconnect() $$, '30일 안 다시 연결 요청 가능');
 reset role;
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+select lives_ok($$ select public.answer_reconnect(true) $$, '찬우가 받아들임');
+reset role;
+select results_eq(
+  $$ select (select couple_state::text from public.couple_space where id = current_setting('test.s')::uuid),
+            (select count(*)::int from public.asset where space_id = current_setting('test.s')::uuid),
+            (select count(*)::int from public.app_user where space_id = current_setting('test.s')::uuid) $$,
+  $$ values ('connected', 2, 2) $$, '다시 연결: 원래 공간에 두 사람, 찬우 통장도 돌아옴');
 
 -- 혼자 쓰는 K: 삭제 → 30일 뒤 공간과 계정까지 지움
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');

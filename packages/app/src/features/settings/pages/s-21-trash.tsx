@@ -26,7 +26,7 @@ export function S21Trash() {
   const c = d.c;
   const refresh = () =>
     Promise.all(
-      [qk.trash, qk.assets, qk.goals, qk.family, qk.careDays, qk.splits].map((k) =>
+      [qk.trash, qk.assets, qk.goals, qk.careDays, qk.splits].map((k) =>
         qc.invalidateQueries({ queryKey: k }),
       ),
     );

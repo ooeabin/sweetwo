@@ -75,22 +75,6 @@ export async function updateAsset(id: string, patch: TablesUpdate<'asset'>) {
 export const trashAsset = (id: string) => updateAsset(id, { deleted_at: new Date().toISOString() });
 export const restoreAsset = (id: string) => updateAsset(id, { deleted_at: null });
 
-/** 목표별 연결 자산 합계(원금 기준, 비공개 제외, 배우자 합계만 포함) */
-export async function fetchGoalAssetSums(): Promise<
-  { goal_id: string; n: number; total: number }[]
-> {
-  const { data, error } = await supabase().rpc('goal_asset_sums');
-  fail(error);
-  return (data ?? []) as { goal_id: string; n: number; total: number }[];
-}
-
-/** 자산들을 목표에 연결(null = 연결 해제) */
-export async function linkAssets(ids: string[], goalId: string | null) {
-  if (!ids.length) return;
-  const { error } = await supabase().from('asset').update({ goal_id: goalId }).in('id', ids);
-  fail(error);
-}
-
 /** 투자 원칙 답(O-53): 내 답과 배우자 답 */
 export async function fetchInvestAnswers(): Promise<{
   mine: InvestAnswer | null;

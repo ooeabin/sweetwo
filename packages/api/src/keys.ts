@@ -22,7 +22,6 @@ export const qk = {
   investAnswers: ['invest_answers'] as const,
   incomeItems: ['income_item'] as const,
   incomeEvents: ['income_event'] as const,
-  family: ['family_member'] as const,
   careDays: ['care_day'] as const,
   careRecords: ['care_record'] as const,
   notifications: ['notification'] as const,

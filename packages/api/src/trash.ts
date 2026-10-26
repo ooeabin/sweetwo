@@ -6,7 +6,7 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type TrashKind = 'asset' | 'goal' | 'family' | 'care_day';
+export type TrashKind = 'asset' | 'goal' | 'care_day';
 export type TrashRow = {
   kind: TrashKind;
   id: string;

@@ -599,83 +599,6 @@ export type Database = {
           },
         ]
       }
-      big_expense: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          goal_id: string | null
-          how: Database["public"]["Enums"]["big_expense_how"]
-          id: string
-          kind: string
-          month_close_id: string
-          name: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id?: string | null
-          how?: Database["public"]["Enums"]["big_expense_how"]
-          id?: string
-          kind: string
-          month_close_id: string
-          name: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id?: string | null
-          how?: Database["public"]["Enums"]["big_expense_how"]
-          id?: string
-          kind?: string
-          month_close_id?: string
-          name?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "big_expense_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "big_expense_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "big_expense_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       care_day: {
         Row: {
           alerts: number[]
@@ -770,13 +693,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "care_day_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "family_member"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "care_day_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
@@ -853,13 +769,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "care_record_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "family_member"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "care_record_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
@@ -891,77 +800,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "checklist_done_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      close_balance: {
-        Row: {
-          account_id: string
-          amount: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          expected: number | null
-          id: string
-          month_close_id: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          account_id: string
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          expected?: number | null
-          id?: string
-          month_close_id: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          account_id?: string
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          expected?: number | null
-          id?: string
-          month_close_id?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "close_balance_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "account"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "close_balance_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "close_balance_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
@@ -1297,129 +1135,6 @@ export type Database = {
           },
         ]
       }
-      emergency_move: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          id: string
-          kind: string
-          moved_on: string
-          reason: string | null
-          space_id: string
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          id?: string
-          kind: string
-          moved_on?: string
-          reason?: string | null
-          space_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          id?: string
-          kind?: string
-          moved_on?: string
-          reason?: string | null
-          space_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "emergency_move_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      family_member: {
-        Row: {
-          birth_day: number | null
-          birth_leap: boolean
-          birth_lunar: boolean
-          birth_month: number | null
-          birth_year: number | null
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          id: string
-          korean_age: boolean
-          memo: string | null
-          relation: Database["public"]["Enums"]["family_relation"]
-          side: Database["public"]["Enums"]["couple_side"]
-          sort: number
-          space_id: string
-          title: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          birth_day?: number | null
-          birth_leap?: boolean
-          birth_lunar?: boolean
-          birth_month?: number | null
-          birth_year?: number | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          korean_age?: boolean
-          memo?: string | null
-          relation: Database["public"]["Enums"]["family_relation"]
-          side: Database["public"]["Enums"]["couple_side"]
-          sort?: number
-          space_id: string
-          title: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          birth_day?: number | null
-          birth_leap?: boolean
-          birth_lunar?: boolean
-          birth_month?: number | null
-          birth_year?: number | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          korean_age?: boolean
-          memo?: string | null
-          relation?: Database["public"]["Enums"]["family_relation"]
-          side?: Database["public"]["Enums"]["couple_side"]
-          sort?: number
-          space_id?: string
-          title?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "family_member_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       fixed_expense: {
         Row: {
           burden: Database["public"]["Enums"]["expense_burden"]
@@ -1628,123 +1343,6 @@ export type Database = {
           },
         ]
       }
-      goal_use: {
-        Row: {
-          amount: number
-          care_record_id: string | null
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          goal_id: string
-          id: string
-          month_close_id: string | null
-          moved_asset_id: string | null
-          moved_goal_id: string | null
-          paid_from: Database["public"]["Enums"]["paid_from"]
-          plan_line_id: string | null
-          source: Database["public"]["Enums"]["goal_use_source"]
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          used_on: string
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          care_record_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id: string
-          id?: string
-          month_close_id?: string | null
-          moved_asset_id?: string | null
-          moved_goal_id?: string | null
-          paid_from: Database["public"]["Enums"]["paid_from"]
-          plan_line_id?: string | null
-          source: Database["public"]["Enums"]["goal_use_source"]
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          used_on: string
-          version?: number
-        }
-        Update: {
-          amount?: number
-          care_record_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id?: string
-          id?: string
-          month_close_id?: string | null
-          moved_asset_id?: string | null
-          moved_goal_id?: string | null
-          paid_from?: Database["public"]["Enums"]["paid_from"]
-          plan_line_id?: string | null
-          source?: Database["public"]["Enums"]["goal_use_source"]
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          used_on?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "goal_use_care_record_id_fkey"
-            columns: ["care_record_id"]
-            isOneToOne: false
-            referencedRelation: "care_record"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_moved_asset_id_fkey"
-            columns: ["moved_asset_id"]
-            isOneToOne: false
-            referencedRelation: "asset"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_moved_goal_id_fkey"
-            columns: ["moved_goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_plan_line_id_fkey"
-            columns: ["plan_line_id"]
-            isOneToOne: false
-            referencedRelation: "plan_line"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_use_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       holiday: {
         Row: {
           date: string
@@ -1769,199 +1367,6 @@ export type Database = {
           source?: Database["public"]["Enums"]["holiday_source"]
         }
         Relationships: []
-      }
-      income_event: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          id: string
-          month: number
-          name: string
-          owner_user_id: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-          yearly: boolean
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          month: number
-          name: string
-          owner_user_id: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-          yearly?: boolean
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          month?: number
-          name?: string
-          owner_user_id?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-          yearly?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "income_event_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      income_item: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          id: string
-          kind: Database["public"]["Enums"]["income_kind"]
-          monthly_amount: number
-          owner_user_id: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          kind: Database["public"]["Enums"]["income_kind"]
-          monthly_amount: number
-          owner_user_id: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["income_kind"]
-          monthly_amount?: number
-          owner_user_id?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "income_item_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      income_period: {
-        Row: {
-          amount: number
-          base_income: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          end_month: string
-          ended_at: string | null
-          id: string
-          space_id: string
-          split_before: Json | null
-          split_proposal_id: string | null
-          start_month: string
-          supplement: number
-          updated_at: string
-          updated_by: string | null
-          user_id: string
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          base_income: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          end_month: string
-          ended_at?: string | null
-          id?: string
-          space_id: string
-          split_before?: Json | null
-          split_proposal_id?: string | null
-          start_month: string
-          supplement?: number
-          updated_at?: string
-          updated_by?: string | null
-          user_id: string
-          version?: number
-        }
-        Update: {
-          amount?: number
-          base_income?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          end_month?: string
-          ended_at?: string | null
-          id?: string
-          space_id?: string
-          split_before?: Json | null
-          split_proposal_id?: string | null
-          start_month?: string
-          supplement?: number
-          updated_at?: string
-          updated_by?: string | null
-          user_id?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "income_period_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "income_period_split_proposal_id_fkey"
-            columns: ["split_proposal_id"]
-            isOneToOne: false
-            referencedRelation: "proposal"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       inquiry: {
         Row: {
@@ -2148,61 +1553,6 @@ export type Database = {
         }
         Relationships: []
       }
-      living_check: {
-        Row: {
-          allowance_cut: number | null
-          allowance_side: Database["public"]["Enums"]["couple_side"] | null
-          answer: string
-          answered_by: string | null
-          cover_from: string | null
-          created_at: string
-          id: string
-          over_amount: number | null
-          plan_id: string
-          space_id: string
-        }
-        ComputedFields: never
-        Insert: {
-          allowance_cut?: number | null
-          allowance_side?: Database["public"]["Enums"]["couple_side"] | null
-          answer: string
-          answered_by?: string | null
-          cover_from?: string | null
-          created_at?: string
-          id?: string
-          over_amount?: number | null
-          plan_id: string
-          space_id: string
-        }
-        Update: {
-          allowance_cut?: number | null
-          allowance_side?: Database["public"]["Enums"]["couple_side"] | null
-          answer?: string
-          answered_by?: string | null
-          cover_from?: string | null
-          created_at?: string
-          id?: string
-          over_amount?: number | null
-          plan_id?: string
-          space_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "living_check_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "monthly_plan"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "living_check_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       loan_rate: {
         Row: {
           applied_on: string
@@ -2307,307 +1657,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
-      }
-      month_close: {
-        Row: {
-          big_none: boolean
-          budget_fix: string | null
-          closed_at: string | null
-          closed_by: string | null
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          detailed_at: string | null
-          emergency_reason: string | null
-          emergency_used: boolean | null
-          gap_amount: number | null
-          gap_choice: string | null
-          gap_goal_id: string | null
-          gap_kind: string | null
-          goal_gap_amount: number | null
-          goal_gap_goal_id: string | null
-          goal_gap_not_goal: boolean | null
-          id: string
-          income: number | null
-          income_actual_bride: number | null
-          income_actual_groom: number | null
-          income_short: number | null
-          income_short_side: Database["public"]["Enums"]["couple_side"] | null
-          late: boolean
-          plan_id: string
-          rested: boolean
-          space_id: string
-          started_at: string | null
-          started_by: string | null
-          status: Database["public"]["Enums"]["month_close_status"]
-          supplement_line_id: string | null
-          together_at: string | null
-          together_by: string | null
-          together_left_at: string | null
-          updated_at: string
-          updated_by: string | null
-          version: number
-          close_together_active: boolean | null
-        }
-        ComputedFields: "close_together_active"
-        Insert: {
-          big_none?: boolean
-          budget_fix?: string | null
-          closed_at?: string | null
-          closed_by?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          detailed_at?: string | null
-          emergency_reason?: string | null
-          emergency_used?: boolean | null
-          gap_amount?: number | null
-          gap_choice?: string | null
-          gap_goal_id?: string | null
-          gap_kind?: string | null
-          goal_gap_amount?: number | null
-          goal_gap_goal_id?: string | null
-          goal_gap_not_goal?: boolean | null
-          id?: string
-          income?: number | null
-          income_actual_bride?: number | null
-          income_actual_groom?: number | null
-          income_short?: number | null
-          income_short_side?: Database["public"]["Enums"]["couple_side"] | null
-          late?: boolean
-          plan_id: string
-          rested?: boolean
-          space_id: string
-          started_at?: string | null
-          started_by?: string | null
-          status?: Database["public"]["Enums"]["month_close_status"]
-          supplement_line_id?: string | null
-          together_at?: string | null
-          together_by?: string | null
-          together_left_at?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          big_none?: boolean
-          budget_fix?: string | null
-          closed_at?: string | null
-          closed_by?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          detailed_at?: string | null
-          emergency_reason?: string | null
-          emergency_used?: boolean | null
-          gap_amount?: number | null
-          gap_choice?: string | null
-          gap_goal_id?: string | null
-          gap_kind?: string | null
-          goal_gap_amount?: number | null
-          goal_gap_goal_id?: string | null
-          goal_gap_not_goal?: boolean | null
-          id?: string
-          income?: number | null
-          income_actual_bride?: number | null
-          income_actual_groom?: number | null
-          income_short?: number | null
-          income_short_side?: Database["public"]["Enums"]["couple_side"] | null
-          late?: boolean
-          plan_id?: string
-          rested?: boolean
-          space_id?: string
-          started_at?: string | null
-          started_by?: string | null
-          status?: Database["public"]["Enums"]["month_close_status"]
-          supplement_line_id?: string | null
-          together_at?: string | null
-          together_by?: string | null
-          together_left_at?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "month_close_gap_goal_id_fkey"
-            columns: ["gap_goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_close_goal_gap_goal_id_fkey"
-            columns: ["goal_gap_goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_close_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "monthly_plan"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_close_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_close_supplement_line_id_fkey"
-            columns: ["supplement_line_id"]
-            isOneToOne: false
-            referencedRelation: "plan_line"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      month_spend: {
-        Row: {
-          amount: number
-          category_id: string
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          id: string
-          month_close_id: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          category_id: string
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          month_close_id: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          amount?: number
-          category_id?: string
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          id?: string
-          month_close_id?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "month_spend_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "spend_category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_spend_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "month_spend_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      monthly_plan: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          cycle_end: string
-          cycle_start: string
-          deleted_at: string | null
-          deleted_by: string | null
-          first_adjust: number | null
-          id: string
-          is_partial: boolean
-          is_temp: boolean
-          label_month: string
-          merged_close: boolean
-          snapshot: NonNullable<Json>
-          space_id: string
-          status: Database["public"]["Enums"]["plan_status"]
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          cycle_end: string
-          cycle_start: string
-          deleted_at?: string | null
-          deleted_by?: string | null
-          first_adjust?: number | null
-          id?: string
-          is_partial?: boolean
-          is_temp?: boolean
-          label_month: string
-          merged_close?: boolean
-          snapshot?: NonNullable<Json>
-          space_id: string
-          status?: Database["public"]["Enums"]["plan_status"]
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          cycle_end?: string
-          cycle_start?: string
-          deleted_at?: string | null
-          deleted_by?: string | null
-          first_adjust?: number | null
-          id?: string
-          is_partial?: boolean
-          is_temp?: boolean
-          label_month?: string
-          merged_close?: boolean
-          snapshot?: NonNullable<Json>
-          space_id?: string
-          status?: Database["public"]["Enums"]["plan_status"]
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "monthly_plan_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notice: {
         Row: {
@@ -2914,241 +1963,6 @@ export type Database = {
           },
         ]
       }
-      plan_line: {
-        Row: {
-          account_role: Database["public"]["Enums"]["account_role"] | null
-          amount: number
-          amount_bride: number | null
-          amount_groom: number | null
-          bride_done_amount: number | null
-          bride_done_at: string | null
-          bride_done_by: string | null
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          done_amount: number | null
-          goal_id: string | null
-          groom_done_amount: number | null
-          groom_done_at: string | null
-          groom_done_by: string | null
-          id: string
-          income_period_id: string | null
-          kind: Database["public"]["Enums"]["plan_line_kind"]
-          plan_id: string
-          sort: number
-          space_id: string
-          state: Database["public"]["Enums"]["plan_line_state"]
-          target: Database["public"]["Enums"]["plan_line_target"]
-          updated_at: string
-          updated_by: string | null
-          version: number
-          split_line_done: boolean | null
-        }
-        ComputedFields: "split_line_done"
-        Insert: {
-          account_role?: Database["public"]["Enums"]["account_role"] | null
-          amount: number
-          amount_bride?: number | null
-          amount_groom?: number | null
-          bride_done_amount?: number | null
-          bride_done_at?: string | null
-          bride_done_by?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          done_amount?: number | null
-          goal_id?: string | null
-          groom_done_amount?: number | null
-          groom_done_at?: string | null
-          groom_done_by?: string | null
-          id?: string
-          income_period_id?: string | null
-          kind?: Database["public"]["Enums"]["plan_line_kind"]
-          plan_id: string
-          sort?: number
-          space_id: string
-          state?: Database["public"]["Enums"]["plan_line_state"]
-          target: Database["public"]["Enums"]["plan_line_target"]
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          account_role?: Database["public"]["Enums"]["account_role"] | null
-          amount?: number
-          amount_bride?: number | null
-          amount_groom?: number | null
-          bride_done_amount?: number | null
-          bride_done_at?: string | null
-          bride_done_by?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          done_amount?: number | null
-          goal_id?: string | null
-          groom_done_amount?: number | null
-          groom_done_at?: string | null
-          groom_done_by?: string | null
-          id?: string
-          income_period_id?: string | null
-          kind?: Database["public"]["Enums"]["plan_line_kind"]
-          plan_id?: string
-          sort?: number
-          space_id?: string
-          state?: Database["public"]["Enums"]["plan_line_state"]
-          target?: Database["public"]["Enums"]["plan_line_target"]
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_line_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_line_income_period_id_fkey"
-            columns: ["income_period_id"]
-            isOneToOne: false
-            referencedRelation: "income_period"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_line_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "monthly_plan"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plan_line_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      proposal: {
-        Row: {
-          after: NonNullable<Json>
-          applied_at: string | null
-          apply_on: string
-          before: NonNullable<Json>
-          created_at: string
-          id: string
-          item: string
-          month_close_id: string | null
-          oppose_count: number
-          proposer: string
-          replaces: string | null
-          responded_at: string | null
-          response: Database["public"]["Enums"]["proposal_response"] | null
-          round_trips: number
-          seen_at: string | null
-          space_id: string
-          status: Database["public"]["Enums"]["proposal_status"]
-          target_id: string | null
-          together: boolean
-          updated_at: string
-          version: number
-          wedding_item_id: string | null
-          apply_proposal_values: undefined | null
-          proposal_item_noun: string | null
-        }
-        ComputedFields: "apply_proposal_values" | "proposal_item_noun"
-        Insert: {
-          after: NonNullable<Json>
-          applied_at?: string | null
-          apply_on: string
-          before: NonNullable<Json>
-          created_at?: string
-          id?: string
-          item: string
-          month_close_id?: string | null
-          oppose_count?: number
-          proposer: string
-          replaces?: string | null
-          responded_at?: string | null
-          response?: Database["public"]["Enums"]["proposal_response"] | null
-          round_trips?: number
-          seen_at?: string | null
-          space_id: string
-          status?: Database["public"]["Enums"]["proposal_status"]
-          target_id?: string | null
-          together?: boolean
-          updated_at?: string
-          version?: number
-          wedding_item_id?: string | null
-        }
-        Update: {
-          after?: NonNullable<Json>
-          applied_at?: string | null
-          apply_on?: string
-          before?: NonNullable<Json>
-          created_at?: string
-          id?: string
-          item?: string
-          month_close_id?: string | null
-          oppose_count?: number
-          proposer?: string
-          replaces?: string | null
-          responded_at?: string | null
-          response?: Database["public"]["Enums"]["proposal_response"] | null
-          round_trips?: number
-          seen_at?: string | null
-          space_id?: string
-          status?: Database["public"]["Enums"]["proposal_status"]
-          target_id?: string | null
-          together?: boolean
-          updated_at?: string
-          version?: number
-          wedding_item_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proposal_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposal_replaces_fkey"
-            columns: ["replaces"]
-            isOneToOne: false
-            referencedRelation: "proposal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposal_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposal_target_id_fkey"
-            columns: ["target_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposal_wedding_item_id_fkey"
-            columns: ["wedding_item_id"]
-            isOneToOne: false
-            referencedRelation: "wedding_item"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       salary_split: {
         Row: {
           created_at: string
@@ -3181,137 +1995,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "salary_split_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      saving_deposit: {
-        Row: {
-          amount: number
-          asset_id: string | null
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          goal_id: string | null
-          id: string
-          month_close_id: string
-          name: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          asset_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id?: string | null
-          id?: string
-          month_close_id: string
-          name: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          amount?: number
-          asset_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_id?: string | null
-          id?: string
-          month_close_id?: string
-          name?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "saving_deposit_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goal"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "saving_deposit_month_close_id_fkey"
-            columns: ["month_close_id"]
-            isOneToOne: false
-            referencedRelation: "month_close"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "saving_deposit_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      spend_category: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          default_key: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          enabled: boolean
-          id: string
-          name: string
-          sort: number
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          default_key?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          enabled?: boolean
-          id?: string
-          name: string
-          sort?: number
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          default_key?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          enabled?: boolean
-          id?: string
-          name?: string
-          sort?: number
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "spend_category_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
@@ -3418,289 +2101,14 @@ export type Database = {
         }
         Relationships: []
       }
-      todo: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          done_at: string | null
-          done_by: string | null
-          for_user: string | null
-          id: string
-          kind: string
-          open_on: string
-          screen: string | null
-          snoozed_until: string | null
-          sort: number
-          space_id: string
-          status: Database["public"]["Enums"]["todo_status"]
-          target_id: string | null
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          done_at?: string | null
-          done_by?: string | null
-          for_user?: string | null
-          id?: string
-          kind: string
-          open_on?: string
-          screen?: string | null
-          snoozed_until?: string | null
-          sort?: number
-          space_id: string
-          status?: Database["public"]["Enums"]["todo_status"]
-          target_id?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          done_at?: string | null
-          done_by?: string | null
-          for_user?: string | null
-          id?: string
-          kind?: string
-          open_on?: string
-          screen?: string | null
-          snoozed_until?: string | null
-          sort?: number
-          space_id?: string
-          status?: Database["public"]["Enums"]["todo_status"]
-          target_id?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "todo_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      unlink_copy: {
-        Row: {
-          new_id: string
-          old_id: string
-          tbl: string
-          unlink_id: string
-          user_id: string
-        }
-        ComputedFields: never
-        Insert: {
-          new_id: string
-          old_id: string
-          tbl: string
-          unlink_id: string
-          user_id: string
-        }
-        Update: {
-          new_id?: string
-          old_id?: string
-          tbl?: string
-          unlink_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "unlink_copy_unlink_id_fkey"
-            columns: ["unlink_id"]
-            isOneToOne: false
-            referencedRelation: "couple_unlink"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      wedding_item: {
-        Row: {
-          balance_amount: number | null
-          balance_on: string | null
-          budget: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          deposit_amount: number | null
-          deposit_on: string | null
-          id: string
-          key: string
-          name: string
-          payer: Database["public"]["Enums"]["wedding_payer"]
-          sort: number
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          balance_amount?: number | null
-          balance_on?: string | null
-          budget?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          deposit_amount?: number | null
-          deposit_on?: string | null
-          id?: string
-          key: string
-          name: string
-          payer?: Database["public"]["Enums"]["wedding_payer"]
-          sort?: number
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          balance_amount?: number | null
-          balance_on?: string | null
-          budget?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          deposit_amount?: number | null
-          deposit_on?: string | null
-          id?: string
-          key?: string
-          name?: string
-          payer?: Database["public"]["Enums"]["wedding_payer"]
-          sort?: number
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wedding_item_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      wedding_payment: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          goal_use_id: string | null
-          id: string
-          item_id: string
-          paid_from: Database["public"]["Enums"]["paid_from"]
-          paid_on: string
-          part: string
-          space_id: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        ComputedFields: never
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_use_id?: string | null
-          id?: string
-          item_id: string
-          paid_from: Database["public"]["Enums"]["paid_from"]
-          paid_on: string
-          part: string
-          space_id: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          goal_use_id?: string | null
-          id?: string
-          item_id?: string
-          paid_from?: Database["public"]["Enums"]["paid_from"]
-          paid_on?: string
-          part?: string
-          space_id?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "wedding_payment_goal_use_id_fkey"
-            columns: ["goal_use_id"]
-            isOneToOne: false
-            referencedRelation: "goal_use"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "wedding_payment_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "wedding_item"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "wedding_payment_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "couple_space"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      accept_counter_unlink: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       achieve_goal: { Args: { p_goal: string }; Returns: boolean }
-      add_income_supplement: { Args: { p_close: string }; Returns: string }
       add_inquiry_message: {
         Args: { p_body: string; p_inquiry: string }
-        Returns: undefined
-      }
-      add_period_supplement: {
-        Args: { p_period: string; p_plan: string }
-        Returns: undefined
-      }
-      adjust_plan: {
-        Args: {
-          p_amount: number
-          p_counter: Database["public"]["Enums"]["account_role"]
-          p_plan: string
-          p_role: Database["public"]["Enums"]["account_role"]
-        }
         Returns: undefined
       }
       admin_access_data: { Args: { p_access: string }; Returns: Json }
@@ -4013,39 +2421,7 @@ export type Database = {
         Args: { p_accept: boolean; p_id: string }
         Returns: undefined
       }
-      answer_actual_income: {
-        Args: { p_amount: number; p_close: string }
-        Returns: number
-      }
-      answer_goal_gap: {
-        Args: { p_amount: number; p_close: string; p_goal?: string }
-        Returns: undefined
-      }
-      answer_living_check: {
-        Args: {
-          p_answer: string
-          p_cover?: string
-          p_over?: number
-          p_plan: string
-        }
-        Returns: string
-      }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
-      apply_base_day: { Args: { p: Json; sid: string }; Returns: undefined }
-      apply_due_proposals: { Args: Record<PropertyKey, never>; Returns: number }
-      apply_family_budget: {
-        Args: { p: Json; sid: string }
-        Returns: undefined
-      }
-      apply_proposal_values: {
-        Args: {
-          p: Omit<
-            Database["public"]["Tables"]["proposal"]["Row"],
-            Database["public"]["Tables"]["proposal"]["ComputedFields"]
-          >
-        }
-        Returns: undefined
-      }
       asset_editable: {
         Args: {
           a: Omit<
@@ -4100,21 +2476,9 @@ export type Database = {
         }
         Returns: string
       }
-      change_wedding_budget: {
-        Args: { p_apply_on: string; p_budget: number; p_item?: string }
-        Returns: string
-      }
       check_pay_line: {
         Args: { p_actual?: number; p_line: string; p_state: string }
         Returns: undefined
-      }
-      check_split: {
-        Args: {
-          p_amount?: number
-          p_line: string
-          p_side: Database["public"]["Enums"]["couple_side"]
-        }
-        Returns: string
       }
       claim_mail: {
         Args: { p_limit?: number }
@@ -4141,15 +2505,6 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
-      }
-      close_together_active: {
-        Args: {
-          c: Omit<
-            Database["public"]["Tables"]["month_close"]["Row"],
-            Database["public"]["Tables"]["month_close"]["ComputedFields"]
-          >
-        }
-        Returns: boolean
       }
       complete_join: {
         Args: { p_lines?: Json; p_version?: number }
@@ -4206,26 +2561,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      confirm_together: {
-        Args: { p_close: string; p_id: string }
-        Returns: undefined
-      }
-      confirm_unlink: {
-        Args: { p_how: string; p_id: string; p_plan: Json }
-        Returns: undefined
-      }
-      counter_unlink: { Args: { p_shares: Json }; Returns: undefined }
-      create_cycle_plan: {
-        Args: {
-          p_cycle_end: string
-          p_cycle_start: string
-          p_is_temp: boolean
-          p_label_month: string
-          p_lines: Json
-          p_snapshot: Json
-        }
-        Returns: string
-      }
       create_inquiry: {
         Args: {
           p_attach?: Json
@@ -4263,7 +2598,6 @@ export type Database = {
         Returns: undefined
       }
       end_access: { Args: { p_id: string }; Returns: undefined }
-      end_income_periods: { Args: Record<PropertyKey, never>; Returns: number }
       end_sessions: { Args: { p_id?: string }; Returns: number }
       enqueue_mail: {
         Args: {
@@ -4279,7 +2613,6 @@ export type Database = {
         Returns: boolean
       }
       ensure_my_space: { Args: Record<PropertyKey, never>; Returns: string }
-      family_budget_now: { Args: { sid: string }; Returns: Json }
       family_budget_ok: { Args: { p: Json }; Returns: boolean }
       finish_goal_use: { Args: { p_goal: string; p_spent: number }; Returns: number }
       finish_join: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -4340,7 +2673,6 @@ export type Database = {
         Returns: boolean
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
-      join_close_together: { Args: { p_close: string }; Returns: undefined }
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
@@ -4350,11 +2682,6 @@ export type Database = {
       ko_obj: { Args: { w: string }; Returns: string }
       ko_subj: { Args: { w: string }; Returns: string }
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
-      leave_close_together: { Args: { p_close: string }; Returns: undefined }
-      living_check_day: {
-        Args: { p_end: string; p_start: string }
-        Returns: string
-      }
       lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
       log_partner_change: {
         Args: {
@@ -4383,20 +2710,11 @@ export type Database = {
         Returns: string
       }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
-      mark_proposal_seen: { Args: { p_id: string }; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
-      move_emergency: {
-        Args: { p_amount: number; p_kind: string; p_reason?: string }
-        Returns: string
-      }
       move_goal: {
         Args: { p_amount: number; p_goal: string; p_kind: string }
         Returns: string
-      }
-      move_goal_rest: {
-        Args: { p_goal: string; p_use: string }
-        Returns: undefined
       }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       my_sessions: {
@@ -4468,16 +2786,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      partner_activity: {
-        Args: { p_limit?: number }
-        Returns: {
-          at: string
-          kind: string
-          name: string
-          ref: string
-          target: string
-        }[]
-      }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4544,35 +2852,6 @@ export type Database = {
         }
         Returns: string
       }
-      proposal_item_noun: {
-        Args: {
-          p: Omit<
-            Database["public"]["Tables"]["proposal"]["Row"],
-            Database["public"]["Tables"]["proposal"]["ComputedFields"]
-          >
-        }
-        Returns: string
-      }
-      proposal_space: { Args: Record<PropertyKey, never>; Returns: string }
-      propose: {
-        Args: {
-          p_after: Json
-          p_apply_on: string
-          p_item: string
-          p_target?: string
-        }
-        Returns: string
-      }
-      propose_in_close: {
-        Args: {
-          p_after: Json
-          p_apply_on: string
-          p_close: string
-          p_item: string
-          p_target?: string
-        }
-        Returns: string
-      }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -4599,15 +2878,6 @@ export type Database = {
         }
         Returns: Json
       }
-      record_wedding_payment: {
-        Args: {
-          p_amount: number
-          p_item: string
-          p_paid_from: Database["public"]["Enums"]["paid_from"]
-          p_part: string
-        }
-        Returns: number
-      }
       renew_invite: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4624,14 +2894,6 @@ export type Database = {
         Returns: undefined
       }
       request_unlink: { Args: { p_confirm: string }; Returns: string }
-      respond_proposal: {
-        Args: {
-          p_id: string
-          p_response: Database["public"]["Enums"]["proposal_response"]
-        }
-        Returns: Database["public"]["Enums"]["proposal_status"]
-      }
-      rest_missed_months: { Args: { p_plans: string[] }; Returns: number }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
       run_access_expiry: {
         Args: Record<PropertyKey, never>
@@ -4642,18 +2904,11 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      save_base_day: { Args: { p_after: Json }; Returns: undefined }
-      save_family_budget: { Args: { p_after: Json }; Returns: undefined }
       save_split: {
         Args: { p_lines: Json; p_owner?: string }
         Returns: string
       }
-      send_close_bundle: { Args: { p_close: string }; Returns: number }
       send_evening_notifications: {
-        Args: { p_today?: string }
-        Returns: number
-      }
-      send_living_check_notifications: {
         Args: { p_today?: string }
         Returns: number
       }
@@ -4667,26 +2922,11 @@ export type Database = {
         Args: { p_done: boolean; p_key: string }
         Returns: undefined
       }
-      set_income_period: {
-        Args: {
-          p_amount: number
-          p_end: string
-          p_split_apply_on?: string
-          p_start: string
-          p_supplement: number
-        }
-        Returns: string
-      }
       set_join_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
       }
       set_joint_cycle_day: { Args: { p_day: number }; Returns: undefined }
-      set_living_check: { Args: { p_on: boolean }; Returns: undefined }
-      set_my_side: {
-        Args: { p_side: Database["public"]["Enums"]["couple_side"] }
-        Returns: undefined
-      }
       set_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
@@ -4703,30 +2943,8 @@ export type Database = {
           user_id: string
         }[]
       }
-      split_line_done: {
-        Args: {
-          l: Omit<
-            Database["public"]["Tables"]["plan_line"]["Row"],
-            Database["public"]["Tables"]["plan_line"]["ComputedFields"]
-          >
-        }
-        Returns: boolean
-      }
       start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }
-      start_first_plan: {
-        Args: {
-          p_cycle_end: string
-          p_cycle_start: string
-          p_first_adjust: number
-          p_is_temp: boolean
-          p_label_month: string
-          p_lines: Json
-          p_merged_close: boolean
-          p_snapshot: Json
-        }
-        Returns: string
-      }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
       stop_access: { Args: { p_id: string }; Returns: undefined }
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
@@ -4742,61 +2960,14 @@ export type Database = {
           sub: string
         }[]
       }
-      uncheck_split: {
-        Args: {
-          p_line: string
-          p_side: Database["public"]["Enums"]["couple_side"]
-        }
-        Returns: undefined
-      }
-      undo_emergency_move: { Args: { p_id: string }; Returns: undefined }
       undo_goal_move: { Args: { p_id: string }; Returns: undefined }
-      undo_living_check: { Args: { p_id: string }; Returns: undefined }
-      unlink_default_plan: {
-        Args: { p_plan: Json; p_ratio: number }
-        Returns: Json
-      }
-      unlink_make_space: {
-        Args: {
-          is_req: boolean
-          plan: Json
-          u: Omit<
-            Database["public"]["Tables"]["couple_unlink"]["Row"],
-            Database["public"]["Tables"]["couple_unlink"]["ComputedFields"]
-          >
-          x: string
-        }
-        Returns: string
-      }
       unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
-      unlink_ratio: { Args: { sid: string; uid: string }; Returns: number }
-      unlink_share: { Args: { amount: number; pct: number }; Returns: number }
-      update_pending_shares: {
-        Args: { p_is_temp: boolean; p_plan_id: string; p_shares: Json }
-        Returns: number
-      }
-      use_goal: {
-        Args: {
-          p_amount: number
-          p_asset?: string
-          p_goal: string
-          p_held: number
-          p_kind: string
-          p_paid_from: Database["public"]["Enums"]["paid_from"]
-          p_rest_goal?: string
-        }
-        Returns: Json
-      }
       weekly_mail_body: {
         Args: { p_actor: string; p_receiver: string; p_today: string }
         Returns: {
           body_html: string
           body_text: string
         }[]
-      }
-      withdraw_proposal: {
-        Args: { p_id: string }
-        Returns: Database["public"]["Enums"]["proposal_status"]
       }
       won_band: { Args: { v: number }; Returns: string }
       ym_label: { Args: { d: string }; Returns: string }

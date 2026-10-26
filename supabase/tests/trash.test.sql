@@ -1,7 +1,7 @@
 -- pgTAP: 휴지통(S-21)과 공개 범위 기본값(S-13). 찬우(시작), 예빈(합류)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(12);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -21,20 +21,17 @@ update public.app_user set nickname = '찬우';
 select is((select default_visibility::text from public.app_user), 'sum', '새 항목 기본값은 합계만');
 select lives_ok($$ update public.app_user set default_visibility = 'private' $$, '기본값 바꾸기');
 insert into public.goal (space_id, template, name, kind, priority) select space_id, 'travel', '여행', 'once', 1 from public.app_user;
-insert into public.family_member (space_id, side, relation, title) select space_id, 'groom', 'parent', '어머니' from public.app_user;
-insert into public.care_day (space_id, category, kind, name, member_id, side, date_rule, month, day, carer)
-  select space_id, 'family', 'birthday', '어머니 생신', id, 'groom', 'solar_yearly', 5, 1, 'groom' from public.family_member;
+insert into public.care_day (space_id, category, kind, name, side, date_rule, month, day, carer)
+  select space_id, 'family', 'birthday', '어머니 생신', 'groom', 'solar_yearly', 5, 1, 'groom' from public.app_user;
 insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id)
   select space_id, 'asset', 'cash', 'bank', '청약 통장', 1000000, 'person', id from public.app_user;
--- 가족과 그 챙길 날을 같이 지움, 목표·자산도 지움
-update public.family_member set deleted_at = now();
+-- 챙길 날, 목표, 자산을 지움
 update public.care_day set deleted_at = now();
 update public.goal set deleted_at = now();
 update public.asset set deleted_at = now();
 select results_eq($$ select kind from public.trash_rows() order by kind $$,
-  $$ values ('asset'), ('family'), ('goal') $$, '휴지통: 같이 지운 챙길 날은 가족 줄로만');
-select is(public.restore_trash('family', (select id from public.family_member)), 'restored', '가족 되살리기');
-select is((select count(*)::int from public.care_day where deleted_at is null), 1, '같이 지운 챙길 날도 되살아남');
+  $$ values ('asset'), ('care_day'), ('goal') $$, '휴지통: 자산, 챙길 날, 목표');
+select is(public.restore_trash('care_day', (select id from public.care_day)), 'restored', '챙길 날 되살리기');
 select is(public.restore_trash('goal', (select id from public.goal)), 'restored', '혼자면 목표도 바로 되살림');
 select is(public.purge_trash('asset', (select id from public.asset)), 1, '영구 삭제');
 select is((select count(*)::int from public.asset), 0, '자산이 사라짐');

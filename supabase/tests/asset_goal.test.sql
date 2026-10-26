@@ -1,7 +1,7 @@
--- pgTAP: 목표 연결 자산 합계(비공개 제외, 합계만 포함), 목표 추가 제안의 자산 연결(23 F-03i, 22 G-03d)
+-- pgTAP: 목표 연결 자산 합계(비공개 제외, 합계만 포함)(23 F-03i)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(4);
+select plan(2);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -38,19 +38,12 @@ insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_
     '22222222-2222-2222-2222-222222222222', 'private', current_setting('test.goal')::uuid from public.app_user;
 select results_eq($$ select n, total from public.goal_asset_sums() $$, $$ values (1, 5000000::bigint) $$,
   '배우자 합계만 포함, 비공개 제외');
-select public.propose('goal_add',
-  jsonb_build_object('template', 'travel', 'name', '여행', 'kind', 'once', 'owner', 'me',
-    'asset_ids', (select jsonb_agg(id) from public.asset)),
-  current_date + 30);
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select results_eq($$ select n, total from public.goal_asset_sums() $$, $$ values (1, 5000000::bigint) $$,
   '찬우에게도 같은 값');
-select public.respond_proposal((select id from public.proposal where status = 'open'), 'like');
-select is((select g.name from public.asset a join public.goal g on g.id = a.goal_id where a.name = '공동 통장'), '여행', '고른 자산이 새 목표에 연결');
-select is((select g.name from public.asset a join public.goal g on g.id = a.goal_id where a.name = '청약'), '집', '제안한 사람이 못 고치는 자산은 그대로');
 reset role;
 
 select * from finish();

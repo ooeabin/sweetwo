@@ -8,39 +8,16 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type FamilyMember = Tables<'family_member'>;
 export type CareDay = Tables<'care_day'>;
 export type CareRecord = Tables<'care_record'>;
 export type PaidFrom = CareRecord['paid_from'];
 
-export async function fetchFamily(): Promise<FamilyMember[]> {
-  const { data, error } = await supabase()
-    .from('family_member')
-    .select('*')
-    .is('deleted_at', null)
-    .order('sort');
-  fail(error);
-  return data ?? [];
-}
 export async function fetchCareDays(): Promise<CareDay[]> {
   const { data, error } = await supabase().from('care_day').select('*').is('deleted_at', null);
   fail(error);
   return data ?? [];
 }
 
-/** 가족 여러 명 추가, 만든 id를 넣은 순서대로 */
-export async function insertFamily(
-  rows: Omit<TablesInsert<'family_member'>, 'space_id'>[],
-): Promise<string[]> {
-  if (!rows.length) return [];
-  const space_id = await ensureSpace();
-  const { data, error } = await supabase()
-    .from('family_member')
-    .insert(rows.map((r) => ({ ...r, space_id })))
-    .select('id');
-  fail(error);
-  return (data ?? []).map((r) => r.id);
-}
 /** 챙길 날 여러 개 추가, 만든 id를 넣은 순서대로 */
 export async function insertCareDays(
   rows: Omit<TablesInsert<'care_day'>, 'space_id'>[],
@@ -64,10 +41,6 @@ export async function trashCareDay(id: string) {
     .from('care_day')
     .update({ deleted_at: new Date().toISOString() }) // 지운 사람은 DB 트리거가 기록
     .eq('id', id);
-  fail(error);
-}
-export async function updateFamily(id: string, patch: TablesUpdate<'family_member'>) {
-  const { error } = await supabase().from('family_member').update(patch).eq('id', id);
   fail(error);
 }
 
