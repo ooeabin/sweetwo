@@ -517,7 +517,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 분배표 또는 대기), 사전 입력 지우기
       if (fn === 'set_join_salary_mode') {
         const mode = body().p_mode;
-        const starter = db.partner?.id ?? null;
+        const starter = (db.partner?.id as string | undefined) ?? null;
         if (db.space) db.space.salary_mode = mode;
         for (const sp of db.splits)
           if (mode === 'joint' && sp.owner_user_id === starter) sp.owner_user_id = null;
@@ -530,15 +530,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.joinCalls.push({ fn, ...b });
         const lines = b.p_lines as Record<string, unknown>[] | undefined;
         if (lines) {
-          const owner = db.space?.salary_mode === 'joint' ? null : db.me.id;
-          let sp = db.splits.find((x) => x.owner_user_id === owner);
-          if (!sp) {
-            sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
-            db.splits.push(sp);
-          }
+          const owner = db.space?.salary_mode === 'joint' ? null : String(db.me.id);
+          const found = db.splits.find((x) => x.owner_user_id === owner);
+          const sp = found ?? {
+            id: `split-${db.splits.length + 1}`,
+            owner_user_id: owner,
+            split_line: [] as Record<string, unknown>[],
+          };
+          if (!found) db.splits.push(sp);
           sp.split_line = lines.map((l, i) => ({
-            id: `${String(sp?.id)}-line-${i}`,
-            split_id: sp?.id,
+            id: `${sp.id}-line-${i}`,
+            split_id: sp.id,
             kind: l.kind,
             goal_id: l.goal_id ?? null,
             user_id: l.kind === 'allowance' ? (l.user_id ?? owner ?? db.me.id) : null,
