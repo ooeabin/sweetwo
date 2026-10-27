@@ -15,6 +15,7 @@ export * from './components/Field';
 export * from './components/ListRow';
 export * from './components/SectionHeader';
 export * from './components/Ring';
+export * from './components/WeekStrip';
 export * from './components/Tabs';
 export * from './components/Toast';
 export * from './components/Illustration';

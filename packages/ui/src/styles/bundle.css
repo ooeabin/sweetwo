@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (848f338). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (5d9c179). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -599,6 +599,16 @@
 .hg-person:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-person__text { flex: 1; min-width: 0; }
 .hg-person > .hg-ico { color: var(--stone); }
+/* WeekStrip: 이번 주 날짜 띠(현대카드 소비 캘린더 느낌). 일~토 7칸, 오늘 검정 원, 일정 있는 날 아래 점 */
+.hg-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: var(--space-3) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-1); }
+.hg-week__day { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink); }
+.hg-week__day small { font: 400 12px/16px var(--font-sans); color: var(--stone); }
+.hg-week__day b { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-full); font: 600 16px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-week__day.is-holiday small, .hg-week__day.is-holiday b { color: var(--holiday-ink); }
+.hg-week__day.is-past b { color: var(--stone); }
+.hg-week__day.is-today b { background: var(--ink); color: var(--on-ink); }
+.hg-week__day i { width: 5px; height: 5px; border-radius: var(--radius-full); }
+.hg-week__day i.is-on { background: var(--ink); }
 /* 사람 탭(W-01·W-02 찬우·예빈): 이름 앞 작은 Avatar */
 .hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
 .hg-sechead__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.2px; }

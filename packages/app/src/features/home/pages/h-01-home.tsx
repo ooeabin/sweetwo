@@ -319,7 +319,7 @@ export function H01Home() {
         </div>,
         <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
           {assetsCard}
-          <UpcomingCard items={items.slice(0, 3)} go={go} />
+          <UpcomingCard items={items.slice(0, 3)} go={go} today={today} />
         </div>,
       ]}
     />

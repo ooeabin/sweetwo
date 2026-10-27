@@ -10,6 +10,7 @@ import {
   Meter,
   Ring,
   SectionHeader,
+  WeekStrip,
 } from '@sweetwo/ui';
 import { useState } from 'react';
 import { PersonDot } from '../../shared/person';
@@ -258,13 +259,23 @@ export interface UpcomingItem {
 }
 
 /** H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 목표 기한, 날짜순 최대 3개 */
-export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {
+export function UpcomingCard({
+  items,
+  go,
+  today,
+}: {
+  items: UpcomingItem[];
+  go: (to: string) => void;
+  /** 이번 주 날짜 띠(오늘, KST). 없으면 띠 없음(트레이 등) */
+  today?: string;
+}) {
   return (
     <section className="hg-stack" aria-label={copy.upcoming}>
       <SectionHeader
         title={copy.upcoming}
         more={{ label: copy.upcoming, href: '/calendar/list' }}
       />
+      {today && <WeekStrip today={today} marked={new Set(items.map((e) => e.date))} />}
       {items.length ? (
         <div className="hg-list">
           {items.map((e) => (
