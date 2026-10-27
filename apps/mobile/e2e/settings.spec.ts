@@ -86,7 +86,7 @@ function seed(db: MemDb) {
 const open = async (page: Page, narrow: boolean) => {
   await page.goto('/calendar/list');
   await page
-    .locator(narrow ? '.hg-frame__mhead' : '.hg-topnav')
+    .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
     .getByRole('button', { name: narrow ? '설정' : '설정 열기', exact: true })
     .click();
   await expect(page).toHaveURL(/\/settings$/);
