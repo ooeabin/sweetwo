@@ -5,8 +5,6 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { useCacheInfo } from '../../shared/offline-cache';
-import { useOutbox } from '../../shared/outbox';
-import { OutboxBanner, useOutboxSync } from './outbox-banner';
 import { useOnline } from '../../shared/online';
 import {
   N01Panel,
@@ -43,9 +41,6 @@ export function MainFrame(
   // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime(데스크톱 OS 알림)
   useNotiRealtime(me.data?.id);
   usePushRegistration(me.data?.id);
-  // 오프라인 입력 대기열: 연결되면 보냄
-  useOutboxSync(me.data?.id);
-  const pending = useOutbox((s) => s.ops.length);
   const unread = useHasUnread();
   const panel = useNotiPanel();
   const narrow = useNarrow();
@@ -76,7 +71,6 @@ export function MainFrame(
   const offline = !online && (
     <div className="hg-banner hg-banner--info" role="status">
       <b>{savedAt ? copy.offlineCached : copy.offlineTitle}</b>
-      {pending > 0 && <small>{copy.pending(pending)}</small>}
       <span>{savedAt ? copy.lastSaved(formatKstMonthDayTime(savedAt)) : copy.offlineBody}</span>
     </div>
   );
@@ -90,11 +84,12 @@ export function MainFrame(
       <AppFrame
         {...p}
         banner={
-          <>
-            {offline}
-            {me.data && <OutboxBanner meId={me.data.id} partnerName={c?.partnerName ?? ''} />}
-            {p.banner}
-          </>
+          offline || p.banner ? (
+            <>
+              {offline}
+              {p.banner}
+            </>
+          ) : undefined
         }
         onSearch={() => setPalette(true)}
         // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)

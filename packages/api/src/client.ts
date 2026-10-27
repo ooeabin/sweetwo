@@ -38,10 +38,22 @@ export function subscribeSaving(f: () => void) {
   savingListeners.add(f);
   return () => void savingListeners.delete(f);
 }
+// 오프라인(30 동기화 4장): 앱은 마지막으로 받은 데이터로 볼 수만 있고, 서버로 가는 쓰기는 보내지 않음.
+// 인터넷이 없으면 쓰기를 바로 실패시키고 그 시각을 남김 → 앱이 실패 안내 대신 “인터넷에 연결되면 할 수 있어요”를 띄움
+let blockedAt = 0;
+/** 인터넷이 없어 쓰기를 막은 마지막 시각(ms) */
+export const lastOfflineBlock = () => blockedAt;
+const offline = () => typeof navigator !== 'undefined' && navigator.onLine === false;
 const trackedFetch: typeof fetch = async (input, init) => {
   const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
   const write = method !== 'GET' && method !== 'HEAD';
   if (!write) return fetch(input, init);
+  const url = input instanceof Request ? input.url : String(input);
+  // 로그인 토큰 갱신(auth)은 막지 않음(Supabase가 알아서 다시 시도)
+  if (offline() && !url.includes('/auth/v1/')) {
+    blockedAt = Date.now();
+    throw new TypeError('Failed to fetch');
+  }
   writing++;
   emitSaving();
   try {

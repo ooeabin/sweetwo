@@ -44,7 +44,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 
 - Electron: 데스크톱 앱과 트레이 위젯. 보안 기본값 contextIsolation 켬, nodeIntegration 끔, preload로 필요한 기능만 열어 줌
 - 로그인: 시스템 브라우저 OAuth(PKCE) → https://sweetwo.kr/auth/callback(웹사이트의 정적 복귀 페이지, (전환 전) app.sweetwo.kr) → 딥링크(sweetwo://)로 복귀. 모바일은 같은 주소가 앱 링크라 앱이 바로 받음. refresh token은 main 프로세스가 safeStorage로 암호화해 보관(세부는 ‘인증과 세션’)
-- 로컬 저장: 위젯 캐시와 오프라인 큐는 암호화, 키는 safeStorage(트레이 위젯 마지막 값은 `widget.json`의 `snapshotEnc`로 암호화, 암호화를 못 쓰면 남기지 않음. 오프라인 큐는 아직 없음). 트레이 값은 앱 창이 30분마다 새로 읽어 고침
+- 로컬 저장: 위젯 캐시와 오프라인 조회 캐시는 암호화, 키는 safeStorage(트레이 위젯 마지막 값은 `widget.json`의 `snapshotEnc`로 암호화, 암호화를 못 쓰면 남기지 않음). 오프라인 입력 큐는 두지 않음(오프라인은 볼 수만). 트레이 값은 앱 창이 30분마다 새로 읽어 고침
 - Capacitor: 모바일 앱. `apps/mobile`(Vite 빌드 + iOS·Android 프로젝트)이 packages/app을 감쌈. 모바일 전용 기능(로그인, 보안 저장소, 잠금·생체 인증, 푸시, 앱 링크)은 데스크톱과 같은 모양의 브리지(`window.sweetwo`)로만 열어 줌. 플랫폼 값은 `desktop` / `ios` / `android`, 데스크톱 전용(트레이, 단축키)은 플랫폼 플래그로 숨김
 - 같은 Vite 화면을 브라우저로 띄우는 건 개발과 e2e(흉내 Supabase)용뿐, 배포하지 않음
 - 서버 데이터: TanStack Query 캐시 + Realtime 변경 신호로 무효화. 끊기면 30초 폴링
@@ -226,7 +226,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 공개 범위 3단계(전체 공개, 합계만, 비공개)는 RLS와 security\_invoker = true 뷰로 걸러냄(이 옵션 없는 뷰는 소유자 권한으로 RLS를 건너뜀). 클라이언트에서 숨기지 않음
 - 목표(20261106090000): 읽기는 우리 목표·내 목표·배우자의 ‘모두 보여 주기’ 내 목표만(‘금액만 보여 주기’는 `space_goals()`가 이름을 가려서 줌), 추가·고치기는 우리 목표 둘 다·내 목표 주인만, 주인은 나 또는 없음(우리)으로만. 앱이 바로 고치는 열만 `grant update`(이름, 형태, 질문 답, 금액, 기한, 이미 모은 돈, 순서, 상태, 주인, 공개 범위, 휴지통). 상태는 진행·지연·보류 사이만(`goal_client_guard`), 달성·사용 완료·사진·템플릿은 함수로만
 - 제안·승인 없음(ADR 0003). 누구나 바로 고치고 상대에게 알림(partner\_change 묶음) + 고친 사람에게 Toast ‘되돌리기’
-- 오프라인 입력 대기열: `packages/app/src/shared/outbox.ts`(zustand). 입력하는 곳에서 `navigator.onLine`이 거짓이거나 네트워크 오류면 `enqueue` + 쿼리 캐시를 바로 고침(지금: `useCheck`, 목표 `useGoalChange`, F-04 금액). 기기 캐시 파일에 `outbox`로 같이 저장(0.5초 모아서). `MainFrame`의 `useOutboxSync`가 켤 때·online·30초마다 순서대로 보냄: 체크는 `check_pay_line`(closed면 거절), 목표·자산은 `updateIfUnchanged` + `conflictDecision(..., { queued: true })`(배우자가 그 뒤 바꿨으면 시간과 상관없이 고르기). 거절은 ‘보내지 못한 입력’(다시 하기 / 버리기), 7일 넘은 입력이 있으면 자동으로 안 보내고 ‘한 번에 보내기’
+- 오프라인은 볼 수만(30 동기화 4장): api `trackedFetch`가 `navigator.onLine`이 거짓이면 서버로 가는 쓰기(POST·PATCH·PUT·DELETE, auth 토큰 갱신 빼고)를 바로 실패시키고 `lastOfflineBlock()`을 남김 → `shared/toast`가 3초 안의 실패 안내를 “인터넷에 연결되면 할 수 있어요”(`shared/copy`)로 바꿈. 입력 대기열은 두지 않음(2026-10-27 결정)
 - 오프라인 조회 캐시: `packages/app/src/shared/offline-cache.ts`가 TanStack Query 캐시를 `dehydrate`해 브리지 `cache.save`로(3초 모아서), 켤 때 `cache.load` → `hydrate` 뒤에 그림. 데스크톱 `main/offline-cache.ts`(safeStorage로 파일 암호화), 모바일 `native/offline-cache.ts`(보안 저장소의 AES-GCM 키 + Filesystem 데이터 폴더). 로그아웃은 main·네이티브 `signOut`이 지움, 앱은 `signed_out` 뒤 저장을 멈춤. 사진 서명 주소·기기 목록은 빼고, 모양이 바뀌면 `VERSION`을 올림
 - 사실 값(잔액 등)은 마지막 쓰기가 이김. 배우자가 1분 안에 같은 필드를 바꿨으면 선택 화면: api `updateIfUnchanged(table, id, patch, base)`가 ‘화면을 열 때 값’(base)이 그대로일 때만 고치고, 아니면 지금 행을 돌려줌 → core `conflictDecision`(same / choose: 배우자 `updated_by` + `updated_at` 1분 안 / overwrite) → 디자인 `ConflictChoice`. 지금은 목표 수정(금액·기한·이름)과 자산 금액(F-04). 분배표·체크리스트·오프라인 대기열은 다음 단계
 - 기록(change\_log, amount\_history)은 추가만. 수정과 삭제 권한 없음
@@ -342,13 +342,10 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - api/realtime.ts에 테이블/id → TanStack 쿼리 키 표를 두고 그대로 무효화
 - 트레이 위젯은 서버를 직접 부르지 않고 main 프로세스 캐시를 IPC로 읽음
 
-### 오프라인 큐
+### 오프라인
 
-- 데스크톱: main 프로세스에 큐. safeStorage로 암호화한 파일 또는 SQLite
-- 입력 순서대로 보내고, 실패하면 지수 백오프로 재시도. 같은 `mutation_id`라 중복 반영 없음
-- 계속 실패하거나 서버가 거부하면 ‘보내지 못한 입력’ 상태로 보여 주고 다시 보내기, 버리기 선택
-- 모바일: 데스크톱과 같은 규칙. SQLite(암호화) 큐, 키는 Keychain·Keystore
-- 로컬 캐시 스키마가 바뀌어 옮기기가 실패하면 큐는 남기고 캐시만 비운 뒤 서버에서 다시 받음
+- 볼 수만 있음: 기기 암호화 조회 캐시(→ 위 ‘권한 규칙’ 아래 오프라인 조회 캐시), 쓰기는 api가 바로 막고 “인터넷에 연결되면 할 수 있어요”
+- 입력 큐는 두지 않음(2026-10-27 결정, 기획서 30 동기화 4장). 다시 필요해지면 ADR로
 
 ### 충돌
 
@@ -649,7 +646,7 @@ supabase/
 - 다른 화면에서 고치러 온 길(`?return=`)은 멈춘 화면으로 기록하지 않는다
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 그 화면부터(‘이어서 할까요?’ 확인은 아직 없음)
 - 결혼기념일 챙길 날은 `couple_space` 트리거 `sync_wedding_care`가 자동 등록(20261029180000). 연결 해제 뒤에는 S-12h → O-11부터(`start_after_unlink`)
-- 아직 없는 것: ‘이어서 할까요?’, 해제 뒤 O-13 건너뛰기, 오프라인 저장. 옛 결과·진단·플랜 계산(`result.ts`, core `plan`·`expenses`·배분 조정·진단)은 지움
+- 아직 없는 것: ‘이어서 할까요?’, 해제 뒤 O-13 건너뛰기. 옛 결과·진단·플랜 계산(`result.ts`, core `plan`·`expenses`·배분 조정·진단)은 지움
 - 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
 - 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards, Q3 AmountInput, Q4 YearInput/DateInput/YearMonthInput/DayChips/DateWheel(`yearOnly`), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
 - e2e는 `apps/mobile/e2e/onboarding-mock.ts`의 메모리 DB(`save_split`, `start_checklist` 흉내 포함)로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜는 `page.clock.setFixedTime`으로 10월 7일에 고정
@@ -669,7 +666,7 @@ supabase/
 - W-01(20261102090000): 각자 + 배우자 합류면 사람 탭(`?who=`), 배우자 분배표도 고칠 수 있고 배우자 내 목표 줄 금액은 잠금(`save_split`이 `locked_line`으로도 막음). 수입 줄 → S-11(내 탭). 합쳐서면 내 목표 줄 이름 앞에 주인 이름(`goalLineName`, 체크리스트·홈도 같음). 직접 추가 줄은 눌러서 이름·금액 바꾸기. ‘추천값으로 다시 채우기’는 core `recommendSplit`의 `others`(각자: 우리 목표는 상대 줄만큼 빼고)·`keep`(배우자 탭: 배우자 내 목표 줄 그대로), 합쳐서는 두 사람 수입·사람마다 용돈. 연결 해제 대기면 보기만
 - W-02: ‹ › 지난 달 보기(`fetchPastChecklists`, 읽기 전용), 기간 시작은 월급날이 주말·공휴일이면 직전 영업일로 표시(`holiday_shift`), 상대가 이번 사이클에 분배표를 바꿨으면 맨 위 안내(× 누르면 이 기기에서 숨김), 배우자 탭은 ‘다른 금액’ 없음
 - 월급날 바꾸기: `app_user` 트리거 `payday_cut_cycle` → `cut_cycle`로 이번 사이클 끝 = 새 기준일 전날(각자 = 내 체크리스트, 합쳐서 + 만드는 날 자동 = 공동)
-- 아직 없는 것: W-02 끝 배우자 진행, 체크 오프라인 저장
+- 아직 없는 것: W-02 끝 배우자 진행
 
 ### 캘린더 구조
 

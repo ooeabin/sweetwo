@@ -15,9 +15,6 @@ import {
 } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { enqueue, isOfflineError } from '../../shared/outbox';
-import { toast } from '../../shared/toast';
-import { copy } from './copy';
 
 // 월급 분배표·체크리스트 데이터(docs/spec/20-salary-plan.md). 키는 qk라 온보딩·홈과 캐시를 같이 쓴다.
 export const useMe = () => useQuery({ queryKey: qk.me, queryFn: fetchMe });
@@ -47,44 +44,11 @@ export const waiting = (c: PayChecklist) => c.pay_check_line.filter((l) => l.sta
 export const doneCount = (c: PayChecklist) =>
   c.pay_check_line.filter((l) => l.state !== 'wait').length;
 
-/**
- * 체크 뒤 새로 읽을 것: 체크리스트, 목표 모은 돈.
- * 인터넷이 없으면 대기열에 넣고 화면은 바로 바꿔 둠(30 동기화 4장) + “연결되면 자동으로 저장돼요”
- */
+/** 체크 뒤 새로 읽을 것: 체크리스트, 목표 모은 돈 */
 export function useCheck() {
   const qc = useQueryClient();
   return async (line: PayCheckLine, state: 'checked' | 'wait' | 'skipped', actual?: number) => {
-    const queue = () => {
-      const goals = qc.getQueryData<Goal[]>(qk.goals) ?? [];
-      const name = line.name ?? goals.find((g) => g.id === line.goal_id)?.name ?? '';
-      enqueue({
-        kind: 'check',
-        lineId: line.id,
-        state,
-        ...(actual === undefined ? {} : { actual }),
-        label: copy.queuedCheck(name),
-      });
-      qc.setQueriesData<PayChecklist[]>({ queryKey: ['pay_checklist'] }, (old) =>
-        old?.map((c) => ({
-          ...c,
-          pay_check_line: c.pay_check_line.map((l) =>
-            l.id === line.id
-              ? { ...l, state, actual: actual ?? (state === 'checked' ? l.actual : null) }
-              : l,
-          ),
-        })),
-      );
-      toast(copy.savedOffline);
-      return 'queued' as const;
-    };
-    if (typeof navigator !== 'undefined' && !navigator.onLine) return queue();
-    let r: Awaited<ReturnType<typeof checkPayLine>>;
-    try {
-      r = await checkPayLine(line.id, state, actual);
-    } catch (e) {
-      if (isOfflineError(e)) return queue();
-      throw e;
-    }
+    const r = await checkPayLine(line.id, state, actual);
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
       qc.invalidateQueries({ queryKey: qk.goalCheckedSums }),
