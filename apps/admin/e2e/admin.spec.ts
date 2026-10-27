@@ -594,6 +594,18 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
     p_scopes: ['income_spend'],
     p_raw: false,
   });
+
+  // 금액 원값: 화면 1개만, 최고 관리자 승인 요청
+  await ask.getByRole('button', { name: '목표' }).click();
+  await ask.getByLabel('금액 원값 요청').check();
+  await expect(ask.getByText('최고 관리자가 승인하면 사용자에게 요청해요', { exact: false })).toBeVisible();
+  await ask.getByLabel('사유').fill('목표 금액 확인');
+  await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
+  await expect(page.getByText('최고 관리자에게 원값 승인을 요청했어요')).toBeVisible();
+  expect(db.rpc.filter((r) => r.fn === 'admin_request_access').at(-1)?.body).toMatchObject({
+    p_scopes: ['goals'],
+    p_raw: true,
+  });
 });
 
 test('감사 로그와 문서', async ({ page }) => {

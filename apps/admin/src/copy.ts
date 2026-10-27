@@ -113,6 +113,8 @@ export const copy = {
     calendar: '캘린더 화면',
   } as Record<string, string>,
   raw: '금액 원값 요청',
+  rawHelp: '화면 1개만. 최고 관리자가 승인하면 사용자에게 요청해요. 거절되면 구간으로만 요청해요', // [확인 필요]
+  rawRequested: '최고 관리자에게 원값 승인을 요청했어요', // [확인 필요]
   sendRequest: '동의 요청 보내기',
   requested: '동의를 요청했어요', // [확인 필요]
   accessStatus: {

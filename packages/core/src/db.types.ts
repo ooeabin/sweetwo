@@ -2276,6 +2276,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      access_send: {
+        Args: {
+          p_admin: string
+          p_raw: boolean
+          p_reason: string
+          p_scopes: string[]
+          q: Omit<
+            Database["public"]["Tables"]["inquiry"]["Row"],
+            Database["public"]["Tables"]["inquiry"]["ComputedFields"]
+          >
+        }
+        Returns: string
+      }
       account_deletion_for: { Args: { uid: string }; Returns: string }
       achieve_goal: { Args: { p_goal: string }; Returns: boolean }
       add_care_photo: {
