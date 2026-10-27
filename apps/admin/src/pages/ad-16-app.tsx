@@ -12,7 +12,8 @@ const toIso = (local: string) => (local ? new Date(`${local}:00+09:00`).toISOStr
 const local = (iso: string | null) => (iso ? formatKstDateTime(iso).replace(' ', 'T') : '');
 
 // AD-16 앱 버전·점검: 최신·최소 지원 버전(데스크톱, iOS, Android. 웹은 설정 없음), 점검 예약(시작·끝·문구). 저장 = 승인 요청(최고 관리자).
-// 앱은 최소 버전 미만이면 강제 업데이트(A-01), 점검 시간 안이면 ‘점검’ 화면(13 13번). 미만 기기 수는 기기 접속 기록이 쌓인 뒤.
+// 앱은 최소 버전 미만이면 강제 업데이트(A-01), 점검 시간 안이면 ‘점검’ 화면(13 13번).
+// 최소 지원 버전마다 지금 저장된 버전보다 낮은 기기 수(90일 안에 켠 기기, app_device)를 칸 아래에.
 export function AD16App() {
   const me = useAdmin();
   const canEdit = me.roles.includes('ops');
@@ -63,7 +64,8 @@ export function AD16App() {
       setMsg(copy.failed);
     }
   };
-  const field = (label: string, k: keyof typeof f, type = 'text') => (
+  const below = q.data?.below_min;
+  const field = (label: string, k: keyof typeof f, type = 'text', help?: number) => (
     <label className="hg-field">
       <span className="hg-field__label">{label}</span>
       <input
@@ -73,6 +75,7 @@ export function AD16App() {
         disabled={!canEdit}
         onChange={(e) => setF({ ...f, [k]: e.target.value })}
       />
+      {help !== undefined && <span className="hg-help">{ops.belowMin(help)}</span>}
     </label>
   );
   return (
@@ -80,9 +83,9 @@ export function AD16App() {
       <SysTabs current="app" />
       <section className="hg-card hg-stack" aria-label={ops.sysTabs.app} style={{ maxWidth: 520 }}>
         {field(ops.appCols.latest, 'latest')}
-        {field(ops.appCols.minDesktop, 'minD')}
-        {field(ops.appCols.minIos, 'minI')}
-        {field(ops.appCols.minAndroid, 'minA')}
+        {field(ops.appCols.minDesktop, 'minD', 'text', below?.desktop)}
+        {field(ops.appCols.minIos, 'minI', 'text', below?.ios)}
+        {field(ops.appCols.minAndroid, 'minA', 'text', below?.android)}
         <span className="hg-card__label">{ops.maintenance}</span>
         {field(ops.field.starts, 'starts', 'datetime-local')}
         {field(ops.field.ends, 'ends', 'datetime-local')}

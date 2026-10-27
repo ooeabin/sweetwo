@@ -433,6 +433,7 @@ async function mock(
           maintenance_starts_at: null,
           maintenance_ends_at: null,
           maintenance_message: null,
+          below_min: { desktop: 12, ios: 0, android: 3 },
         });
       case 'admin_request_app_config':
         return json(route, 'ap9');
@@ -750,6 +751,7 @@ test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버
 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
   await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
+  await expect(page.getByText('지금 최소 버전보다 낮은 기기 12대(90일 안에 켠 기기)')).toBeVisible();
   await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인을 요청했어요')).toBeVisible();

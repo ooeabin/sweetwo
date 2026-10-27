@@ -94,6 +94,8 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
     if (url.pathname === '/rest/v1/goal') return json(route, []);
     if (url.pathname === '/rest/v1/rpc/space_goals') return json(route, []);
     if (url.pathname === '/rest/v1/rpc/note_login') return json(route, false);
+    if (url.pathname === '/rest/v1/rpc/note_device')
+      return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     if (url.pathname === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
     return json(route, { message: `e2e: 흉내 내지 않은 요청 ${url.pathname}` }, 404);

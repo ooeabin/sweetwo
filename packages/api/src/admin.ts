@@ -426,6 +426,8 @@ export type AppConfigRow = {
   maintenance_starts_at: string | null;
   maintenance_ends_at: string | null;
   maintenance_message: string | null;
+  /** 지금 최소 지원 버전보다 낮은 기기 수(90일 안에 켠 기기). 읽기만 */
+  below_min?: { desktop: number; ios: number; android: number };
 };
 export async function fetchAdminAppConfig(): Promise<AppConfigRow> {
   const { data, error } = await supabase().rpc('admin_app_config');

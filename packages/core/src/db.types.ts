@@ -321,6 +321,31 @@ export type Database = {
         }
         Relationships: []
       }
+      app_device: {
+        Row: {
+          app_version: string
+          install_id: string
+          last_seen_at: string
+          platform: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          app_version: string
+          install_id: string
+          last_seen_at?: string
+          platform: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string
+          install_id?: string
+          last_seen_at?: string
+          platform?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_user: {
         Row: {
           adult_confirmed_at: string | null
@@ -3017,6 +3042,10 @@ export type Database = {
         Args: { d: string; day: number; last: boolean }
         Returns: string
       }
+      note_device: {
+        Args: { p_install: string; p_platform: string; p_version: string }
+        Returns: undefined
+      }
       note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
       note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
@@ -3116,6 +3145,7 @@ export type Database = {
           version: string
         }[]
       }
+      purge_app_devices: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -3296,6 +3326,7 @@ export type Database = {
       undo_goal_move: { Args: { p_id: string }; Returns: undefined }
       unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
       unregister_push_device: { Args: { p_token: string }; Returns: undefined }
+      version_below: { Args: { p_min: string; p_version: string }; Returns: boolean }
       weekly_mail_body: {
         Args: { p_actor: string; p_receiver: string; p_today: string }
         Returns: {

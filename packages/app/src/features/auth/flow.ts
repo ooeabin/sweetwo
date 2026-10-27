@@ -1,4 +1,4 @@
-import { fetchLoginState, noteLogin } from '@sweetwo/api';
+import { fetchLoginState, noteDevice, noteLogin } from '@sweetwo/api';
 import type { AuthProvider } from '@sweetwo/core';
 import { track } from '../../shared/analytics';
 import { copy } from './copy';
@@ -53,6 +53,11 @@ export async function routeAfterLogin(
   if (s.state === 'deletion_requested') return { to: paths.restore };
   // existing: 다른 기기에 로그인돼 있으면 서버가 ‘새 기기에서 로그인했어요’ 알림·메일(15 A-08 4번)
   void noteLogin().catch(() => undefined);
+  // 앱 기기 기록(AD-16). 웹(개발·e2e)은 기록 안 함
+  const b = session.bridge;
+  const pf = session.platform;
+  if (b && pf !== 'web' && /^\d+\.\d+\.\d+$/.test(b.appVersion))
+    void noteDevice(prefs.installId(), pf, b.appVersion).catch(() => undefined);
   if (session.bridge) {
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };
