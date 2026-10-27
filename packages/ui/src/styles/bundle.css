@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (cf7d478). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e5f42f9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1144,7 +1144,7 @@ a.hg-btn { text-decoration: none; }
 .hg-appside .hg-iconbtn--dot::after { top: 9px; right: 10px; }
 /* 홈 인사 카드(hg-today): 날짜 + 인사(작게) + 큰 숫자 하나 + 진행 막대 + 버튼 */
 .hg-today { padding: var(--space-8) var(--space-8) 0; }
-.hg-today__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-2xl); background: var(--surface); display: flex; flex-direction: column; gap: var(--space-4); }
+.hg-today__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-2xl); background: var(--surface); box-shadow: var(--shadow-1); display: flex; flex-direction: column; gap: var(--space-4); }
 .hg-today__row { display: flex; align-items: flex-end; gap: var(--space-4); }
 .hg-today__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 .hg-today__date { font: 400 13px/18px var(--font-sans); color: var(--stone); }
@@ -1171,9 +1171,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 /* 회색 바탕 위 맨 바깥 카드: 테두리 없는 흰 카드. 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: transparent; }
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: transparent; box-shadow: var(--shadow-1); }
 .hg-frame .hg-card--fill:not(:is(.hg-card, .hg-list, .hg-checklist, .hg-sheet, .hg-modal) *), .hg-frame .hg-stat:not(:is(.hg-card, .hg-list, .hg-sheet, .hg-modal) *) { background: var(--surface); }
-.hg-frame .hg-banner--info { background: var(--surface); }
+.hg-frame .hg-banner--info { background: var(--surface); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
