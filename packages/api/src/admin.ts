@@ -296,6 +296,11 @@ export async function fetchAdminNotices(): Promise<Notice[]> {
   fail(error);
   return data ?? [];
 }
+/** 약관 개정·장애 공지를 이메일로도(초안·승인 대기만) */
+export async function adminSetNoticeEmail(id: string, email: boolean) {
+  const { error } = await supabase().rpc('admin_set_notice_email', { p_id: id, p_email: email });
+  fail(error);
+}
 export async function adminSaveNotice(n: {
   id: string | null;
   kind: string;

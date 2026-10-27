@@ -1703,10 +1703,12 @@ export type Database = {
           body: string
           created_at: string
           created_by: string | null
+          email: boolean
           ends_at: string
           id: string
           importance: string
           kind: string
+          mailed_at: string | null
           platforms: string[]
           published_at: string | null
           starts_at: string
@@ -1718,10 +1720,12 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          email?: boolean
           ends_at: string
           id?: string
           importance?: string
           kind?: string
+          mailed_at?: string | null
           platforms?: string[]
           published_at?: string | null
           starts_at: string
@@ -1732,10 +1736,12 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          email?: boolean
           ends_at?: string
           id?: string
           importance?: string
           kind?: string
+          mailed_at?: string | null
           platforms?: string[]
           published_at?: string | null
           starts_at?: string
@@ -2431,10 +2437,12 @@ export type Database = {
           body: string
           created_at: string
           created_by: string | null
+          email: boolean
           ends_at: string
           id: string
           importance: string
           kind: string
+          mailed_at: string | null
           platforms: string[]
           published_at: string | null
           starts_at: string
@@ -2560,6 +2568,10 @@ export type Database = {
       }
       admin_set_lock: {
         Args: { p_email: string; p_locked: boolean }
+        Returns: undefined
+      }
+      admin_set_notice_email: {
+        Args: { p_email: boolean; p_id: string }
         Returns: undefined
       }
       admin_terms_versions: {
@@ -3161,6 +3173,7 @@ export type Database = {
         Args: { p_today?: string }
         Returns: number
       }
+      send_notice_mails: { Args: { p_now?: string }; Returns: number }
       send_weekly_summary: { Args: { p_today?: string }; Returns: number }
       set_avatar: { Args: { p_path?: string }; Returns: undefined }
       set_checklist_done: {

@@ -436,6 +436,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 어드민 잠금, 열람 기간 끝 | 매일 04:50, 매시 5분 | `50 19 * * *`, `5 * * * *` | `lock_idle_admins()`, `run_access_expiry()` |
 | 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
 | 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
+| 공지 메일(`send-notice-mails`) | 5분마다 | `*/5 * * * *` | `send_notice_mails()` |
 | 메일 깨우기(`kick-mail`): 보낼 메일이 있으면 pg_net으로 `send-mail` | 매분 | `* * * * *` | `kick_mail()` |
 | 공휴일 받기(`kick-holidays`): pg_net으로 Edge Function `fetch-holidays` → 특일 정보 API 올해·다음 해 → `save_api_holidays`(어드민 날은 안 덮음, 빠진 API 날은 지움) | 월 03:00 | `0 18 * * 0` | `kick_holidays()` |
 
@@ -1075,7 +1076,8 @@ supabase/
 - 콘텐츠: AD-14 `content_version`(확인일 6개월 지나면 ‘재검토’), AD-15 `terms_version`(법률 검토 체크 없으면 `legal_check_required`, 버전별 동의 수, 앱은 승인된 버전만 읽음. 재동의 화면은 다음 단계), AD-19 `loan_rate`(0.01% 단위 정수, 누구나 읽음)·공휴일 직접 추가·지우기
 - 앱 버전·점검(AD-16): `app_config.latest_version_desktop`, `maintenance_starts_at/ends_at/message`. A-01이 점검 시간 안이면 ‘지금 점검 중이에요’ / ‘{시각}에 끝나요’(`fetchLaunchConfig`)
 - AD-02 내려받기(20261107150000 `admin_note_export`): 결과 표 그대로(L0), 사유 필수 + 감사 로그 `download`, 파일 첫 줄에 관리자 ID와 시각
-- 다음 단계(어드민): 공지·장애 고지 메일(SES), 로그인 수단 이전·삭제 대리 접수, 금액 원값 최고 관리자 승인, 최소 지원 버전 미만 기기 수, AD-19 항목 이름 목록
+- 공지 메일(20261107180000): 약관 개정·장애 고지(`notice.kind` terms, incident)만 ‘이메일로도 보내기’(`notice.email`, `admin_set_notice_email`). `send_notice_mails()`(pg_cron `send-notice-mails` 5분마다)가 게시됐고 노출 기간 안이며 아직 안 보낸 공지를 이메일 알림을 켠 사용 중 회원 모두에게 `mail_outbox`로 쌓고(`notice_{kind}`, 메일 상한 밖, 사람마다 한 번) `mailed_at`을 적음. 보내기는 다른 메일과 같은 `send-mail`
+- 다음 단계(어드민): 로그인 수단 이전·삭제 대리 접수, 금액 원값 최고 관리자 승인, 최소 지원 버전 미만 기기 수, AD-19 항목 이름 목록
 - 문서 메뉴(AD-20): 어드민을 배포할 때 저장소 docs/(기획서 docs/spec, 디자인 docs/design과 DESIGN.md, 개발 가이드 docs/DEV\_GUIDE.md)를 함께 빌드해 읽기 전용으로 보여 줌. 어드민에 로그인한 사람 모두 읽기
 
 ## MVP 순서
