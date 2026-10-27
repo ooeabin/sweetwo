@@ -244,6 +244,8 @@ export const ops = {
     kind: '종류',
     importance: '중요도',
     platforms: '대상 플랫폼',
+    email: '이메일로도 보내기',
+    emailHelp: '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
   }, // [확인 필요]
   saveDraft: '초안 저장', // [확인 필요]
   requestApproval: '승인 요청',

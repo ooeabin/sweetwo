@@ -360,7 +360,13 @@ async function mock(
             decided_by: null,
             decided_at: null,
           });
-        return json(route, 'n1');
+        return json(route, `n${db.notices.length}`);
+      }
+      case 'admin_set_notice_email': {
+        const b = body();
+        const n = db.notices.find((x) => x.id === b.p_id);
+        if (n) n.email = b.p_email;
+        return json(route, null);
       }
       case 'admin_approvals':
         return json(
@@ -627,6 +633,28 @@ test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저
     p_kind: 'maintenance',
     p_request: true,
     p_starts_at: '2026-10-20T05:00:00.000Z',
+  });
+});
+
+test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 보내기’', async ({ page }) => {
+  const db = await mock(page, { roles: ['ops'] });
+  await page.goto('/notices');
+  await page.getByRole('button', { name: '새 공지' }).click();
+  const form = page.getByRole('region', { name: '새 공지' });
+  await expect(form.getByRole('switch', { name: '이메일로도 보내기' })).toHaveCount(0);
+  await form.getByLabel('종류').selectOption('terms');
+  await form.getByLabel('제목').fill('이용약관이 바뀌어요');
+  await form.getByLabel('시작', { exact: true }).fill('2026-10-20T10:00');
+  await form.getByLabel('끝', { exact: true }).fill('2026-11-20T10:00');
+  const mail = form.getByRole('switch', { name: '이메일로도 보내기' });
+  await mail.click();
+  await expect(mail).toBeChecked();
+  await axe(page);
+  await form.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByRole('row', { name: /이용약관이 바뀌어요/ })).toContainText('승인 대기');
+  expect(db.rpc.find((r) => r.fn === 'admin_set_notice_email')?.body).toMatchObject({
+    p_id: 'n1',
+    p_email: true,
   });
 });
 

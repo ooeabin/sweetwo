@@ -2,11 +2,12 @@ import {
   AdminError,
   adminEndNotice,
   adminSaveNotice,
+  adminSetNoticeEmail,
   fetchAdminNotices,
   type Notice,
 } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
-import { Button, Chip, DataTable } from '@sweetwo/ui';
+import { Button, Chip, DataTable, Toggle } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
@@ -19,7 +20,7 @@ const KINDS = ['info', 'maintenance', 'incident', 'terms'];
 const toIso = (local: string) => (local ? new Date(`${local}:00+09:00`).toISOString() : '');
 
 // AD-10 공지(MVP: 앱 안 공지). 노출 기간·중요도(일반/필독)·대상 플랫폼. 저장은 초안, 게시는 승인 요청 → 최고 관리자 승인.
-// 밤 10시~아침 8시 시작은 저장 불가. 약관 개정·장애 고지 메일 발송은 메일 발송(SES) 연결 뒤.
+// 밤 10시~아침 8시 시작은 저장 불가. 약관 개정·장애 공지는 ‘이메일로도 보내기’: 게시 + 노출 시작 때 모든 회원에게 한 번(상한 밖, 서버 send_notice_mails).
 export function AD10Notices() {
   const me = useAdmin();
   const canEdit = me.roles.includes('ops');
@@ -99,6 +100,8 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
   );
   const [starts, setStarts] = useState(local(n?.starts_at));
   const [ends, setEnds] = useState(local(n?.ends_at));
+  const [email, setEmail] = useState(n?.email ?? false);
+  const mailable = kind === 'terms' || kind === 'incident';
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const ready = !!title.trim() && !!starts && !!ends && ends > starts && platforms.length > 0;
@@ -106,7 +109,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
     setBusy(true);
     setMsg(null);
     try {
-      await adminSaveNotice({
+      const id = await adminSaveNotice({
         id: n?.id ?? null,
         kind,
         title,
@@ -117,6 +120,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
         endsAt: toIso(ends),
         request,
       });
+      if (mailable || n?.email) await adminSetNoticeEmail(id, mailable && email);
       setMsg(request ? ops.requestedApproval : ops.saved);
       onDone();
     } catch (e) {
@@ -165,6 +169,15 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
           onChange={(e) => setBody(e.target.value)}
         />
       </label>
+      {mailable && (
+        <Toggle
+          label={ops.field.email}
+          help={ops.field.emailHelp}
+          checked={email}
+          disabled={!draft}
+          onChange={setEmail}
+        />
+      )}
       <div
         className="hg-row"
         style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
