@@ -133,7 +133,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
 
   await page.goto('/calendar/list');
   const bell = page
-    .locator(narrow ? '.hg-frame__mhead' : '.hg-topnav')
+    .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
     .getByRole('button', { name: '알림', exact: true });
   await expect(bell).toHaveClass(/hg-iconbtn--dot/);
   await bell.click();
@@ -194,7 +194,7 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
   );
   await page.goto('/calendar/list');
   await page
-    .locator(info.project.name === 'narrow' ? '.hg-frame__mhead' : '.hg-topnav')
+    .locator(info.project.name === 'narrow' ? '.hg-frame__mhead' : '.hg-appside')
     .getByRole('button', { name: '금액 가리기' })
     .click();
   await page.goto('/notifications');

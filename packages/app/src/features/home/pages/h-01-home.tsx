@@ -133,6 +133,14 @@ export function H01Home() {
       : top && pct !== null
         ? copy.hiGoal(myName, top.name, pct)
         : copy.hi(myName);
+  // 인사 카드의 큰 숫자 하나(19 앱 기본 틀 7번): 체크가 남았으면 한 개수/전체, 다 했으면 1순위 목표 %
+  const total = list?.pay_check_line.length ?? 0;
+  const focus =
+    left > 0 && total > 0
+      ? { value: `${total - left}/${total}`, percent: ((total - left) * 100) / total }
+      : top && pct !== null
+        ? { value: `${pct}%`, percent: pct }
+        : undefined;
 
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
@@ -271,6 +279,7 @@ export function H01Home() {
       today={{
         date: formatDateWeekday(today),
         title,
+        focus,
         actions: (
           <>
             <AddMenu />
