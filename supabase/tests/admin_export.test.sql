@@ -12,8 +12,8 @@ select public.admin_me();
 select throws_ok($$ select public.admin_note_export('AD-02', ' ', 3) $$, '22023', 'reason_required', '사유가 없으면 안 됨');
 select is(public.admin_note_export('AD-02', '문의 A-10234 확인', 3), 'cs01@sweetwo.kr', '파일에 적을 관리자 ID');
 reset role;
-select results_eq($$ select action, screen, reason, (detail->>'rows')::int from public.admin_audit where action = 'export' $$,
-  $$ values ('export', 'AD-02', '문의 A-10234 확인', 3) $$, '감사 로그');
+select results_eq($$ select action, screen, reason, (detail->>'rows')::int from public.admin_audit where action = 'download' $$,
+  $$ values ('download', 'AD-02', '문의 A-10234 확인', 3) $$, '감사 로그');
 
 select * from finish();
 rollback;

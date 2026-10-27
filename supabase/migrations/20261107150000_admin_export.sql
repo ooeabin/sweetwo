@@ -16,7 +16,7 @@ begin
   if p_screen not in ('AD-02') then
     raise exception 'bad_screen' using errcode = '22023';
   end if;
-  perform public.admin_log(a, 'export', p_screen, null, left(btrim(p_reason), 200),
+  perform public.admin_log(a, 'download', p_screen, null, left(btrim(p_reason), 200),
     jsonb_build_object('rows', greatest(coalesce(p_rows, 0), 0)));
   return a.email;
 end;
