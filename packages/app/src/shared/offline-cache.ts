@@ -43,6 +43,12 @@ export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefin
       useCacheInfo.getState().set(null);
     }
   });
+  // 부부 공간이 바뀌면(연결 해제 확정, 합류, 계정 삭제 뒤 새 공간) 예전 공간 데이터를 기기에서 지움(31 보안·개인정보 4장).
+  // 그 뒤 저장에는 바뀐 다음에 받은 것만 넣음
+  let spaceId: string | null | undefined = (
+    qc.getQueryData<{ space_id?: string | null }>(['me']) ?? undefined
+  )?.space_id;
+  let changedAt = 0;
   const save = () => {
     timer = null;
     if (paused) return;
@@ -50,7 +56,8 @@ export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefin
       shouldDehydrateQuery: (q) =>
         q.state.status === 'success' &&
         !SKIP.has(String(q.queryKey[0])) &&
-        q.state.data !== undefined,
+        q.state.data !== undefined &&
+        q.state.dataUpdatedAt >= changedAt,
     });
     if (!state.queries.length) return;
     const at = new Date().toISOString();
@@ -60,6 +67,19 @@ export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefin
   };
   const off = qc.getQueryCache().subscribe((e) => {
     if (e.type !== 'updated' || e.action.type !== 'success') return;
+    if (e.query.queryKey[0] === 'me') {
+      const next = (e.query.state.data as { space_id?: string | null } | null | undefined)
+        ?.space_id;
+      if (spaceId !== undefined && next !== undefined && next !== spaceId) {
+        changedAt = e.query.state.dataUpdatedAt;
+        void cache.clear();
+        // 예전 공간 화면 데이터는 메모리에서도 빼고 새로 받음
+        qc.removeQueries({
+          predicate: (q) => q.state.dataUpdatedAt < changedAt && q.queryKey[0] !== 'me',
+        });
+      }
+      spaceId = next;
+    }
     timer ??= setTimeout(save, 3000);
   });
   return () => {
