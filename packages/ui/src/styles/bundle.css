@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (dbce924). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e3c2ead). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -123,7 +123,11 @@
 .hg-badge--warn { background: var(--ink); color: var(--on-ink); }
 
 /* TransferRow: 월급 플랜 이체 줄 */
-.hg-transfer { display: grid; grid-template-columns: 24px 1fr auto; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--hairline-soft); }
+/* 체크 줄(카카오뱅크 체크리스트 느낌): 왼쪽 이름·보조 줄, 오른쪽 금액 → 체크 원. 한 줄은 취소선 + stone */
+.hg-transfer { display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--hairline-soft); }
+.hg-transfer > .hg-check { order: 2; width: 28px; height: 28px; }
+.hg-transfer > .hg-transfer__amount { order: 1; }
+.hg-transfer.is-done .hg-transfer__label { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .hg-check { width: 24px; height: 24px; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); display: grid; place-items: center; }
 .hg-check.is-on { background: var(--success); border-color: var(--success); }
 .hg-check.is-on::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--on-success); border-bottom: 2px solid var(--on-success); transform: rotate(-45deg) translate(1px, -1px); }
@@ -583,6 +587,12 @@
 
 /* SectionHeader */
 .hg-sechead { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; }
+/* Ring: 묶음 진행 원(카카오뱅크 체크리스트 머리 “2/4”). 둘레를 한 만큼 ink로 채움 */
+.hg-ring { position: relative; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ink); }
+.hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--ink) calc(var(--p, 0) * 1%), var(--surface-alt) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
+/* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
+.hg-checkgroup { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
+.hg-checkgroup .hg-checklist__list > :last-child { border-bottom: 0; }
 .hg-sechead__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.2px; }
 .hg-sechead__count { font: 600 18px/26px var(--font-sans); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: 600 14px/20px var(--font-sans); color: var(--slate); text-decoration: none; }
@@ -1108,13 +1118,15 @@ a.hg-btn { text-decoration: none; }
 .hg-meter--family { --c: var(--chart-family); --t: var(--family); }
 .hg-meter__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); }
 .hg-meter__name { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.hg-meter__head > .hg-lead { align-self: center; }
+.hg-meter__head > .hg-lead { align-self: center; width: 48px; height: 48px; }
+.hg-meter__head > .hg-lead img { width: 42px; height: 42px; }
 .hg-meter__name b { font: 600 16px/24px var(--font-sans); }
 .hg-meter__name > span { font: 400 13px/18px var(--font-sans); color: var(--stone); }  /* 금액 줄만(이름 옆 Badge는 제 색) */
-.hg-meter__pct { font: 600 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
+.hg-meter__pct { font: 700 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
 .hg-meter__pct small { font-size: 15px; }
-.hg-meter__segs { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 26px; }
-.hg-meter__segs i { height: 14px; border-radius: var(--radius-xs); background: var(--t); }
+/* 쌓이는 칸(카카오뱅크 26주적금 느낌): 10% 칸 10개를 두 줄로, 아래 줄(0~50%)부터 차서 위 줄로 올라감 */
+.hg-meter__segs { position: relative; display: flex; flex-wrap: wrap-reverse; gap: 6px; margin-top: var(--space-5); }
+.hg-meter__segs i { flex: 0 0 calc((100% - 24px) / 5); height: 22px; border-radius: var(--radius-sm); background: var(--t); }
 .hg-meter__segs i.is-on { background: var(--c); }
 .hg-meter__segs i.is-part { background: linear-gradient(90deg, var(--c) calc(var(--f) * 100%), var(--t) 0); }
 .hg-meter__pace { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }

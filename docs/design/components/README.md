@@ -52,6 +52,7 @@
 | [PageHeader](PageHeader.md) | Layout | 상세 화면 머리 |
 | [QuestionLayout](QuestionLayout.md) | Layout | 한 화면 한 질문 틀 |
 | [SectionHeader](SectionHeader.md) | Layout | 본문 안 묶음 제목 |
+| [Ring](Ring.md) | Data | 묶음 진행 원(“2/4”) |
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |
 | [ListRow](ListRow.md) | Lists | 목록 한 줄 |
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |

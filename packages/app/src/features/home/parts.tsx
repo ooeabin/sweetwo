@@ -8,6 +8,7 @@ import {
   Lead,
   ListRow,
   Meter,
+  Ring,
   SectionHeader,
 } from '@sweetwo/ui';
 import { useState } from 'react';
@@ -185,6 +186,7 @@ export function SalaryCard({
     <section className="hg-stack" aria-label={list.label}>
       <SectionHeader
         title={list.label}
+        lead={<Ring done={done} total={total} label={copy.progress(total, done)} />}
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
       <div className="hg-card hg-stack">
