@@ -452,6 +452,44 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   expect(db.assets.at(-1)?.goal_id ?? null).toBeNull();
 });
 
+test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기본 항목은 빠지고, 새 칩은 따르는 항목 질문)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.kindNames = [
+    {
+      id: 'k1',
+      grp: 'deposit',
+      base: 'term_deposit',
+      name: '정기예금',
+      added: false,
+      hidden: true,
+    },
+    {
+      id: 'k2',
+      grp: 'deposit',
+      base: 'policy_saving',
+      name: '청년도약계좌',
+      added: true,
+      hidden: false,
+    },
+  ];
+  await page.goto('/assets/items');
+  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await page.getByRole('button', { name: '예금·적금' }).click();
+  const chips = page.getByRole('group', { name: '예금·적금' });
+  await expect(chips.getByRole('button')).toHaveText([
+    '적금',
+    '정책형 적금',
+    '청년도약계좌',
+    '기타(직접 입력)',
+  ]);
+  await chips.getByRole('button', { name: '청년도약계좌' }).click();
+  await expect(page.getByLabel('이름을 정해주세요')).toHaveValue('청년도약계좌');
+});
+
 test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
   page,
 }) => {

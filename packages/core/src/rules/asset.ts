@@ -6,6 +6,8 @@ export type AssetSide = 'asset' | 'debt';
 export interface AssetKind {
   key: string;
   name: string;
+  /** 어드민이 더한 칩(AD-19)만. key는 따르는 기본 항목 */
+  id?: string;
 }
 export interface AssetGroup {
   key: string;
@@ -153,6 +155,38 @@ export const assetGroups: AssetGroup[] = [
 ];
 
 export const assetGroupsOf = (side: AssetSide) => assetGroups.filter((g) => g.side === side);
+
+/** AD-19 항목 이름 목록으로 고칠 수 있는 묶음 */
+export const KIND_NAME_GROUPS = ['deposit', 'subscription', 'invest', 'pension'];
+export interface KindNameRow {
+  id: string;
+  grp: string;
+  base: string;
+  name: string;
+  added: boolean;
+  hidden: boolean;
+}
+/**
+ * AD-19 항목 이름 목록을 기본 칩에 입힘(09 6-2): 기본 항목은 이름 바꾸기·숨기기, 새 칩은
+ * 기본 항목들 다음에(들어온 순서), ‘기타(직접 입력)’는 늘 마지막. 그룹에 없는 항목을 따르는 줄은 버림.
+ */
+export function withKindNames(groups: AssetGroup[], rows: KindNameRow[]): AssetGroup[] {
+  return groups.map((g) => {
+    if (!KIND_NAME_GROUPS.includes(g.key)) return g;
+    const mine = rows.filter((r) => r.grp === g.key);
+    if (!mine.length) return g;
+    const base = g.kinds.filter((x) => x.key !== 'other');
+    const kinds = base.flatMap((x) => {
+      const o = mine.find((r) => !r.added && r.base === x.key);
+      if (o?.hidden) return [];
+      return [o ? { ...x, name: o.name } : x];
+    });
+    const extra = mine
+      .filter((r) => r.added && !r.hidden && base.some((x) => x.key === r.base))
+      .map((r) => ({ key: r.base, name: r.name, id: r.id }));
+    return { ...g, kinds: [...kinds, ...extra, ...g.kinds.filter((x) => x.key === 'other')] };
+  });
+}
 export const assetGroup = (key: string) => assetGroups.find((g) => g.key === key);
 /** 원금을 넣을 수 있는 묶음(투자·부동산) */
 export const hasPrincipal = (grp: string) => grp === 'invest' || grp === 'real_estate';

@@ -639,6 +639,43 @@ export type Database = {
           },
         ]
       }
+      asset_kind_name: {
+        Row: {
+          added: boolean
+          base: string
+          created_at: string
+          grp: string
+          hidden: boolean
+          id: string
+          name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          added: boolean
+          base: string
+          created_at?: string
+          grp: string
+          hidden?: boolean
+          id?: string
+          name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          added?: boolean
+          base?: string
+          created_at?: string
+          grp?: string
+          hidden?: boolean
+          id?: string
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       care_day: {
         Row: {
           alerts: number[]
@@ -2434,6 +2471,7 @@ export type Database = {
         Args: { p_decision: string; p_id: string }
         Returns: undefined
       }
+      admin_delete_kind_name: { Args: { p_id: string }; Returns: undefined }
       admin_end_notice: { Args: { p_id: string }; Returns: undefined }
       admin_inquiries: {
         Args: { p_status: Database["public"]["Enums"]["inquiry_status"] }
@@ -2569,6 +2607,17 @@ export type Database = {
           by_email: string
           note: string
         }[]
+      }
+      admin_save_kind_name: {
+        Args: {
+          p_added: boolean
+          p_base: string
+          p_grp: string
+          p_hidden: boolean
+          p_id?: string
+          p_name: string
+        }
+        Returns: string
       }
       admin_save_notice: {
         Args: {

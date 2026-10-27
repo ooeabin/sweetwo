@@ -2,17 +2,21 @@ import {
   AdminError,
   adminAddContentVersion,
   adminAddTermsVersion,
+  adminDeleteKindName,
+  adminSaveKindName,
   adminSetHoliday,
   adminSetLoanRate,
   fetchContentVersions,
+  fetchAssetKindNames,
   fetchHolidays,
   fetchLoanRates,
   fetchTermsVersions,
   type ContentVersion,
+  type KindName,
   type LoanRate,
   type TermsVersionRow,
 } from '@sweetwo/api';
-import { addDays, daysBetween, todayKst } from '@sweetwo/core';
+import { KIND_NAME_GROUPS, addDays, assetGroup, daysBetween, todayKst } from '@sweetwo/core';
 import { Badge, Button, DataTable, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -23,7 +27,7 @@ import { useAdmin } from '../gate';
 type Tab = 'guides' | 'terms' | 'data';
 
 // 콘텐츠: AD-14 가이드·도움말 버전(본문은 저장소 마크다운, 확인일 6개월 지나면 재검토), AD-15 약관·처리방침 버전
-// (법률 검토 체크 없으면 승인 요청 불가, 버전별 동의 수), AD-19 계산·기준 데이터(대출 평균 금리, 공휴일).
+// (법률 검토 체크 없으면 승인 요청 불가, 버전별 동의 수), AD-19 계산·기준 데이터(대출 평균 금리, 공휴일, 항목 이름 목록).
 // 운영이 쓰고, 약관 버전은 최고 관리자 승인.
 export function AD14Content() {
   const me = useAdmin();
@@ -390,7 +394,196 @@ function RefData({ canEdit }: { canEdit: boolean }) {
           </section>
         )}
       </div>
+      <KindNames canEdit={canEdit} />
     </div>
+  );
+}
+
+// AD-19 항목 이름 목록(09 6-2): 예금·적금, 청약, 투자, 연금의 세부 항목 칩. 기본 항목은 이름 바꾸기·숨기기,
+// 새 칩은 기본 항목 하나를 따름(같은 질문). ‘기타(직접 입력)’는 고치지 않음. 저장하면 바로 앱에 반영 + 감사 로그.
+type KindRow = { key: string; grp: string; base: string; added: boolean; row?: KindName };
+function KindNames({ canEdit }: { canEdit: boolean }) {
+  const q = useQuery({ queryKey: ['admin', 'kind-names'], queryFn: fetchAssetKindNames });
+  const [edit, setEdit] = useState<Record<string, { name?: string; hidden?: boolean }>>({});
+  const [add, setAdd] = useState({ grp: 'deposit', base: 'term_deposit', name: '' });
+  const [msg, setMsg] = useState<string | null>(null);
+  const rows = q.data ?? [];
+  const baseKinds = (grp: string) =>
+    (assetGroup(grp)?.kinds ?? []).filter((k) => k.key !== 'other');
+  const baseName = (grp: string, key: string) =>
+    baseKinds(grp).find((k) => k.key === key)?.name ?? key;
+  const list = (grp: string): KindRow[] => [
+    ...baseKinds(grp).map((k) => ({
+      key: `${grp}/${k.key}`,
+      grp,
+      base: k.key,
+      added: false,
+      row: rows.find((r) => r.grp === grp && r.base === k.key && !r.added),
+    })),
+    ...rows
+      .filter((r) => r.grp === grp && r.added)
+      .map((r) => ({ key: r.id, grp, base: r.base, added: true, row: r })),
+  ];
+  const run = (p: Promise<unknown>) =>
+    p.then(
+      () => {
+        setMsg(null);
+        void q.refetch();
+      },
+      () => setMsg(copy.failed),
+    );
+  const nameOf = (x: KindRow) =>
+    edit[x.key]?.name ?? x.row?.name ?? (x.added ? '' : baseName(x.grp, x.base));
+  const hiddenOf = (x: KindRow) => edit[x.key]?.hidden ?? x.row?.hidden ?? false;
+  const save = (x: KindRow) =>
+    run(
+      adminSaveKindName({
+        id: x.row?.id,
+        grp: x.grp,
+        base: x.base,
+        name: nameOf(x),
+        added: x.added,
+        hidden: hiddenOf(x),
+      }).then(() =>
+        setEdit((e) => Object.fromEntries(Object.entries(e).filter(([k]) => k !== x.key))),
+      ),
+    );
+  return (
+    <section className="hg-stack" aria-label={ops.kindTitle}>
+      <span className="hg-card__label">{ops.kindTitle}</span>
+      <p className="hg-help">{ops.kindHelp}</p>
+      {msg && <p className="hg-help is-error">{msg}</p>}
+      {KIND_NAME_GROUPS.map((grp) => (
+        <DataTable<KindRow>
+          key={grp}
+          label={assetGroup(grp)?.name ?? grp}
+          rows={list(grp)}
+          rowKey={(x) => x.key}
+          columns={[
+            {
+              key: 'name',
+              label: ops.kindCols.name,
+              render: (x) =>
+                canEdit ? (
+                  <input
+                    className="hg-input"
+                    aria-label={`${assetGroup(grp)?.name ?? grp} ${nameOf(x) || ops.kindCols.name}`}
+                    value={nameOf(x)}
+                    maxLength={20}
+                    onChange={(e) =>
+                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], name: e.target.value } }))
+                    }
+                  />
+                ) : (
+                  nameOf(x)
+                ),
+            },
+            {
+              key: 'base',
+              label: ops.kindCols.base,
+              render: (x) => (x.added ? baseName(grp, x.base) : ops.kindDefault),
+            },
+            {
+              key: 'hidden',
+              label: ops.kindCols.hidden,
+              render: (x) => (
+                <input
+                  type="checkbox"
+                  aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
+                  checked={hiddenOf(x)}
+                  disabled={!canEdit}
+                  onChange={(e) =>
+                    setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
+                  }
+                />
+              ),
+            },
+            {
+              key: 'act',
+              label: '',
+              render: (x) =>
+                canEdit && (
+                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={!nameOf(x).trim() || edit[x.key] === undefined}
+                      onClick={() => void save(x)}
+                    >
+                      {ops.save}
+                    </Button>
+                    {x.row && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => void run(adminDeleteKindName(x.row?.id ?? ''))}
+                      >
+                        {x.added ? ops.remove : ops.kindReset}
+                      </Button>
+                    )}
+                  </span>
+                ),
+            },
+          ]}
+        />
+      ))}
+      {canEdit && (
+        <section className="hg-card hg-stack" aria-label={ops.kindAdd} style={{ maxWidth: 520 }}>
+          <label className="hg-field">
+            <span className="hg-field__label">{ops.versionCols.kind}</span>
+            <select
+              className="hg-input"
+              value={add.grp}
+              onChange={(e) =>
+                setAdd({
+                  ...add,
+                  grp: e.target.value,
+                  base: baseKinds(e.target.value)[0]?.key ?? '',
+                })
+              }
+            >
+              {KIND_NAME_GROUPS.map((g) => (
+                <option key={g} value={g}>
+                  {assetGroup(g)?.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="hg-field">
+            <span className="hg-field__label">{ops.kindCols.base}</span>
+            <select
+              className="hg-input"
+              value={add.base}
+              onChange={(e) => setAdd({ ...add, base: e.target.value })}
+            >
+              {baseKinds(add.grp).map((k) => (
+                <option key={k.key} value={k.key}>
+                  {k.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Input
+            label={ops.kindCols.name}
+            value={add.name}
+            onChange={(v) => setAdd({ ...add, name: v })}
+          />
+          <Button
+            variant="primary"
+            disabled={!add.name.trim() || add.name.trim().length > 20}
+            onClick={() =>
+              void run(
+                adminSaveKindName({ ...add, added: true, hidden: false }).then(() =>
+                  setAdd({ ...add, name: '' }),
+                ),
+              )
+            }
+          >
+            {ops.kindAdd}
+          </Button>
+        </section>
+      )}
+    </section>
   );
 }
 

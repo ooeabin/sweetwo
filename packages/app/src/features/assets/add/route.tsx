@@ -1,7 +1,6 @@
 import { insertAsset } from '@sweetwo/api';
 import {
   assetGroup,
-  assetGroupsOf,
   bands,
   isHighInterestKind,
   quickChips,
@@ -22,7 +21,7 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useAssetsData, useRefreshAssets } from '../data';
+import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetSteps, useAssetDraft } from './draft';
 
 const path = (step: string) => `/assets/new/${step}`;
@@ -38,6 +37,7 @@ export function AssetAddRoute() {
   const { draft, set, reset } = useAssetDraft();
   const { masked } = useMask();
   const [name, setName] = useState<string | null>(null);
+  const groups = useAssetGroups(draft.side);
   const [dupOk, setDupOk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rateText, setRateText] = useState<string | null>(null);
@@ -105,8 +105,7 @@ export function AssetAddRoute() {
   };
 
   if (step === 'kind') {
-    const groups = assetGroupsOf(draft.side);
-    const g = draft.grp ? assetGroup(draft.grp) : undefined;
+    const g = draft.grp ? groups.find((x) => x.key === draft.grp) : undefined;
     return (
       <QuestionLayout steps={progress} title={copy.addTitle} onBack={back}>
         <Tabs<AssetSide>
@@ -144,8 +143,8 @@ export function AssetAddRoute() {
           >
             {g.kinds.map((k) => (
               <Chip
-                key={k.key}
-                selected={draft.kind === k.key}
+                key={k.id ?? k.key}
+                selected={draft.kind === k.key && (k.key === 'other' || draft.name === k.name)}
                 onClick={() => {
                   setName(null);
                   go({ kind: k.key, name: k.key === 'other' ? '' : k.name });

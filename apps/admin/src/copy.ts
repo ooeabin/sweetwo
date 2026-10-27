@@ -316,6 +316,13 @@ export const ops = {
   } as Record<string, string>,
   loanCols: { kind: '유형', rate: '연 금리', applied: '적용일' },
   holidayTitle: '공휴일', // [확인 필요]
+  // AD-19 항목 이름 목록 [확인 필요]
+  kindTitle: '항목 이름 목록',
+  kindHelp: '자산 추가 화면의 세부 항목 칩이에요. 새 칩은 고른 항목과 같은 질문을 해요. 앱 배포 없이 바로 바뀌어요',
+  kindCols: { name: '이름', base: '따르는 항목', hidden: '숨김' },
+  kindDefault: '기본 항목',
+  kindAdd: '칩 추가',
+  kindReset: '처음대로',
   holidayKinds: { holiday: '공휴일', substitute: '대체공휴일', temporary: '임시공휴일' } as Record<
     string,
     string

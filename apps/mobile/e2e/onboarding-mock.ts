@@ -58,6 +58,7 @@ export interface MemDb {
   goalUses: Record<string, unknown>[];
   /** 공휴일(읽기만) */
   holidays: { date: string; name: string; kind: string }[];
+  kindNames: Record<string, unknown>[];
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
   invites: { code: string; expires_at: string; used_at: string | null }[];
@@ -164,6 +165,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     goalUses: [],
     emergencyMoves: [],
     holidays: [],
+    kindNames: [],
     notifications: [],
     invites: [],
     unlinks: [],
@@ -2139,6 +2141,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
     }
     if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    if (path === '/rest/v1/asset_kind_name' && method === 'GET') return json(route, db.kindNames);
     if (path === '/rest/v1/inquiry' && method === 'GET') return json(route, db.inquiries);
     if (path === '/rest/v1/living_check' && method === 'GET') {
       const plan = url.searchParams.get('plan_id')?.replace(/^eq\./, '');

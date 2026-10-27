@@ -12,6 +12,7 @@ import {
   periodEnabled,
   periodSlice,
   startPeriod,
+  withKindNames,
 } from './asset';
 
 it('분류: 자산 8묶음, 부채 6묶음, 모두 기타(직접 입력)', () => {
@@ -104,4 +105,23 @@ it('첫 주 정리 칩: 묶음과 세부 항목이 분류에 있고, 금리 평�
     4, 6, 2,
   ]);
   expect(avgRate('family_loan')).toBeNull();
+});
+
+it('AD-19 항목 이름 목록: 기본 항목 이름 바꾸기·숨기기, 새 칩은 기본 항목 동작, 기타는 마지막', () => {
+  const groups = withKindNames(assetGroupsOf('asset'), [
+    { id: 'a', grp: 'deposit', base: 'saving', name: '자유적금', added: false, hidden: false },
+    { id: 'b', grp: 'deposit', base: 'term_deposit', name: '정기예금', added: false, hidden: true },
+    { id: 'c', grp: 'deposit', base: 'policy_saving', name: '청년도약계좌', added: true, hidden: false },
+    { id: 'd', grp: 'deposit', base: 'etf', name: '그룹 밖', added: true, hidden: false },
+    { id: 'e', grp: 'cash', base: 'bank', name: '현금성은 안 고침', added: false, hidden: true },
+  ]);
+  const dep = groups.find((g) => g.key === 'deposit');
+  expect(dep?.kinds.map((k) => [k.key, k.name])).toEqual([
+    ['saving', '자유적금'],
+    ['policy_saving', '정책형 적금'],
+    ['policy_saving', '청년도약계좌'],
+    ['other', '기타(직접 입력)'],
+  ]);
+  expect(dep?.kinds[2]?.id).toBe('c');
+  expect(groups.find((g) => g.key === 'cash')).toBe(assetGroup('cash'));
 });
