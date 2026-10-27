@@ -6,7 +6,8 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import { businessDayOnOrBefore, readWon, todayKst } from '@sweetwo/core';
-import { AmountInput, QuestionLayout, SectionHeader, Tabs } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout, Ring, SectionHeader, Tabs } from '@sweetwo/ui';
+import { PersonDot } from '../../../shared/person';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -113,8 +114,23 @@ export function W02Checklist() {
   const people =
     !joint && space.data.couple_state === 'connected' && partner.data
       ? [
-          { value: meId ?? '', label: me.data.nickname ?? '' },
-          { value: partner.data.id, label: partner.data.nickname ?? '' },
+          {
+            value: meId ?? '',
+            label: me.data.nickname ?? '',
+            lead: (
+              <PersonDot name={me.data.nickname ?? ''} starter={meId === space.data.created_by} />
+            ),
+          },
+          {
+            value: partner.data.id,
+            label: partner.data.nickname ?? '',
+            lead: (
+              <PersonDot
+                name={partner.data.nickname ?? ''}
+                starter={partner.data.id === space.data.created_by}
+              />
+            ),
+          },
         ]
       : null;
   if (!list) {
@@ -227,14 +243,24 @@ export function W02Checklist() {
           items={people}
         />
       )}
-      <SectionHeader title={copy.savingGroup} />
-      <div className="hg-checklist__list">
-        {shown.pay_check_line.filter((l) => l.kind === 'saving').map(row)}
-      </div>
-      <SectionHeader title={copy.spendGroup} />
-      <div className="hg-checklist__list">
-        {shown.pay_check_line.filter((l) => l.kind !== 'saving').map(row)}
-      </div>
+      {(
+        [
+          [copy.savingGroup, shown.pay_check_line.filter((l) => l.kind === 'saving')],
+          [copy.spendGroup, shown.pay_check_line.filter((l) => l.kind !== 'saving')],
+        ] as const
+      ).map(([title, ls]) => {
+        // 묶음 카드(카카오뱅크 체크리스트처럼 머리에 한 개수/전체 원)
+        const n = ls.filter((l) => l.state !== 'wait').length;
+        return (
+          <section key={title} className="hg-checkgroup" aria-label={title}>
+            <SectionHeader
+              title={title}
+              lead={<Ring done={n} total={ls.length} label={copy.progress(ls.length, n)} />}
+            />
+            <div className="hg-checklist__list">{ls.map(row)}</div>
+          </section>
+        );
+      })}
       <button
         type="button"
         className="hg-btn hg-btn--link"

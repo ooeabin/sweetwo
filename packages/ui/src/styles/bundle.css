@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (dbce924). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (89ff3b0). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -123,7 +123,11 @@
 .hg-badge--warn { background: var(--ink); color: var(--on-ink); }
 
 /* TransferRow: 월급 플랜 이체 줄 */
-.hg-transfer { display: grid; grid-template-columns: 24px 1fr auto; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--hairline-soft); }
+/* 체크 줄(카카오뱅크 체크리스트 느낌): 왼쪽 이름·보조 줄, 오른쪽 금액 → 체크 원. 한 줄은 취소선 + stone */
+.hg-transfer { display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--hairline-soft); }
+.hg-transfer > .hg-check { order: 2; width: 28px; height: 28px; }
+.hg-transfer > .hg-transfer__amount { order: 1; }
+.hg-transfer.is-done .hg-transfer__label { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .hg-check { width: 24px; height: 24px; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); display: grid; place-items: center; }
 .hg-check.is-on { background: var(--success); border-color: var(--success); }
 .hg-check.is-on::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--on-success); border-bottom: 2px solid var(--on-success); transform: rotate(-45deg) translate(1px, -1px); }
@@ -294,14 +298,27 @@
 .hg-radio.is-on::after { content: ""; width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--ink); }
 .hg-option { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; font: 400 16px/24px var(--font-sans); color: var(--ink); }
 .hg-option.is-disabled { color: var(--muted); cursor: not-allowed; }
-.hg-option--card { box-sizing: border-box; width: 100%; padding: 0 var(--space-4); min-height: 56px; border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
-.hg-option--card.is-on { border: 2px solid var(--ink); }
+.hg-option--card { box-sizing: border-box; width: 100%; justify-content: space-between; padding: var(--space-4) var(--space-5); min-height: 64px; border: 2px solid transparent; border-radius: var(--radius-xl); background: var(--surface-alt); transition: background var(--dur-fast), border-color var(--dur-fast); }
+.hg-option--card.is-on { border-color: var(--ink); background: var(--surface); }
+.hg-option__body { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hg-option__label { font-weight: 600; }
+.hg-option__mark { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box; border-radius: var(--radius-full); border: 2px solid var(--border-control); color: transparent; }
+.hg-option--card.is-on .hg-option__mark { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
+.hg-option--card.is-disabled .hg-option__mark { border-color: var(--hairline); }
+@media (prefers-reduced-motion: reduce) { .hg-option--card { transition: none; } }
 
 /* Banner */
 .hg-banner { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font: 400 14px/21px var(--font-sans); }
 .hg-banner > span { flex: 1; min-width: 0; }
 .hg-banner--info { background: var(--surface-alt); color: var(--ink); }
 .hg-banner .hg-btn--link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.hg-banner--todo { gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: 600 15px/22px var(--font-sans); }
+.hg-banner--todo .hg-btn { flex: none; }
+.hg-banner > .hg-banner__icon { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
+.hg-banner--line { padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-radius: var(--radius-xl); background: var(--surface-alt); color: var(--ink); }
+.hg-banner--line > .hg-ico { flex: none; color: var(--slate); }
+.hg-banner__one { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+@media (max-width: 767px) { .hg-banner--todo { gap: var(--space-3); padding: var(--space-4); } }
 .hg-conflict { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); width: 100%; padding: var(--space-4) var(--space-5); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); }
 .hg-conflict > * { margin: 0; }
 .hg-conflict__title { font: 600 16px/24px var(--font-sans); color: var(--ink); }
@@ -583,6 +600,30 @@
 
 /* SectionHeader */
 .hg-sechead { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; }
+/* Ring: 묶음 진행 원(카카오뱅크 체크리스트 머리 “2/4”). 둘레를 한 만큼 ink로 채움 */
+.hg-ring { position: relative; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ink); }
+.hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--ink) calc(var(--p, 0) * 1%), var(--surface-alt) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
+/* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
+.hg-checkgroup { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
+.hg-checkgroup .hg-checklist__list > :last-child { border-bottom: 0; }
+/* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */
+.hg-person { display: flex; align-items: center; gap: var(--space-3); width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 600 14px/20px var(--font-sans); text-align: left; cursor: pointer; }
+.hg-person:hover { background: var(--surface-alt); }
+.hg-person:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-person__text { flex: 1; min-width: 0; }
+.hg-person > .hg-ico { color: var(--stone); }
+/* WeekStrip: 이번 주 날짜 띠(현대카드 소비 캘린더 느낌). 일~토 7칸, 오늘 검정 원, 일정 있는 날 아래 점 */
+.hg-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: var(--space-3) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-1); }
+.hg-week__day { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ink); }
+.hg-week__day small { font: 400 12px/16px var(--font-sans); color: var(--stone); }
+.hg-week__day b { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-full); font: 600 16px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-week__day.is-holiday small, .hg-week__day.is-holiday b { color: var(--holiday-ink); }
+.hg-week__day.is-past b { color: var(--stone); }
+.hg-week__day.is-today b { background: var(--ink); color: var(--on-ink); }
+.hg-week__day i { width: 5px; height: 5px; border-radius: var(--radius-full); }
+.hg-week__day i.is-on { background: var(--ink); }
+/* 사람 탭(W-01·W-02 찬우·예빈): 이름 앞 작은 Avatar */
+.hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
 .hg-sechead__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.2px; }
 .hg-sechead__count { font: 600 18px/26px var(--font-sans); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: 600 14px/20px var(--font-sans); color: var(--slate); text-decoration: none; }
@@ -1062,6 +1103,12 @@ a.hg-btn { text-decoration: none; }
 .hg-chart__value--lg { font: 600 34px/42px var(--font-sans); letter-spacing: -0.6px; }
 .hg-chart--bleed { max-width: none; padding: 0; gap: 0; overflow: hidden; box-shadow: var(--shadow-1); }
 .hg-chart--bleed .hg-chart__kpi { padding: var(--space-6) var(--space-6) 0; }
+/* 큰 차트 머리(현대카드 자산 요약 느낌): 왼쪽 굵은 이름, 오른쪽 큰 금액 + 그 아래 변화 알약, 보조 줄은 아래 한 줄 */
+.hg-chart--bleed .hg-chart__kpi { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); row-gap: var(--space-1); align-items: baseline; }
+.hg-chart--bleed .hg-chart__label { grid-column: 1; grid-row: 1; font: 700 18px/26px var(--font-sans); color: var(--ink); }
+.hg-chart--bleed .hg-chart__value { grid-column: 2; grid-row: 1; justify-self: end; font: 700 28px/36px var(--font-sans); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+.hg-chart--bleed .hg-chart__delta { grid-column: 2; grid-row: 2; justify-self: end; }
+.hg-chart--bleed .hg-chart__kpi > :not(.hg-chart__label):not(.hg-chart__value):not(.hg-chart__delta) { grid-column: 1 / -1; grid-row: 3; }
 .hg-chart__plot { position: relative; height: 200px; cursor: crosshair; }
 .hg-chart__plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hg-chart--bleed .line, .hg-chart--bleed .line--expected, .hg-chart--bleed .line--lead, .hg-chart--bleed .xhair { vector-effect: non-scaling-stroke; }
@@ -1108,13 +1155,15 @@ a.hg-btn { text-decoration: none; }
 .hg-meter--family { --c: var(--chart-family); --t: var(--family); }
 .hg-meter__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); }
 .hg-meter__name { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.hg-meter__head > .hg-lead { align-self: center; }
+.hg-meter__head > .hg-lead { align-self: center; width: 48px; height: 48px; }
+.hg-meter__head > .hg-lead img { width: 42px; height: 42px; }
 .hg-meter__name b { font: 600 16px/24px var(--font-sans); }
 .hg-meter__name > span { font: 400 13px/18px var(--font-sans); color: var(--stone); }  /* 금액 줄만(이름 옆 Badge는 제 색) */
-.hg-meter__pct { font: 600 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
+.hg-meter__pct { font: 700 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
 .hg-meter__pct small { font-size: 15px; }
-.hg-meter__segs { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-top: 26px; }
-.hg-meter__segs i { height: 14px; border-radius: var(--radius-xs); background: var(--t); }
+/* 쌓이는 칸(카카오뱅크 26주적금 느낌): 10% 칸 10개를 두 줄로, 아래 줄(0~50%)부터 차서 위 줄로 올라감 */
+.hg-meter__segs { position: relative; display: flex; flex-wrap: wrap-reverse; gap: 6px; margin-top: var(--space-5); }
+.hg-meter__segs i { flex: 0 0 calc((100% - 24px) / 5); height: 22px; border-radius: var(--radius-sm); background: var(--t); }
 .hg-meter__segs i.is-on { background: var(--c); }
 .hg-meter__segs i.is-part { background: linear-gradient(90deg, var(--c) calc(var(--f) * 100%), var(--t) 0); }
 .hg-meter__pace { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }
@@ -1171,7 +1220,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 /* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */

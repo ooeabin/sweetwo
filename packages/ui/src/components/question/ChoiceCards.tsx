@@ -93,15 +93,11 @@ export function ChoiceCards<T extends string>({
               on && 'is-on',
               o.disabled && 'is-disabled',
             )}
-            style={{ justifyContent: 'space-between', textAlign: 'left' }}
             aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
-            <span
-              className="hg-stack"
-              style={{ gap: 0, padding: o.detail ? 'var(--space-3) 0' : undefined }}
-            >
-              <span>
+            <span className="hg-option__body">
+              <span className="hg-option__label">
                 {o.label}
                 {o.tag && (
                   <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
@@ -112,7 +108,9 @@ export function ChoiceCards<T extends string>({
               {o.sub && <span className="hg-help">{o.sub}</span>}
               {o.detail}
             </span>
-            {on && <Icon name="check" />}
+            <span className="hg-option__mark" aria-hidden="true">
+              <Icon name="check" size={16} />
+            </span>
           </button>
         );
       })}

@@ -8,9 +8,12 @@ import {
   Lead,
   ListRow,
   Meter,
+  Ring,
   SectionHeader,
+  WeekStrip,
 } from '@sweetwo/ui';
 import { useState } from 'react';
+import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
 import { CheckLine, doneCount, lineName, toAllocGoal } from '../salary';
 import { copy } from './copy';
@@ -144,6 +147,7 @@ export function SalaryCard({
   list,
   partnerList,
   partnerName,
+  partnerStarter = false,
   goalName,
   personName,
   meId,
@@ -153,6 +157,8 @@ export function SalaryCard({
   list: PayChecklist | undefined;
   partnerList?: PayChecklist;
   partnerName: string;
+  /** 배우자가 시작한 사람인지(Avatar 색) */
+  partnerStarter?: boolean;
   goalName: (id: string | null) => string;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
@@ -185,6 +191,7 @@ export function SalaryCard({
     <section className="hg-stack" aria-label={list.label}>
       <SectionHeader
         title={list.label}
+        lead={<Ring done={done} total={total} label={copy.progress(total, done)} />}
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
       <div className="hg-card hg-stack">
@@ -213,16 +220,26 @@ export function SalaryCard({
           </button>
         )}
         {partnerList && (
+          // 배우자 체크 현황(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원
           <button
             type="button"
-            className="hg-btn hg-btn--link"
+            className="hg-person"
             onClick={() => go(`/salary?who=${partnerList.owner_user_id ?? ''}`)}
           >
-            {copy.partnerProgress(
-              partnerName,
-              partnerList.pay_check_line.length,
-              doneCount(partnerList),
-            )}
+            <PersonDot name={partnerName} starter={partnerStarter} />
+            <span className="hg-person__text">
+              {copy.partnerProgress(
+                partnerName,
+                partnerList.pay_check_line.length,
+                doneCount(partnerList),
+              )}
+            </span>
+            <Ring
+              done={doneCount(partnerList)}
+              total={partnerList.pay_check_line.length}
+              label={copy.progress(partnerList.pay_check_line.length, doneCount(partnerList))}
+            />
+            <Icon name="chevron-right" size={16} />
           </button>
         )}
         <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary/split')}>
@@ -242,13 +259,23 @@ export interface UpcomingItem {
 }
 
 /** H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 목표 기한, 날짜순 최대 3개 */
-export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {
+export function UpcomingCard({
+  items,
+  go,
+  today,
+}: {
+  items: UpcomingItem[];
+  go: (to: string) => void;
+  /** 이번 주 날짜 띠(오늘, KST). 없으면 띠 없음(트레이 등) */
+  today?: string;
+}) {
   return (
     <section className="hg-stack" aria-label={copy.upcoming}>
       <SectionHeader
         title={copy.upcoming}
         more={{ label: copy.upcoming, href: '/calendar/list' }}
       />
+      {today && <WeekStrip today={today} marked={new Set(items.map((e) => e.date))} />}
       {items.length ? (
         <div className="hg-list">
           {items.map((e) => (

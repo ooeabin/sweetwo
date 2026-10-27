@@ -1,5 +1,5 @@
 import { fetchActiveNotices, qk } from '@sweetwo/api';
-import { Button } from '@sweetwo/ui';
+import { Button, Icon } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { detectPlatform } from '../../platform';
@@ -39,9 +39,10 @@ export function useNoticeBand() {
     }
   };
   return (
-    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+    <div className="hg-banner hg-banner--line hg-body__banner" role="status">
+      <Icon name="info" size={16} />
       <span className="hg-stack" style={{ gap: 'var(--space-1)' }}>
-        <strong>{n.title}</strong>
+        <strong className={open ? undefined : 'hg-banner__one'}>{n.title}</strong>
         {open && n.body && <span style={{ whiteSpace: 'pre-wrap' }}>{n.body}</span>}
       </span>
       {n.body && (

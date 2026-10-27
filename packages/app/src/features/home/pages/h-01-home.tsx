@@ -6,7 +6,7 @@ import {
   sendDesktopLink,
 } from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
-import { Button } from '@sweetwo/ui';
+import { Button, Icon, IconButton, type IconName } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -53,6 +53,17 @@ const markPcBand = () => {
   } catch {
     /* 기억 못 하면 다음에 한 번 더 보일 수 있음 */
   }
+};
+
+// 할 일 띠 앞 그림(docs/design/components/Banner.md ‘할 일 카드’)
+const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconName> = {
+  unlink: 'link',
+  reconnect: 'link',
+  review: 'check',
+  invite: 'user',
+  amount: 'pencil',
+  matured: 'piggy-bank',
+  care: 'gift',
 };
 
 export function H01Home() {
@@ -162,7 +173,12 @@ export function H01Home() {
       }
     : null;
   const todoBand = todo ? (
-    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
+    <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
+      {t && (
+        <span className="hg-banner__icon" aria-hidden="true">
+          <Icon name={TODO_ICON[t.kind]} />
+        </span>
+      )}
       <span>{todo.text}</span>
       {t?.kind === 'invite' ? (
         // H-06 초대: ‘코드 복사’(코드를 만들거나 지금 코드를 그대로 복사). 코드 화면은 S-12
@@ -183,11 +199,7 @@ export function H01Home() {
           {copy.open}
         </Button>
       )}
-      {todo.close && (
-        <Button variant="ghost" size="sm" onClick={todo.close}>
-          {copy.close}
-        </Button>
-      )}
+      {todo.close && <IconButton icon="x" label={copy.close} ghost small onClick={todo.close} />}
     </div>
   ) : undefined;
   // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
@@ -309,6 +321,7 @@ export function H01Home() {
             list={list}
             partnerList={partnerList}
             partnerName={partner.data?.nickname ?? ''}
+            partnerStarter={!!partner.data && partner.data.id === space.data.created_by}
             goalName={goalName}
             personName={personName}
             meId={meId}
@@ -318,7 +331,7 @@ export function H01Home() {
         </div>,
         <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
           {assetsCard}
-          <UpcomingCard items={items.slice(0, 3)} go={go} />
+          <UpcomingCard items={items.slice(0, 3)} go={go} today={today} />
         </div>,
       ]}
     />

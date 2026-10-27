@@ -1,6 +1,7 @@
 import { qk, saveSplit, updateGoal } from '@sweetwo/api';
 import { addMonths, thisMonth, ymToDate, type SplitLineDraft } from '@sweetwo/core';
 import { Modal, Tabs } from '@sweetwo/ui';
+import { PersonDot } from '../../../shared/person';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -130,10 +131,13 @@ export function W01Split() {
                 label={copy.splitTitle}
                 value={ownerId ?? m.id}
                 onChange={setWho}
-                items={[
-                  { value: m.id, label: m.nickname ?? '' },
-                  { value: p.id, label: p.nickname ?? '' },
-                ]}
+                items={[m, p].map((x) => ({
+                  value: x.id,
+                  label: x.nickname ?? '',
+                  lead: (
+                    <PersonDot name={x.nickname ?? ''} starter={x.id === space.data?.created_by} />
+                  ),
+                }))}
               />
             )}
             {pending && <p className="hg-q__help">{copy.splitPending}</p>}
