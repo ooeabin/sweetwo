@@ -2,7 +2,6 @@ import { qk, trashGoals, updateGoal, updateIfUnchanged, type Goal } from '@sweet
 import { conflictDecision } from '@sweetwo/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { enqueue, isOfflineError } from '../../shared/outbox';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import type { GoalsData } from './data';
@@ -20,12 +19,6 @@ export interface GoalConflict {
   change: GoalChange;
   /** 서버 지금 값(배우자 값) */
   current: Goal;
-}
-/** 인터넷이 없어 대기열에 넣음(화면은 바꿔 둠) */
-class Queued extends Error {
-  constructor() {
-    super('queued');
-  }
 }
 class ConflictFound extends Error {
   constructor(readonly current: Goal) {
@@ -50,28 +43,13 @@ export function useGoalChange(d: GoalsData) {
 
   /** 열 때 값(base)이 그대로면 바꿈. force면 묻지 않고 덮음(‘내 값’ 고름) */
   const guarded = async (g: Goal, patch: Partial<Goal>, base: Partial<Goal>, force: boolean) => {
-    // 오프라인: 대기열 + 화면 값 바로 바꿈(30 동기화 4장). 보낼 때 같은 규칙으로 다시 판정
-    const queue = (): never => {
-      const what = 'target_amount' in patch ? 'amount' : 'deadline' in patch ? 'deadline' : 'name';
-      enqueue({ kind: 'goal', rowId: g.id, patch, base, label: copy.queuedGoal(g.name, what) });
-      qc.setQueryData<Goal[]>(qk.goals, (old) =>
-        old?.map((x) => (x.id === g.id ? { ...x, ...patch } : x)),
-      );
-      throw new Queued();
-    };
-    if (typeof navigator !== 'undefined' && !navigator.onLine) queue();
-    try {
-      if (force) return await updateGoal(g.id, patch);
-      const r = await updateIfUnchanged('goal', g.id, patch, base);
-      if (r.ok) return;
-      const dec = conflictDecision(r.current, patch, d.me?.id ?? '');
-      if (dec === 'same') return;
-      if (dec === 'choose') throw new ConflictFound(r.current);
-      await updateGoal(g.id, patch);
-    } catch (e) {
-      if (e instanceof ConflictFound || !isOfflineError(e)) throw e;
-      queue();
-    }
+    if (force) return updateGoal(g.id, patch);
+    const r = await updateIfUnchanged('goal', g.id, patch, base);
+    if (r.ok) return;
+    const dec = conflictDecision(r.current, patch, d.me?.id ?? '');
+    if (dec === 'same') return;
+    if (dec === 'choose') throw new ConflictFound(r.current);
+    await updateGoal(g.id, patch);
   };
 
   const direct = async (g: Goal, c: GoalChange, force = false) => {
@@ -144,16 +122,13 @@ export function useGoalChange(d: GoalsData) {
       await refresh();
       return true;
     } catch (e) {
-      if (e instanceof Queued) {
-        toast(copy.savedOffline);
-        return true;
-      }
       if (e instanceof ConflictFound) {
         setConflict({ goal: g, change: c, current: e.current });
         return false;
       }
-      await refresh();
+      // 안내 먼저(오프라인이면 다시 읽기가 연결될 때까지 기다림)
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void send(g, c, force) });
+      void refresh();
       return false;
     } finally {
       setBusy(false);

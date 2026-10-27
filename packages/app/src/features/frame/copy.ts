@@ -46,20 +46,4 @@ export const copy = {
   offlineBody: '다시 연결되면 이어서 볼 수 있어요',
   offlineCached: '오프라인',
   lastSaved: (at: string) => `마지막 저장 ${at}`,
-  // 오프라인 입력 대기열(30 동기화 4장, 13 공통 상태 9·11번)
-  pending: (n: number) => `대기 ${n}건`,
-  sendAll: '한 번에 보내기', // [확인 필요] 7일 넘게 오프라인
-  rejected: (n: number) => `보내지 못한 입력 ${n}건`,
-  rejectedShow: '보기', // [확인 필요]
-  retryInput: '다시 하기',
-  discardInput: '버리기',
-  rejectClosed: '지난 체크리스트라 바꿀 수 없어요', // [확인 필요]
-  rejectGone: '지워진 항목이에요', // [확인 필요]
-  rejectDenied: '바꿀 수 없는 항목이에요', // [확인 필요]
-  conflictQ: '어느 쪽으로 할까요?',
-  conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,
-  conflictOffline: (partner: string) =>
-    `오프라인일 때 바꾼 값이 ${partner}님이 나중에 바꾼 값과 달라요`,
-  conflictMine: '내 값',
-  conflictTheirs: (partner: string) => `${partner}님 값`,
 };
