@@ -77,7 +77,10 @@ async function fakeIosBridge(page: Page, signedIn = false) {
         cache: {
           load: async () => localStorage.getItem('e2e-cache'),
           save: async (t: string) => (localStorage.setItem('e2e-cache', t), true),
-          clear: async () => localStorage.removeItem('e2e-cache'),
+          clear: async () => {
+            localStorage.removeItem('e2e-cache');
+            localStorage.setItem('e2e-cache-cleared', '1');
+          },
         },
         lock: {
           status: async () => ({
@@ -271,4 +274,36 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toContainText(
     /마지막 저장 10월 7일 \d{2}:\d{2}/,
   );
+});
+
+test('부부 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 공간 데이터를 지움(31 보안·개인정보 4장)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  await expect
+    .poll(
+      () => page.evaluate(() => (localStorage.getItem('e2e-cache') ?? '').includes('내 집 마련')),
+      {
+        timeout: 10_000,
+      },
+    )
+    .toBe(true);
+  // 서버에서 공간이 바뀜(예전 목표는 더 이상 안 보임)
+  db.me.space_id = 'space-2';
+  if (db.space) db.space.id = 'space-2';
+  db.goals.splice(0, db.goals.length);
+  await page.reload();
+  await expect
+    .poll(
+      () => page.evaluate(() => (localStorage.getItem('e2e-cache') ?? '').includes('내 집 마련')),
+      {
+        timeout: 10_000,
+      },
+    )
+    .toBe(false);
 });
