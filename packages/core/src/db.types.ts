@@ -2869,6 +2869,7 @@ export type Database = {
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
+      kick_holidays: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_mail: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_purge: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_push: { Args: Record<PropertyKey, never>; Returns: boolean }
@@ -3134,6 +3135,10 @@ export type Database = {
       run_unlink_deadlines: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      save_api_holidays: {
+        Args: { p_rows: Json; p_years: number[] }
+        Returns: number
       }
       save_split: {
         Args: { p_lines: Json; p_owner?: string }
