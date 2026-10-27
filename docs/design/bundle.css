@@ -1196,11 +1196,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame__mhead { display: flex; align-items: center; gap: var(--space-1); min-height: 56px; box-sizing: border-box; padding: var(--space-3) var(--space-2) 0 var(--space-4); }
   .hg-frame__mhead .hg-topbar__text { flex: 1; }
   .hg-frame__mhead > img { margin-right: auto; }
-  /* 하단 탭 막대: 화면 폭 꽉 찬 흰 막대, 탭 4칸(아이콘 + 이름), 현재 탭은 채운 아이콘 + ink */
-  .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; height: auto; gap: 0; padding: var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom, 0px)); border: 0; border-top: 1px solid var(--hairline-soft); border-radius: 0; box-shadow: none; background: var(--surface); }
-  .hg-frame > .hg-dock .hg-dock__item, .hg-frame > .hg-dock .hg-dock__item.is-active { flex: 1; flex-direction: column; gap: 2px; height: 52px; padding: 0; border-radius: var(--radius-btn); background: none; color: var(--stone); font: 600 12px/16px var(--font-sans); }
-  .hg-frame > .hg-dock .hg-dock__item.is-active { color: var(--ink); }
-  .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(60px + var(--space-4) + env(safe-area-inset-bottom, 0px)); }
+  /* 하단 탭 막대(배민 느낌): 화면 아래 가운데 떠 있는 흰 알약, 탭 4칸(아이콘 + 이름), 현재 탭은 회색 알약 + ink */
+  .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 50%; right: auto; bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); height: auto; gap: 2px; padding: 6px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-full); background: var(--surface); box-shadow: var(--shadow-2); }
+  .hg-frame > .hg-dock .hg-dock__item, .hg-frame > .hg-dock .hg-dock__item.is-active { flex: none; flex-direction: column; gap: 2px; width: 72px; height: 52px; padding: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 600 12px/16px var(--font-sans); }
+  .hg-frame > .hg-dock .hg-dock__item.is-active { background: var(--surface-alt); color: var(--ink); }
+  .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(var(--space-3) + 66px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
 }
