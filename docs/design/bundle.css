@@ -1120,7 +1120,7 @@ a.hg-btn { text-decoration: none; }
 .hg-meter__pace i { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 2px; font: 600 11px/14px var(--font-sans); font-style: normal; color: var(--ink); white-space: nowrap; }
 .hg-meter__chip { align-self: flex-start; margin-top: var(--space-3); padding: 3px 10px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: 600 12px/18px var(--font-sans); }
 
-/* AppFrame: 넓은 창 = 왼쪽 흰 사이드바 + 회색 바탕(canvas) 위 흰 카드, 좁은 창 = 머리 + 하단 탭 막대 */
+/* AppFrame: 넓은 창 = 왼쪽 사이드바 + 흰 바탕(canvas) 위 테두리·옅은 그림자 카드, 좁은 창 = 머리 + 하단 탭 막대 */
 .hg-frame { min-height: 100vh; min-height: 100dvh; background: var(--canvas); display: grid; grid-template-columns: 232px minmax(0, 1fr); align-items: start; }
 .hg-frame__main { min-width: 0; }
 .hg-appside { align-self: stretch; background: var(--surface); border-right: 1px solid var(--hairline-soft); }
@@ -1143,7 +1143,7 @@ a.hg-btn { text-decoration: none; }
 .hg-appside .hg-iconbtn--dot::after { top: 9px; right: 10px; }
 /* 홈 인사 카드(hg-today): 날짜 + 인사(작게) + 큰 숫자 하나 + 진행 막대 + 버튼 */
 .hg-today { padding: var(--space-8) var(--space-8) 0; }
-.hg-today__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-2xl); background: var(--surface); box-shadow: var(--shadow-1); display: flex; flex-direction: column; gap: var(--space-4); }
+.hg-today__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-2xl); background: var(--surface); border: 1px solid var(--hairline-soft); box-shadow: var(--shadow-1); display: flex; flex-direction: column; gap: var(--space-4); }
 .hg-today__row { display: flex; align-items: flex-end; gap: var(--space-4); }
 .hg-today__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 .hg-today__date { font: 400 13px/18px var(--font-sans); color: var(--stone); }
@@ -1169,10 +1169,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 @media (max-width: 1099px) { .hg-body { grid-template-columns: minmax(0, 1fr); } }  /* 1100px 미만은 한 단(19 앱 기본 틀 8번) */
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
-/* 회색 바탕 위 맨 바깥 카드: 테두리 없는 흰 카드. 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: transparent; box-shadow: var(--shadow-1); }
-.hg-frame .hg-card--fill:not(:is(.hg-card, .hg-list, .hg-checklist, .hg-sheet, .hg-modal) *), .hg-frame .hg-stat:not(:is(.hg-card, .hg-list, .hg-sheet, .hg-modal) *) { background: var(--surface); }
-.hg-frame .hg-banner--info { background: var(--surface); box-shadow: var(--shadow-1); }
+/* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
