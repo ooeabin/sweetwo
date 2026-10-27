@@ -103,6 +103,20 @@ export async function noteLogin(): Promise<boolean> {
   return data === true;
 }
 
+/** 앱 기기 기록(AD-16 최소 지원 버전 미만 기기 수): 로그인된 채 켜질 때 설치 ID, 플랫폼, 앱 버전 */
+export async function noteDevice(
+  installId: string,
+  platform: 'desktop' | 'ios' | 'android',
+  version: string,
+): Promise<void> {
+  const { error } = await supabase().rpc('note_device', {
+    p_install: installId,
+    p_platform: platform,
+    p_version: version,
+  });
+  if (error) throw new Error(error.message);
+}
+
 /** 데스크톱 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄 */
 export async function touchApp(): Promise<void> {
   const { error } = await supabase().rpc('touch_app');

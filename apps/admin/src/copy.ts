@@ -266,6 +266,7 @@ export const ops = {
     emailHelp: '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
   }, // [확인 필요]
   saveDraft: '초안 저장', // [확인 필요]
+  belowMin: (n: number) => `지금 최소 버전보다 낮은 기기 ${n}대(90일 안에 켠 기기)`, // [확인 필요]
   requestApproval: '승인 요청',
   endNotice: '내리기', // [확인 필요]
   quietHours: '밤 10시~아침 8시에는 시작할 수 없어요', // [확인 필요]

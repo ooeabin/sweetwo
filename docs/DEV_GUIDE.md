@@ -433,6 +433,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 저녁 알림(`send-evening-notifications`): 월말 확인(사이클 끝 2일 전 = 다음 기준일 3일 전, 체크 안 한 줄이 있는 체크리스트 주인) | 매일 20:00 | `0 11 * * *` | `send_evening_notifications()` |
 | 연결 해제 확정(`unlink-deadlines`, 요청 + 14일) | 매일 09:00 | `0 0 * * *` | `run_unlink_deadlines()` |
 | 보관 기간 정리: 알림 90일, 해제한 원래 공간 30일, 삭제 계정 30일, 휴지통 30일 | 매일 04:00~04:45 | `0 19 * * *`부터 15분 간격 | `purge_notifications()`, `purge_unlinked_spaces()`, `purge_deleted_accounts()`, `purge_old_trash()` |
+| 앱 기기 기록 정리(`purge-app-devices`): 180일 안 켠 기기 | 매일 04:55 | `55 19 * * *` | `purge_app_devices()` |
 | 어드민 잠금, 열람 기간 끝 | 매일 04:50, 매시 5분 | `50 19 * * *`, `5 * * * *` | `lock_idle_admins()`, `run_access_expiry()` |
 | 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
 | 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
@@ -1079,7 +1080,8 @@ supabase/
 - 공지 메일(20261107180000): 약관 개정·장애 고지(`notice.kind` terms, incident)만 ‘이메일로도 보내기’(`notice.email`, `admin_set_notice_email`). `send_notice_mails()`(pg_cron `send-notice-mails` 5분마다)가 게시됐고 노출 기간 안이며 아직 안 보낸 공지를 이메일 알림을 켠 사용 중 회원 모두에게 `mail_outbox`로 쌓고(`notice_{kind}`, 메일 상한 밖, 사람마다 한 번) `mailed_at`을 적음. 보내기는 다른 메일과 같은 `send-mail`
 - AD-05 계정 조치(20261107210000): 삭제 대리 접수 `delete_request`는 고객 지원이 문의 번호로 바로 실행, 본인 삭제와 같은 `account_deletion_for`(30일 유예). 로그인 수단 이전은 `admin_request_login_move(기존, 새 계정 이메일 또는 사용자 ID, 문의 번호)` → 승인 요청 `login_move` → 최고 관리자 승인 때 `login_move_apply`: 기존 계정의 로그인 수단을 지우고 새 계정의 것을 옮김, `app_user.provider` 바꿈, 새 계정(가입 전이거나 혼자 쓰는 공간뿐)은 지움, 전체 기기 로그아웃, 가입 이메일로 완료 메일(`login_moved`, 상한 밖). 새 계정이 다른 사람과 연결돼 있으면 안 됨
 - AD-04 금액 원값(20261108090000): 고객 지원이 ‘금액 원값 요청’(화면 1개)을 체크하면 사용자에게 바로 가지 않고 승인 요청 `access_raw`. 최고 관리자 승인 = 원값으로, 거절 = 같은 범위를 구간으로만 사용자에게 요청(`access_send`, 요청자는 고객 지원 그대로). 그사이 문의가 끝났으면 보내지 않음
-- 다음 단계(어드민): 최소 지원 버전 미만 기기 수, AD-19 항목 이름 목록
+- AD-16 미만 기기 수(20261108120000 `app_device`): 앱(데스크톱, iOS, Android)이 로그인된 채 켜질 때(`routeAfterLogin`) `note_device(설치 ID, 플랫폼, 앱 버전)`. 설치 ID는 기기 localStorage `sweetwo.install-id`(임의 UUID). 웹은 기록 안 함. `admin_app_config().below_min`이 90일 안에 켠 기기 중 최소 지원 버전 미만을 플랫폼별로 셈(`version_below`). 180일 안 켠 기기는 `purge_app_devices()`가 지움
+- 다음 단계(어드민): AD-19 항목 이름 목록
 - 문서 메뉴(AD-20): 어드민을 배포할 때 저장소 docs/(기획서 docs/spec, 디자인 docs/design과 DESIGN.md, 개발 가이드 docs/DEV\_GUIDE.md)를 함께 빌드해 읽기 전용으로 보여 줌. 어드민에 로그인한 사람 모두 읽기
 
 ## MVP 순서

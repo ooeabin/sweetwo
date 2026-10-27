@@ -54,6 +54,14 @@ export const prefs = {
     return isProvider(v) ? v : null;
   },
   setPendingProvider: (p: AuthProvider | null) => sset('sweetwo.pending-provider', p),
+  /** 앱 기기 기록용 설치 ID(이 기기에서 처음 만든 임의 값, 계정과 상관없이 유지) */
+  installId: () => {
+    const v = get('sweetwo.install-id');
+    if (v) return v;
+    const id = crypto.randomUUID();
+    set('sweetwo.install-id', id);
+    return id;
+  },
   returnTo: () => sget('sweetwo.return-to'),
   setReturnTo: (path: string | null) => sset('sweetwo.return-to', path),
 };
