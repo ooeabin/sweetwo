@@ -19,6 +19,13 @@ export class AdminError extends Error {
   }
 }
 const KNOWN = [
+  // 더 긴 코드가 먼저(new_not_found ⊃ not_found)
+  'new_not_found',
+  'new_no_login',
+  'new_has_partner',
+  'same_account',
+  'already_requested',
+  'not_active',
   'not_admin',
   'mfa_required',
   'no_permission',
@@ -181,7 +188,12 @@ export async function fetchAdminAccessData(accessId: string): Promise<AdminAcces
   fail(error);
   return AdminAccessData.parse(data);
 }
-export type AdminAction = 'sign_out_all' | 'rights_access' | 'rights_fix' | 'rights_delete';
+export type AdminAction =
+  | 'sign_out_all'
+  | 'delete_request'
+  | 'rights_access'
+  | 'rights_fix'
+  | 'rights_delete';
 export async function adminAccountAction(
   id: string,
   action: AdminAction,
@@ -191,6 +203,21 @@ export async function adminAccountAction(
   const { error } = await supabase().rpc('admin_account_action', {
     p_user: id,
     p_action: action,
+    p_inquiry_no: inquiryNo,
+    p_note: note,
+  });
+  fail(error);
+}
+/** 로그인 수단 이전 승인 요청(최고 관리자 승인 때 옮김). newAccount = 새 계정 이메일 또는 사용자 ID */
+export async function adminRequestLoginMove(
+  id: string,
+  newAccount: string,
+  inquiryNo: string,
+  note: string,
+) {
+  const { error } = await supabase().rpc('admin_request_login_move', {
+    p_user: id,
+    p_new: newAccount,
     p_inquiry_no: inquiryNo,
     p_note: note,
   });
