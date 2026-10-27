@@ -3,6 +3,7 @@ import {
   fetchGoalMoves,
   qk,
   restoreTrash,
+  setGoalOwner,
   setGoalPhoto,
   trashGoals,
   updateGoal,
@@ -95,6 +96,23 @@ export function G02GoalDetail() {
       toast(copy.loadFailed);
     }
   };
+  // 내 목표로 바꾸기: 화면이 모르는 사이 배우자가 모았으면 서버가 막음(22 ‘목표 종류’)
+  const toMine = async () => {
+    try {
+      const r = await setGoalOwner(g.id, d.meId, 999);
+      if (r === 'partner_saved') {
+        toast(copy.cantToMine(d.partnerName));
+        return void refresh();
+      }
+      await refresh();
+      toast(copy.changedKind, {
+        label: copy.undo,
+        onClick: () => void setGoalOwner(g.id, null, g.priority).then(refresh),
+      });
+    } catch {
+      toast(copy.loadFailed);
+    }
+  };
   // 목표 사진 지우기 → 회색 기본 그림(프로필 사진처럼 되돌리기 없음)
   const clearPhoto = async () => {
     try {
@@ -119,9 +137,7 @@ export function G02GoalDetail() {
             {
               label: copy.toMine,
               onSelect: () =>
-                partnerMoved
-                  ? toast(copy.cantToMine(d.partnerName))
-                  : void change({ owner_user_id: d.meId, priority: 999 }, copy.changedKind),
+                partnerMoved ? toast(copy.cantToMine(d.partnerName)) : void toMine(),
             },
           ]
         : [

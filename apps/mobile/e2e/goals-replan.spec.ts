@@ -516,3 +516,37 @@ test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 �
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
   expect(home.target_amount).toBe(140_000_000);
 });
+
+test('내 목표로 바꾸기(22 ‘목표 종류’): 바꿈, 그사이 예빈님이 모았으면 서버가 막음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  if (db.space) db.space.partner_nickname = '예빈';
+  const home = db.goals.find((g) => g.id === 'goal-h');
+  if (!home) throw new Error('seed');
+  await page.goto('/goals/goal-h');
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '내 목표로 바꾸기' }).click();
+  await expect(page.getByText('목표 종류를 바꿨어요')).toBeVisible();
+  expect(home.owner_user_id).toBe(chanwoo.id);
+
+  // 화면이 모르는 사이 예빈님이 넣은 돈이 생김 → 서버가 거절
+  home.owner_user_id = null;
+  await page.route('**/rest/v1/goal?*', (r) =>
+    r.request().method() === 'PATCH' && (r.request().postData() ?? '').includes('owner_user_id')
+      ? r.fulfill({
+          status: 403,
+          contentType: 'application/json',
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ message: 'partner_saved', code: '42501' }),
+        })
+      : r.fallback(),
+  );
+  await page.reload();
+  await page.getByRole('button', { name: '목표 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '내 목표로 바꾸기' }).click();
+  await expect(page.getByText('예빈님도 모으고 있어서 바꿀 수 없어요')).toBeVisible();
+  expect(home.owner_user_id).toBeNull();
+});
