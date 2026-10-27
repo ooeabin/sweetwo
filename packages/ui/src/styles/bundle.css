@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (5d9c179). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (ff314b1). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -298,8 +298,14 @@
 .hg-radio.is-on::after { content: ""; width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--ink); }
 .hg-option { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; font: 400 16px/24px var(--font-sans); color: var(--ink); }
 .hg-option.is-disabled { color: var(--muted); cursor: not-allowed; }
-.hg-option--card { box-sizing: border-box; width: 100%; padding: 0 var(--space-4); min-height: 56px; border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
-.hg-option--card.is-on { border: 2px solid var(--ink); }
+.hg-option--card { box-sizing: border-box; width: 100%; justify-content: space-between; padding: var(--space-4) var(--space-5); min-height: 64px; border: 2px solid transparent; border-radius: var(--radius-xl); background: var(--surface-alt); transition: background var(--dur-fast), border-color var(--dur-fast); }
+.hg-option--card.is-on { border-color: var(--ink); background: var(--surface); }
+.hg-option__body { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hg-option__label { font-weight: 600; }
+.hg-option__mark { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box; border-radius: var(--radius-full); border: 2px solid var(--border-control); color: transparent; }
+.hg-option--card.is-on .hg-option__mark { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
+.hg-option--card.is-disabled .hg-option__mark { border-color: var(--hairline); }
+@media (prefers-reduced-motion: reduce) { .hg-option--card { transition: none; } }
 
 /* Banner */
 .hg-banner { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font: 400 14px/21px var(--font-sans); }
