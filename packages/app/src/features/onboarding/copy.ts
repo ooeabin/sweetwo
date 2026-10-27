@@ -3,6 +3,10 @@ import { object } from '@sweetwo/core';
 // 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
+  resumeQ: '이어서 할까요?',
+  resumeHelp: '멈춘 곳부터 이어서 해요. 적어 둔 답은 그대로예요', // [확인 필요]
+  resumeGo: '이어서 할게요', // [확인 필요]
   next: '다음',
   unsure: '잘 모르겠어요',
   unsureLater: '잘 모르겠어요, 나중에 적을게요', // [확인 필요] 금액 칸 보조 링크(구간 골라 추정 + 할 일)

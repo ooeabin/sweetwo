@@ -29,6 +29,10 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'onboarding_resumed';
+      props: { screen_id: string; hours_since_last: number };
+    }
+  | {
       name: 'unlink_requested';
       props: { linked_months: number };
     }
