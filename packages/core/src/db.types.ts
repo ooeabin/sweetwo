@@ -2421,6 +2421,10 @@ export type Database = {
         Returns: undefined
       }
       admin_me: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_note_export: {
+        Args: { p_reason: string; p_rows: number; p_screen: string }
+        Returns: string
+      }
       admin_notices: {
         Args: Record<PropertyKey, never>
         Returns: {

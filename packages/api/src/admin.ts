@@ -122,6 +122,20 @@ export type AdminSearchRow = {
   couple_state: string | null;
   subscription: string;
 };
+/** 내려받기 전 사유 기록(감사 로그). 돌려줌: 파일에 적을 관리자 ID */
+export async function adminNoteExport(
+  screen: 'AD-02',
+  reason: string,
+  rows: number,
+): Promise<string> {
+  const { data, error } = await supabase().rpc('admin_note_export', {
+    p_screen: screen,
+    p_reason: reason,
+    p_rows: rows,
+  });
+  fail(error);
+  return String(data ?? '');
+}
 export async function adminSearch(q: string): Promise<AdminSearchRow[]> {
   const { data, error } = await supabase().rpc('admin_search', { p_q: q });
   fail(error);
