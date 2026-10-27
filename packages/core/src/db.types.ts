@@ -2276,6 +2276,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_deletion_for: { Args: { uid: string }; Returns: string }
       achieve_goal: { Args: { p_goal: string }; Returns: boolean }
       add_care_photo: {
         Args: { p_path: string; p_record: string; p_size: number }
@@ -2475,6 +2476,15 @@ export type Database = {
           p_kind: string
           p_payload: Json
           p_summary: string
+        }
+        Returns: string
+      }
+      admin_request_login_move: {
+        Args: {
+          p_inquiry_no: string
+          p_new: string
+          p_note: string
+          p_user: string
         }
         Returns: string
       }
@@ -2911,6 +2921,14 @@ export type Database = {
       }
       log_split_changes: {
         Args: { p_old: Json; p_split: string }
+        Returns: undefined
+      }
+      login_move_apply: {
+        Args: { p: Json; p_approval: string }
+        Returns: undefined
+      }
+      login_move_check: {
+        Args: { p_new: string; p_user: string }
         Returns: undefined
       }
       login_state: {

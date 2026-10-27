@@ -1,6 +1,7 @@
 import {
   AdminError,
   adminAccountAction,
+  adminRequestLoginMove,
   adminReveal,
   fetchAdminAccessData,
   fetchAdminUser,
@@ -19,7 +20,7 @@ import { Button, Chip, DataTable, Modal } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { copy } from '../copy';
+import { copy, ops } from '../copy';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 
@@ -282,22 +283,37 @@ function RevealForm({ userId, onShown }: { userId: string; onShown: (d: AdminRev
   );
 }
 
+type ActionKind = AdminAction | 'login_move';
+// 전체 기기 로그아웃, 삭제 대리 접수는 확인 모달 뒤 바로. 로그인 수단 이전은 최고 관리자 승인 요청(AD-18에서 승인)
+const CONFIRM: Partial<Record<ActionKind, { title: string; body?: string }>> = {
+  sign_out_all: { title: copy.confirmSignOut },
+  delete_request: { title: copy.confirmDelete, body: copy.confirmDeleteHelp },
+};
+
 function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) {
-  const [action, setAction] = useState<AdminAction>('sign_out_all');
+  const [action, setAction] = useState<ActionKind>('sign_out_all');
   const [no, setNo] = useState('');
   const [note, setNote] = useState('');
+  const [target, setTarget] = useState('');
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const move = action === 'login_move';
+  const ask = CONFIRM[action];
   const run = async () => {
     setBusy(true);
     setMsg(null);
     try {
-      await adminAccountAction(userId, action, no.trim(), note);
-      setMsg(copy.done);
+      if (action === 'login_move') {
+        await adminRequestLoginMove(userId, target.trim(), no.trim(), note);
+        setMsg(copy.moveRequested);
+      } else {
+        await adminAccountAction(userId, action, no.trim(), note);
+        setMsg(copy.done);
+      }
       onDone();
-    } catch {
-      setMsg(copy.failed);
+    } catch (e) {
+      setMsg((e instanceof AdminError && copy.moveErrors[e.code]) || copy.failed);
     } finally {
       setBusy(false);
       setConfirm(false);
@@ -311,7 +327,7 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
         <select
           className="hg-input"
           value={action}
-          onChange={(e) => setAction(e.target.value as AdminAction)}
+          onChange={(e) => setAction(e.target.value as ActionKind)}
         >
           {Object.entries(copy.actions).map(([k, v]) => (
             <option key={k} value={k}>
@@ -329,6 +345,13 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
           placeholder="A-10001"
         />
       </label>
+      {move && (
+        <label className="hg-field">
+          <span className="hg-field__label">{copy.newAccount}</span>
+          <input className="hg-input" value={target} onChange={(e) => setTarget(e.target.value)} />
+          <span className="hg-help">{copy.newAccountHelp}</span>
+        </label>
+      )}
       <label className="hg-field">
         <span className="hg-field__label">{copy.note}</span>
         <input className="hg-input" value={note} onChange={(e) => setNote(e.target.value)} />
@@ -339,17 +362,18 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
         </p>
       )}
       <Button
-        variant={action === 'sign_out_all' ? 'danger' : 'primary'}
+        variant={ask ? 'danger' : 'primary'}
         aria-busy={busy}
-        disabled={!/^A-\d+$/i.test(no.trim())}
-        onClick={() => (action === 'sign_out_all' ? setConfirm(true) : void run())}
+        disabled={!/^A-\d+$/i.test(no.trim()) || (move && !target.trim())}
+        onClick={() => (ask ? setConfirm(true) : void run())}
       >
-        {copy.run}
+        {move ? ops.requestApproval : copy.run}
       </Button>
-      {confirm && (
+      {confirm && ask && (
         <Modal
-          title={copy.confirmSignOut}
-          confirmLabel={copy.actions.sign_out_all ?? ''}
+          title={ask.title}
+          body={ask.body}
+          confirmLabel={copy.actions[action] ?? ''}
           cancelLabel={copy.cancel}
           onConfirm={() => void run()}
           onCancel={() => setConfirm(false)}

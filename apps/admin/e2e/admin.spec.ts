@@ -257,6 +257,12 @@ async function mock(
           sessions: 2,
           access: [],
         });
+      case 'admin_account_action':
+        return json(route, null);
+      case 'admin_request_login_move':
+        return body().p_new === 'nobody@example.com'
+          ? json(route, { message: 'new_not_found' }, 400)
+          : json(route, 'ap9');
       case 'admin_reveal':
         return json(route, { email: 'chanwoo@example.com' });
       case 'admin_inquiries':
@@ -605,6 +611,44 @@ test('감사 로그와 문서', async ({ page }) => {
   await page.getByLabel('문서 검색').fill('어드민 화면');
   await page.getByRole('button', { name: '어드민 화면' }).click();
   await expect(page.getByRole('heading', { name: 'AD-06 문의 처리' })).toBeVisible();
+});
+
+test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인 수단 이전은 승인 요청', async ({
+  page,
+}) => {
+  const db = await mock(page);
+  await page.goto(`/members/${CHANWOO}`);
+  await heading(page, '회원 상세');
+  await page.getByRole('button', { name: '계정 조치' }).click();
+  const form = page.getByRole('region', { name: '계정 조치' });
+  await form.getByLabel('계정 조치').selectOption('delete_request');
+  await form.getByLabel('문의 번호').fill('A-10001');
+  await form.getByRole('button', { name: '실행' }).click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText('30일 뒤 지워져요');
+  await axe(page);
+  await dialog.getByRole('button', { name: '삭제 대리 접수' }).click();
+  await expect(form.getByRole('status')).toHaveText('처리했어요');
+  expect(db.rpc.find((r) => r.fn === 'admin_account_action')?.body).toMatchObject({
+    p_action: 'delete_request',
+    p_inquiry_no: 'A-10001',
+  });
+
+  await form.getByLabel('계정 조치').selectOption('login_move');
+  const go = form.getByRole('button', { name: '승인 요청' });
+  await expect(go).toBeDisabled();
+  await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('nobody@example.com');
+  await go.click();
+  await expect(form.getByRole('status')).toHaveText('새 계정을 찾지 못했어요');
+  await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('chanwoo.new@example.com');
+  await go.click();
+  await expect(form.getByRole('status')).toHaveText('최고 관리자에게 승인을 요청했어요');
+  await axe(page);
+  expect(db.rpc.filter((r) => r.fn === 'admin_request_login_move').at(-1)?.body).toMatchObject({
+    p_user: CHANWOO,
+    p_new: 'chanwoo.new@example.com',
+    p_inquiry_no: 'A-10001',
+  });
 });
 
 test('운영 역할: 회원 상세에 열람·조치 버튼 없음', async ({ page }) => {

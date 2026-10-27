@@ -138,7 +138,9 @@ export const copy = {
 
   // AD-05
   actions: {
+    login_move: '로그인 수단 이전',
     sign_out_all: '전체 기기 로그아웃',
+    delete_request: '삭제 대리 접수',
     rights_access: '권리 요구 기록: 열람',
     rights_fix: '권리 요구 기록: 정정',
     rights_delete: '권리 요구 기록: 삭제',
@@ -147,6 +149,20 @@ export const copy = {
   run: '실행', // [확인 필요]
   done: '처리했어요', // [확인 필요]
   confirmSignOut: '이 회원의 모든 기기에서 로그아웃할까요?', // [확인 필요]
+  confirmDelete: '이 회원의 계정 삭제를 접수할까요?', // [확인 필요]
+  confirmDeleteHelp: '30일 뒤 지워져요. 그 전에 본인이 다시 로그인하면 취소돼요', // [확인 필요]
+  newAccount: '새 계정 이메일 또는 사용자 ID', // [확인 필요]
+  newAccountHelp: '본인 확인이 끝난 뒤 사용자가 새 소셜 계정으로 한 번 로그인해요. 최고 관리자가 승인하면 옮겨요', // [확인 필요]
+  moveRequested: '최고 관리자에게 승인을 요청했어요', // [확인 필요]
+  moveErrors: {
+    new_not_found: '새 계정을 찾지 못했어요',
+    new_no_login: '새 계정에 로그인 수단이 없어요',
+    new_has_partner: '새 계정이 다른 사람과 연결돼 있어요',
+    same_account: '같은 계정이에요',
+    already_requested: '이미 승인 대기 중이에요',
+    not_active: '사용 중인 계정이 아니에요',
+    reason_required: '문의 번호를 확인해 주세요',
+  } as Record<string, string>, // [확인 필요]
   cancel: '취소',
 
   // AD-06
