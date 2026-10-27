@@ -29,6 +29,7 @@ export const qk = {
   /** 배우자 활동(H-08). 알림 키 아래라 새 알림이 오면 같이 새로 받음 */
   partnerActivity: ['notification', 'activity'] as const,
   holidays: ['holiday'] as const,
+  assetKindNames: ['asset_kind_name'] as const,
   latestInvite: ['invite', 'latest'] as const,
   unlink: ['couple_unlink'] as const,
   myUnlink: ['couple_unlink', 'mine'] as const,

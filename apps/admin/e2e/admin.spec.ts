@@ -58,6 +58,7 @@ interface Db {
   inquiryStatus: string;
   messages: { author: string; body: string; created_at: string }[];
   notices: Record<string, unknown>[];
+  kindNames: Record<string, unknown>[];
   approvals: {
     id: string;
     kind: string;
@@ -89,6 +90,7 @@ async function mock(
     inquiryStatus: 'received',
     messages: [{ author: 'user', body: '연결이 안 돼요', created_at: '2026-10-17T01:00:00Z' }],
     notices: [],
+    kindNames: [],
     approvals: [
       {
         id: 'ap0',
@@ -149,6 +151,7 @@ async function mock(
     }
     if (p === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    if (p === '/rest/v1/asset_kind_name') return json(route, db.kindNames);
     if (p === '/rest/v1/loan_rate')
       return json(route, [
         {
@@ -421,6 +424,20 @@ async function mock(
         ]);
       case 'admin_add_terms_version':
         return json(route, 't2');
+      case 'admin_save_kind_name': {
+        const b = body();
+        const id = (b.p_id as string | undefined) ?? `k${db.kindNames.length + 1}`;
+        db.kindNames = db.kindNames.filter((x) => x.id !== id);
+        db.kindNames.push({
+          id,
+          grp: b.p_grp,
+          base: b.p_base,
+          name: b.p_name,
+          added: b.p_added,
+          hidden: b.p_hidden,
+        });
+        return json(route, id);
+      }
       case 'admin_set_loan_rate':
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       case 'admin_app_config':
@@ -599,7 +616,9 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   // 금액 원값: 화면 1개만, 최고 관리자 승인 요청
   await ask.getByRole('button', { name: '목표' }).click();
   await ask.getByLabel('금액 원값 요청').check();
-  await expect(ask.getByText('최고 관리자가 승인하면 사용자에게 요청해요', { exact: false })).toBeVisible();
+  await expect(
+    ask.getByText('최고 관리자가 승인하면 사용자에게 요청해요', { exact: false }),
+  ).toBeVisible();
   await ask.getByLabel('사유').fill('목표 금액 확인');
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
   await expect(page.getByText('최고 관리자에게 원값 승인을 요청했어요')).toBeVisible();
@@ -735,6 +754,36 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
     .poll(() => db.rpc.find((r) => r.fn === 'admin_set_loan_rate')?.body.p_rate_bp)
     .toBe(650);
   await axe(page);
+
+  // AD-19 항목 이름 목록: 새 칩은 기본 항목을 따름, 기본 항목은 숨김
+  const kinds = page.getByRole('region', { name: '칩 추가' });
+  await kinds.getByLabel('종류').selectOption({ label: '예금·적금' });
+  await kinds.getByLabel('따르는 항목').selectOption({ label: '정책형 적금' });
+  await kinds.getByLabel('이름').fill('청년도약계좌');
+  await kinds.getByRole('button', { name: '칩 추가' }).click();
+  await expect(page.getByRole('row', { name: /청년도약계좌/ })).toContainText('정책형 적금');
+  const term = page.getByRole('row', { name: /정기예금/ });
+  await term.getByRole('checkbox', { name: '정기예금 숨김' }).check();
+  await term.getByRole('button', { name: '저장' }).click();
+  await expect(term.getByRole('button', { name: '처음대로' })).toBeVisible();
+  await page.mouse.move(0, 0); // 줄 hover 바탕은 빼고 봄
+  await axe(page);
+  expect(db.rpc.filter((r) => r.fn === 'admin_save_kind_name').map((r) => r.body)).toEqual([
+    {
+      p_grp: 'deposit',
+      p_base: 'policy_saving',
+      p_name: '청년도약계좌',
+      p_added: true,
+      p_hidden: false,
+    },
+    {
+      p_grp: 'deposit',
+      p_base: 'term_deposit',
+      p_name: '정기예금',
+      p_added: false,
+      p_hidden: true,
+    },
+  ]);
 });
 
 test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버전·점검은 승인 요청, 관리자 계정', async ({
@@ -751,7 +800,9 @@ test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버
 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
   await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
-  await expect(page.getByText('지금 최소 버전보다 낮은 기기 12대(90일 안에 켠 기기)')).toBeVisible();
+  await expect(
+    page.getByText('지금 최소 버전보다 낮은 기기 12대(90일 안에 켠 기기)'),
+  ).toBeVisible();
   await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인을 요청했어요')).toBeVisible();

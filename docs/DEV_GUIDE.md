@@ -1081,7 +1081,7 @@ supabase/
 - AD-05 계정 조치(20261107210000): 삭제 대리 접수 `delete_request`는 고객 지원이 문의 번호로 바로 실행, 본인 삭제와 같은 `account_deletion_for`(30일 유예). 로그인 수단 이전은 `admin_request_login_move(기존, 새 계정 이메일 또는 사용자 ID, 문의 번호)` → 승인 요청 `login_move` → 최고 관리자 승인 때 `login_move_apply`: 기존 계정의 로그인 수단을 지우고 새 계정의 것을 옮김, `app_user.provider` 바꿈, 새 계정(가입 전이거나 혼자 쓰는 공간뿐)은 지움, 전체 기기 로그아웃, 가입 이메일로 완료 메일(`login_moved`, 상한 밖). 새 계정이 다른 사람과 연결돼 있으면 안 됨
 - AD-04 금액 원값(20261108090000): 고객 지원이 ‘금액 원값 요청’(화면 1개)을 체크하면 사용자에게 바로 가지 않고 승인 요청 `access_raw`. 최고 관리자 승인 = 원값으로, 거절 = 같은 범위를 구간으로만 사용자에게 요청(`access_send`, 요청자는 고객 지원 그대로). 그사이 문의가 끝났으면 보내지 않음
 - AD-16 미만 기기 수(20261108120000 `app_device`): 앱(데스크톱, iOS, Android)이 로그인된 채 켜질 때(`routeAfterLogin`) `note_device(설치 ID, 플랫폼, 앱 버전)`. 설치 ID는 기기 localStorage `sweetwo.install-id`(임의 UUID). 웹은 기록 안 함. `admin_app_config().below_min`이 90일 안에 켠 기기 중 최소 지원 버전 미만을 플랫폼별로 셈(`version_below`). 180일 안 켠 기기는 `purge_app_devices()`가 지움
-- 다음 단계(어드민): AD-19 항목 이름 목록
+- AD-19 항목 이름 목록(20261108150000 `asset_kind_name`): 예금·적금, 청약, 투자, 연금의 F-03a 세부 항목 칩. 기본 항목은 한 줄(`added = false`)로 이름 바꾸기·숨기기, 새 칩(`added = true`)은 `base` 기본 항목의 key로 저장돼 같은 질문. 운영이 `admin_save_kind_name`·`admin_delete_kind_name`으로 바로 저장(감사 로그 전·후), 앱은 읽기만(`useAssetGroups` → core `withKindNames`, 못 받으면 기본 칩)
 - 문서 메뉴(AD-20): 어드민을 배포할 때 저장소 docs/(기획서 docs/spec, 디자인 docs/design과 DESIGN.md, 개발 가이드 docs/DEV\_GUIDE.md)를 함께 빌드해 읽기 전용으로 보여 줌. 어드민에 로그인한 사람 모두 읽기
 
 ## MVP 순서

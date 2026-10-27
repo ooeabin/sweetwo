@@ -9,6 +9,16 @@ const fail = (e: { message?: string } | null) => {
 };
 
 export type Asset = Tables<'asset'>;
+
+/** AD-19 항목 이름 목록(F-03a 세부 항목 칩). 기본 칩에 입히는 건 core withKindNames */
+export async function fetchAssetKindNames(): Promise<Tables<'asset_kind_name'>[]> {
+  const { data, error } = await supabase()
+    .from('asset_kind_name')
+    .select('*')
+    .order('created_at');
+  fail(error);
+  return data ?? [];
+}
 export type AssetInsert = Omit<TablesInsert<'asset'>, 'space_id'>;
 export type AssetHistory = Tables<'asset_history'>;
 export interface PartnerAssetSum {

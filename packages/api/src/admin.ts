@@ -493,6 +493,31 @@ export async function adminSetLoanRate(kind: string, rateBp: number, applied: st
   });
   fail(error);
 }
+export type KindName = Tables<'asset_kind_name'>;
+/** AD-19 항목 이름 목록: 새 칩(added) 또는 기본 항목 한 줄. id가 있으면 그 줄을 고침 */
+export async function adminSaveKindName(r: {
+  id?: string;
+  grp: string;
+  base: string;
+  name: string;
+  added: boolean;
+  hidden: boolean;
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('admin_save_kind_name', {
+    p_grp: r.grp,
+    p_base: r.base,
+    p_name: r.name.trim(),
+    p_added: r.added,
+    p_hidden: r.hidden,
+    ...(r.id ? { p_id: r.id } : {}),
+  });
+  fail(error);
+  return data as string;
+}
+export async function adminDeleteKindName(id: string) {
+  const { error } = await supabase().rpc('admin_delete_kind_name', { p_id: id });
+  fail(error);
+}
 export async function adminSetHoliday(
   date: string,
   name: string,
