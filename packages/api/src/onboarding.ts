@@ -147,6 +147,21 @@ export async function updateGoal(id: string, patch: TablesUpdate<'goal'>) {
   fail(error);
 }
 
+/** 우리 ↔ 내 목표 바꾸기(22 ‘목표 종류’). 상대가 체크한 저금 줄·직접 넣은 돈이 있으면 서버가 막음 */
+export async function setGoalOwner(
+  id: string,
+  owner: string | null,
+  priority: number,
+): Promise<'ok' | 'partner_saved'> {
+  const { error } = await supabase()
+    .from('goal')
+    .update({ owner_user_id: owner, priority })
+    .eq('id', id);
+  if (error?.message?.includes('partner_saved')) return 'partner_saved';
+  fail(error);
+  return 'ok';
+}
+
 /** 휴지통으로(영구 삭제는 30일 뒤 예약 작업) */
 export async function trashGoals(ids: string[]) {
   if (!ids.length) return;
