@@ -592,6 +592,14 @@
 /* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
 .hg-checkgroup { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-checkgroup .hg-checklist__list > :last-child { border-bottom: 0; }
+/* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */
+.hg-person { display: flex; align-items: center; gap: var(--space-3); width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 600 14px/20px var(--font-sans); text-align: left; cursor: pointer; }
+.hg-person:hover { background: var(--surface-alt); }
+.hg-person:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-person__text { flex: 1; min-width: 0; }
+.hg-person > .hg-ico { color: var(--stone); }
+/* 사람 탭(W-01·W-02 찬우·예빈): 이름 앞 작은 Avatar */
+.hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
 .hg-sechead__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.2px; }
 .hg-sechead__count { font: 600 18px/26px var(--font-sans); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: 600 14px/20px var(--font-sans); color: var(--slate); text-decoration: none; }
@@ -1182,7 +1190,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 /* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */

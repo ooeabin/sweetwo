@@ -7,3 +7,5 @@
 - 세그먼트: 2~3개의 보기 전환(월·연, 목록·달력). 현재 항목은 흰 바탕 + `shadow-1`.
 - 탭 이름은 명사 1~2단어.
 - `role="tablist"` + `button role="tab"` + `aria-selected`. 세그먼트 칸 높이 36px 이상, 터치 좁은 창 44px.
+
+- 항목 앞 칸(`lead`, 선택): 사람 탭은 이름 앞에 작은 Avatar(22px).

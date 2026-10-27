@@ -309,6 +309,7 @@ export function H01Home() {
             list={list}
             partnerList={partnerList}
             partnerName={partner.data?.nickname ?? ''}
+            partnerStarter={!!partner.data && partner.data.id === space.data.created_by}
             goalName={goalName}
             personName={personName}
             meId={meId}

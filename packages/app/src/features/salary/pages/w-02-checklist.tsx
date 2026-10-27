@@ -7,6 +7,7 @@ import {
 } from '@sweetwo/api';
 import { businessDayOnOrBefore, readWon, todayKst } from '@sweetwo/core';
 import { AmountInput, QuestionLayout, Ring, SectionHeader, Tabs } from '@sweetwo/ui';
+import { PersonDot } from '../../../shared/person';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -113,8 +114,23 @@ export function W02Checklist() {
   const people =
     !joint && space.data.couple_state === 'connected' && partner.data
       ? [
-          { value: meId ?? '', label: me.data.nickname ?? '' },
-          { value: partner.data.id, label: partner.data.nickname ?? '' },
+          {
+            value: meId ?? '',
+            label: me.data.nickname ?? '',
+            lead: (
+              <PersonDot name={me.data.nickname ?? ''} starter={meId === space.data.created_by} />
+            ),
+          },
+          {
+            value: partner.data.id,
+            label: partner.data.nickname ?? '',
+            lead: (
+              <PersonDot
+                name={partner.data.nickname ?? ''}
+                starter={partner.data.id === space.data.created_by}
+              />
+            ),
+          },
         ]
       : null;
   if (!list) {

@@ -12,6 +12,7 @@ import {
   SectionHeader,
 } from '@sweetwo/ui';
 import { useState } from 'react';
+import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
 import { CheckLine, doneCount, lineName, toAllocGoal } from '../salary';
 import { copy } from './copy';
@@ -145,6 +146,7 @@ export function SalaryCard({
   list,
   partnerList,
   partnerName,
+  partnerStarter = false,
   goalName,
   personName,
   meId,
@@ -154,6 +156,8 @@ export function SalaryCard({
   list: PayChecklist | undefined;
   partnerList?: PayChecklist;
   partnerName: string;
+  /** 배우자가 시작한 사람인지(Avatar 색) */
+  partnerStarter?: boolean;
   goalName: (id: string | null) => string;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
@@ -215,16 +219,26 @@ export function SalaryCard({
           </button>
         )}
         {partnerList && (
+          // 배우자 체크 현황(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원
           <button
             type="button"
-            className="hg-btn hg-btn--link"
+            className="hg-person"
             onClick={() => go(`/salary?who=${partnerList.owner_user_id ?? ''}`)}
           >
-            {copy.partnerProgress(
-              partnerName,
-              partnerList.pay_check_line.length,
-              doneCount(partnerList),
-            )}
+            <PersonDot name={partnerName} starter={partnerStarter} />
+            <span className="hg-person__text">
+              {copy.partnerProgress(
+                partnerName,
+                partnerList.pay_check_line.length,
+                doneCount(partnerList),
+              )}
+            </span>
+            <Ring
+              done={doneCount(partnerList)}
+              total={partnerList.pay_check_line.length}
+              label={copy.progress(partnerList.pay_check_line.length, doneCount(partnerList))}
+            />
+            <Icon name="chevron-right" size={16} />
           </button>
         )}
         <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary/split')}>
