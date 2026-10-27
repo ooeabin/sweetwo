@@ -195,6 +195,24 @@ async function mock(
         });
       case 'admin_search': {
         const q = String(body().p_q);
+        // 부부 공간 ID: 두 사람
+        if (q === 'space-1')
+          return json(route, [
+            {
+              user_id: CHANWOO,
+              email_masked: 'cha***@example.com',
+              created_at: '2026-10-01T00:00:00Z',
+              couple_state: 'connected',
+              subscription: '무료',
+            },
+            {
+              user_id: 'yebin-0000',
+              email_masked: 'yeb***@example.com',
+              created_at: '2026-10-03T00:00:00Z',
+              couple_state: 'connected',
+              subscription: '무료',
+            },
+          ]);
         return json(
           route,
           q === 'chanwoo@example.com' || q === 'A-10001'
@@ -210,6 +228,8 @@ async function mock(
             : [],
         );
       }
+      case 'admin_note_export':
+        return json(route, 'cs01@sweetwo.kr');
       case 'admin_user_detail':
         return json(route, {
           user_id: CHANWOO,
@@ -502,6 +522,33 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
     p_inquiry_no: 'A-10001',
     p_scopes: ['email'],
     p_reason: '본인 확인',
+  });
+});
+
+test('회원 검색 내려받기(AD-02 5번): 사유를 남겨야 받음, L0 열만, 첫 줄에 관리자 ID', async ({
+  page,
+}) => {
+  const db = await mock(page);
+  await page.goto('/members');
+  await page.getByLabel('이메일, 사용자 ID, 문의 번호로 찾기').fill('space-1');
+  await page.getByRole('button', { name: '보기' }).click();
+  await expect(page.getByText('yeb***@example.com')).toBeVisible();
+  await page.getByRole('button', { name: '내려받기' }).click();
+  const go = page.getByRole('button', { name: '사유 남기고 내려받기' });
+  await expect(go).toBeDisabled();
+  await page.getByLabel('내려받는 이유').fill('문의 A-10001 부부 확인');
+  await axe(page);
+  const dl = page.waitForEvent('download');
+  await go.click();
+  const file = await dl;
+  const text = (await import('node:fs')).readFileSync(await file.path(), 'utf8');
+  expect(text).toContain('내려받은 관리자 cs01@sweetwo.kr');
+  expect(text).toContain('yeb***@example.com');
+  expect(text).not.toContain('chanwoo@'); // 가리지 않은 이메일 없음
+  expect(db.rpc.find((r) => r.fn === 'admin_note_export')?.body).toMatchObject({
+    p_screen: 'AD-02',
+    p_reason: '문의 A-10001 부부 확인',
+    p_rows: 2,
   });
 });
 

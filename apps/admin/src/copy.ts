@@ -49,6 +49,12 @@ export const copy = {
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',
   noMember: '일치하는 회원이 없어요',
+  // AD-02 내려받기(L0 열만, 사유 입력 후, 파일에 관리자 ID)
+  download: '내려받기',
+  downloadReason: '내려받는 이유', // [확인 필요]
+  downloadGo: '사유 남기고 내려받기', // [확인 필요]
+  downloadBy: (admin: string, at: string) => `내려받은 관리자 ${admin}, ${at}`, // [확인 필요] 파일 첫 줄
+  downloadName: (date: string) => `sweetwo-members-${date}.csv`,
   cols: {
     userId: '사용자 ID',
     email: '이메일',
