@@ -199,3 +199,21 @@ test('예비부부, 합쳐서, 월급 없음: 결혼 비용 질문과 0원 분�
   expect(db.splits[0]?.owner_user_id).toBeNull();
   expect(db.checklists).toHaveLength(0); // 월급날이 없으면 체크리스트 없음
 });
+
+test('이어하기(16): 앱을 다시 열면 “이어서 할까요?” → 멈춘 화면부터, 한 번만 물음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-11', onboarding_done_at: null });
+  await page.goto('/');
+  await heading(page, '이어서 할까요?');
+  await expect(page.getByText('멈춘 곳부터 이어서 해요. 적어 둔 답은 그대로예요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '이어서 할게요' }).click();
+  await expect(page).toHaveURL(/\/onboarding\/o-11$/);
+  // 같은 실행 안에서는 다시 묻지 않음
+  await page.evaluate(() => history.pushState({}, '', '/'));
+  await page.goto('/onboarding/o-11');
+  await expect(page.getByRole('heading', { name: '이어서 할까요?' })).toHaveCount(0);
+});

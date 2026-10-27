@@ -1,5 +1,8 @@
+import { QuestionLayout } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { track } from '../../shared/analytics';
+import { copy } from './copy';
 import { isJoinScreen } from '../pairing';
 import { useMe } from './data';
 import { O03MyNickname } from './pages/o-03-my-nickname';
@@ -36,25 +39,68 @@ const SCREENS: Record<string, () => ReactNode> = {
 
 export const isOnboardingScreen = (id: string) => id in SCREENS || /^o-23-\d+$/.test(id);
 
+// 온보딩 화면을 마지막으로 본 시각(분석 onboarding_resumed hours_since_last). 이 기기에만
+const SEEN_KEY = 'sweetwo.onboardingSeenAt';
+const markSeen = () => {
+  try {
+    localStorage.setItem(SEEN_KEY, String(Date.now()));
+  } catch {
+    /* 기억 못 해도 됨 */
+  }
+};
+const hoursSinceSeen = () => {
+  try {
+    const t = Number(localStorage.getItem(SEEN_KEY));
+    return t ? Math.max(0, Math.floor((Date.now() - t) / 3_600_000)) : 0;
+  } catch {
+    return 0;
+  }
+};
+
 export function OnboardingRoute() {
   const { screen = 'o-10' } = useParams();
+  markSeen();
   const m = /^o-23-(\d+)$/.exec(screen);
   if (m) return <O23GoalQuestion key={screen} index={Number(m[1])} />;
   const render = SCREENS[screen];
   return render ? <div key={screen}>{render()}</div> : <Navigate to="/onboarding/o-10" replace />;
 }
 
-/** 온보딩을 마치지 않았으면 멈춘 화면으로(이어하기). 모르는 화면 ID면 그대로 둔다. */
+// 이번 실행에서 이미 물었는지(앱을 다시 열 때만 한 번)
+let asked = false;
+
+/**
+ * 온보딩을 마치지 않았으면 멈춘 화면으로(이어하기). 모르는 화면 ID면 그대로 둔다.
+ * 앱을 다시 열어 첫 화면(O-10)이 아닌 곳에 멈춰 있으면 먼저 “이어서 할까요?”(16·12) → 멈춘 화면부터
+ */
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
+  const nav = useNavigate();
   if (me.isLoading) return null;
   const step = me.data?.onboarding_step?.toLowerCase() ?? 'o-10';
-  if (me.data && !me.data.onboarding_done_at && isOnboardingScreen(step)) {
-    return <Navigate to={`/onboarding/${step}`} replace />;
-  }
-  // 합류 중(P-02b~P-08)이면 그 화면부터
-  if (me.data && !me.data.onboarding_done_at && isJoinScreen(step)) {
-    return <Navigate to={`/join/${step}`} replace />;
-  }
-  return <>{children}</>;
+  const open = !!me.data && !me.data.onboarding_done_at;
+  const to =
+    open && isOnboardingScreen(step)
+      ? `/onboarding/${step}`
+      : open && isJoinScreen(step)
+        ? `/join/${step}`
+        : null;
+  if (!to) return <>{children}</>;
+  // 합류 중(P-)은 묻지 않고 그 화면부터(18 ‘이어서’)
+  if (step === 'o-10' || asked || !isOnboardingScreen(step)) return <Navigate to={to} replace />;
+  return (
+    <QuestionLayout
+      title={copy.resumeQ}
+      help={copy.resumeHelp}
+      primary={{ label: copy.resumeGo }}
+      onSubmit={() => {
+        asked = true;
+        track('onboarding_resumed', {
+          screen_id: step.toUpperCase(),
+          hours_since_last: hoursSinceSeen(),
+        });
+        nav(to, { replace: true });
+      }}
+    />
+  );
 }
