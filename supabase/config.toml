@@ -450,3 +450,7 @@ verify_jwt = false
 # 사진 파일 지우기(DB kick_purge가 pg_net으로 부름). JWT 대신 x-purge-secret(PURGE_CRON_SECRET)로 확인
 [functions.purge-storage]
 verify_jwt = false
+
+# 공휴일 받기(DB kick_holidays가 매주 pg_net으로 부름). JWT 대신 x-holiday-secret(HOLIDAY_CRON_SECRET)로 확인
+[functions.fetch-holidays]
+verify_jwt = false

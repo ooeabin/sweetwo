@@ -437,7 +437,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
 | 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
 | 메일 깨우기(`kick-mail`): 보낼 메일이 있으면 pg_net으로 `send-mail` | 매분 | `* * * * *` | `kick_mail()` |
-| 다음 단계: 공휴일 받기(월 03:00) | | | |
+| 공휴일 받기(`kick-holidays`): pg_net으로 Edge Function `fetch-holidays` → 특일 정보 API 올해·다음 해 → `save_api_holidays`(어드민 날은 안 덮음, 빠진 API 날은 지움) | 월 03:00 | `0 18 * * 0` | `kick_holidays()` |
 
 - (다음 단계) 재시도: 함수 안에서 space 단위로 3회 지수 백오프. 끝내 실패하면 job\_run에 남기고 알림(‘운영 절차’)
 - space마다 `pg_try_advisory_xact_lock`으로 중복 실행 막음. 작업은 멱등하게(두 번 돌아도 결과 같음)
@@ -681,9 +681,9 @@ supabase/
 - 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate`. 다음 챙길 날은 오늘 이후만
 - Y-09 `/calendar/gifts`: 챙길 날별 / 연도별(기기에 기억), 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”(core `giftRepeated`, Y-08b도 같은 규칙)
 - 자동 결혼기념일(마이그레이션 20261029180000): `couple_space` 트리거가 결혼했고(married) 결혼한 날이 있으면 `sync_wedding_care`로 챙길 날 “결혼기념일”(매년 양력, `auto = 'wedding'`) 하나를 만듦. 공간마다 하나(지운 것도 셈, 지우면 다시 안 만듦). 결혼한 날이 바뀌면 날짜를 옮기되 사람이 날짜를 고쳤으면(`auto_moves = false`, 트리거가 표시) 그대로. 예정일(engaged)은 만들지 않음
-- 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function + pg_cron으로 나중에
+- 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function `fetch-holidays` + pg_cron `kick-holidays`(20261107120000, 키는 사람이 할 일)
 - 월급날 앞당기기: core `businessDayOnOrBefore`, `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로
-- 미리 알림(D-30·14·7·당일)과 상대 알림(`care_partner_change`)은 있음. 다음 단계: 특일 API(옛 `family_member`·`apply_family_budget`는 20261101180000에서 지움). 다녀온 뒤 기록 `record_care`는 기록만(목표 돈을 썼으면 G-02b 꺼내 쓰기)
+- 미리 알림(D-30·14·7·당일)과 상대 알림(`care_partner_change`)은 있음. 옛 `family_member`·`apply_family_budget`는 20261101180000에서 지움. 다녀온 뒤 기록 `record_care`는 기록만(목표 돈을 썼으면 G-02b 꺼내 쓰기)
 
 ### 설정 구조
 
@@ -1175,6 +1175,7 @@ supabase/
 - [ ] 메일 3단계(반송·수신 거부): `openssl rand -hex 32`로 값 하나 → Edge Function Secrets `MAIL_EVENTS_SECRET`. SNS 주제(서울) 만들기 → ARN을 `MAIL_EVENTS_TOPIC_ARN`. SES 구성 세트 만들기 → 이벤트 대상 SNS(그 주제, Bounce·Complaint) → 이름을 `SES_CONFIGURATION_SET`. SNS 구독 HTTPS `https://<프로젝트>.supabase.co/functions/v1/mail-events?token=<같은 값>`(구독 확인은 함수가 자동). 메일 2단계 뒤에
 - [ ] 모바일 앱 링크·로그인(기기 빌드 전): Apple Developer 팀 ID → 웹사이트 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`(공개 값), Xcode → App 타깃 → Signing & Capabilities → Associated Domains `applinks:sweetwo.kr`. Android 서명 인증서 SHA-256(Play Console 앱 서명 키, 업로드 키) → `PUBLIC_ANDROID_CERT_SHA256`(쉼표로). appId `kr.sweetwo.app`은 스토어 등록 전에 확정
 - [ ] 모바일 푸시: Apple Developer → Keys에서 APNs 키(.p8) → Edge Function Secrets `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`, `APNS_TOPIC`(kr.sweetwo.app), 개발 설치면 `APNS_ENV`=`sandbox`. Xcode → Signing & Capabilities → Push Notifications. Firebase 프로젝트에 Android 앱(kr.sweetwo.app) 추가 → `google-services.json`을 `apps/mobile/android/app/`에(커밋하지 않음, CI 빌드는 없어도 됨), 서비스 계정 키 JSON → `FCM_SERVICE_ACCOUNT`. `openssl rand -hex 32` → `PUSH_CRON_SECRET`, Vault `push_function_url`(…/functions/v1/send-push)·`push_cron_secret`(같은 값). 다 넣은 뒤 `PUSH_DRIVER`=`send`
+- [ ] 공휴일 받기: 공공데이터포털(data.go.kr)에서 ‘한국천문연구원_특일 정보’ 활용신청 → 마이페이지의 일반 인증키(Decoding) → Edge Function Secrets `HOLIDAY_API_KEY`. `openssl rand -hex 32` → `HOLIDAY_CRON_SECRET`, Vault `holiday_function_url`(…/functions/v1/fetch-holidays)·`holiday_cron_secret`(같은 값). 넣기 전에는 마이그레이션으로 넣은 2026·2027년과 어드민 AD-19 입력만 씀. 응답 모양(item 하나면 객체)은 키를 받은 뒤 실제 응답으로 한 번 확인
 - [ ] 사진 지우기: `openssl rand -hex 32` → Edge Function Secrets `PURGE_CRON_SECRET`, Vault `purge_function_url`(…/functions/v1/purge-storage)·`purge_cron_secret`(같은 값). 넣기 전에는 지울 목록에 쌓이기만 함
 - [ ] 웹사이트 스토어: 앱 등록 뒤 App Store 주소 → 웹사이트 빌드 환경 변수 `PUBLIC_APP_STORE_URL`(Google Play는 `kr.sweetwo.app`으로 정해져 있음, 바꾸면 `PUBLIC_PLAY_STORE_URL`). 공식 배지 이미지(Apple 마케팅 리소스, Google Play 배지)를 받아 `docs/design/assets`에 넣으면 `StoreBadges.astro`를 이미지로 바꿈
 - [ ] 운영 준비 때: Supabase 토큰 `github-actions-sweetwo-prod`(sweetwo-prod만) → GitHub Environments production(승인자 1명), `deploy-prod.yml`
