@@ -1076,7 +1076,7 @@ supabase/
   - 스테이징 Supabase 기본 메일은 조직 팀원 주소로만, 한 시간에 2통까지 보냄. 어드민으로 들어올 회사 메일 주소를 Supabase 조직 → Team에 초대하고 수락해 둠. 운영자가 늘거나 출시 전에는 메일 발송 서비스(SES)를 Supabase SMTP에 붙임
   - `dev-ops.sweetwo.kr` → 회사 메일 입력 → 메일의 링크 → 인증 앱 QR 등록 → 6자리 숫자. 처음 들어온 `@sweetwo.kr`이 최고 관리자
 - 공지(AD-10 `notice`): 초안 → 승인 요청 → 게시. 밤 10시~아침 8시 시작 불가(`quiet_hours`). 앱은 RLS로 게시·노출 기간 안의 것만 읽고 이번 달 상단 띠(`month/notice-band.tsx`, 필독 먼저, 일반은 닫으면 이 기기에서 안 보임)
-- 콘텐츠: AD-14 `content_version`(확인일 6개월 지나면 ‘재검토’), AD-15 `terms_version`(법률 검토 체크 없으면 `legal_check_required`, 버전별 동의 수, 앱은 승인된 버전만 읽음. 재동의 화면은 다음 단계), AD-19 `loan_rate`(0.01% 단위 정수, 누구나 읽음)·공휴일 직접 추가·지우기
+- 콘텐츠: AD-14 `content_version`(확인일 6개월 지나면 ‘재검토’), AD-15 `terms_version`(법률 검토 체크 없으면 `legal_check_required`, 버전별 동의 수, 앱은 승인된 버전만 읽음. 재동의 화면은 다음 단계), AD-19 `loan_rate`(0.01% 단위 정수, 누구나 읽음)·공휴일 직접 추가·지우기(AD-19는 금리·공휴일·항목 이름 모두 운영이 바로 저장 + 감사 로그, 승인 없음. 승인은 AD-15 약관 버전만)
 - 앱 버전·점검(AD-16): `app_config.latest_version_desktop`, `maintenance_starts_at/ends_at/message`. A-01이 점검 시간 안이면 ‘지금 점검 중이에요’ / ‘{시각}에 끝나요’(`fetchLaunchConfig`)
 - AD-02 내려받기(20261107150000 `admin_note_export`): 결과 표 그대로(L0), 사유 필수 + 감사 로그 `download`, 파일 첫 줄에 관리자 ID와 시각
 - 공지 메일(20261107180000): 약관 개정·장애 고지(`notice.kind` terms, incident)만 ‘이메일로도 보내기’(`notice.email`, `admin_set_notice_email`). `send_notice_mails()`(pg_cron `send-notice-mails` 5분마다)가 게시됐고 노출 기간 안이며 아직 안 보낸 공지를 이메일 알림을 켠 사용 중 회원 모두에게 `mail_outbox`로 쌓고(`notice_{kind}`, 메일 상한 밖, 사람마다 한 번) `mailed_at`을 적음. 보내기는 다른 메일과 같은 `send-mail`
