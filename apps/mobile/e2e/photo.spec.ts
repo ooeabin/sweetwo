@@ -96,3 +96,15 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   expect(db.me.avatar_path).toBeNull();
   await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
 });
+
+test('사진 고지: 배우자 합류 전이고 이름도 없으면 ‘배우자와 나만’', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  if (db.space) db.space.partner_nickname = null;
+  await page.goto('/settings/me');
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
+  await heading(page, '프로필 사진');
+  await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
+  await expect(page.getByText('님과 나만')).toHaveCount(0);
+});

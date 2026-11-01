@@ -545,7 +545,11 @@ export const copy = {
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
   photoPick: '사진 고르기',
   photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
-  photoNotice: (partner: string) => `올린 사진은 ${partner}님과 나만 볼 수 있어요`,
+  // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]
+  photoNotice: (partner: string) =>
+    partner
+      ? `올린 사진은 ${partner}님과 나만 볼 수 있어요`
+      : '올린 사진은 배우자와 나만 볼 수 있어요',
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',

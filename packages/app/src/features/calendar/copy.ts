@@ -130,7 +130,11 @@ export const copy = {
   // 사진(챙길 날) 동의: 처음 사진 추가 시(31 동의 8종)
   photoConsentTitle: '사진을 저장해도 될까요?', // [확인 필요]
   photoConsentBody: '기억하고 싶은 사진을 기록과 함께 보관해요', // [확인 필요]
-  photoNotice: (partner: string) => `올린 사진은 ${partner}님과 나만 볼 수 있어요`,
+  // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]
+  photoNotice: (partner: string) =>
+    partner
+      ? `올린 사진은 ${partner}님과 나만 볼 수 있어요`
+      : '올린 사진은 배우자와 나만 볼 수 있어요',
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoGoesWith: '기록을 지우면 사진도 함께 지워져요', // [확인 필요]
   photoConsentLater: '나중에 할게요', // [확인 필요]
