@@ -452,7 +452,7 @@ test('목표 사진(22 G-02): 직접 만든 목표만 “사진 바꾸기” →
   await expect(page.locator('.hg-card__art--custom')).toBeVisible();
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await expect(page.getByRole('heading', { name: '목표 사진' }).first()).toBeVisible();
-  await expect(page.getByText(/님과 나만 볼 수 있어요$/)).toBeVisible();
+  await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
   await axe(page);
   await page
     .getByLabel('사진 고르기', { exact: true })
