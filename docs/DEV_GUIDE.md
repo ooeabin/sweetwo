@@ -930,7 +930,7 @@ supabase/
 
 ### CI/CD (GitHub Actions)
 
-- 러너는 `ubuntu-24.04`로 고정(`ubuntu-latest`가 26.04로 바뀌면서 Playwright 1.56이 chromium 설치를 거부함, 2026-11). Playwright를 올려 26.04를 지원하면 그때 다시 정함
+- 러너는 `ubuntu-latest`(지금 26.04). Playwright를 Ubuntu 26.04를 지원하는 1.64.1로 올림(2026-11, 1.56은 chromium 설치를 거부했음). Playwright 버전은 네 앱(`desktop`, `admin`, `site`, `mobile`) 모두 같게
 
 1. PR(`.github/workflows/ci.yml`): check(lint, 타입 검사, Vitest, 빌드, 에셋 크기, 비밀 값 검사), e2e-web(Playwright, apps/mobile 화면을 브라우저로), e2e-desktop(Electron, xvfb), mobile-android(`cap sync android` + Gradle 디버그 빌드. iOS 시뮬레이터 빌드는 macos 러너로 나중에 추가), db(로컬 Supabase + pgTAP + DB 타입 비교. pgTAP이 실패하면 실패한 줄을 주석(annotation)으로도 남겨 `gh api .../check-runs/{id}/annotations`로 볼 수 있음)
 2. develop 합치기(개발 서버, ADR 0002): 마이그레이션과 Edge Functions를 스테이징 Supabase에, 앱 화면·어드민·웹사이트는 Cloudflare Workers Builds가 GitHub 연결로 빌드해 개발 서버 주소에(→ ‘개발 서버’)
