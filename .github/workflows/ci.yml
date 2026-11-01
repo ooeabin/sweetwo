@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
@@ -50,7 +50,7 @@ jobs:
           '
 
   e2e-web:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
@@ -74,7 +74,7 @@ jobs:
         with: { name: e2e-site, path: apps/site/test-results, if-no-files-found: ignore }
 
   mobile-android:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
@@ -92,7 +92,7 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
 
   e2e-desktop:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -106,7 +106,7 @@ jobs:
       - run: xvfb-run -a pnpm --filter @sweetwo/desktop e2e
 
   db:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     defaults:
       run: { shell: bash }
     steps:
