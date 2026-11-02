@@ -14,7 +14,7 @@ export const URLS = {
   privacyMail: 'mailto:privacy@sweetwo.kr',
 };
 
-export const CATCH = '함께 구워 더 달콤한 자산파이';
+export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
