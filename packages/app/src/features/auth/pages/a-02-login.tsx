@@ -59,10 +59,11 @@ export function A02Login() {
             {st.inviter.slice(0, 1)}
           </span>
         ) : (
-          <Wordmark height={56} />
+          <Wordmark height={40} />
         )
       }
       title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}
+      help={st.inviter ? undefined : copy.startHelp}
       onBack={st.fromStart ? () => nav(-1) : undefined}
       backLabel={st.inviter ? undefined : copy.toStart}
       actions={

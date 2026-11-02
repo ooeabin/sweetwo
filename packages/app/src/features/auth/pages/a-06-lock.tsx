@@ -34,17 +34,18 @@ export function A06LockSetup() {
       <AuthLayout
         icon="fingerprint"
         title={copy.touchIdAsk(bioKind)}
+        help={copy.touchIdHelp(bioKind)}
+        actionsRow
         actions={
           <>
+            <Button variant="secondary" onClick={finish}>
+              {copy.later}
+            </Button>
             <Button
               variant="primary"
-              block
               onClick={() => void bridge.lock.setTouchId(true).then(finish)}
             >
               {copy.touchIdYes(bioKind)}
-            </Button>
-            <Button variant="ghost" block onClick={finish}>
-              {copy.later}
             </Button>
           </>
         }

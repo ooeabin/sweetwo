@@ -43,9 +43,9 @@ test.describe('Mac', () => {
   }) => {
     await outside(page);
     await page.goto('/');
-    await expect(page).toHaveTitle('sweeTwo | 함께 구워 더 달콤한 자산파이');
+    await expect(page).toHaveTitle('sweeTwo | 둘이 구워서 더 달콤한 자산파이');
     await expect(
-      page.getByRole('heading', { level: 1, name: '함께 구워 더 달콤한 자산파이' }),
+      page.getByRole('heading', { level: 1, name: '둘이 구워서 더 달콤한 자산파이' }),
     ).toBeVisible();
     const hero = page.locator('[data-download]').first();
     await expect(hero.getByRole('link', { name: 'Mac용 다운로드' })).toBeVisible();

@@ -9,22 +9,26 @@ export function O01Start() {
   const nav = useNavigate();
   const go = (entry: 'first_run' | 'invite') => {
     prefs.setStarted();
-    // ‘초대받았어요’는 P-01 코드 직접 입력 → 합류하기 → A-02(초대 문구)
+    // ‘코드 입력하기’는 P-01 코드 직접 입력 → 합류하기 → A-02(초대 문구)
     nav(entry === 'invite' ? paths.joinCode : paths.login, { state: { fromStart: true, entry } });
   };
   return (
     <AuthLayout
       className="hg-auth--hero hg-auth--start"
-      media={<Wordmark height={56} />}
+      media={<Wordmark height={40} />}
       title={copy.catchphrase}
+      help={copy.startHelp}
       actions={
         <>
           <Button variant="primary" block onClick={() => go('first_run')}>
             {copy.start}
           </Button>
-          <Button variant="secondary" block onClick={() => go('invite')}>
-            {copy.invited}
-          </Button>
+          <p className="hg-auth__alt">
+            {copy.invitedAsk}{' '}
+            <button type="button" className="hg-btn hg-btn--link" onClick={() => go('invite')}>
+              {copy.invitedLink}
+            </button>
+          </p>
         </>
       }
     />

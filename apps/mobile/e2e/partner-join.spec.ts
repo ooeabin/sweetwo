@@ -41,13 +41,13 @@ test('로그인 전: 초대한 사람을 보여 주고, 합류하기 → 로그�
   expect(back).toBe('/i/K7M2QX?go=1');
 });
 
-test('O-01 ‘초대받았어요’ → P-01 코드 입력 → 초대 확인 → 합류하기 → A-02 초대 문구', async ({
+test('O-01 ‘코드 입력하기’ → P-01 코드 입력 → 초대 확인 → 합류하기 → A-02 초대 문구', async ({
   page,
 }) => {
   await mockSupabase(page);
   await mockPreview(page);
   await page.goto('/');
-  await page.getByRole('button', { name: '초대받았어요' }).click();
+  await page.getByRole('button', { name: '코드 입력하기' }).click();
   await heading(page, '받은 초대 코드를 넣어 주세요');
   await expect(page.getByText('배우자가 보낸 6자리 코드예요')).toBeVisible();
   const next = page.getByRole('button', { name: '다음' });

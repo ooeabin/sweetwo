@@ -12,7 +12,7 @@
 @media (max-width: 767px) and (pointer: coarse) { .hg-chip, .hg-chip--sm, .hg-tab, .hg-seg__item { min-height: 44px; } }
 
 /* Button */
-.hg-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 52px; padding: 0 var(--space-6); border-radius: var(--radius-btn); border: 1px solid transparent; font: 600 14px/20px var(--font-sans); cursor: pointer; white-space: nowrap; }
+.hg-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 52px; padding: 0 var(--space-6); border-radius: var(--radius-btn); border: 1px solid transparent; font: 700 16px/24px var(--font-sans); cursor: pointer; white-space: nowrap; }
 .hg-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-btn__mark { width: 20px; height: 20px; flex: none; }
 .hg-btn--primary { background: var(--brand); color: var(--on-brand); }
@@ -21,8 +21,8 @@
 /* 카드 안 보조 버튼은 옅은 오렌지 바탕 + 진한 오렌지 글자 */
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--brand-ink); }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
-.hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--focus); font-weight: 600; }
-.hg-btn--sm { height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-btn-sm); }
+.hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--focus); font: 600 14px/20px var(--font-sans); }
+.hg-btn--sm { height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-btn-sm); font: 600 14px/20px var(--font-sans); }
 .hg-btn--block { width: 100%; }
 .hg-btn--danger { background: var(--danger); color: var(--on-danger); border-color: transparent; }
 .hg-btn--danger:active, .hg-btn--danger.is-pressed { background: color-mix(in srgb, var(--danger) 85%, var(--ink)); }
@@ -91,7 +91,7 @@
 .hg-field { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; max-width: 480px; min-width: 0; }
 .hg-field__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
 .hg-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); align-items: start; max-width: 480px; }
-.hg-input { box-sizing: border-box; width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 400 16px/24px var(--font-sans); }
+.hg-input { box-sizing: border-box; width: 100%; height: 52px; padding: 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 400 16px/24px var(--font-sans); }
 .hg-input::placeholder { color: var(--stone); }
 .hg-input:focus { outline: 2px solid var(--ink); outline-offset: 0; border-color: transparent; }  /* 입력 칸 포커스는 ink(오렌지는 오류 빨강과 헷갈림, 파랑은 키보드 링과 글자 링크에만) */
 .hg-input.is-error { border-color: var(--danger); }
@@ -223,7 +223,7 @@
 .hg-chapters__item.is-next .hg-chapters__num { color: var(--stone); }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
-.hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
+.hg-q__title { font: 700 24px/34px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
 .hg-q__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 /* 제목 묶음과 입력 사이는 한 단계 넓게(24 + 16 = 40px), 입력은 열 너비를 꽉 채움(버튼과 같은 양옆) */
 .hg-q > .hg-q__head { margin-bottom: var(--space-4); }
@@ -740,7 +740,7 @@
 .hg-lock > * { margin: 0; }
 .hg-lock__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-lock__head > * { margin: 0; }
-.hg-lock__title { font: 600 22px/30px var(--font-sans); text-align: center; word-break: keep-all; }
+.hg-lock__title { font: 700 22px/30px var(--font-sans); text-align: center; word-break: keep-all; }
 .hg-pin { display: flex; gap: var(--space-4); }
 .hg-pin i { width: 16px; height: 16px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
 .hg-pin i.is-on { background: var(--ink); border-color: var(--ink); }
@@ -935,7 +935,9 @@
 .hg-consent__sub .hg-checkbox.is-on { background: none; }
 .hg-consent__sub .hg-checkbox.is-on::after { border-color: var(--ink); }
 .hg-consent__sub .hg-consent__label { font-size: 14px; line-height: 21px; color: var(--slate); }
-.hg-consent__row .hg-btn--link { font-size: 14px; color: var(--slate); text-decoration: underline; text-underline-offset: 3px; }
+.hg-consent__view { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0 calc(var(--space-2) * -1) 0 0; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--stone); cursor: pointer; }
+.hg-consent__view:hover { background: var(--surface-alt); }
+.hg-consent__view:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-consent-card > * { margin: 0; }
 .hg-consent-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
@@ -1264,7 +1266,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 }
 .hg-auth__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-auth__head > * { margin: 0; }
-.hg-auth__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; white-space: pre-line; word-break: keep-all; }
+.hg-auth__title { font: 700 24px/34px var(--font-sans); letter-spacing: -0.4px; white-space: pre-line; word-break: keep-all; }
 .hg-auth__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 .hg-auth__actions { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 360px; }
 .hg-auth__actions .hg-btn { position: relative; }
@@ -1281,9 +1283,18 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth__alert > .hg-ico { flex: none; color: var(--slate); }
 /* 이메일 충돌: 그 제공자 버튼은 제 색 그대로 + 2px ink 테두리 */
 .hg-auth__actions .hg-btn.is-conflict { box-shadow: 0 0 0 2px var(--ink); }
+/* 두 갈래 질문(Face ID 켜기 등): 보조 1 : 주 2 가로 나란히(현대카드 ‘다음에 | 설정’) */
+.hg-auth__actions--row { flex-direction: row; }
+.hg-auth__actions--row > .hg-btn { flex: 1; min-width: 0; }
+.hg-auth__actions--row > .hg-btn--primary { flex: 2; }
 /* 히어로 배치(hg-auth--hero): 워드마크 + 캐치프레이즈(태그라인 18px). O-01 시작·A-02 로그인 공용 */
-.hg-auth--hero .hg-auth__title { font-size: 18px; line-height: 26px; }
-/* O-01 시작(hg-auth--start): 주 버튼 아래 보조 버튼(‘초대받았어요’)은 기본 회색 보조 버튼(surface-alt) */
+.hg-auth--hero .hg-auth__title { font-size: 20px; line-height: 28px; letter-spacing: -0.3px; }
+.hg-auth--hero .hg-auth__help { font-size: 15px; line-height: 22px; white-space: pre-line; word-break: keep-all; }
+/* O-01 버튼 아래 한 줄(당근 ‘이미 계정이 있나요? 로그인’): 회색 글자 + 글자 링크 */
+.hg-auth__alt { margin: var(--space-1) 0 0; text-align: center; font: 400 14px/20px var(--font-sans); color: var(--slate); }
+/* 로그인·잠금 화면의 글자 링크(‘나중에 할게요’, ‘업데이트 없이 보기만 할게요’)는 파랑 대신 회색 */
+:is(.hg-auth, .hg-lock) .hg-btn--link { color: var(--slate); }
+.hg-auth__alt .hg-btn--link { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 /* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
 .hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
 /* 구글·애플(secondary)은 로그인에선 회색 채움 대신 중간 회색 테두리 버튼으로(border-control~hairline 사이) */
@@ -1302,7 +1313,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth__head { margin-top: auto; }     /* 제목을 세로 가운데로 */
   .hg-auth__actions { margin-top: auto; }  /* 버튼 묶음은 아래 끝 기준 */
   /* 히어로(O-01·A-02)는 워드마크+캐치프레이즈를 묶어 함께 세로 가운데로 */
-  .hg-auth--hero > img { margin-top: max(var(--space-16), 20vh); margin-top: max(var(--space-16), 20dvh); }
+  .hg-auth--hero > img { margin-top: auto; }
   .hg-auth--hero .hg-auth__head { margin-top: 0; }
   /* 상태 화면: 아이콘 원 + 제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-auth__icon { margin-top: auto; }
@@ -1320,6 +1331,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
+  /* 약관 동의(A-05): 동의 묶음을 주 버튼 바로 위로(배민 가입 화면처럼 엄지 닿는 곳) */
+  .hg-q > .hg-consent { margin-top: auto; }
+  .hg-q:has(> .hg-consent) .hg-q__foot { margin-top: 0; }
 }
 
 /* 행 앞 아이콘 칸: 3D 그림(목표) 또는 영역 색 원 */

@@ -28,11 +28,14 @@ export const copy = {
   retry: '다시 시도',
 
   // O-01·A-02 공용 히어로 캐치프레이즈(04-brand.md 슬로건). 하나만 쓰고 새 표어를 만들지 않는다
-  catchphrase: '함께 구워 더 달콤한 자산파이',
+  catchphrase: '둘이 구워서 더 달콤한 자산파이',
+  // O-01 서브 2줄
+  startHelp: '함께 모을 목표부터 월급날 체크까지\n둘만의 재정 플랜을 세워 보세요',
 
   // O-01
   start: '시작하기',
-  invited: '초대받았어요',
+  invitedAsk: '초대를 받았나요?', // [확인 필요]
+  invitedLink: '코드 입력하기', // [확인 필요]
 
   // A-02
   recent: '최근 사용',
@@ -111,6 +114,11 @@ export const copy = {
   bioName: { touch: 'Touch ID', face: 'Face ID', fingerprint: '지문' } as const,
   touchIdAsk: (kind: Bio) => `${bioObj(kind)}로도 풀까요?`,
   touchIdYes: (kind: Bio) => `${copy.bioName[kind]} 켜기`, // [확인 필요] 버튼 문구
+  // [확인 필요] 생체 질문 보조 1줄
+  touchIdHelp: (kind: Bio) =>
+    kind === 'face'
+      ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
+      : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
   pinUnlockTitle: 'PIN을 입력해 주세요',
   touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,

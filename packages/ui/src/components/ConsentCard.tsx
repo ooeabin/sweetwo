@@ -52,11 +52,11 @@ export function ConsentGroup({
         {i.onView && (
           <button
             type="button"
-            className="hg-btn hg-btn--link"
+            className="hg-consent__view"
             onClick={i.onView}
             aria-label={`${i.label} ${viewLabel}`}
           >
-            {viewLabel}
+            <Icon name="chevron-right" />
           </button>
         )}
       </div>
