@@ -1,4 +1,4 @@
-import { AuthLayout, BrandSymbol, Button } from '@sweetwo/ui';
+import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths } from '../flow';
@@ -15,7 +15,7 @@ export function O01Start() {
   return (
     <AuthLayout
       className="hg-auth--hero hg-auth--start"
-      media={<BrandSymbol />}
+      media={<Wordmark height={56} />}
       title={copy.catchphrase}
       actions={
         <>

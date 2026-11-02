@@ -1,6 +1,6 @@
 import { webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
-import { AuthLayout, BrandSymbol, ProviderButton } from '@sweetwo/ui';
+import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -59,7 +59,7 @@ export function A02Login() {
             {st.inviter.slice(0, 1)}
           </span>
         ) : (
-          <BrandSymbol />
+          <Wordmark height={56} />
         )
       }
       title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}
