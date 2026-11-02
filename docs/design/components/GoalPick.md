@@ -10,3 +10,5 @@
 - 직접 만들기: 그림 대신 회색 판(`hg-pick__art--custom`, `hairline-soft`) + `plus` 아이콘, 이름 “+ 직접 만들기”.
 - 화면 읽기: 이름, 추천, 순번을 글자로 읽음(순번 원은 글자 그대로). 키보드 Tab·Space·Enter.
 - React 래퍼 `GoalPick`(packages/ui): `items`(key, name, illustration, recommended), `order(key)`, `onToggle(key)`, `customLabel`, `recommendedLabel`.
+
+- 2026-11-02부터 그림 파일이 비어 있음: 그림 자리는 비어 있고 이름만. 새 3D 이모지가 들어오면 원래대로(→ Illustrations ‘다시 만들기 계획’).

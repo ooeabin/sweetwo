@@ -7,6 +7,10 @@ import { paths } from '../flow';
 import { prefs } from '../prefs';
 import { session } from '../session';
 
+// Face ID는 얼굴 스캔, Touch ID와 지문은 지문 아이콘
+const bioIcon = (kind: 'touch' | 'face' | 'fingerprint') =>
+  kind === 'face' ? ('scan-smiley' as const) : ('fingerprint' as const);
+
 const Center = ({ children }: { children: ReactNode }) => (
   <main className="hg-auth">{children}</main>
 );
@@ -32,7 +36,7 @@ export function A06LockSetup() {
   if (step === 'touch') {
     return (
       <AuthLayout
-        icon="fingerprint"
+        icon={bioIcon(bioKind)}
         title={copy.touchIdAsk(bioKind)}
         help={copy.touchIdHelp(bioKind)}
         actionsRow
@@ -210,7 +214,11 @@ export function LockGate({ active }: { active: boolean }) {
         notice={notice}
         touchId={
           touchId
-            ? { label: copy.touchIdUnlock(bioKind), onClick: () => void tryTouchId() }
+            ? {
+                label: copy.touchIdUnlock(bioKind),
+                icon: bioIcon(bioKind),
+                onClick: () => void tryTouchId(),
+              }
             : undefined
         }
         footer={

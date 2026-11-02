@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
-import { Illustration } from './Illustration';
+import { Illustration, hasIllustration } from './Illustration';
 
 // 그림 카드로 목표 고르기(docs/design/components/GoalPick.md). 고른 순서 = 순번 원, 해제하면 당겨짐.
 export interface GoalPickItem {
@@ -52,7 +52,7 @@ export function GoalPick({
           t.key,
           t.name,
           <span className="hg-pick__art" aria-hidden="true">
-            {t.illustration && <Illustration name={t.illustration} />}
+            {hasIllustration(t.illustration) && <Illustration name={t.illustration} />}
           </span>,
           t.recommended,
         ),
