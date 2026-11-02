@@ -26,7 +26,11 @@ export function S11hWeddingDate() {
   const sp = d.space;
   const param = params.get('status');
   const status: Status =
-    param === 'married' || param === 'engaged' ? param : (sp.marriage_status ?? 'married');
+    param === 'married' || param === 'engaged'
+      ? param
+      : sp.marriage_status === 'engaged'
+        ? 'engaged'
+        : 'married'; // 아직 안 정했어요면 날짜 화면이 없어 기본 ‘결혼했어요’
   const changedStatus = status !== sp.marriage_status;
   const engaged = status === 'engaged';
   const today = todayKst();
