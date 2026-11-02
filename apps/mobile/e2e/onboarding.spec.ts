@@ -22,7 +22,7 @@ const NOW = new Date('2026-10-07T10:00:00+09:00');
 async function start(page: Page) {
   await page.goto('/');
   await heading(page, '2분이면 우리의 첫 목표가 생겨요');
-  await expect(page.getByText('목표와 월급만 알려 주세요')).toBeVisible();
+  await expect(page.getByText('언제든 고칠 수 있으니 편하게 적어 주세요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
@@ -35,7 +35,7 @@ async function start(page: Page) {
   await page.getByRole('radio', { name: '나중에 할게요' }).click();
 }
 
-test('신혼부부: 이름부터 첫 체크리스트까지 8화면, 홈에서 분배표 확인과 금액 정하기', async ({
+test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 분배표 확인과 금액 정하기', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -74,6 +74,10 @@ test('신혼부부: 이름부터 첫 체크리스트까지 8화면, 홈에서 �
   await next(page);
   await heading(page, '한 달에 월급이 얼마 들어와요?');
   await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('3500000');
+  await axe(page);
+  await next(page);
+  // 월급날은 따로 한 화면(O-32), 마지막 질문
+  await heading(page, '월급날은 며칠이에요?');
   await page.getByRole('radio', { name: '25일' }).click();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();

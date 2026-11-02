@@ -15,6 +15,7 @@ import { O13BirthYear } from './pages/o-13-birth-year';
 import { O21Goals } from './pages/o-21-goals';
 import { O30SalaryMode } from './pages/o-30-salary-mode';
 import { O31Salary } from './pages/o-31-salary';
+import { O32Payday } from './pages/o-32-payday';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
 const SCREENS: Record<string, () => ReactNode> = {
@@ -28,6 +29,7 @@ const SCREENS: Record<string, () => ReactNode> = {
   'o-21': () => <O21Goals />,
   'o-30': () => <O30SalaryMode />,
   'o-31': () => <O31Salary />,
+  'o-32': () => <O32Payday />,
 };
 
 // 온보딩에서 뺀 화면(2026-11-02, ADR 0004·0005)에 멈춰 있던 사람: O-23·O-24 → O-30, O-50·O-60 → O-31

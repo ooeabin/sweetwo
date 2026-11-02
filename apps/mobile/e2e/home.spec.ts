@@ -3,6 +3,17 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
+// 이미 쓰던 사람: 온보딩 뒤 ‘분배표 확인’(ADR 0005)은 끝낸 상태로
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('sweetwo:home:todo-closed', JSON.stringify(['split:split-1']));
+    } catch {
+      /* 없음 */
+    }
+  });
+});
+
 // 홈(19)과 월급 체크리스트(20 W-01·W-02·W-02a·W-02 끝·W-05). 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 월급 사이클 = 9월 25일 ~ 10월 24일, 월말 확인은 10월 22일부터.
 

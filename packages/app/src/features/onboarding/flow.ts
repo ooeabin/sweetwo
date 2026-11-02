@@ -23,7 +23,7 @@ export const pickedGoals = (goals: Goal[] | undefined) =>
   (goals ?? []).filter((g) => !AUTO_GOALS.includes(g.template));
 export const topGoal = (goals: Goal[] | undefined) => pickedGoals(goals)[0];
 
-/** O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → 홈 */
+/** O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → 홈 */
 export function screens(s: FlowState): string[] {
   // 연결 해제 뒤 다시(16 흐름 요약): O-11부터, O-10·O-03·O-06 건너뜀, O-13 출생연도는 남아 있으면 건너뜀
   const afterUnlink = !!s.space?.unlinked_from;
@@ -35,12 +35,12 @@ export function screens(s: FlowState): string[] {
   if (!(afterUnlink && s.me?.birth_year)) list.push('o-13');
   // 목표는 고르기만(2026-11-02, ADR 0004). 금액·기한은 홈 할 일 ‘목표 금액 정하기’ → G-03b·G-03c
   // 분배표(O-50)와 결과(O-60)는 온보딩에서 뺌(ADR 0005). O-31 다음에 추천 분배표를 만들고 홈으로
-  list.push('o-21', 'o-30', 'o-31');
+  list.push('o-21', 'o-30', 'o-31', 'o-32');
   return list;
 }
 
-/** 마지막 화면(O-31 월급). 여기서 온보딩을 마친다 */
-export const LAST = 'o-31';
+/** 마지막 화면(O-32 월급날). 여기서 온보딩을 마친다 */
+export const LAST = 'o-32';
 
 /** 진행 막대 하나(챕터 없음): O-03~O-50 질문 중 지금까지. O-10, O-60은 없음 */
 export function progressOf(id: string, list: string[]) {

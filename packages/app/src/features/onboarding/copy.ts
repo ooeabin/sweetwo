@@ -33,7 +33,6 @@ export const copy = {
 
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
   overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
-  overviewHelp: '목표와 월급만 알려 주세요', // [확인 필요]
   overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
   chapterStart: '시작할게요',
   edit: '수정',

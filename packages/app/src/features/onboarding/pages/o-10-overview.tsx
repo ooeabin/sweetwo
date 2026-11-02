@@ -9,11 +9,9 @@ export function O10Overview() {
   return (
     <QuestionLayout
       title={copy.overviewTitle}
-      help={copy.overviewHelp}
+      help={copy.overviewEditable}
       primary={{ label: copy.chapterStart, loading: s.saving }}
       onSubmit={() => void s.done()}
-    >
-      <p className="hg-help">{copy.overviewEditable}</p>
-    </QuestionLayout>
+    />
   );
 }

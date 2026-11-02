@@ -3,6 +3,17 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
+// 이미 쓰던 사람: 온보딩 뒤 ‘분배표 확인’(ADR 0005)은 끝낸 상태로
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('sweetwo:home:todo-closed', JSON.stringify(['split:split-1']));
+    } catch {
+      /* 없음 */
+    }
+  });
+});
+
 // 만기일 당일(23 F-04a, 19 H-06 ‘만기·챙길 날’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
 // 찬우 혼자, 10월 7일. 청년 적금 만기 10월 7일, 입출금 통장 300만.
 
