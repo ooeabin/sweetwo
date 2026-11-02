@@ -91,12 +91,14 @@ export function useHomeInput(on = true) {
           inviteClosedOn,
           closed,
           // 내 분배표(각자 = 내 것, 합쳐서 = 공동). 온보딩이 추천값으로 만든 뒤 W-01을 한 번 열 때까지 할 일(ADR 0005)
-          splitId:
-            splits.data?.find((x) =>
-              space.data?.salary_mode === 'joint'
-                ? x.owner_user_id === null
-                : x.owner_user_id === me.data?.id,
-            )?.id ?? null,
+          // 월급이 없으면(쉬는 중) 분배표가 0원뿐이라 확인 대신 ‘월급 알려 주기’ 카드만
+          splitId: !me.data.monthly_income
+            ? null
+            : (splits.data?.find((x) =>
+                space.data?.salary_mode === 'joint'
+                  ? x.owner_user_id === null
+                  : x.owner_user_id === me.data?.id,
+              )?.id ?? null),
         }
       : null;
   return {
