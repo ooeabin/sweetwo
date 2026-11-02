@@ -134,6 +134,21 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면', async ({ pa
   ]);
   expect(db.rpc).toContain('start_checklist');
   expect(db.checklists).toHaveLength(1);
+
+  // 홈 1순위 카드 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)
+  await page.getByRole('button', { name: '금액 정하기', exact: true }).click();
+  await heading(page, '어느 정도 집을 생각하세요?');
+  await page.getByLabel('어느 정도 집을 생각하세요?').fill('500000000');
+  await next(page);
+  await heading(page, '그중 얼마를 모아서 낼까요?');
+  await next(page);
+  await heading(page, '언제까지 모을까요?');
+  await next(page);
+  await expect(page).toHaveURL(/\/goals\/[^/]+$/);
+  expect(db.goals.find((g) => g.template === 'home')).toMatchObject({
+    target_amount: 150_000_000,
+    deadline: '2031-10-01',
+  });
 });
 
 test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도로, 결혼 비용 추천 없음', async ({

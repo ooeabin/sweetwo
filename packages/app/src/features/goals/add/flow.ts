@@ -8,6 +8,12 @@ export const addPath = (step = '') => (step ? `/goals/new/${step}` : '/goals/new
 export function addSteps(d: AddDraft, askOwner: boolean): string[] {
   const t = d.template ? templateByKey(d.template) : undefined;
   if (!t) return ['g-03a'];
+  // 금액 정하기: 질문과 기한만(누구 목표, 이미 모은 돈, 확인은 묻지 않음. 22 G-03b 예외)
+  if (d.fillGoalId)
+    return [
+      ...t.questions.map((_, i) => `q${i + 1}`),
+      ...(t.asksDeadline(d.answers) ? ['deadline'] : []),
+    ];
   return [
     'g-03a',
     ...(askOwner ? ['owner'] : []),

@@ -4,6 +4,7 @@ import { object } from '@sweetwo/core';
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
+  resumeHelp: '멈춘 화면부터 이어서 할 수 있어요', // [확인 필요] 2026-11-02 짧게 다시 넣음
   resumeQ: '이어서 할까요?',
   resumeGo: '이어서 할게요', // [확인 필요]
   next: '다음',

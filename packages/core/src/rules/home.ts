@@ -149,7 +149,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       kind: 'amount',
       goal: noAmount.name,
       key: `amount:${noAmount.id}`,
-      to: `/goals/${noAmount.id}/edit/amount`,
+      to: `/goals/${noAmount.id}/set-amount`,
     };
   const matured = i.assets.find(
     (a) =>
