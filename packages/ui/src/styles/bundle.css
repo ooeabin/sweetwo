@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ecb3e8c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (c933499). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -209,6 +209,7 @@
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
 .hg-q__back { display: inline-flex; align-items: center; justify-content: flex-start; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: var(--radius-md); }
 .hg-q__back:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-q__back-space { display: block; width: 36px; height: 36px; }
 /* 온보딩 챕터 진행(ChapterBar): 뒤로 + 가운데 “2/4 목표” + 챕터 안에서만 차는 얇은 막대(brand). 챕터가 바뀌면 처음부터 */
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
@@ -1339,7 +1340,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth > .hg-auth__alert { margin-top: auto; }
   /* PIN 정하기·잠금: 카드 없이 화면 전체, 키패드는 아래 */
   .hg-auth:has(> .hg-lock) { padding: 0; }
-  .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: var(--space-16) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
+  .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-avatar { margin-top: auto; }
