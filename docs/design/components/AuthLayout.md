@@ -6,7 +6,8 @@
 - 가운데 한 열, 글자 가운데 정렬. 제목 `hg-auth__title`(24px 700, 줄바꿈 `\n` 그대로, 낱말 중간에서 끊지 않음 `keep-all`), 보조 `hg-auth__help`.
 - 글자 링크(`hg-btn--link`, ‘업데이트 없이 보기만 할게요’ 등)는 파랑이 아니라 `slate`. O-01 ‘코드 입력하기’만 `ink` 700 밑줄(당근 ‘로그인’ 링크처럼 눈에 띄게).
 - 상태 아이콘 `hg-auth__icon`(2026-11-02): 제목 위 72px `surface-alt` 원 + `ink` 아이콘 32px(`aria-hidden`). 글자만 있던 상태 화면을 하나의 모양으로 맞춤. 로그인 대기(A-03) `loader-circle`(천천히 돎 `is-busy`, ‘동작 줄이기’면 멈춤), 업데이트 필요 `download`, 점검 중 `settings`, 오프라인(로그인 전) `link`, 실행 오류 `circle-alert`, 세션 만료(A-08) `lock`, Face ID·Touch ID 켜기(A-06) `fingerprint`. 상태 화면 머리에 워드마크는 두지 않음.
-- 안내 띠 `hg-auth__alert`(Banner `hg-banner--info` + `info` 16px, 최대 360px, `role="status"`): 버튼 묶음 바로 위. 로그인 취소, 다른 소셜로 가입함, 오프라인, 브라우저 열기 실패, 업데이트 실패. 화면 맨 아래 작은 회색 글씨로 두지 않음.
+- 안내 띠 `hg-auth__alert`(2026-11-02 당근 안내 상자): `plate` 바탕, `radius-lg`, 안쪽 12px 16px, `info` 16px `ink-2`(첫 줄에 맞춤) + 14px `ink-2` 글자, 최대 360px, `role="status"`. 버튼 묶음 바로 위. 상황이 풀릴 때까지 남는 안내만: 오프라인, 다시 로그인해 주세요, PIN 5번 틀림, 브라우저 열기 실패, 업데이트 실패.
+- 버튼 위 알약 토스트 `hg-auth__toast`(포켓CU): 결과만 알리는 안내(로그인 취소, 제공자 오류, 시간 초과)는 버튼 묶음 위 16px에 `ink` 알약(14px 500)으로 4초 떴다 사라짐. 자리를 차지하지 않아 화면이 흔들리지 않음. 아래 버튼을 가리지 않으려고 전역 Toast 대신 씀.
 - 두 갈래 질문(A-06 Face ID 켜기): 버튼 두 개를 가로로(`hg-auth__actions--row`, 보조 ‘나중에 할게요’ 1 : 주 2). 현대카드 ‘다음에 | 설정’.
 - 버튼 묶음 `hg-auth__actions`: 세로로 쌓고 최대 360px. 버튼은 꽉 차게(`hg-btn--block`). ‘최근 사용’ 배지는 버튼 안 오른쪽 `hg-tag`.
 - 뒤로 `hg-auth__back`: 왼쪽 위. 좁은 창은 IconButton `chevron-left`, 넓은 창은 고스트 버튼 “‹ 이전”(`backLabel`, A-02는 “‹ 처음으로”).

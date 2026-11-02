@@ -141,8 +141,16 @@
 .hg-networth__expected { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 
 /* Toast */
-.hg-toast { display: inline-flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 400 14px/21px var(--font-sans); }
-.hg-toast .hg-btn--link { color: var(--on-ink); text-decoration: underline; text-underline-offset: 3px; }
+.hg-toast { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; max-width: 440px; min-height: 52px; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5); border-radius: var(--radius-btn); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 15px/22px var(--font-sans); }
+.hg-toast__msg { flex: 1; min-width: 0; }
+.hg-toast .hg-btn--link { flex: none; margin-left: auto; color: var(--on-ink); font: 700 15px/22px var(--font-sans); text-decoration: none; }
+.hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
+@keyframes hg-toast-in { from { opacity: 0; transform: translateY(8px); } }
+/* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
+.hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
+.hg-toasts > * { pointer-events: auto; }
+@media (max-width: 767px) { body:has(.hg-frame > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
 /* Modal */
 .hg-scrim { display: grid; place-items: center; padding: var(--space-6); background: var(--scrim); }
@@ -1279,10 +1287,15 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 @media (prefers-reduced-motion: reduce) { .hg-auth__icon.is-busy .hg-ico { animation: none; } }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
 /* 버튼 묶음 위 안내 띠(로그인 취소, 다른 소셜로 가입함, 오프라인, 열기 실패) */
-.hg-auth__alert { box-sizing: border-box; width: 100%; max-width: 360px; text-align: left; }
-.hg-auth__alert > .hg-ico { flex: none; color: var(--slate); }
+/* 안내 띠(당근 안내 상자): 회색 판, 아이콘은 첫 줄에 맞춤, 글자 14px ink-2 */
+.hg-auth__alert { box-sizing: border-box; width: 100%; max-width: 360px; align-items: flex-start; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--plate); color: var(--ink-2); font: 400 14px/21px var(--font-sans); text-align: left; }
+.hg-auth__alert > .hg-ico { flex: none; margin-top: 2px; color: var(--ink-2); }
+/* 버튼 위 알약 토스트(포켓CU): 버튼 묶음 위에 떠 있고 자리를 차지하지 않음 */
+.hg-auth__actions { position: relative; }
+.hg-auth__toast { position: absolute; left: 50%; bottom: calc(100% + var(--space-4)); transform: translateX(-50%); width: auto; max-width: 100%; min-height: 0; padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); font: 500 14px/21px var(--font-sans); white-space: nowrap; animation: hg-auth-toast var(--dur-base) var(--ease-out); }
+@keyframes hg-auth-toast { from { opacity: 0; transform: translate(-50%, 8px); } }
+@media (prefers-reduced-motion: reduce) { .hg-auth__toast { animation: none; } }
 /* 이메일 충돌: 그 제공자 버튼은 제 색 그대로 + 2px ink 테두리 */
-.hg-auth__actions .hg-btn.is-conflict { box-shadow: 0 0 0 2px var(--ink); }
 /* 두 갈래 질문(Face ID 켜기 등): 보조 1 : 주 2 가로 나란히(현대카드 ‘다음에 | 설정’) */
 .hg-auth__actions--row { flex-direction: row; }
 .hg-auth__actions--row > .hg-btn { flex: 1; min-width: 0; }

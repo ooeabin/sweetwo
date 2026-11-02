@@ -32,12 +32,18 @@ export function A03BrowserWait() {
         void routeAfterLogin(p)
           .then((r) => nav(r.to, { replace: true, state: r.state }))
           .catch(() =>
-            nav(paths.login, { replace: true, state: { notice: copy.providerError(p) } }),
+            nav(paths.login, {
+              replace: true,
+              state: { notice: copy.providerError(p), toast: true },
+            }),
           );
       } else if (ev.type === 'login_failed') {
         const reason = ev.reason === 'network' ? 'provider_error' : ev.reason;
         track('login_failed', { method: p, reason });
-        nav(paths.login, { replace: true, state: { notice: failNotice(ev.reason, p) } });
+        nav(paths.login, {
+          replace: true,
+          state: { notice: failNotice(ev.reason, p), toast: true },
+        });
       }
     });
     const onKey = (e: KeyboardEvent) => {

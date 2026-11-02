@@ -98,11 +98,10 @@ test('다른 소셜로 가입된 계정이면 막고 가입한 방법을 알려 
   await asReturningFromProvider(page, 'google');
   await page.goto('/auth/callback?code=e2e-code');
   await expect(page.getByText('이미 카카오로 가입한 이메일이에요')).toBeVisible();
-  // 카카오 버튼은 노란색 그대로 + 테두리 강조(is-conflict), 안내는 버튼 위 띠
-  const kakao = page.getByRole('button', { name: '카카오로 3초 만에 시작하기' });
+  // 카카오 버튼은 노란색 그대로, 안내는 그 버튼 위 말풍선
+  const kakao = page.getByRole('button', { name: /카카오로 3초 만에 시작하기/ });
   await expect(kakao).toHaveClass(/hg-btn--kakao/);
-  await expect(kakao).toHaveClass(/is-conflict/);
-  await expect(page.locator('.hg-auth__alert')).toContainText('이미 카카오로 가입한 이메일이에요');
+  await expect(kakao.locator('.hg-auth__recent')).toHaveText('이미 카카오로 가입한 이메일이에요');
 });
 
 test('제공자 화면에서 취소하면 A-02에 안내', async ({ page }) => {

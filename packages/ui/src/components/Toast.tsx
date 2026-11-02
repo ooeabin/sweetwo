@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 // 잠깐 떴다 사라지는 알림. 4초, 행동이 있으면 6초(docs/design/components/Toast.md). 위치와 쌓기는 app의 ToastHost가 맡는다.
 export function Toast({
   message,
@@ -8,10 +9,11 @@ export function Toast({
 }) {
   return (
     <div className="hg-toast" role="status">
-      {message}
+      <span className="hg-toast__msg">{message}</span>
       {action && (
         <button type="button" className="hg-btn hg-btn--link" onClick={action.onClick}>
           {action.label}
+          <Icon name="chevron-right" size={16} />
         </button>
       )}
     </div>

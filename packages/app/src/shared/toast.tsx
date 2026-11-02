@@ -22,9 +22,7 @@ const useToastStore = create<{
  */
 export const toast = (message: string, action?: ToastItem['action']) => {
   const blocked = Date.now() - lastOfflineBlock() < 3000;
-  useToastStore
-    .getState()
-    .show(blocked ? { message: sharedCopy.needOnline } : { message, action });
+  useToastStore.getState().show(blocked ? { message: sharedCopy.needOnline } : { message, action });
 };
 
 export function ToastHost() {
@@ -36,19 +34,7 @@ export function ToastHost() {
   }, [current, hide]);
   if (!current) return null;
   return (
-    <div
-      aria-live="polite"
-      style={{
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        bottom: 'var(--space-8)',
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '0 var(--space-4)',
-        zIndex: 50,
-      }}
-    >
+    <div aria-live="polite" className="hg-toasts">
       <Toast key={current.id} message={current.message} action={current.action} />
     </div>
   );

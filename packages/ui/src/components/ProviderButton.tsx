@@ -10,6 +10,8 @@ export interface ProviderButtonProps extends Omit<ButtonProps, 'variant' | 'chil
   // 이 기기에서 마지막으로 쓴 방법이면 '최근 사용' 말풍선 표시
   recent?: boolean;
   recentLabel?: ReactNode;
+  // 말풍선에 ‘최근 사용’ 대신 보일 문구(이메일 충돌: 이미 이 방법으로 가입함)
+  bubble?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,6 +21,7 @@ export function ProviderButton({
   variant,
   recent,
   recentLabel,
+  bubble,
   children,
   ...rest
 }: ProviderButtonProps) {
@@ -27,7 +30,7 @@ export function ProviderButton({
     <Button variant={v} block {...rest}>
       <ProviderMark provider={provider} />
       {children}
-      {recent && <span className="hg-auth__recent">{recentLabel}</span>}
+      {(bubble || recent) && <span className="hg-auth__recent">{bubble ?? recentLabel}</span>}
     </Button>
   );
 }
