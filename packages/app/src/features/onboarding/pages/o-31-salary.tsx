@@ -50,18 +50,20 @@ export function O31Salary() {
         monthly
         embedded
         zeroLink={{ label: copy.noSalary, onClick: () => void noSalary() }}
+        extra={
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={isVariable}
+            className="hg-consent__check"
+            onClick={() => setVariable(!isVariable)}
+          >
+            <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
+            <span className="hg-consent__label">{copy.salaryVariable}</span>
+          </button>
+        }
       />
       {ok.banner}
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={isVariable}
-        className="hg-consent__check"
-        onClick={() => setVariable(!isVariable)}
-      >
-        <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
-        <span className="hg-consent__label">{copy.salaryVariable}</span>
-      </button>
     </QuestionLayout>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { goalIcon } from './goal-icons';
 import { Icon } from './Icon';
 import { Illustration, hasIllustration } from './Illustration';
 
@@ -51,9 +52,16 @@ export function GoalPick({
         card(
           t.key,
           t.name,
-          <span className="hg-pick__art" aria-hidden="true">
-            {hasIllustration(t.illustration) && <Illustration name={t.illustration} />}
-          </span>,
+          hasIllustration(t.illustration) ? (
+            <span className="hg-pick__art" aria-hidden="true">
+              <Illustration name={t.illustration} />
+            </span>
+          ) : (
+            // 그림이 아직 없으면 아이콘(2026-11-02, 쿠팡플레이 장르 고르기처럼)
+            <span className="hg-pick__art hg-pick__art--icon" aria-hidden="true">
+              <Icon name={goalIcon(t.key)} size={24} />
+            </span>
+          ),
           t.recommended,
         ),
       )}

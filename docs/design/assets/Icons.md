@@ -67,3 +67,23 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--wallet` | `wallet` |  |
 | `hg-ico--windows-logo` | `windows-logo` | 웹사이트 Windows용 다운로드 |
 | `hg-ico--x` | `x` |  |
+| `hg-ico--hand-coins` | `hand-coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--truck` | `truck` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--couch` | `couch` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--baby` | `baby` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--graduation-cap` | `graduation-cap` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--users-three` | `users-three` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--paw-print` | `paw-print` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--airplane-tilt` | `airplane-tilt` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--heart` | `heart` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--shopping-bag` | `shopping-bag` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--palette` | `palette` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--car` | `car` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--wrench` | `wrench` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--calendar-check` | `calendar-check` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--plant` | `plant` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--coins` | `coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--diamond` | `diamond` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--first-aid-kit` | `first-aid-kit` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+

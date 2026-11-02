@@ -33,6 +33,12 @@ export const copy = {
 
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
   overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
+  // [확인 필요] O-10 3단계 안내(2026-11-02, 배민 커넥트·GCOO 시작 화면처럼)
+  overviewSteps: [
+    { icon: 'flag-pennant', text: '같이 이룰 목표를 골라요' },
+    { icon: 'wallet', text: '월급과 월급날을 알려 줘요' },
+    { icon: 'calendar-check', text: '월급날마다 보낸 돈을 체크해요' },
+  ] as const,
   overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
   chapterStart: '시작할게요',
   edit: '수정',
