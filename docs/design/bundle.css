@@ -145,7 +145,7 @@
 .hg-toast__msg { flex: 1; min-width: 0; }
 .hg-toast .hg-btn--link { flex: none; margin-left: auto; color: var(--on-ink); font: 700 15px/22px var(--font-sans); text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
-@keyframes hg-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
