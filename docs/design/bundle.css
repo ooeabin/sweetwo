@@ -1330,7 +1330,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth__head { margin-top: auto; }     /* 제목을 세로 가운데로 */
   .hg-auth__actions { margin-top: auto; }  /* 버튼 묶음은 아래 끝 기준 */
   /* 히어로(O-01·A-02)는 워드마크+캐치프레이즈를 묶어 함께 세로 가운데로 */
-  .hg-auth--hero > img { margin-top: auto; }
+  .hg-auth--hero > img { margin-top: max(var(--space-16), 30vh); margin-top: max(var(--space-16), 30dvh); }  /* O-01·A-02 같은 높이(버튼 수와 상관없이) */
   .hg-auth--hero .hg-auth__head { margin-top: 0; }
   /* 상태 화면: 아이콘 원 + 제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-auth__icon { margin-top: auto; }
