@@ -16,8 +16,6 @@ const axe = async (page: Page) => {
 const heading = (page: Page, name: string | RegExp) =>
   expect(page.getByRole('heading', { name })).toBeVisible();
 const next = (page: Page) => page.getByRole('button', { name: '다음' }).click();
-const row = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^${name}`) });
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
 /** O-10 → O-03 → O-06(나중에) */
