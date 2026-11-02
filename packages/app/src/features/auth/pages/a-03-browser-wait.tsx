@@ -65,6 +65,8 @@ export function A03BrowserWait() {
 
   return (
     <AuthLayout
+      icon="loader-circle"
+      busy={!openFailed}
       title={copy.waitTitle}
       help={copy.waitHelp}
       actions={
@@ -78,7 +80,7 @@ export function A03BrowserWait() {
           </Button>
         </>
       }
-      note={openFailed ? copy.browserFailed : undefined}
+      alert={openFailed ? copy.browserFailed : undefined}
     />
   );
 }

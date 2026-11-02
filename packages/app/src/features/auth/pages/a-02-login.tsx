@@ -71,11 +71,14 @@ export function A02Login() {
             <ProviderButton
               key={p}
               provider={p}
-              variant={st.conflict === p ? 'primary' : undefined}
               recent={recent === p}
               recentLabel={copy.recent}
               disabled={!online || busy !== null}
-              className={busy === p ? 'is-loading' : undefined}
+              className={
+                [busy === p && 'is-loading', st.conflict === p && 'is-conflict']
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
               onClick={() => void start(p)}
             >
               {copy.continueWith[p]}
@@ -83,7 +86,7 @@ export function A02Login() {
           ))}
         </>
       }
-      note={!online ? copy.offline : notice}
+      alert={!online ? copy.offline : notice}
     />
   );
 }

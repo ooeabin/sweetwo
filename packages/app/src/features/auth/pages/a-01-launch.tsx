@@ -110,7 +110,7 @@ export function A01Launch() {
   if (phase === 'maintenance') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="settings"
         title={copy.maintenanceTitle}
         help={
           maintenanceEnds
@@ -129,7 +129,7 @@ export function A01Launch() {
   if (phase === 'update') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="download"
         title={copy.updateTitle}
         help={copy.updateSub}
         actions={
@@ -159,14 +159,14 @@ export function A01Launch() {
             </button>
           </>
         }
-        note={updateFailed ? copy.updateFailed : undefined}
+        alert={updateFailed ? copy.updateFailed : undefined}
       />
     );
   }
   if (phase === 'error') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="circle-alert"
         title={copy.signupFailed}
         actions={
           <Button variant="secondary" block onClick={() => window.location.reload()}>
@@ -179,7 +179,7 @@ export function A01Launch() {
   if (phase === 'offline') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="link"
         title={copy.offlineNoSession}
         actions={
           <Button variant="secondary" block onClick={() => void decide()}>
