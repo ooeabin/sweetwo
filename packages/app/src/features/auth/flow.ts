@@ -23,7 +23,8 @@ export const paths = {
 } as const;
 
 /** A-02로 갈 때 넘기는 안내 */
-export type LoginNotice = { notice?: string; conflict?: AuthProvider };
+/** notice: 버튼 위 띠(남아 있음). toast: true면 버튼 위 알약 토스트로 4초만(취소, 실패 같은 결과 안내). conflict: 가입한 방법 버튼에 말풍선 */
+export type LoginNotice = { notice?: string; toast?: boolean; conflict?: AuthProvider };
 
 /** 로그인이 끝난 뒤(또는 세션이 있는 재방문) 어디로 갈지. provider는 방금 누른 버튼. */
 export async function routeAfterLogin(

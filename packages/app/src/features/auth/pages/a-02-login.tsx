@@ -1,7 +1,7 @@
 import { webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
 import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { copy } from '../copy';
@@ -24,12 +24,20 @@ export function A02Login() {
   const online = useOnline();
   const recent = prefs.lastProvider();
   const [busy, setBusy] = useState<AuthProvider | null>(null);
-  const [notice, setNotice] = useState(st.notice);
+  const [notice, setNotice] = useState(st.toast ? undefined : st.notice);
+  // 취소·실패 같은 결과는 버튼 위 알약으로 4초만(디자인 Toast)
+  const [flash, setFlash] = useState(st.toast ? st.notice : undefined);
+  useEffect(() => {
+    if (!flash) return;
+    const t = setTimeout(() => setFlash(undefined), 4000);
+    return () => clearTimeout(t);
+  }, [flash]);
   const entry: Entry = st.entry ?? (recent ? 'revisit' : 'first_run');
 
   const start = async (p: AuthProvider) => {
     setBusy(p);
     setNotice(undefined);
+    setFlash(undefined);
     if (session.bridge) {
       track('login_started', { method: p, entry, flow: 'browser' });
       const r = await session.bridge.auth.start(p);
@@ -75,11 +83,8 @@ export function A02Login() {
               recent={recent === p}
               recentLabel={copy.recent}
               disabled={!online || busy !== null}
-              className={
-                [busy === p && 'is-loading', st.conflict === p && 'is-conflict']
-                  .filter(Boolean)
-                  .join(' ') || undefined
-              }
+              className={busy === p ? 'is-loading' : undefined}
+              bubble={st.conflict === p ? copy.emailConflict(p) : undefined}
               onClick={() => void start(p)}
             >
               {copy.continueWith[p]}
@@ -87,7 +92,8 @@ export function A02Login() {
           ))}
         </>
       }
-      alert={!online ? copy.offline : notice}
+      alert={!online ? copy.offline : st.conflict ? undefined : notice}
+      toast={online ? flash : undefined}
     />
   );
 }

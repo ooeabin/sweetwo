@@ -204,17 +204,22 @@ export function QuestionLayout({
           <div className="hg-q__nav">
             <ChapterBar chapter={chapter} onBack={onBack} />
           </div>
+        ) : steps || onBack ? (
+          <div className="hg-q__nav">
+            {steps && <StepsBar steps={steps} />}
+            {onBack ? (
+              <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+                <Icon name="chevron-left" size={24} />
+              </button>
+            ) : (
+              <span className="hg-q__back-space" aria-hidden="true" />
+            )}
+          </div>
         ) : (
-          (steps || onBack) && (
-            <div className="hg-q__nav">
-              {steps && <StepsBar steps={steps} />}
-              {onBack && (
-                <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
-                  <Icon name="chevron-left" size={24} />
-                </button>
-              )}
-            </div>
-          )
+          // 뒤로가 없는 화면도 제목 자리를 같게(좁은 창에서 뒤로 버튼 높이만큼 비움)
+          <div className="hg-q__nav" aria-hidden="true">
+            <span className="hg-q__back-space" />
+          </div>
         )}
         <div className="hg-q__head">
           <h1 className="hg-q__title">{title}</h1>

@@ -53,7 +53,7 @@ export function AuthCallback() {
       });
       nav(paths.login, {
         replace: true,
-        state: { notice: cancelled ? copy.cancelled : copy.providerError(provider) },
+        state: { notice: cancelled ? copy.cancelled : copy.providerError(provider), toast: true },
       });
       return;
     }

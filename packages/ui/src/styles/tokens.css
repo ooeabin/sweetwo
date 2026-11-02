@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (68949cd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (f445693). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -13,8 +13,8 @@
   --ink: #1a1b1c; /* 제목·본문 기본 글자색, 주 버튼이 아닌 강한 요소(현재 탭 알약 등). surface·surface-alt·모든 영역 틴트 위 4.5:1 이상. */
   --ink-2: #2a2b2d; /* 강조 본문. ink보다 한 단계 부드러운 문단. */
   --slate: #545557; /* 보조 글자: 설명 1줄, 메타 정보. surface·surface-alt 위. */
-  --stone: #68696b; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜, 비활성 버튼 글자. surface·surface-alt 위 4.5:1 이상. */
-  --muted: #a4a5a7; /* 비활성 글자·아이콘에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
+  --stone: #68696b; /* 캡션, 회색 보조 줄(예상 순자산 등), 입력 자리표시, 다른 달 날짜. surface·surface-alt 위 4.5:1 이상. */
+  --muted: #a4a5a7; /* 비활성 글자·아이콘(비활성 버튼 글자 포함)에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
   --brand: #ff7716; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 달성 배지, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. 흰 글자 대비 2.7:1로 WCAG AA 미달을 알고 씀(주 버튼, 달성 배지만 axe color-contrast 예외). */

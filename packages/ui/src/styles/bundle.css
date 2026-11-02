@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (68949cd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (f445693). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -30,7 +30,7 @@
 /* 카카오 브랜드 버튼: 제공자 공식색 예외(토큰 아님). 라이트·다크 모두 노랑 유지 */
 .hg-btn--kakao { background: #fee500; color: rgba(0, 0, 0, 0.85); border-color: transparent; }
 .hg-btn--kakao:active, .hg-btn--kakao.is-pressed { background: #efd900; }
-.hg-btn:disabled, .hg-btn.is-disabled { background: var(--hairline); color: var(--stone); border-color: transparent; cursor: not-allowed; }
+.hg-btn:disabled, .hg-btn.is-disabled { background: var(--surface-alt); color: var(--muted); border-color: transparent; cursor: not-allowed; }
 
 /* Chip */
 .hg-chip { display: inline-flex; align-items: center; gap: var(--space-1); height: 40px; padding: 0 var(--space-4); border-radius: var(--radius-full); border: 1px solid var(--border-control); background: var(--surface); color: var(--ink); font: 600 14px/20px var(--font-sans); cursor: pointer; }
@@ -142,8 +142,16 @@
 .hg-networth__expected { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 
 /* Toast */
-.hg-toast { display: inline-flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 400 14px/21px var(--font-sans); }
-.hg-toast .hg-btn--link { color: var(--on-ink); text-decoration: underline; text-underline-offset: 3px; }
+.hg-toast { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; max-width: 440px; min-height: 52px; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5); border-radius: var(--radius-btn); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 15px/22px var(--font-sans); }
+.hg-toast__msg { flex: 1; min-width: 0; }
+.hg-toast .hg-btn--link { flex: none; margin-left: auto; color: var(--on-ink); font: 700 15px/22px var(--font-sans); text-decoration: none; }
+.hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
+@keyframes hg-toast-in { from { opacity: 0; transform: translateY(8px); } }
+/* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
+.hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
+.hg-toasts > * { pointer-events: auto; }
+@media (max-width: 767px) { body:has(.hg-frame > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
 /* Modal */
 .hg-scrim { display: grid; place-items: center; padding: var(--space-6); background: var(--scrim); }
@@ -201,6 +209,7 @@
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
 .hg-q__back { display: inline-flex; align-items: center; justify-content: flex-start; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: var(--radius-md); }
 .hg-q__back:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-q__back-space { display: block; width: 36px; height: 36px; }
 /* 온보딩 챕터 진행(ChapterBar): 뒤로 + 가운데 “2/4 목표” + 챕터 안에서만 차는 얇은 막대(brand). 챕터가 바뀌면 처음부터 */
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
@@ -1280,10 +1289,15 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 @media (prefers-reduced-motion: reduce) { .hg-auth__icon.is-busy .hg-ico { animation: none; } }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
 /* 버튼 묶음 위 안내 띠(로그인 취소, 다른 소셜로 가입함, 오프라인, 열기 실패) */
-.hg-auth__alert { box-sizing: border-box; width: 100%; max-width: 360px; text-align: left; }
-.hg-auth__alert > .hg-ico { flex: none; color: var(--slate); }
+/* 안내 띠(당근 안내 상자): 회색 판, 아이콘은 첫 줄에 맞춤, 글자 14px ink-2 */
+.hg-auth__alert { box-sizing: border-box; width: 100%; max-width: 360px; align-items: flex-start; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--plate); color: var(--ink-2); font: 400 14px/21px var(--font-sans); text-align: left; }
+.hg-auth__alert > .hg-ico { flex: none; margin-top: 2px; color: var(--ink-2); }
+/* 버튼 위 알약 토스트(포켓CU): 버튼 묶음 위에 떠 있고 자리를 차지하지 않음 */
+.hg-auth__actions { position: relative; }
+.hg-auth__toast { position: absolute; left: 50%; bottom: calc(100% + var(--space-4)); transform: translateX(-50%); width: auto; max-width: 100%; min-height: 0; padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); font: 500 14px/21px var(--font-sans); white-space: nowrap; animation: hg-auth-toast var(--dur-base) var(--ease-out); }
+@keyframes hg-auth-toast { from { opacity: 0; transform: translate(-50%, 8px); } }
+@media (prefers-reduced-motion: reduce) { .hg-auth__toast { animation: none; } }
 /* 이메일 충돌: 그 제공자 버튼은 제 색 그대로 + 2px ink 테두리 */
-.hg-auth__actions .hg-btn.is-conflict { box-shadow: 0 0 0 2px var(--ink); }
 /* 두 갈래 질문(Face ID 켜기 등): 보조 1 : 주 2 가로 나란히(현대카드 ‘다음에 | 설정’) */
 .hg-auth__actions--row { flex-direction: row; }
 .hg-auth__actions--row > .hg-btn { flex: 1; min-width: 0; }
@@ -1306,8 +1320,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth--login .hg-checkbox { width: 18px; height: 18px; }
 .hg-auth--login .hg-auth__recent { position: absolute; right: var(--space-4); bottom: calc(100% - var(--space-2)); z-index: 1; padding: 2px 8px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 11px/16px var(--font-sans); white-space: nowrap; pointer-events: none; }
 .hg-auth--login .hg-auth__recent::after { content: ""; position: absolute; top: 100%; right: 14px; border: 5px solid transparent; border-bottom: 0; border-top-color: var(--ink); }
+/* 이메일 충돌 말풍선(지그재그 ‘지금 가입하고…’): 버튼 위 가운데 흰 말풍선, 13px, 넉넉한 여백, 꼬리 아래 */
+.hg-auth--login .hg-auth__bubble { position: absolute; left: 50%; bottom: calc(100% + var(--space-3)); transform: translateX(-50%); z-index: 1; padding: var(--space-2) var(--space-4); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); font: 500 13px/20px var(--font-sans); white-space: nowrap; pointer-events: none; }
+.hg-auth--login .hg-auth__bubble::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-right: 1px solid var(--hairline-soft); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); transform: rotate(45deg); }
 @media (min-width: 768px) {
-  .hg-auth--hero .hg-auth__actions { margin-top: var(--space-6); }
+  .hg-auth--hero .hg-auth__actions { margin-top: var(--space-16); }  /* 버튼 위 토스트·말풍선 자리 */
 }
 @media (max-width: 767px) {
   .hg-auth { justify-content: flex-start; }
@@ -1323,7 +1340,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth > .hg-auth__alert { margin-top: auto; }
   /* PIN 정하기·잠금: 카드 없이 화면 전체, 키패드는 아래 */
   .hg-auth:has(> .hg-lock) { padding: 0; }
-  .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: var(--space-16) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
+  .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-avatar { margin-top: auto; }
