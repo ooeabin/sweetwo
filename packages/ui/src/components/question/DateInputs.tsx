@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { cx } from '../cx';
+import { DateWheel } from './DateWheel';
 import { Chip } from '../Chip';
 
 // Q4 날짜·월 선택(docs/spec/12-question-pattern.md Q4). 칸이 차면 다음 칸으로.
@@ -28,6 +29,7 @@ function Box({
   inputRef,
   invalid,
   onPasteAll,
+  seg,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -38,12 +40,14 @@ function Box({
   inputRef?: React.Ref<HTMLInputElement>;
   invalid?: boolean;
   onPasteAll?: (t: string) => boolean;
+  /** 한 칸처럼 보이는 날짜 칸 안의 조각(테두리 없음) */
+  seg?: boolean;
 }) {
   return (
     <input
       ref={inputRef}
-      className={cx('hg-input', invalid && 'is-error')}
-      style={{ width: len === 4 ? '6.5em' : '4.5em', textAlign: 'center' }}
+      className={seg ? 'hg-datefield__seg' : cx('hg-input', invalid && 'is-error')}
+      style={seg ? { width: len === 4 ? '3.2em' : '1.8em' } : { width: len === 4 ? '6.5em' : '4.5em', textAlign: 'center' }}
       inputMode="numeric"
       aria-label={label}
       placeholder={placeholder}
@@ -145,14 +149,15 @@ export function DateInput({
   };
   return (
     <div className="hg-field" role="group" aria-label={label}>
-      <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+      {/* 한 칸(2026-11-02): 연, 월, 일 조각을 글자 칸 하나 안에. 칸 단위는 조각 뒤 작은 글자 */}
+      <div className={cx('hg-input hg-datefield', error && 'is-error')}>
         <Box
           inputRef={yRef}
           label="년"
           len={4}
           placeholder="YYYY"
           value={y}
-          invalid={!!error}
+          seg
           onPasteAll={pasteAll}
           onChange={(v) => {
             setY(v);
@@ -160,14 +165,14 @@ export function DateInput({
           }}
           next={() => mRef.current?.focus()}
         />
-        <span>년</span>
+        <span className="hg-datefield__unit">년</span>
         <Box
           inputRef={mRef}
           label="월"
           len={2}
           placeholder="MM"
           value={m}
-          invalid={!!error}
+          seg
           onPasteAll={pasteAll}
           onChange={(v) => {
             setM(v);
@@ -175,21 +180,21 @@ export function DateInput({
           }}
           next={() => dRef.current?.focus()}
         />
-        <span>월</span>
+        <span className="hg-datefield__unit">월</span>
         <Box
           inputRef={dRef}
           label="일"
           len={2}
           placeholder="DD"
           value={d}
-          invalid={!!error}
+          seg
           onPasteAll={pasteAll}
           onChange={(v) => {
             setD(v);
             emit(y, m, v);
           }}
         />
-        <span>일</span>
+        <span className="hg-datefield__unit">일</span>
       </div>
       {error && (
         <span className="hg-help is-error" role="alert">
@@ -200,44 +205,38 @@ export function DateInput({
   );
 }
 
-/** 연·월(예정 연·월, 여행 가는 달, 신혼집 시기). 연도 칸 + 월 12칸 */
+/** 연·월(예정 연·월, 여행 가는 달, 기한). 연·월 2열 휠(2026-11-02, 카카오페이 월 고르기처럼).
+ * 값이 없으면 다음 달에서 시작하고 그 값을 바로 알려 줌. 범위 밖은 소비자가 error로 알림 */
 export function YearMonthInput({
   label,
   value,
   onChange,
   error,
+  minYear,
+  maxYear,
 }: {
   label: string;
   value: string | null; // 'YYYY-MM'
   onChange: (v: string | null) => void;
   error?: string;
+  minYear?: number;
+  maxYear?: number;
 }) {
-  const [y, setY] = useState(value?.slice(0, 4) ?? '');
-  const month = value ? Number(value.slice(5, 7)) : null;
-  const yRef = useRef<HTMLInputElement>(null);
-  useEffect(() => yRef.current?.focus(), []);
+  const now = new Date();
+  const y0 = now.getFullYear();
+  const nextM = now.getMonth() + 2; // 다음 달(1~13)
+  const start = nextM > 12 ? { y: y0 + 1, m: 1, d: 1 } : { y: y0, m: nextM, d: 1 };
+  const v = value ? { y: Number(value.slice(0, 4)), m: Number(value.slice(5, 7)), d: 1 } : null;
   return (
-    <div className="hg-field" role="group" aria-label={label}>
-      <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
-        <Box
-          inputRef={yRef}
-          label="년"
-          len={4}
-          placeholder="YYYY"
-          value={y}
-          invalid={!!error}
-          onChange={(v) => {
-            setY(v);
-            onChange(v.length === 4 && month ? `${v}-${pad(month)}` : null);
-          }}
-        />
-        <span>년</span>
-      </div>
-      <MonthChips
-        value={month}
-        onChange={(mm) => onChange(y.length === 4 ? `${y}-${pad(mm)}` : null)}
-        label="월"
-        disabled={y.length !== 4}
+    <div className="hg-field">
+      <DateWheel
+        label={label}
+        value={v}
+        initial={start}
+        minYear={minYear ?? y0 - 50}
+        maxYear={maxYear ?? y0 + 40}
+        yearMonth
+        onChange={(n) => onChange(`${n.y}-${pad(n.m)}`)}
       />
       {error && (
         <span className="hg-help is-error" role="alert">

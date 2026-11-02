@@ -19,3 +19,19 @@ export async function setWheel(page: Page, label: string, y: number, m?: number,
     }
   }
 }
+
+/** 연·월 휠(YearMonthInput)을 맞춤. 화면에 휠이 하나일 때 */
+export async function setYearMonth(page: Page, y: number, m: number) {
+  for (const [name, want] of [
+    ['년', y],
+    ['월', m],
+  ] as const) {
+    const col = page.getByRole('spinbutton', { name, exact: true });
+    await col.focus();
+    for (let i = 0; i < 400; i++) {
+      const now = Number(await col.getAttribute('aria-valuenow'));
+      if (now === want) break;
+      await col.press(now < want ? 'ArrowDown' : 'ArrowUp');
+    }
+  }
+}

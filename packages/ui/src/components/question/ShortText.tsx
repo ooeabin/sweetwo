@@ -62,7 +62,8 @@ export function ShortText({
         )}
       </div>
       <span id={`${id}-count`} className={error ? 'hg-help is-error' : 'hg-help'}>
-        {error ?? notice ?? `${chars.length}/${max}`}
+        {/* 글자 수는 한도에 가까워질 때만(80%부터, 2026-11-02 배민·당근처럼 평소엔 숨김) */}
+        {error ?? notice ?? (chars.length >= Math.ceil(max * 0.8) ? `${chars.length}/${max}` : '')}
       </span>
     </div>
   );
