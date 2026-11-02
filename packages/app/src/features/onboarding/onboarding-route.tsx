@@ -91,7 +91,6 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   return (
     <QuestionLayout
       title={copy.resumeQ}
-      help={copy.resumeHelp}
       primary={{ label: copy.resumeGo }}
       onSubmit={() => {
         asked = true;
