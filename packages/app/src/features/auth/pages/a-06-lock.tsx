@@ -221,7 +221,7 @@ export function LockGate({ active }: { active: boolean }) {
               }
             : undefined
         }
-        footer={
+        assist={
           <button type="button" className="hg-btn hg-btn--link" onClick={() => void forgot()}>
             {copy.forgotPin}
           </button>
