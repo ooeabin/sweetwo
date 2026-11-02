@@ -4,6 +4,7 @@
 
 - 소비자가 주는 것: 장면 자리(선택, SceneMedia, 지금은 비어 있음), 상태 아이콘(선택), 제목, 보조 1줄(선택), 안내 띠(선택), 버튼 묶음, 뒤로(선택), 아래 안내 1줄(선택).
 - 가운데 한 열, 글자 가운데 정렬. 제목 `hg-auth__title`(28px, 줄바꿈 `\n` 그대로, 낱말 중간에서 끊지 않음 `keep-all`), 보조 `hg-auth__help`.
+- 글자 링크(`hg-btn--link`, ‘업데이트 없이 보기만 할게요’ 등)는 파랑이 아니라 `slate`(2026-11-02).
 - 상태 아이콘 `hg-auth__icon`(2026-11-02): 제목 위 72px `surface-alt` 원 + `ink` 아이콘 32px(`aria-hidden`). 글자만 있던 상태 화면을 하나의 모양으로 맞춤. 로그인 대기(A-03) `loader-circle`(천천히 돎 `is-busy`, ‘동작 줄이기’면 멈춤), 업데이트 필요 `download`, 점검 중 `settings`, 오프라인(로그인 전) `link`, 실행 오류 `circle-alert`, 세션 만료(A-08) `lock`, Face ID·Touch ID 켜기(A-06) `fingerprint`. 상태 화면 머리에 워드마크는 두지 않음.
 - 안내 띠 `hg-auth__alert`(Banner `hg-banner--info` + `info` 16px, 최대 360px, `role="status"`): 버튼 묶음 바로 위. 로그인 취소, 다른 소셜로 가입함, 오프라인, 브라우저 열기 실패, 업데이트 실패. 화면 맨 아래 작은 회색 글씨로 두지 않음.
 - 버튼 묶음 `hg-auth__actions`: 세로로 쌓고 최대 360px. 버튼은 꽉 차게(`hg-btn--block`). ‘최근 사용’ 배지는 버튼 안 오른쪽 `hg-tag`.

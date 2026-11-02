@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (9f55606). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (445f259). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1271,6 +1271,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth__actions .hg-btn { position: relative; }
 .hg-auth__actions .hg-tag { position: absolute; right: var(--space-3); }
 .hg-auth__note { font: 400 13px/18px var(--font-sans); color: var(--slate); }
+/* 로그인·잠금 화면의 글자 링크(‘나중에 할게요’, ‘업데이트 없이 보기만 할게요’)는 파랑 대신 회색 */
+:is(.hg-auth, .hg-lock) .hg-btn--link { color: var(--slate); }
 /* 상태 화면(로그인 대기, 업데이트, 점검, 세션 만료, 오프라인, Face ID) 제목 위 아이콘 원 */
 .hg-auth__icon { display: grid; place-items: center; flex: none; width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
 .hg-auth__icon .hg-ico { width: 32px; height: 32px; }
