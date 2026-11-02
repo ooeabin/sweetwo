@@ -111,16 +111,41 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 예비·�
 - 가까운 때는 말로: “오늘”, “어제”, “내일”, “3일 전”, “2시간 전”(7일 넘으면 날짜).
 - 마감은 “D-2” 알약 + 날짜, 당일은 “오늘까지”. 시간은 “오전 9시”, “오후 2:30”.
 
-## 그림(앱 아이콘 3D)
+## 그림(3D 이모지)
 
-- 목표 카드 그림, 목표 달성 화면, 온보딩 결과, 빈 상태, 장면 그림은 모두 지금 목표 그림과 같은 무광 3D 그림체(앱 아이콘은 같은 무광 3D지만 한 색이고 형상 수치로 만듦).
-- 부드러운 무광 3D, 단순하고 통통한 둥근 모양, 은은한 그라데이션, 디테일 최소. 물건 1개, 흰 바탕, 가운데 정렬과 넉넉한 여백. 사람 얼굴·글자·로고 없음(달력의 연도 숫자만 예외).
-- 색은 3~4가지로 적게. 체리색을 포인트로, 나머지는 크림, 흰색, 모래색 같은 밝은 중간색. 물건 고유색이 분명한 것(금반지, 하늘색 금고, 베이지 머그잔 등)은 그 색.
-- 목표 종류마다 1장(내 집, 신혼여행, 차, 결혼 준비, 아이, 비상금 등), 사용자가 고르지 않음.
-- 1:1, 1024px로 만들고 바탕을 지운 512px PNG로 배포. 56px·48px에서도 물건이 알아보이게 단순한 물건을 고름.
-- 한 세트처럼: 힉스필드에서 기존 목표 그림 한 장을 그림체 참고로 넣고, 같은 프롬프트 틀(부록)에 물건 이름만 바꿔 생성.
-- 확정 그림은 Illustrations 묶음(목표 21장, 빈 상태 1장, 장면 5장). 직접 만든 목표는 회색 기본 그림(`flag-pennant`(깃발) 아이콘)으로 시작하고, 사용자가 올린 사진으로 바꿀 수 있음(Card ‘그림 자리’).
-- 실사 사진, 반짝이는 유광, 플랫 일러스트는 쓰지 않음.
+2026-11-02 새 스타일로 확정, 지금 그림은 모두 다시 뽑는 중(다 바뀔 때까지 기존 무광 그림을 씀). 레퍼런스: 토스, 배민, 카카오페이의 3D 이모지·아이콘.
+
+- 질감: 반광택. 매끄럽고 부푼 듯한 면, 왼쪽 위 빛에 은은한 하이라이트. 거울 같은 유광과 무광 점토는 쓰지 않음.
+- 색: 사물 고유색(집은 집 색, 반지는 금색, 저금병은 유리와 동전 색). 한 그림 3~4색. 브랜드 오렌지를 억지로 넣지 않음.
+- 모양: 뭉툭하고 귀엽게. 두껍고 둥근 형태, 디테일 최소. 40px에서도 알아볼 것. 물건 1개(축하처럼 필요하면 작은 조각 몇 개).
+- 사람 얼굴·글자·로고 없음(Face ID 안내의 웃는 얼굴 이모지와 달력 연도 숫자만 예외).
+- 1:1, 1024px로 만들고 투명 바탕 512px로 배포(앱에는 webp).
+- 한 세트처럼: 같은 프롬프트 틀(부록)에 물건 이름만 바꿔 생성. 첫 확정 그림 한 장을 이후 그림의 그림체 참고로 넣음.
+- 쓰는 곳: 목표 그림 21장, 빈 상태, 상태 화면 이모지(→ Illustrations ‘상태 이모지’), 축하 이모지.
+- 앱 아이콘·심볼(파이 차트)은 이 스타일과 따로(무광 3D, 형상 수치로 만듦).
+
+## 움직이는 그림
+
+원칙: 눈길이 한 곳에 모이는 순간에만 움직이고, 나머지는 멈춰 있음.
+
+- 화면당 움직이는 그림은 최대 1개.
+- 96px 이상, 화면 주인공 자리일 때만 움직임. 64px 미만(목록, 카드, 위젯, 할 일 그림 원)은 항상 정지.
+- 반복은 기다리는 화면만(로그인 대기, 온보딩 ‘분석 중’). 나머지는 1~2초 한 번 재생하고 마지막 장면에서 멈춤.
+- ‘동작 줄이기’면 정지 그림. 데스크톱 트레이·위젯도 정지.
+- 움직이는 그림도 정지 그림을 함께 만들어 작은 자리에서 씀.
+
+| 구분 | 어디 | 움직임 |
+| --- | --- | --- |
+| 기다림 | A-03 로그인 대기, 온보딩 ‘분석 중’ | 반복 |
+| 축하 | 목표 달성(G-05), 월급 체크 끝(W-02 끝), 온보딩 결과(O-60), 배우자 합류 완료 | 공통 축하 이모지 1개, 1번 재생 후 멈춤 |
+| 전체 화면 안내 | Face ID 켜기, 다시 로그인, 업데이트, 점검, 오프라인, 오류 | 1번 재생 후 멈춤 |
+| 첫 화면 | 시작, 로그인(그림을 넣을 때) | 1번 재생 후 멈춤 |
+| 빈 상태 | 목표 없음, 자산 없음 등 | 정지 |
+| 작은 자리 | 목표 카드 56px, 목록 아이콘, 위젯 40px | 정지 |
+| 큰 상세 | 목표 상세 위 큰 그림 | 정지 |
+
+- 만드는 법: 힉스필드 정지 그림 → 힉스필드 3D 변환(GLB) → Blender로 1~2초 움직임을 투명 바탕으로 렌더 → 움직이는 WebP(100~300KB 목표). 첫 장면이 정지 그림과 같게.
+- 움직임은 짧고 가볍게: 통통 튀기, 살짝 돌기, 흔들기. 이징은 `ease-out`, 크게 늘어나거나 번쩍이는 효과 없음.
 
 ## 장면 자리(비어 있음)
 
@@ -226,6 +251,8 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 예비·�
 
 ## 부록: 그림 프롬프트 틀
 
-참고 그림: 기존 목표 그림 한 장(예: `goal-01-emergency`, role image_references). 심볼은 그림체 참고로 쓰지 않음. 모델 gpt_image_2_5, 1:1.
+모델 gpt_image_2_5, 1:1, 투명 바탕(background transparent). 첫 확정 그림이 생기면 그 그림을 그림체 참고(role image_references)로 함께 넣음.
 
-“Use the reference image ONLY for its style: soft matte 3D, simplified chunky rounded shapes, smooth gentle gradients, minimal detail, clean modern app-icon illustration, pure white background, centered, generous margins. Subject (do not copy the reference object): {물건}, limited palette of 3 to 4 colors with cherry red (#c8102e) accent. No text.”
+“Cute chunky 3D emoji-style icon of {물건}. Soft semi-gloss finish with gentle highlights, smooth rounded inflated shapes, minimal detail, natural real-world colors of the object, soft studio light from top-left, no outline, no text, centered with generous margins, transparent background.”
+
+이전(무광, 체리색 포인트) 틀은 다시 뽑기 전 그림을 고칠 때만 씀: “Use the reference image ONLY for its style: soft matte 3D, simplified chunky rounded shapes, smooth gentle gradients, minimal detail, clean modern app-icon illustration, pure white background, centered, generous margins. Subject (do not copy the reference object): {물건}, limited palette of 3 to 4 colors with cherry red (#c8102e) accent. No text.”
