@@ -231,18 +231,19 @@ export function SplitEditor({
       <SectionHeader title={copy.spendGroup} />
       <List label={copy.spendGroup}>
         {indexed.filter(({ l }) => l.kind !== 'saving').map(({ l, i }) => row(l, i))}
+        {/* 줄 추가는 쓰는 돈 묶음 맨 아래 한 줄(+ 아이콘이 글자 앞 ‘+’를 대신) */}
+        {!readOnly && customs < MAX_CUSTOM && (
+          <ListRow
+            icon="plus"
+            label={copy.addLine.replace(/^\+\s*/, '')}
+            chevron={false}
+            onClick={() => {
+              setEdit({ add: true });
+              setAmount(0);
+            }}
+          />
+        )}
       </List>
-      {!readOnly && customs < MAX_CUSTOM && (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            setEdit({ add: true });
-            setAmount(0);
-          }}
-        >
-          {copy.addLine}
-        </Button>
-      )}
       {extra}
     </QuestionLayout>
   );

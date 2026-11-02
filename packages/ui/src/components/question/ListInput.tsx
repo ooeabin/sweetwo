@@ -40,44 +40,18 @@ export function ListInput({
   const set = (i: number, patch: Partial<ListRowValue>) =>
     onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   return (
-    <div className="hg-stack" role="group" aria-label={label} style={{ gap: 'var(--space-3)' }}>
+    <div className="hg-listin" role="group" aria-label={label}>
       {rows.map((r, i) => {
         const partial = !isBlank(r) && !isCompleteRow(r);
         return (
-          <div key={i} className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'nowrap' }}>
-            <select
-              className={cx('hg-input', partial && r.month === null && 'is-error')}
-              style={{ width: '6em', flex: 'none' }}
-              aria-label={`${i + 1}번째 월`}
-              value={r.month ?? ''}
-              onChange={(e) => set(i, { month: e.target.value ? Number(e.target.value) : null })}
-            >
-              <option value="">월</option>
-              {Array.from({ length: 12 }, (_, k) => (
-                <option key={k + 1} value={k + 1}>
-                  {k + 1}월
-                </option>
-              ))}
-            </select>
+          <div key={i} className="hg-listin__row">
             <input
-              className={cx('hg-input', partial && !r.name.trim() && 'is-error')}
+              className={cx('hg-input hg-listin__name', partial && !r.name.trim() && 'is-error')}
               aria-label={`${i + 1}번째 이름`}
               placeholder={namePlaceholder}
               maxLength={20}
               value={r.name}
               onChange={(e) => set(i, { name: e.target.value })}
-            />
-            <input
-              className={cx('hg-input', partial && !r.amount && 'is-error')}
-              style={{ textAlign: 'right', width: '9em', flex: 'none' }}
-              inputMode="numeric"
-              aria-label={`${i + 1}번째 금액`}
-              placeholder="0원"
-              value={r.amount === null ? '' : `${r.amount.toLocaleString('ko-KR')}`}
-              onChange={(e) => {
-                const d = e.target.value.replace(/\D/g, '');
-                set(i, { amount: d === '' ? null : Math.min(Number(d), MAX_WON) });
-              }}
             />
             <IconButton
               icon="x"
@@ -90,16 +64,39 @@ export function ListInput({
                 onRemoved?.(r, i);
               }}
             />
+            <select
+              className={cx('hg-input hg-listin__month', partial && r.month === null && 'is-error')}
+              aria-label={`${i + 1}번째 월`}
+              value={r.month ?? ''}
+              onChange={(e) => set(i, { month: e.target.value ? Number(e.target.value) : null })}
+            >
+              <option value="">월</option>
+              {Array.from({ length: 12 }, (_, k) => (
+                <option key={k + 1} value={k + 1}>
+                  {k + 1}월
+                </option>
+              ))}
+            </select>
+            <input
+              className={cx('hg-input hg-listin__amount', partial && !r.amount && 'is-error')}
+              inputMode="numeric"
+              aria-label={`${i + 1}번째 금액`}
+              placeholder="0원"
+              value={r.amount === null ? '' : `${r.amount.toLocaleString('ko-KR')}`}
+              onChange={(e) => {
+                const d = e.target.value.replace(/\D/g, '');
+                set(i, { amount: d === '' ? null : Math.min(Number(d), MAX_WON) });
+              }}
+            />
           </div>
         );
       })}
-      {rows.some((r) => !isBlank(r) && !isCompleteRow(r)) && (
+      {rows.some((r) => !isBlank(r) && !isCompleteRow(r) && !r.amount) && (
         <span className="hg-help is-error">금액을 넣어 주세요</span>
       )}
       <button
         type="button"
         className="hg-btn hg-btn--ghost hg-btn--sm"
-        style={{ alignSelf: 'flex-start' }}
         disabled={rows.length >= limit}
         onClick={() => {
           if (!rows.some(isBlank)) onChange([...rows, emptyRow()]);
@@ -109,7 +106,7 @@ export function ListInput({
         항목 추가
       </button>
       {rows.length >= limit && <span className="hg-help">{limit}개까지 넣을 수 있어요</span>}
-      <p className="hg-q__help" aria-live="polite">
+      <p className="hg-listin__total" aria-live="polite">
         {done.length ? totalLabel(formatManWon(total)) : '—'}
       </p>
     </div>

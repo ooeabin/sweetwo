@@ -140,7 +140,7 @@ test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 
 
   // 내 탭: 직접 추가 줄 → 이름 바꾸기, 수입 줄 → S-11
   await page.goto('/salary/split');
-  await page.getByRole('button', { name: '+ 줄 추가' }).click();
+  await page.getByRole('button', { name: '줄 추가' }).click();
   await page.getByLabel('줄 이름').fill('운동');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();

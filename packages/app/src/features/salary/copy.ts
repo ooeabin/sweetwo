@@ -3,7 +3,7 @@
 export const copy = {
   // W-01 월급 분배표
   splitTitle: '월급 분배표',
-  splitHelp: '금액을 눌러 바꿀 수 있어요', // [확인 필요]
+  splitHelp: '눌러서 금액을 바꿔요', // [확인 필요]
   save: '저장',
   saved: '분배표를 바꿨어요',
   undo: '되돌리기',

@@ -83,7 +83,7 @@ export const copy = {
   // P-06 월급 분배표
   splitTitle: '내 월급을 이렇게 나눠 볼까요?', // [확인 필요]
   splitJointTitle: '같이 쓰는 분배표예요', // [확인 필요]
-  splitHelp: '금액을 눌러 바꿀 수 있어요',
+  splitHelp: '눌러서 금액을 바꿔요',
   splitJointHelp: (me: string) => `${me}님 월급을 더해 다시 채웠어요`, // [확인 필요]
   splitDone: '이대로 할게요',
   partnerPuts: (starter: string, amount: string) => `${starter}님이 매달 ${amount} 넣어요`, // [확인 필요]

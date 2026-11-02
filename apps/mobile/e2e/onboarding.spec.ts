@@ -208,7 +208,6 @@ test('이어하기(16): 앱을 다시 열면 “이어서 할까요?” → 멈�
   Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-11', onboarding_done_at: null });
   await page.goto('/');
   await heading(page, '이어서 할까요?');
-  await expect(page.getByText('멈춘 곳부터 이어서 해요. 적어 둔 답은 그대로예요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '이어서 할게요' }).click();
   await expect(page).toHaveURL(/\/onboarding\/o-11$/);

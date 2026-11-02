@@ -42,6 +42,7 @@ export * from './components/NotificationPanel';
 export * from './components/PageHeader';
 export * from './components/Menu';
 export * from './components/Modal';
+export * from './components/BottomSheet';
 export * from './components/Accordion';
 export * from './components/Search';
 export * from './components/ReorderList';

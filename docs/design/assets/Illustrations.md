@@ -52,7 +52,7 @@
 
 - `Illustration`은 파일이 없으면 아무것도 그리지 않음. `hasIllustration(이름)`으로 빈 자리 모양을 고름.
 - 목표 카드·홈 목표 줄·목표 달성: 직접 만든 목표와 같은 회색 기본 자리(`hairline-soft` 바탕 + `stone` 깃발).
-- 온보딩 목표 고르기(O-21) 그림 칸, 온보딩 결과(O-60), 빈 상태(EmptyState): 그림 없이 글자만.
+- 온보딩 목표 고르기(O-21) 그림 칸, 빈 상태(EmptyState): 그림 없이 글자만. 온보딩 결과(O-60)는 그림 자리에 완료 표시(DoneMark, 옅은 오렌지 원 + 체크).
 - 상태 화면(AuthLayout)은 지금처럼 Phosphor 아이콘 원.
 - 새 그림 파일을 `packages/ui/src/assets/illustrations/{이름}.webp`에 넣으면 코드 수정 없이 바로 보임.
 

@@ -5,7 +5,6 @@ import { object } from '@sweetwo/core';
 export const copy = {
   // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
   resumeQ: '이어서 할까요?',
-  resumeHelp: '멈춘 곳부터 이어서 해요. 적어 둔 답은 그대로예요', // [확인 필요]
   resumeGo: '이어서 할게요', // [확인 필요]
   next: '다음',
   unsure: '잘 모르겠어요',
@@ -34,8 +33,7 @@ export const copy = {
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
   overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
   overviewHelp: '목표와 월급만 알려 주세요', // [확인 필요]
-  overviewEditable:
-    '입력하신 내용은 나중에 언제든 자유롭게 수정할 수 있으니, 편하게 작성해 주세요!',
+  overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
   chapterStart: '시작할게요',
   edit: '수정',
 
@@ -96,7 +94,7 @@ export const copy = {
 
   // 재기획(ADR 0003) 온보딩 ②: O-30 월급 관리 방식, O-31 월급, O-50 월급 분배표, O-60 결과(17-onboarding-2.md)
   salaryMode: '월급을 어떻게 관리해요?', // [확인 필요]
-  salaryModeHelp: '나중에 설정에서 바꿀 수 있어요', // [확인 필요]
+  salaryModeHelp: '나중에 바꿀 수 있어요', // [확인 필요]
   salaryModes: {
     separate: { label: '각자 월급을 따로 관리해요', sub: '분배표와 체크리스트가 사람마다 있어요' }, // [확인 필요]
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 분배표로 나눠요' }, // [확인 필요]
@@ -107,7 +105,7 @@ export const copy = {
   salaryVariableHelp: '가장 적게 들어온 달 기준으로 적어 주세요', // [확인 필요]
   noSalary: '지금은 월급이 없어요',
   splitTitle: '월급을 이렇게 나눠 볼까요?',
-  splitTableHelp: '금액을 눌러 바꿀 수 있어요', // [확인 필요]
+  splitTableHelp: '눌러서 금액을 바꿔요', // [확인 필요]
   splitIncome: (man: string) => `월급 ${man}`,
   savingGroup: '저금',
   spendGroup: '쓰는 돈',
