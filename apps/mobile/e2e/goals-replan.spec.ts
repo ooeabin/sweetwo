@@ -1,3 +1,4 @@
+import { setYearMonth } from './wheel';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo } from './supabase-mock';
@@ -103,8 +104,7 @@ test('G-03 목표 추가: 누구 목표예요? 나 → 내 목표, 분배표 저
   await page.getByRole('radio', { name: '나' }).click();
   await page.getByLabel('얼마를 모아서 시작할까요?').fill('10000000');
   await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('textbox', { name: '년' }).fill('2028');
-  await page.getByRole('radio', { name: '12월' }).click();
+  await setYearMonth(page, 2028, 12);
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '없어요' }).click();
   await expect(
@@ -134,8 +134,7 @@ test('G-02 수정은 바로 저장: 기한, 이름, 보류·삭제는 되돌리�
   await page.goto('/goals/goal-h');
   await page.getByRole('button', { name: /기한/ }).click();
   await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
-  await page.getByRole('textbox', { name: '년' }).fill('2032');
-  await page.getByRole('radio', { name: '3월' }).click();
+  await setYearMonth(page, 2032, 3);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   expect(db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2032-03-01');
@@ -171,8 +170,7 @@ test('G-02 기한 줄이기·늘리기(연결된 부부): 제안 없이 ‘저�
   await page.goto('/goals/goal-h/edit/deadline');
   await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
   // 줄이기: 2031년 10월 → 2029년 6월
-  await page.getByRole('textbox', { name: '년' }).fill('2029');
-  await page.getByRole('radio', { name: '6월' }).click();
+  await setYearMonth(page, 2029, 6);
   await expect(page.getByRole('button', { name: /제안하기/ })).toHaveCount(0);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('기한을 바꿨어요')).toBeVisible();
@@ -181,11 +179,10 @@ test('G-02 기한 줄이기·늘리기(연결된 부부): 제안 없이 ‘저�
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2031-10-01');
   // 늘리기: 2035년 1월. 이번 달 이전은 저장 꺼짐
   await page.goto('/goals/goal-h/edit/deadline');
-  await page.getByRole('textbox', { name: '년' }).fill('2025');
-  await page.getByRole('radio', { name: '1월', exact: true }).click();
+  await setYearMonth(page, 2025, 1);
   await expect(page.getByText('이번 달부터 고를 수 있어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
-  await page.getByRole('textbox', { name: '년' }).fill('2035');
+  await setYearMonth(page, 2035, 1);
   await page.getByRole('button', { name: '저장' }).click();
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-h')?.deadline).toBe('2035-01-01');
 });
@@ -206,8 +203,7 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
   await page.getByLabel('얼마가 필요해요?').fill('2400000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: /한 번이에요/ }).click();
-  await page.getByRole('textbox', { name: '년' }).fill('2027');
-  await page.getByRole('radio', { name: '12월' }).click();
+  await setYearMonth(page, 2027, 12);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(
     page.getByRole('heading', { name: '이 목표로 이미 모은 돈이 있나요?' }),

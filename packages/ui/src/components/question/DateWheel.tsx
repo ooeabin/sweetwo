@@ -121,6 +121,7 @@ export function DateWheel({
   initial,
   className,
   yearOnly,
+  yearMonth,
 }: {
   label: string;
   value: YMD | null;
@@ -131,6 +132,8 @@ export function DateWheel({
   className?: string;
   /** 연도만 1열(O-13, P-03a 출생연도). 값의 월·일은 1 */
   yearOnly?: boolean;
+  /** 연·월 2열(예정 연·월, 여행 가는 달, 기한). 값의 일은 1 */
+  yearMonth?: boolean;
 }) {
   const start = initial ?? { y: maxYear - 12, m: 1, d: 1 };
   const v = value ?? start;
@@ -149,7 +152,12 @@ export function DateWheel({
 
   return (
     <div
-      className={cx('hg-wheel', yearOnly && 'hg-wheel--year', className)}
+      className={cx(
+        'hg-wheel',
+        yearOnly && 'hg-wheel--year',
+        yearMonth && 'hg-wheel--ym',
+        className,
+      )}
       role="group"
       aria-label={label}
     >
@@ -172,14 +180,16 @@ export function DateWheel({
             page={3}
             onChange={(m) => set({ m })}
           />
-          <Column
-            label="일"
-            items={days}
-            value={v.d}
-            unit="일"
-            page={3}
-            onChange={(d) => set({ d })}
-          />
+          {!yearMonth && (
+            <Column
+              label="일"
+              items={days}
+              value={v.d}
+              unit="일"
+              page={3}
+              onChange={(d) => set({ d })}
+            />
+          )}
         </>
       )}
     </div>

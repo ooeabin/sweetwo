@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (403b3ad). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (b575119). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -98,7 +98,7 @@
 .hg-input:focus { outline: 2px solid var(--ink); outline-offset: 0; border-color: transparent; }  /* 입력 칸 포커스는 ink(오렌지는 오류 빨강과 헷갈림, 파랑은 키보드 링과 글자 링크에만) */
 .hg-input.is-error { border-color: var(--danger); }
 .hg-amount { display: flex; align-items: baseline; gap: 2px; border-bottom: 2px solid var(--ink); padding-bottom: var(--space-2); }
-.hg-amount__value { font: 600 28px/36px var(--font-sans); letter-spacing: -0.4px; }
+.hg-amount__value { font: 700 32px/40px var(--font-sans); letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }  /* 2026-11-02 당근, 카카오페이 금액처럼 크게 */
 .hg-amount__unit { font: 600 18px/26px var(--font-sans); }
 .hg-help { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-help.is-error { color: var(--danger); }
@@ -695,6 +695,17 @@
 
 /* AmountInput: 빠른 추가 + 숫자 키패드 */
 .hg-amountin { display: flex; flex-direction: column; gap: var(--space-4); max-width: 360px; }
+/* 빠른 금액 칩: 한 줄 같은 폭 회색 버튼(카카오뱅크 보내기처럼) */
+.hg-amountin > .hg-quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-2); }
+.hg-amountin > .hg-quick > .hg-chip { justify-content: center; height: 40px; border-color: transparent; background: var(--surface-alt); color: var(--ink); font: 600 14px/20px var(--font-sans); border-radius: var(--radius-md); }
+.hg-amountin > .hg-quick > .hg-chip:hover { background: var(--hairline-soft); }
+/* 날짜 한 칸(DateInput): 글자 칸 하나 안에 연·월·일 조각 */
+.hg-datefield { display: flex; align-items: center; gap: var(--space-1); max-width: 280px; }
+.hg-datefield:focus-within { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.hg-datefield__seg { box-sizing: content-box; padding: 0; border: 0; outline: 0; background: none; color: var(--ink); font: 500 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; text-align: right; }
+.hg-datefield__seg::placeholder { color: var(--stone); }
+.hg-datefield__unit { margin-right: var(--space-2); font: 400 15px/22px var(--font-sans); color: var(--slate); }
+.hg-datefield__unit:last-child { margin-right: 0; }
 /* 월급날 숫자 판(DayChips): 회색 판 위 1~31 7칸, 테두리 없는 숫자, 고른 날만 검정 동그라미. ‘말일’은 판 아래 한 줄 */
 .hg-daygrid { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); background: var(--plate); border-radius: var(--radius-xl); }
 .hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); justify-items: center; }
@@ -712,6 +723,7 @@
 .hg-wheel__col:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
+.hg-wheel--ym { grid-template-columns: 1.2fr 1fr; }  /* 연·월(YearMonthInput) */
 .hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
 .hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
 .hg-wheel__unit { font-size: 15px; }
