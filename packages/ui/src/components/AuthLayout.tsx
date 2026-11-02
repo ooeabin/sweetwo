@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 
 // 로그인, 가입 화면 틀(docs/design/components/AuthLayout.md)
 export function AuthLayout({
   media,
+  icon,
+  busy,
+  alert,
   title,
   help,
   actions,
@@ -15,6 +18,12 @@ export function AuthLayout({
   className,
 }: {
   media?: ReactNode;
+  /** 상태 화면 제목 위 아이콘 원(72px) */
+  icon?: IconName;
+  /** 아이콘을 천천히 돌림(기다리는 중). ‘동작 줄이기’면 멈춤 */
+  busy?: boolean;
+  /** 버튼 묶음 바로 위 안내 띠(취소, 충돌, 오프라인, 실패) */
+  alert?: ReactNode;
   title: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
@@ -36,12 +45,23 @@ export function AuthLayout({
           </button>
         </div>
       )}
+      {icon && (
+        <span className={busy ? 'hg-auth__icon is-busy' : 'hg-auth__icon'} aria-hidden="true">
+          <Icon name={icon} />
+        </span>
+      )}
       {media}
       <div className="hg-auth__head">
         <h1 className="hg-auth__title">{title}</h1>
         {help && <p className="hg-auth__help">{help}</p>}
       </div>
       {children}
+      {alert && (
+        <div className="hg-banner hg-banner--info hg-auth__alert" role="status">
+          <Icon name="info" size={16} />
+          <span>{alert}</span>
+        </div>
+      )}
       {actions && <div className="hg-auth__actions">{actions}</div>}
       {note && (
         <p className="hg-auth__note" role="status">

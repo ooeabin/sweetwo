@@ -32,6 +32,7 @@ export function A06LockSetup() {
   if (step === 'touch') {
     return (
       <AuthLayout
+        icon="fingerprint"
         title={copy.touchIdAsk(bioKind)}
         actions={
           <>

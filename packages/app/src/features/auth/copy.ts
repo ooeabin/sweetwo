@@ -73,7 +73,7 @@ export const copy = {
 
   // A-04
   emailTitle: '알림 받을 이메일을 알려주세요',
-  emailHelp: '주간 요약·초대·제안 메일을 보내요',
+  emailHelp: '주간 요약·초대·월말 확인 메일을 보내요', // [확인 필요]
   emailLabel: '알림 이메일', // 설정 이름
   emailPlaceholder: 'name@example.com',
   next: '다음',
