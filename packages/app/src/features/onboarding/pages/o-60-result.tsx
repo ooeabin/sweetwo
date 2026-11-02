@@ -1,6 +1,6 @@
 import { startChecklist } from '@sweetwo/api';
 import { formatYm, goalEta, readWon, templateByKey } from '@sweetwo/core';
-import { Illustration, QuestionLayout } from '@sweetwo/ui';
+import { DoneMark, hasIllustration, Icon, Illustration, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -64,9 +64,17 @@ export function O60Result() {
       }
       primary={{ label: copy.resultStart, loading: busy }}
       onSubmit={() => void start()}
+      center
+      hero={
+        hasIllustration(art) ? <Illustration name={art} className="hg-empty__art" /> : <DoneMark />
+      }
     >
-      {art && <Illustration name={art} className="hg-empty__art" />}
-      {payday && <p className="hg-help">{copy.resultTodo(payday)}</p>}
+      {payday && (
+        <p className="hg-banner hg-banner--info">
+          <Icon name="calendar" />
+          <span>{copy.resultTodo(payday)}</span>
+        </p>
+      )}
     </QuestionLayout>
   );
 }

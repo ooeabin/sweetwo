@@ -349,7 +349,7 @@ export const goalTemplates: GoalTemplate[] = [
     name: '연간 고정 지출',
     tab: 'life',
     illustration: 'goal-18-annual-fixed',
-    questions: [{ id: 'items', type: 'list', title: '1년에 한 번 나가는 돈을 알려주세요' }],
+    questions: [{ id: 'items', type: 'list', title: '1년에 한 번 나가는 돈을 알려 주세요' }],
     asksDeadline: never,
     kind: () => 'yearly',
     target: (a) =>

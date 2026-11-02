@@ -280,7 +280,7 @@ export function MonthChips({
   );
 }
 
-/** 월급날(O-32, P-05d, F-05): 회색 판 위 1~31 7칸 숫자 판 + 아래 ‘말일’. 하나만 고름(radiogroup).
+/** 월급날(O-32, P-05d, F-05): 회색 판 위 1~31 7칸 숫자 판, 31 옆 두 칸에 ‘말일’. 하나만 고름(radiogroup).
  * 화살표 ←→ 하루, ↑↓ 일주일, Home/End 처음/끝(말일). 고른 칸만 탭 순서에 들어감 */
 export function DayChips({
   value,
@@ -346,8 +346,7 @@ export function DayChips({
   );
   return (
     <div className="hg-daygrid" role="radiogroup" aria-label={label}>
-      <div className="hg-daygrid__days">{days.slice(0, 31).map((d, i) => cell(d, i))}</div>
-      {cell('last', 31)}
+      <div className="hg-daygrid__days">{days.map((d, i) => cell(d, i))}</div>
     </div>
   );
 }

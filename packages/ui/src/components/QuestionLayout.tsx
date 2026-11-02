@@ -155,6 +155,7 @@ export function QuestionLayout({
   wide,
   center,
   summary,
+  hero,
 }: {
   steps?: { total: number; now: number; fill?: number };
   /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
@@ -172,6 +173,8 @@ export function QuestionLayout({
   center?: boolean;
   /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
   summary?: ReactNode;
+  /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
+  hero?: ReactNode;
 }) {
   const centered = center ?? Children.toArray(children).length === 0;
   useEffect(() => {
@@ -221,6 +224,7 @@ export function QuestionLayout({
             <span className="hg-q__back-space" />
           </div>
         )}
+        {hero && <div className="hg-q__hero">{hero}</div>}
         <div className="hg-q__head">
           <h1 className="hg-q__title">{title}</h1>
           {help && <p className="hg-q__help">{help}</p>}

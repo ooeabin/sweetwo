@@ -1,7 +1,8 @@
-/* docs/design/bundle.css에서 복사 (b6095d8). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (75c505b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.hg-row--fill > * { flex: 1; }  /* 버튼 두 개를 반씩 */
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
 :where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
@@ -168,6 +169,21 @@
 .hg-sheet > * { margin: 0; }
 .hg-sheet__handle { align-self: center; width: 36px; height: 4px; border-radius: var(--radius-full); background: var(--hairline); }
 .hg-sheet__title { font: 600 18px/26px var(--font-sans); }
+/* 앱 안 시트(BottomSheet 컴포넌트): 막 위 화면 아래에 붙음, 넓은 창은 가운데 카드 */
+.hg-scrim--sheet { position: fixed; inset: 0; z-index: 60; align-items: end; padding: 0; }
+.hg-scrim--sheet > .hg-sheet { width: 100%; max-height: 90dvh; overflow-y: auto; padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); outline: none; }
+.hg-sheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.hg-sheet__actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
+@media (prefers-reduced-motion: no-preference) { .hg-scrim--sheet > .hg-sheet { animation: hg-sheet-in var(--dur-base) var(--ease-out); } }
+@keyframes hg-sheet-in { from { transform: translateY(24px); } }
+/* 초대 코드(O-07, S-12): 큰 숫자, 글자 사이를 띄움, 누르면 복사 */
+.hg-invite-code { align-self: flex-start; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 700 36px/44px var(--font-sans); letter-spacing: var(--space-2); font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; }
+.hg-invite-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: var(--radius-sm); }
+@media (min-width: 768px) {
+  .hg-scrim--sheet { align-items: center; padding: var(--space-6); }
+  .hg-scrim--sheet > .hg-sheet { max-width: 440px; border-bottom: 1px solid var(--hairline); border-radius: var(--radius-2xl); padding: var(--space-5) var(--space-6) var(--space-6); }
+  .hg-scrim--sheet .hg-sheet__handle { display: none; }
+}
 
 /* AppFrame */
 .hg-app { box-sizing: border-box; display: grid; grid-template-columns: 208px 1fr; gap: var(--space-2); min-height: 400px; padding: var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-2xl); background: var(--surface-alt); }
@@ -243,9 +259,17 @@
 .hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 남는 돈) */
 .hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: 600 16px/24px var(--font-sans); color: var(--ink); }
 .hg-q__sum .hg-help { font-weight: 400; }
+/* 좁은 창: 요약이 있는 아래 고정 영역은 위에 옅은 선을 둬 목록이 그 밑으로 지나가는 게 보이게 */
+@media (max-width: 767px) { .hg-q__foot.has-sum { border-top: 1px solid var(--hairline-soft); padding-top: var(--space-3); } }
 /* 안내 화면(입력 없음, hg-q--center): 제목을 가운데 정렬하고 세로 가운데로. O-01 시작, A-02 로그인과 같은 배치 */
 .hg-q--center .hg-q__head { align-items: center; text-align: center; margin-top: auto; }
 .hg-q--center .hg-q__help { word-break: keep-all; }
+.hg-q--center .hg-banner { text-align: left; }
+/* 제목 위 주인공 자리(hero): 가운데 배치면 hero + 제목 묶음을 세로 가운데로 */
+.hg-q__hero { display: flex; justify-content: center; }
+.hg-q__hero > .hg-donemark { margin: 0; }
+.hg-q--center > .hg-q__hero { margin-top: auto; }
+.hg-q--center > .hg-q__hero + .hg-q__head { margin-top: 0; }
 .hg-q--center > :last-child:not(.hg-q__foot) { margin-bottom: auto; }  /* 버튼 없는 안내(분석 중)도 세로 가운데 */
 /* 넓은 창(데스크톱 앱 등 768px 이상, Meetup식): 위 바 = 왼쪽 워드마크 + 가운데 진행, 아래 바 = 왼쪽 ‘이전’ + 오른쪽 Enter 안내와 주 버튼(글자 길이만큼).
    헤더 꺾쇠(hg-q__nav)는 숨김. 좁은 창은 위 규칙 그대로(꺾쇠, 꽉 찬 주 버튼) */
@@ -274,6 +298,12 @@
 
 /* Tabs, Segmented */
 .hg-tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+/* 좁은 창: 한 줄로 두고 가로로 밀기(줄바꿈 없음). 화면 끝까지 닿게 좌우 여백만큼 넓힘 */
+@media (max-width: 767px) {
+  .hg-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); scrollbar-width: none; scroll-padding: 0 var(--space-4); }
+  .hg-tabs::-webkit-scrollbar { display: none; }
+  .hg-tab { flex: none; }
+}
 .hg-tab { display: inline-flex; align-items: center; height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-full); border: 1px solid var(--hairline); background: var(--surface); color: var(--slate); font: 600 14px/20px var(--font-sans); }
 .hg-tab.is-active { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
 .hg-seg { display: inline-flex; width: fit-content; align-self: flex-start; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-full); background: var(--surface-alt); }
@@ -319,6 +349,7 @@
 /* Banner */
 .hg-banner { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font: 400 14px/21px var(--font-sans); }
 .hg-banner > span { flex: 1; min-width: 0; }
+.hg-banner > .hg-ico { flex: none; }  /* 아이콘도 span이라 위 규칙에서 빼기 */
 .hg-banner--info { background: var(--surface-alt); color: var(--ink); }
 .hg-banner .hg-btn--link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .hg-banner--todo { gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: 600 15px/22px var(--font-sans); }
@@ -646,7 +677,7 @@
 .hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); justify-items: center; }
 .hg-daygrid__day, .hg-daygrid__last { display: inline-grid; place-items: center; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 500 16px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
 .hg-daygrid__day { width: 44px; max-width: 100%; aspect-ratio: 1; border-radius: var(--radius-full); }
-.hg-daygrid__last { height: 44px; border-radius: var(--radius-full); }
+.hg-daygrid__last { grid-column: span 2; justify-self: stretch; height: 44px; border-radius: var(--radius-full); }  /* 31 옆 두 칸(29 30 31 말일) */
 .hg-daygrid__day:hover, .hg-daygrid__last:hover { background: var(--surface-alt); }
 .hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
 .hg-daygrid__day:focus-visible, .hg-daygrid__last:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -664,6 +695,18 @@
 .hg-wheel__age { margin: 0; text-align: center; font: 400 15px/22px var(--font-sans); color: var(--slate); }
 @media (prefers-reduced-motion: reduce) { .hg-wheel__col { scroll-behavior: auto; } }
 .hg-quick { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+/* Q6 목록 입력(ListInput): 항목마다 둥근 판. 좁은 창은 두 줄(이름 + 지우기 / 월 + 금액), 넓은 창은 한 줄 */
+.hg-listin { display: flex; flex-direction: column; gap: var(--space-3); }
+.hg-listin__row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; grid-template-areas: "name name del" "month amount amount"; align-items: center; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-xl); background: var(--plate); }
+.hg-listin__name { grid-area: name; min-width: 0; }
+.hg-listin__row > .hg-iconbtn { grid-area: del; }
+.hg-listin__month { grid-area: month; }
+.hg-listin__amount { grid-area: amount; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.hg-listin > .hg-btn { align-self: flex-start; }
+.hg-listin__total { margin: 0; font: 600 16px/24px var(--font-sans); color: var(--ink); }
+@media (min-width: 768px) {
+  .hg-listin__row { grid-template-columns: 7.5em minmax(0, 1fr) 10em auto; grid-template-areas: "month name amount del"; }
+}
 .hg-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); }
 .hg-key { display: grid; place-items: center; height: 64px; border: 0; border-radius: var(--radius-lg); background: transparent; color: var(--ink); font: 600 26px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
 .hg-key:active, .hg-key.is-pressed { background: var(--surface-alt); }

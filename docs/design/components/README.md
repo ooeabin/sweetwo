@@ -62,6 +62,7 @@
 | [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(“목표” + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |
 | [Tabs](Tabs.md) | Navigation | 같은 화면 안에서 묶음을 바꾸는 알약 탭(hg-tabs)과, 보기 방식을 바꾸는 세그먼트(hg-seg) |
 | [BottomSheet](BottomSheet.md) | Overlays | 좁은 창(768px 미만)에서 아래에서 올라오는 시트 |
+| [ListInput](ListInput.md) | Inputs | Q6 목록 입력(이름 + 월 + 금액 여러 줄) |
 | [CommandPalette](CommandPalette.md) | Overlays | Ctrl/⌘+K로 여는 검색, 빠른 실행 |
 | [Modal](Modal.md) | Overlays | 되돌릴 수 없는 행동 앞의 확인 대화상자 |
 | [NotificationPanel](NotificationPanel.md) | Overlays | 알림 패널(N-01) |
