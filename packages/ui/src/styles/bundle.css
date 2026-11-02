@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (09fcefe). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (68949cd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -311,7 +311,7 @@
 .hg-banner { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font: 400 14px/21px var(--font-sans); }
 .hg-banner > span { flex: 1; min-width: 0; }
 .hg-banner--info { background: var(--surface-alt); color: var(--ink); }
-.hg-banner .hg-btn--link { text-decoration: underline; text-underline-offset: 3px; }
+.hg-banner .hg-btn--link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .hg-banner--todo { gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: 600 15px/22px var(--font-sans); }
 .hg-banner--todo .hg-btn { flex: none; }
 .hg-banner > .hg-banner__icon { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
@@ -1293,6 +1293,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth--hero .hg-auth__help { font-size: 15px; line-height: 22px; white-space: pre-line; word-break: keep-all; }
 /* O-01 버튼 아래 한 줄(당근 ‘이미 계정이 있나요? 로그인’): 회색 글자 + 글자 링크 */
 .hg-auth__alt { margin: var(--space-1) 0 0; text-align: center; font: 400 14px/20px var(--font-sans); color: var(--slate); }
+/* 로그인·잠금 화면의 글자 링크(‘나중에 할게요’, ‘업데이트 없이 보기만 할게요’)는 파랑 대신 회색 */
+:is(.hg-auth, .hg-lock) .hg-btn--link { color: var(--slate); }
+.hg-auth__alt .hg-btn--link { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 /* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
 .hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
 /* 구글·애플(secondary)은 로그인에선 회색 채움 대신 중간 회색 테두리 버튼으로(border-control~hairline 사이) */

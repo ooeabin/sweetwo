@@ -14,10 +14,10 @@ const noA11yViolations = async (page: import('@playwright/test').Page) => {
 test('첫 방문: O-01 → A-02', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: '함께 구워 더 달콤한 자산파이' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
   await noA11yViolations(page);
   await page.getByRole('button', { name: '시작하기' }).click();
-  await expect(page.getByRole('heading', { name: '함께 구워 더 달콤한 자산파이' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
   for (const name of ['카카오로 3초 만에 시작하기', 'Google로 시작하기', 'Apple로 시작하기']) {
     await expect(page.getByRole('button', { name })).toBeEnabled();
   }
@@ -30,7 +30,7 @@ test('A-01: 최소 지원 버전 미만이면 업데이트 안내', async ({ pag
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '새 버전으로 업데이트해 주세요' })).toBeVisible();
   await page.getByRole('button', { name: '업데이트 없이 보기만 할게요' }).click();
-  await expect(page.getByRole('heading', { name: '함께 구워 더 달콤한 자산파이' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
 });
 
 test('A-01: 점검 시간이면 점검 안내, 끝나는 시각', async ({ page }) => {

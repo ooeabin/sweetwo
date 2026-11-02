@@ -6,7 +6,7 @@
 - `hg-btn--primary`: 화면의 주 행동. `brand` 바탕 + `on-brand`, 누름 `brand-pressed`.
 - 축하 순간에도 같은 주 버튼. 오렌지는 주 버튼에만, 보조 버튼에는 쓰지 않음.
 - `hg-btn--secondary`: 보조 행동. `surface-alt` 바탕, 테두리 없음(카드 안은 옅은 오렌지 `brand-soft` 바탕 + `brand-ink` 글자.)(“다르게 해볼래요”, “나중에 할게요” 버튼형).
-- `hg-btn--ghost`(알약, 36px), `hg-btn--link`: 덜 중요한 행동, 글자 링크(14px 600, 색은 어디서나 `focus` 파랑으로 통일. Toast 안만 `on-ink` 밑줄).
+- `hg-btn--ghost`(알약, 36px), `hg-btn--link`: 덜 중요한 행동, 글자 링크(14px 600, `focus`. 로그인·잠금 화면은 `slate`).
 - `hg-btn--danger`(`danger` 바탕 + `on-danger` 글자): 확인 Modal의 되돌릴 수 없는 실행 버튼에만. 옆 취소는 `secondary`.
 - 좁은 창 질문 화면의 주 버튼은 `hg-btn--block`으로 하단 고정.
 - `hg-btn--kakao`: 카카오 공식 노란 브랜드 버튼(바탕 `#fee500` + 글자 `rgba(0,0,0,.85)`). 제공자 브랜드색 예외로, 라이트·다크 모두 노랑을 유지한다. A-02 카카오 로그인에만.
