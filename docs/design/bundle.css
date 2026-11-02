@@ -1290,7 +1290,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth__actions--row > .hg-btn { flex: 1; min-width: 0; }
 .hg-auth__actions--row > .hg-btn--primary { flex: 2; }
 /* 히어로 배치(hg-auth--hero): 워드마크 + 캐치프레이즈(태그라인 18px). O-01 시작·A-02 로그인 공용 */
-.hg-auth--hero .hg-auth__title { font-size: 20px; line-height: 28px; }
+.hg-auth--hero .hg-auth__title { font-size: 24px; line-height: 34px; }
 /* O-01 시작(hg-auth--start): 주 버튼 아래 보조 버튼(‘초대받았어요’)은 기본 회색 보조 버튼(surface-alt) */
 /* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
 .hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
