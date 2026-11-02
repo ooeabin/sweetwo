@@ -3,6 +3,7 @@ import { AmountInput, DayChips, QuestionLayout, SectionHeader } from '@sweetwo/u
 import { useState } from 'react';
 import { useConfirmOnce } from '../confirm';
 import { copy } from '../copy';
+import { saveRecommendedSplit } from '../auto-split';
 import { saveMe } from '../data';
 import { useStep } from '../step';
 
@@ -25,22 +26,24 @@ export function O31Salary() {
   const payday = day === undefined ? savedDay : day;
   const valid = value !== null && value > 0 && payday !== null;
 
+  // 마지막 질문: 저장 → 추천 분배표 + 첫 체크리스트 → 온보딩 끝, 홈(ADR 0005)
   const save = (income: number, d: Day | null) =>
-    s.done(() =>
-      saveMe({
+    s.finish(async () => {
+      await saveMe({
         monthly_income: income,
         income_variable: income > 0 && isVariable,
         payday: typeof d === 'number' ? d : null,
         payday_last: d === 'last',
-      }),
-    );
+      });
+      await saveRecommendedSplit();
+    });
   return (
     <QuestionLayout
       chapter={s.chapter}
       title={copy.salary}
       help={isVariable ? copy.salaryVariableHelp : copy.salaryHelp}
       onBack={s.onBack}
-      primary={{ label: copy.next, disabled: !valid, loading: s.saving }}
+      primary={{ label: copy.resultStart, disabled: !valid, loading: s.saving }}
       onSubmit={() => valid && ok.check(value > ODD) && void save(value, payday)}
     >
       <AmountInput

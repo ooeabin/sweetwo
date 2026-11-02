@@ -50,6 +50,8 @@ export interface HomeInput {
   inviteClosedOn: string | null;
   /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘amount:{목표 id}’, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
   closed: string[];
+  /** 내 분배표 id. ‘split:{id}’가 closed에 없으면 ‘분배표 확인’ 할 일(ADR 0005) */
+  splitId?: string | null;
 }
 
 export type HomeTodo =
@@ -57,6 +59,7 @@ export type HomeTodo =
   | { kind: 'reconnect'; to: string }
   | { kind: 'review'; label: string; left: number; key: string; to: string }
   | { kind: 'invite'; to: string }
+  | { kind: 'split'; key: string; to: string }
   | { kind: 'amount'; goal: string; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
   | { kind: 'care'; name: string; date: string; key: string; to: string };
@@ -122,6 +125,9 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       key: `review:${s.label}:${s.nextPayday}`,
       to: PATHS.review,
     };
+  // 온보딩이 추천값으로 만든 분배표를 아직 안 열어 봤으면(W-01을 열면 닫힘)
+  if (i.splitId && !i.closed.includes(`split:${i.splitId}`))
+    return { kind: 'split', key: `split:${i.splitId}`, to: '/salary/split' };
   if (
     i.coupleState === 'not_joined' &&
     (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)

@@ -61,6 +61,7 @@ const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconNa
   reconnect: 'link',
   review: 'check',
   invite: 'user',
+  split: 'wallet',
   amount: 'pencil',
   matured: 'piggy-bank',
   care: 'gift',
@@ -167,7 +168,8 @@ export function H01Home() {
             : t.kind === 'matured' ||
                 t.kind === 'care' ||
                 t.kind === 'review' ||
-                t.kind === 'amount'
+                t.kind === 'amount' ||
+                t.kind === 'split'
               ? () => h.closeTodo(t.key)
               : undefined,
       }

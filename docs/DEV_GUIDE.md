@@ -637,7 +637,7 @@ supabase/
 
 ### 온보딩 구조
 
-재기획(ADR 0003, 0004) 온보딩 9~10화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-50 → O-60 → 홈. 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로.
+재기획(ADR 0003, 0004, 0005) 온보딩 8~9화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → 홈. O-31 다음 `onboarding/auto-split.ts`가 추천 분배표, 비상금 금액, 첫 체크리스트를 만듦. 홈 할 일 ‘분배표 확인’은 `shared/home-todo.ts`(기기 기록). 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로, O-50·O-60은 O-31로.
 
 - `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 진행 막대 하나 `progressOf`: O-03~O-50 질문 중 지금까지, O-10·O-60 없음), `step.tsx`(진행, 뒤로, 저장 뒤 다음, 멈춘 화면 기록, `finish`), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 이어하기 `OnboardingGate`)
 - O-21에서 고른 목표는 모두 우리 목표(`goal.owner_user_id` null). 비상금은 자동으로 만들고 금액은 O-50 저장 때 (고정지출 + 생활비) × 3, 기한 1년 뒤

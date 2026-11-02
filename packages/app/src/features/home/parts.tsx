@@ -94,9 +94,7 @@ export function GoalsCard({
           type="button"
           className="hg-btn hg-btn--link"
           style={{ alignSelf: 'flex-start' }}
-          onClick={() =>
-            go(top.target_amount ? `/goals/${top.id}` : `/goals/${top.id}/set-amount`)
-          }
+          onClick={() => go(top.target_amount ? `/goals/${top.id}` : `/goals/${top.id}/set-amount`)}
         >
           {top.target_amount ? copy.seeGoal : copy.setAmount}
         </button>

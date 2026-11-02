@@ -15,8 +15,6 @@ import { O13BirthYear } from './pages/o-13-birth-year';
 import { O21Goals } from './pages/o-21-goals';
 import { O30SalaryMode } from './pages/o-30-salary-mode';
 import { O31Salary } from './pages/o-31-salary';
-import { O50Split } from './pages/o-50-split';
-import { O60Result } from './pages/o-60-result';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
 const SCREENS: Record<string, () => ReactNode> = {
@@ -30,13 +28,11 @@ const SCREENS: Record<string, () => ReactNode> = {
   'o-21': () => <O21Goals />,
   'o-30': () => <O30SalaryMode />,
   'o-31': () => <O31Salary />,
-  'o-50': () => <O50Split />,
-  'o-60': () => <O60Result />,
 };
 
-// 예전 1순위 목표 질문(O-23·O-24)에 멈춰 있던 사람은 그다음 화면(O-30)으로(2026-11-02 온보딩에서 뺌)
-const RETIRED = /^o-23-\d+$|^o-24$/;
-const current = (id: string) => (RETIRED.test(id) ? 'o-30' : id);
+// 온보딩에서 뺀 화면(2026-11-02, ADR 0004·0005)에 멈춰 있던 사람: O-23·O-24 → O-30, O-50·O-60 → O-31
+const RETIRED = /^o-23-\d+$|^o-24$|^o-50$|^o-60$/;
+const current = (id: string) => (RETIRED.test(id) ? (/^o-[56]0$/.test(id) ? 'o-31' : 'o-30') : id);
 
 export const isOnboardingScreen = (id: string) => current(id) in SCREENS;
 
@@ -61,7 +57,7 @@ const hoursSinceSeen = () => {
 export function OnboardingRoute() {
   const { screen = 'o-10' } = useParams();
   markSeen();
-  if (RETIRED.test(screen)) return <Navigate to="/onboarding/o-30" replace />;
+  if (RETIRED.test(screen)) return <Navigate to={`/onboarding/${current(screen)}`} replace />;
   const render = SCREENS[screen];
   return render ? <div key={screen}>{render()}</div> : <Navigate to="/onboarding/o-10" replace />;
 }
