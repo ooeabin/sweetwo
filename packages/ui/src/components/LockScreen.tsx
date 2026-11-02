@@ -52,7 +52,7 @@ export function LockScreen({
     <div
       className="hg-lock"
       role="group"
-      aria-label={title}
+      aria-label={title.replace(/\n/g, ' ')}
       aria-describedby={error ? errId : undefined}
     >
       <div className="hg-lock__head">

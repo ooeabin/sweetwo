@@ -200,7 +200,7 @@ export function LockGate({ active }: { active: boolean }) {
       style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'var(--surface)' }}
       aria-modal="true"
       role="dialog"
-      aria-label={copy.pinUnlockTitle}
+      aria-label={copy.pinUnlockTitle.replace(/\n/g, ' ')}
     >
       <LockScreen
         title={copy.pinUnlockTitle}

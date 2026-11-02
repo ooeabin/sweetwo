@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (bf76657). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (4ee69a4). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -751,7 +751,7 @@
 .hg-lock > * { margin: 0; }
 .hg-lock__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-lock__head > * { margin: 0; }
-.hg-lock__title { font: 700 24px/34px var(--font-sans); text-align: center; word-break: keep-all; text-wrap: balance; }
+.hg-lock__title { font: 700 24px/34px var(--font-sans); letter-spacing: -0.4px; text-align: center; word-break: keep-all; white-space: pre-line; }
 .hg-pin { display: flex; gap: var(--space-5); }
 .hg-lock__head + .hg-pin { margin-top: var(--space-4); }  /* 제목과 점 사이 40px */
 .hg-pin i { width: 18px; height: 18px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
@@ -1347,6 +1347,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth:has(> .hg-lock) { padding: 0; }
   .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
+  /* 제목과 보조 줄은 질문 화면 제목(hg-q__title)과 같은 자리: 왼쪽 정렬, 같은 높이. 점은 가운데 */
+  .hg-auth > .hg-lock .hg-lock__head { align-self: stretch; align-items: flex-start; }
+  .hg-auth > .hg-lock .hg-lock__head > * { text-align: left; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-avatar { margin-top: auto; }
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
