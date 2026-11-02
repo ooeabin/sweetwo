@@ -8,6 +8,7 @@ export function AuthLayout({
   icon,
   busy,
   alert,
+  actionsRow,
   title,
   help,
   actions,
@@ -24,6 +25,8 @@ export function AuthLayout({
   busy?: boolean;
   /** 버튼 묶음 바로 위 안내 띠(취소, 충돌, 오프라인, 실패) */
   alert?: ReactNode;
+  /** 버튼 두 개를 가로로(보조 1 : 주 2) */
+  actionsRow?: boolean;
   title: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
@@ -62,7 +65,11 @@ export function AuthLayout({
           <span>{alert}</span>
         </div>
       )}
-      {actions && <div className="hg-auth__actions">{actions}</div>}
+      {actions && (
+        <div className={actionsRow ? 'hg-auth__actions hg-auth__actions--row' : 'hg-auth__actions'}>
+          {actions}
+        </div>
+      )}
       {note && (
         <p className="hg-auth__note" role="status">
           {note}
