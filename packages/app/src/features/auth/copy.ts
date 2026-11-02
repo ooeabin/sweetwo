@@ -111,6 +111,11 @@ export const copy = {
   bioName: { touch: 'Touch ID', face: 'Face ID', fingerprint: '지문' } as const,
   touchIdAsk: (kind: Bio) => `${bioObj(kind)}로도 풀까요?`,
   touchIdYes: (kind: Bio) => `${copy.bioName[kind]} 켜기`, // [확인 필요] 버튼 문구
+  // [확인 필요] 생체 질문 보조 1줄
+  touchIdHelp: (kind: Bio) =>
+    kind === 'face'
+      ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
+      : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
   pinUnlockTitle: 'PIN을 입력해 주세요',
   touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,

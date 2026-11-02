@@ -34,6 +34,7 @@ export function A06LockSetup() {
       <AuthLayout
         icon="fingerprint"
         title={copy.touchIdAsk(bioKind)}
+        help={copy.touchIdHelp(bioKind)}
         actions={
           <>
             <Button

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (445f259). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (f4311e3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -224,7 +224,7 @@
 .hg-chapters__item.is-next .hg-chapters__num { color: var(--stone); }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
-.hg-q__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
+.hg-q__title { font: 700 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
 .hg-q__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 /* 제목 묶음과 입력 사이는 한 단계 넓게(24 + 16 = 40px), 입력은 열 너비를 꽉 채움(버튼과 같은 양옆) */
 .hg-q > .hg-q__head { margin-bottom: var(--space-4); }
@@ -741,7 +741,7 @@
 .hg-lock > * { margin: 0; }
 .hg-lock__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-lock__head > * { margin: 0; }
-.hg-lock__title { font: 600 22px/30px var(--font-sans); text-align: center; word-break: keep-all; }
+.hg-lock__title { font: 700 22px/30px var(--font-sans); text-align: center; word-break: keep-all; }
 .hg-pin { display: flex; gap: var(--space-4); }
 .hg-pin i { width: 16px; height: 16px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
 .hg-pin i.is-on { background: var(--ink); border-color: var(--ink); }
@@ -936,7 +936,9 @@
 .hg-consent__sub .hg-checkbox.is-on { background: none; }
 .hg-consent__sub .hg-checkbox.is-on::after { border-color: var(--ink); }
 .hg-consent__sub .hg-consent__label { font-size: 14px; line-height: 21px; color: var(--slate); }
-.hg-consent__row .hg-btn--link { font-size: 14px; color: var(--slate); text-decoration: underline; text-underline-offset: 3px; }
+.hg-consent__view { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0 calc(var(--space-2) * -1) 0 0; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--stone); cursor: pointer; }
+.hg-consent__view:hover { background: var(--surface-alt); }
+.hg-consent__view:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-consent-card > * { margin: 0; }
 .hg-consent-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
@@ -1265,7 +1267,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 }
 .hg-auth__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-auth__head > * { margin: 0; }
-.hg-auth__title { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; white-space: pre-line; word-break: keep-all; }
+.hg-auth__title { font: 700 28px/38px var(--font-sans); letter-spacing: -0.4px; white-space: pre-line; word-break: keep-all; }
 .hg-auth__help { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 .hg-auth__actions { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 360px; }
 .hg-auth__actions .hg-btn { position: relative; }
@@ -1285,7 +1287,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 /* 이메일 충돌: 그 제공자 버튼은 제 색 그대로 + 2px ink 테두리 */
 .hg-auth__actions .hg-btn.is-conflict { box-shadow: 0 0 0 2px var(--ink); }
 /* 히어로 배치(hg-auth--hero): 워드마크 + 캐치프레이즈(태그라인 18px). O-01 시작·A-02 로그인 공용 */
-.hg-auth--hero .hg-auth__title { font-size: 18px; line-height: 26px; }
+.hg-auth--hero .hg-auth__title { font-size: 20px; line-height: 28px; }
 /* O-01 시작(hg-auth--start): 주 버튼 아래 보조 버튼(‘초대받았어요’)은 기본 회색 보조 버튼(surface-alt) */
 /* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
 .hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
