@@ -3,7 +3,7 @@
 앱 잠금 화면. 앱을 다시 열 때, Ctrl/⌘+L.
 
 - 소비자가 주는 것: 입력한 자릿수, 틀린 횟수, Touch ID 사용 여부(macOS만).
-- 가운데 한 열: “잠겨 있어요”(22px 700) + 보조 1줄 “PIN 6자리를 눌러 주세요” → 6칸 점 → 숫자 키패드(AmountInput의 `hg-keypad` 그대로, 마지막 줄 빈칸, 0, 지우기) → 글자 링크 “Touch ID로 풀기”(`fingerprint` 아이콘).
+- 가운데 한 열: “잠겨 있어요”(22px 700) + 보조 1줄 “PIN 6자리를 눌러 주세요” → 6칸 점 → 숫자 키패드(AmountInput의 `hg-keypad` 그대로, 마지막 줄 빈칸, 0, 지우기) → 글자 링크 “Touch ID로 풀기”(`fingerprint` 아이콘, Face ID면 `scan-smiley`. `touchId.icon`으로 넘김).
 - PIN은 6자리 숫자. 점: 16px(사이 16px), 입력한 칸 `ink` 채움, 남은 칸 `border-control` 테두리. 숫자는 보여 주지 않음.
 - “Touch ID로 풀기”는 Touch ID가 켜진 macOS에서만 보임. Windows Hello는 출시 뒤, 그 전까지 Windows는 PIN만.
 - 틀리면 점을 비우고 점 아래 1줄 “PIN이 맞지 않아요”(`danger` + `circle-alert` 아이콘, `role="alert"`). 흔들기 움직임 없음.

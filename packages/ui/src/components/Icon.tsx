@@ -39,6 +39,7 @@ export type IconName =
   | 'pencil'
   | 'piggy-bank'
   | 'plus'
+  | 'scan-smiley'
   | 'search'
   | 'settings'
   | 'shield-check'

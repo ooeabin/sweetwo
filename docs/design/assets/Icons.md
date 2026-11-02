@@ -38,7 +38,8 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--envelope` | `envelope` | 문의 메일, 이메일 |
 | `hg-ico--eye` | `eye` |  |
 | `hg-ico--eye-off` | `eye-slash` |  |
-| `hg-ico--fingerprint` | `fingerprint` | Touch ID로 풀기 |
+| `hg-ico--fingerprint` | `fingerprint` | Touch ID, 지문으로 풀기 |
+| `hg-ico--scan-smiley` | `scan-smiley` | Face ID로 풀기, Face ID 켜기(A-06) |
 | `hg-ico--flag-pennant` | `flag-pennant` | 직접 만든 목표의 회색 기본 그림 |
 | `hg-ico--gift` | `gift` |  |
 | `hg-ico--house` | `house` |  |

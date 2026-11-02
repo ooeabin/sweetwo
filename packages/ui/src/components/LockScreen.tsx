@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, type ReactNode } from 'react';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 
 // 앱 잠금 화면, PIN 정하기(docs/design/components/LockScreen.md). 숫자는 보여 주지 않는다.
 // 키보드 숫자 입력 + 키패드. 값과 검사는 소비자가 맡는다(6자리가 차면 onComplete).
@@ -21,7 +21,7 @@ export function LockScreen({
   onComplete: (pin: string) => void;
   error?: string;
   notice?: string;
-  touchId?: { label: string; onClick: () => void };
+  touchId?: { label: string; onClick: () => void; icon?: IconName };
   footer?: ReactNode;
 }) {
   const errId = useId();
@@ -84,7 +84,7 @@ export function LockScreen({
       </div>
       {touchId && (
         <button type="button" className="hg-btn hg-btn--link" onClick={touchId.onClick}>
-          <Icon name="fingerprint" size={20} />
+          <Icon name={touchId.icon ?? 'fingerprint'} size={20} />
           {touchId.label}
         </button>
       )}

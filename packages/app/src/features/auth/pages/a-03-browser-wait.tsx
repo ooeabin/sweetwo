@@ -71,10 +71,10 @@ export function A03BrowserWait() {
 
   return (
     <AuthLayout
-      icon="loader-circle"
+      icon={openFailed ? 'circle-alert' : 'loader-circle'}
       busy={!openFailed}
-      title={copy.waitTitle}
-      help={copy.waitHelp}
+      title={openFailed ? copy.browserFailed : copy.waitTitle}
+      help={openFailed ? undefined : copy.waitHelp}
       actions={
         <>
           <p className="hg-auth__help">{copy.loginWith[p]}</p>
@@ -86,7 +86,6 @@ export function A03BrowserWait() {
           </Button>
         </>
       }
-      alert={openFailed ? copy.browserFailed : undefined}
     />
   );
 }
