@@ -5,5 +5,5 @@ A-02 소셜 로그인 버튼. `Button` + `ProviderMark`를 한 줄로 묶는다(
 - 소비자가 주는 것: `provider`(kakao·google·apple), 글자(children), `recent`·`recentLabel`(‘최근 사용’ 말풍선), `disabled`·`onClick`.
 - 변형: 카카오는 공식 노란 브랜드 버튼(`hg-btn--kakao`), 구글·애플은 테두리 버튼(`hg-btn--secondary`). 이메일 충돌로 그 제공자를 강조할 때는 제 색(카카오 노랑, 구글·애플 테두리) 그대로 두고 `is-conflict`(2px `ink` 테두리)만 더한다. 오렌지 주 버튼으로 바꾸지 않음(브랜드 색 규칙). 안내 “이미 {카카오}로 가입한 이메일이에요”는 AuthLayout 안내 띠(`hg-auth__alert`).
 - 마크(`ProviderMark`, `hg-btn__mark`)는 글자 앞. `hg-auth--login` 영역에선 버튼 왼쪽 고정·글자 가운데, 카카오 마크는 24px, 구글·애플은 중간 회색 테두리(바탕 투명)로 바뀐다(→ AuthLayout).
-- ‘최근 사용’은 해당 버튼 안 오른쪽 끝 세로 가운데 검정 알약 `hg-auth__recent`(12px 600, 꼬리 없음).
+- ‘최근 사용’은 버튼 안 배지가 아니라 해당 버튼 위 오른쪽 말풍선 `hg-auth__recent`(꼬리 아래).
 - 쓰는 곳: A-02 로그인.
