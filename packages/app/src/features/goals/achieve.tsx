@@ -1,5 +1,5 @@
 import { achieveGoal, qk } from '@sweetwo/api';
-import { Icon, Illustration } from '@sweetwo/ui';
+import { Icon, Illustration, hasIllustration } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +52,7 @@ export function AchieveWatch() {
 
 /** 축하 그림: 템플릿 그림, 직접 만든 목표는 회색 기본 그림 */
 export function AchieveArt({ g }: { g: { illustration: string | null; custom: boolean } }) {
-  return g.illustration && !g.custom ? (
+  return hasIllustration(g.illustration) && !g.custom ? (
     <Illustration name={g.illustration} />
   ) : (
     <span

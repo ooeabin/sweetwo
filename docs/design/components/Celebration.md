@@ -14,3 +14,5 @@
 - 말투는 사실만, 감탄사, 이모지 없음.
 
 - React 래퍼 `Celebration`(packages/ui): `art`, `eyebrow`, `title`, `value`, `story`, 버튼은 `children`. 기획서 G-05 축하 문구가 이 문서의 예시 문장보다 우선(제목 = 목표 이름).
+
+- 2026-11-02부터 그림 파일이 비어 있음: 그림 자리는 회색 기본 자리(깃발). 새 3D 이모지가 들어오면 원래대로(→ Illustrations ‘다시 만들기 계획’).
