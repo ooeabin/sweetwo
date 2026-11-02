@@ -736,7 +736,7 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       },
-      { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘초대받았어요’)
+      { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘코드 입력하기’)
       { path: '/i/:code', element: <P01JoinStart /> }, // A-07 초대 링크, P-01 합류 시작(로그인 전에도)
       {
         path: '/join/:screen', // P-02b~P-11 배우자 합류

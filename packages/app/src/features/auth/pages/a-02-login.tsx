@@ -59,7 +59,7 @@ export function A02Login() {
             {st.inviter.slice(0, 1)}
           </span>
         ) : (
-          <Wordmark height={56} />
+          <Wordmark height={40} />
         )
       }
       title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}

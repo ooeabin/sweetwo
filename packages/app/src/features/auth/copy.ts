@@ -28,11 +28,14 @@ export const copy = {
   retry: '다시 시도',
 
   // O-01·A-02 공용 히어로 캐치프레이즈(04-brand.md 슬로건). 하나만 쓰고 새 표어를 만들지 않는다
-  catchphrase: '함께 구워\n더 달콤한 자산파이',
+  catchphrase: '함께 구워 더 달콤한 자산파이',
+  // [확인 필요] O-01 보조 2줄
+  startHelp: '둘이 같이 목표를 정하고\n월급날마다 함께 체크해요',
 
   // O-01
   start: '시작하기',
-  invited: '초대받았어요',
+  invitedAsk: '초대를 받았나요?', // [확인 필요]
+  invitedLink: '코드 입력하기', // [확인 필요]
 
   // A-02
   recent: '최근 사용',

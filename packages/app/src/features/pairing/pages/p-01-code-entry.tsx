@@ -6,7 +6,7 @@ import { copy } from '../copy';
 // 초대 코드: 영문 대문자와 숫자 6자(헷갈리는 I, O, 0, 1은 안 씀). DB 검사와 같은 규칙
 const CODE = /^[A-HJ-NP-Z2-9]{6}$/;
 
-// P-01 합류 시작, 코드 직접 입력(O-01 ‘초대받았어요’로 들어온 길). 링크로 오면 코드가 이미 있어 /i/:code로 바로 간다.
+// P-01 합류 시작, 코드 직접 입력(O-01 ‘코드 입력하기’로 들어온 길). 링크로 오면 코드가 이미 있어 /i/:code로 바로 간다.
 export function P01CodeEntry() {
   const nav = useNavigate();
   const [code, setCode] = useState('');
