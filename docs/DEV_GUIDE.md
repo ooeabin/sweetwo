@@ -637,14 +637,14 @@ supabase/
 
 ### 온보딩 구조
 
-재기획(ADR 0003, 0004, 0005) 온보딩 8~9화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → 홈. O-32 다음 `onboarding/auto-split.ts`가 추천 분배표, 비상금 금액, 첫 체크리스트를 만듦. 홈 할 일 ‘분배표 확인’은 `shared/home-todo.ts`(기기 기록). 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로, O-50·O-60은 O-31로.
+재기획(ADR 0003, 0004, 0005) 온보딩 8~9화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → O-60 → 홈. O-32 다음 `onboarding/auto-split.ts`가 추천 분배표, 비상금 금액, 첫 체크리스트를 만듦. 홈 할 일 ‘분배표 확인’은 `shared/home-todo.ts`(기기 기록). 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로, O-50은 O-31로.
 
 - `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 진행 막대 하나 `progressOf`: O-03~O-50 질문 중 지금까지, O-10·O-60 없음), `step.tsx`(진행, 뒤로, 저장 뒤 다음, 멈춘 화면 기록, `finish`), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 이어하기 `OnboardingGate`)
 - O-21에서 고른 목표는 모두 우리 목표(`goal.owner_user_id` null). 비상금은 자동으로 만들고 금액은 O-50 저장 때 (고정지출 + 생활비) × 3, 기한 1년 뒤
 - 결혼 비용은 보통 템플릿(가족 탭, 결혼 준비 중이면 ‘자주 고르는’ 맨 앞 + 추천). 질문 ② 모아둔 돈은 템플릿 `held` → `goal.other_held`, 기한 기본값은 O-12 예정일(없으면 1년 뒤 추정)
 - O-30 월급 관리 방식 `couple_space.salary_mode`(각자 `separate` / 합쳐서 `joint`), O-31 월급 `app_user.monthly_income`·`income_variable`·`payday`·`payday_last`
 - O-50 분배표: 추천값은 core `rules/salary-split.ts` `recommendSplit`(앱 쪽 순서·변환은 `split-draft.ts`). 줄을 누르면 같은 화면이 금액 입력(Q3)으로 바뀜, ‘+ 줄 추가’는 이름 + 금액. 저장은 RPC `save_split(p_lines, p_owner)`(각자면 내 id, 합쳐서면 생략)
-- O-60 결과: core `goalEta`(오늘 + 남은 금액 ÷ 저금 줄 금액, 올림). ‘시작할게요’ → RPC `start_checklist`(지금이 든 사이클 체크리스트, 월급날이 없으면 만들지 않음) → `useStep().finish`(onboarding_done_at) → 홈
+- O-32 ‘다음’(월급 없음이면 O-31) → `auto-split.ts`(추천 분배표, 비상금 금액, RPC `start_checklist`: 지금이 든 사이클, 월급날이 없으면 만들지 않음) → O-60 준비 끝 ‘홈으로 갈게요’ → `useStep().finish`(onboarding_done_at) → 홈
 - 다른 화면에서 고치러 온 길(`?return=`)은 멈춘 화면으로 기록하지 않는다
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 `OnboardingGate`가 “이어서 할까요?”(실행마다 한 번, O-10·합류 중이면 안 물음, 분석 `onboarding_resumed`) 뒤 그 화면부터
 - 결혼기념일 챙길 날은 `couple_space` 트리거 `sync_wedding_care`가 자동 등록(20261029180000). 연결 해제 뒤에는 S-12h → O-11부터(`start_after_unlink`)

@@ -24,12 +24,20 @@ export function O31Salary() {
 
   const save = (income: number) =>
     s.done(() => saveMe({ monthly_income: income, income_variable: isVariable }));
-  // 월급이 없으면 월급날도 없음: 0원 분배표를 만들고 온보딩 끝
+  // 월급이 없으면 월급날도 없음: 0원 분배표를 만들고 O-60 준비 끝으로
   const noSalary = () =>
-    s.finish(async () => {
-      await saveMe({ monthly_income: 0, income_variable: false, payday: null, payday_last: false });
-      await saveRecommendedSplit();
-    });
+    s.done(
+      async () => {
+        await saveMe({
+          monthly_income: 0,
+          income_variable: false,
+          payday: null,
+          payday_last: false,
+        });
+        await saveRecommendedSplit();
+      },
+      () => 'o-60',
+    );
   return (
     <QuestionLayout
       chapter={s.chapter}

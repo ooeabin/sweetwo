@@ -80,7 +80,13 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await heading(page, '월급날은 며칠이에요?');
   await page.getByRole('radio', { name: '25일' }).click();
   await axe(page);
-  await page.getByRole('button', { name: '시작할게요' }).click();
+  await next(page);
+  // O-60 준비 끝: 해 둔 것 + 홈에서 할 것, 진행 막대 없음
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await expect(page.getByText('25일 월급 체크리스트를 만들었어요')).toBeVisible();
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '홈으로 갈게요' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
 
   expect(db.me).toMatchObject({
@@ -192,6 +198,9 @@ test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 분�
   await next(page);
   await heading(page, '한 달에 월급이 얼마 들어와요?');
   await page.getByRole('button', { name: '지금은 월급이 없어요' }).click();
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await expect(page.getByText('월급이 생기면 홈에서 알려 주세요')).toBeVisible();
+  await page.getByRole('button', { name: '홈으로 갈게요' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
 
   expect(db.space).toMatchObject({ marriage_status: 'engaged', salary_mode: 'joint' });
