@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (245942f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (b6095d8). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -146,7 +146,7 @@
 .hg-toast__msg { flex: 1; min-width: 0; }
 .hg-toast .hg-btn--link { flex: none; margin-left: auto; color: var(--on-ink); font: 700 15px/22px var(--font-sans); text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
-@keyframes hg-toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
@@ -751,9 +751,10 @@
 .hg-lock > * { margin: 0; }
 .hg-lock__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-lock__head > * { margin: 0; }
-.hg-lock__title { font: 700 22px/30px var(--font-sans); text-align: center; word-break: keep-all; }
-.hg-pin { display: flex; gap: var(--space-4); }
-.hg-pin i { width: 16px; height: 16px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
+.hg-lock__title { font: 700 24px/34px var(--font-sans); letter-spacing: -0.4px; text-align: center; word-break: keep-all; white-space: pre-line; }
+.hg-pin { display: flex; gap: var(--space-5); }
+.hg-lock__head + .hg-pin { margin-top: var(--space-4); }  /* 제목과 점 사이 40px */
+.hg-pin i { width: 18px; height: 18px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
 .hg-pin i.is-on { background: var(--ink); border-color: var(--ink); }
 .hg-lock .hg-keypad { align-self: stretch; }
 
@@ -867,6 +868,12 @@
 .hg-lock__sub { font: 400 14px/21px var(--font-sans); color: var(--slate); }
 .hg-lock__error { display: inline-flex; align-items: center; gap: 6px; margin: 0; font: 400 13px/18px var(--font-sans); color: var(--danger); }
 .hg-lock .hg-btn--link { gap: 6px; }
+.hg-lock__assist { display: flex; justify-content: center; }
+/* 점 아래 작은 알약 버튼(카카오T처럼): 테두리가 있어 가운데에 떠 보이지 않음 */
+.hg-lock__assist > .hg-btn--link { min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--hairline); border-radius: var(--radius-full); font: 500 13px/18px var(--font-sans); text-decoration: none; }
+.hg-lock__assist > .hg-btn--link:hover { background: var(--surface-alt); }
+/* 아래 링크 자리: 링크가 없어도 높이를 지켜 PIN 정하기와 잠금 해제의 키패드 위치를 같게 */
+.hg-lock__foot { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-height: 44px; }
 
 /* 공통 버튼 지우기: 새 컴포넌트의 누르는 줄 */
 :where(button):where(.hg-noti__item, .hg-consent__check, .hg-reorder__handle, .hg-file__remove) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -924,11 +931,11 @@
 
 /* Consent: 동의 묶음, 한 건 동의 카드 */
 .hg-consent { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: 480px; padding: 0; background: var(--surface); }
-.hg-consent__row { display: flex; align-items: center; gap: var(--space-3); min-height: 52px; }
+.hg-consent__row { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; }
 .hg-consent__row--all { min-height: 56px; border-bottom: 1px solid var(--hairline-soft); }
 .hg-consent__check { flex: 1; display: flex; align-items: center; gap: var(--space-3); min-width: 0; min-height: 44px; }
-.hg-consent__label { min-width: 0; font: 400 15px/22px var(--font-sans); color: var(--ink); }
-.hg-consent__row--all .hg-consent__label { font: 600 16px/24px var(--font-sans); }
+.hg-consent__label { min-width: 0; font: 400 16px/24px var(--font-sans); color: var(--ink); }
+.hg-consent__row--all .hg-consent__label { font: 600 17px/26px var(--font-sans); }
 .hg-consent__label b { font-weight: 600; color: var(--slate); }
 .hg-consent__label b.is-optional { font-weight: 400; color: var(--stone); }
 /* 약관 묶음(카카오뱅크식): 동그라미 체크, ‘모두 동의’는 회색 판, 필수 묶음은 펼쳐서 하위 약관(작은 체크 표시) */
@@ -940,12 +947,12 @@
 .hg-consent__fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-consent__sub { padding-left: var(--space-8); }
 .hg-consent__row:not(.hg-consent__row--all) { padding: 0 var(--space-4); }
-.hg-consent__sub .hg-consent__row { min-height: 44px; }
+.hg-consent__sub .hg-consent__row { min-height: 48px; }
 .hg-consent__sub .hg-checkbox { width: 18px; height: 18px; border: 0; background: none; }
 .hg-consent__sub .hg-checkbox::after { content: ""; width: 9px; height: 5px; border-left: 2px solid var(--border-control); border-bottom: 2px solid var(--border-control); transform: rotate(-45deg) translate(1px, -1px); }
 .hg-consent__sub .hg-checkbox.is-on { background: none; }
 .hg-consent__sub .hg-checkbox.is-on::after { border-color: var(--ink); }
-.hg-consent__sub .hg-consent__label { font-size: 14px; line-height: 21px; color: var(--slate); }
+.hg-consent__sub .hg-consent__label { font-size: 15px; line-height: 22px; color: var(--slate); }
 .hg-consent__view { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0 calc(var(--space-2) * -1) 0 0; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--stone); cursor: pointer; }
 .hg-consent__view:hover { background: var(--surface-alt); }
 .hg-consent__view:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -1343,6 +1350,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-auth:has(> .hg-lock) { padding: 0; }
   .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
+  /* 제목과 보조 줄은 질문 화면 제목(hg-q__title)과 같은 자리: 왼쪽 정렬, 같은 높이. 점은 가운데 */
+  .hg-auth > .hg-lock .hg-lock__head { align-self: stretch; align-items: flex-start; }
+  .hg-auth > .hg-lock .hg-lock__head > * { text-align: left; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-avatar { margin-top: auto; }
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
@@ -1350,9 +1360,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
-  /* 약관 동의(A-05): 동의 묶음을 주 버튼 바로 위로(배민 가입 화면처럼 엄지 닿는 곳) */
-  .hg-q > .hg-consent { margin-top: auto; }
-  .hg-q:has(> .hg-consent) .hg-q__foot { margin-top: 0; }
 }
 
 /* 행 앞 아이콘 칸: 3D 그림(목표) 또는 영역 색 원 */

@@ -105,9 +105,9 @@ export const copy = {
   signupFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 
   // A-06
-  pinSetTitle: '앱을 열 때 쓸 PIN 6자리를 정해 주세요',
+  pinSetTitle: '앱을 열 때 쓸\nPIN 6자리를 정해 주세요',
   pinSetSub: '자리를 비우면 5분 뒤 잠겨요',
-  pinConfirm: '한 번 더 입력해 주세요',
+  pinConfirm: '한 번 더\n입력해 주세요',
   pinMismatch: 'PIN이 서로 달라요',
   pinWeak: '같은 숫자나 이어지는 숫자는 쓸 수 없어요', // [확인 필요] 기획서는 규칙만 있음
   // 생체 인증 이름(15 A-06 1·5번): Mac·iPhone Touch ID, iPhone Face ID, Android 지문
@@ -120,7 +120,7 @@ export const copy = {
       ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
       : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
-  pinUnlockTitle: 'PIN을 입력해 주세요',
+  pinUnlockTitle: 'PIN을\n입력해 주세요',
   touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,
   forgotPin: 'PIN을 잊었어요',
   pinWrong: 'PIN이 맞지 않아요',
