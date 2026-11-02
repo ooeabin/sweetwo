@@ -1,5 +1,5 @@
 import { MAX_WON, readWon } from '@sweetwo/core';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Chip } from '../Chip';
 import { Icon } from '../Icon';
 import { useNarrow } from './useNarrow';
@@ -40,6 +40,7 @@ export function AmountInput({
   unsureLabel = '잘 모르겠어요',
   onBand,
   zeroLink,
+  extra,
   monthly,
   placeholder = '0',
   allowZero = false,
@@ -55,6 +56,8 @@ export function AmountInput({
   onBand?: (b: AmountBand) => void;
   /** ‘없어요’ 같은 0원 링크 */
   zeroLink?: { label: string; onClick: () => void };
+  /** 빠른 금액·링크 바로 아래(키패드 위)에 둘 것(O-31 ‘매달 금액이 달라요’) */
+  extra?: ReactNode;
   /** 월 금액이면 1~9,999원에 “{n}만 원인가요?” */
   monthly?: boolean;
   placeholder?: string;
@@ -181,6 +184,7 @@ export function AmountInput({
           )}
         </div>
       )}
+      {extra}
       {narrow && (
         <div className="hg-keypad" aria-label="숫자 키패드">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0'].map((k) => (

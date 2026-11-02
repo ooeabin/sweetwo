@@ -16,15 +16,13 @@ const axe = async (page: Page) => {
 const heading = (page: Page, name: string | RegExp) =>
   expect(page.getByRole('heading', { name })).toBeVisible();
 const next = (page: Page) => page.getByRole('button', { name: '다음' }).click();
-const row = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^${name}`) });
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
 /** O-10 → O-03 → O-06(나중에) */
 async function start(page: Page) {
   await page.goto('/');
   await heading(page, '2분이면 우리의 첫 목표가 생겨요');
-  await expect(page.getByText('목표와 월급만 알려 주세요')).toBeVisible();
+  await expect(page.getByText('언제든 고칠 수 있으니 편하게 적어 주세요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
@@ -37,7 +35,9 @@ async function start(page: Page) {
   await page.getByRole('radio', { name: '나중에 할게요' }).click();
 }
 
-test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ page }) => {
+test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 분배표 확인과 금액 정하기', async ({
+  page,
+}) => {
   test.setTimeout(60_000);
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -57,57 +57,28 @@ test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ p
   await next(page);
 
   await heading(page, '둘이 가장 먼저 이루고 싶은 건 뭐예요?');
-  await expect(page.getByText('비상금은 자동으로 들어가요')).toBeVisible();
+  await expect(page.getByText('비상금은 자동으로 들어가요')).toHaveCount(0);
   await page.getByRole('button', { name: /내 집 마련/ }).click();
   await page.getByRole('button', { name: /여행/ }).click();
   await expect(page.getByText('2개 골랐어요')).toBeVisible();
   await axe(page);
+  await expect(page.getByRole('button', { name: '+ 직접 만들기' })).toHaveCount(0);
   await next(page);
 
-  await heading(page, '어느 정도 집을 생각하세요?');
-  await page.getByLabel('어느 정도 집을 생각하세요?').fill('500000000');
-  await next(page);
-  await heading(page, '그중 얼마를 모아서 낼까요?');
-  await expect(page.getByText('1억 5,000만 원을 모아요')).toBeVisible();
-  await next(page);
-  await heading(page, '언제까지 모을까요?');
-  await expect(page.getByText('매달 250만 원씩 모으면 돼요')).toBeVisible();
-  await next(page);
+  // 목표는 고르기만: 금액·기한 질문 없이 바로 월급(2026-11-02, ADR 0004)
 
-  // 온보딩 ②: 관리 방식, 월급, 분배표, 결과
+  // 월급까지만 묻고 끝(ADR 0005): 관리 방식, 월급 → 추천 분배표 + 첫 체크리스트 → 홈
   await heading(page, '월급을 어떻게 관리해요?');
   await expect(page.getByRole('radio', { name: /각자 월급을 따로 관리해요/ })).toBeChecked();
   await axe(page);
   await next(page);
   await heading(page, '한 달에 월급이 얼마 들어와요?');
   await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('3500000');
+  await axe(page);
+  await next(page);
+  // 월급날은 따로 한 화면(O-32), 마지막 질문
+  await heading(page, '월급날은 며칠이에요?');
   await page.getByRole('radio', { name: '25일' }).click();
-  await axe(page);
-  await next(page);
-
-  // 추천값(17 O-50 예시): 고정지출 88만, 생활비 88만, 용돈 35만, 비상금 44만, 내 집 마련 95만, 여행 0원, 남는 돈 0원
-  await heading(page, '월급을 이렇게 나눠 볼까요?');
-  await expect(page.getByText('월급 350만 원')).toBeVisible();
-  await expect(row(page, '비상금')).toContainText('44만 원');
-  await expect(row(page, '내 집 마련')).toContainText('95만 원');
-  await expect(row(page, '내 집 마련')).toContainText('매달 250만 원이 필요해요');
-  await expect(row(page, '여행')).toContainText('0원');
-  await expect(row(page, '고정지출')).toContainText('88만 원');
-  await expect(row(page, '생활비')).toContainText('88만 원');
-  await expect(row(page, '용돈')).toContainText('35만 원');
-  await expect(page.getByText('남는 돈 0원')).toBeVisible();
-  await axe(page);
-  // 줄을 눌러 금액 고치기 → 남는 돈이 바로 바뀜
-  await row(page, '생활비').click();
-  await heading(page, '생활비 금액');
-  await page.getByLabel('생활비 금액').fill('780000');
-  await next(page);
-  await expect(page.getByText('남는 돈 10만 원')).toBeVisible();
-  await page.getByRole('button', { name: '이대로 할게요' }).click();
-
-  await heading(page, '매달 95만 원씩 모으면 2039년 12월에 내 집 마련을 이뤄요');
-  await expect(page.getByText(/목표 기한보다 8년 2개월 늦어요/)).toBeVisible();
-  await expect(page.getByText('월급날(25일)에 분배표대로 보내고 체크해 주세요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '시작할게요' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
@@ -125,23 +96,47 @@ test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ p
     wedding_date: '2025-05-17',
     salary_mode: 'separate',
   });
-  // 비상금 목표 금액 = (고정지출 88만 + 생활비 78만) × 3
-  expect(db.goals.find((g) => g.template === 'emergency')).toMatchObject({
-    target_amount: 4_980_000,
-    deadline: '2027-10-01',
-  });
+  // 추천 분배표(17 O-50 추천값): 고정지출 88만, 생활비 88만, 용돈 35만, 비상금 44만, 금액 없는 목표 0원
   expect(db.splits).toHaveLength(1);
   expect(db.splits[0]?.owner_user_id).toBe(chanwoo.id);
   expect(db.splits[0]?.split_line.map((l) => [l.kind, l.amount])).toEqual([
     ['saving', 440_000],
-    ['saving', 950_000],
+    ['saving', 0],
     ['saving', 0],
     ['fixed', 880_000],
-    ['living', 780_000],
+    ['living', 880_000],
     ['allowance', 350_000],
   ]);
+  // 비상금 목표 금액 = (고정지출 88만 + 생활비 88만) × 3
+  expect(db.goals.find((g) => g.template === 'emergency')).toMatchObject({
+    target_amount: 5_280_000,
+    deadline: '2027-10-01',
+  });
   expect(db.rpc).toContain('start_checklist');
   expect(db.checklists).toHaveLength(1);
+
+  // 홈 할 일: 분배표 확인 → W-01을 열면 끝남
+  const todo = page.getByText('추천으로 나눈 분배표를 확인해 주세요');
+  await expect(todo).toBeVisible();
+  await page.locator('.hg-banner--todo').getByRole('button').first().click();
+  await expect(page).toHaveURL(/\/salary\/split$/);
+  await page.goto('/');
+  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
+
+  // 홈 1순위 카드 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)
+  await page.getByRole('button', { name: '금액 정하기', exact: true }).click();
+  await heading(page, '어느 정도 집을 생각하세요?');
+  await page.getByLabel('어느 정도 집을 생각하세요?').fill('500000000');
+  await next(page);
+  await heading(page, '그중 얼마를 모아서 낼까요?');
+  await next(page);
+  await heading(page, '언제까지 모을까요?');
+  await next(page);
+  await expect(page).toHaveURL(/\/goals\/[^/]+$/);
+  expect(db.goals.find((g) => g.template === 'home')).toMatchObject({
+    target_amount: 150_000_000,
+    deadline: '2031-10-01',
+  });
 });
 
 test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도로, 결혼 비용 추천 없음', async ({
@@ -171,7 +166,7 @@ test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도�
   await heading(page, '두 사람은 어떤 사이예요?');
 });
 
-test('예비부부, 합쳐서, 월급 없음: 결혼 비용 질문과 0원 분배표', async ({ page }) => {
+test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 분배표', async ({ page }) => {
   test.setTimeout(60_000);
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -192,38 +187,18 @@ test('예비부부, 합쳐서, 월급 없음: 결혼 비용 질문과 0원 분�
   await expect(page.getByText('개 골랐어요')).toHaveCount(0);
   await wedding.click();
   await next(page);
-  await heading(page, '결혼 준비에 총 얼마를 생각하세요?');
-  await expect(page.getByText('둘이 합한 금액이에요')).toBeVisible();
-  await page.getByLabel('결혼 준비에 총 얼마를 생각하세요?').fill('30000000');
-  await next(page);
-  await heading(page, '지금까지 모아둔 돈이 있나요?');
-  await page.getByRole('button', { name: '없어요' }).click();
-  await heading(page, '언제까지 모을까요?');
-  await next(page);
-
   await heading(page, '월급을 어떻게 관리해요?');
   await page.getByRole('radio', { name: /합쳐서 같이 관리해요/ }).click();
   await next(page);
   await heading(page, '한 달에 월급이 얼마 들어와요?');
   await page.getByRole('button', { name: '지금은 월급이 없어요' }).click();
-
-  await heading(page, '월급을 이렇게 나눠 볼까요?');
-  await expect(row(page, '결혼 비용')).toContainText('0원');
-  await expect(page.getByText('남는 돈 0원')).toBeVisible();
-  await page.getByRole('button', { name: '이대로 할게요' }).click();
-
-  await heading(page, '분배표에서 저금을 정하면 언제 이룰지 알려 드려요');
-  await page.getByRole('button', { name: '시작할게요' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
 
   expect(db.space).toMatchObject({ marriage_status: 'engaged', salary_mode: 'joint' });
-  expect(db.goals.find((g) => g.template === 'wedding')).toMatchObject({
-    target_amount: 30_000_000,
-    other_held: 0,
-    deadline_estimated: true,
-  });
+  expect(db.goals.find((g) => g.template === 'wedding')).toMatchObject({ target_amount: null });
   expect(db.me).toMatchObject({ monthly_income: 0, payday: null });
   expect(db.splits[0]?.owner_user_id).toBeNull();
+  expect(db.splits[0]?.split_line.every((l) => l.amount === 0)).toBe(true);
   expect(db.checklists).toHaveLength(0); // 월급날이 없으면 체크리스트 없음
 });
 

@@ -65,11 +65,12 @@ export function useStep(id: string) {
     }
   };
 
-  /** 온보딩을 마치고 홈으로(O-60). 완료 시각을 남기고 이어하기가 옛 값을 보지 않게 다시 읽는다 */
-  const finish = async () => {
+  /** 온보딩을 마치고 홈으로(O-31 다음). before(마지막 답 저장, 추천 분배표)를 먼저. 완료 시각을 남기고 다시 읽는다 */
+  const finish = async (before?: () => Promise<unknown>) => {
     if (saving) return;
     setSaving(true);
     try {
+      await before?.();
       await saveMe({
         onboarding_step: id.toUpperCase(),
         onboarding_done_at: new Date().toISOString(),
@@ -79,7 +80,7 @@ export function useStep(id: string) {
       nav('/', { replace: true });
     } catch {
       setSaving(false);
-      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish() });
+      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish(before) });
     }
   };
 

@@ -14,6 +14,8 @@ export interface AddDraft {
   /** 고른 자산 합계(원금 기준, 미리보기용) */
   assetTotal: number;
   owner: 'together' | 'me' | 'partner' | null;
+  /** 금액 정하기(22 G-03b → G-03c): 금액 없이 만든 목표에 템플릿별 질문으로 금액, 기한만 채움 */
+  fillGoalId: string | null;
 }
 
 const KEY = 'sweetwo.goal-add';
@@ -26,6 +28,7 @@ const empty: AddDraft = {
   assetIds: [],
   assetTotal: 0,
   owner: null,
+  fillGoalId: null,
 };
 const read = (): AddDraft => {
   try {
@@ -46,7 +49,7 @@ const write = (d: AddDraft) => {
 export const useAddDraft = create<{
   draft: AddDraft;
   set: (patch: Partial<AddDraft>) => void;
-  start: (template: string) => void;
+  start: (template: string, fillGoalId?: string) => void;
   clear: () => void;
 }>((set, get) => ({
   draft: read(),
@@ -55,8 +58,8 @@ export const useAddDraft = create<{
     write(draft);
     set({ draft });
   },
-  start: (template) => {
-    const draft = { ...empty, template };
+  start: (template, fillGoalId) => {
+    const draft = { ...empty, template, fillGoalId: fillGoalId ?? null };
     write(draft);
     set({ draft });
   },

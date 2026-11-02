@@ -13,12 +13,9 @@ import { O11Marriage } from './pages/o-11-marriage';
 import { O12WeddingDate } from './pages/o-12-wedding-date';
 import { O13BirthYear } from './pages/o-13-birth-year';
 import { O21Goals } from './pages/o-21-goals';
-import { O23GoalQuestion } from './pages/o-23-goal-question';
-import { O24GoalDeadline } from './pages/o-24-goal-deadline';
 import { O30SalaryMode } from './pages/o-30-salary-mode';
 import { O31Salary } from './pages/o-31-salary';
-import { O50Split } from './pages/o-50-split';
-import { O60Result } from './pages/o-60-result';
+import { O32Payday } from './pages/o-32-payday';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
 const SCREENS: Record<string, () => ReactNode> = {
@@ -30,14 +27,16 @@ const SCREENS: Record<string, () => ReactNode> = {
   'o-12': () => <O12WeddingDate />,
   'o-13': () => <O13BirthYear />,
   'o-21': () => <O21Goals />,
-  'o-24': () => <O24GoalDeadline />,
   'o-30': () => <O30SalaryMode />,
   'o-31': () => <O31Salary />,
-  'o-50': () => <O50Split />,
-  'o-60': () => <O60Result />,
+  'o-32': () => <O32Payday />,
 };
 
-export const isOnboardingScreen = (id: string) => id in SCREENS || /^o-23-\d+$/.test(id);
+// 온보딩에서 뺀 화면(2026-11-02, ADR 0004·0005)에 멈춰 있던 사람: O-23·O-24 → O-30, O-50·O-60 → O-31
+const RETIRED = /^o-23-\d+$|^o-24$|^o-50$|^o-60$/;
+const current = (id: string) => (RETIRED.test(id) ? (/^o-[56]0$/.test(id) ? 'o-31' : 'o-30') : id);
+
+export const isOnboardingScreen = (id: string) => current(id) in SCREENS;
 
 // 온보딩 화면을 마지막으로 본 시각(분석 onboarding_resumed hours_since_last). 이 기기에만
 const SEEN_KEY = 'sweetwo.onboardingSeenAt';
@@ -60,8 +59,7 @@ const hoursSinceSeen = () => {
 export function OnboardingRoute() {
   const { screen = 'o-10' } = useParams();
   markSeen();
-  const m = /^o-23-(\d+)$/.exec(screen);
-  if (m) return <O23GoalQuestion key={screen} index={Number(m[1])} />;
+  if (RETIRED.test(screen)) return <Navigate to={`/onboarding/${current(screen)}`} replace />;
   const render = SCREENS[screen];
   return render ? <div key={screen}>{render()}</div> : <Navigate to="/onboarding/o-10" replace />;
 }
@@ -77,7 +75,7 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
   const nav = useNavigate();
   if (me.isLoading) return null;
-  const step = me.data?.onboarding_step?.toLowerCase() ?? 'o-10';
+  const step = current(me.data?.onboarding_step?.toLowerCase() ?? 'o-10');
   const open = !!me.data && !me.data.onboarding_done_at;
   const to =
     open && isOnboardingScreen(step)
@@ -91,6 +89,7 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   return (
     <QuestionLayout
       title={copy.resumeQ}
+      help={copy.resumeHelp}
       primary={{ label: copy.resumeGo }}
       onSubmit={() => {
         asked = true;

@@ -4,6 +4,7 @@ import { object } from '@sweetwo/core';
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
+  resumeHelp: '멈춘 화면부터 이어서 할 수 있어요', // [확인 필요] 2026-11-02 짧게 다시 넣음
   resumeQ: '이어서 할까요?',
   resumeGo: '이어서 할게요', // [확인 필요]
   next: '다음',
@@ -32,7 +33,12 @@ export const copy = {
 
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
   overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
-  overviewHelp: '목표와 월급만 알려 주세요', // [확인 필요]
+  // [확인 필요] O-10 3단계 안내(2026-11-02, 배민 커넥트·GCOO 시작 화면처럼)
+  overviewSteps: [
+    { icon: 'flag-pennant', text: '같이 이룰 목표를 골라요' },
+    { icon: 'wallet', text: '월급과 월급날을 알려 줘요' },
+    { icon: 'calendar-check', text: '월급날마다 보낸 돈을 체크해요' },
+  ] as const,
   overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
   chapterStart: '시작할게요',
   edit: '수정',
@@ -62,7 +68,6 @@ export const copy = {
   // O-21
   goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
   goalsHelp: '고른 순서가 우선순위가 돼요', // [확인 필요]
-  autoEmergency: '비상금은 자동으로 들어가요',
   recommended: '추천',
   makeOwn: '+ 직접 만들기',
   picked: (n: number) => `${n}개 골랐어요`,

@@ -81,7 +81,7 @@ export function G01GoalList() {
             // 금액 없는 목표는 “금액 정하기” → G-03b(목표 금액)
             nav(
               i.goal.target_amount === null && i.canEdit && i.goal.kind !== 'monthly'
-                ? `/goals/${i.goal.id}/edit/amount`
+                ? `/goals/${i.goal.id}/set-amount`
                 : `/goals/${i.goal.id}`,
             )
           }

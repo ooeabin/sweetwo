@@ -4,16 +4,17 @@ import {
   fetchChecklistsEnsured,
   fetchGoals,
   fetchMyUnlink,
+  fetchSplits,
   fetchUnlink,
   qk,
 } from '@sweetwo/api';
 import { todayKst, type HomeCare, type HomeInput } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { closeHomeTodo, readClosedTodos } from '../../shared/home-todo';
 import { useMe, useSpace } from './data';
 
 const INVITE_KEY = 'sweetwo:home:invite-closed'; // 초대 할 일 닫은 날(7일 동안 안 보임)
-const TODO_KEY = 'sweetwo:home:todo-closed'; // 닫은 만기·챙길 날 할 일(항목 + 날짜)
 
 const read = (k: string) => {
   try {
@@ -29,14 +30,7 @@ const write = (k: string, v: string) => {
     /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
   }
 };
-const readList = (): string[] => {
-  try {
-    const v: unknown = JSON.parse(read(TODO_KEY) ?? '[]');
-    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
-};
+const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 분배표 확인)
 
 // 홈(H-05·H-06)과 트레이 위젯이 같이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
 /** on = false면 읽지 않음(트레이 위젯이 없는 웹·모바일) */
@@ -52,6 +46,7 @@ export function useHomeInput(on = true) {
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals, enabled: on });
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays, enabled: on });
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets, enabled: on });
+  const splits = useQuery({ queryKey: qk.splits, queryFn: fetchSplits, enabled: on });
   const state = space.data?.couple_state;
   const unlink = useQuery({
     queryKey: qk.unlink,
@@ -95,6 +90,15 @@ export function useHomeInput(on = true) {
               : null,
           inviteClosedOn,
           closed,
+          // 내 분배표(각자 = 내 것, 합쳐서 = 공동). 온보딩이 추천값으로 만든 뒤 W-01을 한 번 열 때까지 할 일(ADR 0005)
+          // 월급이 없으면(쉬는 중) 분배표가 0원뿐이라 확인 대신 ‘월급 알려 주기’ 카드만
+          splitId: !me.data.monthly_income
+            ? null
+            : (splits.data?.find((x) =>
+                space.data?.salary_mode === 'joint'
+                  ? x.owner_user_id === null
+                  : x.owner_user_id === me.data?.id,
+              )?.id ?? null),
         }
       : null;
   return {
@@ -105,11 +109,7 @@ export function useHomeInput(on = true) {
         ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
         : null,
     /** 만기·챙길 날 할 일 닫기(그 항목·날짜만) */
-    closeTodo: (key: string) => {
-      const next = [...closed.slice(-30), key];
-      write(TODO_KEY, JSON.stringify(next));
-      setClosed(next);
-    },
+    closeTodo: (key: string) => setClosed(closeHomeTodo(key)),
     /** 초대 할 일 닫기(7일) */
     closeInvite: () => {
       write(INVITE_KEY, today);
