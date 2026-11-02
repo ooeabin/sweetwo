@@ -39,6 +39,16 @@ export const copy = {
     { icon: 'wallet', text: '월급과 월급날을 알려 줘요' },
     { icon: 'calendar-check', text: '월급날마다 보낸 돈을 체크해요' },
   ] as const,
+  // O-60 준비 끝(2026-11-02 다시 둠) [확인 필요]
+  readyTitle: (name: string) => `${name}님, 준비가 끝났어요`,
+  readyHelp: '이제 홈에서 하나씩 해 볼게요',
+  readyDone: {
+    split: '월급을 추천값으로 나눠 뒀어요',
+    checklist: (day: string) => `${day} 월급 체크리스트를 만들었어요`,
+    goal: '목표 금액은 홈에서 정해요',
+    salary: '월급이 생기면 홈에서 알려 주세요',
+  },
+  readyGo: '홈으로 갈게요',
   overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
   chapterStart: '시작할게요',
   edit: '수정',
