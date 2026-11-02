@@ -867,7 +867,10 @@
 .hg-lock__sub { font: 400 14px/21px var(--font-sans); color: var(--slate); }
 .hg-lock__error { display: inline-flex; align-items: center; gap: 6px; margin: 0; font: 400 13px/18px var(--font-sans); color: var(--danger); }
 .hg-lock .hg-btn--link { gap: 6px; }
-.hg-lock__assist { display: flex; justify-content: center; margin-top: calc(var(--space-2) * -1); }
+.hg-lock__assist { display: flex; justify-content: center; }
+/* 점 아래 작은 알약 버튼(카카오T처럼): 테두리가 있어 가운데에 떠 보이지 않음 */
+.hg-lock__assist > .hg-btn--link { min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--hairline); border-radius: var(--radius-full); font: 500 13px/18px var(--font-sans); text-decoration: none; }
+.hg-lock__assist > .hg-btn--link:hover { background: var(--surface-alt); }
 /* 아래 링크 자리: 링크가 없어도 높이를 지켜 PIN 정하기와 잠금 해제의 키패드 위치를 같게 */
 .hg-lock__foot { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-height: 44px; }
 
