@@ -70,9 +70,6 @@ export function O21Goals() {
       primary={{ label: primary, loading: s.saving }}
       onSubmit={() => void s.done(save)}
     >
-      <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
-        <span>{copy.autoEmergency}</span>
-      </p>
       <Tabs
         label={copy.goalTabsLabel}
         value={tab}

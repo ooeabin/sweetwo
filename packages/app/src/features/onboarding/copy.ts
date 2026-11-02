@@ -68,7 +68,6 @@ export const copy = {
   // O-21
   goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
   goalsHelp: '고른 순서가 우선순위가 돼요', // [확인 필요]
-  autoEmergency: '비상금은 자동으로 들어가요',
   recommended: '추천',
   makeOwn: '+ 직접 만들기',
   picked: (n: number) => `${n}개 골랐어요`,

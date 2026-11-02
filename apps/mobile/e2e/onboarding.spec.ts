@@ -57,7 +57,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await next(page);
 
   await heading(page, '둘이 가장 먼저 이루고 싶은 건 뭐예요?');
-  await expect(page.getByText('비상금은 자동으로 들어가요')).toBeVisible();
+  await expect(page.getByText('비상금은 자동으로 들어가요')).toHaveCount(0);
   await page.getByRole('button', { name: /내 집 마련/ }).click();
   await page.getByRole('button', { name: /여행/ }).click();
   await expect(page.getByText('2개 골랐어요')).toBeVisible();
