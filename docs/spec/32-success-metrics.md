@@ -191,5 +191,5 @@
 | 월간 (사이클 종료 7일 뒤) | 핵심 지표 월 추이, 가입 주차 코호트별 첫 체크 완료율·M1·M3, 월별 체크리스트 완료율·저금 줄 체크율, 목표 진행·지연, 되돌리기, 연결 해제, 유료·페이월 전환 | 기능 개선·알림 정책 조정 |
 | 분기 | 목표치(가설) 재설정, 지표·이벤트 정의 점검 | 다음 분기 목표 |
 
-- 기본 분해: couple\_state, marriage\_state(했어요 / 준비 중이에요), salary\_mode(각자 / 합쳐서), platform(desktop / ios / android), 변동 수입 여부, 가입 경로(starter / partner)
+- 기본 분해: couple\_state, marriage\_state(결혼했어요 / 준비 중 / 아직 안 정함), salary\_mode(각자 / 합쳐서), platform(desktop / ios / android), 변동 수입 여부, 가입 경로(starter / partner)
 - 코호트 단위: 온보딩 완료 주차. 유지율은 연결·혼자 쓰기·미합류로 나눠서도 표시

@@ -30,7 +30,9 @@ export function screens(s: FlowState): string[] {
   const afterUnlink = !!s.space?.unlinked_from;
   const list = afterUnlink ? [] : ['o-10', 'o-03', 'o-06'];
   if (!afterUnlink && s.inviteNow === 'now') list.push('o-07');
-  list.push('o-11', 'o-12');
+  list.push('o-11');
+  // 아직 안 정했어요면 결혼한 날·예정일(O-12)을 묻지 않음
+  if (s.space?.marriage_status !== 'undecided') list.push('o-12');
   if (!(afterUnlink && s.me?.birth_year)) list.push('o-13');
   list.push('o-21');
   const top = topGoal(s.goals);

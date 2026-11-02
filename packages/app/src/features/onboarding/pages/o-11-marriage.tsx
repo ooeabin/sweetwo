@@ -5,7 +5,8 @@ import { useStep } from '../step';
 
 type Status = keyof typeof copy.marriedChoices;
 
-// O-11 결혼 상태(Q1) → O-12(했어요 / 준비 중에 따라 질문이 다름). 준비 중 → O-21 ‘결혼 비용’ 추천 배지 + 맨 앞
+// O-11 결혼 상태(Q1) → O-12(했어요 / 준비 중에 따라 질문이 다름). 준비 중 → O-21 ‘결혼 비용’ 추천 배지 + 맨 앞.
+// 아직 안 정했어요 → O-12 없이 O-13(날짜는 비움)
 export function O11Marriage() {
   const s = useStep('o-11');
   if (!s.ready) return null;
@@ -20,7 +21,7 @@ export function O11Marriage() {
           void s.done(() =>
             // 상태가 바뀌면 날짜는 다시 받음(했어요는 지난 날, 준비 중은 앞날)
             saveSpace(
-              v === sp?.marriage_status
+              v === sp?.marriage_status && v !== 'undecided'
                 ? { marriage_status: v }
                 : { marriage_status: v, wedding_date: null, wedding_month: null },
             ),
@@ -29,6 +30,7 @@ export function O11Marriage() {
         options={[
           { value: 'married', label: copy.marriedChoices.married },
           { value: 'engaged', label: copy.marriedChoices.engaged },
+          { value: 'undecided', label: copy.marriedChoices.undecided },
         ]}
       />
     </QuestionLayout>

@@ -38,8 +38,13 @@ export const copy = {
   edit: '수정',
 
   // O-11
-  married: '결혼은 하셨나요?',
-  marriedChoices: { married: '했어요', engaged: '준비 중이에요' },
+  married: '두 사람은 어떤 사이예요?',
+  // [확인 필요] 제목을 결혼 여부에서 관계로 바꾸면서 답도 ‘결혼’을 넣어 다듬음, 세 번째 답 추가(2026-11-02)
+  marriedChoices: {
+    married: '결혼했어요',
+    engaged: '결혼 준비 중이에요',
+    undecided: '아직 안 정했어요',
+  },
   cancel: '취소',
 
   // O-12

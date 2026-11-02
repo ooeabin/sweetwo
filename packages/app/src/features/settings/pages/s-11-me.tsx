@@ -161,7 +161,7 @@ export function S11Me() {
             onClick={() => nav('/settings/me/marriage')}
           />
         )}
-        {sp.marriage_status && (
+        {sp.marriage_status && sp.marriage_status !== 'undecided' && (
           <ListRow
             label={copy.weddingDay[married ? 'married' : 'engaged']}
             value={weddingText}

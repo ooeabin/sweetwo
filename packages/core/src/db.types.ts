@@ -3435,7 +3435,7 @@ export type Database = {
       inquiry_category: "account" | "couple" | "calc" | "sync" | "billing" | "privacy" | "etc"
       inquiry_status: "received" | "in_progress" | "waiting_user" | "done"
       invest_answer: "keep" | "some" | "active" | "unsure"
-      marriage_status: "married" | "engaged"
+      marriage_status: "married" | "engaged" | "undecided"
       month_close_status: "draft" | "done"
       newlywed_home: "have" | "before" | "after" | "parents"
       paid_from: "goal_fund" | "living" | "personal" | "wedding_account" | "personal_support"
@@ -3623,7 +3623,7 @@ export const Constants = {
       inquiry_category: ["account", "couple", "calc", "sync", "billing", "privacy", "etc"],
       inquiry_status: ["received", "in_progress", "waiting_user", "done"],
       invest_answer: ["keep", "some", "active", "unsure"],
-      marriage_status: ["married", "engaged"],
+      marriage_status: ["married", "engaged", "undecided"],
       month_close_status: ["draft", "done"],
       newlywed_home: ["have", "before", "after", "parents"],
       paid_from: ["goal_fund", "living", "personal", "wedding_account", "personal_support"],

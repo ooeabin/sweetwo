@@ -253,7 +253,7 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
 
   // 결혼 상태 준비 중 → 예정일
   await page.getByRole('button', { name: /결혼 상태/ }).click();
-  await page.getByRole('radio', { name: '준비 중이에요' }).click();
+  await page.getByRole('radio', { name: '결혼 준비 중이에요' }).click();
   await expect(page.getByRole('heading', { name: '결혼 예정일은 언제예요?' })).toBeVisible();
   await page.getByLabel('년', { exact: true }).fill('2027');
   await page.getByLabel('월', { exact: true }).fill('5');

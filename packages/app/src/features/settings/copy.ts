@@ -44,7 +44,11 @@ export const copy = {
   save: '저장',
   saved: '저장했어요', // [확인 필요]
   marriage: '결혼 상태',
-  marriageValue: { married: '했어요', engaged: '준비 중이에요' },
+  marriageValue: {
+    married: '결혼했어요',
+    engaged: '결혼 준비 중이에요',
+    undecided: '아직 안 정했어요',
+  },
   weddingDay: { married: '결혼한 날', engaged: '결혼 예정일' }, // [확인 필요]
   weddingPlannedMonth: (y: number, m: number) => `${y}년 ${m}월 예정`, // [확인 필요]
   undecidedValue: '미정', // [확인 필요]
@@ -95,7 +99,7 @@ export const copy = {
   salaryModeSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
 
   // S-11g·h·i
-  marriageQ: '결혼은 하셨나요?',
+  marriageQ: '두 사람은 어떤 사이예요?',
   weddingDoneQ: '결혼한 날은 언제예요?',
   weddingPlannedQ: '결혼 예정일은 언제예요?',
   whenPlanned: '언제쯤 예정이에요?',
@@ -510,7 +514,11 @@ export const copy = {
     split: '분담 방식',
   },
   goalsCount: (n: number) => `${n}개`,
-  marriageState: { married: '결혼했어요', engaged: '준비 중이에요' } as Record<string, string>,
+  marriageState: {
+    married: '결혼했어요',
+    engaged: '결혼 준비 중이에요',
+    undecided: '아직 안 정했어요',
+  } as Record<string, string>,
   housingOptions: {
     jeonse: '전세',
     monthly_rent: '반전세·월세',

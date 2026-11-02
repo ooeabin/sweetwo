@@ -43,8 +43,8 @@ test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ p
   const db = await mockOnboarding(page, { now: NOW });
   await start(page);
 
-  await heading(page, '결혼은 하셨나요?');
-  await page.getByRole('radio', { name: '했어요' }).click();
+  await heading(page, '두 사람은 어떤 사이예요?');
+  await page.getByRole('radio', { name: '결혼했어요' }).click();
   await heading(page, '결혼한 날은 언제예요?');
   await page.getByLabel('년', { exact: true }).fill('2025');
   await page.getByLabel('월', { exact: true }).fill('05');
@@ -144,13 +144,40 @@ test('신혼부부: 이름부터 첫 체크리스트까지 11화면', async ({ p
   expect(db.checklists).toHaveLength(1);
 });
 
+test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도로, 결혼 비용 추천 없음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  await start(page);
+  await heading(page, '두 사람은 어떤 사이예요?');
+  await page.getByRole('radio', { name: '아직 안 정했어요' }).click();
+  await heading(page, '찬우님은 몇 년생이에요?');
+  expect(db.space?.marriage_status).toBe('undecided');
+  expect(db.space?.wedding_date ?? null).toBeNull();
+  await next(page);
+  await heading(page, '둘이 가장 먼저 이루고 싶은 건 뭐예요?');
+  await expect(page.getByRole('button', { name: /결혼 비용/ })).toHaveCount(0);
+  // 뒤로 가도 날짜 질문 없이 O-11
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await heading(page, '찬우님은 몇 년생이에요?');
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await heading(page, '두 사람은 어떤 사이예요?');
+});
+
 test('예비부부, 합쳐서, 월급 없음: 결혼 비용 질문과 0원 분배표', async ({ page }) => {
   test.setTimeout(60_000);
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   await start(page);
 
-  await page.getByRole('radio', { name: '준비 중이에요' }).click();
+  await page.getByRole('radio', { name: '결혼 준비 중이에요' }).click();
   await heading(page, '결혼 예정일은 언제예요?');
   await page.getByRole('button', { name: '아직 미정이에요' }).click();
   await heading(page, '언제쯤 예정이에요?');
