@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (5d96923). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (5ccb840). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1319,6 +1319,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-auth--login .hg-checkbox { width: 18px; height: 18px; }
 .hg-auth--login .hg-auth__recent { position: absolute; right: var(--space-4); bottom: calc(100% - var(--space-2)); z-index: 1; padding: 2px 8px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 11px/16px var(--font-sans); white-space: nowrap; pointer-events: none; }
 .hg-auth--login .hg-auth__recent::after { content: ""; position: absolute; top: 100%; right: 14px; border: 5px solid transparent; border-bottom: 0; border-top-color: var(--ink); }
+/* 이메일 충돌 말풍선(지그재그 ‘지금 가입하고…’): 버튼 위 가운데 흰 말풍선, 13px, 넉넉한 여백, 꼬리 아래 */
+.hg-auth--login .hg-auth__bubble { position: absolute; left: 50%; bottom: calc(100% + var(--space-3)); transform: translateX(-50%); z-index: 1; padding: var(--space-2) var(--space-4); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); font: 500 13px/20px var(--font-sans); white-space: nowrap; pointer-events: none; }
+.hg-auth--login .hg-auth__bubble::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-right: 1px solid var(--hairline-soft); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); transform: rotate(45deg); }
 @media (min-width: 768px) {
   .hg-auth--hero .hg-auth__actions { margin-top: var(--space-6); }
 }

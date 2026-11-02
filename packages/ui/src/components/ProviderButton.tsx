@@ -30,7 +30,11 @@ export function ProviderButton({
     <Button variant={v} block {...rest}>
       <ProviderMark provider={provider} />
       {children}
-      {(bubble || recent) && <span className="hg-auth__recent">{bubble ?? recentLabel}</span>}
+      {bubble ? (
+        <span className="hg-auth__bubble">{bubble}</span>
+      ) : (
+        recent && <span className="hg-auth__recent">{recentLabel}</span>
+      )}
     </Button>
   );
 }
