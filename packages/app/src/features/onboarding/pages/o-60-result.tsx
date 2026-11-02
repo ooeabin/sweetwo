@@ -26,7 +26,10 @@ export function O60Result() {
   if (!s.ready || splits.isLoading) return null;
   const me = s.state.me;
   const goals = s.state.goals ?? [];
-  const goal = topGoal(goals) ?? goals.find((g) => g.template === 'emergency');
+  // 금액을 정한 1순위 목표, 없으면 비상금(온보딩에서는 고르기만 하므로 보통 비상금)
+  const top = topGoal(goals);
+  const goal =
+    (top?.target_amount ? top : undefined) ?? goals.find((g) => g.template === 'emergency');
   const split = splits.data?.find((x) => x.owner_user_id === me?.id || x.owner_user_id === null);
   const monthly =
     split?.split_line.find((l) => l.kind === 'saving' && l.goal_id === goal?.id)?.amount ?? 0;

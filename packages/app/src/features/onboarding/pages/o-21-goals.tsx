@@ -61,7 +61,6 @@ export function O21Goals() {
     }
   };
 
-  const prevTop = saved[0];
   return (
     <QuestionLayout
       chapter={s.chapter}
@@ -69,14 +68,7 @@ export function O21Goals() {
       help={copy.goalsHelp}
       onBack={s.onBack}
       primary={{ label: primary, loading: s.saving }}
-      onSubmit={() =>
-        void s.done(save, (fresh) => {
-          // 1순위가 그대로이고 이미 답했으면 O-23·O-24를 다시 묻지 않는다
-          const top = pickedGoals(fresh.goals)[0];
-          if (top && prevTop && top.id === prevTop.id && top.target_amount !== null) return 'o-30';
-          return undefined;
-        })
-      }
+      onSubmit={() => void s.done(save)}
     >
       <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
         <span>{copy.autoEmergency}</span>
@@ -96,8 +88,7 @@ export function O21Goals() {
         }))}
         order={order}
         onToggle={toggle}
-        customKey="custom"
-        customLabel={copy.makeOwn}
+        // 직접 만들기는 이름부터 물어야 해서 온보딩에서는 빼고 목표 탭(G-03a)에서(2026-11-02)
         recommendedLabel={copy.recommended}
       />
       <p className="hg-q__help" aria-live="polite">
