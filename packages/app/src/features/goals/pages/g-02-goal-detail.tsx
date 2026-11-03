@@ -367,7 +367,9 @@ export function G02GoalDetail() {
           </div>
           {g.target_amount !== null && (
             <div
-              className="hg-goalbox__bar"
+              className={
+                g.template === 'emergency' ? 'hg-goalbox__bar is-safety' : 'hg-goalbox__bar'
+              }
               role="img"
               aria-label={`${g.name} ${Math.round(i.pct)}%`}
             >
@@ -453,7 +455,7 @@ export function G02GoalDetail() {
                 personName={(x) => d.nameOf(x)}
                 meId={d.meId}
                 // 각자 모드에서 배우자 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
-                readOnly={!d.joint && p.userId !== d.meId}
+                viewOnly={!d.joint && p.userId !== d.meId}
               />
             ) : (
               <div key={p.userId} className="hg-goalbox__person">
@@ -465,24 +467,34 @@ export function G02GoalDetail() {
           })}
         </div>
       </section>
+      {/* 달성·사용 완료(2026-11-03): 다른 묶음 카드와 같은 모양. 달성은 배지 + 안내 + ‘쓴 돈 기록하기’(보조 버튼) */}
       {(g.status === 'achieved' || g.status === 'used') && (
-        <section className="hg-card hg-card--fill hg-stack">
-          <b>
-            {g.status === 'used'
-              ? // 사용 완료: 꺼내 쓴 돈 합(22 접힌 목록 4번, 2026-11-03)
-                copy.spentAll(
-                  m(
-                    (moves.data ?? [])
-                      .filter((x) => x.kind === 'use')
-                      .reduce((t, x) => t + x.amount, 0),
-                  ),
-                )
-              : copy.savedAll(m(i.saved))}
-          </b>
-          {g.status === 'achieved' && i.canEdit && (
-            <Button variant="secondary" size="sm" onClick={() => nav(`/goals/${id}/use`)}>
-              {copy.usedQ}
-            </Button>
+        <section className="hg-goalbox" aria-label={copy.status[g.status]}>
+          <div className="hg-goalbox__head">
+            <b>
+              {g.status === 'used'
+                ? copy.spentAll(
+                    m(
+                      (moves.data ?? [])
+                        .filter((x) => x.kind === 'use')
+                        .reduce((t, x) => t + x.amount, 0),
+                    ),
+                  )
+                : copy.savedAll(m(i.saved))}
+            </b>
+            <Badge kind={g.status === 'achieved' ? 'achieved' : 'temp'}>
+              {copy.status[g.status]}
+            </Badge>
+          </div>
+          {g.status === 'achieved' && (
+            <>
+              <span className="hg-goalbox__sub">{copy.achievedUseHelp}</span>
+              {i.canEdit && (
+                <Button variant="secondary" block onClick={() => nav(`/goals/${id}/use`)}>
+                  {copy.useRecord}
+                </Button>
+              )}
+            </>
           )}
         </section>
       )}

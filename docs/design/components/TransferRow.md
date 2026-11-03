@@ -12,3 +12,4 @@
 - 줄 아래 글자 링크(`actions`): 지금은 쓰지 않음(남겨 둠).
 - React 래퍼 `TransferRow`(packages/ui): `label`, `meta`(보조 줄), `amount`, `done`, `checkLabel`, `onToggle`, `disabled`(볼 수만), `badge`, `actions`(줄 아래 글자 링크), `onOpen`(줄을 누르면 시트), `lead`(줄 앞 아이콘 칸, `hg-transfer--lead`: 40px Lead + 이름·금액 + 체크 원, 홈 이번 달 체크리스트).
 - 체크한 사람 칩(2026-11-03): 보조 줄 앞 `hg-transfer__who`(높이 20px, `surface-alt` 알약, 12px 600 `ink`) + “08.26 체크”. 내가 체크한 줄은 칩 없이 날짜만.
+- `viewOnly`(2026-11-03 대신 체크 없앰): 배우자 줄 보기만. 체크 칸 대신 상태 칸 `hg-transfer__state`(한 줄은 `success` 체크 아이콘, 안 한 줄은 비움). 화면 읽기 “예빈 체크했어요 / 아직 체크 안 했어요” [확인 필요].

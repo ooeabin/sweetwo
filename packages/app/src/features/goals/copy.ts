@@ -121,6 +121,8 @@ export const copy = {
   } as Record<string, string>,
   savedAll: (amount: string) => `${amount} 모았어요`,
   usedQ: '이 돈을 썼나요?',
+  achievedUseHelp: '이 돈을 썼다면 얼마 썼는지 남겨 주세요', // [확인 필요] G-02 달성 카드
+  useRecord: '쓴 돈 기록하기', // [확인 필요]
   spentAll: (amount: string) => `${amount} 썼어요`, // 사용 완료 카드(22 접힌 목록 4번)
   numNextUse: '다음에 쓰는 달',
   numRound: '회차',
@@ -186,6 +188,8 @@ export const copy = {
   // G-06 순서 바꾸기
   orderTitle: '어떤 것부터 모을까요?',
   orderNothing: '목표가 하나라 아직 바꿀 순서가 없어요', // [확인 필요] G-06 목표가 하나일 때
+  orderPinned: '맨 위에 고정돼요', // [확인 필요] G-06 비상금 줄
+  orderAdd: '목표 추가하기', // [확인 필요] G-06 목표가 하나뿐일 때
   orderOk: '이 순서로 정하기',
   orderFixed: '비상금은 맨 위에 고정돼요', // [확인 필요]
   // 첫 주 5일째 나머지 목표(16 O-22~25)

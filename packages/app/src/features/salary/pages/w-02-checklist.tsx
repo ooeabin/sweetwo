@@ -192,7 +192,8 @@ export function W02Checklist() {
       personName={personName}
       meId={meId}
       lead={<LineLead line={l} goalTemplate={goalTemplate} />}
-      readOnly={readOnly || partnerTab}
+      readOnly={readOnly}
+      viewOnly={partnerTab}
       // 배우자 탭은 보기만(20 W-02 2번, 2026-11-03 대신 체크 없앰)
       onOther={partnerTab ? undefined : () => setOther(l)}
     />

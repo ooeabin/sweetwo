@@ -94,8 +94,16 @@ export function GoalItemCard({
       <button type="button" className="hg-goaltile__main" onClick={onOpen}>
         <span className="hg-goaltile__top">
           <GoalArt g={i} tile />
-          {(late || g.kind !== 'once') && (
+          {(late ||
+            g.kind !== 'once' ||
+            i.state === 'achieved' ||
+            i.state === 'used' ||
+            i.state === 'paused') && (
             <span className="hg-goaltile__badges">
+              {/* 접힌 목록 상태 배지(2026-11-03): 달성은 브랜드 배지, 사용 완료·보류는 회색 */}
+              {i.state === 'achieved' && <Badge kind="achieved">{copy.status.achieved}</Badge>}
+              {i.state === 'used' && <Badge kind="temp">{copy.status.used}</Badge>}
+              {i.state === 'paused' && <Badge kind="temp">{copy.status.paused}</Badge>}
               {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
               {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
               {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
@@ -113,7 +121,12 @@ export function GoalItemCard({
           </span>
           {!bare && i.saved <= 0 && <span className="hg-card__meta">{copy.noSavedYet}</span>}
           {!bare && i.saved > 0 && (
-            <span className="hg-goaltile__bar" aria-hidden="true">
+            <span
+              className={
+                g.template === 'emergency' ? 'hg-goaltile__bar is-safety' : 'hg-goaltile__bar'
+              }
+              aria-hidden="true"
+            >
               <i style={{ width: `${Math.min(Math.max(i.pct, 2), 100)}%` }} />
             </span>
           )}
