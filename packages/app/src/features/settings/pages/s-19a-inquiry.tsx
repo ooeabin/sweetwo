@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
+import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
@@ -18,7 +19,6 @@ export function S19aInquiry() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  const id = useId();
   const [cat, setCat] = useState<InquiryCategory>('etc');
   const [text, setText] = useState('');
   const [attach, setAttach] = useState(true);
@@ -70,22 +70,15 @@ export function S19aInquiry() {
         backTo={copy.help}
         onBack={() => nav('/settings/help')}
       />
-      <div className="hg-field">
-        <label className="hg-field__label" htmlFor={id}>
-          {copy.categoryLabel}
-        </label>
-        <select
-          id={id}
-          className="hg-input"
+      <div className="hg-list">
+        <SheetSelect<InquiryCategory>
+          label={copy.categoryLabel}
+          rowLabel={copy.categoryLabel}
           value={cat}
-          onChange={(e) => setCat(e.target.value as InquiryCategory)}
-        >
-          {CATS.map((c) => (
-            <option key={c} value={c}>
-              {copy.categories[c]}
-            </option>
-          ))}
-        </select>
+          options={CATS}
+          nameOf={(c) => copy.categories[c] ?? c}
+          onChange={setCat}
+        />
       </div>
       <InquiryText value={text} onChange={setText} />
       <Toggle

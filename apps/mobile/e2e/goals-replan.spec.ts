@@ -350,9 +350,14 @@ test('배우자 내 목표 ‘금액만 보여 주기’: G-01 배우자 묶음�
   await expect(theirs.getByRole('button', { name: /개인 목표/ })).toBeVisible();
   await expect(page.getByText('예빈 카메라')).toHaveCount(0);
   await page.goto('/settings/visibility');
-  const pick = page.getByRole('combobox', { name: '찬우 자전거 공개 범위' });
-  await expect(pick).toHaveValue('all');
-  await pick.selectOption('amount');
+  // 줄 + 시트(2026-11-03)
+  const pick = page.getByRole('button', { name: /찬우 자전거/ });
+  await expect(pick).toContainText('모두 보여 주기');
+  await pick.click();
+  await page
+    .getByRole('dialog', { name: '찬우 자전거 공개 범위' })
+    .getByRole('radio', { name: '금액만 보여 주기' })
+    .click();
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-c')?.visibility).toBe('amount');
   await axe(page);
 });

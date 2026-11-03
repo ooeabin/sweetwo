@@ -2,9 +2,10 @@ import { endSessions, fetchSessions, qk } from '@sweetwo/api';
 import { deviceLabel, formatMonthDay, todayKst } from '@sweetwo/core';
 import { Button, Field, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { LockStatus } from '../../../platform';
+import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
 import { paths, prefs, session } from '../../auth';
 import { MainFrame } from '../../frame';
@@ -25,7 +26,6 @@ export function S15Security() {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
   const [busy, setBusy] = useState(false);
-  const selId = useId();
   const refreshLock = () => bridge?.lock.status().then(setLock);
   useEffect(() => {
     void refreshLock();
@@ -115,24 +115,15 @@ export function S15Security() {
                   onChange={(on) => void bridge.lock.setTouchId(on).then(refreshLock)}
                 />
               )}
-              <div className="hg-field">
-                <label className="hg-field__label" htmlFor={selId}>
-                  {copy.autoLock}
-                </label>
-                <select
-                  id={selId}
-                  className="hg-input"
+              <div className="hg-list">
+                <SheetSelect<number>
+                  label={copy.autoLock}
+                  rowLabel={copy.autoLock}
                   value={lock.autoLockMin}
-                  onChange={(e) =>
-                    void bridge.lock.setAutoLock(Number(e.target.value)).then(refreshLock)
-                  }
-                >
-                  {[1, 5, 15, 0].map((m) => (
-                    <option key={m} value={m}>
-                      {copy.autoLockOptions[m]}
-                    </option>
-                  ))}
-                </select>
+                  options={[1, 5, 15, 0]}
+                  nameOf={(m) => copy.autoLockOptions[m] ?? String(m)}
+                  onChange={(m) => void bridge.lock.setAutoLock(m).then(refreshLock)}
+                />
               </div>
             </>
           )}

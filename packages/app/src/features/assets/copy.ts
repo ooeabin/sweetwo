@@ -231,6 +231,7 @@ export const copy = {
   soldRemain: '남은 평가금액은요?',
   soldTo_q: '받은 돈은 어느 통장에 들어왔어요?', // [확인 필요]
   soldDone: '팔았어요', // [확인 필요] 결과 제목
+  toList: '목록으로 가기', // [확인 필요] F-04d 주 버튼(2026-11-03)
   soldTo: (name: string, amount: string) => `${name} +${amount}`,
   soldGain: (v: string) => `실현 손익 ${v}`,
   ok: '확인',

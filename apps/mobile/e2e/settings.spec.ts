@@ -157,10 +157,11 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await expect(page).toHaveURL(/\/settings\/notifications$/);
   await expect(page.getByText('이메일은 한 달에 6번까지만 보내요')).toBeVisible();
   await expect(page.getByRole('switch', { name: 'OS 알림' })).toHaveCount(0);
+  // 챙길 날은 받는 방법별 칩 한 줄(2026-11-03)
   const d14 = page
-    .getByRole('region', { name: '챙길 날 D-14' })
-    .getByRole('switch', { name: '이메일' });
-  await expect(d14).toHaveAttribute('aria-checked', 'false');
+    .getByRole('group', { name: '챙길 날 이메일' })
+    .getByRole('button', { name: 'D-14' });
+  await expect(d14).toHaveAttribute('aria-pressed', 'false');
   await d14.click();
   await expect
     .poll(
@@ -194,7 +195,12 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await expect(
     page.getByRole('heading', { name: '알림을 받지 않을 시간을 정해 주세요' }),
   ).toBeVisible();
-  await page.getByLabel('시작').selectOption('23');
+  // 시작·끝 휠(2026-11-03 기본 드롭다운 대신)
+  const start = page.getByRole('spinbutton', { name: '시작' });
+  await expect(start).toHaveAttribute('aria-valuetext', '밤 10시');
+  await start.focus();
+  await start.press('ArrowDown');
+  await expect(start).toHaveAttribute('aria-valuenow', '23');
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
@@ -517,13 +523,22 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   await expect(page.getByText('월급과 분배표는 늘 같이 봐요')).toBeVisible();
   await axe(page);
 
-  await page.getByLabel('새 항목 기본값').selectOption('private');
+  // 줄 + 시트(2026-11-03 기본 드롭다운 대신)
+  await page.getByRole('button', { name: /내 자산·내 부채/ }).click();
+  await page
+    .getByRole('dialog', { name: '새 항목 기본값' })
+    .getByRole('radio', { name: '숨기기' })
+    .click();
   await expect(page.getByText('이미 있는 항목 1개도 바꿀까요?')).toBeVisible();
   await page.getByRole('button', { name: '모두 바꾸기' }).click();
   await expect.poll(() => db.me.default_visibility).toBe('private');
   await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.visibility).toBe('private');
 
-  await page.getByLabel('찬우 주식 공개 범위').selectOption('all');
+  await page.getByRole('button', { name: /찬우 주식/ }).click();
+  await page
+    .getByRole('dialog', { name: '찬우 주식 공개 범위' })
+    .getByRole('radio', { name: '모두 보여 주기' })
+    .click();
   await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.visibility).toBe('all');
   await axe(page);
 });
@@ -692,7 +707,11 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
 
   // 문의하기
   await expect(page).toHaveURL(/\/settings\/help\/inquiry$/);
-  await page.getByLabel('분류').selectOption('couple');
+  await page.getByRole('button', { name: /분류/ }).click();
+  await page
+    .getByRole('dialog', { name: '분류' })
+    .getByRole('radio', { name: '부부 연결' })
+    .click();
   await page.getByLabel('내용').fill('예빈이 합류 코드를 넣었는데 연결이 안 돼요');
   await axe(page);
   await page.getByRole('button', { name: '보내기' }).click();

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { LoadFailed } from '../load-failed';
 import { GUIDES, TOPIC_KEYS, checkPath, readPath, useChecklist } from '../guides';
 
 // S-01 가이드 모아보기(25 S-01): 지금 단계 체크리스트(진행률, 항목은 보기만 → S-02), 우리 상황에 맞는 글 3개(목표·거주 형태·자녀 계획),
@@ -15,6 +16,16 @@ export function S01Guides() {
   const d = useSettingsData();
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const ck = useChecklist(d.space);
+  if (d.failed || ck.failed || goals.isError)
+    return (
+      <LoadFailed
+        onRetry={() => {
+          d.retry();
+          ck.retry();
+          void goals.refetch();
+        }}
+      />
+    );
   if (d.loading || ck.loading || goals.isLoading || !d.space)
     return <MainFrame current={null} columns={[null]} />;
   const mine = pickGuides({

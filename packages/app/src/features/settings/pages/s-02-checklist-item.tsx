@@ -8,6 +8,7 @@ import { MainFrame } from '../../frame';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { LoadFailed } from '../load-failed';
 import { CHECKLIST, guidesPath, useChecklist } from '../guides';
 
 // S-02 체크리스트 항목(25 S-02): 제목·설명(3줄 이내), 해야 할 일 단계, 출처(공식 사이트)·확인일, 완료자 표시, 관련 기능 링크.
@@ -22,6 +23,15 @@ export function S02ChecklistItem() {
   const [saving, setSaving] = useState(false);
   const item = CHECKLIST.flatMap((s) => s.items).find((i) => i.key === key);
   if (!item) return <Navigate to={guidesPath} replace />;
+  if (d.failed || ck.failed)
+    return (
+      <LoadFailed
+        onRetry={() => {
+          d.retry();
+          ck.retry();
+        }}
+      />
+    );
   if (d.loading || ck.loading || !d.c) return <MainFrame current={null} columns={[null]} />;
   const fromTodo = params.get('from') === 'todo';
   const done = ck.doneOf(key);

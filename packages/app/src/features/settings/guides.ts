@@ -24,6 +24,8 @@ export function useChecklist(
   const doneOf = (key: string) => (done.data ?? []).find((x) => x.key === key) ?? null;
   return {
     loading: done.isLoading,
+    failed: done.isError,
+    retry: () => void done.refetch(),
     stage,
     doneOf,
     count: stage ? stage.items.filter((i) => doneOf(i.key)).length : 0,

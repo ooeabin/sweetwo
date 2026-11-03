@@ -149,16 +149,37 @@ export function S14Notifications() {
       {pair('plan', copy.groups.plan)}
       {d.c.joined &&
         pair('partner_change', copy.groups.partner_change(d.c.partnerName), copy.partnerChangeSub)}
-      <section className="hg-stack" aria-label={copy.groups.care} style={{ gap: 'var(--space-3)' }}>
+      {/* 챙길 날: 시점마다 켜고 끄는 걸 받는 방법별 칩 한 줄로(2026-11-03, 토글 8개가 길게 반복돼서) */}
+      <section className="hg-stack" aria-label={copy.groups.care} style={{ gap: 'var(--space-2)' }}>
         <span className="hg-card__label">{copy.groups.care}</span>
-        {CARE.map((t) =>
-          pair(
-            t,
-            copy.carePoints[t as keyof typeof copy.carePoints],
-            undefined,
-            `${copy.groups.care} ${copy.carePoints[t as keyof typeof copy.carePoints]}`,
-          ),
-        )}
+        {(desktop ? (['push', 'email'] as const) : (['email'] as const)).map((ch) => (
+          <div
+            key={ch}
+            className="hg-stack"
+            role="group"
+            aria-label={`${copy.groups.care} ${ch === 'push' ? copy.push : copy.email}`}
+            style={{ gap: 'var(--space-1)' }}
+          >
+            <span className="hg-help">{ch === 'push' ? copy.push : copy.email}</span>
+            <div className="hg-quick">
+              {CARE.map((t) => {
+                const on = prefs.topics[t][ch];
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    className={on ? 'hg-chip hg-chip--sm is-selected' : 'hg-chip hg-chip--sm'}
+                    aria-pressed={on}
+                    disabled={!prefs[ch]}
+                    onClick={() => setTopic(t, ch, !on)}
+                  >
+                    {copy.carePoints[t as keyof typeof copy.carePoints]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </section>
       {pair('money', copy.groups.money)}
       {pair('goal', copy.groups.goal)}
