@@ -10,18 +10,7 @@ import {
   type Goal,
 } from '@sweetwo/api';
 import { formatDateFull, formatYm, goalBars, goalProgress, todayKst } from '@sweetwo/core';
-import {
-  Badge,
-  BarChart,
-  Button,
-  Icon,
-  LineChart,
-  ListRow,
-  Menu,
-  PageHeader,
-  SectionHeader,
-  type MenuAction,
-} from '@sweetwo/ui';
+import { Badge, BarChart, Button, Icon, IconButton, LineChart, ListRow, Menu, PageHeader, SectionHeader, type MenuAction } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -311,7 +300,30 @@ export function G02GoalDetail() {
             </span>
           )}
           <p className="hg-goalhero__name">{g.name}</p>
-          <p className="hg-goalhero__amount">{m(i.saved)}</p>
+          {/* 2026-11-04 모은 돈 이름표 + 금액 옆 − + 버튼(넣기·빼기)만. 쓴 돈 기록 버튼은 없앰 */}
+          <div className="hg-goalhero__amountrow">
+            <p className="hg-goalhero__amount">
+              <span className="hg-goalhero__label">{copy.numSaved}</span>
+              {m(i.saved)}
+            </p>
+            {i.canEdit && (
+              <span className="hg-goalhero__steps">
+                <IconButton
+                  icon="minus"
+                  label={copy.takeOut}
+                  className="hg-goalhero__step"
+                  disabled={i.saved <= 0}
+                  onClick={() => nav(`/goals/${id}/move/out`)}
+                />
+                <IconButton
+                  icon="plus"
+                  label={copy.putIn}
+                  className="hg-goalhero__step"
+                  onClick={() => nav(`/goals/${id}/move/in`)}
+                />
+              </span>
+            )}
+          </div>
           {g.photo_path && i.canEdit && (
             <button
               type="button"
@@ -324,21 +336,6 @@ export function G02GoalDetail() {
           )}
           {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
-          {i.canEdit && (
-            <div className="hg-goalhero__actions">
-              <Button
-                variant="secondary"
-                block
-                onClick={() => nav(`/goals/${id}/spend`)}
-                disabled={i.saved <= 0}
-              >
-                {copy.use}
-              </Button>
-              <Button variant="primary" block onClick={() => nav(`/goals/${id}/move`)}>
-                {copy.inOut}
-              </Button>
-            </div>
-          )}
         </div>
       </section>
       {g.kind !== 'monthly' && (
@@ -465,35 +462,13 @@ export function G02GoalDetail() {
           })}
         </div>
       </section>
-      {/* 달성·사용 완료(2026-11-03): 다른 묶음 카드와 같은 모양. 달성은 배지 + 안내 + ‘쓴 돈 기록하기’(보조 버튼) */}
+      {/* 달성(2026-11-04): “400만 원 모았어요” + 달성 배지만. 쓴 돈 기록·사용 완료는 없앰(쓴 돈은 금액 옆 − 로) */}
       {(g.status === 'achieved' || g.status === 'used') && (
-        <section className="hg-goalbox" aria-label={copy.status[g.status]}>
+        <section className="hg-goalbox" aria-label={copy.status.achieved}>
           <div className="hg-goalbox__head">
-            <b>
-              {g.status === 'used'
-                ? copy.spentAll(
-                    m(
-                      (moves.data ?? [])
-                        .filter((x) => x.kind === 'use')
-                        .reduce((t, x) => t + x.amount, 0),
-                    ),
-                  )
-                : copy.savedAll(m(i.saved))}
-            </b>
-            <Badge kind={g.status === 'achieved' ? 'achieved' : 'temp'}>
-              {copy.status[g.status]}
-            </Badge>
+            <b>{copy.savedAll(m(i.saved))}</b>
+            <Badge kind="achieved">{copy.status.achieved}</Badge>
           </div>
-          {g.status === 'achieved' && (
-            <>
-              <span className="hg-goalbox__sub">{copy.achievedUseHelp}</span>
-              {i.canEdit && (
-                <Button variant="secondary" block onClick={() => nav(`/goals/${id}/use`)}>
-                  {copy.useRecord}
-                </Button>
-              )}
-            </>
-          )}
         </section>
       )}
       {progress.length > 1 && (

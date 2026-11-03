@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (295ef40). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (4049b5e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -116,7 +116,7 @@
 .hg-badge { display: inline-flex; align-items: center; gap: var(--space-1); height: 24px; padding: 0 10px; border-radius: var(--radius-full); font: 600 12px/16px var(--font-sans); letter-spacing: 0.2px; white-space: nowrap; flex-shrink: 0; }
 .hg-badge--temp { background: var(--surface-alt); color: var(--slate); box-shadow: inset 0 0 0 1px var(--hairline); }
 .hg-badge--done { background: var(--success); color: var(--on-success); }
-.hg-badge--achieved { background: var(--success); color: var(--on-success); }  /* 2026-11-03 달성 배지는 파랑(브랜드 오렌지에서 바꿈) */
+.hg-badge--achieved { background: var(--success-soft); color: var(--success); }  /* 2026-11-04 달성 배지는 연한 파랑 바탕 + 파랑 글자 */
 .hg-badge--together { background: var(--together); color: var(--together-ink); }
 .hg-badge--family { background: var(--family); color: var(--family-ink); }
 .hg-badge--goal { background: var(--goal); color: var(--goal-ink); }
@@ -884,7 +884,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-wheel__col:focus-visible { outline: none; }  /* 2026-11-03 줄 테두리 대신 가운데 띠에 ink 테두리(파란 세로선이 거슬림) */
 .hg-wheel:has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: inset 0 0 0 2px var(--ink); }
 .hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day):has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: none; }
-.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { text-decoration: underline 2px; text-underline-offset: 6px; }
+.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { box-shadow: inset 0 0 0 2px var(--focus); border-radius: var(--radius-md); }  /* 2026-11-04 키보드 초점: 숫자와 ‘월’에 따로 밑줄이 그어지던 것을 칸 테두리로 */
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
@@ -1644,8 +1644,13 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-pick__item:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-pick__art { display: grid; place-items: center; width: 64px; height: 64px; }
 .hg-pick__art img { width: 100%; height: 100%; object-fit: contain; }
-.hg-pick__art--custom { border-radius: var(--radius-lg); background: var(--hairline-soft); color: var(--stone); }
-.hg-pick__art--custom .hg-ico { width: 28px; height: 28px; }
+.hg-pick__art--custom { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
+.hg-pick__art--custom .hg-ico { width: 24px; height: 24px; }
+/* 직접 만들기 카드(2026-11-04): 점선 테두리 + 더하기 원, 이름은 ‘직접 만들기’(+ 기호 없이) */
+.hg-pick__item:has(> .hg-pick__art--custom) { border-style: dashed; border-color: var(--hairline); background: transparent; color: var(--slate); }
+.hg-pick__item:has(> .hg-pick__art--custom):hover { background: var(--surface-alt); color: var(--ink); }
+.hg-pick:has(.hg-pick__art--icon) .hg-pick__item:has(> .hg-pick__art--custom) { min-height: 104px; align-items: flex-start; justify-content: space-between; padding: var(--space-4); text-align: left; }  /* 아이콘 카드 사이에서는 같은 모양(아이콘 위 왼쪽) */
+.hg-pick:has(.hg-pick__art--icon) .hg-pick__art--custom { width: 40px; height: 40px; }
 /* 그림이 없을 때 아이콘 원(GoalPick): 카드도 낮게 */
 .hg-pick__art--icon { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
 .hg-pick__item:has(> .hg-pick__art--icon) { min-height: 104px; align-items: flex-start; justify-content: space-between; padding: var(--space-4); text-align: left; }  /* 2026-11-03 Strava처럼 아이콘 위 왼쪽, 이름 아래 왼쪽 */
@@ -1666,6 +1671,14 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalhero__name { margin: 0; font: 700 22px/30px var(--font-sans); }
 .hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
+/* 금액 줄(2026-11-04): 왼쪽 ‘모은 돈’ 이름표 + 금액, 오른쪽 − + 둥근 버튼(넣기·빼기) */
+.hg-goalhero__amountrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.hg-goalhero__label { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 금액 위 ‘모은 돈’ 이름표: − +가 목표 금액이 아니라 모은 돈을 고친다는 걸 보임 */
+.hg-goalhero__steps { display: inline-flex; gap: var(--space-2); flex: none; }
+.hg-iconbtn.hg-goalhero__step { width: 44px; height: 44px; border: 0; background: var(--surface-alt); color: var(--ink); }
+.hg-iconbtn.hg-goalhero__step:hover { background: var(--hairline-soft); }
+.hg-iconbtn.hg-goalhero__step:disabled { color: var(--stone); opacity: .5; cursor: default; }
+.hg-goalhero__step .hg-ico { width: 20px; height: 20px; }
 /* 묶음 카드: 목표(목표 금액의 %, 막대, 기한·예상), 매달(사람별) */
 .hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
 .hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }
@@ -1711,8 +1724,19 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-q__title .hg-celebrate__eyebrow { margin-bottom: var(--space-1); }
 .hg-celebrate__body--plain { padding: 0; }
 .hg-celebrate__body--plain .hg-celebrate__story { margin: 0 !important; text-align: center; }
-/* 축하 그림 = 목표 사진(2026-11-03, 체크·그림자 대신): 200px 정사각, 둥근 모서리 */
+/* 축하 그림 = 목표 사진(2026-11-04): 화면 위를 꽉 채우는 사진(G-02 머리 사진과 같은 비율). 좁은 창은 양옆과 위 끝까지,
+   넓은 창은 질문 폭 안에서 둥근 모서리. 이름과 금액은 남은 자리 가운데 */
+.hg-celebrate__hero--photo { display: block; height: auto; padding: 0; }
 .hg-celebrate__hero--photo::after { display: none; }
-.hg-celebrate__photo { display: block; width: 200px; height: 200px; overflow: hidden; border-radius: var(--radius-2xl); box-shadow: var(--shadow-2); }
-.hg-celebrate__photo .hg-goaltile__photo { width: 100%; height: 100%; aspect-ratio: auto; }
+.hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) { display: block; margin-top: 0; }
+.hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) + .hg-q__head { margin-top: auto; }
+.hg-celebrate__photo { display: block; width: 100%; overflow: hidden; border-radius: var(--radius-2xl); }
+.hg-celebrate__photo .hg-goaltile__photo { width: 100%; aspect-ratio: 4 / 3; max-height: 56vh; border-radius: 0; }
 .hg-celebrate__photo .hg-goaltile__photo .hg-ico { width: 56px; height: 56px; }
+@media (max-width: 767px) {
+  .hg-q:has(> .hg-q__hero .hg-celebrate__hero--photo) > .hg-q__nav { display: none; }  /* 뒤로 자리 없이 사진이 맨 위 */
+  .hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) { margin: calc(var(--space-6) * -1) calc(var(--space-4) * -1) 0; }
+  .hg-celebrate__photo { border-radius: 0; }
+  .hg-celebrate__photo .hg-goaltile__photo { aspect-ratio: 1 / 1; }  /* 좁은 창은 정사각으로 위를 더 채움 */
+}
+.hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */

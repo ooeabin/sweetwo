@@ -62,7 +62,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await page.getByRole('button', { name: /여행/ }).click();
   await expect(page.getByText('2개 골랐어요')).toBeVisible();
   await axe(page);
-  await expect(page.getByRole('button', { name: '+ 직접 만들기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '직접 만들기' })).toHaveCount(0);
   await next(page);
 
   // 목표는 고르기만: 금액·기한 질문 없이 바로 월급(2026-11-02, ADR 0004)

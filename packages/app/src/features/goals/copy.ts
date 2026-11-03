@@ -120,10 +120,6 @@ export const copy = {
     wait: '아직',
   } as Record<string, string>,
   savedAll: (amount: string) => `${amount} 모았어요`,
-  usedQ: '이 돈을 썼나요?',
-  achievedUseHelp: '이 돈을 썼다면 얼마 썼는지 남겨 주세요', // [확인 필요] G-02 달성 카드
-  useRecord: '쓴 돈 기록하기', // [확인 필요]
-  spentAll: (amount: string) => `${amount} 썼어요`, // 사용 완료 카드(22 접힌 목록 4번)
   numNextUse: '다음에 쓰는 달',
   numRound: '회차',
   round: (n: number) => `${n}회차`,
@@ -167,7 +163,7 @@ export const copy = {
   // G-03a~f 목표 추가
   addTitle: '어떤 목표를 추가할까요?',
   addTabs: '목표 분류', // [확인 필요] 화면 읽기용
-  makeOwn: '+ 직접 만들기',
+  makeOwn: '직접 만들기',
   next: '다음',
   heldTitle: '이 목표로 이미 모은 돈이 있나요?', // [확인 필요]
   heldAssets: '가진 자산에서 고르기',
@@ -233,16 +229,6 @@ export const copy = {
   sendOptions: { goal: '다른 목표', add: '새 목표 만들기', split: '월급 계획에서 정할게요' }, // [확인 필요]
   sendPick: '어느 목표에 더할까요?', // [확인 필요]
   sendDone: (goal: string, amount: string) => `${goal} 저금 줄에 ${amount}을 더했어요`, // [확인 필요]
-  // G-05 사용 기록
-  useAsk: (name: string, amount: string) => `${name}에 모은 ${amount}, 썼나요?`,
-  useOptions: { later: '아직이에요', spent: '썼어요' },
-  useAmount: '얼마 썼어요?',
-  restTitle: (amount: string) => `남은 ${amount}은 어떻게 할까요?`, // [확인 필요]
-  restOptions: { emergency: '비상금에 넣기', goal: '다른 목표에 넣기', keep: '그대로 두기' }, // [확인 필요]
-  restPick: '어느 목표에 넣을까요?', // [확인 필요]
-  restDone: '넣었어요', // [확인 필요]
-  partnerRecorded: (name: string) => `${name}님이 기록했어요`,
-  seeRecord: '기록 보기',
 
   // G-07 결혼 비용 상세
   wedding: '결혼 비용',
@@ -307,7 +293,7 @@ export const copy = {
   thisMonthDone: (amount: string) => `이번 달 ${amount} 넣었어요`,
   thisMonthTodo: (amount: string) => `이번 달 ${amount} 넣을 차례예요`,
   thisMonthSkipped: '이번 달은 못 했어요', // [확인 필요]
-  foldedNew: (n: number) => `보류, 달성, 다 쓴 목표 ${n}개`, // [확인 필요]
+  foldedNew: (n: number) => `보류, 달성 목표 ${n}개`, // [확인 필요] 2026-11-04 사용 완료 없앰
   onlyEmergency: '다른 목표 추가하기',
   years: (n: number) => `${n}년`,
   months: (n: number) => `${n}개월`,
@@ -328,6 +314,8 @@ export const copy = {
   addHeldSub: '목표를 만들기 전에 따로 모아 둔 돈이에요', // [확인 필요] G-02a 첫 질문
   changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
   inOut: '넣기·빼기', // [확인 필요]
+  putIn: '넣기', // 2026-11-04 G-02 금액 옆 + 버튼 이름
+  takeOut: '빼기', // 2026-11-04 G-02 금액 옆 − 버튼 이름
   use: '꺼내 쓰기',
   // G-02 묶음 카드(2026-11-03 시안 B3)
   boxTarget: (target: string, pct: number) => `목표 ${target}의 ${pct}%`, // [확인 필요]

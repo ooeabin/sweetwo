@@ -5,14 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { useSplits } from '../../salary';
-import { AchieveArt, goalUsePath, sendPath } from '../achieve';
+import { AchieveArt, sendPath } from '../achieve';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
 import { useGoalsModel } from '../model';
 import { freedAmount, mySplit } from '../freed';
 
 // G-05 축하(22 G-05 축하): 큰 그림 → “목표 달성” → 목표 이름 → 모은 금액 → 함께 모은 달 문장 → “다음”.
-// 다음: 달성으로 내 월급 계획에서 빠진 저금 줄이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?”, 없으면 사용 기록.
+// 다음: 달성으로 내 월급 계획에서 빠진 저금 줄이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?”, 없으면 목표 상세(2026-11-04 사용 기록 없앰).
 // 사람마다 한 번(AchieveWatch가 엶). 합쳐서·혼자 쓰기·내 목표는 늘 “n개월 만에 모았어요”
 export function G05Achieved() {
   const { id = '' } = useParams();
@@ -46,7 +46,7 @@ export function G05Achieved() {
           : copy.storySolo(s.months);
   // 2026-11-03: 카드 틀을 없애고 다른 질문 화면과 같은 QuestionLayout(가운데 배치, 주 버튼 “다음”은 아래 고정)
   const next = () =>
-    nav(freed > 0 ? `${sendPath(id)}?m=${freed}` : goalUsePath(id), { replace: true });
+    nav(freed > 0 ? `${sendPath(id)}?m=${freed}` : `/goals/${id}`, { replace: true });
   return (
     <QuestionLayout
       center

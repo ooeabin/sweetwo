@@ -80,7 +80,7 @@ export const copy = {
   goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
   goalsHelp: '모으고 싶은 순서대로 골라 주세요', // [확인 필요]
   recommended: '추천',
-  makeOwn: '+ 직접 만들기',
+  makeOwn: '직접 만들기',
   picked: (n: number) => `${n}개 골랐어요`,
   goalsLater: '나중에 고를게요', // [확인 필요] O-21 하나도 안 골랐을 때
   goalTabsLabel: '목표 분류',
