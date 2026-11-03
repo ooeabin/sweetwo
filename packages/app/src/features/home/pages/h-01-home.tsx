@@ -249,7 +249,7 @@ export function H01Home() {
 
   const go = (to: string) => nav(to);
   // 가진 돈을 하나도 안 적었으면 카드 없음(2026-11-03, ‘가진 돈 추가하기’ 빈 카드가 어색해서. 추가는 우리 자산 탭)
-  const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} onOpen={() => nav('/assets')} /> : null;
+  const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} /> : null;
   return (
     <MainFrame
       current="month"
@@ -270,7 +270,7 @@ export function H01Home() {
       }}
       banner={banner}
       columns={[
-        <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
+        <div key="l" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
           <SalaryCard
             list={list}
             partnerList={partnerList}
@@ -292,7 +292,7 @@ export function H01Home() {
             go={go}
           />
         </div>,
-        <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
+        <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
           {assetsCard}
           <UpcomingCard items={items.slice(0, 3)} go={go} />
         </div>,

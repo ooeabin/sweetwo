@@ -23,11 +23,12 @@ export const copy = {
   netWorth: '순자산',
   // 2026-11-03 H-04 F-01과 같게 [확인 필요]
   ourNetWorth: '우리 순자산',
+  assetsTitle: '우리 자산',
+  assetsMore: '자산 더보기',
   lastMonth: '지난달보다',
   grew: '늘었어요',
   shrank: '줄었어요',
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
-  netWorthSee: '우리 자산 보기', // [확인 필요]
   addGoal: '목표',
   addAsset: '가진 돈·대출',
   addCare: '챙길 날',
