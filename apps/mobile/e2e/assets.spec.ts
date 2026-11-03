@@ -187,22 +187,24 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(�
   await page.getByRole('link', { name: '우리 자산' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/assets$/);
   // 자산(원금 기준) 3 + 8 + 2 + 배우자 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
-  const nw = page.getByRole('region', { name: '순자산' });
+  const nw = page.getByRole('region', { name: '우리 순자산' });
   await expect(nw).toContainText('1,600만 원');
-  await expect(nw).toContainText('예상 순자산 1,840만 원, 안 판 수익 +240만 원');
   await expect(nw).toContainText('지난달보다 180만 원 늘었어요');
-  await expect(page.getByRole('button', { name: /자산 1,940만 원/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /부채 100만 원/ })).toBeVisible();
+  // 예상 순자산과 안 판 수익은 목록 한 줄(2026-11-03)
+  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText('1,840만 원');
+  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText('안 판 수익 +240만 원 포함');
+  await expect(page.getByRole('button', { name: /^자산\s*1,940만 원/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^부채\s*100만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /이번 달 계획/ })).toHaveCount(0);
   await expect(page.getByRole('tab', { name: '재정 진단' })).toHaveCount(0);
   await axe(page);
 
-  await page.getByRole('button', { name: /부채 100만 원/ }).click();
+  await page.getByRole('button', { name: /^부채\s*100만 원/ }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=debt/);
   await expect(page.getByRole('button', { name: /신용대출/ })).toContainText('금액이 맞나요?');
 });
 
-test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억', async ({ page }) => {
+test('한눈에: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 값)', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -251,31 +253,11 @@ test('한눈에: 순자산 그래프 말풍선과 기간 탭 기억', async ({ p
   );
 
   await page.goto('/assets');
-  const plot = page.getByRole('slider', { name: '순자산 그래프' });
-  // 처음엔 마지막 달(이번 달 = 지금 값)
-  await expect(plot).toHaveAttribute('aria-valuetext', '2026년 10월, 1,600만 원, 예상 1,840만 원');
-  const tabs = page.getByRole('group', { name: '기간' });
-  // 14달: 1년으로 시작, 3년은 비활성
-  await expect(tabs.getByRole('button', { name: '1년' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(tabs.getByRole('button', { name: '3년' })).toBeDisabled();
-  await plot.focus();
-  await page.keyboard.press('ArrowLeft');
-  await expect(plot).toHaveAttribute('aria-valuetext', '2026년 9월, 1,360만 원, 예상 1,480만 원');
-  await page.keyboard.press('Home');
-  await expect(plot).toHaveAttribute('aria-valuetext', /^2025년 11월/);
-  await tabs.getByRole('button', { name: '6개월' }).click();
-  await expect(plot).toHaveAttribute('aria-valuetext', /^2026년 10월/);
-  await plot.focus();
-  await page.keyboard.press('Home');
-  await expect(plot).toHaveAttribute('aria-valuetext', /^2026년 5월/);
-
+  const bars = page.getByRole('img', { name: '달마다 순자산, 2026년 10월 1,600만 원' });
+  await expect(bars).toBeVisible();
+  await expect(bars.locator('.hg-mbars__col small')).toHaveText(['5월', '6월', '7월', '8월', '9월', '10월']);
+  await expect(bars.locator('.hg-mbars__col.is-now')).toContainText('1,600만');
   await axe(page);
-
-  // 기간 탭은 기억
-  await page.reload();
-  await expect(
-    page.getByRole('group', { name: '기간' }).getByRole('button', { name: '6개월' }),
-  ).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정렬 칩(묶음 안, 기억)', async ({

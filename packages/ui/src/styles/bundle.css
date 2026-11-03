@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (31da6fe). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (a87161a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -142,6 +142,21 @@
 .hg-networth__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
 .hg-networth__value { font: 600 40px/48px var(--font-sans); letter-spacing: -0.8px; }
 .hg-networth__expected { font: 400 13px/18px var(--font-sans); color: var(--stone); }
+.hg-networth__delta { font: 500 15px/22px var(--font-sans); color: var(--slate); }  /* 2026-11-03 F-01 알약 대신 문장, 금액만 영역 색 */
+.hg-networth__delta b { font-weight: 600; color: var(--invest-ink); }
+.hg-networth__delta.is-down b { color: var(--goal-ink); }
+/* MonthBars 달마다 막대(2026-11-03 F-01). 지난 달 옅은 영역 색, 이번 달 진한 영역 색 + 값 */
+.hg-mbars { --bar: var(--invest); --bar-now: var(--invest-ink); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: end; gap: var(--space-3); min-height: 140px; }
+.hg-mbars--safety { --bar: var(--safety); --bar-now: var(--safety-ink); }
+.hg-mbars--goal { --bar: var(--goal); --bar-now: var(--goal-ink); }
+.hg-mbars--family { --bar: var(--family); --bar-now: var(--family-ink); }
+.hg-mbars--together { --bar: var(--together); --bar-now: var(--together-ink); }
+.hg-mbars__col { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+.hg-mbars__col i { display: block; width: 100%; max-width: 28px; border-radius: var(--radius-sm) var(--radius-sm) var(--radius-xs) var(--radius-xs); background: var(--bar); }
+.hg-mbars__col.is-now i { background: var(--bar-now); }
+.hg-mbars__col small { font: 500 12px/16px var(--font-sans); color: var(--stone); }
+.hg-mbars__col.is-now small { font-weight: 600; color: var(--bar-now); }
+.hg-mbars__v { min-height: 16px; font: 600 12px/16px var(--font-sans); color: var(--bar-now); white-space: nowrap; }
 
 /* Toast */
 /* 작은 알약, 화면 아래 가운데(2026-11-02, 포켓CU처럼). 글자 길이만큼, 되돌리기는 글자 옆 굵은 링크 */

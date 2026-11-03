@@ -18,6 +18,13 @@ export const copy = {
 
   // F-01
   netWorth: '순자산',
+  // 2026-11-03 F-01 다시 짬 [확인 필요]
+  ourNetWorth: '우리 순자산',
+  lastMonth: '지난달보다',
+  grew: '늘었어요',
+  shrank: '줄었어요',
+  monthly: '달마다 순자산',
+  gainIncl: (amount: string) => `안 판 수익 ${amount} 포함`,
   netWorthValue: (amount: string) => `순자산 ${amount}`,
   expected: (amount: string) => `예상 순자산 ${amount}`,
   gain: (amount: string) => `안 판 수익 ${amount}`,
