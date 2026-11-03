@@ -121,12 +121,7 @@ export function GoalItemCard({
           </span>
           {!bare && i.saved <= 0 && <span className="hg-card__meta">{copy.noSavedYet}</span>}
           {!bare && i.saved > 0 && (
-            <span
-              className={
-                g.template === 'emergency' ? 'hg-goaltile__bar is-safety' : 'hg-goaltile__bar'
-              }
-              aria-hidden="true"
-            >
+            <span className={'hg-goaltile__bar'} aria-hidden="true">
               <i style={{ width: `${Math.min(Math.max(i.pct, 2), 100)}%` }} />
             </span>
           )}

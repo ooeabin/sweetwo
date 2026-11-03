@@ -781,8 +781,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-goalrow__pct small { font-size: 13px; }
 .hg-goalrow__set { font: 600 14px/20px var(--font-sans); color: var(--focus); }
 .hg-goalrow__sub { grid-column: 2; font: 400 13px/18px var(--font-sans); color: var(--stone); }
-.hg-goalrow__bar { grid-column: 2 / 4; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
-.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--chart-goal); }
+.hg-goalrow__bar { grid-column: 2 / 4; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--success-soft); overflow: hidden; }
+.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03, 체크·진행 원과 같음) */
 /* 2026-11-03 홈 다가오는 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
 .hg-daylist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
 .hg-dayrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
@@ -1668,10 +1668,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 /* 묶음 카드: 목표(목표 금액의 %, 막대, 기한·예상), 매달(사람별) */
 .hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
 .hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }
-.hg-goalbox__bar { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--goal); }
-.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--chart-goal); }
-.hg-goalbox__bar.is-safety { background: var(--safety); }
-.hg-goalbox__bar.is-safety > i { background: var(--chart-safety); }
+.hg-goalbox__bar { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
+.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }
 .hg-goalbox__meta { display: flex; justify-content: space-between; gap: var(--space-3); font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-goalbox__metabtn { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: 400 15px/22px var(--font-sans); }
@@ -1700,10 +1698,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goaltile__body { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-3) var(--space-4); }
 .hg-goaltile__name { font: 600 15px/22px var(--font-sans); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .hg-goaltile__amount { font: 400 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
-.hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--goal); }
-.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--chart-goal); }  /* Meter와 같은 차트 색(2026-11-03, 짙은 갈색이던 것) */
-.hg-goaltile__bar.is-safety { background: var(--safety); }
-.hg-goaltile__bar.is-safety > i { background: var(--chart-safety); }
+.hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
+.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03) */
 .hg-goaltile .hg-card__meta { font-size: 12px; line-height: 16px; }
 .hg-goaltile__main:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-xl); }
 /* 접힌 목록 펼치기 줄(G-01, 2026-11-03): 글자 링크 대신 가득 찬 줄 + 화살표 */

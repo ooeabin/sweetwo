@@ -367,9 +367,7 @@ export function G02GoalDetail() {
           </div>
           {g.target_amount !== null && (
             <div
-              className={
-                g.template === 'emergency' ? 'hg-goalbox__bar is-safety' : 'hg-goalbox__bar'
-              }
+              className={'hg-goalbox__bar'}
               role="img"
               aria-label={`${g.name} ${Math.round(i.pct)}%`}
             >
