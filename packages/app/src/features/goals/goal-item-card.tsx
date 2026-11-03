@@ -59,7 +59,8 @@ export function GoalItemCard({
   changed?: string;
 }) {
   const g = i.goal;
-  const late = i.lateMonths !== null && i.lateMonths > 0;
+  // 아직 모은 돈이 없으면 지연으로 보지 않음(배지, 늦어요 줄 모두, 2026-11-03)
+  const late = i.lateMonths !== null && i.lateMonths > 0 && i.saved > 0;
   const month = thisMonthText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`));
   const card = (
     <button

@@ -182,7 +182,8 @@ export function G02GoalDetail() {
         ]),
   ];
 
-  const late = i.lateMonths !== null && i.lateMonths > 0;
+  // 아직 모은 돈이 없으면 지연으로 보지 않음(2026-11-03)
+  const late = i.lateMonths !== null && i.lateMonths > 0 && i.saved > 0;
   // 매년 목표 회차 = 만든 해부터 센 해(쓰는 달이 지난 해마다 1씩) [확인 필요]
   const round = Math.max(
     (i.nextUse ? Number(i.nextUse.slice(0, 4)) : new Date().getFullYear()) -
