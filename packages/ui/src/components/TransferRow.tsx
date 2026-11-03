@@ -13,6 +13,7 @@ export function TransferRow({
   disabled,
   badge,
   actions,
+  onOpen,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -27,7 +28,26 @@ export function TransferRow({
   badge?: ReactNode;
   /** 줄 아래 글자 링크(취소, 다른 금액) */
   actions?: ReactNode;
+  /** 줄(이름·금액)을 누르면 여는 선택 시트(W-02 ‘다른 금액’, W-05 ‘못 했어요’, 2026-11-03) */
+  onOpen?: () => void;
 }) {
+  const body = (
+    <>
+      <span className="hg-stack" style={{ gap: 0 }}>
+        <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+          <span className="hg-transfer__label">{label}</span>
+          {badge}
+        </span>
+        {meta && <span className="hg-transfer__meta">{meta}</span>}
+        {actions && (
+          <span className="hg-row" style={{ gap: 'var(--space-3)' }}>
+            {actions}
+          </span>
+        )}
+      </span>
+      <span className="hg-transfer__amount">{amount}</span>
+    </>
+  );
   return (
     <div className={cx('hg-transfer', done && 'is-done')}>
       <button
@@ -39,19 +59,12 @@ export function TransferRow({
         disabled={disabled}
         onClick={onToggle}
       />
-      <div className="hg-stack" style={{ gap: 0 }}>
-        <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-          <span className="hg-transfer__label">{label}</span>
-          {badge}
-        </span>
-        {meta && <span className="hg-transfer__meta">{meta}</span>}
-        {actions && (
-          <span className="hg-row" style={{ gap: 'var(--space-3)' }}>
-            {actions}
-          </span>
-        )}
-      </div>
-      <span className="hg-transfer__amount">{amount}</span>
-    </div>
-  );
+      {onOpen ? (
+        <button type="button" className="hg-transfer__open" aria-haspopup="dialog" onClick={onOpen}>
+          {body}
+        </button>
+      ) : (
+        body
+      )}
+    </div>  );
 }

@@ -27,6 +27,9 @@ export const copy = {
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
   checkLabel: (name: string) => `${name} 체크`,
   otherAmount: '다른 금액으로 보냈어요',
+  // 줄을 누르면 여는 시트(2026-11-03) [확인 필요]
+  lineSheet: (name: string, amount: string) => `${name} ${amount}`,
+  sent: '보냈어요',
   checkedBy: (who: string, date: string) => `${who}님이 ${date}에 체크했어요`,
   checkedOn: (date: string) => `${date}에 체크했어요`, // [확인 필요] 내가 체크한 줄
   skipped: '이번 달은 못 했어요',

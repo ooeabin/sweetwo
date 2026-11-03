@@ -194,26 +194,32 @@ export function W02Checklist() {
   return (
     <QuestionLayout
       title={copy.cycleTitle(shown.label)}
-      help={`${periodText(start, shown.cycle_end)}. ${done === total ? copy.allDone : copy.progress(total, done)}`}
+      help={
+        // 지난 달·다음 달 ‹ ›는 기간 줄 오른쪽 끝(2026-11-03)
+        <span className="hg-row" style={{ justifyContent: 'space-between', gap: 'var(--space-2)' }}>
+          <span>
+            {`${periodText(start, shown.cycle_end)}. ${done === total ? copy.allDone : copy.progress(total, done)}`}
+          </span>
+          <span className="hg-row" style={{ gap: 'var(--space-2)', flex: 'none' }}>
+            <IconButton
+              icon="chevron-left"
+              label={copy.prevMonth}
+              small
+              disabled={!more}
+              onClick={() => setAgo(ago + 1)}
+            />
+            <IconButton
+              icon="chevron-right"
+              label={copy.nextMonth}
+              small
+              disabled={ago === 0}
+              onClick={() => setAgo(ago - 1)}
+            />
+          </span>
+        </span>
+      }
       onBack={() => nav('/')}
     >
-      {/* 지난 달·다음 달(2026-11-03 회색 네모 대신 둥근 화살표 아이콘 버튼) */}
-      <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        <IconButton
-          icon="chevron-left"
-          label={copy.prevMonth}
-          small
-          disabled={!more}
-          onClick={() => setAgo(ago + 1)}
-        />
-        <IconButton
-          icon="chevron-right"
-          label={copy.nextMonth}
-          small
-          disabled={ago === 0}
-          onClick={() => setAgo(ago - 1)}
-        />
-      </div>
       {changedBy && !dismissed && (
         <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
           <p className="hg-q__help" style={{ flex: 1 }}>
