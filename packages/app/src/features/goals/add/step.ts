@@ -36,8 +36,8 @@ export function useAddStep(step: string) {
         const id = d.fillGoalId;
         void saveFill(d, qc)
           .then(() => {
-            toast(copy.saved);
-            nav(`/goals/${id}`, { replace: true });
+            // 금액을 정했으면 매달 넣는 돈(G-03g)까지 묻고 상세로(2026-11-03)
+            nav(`/goals/${id}/monthly`, { replace: true });
             // 화면을 떠난 뒤에 비움(먼저 비우면 질문 화면이 목표 추가 첫 화면으로 돌아감)
             setTimeout(clear, 0);
           })

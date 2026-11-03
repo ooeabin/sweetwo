@@ -133,6 +133,12 @@ export const copy = {
   remove: '삭제',
   undo: '되돌리기',
   saved: '저장했어요', // [확인 필요]
+  // G-03g 매달 넣는 돈(2026-11-03, 금액 정하기 끝)
+  monthlyTitle: '매달 얼마씩 넣을까요?', // [확인 필요]
+  monthlyNeed: (need: string) => `매달 ${need}이 필요해요`, // [확인 필요]
+  monthlyLeft: (left: string) => `지금 남는 돈 ${left}`, // [확인 필요]
+  monthlyShort: '남는 돈이 모자라요. 쓰는 돈이나 저금을 줄여 주세요', // [확인 필요]
+  monthlyLater: '나중에 할게요',
   amountChanged: '목표 금액을 바꿨어요', // [확인 필요] 08 4장 “{무엇}을 바꿨어요”
   deadlineChanged: '기한을 바꿨어요',
   nameChanged: '이름을 바꿨어요', // [확인 필요]

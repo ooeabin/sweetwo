@@ -4,6 +4,7 @@ export { G02GoalDetail } from './pages/g-02-goal-detail';
 export { G02GoalEdit } from './pages/g-02-goal-edit';
 export { G02pGoalPhoto } from './pages/g-02p-goal-photo';
 export { GoalAddRoute, GoalFillStart } from './add/route';
+export { G03gGoalMonthly } from './pages/g-03g-goal-monthly';
 export { G06GoalOrder } from './pages/g-06-goal-order';
 export { AchieveWatch } from './achieve';
 export { G05Achieved } from './pages/g-05-achieved';
