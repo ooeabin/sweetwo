@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { cx } from '../cx';
 
 // 생년월일 휠(docs/design/components/DateWheel.md). 연, 월, 일 세 줄을 위아래로 굴려 고름.
@@ -21,6 +21,7 @@ function Column({
   unit,
   page,
   onChange,
+  format,
 }: {
   label: string;
   items: number[];
@@ -28,6 +29,8 @@ function Column({
   unit: string;
   page: number;
   onChange: (v: number) => void;
+  /** 칸 글자(기본 숫자 + 단위). 읽기 값도 이걸로 */
+  format?: (v: number) => string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const idx = Math.max(items.indexOf(value), 0);
@@ -92,7 +95,7 @@ function Column({
       aria-valuenow={value}
       aria-valuemin={items[0]}
       aria-valuemax={items[items.length - 1]}
-      aria-valuetext={`${value}${unit}`}
+      aria-valuetext={format ? format(value) : `${value}${unit}`}
       onScroll={onScroll}
       onKeyDown={onKey}
     >
@@ -103,8 +106,14 @@ function Column({
           className={cx('hg-wheel__item', v === value && 'is-on')}
           onClick={() => onChange(v)}
         >
-          {v}
-          <span className="hg-wheel__unit">{unit}</span>
+          {format ? (
+            format(v)
+          ) : (
+            <>
+              {v}
+              <span className="hg-wheel__unit">{unit}</span>
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -192,6 +201,50 @@ export function DateWheel({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+export type PayDay = number | 'last';
+const LAST = 32; // 휠 안에서 ‘말일’ 자리(31 다음)
+
+/** 월급날 휠(1~31일 + 말일 1열, docs/design/components/DateWheel.md ‘일만’). 값이 없으면 initial을 바로 알려 줌 */
+export function DayWheel({
+  label,
+  value,
+  onChange,
+  lastLabel,
+  hint,
+  initial = 25,
+}: {
+  label: string;
+  value: PayDay | null;
+  onChange: (v: PayDay) => void;
+  lastLabel: string;
+  /** 휠 아래 한 줄(‘말일’ 안내) */
+  hint?: ReactNode;
+  initial?: PayDay;
+}) {
+  useEffect(() => {
+    if (value === null) onChange(initial);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const v = value ?? initial;
+  const items = Array.from({ length: LAST }, (_, i) => i + 1);
+  return (
+    <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+      <div className="hg-wheel hg-wheel--day" role="group" aria-label={label}>
+        <span className="hg-wheel__band" aria-hidden="true" />
+        <Column
+          label={label}
+          items={items}
+          value={v === 'last' ? LAST : v}
+          unit="일"
+          page={7}
+          format={(d) => (d === LAST ? lastLabel : `${d}일`)}
+          onChange={(d) => onChange(d === LAST ? 'last' : d)}
+        />
+      </div>
+      {hint && <p className="hg-wheel__age">{hint}</p>}
     </div>
   );
 }

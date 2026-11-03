@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { cx } from '../cx';
-import { Icon } from '../Icon';
+import { Icon, type IconName } from '../Icon';
 
 // Q1 단일 선택(docs/spec/12-question-pattern.md Q1, 디자인 Selection ‘hg-option--card’).
 // 고르면 0.3초 뒤 onPick(그 사이 바꾸면 다시 셈). 1~9 키로 n번째 선택.
@@ -14,6 +14,8 @@ export interface Choice<T extends string> {
   tag?: string;
   /** 고를 수 없음(is-disabled) */
   disabled?: boolean;
+  /** 라벨 왼쪽 작은 아이콘 칸(2026-11-03 지그재그처럼) */
+  icon?: IconName;
 }
 
 export function ChoiceCards<T extends string>({
@@ -25,6 +27,7 @@ export function ChoiceCards<T extends string>({
   autoAdvance = true,
   autoFocus = true,
   shortcuts = true,
+  go,
 }: {
   label: string;
   options: Choice<T>[];
@@ -37,7 +40,10 @@ export function ChoiceCards<T extends string>({
   autoFocus?: boolean;
   /** 1~9 키로 고르기(한 화면에 묶음이 여럿이면 하나만) */
   shortcuts?: boolean;
+  /** 오른쪽 표시: 누르면 바로 넘어가면 ›, 고른 뒤 ‘다음’이면 동그라미. 기본은 자동 다음이면 › */
+  go?: boolean;
 }) {
+  const chevron = go ?? (autoAdvance && !!onPick);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const first = useRef<HTMLButtonElement>(null);
 
@@ -96,6 +102,11 @@ export function ChoiceCards<T extends string>({
             aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
+            {o.icon && (
+              <span className="hg-option__icon" aria-hidden="true">
+                <Icon name={o.icon} />
+              </span>
+            )}
             <span className="hg-option__body">
               <span className="hg-option__label">
                 {o.label}
@@ -108,9 +119,15 @@ export function ChoiceCards<T extends string>({
               {o.sub && <span className="hg-help">{o.sub}</span>}
               {o.detail}
             </span>
-            <span className="hg-option__mark" aria-hidden="true">
-              <Icon name="check" size={16} />
-            </span>
+            {chevron ? (
+              <span className="hg-option__go" aria-hidden="true">
+                <Icon name="chevron-right" />
+              </span>
+            ) : (
+              <span className="hg-option__mark" aria-hidden="true">
+                <Icon name="check" size={16} />
+              </span>
+            )}
           </button>
         );
       })}

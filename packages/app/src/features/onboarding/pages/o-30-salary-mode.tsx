@@ -31,6 +31,7 @@ export function O30SalaryMode() {
           value: k,
           label: copy.salaryModes[k].label,
           sub: copy.salaryModes[k].sub,
+          icon: k === 'separate' ? 'user' : 'users-three',
         }))}
       />
     </QuestionLayout>

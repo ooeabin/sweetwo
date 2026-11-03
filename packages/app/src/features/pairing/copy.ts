@@ -78,6 +78,7 @@ export const copy = {
   noSalary: '지금은 월급이 없어요',
   payday: '월급날',
   paydayLast: '말일',
+  paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   checkValue: '입력한 값이 맞나요?',
 
   // P-06 월급 분배표

@@ -650,7 +650,7 @@ supabase/
 - 결혼기념일 챙길 날은 `couple_space` 트리거 `sync_wedding_care`가 자동 등록(20261029180000). 연결 해제 뒤에는 S-12h → O-11부터(`start_after_unlink`)
 - 옛 결과·진단·플랜 계산(`result.ts`, core `plan`·`expenses`·배분 조정·진단)은 지움
 - 목표 템플릿, 질문 순서, 기본 기한, 월 필요액, ‘잘 모르겠어요’ 구간값은 `packages/core/src/onboarding`(Vitest). 화면은 이 정의만 읽는다
-- 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards, Q3 AmountInput, Q4 YearInput/DateInput/YearMonthInput/DayChips/DateWheel(`yearOnly`), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
+- 질문 입력 부품은 `packages/ui/src/components/question`(Q1 ChoiceCards, Q3 AmountInput, Q4 YearInput/DateInput/YearMonthInput/DayChips/DateWheel(`yearOnly`)/DayWheel(월급날), Q5 ShortText, 비율 PercentSlider, Q6 ListInput)
 - e2e는 `apps/mobile/e2e/onboarding-mock.ts`의 메모리 DB(`save_split`, `start_checklist` 흉내 포함)로 흐름을 끝까지 돌리고 저장된 값을 확인. 날짜는 `page.clock.setFixedTime`으로 10월 7일에 고정
 
 ### 홈과 월급 체크리스트 구조

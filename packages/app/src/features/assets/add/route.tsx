@@ -1,11 +1,5 @@
 import { insertAsset } from '@sweetwo/api';
-import {
-  assetGroup,
-  bands,
-  isHighInterestKind,
-  quickChips,
-  type AssetSide,
-} from '@sweetwo/core';
+import { assetGroup, bands, isHighInterestKind, quickChips, type AssetSide } from '@sweetwo/core';
 import {
   AmountInput,
   ChoiceCards,
