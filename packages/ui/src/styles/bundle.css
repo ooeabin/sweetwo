@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3edef45). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (89e80b9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1675,6 +1675,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: 400 15px/22px var(--font-sans); }
 .hg-goalbox__person > span:not(.hg-avatar) { flex: 1; }
 .hg-goalbox__person > b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hg-goalbox__person { min-height: 56px; }
+.hg-goalbox__sub { margin-top: calc(var(--space-2) * -1); font: 400 13px/18px var(--font-sans); color: var(--slate); }
+.hg-goalbox .hg-checklist__list > :last-child { border-bottom: 0; }
 @media (max-width: 767px) {
   .hg-goalhero__photo { margin: 0 calc(var(--space-4) * -1); width: calc(100% + var(--space-4) * 2); border-radius: 0; }
   .hg-goalhero__sheet { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-5) var(--space-4) 0; }

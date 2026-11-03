@@ -11,7 +11,6 @@ import {
 } from '@sweetwo/api';
 import {
   formatDateFull,
-  formatMonthDay,
   formatYm,
   goalBars,
   goalProgress,
@@ -419,19 +418,46 @@ export function G02GoalDetail() {
             </button>
           )}
         </div>
-        {i.perPerson.length > 1 &&
-          i.perPerson.map((p) => (
-            <div key={p.userId} className="hg-goalbox__person">
+        {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 대신 체크).
+            이번 달 줄이 없는 사람은 금액만 */}
+        {i.thisMonth.length > 0 && <span className="hg-goalbox__sub">{copy.boxThisMonth}</span>}
+        <div className="hg-checklist__list">
+          {(i.perPerson.length
+            ? i.perPerson
+            : i.thisMonth.map((l) => {
+                const who = l.user_id ?? d.lineOwner[l.id] ?? d.meId;
+                return { userId: who, name: d.nameOf(who) ?? '', amount: l.planned };
+              })
+          ).map((p) => {
+            const line = i.thisMonth.find(
+              (l) => (l.user_id ?? d.lineOwner[l.id] ?? d.meId) === p.userId,
+            );
+            const dot = (
               <PersonDot
                 name={p.name}
                 starter={p.userId === d.space.created_by}
                 userId={p.userId}
-                className="hg-avatar--sm"
               />
-              <span>{p.name}</span>
-              <b>{m(p.amount)}</b>
-            </div>
-          ))}
+            );
+            return line ? (
+              <CheckLine
+                key={p.userId}
+                line={line}
+                goalName={g.name}
+                name={p.name}
+                lead={dot}
+                personName={(x) => d.nameOf(x)}
+                meId={d.meId}
+              />
+            ) : (
+              <div key={p.userId} className="hg-goalbox__person">
+                {dot}
+                <span>{p.name}</span>
+                <b>{m(p.amount)}</b>
+              </div>
+            );
+          })}
+        </div>
       </section>
       {(g.status === 'achieved' || g.status === 'used') && (
         <section className="hg-card hg-card--fill hg-stack">
@@ -472,29 +498,6 @@ export function G02GoalDetail() {
         />
       )}
       {/* ‘이미 모은 돈 넣기’는 넣기·빼기 첫 질문으로 합침(입구 하나, 2026-11-03) */}
-      {i.thisMonth.length > 0 && (
-        <div className="hg-checklist__list">
-          {i.thisMonth.map((l) => (
-            <CheckLine
-              key={l.id}
-              line={l}
-              goalName={g.name}
-              name={
-                l.state === 'checked'
-                  ? `${formatMonthDay((l.checked_at ?? '').slice(0, 10))}에 ${m(l.actual ?? l.planned)} 넣었어요`
-                  : // 두 사람 줄이 있을 때 배우자 줄만 이름(내 줄은 이름 없이, 2026-11-03 내 줄에 배우자 이름이 붙던 문제)
-                    `${
-                      i.perPerson.length > 1 && (l.user_id ?? d.lineOwner[l.id] ?? null) !== d.meId
-                        ? `${d.nameOf(l.user_id ?? d.lineOwner[l.id] ?? null)}님 `
-                        : ''
-                    }${copy.thisMonthTodo(m(l.planned))}`
-              }
-              personName={(x) => d.nameOf(x)}
-              meId={d.meId}
-            />
-          ))}
-        </div>
-      )}
       {/* 늦을 때만 안내(2026-11-03 ‘기한 안에 이뤄요’ 상자는 없앰) */}
       {late &&
         g.kind === 'once' &&
