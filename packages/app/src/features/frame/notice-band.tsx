@@ -1,5 +1,5 @@
 import { fetchActiveNotices, qk } from '@sweetwo/api';
-import { Button, Icon } from '@sweetwo/ui';
+import { Button, Icon, type IconName } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { detectPlatform } from '../../platform';
@@ -53,6 +53,54 @@ export function useNoticeBand() {
       {n.importance !== 'must' && (
         <Button variant="ghost" size="sm" onClick={close}>
           {copy.noticeClose}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 회색 한 줄 띠(2026-11-03, `hg-banner--info hg-banner--strip`): 해제 대기, 알림 메일 반송, 오프라인, PC 안내.
+ * 좁은 창은 할 일·공지 띠처럼 한 줄 높이로 양옆 여백 없이 꽉 차게, 굵은 제목만(보조 문장은 넓은 창에서만).
+ */
+export function LineBand({
+  icon,
+  title,
+  sub,
+  action,
+  close,
+  body = true,
+}: {
+  icon: IconName;
+  title: string;
+  sub?: string;
+  action?: { label: string; onClick: () => void };
+  close?: { label: string; onClick: () => void };
+  /** 본문 맨 위 띠 자리(hg-body__banner). 앱 틀 위쪽 띠(오프라인)는 false */
+  body?: boolean;
+}) {
+  return (
+    <div
+      className={
+        body
+          ? 'hg-banner hg-banner--info hg-banner--strip hg-body__banner'
+          : 'hg-banner hg-banner--info hg-banner--strip'
+      }
+      role="status"
+    >
+      <Icon name={icon} size={16} />
+      <span className="hg-banner__one">
+        <strong>{title}</strong>
+        {sub && <span className="hg-banner__sub"> {sub}</span>}
+      </span>
+      {action && (
+        <Button variant="secondary" size="sm" onClick={action.onClick}>
+          {action.label}
+        </Button>
+      )}
+      {close && (
+        <Button variant="ghost" size="sm" onClick={close.onClick}>
+          {close.label}
         </Button>
       )}
     </div>

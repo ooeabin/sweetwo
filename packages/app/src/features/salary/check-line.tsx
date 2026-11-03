@@ -1,6 +1,6 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatMonthDay, todayKst } from '@sweetwo/core';
-import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
+import { BottomSheet, Button, Lead, TransferRow, goalIcon, type IconName } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { toast } from '../../shared/toast';
@@ -8,6 +8,33 @@ import { copy } from './copy';
 import { useCheck } from './data';
 
 const LINE_NAMES = { fixed: '고정지출', living: '생활비', allowance: '용돈' } as const;
+
+/** 쓰는 돈 줄 아이콘(홈 체크리스트, W-02, W-05 같음) */
+const LINE_ICON = {
+  fixed: 'calendar-check',
+  living: 'shopping-bag',
+  allowance: 'coins',
+  custom: 'wallet',
+} as const satisfies Record<string, IconName>;
+
+/** 줄 앞 아이콘(2026-11-03): 저금은 목표 아이콘, 쓰는 돈은 종류 아이콘. 아이콘은 나중에 새로 만들 예정(Illustrations ‘나중 과제’) */
+export function LineLead({
+  line,
+  goalTemplate,
+}: {
+  line: Pick<PayCheckLine, 'kind' | 'goal_id'>;
+  goalTemplate: (id: string | null) => string | null;
+}) {
+  return (
+    <Lead
+      icon={
+        line.kind === 'saving'
+          ? goalIcon(goalTemplate(line.goal_id) ?? 'custom')
+          : LINE_ICON[line.kind as keyof typeof LINE_ICON]
+      }
+    />
+  );
+}
 
 /**
  * 저금 줄 목표 이름. 합쳐서 모드에서 내 목표 줄은 앞에 주인 이름(“찬우 자기계발”, 20 W-01 3번).

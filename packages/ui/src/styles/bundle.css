@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (dcab6a3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8207aa7). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -799,6 +799,12 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-banner--todo .hg-banner__text, .hg-banner--line strong { color: var(--success); font-weight: 600; }
 .hg-banner--todo .hg-banner__icon { background: none; color: var(--success); }
 .hg-banner--line > .hg-ico { color: var(--success); }
+.hg-banner--strip { align-items: center; }
+.hg-banner--strip > .hg-ico { flex: none; color: var(--slate); }
+.hg-banner--strip > .hg-banner__one { flex: 1; min-width: 0; }
+.hg-banner--strip .hg-banner__sub { font-weight: 400; color: var(--slate); }
+/* 띠 묶음: 여러 띠가 겹치면 사이를 좁게(2026-11-03) */
+.hg-body__banners { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-banner--todo .hg-btn--secondary, .hg-banner--line .hg-btn--secondary { background: var(--surface); color: var(--ink); }
 .hg-banner--todo .hg-iconbtn, .hg-banner--line .hg-btn--ghost { color: var(--success); }
 .hg-banner__pair { flex: none; display: inline-flex; align-items: center; }
@@ -810,6 +816,10 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-banner--todo .hg-banner__icon { width: 24px; height: 24px; }
   .hg-banner--todo .hg-banner__text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; }
   .hg-banner--todo .hg-btn--sm, .hg-banner--line .hg-btn--sm { height: 32px; padding: 0 var(--space-3); }
+  .hg-banner--strip { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); gap: var(--space-2); border-radius: 0; min-height: 48px; font-size: 14px; line-height: 20px; }
+  .hg-banner--strip .hg-banner__sub { display: none; }
+  .hg-banner--strip .hg-btn--sm { height: 32px; padding: 0 var(--space-3); }
+  .hg-body__banners { gap: 1px; }
 }
 
 /* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */

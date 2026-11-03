@@ -356,7 +356,8 @@ export function AppFrame(p: AppFrameProps) {
         ) : null}
 
         <main className="hg-body" style={{ '--cols': p.columns.length } as React.CSSProperties}>
-          {p.banner}
+          {/* 띠 묶음(2026-11-03): 띠 사이를 좁게 하나로 */}
+          {p.banner && <div className="hg-body__banners">{p.banner}</div>}
           {p.columns.map((c, i) => (
             <div key={i} className="hg-body__col">
               {c}

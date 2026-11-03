@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { CheckLine, goalLineName, isPast, lineName, periodText } from '../check-line';
+import { CheckLine, goalLineName, isPast, LineLead, lineName, periodText } from '../check-line';
 import { copy } from '../copy';
 import {
   doneCount,
@@ -76,6 +76,7 @@ export function W02Checklist() {
   const personName = (id: string | null) =>
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
+  const goalTemplate = (id: string | null) => goals.data.find((g) => g.id === id)?.template ?? null;
 
   // W-02a 다른 금액
   if (other) {
@@ -190,6 +191,7 @@ export function W02Checklist() {
       name={lineName(l, goalName, personName, joint)}
       personName={personName}
       meId={meId}
+      lead={<LineLead line={l} goalTemplate={goalTemplate} />}
       readOnly={readOnly}
       // 배우자 탭은 보기 + 대신 체크만(20 W-02 2번): ‘다른 금액’ 없음
       onOther={partnerTab ? undefined : () => setOther(l)}
