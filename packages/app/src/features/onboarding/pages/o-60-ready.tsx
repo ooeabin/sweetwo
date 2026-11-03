@@ -3,7 +3,7 @@ import { copy } from '../copy';
 import { useStep } from '../step';
 
 // O-60 준비 끝(17 온보딩 ②, 2026-11-02 다시 둠). 홈에 들어가기 전 한 장: 무엇을 해 뒀고 홈에서 무엇을 할지.
-// ‘홈으로 갈게요’ → 온보딩을 마치고 홈. 진행 막대, 뒤로 없음
+// ‘홈으로 가기’ → 온보딩을 마치고 홈. 진행 막대, 뒤로 없음
 export function O60Ready() {
   const s = useStep('o-60');
   if (!s.ready) return null;

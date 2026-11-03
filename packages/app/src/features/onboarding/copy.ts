@@ -6,7 +6,7 @@ export const copy = {
   // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
   resumeHelp: '멈춘 화면부터 이어서 할 수 있어요', // [확인 필요] 2026-11-02 짧게 다시 넣음
   resumeQ: '이어서 할까요?',
-  resumeGo: '이어서 할게요', // [확인 필요]
+  resumeGo: '이어서 하기', // [확인 필요]
   next: '다음',
   unsure: '잘 모르겠어요',
   unsureLater: '잘 모르겠어요, 나중에 적을게요', // [확인 필요] 금액 칸 보조 링크(구간 골라 추정 + 할 일)
@@ -49,9 +49,9 @@ export const copy = {
     goal: '목표 금액은 홈에서 정해요',
     salary: '월급이 생기면 홈에서 알려 주세요',
   },
-  readyGo: '홈으로 갈게요',
+  readyGo: '홈으로 가기',
   overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
-  chapterStart: '시작할게요',
+  chapterStart: '시작하기',
   edit: '수정',
 
   // O-11
@@ -144,7 +144,7 @@ export const copy = {
   leftover: (man: string) => `남는 돈 ${man}`,
   short: (man: string) => `${man}이 모자라요`,
   shortHelp: '쓰는 돈이나 저금을 줄여 주세요',
-  splitDone: '이대로 할게요',
+  splitDone: '이대로 저장하기',
   resultTitle: (monthly: string, when: string, goal: string) =>
     `매달 ${monthly}씩 모으면 ${when}에 ${object(goal)} 이뤄요`, // [확인 필요]
   resultNoSaving: '분배표에서 저금을 정하면 언제 이룰지 알려 드려요',
@@ -152,7 +152,7 @@ export const copy = {
   resultOnTime: '목표 기한 안에 이뤄요',
   resultLateHelp: '분배표에서 저금을 늘리면 앞당길 수 있어요',
   resultTodo: (day: string) => `월급날(${day})에 분배표대로 보내고 체크해 주세요`, // [확인 필요]
-  resultStart: '시작할게요',
+  resultStart: '시작하기',
   years: (n: number) => `${n}년`,
   months: (n: number) => `${n}개월`,
 };
