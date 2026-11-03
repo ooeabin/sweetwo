@@ -186,6 +186,17 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
       onSubmit={() => void save()}
     >
       <AmountInput label={title} value={amount} onChange={setAmount} />
+      {/* + 버튼으로 바로 온 넣기: 만들기 전에 모아 둔 돈은 이 링크로(22 G-02 3a, 2026-11-04) */}
+      {pick === 'in' && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => setPick('held')}
+        >
+          {copy.addHeld}
+        </button>
+      )}
     </QuestionLayout>
   );
 }

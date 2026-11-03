@@ -1670,6 +1670,14 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalhero__name { margin: 0; font: 700 22px/30px var(--font-sans); }
 .hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
+.hg-goalhero__actions--one { grid-template-columns: 1fr; }
+/* 금액 줄(2026-11-04): 왼쪽 모은 돈, 오른쪽 − + 둥근 버튼(넣기·빼기). 목표에 쓴 돈은 아래 ‘쓴 돈 기록하기’ 따로 */
+.hg-goalhero__amountrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.hg-goalhero__steps { display: inline-flex; gap: var(--space-2); flex: none; }
+.hg-iconbtn.hg-goalhero__step { width: 44px; height: 44px; border: 0; background: var(--surface-alt); color: var(--ink); }
+.hg-iconbtn.hg-goalhero__step:hover { background: var(--hairline-soft); }
+.hg-iconbtn.hg-goalhero__step:disabled { color: var(--stone); opacity: .5; cursor: default; }
+.hg-goalhero__step .hg-ico { width: 20px; height: 20px; }
 /* 묶음 카드: 목표(목표 금액의 %, 막대, 기한·예상), 매달(사람별) */
 .hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
 .hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }

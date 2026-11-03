@@ -78,15 +78,14 @@ test('G-02 넣기·빼기, 꺼내 쓰기(모은 돈보다 많으면 저장 꺼�
   await expect(page.getByText('우리 목표').first()).toBeVisible();
   await axe(page);
 
-  await page.getByRole('button', { name: '넣기·빼기' }).click();
-  await page.getByRole('radio', { name: '넣을게요' }).click();
+  await page.getByRole('button', { name: '넣기', exact: true }).click();
   await page.getByLabel('얼마를 넣을까요?').fill('500000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('내 집 마련에 50만 원 넣었어요')).toBeVisible();
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   expect(db.goalMoves).toHaveLength(1);
 
-  await page.getByRole('button', { name: '꺼내 쓰기' }).click();
+  await page.getByRole('button', { name: '쓴 돈 기록하기' }).click();
   await expect(
     page.getByRole('heading', { name: '내 집 마련에서 얼마를 꺼내 썼어요?' }),
   ).toBeVisible();

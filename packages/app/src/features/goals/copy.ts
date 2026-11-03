@@ -328,6 +328,8 @@ export const copy = {
   addHeldSub: '목표를 만들기 전에 따로 모아 둔 돈이에요', // [확인 필요] G-02a 첫 질문
   changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
   inOut: '넣기·빼기', // [확인 필요]
+  putIn: '넣기', // 2026-11-04 G-02 금액 옆 + 버튼 이름
+  takeOut: '빼기', // 2026-11-04 G-02 금액 옆 − 버튼 이름
   use: '꺼내 쓰기',
   // G-02 묶음 카드(2026-11-03 시안 B3)
   boxTarget: (target: string, pct: number) => `목표 ${target}의 ${pct}%`, // [확인 필요]

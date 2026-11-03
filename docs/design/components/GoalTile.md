@@ -15,7 +15,7 @@
 
 - 사진 `hg-goalhero__photo`: 16:10, 최대 320px, 넓은 창 모서리 `radius-2xl`, 좁은 창은 양옆 여백 없이 모서리 없음.
 - ‘사진 바꾸기’ `hg-goalhero__change`: 사진 오른쪽 아래 흰 알약(카메라 + 글자).
-- 판 `hg-goalhero__sheet`: 사진 위로 24px 올라오는 둥근 판. 배지 → 이름(22px 700) → 모은 돈(28px 700) → 버튼 2개 `hg-goalhero__actions`(보조 / 주).
+- 판 `hg-goalhero__sheet`: 사진 위로 24px 올라오는 둥근 판. 배지 → 이름(22px 700) → 금액 줄 `hg-goalhero__amountrow`(2026-11-04: 왼쪽 모은 돈 28px 700, 오른쪽 `hg-goalhero__steps` 안 44px 둥근 버튼 `hg-goalhero__step` − + (`surface-alt`, 테두리 없음, IconButton 이름 ‘빼기’ ‘넣기’)) → 보조 버튼 1개 ‘쓴 돈 기록하기’ `hg-goalhero__actions--one`(가득 폭).
 - 묶음 카드 `hg-goalbox`: 머리(16px 600 + 오른쪽 글자 링크) → 막대 8px → 보조 줄(13px `slate`, 기한은 밑줄 버튼 `hg-goalbox__metabtn`). 사람별 줄 `hg-goalbox__person`(Avatar 24px + 이름 + 금액).
 - 영역 사이 32px.
 - 레퍼런스: ANZ Plus(사진 히어로), Monzo(묶음 카드).

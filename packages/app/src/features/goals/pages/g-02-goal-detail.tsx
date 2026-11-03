@@ -10,18 +10,7 @@ import {
   type Goal,
 } from '@sweetwo/api';
 import { formatDateFull, formatYm, goalBars, goalProgress, todayKst } from '@sweetwo/core';
-import {
-  Badge,
-  BarChart,
-  Button,
-  Icon,
-  LineChart,
-  ListRow,
-  Menu,
-  PageHeader,
-  SectionHeader,
-  type MenuAction,
-} from '@sweetwo/ui';
+import { Badge, BarChart, Button, Icon, IconButton, LineChart, ListRow, Menu, PageHeader, SectionHeader, type MenuAction } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -311,7 +300,27 @@ export function G02GoalDetail() {
             </span>
           )}
           <p className="hg-goalhero__name">{g.name}</p>
-          <p className="hg-goalhero__amount">{m(i.saved)}</p>
+          {/* 2026-11-04 넣기·빼기는 금액 옆 − + 버튼, 목표에 쓴 돈은 아래 따로 */}
+          <div className="hg-goalhero__amountrow">
+            <p className="hg-goalhero__amount">{m(i.saved)}</p>
+            {i.canEdit && (
+              <span className="hg-goalhero__steps">
+                <IconButton
+                  icon="minus"
+                  label={copy.takeOut}
+                  className="hg-goalhero__step"
+                  disabled={i.saved <= 0}
+                  onClick={() => nav(`/goals/${id}/move/out`)}
+                />
+                <IconButton
+                  icon="plus"
+                  label={copy.putIn}
+                  className="hg-goalhero__step"
+                  onClick={() => nav(`/goals/${id}/move/in`)}
+                />
+              </span>
+            )}
+          </div>
           {g.photo_path && i.canEdit && (
             <button
               type="button"
@@ -325,17 +334,14 @@ export function G02GoalDetail() {
           {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
           {i.canEdit && (
-            <div className="hg-goalhero__actions">
+            <div className="hg-goalhero__actions hg-goalhero__actions--one">
               <Button
                 variant="secondary"
                 block
                 onClick={() => nav(`/goals/${id}/spend`)}
                 disabled={i.saved <= 0}
               >
-                {copy.use}
-              </Button>
-              <Button variant="primary" block onClick={() => nav(`/goals/${id}/move`)}>
-                {copy.inOut}
+                {copy.useRecord}
               </Button>
             </div>
           )}
