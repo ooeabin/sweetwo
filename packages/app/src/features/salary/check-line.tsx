@@ -1,5 +1,5 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { formatMonthDay, todayKst } from '@sweetwo/core';
+import { formatDot2, todayKst } from '@sweetwo/core';
 import { BottomSheet, Button, Lead, TransferRow, goalIcon, type IconName } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
@@ -126,14 +126,19 @@ export function CheckLine({
     }
   };
 
-  const when = line.checked_at ? formatMonthDay(line.checked_at.slice(0, 10)) : null;
-  const meta = skipped
-    ? copy.skipped
-    : done && when
-      ? line.checked_by && line.checked_by !== meId
-        ? copy.checkedBy(personName(line.checked_by) ?? '', when)
-        : copy.checkedOn(when)
-      : undefined;
+  const when = line.checked_at ? formatDot2(line.checked_at.slice(0, 10)) : null;
+  const meta = skipped ? (
+    copy.skipped
+  ) : done && when ? (
+    line.checked_by && line.checked_by !== meId ? (
+      <>
+        <span className="hg-transfer__who">{personName(line.checked_by) ?? ''}</span>
+        {copy.checkedAt(when)}
+      </>
+    ) : (
+      copy.checkedAt(when)
+    )
+  ) : undefined;
   const open = !done && !skipped && !readOnly;
   const pick = (f: () => void) => () => {
     setSheet(false);

@@ -28,6 +28,11 @@ export function formatMonthDay(s: string): string {
   return `${m}월 ${d}일`;
 }
 
+/** '2026-08-26' → "08.26"(체크한 날, 월급 기간처럼 두 자리. 2026-11-03) */
+export function formatDot2(s: string): string {
+  return s.slice(5, 10).replace('-', '.');
+}
+
 /** '2026-10-24' → "10.24"(기록 줄 날짜) */
 export function formatDot(s: string): string {
   const { m, d } = ymd(s);
