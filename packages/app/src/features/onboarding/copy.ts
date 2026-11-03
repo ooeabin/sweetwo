@@ -25,7 +25,6 @@ export const copy = {
   inviteNowHelp: '목표와 월급을 둘이 같이 볼 수 있어요', // [확인 필요]
   inviteChoices: { now: '초대하기', later: '나중에 할게요' },
   inviteTitle: '이 코드를 보내 주세요',
-  inviteValid: '7일 동안 쓸 수 있어요',
   copyLink: '링크 복사',
   tapToCopy: '눌러서 복사', // [확인 필요] 코드 상자 아래
   sendLater: '나중에 보낼게요', // [확인 필요] 보내기 전 ‘다음’ 대신

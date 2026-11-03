@@ -73,19 +73,19 @@ export function O07InviteCode() {
         actions={
           <>
             {!invite.isError && (
-              <>
-                <Button variant="primary" block disabled={!code} onClick={share}>
-                  {copy.sendKakao}
-                </Button>
+              // 2026-11-03 한 줄: 왼쪽 보조 ‘링크 복사’, 오른쪽 주 버튼 ‘카톡으로 보내기’(Lyft처럼)
+              <div className="hg-row hg-row--fill">
                 <Button
                   variant="secondary"
-                  block
                   disabled={!code}
                   onClick={() => code && void copyAndMark(inviteLink(code))}
                 >
                   {copy.copyLink}
                 </Button>
-              </>
+                <Button variant="primary" disabled={!code} onClick={share}>
+                  {copy.sendKakao}
+                </Button>
+              </div>
             )}
             <Button variant="ghost" block onClick={next}>
               {sent || invite.isError ? copy.next : copy.sendLater}
@@ -118,9 +118,6 @@ export function O07InviteCode() {
                 {copy.tapToCopy}
               </span>
             </button>
-            <p className="hg-q__help" style={{ textAlign: 'center' }}>
-              {copy.inviteValid}
-            </p>
           </>
         )}
       </BottomSheet>
