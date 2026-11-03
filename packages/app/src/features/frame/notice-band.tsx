@@ -61,7 +61,7 @@ export function useNoticeBand() {
 
 /**
  * 회색 한 줄 띠(2026-11-03, `hg-banner--info hg-banner--strip`): 해제 대기, 알림 메일 반송, 오프라인, PC 안내.
- * 좁은 창은 할 일·공지 띠처럼 한 줄 높이로 양옆 여백 없이 꽉 차게, 굵은 제목만(보조 문장은 넓은 창에서만).
+ * 좁은 창은 할 일·공지 띠처럼 양옆 여백 없이 꽉 차게, 보조 문장은 제목 아래 둘째 줄(해제 날짜 등).
  */
 export function LineBand({
   icon,
