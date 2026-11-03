@@ -25,7 +25,7 @@
 | [14-notifications.md](14-notifications.md) | 알림 |
 | [15-login-signup.md](15-login-signup.md) | 로그인·가입 |
 | [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 흐름과 목표 |
-| [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 월급과 분배표 |
+| [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 월급과 월급 계획 |
 | [18-partner-join.md](18-partner-join.md) | 배우자 합류 |
 | [19-this-month.md](19-this-month.md) | 홈 |
 | [20-salary-plan.md](20-salary-plan.md) | 월급 체크리스트 |

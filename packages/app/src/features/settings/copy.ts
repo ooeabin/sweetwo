@@ -70,7 +70,7 @@ export const copy = {
   laterPayday: '늦은 월급날',
   holidayShift: '월급날이 쉬는 날이면 앞당겨 보여줘요',
   holidayShiftLabel: '주말·공휴일 앞당기기', // [확인 필요] 줄 이름
-  openSplit: '월급 분배표 열기',
+  openSplit: '월급 계획 열기',
   logout: '로그아웃',
   loggedOut: '로그아웃했어요',
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
@@ -136,7 +136,7 @@ export const copy = {
   pendingReceived: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   seeRequest: '확인하기', // [확인 필요]
   proposalsRow: '제안', // [확인 필요] 줄 이름
-  frozen: '해제 전까지 분배표를 고칠 수 없어요', // [확인 필요]
+  frozen: '해제 전까지 월급 계획을 고칠 수 없어요', // [확인 필요]
   cancelRequest: '요청 취소',
   cancelled: '연결 해제 요청을 취소했어요', // [확인 필요]
   pendingWhen: (name: string, md: string) => `${name}님이 확인하거나 ${md}이 되면 해제돼요`, // [확인 필요]
@@ -144,7 +144,7 @@ export const copy = {
   // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
   unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
-  unlinkList: ['목표', '월급 분배표와 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
+  unlinkList: ['목표', '월급 계획과 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
   unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
   exportFirst: '먼저 내보내기',
@@ -162,7 +162,7 @@ export const copy = {
   reconnect: '다시 연결하기',
   reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
   reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
-  reconnectBack: '연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요', // [확인 필요]
+  reconnectBack: '연결을 끊기 전 같이 쓰던 목표와 월급 계획이 돌아와요', // [확인 필요]
   reconnectDiscard: '해제 뒤 새로 적은 내용은 지워져요', // [확인 필요]
   reconnectYes: '다시 연결할게요',
   reconnectNo: '괜찮아요',
@@ -184,8 +184,8 @@ export const copy = {
   visAll: '모두 바꾸기',
   visNewOnly: '새 항목만',
   visFixed: [
-    // [확인 필요] 기획서 25 S-13 2번 “월급과 분배표는 늘 같이 봐요” 등
-    '월급과 분배표는 늘 같이 봐요',
+    // [확인 필요] 기획서 25 S-13 2번 “월급과 월급 계획은 늘 같이 봐요” 등
+    '월급과 월급 계획은 늘 같이 봐요',
     '우리 목표와 공동 명의 항목은 늘 같이 봐요',
     '챙길 날은 늘 같이 봐요',
   ],
@@ -275,7 +275,7 @@ export const copy = {
       assets: '자산.csv',
       debts: '부채.csv',
       goals: '목표.csv',
-      splits: '월급 분배표.csv',
+      splits: '월급 계획.csv',
       checklists: '월급 체크리스트.csv',
       care: '챙길 날.csv',
     },
@@ -290,7 +290,7 @@ export const copy = {
         '기한',
         '우선순위',
         '상태',
-        '분배표 저금 금액',
+        '월급 계획 저금 금액',
       ],
       splits: ['사람', '줄 종류', '줄 이름·목표', '금액'],
       checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
@@ -460,7 +460,7 @@ export const copy = {
     goal: '목표',
     invite: '배우자 초대',
   },
-  partnerChangeSub: '분배표·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
+  partnerChangeSub: '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: 'D-30', care_14: 'D-14', care_7: 'D-7', care_0: '당일' },
   channels: '받는 방법',
   noChannel: '알림을 받을 방법이 없어요',

@@ -29,7 +29,7 @@ const write = (k: string, v: string) => {
     /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
   }
 };
-const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 분배표 확인)
+const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 월급 계획 확인)
 
 // 홈(H-05·H-06)과 트레이 위젯이 같이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
 /** on = false면 읽지 않음(트레이 위젯이 없는 웹·모바일) */

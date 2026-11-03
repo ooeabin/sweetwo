@@ -38,7 +38,7 @@ export async function joinSpace(code: string): Promise<JoinResult> {
   return data as JoinResult;
 }
 
-/** P-02a ‘안 옮겨요’ 개수: 목표(비상금 빼고), 분배표, 체크리스트 */
+/** P-02a ‘안 옮겨요’ 개수: 목표(비상금 빼고), 월급 계획, 체크리스트 */
 export async function fetchRecordCounts(): Promise<{
   goals: number;
   splits: number;
@@ -72,8 +72,8 @@ export async function joinMovingRecords(
 }
 
 /**
- * 합류 완료(18): P-06 분배표 저장 + 첫 체크리스트 + 연결 + 코드 사용됨. lines 없으면 대기(시작한 사람이 아직 온보딩 중, P-05).
- * version = P-06을 열 때 공동 분배표 버전(합쳐서). 그 사이 바뀌었으면 'split_changed'
+ * 합류 완료(18): P-06 월급 계획 저장 + 첫 체크리스트 + 연결 + 코드 사용됨. lines 없으면 대기(시작한 사람이 아직 온보딩 중, P-05).
+ * version = P-06을 열 때 공동 월급 계획 버전(합쳐서). 그 사이 바뀌었으면 'split_changed'
  */
 export async function completeJoin(
   lines?: SplitLineDraft[],

@@ -1,4 +1,4 @@
--- pgTAP: 다녀온 뒤 기록(Y-08). 다녀왔어요, 기록만(목표·분배표는 안 건드림), 다른 부부 막힘
+-- pgTAP: 다녀온 뒤 기록(Y-08). 다녀왔어요, 기록만(목표·월급 계획은 안 건드림), 다른 부부 막힘
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(5);

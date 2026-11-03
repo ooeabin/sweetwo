@@ -65,7 +65,7 @@ export function useStep(id: string) {
     }
   };
 
-  /** 온보딩을 마치고 홈으로(O-31 다음). before(마지막 답 저장, 추천 분배표)를 먼저. 완료 시각을 남기고 다시 읽는다 */
+  /** 온보딩을 마치고 홈으로(O-31 다음). before(마지막 답 저장, 추천 월급 계획)를 먼저. 완료 시각을 남기고 다시 읽는다 */
   const finish = async (before?: () => Promise<unknown>) => {
     if (saving) return;
     setSaving(true);

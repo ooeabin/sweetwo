@@ -3,7 +3,7 @@ import { goalEta, nextOccurrence, templateByKey, type YearMonth } from '@sweetwo
 import { savedOf, toAllocGoal, useChecklists, useGoalSaved, useSplits } from '../salary';
 import { useMe, usePartner, useSpace, useGoalsList } from './queries';
 
-// 재기획 목표 화면 값(22 G-01, G-02). 모은 돈은 서버(goal_saved_sums), 매달 넣는 돈은 분배표 저금 줄,
+// 재기획 목표 화면 값(22 G-01, G-02). 모은 돈은 서버(goal_saved_sums), 매달 넣는 돈은 월급 계획 저금 줄,
 // 이번 달은 이번 사이클 체크 줄. 계산은 core(goalEta)만 부른다.
 
 export type GoalGroup = 'ours' | 'mine' | 'partner';
@@ -12,7 +12,7 @@ export interface GoalItem {
   goal: Goal;
   group: GoalGroup;
   saved: number;
-  /** 매달 넣는 돈 = 보이는 분배표의 이 목표 저금 줄 합 */
+  /** 매달 넣는 돈 = 보이는 월급 계획의 이 목표 저금 줄 합 */
   monthly: number;
   /** 사람별 저금 줄(우리 목표 + 각자 + 배우자 합류일 때 “찬우 60만 + 예빈 35만”) */
   perPerson: { userId: string; name: string; amount: number }[];
@@ -119,7 +119,7 @@ export function useGoalsModel() {
   const folded = items
     .filter((i) => !OPEN.has(i.goal.status))
     .sort((a, b) => (FOLD_ORDER[a.goal.status] ?? 3) - (FOLD_ORDER[b.goal.status] ?? 3));
-  // 상단 요약: 내가 볼 수 있는 목표의 분배표 저금 줄 합(배우자 내 목표 포함)
+  // 상단 요약: 내가 볼 수 있는 목표의 월급 계획 저금 줄 합(배우자 내 목표 포함)
   const monthlyTotal = open.reduce((t, i) => t + i.monthly, 0);
   return {
     loading,

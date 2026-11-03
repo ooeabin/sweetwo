@@ -1,4 +1,4 @@
--- pgTAP: 배우자 분배표의 배우자 내 목표 줄 잠금(20 W-01 1번), 월급날 바꾸면 이번 사이클 끝 = 새 기준일 전날(07 3장).
+-- pgTAP: 배우자 월급 계획의 배우자 내 목표 줄 잠금(20 W-01 1번), 월급날 바꾸면 이번 사이클 끝 = 새 기준일 전날(07 3장).
 -- 찬우(시작), 예빈(합류), 각자
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -37,7 +37,7 @@ select public.save_split(jsonb_build_array(
 ), auth.uid());
 reset role;
 
--- 찬우가 예빈 분배표를 고침
+-- 찬우가 예빈 월급 계획을 고침
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok(format($$ select public.save_split(jsonb_build_array(

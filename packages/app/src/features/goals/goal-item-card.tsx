@@ -53,7 +53,7 @@ export function GoalItemCard({
   i: GoalItem;
   masked: boolean;
   onOpen: () => void;
-  /** 4a ‘분배표에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
+  /** 4a ‘월급 계획에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
   onLate?: () => void;
   /** 배우자가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
   changed?: string;

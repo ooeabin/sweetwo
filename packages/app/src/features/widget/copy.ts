@@ -7,7 +7,7 @@ export const copy = {
   allDone: (label: string) => `${label} 체크를 다 했어요`,
   payday: (day: number) => `다음 월급날 ${day}일`,
   review: (n: number) => `체크 안 한 게 ${n}개 있어요`, // [확인 필요]
-  noSalary: '월급이 생기면 분배표를 만들어 드려요',
+  noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   noPlan: '온보딩을 마치면 보여요',
   task: '다음 할 일',
   noDays: '다가오는 날이 없어요',

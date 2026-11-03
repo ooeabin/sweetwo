@@ -31,7 +31,7 @@ import { salaryPaths } from '../paths';
 // 각자 모드 + 배우자 합류면 사람 탭(배우자 탭은 보기 + 대신 체크). 줄 ⋯ ‘다른 금액으로 보냈어요’ → W-02a.
 // `?who=사람 id`면 그 사람 탭으로 엶(배우자 체크 다 함 알림). 마지막 줄을 체크하면 W-02 끝.
 // ‹ › 지난 달 보기(읽기 전용). 월급날이 주말·공휴일이면 기간 시작을 직전 영업일로 표시(07 1장, 끌 수 있음).
-// 상대가 이번 사이클에 분배표를 바꿨으면 맨 위 안내 한 줄(× 또는 다음 달에 사라짐).
+// 상대가 이번 사이클에 월급 계획을 바꿨으면 맨 위 안내 한 줄(× 또는 다음 달에 사라짐).
 export function W02Checklist() {
   const nav = useNavigate();
   const me = useMe();
@@ -151,7 +151,7 @@ export function W02Checklist() {
     space.data.holiday_shift === false
       ? shown.cycle_start
       : businessDayOnOrBefore(shown.cycle_start, holidaySet);
-  // 상대가 이번 사이클에 분배표를 바꿨으면 안내(20 ‘바뀐 직후 W-02 맨 위 안내 한 줄’)
+  // 상대가 이번 사이클에 월급 계획을 바꿨으면 안내(20 ‘바뀐 직후 W-02 맨 위 안내 한 줄’)
   const split = (splits.data ?? []).find((x) => x.owner_user_id === owner);
   const changedBy =
     ago === 0 &&

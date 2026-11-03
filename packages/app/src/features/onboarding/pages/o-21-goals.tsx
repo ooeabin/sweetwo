@@ -13,7 +13,7 @@ import { pickedGoals } from '../flow';
 import { useStep } from '../step';
 
 // O-21 목표 고르기(Q2 변형). 고른 순서 = 우선순위, 해제하면 당겨짐. 0개여도 진행.
-// 고른 목표는 모두 우리 목표(owner_user_id null). 비상금은 자동(금액·기한은 O-50 분배표에서 정함).
+// 고른 목표는 모두 우리 목표(owner_user_id null). 비상금은 자동(금액·기한은 O-50 월급 계획에서 정함).
 // 디자인: 그림 카드 GoalPick(3열, 좁은 창 2열, 순번 원) + 알약 탭(docs/design/components/GoalPick.md, Tabs.md)
 type Pick = { key: string; id?: string }; // id = 이미 저장된 목표
 

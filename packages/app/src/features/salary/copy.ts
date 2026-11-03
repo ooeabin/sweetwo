@@ -1,13 +1,13 @@
 // 월급 체크리스트 문구(docs/spec/20-salary-plan.md, 홈 19-this-month.md H-03). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
-  // W-01 월급 분배표
-  splitTitle: '월급 분배표',
+  // W-01 월급 계획
+  splitTitle: '월급 계획',
   splitHelp: '눌러서 금액을 바꿔요', // [확인 필요]
   save: '저장',
-  saved: '분배표를 바꿨어요',
+  saved: '월급 계획을 바꿨어요',
   undo: '되돌리기',
-  splitPending: '연결 해제 대기 중에는 분배표를 고칠 수 없어요', // [확인 필요]
+  splitPending: '연결 해제 대기 중에는 월급 계획을 고칠 수 없어요', // [확인 필요]
   refill: '추천값으로 다시 채우기',
   refillTitle: '추천값으로 다시 채울까요?', // [확인 필요]
   refillBody: '지금 적은 금액은 추천값으로 바뀌어요', // [확인 필요]
@@ -21,7 +21,7 @@ export const copy = {
   prevMonth: '지난 달 보기', // [확인 필요]
   nextMonth: '다음 달 보기', // [확인 필요]
   partnerChangedSplit: (name: string) =>
-    `${name}님이 분배표를 바꿔서 체크 안 한 줄을 다시 계산했어요`,
+    `${name}님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요`,
   allDone: '다 보냈어요',
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
@@ -33,7 +33,7 @@ export const copy = {
   checkedBy: (who: string, date: string) => `${who}님이 ${date}에 체크했어요`,
   checkedOn: (date: string) => `${date}에 체크했어요`, // [확인 필요] 내가 체크한 줄
   skipped: '이번 달은 못 했어요',
-  editSplit: '분배표 고치기',
+  editSplit: '월급 계획 고치기',
   // 토스트는 한 줄(Toast.md): 목표 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게
   addedToGoal: (goal: string, amount: string) =>
     `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,
@@ -42,7 +42,7 @@ export const copy = {
   closed: '지난 달 체크리스트는 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
-  noChecklist: '월급이 생기면 분배표를 만들어 드려요',
+  noChecklist: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
@@ -58,7 +58,7 @@ export const copy = {
   // W-05 월말 확인
   reviewTitle: (label: string) => `${label}, 빠진 게 있나요?`,
   reviewNone: '빠진 게 없어요', // [확인 필요]
-  // 분배표 목록(O-50, W-01 같은 틀), W-02 묶음 이름도 같이 씀
+  // 월급 계획 목록(O-50, W-01 같은 틀), W-02 묶음 이름도 같이 씀
   splitIncome: (amount: string) => `월급 ${amount}`,
   paydayLast: '말일',
   payday: (d: number) => `${d}일`,

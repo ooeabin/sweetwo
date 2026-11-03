@@ -31,7 +31,7 @@ select public.check_pay_line((select id from public.pay_check_line where goal_id
 -- 달성: 저금 줄이 빠지고 그 금액은 freed_lines에
 select is(public.achieve_goal((select id from public.goal where template = 'appliance')), true, '달성, 처음 봄');
 select is((select count(*)::int from public.split_line where goal_id = (select id from public.goal where template = 'appliance')), 0,
-  '분배표에서 저금 줄 빠짐');
+  '월급 계획에서 저금 줄 빠짐');
 select is((select (freed_lines->>(select id::text from public.salary_split))::bigint from public.goal where template = 'appliance'),
   300000::bigint, '빠진 금액(매달 넣던 돈)');
 select results_eq($$ select months, together from public.goal_story((select id from public.goal where template = 'appliance')) $$,

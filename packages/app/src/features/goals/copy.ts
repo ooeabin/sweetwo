@@ -98,7 +98,7 @@ export const copy = {
   positionLabel: '어디에 넣을까요?', // [확인 필요] 우선순위 위치
   positionBefore: (name: string) => `${name} 앞`,
   positionLast: '맨 아래',
-  lateLink: '분배표에서 저금 늘리기', // [확인 필요]
+  lateLink: '월급 계획에서 저금 늘리기', // [확인 필요]
   nextYearQ: (name: string, amount: string) => `내년 ${name}도 ${amount}으로 할까요?`,
   nextYearKeep: '그대로',
   nextYearChange: '바꿀래요',
@@ -225,7 +225,7 @@ export const copy = {
   storySolo: (n: number) => `${n}개월 만에 모았어요`,
   // G-05 보낼 곳
   sendTitle: (amount: string) => `매달 넣던 ${amount}은 어디로 보낼까요?`,
-  sendOptions: { goal: '다른 목표', add: '새 목표 만들기', split: '분배표에서 정할게요' }, // [확인 필요]
+  sendOptions: { goal: '다른 목표', add: '새 목표 만들기', split: '월급 계획에서 정할게요' }, // [확인 필요]
   sendPick: '어느 목표에 더할까요?', // [확인 필요]
   sendDone: (goal: string, amount: string) => `${goal} 저금 줄에 ${amount}을 더했어요`, // [확인 필요]
   // G-05 사용 기록
@@ -293,12 +293,12 @@ export const copy = {
   groups: { ours: '우리 목표', mine: '내 목표' }, // [확인 필요]
   partnerGroup: (name: string) => `${name}님 목표`, // [확인 필요]
   monthlySummary: (amount: string) => `매달 목표에 ${amount}씩 모으고 있어요`, // [확인 필요]
-  noSplit: '분배표에서 저금을 정해 주세요', // [확인 필요]
-  editSplit: '분배표 고치기',
+  noSplit: '월급 계획에서 저금을 정해 주세요', // [확인 필요]
+  editSplit: '월급 계획 고치기',
   planNew: (amount: string, ym: string) => `매달 ${amount}씩, ${ym} 달성 예정`,
   setAmount: '금액 정하기',
   lateLine: (n: string) => `기한보다 ${n} 늦어요`,
-  moreSaving: '분배표에서 저금 늘리기', // [확인 필요]
+  moreSaving: '월급 계획에서 저금 늘리기', // [확인 필요]
   thisMonthDone: (amount: string) => `이번 달 ${amount} 넣었어요`,
   thisMonthTodo: (amount: string) => `이번 달 ${amount} 넣을 차례예요`,
   thisMonthSkipped: '이번 달은 못 했어요', // [확인 필요]
@@ -325,7 +325,7 @@ export const copy = {
   inOut: '넣기·빼기', // [확인 필요]
   use: '꺼내 쓰기',
   onTime: '기한 안에 이뤄요',
-  lateHelp: '분배표에서 저금을 늘리면 앞당길 수 있어요',
+  lateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
   toOurs: '우리 목표로 바꾸기', // [확인 필요]
   toMine: '내 목표로 바꾸기', // [확인 필요]
   cantToMine: (name: string) => `${name}님도 모으고 있어서 바꿀 수 없어요`, // [확인 필요]

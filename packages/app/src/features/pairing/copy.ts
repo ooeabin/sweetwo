@@ -43,7 +43,7 @@ export const copy = {
   moveDo: '옮겨요', // [확인 필요] 옮길 항목 묶음 이름(2026-11-03)
   moveSalaryLabel: '월급',
   moveDay: (day: string) => `월급날 ${day}`,
-  moveSkipItems: { goals: '목표', splits: '분배표', lists: '체크리스트' },
+  moveSkipItems: { goals: '목표', splits: '월급 계획', lists: '체크리스트' },
   moveCount: (n: number) => `${n}개`,
   moveSkip: '안 옮겨요',
   moveKeep: '30일 보관 후 지워져요',
@@ -68,8 +68,8 @@ export const copy = {
   modeTitle: (starter: string) => `${starter}님이 고른 월급 관리 방식이에요`, // [확인 필요]
   modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]
   modes: {
-    separate: { label: '각자 월급을 따로 관리해요', sub: '분배표와 체크리스트가 사람마다 있어요' }, // [확인 필요]
-    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 분배표로 나눠요' }, // [확인 필요]
+    separate: { label: '각자 월급을 따로 관리해요', sub: '월급 계획과 체크리스트가 사람마다 있어요' }, // [확인 필요]
+    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
 
   // P-05 내 월급(O-31과 같음)
@@ -84,9 +84,9 @@ export const copy = {
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   checkValue: '입력한 값이 맞나요?',
 
-  // P-06 월급 분배표
+  // P-06 월급 계획
   splitTitle: '내 월급을 이렇게 나눠 볼까요?', // [확인 필요]
-  splitJointTitle: '같이 쓰는 분배표예요', // [확인 필요]
+  splitJointTitle: '같이 쓰는 월급 계획이에요', // [확인 필요]
   splitHelp: '눌러서 금액을 바꿔요',
   splitJointHelp: (me: string) => `${me}님 월급을 더해 다시 채웠어요`, // [확인 필요]
   splitDone: '이대로 저장하기',
@@ -94,5 +94,5 @@ export const copy = {
   incomes: (a: string, b: string) => `${a}, ${b}`, // [확인 필요] 합쳐서 수입 줄 아래
   personIncome: (name: string, amount: string) => `${name} ${amount}`,
   changed: (before: string, after: string) => `${before} → ${after}`,
-  splitChanged: (starter: string) => `${starter}님이 방금 분배표를 바꿨어요`, // [확인 필요]
+  splitChanged: (starter: string) => `${starter}님이 방금 월급 계획을 바꿨어요`, // [확인 필요]
 };

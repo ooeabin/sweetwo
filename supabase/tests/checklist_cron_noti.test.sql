@@ -47,8 +47,8 @@ select public.complete_join(jsonb_build_array(
 reset role;
 delete from public.notification;
 
--- 기준일 0시: 분배표마다 이번 사이클 체크리스트, 다시 돌려도 같음
-select is(public.run_cycle_checklists('2027-03-25'), 2, '두 분배표');
+-- 기준일 0시: 월급 계획마다 이번 사이클 체크리스트, 다시 돌려도 같음
+select is(public.run_cycle_checklists('2027-03-25'), 2, '두 월급 계획');
 select results_eq(
   $$ select owner_user_id, cycle_start, cycle_end, label from public.pay_checklist
      where cycle_start >= '2027-01-01' order by cycle_start $$,
@@ -66,7 +66,7 @@ select results_eq(
   $$ select user_id, kind, title, body, target from public.notification order by kind $$,
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'maturity', '결혼자금 적금이 두 달 뒤 만기예요', null::text,
              '/assets/' || (select id from public.asset where name = '결혼자금 적금')),
-            ('11111111-1111-1111-1111-111111111111'::uuid, 'payday', '오늘은 월급날이에요', '분배표대로 보내고 체크해 주세요', '/salary') $$,
+            ('11111111-1111-1111-1111-111111111111'::uuid, 'payday', '오늘은 월급날이에요', '월급 계획대로 보내고 체크해 주세요', '/salary') $$,
   '찬우에게만');
 select results_eq($$ select topic from public.notification order by kind $$, $$ values ('money'), ('plan') $$, '알림 묶음');
 

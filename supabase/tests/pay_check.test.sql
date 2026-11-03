@@ -1,4 +1,4 @@
--- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 돈 합, 분배표를 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
+-- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 돈 합, 월급 계획을 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(11);
@@ -37,7 +37,7 @@ select public.check_pay_line(pg_temp.line('home'), 'checked');
 select is((select amount from public.goal_checked_sums()), 950000::bigint, '저금 줄 체크 = 목표에 더함');
 select is((select state from public.pay_checklist), 'open', '남은 줄이 있으면 진행 중');
 
--- 분배표를 고치면 체크 안 한 줄(생활비)만 새 금액, 체크한 줄은 그대로
+-- 월급 계획을 고치면 체크 안 한 줄(생활비)만 새 금액, 체크한 줄은 그대로
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 500000),
   jsonb_build_object('kind', 'living', 'amount', 700000)

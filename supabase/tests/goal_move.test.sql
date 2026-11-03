@@ -1,4 +1,4 @@
--- pgTAP: 목표 넣기·빼기·꺼내 쓰기, 모은 돈, 목표를 만들고 지우면 분배표 저금 줄이 따라감, 내 목표는 주인만. 찬우, 예빈
+-- pgTAP: 목표 넣기·빼기·꺼내 쓰기, 모은 돈, 목표를 만들고 지우면 월급 계획 저금 줄이 따라감, 내 목표는 주인만. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(12);
@@ -37,7 +37,7 @@ select public.undo_goal_move(current_setting('test.out')::uuid);
 select is((select saved from public.goal_saved_sums() where goal_id = (select id from public.goal where template = 'home')),
   1500000::bigint, '되돌리기');
 
--- 새 목표 → 분배표 저금 묶음 맨 아래 0원 줄(쓰는 돈 줄보다 앞)
+-- 새 목표 → 월급 계획 저금 묶음 맨 아래 0원 줄(쓰는 돈 줄보다 앞)
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'travel', '여행', 'once', 2 from public.app_user where id = auth.uid();
 select is((select amount from public.split_line where goal_id = (select id from public.goal where template = 'travel')),
@@ -58,7 +58,7 @@ insert into public.goal (space_id, template, name, kind, priority, owner_user_id
   select space_id, 'hobby', '자기계발', 'once', 1, auth.uid() from public.app_user where id = auth.uid();
 reset role;
 
--- 예빈 합류: 분배표를 만들면 우리 목표 줄만 생기고 찬우 내 목표는 없음
+-- 예빈 합류: 월급 계획을 만들면 우리 목표 줄만 생기고 찬우 내 목표는 없음
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -67,10 +67,10 @@ select public.save_split('[{"kind":"fixed","amount":500000}]', auth.uid());
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'car', '자동차', 'once', 3 from public.app_user where id = auth.uid();
 select is((select count(*) from public.split_line where goal_id = (select id from public.goal where template = 'car')),
-  2::bigint, '각자 모드 우리 목표는 두 사람 분배표 모두에');
+  2::bigint, '각자 모드 우리 목표는 두 사람 월급 계획 모두에');
 select is((select count(*) from public.split_line l join public.salary_split s on s.id = l.split_id
   where l.goal_id = (select id from public.goal where template = 'hobby') and s.owner_user_id = auth.uid()),
-  0::bigint, '찬우 내 목표는 예빈 분배표에 없음');
+  0::bigint, '찬우 내 목표는 예빈 월급 계획에 없음');
 select throws_ok($$ select public.move_goal((select id from public.goal where template = 'hobby'), 'in', 10000) $$,
   '42501', 'not_owner', '배우자 내 목표는 넣기 못 함');
 update public.goal set name = '바꿈' where template = 'hobby';

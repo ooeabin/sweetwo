@@ -12,8 +12,8 @@ import { addMonths, thisMonth, ymToDate } from '@sweetwo/core';
 import { emergencyGoalTarget, recommendedDraft } from '../salary';
 
 /**
- * 온보딩 끝(O-31 다음, ADR 0005): 분배표를 추천값으로 바로 만들고 첫 체크리스트를 연다.
- * 사용자는 홈 할 일 ‘분배표 확인’에서 W-01로 고친다. 이미 분배표가 있으면(다시 온보딩) 그대로 둔다.
+ * 온보딩 끝(O-31 다음, ADR 0005): 월급 계획을 추천값으로 바로 만들고 첫 체크리스트를 연다.
+ * 사용자는 홈 할 일 ‘월급 계획 확인’에서 W-01로 고친다. 이미 월급 계획이 있으면(다시 온보딩) 그대로 둔다.
  * 비상금 목표 금액 = (고정지출 + 생활비) × 3, 기한 1년 뒤(17 O-50과 같음).
  */
 export async function saveRecommendedSplit() {

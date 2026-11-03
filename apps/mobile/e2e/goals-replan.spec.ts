@@ -13,7 +13,7 @@ const addEntry = (page: Page, name: string) =>
     .locator('visible=true')
     .first();
 
-// 재기획 목표(22): G-01 묶음과 매달·예상·이번 달, G-02 넣기·빼기·꺼내 쓰기, G-03 누구 목표 → 분배표 0원 줄.
+// 재기획 목표(22): G-01 묶음과 매달·예상·이번 달, G-02 넣기·빼기·꺼내 쓰기, G-03 누구 목표 → 월급 계획 0원 줄.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(
@@ -100,7 +100,7 @@ test('G-02 넣기·빼기, 꺼내 쓰기(모은 돈보다 많으면 저장 꺼�
   await expect(history).toContainText('넣었어요');
 });
 
-test('G-03 목표 추가: 누구 목표예요? 나 → 내 목표, 분배표 저금 묶음 맨 아래 0원 줄', async ({
+test('G-03 목표 추가: 누구 목표예요? 나 → 내 목표, 월급 계획 저금 묶음 맨 아래 0원 줄', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -161,7 +161,7 @@ test('G-02 수정은 바로 저장: 기한, 이름, 보류·삭제는 되돌리�
   await page.getByRole('menuitem', { name: '보류' }).click();
   await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toBeVisible();
   expect(db.goals.find((g) => g.id === 'goal-h')?.status).toBe('paused');
-  // 보류하면 분배표 저금 줄이 빠짐
+  // 보류하면 월급 계획 저금 줄이 빠짐
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toHaveCount(0);

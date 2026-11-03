@@ -59,7 +59,7 @@ test.describe('Mac', () => {
       'https://play.google.com/store/apps/details?id=kr.sweetwo.app',
     );
     await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute('href', '/#get');
-    await expect(page.getByText('월급 분배표와 체크리스트')).toBeVisible();
+    await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
     await expect(
       page.getByText('macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요').first(),
     ).toBeVisible();

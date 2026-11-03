@@ -27,7 +27,7 @@ export function useJoinData() {
     partner: partner.data ?? null,
     goals: goals.data ?? [],
     splits: splits.data ?? [],
-    /** 시작한 사람이 아직 온보딩 중(분배표가 없음): P-03 → P-03a → P-05 → 홈 대기 */
+    /** 시작한 사람이 아직 온보딩 중(월급 계획이 없음): P-03 → P-03a → P-05 → 홈 대기 */
     waiting: !splits.isLoading && !(splits.data ?? []).length,
     /** 대기 뒤 이어서(P-04 → P-06) */
     resumed: me.data?.onboarding_step === 'P-WAIT',

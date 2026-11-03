@@ -17,7 +17,7 @@ update public.app_user set quiet_start = 22, quiet_end = 8;
 
 -- 오후 3시(KST): 20분 전 알림, 접속 신호 없음 → 메일
 insert into public.notification (user_id, kind, title, body, target, dedupe, created_at)
-  values ('11111111-1111-1111-1111-111111111111', 'payday', '오늘은 월급날이에요', '분배표대로 보내고 체크해 주세요', '/salary', 'n1',
+  values ('11111111-1111-1111-1111-111111111111', 'payday', '오늘은 월급날이에요', '월급 계획대로 보내고 체크해 주세요', '/salary', 'n1',
           '2027-03-25 05:40:00+00');
 select is(public.mail_missed_notifications('2027-03-25 06:00:00+00'), 1, '접속 없으면 메일로 대신');
 select is((select subject from public.mail_outbox where dedupe like 'noti:%'), '오늘은 월급날이에요', '알림 제목 그대로');

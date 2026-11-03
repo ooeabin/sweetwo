@@ -26,8 +26,8 @@ export const copy = {
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
   allDone: (label: string) => `${label} 체크를 다 했어요`,
   savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
-  editSplit: '분배표 고치기',
-  noSalary: '월급이 생기면 분배표를 만들어 드려요',
+  editSplit: '월급 계획 고치기',
+  noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
   // H-04 우리 자산
   assets: '우리 자산',

@@ -34,7 +34,7 @@ export function screens(s: FlowState): string[] {
   if (s.space?.marriage_status !== 'undecided') list.push('o-12');
   if (!(afterUnlink && s.me?.birth_year)) list.push('o-13');
   // 목표는 고르기만(2026-11-02, ADR 0004). 금액·기한은 홈 할 일 ‘목표 금액 정하기’ → G-03b·G-03c
-  // 분배표(O-50)와 결과(O-60)는 온보딩에서 뺌(ADR 0005). O-31 다음에 추천 분배표를 만들고 홈으로
+  // 월급 계획(O-50)와 결과(O-60)는 온보딩에서 뺌(ADR 0005). O-31 다음에 추천 월급 계획을 만들고 홈으로
   list.push('o-21', 'o-30', 'o-31', 'o-32', 'o-60');
   return list;
 }

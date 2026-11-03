@@ -17,7 +17,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
 $$;
 
--- 찬우: 각자, 분배표와 체크리스트, 초대
+-- 찬우: 각자, 월급 계획과 체크리스트, 초대
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -35,7 +35,7 @@ select set_config('test.code', (select code from public.create_invite()), true);
 select throws_ok($$ select public.complete_join() $$, '42501', 'not_joining', '합류 중이 아니면 못 함');
 reset role;
 
--- 예빈 합류: 합쳐서로 바꿈 → 찬우 분배표·체크리스트가 공동 것, 찬우 알림
+-- 예빈 합류: 합쳐서로 바꿈 → 찬우 월급 계획·체크리스트가 공동 것, 찬우 알림
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -43,16 +43,16 @@ select is(public.join_space(current_setting('test.code')), 'joined', '코드로 
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.set_join_salary_mode('joint');
 reset role;
-select is((select count(*) from public.salary_split where owner_user_id is null), 1::bigint, '찬우 분배표가 공동 분배표로');
+select is((select count(*) from public.salary_split where owner_user_id is null), 1::bigint, '찬우 월급 계획이 공동 월급 계획으로');
 select is((select count(*) from public.pay_checklist where owner_user_id is null), 1::bigint, '찬우 체크리스트가 공동 체크리스트로');
 select is((select title from public.notification where kind = 'salary_mode'), '예빈님이 월급 관리 방식을 바꿨어요', '찬우에게 알림');
 
--- P-06: 연 뒤에 분배표가 바뀌었으면 거절, 맞으면 저장 + 연결
+-- P-06: 연 뒤에 월급 계획이 바뀌었으면 거절, 맞으면 저장 + 연결
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select set_config('test.v', (select version::text from public.salary_split where owner_user_id is null), true);
 select throws_ok(format($$ select public.complete_join('[]'::jsonb, %s) $$, current_setting('test.v')::int - 1),
-  '40001', 'split_changed', '분배표가 바뀌었으면 다시');
+  '40001', 'split_changed', '월급 계획이 바뀌었으면 다시');
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 2500000),
   jsonb_build_object('kind', 'fixed', 'amount', 880000),

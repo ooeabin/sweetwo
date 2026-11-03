@@ -1,4 +1,4 @@
--- pgTAP: 월급 분배표 저장(O-50, W-01)과 첫 체크리스트(O-60 직후). 찬우(시작한 사람), 예빈(합류한 사람)
+-- pgTAP: 월급 계획 저장(O-50, W-01)과 첫 체크리스트(O-60 직후). 찬우(시작한 사람), 예빈(합류한 사람)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(14);
@@ -62,7 +62,7 @@ select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
-select is((select count(*) from public.split_line) + (select count(*) from public.pay_check_line), 0::bigint, '다른 부부 분배표·체크리스트는 안 보임');
+select is((select count(*) from public.split_line) + (select count(*) from public.pay_check_line), 0::bigint, '다른 부부 월급 계획·체크리스트는 안 보임');
 reset role;
 
 select * from finish();
