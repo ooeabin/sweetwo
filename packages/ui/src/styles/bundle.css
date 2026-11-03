@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (535ce57). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (dcab6a3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -299,6 +299,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 남는 돈) */
 .hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: 600 16px/24px var(--font-sans); color: var(--ink); }
 .hg-q__sum .hg-help { font-weight: 400; }
+.hg-q__foot.has-note { flex-wrap: wrap; row-gap: var(--space-3); }
+.hg-q__note { flex-basis: 100%; margin: 0; text-align: center; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 버튼 위 가운데 안내 한 줄(2026-11-03) */
 /* 좁은 창: 요약이 있는 아래 고정 영역은 위에 옅은 선을 둬 목록이 그 밑으로 지나가는 게 보이게 */
 @media (max-width: 767px) { .hg-q__foot.has-sum { border-top: 1px solid var(--hairline-soft); padding-top: var(--space-3); } }
 /* 안내 화면(입력 없음, hg-q--center): 제목을 가운데 정렬하고 세로 가운데로. O-01 시작, A-02 로그인과 같은 배치 */

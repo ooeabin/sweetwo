@@ -158,6 +158,7 @@ export function QuestionLayout({
   wide,
   center,
   summary,
+  note,
   hero,
 }: {
   steps?: { total: number; now: number; fill?: number };
@@ -184,6 +185,8 @@ export function QuestionLayout({
   center?: boolean;
   /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
   summary?: ReactNode;
+  /** 버튼 바로 위 가운데 정렬 안내 한 줄(2026-11-03, S-11e·G-02p ‘올린 사진은 …’) */
+  note?: ReactNode;
   /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
   hero?: ReactNode;
 }) {
@@ -256,8 +259,9 @@ export function QuestionLayout({
         {children}
         {(primary || later || secondary || onBack) && (
           <div
-            className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}`}
+            className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}${note ? ' has-note' : ''}`}
           >
+            {note && <p className="hg-q__note">{note}</p>}
             {summary && (
               <div className="hg-q__sum" aria-live="polite">
                 {summary}

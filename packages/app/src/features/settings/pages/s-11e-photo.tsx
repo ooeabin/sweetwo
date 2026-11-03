@@ -1,6 +1,6 @@
 import { fetchAvatars, qk, setAvatarPreset, uploadAvatar } from '@sweetwo/api';
 import { avatarPresets } from '@sweetwo/core';
-import { avatarArt, PageHeader } from '@sweetwo/ui';
+import { avatarArt } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -58,42 +58,40 @@ export function S11ePhoto() {
   // 올린 사진이 있으면 고른 지정 아바타 없음
   const current = avatars.data?.photos[me.id] ? null : (avatars.data?.presets[me.id] ?? null);
   const photoUrl = avatars.data?.photos[me.id];
-  const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.photo} backLabel={copy.back} backTo={copy.me} onBack={back} />
-      <ArtChoose
-        round
-        presets={avatarPresets.map((key) => ({ key, src: avatarArt(key) }))}
-        current={current}
-        currentSrc={photoUrl}
-        empty="user"
-        initial={dropped}
-        saving={saving}
-        labels={{
-          list: copy.presetTitle,
-          item: copy.presetItem,
-          upload: copy.uploadTitle,
-          submit: copy.photoSubmit,
-          previewLabel: copy.photoPreviewNow,
-          drop: copy.photoDrop,
-          pick: copy.photoPick,
-          help: copy.photoHelp,
-          notice:
-            d.c.joined || d.space?.couple_state === 'not_joined'
-              ? copy.photoNotice(d.c.partnerName)
-              : copy.photoNoticeSolo,
-          tooBig: copy.photoTooBig,
-          badType: copy.photoBadType,
-          stage: copy.photoStage,
-          zoom: copy.photoZoom,
-          preview: copy.photoPreview,
-          again: copy.photoAgain,
-          save: copy.photoSave,
-        }}
-        onPreset={(k) => void pickPreset(k)}
-        onPhoto={(b) => void save(b)}
-      />
-    </div>
+  return (
+    <ArtChoose
+      title={copy.photo}
+      onBack={back}
+      round
+      presets={avatarPresets.map((key) => ({ key, src: avatarArt(key) }))}
+      current={current}
+      currentSrc={photoUrl}
+      empty="user"
+      initial={dropped}
+      saving={saving}
+      labels={{
+        list: copy.presetTitle,
+        item: copy.presetItem,
+        upload: copy.uploadTitle,
+        submit: copy.photoSubmit,
+        previewLabel: copy.photoPreviewNow,
+        drop: copy.photoDrop,
+        pick: copy.photoPick,
+        help: copy.photoHelp,
+        notice:
+          d.c.joined || d.space?.couple_state === 'not_joined'
+            ? copy.photoNotice(d.c.partnerName)
+            : copy.photoNoticeSolo,
+        tooBig: copy.photoTooBig,
+        badType: copy.photoBadType,
+        stage: copy.photoStage,
+        zoom: copy.photoZoom,
+        preview: copy.photoPreview,
+        again: copy.photoAgain,
+        save: copy.photoSave,
+      }}
+      onPreset={(k) => void pickPreset(k)}
+      onPhoto={(b) => void save(b)}
+    />
   );
-  return <MainFrame sub="settings" current={null} page={{ title: copy.photo }} columns={[body]} />;
 }

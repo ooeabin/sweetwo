@@ -1,13 +1,13 @@
 import { qk, setGoalPhoto, setGoalPreset, uploadPhoto } from '@sweetwo/api';
 import { goalPhotoChoices, goalPreset } from '@sweetwo/core';
-import { PageHeader, goalIcon, goalPhotoArt } from '@sweetwo/ui';
+import { goalIcon, goalPhotoArt } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArtChoose } from '../../../shared/art-choose';
 import { usePhotoUrls } from '../../../shared/photo';
 import { toast } from '../../../shared/toast';
-import { LoadingFrame, MainFrame } from '../../frame';
+import { LoadingFrame } from '../../frame';
 import { copy } from '../copy';
 import { useGoalsModel } from '../model';
 
@@ -59,44 +59,35 @@ export function G02pGoalPhoto() {
   // 올린 사진이 있으면 고른 지정 사진 없음
   const current = i.goal.photo_path ? null : goalPreset(i.goal);
   const photoUrl = urls[i.goal.photo_path ?? ''];
-  const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader
-        title={copy.photoTitle}
-        backLabel={copy.back}
-        backTo={i.goal.name}
-        onBack={back}
-      />
-      <ArtChoose
-        presets={goalPhotoChoices(i.goal.template).map((key) => ({ key, src: goalPhotoArt(key) }))}
-        current={current}
-        currentSrc={photoUrl}
-        empty={i.custom ? 'flag-pennant' : goalIcon(i.goal.template)}
-        saving={saving}
-        labels={{
-          list: copy.presetTitle,
-          item: copy.presetItem,
-          upload: copy.uploadTitle,
-          submit: copy.photoSubmit,
-          previewLabel: copy.photoPreviewNow,
-          drop: copy.photoDrop,
-          pick: copy.photoPick,
-          help: copy.photoHelp,
-          notice: d.solo ? copy.photoNoticeSolo : copy.photoNotice(d.partnerName),
-          tooBig: copy.photoTooBig,
-          badType: copy.photoBadType,
-          stage: copy.photoStage,
-          zoom: copy.photoZoom,
-          preview: copy.photoPreview,
-          again: copy.photoAgain,
-          save: copy.photoSave,
-        }}
-        onPreset={(k) => void pick(k)}
-        onPhoto={(b) => void save(b)}
-      />
-    </div>
-  );
   return (
-    <MainFrame sub="detail" current="goals" page={{ title: copy.photoTitle }} columns={[body]} />
+    <ArtChoose
+      title={copy.photoTitle}
+      onBack={back}
+      presets={goalPhotoChoices(i.goal.template).map((key) => ({ key, src: goalPhotoArt(key) }))}
+      current={current}
+      currentSrc={photoUrl}
+      empty={i.custom ? 'flag-pennant' : goalIcon(i.goal.template)}
+      saving={saving}
+      labels={{
+        list: copy.presetTitle,
+        item: copy.presetItem,
+        upload: copy.uploadTitle,
+        submit: copy.photoSubmit,
+        previewLabel: copy.photoPreviewNow,
+        drop: copy.photoDrop,
+        pick: copy.photoPick,
+        help: copy.photoHelp,
+        notice: d.solo ? copy.photoNoticeSolo : copy.photoNotice(d.partnerName),
+        tooBig: copy.photoTooBig,
+        badType: copy.photoBadType,
+        stage: copy.photoStage,
+        zoom: copy.photoZoom,
+        preview: copy.photoPreview,
+        again: copy.photoAgain,
+        save: copy.photoSave,
+      }}
+      onPreset={(k) => void pick(k)}
+      onPhoto={(b) => void save(b)}
+    />
   );
 }
