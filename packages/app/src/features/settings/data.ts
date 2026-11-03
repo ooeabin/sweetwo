@@ -15,5 +15,8 @@ export function useSettingsData() {
     space: space.data ?? null,
     partner: partner.data ?? null,
     c,
+    /** 불러오지 못함(빈 화면 대신 다시 시도 안내, 2026-11-03) */
+    failed: me.isError || space.isError,
+    retry: () => [me, space, partner].forEach((q) => void q.refetch()),
   };
 }

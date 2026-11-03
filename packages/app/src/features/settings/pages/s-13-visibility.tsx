@@ -9,8 +9,9 @@ import {
 } from '@sweetwo/api';
 import { Button, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
@@ -21,41 +22,6 @@ const VIS: Vis[] = ['all', 'sum', 'private'];
 /** 내 목표는 두 가지(숨기기 없음): 모두 보여 주기 / 금액만 보여 주기(25 S-13 3번, 22 공개) */
 type GoalVis = 'all' | 'amount';
 const GOAL_VIS: GoalVis[] = ['all', 'amount'];
-
-function VisSelect<V extends string>({
-  label,
-  value,
-  onChange,
-  options = VIS as unknown as V[],
-  names = copy.vis,
-}: {
-  label: string;
-  value: V;
-  onChange: (v: V) => void;
-  options?: V[];
-  names?: Record<string, string>;
-}) {
-  const id = useId();
-  return (
-    <>
-      <label htmlFor={id} className="hg-sr">
-        {label}
-      </label>
-      <select
-        id={id}
-        className="hg-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value as V)}
-      >
-        {options.map((v) => (
-          <option key={v} value={v}>
-            {names[v]}
-          </option>
-        ))}
-      </select>
-    </>
-  );
-}
 
 // S-13 공개 범위(docs/spec/25-settings.md, 08 4장): 새 항목 기본값(바꾸면 “이미 있는 항목 n개도 바꿀까요?”),
 // 항상 함께 보는 것 3줄(보기만), 내 명의 항목마다 공개 범위(바로 반영). 다시 연결 뒤 한 번 확인할 때는 ?next=/ 로 열고 ‘확인’.
@@ -111,16 +77,19 @@ export function S13Visibility() {
       />
       <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
         <SectionHeader title={copy.visDefault} />
-        <p className="hg-q__help">{copy.visDefaultSub}</p>
-        <VisSelect
-          label={copy.visDefault}
-          value={me.default_visibility}
-          onChange={(v) => {
-            if (v === me.default_visibility) return;
-            if (differ(v) > 0) setAsk(v);
-            else void setDefault(v, false);
-          }}
-        />
+        <div className="hg-list">
+          <SheetSelect<Vis>
+            label={copy.visDefault}
+            rowLabel={copy.visDefaultSub}
+            value={me.default_visibility}
+            options={VIS}
+            nameOf={(v) => copy.vis[v] ?? v}
+            onChange={(v) => {
+              if (differ(v) > 0) setAsk(v);
+              else void setDefault(v, false);
+            }}
+          />
+        </div>
         {ask && (
           <div className="hg-stack" role="alertdialog" aria-label={copy.visApplyAll(differ(ask))}>
             <b>{copy.visApplyAll(differ(ask))}</b>
@@ -164,24 +133,17 @@ export function S13Visibility() {
         {mine.length === 0 ? (
           !myGoals.length && <p className="hg-q__help">{copy.visNone}</p>
         ) : (
-          <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+          <div className="hg-list">
             {mine.map((a) => (
-              <div
+              <SheetSelect<Vis>
                 key={a.id}
-                className="hg-row"
-                style={{ gap: 'var(--space-3)', alignItems: 'center' }}
-              >
-                <span style={{ flex: 1, minWidth: 0 }}>{label(a)}</span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <VisSelect
-                    label={copy.visLabel(a.name)}
-                    value={a.visibility}
-                    onChange={(v) =>
-                      void run(() => updateAsset(a.id, { visibility: v }), [qk.assets])
-                    }
-                  />
-                </span>
-              </div>
+                label={copy.visLabel(a.name)}
+                rowLabel={label(a)}
+                value={a.visibility}
+                options={VIS}
+                nameOf={(v) => copy.vis[v] ?? v}
+                onChange={(v) => void run(() => updateAsset(a.id, { visibility: v }), [qk.assets])}
+              />
             ))}
           </div>
         )}
@@ -189,26 +151,17 @@ export function S13Visibility() {
       {!!myGoals.length && (
         <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <SectionHeader title={copy.visGoals} />
-          <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+          <div className="hg-list">
             {myGoals.map((g) => (
-              <div
+              <SheetSelect<GoalVis>
                 key={g.id}
-                className="hg-row"
-                style={{ gap: 'var(--space-3)', alignItems: 'center' }}
-              >
-                <span style={{ flex: 1, minWidth: 0 }}>{g.name}</span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <VisSelect<GoalVis>
-                    label={copy.visLabel(g.name)}
-                    value={g.visibility === 'amount' ? 'amount' : 'all'}
-                    options={GOAL_VIS}
-                    names={copy.goalVis}
-                    onChange={(v) =>
-                      void run(() => updateGoal(g.id, { visibility: v }), [qk.goals])
-                    }
-                  />
-                </span>
-              </div>
+                label={copy.visLabel(g.name)}
+                rowLabel={g.name}
+                value={g.visibility === 'amount' ? 'amount' : 'all'}
+                options={GOAL_VIS}
+                nameOf={(v) => copy.goalVis[v] ?? v}
+                onChange={(v) => void run(() => updateGoal(g.id, { visibility: v }), [qk.goals])}
+              />
             ))}
           </div>
         </section>

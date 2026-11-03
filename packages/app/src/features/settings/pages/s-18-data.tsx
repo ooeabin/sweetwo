@@ -148,6 +148,8 @@ export function S18Data() {
       />
       <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
         <SectionHeader title={copy.exportTitle} />
+        {/* 2026-11-03 범위와 형식이 한 묶음처럼 보여서 이름을 붙이고, 내보내기는 가득 너비 버튼 */}
+        <p className="hg-field__label">{copy.scopeLabel}</p>
         <ChoiceCards<Scope>
           label={copy.scopeLabel}
           value={scope}
@@ -158,8 +160,11 @@ export function S18Data() {
             { value: 'joint', label: copy.scope.joint ?? '' },
           ]}
         />
+        <p className="hg-field__label">{copy.formatLabel}</p>
         <ChoiceCards<Format>
           label={copy.formatLabel}
+          autoFocus={false}
+          shortcuts={false}
           value={format}
           onChange={setFormat}
           autoAdvance={false}
@@ -206,6 +211,7 @@ export function S18Data() {
             <div className="hg-row">
               <Button
                 variant="primary"
+                block
                 disabled={state === 'busy'}
                 aria-busy={state === 'busy'}
                 onClick={() => void start()}

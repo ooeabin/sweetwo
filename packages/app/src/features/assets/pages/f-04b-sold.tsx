@@ -1,6 +1,6 @@
 import { sellAsset } from '@sweetwo/api';
 import { hasPrincipal } from '@sweetwo/core';
-import { AmountInput, Button, ChoiceCards, QuestionLayout, Toggle } from '@sweetwo/ui';
+import { AmountInput, Button, ChoiceCards, DoneMark, QuestionLayout, Toggle } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -35,8 +35,11 @@ export function F04bSold() {
     const to = d.items.find((x) => x.id === result.to);
     return (
       <QuestionLayout
+        // 2026-11-03 끝난 걸 알 수 있게 완료 표시(O-60과 같음) + ‘목록으로 가기’
+        hero={<DoneMark />}
+        center
         title={copy.soldDone}
-        primary={{ label: copy.ok }}
+        primary={{ label: copy.toList }}
         onSubmit={() => nav(`/assets/items?side=asset`, { replace: true })}
       >
         <section className="hg-card hg-stack">

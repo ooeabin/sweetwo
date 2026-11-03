@@ -248,3 +248,33 @@ export function DayWheel({
     </div>
   );
 }
+
+/** 숫자 하나 1열 휠(방해 금지 시각 등, 2026-11-03 기본 드롭다운 대신). 칸 글자는 format */
+export function NumberWheel({
+  label,
+  value,
+  items,
+  format,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  items: number[];
+  format: (v: number) => string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="hg-wheel hg-wheel--day" role="group" aria-label={label}>
+      <span className="hg-wheel__band" aria-hidden="true" />
+      <Column
+        label={label}
+        items={items}
+        value={value}
+        unit=""
+        page={6}
+        format={format}
+        onChange={onChange}
+      />
+    </div>
+  );
+}
