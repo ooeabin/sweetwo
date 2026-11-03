@@ -1,8 +1,8 @@
 import { achieveGoal, qk } from '@sweetwo/api';
-import { DoneMark, Illustration, hasIllustration } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoalArt } from './goal-art';
 import { useGoalsModel, type GoalItem } from './model';
 
 export const achievedPath = (id: string) => `/goals/${id}/achieved`;
@@ -50,11 +50,11 @@ export function AchieveWatch() {
   return null;
 }
 
-/** 축하 그림: 템플릿 그림. 그림이 없으면(직접 만든 목표, 그림을 다시 만드는 동안) 완료 표시(O-60과 같은 DoneMark, 2026-11-03 회색 깃발에서 바꿈) */
-export function AchieveArt({ g }: { g: { illustration: string | null; custom: boolean } }) {
-  return hasIllustration(g.illustration) && !g.custom ? (
-    <Illustration name={g.illustration} />
-  ) : (
-    <DoneMark />
+/** 축하 그림(2026-11-03): 목표 사진(올린 사진 → 지정 사진, 없으면 회색 빈 자리 + 아이콘). 체크·그림자 대신 */
+export function AchieveArt({ item }: { item: GoalItem }) {
+  return (
+    <span className="hg-celebrate__photo">
+      <GoalArt g={item} tile />
+    </span>
   );
 }

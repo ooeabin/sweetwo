@@ -51,8 +51,11 @@ export function G05Achieved() {
     <QuestionLayout
       center
       hero={
-        <div className="hg-celebrate__hero hg-celebrate__hero--plain" aria-hidden="true">
-          <AchieveArt g={g} />
+        <div
+          className="hg-celebrate__hero hg-celebrate__hero--plain hg-celebrate__hero--photo"
+          aria-hidden="true"
+        >
+          <AchieveArt item={item} />
         </div>
       }
       title={

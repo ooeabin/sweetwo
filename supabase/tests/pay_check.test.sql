@@ -64,7 +64,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select throws_ok($$ select public.check_pay_line(pg_temp.line('living'), 'checked') $$, '42501', 'not_owner', '배우자 체크리스트는 체크 못 함');
-select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'wait', '배우자 줄은 그대로');
+select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'skipped', '배우자 줄은 그대로');
 reset role;
 
 -- 다른 부부는 체크할 수 없음

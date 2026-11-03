@@ -19,5 +19,5 @@
 - 묶음 카드 `hg-goalbox`: 머리(16px 600 + 오른쪽 글자 링크) → 막대 8px → 보조 줄(13px `slate`, 기한은 밑줄 버튼 `hg-goalbox__metabtn`). 사람별 줄 `hg-goalbox__person`(Avatar 24px + 이름 + 금액).
 - 영역 사이 32px.
 - 레퍼런스: ANZ Plus(사진 히어로), Monzo(묶음 카드).
-- 상태 배지(2026-11-03): 사진 위 왼쪽, 달성 `achieved`(브랜드), 보류·사용 완료 `temp`. 막대 색은 `success` 파랑(바탕 `success-soft`, 2026-11-03, 홈 목표 줄 GoalRow도 같음).
+- 상태 배지(2026-11-03): 사진 위 왼쪽, 달성 `achieved`(파랑), 보류·사용 완료 `temp`. 막대 색은 `success` 파랑(바탕 `success-soft`, 2026-11-03, 홈 목표 줄 GoalRow도 같음).
 - 접힌 목록 펼치기 줄 `hg-foldrow`: `plate` 바탕 가득 찬 줄(48px) + 화살표.
