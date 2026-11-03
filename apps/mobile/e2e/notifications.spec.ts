@@ -148,12 +148,14 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
     '어머니 생신이 한 달 남았어요',
   );
   await expect(panel.getByRole('region', { name: '이전' })).toContainText('9월 22일');
-  // 열리면 첫 줄 포커스, ↓로 다음 줄
-  await expect(today.getByRole('button').first()).toBeFocused();
-  await page.keyboard.press('ArrowDown');
-  await expect(
-    panel.getByRole('region', { name: '이번 주' }).getByRole('button').first(),
-  ).toBeFocused();
+  // 열리면 첫 줄 포커스, ↓로 다음 줄(넓은 창). 좁은 창은 손가락이라 첫 줄에 포커스 테두리를 두지 않음(2026-11-03)
+  if (!narrow) {
+    await expect(today.getByRole('button').first()).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(
+      panel.getByRole('region', { name: '이번 주' }).getByRole('button').first(),
+    ).toBeFocused();
+  } else await expect(today.getByRole('button').first()).not.toBeFocused();
   await axe(page);
 
   // 누르면 읽음 + 그 화면

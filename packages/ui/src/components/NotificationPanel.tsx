@@ -52,12 +52,14 @@ export function NotificationPanel(p: {
   const unread = items.some((x) => !x.read);
   const hasItems = items.length > 0;
 
-  // 열리면 첫 줄 포커스(목록이 처음 올 때 한 번)
+  // 열리면 첫 줄 포커스(목록이 처음 올 때 한 번). 좁은 창(손가락)에서는 포커스 테두리가 고른 것처럼 보여 목록 칸에만(2026-11-03)
   const focused = useRef(false);
   useEffect(() => {
     if (p.loading || !hasItems || focused.current) return;
     focused.current = true;
-    body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item')?.focus();
+    if (window.matchMedia?.('(min-width: 768px)').matches)
+      body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item')?.focus();
+    else body.current?.focus({ preventScroll: true });
   }, [p.loading, hasItems]);
 
   // Esc 닫기(시트)
@@ -139,7 +141,7 @@ export function NotificationPanel(p: {
         )}
       </div>
       {p.notice}
-      <div className="hg-noti__body" ref={body} onKeyDown={move}>
+      <div className="hg-noti__body" ref={body} tabIndex={-1} onKeyDown={move}>
         {p.loading ? (
           skeleton(3)
         ) : p.error ? (
