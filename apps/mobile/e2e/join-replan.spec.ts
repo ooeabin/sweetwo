@@ -195,12 +195,18 @@ test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류�
   await expect(page.getByRole('heading', { name: '이미 시작한 기록이 있어요' })).toBeVisible();
   await page.getByRole('button', { name: '합류하기' }).click();
   await expect(page.getByRole('heading', { name: '내 정보만 옮겨요' })).toBeVisible();
-  await expect(page.getByText('월급 270만 원, 월급날 10일')).toBeVisible();
-  const pick = page.getByRole('combobox', { name: '예빈 적금 공개 범위' });
-  await expect(pick).toHaveValue('sum');
-  await pick.selectOption('all');
+  await expect(page.getByText('월급날 10일')).toBeVisible();
+  await expect(page.getByText('270만 원', { exact: true })).toBeVisible();
+  // 공개 범위: 줄 오른쪽 ‘금액만 보여 주기’ → 시트에서 고름(2026-11-03)
+  const row = page.getByRole('button', { name: /예빈 적금 500만 원/ });
+  await expect(row).toContainText('금액만 보여 주기');
   await expect(page.getByText(/30일 보관 후 지워져요/)).toBeVisible();
   await axe(page);
+  await row.click();
+  const sheet = page.getByRole('dialog', { name: '예빈 적금 공개 범위' });
+  await sheet.getByRole('radio', { name: '모두 보여 주기' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect(row).toContainText('모두 보여 주기');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page).toHaveURL(/\/join\/p-03$/);
   expect(db.assets.find((a) => a.id === 'a-y')).toMatchObject({
