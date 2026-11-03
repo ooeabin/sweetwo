@@ -87,7 +87,7 @@ export function O07InviteCode() {
                 </Button>
               </div>
             )}
-            <Button variant="ghost" block onClick={next}>
+            <Button variant="ghost" block className="hg-btn--quiet" onClick={next}>
               {sent || invite.isError ? copy.next : copy.sendLater}
             </Button>
           </>
