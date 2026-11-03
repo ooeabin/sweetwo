@@ -47,7 +47,11 @@ function Box({
     <input
       ref={inputRef}
       className={seg ? 'hg-datefield__seg' : cx('hg-input', invalid && 'is-error')}
-      style={seg ? { width: len === 4 ? '3.2em' : '1.8em' } : { width: len === 4 ? '6.5em' : '4.5em', textAlign: 'center' }}
+      style={
+        seg
+          ? { width: len === 4 ? '3.2em' : '1.8em' }
+          : { width: len === 4 ? '6.5em' : '4.5em', textAlign: 'center' }
+      }
       inputMode="numeric"
       aria-label={label}
       placeholder={placeholder}

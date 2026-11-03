@@ -155,6 +155,9 @@
 @media (max-width: 767px) { body:has(.hg-frame > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
 /* 떠 있는 추가 버튼(FAB)이 있으면 그 위로(겹치지 않게) */
 @media (max-width: 767px) { body:has(.hg-frame > .hg-fab) .hg-toasts { bottom: calc(var(--space-3) * 3 + 66px + 56px + env(safe-area-inset-bottom, 0px)); } }
+/* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
+@media (max-width: 767px) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(52px + var(--space-4) * 2 + var(--space-3) + env(safe-area-inset-bottom, 0px)); } }
+body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); bottom: auto; }
 @media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
 /* Modal */

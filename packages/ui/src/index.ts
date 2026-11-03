@@ -26,6 +26,7 @@ export * from './components/SceneMedia';
 export * from './components/LineChart';
 export * from './components/BarChart';
 export * from './components/GoalPick';
+export { goalIcon } from './components/goal-icons';
 export * from './components/FileAttach';
 export * from './components/ConflictChoice';
 export * from './components/TransferRow';
