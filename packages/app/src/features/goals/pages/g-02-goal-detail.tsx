@@ -425,6 +425,7 @@ export function G02GoalDetail() {
             <CheckLine
               key={l.id}
               line={l}
+              goalName={g.name}
               name={
                 l.state === 'checked'
                   ? `${formatMonthDay((l.checked_at ?? '').slice(0, 10))}에 ${m(l.actual ?? l.planned)} 넣었어요`

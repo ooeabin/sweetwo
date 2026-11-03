@@ -467,7 +467,8 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await page.goto('/');
   await page
     .locator('.hg-body__banner', { hasText: '예빈님이 다시 연결하자고 했어요' })
-    .getByRole('button', { name: '열기' })
+    .getByRole('button')
+    .first()
     .click();
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();

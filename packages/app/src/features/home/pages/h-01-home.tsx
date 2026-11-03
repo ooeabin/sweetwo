@@ -176,13 +176,17 @@ export function H01Home() {
     : null;
   const todoBand = todo ? (
     <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
-      {t && (
-        <span className="hg-banner__icon" aria-hidden="true">
-          <Icon name={TODO_ICON[t.kind]} />
-        </span>
-      )}
-      <span>{todo.text}</span>
-      {t?.kind === 'invite' ? (
+      {/* 띠 전체(그림 + 글자 + 화살표)가 이동 버튼(2026-11-02, 네이버·GCOO 홈처럼). 초대는 ‘코드 복사’가 따로 */}
+      <button type="button" className="hg-banner__main" onClick={() => nav(todo.to)}>
+        {t && (
+          <span className="hg-banner__icon" aria-hidden="true">
+            <Icon name={TODO_ICON[t.kind]} />
+          </span>
+        )}
+        <span className="hg-banner__text">{todo.text}</span>
+        {t?.kind !== 'invite' && <span className="hg-chevron" aria-hidden="true" />}
+      </button>
+      {t?.kind === 'invite' && (
         // H-06 초대: ‘코드 복사’(코드를 만들거나 지금 코드를 그대로 복사). 코드 화면은 S-12
         <Button
           variant="secondary"
@@ -195,10 +199,6 @@ export function H01Home() {
           }
         >
           {copy.copyCode}
-        </Button>
-      ) : (
-        <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
-          {copy.open}
         </Button>
       )}
       {todo.close && <IconButton icon="x" label={copy.close} ghost small onClick={todo.close} />}
