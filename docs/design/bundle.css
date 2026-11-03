@@ -143,8 +143,8 @@
 
 /* Toast */
 /* 작은 알약, 화면 아래 가운데(2026-11-02, 포켓CU처럼). 글자 길이만큼, 되돌리기는 글자 옆 굵은 링크 */
-.hg-toast { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-4); width: fit-content; max-width: min(440px, 100%); align-self: center; margin-inline: auto; min-height: 44px; padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 14px/20px var(--font-sans); }
-.hg-toast__msg { min-width: 0; text-align: center; word-break: keep-all; }
+.hg-toast { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-3); width: fit-content; max-width: min(440px, 100%); align-self: center; margin-inline: auto; min-height: 44px; padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 14px/20px var(--font-sans); }
+.hg-toast__msg { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: center; }  /* 늘 한 줄, 넘치면 말줄임(화면 읽기는 전체를 읽음) */
 .hg-toast .hg-btn--link { flex: none; color: var(--on-ink); font: 700 14px/20px var(--font-sans); text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
 @keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
@@ -152,6 +152,8 @@
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
 @media (max-width: 767px) { body:has(.hg-frame > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
+/* 떠 있는 추가 버튼(FAB)이 있으면 그 위로(겹치지 않게) */
+@media (max-width: 767px) { body:has(.hg-frame > .hg-fab) .hg-toasts { bottom: calc(var(--space-3) * 3 + 66px + 56px + env(safe-area-inset-bottom, 0px)); } }
 @media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
 /* Modal */
