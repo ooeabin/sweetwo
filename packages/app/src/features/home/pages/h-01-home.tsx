@@ -33,6 +33,7 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
+import { PersonDot } from '../../../shared/person';
 
 // 홈(19): 오늘 띠(인사 H-01 + ‘월급 체크하기’) → 할 일 한 줄(H-06) → 왼쪽 목표(H-02)·이번 달 월급(H-03),
 // 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 배우자 활동은 알림 센터.
@@ -149,9 +150,7 @@ export function H01Home() {
         {t?.kind === 'invite' ? (
           // 초대: 내 아바타 + 빈 자리(점선 +)(2026-11-03, PocketCU·DoorDash 멤버 초대처럼)
           <span className="hg-banner__pair" aria-hidden="true">
-            <span className={space.data.created_by === meId ? 'hg-avatar hg-avatar--p1' : 'hg-avatar hg-avatar--p2'}>
-              {[...myName][0] ?? ''}
-            </span>
+            <PersonDot name={myName} starter={space.data.created_by === meId} userId={meId} />
             <span className="hg-banner__slot">
               <Icon name="plus" size={16} />
             </span>

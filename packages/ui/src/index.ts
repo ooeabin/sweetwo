@@ -52,3 +52,5 @@ export * from './components/question';
 export * from './components/AdminFrame';
 export * from './components/DataTable';
 export * from './components/CommandPalette';
+export { ArtPick } from './components/ArtPick';
+export { avatarArt, goalPhotoArt } from './components/preset-art';

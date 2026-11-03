@@ -30,6 +30,12 @@ export async function setGoalPhoto(goalId: string, photo: { path: string; size: 
   fail(error);
 }
 
+/** 목표 지정 사진 고르기(2026-11-03, G-02p). 올린 사진이 있었으면 서버가 지우고 파일도 지울 목록에 */
+export async function setGoalPreset(goalId: string, preset: string) {
+  const { error } = await supabase().rpc('set_goal_preset', { p_goal: goalId, p_preset: preset });
+  fail(error);
+}
+
 /** 기록에 사진 붙이기(한 기록 10장까지) */
 export async function addCarePhoto(recordId: string, photo: { path: string; size: number }) {
   const { error } = await supabase().rpc('add_care_photo', {

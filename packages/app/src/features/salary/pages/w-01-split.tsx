@@ -135,7 +135,11 @@ export function W01Split() {
                   value: x.id,
                   label: x.nickname ?? '',
                   lead: (
-                    <PersonDot name={x.nickname ?? ''} starter={x.id === space.data?.created_by} />
+                    <PersonDot
+                      name={x.nickname ?? ''}
+                      starter={x.id === space.data?.created_by}
+                      userId={x.id}
+                    />
                   ),
                 }))}
               />

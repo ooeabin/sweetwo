@@ -17,6 +17,7 @@
 | [Accordion](Accordion.md) | Containers | 가이드·자주 묻는 질문을 접었다 폈다 |
 | [Card](Card.md) | Containers | 정보 묶음 |
 | [ActivityFeed](ActivityFeed.md) | Data | 배우자 활동과 변경 이력 |
+| [ArtPick](ArtPick.md) | Data | 지정 그림 고르기(지정 아바타, 목표 지정 사진) |
 | [Avatar](Avatar.md) | Data | 사람 표시 |
 | [Calendar](Calendar.md) | Data | ‘캘린더’ 메뉴의 달력 |
 | [Checklist](Checklist.md) | Data | 첫 주 할 일처럼 끝내야 할 일 목록 카드 |

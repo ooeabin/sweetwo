@@ -118,7 +118,11 @@ export function W02Checklist() {
             value: meId ?? '',
             label: me.data.nickname ?? '',
             lead: (
-              <PersonDot name={me.data.nickname ?? ''} starter={meId === space.data.created_by} />
+              <PersonDot
+                name={me.data.nickname ?? ''}
+                starter={meId === space.data.created_by}
+                userId={meId}
+              />
             ),
           },
           {
@@ -128,6 +132,7 @@ export function W02Checklist() {
               <PersonDot
                 name={partner.data.nickname ?? ''}
                 starter={partner.data.id === space.data.created_by}
+                userId={partner.data.id}
               />
             ),
           },

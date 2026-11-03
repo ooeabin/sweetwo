@@ -211,7 +211,11 @@ export function SalaryCard({
             className="hg-person"
             onClick={() => go(`/salary?who=${partnerList.owner_user_id ?? ''}`)}
           >
-            <PersonDot name={partnerName} starter={partnerStarter} />
+            <PersonDot
+              name={partnerName}
+              starter={partnerStarter}
+              userId={partnerList.owner_user_id}
+            />
             <span className="hg-person__text">
               {copy.partnerProgress(
                 partnerName,

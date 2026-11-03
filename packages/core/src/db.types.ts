@@ -353,6 +353,7 @@ export type Database = {
           analytics_off: boolean
           app_seen_at: string | null
           avatar_path: string | null
+          avatar_preset: string
           avatar_updated_at: string | null
           birth_day: number | null
           birth_month: number | null
@@ -393,6 +394,7 @@ export type Database = {
           analytics_off?: boolean
           app_seen_at?: string | null
           avatar_path?: string | null
+          avatar_preset?: string
           avatar_updated_at?: string | null
           birth_day?: number | null
           birth_month?: number | null
@@ -432,6 +434,7 @@ export type Database = {
           analytics_off?: boolean
           app_seen_at?: string | null
           avatar_path?: string | null
+          avatar_preset?: string
           avatar_updated_at?: string | null
           birth_day?: number | null
           birth_month?: number | null
@@ -1293,6 +1296,7 @@ export type Database = {
           owner: Database["public"]["Enums"]["goal_owner"]
           owner_user_id: string | null
           photo_path: string | null
+          photo_preset: string | null
           priority: number
           space_id: string
           status: Database["public"]["Enums"]["goal_status"]
@@ -1324,6 +1328,7 @@ export type Database = {
           owner?: Database["public"]["Enums"]["goal_owner"]
           owner_user_id?: string | null
           photo_path?: string | null
+          photo_preset?: string | null
           priority: number
           space_id: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -1354,6 +1359,7 @@ export type Database = {
           owner?: Database["public"]["Enums"]["goal_owner"]
           owner_user_id?: string | null
           photo_path?: string | null
+          photo_preset?: string | null
           priority?: number
           space_id?: string
           status?: Database["public"]["Enums"]["goal_status"]
@@ -2825,6 +2831,7 @@ export type Database = {
           analytics_off: boolean
           app_seen_at: string | null
           avatar_path: string | null
+          avatar_preset: string
           avatar_updated_at: string | null
           birth_day: number | null
           birth_month: number | null
@@ -3286,12 +3293,17 @@ export type Database = {
       send_notice_mails: { Args: { p_now?: string }; Returns: number }
       send_weekly_summary: { Args: { p_today?: string }; Returns: number }
       set_avatar: { Args: { p_path?: string }; Returns: undefined }
+      set_avatar_preset: { Args: { p_preset: string }; Returns: undefined }
       set_checklist_done: {
         Args: { p_done: boolean; p_key: string }
         Returns: undefined
       }
       set_goal_photo: {
         Args: { p_goal: string; p_path?: string; p_size?: number }
+        Returns: undefined
+      }
+      set_goal_preset: {
+        Args: { p_goal: string; p_preset: string }
         Returns: undefined
       }
       set_join_salary_mode: {
@@ -3337,6 +3349,7 @@ export type Database = {
           owner: Database["public"]["Enums"]["goal_owner"]
           owner_user_id: string | null
           photo_path: string | null
+          photo_preset: string | null
           priority: number
           space_id: string
           status: Database["public"]["Enums"]["goal_status"]
@@ -3353,6 +3366,15 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      space_people_art: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          path: string
+          preset: string
+          updated_at: string
+          user_id: string
+        }[]
       }
       start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }

@@ -905,7 +905,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         else if (db.space) db.space.wedding_budget = b.p_budget;
         return json(route, 'applied');
       }
-      if (fn === 'space_avatars')
+      if (fn === 'space_avatars' || fn === 'space_people_art')
         return json(
           route,
           [db.me, db.partner]
@@ -914,8 +914,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
               user_id: u.id,
               path: u.avatar_path ?? null,
               updated_at: u.avatar_updated_at ?? null,
+              // 지정 아바타(2026-11-03): 가입 때 무작위, 테스트는 a01
+              preset: u.avatar_preset ?? 'a01',
             })),
         );
+      if (fn === 'set_avatar_preset') {
+        const b = body();
+        Object.assign(db.me, {
+          avatar_preset: b.p_preset,
+          avatar_path: null,
+          avatar_updated_at: new Date().toISOString(),
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'set_avatar') {
         const b = body();
         Object.assign(db.me, {
@@ -1123,6 +1134,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.photos = (db.photos ?? []).filter((x) => x.goal_id !== g.id);
         if (a.p_path) db.photos.push({ goal_id: String(g.id), path: String(a.p_path), sort: 0 });
         g.photo_path = a.p_path ?? null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_goal_preset') {
+        const a = body();
+        const g = db.goals.find((x) => x.id === a.p_goal);
+        if (!g) return json(route, { message: 'not_found' }, 400);
+        db.photos = (db.photos ?? []).filter((x) => x.goal_id !== g.id);
+        g.photo_path = null;
+        g.photo_preset = a.p_preset;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'add_care_photo') {
