@@ -1,10 +1,10 @@
 import { fetchAvatars, qk, setAvatarPreset, uploadAvatar } from '@sweetwo/api';
 import { avatarPresets } from '@sweetwo/core';
-import { ArtPick, avatarArt, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { avatarArt, PageHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PhotoPick } from '../../../shared/photo-pick';
+import { ArtChoose } from '../../../shared/art-choose';
 import { toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
@@ -13,7 +13,8 @@ import { useSettingsData } from '../data';
 // S-11e 프로필 사진(25 S-11e, 디자인 ImageCrop): 올리기(고르기·끌어 놓기 + “올린 사진은 예빈님과 나만 볼 수 있어요”) → 자르기(정사각 틀, 확대,
 // 원형 미리보기) → “저장할게요”: 정사각 512px JPEG로 다시 그려(EXIF 위치 정보 없음) 저장 → S-11, “사진을 바꿨어요”.
 // 고르기·자르기는 목표 사진(22 G-02)과 같은 shared/photo-pick.
-// 2026-11-03: 위에 지정 아바타 고르기(ArtPick 원, 누르면 바로 저장 → S-11, 올린 사진은 지움). 그림 파일이 없으면 회색 빈 자리
+// 2026-11-03(시안 A): 큰 미리보기 → 격자(맨 앞 ‘내 사진 올리기’ 칸 + 지정 아바타 7개) → 고지 → “저장하기”(지정 아바타 저장, 올린 사진은 지움).
+// 올리기 칸 → 자르기 → “저장할게요”. 그림 파일이 없으면 회색 빈 자리
 export function S11ePhoto() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -56,26 +57,24 @@ export function S11ePhoto() {
   };
   // 올린 사진이 있으면 고른 지정 아바타 없음
   const current = avatars.data?.photos[me.id] ? null : (avatars.data?.presets[me.id] ?? null);
+  const photoUrl = avatars.data?.photos[me.id];
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader title={copy.photo} backLabel={copy.back} backTo={copy.me} onBack={back} />
-      <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-        <SectionHeader title={copy.presetTitle} />
-        <ArtPick
-          round
-          items={avatarPresets.map((key) => ({ key, src: avatarArt(key) }))}
-          value={current}
-          onPick={(k) => void pickPreset(k)}
-          empty="user"
-          label={copy.presetTitle}
-          itemLabel={(i) => copy.presetItem(i + 1)}
-          disabled={saving}
-        />
-      </section>
-      <SectionHeader title={copy.uploadTitle} />
-      <PhotoPick
+      <ArtChoose
+        round
+        presets={avatarPresets.map((key) => ({ key, src: avatarArt(key) }))}
+        current={current}
+        currentSrc={photoUrl}
+        empty="user"
         initial={dropped}
+        saving={saving}
         labels={{
+          list: copy.presetTitle,
+          item: copy.presetItem,
+          upload: copy.uploadTitle,
+          submit: copy.photoSubmit,
+          previewLabel: copy.photoPreviewNow,
           drop: copy.photoDrop,
           pick: copy.photoPick,
           help: copy.photoHelp,
@@ -91,7 +90,8 @@ export function S11ePhoto() {
           again: copy.photoAgain,
           save: copy.photoSave,
         }}
-        onSave={(b) => void save(b)}
+        onPreset={(k) => void pickPreset(k)}
+        onPhoto={(b) => void save(b)}
       />
     </div>
   );

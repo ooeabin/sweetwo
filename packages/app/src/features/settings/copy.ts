@@ -571,9 +571,11 @@ export const copy = {
   photoSave: '저장할게요',
   photoSaved: '사진을 바꿨어요',
   // 2026-11-03 지정 아바타(S-11e)
-  presetTitle: '기본 그림에서 고르기', // [확인 필요]
-  presetItem: (n: number) => `기본 그림 ${n}`, // [확인 필요] 화면 읽기용
-  uploadTitle: '내 사진 올리기', // [확인 필요]
+  presetTitle: '기본 그림', // [확인 필요] 화면 읽기용 목록 이름
+  presetItem: (n: number) => `기본 그림 ${n + 1}`, // [확인 필요] 화면 읽기용
+  uploadTitle: '내 사진 올리기', // [확인 필요] 화면 읽기용(격자 맨 앞 카메라 칸)
+  photoSubmit: '저장하기',
+  photoPreviewNow: '고른 사진 미리보기', // [확인 필요] 화면 읽기용
   // S-22 위젯
   widgetTitle: '위젯',
   widgetTray: '트레이 아이콘',

@@ -29,7 +29,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 select set_config('test.code', (select code from public.create_invite()), true);
 select set_config('test.sid', (select space_id::text from public.app_user), true);
-select matches((select avatar_preset from public.app_user), '^a0[1-8]$', '가입하면 지정 아바타 하나');
+select matches((select avatar_preset from public.app_user), '^a0[1-7]$', '가입하면 지정 아바타 하나');
 select public.set_avatar(current_setting('test.sid') || '/11111111-1111-1111-1111-111111111111.jpg');
 select public.set_avatar_preset('a03');
 select results_eq($$ select avatar_preset, avatar_path from public.app_user $$, $$ values ('a03'::text, null::text) $$,

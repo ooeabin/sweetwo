@@ -3,8 +3,8 @@ import { goalTemplates } from '../onboarding/goals';
 // 지정 그림(2026-11-03, 25 S-11e 지정 아바타, 22 G-02 ‘목표 사진’). 그림 파일은 packages/ui assets(avatars, goal-photos),
 // 힉스필드로 만들어 넣기 전까지는 비어 있고 화면은 빈 자리(첫 글자, 목표 아이콘)를 보여 줌.
 
-/** 지정 아바타 개수 [확인 필요]. DB 가입 기본값(a01~a08 무작위)과 같아야 함 */
-export const AVATAR_PRESET_COUNT = 8;
+/** 지정 아바타 개수 [확인 필요]. DB 가입 기본값(a01~a07 무작위)과 같아야 함 */
+export const AVATAR_PRESET_COUNT = 7;
 /** 목표 종류마다 지정 사진 개수 [확인 필요]. 직접 만든 목표는 기본 1장 */
 export const GOAL_PHOTO_COUNT = 3;
 

@@ -102,12 +102,12 @@
 
 | 무엇 | 파일 | 개수 | 스타일 | 쓰는 곳 |
 | --- | --- | --- | --- | --- |
-| 지정 아바타 | `packages/ui/src/assets/avatars/a01.webp` ~ `a08.webp` | 8 [확인 필요] | 정사각 512px, 원으로 잘라 보임(가운데 맞춤) | Avatar 모든 곳. 가입 때 무작위, 설정 S-11e에서 고름 |
+| 지정 아바타 | `packages/ui/src/assets/avatars/a01.webp` ~ `a07.webp` | 7 | 정사각 512px, 원으로 잘라 보임(가운데 맞춤) | Avatar 모든 곳. 가입 때 무작위, 설정 S-11e에서 고름 |
 | 배우자 빈 자리 | `packages/ui/src/assets/avatars/empty.webp` | 1 | 지정 아바타와 같은 그림체 | 미합류 배우자 자리(AppFrame 머리, 사이드바) |
 | 목표 지정 사진 | `packages/ui/src/assets/goal-photos/{템플릿}-01.webp` ~ `-03.webp` | 목표 종류 21 × 3 [확인 필요] | 실사(블라인드 채널 썸네일처럼), 정사각 512px, 가운데에 주제 | G-01 카드, G-02 헤더 그림, G-02p 고르기. 고른 게 없으면 `-01` |
 | 직접 만든 목표 기본 사진 | `packages/ui/src/assets/goal-photos/custom-01.webp` | 1 | 목표 지정 사진과 같은 실사 | 직접 만든 목표, ‘금액만 보여 주기’ 배우자 목표 |
 
-- 이름 목록의 기준은 `packages/core` `rules/preset-art.ts`(개수 바꾸면 DB 가입 기본값 a01~a08도 같이).
+- 이름 목록의 기준은 `packages/core` `rules/preset-art.ts`(개수 바꾸면 DB 가입 기본값 a01~a07도 같이).
 - 코드: `avatarArt(이름)`, `goalPhotoArt(이름)`(packages/ui `preset-art.ts`), 고르기 화면은 ArtPick.
 
 ## 나중 과제

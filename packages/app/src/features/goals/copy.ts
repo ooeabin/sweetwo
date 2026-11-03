@@ -364,9 +364,11 @@ export const copy = {
   photoRemoved: '사진을 지웠어요', // [확인 필요]
   photoSaved: '사진을 바꿨어요',
   // 2026-11-03 지정 사진(G-02p)
-  presetTitle: '기본 사진에서 고르기', // [확인 필요]
-  presetItem: (n: number) => `기본 사진 ${n}`, // [확인 필요] 화면 읽기용
-  uploadTitle: '내 사진 올리기', // [확인 필요]
+  presetTitle: '기본 사진', // [확인 필요] 화면 읽기용 목록 이름
+  presetItem: (n: number) => `기본 사진 ${n + 1}`, // [확인 필요] 화면 읽기용
+  uploadTitle: '내 사진 올리기', // [확인 필요] 화면 읽기용(격자 맨 앞 카메라 칸)
+  photoSubmit: '저장하기',
+  photoPreviewNow: '고른 사진 미리보기', // [확인 필요] 화면 읽기용
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
   photoDropNarrow: '사진을 골라 주세요', // 좁은 창(끌어 놓기 없음, 2026-11-03)
   photoPick: '사진 고르기',

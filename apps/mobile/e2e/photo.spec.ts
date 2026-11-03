@@ -97,19 +97,22 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
 });
 
-test('지정 아바타(S-11e, 2026-11-03): 8개 중 고르면 바로 저장, 올린 사진 대신', async ({ page }) => {
+test('지정 아바타(S-11e, 2026-11-03): 올리기 칸 + 7개, 고르고 저장하기, 올린 사진 대신', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   db.me.avatar_path = `space-1/${db.me.id}.jpg`;
   await page.goto('/settings/me/photo');
   await heading(page, '프로필 사진');
-  const picks = page.getByRole('list', { name: '기본 그림에서 고르기' }).getByRole('button');
+  const picks = page.getByRole('list', { name: '기본 그림' }).getByRole('button');
   await expect(picks).toHaveCount(8);
+  await expect(picks.first()).toHaveAccessibleName('내 사진 올리기');
   // 올린 사진이 있으면 고른 지정 아바타 없음
   await expect(page.locator('.hg-artpick__item[aria-pressed="true"]')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '기본 그림 3' }).click();
+  await expect(page.getByRole('button', { name: '기본 그림 3' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '저장하기' }).click();
   await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.me.avatar_preset).toBe('a03');

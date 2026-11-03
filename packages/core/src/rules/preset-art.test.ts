@@ -7,8 +7,8 @@ import {
 } from './preset-art';
 
 describe('지정 그림', () => {
-  it('지정 아바타는 a01~a08(DB 모양 ^a[0-9]{2}$)', () => {
-    expect(avatarPresets).toHaveLength(8);
+  it('지정 아바타는 a01~a07(DB 모양 ^a[0-9]{2}$)', () => {
+    expect(avatarPresets).toHaveLength(7);
     expect(avatarPresets[0]).toBe('a01');
     expect(avatarPresets.every((p) => /^a[0-9]{2}$/.test(p))).toBe(true);
   });

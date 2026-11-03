@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (e06c53d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (535ce57). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -718,7 +718,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar-edit__btn { position: absolute; right: -2px; bottom: -2px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--hairline), var(--shadow-1); border: 0; cursor: pointer; }
 .hg-avatar-edit.is-drop .hg-avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
 /* ArtPick(2026-11-03): 지정 그림 고르기. 프로필 지정 아바타(S-11e, 원), 목표 지정 사진(G-02p, 둥근 네모). 그림 파일이 없으면 회색 빈 자리 + 아이콘 */
-.hg-artpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.hg-artpick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .hg-artpick__item { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--hairline-soft); color: var(--stone); cursor: pointer; }
 .hg-artpick--round .hg-artpick__item { border-radius: var(--radius-full); }
 .hg-artpick__item img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
@@ -728,6 +728,14 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-artpick__check { position: absolute; right: 4px; bottom: 4px; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--ink); color: var(--surface); }
 .hg-artpick__check .hg-ico { width: 12px; height: 12px; }
 .hg-artpick--round .hg-artpick__check { right: 0; bottom: 0; }
+.hg-artpick__upload { background: transparent; border: 1.5px dashed var(--border-control); color: var(--slate); }
+.hg-artpick__upload:hover { background: var(--hairline-soft); }
+/* 미리보기(2026-11-03): 고른 그림을 크게. 프로필 원 120px, 목표 16:10 카드 */
+.hg-artprev { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: var(--radius-xl); background: var(--hairline-soft); color: var(--stone); }
+.hg-artprev--round { width: 120px; aspect-ratio: 1; margin: 0 auto; border-radius: var(--radius-full); }
+.hg-artprev img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hg-artprev .hg-ico { width: 44px; height: 44px; }
+.hg-artchoose { width: 100%; max-width: 440px; }
 
 /* IconButton */
 .hg-iconbtn { display: inline-grid; place-items: center; box-sizing: border-box; width: 36px; height: 36px; padding: 0; border-radius: var(--radius-full); border: 1px solid var(--hairline); background: var(--surface); color: var(--ink); font: 600 16px/1 var(--font-sans); cursor: pointer; }

@@ -1,5 +1,5 @@
 -- 지정 그림(2026-11-03): 프로필 지정 아바타(25 S-11e), 목표 지정 사진(22 G-02 ‘목표 사진’).
--- - 프로필: 가입할 때 지정 아바타 a01~a08 중 하나를 무작위로 정함. S-11e에서 다른 지정 아바타를 고르거나 직접 올림.
+-- - 프로필: 가입할 때 지정 아바타 a01~a07 중 하나를 무작위로 정함. S-11e에서 다른 지정 아바타를 고르거나 직접 올림.
 --   보이는 순서: 올린 사진 → 지정 아바타 그림(파일이 생기기 전까지는 이름 첫 글자).
 -- - 목표: 모든 목표(기본 목표 포함)가 사진을 가짐. photo_preset이 비어 있으면 그 종류의 1번 지정 사진({template}-01).
 --   G-02p에서 지정 사진을 고르거나 직접 올림. 직접 올린 사진(photo_path)이 있으면 그것이 먼저.
@@ -8,7 +8,7 @@
 -- 기존 사람도 무작위로 채움(volatile 기본값이라 줄마다 따로 정해짐)
 alter table public.app_user
   add column avatar_preset text not null
-    default ('a' || lpad((1 + floor(random() * 8))::int::text, 2, '0'))
+    default ('a' || lpad((1 + floor(random() * 7))::int::text, 2, '0'))
     check (avatar_preset ~ '^a[0-9]{2}$');
 
 alter table public.goal

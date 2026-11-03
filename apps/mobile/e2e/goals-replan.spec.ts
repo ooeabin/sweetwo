@@ -463,11 +463,15 @@ test('목표 사진(22 G-02): 기본 목표도 “사진 바꾸기” → 지정
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   // 2026-11-03 모든 목표: 그 종류 지정 사진 3장(파일 전에는 빈 자리), 1번이 기본
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
-  const picks = page.getByRole('list', { name: '기본 사진에서 고르기' }).getByRole('button');
-  await expect(picks).toHaveCount(3);
-  await expect(picks.first()).toHaveAttribute('aria-pressed', 'true');
+  // 시안 A: 맨 앞 ‘내 사진 올리기’ 칸 + 지정 사진 3장, 고른 뒤 “저장하기”
+  const picks = page.getByRole('list', { name: '기본 사진' }).getByRole('button');
+  await expect(picks).toHaveCount(4);
+  await expect(picks.first()).toHaveAccessibleName('내 사진 올리기');
+  await expect(page.getByRole('button', { name: '기본 사진 1' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '저장하기' })).toBeDisabled();
   await axe(page);
   await page.getByRole('button', { name: '기본 사진 2' }).click();
+  await page.getByRole('button', { name: '저장하기' }).click();
   await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
   expect(db.goals.find((g) => g.id === 'goal-h')?.photo_preset).toBe('home-02');
