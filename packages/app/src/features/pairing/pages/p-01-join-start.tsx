@@ -87,7 +87,7 @@ export function P01JoinStart() {
         help={copy.hasRecordsHelp}
         center={false}
         primary={{ label: copy.join }}
-        later={{ label: copy.cancel, onClick: () => nav('/', { replace: true }) }}
+        secondary={{ label: copy.cancel, onClick: () => nav('/', { replace: true }) }}
         onSubmit={() => setMoving(true)}
       />
     );

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (7ace461). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (5abe275). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -266,7 +266,8 @@
 .hg-q > .hg-q__head { margin-bottom: var(--space-4); }
 .hg-q .hg-amountin, .hg-q .hg-field { max-width: none; }
 .hg-q__foot { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-4); margin-top: auto; padding-top: var(--space-4); }  /* 주 버튼은 틀 아래 끝 */
-.hg-q__foot :is(.hg-btn--primary, button[type="submit"].hg-btn--secondary) { flex: 1; }  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
+.hg-q__foot :is(.hg-btn--primary, button[type="submit"].hg-btn--secondary) { flex: 1; }
+.hg-q__foot .hg-q__second { flex: 1; }  /* 주 버튼 옆 회색 보조(‘취소’, 2026-11-03). 좁은 창에서 반씩 */  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
 .hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 남는 돈) */
 .hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: 600 16px/24px var(--font-sans); color: var(--ink); }
 .hg-q__sum .hg-help { font-weight: 400; }
@@ -304,6 +305,7 @@
   .hg-q__foot, .hg-q__foot.is-backonly { position: sticky; bottom: 0; z-index: 1; display: flex; padding: var(--space-4) 0; background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); }
   .hg-q__foot::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; transform: translateX(-50%); border-top: 1px solid var(--hairline-soft); }
   .hg-q__foot :is(.hg-btn--primary, button[type="submit"].hg-btn--secondary) { flex: none; min-width: 120px; }
+  .hg-q__foot .hg-q__second { flex: none; min-width: 120px; }
   .hg-q__prev { display: inline-flex; margin-right: auto; }
   .hg-q__hint { display: inline; font: 400 13px/18px var(--font-sans); color: var(--stone); }
 }

@@ -5,6 +5,7 @@ import { P03Name } from './pages/p-03-name';
 import { P03aBirthYear } from './pages/p-03a-birth-year';
 import { P04SalaryMode } from './pages/p-04-salary-mode';
 import { P05Salary } from './pages/p-05-salary';
+import { P05bPayday } from './pages/p-05b-payday';
 import { P06Split } from './pages/p-06-split';
 import { P11Push } from './pages/p-11-push';
 
@@ -15,6 +16,7 @@ const SCREENS: Record<string, () => ReactNode> = {
   'p-03a': () => <P03aBirthYear />,
   'p-04': () => <P04SalaryMode />,
   'p-05': () => <P05Salary />,
+  'p-05b': () => <P05bPayday />,
   'p-06': () => <P06Split />,
   'p-11': () => <P11Push />,
 };

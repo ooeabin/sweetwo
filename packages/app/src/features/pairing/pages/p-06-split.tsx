@@ -1,19 +1,15 @@
 import { completeJoin } from '@sweetwo/api';
-import {
-  formatManWon,
-  jointRefill,
-  joinerSplit,
-  readWon,
-  type SplitLineDraft,
-} from '@sweetwo/core';
+import { formatManWon, readWon, type SplitLineDraft } from '@sweetwo/core';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { savingGoals, SplitEditor, toAllocGoal, toDraft } from '../../salary';
+import { SplitEditor } from '../../salary';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
+import { joinDraft } from '../join-split';
 
-// P-06 월급 분배표(18, O-50과 같은 틀). 저장 = 합류 완료 → 홈.
+// P-06 월급 분배표(18, O-50과 같은 틀). 2026-11-03부터 합류 흐름에서는 안 보임(P-05b에서 추천으로 저장 → 홈 할 일 ‘분배표 확인’).
+// 예전에 이 화면에서 멈춘 사람만 이어서 봄. 저장 = 합류 완료 → 홈.
 // 각자: 내 분배표 만들기(core joinerSplit: 고정 25%, 생활 25%, 용돈 10%, 우리 목표에 아직 안 채운 월 필요액만큼). 줄 옆 “찬우님이 매달 95만 원 넣어요”.
 // 합쳐서: 공동 분배표 다시 채우기(core jointRefill: 있던 줄은 그대로, 내 용돈 줄 + 늘어난 수입을 저금 줄 순서대로). 바뀐 줄은 “95만 원 → 250만 원”.
 //   대기 뒤 이어서면 시작한 사람이 이미 두 사람 합으로 만든 분배표를 확인만. 그 사이 분배표가 바뀌었으면 알리고 다시 계산.
@@ -31,40 +27,14 @@ export function P06Split() {
   const partnerIncome = d.partner?.monthly_income ?? 0;
   const won = (v: number) => readWon(v);
 
-  let base: SplitLineDraft[];
-  let before = new Map<string, number>();
-  let others: Record<string, number> = {};
-  const jointSplit = d.splits.find((x) => x.owner_user_id === null);
-  if (joint) {
-    const current = jointSplit ? toDraft(jointSplit.split_line) : [];
-    before = new Map(
-      current.filter((l) => l.kind === 'saving').map((l) => [l.goalId ?? '', l.amount]),
-    );
-    base = d.resumed
-      ? current
-      : jointRefill({
-          lines: current,
-          income: myIncome,
-          userId: me.id,
-          goals: d.goals.map(toAllocGoal),
-        });
-  } else {
-    const theirs = d.splits.find((x) => x.owner_user_id === d.partner?.id);
-    others = Object.fromEntries(
-      (theirs?.split_line ?? [])
-        .filter((l) => l.kind === 'saving' && l.goal_id)
-        .map((l) => [l.goal_id ?? '', l.amount]),
-    );
-    base = joinerSplit({
-      income: myIncome,
-      userId: me.id,
-      // 우리 목표만(시작한 사람의 내 목표는 줄이 없음)
-      goals: savingGoals(d.goals, me.id)
-        .filter((g) => g.owner_user_id === null)
-        .map(toAllocGoal),
-      others,
-    });
-  }
+  const x = joinDraft(d);
+  if (!x) return null;
+  const base = x.lines;
+  const before = new Map(
+    x.current.filter((l) => l.kind === 'saving').map((l) => [l.goalId ?? '', l.amount]),
+  );
+  const others = x.others;
+  const jointSplit = d.splits.find((sp) => sp.owner_user_id === null);
   const lines = draft ?? base;
   const noteOf = (l: SplitLineDraft) => {
     if (l.kind !== 'saving' || !l.goalId) return undefined;
