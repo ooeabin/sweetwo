@@ -43,7 +43,6 @@ export function SplitEditor({
   extra,
   locked,
   steps,
-  chapter,
   noteOf,
   incomeSub,
   onIncome,
@@ -72,8 +71,6 @@ export function SplitEditor({
   locked?: (l: SplitLineDraft) => boolean;
   /** 칸 막대(합류 P-06 5칸 등) */
   steps?: { total: number; now: number; fill?: number };
-  /** 온보딩·합류처럼 얇은 막대(ChapterBar)를 쓸 때 */
-  chapter?: ChapterProgress;
   /** 줄 오른쪽 회색 글(있으면 기본 보조 글 대신, 합류 P-06 “찬우님이 매달 95만 원 넣어요”, “95만 원 → 250만 원”) */
   noteOf?: (l: SplitLineDraft) => string | undefined;
   /** 수입 줄 아래 회색 글(합쳐서 “찬우 350만 원, 예빈 270만 원”) */
@@ -128,8 +125,6 @@ export function SplitEditor({
       <QuestionLayout
         chapter={progress}
         steps={steps}
-        chapter={chapter}
-        chapter={chapter}
         title={head}
         onBack={close}
         primary={{ label: copy.next, disabled: !valid }}
@@ -207,7 +202,6 @@ export function SplitEditor({
     <QuestionLayout
       chapter={progress}
       steps={steps}
-      chapter={chapter}
       title={title}
       help={help}
       onBack={onBack}

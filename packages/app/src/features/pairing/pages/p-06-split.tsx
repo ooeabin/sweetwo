@@ -119,7 +119,7 @@ export function P06Split() {
       help={joint && !d.resumed ? copy.splitJointHelp(me.nickname ?? '') : copy.splitHelp}
       primaryLabel={copy.splitDone}
       saving={busy}
-      chapter={s.chapter}
+      progress={s.chapter}
       onBack={s.onBack}
       noteOf={noteOf}
       onSave={() => void save()}

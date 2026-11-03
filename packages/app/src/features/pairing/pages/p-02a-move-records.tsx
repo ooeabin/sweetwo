@@ -119,7 +119,10 @@ export function P02aMoveRecords({
             value={vis[open] ?? 'sum'}
             onChange={(v) => setVis({ ...vis, [open]: v })}
             onPick={() => setOpen(null)}
-            options={(['all', 'sum'] as Vis[]).map((v) => ({ value: v, label: copy.moveVis[v] }))}
+            options={(['all', 'sum'] as Vis[]).map((v) => ({
+              value: v,
+              label: copy.moveVis[v] ?? v,
+            }))}
           />
         </BottomSheet>
       )}
