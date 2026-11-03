@@ -64,8 +64,18 @@ export function FilterChips({
   );
 }
 
-// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 보기 전환 “목록” / “달력”
-export function CalendarFrame({ view, children }: { view: CalView; children: ReactNode }) {
+// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 한 줄(2026-11-03): 왼쪽 보기 필터 칩, 오른쪽 “목록” / “달력”
+export function CalendarFrame({
+  view,
+  filter,
+  onFilter,
+  children,
+}: {
+  view: CalView;
+  filter: CalFilter;
+  onFilter: (f: CalFilter) => void;
+  children: ReactNode;
+}) {
   const nav = useNavigate();
   write(VIEW_KEY, view);
   return (
@@ -87,17 +97,20 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
         ),
       }}
       columns={[
-        <div key="c" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-          <Tabs<CalView>
-            variant="seg"
-            label={copy.viewsLabel}
-            value={view}
-            onChange={(v) => nav(v === 'month' ? '/calendar/month' : '/calendar/list')}
-            items={[
-              { value: 'list', label: copy.views.list },
-              { value: 'month', label: copy.views.month },
-            ]}
-          />
+        <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+          <div className="hg-cal__top">
+            <FilterChips value={filter} onChange={onFilter} />
+            <Tabs<CalView>
+              variant="seg"
+              label={copy.viewsLabel}
+              value={view}
+              onChange={(v) => nav(v === 'month' ? '/calendar/month' : '/calendar/list')}
+              items={[
+                { value: 'list', label: copy.views.list },
+                { value: 'month', label: copy.views.month },
+              ]}
+            />
+          </div>
           {children}
         </div>,
       ]}

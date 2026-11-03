@@ -13,6 +13,12 @@ export const copy = {
   emptyAdd: '챙길 날 추가',
   noMoneyThisMonth: '이번 달은 돈 일정이 없어요', // [확인 필요]
   none60: '60일 안에는 챙길 날이 없어요',
+  // 2026-11-03 Y-01 한 목록 [확인 필요]
+  noMoney60: '60일 안에는 돈 일정이 없어요',
+  upcomingList: '다가오는 일정',
+  recordCount: (n: number) => `기록할 날이 ${n}개 있어요`,
+  recordWhich: (name: string, date: string, more: number) =>
+    more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
   money: {
     payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
     review: '월급 확인', // [확인 필요]
@@ -38,6 +44,12 @@ export const copy = {
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
   agendaEmpty: '이 날짜엔 없어요',
+  // 2026-11-03 주 단위로 접기 [확인 필요]
+  unfold: '펼치기',
+  fold: '접기',
+  weekEmpty: '이번 주는 일정이 없어요',
+  prevWeek: '이전 주',
+  nextWeek: '다음 주',
   listMoney: '돈 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 

@@ -457,6 +457,22 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-mark--together { background: var(--chart-together); }
 .hg-mark--goal { background: var(--chart-goal); }
 .hg-cal__agenda { display: flex; flex-direction: column; border-top: 1px solid var(--hairline-soft); padding-top: var(--space-3); }
+/* 2026-11-03 Y-01·Y-04 한 줄(필터 칩 + 목록/달력), 접기, 목록 D-day, 기록할 날 띠 */
+.hg-cal__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
+.hg-cal__top .hg-cal__filter { flex-wrap: nowrap; }
+.hg-cal__fold { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1); align-self: center; min-height: 32px; margin: 0; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 600 14px/20px var(--font-sans); cursor: pointer; }
+.hg-cal__fold:hover { background: var(--surface-alt); }
+.hg-cal__fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-cal__lead { display: inline-grid; place-items: center; width: 16px; }
+.hg-cal__lead .hg-cal__mark { width: 4px; height: 20px; border-radius: var(--radius-full); }
+.hg-cal__dday { font: 600 14px/20px var(--font-sans); color: var(--slate); }
+.hg-cal__dday.is-near { color: var(--ink); }
+.hg-recband { display: flex; align-items: center; gap: var(--space-3); width: 100%; margin: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-xl); background: var(--surface-alt); color: var(--ink); text-align: left; cursor: pointer; }
+.hg-recband:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-recband__icon { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface); }
+.hg-recband__text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.hg-recband__text b { font: 600 16px/24px var(--font-sans); }
+.hg-recband__text span { font: 400 14px/20px var(--font-sans); color: var(--slate); }
 .hg-cal__date { font: 600 14px/20px var(--font-sans); color: var(--slate); padding-bottom: var(--space-1); }
 .hg-cal__event { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: var(--space-3); min-height: 44px; }
 .hg-cal__event i { width: 8px; height: 8px; border-radius: var(--radius-full); }
