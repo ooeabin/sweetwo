@@ -144,6 +144,8 @@ export function GoalsCard({
   );
 }
 
+const SHOW = 3;
+
 /**
  * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 했어요” + 줄 목록(저금 먼저) + ‘분배표 고치기’.
  * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 접힘(펼치기 가능). 월급이 없으면 ‘월급 알려 주기’.
@@ -172,6 +174,7 @@ export function SalaryCard({
 }) {
   const { masked } = useMask();
   const [open, setOpen] = useState(false);
+  const [more, setMore] = useState(false);
   if (!list) {
     return (
       <section className="hg-card hg-card--fill hg-stack">
@@ -208,7 +211,8 @@ export function SalaryCard({
         )}
         {(!finished || open) && (
           <div className="hg-checklist__list">
-            {lines.map((l) => (
+            {/* 홈 맨 위(2026-11-03): 처음엔 3줄만(저금 먼저), 아래 꽉 찬 회색 ‘N개 더 보기’ */}
+            {(more || finished ? lines : lines.slice(0, SHOW)).map((l) => (
               <CheckLine
                 key={l.id}
                 line={l}
@@ -218,6 +222,12 @@ export function SalaryCard({
               />
             ))}
           </div>
+        )}
+        {!finished && !more && lines.length > SHOW && (
+          <button type="button" className="hg-more" aria-expanded={false} onClick={() => setMore(true)}>
+            {copy.moreLines(lines.length - SHOW)}
+            <Icon name="chevron-down" size={16} />
+          </button>
         )}
         {finished && !open && (
           <button type="button" className="hg-btn hg-btn--link" onClick={() => setOpen(true)}>

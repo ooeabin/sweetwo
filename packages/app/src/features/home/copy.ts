@@ -27,6 +27,7 @@ export const copy = {
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
   allDone: (label: string) => `${label} 체크를 다 했어요`,
+  moreLines: (n: number) => `${n}개 더 보기`, // [확인 필요] 2026-11-03
   savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
   showLines: '줄 펼치기', // [확인 필요]
   editSplit: '분배표 고치기',
