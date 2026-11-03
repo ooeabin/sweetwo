@@ -10,7 +10,19 @@ import {
   type Goal,
 } from '@sweetwo/api';
 import { formatDateFull, formatYm, goalBars, goalProgress, todayKst } from '@sweetwo/core';
-import { Badge, BarChart, Button, Icon, IconButton, LineChart, ListRow, Menu, PageHeader, SectionHeader, type MenuAction } from '@sweetwo/ui';
+import {
+  Badge,
+  BarChart,
+  Button,
+  Icon,
+  IconButton,
+  LineChart,
+  ListRow,
+  Menu,
+  PageHeader,
+  SectionHeader,
+  type MenuAction,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -128,7 +140,8 @@ export function G02GoalDetail() {
             },
           ];
   const actions: MenuAction[] = [
-    { label: copy.rename, icon: 'pencil', onSelect: () => nav(`/goals/${id}/edit/name`) },
+    // 2026-11-04 메뉴는 글자만(이름 변경에만 아이콘이 있던 것을 맞춤), 삭제는 빨간 글자
+    { label: copy.rename, onSelect: () => nav(`/goals/${id}/edit/name`) },
     ...(emergency
       ? []
       : [
@@ -147,7 +160,6 @@ export function G02GoalDetail() {
       : [
           {
             label: copy.remove,
-            icon: 'trash-2' as const,
             danger: true,
             onSelect: () =>
               void trashGoals([g.id])
@@ -264,20 +276,6 @@ export function G02GoalDetail() {
         onBack={back}
         action={i.canEdit ? <Menu label={copy.menu} actions={actions} /> : undefined}
       />
-      {paused && (
-        <div className="hg-banner hg-banner--info">
-          <span>{copy.pausedNote}</span>
-          {i.canEdit && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => void change({ status: 'active' }, copy.resumed)}
-            >
-              {copy.resume}
-            </Button>
-          )}
-        </div>
-      )}
       {/* 2026-11-03 시안 B3(사진 히어로 + 묶음 카드, ANZ·Monzo처럼): 위 사진 꽉 차게 → 둥근 판 위 배지, 이름, 모은 돈,
           버튼 2개 → 목표 카드(목표 금액의 %, 막대, 기한·예상) → 매달 카드(사람별). 숫자 칸(hg-stats)은 이 카드들로 바꿈 */}
       <section className="hg-goalhero" aria-label={g.name}>
@@ -293,9 +291,10 @@ export function G02GoalDetail() {
           </button>
         )}
         <div className="hg-goalhero__sheet">
-          {(kindLabel || late) && (
+          {(kindLabel || late || paused) && (
             <span className="hg-row" style={{ gap: 'var(--space-1)' }}>
               {kindLabel && <Badge kind="temp">{kindLabel}</Badge>}
+              {paused && <Badge kind="temp">{copy.status.paused}</Badge>}
               {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
             </span>
           )}
@@ -338,6 +337,23 @@ export function G02GoalDetail() {
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
         </div>
       </section>
+      {/* 보류(2026-11-04): 사진 위 띠 대신 다른 묶음 카드와 같은 모양으로 판 아래에. “지금은 모으지 않고 있어요” + ‘다시 모으기’ */}
+      {paused && (
+        <section className="hg-goalbox" aria-label={copy.status.paused}>
+          <div className="hg-goalbox__head">
+            <b>{copy.pausedNote}</b>
+          </div>
+          {i.canEdit && (
+            <Button
+              variant="secondary"
+              block
+              onClick={() => void change({ status: 'active' }, copy.resumed)}
+            >
+              {copy.resume}
+            </Button>
+          )}
+        </section>
+      )}
       {g.kind !== 'monthly' && (
         <section className="hg-goalbox" aria-label={copy.numTarget}>
           <div className="hg-goalbox__head">
@@ -400,7 +416,8 @@ export function G02GoalDetail() {
                 ) : (
                   <span>{g.deadline ? copy.boxUntil(formatYm(g.deadline)) : copy.noDeadline}</span>
                 )}
-                {g.target_amount !== null && (
+                {/* 보류는 모으지 않아 예상 달 없음(2026-11-04) */}
+                {g.target_amount !== null && !paused && (
                   <span>
                     {i.expected ? copy.boxExpected(formatYm(i.expected)) : copy.expectUnknown}
                   </span>
@@ -410,58 +427,61 @@ export function G02GoalDetail() {
           </div>
         </section>
       )}
-      <section className="hg-goalbox" aria-label={copy.numMonthly}>
-        <div className="hg-goalbox__head">
-          <b>{copy.boxMonthly(m(i.monthly))}</b>
-          {i.canEdit && !pending && (
-            <button type="button" className="hg-btn hg-btn--link" onClick={() => nav(splitTo)}>
-              {copy.boxChange}
-            </button>
-          )}
-        </div>
-        {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 보기만).
+      {/* 달성·보류는 저금 줄이 빠져 매달 카드 없음(2026-11-04) */}
+      {!paused && g.status !== 'achieved' && g.status !== 'used' && (
+        <section className="hg-goalbox" aria-label={copy.numMonthly}>
+          <div className="hg-goalbox__head">
+            <b>{copy.boxMonthly(m(i.monthly))}</b>
+            {i.canEdit && !pending && (
+              <button type="button" className="hg-btn hg-btn--link" onClick={() => nav(splitTo)}>
+                {copy.boxChange}
+              </button>
+            )}
+          </div>
+          {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 보기만).
             이번 달 줄이 없는 사람은 금액만 */}
-        {i.thisMonth.length > 0 && <span className="hg-goalbox__sub">{copy.boxThisMonth}</span>}
-        <div className="hg-checklist__list">
-          {(i.perPerson.length
-            ? i.perPerson
-            : i.thisMonth.map((l) => {
-                const who = l.user_id ?? d.lineOwner[l.id] ?? d.meId;
-                return { userId: who, name: d.nameOf(who) ?? '', amount: l.planned };
-              })
-          ).map((p) => {
-            const line = i.thisMonth.find(
-              (l) => (l.user_id ?? d.lineOwner[l.id] ?? d.meId) === p.userId,
-            );
-            const dot = (
-              <PersonDot
-                name={p.name}
-                starter={p.userId === d.space.created_by}
-                userId={p.userId}
-              />
-            );
-            return line ? (
-              <CheckLine
-                key={p.userId}
-                line={line}
-                goalName={g.name}
-                name={p.name}
-                lead={dot}
-                personName={(x) => d.nameOf(x)}
-                meId={d.meId}
-                // 각자 모드에서 배우자 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
-                viewOnly={!d.joint && p.userId !== d.meId}
-              />
-            ) : (
-              <div key={p.userId} className="hg-goalbox__person">
-                {dot}
-                <span>{p.name}</span>
-                <b>{m(p.amount)}</b>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+          {i.thisMonth.length > 0 && <span className="hg-goalbox__sub">{copy.boxThisMonth}</span>}
+          <div className="hg-checklist__list">
+            {(i.perPerson.length
+              ? i.perPerson
+              : i.thisMonth.map((l) => {
+                  const who = l.user_id ?? d.lineOwner[l.id] ?? d.meId;
+                  return { userId: who, name: d.nameOf(who) ?? '', amount: l.planned };
+                })
+            ).map((p) => {
+              const line = i.thisMonth.find(
+                (l) => (l.user_id ?? d.lineOwner[l.id] ?? d.meId) === p.userId,
+              );
+              const dot = (
+                <PersonDot
+                  name={p.name}
+                  starter={p.userId === d.space.created_by}
+                  userId={p.userId}
+                />
+              );
+              return line ? (
+                <CheckLine
+                  key={p.userId}
+                  line={line}
+                  goalName={g.name}
+                  name={p.name}
+                  lead={dot}
+                  personName={(x) => d.nameOf(x)}
+                  meId={d.meId}
+                  // 각자 모드에서 배우자 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
+                  viewOnly={!d.joint && p.userId !== d.meId}
+                />
+              ) : (
+                <div key={p.userId} className="hg-goalbox__person">
+                  {dot}
+                  <span>{p.name}</span>
+                  <b>{m(p.amount)}</b>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
       {/* 달성(2026-11-04): “400만 원 모았어요” + 달성 배지만. 쓴 돈 기록·사용 완료는 없앰(쓴 돈은 금액 옆 − 로) */}
       {(g.status === 'achieved' || g.status === 'used') && (
         <section className="hg-goalbox" aria-label={copy.status.achieved}>

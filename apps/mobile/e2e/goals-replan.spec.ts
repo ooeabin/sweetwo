@@ -161,12 +161,12 @@ test('G-02 수정은 바로 저장: 기한, 이름, 보류·삭제는 되돌리�
 
   await page.getByRole('button', { name: '목표 메뉴' }).click();
   await page.getByRole('menuitem', { name: '보류' }).click();
-  await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toBeVisible();
+  await expect(page.getByText('지금은 모으지 않고 있어요')).toBeVisible();
   expect(db.goals.find((g) => g.id === 'goal-h')?.status).toBe('paused');
   // 보류하면 월급 계획 저금 줄이 빠짐
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(page.getByText('월 0원으로 배분에서 빠져 있어요')).toHaveCount(0);
+  await expect(page.getByText('지금은 모으지 않고 있어요')).toHaveCount(0);
 
   await page.getByRole('button', { name: '목표 메뉴' }).click();
   await page.getByRole('menuitem', { name: '삭제' }).click();
