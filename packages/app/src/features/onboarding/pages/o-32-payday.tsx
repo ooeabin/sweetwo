@@ -16,7 +16,7 @@ export function O32Payday() {
   if (!s.ready) return null;
   const saved: Day | null = me?.payday_last ? 'last' : (me?.payday ?? null);
   const payday = day === undefined ? saved : day;
-  // 저장 → 추천 분배표, 비상금 금액, 첫 체크리스트 → O-60 준비 끝
+  // 저장 → 추천 월급 계획, 비상금 금액, 첫 체크리스트 → O-60 준비 끝
   const save = (d: Day) =>
     s.done(async () => {
       await saveMe({ payday: typeof d === 'number' ? d : null, payday_last: d === 'last' });

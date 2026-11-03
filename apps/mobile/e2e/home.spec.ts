@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// 이미 쓰던 사람: 온보딩 뒤 ‘분배표 확인’(ADR 0005)은 끝낸 상태로
+// 이미 쓰던 사람: 온보딩 뒤 ‘월급 계획 확인’(ADR 0005)은 끝낸 상태로
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     try {
@@ -75,7 +75,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
 });
 
-test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 금액)', async ({ page }) => {
+test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 새 금액)', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -98,8 +98,8 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   });
 
   // W-01: 고정지출 88만 → 90만, 저장 → Toast, 체크 안 한 고정지출 줄만 새 금액
-  await page.getByRole('button', { name: '분배표 고치기' }).click();
-  await expect(page.getByRole('heading', { name: '월급 분배표' })).toBeVisible();
+  await page.getByRole('button', { name: '월급 계획 고치기' }).click();
+  await expect(page.getByRole('heading', { name: '월급 계획' })).toBeVisible();
   await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
   await axe(page);
   await page.getByRole('button', { name: /^고정지출/ }).click();
@@ -107,7 +107,7 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('2만 원이 모자라요')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('분배표를 바꿨어요')).toBeVisible();
+  await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   expect(lines.find((l) => l.kind === 'fixed')).toMatchObject({ planned: 900_000, state: 'wait' });
   expect(lines.find((l) => l.kind === 'living')).toMatchObject({

@@ -62,7 +62,7 @@ update public.goal set target_amount = 200000000 where template = 'home';
 update public.goal set target_amount = 150000000 where template = 'home';
 select is(public.flush_partner_changes(now() + interval '11 minutes'), 0, '되돌린 변경은 안 알림');
 
--- 분배표 금액 + 월급 금액 → 묶어서 하나, 자산 금액은 활동 기록(인앱만)
+-- 월급 계획 금액 + 월급 금액 → 묶어서 하나, 자산 금액은 활동 기록(인앱만)
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 1070000),
   jsonb_build_object('kind', 'living', 'amount', 700000)

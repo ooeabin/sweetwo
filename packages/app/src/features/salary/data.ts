@@ -16,7 +16,7 @@ import {
 import { todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-// 월급 분배표·체크리스트 데이터(docs/spec/20-salary-plan.md). 키는 qk라 온보딩·홈과 캐시를 같이 쓴다.
+// 월급 계획·체크리스트 데이터(docs/spec/20-salary-plan.md). 키는 qk라 온보딩·홈과 캐시를 같이 쓴다.
 export const useMe = () => useQuery({ queryKey: qk.me, queryFn: fetchMe });
 export const useSpace = () => useQuery({ queryKey: qk.space, queryFn: fetchSpace });
 export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
@@ -29,7 +29,7 @@ export const useGoalSaved = () => useQuery({ queryKey: qk.goalSaved, queryFn: fe
 
 /**
  * 지금 사이클 체크리스트들(각자 = 사람마다, 합쳐서 = 하나). 기준일이 지나 처음 열면
- * 분배표마다 이번 사이클 체크리스트를 만들고(서버가 같은 사이클이면 그대로) 읽는다(07 3장).
+ * 월급 계획마다 이번 사이클 체크리스트를 만들고(서버가 같은 사이클이면 그대로) 읽는다(07 3장).
  */
 export function useChecklists() {
   const today = todayKst();

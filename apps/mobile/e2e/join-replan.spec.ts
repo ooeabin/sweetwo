@@ -5,8 +5,8 @@ import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 import { setWheel } from './wheel';
 
-// 배우자 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 분배표.
-// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(분배표 비상금 44만, 내 집 마련 95만).
+// 배우자 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
+// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 비상금 44만, 내 집 마련 95만).
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(
@@ -77,7 +77,7 @@ async function salary(page: Page) {
   await page.getByRole('button', { name: '다음' }).click();
 }
 
-test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 분배표(아직 안 채운 월 필요액)로 합류 완료 → 홈 할 일', async ({
+test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급 계획(아직 안 채운 월 필요액)로 합류 완료 → 홈 할 일', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -92,9 +92,9 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 분배
   await page.getByRole('button', { name: '다음' }).click();
   await salary(page);
 
-  // 분배표 화면 없이 홈(온보딩 ADR 0005처럼). 홈 할 일 ‘분배표 확인’은 없앰(2026-11-03)
+  // 월급 계획 화면 없이 홈(온보딩 ADR 0005처럼). 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
+  await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
   expect(
@@ -110,7 +110,7 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 분배
   expect(db.space?.couple_state).toBe('connected');
 });
 
-test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
+test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -133,7 +133,7 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기
   expect(db.splits.find((x) => x.owner_user_id === null)?.split_line).toHaveLength(6);
 });
 
-test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 → 월급날 저장 = 합류, 홈 대기, 분배표가 생기면 P-04부터', async ({
+test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 → 월급날 저장 = 합류, 홈 대기, 월급 계획이 생기면 P-04부터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -147,7 +147,7 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월�
   expect(db.me.onboarding_step).toBe('P-WAIT');
   await axe(page);
 
-  // 찬우가 분배표를 만들면 다음에 열 때 P-04 → 홈(분배표는 자동)
+  // 찬우가 월급 계획을 만들면 다음에 열 때 P-04 → 홈(월급 계획은 자동)
   seed(db);
   Object.assign(db.me, { nickname: '예빈', onboarding_step: 'P-WAIT' });
   db.partner = {

@@ -171,7 +171,7 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
     )
     .toBe(true);
   await expect(page.getByRole('region', { name: '예빈님이 바꾼 값' })).toContainText(
-    '분배표·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요',
+    '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요',
   );
   await expect(page.getByRole('region', { name: '월급 체크리스트' })).toBeVisible();
   await expect(page.getByRole('region', { name: '제안' })).toHaveCount(0);
@@ -232,7 +232,7 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
   expect(db.me.monthly_income).toBe(3_800_000);
 
-  // 관리 방식: 합쳐서로 → 서버가 분배표를 합치고 W-01로
+  // 관리 방식: 합쳐서로 → 서버가 월급 계획을 합치고 W-01로
   await page.getByRole('button', { name: /월급 관리 방식/ }).click();
   await expect(page.getByRole('heading', { name: '월급을 어떻게 관리해요?' })).toBeVisible();
   await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
@@ -331,7 +331,7 @@ test('부부 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기,
   await axe(page);
 });
 
-test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입력, 대기(분배표 멈춤), 요청 취소', async ({
+test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입력, 대기(월급 계획 멈춤), 요청 취소', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -344,7 +344,7 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   // S-12a 안내: 나누지 않고 모두 지움
   await expect(page.getByRole('heading', { name: '연결을 해제할까요?' })).toBeVisible();
   await expect(page.getByText('해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요')).toBeVisible();
-  await expect(page.getByText('월급 분배표와 체크리스트')).toBeVisible();
+  await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 14일이 지나면 해제돼요')).toBeVisible();
   await expect(page.getByRole('button', { name: '먼저 내보내기' })).toBeVisible();
   await axe(page);
@@ -365,7 +365,7 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   await expect(page).toHaveURL(/\/settings\/couple$/);
   await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 10월 21일이 되면 해제돼요')).toBeVisible();
-  await expect(page.getByText('해제 전까지 분배표를 고칠 수 없어요')).toBeVisible();
+  await expect(page.getByText('해제 전까지 월급 계획을 고칠 수 없어요')).toBeVisible();
   await axe(page);
 
   // 요청 취소 → 연결
@@ -480,7 +480,7 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
     page.getByText(
-      '연결을 끊기 전 같이 쓰던 목표와 분배표가 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
+      '연결을 끊기 전 같이 쓰던 목표와 월급 계획이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
     ),
   ).toBeVisible();
   await axe(page);
@@ -520,7 +520,7 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   await expect(row).toContainText('내 자산 금액만 보여 주기');
   await row.click();
   await expect(page).toHaveURL(/\/settings\/visibility$/);
-  await expect(page.getByText('월급과 분배표는 늘 같이 봐요')).toBeVisible();
+  await expect(page.getByText('월급과 월급 계획은 늘 같이 봐요')).toBeVisible();
   await axe(page);
 
   // 줄 + 시트(2026-11-03 기본 드롭다운 대신)

@@ -109,7 +109,7 @@ export const routes: RouteObject[] = [
       }, // 홈 H-01~06
       ...(
         [
-          ['/salary/split', <W01Split key="w01" />], // W-01 월급 분배표
+          ['/salary/split', <W01Split key="w01" />], // W-01 월급 계획
           ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
           ['/salary/done', <W02Done key="w02e" />], // W-02 끝
           ['/salary/review', <W05Review key="w05" />], // W-05 월말 확인

@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 분배표를 바꾼 안내, 배우자 탭(분배표 고치기, 내 목표 줄 잠금),
+// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 월급 계획을 바꾼 안내, 배우자 탭(월급 계획 고치기, 내 목표 줄 잠금),
 // 수입 줄 → 설정 내 월급, 직접 추가 줄 이름 바꾸기, 연결 해제 대기면 보기만. 찬우(시작), 예빈(합류), 각자.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -13,7 +13,7 @@ const axe = async (page: Page) => {
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-/** 예빈 합류: 예빈 분배표(내 집 마련 + 예빈 카메라(내 목표) + 생활비) */
+/** 예빈 합류: 예빈 월급 계획(내 집 마련 + 예빈 카메라(내 목표) + 생활비) */
 function joinYebin(db: MemDb) {
   Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
   db.partner = {
@@ -75,7 +75,7 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('W-02 지난 달 보기(‹ ›)와 상대가 분배표를 바꾼 안내', async ({ page }) => {
+test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안내', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -100,11 +100,11 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 분배표를 바꾼 안내', 
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
   await expect(
-    page.getByText('예빈님이 분배표를 바꿔서 체크 안 한 줄을 다시 계산했어요'),
+    page.getByText('예빈님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요'),
   ).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '닫기' }).click();
-  await expect(page.getByText('예빈님이 분배표를 바꿔서')).toHaveCount(0);
+  await expect(page.getByText('예빈님이 월급 계획을 바꿔서')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
@@ -123,8 +123,8 @@ test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 
   seed(db);
   joinYebin(db);
   await page.goto('/salary');
-  await page.getByRole('button', { name: '분배표 고치기' }).click();
-  await expect(page.getByRole('heading', { name: '월급 분배표' })).toBeVisible();
+  await page.getByRole('button', { name: '월급 계획 고치기' }).click();
+  await expect(page.getByRole('heading', { name: '월급 계획' })).toBeVisible();
   await page.getByRole('tab', { name: '예빈' }).click();
   await expect(page.getByText('월급 270만 원')).toBeVisible();
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
@@ -133,7 +133,7 @@ test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 
   await page.getByLabel('생활비 금액').fill('700000');
   await page.getByRole('button', { name: '확인' }).click();
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('분배표를 바꿨어요')).toBeVisible();
+  await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
     (y?.split_line as Record<string, unknown>[]).find((l) => l.kind === 'living')?.amount,
@@ -159,7 +159,7 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
   joinYebin(db);
   Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
   await page.goto('/salary/split');
-  await expect(page.getByText('연결 해제 대기 중에는 분배표를 고칠 수 없어요')).toBeVisible();
+  await expect(page.getByText('연결 해제 대기 중에는 월급 계획을 고칠 수 없어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /^고정지출/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '추천값으로 다시 채우기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();

@@ -74,7 +74,7 @@ export interface MemDb {
   notices: Record<string, unknown>[];
   /** 꼼꼼 모드 통장 잔액(W-04b) */
   balances: Record<string, unknown>[];
-  /** 월급 분배표(save_split)와 이번 달 월급 체크리스트(start_checklist) */
+  /** 월급 계획(save_split)와 이번 달 월급 체크리스트(start_checklist) */
   splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
   checklists: Record<string, unknown>[];
   /** 목표 넣기·빼기·꺼내 쓰기(goal_move) */
@@ -203,7 +203,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         v += mv.kind === 'in' ? Number(mv.amount) : -Number(mv.amount);
     return Math.max(v, 0);
   };
-  // 서버 goal_lines_sync 흉내: 모으는 목표만 분배표 저금 줄(각자: 우리 목표는 모든 분배표, 내 목표는 주인 것)
+  // 서버 goal_lines_sync 흉내: 모으는 목표만 월급 계획 저금 줄(각자: 우리 목표는 모든 월급 계획, 내 목표는 주인 것)
   const goalLinesSync = (g: Record<string, unknown>) => {
     const want = (sp: (typeof db.splits)[number]) =>
       !g.deleted_at &&
@@ -393,7 +393,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'space-1');
       }
       if (fn === 'save_split') {
-        // 서버 흉내: 주인의 분배표 줄을 통째로 교체
+        // 서버 흉내: 주인의 월급 계획 줄을 통째로 교체
         const b = body() as unknown as { p_lines: Record<string, unknown>[]; p_owner?: string };
         const owner = b.p_owner ?? null;
         let sp = db.splits.find((x) => x.owner_user_id === owner);
@@ -589,8 +589,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'joined');
       }
       if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
-      // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 분배표 또는 대기), 사전 입력 지우기
-      // 설정 S-11f·S-11d(서버가 분배표를 합치거나 나눔: 여기서는 방식만)
+      // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 월급 계획 또는 대기), 사전 입력 지우기
+      // 설정 S-11f·S-11d(서버가 월급 계획을 합치거나 나눔: 여기서는 방식만)
       if (fn === 'set_salary_mode') {
         if (db.space) db.space.salary_mode = body().p_mode;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });

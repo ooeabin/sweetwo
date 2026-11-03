@@ -2,7 +2,7 @@ import type { Json, SplitLineDraft, Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// 월급 분배표(W-01, O-50)와 이번 달 월급 체크리스트(W-02). 쓰기는 RPC로만(docs/spec/20-salary-plan.md).
+// 월급 계획(W-01, O-50)와 이번 달 월급 체크리스트(W-02). 쓰기는 RPC로만(docs/spec/20-salary-plan.md).
 export type SplitLine = Tables<'split_line'>;
 export type SalarySplit = Tables<'salary_split'> & { split_line: SplitLine[] };
 export type PayCheckLine = Tables<'pay_check_line'>;
@@ -12,7 +12,7 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-/** 부부 공간의 분배표 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
+/** 부부 공간의 월급 계획 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
 export async function fetchSplits(): Promise<SalarySplit[]> {
   const { data, error } = await supabase()
     .from('salary_split')
@@ -22,7 +22,7 @@ export async function fetchSplits(): Promise<SalarySplit[]> {
   return (data ?? []) as SalarySplit[];
 }
 
-/** 이번 사이클 체크리스트(분배표마다 서버가 없으면 만듦, 예약 작업 전에 앱을 열어도 같게) */
+/** 이번 사이클 체크리스트(월급 계획마다 서버가 없으면 만듦, 예약 작업 전에 앱을 열어도 같게) */
 export async function fetchChecklistsEnsured(today: string): Promise<PayChecklist[]> {
   const splits = await fetchSplits();
   await Promise.all(
@@ -31,7 +31,7 @@ export async function fetchChecklistsEnsured(today: string): Promise<PayChecklis
   return fetchCurrentChecklists(today);
 }
 
-/** 분배표 저장(줄 통째로 교체). owner: 각자면 사람 id, 합쳐서면 생략 */
+/** 월급 계획 저장(줄 통째로 교체). owner: 각자면 사람 id, 합쳐서면 생략 */
 export async function saveSplit(lines: SplitLineDraft[], owner?: string): Promise<string> {
   const p_lines = lines.map((l) => ({
     kind: l.kind,
@@ -173,7 +173,7 @@ export async function fetchGoalLines(
   return (data ?? []) as never;
 }
 
-/** S-11f 월급 관리 방식 바꾸기(분배표 합치기·나누기는 서버, 체크리스트는 다음 월급날부터). 해제 대기 중이면 'unlink_pending' */
+/** S-11f 월급 관리 방식 바꾸기(월급 계획 합치기·나누기는 서버, 체크리스트는 다음 월급날부터). 해제 대기 중이면 'unlink_pending' */
 export async function setSalaryMode(mode: 'separate' | 'joint'): Promise<'ok' | 'unlink_pending'> {
   const { error } = await supabase().rpc('set_salary_mode', { p_mode: mode });
   if (error?.message?.includes('unlink_pending')) return 'unlink_pending';

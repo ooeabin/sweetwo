@@ -2,7 +2,7 @@ import { type Won } from '../money';
 import { expectedMonth, goalNeed, type AllocGoal } from '../onboarding/allocation';
 import { monthsBetween, type YearMonth } from '../onboarding/month';
 
-// 월급 분배표 추천값과 예상 달성일(docs/spec/17-onboarding-2.md O-50·O-60, 06-calc-allocation.md 3장·5장).
+// 월급 계획 추천값과 예상 달성일(docs/spec/17-onboarding-2.md O-50·O-60, 06-calc-allocation.md 3장·5장).
 
 export type SplitKind = 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
 
@@ -33,13 +33,13 @@ export const emergencyMonthly = (fixed: Won, living: Won): Won =>
   round10k(emergencyTarget(fixed, living) / 12);
 
 export interface RecommendInput {
-  /** 분배표 수입(합쳐서면 두 사람 합) */
+  /** 월급 계획 수입(합쳐서면 두 사람 합) */
   income: Won;
   /** 용돈 줄을 받을 사람과 그 사람 실수령 */
   people: { userId: string; income: Won }[];
   /** 저금 줄 순서대로(비상금 → 우리 목표 → 내 목표, 묶음 안은 우선순위). 비상금은 template 'emergency' */
   goals: AllocGoal[];
-  /** 각자 모드 우리 목표: 상대 분배표의 같은 목표 줄 금액. 월 필요액에서 빼고 채움(0원 아래로 안 감, 20 W-01 6번) */
+  /** 각자 모드 우리 목표: 상대 월급 계획의 같은 목표 줄 금액. 월 필요액에서 빼고 채움(0원 아래로 안 감, 20 W-01 6번) */
   others?: Record<string, Won>;
   /** 금액을 그대로 두는 저금 줄(배우자 탭의 배우자 내 목표 줄, 20 W-01 6번) */
   keep?: Record<string, Won>;
@@ -104,13 +104,13 @@ export interface JoinerSplitInput {
   userId: string;
   /** 우리 목표만, 저금 줄 순서대로(비상금 → 우선순위) */
   goals: AllocGoal[];
-  /** 시작한 사람 분배표의 목표별 저금 줄 금액 */
+  /** 시작한 사람 월급 계획의 목표별 저금 줄 금액 */
   others: Record<string, Won>;
   now?: Date;
 }
 
 /**
- * 각자: 합류한 사람 분배표 추천값(18 P-06 각자). 고정지출·생활비 = 실수령 × 25%, 용돈 = × 10%,
+ * 각자: 합류한 사람 월급 계획 추천값(18 P-06 각자). 고정지출·생활비 = 실수령 × 25%, 용돈 = × 10%,
  * 남은 금액을 우리 목표 우선순위대로 ‘아직 안 채운 월 필요액’(= 월 필요액 − 시작한 사람 저금 줄, 0 아래는 0)만큼.
  * 비상금 목표 금액은 그대로(월 필요액을 모르면 시작한 사람 줄을 필요액으로 봐서 0원). 금액이 없는 목표는 0원.
  */
@@ -137,7 +137,7 @@ export function joinerSplit(o: JoinerSplitInput): SplitLineDraft[] {
 }
 
 export interface JointRefillInput {
-  /** 지금 공동 분배표 줄(시작한 사람이 정한 값) */
+  /** 지금 공동 월급 계획 줄(시작한 사람이 정한 값) */
   lines: SplitLineDraft[];
   /** 합류한 사람 실수령과 id */
   income: Won;
@@ -148,7 +148,7 @@ export interface JointRefillInput {
 }
 
 /**
- * 합쳐서: 공동 분배표 다시 채우기(18 P-06 합쳐서). 있던 줄은 줄이지 않음. 합류한 사람 용돈 줄(실수령 × 10%)을 더하고,
+ * 합쳐서: 공동 월급 계획 다시 채우기(18 P-06 합쳐서). 있던 줄은 줄이지 않음. 합류한 사람 용돈 줄(실수령 × 10%)을 더하고,
  * 늘어난 수입 − 그 용돈을 저금 줄 순서대로(비상금 → 우리 목표 → 내 목표) 각 목표 월 필요액까지 더함. 남으면 남는 돈.
  */
 export function jointRefill(o: JointRefillInput): SplitLineDraft[] {

@@ -1,16 +1,16 @@
 import { saveSplit, type SalarySplit } from '@sweetwo/api';
 import { toDraft } from '../salary';
 
-// G-05 매달 넣던 돈(22): 달성으로 빠진 저금 줄 금액(goal.freed_lines, 분배표마다)을 다른 목표 저금 줄에 더함.
+// G-05 매달 넣던 돈(22): 달성으로 빠진 저금 줄 금액(goal.freed_lines, 월급 계획마다)을 다른 목표 저금 줄에 더함.
 
-/** 내가 고칠 분배표(각자 = 내 것, 합쳐서 = 공동) */
+/** 내가 고칠 월급 계획(각자 = 내 것, 합쳐서 = 공동) */
 export const mySplit = (
   splits: SalarySplit[] | undefined,
   meId: string | undefined,
   joint: boolean,
 ) => splits?.find((s) => (joint ? s.owner_user_id === null : s.owner_user_id === meId));
 
-/** 이 목표가 달성되며 내 분배표에서 빠진 금액 */
+/** 이 목표가 달성되며 내 월급 계획에서 빠진 금액 */
 export function freedAmount(freed: unknown, split: SalarySplit | undefined) {
   if (!split || !freed || typeof freed !== 'object' || Array.isArray(freed)) return 0;
   const v = (freed as Record<string, unknown>)[split.id];

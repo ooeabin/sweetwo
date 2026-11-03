@@ -21,7 +21,7 @@ const NAME_MAX = 20; // 직접 추가 줄 이름
 type Edit = { index: number } | { add: true } | null;
 
 /**
- * 월급 분배표 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음 → 쓰는 돈 묶음 → ‘+ 줄 추가’,
+ * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음 → 쓰는 돈 묶음 → ‘+ 줄 추가’,
  * 주 버튼 위에 남는 돈(음수면 “{n}이 모자라요”, 막지 않음). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜.
  */
 export function SplitEditor({
@@ -249,7 +249,7 @@ export function SplitEditor({
   );
 }
 
-/** 저장된 분배표 줄 → 초안 */
+/** 저장된 월급 계획 줄 → 초안 */
 export const toDraft = (
   rows: {
     kind: SplitLineDraft['kind'];

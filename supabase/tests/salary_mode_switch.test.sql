@@ -34,7 +34,7 @@ select public.start_checklist(auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 
--- 예빈(270만, 10일) 합류: 각자 분배표
+-- 예빈(270만, 10일) 합류: 각자 월급 계획
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -49,7 +49,7 @@ select public.complete_join(jsonb_build_array(
 
 -- 합쳐서로: 같은 목표 더하고, 고정·생활 더하고, 용돈은 사람마다, 내 목표 줄 그대로
 select public.set_salary_mode('joint');
-select is((select count(*) from public.salary_split), 1::bigint, '분배표 하나');
+select is((select count(*) from public.salary_split), 1::bigint, '월급 계획 하나');
 select is((select amount from public.split_line where goal_id = (select id from public.goal where template = 'home')),
   2020000::bigint, '같은 목표 줄은 더함');
 select is((select amount from public.split_line where kind = 'fixed'), 1560000::bigint, '고정지출 더함');
@@ -69,7 +69,7 @@ select lives_ok($$ select public.set_joint_cycle_day(10::smallint) $$, '예빈 �
 
 -- 다시 각자로: 수입 비율로 나눔(남는 차이는 기준일 사람), 용돈·내 목표는 주인에게
 select public.set_salary_mode('separate');
-select is((select count(*) from public.salary_split), 2::bigint, '분배표 둘');
+select is((select count(*) from public.salary_split), 2::bigint, '월급 계획 둘');
 select is((select array_agg(l.amount order by s.owner_user_id) from public.split_line l join public.salary_split s on s.id = l.split_id
   where l.kind = 'fixed'), array[880000, 680000]::bigint[], '고정지출을 수입 비율로(156만 × 270/620 = 68만, 나머지 88만)');
 select is((select s.owner_user_id::text from public.split_line l join public.salary_split s on s.id = l.split_id

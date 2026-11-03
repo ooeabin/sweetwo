@@ -114,12 +114,12 @@ export const copy = {
   // O-66 조건 요약 판 [확인 필요]
   start: '시작하기',
 
-  // 재기획(ADR 0003) 온보딩 ②: O-30 월급 관리 방식, O-31 월급, O-50 월급 분배표, O-60 결과(17-onboarding-2.md)
+  // 재기획(ADR 0003) 온보딩 ②: O-30 월급 관리 방식, O-31 월급, O-50 월급 계획, O-60 결과(17-onboarding-2.md)
   salaryMode: '월급을 어떻게 관리해요?', // [확인 필요]
   salaryModeHelp: '나중에 바꿀 수 있어요', // [확인 필요]
   salaryModes: {
-    separate: { label: '각자 월급을 따로 관리해요', sub: '분배표와 체크리스트가 사람마다 있어요' }, // [확인 필요]
-    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 분배표로 나눠요' }, // [확인 필요]
+    separate: { label: '각자 월급을 따로 관리해요', sub: '월급 계획과 체크리스트가 사람마다 있어요' }, // [확인 필요]
+    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
   salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
@@ -147,11 +147,11 @@ export const copy = {
   splitDone: '이대로 저장하기',
   resultTitle: (monthly: string, when: string, goal: string) =>
     `매달 ${monthly}씩 모으면 ${when}에 ${object(goal)} 이뤄요`, // [확인 필요]
-  resultNoSaving: '분배표에서 저금을 정하면 언제 이룰지 알려 드려요',
+  resultNoSaving: '월급 계획에서 저금을 정하면 언제 이룰지 알려 드려요',
   resultLate: (n: string) => `목표 기한보다 ${n} 늦어요`,
   resultOnTime: '목표 기한 안에 이뤄요',
-  resultLateHelp: '분배표에서 저금을 늘리면 앞당길 수 있어요',
-  resultTodo: (day: string) => `월급날(${day})에 분배표대로 보내고 체크해 주세요`, // [확인 필요]
+  resultLateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
+  resultTodo: (day: string) => `월급날(${day})에 월급 계획대로 보내고 체크해 주세요`, // [확인 필요]
   resultStart: '시작하기',
   years: (n: number) => `${n}년`,
   months: (n: number) => `${n}개월`,

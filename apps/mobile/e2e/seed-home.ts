@@ -2,7 +2,7 @@ import { chanwoo } from './supabase-mock';
 import type { MemDb } from './onboarding-mock';
 
 // 홈·목표 e2e 공통 준비: 온보딩을 마친 찬우(혼자, 각자, 실수령 350만, 월급날 25일), 목표 비상금·내 집 마련,
-// 분배표와 9월 월급 체크리스트(9월 25일 ~ 10월 24일).
+// 월급 계획과 9월 월급 체크리스트(9월 25일 ~ 10월 24일).
 const LINES: [string, string | null, number][] = [
   ['saving', 'goal-e', 440_000],
   ['saving', 'goal-h', 950_000],
@@ -11,7 +11,7 @@ const LINES: [string, string | null, number][] = [
   ['allowance', null, 350_000],
 ];
 
-/** 온보딩을 마친 찬우: 목표(비상금, 내 집 마련), 분배표, 9월 월급 체크리스트 */
+/** 온보딩을 마친 찬우: 목표(비상금, 내 집 마련), 월급 계획, 9월 월급 체크리스트 */
 export function seed(db: MemDb) {
   Object.assign(db.me, {
     nickname: '찬우',

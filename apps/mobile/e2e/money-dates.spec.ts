@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// 이미 쓰던 사람: 온보딩 뒤 ‘분배표 확인’(ADR 0005)은 끝낸 상태로
+// 이미 쓰던 사람: 온보딩 뒤 ‘월급 계획 확인’(ADR 0005)은 끝낸 상태로
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     try {

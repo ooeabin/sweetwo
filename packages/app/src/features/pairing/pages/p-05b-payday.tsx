@@ -6,7 +6,7 @@ import { useJoinStep } from '../join-step';
 
 type Day = number | 'last';
 
-// P-05b 월급날(18, O-32와 같음, 2026-11-03 P-05에서 나눔). 합류 마지막 질문: 저장 → 추천 분배표로 합류 완료 → 홈(할 일 ‘분배표 확인’).
+// P-05b 월급날(18, O-32와 같음, 2026-11-03 P-05에서 나눔). 합류 마지막 질문: 저장 → 추천 월급 계획으로 합류 완료 → 홈(할 일 ‘월급 계획 확인’).
 // 시작한 사람이 아직 온보딩 중이면 합류만(홈 대기).
 export function P05bPayday() {
   const s = useJoinStep('p-05b');

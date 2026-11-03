@@ -40,7 +40,7 @@ export function App({ platform }: { platform: Platform }) {
     });
     return () => stop();
   }, [queryClient]);
-  // 새 화면으로 가면 맨 위부터(2026-11-03, W-02 아래쪽에서 ‘분배표 고치기’를 누르면 W-01이 내려간 채 열리던 것). 뒤로 가기는 브라우저 기억대로
+  // 새 화면으로 가면 맨 위부터(2026-11-03, W-02 아래쪽에서 ‘월급 계획 고치기’를 누르면 W-01이 내려간 채 열리던 것). 뒤로 가기는 브라우저 기억대로
   useEffect(() => {
     let last = router.state.location.pathname;
     return router.subscribe((st) => {

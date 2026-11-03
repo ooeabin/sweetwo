@@ -8,12 +8,12 @@ import { shouldAskPush } from './pages/p-11-push';
 
 export const joinPath = (id: string) => `/join/${id}`;
 
-/** 진행 막대(18): P-03, P-03a, P-04, P-05, P-05b. 분배표(P-06)는 안 보여 줌(2026-11-03, 온보딩 ADR 0005처럼) */
+/** 진행 막대(18): P-03, P-03a, P-04, P-05, P-05b. 월급 계획(P-06)는 안 보여 줌(2026-11-03, 온보딩 ADR 0005처럼) */
 const BAR = ['p-03', 'p-03a', 'p-04', 'p-05', 'p-05b'];
 
 /**
- * 합류 화면 순서(18 흐름 요약). 기본 P-03 → P-03a → P-04 → P-05 → P-05b(마지막 저장 = 추천 분배표로 합류 완료 → 홈).
- * 시작한 사람이 아직 온보딩 중이면 P-03 → P-03a → P-05 → P-05b(저장 = 합류, 홈 대기), 대기 뒤 이어서 P-04(저장 = 분배표 만들기).
+ * 합류 화면 순서(18 흐름 요약). 기본 P-03 → P-03a → P-04 → P-05 → P-05b(마지막 저장 = 추천 월급 계획으로 합류 완료 → 홈).
+ * 시작한 사람이 아직 온보딩 중이면 P-03 → P-03a → P-05 → P-05b(저장 = 합류, 홈 대기), 대기 뒤 이어서 P-04(저장 = 월급 계획 만들기).
  * 월급이 없으면 P-05b 없이 끝. 예전에 P-06에서 멈춘 사람만 P-06.
  */
 export function joinScreens(d: Pick<JoinData, 'waiting' | 'resumed' | 'me'>): string[] {
@@ -58,7 +58,7 @@ export function useJoinStep(id: string) {
     try {
       await save?.();
       const to = next === null ? undefined : (next ?? list[i + 1]);
-      // 마지막 화면: 추천 분배표로 합류 완료(분배표 화면 없이, 홈 할 일 ‘분배표 확인’)
+      // 마지막 화면: 추천 월급 계획으로 합류 완료(월급 계획 화면 없이, 홈 할 일 ‘월급 계획 확인’)
       if (!to && id !== 'p-06') {
         const r = await finishJoin(d);
         if (r === 'split_changed') throw new Error('split_changed');

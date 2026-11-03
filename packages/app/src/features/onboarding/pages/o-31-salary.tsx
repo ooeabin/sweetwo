@@ -10,7 +10,7 @@ import { useStep } from '../step';
 const ODD = 100_000_000; // 1억 원 초과면 한 번 확인
 
 // O-31 월급 금액(17 온보딩 ②) → O-32 월급날. ‘매달 금액이 달라요’면 가장 적게 들어온 달 기준.
-// ‘지금은 월급이 없어요’ = 금액 0, 월급날 없음 → 0원 분배표를 만들고 바로 홈(ADR 0005).
+// ‘지금은 월급이 없어요’ = 금액 0, 월급날 없음 → 0원 월급 계획을 만들고 바로 홈(ADR 0005).
 export function O31Salary() {
   const s = useStep('o-31');
   const me = s.state.me;
@@ -24,7 +24,7 @@ export function O31Salary() {
 
   const save = (income: number) =>
     s.done(() => saveMe({ monthly_income: income, income_variable: isVariable }));
-  // 월급이 없으면 월급날도 없음: 0원 분배표를 만들고 O-60 준비 끝으로
+  // 월급이 없으면 월급날도 없음: 0원 월급 계획을 만들고 O-60 준비 끝으로
   const noSalary = () =>
     s.done(
       async () => {

@@ -41,7 +41,7 @@ export function useGoals() {
   return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 }
 
-/** 월급 분배표(O-50에서 다시 열면 저장한 값부터) */
+/** 월급 계획(O-50에서 다시 열면 저장한 값부터) */
 export function useSplits() {
   return useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
 }

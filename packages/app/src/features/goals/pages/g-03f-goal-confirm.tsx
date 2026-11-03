@@ -16,7 +16,7 @@ import { addToGoalLine, mySplit, takeFreed } from '../freed';
 const man = (v: number) => `${formatManWon(v)} 원`;
 
 // G-03f 미리보기(Q7, 22): “매달 25만 원씩 모으면 2028년 3월에 이뤄요”(월 필요액 기준) /
-// 추가하기 → 바로 저장, 분배표에 0원 저금 줄(서버 트리거) → G-03g 매달 넣는 돈 → G-02(2026-11-03, 0원 보조 문구 없앰).
+// 추가하기 → 바로 저장, 월급 계획에 0원 저금 줄(서버 트리거) → G-03g 매달 넣는 돈 → G-02(2026-11-03, 0원 보조 문구 없앰).
 // 우선순위는 그 종류 묶음 맨 아래.
 export function G03fGoalConfirm() {
   const s = useAddStep('confirm');

@@ -35,7 +35,7 @@ async function start(page: Page) {
   await page.getByRole('radio', { name: '나중에 할게요' }).click();
 }
 
-test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 분배표 확인과 금액 정하기', async ({
+test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 월급 계획 확인과 금액 정하기', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -67,7 +67,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
 
   // 목표는 고르기만: 금액·기한 질문 없이 바로 월급(2026-11-02, ADR 0004)
 
-  // 월급까지만 묻고 끝(ADR 0005): 관리 방식, 월급 → 추천 분배표 + 첫 체크리스트 → 홈
+  // 월급까지만 묻고 끝(ADR 0005): 관리 방식, 월급 → 추천 월급 계획 + 첫 체크리스트 → 홈
   await heading(page, '월급을 어떻게 관리해요?');
   await expect(page.getByRole('radio', { name: /각자 월급을 따로 관리해요/ })).toBeChecked();
   await axe(page);
@@ -111,7 +111,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
     wedding_date: '2025-05-17',
     salary_mode: 'separate',
   });
-  // 추천 분배표(17 O-50 추천값): 고정지출 88만, 생활비 88만, 용돈 35만, 비상금 44만, 금액 없는 목표 0원
+  // 추천 월급 계획(17 O-50 추천값): 고정지출 88만, 생활비 88만, 용돈 35만, 비상금 44만, 금액 없는 목표 0원
   expect(db.splits).toHaveLength(1);
   expect(db.splits[0]?.owner_user_id).toBe(chanwoo.id);
   expect(db.splits[0]?.split_line.map((l) => [l.kind, l.amount])).toEqual([
@@ -130,8 +130,8 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   expect(db.rpc).toContain('start_checklist');
   expect(db.checklists).toHaveLength(1);
 
-  // 홈 할 일 ‘분배표 확인’은 없앰(2026-11-03)
-  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
+  // 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
+  await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
 
   // 홈 목표 줄 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)
   await page
@@ -146,7 +146,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await next(page);
   await heading(page, '언제까지 모을까요?');
   await next(page);
-  // G-03g 매달 넣는 돈(2026-11-03): 추천 = min(월 필요액, 남는 돈 95만) → 분배표 저금 줄
+  // G-03g 매달 넣는 돈(2026-11-03): 추천 = min(월 필요액, 남는 돈 95만) → 월급 계획 저금 줄
   await heading(page, '매달 얼마씩 넣을까요?');
   await expect(page.getByText('지금 남는 돈 95만 원')).toBeVisible();
   await expect(page.getByLabel('매달 얼마씩 넣을까요?')).toHaveValue('950,000');
@@ -216,7 +216,7 @@ test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도�
   await heading(page, '두 사람은 어떤 사이예요?');
 });
 
-test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 분배표', async ({ page }) => {
+test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 월급 계획', async ({ page }) => {
   test.setTimeout(60_000);
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
