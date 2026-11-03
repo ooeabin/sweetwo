@@ -214,10 +214,22 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리: 홈은 워드마크, 다른 메뉴는 메뉴 이름 */}
+        {/* 좁은 창 머리: 홈은 두 사람(아바타 + 이름, 2026-11-03 워드마크 대신), 다른 메뉴는 메뉴 이름 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
           {p.today ? (
-            <Wordmark height={24} />
+            <span className="hg-mhead__people">
+              <span className="hg-avatars" aria-hidden="true">
+                {p.people.map((x) => (
+                  <Person key={x.no} p={x} />
+                ))}
+              </span>
+              <span className="hg-mhead__names">
+                {p.people
+                  .filter((x) => !x.empty && x.name)
+                  .map((x) => x.name)
+                  .join(', ')}
+              </span>
+            </span>
           ) : (
             <div className="hg-topbar__text">
               <h1 className="hg-topbar__title">{p.narrowTitle}</h1>

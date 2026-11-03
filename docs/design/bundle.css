@@ -1419,10 +1419,13 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame__mhead { display: flex; align-items: center; gap: var(--space-1); min-height: 56px; box-sizing: border-box; padding: var(--space-3) var(--space-2) 0 var(--space-4); }
   .hg-frame__mhead .hg-topbar__text { flex: 1; }
   .hg-frame__mhead > img { margin-right: auto; }
+  .hg-mhead__people { flex: 1; display: flex; align-items: center; gap: var(--space-2); min-width: 0; }  /* 2026-11-03 홈 머리: 두 사람(카카오뱅크 이름 + 칩처럼) */
+  .hg-mhead__names { display: inline-flex; align-items: center; min-width: 0; height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: 600 13px/1 var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* 하단 탭 막대(배민 느낌): 화면 아래 가운데 떠 있는 흰 알약, 탭 4칸(아이콘 + 이름), 현재 탭은 회색 알약 + ink */
   .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 50%; right: auto; bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); height: auto; gap: 2px; padding: 6px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-full); background: var(--surface); box-shadow: var(--shadow-2); }
   .hg-frame > .hg-dock .hg-dock__item, .hg-frame > .hg-dock .hg-dock__item.is-active { flex: none; flex-direction: column; gap: 2px; width: 72px; height: 52px; padding: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 600 12px/16px var(--font-sans); }
-  .hg-frame > .hg-dock .hg-dock__item.is-active { background: var(--surface-alt); color: var(--ink); }
+  .hg-frame > .hg-dock .hg-dock__item.is-active { background: none; color: var(--ink); }  /* 2026-11-03 고른 탭은 배경 없이 색만(ink), 나머지 stone */
+  .hg-frame > .hg-dock .hg-dock__item:not(.is-active) { color: var(--stone); }
   .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(var(--space-3) + 66px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
