@@ -1,6 +1,6 @@
 import { completeJoin } from '@sweetwo/api';
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, DayChips, QuestionLayout, SectionHeader } from '@sweetwo/ui';
+import { AmountInput, DayWheel, QuestionLayout, SectionHeader } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
@@ -77,7 +77,13 @@ export function P05Salary() {
         <span className="hg-consent__label">{copy.salaryVariable}</span>
       </button>
       <SectionHeader title={copy.payday} />
-      <DayChips label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.paydayLast} />
+      <DayWheel
+        label={copy.payday}
+        value={payday}
+        onChange={setDay}
+        lastLabel={copy.paydayLast}
+        hint={copy.paydayLastHint}
+      />
     </QuestionLayout>
   );
 }

@@ -66,7 +66,12 @@ async function answerBasics(page: Page, waiting = false) {
 async function salary(page: Page) {
   await expect(page.getByRole('heading', { name: '한 달에 월급이 얼마 들어와요?' })).toBeVisible();
   await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('2700000');
-  await page.getByRole('radio', { name: '10일', exact: true }).click();
+  // 월급날 휠(2026-11-03): 25일에서 시작 → 10일
+  const day = page.getByRole('spinbutton', { name: '월급날', exact: true });
+  await expect(day).toHaveAttribute('aria-valuetext', '25일');
+  await day.focus();
+  for (let i = 0; i < 15; i++) await day.press('ArrowUp');
+  await expect(day).toHaveAttribute('aria-valuetext', '10일');
   await page.getByRole('button', { name: '다음' }).click();
 }
 

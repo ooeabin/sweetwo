@@ -1,6 +1,6 @@
 import { qk, updateMe } from '@sweetwo/api';
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, DayChips, QuestionLayout, SectionHeader } from '@sweetwo/ui';
+import { AmountInput, DayWheel, QuestionLayout, SectionHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -86,7 +86,13 @@ export function S11cSalary() {
         <span className="hg-consent__label">{copy.variable}</span>
       </button>
       <SectionHeader title={copy.payday} />
-      <DayChips label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.lastDay} />
+      <DayWheel
+        label={copy.payday}
+        value={payday}
+        onChange={setDay}
+        lastLabel={copy.lastDay}
+        hint={copy.paydayLastHint}
+      />
     </QuestionLayout>
   );
 }

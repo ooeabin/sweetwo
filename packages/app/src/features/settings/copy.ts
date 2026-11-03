@@ -63,6 +63,7 @@ export const copy = {
   salaryModeValue: { separate: '각자 관리해요', joint: '합쳐서 관리해요' }, // [확인 필요]
   planDay: '체크리스트 만드는 날',
   lastDay: '말일',
+  paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
   holidayShift: '월급날이 쉬는 날이면 앞당겨 보여줘요',
