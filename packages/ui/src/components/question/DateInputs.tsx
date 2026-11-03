@@ -92,7 +92,7 @@ export function YearInput({
           inputRef={ref}
           label={label}
           len={4}
-          placeholder="YYYY"
+          placeholder="0000"
           value={text}
           invalid={!!error}
           onChange={(v) => {
@@ -155,7 +155,7 @@ export function DateInput({
           inputRef={yRef}
           label="년"
           len={4}
-          placeholder="YYYY"
+          placeholder="0000"
           value={y}
           seg
           onPasteAll={pasteAll}
@@ -170,7 +170,7 @@ export function DateInput({
           inputRef={mRef}
           label="월"
           len={2}
-          placeholder="MM"
+          placeholder="00"
           value={m}
           seg
           onPasteAll={pasteAll}
@@ -185,7 +185,7 @@ export function DateInput({
           inputRef={dRef}
           label="일"
           len={2}
-          placeholder="DD"
+          placeholder="00"
           value={d}
           seg
           onPasteAll={pasteAll}
