@@ -114,12 +114,12 @@ export function CheckLine({
         open && (onOther || onSkip) ? (
           <>
             {onOther && (
-              <button type="button" className="hg-btn hg-btn--link" onClick={onOther}>
+              <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={onOther}>
                 {copy.otherAmount}
               </button>
             )}
             {onSkip && (
-              <button type="button" className="hg-btn hg-btn--link" onClick={onSkip}>
+              <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={onSkip}>
                 {copy.skipped}
               </button>
             )}

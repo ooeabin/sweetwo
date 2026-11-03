@@ -120,7 +120,8 @@ export function Menu({
           style={{
             position: 'absolute',
             top: '100%',
-            right: 0,
+            // 글자 버튼(‘추가’)은 버튼 왼쪽 끝에 맞춤(화면 왼쪽에 있어서 오른쪽 맞춤이면 밖으로 나감, 2026-11-03). ⋯은 오른쪽 맞춤
+            ...(button ? { left: 0 } : { right: 0 }),
             marginTop: 'var(--space-1)',
             zIndex: 'var(--z-dropdown)',
           }}

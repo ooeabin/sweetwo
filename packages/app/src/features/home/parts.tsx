@@ -12,6 +12,7 @@ import {
   Ring,
   SectionHeader,
   WeekStrip,
+  goalIcon,
 } from '@sweetwo/ui';
 import { useState } from 'react';
 import { PersonDot } from '../../shared/person';
@@ -19,13 +20,13 @@ import { money, useMask } from '../../shared/mask';
 import { CheckLine, doneCount, lineName, toAllocGoal } from '../salary';
 import { copy } from './copy';
 
-/** 목표 그림(템플릿 그림, 직접 만든 목표는 깃발) */
+/** 목표 그림(템플릿 그림. 그림이 없으면 O-21과 같은 템플릿 아이콘, 직접 만든 목표는 깃발) */
 function GoalLead({ template }: { template: string }) {
   const art = templateByKey(template)?.illustration;
   return hasIllustration(art) ? (
     <Lead art={<Illustration name={art} />} />
   ) : (
-    <Lead icon="flag-pennant" />
+    <Lead icon={goalIcon(template)} />
   );
 }
 const pctOf = (saved: number, target: number | null) =>
