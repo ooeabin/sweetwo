@@ -91,7 +91,7 @@ export function GoalsCard({
           }
           badge={late ? <Badge kind="warn">{copy.delayed}</Badge> : undefined}
           lead={<GoalLead template={top.template} />}
-          empty={copy.noSavedYet}
+          empty={saved > 0 ? undefined : copy.noSavedYet}
         />
         <button
           type="button"

@@ -353,7 +353,7 @@ export function G02GoalDetail() {
             }
             pct={i.pct}
             tone={tone(g.template)}
-            empty={copy.noSavedYet}
+            empty={i.saved > 0 ? undefined : copy.noSavedYet}
           />
         )}
       </section>

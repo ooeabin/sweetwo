@@ -109,7 +109,8 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 분배표를 바꾼 안내', 
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
   await expect(page.getByText('08.25 ~ 09.24. 다 보냈어요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '다른 금액으로 보냈어요' })).toHaveCount(0);
+  // 지난 달은 읽기 전용: 줄을 눌러 여는 시트 없음
+  await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
   await page.getByRole('button', { name: '다음 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });

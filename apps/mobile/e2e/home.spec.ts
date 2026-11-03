@@ -71,8 +71,11 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   seed(db);
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
-  // 생활비 줄 ‘다른 금액으로 보냈어요’ → W-02a
-  await page.getByRole('button', { name: '다른 금액으로 보냈어요' }).nth(3).click();
+  // 생활비 줄을 누르면 시트 → ‘다른 금액으로 보냈어요’ → W-02a
+  await page.getByRole('button', { name: /^생활비/ }).click();
+  await expect(page.getByRole('dialog', { name: '생활비 88만 원' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다른 금액으로 보냈어요' }).click();
   await expect(page.getByRole('heading', { name: '얼마를 보냈어요?' })).toBeVisible();
   await page.getByLabel('얼마를 보냈어요?').fill('780000');
   await expect(page.getByText('계획보다 10만 원 적어요')).toBeVisible();
@@ -122,7 +125,8 @@ test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → �
   await expect(page.getByRole('heading', { name: '9월 월급, 빠진 게 있나요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('checkbox', { name: '내 집 마련 체크' }).click();
-  await page.getByRole('button', { name: '이번 달은 못 했어요' }).first().click();
+  await page.getByRole('button', { name: /^비상금/ }).click();
+  await page.getByRole('button', { name: '이번 달은 못 했어요' }).click();
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   await expect.poll(() => lines.find((l) => l.goal_id === 'goal-e')?.state).toBe('skipped');
   expect(lines.find((l) => l.goal_id === 'goal-h')?.state).toBe('checked');

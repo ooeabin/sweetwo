@@ -7,5 +7,7 @@
 - 배치(2026-10-27, 카카오뱅크 체크리스트 느낌): 왼쪽 이름(16px 600) 아래 보조 줄 → 오른쪽 금액 → 맨 오른쪽 체크 원(28px). 줄 위아래 16px, 줄 사이 `hairline-soft` 선(묶음 카드 마지막 줄은 선 없음).
 - 체크는 `success` 원 + 흰 체크. 체크한 줄은 이름에 취소선, 이름과 금액을 `stone`으로 낮춤. ‘못 함’ 줄도 체크된 모양 + 보조 줄로 구분.
 - 체크는 `button role="checkbox"` + `aria-checked`, `aria-label`은 “{줄 이름} 체크”.
-- 줄 아래 글자 링크: ‘다른 금액으로 보냈어요’(W-02a), W-05 ‘이번 달은 못 했어요’.
-- React 래퍼 `TransferRow`(packages/ui): `label`, `meta`(보조 줄), `amount`, `done`, `checkLabel`, `onToggle`, `disabled`(볼 수만), `badge`, `actions`(줄 아래 글자 링크).
+- 체크 안 한 원(2026-11-03): `border-control` 테두리 안에 아주 흐린 체크(`hairline`, 카카오뱅크 체크리스트처럼). 빈 원이 비어 보이지 않게. 모든 `hg-check`에 같음.
+- 줄 시트(2026-11-03): `onOpen`을 주면 이름·금액 부분이 버튼(`hg-transfer__open`, `aria-haspopup="dialog"`)이 되고, 누르면 소비자가 BottomSheet를 엶. W-02 ‘보냈어요’ + ‘다른 금액으로 보냈어요’(W-02a), W-05 ‘보냈어요’ + ‘이번 달은 못 했어요’. 줄 아래 링크를 줄마다 반복하지 않음.
+- 줄 아래 글자 링크(`actions`): 지금은 쓰지 않음(남겨 둠).
+- React 래퍼 `TransferRow`(packages/ui): `label`, `meta`(보조 줄), `amount`, `done`, `checkLabel`, `onToggle`, `disabled`(볼 수만), `badge`, `actions`(줄 아래 글자 링크), `onOpen`(줄을 누르면 시트).

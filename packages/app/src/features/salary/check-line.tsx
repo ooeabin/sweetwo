@@ -1,6 +1,7 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatMonthDay, todayKst } from '@sweetwo/core';
-import { TransferRow } from '@sweetwo/ui';
+import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
+import { useState } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
@@ -45,6 +46,8 @@ const amountOf = (l: PayCheckLine) => l.actual ?? l.planned;
 /**
  * 체크리스트 줄 하나(W-02, H-03, W-05). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
  * 체크 = 바로 완료, 저금이면 목표에 더하고 Toast “{목표}에 {금액} 더했어요” + 되돌리기. 다시 누르면 풀림.
+ * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02) / ‘이번 달은 못 했어요’(W-05).
+ * 줄마다 링크를 반복하지 않음(2026-11-03).
  */
 export function CheckLine({
   line,
@@ -71,6 +74,7 @@ export function CheckLine({
 }) {
   const { masked } = useMask();
   const check = useCheck();
+  const [sheet, setSheet] = useState(false);
   const done = line.state === 'checked';
   const skipped = line.state === 'skipped';
   const amount = money(amountOf(line), masked);
@@ -101,32 +105,46 @@ export function CheckLine({
         : copy.checkedOn(when)
       : undefined;
   const open = !done && !skipped && !readOnly;
+  const pick = (f: () => void) => () => {
+    setSheet(false);
+    f();
+  };
   return (
-    <TransferRow
-      label={name}
-      amount={amount}
-      done={done || skipped}
-      checkLabel={copy.checkLabel(name)}
-      onToggle={readOnly ? undefined : () => void toggle()}
-      disabled={readOnly}
-      meta={meta}
-      actions={
-        open && (onOther || onSkip) ? (
-          <>
-            {onOther && (
-              <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={onOther}>
-                {copy.otherAmount}
-              </button>
-            )}
-            {onSkip && (
-              <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={onSkip}>
-                {copy.skipped}
-              </button>
-            )}
-          </>
-        ) : undefined
-      }
-    />
+    <>
+      <TransferRow
+        label={name}
+        amount={amount}
+        done={done || skipped}
+        checkLabel={copy.checkLabel(name)}
+        onToggle={readOnly ? undefined : () => void toggle()}
+        disabled={readOnly}
+        meta={meta}
+        onOpen={open && (onOther || onSkip) ? () => setSheet(true) : undefined}
+      />
+      {sheet && (
+        <BottomSheet
+          title={copy.lineSheet(name, amount)}
+          onClose={() => setSheet(false)}
+          actions={
+            <>
+              <Button block variant="primary" onClick={pick(() => void toggle())}>
+                {copy.sent}
+              </Button>
+              {onOther && (
+                <Button block variant="secondary" onClick={pick(onOther)}>
+                  {copy.otherAmount}
+                </Button>
+              )}
+              {onSkip && (
+                <Button block variant="secondary" onClick={pick(onSkip)}>
+                  {copy.skipped}
+                </Button>
+              )}
+            </>
+          }
+        />
+      )}
+    </>
   );
 }
 
