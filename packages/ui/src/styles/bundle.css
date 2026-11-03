@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a87161a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e8dbe89). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -134,7 +134,9 @@
 .hg-transfer__open:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-transfer.is-done .hg-transfer__label { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .hg-check { width: 24px; height: 24px; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); display: grid; place-items: center; }
-.hg-check:not(.is-on)::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--hairline); border-bottom: 2px solid var(--hairline); transform: rotate(-45deg) translate(1px, -1px); }  /* 2026-11-03 빈 원이 비어 보이지 않게 아주 흐린 체크(카카오뱅크 체크리스트처럼) */
+.hg-check:not(.is-on) { border-color: var(--hairline); }  /* 2026-11-03 체크 안 한 원은 테두리와 안 체크를 같이 아주 흐리게(카카오뱅크 체크리스트처럼). 줄 이름과 금액이 함께 있어 원만으로 알아보지 않아도 됨 */
+.hg-check:not(.is-on)::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--hairline); border-bottom: 2px solid var(--hairline); transform: rotate(-45deg) translate(1px, -1px); }
+.hg-check:not(.is-on):hover { border-color: var(--border-control); }
 .hg-check.is-on { background: var(--success); border-color: var(--success); }
 .hg-check.is-on::after { content: ""; width: 10px; height: 6px; border-left: 2px solid var(--on-success); border-bottom: 2px solid var(--on-success); transform: rotate(-45deg) translate(1px, -1px); }
 .hg-transfer__label { font: 600 16px/24px var(--font-sans); }
@@ -199,6 +201,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sheet__close { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); cursor: pointer; }
 .hg-sheet__close:hover { background: var(--hairline-soft); }
 .hg-sheet__close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* 2026-11-03 시트에는 ×를 보이지 않음(막 누르기, Esc로 닫음). 화면 읽기와 키보드로는 닿고, 키보드로 닿으면 보임 */
+.hg-sheet__close:not(:focus-visible) { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
 /* 앱 안 시트(BottomSheet 컴포넌트): 막 위 화면 아래에 붙음, 넓은 창은 가운데 카드 */
 .hg-scrim--sheet { position: fixed; inset: 0; z-index: 60; align-items: end; padding: 0; }
 .hg-scrim--sheet > .hg-sheet { width: 100%; max-height: 90dvh; overflow-y: auto; padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); outline: none; }
