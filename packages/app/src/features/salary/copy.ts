@@ -50,7 +50,7 @@ export const copy = {
   moreThanPlan: (amount: string) => `계획보다 ${amount} 많아요`, // [확인 필요]
   next: '다음',
   // W-02 끝
-  doneTitle: '이번 달 월급을 다 나눴어요', // [확인 필요]
+  doneTitle: '이번 달 월급 체크를 다 했어요', // [확인 필요] 2026-11-03 ‘나눴어요’ 대신
   doneSaved: (amount: string) => `이번 달 목표에 ${amount} 모았어요`,
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,

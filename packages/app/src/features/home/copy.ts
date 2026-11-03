@@ -26,7 +26,7 @@ export const copy = {
   progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`,
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
-  allDone: (label: string) => `${label}을 다 나눴어요`,
+  allDone: (label: string) => `${label} 체크를 다 했어요`,
   savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
   showLines: '줄 펼치기', // [확인 필요]
   editSplit: '분배표 고치기',

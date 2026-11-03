@@ -89,7 +89,7 @@ select public.check_pay_line((select l.id from public.pay_check_line l join publ
 reset role;
 select results_eq(
   $$ select user_id, title, target, topic from public.notification where kind = 'partner_done' $$,
-  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '찬우님이 3월 월급을 다 나눴어요',
+  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '찬우님이 3월 월급 체크를 다 했어요',
              '/salary?who=11111111-1111-1111-1111-111111111111', 'silent') $$,
   '다 했어요 알림');
 

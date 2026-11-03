@@ -149,8 +149,9 @@ export function H01Home() {
           ? copy.hiAllDone(myName) // 다 했는데 0%면 “0% 왔어요” 대신(2026-11-03)
           : copy.hi(myName);
   // 인사 카드의 큰 숫자 하나(19 앱 기본 틀 7번): 체크가 남았으면 한 개수/전체, 다 했으면 1순위 목표 %
+  // 다 했는데 1순위 목표가 아직 0%면 “0%” 빈 막대 대신 “5/5” 꽉 찬 막대(2026-11-03)
   const focus =
-    left > 0 && total > 0
+    (left > 0 || !(top && pct)) && total > 0
       ? { value: `${total - left}/${total}`, percent: ((total - left) * 100) / total }
       : top && pct !== null
         ? { value: `${pct}%`, percent: pct }
@@ -298,7 +299,10 @@ export function H01Home() {
         focus,
         actions: (
           <>
-            <AddMenu />
+            {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 목표·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}
+            <span className="hg-wide-only">
+              <AddMenu />
+            </span>
             {left > 0 && (
               <Button variant="primary" onClick={() => nav(salaryPaths.checklist)}>
                 {copy.check}
