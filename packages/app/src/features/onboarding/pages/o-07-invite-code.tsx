@@ -118,9 +118,6 @@ export function O07InviteCode() {
                 {copy.tapToCopy}
               </span>
             </button>
-            <p className="hg-q__help" style={{ textAlign: 'center' }}>
-              {copy.inviteValid}
-            </p>
           </>
         )}
       </BottomSheet>
