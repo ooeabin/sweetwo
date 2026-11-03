@@ -36,6 +36,7 @@ export const copy = {
   upcoming: '다가오는 일정',
   moreCalendar: '캘린더', // 다가오는 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)
   noUpcoming: '30일 안에 일정이 없어요', // [확인 필요]
+  monthShort: (m: number) => `${m}월`,
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
   // H-06 할 일 한 줄(19 ‘할 일 한 줄 순서’)
   open: '열기', // [확인 필요] 할 일 이동 버튼

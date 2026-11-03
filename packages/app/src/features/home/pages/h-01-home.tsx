@@ -123,9 +123,6 @@ export function H01Home() {
     id === meId ? myName : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
   const saved = (g: (typeof goals.data)[number]) => savedOf(g, sums.data);
-  const split = splits.data?.find((x) => x.owner_user_id === (joint ? null : meId));
-  const monthly = (g: { id: string }) =>
-    split?.split_line.find((l) => l.kind === 'saving' && l.goal_id === g.id)?.amount ?? 0;
 
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
@@ -245,6 +242,7 @@ export function H01Home() {
     label: upcomingName(u, myName),
     dday: u.dday,
     to: u.to,
+    kind: u.kind,
   }));
 
   const go = (to: string) => nav(to);
@@ -289,14 +287,12 @@ export function H01Home() {
             personName={personName}
             meId={meId}
             joint={joint}
+            goalTemplate={(id) => goals.data.find((g) => g.id === id)?.template ?? null}
             go={go}
           />
           <GoalsCard
             goals={goals.data}
             savedOf={saved}
-            monthly={monthly}
-            list={list}
-            personName={personName}
             meId={meId}
             joined={joined}
             solo={space.data.couple_state === 'solo'}
@@ -305,7 +301,7 @@ export function H01Home() {
         </div>,
         <div key="r" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
           {assetsCard}
-          <UpcomingCard items={items.slice(0, 3)} go={go} today={today} />
+          <UpcomingCard items={items.slice(0, 3)} go={go} />
         </div>,
       ]}
     />

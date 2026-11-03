@@ -40,7 +40,10 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   // 홈에서는 3줄까지만(나머지는 W-02)
   await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(3);
   await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
-  await expect(page.getByText('이번 달 95만 원 넣을 차례예요')).toBeVisible();
+  // 목표는 한 카드 안 목표 줄(그림 + 금액 + 얇은 막대, 2026-11-03). 이번 달 체크는 위 체크리스트에서만
+  await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
+    '0원 / 1억 5,000만 원',
+  );
   await expect(salaryCard(page)).toContainText('5개 중 0개 했어요');
   await expect(page.getByText('가진 돈을 적으면 순자산을 보여 드려요')).toBeVisible();
   await expect(page.getByText('같이 쓸 사람을 초대해 주세요')).toBeVisible();
@@ -49,7 +52,9 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   // 홈 카드에서 바로 체크 → Toast, 목표 카드도 “넣었어요”
   await salaryCard(page).getByRole('checkbox', { name: '내 집 마련 체크' }).click();
   await expect(page.getByText('내 집 마련에 95만 원 더했어요')).toBeVisible();
-  await expect(page.getByText('이번 달 95만 원 넣었어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
+    '95만 원 / 1억 5,000만 원',
+  );
   await expect(salaryCard(page)).toContainText('5개 중 1개 했어요');
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
 
@@ -183,7 +188,10 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   await bands.first().getByRole('button', { name: '보기' }).click();
   await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '자세히', exact: false }).first().click();
+  await page
+    .getByRole('region', { name: '목표' })
+    .getByRole('button', { name: /^내 집 마련/ })
+    .click();
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
 });
 
