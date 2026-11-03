@@ -1,5 +1,5 @@
 import { achieveGoal, qk } from '@sweetwo/api';
-import { Icon, Illustration, hasIllustration } from '@sweetwo/ui';
+import { DoneMark, Illustration, hasIllustration } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -50,16 +50,11 @@ export function AchieveWatch() {
   return null;
 }
 
-/** 축하 그림: 템플릿 그림, 직접 만든 목표는 회색 기본 그림 */
+/** 축하 그림: 템플릿 그림. 그림이 없으면(직접 만든 목표, 그림을 다시 만드는 동안) 완료 표시(O-60과 같은 DoneMark, 2026-11-03 회색 깃발에서 바꿈) */
 export function AchieveArt({ g }: { g: { illustration: string | null; custom: boolean } }) {
   return hasIllustration(g.illustration) && !g.custom ? (
     <Illustration name={g.illustration} />
   ) : (
-    <span
-      className="hg-art hg-art--custom"
-      style={{ width: 'calc(var(--space-16) * 3)', height: 'calc(var(--space-16) * 3)' }}
-    >
-      <Icon name="flag-pennant" />
-    </span>
+    <DoneMark />
   );
 }

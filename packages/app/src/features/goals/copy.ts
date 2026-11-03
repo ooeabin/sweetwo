@@ -183,6 +183,7 @@ export const copy = {
 
   // G-06 순서 바꾸기
   orderTitle: '어떤 것부터 모을까요?',
+  orderNothing: '목표가 하나라 아직 바꿀 순서가 없어요', // [확인 필요] G-06 목표가 하나일 때
   orderOk: '이 순서로 정하기',
   orderFixed: '비상금은 맨 위에 고정돼요', // [확인 필요]
   // 첫 주 5일째 나머지 목표(16 O-22~25)
@@ -362,6 +363,7 @@ export const copy = {
   photoRemoved: '사진을 지웠어요', // [확인 필요]
   photoSaved: '사진을 바꿨어요',
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
+  photoDropNarrow: '사진을 골라 주세요', // 좁은 창(끌어 놓기 없음, 2026-11-03)
   photoPick: '사진 고르기',
   photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
   // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]

@@ -91,16 +91,18 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
         />
       </section>
     );
+  // 묶음마다 목표가 하나뿐이면 바꿀 순서가 없음(2026-11-03)
+  const nothing = oursIds.length <= 1 && mineIds.length <= 1;
   return (
     <QuestionLayout
       title={copy.orderTitle}
-      help={copy.orderFixed}
+      help={nothing ? copy.orderNothing : copy.orderFixed}
       onBack={() => nav('/goals')}
-      primary={{ label: copy.orderOk, disabled: !changed, loading: saving }}
+      primary={nothing ? undefined : { label: copy.orderOk, disabled: !changed, loading: saving }}
       onSubmit={() => void save()}
     >
-      {list(oursIds, setOurs, copy.groups.ours)}
-      {list(mineIds, setMine, copy.groups.mine)}
+      {!nothing && list(oursIds, setOurs, copy.groups.ours)}
+      {!nothing && list(mineIds, setMine, copy.groups.mine)}
     </QuestionLayout>
   );
 }

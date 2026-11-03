@@ -139,14 +139,16 @@ export function H01Home() {
   const pct = top?.target_amount
     ? Math.min(Math.floor((saved(top) * 100) / top.target_amount), 100)
     : null;
+  const total = list?.pay_check_line.length ?? 0;
   const title =
     left > 0
       ? copy.hiLeft(myName, left)
-      : top && pct !== null
+      : top && pct !== null && pct > 0
         ? copy.hiGoal(myName, top.name, pct)
-        : copy.hi(myName);
+        : total > 0
+          ? copy.hiAllDone(myName) // 다 했는데 0%면 “0% 왔어요” 대신(2026-11-03)
+          : copy.hi(myName);
   // 인사 카드의 큰 숫자 하나(19 앱 기본 틀 7번): 체크가 남았으면 한 개수/전체, 다 했으면 1순위 목표 %
-  const total = list?.pay_check_line.length ?? 0;
   const focus =
     left > 0 && total > 0
       ? { value: `${total - left}/${total}`, percent: ((total - left) * 100) / total }

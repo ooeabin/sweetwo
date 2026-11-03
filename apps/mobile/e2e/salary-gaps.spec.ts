@@ -130,7 +130,7 @@ test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 
   await expect(page.getByText('예빈 카메라')).toBeVisible();
   await page.getByRole('button', { name: /^생활비/ }).click();
   await page.getByLabel('생활비 금액').fill('700000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '확인' }).click();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('분배표를 바꿨어요')).toBeVisible();
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
@@ -142,10 +142,10 @@ test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 
   await page.goto('/salary/split');
   await page.getByRole('button', { name: '줄 추가' }).click();
   await page.getByLabel('줄 이름').fill('운동');
-  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '확인' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();
   await page.getByLabel('줄 이름').fill('헬스');
-  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
   await page.getByRole('button', { name: /월급 350만 원/ }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);

@@ -55,6 +55,10 @@ export function useGoalsModel() {
   const nameOf = (id: string | null) => (id === meId ? myName : partnerName);
   const allSplits = splits.data ?? [];
   const lines = (lists.data ?? []).flatMap((c) => c.pay_check_line);
+  // 줄 id → 그 체크리스트 주인(저금 줄은 user_id가 비어 있어 이름을 붙일 때 씀)
+  const lineOwner: Record<string, string | null> = Object.fromEntries(
+    (lists.data ?? []).flatMap((c) => c.pay_check_line.map((l) => [l.id, c.owner_user_id ?? null])),
+  );
 
   const item = (g: Goal): GoalItem => {
     const group: GoalGroup =
@@ -132,6 +136,7 @@ export function useGoalsModel() {
     monthlyTotal,
     byId: (id: string) => items.find((i) => i.goal.id === id),
     nameOf,
+    lineOwner,
     retry: () => [me, space, goals, splits, lists, saved].forEach((q) => void q.refetch()),
   };
 }
