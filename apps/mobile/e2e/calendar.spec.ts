@@ -155,11 +155,13 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 목표 기한
   await page.goto('/calendar');
   await expect(page).toHaveURL(/\/calendar\/list$/);
   await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toBeVisible();
-  const money = page.getByRole('region', { name: '돈 일정' });
+  // 챙길 날과 돈 일정은 “다가오는 일정” 한 목록, 오른쪽 D-day(2026-11-03)
+  const money = page.getByRole('region', { name: '다가오는 일정' });
   // 예빈 월급날 10일(토) → 9일(금), 월급 확인 22일, 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 1일
   const rows = await money.getByRole('button').allTextContents();
   expect(rows[0]).toContain('예빈 월급날');
   expect(rows[0]).toContain('10월 9일');
+  expect(rows[0]).toContain('D-2');
   const all = rows.join('|');
   expect(all).toContain('월급 확인');
   expect(all).toContain('청년 적금 만기');
@@ -169,7 +171,7 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 목표 기한
   await axe(page);
 
   await page.getByRole('button', { name: '챙길 날', exact: true }).click();
-  await expect(money).toHaveCount(0);
+  await expect(money.getByRole('button')).toHaveCount(0);
   await page.getByRole('button', { name: '돈 일정', exact: true }).click();
   await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: /여행 기한/ }).click();
@@ -186,10 +188,19 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/calendar/month');
+  // 처음엔 이번 주만(2026-11-03 주 단위로 접기) + 그 주 일정
+  await expect(page.locator('.hg-cal__day')).toHaveCount(7);
   await expect(page.getByRole('button', { name: '10월 7일' })).toHaveAttribute(
     'aria-current',
     'date',
   );
+  await expect(page.locator('.hg-cal__agenda')).toContainText('예빈 월급날');
+  await axe(page);
+  await page.getByRole('button', { name: '다음 주' }).click();
+  await expect(page.getByRole('button', { name: /^10월 14일/ })).toBeVisible();
+  await page.getByRole('button', { name: '이전 주' }).click();
+  await page.getByRole('button', { name: '펼치기' }).click();
+  await expect(page.locator('.hg-cal__day')).toHaveCount(42);
   await expect(page.getByText('이 날짜엔 없어요')).toBeVisible();
   await axe(page);
 
@@ -199,6 +210,7 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
   await expect(page).toHaveURL(/\/salary\/review$/);
   await page.goto('/calendar/month');
+  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: '10월 23일, 일정 1개' }).click();
   await expect(page.getByText('10월 23일(금)')).toBeVisible();
   await page.getByRole('button', { name: /찬우 월급날/ }).click();
@@ -206,6 +218,7 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
 
   await page.goto('/calendar');
   await expect(page).toHaveURL(/\/calendar\/month$/);
+  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: '다음 달' }).click();
   await expect(page.getByRole('region', { name: '2026년 11월' })).toBeVisible();
   await page.getByRole('button', { name: '11월 1일, 일정 1개' }).click();
@@ -293,6 +306,7 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
 
   // 달력에서 고른 날 → 날짜 채움
   await page.getByRole('tab', { name: '달력' }).click();
+  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: /^10월 30일/ }).click();
   await page.getByRole('button', { name: '이 날에 챙길 날 추가' }).click();
   await page.getByLabel('어떤 날이에요?').fill('집들이');
@@ -322,14 +336,15 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기, 목표 고르�
   );
 
   await page.goto('/calendar/list');
-  const overdue = page.getByRole('region', { name: '기록하기' });
-  await expect(overdue).toContainText('민지 결혼식');
+  // 기록할 날은 맨 위 회색 띠(2026-11-03)
+  const overdue = page.getByRole('button', { name: /기록할 날이 1개 있어요/ });
+  await expect(overdue).toContainText('민지 결혼식, 10월 5일');
   const next = page.getByRole('region', { name: '다음 챙길 날' });
   await expect(next).toContainText('D-6');
   await expect(next).toContainText('30만 원 생각해 뒀어요');
   await axe(page);
 
-  await overdue.getByRole('button', { name: /민지 결혼식/ }).click();
+  await overdue.click();
   await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
   await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('100,000');
   await expect(
@@ -454,6 +469,7 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   );
 
   await page.goto('/calendar/month');
+  await page.getByRole('button', { name: '펼치기' }).click();
   const hangul = page.getByRole('button', { name: '10월 9일, 한글날' });
   await expect(hangul).toHaveClass(/is-holiday/);
   await expect(hangul).toContainText('한글날');
@@ -482,5 +498,6 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   (db.space as Record<string, unknown>).holiday_shift = false;
   await page.reload();
   await page.getByRole('tab', { name: '목록' }).click();
-  await expect(page.getByRole('region', { name: '돈 일정' })).toContainText('예빈 월급날10월 10일');
+  const up = page.getByRole('region', { name: '다가오는 일정' });
+  await expect(up.getByRole('button', { name: /예빈 월급날/ }).first()).toContainText('10월 10일');
 });
