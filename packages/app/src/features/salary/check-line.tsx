@@ -1,7 +1,7 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatMonthDay, todayKst } from '@sweetwo/core';
 import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
@@ -58,6 +58,7 @@ export function CheckLine({
   readOnly,
   onOther,
   onSkip,
+  lead,
 }: {
   line: PayCheckLine;
   name: string;
@@ -71,6 +72,8 @@ export function CheckLine({
   onOther?: () => void;
   /** W-05 ‘이번 달은 못 했어요’ */
   onSkip?: () => void;
+  /** 줄 앞 아이콘(홈) */
+  lead?: ReactNode;
 }) {
   const { masked } = useMask();
   const check = useCheck();
@@ -119,6 +122,7 @@ export function CheckLine({
         onToggle={readOnly ? undefined : () => void toggle()}
         disabled={readOnly}
         meta={meta}
+        lead={lead}
         onOpen={open && (onOther || onSkip) ? () => setSheet(true) : undefined}
       />
       {sheet && (

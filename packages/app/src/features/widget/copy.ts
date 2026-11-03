@@ -3,7 +3,7 @@
 export const copy = {
   // WG-01 이번 달 월급
   count: (n: number) => `${n}개`,
-  progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`, // [확인 필요]
+  progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`, // [확인 필요]
   allDone: (label: string) => `${label} 체크를 다 했어요`,
   payday: (day: number) => `다음 월급날 ${day}일`,
   review: (n: number) => `체크 안 한 게 ${n}개 있어요`, // [확인 필요]

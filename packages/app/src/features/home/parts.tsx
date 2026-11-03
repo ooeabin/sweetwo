@@ -1,5 +1,5 @@
 import type { Goal, PayChecklist } from '@sweetwo/api';
-import { formatDateWeekday, formatYm, goalEta, templateByKey } from '@sweetwo/core';
+import { formatDateWeekday, templateByKey } from '@sweetwo/core';
 import {
   Badge,
   Button,
@@ -7,16 +7,14 @@ import {
   Illustration,
   hasIllustration,
   Lead,
-  ListRow,
-  Meter,
   Ring,
   SectionHeader,
-  WeekStrip,
   goalIcon,
+  type IconName,
 } from '@sweetwo/ui';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
-import { CheckLine, doneCount, lineName, toAllocGoal } from '../salary';
+import { CheckLine, doneCount, lineName } from '../salary';
 import { copy } from './copy';
 
 /** 목표 그림(템플릿 그림. 그림이 없으면 O-21과 같은 템플릿 아이콘, 직접 만든 목표는 깃발) */
@@ -32,16 +30,14 @@ const pctOf = (saved: number, target: number | null) =>
   target ? Math.min(Math.floor((saved * 100) / target), 100) : 0;
 
 /**
- * H-02 목표: 1순위 큰 카드(그림, 모은 돈 / 목표 금액, Meter, 예상, 이번 달 줄 체크) + 나머지 2~4순위 작은 줄 + 목표 더보기.
- * 1순위 = 우리 목표 1순위(비상금 다음), 없으면 비상금. 배우자 미합류·혼자 쓰기면 우리 목표 → 내 목표 → 비상금.
- * 내 목표 줄에는 작은 “나”(혼자 쓰기는 없음). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
+ * H-02 목표(2026-11-03 다시 짬, 카카오T·카카오페이 진행 막대처럼): 큰 카드 하나 대신 한 카드 안에 목표 줄 최대 4개.
+ * 줄 = 그림 + 이름(내 목표는 작은 “나”) + “95만 / 1억 5,000만 원” + 오른쪽 % + 아래 얇은 막대(예상 달은 목표 탭).
+ * 순서: 우리 목표 → 비상금 → 내 목표(배우자 미합류·혼자 쓰기면 우리 → 내 → 비상금). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
+ * 이번 달 저금 체크는 위 이번 달 체크리스트에서만. 줄 → G-02. ‘지연’ 배지는 홈에 없음.
  */
 export function GoalsCard({
   goals,
   savedOf,
-  monthly,
-  list,
-  personName,
   meId,
   joined = true,
   solo = false,
@@ -49,12 +45,8 @@ export function GoalsCard({
 }: {
   goals: Goal[];
   savedOf: (g: Goal) => number;
-  /** 그 목표 저금 줄 금액(이번 분배표) */
-  monthly: (g: Goal) => number;
-  list: PayChecklist | undefined;
-  personName: (id: string | null) => string | null;
   meId: string | undefined;
-  /** 배우자가 합류했는지(미합류·혼자 쓰기면 1순위를 내 목표까지 봄) */
+  /** 배우자가 합류했는지(미합류·혼자 쓰기면 내 목표를 비상금보다 먼저) */
   joined?: boolean;
   solo?: boolean;
   go: (to: string) => void;
@@ -64,77 +56,47 @@ export function GoalsCard({
   const live = goals.filter((g) => g.status === 'active' || g.status === 'delayed');
   const ours = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === null);
   const mine = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === meId);
-  const emergency = live.find((g) => g.template === 'emergency');
-  const top = joined ? (ours[0] ?? emergency) : (ours[0] ?? mine[0] ?? emergency);
-  const rest = [...ours, ...(emergency ? [emergency] : []), ...mine]
-    .filter((g) => g !== top)
-    .slice(0, 3);
-  if (!top) return null;
-  const saved = savedOf(top);
-  const eta = goalEta(toAllocGoal({ ...top, other_held: saved }), monthly(top));
-  const line = list?.pay_check_line.find((l) => l.kind === 'saving' && l.goal_id === top.id);
-  // 홈에서는 ‘지연’ 배지를 달지 않음(예상 달만). 첫 체크 직후에도 비난처럼 읽혀서, 지연은 목표 탭에서만(2026-11-03)
+  const emergency = live.filter((g) => g.template === 'emergency');
+  const list = (joined ? [...ours, ...emergency, ...mine] : [...ours, ...mine, ...emergency]).slice(0, 4);
+  if (!list.length) return null;
   return (
     <section className="hg-stack" aria-label={copy.goals}>
       <SectionHeader title={copy.goals} more={{ label: copy.moreGoals, href: '/goals' }} />
-      <div className="hg-card hg-stack">
-        <Meter
-          name={top.name}
-          tone={top.template === 'emergency' ? 'safety' : 'goal'}
-          pct={pctOf(saved, top.target_amount)}
-          sub={
-            top.target_amount
-              ? `${copy.goalAmount(m(saved), m(top.target_amount))}${eta.expected ? `, ${copy.expected(formatYm(eta.expected))}` : ''}`
-              : copy.setAmount
-          }
-          lead={<GoalLead template={top.template} />}
-          empty={saved > 0 ? undefined : copy.noSavedYet}
-          started={saved > 0}
-        />
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => go(top.target_amount ? `/goals/${top.id}` : `/goals/${top.id}/set-amount`)}
-        >
-          {top.target_amount ? copy.seeGoal : copy.setAmount}
-        </button>
-        {line && (
-          <CheckLine
-            line={line}
-            goalName={top.name}
-            name={
-              line.state === 'checked'
-                ? copy.thisMonthDone(m(line.actual ?? line.planned))
-                : copy.thisMonthTodo(m(line.planned))
-            }
-            personName={personName}
-            meId={meId}
-          />
-        )}
-      </div>
-      {rest.length > 0 && (
-        <div className="hg-list">
-          {rest.map((g) => (
-            <ListRow
-              key={g.id}
-              lead={<GoalLead template={g.template} />}
-              label={
-                g.owner_user_id === meId && !solo ? (
-                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                    {g.name}
-                    <Badge kind="temp">{copy.mineMark}</Badge>
-                  </span>
+      <div className="hg-card hg-goallist">
+        {list.map((g) => {
+          const saved = savedOf(g);
+          const pct = pctOf(saved, g.target_amount);
+          const to = g.target_amount ? `/goals/${g.id}` : `/goals/${g.id}/set-amount`;
+          return (
+            <button key={g.id} type="button" className="hg-goalrow" onClick={() => go(to)}>
+              <GoalLead template={g.template} />
+              <span className="hg-goalrow__name">
+                {g.name}
+                {g.owner_user_id === meId && !solo && <Badge kind="temp">{copy.mineMark}</Badge>}
+              </span>
+              <span className="hg-goalrow__pct">
+                {g.target_amount ? (
+                  <>
+                    {pct}
+                    <small>%</small>
+                  </>
                 ) : (
-                  g.name
-                )
-              }
-              value={g.target_amount ? `${pctOf(savedOf(g), g.target_amount)}%` : copy.setAmount}
-              onClick={() => go(g.target_amount ? `/goals/${g.id}` : `/goals/${g.id}/set-amount`)}
-            />
-          ))}
-        </div>
-      )}
+                  <span className="hg-goalrow__set">{copy.setAmount}</span>
+                )}
+              </span>
+              <span className="hg-goalrow__sub">
+                {/* 금액만(한 줄). 예상 달은 목표 탭에서 */}
+                {g.target_amount ? copy.goalAmount(m(saved), m(g.target_amount)) : m(saved)}
+              </span>
+              {g.target_amount ? (
+                <span className="hg-goalrow__bar" aria-hidden="true">
+                  <i style={{ width: `${saved > 0 ? Math.max(pct, 2) : 0}%` }} />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
       {!ours.length && !mine.length && (
         <Button variant="secondary" onClick={() => go('/goals/new')}>
           {copy.addGoal}
@@ -145,9 +107,16 @@ export function GoalsCard({
 }
 
 const SHOW = 3;
+/** 쓰는 돈 줄 아이콘(홈 체크리스트) */
+const LINE_ICON = {
+  fixed: 'calendar-check',
+  living: 'shopping-bag',
+  allowance: 'coins',
+  custom: 'wallet',
+} as const satisfies Record<string, IconName>;
 
 /**
- * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 했어요” + 줄 목록(저금 먼저) + ‘분배표 고치기’.
+ * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 완료” + 줄 목록(저금 먼저) + ‘분배표 고치기’.
  * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 숨김(펼치기 없음, 머리 링크 → W-02). 월급이 없으면 ‘월급 알려 주기’.
  */
 export function SalaryCard({
@@ -156,6 +125,7 @@ export function SalaryCard({
   partnerName,
   partnerStarter = false,
   goalName,
+  goalTemplate,
   personName,
   meId,
   joint,
@@ -167,6 +137,8 @@ export function SalaryCard({
   /** 배우자가 시작한 사람인지(Avatar 색) */
   partnerStarter?: boolean;
   goalName: (id: string | null) => string;
+  /** 저금 줄 목표 템플릿(아이콘) */
+  goalTemplate: (id: string | null) => string | null;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
   joint: boolean;
@@ -194,13 +166,14 @@ export function SalaryCard({
     .filter((l) => l.kind === 'saving' && l.state === 'checked')
     .reduce((s, l) => s + (l.actual ?? l.planned), 0);
   return (
+    // 2026-11-03 다른 영역처럼 제목 줄은 카드 위(진행 원 + “9월 월급” + “5개 중 1개 완료 ›”), 줄마다 아이콘, 마지막 줄 선 없음
     <section className="hg-stack" aria-label={list.label}>
       <SectionHeader
         title={list.label}
         lead={<Ring done={done} total={total} label={copy.progress(total, done)} />}
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
-      <div className="hg-card hg-stack">
+      <div className="hg-card hg-stack hg-salarycard">
         {finished && (
           <p className="hg-card__meta">
             <Icon name="check" size={16} /> {copy.allDone(list.label)}.{' '}
@@ -210,7 +183,7 @@ export function SalaryCard({
         {/* 다 했으면 줄 없이 한 줄 요약만(‘줄 펼치기’ 없음, 줄은 머리 링크 → W-02, 2026-11-03) */}
         {!finished && (
           <div className="hg-checklist__list">
-            {/* 홈 맨 위(2026-11-03): 3줄까지만(저금 먼저). 나머지는 머리 ‘5개 중 2개 했어요 ›’ → W-02 */}
+            {/* 홈 맨 위(2026-11-03): 3줄까지만(저금 먼저). 나머지는 머리 ‘5개 중 2개 완료 ›’ → W-02 */}
             {lines.slice(0, SHOW).map((l) => (
               <CheckLine
                 key={l.id}
@@ -218,6 +191,15 @@ export function SalaryCard({
                 name={lineName(l, goalName, personName, joint)}
                 personName={personName}
                 meId={meId}
+                lead={
+                  <Lead
+                    icon={
+                      l.kind === 'saving'
+                        ? goalIcon(goalTemplate(l.goal_id) ?? 'custom')
+                        : LINE_ICON[l.kind]
+                    }
+                  />
+                }
               />
             ))}
           </div>
@@ -259,37 +241,55 @@ export interface UpcomingItem {
   label: string;
   dday: number;
   to: string;
+  /** 날짜 칸 색(월급날 초록, 월말 확인 청록, 챙길 날 분홍, 목표 기한 베이지, 만기 보라) */
+  kind: 'payday' | 'review' | 'care' | 'goal' | 'maturity';
 }
 
-/** H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 목표 기한, 날짜순 최대 3개 */
-export function UpcomingCard({
-  items,
-  go,
-  today,
-}: {
-  items: UpcomingItem[];
-  go: (to: string) => void;
-  /** 이번 주 날짜 띠(오늘, KST). 없으면 띠 없음(트레이 등) */
-  today?: string;
-}) {
+const KIND_TONE = {
+  payday: 'invest',
+  review: 'safety',
+  care: 'together',
+  goal: 'goal',
+  maturity: 'family',
+} as const;
+
+/**
+ * H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 목표 기한, 날짜순 최대 3개.
+ * 2026-11-03 카카오톡 일정처럼 왼쪽 날짜 칸(“10월” / “22”, 종류별 옅은 영역 색) + 이름 + 요일, 오른쪽 D-day. 주 띠는 없앰.
+ */
+export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {
   return (
     <section className="hg-stack" aria-label={copy.upcoming}>
       <SectionHeader
         title={copy.upcoming}
         more={{ label: copy.moreCalendar, href: '/calendar/list' }}
       />
-      {today && <WeekStrip today={today} marked={new Set(items.map((e) => e.date))} />}
       {items.length ? (
-        <div className="hg-list">
-          {items.map((e) => (
-            <ListRow
-              key={e.key}
-              label={e.label}
-              sub={formatDateWeekday(e.date)}
-              value={copy.dday(e.dday)}
-              onClick={() => go(e.to)}
-            />
-          ))}
+        <div className="hg-card hg-daylist">
+          {items.map((e) => {
+            const [, mo, d] = e.date.split('-').map(Number) as [number, number, number];
+            return (
+              <button
+                key={e.key}
+                type="button"
+                className="hg-dayrow"
+                aria-label={`${e.label}, ${formatDateWeekday(e.date)}, ${copy.dday(e.dday)}`}
+                onClick={() => go(e.to)}
+              >
+                <span className={`hg-dayrow__date hg-dayrow__date--${KIND_TONE[e.kind]}`} aria-hidden="true">
+                  <small>{copy.monthShort(mo)}</small>
+                  <b>{d}</b>
+                </span>
+                <span className="hg-dayrow__text" aria-hidden="true">
+                  <b>{e.label}</b>
+                  <small>{formatDateWeekday(e.date).replace(/^.*?일 /, '')}</small>
+                </span>
+                <span className="hg-dayrow__dday" aria-hidden="true">
+                  {copy.dday(e.dday)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       ) : (
         <div className="hg-card hg-card--fill">

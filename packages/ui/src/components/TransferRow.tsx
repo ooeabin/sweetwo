@@ -14,6 +14,7 @@ export function TransferRow({
   badge,
   actions,
   onOpen,
+  lead,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -30,6 +31,8 @@ export function TransferRow({
   actions?: ReactNode;
   /** 줄(이름·금액)을 누르면 여는 선택 시트(W-02 ‘다른 금액’, W-05 ‘못 했어요’, 2026-11-03) */
   onOpen?: () => void;
+  /** 줄 앞 아이콘 칸(홈 이번 달 체크리스트, 2026-11-03) */
+  lead?: ReactNode;
 }) {
   const body = (
     <>
@@ -49,7 +52,8 @@ export function TransferRow({
     </>
   );
   return (
-    <div className={cx('hg-transfer', done && 'is-done')}>
+    <div className={cx('hg-transfer', done && 'is-done', !!lead && 'hg-transfer--lead')}>
+      {lead}
       <button
         type="button"
         role="checkbox"

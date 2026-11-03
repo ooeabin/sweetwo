@@ -133,8 +133,12 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   // 홈 할 일 ‘분배표 확인’은 없앰(2026-11-03)
   await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
 
-  // 홈 1순위 카드 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)
-  await page.getByRole('button', { name: '금액 정하기', exact: true }).click();
+  // 홈 목표 줄 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)
+  await page
+    .getByRole('region', { name: '목표' })
+    .getByRole('button', { name: /금액 정하기/ })
+    .first()
+    .click();
   await heading(page, '어느 정도 집을 생각하세요?');
   await page.getByLabel('어느 정도 집을 생각하세요?').fill('500000000');
   await next(page);

@@ -1,61 +1,45 @@
 import { formatYm } from '@sweetwo/core';
-import { LineChart } from '@sweetwo/ui';
+import { MonthBars, SectionHeader } from '@sweetwo/ui';
 import { money, useMask } from '../../shared/mask';
 import { copy } from './copy';
 import type { NetWorthView } from './data';
 
-const signed = (v: number, m: (n: number) => string) => `${v > 0 ? '+' : '−'}${m(Math.abs(v))}`;
-
-// H-06 순자산(19 이번 달 6번): “8,420만 원” / “예상 8,540만” / “안 판 수익 +120만” / “지난달보다 +210만 원” + 6개월 그래프.
-// 계산·회색 줄 규칙은 F-01과 같음(core netWorth). 누르면 F-01.
-export function H06NetWorth({ n, onOpen }: { n: NetWorthView; onOpen: () => void }) {
+// H-04 우리 자산(19 이번 달 5번, 2026-11-03 F-01과 같게): “우리 순자산” + 큰 숫자 + “지난달보다 180만 원 늘었어요”
+// + 최근 6달 막대(MonthBars, 이번 달만 진한 초록) + ‘우리 자산 보기’ → F-01. 계산은 F-01과 같음(core netWorth).
+// 가진 돈이 하나도 없으면 홈에서 카드 자체를 숨김(소비자).
+export function H06NetWorth({ n }: { n: NetWorthView }) {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
-  if (n.empty)
-    return (
-      <section className="hg-card hg-card--fill hg-stack" aria-label={copy.netWorth}>
-        <p className="hg-card__meta">{copy.netWorthEmpty}</p>
-        <button type="button" className="hg-btn hg-btn--link" onClick={onOpen}>
-          {copy.netWorthSee}
-        </button>
-      </section>
-    );
+  const now = n.series[n.series.length - 1];
+  // 다른 영역처럼 카드 위 제목 줄 “우리 자산” + “더보기 ›”(2026-11-03)
   return (
-    <div className="hg-stack">
-      <LineChart
-        label={copy.netWorth}
-        value={m(n.nw.net)}
-        sub={
-          n.nw.gain !== 0 ? (
-            <span className="hg-networth__expected">
-              {copy.netWorthExpected(m(n.nw.expected))}
-              {', '}
-              {copy.netWorthGain(signed(n.nw.gain, m))}
+    <section className="hg-stack" aria-label={copy.assetsTitle}>
+      <SectionHeader title={copy.assetsTitle} more={{ label: copy.assetsMore, href: '/assets' }} />
+      <section className="hg-card hg-stack" aria-label={copy.ourNetWorth}>
+        <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+          <span className="hg-networth__label">{copy.ourNetWorth}</span>
+          <span className="hg-networth__value hg-networth__value--card">{m(n.nw.net)}</span>
+          {n.change !== null && n.change !== 0 && (
+            <span className={n.change > 0 ? 'hg-networth__delta' : 'hg-networth__delta is-down'}>
+              {copy.lastMonth} <b>{m(Math.abs(n.change))}</b>{' '}
+              {n.change > 0 ? copy.grew : copy.shrank}
             </span>
-          ) : undefined
-        }
-        delta={
-          n.change !== null && n.change !== 0
-            ? {
-                dir: n.change > 0 ? 'up' : 'down',
-                text: copy.netWorthChange(signed(n.change, m)),
-              }
-            : undefined
-        }
-        points={n.series.map((x) => ({
-          label: formatYm(x.month),
-          value: x.net,
-          expected: x.expected,
-        }))}
-        format={m}
-        name={copy.netWorth}
-        expectedName={copy.netWorthExpectedName}
-        expectedText={copy.netWorthExpected}
-        plotLabel={copy.netWorthGraph}
-      />
-      <button type="button" className="hg-btn hg-btn--link" onClick={onOpen}>
-        {copy.netWorthSee}
-      </button>
-    </div>
+          )}
+        </div>
+        <MonthBars
+          label={
+            now ? `${copy.netWorthGraph}, ${formatYm(now.month)} ${m(now.net)}` : copy.netWorthGraph
+          }
+          nowText={now ? m(now.net).replace(/ 원$/, '') : undefined}
+          bars={n.series.map((x, i) => ({
+            key: x.month,
+            label: `${Number(x.month.slice(5, 7))}월`,
+            value: x.net,
+            tip: `${formatYm(x.month)} ${m(x.net)}`,
+            now: i === n.series.length - 1,
+          }))}
+        />
+      </section>
+    </section>
   );
 }

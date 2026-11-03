@@ -51,7 +51,7 @@ test('트레이 위젯: 이번 달 월급(WG-01) 체크 개수와 다음 월급�
   await fakeBridge(page, { signedIn: true, locked: false, snapshot, settings });
   await page.goto('/widget/tray');
   const sum = page.getByRole('button', {
-    name: /9월 월급, 2개, 5개 중 2개 했어요, 다음 월급날 25일/,
+    name: /9월 월급, 2개, 5개 중 2개 완료, 다음 월급날 25일/,
   });
   await expect(sum).toBeVisible();
   await expect(page.getByRole('button', { name: /다음 할 일/ })).toContainText(
