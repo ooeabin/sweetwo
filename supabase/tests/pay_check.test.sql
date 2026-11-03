@@ -58,14 +58,13 @@ select is((select count(*) from public.goal_checked_sums()), 0::bigint, '풀면 
 select public.check_pay_line(pg_temp.line('home'), 'checked');
 reset role;
 
--- 예빈(합류): 찬우 체크리스트에 대신 체크, 이미 체크한 줄은 먼저 저장된 체크 유지
+-- 예빈(합류): 찬우 체크리스트는 보기만(2026-11-03 대신 체크 없앰)
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
-select throws_ok($$ select public.check_pay_line(pg_temp.line('home'), 'checked') $$, '40001', 'already_checked', '먼저 저장된 체크 유지');
-select public.check_pay_line(pg_temp.line('living'), 'checked');
-select ok((select on_behalf from public.pay_check_line where id = pg_temp.line('living')), '대신 체크 표시');
+select throws_ok($$ select public.check_pay_line(pg_temp.line('living'), 'checked') $$, '42501', 'not_owner', '배우자 체크리스트는 체크 못 함');
+select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'wait', '배우자 줄은 그대로');
 reset role;
 
 -- 다른 부부는 체크할 수 없음

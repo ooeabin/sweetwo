@@ -418,7 +418,7 @@ export function G02GoalDetail() {
             </button>
           )}
         </div>
-        {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 대신 체크).
+        {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 보기만).
             이번 달 줄이 없는 사람은 금액만 */}
         {i.thisMonth.length > 0 && <span className="hg-goalbox__sub">{copy.boxThisMonth}</span>}
         <div className="hg-checklist__list">
@@ -448,6 +448,8 @@ export function G02GoalDetail() {
                 lead={dot}
                 personName={(x) => d.nameOf(x)}
                 meId={d.meId}
+                // 각자 모드에서 배우자 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
+                readOnly={!d.joint && p.userId !== d.meId}
               />
             ) : (
               <div key={p.userId} className="hg-goalbox__person">
