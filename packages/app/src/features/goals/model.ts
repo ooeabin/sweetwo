@@ -76,7 +76,8 @@ export function useGoalsModel() {
     const monthly = perPerson.reduce((t, p) => t + p.amount, 0);
     const eta = goalEta(toAllocGoal({ ...g, other_held: s }), monthly);
     const t = templateByKey(g.template);
-    const late = eta.lateMonths !== null && eta.lateMonths > 0;
+    // 아직 모은 돈이 없으면 지연으로 보지 않음(첫 사이클 ‘지연’ 배지, 2026-11-03)
+    const late = eta.lateMonths !== null && eta.lateMonths > 0 && s > 0;
     const state = (
       g.status === 'paused' || g.status === 'achieved' || g.status === 'used'
         ? g.status

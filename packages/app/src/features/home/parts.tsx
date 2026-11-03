@@ -74,7 +74,8 @@ export function GoalsCard({
   const saved = savedOf(top);
   const eta = goalEta(toAllocGoal({ ...top, other_held: saved }), monthly(top));
   const line = list?.pay_check_line.find((l) => l.kind === 'saving' && l.goal_id === top.id);
-  const late = eta.lateMonths !== null && eta.lateMonths > 0;
+  // 아직 모은 돈이 없으면 ‘지연’ 배지 없이 예상 달만(첫 사이클에 비난처럼 읽혀서, 2026-11-03)
+  const late = eta.lateMonths !== null && eta.lateMonths > 0 && saved > 0;
   return (
     <section className="hg-stack" aria-label={copy.goals}>
       <SectionHeader title={copy.goals} more={{ label: copy.moreGoals, href: '/goals' }} />
@@ -90,6 +91,7 @@ export function GoalsCard({
           }
           badge={late ? <Badge kind="warn">{copy.delayed}</Badge> : undefined}
           lead={<GoalLead template={top.template} />}
+          empty={copy.noSavedYet}
         />
         <button
           type="button"

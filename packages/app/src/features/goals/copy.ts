@@ -1,6 +1,7 @@
 // 목표 문구(docs/spec/22-goals.md G-01, G-02). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
+  noSavedYet: '아직 모은 돈이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
   title: '목표',
   retry: '다시 시도',
   saveFailed: '저장하지 못했어요',
@@ -319,6 +320,7 @@ export const copy = {
   noDeadline: '없음', // [확인 필요]
   expectUnknown: '예상 미정',
   addHeld: '이미 모은 돈 넣기',
+  addHeldSub: '목표를 만들기 전에 따로 모아 둔 돈이에요', // [확인 필요] G-02a 첫 질문
   changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
   inOut: '넣기·빼기', // [확인 필요]
   use: '꺼내 쓰기',
@@ -354,7 +356,6 @@ export const copy = {
   whoTitle: '누구 목표예요?', // [확인 필요]
   whoOurs: '우리 둘', // [확인 필요]
   whoMine: '나', // [확인 필요]
-  confirmZeroLine: '분배표에 이 목표 줄을 0원으로 만들어 둘게요. 금액은 분배표에서 정해요', // [확인 필요]
 
   // 목표 사진(22 G-02 ‘목표 사진’, 직접 만든 목표만). 올리기 규칙·문구는 프로필 사진(25 S-11e)과 같음
   photoTitle: '목표 사진', // [확인 필요]

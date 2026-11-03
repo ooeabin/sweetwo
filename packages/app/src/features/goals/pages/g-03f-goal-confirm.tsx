@@ -16,8 +16,8 @@ import { addToGoalLine, mySplit, takeFreed } from '../freed';
 const man = (v: number) => `${formatManWon(v)} 원`;
 
 // G-03f 미리보기(Q7, 22): “매달 25만 원씩 모으면 2028년 3월에 이뤄요”(월 필요액 기준) /
-// 보조 “분배표에 이 목표 줄을 0원으로 만들어 둘게요. 금액은 분배표에서 정해요”. 추가하기 → 바로 저장,
-// 분배표에 0원 저금 줄(서버 트리거) → G-02. 우선순위는 그 종류 묶음 맨 아래.
+// 추가하기 → 바로 저장, 분배표에 0원 저금 줄(서버 트리거) → G-03g 매달 넣는 돈 → G-02(2026-11-03, 0원 보조 문구 없앰).
+// 우선순위는 그 종류 묶음 맨 아래.
 export function G03fGoalConfirm() {
   const s = useAddStep('confirm');
   const nav = useNavigate();
@@ -77,7 +77,10 @@ export function G03fGoalConfirm() {
         [qk.goals, qk.splits, qk.goalSaved].map((k) => qc.invalidateQueries({ queryKey: k })),
       );
       await qc.invalidateQueries({ queryKey: ['pay_checklist'] });
-      nav(`/goals/${id}`, { replace: true });
+      // 금액이 있는 목표는 매달 넣는 돈(G-03g)까지 묻고 상세로(2026-11-03). 넘겨받은 돈으로 채웠으면 바로 상세
+      nav(freed > 0 || p.target_amount === null ? `/goals/${id}` : `/goals/${id}/monthly`, {
+        replace: true,
+      });
     } catch {
       toast(copy.loadFailed);
     } finally {
@@ -89,7 +92,6 @@ export function G03fGoalConfirm() {
     <QuestionLayout
       steps={s.steps}
       title={title}
-      help={copy.confirmZeroLine}
       onBack={s.onBack}
       primary={{ label: copy.addDone, loading: saving }}
       onSubmit={() => void submit()}

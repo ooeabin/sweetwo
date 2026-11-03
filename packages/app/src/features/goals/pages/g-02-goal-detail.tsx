@@ -352,6 +352,7 @@ export function G02GoalDetail() {
             }
             pct={i.pct}
             tone={tone(g.template)}
+            empty={copy.noSavedYet}
           />
         )}
       </section>
@@ -409,16 +410,7 @@ export function G02GoalDetail() {
           plotLabel={copy.graphTitle}
         />
       )}
-      {i.canEdit && history.length === 0 && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav(`/goals/${id}/move/held`)}
-        >
-          {copy.addHeld}
-        </button>
-      )}
+      {/* ‘이미 모은 돈 넣기’는 넣기·빼기 첫 질문으로 합침(입구 하나, 2026-11-03) */}
       {i.thisMonth.length > 0 && (
         <div className="hg-checklist__list">
           {i.thisMonth.map((l) => (

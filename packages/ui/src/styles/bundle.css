@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (bd5037f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (4ef793b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1291,6 +1291,7 @@ a.hg-btn { text-decoration: none; }
 .hg-meter__pct { font: 700 28px/32px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
 .hg-meter__pct small { font-size: 15px; }
 /* 쌓이는 칸(카카오뱅크 26주적금 느낌): 10% 칸 10개를 두 줄로, 아래 줄(0~50%)부터 차서 위 줄로 올라감 */
+.hg-meter__empty { margin: var(--space-3) 0 0; font: 400 13px/18px var(--font-sans); color: var(--stone); }  /* 0%일 때 칸 대신 한 줄(2026-11-03) */
 .hg-meter__segs { position: relative; display: flex; flex-wrap: wrap-reverse; gap: 6px; margin-top: var(--space-5); }
 .hg-meter__segs i { flex: 0 0 calc((100% - 24px) / 5); height: 22px; border-radius: var(--radius-sm); background: var(--t); }
 .hg-meter__segs i.is-on { background: var(--c); }

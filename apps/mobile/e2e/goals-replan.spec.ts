@@ -107,10 +107,10 @@ test('G-03 목표 추가: 누구 목표예요? 나 → 내 목표, 분배표 저
   await setYearMonth(page, 2028, 12);
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '없어요' }).click();
-  await expect(
-    page.getByText('분배표에 이 목표 줄을 0원으로 만들어 둘게요. 금액은 분배표에서 정해요'),
-  ).toBeVisible();
   await page.getByRole('button', { name: '추가하기' }).click();
+  // 금액이 있는 목표는 매달 넣는 돈(G-03g)까지 묻고 상세로(2026-11-03). 나중에 → 0원 줄 그대로
+  await expect(page.getByRole('heading', { name: '매달 얼마씩 넣을까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page.getByRole('heading', { name: '투자 종잣돈' })).toBeVisible();
   await expect(page.getByText('내 목표').first()).toBeVisible();
 
@@ -214,6 +214,8 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
   await page.getByRole('button', { name: '다음' }).click();
   await axe(page);
   await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page.getByRole('heading', { name: '매달 얼마씩 넣을까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page.getByRole('heading', { name: '캠핑 장비' })).toBeVisible();
   expect(db.goals.find((g) => g.name === '캠핑 장비')).toMatchObject({
     template: 'custom',
