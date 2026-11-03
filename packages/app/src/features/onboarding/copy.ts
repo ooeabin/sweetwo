@@ -78,11 +78,11 @@ export const copy = {
   birthYear: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
   // O-21
   goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
-  goalsHelp: '고른 순서가 우선순위가 돼요', // [확인 필요]
+  goalsHelp: '모으고 싶은 순서대로 골라 주세요', // [확인 필요]
   recommended: '추천',
   makeOwn: '+ 직접 만들기',
   picked: (n: number) => `${n}개 골랐어요`,
-  onlyEmergency: '비상금만 먼저 모을게요',
+  onlyEmergency: '일단 비상금부터 챙길게요',
   goalTabsLabel: '목표 분류',
 
   // O-23, O-24
@@ -121,7 +121,7 @@ export const copy = {
     separate: { label: '각자 월급을 따로 관리해요', sub: '분배표와 체크리스트가 사람마다 있어요' }, // [확인 필요]
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 분배표로 나눠요' }, // [확인 필요]
   },
-  salary: '한 달에 월급이 얼마 들어와요?',
+  salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
   salaryVariable: '매달 금액이 달라요',
   salaryVariableHelp: '가장 적게 들어온 달 기준으로 적어 주세요', // [확인 필요]

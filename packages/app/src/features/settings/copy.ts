@@ -78,7 +78,7 @@ export const copy = {
   nicknameQ: '내 이름이나 애칭을 알려 주세요',
 
   // S-11c 내 월급(O-31과 같음)
-  salaryQ: '한 달에 월급이 얼마 들어와요?',
+  salaryQ: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
   salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
   noSalary: '지금은 월급이 없어요',

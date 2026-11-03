@@ -64,8 +64,8 @@ async function answerBasics(page: Page, waiting = false) {
 }
 
 async function salary(page: Page) {
-  await expect(page.getByRole('heading', { name: '한 달에 월급이 얼마 들어와요?' })).toBeVisible();
-  await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('2700000');
+  await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('2700000');
   // 월급날 휠(2026-11-03): 25일에서 시작 → 10일
   const day = page.getByRole('spinbutton', { name: '월급날', exact: true });
   await expect(day).toHaveAttribute('aria-valuetext', '25일');
