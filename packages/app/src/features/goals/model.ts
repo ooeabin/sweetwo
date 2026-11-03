@@ -117,11 +117,12 @@ export function useGoalsModel() {
     mine: open.filter((i) => i.group === 'mine'),
     partner: open.filter((i) => i.group === 'partner'),
   };
-  // 접힌 목록: 보류 → 달성 → 사용 완료(22 달성·보류 1번)
-  const FOLD_ORDER: Record<string, number> = { paused: 0, achieved: 1, used: 2 };
+  // 접힌 목록: 보류 → 달성(22 달성·보류 1번, 2026-11-04 사용 완료 없앰, 옛 used는 달성으로).
+  // 개수와 펼친 묶음이 같도록 화면에 묶음이 있는 상태만(쓰지 않는 wrapping_up 같은 값은 빼고)
+  const FOLD_ORDER: Record<string, number> = { paused: 0, achieved: 1 };
   const folded = items
-    .filter((i) => !OPEN.has(i.goal.status))
-    .sort((a, b) => (FOLD_ORDER[a.goal.status] ?? 3) - (FOLD_ORDER[b.goal.status] ?? 3));
+    .filter((i) => !OPEN.has(i.goal.status) && i.state in FOLD_ORDER)
+    .sort((a, b) => (FOLD_ORDER[a.state] ?? 2) - (FOLD_ORDER[b.state] ?? 2));
   // 상단 요약: 내가 볼 수 있는 목표의 월급 계획 저금 줄 합(배우자 내 목표 포함)
   const monthlyTotal = open.reduce((t, i) => t + i.monthly, 0);
   return {

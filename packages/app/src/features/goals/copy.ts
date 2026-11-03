@@ -37,7 +37,6 @@ export const copy = {
   monthly: '매달',
   monthlyHeld: (amount: string) => `${amount} 모았어요`, // [확인 필요] 매달 목표 누적액
   noAmount: '금액을 정하면 계산돼요', // [확인 필요] O-64와 같음
-  folded: (n: number) => `보류·달성·사용 완료 ${n}개`,
   add: '+ 목표 추가',
   reorder: '순서 바꾸기',
   short: (amount: string) => `저축 가능 금액보다 월 ${amount} 많아요`,
@@ -158,7 +157,7 @@ export const copy = {
   impactNeed: (before: string, after: string) => `월 필요액 ${before} → ${after}`, // [확인 필요]
   impactStatus: (before: string, after: string) => `상태 ${before} → ${after}`, // [확인 필요]
   impactExpected: (before: string, after: string) => `예상 달성 ${before} → ${after}`, // [확인 필요]
-  pausedNote: '월 0원으로 배분에서 빠져 있어요',
+  pausedNote: '지금은 모으지 않고 있어요', // 22 달성·보류 2번
 
   // G-03a~f 목표 추가
   addTitle: '어떤 목표를 추가할까요?',
@@ -183,7 +182,7 @@ export const copy = {
 
   // G-06 순서 바꾸기
   orderTitle: '어떤 것부터 모을까요?',
-  orderNothing: '목표가 하나라 아직 바꿀 순서가 없어요', // [확인 필요] G-06 목표가 하나일 때
+  orderNothing: '비상금은 맨 위에 고정돼요. 목표가 하나 더 생기면 순서를 바꿀 수 있어요', // [확인 필요] G-06 바꿀 목표가 하나일 때(2026-11-04)
   orderPinned: '맨 위에 고정돼요', // [확인 필요] G-06 비상금 줄
   orderAdd: '목표 추가하기', // [확인 필요] G-06 목표가 하나뿐일 때
   orderOk: '이 순서로 정하기',
