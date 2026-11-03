@@ -78,7 +78,16 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await next(page);
   // 월급날은 따로 한 화면(O-32), 마지막 질문
   await heading(page, '월급날은 며칠이에요?');
-  await page.getByRole('radio', { name: '25일' }).click();
+  // 휠(2026-11-03): 처음 값 25일, 맨 아래 말일
+  const day = page.getByRole('spinbutton', { name: '월급날은 며칠이에요?' });
+  await expect(day).toHaveAttribute('aria-valuetext', '25일');
+  await day.focus();
+  await day.press('End');
+  await expect(day).toHaveAttribute('aria-valuetext', '말일');
+  await day.press('Home');
+  for (let i = 1; i < 25; i++) await day.press('ArrowDown');
+  await expect(day).toHaveAttribute('aria-valuetext', '25일');
+  await expect(page.getByText('맨 아래에 ‘말일’도 있어요')).toBeVisible();
   await axe(page);
   await next(page);
   // O-60 준비 끝: 해 둔 것 + 홈에서 할 것, 진행 막대 없음
@@ -143,6 +152,32 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
     target_amount: 150_000_000,
     deadline: '2031-10-01',
   });
+});
+
+test('O-07 초대 코드 시트: 카톡 주 버튼, 링크 복사, 보내기 전엔 ‘나중에 보낼게요’, 복사하면 ‘다음’', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.clock.setFixedTime(NOW);
+  await mockOnboarding(page, { now: NOW });
+  await page.goto('/');
+  await page.getByRole('button', { name: '시작할게요' }).click();
+  await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
+  await next(page);
+  await heading(page, '같이 쓸 사람을 초대할까요?');
+  await page.getByRole('radio', { name: '초대하기' }).click();
+  const sheet = page.getByRole('dialog', { name: '이 코드를 보내 주세요' });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByText('눌러서 복사')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: '카톡으로 보내기' })).toHaveClass(
+    /hg-btn--primary/,
+  );
+  await expect(sheet.getByRole('button', { name: '나중에 보낼게요' })).toBeVisible();
+  await axe(page);
+  await sheet.getByRole('button', { name: '링크 복사' }).click();
+  await sheet.getByRole('button', { name: '다음' }).click();
+  await heading(page, '두 사람은 어떤 사이예요?');
 });
 
 test('O-11 아직 안 정했어요: 결혼 날짜를 묻지 않고 출생연도로, 결혼 비용 추천 없음', async ({

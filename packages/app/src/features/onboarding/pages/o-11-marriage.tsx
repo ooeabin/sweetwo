@@ -28,9 +28,9 @@ export function O11Marriage() {
           )
         }
         options={[
-          { value: 'married', label: copy.marriedChoices.married },
-          { value: 'engaged', label: copy.marriedChoices.engaged },
-          { value: 'undecided', label: copy.marriedChoices.undecided },
+          { value: 'married', label: copy.marriedChoices.married, icon: 'heart' },
+          { value: 'engaged', label: copy.marriedChoices.engaged, icon: 'diamond' },
+          { value: 'undecided', label: copy.marriedChoices.undecided, icon: 'ellipsis' },
         ]}
       />
     </QuestionLayout>

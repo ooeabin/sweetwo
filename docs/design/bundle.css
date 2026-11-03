@@ -183,8 +183,10 @@
 @media (prefers-reduced-motion: no-preference) { .hg-scrim--sheet > .hg-sheet { animation: hg-sheet-in var(--dur-base) var(--ease-out); } }
 @keyframes hg-sheet-in { from { transform: translateY(24px); } }
 /* 초대 코드(O-07, S-12): 큰 숫자, 글자 사이를 띄움, 누르면 복사 */
-.hg-invite-code { align-self: flex-start; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 700 36px/44px var(--font-sans); letter-spacing: var(--space-2); font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; }
-.hg-invite-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: var(--radius-sm); }
+.hg-invite-code { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 100%; margin: 0; padding: var(--space-5) var(--space-4); border: 0; border-radius: var(--radius-xl); background: var(--plate); color: var(--ink); cursor: pointer; }  /* 2026-11-03 Setel처럼 회색 상자 가운데 */
+.hg-invite-code__code { font: 700 32px/40px var(--font-sans); letter-spacing: var(--space-2); font-variant-numeric: tabular-nums; }
+.hg-invite-code__tap { display: inline-flex; align-items: center; gap: var(--space-1); font: 500 13px/18px var(--font-sans); color: var(--slate); }
+.hg-invite-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (min-width: 768px) {
   .hg-scrim--sheet { align-items: center; padding: var(--space-6); }
   .hg-scrim--sheet > .hg-sheet { max-width: 440px; border-bottom: 1px solid var(--hairline); border-radius: var(--radius-2xl); padding: var(--space-5) var(--space-6) var(--space-6); }
@@ -347,9 +349,12 @@
 .hg-radio.is-on::after { content: ""; width: 10px; height: 10px; border-radius: var(--radius-full); background: var(--ink); }
 .hg-option { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; font: 400 16px/24px var(--font-sans); color: var(--ink); }
 .hg-option.is-disabled { color: var(--muted); cursor: not-allowed; }
-.hg-option--card { box-sizing: border-box; width: 100%; justify-content: space-between; padding: var(--space-4) var(--space-5); min-height: 64px; border: 2px solid transparent; border-radius: var(--radius-xl); background: var(--surface-alt); transition: background var(--dur-fast), border-color var(--dur-fast); }
-.hg-option--card.is-on { border-color: var(--ink); background: var(--surface); }
-.hg-option__body { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hg-option--card { box-sizing: border-box; width: 100%; justify-content: flex-start; padding: var(--space-4); min-height: 64px; border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }  /* 2026-11-03 지그재그처럼 흰 바탕 + 얇은 테두리 */
+.hg-option--card:hover { border-color: var(--border-control); }
+.hg-option--card.is-on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.hg-option__body { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hg-option__icon { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--surface-alt); color: var(--ink); }
+.hg-option__go { flex: none; color: var(--stone); }  /* 누르면 바로 넘어가는 선택(자동 다음) */
 .hg-option__label { font-weight: 600; }
 .hg-option__mark { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box; border-radius: var(--radius-full); border: 2px solid var(--border-control); color: transparent; }
 .hg-option--card.is-on .hg-option__mark { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
@@ -734,6 +739,8 @@
 .hg-wheel__col:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
+.hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
+.hg-wheel--day .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--ym { grid-template-columns: 1.2fr 1fr; }  /* 연·월(YearMonthInput) */
 .hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
 .hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
@@ -1471,7 +1478,10 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-pick__art--custom .hg-ico { width: 28px; height: 28px; }
 /* 그림이 없을 때 아이콘 원(GoalPick): 카드도 낮게 */
 .hg-pick__art--icon { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
-.hg-pick__item:has(> .hg-pick__art--icon) { min-height: 104px; }
+.hg-pick__item:has(> .hg-pick__art--icon) { min-height: 104px; align-items: flex-start; justify-content: space-between; padding: var(--space-4); text-align: left; }  /* 2026-11-03 Strava처럼 아이콘 위 왼쪽, 이름 아래 왼쪽 */
+.hg-pick__item:has(> .hg-pick__art--icon) .hg-pick__art--icon { width: 40px; height: 40px; }
+.hg-pick__item:has(> .hg-pick__art--icon) :is(.hg-pick__order, .hg-tag) { top: var(--space-3); right: var(--space-3); left: auto; }
+.hg-pick__item.is-on:has(> .hg-pick__art--icon) .hg-tag { display: none; }  /* 고르면 같은 자리의 순번이 대신 */
 .hg-pick__order { position: absolute; top: var(--space-2); right: var(--space-2); display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); }
 .hg-pick__item .hg-tag { position: absolute; top: var(--space-2); left: var(--space-2); }
 @media (max-width: 767px) { .hg-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

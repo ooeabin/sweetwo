@@ -27,6 +27,8 @@ export const copy = {
   inviteTitle: '이 코드를 보내 주세요',
   inviteValid: '7일 동안 쓸 수 있어요',
   copyLink: '링크 복사',
+  tapToCopy: '눌러서 복사', // [확인 필요] 코드 상자 아래
+  sendLater: '나중에 보낼게요', // [확인 필요] 보내기 전 ‘다음’ 대신
   sendKakao: '카톡으로 보내기',
   inviteFailed: '지금은 코드를 만들 수 없어요',
   copied: '복사했어요', // [확인 필요] 복사 토스트
@@ -97,6 +99,7 @@ export const copy = {
   // O-32, O-33
   payday: '월급날은 며칠이에요?',
   paydayLast: '말일',
+  paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] O-32 휠 아래
   partnerIncome: (partner: string) => `${partner}님 수입은 한 달에 어느 정도예요?`,
   // O-36
   add: '추가', // [확인 필요]

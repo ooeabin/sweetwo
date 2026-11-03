@@ -11,4 +11,5 @@
 - 키보드: 줄마다 `role="spinbutton"`(이름 ‘년’ ‘월’ ‘일’, `aria-valuetext` “1994년”). ↑↓ 하나, PageUp/PageDown 연 10, 월·일 3, Home/End 처음/끝. 포커스는 줄 둘레 `focus` 링.
 - 처음부터 값이 있음(첫 위치를 바로 알려 줌). 휠 아래 `hg-wheel__age` “만 {n}세”(15px `slate`).
 - ‘동작 줄이기’면 부드럽게 굴리기 없음.
+- 일만 1열(`DayWheel`, `hg-wheel--day`, 2026-11-03): O-32 월급날. 칸 1~31일 + 맨 아래 ‘말일’, 처음 값 25일, 휠 아래 “맨 아래에 ‘말일’도 있어요”(`hg-wheel__age`). 카카오페이 모을 날 고르기처럼. 값은 숫자 또는 `'last'`. ↑↓ 하나, PageUp/PageDown 7, Home/End.
 - 연·월 2열(`yearMonth`, `hg-wheel--ym`, 2026-11-02): YearMonthInput이 이 휠을 씀(예정 연·월, 여행 가는 달, 목표 기한). 값이 없으면 다음 달에서 시작. 카카오페이 월 고르기처럼.
