@@ -180,9 +180,11 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
     platforms: ['desktop', 'web'],
   });
   await page.goto('/');
-  const chart = page.getByRole('region', { name: '순자산' });
-  await expect(chart).toContainText('예상 3,120만 원, 안 판 수익 +120만 원');
-  await expect(chart).toContainText('지난달보다 +210만 원');
+  // F-01과 같은 모양(2026-11-03): 문장 + 최근 달 막대. 예상·안 판 수익은 F-01에서
+  const card = page.getByRole('region', { name: '우리 순자산' });
+  await expect(card).toContainText('3,000만 원');
+  await expect(card).toContainText('지난달보다 210만 원 늘었어요');
+  await expect(card.getByRole('img', { name: /최근 6개월 순자산, 2026년 10월 3,000만 원/ })).toBeVisible();
   const bands = page.locator('.hg-body__banner');
   await expect(bands.first()).toContainText('10월 20일 새벽 점검');
   await expect(bands.nth(1)).toContainText('함께할 사람을 초대해 주세요');

@@ -21,12 +21,12 @@ export const copy = {
   noticeClose: '닫기', // [확인 필요]
   // H-04 순자산(F-01과 같은 표기)
   netWorth: '순자산',
-  netWorthExpected: (amount: string) => `예상 ${amount}`,
-  netWorthExpectedName: '예상 순자산',
-  netWorthGain: (amount: string) => `안 판 수익 ${amount}`,
-  netWorthChange: (amount: string) => `지난달보다 ${amount}`,
+  // 2026-11-03 H-04 F-01과 같게 [확인 필요]
+  ourNetWorth: '우리 순자산',
+  lastMonth: '지난달보다',
+  grew: '늘었어요',
+  shrank: '줄었어요',
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
-  netWorthEmpty: '자산을 적으면 여기에 보여요', // [확인 필요]
   netWorthSee: '우리 자산 보기', // [확인 필요]
   addGoal: '목표',
   addAsset: '가진 돈·대출',

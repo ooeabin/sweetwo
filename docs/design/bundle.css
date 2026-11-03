@@ -147,6 +147,7 @@
 .hg-networth__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
 .hg-networth__value { font: 600 40px/48px var(--font-sans); letter-spacing: -0.8px; }
 .hg-networth__expected { font: 400 13px/18px var(--font-sans); color: var(--stone); }
+.hg-networth__value--card { font-size: 28px; line-height: 36px; letter-spacing: -0.5px; }  /* 홈 카드 안(2026-11-03) */
 .hg-networth__delta { font: 500 15px/22px var(--font-sans); color: var(--slate); }  /* 2026-11-03 F-01 알약 대신 문장, 금액만 영역 색 */
 .hg-networth__delta b { font-weight: 600; color: var(--invest-ink); }
 .hg-networth__delta.is-down b { color: var(--goal-ink); }
