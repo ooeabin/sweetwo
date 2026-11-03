@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (dda23cc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (4049b5e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -783,7 +783,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-goalrow__set { font: 600 14px/20px var(--font-sans); color: var(--focus); }
 .hg-goalrow__sub { grid-column: 2; font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-goalrow__bar { grid-column: 2 / 4; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--success-soft); overflow: hidden; }
-.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }  /* 목표 진행 막대는 파랑(2026-11-03, 체크·진행 원과 같음) */
+.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03, 체크·진행 원과 같음) */
 /* 2026-11-03 홈 다가오는 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
 .hg-daylist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
 .hg-dayrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
@@ -1671,7 +1671,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalhero__name { margin: 0; font: 700 22px/30px var(--font-sans); }
 .hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
-.hg-goalhero__actions--one { grid-template-columns: 1fr; }
 /* 금액 줄(2026-11-04): 왼쪽 ‘모은 돈’ 이름표 + 금액, 오른쪽 − + 둥근 버튼(넣기·빼기) */
 .hg-goalhero__amountrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .hg-goalhero__label { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 금액 위 ‘모은 돈’ 이름표: − +가 목표 금액이 아니라 모은 돈을 고친다는 걸 보임 */
@@ -1684,7 +1683,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
 .hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }
 .hg-goalbox__bar { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
-.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }
+.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }
 .hg-goalbox__meta { display: flex; justify-content: space-between; gap: var(--space-3); font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-goalbox__metabtn { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: 400 15px/22px var(--font-sans); }
@@ -1714,7 +1713,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goaltile__name { font: 600 15px/22px var(--font-sans); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .hg-goaltile__amount { font: 400 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
-.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }  /* 목표 진행 막대는 파랑(2026-11-03) */
+.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03) */
 .hg-goaltile .hg-card__meta { font-size: 12px; line-height: 16px; }
 .hg-goaltile__main:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-xl); }
 /* 접힌 목록 펼치기 줄(G-01, 2026-11-03): 글자 링크 대신 가득 찬 줄 + 화살표 */

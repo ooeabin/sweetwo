@@ -42,7 +42,7 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 예비·�
 - 회색은 따뜻한 기운 없는 중립 회색(살짝 차가운 쪽). 글자 `ink`·`slate`·`stone`도 같은 계열.
 - 행 앞 아이콘 칸(`hg-lead`): 영역 색 원 + 아이콘, 목표는 3D 그림. 화면에 색을 주는 곳은 이 아이콘 칸과 영역 틴트뿐, 파스텔 타일 바탕은 쓰지 않음.
 - 주 버튼 `brand` 바탕 + `on-brand` 글자(라이트 흰 글자, 다크 어두운 글자), 누름 `brand-pressed`. 라이트의 흰 글자 대비는 2.7:1로 WCAG AA(4.5:1)에 못 미치는 걸 알고 씀(2026-10-25 결정, 당근처럼 쨍한 오렌지 우선). 그래서 e2e axe는 주 버튼과 달성 배지의 color-contrast만 예외(`e2e/axe.ts`(mobile, admin, site)), 나머지는 그대로 검사. 보조 버튼 `surface-alt` 바탕(카드 안에서는 `brand-soft` + `brand-ink`), 테두리 없음. 영구 삭제 확인 버튼만 `danger` 바탕.
-- 달성 배지는 2026-11-04부터 `success-soft` 연한 파랑 바탕 + `success` 글자. 목표 진행 막대는 채도를 낮춘 파랑 `progress`(바탕 `success-soft`). `brand-soft` 위 글자와 축하 머리글은 `brand-ink`.
+- 달성 배지는 2026-11-04부터 `success-soft` 연한 파랑 바탕 + `success` 글자. 목표 진행 막대는 `success` 파랑(바탕 `success-soft`). `brand-soft` 위 글자와 축하 머리글은 `brand-ink`.
 - `danger`는 기본 빨강(#DC2626, 다크 #F87171, 2026-10-25 짙은 빨강 #B91C1C에서 바꿈). 흰 바탕과 회색 판 위 4.5:1 이상. 그래도 항상 아이콘·문구와 같이 씀.
 - `holiday-ink`는 캘린더 공휴일 숫자와 이름에만(기획서 ‘빨간 글자’). 오류 `danger`와 브랜드 오렌지와 섞지 않음. 이름이나 일정 목록 글자가 함께 있어 색만으로 뜻을 전하지 않음.
 - 영역 틴트 위 글자는 짝이 되는 `*-ink`(`together-ink` on `together` 등). 본문 `ink`도 모든 틴트 위에서 읽힘.
