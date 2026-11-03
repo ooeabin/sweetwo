@@ -1,6 +1,6 @@
 import { sellAsset } from '@sweetwo/api';
 import { hasPrincipal } from '@sweetwo/core';
-import { AmountInput, Button, ChoiceCards, DoneMark, QuestionLayout, Toggle } from '@sweetwo/ui';
+import { AmountInput, ChoiceCards, DoneMark, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -9,7 +9,8 @@ import { copy } from '../copy';
 import { canEdit, useAssetsData, useRefreshAssets } from '../data';
 
 // F-04b~d 팔았어요(23): 투자·부동산만.
-// b “받은 금액은 얼마예요?”(Q3, 통장에 실제 들어온 금액) + ‘일부만 팔았어요’ → “남은 평가금액은요?”
+// b 먼저 “얼마나 팔았어요?”(전부 / 일부만, 2026-11-03) → “받은 금액은 얼마예요?”(Q3, 통장에 실제 들어온 금액)
+//   → 일부만이면 “남은 평가금액은 얼마예요?”. 화면마다 금액 칸과 키패드 하나
 // c 받은 통장(내 통장·공동 통장, Q1, 고르면 바로 저장) → d 결과 “입출금 통장 +1,130만 원” / “실현 손익 +150만 원”(원금 없으면 없음)
 // ‘확인’ → F-02. 다 팔면 ‘매도 완료’로 보관(목록에서 빠짐, 과거 순자산 기록 유지). 저장 즉시 반영 + 상대 알림(서버)
 export function F04bSold() {
@@ -19,7 +20,7 @@ export function F04bSold() {
   const refresh = useRefreshAssets();
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
-  const [step, setStep] = useState<'amount' | 'to' | 'done'>('amount');
+  const [step, setStep] = useState<'how' | 'amount' | 'remain' | 'to' | 'done'>('how');
   const [received, setReceived] = useState<number | null>(null);
   const [part, setPart] = useState(false);
   const [remain, setRemain] = useState<number | null>(null);
@@ -77,7 +78,7 @@ export function F04bSold() {
       }
     };
     return (
-      <QuestionLayout title={copy.soldTo_q} onBack={() => setStep('amount')}>
+      <QuestionLayout title={copy.soldTo_q} onBack={() => setStep(part ? 'remain' : 'amount')}>
         {targets.length ? (
           <ChoiceCards<string>
             label={copy.soldTo_q}
@@ -97,22 +98,50 @@ export function F04bSold() {
     );
   }
 
-  const ok = received !== null && received > 0 && (!part || remain !== null);
+  if (step === 'how') {
+    return (
+      <QuestionLayout title={copy.soldHow} onBack={back}>
+        <ChoiceCards<'all' | 'part'>
+          label={copy.soldHow}
+          value={null}
+          onChange={() => undefined}
+          go
+          onPick={(v) => {
+            setPart(v === 'part');
+            setStep('amount');
+          }}
+          options={[
+            { value: 'all', label: copy.soldAll },
+            { value: 'part', label: copy.soldPart, sub: copy.soldPartSub },
+          ]}
+        />
+      </QuestionLayout>
+    );
+  }
+
+  if (step === 'remain') {
+    const done = remain !== null;
+    return (
+      <QuestionLayout
+        title={copy.soldRemain}
+        onBack={() => setStep('amount')}
+        primary={{ label: copy.next, disabled: !done }}
+        onSubmit={() => done && setStep('to')}
+      >
+        <AmountInput label={copy.soldRemain} value={remain} onChange={setRemain} allowZero />
+      </QuestionLayout>
+    );
+  }
+
+  const ok = received !== null && received > 0;
   return (
     <QuestionLayout
       title={copy.soldAmount}
-      onBack={back}
+      onBack={() => setStep('how')}
       primary={{ label: copy.next, disabled: !ok }}
-      onSubmit={() => ok && setStep('to')}
+      onSubmit={() => ok && setStep(part ? 'remain' : 'to')}
     >
       <AmountInput label={copy.soldAmount} value={received} onChange={setReceived} />
-      <Toggle label={copy.soldPart} checked={part} onChange={setPart} />
-      {part && (
-        <AmountInput label={copy.soldRemain} value={remain} onChange={setRemain} allowZero />
-      )}
-      <Button variant="ghost" onClick={back}>
-        {copy.cancel}
-      </Button>
     </QuestionLayout>
   );
 }
