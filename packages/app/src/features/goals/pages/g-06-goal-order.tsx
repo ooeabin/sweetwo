@@ -96,6 +96,8 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
   return (
     <QuestionLayout
       title={copy.orderTitle}
+      // 목표가 하나뿐이어도 제목은 다른 질문 화면처럼 위(2026-11-03, 가운데로 내려가던 것)
+      center={false}
       help={nothing ? copy.orderNothing : copy.orderFixed}
       onBack={() => nav('/goals')}
       primary={nothing ? undefined : { label: copy.orderOk, disabled: !changed, loading: saving }}

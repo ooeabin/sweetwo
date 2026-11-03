@@ -121,6 +121,7 @@ export const copy = {
   } as Record<string, string>,
   savedAll: (amount: string) => `${amount} 모았어요`,
   usedQ: '이 돈을 썼나요?',
+  spentAll: (amount: string) => `${amount} 썼어요`, // 사용 완료 카드(22 접힌 목록 4번)
   numNextUse: '다음에 쓰는 달',
   numRound: '회차',
   round: (n: number) => `${n}회차`,

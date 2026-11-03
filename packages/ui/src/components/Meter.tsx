@@ -16,6 +16,7 @@ export function Meter({
   lead,
   empty,
   started,
+  bare = false,
 }: {
   name: string;
   /** 이름 아래 금액 줄(“390만 / 780만 원”) */
@@ -35,6 +36,8 @@ export function Meter({
   empty?: string;
   /** 모은 돈이 있음: 1% 미만이라 0%여도 첫 칸을 조금 채움(빈 칸이 불러오는 중처럼 보여서, 2026-11-03) */
   started?: boolean;
+  /** 진행률·칸 없이 이름과 금액 줄만(매달 목표, 금액 미정 목표, 2026-11-03) */
+  bare?: boolean;
 }) {
   const p = Math.min(Math.max(pct, started && pct < 2 ? 2 : pct, 0), 100);
   return (
@@ -47,12 +50,14 @@ export function Meter({
           </b>
           {sub && <span>{sub}</span>}
         </div>
-        <span className="hg-meter__pct">
-          {Math.round(pct)}
-          <small>%</small>
-        </span>
+        {!bare && (
+          <span className="hg-meter__pct">
+            {Math.round(pct)}
+            <small>%</small>
+          </span>
+        )}
       </div>
-      {p === 0 && empty && !started ? (
+      {bare ? null : p === 0 && empty && !started ? (
         <p className="hg-meter__empty">{empty}</p>
       ) : (
         <div className="hg-meter__segs" role="img" aria-label={`${name} ${Math.round(pct)}%`}>
