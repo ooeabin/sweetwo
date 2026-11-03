@@ -39,6 +39,7 @@ import {
   G02bGoalUse,
   GoalAddRoute,
   GoalFillStart,
+  G03gGoalMonthly,
 } from './features/goals';
 import {
   CalendarHome,
@@ -162,6 +163,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 금액 정하기: G-03b → G-03c
+      {
+        path: '/goals/:id/monthly',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G03gGoalMonthly />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-03g 매달 넣는 돈(금액 정하기 끝)
       {
         path: '/goals/:id',
         element: (

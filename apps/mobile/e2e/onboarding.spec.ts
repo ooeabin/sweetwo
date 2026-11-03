@@ -147,11 +147,21 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await next(page);
   await heading(page, '언제까지 모을까요?');
   await next(page);
+  // G-03g 매달 넣는 돈(2026-11-03): 추천 = min(월 필요액, 남는 돈 95만) → 분배표 저금 줄
+  await heading(page, '매달 얼마씩 넣을까요?');
+  await expect(page.getByText('지금 남는 돈 95만 원')).toBeVisible();
+  await expect(page.getByLabel('매달 얼마씩 넣을까요?')).toHaveValue('950,000');
+  await axe(page);
+  await next(page);
   await expect(page).toHaveURL(/\/goals\/[^/]+$/);
   expect(db.goals.find((g) => g.template === 'home')).toMatchObject({
     target_amount: 150_000_000,
     deadline: '2031-10-01',
   });
+  const home = db.goals.find((g) => g.template === 'home');
+  expect(
+    db.splits[0]?.split_line.find((l) => l.kind === 'saving' && l.goal_id === home?.id)?.amount,
+  ).toBe(950_000);
 });
 
 test('O-07 초대 코드 시트: 카톡 주 버튼, 링크 복사, 보내기 전엔 ‘나중에 보낼게요’, 복사하면 ‘다음’', async ({
