@@ -325,7 +325,15 @@ export const copy = {
   changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
   inOut: '넣기·빼기', // [확인 필요]
   use: '꺼내 쓰기',
-  onTime: '기한 안에 이뤄요',
+  // G-02 묶음 카드(2026-11-03 시안 B3)
+  boxTarget: (target: string, pct: number) => `목표 ${target}의 ${pct}%`, // [확인 필요]
+  boxEdit: '고치기',
+  boxSet: '정하기', // [확인 필요]
+  boxUntil: (ym: string) => `${ym}까지`,
+  boxExpected: (ym: string) => `예상 ${ym}`, // [확인 필요]
+  boxMonthly: (amount: string) => `매달 ${amount}씩`, // [확인 필요]
+  boxChange: '바꾸기',
+  boxThisMonth: '이번 달 보냈으면 체크해 주세요', // [확인 필요] 매달 카드 보조 줄
   lateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
   toOurs: '우리 목표로 바꾸기', // [확인 필요]
   toMine: '내 목표로 바꾸기', // [확인 필요]

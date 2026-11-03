@@ -7,6 +7,7 @@
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
+| [GoalTile](GoalTile.md) | Cards | 목표 사진 타일(G-01)과 상세 머리(G-02) |
 | [GoalRow](GoalRow.md) | Charts | 홈 목표 목록 줄(그림 + 금액 + 얇은 막대) |
 | [DayRow](DayRow.md) | Lists | 홈 다가오는 일정 줄(색 날짜 칸 + D-day) |
 | [MonthBars](MonthBars.md) | Charts | 달마다 값(F-01 순자산 6달), 이번 달만 진하게 |

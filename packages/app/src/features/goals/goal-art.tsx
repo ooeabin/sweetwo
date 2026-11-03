@@ -6,7 +6,13 @@ import { usePhotoUrls } from '../../shared/photo';
 // 그림 파일이 아직 없으면 템플릿 그림 → 회색 기본 자리 + 아이콘. 장식이라 alt 없음
 export function GoalArt({
   g,
+  hero = false,
+  tile = false,
 }: {
+  /** G-02 머리 사진(꽉 찬 히어로, 2026-11-03 시안 B3) */
+  hero?: boolean;
+  /** G-01 타일 위 사진(2026-11-03 시안 B) */
+  tile?: boolean;
   g: {
     illustration: string | null;
     custom: boolean;
@@ -19,6 +25,19 @@ export function GoalArt({
     ? goalPhotoArt(goalPreset({ template: g.goal.template, photo_preset: g.goal.photo_preset }))
     : undefined;
   const src = url ?? preset;
+  if (hero || tile)
+    return (
+      <span
+        className={(tile ? 'hg-goaltile__photo' : 'hg-goalhero__photo') + (src ? '' : ' is-empty')}
+        aria-hidden="true"
+      >
+        {src ? (
+          <img src={src} alt="" />
+        ) : (
+          <Icon name={g.custom ? 'flag-pennant' : goalIcon(g.goal?.template ?? '')} />
+        )}
+      </span>
+    );
   if (src)
     return (
       <span className="hg-card__art hg-card__art--photo" aria-hidden="true">
