@@ -219,8 +219,8 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
 
   // 내 월급
   await page.getByRole('button', { name: /내 월급/ }).click();
-  await expect(page.getByRole('heading', { name: '한 달에 월급이 얼마 들어와요?' })).toBeVisible();
-  await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('3800000');
+  await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3800000');
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();

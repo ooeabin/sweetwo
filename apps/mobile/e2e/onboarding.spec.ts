@@ -72,8 +72,8 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await expect(page.getByRole('radio', { name: /각자 월급을 따로 관리해요/ })).toBeChecked();
   await axe(page);
   await next(page);
-  await heading(page, '한 달에 월급이 얼마 들어와요?');
-  await page.getByLabel('한 달에 월급이 얼마 들어와요?').fill('3500000');
+  await heading(page, '한 달 실수령액은 얼마예요?');
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3500000');
   await axe(page);
   await next(page);
   // 월급날은 따로 한 화면(O-32), 마지막 질문
@@ -231,7 +231,7 @@ test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 분�
   await heading(page, '월급을 어떻게 관리해요?');
   await page.getByRole('radio', { name: /합쳐서 같이 관리해요/ }).click();
   await next(page);
-  await heading(page, '한 달에 월급이 얼마 들어와요?');
+  await heading(page, '한 달 실수령액은 얼마예요?');
   await page.getByRole('button', { name: '지금은 월급이 없어요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급이 생기면 홈에서 알려 주세요')).toBeVisible();
