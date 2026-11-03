@@ -163,7 +163,13 @@ export function QuestionLayout({
   title: ReactNode;
   help?: ReactNode;
   children?: ReactNode;
-  primary?: { label: string; disabled?: boolean; loading?: boolean };
+  /** variant 기본 primary. 대답 성격(O-21 0개 ‘목표는 나중에 고를게요’)이면 secondary */
+  primary?: {
+    label: string;
+    disabled?: boolean;
+    loading?: boolean;
+    variant?: 'primary' | 'secondary';
+  };
   later?: { label: string; onClick: () => void };
   onBack?: () => void;
   onSubmit?: () => void;
@@ -254,7 +260,7 @@ export function QuestionLayout({
             {primary && (
               <button
                 type="submit"
-                className={`hg-btn hg-btn--primary${primary.loading ? ' is-loading' : ''}`}
+                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primary.loading ? ' is-loading' : ''}`}
                 disabled={primary.disabled}
                 aria-busy={primary.loading || undefined}
               >

@@ -82,7 +82,7 @@ export const copy = {
   recommended: '추천',
   makeOwn: '+ 직접 만들기',
   picked: (n: number) => `${n}개 골랐어요`,
-  onlyEmergency: '일단 비상금부터 챙길게요',
+  goalsLater: '목표는 나중에 고를게요', // [확인 필요] O-21 하나도 안 골랐을 때
   goalTabsLabel: '목표 분류',
 
   // O-23, O-24
