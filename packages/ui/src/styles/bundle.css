@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (89e80b9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9512e5c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1685,7 +1685,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 
 /* 목표 타일(G-01, 2026-11-03 시안 B, Vivid·ANZ처럼): 위 4:3 사진 + 아래 이름, 금액, 얇은 막대. 좁은 창 2열, 넓은 창 3~4열 */
 .hg-goaltiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3); align-items: stretch; }
-.hg-goaltile { display: flex; flex-direction: column; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); color: var(--ink); text-align: left; cursor: pointer; }
+.hg-goaltile { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
+.hg-goaltile__main { display: flex; flex-direction: column; flex: 1; width: 100%; padding: 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.hg-goaltile__line { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hg-goaltile__foot { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: 0 var(--space-3) var(--space-3); margin-top: calc(var(--space-2) * -1); }
+.hg-goaltile__foot .hg-btn--link { font-size: 13px; line-height: 18px; }
 .hg-goaltile__top { position: relative; display: block; }
 .hg-goaltile__photo { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--hairline-soft); color: var(--stone); }
 .hg-goaltile__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -1697,4 +1701,4 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--hairline-soft); }
 .hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--goal-ink); }
 .hg-goaltile .hg-card__meta { font-size: 12px; line-height: 16px; }
-.hg-goaltile:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-goaltile__main:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-xl); }

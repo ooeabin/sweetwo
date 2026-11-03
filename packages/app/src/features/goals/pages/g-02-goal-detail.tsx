@@ -9,13 +9,7 @@ import {
   updateGoal,
   type Goal,
 } from '@sweetwo/api';
-import {
-  formatDateFull,
-  formatYm,
-  goalBars,
-  goalProgress,
-  todayKst,
-} from '@sweetwo/core';
+import { formatDateFull, formatYm, goalBars, goalProgress, todayKst } from '@sweetwo/core';
 import {
   Badge,
   BarChart,
@@ -281,7 +275,6 @@ export function G02GoalDetail() {
         onBack={back}
         action={i.canEdit ? <Menu label={copy.menu} actions={actions} /> : undefined}
       />
-      {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
       {paused && (
         <div className="hg-banner hg-banner--info">
           <span>{copy.pausedNote}</span>
@@ -329,6 +322,8 @@ export function G02GoalDetail() {
               {copy.photoRemove}
             </button>
           )}
+          {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
+          {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
           {i.canEdit && (
             <div className="hg-goalhero__actions">
               <Button
@@ -387,7 +382,16 @@ export function G02GoalDetail() {
               </>
             ) : (
               <>
-                {i.canEdit ? (
+                {i.canEdit && !g.deadline ? (
+                  // 기한이 없으면 밑줄 ‘없음’ 대신 “기한 정하기” 글자 링크(2026-11-03)
+                  <button
+                    type="button"
+                    className="hg-btn hg-btn--link"
+                    onClick={() => nav(`/goals/${id}/edit/deadline`)}
+                  >
+                    {copy.boxSetDeadline}
+                  </button>
+                ) : i.canEdit ? (
                   <button
                     type="button"
                     className="hg-goalbox__metabtn"

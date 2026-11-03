@@ -333,6 +333,7 @@ export const copy = {
   boxExpected: (ym: string) => `예상 ${ym}`, // [확인 필요]
   boxMonthly: (amount: string) => `매달 ${amount}씩`, // [확인 필요]
   boxChange: '바꾸기',
+  boxSetDeadline: '기한 정하기', // [확인 필요]
   boxThisMonth: '이번 달 보냈으면 체크해 주세요', // [확인 필요] 매달 카드 보조 줄
   lateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
   toOurs: '우리 목표로 바꾸기', // [확인 필요]

@@ -79,73 +79,65 @@ export function GoalItemCard({
   const month = thisMonthText(i, fmt);
   // 매달 목표·금액 미정 목표는 진행률과 칸 없이(22 G-01 5번, 2026-11-03)
   const bare = g.kind === 'monthly' || g.target_amount === null;
-  // 2026-11-03 시안 B 타일: 위 사진(배지는 사진 위 왼쪽) → 이름 → 금액 → 얇은 막대 → 매달·예상 한 줄
-  const card = (
-    <button type="button" className="hg-goaltile" onClick={onOpen}>
-      <span className="hg-goaltile__top">
-        <GoalArt g={i} tile />
-        {(late || g.kind !== 'once') && (
-          <span className="hg-goaltile__badges">
-            {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
-            {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
-            {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
-          </span>
-        )}
-      </span>
-      <span className="hg-goaltile__body">
-        <b className="hg-goaltile__name">{g.name}</b>
-        <span className="hg-goaltile__amount">
-          {g.target_amount && !bare
-            ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
-            : g.kind === 'monthly'
-              ? copy.monthlyHeld(fmt(i.saved))
-              : fmt(i.saved)}
-        </span>
-        {/* 아직 모은 돈이 없으면 빈 막대 대신 한 줄(2026-11-03) */}
-        {!bare && i.saved <= 0 && <span className="hg-card__meta">{copy.noSavedYet}</span>}
-        {!bare && i.saved > 0 && (
-          <span className="hg-goaltile__bar" aria-hidden="true">
-            <i style={{ width: `${Math.min(Math.max(i.pct, i.saved > 0 ? 2 : 0), 100)}%` }} />
-          </span>
-        )}
-        {i.state === 'used' ? (
-          <UsedLine goalId={g.id} masked={masked} />
-        ) : (
-          g.kind !== 'monthly' && <span className="hg-card__meta">{planText(i, fmt)}</span>
-        )}
-        {late && i.lateMonths !== null && (
-          <span className="hg-card__meta">{copy.lateLine(lateText(i.lateMonths))}</span>
-        )}
-        {month && <span className="hg-card__meta">{month}</span>}
-      </span>
-    </button>
-  );
+  // 2026-11-03 시안 B 타일: 위 사진(배지는 사진 위 왼쪽) → 이름 → 금액 → 막대(또는 “아직 모은 돈이 없어요”) → 한 줄.
+  // 한 줄은 늦어요 > 이번 달 > 매달·예상 순서로 하나만(타일이 빽빽해서). 링크·배우자 변경 안내는 타일 안 아래 칸
+  const line =
+    i.state === 'used'
+      ? null
+      : late && i.lateMonths !== null
+        ? copy.lateLine(lateText(i.lateMonths))
+        : (month ?? (g.kind === 'monthly' ? null : planText(i, fmt)));
   const lateLink = late && onLate;
   const useLink = i.state === 'achieved' && onUse;
-  if (!lateLink && !changed && !useLink) return card;
   return (
-    <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
-      {card}
-      {changed && <span className="hg-help">{changed}</span>}
-      {lateLink && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={onLate}
-        >
-          {copy.lateLink}
-        </button>
-      )}
-      {useLink && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={onUse}
-        >
-          {copy.usedQ}
-        </button>
+    <div className="hg-goaltile">
+      <button type="button" className="hg-goaltile__main" onClick={onOpen}>
+        <span className="hg-goaltile__top">
+          <GoalArt g={i} tile />
+          {(late || g.kind !== 'once') && (
+            <span className="hg-goaltile__badges">
+              {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
+              {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
+              {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
+            </span>
+          )}
+        </span>
+        <span className="hg-goaltile__body">
+          <b className="hg-goaltile__name">{g.name}</b>
+          <span className="hg-goaltile__amount">
+            {g.target_amount && !bare
+              ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
+              : g.kind === 'monthly'
+                ? copy.monthlyHeld(fmt(i.saved))
+                : fmt(i.saved)}
+          </span>
+          {!bare && i.saved <= 0 && <span className="hg-card__meta">{copy.noSavedYet}</span>}
+          {!bare && i.saved > 0 && (
+            <span className="hg-goaltile__bar" aria-hidden="true">
+              <i style={{ width: `${Math.min(Math.max(i.pct, 2), 100)}%` }} />
+            </span>
+          )}
+          {i.state === 'used' ? (
+            <UsedLine goalId={g.id} masked={masked} />
+          ) : (
+            line && <span className="hg-card__meta hg-goaltile__line">{line}</span>
+          )}
+        </span>
+      </button>
+      {(changed || lateLink || useLink) && (
+        <span className="hg-goaltile__foot">
+          {changed && <span className="hg-help">{changed}</span>}
+          {lateLink && (
+            <button type="button" className="hg-btn hg-btn--link" onClick={onLate}>
+              {copy.lateLink}
+            </button>
+          )}
+          {useLink && (
+            <button type="button" className="hg-btn hg-btn--link" onClick={onUse}>
+              {copy.usedQ}
+            </button>
+          )}
+        </span>
       )}
     </div>
   );
