@@ -39,7 +39,16 @@ export function W05Review() {
   const left = list ? waiting(list) : [];
   if (empty.current === null) empty.current = !!list && left.length === 0;
   if (empty.current) return <Navigate to="/salary" replace />;
-  const skip = (l: PayCheckLine) => void check(l, 'skipped').catch(() => toast(copy.failed));
+  // ‘이번 달은 못 했어요’: 줄이 목록에서 빠지니 Toast로 알리고 되돌리기(2026-11-03)
+  const skip = (l: PayCheckLine) =>
+    void check(l, 'skipped')
+      .then(() =>
+        toast(copy.skippedDone(lineName(l, goalName, personName, joint)), {
+          label: copy.undo,
+          onClick: () => void check(l, 'wait'),
+        }),
+      )
+      .catch(() => toast(copy.failed));
   return (
     <QuestionLayout
       title={list ? copy.reviewTitle(list.label) : copy.reviewNone}

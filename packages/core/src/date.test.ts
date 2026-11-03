@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { formatKstDateTime, formatKstMonthDayTime, hoursBetween } from './date';
+import { formatDot2, formatKstDateTime, formatKstMonthDayTime, hoursBetween } from './date';
 
 test('어드민 시각은 KST', () => {
   expect(formatKstDateTime('2026-10-18T05:05:00Z')).toBe('2026-10-18 14:05');
@@ -14,4 +14,8 @@ test('경과 시간(시간 단위 내림)', () => {
 test('오프라인 띠 마지막 저장 시각은 KST 월·일 + 시각', () => {
   expect(formatKstMonthDayTime('2026-10-27T06:05:00Z')).toBe('10월 27일 15:05');
   expect(formatKstMonthDayTime('2026-10-27T16:30:00Z')).toBe('10월 28일 01:30');
+});
+
+test('formatDot2: 두 자리 월.일', () => {
+  expect(formatDot2('2026-08-26')).toBe('08.26');
 });

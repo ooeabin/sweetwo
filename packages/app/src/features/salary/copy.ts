@@ -30,8 +30,10 @@ export const copy = {
   // 줄을 누르면 여는 시트(2026-11-03) [확인 필요]
   lineSheet: (name: string, amount: string) => `${name} ${amount}`,
   sent: '보냈어요',
-  checkedBy: (who: string, date: string) => `${who}님이 ${date}에 체크했어요`,
-  checkedOn: (date: string) => `${date}에 체크했어요`, // [확인 필요] 내가 체크한 줄
+  // 체크한 사람·때(2026-11-03): 배우자가 체크했으면 이름 칩 + “08.26 체크”, 내가 체크했으면 날짜만
+  checkedAt: (date: string) => `${date} 체크`, // [확인 필요]
+  // W-05 ‘이번 달은 못 했어요’ 뒤 Toast(2026-11-03)
+  skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]
   skipped: '이번 달은 못 했어요',
   editSplit: '월급 계획 고치기',
   // 토스트는 한 줄(Toast.md): 목표 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게

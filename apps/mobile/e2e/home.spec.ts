@@ -139,6 +139,8 @@ test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → �
   await page.getByRole('button', { name: '이번 달은 못 했어요' }).click();
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   await expect.poll(() => lines.find((l) => l.goal_id === 'goal-e')?.state).toBe('skipped');
+  // 줄이 빠지니 Toast로 알림 + 되돌리기(2026-11-03)
+  await expect(page.getByText('비상금, 이번 달은 못 한 걸로 했어요')).toBeVisible();
   expect(lines.find((l) => l.goal_id === 'goal-h')?.state).toBe('checked');
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page).toHaveURL(/\/$/);

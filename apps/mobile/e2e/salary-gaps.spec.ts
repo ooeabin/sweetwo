@@ -108,6 +108,8 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
+  // 체크한 사람 이름 칩 + 두 자리 날짜(2026-11-03)
+  await expect(page.locator('.hg-transfer__who', { hasText: '예빈' }).first()).toBeVisible();
   await expect(page.getByText('08.25 ~ 09.24. 다 보냈어요')).toBeVisible();
   // 지난 달은 읽기 전용: 줄을 눌러 여는 시트 없음
   await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
