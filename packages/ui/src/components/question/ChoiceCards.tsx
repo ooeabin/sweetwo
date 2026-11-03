@@ -60,7 +60,8 @@ export function ChoiceCards<T extends string>({
   pickRef.current = pick;
 
   useEffect(() => {
-    if (autoFocus) first.current?.focus();
+    // 처음 포커스는 넓은 창(키보드)에서만. 좁은 창은 손가락이라 첫 카드에 포커스 테두리가 남아 고른 것처럼 보임(2026-11-03)
+    if (autoFocus && window.matchMedia?.('(min-width: 768px)').matches) first.current?.focus();
     return () => clearTimeout(timer.current); // 화면을 떠날 때만 자동 다음 취소
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 처음 한 번만
 

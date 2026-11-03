@@ -11,6 +11,8 @@ export interface ChapterProgress {
   fill: number | null;
   /** 넓은 창 칸 막대(Meetup식): 챕터 안 질문 수와 지금까지 연 질문 수 */
   steps?: { total: number; done: number };
+  /** 이름이 없을 때 화면 읽기 이름 앞말(기본 ‘온보딩’) */
+  label?: string;
 }
 
 /** 넓은 창 위 바 가운데: 챕터면 “목표” + 칸 막대(brand), 아니면 ProgressSteps */
@@ -30,7 +32,7 @@ function BarProgress({
           <div
             className="hg-segs"
             role="progressbar"
-            aria-label={`${chapter.name || '온보딩'} 진행`}
+            aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
             aria-valuemin={0}
             aria-valuemax={s.total}
             aria-valuenow={s.done}
@@ -86,7 +88,7 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
         <div
           className="hg-chapterbar__track"
           role="progressbar"
-          aria-label={`${chapter.name || '온보딩'} 진행`}
+          aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={fill}
@@ -144,7 +146,7 @@ export function ChapterList({
 // 한 화면 한 질문 틀(docs/design/components/QuestionLayout.md). Enter = 다음(폼 제출), Esc = 뒤로.
 export function QuestionLayout({
   steps,
-  chapter,
+  chapter: chapterProp,
   title,
   help,
   children,
@@ -185,6 +187,19 @@ export function QuestionLayout({
   /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
   hero?: ReactNode;
 }) {
+  // 2026-11-03 칸 막대(StepsBar) 대신 모든 질문 흐름을 온보딩과 같은 얇은 막대(ChapterBar)로
+  const chapter: ChapterProgress | undefined =
+    chapterProp ??
+    (steps && steps.total > 0
+      ? {
+          index: 1,
+          total: 1,
+          name: '',
+          label: '질문',
+          fill: ((steps.now + (steps.fill ?? 50) / 100) / steps.total) * 100,
+          steps: { total: steps.total, done: steps.now + 1 },
+        }
+      : undefined);
   const centered = center ?? Children.toArray(children).length === 0;
   useEffect(() => {
     if (!onBack) return;

@@ -17,8 +17,8 @@ export function G03eGoalOwner() {
         onChange={(owner) => s.set({ owner })}
         onPick={(owner) => s.next({ owner })}
         options={[
-          { value: 'together', label: copy.whoOurs },
-          { value: 'me', label: copy.whoMine },
+          { value: 'together', label: copy.whoOurs, icon: 'users-three' },
+          { value: 'me', label: copy.whoMine, icon: 'user' },
         ]}
       />
     </QuestionLayout>
