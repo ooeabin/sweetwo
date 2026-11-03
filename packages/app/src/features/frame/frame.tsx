@@ -93,7 +93,8 @@ export function MainFrame(
         }
         onSearch={() => setPalette(true)}
         // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
-        onAdd={p.current ? () => nav(addFor(p.current)) : undefined}
+        // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
+        onAdd={p.current && p.current !== 'month' ? () => nav(addFor(p.current)) : undefined}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
