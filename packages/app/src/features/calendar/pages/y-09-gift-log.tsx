@@ -34,7 +34,7 @@ export function Y09GiftLog() {
   const urls = usePhotoUrls(
     [...new Set(photos.map((p) => p.care_record_id))].map((id) => firstOf(id)?.path),
   );
-  if (c.loading) return <MainFrame current="calendar" columns={[null]} />;
+  if (c.loading) return <MainFrame sub="detail" current="calendar" columns={[null]} />;
 
   const careOf = (id: string) => c.cares.find((x) => x.id === id);
   const rows = c.records
@@ -124,5 +124,5 @@ export function Y09GiftLog() {
       )}
     </div>
   );
-  return <MainFrame current="calendar" columns={[body]} />;
+  return <MainFrame sub="detail" current="calendar" columns={[body]} />;
 }

@@ -83,6 +83,8 @@ export interface AppFrameProps {
   columns: ReactNode[];
   /** 본문 맨 위 띠(해제 대기 등) */
   banner?: ReactNode;
+  /** 하위 화면(설정 안쪽 등): 좁은 창에서 앱 머리와 탭 막대를 숨기고 본문의 ‘‹ 제목’ 한 줄만(2026-11-03) */
+  sub?: boolean;
 }
 
 function Person({ p }: { p: AppFramePerson }) {
@@ -158,7 +160,7 @@ export function AppFrame(p: AppFrameProps) {
   );
   const focus = p.today?.focus;
   return (
-    <div className="hg-frame">
+    <div className={cx('hg-frame', p.sub && 'hg-frame--sub')}>
       <aside className="hg-appside">
         <div className="hg-appside__in">
           <span className="hg-appside__logo">

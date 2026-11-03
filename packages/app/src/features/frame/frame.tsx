@@ -30,7 +30,13 @@ const HREF: Record<AppTab, string | undefined> = {
  * 이번 달은 오늘 띠(today), 다른 메뉴는 화면 제목 줄(page).
  */
 export function MainFrame(
-  p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'>,
+  p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'> & {
+    /**
+     * 메뉴 첫 화면이 아닌 화면(2026-11-03 추가 입구 하나로): + 버튼 없음.
+     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위 화면(좁은 창은 앱 머리와 탭 막대도 숨김)
+     */
+    sub?: 'detail' | 'settings';
+  },
 ) {
   const nav = useNavigate();
   const me = useMe();
@@ -82,7 +88,11 @@ export function MainFrame(
       setPaletteOpen={setPalette}
     >
       <AppFrame
-        {...p}
+        current={p.current}
+        today={p.today}
+        page={p.page}
+        columns={p.columns}
+        sub={p.sub === 'settings'}
         banner={
           offline || p.banner ? (
             <>
@@ -94,7 +104,10 @@ export function MainFrame(
         onSearch={() => setPalette(true)}
         // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
         // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
-        onAdd={p.current && p.current !== 'month' ? () => nav(addFor(p.current)) : undefined}
+        // + 버튼은 목표, 우리 자산, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
+        onAdd={
+          p.current && p.current !== 'month' && !p.sub ? () => nav(addFor(p.current)) : undefined
+        }
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}

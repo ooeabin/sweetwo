@@ -2,6 +2,14 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
+/** 추가 입구(2026-11-03): 넓은 창은 제목 줄 버튼, 좁은 창은 + 버튼 */
+const addEntry = (page: Page, name: string) =>
+  page
+    .getByRole('button', { name, exact: true })
+    .or(page.locator('.hg-fab'))
+    .locator('visible=true')
+    .first();
+
 // 캘린더(docs/spec/24-calendar.md, 재기획): 돈 일정과 챙길 날. 찬우(월급날 25일)와 합류한 예빈(10일)
 
 const axe = async (page: Page) => {
@@ -215,7 +223,7 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
   seed(db);
 
   await page.goto('/calendar/list');
-  await page.getByRole('button', { name: '+ 추가' }).click();
+  await addEntry(page, '+ 추가').click();
   await expect(page.getByRole('heading', { name: '어떤 날이에요?' })).toBeVisible();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveAttribute('placeholder', '예: 어머니 생신');
   await axe(page);
@@ -246,7 +254,7 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
   });
 
   // 추석: 날짜를 채우고 건너뜀, 금액은 건너뛰기
-  await page.getByRole('button', { name: '+ 추가' }).click();
+  await addEntry(page, '+ 추가').click();
   await page.getByRole('button', { name: '추석', exact: true }).click();
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '쓸 돈을 메모해 둘까요?' })).toBeVisible();
@@ -261,7 +269,7 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
   });
 
   // 행사(한 번): 지난 날이면 안내 + 다음 꺼짐
-  await page.getByRole('button', { name: '+ 추가' }).click();
+  await addEntry(page, '+ 추가').click();
   await page.getByRole('button', { name: '행사', exact: true }).click();
   await page.getByLabel('어떤 날이에요?').fill('민지 결혼식');
   await page.getByRole('button', { name: '다음' }).click();

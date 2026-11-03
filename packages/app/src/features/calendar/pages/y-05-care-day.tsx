@@ -37,7 +37,7 @@ export function Y05CareDay() {
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [memo, setMemo] = useState<string | null>(null);
-  if (c.loading) return <MainFrame current="calendar" columns={[null]} />;
+  if (c.loading) return <MainFrame sub="detail" current="calendar" columns={[null]} />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
   const date = nextCareDate(care, c.today);
@@ -199,7 +199,7 @@ export function Y05CareDay() {
       />
     </div>
   );
-  return <MainFrame current="calendar" columns={[body]} />;
+  return <MainFrame sub="detail" current="calendar" columns={[body]} />;
 }
 
 /** Y-05 금액 메모 수정(Q3, 비워 둘 수 있음) */

@@ -23,7 +23,7 @@ export function S19aInquiries() {
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  if (list.isLoading) return <MainFrame current={null} columns={[null]} />;
+  if (list.isLoading) return <MainFrame sub="settings" current={null} columns={[null]} />;
   const rows = list.data ?? [];
   const q: Inquiry | undefined = id ? rows.find((r) => r.id === id) : undefined;
 
@@ -77,7 +77,10 @@ export function S19aInquiries() {
       </div>
     </div>
   );
-  if (!q) return <MainFrame current={null} page={{ title: copy.title }} columns={[listBody]} />;
+  if (!q)
+    return (
+      <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[listBody]} />
+    );
 
   const asking = q.access_request.find((a) => a.status === 'requested');
   const on = q.access_request.find((a) => a.status === 'approved');
@@ -156,5 +159,7 @@ export function S19aInquiries() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[detail]} />;
+  return (
+    <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[detail]} />
+  );
 }

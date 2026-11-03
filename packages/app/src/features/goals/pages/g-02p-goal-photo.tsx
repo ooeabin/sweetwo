@@ -64,5 +64,7 @@ export function G02pGoalPhoto() {
       />
     </div>
   );
-  return <MainFrame current="goals" page={{ title: copy.photoTitle }} columns={[body]} />;
+  return (
+    <MainFrame sub="detail" current="goals" page={{ title: copy.photoTitle }} columns={[body]} />
+  );
 }

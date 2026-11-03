@@ -434,5 +434,5 @@ export function F04Item() {
       )}
     </div>
   );
-  return <MainFrame current="assets" columns={[body]} />;
+  return <MainFrame sub="detail" current="assets" columns={[body]} />;
 }

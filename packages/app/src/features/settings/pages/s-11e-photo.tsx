@@ -19,7 +19,8 @@ export function S11ePhoto() {
   const [saving, setSaving] = useState(false);
   // S-11에서 Avatar에 끌어 놓은 사진이면 바로 받음
   const dropped = (useLocation().state as { file?: unknown } | null)?.file;
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const me = d.me;
   const back = () => nav('/settings/me');
   const save = async (jpeg: Blob) => {
@@ -61,5 +62,5 @@ export function S11ePhoto() {
       />
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.photo }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.photo }} columns={[body]} />;
 }

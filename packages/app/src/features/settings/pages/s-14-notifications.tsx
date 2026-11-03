@@ -36,7 +36,8 @@ export function S14Notifications() {
   const d = useSettingsData();
   const [confirm, setConfirm] = useState<'push' | 'email' | null>(null);
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   // 받는 방법 ‘OS 알림’은 앱(데스크톱 로컬 알림, 모바일 푸시)만
   const desktop = isApp(detectPlatform());
   const prefs = notiPrefs(d.me.noti_prefs);
@@ -201,5 +202,5 @@ export function S14Notifications() {
       />
     </div>
   );
-  return <MainFrame current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

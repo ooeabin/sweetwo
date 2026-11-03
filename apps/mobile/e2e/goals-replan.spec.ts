@@ -5,6 +5,14 @@ import { chanwoo } from './supabase-mock';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
+/** 추가 입구(2026-11-03): 넓은 창은 제목 줄 버튼, 좁은 창은 + 버튼 */
+const addEntry = (page: Page, name: string) =>
+  page
+    .getByRole('button', { name, exact: true })
+    .or(page.locator('.hg-fab'))
+    .locator('visible=true')
+    .first();
+
 // 재기획 목표(22): G-01 묶음과 매달·예상·이번 달, G-02 넣기·빼기·꺼내 쓰기, G-03 누구 목표 → 분배표 0원 줄.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -95,7 +103,7 @@ test('G-03 목표 추가: 누구 목표예요? 나 → 내 목표, 분배표 저
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/goals');
-  await page.getByRole('button', { name: '+ 목표 추가' }).click();
+  await addEntry(page, '+ 목표 추가').click();
   await expect(page.getByRole('heading', { name: '어떤 목표를 추가할까요?' })).toBeVisible();
   await page.getByRole('tab', { name: '미래' }).click();
   await page.getByRole('button', { name: '투자 종잣돈' }).click();
@@ -194,7 +202,7 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/goals');
-  await page.getByRole('button', { name: '+ 목표 추가' }).click();
+  await addEntry(page, '+ 목표 추가').click();
   await axe(page);
   await page.getByRole('button', { name: '+ 직접 만들기' }).click();
   await page.getByRole('radio', { name: '우리 둘' }).click();

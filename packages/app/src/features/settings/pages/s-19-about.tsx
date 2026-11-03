@@ -77,5 +77,5 @@ export function S19About() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

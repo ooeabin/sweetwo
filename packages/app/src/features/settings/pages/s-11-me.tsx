@@ -27,7 +27,8 @@ export function S11Me() {
   const [email, setEmail] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
-  if (d.loading || !d.me || !d.c || !d.space) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c || !d.space)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const { me, c, space: sp } = d;
   const value = email ?? me.notify_email ?? '';
   const parsed = NotifyEmail.safeParse(value);
@@ -253,5 +254,5 @@ export function S11Me() {
       </Button>
     </div>
   );
-  return <MainFrame current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

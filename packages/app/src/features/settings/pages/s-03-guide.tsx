@@ -31,5 +31,5 @@ export function S03Guide() {
       <p className="hg-card__meta">{copy.notAdvice}</p>
     </article>
   );
-  return <MainFrame current={null} page={{ title: g.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: g.title }} columns={[body]} />;
 }

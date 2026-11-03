@@ -16,7 +16,7 @@ export function S19bAccess() {
   const qc = useQueryClient();
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const [busy, setBusy] = useState(false);
-  if (list.isLoading) return <MainFrame current={null} columns={[null]} />;
+  if (list.isLoading) return <MainFrame sub="settings" current={null} columns={[null]} />;
   const q = (list.data ?? []).find((x) => x.access_request.some((a) => a.id === id));
   const r = q?.access_request.find((a) => a.id === id);
   if (!q || !r || r.status !== 'requested')
@@ -75,5 +75,5 @@ export function S19bAccess() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }
