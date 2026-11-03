@@ -242,7 +242,15 @@ export function AppFrame(p: AppFrameProps) {
             disabled={!p.onSearch}
             onClick={p.onSearch}
           />
-          {tools}
+          {/* 금액 가리기 눈은 좁은 창 머리에서 뺌(설정 S-10, ⌘K, Ctrl+Shift+H, 2026-11-03) */}
+          <IconButton
+            icon="bell"
+            label={p.labels.noti}
+            ghost
+            dot={p.hasNewNoti}
+            disabled={!p.onNoti}
+            onClick={p.onNoti}
+          />
           <IconButton
             icon="settings"
             label={p.labels.settings}

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (5afd0a5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (1011173). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -357,6 +357,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* ListRow */
 .hg-list { border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); overflow: hidden; }
 .hg-listrow { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--space-3); min-height: 60px; padding: var(--space-2) var(--space-4); }
+.hg-listrow--toggle { display: block; }  /* 2026-11-03 목록 안 스위치 한 줄(설정 금액 가리기) */
+.hg-listrow--toggle > label { margin-left: var(--space-3); }  /* 다른 줄의 빈 앞 칸 + 간격과 글자 줄을 맞춤 */
 .hg-listrow:last-child { border-bottom: 0; }
 .hg-listrow:is(button, a):hover { background: var(--surface-alt); }
 .hg-listrow__value.is-soft { font-weight: 400; color: var(--slate); }

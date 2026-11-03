@@ -1,9 +1,10 @@
 import { fetchInquiries, qk } from '@sweetwo/api';
 import { notiPrefs } from '@sweetwo/core';
-import { Badge, ListRow } from '@sweetwo/ui';
+import { Badge, ListRow, Toggle } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform, isApp } from '../../../platform';
+import { useMask } from '../../../shared/mask';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -18,6 +19,7 @@ export function S10Settings() {
   const d = useSettingsData();
   const ck = useChecklist(d.space);
   const widget = useWidgetSettings();
+  const mask = useMask();
   const platform = detectPlatform();
   const desktop = platform === 'desktop';
   const app = isApp(platform);
@@ -90,6 +92,15 @@ export function S10Settings() {
           onClick={() => nav('/settings/guides')}
         />
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
+        {/* 금액 가리기(2026-11-03 좁은 창 머리 눈 아이콘 대신 여기서. 기기마다 기억) */}
+        <div className="hg-listrow hg-listrow--toggle">
+          <Toggle
+            label={copy.rows.mask}
+            help={copy.rows.maskHelp}
+            checked={mask.masked}
+            onChange={() => mask.toggle()}
+          />
+        </div>
       </div>
       <div className="hg-list">
         <ListRow label={copy.rows.help} onClick={() => nav('/settings/help')} />
