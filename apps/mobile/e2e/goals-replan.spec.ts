@@ -435,7 +435,7 @@ test('G-02 정보·도움말·월별 기록, 삭제 되돌리기, 매년 목표 
   await expect.poll(() => db.goals.find((g) => g.id === 'goal-t')?.deleted_at ?? null).toBeNull();
 });
 
-test('목표 사진(22 G-02): 직접 만든 목표만 “사진 바꾸기” → 자르기 → 저장 → 카드 그림, 지우기, 기본 목표는 없음', async ({
+test('목표 사진(22 G-02): 기본 목표도 “사진 바꾸기” → 지정 사진 고르기, 직접 만든 목표 올리기 → 자르기 → 저장 → 카드 그림, 지우기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -461,7 +461,16 @@ test('목표 사진(22 G-02): 직접 만든 목표만 “사진 바꾸기” →
   });
   await page.goto('/goals/goal-h');
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '사진 바꾸기' })).toHaveCount(0);
+  // 2026-11-03 모든 목표: 그 종류 지정 사진 3장(파일 전에는 빈 자리), 1번이 기본
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
+  const picks = page.getByRole('list', { name: '기본 사진에서 고르기' }).getByRole('button');
+  await expect(picks).toHaveCount(3);
+  await expect(picks.first()).toHaveAttribute('aria-pressed', 'true');
+  await axe(page);
+  await page.getByRole('button', { name: '기본 사진 2' }).click();
+  await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  expect(db.goals.find((g) => g.id === 'goal-h')?.photo_preset).toBe('home-02');
 
   await page.goto('/goals/goal-camp');
   await expect(page.locator('.hg-card__art--custom')).toBeVisible();

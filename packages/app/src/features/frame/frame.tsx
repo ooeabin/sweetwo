@@ -4,6 +4,7 @@ import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
+import { usePeopleArt } from '../../shared/person';
 import { useCacheInfo } from '../../shared/offline-cache';
 import { useOnline } from '../../shared/online';
 import {
@@ -55,6 +56,10 @@ export function MainFrame(
   const saving = useSyncExternalStore(subscribeSaving, isSaving);
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const name = c?.myName ?? '';
+  // 두 사람 그림(올린 사진 → 지정 아바타 그림, 없으면 첫 글자. 2026-11-03)
+  const art = usePeopleArt();
+  const mySrc = art(me.data?.id);
+  const partnerSrc = art(partner.data?.id);
   const label: Record<AppTab, string> = {
     month: copy.tabMonth,
     goals: copy.tabGoals,
@@ -140,12 +145,12 @@ export function MainFrame(
         people={
           c && !c.starter
             ? [
-                { name: c.partnerName, no: 1 },
-                { name, no: 2 },
+                { name: c.partnerName, no: 1, src: partnerSrc },
+                { name, no: 2, src: mySrc },
               ]
             : [
-                { name, no: 1 },
-                { name: c?.partnerName ?? '', no: 2, empty: !c?.joined },
+                { name, no: 1, src: mySrc },
+                { name: c?.partnerName ?? '', no: 2, empty: !c?.joined, src: partnerSrc },
               ]
         }
         saveState={saving ? copy.saving : copy.saved}

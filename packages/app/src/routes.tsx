@@ -253,7 +253,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // 목표 사진 바꾸기(직접 만든 목표만)
+      }, // 목표 사진 바꾸기(모든 목표, 지정 사진 고르기 + 올리기)
       {
         path: '/assets',
         element: (

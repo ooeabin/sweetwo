@@ -1,4 +1,4 @@
--- pgTAP: 목표 사진(직접 만든 목표만, 바꾸면 옛 파일 지울 목록에), 기록 사진 10장까지, 다른 부부는 못 봄, 계정 삭제 요청 시 프로필 사진
+-- pgTAP: 목표 사진(모든 목표, 바꾸면 옛 파일 지울 목록에), 기록 사진 10장까지, 다른 부부는 못 봄, 계정 삭제 요청 시 프로필 사진
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(10);
@@ -44,8 +44,8 @@ select public.set_goal_photo(current_setting('test.g')::uuid, ('g' || '/' || lpa
 select is((select photo_path from public.goal where id = current_setting('test.g')::uuid), ('g' || '/' || lpad(2::text, 8, '0') || '-0000-4000-8000-000000000000.jpg'),
   '목표 사진 바꿈');
 select is((select count(*)::int from public.photo where goal_id = current_setting('test.g')::uuid), 1, '목표 사진은 하나');
-select throws_ok(format($$ select public.set_goal_photo(%L, %L, 1) $$, current_setting('test.e'), ('g' || '/' || lpad(3::text, 8, '0') || '-0000-4000-8000-000000000000.jpg')),
-  '42501', null, '기본 목표는 사진을 바꿀 수 없음');
+select lives_ok(format($$ select public.set_goal_photo(%L, %L, 1) $$, current_setting('test.e'), ('g' || '/' || lpad(3::text, 8, '0') || '-0000-4000-8000-000000000000.jpg')),
+  '기본 목표도 사진을 바꿈(2026-11-03)');
 select throws_ok(format($$ select public.set_goal_photo(%L, 'g/../x.jpg', 1) $$, current_setting('test.g')),
   '22023', null, '경로 모양이 다르면 안 됨');
 select throws_ok($$ insert into public.photo (space_id, goal_id, path, size_bytes)

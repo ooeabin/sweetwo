@@ -10,6 +10,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
 import { useWidgetSettings } from '../widget-settings';
+import { PersonDot } from '../../../shared/person';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
 // 오른쪽 회색 요약 값(공개 범위, 알림 채널, 앱 잠금(데스크톱), 가이드 진행), 앱 정보 줄에 버전 + 확인 요청 배지(관리자 열람 요청이 있을 때만 → S-19a).
@@ -42,13 +43,9 @@ export function S10Settings() {
         <ListRow
           lead={
             <span className="hg-avatars" aria-hidden="true">
-              <span className={c.starter ? 'hg-avatar hg-avatar--p1' : 'hg-avatar hg-avatar--p2'}>
-                {[...c.myName][0] ?? ''}
-              </span>
+              <PersonDot name={c.myName} starter={c.starter} userId={d.me.id} />
               {c.partnerName && !c.solo && (
-                <span className={c.starter ? 'hg-avatar hg-avatar--p2' : 'hg-avatar hg-avatar--p1'}>
-                  {[...c.partnerName][0] ?? ''}
-                </span>
+                <PersonDot name={c.partnerName} starter={!c.starter} userId={d.partner?.id} />
               )}
             </span>
           }

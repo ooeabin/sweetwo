@@ -6,7 +6,7 @@ import {
   NotifyEmail,
   type BaseDay,
 } from '@sweetwo/core';
-import { Button, Field, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import { avatarArt, Button, Field, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +50,9 @@ export function S11Me() {
         )
       : copy.undecidedValue;
 
-  const photo = avatars.data?.[me.id] ?? null;
+  // 올린 사진(지우기 대상)과 보여 줄 그림(올린 사진 → 지정 아바타 그림 → 첫 글자, 2026-11-03)
+  const photo = avatars.data?.photos[me.id] ?? null;
+  const shown = photo ?? avatarArt(avatars.data?.presets[me.id]) ?? null;
   const clearPhoto = async () => {
     if (!me.space_id) return;
     try {
@@ -85,7 +87,7 @@ export function S11Me() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
-      {/* 1번 프로필 사진: 사진 있으면 사진, 없으면 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로 */}
+      {/* 1번 프로필 사진: 올린 사진 → 지정 아바타 그림 → 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로(지정 아바타로 돌아감) */}
       <div className="hg-row" style={{ gap: 'var(--space-4)', alignItems: 'center' }}>
         <span
           className="hg-avatar-edit"
@@ -97,9 +99,9 @@ export function S11Me() {
             if (file) nav('/settings/me/photo', { state: { file } });
           }}
         >
-          {photo ? (
+          {shown ? (
             <span className="hg-avatar hg-avatar--xl hg-avatar--photo">
-              <img src={photo} alt={c.myName} />
+              <img src={shown} alt={c.myName} />
             </span>
           ) : (
             <span

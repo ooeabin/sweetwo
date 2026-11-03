@@ -29,3 +29,4 @@ export * from './rules/goal-progress';
 export * from './rules/year-summary';
 export * from './rules/conflict';
 export * from './deep-link';
+export * from './rules/preset-art';

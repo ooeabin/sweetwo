@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { avatarArt } from './preset-art';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 import { Wordmark } from './Wordmark';
@@ -33,6 +34,8 @@ export interface AppFramePerson {
   no: 1 | 2;
   /** 미합류면 빈 원 */
   empty?: boolean;
+  /** 올린 사진이나 지정 아바타 그림 주소(없으면 첫 글자) */
+  src?: string;
 }
 
 export interface AppFrameStat {
@@ -94,10 +97,23 @@ export interface AppFrameProps {
 }
 
 function Person({ p }: { p: AppFramePerson }) {
-  // 배우자 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음
-  return p.empty ? (
-    <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
-      <Icon name="user" size={16} />
+  // 배우자 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음.
+  // 빈 자리 그림 파일(assets/avatars/empty.webp)이 생기면 그 그림
+  const emptyArt = avatarArt('empty');
+  if (p.empty)
+    return emptyArt ? (
+      <span className="hg-avatar hg-avatar--photo" aria-hidden="true">
+        <img src={emptyArt} alt="" />
+      </span>
+    ) : (
+      <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
+        <Icon name="user" size={16} />
+      </span>
+    );
+  // 올린 사진 또는 지정 아바타 그림(2026-11-03), 없으면 이름 첫 글자
+  return p.src ? (
+    <span className="hg-avatar hg-avatar--photo" aria-hidden="true">
+      <img src={p.src} alt="" />
     </span>
   ) : (
     <span

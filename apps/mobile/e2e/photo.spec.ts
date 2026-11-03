@@ -97,6 +97,27 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
 });
 
+test('지정 아바타(S-11e, 2026-11-03): 8개 중 고르면 바로 저장, 올린 사진 대신', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.avatar_path = `space-1/${db.me.id}.jpg`;
+  await page.goto('/settings/me/photo');
+  await heading(page, '프로필 사진');
+  const picks = page.getByRole('list', { name: '기본 그림에서 고르기' }).getByRole('button');
+  await expect(picks).toHaveCount(8);
+  // 올린 사진이 있으면 고른 지정 아바타 없음
+  await expect(page.locator('.hg-artpick__item[aria-pressed="true"]')).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '기본 그림 3' }).click();
+  await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  expect(db.me.avatar_preset).toBe('a03');
+  expect(db.me.avatar_path).toBeNull();
+  // 그림 파일이 생기기 전에는 첫 글자
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+});
+
 test('사진 고지: 배우자 합류 전이고 이름도 없으면 ‘배우자와 나만’', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });

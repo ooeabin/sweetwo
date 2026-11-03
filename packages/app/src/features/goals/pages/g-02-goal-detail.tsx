@@ -331,7 +331,8 @@ export function G02GoalDetail() {
           </span>
         </span>
         <GoalArt g={i} />
-        {i.custom && i.canEdit && (
+        {/* 사진 바꾸기: 2026-11-03 모든 목표(지정 사진 고르기 + 올리기). 고칠 수 있는 사람만 */}
+        {i.canEdit && (
           <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
             <Button variant="ghost" size="sm" onClick={() => nav(`/goals/${id}/photo`)}>
               {copy.photoChange}
