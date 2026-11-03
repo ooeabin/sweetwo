@@ -3,9 +3,8 @@ import { addMonths, thisMonth, ymToDate, type SplitLineDraft } from '@sweetwo/co
 import { Modal, Tabs } from '@sweetwo/ui';
 import { PersonDot } from '../../../shared/person';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { closeHomeTodo } from '../../../shared/home-todo';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
@@ -29,15 +28,6 @@ export function W01Split() {
   const [drafts, setDrafts] = useState<Record<string, SplitLineDraft[]>>({});
   const [refill, setRefill] = useState(false);
   const [saving, setSaving] = useState(false);
-  // 분배표를 한 번 열면 홈 할 일 ‘분배표 확인’(ADR 0005)을 끝냄
-  const myId = me.data?.id;
-  const jointMode = space.data?.salary_mode === 'joint';
-  const mySplitId = splits.data?.find((x) =>
-    jointMode ? x.owner_user_id === null : x.owner_user_id === myId,
-  )?.id;
-  useEffect(() => {
-    if (mySplitId) closeHomeTodo(`split:${mySplitId}`);
-  }, [mySplitId]);
   if (!me.data || !space.data || !goals.data || !splits.data) return null;
   const m = me.data;
   const p = partner.data ?? null;

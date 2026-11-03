@@ -54,6 +54,8 @@ export interface AppFrameProps {
     stats?: AppFrameStat[];
     /** 큰 숫자 하나 + 진행 막대(0~100) */
     focus?: { value: ReactNode; percent: number };
+    /** 인사 카드 없이(2026-11-03 홈): 다른 메뉴처럼 제목 줄(넓은 창 “홈” + ‘추가’), 좁은 창은 화면 읽기용 제목만 */
+    plain?: boolean;
   };
   /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리에 메뉴 이름이 있어 동작만 */
   page?: { title: ReactNode; actions?: ReactNode };
@@ -238,7 +240,15 @@ export function AppFrame(p: AppFrameProps) {
           />
         </div>
 
-        {p.today ? (
+        {p.today?.plain ? (
+          // 다른 메뉴와 같은 제목 줄(넓은 창: “홈” + 오른쪽 ‘추가’). 좁은 창은 화면 읽기용 제목만
+          <section className="hg-pagetitle hg-today--plain">
+            <div className="hg-pagetitle__in">
+              <h1 className="hg-pagetitle__title">{p.today.title}</h1>
+              {p.today.actions && <div className="hg-row hg-frame__actions">{p.today.actions}</div>}
+            </div>
+          </section>
+        ) : p.today ? (
           <section className="hg-today">
             <div className="hg-today__in">
               <div className="hg-today__row">

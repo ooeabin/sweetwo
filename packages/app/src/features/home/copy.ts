@@ -1,13 +1,9 @@
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
   noSavedYet: '아직 모은 돈이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
-  // H-01 인사
-  hiLeft: (name: string, n: number) => `${name}님, 이번 달 월급 체크가 ${n}개 남았어요`, // [확인 필요]
-  hiGoal: (name: string, goal: string, pct: number) => `${name}님, ${goal}까지 ${pct}% 왔어요`, // [확인 필요]
+  // H-01 기다리는 화면
   waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
   waitCard: (starter: string) => `${starter}님이 첫 목표를 정하면 알려 드릴게요`,
-  hiAllDone: (name: string) => `${name}님, 이번 달 월급 체크를 다 했어요`, // [확인 필요] 다 했고 1순위 목표가 0%일 때
-  hi: (name: string) => `${name}님, 반가워요`, // [확인 필요] 목표 금액이 없을 때
   // 오늘 띠
   add: '추가',
   check: '월급 체크하기',
@@ -26,9 +22,9 @@ export const copy = {
   progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`,
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
+  homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
   allDone: (label: string) => `${label} 체크를 다 했어요`,
   savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
-  showLines: '줄 펼치기', // [확인 필요]
   editSplit: '분배표 고치기',
   noSalary: '월급이 생기면 분배표를 만들어 드려요',
   tellSalary: '월급 알려 주기',

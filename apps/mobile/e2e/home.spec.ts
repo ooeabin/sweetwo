@@ -34,7 +34,11 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   seed(db);
   await page.goto('/');
 
-  await expect(page.getByText('찬우님, 이번 달 월급 체크가 5개 남았어요').first()).toBeVisible();
+  // 인사 카드 없이 맨 위가 이번 달 체크리스트(2026-11-03). 인사 문장은 화면 읽기용 제목
+  await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
+  await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
+  // 홈에서는 3줄까지만(나머지는 W-02)
+  await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(3);
   await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
   await expect(page.getByText('이번 달 95만 원 넣을 차례예요')).toBeVisible();
   await expect(salaryCard(page)).toContainText('5개 중 0개 했어요');
@@ -47,10 +51,10 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByText('내 집 마련에 95만 원 더했어요')).toBeVisible();
   await expect(page.getByText('이번 달 95만 원 넣었어요')).toBeVisible();
   await expect(salaryCard(page)).toContainText('5개 중 1개 했어요');
-  await expect(page.getByText('찬우님, 이번 달 월급 체크가 4개 남았어요').first()).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
 
-  // W-02: 남은 줄 체크 → 마지막 줄이면 W-02 끝
-  await page.getByRole('button', { name: '월급 체크하기' }).first().click();
+  // W-02: 남은 줄 체크 → 마지막 줄이면 W-02 끝(카드 머리 ‘5개 중 1개 했어요 ›’)
+  await salaryCard(page).getByRole('link', { name: '5개 중 1개 했어요' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
   await expect(page.getByText(/09\.25 ~ 10\.24\. 5개 중 1개 했어요/)).toBeVisible();
   await axe(page);
@@ -60,7 +64,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByText('이번 달 목표에 139만 원 모았어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText(/찬우님, 이번 달 월급 체크를 다 했어요/).first()).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
   await expect(page.getByText('9월 월급 체크를 다 했어요', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
 });

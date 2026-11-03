@@ -130,12 +130,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   expect(db.rpc).toContain('start_checklist');
   expect(db.checklists).toHaveLength(1);
 
-  // 홈 할 일: 분배표 확인 → W-01을 열면 끝남
-  const todo = page.getByText('추천으로 나눈 분배표를 확인해 주세요');
-  await expect(todo).toBeVisible();
-  await page.locator('.hg-banner--todo').getByRole('button').first().click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
-  await page.goto('/');
+  // 홈 할 일 ‘분배표 확인’은 없앰(2026-11-03)
   await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
 
   // 홈 1순위 카드 ‘금액 정하기’ → 템플릿 질문(G-03b) → 기한(G-03c) → 목표 상세(ADR 0004)

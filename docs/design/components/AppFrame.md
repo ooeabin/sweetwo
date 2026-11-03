@@ -42,3 +42,5 @@
 - 아이콘(현재 탭은 채운 모양): `house`(홈), `target`(목표), `wallet`(우리 자산), `calendar`(캘린더), `search`, `eye`, `bell`, `settings`, `plus`.
 - 설정은 메뉴 탭에 두지 않음. 넓은 창은 사이드바 아래 아바타 줄, 좁은 창은 톱니.
 - 본문 단 수는 넘긴 `columns` 개수(`--cols`). 1100px 미만은 한 단. 맨 위 띠(`banner`)가 있어도 단 너비는 같음
+
+- 홈 인사 카드 없음(2026-11-03, `today.plain`): 다른 메뉴와 같은 제목 줄(`hg-pagetitle hg-today--plain`, 넓은 창 “홈” + ‘추가’), 좁은 창은 제목을 화면 읽기용으로만(1px로 가림). Meter `started`, 새 화면은 맨 위부터(뒤로 가기 제외).

@@ -26,11 +26,9 @@ import {
   goalLineName,
   myChecklist,
   savedOf,
-  salaryPaths,
   useChecklists,
   useGoalSaved,
   useSplits,
-  waiting,
 } from '../../salary';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -61,7 +59,6 @@ const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconNa
   reconnect: 'link',
   review: 'check',
   invite: 'user',
-  split: 'wallet',
   amount: 'pencil',
   matured: 'piggy-bank',
   care: 'gift',
@@ -122,7 +119,6 @@ export function H01Home() {
   const list = myChecklist(lists.data, meId);
   const partnerList =
     !joint && joined ? lists.data?.find((c) => c.owner_user_id === partner.data?.id) : undefined;
-  const left = list ? waiting(list).length : 0;
   const personName = (id: string | null) =>
     id === meId ? myName : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
@@ -130,32 +126,6 @@ export function H01Home() {
   const split = splits.data?.find((x) => x.owner_user_id === (joint ? null : meId));
   const monthly = (g: { id: string }) =>
     split?.split_line.find((l) => l.kind === 'saving' && l.goal_id === g.id)?.amount ?? 0;
-
-  // H-01 인사: 체크 안 한 줄이 있으면 남은 개수, 다 했으면 1순위 목표까지 몇 %
-  const top =
-    goals.data.find(
-      (g) => g.template !== 'emergency' && g.owner_user_id === null && g.status === 'active',
-    ) ?? goals.data.find((g) => g.template === 'emergency');
-  const pct = top?.target_amount
-    ? Math.min(Math.floor((saved(top) * 100) / top.target_amount), 100)
-    : null;
-  const total = list?.pay_check_line.length ?? 0;
-  const title =
-    left > 0
-      ? copy.hiLeft(myName, left)
-      : top && pct !== null && pct > 0
-        ? copy.hiGoal(myName, top.name, pct)
-        : total > 0
-          ? copy.hiAllDone(myName) // 다 했는데 0%면 “0% 왔어요” 대신(2026-11-03)
-          : copy.hi(myName);
-  // 인사 카드의 큰 숫자 하나(19 앱 기본 틀 7번): 체크가 남았으면 한 개수/전체, 다 했으면 1순위 목표 %
-  // 다 했는데 1순위 목표가 아직 0%면 “0%” 빈 막대 대신 “5/5” 꽉 찬 막대(2026-11-03)
-  const focus =
-    (left > 0 || !(top && pct)) && total > 0
-      ? { value: `${total - left}/${total}`, percent: ((total - left) * 100) / total }
-      : top && pct !== null
-        ? { value: `${pct}%`, percent: pct }
-        : undefined;
 
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
@@ -171,8 +141,7 @@ export function H01Home() {
             : t.kind === 'matured' ||
                 t.kind === 'care' ||
                 t.kind === 'review' ||
-                t.kind === 'amount' ||
-                t.kind === 'split'
+                t.kind === 'amount'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -293,38 +262,24 @@ export function H01Home() {
   return (
     <MainFrame
       current="month"
+      // 2026-11-03 인사 카드(날짜, 인사, 큰 숫자, 진행 막대, ‘월급 체크하기’)를 없애고 맨 위에 이번 달 체크리스트.
+      // 인사 문장은 화면 읽기용 제목으로만, 넓은 창은 오른쪽 ‘추가’ 한 줄
       today={{
+        plain: true,
         date: formatDateWeekday(today),
-        title,
-        focus,
+        title: copy.homeTitle,
         actions: (
           <>
             {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 목표·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}
             <span className="hg-wide-only">
               <AddMenu />
             </span>
-            {left > 0 && (
-              <Button variant="primary" onClick={() => nav(salaryPaths.checklist)}>
-                {copy.check}
-              </Button>
-            )}
           </>
         ),
       }}
       banner={banner}
       columns={[
         <div key="l" className="hg-stack" style={{ gap: 'var(--space-8)' }}>
-          <GoalsCard
-            goals={goals.data}
-            savedOf={saved}
-            monthly={monthly}
-            list={list}
-            personName={personName}
-            meId={meId}
-            joined={joined}
-            solo={space.data.couple_state === 'solo'}
-            go={go}
-          />
           <SalaryCard
             list={list}
             partnerList={partnerList}
@@ -334,6 +289,17 @@ export function H01Home() {
             personName={personName}
             meId={meId}
             joint={joint}
+            go={go}
+          />
+          <GoalsCard
+            goals={goals.data}
+            savedOf={saved}
+            monthly={monthly}
+            list={list}
+            personName={personName}
+            meId={meId}
+            joined={joined}
+            solo={space.data.couple_state === 'solo'}
             go={go}
           />
         </div>,

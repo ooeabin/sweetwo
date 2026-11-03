@@ -1393,6 +1393,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 /* 2026-11-03 추가 입구 하나로: 넓은 창에만 보이는 동작(제목 줄 ‘+ 추가’). 좁은 창은 + 버튼 */
 @media (max-width: 767px) {
   .hg-wide-only { display: none; }
+  .hg-pagetitle.hg-today--plain { display: block !important; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }  /* 2026-11-03 홈 제목은 좁은 창에서 화면 읽기용으로만 */
   .hg-pagetitle:has(.hg-frame__actions):not(:has(.hg-frame__actions > :not(.hg-wide-only))) { display: none; }
 }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
@@ -1404,6 +1405,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-appside { display: none; }
   .hg-pagetitle__in { padding: var(--space-3) var(--space-4) 0; }
   .hg-pagetitle__title { display: none; } /* 좁은 창은 머리에 메뉴 이름 */
+  .hg-today--plain .hg-pagetitle__title { display: block; }  /* 홈은 머리에 제목이 없어서 화면 읽기용으로 남김(바깥 칸이 1px로 가림) */
   .hg-today { padding: var(--space-3) var(--space-4) 0; }
   .hg-today__in { padding: var(--space-5); gap: var(--space-4); }
   .hg-today__row { flex-wrap: wrap; }

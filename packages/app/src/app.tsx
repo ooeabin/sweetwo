@@ -40,6 +40,14 @@ export function App({ platform }: { platform: Platform }) {
     });
     return () => stop();
   }, [queryClient]);
+  // 새 화면으로 가면 맨 위부터(2026-11-03, W-02 아래쪽에서 ‘분배표 고치기’를 누르면 W-01이 내려간 채 열리던 것). 뒤로 가기는 브라우저 기억대로
+  useEffect(() => {
+    let last = router.state.location.pathname;
+    return router.subscribe((st) => {
+      if (st.location.pathname !== last && st.historyAction !== 'POP') window.scrollTo(0, 0);
+      last = st.location.pathname;
+    });
+  }, [router]);
   // 데스크톱: 트레이 위젯·트레이 메뉴가 고른 화면으로(main → 앱 창)
   useEffect(() => window.sweetwo?.onNavigate?.((path) => void router.navigate(path)), [router]);
   if (!restored) return null;

@@ -14,7 +14,6 @@ import {
   WeekStrip,
   goalIcon,
 } from '@sweetwo/ui';
-import { useState } from 'react';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
 import { CheckLine, doneCount, lineName, toAllocGoal } from '../salary';
@@ -90,6 +89,7 @@ export function GoalsCard({
           }
           lead={<GoalLead template={top.template} />}
           empty={saved > 0 ? undefined : copy.noSavedYet}
+          started={saved > 0}
         />
         <button
           type="button"
@@ -144,9 +144,11 @@ export function GoalsCard({
   );
 }
 
+const SHOW = 3;
+
 /**
  * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 했어요” + 줄 목록(저금 먼저) + ‘분배표 고치기’.
- * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 접힘(펼치기 가능). 월급이 없으면 ‘월급 알려 주기’.
+ * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 숨김(펼치기 없음, 머리 링크 → W-02). 월급이 없으면 ‘월급 알려 주기’.
  */
 export function SalaryCard({
   list,
@@ -171,7 +173,6 @@ export function SalaryCard({
   go: (to: string) => void;
 }) {
   const { masked } = useMask();
-  const [open, setOpen] = useState(false);
   if (!list) {
     return (
       <section className="hg-card hg-card--fill hg-stack">
@@ -206,9 +207,11 @@ export function SalaryCard({
             {savedSum > 0 && copy.savedThisMonth(money(savedSum, masked))}
           </p>
         )}
-        {(!finished || open) && (
+        {/* 다 했으면 줄 없이 한 줄 요약만(‘줄 펼치기’ 없음, 줄은 머리 링크 → W-02, 2026-11-03) */}
+        {!finished && (
           <div className="hg-checklist__list">
-            {lines.map((l) => (
+            {/* 홈 맨 위(2026-11-03): 3줄까지만(저금 먼저). 나머지는 머리 ‘5개 중 2개 했어요 ›’ → W-02 */}
+            {lines.slice(0, SHOW).map((l) => (
               <CheckLine
                 key={l.id}
                 line={l}
@@ -218,11 +221,6 @@ export function SalaryCard({
               />
             ))}
           </div>
-        )}
-        {finished && !open && (
-          <button type="button" className="hg-btn hg-btn--link" onClick={() => setOpen(true)}>
-            {copy.showLines}
-          </button>
         )}
         {partnerList && (
           // 배우자 체크 현황(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원

@@ -92,9 +92,9 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 분배
   await page.getByRole('button', { name: '다음' }).click();
   await salary(page);
 
-  // 분배표 화면 없이 홈(온보딩 ADR 0005처럼), 홈 할 일 ‘분배표 확인’
+  // 분배표 화면 없이 홈(온보딩 ADR 0005처럼). 홈 할 일 ‘분배표 확인’은 없앰(2026-11-03)
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toBeVisible();
+  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toHaveCount(0);
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
   expect(
@@ -119,7 +119,9 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기
   await answerBasics(page);
   await page.getByRole('radio', { name: /합쳐서 같이 관리해요/ }).click();
   await page.getByRole('button', { name: '다음' }).click();
-  expect(db.joinCalls[0]).toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });
+  await expect
+    .poll(() => db.joinCalls[0])
+    .toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });
   await salary(page);
 
   await expect(page).toHaveURL(/\/$/);
