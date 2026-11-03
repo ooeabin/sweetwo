@@ -87,6 +87,7 @@ export function G01GoalList() {
             )
           }
           onLate={i.canEdit ? () => nav('/salary/split') : undefined}
+          onUse={i.canEdit ? () => nav(`/goals/${i.goal.id}/use`) : undefined}
           changed={changedOf(i.goal.id)}
         />
       ))}

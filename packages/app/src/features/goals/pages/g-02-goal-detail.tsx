@@ -352,16 +352,29 @@ export function G02GoalDetail() {
                 ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
                 : undefined
             }
-            pct={i.pct}
+            pct={g.target_amount === null ? 0 : i.pct}
+            // 금액 미정이면 진행률·칸 없이(2026-11-03)
+            bare={g.target_amount === null}
             tone={tone(g.template)}
-            empty={i.saved > 0 ? undefined : copy.noSavedYet}
-            started={i.saved > 0}
+            empty={g.target_amount === null || i.saved > 0 ? undefined : copy.noSavedYet}
+            started={g.target_amount !== null && i.saved > 0}
           />
         )}
       </section>
       {(g.status === 'achieved' || g.status === 'used') && (
         <section className="hg-card hg-card--fill hg-stack">
-          <b>{copy.savedAll(m(i.saved))}</b>
+          <b>
+            {g.status === 'used'
+              ? // 사용 완료: 꺼내 쓴 돈 합(22 접힌 목록 4번, 2026-11-03)
+                copy.spentAll(
+                  m(
+                    (moves.data ?? [])
+                      .filter((x) => x.kind === 'use')
+                      .reduce((t, x) => t + x.amount, 0),
+                  ),
+                )
+              : copy.savedAll(m(i.saved))}
+          </b>
           {g.status === 'achieved' && i.canEdit && (
             <Button variant="secondary" size="sm" onClick={() => nav(`/goals/${id}/use`)}>
               {copy.usedQ}

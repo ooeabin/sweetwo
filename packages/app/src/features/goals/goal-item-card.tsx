@@ -1,5 +1,7 @@
-import { formatManWon, formatYm } from '@sweetwo/core';
+import { fetchGoalMoves, qk } from '@sweetwo/api';
+import { formatYm } from '@sweetwo/core';
 import { Badge, Meter } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { money } from '../../shared/mask';
 import { copy } from './copy';
 import { GoalArt } from './goal-art';
@@ -22,6 +24,8 @@ export const lateText = (months: number) => {
 export function planText(i: GoalItem, m: (v: number) => string) {
   const g = i.goal;
   if (g.kind === 'monthly') return copy.monthlyHeld(m(i.saved));
+  // 달성: “400만 원 모았어요”(접힌 목록 3번, 2026-11-03. ‘이 돈을 썼나요?’는 카드 아래 링크)
+  if (i.state === 'achieved') return copy.savedAll(m(i.saved));
   if (g.target_amount === null) return copy.setAmount;
   if (g.kind === 'yearly') return i.nextUse ? copy.yearlyUse(formatYm(i.nextUse)) : '';
   if (i.state === 'paused') return copy.paused;
@@ -42,12 +46,21 @@ export function thisMonthText(i: GoalItem, m: (v: number) => string) {
   );
 }
 
+/** 사용 완료 카드 줄: “380만 원 썼어요”(꺼내 쓰기 기록 합, 접힌 목록 4번) */
+function UsedLine({ goalId, masked }: { goalId: string; masked: boolean }) {
+  const moves = useQuery({ queryKey: qk.goalMoves(goalId), queryFn: () => fetchGoalMoves(goalId) });
+  if (!moves.data) return null;
+  const spent = moves.data.filter((x) => x.kind === 'use').reduce((t, x) => t + x.amount, 0);
+  return <span className="hg-card__meta">{copy.spentAll(money(spent, masked))}</span>;
+}
+
 /** G-01 목표 카드: 그림 + Meter(모은 돈 / 목표 금액) + 매달·예상 + 기한보다 늦어요 + 이번 달. 누르면 G-02 */
 export function GoalItemCard({
   i,
   masked,
   onOpen,
   onLate,
+  onUse,
   changed,
 }: {
   i: GoalItem;
@@ -55,13 +68,19 @@ export function GoalItemCard({
   onOpen: () => void;
   /** 4a ‘월급 계획에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
   onLate?: () => void;
+  /** 달성 카드 ‘이 돈을 썼나요?’ → G-05 사용(카드 아래 글자 링크) */
+  onUse?: () => void;
   /** 배우자가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
   changed?: string;
 }) {
   const g = i.goal;
   // 아직 모은 돈이 없으면 지연으로 보지 않음(배지, 늦어요 줄 모두, 2026-11-03)
   const late = i.lateMonths !== null && i.lateMonths > 0 && i.saved > 0;
-  const month = thisMonthText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`));
+  // 금액은 readWon(0원은 “0원”, 2026-11-03 “0만 원”이던 것)
+  const fmt = (v: number) => money(v, masked);
+  const month = thisMonthText(i, fmt);
+  // 매달 목표·금액 미정 목표는 진행률과 칸 없이(22 G-01 5번, 2026-11-03)
+  const bare = g.kind === 'monthly' || g.target_amount === null;
   const card = (
     <button
       type="button"
@@ -83,14 +102,17 @@ export function GoalItemCard({
             ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
             : undefined
         }
-        pct={g.kind === 'monthly' ? 0 : i.pct}
+        pct={bare ? 0 : i.pct}
+        bare={bare}
         tone={tone(g.template)}
-        empty={g.kind === 'monthly' || i.saved > 0 ? undefined : copy.noSavedYet}
-        started={g.kind !== 'monthly' && i.saved > 0}
+        empty={bare || i.saved > 0 ? undefined : copy.noSavedYet}
+        started={!bare && i.saved > 0}
       />
-      <span className="hg-card__meta">
-        {planText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`))}
-      </span>
+      {i.state === 'used' ? (
+        <UsedLine goalId={g.id} masked={masked} />
+      ) : (
+        <span className="hg-card__meta">{planText(i, fmt)}</span>
+      )}
       {late && i.lateMonths !== null && (
         <span className="hg-card__meta">{copy.lateLine(lateText(i.lateMonths))}</span>
       )}
@@ -98,7 +120,8 @@ export function GoalItemCard({
     </button>
   );
   const lateLink = late && onLate;
-  if (!lateLink && !changed) return card;
+  const useLink = i.state === 'achieved' && onUse;
+  if (!lateLink && !changed && !useLink) return card;
   return (
     <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
       {card}
@@ -111,6 +134,16 @@ export function GoalItemCard({
           onClick={onLate}
         >
           {copy.lateLink}
+        </button>
+      )}
+      {useLink && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={onUse}
+        >
+          {copy.usedQ}
         </button>
       )}
     </div>
