@@ -163,7 +163,7 @@ export function QuestionLayout({
   title: ReactNode;
   help?: ReactNode;
   children?: ReactNode;
-  /** variant 기본 primary. 대답 성격(O-21 0개 ‘목표는 나중에 고를게요’)이면 secondary */
+  /** variant 기본 primary. 대답 성격(O-21 0개 ‘나중에 고를게요’)이면 secondary */
   primary?: {
     label: string;
     disabled?: boolean;

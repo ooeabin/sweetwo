@@ -65,7 +65,7 @@ export function O21Goals() {
       title={copy.goalsTitle}
       help={copy.goalsHelp}
       onBack={s.onBack}
-      // 하나도 안 골랐으면 회색 보조 “목표는 나중에 고를게요”, 고르면 주황 ‘다음’(2026-11-03). 비상금은 어느 쪽이든 자동으로 들어감
+      // 하나도 안 골랐으면 회색 보조 “나중에 고를게요”, 고르면 주황 ‘다음’(2026-11-03). 비상금은 어느 쪽이든 자동으로 들어감
       primary={{
         label: list.length ? copy.next : copy.goalsLater,
         variant: list.length ? 'primary' : 'secondary',
