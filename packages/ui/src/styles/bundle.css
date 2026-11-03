@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (e8dbe89). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (07dd223). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -730,7 +730,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sechead { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; }
 /* Ring: 묶음 진행 원(카카오뱅크 체크리스트 머리 “2/4”). 둘레를 한 만큼 ink로 채움 */
 .hg-ring { position: relative; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ink); }
-.hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--ink) calc(var(--p, 0) * 1%), var(--surface-alt) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
+.hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--success) calc(var(--p, 0) * 1%), var(--surface-alt) 0);  /* 2026-11-03 체크 원과 같은 파랑 */ -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
 /* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
 .hg-checkgroup { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-checkgroup .hg-checklist__list > :last-child { border-bottom: 0; }
