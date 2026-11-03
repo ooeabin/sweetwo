@@ -16,7 +16,7 @@ export function P03aBirthYear() {
   const initial: YMD = { y: d.me.birth_year ?? range.max - 12, m: 1, d: 1 };
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={title}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !b && !d.me.birth_year, loading: s.saving }}

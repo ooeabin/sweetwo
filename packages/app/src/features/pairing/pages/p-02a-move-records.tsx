@@ -7,9 +7,16 @@ import {
   type JoinResult,
 } from '@sweetwo/api';
 import { readWon } from '@sweetwo/core';
-import { ListRow, QuestionLayout, SectionHeader } from '@sweetwo/ui';
+import {
+  BottomSheet,
+  ChoiceCards,
+  List,
+  ListRow,
+  QuestionLayout,
+  SectionHeader,
+} from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -34,19 +41,14 @@ export function P02aMoveRecords({
   const counts = useQuery({ queryKey: ['record-counts'], queryFn: fetchRecordCounts });
   const [vis, setVis] = useState<Record<string, Vis>>({});
   const [busy, setBusy] = useState(false);
-  const id = useId();
+  const [open, setOpen] = useState<string | null>(null);
   if (me.isLoading || assets.isLoading || counts.isLoading || !me.data) return null;
   const m = me.data;
   const mine = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && (a.owner_user_id ?? a.created_by) === m.id && !a.deleted_at,
   );
-  const salary =
-    m.monthly_income !== null
-      ? copy.moveSalary(
-          readWon(m.monthly_income),
-          m.payday_last ? copy.paydayLast : m.payday ? copy.paydayDay(m.payday) : '-',
-        )
-      : null;
+  const salary = m.monthly_income !== null;
+  const day = m.payday_last ? copy.paydayLast : m.payday ? copy.paydayDay(m.payday) : null;
   const c = counts.data ?? { goals: 0, splits: 0, lists: 0 };
   const submit = async () => {
     if (busy) return;
@@ -73,53 +75,57 @@ export function P02aMoveRecords({
       {!salary && !mine.length ? (
         <p className="hg-q__help">{copy.moveNone}</p>
       ) : (
-        <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-          {salary && (
-            <div className="hg-list">
-              <ListRow label={salary} chevron={false} />
-            </div>
-          )}
-          {mine.map((a, i) => (
-            <div
-              key={a.id}
-              className="hg-row"
-              style={{ gap: 'var(--space-3)', alignItems: 'center' }}
-            >
-              <span style={{ flex: 1, minWidth: 0 }}>
-                {a.name} {readWon(a.amount)}
-              </span>
-              <label htmlFor={`${id}-${i}`} className="hg-sr">
-                {copy.moveVisLabel(a.name)}
-              </label>
-              <select
-                id={`${id}-${i}`}
-                className="hg-input"
-                style={{ flex: 1 }}
-                value={vis[a.id] ?? 'sum'}
-                onChange={(e) => setVis({ ...vis, [a.id]: e.target.value as Vis })}
-              >
-                {(['all', 'sum'] as Vis[]).map((v) => (
-                  <option key={v} value={v}>
-                    {copy.moveVis[v]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
+        <>
+          <SectionHeader title={copy.moveDo} />
+          <List label={copy.moveDo}>
+            {salary && (
+              <ListRow
+                label={copy.moveSalaryLabel}
+                sub={day ? copy.moveDay(day) : undefined}
+                value={readWon(m.monthly_income ?? 0)}
+              />
+            )}
+            {/* 2026-11-03 휴대폰 기본 드롭다운 대신: 줄 오른쪽에 공개 범위, 누르면 시트에서 고름 */}
+            {mine.map((a) => (
+              <ListRow
+                key={a.id}
+                label={`${a.name} ${readWon(a.amount)}`}
+                value={copy.moveVis[vis[a.id] ?? 'sum']}
+                onClick={() => setOpen(a.id)}
+              />
+            ))}
+          </List>
+        </>
       )}
       <SectionHeader title={copy.moveSkip} />
-      <p className="hg-q__help" style={{ margin: 0 }}>
-        {copy.moveSkipCounts(c.goals, c.splits, c.lists)}. {copy.moveKeep}
+      <List label={copy.moveSkip}>
+        {(['goals', 'splits', 'lists'] as const).map((k) => (
+          <ListRow key={k} label={copy.moveSkipItems[k]} value={copy.moveCount(c[k])} />
+        ))}
+      </List>
+      <p className="hg-help" style={{ margin: 0 }}>
+        {copy.moveKeep}{' '}
+        <button type="button" className="hg-btn hg-btn--link" onClick={() => nav('/settings/data')}>
+          {copy.moveCopy}
+        </button>
       </p>
-      <button
-        type="button"
-        className="hg-btn hg-btn--link"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={() => nav('/settings/data')}
-      >
-        {copy.moveCopy}
-      </button>
+      {open && (
+        <BottomSheet
+          title={copy.moveVisLabel(mine.find((a) => a.id === open)?.name ?? '')}
+          onClose={() => setOpen(null)}
+        >
+          <ChoiceCards<Vis>
+            label={copy.moveVisLabel(mine.find((a) => a.id === open)?.name ?? '')}
+            value={vis[open] ?? 'sum'}
+            onChange={(v) => setVis({ ...vis, [open]: v })}
+            onPick={() => setOpen(null)}
+            options={(['all', 'sum'] as Vis[]).map((v) => ({
+              value: v,
+              label: copy.moveVis[v] ?? v,
+            }))}
+          />
+        </BottomSheet>
+      )}
     </QuestionLayout>
   );
 }

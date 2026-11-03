@@ -19,11 +19,17 @@ export function joinScreens(d: Pick<JoinData, 'waiting' | 'resumed'>): string[] 
   if (d.waiting) return ['p-03', 'p-03a', 'p-05'];
   return BAR;
 }
-export const joinProgress = (id: string) => ({
-  total: BAR.length,
-  now: Math.max(BAR.indexOf(id), 0),
-  fill: 50,
-});
+/** 온보딩과 같은 얇은 주황 막대(ChapterBar, 2026-11-03) */
+export const joinChapter = (id: string) => {
+  const done = Math.max(BAR.indexOf(id), 0) + 1;
+  return {
+    index: 1,
+    total: 1,
+    name: '',
+    fill: (done / BAR.length) * 100,
+    steps: { total: BAR.length, done },
+  };
+};
 
 /** 합류 화면 하나: 멈춘 화면 기록, 저장 뒤 다음(마지막이면 홈), 뒤로 */
 export function useJoinStep(id: string) {
@@ -62,7 +68,7 @@ export function useJoinStep(id: string) {
   return {
     d,
     saving,
-    steps: joinProgress(id),
+    chapter: joinChapter(id),
     /** 이 흐름의 마지막 화면(저장 = 합류 완료) */
     last: i === list.length - 1,
     done,
