@@ -25,7 +25,7 @@ async function start(page: Page) {
   await expect(page.getByText('언제든 고칠 수 있으니 편하게 적어 주세요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '시작할게요' }).click();
+  await page.getByRole('button', { name: '시작하기' }).click();
   await heading(page, '내 이름이나 애칭을 알려 주세요');
   await expect(page.getByRole('progressbar', { name: '온보딩 진행' }).first()).toBeVisible();
   await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
@@ -95,7 +95,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await expect(page.getByText('25일 월급 체크리스트를 만들었어요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '홈으로 갈게요' }).click();
+  await page.getByRole('button', { name: '홈으로 가기' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
 
   expect(db.me).toMatchObject({
@@ -162,7 +162,7 @@ test('O-07 초대 코드 시트: 카톡 주 버튼, 링크 복사, 보내기 전
   await page.clock.setFixedTime(NOW);
   await mockOnboarding(page, { now: NOW });
   await page.goto('/');
-  await page.getByRole('button', { name: '시작할게요' }).click();
+  await page.getByRole('button', { name: '시작하기' }).click();
   await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
   await next(page);
   await heading(page, '같이 쓸 사람을 초대할까요?');
@@ -235,7 +235,7 @@ test('예비부부, 합쳐서, 월급 없음: 결혼 비용 추천과 0원 분�
   await page.getByRole('button', { name: '지금은 월급이 없어요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급이 생기면 홈에서 알려 주세요')).toBeVisible();
-  await page.getByRole('button', { name: '홈으로 갈게요' }).click();
+  await page.getByRole('button', { name: '홈으로 가기' }).click();
   await expect(page).not.toHaveURL(/onboarding/);
 
   expect(db.space).toMatchObject({ marriage_status: 'engaged', salary_mode: 'joint' });
@@ -255,7 +255,7 @@ test('이어하기(16): 앱을 다시 열면 “이어서 할까요?” → 멈�
   await page.goto('/');
   await heading(page, '이어서 할까요?');
   await axe(page);
-  await page.getByRole('button', { name: '이어서 할게요' }).click();
+  await page.getByRole('button', { name: '이어서 하기' }).click();
   await expect(page).toHaveURL(/\/onboarding\/o-11$/);
   // 같은 실행 안에서는 다시 묻지 않음
   await page.evaluate(() => history.pushState({}, '', '/'));

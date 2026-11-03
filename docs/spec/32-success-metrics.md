@@ -17,7 +17,7 @@
 
 | 지표 | 정의(계산식) | 초기 목표치(가설) | 보는 이유 |
 | --- | --- | --- | --- |
-| 온보딩 완료율 | O-60 ‘시작할게요’ 사용자 ÷ O-10 ‘시작할게요’ 사용자 (초대받은 배우자 제외) | 80% [확인 필요] | 11화면 안에 첫 목표와 분배표까지 가야 가치 체험 시작 |
+| 온보딩 완료율 | O-60 ‘시작하기’ 사용자 ÷ O-10 ‘시작하기’ 사용자 (초대받은 배우자 제외) | 80% [확인 필요] | 11화면 안에 첫 목표와 분배표까지 가야 가치 체험 시작 |
 | 온보딩 소요 시간 | O-10 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 3분 이하 [확인 필요] | 약 2분·11화면 설계 검증 |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 분배표가 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 분배표 전체를 따라가는지 |
@@ -88,12 +88,12 @@
 | login\_completed | 제공자 로그인 후 앱 복귀(A-03 딥링크·앱 링크) (서버) | method, is\_new\_account, wait\_sec(브라우저 로그인 대기 시간), reopened(A-03 ‘다시 열기’ 사용) |
 | login\_failed | A-02·A-03 예외 | method, reason(cancelled / timeout / provider\_error / email\_conflict / request\_mismatch / browser\_open\_failed) |
 | signup\_completed | A-05 ‘동의하고 계속하기’ 계정 생성 (서버) | method, email\_source(provider / manual: A-04 직접 입력), marketing\_opt\_in, role |
-| onboarding\_started | O-10 ‘시작할게요’ [확인 필요] | entry(`direct` / `invite_link`) |
+| onboarding\_started | O-10 ‘시작하기’ [확인 필요] | entry(`direct` / `invite_link`) |
 | onboarding\_step\_viewed | O-10\~O-60, 배우자 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required, marriage\_state |
 | onboarding\_step\_completed | 각 화면 ‘다음’ | screen\_id, answer(`input` / `estimate` / `none`), duration\_sec, changed\_after\_back |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | “이어서 할까요?” | screen\_id, hours\_since\_last |
-| onboarding\_completed | O-60 ‘시작할게요’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(남는 돈 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
+| onboarding\_completed | O-60 ‘시작하기’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(남는 돈 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
 | invite\_sent | O-07, 홈 H-06, 설정 S-12 ‘부부 정보’ | channel(`code` / `link` / `kakao`), entry(`onboarding` / `home` / `settings`), issue\_seq(재발급 회차) |
 | invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |

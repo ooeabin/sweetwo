@@ -96,7 +96,7 @@ test('각자: 관리 방식 그대로 → 월급 → 내 분배표(아직 안 �
   await expect(home).toContainText('찬우님이 매달 95만 원 넣어요');
   await expect(page.getByRole('button', { name: /비상금/ })).toContainText('0원');
   await axe(page);
-  await page.getByRole('button', { name: '이대로 할게요' }).click();
+  await page.getByRole('button', { name: '이대로 저장하기' }).click();
   await expect(page).toHaveURL(/\/$/);
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
@@ -131,7 +131,7 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기
   await expect(home).toContainText('95만 원 → ');
   await expect(page.getByRole('button', { name: /예빈 용돈/ })).toContainText('27만 원');
   await axe(page);
-  await page.getByRole('button', { name: '이대로 할게요' }).click();
+  await page.getByRole('button', { name: '이대로 저장하기' }).click();
   await expect(page).toHaveURL(/\/$/);
   expect(db.splits.find((x) => x.owner_user_id === null)?.split_line).toHaveLength(6);
 });

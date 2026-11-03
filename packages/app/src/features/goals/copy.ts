@@ -177,7 +177,7 @@ export const copy = {
 
   // G-06 순서 바꾸기
   orderTitle: '어떤 것부터 모을까요?',
-  orderOk: '이 순서로 할게요',
+  orderOk: '이 순서로 정하기',
   orderFixed: '비상금은 맨 위에 고정돼요', // [확인 필요]
   // 첫 주 5일째 나머지 목표(16 O-22~25)
   weekHeldTitle: '이 목표에 이미 모아둔 돈이 있나요?',

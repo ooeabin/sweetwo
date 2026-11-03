@@ -644,7 +644,7 @@ supabase/
 - 결혼 비용은 보통 템플릿(가족 탭, 결혼 준비 중이면 ‘자주 고르는’ 맨 앞 + 추천). 질문 ② 모아둔 돈은 템플릿 `held` → `goal.other_held`, 기한 기본값은 O-12 예정일(없으면 1년 뒤 추정)
 - O-30 월급 관리 방식 `couple_space.salary_mode`(각자 `separate` / 합쳐서 `joint`), O-31 월급 `app_user.monthly_income`·`income_variable`·`payday`·`payday_last`
 - O-50 분배표: 추천값은 core `rules/salary-split.ts` `recommendSplit`(앱 쪽 순서·변환은 `split-draft.ts`). 줄을 누르면 같은 화면이 금액 입력(Q3)으로 바뀜, ‘+ 줄 추가’는 이름 + 금액. 저장은 RPC `save_split(p_lines, p_owner)`(각자면 내 id, 합쳐서면 생략)
-- O-32 ‘다음’(월급 없음이면 O-31) → `auto-split.ts`(추천 분배표, 비상금 금액, RPC `start_checklist`: 지금이 든 사이클, 월급날이 없으면 만들지 않음) → O-60 준비 끝 ‘홈으로 갈게요’ → `useStep().finish`(onboarding_done_at) → 홈
+- O-32 ‘다음’(월급 없음이면 O-31) → `auto-split.ts`(추천 분배표, 비상금 금액, RPC `start_checklist`: 지금이 든 사이클, 월급날이 없으면 만들지 않음) → O-60 준비 끝 ‘홈으로 가기’ → `useStep().finish`(onboarding_done_at) → 홈
 - 다른 화면에서 고치러 온 길(`?return=`)은 멈춘 화면으로 기록하지 않는다
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 `OnboardingGate`가 “이어서 할까요?”(실행마다 한 번, O-10·합류 중이면 안 물음, 분석 `onboarding_resumed`) 뒤 그 화면부터
 - 결혼기념일 챙길 날은 `couple_space` 트리거 `sync_wedding_care`가 자동 등록(20261029180000). 연결 해제 뒤에는 S-12h → O-11부터(`start_after_unlink`)
@@ -821,6 +821,7 @@ supabase/
 
 ### 문구
 
+- 버튼 말투(2026-11-03): 화면 맨 아래 주 버튼은 할 일을 ‘~하기’나 짧은 말로(“다음”, “시작하기”, “홈으로 가기”, “월급 체크하기”). 사용자의 대답이나 선택(보조 버튼, 선택지, 확인 대화상자 답)은 해요체(“나중에 할게요”, “일단 비상금부터 챙길게요”, “다시 연결할게요”).
 - 화면 문구는 기획서 화면 요소 표의 “ ” 안 문장을 그대로. 해요체
 - 문구는 기능 폴더마다 copy.ts에 모음. 한국어만 지원, 다국어 프레임워크 없음
 - 오류 문구에 기술 용어와 오류 코드를 보이지 않음

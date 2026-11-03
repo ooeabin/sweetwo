@@ -86,7 +86,7 @@ export const copy = {
   splitJointTitle: '같이 쓰는 분배표예요', // [확인 필요]
   splitHelp: '눌러서 금액을 바꿔요',
   splitJointHelp: (me: string) => `${me}님 월급을 더해 다시 채웠어요`, // [확인 필요]
-  splitDone: '이대로 할게요',
+  splitDone: '이대로 저장하기',
   partnerPuts: (starter: string, amount: string) => `${starter}님이 매달 ${amount} 넣어요`, // [확인 필요]
   incomes: (a: string, b: string) => `${a}, ${b}`, // [확인 필요] 합쳐서 수입 줄 아래
   personIncome: (name: string, amount: string) => `${name} ${amount}`,
