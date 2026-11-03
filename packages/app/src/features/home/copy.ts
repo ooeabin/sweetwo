@@ -19,7 +19,7 @@ export const copy = {
   seeGoal: '자세히 보기', // [확인 필요] 1순위 카드 → G-02
   addGoal: '다른 목표 추가하기',
   // H-03 이번 달 월급
-  progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`,
+  progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
@@ -30,8 +30,6 @@ export const copy = {
   tellSalary: '월급 알려 주기',
   // H-04 우리 자산
   assets: '우리 자산',
-  assetsEmpty: '가진 돈을 적으면 순자산을 보여 드려요',
-  addAsset: '가진 돈 추가하기',
   // H-05 다가오는 일정
   upcoming: '다가오는 일정',
   moreCalendar: '캘린더', // 다가오는 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)

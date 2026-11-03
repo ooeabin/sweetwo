@@ -246,17 +246,8 @@ export function H01Home() {
   }));
 
   const go = (to: string) => nav(to);
-  const assetsCard =
-    nw && !nw.empty ? (
-      <H06NetWorth n={nw} onOpen={() => nav('/assets')} />
-    ) : (
-      <section className="hg-card hg-card--fill hg-stack" aria-label={copy.assets}>
-        <p className="hg-card__meta">{copy.assetsEmpty}</p>
-        <button type="button" className="hg-btn hg-btn--link" onClick={() => nav('/assets/new')}>
-          {copy.addAsset}
-        </button>
-      </section>
-    );
+  // 가진 돈을 하나도 안 적었으면 카드 없음(2026-11-03, ‘가진 돈 추가하기’ 빈 카드가 어색해서. 추가는 우리 자산 탭)
+  const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} onOpen={() => nav('/assets')} /> : null;
   return (
     <MainFrame
       current="month"

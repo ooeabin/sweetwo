@@ -44,9 +44,10 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
     '0원 / 1억 5,000만 원',
   );
-  await expect(salaryCard(page)).toContainText('5개 중 0개 했어요');
-  await expect(page.getByText('가진 돈을 적으면 순자산을 보여 드려요')).toBeVisible();
-  await expect(page.getByText('같이 쓸 사람을 초대해 주세요')).toBeVisible();
+  await expect(salaryCard(page)).toContainText('5개 중 0개 완료');
+  // 가진 돈이 없으면 우리 자산 카드 없음(2026-11-03)
+  await expect(page.getByRole('region', { name: '우리 자산' })).toHaveCount(0);
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
   await axe(page);
 
   // 홈 카드에서 바로 체크 → Toast, 목표 카드도 “넣었어요”
@@ -55,13 +56,13 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
     '95만 원 / 1억 5,000만 원',
   );
-  await expect(salaryCard(page)).toContainText('5개 중 1개 했어요');
+  await expect(salaryCard(page)).toContainText('5개 중 1개 완료');
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
 
-  // W-02: 남은 줄 체크 → 마지막 줄이면 W-02 끝(카드 머리 ‘5개 중 1개 했어요 ›’)
-  await salaryCard(page).getByRole('link', { name: '5개 중 1개 했어요' }).click();
+  // W-02: 남은 줄 체크 → 마지막 줄이면 W-02 끝(카드 머리 ‘5개 중 1개 완료 ›’)
+  await salaryCard(page).getByRole('link', { name: '5개 중 1개 완료' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
-  await expect(page.getByText(/09\.25 ~ 10\.24\. 5개 중 1개 했어요/)).toBeVisible();
+  await expect(page.getByText(/09\.25 ~ 10\.24\. 5개 중 1개 완료/)).toBeVisible();
   await axe(page);
   for (const name of ['비상금', '고정지출', '생활비', '용돈'])
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
@@ -184,7 +185,7 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   await expect(chart).toContainText('지난달보다 +210만 원');
   const bands = page.locator('.hg-body__banner');
   await expect(bands.first()).toContainText('10월 20일 새벽 점검');
-  await expect(bands.nth(1)).toContainText('같이 쓸 사람을 초대해 주세요');
+  await expect(bands.nth(1)).toContainText('함께할 사람을 초대해 주세요');
   await bands.first().getByRole('button', { name: '보기' }).click();
   await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
   await axe(page);

@@ -16,7 +16,7 @@ export const copy = {
   // W-02 이번 달 월급
   cycleTitle: (label: string) => label,
   period: (start: string, end: string) => `${start} ~ ${end}`,
-  progress: (total: number, done: number) => `${total}개 중 ${done}개 했어요`,
+  progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
   close: '닫기',
   prevMonth: '지난 달 보기', // [확인 필요]
   nextMonth: '다음 달 보기', // [확인 필요]
