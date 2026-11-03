@@ -37,6 +37,8 @@ export function AddMenu() {
     <Menu
       label={copy.add}
       button={copy.add}
+      // 홈 넓은 창 제목 줄 오른쪽 끝이라 오른쪽 맞춤(2026-11-03)
+      align="right"
       actions={actions}
       open={addOpen}
       onOpenChange={setAddOpen}

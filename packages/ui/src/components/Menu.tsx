@@ -16,6 +16,7 @@ export function Menu({
   label,
   actions,
   button,
+  align,
   open: openProp,
   onOpenChange,
 }: {
@@ -23,6 +24,8 @@ export function Menu({
   actions: MenuAction[];
   /** 글자 버튼으로 열기(보조 버튼, 예: 오늘 띠 ‘추가’). 없으면 ⋯ */
   button?: string;
+  /** 펼친 목록을 버튼 어느 끝에 맞출지. 글자 버튼 기본 왼쪽, ⋯ 기본 오른쪽(화면 오른쪽 끝의 글자 버튼은 'right') */
+  align?: 'left' | 'right';
   /** 밖에서 열고 닫기(Ctrl+N 등) */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -121,7 +124,7 @@ export function Menu({
             position: 'absolute',
             top: '100%',
             // 글자 버튼(‘추가’)은 버튼 왼쪽 끝에 맞춤(화면 왼쪽에 있어서 오른쪽 맞춤이면 밖으로 나감, 2026-11-03). ⋯은 오른쪽 맞춤
-            ...(button ? { left: 0 } : { right: 0 }),
+            ...((align ?? (button ? 'left' : 'right')) === 'left' ? { left: 0 } : { right: 0 }),
             marginTop: 'var(--space-1)',
             zIndex: 'var(--z-dropdown)',
           }}
