@@ -29,7 +29,6 @@ import {
   useChecklists,
   useGoalSaved,
   useSplits,
-  waiting,
 } from '../../salary';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -60,7 +59,6 @@ const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconNa
   reconnect: 'link',
   review: 'check',
   invite: 'user',
-  split: 'wallet',
   amount: 'pencil',
   matured: 'piggy-bank',
   care: 'gift',
@@ -121,7 +119,6 @@ export function H01Home() {
   const list = myChecklist(lists.data, meId);
   const partnerList =
     !joint && joined ? lists.data?.find((c) => c.owner_user_id === partner.data?.id) : undefined;
-  const left = list ? waiting(list).length : 0;
   const personName = (id: string | null) =>
     id === meId ? myName : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
@@ -130,23 +127,6 @@ export function H01Home() {
   const monthly = (g: { id: string }) =>
     split?.split_line.find((l) => l.kind === 'saving' && l.goal_id === g.id)?.amount ?? 0;
 
-  // H-01 인사: 체크 안 한 줄이 있으면 남은 개수, 다 했으면 1순위 목표까지 몇 %
-  const top =
-    goals.data.find(
-      (g) => g.template !== 'emergency' && g.owner_user_id === null && g.status === 'active',
-    ) ?? goals.data.find((g) => g.template === 'emergency');
-  const pct = top?.target_amount
-    ? Math.min(Math.floor((saved(top) * 100) / top.target_amount), 100)
-    : null;
-  const total = list?.pay_check_line.length ?? 0;
-  const title =
-    left > 0
-      ? copy.hiLeft(myName, left)
-      : top && pct !== null && pct > 0
-        ? copy.hiGoal(myName, top.name, pct)
-        : total > 0
-          ? copy.hiAllDone(myName) // 다 했는데 0%면 “0% 왔어요” 대신(2026-11-03)
-          : copy.hi(myName);
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
   // 해제 대기 띠가 있으면 같은 할 일 줄은 빼고 띠만
@@ -161,8 +141,7 @@ export function H01Home() {
             : t.kind === 'matured' ||
                 t.kind === 'care' ||
                 t.kind === 'review' ||
-                t.kind === 'amount' ||
-                t.kind === 'split'
+                t.kind === 'amount'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -288,7 +267,7 @@ export function H01Home() {
       today={{
         plain: true,
         date: formatDateWeekday(today),
-        title,
+        title: copy.homeTitle,
         actions: (
           <>
             {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 목표·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}

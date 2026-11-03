@@ -86,6 +86,7 @@ export function GoalItemCard({
         pct={g.kind === 'monthly' ? 0 : i.pct}
         tone={tone(g.template)}
         empty={g.kind === 'monthly' || i.saved > 0 ? undefined : copy.noSavedYet}
+        started={g.kind !== 'monthly' && i.saved > 0}
       />
       <span className="hg-card__meta">
         {planText(i, (v) => (masked ? '•••' : `${formatManWon(v)} 원`))}

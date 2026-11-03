@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (922b70e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8552ec9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1362,8 +1362,6 @@ a.hg-btn { text-decoration: none; }
 .hg-appside .hg-iconbtn--dot::after { top: 9px; right: 10px; }
 /* 홈 인사 카드(hg-today): 날짜 + 인사(작게) + 큰 숫자 하나 + 진행 막대 + 버튼 */
 .hg-today { padding: var(--space-8) var(--space-8) 0; }
-.hg-today--plain { padding-bottom: 0; }  /* 2026-11-03 홈 인사 카드 없음: 넓은 창은 오른쪽 ‘추가’ 한 줄만 */
-.hg-today--plain .hg-today__foot { max-width: 1120px; margin: 0 auto; }
 .hg-today__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6); border-radius: var(--radius-2xl); background: var(--surface); border: 1px solid var(--hairline-soft); box-shadow: var(--shadow-1); display: flex; flex-direction: column; gap: var(--space-4); }
 .hg-today__row { display: flex; align-items: flex-end; gap: var(--space-4); }
 .hg-today__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
@@ -1396,6 +1394,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 /* 2026-11-03 추가 입구 하나로: 넓은 창에만 보이는 동작(제목 줄 ‘+ 추가’). 좁은 창은 + 버튼 */
 @media (max-width: 767px) {
   .hg-wide-only { display: none; }
+  .hg-pagetitle.hg-today--plain { display: block !important; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }  /* 2026-11-03 홈 제목은 좁은 창에서 화면 읽기용으로만 */
   .hg-pagetitle:has(.hg-frame__actions):not(:has(.hg-frame__actions > :not(.hg-wide-only))) { display: none; }
 }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
@@ -1407,9 +1406,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-appside { display: none; }
   .hg-pagetitle__in { padding: var(--space-3) var(--space-4) 0; }
   .hg-pagetitle__title { display: none; } /* 좁은 창은 머리에 메뉴 이름 */
+  .hg-today--plain .hg-pagetitle__title { display: block; }  /* 홈은 머리에 제목이 없어서 화면 읽기용으로 남김(바깥 칸이 1px로 가림) */
   .hg-today { padding: var(--space-3) var(--space-4) 0; }
-  .hg-today--plain { padding: 0; }
-  .hg-today--plain .hg-today__foot { display: none; }
   .hg-today__in { padding: var(--space-5); gap: var(--space-4); }
   .hg-today__row { flex-wrap: wrap; }
   .hg-today__title { font: 700 20px/28px var(--font-sans); }

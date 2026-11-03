@@ -354,6 +354,7 @@ export function G02GoalDetail() {
             pct={i.pct}
             tone={tone(g.template)}
             empty={i.saved > 0 ? undefined : copy.noSavedYet}
+            started={i.saved > 0}
           />
         )}
       </section>
