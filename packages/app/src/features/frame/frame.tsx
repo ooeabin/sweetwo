@@ -111,6 +111,7 @@ export function MainFrame(
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
+        onInvite={() => nav('/settings/couple')}
         tabs={keys.map((key) => ({
           key,
           label: label[key],
@@ -131,6 +132,7 @@ export function MainFrame(
           add: copy.add,
           me: copy.me,
           stats: copy.stats,
+          invite: copy.invite,
         }}
         masked={masked}
         onMask={toggle}

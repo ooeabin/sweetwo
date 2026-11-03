@@ -440,6 +440,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar--sm { width: 24px; height: 24px; font-size: 12px; }
 .hg-avatar--lg { width: 40px; height: 40px; font-size: 15px; }
 .hg-avatars { display: inline-flex; }
+.hg-avatar--empty { background: var(--surface-alt); color: var(--stone); }  /* 2026-11-03 배우자 빈 자리 기본 그림 */
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
 
 /* Slider */
@@ -1422,6 +1423,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame__mhead .hg-topbar__text { flex: 1; }
   .hg-frame__mhead > img { margin-right: auto; }
   .hg-mhead__people { flex: 1; display: flex; align-items: center; gap: var(--space-2); min-width: 0; }  /* 2026-11-03 홈 머리: 두 사람(카카오뱅크 이름 + 칩처럼) */
+  button.hg-mhead__people { margin: 0; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-full); }
+  button.hg-mhead__people:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .hg-mhead__names { display: inline-flex; align-items: center; min-width: 0; height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: 600 13px/1 var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* 하단 탭 막대(배민 느낌): 화면 아래 가운데 떠 있는 흰 알약, 탭 4칸(아이콘 + 이름), 현재 탭은 회색 알약 + ink */
   .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 50%; right: auto; bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); height: auto; gap: 2px; padding: 6px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-full); background: var(--surface); box-shadow: var(--shadow-2); }
