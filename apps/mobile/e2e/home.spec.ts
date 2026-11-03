@@ -39,10 +39,8 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
     page.getByRole('heading', { level: 1, name: '찬우님, 이번 달 월급 체크가 5개 남았어요' }),
   ).toBeAttached();
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
-  // 처음엔 3줄 + ‘2개 더 보기’
+  // 홈에서는 3줄까지만(나머지는 W-02)
   await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(3);
-  await salaryCard(page).getByRole('button', { name: '2개 더 보기' }).click();
-  await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(5);
   await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
   await expect(page.getByText('이번 달 95만 원 넣을 차례예요')).toBeVisible();
   await expect(salaryCard(page)).toContainText('5개 중 0개 했어요');

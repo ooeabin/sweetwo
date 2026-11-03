@@ -174,7 +174,6 @@ export function SalaryCard({
 }) {
   const { masked } = useMask();
   const [open, setOpen] = useState(false);
-  const [more, setMore] = useState(false);
   if (!list) {
     return (
       <section className="hg-card hg-card--fill hg-stack">
@@ -211,8 +210,8 @@ export function SalaryCard({
         )}
         {(!finished || open) && (
           <div className="hg-checklist__list">
-            {/* 홈 맨 위(2026-11-03): 처음엔 3줄만(저금 먼저), 아래 꽉 찬 회색 ‘N개 더 보기’ */}
-            {(more || finished ? lines : lines.slice(0, SHOW)).map((l) => (
+            {/* 홈 맨 위(2026-11-03): 3줄까지만(저금 먼저). 나머지는 머리 ‘5개 중 2개 했어요 ›’ → W-02 */}
+            {(finished ? lines : lines.slice(0, SHOW)).map((l) => (
               <CheckLine
                 key={l.id}
                 line={l}
@@ -222,12 +221,6 @@ export function SalaryCard({
               />
             ))}
           </div>
-        )}
-        {!finished && !more && lines.length > SHOW && (
-          <button type="button" className="hg-more" aria-expanded={false} onClick={() => setMore(true)}>
-            {copy.moreLines(lines.length - SHOW)}
-            <Icon name="chevron-down" size={16} />
-          </button>
         )}
         {finished && !open && (
           <button type="button" className="hg-btn hg-btn--link" onClick={() => setOpen(true)}>
