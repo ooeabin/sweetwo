@@ -7,6 +7,7 @@
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
+| [MonthBars](MonthBars.md) | Charts | 달마다 값(F-01 순자산 6달), 이번 달만 진하게 |
 | [Breakdown](Breakdown.md) | Charts | 전체를 나눈 구성(월급 플랜 배분, 자산 구성) |
 | [Distribution](Distribution.md) | Charts | F-08 분포 그림 |
 | [LineChart](LineChart.md) | Charts | 시간에 따른 금액 변화(순자산 추이) |
