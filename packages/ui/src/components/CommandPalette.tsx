@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Icon } from './Icon';
+import { createPortal } from 'react-dom';
+import { Icon, type IconName } from './Icon';
 
 export interface CommandItem {
   key: string;
@@ -8,6 +9,8 @@ export interface CommandItem {
   sub?: string;
   /** 단축키 표시(넓은 창만) */
   kbd?: string;
+  /** 줄 앞 아이콘(2026-11-03) */
+  icon?: IconName;
   onRun: () => void;
 }
 export interface CommandGroup {
@@ -31,7 +34,13 @@ export function CommandPalette({
   onQuery: (q: string) => void;
   groups: CommandGroup[];
   onClose: () => void;
-  labels: { input: string; placeholder: string; empty: string };
+  labels: {
+    input: string;
+    placeholder: string;
+    empty: string;
+    /** 아래 키 안내 줄(넓은 창, 2026-11-03): ↑↓ 이동, Enter 열기, Esc 닫기 */
+    keys?: { move: string; open: string; close: string };
+  };
   /** 단축키 칸 보이기(좁은 창·터치에서는 숨김) */
   showKeys?: boolean;
 }) {
@@ -51,10 +60,11 @@ export function CommandPalette({
     item.onRun();
   };
   let n = -1;
-  return (
+  // 앱 틀(탭 막대 등) 위에 덮이게 body에 붙임(2026-11-03, 좁은 창 탭 막대가 딤 위로 보이던 것)
+  return createPortal(
     <div
       className="hg-scrim hg-scrim--top"
-      style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 70 }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -118,9 +128,14 @@ export function CommandPalette({
                       onMouseEnter={() => setActive(i)}
                       onClick={() => run(item)}
                     >
-                      <span>
+                      {item.icon && (
+                        <span className="hg-cmd__lead" aria-hidden="true">
+                          <Icon name={item.icon} size={16} />
+                        </span>
+                      )}
+                      <span className="hg-cmd__text">
                         {item.label}
-                        {item.sub && <em> {item.sub}</em>}
+                        {item.sub && <em>{item.sub}</em>}
                       </span>
                       {showKeys && (on || item.kbd) && (
                         <span className="hg-kbd">{on ? 'Enter' : item.kbd}</span>
@@ -131,7 +146,25 @@ export function CommandPalette({
               </div>
             ))}
         </div>
+        {showKeys && labels.keys && (
+          <div className="hg-cmd__foot" aria-hidden="true">
+            <span>
+              <span className="hg-kbd">↑</span>
+              <span className="hg-kbd">↓</span>
+              {labels.keys.move}
+            </span>
+            <span>
+              <span className="hg-kbd">Enter</span>
+              {labels.keys.open}
+            </span>
+            <span>
+              <span className="hg-kbd">Esc</span>
+              {labels.keys.close}
+            </span>
+          </div>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

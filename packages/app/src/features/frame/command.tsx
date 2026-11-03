@@ -1,5 +1,12 @@
 import { fetchAssets, fetchCareDays, fetchGoals, qk } from '@sweetwo/api';
-import { CommandPalette, Menu, type CommandGroup, type MenuAction } from '@sweetwo/ui';
+import {
+  CommandPalette,
+  Menu,
+  goalIcon,
+  type CommandGroup,
+  type CommandItem,
+  type MenuAction,
+} from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -127,13 +134,29 @@ function Palette({
   const lock = session.bridge?.lock;
   const q = query.trim().toLowerCase();
   const hit = (s: string) => !q || s.toLowerCase().includes(q);
-  const actions = [
-    { key: 'check', label: copy.cmdCheck, onRun: () => nav('/salary') },
-    { key: 'goal', label: copy.cmdGoal, onRun: () => nav(ADD_TO.goal) },
-    { key: 'asset', label: copy.cmdAsset, onRun: () => nav(ADD_TO.asset) },
-    { key: 'mask', label: masked ? copy.cmdUnmask : copy.cmdMask, onRun: onMask },
-    ...(lock ? [{ key: 'lock', label: copy.cmdLock, onRun: () => void lock.lockNow() }] : []),
-  ].filter((a) => hit(a.label));
+  // 줄 앞 아이콘(2026-11-03)
+  const all: CommandItem[] = [
+    { key: 'check', icon: 'check', label: copy.cmdCheck, onRun: () => nav('/salary') },
+    { key: 'goal', icon: 'target', label: copy.cmdGoal, onRun: () => nav(ADD_TO.goal) },
+    { key: 'asset', icon: 'wallet', label: copy.cmdAsset, onRun: () => nav(ADD_TO.asset) },
+    {
+      key: 'mask',
+      icon: masked ? 'eye' : 'eye-off',
+      label: masked ? copy.cmdUnmask : copy.cmdMask,
+      onRun: onMask,
+    },
+    ...(lock
+      ? [
+          {
+            key: 'lock',
+            icon: 'lock' as const,
+            label: copy.cmdLock,
+            onRun: () => void lock.lockNow(),
+          },
+        ]
+      : []),
+  ];
+  const actions = all.filter((a) => hit(a.label));
   const groups: CommandGroup[] = [{ label: copy.cmdQuick, items: actions }];
   if (q) {
     groups.push(
@@ -142,21 +165,36 @@ function Palette({
         items: (goals.data ?? [])
           .filter((g) => hit(g.name))
           .slice(0, 5)
-          .map((g) => ({ key: g.id, label: g.name, onRun: () => nav(`/goals/${g.id}`) })),
+          .map((g) => ({
+            key: g.id,
+            icon: goalIcon(g.template),
+            label: g.name,
+            onRun: () => nav(`/goals/${g.id}`),
+          })),
       },
       {
         label: copy.cmdAssets,
         items: (assets.data ?? [])
           .filter((a) => !a.deleted_at && hit(a.name))
           .slice(0, 5)
-          .map((a) => ({ key: a.id, label: a.name, onRun: () => nav(`/assets/${a.id}`) })),
+          .map((a) => ({
+            key: a.id,
+            icon: 'wallet' as const,
+            label: a.name,
+            onRun: () => nav(`/assets/${a.id}`),
+          })),
       },
       {
         label: copy.cmdCares,
         items: (cares.data ?? [])
           .filter((c) => !c.deleted_at && hit(c.name))
           .slice(0, 5)
-          .map((c) => ({ key: c.id, label: c.name, onRun: () => nav(`/calendar/day/${c.id}`) })),
+          .map((c) => ({
+            key: c.id,
+            icon: 'calendar' as const,
+            label: c.name,
+            onRun: () => nav(`/calendar/day/${c.id}`),
+          })),
       },
     );
   }
@@ -167,7 +205,12 @@ function Palette({
       groups={groups}
       onClose={onClose}
       showKeys={!narrow}
-      labels={{ input: copy.search, placeholder: copy.cmdPlaceholder, empty: copy.cmdEmpty }}
+      labels={{
+        input: copy.search,
+        placeholder: copy.cmdPlaceholder,
+        empty: copy.cmdEmpty,
+        keys: { move: copy.cmdKeyMove, open: copy.cmdKeyOpen, close: copy.cmdKeyClose },
+      }}
     />
   );
 }

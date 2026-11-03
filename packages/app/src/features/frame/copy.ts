@@ -34,6 +34,10 @@ export const copy = {
   addCare: '챙길 날',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
   cmdEmpty: '찾는 게 없어요',
+  // 검색 아래 키 안내(넓은 창, 2026-11-03)
+  cmdKeyMove: '이동', // [확인 필요]
+  cmdKeyOpen: '열기', // [확인 필요]
+  cmdKeyClose: '닫기', // [확인 필요]
   cmdQuick: '바로 하기',
   cmdCheck: '월급 체크하기',
   cmdGoal: '목표 추가',
