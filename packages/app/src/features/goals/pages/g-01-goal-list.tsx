@@ -72,7 +72,8 @@ export function G01GoalList() {
   }
 
   const cards = (list: GoalItem[]) => (
-    <div className="hg-cards">
+    // 2026-11-03 시안 B: 사진이 위인 2열 타일(Vivid·ANZ처럼, 넓은 창은 3~4열)
+    <div className="hg-goaltiles">
       {list.map((i) => (
         <GoalItemCard
           key={i.goal.id}

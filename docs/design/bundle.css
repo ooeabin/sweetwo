@@ -1653,3 +1653,44 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-pick__order { position: absolute; top: var(--space-2); right: var(--space-2); display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); }
 .hg-pick__item .hg-tag { position: absolute; top: var(--space-2); left: var(--space-2); }
 @media (max-width: 767px) { .hg-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* 목표 상세 머리(2026-11-03 시안 B3, ANZ·Monzo처럼): 위 사진 꽉 차게(좁은 창은 양옆 여백 없이) → 둥근 판이 사진 위로 올라옴 */
+.hg-goalhero { position: relative; display: flex; flex-direction: column; }
+.hg-goalhero__photo { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 10; max-height: 320px; overflow: hidden; border-radius: var(--radius-2xl); background: var(--hairline-soft); color: var(--stone); }
+.hg-goalhero__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hg-goalhero__photo .hg-ico { width: 48px; height: 48px; }
+.hg-goalhero__change { position: absolute; right: var(--space-3); top: calc(min(320px, 62.5vw) - 44px - var(--space-6)); display: inline-flex; align-items: center; gap: var(--space-1); height: 32px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); font: 600 13px/1 var(--font-sans); box-shadow: var(--shadow-1); cursor: pointer; }
+.hg-goalhero__sheet { position: relative; display: flex; flex-direction: column; gap: var(--space-2); margin-top: calc(var(--space-6) * -1); padding: var(--space-5) var(--space-1) 0; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; background: var(--surface); }
+.hg-goalhero__name { margin: 0; font: 700 22px/30px var(--font-sans); }
+.hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
+/* 묶음 카드: 목표(목표 금액의 %, 막대, 기한·예상), 매달(사람별) */
+.hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
+.hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }
+.hg-goalbox__bar { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--hairline-soft); }
+.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--goal-ink); }
+.hg-goalbox__meta { display: flex; justify-content: space-between; gap: var(--space-3); font: 400 13px/18px var(--font-sans); color: var(--slate); }
+.hg-goalbox__metabtn { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: 400 15px/22px var(--font-sans); }
+.hg-goalbox__person > span:not(.hg-avatar) { flex: 1; }
+.hg-goalbox__person > b { font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 767px) {
+  .hg-goalhero__photo { margin: 0 calc(var(--space-4) * -1); width: calc(100% + var(--space-4) * 2); border-radius: 0; }
+  .hg-goalhero__sheet { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-5) var(--space-4) 0; }
+}
+
+/* 목표 타일(G-01, 2026-11-03 시안 B, Vivid·ANZ처럼): 위 4:3 사진 + 아래 이름, 금액, 얇은 막대. 좁은 창 2열, 넓은 창 3~4열 */
+.hg-goaltiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3); align-items: stretch; }
+.hg-goaltile { display: flex; flex-direction: column; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); color: var(--ink); text-align: left; cursor: pointer; }
+.hg-goaltile__top { position: relative; display: block; }
+.hg-goaltile__photo { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--hairline-soft); color: var(--stone); }
+.hg-goaltile__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hg-goaltile__photo .hg-ico { width: 32px; height: 32px; }
+.hg-goaltile__badges { position: absolute; left: var(--space-2); top: var(--space-2); display: inline-flex; gap: var(--space-1); }
+.hg-goaltile__body { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-3) var(--space-4); }
+.hg-goaltile__name { font: 600 15px/22px var(--font-sans); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.hg-goaltile__amount { font: 400 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
+.hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--hairline-soft); }
+.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--goal-ink); }
+.hg-goaltile .hg-card__meta { font-size: 12px; line-height: 16px; }
+.hg-goaltile:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

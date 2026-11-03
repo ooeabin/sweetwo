@@ -1,6 +1,6 @@
 import { fetchGoalMoves, qk } from '@sweetwo/api';
 import { formatYm } from '@sweetwo/core';
-import { Badge, Meter } from '@sweetwo/ui';
+import { Badge } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { money } from '../../shared/mask';
 import { copy } from './copy';
@@ -9,8 +9,6 @@ import type { GoalItem } from './model';
 
 /** Meter 아래 “2,700만 / 1억 5,000만 원”의 금액(0원은 “0”) */
 export const heldMan = (v: number, masked: boolean) => money(v, masked).replace(/\s?원$/, '');
-
-const tone = (t: string) => (t === 'emergency' ? 'safety' : t === 'invest' ? 'invest' : 'goal');
 
 /** 늦은 기간 “n년 m개월” */
 export const lateText = (months: number) => {
@@ -81,42 +79,45 @@ export function GoalItemCard({
   const month = thisMonthText(i, fmt);
   // 매달 목표·금액 미정 목표는 진행률과 칸 없이(22 G-01 5번, 2026-11-03)
   const bare = g.kind === 'monthly' || g.target_amount === null;
+  // 2026-11-03 시안 B 타일: 위 사진(배지는 사진 위 왼쪽) → 이름 → 금액 → 얇은 막대 → 매달·예상 한 줄
   const card = (
-    <button
-      type="button"
-      className="hg-card hg-card--art hg-card--raised hg-stack"
-      onClick={onOpen}
-    >
-      <span className="hg-card__top">
-        <span className="hg-row" style={{ gap: 'var(--space-1)' }}>
-          {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
-          {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
-          {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
-        </span>
+    <button type="button" className="hg-goaltile" onClick={onOpen}>
+      <span className="hg-goaltile__top">
+        <GoalArt g={i} tile />
+        {(late || g.kind !== 'once') && (
+          <span className="hg-goaltile__badges">
+            {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
+            {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
+            {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
+          </span>
+        )}
       </span>
-      <GoalArt g={i} />
-      <Meter
-        name={g.name}
-        sub={
-          g.target_amount
+      <span className="hg-goaltile__body">
+        <b className="hg-goaltile__name">{g.name}</b>
+        <span className="hg-goaltile__amount">
+          {g.target_amount && !bare
             ? copy.heldOf(heldMan(i.saved, masked), heldMan(g.target_amount, masked))
-            : undefined
-        }
-        pct={bare ? 0 : i.pct}
-        bare={bare}
-        tone={tone(g.template)}
-        empty={bare || i.saved > 0 ? undefined : copy.noSavedYet}
-        started={!bare && i.saved > 0}
-      />
-      {i.state === 'used' ? (
-        <UsedLine goalId={g.id} masked={masked} />
-      ) : (
-        <span className="hg-card__meta">{planText(i, fmt)}</span>
-      )}
-      {late && i.lateMonths !== null && (
-        <span className="hg-card__meta">{copy.lateLine(lateText(i.lateMonths))}</span>
-      )}
-      {month && <span className="hg-card__meta">{month}</span>}
+            : g.kind === 'monthly'
+              ? copy.monthlyHeld(fmt(i.saved))
+              : fmt(i.saved)}
+        </span>
+        {/* 아직 모은 돈이 없으면 빈 막대 대신 한 줄(2026-11-03) */}
+        {!bare && i.saved <= 0 && <span className="hg-card__meta">{copy.noSavedYet}</span>}
+        {!bare && i.saved > 0 && (
+          <span className="hg-goaltile__bar" aria-hidden="true">
+            <i style={{ width: `${Math.min(Math.max(i.pct, i.saved > 0 ? 2 : 0), 100)}%` }} />
+          </span>
+        )}
+        {i.state === 'used' ? (
+          <UsedLine goalId={g.id} masked={masked} />
+        ) : (
+          g.kind !== 'monthly' && <span className="hg-card__meta">{planText(i, fmt)}</span>
+        )}
+        {late && i.lateMonths !== null && (
+          <span className="hg-card__meta">{copy.lateLine(lateText(i.lateMonths))}</span>
+        )}
+        {month && <span className="hg-card__meta">{month}</span>}
+      </span>
     </button>
   );
   const lateLink = late && onLate;

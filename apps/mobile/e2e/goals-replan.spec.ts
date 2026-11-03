@@ -477,7 +477,7 @@ test('목표 사진(22 G-02): 기본 목표도 “사진 바꾸기” → 지정
   expect(db.goals.find((g) => g.id === 'goal-h')?.photo_preset).toBe('home-02');
 
   await page.goto('/goals/goal-camp');
-  await expect(page.locator('.hg-card__art--custom')).toBeVisible();
+  await expect(page.locator('.hg-goalhero__photo.is-empty')).toBeVisible();
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await expect(page.getByRole('heading', { name: '목표 사진' }).first()).toBeVisible();
   await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
@@ -491,15 +491,15 @@ test('목표 사진(22 G-02): 기본 목표도 “사진 바꾸기” → 지정
   const path = String(db.goals.find((g) => g.id === 'goal-camp')?.photo_path);
   expect(path).toMatch(/^g\/[0-9a-f-]{36}\.jpg$/);
   expect(db.storage).toEqual([`/storage/v1/object/photos/${path}`]);
-  await expect(page.locator('.hg-card__art--photo img')).toBeVisible();
+  await expect(page.locator('.hg-goalhero__photo img')).toBeVisible();
   await page.goto('/goals');
-  await expect(page.locator('.hg-card__art--photo img')).toHaveCount(1);
+  await expect(page.locator('.hg-goaltile__photo img')).toHaveCount(1);
 
   await page.goto('/goals/goal-camp');
   await page.getByRole('button', { name: '사진 지우기' }).click();
   await expect(page.getByText('사진을 지웠어요')).toBeVisible();
   expect(db.goals.find((g) => g.id === 'goal-camp')?.photo_path).toBeNull();
-  await expect(page.locator('.hg-card__art--custom')).toBeVisible();
+  await expect(page.locator('.hg-goalhero__photo.is-empty')).toBeVisible();
 });
 
 test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 바꿨으면 “어느 쪽으로 할까요?”, 1분 넘었으면 덮음', async ({
