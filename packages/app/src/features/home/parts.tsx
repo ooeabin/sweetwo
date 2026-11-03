@@ -74,8 +74,7 @@ export function GoalsCard({
   const saved = savedOf(top);
   const eta = goalEta(toAllocGoal({ ...top, other_held: saved }), monthly(top));
   const line = list?.pay_check_line.find((l) => l.kind === 'saving' && l.goal_id === top.id);
-  // 아직 모은 돈이 없으면 ‘지연’ 배지 없이 예상 달만(첫 사이클에 비난처럼 읽혀서, 2026-11-03)
-  const late = eta.lateMonths !== null && eta.lateMonths > 0 && saved > 0;
+  // 홈에서는 ‘지연’ 배지를 달지 않음(예상 달만). 첫 체크 직후에도 비난처럼 읽혀서, 지연은 목표 탭에서만(2026-11-03)
   return (
     <section className="hg-stack" aria-label={copy.goals}>
       <SectionHeader title={copy.goals} more={{ label: copy.moreGoals, href: '/goals' }} />
@@ -89,7 +88,6 @@ export function GoalsCard({
               ? `${copy.goalAmount(m(saved), m(top.target_amount))}${eta.expected ? `, ${copy.expected(formatYm(eta.expected))}` : ''}`
               : copy.setAmount
           }
-          badge={late ? <Badge kind="warn">{copy.delayed}</Badge> : undefined}
           lead={<GoalLead template={top.template} />}
           empty={saved > 0 ? undefined : copy.noSavedYet}
         />
@@ -148,7 +146,7 @@ export function GoalsCard({
 
 /**
  * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 했어요” + 줄 목록(저금 먼저) + ‘분배표 고치기’.
- * 다 했으면 “10월 월급을 다 나눴어요” + 저금 합계, 줄은 접힘(펼치기 가능). 월급이 없으면 ‘월급 알려 주기’.
+ * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 접힘(펼치기 가능). 월급이 없으면 ‘월급 알려 주기’.
  */
 export function SalaryCard({
   list,

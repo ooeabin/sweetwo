@@ -133,7 +133,7 @@ function Sum({ s, open }: { s: TraySnapshot; open: (p: string) => void }) {
         <p className="hg-wg__note">{m.state === 'no_salary' ? copy.noSalary : copy.noPlan}</p>
       </button>
     );
-  // WG-01: “10월 월급” / “2개” / “5개 중 2개 했어요”, 다 하면 “10월 월급을 다 나눴어요”.
+  // WG-01: “10월 월급” / “2개” / “5개 중 2개 했어요”, 다 하면 “10월 월급 체크를 다 했어요”.
   // 아래 줄은 다음 월급날, 월말 확인 기간이면 “체크 안 한 게 2개 있어요”(→ W-05). 금액이 없어 가림과 상관없음
   const done = m.state === 'done';
   const value = done ? copy.allDone(m.label) : copy.count(m.done);

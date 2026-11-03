@@ -69,7 +69,7 @@ test('트레이 위젯: 이번 달 월급(WG-01) 체크 개수와 다음 월급�
   );
 });
 
-test('트레이 위젯: 월말 확인 기간은 체크 안 한 줄 → W-05, 다 하면 다 나눴어요, 잠기면 안내만, 로그인 전 안내', async ({
+test('트레이 위젯: 월말 확인 기간은 체크 안 한 줄 → W-05, 다 하면 체크를 다 했어요, 잠기면 안내만, 로그인 전 안내', async ({
   page,
 }) => {
   await fakeBridge(page, {
@@ -92,7 +92,7 @@ test('트레이 위젯: 월말 확인 기간은 체크 안 한 줄 → W-05, 다
     settings,
   });
   await page.reload();
-  await expect(page.getByText('9월 월급을 다 나눴어요')).toBeVisible();
+  await expect(page.getByText('9월 월급 체크를 다 했어요')).toBeVisible();
 
   await fakeBridge(page, { signedIn: true, locked: true, snapshot, settings });
   await page.reload();
