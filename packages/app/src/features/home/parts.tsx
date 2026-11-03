@@ -10,11 +10,10 @@ import {
   Ring,
   SectionHeader,
   goalIcon,
-  type IconName,
 } from '@sweetwo/ui';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
-import { CheckLine, doneCount, lineName } from '../salary';
+import { CheckLine, doneCount, LineLead, lineName } from '../salary';
 import { copy } from './copy';
 
 /** 목표 그림(템플릿 그림. 그림이 없으면 O-21과 같은 템플릿 아이콘, 직접 만든 목표는 깃발) */
@@ -57,7 +56,10 @@ export function GoalsCard({
   const ours = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === null);
   const mine = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === meId);
   const emergency = live.filter((g) => g.template === 'emergency');
-  const list = (joined ? [...ours, ...emergency, ...mine] : [...ours, ...mine, ...emergency]).slice(0, 4);
+  const list = (joined ? [...ours, ...emergency, ...mine] : [...ours, ...mine, ...emergency]).slice(
+    0,
+    4,
+  );
   if (!list.length) return null;
   return (
     <section className="hg-stack" aria-label={copy.goals}>
@@ -107,13 +109,6 @@ export function GoalsCard({
 }
 
 const SHOW = 3;
-/** 쓰는 돈 줄 아이콘(홈 체크리스트) */
-const LINE_ICON = {
-  fixed: 'calendar-check',
-  living: 'shopping-bag',
-  allowance: 'coins',
-  custom: 'wallet',
-} as const satisfies Record<string, IconName>;
 
 /**
  * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 완료” + 줄 목록(저금 먼저) + ‘월급 계획 고치기’.
@@ -130,6 +125,7 @@ export function SalaryCard({
   meId,
   joint,
   go,
+  locked = false,
 }: {
   list: PayChecklist | undefined;
   partnerList?: PayChecklist;
@@ -143,6 +139,8 @@ export function SalaryCard({
   meId: string | undefined;
   joint: boolean;
   go: (to: string) => void;
+  /** 연결 해제 대기 중: 월급 계획을 고칠 수 없어서 ‘월급 계획 고치기’ 숨김(2026-11-03) */
+  locked?: boolean;
 }) {
   const { masked } = useMask();
   if (!list) {
@@ -191,15 +189,7 @@ export function SalaryCard({
                 name={lineName(l, goalName, personName, joint)}
                 personName={personName}
                 meId={meId}
-                lead={
-                  <Lead
-                    icon={
-                      l.kind === 'saving'
-                        ? goalIcon(goalTemplate(l.goal_id) ?? 'custom')
-                        : LINE_ICON[l.kind]
-                    }
-                  />
-                }
+                lead={<LineLead line={l} goalTemplate={goalTemplate} />}
               />
             ))}
           </div>
@@ -231,9 +221,11 @@ export function SalaryCard({
             <Icon name="chevron-right" size={16} />
           </button>
         )}
-        <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary/split')}>
-          {copy.editSplit}
-        </button>
+        {!locked && (
+          <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary/split')}>
+            {copy.editSplit}
+          </button>
+        )}
       </div>
     </section>
   );
@@ -280,7 +272,10 @@ export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: st
                 aria-label={`${e.label}, ${formatDateWeekday(e.date)}, ${copy.dday(e.dday)}`}
                 onClick={() => go(e.to)}
               >
-                <span className={`hg-dayrow__date hg-dayrow__date--${KIND_TONE[e.kind]}`} aria-hidden="true">
+                <span
+                  className={`hg-dayrow__date hg-dayrow__date--${KIND_TONE[e.kind]}`}
+                  aria-hidden="true"
+                >
                   <small>{copy.monthShort(mo)}</small>
                   <b>{d}</b>
                 </span>

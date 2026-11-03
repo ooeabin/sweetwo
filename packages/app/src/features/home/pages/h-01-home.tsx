@@ -1,9 +1,4 @@
-import {
-  fetchMailBounced,
-  fetchUnlinkPartnerName,
-  qk,
-  sendDesktopLink,
-} from '@sweetwo/api';
+import { fetchMailBounced, fetchUnlinkPartnerName, qk, sendDesktopLink } from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button, Icon, IconButton, type IconName } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +9,7 @@ import {
   LoadingFrame,
   AddMenu,
   H06NetWorth,
+  LineBand,
   MainFrame,
   todoText,
   upcomingName,
@@ -33,7 +29,6 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
-import { PersonDot } from '../../../shared/person';
 
 // 홈(19): 오늘 띠(인사 H-01 + ‘월급 체크하기’) → 할 일 한 줄(H-06) → 왼쪽 목표(H-02)·이번 달 월급(H-03),
 // 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 배우자 활동은 알림 센터.
@@ -148,9 +143,8 @@ export function H01Home() {
       {/* 띠 전체(그림 + 글자 + 화살표)가 이동 버튼(2026-11-02, 네이버·GCOO 홈처럼). 초대는 ‘코드 복사’가 따로 */}
       <button type="button" className="hg-banner__main" onClick={() => nav(todo.to)}>
         {t?.kind === 'invite' ? (
-          // 초대: 내 아바타 + 빈 자리(점선 +)(2026-11-03, PocketCU·DoorDash 멤버 초대처럼)
+          // 초대: 빈 자리(점선 +) 하나(2026-11-03, 머리 줄에 내 아바타가 이미 있어 겹치지 않게)
           <span className="hg-banner__pair" aria-hidden="true">
-            <PersonDot name={myName} starter={space.data.created_by === meId} userId={meId} />
             <span className="hg-banner__slot">
               <Icon name="plus" size={16} />
             </span>
@@ -174,31 +168,26 @@ export function H01Home() {
       {todo.close && <IconButton icon="x" label={copy.close} ghost small onClick={todo.close} />}
     </div>
   ) : undefined;
-  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
+  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d. 2026-11-03 공지 띠와 같은 한 줄 파랑
   const unlinkBand = h.unlink ? (
-    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
-      <span>
-        <b>{copy.unlinkWait}</b> {copy.unlinkOn(formatMonthDay(h.unlink.deadline))}
-      </span>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => nav(h.unlink?.mine ? '/settings/couple' : '/settings/couple/unlink/review')}
-      >
-        {copy.unlinkCheck}
-      </Button>
-    </div>
+    <LineBand
+      icon="link"
+      title={copy.unlinkWait}
+      sub={copy.unlinkOn(formatMonthDay(h.unlink.deadline))}
+      action={{
+        label: copy.unlinkCheck,
+        onClick: () => nav(h.unlink?.mine ? '/settings/couple' : '/settings/couple/unlink/review'),
+      }}
+    />
   ) : undefined;
   // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-14
   const bounceBand = bounced.data ? (
-    <div className="hg-banner hg-banner--info hg-body__banner" role="status">
-      <span>
-        <b>{copy.mailBounced}</b> {copy.mailBouncedSub}
-      </span>
-      <Button variant="secondary" size="sm" onClick={() => nav('/settings/notifications')}>
-        {copy.mailCheck}
-      </Button>
-    </div>
+    <LineBand
+      icon="envelope"
+      title={copy.mailBounced}
+      sub={copy.mailBouncedSub}
+      action={{ label: copy.mailCheck, onClick: () => nav('/settings/notifications') }}
+    />
   ) : undefined;
   const closePc = () => {
     markPcBand();
@@ -206,24 +195,19 @@ export function H01Home() {
   };
   const pcBandEl =
     pcBand && space.data.created_by && space.data.created_by !== me.data.id ? (
-      <div className="hg-banner hg-banner--info hg-body__banner" role="status">
-        <span>{copy.pcAlso}</span>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() =>
+      <LineBand
+        icon="info"
+        title={copy.pcAlso}
+        action={{
+          label: copy.pcSend,
+          onClick: () =>
             void sendDesktopLink()
               .then(() => toast(copy.pcSent))
               .catch(() => toast(copy.pcFailed))
-              .finally(closePc)
-          }
-        >
-          {copy.pcSend}
-        </Button>
-        <Button variant="ghost" size="sm" onClick={closePc}>
-          {copy.close}
-        </Button>
-      </div>
+              .finally(closePc),
+        }}
+        close={{ label: copy.close, onClick: closePc }}
+      />
     ) : undefined;
   const banner =
     notice || todoBand || unlinkBand || bounceBand || pcBandEl ? (
@@ -281,6 +265,7 @@ export function H01Home() {
             joint={joint}
             goalTemplate={(id) => goals.data.find((g) => g.id === id)?.template ?? null}
             go={go}
+            locked={space.data.couple_state === 'unlink_pending'}
           />
           <GoalsCard
             goals={goals.data}

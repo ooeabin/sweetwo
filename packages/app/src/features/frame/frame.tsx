@@ -18,6 +18,7 @@ import { addFor, FrameCommands } from './command';
 import { copy } from './copy';
 import { useTraySync } from './tray-sync';
 import { useMe, usePartner, useSpace } from './data';
+import { LineBand } from './notice-band';
 
 const HREF: Record<AppTab, string | undefined> = {
   month: '/',
@@ -79,11 +80,13 @@ export function MainFrame(
   const online = useOnline();
   // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”
   const savedAt = useCacheInfo((s) => s.savedAt);
+  // 2026-11-03 공지 띠와 같은 한 줄 파랑(LineBand)
   const offline = !online && (
-    <div className="hg-banner hg-banner--info" role="status">
-      <b>{savedAt ? copy.offlineCached : copy.offlineTitle}</b>
-      <span>{savedAt ? copy.lastSaved(formatKstMonthDayTime(savedAt)) : copy.offlineBody}</span>
-    </div>
+    <LineBand
+      icon="circle-alert"
+      title={savedAt ? copy.offlineCached : copy.offlineTitle}
+      sub={savedAt ? copy.lastSaved(formatKstMonthDayTime(savedAt)) : copy.offlineBody}
+    />
   );
   return (
     <FrameCommands

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (dcab6a3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (cf6415e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -676,17 +676,22 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 
 /* CommandPalette */
 .hg-cmd { box-sizing: border-box; width: 100%; max-width: 520px; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-2xl); box-shadow: var(--shadow-3); overflow: hidden; }
-.hg-cmd__input { display: flex; align-items: center; gap: var(--space-3); height: 56px; padding: 0 var(--space-5); border-bottom: 1px solid var(--hairline-soft); font: 400 16px/24px var(--font-sans); }
-.hg-cmd__input > span:not(.hg-ico) { flex: 1; }
-.hg-kbd { display: inline-grid; place-items: center; min-width: 20px; height: 22px; padding: 0 6px; border-radius: var(--radius-sm); border: 1px solid var(--hairline); background: var(--surface-alt); font: 600 12px/1 var(--font-sans); color: var(--slate); }
-.hg-cmd__list { display: flex; flex-direction: column; padding: var(--space-2); }
-.hg-cmd__group { font: 600 12px/16px var(--font-sans); color: var(--stone); padding: var(--space-2) var(--space-3) var(--space-1); }
-.hg-cmd__item { display: flex; align-items: center; gap: var(--space-3); height: 44px; padding: 0 var(--space-3); border-radius: var(--radius-md); font: 400 15px/22px var(--font-sans); }
-.hg-cmd__item > span:not(.hg-ico) { flex: 1; }
-.hg-cmd__item em { font-style: normal; font-size: 13px; color: var(--stone); }
+.hg-cmd__input { display: flex; align-items: center; gap: var(--space-3); height: 60px; padding: 0 var(--space-6); border-bottom: 1px solid var(--hairline-soft); font: 400 16px/24px var(--font-sans); }
+.hg-kbd { display: inline-grid; place-items: center; flex: none; min-width: 20px; height: 22px; padding: 0 6px; border-radius: var(--radius-sm); border: 1px solid var(--hairline); background: var(--surface-alt); font: 600 12px/1 var(--font-sans); color: var(--slate); }
+/* 2026-11-03: 안쪽 여백을 넉넉히(입력 줄·묶음 이름·줄 글자가 왼쪽 24px에 맞음), 줄 앞 아이콘 원, 아래 키 안내 줄 */
+.hg-cmd__list { display: flex; flex-direction: column; padding: var(--space-2) var(--space-3) var(--space-3); max-height: min(60dvh, 480px); overflow-y: auto; }
+.hg-cmd__group { font: 600 12px/16px var(--font-sans); color: var(--stone); padding: var(--space-4) var(--space-3) var(--space-2); }
+.hg-cmd__item { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 52px; padding: var(--space-2) var(--space-3); box-sizing: border-box; border: 0; border-radius: var(--radius-lg); background: none; color: var(--ink); text-align: left; font: 500 15px/22px var(--font-sans); }
+.hg-cmd__lead { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--plate); color: var(--slate); }
+.hg-cmd__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hg-cmd__item em { font-style: normal; font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-cmd__item.is-active { background: var(--surface-alt); }
 .hg-cmd__input input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; color: inherit; }
-.hg-cmd__empty { padding: var(--space-6) var(--space-3); font: 400 15px/22px var(--font-sans); color: var(--stone); text-align: center; }
+.hg-cmd__empty { padding: var(--space-8) var(--space-3); font: 400 15px/22px var(--font-sans); color: var(--stone); text-align: center; }
+.hg-cmd__foot { display: flex; align-items: center; gap: var(--space-5); height: 44px; padding: 0 var(--space-6); border-top: 1px solid var(--hairline-soft); font: 400 12px/16px var(--font-sans); color: var(--stone); }
+.hg-cmd__foot > span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.hg-cmd { max-width: 560px; }
+@media (max-width: 767px) { .hg-scrim--top { padding: var(--space-16) var(--space-3) 0; } .hg-cmd__input { padding: 0 var(--space-5); } .hg-cmd__list { padding: var(--space-1) var(--space-2) var(--space-3); } }
 .hg-scrim--top { align-items: start; padding-top: var(--space-16); }
 
 /* DatePicker */
@@ -799,6 +804,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-banner--todo .hg-banner__text, .hg-banner--line strong { color: var(--success); font-weight: 600; }
 .hg-banner--todo .hg-banner__icon { background: none; color: var(--success); }
 .hg-banner--line > .hg-ico { color: var(--success); }
+.hg-banner--strip { align-items: center; }
+.hg-banner--strip > .hg-ico { flex: none; color: var(--slate); }
+.hg-banner--strip .hg-btn--secondary { flex: none; background: var(--surface); color: var(--ink); }  /* 할 일 띠 ‘초대하기’와 같은 흰 작은 버튼 */
+.hg-banner--strip > .hg-banner__one { flex: 1; min-width: 0; }
+.hg-banner--strip .hg-banner__sub { font-weight: 400; color: var(--slate); }
+/* 띠 묶음: 여러 띠가 겹치면 사이를 좁게(2026-11-03) */
+.hg-body__banners { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-banner--todo .hg-btn--secondary, .hg-banner--line .hg-btn--secondary { background: var(--surface); color: var(--ink); }
 .hg-banner--todo .hg-iconbtn, .hg-banner--line .hg-btn--ghost { color: var(--success); }
 .hg-banner__pair { flex: none; display: inline-flex; align-items: center; }
@@ -810,6 +822,11 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-banner--todo .hg-banner__icon { width: 24px; height: 24px; }
   .hg-banner--todo .hg-banner__text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; }
   .hg-banner--todo .hg-btn--sm, .hg-banner--line .hg-btn--sm { height: 32px; padding: 0 var(--space-3); }
+  .hg-banner--strip { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); gap: var(--space-2); border-radius: 0; min-height: 48px; font-size: 14px; line-height: 20px; }
+  .hg-banner--strip > .hg-banner__one > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hg-banner--strip .hg-banner__sub { font-size: 13px; line-height: 18px; }  /* 보조 문장은 제목 아래 둘째 줄(해제 날짜 등) */
+  .hg-banner--strip .hg-btn--sm { height: 32px; padding: 0 var(--space-3); }
+  .hg-body__banners { gap: 1px; }
 }
 
 /* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */
@@ -1603,6 +1620,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   /* 좁은 창: 주 버튼은 화면 아래 끝(내용이 짧아도), 길면 따라 내려오다 아래에 붙음 */
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
+  /* 2026-11-03: 아래 고정 영역 위로 목록이 지나갈 때 잘려 겹쳐 보이지 않게 위쪽을 바탕색으로 흐리게(토스 하단 버튼처럼). 선 대신 */
+  .hg-q__foot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-6); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
+  .hg-q__foot.has-sum { border-top: 0; }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
 }
 

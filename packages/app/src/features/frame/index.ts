@@ -2,7 +2,7 @@
 export { MainFrame } from './frame';
 export { useNetWorth, type NetWorthView } from './data';
 export { H06NetWorth } from './h-06-net-worth';
-export { useNoticeBand } from './notice-band';
+export { LineBand, useNoticeBand } from './notice-band';
 export { useHomeInput, type HomeInputState } from './home-input';
 export { homeText, todoText, upcomingName } from './home-text';
 export { AddMenu, searchKey } from './command';
