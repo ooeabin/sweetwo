@@ -2,6 +2,14 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
+/** 추가 입구(2026-11-03): 넓은 창은 제목 줄 버튼, 좁은 창은 + 버튼 */
+const addEntry = (page: Page, name: string) =>
+  page
+    .getByRole('button', { name, exact: true })
+    .or(page.locator('.hg-fab'))
+    .locator('visible=true')
+    .first();
+
 // 우리 자산 F-01 한눈에, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
 
 const axe = async (page: Page) => {
@@ -401,7 +409,7 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   });
 
   await page.goto('/assets/items');
-  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await addEntry(page, '+ 추가').click();
   await heading(page, '무엇을 추가할까요?');
   await page.getByRole('button', { name: '예금·적금' }).click();
   await axe(page);
@@ -477,7 +485,7 @@ test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기�
     },
   ];
   await page.goto('/assets/items');
-  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await addEntry(page, '+ 추가').click();
   await page.getByRole('button', { name: '예금·적금' }).click();
   const chips = page.getByRole('group', { name: '예금·적금' });
   await expect(chips.getByRole('button')).toHaveText([
@@ -539,7 +547,7 @@ test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/assets/items');
-  await page.getByRole('button', { name: '+ 추가' }).first().click();
+  await addEntry(page, '+ 추가').click();
   await page.getByRole('button', { name: '예금·적금' }).click();
   await page.getByRole('button', { name: '적금', exact: true }).click();
   await page.getByRole('button', { name: '다음' }).click();
