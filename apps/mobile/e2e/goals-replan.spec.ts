@@ -209,7 +209,7 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
   await page.goto('/goals');
   await addEntry(page, '+ 목표 추가').click();
   await axe(page);
-  await page.getByRole('button', { name: '+ 직접 만들기' }).click();
+  await page.getByRole('button', { name: '직접 만들기' }).click();
   await page.getByRole('radio', { name: '우리 둘' }).click();
   await page.getByLabel('무엇을 위한 돈인가요?').fill('캠핑 장비');
   await page.getByRole('button', { name: '다음' }).click();

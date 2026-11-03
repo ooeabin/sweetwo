@@ -7,7 +7,7 @@
 - 카드 `hg-pick__item`(`button`, `aria-pressed`): 흰 바탕 `hairline` 1px 테두리, 모서리 `radius-xl`, 가운데에 그림 64px(`hg-pick__art`, Illustrations 512px 무광 3D 그대로) → 이름(14px 600).
 - 고른 카드(`is-on`): 테두리 `ink` 2px(안쪽 그림자로 두께를 더해 칸 크기가 변하지 않게) + 오른쪽 위 순번 원(`hg-pick__order`, `ink` 바탕 22px, 1, 2, 3). 해제하면 뒤 순번이 당겨짐. 브랜드 색은 쓰지 않음.
 - 추천: 왼쪽 위 `hg-tag` “추천”.
-- 직접 만들기: 그림 대신 회색 판(`hg-pick__art--custom`, `hairline-soft`) + `plus` 아이콘, 이름 “+ 직접 만들기”.
+- 직접 만들기(2026-11-04): 점선 테두리 카드(`hairline`, 바탕 없음, 글자 `slate`) + 48px `surface-alt` 원 안 `plus` 아이콘, 이름 “직접 만들기”(+ 기호는 아이콘이 대신). 아이콘 카드 사이에서는 같은 모양(40px 원 위 왼쪽, 이름 아래 왼쪽). 마우스를 올리면 `surface-alt` 바탕.
 - 화면 읽기: 이름, 추천, 순번을 글자로 읽음(순번 원은 글자 그대로). 키보드 Tab·Space·Enter.
 - React 래퍼 `GoalPick`(packages/ui): `items`(key, name, illustration, recommended), `order(key)`, `onToggle(key)`, `customLabel`, `recommendedLabel`.
 

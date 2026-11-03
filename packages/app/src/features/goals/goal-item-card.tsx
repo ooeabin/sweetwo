@@ -105,8 +105,8 @@ export function GoalItemCard({
               {i.state === 'used' && <Badge kind="temp">{copy.status.used}</Badge>}
               {i.state === 'paused' && <Badge kind="temp">{copy.status.paused}</Badge>}
               {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
-              {g.kind === 'yearly' && <Badge kind="goal">{copy.yearly}</Badge>}
-              {g.kind === 'monthly' && <Badge kind="goal">{copy.monthly}</Badge>}
+              {g.kind === 'yearly' && <Badge kind="brand">{copy.yearly}</Badge>}
+              {g.kind === 'monthly' && <Badge kind="brand">{copy.monthly}</Badge>}
             </span>
           )}
         </span>

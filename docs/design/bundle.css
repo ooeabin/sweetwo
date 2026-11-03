@@ -115,7 +115,7 @@
 .hg-badge { display: inline-flex; align-items: center; gap: var(--space-1); height: 24px; padding: 0 10px; border-radius: var(--radius-full); font: 600 12px/16px var(--font-sans); letter-spacing: 0.2px; white-space: nowrap; flex-shrink: 0; }
 .hg-badge--temp { background: var(--surface-alt); color: var(--slate); box-shadow: inset 0 0 0 1px var(--hairline); }
 .hg-badge--done { background: var(--success); color: var(--on-success); }
-.hg-badge--achieved { background: var(--success); color: var(--on-success); }  /* 2026-11-03 달성 배지는 파랑(브랜드 오렌지에서 바꿈) */
+.hg-badge--achieved { background: var(--success-soft); color: var(--success); }  /* 2026-11-04 달성 배지는 연한 파랑 바탕 + 파랑 글자 */
 .hg-badge--together { background: var(--together); color: var(--together-ink); }
 .hg-badge--family { background: var(--family); color: var(--family-ink); }
 .hg-badge--goal { background: var(--goal); color: var(--goal-ink); }
@@ -782,7 +782,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-goalrow__set { font: 600 14px/20px var(--font-sans); color: var(--focus); }
 .hg-goalrow__sub { grid-column: 2; font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-goalrow__bar { grid-column: 2 / 4; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--success-soft); overflow: hidden; }
-.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03, 체크·진행 원과 같음) */
+.hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }  /* 목표 진행 막대는 파랑(2026-11-03, 체크·진행 원과 같음) */
 /* 2026-11-03 홈 다가오는 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
 .hg-daylist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
 .hg-dayrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
@@ -883,7 +883,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-wheel__col:focus-visible { outline: none; }  /* 2026-11-03 줄 테두리 대신 가운데 띠에 ink 테두리(파란 세로선이 거슬림) */
 .hg-wheel:has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: inset 0 0 0 2px var(--ink); }
 .hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day):has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: none; }
-.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { text-decoration: underline 2px; text-underline-offset: 6px; }
+.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { box-shadow: inset 0 0 0 2px var(--focus); border-radius: var(--radius-md); }  /* 2026-11-04 키보드 초점: 숫자와 ‘월’에 따로 밑줄이 그어지던 것을 칸 테두리로 */
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
@@ -1643,8 +1643,13 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-pick__item:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-pick__art { display: grid; place-items: center; width: 64px; height: 64px; }
 .hg-pick__art img { width: 100%; height: 100%; object-fit: contain; }
-.hg-pick__art--custom { border-radius: var(--radius-lg); background: var(--hairline-soft); color: var(--stone); }
-.hg-pick__art--custom .hg-ico { width: 28px; height: 28px; }
+.hg-pick__art--custom { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
+.hg-pick__art--custom .hg-ico { width: 24px; height: 24px; }
+/* 직접 만들기 카드(2026-11-04): 점선 테두리 + 더하기 원, 이름은 ‘직접 만들기’(+ 기호 없이) */
+.hg-pick__item:has(> .hg-pick__art--custom) { border-style: dashed; border-color: var(--hairline); background: transparent; color: var(--slate); }
+.hg-pick__item:has(> .hg-pick__art--custom):hover { background: var(--surface-alt); color: var(--ink); }
+.hg-pick:has(.hg-pick__art--icon) .hg-pick__item:has(> .hg-pick__art--custom) { min-height: 104px; align-items: flex-start; justify-content: space-between; padding: var(--space-4); text-align: left; }  /* 아이콘 카드 사이에서는 같은 모양(아이콘 위 왼쪽) */
+.hg-pick:has(.hg-pick__art--icon) .hg-pick__art--custom { width: 40px; height: 40px; }
 /* 그림이 없을 때 아이콘 원(GoalPick): 카드도 낮게 */
 .hg-pick__art--icon { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
 .hg-pick__item:has(> .hg-pick__art--icon) { min-height: 104px; align-items: flex-start; justify-content: space-between; padding: var(--space-4); text-align: left; }  /* 2026-11-03 Strava처럼 아이콘 위 왼쪽, 이름 아래 왼쪽 */
@@ -1669,7 +1674,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalbox { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-xl); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline-soft); }
 .hg-goalbox__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font: 600 16px/24px var(--font-sans); }
 .hg-goalbox__bar { height: 8px; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
-.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }
+.hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }
 .hg-goalbox__meta { display: flex; justify-content: space-between; gap: var(--space-3); font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-goalbox__metabtn { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: 400 15px/22px var(--font-sans); }
@@ -1699,7 +1704,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goaltile__name { font: 600 15px/22px var(--font-sans); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .hg-goaltile__amount { font: 400 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-goaltile__bar { display: block; height: 6px; margin: var(--space-1) 0; overflow: hidden; border-radius: var(--radius-full); background: var(--success-soft); }
-.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--success); }  /* 목표 진행 막대는 파랑(2026-11-03) */
+.hg-goaltile__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--progress); }  /* 목표 진행 막대는 파랑(2026-11-03) */
 .hg-goaltile .hg-card__meta { font-size: 12px; line-height: 16px; }
 .hg-goaltile__main:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-xl); }
 /* 접힌 목록 펼치기 줄(G-01, 2026-11-03): 글자 링크 대신 가득 찬 줄 + 화살표 */
@@ -1710,8 +1715,19 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-q__title .hg-celebrate__eyebrow { margin-bottom: var(--space-1); }
 .hg-celebrate__body--plain { padding: 0; }
 .hg-celebrate__body--plain .hg-celebrate__story { margin: 0 !important; text-align: center; }
-/* 축하 그림 = 목표 사진(2026-11-03, 체크·그림자 대신): 200px 정사각, 둥근 모서리 */
+/* 축하 그림 = 목표 사진(2026-11-04): 화면 위를 꽉 채우는 사진(G-02 머리 사진과 같은 비율). 좁은 창은 양옆과 위 끝까지,
+   넓은 창은 질문 폭 안에서 둥근 모서리. 이름과 금액은 남은 자리 가운데 */
+.hg-celebrate__hero--photo { display: block; height: auto; padding: 0; }
 .hg-celebrate__hero--photo::after { display: none; }
-.hg-celebrate__photo { display: block; width: 200px; height: 200px; overflow: hidden; border-radius: var(--radius-2xl); box-shadow: var(--shadow-2); }
-.hg-celebrate__photo .hg-goaltile__photo { width: 100%; height: 100%; aspect-ratio: auto; }
+.hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) { display: block; margin-top: 0; }
+.hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) + .hg-q__head { margin-top: auto; }
+.hg-celebrate__photo { display: block; width: 100%; overflow: hidden; border-radius: var(--radius-2xl); }
+.hg-celebrate__photo .hg-goaltile__photo { width: 100%; aspect-ratio: 4 / 3; max-height: 56vh; border-radius: 0; }
 .hg-celebrate__photo .hg-goaltile__photo .hg-ico { width: 56px; height: 56px; }
+@media (max-width: 767px) {
+  .hg-q:has(> .hg-q__hero .hg-celebrate__hero--photo) > .hg-q__nav { display: none; }  /* 뒤로 자리 없이 사진이 맨 위 */
+  .hg-q--center > .hg-q__hero:has(.hg-celebrate__hero--photo) { margin: calc(var(--space-6) * -1) calc(var(--space-4) * -1) 0; }
+  .hg-celebrate__photo { border-radius: 0; }
+  .hg-celebrate__photo .hg-goaltile__photo { aspect-ratio: 1 / 1; }  /* 좁은 창은 정사각으로 위를 더 채움 */
+}
+.hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */

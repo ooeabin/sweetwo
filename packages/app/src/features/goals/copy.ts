@@ -167,7 +167,7 @@ export const copy = {
   // G-03a~f 목표 추가
   addTitle: '어떤 목표를 추가할까요?',
   addTabs: '목표 분류', // [확인 필요] 화면 읽기용
-  makeOwn: '+ 직접 만들기',
+  makeOwn: '직접 만들기',
   next: '다음',
   heldTitle: '이 목표로 이미 모은 돈이 있나요?', // [확인 필요]
   heldAssets: '가진 자산에서 고르기',
