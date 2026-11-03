@@ -99,7 +99,7 @@ export function A06LockSetup() {
         error={error}
         footer={
           // ‘나중에 할게요’: 잠금 꺼진 채 시작(이번 달 ‘할 일’에 남기는 건 할 일 기능에서)
-          <button type="button" className="hg-btn hg-btn--link" onClick={finish}>
+          <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={finish}>
             {copy.later}
           </button>
         }

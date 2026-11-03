@@ -23,6 +23,7 @@
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--brand-ink); }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
 .hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--focus); font: 600 14px/20px var(--font-sans); }
+.hg-btn--quiet, .hg-btn--link.hg-btn--quiet { color: var(--slate); font-weight: 500; }  /* 건너뛰기·미루기 글자 버튼(‘나중에 할게요’ ‘건너뛸게요’, 2026-11-03). 파랑은 글 속 링크만 */
 .hg-btn--sm { height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-btn-sm); font: 600 14px/20px var(--font-sans); }
 .hg-btn--block { width: 100%; }
 .hg-btn--danger { background: var(--danger); color: var(--on-danger); border-color: transparent; }

@@ -56,7 +56,7 @@ export function O12WeddingDate() {
         <YearMonthInput label={copy.whenPlanned} value={m} onChange={setMonth} error={monthError} />
         <button
           type="button"
-          className="hg-btn hg-btn--link"
+          className="hg-btn hg-btn--link hg-btn--quiet"
           style={{ alignSelf: 'flex-start' }}
           onClick={() =>
             void s.done(() =>

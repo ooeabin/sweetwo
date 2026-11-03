@@ -255,7 +255,11 @@ export function QuestionLayout({
               </button>
             )}
             {later && (
-              <button type="button" className="hg-btn hg-btn--link" onClick={later.onClick}>
+              <button
+                type="button"
+                className="hg-btn hg-btn--link hg-btn--quiet"
+                onClick={later.onClick}
+              >
                 {later.label}
               </button>
             )}

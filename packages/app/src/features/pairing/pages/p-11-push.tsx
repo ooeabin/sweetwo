@@ -55,7 +55,7 @@ export function P11Push() {
       onSubmit={() => void allow()}
       center
     >
-      <Button variant="ghost" onClick={home}>
+      <Button variant="ghost" className="hg-btn--quiet" onClick={home}>
         {copy.later}
       </Button>
     </QuestionLayout>
