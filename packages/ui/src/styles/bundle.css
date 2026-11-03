@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (95029bb). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (dda23cc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1672,8 +1672,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
 .hg-goalhero__actions--one { grid-template-columns: 1fr; }
-/* 금액 줄(2026-11-04): 왼쪽 모은 돈, 오른쪽 − + 둥근 버튼(넣기·빼기). 목표에 쓴 돈은 아래 ‘쓴 돈 기록하기’ 따로 */
+/* 금액 줄(2026-11-04): 왼쪽 ‘모은 돈’ 이름표 + 금액, 오른쪽 − + 둥근 버튼(넣기·빼기) */
 .hg-goalhero__amountrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.hg-goalhero__label { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 금액 위 ‘모은 돈’ 이름표: − +가 목표 금액이 아니라 모은 돈을 고친다는 걸 보임 */
 .hg-goalhero__steps { display: inline-flex; gap: var(--space-2); flex: none; }
 .hg-iconbtn.hg-goalhero__step { width: 44px; height: 44px; border: 0; background: var(--surface-alt); color: var(--ink); }
 .hg-iconbtn.hg-goalhero__step:hover { background: var(--hairline-soft); }

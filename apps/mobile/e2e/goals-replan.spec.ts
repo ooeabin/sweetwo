@@ -85,7 +85,9 @@ test('G-02 넣기·빼기, 꺼내 쓰기(모은 돈보다 많으면 저장 꺼�
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   expect(db.goalMoves).toHaveLength(1);
 
-  await page.getByRole('button', { name: '쓴 돈 기록하기' }).click();
+  // 2026-11-04 G-02의 쓴 돈 버튼은 없앰. G-02b는 캘린더(Y-08)와 달성 카드에서만 열림
+  await expect(page.getByRole('button', { name: '쓴 돈 기록하기' })).toHaveCount(0);
+  await page.goto('/goals/goal-h/spend');
   await expect(
     page.getByRole('heading', { name: '내 집 마련에서 얼마를 꺼내 썼어요?' }),
   ).toBeVisible();

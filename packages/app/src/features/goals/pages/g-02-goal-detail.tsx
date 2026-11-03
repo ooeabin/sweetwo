@@ -300,9 +300,12 @@ export function G02GoalDetail() {
             </span>
           )}
           <p className="hg-goalhero__name">{g.name}</p>
-          {/* 2026-11-04 넣기·빼기는 금액 옆 − + 버튼, 목표에 쓴 돈은 아래 따로 */}
+          {/* 2026-11-04 모은 돈 이름표 + 금액 옆 − + 버튼(넣기·빼기)만. 쓴 돈 기록 버튼은 없앰 */}
           <div className="hg-goalhero__amountrow">
-            <p className="hg-goalhero__amount">{m(i.saved)}</p>
+            <p className="hg-goalhero__amount">
+              <span className="hg-goalhero__label">{copy.numSaved}</span>
+              {m(i.saved)}
+            </p>
             {i.canEdit && (
               <span className="hg-goalhero__steps">
                 <IconButton
@@ -333,18 +336,6 @@ export function G02GoalDetail() {
           )}
           {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
-          {i.canEdit && (
-            <div className="hg-goalhero__actions hg-goalhero__actions--one">
-              <Button
-                variant="secondary"
-                block
-                onClick={() => nav(`/goals/${id}/spend`)}
-                disabled={i.saved <= 0}
-              >
-                {copy.useRecord}
-              </Button>
-            </div>
-          )}
         </div>
       </section>
       {g.kind !== 'monthly' && (
