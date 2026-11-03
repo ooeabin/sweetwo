@@ -771,14 +771,24 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-dayrow__text b { font: 600 16px/24px var(--font-sans); }
 .hg-dayrow__text small { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-dayrow__dday { font: 600 14px/20px var(--font-sans); color: var(--slate); }
-/* 2026-11-03 좁은 창 할 일 띠: 한 줄 높이, 양옆 여백 없이 꽉 차게(회색 띠) */
+/* 2026-11-03 할 일 띠·공지 띠: 연한 파랑(success-soft) 바탕 + 파랑 글자. 좁은 창은 한 줄 높이로 양옆 여백 없이 꽉 차게 */
+.hg-banner--todo, .hg-banner--line { border: 0; box-shadow: none; background: var(--success-soft); color: var(--success); }
+.hg-banner--todo .hg-banner__text, .hg-banner--line strong { color: var(--success); font-weight: 600; }
+.hg-banner--todo .hg-banner__icon { background: none; color: var(--success); }
+.hg-banner--line > .hg-ico { color: var(--success); }
+.hg-banner--todo .hg-btn--secondary, .hg-banner--line .hg-btn--secondary { background: var(--surface); color: var(--ink); }
+.hg-banner--todo .hg-iconbtn, .hg-banner--line .hg-btn--ghost { color: var(--success); }
+.hg-banner__pair { flex: none; display: inline-flex; align-items: center; }
+.hg-banner__pair .hg-avatar { width: 28px; height: 28px; font-size: 12px; }
+.hg-banner__pair .hg-banner__slot { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-left: -6px; box-sizing: border-box; border: 1.5px dashed currentColor; border-radius: var(--radius-full); background: var(--success-soft); box-shadow: 0 0 0 2px var(--success-soft); }
 @media (max-width: 767px) {
-  .hg-banner--todo { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); gap: var(--space-2); border: 0; border-radius: 0; box-shadow: none; background: var(--surface-alt); min-height: 48px; }
+  .hg-banner--todo, .hg-banner--line { margin-left: calc(var(--space-4) * -1); margin-right: calc(var(--space-4) * -1); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); gap: var(--space-2); border-radius: 0; min-height: 48px; }
   .hg-banner--todo .hg-banner__main { gap: var(--space-2); margin: 0; padding: 0; }
-  .hg-banner--todo .hg-banner__icon { width: 24px; height: 24px; background: none; }
+  .hg-banner--todo .hg-banner__icon { width: 24px; height: 24px; }
   .hg-banner--todo .hg-banner__text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; line-height: 20px; }
-  .hg-banner--todo .hg-btn--sm { height: 32px; padding: 0 var(--space-3); background: var(--surface); }
+  .hg-banner--todo .hg-btn--sm, .hg-banner--line .hg-btn--sm { height: 32px; padding: 0 var(--space-3); }
 }
+
 /* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */
 .hg-person { display: flex; align-items: center; gap: var(--space-3); width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 600 14px/20px var(--font-sans); text-align: left; cursor: pointer; }
 .hg-person:hover { background: var(--surface-alt); }

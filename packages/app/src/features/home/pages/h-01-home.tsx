@@ -1,5 +1,4 @@
 import {
-  createInvite,
   fetchMailBounced,
   fetchUnlinkPartnerName,
   qk,
@@ -147,27 +146,30 @@ export function H01Home() {
     <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
       {/* 띠 전체(그림 + 글자 + 화살표)가 이동 버튼(2026-11-02, 네이버·GCOO 홈처럼). 초대는 ‘코드 복사’가 따로 */}
       <button type="button" className="hg-banner__main" onClick={() => nav(todo.to)}>
-        {t && (
-          <span className="hg-banner__icon" aria-hidden="true">
-            <Icon name={TODO_ICON[t.kind]} />
+        {t?.kind === 'invite' ? (
+          // 초대: 내 아바타 + 빈 자리(점선 +)(2026-11-03, PocketCU·DoorDash 멤버 초대처럼)
+          <span className="hg-banner__pair" aria-hidden="true">
+            <span className={space.data.created_by === meId ? 'hg-avatar hg-avatar--p1' : 'hg-avatar hg-avatar--p2'}>
+              {[...myName][0] ?? ''}
+            </span>
+            <span className="hg-banner__slot">
+              <Icon name="plus" size={16} />
+            </span>
           </span>
+        ) : (
+          t && (
+            <span className="hg-banner__icon" aria-hidden="true">
+              <Icon name={TODO_ICON[t.kind]} />
+            </span>
+          )
         )}
         <span className="hg-banner__text">{todo.text}</span>
         {t?.kind !== 'invite' && <span className="hg-chevron" aria-hidden="true" />}
       </button>
       {t?.kind === 'invite' && (
-        // H-06 초대: ‘코드 복사’(코드를 만들거나 지금 코드를 그대로 복사). 코드 화면은 S-12
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() =>
-            void createInvite()
-              .then((r) => navigator.clipboard.writeText(r.code))
-              .then(() => toast(copy.codeCopied))
-              .catch(() => nav(todo.to))
-          }
-        >
-          {copy.copyCode}
+        // H-06 초대: ‘초대하기’ → 초대 화면 S-12(2026-11-03 ‘코드 복사’ 대신)
+        <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
+          {copy.inviteNow}
         </Button>
       )}
       {todo.close && <IconButton icon="x" label={copy.close} ghost small onClick={todo.close} />}

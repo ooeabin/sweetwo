@@ -22,6 +22,7 @@ export const copy = {
   progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
+  inviteNow: '초대하기', // 2026-11-03 할 일 띠 초대 버튼
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
   allDone: (label: string) => `${label} 체크를 다 했어요`,
   savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
@@ -43,8 +44,6 @@ export const copy = {
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
   unlinkCheck: '확인하기',
   mineMark: '나', // [확인 필요]
-  copyCode: '코드 복사',
-  codeCopied: '코드를 복사했어요', // [확인 필요]
   mailBounced: '알림 메일이 전달되지 않았어요',
   mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
   mailCheck: '확인하기', // [확인 필요]
