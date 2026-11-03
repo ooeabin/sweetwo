@@ -27,6 +27,8 @@ export const copy = {
     guide: '가이드 모아보기',
     screen: '화면',
     screenValue: '기기 설정을 따라요',
+    mask: '금액 가리기',
+    maskHelp: '모든 금액을 •••로 가려요. 이 기기에서만', // [확인 필요]
     help: '도움말',
     data: '데이터',
     dataSub: '내보내기, 휴지통, 계정 삭제',

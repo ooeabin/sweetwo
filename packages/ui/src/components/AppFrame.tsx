@@ -71,6 +71,8 @@ export interface AppFrameProps {
     me: string;
     /** 숫자 타일 묶음(좁은 창에서 가로로 넘김) */
     stats: string;
+    /** 홈 머리 두 사람을 눌러 초대할 때 이름 */
+    invite?: string;
   };
   masked: boolean;
   onMask: () => void;
@@ -78,6 +80,8 @@ export interface AppFrameProps {
   onNoti?: () => void;
   onSettings?: () => void;
   onAdd?: () => void;
+  /** 홈 머리 두 사람: 배우자가 아직 없으면 눌러서 초대(S-12) */
+  onInvite?: () => void;
   hasNewNoti?: boolean;
   people: AppFramePerson[];
   saveState?: string;
@@ -90,12 +94,11 @@ export interface AppFrameProps {
 }
 
 function Person({ p }: { p: AppFramePerson }) {
+  // 배우자 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음
   return p.empty ? (
-    <span
-      className="hg-avatar"
-      aria-hidden="true"
-      style={{ background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--hairline)' }}
-    />
+    <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
+      <Icon name="user" size={16} />
+    </span>
   ) : (
     <span
       className={cx('hg-avatar', p.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2')}
@@ -214,10 +217,39 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리: 홈은 워드마크, 다른 메뉴는 메뉴 이름 */}
+        {/* 좁은 창 머리: 홈은 두 사람(아바타 + 이름, 2026-11-03 워드마크 대신), 다른 메뉴는 메뉴 이름 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
           {p.today ? (
-            <Wordmark height={24} />
+            (() => {
+              const body = (
+                <>
+                  {/* 배우자 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
+                  <span className="hg-avatars" aria-hidden="true">
+                    {p.people.map((x) => (
+                      <Person key={x.no} p={x} />
+                    ))}
+                  </span>
+                  <span className="hg-mhead__names">
+                    {p.people
+                      .filter((x) => !x.empty && x.name)
+                      .map((x) => x.name)
+                      .join(', ')}
+                  </span>
+                </>
+              );
+              return p.onInvite && p.people.some((x) => x.empty) ? (
+                <button
+                  type="button"
+                  className="hg-mhead__people"
+                  aria-label={p.labels.invite}
+                  onClick={p.onInvite}
+                >
+                  {body}
+                </button>
+              ) : (
+                <span className="hg-mhead__people">{body}</span>
+              );
+            })()
           ) : (
             <div className="hg-topbar__text">
               <h1 className="hg-topbar__title">{p.narrowTitle}</h1>
@@ -230,7 +262,15 @@ export function AppFrame(p: AppFrameProps) {
             disabled={!p.onSearch}
             onClick={p.onSearch}
           />
-          {tools}
+          {/* 금액 가리기 눈은 좁은 창 머리에서 뺌(설정 S-10, ⌘K, Ctrl+Shift+H, 2026-11-03) */}
+          <IconButton
+            icon="bell"
+            label={p.labels.noti}
+            ghost
+            dot={p.hasNewNoti}
+            disabled={!p.onNoti}
+            onClick={p.onNoti}
+          />
           <IconButton
             icon="settings"
             label={p.labels.settings}

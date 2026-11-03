@@ -194,11 +194,20 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
       created_at: '2026-10-07T00:00:00Z',
     }),
   );
-  await page.goto('/calendar/list');
-  await page
-    .locator(info.project.name === 'narrow' ? '.hg-frame__mhead' : '.hg-appside')
-    .getByRole('button', { name: '금액 가리기' })
-    .click();
+  if (info.project.name === 'narrow') {
+    // 좁은 창은 머리에 눈 아이콘이 없고 설정(S-10) 스위치로(2026-11-03)
+    await page.goto('/calendar/list');
+    await expect(
+      page.locator('.hg-frame__mhead').getByRole('button', { name: '금액 가리기' }),
+    ).toHaveCount(0);
+    await page.goto('/settings');
+    await page.getByRole('switch', { name: /금액 가리기/ }).click();
+    await expect(page.getByRole('switch', { name: /금액 가리기/ })).toBeChecked();
+    await axe(page);
+  } else {
+    await page.goto('/calendar/list');
+    await page.locator('.hg-appside').getByRole('button', { name: '금액 가리기' }).click();
+  }
   await page.goto('/notifications');
   await expect(page.getByRole('complementary', { name: '알림' })).toContainText('예산은 •••이에요');
 });
