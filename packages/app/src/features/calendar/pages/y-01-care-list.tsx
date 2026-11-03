@@ -53,7 +53,7 @@ export function Y01CareList() {
           <EmptyState
             title={copy.empty}
             action={
-              <Button variant="primary" onClick={add}>
+              <Button variant="secondary" onClick={add}>
                 {copy.emptyAdd}
               </Button>
             }

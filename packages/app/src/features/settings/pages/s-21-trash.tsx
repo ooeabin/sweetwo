@@ -29,7 +29,7 @@ export function S21Trash() {
   const [confirm, setConfirm] = useState<TrashRow | 'all' | null>(null);
   const [busy, setBusy] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space || list.isLoading)
-    return <MainFrame current={null} columns={[null]} />;
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const rows = list.data ?? [];
   const today = todayKst();
   const c = d.c;
@@ -162,5 +162,5 @@ export function S21Trash() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

@@ -569,5 +569,5 @@ export function G02GoalDetail() {
       )}
     </div>
   );
-  return <MainFrame current="goals" columns={[body]} />;
+  return <MainFrame sub="detail" current="goals" columns={[body]} />;
 }

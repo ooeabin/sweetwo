@@ -193,5 +193,5 @@ export function S15Security() {
       </section>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

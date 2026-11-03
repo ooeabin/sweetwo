@@ -27,7 +27,7 @@ export function S01Guides() {
       />
     );
   if (d.loading || ck.loading || goals.isLoading || !d.space)
-    return <MainFrame current={null} columns={[null]} />;
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const mine = pickGuides({
     housing: d.space.housing,
     childPlan: d.space.child_plan,
@@ -86,5 +86,7 @@ export function S01Guides() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.guidesTitle }} columns={[body]} />;
+  return (
+    <MainFrame sub="settings" current={null} page={{ title: copy.guidesTitle }} columns={[body]} />
+  );
 }

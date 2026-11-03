@@ -43,7 +43,12 @@ export function AssetsFrame({
       page={{
         title: copy.title,
         actions: (
-          <Button variant="primary" onClick={() => nav(`/assets/new?side=${addSide}`)}>
+          // 좁은 창은 + 버튼이 같은 일(2026-11-03 추가 입구 하나로)
+          <Button
+            variant="primary"
+            className="hg-wide-only"
+            onClick={() => nav(`/assets/new?side=${addSide}`)}
+          >
             {copy.add}
           </Button>
         ),

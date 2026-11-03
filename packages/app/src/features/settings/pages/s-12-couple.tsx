@@ -75,7 +75,7 @@ export function S12Couple() {
     (state === 'unlink_pending' && unlink.isLoading) ||
     ((state === 'solo' || state === 'not_joined') && myUnlink.isLoading)
   )
-    return <MainFrame current={null} columns={[null]} />;
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const { c, space: sp } = d;
   const today = todayKst();
 
@@ -325,5 +325,5 @@ export function S12Couple() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

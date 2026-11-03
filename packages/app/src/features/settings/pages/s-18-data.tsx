@@ -110,7 +110,8 @@ export function S18Data() {
     );
   }, [d.me, d.c]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const me = d.me;
 
   const start = async () => {
@@ -246,5 +247,5 @@ export function S18Data() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

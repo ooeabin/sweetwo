@@ -94,7 +94,7 @@ export function S19aInquiry() {
       </div>
     </form>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }
 
 /** 여러 줄 내용 칸(입력 칸 모양 그대로, 높이만 늘림) */

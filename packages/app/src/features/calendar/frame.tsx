@@ -75,6 +75,7 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
         title: copy.title,
         actions: (
           <Button
+            className="hg-wide-only"
             variant="primary"
             onClick={() => {
               startCareAdd();

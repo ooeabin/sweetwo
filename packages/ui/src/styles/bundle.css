@@ -153,7 +153,7 @@
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
-@media (max-width: 767px) { body:has(.hg-frame > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 767px) { body:has(.hg-frame:not(.hg-frame--sub) > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
 /* 떠 있는 추가 버튼(FAB)이 있으면 그 위로(겹치지 않게) */
 @media (max-width: 767px) { body:has(.hg-frame > .hg-fab) .hg-toasts { bottom: calc(var(--space-3) * 3 + 66px + 56px + env(safe-area-inset-bottom, 0px)); } }
 /* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
@@ -1352,6 +1352,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 /* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
 .hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
+/* 2026-11-03 추가 입구 하나로: 넓은 창에만 보이는 동작(제목 줄 ‘+ 추가’). 좁은 창은 + 버튼 */
+@media (max-width: 767px) {
+  .hg-wide-only { display: none; }
+  .hg-pagetitle:has(.hg-frame__actions):not(:has(.hg-frame__actions > :not(.hg-wide-only))) { display: none; }
+}
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
 .hg-pagetitle__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 0; display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
@@ -1381,6 +1386,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(var(--space-3) + 66px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
+  /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
+  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }
+  .hg-frame--sub .hg-body { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* 로그인, 가입 화면 틀(AuthLayout: A-01~A-08, O-01). 가운데 한 열, 좁은 창은 버튼 묶음을 아래로 */

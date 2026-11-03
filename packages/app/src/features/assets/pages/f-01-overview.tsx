@@ -32,7 +32,7 @@ export function F01Overview() {
       <EmptyState
         title={copy.empty}
         action={
-          <Button variant="primary" onClick={() => nav('/assets/new?side=asset')}>
+          <Button variant="secondary" onClick={() => nav('/assets/new?side=asset')}>
             {copy.addAsset}
           </Button>
         }

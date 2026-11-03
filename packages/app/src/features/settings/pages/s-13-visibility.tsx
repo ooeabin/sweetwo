@@ -36,7 +36,7 @@ export function S13Visibility() {
   const [ask, setAsk] = useState<Vis | null>(null);
   const [busy, setBusy] = useState(false);
   if (d.loading || !d.me || assets.isLoading || goals.isLoading)
-    return <MainFrame current={null} columns={[null]} />;
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const me = d.me;
   const mine = (assets.data ?? []).filter((a) => a.owner === 'person' && a.owner_user_id === me.id);
   // 내 목표(비상금은 늘 우리 목표). 혼자 쓰기·미합류면 볼 사람이 없어 묶음을 숨김
@@ -175,5 +175,5 @@ export function S13Visibility() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

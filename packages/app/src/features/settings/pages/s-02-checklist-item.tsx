@@ -32,7 +32,8 @@ export function S02ChecklistItem() {
         }}
       />
     );
-  if (d.loading || ck.loading || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || ck.loading || !d.c)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const fromTodo = params.get('from') === 'todo';
   const done = ck.doneOf(key);
   const who = done ? (done.done_by === d.me?.id ? d.c.myName : d.c.partnerName) : null;
@@ -108,5 +109,5 @@ export function S02ChecklistItem() {
         ))}
     </div>
   );
-  return <MainFrame current={null} page={{ title: item.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: item.title }} columns={[body]} />;
 }

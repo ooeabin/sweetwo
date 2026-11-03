@@ -54,7 +54,7 @@ export function S18bDelete() {
   }, [d.loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (d.loading || !d.me || !d.c || !d.space || assets.isLoading)
-    return <MainFrame current={null} columns={[null]} />;
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const { me, space } = d;
   const n = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && a.owner_user_id === me.id,
@@ -101,5 +101,5 @@ export function S18bDelete() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
 }

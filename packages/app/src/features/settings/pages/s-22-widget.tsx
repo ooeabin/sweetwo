@@ -14,7 +14,8 @@ export function S22Widget() {
   const w = useWidgetSettings();
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   if (!w.desktop) return <Navigate to="/settings" replace />;
-  if (!w.settings || goals.isLoading) return <MainFrame current={null} columns={[null]} />;
+  if (!w.settings || goals.isLoading)
+    return <MainFrame sub="settings" current={null} columns={[null]} />;
   const s = w.settings;
   // 휴지통·보류·사용 완료 목표는 고를 수 없음 → 우선순위 첫 목표
   const open = (goals.data ?? [])
@@ -67,5 +68,7 @@ export function S22Widget() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.widgetTitle }} columns={[body]} />;
+  return (
+    <MainFrame sub="settings" current={null} page={{ title: copy.widgetTitle }} columns={[body]} />
+  );
 }
