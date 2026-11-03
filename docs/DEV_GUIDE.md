@@ -449,10 +449,10 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 알림
 
 - 테이블 `notification`(받는 사람, 종류, 문구, OS 알림 문구·숨김, 갈 화면, 아이콘, 한 사람, dedupe, 읽음). 앱은 내 것만 읽고 `mark_notifications_read`로 읽음만. 쓰기는 서버(트리거·예약 작업)만
-- 바로 만드는 알림: 배우자 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식(`set_salary_mode`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 배우자 대신 체크 → 주인(`behalf_checked`, 줄마다 한 번, “{줄}에 {금액}”, 줄 이름은 `pay_line_noun`), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
+- 바로 만드는 알림: 배우자 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식(`set_salary_mode`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 각자 체크리스트는 주인만 체크(2026-11-03 대신 체크 없앰, `behalf_checked` 알림도 없앰), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
 - 배우자 변경(20261031120000): 바로 알리지 않고 `partner_change`(고친 사람, 받는 사람, 항목, 전 → 후 문구 값, 바로/주간)에 쌓음. 기록은 `log_partner_change`(연결·해제 대기, 고친 사람 = auth.uid(), 같은 값이면 안 남김). 쌓는 곳: 우리 목표 트리거(금액·기한·삭제 = 바로, 이름·순서·형태·보류·추가·되살리기 = 주간), 목표 넣기·빼기·꺼내 쓰기(`goal_move`, 되돌리기 = 빈 값), 자산 트리거(주간, 비공개 개인 항목 빼고, 합계만 보여 주는 개인 항목은 “개인 자산 금액이 바뀌었어요”), 챙길 날 추가·메모(주간), 월급 금액(바로), `save_split`(줄마다 전·후 비교 `log_split_changes`, 처음 만들 때는 빼고), `set_joint_cycle_day`(주간). 내 목표는 남기지 않음
 - 묶어 보내기 `flush_partner_changes()`(pg_cron `flush-partner-changes` 매분): (고친 사람, 받는 사람)마다 첫 변경부터 10분 지난 묶음을 같은 항목끼리 처음 전 값 → 마지막 후 값으로 합치고 같으면(되돌리기) 버림. 바로 알림은 `partner_change` 하나(여럿이면 “{이름}님이 n가지를 바꿨어요”), 주간은 `partner_activity`(silent) 하나. 월요일 09:00 `send_weekly_summary()`(`send-weekly-summary`): 지난 7일 합친 변경 수 “이번 주 {이름}님이 바꾼 게 n개 있어요” → `/notifications`. 같은 내용을 주간 요약 메일로도 쌓음(`enqueue_mail`, 20261101120000). 다른 묶음 메일·보안·문의 메일은 다음 단계
-- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(대신 체크, 배우자 변경 묶음, 관리 방식, 주간 요약), silent에는 배우자 활동 기록(`partner_activity`)도, money(만기, 만기된 돈 정리, 전세 만기, 연말정산), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false: 배우자 체크 다 함, 활동 기록), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
+- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(배우자 변경 묶음, 관리 방식, 주간 요약), silent에는 배우자 활동 기록(`partner_activity`)도, money(만기, 만기된 돈 정리, 전세 만기, 연말정산), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false: 배우자 체크 다 함, 활동 기록), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
 - 챙길 날 날짜는 서버도 앱과 같게: 음력은 `lunar_date` 표(2025~2050년, korean-lunar-calendar로 만든 행, 윤달 행이 없으면 평달), `care_date_in_year`·`care_next_date`. 월급날 앞당기기는 `business_day_on_or_before`(holiday 표)
 - 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
 - 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
@@ -488,7 +488,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지킬 것
 
-- 브랜드 색(오렌지)은 워드마크, 주 버튼, 달성 배지, 새 알림 점, 결과 카드(ResultCard) 체크, 온보딩 챕터 진행 막대(ChapterBar)에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만
+- 브랜드 색(오렌지)은 워드마크, 주 버튼, 새 알림 점, 결과 카드(ResultCard) 체크, 온보딩 챕터 진행 막대(ChapterBar)에만(순자산 차트 끝점은 없음). 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -805,7 +805,7 @@ supabase/
 
 - core 계산과 포맷: Vitest 단위 테스트. 계산·배분 탭의 예시를 그대로 테스트 케이스로
 - DB 함수와 RLS: pgTAP. ‘배우자가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
-- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 월급 체크, 대신 체크
+- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 월급 체크, 배우자 체크리스트는 보기만(체크 칸은 누를 수 없음, 2026-11-03 대신 체크 없앰)
 - 화면 e2e는 `vite --mode e2e`(apps/mobile/.env.e2e, 가짜 Supabase 주소)로 브라우저에 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
 - 테스트 데이터의 예시 이름은 찬우(시작한 사람), 예빈(합류한 사람)
 

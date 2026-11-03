@@ -1,5 +1,5 @@
 import { fetchRecentGoalChanges, qk } from '@sweetwo/api';
-import { Button, SectionHeader } from '@sweetwo/ui';
+import { Button, Icon, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -138,18 +138,28 @@ export function G01GoalList() {
           {copy.onlyEmergency}
         </Button>
       )}
+      {/* 접힌 목록(2026-11-03): 펼치기 줄 + 펼치면 상태별 묶음(보류, 달성, 사용 완료) 제목 */}
       {d.folded.length > 0 && (
         <button
           type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
+          className="hg-foldrow"
           aria-expanded={unfold}
           onClick={() => setUnfold((x) => !x)}
         >
-          {copy.foldedNew(d.folded.length)}
+          <span>{copy.foldedNew(d.folded.length)}</span>
+          <Icon name={unfold ? 'chevron-up' : 'chevron-down'} size={16} />
         </button>
       )}
-      {unfold && cards(d.folded)}
+      {unfold &&
+        (['paused', 'achieved', 'used'] as const).map((st) => {
+          const list = d.folded.filter((x) => x.goal.status === st);
+          return list.length ? (
+            <section key={st} className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+              <SectionHeader title={copy.status[st]} count={list.length} />
+              {cards(list)}
+            </section>
+          ) : null;
+        })}
     </div>
   );
   return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={[column]} />;

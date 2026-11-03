@@ -1,6 +1,6 @@
 import { fetchGoalStory } from '@sweetwo/api';
 import { celebrationStory } from '@sweetwo/core';
-import { Button, Celebration } from '@sweetwo/ui';
+import { QuestionLayout } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -44,25 +44,33 @@ export function G05Achieved() {
         : s.kind === 'some'
           ? copy.storySome(s.months, s.together)
           : copy.storySolo(s.months);
+  // 2026-11-03: 카드 틀을 없애고 다른 질문 화면과 같은 QuestionLayout(가운데 배치, 주 버튼 “다음”은 아래 고정)
+  const next = () =>
+    nav(freed > 0 ? `${sendPath(id)}?m=${freed}` : goalUsePath(id), { replace: true });
   return (
-    <main style={{ padding: 'var(--space-10) var(--space-4)' }}>
-      <Celebration
-        art={<AchieveArt g={g} />}
-        eyebrow={copy.achievedEyebrow}
-        title={g.name}
-        value={money(g.held, masked)}
-        story={line}
-      >
-        <Button
-          variant="primary"
-          block
-          onClick={() =>
-            nav(freed > 0 ? `${sendPath(id)}?m=${freed}` : goalUsePath(id), { replace: true })
-          }
+    <QuestionLayout
+      center
+      hero={
+        <div
+          className="hg-celebrate__hero hg-celebrate__hero--plain hg-celebrate__hero--photo"
+          aria-hidden="true"
         >
-          {copy.next}
-        </Button>
-      </Celebration>
-    </main>
+          <AchieveArt item={item} />
+        </div>
+      }
+      title={
+        <>
+          <span className="hg-celebrate__eyebrow">{copy.achievedEyebrow}</span>
+          <span className="hg-celebrate__title">{g.name}</span>
+        </>
+      }
+      primary={{ label: copy.next }}
+      onSubmit={next}
+    >
+      <div className="hg-celebrate__body hg-celebrate__body--plain">
+        <p className="hg-celebrate__value">{money(g.held, masked)}</p>
+        {line && <p className="hg-celebrate__story">{line}</p>}
+      </div>
+    </QuestionLayout>
   );
 }

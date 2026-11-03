@@ -1,5 +1,14 @@
 import { qk, saveSplit, updateGoal } from '@sweetwo/api';
-import { QuestionLayout, ReorderList, SectionHeader } from '@sweetwo/ui';
+import {
+  Button,
+  Lead,
+  List,
+  ListRow,
+  QuestionLayout,
+  ReorderList,
+  SectionHeader,
+  goalIcon,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -105,6 +114,25 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
     >
       {!nothing && list(oursIds, setOurs, copy.groups.ours)}
       {!nothing && list(mineIds, setMine, copy.groups.mine)}
+      {/* 바꿀 순서가 없을 때(2026-11-03): 지금 목표 목록(보기만) + ‘목표 추가하기’ */}
+      {nothing && (
+        <>
+          <List label={copy.orderTitle}>
+            {[...d.groups.ours, ...d.groups.mine].map((i) => (
+              <ListRow
+                key={i.goal.id}
+                lead={<Lead icon={goalIcon(i.goal.template)} />}
+                label={i.goal.name}
+                sub={i.goal.template === 'emergency' ? copy.orderPinned : undefined}
+                chevron={false}
+              />
+            ))}
+          </List>
+          <Button variant="secondary" onClick={() => nav('/goals/new')}>
+            {copy.orderAdd}
+          </Button>
+        </>
+      )}
     </QuestionLayout>
   );
 }

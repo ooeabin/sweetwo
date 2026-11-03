@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { Icon } from './Icon';
 
 // 월급 체크리스트 줄(docs/design/components/TransferRow.md). 은행 앱에서 보낸 뒤 체크하면 한 것으로 기록.
 // 체크 = button role="checkbox" + aria-checked, aria-label “{줄 이름} 체크”. 체크한 줄은 글자를 stone으로.
@@ -15,6 +16,7 @@ export function TransferRow({
   actions,
   onOpen,
   lead,
+  viewOnly = false,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -33,6 +35,8 @@ export function TransferRow({
   onOpen?: () => void;
   /** 줄 앞 아이콘 칸(홈 이번 달 체크리스트, 2026-11-03) */
   lead?: ReactNode;
+  /** 남의 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 대신 상태 표시(한 줄은 작은 체크, 안 한 줄은 비움) */
+  viewOnly?: boolean;
 }) {
   const body = (
     <>
@@ -54,15 +58,21 @@ export function TransferRow({
   return (
     <div className={cx('hg-transfer', done && 'is-done', !!lead && 'hg-transfer--lead')}>
       {lead}
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={done}
-        aria-label={checkLabel}
-        className={cx('hg-check', done && 'is-on')}
-        disabled={disabled}
-        onClick={onToggle}
-      />
+      {viewOnly ? (
+        <span className="hg-transfer__state" role="img" aria-label={checkLabel}>
+          {done && <Icon name="check" size={20} />}
+        </span>
+      ) : (
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={done}
+          aria-label={checkLabel}
+          className={cx('hg-check', done && 'is-on')}
+          disabled={disabled}
+          onClick={onToggle}
+        />
+      )}
       {onOpen ? (
         <button type="button" className="hg-transfer__open" aria-haspopup="dialog" onClick={onOpen}>
           {body}
@@ -70,5 +80,6 @@ export function TransferRow({
       ) : (
         body
       )}
-    </div>  );
+    </div>
+  );
 }

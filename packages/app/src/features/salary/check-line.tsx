@@ -83,6 +83,7 @@ export function CheckLine({
   personName,
   meId,
   readOnly,
+  viewOnly = false,
   onOther,
   onSkip,
   lead,
@@ -95,6 +96,8 @@ export function CheckLine({
   meId: string | undefined;
   /** 지난 사이클(읽기 전용) */
   readOnly?: boolean;
+  /** 배우자 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 없이 상태만 */
+  viewOnly?: boolean;
   /** ⋯ 다른 금액(W-02a) */
   onOther?: () => void;
   /** W-05 ‘이번 달은 못 했어요’ */
@@ -139,7 +142,7 @@ export function CheckLine({
       copy.checkedAt(when)
     )
   ) : undefined;
-  const open = !done && !skipped && !readOnly;
+  const open = !done && !skipped && !readOnly && !viewOnly;
   const pick = (f: () => void) => () => {
     setSheet(false);
     f();
@@ -150,9 +153,10 @@ export function CheckLine({
         label={name}
         amount={amount}
         done={done || skipped}
-        checkLabel={copy.checkLabel(name)}
-        onToggle={readOnly ? undefined : () => void toggle()}
+        checkLabel={viewOnly ? copy.viewLabel(name, done || skipped) : copy.checkLabel(name)}
+        onToggle={readOnly || viewOnly ? undefined : () => void toggle()}
         disabled={readOnly}
+        viewOnly={viewOnly}
         meta={meta}
         lead={lead}
         onOpen={open && (onOther || onSkip) ? () => setSheet(true) : undefined}

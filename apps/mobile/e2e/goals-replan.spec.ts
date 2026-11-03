@@ -36,7 +36,8 @@ test('G-01 목표 목록: 우리 목표 묶음, 매달·예상, 모은 돈이 �
   await expect(page.getByText('매달 목표에 139만 원씩 모으고 있어요')).toBeVisible();
   const ours = page.getByRole('region', { name: '우리 목표' });
   const home = ours.getByRole('button', { name: /내 집 마련/ });
-  await expect(home).toContainText('매달 95만 원씩, 2039년 12월 달성 예정');
+  // 타일 보조 줄은 하나(늦어요 > 이번 달 > 매달·예상, 2026-11-03): 이번 달 줄이 있으면 그것만
+  await expect(home).not.toContainText('매달 95만 원씩, 2039년 12월 달성 예정');
   // 아직 모은 돈이 0원이면 지연 배지와 늦어요 줄 없이 예상 달만(2026-11-03)
   await expect(home).not.toContainText('늦어요');
   await expect(home).toContainText('아직 모은 돈이 없어요');

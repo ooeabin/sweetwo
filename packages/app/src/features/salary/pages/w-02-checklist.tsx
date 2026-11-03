@@ -28,7 +28,7 @@ import {
 import { salaryPaths } from '../paths';
 
 // W-02 이번 달 월급(20). 디자인 시스템 Checklist 틀(TransferRow 줄). 저금 줄 먼저, 쓰는 돈 다음.
-// 각자 모드 + 배우자 합류면 사람 탭(배우자 탭은 보기 + 대신 체크). 줄 ⋯ ‘다른 금액으로 보냈어요’ → W-02a.
+// 각자 모드 + 배우자 합류면 사람 탭(배우자 탭은 보기만, 2026-11-03 대신 체크 없앰). 줄 ⋯ ‘다른 금액으로 보냈어요’ → W-02a.
 // `?who=사람 id`면 그 사람 탭으로 엶(배우자 체크 다 함 알림). 마지막 줄을 체크하면 W-02 끝.
 // ‹ › 지난 달 보기(읽기 전용). 월급날이 주말·공휴일이면 기간 시작을 직전 영업일로 표시(07 1장, 끌 수 있음).
 // 상대가 이번 사이클에 월급 계획을 바꿨으면 맨 위 안내 한 줄(× 또는 다음 달에 사라짐).
@@ -193,7 +193,8 @@ export function W02Checklist() {
       meId={meId}
       lead={<LineLead line={l} goalTemplate={goalTemplate} />}
       readOnly={readOnly}
-      // 배우자 탭은 보기 + 대신 체크만(20 W-02 2번): ‘다른 금액’ 없음
+      viewOnly={partnerTab}
+      // 배우자 탭은 보기만(20 W-02 2번, 2026-11-03 대신 체크 없앰)
       onOther={partnerTab ? undefined : () => setOther(l)}
     />
   );

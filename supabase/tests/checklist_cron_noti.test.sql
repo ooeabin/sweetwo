@@ -1,4 +1,4 @@
--- pgTAP: 기준일 0시 체크리스트, 월급날·만기·초대 오전 알림, 월말 확인 저녁 알림, 대신 체크·다 했어요 알림(07, 14, 20).
+-- pgTAP: 기준일 0시 체크리스트, 월급날·만기·초대 오전 알림, 월말 확인 저녁 알림, 대신 체크 막음(2026-11-03)·다 했어요 알림(07, 14, 20).
 -- 찬우(25일), 예빈(10일), 각자. 날짜는 실제 오늘보다 뒤(2027년)로 돌려 오늘과 상관없이 같은 결과
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -70,20 +70,19 @@ select results_eq(
   '찬우에게만');
 select results_eq($$ select topic from public.notification order by kind $$, $$ values ('money'), ('plan') $$, '알림 묶음');
 
--- 예빈이 찬우 줄을 대신 체크 → 찬우에게
+-- 예빈은 찬우 줄을 체크할 수 없음(2026-11-03 대신 체크 없앰), 대신 체크 알림도 없음
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked');
+select throws_ok($$ select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
+  where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked') $$, '42501', 'not_owner', '배우자 줄은 체크 못 함');
 reset role;
-select is((select title || ' / ' || body || ' / ' || topic from public.notification where kind = 'behalf_checked'),
-  '예빈님이 대신 체크했어요 / 내 집 마련에 95만 원 / partner_change', '대신 체크 알림');
-select is((select user_id from public.notification where kind = 'behalf_checked'),
-  '11111111-1111-1111-1111-111111111111'::uuid, '주인에게');
+select is((select count(*)::int from public.notification where kind = 'behalf_checked'), 0, '대신 체크 알림 없음');
 
 -- 찬우가 남은 줄을 끝냄 → 예빈에게 인앱만
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
+select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
+  where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked');
 select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.cycle_start = '2027-03-25' and l.kind = 'living'), 'checked');
 reset role;
