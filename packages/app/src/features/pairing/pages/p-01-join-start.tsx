@@ -1,5 +1,5 @@
 import { fetchMe, invitePreview, joinSpace, type JoinResult } from '@sweetwo/api';
-import { AuthLayout, Button, SceneMedia } from '@sweetwo/ui';
+import { QuestionLayout } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -82,70 +82,54 @@ export function P01JoinStart() {
     );
   if (result === 'has_records') {
     return (
-      <AuthLayout
+      <QuestionLayout
         title={copy.hasRecords}
         help={copy.hasRecordsHelp}
-        actions={
-          <>
-            <Button variant="primary" block onClick={() => setMoving(true)}>
-              {copy.join}
-            </Button>
-            <Button variant="secondary" block onClick={() => nav('/', { replace: true })}>
-              {copy.cancel}
-            </Button>
-          </>
-        }
+        center={false}
+        primary={{ label: copy.join }}
+        later={{ label: copy.cancel, onClick: () => nav('/', { replace: true }) }}
+        onSubmit={() => setMoving(true)}
       />
     );
   }
 
+  // 2026-11-03 질문 화면 틀: 제목 위, 코드는 바로 아래 회색 상자(O-07과 같은 모양)
+  const canJoin = !blocked;
   return (
-    <AuthLayout
-      media={<SceneMedia tall />}
+    <QuestionLayout
       title={p?.inviter ? copy.invited(p.inviter) : copy.join}
       help={blocked ? copy.errors[blocked] : copy.invitedHelp}
-      actions={
-        <>
-          <p
-            className="hg-amount__value"
-            style={{ margin: 0, letterSpacing: 'var(--space-2)' }}
-            aria-label={`${copy.codeLabel} ${code.toUpperCase().split('').join(' ')}`}
-          >
-            {code.toUpperCase()}
-          </p>
-          {signedIn.data && me.data && !blocked && (
-            <p className="hg-help" style={{ margin: 0 }}>
-              {copy.joinAs(providerName[me.data.provider])}{' '}
-              <button
-                type="button"
-                className="hg-btn hg-btn--link"
-                onClick={() => {
-                  prefs.setReturnTo(`/i/${code}?go=1`);
-                  void session.signOut().finally(() => nav(paths.login));
-                }}
-              >
-                {copy.otherAccount}
-              </button>
-            </p>
-          )}
-          {blocked ? (
-            signedIn.data && (
-              <Button variant="primary" block onClick={() => nav('/', { replace: true })}>
-                {copy.toMonth}
-              </Button>
-            )
-          ) : (
-            <Button
-              variant="primary"
-              block
-              className={busy ? 'is-loading' : undefined}
-              onClick={() => void join()}
-            >
-              {copy.join}
-            </Button>
-          )}
-        </>
+      center={false}
+      primary={
+        canJoin
+          ? { label: copy.join, loading: busy }
+          : signedIn.data
+            ? { label: copy.toMonth }
+            : undefined
       }
-    />
+      onSubmit={() => (canJoin ? void join() : nav('/', { replace: true }))}
+    >
+      <p className="hg-invite-code hg-invite-code--static">
+        <span className="hg-sr">{`${copy.codeLabel} ${code.toUpperCase().split('').join(' ')}`}</span>
+        <span className="hg-invite-code__code" aria-hidden="true">
+          {code.toUpperCase()}
+        </span>
+      </p>
+      {signedIn.data && me.data && !blocked && (
+        <p className="hg-help" style={{ margin: 0 }}>
+          {copy.joinAs(providerName[me.data.provider])}{' '}
+          <button
+            type="button"
+            className="hg-btn hg-btn--link"
+            onClick={() => {
+              prefs.setReturnTo(`/i/${code}?go=1`);
+              void session.signOut().finally(() => nav(paths.login));
+            }}
+          >
+            {copy.otherAccount}
+          </button>
+        </p>
+      )}
+    </QuestionLayout>
   );
 }

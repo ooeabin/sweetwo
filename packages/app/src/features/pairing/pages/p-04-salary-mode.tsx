@@ -17,7 +17,7 @@ export function P04SalaryMode() {
   const starter = d.couple?.partnerName ?? '';
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.modeTitle(starter)}
       help={copy.modeHelp}
       onBack={s.onBack}

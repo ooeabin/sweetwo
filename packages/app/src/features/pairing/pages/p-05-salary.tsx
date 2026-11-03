@@ -38,7 +38,7 @@ export function P05Salary() {
     });
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.salary}
       help={isVariable ? copy.salaryVariableHelp : copy.salaryHelp}
       onBack={s.onBack}

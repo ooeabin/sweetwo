@@ -15,7 +15,7 @@ export function P03Name() {
   const name = value.trim();
   return (
     <QuestionLayout
-      steps={s.steps}
+      chapter={s.chapter}
       title={copy.nameTitle}
       help={copy.nameHelp}
       onBack={s.onBack}

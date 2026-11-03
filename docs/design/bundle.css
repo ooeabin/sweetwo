@@ -183,10 +183,12 @@
 @media (prefers-reduced-motion: no-preference) { .hg-scrim--sheet > .hg-sheet { animation: hg-sheet-in var(--dur-base) var(--ease-out); } }
 @keyframes hg-sheet-in { from { transform: translateY(24px); } }
 /* 초대 코드(O-07, S-12): 큰 숫자, 글자 사이를 띄움, 누르면 복사 */
-.hg-invite-code { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 100%; margin: 0; padding: var(--space-5) var(--space-4); border: 0; border-radius: var(--radius-xl); background: var(--plate); color: var(--ink); cursor: pointer; }  /* 2026-11-03 Setel처럼 회색 상자 가운데 */
+.hg-invite-code { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: 100%; margin: 0; padding: var(--space-5) var(--space-4); border: 0; border-radius: var(--radius-xl); background: var(--plate); color: var(--ink); cursor: pointer; }  /* 2026-11-03 Setel처럼 회색 상자 가운데 */
 .hg-invite-code__code { font: 700 32px/40px var(--font-sans); letter-spacing: var(--space-2); font-variant-numeric: tabular-nums; }
 .hg-invite-code__tap { display: inline-flex; align-items: center; gap: var(--space-1); font: 500 13px/18px var(--font-sans); color: var(--slate); }
 .hg-invite-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-invite-code--static { cursor: default; }  /* 보여 주기만(P-01 합류 시작) */
+.hg-input--code { text-align: center; letter-spacing: var(--space-2); font-variant-numeric: tabular-nums; }  /* 6자리 코드 칸(P-01) */
 @media (min-width: 768px) {
   .hg-scrim--sheet { align-items: center; padding: var(--space-6); }
   .hg-scrim--sheet > .hg-sheet { max-width: 440px; border-bottom: 1px solid var(--hairline); border-radius: var(--radius-2xl); padding: var(--space-5) var(--space-6) var(--space-6); }
