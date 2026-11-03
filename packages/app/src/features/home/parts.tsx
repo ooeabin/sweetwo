@@ -101,6 +101,7 @@ export function GoalsCard({
         {line && (
           <CheckLine
             line={line}
+            goalName={top.name}
             name={
               line.state === 'checked'
                 ? copy.thisMonthDone(m(line.actual ?? line.planned))

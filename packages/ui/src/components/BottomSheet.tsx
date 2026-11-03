@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import { IconButton } from './IconButton';
+import { Icon } from './Icon';
 
 // 아래에서 올라오는 시트(docs/design/components/BottomSheet.md). 좁은 창은 화면 아래에 붙고,
 // 넓은 창은 가운데 카드. Esc, 막 누르기, 닫기 버튼으로 닫힘. 포커스는 시트 안에서 돈다.
@@ -65,7 +65,14 @@ export function BottomSheet({
           <h2 id={id} className="hg-sheet__title">
             {title}
           </h2>
-          <IconButton icon="x" label={closeLabel} ghost small onClick={onClose} />
+          <button
+            type="button"
+            className="hg-sheet__close"
+            aria-label={closeLabel}
+            onClick={onClose}
+          >
+            <Icon name="x" size={16} />
+          </button>
         </div>
         {children}
         {actions && <div className="hg-sheet__actions">{actions}</div>}

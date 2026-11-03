@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (b575119). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (6ccebb4). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -36,9 +36,9 @@
 /* Chip */
 .hg-chip { display: inline-flex; align-items: center; gap: var(--space-1); height: 40px; padding: 0 var(--space-4); border-radius: var(--radius-full); border: 1px solid var(--border-control); background: var(--surface); color: var(--ink); font: 600 14px/20px var(--font-sans); cursor: pointer; }
 .hg-chip--sm { height: 32px; padding: 0 var(--space-3); font-size: 13px; line-height: 18px; }
-.hg-chip.is-selected { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.hg-chip.is-selected { background: var(--surface); border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); color: var(--ink); font-weight: 600; }  /* 2026-11-02 카카오톡·현대카드처럼 테두리만 진하게 */
 .hg-chip__order { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); }
-.hg-chip.is-selected .hg-chip__order { background: var(--on-ink); color: var(--ink); }
+.hg-chip.is-selected .hg-chip__order { background: var(--ink); color: var(--on-ink); }
 
 /* Card */
 .hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-6); }
@@ -143,9 +143,10 @@
 .hg-networth__expected { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 
 /* Toast */
-.hg-toast { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; max-width: 440px; min-height: 52px; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5); border-radius: var(--radius-btn); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 15px/22px var(--font-sans); }
-.hg-toast__msg { flex: 1; min-width: 0; }
-.hg-toast .hg-btn--link { flex: none; margin-left: auto; color: var(--on-ink); font: 700 15px/22px var(--font-sans); text-decoration: none; }
+/* 작은 알약, 화면 아래 가운데(2026-11-02, 포켓CU처럼). 글자 길이만큼, 되돌리기는 글자 옆 굵은 링크 */
+.hg-toast { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-4); width: fit-content; max-width: min(440px, 100%); align-self: center; margin-inline: auto; min-height: 44px; padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 14px/20px var(--font-sans); }
+.hg-toast__msg { min-width: 0; text-align: center; word-break: keep-all; }
+.hg-toast .hg-btn--link { flex: none; color: var(--on-ink); font: 700 14px/20px var(--font-sans); text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
 @keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
@@ -168,7 +169,11 @@
 .hg-sheet { position: relative; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-3) var(--space-4) var(--space-6); background: var(--surface); border: 1px solid var(--hairline); border-bottom: 0; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; box-shadow: var(--shadow-3); }
 .hg-sheet > * { margin: 0; }
 .hg-sheet__handle { align-self: center; width: 36px; height: 4px; border-radius: var(--radius-full); background: var(--hairline); }
-.hg-sheet__title { font: 600 18px/26px var(--font-sans); }
+.hg-sheet__title { font: 700 20px/28px var(--font-sans); }
+/* 시트 닫기: 작은 회색 원 안 ×(카카오페이, 현대카드처럼) */
+.hg-sheet__close { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); cursor: pointer; }
+.hg-sheet__close:hover { background: var(--hairline-soft); }
+.hg-sheet__close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 /* 앱 안 시트(BottomSheet 컴포넌트): 막 위 화면 아래에 붙음, 넓은 창은 가운데 카드 */
 .hg-scrim--sheet { position: fixed; inset: 0; z-index: 60; align-items: end; padding: 0; }
 .hg-scrim--sheet > .hg-sheet { width: 100%; max-height: 90dvh; overflow-y: auto; padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); outline: none; }
@@ -358,7 +363,12 @@
 .hg-banner .hg-btn--link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .hg-banner--todo { gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: 600 15px/22px var(--font-sans); }
 .hg-banner--todo .hg-btn { flex: none; }
-.hg-banner > .hg-banner__icon { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
+/* 할 일 띠: 그림 + 글자 + 화살표를 한 버튼으로(띠 전체가 이동). 닫기(×), 코드 복사는 옆에 따로 */
+.hg-banner__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); margin: calc(var(--space-2) * -1) 0; padding: var(--space-2) 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-lg); }
+.hg-banner__main:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-banner__text { flex: 1; min-width: 0; font: 500 15px/22px var(--font-sans); color: var(--ink); word-break: keep-all; }
+.hg-banner__main > .hg-chevron { flex: none; }
+.hg-banner .hg-banner__icon { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
 .hg-banner--line { padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-radius: var(--radius-xl); background: var(--surface-alt); color: var(--ink); }
 .hg-banner--line > .hg-ico { flex: none; color: var(--slate); }
 .hg-banner__one { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

@@ -71,7 +71,7 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
   await expect(band).toBeVisible();
   await expect(page.getByRole('region', { name: '다가오는 일정' })).toContainText('청년 적금 만기');
-  await band.getByRole('button', { name: '열기' }).click();
+  await band.getByRole('button').first().click();
   await expect(page.getByRole('heading', { name: '만기된 돈은 어디로 옮겼어요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: /다른 통장으로/ }).click();

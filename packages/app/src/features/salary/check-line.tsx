@@ -49,6 +49,7 @@ const amountOf = (l: PayCheckLine) => l.actual ?? l.planned;
 export function CheckLine({
   line,
   name,
+  goalName,
   personName,
   meId,
   readOnly,
@@ -57,6 +58,8 @@ export function CheckLine({
 }: {
   line: PayCheckLine;
   name: string;
+  /** 토스트 “{목표}에 {금액} 더했어요”의 목표 이름(줄 글자가 목표 이름이 아닌 곳: 홈 큰 카드, 목표 상세) */
+  goalName?: string;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
   /** 지난 사이클(읽기 전용) */
@@ -80,7 +83,10 @@ export function CheckLine({
       if (r === 'closed') return toast(copy.closed);
       if (done || skipped) return;
       const undo = { label: copy.undo, onClick: () => void check(line, 'wait') };
-      toast(line.kind === 'saving' ? copy.addedToGoal(name, amount) : copy.checked, undo);
+      toast(
+        line.kind === 'saving' ? copy.addedToGoal(goalName ?? name, amount) : copy.checked,
+        undo,
+      );
     } catch {
       toast(copy.failed, { label: copy.retry, onClick: () => void toggle() });
     }

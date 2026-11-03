@@ -116,7 +116,8 @@ test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → �
   await page
     .getByRole('status')
     .filter({ hasText: '체크 안 한 게' })
-    .getByRole('button', { name: '열기' })
+    .getByRole('button')
+    .first()
     .click();
   await expect(page.getByRole('heading', { name: '9월 월급, 빠진 게 있나요?' })).toBeVisible();
   await axe(page);
