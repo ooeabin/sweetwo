@@ -1,7 +1,5 @@
-import { fetchGoalMoves, qk } from '@sweetwo/api';
 import { formatYm } from '@sweetwo/core';
 import { Badge } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
 import { money } from '../../shared/mask';
 import { copy } from './copy';
 import { GoalArt } from './goal-art';
@@ -22,7 +20,7 @@ export const lateText = (months: number) => {
 export function planText(i: GoalItem, m: (v: number) => string) {
   const g = i.goal;
   if (g.kind === 'monthly') return copy.monthlyHeld(m(i.saved));
-  // 달성: “400만 원 모았어요”(접힌 목록 3번, 2026-11-03. ‘이 돈을 썼나요?’는 카드 아래 링크)
+  // 달성: “400만 원 모았어요”(접힌 목록 3번)
   if (i.state === 'achieved') return copy.savedAll(m(i.saved));
   if (g.target_amount === null) return copy.setAmount;
   if (g.kind === 'yearly') return i.nextUse ? copy.yearlyUse(formatYm(i.nextUse)) : '';
@@ -44,21 +42,12 @@ export function thisMonthText(i: GoalItem, m: (v: number) => string) {
   );
 }
 
-/** 사용 완료 카드 줄: “380만 원 썼어요”(꺼내 쓰기 기록 합, 접힌 목록 4번) */
-function UsedLine({ goalId, masked }: { goalId: string; masked: boolean }) {
-  const moves = useQuery({ queryKey: qk.goalMoves(goalId), queryFn: () => fetchGoalMoves(goalId) });
-  if (!moves.data) return null;
-  const spent = moves.data.filter((x) => x.kind === 'use').reduce((t, x) => t + x.amount, 0);
-  return <span className="hg-card__meta">{copy.spentAll(money(spent, masked))}</span>;
-}
-
 /** G-01 목표 카드: 그림 + Meter(모은 돈 / 목표 금액) + 매달·예상 + 기한보다 늦어요 + 이번 달. 누르면 G-02 */
 export function GoalItemCard({
   i,
   masked,
   onOpen,
   onLate,
-  onUse,
   changed,
 }: {
   i: GoalItem;
@@ -66,8 +55,6 @@ export function GoalItemCard({
   onOpen: () => void;
   /** 4a ‘월급 계획에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
   onLate?: () => void;
-  /** 달성 카드 ‘이 돈을 썼나요?’ → G-05 사용(카드 아래 글자 링크) */
-  onUse?: () => void;
   /** 배우자가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
   changed?: string;
 }) {
@@ -82,13 +69,10 @@ export function GoalItemCard({
   // 2026-11-03 시안 B 타일: 위 사진(배지는 사진 위 왼쪽) → 이름 → 금액 → 막대(또는 “아직 모은 돈이 없어요”) → 한 줄.
   // 한 줄은 늦어요 > 이번 달 > 매달·예상 순서로 하나만(타일이 빽빽해서). 링크·배우자 변경 안내는 타일 안 아래 칸
   const line =
-    i.state === 'used'
-      ? null
-      : late && i.lateMonths !== null
-        ? copy.lateLine(lateText(i.lateMonths))
-        : (month ?? (g.kind === 'monthly' ? null : planText(i, fmt)));
+    late && i.lateMonths !== null
+      ? copy.lateLine(lateText(i.lateMonths))
+      : (month ?? (g.kind === 'monthly' ? null : planText(i, fmt)));
   const lateLink = late && onLate;
-  const useLink = i.state === 'achieved' && onUse;
   return (
     <div className="hg-goaltile">
       <button type="button" className="hg-goaltile__main" onClick={onOpen}>
@@ -97,12 +81,10 @@ export function GoalItemCard({
           {(late ||
             g.kind !== 'once' ||
             i.state === 'achieved' ||
-            i.state === 'used' ||
             i.state === 'paused') && (
             <span className="hg-goaltile__badges">
-              {/* 접힌 목록 상태 배지(2026-11-03): 달성은 브랜드 배지, 사용 완료·보류는 회색 */}
+              {/* 접힌 목록 상태 배지: 달성은 연한 파랑, 보류는 회색(2026-11-04 사용 완료 없앰) */}
               {i.state === 'achieved' && <Badge kind="achieved">{copy.status.achieved}</Badge>}
-              {i.state === 'used' && <Badge kind="temp">{copy.status.used}</Badge>}
               {i.state === 'paused' && <Badge kind="temp">{copy.status.paused}</Badge>}
               {late && <Badge kind="warn">{copy.status.delayed}</Badge>}
               {g.kind === 'yearly' && <Badge kind="brand">{copy.yearly}</Badge>}
@@ -125,24 +107,15 @@ export function GoalItemCard({
               <i style={{ width: `${Math.min(Math.max(i.pct, 2), 100)}%` }} />
             </span>
           )}
-          {i.state === 'used' ? (
-            <UsedLine goalId={g.id} masked={masked} />
-          ) : (
-            line && <span className="hg-card__meta hg-goaltile__line">{line}</span>
-          )}
+          {line && <span className="hg-card__meta hg-goaltile__line">{line}</span>}
         </span>
       </button>
-      {(changed || lateLink || useLink) && (
+      {(changed || lateLink) && (
         <span className="hg-goaltile__foot">
           {changed && <span className="hg-help">{changed}</span>}
           {lateLink && (
             <button type="button" className="hg-btn hg-btn--link" onClick={onLate}>
               {copy.lateLink}
-            </button>
-          )}
-          {useLink && (
-            <button type="button" className="hg-btn hg-btn--link" onClick={onUse}>
-              {copy.usedQ}
             </button>
           )}
         </span>

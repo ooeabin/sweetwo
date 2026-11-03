@@ -28,7 +28,7 @@ export interface GoalItem {
   /** 매년 목표 다음 쓰는 달 */
   nextUse: YearMonth | null;
   /** 진행 중·지연·달성·사용 완료·보류 */
-  state: 'active' | 'delayed' | 'achieved' | 'used' | 'paused';
+  state: 'active' | 'delayed' | 'achieved' | 'paused';
 }
 
 const OPEN = new Set(['active', 'delayed']);
@@ -79,9 +79,12 @@ export function useGoalsModel() {
     // 아직 모은 돈이 없으면 지연으로 보지 않음(첫 사이클 ‘지연’ 배지, 2026-11-03)
     const late = eta.lateMonths !== null && eta.lateMonths > 0 && s > 0;
     const state = (
-      g.status === 'paused' || g.status === 'achieved' || g.status === 'used'
-        ? g.status
-        : late
+      // 2026-11-04 사용 완료 없앰: 옛 ‘used’ 목표도 달성으로 보임
+      g.status === 'used'
+        ? 'achieved'
+        : g.status === 'paused' || g.status === 'achieved'
+          ? g.status
+          : late
           ? 'delayed'
           : 'active'
     ) as GoalItem['state'];

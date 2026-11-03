@@ -241,7 +241,7 @@ test('G-03 직접 만들기(우리 둘): 이름, 금액, 한 번, 기한, 이미
   });
 });
 
-test('G-05 달성: 축하 → 매달 넣던 돈 다른 목표 → 썼어요(얼마) → 남은 돈 비상금 → 고른 목표 저금 줄에 더함', async ({
+test('G-05 달성: 축하 → 매달 넣던 돈 다른 목표 → 고른 목표 저금 줄에 더함, 달성 유지', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -274,26 +274,15 @@ test('G-05 달성: 축하 → 매달 넣던 돈 다른 목표 → 썼어요(얼�
     page.getByRole('heading', { name: '매달 넣던 30만 원은 어디로 보낼까요?' }),
   ).toBeVisible();
   await page.getByRole('radio', { name: '다른 목표' }).click();
-  await expect(
-    page.getByRole('heading', { name: '가전 바꾸기에 모은 100만 원, 썼나요?' }),
-  ).toBeVisible();
-  await page.getByRole('radio', { name: '썼어요' }).click();
-  await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
-  await page.getByLabel('얼마 썼어요?').fill('800000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '남은 20만 원은 어떻게 할까요?' })).toBeVisible();
-  await page.getByRole('radio', { name: '비상금에 넣기' }).click();
+  // 2026-11-04 사용 기록(썼나요?, 남은 돈)과 사용 완료를 없앰: 바로 어느 목표에 더할지
   await expect(page.getByRole('heading', { name: '어느 목표에 더할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '내 집 마련' }).click();
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
   await expect(page.getByText('내 집 마련 저금 줄에 30만 원을 더했어요')).toBeVisible();
-  expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('used');
+  expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('achieved');
   const line = db.splits[0]?.split_line.find((l) => l.goal_id === 'goal-h');
   expect(line?.amount).toBe(1_250_000);
-  // 남은 20만 원은 비상금으로(빼기 + 넣기)
-  expect(db.goalMoves.filter((m) => m.goal_id === 'goal-e').map((m) => m.amount)).toEqual([
-    200_000,
-  ]);
+  expect(db.goalMoves).toHaveLength(0);
 });
 
 test('달성 지켜보기: 모은 돈(이미 모은 돈 + 체크한 저금 + 넣기)이 목표 금액이 되면 축하로', async ({

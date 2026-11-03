@@ -120,10 +120,6 @@ export const copy = {
     wait: '아직',
   } as Record<string, string>,
   savedAll: (amount: string) => `${amount} 모았어요`,
-  usedQ: '이 돈을 썼나요?',
-  achievedUseHelp: '이 돈을 썼다면 얼마 썼는지 남겨 주세요', // [확인 필요] G-02 달성 카드
-  useRecord: '쓴 돈 기록하기', // [확인 필요]
-  spentAll: (amount: string) => `${amount} 썼어요`, // 사용 완료 카드(22 접힌 목록 4번)
   numNextUse: '다음에 쓰는 달',
   numRound: '회차',
   round: (n: number) => `${n}회차`,
@@ -233,16 +229,6 @@ export const copy = {
   sendOptions: { goal: '다른 목표', add: '새 목표 만들기', split: '월급 계획에서 정할게요' }, // [확인 필요]
   sendPick: '어느 목표에 더할까요?', // [확인 필요]
   sendDone: (goal: string, amount: string) => `${goal} 저금 줄에 ${amount}을 더했어요`, // [확인 필요]
-  // G-05 사용 기록
-  useAsk: (name: string, amount: string) => `${name}에 모은 ${amount}, 썼나요?`,
-  useOptions: { later: '아직이에요', spent: '썼어요' },
-  useAmount: '얼마 썼어요?',
-  restTitle: (amount: string) => `남은 ${amount}은 어떻게 할까요?`, // [확인 필요]
-  restOptions: { emergency: '비상금에 넣기', goal: '다른 목표에 넣기', keep: '그대로 두기' }, // [확인 필요]
-  restPick: '어느 목표에 넣을까요?', // [확인 필요]
-  restDone: '넣었어요', // [확인 필요]
-  partnerRecorded: (name: string) => `${name}님이 기록했어요`,
-  seeRecord: '기록 보기',
 
   // G-07 결혼 비용 상세
   wedding: '결혼 비용',
@@ -307,7 +293,7 @@ export const copy = {
   thisMonthDone: (amount: string) => `이번 달 ${amount} 넣었어요`,
   thisMonthTodo: (amount: string) => `이번 달 ${amount} 넣을 차례예요`,
   thisMonthSkipped: '이번 달은 못 했어요', // [확인 필요]
-  foldedNew: (n: number) => `보류, 달성, 다 쓴 목표 ${n}개`, // [확인 필요]
+  foldedNew: (n: number) => `보류, 달성 목표 ${n}개`, // [확인 필요] 2026-11-04 사용 완료 없앰
   onlyEmergency: '다른 목표 추가하기',
   years: (n: number) => `${n}년`,
   months: (n: number) => `${n}개월`,

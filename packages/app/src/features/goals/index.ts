@@ -9,6 +9,5 @@ export { G06GoalOrder } from './pages/g-06-goal-order';
 export { AchieveWatch } from './achieve';
 export { G05Achieved } from './pages/g-05-achieved';
 export { G05Send } from './pages/g-05-send';
-export { G05Use } from './pages/g-05-use';
 export { useGoalsData } from './data';
 export { G02aGoalMove, G02bGoalUse } from './pages/g-02a-goal-move';

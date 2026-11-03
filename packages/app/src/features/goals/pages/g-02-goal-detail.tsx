@@ -462,35 +462,13 @@ export function G02GoalDetail() {
           })}
         </div>
       </section>
-      {/* 달성·사용 완료(2026-11-03): 다른 묶음 카드와 같은 모양. 달성은 배지 + 안내 + ‘쓴 돈 기록하기’(보조 버튼) */}
+      {/* 달성(2026-11-04): “400만 원 모았어요” + 달성 배지만. 쓴 돈 기록·사용 완료는 없앰(쓴 돈은 금액 옆 − 로) */}
       {(g.status === 'achieved' || g.status === 'used') && (
-        <section className="hg-goalbox" aria-label={copy.status[g.status]}>
+        <section className="hg-goalbox" aria-label={copy.status.achieved}>
           <div className="hg-goalbox__head">
-            <b>
-              {g.status === 'used'
-                ? copy.spentAll(
-                    m(
-                      (moves.data ?? [])
-                        .filter((x) => x.kind === 'use')
-                        .reduce((t, x) => t + x.amount, 0),
-                    ),
-                  )
-                : copy.savedAll(m(i.saved))}
-            </b>
-            <Badge kind={g.status === 'achieved' ? 'achieved' : 'temp'}>
-              {copy.status[g.status]}
-            </Badge>
+            <b>{copy.savedAll(m(i.saved))}</b>
+            <Badge kind="achieved">{copy.status.achieved}</Badge>
           </div>
-          {g.status === 'achieved' && (
-            <>
-              <span className="hg-goalbox__sub">{copy.achievedUseHelp}</span>
-              {i.canEdit && (
-                <Button variant="secondary" block onClick={() => nav(`/goals/${id}/use`)}>
-                  {copy.useRecord}
-                </Button>
-              )}
-            </>
-          )}
         </section>
       )}
       {progress.length > 1 && (

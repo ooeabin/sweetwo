@@ -7,7 +7,6 @@ import { useGoalsModel, type GoalItem } from './model';
 
 export const achievedPath = (id: string) => `/goals/${id}/achieved`;
 export const sendPath = (id: string) => `/goals/${id}/achieved/send`;
-export const goalUsePath = (id: string) => `/goals/${id}/use`;
 
 /** 달성 축하가 필요한 목표(한 번 모으는 목표, 결혼 비용 제외). 결혼 비용 달성은 결혼일 전환(H-T2) */
 export const canAchieve = (g: { kind: string; template: string }) =>

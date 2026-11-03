@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router-dom';
+import { Navigate, type RouteObject } from 'react-router-dom';
 import {
   A01Launch,
   A02Login,
@@ -31,7 +31,6 @@ import {
   G02GoalDetail,
   G05Achieved,
   G05Send,
-  G05Use,
   G02GoalEdit,
   G02pGoalPhoto,
   G06GoalOrder,
@@ -206,14 +205,8 @@ export const routes: RouteObject[] = [
       }, // G-05 보낼 곳
       {
         path: '/goals/:id/use',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G05Use />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-05 사용 기록
+        element: <Navigate to=".." relative="path" replace />,
+      }, // 2026-11-04 사용 기록 없앰: 옛 링크는 목표 상세로
       {
         path: '/goals/:id/move/:kind?',
         element: (

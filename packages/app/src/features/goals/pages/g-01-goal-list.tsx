@@ -10,7 +10,7 @@ import { GoalItemCard } from '../goal-item-card';
 import { useGoalsModel, type GoalItem } from '../model';
 
 // G-01 목표 목록(22). 상단 요약(매달 목표에 모으는 돈) → 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위)
-// → 접힌 목록(보류, 달성, 다 쓴 목표). 혼자 쓰기면 묶음 제목 없이 한 목록. 데스크톱 2열(hg-cards), 좁은 창 1열.
+// → 접힌 목록(보류, 달성). 혼자 쓰기면 묶음 제목 없이 한 목록. 데스크톱 2열(hg-cards), 좁은 창 1열.
 const SEEN = 'sweetwo.goalsSeenAt';
 const readSeen = () => {
   try {
@@ -88,7 +88,6 @@ export function G01GoalList() {
             )
           }
           onLate={i.canEdit ? () => nav('/salary/split') : undefined}
-          onUse={i.canEdit ? () => nav(`/goals/${i.goal.id}/use`) : undefined}
           changed={changedOf(i.goal.id)}
         />
       ))}
@@ -138,7 +137,7 @@ export function G01GoalList() {
           {copy.onlyEmergency}
         </Button>
       )}
-      {/* 접힌 목록(2026-11-03): 펼치기 줄 + 펼치면 상태별 묶음(보류, 달성, 사용 완료) 제목 */}
+      {/* 접힌 목록(2026-11-03): 펼치기 줄 + 펼치면 상태별 묶음(보류, 달성) 제목. 2026-11-04 사용 완료 없앰(옛 사용 완료는 달성으로) */}
       {d.folded.length > 0 && (
         <button
           type="button"
@@ -151,8 +150,8 @@ export function G01GoalList() {
         </button>
       )}
       {unfold &&
-        (['paused', 'achieved', 'used'] as const).map((st) => {
-          const list = d.folded.filter((x) => x.goal.status === st);
+        (['paused', 'achieved'] as const).map((st) => {
+          const list = d.folded.filter((x) => x.state === st);
           return list.length ? (
             <section key={st} className="hg-stack" style={{ gap: 'var(--space-3)' }}>
               <SectionHeader title={copy.status[st]} count={list.length} />
