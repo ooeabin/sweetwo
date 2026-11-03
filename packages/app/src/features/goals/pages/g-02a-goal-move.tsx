@@ -93,14 +93,16 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
   if (!pick) {
     return (
       <QuestionLayout title={copy.moveTitle} onBack={back}>
-        <ChoiceCards<'in' | 'out'>
+        <ChoiceCards<'in' | 'out' | 'held'>
           label={copy.moveTitle}
           value={null}
           onChange={() => undefined}
           onPick={(v) => setPick(v)}
           options={[
-            { value: 'in', label: copy.moveIn },
-            { value: 'out', label: copy.moveOut, disabled: i.saved <= 0 },
+            { value: 'in', label: copy.moveIn, icon: 'plus' },
+            { value: 'out', label: copy.moveOut, icon: 'minus', disabled: i.saved <= 0 },
+            // 다른 곳에 이미 모아 둔 돈(goal.other_held, 22 G-02 3a). 상세의 따로 있던 링크를 여기로(2026-11-03)
+            { value: 'held', label: copy.addHeld, sub: copy.addHeldSub, icon: 'piggy-bank' },
           ]}
         />
       </QuestionLayout>

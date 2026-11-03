@@ -1,5 +1,6 @@
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
+  noSavedYet: '아직 모은 돈이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
   // H-01 인사
   hiLeft: (name: string, n: number) => `${name}님, 이번 달 월급 체크가 ${n}개 남았어요`, // [확인 필요]
   hiGoal: (name: string, goal: string, pct: number) => `${name}님, ${goal}까지 ${pct}% 왔어요`, // [확인 필요]
