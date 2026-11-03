@@ -127,7 +127,7 @@ export function SplitEditor({
         steps={steps}
         title={head}
         onBack={close}
-        primary={{ label: copy.next, disabled: !valid }}
+        primary={{ label: copy.ok, disabled: !valid }}
         onSubmit={() => {
           if (v === null) return;
           onChange(

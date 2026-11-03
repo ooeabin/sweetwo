@@ -60,7 +60,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByText('이번 달 목표에 139만 원 모았어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText(/찬우님, 내 집 마련까지 0% 왔어요/).first()).toBeVisible();
+  await expect(page.getByText(/찬우님, 이번 달 월급 체크를 다 했어요/).first()).toBeVisible();
   await expect(page.getByText('9월 월급을 다 나눴어요', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
 });
@@ -91,7 +91,7 @@ test('W-02a 다른 금액, W-01 분배표 고치기(체크 안 한 줄만 새 �
   await axe(page);
   await page.getByRole('button', { name: /^고정지출/ }).click();
   await page.getByLabel('고정지출 금액').fill('900000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('2만 원이 모자라요')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('분배표를 바꿨어요')).toBeVisible();

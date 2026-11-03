@@ -5,6 +5,7 @@ export const copy = {
   hiGoal: (name: string, goal: string, pct: number) => `${name}님, ${goal}까지 ${pct}% 왔어요`, // [확인 필요]
   waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
   waitCard: (starter: string) => `${starter}님이 첫 목표를 정하면 알려 드릴게요`,
+  hiAllDone: (name: string) => `${name}님, 이번 달 월급 체크를 다 했어요`, // [확인 필요] 다 했고 1순위 목표가 0%일 때
   hi: (name: string) => `${name}님, 반가워요`, // [확인 필요] 목표 금액이 없을 때
   // 오늘 띠
   add: '추가',
@@ -36,6 +37,7 @@ export const copy = {
   addAsset: '가진 돈 추가하기',
   // H-05 다가오는 일정
   upcoming: '다가오는 일정',
+  moreCalendar: '캘린더', // 다가오는 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)
   noUpcoming: '30일 안에 일정이 없어요', // [확인 필요]
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
   // H-06 할 일 한 줄(19 ‘할 일 한 줄 순서’)

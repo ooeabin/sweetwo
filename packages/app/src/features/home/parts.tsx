@@ -278,7 +278,7 @@ export function UpcomingCard({
     <section className="hg-stack" aria-label={copy.upcoming}>
       <SectionHeader
         title={copy.upcoming}
-        more={{ label: copy.upcoming, href: '/calendar/list' }}
+        more={{ label: copy.moreCalendar, href: '/calendar/list' }}
       />
       {today && <WeekStrip today={today} marked={new Set(items.map((e) => e.date))} />}
       {items.length ? (

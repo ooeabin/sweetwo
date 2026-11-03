@@ -46,7 +46,9 @@ export function G02pGoalPhoto() {
       />
       <PhotoPick
         labels={{
-          drop: copy.photoDrop,
+          drop: window.matchMedia?.('(min-width: 768px)').matches
+            ? copy.photoDrop
+            : copy.photoDropNarrow,
           pick: copy.photoPick,
           help: copy.photoHelp,
           notice: d.solo ? copy.photoNoticeSolo : copy.photoNotice(d.partnerName),

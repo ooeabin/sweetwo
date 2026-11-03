@@ -429,7 +429,12 @@ export function G02GoalDetail() {
               name={
                 l.state === 'checked'
                   ? `${formatMonthDay((l.checked_at ?? '').slice(0, 10))}에 ${m(l.actual ?? l.planned)} 넣었어요`
-                  : `${i.perPerson.length > 1 ? `${d.nameOf(l.user_id ?? null)}님 ` : ''}${copy.thisMonthTodo(m(l.planned))}`
+                  : // 두 사람 줄이 있을 때 배우자 줄만 이름(내 줄은 이름 없이, 2026-11-03 내 줄에 배우자 이름이 붙던 문제)
+                    `${
+                      i.perPerson.length > 1 && (l.user_id ?? d.lineOwner[l.id] ?? null) !== d.meId
+                        ? `${d.nameOf(l.user_id ?? d.lineOwner[l.id] ?? null)}님 `
+                        : ''
+                    }${copy.thisMonthTodo(m(l.planned))}`
               }
               personName={(x) => d.nameOf(x)}
               meId={d.meId}
