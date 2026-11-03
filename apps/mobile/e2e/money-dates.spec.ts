@@ -135,10 +135,15 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
   await page.goto('/assets/a-stock');
   await expect(page.getByRole('heading', { name: '찬우 주식' })).toBeVisible();
   await page.getByRole('button', { name: '팔았어요' }).click();
+  // 먼저 묻기(전부 / 일부만) → 받은 금액 → 남은 평가금액, 화면마다 키패드 하나
+  await expect(page.getByRole('heading', { name: '얼마나 팔았어요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /일부만 팔았어요/ }).click();
   await expect(page.getByRole('heading', { name: '받은 금액은 얼마예요?' })).toBeVisible();
   await page.getByLabel('받은 금액은 얼마예요?').fill('5000000');
-  await page.getByRole('switch', { name: '일부만 팔았어요' }).click();
-  await page.getByLabel('남은 평가금액은요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '남은 평가금액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('남은 평가금액은 얼마예요?').fill('5000000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: /입출금 통장/ }).click();
   await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
