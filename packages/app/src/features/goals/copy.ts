@@ -325,7 +325,6 @@ export const copy = {
   changeMonthly: '매달 넣을 돈 바꾸기', // [확인 필요]
   inOut: '넣기·빼기', // [확인 필요]
   use: '꺼내 쓰기',
-  onTime: '기한 안에 이뤄요',
   // G-02 묶음 카드(2026-11-03 시안 B3)
   boxTarget: (target: string, pct: number) => `목표 ${target}의 ${pct}%`, // [확인 필요]
   boxEdit: '고치기',

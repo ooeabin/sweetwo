@@ -495,17 +495,22 @@ export function G02GoalDetail() {
           ))}
         </div>
       )}
-      {g.kind === 'once' && g.deadline && g.target_amount !== null && i.lateMonths !== null && (
-        <section className="hg-card hg-card--fill hg-stack">
-          <b>{late ? copy.lateLine(lateText(i.lateMonths)) : copy.onTime}</b>
-          {late && <span className="hg-card__meta">{copy.lateHelp}</span>}
-          {late && i.canEdit && !pending && (
-            <Button variant="secondary" size="sm" onClick={() => nav(splitTo)}>
-              {copy.changeMonthly}
-            </Button>
-          )}
-        </section>
-      )}
+      {/* 늦을 때만 안내(2026-11-03 ‘기한 안에 이뤄요’ 상자는 없앰) */}
+      {late &&
+        g.kind === 'once' &&
+        g.deadline &&
+        g.target_amount !== null &&
+        i.lateMonths !== null && (
+          <section className="hg-card hg-card--fill hg-stack">
+            <b>{copy.lateLine(lateText(i.lateMonths))}</b>
+            {late && <span className="hg-card__meta">{copy.lateHelp}</span>}
+            {late && i.canEdit && !pending && (
+              <Button variant="secondary" size="sm" onClick={() => nav(splitTo)}>
+                {copy.changeMonthly}
+              </Button>
+            )}
+          </section>
+        )}
       <section className="hg-stack" aria-label={copy.history}>
         <SectionHeader title={copy.history} />
         {history.length ? (
