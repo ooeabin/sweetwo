@@ -218,10 +218,13 @@ export function AppFrame(p: AppFrameProps) {
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
           {p.today ? (
             <span className="hg-mhead__people">
+              {/* 배우자 빈 자리는 머리에서 빼고 내 아바타와 이름만(2026-11-03) */}
               <span className="hg-avatars" aria-hidden="true">
-                {p.people.map((x) => (
-                  <Person key={x.no} p={x} />
-                ))}
+                {p.people
+                  .filter((x) => !x.empty)
+                  .map((x) => (
+                    <Person key={x.no} p={x} />
+                  ))}
               </span>
               <span className="hg-mhead__names">
                 {p.people
