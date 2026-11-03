@@ -31,7 +31,9 @@ export const copy = {
   checkedOn: (date: string) => `${date}에 체크했어요`, // [확인 필요] 내가 체크한 줄
   skipped: '이번 달은 못 했어요',
   editSplit: '분배표 고치기',
-  addedToGoal: (goal: string, amount: string) => `${goal}에 ${amount} 더했어요`,
+  // 토스트는 한 줄(Toast.md): 목표 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게
+  addedToGoal: (goal: string, amount: string) =>
+    `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,
   checked: '체크했어요', // [확인 필요] 쓰는 돈 줄 체크 토스트
   alreadyChecked: (who: string) => `${who}님이 먼저 체크했어요`,
   closed: '지난 달 체크리스트는 고칠 수 없어요', // [확인 필요]
