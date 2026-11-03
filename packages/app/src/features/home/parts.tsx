@@ -166,14 +166,14 @@ export function SalaryCard({
     .filter((l) => l.kind === 'saving' && l.state === 'checked')
     .reduce((s, l) => s + (l.actual ?? l.planned), 0);
   return (
-    // 2026-11-03 머리를 카드 안에(카카오뱅크 체크리스트처럼), 줄마다 아이콘, 마지막 줄 선 없음
-    <section className="hg-card hg-stack hg-salarycard" aria-label={list.label}>
+    // 2026-11-03 다른 영역처럼 제목 줄은 카드 위(진행 원 + “9월 월급” + “5개 중 1개 완료 ›”), 줄마다 아이콘, 마지막 줄 선 없음
+    <section className="hg-stack" aria-label={list.label}>
       <SectionHeader
         title={list.label}
         lead={<Ring done={done} total={total} label={copy.progress(total, done)} />}
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
-      <div className="hg-stack">
+      <div className="hg-card hg-stack hg-salarycard">
         {finished && (
           <p className="hg-card__meta">
             <Icon name="check" size={16} /> {copy.allDone(list.label)}.{' '}
