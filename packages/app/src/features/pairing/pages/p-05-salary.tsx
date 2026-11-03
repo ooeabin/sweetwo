@@ -1,41 +1,36 @@
-import { completeJoin } from '@sweetwo/api';
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, DayWheel, QuestionLayout, SectionHeader } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
 import { useJoinStep } from '../join-step';
 
 const ODD = 100_000_000; // 1억 원 초과면 한 번 확인
-type Day = number | 'last';
 
-// P-05 내 월급(O-31과 같음): 금액 + 매달 달라요 + 월급날. 시작한 사람이 아직 온보딩 중이면 이 화면 저장 = 합류 완료(홈 대기).
+// P-05 내 월급(O-31과 같음): 금액 + 매달 달라요. 월급날은 P-05b(2026-11-03, 온보딩처럼 화면을 나눔). 월급이 없으면 P-05b 없이 합류 완료.
 export function P05Salary() {
   const s = useJoinStep('p-05');
   const d = s.d;
   const me = d.me;
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
-  const [day, setDay] = useState<Day | null | undefined>(undefined);
   const [asked, setAsked] = useState(false);
   if (!d.ready || !me) return null;
   const value = amount === undefined ? (me.monthly_income ?? null) : amount;
   const isVariable = variable ?? me.income_variable ?? false;
-  const savedDay: Day | null = me.payday_last ? 'last' : (me.payday ?? null);
-  const payday = day === undefined ? savedDay : day;
-  const valid = value !== null && value > 0 && payday !== null;
+  const valid = value !== null && value > 0;
   const odd = value !== null && value > ODD;
 
-  const save = (income: number, dd: Day | null) =>
-    s.done(async () => {
-      await saveMe({
-        monthly_income: income,
-        income_variable: income > 0 && isVariable,
-        payday: typeof dd === 'number' ? dd : null,
-        payday_last: dd === 'last',
-      });
-      if (s.last) await completeJoin();
-    });
+  const save = (income: number) =>
+    s.done(
+      () =>
+        saveMe(
+          income > 0
+            ? { monthly_income: income, income_variable: isVariable }
+            : { monthly_income: 0, income_variable: false, payday: null, payday_last: false },
+        ),
+      income > 0 ? undefined : null,
+    );
   return (
     <QuestionLayout
       chapter={s.chapter}
@@ -46,7 +41,7 @@ export function P05Salary() {
       onSubmit={() => {
         if (!valid) return;
         if (odd && !asked) return setAsked(true);
-        void save(value, payday);
+        void save(value);
       }}
     >
       <AmountInput
@@ -59,31 +54,25 @@ export function P05Salary() {
         quick={quickChips.small.slice(1)}
         monthly
         embedded
-        zeroLink={{ label: copy.noSalary, onClick: () => void save(0, null) }}
+        zeroLink={{ label: copy.noSalary, onClick: () => void save(0) }}
+        extra={
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={isVariable}
+            className="hg-consent__check"
+            onClick={() => setVariable(!isVariable)}
+          >
+            <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
+            <span className="hg-consent__label">{copy.salaryVariable}</span>
+          </button>
+        }
       />
       {asked && (
         <p className="hg-help" role="status">
           {copy.checkValue}
         </p>
       )}
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={isVariable}
-        className="hg-consent__check"
-        onClick={() => setVariable(!isVariable)}
-      >
-        <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
-        <span className="hg-consent__label">{copy.salaryVariable}</span>
-      </button>
-      <SectionHeader title={copy.payday} />
-      <DayWheel
-        label={copy.payday}
-        value={payday}
-        onChange={setDay}
-        lastLabel={copy.paydayLast}
-        hint={copy.paydayLastHint}
-      />
     </QuestionLayout>
   );
 }

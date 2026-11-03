@@ -79,6 +79,7 @@ export const copy = {
   salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
   noSalary: '지금은 월급이 없어요',
   payday: '월급날',
+  paydayTitle: '월급날은 며칠이에요?',
   paydayLast: '말일',
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   checkValue: '입력한 값이 맞나요?',

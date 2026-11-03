@@ -150,6 +150,7 @@ export function QuestionLayout({
   children,
   primary,
   later,
+  secondary,
   onBack,
   onSubmit,
   wide,
@@ -171,6 +172,8 @@ export function QuestionLayout({
     variant?: 'primary' | 'secondary';
   };
   later?: { label: string; onClick: () => void };
+  /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */
+  secondary?: { label: string; onClick: () => void };
   onBack?: () => void;
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
@@ -192,7 +195,7 @@ export function QuestionLayout({
     return () => window.removeEventListener('keydown', onKey);
   }, [onBack]);
 
-  const backOnly = !primary && !later;
+  const backOnly = !primary && !later && !secondary;
   return (
     <main style={{ padding: '0 var(--space-4)' }}>
       <div className="hg-qbar">
@@ -236,7 +239,7 @@ export function QuestionLayout({
           {help && <p className="hg-q__help">{help}</p>}
         </div>
         {children}
-        {(primary || later || onBack) && (
+        {(primary || later || secondary || onBack) && (
           <div
             className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}`}
           >
@@ -257,6 +260,15 @@ export function QuestionLayout({
               </button>
             )}
             {primary && <span className="hg-q__hint">Enter 키를 눌러도 돼요</span>}
+            {secondary && (
+              <button
+                type="button"
+                className="hg-btn hg-btn--secondary hg-q__second"
+                onClick={secondary.onClick}
+              >
+                {secondary.label}
+              </button>
+            )}
             {primary && (
               <button
                 type="submit"

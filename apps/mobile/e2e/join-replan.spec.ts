@@ -66,8 +66,10 @@ async function answerBasics(page: Page, waiting = false) {
 async function salary(page: Page) {
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
   await page.getByLabel('한 달 실수령액은 얼마예요?').fill('2700000');
-  // 월급날 휠(2026-11-03): 25일에서 시작 → 10일
-  const day = page.getByRole('spinbutton', { name: '월급날', exact: true });
+  await page.getByRole('button', { name: '다음' }).click();
+  // 월급날은 따로 P-05b(2026-11-03), 휠 25일에서 시작 → 10일
+  await expect(page.getByRole('heading', { name: '월급날은 며칠이에요?' })).toBeVisible();
+  const day = page.getByRole('spinbutton', { name: '월급날은 며칠이에요?' });
   await expect(day).toHaveAttribute('aria-valuetext', '25일');
   await day.focus();
   for (let i = 0; i < 15; i++) await day.press('ArrowUp');
@@ -75,7 +77,7 @@ async function salary(page: Page) {
   await page.getByRole('button', { name: '다음' }).click();
 }
 
-test('각자: 관리 방식 그대로 → 월급 → 내 분배표(아직 안 채운 월 필요액) → 합류 완료', async ({
+test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 분배표(아직 안 채운 월 필요액)로 합류 완료 → 홈 할 일', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -90,14 +92,9 @@ test('각자: 관리 방식 그대로 → 월급 → 내 분배표(아직 안 �
   await page.getByRole('button', { name: '다음' }).click();
   await salary(page);
 
-  await expect(page.getByRole('heading', { name: '내 월급을 이렇게 나눠 볼까요?' })).toBeVisible();
-  const home = page.getByRole('button', { name: /내 집 마련/ });
-  await expect(home).toContainText('107만 원');
-  await expect(home).toContainText('찬우님이 매달 95만 원 넣어요');
-  await expect(page.getByRole('button', { name: /비상금/ })).toContainText('0원');
-  await axe(page);
-  await page.getByRole('button', { name: '이대로 저장하기' }).click();
+  // 분배표 화면 없이 홈(온보딩 ADR 0005처럼), 홈 할 일 ‘분배표 확인’
   await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText('추천으로 나눈 분배표를 확인해 주세요')).toBeVisible();
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
   expect(
@@ -113,7 +110,7 @@ test('각자: 관리 방식 그대로 → 월급 → 내 분배표(아직 안 �
   expect(db.space?.couple_state).toBe('connected');
 });
 
-test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기(있던 줄 그대로, 예빈 용돈, 바뀐 줄 이전 값)', async ({
+test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -125,18 +122,16 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 분배표 다시 채우기
   expect(db.joinCalls[0]).toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });
   await salary(page);
 
-  await expect(page.getByRole('heading', { name: '같이 쓰는 분배표예요' })).toBeVisible();
-  await expect(page.getByText('찬우 350만 원, 예빈 270만 원')).toBeVisible();
-  const home = page.getByRole('button', { name: /내 집 마련/ });
-  await expect(home).toContainText('95만 원 → ');
-  await expect(page.getByRole('button', { name: /예빈 용돈/ })).toContainText('27만 원');
-  await axe(page);
-  await page.getByRole('button', { name: '이대로 저장하기' }).click();
   await expect(page).toHaveURL(/\/$/);
+  const lines = db.splits.find((x) => x.owner_user_id === null)?.split_line as {
+    kind: string;
+    amount: number;
+  }[];
+  expect(lines.some((l) => l.kind === 'allowance' && l.amount === 270_000)).toBe(true);
   expect(db.splits.find((x) => x.owner_user_id === null)?.split_line).toHaveLength(6);
 });
 
-test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 저장 = 합류, 홈 대기, 분배표가 생기면 P-04부터', async ({
+test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 → 월급날 저장 = 합류, 홈 대기, 분배표가 생기면 P-04부터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -150,7 +145,7 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월�
   expect(db.me.onboarding_step).toBe('P-WAIT');
   await axe(page);
 
-  // 찬우가 분배표를 만들면 다음에 열 때 P-04 → P-06
+  // 찬우가 분배표를 만들면 다음에 열 때 P-04 → 홈(분배표는 자동)
   seed(db);
   Object.assign(db.me, { nickname: '예빈', onboarding_step: 'P-WAIT' });
   db.partner = {
@@ -162,6 +157,10 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월�
   };
   await page.reload();
   await expect(page).toHaveURL(/\/join\/p-04$/);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
+  expect(db.joinCalls.at(-1)?.p_lines).toBeTruthy();
 });
 
 test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류하기 → 내 정보만(자산 공개 범위) → 다음 → P-03', async ({
