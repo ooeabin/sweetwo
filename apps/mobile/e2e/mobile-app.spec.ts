@@ -166,7 +166,7 @@ test('모바일 푸시(S-14): 켜면 OS 허용 → 기기 등록, 푸시를 누�
   await page.goto('/settings/notifications');
   // 앱 기기 기록(AD-16 최소 지원 버전 미만 기기 수)
   await expect.poll(() => db.rpc).toContain('note_device');
-  const push = page.getByRole('switch', { name: '푸시 알림' }).first();
+  const push = page.getByRole('switch', { name: /^푸시 알림/ }).first();
   await expect(push).not.toBeChecked();
   await push.click();
   await expect.poll(async () => (await fake(page)).asked).toBe(1);

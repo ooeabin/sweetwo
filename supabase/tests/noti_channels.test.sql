@@ -15,17 +15,18 @@ select public.ensure_my_space();
 reset role;
 update public.app_user set quiet_start = 22, quiet_end = 8;
 
--- 오후 3시(KST): 20분 전 알림, 접속 신호 없음 → 메일
-insert into public.notification (user_id, kind, title, body, target, dedupe, created_at)
-  values ('11111111-1111-1111-1111-111111111111', 'payday', '오늘은 월급날이에요', '월급 계획대로 보내고 체크해 주세요', '/salary', 'n1',
-          '2027-03-25 05:40:00+00');
-select is(public.mail_missed_notifications('2027-03-25 06:00:00+00'), 1, '접속 없으면 메일로 대신');
-select is((select subject from public.mail_outbox where dedupe like 'noti:%'), '오늘은 월급날이에요', '알림 제목 그대로');
+-- 오후 3시(KST): 20분 전 알림, 접속 신호 없음 → 월말 확인만 메일로 대신(2026-11-04 다른 종류는 메일 없음)
+insert into public.notification (user_id, kind, title, body, target, dedupe, created_at) values
+  ('11111111-1111-1111-1111-111111111111', 'review_due', '월말 확인할 차례예요', '체크 안 한 줄이 있어요', '/salary/review', 'n1',
+   '2027-03-25 05:40:00+00'),
+  ('11111111-1111-1111-1111-111111111111', 'payday', '오늘은 월급날이에요', null, '/salary', 'n0', '2027-03-25 05:40:00+00');
+select is(public.mail_missed_notifications('2027-03-25 06:00:00+00'), 1, '접속 없으면 월말 확인만 메일로 대신');
+select is((select subject from public.mail_outbox where dedupe like 'noti:%'), '월말 확인할 차례예요', '알림 제목 그대로');
 
 -- 접속 신호가 있으면 안 보냄
 update public.app_user set app_seen_at = '2027-03-25 05:55:00+00';
 insert into public.notification (user_id, kind, title, target, dedupe, created_at)
-  values ('11111111-1111-1111-1111-111111111111', 'payday', '두 번째', '/salary', 'n2', '2027-03-25 05:56:00+00');
+  values ('11111111-1111-1111-1111-111111111111', 'review_due', '두 번째', '/salary/review', 'n2', '2027-03-25 05:56:00+00');
 update public.app_user set app_seen_at = '2027-03-25 05:58:00+00';
 select is(public.mail_missed_notifications('2027-03-25 06:10:00+00'), 0, '데스크톱이 켜져 있으면 메일 없음');
 

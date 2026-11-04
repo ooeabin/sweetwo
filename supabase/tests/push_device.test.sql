@@ -60,7 +60,7 @@ select is((select count(*)::int from public.claim_push(100, '2026-10-25 23:30:00
 
 -- 메일로 대신: 푸시 기기가 있으면 접속 신호가 없어도 메일 안 보냄
 update public.notification set mailed_at = now();
-select public.notify('11111111-1111-1111-1111-111111111111', null, 'payday', '월급날', null, '/salary', null, null, 'p6');
+select public.notify('11111111-1111-1111-1111-111111111111', null, 'review_due', '월말 확인', null, '/salary/review', null, null, 'p6');
 update public.notification set created_at = '2026-10-25 02:00:00+00' where dedupe = 'p6';
 select is(public.mail_missed_notifications('2026-10-25 03:00:00+00'), 0, '푸시 기기가 있으면 메일로 대신 안 함');
 

@@ -1,8 +1,8 @@
--- pgTAP: 알림 메일 쌓기(받는 방법·묶음 이메일 토글, 월 6회 상한), 주간 요약 메일 본문, 꺼내기·결과(14).
+-- pgTAP: 알림 메일 쌓기(2026-11-04 자동 예비로만: 꼭 필요한 메일만), 주간 요약은 알림만, 꺼내기·결과(14).
 -- 찬우(시작한 사람), 예빈(합류한 사람)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(9);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -36,37 +36,27 @@ select public.complete_join(jsonb_build_array(
 reset role;
 update public.app_user set notify_email = 'chanwoo@example.com' where id = '11111111-1111-1111-1111-111111111111';
 
--- 쌓기: 받는 방법·묶음 이메일을 끄면 안 쌓음, 월 6회 상한(상한 밖 메일은 셈하지 않음)
+-- 쌓기(2026-11-04 이메일은 자동 예비로만): 상한 안 메일(종류별 알림)은 안 쌓음, 꼭 필요한 메일은 설정과 상관없이 쌓음
 select is(public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', 'money', '제목', '본문', '<p>본문</p>', true, 'x:1'),
-  true, '쌓음');
-update public.app_user set noti_prefs = '{"topics":{"money":{"email":false}}}' where id = '11111111-1111-1111-1111-111111111111';
-select is(public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', 'money', '제목', '본문', '<p>본문</p>', true, 'x:2'),
-  false, '묶음 이메일을 끄면 안 쌓음');
-update public.app_user set noti_prefs = '{}' where id = '11111111-1111-1111-1111-111111111111';
-select public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', null, '제목', '본문', '<p>본문</p>', true, 'x:' || n)
-  from generate_series(3, 7) n;
-select is(public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', null, '제목', '본문', '<p>본문</p>', true, 'x:8'),
-  false, '월 6회 넘으면 안 쌓음');
-select is(public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', null, '제목', '본문', '<p>본문</p>', false, 'x:9'),
-  true, '상한 밖 메일은 쌓음');
+  false, '종류별 알림 메일은 안 보냄');
+select is(public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', null, '제목', '본문', '<p>본문</p>', false, 'x:2'),
+  true, '꼭 필요한 메일은 쌓음');
 update public.app_user set noti_prefs = '{"email":false}' where id = '22222222-2222-2222-2222-222222222222';
-select is(public.enqueue_mail('22222222-2222-2222-2222-222222222222', 'x_test', null, '제목', '본문', '<p>본문</p>', false, 'x:10'),
-  false, '받는 방법 이메일을 끄면 안 쌓음');
+select is(public.enqueue_mail('22222222-2222-2222-2222-222222222222', 'x_test', null, '제목', '본문', '<p>본문</p>', false, 'x:3'),
+  true, '예전 이메일 끄기 설정과 상관없이 쌓음');
 delete from public.mail_outbox;
 
--- 주간 요약 메일: 예빈이 우리 목표 금액을 바꿈 → 월요일 찬우에게 알림 + 메일(상한 밖)
+-- 주간 요약: 예빈이 우리 목표 금액을 바꿈 → 월요일 찬우에게 알림만(메일 없음)
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 update public.goal set target_amount = 150000000 where template = 'home';
 select is(public.send_weekly_summary(public.kst_today() + 1), 1, '요약 하나');
-select results_eq(
-  $$ select to_email, kind, subject, capped from public.mail_outbox $$,
-  $$ values ('chanwoo@example.com', 'weekly_summary', '이번 주 예빈님이 바꾼 게 1개 있어요', false) $$,
-  '메일 쌓임');
-select ok((select body_text like '예빈님이 바꾼 것' || E'\n' || '- 목표 금액 1억 원 → 1억 5,000만 원%' from public.mail_outbox),
-  '바뀐 것 전 → 후');
-select ok((select body_html like '%<a href="https://sweetwo.kr/n">앱에서 보기</a>%<a href="https://sweetwo.kr/n/settings">알림 설정</a>%'
-  from public.mail_outbox), '앱에서 보기, 알림 설정 링크');
+select is((select count(*)::int from public.mail_outbox), 0, '주간 요약 메일은 안 보냄');
+select is((select count(*)::int from public.notification where kind = 'weekly_summary'), 1, '알림은 남김');
+select ok((select body_text like '예빈님이 바꾼 것' || E'\n' || '- 목표 금액 1억 원 → 1억 5,000만 원%'
+  from public.weekly_mail_body('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', public.kst_today() + 1)),
+  '요약 본문 바뀐 것 전 → 후');
 
+select public.enqueue_mail('11111111-1111-1111-1111-111111111111', 'x_test', null, '제목', '본문', '<p>본문</p>', false, 'x:4');
 -- 꺼내기 → 실패 기록 → 다시 꺼냄 → 보냄
 select is((select count(*)::int from public.claim_mail(10)), 1, '꺼냄');
 select public.finish_mail((select id from public.mail_outbox), null, 'ses 500');

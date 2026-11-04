@@ -69,11 +69,7 @@ export function S10Settings() {
         )}
         <ListRow
           label={copy.rows.noti}
-          value={copy.channelsOn(
-            [desktop && prefs.push ? copy.push : null, prefs.email ? copy.email : null].filter(
-              (x): x is string => !!x,
-            ),
-          )}
+          value={copy.pushState(prefs.push)}
           onClick={() => nav('/settings/notifications')}
         />
         <ListRow
