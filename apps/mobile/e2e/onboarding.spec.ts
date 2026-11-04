@@ -46,9 +46,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 9화면, 홈에서 �
   await heading(page, '두 사람은 어떤 사이예요?');
   await page.getByRole('radio', { name: '결혼했어요' }).click();
   await heading(page, '결혼한 날은 언제예요?');
-  await page.getByLabel('년', { exact: true }).fill('2025');
-  await page.getByLabel('월', { exact: true }).fill('05');
-  await page.getByLabel('일', { exact: true }).fill('17');
+  await setWheel(page, '결혼한 날은 언제예요?', 2025, 5, 17);
   await next(page);
   await heading(page, '찬우님은 몇 년생이에요?');
   await expect(page.getByRole('spinbutton', { name: '월', exact: true })).toHaveCount(0);

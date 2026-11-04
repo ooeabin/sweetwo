@@ -1,47 +1,25 @@
-import { fetchAvatars, qk, removeAvatar, updateMe, updateSpace } from '@sweetwo/api';
-import {
-  coupleBaseDay,
-  formatDateFull,
-  formatManWon,
-  NotifyEmail,
-  type BaseDay,
-} from '@sweetwo/core';
-import {
-  avatarArt,
-  Button,
-  Field,
-  Icon,
-  ListRow,
-  PageHeader,
-  SectionHeader,
-  Toggle,
-} from '@sweetwo/ui';
+import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
+import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
+import { avatarArt, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { session } from '../../auth';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-11 내 정보와 월급(25, 재기획): 프로필 사진(→ S-11e), 이름(→ S-11a), 로그인, 알림 이메일(그 자리에서 수정),
+// S-11 내 정보와 월급(25, 재기획): 프로필 사진(→ S-11e), 이름(→ S-11a), 로그인, 알림 이메일(→ S-11b),
 // 결혼 상태(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
 // 월급: 내 월급(→ S-11c, 합류 뒤 배우자 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
-// 주말·공휴일 앞당기기(부부 공통, 바로), 월급 계획 열기(→ W-01), 로그아웃. 해제 대기 중엔 관리 방식·만드는 날 비활성.
+// 주말·공휴일 앞당기기(부부 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
 export function S11Me() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  const [email, setEmail] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
-  if (d.loading || !d.me || !d.c || !d.space)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
-  const value = email ?? me.notify_email ?? '';
-  const parsed = NotifyEmail.safeParse(value);
-  const changed = parsed.success && parsed.data !== me.notify_email;
   const later = coupleBaseDay(c);
   const base: BaseDay | null =
     sp.joint_cycle_day === null ? later : sp.joint_cycle_day === 31 ? 'last' : sp.joint_cycle_day;
@@ -70,21 +48,6 @@ export function S11Me() {
       toast(copy.photoRemoved);
     } catch {
       toast(copy.failed);
-    }
-  };
-
-  const saveEmail = async () => {
-    if (!parsed.success || saving) return;
-    setSaving(true);
-    try {
-      await updateMe({ notify_email: parsed.data });
-      await qc.invalidateQueries({ queryKey: qk.me });
-      setEmail(null);
-      toast(copy.saved);
-    } catch {
-      toast(copy.failed);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -142,29 +105,13 @@ export function S11Me() {
           onClick={() => nav('/settings/me/nickname')}
         />
         <ListRow label={copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')} chevron={false} />
+        {/* 4번 알림 이메일: 2026-11-04 그 자리 입력칸 대신 줄 → S-11b */}
+        <ListRow
+          label={copy.notifyEmail}
+          value={me.notify_email ?? ''}
+          onClick={() => nav('/settings/me/email')}
+        />
       </div>
-      <form
-        className="hg-row"
-        style={{ gap: 'var(--space-2)', alignItems: 'flex-end' }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void saveEmail();
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <Field
-            label={copy.notifyEmail}
-            type="email"
-            autoComplete="email"
-            value={value}
-            onChange={(e) => setEmail(e.target.value)}
-            error={value.trim() && !parsed.success ? copy.emailError : undefined}
-          />
-        </div>
-        <Button type="submit" variant="secondary" disabled={!changed || saving}>
-          {copy.save}
-        </Button>
-      </form>
       <div className="hg-list">
         {sp.marriage_status && (
           <ListRow
@@ -242,27 +189,24 @@ export function S11Me() {
             }
           }}
         />
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav('/salary/split')}
-        >
-          {copy.openSplit}
-        </button>
+        {/* 10번 월급 계획: 2026-11-04 다른 줄과 같은 목록 줄로 */}
+        <div className="hg-list">
+          <ListRow label={copy.openSplit} onClick={() => nav('/salary/split')} />
+        </div>
       </section>
-      <Button
-        variant="secondary"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={async () => {
-          await session.signOut();
-          qc.clear();
-          toast(copy.loggedOut);
-          nav('/login', { replace: true });
-        }}
-      >
-        {copy.logout}
-      </Button>
+      {/* 11번 로그아웃: 2026-11-04 맨 아래 목록 줄 */}
+      <div className="hg-list">
+        <ListRow
+          label={copy.logout}
+          chevron={false}
+          onClick={async () => {
+            await session.signOut();
+            qc.clear();
+            toast(copy.loggedOut);
+            nav('/login', { replace: true });
+          }}
+        />
+      </div>
     </div>
   );
   return <MainFrame sub="settings" current={null} columns={[body]} />;

@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -36,7 +36,7 @@ export function S13Visibility() {
   const [ask, setAsk] = useState<Vis | null>(null);
   const [busy, setBusy] = useState(false);
   if (d.loading || !d.me || assets.isLoading || goals.isLoading)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+    return <LoadingFrame sub="settings" current={null} />;
   const me = d.me;
   const mine = (assets.data ?? []).filter((a) => a.owner === 'person' && a.owner_user_id === me.id);
   // 내 목표(비상금은 늘 우리 목표). 혼자 쓰기·미합류면 볼 사람이 없어 묶음을 숨김

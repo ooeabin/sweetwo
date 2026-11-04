@@ -1,12 +1,11 @@
 import { createInquiry, qk, type InquiryCategory } from '@sweetwo/api';
-import { Button, PageHeader, Toggle } from '@sweetwo/ui';
+import { QuestionLayout, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -55,21 +54,14 @@ export function S19aInquiry() {
       setBusy(false);
     }
   };
-  const body = (
-    <form
-      className="hg-stack"
-      style={{ gap: 'var(--space-6)' }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        void send();
-      }}
+  // 2026-11-04 ‘보내기’는 화면 아래 꽉 찬 주 버튼(질문 화면과 같은 자리)
+  return (
+    <QuestionLayout
+      title={copy.contact}
+      onBack={() => nav('/settings/help')}
+      primary={{ label: copy.sendInquiry, disabled: !ok || busy, loading: busy }}
+      onSubmit={() => void send()}
     >
-      <PageHeader
-        title={copy.contact}
-        backLabel={copy.back}
-        backTo={copy.help}
-        onBack={() => nav('/settings/help')}
-      />
       <div className="hg-list">
         <SheetSelect<InquiryCategory>
           label={copy.categoryLabel}
@@ -87,14 +79,8 @@ export function S19aInquiry() {
         checked={attach}
         onChange={setAttach}
       />
-      <div className="hg-row">
-        <Button variant="primary" type="submit" disabled={!ok || busy}>
-          {copy.sendInquiry}
-        </Button>
-      </div>
-    </form>
+    </QuestionLayout>
   );
-  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }
 
 /** 여러 줄 내용 칸(입력 칸 모양 그대로, 높이만 늘림) */

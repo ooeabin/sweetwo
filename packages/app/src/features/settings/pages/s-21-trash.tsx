@@ -14,7 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -29,7 +29,7 @@ export function S21Trash() {
   const [confirm, setConfirm] = useState<TrashRow | 'all' | null>(null);
   const [busy, setBusy] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space || list.isLoading)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+    return <LoadingFrame sub="settings" current={null} />;
   const rows = list.data ?? [];
   const today = todayKst();
   const c = d.c;

@@ -20,11 +20,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform, isApp } from '../../../platform';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy, hourLabel } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-14 알림(docs/spec/25-settings.md): 메일 상한 안내, 묶음별 OS 알림·이메일(웹은 이메일만), 챙길 날은 시점마다,
+// S-14 알림(docs/spec/25-settings.md): 메일 상한 안내, 받는 방법마다 카드(웹은 이메일만) 안에 묶음별 토글, 챙길 날은 시점 체크 목록,
 // 받는 방법(둘 다 끄면 “알림을 받을 방법이 없어요” 확인), 방해 금지 시간(→ S-14a). 바뀌면 바로 저장.
 // 센터 기록은 설정과 상관없이 남음. 끌 수 없는 종류(보안·결정 기한)는 목록에 없음.
 // 마케팅 정보 받기(기본 꺼짐): 켜고 끌 때마다 동의 기록(consent, 추가만), 켜면 “{날짜} 동의”.
@@ -36,8 +36,7 @@ export function S14Notifications() {
   const d = useSettingsData();
   const [confirm, setConfirm] = useState<'push' | 'email' | null>(null);
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
-  if (d.loading || !d.me || !d.c)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c) return <LoadingFrame sub="settings" current={null} />;
   // 받는 방법 ‘OS 알림’은 앱(데스크톱 로컬 알림, 모바일 푸시)만
   const desktop = isApp(detectPlatform());
   const prefs = notiPrefs(d.me.noti_prefs);
@@ -72,24 +71,69 @@ export function S14Notifications() {
     void save({ ...prefs, [ch]: on });
   };
 
-  const pair = (t: NotiTopic, label: string, sub?: string, name = label) => (
-    <section key={t} className="hg-stack" aria-label={name} style={{ gap: 'var(--space-1)' }}>
-      <span className="hg-card__label">{label}</span>
-      {sub && <span className="hg-help">{sub}</span>}
-      {desktop && (
-        <Toggle
-          label={copy.push}
-          checked={prefs.topics[t].push}
-          disabled={!prefs.push}
-          onChange={(on) => setTopic(t, 'push', on)}
-        />
-      )}
-      <Toggle
-        label={copy.email}
-        checked={prefs.topics[t].email}
-        disabled={!prefs.email}
-        onChange={(on) => setTopic(t, 'email', on)}
-      />
+  // 2026-11-04 받는 방법마다 카드 하나: 묶음 줄마다 토글, 챙길 날은 시점 체크 목록(Y-05 미리 알림과 같은 모양)
+  const channels = desktop ? (['push', 'email'] as const) : (['email'] as const);
+  const topicRow = (ch: 'push' | 'email', t: NotiTopic, label: string, sub?: string) => (
+    <Toggle
+      key={t}
+      label={label}
+      help={sub}
+      checked={prefs.topics[t][ch]}
+      disabled={!prefs[ch]}
+      onChange={(on) => setTopic(t, ch, on)}
+    />
+  );
+  const channelCard = (ch: 'push' | 'email') => (
+    <section
+      key={ch}
+      className="hg-card hg-stack"
+      aria-label={copy.topicsBy[ch]}
+      style={{ gap: 0 }}
+    >
+      <span className="hg-card__label">{copy.topicsBy[ch]}</span>
+      {topicRow(ch, 'plan', copy.groups.plan)}
+      {d.c?.joined &&
+        topicRow(
+          ch,
+          'partner_change',
+          copy.groups.partner_change(d.c.partnerName),
+          copy.partnerChangeSub,
+        )}
+      {topicRow(ch, 'money', copy.groups.money)}
+      {topicRow(ch, 'goal', copy.groups.goal)}
+      {topicRow(ch, 'invite', copy.groups.invite)}
+      <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
+        {copy.careAlerts}
+      </span>
+      <div
+        className="hg-list hg-list--plain"
+        role="group"
+        aria-label={`${copy.careAlerts} ${ch === 'push' ? copy.push : copy.email}`}
+      >
+        {CARE.map((t) => {
+          const on = prefs.topics[t][ch];
+          return (
+            <button
+              key={t}
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              disabled={!prefs[ch]}
+              className="hg-listrow"
+              onClick={() => setTopic(t, ch, !on)}
+            >
+              <span />
+              <span className="hg-listrow__text">
+                <span className="hg-listrow__label">
+                  {copy.carePoints[t as keyof typeof copy.carePoints]}
+                </span>
+              </span>
+              <span className={on ? 'hg-check is-on' : 'hg-check'} aria-hidden="true" />
+              <span />
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 
@@ -147,59 +191,24 @@ export function S14Notifications() {
           onClick={() => nav('/settings/notifications/quiet')}
         />
       </div>
-      {pair('plan', copy.groups.plan)}
-      {d.c.joined &&
-        pair('partner_change', copy.groups.partner_change(d.c.partnerName), copy.partnerChangeSub)}
-      {/* 챙길 날: 시점마다 켜고 끄는 걸 받는 방법별 칩 한 줄로(2026-11-03, 토글 8개가 길게 반복돼서) */}
-      <section className="hg-stack" aria-label={copy.groups.care} style={{ gap: 'var(--space-2)' }}>
-        <span className="hg-card__label">{copy.groups.care}</span>
-        {(desktop ? (['push', 'email'] as const) : (['email'] as const)).map((ch) => (
-          <div
-            key={ch}
-            className="hg-stack"
-            role="group"
-            aria-label={`${copy.groups.care} ${ch === 'push' ? copy.push : copy.email}`}
-            style={{ gap: 'var(--space-1)' }}
-          >
-            <span className="hg-help">{ch === 'push' ? copy.push : copy.email}</span>
-            <div className="hg-quick">
-              {CARE.map((t) => {
-                const on = prefs.topics[t][ch];
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    className={on ? 'hg-chip hg-chip--sm is-selected' : 'hg-chip hg-chip--sm'}
-                    aria-pressed={on}
-                    disabled={!prefs[ch]}
-                    onClick={() => setTopic(t, ch, !on)}
-                  >
-                    {copy.carePoints[t as keyof typeof copy.carePoints]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </section>
-      {pair('money', copy.groups.money)}
-      {pair('goal', copy.groups.goal)}
-      {pair('invite', copy.groups.invite)}
-      {/* 5번 마케팅 정보 받기(기본 꺼짐, 켜면 “{날짜} 동의”) */}
-      <Toggle
-        label={copy.marketing}
-        checked={!!marketing.data?.agreed}
-        help={
-          marketing.data?.agreed
-            ? copy.marketingAt(formatDateFull(todayKst(new Date(marketing.data.at))))
-            : undefined
-        }
-        onChange={(on) =>
-          void setMarketing(me.id, on, TERMS_VERSION)
-            .then(() => qc.invalidateQueries({ queryKey: ['consent', 'marketing'] }))
-            .catch(() => toast(copy.failed))
-        }
-      />
+      {channels.map(channelCard)}
+      {/* 5번 마케팅 정보 받기(기본 꺼짐, 켜면 “{날짜} 동의”). 2026-11-04 다른 묶음처럼 카드 안에 */}
+      <div className="hg-card">
+        <Toggle
+          label={copy.marketing}
+          checked={!!marketing.data?.agreed}
+          help={
+            marketing.data?.agreed
+              ? copy.marketingAt(formatDateFull(todayKst(new Date(marketing.data.at))))
+              : undefined
+          }
+          onChange={(on) =>
+            void setMarketing(me.id, on, TERMS_VERSION)
+              .then(() => qc.invalidateQueries({ queryKey: ['consent', 'marketing'] }))
+              .catch(() => toast(copy.failed))
+          }
+        />
+      </div>
     </div>
   );
   return <MainFrame sub="settings" current={null} columns={[body]} />;

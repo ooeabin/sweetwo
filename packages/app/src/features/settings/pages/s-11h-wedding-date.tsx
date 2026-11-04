@@ -1,6 +1,6 @@
 import { qk, updateSpace } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { DateInput, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,6 +9,19 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 type Status = 'married' | 'engaged';
+
+const wheelOf = (s: string) => ({
+  y: Number(s.slice(0, 4)),
+  m: Number(s.slice(5, 7)),
+  d: Number(s.slice(8, 10)),
+});
+const textOf = (v: { y: number; m: number; d: number }) =>
+  `${v.y}-${String(v.m).padStart(2, '0')}-${String(v.d).padStart(2, '0')}`;
+const addDay = (s: string) => {
+  const t = new Date(`${s}T00:00:00Z`);
+  t.setUTCDate(t.getUTCDate() + 1);
+  return t.toISOString().slice(0, 10);
+};
 
 // S-11h 결혼한 날·예정일(Q4, O-12와 같음): 했어요는 오늘까지, 준비 중은 내일부터, 준비 중만 ‘아직 미정이에요’ → 예정 연·월.
 // S-11g에서 상태를 바꿨으면 ?status=로 와서 상태와 날짜를 함께 저장. 저장 = Toast ‘되돌리기’(상대 알림은 서버),
@@ -109,7 +122,20 @@ export function S11hWeddingDate() {
         dv && void save({ wedding_date: dv, wedding_month: null, wedding_date_estimated: false })
       }
     >
-      <DateInput label={title} value={dv} onChange={(v) => setDate(v)} error={rangeError} />
+      {/* 2026-11-04 다른 날짜 질문과 같은 휠. 처음 값: 했어요 = 오늘, 준비 중 = 내일 */}
+      <DateWheel
+        label={title}
+        value={dv ? wheelOf(dv) : null}
+        initial={wheelOf(engaged ? addDay(today) : today)}
+        minYear={engaged ? Number(today.slice(0, 4)) : 1950}
+        maxYear={Number(today.slice(0, 4)) + (engaged ? 5 : 0)}
+        onChange={(v) => setDate(textOf(v))}
+      />
+      {rangeError && (
+        <p className="hg-help is-error" role="alert">
+          {rangeError}
+        </p>
+      )}
       {engaged && (
         <button
           type="button"

@@ -17,7 +17,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { inviteLink } from '../../onboarding';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -75,7 +75,7 @@ export function S12Couple() {
     (state === 'unlink_pending' && unlink.isLoading) ||
     ((state === 'solo' || state === 'not_joined') && myUnlink.isLoading)
   )
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+    return <LoadingFrame sub="settings" current={null} />;
   const { c, space: sp } = d;
   const today = todayKst();
 
