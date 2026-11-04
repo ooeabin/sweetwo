@@ -14,18 +14,19 @@ import { useNavigate } from 'react-router-dom';
 import { track } from '../../shared/analytics';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
-import { useMe, useNetWorth } from './data';
+import { useMe, useNetWorth, type NetWorthView } from './data';
 
 export const RANK_PATH = '/assets/rank';
 
 /** 순위 배너 상태(계산·배분 7-7): 자산 없음 / 안 봄 / 이번 달 봄 / 지난번 값 */
-export function useRank(): { state: RankState; net: number } | null {
+export function useRank(): { state: RankState; net: number; view: NetWorthView } | null {
   const me = useMe();
   const nw = useNetWorth(true);
   if (!me.data || !nw) return null;
   const thisMonth = `${todayKst().slice(0, 7)}-01`;
   return {
     net: nw.nw.net,
+    view: nw,
     state: rankState({
       hasItems: !nw.empty,
       net: nw.nw.net,

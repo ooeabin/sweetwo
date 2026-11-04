@@ -339,6 +339,16 @@ export const copy = {
   rankAgeMedian: (band: string) => `${band} 가구 중앙값`, // [확인 필요]
   rankAgeAbove: (band: string) => `${band} 가구 가운데 중간보다 많아요`, // [확인 필요]
   rankAgeBelow: (band: string) => `${band} 가구 가운데 중간보다 아래예요`, // [확인 필요] 계산·배분 7-3 말투(사실만)
+  rankPrev: (m: number) => `${m}월보다`, // [확인 필요]
+  rankPrevSub: (m: number, pct: number) => `${m}월 상위 ${pct}%`,
+  rankUp: (p: number) => `${p}%p 올랐어요`, // [확인 필요]
+  rankDown: (p: number) => `${p}%p 내려갔어요`, // [확인 필요]
+  rankSame: '그대로예요',
+  rankNextStep: (top: number) => `상위 ${top}%까지 남은 금액`, // [확인 필요]
+  rankDebt: '부채 비율', // [확인 필요] 부채 ÷ 자산
+  rankFinancial: '자산 중 금융자산', // [확인 필요] 예금·투자·보험·보증금
+  rankAgeAvg: (band: string, pct: number) => `${band} 가구 평균 ${pct}%`,
+  rankOurPct: (pct: number) => `우리 ${pct}%`,
   rankAgeNote: '가구주 나이별 공공 통계 기준', // [확인 필요]
   // F-01 빈 상태 항목별 등록(2026-11-04)
   emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]

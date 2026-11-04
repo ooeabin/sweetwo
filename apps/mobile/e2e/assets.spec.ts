@@ -621,11 +621,17 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await row.click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   await expect(page.getByText(/우리 자산은 상위 \d+%예요/)).toBeVisible();
-  await expect(page.getByText('공공 통계 기준')).toBeVisible();
+  await expect(page.getByText('공공 통계 기준', { exact: true })).toBeVisible();
   await expect(page.getByText('전체 가구 중앙값')).toBeVisible();
   await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
   await expect(page.getByText('30대 가구 중앙값')).toBeVisible();
   await expect(page.getByText(/30대 가구 가운데 중간보다 (많아요|아래예요)/)).toBeVisible();
+  await expect(page.getByText(/상위 \d+%까지 남은 금액/)).toBeVisible();
+  await expect(page.getByText(/^\d+월보다$/)).toBeVisible(); // 지난달 기록이 있음
+  await expect(page.getByText('부채 비율')).toBeVisible();
+  await expect(page.getByText('30대 가구 평균 30%')).toBeVisible();
+  await expect(page.getByText('자산 중 금융자산')).toBeVisible();
+  await expect(page.getByText('가구주 나이별 공공 통계 기준')).toBeVisible();
   await axe(page);
   await expect.poll(() => db.me.rank_month).toBe('2026-10-01');
   const pct = Number(db.me.rank_pct);

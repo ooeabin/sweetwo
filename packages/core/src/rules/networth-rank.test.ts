@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { rankAgeBand, rankBracket, rankState, rankTopPct } from './networth-rank';
+import {
+  debtRatioPct,
+  financialPct,
+  rankAgeBand,
+  rankBracket,
+  rankChange,
+  rankNextStep,
+  rankState,
+  rankTopPct,
+} from './networth-rank';
 
 // 계산·배분 7-7 예시를 그대로
 describe('우리 자산 순위 1단계(7-7, 2025년 기준)', () => {
@@ -17,6 +26,32 @@ describe('우리 자산 순위 1단계(7-7, 2025년 기준)', () => {
   it('−1억 미만은 상위 99%', () => expect(rankTopPct(-200_000_000)).toBe(99));
   it('0원 → 상위 97%', () => expect(rankTopPct(0)).toBe(97));
   it('칸 경계: P10(1,210만 원)은 P10~P20 칸', () => expect(rankBracket(12_100_000)).toBe(3));
+});
+
+describe('다음 칸, 지난달 대비, 부채·금융자산 비율(F-08)', () => {
+  it('1,600만 원(상위 89%) → 상위 80%(P20 5,108만 원)까지 3,508만 원', () =>
+    expect(rankNextStep(16_000_000)).toEqual({ top: 80, need: 35_080_000 }));
+  it('상위 90%면 다음은 80%', () => expect(rankNextStep(12_100_000)?.top).toBe(80));
+  it('3억 5,000만 원(상위 39%) → 상위 30%(P70 4억 6,180만 원)까지 1억 1,180만 원', () =>
+    expect(rankNextStep(350_000_000)).toEqual({ top: 30, need: 111_800_000 }));
+  it('상위 10%면 없음', () => expect(rankNextStep(2_000_000_000)).toBeNull());
+  it('지난달 1,000만 원 → 이번 달 1,600만 원: 상위 92%(3 + 7 × 1,000 ÷ 1,210 = 8.8) → 89%, 3%p 올라감', () =>
+    expect(rankChange(10_000_000, 16_000_000)).toEqual({ prev: 92, up: 3 }));
+  it('지난달 기록이 없으면 없음', () => expect(rankChange(null, 16_000_000)).toBeNull());
+  it('부채 비율: 자산 2억, 부채 3,600만 → 18%', () =>
+    expect(debtRatioPct(200_000_000, 36_000_000)).toBe(18));
+  it('부채 비율: 자산 0원이면 없음', () => expect(debtRatioPct(0, 1_000_000)).toBeNull());
+  it('금융자산 비율: 예금 4,000만 + 전세 보증금 1억 + 집 2억 + 차 2,000만 → 14,000 ÷ 36,000 = 39%', () =>
+    expect(
+      financialPct([
+        { side: 'asset', grp: 'deposit', kind: 'savings', amount: 40_000_000 },
+        { side: 'asset', grp: 'real_estate', kind: 'deposit_money', amount: 100_000_000 },
+        { side: 'asset', grp: 'real_estate', kind: 'house', amount: 200_000_000 },
+        { side: 'asset', grp: 'etc', kind: 'car', amount: 20_000_000 },
+        { side: 'debt', grp: 'credit', kind: 'credit_loan', amount: 5_000_000 },
+        { side: 'asset', grp: 'deposit', kind: 'savings', amount: 9_000_000, visibility: 'private' },
+      ]),
+    ).toBe(39));
 });
 
 describe('연령대(7-1처럼 두 사람 평균 나이)', () => {

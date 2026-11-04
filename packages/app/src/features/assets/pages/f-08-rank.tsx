@@ -1,8 +1,12 @@
 import {
+  debtRatioPct,
   formatYm,
   RANK_AGE_MEDIAN,
+  RANK_AGE_STATS,
   RANK_BASIS,
   rankBracket,
+  rankChange,
+  rankNextStep,
   rankTopPct,
   todayKst,
 } from '@sweetwo/core';
@@ -34,6 +38,13 @@ export function F08Rank() {
   if (r.state.kind === 'empty') return <Navigate to="/assets" replace />;
   const p = pct ?? 99;
   const month = Number(todayKst().slice(5, 7));
+  const v = r.view;
+  const change = rankChange(v.prev?.net ?? null, r.net);
+  const prevMonth = v.prev ? Number(v.prev.month.slice(5, 7)) : null;
+  const next = rankNextStep(r.net);
+  const debt = debtRatioPct(v.nw.assets, v.nw.debts);
+  const bandName = age ? copy.rankAge[age] : '';
+  const stats = age ? RANK_AGE_STATS[age] : null;
   const body = (
     <div key="r" className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
       <PageHeader title={copy.rankTitle} backLabel={copy.back} onBack={() => nav(-1)} />
@@ -51,6 +62,27 @@ export function F08Rank() {
       </section>
       <div className="hg-list">
         <ListRow label={copy.rankOurs(month)} value={money(r.net, masked)} chevron={false} />
+        {change && prevMonth && (
+          <ListRow
+            label={copy.rankPrev(prevMonth)}
+            sub={copy.rankPrevSub(prevMonth, change.prev)}
+            value={
+              change.up > 0
+                ? copy.rankUp(change.up)
+                : change.up < 0
+                  ? copy.rankDown(-change.up)
+                  : copy.rankSame
+            }
+            chevron={false}
+          />
+        )}
+        {next && (
+          <ListRow
+            label={copy.rankNextStep(next.top)}
+            value={money(next.need, masked)}
+            chevron={false}
+          />
+        )}
         <ListRow
           label={copy.rankMedian}
           value={money(RANK_BASIS.medianNet, masked)}
@@ -58,19 +90,35 @@ export function F08Rank() {
         />
       </div>
       {age && (
-        <section className="hg-stack" aria-label={copy.rankAgeTitle(copy.rankAge[age])}>
-          <SectionHeader title={copy.rankAgeTitle(copy.rankAge[age])} />
+        <section className="hg-stack" aria-label={copy.rankAgeTitle(bandName)}>
+          <SectionHeader title={copy.rankAgeTitle(bandName)} />
           <div className="hg-list">
             <ListRow
-              label={copy.rankAgeMedian(copy.rankAge[age])}
+              label={copy.rankAgeMedian(bandName)}
               sub={
                 r.net >= RANK_AGE_MEDIAN[age]
-                  ? copy.rankAgeAbove(copy.rankAge[age])
-                  : copy.rankAgeBelow(copy.rankAge[age])
+                  ? copy.rankAgeAbove(bandName)
+                  : copy.rankAgeBelow(bandName)
               }
               value={money(RANK_AGE_MEDIAN[age], masked)}
               chevron={false}
             />
+            {stats && debt !== null && (
+              <ListRow
+                label={copy.rankDebt}
+                sub={copy.rankAgeAvg(bandName, Math.round(stats.debtPct))}
+                value={copy.rankOurPct(debt)}
+                chevron={false}
+              />
+            )}
+            {stats && v.financialPct !== null && (
+              <ListRow
+                label={copy.rankFinancial}
+                sub={copy.rankAgeAvg(bandName, Math.round(stats.financialPct))}
+                value={copy.rankOurPct(v.financialPct)}
+                chevron={false}
+              />
+            )}
           </div>
         </section>
       )}

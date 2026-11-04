@@ -1,4 +1,5 @@
 import type { Won } from '../money';
+import type { AssetSide, NetWorthItem } from './asset';
 
 // 우리 자산 순위 1단계(계산·배분 7-7, 23 F-08, ADR 0006, 2026-11-04).
 // 2025년 가계금융복지조사(통계청·한국은행·금융감독원, 자산·부채 2025년 3월 말) 부록 통계표 12의 순자산 분위 경계값(P10~P90),
@@ -49,6 +50,26 @@ export function rankTopPct(net: Won): number {
   return Math.min(Math.max(pct, 1), 99);
 }
 
+/**
+ * 다음 10% 칸까지(F-08 6b): 지금 상위 n%에서 한 칸 위(상위 80%, 70% …) 경계값까지 남은 금액.
+ * P90 이상(상위 10%)이면 null
+ */
+export function rankNextStep(net: Won): { top: number; need: Won } | null {
+  const now = rankTopPct(net);
+  const top = Math.floor((now - 1) / 10) * 10;
+  if (top < 10) return null;
+  const point = RANK_BASIS.points.find((x) => x.below === 100 - top);
+  if (!point) return null;
+  return { top, need: Math.max(point.net - net, 1) };
+}
+
+/** 지난달 대비(F-08 6c): 지난달 순자산으로 다시 계산한 상위 n%. 양수 = 올라감(%p) */
+export function rankChange(prevNet: Won | null, net: Won): { prev: number; up: number } | null {
+  if (prevNet === null) return null;
+  const prev = rankTopPct(prevNet);
+  return { prev, up: prev - rankTopPct(net) };
+}
+
 /** 가구주 연령대(부록 통계표 1~10 ‘가구주 연령대별’, 10세 구간) */
 export type RankAgeBand = '20s' | '30s' | '40s' | '50s' | '60s';
 
@@ -60,6 +81,49 @@ export const RANK_AGE_MEDIAN: Record<RankAgeBand, Won> = {
   '50s': 31_685 * MAN,
   '60s': 25_000 * MAN,
 };
+
+/**
+ * 연령대별 부채 비율(부채 ÷ 자산, 평균끼리, %)과 금융자산 비율(금융자산 ÷ 자산, 평균끼리, %), 2025년 3월 말.
+ * 부록 통계표 1~10 ‘가계의 재무건전성 부채/자산’, 자산·금융자산 평균에서 계산(소수 첫째 자리)
+ */
+export const RANK_AGE_STATS: Record<RankAgeBand, { debtPct: number; financialPct: number }> = {
+  '20s': { debtPct: 30.3, financialPct: 57.1 },
+  '30s': { debtPct: 30.3, financialPct: 39.2 },
+  '40s': { debtPct: 22.8, financialPct: 26.2 },
+  '50s': { debtPct: 16.7, financialPct: 24.9 },
+  '60s': { debtPct: 10.8, financialPct: 18.7 },
+};
+
+/** 우리 부채 비율(계산·배분 7-2): 부채 합계 ÷ 자산 합계(평가금액), 반올림 %. 자산 0원이면 null */
+export function debtRatioPct(assets: Won, debts: Won): number | null {
+  if (assets <= 0) return null;
+  return Math.round((debts * 100) / assets);
+}
+
+// 공공 통계의 금융자산 = 저축액(예금·적금, 주식·펀드, 보험 등) + 전·월세 보증금. 나머지(부동산, 자동차 등)는 실물자산
+const FINANCIAL_GROUPS = new Set(['cash', 'deposit', 'subscription', 'invest', 'pension', 'insurance']);
+const isFinancial = (grp: string, kind?: string) =>
+  FINANCIAL_GROUPS.has(grp) || (grp === 'real_estate' && kind === 'deposit_money');
+
+/**
+ * 우리 금융자산 비율(F-08 6a): 금융자산 ÷ 자산(평가금액), 반올림 %. 비공개·판 항목 제외.
+ * 배우자 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
+ */
+export function financialPct(
+  items: (NetWorthItem & { grp: string; kind?: string })[],
+  partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
+): number | null {
+  const live = items.filter(
+    (i) => i.side === 'asset' && i.visibility !== 'private' && (i.status ?? 'held') === 'held',
+  );
+  const partner = partnerSums.filter((p) => p.side === 'asset');
+  const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);
+  if (total <= 0) return null;
+  const fin =
+    live.filter((i) => isFinancial(i.grp, i.kind)).reduce((t, i) => t + i.amount, 0) +
+    partner.filter((p) => isFinancial(p.grp)).reduce((t, p) => t + p.total, 0);
+  return Math.round((fin * 100) / total);
+}
 
 /**
  * 우리 연령대(7-1처럼 두 사람 출생연도로 계산한 평균 나이 = 올해 − 출생연도, 내림).
