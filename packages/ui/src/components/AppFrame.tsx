@@ -60,7 +60,7 @@ export interface AppFrameProps {
     /** 인사 카드 없이(2026-11-03 홈): 다른 메뉴처럼 제목 줄(넓은 창 “홈” + ‘추가’), 좁은 창은 화면 읽기용 제목만 */
     plain?: boolean;
   };
-  /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리에 메뉴 이름이 있어 동작만 */
+  /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리가 홈과 같아(메뉴 이름은 화면 읽기용) 동작만 */
   page?: { title: ReactNode; actions?: ReactNode };
   /** 좁은 창 머리의 큰 제목(메뉴 이름) */
   narrowTitle: string;
@@ -233,44 +233,39 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리: 홈은 두 사람(아바타 + 이름, 2026-11-03 워드마크 대신), 다른 메뉴는 메뉴 이름 */}
+        {/* 좁은 창 머리: 모든 화면이 홈과 같음(두 사람 아바타 + 이름, 2026-11-04 머리 공통화). 메뉴 이름은 화면 읽기용 제목으로만 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
-          {p.today ? (
-            (() => {
-              const body = (
-                <>
-                  {/* 배우자 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
-                  <span className="hg-avatars" aria-hidden="true">
-                    {p.people.map((x) => (
-                      <Person key={x.no} p={x} />
-                    ))}
-                  </span>
-                  <span className="hg-mhead__names">
-                    {p.people
-                      .filter((x) => !x.empty && x.name)
-                      .map((x) => x.name)
-                      .join(', ')}
-                  </span>
-                </>
-              );
-              return p.onInvite && p.people.some((x) => x.empty) ? (
-                <button
-                  type="button"
-                  className="hg-mhead__people"
-                  aria-label={p.labels.invite}
-                  onClick={p.onInvite}
-                >
-                  {body}
-                </button>
-              ) : (
-                <span className="hg-mhead__people">{body}</span>
-              );
-            })()
-          ) : (
-            <div className="hg-topbar__text">
-              <h1 className="hg-topbar__title">{p.narrowTitle}</h1>
-            </div>
-          )}
+          {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
+          {(() => {
+            const body = (
+              <>
+                {/* 배우자 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
+                <span className="hg-avatars" aria-hidden="true">
+                  {p.people.map((x) => (
+                    <Person key={x.no} p={x} />
+                  ))}
+                </span>
+                <span className="hg-mhead__names">
+                  {p.people
+                    .filter((x) => !x.empty && x.name)
+                    .map((x) => x.name)
+                    .join(', ')}
+                </span>
+              </>
+            );
+            return p.onInvite && p.people.some((x) => x.empty) ? (
+              <button
+                type="button"
+                className="hg-mhead__people"
+                aria-label={p.labels.invite}
+                onClick={p.onInvite}
+              >
+                {body}
+              </button>
+            ) : (
+              <span className="hg-mhead__people">{body}</span>
+            );
+          })()}
           <IconButton
             icon="search"
             label={p.labels.search}
