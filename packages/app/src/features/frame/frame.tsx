@@ -35,7 +35,7 @@ export function MainFrame(
   p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'> & {
     /**
      * 메뉴 첫 화면이 아닌 화면(2026-11-03 추가 입구 하나로): + 버튼 없음.
-     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면(좁은 창은 탭 막대만 숨김, 앱 머리는 보임 2026-11-04)
+     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면. 둘 다 좁은 창은 앱 머리와 탭 막대 없이 ‘‹ 제목’ 한 줄(2026-11-04 토스 구조)
      */
     sub?: 'detail' | 'settings';
     /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
@@ -102,7 +102,7 @@ export function MainFrame(
         today={p.today}
         page={p.page}
         columns={p.columns}
-        sub={p.sub === 'settings'}
+        sub={!!p.sub}
         banner={
           offline || p.banner ? (
             <>
