@@ -166,19 +166,17 @@ export function Y05CareDay() {
       </section>
       <section className="hg-stack" aria-label={copy.alerts}>
         <span className="hg-card__label">{copy.alerts}</span>
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.alerts}
-          style={{ gap: 'var(--space-2)' }}
-        >
+        {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름, iOS 미리 알림·Rodeo처럼) */}
+        <div className="hg-list" role="group" aria-label={copy.alerts}>
           {ALERTS.map((n) => {
             const on = care.alerts.includes(n);
             return (
-              <Chip
+              <button
                 key={n}
-                small
-                selected={on}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                className="hg-listrow"
                 onClick={() =>
                   void patch({
                     alerts: on
@@ -187,8 +185,13 @@ export function Y05CareDay() {
                   })
                 }
               >
-                {copy.alertChip(n)}
-              </Chip>
+                <span />
+                <span className="hg-listrow__text">
+                  <span className="hg-listrow__label">{copy.alertRow(n)}</span>
+                </span>
+                <span className={on ? 'hg-check is-on' : 'hg-check'} aria-hidden="true" />
+                <span />
+              </button>
             );
           })}
         </div>

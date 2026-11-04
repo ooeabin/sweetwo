@@ -123,7 +123,7 @@ export const copy = {
   status: '준비 상황',
   statuses: { todo: '아직', preparing: '준비 중', done: '다녀왔어요' },
   alerts: '미리 알림',
-  alertChip: (n: number) => (n === 0 ? '당일' : `D-${n}`),
+  alertRow: (n: number) => (n === 0 ? '당일' : `${n}일 전`), // [확인 필요] 2026-11-04 체크 목록(‘D-30’ 칩에서)
   memo: '메모',
   memoPlaceholder: '예: 같이 케이크 먹었어요', // [확인 필요] 2026-11-04 Y-08c
   dayMemoPlaceholder: '예: 무릎이 안 좋으시다고 하셨음', // 24 Y-05 7번 예시

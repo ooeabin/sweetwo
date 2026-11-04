@@ -532,6 +532,16 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
   const status = page.getByRole('group', { name: '준비 상황' });
   await expect(status.getByRole('button')).toHaveCount(2);
   await expect(page.getByRole('button', { name: '다녀왔어요' })).toBeVisible();
+  // 미리 알림은 체크 목록
+  const alerts = page.getByRole('group', { name: '미리 알림' });
+  await expect(alerts.getByRole('checkbox', { name: '30일 전' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await alerts.getByRole('checkbox', { name: '14일 전' }).click();
+  await expect
+    .poll(() => (db.cares.find((x) => x.id === 'c-mom') as { alerts: number[] }).alerts)
+    .toContain(14);
   await expect(page.getByLabel('메모')).toHaveAttribute(
     'placeholder',
     '예: 무릎이 안 좋으시다고 하셨음',
