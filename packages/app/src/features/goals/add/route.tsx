@@ -1,4 +1,5 @@
 import { templateByKey } from '@sweetwo/core';
+import { QuestionSkeleton } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { useGoalsData } from '../data';
@@ -44,7 +45,7 @@ export function GoalFillStart() {
     start(t.key, g.id);
     setReady(true);
   }, [g, t, start]);
-  if (data.loading) return null;
+  if (data.loading) return <QuestionSkeleton />;
   // 템플릿 질문이 없는 목표(비상금 등)는 금액 칸 하나로
   if (!g || !t?.questions.length) return <Navigate to={`/goals/${id}/edit/amount`} replace />;
   return ready ? <Navigate to={addPath('q1')} replace /> : null;

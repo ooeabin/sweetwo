@@ -1,6 +1,6 @@
 import { qk, requestUnlink } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { Field, QuestionLayout } from '@sweetwo/ui';
+import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +25,7 @@ export function S12cUnlinkConfirm() {
   const d = useSettingsData();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  if (d.loading || !d.c) return null;
+  if (d.loading || !d.c) return <QuestionSkeleton />;
   const c = d.c;
   const ok = text.trim() === copy.confirmWord;
   const send = async () => {

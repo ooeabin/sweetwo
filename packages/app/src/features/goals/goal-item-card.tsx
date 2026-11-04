@@ -78,10 +78,7 @@ export function GoalItemCard({
       <button type="button" className="hg-goaltile__main" onClick={onOpen}>
         <span className="hg-goaltile__top">
           <GoalArt g={i} tile />
-          {(late ||
-            g.kind !== 'once' ||
-            i.state === 'achieved' ||
-            i.state === 'paused') && (
+          {(late || g.kind !== 'once' || i.state === 'achieved' || i.state === 'paused') && (
             <span className="hg-goaltile__badges">
               {/* 접힌 목록 상태 배지: 달성은 연한 파랑, 보류는 회색(2026-11-04 사용 완료 없앰) */}
               {i.state === 'achieved' && <Badge kind="achieved">{copy.status.achieved}</Badge>}

@@ -1,5 +1,5 @@
 import { qk } from '@sweetwo/api';
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -38,7 +38,7 @@ export function G05Send() {
     );
 
   if (step === 'pick') {
-    if (d.loading || splits.isLoading) return null;
+    if (d.loading || splits.isLoading) return <QuestionSkeleton />;
     // 모으는 중인 목표(이 목표 빼고), 배우자 내 목표 빼고
     const targets = d.goals.filter(
       (x) =>

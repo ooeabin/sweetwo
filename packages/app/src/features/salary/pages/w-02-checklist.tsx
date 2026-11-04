@@ -6,7 +6,15 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import { businessDayOnOrBefore, readWon, todayKst } from '@sweetwo/core';
-import { AmountInput, IconButton, QuestionLayout, Ring, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  AmountInput,
+  IconButton,
+  QuestionLayout,
+  Ring,
+  SectionHeader,
+  Tabs,
+  QuestionSkeleton,
+} from '@sweetwo/ui';
 import { PersonDot } from '../../../shared/person';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -72,7 +80,7 @@ export function W02Checklist() {
     prevLeft.current = left;
   }, [left, nav]);
 
-  if (!me.data || !space.data || !goals.data || lists.isLoading) return null;
+  if (!me.data || !space.data || !goals.data || lists.isLoading) return <QuestionSkeleton />;
   const personName = (id: string | null) =>
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);

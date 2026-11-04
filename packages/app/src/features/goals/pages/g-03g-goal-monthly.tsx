@@ -1,6 +1,6 @@
 import { qk, saveSplit } from '@sweetwo/api';
 import { goalNeed, leftover, readWon, type SplitLineDraft } from '@sweetwo/core';
-import { AmountInput, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -20,7 +20,7 @@ export function G03gGoalMonthly() {
   const splits = useSplits();
   const [value, setValue] = useState<number | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
-  if (data.loading || splits.isLoading) return null;
+  if (data.loading || splits.isLoading) return <QuestionSkeleton />;
   const me = data.me;
   const g = data.goals.find((x) => x.id === id);
   const joint = data.space?.salary_mode === 'joint';

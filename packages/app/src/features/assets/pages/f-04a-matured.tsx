@@ -1,6 +1,6 @@
 import { settleMatured } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { ChoiceCards, DateWheel, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, DateWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -29,7 +29,7 @@ export function F04aMatured() {
   const [date, setDate] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (d.loading) return null;
+  if (d.loading) return <QuestionSkeleton />;
   const a = d.items.find((x) => x.id === id);
   if (!a || !canEdit(a, d.me?.id) || a.side !== 'asset') return <Navigate to="/assets" replace />;
   const today = todayKst();

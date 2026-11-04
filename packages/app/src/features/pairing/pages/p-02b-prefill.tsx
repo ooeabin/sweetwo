@@ -1,6 +1,6 @@
 import { discardPrefill, fetchAssets, qk, recordPrefillConsent } from '@sweetwo/api';
 import { readWon } from '@sweetwo/core';
-import { ListRow, QuestionLayout } from '@sweetwo/ui';
+import { ListRow, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
@@ -11,7 +11,7 @@ export function P02bPrefill() {
   const s = useJoinStep('p-02b');
   const d = s.d;
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
-  if (!d.ready || !d.me || assets.isLoading) return null;
+  if (!d.ready || !d.me || assets.isLoading) return <QuestionSkeleton />;
   const starter = d.couple?.partnerName ?? '';
   const items = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && a.owner_user_id === null && a.created_by !== d.me?.id,

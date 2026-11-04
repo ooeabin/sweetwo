@@ -236,6 +236,7 @@ export const copy = {
   noPhotos: '사진은 내보내기에 들어가지 않아요',
   doExport: '내보내기',
   exporting: '파일을 만들고 있어요',
+  exportingSub: '잠시만 기다려 주세요', // [확인 필요] 2026-11-04 처리 중 화면
   exportFailed: '파일을 만들지 못했어요',
   retry: '다시 시도',
   exported: '파일을 저장했어요', // [확인 필요]

@@ -32,7 +32,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { lastAssetsTab } from '../assets-frame';
 import { copy } from '../copy';
 import { canEdit, ownerOf, useAssetsData, useRefreshAssets } from '../data';
@@ -75,7 +75,7 @@ export function F04Item() {
   const [draftAmount, setDraftAmount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (d.loading) return null;
+  if (d.loading) return <LoadingFrame sub="detail" current="assets" />;
   const a = d.items.find((x) => x.id === id);
   if (!a) return <Navigate to={lastAssetsTab()} replace />;
   const o = ownerOf(a, d);

@@ -1,6 +1,6 @@
 import { qk, updateMe } from '@sweetwo/api';
 import { birthYearRange } from '@sweetwo/core';
-import { DateWheel, QuestionLayout, type YMD } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, type YMD, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ export function S11iBirthYear() {
   const d = useSettingsData();
   const [b, setB] = useState<YMD | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me) return <QuestionSkeleton />;
   const range = birthYearRange();
   const title = copy.birthYearQ(d.me.nickname ?? '');
   const y = b?.y ?? d.me.birth_year;

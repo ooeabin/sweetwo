@@ -76,6 +76,7 @@ let asked = false;
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
   const nav = useNavigate();
+  // 모든 화면을 감싸는 문이라 뼈대 없이(어느 화면 모양인지 모름, 보통 A-01에서 이미 불러옴)
   if (me.isLoading) return null;
   const step = current(me.data?.onboarding_step?.toLowerCase() ?? 'o-10');
   const open = !!me.data && !me.data.onboarding_done_at;

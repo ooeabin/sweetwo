@@ -1,4 +1,4 @@
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -9,7 +9,7 @@ import { UnlinkDeleted } from '../unlink';
 export function S12aUnlinkIntro() {
   const nav = useNavigate();
   const d = useSettingsData();
-  if (d.loading || !d.c || !d.space) return null;
+  if (d.loading || !d.c || !d.space) return <QuestionSkeleton />;
   if (d.space.couple_state !== 'connected') return <Navigate to="/settings/couple" replace />;
   return (
     <QuestionLayout

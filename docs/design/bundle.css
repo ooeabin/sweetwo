@@ -441,6 +441,18 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-skel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--surface-sunk), transparent); transform: translateX(-100%); animation: hg-shimmer 1.4s ease-in-out infinite; }
 @keyframes hg-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .hg-skel::after { animation: none; display: none; } }
+/* 2026-11-04 로딩 상태(Skeleton.md): 실제 모양 뼈대(B), 질문 화면 뼈대(D), 처리 중(E) */
+.hg-skelcard { box-sizing: border-box; padding: var(--space-2) var(--space-5); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-1); }
+.hg-skelcard__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 56px; }
+.hg-skelq { min-height: 56px; }
+.hg-busy { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); min-height: 60vh; padding: 0 var(--space-6); text-align: center; }
+.hg-busy__art { display: grid; place-items: center; width: 112px; height: 112px; margin-bottom: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); }
+.hg-busy__art .hg-ico { width: 44px; height: 44px; animation: hg-breathe 1.6s ease-in-out infinite; }
+.hg-busy__art img { width: 96px; height: 96px; object-fit: contain; }
+.hg-busy__title { margin: 0; font: 700 20px/28px var(--font-sans); color: var(--ink); }
+.hg-busy__sub { margin: 0; font: 400 15px/22px var(--font-sans); color: var(--slate); }
+@keyframes hg-breathe { 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .hg-busy__art .hg-ico { animation: none; } }
 
 /* Avatar */
 .hg-avatar { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); font: 600 13px/1 var(--font-sans); flex: none; box-sizing: border-box; }

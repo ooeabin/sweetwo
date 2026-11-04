@@ -1,5 +1,5 @@
 import { fetchMe, invitePreview, joinSpace, type JoinResult } from '@sweetwo/api';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -63,7 +63,8 @@ export function P01JoinStart() {
     void join();
   }, [me.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (preview.isLoading || signedIn.isLoading || (signedIn.data && me.isLoading)) return null;
+  if (preview.isLoading || signedIn.isLoading || (signedIn.data && me.isLoading))
+    return <QuestionSkeleton />;
   const p = preview.data;
   const blocked: ErrorKey | null =
     result && result in copy.errors

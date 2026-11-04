@@ -18,6 +18,7 @@ import {
   QuestionLayout,
   ShortText,
   Tabs,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -64,7 +65,7 @@ export function AssetAddRoute() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || !d.couple || !d.space) return null;
+  if (d.loading || !d.couple || !d.space) return <QuestionSkeleton />;
   const solo = d.space.couple_state === 'solo';
   const joined = d.couple.joined;
   const steps = assetSteps(draft, solo);

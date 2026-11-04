@@ -17,6 +17,7 @@ import {
   ListRow,
   QuestionLayout,
   ShortText,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -89,7 +90,7 @@ export function Y08Record() {
     if (care && d.key !== key) set(blank(key, care.budget || null));
   }, [care, d.key, key, set]);
 
-  if (c.loading) return null;
+  if (c.loading) return <QuestionSkeleton />;
   if (!care || !on) return <Navigate to="/calendar/list" replace />;
   if (d.key !== key) return null;
 

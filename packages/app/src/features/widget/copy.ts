@@ -1,4 +1,3 @@
-
 // 위젯 문구(docs/spec/26-widgets.md, 디자인 Widget). 기획서 “ ” 안 문장을 그대로.
 export const copy = {
   // WG-01 이번 달 월급

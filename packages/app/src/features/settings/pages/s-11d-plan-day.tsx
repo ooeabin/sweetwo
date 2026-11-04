@@ -1,6 +1,6 @@
 import { qk, setJointCycleDay } from '@sweetwo/api';
 import { coupleBaseDay, type BaseDay } from '@sweetwo/core';
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ export function S11dPlanDay() {
   const d = useSettingsData();
   const [v, setV] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.c || !d.space) return null;
+  if (d.loading || !d.c || !d.space) return <QuestionSkeleton />;
   const { c, space: sp } = d;
   const current: BaseDay | null =
     sp.joint_cycle_day === null

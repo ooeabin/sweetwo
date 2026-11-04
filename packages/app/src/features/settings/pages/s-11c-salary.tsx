@@ -1,6 +1,12 @@
 import { qk, updateMe } from '@sweetwo/api';
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, DayWheel, QuestionLayout, SectionHeader } from '@sweetwo/ui';
+import {
+  AmountInput,
+  DayWheel,
+  QuestionLayout,
+  SectionHeader,
+  QuestionSkeleton,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +26,7 @@ export function S11cSalary() {
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
   const [day, setDay] = useState<Day | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me) return <QuestionSkeleton />;
   const me = d.me;
   const value = amount === undefined ? (me.monthly_income ?? null) : amount;
   const isVariable = variable ?? me.income_variable ?? false;
