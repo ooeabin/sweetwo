@@ -1,7 +1,18 @@
 import { formatYm, readWon } from '@sweetwo/core';
-import { Button, EmptyState, Lead, List, ListRow, MonthBars } from '@sweetwo/ui';
+import { assetGroupsOf } from '@sweetwo/core';
+import {
+  assetIcon,
+  Button,
+  Icon,
+  Lead,
+  List,
+  ListRow,
+  MonthBars,
+  SectionHeader,
+} from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
+import { RankBanner } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
@@ -27,15 +38,46 @@ export function F01Overview() {
   } else if (d.loading) {
     body = null;
   } else if (!d.items.length && !d.sums.length) {
+    // 2026-11-04 항목별 등록 유도: 순위 줄 + 자산 묶음 타일 + 부채 묶음 타일(F-03a와 같은 타일, 누르면 그 묶음을 고른 F-03a)
+    const tiles = (side: 'asset' | 'debt') => (
+      <div
+        className="hg-pick hg-pick--tiles"
+        role="group"
+        aria-label={side === 'asset' ? copy.emptyAssetsQ : copy.emptyDebtsQ}
+      >
+        {assetGroupsOf(side).map((g) => (
+          <button
+            key={g.key}
+            type="button"
+            className="hg-pick__item"
+            onClick={() => nav(`/assets/new?side=${side}&grp=${g.key}`)}
+          >
+            <Icon name={assetIcon(g.key)} />
+            {g.name}
+          </button>
+        ))}
+      </div>
+    );
     body = (
-      <EmptyState
-        title={copy.empty}
-        action={
-          <Button variant="secondary" onClick={() => nav('/assets/new?side=asset')}>
-            {copy.emptyAdd}
-          </Button>
-        }
-      />
+      <>
+        <RankBanner entry="assets" />
+        <section
+          className="hg-stack"
+          style={{ gap: 'var(--space-3)' }}
+          aria-label={copy.emptyAssetsQ}
+        >
+          <SectionHeader title={copy.emptyAssetsQ} />
+          {tiles('asset')}
+        </section>
+        <section
+          className="hg-stack"
+          style={{ gap: 'var(--space-3)' }}
+          aria-label={copy.emptyDebtsQ}
+        >
+          <SectionHeader title={copy.emptyDebtsQ} />
+          {tiles('debt')}
+        </section>
+      </>
     );
   } else {
     const nw = d.nw;
@@ -43,7 +85,13 @@ export function F01Overview() {
     const short = (v: number) => m(v).replace(/ 원$/, '');
     body = (
       <>
-        <section className="hg-stack" style={{ gap: 'var(--space-1)' }} aria-label={copy.ourNetWorth}>
+        {/* 2026-11-04 순위 줄(23 F-01 0번)은 한눈에 맨 위 */}
+        <RankBanner entry="assets" />
+        <section
+          className="hg-stack"
+          style={{ gap: 'var(--space-1)' }}
+          aria-label={copy.ourNetWorth}
+        >
           <span className="hg-networth__label">{copy.ourNetWorth}</span>
           <span className="hg-networth__value">{m(nw.net)}</span>
           {d.change !== null && d.change !== 0 && (
@@ -56,9 +104,7 @@ export function F01Overview() {
         <section className="hg-card hg-stack" aria-label={copy.monthly}>
           <h2 className="hg-card__label">{copy.monthly}</h2>
           <MonthBars
-            label={
-              now ? `${copy.monthly}, ${formatYm(now.month)} ${m(now.net)}` : copy.monthly
-            }
+            label={now ? `${copy.monthly}, ${formatYm(now.month)} ${m(now.net)}` : copy.monthly}
             nowText={now ? short(now.net) : undefined}
             bars={d.series.map((x, i) => ({
               key: x.month,

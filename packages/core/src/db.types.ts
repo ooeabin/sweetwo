@@ -381,6 +381,9 @@ export type Database = {
           provider: Database["public"]["Enums"]["auth_provider"]
           quiet_end: number
           quiet_start: number
+          rank_month: string | null
+          rank_net: number | null
+          rank_pct: number | null
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -422,6 +425,9 @@ export type Database = {
           provider: Database["public"]["Enums"]["auth_provider"]
           quiet_end?: number
           quiet_start?: number
+          rank_month?: string | null
+          rank_net?: number | null
+          rank_pct?: number | null
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -462,6 +468,9 @@ export type Database = {
           provider?: Database["public"]["Enums"]["auth_provider"]
           quiet_end?: number
           quiet_start?: number
+          rank_month?: string | null
+          rank_net?: number | null
+          rank_pct?: number | null
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]

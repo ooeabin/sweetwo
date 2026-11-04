@@ -53,6 +53,18 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'rank_banner_tapped';
+      props: { state: 'empty' | 'unseen' | 'seen' | 'stale'; entry: 'home' | 'assets' };
+    }
+  | {
+      name: 'rank_ad_result';
+      props: { result: 'rewarded' | 'closed' | 'failed' | 'none' };
+    }
+  | {
+      name: 'rank_viewed';
+      props: { top_band: number; basis: 'public_2024' };
+    }
+  | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {

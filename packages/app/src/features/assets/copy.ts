@@ -34,7 +34,7 @@ export const copy = {
   debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '가진 돈을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
+  empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
   graphLabel: '순자산 그래프', // [확인 필요] 화면 읽기용
   periodsLabel: '기간', // [확인 필요] 화면 읽기용
   periods: ['6개월', '1년', '3년', '전체'],
@@ -42,7 +42,7 @@ export const copy = {
   expectedShort: (amount: string) => `예상 ${amount}`,
   summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
   addAsset: '자산 추가',
-  emptyAdd: '가진 돈 추가하기', // 23 빈 상태
+  emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02
   noDebt: '갚을 돈이 없어요',
@@ -148,7 +148,7 @@ export const copy = {
       : `공동자금은 ${limit}%까지 투자하기로 했어요`, // [확인 필요]
 
   // 첫 주 자산·대출 정리(17 O-41~47)
-  weekAssets: '지금 가진 돈을 골라주세요',
+  weekAssets: '지금 자산을 골라주세요',
   weekAccountsIn: (n: number) => `쓰던 통장 ${n}개는 이미 넣어뒀어요`,
   weekAssetAmount: (name: string) => `${topic(name)} 얼마예요?`,
   weekLumpGoal: '이 돈을 어느 목표에 넣을까요?',
@@ -321,4 +321,21 @@ export const copy = {
   overlap: '이미 바꾼 기간과 겹쳐요', // [확인 필요]
   noChange: '바뀌는 점이 없어요', // [확인 필요]
   unknown: '아직 몰라요',
+  // F-08 우리 자산 순위(23 F-08, 2026-11-04)
+  rankTitle: '우리 자산 순위', // [확인 필요]
+  rankCompare: '우리나라 전체 가구 순자산과 비교했어요',
+  rankPublic: '공공 통계 기준',
+  rankBig: (pct: number) => `우리 자산은 상위 ${pct}%예요`, // [확인 필요]
+  rankAxis: { low: '하위', mid: '중간', high: '상위' },
+  rankYou: '우리',
+  rankAria: (pct: number) => `우리나라 전체 가구 중 상위 ${pct}%`,
+  rankBasis: (label: string, ym: string) => `${label}, ${ym} 말 기준`,
+  rankOurs: (month: number) => `${month}월 우리 순자산`,
+  rankMedian: '전체 가구 중앙값', // [확인 필요]
+  rankNote: '구간 안은 고르게 나눠 계산한 추정이에요. 숨긴 항목은 계산에서 빠졌어요', // [확인 필요]
+  rankNext: '다음 달에 다시 확인해 보세요', // [확인 필요]
+  rankBracket: (i: number) => `순자산 구간 ${i + 1}번째`,
+  // F-01 빈 상태 항목별 등록(2026-11-04)
+  emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
+  emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]
 };

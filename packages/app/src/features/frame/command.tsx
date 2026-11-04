@@ -15,14 +15,14 @@ import { session } from '../auth';
 import { copy } from './copy';
 
 // 앱 기본 틀 동작(19 앱 기본 틀 3·4·7·11·12번):
-// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 목표, 가진 돈·대출, 챙길 날(최대 5개씩)
+// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 목표, 자산·부채, 챙길 날(최대 5개씩)
 // - Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N 추가(홈은 추가 메뉴를 엶, 다른 메뉴는 그 화면에 맞는 추가)
-// - 추가 = 목표 / 가진 돈·대출 / 챙길 날
+// - 추가 = 목표 / 자산·부채 / 챙길 날
 
 export const ADD_TO = { goal: '/goals/new', asset: '/assets/new', care: '/calendar/add' } as const;
 const TABS = ['/', '/goals', '/assets', '/calendar'] as const;
 type Tab = 'month' | 'goals' | 'assets' | 'calendar';
-/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·목표 = 목표, 우리 자산 = 가진 돈·대출, 캘린더 = 챙길 날 */
+/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·목표 = 목표, 우리 자산 = 자산·부채, 캘린더 = 챙길 날 */
 export const addFor = (t: Tab | null) =>
   t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.goal;
 
@@ -31,7 +31,7 @@ const Ctx = createContext<{ addOpen: boolean; setAddOpen: (v: boolean) => void }
   setAddOpen: () => undefined,
 });
 
-/** 오늘 띠 ‘추가’(보조 버튼): 목표 / 가진 돈·대출 / 챙길 날. Ctrl(⌘)+N으로도 열림 */
+/** 오늘 띠 ‘추가’(보조 버튼): 목표 / 자산·부채 / 챙길 날. Ctrl(⌘)+N으로도 열림 */
 export function AddMenu() {
   const nav = useNavigate();
   const { addOpen, setAddOpen } = useContext(Ctx);

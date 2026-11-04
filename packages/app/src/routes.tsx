@@ -20,6 +20,7 @@ import {
   F01Overview,
   F02Items,
   F04Item,
+  F08Rank,
   F04aMatured,
   F04bSold,
 } from './features/assets';
@@ -713,6 +714,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-03 항목 추가
+      {
+        path: '/assets/rank',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F08Rank />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-08 우리 자산 순위(2026-11-04)
       {
         path: '/assets/:id',
         element: (

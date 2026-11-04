@@ -29,6 +29,8 @@ export * from './components/MonthBars';
 export * from './components/GoalPick';
 export { goalIcon } from './components/goal-icons';
 export { assetIcon } from './components/asset-icons';
+export { Distribution } from './components/Distribution';
+export { RankRow } from './components/RankRow';
 export * from './components/FileAttach';
 export * from './components/ConflictChoice';
 export * from './components/TransferRow';

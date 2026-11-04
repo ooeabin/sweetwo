@@ -1767,3 +1767,12 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
 /* 상세 화면 폭(2026-11-04 F-04): 넓은 창에서 본문을 720px 안으로(금액, 버튼이 한쪽에 몰리지 않게) */
 @media (min-width: 768px) { .hg-detail { width: 100%; max-width: 720px; } }
+/* RankRow 우리 자산 순위 줄(2026-11-04 F-01·H-01, 토스 혜택 줄처럼): 원 44px(invest 바탕 + invest-ink 13px 800) + 제목 16px 600 + 파란 글자 14px. 광고가 나오면 파란 글자 앞 작은 ‘광고’ 표시 */
+.hg-rankrow { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; margin: 0; padding: var(--space-2) 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; }
+button.hg-rankrow { cursor: pointer; border-radius: var(--radius-lg); }
+button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-rankrow__badge { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); font: 800 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-rankrow__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hg-rankrow__title { font: 600 16px/22px var(--font-sans); word-break: keep-all; }
+.hg-rankrow__action { display: inline-flex; align-items: center; gap: var(--space-1); font: 500 14px/20px var(--font-sans); color: var(--focus); }
+.hg-rankrow__ad { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--radius-sm); background: var(--surface-alt); color: var(--slate); font: 600 11px/1 var(--font-sans); }
