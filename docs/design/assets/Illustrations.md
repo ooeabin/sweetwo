@@ -36,40 +36,41 @@
 - 상태 화면(AuthLayout)은 지금처럼 Phosphor 아이콘 원.
 - 새 그림 파일을 `packages/ui/src/assets/illustrations/{이름}.webp`에 넣으면 코드 수정 없이 바로 보임.
 
-## 다시 만들기 계획 (보류: 힉스필드 결제 뒤)
+## 다시 만들기 계획 (2026-11-04 순서 확정, 힉스필드는 번호마다 사람이 허락한 뒤에만 돌림)
 
-### 1. 만들 것
+### 1. 순서
 
-| 묶음 | 개수 | 이름 | 움직임 |
+| 번호 | 할 일 | 수 | 허락 |
 | --- | --- | --- | --- |
-| 빈 상태 | 1 | `empty-plate`(또는 새 물건, 정할 때) | 정지 |
-| 상태 이모지 | 7(+1) | `status-face-id`, `status-fingerprint`, `status-lock`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error` | 모래시계 반복, 나머지 1번 |
-| 축하 | 1 | `celebrate` | 1번 |
-| 첫 화면(선택) | 0~1 | 정할 때 | 1번 |
+| 1 | 레퍼런스 확정(아래 2번 표). A, B, D 확정, C 아바타는 더 찾는 중 | 0 | 생성 없음 |
+| 2 | 시험: 3D 4장(자물쇠, Face ID 웃는 얼굴, 빈 접시, 축하) + 목표 실사 2장(집, 여행 가방). 모델·품질 비교, 한 장 크레딧 확인, 기준 그림 1장 고름 | 6 | 허락 1 |
+| 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 4(`scene-plan`, `scene-joined`, `scene-invite`(3:4), `scene-wedding`) | 13 | 허락 2 |
+| 4 | 목표 실사 사진 나머지 19장(‘목표 사진 주제’ 표) | 19 | 허락 3 |
+| 5 | 지정 아바타 7 + 배우자 빈 자리 1(C 확정 뒤) | 8 | 허락 4 |
+| 6 | 작은 3D 아이콘: 월급 체크리스트 줄 약 8, 하단 탭 4, 자산 종류 약 10, 챙길 날 4, 캘린더 돈 일정 4 | 약 30 | 허락 5 |
+| 7 | 앱에 넣기: 바탕 지우기 → 512px webp(150KB 이하). AuthLayout·SceneMedia·DoneMark·ProcessingState·Lead가 그림을 받게 코드, 문서, PR | 0 | 생성 없음 |
+| 8 | 움직이는 그림: 상태 7 + 축하 1. 힉스필드 3D 변환(GLB) → Blender(`bpy`) 1~2초 렌더 → 움직이는 WebP(100~300KB). 모래시계 1개로 먼저 시험 | 8 | 허락 6 |
+| 9 | 스플래시 | 0~1 | 나중 |
 
-- 2구간(온보딩) 이후 화면을 다듬으면서 후보가 생기면 이 표에 더함.
+- 크레딧이 모자라면 6번(작은 아이콘)부터 줄임. 원본(1024px)은 저장소 밖(디자인 폴더)에.
 
-### 2. 스타일(확정, → DESIGN.md ‘그림(3D 이모지)’)
+### 2. 레퍼런스(2026-11-04)
 
-- 반광택, 사물 고유색, 뭉툭하고 귀엽게, 왼쪽 위 빛, 투명 바탕, 1:1.
-- 프롬프트 틀: DESIGN.md 부록. 모델 gpt_image_2_5(시험에서 Recraft V4와 비교 후 확정).
+| 묶음 | 확정 | 레퍼런스 | 지킬 것 |
+| --- | --- | --- | --- |
+| A 3D 이모지(상태, 빈 상태, 축하, 처리 중, 완료, 장면) | 토스 행운 복권형 | [Toss 행운 복권](https://mobbin.com/screens/565bb38d-ffbf-4291-b5c6-3a9bf4de645b?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp), [Toss 증권 빈 상태](https://mobbin.com/screens/5d378b66-9281-4f81-b50b-a6aa39d5709c?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 반광택, 사물 고유색, 뭉툭한 형태, 왼쪽 위 빛, 투명 바탕, 물건 하나 |
+| B 목표 실사 사진 | 블라인드 채널 썸네일형 | 사용자 첨부(블라인드 채널 목록: 피크닉 바구니, 접시, 리모컨, 헤드폰, 서류 가방, 안전모, 헤드셋, 팔레트) | 실사, 주제 물건 하나가 가운데에 크게, 얕은 심도로 배경은 흐린 실제 공간, 밝고 부드러운 자연광. 원으로 잘라도(홈 줄 앞 40px) 무엇인지 보이게 |
+| C 지정 아바타 | 보류(토스 캐릭터형이 가장 가까움, 더 찾는 중) | [Toss 캐릭터](https://mobbin.com/screens/17ce389e-6dc0-4229-939e-0f89f754580f?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | — |
+| D 작은 3D 아이콘 | 토스 카드 추천형 | [Toss 카드 추천](https://mobbin.com/screens/fee5ef80-0773-4dae-ae42-90f52ebd2fce?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 원 판 없이 3D 사물만(A와 같은 그림체), 줄 앞 32~40px, 사물 고유색 |
 
-### 3. 순서와 허락 지점(힉스필드는 매번 사람이 허락한 뒤에만 돌림)
-
-1. **시험 4장**(허락 1): 3D 자물쇠, Face ID 웃는 얼굴, 빈 접시, 축하 + 목표 실사 사진 2장(내 집 마련, 여행). 두 모델로 나란히 뽑아 비교 → 스타일·모델 확정, 첫 확정 그림을 이후 그림체 참고로.
-2. **나머지 정지 그림**(허락 2): 상태 6 + 처리 중 1. 목표 실사 사진 19장은 따로 묶어서. 12장씩 묶어 생성, 마음에 안 드는 것만 다시.
-3. **바탕 지우기·저장**: 투명 1024px 원본 → 512px webp(150KB 이하)로 `packages/ui/src/assets/illustrations/`. 원본은 저장소 밖(디자인 폴더)에.
-4. **움직임 시험 1개**(허락 3): 모래시계를 힉스필드 3D 변환(GLB) → Blender(`bpy` 5.2, 이 작업 환경에서 설치 확인함)로 1~2초 반복 렌더(투명 PNG 프레임) → 움직이는 WebP(ffmpeg `libwebp_anim` 또는 Pillow). 목표 100~300KB.
-5. **나머지 움직임**(허락 4): 상태 6 + 축하 1(+ 첫 화면). 1번 재생 후 마지막 장면에서 멈춤, 첫 장면 = 정지 그림.
-
-### 4. 코드에 붙이기
+### 3. 코드에 붙이기
 
 - 정지 그림: 파일만 넣으면 됨(`Illustration`, `hasIllustration`).
 - 상태 이모지: AuthLayout에 `art`(이모지 이름) 받기 → 96px 그림, 아이콘 원 대신. 지금 `icon`은 그림이 없을 때 대신 씀.
 - 움직이는 그림: 새 ui 컴포넌트 `MotionArt`(움직이는 webp + 정지 webp). ‘동작 줄이기’면 정지 그림, 화면당 1개, 64px 미만에서는 정지. 1번 재생은 움직이는 webp를 반복 없이(loop 1) 만들어서.
 - 문서: Illustrations 표(새 그림 설명), DESIGN.md ‘그림’, 컴포넌트 md(AuthLayout, Celebration, EmptyState, GoalPick), 기획서 화면 표에서 그림 문구가 바뀌면 그 화면 ID 부분.
 
-### 5. 확인
+### 4. 확인
 
 - 56px·40px에서 알아보이는지, 다크 바탕에서 가장자리 지저분함 없는지, 세트로 늘어놓았을 때 빛 방향·채도가 같은지.
 - 모바일·데스크톱·좁은 창 캡처로 화면마다 확인, 용량 합계(정지 30장 + 움직임 8개) 앱 번들 한도 안.
@@ -83,7 +84,7 @@
 | --- | --- | --- | --- | --- |
 | 지정 아바타 | `packages/ui/src/assets/avatars/a01.webp` ~ `a07.webp` | 7 | 정사각 512px, 원으로 잘라 보임(가운데 맞춤) | Avatar 모든 곳. 가입 때 무작위, 설정 S-11e에서 고름 |
 | 배우자 빈 자리 | `packages/ui/src/assets/avatars/empty.webp` | 1 | 지정 아바타와 같은 그림체 | 미합류 배우자 자리(AppFrame 머리, 사이드바) |
-| 목표 지정 사진 | `packages/ui/src/assets/goal-photos/{템플릿}-01.webp` | 21(종류마다 1장, 2026-11-04) | 실사(블라인드 채널 썸네일처럼), 정사각 512px, 가운데에 주제(물건은 이전 3D 목표 그림 목록 참고) | 목표 카드·타일·상세 머리·달성, 홈 목표 줄 앞 칸, 목표 고르기(O-21, G-03a), 위젯. 사용자가 직접 올리면 그 사진 |
+| 목표 지정 사진 | `packages/ui/src/assets/goal-photos/{템플릿}-01.webp` | 21(종류마다 1장, 2026-11-04) | 실사(블라인드 채널 썸네일처럼, 위 레퍼런스 B), 정사각 512px, 가운데에 주제 | 목표 카드·타일·상세 머리·달성, 홈 목표 줄 앞 칸, 목표 고르기(O-21, G-03a), 위젯. 사용자가 직접 올리면 그 사진 |
 
 ### 목표 사진 주제(2026-11-04, 실사 정사각 512px, 가운데에 주제 하나)
 
