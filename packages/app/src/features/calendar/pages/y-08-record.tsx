@@ -378,6 +378,9 @@ export function Y08Record() {
           removeLabel={copy.photoRemove}
           retryLabel={copy.photoRetry}
           uploadingLabel={copy.photoUploading}
+          grid
+          addLabel={copy.photoAdd}
+          count={`${d.photos.length}/${MAX_PHOTOS}`}
         />
       )}
     </QuestionLayout>

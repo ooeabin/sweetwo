@@ -145,6 +145,7 @@ export const copy = {
   photos: '사진',
   photoDrop: '사진을 끌어 놓거나',
   photoPick: '골라 주세요',
+  photoAdd: '사진 추가', // [확인 필요] 2026-11-04 사진 칸 첫 칸
   photoHelp: '사진 10장까지, 한 장에 10MB 이하', // [확인 필요]
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',

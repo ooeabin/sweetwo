@@ -439,9 +439,9 @@ test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 �
     })),
   );
   await expect(page.getByRole('alert')).toHaveText('사진은 10장까지 올릴 수 있어요');
-  await expect(page.locator('.hg-file')).toHaveCount(10);
+  await expect(page.locator('.hg-photos__item')).toHaveCount(10);
   await page.getByRole('button', { name: 'cake.png 빼기' }).click();
-  await expect(page.locator('.hg-file')).toHaveCount(9);
+  await expect(page.locator('.hg-photos__item')).toHaveCount(9);
   await axe(page);
 
   await page.getByLabel('메모').fill('케이크 맛있었어요');

@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (e62536d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (0573f12). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -43,7 +43,7 @@
   --on-success: #ffffff; /* success 바탕 위 글자. */
   --danger: #dc2626; /* 입력 오류·저장 실패에만. 기본 빨강(흰 바탕 4.8:1)으로 브랜드 오렌지와 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
-  --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. */
+  --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. 사진 위 ✕ 원과 올리는 중 띠 바탕(2026-11-04). */
   --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
   --chart-together: #e7566b; /* 차트 계열: 우리 둘(공동 생활비). 계열 순서 2. */
   --chart-safety: #2cbad7; /* 차트 계열: 비상금. 계열 순서 3. 흰 바탕 3:1 미만이라 범례·라벨 필수. */
