@@ -1,5 +1,12 @@
-import { dday, formatDateWeekday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
-import { Button, EmptyState, Icon, ListRow, SectionHeader } from '@sweetwo/ui';
+import {
+  dday,
+  formatDateWeekday,
+  formatMonthDay,
+  withinDays,
+  type MoneyDate,
+  type MoneyKind,
+} from '@sweetwo/core';
+import { Button, EmptyState, Icon, Lead, ListRow, SectionHeader, type IconName } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../../shared/mask';
@@ -8,6 +15,15 @@ import { moneyLine, useCalendarData } from '../data';
 import { CalendarFrame, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 import { reviewMonth } from '../data';
+
+// 2026-11-04 줄 앞 종류 아이콘(24 Y-01 6번): 챙길 날 선물(together 판), 돈 일정은 종류마다
+const MONEY_ICON: Record<MoneyKind, IconName> = {
+  payday: 'wallet',
+  review: 'calendar-check',
+  deadline: 'target',
+  goal: 'target',
+  maturity: 'piggy-bank',
+};
 
 // Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
 // 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 챙길 날 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
@@ -44,7 +60,15 @@ export function Y01CareList() {
   };
 
   // 다가오는 일정: 챙길 날과 돈 일정을 날짜순 한 목록으로
-  type Row = { key: string; date: string; label: string; sub: string; care: boolean; to: string };
+  type Row = {
+    key: string;
+    date: string;
+    label: string;
+    sub: string;
+    care: boolean;
+    icon: IconName;
+    to: string;
+  };
   const rows: Row[] = [
     ...(filter === 'money'
       ? []
@@ -57,6 +81,7 @@ export function Y01CareList() {
               ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
               : formatDateWeekday(x.date),
           care: true,
+          icon: 'gift' as IconName,
           to: `/calendar/day/${x.care.id}`,
         }))),
     ...(filter === 'care'
@@ -69,6 +94,7 @@ export function Y01CareList() {
             label: l.label,
             sub: formatDateWeekday(x.date),
             care: false,
+            icon: MONEY_ICON[x.kind],
             to: l.to,
           };
         })),
@@ -154,11 +180,7 @@ export function Y01CareList() {
               return (
                 <ListRow
                   key={r.key}
-                  lead={
-                    <span className="hg-cal__lead" aria-hidden="true">
-                      <i className={r.care ? 'hg-cal__mark hg-mark--together' : 'hg-cal__dot'} />
-                    </span>
-                  }
+                  lead={<Lead icon={r.icon} tone={r.care ? 'together' : undefined} />}
                   label={r.label}
                   sub={r.sub}
                   value={
