@@ -1,11 +1,10 @@
 import type { Goal, PayChecklist } from '@sweetwo/api';
-import { formatDateWeekday, templateByKey } from '@sweetwo/core';
+import { defaultGoalPreset, formatDateWeekday } from '@sweetwo/core';
 import {
   Badge,
   Button,
   Icon,
-  Illustration,
-  hasIllustration,
+  goalPhotoArt,
   Lead,
   Ring,
   SectionHeader,
@@ -16,14 +15,10 @@ import { money, useMask } from '../../shared/mask';
 import { CheckLine, doneCount, LineLead, lineName } from '../salary';
 import { copy } from './copy';
 
-/** 목표 그림(템플릿 그림. 그림이 없으면 O-21과 같은 템플릿 아이콘, 직접 만든 목표는 깃발) */
+/** 목표 그림(2026-11-04 그 종류 지정 사진. 사진이 없으면 O-21과 같은 템플릿 아이콘) */
 function GoalLead({ template }: { template: string }) {
-  const art = templateByKey(template)?.illustration;
-  return hasIllustration(art) ? (
-    <Lead art={<Illustration name={art} />} />
-  ) : (
-    <Lead icon={goalIcon(template)} />
-  );
+  const photo = goalPhotoArt(defaultGoalPreset(template));
+  return photo ? <Lead photo={photo} /> : <Lead icon={goalIcon(template)} />;
 }
 const pctOf = (saved: number, target: number | null) =>
   target ? Math.min(Math.floor((saved * 100) / target), 100) : 0;

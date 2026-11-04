@@ -5,8 +5,9 @@ import {
   recommendedGoals,
   templateByKey,
   type GoalTab,
+  defaultGoalPreset,
 } from '@sweetwo/core';
-import { GoalPick, QuestionLayout, Tabs } from '@sweetwo/ui';
+import { GoalPick, QuestionLayout, Tabs, goalPhotoArt } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { pickedGoals } from '../flow';
@@ -83,7 +84,7 @@ export function O21Goals() {
         items={pickableGoals(tab, engaged).map((t) => ({
           key: t.key,
           name: t.name,
-          illustration: t.illustration,
+          photo: goalPhotoArt(defaultGoalPreset(t.key)),
           recommended: rec.includes(t.key),
         }))}
         order={order}

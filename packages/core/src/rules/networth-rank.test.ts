@@ -54,7 +54,13 @@ describe('다음 칸, 지난달 대비, 부채·금융자산 비율(F-08)', () =
         { side: 'asset', grp: 'real_estate', kind: 'house', amount: 200_000_000 },
         { side: 'asset', grp: 'etc', kind: 'car', amount: 20_000_000 },
         { side: 'debt', grp: 'credit', kind: 'credit_loan', amount: 5_000_000 },
-        { side: 'asset', grp: 'deposit', kind: 'savings', amount: 9_000_000, visibility: 'private' },
+        {
+          side: 'asset',
+          grp: 'deposit',
+          kind: 'savings',
+          amount: 9_000_000,
+          visibility: 'private',
+        },
       ]),
     ).toBe(39));
 });
@@ -75,13 +81,17 @@ describe('순위 배너 상태', () => {
       rankState({ ...base, hasItems: false, seen: { month: null, pct: null, net: null } }).kind,
     ).toBe('empty'));
   it('안 봄', () =>
-    expect(rankState({ ...base, seen: { month: null, pct: null, net: null } }).kind).toBe('unseen'));
+    expect(rankState({ ...base, seen: { month: null, pct: null, net: null } }).kind).toBe(
+      'unseen',
+    ));
   it('이번 달에 봤고 순자산 그대로', () =>
-    expect(rankState({ ...base, seen: { month: '2026-11-01', pct: 93, net: 16_000_000 } })).toEqual({
-      kind: 'seen',
-      pct: 93,
-      month: '2026-11-01',
-    }));
+    expect(rankState({ ...base, seen: { month: '2026-11-01', pct: 93, net: 16_000_000 } })).toEqual(
+      {
+        kind: 'seen',
+        pct: 93,
+        month: '2026-11-01',
+      },
+    ));
   it('순자산이 바뀜', () =>
     expect(
       rankState({ ...base, seen: { month: '2026-11-01', pct: 93, net: 15_000_000 } }).kind,

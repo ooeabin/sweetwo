@@ -1,5 +1,5 @@
 import type { Goal, PayCheckLine } from '@sweetwo/api';
-import { goalEta, nextOccurrence, templateByKey, type YearMonth } from '@sweetwo/core';
+import { goalEta, nextOccurrence, type YearMonth } from '@sweetwo/core';
 import { savedOf, toAllocGoal, useChecklists, useGoalSaved, useSplits } from '../salary';
 import { useMe, usePartner, useSpace, useGoalsList } from './queries';
 
@@ -23,7 +23,6 @@ export interface GoalItem {
   thisMonth: PayCheckLine[];
   /** 내가 고칠 수 있음(우리 목표, 또는 내 내 목표) */
   canEdit: boolean;
-  illustration: string | null;
   custom: boolean;
   /** 매년 목표 다음 쓰는 달 */
   nextUse: YearMonth | null;
@@ -75,7 +74,6 @@ export function useGoalsModel() {
     );
     const monthly = perPerson.reduce((t, p) => t + p.amount, 0);
     const eta = goalEta(toAllocGoal({ ...g, other_held: s }), monthly);
-    const t = templateByKey(g.template);
     // 아직 모은 돈이 없으면 지연으로 보지 않음(첫 사이클 ‘지연’ 배지, 2026-11-03)
     const late = eta.lateMonths !== null && eta.lateMonths > 0 && s > 0;
     const state = // 2026-11-04 사용 완료 없앰: 옛 ‘used’ 목표도 달성으로 보임
@@ -99,7 +97,6 @@ export function useGoalsModel() {
       pct: g.target_amount ? Math.min(Math.floor((s * 100) / g.target_amount), 100) : 0,
       thisMonth: lines.filter((l) => l.kind === 'saving' && l.goal_id === g.id),
       canEdit: g.owner_user_id == null || g.owner_user_id === meId,
-      illustration: t?.illustration ?? null,
       custom: g.template === 'custom',
       nextUse:
         g.kind === 'yearly' && g.deadline ? nextOccurrence(Number(g.deadline.slice(5, 7))) : null,

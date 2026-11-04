@@ -1,3 +1,4 @@
+import { cx } from './cx';
 import type { ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
 
@@ -53,15 +54,21 @@ export function Lead({
   tone,
   icon,
   art,
+  photo,
 }: {
   tone?: 'together' | 'family' | 'goal' | 'safety' | 'invest';
   icon?: IconName;
   /** 3D 그림(Illustration 등) */
   art?: ReactNode;
+  /** 사진 주소(목표 사진, 원 안을 꽉 채움, 2026-11-04) */
+  photo?: string;
 }) {
   return (
-    <span className={tone ? `hg-lead hg-lead--${tone}` : 'hg-lead'} aria-hidden="true">
-      {art ?? (icon ? <Icon name={icon} /> : null)}
+    <span
+      className={cx('hg-lead', tone && `hg-lead--${tone}`, photo && 'hg-lead--photo')}
+      aria-hidden="true"
+    >
+      {photo ? <img src={photo} alt="" /> : (art ?? (icon ? <Icon name={icon} /> : null))}
     </span>
   );
 }

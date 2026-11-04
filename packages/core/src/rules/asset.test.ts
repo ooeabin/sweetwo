@@ -111,7 +111,14 @@ it('AD-19 항목 이름 목록: 기본 항목 이름 바꾸기·숨기기, 새 �
   const groups = withKindNames(assetGroupsOf('asset'), [
     { id: 'a', grp: 'deposit', base: 'saving', name: '자유적금', added: false, hidden: false },
     { id: 'b', grp: 'deposit', base: 'term_deposit', name: '정기예금', added: false, hidden: true },
-    { id: 'c', grp: 'deposit', base: 'policy_saving', name: '청년도약계좌', added: true, hidden: false },
+    {
+      id: 'c',
+      grp: 'deposit',
+      base: 'policy_saving',
+      name: '청년도약계좌',
+      added: true,
+      hidden: false,
+    },
     { id: 'd', grp: 'deposit', base: 'etf', name: '그룹 밖', added: true, hidden: false },
     { id: 'e', grp: 'cash', base: 'bank', name: '현금성은 안 고침', added: false, hidden: true },
   ]);

@@ -30,7 +30,6 @@ export function G05Achieved() {
   const g = {
     name: row.name,
     held: item.saved,
-    illustration: item.illustration,
     custom: item.custom,
   };
   const joint = d.space?.salary_mode === 'joint';
