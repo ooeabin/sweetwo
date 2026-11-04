@@ -74,11 +74,11 @@ export function F08Rank() {
           </div>
         </section>
       )}
-      <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-        {age && <div className="hg-help">{copy.rankAgeNote}</div>}
-        <div className="hg-help">{copy.rankNote}</div>
-        <div className="hg-help">{copy.rankNext}</div>
-      </div>
+      {age && (
+        <div className="hg-help" style={{ textAlign: 'center' }}>
+          {copy.rankAgeNote}
+        </div>
+      )}
       {/* 우리 구간(접근성·테스트용): 분포 그림과 같은 값 */}
       <span className="hg-sr">{copy.rankBracket(rankBracket(r.net))}</span>
     </div>
