@@ -11,6 +11,8 @@ import {
   AmountInput,
   ChoiceCards,
   Chip,
+  Icon,
+  assetIcon,
   DateWheel,
   Field,
   QuestionLayout,
@@ -27,7 +29,11 @@ import { assetSteps, useAssetDraft } from './draft';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ymdText = (v: { y: number; m: number; d: number }) => `${v.y}-${pad(v.m)}-${pad(v.d)}`;
-const ymdOf = (s: string) => ({ y: Number(s.slice(0, 4)), m: Number(s.slice(5, 7)), d: Number(s.slice(8, 10)) });
+const ymdOf = (s: string) => ({
+  y: Number(s.slice(0, 4)),
+  m: Number(s.slice(5, 7)),
+  d: Number(s.slice(8, 10)),
+});
 
 const path = (step: string) => `/assets/new/${step}`;
 
@@ -123,20 +129,19 @@ export function AssetAddRoute() {
             { value: 'debt', label: copy.debtsLabel },
           ]}
         />
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.groupLabel}
-          style={{ gap: 'var(--space-2)' }}
-        >
+        {/* 2026-11-04 묶음은 아이콘 타일 3열(시안 A, Rocket Money처럼). 고르면 아래 세부 항목 */}
+        <div className="hg-pick hg-pick--tiles" role="group" aria-label={copy.groupLabel}>
           {groups.map((x) => (
-            <Chip
+            <button
               key={x.key}
-              selected={draft.grp === x.key}
+              type="button"
+              className={'hg-pick__item' + (draft.grp === x.key ? ' is-on' : '')}
+              aria-pressed={draft.grp === x.key}
               onClick={() => set({ grp: x.key, kind: null })}
             >
+              <Icon name={assetIcon(x.key)} />
               {x.name}
-            </Chip>
+            </button>
           ))}
         </div>
         {g && (
@@ -274,7 +279,11 @@ export function AssetAddRoute() {
 
   if (step === 'maturity') {
     const t = todayKst();
-    const initial = { y: Number(t.slice(0, 4)) + 1, m: Number(t.slice(5, 7)), d: Number(t.slice(8, 10)) };
+    const initial = {
+      y: Number(t.slice(0, 4)) + 1,
+      m: Number(t.slice(5, 7)),
+      d: Number(t.slice(8, 10)),
+    };
     const title = draft.kind === 'deposit_money' ? copy.contractEnd : copy.maturity;
     return (
       <QuestionLayout

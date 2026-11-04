@@ -91,9 +91,7 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   await page.goto('/assets/a-sav/matured');
   await page.getByRole('radio', { name: /다시 가입했어요/ }).click();
   await expect(page.getByRole('heading', { name: '만기일은 언제예요?' })).toBeVisible();
-  await page.getByLabel('년', { exact: true }).fill('2027');
-  await page.getByLabel('월', { exact: true }).fill('10');
-  await page.getByLabel('일', { exact: true }).fill('7');
+  // 2026-11-04 날짜 휠: 처음 값이 1년 뒤 오늘(2027-10-07)이라 그대로 저장
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
   expect(db.assets.find((a) => a.id === 'a-sav')?.maturity_date).toBe('2027-10-07');
