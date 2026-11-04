@@ -50,6 +50,11 @@ export function rankTopPct(net: Won): number {
   return Math.min(Math.max(pct, 1), 99);
 }
 
+/** P90 이상(상위 10% 안, 그 위는 나눌 수 없음). 문구를 “상위 10% 안이에요”로 */
+export function rankTopOpen(net: Won): boolean {
+  return rankBracket(net) >= RANK_BASIS.points.length;
+}
+
 /**
  * 다음 10% 칸까지(F-08 6b): 지금 상위 n%에서 한 칸 위(상위 80%, 70% …) 경계값까지 남은 금액.
  * P90 이상(상위 10%)이면 null

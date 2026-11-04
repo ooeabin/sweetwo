@@ -7,6 +7,7 @@ import {
   rankChange,
   rankNextStep,
   rankState,
+  rankTopOpen,
   rankTopPct,
 } from './networth-rank';
 
@@ -22,6 +23,10 @@ describe('우리 자산 순위 1단계(7-7, 2025년 기준)', () => {
   it('P90(11억 20만 원) 이상은 상위 10% 고정', () => {
     expect(rankTopPct(1_100_200_000)).toBe(10);
     expect(rankTopPct(5_000_000_000)).toBe(10);
+  });
+  it('P90 이상은 ‘상위 10% 안’', () => {
+    expect(rankTopOpen(1_100_200_000)).toBe(true);
+    expect(rankTopOpen(1_100_199_999)).toBe(false);
   });
   it('−1억 미만은 상위 99%', () => expect(rankTopPct(-200_000_000)).toBe(99));
   it('0원 → 상위 97%', () => expect(rankTopPct(0)).toBe(97));

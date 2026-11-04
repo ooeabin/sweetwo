@@ -56,10 +56,12 @@ export const copy = {
   rankQ: '우리 자산은 상위 몇 %일까요?', // [확인 필요]
   rankCheck: '확인하기', // [확인 필요] 앞에 ‘광고’ 표시
   rankAd: '광고',
-  rankSeen: (pct: number) => `우리 자산 상위 ${pct}%예요`, // [확인 필요]
+  rankSeen: (pct: number, open = false) =>
+    open ? `우리 자산 상위 ${pct}% 안이에요` : `우리 자산 상위 ${pct}%예요`, // [확인 필요]
   rankSeenMore: (month: number) => `${month}월 기준, 자세히 보기`, // [확인 필요]
   rankStale: (pct: number) => `지난번엔 상위 ${pct}%였어요`, // [확인 필요]
   rankRefresh: '새로 확인하기', // [확인 필요]
   rankEmpty: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요]
+  rankEmptyGo: '우리 자산 입력하기', // 2026-11-04 홈에서만(누르면 F-01)
   rankAdClosed: '광고를 끝까지 보면 볼 수 있어요', // [확인 필요]
 };

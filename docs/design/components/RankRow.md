@@ -4,7 +4,7 @@
 
 - 원 `hg-rankrow__badge`: `invest` 바탕 + `invest-ink` 13px 800. 안 봄·자산 없음 “?%”, 본 뒤 “38%”.
 - 제목 `hg-rankrow__title`: 16px 600 `ink`, 줄바꿈 keep-all.
-- 파란 글자 `hg-rankrow__action`: 14px 500 `focus`(“확인하기”, “10월 기준, 자세히 보기”, “새로 확인하기”). 자산이 없으면 없음.
+- 파란 글자 `hg-rankrow__action`: 14px 500 `focus`(“확인하기”, “10월 기준, 자세히 보기”, “새로 확인하기”). 자산이 없으면 F-01에서는 없음, 홈에서는 “우리 자산 입력하기”(2026-11-04).
 - 광고 표시 `hg-rankrow__ad`: 광고가 나오는 상태(안 봄, 지난번)에만 파란 글자 앞 작은 회색 ‘광고’(`surface-alt` 바탕, 11px 600 `slate`). AdMob 보상형 광고 정책상 누르기 전에 광고를 알림(ADR 0006).
 - 누를 수 있으면 `button`(포커스 링 2px `focus`), 누를 수 없으면(우리 자산 빈 상태) `div`.
 - React: `RankRow({ badge, title, action, ad, adLabel, onClick })`. 앱은 `RankBanner`(frame)가 상태(7-7)와 광고 흐름을 맡음.

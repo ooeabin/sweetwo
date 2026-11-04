@@ -8,7 +8,7 @@ const ICONS: Record<string, IconName> = {
   invest: 'trending-up',
   pension: 'shield-check',
   insurance: 'coins',
-  real_estate: 'couch',
+  real_estate: 'buildings', // 2026-11-04 소파에서 바꿈(청약은 house)
   etc: 'car',
   housing_loan: 'house',
   credit: 'bank',

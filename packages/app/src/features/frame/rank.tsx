@@ -2,6 +2,7 @@ import { fetchPartnerBirthYear, qk, updateMe } from '@sweetwo/api';
 import {
   rankAgeBand,
   rankState,
+  rankTopOpen,
   rankTopPct,
   todayKst,
   type RankAgeBand,
@@ -91,6 +92,7 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
       <RankRow
         badge="?%"
         title={copy.rankEmpty}
+        action={entry === 'home' ? copy.rankEmptyGo : undefined}
         onClick={entry === 'home' ? () => void open() : undefined}
       />
     );
@@ -98,7 +100,7 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
     return (
       <RankRow
         badge={`${s.pct}%`}
-        title={copy.rankSeen(s.pct)}
+        title={copy.rankSeen(s.pct, s.pct === 10 && rankTopOpen(r.net))}
         action={copy.rankSeenMore(Number(s.month.slice(5, 7)))}
         onClick={() => void open()}
       />
