@@ -609,6 +609,9 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  // 연령대 비교: 찬우 1993년생 + 예빈 1995년생 → 평균 32세(2026년) → 30대
+  db.me.birth_year = 1993;
+  if (db.partner) Object.assign(db.partner, { birth_year: 1995 });
   await page.goto('/assets');
   const row = page.getByRole('button', { name: /우리 자산은 상위 몇 %일까요\?/ });
   await expect(row).toBeVisible();
@@ -620,6 +623,9 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await expect(page.getByText(/우리 자산은 상위 \d+%예요/)).toBeVisible();
   await expect(page.getByText('공공 통계 기준')).toBeVisible();
   await expect(page.getByText('전체 가구 중앙값')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
+  await expect(page.getByText('30대 가구 중앙값')).toBeVisible();
+  await expect(page.getByText(/30대 가구 가운데 중간보다 (많아요|아래예요)/)).toBeVisible();
   await axe(page);
   await expect.poll(() => db.me.rank_month).toBe('2026-10-01');
   const pct = Number(db.me.rank_pct);

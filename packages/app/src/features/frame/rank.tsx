@@ -1,7 +1,14 @@
-import { qk, updateMe } from '@sweetwo/api';
-import { rankState, rankTopPct, todayKst, type RankState } from '@sweetwo/core';
+import { fetchPartnerBirthYear, qk, updateMe } from '@sweetwo/api';
+import {
+  rankAgeBand,
+  rankState,
+  rankTopPct,
+  todayKst,
+  type RankAgeBand,
+  type RankState,
+} from '@sweetwo/core';
 import { RankRow } from '@sweetwo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../shared/analytics';
@@ -26,6 +33,14 @@ export function useRank(): { state: RankState; net: number } | null {
       seen: { month: me.data.rank_month, pct: me.data.rank_pct, net: me.data.rank_net },
     }),
   };
+}
+
+/** 연령대 비교(계산·배분 7-7): 나와 배우자 출생연도 평균 나이. 아무도 안 적었으면 null */
+export function useRankAge(): RankAgeBand | null {
+  const me = useMe();
+  const py = useQuery({ queryKey: qk.partnerBirthYear, queryFn: fetchPartnerBirthYear });
+  if (!me.data) return null;
+  return rankAgeBand([me.data.birth_year, py.data ?? null], Number(todayKst().slice(0, 4)));
 }
 
 // 모바일 앱이면 보상형 광고(ADR 0006). 데스크톱·브라우저(브리지 없음)와 못 불러오면 광고 없이 바로

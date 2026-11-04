@@ -589,6 +589,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'joined');
       }
       if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
+      if (fn === 'partner_birth_year')
+        return json(route, (db.partner as { birth_year?: number } | null)?.birth_year ?? null);
       // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 월급 계획 또는 대기), 사전 입력 지우기
       // 설정 S-11f·S-11d(서버가 월급 계획을 합치거나 나눔: 여기서는 방식만)
       if (fn === 'set_salary_mode') {

@@ -62,7 +62,7 @@ export type AnalyticsEvent =
     }
   | {
       name: 'rank_viewed';
-      props: { top_band: number; basis: 'public_2024' };
+      props: { top_band: number; basis: 'public_2025'; age_band: string | null };
     }
   | {
       name: 'unlink_resolved';

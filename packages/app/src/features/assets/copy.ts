@@ -332,9 +332,16 @@ export const copy = {
   rankBasis: (label: string, ym: string) => `${label}, ${ym} 말 기준`,
   rankOurs: (month: number) => `${month}월 우리 순자산`,
   rankMedian: '전체 가구 중앙값', // [확인 필요]
-  rankNote: '구간 안은 고르게 나눠 계산한 추정이에요. 숨긴 항목은 계산에서 빠졌어요', // [확인 필요]
+  rankNote: '통계 값 사이는 고르게 나눠 계산한 추정이에요. 숨긴 항목은 계산에서 빠졌어요', // [확인 필요]
   rankNext: '다음 달에 다시 확인해 보세요', // [확인 필요]
   rankBracket: (i: number) => `순자산 구간 ${i + 1}번째`,
+  // 연령대 비교(계산·배분 7-7, 2026-11-04): 연령대별 중앙값만 공공 통계에 있어 순위 없이 중간보다 많은지만
+  rankAge: { '20s': '20대', '30s': '30대', '40s': '40대', '50s': '50대', '60s': '60대 이상' },
+  rankAgeTitle: (band: string) => `${band} 가구와 비교`, // [확인 필요]
+  rankAgeMedian: (band: string) => `${band} 가구 중앙값`, // [확인 필요]
+  rankAgeAbove: (band: string) => `${band} 가구 가운데 중간보다 많아요`, // [확인 필요]
+  rankAgeBelow: (band: string) => `${band} 가구 가운데 중간보다 아래예요`, // [확인 필요] 계산·배분 7-3 말투(사실만)
+  rankAgeNote: '가구주 나이별 공공 통계예요. 두 사람 나이의 평균으로 연령대를 정했어요', // [확인 필요]
   // F-01 빈 상태 항목별 등록(2026-11-04)
   emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
   emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]

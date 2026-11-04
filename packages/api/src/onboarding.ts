@@ -226,6 +226,12 @@ export type PartnerProfile = {
   /** 다른 수입 월 합계(O-35b) */
   other_income: number;
 };
+/** 배우자 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 배우자가 없거나 안 적었으면 null */
+export async function fetchPartnerBirthYear(): Promise<number | null> {
+  const { data, error } = await supabase().rpc('partner_birth_year');
+  fail(error);
+  return typeof data === 'number' ? data : null;
+}
 export async function fetchPartner(): Promise<PartnerProfile | null> {
   const { data, error } = await supabase().rpc('partner_profile');
   fail(error);

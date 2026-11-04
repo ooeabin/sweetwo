@@ -8,3 +8,21 @@ alter table public.app_user
   add column rank_net bigint;
 
 grant update (rank_month, rank_pct, rank_net) on public.app_user to authenticated;
+
+-- 연령대 비교(계산·배분 7-7): 두 사람 출생연도 평균으로 연령대를 정하려고 배우자 출생연도만 돌려줌.
+-- 같은 부부 공간의 사용 중인 배우자만, 없으면 null(partner_profile과 같은 조건)
+create function public.partner_birth_year()
+returns smallint
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.birth_year
+  from public.app_user me
+  join public.app_user p on p.space_id = me.space_id and p.id <> me.id and p.status = 'active'
+  where me.id = auth.uid() and me.space_id is not null
+  limit 1;
+$$;
+revoke execute on function public.partner_birth_year() from public, anon;
+grant execute on function public.partner_birth_year() to authenticated;

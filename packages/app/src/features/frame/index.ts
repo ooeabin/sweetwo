@@ -7,4 +7,4 @@ export { useHomeInput, type HomeInputState } from './home-input';
 export { homeText, todoText, upcomingName } from './home-text';
 export { AddMenu, searchKey } from './command';
 export { LoadingFrame } from './loading';
-export { RankBanner, RANK_PATH, useRank } from './rank';
+export { RankBanner, RANK_PATH, useRank, useRankAge } from './rank';

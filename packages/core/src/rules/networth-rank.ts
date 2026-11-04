@@ -1,53 +1,79 @@
 import type { Won } from '../money';
 
 // 우리 자산 순위 1단계(계산·배분 7-7, 23 F-08, ADR 0006, 2026-11-04).
-// 2024년 가계금융복지조사 순자산 구간별 가구 분포, 전체 가구(통계청·한국은행·금융감독원, 2024년 3월 말, 보도자료 표 1-2).
-// 구간 안은 고르게 퍼져 있다고 보고 우리보다 위에 있는 가구 비율을 추정. 비율 합(100.1)으로 나눠 100에 맞춤.
+// 2025년 가계금융복지조사(통계청·한국은행·금융감독원, 자산·부채 2025년 3월 말) 부록 통계표 12의 순자산 분위 경계값(P10~P90),
+// 0원 아래는 2024년 보도자료 표 1-2의 순자산 구간별 가구 분포(−1억 미만 0.2%, −1억~0 2.8%).
+// 점 사이는 고르게 퍼져 있다고 보고 우리 아래 가구 비율(백분위)을 추정.
 
 const EOK = 100_000_000;
+const MAN = 10_000;
 
-/** 순자산 구간(아래 끝 포함, 위 끝 미만)과 가구 비율(%). 끝이 null이면 열린 구간 */
+/** 순자산(원)과 그 값 아래 가구 비율(%, 백분위). 낮은 값부터 */
 export const RANK_BASIS = {
-  label: '2024년 가계금융복지조사',
-  asOf: '2024-03-31',
-  medianNet: 240_000_000, // 순자산 중앙값(보도자료 표 1-5)
-  brackets: [
-    { from: null, to: -1 * EOK, share: 0.2 },
-    { from: -1 * EOK, to: 0, share: 2.8 },
-    { from: 0, to: 1 * EOK, share: 26.2 },
-    { from: 1 * EOK, to: 2 * EOK, share: 15.5 },
-    { from: 2 * EOK, to: 3 * EOK, share: 12.2 },
-    { from: 3 * EOK, to: 4 * EOK, share: 9.1 },
-    { from: 4 * EOK, to: 5 * EOK, share: 6.6 },
-    { from: 5 * EOK, to: 6 * EOK, share: 4.9 },
-    { from: 6 * EOK, to: 7 * EOK, share: 3.6 },
-    { from: 7 * EOK, to: 8 * EOK, share: 3.1 },
-    { from: 8 * EOK, to: 9 * EOK, share: 2.7 },
-    { from: 9 * EOK, to: 10 * EOK, share: 2.3 },
-    { from: 10 * EOK, to: null, share: 10.9 },
-  ] as { from: Won | null; to: Won | null; share: number }[],
+  label: '2025년 가계금융복지조사',
+  asOf: '2025-03-31',
+  medianNet: 23_860 * MAN, // P50(부록 통계표 12)
+  points: [
+    { net: -1 * EOK, below: 0.2 }, // 2024 표 1-2
+    { net: 0, below: 3 }, // 2024 표 1-2
+    { net: 1_210 * MAN, below: 10 },
+    { net: 5_108 * MAN, below: 20 },
+    { net: 10_296 * MAN, below: 30 },
+    { net: 16_472 * MAN, below: 40 },
+    { net: 23_860 * MAN, below: 50 },
+    { net: 33_050 * MAN, below: 60 },
+    { net: 46_180 * MAN, below: 70 },
+    { net: 69_380 * MAN, below: 80 },
+    { net: 110_020 * MAN, below: 90 },
+  ] as { net: Won; below: number }[],
 };
 
-/** 순자산이 들어가는 구간 번호(RANK_BASIS.brackets) */
+/** 우리 순자산이 들어가는 칸 번호: 0 = −1억 미만, 1~10 = 점 사이, 11 = P90(11억 20만 원) 이상 */
 export function rankBracket(net: Won): number {
-  const b = RANK_BASIS.brackets;
-  const i = b.findIndex((x) => (x.from === null || net >= x.from) && (x.to === null || net < x.to));
-  return i < 0 ? b.length - 1 : i;
+  const p = RANK_BASIS.points;
+  const i = p.findIndex((x) => net < x.net);
+  return i < 0 ? p.length : i;
 }
 
-/** 상위 n%(1~99 정수, 올림). 10억 이상은 11, −1억 미만은 99 */
+/** 상위 n%(1~99 정수, 올림). P90 이상은 10(위로는 나눌 수 없음), −1억 미만은 99 */
 export function rankTopPct(net: Won): number {
-  const b = RANK_BASIS.brackets;
-  const total = b.reduce((t, x) => t + x.share, 0);
+  const p = RANK_BASIS.points;
   const i = rankBracket(net);
-  const x = b[i];
-  if (!x) return 99;
-  if (x.to === null) return Math.ceil((x.share * 100) / total); // 10억 이상: 구간 안을 모름
-  if (x.from === null) return 99;
-  const above = b.slice(i + 1).reduce((t, y) => t + y.share, 0);
-  const inside = (x.share * (x.to - net)) / (x.to - x.from);
-  const pct = Math.ceil(((above + inside) * 100) / total - 1e-9);
+  if (i === 0) return 99;
+  if (i >= p.length) return 10;
+  const lo = p[i - 1];
+  const hi = p[i];
+  if (!lo || !hi) return 99;
+  const below = lo.below + ((hi.below - lo.below) * (net - lo.net)) / (hi.net - lo.net);
+  const pct = Math.ceil(100 - below - 1e-9);
   return Math.min(Math.max(pct, 1), 99);
+}
+
+/** 가구주 연령대(부록 통계표 1~10 ‘가구주 연령대별’, 10세 구간) */
+export type RankAgeBand = '20s' | '30s' | '40s' | '50s' | '60s';
+
+/** 연령대별 순자산 중앙값(2025년 3월 말, 원). 29세 이하는 20대로 */
+export const RANK_AGE_MEDIAN: Record<RankAgeBand, Won> = {
+  '20s': 5_000 * MAN,
+  '30s': 15_585 * MAN,
+  '40s': 28_384 * MAN,
+  '50s': 31_685 * MAN,
+  '60s': 25_000 * MAN,
+};
+
+/**
+ * 우리 연령대(7-1처럼 두 사람 출생연도로 계산한 평균 나이 = 올해 − 출생연도, 내림).
+ * 한 사람만 적었으면 그 사람 나이. 아무도 안 적었으면 null(연령대 비교를 숨김)
+ */
+export function rankAgeBand(birthYears: (number | null | undefined)[], year: number): RankAgeBand | null {
+  const ys = birthYears.filter((y): y is number => typeof y === 'number' && y > 1900);
+  if (ys.length === 0) return null;
+  const age = Math.floor(ys.reduce((t, y) => t + (year - y), 0) / ys.length);
+  if (age < 30) return '20s';
+  if (age < 40) return '30s';
+  if (age < 50) return '40s';
+  if (age < 60) return '50s';
+  return '60s';
 }
 
 /** 배너 상태: 자산 없음 / 안 봄 / 이번 달 봄(순자산 그대로) / 지난번 값 */
