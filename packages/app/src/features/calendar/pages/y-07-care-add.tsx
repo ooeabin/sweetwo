@@ -1,6 +1,6 @@
 import { insertCareDays, qk, updateCareDay, type CareDay } from '@sweetwo/api';
-import { lunarToSolar, nextCareDate, quickChips } from '@sweetwo/core';
-import { AmountInput, Chip, DateInput, QuestionLayout, ShortText, Tabs, Toggle } from '@sweetwo/ui';
+import { lunarToSolar, nextCareDate, quickChips, todayKst } from '@sweetwo/core';
+import { AmountInput, Chip, DateWheel, QuestionLayout, ShortText, Tabs, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -35,6 +35,12 @@ interface Draft {
   yearly: boolean;
   amount: number | null;
 }
+const pad2 = (n: number) => String(n).padStart(2, '0');
+const wheelOf = (s: string) => ({
+  y: Number(s.slice(0, 4)),
+  m: Number(s.slice(5, 7)),
+  d: Number(s.slice(8, 10)),
+});
 const start = (date: string | null = null): Draft => ({
   editId: null,
   chip: null,
@@ -260,15 +266,24 @@ export function Y07CareAdd() {
             { value: 'lunar', label: copy.lunar },
           ]}
         />
-        <DateInput
+        {/* 2026-11-04 다른 날짜 질문(만기일, 목표 기한)과 같은 휠. 처음 값은 달력에서 고른 날 또는 오늘. 음력은 어느 달이든 30일까지 */}
+        <DateWheel
           label={copy.dateQ}
-          value={d.date}
-          onChange={(date) => {
+          lunar={d.lunar}
+          value={d.date ? wheelOf(d.date) : null}
+          initial={wheelOf(todayKst())}
+          minYear={1940}
+          maxYear={Number(todayKst().slice(0, 4)) + 10}
+          onChange={(v) => {
             setAsked(false);
-            set({ date });
+            set({ date: `${v.y}-${pad2(v.m)}-${pad2(v.d)}` });
           }}
-          error={past ? copy.pastDate : d.date && !solar ? copy.dateError : undefined}
         />
+        {(past || (d.date && !solar)) && (
+          <p className="hg-help is-error" role="alert">
+            {past ? copy.pastDate : copy.dateError}
+          </p>
+        )}
         {d.lunar && (
           <Chip small selected={d.leap} onClick={() => set({ leap: !d.leap })}>
             {copy.leapMonth}

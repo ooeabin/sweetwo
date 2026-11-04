@@ -2,20 +2,23 @@ import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { IconButton } from './IconButton';
 
-// 캘린더 달력(docs/design/components/Calendar.md): 머리(월·연도, 이전·다음) → 요일 → 6주 칸 → 아래 일정 목록(children).
-// 칸: 숫자 + 일정 막대(챙길 날, 영역색 최대 3개) + 돈 날짜 점(ink). 오늘 brand-soft, 고른 날 ink 원, 정리 기간 띠.
-// 공휴일은 숫자 holiday-ink(막대가 없으면 이름 작게), 설·추석 연휴는 family 띠.
-export type CalMark = 'family' | 'together' | 'goal';
+// 캘린더 달력(docs/design/components/Calendar.md, 2026-11-04 토스 소비 달력형):
+// 카드 없이 가운데 ‘‹ 10월 ›’(다른 달이면 오른쪽 ‘오늘’) → 요일 → 그 달 주만 → 아래 일정 목록(children).
+// 칸: 숫자 + 짧은 이름 한 줄(월급, 생신, 만기, 공휴일 이름) + 월말 확인 기간은 칸 아래 이어진 한 줄 띠.
+// 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달 날짜는 비워 둠.
+export type CalTone = 'care' | 'holiday' | 'money';
 export interface CalDay {
   date: string;
   day: number;
   muted: boolean;
-  marks?: CalMark[];
-  money?: boolean;
-  band?: boolean;
-  /** 공휴일 이름(숫자 빨간 글자, 막대가 없으면 이름 작게) */
-  holiday?: string;
-  /** 설·추석 연휴 띠 */
+  /** 칸 안 짧은 이름(“월급”, “생신”, “만기”). 여러 개면 화면이 ‘+1’을 붙여 줌 */
+  short?: string;
+  tone?: CalTone;
+  /** 월말 확인 기간 띠의 자리. start 칸에 띠 이름 */
+  band?: 'start' | 'mid' | 'end' | 'single';
+  /** 공휴일(숫자 빨간 글자) */
+  holiday?: boolean;
+  /** 설·추석 연휴 */
   festive?: boolean;
   /** 화면 읽기용(“10월 25일, 일정 2개”) */
   label: string;
@@ -28,6 +31,7 @@ export function Calendar({
   month,
   yearLabel,
   monthLabel,
+  showYear = false,
   days,
   today,
   selected,
@@ -36,6 +40,9 @@ export function Calendar({
   onNext,
   prevLabel,
   nextLabel,
+  todayLabel,
+  onToday,
+  bandLabel,
   filter,
   children,
 }: {
@@ -43,6 +50,8 @@ export function Calendar({
   month: number;
   yearLabel: string;
   monthLabel: string;
+  /** 올해가 아니면 연도도 보여 줌 */
+  showYear?: boolean;
   days: CalDay[];
   today: string;
   selected: string | null;
@@ -51,23 +60,31 @@ export function Calendar({
   onNext: () => void;
   prevLabel: string;
   nextLabel: string;
+  /** 오늘이 든 달이 아니면 ‘오늘’ */
+  todayLabel?: string;
+  onToday?: () => void;
+  /** 월말 확인 띠 이름(“월말 확인”) */
+  bandLabel?: string;
   /** 맨 위 보기 필터(칩) */
   filter?: ReactNode;
-  /** 범례, 고른 날 일정 목록 */
+  /** 고른 날 일정 목록 */
   children?: ReactNode;
 }) {
   return (
     <section className="hg-cal" aria-label={`${yearLabel} ${monthLabel}`}>
       {filter}
       <div className="hg-cal__head">
+        <IconButton icon="chevron-left" label={prevLabel} small onClick={onPrev} />
         <span className="hg-cal__month">
+          {showYear && <span>{yearLabel}</span>}
           <b>{monthLabel}</b>
-          <span>{yearLabel}</span>
         </span>
-        <span className="hg-cal__nav">
-          <IconButton icon="chevron-left" label={prevLabel} small onClick={onPrev} />
-          <IconButton icon="chevron-right" label={nextLabel} small onClick={onNext} />
-        </span>
+        <IconButton icon="chevron-right" label={nextLabel} small onClick={onNext} />
+        {todayLabel && onToday && (
+          <button type="button" className="hg-cal__today" onClick={onToday}>
+            {todayLabel}
+          </button>
+        )}
       </div>
       <div className="hg-cal__grid" role="group" aria-label={`${year}-${month}`}>
         {DOW.map((d) => (
@@ -75,39 +92,41 @@ export function Calendar({
             {d}
           </span>
         ))}
-        {days.map((d) => (
-          <button
-            key={d.date}
-            type="button"
-            className={cx(
-              'hg-cal__day',
-              d.muted && 'is-muted',
-              d.band && 'is-band',
-              d.festive && 'is-festive',
-              d.holiday && 'is-holiday',
-              d.date === today && 'is-today',
-              d.date === selected && 'is-selected',
-            )}
-            aria-label={d.label}
-            aria-pressed={d.date === selected}
-            aria-current={d.date === today ? 'date' : undefined}
-            onClick={() => onSelect(d.date)}
-          >
-            <span className="hg-cal__num">{d.day}</span>
-            {d.holiday && !d.marks?.length && !d.money ? (
-              <span className="hg-cal__hol" aria-hidden="true">
-                {d.holiday}
-              </span>
-            ) : (
-              <span className="hg-cal__marks" aria-hidden="true">
-                {(d.marks ?? []).slice(0, 3).map((k, i) => (
-                  <i key={i} className={cx('hg-cal__mark', `hg-mark--${k}`)} />
-                ))}
-                {d.money && <i className="hg-cal__dot" />}
-              </span>
-            )}
-          </button>
-        ))}
+        {days.map((d) =>
+          // 2026-11-04 다른 달 날짜는 비워 둠(토스처럼, 흐린 숫자는 대비가 모자람)
+          d.muted ? (
+            <span key={d.date} className="hg-cal__day is-muted" aria-hidden="true" />
+          ) : (
+            <button
+              key={d.date}
+              type="button"
+              className={cx(
+                'hg-cal__day',
+                d.muted && 'is-muted',
+                d.festive && 'is-festive',
+                d.holiday && 'is-holiday',
+                d.date === today && 'is-today',
+                d.date === selected && 'is-selected',
+              )}
+              aria-label={d.label}
+              aria-pressed={d.date === selected}
+              aria-current={d.date === today ? 'date' : undefined}
+              onClick={() => onSelect(d.date)}
+            >
+              <span className="hg-cal__num">{d.day}</span>
+              {d.short && (
+                <span className={cx('hg-cal__short', d.tone && `is-${d.tone}`)} aria-hidden="true">
+                  {d.short}
+                </span>
+              )}
+              {d.band && (
+                <span className={cx('hg-cal__band', `is-${d.band}`)} aria-hidden="true">
+                  {(d.band === 'start' || d.band === 'single') && bandLabel}
+                </span>
+              )}
+            </button>
+          ),
+        )}
       </div>
       {children}
     </section>

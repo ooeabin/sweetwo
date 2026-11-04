@@ -9,11 +9,12 @@ import {
 import { formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetwo/core';
 import {
   AmountInput,
-  Button,
   Chip,
   ChoiceCards,
   ConsentCard,
   FileAttach,
+  Lead,
+  ListRow,
   QuestionLayout,
   ShortText,
 } from '@sweetwo/ui';
@@ -248,14 +249,15 @@ export function Y08Record() {
                 options={c.goals.map((g) => ({ value: g.id, label: g.name }))}
               />
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                style={{ alignSelf: 'flex-start' }}
-                onClick={() => setPicking(true)}
-              >
-                {goal ? goal.name : copy.pickGoal}
-              </Button>
+              // 2026-11-04 고르기 전에도 고른 뒤와 같은 줄 모양(누를 수 있다는 게 보이게)
+              <div className="hg-list">
+                <ListRow
+                  lead={<Lead icon="target" tone="goal" />}
+                  label={goal ? goal.name : copy.pickGoal}
+                  onClick={() => setPicking(true)}
+                  chevron
+                />
+              </div>
             )}
           </div>
         )}
@@ -333,7 +335,13 @@ export function Y08Record() {
       primary={{ label: copy.save, loading: saving }}
       onSubmit={() => void save()}
     >
-      <ShortText label={copy.memo} value={d.memo} onChange={(memo) => set({ memo })} max={200} />
+      <ShortText
+        label={copy.memo}
+        value={d.memo}
+        onChange={(memo) => set({ memo })}
+        max={200}
+        placeholder={copy.memoPlaceholder}
+      />
       {pending ? (
         <ConsentCard
           icon="image"
@@ -370,6 +378,9 @@ export function Y08Record() {
           removeLabel={copy.photoRemove}
           retryLabel={copy.photoRetry}
           uploadingLabel={copy.photoUploading}
+          grid
+          addLabel={copy.photoAdd}
+          count={`${d.photos.length}/${MAX_PHOTOS}`}
         />
       )}
     </QuestionLayout>

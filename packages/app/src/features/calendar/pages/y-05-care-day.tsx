@@ -9,6 +9,7 @@ import {
   Menu,
   PageHeader,
   QuestionLayout,
+  StatBlock,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -102,13 +103,18 @@ export function Y05CareDay() {
           />
         }
       />
-      <section className="hg-card hg-stack" aria-label={care.name}>
-        {date && <span className="hg-card__label">{copy.dday(dday(c.today, date))}</span>}
-        <b>{care.name}</b>
-        <span className="hg-card__meta">
-          {date ? formatMonthDay(date) : copy.noDate}
-          {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
-        </span>
+      {/* 1 제목(2026-11-04): 이름은 머리에 있으니 카드는 큰 D-day + 날짜만 */}
+      <section className="hg-card" aria-label={care.name}>
+        <StatBlock
+          as="div"
+          big={date ? copy.dday(dday(c.today, date)) : undefined}
+          sub={
+            <>
+              {date ? formatMonthDay(date) : copy.noDate}
+              {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
+            </>
+          }
+        />
       </section>
       <div className="hg-list">
         <ListRow
@@ -139,36 +145,38 @@ export function Y05CareDay() {
             aria-label={copy.status}
             style={{ gap: 'var(--space-2)' }}
           >
-            {(['todo', 'preparing', 'done'] as const).map((s) => (
+            {/* 2026-11-04 칩은 ‘아직’ ‘준비 중’만. ‘다녀왔어요’는 그날부터 아래 주 버튼(누르면 기록 화면이라 칩과 다르게) */}
+            {(['todo', 'preparing'] as const).map((s) => (
               <Chip
                 key={s}
                 small
                 selected={st === s}
-                onClick={() =>
-                  s === 'done' ? record() : void patch({ status: s, status_on: date })
-                }
+                onClick={() => void patch({ status: s, status_on: date })}
               >
                 {copy.statuses[s]}
               </Chip>
             ))}
           </div>
         )}
+        {!overdue && date && date <= c.today && st !== 'done' && (
+          <Button variant="primary" block onClick={() => record(date)}>
+            {copy.statuses.done}
+          </Button>
+        )}
       </section>
       <section className="hg-stack" aria-label={copy.alerts}>
         <span className="hg-card__label">{copy.alerts}</span>
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.alerts}
-          style={{ gap: 'var(--space-2)' }}
-        >
+        {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름, iOS 미리 알림·Rodeo처럼) */}
+        <div className="hg-list" role="group" aria-label={copy.alerts}>
           {ALERTS.map((n) => {
             const on = care.alerts.includes(n);
             return (
-              <Chip
+              <button
                 key={n}
-                small
-                selected={on}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                className="hg-listrow"
                 onClick={() =>
                   void patch({
                     alerts: on
@@ -177,8 +185,13 @@ export function Y05CareDay() {
                   })
                 }
               >
-                {copy.alertChip(n)}
-              </Chip>
+                <span />
+                <span className="hg-listrow__text">
+                  <span className="hg-listrow__label">{copy.alertRow(n)}</span>
+                </span>
+                <span className={on ? 'hg-check is-on' : 'hg-check'} aria-hidden="true" />
+                <span />
+              </button>
             );
           })}
         </div>
@@ -190,6 +203,7 @@ export function Y05CareDay() {
       )}
       <Field
         label={copy.memo}
+        placeholder={copy.dayMemoPlaceholder}
         value={memo ?? care.memo ?? ''}
         maxLength={200}
         onChange={(e) => setMemo(e.target.value)}

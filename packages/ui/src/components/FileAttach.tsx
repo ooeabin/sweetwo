@@ -39,6 +39,12 @@ export interface FileAttachProps {
   removeLabel: (name: string) => string;
   retryLabel: string;
   uploadingLabel: string;
+  /** 사진 칸 3열(2026-11-04 Y-08c, Stoic·AllTrails): 첫 칸 ‘+ 사진 추가’, 올린 사진은 정사각 칸 + ✕ */
+  grid?: boolean;
+  /** grid: 첫 칸 글자(“사진 추가”) */
+  addLabel?: string;
+  /** grid: 라벨 옆 개수(“2/10”) */
+  count?: string;
 }
 
 export function FileAttach(p: FileAttachProps) {
@@ -59,6 +65,103 @@ export function FileAttach(p: FileAttachProps) {
     take(e.dataTransfer.files);
   };
   const error = p.error ?? (fullHit && p.full ? p.fullText : null);
+  const fileInput = (
+    <input
+      ref={input}
+      type="file"
+      accept={p.accept}
+      multiple={p.multiple}
+      hidden
+      aria-labelledby={`${id}-l`}
+      onChange={(e) => {
+        take(e.target.files);
+        e.target.value = '';
+      }}
+    />
+  );
+  if (p.grid)
+    return (
+      <div className="hg-attach">
+        <span className="hg-field__label" id={`${id}-l`}>
+          {p.label}
+          {p.count && <span className="hg-attach__count"> {p.count}</span>}
+        </span>
+        <ul
+          className={cx('hg-photos', over && !p.full && 'is-over')}
+          aria-labelledby={`${id}-l`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOver(true);
+          }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setOver(false);
+            take(e.dataTransfer.files);
+          }}
+        >
+          {!p.full && (
+            <li>
+              <button
+                type="button"
+                className={cx('hg-photos__add', error && 'is-error')}
+                aria-describedby={`${id}-h`}
+                onClick={() => input.current?.click()}
+              >
+                <Icon name="plus" />
+                <span>{p.addLabel ?? p.pick}</span>
+              </button>
+              {fileInput}
+            </li>
+          )}
+          {p.files.map((f) => (
+            <li key={f.key} className={cx('hg-photos__item', f.error && 'is-error')}>
+              {f.thumb ? <img src={f.thumb} alt={f.name} /> : <Icon name="image" />}
+              {f.progress !== undefined && (
+                <span
+                  className="hg-photos__state"
+                  role="progressbar"
+                  aria-label={`${f.name} ${p.uploadingLabel}`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(f.progress * 100)}
+                >
+                  {p.uploadingLabel}
+                </span>
+              )}
+              {f.error && (
+                <span className="hg-photos__state is-error">
+                  {f.onRetry ? (
+                    <button type="button" className="hg-btn hg-btn--link" onClick={f.onRetry}>
+                      {p.retryLabel}
+                    </button>
+                  ) : (
+                    f.error
+                  )}
+                </span>
+              )}
+              <button
+                type="button"
+                className="hg-photos__remove"
+                aria-label={p.removeLabel(f.name)}
+                onClick={() => p.onRemove(f.key)}
+              >
+                <Icon name="x" size={16} />
+              </button>
+            </li>
+          ))}
+        </ul>
+        {p.full && fileInput}
+        <p className="hg-help" id={`${id}-h`} style={{ margin: 0 }}>
+          {p.help}
+        </p>
+        {error && (
+          <p className="hg-help is-error" role="alert" style={{ margin: 0 }}>
+            {error}
+          </p>
+        )}
+      </div>
+    );
   return (
     <div className="hg-attach">
       <span className="hg-field__label" id={`${id}-l`}>

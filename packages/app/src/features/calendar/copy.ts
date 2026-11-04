@@ -33,6 +33,27 @@ export const copy = {
     goal: '목표',
     maturity: '자산',
   },
+  // 2026-11-04 토스 소비 달력형: 칸 안 짧은 이름, 월말 확인 띠 이름, 오늘로 [확인 필요]
+  short: {
+    payday: '월급',
+    review: '월급 확인',
+    deadline: '기한',
+    goal: '쓰는 달',
+    maturity: '만기',
+    band: '월말 확인',
+  },
+  today: '오늘',
+  // 달력 고른 날 돈 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
+  goSub: {
+    payday: '체크리스트 보기',
+    review: '월말 확인하기',
+    deadline: '목표 보기',
+    goal: '목표 보기',
+    maturity: '자산 보기',
+  },
+  monthHead: (m: number) => `${m}월`,
+  holiday: '공휴일',
+  agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
   legendCare: '챙길 날',
   legendMoney: '돈 일정',
@@ -42,14 +63,7 @@ export const copy = {
   next: '다음 달',
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
-  agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
-  agendaEmpty: '이 날짜엔 없어요',
-  // 2026-11-03 주 단위로 접기 [확인 필요]
-  unfold: '펼치기',
-  fold: '접기',
-  weekEmpty: '이번 주는 일정이 없어요',
-  prevWeek: '이전 주',
-  nextWeek: '다음 주',
+  agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
   listMoney: '돈 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
@@ -109,8 +123,10 @@ export const copy = {
   status: '준비 상황',
   statuses: { todo: '아직', preparing: '준비 중', done: '다녀왔어요' },
   alerts: '미리 알림',
-  alertChip: (n: number) => (n === 0 ? '당일' : `D-${n}`),
+  alertRow: (n: number) => (n === 0 ? '당일' : `${n}일 전`), // [확인 필요] 2026-11-04 체크 목록(‘D-30’ 칩에서)
   memo: '메모',
+  memoPlaceholder: '예: 같이 케이크 먹었어요', // [확인 필요] 2026-11-04 Y-08c
+  dayMemoPlaceholder: '예: 무릎이 안 좋으시다고 하셨음', // 24 Y-05 7번 예시
   lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
   save: '저장', // [확인 필요]
   back: '뒤로',
@@ -118,7 +134,7 @@ export const copy = {
   // Y-08 다녀온 뒤 기록
   spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
   goalHelp: '목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요', // [확인 필요]
-  pickGoal: '목표 고르기',
+  pickGoal: '목표에서 꺼내 쓰기', // [확인 필요] 2026-11-04 ‘목표 고르기’에서, 줄 모양
   pickGoalQ: '어느 목표에서 꺼내 썼어요?', // [확인 필요]
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },
@@ -129,6 +145,7 @@ export const copy = {
   photos: '사진',
   photoDrop: '사진을 끌어 놓거나',
   photoPick: '골라 주세요',
+  photoAdd: '사진 추가', // [확인 필요] 2026-11-04 사진 칸 첫 칸
   photoHelp: '사진 10장까지, 한 장에 10MB 이하', // [확인 필요]
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',
@@ -157,6 +174,7 @@ export const copy = {
   giftedViews: { care: '챙길 날별', year: '연도별' },
   giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
   giftedEmpty: '아직 드린 기록이 없어요', // [확인 필요]
+  giftedEmptyBody: '챙길 날에 ‘다녀왔어요’를 누르고 기록하면 여기에 모여요', // [확인 필요] 2026-11-04
   giftedYear: (y: number) => `${y}년`,
   giftedWhat: (items: string[]) => items.join(', '),
   giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]

@@ -1,5 +1,21 @@
-import { dday, formatDateWeekday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
-import { Button, EmptyState, Icon, ListRow, SectionHeader } from '@sweetwo/ui';
+import {
+  dday,
+  formatDateWeekday,
+  formatMonthDay,
+  withinDays,
+  type MoneyDate,
+  type MoneyKind,
+} from '@sweetwo/core';
+import {
+  Button,
+  EmptyState,
+  Icon,
+  Lead,
+  ListRow,
+  SectionHeader,
+  StatBlock,
+  type IconName,
+} from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../../shared/mask';
@@ -8,6 +24,15 @@ import { moneyLine, useCalendarData } from '../data';
 import { CalendarFrame, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 import { reviewMonth } from '../data';
+
+// 2026-11-04 줄 앞 종류 아이콘(24 Y-01 6번): 챙길 날 선물(together 판), 돈 일정은 종류마다
+const MONEY_ICON: Record<MoneyKind, IconName> = {
+  payday: 'wallet',
+  review: 'calendar-check',
+  deadline: 'target',
+  goal: 'target',
+  maturity: 'piggy-bank',
+};
 
 // Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
 // 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 챙길 날 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
@@ -44,7 +69,15 @@ export function Y01CareList() {
   };
 
   // 다가오는 일정: 챙길 날과 돈 일정을 날짜순 한 목록으로
-  type Row = { key: string; date: string; label: string; sub: string; care: boolean; to: string };
+  type Row = {
+    key: string;
+    date: string;
+    label: string;
+    sub: string;
+    care: boolean;
+    icon: IconName;
+    to: string;
+  };
   const rows: Row[] = [
     ...(filter === 'money'
       ? []
@@ -52,8 +85,12 @@ export function Y01CareList() {
           key: `c-${x.care.id}`,
           date: x.date,
           label: x.care.name,
-          sub: x.care.budget > 0 ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}` : formatDateWeekday(x.date),
+          sub:
+            x.care.budget > 0
+              ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
+              : formatDateWeekday(x.date),
           care: true,
+          icon: 'gift' as IconName,
           to: `/calendar/day/${x.care.id}`,
         }))),
     ...(filter === 'care'
@@ -66,6 +103,7 @@ export function Y01CareList() {
             label: l.label,
             sub: formatDateWeekday(x.date),
             care: false,
+            icon: MONEY_ICON[x.kind],
             to: l.to,
           };
         })),
@@ -94,7 +132,9 @@ export function Y01CareList() {
           </span>
           <span className="hg-recband__text">
             <b>{copy.recordCount(d.overdue.length)}</b>
-            <span>{copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}</span>
+            <span>
+              {copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}
+            </span>
           </span>
           <span className="hg-chevron" aria-hidden="true" />
         </button>
@@ -111,10 +151,17 @@ export function Y01CareList() {
       )}
       {filter !== 'money' && next && (
         <section className="hg-card hg-stack" aria-label={copy.nextCare}>
-          <span className="hg-card__label">{copy.dday(dday(d.today, next.date))}</span>
-          <b>{next.care.name}</b>
-          <span className="hg-card__meta">{formatMonthDay(next.date)}</span>
-          {next.care.budget > 0 && <span>{copy.memoAmount(m(next.care.budget))}</span>}
+          {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}
+          <StatBlock
+            as="div"
+            big={copy.dday(dday(d.today, next.date))}
+            title={next.care.name}
+            sub={
+              next.care.budget > 0
+                ? `${formatMonthDay(next.date)}, ${copy.memoAmount(m(next.care.budget))}`
+                : formatMonthDay(next.date)
+            }
+          />
           <div className="hg-row">
             <Button
               variant="secondary"
@@ -143,29 +190,36 @@ export function Y01CareList() {
             {filter === 'money' ? copy.noMoney60 : copy.none60}
           </p>
         ) : (
-          <div className="hg-list">
-            {rows.map((r) => {
-              const n = dday(d.today, r.date);
-              return (
-                <ListRow
-                  key={r.key}
-                  lead={
-                    <span className="hg-cal__lead" aria-hidden="true">
-                      <i className={r.care ? 'hg-cal__mark hg-mark--together' : 'hg-cal__dot'} />
-                    </span>
-                  }
-                  label={r.label}
-                  sub={r.sub}
-                  value={
-                    <span className={n <= 7 ? 'hg-cal__dday is-near' : 'hg-cal__dday'}>
-                      {copy.dday(n)}
-                    </span>
-                  }
-                  onClick={() => nav(r.to)}
-                />
-              );
-            })}
-          </div>
+          // 2026-11-04 달 머리로 묶음(토스 소비 목록처럼, 월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
+          Object.entries(
+            rows.reduce<Record<string, Row[]>>((acc, r) => {
+              (acc[r.date.slice(0, 7)] ??= []).push(r);
+              return acc;
+            }, {}),
+          ).map(([ym, list]) => (
+            <div key={ym} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+              <h3 className="hg-cal__monthhead">{copy.monthHead(Number(ym.slice(5, 7)))}</h3>
+              <div className="hg-list">
+                {list.map((r) => {
+                  const n = dday(d.today, r.date);
+                  return (
+                    <ListRow
+                      key={r.key}
+                      lead={<Lead icon={r.icon} tone={r.care ? 'together' : undefined} />}
+                      label={r.label}
+                      sub={r.sub}
+                      value={
+                        <span className={n <= 7 ? 'hg-cal__dday is-near' : 'hg-cal__dday'}>
+                          {copy.dday(n)}
+                        </span>
+                      }
+                      onClick={() => nav(r.to)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))
         )}
       </section>
       {filter !== 'money' && !!d.cares.length && (
