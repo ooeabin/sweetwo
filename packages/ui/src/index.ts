@@ -28,6 +28,7 @@ export * from './components/BarChart';
 export * from './components/MonthBars';
 export * from './components/GoalPick';
 export { goalIcon } from './components/goal-icons';
+export { assetIcon } from './components/asset-icons';
 export * from './components/FileAttach';
 export * from './components/ConflictChoice';
 export * from './components/TransferRow';

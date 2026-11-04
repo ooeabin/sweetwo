@@ -55,6 +55,11 @@ export function F04bSold() {
     );
   }
 
+  // 2026-11-04 진행 막대(F-04a 만기 정리와 같음): 얼마나 → 받은 금액 → (남은 평가금액) → 받은 통장
+  const order = part ? ['how', 'amount', 'remain', 'to'] : ['how', 'amount', 'to'];
+  const now = Math.max(order.indexOf(step), 0);
+  const progress = { total: order.length, now, fill: 50 };
+
   if (step === 'to') {
     const targets = d.items.filter(
       (x) =>
@@ -78,7 +83,11 @@ export function F04bSold() {
       }
     };
     return (
-      <QuestionLayout title={copy.soldTo_q} onBack={() => setStep(part ? 'remain' : 'amount')}>
+      <QuestionLayout
+        steps={progress}
+        title={copy.soldTo_q}
+        onBack={() => setStep(part ? 'remain' : 'amount')}
+      >
         {targets.length ? (
           <ChoiceCards<string>
             label={copy.soldTo_q}
@@ -100,7 +109,7 @@ export function F04bSold() {
 
   if (step === 'how') {
     return (
-      <QuestionLayout title={copy.soldHow} onBack={back}>
+      <QuestionLayout steps={progress} title={copy.soldHow} onBack={back}>
         <ChoiceCards<'all' | 'part'>
           label={copy.soldHow}
           value={null}
@@ -123,6 +132,7 @@ export function F04bSold() {
     const done = remain !== null;
     return (
       <QuestionLayout
+        steps={progress}
         title={copy.soldRemain}
         onBack={() => setStep('amount')}
         primary={{ label: copy.next, disabled: !done }}
@@ -136,6 +146,7 @@ export function F04bSold() {
   const ok = received !== null && received > 0;
   return (
     <QuestionLayout
+      steps={progress}
       title={copy.soldAmount}
       onBack={() => setStep('how')}
       primary={{ label: copy.next, disabled: !ok }}
