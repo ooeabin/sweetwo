@@ -90,11 +90,13 @@ import { H01Home } from './features/home';
 import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
+import { CS19NotFound, RouteError } from './shared/cs-19-not-found';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
   {
     element: <A01Launch />, // A-01 실행, 자동 로그인 판단 + 잠금(A-06 해제) + 토스트
+    errorElement: <RouteError />, // 13 공통 상태 7번(화면 오류), 19번(없는 주소)
     children: [
       {
         path: paths.home,
@@ -781,6 +783,7 @@ export const routes: RouteObject[] = [
       { path: paths.expired, element: <A08SessionExpired /> }, // A-08 세션 만료
       { path: paths.restore, element: <A02Restore /> }, // A-02 계정 삭제 취소
       { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 데스크톱 복귀 페이지)
+      { path: '*', element: <CS19NotFound /> }, // 13 공통 상태 19번 없는 주소
     ],
   },
   // 트레이 위젯 창(데스크톱, 26). 앱 틀·로그인 확인 없이 브리지 값만 그림

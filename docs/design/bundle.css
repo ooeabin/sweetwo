@@ -39,6 +39,7 @@
 .hg-chip.is-selected { background: var(--surface); border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); color: var(--ink); font-weight: 600; }  /* 2026-11-02 카카오톡·현대카드처럼 테두리만 진하게 */
 .hg-chip__order { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); }
 .hg-chip.is-selected .hg-chip__order { background: var(--ink); color: var(--on-ink); }
+.hg-chip.hg-chip--sm.is-selected { background: var(--ink); border-color: var(--ink); box-shadow: none; color: var(--on-ink); }  /* 2026-11-04 작은 칩(필터, 미리 알림, 준비 상황)은 테두리만으로는 고른 게 안 보여 채움 */
 
 /* Card */
 .hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-6); }
@@ -481,8 +482,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__day { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 56px; padding-top: 6px; box-sizing: border-box; border-radius: var(--radius-lg); }
 .hg-cal__num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-full); font: 400 15px/1 var(--font-sans); }
 .hg-cal__day.is-muted .hg-cal__num { color: var(--stone); }
-.hg-cal__day.is-today { background: var(--brand-soft); }
-.hg-cal__day.is-today .hg-cal__num { font-weight: 600; color: var(--brand-ink); }
+.hg-cal__day.is-today .hg-cal__num { font-weight: 700; color: var(--ink); background: var(--surface-alt); }  /* 2026-11-04 브랜드 옅은 판에서 회색 원으로(브랜드 색 규칙) */
 .hg-cal__day.is-selected .hg-cal__num { background: var(--ink); color: var(--on-ink); font-weight: 600; }
 .hg-cal__marks { display: flex; gap: 2px; height: 4px; }
 .hg-cal__mark { width: 14px; height: 4px; border-radius: var(--radius-full); }
@@ -950,15 +950,14 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__event + .hg-cal__date { padding-top: var(--space-3); }
 /* 공휴일: 숫자 holiday-ink + 이름 작게(막대가 없을 때 그 자리), 설·추석 연휴 띠 family(정리 기간 띠보다 위). 오늘·고른 날이 이김 */
 .hg-cal__day.is-holiday .hg-cal__num { color: var(--holiday-ink); }
-.hg-cal__day.is-holiday.is-today .hg-cal__num { color: var(--brand-ink); }
+.hg-cal__day.is-holiday.is-today:not(.is-selected) .hg-cal__num { color: var(--holiday-ink); }
 .hg-cal__day.is-holiday.is-selected .hg-cal__num { color: var(--on-ink); }
-.hg-cal__day.is-festive:not(.is-today) { background: var(--family); }
+.hg-cal__day.is-festive { background: var(--family); }
 .hg-cal__hol { max-width: 100%; padding: 0 2px; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 10px/12px var(--font-sans); color: var(--holiday-ink); }
 .hg-cal__event.is-holiday { cursor: default; }
 .hg-cal__event.is-holiday i { background: var(--holiday-ink); }
 .hg-cal__event.is-holiday span { color: var(--holiday-ink); }
 .hg-cal__day.is-band { background: var(--surface-alt); }
-.hg-cal__day.is-band.is-today { background: var(--brand-soft); }
 .hg-cal__nav { display: flex; gap: var(--space-1); }
 
 /* 좁은 창 떠 있는 추가 버튼: 독 오른쪽 위 */
@@ -1805,3 +1804,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offse
 .hg-list--plain .hg-listrow { column-gap: 0; padding: var(--space-2) 0; min-height: 64px; }
 .hg-list--plain .hg-listrow__value { padding-left: var(--space-3); font-size: 17px; font-variant-numeric: tabular-nums; }
 .hg-list--plain .hg-listrow__sub { font-size: 14px; line-height: 20px; color: var(--slate); }
+
+/* 공통 상태 화면(2026-11-04 13 공통 상태 19번 없는 주소, 7번 화면 오류): 앱 틀 없이 화면 가운데 EmptyState */
+.hg-state-page { box-sizing: border-box; display: grid; place-items: center; min-height: 100vh; min-height: 100dvh; padding: var(--space-6) var(--space-4); background: var(--surface); }
+.hg-cal__legend { display: block; text-align: center; margin-top: var(--space-2); }  /* 2026-11-04 펼친 달력 아래 월말 확인 회색 칸 안내 */

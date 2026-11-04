@@ -52,7 +52,10 @@ export function Y01CareList() {
           key: `c-${x.care.id}`,
           date: x.date,
           label: x.care.name,
-          sub: x.care.budget > 0 ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}` : formatDateWeekday(x.date),
+          sub:
+            x.care.budget > 0
+              ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
+              : formatDateWeekday(x.date),
           care: true,
           to: `/calendar/day/${x.care.id}`,
         }))),
@@ -94,7 +97,9 @@ export function Y01CareList() {
           </span>
           <span className="hg-recband__text">
             <b>{copy.recordCount(d.overdue.length)}</b>
-            <span>{copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}</span>
+            <span>
+              {copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}
+            </span>
           </span>
           <span className="hg-chevron" aria-hidden="true" />
         </button>

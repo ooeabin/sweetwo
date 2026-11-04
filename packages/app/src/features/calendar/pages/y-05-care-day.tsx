@@ -1,15 +1,6 @@
 import { qk, restoreTrash, trashCareDay, updateCareDay, type CareDay } from '@sweetwo/api';
 import { dday, formatMonthDay, nextCareDate, quickChips, solarToLunar } from '@sweetwo/core';
-import {
-  AmountInput,
-  Button,
-  Chip,
-  Field,
-  ListRow,
-  Menu,
-  PageHeader,
-  QuestionLayout,
-} from '@sweetwo/ui';
+import { AmountInput, Button, Chip, Field, ListRow, Menu, PageHeader, QuestionLayout, StatBlock } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -102,13 +93,18 @@ export function Y05CareDay() {
           />
         }
       />
-      <section className="hg-card hg-stack" aria-label={care.name}>
-        {date && <span className="hg-card__label">{copy.dday(dday(c.today, date))}</span>}
-        <b>{care.name}</b>
-        <span className="hg-card__meta">
-          {date ? formatMonthDay(date) : copy.noDate}
-          {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
-        </span>
+      {/* 1 제목(2026-11-04): 이름은 머리에 있으니 카드는 큰 D-day + 날짜만 */}
+      <section className="hg-card" aria-label={care.name}>
+        <StatBlock
+          as="div"
+          big={date ? copy.dday(dday(c.today, date)) : undefined}
+          sub={
+            <>
+              {date ? formatMonthDay(date) : copy.noDate}
+              {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
+            </>
+          }
+        />
       </section>
       <div className="hg-list">
         <ListRow

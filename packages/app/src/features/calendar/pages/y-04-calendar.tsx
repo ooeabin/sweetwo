@@ -99,7 +99,11 @@ export function Y04Calendar() {
           </div>
         )}
         {band && (
-          <button type="button" className="hg-cal__event is-money" onClick={() => nav('/salary/review')}>
+          <button
+            type="button"
+            className="hg-cal__event is-money"
+            onClick={() => nav('/salary/review')}
+          >
             <i />
             <span>{copy.reviewBand(reviewMonth(band.end))}</span>
             <span className="hg-cal__go">
@@ -176,6 +180,16 @@ export function Y04Calendar() {
       prevLabel={open ? copy.prev : copy.prevWeek}
       nextLabel={open ? copy.next : copy.nextWeek}
     >
+      {open &&
+        filter !== 'care' &&
+        d
+          .monthOf(y, m)
+          .bands.filter((b) => b.start.slice(0, 7) === `${y}-${String(m).padStart(2, '0')}`)
+          .map((b) => (
+            <span key={b.start} className="hg-help hg-cal__legend">
+              {copy.bandLegend(ymd(b.start)[2], ymd(b.end)[2])}
+            </span>
+          ))}
       <button
         type="button"
         className="hg-cal__fold"

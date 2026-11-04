@@ -33,6 +33,7 @@ export const copy = {
     goal: '목표',
     maturity: '자산',
   },
+  bandLegend: (a: number, b: number) => `회색 칸 ${a}~${b}일은 월말 확인 기간이에요`, // [확인 필요] 2026-11-04 펼친 달력 아래
   reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
   legendCare: '챙길 날',
   legendMoney: '돈 일정',
@@ -43,7 +44,7 @@ export const copy = {
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
-  agendaEmpty: '이 날짜엔 없어요',
+  agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
   // 2026-11-03 주 단위로 접기 [확인 필요]
   unfold: '펼치기',
   fold: '접기',
@@ -111,6 +112,7 @@ export const copy = {
   alerts: '미리 알림',
   alertChip: (n: number) => (n === 0 ? '당일' : `D-${n}`),
   memo: '메모',
+  memoPlaceholder: '예: 같이 케이크 먹었어요', // [확인 필요] 2026-11-04 Y-08c
   lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
   save: '저장', // [확인 필요]
   back: '뒤로',

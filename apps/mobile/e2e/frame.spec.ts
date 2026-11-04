@@ -95,3 +95,16 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d)', asyn
   await page.getByRole('button', { name: '확인하기' }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/unlink\/review$/);
 });
+
+test('없는 주소(13 공통 상태 19번): “찾는 화면이 없어요” + 홈으로 가기', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar/nowhere/really');
+  await expect(page.getByRole('heading', { name: '찾는 화면이 없어요' })).toBeAttached();
+  await expect(page.getByText('지워졌거나 주소가 바뀌었어요')).toBeVisible();
+  await expect(page.getByText(/Unexpected Application Error/)).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '홈으로 가기' }).click();
+  await expect(page).toHaveURL(/\/$/);
+});

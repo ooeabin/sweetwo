@@ -333,7 +333,13 @@ export function Y08Record() {
       primary={{ label: copy.save, loading: saving }}
       onSubmit={() => void save()}
     >
-      <ShortText label={copy.memo} value={d.memo} onChange={(memo) => set({ memo })} max={200} />
+      <ShortText
+        label={copy.memo}
+        value={d.memo}
+        onChange={(memo) => set({ memo })}
+        max={200}
+        placeholder={copy.memoPlaceholder}
+      />
       {pending ? (
         <ConsentCard
           icon="image"

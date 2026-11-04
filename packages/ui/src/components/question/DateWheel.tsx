@@ -131,6 +131,7 @@ export function DateWheel({
   className,
   yearOnly,
   yearMonth,
+  lunar,
 }: {
   label: string;
   value: YMD | null;
@@ -143,7 +144,10 @@ export function DateWheel({
   yearOnly?: boolean;
   /** 연·월 2열(예정 연·월, 여행 가는 달, 기한). 값의 일은 1 */
   yearMonth?: boolean;
+  /** 음력(2026-11-04 Y-07c): 어느 달이든 1~30일(맞는 날인지는 화면이 따로 확인) */
+  lunar?: boolean;
 }) {
+  const dim = (y: number, m: number) => (lunar ? 30 : daysIn(y, m));
   const start = initial ?? { y: maxYear - 12, m: 1, d: 1 };
   const v = value ?? start;
   useEffect(() => {
@@ -152,10 +156,10 @@ export function DateWheel({
 
   const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  const days = Array.from({ length: daysIn(v.y, v.m) }, (_, i) => i + 1);
+  const days = Array.from({ length: dim(v.y, v.m) }, (_, i) => i + 1);
   const set = (p: Partial<YMD>) => {
     const n = { ...v, ...p };
-    n.d = Math.min(n.d, daysIn(n.y, n.m)); // 2월 30일 같은 날은 그 달 끝날로
+    n.d = Math.min(n.d, dim(n.y, n.m)); // 2월 30일 같은 날은 그 달 끝날로
     onChange(n);
   };
 
