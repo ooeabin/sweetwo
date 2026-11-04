@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (4049b5e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (b8de336). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -163,6 +163,7 @@
 .hg-mbars__col { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
 .hg-mbars__col i { display: block; width: 100%; max-width: 28px; border-radius: var(--radius-sm) var(--radius-sm) var(--radius-xs) var(--radius-xs); background: var(--bar); }
 .hg-mbars__col.is-now i { background: var(--bar-now); }
+[data-theme="dark"] .hg-mbars__col:not(.is-now) i { background: color-mix(in srgb, var(--bar-now) 35%, var(--surface)); }  /* 2026-11-04 다크에서 지난 달 막대가 바탕에 묻혀서 */
 .hg-mbars__col small { font: 500 12px/16px var(--font-sans); color: var(--stone); }
 .hg-mbars__col.is-now small { font-weight: 600; color: var(--bar-now); }
 .hg-mbars__v { min-height: 16px; font: 600 12px/16px var(--font-sans); color: var(--bar-now); white-space: nowrap; }
@@ -1529,6 +1530,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame > .hg-dock .hg-dock__item.is-active { background: none; color: var(--ink); }  /* 2026-11-03 고른 탭은 배경 없이 색만(ink), 나머지 stone */
   .hg-frame > .hg-dock .hg-dock__item:not(.is-active) { color: var(--stone); }
   .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(var(--space-3) + 66px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }
+  .hg-frame:has(> .hg-fab) .hg-body { padding-bottom: calc(var(--space-22) + 24px + 52px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }  /* 2026-11-04 + 버튼이 목록 마지막 줄을 가리지 않게 */
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
   /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
@@ -1740,3 +1742,5 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-celebrate__photo .hg-goaltile__photo { aspect-ratio: 1 / 1; }  /* 좁은 창은 정사각으로 위를 더 채움 */
 }
 .hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
+/* 상세 화면 폭(2026-11-04 F-04): 넓은 창에서 본문을 720px 안으로(금액, 버튼이 한쪽에 몰리지 않게) */
+@media (min-width: 768px) { .hg-detail { width: 100%; max-width: 720px; } }

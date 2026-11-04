@@ -1,10 +1,17 @@
 import { insertAsset } from '@sweetwo/api';
-import { assetGroup, bands, isHighInterestKind, quickChips, type AssetSide } from '@sweetwo/core';
+import {
+  assetGroup,
+  bands,
+  isHighInterestKind,
+  quickChips,
+  todayKst,
+  type AssetSide,
+} from '@sweetwo/core';
 import {
   AmountInput,
   ChoiceCards,
   Chip,
-  DateInput,
+  DateWheel,
   Field,
   QuestionLayout,
   ShortText,
@@ -17,6 +24,10 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetSteps, useAssetDraft } from './draft';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const ymdText = (v: { y: number; m: number; d: number }) => `${v.y}-${pad(v.m)}-${pad(v.d)}`;
+const ymdOf = (s: string) => ({ y: Number(s.slice(0, 4)), m: Number(s.slice(5, 7)), d: Number(s.slice(8, 10)) });
 
 const path = (step: string) => `/assets/new/${step}`;
 
@@ -262,6 +273,8 @@ export function AssetAddRoute() {
   const lastLabel = steps[i + 1] ? copy.next : copy.save;
 
   if (step === 'maturity') {
+    const t = todayKst();
+    const initial = { y: Number(t.slice(0, 4)) + 1, m: Number(t.slice(5, 7)), d: Number(t.slice(8, 10)) };
     const title = draft.kind === 'deposit_money' ? copy.contractEnd : copy.maturity;
     return (
       <QuestionLayout
@@ -269,13 +282,17 @@ export function AssetAddRoute() {
         title={title}
         onBack={back}
         later={skip}
-        primary={{ label: lastLabel, disabled: !draft.maturity, loading: saving }}
-        onSubmit={() => draft.maturity && go({})}
+        primary={{ label: lastLabel, loading: saving }}
+        onSubmit={() => go({ maturity: draft.maturity ?? ymdText(initial) })}
       >
-        <DateInput
+        {/* 2026-11-04 다른 날짜 질문(목표 기한)과 같은 휠. 처음 값은 1년 뒤 오늘 */}
+        <DateWheel
           label={title}
-          value={draft.maturity}
-          onChange={(maturity) => set({ maturity })}
+          value={draft.maturity ? ymdOf(draft.maturity) : null}
+          initial={initial}
+          minYear={initial.y - 11}
+          maxYear={initial.y + 39}
+          onChange={(v) => set({ maturity: ymdText(v) })}
         />
       </QuestionLayout>
     );

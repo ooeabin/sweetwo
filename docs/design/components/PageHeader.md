@@ -10,3 +10,5 @@
 - AppFrame 상단 줄(날짜 + 큰 제목)은 메뉴 첫 화면용, PageHeader는 그 아래 단계 화면용. 질문 흐름은 QuestionLayout.
 - Esc = 뒤로.
 - React 래퍼 `PageHeader`(packages/ui): `title`, `sub`, `backLabel`(화면 읽기 “뒤로”), `backTo`(넓은 창에 보이는 돌아갈 화면 이름: 설정, 도움말, 내 문의, 데이터, 내 정보, 가이드 모아보기, 목표, 우리 자산, 월급 플랜, 이번 달), `onBack`, `action`(⋯ `Menu` 등).
+
+- 상세 화면 머리(2026-11-04): 목표 상세(G-02)와 자산 상세(F-04) 모두 ‘‹ 이름’ + 오른쪽 ⋯ 메뉴(삭제 등). 이름 아래 보조 줄은 두지 않음. 넓은 창 상세 본문은 `hg-detail`(최대 720px).

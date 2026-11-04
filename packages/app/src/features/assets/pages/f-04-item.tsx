@@ -7,7 +7,6 @@ import {
   updateIfUnchanged,
 } from '@sweetwo/api';
 import {
-  assetGroup,
   conflictDecision,
   formatDateFull,
   formatDot,
@@ -24,6 +23,7 @@ import {
   ConflictChoice,
   LineChart,
   ListRow,
+  Menu,
   PageHeader,
   SectionHeader,
 } from '@sweetwo/ui';
@@ -135,7 +135,9 @@ export function F04Item() {
     });
 
   const gain = hasPrincipal(a.grp) && a.principal !== null ? a.amount - a.principal : null;
-  const market = editable && a.side === 'asset' && hasPrincipal(a.grp);
+  // 시세 바꾸기·팔았어요: 투자·부동산만, 전·월세 보증금은 팔거나 시세가 바뀌는 것이 아니라 뺌(2026-11-04)
+  const market =
+    editable && a.side === 'asset' && hasPrincipal(a.grp) && a.kind !== 'deposit_money';
   const nameOf = (uid: string | null) =>
     uid === d.me?.id ? (d.me?.nickname ?? '') : (d.partnerProfile?.nickname ?? '');
   // 금액 그래프: 달마다 마지막 기록(등록 이후)
@@ -220,12 +222,20 @@ export function F04Item() {
     </div>
   );
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
+      {/* 2026-11-04 목표 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
       <PageHeader
         title={a.name}
-        sub={assetGroup(a.grp)?.name}
         backLabel={copy.back}
         onBack={back}
+        action={
+          editable ? (
+            <Menu
+              label={copy.menu}
+              actions={[{ label: copy.remove, danger: true, onSelect: remove }]}
+            />
+          ) : undefined
+        }
       />
       {!editable && (
         <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
@@ -280,32 +290,24 @@ export function F04Item() {
             )}
           </div>
         ) : (
-          <span className="hg-row" style={{ gap: 'var(--space-3)', alignItems: 'baseline' }}>
-            <span className="hg-card__value">{m(a.amount)}</span>
-            {editable && (
-              <button
-                type="button"
-                className="hg-btn hg-btn--link"
-                onClick={() => startEdit(a.amount)}
-              >
-                {copy.edit}
-              </button>
-            )}
-          </span>
+          <span className="hg-card__value">{m(a.amount)}</span>
         )}
         {gain !== null && a.principal !== null && (
           <span className="hg-card__meta">
             {`${gain >= 0 ? '+' : '−'}${m(Math.abs(gain))}`}, {copy.principal(m(a.principal))}
           </span>
         )}
-        {market && editAmount === undefined && (
+        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 보조 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일) */}
+        {editable && editAmount === undefined && (
           <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
             <Button variant="secondary" size="sm" onClick={() => startEdit(a.amount)}>
-              {copy.marketEdit}
+              {market ? copy.marketEdit : copy.amountEdit}
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => nav(`/assets/${a.id}/sold`)}>
-              {copy.sold}
-            </Button>
+            {market && (
+              <Button variant="secondary" size="sm" onClick={() => nav(`/assets/${a.id}/sold`)}>
+                {copy.sold}
+              </Button>
+            )}
           </span>
         )}
       </section>
@@ -328,6 +330,10 @@ export function F04Item() {
               {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
             </span>
           }
+        />
+        <ListRow
+          label={copy.createdLabel}
+          value={formatDateFull(todayKst(new Date(a.created_at)))}
         />
         {a.maturity_date !== null && (
           <ListRow
@@ -404,34 +410,26 @@ export function F04Item() {
       )}
       <section className="hg-stack" aria-label={copy.history}>
         <SectionHeader title={copy.history} />
-        <div className="hg-list">
-          {manual.map((h) => (
-            <ListRow
-              key={h.id}
-              label={
-                <span className="hg-help">
-                  {copy.editedBy(
-                    formatDot(todayKst(new Date(h.recorded_at))),
-                    h.recorded_by ? nameOf(h.recorded_by) : '',
-                  )}
-                </span>
-              }
-              value={<b>{m(h.amount)}</b>}
-            />
-          ))}
-        </div>
-        <span className="hg-help">{formatDateFull(todayKst(new Date(a.created_at)))}</span>
+        {manual.length === 0 && <p className="hg-help">{copy.historyEmpty}</p>}
+        {manual.length > 0 && (
+          <div className="hg-list">
+            {manual.map((h) => (
+              <ListRow
+                key={h.id}
+                label={
+                  <span className="hg-help">
+                    {copy.editedBy(
+                      formatDot(todayKst(new Date(h.recorded_at))),
+                      h.recorded_by ? nameOf(h.recorded_by) : '',
+                    )}
+                  </span>
+                }
+                value={<b>{m(h.amount)}</b>}
+              />
+            ))}
+          </div>
+        )}
       </section>
-      {editable && (
-        <Button
-          variant="secondary"
-          disabled={busy}
-          onClick={remove}
-          style={{ alignSelf: 'flex-start' }}
-        >
-          {copy.remove}
-        </Button>
-      )}
     </div>
   );
   return <MainFrame sub="detail" current="assets" columns={[body]} />;
