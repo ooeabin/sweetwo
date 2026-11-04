@@ -189,39 +189,41 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/calendar/month');
-  // 처음엔 이번 주만(2026-11-03 주 단위로 접기) + 그 주 일정
-  await expect(page.locator('.hg-cal__day')).toHaveCount(7);
+  // 2026-11-04 토스 소비 달력형: 처음부터 한 달(그 달 주만, 10월은 5주), 처음 고른 날은 오늘
+  await expect(page.locator('.hg-cal__day')).toHaveCount(35);
   await expect(page.getByRole('button', { name: '10월 7일' })).toHaveAttribute(
     'aria-current',
     'date',
   );
-  await expect(page.locator('.hg-cal__agenda')).toContainText('예빈 월급날');
-  await axe(page);
-  await page.getByRole('button', { name: '다음 주' }).click();
-  await expect(page.getByRole('button', { name: /^10월 14일/ })).toBeVisible();
-  await page.getByRole('button', { name: '이전 주' }).click();
-  await page.getByRole('button', { name: '펼치기' }).click();
-  await expect(page.locator('.hg-cal__day')).toHaveCount(42);
+  await expect(page.getByRole('button', { name: '10월 7일' })).toHaveClass(/is-selected/);
+  await expect(page.getByText('10월 7일 수요일')).toBeVisible();
   await expect(page.getByText('이 날은 일정이 없어요')).toBeVisible();
+  // 칸 안 짧은 이름
+  await expect(page.getByRole('button', { name: '10월 9일, 일정 1개' })).toContainText('월급');
+  await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   await axe(page);
 
   const d23 = page.getByRole('button', { name: '10월 23일, 일정 1개' });
-  await expect(d23).toHaveClass(/is-band/);
+  // 월말 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름
+  await expect(d23.locator('.hg-cal__band')).toHaveCount(1);
+  await expect(
+    page.getByRole('button', { name: '10월 22일, 일정 1개' }).locator('.hg-cal__band'),
+  ).toHaveText('월말 확인');
   await page.getByRole('button', { name: '10월 22일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
   await expect(page).toHaveURL(/\/salary\/review$/);
   await page.goto('/calendar/month');
-  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: '10월 23일, 일정 1개' }).click();
-  await expect(page.getByText('10월 23일(금)')).toBeVisible();
+  await expect(page.getByText('10월 23일 금요일')).toBeVisible();
   await page.getByRole('button', { name: /찬우 월급날/ }).click();
   await expect(page).toHaveURL(/\/salary$/);
 
   await page.goto('/calendar');
   await expect(page).toHaveURL(/\/calendar\/month$/);
-  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: '다음 달' }).click();
   await expect(page.getByRole('region', { name: '2026년 11월' })).toBeVisible();
+  // 다른 달이면 ‘오늘’로 돌아오기
+  await expect(page.getByRole('button', { name: '오늘' })).toBeVisible();
   await page.getByRole('button', { name: '11월 1일, 일정 1개' }).click();
   await expect(page.getByRole('button', { name: /여행 기한/ })).toBeVisible();
   // 챙길 날만 보면 돈 일정 점·띠 없음
@@ -302,7 +304,6 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
 
   // 달력에서 고른 날 → 날짜 채움
   await page.getByRole('tab', { name: '달력' }).click();
-  await page.getByRole('button', { name: '펼치기' }).click();
   await page.getByRole('button', { name: /^10월 30일/ }).click();
   await page.getByRole('button', { name: '이 날에 챙길 날 추가' }).click();
   await page.getByLabel('어떤 날이에요?').fill('집들이');
@@ -413,7 +414,7 @@ test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 �
   await expect(consent).toContainText('기록을 지우면 사진도 함께 지워져요');
   await axe(page);
   await consent.getByRole('button', { name: '동의할게요' }).click();
-  expect(db.consents.at(-1)).toMatchObject({
+  await expect.poll(() => db.consents.at(-1)).toMatchObject({
     kind: 'photo',
     agreed: true,
     source: 'care_day_first',
@@ -471,7 +472,6 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   );
 
   await page.goto('/calendar/month');
-  await page.getByRole('button', { name: '펼치기' }).click();
   const hangul = page.getByRole('button', { name: '10월 9일, 한글날' });
   await expect(hangul).toHaveClass(/is-holiday/);
   await expect(hangul).toContainText('한글날');
@@ -493,7 +493,7 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   );
   await expect(page.getByRole('button', { name: /^9월 27일/ })).not.toHaveClass(/is-festive/);
   await chuseok.click();
-  await expect(page.locator('.hg-cal__event.is-holiday')).toHaveText('추석');
+  await expect(page.locator('.hg-cal__agenda .hg-listrow__label').first()).toHaveText('추석');
   await axe(page);
 
   // 앞당기기 끄면 10일 그대로

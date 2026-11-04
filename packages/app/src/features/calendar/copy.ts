@@ -33,7 +33,18 @@ export const copy = {
     goal: '목표',
     maturity: '자산',
   },
-  bandLegend: (a: number, b: number) => `회색 칸 ${a}~${b}일은 월말 확인 기간이에요`, // [확인 필요] 2026-11-04 펼친 달력 아래
+  // 2026-11-04 토스 소비 달력형: 칸 안 짧은 이름, 월말 확인 띠 이름, 오늘로 [확인 필요]
+  short: {
+    payday: '월급',
+    review: '월급 확인',
+    deadline: '기한',
+    goal: '쓰는 달',
+    maturity: '만기',
+    band: '월말 확인',
+  },
+  today: '오늘',
+  holiday: '공휴일',
+  agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
   legendCare: '챙길 날',
   legendMoney: '돈 일정',
@@ -43,14 +54,7 @@ export const copy = {
   next: '다음 달',
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
-  agendaDate: (m: number, d: number, dow: string) => `${m}월 ${d}일(${dow})`,
   agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
-  // 2026-11-03 주 단위로 접기 [확인 필요]
-  unfold: '펼치기',
-  fold: '접기',
-  weekEmpty: '이번 주는 일정이 없어요',
-  prevWeek: '이전 주',
-  nextWeek: '다음 주',
   listMoney: '돈 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
