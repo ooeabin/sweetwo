@@ -9,6 +9,7 @@ export type IconName =
   | 'baby'
   | 'bank'
   | 'bell'
+  | 'buildings'
   | 'calendar'
   | 'calendar-check'
   | 'camera'

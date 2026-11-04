@@ -71,6 +71,7 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--truck` | `truck` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--couch` | `couch` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--buildings` | `buildings` | 자산 묶음 부동산(F-03a, F-01 빈 상태, 2026-11-04) |
 | `hg-ico--baby` | `baby` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--graduation-cap` | `graduation-cap` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--users-three` | `users-three` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |

@@ -7,6 +7,7 @@ import {
   rankBracket,
   rankChange,
   rankNextStep,
+  rankTopOpen,
   rankTopPct,
   todayKst,
 } from '@sweetwo/core';
@@ -57,7 +58,7 @@ export function F08Rank() {
             <>
               {copy.rankHero1}
               <br />
-              {copy.rankHero2(p)}
+              {copy.rankHero2(p, rankTopOpen(r.net))}
             </>
           }
           note={

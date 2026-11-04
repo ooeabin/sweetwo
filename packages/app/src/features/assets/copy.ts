@@ -324,7 +324,7 @@ export const copy = {
   // F-08 우리 자산 순위(23 F-08, 2026-11-04 토스형: 카드 없이 문장 + 곡선 + 굵은 띠 + 이름·값 줄)
   rankTitle: '우리 자산 순위', // [확인 필요]
   rankHero1: '우리 자산은 전체 가구 중', // [확인 필요]
-  rankHero2: (pct: number) => `상위 ${pct}%예요`, // [확인 필요]
+  rankHero2: (pct: number, open = false) => (open ? `상위 ${pct}% 안이에요` : `상위 ${pct}%예요`), // [확인 필요] open = P90 이상
   rankAxis: { low: '하위', mid: '중간', high: '상위' },
   rankYou: '우리',
   rankAria: (pct: number) => `우리나라 전체 가구 중 상위 ${pct}%`,
