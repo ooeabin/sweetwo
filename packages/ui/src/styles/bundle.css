@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (365d226). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e3216f6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -986,9 +986,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-noti--page .hg-noti__head { display: grid; grid-template-columns: minmax(40px, 1fr) auto minmax(40px, 1fr); }
   .hg-noti--page .hg-noti__title { text-align: center; font-size: 17px; line-height: 24px; }
   .hg-noti--page .hg-noti__head > .hg-btn { justify-self: end; }
-  /* 앱 머리 바로 아래 ‘‹ 제목’ 줄(본문 위 여백 없이, 토스처럼 머리와 붙여서) */
-  .hg-body:has(> .hg-body__col:first-child > .hg-stack:first-child > .hg-pagehead:first-child) { padding-top: 0; }
-  .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: 0; }
+  /* 맨 위 ‘‹ 제목’ 줄(토스 구조: 앱 머리 없는 상세·하위 화면 맨 위, 위 여백 8px) */
+  .hg-body:has(> .hg-body__col:first-child > .hg-stack:first-child > .hg-pagehead:first-child) { padding-top: var(--space-2); }
+  .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: var(--space-2); }
   .hg-noti--page .hg-noti__head { padding: 0 var(--space-1) 0 0; min-height: 56px; }
 }
 
@@ -1553,7 +1553,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
   /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
-  .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 머리 공통화: 설정 하위·알림도 홈과 같은 앱 머리(제목 + 검색·알림·설정)를 두고 그 아래 ‘‹ 제목’ 줄. 탭 막대만 숨김 */
+  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 토스 구조: 상세·설정 하위·알림은 앱 머리와 탭 막대 없이 맨 위 ‘‹ 제목 ⋯’ 한 줄. 앱 머리는 메뉴 첫 화면(홈, 목표, 우리 자산, 캘린더, 설정)에만 */
   .hg-frame--sub .hg-body { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 }
 
