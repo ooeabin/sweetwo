@@ -429,7 +429,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* EmptyState */
 .hg-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-10) var(--space-6); text-align: center; }
 .hg-empty > * { margin: 0; }
-.hg-empty__title { font: 600 18px/26px var(--font-sans); }
+.hg-empty__title { font: 600 18px/26px var(--font-sans); word-break: keep-all; }
 .hg-empty__art { display: block; width: 120px; height: 120px; object-fit: contain; }
 .hg-empty__body { font: 400 14px/21px var(--font-sans); color: var(--slate); max-width: 280px; }
 
@@ -975,6 +975,21 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-pagehead .hg-pagehead__icon { display: none; }
   .hg-pagehead__crumb { display: inline-flex; }
 }
+/* 좁은 창(2026-11-04 토스형): ‹ 왼쪽, 제목 17px 굵게 가운데, 동작(⋯) 오른쪽. 동작이 없어도 제목은 가운데 */
+@media (max-width: 767px) {
+  .hg-pagehead { display: grid; grid-template-columns: minmax(40px, 1fr) minmax(0, auto) minmax(40px, 1fr); }
+  .hg-pagehead > .hg-pagehead__icon { grid-column: 1; justify-self: start; }
+  .hg-pagehead > .hg-pagehead__text { grid-column: 2; align-items: center; text-align: center; }
+  .hg-pagehead > :last-child:not(.hg-pagehead__text):not(.hg-pagehead__icon) { grid-column: 3; justify-self: end; }
+  .hg-pagehead__title { font-size: 17px; line-height: 24px; }
+  .hg-noti--page .hg-noti__head { display: grid; grid-template-columns: minmax(40px, 1fr) auto minmax(40px, 1fr); }
+  .hg-noti--page .hg-noti__title { text-align: center; font-size: 17px; line-height: 24px; }
+  .hg-noti--page .hg-noti__head > .hg-btn { justify-self: end; }
+  /* 앱 머리 바로 아래 ‘‹ 제목’ 줄(본문 위 여백 없이, 토스처럼 머리와 붙여서) */
+  .hg-body:has(> .hg-body__col:first-child > .hg-stack:first-child > .hg-pagehead:first-child) { padding-top: 0; }
+  .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: 0; }
+  .hg-noti--page .hg-noti__head { padding: 0 var(--space-1) 0 0; min-height: 56px; }
+}
 
 /* Search: 알약 검색 칸 + 결과 */
 .hg-search { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-1) 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); color: var(--stone); }
@@ -1505,7 +1520,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame { display: block; }
   .hg-appside { display: none; }
   .hg-pagetitle__in { padding: var(--space-3) var(--space-4) 0; }
-  .hg-pagetitle__title { display: none; } /* 좁은 창은 머리에 메뉴 이름 */
+  .hg-pagetitle__title { display: none; } /* 좁은 창은 머리가 홈과 같고 메뉴 이름은 화면 읽기용 제목으로만(2026-11-04) */
   .hg-today--plain .hg-pagetitle__title { display: block; }  /* 홈은 머리에 제목이 없어서 화면 읽기용으로 남김(바깥 칸이 1px로 가림) */
   .hg-today { padding: var(--space-3) var(--space-4) 0; }
   .hg-today__in { padding: var(--space-5); gap: var(--space-4); }
@@ -1523,7 +1538,10 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-mhead__people { flex: 1; display: flex; align-items: center; gap: var(--space-2); min-width: 0; }  /* 2026-11-03 홈 머리: 두 사람(카카오뱅크 이름 + 칩처럼) */
   button.hg-mhead__people { margin: 0; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-full); }
   button.hg-mhead__people:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .hg-mhead__names { display: inline-flex; align-items: center; min-width: 0; height: 28px; padding: 0 var(--space-3); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: 600 13px/1 var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hg-mhead__names { display: inline-flex; align-items: center; min-width: 0; color: var(--ink); font: 600 15px/20px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }  /* 2026-11-04 토스형: 칩 없이 15px 굵게 ink */
+  .hg-frame__mhead .hg-avatar { width: 28px; height: 28px; font-size: 12px; }
+  .hg-frame__mhead .hg-iconbtn { color: var(--stone); }  /* 2026-11-04 토스형: 앱 머리 아이콘은 회색 22px */
+  .hg-frame__mhead .hg-iconbtn .hg-ico { width: 22px; height: 22px; }
   /* 하단 탭 막대(배민 느낌): 화면 아래 가운데 떠 있는 흰 알약, 탭 4칸(아이콘 + 이름), 현재 탭은 회색 알약 + ink */
   .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 50%; right: auto; bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); height: auto; gap: 2px; padding: 6px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-full); background: var(--surface); box-shadow: var(--shadow-2); }
   .hg-frame > .hg-dock .hg-dock__item, .hg-frame > .hg-dock .hg-dock__item.is-active { flex: none; flex-direction: column; gap: 2px; width: 72px; height: 52px; padding: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 600 12px/16px var(--font-sans); }
