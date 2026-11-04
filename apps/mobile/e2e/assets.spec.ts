@@ -289,9 +289,10 @@ test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정
   const cash = page.getByRole('region', { name: '현금성' });
   // 통장 역할 배지는 재기획으로 없앰
   await expect(cash.getByRole('button', { name: /생활비 통장/ })).not.toContainText('공동 생활비');
-  // 투자 비중 = (1,000 + 440) ÷ (300 + 100 + 1,000 + 200 + 440) = 71%, 손익 = 1,000 − 800
+  // 투자 묶음 줄 = 안 판 수익(손익 = 1,000 − 800). 2026-11-04 투자 비중 줄은 뺌
   const invest = page.getByRole('region', { name: '투자' });
-  await expect(invest).toContainText('공동자금 투자 비중 71%');
+  await expect(invest).toContainText('안 판 수익');
+  await expect(invest).not.toContainText('투자 비중');
   await expect(invest).toContainText('+200만 원(+25%)');
 
   const names = () => cash.getByRole('button').allTextContents();
@@ -327,7 +328,7 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
     'true',
   );
   const invest = page.getByRole('region', { name: '투자' });
-  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('금액만 보여 주기');
+  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('금액만');
   await expect(invest).toContainText('예빈님 자산 2개');
   await expect(invest).toContainText('440만 원');
   await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('공동');
@@ -336,8 +337,8 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   // 배우자 명의는 볼 수만
   await page.getByRole('button', { name: /예빈 적금/ }).click();
   await expect(page.getByText('예빈님 항목이라 볼 수만 있어요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '수정' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '삭제' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '시세 바꾸기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '항목 메뉴' })).toHaveCount(0);
 
   await page.goto('/assets/a2');
   await heading(page, '내 주식');
@@ -345,20 +346,21 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
     '+200만 원, 원금 800만 원',
   );
   // 고친 기록은 직접 고친 것만(23 F-04 5번)
-  await expect(page.getByRole('region', { name: '월별 기록' })).not.toContainText('월말 정리');
+  await expect(page.getByRole('region', { name: '고친 기록' })).not.toContainText('월말 정리');
   await axe(page);
-  await page.getByRole('button', { name: '수정' }).click();
+  await page.getByRole('button', { name: '시세 바꾸기' }).click();
   await page.getByRole('textbox', { name: '금액' }).fill('12000000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('저장했어요')).toBeVisible();
   expect(db.assets.find((a) => a.id === 'a2')?.amount).toBe(12_000_000);
-  await expect(page.getByRole('region', { name: '월별 기록' })).toContainText('1,200만 원');
+  await expect(page.getByRole('region', { name: '고친 기록' })).toContainText('1,200만 원');
 
   await page.getByRole('button', { name: /공개 범위/ }).click();
   await page.getByRole('radio', { name: /숨기기/ }).click();
   await expect.poll(() => db.assets.find((a) => a.id === 'a2')?.visibility).toBe('private');
 
-  await page.getByRole('button', { name: '삭제' }).click();
+  await page.getByRole('button', { name: '항목 메뉴' }).click();
+  await page.getByRole('menuitem', { name: '삭제' }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
   await expect(page.getByText('휴지통으로 옮겼어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /내 주식/ })).toHaveCount(0);
@@ -416,9 +418,9 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await page.getByRole('button', { name: '다음' }).click();
   // 적금 유형별 질문(F-03f): 만기일 → 월 납입액 → 끝
   await heading(page, '만기일은 언제예요?');
-  await page.getByLabel('년', { exact: true }).fill('2027');
-  await page.getByLabel('월', { exact: true }).fill('9');
-  await page.getByLabel('일', { exact: true }).fill('30');
+  // 2026-11-04 날짜 휠(처음 값 1년 뒤 오늘 2027-10-07): 월 ↑ 한 번(9월), 일 End(30일)
+  await page.getByRole('spinbutton', { name: '월' }).press('ArrowUp');
+  await page.getByRole('spinbutton', { name: '일' }).press('End');
   await page.getByRole('button', { name: '다음' }).click();
   await heading(page, '월 납입액은요?');
   await page.getByLabel('월 납입액은요?').fill('300000');
@@ -581,7 +583,7 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   seed(db);
   await page.goto('/assets/a1');
   await heading(page, '생활비 통장');
-  await page.getByRole('button', { name: '수정' }).click();
+  await page.getByRole('button', { name: '금액 고치기' }).click();
   const a1 = db.assets.find((a) => a.id === 'a1');
   if (!a1) throw new Error('seed');
   Object.assign(a1, {

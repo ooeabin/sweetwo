@@ -9,3 +9,5 @@
 - 화면 읽기: 전체가 `role="img"`, 이름은 “달마다 순자산, 2026년 10월 1,600만 원”.
 - React 래퍼 `MonthBars`(packages/ui): `bars`(key, label, value, tip, now), `label`, `nowText`, `tone`.
 - 클래스: `hg-mbars`, `hg-mbars--{tone}`, `hg-mbars__col`(`is-now`), `hg-mbars__v`.
+
+- 다크(2026-11-04): 지난 달 막대는 `--bar-now` 35% + `surface`를 섞은 색(옅은 영역 색이 다크 바탕에 묻혀서).

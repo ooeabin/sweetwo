@@ -34,7 +34,7 @@ export const copy = {
   debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '자산을 하나씩 적어볼까요?',
+  empty: '가진 돈을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
   graphLabel: '순자산 그래프', // [확인 필요] 화면 읽기용
   periodsLabel: '기간', // [확인 필요] 화면 읽기용
   periods: ['6개월', '1년', '3년', '전체'],
@@ -42,6 +42,7 @@ export const copy = {
   expectedShort: (amount: string) => `예상 ${amount}`,
   summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
   addAsset: '자산 추가',
+  emptyAdd: '가진 돈 추가하기', // 23 빈 상태
 
   // F-02
   noDebt: '갚을 돈이 없어요',
@@ -50,14 +51,14 @@ export const copy = {
   proxy: '대신 입력',
   vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
   partnerPill: '금액만', // [확인 필요]
+  visShort: { all: '', sum: '금액만', private: '숨김' }, // 2026-11-04 목록 배지는 짧게(배우자 합계 줄 ‘금액만’과 같게) [확인 필요]
   partnerSum: (name: string, side: string, n: number) => `${name}님 ${side} ${n}개`,
   checkAmount: '금액이 맞나요?',
   updated: (date: string) => `${date} 수정`, // [확인 필요]
   sortLabel: '정렬', // [확인 필요] 화면 읽기용
   sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
   sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
-  investShare: (pct: number, limit: number | null) =>
-    limit === null ? `공동자금 투자 비중 ${pct}%` : `공동자금 투자 비중 ${pct}% / 허용 ${limit}%`,
+  investGainLabel: '안 판 수익', // 23 F-02 9번 투자 묶음 줄 이름(2026-11-04, 투자 비중 줄 없앰. F-04 7번과 같은 말)
   investGain: (amount: string, pct: number | null) =>
     pct === null ? amount : `${amount}(${pct > 0 ? '+' : pct < 0 ? '−' : ''}${Math.abs(pct)}%)`,
 
@@ -255,6 +256,7 @@ export const copy = {
   amountLabel: '금액', // [확인 필요]
   visLabel: '공개 범위', // [확인 필요]
   edit: '수정',
+  amountEdit: '금액 고치기', // [확인 필요] 2026-11-04 F-04 1번 보조 버튼
   cancel: '취소',
   rateInvalid: '0~30% 사이로 적어 주세요', // [확인 필요]
   countInvalid: '숫자만 적어 주세요', // [확인 필요]
@@ -264,7 +266,10 @@ export const copy = {
   undo: '되돌리기',
   saved: '저장했어요', // [확인 필요]
   readOnly: (name: string) => `${name}님 항목이라 볼 수만 있어요`,
-  history: '월별 기록', // [확인 필요] 요소 이름
+  history: '고친 기록', // 23 F-04 5번
+  historyEmpty: '아직 고친 기록이 없어요', // [확인 필요]
+  createdLabel: '처음 적은 날', // [확인 필요]
+  menu: '항목 메뉴',
   fromClose: '월말 정리',
   fromManual: '직접 수정',
   principal: (amount: string) => `원금 ${amount}`,
