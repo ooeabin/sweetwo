@@ -98,4 +98,4 @@ Electron(데스크톱) + Capacitor(iOS, Android) + React 18 + TypeScript + Vite,
 - [ ] 다크 모드, 좁은 창, axe 접근성 확인
 - [ ] 분석 이벤트 추가
 - [ ] 기획이나 디자인을 바꿨으면 `docs/spec`, `docs/design` md도 같은 PR에서 고침
-- [ ] PR 리뷰 1명(마이그레이션, RLS는 2명), Conventional Commits
+- [ ] PR 리뷰 1명(마이그레이션, RLS도 1명, 2026-11-04 2명 규칙 없앰), Conventional Commits

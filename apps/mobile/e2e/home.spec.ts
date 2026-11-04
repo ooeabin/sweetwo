@@ -186,7 +186,9 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   const card = page.getByRole('region', { name: '우리 순자산' });
   await expect(card).toContainText('3,000만 원');
   await expect(card).toContainText('지난달보다 210만 원 늘었어요');
-  await expect(card.getByRole('img', { name: /최근 6개월 순자산, 2026년 10월 3,000만 원/ })).toBeVisible();
+  await expect(
+    card.getByRole('img', { name: /최근 6개월 순자산, 2026년 10월 3,000만 원/ }),
+  ).toBeVisible();
   const bands = page.locator('.hg-body__banner');
   await expect(bands.first()).toContainText('10월 20일 새벽 점검');
   await expect(bands.nth(1)).toContainText('함께할 사람을 초대해 주세요');
@@ -200,7 +202,7 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
 });
 
-test('알림 메일 반송(14): 홈 상단 띠 → S-14', async ({ page }) => {
+test('알림 메일 반송(14): 홈 상단 띠 → S-11b 알림 이메일', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -208,7 +210,7 @@ test('알림 메일 반송(14): 홈 상단 띠 → S-14', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('알림 메일이 전달되지 않았어요')).toBeVisible();
   await page.getByRole('button', { name: '확인하기' }).click();
-  await expect(page).toHaveURL(/\/settings\/notifications$/);
+  await expect(page).toHaveURL(/\/settings\/me\/email$/);
 });
 
 test('오프라인(30 동기화 4장): 볼 수만 있고, 체크를 누르면 “인터넷에 연결되면 할 수 있어요”(저장 안 함)', async ({

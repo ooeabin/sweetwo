@@ -798,7 +798,7 @@ supabase/
 
 - main은 항상 배포 가능. 기능 브랜치는 `feat/`, `fix/`, `chore/`
 - 커밋 메시지는 Conventional Commits (`feat: 월말 정리 단계 동기화`)
-- PR은 리뷰 1명 이상. DB 마이그레이션과 RLS를 바꾸는 PR은 2명
+- PR은 리뷰 1명 이상. DB 마이그레이션과 RLS를 바꾸는 PR도 같음(2026-11-04 2명 규칙 없앰, 대신 pgTAP 필수)
 - 스키마는 추가만. 이름 바꾸기와 지우기는 2단계(새 컬럼 추가 → 최소 지원 버전이 예전 앱을 넘어선 뒤 예전 컬럼 제거)
 - 큰 기술 결정은 docs/adr에 ADR 한 장으로 남김
 
@@ -856,7 +856,7 @@ supabase/
 
 - PR 템플릿(.github/pull\_request\_template.md): 무엇, 왜, 마이그레이션 있음?, RLS 바뀜?, 스크린샷(라이트, 다크)
 - ADR 템플릿(docs/adr/0000-template.md): 맥락, 결정, 고른 대안, 결과
-- CODEOWNERS: supabase/는 리뷰 2명, packages/ui는 디자인 시스템 오너
+- CODEOWNERS: supabase/는 DB 오너, packages/ui는 디자인 시스템 오너
 
 새 개발자 첫날
 
@@ -1140,7 +1140,7 @@ supabase/
 
 - [ ] GitHub 조직과 저장소, pnpm 워크스페이스 + Turborepo 골격(apps/desktop·mobile·admin·site, packages/ui·app·core·api, supabase/)
 - [ ] .nvmrc, packageManager 버전, lint-staged, eslint-plugin-boundaries import 규칙
-- [ ] PR 템플릿, ADR 템플릿(docs/adr), CODEOWNERS(supabase/ 리뷰 2명, packages/ui는 디자인 시스템 오너)
+- [ ] PR 템플릿, ADR 템플릿(docs/adr), CODEOWNERS(supabase/는 DB 오너, packages/ui는 디자인 시스템 오너)
 - [ ] .env.example 5개(apps/desktop, apps/mobile, apps/admin, apps/site, supabase/functions), 비밀 값 담당자와 교체 주기(docs/secrets.md)
 - [ ] Supabase 프로젝트 sweetwo-staging, sweetwo-prod(서울, Pro 플랜), GitHub Environments staging, production(승인자 1명)
 - [ ] AWS: KMS 키(staging, prod), SES 발송 도메인 인증과 발송 제한 해제, S3 + CloudFront, 최소 권한 IAM 사용자

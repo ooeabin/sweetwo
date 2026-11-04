@@ -181,13 +181,13 @@ export function H01Home() {
       }}
     />
   ) : undefined;
-  // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-14
+  // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-11b(2026-11-04 이메일 고치는 곳)
   const bounceBand = bounced.data ? (
     <LineBand
       icon="envelope"
       title={copy.mailBounced}
       sub={copy.mailBouncedSub}
-      action={{ label: copy.mailCheck, onClick: () => nav('/settings/notifications') }}
+      action={{ label: copy.mailCheck, onClick: () => nav('/settings/me/email') }}
     />
   ) : undefined;
   const closePc = () => {

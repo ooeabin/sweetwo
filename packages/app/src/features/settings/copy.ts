@@ -447,10 +447,11 @@ export const copy = {
   logoutAll: '모든 기기에서 로그아웃',
   loggedOutDevice: '그 기기에서 로그아웃했어요', // [확인 필요]
 
-  // S-14 알림
-  cap: '이메일은 한 달에 6번까지만 보내요',
+  // S-14 알림(2026-11-04 이메일은 자동 예비로만: 이메일 설정 없음)
   push: '푸시 알림',
-  email: '이메일',
+  pushOffHelp: '알림 센터에서만 볼 수 있어요', // [확인 필요]
+  notiTopics: '받을 알림', // [확인 필요]
+  mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
   livingCheck: '생활비 체크',
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
@@ -463,16 +464,11 @@ export const copy = {
   },
   partnerChangeSub: '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
-  // 2026-11-04 받는 방법마다 카드 하나(줄마다 토글), 챙길 날은 체크 목록
-  topicsBy: { push: '푸시 알림으로 받을 알림', email: '이메일로 받을 알림' }, // [확인 필요]
   careAlerts: '챙길 날 미리 알림', // [확인 필요]
-  channels: '받는 방법',
-  noChannel: '알림을 받을 방법이 없어요',
-  turnOff: '끄기', // [확인 필요]
   cancel: '취소',
   quiet: '방해 금지 시간',
   quietValue: (a: string, b: string) => `${a} ~ ${b}`,
-  channelsOn: (on: string[]) => (on.length ? on.join(', ') : '꺼짐'), // [확인 필요] 둘 다 끔
+  pushState: (on: boolean) => (on ? '푸시 알림 켜짐' : '꺼짐'), // [확인 필요] S-10 요약
 
   // S-14a
   quietQ: '알림을 받지 않을 시간을 정해 주세요',
