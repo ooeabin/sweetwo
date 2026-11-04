@@ -6,11 +6,12 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { detectPlatform, isMobile } from '../../../platform';
 import {
-  LoadingFrame,
   AddMenu,
   H06NetWorth,
   LineBand,
+  LoadingFrame,
   MainFrame,
+  RankBanner,
   todoText,
   upcomingName,
   useHomeInput,
@@ -231,7 +232,7 @@ export function H01Home() {
   }));
 
   const go = (to: string) => nav(to);
-  // 가진 돈을 하나도 안 적었으면 카드 없음(2026-11-03, ‘가진 돈 추가하기’ 빈 카드가 어색해서. 추가는 우리 자산 탭)
+  // 자산을 하나도 안 적었으면 카드 없음(2026-11-03, ‘자산 추가하기’ 빈 카드가 어색해서. 추가는 우리 자산 탭)
   const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} /> : null;
   return (
     <MainFrame
@@ -277,6 +278,8 @@ export function H01Home() {
           />
         </div>,
         <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
+          {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}
+          <RankBanner entry="home" />
           {assetsCard}
           <UpcomingCard items={items.slice(0, 3)} go={go} />
         </div>,

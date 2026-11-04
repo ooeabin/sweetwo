@@ -49,7 +49,7 @@ test('Ctrl+2 목표 탭, Ctrl+N 홈은 추가 메뉴, 목표 화면은 목표 �
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.keyboard.press('ControlOrMeta+n');
   const menu = page.getByRole('menu', { name: '추가' });
-  await expect(menu.getByRole('menuitem', { name: '가진 돈·대출' })).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: '자산·부채' })).toBeVisible();
   await menu.getByRole('menuitem', { name: '챙길 날' }).click();
   await expect(page).toHaveURL(/\/calendar\/add/);
   await page.goto('/');

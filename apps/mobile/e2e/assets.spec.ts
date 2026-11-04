@@ -602,3 +602,75 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   expect(a1.amount).toBe(3_500_000);
   await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
 });
+
+test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈에도 같은 줄', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  // 연령대 비교: 찬우 1993년생 + 예빈 1995년생 → 평균 32세(2026년) → 30대
+  db.me.birth_year = 1993;
+  if (db.partner) Object.assign(db.partner, { birth_year: 1995 });
+  await page.goto('/assets');
+  const row = page.getByRole('button', { name: /우리 자산은 상위 몇 %일까요\?/ });
+  await expect(row).toBeVisible();
+  await expect(row).toContainText('광고'); // 누르기 전 광고 알림(AdMob 정책)
+  await axe(page);
+  // 브라우저는 광고 브리지가 없어 바로 순위
+  await row.click();
+  await expect(page).toHaveURL(/\/assets\/rank$/);
+  await expect(page.getByText(/상위 \d+%예요/).first()).toBeVisible();
+  await expect(page.getByText('우리 자산은 전체 가구 중')).toBeVisible();
+  await expect(page.getByText('전체 가구 중앙값')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
+  await expect(page.getByText('30대 가구 중앙값')).toBeVisible();
+  await expect(page.getByText(/30대 가구 (중간보다 .+ 많아요|가운데 중간보다 아래예요)/)).toBeVisible();
+  await expect(page.getByText(/^상위 \d+%까지$/)).toBeVisible();
+  await expect(page.getByText(/남았어요$/)).toBeVisible();
+  await expect(page.getByText(/\d+월(보다 .+(올랐어요|내려갔어요)|과 같아요)/)).toBeVisible(); // 지난달 기록이 있음
+  await expect(page.getByText('부채 비율')).toBeVisible();
+  await expect(page.getByText('30대 가구 평균 30%')).toBeVisible();
+  await expect(page.getByText('자산 중 금융자산')).toBeVisible();
+  await expect(page.getByText('가구주 나이별 공공 통계 기준')).toBeVisible();
+  await axe(page);
+  await expect.poll(() => db.me.rank_month).toBe('2026-10-01');
+  const pct = Number(db.me.rank_pct);
+  expect(pct).toBeGreaterThanOrEqual(1);
+  expect(pct).toBeLessThanOrEqual(99);
+
+  await page.goto('/assets');
+  const seen = page.getByRole('button', { name: new RegExp(`우리 자산 상위 ${pct}%예요`) });
+  await expect(seen).toBeVisible();
+  await expect(seen).not.toContainText('광고');
+  await expect(seen).toContainText('10월 기준, 자세히 보기');
+
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: new RegExp(`우리 자산 상위 ${pct}%예요`) })).toBeVisible();
+
+  // 순자산이 바뀌면 지난번 값 + 새로 확인하기(광고)
+  db.me.rank_net = 1;
+  await page.goto('/assets');
+  const stale = page.getByRole('button', { name: new RegExp(`지난번엔 상위 ${pct}%였어요`) });
+  await expect(stale).toContainText('새로 확인하기');
+  await expect(stale).toContainText('광고');
+});
+
+test('우리 자산 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db, false);
+  db.assets.length = 0;
+  db.partnerSums.length = 0;
+  await page.goto('/assets');
+  await expect(page.getByText('자산을 적으면 상위 몇 %인지 알려 드려요')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '무엇부터 적어 볼까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '갚을 돈도 있나요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('group', { name: '무엇부터 적어 볼까요?' }).getByRole('button', { name: '예금·적금' }).click();
+  await heading(page, '무엇을 추가할까요?');
+  await expect(page.getByRole('button', { name: '예금·적금', pressed: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '적금', exact: true })).toBeVisible();
+});

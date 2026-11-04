@@ -34,7 +34,7 @@ export const copy = {
   debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '가진 돈을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
+  empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
   graphLabel: '순자산 그래프', // [확인 필요] 화면 읽기용
   periodsLabel: '기간', // [확인 필요] 화면 읽기용
   periods: ['6개월', '1년', '3년', '전체'],
@@ -42,7 +42,7 @@ export const copy = {
   expectedShort: (amount: string) => `예상 ${amount}`,
   summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
   addAsset: '자산 추가',
-  emptyAdd: '가진 돈 추가하기', // 23 빈 상태
+  emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02
   noDebt: '갚을 돈이 없어요',
@@ -148,7 +148,7 @@ export const copy = {
       : `공동자금은 ${limit}%까지 투자하기로 했어요`, // [확인 필요]
 
   // 첫 주 자산·대출 정리(17 O-41~47)
-  weekAssets: '지금 가진 돈을 골라주세요',
+  weekAssets: '지금 자산을 골라주세요',
   weekAccountsIn: (n: number) => `쓰던 통장 ${n}개는 이미 넣어뒀어요`,
   weekAssetAmount: (name: string) => `${topic(name)} 얼마예요?`,
   weekLumpGoal: '이 돈을 어느 목표에 넣을까요?',
@@ -321,4 +321,40 @@ export const copy = {
   overlap: '이미 바꾼 기간과 겹쳐요', // [확인 필요]
   noChange: '바뀌는 점이 없어요', // [확인 필요]
   unknown: '아직 몰라요',
+  // F-08 우리 자산 순위(23 F-08, 2026-11-04 토스형: 카드 없이 문장 + 곡선 + 굵은 띠 + 이름·값 줄)
+  rankTitle: '우리 자산 순위', // [확인 필요]
+  rankHero1: '우리 자산은 전체 가구 중', // [확인 필요]
+  rankHero2: (pct: number) => `상위 ${pct}%예요`, // [확인 필요]
+  rankAxis: { low: '하위', mid: '중간', high: '상위' },
+  rankYou: '우리',
+  rankAria: (pct: number) => `우리나라 전체 가구 중 상위 ${pct}%`,
+  rankBasis: (label: string, ym: string) => `${label}, ${ym} 말 기준`,
+  rankOurs: (month: number) => `${month}월 우리 순자산`,
+  rankMedian: '전체 가구 중앙값', // [확인 필요]
+  rankBracket: (i: number) => `순자산 구간 ${i + 1}번째`,
+  // 지난달 대비(히어로 아래 한 줄): ‘9월보다 [3%p] 올랐어요’
+  rankPrev: (m: number) => `${m}월보다 `, // [확인 필요]
+  rankUp: ' 올랐어요', // [확인 필요]
+  rankDown: ' 내려갔어요', // [확인 필요]
+  rankSame: (m: number) => `${m}월과 같아요`, // [확인 필요]
+  rankPp: (p: number) => `${p}%p`,
+  // 다음 칸까지
+  rankNextLabel: (top: number) => `상위 ${top}%까지`, // [확인 필요]
+  rankNextBig: (amount: string) => `${amount} 남았어요`, // [확인 필요]
+  rankNextSub: (target: string, top: number) => `순자산이 ${target}이 되면 상위 ${top}%예요`, // [확인 필요]
+  // 연령대 비교(계산·배분 7-7): 연령대별 중앙값만 공공 통계에 있어 순위 없이 중간보다 많은지만
+  rankAge: { '20s': '20대', '30s': '30대', '40s': '40대', '50s': '50대', '60s': '60대 이상' },
+  rankAgeTitle: (band: string) => `${band} 가구와 비교`, // [확인 필요]
+  rankAgeMore: (band: string) => `${band} 가구 중간보다 `, // [확인 필요] + 금액 + rankAgeMoreTail
+  rankAgeMoreTail: ' 많아요',
+  rankAgeBelow: (band: string) => `${band} 가구 가운데 중간보다 아래예요`, // [확인 필요] 계산·배분 7-3 말투(사실만)
+  rankAgeMedian: (band: string) => `${band} 가구 중앙값`, // [확인 필요]
+  rankDebt: '부채 비율', // [확인 필요] 부채 ÷ 자산
+  rankFinancial: '자산 중 금융자산', // [확인 필요] 예금·투자·보험·보증금
+  rankAgeAvg: (band: string, pct: number) => `${band} 가구 평균 ${pct}%`,
+  rankPct: (pct: number) => `${pct}%`,
+  rankAgeNote: '가구주 나이별 공공 통계 기준', // [확인 필요]
+  // F-01 빈 상태 항목별 등록(2026-11-04)
+  emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
+  emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]
 };

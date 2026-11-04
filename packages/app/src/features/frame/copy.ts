@@ -30,7 +30,7 @@ export const copy = {
   shrank: '줄었어요',
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
   addGoal: '목표',
-  addAsset: '가진 돈·대출',
+  addAsset: '자산·부채',
   addCare: '챙길 날',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
   cmdEmpty: '찾는 게 없어요',
@@ -41,15 +41,25 @@ export const copy = {
   cmdQuick: '바로 하기',
   cmdCheck: '월급 체크하기',
   cmdGoal: '목표 추가',
-  cmdAsset: '가진 돈 추가',
+  cmdAsset: '자산 추가',
   cmdMask: '금액 가리기',
   cmdUnmask: '금액 보이기',
   cmdLock: '잠그기',
   cmdGoals: '목표',
-  cmdAssets: '가진 돈·대출',
+  cmdAssets: '자산·부채',
   cmdCares: '챙길 날',
   offlineTitle: '연결이 끊겼어요',
   offlineBody: '다시 연결되면 이어서 볼 수 있어요',
   offlineCached: '오프라인',
   lastSaved: (at: string) => `마지막 저장 ${at}`,
+  // 우리 자산 순위 줄(23 F-01 0번, 19 H-01 1a, 2026-11-04)
+  rankQ: '우리 자산은 상위 몇 %일까요?', // [확인 필요]
+  rankCheck: '확인하기', // [확인 필요] 앞에 ‘광고’ 표시
+  rankAd: '광고',
+  rankSeen: (pct: number) => `우리 자산 상위 ${pct}%예요`, // [확인 필요]
+  rankSeenMore: (month: number) => `${month}월 기준, 자세히 보기`, // [확인 필요]
+  rankStale: (pct: number) => `지난번엔 상위 ${pct}%였어요`, // [확인 필요]
+  rankRefresh: '새로 확인하기', // [확인 필요]
+  rankEmpty: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요]
+  rankAdClosed: '광고를 끝까지 보면 볼 수 있어요', // [확인 필요]
 };

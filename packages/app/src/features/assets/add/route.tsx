@@ -56,7 +56,12 @@ export function AssetAddRoute() {
   // 처음 열면 진입한 탭(자산/부채)으로 새로 시작
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   useEffect(() => {
-    if (step === 'kind' && !params.get('keep')) reset(startSide, d.me?.default_visibility);
+    if (step === 'kind' && !params.get('keep')) {
+      reset(startSide, d.me?.default_visibility);
+      // F-01 빈 상태 묶음 타일에서 오면 그 묶음을 고른 채로(2026-11-04)
+      const grp = params.get('grp');
+      if (grp) set({ grp, kind: null });
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (d.loading || !d.couple || !d.space) return null;

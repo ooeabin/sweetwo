@@ -123,6 +123,9 @@
 | goal\_delayed | 예상 달성일이 기한보다 늦어져 ‘지연’ 배지가 붙음 (서버) | template\_id, months\_late\_band, cause(`short_line` / `missed_line`) |
 | goal\_achieved | G-05 | template\_id, months\_taken, vs\_plan(`early` / `on_time` / `late`) |
 | asset\_added | F-03 저장 | kind(`account` / `invest` / `real_estate` / `debt` 등), entry(`home` / `assets` / `palette`), is\_first |
+| rank\_banner\_tapped | F-01 0번·H-01 순위 배너 (2026-11-04) | state(`unseen` / `seen` / `stale` / `empty`), entry(`home` / `assets`) |
+| rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform |
+| rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
 | fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면 | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
 | event\_recorded | Y-08 챙길 날 기록 | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요], amount\_band, vs\_budget(`under` / `on` / `over`), is\_secret(서프라이즈면 event\_type 미전송) |
 

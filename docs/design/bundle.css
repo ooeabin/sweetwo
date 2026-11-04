@@ -1504,7 +1504,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 /* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(.hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
 .hg-frame__mhead { display: none; }
 /* 2026-11-03 추가 입구 하나로: 넓은 창에만 보이는 동작(제목 줄 ‘+ 추가’). 좁은 창은 + 버튼 */
 @media (max-width: 767px) {
@@ -1767,3 +1767,39 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
 /* 상세 화면 폭(2026-11-04 F-04): 넓은 창에서 본문을 720px 안으로(금액, 버튼이 한쪽에 몰리지 않게) */
 @media (min-width: 768px) { .hg-detail { width: 100%; max-width: 720px; } }
+/* RankRow 우리 자산 순위 줄(2026-11-04 F-01·H-01, 토스 혜택 줄처럼): 원 44px(invest 바탕 + invest-ink 13px 800) + 제목 16px 600 + 파란 글자 14px. 광고가 나오면 파란 글자 앞 작은 ‘광고’ 표시 */
+.hg-rankrow { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; margin: 0; padding: var(--space-2) 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; }
+button.hg-rankrow { cursor: pointer; border-radius: var(--radius-lg); }
+button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.hg-rankrow__badge { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--invest); color: var(--invest-ink); font: 800 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-rankrow__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hg-rankrow__title { font: 600 16px/22px var(--font-sans); word-break: keep-all; }
+.hg-rankrow__action { display: inline-flex; align-items: center; gap: var(--space-1); font: 500 14px/20px var(--font-sans); color: var(--focus); }
+.hg-rankrow__ad { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--radius-sm); background: var(--surface-alt); color: var(--slate); font: 600 11px/1 var(--font-sans); }
+
+/* Distribution 히어로(2026-11-04 F-08 토스형): 카드 없이 가운데, 두 줄 문장 + 변화 한 줄 + 곡선 + 기준 */
+.hg-dist--hero { align-items: center; text-align: center; gap: var(--space-2); padding-top: var(--space-3); }
+.hg-dist--hero .hg-dist__title { font: 700 24px/34px var(--font-sans); letter-spacing: -0.3px; text-wrap: balance; word-break: keep-all; }
+.hg-dist--hero svg { margin-top: var(--space-6); max-width: 420px; }  /* 넓은 창에서 축 글자가 커지지 않게 */
+.hg-dist__note { font: 400 15px/22px var(--font-sans); color: var(--slate); }
+.hg-dist__note b { font-weight: 600; color: var(--invest-ink); }  /* 좋아진 숫자(H-04 지난달보다와 같은 규칙) */
+.hg-dist__note.is-down b { color: var(--goal-ink); }
+
+/* Band(2026-11-04): 구역을 나누는 굵은 회색 띠. 좁은 창은 화면 끝까지, 넓은 창은 둥근 띠 */
+.hg-band { display: block; height: 10px; background: var(--surface-alt); border: 0; margin: var(--space-2) calc(-1 * var(--space-4)); }
+@media (min-width: 768px) { .hg-band { height: 8px; margin: var(--space-2) 0; border-radius: var(--radius-full); } }
+
+/* StatBlock(2026-11-04): 토스형 구역 머리. 작은 라벨 + 큰 숫자 문장 + 보조 한 줄. 제목형은 20px */
+.hg-statblock { display: flex; flex-direction: column; gap: var(--space-1); }
+.hg-statblock > * { margin: 0; }
+.hg-statblock__label { font: 400 14px/20px var(--font-sans); color: var(--slate); }
+.hg-statblock__big { font: 700 26px/34px var(--font-sans); letter-spacing: -0.3px; font-variant-numeric: tabular-nums; word-break: keep-all; }
+.hg-statblock__title { font: 700 20px/28px var(--font-sans); word-break: keep-all; }
+.hg-statblock__sub { font: 400 14px/20px var(--font-sans); color: var(--slate); word-break: keep-all; }
+.hg-statblock__sub b { font-weight: 600; color: var(--invest-ink); }
+
+/* 목록 줄만(2026-11-04 F-08): 테두리·바탕 없이 왼쪽 이름 + 오른쪽 값 */
+.hg-list--plain { border: 0; border-radius: 0; background: none; }
+.hg-list--plain .hg-listrow { column-gap: 0; padding: var(--space-2) 0; min-height: 64px; }
+.hg-list--plain .hg-listrow__value { padding-left: var(--space-3); font-size: 17px; font-variant-numeric: tabular-nums; }
+.hg-list--plain .hg-listrow__sub { font-size: 14px; line-height: 20px; color: var(--slate); }

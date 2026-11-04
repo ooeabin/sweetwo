@@ -45,7 +45,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
     '0원 / 1억 5,000만 원',
   );
   await expect(salaryCard(page)).toContainText('5개 중 0개 완료');
-  // 가진 돈이 없으면 우리 자산 카드 없음(2026-11-03)
+  // 자산이 없으면 우리 자산 카드 없음(2026-11-03)
   await expect(page.getByRole('region', { name: '우리 자산' })).toHaveCount(0);
   await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
   await axe(page);

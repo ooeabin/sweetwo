@@ -7,7 +7,7 @@ import {
   fetchSpace,
   qk,
 } from '@sweetwo/api';
-import { netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
+import { financialPct, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 
 // 앱 기본 틀 데이터(react-query). 키는 다른 기능과 같은 qk라 캐시를 같이 쓴다.
@@ -39,6 +39,10 @@ export function useNetWorth(enabled: boolean) {
     nw,
     series: series.slice(-6),
     change: last && last.net !== 0 ? nw.net - last.net : null,
+    /** 지난달 월말 순자산(F-08 지난달 대비). 기록이 없으면 null */
+    prev: last ? { month: last.month, net: last.net } : null,
+    /** 금융자산 비율(F-08 연령대 비교) */
+    financialPct: financialPct(items, sums.data),
   };
 }
 export type NetWorthView = NonNullable<ReturnType<typeof useNetWorth>>;
