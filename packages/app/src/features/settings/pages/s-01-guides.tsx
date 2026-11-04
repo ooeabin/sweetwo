@@ -3,7 +3,7 @@ import { pickGuides } from '@sweetwo/core';
 import { ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { LoadFailed } from '../load-failed';
@@ -27,7 +27,7 @@ export function S01Guides() {
       />
     );
   if (d.loading || ck.loading || goals.isLoading || !d.space)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+    return <LoadingFrame sub="settings" current={null} />;
   const mine = pickGuides({
     housing: d.space.housing,
     childPlan: d.space.child_plan,
@@ -45,7 +45,7 @@ export function S01Guides() {
       <section className="hg-stack">
         <SectionHeader
           title={ck.stage ? copy.checklistStage(ck.stage.name) : copy.noStage}
-          count={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}
+          count={ck.stage ? copy.checklistCount(ck.count, ck.total) : undefined}
         />
         {ck.stage && (
           <div className="hg-list">

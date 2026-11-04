@@ -1,9 +1,22 @@
 import { todayKst } from '@sweetwo/core';
-import { DateInput, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveSpace } from '../data';
 import { useStep } from '../step';
+
+const wheelOf = (s: string) => ({
+  y: Number(s.slice(0, 4)),
+  m: Number(s.slice(5, 7)),
+  d: Number(s.slice(8, 10)),
+});
+const textOf = (v: { y: number; m: number; d: number }) =>
+  `${v.y}-${String(v.m).padStart(2, '0')}-${String(v.d).padStart(2, '0')}`;
+const addDay = (s: string) => {
+  const t = new Date(`${s}T00:00:00Z`);
+  t.setUTCDate(t.getUTCDate() + 1);
+  return t.toISOString().slice(0, 10);
+};
 
 // O-12 결혼한 날·예정일(Q4). 했어요는 오늘까지, 준비 중은 내일부터. 준비 중만 ‘아직 미정이에요’ → 예정 연·월(추정),
 // 그것도 모르면 ‘건너뛸게요’. 결혼 단계(비교 통계)와 결혼 비용 기한 기본값에 씀.
@@ -81,16 +94,23 @@ export function O12WeddingDate() {
         )
       }
     >
-      <DateInput
+      {/* 2026-11-04 S-11h와 같은 날짜 휠. 처음 값: 했어요 = 오늘, 준비 중 = 내일 */}
+      <DateWheel
         label={engaged ? copy.weddingPlanned : copy.weddingDone}
-        value={d}
-        onChange={(v, parts) => {
+        value={d ? wheelOf(d) : null}
+        initial={wheelOf(engaged ? addDay(todayKst()) : todayKst())}
+        minYear={engaged ? Number(todayKst().slice(0, 4)) : 1950}
+        maxYear={Number(todayKst().slice(0, 4)) + (engaged ? 5 : 0)}
+        onChange={(v) => {
           setTyped(true);
-          setDate(v);
-          void parts;
+          setDate(textOf(v));
         }}
-        error={rangeError}
       />
+      {rangeError && (
+        <p className="hg-help is-error" role="alert">
+          {rangeError}
+        </p>
+      )}
       {engaged && (
         <button
           type="button"

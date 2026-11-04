@@ -118,7 +118,10 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(salary).toContainText('예빈 250만 원, 10일');
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 관리해요');
   await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toHaveCount(0);
-  // 알림 이메일: 형식 오류면 저장 안 됨
+  // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
+  await page.getByRole('button', { name: /알림 이메일/ }).click();
+  await expect(page).toHaveURL(/\/settings\/me\/email$/);
+  await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려주세요' })).toBeVisible();
   const email = page.getByLabel('알림 이메일');
   await email.fill('chanwoo@');
   await expect(page.getByText('이메일 주소를 다시 확인해 주세요')).toBeVisible();
@@ -126,6 +129,9 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await email.fill(' New@Example.com ');
   await page.getByRole('button', { name: '저장' }).click();
   await expect.poll(() => db.me.notify_email).toBe('new@example.com');
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  await expect(page.getByRole('button', { name: /알림 이메일/ })).toContainText('new@example.com');
+  await expect(page.getByRole('button', { name: '월급 계획 열기' })).toBeVisible();
   // 앞당기기 끄기(부부 공통)
   const shift = page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여줘요' });
   await expect(shift).toHaveAttribute('aria-checked', 'true');
@@ -157,11 +163,12 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
   await expect(page).toHaveURL(/\/settings\/notifications$/);
   await expect(page.getByText('이메일은 한 달에 6번까지만 보내요')).toBeVisible();
   await expect(page.getByRole('switch', { name: 'OS 알림' })).toHaveCount(0);
-  // 챙길 날은 받는 방법별 칩 한 줄(2026-11-03)
-  const d14 = page
-    .getByRole('group', { name: '챙길 날 이메일' })
-    .getByRole('button', { name: 'D-14' });
-  await expect(d14).toHaveAttribute('aria-pressed', 'false');
+  // 받는 방법마다 카드 하나, 챙길 날은 시점 체크 목록(2026-11-04)
+  const card = page.getByRole('region', { name: '이메일로 받을 알림' });
+  const d14 = card
+    .getByRole('group', { name: '챙길 날 미리 알림 이메일' })
+    .getByRole('checkbox', { name: '14일 전' });
+  await expect(d14).toHaveAttribute('aria-checked', 'false');
   await d14.click();
   await expect
     .poll(
@@ -170,11 +177,13 @@ test('알림 설정(S-14, S-14a): 웹은 이메일만, 묶음 토글, 받는 방
           ?.email,
     )
     .toBe(true);
-  await expect(page.getByRole('region', { name: '예빈님이 바꾼 값' })).toContainText(
+  await expect(card.getByRole('switch', { name: /예빈님이 바꾼 값/ })).toBeVisible();
+  await expect(card).toContainText(
     '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요',
   );
-  await expect(page.getByRole('region', { name: '월급 체크리스트' })).toBeVisible();
-  await expect(page.getByRole('region', { name: '제안' })).toHaveCount(0);
+  await expect(card.getByRole('switch', { name: '월급 체크리스트' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '푸시 알림으로 받을 알림' })).toHaveCount(0);
+  await expect(page.getByText('제안')).toHaveCount(0);
   await axe(page);
 
   // 받는 방법: 웹은 이메일 하나라 끄면 확인
@@ -261,9 +270,7 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
   await page.getByRole('button', { name: /결혼 상태/ }).click();
   await page.getByRole('radio', { name: '결혼 준비 중이에요' }).click();
   await expect(page.getByRole('heading', { name: '결혼 예정일은 언제예요?' })).toBeVisible();
-  await page.getByLabel('년', { exact: true }).fill('2027');
-  await page.getByLabel('월', { exact: true }).fill('5');
-  await page.getByLabel('일', { exact: true }).fill('15');
+  await setWheel(page, '결혼 예정일은 언제예요?', 2027, 5, 15);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.space).toMatchObject({ marriage_status: 'engaged', wedding_date: '2027-05-15' });

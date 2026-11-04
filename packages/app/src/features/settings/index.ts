@@ -18,6 +18,7 @@ export { S20Help } from './pages/s-20-help';
 export { S21Trash } from './pages/s-21-trash';
 export { S12hUnlinked } from './pages/s-12h-unlinked';
 export { S11aNickname } from './pages/s-11a-nickname';
+export { S11bNotifyEmail } from './pages/s-11b-notify-email';
 export { S14Notifications } from './pages/s-14-notifications';
 export { S14aQuiet } from './pages/s-14a-quiet';
 export { S11dPlanDay } from './pages/s-11d-plan-day';

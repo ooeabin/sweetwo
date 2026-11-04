@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 import { startCareEdit } from './y-07-care-add';
@@ -38,7 +38,7 @@ export function Y05CareDay() {
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [memo, setMemo] = useState<string | null>(null);
-  if (c.loading) return <MainFrame sub="detail" current="calendar" columns={[null]} />;
+  if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
   const date = nextCareDate(care, c.today);

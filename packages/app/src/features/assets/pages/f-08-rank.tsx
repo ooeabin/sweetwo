@@ -16,7 +16,7 @@ import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
-import { MainFrame, useRank, useRankAge } from '../../frame';
+import { LoadingFrame, MainFrame, useRank, useRankAge } from '../../frame';
 import { copy } from '../copy';
 
 // F-08 우리 자산 순위(23 F-08, 계산·배분 7-7, 2026-11-04 1단계 공공 통계): 상위 n% + 분포 그림 + 중앙값 + 우리 값 + 기준.
@@ -35,7 +35,7 @@ export function F08Rank() {
         age_band: age,
       });
   }, [pct, age]);
-  if (!r) return <MainFrame sub="detail" current="assets" columns={[null]} />;
+  if (!r) return <LoadingFrame sub="detail" current={'assets'} />;
   if (r.state.kind === 'empty') return <Navigate to="/assets" replace />;
   const p = pct ?? 99;
   const month = Number(todayKst().slice(5, 7));

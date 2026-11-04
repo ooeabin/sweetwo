@@ -42,6 +42,7 @@ export const copy = {
   me: '내 정보',
   nickname: '이름',
   notifyEmail: '알림 이메일',
+  notifyEmailQ: '알림 받을 이메일을 알려주세요', // S-11b, 가입(A-03) 질문과 같음
   emailError: '이메일 주소를 다시 확인해 주세요',
   save: '저장',
   saved: '저장했어요', // [확인 필요]
@@ -461,7 +462,10 @@ export const copy = {
     invite: '배우자 초대',
   },
   partnerChangeSub: '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
-  carePoints: { care_30: 'D-30', care_14: 'D-14', care_7: 'D-7', care_0: '당일' },
+  carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
+  // 2026-11-04 받는 방법마다 카드 하나(줄마다 토글), 챙길 날은 체크 목록
+  topicsBy: { push: '푸시 알림으로 받을 알림', email: '이메일로 받을 알림' }, // [확인 필요]
+  careAlerts: '챙길 날 미리 알림', // [확인 필요]
   channels: '받는 방법',
   noChannel: '알림을 받을 방법이 없어요',
   turnOff: '끄기', // [확인 필요]
@@ -477,6 +481,7 @@ export const copy = {
   // S-01~S-03 가이드
   guidesTitle: '가이드 모아보기',
   checklistProgress: (done: number, total: number) => `체크리스트 ${done}/${total}`,
+  checklistCount: (done: number, total: number) => `${done}/${total}`, // 2026-11-04 S-01은 제목에 ‘체크리스트’가 있어 숫자만
   checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
   forUs: '우리 상황에 맞는 글', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름

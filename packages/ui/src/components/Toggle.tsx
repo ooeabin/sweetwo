@@ -27,7 +27,8 @@ export function Toggle({
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >
-      <span className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+      {/* 보조 글이 길어도 토글은 오른쪽 그대로(2026-11-04) */}
+      <span className="hg-stack" style={{ gap: 'var(--space-1)', flex: 1, minWidth: 0 }}>
         <span>{label}</span>
         {help && <span className="hg-help">{help}</span>}
       </span>
@@ -37,6 +38,7 @@ export function Toggle({
         aria-checked={!!checked}
         disabled={disabled}
         className={cx('hg-toggle', checked && 'is-on')}
+        style={{ flex: 'none' }}
         onClick={() => onChange(!checked)}
       />
     </label>

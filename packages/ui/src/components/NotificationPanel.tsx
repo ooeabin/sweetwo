@@ -57,9 +57,20 @@ export function NotificationPanel(p: {
   useEffect(() => {
     if (p.loading || !hasItems || focused.current) return;
     focused.current = true;
-    if (window.matchMedia?.('(min-width: 768px)').matches)
-      body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item')?.focus();
-    else body.current?.focus({ preventScroll: true });
+    if (window.matchMedia?.('(min-width: 768px)').matches) {
+      // 2026-11-04 처음 포커스는 테두리 없이(열자마자 고른 것처럼 보여서). 키를 누르거나 떠나면 보통대로
+      const el = body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item');
+      if (!el) return;
+      el.dataset.autofocus = '';
+      el.focus({ preventScroll: true });
+      const clear = () => {
+        delete el.dataset.autofocus;
+        el.removeEventListener('keydown', clear);
+        el.removeEventListener('blur', clear);
+      };
+      el.addEventListener('keydown', clear);
+      el.addEventListener('blur', clear);
+    } else body.current?.focus({ preventScroll: true });
   }, [p.loading, hasItems]);
 
   // Esc 닫기(시트)

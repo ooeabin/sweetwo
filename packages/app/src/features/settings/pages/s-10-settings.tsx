@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform, isApp } from '../../../platform';
 import { useMask } from '../../../shared/mask';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
@@ -33,7 +33,7 @@ export function S10Settings() {
   const asking = (inquiries.data ?? []).filter((q) =>
     q.access_request.some((a) => a.status === 'requested'),
   ).length;
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c) return <LoadingFrame current={null} />;
   const c = d.c;
   const state = d.space?.couple_state ?? 'not_joined';
   const prefs = notiPrefs(d.me.noti_prefs);

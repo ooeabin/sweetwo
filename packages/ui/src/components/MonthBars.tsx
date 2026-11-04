@@ -39,7 +39,9 @@ export function MonthBars({
       {shown.map((b) => (
         <span key={b.key} className={cx('hg-mbars__col', b.now && 'is-now')} title={b.tip}>
           <span className="hg-mbars__v">{b.now ? nowText : ''}</span>
-          <i style={{ height: `${Math.max(Math.round((Math.max(b.value, 0) / max) * MAX_H), 4)}px` }} />
+          <i
+            style={{ height: `${Math.max(Math.round((Math.max(b.value, 0) / max) * MAX_H), 4)}px` }}
+          />
           <small>{b.label}</small>
         </span>
       ))}

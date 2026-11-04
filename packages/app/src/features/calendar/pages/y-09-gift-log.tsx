@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { usePhotoUrls } from '../../../shared/photo';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
@@ -34,7 +34,7 @@ export function Y09GiftLog() {
   const urls = usePhotoUrls(
     [...new Set(photos.map((p) => p.care_record_id))].map((id) => firstOf(id)?.path),
   );
-  if (c.loading) return <MainFrame sub="detail" current="calendar" columns={[null]} />;
+  if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
 
   const careOf = (id: string) => c.cares.find((x) => x.id === id);
   const rows = c.records

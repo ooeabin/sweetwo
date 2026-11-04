@@ -4,7 +4,7 @@ import { Button, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -32,8 +32,7 @@ export function S02ChecklistItem() {
         }}
       />
     );
-  if (d.loading || ck.loading || !d.c)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+  if (d.loading || ck.loading || !d.c) return <LoadingFrame sub="settings" current={null} />;
   const fromTodo = params.get('from') === 'todo';
   const done = ck.doneOf(key);
   const who = done ? (done.done_by === d.me?.id ? d.c.myName : d.c.partnerName) : null;

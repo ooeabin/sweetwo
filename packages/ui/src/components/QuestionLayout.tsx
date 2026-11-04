@@ -167,12 +167,12 @@ export function QuestionLayout({
   title: ReactNode;
   help?: ReactNode;
   children?: ReactNode;
-  /** variant 기본 primary. 대답 성격(O-21 0개 ‘나중에 고를게요’)이면 secondary */
+  /** variant 기본 primary. 대답 성격(O-21 0개 ‘나중에 고를게요’)이면 secondary, 되돌릴 수 없는 삭제(S-18b)면 danger */
   primary?: {
     label: string;
     disabled?: boolean;
     loading?: boolean;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'danger';
   };
   later?: { label: string; onClick: () => void };
   /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */

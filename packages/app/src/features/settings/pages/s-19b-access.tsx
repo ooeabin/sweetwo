@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 
 // S-19b 관리자 열람 동의(docs/spec/25-settings.md): “문의 #A-10234” / “동의하면 24시간만 봐요”,
@@ -16,7 +16,7 @@ export function S19bAccess() {
   const qc = useQueryClient();
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const [busy, setBusy] = useState(false);
-  if (list.isLoading) return <MainFrame sub="settings" current={null} columns={[null]} />;
+  if (list.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const q = (list.data ?? []).find((x) => x.access_request.some((a) => a.id === id));
   const r = q?.access_request.find((a) => a.id === id);
   if (!q || !r || r.status !== 'requested')

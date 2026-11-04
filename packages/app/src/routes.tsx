@@ -71,6 +71,7 @@ import {
   S21Trash,
   S12hUnlinked,
   S11aNickname,
+  S11bNotifyEmail,
   S11ePhoto,
   S22Widget,
   S01Guides,
@@ -566,6 +567,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11a 호칭
+      {
+        path: '/settings/me/email',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11bNotifyEmail />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11b 알림 이메일
       {
         path: '/settings/me/photo',
         element: (

@@ -22,7 +22,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { reauthenticate, session } from '../../auth';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { buildExport, type Scope } from '../export';
@@ -110,8 +110,7 @@ export function S18Data() {
     );
   }, [d.me, d.c]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || !d.me || !d.c)
-    return <MainFrame sub="settings" current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c) return <LoadingFrame sub="settings" current={null} />;
   const me = d.me;
 
   const start = async () => {
