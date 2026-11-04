@@ -3150,6 +3150,7 @@ export type Database = {
           total: number
         }[]
       }
+      partner_birth_year: { Args: Record<PropertyKey, never>; Returns: number }
       partner_birthday: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3171,7 +3172,6 @@ export type Database = {
         Args: { p_noun: string; p_topic: string; who: string }
         Returns: string
       }
-      partner_birth_year: { Args: Record<PropertyKey, never>; Returns: number }
       partner_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
