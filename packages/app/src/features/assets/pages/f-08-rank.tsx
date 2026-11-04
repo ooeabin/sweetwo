@@ -10,7 +10,7 @@ import {
   rankTopPct,
   todayKst,
 } from '@sweetwo/core';
-import { Distribution, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { Band, Distribution, ListRow, PageHeader, StatBlock } from '@sweetwo/ui';
 import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -45,14 +45,35 @@ export function F08Rank() {
   const debt = debtRatioPct(v.nw.assets, v.nw.debts);
   const bandName = age ? copy.rankAge[age] : '';
   const stats = age ? RANK_AGE_STATS[age] : null;
+  const ageMedian = age ? RANK_AGE_MEDIAN[age] : 0;
   const body = (
     <div key="r" className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
       <PageHeader title={copy.rankTitle} backLabel={copy.back} onBack={() => nav(-1)} />
-      <section className="hg-card hg-stack" aria-label={copy.rankTitle}>
+      {/* 1 히어로: 두 줄 문장 + 지난달 대비 + 분포 곡선 + 기준 */}
+      <section aria-label={copy.rankTitle}>
         <Distribution
-          label={copy.rankCompare}
-          tag={<span className="hg-tag">{copy.rankPublic}</span>}
-          title={copy.rankBig(p)}
+          hero
+          title={
+            <>
+              {copy.rankHero1}
+              <br />
+              {copy.rankHero2(p)}
+            </>
+          }
+          note={
+            change && prevMonth ? (
+              change.up === 0 ? (
+                copy.rankSame(prevMonth)
+              ) : (
+                <>
+                  {copy.rankPrev(prevMonth)}
+                  <b>{copy.rankPp(Math.abs(change.up))}</b>
+                  {change.up > 0 ? copy.rankUp : copy.rankDown}
+                </>
+              )
+            ) : undefined
+          }
+          noteDown={!!change && change.up < 0}
           sub={copy.rankBasis(RANK_BASIS.label, formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'))}
           percentile={100 - p}
           axis={copy.rankAxis}
@@ -60,68 +81,71 @@ export function F08Rank() {
           ariaLabel={copy.rankAria(p)}
         />
       </section>
-      <div className="hg-list">
+      {next && (
+        <>
+          <Band />
+          <StatBlock
+            ariaLabel={copy.rankNextLabel(next.top)}
+            label={copy.rankNextLabel(next.top)}
+            big={copy.rankNextBig(money(next.need, masked))}
+            sub={copy.rankNextSub(money(r.net + next.need, masked), next.top)}
+          />
+        </>
+      )}
+      {age && (
+        <>
+          <Band />
+          <section className="hg-stack" aria-label={copy.rankAgeTitle(bandName)}>
+            <StatBlock
+              as="div"
+              title={copy.rankAgeTitle(bandName)}
+              sub={
+                r.net >= ageMedian ? (
+                  <>
+                    {copy.rankAgeMore(bandName)}
+                    <b>{money(r.net - ageMedian, masked)}</b>
+                    {copy.rankAgeMoreTail}
+                  </>
+                ) : (
+                  copy.rankAgeBelow(bandName)
+                )
+              }
+            />
+            <div className="hg-list hg-list--plain">
+              <ListRow
+                label={copy.rankAgeMedian(bandName)}
+                value={money(ageMedian, masked)}
+                chevron={false}
+              />
+              {stats && debt !== null && (
+                <ListRow
+                  label={copy.rankDebt}
+                  sub={copy.rankAgeAvg(bandName, Math.round(stats.debtPct))}
+                  value={copy.rankPct(debt)}
+                  chevron={false}
+                />
+              )}
+              {stats && v.financialPct !== null && (
+                <ListRow
+                  label={copy.rankFinancial}
+                  sub={copy.rankAgeAvg(bandName, Math.round(stats.financialPct))}
+                  value={copy.rankPct(v.financialPct)}
+                  chevron={false}
+                />
+              )}
+            </div>
+          </section>
+        </>
+      )}
+      <Band />
+      <div className="hg-list hg-list--plain">
         <ListRow label={copy.rankOurs(month)} value={money(r.net, masked)} chevron={false} />
-        {change && prevMonth && (
-          <ListRow
-            label={copy.rankPrev(prevMonth)}
-            sub={copy.rankPrevSub(prevMonth, change.prev)}
-            value={
-              change.up > 0
-                ? copy.rankUp(change.up)
-                : change.up < 0
-                  ? copy.rankDown(-change.up)
-                  : copy.rankSame
-            }
-            chevron={false}
-          />
-        )}
-        {next && (
-          <ListRow
-            label={copy.rankNextStep(next.top)}
-            value={money(next.need, masked)}
-            chevron={false}
-          />
-        )}
         <ListRow
           label={copy.rankMedian}
           value={money(RANK_BASIS.medianNet, masked)}
           chevron={false}
         />
       </div>
-      {age && (
-        <section className="hg-stack" aria-label={copy.rankAgeTitle(bandName)}>
-          <SectionHeader title={copy.rankAgeTitle(bandName)} />
-          <div className="hg-list">
-            <ListRow
-              label={copy.rankAgeMedian(bandName)}
-              sub={
-                r.net >= RANK_AGE_MEDIAN[age]
-                  ? copy.rankAgeAbove(bandName)
-                  : copy.rankAgeBelow(bandName)
-              }
-              value={money(RANK_AGE_MEDIAN[age], masked)}
-              chevron={false}
-            />
-            {stats && debt !== null && (
-              <ListRow
-                label={copy.rankDebt}
-                sub={copy.rankAgeAvg(bandName, Math.round(stats.debtPct))}
-                value={copy.rankOurPct(debt)}
-                chevron={false}
-              />
-            )}
-            {stats && v.financialPct !== null && (
-              <ListRow
-                label={copy.rankFinancial}
-                sub={copy.rankAgeAvg(bandName, Math.round(stats.financialPct))}
-                value={copy.rankOurPct(v.financialPct)}
-                chevron={false}
-              />
-            )}
-          </div>
-        </section>
-      )}
       {age && (
         <div className="hg-help" style={{ textAlign: 'center' }}>
           {copy.rankAgeNote}

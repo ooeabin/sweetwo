@@ -53,15 +53,25 @@ export function Distribution({
   label,
   tag,
   title,
+  note,
+  noteDown = false,
+  hero = false,
   sub,
   percentile,
   axis,
   youLabel,
   ariaLabel,
 }: {
-  label: ReactNode;
+  /** 카드형 머리 라벨. 히어로는 보통 없음 */
+  label?: ReactNode;
   tag?: ReactNode;
   title: ReactNode;
+  /** 제목 아래 한 줄(지난달 대비, <b>로 숫자 강조) */
+  note?: ReactNode;
+  /** 내려간 쪽이면 강조 숫자를 goal-ink로 */
+  noteDown?: boolean;
+  /** 카드 없이 가운데(2026-11-04 F-08 토스형) */
+  hero?: boolean;
   sub?: ReactNode;
   /** 아래에서부터 백분위 0~100(상위 n%면 100 − n) */
   percentile: number;
@@ -78,12 +88,15 @@ export function Distribution({
   const px = x(zp);
   const py = y(zp);
   return (
-    <div className="hg-dist">
-      <div className="hg-dist__head">
-        <span className="hg-dist__label">{label}</span>
-        {tag}
-      </div>
+    <div className={hero ? 'hg-dist hg-dist--hero' : 'hg-dist'}>
+      {(label || tag) && (
+        <div className="hg-dist__head">
+          <span className="hg-dist__label">{label}</span>
+          {tag}
+        </div>
+      )}
       <p className="hg-dist__title">{title}</p>
+      {note && <p className={noteDown ? 'hg-dist__note is-down' : 'hg-dist__note'}>{note}</p>}
       <svg viewBox={`0 0 ${W} ${H + 16}`} role="img" aria-label={ariaLabel}>
         {cuts.slice(0, 10).map((z0, i) => (
           <path

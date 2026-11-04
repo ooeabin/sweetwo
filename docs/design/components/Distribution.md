@@ -16,3 +16,4 @@ F-08 분포 그림. 같은 나이대 부부 중 우리 위치를 종 모양 곡�
 쓰는 곳: 순자산 화면(F-01)의 F-08 비교 카드. 참여 동의(ConsentCard) 뒤에만 참여 부부 기준을 씀.
 
 - React(2026-11-04): `Distribution({ label, tag, title, sub, percentile, axis, youLabel, ariaLabel })`. 1단계 순위(F-08)는 제목에 정수 %(“우리 자산은 상위 93%예요”, 계산·배분 7-7)를 넣고 위치는 100 − 상위 %. 곡선 칸 경계는 표준정규 분위수(10%마다).
+- 히어로(2026-11-04 F-08 토스형): `hero`면 카드 없이 가운데 정렬(`hg-dist--hero`). 라벨·태그 없이 두 줄 문장(24px 700, “우리 자산은 전체 가구 중” / “상위 39%예요”) → `note` 한 줄(15px `slate`, `<b>` 강조 숫자는 올라감 `invest-ink`, 내려감 `goal-ink`, “9월보다 1%p 올랐어요”) → 곡선(최대 420px) → 기준 한 줄. React `note`, `noteDown`, `hero`, `label`은 선택.

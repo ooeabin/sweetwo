@@ -57,3 +57,5 @@ export * from './components/DataTable';
 export * from './components/CommandPalette';
 export { ArtPick } from './components/ArtPick';
 export { avatarArt, goalPhotoArt } from './components/preset-art';
+export { Band } from './components/Band';
+export { StatBlock } from './components/StatBlock';
