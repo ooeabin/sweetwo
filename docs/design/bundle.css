@@ -1247,7 +1247,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-noti__empty span { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 /* 놓이는 곳: 넓은 창은 오른쪽 끝에 붙는 시트(막 없음), 좁은 창은 전체 화면 페이지 */
 .hg-noti--sheet { position: fixed; top: 0; right: 0; bottom: 0; height: auto; z-index: var(--z-sheet); }
-.hg-noti--page { width: 100%; height: auto; min-height: 100vh; border-left: 0; box-shadow: none; }
+.hg-noti--page { width: 100%; height: auto; min-height: 0; border-left: 0; box-shadow: none; }  /* 2026-11-04 앱 틀(MainFrame) 안에 들어감 */
 .hg-noti__item .hg-avatar { width: 32px; height: 32px; }
 .hg-noti__more { padding: var(--space-3); text-align: center; }
 .hg-noti__foot { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--hairline-soft); }
@@ -1495,6 +1495,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-wide-only { display: none; }
   .hg-pagetitle.hg-today--plain { display: block !important; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }  /* 2026-11-03 홈 제목은 좁은 창에서 화면 읽기용으로만 */
   .hg-pagetitle:has(.hg-frame__actions):not(:has(.hg-frame__actions > :not(.hg-wide-only))) { display: none; }
+  .hg-pagetitle:not(.hg-today--plain):not(:has(.hg-frame__actions)) { display: none; }  /* 2026-11-04 제목은 앱 머리에 있어 동작 없는 제목 줄은 숨김(머리와 ‘‹ 제목’ 줄 사이 거리를 모든 화면 같게) */
 }
 .hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
@@ -1533,7 +1534,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
   /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
-  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }
+  .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 머리 공통화: 설정 하위·알림도 홈과 같은 앱 머리(제목 + 검색·알림·설정)를 두고 그 아래 ‘‹ 제목’ 줄. 탭 막대만 숨김 */
   .hg-frame--sub .hg-body { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 }
 

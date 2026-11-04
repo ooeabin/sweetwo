@@ -6,7 +6,16 @@ import {
   NotifyEmail,
   type BaseDay,
 } from '@sweetwo/core';
-import { avatarArt, Button, Field, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import {
+  avatarArt,
+  Button,
+  Field,
+  Icon,
+  ListRow,
+  PageHeader,
+  SectionHeader,
+  Toggle,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

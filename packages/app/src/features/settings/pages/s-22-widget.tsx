@@ -68,7 +68,5 @@ export function S22Widget() {
       </div>
     </div>
   );
-  return (
-    <MainFrame sub="settings" current={null} page={{ title: copy.widgetTitle }} columns={[body]} />
-  );
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }
