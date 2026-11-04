@@ -101,5 +101,5 @@ export function S18bDelete() {
       )}
     </div>
   );
-  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

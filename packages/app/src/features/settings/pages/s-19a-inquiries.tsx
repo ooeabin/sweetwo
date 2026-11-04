@@ -77,10 +77,7 @@ export function S19aInquiries() {
       </div>
     </div>
   );
-  if (!q)
-    return (
-      <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[listBody]} />
-    );
+  if (!q) return <MainFrame sub="settings" current={null} columns={[listBody]} />;
 
   const asking = q.access_request.find((a) => a.status === 'requested');
   const on = q.access_request.find((a) => a.status === 'approved');
@@ -159,7 +156,5 @@ export function S19aInquiries() {
       )}
     </div>
   );
-  return (
-    <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[detail]} />
-  );
+  return <MainFrame sub="settings" current={null} columns={[detail]} />;
 }

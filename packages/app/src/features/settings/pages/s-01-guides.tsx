@@ -86,7 +86,5 @@ export function S01Guides() {
       </div>
     </div>
   );
-  return (
-    <MainFrame sub="settings" current={null} page={{ title: copy.guidesTitle }} columns={[body]} />
-  );
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

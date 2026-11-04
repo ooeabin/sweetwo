@@ -75,5 +75,5 @@ export function S19bAccess() {
       </div>
     </div>
   );
-  return <MainFrame sub="settings" current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

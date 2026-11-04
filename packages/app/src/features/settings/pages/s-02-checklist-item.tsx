@@ -109,5 +109,5 @@ export function S02ChecklistItem() {
         ))}
     </div>
   );
-  return <MainFrame sub="settings" current={null} page={{ title: item.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

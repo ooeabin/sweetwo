@@ -35,9 +35,11 @@ export function MainFrame(
   p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'> & {
     /**
      * 메뉴 첫 화면이 아닌 화면(2026-11-03 추가 입구 하나로): + 버튼 없음.
-     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위 화면(좁은 창은 앱 머리와 탭 막대도 숨김)
+     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면(좁은 창은 탭 막대만 숨김, 앱 머리는 보임 2026-11-04)
      */
     sub?: 'detail' | 'settings';
+    /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
+    narrowTitle?: string;
   },
 ) {
   const nav = useNavigate();
@@ -131,7 +133,7 @@ export function MainFrame(
           if (to) nav(to);
         }}
         date={formatDateWeekday(todayKst())}
-        narrowTitle={p.current ? label[p.current] : copy.settings}
+        narrowTitle={p.narrowTitle ?? (p.current ? label[p.current] : copy.settings)}
         labels={{
           search: copy.search,
           mask: copy.mask,
