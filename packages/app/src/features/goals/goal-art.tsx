@@ -1,9 +1,9 @@
 import { goalPreset } from '@sweetwo/core';
-import { Icon, Illustration, goalIcon, goalPhotoArt, hasIllustration } from '@sweetwo/ui';
+import { Icon, goalIcon, goalPhotoArt } from '@sweetwo/ui';
 import { usePhotoUrls } from '../../shared/photo';
 
-// 목표 그림(22 G-01 10번, G-02 1번). 2026-11-03 모든 목표가 사진: 올린 사진 → 지정 사진(고른 것, 없으면 그 종류 1번) →
-// 그림 파일이 아직 없으면 템플릿 그림 → 회색 기본 자리 + 아이콘. 장식이라 alt 없음
+// 목표 그림(22 G-01 10번, G-02 1번). 2026-11-04 모든 목표가 사진: 올린 사진 → 그 종류 지정 사진(실사 1장) →
+// 사진 파일이 아직 없거나 직접 만든 목표면 회색 기본 자리 + 아이콘(직접 만든 목표는 깃발). 장식이라 alt 없음
 export function GoalArt({
   g,
   hero = false,
@@ -14,7 +14,6 @@ export function GoalArt({
   /** G-01 타일 위 사진(2026-11-03 시안 B) */
   tile?: boolean;
   g: {
-    illustration: string | null;
     custom: boolean;
     goal?: { photo_path?: string | null; photo_preset?: string | null; template?: string };
   };
@@ -44,16 +43,10 @@ export function GoalArt({
         <img src={src} alt="" />
       </span>
     );
-  // 사진 파일이 없으면(힉스필드로 만들기 전) 템플릿 그림, 그것도 없으면 회색 기본 자리
-  const art = !g.custom && hasIllustration(g.illustration) ? g.illustration : null;
+  // 사진 파일이 없으면(힉스필드로 만들기 전) 회색 기본 자리 + 템플릿 아이콘(O-21과 같음), 직접 만든 목표는 깃발
   return (
-    <span className={art ? 'hg-card__art' : 'hg-card__art hg-card__art--custom'} aria-hidden="true">
-      {/* 그림이 아직 없으면 템플릿 아이콘(목표 고르기 O-21과 같음, 2026-11-03). 직접 만든 목표는 깃발 */}
-      {art ? (
-        <Illustration name={art} />
-      ) : (
-        <Icon name={g.custom ? 'flag-pennant' : goalIcon(g.goal?.template ?? '')} />
-      )}
+    <span className="hg-card__art hg-card__art--custom" aria-hidden="true">
+      <Icon name={g.custom ? 'flag-pennant' : goalIcon(g.goal?.template ?? '')} />
     </span>
   );
 }

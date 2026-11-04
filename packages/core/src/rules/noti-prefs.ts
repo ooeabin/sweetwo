@@ -61,7 +61,8 @@ export function pushAllowed(
   topic: string | null,
   quiet: { hour: number; start: number; end: number },
 ) {
-  if (topic === 'silent' || !prefs.push || inQuiet(quiet.hour, quiet.start, quiet.end)) return false;
+  if (topic === 'silent' || !prefs.push || inQuiet(quiet.hour, quiet.start, quiet.end))
+    return false;
   const t = prefs.topics[topic as NotiTopic];
   return t ? t.push : true;
 }

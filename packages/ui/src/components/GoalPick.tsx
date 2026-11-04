@@ -2,13 +2,13 @@ import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { goalIcon } from './goal-icons';
 import { Icon } from './Icon';
-import { Illustration, hasIllustration } from './Illustration';
 
 // 그림 카드로 목표 고르기(docs/design/components/GoalPick.md). 고른 순서 = 순번 원, 해제하면 당겨짐.
 export interface GoalPickItem {
   key: string;
   name: string;
-  illustration: string | null;
+  /** 지정 사진 주소(2026-11-04 실사, 파일이 없으면 아이콘) */
+  photo?: string;
   recommended?: boolean;
 }
 
@@ -52,12 +52,15 @@ export function GoalPick({
         card(
           t.key,
           t.name,
-          hasIllustration(t.illustration) ? (
-            <span className="hg-pick__art" aria-hidden="true">
-              <Illustration name={t.illustration} />
+          t.photo ? (
+            <span
+              className="hg-pick__art hg-pick__art--icon hg-pick__art--photo"
+              aria-hidden="true"
+            >
+              <img src={t.photo} alt="" />
             </span>
           ) : (
-            // 그림이 아직 없으면 아이콘(2026-11-02, 쿠팡플레이 장르 고르기처럼)
+            // 사진이 아직 없으면 아이콘(2026-11-02, 쿠팡플레이 장르 고르기처럼)
             <span className="hg-pick__art hg-pick__art--icon" aria-hidden="true">
               <Icon name={goalIcon(t.key)} size={24} />
             </span>

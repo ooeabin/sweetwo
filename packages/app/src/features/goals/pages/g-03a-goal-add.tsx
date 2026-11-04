@@ -1,5 +1,5 @@
-import { goalTabs, pickableGoals, type GoalTab } from '@sweetwo/core';
-import { GoalPick, QuestionLayout, Tabs } from '@sweetwo/ui';
+import { goalTabs, pickableGoals, type GoalTab, defaultGoalPreset } from '@sweetwo/core';
+import { GoalPick, QuestionLayout, Tabs, goalPhotoArt } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { useAddDraft } from '../add/draft';
@@ -28,7 +28,7 @@ export function G03aGoalAdd() {
         items={pickableGoals(tab).map((t) => ({
           key: t.key,
           name: t.name,
-          illustration: t.illustration,
+          photo: goalPhotoArt(defaultGoalPreset(t.key)),
         }))}
         order={() => undefined}
         onToggle={pick}

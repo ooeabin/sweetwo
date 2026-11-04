@@ -106,7 +106,14 @@ export function debtRatioPct(assets: Won, debts: Won): number | null {
 }
 
 // 공공 통계의 금융자산 = 저축액(예금·적금, 주식·펀드, 보험 등) + 전·월세 보증금. 나머지(부동산, 자동차 등)는 실물자산
-const FINANCIAL_GROUPS = new Set(['cash', 'deposit', 'subscription', 'invest', 'pension', 'insurance']);
+const FINANCIAL_GROUPS = new Set([
+  'cash',
+  'deposit',
+  'subscription',
+  'invest',
+  'pension',
+  'insurance',
+]);
 const isFinancial = (grp: string, kind?: string) =>
   FINANCIAL_GROUPS.has(grp) || (grp === 'real_estate' && kind === 'deposit_money');
 
@@ -134,7 +141,10 @@ export function financialPct(
  * 우리 연령대(7-1처럼 두 사람 출생연도로 계산한 평균 나이 = 올해 − 출생연도, 내림).
  * 한 사람만 적었으면 그 사람 나이. 아무도 안 적었으면 null(연령대 비교를 숨김)
  */
-export function rankAgeBand(birthYears: (number | null | undefined)[], year: number): RankAgeBand | null {
+export function rankAgeBand(
+  birthYears: (number | null | undefined)[],
+  year: number,
+): RankAgeBand | null {
   const ys = birthYears.filter((y): y is number => typeof y === 'number' && y > 1900);
   if (ys.length === 0) return null;
   const age = Math.floor(ys.reduce((t, y) => t + (year - y), 0) / ys.length);
