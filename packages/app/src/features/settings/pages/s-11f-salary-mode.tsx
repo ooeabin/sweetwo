@@ -1,5 +1,5 @@
 import { qk, setSalaryMode } from '@sweetwo/api';
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ export function S11fSalaryMode() {
   const d = useSettingsData();
   const [v, setV] = useState<Mode | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.space) return null;
+  if (d.loading || !d.space) return <QuestionSkeleton />;
   const saved: Mode = d.space.salary_mode;
   const value = v ?? saved;
   const locked = d.space.couple_state === 'unlink_pending';

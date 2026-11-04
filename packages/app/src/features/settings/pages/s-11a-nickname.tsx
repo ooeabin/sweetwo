@@ -1,5 +1,5 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { QuestionLayout, ShortText } from '@sweetwo/ui';
+import { QuestionLayout, ShortText, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +14,8 @@ export function S11aNickname() {
   const d = useSettingsData();
   const [value, setValue] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me)
+    return <QuestionSkeleton title={copy.nicknameQ} onBack={() => nav('/settings/me')} />;
   const v = value ?? d.me.nickname ?? '';
   const ok = !!v.trim() && v.trim() !== d.me.nickname;
   return (

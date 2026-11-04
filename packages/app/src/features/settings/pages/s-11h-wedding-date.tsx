@@ -1,6 +1,6 @@
 import { qk, updateSpace } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { DateWheel, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -35,7 +35,7 @@ export function S11hWeddingDate() {
   const [month, setMonth] = useState<string | null | undefined>(undefined);
   const [undecided, setUndecided] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.space) return null;
+  if (d.loading || !d.space) return <QuestionSkeleton />;
   const sp = d.space;
   const param = params.get('status');
   const status: Status =

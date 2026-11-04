@@ -1,6 +1,6 @@
 import { fetchSplits, insertGoal, qk, updateGoal } from '@sweetwo/api';
 import { formatManWon, formatYm, goalNeed } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ export function G03fGoalConfirm() {
   const meId = d.me?.id ?? null;
   const p = addPayload(solo ? { ...s.draft, owner: 'me' } : s.draft, meId);
   if (!p) return <Navigate to={addPath()} replace />;
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me) return <QuestionSkeleton />;
 
   const group = d.goals.filter(
     (g) => g.owner_user_id === p.owner_user_id && g.template !== 'emergency',

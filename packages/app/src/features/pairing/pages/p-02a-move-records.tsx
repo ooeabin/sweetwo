@@ -14,6 +14,7 @@ import {
   ListRow,
   QuestionLayout,
   SectionHeader,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -42,7 +43,7 @@ export function P02aMoveRecords({
   const [vis, setVis] = useState<Record<string, Vis>>({});
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
-  if (me.isLoading || assets.isLoading || counts.isLoading || !me.data) return null;
+  if (me.isLoading || assets.isLoading || counts.isLoading || !me.data) return <QuestionSkeleton />;
   const m = me.data;
   const mine = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && (a.owner_user_id ?? a.created_by) === m.id && !a.deleted_at,

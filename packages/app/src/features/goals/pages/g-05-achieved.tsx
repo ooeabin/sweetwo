@@ -1,6 +1,6 @@
 import { fetchGoalStory } from '@sweetwo/api';
 import { celebrationStory } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -22,7 +22,8 @@ export function G05Achieved() {
   const splits = useSplits();
   const { masked } = useMask();
   const story = useQuery({ queryKey: ['goal_story', id], queryFn: () => fetchGoalStory(id) });
-  if (d.loading || model.loading || story.isLoading || splits.isLoading) return null;
+  if (d.loading || model.loading || story.isLoading || splits.isLoading)
+    return <QuestionSkeleton />;
   const item = model.ready ? model.byId(id) : undefined;
   const row = d.goals.find((x) => x.id === id);
   if (!item || !row) return <Navigate to="/goals" replace />;

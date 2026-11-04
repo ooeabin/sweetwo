@@ -91,7 +91,7 @@ export function H01Home() {
     return <Navigate to="/settings/couple/unlinked" replace />;
   // 합류했는데 시작한 사람이 아직 온보딩 중(18 ‘시작한 사람이 아직 온보딩 중’): 월급 계획이 생기면 P-04 → P-06, 그 전엔 홈 대기(상태 변형 4)
   if (me.data.onboarding_step === 'P-WAIT') {
-    if (splits.isLoading) return null;
+    if (splits.isLoading) return <LoadingFrame current="month" />;
     if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
     const starter = partner.data?.nickname ?? space.data.partner_nickname ?? '';
     return (

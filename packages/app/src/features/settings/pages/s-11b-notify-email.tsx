@@ -1,6 +1,6 @@
 import { qk, updateMe } from '@sweetwo/api';
 import { NotifyEmail } from '@sweetwo/core';
-import { Field, QuestionLayout } from '@sweetwo/ui';
+import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,8 @@ export function S11bNotifyEmail() {
   const d = useSettingsData();
   const [value, setValue] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me)
+    return <QuestionSkeleton title={copy.notifyEmailQ} onBack={() => nav('/settings/me')} />;
   const me = d.me;
   const v = value ?? me.notify_email ?? '';
   const parsed = NotifyEmail.safeParse(v);

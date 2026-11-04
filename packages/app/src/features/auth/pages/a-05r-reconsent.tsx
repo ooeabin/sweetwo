@@ -1,5 +1,5 @@
 import { agreeTerms, fetchPendingTerms, qk } from '@sweetwo/api';
-import { Button, ConsentGroup, QuestionLayout } from '@sweetwo/ui';
+import { Button, ConsentGroup, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ export function A05rReconsent() {
   const pending = useQuery({ queryKey: qk.pendingTerms, queryFn: fetchPendingTerms });
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
-  if (pending.isLoading) return null;
+  if (pending.isLoading) return <QuestionSkeleton />;
   const list = pending.data ?? [];
   const required = list.filter((p) => p.kind !== 'marketing').map((p) => p.kind);
   const askMarketing = list.some((p) => p.kind === 'marketing');

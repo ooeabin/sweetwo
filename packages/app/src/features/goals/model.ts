@@ -78,15 +78,15 @@ export function useGoalsModel() {
     const t = templateByKey(g.template);
     // 아직 모은 돈이 없으면 지연으로 보지 않음(첫 사이클 ‘지연’ 배지, 2026-11-03)
     const late = eta.lateMonths !== null && eta.lateMonths > 0 && s > 0;
-    const state = (
-      // 2026-11-04 사용 완료 없앰: 옛 ‘used’ 목표도 달성으로 보임
+    const state = // 2026-11-04 사용 완료 없앰: 옛 ‘used’ 목표도 달성으로 보임
+    (
       g.status === 'used'
         ? 'achieved'
         : g.status === 'paused' || g.status === 'achieved'
           ? g.status
           : late
-          ? 'delayed'
-          : 'active'
+            ? 'delayed'
+            : 'active'
     ) as GoalItem['state'];
     return {
       goal: g,

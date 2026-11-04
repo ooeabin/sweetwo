@@ -10,6 +10,7 @@ import {
   PageHeader,
   QuestionLayout,
   StatBlock,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -224,7 +225,7 @@ export function Y05Budget() {
   const c = useCalendarData();
   const [value, setValue] = useState<number | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
-  if (c.loading) return null;
+  if (c.loading) return <QuestionSkeleton />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
   const v = value === undefined ? care.budget || null : value;

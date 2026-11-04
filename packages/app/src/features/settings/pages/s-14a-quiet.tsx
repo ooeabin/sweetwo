@@ -1,5 +1,5 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { NumberWheel, QuestionLayout } from '@sweetwo/ui';
+import { NumberWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,8 @@ export function S14aQuiet() {
   const d = useSettingsData();
   const [v, setV] = useState<{ start: number; end: number } | null>(null);
   const [saving, setSaving] = useState(false);
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me)
+    return <QuestionSkeleton title={copy.quietQ} onBack={() => nav('/settings/notifications')} />;
   const cur = v ?? { start: d.me.quiet_start ?? 22, end: d.me.quiet_end ?? 8 };
   return (
     <QuestionLayout

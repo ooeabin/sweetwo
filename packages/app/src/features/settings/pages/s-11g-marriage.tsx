@@ -1,5 +1,5 @@
 import { qk, updateSpace } from '@sweetwo/api';
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
@@ -13,7 +13,10 @@ export function S11gMarriage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  if (d.loading || !d.space) return null;
+  if (d.loading || !d.space)
+    return (
+      <QuestionSkeleton title={copy.marriageQ} onBack={() => nav('/settings/me')} fields={3} />
+    );
   const saved = (d.space.marriage_status ?? null) as Status | null;
   return (
     <QuestionLayout title={copy.marriageQ} onBack={() => nav('/settings/me')}>

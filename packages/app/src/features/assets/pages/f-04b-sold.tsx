@@ -1,6 +1,6 @@
 import { sellAsset } from '@sweetwo/api';
 import { hasPrincipal } from '@sweetwo/core';
-import { AmountInput, ChoiceCards, DoneMark, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, ChoiceCards, DoneMark, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -26,7 +26,7 @@ export function F04bSold() {
   const [remain, setRemain] = useState<number | null>(null);
   const [result, setResult] = useState<{ to: string; gain: number | null } | null>(null);
   const [busy, setBusy] = useState(false);
-  if (d.loading) return null;
+  if (d.loading) return <QuestionSkeleton />;
   const a = d.items.find((x) => x.id === id);
   if (!a || !canEdit(a, d.me?.id) || a.side !== 'asset' || !hasPrincipal(a.grp))
     return <Navigate to="/assets" replace />;

@@ -68,7 +68,10 @@ export const copy = {
   modeTitle: (starter: string) => `${starter}님이 고른 월급 관리 방식이에요`, // [확인 필요]
   modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]
   modes: {
-    separate: { label: '각자 월급을 따로 관리해요', sub: '월급 계획과 체크리스트가 사람마다 있어요' }, // [확인 필요]
+    separate: {
+      label: '각자 월급을 따로 관리해요',
+      sub: '월급 계획과 체크리스트가 사람마다 있어요',
+    }, // [확인 필요]
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
 

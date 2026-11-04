@@ -1,6 +1,15 @@
 import { insertCareDays, qk, updateCareDay, type CareDay } from '@sweetwo/api';
 import { lunarToSolar, nextCareDate, quickChips, todayKst } from '@sweetwo/core';
-import { AmountInput, Chip, DateWheel, QuestionLayout, ShortText, Tabs, Toggle } from '@sweetwo/ui';
+import {
+  AmountInput,
+  Chip,
+  DateWheel,
+  QuestionLayout,
+  ShortText,
+  Tabs,
+  Toggle,
+  QuestionSkeleton,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -98,7 +107,7 @@ export function Y07CareAdd() {
   const [saving, setSaving] = useState(false);
   /** 같은 날 확인을 한 번 보여 줬음(다시 누르면 그대로 진행) */
   const [asked, setAsked] = useState(false);
-  if (c.loading) return null;
+  if (c.loading) return <QuestionSkeleton />;
   const editing = d.editId ? c.cares.find((x) => x.id === d.editId) : null;
   const fixed = d.chip ? FIXED[d.chip] : undefined;
   const steps = editing ? ['a', 'c'] : ['a', ...(fixed ? [] : ['c']), 'd'];

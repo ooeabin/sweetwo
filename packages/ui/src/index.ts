@@ -37,6 +37,7 @@ export * from './components/TransferRow';
 export * from './components/Calendar';
 export * from './components/AuthLayout';
 export * from './components/QuestionLayout';
+export * from './components/LoadingStates';
 export * from './components/LockScreen';
 export * from './components/ConsentCard';
 export * from './components/Wordmark';

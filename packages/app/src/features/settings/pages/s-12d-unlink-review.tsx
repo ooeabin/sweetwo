@@ -1,6 +1,6 @@
 import { agreeUnlink, fetchUnlink, qk } from '@sweetwo/api';
 import { formatMonthDay } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ export function S12dUnlinkReview() {
   const d = useSettingsData();
   const u = useQuery({ queryKey: qk.unlink, queryFn: fetchUnlink });
   const [busy, setBusy] = useState(false);
-  if (d.loading || !d.c || !d.me || u.isLoading) return null;
+  if (d.loading || !d.c || !d.me || u.isLoading) return <QuestionSkeleton />;
   const req = u.data;
   if (!req || req.requested_by === d.me.id) return <Navigate to="/settings/couple" replace />;
   const agree = async () => {

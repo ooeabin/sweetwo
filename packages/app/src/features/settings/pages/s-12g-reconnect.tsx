@@ -1,5 +1,5 @@
 import { answerReconnect, fetchMyUnlink, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ export function S12gReconnect() {
   const u = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink });
   const name = useQuery({ queryKey: qk.unlinkPartner, queryFn: fetchUnlinkPartnerName });
   const [busy, setBusy] = useState(false);
-  if (d.loading || !d.me || !d.c || u.isLoading || name.isLoading) return null;
+  if (d.loading || !d.me || !d.c || u.isLoading || name.isLoading) return <QuestionSkeleton />;
   const done = u.data;
   const open = done && done.reconnect_by && !done.reconnect_answer && done.reconnect_by !== d.me.id;
   if (!done || (!open && done.reconnect_until && Date.parse(done.reconnect_until) > Date.now()))

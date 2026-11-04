@@ -15,6 +15,7 @@ import {
   QuestionLayout,
   ShortText,
   YearMonthInput,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -47,7 +48,7 @@ export function G02GoalEdit() {
     if (live && !opened) setOpened(live);
   }, [live, opened]);
 
-  if (d.loading || model.loading) return null;
+  if (d.loading || model.loading) return <QuestionSkeleton />;
   const g = opened ?? live;
   const f = field as Field;
   if (!g || !['amount', 'deadline', 'name'].includes(f)) return <Navigate to="/goals" replace />;
