@@ -43,6 +43,15 @@ export const copy = {
     band: '월말 확인',
   },
   today: '오늘',
+  // 달력 고른 날 돈 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
+  goSub: {
+    payday: '체크리스트 보기',
+    review: '월말 확인하기',
+    deadline: '목표 보기',
+    goal: '목표 보기',
+    maturity: '자산 보기',
+  },
+  monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
@@ -117,6 +126,7 @@ export const copy = {
   alertChip: (n: number) => (n === 0 ? '당일' : `D-${n}`),
   memo: '메모',
   memoPlaceholder: '예: 같이 케이크 먹었어요', // [확인 필요] 2026-11-04 Y-08c
+  dayMemoPlaceholder: '예: 무릎이 안 좋으시다고 하셨음', // 24 Y-05 7번 예시
   lastYear: (gift: string, amount: string) => `작년엔 ${object(gift)} 드렸어요 (${amount})`,
   save: '저장', // [확인 필요]
   back: '뒤로',
@@ -124,7 +134,7 @@ export const copy = {
   // Y-08 다녀온 뒤 기록
   spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
   goalHelp: '목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요', // [확인 필요]
-  pickGoal: '목표 고르기',
+  pickGoal: '목표에서 꺼내 쓰기', // [확인 필요] 2026-11-04 ‘목표 고르기’에서, 줄 모양
   pickGoalQ: '어느 목표에서 꺼내 썼어요?', // [확인 필요]
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },
@@ -163,6 +173,7 @@ export const copy = {
   giftedViews: { care: '챙길 날별', year: '연도별' },
   giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
   giftedEmpty: '아직 드린 기록이 없어요', // [확인 필요]
+  giftedEmptyBody: '챙길 날에 ‘다녀왔어요’를 누르고 기록하면 여기에 모여요', // [확인 필요] 2026-11-04
   giftedYear: (y: number) => `${y}년`,
   giftedWhat: (items: string[]) => items.join(', '),
   giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]

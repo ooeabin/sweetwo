@@ -6,7 +6,16 @@ import {
   type MoneyDate,
   type MoneyKind,
 } from '@sweetwo/core';
-import { Button, EmptyState, Icon, Lead, ListRow, SectionHeader, type IconName } from '@sweetwo/ui';
+import {
+  Button,
+  EmptyState,
+  Icon,
+  Lead,
+  ListRow,
+  SectionHeader,
+  StatBlock,
+  type IconName,
+} from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../../shared/mask';
@@ -142,10 +151,17 @@ export function Y01CareList() {
       )}
       {filter !== 'money' && next && (
         <section className="hg-card hg-stack" aria-label={copy.nextCare}>
-          <span className="hg-card__label">{copy.dday(dday(d.today, next.date))}</span>
-          <b>{next.care.name}</b>
-          <span className="hg-card__meta">{formatMonthDay(next.date)}</span>
-          {next.care.budget > 0 && <span>{copy.memoAmount(m(next.care.budget))}</span>}
+          {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}
+          <StatBlock
+            as="div"
+            big={copy.dday(dday(d.today, next.date))}
+            title={next.care.name}
+            sub={
+              next.care.budget > 0
+                ? `${formatMonthDay(next.date)}, ${copy.memoAmount(m(next.care.budget))}`
+                : formatMonthDay(next.date)
+            }
+          />
           <div className="hg-row">
             <Button
               variant="secondary"
@@ -174,25 +190,36 @@ export function Y01CareList() {
             {filter === 'money' ? copy.noMoney60 : copy.none60}
           </p>
         ) : (
-          <div className="hg-list">
-            {rows.map((r) => {
-              const n = dday(d.today, r.date);
-              return (
-                <ListRow
-                  key={r.key}
-                  lead={<Lead icon={r.icon} tone={r.care ? 'together' : undefined} />}
-                  label={r.label}
-                  sub={r.sub}
-                  value={
-                    <span className={n <= 7 ? 'hg-cal__dday is-near' : 'hg-cal__dday'}>
-                      {copy.dday(n)}
-                    </span>
-                  }
-                  onClick={() => nav(r.to)}
-                />
-              );
-            })}
-          </div>
+          // 2026-11-04 달 머리로 묶음(토스 소비 목록처럼, 월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
+          Object.entries(
+            rows.reduce<Record<string, Row[]>>((acc, r) => {
+              (acc[r.date.slice(0, 7)] ??= []).push(r);
+              return acc;
+            }, {}),
+          ).map(([ym, list]) => (
+            <div key={ym} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+              <h3 className="hg-cal__monthhead">{copy.monthHead(Number(ym.slice(5, 7)))}</h3>
+              <div className="hg-list">
+                {list.map((r) => {
+                  const n = dday(d.today, r.date);
+                  return (
+                    <ListRow
+                      key={r.key}
+                      lead={<Lead icon={r.icon} tone={r.care ? 'together' : undefined} />}
+                      label={r.label}
+                      sub={r.sub}
+                      value={
+                        <span className={n <= 7 ? 'hg-cal__dday is-near' : 'hg-cal__dday'}>
+                          {copy.dday(n)}
+                        </span>
+                      }
+                      onClick={() => nav(r.to)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))
         )}
       </section>
       {filter !== 'money' && !!d.cares.length && (

@@ -1,6 +1,16 @@
 import { qk, restoreTrash, trashCareDay, updateCareDay, type CareDay } from '@sweetwo/api';
 import { dday, formatMonthDay, nextCareDate, quickChips, solarToLunar } from '@sweetwo/core';
-import { AmountInput, Button, Chip, Field, ListRow, Menu, PageHeader, QuestionLayout, StatBlock } from '@sweetwo/ui';
+import {
+  AmountInput,
+  Button,
+  Chip,
+  Field,
+  ListRow,
+  Menu,
+  PageHeader,
+  QuestionLayout,
+  StatBlock,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -135,19 +145,23 @@ export function Y05CareDay() {
             aria-label={copy.status}
             style={{ gap: 'var(--space-2)' }}
           >
-            {(['todo', 'preparing', 'done'] as const).map((s) => (
+            {/* 2026-11-04 칩은 ‘아직’ ‘준비 중’만. ‘다녀왔어요’는 그날부터 아래 주 버튼(누르면 기록 화면이라 칩과 다르게) */}
+            {(['todo', 'preparing'] as const).map((s) => (
               <Chip
                 key={s}
                 small
                 selected={st === s}
-                onClick={() =>
-                  s === 'done' ? record() : void patch({ status: s, status_on: date })
-                }
+                onClick={() => void patch({ status: s, status_on: date })}
               >
                 {copy.statuses[s]}
               </Chip>
             ))}
           </div>
+        )}
+        {!overdue && date && date <= c.today && st !== 'done' && (
+          <Button variant="primary" block onClick={() => record(date)}>
+            {copy.statuses.done}
+          </Button>
         )}
       </section>
       <section className="hg-stack" aria-label={copy.alerts}>
@@ -186,6 +200,7 @@ export function Y05CareDay() {
       )}
       <Field
         label={copy.memo}
+        placeholder={copy.dayMemoPlaceholder}
         value={memo ?? care.memo ?? ''}
         maxLength={200}
         onChange={(e) => setMemo(e.target.value)}

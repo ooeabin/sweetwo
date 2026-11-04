@@ -26,6 +26,8 @@ const MONEY_ICON: Record<MoneyKind, IconName> = {
   goal: 'target',
   maturity: 'piggy-bank',
 };
+let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
+
 /** 챙길 날 이름의 마지막 낱말(“어머니 생신” → “생신”) */
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
@@ -38,8 +40,18 @@ export function Y04Calendar() {
   const d = useCalendarData();
   const [filter, setFilter] = useCalFilter();
   const [ty, tm] = ymd(d.today);
-  const [ym, setYm] = useState<[number, number]>([ty, tm]);
-  const [selected, setSelected] = useState<string>(d.today);
+  // 2026-11-04 일정을 보고 돌아와도 보던 달과 고른 날 그대로(앱을 쓰는 동안만, 날이 바뀌면 오늘로)
+  const kept = lastView?.today === d.today ? lastView : null;
+  const [ym, setYmRaw] = useState<[number, number]>(kept?.ym ?? [ty, tm]);
+  const [selected, setSelectedRaw] = useState<string>(kept?.selected ?? d.today);
+  const setYm = (v: [number, number]) => {
+    setYmRaw(v);
+    lastView = { today: d.today, ym: v, selected: lastView?.selected ?? selected };
+  };
+  const setSelected = (v: string) => {
+    setSelectedRaw(v);
+    lastView = { today: d.today, ym: lastView?.ym ?? ym, selected: v };
+  };
   const { masked } = useMask();
   const frame = (children: ReactNode) => (
     <CalendarFrame view="month" filter={filter} onFilter={setFilter}>
@@ -174,7 +186,7 @@ export function Y04Calendar() {
           key={`${x.kind}-${i}`}
           lead={<Lead icon={MONEY_ICON[x.kind]} />}
           label={l.label}
-          sub={l.go}
+          sub={copy.goSub[x.kind]}
           onClick={() => nav(l.to)}
           chevron
         />,

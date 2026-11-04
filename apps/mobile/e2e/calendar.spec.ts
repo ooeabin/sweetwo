@@ -350,7 +350,7 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기, 목표 고르�
   await expect(
     page.getByText('목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요'),
   ).toBeVisible();
-  await page.getByRole('button', { name: '목표 고르기' }).click();
+  await page.getByRole('button', { name: '목표에서 꺼내 쓰기' }).click();
   await page.getByRole('radio', { name: '여행' }).click();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
@@ -414,11 +414,13 @@ test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 �
   await expect(consent).toContainText('기록을 지우면 사진도 함께 지워져요');
   await axe(page);
   await consent.getByRole('button', { name: '동의할게요' }).click();
-  await expect.poll(() => db.consents.at(-1)).toMatchObject({
-    kind: 'photo',
-    agreed: true,
-    source: 'care_day_first',
-  });
+  await expect
+    .poll(() => db.consents.at(-1))
+    .toMatchObject({
+      kind: 'photo',
+      agreed: true,
+      source: 'care_day_first',
+    });
   await expect(page.getByRole('button', { name: 'cake.png 빼기' })).toBeVisible();
 
   await input.setInputFiles({
@@ -502,4 +504,37 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   await page.getByRole('tab', { name: '목록' }).click();
   const up = page.getByRole('region', { name: '다가오는 일정' });
   await expect(up.getByRole('button', { name: /예빈 월급날/ }).first()).toContainText('10월 10일');
+});
+
+test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다녀왔어요’ 주 버튼, 목록은 달 머리', async ({
+  page,
+}) => {
+  const DAY = new Date('2026-10-20T10:00:00+09:00');
+  await page.clock.setFixedTime(DAY);
+  const db = await mockOnboarding(page, { now: DAY });
+  seed(db);
+  db.cares.push(care({ id: 'c-mom' }));
+  await page.goto('/calendar/list');
+  await expect(page.getByRole('heading', { name: '10월', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '11월', exact: true })).toBeVisible();
+
+  await page.goto('/calendar/month');
+  await page.getByRole('button', { name: '다음 달' }).click();
+  await page.getByRole('button', { name: /^11월 10일/ }).click();
+  await page
+    .getByRole('button', { name: /월급날/ })
+    .first()
+    .click();
+  await page.goBack();
+  await expect(page.getByText('11월 10일 화요일')).toBeVisible();
+
+  await page.goto('/calendar/day/c-mom');
+  const status = page.getByRole('group', { name: '준비 상황' });
+  await expect(status.getByRole('button')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: '다녀왔어요' })).toBeVisible();
+  await expect(page.getByLabel('메모')).toHaveAttribute(
+    'placeholder',
+    '예: 무릎이 안 좋으시다고 하셨음',
+  );
+  await axe(page);
 });

@@ -80,7 +80,7 @@ export function Y09GiftLog() {
         ]}
       />
       {!rows.length ? (
-        <EmptyState title={copy.giftedEmpty} />
+        <EmptyState title={copy.giftedEmpty} body={copy.giftedEmptyBody} />
       ) : (
         groups.map((g) => (
           <section key={g.key} className="hg-stack" aria-label={g.title}>
