@@ -42,11 +42,11 @@
 
 | 번호 | 할 일 | 수 | 허락 |
 | --- | --- | --- | --- |
-| 1 | 레퍼런스 확정(아래 2번 표). A, B, C, D 모두 확정(2026-11-04) | 0 | 생성 없음 |
+| 1 | 레퍼런스 확정(아래 2번 표). A, B, D 확정(2026-11-04), C 지정 아바타는 없앰(2026-11-05) | 0 | 생성 없음 |
 | 2 | 시험: 3D 4장(자물쇠, Face ID 웃는 얼굴, 빈 접시, 축하) + 목표 실사 2장(집, 여행 가방). 모델·품질 비교, 한 장 크레딧 확인, 기준 그림 1장 고름 | 6 | 허락 1 |
 | 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 4(`scene-plan`, `scene-joined`, `scene-invite`(3:4), `scene-wedding`) | 13 | 허락 2 |
 | 4 | 목표 실사 사진 나머지 19장(‘목표 사진 주제’ 표) | 19 | 허락 3 |
-| 5 | 지정 아바타 7(동물 7종) + 배우자 빈 자리 1 | 8 | 허락 4 |
+| 5 | ~~지정 아바타 7 + 배우자 빈 자리 1~~ 없앰(2026-11-05). 프로필은 올린 사진 → 소셜 로그인 프로필 사진 → 이름 첫 글자, 배우자 빈 자리는 사람 아이콘 | 0 | 생성 없음 |
 | 6 | 작은 3D 아이콘: 월급 체크리스트 줄 약 8, 하단 탭 4, 자산 종류 약 10, 챙길 날 4, 캘린더 돈 일정 4 | 약 30 | 허락 5 |
 | 7 | 앱에 넣기: 바탕 지우기 → 512px webp(150KB 이하). AuthLayout·SceneMedia·DoneMark·ProcessingState·Lead가 그림을 받게 코드, 문서, PR | 0 | 생성 없음 |
 | 8 | 움직이는 그림: 상태 7 + 축하 1. 힉스필드 3D 변환(GLB) → Blender(`bpy`) 1~2초 렌더 → 움직이는 WebP(100~300KB). 모래시계 1개로 먼저 시험 | 8 | 허락 6 |
@@ -60,7 +60,7 @@
 | --- | --- | --- | --- |
 | A 3D 이모지(상태, 빈 상태, 축하, 처리 중, 완료, 장면) | 토스 행운 복권형 | [Toss 행운 복권](https://mobbin.com/screens/565bb38d-ffbf-4291-b5c6-3a9bf4de645b?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp), [Toss 증권 빈 상태](https://mobbin.com/screens/5d378b66-9281-4f81-b50b-a6aa39d5709c?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 반광택, 사물 고유색, 뭉툭한 형태, 왼쪽 위 빛, 투명 바탕, 물건 하나 |
 | B 목표 실사 사진 | 블라인드 채널 썸네일형 | 사용자 첨부(블라인드 채널 목록: 피크닉 바구니, 접시, 리모컨, 헤드폰, 서류 가방, 안전모, 헤드셋, 팔레트) | 실사, 주제 물건 하나가 가운데에 크게, 얕은 심도로 배경은 흐린 실제 공간, 밝고 부드러운 자연광. 원으로 잘라도(홈 줄 앞 40px) 무엇인지 보이게 |
-| C 지정 아바타 | 3D 동물 캐릭터(토스 쇼핑 고양이·토스 병아리 느낌, 사용자 첨부) | 사용자 첨부(토스 쇼핑 홈 고양이, 토스 메시지 카드 병아리), [Toss 캐릭터](https://mobbin.com/screens/17ce389e-6dc0-4229-939e-0f89f754580f?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 우리만의 동물 7종(같은 캐릭터를 따라 그리지 않음). 통통한 몸, 크고 반짝이는 눈, 작은 코·부리, 반광택 3D, 정면, 머리와 어깨까지(원으로 잘려도 얼굴이 가운데). 바탕은 파스텔 단색(원으로 잘림). 옷·소품·글자 없음. 배우자 빈 자리는 같은 그림체의 회색 실루엣 1장 |
+| C 지정 아바타 | 없앰(2026-11-05). 3D 동물 캐릭터를 시험했지만 쓰지 않기로 함 | — | — |
 | D 작은 3D 아이콘 | 토스 카드 추천형 | [Toss 카드 추천](https://mobbin.com/screens/fee5ef80-0773-4dae-ae42-90f52ebd2fce?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 원 판 없이 3D 사물만(A와 같은 그림체), 줄 앞 32~40px, 사물 고유색 |
 
 ### 3. 코드에 붙이기
