@@ -100,7 +100,7 @@ export function P01JoinStart() {
     <QuestionLayout
       hero={
         hasIllustration('scene-invite') ? (
-          <Illustration name="scene-invite" className="hg-sceneart hg-sceneart--tall" />
+          <Illustration name="scene-invite" className="hg-sceneart hg-sceneart--tall" motion />
         ) : undefined
       }
       title={p?.inviter ? copy.invited(p.inviter) : copy.join}

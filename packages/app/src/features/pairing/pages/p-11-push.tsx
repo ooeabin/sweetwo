@@ -51,7 +51,7 @@ export function P11Push() {
     <QuestionLayout
       hero={
         hasIllustration('scene-clap') ? (
-          <Illustration name="scene-clap" className="hg-sceneart" />
+          <Illustration name="scene-clap" className="hg-sceneart" motion />
         ) : undefined
       }
       title={copy.pushTitle}
