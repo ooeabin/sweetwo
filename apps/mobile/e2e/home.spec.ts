@@ -68,6 +68,8 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
   await expect(page.getByText('이번 달 목표에 139만 원 모았어요')).toBeVisible();
+  // 축하 폭죽은 한 번 터지는 움직이는 그림(2026-11-05)
+  await expect(page.locator('img.hg-doneart.hg-motion')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();

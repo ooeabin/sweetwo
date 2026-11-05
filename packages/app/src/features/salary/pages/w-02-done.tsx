@@ -39,30 +39,33 @@ export function W02Done() {
       primary={{ label: copy.ok }}
       onSubmit={() => nav('/', { replace: true })}
       center
+      hero={<DoneMark art="celebrate" />}
     >
-      <DoneMark art="celebrate" />
-      {total > 0 && (
-        <InfoPlate
-          title={copy.doneSaved(readWon(total))}
-          rows={saved.map((l) => ({
-            label: name(l.goal_id),
-            value: readWon(l.actual ?? l.planned),
-          }))}
-        />
-      )}
-      {partnerList && p && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          onClick={() => nav(`/salary?who=${p.id}`)}
-        >
-          {copy.partnerProgress(
-            p.nickname ?? '',
-            partnerList.pay_check_line.length,
-            doneCount(partnerList),
-          )}
-        </button>
-      )}
+      {/* 그림 → 제목은 가운데, 저금 요약과 배우자 진행은 버튼 바로 위(2026-11-05) */}
+      <div className="hg-q__end">
+        {total > 0 && (
+          <InfoPlate
+            title={copy.doneSaved(readWon(total))}
+            rows={saved.map((l) => ({
+              label: name(l.goal_id),
+              value: readWon(l.actual ?? l.planned),
+            }))}
+          />
+        )}
+        {partnerList && p && (
+          <button
+            type="button"
+            className="hg-btn hg-btn--link"
+            onClick={() => nav(`/salary?who=${p.id}`)}
+          >
+            {copy.partnerProgress(
+              p.nickname ?? '',
+              partnerList.pay_check_line.length,
+              doneCount(partnerList),
+            )}
+          </button>
+        )}
+      </div>
     </QuestionLayout>
   );
 }
