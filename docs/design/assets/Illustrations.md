@@ -42,7 +42,7 @@
 | | `celebrate` | 512 | 축하(공통). 지금 쓰는 화면 없음(목표 달성은 목표 사진) |
 | `goal-photos/` | `{템플릿}-01` 21장 | 1200 | 목표 사진(→ 아래 ‘목표 사진 주제’). 직접 만든 목표는 없음(회색 기본 자리 + 깃발) |
 | `icons3d/` | `line-fixed` · `line-living` · `line-allowance` · `line-custom` | 160 | 월급 체크리스트 쓰는 돈 줄(고정지출 달력, 생활비 장바구니, 용돈 동전, 직접 추가 지갑) |
-| | `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금은 `line-custom`, 청약·주택대출은 `asset-real-estate` |
+| | `asset-cash` · `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금성은 `asset-cash`(밝은 민트 지갑, 2026-11-05), 청약·주택대출은 `asset-real-estate` |
 | | `care-gift` · `goal-deadline` | 160 | 캘린더 챙길 날, 목표 기한(월급날 `line-custom`, 월급 확인 `line-fixed`, 만기 `asset-deposit`) |
 
 - 3D 이모지: 바탕 투명, 그림이 칸의 약 85%(여백을 맞춰 잘라 줄임). 작은 3D 아이콘: 원 판 없이 사물만(`hg-lead--art`), 사물마다 색 계열 하나. 목표 사진: 실사, 주제가 가운데(16:10 배너·40px 원으로 잘려도 보이게).
