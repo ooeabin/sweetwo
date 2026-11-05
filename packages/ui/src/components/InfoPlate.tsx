@@ -36,7 +36,8 @@ export function InfoPlate({
  * 그림 파일이 없으면 큰 체크(옅은 오렌지 원 + 오렌지 체크)
  */
 export function DoneMark({ art = 'done-check' }: { art?: string } = {}) {
-  if (hasIllustration(art)) return <Illustration name={art} className="hg-doneart" />;
+  // 축하(폭죽)는 한 번 터지는 움직이는 그림(2026-11-05), 나머지는 톡 커짐
+  if (hasIllustration(art)) return <Illustration name={art} className="hg-doneart" motion />;
   return (
     <span className="hg-donemark" aria-hidden="true">
       <Icon name="check" size={24} />

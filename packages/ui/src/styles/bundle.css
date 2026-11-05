@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (8759e1c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (45234a6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -321,10 +321,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__hero > .hg-donemark { margin: 0; }
 /* 2026-11-05 완료, 장면 3D 그림(96px, 초대 장면은 3:4 120x160) */
 .hg-doneart { display: block; width: 96px; height: 96px; margin: var(--space-4) auto; object-fit: contain; }
-.hg-q__hero > .hg-doneart { margin: 0; }
+.hg-q__hero > .hg-doneart, .hg-q__hero > .hg-motion-wrap > .hg-doneart { margin: 0; }
 .hg-sceneart { display: block; width: 120px; height: 120px; object-fit: contain; }
 .hg-sceneart--tall { width: 120px; height: 160px; }
 @media (prefers-reduced-motion: no-preference) { .hg-doneart, .hg-sceneart { animation: hg-pop .32s ease-out both; } }
+/* 2026-11-05 W-02 끝 축하(폭죽): 그림 자체가 한 번 터지는 움직이는 WebP(assets/motion)라 톡 커짐은 끔. 동작 줄이기면 정지 그림(Illustration motion) */
+.hg-motion-wrap { display: contents; }
+.hg-motion { animation: none; }
 .hg-q--center > .hg-q__hero { margin-top: auto; }
 .hg-q--center > .hg-q__hero + .hg-q__head { margin-top: 0; }
 .hg-q--center > :last-child:not(.hg-q__foot) { margin-bottom: auto; }  /* 버튼 없는 안내(분석 중)도 세로 가운데 */
