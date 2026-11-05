@@ -37,7 +37,7 @@ export function F04bSold() {
     return (
       <QuestionLayout
         // 2026-11-03 끝난 걸 알 수 있게 완료 표시(O-60과 같음) + ‘목록으로 가기’
-        hero={<DoneMark />}
+        hero={<DoneMark art="done-sold" />}
         center
         title={copy.soldDone}
         primary={{ label: copy.toList }}

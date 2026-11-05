@@ -1,5 +1,5 @@
 import { fetchMe, invitePreview, joinSpace, type JoinResult } from '@sweetwo/api';
-import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { hasIllustration, Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -98,6 +98,11 @@ export function P01JoinStart() {
   const canJoin = !blocked;
   return (
     <QuestionLayout
+      hero={
+        hasIllustration('scene-invite') ? (
+          <Illustration name="scene-invite" className="hg-sceneart hg-sceneart--tall" />
+        ) : undefined
+      }
       title={p?.inviter ? copy.invited(p.inviter) : copy.join}
       help={blocked ? copy.errors[blocked] : copy.invitedHelp}
       center={false}

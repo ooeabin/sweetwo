@@ -13,6 +13,7 @@ export function A08SessionExpired() {
   return (
     <AuthLayout
       icon="lock"
+      art="status-lock"
       title={copy.expiredTitle}
       help={reason ? copy.expiredReason[reason] : undefined}
       actions={

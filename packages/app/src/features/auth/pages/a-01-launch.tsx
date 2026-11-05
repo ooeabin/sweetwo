@@ -111,6 +111,7 @@ export function A01Launch() {
     return (
       <AuthLayout
         icon="settings"
+        art="status-maintenance"
         title={copy.maintenanceTitle}
         help={
           maintenanceEnds
@@ -130,6 +131,7 @@ export function A01Launch() {
     return (
       <AuthLayout
         icon="download"
+        art="status-update"
         title={copy.updateTitle}
         help={copy.updateSub}
         actions={
@@ -167,6 +169,7 @@ export function A01Launch() {
     return (
       <AuthLayout
         icon="circle-alert"
+        art="status-error"
         title={copy.signupFailed}
         actions={
           <Button variant="secondary" block onClick={() => window.location.reload()}>
@@ -180,6 +183,7 @@ export function A01Launch() {
     return (
       <AuthLayout
         icon="link"
+        art="status-offline"
         title={copy.offlineNoSession}
         actions={
           <Button variant="secondary" block onClick={() => void decide()}>

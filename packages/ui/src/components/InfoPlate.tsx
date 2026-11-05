@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { hasIllustration, Illustration } from './Illustration';
 import { Icon } from './Icon';
 
 // 조건 요약 판(docs/design/components/InfoPlate.md). 회색 판 위 이름–값 두 열(dl). 줄 사이 선 없음.
@@ -30,8 +31,12 @@ export function InfoPlate({
   );
 }
 
-/** 완료 표시: 완료 화면 제목 아래 큰 체크(옅은 오렌지 원 + 오렌지 체크) */
-export function DoneMark() {
+/**
+ * 완료 표시: 3D 완료 그림(Illustrations `done-check`, 팔았어요는 `done-sold`, 96px, 2026-11-05).
+ * 그림 파일이 없으면 큰 체크(옅은 오렌지 원 + 오렌지 체크)
+ */
+export function DoneMark({ art = 'done-check' }: { art?: string } = {}) {
+  if (hasIllustration(art)) return <Illustration name={art} className="hg-doneart" />;
   return (
     <span className="hg-donemark" aria-hidden="true">
       <Icon name="check" size={24} />

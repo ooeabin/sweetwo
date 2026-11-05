@@ -1,6 +1,6 @@
 # Illustrations
 
-빈 상태 그림, 상태 이모지, 축하 이모지. 2026-11-02 새 스타일(반광택 3D 이모지)로 다시 만들기로 하고, **이전 그림 파일 22개는 모두 지움**(앱은 빈 자리로 동작, 아래 ‘지금 화면’). 새 그림은 힉스필드 결제가 되면 아래 ‘다시 만들기 계획’대로 만듦.
+빈 상태 그림, 상태 이모지, 축하 이모지, 목표 사진, 작은 3D 아이콘. 2026-11-02 새 스타일(반광택 3D 이모지)로 다시 만들기로 하고 이전 그림 22개를 지웠고, 2026-11-05 새 그림 53장을 넣음(아래 ‘지금 화면’).
 
 **목표 그림(2026-11-04 바뀜)**: 3D 목표 그림 21장(`goal-01-emergency` ~ `goal-21-wedding`)은 만들지 않음. 목표는 종류마다 **실사 지정 사진 1장**(아래 ‘지정 그림’, `goal-photos/{템플릿}-01.webp`, 21장)이고, 바꾸고 싶으면 사용자가 직접 올림(G-02p). 직접 만든 목표는 지정 사진 없이 회색 기본 자리(깃발). 목표 사진은 목표 카드·타일·상세 머리·목표 달성·홈 목표 줄 앞 칸(`Lead photo`)·목표 고르기(O-21, G-03a)·위젯에 씀. 사진마다 들어갈 주제는 아래 ‘목표 사진 주제’.
 
@@ -10,9 +10,9 @@
 
 - 쓰는 곳: 빈 상태 `hg-empty__art`(120px). `object-fit: contain`.
 - 확정한 그림을 손으로 다시 그리기, 색 바꾸기, 잘라 쓰기 금지.
-- 장면 그림(scene 묶음)과 장면 영상은 없앰(2026-10-19). W-04, P-11, P-01, H-T1의 장면 자리는 그림 없이 비워 둠(SceneMedia). A-02 로그인 첫 화면은 그 자리에 영어 워드마크(`Wordmark`)를 넣음.
+- 예전 장면 그림·영상은 없앰(2026-10-19). 2026-11-05 새 3D 장면 2장: P-11 `scene-clap`, P-01 `scene-invite`. W-04 끝(없앤 화면)·H-T1(아직 없는 화면)은 비워 둠(SceneMedia). A-02 로그인 첫 화면은 그 자리에 영어 워드마크(`Wordmark`)를 넣음.
 
-## 상태 이모지 (새로 만듦, 지금은 AuthLayout 아이콘 원)
+## 상태 이모지 (2026-11-05 들어옴, AuthLayout `art`)
 
 | 화면 | 이모지 | 움직임 |
 | --- | --- | --- |
@@ -28,13 +28,26 @@
 - 크기 96px(전체 화면 안내). 들어오면 `hg-auth__icon` 원 대신 그림만(원 판 없음).
 - 움직이는 그림 규칙과 만드는 법 → DESIGN.md ‘움직이는 그림’.
 
-## 지금 화면 (그림 파일 없음, 2026-11-02)
+## 지금 화면 (2026-11-05 새 그림 53장 넣음)
 
-- `Illustration`은 파일이 없으면 아무것도 그리지 않음. `hasIllustration(이름)`으로 빈 자리 모양을 고름.
-- 목표 카드·홈 목표 줄·목표 고르기(O-21): 목표 사진 파일이 생기기 전에는 회색 기본 자리 + 템플릿 아이콘(`goalIcon`). 직접 만든 목표만 깃발.
-- 빈 상태(EmptyState): 그림 없이 글자만. 온보딩 결과(O-60)는 그림 자리에 완료 표시(DoneMark, 옅은 오렌지 원 + 체크).
-- 상태 화면(AuthLayout)은 지금처럼 Phosphor 아이콘 원.
-- 새 그림 파일을 `packages/ui/src/assets/illustrations/{이름}.webp`에 넣으면 코드 수정 없이 바로 보임.
+파일은 `packages/ui/src/assets/`에 이름대로 넣으면 코드 수정 없이 보임. 원본(1024~2048px)은 저장소 밖(힉스필드), 앱에는 webp만.
+
+| 폴더 | 파일 | 크기 | 쓰는 곳 |
+| --- | --- | --- | --- |
+| `illustrations/` | `empty-plate` | 512 | 빈 상태(EmptyState) |
+| | `status-lock` · `status-faceid` · `status-fingerprint` · `status-hourglass` · `status-update` · `status-maintenance` · `status-offline` · `status-error` | 512 | 상태 화면(AuthLayout `art`): A-08, A-06, A-03, A-01 |
+| | `done-check` · `done-sold` | 512 | 완료(DoneMark): O-60, W-02 끝 / F-04b 팔았어요 |
+| | `busy-file` | 512 | 처리 중(ProcessingState): S-18 내보내기 |
+| | `scene-clap` · `scene-invite`(3:4, 576×768) | 512 | 장면: P-11 합류 완료 / P-01 초대받은 사람 첫 화면 |
+| | `celebrate` | 512 | 축하(공통). 지금 쓰는 화면 없음(목표 달성은 목표 사진) |
+| `goal-photos/` | `{템플릿}-01` 21장 | 1200 | 목표 사진(→ 아래 ‘목표 사진 주제’). 직접 만든 목표는 없음(회색 기본 자리 + 깃발) |
+| `icons3d/` | `line-fixed` · `line-living` · `line-allowance` · `line-custom` | 160 | 월급 체크리스트 쓰는 돈 줄(고정지출 달력, 생활비 장바구니, 용돈 동전, 직접 추가 지갑) |
+| | `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금은 `line-custom`, 청약·주택대출은 `asset-real-estate` |
+| | `care-gift` · `goal-deadline` | 160 | 캘린더 챙길 날, 목표 기한(월급날 `line-custom`, 월급 확인 `line-fixed`, 만기 `asset-deposit`) |
+
+- 3D 이모지: 바탕 투명, 그림이 칸의 약 85%(여백을 맞춰 잘라 줄임). 작은 3D 아이콘: 원 판 없이 사물만(`hg-lead--art`), 사물마다 색 계열 하나. 목표 사진: 실사, 주제가 가운데(16:10 배너·40px 원으로 잘려도 보이게).
+- 하단 탭 아이콘은 3D로 바꾸지 않음(고른 탭이 보이게 단색 Phosphor 그대로, 2026-11-05).
+- 그림이 없을 때(파일을 지우면): `Illustration`은 아무것도 안 그리고, 상태 화면은 아이콘 원, 완료는 오렌지 체크 원, 줄 앞은 Phosphor 아이콘으로 돌아감.
 
 ## 다시 만들기 계획 (2026-11-04 순서 확정, 힉스필드는 번호마다 사람이 허락한 뒤에만 돌림)
 
@@ -44,11 +57,11 @@
 | --- | --- | --- | --- |
 | 1 | 레퍼런스 확정(아래 2번 표). A, B, D 확정(2026-11-04), C 지정 아바타는 없앰(2026-11-05) | 0 | 생성 없음 |
 | 2 | 시험: 3D 4장(자물쇠, Face ID 웃는 얼굴, 빈 접시, 축하) + 목표 실사 2장(집, 여행 가방). 모델·품질 비교, 한 장 크레딧 확인, 기준 그림 1장 고름 | 6 | 허락 1 |
-| 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 4(`scene-plan`, `scene-joined`, `scene-invite`(3:4), `scene-wedding`) | 13 | 허락 2 |
+| 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 2(`scene-clap`(월급 계획 끝·합류 완료·결혼일 축하를 박수 하나로), `scene-invite`(3:4)) | 11 | 허락 2 |
 | 4 | 목표 실사 사진 나머지 19장(‘목표 사진 주제’ 표) | 19 | 허락 3 |
 | 5 | ~~지정 아바타 7 + 배우자 빈 자리 1~~ 없앰(2026-11-05). 프로필은 올린 사진 → 소셜 로그인 프로필 사진 → 이름 첫 글자, 배우자 빈 자리는 사람 아이콘 | 0 | 생성 없음 |
-| 6 | 작은 3D 아이콘: 월급 체크리스트 줄 약 8, 하단 탭 4, 자산 종류 약 10, 챙길 날 4, 캘린더 돈 일정 4 | 약 30 | 허락 5 |
-| 7 | 앱에 넣기: 바탕 지우기 → 512px webp(150KB 이하). AuthLayout·SceneMedia·DoneMark·ProcessingState·Lead가 그림을 받게 코드, 문서, PR | 0 | 생성 없음 |
+| 6 | ~~작은 3D 아이콘~~ 끝(2026-11-05): 17장(월급 줄 4, 자산·부채 11, 챙길 날 1, 목표 기한 1). 하단 탭은 단색 그대로, 챙길 날은 한 종류라 선물 1장 | 17 | 허락 5 |
+| 7 | ~~앱에 넣기~~ 끝(2026-11-05): webp(3D 512, 아이콘 160, 사진 1200), AuthLayout `art`, DoneMark `art`, ProcessingState `art`, Lead `art3d`, P-01·P-11 장면 | 0 | 생성 없음 |
 | 8 | 움직이는 그림: 상태 7 + 축하 1. 힉스필드 3D 변환(GLB) → Blender(`bpy`) 1~2초 렌더 → 움직이는 WebP(100~300KB). 모래시계 1개로 먼저 시험 | 8 | 허락 6 |
 | 9 | 스플래시 | 0~1 | 나중 |
 

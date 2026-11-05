@@ -58,5 +58,6 @@ export * from './components/DataTable';
 export * from './components/CommandPalette';
 export { ArtPick } from './components/ArtPick';
 export { goalPhotoArt } from './components/preset-art';
+export { assetIcon3d, icon3d } from './components/icons3d';
 export { Band } from './components/Band';
 export { StatBlock } from './components/StatBlock';

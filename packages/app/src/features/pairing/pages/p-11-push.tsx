@@ -1,5 +1,5 @@
 import { registerPushDevice } from '@sweetwo/api';
-import { Button, QuestionLayout } from '@sweetwo/ui';
+import { Button, hasIllustration, Illustration, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
@@ -49,6 +49,11 @@ export function P11Push() {
   };
   return (
     <QuestionLayout
+      hero={
+        hasIllustration('scene-clap') ? (
+          <Illustration name="scene-clap" className="hg-sceneart" />
+        ) : undefined
+      }
       title={copy.pushTitle}
       help={copy.pushHelp}
       primary={{ label: copy.pushAllow, loading: busy }}

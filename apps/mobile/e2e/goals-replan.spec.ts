@@ -491,7 +491,8 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   expect(db.storage).toEqual([`/storage/v1/object/photos/${path}`]);
   await expect(page.locator('.hg-goalhero__photo img')).toBeVisible();
   await page.goto('/goals');
-  await expect(page.locator('.hg-goaltile__photo img')).toHaveCount(1);
+  // 2026-11-05 기본 목표는 지정 사진, 직접 만든 목표는 올린 사진(모두 그림)
+  await expect(page.locator('.hg-goaltile__photo img')).toHaveCount(3);
 
   // 2026-11-05 ‘사진 지우기’ 대신 사진 바꾸기에서 ‘기본 사진’을 골라 되돌림
   await page.goto('/goals/goal-camp');

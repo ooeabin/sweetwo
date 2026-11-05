@@ -10,11 +10,12 @@ import {
   Button,
   EmptyState,
   Icon,
+  icon3d,
+  type IconName,
   Lead,
   ListRow,
   SectionHeader,
   StatBlock,
-  type IconName,
 } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,14 @@ import { startCareAdd } from './y-07-care-add';
 import { reviewMonth } from '../data';
 
 // 2026-11-04 줄 앞 종류 아이콘(24 Y-01 6번): 챙길 날 선물(together 판), 돈 일정은 종류마다
+// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
+const MONEY_ART: Record<MoneyKind, string> = {
+  payday: 'line-custom',
+  review: 'line-fixed',
+  deadline: 'goal-deadline',
+  goal: 'goal-deadline',
+  maturity: 'asset-deposit',
+};
 const MONEY_ICON: Record<MoneyKind, IconName> = {
   payday: 'wallet',
   review: 'calendar-check',
@@ -76,6 +85,8 @@ export function Y01CareList() {
     sub: string;
     care: boolean;
     icon: IconName;
+    /** 3D 아이콘 이름(2026-11-05) */
+    art: string;
     to: string;
   };
   const rows: Row[] = [
@@ -91,6 +102,7 @@ export function Y01CareList() {
               : formatDateWeekday(x.date),
           care: true,
           icon: 'gift' as IconName,
+          art: 'care-gift',
           to: `/calendar/day/${x.care.id}`,
         }))),
     ...(filter === 'care'
@@ -104,6 +116,7 @@ export function Y01CareList() {
             sub: formatDateWeekday(x.date),
             care: false,
             icon: MONEY_ICON[x.kind],
+            art: MONEY_ART[x.kind],
             to: l.to,
           };
         })),
@@ -205,7 +218,13 @@ export function Y01CareList() {
                   return (
                     <ListRow
                       key={r.key}
-                      lead={<Lead icon={r.icon} tone={r.care ? 'together' : undefined} />}
+                      lead={
+                        <Lead
+                          icon={r.icon}
+                          tone={r.care ? 'together' : undefined}
+                          art3d={icon3d(r.art)}
+                        />
+                      }
                       label={r.label}
                       sub={r.sub}
                       value={

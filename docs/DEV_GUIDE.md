@@ -505,7 +505,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 파일 이름: `<종류>-<이름>.webp` (예: `goal-04-home.webp`)
 - 크기 상한: 그림 150KB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
 - 그림은 `<Illustration name>`, 빈 상태는 `<EmptyState>`로만 씀. 파일을 직접 import하지 않음
-- 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 지금은 그림 없이 영역만 잡아 비워 둠
+- 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 그림이 없는 화면은 영역만 잡아 비워 둠. 그림이 있는 P-01·P-11은 `Illustration`(`scene-invite`, `scene-clap`)을 QuestionLayout `hero`에(2026-11-05). 그림 파일: `packages/ui/src/assets/illustrations`(3D 이모지), `goal-photos`(목표 사진), `icons3d`(작은 3D 아이콘, `icon3d`·`assetIcon3d`)
 
 ### 디자인 시스템 갱신 절차
 
