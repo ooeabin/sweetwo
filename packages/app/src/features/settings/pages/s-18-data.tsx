@@ -253,7 +253,7 @@ export function S18Data() {
   const busy = (
     <ProcessingState
       icon="download"
-      art={hasIllustration('busy-file') ? <Illustration name="busy-file" /> : undefined}
+      art={hasIllustration('busy-file') ? <Illustration name="busy-file" motion /> : undefined}
       title={copy.exporting}
       sub={copy.exportingSub}
     />
