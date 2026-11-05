@@ -18,7 +18,7 @@ export const icon3d = (name: string | null | undefined): string | undefined =>
 
 /** 자산·부채 묶음(core asset.ts 그룹 key) → 3D 아이콘 이름 */
 const ASSET: Record<string, string> = {
-  cash: 'line-custom',
+  cash: 'asset-cash', // 2026-11-05 밝은 민트 지갑(직접 추가 줄·월급날의 갈색 지갑과 구분)
   deposit: 'asset-deposit',
   subscription: 'asset-real-estate',
   invest: 'asset-invest',
