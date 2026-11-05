@@ -33,6 +33,37 @@ export async function shrinkPhoto(file: Blob, longEdge = 1600): Promise<Blob> {
   }
 }
 
+/** 가운데를 정사각으로 잘라 size px JPEG로 다시 그림(EXIF 위치 정보 없음). 소셜 계정 프로필 사진(25 S-11e)에 씀 */
+export async function squarePhoto(file: Blob, size = 512): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    if (!side) throw new Error('empty');
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    c.getContext('2d')?.drawImage(
+      img,
+      (img.naturalWidth - side) / 2,
+      (img.naturalHeight - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      size,
+      size,
+    );
+    return await new Promise<Blob>((ok, no) =>
+      c.toBlob((b) => (b ? ok(b) : no(new Error('encode'))), 'image/jpeg', 0.9),
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 /** 사진 경로들 → 서명 주소(1시간, 50분마다 새로) */
 export function usePhotoUrls(paths: (string | null | undefined)[]) {
   const list = [...new Set(paths.filter((p): p is string => !!p))].sort();

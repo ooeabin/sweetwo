@@ -754,7 +754,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar-edit { position: relative; display: inline-block; }
 .hg-avatar-edit__btn { position: absolute; right: -2px; bottom: -2px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--hairline), var(--shadow-1); border: 0; cursor: pointer; }
 .hg-avatar-edit.is-drop .hg-avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
-/* ArtPick(2026-11-03): 지정 그림 고르기. 프로필 지정 아바타(S-11e, 원), 목표 지정 사진(G-02p, 둥근 네모). 그림 파일이 없으면 회색 빈 자리 + 아이콘 */
+/* ArtPick(2026-11-03): 지정 그림 고르기. 목표 지정 사진(G-02p, 둥근 네모). 원 모양(--round)은 2026-11-05 프로필 지정 아바타를 없애 지금은 안 씀. 그림 파일이 없으면 회색 빈 자리 + 아이콘 */
 .hg-artpick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .hg-artpick__item { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--hairline-soft); color: var(--stone); cursor: pointer; }
 .hg-artpick--round .hg-artpick__item { border-radius: var(--radius-full); }

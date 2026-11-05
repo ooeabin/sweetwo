@@ -153,7 +153,7 @@
 | widget\_tapped | 위젯 누름 → 딥링크 진입 | widget, element, landing\_screen, app\_was\_running |
 | peer\_stats\_viewed | F-08 지표 카드 표시 (출시 후) | metric(net\_worth / saving\_rate / saving\_amount / emergency\_months / debt\_ratio), group\_level [확인 필요], source(public / app) |
 | peer\_stats\_consent\_changed | F-08 참여 안내, 설정 S-18 통계 참여 토글 (출시 후) | state(on / off), entry(f08 / settings), couple\_both\_on |
-| profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’ | action(set / remove) |
+| profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’, 소셜 계정 사진을 처음 가져왔을 때(2026-11-05) | action(set / remove / imported) |
 | account\_delete\_requested | S-18b 삭제 확인 | couple\_state, exported\_before |
 | account\_restored | 유예 중 재로그인 ‘취소하고 계속 쓰기’ (서버) | days\_pending, was\_linked |
 | data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |

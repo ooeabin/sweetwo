@@ -45,6 +45,10 @@ export interface MemDb {
   checklistDone?: Record<string, unknown>[];
   /** 저장소에 올린 파일 경로 */
   storage?: string[];
+  /** 소셜 계정 프로필 사진(함수 social-avatar가 돌려줄 그림, 25 S-11e). 없으면 204 */
+  socialPhoto?: Buffer;
+  /** 함수 social-avatar를 부른 횟수 */
+  socialCalls?: number;
   /** 붙인 사진(목표·기록) */
   photos?: { goal_id?: string; care_record_id?: string; path: string; sort: number }[];
   /** 다른 수입(O-35b), 상여금(O-35) */
@@ -302,6 +306,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           'Content-Range': `*/${n}`,
         },
       });
+    }
+    // 소셜 계정 프로필 사진 받기(함수 social-avatar, 25 S-11e ‘처음 사진’)
+    if (path === '/functions/v1/social-avatar') {
+      db.socialCalls = (db.socialCalls ?? 0) + 1;
+      const cors = { 'Access-Control-Allow-Origin': '*' };
+      return db.socialPhoto
+        ? route.fulfill({
+            status: 200,
+            headers: { ...cors, 'Content-Type': 'application/octet-stream' },
+            body: db.socialPhoto,
+          })
+        : route.fulfill({ status: 204, headers: cors });
     }
     // 저장소(S-11e 프로필 사진): 올리기, 서명 주소, 사진 받기, 지우기
     if (path.startsWith('/storage/v1/')) {
@@ -916,17 +932,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
               user_id: u.id,
               path: u.avatar_path ?? null,
               updated_at: u.avatar_updated_at ?? null,
-              // 지정 아바타(2026-11-03): 가입 때 무작위, 테스트는 a01
-              preset: u.avatar_preset ?? 'a01',
             })),
         );
-      if (fn === 'set_avatar_preset') {
-        const b = body();
-        Object.assign(db.me, {
-          avatar_preset: b.p_preset,
-          avatar_path: null,
-          avatar_updated_at: new Date().toISOString(),
-        });
+      if (fn === 'mark_social_avatar_checked') {
+        db.me.avatar_social_checked_at ??= new Date().toISOString();
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'set_avatar') {

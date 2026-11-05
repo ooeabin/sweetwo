@@ -1,8 +1,9 @@
 import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
 import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
-import { avatarArt, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { session } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
@@ -37,14 +38,15 @@ export function S11Me() {
         )
       : copy.undecidedValue;
 
-  // 올린 사진(지우기 대상)과 보여 줄 그림(올린 사진 → 지정 아바타 그림 → 첫 글자, 2026-11-03)
+  // 프로필 사진(직접 올린 사진 또는 처음 가져온 소셜 계정 사진). 없으면 이름 첫 글자(2026-11-05 지정 아바타 없앰)
   const photo = avatars.data?.photos[me.id] ?? null;
-  const shown = photo ?? avatarArt(avatars.data?.presets[me.id]) ?? null;
+  const shown = photo;
   const clearPhoto = async () => {
     if (!me.space_id) return;
     try {
       await removeAvatar(me.space_id, me.id);
       await qc.invalidateQueries({ queryKey: qk.avatars });
+      track('profile_photo_changed', { action: 'remove' });
       toast(copy.photoRemoved);
     } catch {
       toast(copy.failed);
@@ -59,7 +61,7 @@ export function S11Me() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
-      {/* 1번 프로필 사진: 올린 사진 → 지정 아바타 그림 → 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로(지정 아바타로 돌아감) */}
+      {/* 1번 프로필 사진: 사진 → 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로(이름 첫 글자로, 소셜 사진을 다시 가져오지 않음) */}
       <div className="hg-row" style={{ gap: 'var(--space-4)', alignItems: 'center' }}>
         <span
           className="hg-avatar-edit"
