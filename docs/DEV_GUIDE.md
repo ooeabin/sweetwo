@@ -962,6 +962,10 @@ supabase/
 - iOS: Apple 개발자 계정(법인), App Store Connect API 키로 CI가 TestFlight 업로드. 서명은 Xcode 자동 관리 대신 CI용 인증서·프로비저닝(Environments production에만)
 - Android: Google Play 앱 서명, 업로드 키는 Environments production에만. AAB로 올림
 - 업데이트는 스토어만. 코드 바꿔 넣기(라이브 업데이트) 쓰지 않음(심사 규정, 보안)
+- 실행 화면(스플래시, 2026-11-05, 04 브랜드): 흰 바탕(다크는 surface 다크 `#121315`) 가운데 심볼 96pt(dp), 글자 없음. 플러그인 없이 네이티브만, 최소 표시 시간 없음(A-01).
+  - iOS: `LaunchScreen.storyboard`가 심볼(`Splash.imageset`, 96pt 1x·2x·3x)을 가운데 그대로(`contentMode=center`), 바탕은 색 에셋 `SplashBackground`(라이트·다크).
+  - Android 12 이상: 시스템 스플래시(`windowSplashScreenBackground` = `@color/splash_background`, `values-night`에 다크, `windowSplashScreenAnimatedIcon` = `drawable-*dpi/splash_icon`(288dp 캔버스 가운데 심볼 96dp)). 그 아래 버전: `drawable-port|land(-night)-*dpi/splash.png`.
+  - 다시 만들 때: 심볼(`packages/ui/src/assets/brand/symbol.png`)에서 같은 크기로 다시 뽑음. 색 값은 tokens.css surface와 맞춤(네이티브 리소스라 토큰을 못 읽음)
 - 단계 출시: App Store 단계적 출시(7일), Google Play 비율 출시 10% → 50% → 100%
 - 심사: 첫 제출은 출시 2주 전. 심사용 계정과 흉내 데이터 공간, 개인정보 라벨·데이터 보안 양식
 
