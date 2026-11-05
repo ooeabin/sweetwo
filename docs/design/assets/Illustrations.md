@@ -43,6 +43,7 @@
 | | `celebrate` | 512 | 축하: W-02 끝(월급 체크 다 했어요, 2026-11-05). 목표 달성은 목표 사진 |
 | `motion/` | `celebrate` | 192, 41장 30fps, 한 번 재생 | 움직이는 그림(`Illustration motion`): W-02 끝 폭죽 터짐. 같은 이름 정지 그림의 조각(원뿔, 리본, 조각 4)만 움직이고 마지막 장면은 정지 그림과 같음. 만드는 법은 아래 8번 |
 | | `scene-clap` · `scene-invite` · `done-check` | 240(초대장 240×320, 체크 192), 37~40장 30fps, 한 번 재생 | P-11 박수(두 손이 두 번 맞부딪힘), P-01 초대장(빈 봉투가 튀고 편지가 쑥 올라옴), O-60 완료(원판이 튀고 체크가 그려짐) (2026-11-05). 가려 있던 부분(뒷손, 빈 봉투 안쪽, 빈 원판)만 AI로 채우고 보이는 부분은 정지 그림 그대로. `scene-clap` 정지 그림은 이때 뒷손을 다시 뽑은 그림으로 바꿈(손가락 4 + 엄지, 손목 없음) |
+| | `busy-file` · `done-sold` | 192, 48장 반복 / 38장 한 번 | S-18 처리 중(종이가 폴더 안으로 들어갔다 나옴, 1.6초 반복. 위로 올리면 가려진 아래를 채워야 해서 절단선이 생겨 아래로만 움직임), F-04b 팔았어요(동전 더미가 튀고 기댄 동전 하나가 떨어져 자리 잡음, 그림자는 닿은 뒤에) (2026-11-05) |
 | `goal-photos/` | `{템플릿}-01` 21장 | 1200 | 목표 사진(→ 아래 ‘목표 사진 주제’). 직접 만든 목표는 없음(회색 기본 자리 + 깃발) |
 | `icons3d/` | `line-fixed` · `line-living` · `line-allowance` · `line-custom` | 160 | 월급 체크리스트 쓰는 돈 줄(고정지출 달력, 생활비 장바구니, 용돈 동전, 직접 추가 지갑) |
 | | `asset-cash` · `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금성은 `asset-cash`(밝은 민트 지갑, 2026-11-05), 청약·주택대출은 `asset-real-estate` |
