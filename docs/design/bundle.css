@@ -330,6 +330,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q--center > .hg-q__hero { margin-top: auto; }
 .hg-q--center > .hg-q__hero + .hg-q__head { margin-top: 0; }
 .hg-q--center > :last-child:not(.hg-q__foot) { margin-bottom: auto; }  /* 버튼 없는 안내(분석 중)도 세로 가운데 */
+/* 2026-11-05 가운데 배치에서 버튼 바로 위로 내리는 묶음(W-02 끝 저금 요약): 그림 + 제목은 남은 자리 세로 가운데 */
+.hg-q--center > .hg-q__end { display: flex; flex-direction: column; gap: var(--space-3); margin-top: auto; margin-bottom: 0; }
+.hg-q--center > .hg-q__end + .hg-q__foot { margin-top: 0; }
 /* 넓은 창(데스크톱 앱 등 768px 이상, Meetup식): 위 바 = 왼쪽 워드마크 + 가운데 진행, 아래 바 = 왼쪽 ‘이전’ + 오른쪽 Enter 안내와 주 버튼(글자 길이만큼).
    헤더 꺾쇠(hg-q__nav)는 숨김. 좁은 창은 위 규칙 그대로(꺾쇠, 꽉 찬 주 버튼) */
 .hg-qbar, .hg-q__prev, .hg-q__hint { display: none; }
