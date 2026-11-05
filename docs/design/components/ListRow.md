@@ -16,4 +16,4 @@
 - 앞 아이콘은 20px `ink`, 보조 1줄은 지금 설정을 사실로(“월요일 오전 9시”).
 - 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 값 17px, 보조 14px `slate`. 토스형 구역(StatBlock 아래)에서만.
 
-- 3D 아이콘 앞 칸(2026-11-05): `Lead art3d={icon3d(이름)}`이면 원 판 없이 사물만(`hg-lead--art`, 40px 칸을 꽉 채움, 영역 색 없음). 월급 체크리스트 쓰는 돈 줄(`line-*`, 저금 줄은 그 목표 종류의 지정 사진 `Lead photo`), 캘린더 돈 일정·챙길 날(`goal-deadline`, `asset-deposit`, `line-*`, `care-gift`). 파일이 없으면 `icon`.
+- 3D 아이콘 앞 칸(2026-11-05): `Lead art3d={icon3d(이름)}`이면 원 판 없이 사물만(`hg-lead--art`, 40px 칸을 꽉 채움, 영역 색 없음). 월급 체크리스트 쓰는 돈 줄(`line-*`, 저금 줄은 그 목표 사진 `Lead photo`(올린 사진 → 종류 지정 사진)), 캘린더 돈 일정·챙길 날(`goal-deadline`, `asset-deposit`, `line-*`, `care-gift`). 파일이 없으면 `icon`.

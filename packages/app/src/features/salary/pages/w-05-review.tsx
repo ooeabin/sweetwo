@@ -35,7 +35,7 @@ export function W05Review() {
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const joint = space.data.salary_mode === 'joint';
   const goalName = goalLineName(goals.data, personName, joint);
-  const goalTemplate = (id: string | null) => goals.data.find((g) => g.id === id)?.template ?? null;
+  const goalOf = (id: string | null) => goals.data.find((g) => g.id === id) ?? null;
   const left = list ? waiting(list) : [];
   if (empty.current === null) empty.current = !!list && left.length === 0;
   if (empty.current) return <Navigate to="/salary" replace />;
@@ -65,7 +65,7 @@ export function W05Review() {
               name={lineName(l, goalName, personName, joint)}
               personName={personName}
               meId={meId}
-              lead={<LineLead line={l} goalTemplate={goalTemplate} />}
+              lead={<LineLead line={l} goalOf={goalOf} />}
               onSkip={() => skip(l)}
             />
           ))}

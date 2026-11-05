@@ -264,7 +264,7 @@ export function H01Home() {
             personName={personName}
             meId={meId}
             joint={joint}
-            goalTemplate={(id) => goals.data.find((g) => g.id === id)?.template ?? null}
+            goalOf={(id) => goals.data.find((g) => g.id === id) ?? null}
             go={go}
             locked={space.data.couple_state === 'unlink_pending'}
           />

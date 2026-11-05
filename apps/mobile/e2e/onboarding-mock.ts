@@ -923,7 +923,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         else if (db.space) db.space.wedding_budget = b.p_budget;
         return json(route, 'applied');
       }
-      if (fn === 'space_avatars' || fn === 'space_people_art')
+      if (fn === 'space_avatars')
         return json(
           route,
           [db.me, db.partner]

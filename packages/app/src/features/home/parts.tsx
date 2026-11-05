@@ -115,7 +115,7 @@ export function SalaryCard({
   partnerName,
   partnerStarter = false,
   goalName,
-  goalTemplate,
+  goalOf,
   personName,
   meId,
   joint,
@@ -129,7 +129,7 @@ export function SalaryCard({
   partnerStarter?: boolean;
   goalName: (id: string | null) => string;
   /** 저금 줄 목표 템플릿(아이콘) */
-  goalTemplate: (id: string | null) => string | null;
+  goalOf: (id: string | null) => { template: string; photo_path: string | null } | null;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
   joint: boolean;
@@ -184,7 +184,7 @@ export function SalaryCard({
                 name={lineName(l, goalName, personName, joint)}
                 personName={personName}
                 meId={meId}
-                lead={<LineLead line={l} goalTemplate={goalTemplate} />}
+                lead={<LineLead line={l} goalOf={goalOf} />}
               />
             ))}
           </div>
