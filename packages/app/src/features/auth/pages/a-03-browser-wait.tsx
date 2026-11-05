@@ -72,7 +72,8 @@ export function A03BrowserWait() {
   return (
     <AuthLayout
       icon={openFailed ? 'circle-alert' : 'loader-circle'}
-      art={openFailed ? 'status-error' : 'status-hourglass'}
+      // 기다리는 동안은 다른 로딩과 같은 도는 아이콘(2026-11-05 모래시계 없앰), 실패면 오류 그림
+      art={openFailed ? 'status-error' : undefined}
       busy={!openFailed}
       title={openFailed ? copy.browserFailed : copy.waitTitle}
       help={openFailed ? undefined : copy.waitHelp}
