@@ -454,10 +454,11 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   // 2026-11-04 모든 목표: 그 종류 지정 사진 1장(파일 전에는 빈 자리), 바꾸려면 직접 올림
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
-  const picks = page.getByRole('list', { name: '기본 사진' }).getByRole('button');
+  // 2026-11-05 칸 아래 이름: [사진 올리기][기본 사진]
+  const picks = page.getByRole('list', { name: '고를 수 있는 사진' }).getByRole('button');
   await expect(picks).toHaveCount(2);
-  await expect(picks.first()).toHaveAccessibleName('내 사진 올리기');
-  await expect(page.getByRole('button', { name: '기본 사진 1' })).toHaveAttribute(
+  await expect(picks.first()).toHaveAccessibleName('사진 올리기');
+  await expect(page.getByRole('button', { name: '기본 사진' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
@@ -470,8 +471,14 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await expect(page.getByRole('heading', { name: '목표 사진' }).first()).toBeVisible();
   await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
-  // 직접 만든 목표는 지정 사진 없이 올리기 칸만
-  await expect(page.getByRole('list', { name: '기본 사진' }).getByRole('button')).toHaveCount(1);
+  // 직접 만든 목표: 지정 사진이 없어 기본 사진은 회색 빈 자리
+  await expect(
+    page.getByRole('list', { name: '고를 수 있는 사진' }).getByRole('button'),
+  ).toHaveCount(2);
+  await expect(page.getByRole('button', { name: '기본 사진' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await axe(page);
   await page
     .getByLabel('사진 고르기', { exact: true })
@@ -486,9 +493,20 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   await page.goto('/goals');
   await expect(page.locator('.hg-goaltile__photo img')).toHaveCount(1);
 
+  // 2026-11-05 ‘사진 지우기’ 대신 사진 바꾸기에서 ‘기본 사진’을 골라 되돌림
   await page.goto('/goals/goal-camp');
-  await page.getByRole('button', { name: '사진 지우기' }).click();
-  await expect(page.getByText('사진을 지웠어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '사진 지우기' })).toHaveCount(0);
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
+  await expect(page.getByRole('button', { name: '내 사진' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(page.getByText('내 사진', { exact: true })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '기본 사진' }).click();
+  await page.getByRole('button', { name: '저장하기' }).click();
+  await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/goals\/goal-camp$/);
   expect(db.goals.find((g) => g.id === 'goal-camp')?.photo_path).toBeNull();
   await expect(page.locator('.hg-goalhero__photo.is-empty')).toBeVisible();
 });

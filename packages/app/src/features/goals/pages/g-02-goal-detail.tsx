@@ -4,7 +4,6 @@ import {
   qk,
   restoreTrash,
   setGoalOwner,
-  setGoalPhoto,
   trashGoals,
   updateGoal,
   type Goal,
@@ -102,16 +101,6 @@ export function G02GoalDetail() {
         label: copy.undo,
         onClick: () => void setGoalOwner(g.id, null, g.priority).then(refresh),
       });
-    } catch {
-      toast(copy.loadFailed);
-    }
-  };
-  // 목표 사진 지우기 → 회색 기본 그림(프로필 사진처럼 되돌리기 없음)
-  const clearPhoto = async () => {
-    try {
-      await setGoalPhoto(g.id, null);
-      await qc.invalidateQueries({ queryKey: qk.goals });
-      toast(copy.photoRemoved);
     } catch {
       toast(copy.loadFailed);
     }
@@ -323,16 +312,7 @@ export function G02GoalDetail() {
               </span>
             )}
           </div>
-          {g.photo_path && i.canEdit && (
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => void clearPhoto()}
-            >
-              {copy.photoRemove}
-            </button>
-          )}
+          {/* 2026-11-05 ‘사진 지우기’ 없앰: 사진 바꾸기(G-02p)에서 ‘기본 사진’을 골라 되돌림 */}
           {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
         </div>

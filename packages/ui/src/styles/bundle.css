@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (e999e65). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (1ef9b0f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -757,6 +757,10 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar-edit.is-drop .hg-avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
 /* ArtPick(2026-11-03): 지정 그림 고르기. 목표 지정 사진(G-02p, 둥근 네모). 원 모양(--round)은 2026-11-05 프로필 지정 아바타를 없애 지금은 안 씀. 그림 파일이 없으면 회색 빈 자리 + 아이콘 */
 .hg-artpick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.hg-artpick > li { display: grid; gap: var(--space-2); align-content: start; }
+/* 2026-11-05 칸 아래 이름(사진 올리기, 내 사진, 기본 사진) */
+.hg-artpick__name { font: 400 13px/18px var(--font-sans); color: var(--slate); text-align: center; }
+.hg-artpick__item[aria-pressed="true"] + .hg-artpick__name { color: var(--ink); font-weight: 600; }
 .hg-artpick__item { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--hairline-soft); color: var(--stone); cursor: pointer; }
 .hg-artpick--round .hg-artpick__item { border-radius: var(--radius-full); }
 .hg-artpick__item img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
