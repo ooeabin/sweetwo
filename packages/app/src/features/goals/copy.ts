@@ -361,13 +361,12 @@ export const copy = {
   // 목표 사진(22 G-02 ‘목표 사진’, 2026-11-03 모든 목표). 올리기 규칙·문구는 프로필 사진(25 S-11e)과 같음
   photoTitle: '목표 사진', // [확인 필요]
   photoChange: '사진 바꾸기',
-  photoRemove: '사진 지우기',
-  photoRemoved: '사진을 지웠어요', // [확인 필요]
   photoSaved: '사진을 바꿨어요',
-  // 2026-11-03 지정 사진(G-02p)
-  presetTitle: '기본 사진', // [확인 필요] 화면 읽기용 목록 이름
-  presetItem: (n: number) => `기본 사진 ${n + 1}`, // [확인 필요] 화면 읽기용
-  uploadTitle: '내 사진 올리기', // [확인 필요] 화면 읽기용(격자 맨 앞 카메라 칸)
+  // G-02p 칸(2026-11-05 칸 아래 이름, ‘사진 지우기’ 대신 ‘기본 사진’ 고르기)
+  photoList: '고를 수 있는 사진', // [확인 필요] 화면 읽기용 목록 이름
+  uploadTitle: '사진 올리기', // [확인 필요]
+  photoMine: '내 사진', // [확인 필요]
+  photoDefault: '기본 사진', // [확인 필요]
   photoSubmit: '저장하기',
   photoPreviewNow: '고른 사진 미리보기', // [확인 필요] 화면 읽기용
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
