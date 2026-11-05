@@ -7,22 +7,13 @@ const fail = (e: { message?: string } | null) => {
 };
 const BUCKET = 'avatars';
 
-/**
- * 같은 공간 사람 그림(2026-11-03). photos: 사람 id → 올린 사진 주소(없으면 목록에 없음),
- * presets: 사람 id → 지정 아바타 이름(a01…). 화면은 올린 사진 → 지정 아바타 그림 → 첫 글자 순서로 보여 줌
- */
-export async function fetchAvatars(): Promise<{
-  photos: Record<string, string>;
-  presets: Record<string, string>;
-}> {
-  const { data, error } = await supabase().rpc('space_people_art');
+/** 같은 공간 사람 프로필 사진: 사람 id → 서명 주소(없으면 목록에 없음 → 이름 첫 글자). 2026-11-05 지정 아바타 없앰 */
+export async function fetchAvatars(): Promise<{ photos: Record<string, string> }> {
+  const { data, error } = await supabase().rpc('space_avatars');
   fail(error);
-  const all = data ?? [];
-  const presets: Record<string, string> = {};
-  for (const r of all) if (r.preset) presets[r.user_id] = r.preset;
-  const rows = all.filter((r): r is typeof r & { path: string } => !!r.path);
+  const rows = (data ?? []).filter((r): r is typeof r & { path: string } => !!r.path);
   const photos: Record<string, string> = {};
-  if (!rows.length) return { photos, presets };
+  if (!rows.length) return { photos };
   const signed = await supabase()
     .storage.from(BUCKET)
     .createSignedUrls(
@@ -35,17 +26,23 @@ export async function fetchAvatars(): Promise<{
     // 바뀐 사진을 바로 보이게 시각을 붙임
     if (url) photos[r.user_id] = `${url}&v=${encodeURIComponent(r.updated_at ?? '')}`;
   });
-  return { photos, presets };
+  return { photos };
 }
 
-/** 지정 아바타 고르기(S-11e). 올린 사진이 있었으면 서버가 경로를 비우고 파일은 여기서 지움 */
-export async function setAvatarPreset(spaceId: string | null, userId: string, preset: string) {
-  const { error } = await supabase().rpc('set_avatar_preset', { p_preset: preset });
+/**
+ * 소셜 계정(카카오·구글) 프로필 사진 받기(2026-11-05, 25 S-11e ‘처음 사진’). 함수 social-avatar가 내 로그인 정보의 사진을 받아 줌.
+ * 사진이 없으면 null. 함수 호출 자체가 실패하면 throw(다음에 다시)
+ */
+export async function fetchSocialAvatar(): Promise<Blob | null> {
+  const { data, error } = await supabase().functions.invoke('social-avatar', { method: 'POST' });
+  if (error) throw new AuthCallError('network');
+  return data instanceof Blob && data.size > 0 ? data : null;
+}
+
+/** 소셜 사진 가져오기를 시도했다고 남김(한 번만) */
+export async function markSocialAvatarChecked() {
+  const { error } = await supabase().rpc('mark_social_avatar_checked');
   fail(error);
-  if (spaceId)
-    await supabase()
-      .storage.from(BUCKET)
-      .remove([`${spaceId}/${userId}.jpg`]);
 }
 
 /** 정사각 512px JPEG 올리기 → 경로 저장 */
@@ -59,11 +56,21 @@ export async function uploadAvatar(spaceId: string, userId: string, jpeg: Blob) 
   fail(error);
 }
 
-/** 사진 지우기 → 이름 첫 글자 */
+/** 사진 지우기 → 이름 첫 글자(소셜 사진을 다시 가져오지 않음) */
 export async function removeAvatar(spaceId: string, userId: string) {
   const { error } = await supabase().rpc('set_avatar', {});
   fail(error);
   await supabase()
     .storage.from(BUCKET)
     .remove([`${spaceId}/${userId}.jpg`]);
+}
+
+/** 소셜 사진을 가져올 차례인지: 부부 공간이 있고, 사진이 없고, 아직 시도하지 않았을 때(25 S-11e) */
+export async function needsSocialAvatar(): Promise<boolean> {
+  const { data, error } = await supabase()
+    .from('app_user')
+    .select('space_id, avatar_path, avatar_social_checked_at')
+    .maybeSingle();
+  fail(error);
+  return !!data?.space_id && !data.avatar_path && !data.avatar_social_checked_at;
 }

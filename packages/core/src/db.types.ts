@@ -354,6 +354,7 @@ export type Database = {
           app_seen_at: string | null
           avatar_path: string | null
           avatar_preset: string
+          avatar_social_checked_at: string | null
           avatar_updated_at: string | null
           birth_day: number | null
           birth_month: number | null
@@ -398,6 +399,7 @@ export type Database = {
           app_seen_at?: string | null
           avatar_path?: string | null
           avatar_preset?: string
+          avatar_social_checked_at?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
           birth_month?: number | null
@@ -441,6 +443,7 @@ export type Database = {
           app_seen_at?: string | null
           avatar_path?: string | null
           avatar_preset?: string
+          avatar_social_checked_at?: string | null
           avatar_updated_at?: string | null
           birth_day?: number | null
           birth_month?: number | null
@@ -2841,6 +2844,7 @@ export type Database = {
           app_seen_at: string | null
           avatar_path: string | null
           avatar_preset: string
+          avatar_social_checked_at: string | null
           avatar_updated_at: string | null
           birth_day: number | null
           birth_month: number | null
@@ -3048,6 +3052,7 @@ export type Database = {
         Returns: string
       }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
+      mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
       move_goal: {

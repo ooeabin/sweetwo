@@ -29,6 +29,10 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'profile_photo_changed';
+      props: { action: 'set' | 'remove' | 'imported' };
+    }
+  | {
       name: 'onboarding_resumed';
       props: { screen_id: string; hours_since_last: number };
     }

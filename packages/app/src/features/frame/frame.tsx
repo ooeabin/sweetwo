@@ -4,7 +4,7 @@ import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
-import { usePeopleArt } from '../../shared/person';
+import { usePeopleArt, useSocialAvatar } from '../../shared/person';
 import { useCacheInfo } from '../../shared/offline-cache';
 import { useOnline } from '../../shared/online';
 import {
@@ -51,6 +51,8 @@ export function MainFrame(
   // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime(데스크톱 OS 알림)
   useNotiRealtime(me.data?.id);
   usePushRegistration(me.data?.id);
+  // 소셜 계정 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-05)
+  useSocialAvatar(me.data?.id, me.data?.space_id);
   const unread = useHasUnread();
   const panel = useNotiPanel();
   const narrow = useNarrow();

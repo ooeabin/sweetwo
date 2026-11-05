@@ -97,28 +97,46 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
 });
 
-test('지정 아바타(S-11e, 2026-11-03): 올리기 칸 + 7개, 고르고 저장하기, 올린 사진 대신', async ({ page }) => {
+test('소셜 계정 사진(S-11e 처음 사진, 2026-11-05): 처음 한 번 가져와 저장, 지우면 다시 안 가져옴', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
-  db.me.avatar_path = `space-1/${db.me.id}.jpg`;
-  await page.goto('/settings/me/photo');
+  db.socialPhoto = PNG;
+  await page.goto('/settings/me');
+  await expect(page.getByRole('img', { name: '찬우' })).toBeVisible();
+  expect(db.me.avatar_path).toBe(`space-1/${db.me.id}.jpg`);
+  expect(db.storage).toEqual([`/storage/v1/object/avatars/space-1/${db.me.id}.jpg`]);
+  expect(db.me.avatar_social_checked_at).toBeTruthy();
+  expect(db.socialCalls).toBe(1);
+  // 지정 아바타 고르기 격자 없음, 올리기만
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await heading(page, '프로필 사진');
-  const picks = page.getByRole('list', { name: '기본 그림' }).getByRole('button');
-  await expect(picks).toHaveCount(8);
-  await expect(picks.first()).toHaveAccessibleName('내 사진 올리기');
-  // 올린 사진이 있으면 고른 지정 아바타 없음
-  await expect(page.locator('.hg-artpick__item[aria-pressed="true"]')).toHaveCount(0);
+  await expect(page.locator('.hg-artpick')).toHaveCount(0);
+  await expect(page.getByLabel('사진 고르기', { exact: true })).toBeAttached();
   await axe(page);
-  await page.getByRole('button', { name: '기본 그림 3' }).click();
-  await expect(page.getByRole('button', { name: '기본 그림 3' })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByRole('button', { name: '저장하기' }).click();
-  await expect(page.getByText('사진을 바꿨어요')).toBeVisible();
-  await expect(page).toHaveURL(/\/settings\/me$/);
-  expect(db.me.avatar_preset).toBe('a03');
-  expect(db.me.avatar_path).toBeNull();
-  // 그림 파일이 생기기 전에는 첫 글자
+
+  await page.goto('/settings/me');
+  await page.getByRole('button', { name: '사진 지우기' }).click();
+  await expect(page.getByText('사진을 지웠어요')).toBeVisible();
+  await page.reload();
   await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  expect(db.me.avatar_path).toBeNull();
+  expect(db.socialCalls).toBe(1);
+});
+
+test('소셜 계정 사진이 없으면(애플, 기본 사진) 시도만 남기고 이름 첫 글자', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/settings/me');
+  await expect.poll(() => db.me.avatar_social_checked_at).toBeTruthy();
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  expect(db.me.avatar_path ?? null).toBeNull();
+  await page.reload();
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  expect(db.socialCalls).toBe(1);
 });
 
 test('사진 고지: 배우자 합류 전이고 이름도 없으면 ‘배우자와 나만’', async ({ page }) => {
