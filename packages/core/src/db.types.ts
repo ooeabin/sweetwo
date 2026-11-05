@@ -3051,8 +3051,8 @@ export type Database = {
         Args: { p_owner: string; p_space: string; p_today?: string }
         Returns: string
       }
-      mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
+      mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
       move_goal: {
