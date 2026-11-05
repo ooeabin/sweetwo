@@ -36,10 +36,10 @@
 | --- | --- | --- | --- |
 | `illustrations/` | `empty-plate` | 512 | 빈 상태(EmptyState) |
 | | `status-lock` · `status-faceid` · `status-fingerprint` · `status-hourglass` · `status-update` · `status-maintenance` · `status-offline` · `status-error` | 512 | 상태 화면(AuthLayout `art`): A-08, A-06, A-03, A-01 |
-| | `done-check` · `done-sold` | 512 | 완료(DoneMark): O-60, W-02 끝 / F-04b 팔았어요 |
+| | `done-check` · `done-sold` | 512 | 완료(DoneMark): O-60 / F-04b 팔았어요 |
 | | `busy-file` | 512 | 처리 중(ProcessingState): S-18 내보내기 |
 | | `scene-clap` · `scene-invite`(3:4, 576×768) | 512 | 장면: P-11 합류 완료 / P-01 초대받은 사람 첫 화면 |
-| | `celebrate` | 512 | 축하(공통). 지금 쓰는 화면 없음(목표 달성은 목표 사진) |
+| | `celebrate` | 512 | 축하: W-02 끝(월급 체크 다 했어요, 2026-11-05). 목표 달성은 목표 사진 |
 | `goal-photos/` | `{템플릿}-01` 21장 | 1200 | 목표 사진(→ 아래 ‘목표 사진 주제’). 직접 만든 목표는 없음(회색 기본 자리 + 깃발) |
 | `icons3d/` | `line-fixed` · `line-living` · `line-allowance` · `line-custom` | 160 | 월급 체크리스트 쓰는 돈 줄(고정지출 달력, 생활비 장바구니, 용돈 동전, 직접 추가 지갑) |
 | | `asset-cash` · `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금성은 `asset-cash`(밝은 민트 지갑, 2026-11-05), 청약·주택대출은 `asset-real-estate` |

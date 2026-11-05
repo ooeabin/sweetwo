@@ -12,6 +12,7 @@ import {
 } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
+import { usePhotoUrls } from '../../shared/photo';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useCheck } from './data';
@@ -34,17 +35,21 @@ const LINE_ART = {
   custom: 'line-custom',
 } as const;
 
-/** 줄 앞 아이콘(2026-11-03): 저금은 그 목표 종류의 지정 사진(없으면 목표 아이콘), 쓰는 돈은 종류 3D 아이콘(2026-11-05) */
+/** 줄 앞 아이콘(2026-11-03): 저금은 그 목표 사진(올린 사진 → 종류 지정 사진 → 목표 아이콘), 쓰는 돈은 종류 3D 아이콘(2026-11-05) */
 export function LineLead({
   line,
-  goalTemplate,
+  goalOf,
 }: {
   line: Pick<PayCheckLine, 'kind' | 'goal_id'>;
-  goalTemplate: (id: string | null) => string | null;
+  /** 저금 줄의 목표(종류, 올린 사진 경로) */
+  goalOf: (id: string | null) => { template: string; photo_path: string | null } | null;
 }) {
+  const g = line.kind === 'saving' ? goalOf(line.goal_id) : null;
+  // 올린 사진(서명 주소) → 그 종류 지정 사진 → 목표 아이콘(2026-11-05)
+  const uploaded = usePhotoUrls([g?.photo_path])[g?.photo_path ?? ''];
   if (line.kind === 'saving') {
-    const t = goalTemplate(line.goal_id) ?? 'custom';
-    return <Lead icon={goalIcon(t)} photo={goalPhotoArt(defaultGoalPreset(t))} />;
+    const t = g?.template ?? 'custom';
+    return <Lead icon={goalIcon(t)} photo={uploaded ?? goalPhotoArt(defaultGoalPreset(t))} />;
   }
   const k = line.kind as keyof typeof LINE_ICON;
   return <Lead icon={LINE_ICON[k]} art3d={icon3d(LINE_ART[k])} />;

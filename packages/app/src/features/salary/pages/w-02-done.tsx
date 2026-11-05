@@ -40,7 +40,7 @@ export function W02Done() {
       onSubmit={() => nav('/', { replace: true })}
       center
     >
-      <DoneMark />
+      <DoneMark art="celebrate" />
       {total > 0 && (
         <InfoPlate
           title={copy.doneSaved(readWon(total))}
