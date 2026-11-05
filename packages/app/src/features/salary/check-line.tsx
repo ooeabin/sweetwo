@@ -1,6 +1,15 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { formatDot2, todayKst } from '@sweetwo/core';
-import { BottomSheet, Button, Lead, TransferRow, goalIcon, type IconName } from '@sweetwo/ui';
+import { defaultGoalPreset, formatDot2, todayKst } from '@sweetwo/core';
+import {
+  BottomSheet,
+  Button,
+  goalIcon,
+  goalPhotoArt,
+  icon3d,
+  type IconName,
+  Lead,
+  TransferRow,
+} from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { toast } from '../../shared/toast';
@@ -17,7 +26,15 @@ const LINE_ICON = {
   custom: 'wallet',
 } as const satisfies Record<string, IconName>;
 
-/** 줄 앞 아이콘(2026-11-03): 저금은 목표 아이콘, 쓰는 돈은 종류 아이콘. 아이콘은 나중에 새로 만들 예정(Illustrations ‘나중 과제’) */
+/** 쓰는 돈 줄 3D 아이콘(2026-11-05, Illustrations D): 파일이 없으면 위 Phosphor 아이콘 */
+const LINE_ART = {
+  fixed: 'line-fixed',
+  living: 'line-living',
+  allowance: 'line-allowance',
+  custom: 'line-custom',
+} as const;
+
+/** 줄 앞 아이콘(2026-11-03): 저금은 그 목표 종류의 지정 사진(없으면 목표 아이콘), 쓰는 돈은 종류 3D 아이콘(2026-11-05) */
 export function LineLead({
   line,
   goalTemplate,
@@ -25,15 +42,12 @@ export function LineLead({
   line: Pick<PayCheckLine, 'kind' | 'goal_id'>;
   goalTemplate: (id: string | null) => string | null;
 }) {
-  return (
-    <Lead
-      icon={
-        line.kind === 'saving'
-          ? goalIcon(goalTemplate(line.goal_id) ?? 'custom')
-          : LINE_ICON[line.kind as keyof typeof LINE_ICON]
-      }
-    />
-  );
+  if (line.kind === 'saving') {
+    const t = goalTemplate(line.goal_id) ?? 'custom';
+    return <Lead icon={goalIcon(t)} photo={goalPhotoArt(defaultGoalPreset(t))} />;
+  }
+  const k = line.kind as keyof typeof LINE_ICON;
+  return <Lead icon={LINE_ICON[k]} art3d={icon3d(LINE_ART[k])} />;
 }
 
 /**

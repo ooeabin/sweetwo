@@ -11,8 +11,6 @@ import {
   AmountInput,
   ChoiceCards,
   Chip,
-  Icon,
-  assetIcon,
   DateWheel,
   Field,
   QuestionLayout,
@@ -27,6 +25,7 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetSteps, useAssetDraft } from './draft';
+import { AssetArt } from '../asset-art';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ymdText = (v: { y: number; m: number; d: number }) => `${v.y}-${pad(v.m)}-${pad(v.d)}`;
@@ -145,7 +144,7 @@ export function AssetAddRoute() {
               aria-pressed={draft.grp === x.key}
               onClick={() => set({ grp: x.key, kind: null })}
             >
-              <Icon name={assetIcon(x.key)} />
+              <AssetArt group={x.key} />
               {x.name}
             </button>
           ))}

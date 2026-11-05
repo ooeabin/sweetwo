@@ -49,12 +49,13 @@ export function ListRow({
   );
 }
 
-/** 행 앞 아이콘 칸(hg-lead): 영역 색 원 + 아이콘, 또는 3D 그림 */
+/** 행 앞 아이콘 칸(hg-lead): 영역 색 원 + 아이콘, 3D 그림, 또는 원 판 없는 3D 아이콘(art3d) */
 export function Lead({
   tone,
   icon,
   art,
   photo,
+  art3d,
 }: {
   tone?: 'together' | 'family' | 'goal' | 'safety' | 'invest';
   icon?: IconName;
@@ -62,13 +63,25 @@ export function Lead({
   art?: ReactNode;
   /** 사진 주소(목표 사진, 원 안을 꽉 채움, 2026-11-04) */
   photo?: string;
+  /** 작은 3D 아이콘 주소(icon3d, 2026-11-05). 원 판 없이 사물만, 있으면 icon 대신 */
+  art3d?: string;
 }) {
+  const flat = !photo && !art && !!art3d;
   return (
     <span
-      className={cx('hg-lead', tone && `hg-lead--${tone}`, photo && 'hg-lead--photo')}
+      className={cx(
+        'hg-lead',
+        !flat && tone && `hg-lead--${tone}`,
+        photo && 'hg-lead--photo',
+        flat && 'hg-lead--art',
+      )}
       aria-hidden="true"
     >
-      {photo ? <img src={photo} alt="" /> : (art ?? (icon ? <Icon name={icon} /> : null))}
+      {photo ? (
+        <img src={photo} alt="" />
+      ) : (
+        (art ?? (art3d ? <img src={art3d} alt="" /> : icon ? <Icon name={icon} /> : null))
+      )}
     </span>
   );
 }

@@ -1,5 +1,14 @@
 import { dday, isFestive, monthGrid, type MoneyKind } from '@sweetwo/core';
-import { Band, Button, Calendar, Lead, ListRow, type CalDay, type IconName } from '@sweetwo/ui';
+import {
+  Band,
+  Button,
+  type CalDay,
+  Calendar,
+  icon3d,
+  type IconName,
+  Lead,
+  ListRow,
+} from '@sweetwo/ui';
 import { Fragment, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
@@ -18,6 +27,14 @@ const MONEY_SHORT: Record<MoneyKind, string> = {
   deadline: copy.short.deadline,
   goal: copy.short.goal,
   maturity: copy.short.maturity,
+};
+// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
+const MONEY_ART: Record<MoneyKind, string> = {
+  payday: 'line-custom',
+  review: 'line-fixed',
+  deadline: 'goal-deadline',
+  goal: 'goal-deadline',
+  maturity: 'asset-deposit',
 };
 const MONEY_ICON: Record<MoneyKind, IconName> = {
   payday: 'wallet',
@@ -143,7 +160,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key="band"
-          lead={<Lead icon="calendar-check" />}
+          lead={<Lead icon="calendar-check" art3d={icon3d('line-fixed')} />}
           label={copy.reviewBand(reviewMonth(band.end))}
           sub={copy.go.review}
           onClick={() => nav('/salary/review')}
@@ -155,7 +172,7 @@ export function Y04Calendar() {
       rows.push(
         <Fragment key={x.care.id}>
           <ListRow
-            lead={<Lead icon="gift" tone="together" />}
+            lead={<Lead icon="gift" tone="together" art3d={icon3d('care-gift')} />}
             label={x.care.name}
             sub={
               x.care.budget > 0
@@ -184,7 +201,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key={`${x.kind}-${i}`}
-          lead={<Lead icon={MONEY_ICON[x.kind]} />}
+          lead={<Lead icon={MONEY_ICON[x.kind]} art3d={icon3d(MONEY_ART[x.kind])} />}
           label={l.label}
           sub={copy.goSub[x.kind]}
           onClick={() => nav(l.to)}

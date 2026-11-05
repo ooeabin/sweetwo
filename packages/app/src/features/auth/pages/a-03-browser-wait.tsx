@@ -72,6 +72,7 @@ export function A03BrowserWait() {
   return (
     <AuthLayout
       icon={openFailed ? 'circle-alert' : 'loader-circle'}
+      art={openFailed ? 'status-error' : 'status-hourglass'}
       busy={!openFailed}
       title={openFailed ? copy.browserFailed : copy.waitTitle}
       help={openFailed ? undefined : copy.waitHelp}
