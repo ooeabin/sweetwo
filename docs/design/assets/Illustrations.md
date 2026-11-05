@@ -18,7 +18,7 @@
 | --- | --- | --- |
 | A-06 Face ID 켜기 | 얼굴 인식 틀이 있는 웃는 얼굴(지문 기기용 3D 지문 따로) | 1번 |
 | A-08 다시 로그인 | 3D 자물쇠 | 1번 |
-| A-03 로그인 대기 | 3D 모래시계 | 반복 |
+| A-03 로그인 대기 | 없음(다른 로딩과 같은 도는 아이콘, 2026-11-05 모래시계 없앰) | 아이콘만 돎 |
 | A-01 업데이트 필요 | 반짝이는 새 상자 또는 로켓 | 1번 |
 | A-01 점검 중 | 3D 공구(렌치와 스패너) | 1번 |
 | A-01 오프라인 | 끊어진 와이파이 구름 | 1번 |
@@ -35,7 +35,7 @@
 | 폴더 | 파일 | 크기 | 쓰는 곳 |
 | --- | --- | --- | --- |
 | `illustrations/` | `empty-plate` | 512 | 빈 상태(EmptyState) |
-| | `status-lock` · `status-faceid` · `status-fingerprint` · `status-hourglass` · `status-update` · `status-maintenance` · `status-offline` · `status-error` | 512 | 상태 화면(AuthLayout `art`): A-08, A-06, A-03, A-01 |
+| | `status-lock` · `status-faceid` · `status-fingerprint` · `status-update` · `status-maintenance` · `status-offline` · `status-error` | 512 | 상태 화면(AuthLayout `art`): A-08, A-06, A-01, A-03 실패(`status-error`) |
 | | `done-check` · `done-sold` | 512 | 완료(DoneMark): O-60 / F-04b 팔았어요 |
 | | `busy-file` | 512 | 처리 중(ProcessingState): S-18 내보내기 |
 | | `scene-clap` · `scene-invite`(3:4, 576×768) | 512 | 장면: P-11 합류 완료 / P-01 초대받은 사람 첫 화면 |
@@ -57,12 +57,12 @@
 | --- | --- | --- | --- |
 | 1 | 레퍼런스 확정(아래 2번 표). A, B, D 확정(2026-11-04), C 지정 아바타는 없앰(2026-11-05) | 0 | 생성 없음 |
 | 2 | 시험: 3D 4장(자물쇠, Face ID 웃는 얼굴, 빈 접시, 축하) + 목표 실사 2장(집, 여행 가방). 모델·품질 비교, 한 장 크레딧 확인, 기준 그림 1장 고름 | 6 | 허락 1 |
-| 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`, `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 2(`scene-clap`(월급 계획 끝·합류 완료·결혼일 축하를 박수 하나로), `scene-invite`(3:4)) | 11 | 허락 2 |
+| 3 | 3D 이모지 나머지: 상태 6(`status-fingerprint`, `status-hourglass`(2026-11-05 없앰), `status-update`, `status-maintenance`, `status-offline`, `status-error`), 처리 중 1(`busy-file`), 완료 2(`done-check`, `done-sold`), 장면 2(`scene-clap`(월급 계획 끝·합류 완료·결혼일 축하를 박수 하나로), `scene-invite`(3:4)) | 11 | 허락 2 |
 | 4 | 목표 실사 사진 나머지 19장(‘목표 사진 주제’ 표) | 19 | 허락 3 |
 | 5 | ~~지정 아바타 7 + 배우자 빈 자리 1~~ 없앰(2026-11-05). 프로필은 올린 사진 → 소셜 로그인 프로필 사진 → 이름 첫 글자, 배우자 빈 자리는 사람 아이콘 | 0 | 생성 없음 |
 | 6 | ~~작은 3D 아이콘~~ 끝(2026-11-05): 17장(월급 줄 4, 자산·부채 11, 챙길 날 1, 목표 기한 1). 하단 탭은 단색 그대로, 챙길 날은 한 종류라 선물 1장 | 17 | 허락 5 |
 | 7 | ~~앱에 넣기~~ 끝(2026-11-05): webp(3D 512, 아이콘 160, 사진 1200), AuthLayout `art`, DoneMark `art`, ProcessingState `art`, Lead `art3d`, P-01·P-11 장면 | 0 | 생성 없음 |
-| 8 | 움직이는 그림: 상태 7 + 축하 1. 힉스필드 3D 변환(GLB) → Blender(`bpy`) 1~2초 렌더 → 움직이는 WebP(100~300KB). 모래시계 1개로 먼저 시험 | 8 | 허락 6 |
+| 8 | 움직이는 그림: 상태 7 + 축하 1. 모래시계로 시험(2026-11-05): 3D 변환(GLB)은 유리·모래가 망가져 못 씀, 2D 모래 흐름은 부자연스러움 → A-03 모래시계는 없애고 도는 아이콘으로. 나머지는 정할 일 | 8 | 허락 6 |
 | 9 | 스플래시 | 0~1 | 나중 |
 
 - 크레딧이 모자라면 6번(작은 아이콘)부터 줄임. 원본(1024px)은 저장소 밖(디자인 폴더)에.
