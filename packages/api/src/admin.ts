@@ -5,7 +5,9 @@ import {
   AdminMe,
   AdminReveal,
   AdminUserDetail,
+  NoticeAudience,
   type AdminRole,
+  type NoticeTarget,
   type Json,
   type Tables,
 } from '@sweetwo/core';
@@ -43,6 +45,9 @@ const KNOWN = [
   'self_lock',
   'reauth_required',
   'super_min',
+  'no_audience',
+  'too_many',
+  'bad_target',
   // 로그인 링크(Supabase Auth 오류 코드)
   'over_email_send_rate_limit',
   'email_address_not_authorized',
@@ -191,11 +196,7 @@ export async function fetchAdminAccessData(accessId: string): Promise<AdminAcces
   return AdminAccessData.parse(data);
 }
 export type AdminAction =
-  | 'sign_out_all'
-  | 'delete_request'
-  | 'rights_access'
-  | 'rights_fix'
-  | 'rights_delete';
+  'sign_out_all' | 'delete_request' | 'rights_access' | 'rights_fix' | 'rights_delete';
 export async function adminAccountAction(
   id: string,
   action: AdminAction,
@@ -355,6 +356,44 @@ export async function adminSaveNotice(n: {
   });
   fail(error);
   return data as string;
+}
+/** 대상 조건(부부 상태, 앱 버전, 가입 주차). 초안·승인 대기만, 약관 개정은 빈 조건만 */
+export async function adminSetNoticeTarget(id: string, target: NoticeTarget) {
+  const { error } = await supabase().rpc('admin_set_notice_target', {
+    p_id: id,
+    p_target: target as Json,
+  });
+  fail(error);
+}
+/** 대상 수(숫자만). 조건을 바꿀 때마다 다시 셈 */
+export async function fetchNoticeAudience(a: {
+  kind: string;
+  platforms: string[];
+  target: NoticeTarget;
+  email: boolean;
+}): Promise<NoticeAudience> {
+  const { data, error } = await supabase().rpc('admin_notice_audience', {
+    p_kind: a.kind,
+    p_platforms: a.platforms,
+    p_target: a.target as Json,
+    p_email: a.email,
+  });
+  fail(error);
+  return NoticeAudience.parse(data);
+}
+/** 초안 → 승인 요청(대상 0명이면 서버가 no_audience) */
+export async function adminRequestNotice(id: string) {
+  const { error } = await supabase().rpc('admin_request_notice', { p_id: id });
+  fail(error);
+}
+/** 테스트 발송: 메일 공지(약관 개정·장애 고지)를 내 관리자 메일로만 */
+export async function adminTestNoticeMail(n: { kind: string; title: string; body: string }) {
+  const { error } = await supabase().rpc('admin_test_notice_mail', {
+    p_kind: n.kind,
+    p_title: n.title,
+    p_body: n.body,
+  });
+  fail(error);
 }
 export async function adminEndNotice(id: string) {
   const { error } = await supabase().rpc('admin_end_notice', { p_id: id });

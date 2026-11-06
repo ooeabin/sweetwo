@@ -1316,6 +1316,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
+      // 공지(AD-10): 대상 조건은 서버가 봄. 흉내는 쌓인 공지를 그대로
+      if (fn === 'my_notices') return json(route, db.notices);
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
       if (fn === 'my_mail_bounced') return json(route, db.mailBounced);

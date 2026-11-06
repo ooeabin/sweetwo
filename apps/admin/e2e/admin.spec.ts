@@ -60,6 +60,8 @@ interface Db {
   inquiryStatus: string;
   messages: { author: string; body: string; created_at: string }[];
   notices: Record<string, unknown>[];
+  /** 공지 대상 수(admin_notice_audience) 흉내: 조건을 받아 숫자를 돌려줌 */
+  audience: (b: Record<string, unknown>) => { target: number; excluded: number; blocked: number };
   kindNames: Record<string, unknown>[];
   approvals: {
     id: string;
@@ -93,6 +95,10 @@ async function mock(
     inquiryStatus: 'received',
     messages: [{ author: 'user', body: '연결이 안 돼요', created_at: '2026-10-17T01:00:00Z' }],
     notices: [],
+    audience: (b) =>
+      b.p_email
+        ? { target: 3214, excluded: 412, blocked: 412 }
+        : { target: 3214, excluded: 0, blocked: 0 },
     kindNames: [],
     approvals: [
       {
@@ -414,6 +420,34 @@ async function mock(
           });
         return json(route, `n${db.notices.length}`);
       }
+      case 'admin_notice_audience':
+        return json(route, db.audience(body()));
+      case 'admin_set_notice_target': {
+        const b = body();
+        const n = db.notices.find((x) => x.id === b.p_id);
+        if (n) n.target = b.p_target;
+        return json(route, null);
+      }
+      case 'admin_request_notice': {
+        const n = db.notices.find((x) => x.id === body().p_id);
+        if (n) {
+          n.status = 'requested';
+          db.approvals.push({
+            id: `ap${db.approvals.length + 1}`,
+            kind: 'notice_publish',
+            summary: `공지 게시: ${String(n.title)}`,
+            payload: {},
+            requested_by: ADMIN.email,
+            requested_at: '2026-10-18T00:00:00Z',
+            status: 'requested',
+            decided_by: null,
+            decided_at: null,
+          });
+        }
+        return json(route, null);
+      }
+      case 'admin_test_notice_mail':
+        return json(route, null);
       case 'admin_set_notice_email': {
         const b = body();
         const n = db.notices.find((x) => x.id === b.p_id);
@@ -793,8 +827,68 @@ test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저
   await expect(page.getByRole('row', { name: /저장 기능 점검/ })).toContainText('승인 대기');
   expect(db.rpc.find((r) => r.fn === 'admin_save_notice')?.body).toMatchObject({
     p_kind: 'maintenance',
-    p_request: true,
+    p_request: false,
     p_starts_at: '2026-10-20T05:00:00.000Z',
+  });
+  // 대상 조건이 없으면 조건 저장 없이 승인 요청(서버가 대상 0명인지 다시 봄)
+  expect(db.rpc.some((r) => r.fn === 'admin_set_notice_target')).toBe(false);
+  expect(db.rpc.find((r) => r.fn === 'admin_request_notice')?.body).toMatchObject({ p_id: 'n1' });
+});
+
+test('공지 대상(AD-10 2·4·6번): 조건 바꾸면 대상 수 다시 셈, 0명이면 승인 요청 막음, 미리보기', async ({
+  page,
+}) => {
+  const db = await mock(page, { roles: ['ops'] });
+  db.audience = (b) => {
+    const t = b.p_target as { couple_states?: string[]; version_below?: string };
+    if (t.couple_states?.includes('unlink_pending')) return { target: 0, excluded: 0, blocked: 0 };
+    return { target: t.version_below ? 120 : 3214, excluded: 0, blocked: 0 };
+  };
+  await page.goto('/notices');
+  await page.getByRole('button', { name: '새 공지' }).click();
+  const form = page.getByRole('region', { name: '새 공지' });
+  const target = page.getByRole('region', { name: '대상', exact: true });
+  await form.getByLabel('종류').selectOption('maintenance');
+  await form.getByLabel('제목').fill('새 버전으로 업데이트해 주세요');
+  await form.getByLabel('내용').fill('1.4.0부터 저장이 빨라져요');
+  await form.getByLabel('시작').fill('2026-10-20T14:00');
+  await form.getByLabel('끝').fill('2026-10-20T16:00');
+  const counts = target.getByRole('group', { name: '대상 수' });
+  await expect(counts).toContainText('3,214명');
+  await target.getByLabel('이 버전보다 낮은 앱만').fill('1.4');
+  await expect(target.getByText('버전은 1.4.0처럼 숫자 세 개로 넣어 주세요')).toBeVisible();
+  await expect(form.getByRole('button', { name: '승인 요청' })).toBeDisabled();
+  await target.getByLabel('이 버전보다 낮은 앱만').fill('1.4.0');
+  await expect(counts).toContainText('120명');
+  expect(db.rpc.filter((r) => r.fn === 'admin_notice_audience').at(-1)?.body).toMatchObject({
+    p_kind: 'maintenance',
+    p_target: { version_below: '1.4.0' },
+    p_email: false,
+  });
+  // 부부 상태 ‘해제 대기’만 → 0명이면 승인 요청 막음
+  await target.getByRole('button', { name: '해제 대기' }).click();
+  await expect(counts.locator('.hg-admin__stat').first()).toHaveText(/^대상\s*0명$/);
+  await expect(target.getByText('대상이 0명이라 승인을 요청할 수 없어요')).toBeVisible();
+  await expect(form.getByRole('button', { name: '승인 요청' })).toBeDisabled();
+  await target.getByRole('button', { name: '해제 대기' }).click();
+  await target.getByRole('button', { name: '혼자 쓰기' }).click();
+  await target.getByLabel('가입 주차(까지)').fill('4');
+  await expect(form.getByRole('button', { name: '승인 요청' })).toBeEnabled();
+  // 미리보기: 홈 상단 띠(점검은 메일 없음)
+  const preview = page.getByRole('region', { name: '미리보기' });
+  await expect(preview.locator('.hg-banner--line').first()).toContainText(
+    '새 버전으로 업데이트해 주세요',
+  );
+  await expect(preview.getByText('이메일', { exact: true })).toHaveCount(0);
+  await expect(form.getByRole('button', { name: '테스트 발송' })).toHaveCount(0);
+  await axe(page);
+  await form.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByRole('row', { name: /새 버전으로 업데이트해 주세요/ })).toContainText(
+    '승인 대기',
+  );
+  expect(db.rpc.find((r) => r.fn === 'admin_set_notice_target')?.body).toMatchObject({
+    p_id: 'n1',
+    p_target: { couple_states: ['solo'], version_below: '1.4.0', weeks_max: 4 },
   });
 });
 
@@ -811,6 +905,20 @@ test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 �
   const mail = form.getByRole('switch', { name: '이메일로도 보내기' });
   await mail.click();
   await expect(mail).toBeChecked();
+  // 약관 개정은 조건 없이 모두, 메일은 막힌 주소를 제외로
+  const target = page.getByRole('region', { name: '대상', exact: true });
+  await expect(target.getByText('약관 개정은 모든 회원에게 보여요')).toBeVisible();
+  await expect(target.getByRole('group', { name: '대상 수' })).toContainText('412명');
+  await expect(target).toContainText('반송·수신 거부');
+  // 미리보기: 띠 + 메일. 테스트 발송은 내 관리자 메일로만
+  const preview = page.getByRole('region', { name: '미리보기' });
+  await expect(preview.getByText('보내는 곳 sweeTwo')).toBeVisible();
+  await form.getByRole('button', { name: '테스트 발송' }).click();
+  await expect(form.getByText('내 관리자 메일로 보냈어요')).toBeVisible();
+  expect(db.rpc.find((r) => r.fn === 'admin_test_notice_mail')?.body).toMatchObject({
+    p_kind: 'terms',
+    p_title: '이용약관이 바뀌어요',
+  });
   await axe(page);
   await form.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByRole('row', { name: /이용약관이 바뀌어요/ })).toContainText('승인 대기');

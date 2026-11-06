@@ -169,3 +169,44 @@ export type AdminAccessData = z.infer<typeof AdminAccessData>;
 // 2026-11-06: 지금 앱에 있는 화면만(‘월급 플랜’ plan은 month와 같은 데이터, ‘월말 정리’ close와 ‘월 수입·지출’ income_spend는 없앤 화면).
 // 예전 요청 기록의 키는 그대로 읽음.
 export const ACCESS_SCOPES = ['month', 'goals', 'assets', 'calendar'] as const;
+
+// ── AD-10 공지 대상(27 AD-10·11 2·4번) ───────────────────────────────────
+/** 부부 상태: 미합류 / 연결 / 해제 대기 / 혼자 쓰기(AD-03과 같은 값) */
+export const NOTICE_COUPLE_STATES = ['not_joined', 'connected', 'unlink_pending', 'solo'] as const;
+export const NOTICE_VERSION = /^\d{1,4}\.\d{1,4}\.\d{1,4}$/;
+
+/**
+ * 공지 대상 조건(notice.target, 서버 notice_target_valid와 같은 모양). 빈 객체 = 모두.
+ * 금액·목표 금액 조건은 없음. 가입 주차는 가입한 날이 1주차.
+ */
+export const NoticeTarget = z
+  .object({
+    couple_states: z.array(z.enum(NOTICE_COUPLE_STATES)).min(1).optional(),
+    version_below: z.string().regex(NOTICE_VERSION).optional(),
+    weeks_min: z.number().int().min(1).max(520).optional(),
+    weeks_max: z.number().int().min(1).max(520).optional(),
+  })
+  .strict()
+  .refine(
+    (t) => t.weeks_min === undefined || t.weeks_max === undefined || t.weeks_min <= t.weeks_max,
+  );
+export type NoticeTarget = z.infer<typeof NoticeTarget>;
+
+/** 대상 수(숫자만). 메일이면 반송·수신 거부로 막힌 주소를 제외(blocked)로 */
+export const NoticeAudience = z.object({
+  target: z.number().int(),
+  excluded: z.number().int(),
+  blocked: z.number().int(),
+});
+export type NoticeAudience = z.infer<typeof NoticeAudience>;
+
+/** 앱이 읽는 공지(my_notices) */
+export const ActiveNotice = z.object({
+  id: z.string(),
+  kind: z.string(),
+  title: z.string(),
+  body: z.string(),
+  importance: z.enum(['normal', 'must']).catch('normal'),
+  platforms: z.array(z.string()),
+});
+export type ActiveNotice = z.infer<typeof ActiveNotice>;
