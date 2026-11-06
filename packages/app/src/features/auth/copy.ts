@@ -103,6 +103,7 @@ export const copy = {
   marketingStop: '그만 받을게요',
   reconsentFailed: '저장하지 못했어요. 다시 시도해 주세요',
   signupFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  restoreFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요', // [확인 필요] A-02 삭제 취소 실패(2026-11-06)
 
   // A-06
   pinSetTitle: '앱을 열 때 쓸\nPIN 6자리를 정해 주세요',

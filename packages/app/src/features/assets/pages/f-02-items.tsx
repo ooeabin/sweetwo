@@ -133,8 +133,9 @@ export function F02Items() {
         value={side}
         onChange={(s) => setParams({ side: s }, { replace: true })}
         items={[
-          { value: 'asset', label: copy.assets(m(total('asset'))) },
-          { value: 'debt', label: copy.debts(m(total('debt'))) },
+          // 불러오는 동안은 이름만(0원이 먼저 보였다가 바뀌지 않게, 2026-11-06)
+          { value: 'asset', label: d.loading ? copy.assetsLabel : copy.assets(m(total('asset'))) },
+          { value: 'debt', label: d.loading ? copy.debtsLabel : copy.debts(m(total('debt'))) },
         ]}
       />
       {d.loading && <SkelBody shape="rows" />}

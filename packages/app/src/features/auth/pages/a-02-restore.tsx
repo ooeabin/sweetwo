@@ -1,6 +1,7 @@
 import { cancelAccountDeletion } from '@sweetwo/api';
 import { AuthLayout, Button } from '@sweetwo/ui';
-import { useState } from 'react';
+import { TOAST_MS } from '@sweetwo/ui';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths, routeAfterLogin } from '../flow';
@@ -13,10 +14,18 @@ export function A02Restore() {
   const nav = useNavigate();
   // 누른 버튼(yes 복구, no 그대로 두기)만 도는 원
   const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
+  // 실패하면 로그인 화면 알림 자리(hg-auth__toast)에 4초(2026-11-06, 조용히 멈추던 것)
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!failed) return;
+    const t = window.setTimeout(() => setFailed(false), TOAST_MS.plain);
+    return () => window.clearTimeout(t);
+  }, [failed]);
   return (
     <AuthLayout
       title={copy.restoreTitle}
       help={copy.restoreHelp}
+      toast={failed ? copy.restoreFailed : undefined}
       actions={
         <>
           <Button
@@ -29,7 +38,10 @@ export function A02Restore() {
               void cancelAccountDeletion()
                 .then(() => routeAfterLogin())
                 .then((r) => nav(r.to, { replace: true, state: r.state }))
-                .catch(() => setBusy(null));
+                .catch(() => {
+                  setBusy(null);
+                  setFailed(true);
+                });
             }}
           >
             {copy.restoreYes}
@@ -41,7 +53,13 @@ export function A02Restore() {
             onClick={() => {
               if (busy) return;
               setBusy('no');
-              void session.signOut().then(() => nav(paths.login, { replace: true }));
+              void session
+                .signOut()
+                .then(() => nav(paths.login, { replace: true }))
+                .catch(() => {
+                  setBusy(null);
+                  setFailed(true);
+                });
             }}
           >
             {copy.restoreNo}

@@ -27,15 +27,18 @@ export function S19aInquiries() {
   const rows = list.data ?? [];
   const q: Inquiry | undefined = id ? rows.find((r) => r.id === id) : undefined;
 
+  // 성공하면 true(2026-11-06 실패해도 답장 칸이 비워지던 것 고침)
   const run = async (key: 'stop' | 'reply', f: () => Promise<unknown>, done: string) => {
-    if (busy) return;
+    if (busy) return false;
     setBusy(key);
     try {
       await f();
       await qc.invalidateQueries({ queryKey: qk.inquiries });
       toast(done);
+      return true;
     } catch {
       toast(copy.failed);
+      return false;
     } finally {
       setBusy(null);
     }
@@ -153,8 +156,8 @@ export function S19aInquiries() {
             e.preventDefault();
             const t = text.trim();
             if (!t) return;
-            void run('reply', () => addInquiryMessage(q.id, t), copy.replySent).then(() =>
-              setText(''),
+            void run('reply', () => addInquiryMessage(q.id, t), copy.replySent).then(
+              (ok) => ok && setText(''),
             );
           }}
         >
