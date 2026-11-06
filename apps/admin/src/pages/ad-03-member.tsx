@@ -16,12 +16,15 @@ import {
   type AdminAccessData,
   type AdminReveal,
 } from '@sweetwo/core';
-import { Button, Chip, DataTable, Modal } from '@sweetwo/ui';
+import { Chip, DataTable, Modal } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { Frame } from '../frame';
+import { PageSkel } from '../skel';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 
 type L1Scope = 'email' | 'sign_ins' | 'payments';
@@ -52,7 +55,7 @@ export function AD03Member() {
   if (q.isLoading)
     return (
       <Frame menu="members" title={copy.memberTitle}>
-        {null}
+        <PageSkel />
       </Frame>
     );
   if (q.isError || !q.data)
@@ -99,7 +102,7 @@ export function AD03Member() {
             <Button
               variant="link"
               size="sm"
-              onClick={() => void fetchAdminAccessData(approved.id).then(setAccess)}
+              onAct={() => fetchAdminAccessData(approved.id).then(setAccess)}
             >
               {copy.see}
             </Button>
@@ -317,7 +320,7 @@ function RevealForm({ userId, onShown }: { userId: string; onShown: (d: AdminRev
         variant="primary"
         aria-busy={busy}
         disabled={!/^A-\d+$/i.test(no.trim()) || !scopes.length}
-        onClick={() => void go()}
+        onAct={() => go()}
       >
         {copy.revealGo}
       </Button>
@@ -339,7 +342,7 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
   const [target, setTarget] = useState('');
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const move = action === 'login_move';
   const ask = CONFIRM[action];
   const run = async () => {
@@ -398,11 +401,6 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
         <span className="hg-field__label">{copy.note}</span>
         <input className="hg-input" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <Button
         variant={ask ? 'danger' : 'primary'}
         aria-busy={busy}

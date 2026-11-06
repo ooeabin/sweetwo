@@ -7,13 +7,16 @@ import {
   type InquiryStatus,
 } from '@sweetwo/api';
 import { ACCESS_SCOPES, formatKstDateTime } from '@sweetwo/core';
-import { Button, Chip, Status } from '@sweetwo/ui';
+import { Chip, Status } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '../act';
 import { copy } from '../copy';
 import { inquiryTone } from '../tones';
 import { Frame } from '../frame';
+import { PageSkel } from '../skel';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
 
@@ -34,7 +37,7 @@ export function AD06Inquiry() {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState<InquiryStatus>('waiting_user');
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const refresh = () =>
     Promise.all([
       q.refetch(),
@@ -45,7 +48,7 @@ export function AD06Inquiry() {
   if (!q.data)
     return (
       <Frame menu="inquiries" title={copy.menus.inquiries}>
-        {null}
+        <PageSkel />
       </Frame>
     );
   const d = q.data;
@@ -120,7 +123,7 @@ export function AD06Inquiry() {
                 {d.status === 'received' && (
                   <Button
                     variant="secondary"
-                    onClick={() => void adminSetInquiryStatus(d.id, 'in_progress').then(refresh)}
+                    onAct={() => adminSetInquiryStatus(d.id, 'in_progress').then(refresh)}
                   >
                     {copy.statuses.in_progress}
                   </Button>
@@ -129,16 +132,11 @@ export function AD06Inquiry() {
                   variant="primary"
                   aria-busy={busy}
                   disabled={!body.trim()}
-                  onClick={() => void send()}
+                  onAct={() => send()}
                 >
                   {copy.sendAnswer}
                 </Button>
               </div>
-              {msg && (
-                <p className="hg-help" role="status">
-                  {msg}
-                </p>
-              )}
             </section>
           )}
         </div>
@@ -225,7 +223,7 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
   const [raw, setRaw] = useState(false);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const reauth = useReauth();
   const toggle = (s: string) =>
     setScopes((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]));
@@ -263,16 +261,11 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
         <span className="hg-field__label">{copy.l1Reason}</span>
         <input className="hg-input" value={reason} onChange={(e) => setReason(e.target.value)} />
       </label>
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <Button
         variant="primary"
         aria-busy={busy}
         disabled={!scopes.length || !reason.trim() || (raw && scopes.length !== 1)}
-        onClick={() => void go()}
+        onAct={() => go()}
       >
         {copy.sendRequest}
       </Button>

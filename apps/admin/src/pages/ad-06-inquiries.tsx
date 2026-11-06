@@ -43,9 +43,10 @@ export function AD06Inquiries() {
       <DataTable
         label={copy.statuses[status] ?? ''}
         rows={list.data ?? []}
+        loading={list.isLoading}
         rowKey={(r) => r.id}
         onRow={(r) => nav(`/inquiries/${r.id}`)}
-        empty={list.isLoading ? null : copy.noInquiry}
+        empty={copy.noInquiry}
         columns={[
           { key: 'no', label: copy.inqCols.no, render: (r) => r.no },
           {

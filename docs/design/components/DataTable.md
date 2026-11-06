@@ -11,3 +11,4 @@
 - 펼친 줄(`hg-table__more`, 2026-11-06): 행을 누르면 그 행 바로 아래에 상세(`surface-sunk`, 줄바꿈 허용). 어드민 감사 로그(AD-17).
 
 React 래퍼: `DataTable`(packages/ui, 열 이름·숫자 열·행·행 누르기·펼친 줄 `expanded`·빈 상태). 행을 누를 수 있으면 키보드 Enter도.
+- `loading`(2026-11-06): 불러오는 중이고 행이 없으면 0.3초 뒤 뼈대 줄 5개, `tbody aria-busy`.

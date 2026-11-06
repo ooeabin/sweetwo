@@ -98,6 +98,7 @@ export function AD17Audit() {
       <DataTable<AdminAuditRow>
         label={copy.auditTitle}
         rows={q.data ?? []}
+        loading={q.isLoading}
         rowKey={(r) => String(r.id)}
         onRow={(r) => setOpen(open === r.id ? null : r.id)}
         expanded={(r) =>
@@ -124,7 +125,7 @@ export function AD17Audit() {
             </div>
           ) : null
         }
-        empty={q.isLoading ? null : copy.noAudit}
+        empty={copy.noAudit}
         columns={[
           { key: 'at', label: copy.auditCols.at, render: (r) => formatKstDateTime(r.at) },
           { key: 'admin', label: copy.auditCols.admin, render: (r) => r.admin_email ?? '—' },

@@ -829,7 +829,7 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
   await expect(dialog).toContainText('30일 뒤 삭제');
   await axe(page);
   await dialog.getByRole('button', { name: '삭제 대리 접수' }).click();
-  await expect(form.getByRole('status')).toHaveText('처리됨');
+  await expect(page.locator('.hg-toasts').getByRole('status')).toHaveText('처리됨');
   expect(db.rpc.find((r) => r.fn === 'admin_account_action')?.body).toMatchObject({
     p_action: 'delete_request',
     p_inquiry_no: 'A-10001',
@@ -840,10 +840,10 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
   await expect(go).toBeDisabled();
   await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('nobody@example.com');
   await go.click();
-  await expect(form.getByRole('status')).toHaveText('새 계정 없음');
+  await expect(page.locator('.hg-toasts').getByRole('status')).toHaveText('새 계정 없음');
   await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('chanwoo.new@example.com');
   await go.click();
-  await expect(form.getByRole('status')).toHaveText('승인 요청됨');
+  await expect(page.locator('.hg-toasts').getByRole('status')).toHaveText('승인 요청됨');
   await axe(page);
   expect(db.rpc.filter((r) => r.fn === 'admin_request_login_move').at(-1)?.body).toMatchObject({
     p_user: CHANWOO,
@@ -963,7 +963,7 @@ test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 �
   const preview = page.getByRole('region', { name: '미리보기' });
   await expect(preview.getByText('보내는 곳 sweeTwo')).toBeVisible();
   await form.getByRole('button', { name: '테스트 발송' }).click();
-  await expect(form.getByText('내 메일로 보냄')).toBeVisible();
+  await expect(page.locator('.hg-toasts')).toContainText('내 메일로 보냄');
   expect(db.rpc.find((r) => r.fn === 'admin_test_notice_mail')?.body).toMatchObject({
     p_kind: 'terms',
     p_title: '이용약관이 바뀌어요',
