@@ -1861,7 +1861,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
-          target: Json
+          target: NonNullable<Json>
           title: string
         }
         ComputedFields: never
@@ -1879,7 +1879,7 @@ export type Database = {
           published_at?: string | null
           starts_at: string
           status?: string
-          target?: Json
+          target?: NonNullable<Json>
           title: string
         }
         Update: {
@@ -1896,7 +1896,7 @@ export type Database = {
           published_at?: string | null
           starts_at?: string
           status?: string
-          target?: Json
+          target?: NonNullable<Json>
           title?: string
         }
         Relationships: []
@@ -2622,7 +2622,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
-          target: Json
+          target: NonNullable<Json>
           title: string
         }[]
         SetofOptions: {
