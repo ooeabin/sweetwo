@@ -1414,7 +1414,8 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__bar .hg-search { width: 440px; height: 36px; border-radius: var(--radius-md); background: var(--surface); border-color: var(--hairline); }
 .hg-admin__bar .hg-search:focus-within { outline-color: var(--focus); }
 .hg-admin__bar .hg-search input { font: 400 14px/20px var(--font-sans); }
-.hg-admin__account { display: flex; align-items: center; gap: var(--space-2); margin-top: auto; padding: var(--space-2); border-top: 1px solid var(--hairline-soft); }
+.hg-admin__account { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-1) var(--space-2); margin-top: auto; padding: var(--space-3) var(--space-2) var(--space-2); border-top: 1px solid var(--hairline-soft); }
+.hg-admin__account > .hg-btn { flex-basis: 100%; justify-content: flex-start; height: auto; padding: 0 0 0 calc(28px + var(--space-2)); color: var(--slate); font: 500 12px/16px var(--font-sans); }  /* 2026-11-06 로그아웃은 글 아래 줄로(역할 글이 좁아 여러 줄로 깨지던 것) */
 .hg-admin__account .hg-avatar { width: 28px; height: 28px; background: var(--ink); color: var(--on-ink); font-size: 12px; }
 .hg-admin__account-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .hg-admin__account-text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 13px/18px var(--font-sans); }
@@ -1428,9 +1429,9 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); align-items: start; }
 .hg-admin__col { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 /* 항목-값 줄: 이름 왼쪽 고정 폭, 값은 바로 옆(왼쪽 정렬) */
-.hg-admin__kv { display: grid; grid-template-columns: 132px minmax(0, 1fr); align-items: baseline; gap: var(--space-3); min-height: 20px; padding: 0; font: 400 14px/20px var(--font-sans); }
+.hg-admin__kv { display: grid; grid-template-columns: minmax(72px, 132px) minmax(0, 1fr); align-items: baseline; gap: var(--space-3); min-height: 20px; padding: 0; font: 400 14px/20px var(--font-sans); }
 .hg-admin__kv > :first-child { font: 400 13px/18px var(--font-sans); color: var(--stone); }
-.hg-admin__kv > :last-child { min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.hg-admin__kv > :last-child { min-width: 0; overflow-wrap: anywhere; word-break: keep-all; font-variant-numeric: tabular-nums; }
 /* 대시보드 숫자 칸 */
 .hg-admin__grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .hg-admin__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4); margin-top: var(--space-2); }
@@ -1489,7 +1490,9 @@ a.hg-btn { text-decoration: none; }
 .hg-admin .hg-tab.is-active, .hg-admin .hg-tab[aria-selected="true"], .hg-admin .hg-tab[aria-current="page"] { background: none; border-bottom-color: var(--accent-ink); color: var(--ink); font-weight: 600; }  /* 2026-11-06 밑줄 인디고 */
 .hg-admin .hg-table { border-radius: var(--radius-lg); font: 400 13px/18px var(--font-sans); }
 .hg-admin .hg-table th { height: 32px; padding: 0 var(--space-3); font: 600 12px/16px var(--font-sans); }
-.hg-admin .hg-table td { height: 36px; padding: 0 var(--space-3); white-space: nowrap; }
+.hg-admin .hg-table td { height: 36px; padding: var(--space-2) var(--space-3); overflow-wrap: anywhere; word-break: keep-all; }  /* 2026-11-06 긴 값(ID, 제목)은 칸 안에서 줄바꿈 */
+.hg-admin .hg-table td.is-num { white-space: nowrap; }
+.hg-admin .hg-btn--link { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; }  /* 긴 ID 링크가 칸 밖으로 나가지 않게 */
 .hg-admin .hg-table tr.hg-table__more td { height: auto; padding: var(--space-3); white-space: normal; }
 .hg-admin .hg-body__banner { border-radius: var(--radius-md); font-size: 13px; }
 .hg-mask-text { letter-spacing: 0.5px; color: var(--slate); font-variant-numeric: tabular-nums; }
@@ -2011,3 +2014,5 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offse
 .hg-status--bad { color: var(--danger); }
 .hg-status--info::before { background: var(--accent-ink); }
 .hg-status--off { color: var(--stone); }
+
+.hg-admin__grid > .hg-admin__col:last-child .hg-admin__kv { grid-template-columns: 88px minmax(0, 1fr); }  /* 오른쪽 좁은 칸(340px) 카드는 이름표 칸을 좁게 */
