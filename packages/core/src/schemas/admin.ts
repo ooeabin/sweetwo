@@ -96,6 +96,15 @@ export const AdminInquiry = z.object({
   created_at: z.string(),
   done_at: z.string().nullable(),
   attach: z.record(z.unknown()).nullable(),
+  /** 이메일 문의만: 제목, 가린 보낸 주소(전체 주소는 보여 주지 않음), 받지 않은 첨부 수 */
+  email: z
+    .object({
+      from_masked: z.string().nullable(),
+      subject: z.string().nullable(),
+      attachments: z.number(),
+    })
+    .nullable()
+    .optional(),
   messages: z.array(z.object({ author: z.string(), body: z.string(), created_at: z.string() })),
   access: z.array(AccessRow),
 });

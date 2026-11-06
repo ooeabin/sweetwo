@@ -443,6 +443,10 @@ verify_jwt = false
 [functions.mail-events]
 verify_jwt = false
 
+# 이메일 문의 받기(네이버웍스 전달 → SES 받기 → SNS HTTPS 구독). JWT 대신 주소의 ?token=(INBOUND_MAIL_SECRET)과 주제 ARN으로 확인
+[functions.inbound-mail]
+verify_jwt = false
+
 # 모바일 푸시 보내기(DB kick_push가 pg_net으로 부름). JWT 대신 x-push-secret(PUSH_CRON_SECRET)로 확인
 [functions.send-push]
 verify_jwt = false

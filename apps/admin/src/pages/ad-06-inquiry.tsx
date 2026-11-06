@@ -19,7 +19,9 @@ import { useReauth } from '../reauth';
 const STATUSES: InquiryStatus[] = ['received', 'in_progress', 'waiting_user', 'done'];
 
 // AD-06 문의 상세: 대화, 자동 첨부(사용자가 켠 경우만, 금액·메모 없음), 답변(해요체) + 상태, ‘답변 보내기’
-// (보내면 ‘사용자 답변 대기’ + 앱 ‘내 문의’ 알림). 화면 확인이 필요하면 AD-04 L2 동의 요청(CS만).
+// (보내면 ‘사용자 답변 대기’ + 앱 ‘내 문의’ 알림). 화면 확인이 필요하면 AD-04 L2 동의 요청(CS만, 앱 문의만).
+// 이메일 문의: 제목, 가린 보낸 주소, 회원(정확히 일치한 경우만) 또는 ‘회원 연결 없음’, 받지 않은 첨부 수.
+// 답변은 help@sweetwo.kr에서 같은 주소로 메일로 감(앱 알림 없음).
 export function AD06Inquiry() {
   const { id = '' } = useParams();
   const nav = useNavigate();
@@ -122,6 +124,7 @@ export function AD06Inquiry() {
                   </Button>
                 )}
               </div>
+              {d.channel === 'email' && <p className="hg-help">{copy.emailAnswerHelp}</p>}
               {msg && (
                 <p className="hg-help" role="status">
                   {msg}
@@ -131,32 +134,65 @@ export function AD06Inquiry() {
           )}
         </div>
         <div className="hg-admin__col">
-          <section className="hg-card hg-stack" aria-label={copy.attach}>
-            <span className="hg-card__label">{copy.attach}</span>
-            {d.user_id && (
-              <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
-                {d.user_id}
-              </Button>
-            )}
-            {d.attach ? (
-              Object.entries(d.attach).map(([k, v]) => (
-                <div key={k} className="hg-admin__kv">
-                  <span>{copy.attachKeys[k] ?? k}</span>
-                  <span>
-                    {k === 'couple_state' && typeof v === 'string'
-                      ? (copy.coupleStates[v] ?? v)
-                      : typeof v === 'string'
-                        ? (copy.attachValues[v] ?? v) || '—'
-                        : typeof v === 'number'
-                          ? v
-                          : JSON.stringify(v)}
-                  </span>
+          {d.email && (
+            <section className="hg-card hg-stack" aria-label={copy.emailInfo}>
+              <span className="hg-card__label">{copy.emailInfo}</span>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.subject}</span>
+                <span>{d.email.subject || copy.noSubject}</span>
+              </div>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.from}</span>
+                <span>{d.email.from_masked ?? '—'}</span>
+              </div>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.member}</span>
+                <span>
+                  {d.user_id ? (
+                    <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
+                      {d.user_id}
+                    </Button>
+                  ) : (
+                    copy.noMemberLink
+                  )}
+                </span>
+              </div>
+              {d.email.attachments > 0 && (
+                <div className="hg-admin__kv">
+                  <span>{copy.emailKeys.attachments}</span>
+                  <span>{copy.attachmentsDropped(d.email.attachments)}</span>
                 </div>
-              ))
-            ) : (
-              <span className="hg-help">—</span>
-            )}
-          </section>
+              )}
+            </section>
+          )}
+          {d.channel !== 'email' && (
+            <section className="hg-card hg-stack" aria-label={copy.attach}>
+              <span className="hg-card__label">{copy.attach}</span>
+              {d.user_id && (
+                <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
+                  {d.user_id}
+                </Button>
+              )}
+              {d.attach ? (
+                Object.entries(d.attach).map(([k, v]) => (
+                  <div key={k} className="hg-admin__kv">
+                    <span>{copy.attachKeys[k] ?? k}</span>
+                    <span>
+                      {k === 'couple_state' && typeof v === 'string'
+                        ? (copy.coupleStates[v] ?? v)
+                        : typeof v === 'string'
+                          ? (copy.attachValues[v] ?? v) || '—'
+                          : typeof v === 'number'
+                            ? v
+                            : JSON.stringify(v)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <span className="hg-help">—</span>
+              )}
+            </section>
+          )}
           {d.access.map((a) => (
             <section key={a.id} className="hg-card hg-stack" aria-label={copy.l2}>
               <span className="hg-card__label">
@@ -166,7 +202,7 @@ export function AD06Inquiry() {
               {a.expires_at && <span className="hg-help">{formatKstDateTime(a.expires_at)}</span>}
             </section>
           ))}
-          {cs && d.user_id && d.status !== 'done' && (
+          {cs && d.user_id && d.channel !== 'email' && d.status !== 'done' && (
             <AccessForm inquiryId={d.id} onDone={() => void refresh()} />
           )}
         </div>
