@@ -2606,6 +2606,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_require_fresh: { Args: { p_seconds?: number }; Returns: undefined }
       admin_reveal: {
         Args: {
           p_inquiry_no: string
