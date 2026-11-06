@@ -111,7 +111,10 @@ export function AD03Member() {
               k={copy.cols.email}
               v={shown?.data.email ?? <span className="hg-mask-text">{u.email_masked ?? '—'}</span>}
             />
-            <KV k={copy.provider} v={u.provider ?? '—'} />
+            <KV
+              k={copy.provider}
+              v={u.provider ? (copy.providers[u.provider] ?? u.provider) : '—'}
+            />
             <KV k={copy.cols.joined} v={u.created_at ? formatKstDateTime(u.created_at) : '—'} />
             <KV
               k={copy.lastSeen}
@@ -119,6 +122,20 @@ export function AD03Member() {
             />
             <KV k={copy.cols.sub} v={u.subscription} />
             <span className="hg-help">{copy.sessions(u.sessions)}</span>
+            {u.devices.length > 0 && (
+              <>
+                <span className="hg-card__meta">{copy.devices}</span>
+                {u.devices.map((d) => (
+                  <span key={`${d.platform}-${d.last_seen_at}`} className="hg-help">
+                    {copy.deviceLine(
+                      copy.platforms[d.platform] ?? d.platform,
+                      d.app_version,
+                      formatKstDateTime(d.last_seen_at),
+                    )}
+                  </span>
+                ))}
+              </>
+            )}
           </section>
           <section className="hg-card hg-stack" aria-label={copy.space}>
             <span className="hg-card__label">{copy.space}</span>
@@ -155,14 +172,33 @@ export function AD03Member() {
                 u.counts.closes,
               )}
             </span>
-            <KV k={copy.planStatus} v={u.plan_status ?? '—'} />
+            <KV k={copy.salaryMode} v={u.salary_mode ? copy.salaryModes[u.salary_mode] : '—'} />
+            <KV
+              k={copy.planStatus}
+              v={
+                u.checklist
+                  ? copy.checklistLine(
+                      u.checklist.label,
+                      copy.checklistStates[u.checklist.state] ?? u.checklist.state,
+                      u.checklist.checked,
+                      u.checklist.total,
+                    )
+                  : u.plan_status
+                    ? (copy.checklistStates[u.plan_status] ?? '—')
+                    : '—'
+              }
+            />
           </section>
           <DataTable
             label={copy.consents}
             rows={u.consents}
             rowKey={(c) => `${c.kind}-${c.at}`}
             columns={[
-              { key: 'kind', label: copy.consents, render: (c) => c.kind },
+              {
+                key: 'kind',
+                label: copy.consents,
+                render: (c) => copy.consentKinds[c.kind] ?? c.kind,
+              },
               { key: 'version', label: copy.versionCol, render: (c) => c.version },
               {
                 key: 'agreed',
@@ -404,7 +440,17 @@ function AccessView({ d }: { d: AdminAccessData }) {
       {d.assets?.map((a) => (
         <KV key={`${a.name}-${a.grp}`} k={a.name} v={val(a.amount)} />
       ))}
-      {d.plan && <KV k={copy.planStatus} v={`${d.plan.status} ${d.plan.done}/${d.plan.lines}`} />}
+      {d.plan && (
+        <KV
+          k={copy.planStatus}
+          v={copy.checklistLine(
+            d.plan.label_month,
+            copy.checklistStates[d.plan.status] ?? d.plan.status,
+            d.plan.done,
+            d.plan.lines,
+          )}
+        />
+      )}
       {d.close && <KV k={copy.l2Labels.close} v={`${d.close.status} ${val(d.close.spent)}`} />}
       {d.calendar?.map((c) => (
         <KV key={c.name} k={c.name} v={c.kind} />

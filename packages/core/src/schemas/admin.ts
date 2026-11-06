@@ -55,6 +55,15 @@ export const AdminUserDetail = z.object({
     closes: z.number(),
   }),
   plan_status: z.string().nullable(),
+  // 2026-11-06 추가(AD-03 4·5번). 예전 서버 응답에도 맞게 기본값
+  salary_mode: z.enum(['separate', 'joint']).nullable().default(null),
+  checklist: z
+    .object({ state: z.string(), label: z.string(), checked: z.number(), total: z.number() })
+    .nullable()
+    .default(null),
+  devices: z
+    .array(z.object({ platform: z.string(), app_version: z.string(), last_seen_at: z.string() }))
+    .default([]),
   sessions: z.number(),
   access: z.array(AccessRow),
 });
@@ -146,12 +155,6 @@ export const AdminAccessData = z.object({
 export type AdminAccessData = z.infer<typeof AdminAccessData>;
 
 /** 사용자 화면 범위(S-19b와 같은 키) */
-export const ACCESS_SCOPES = [
-  'month',
-  'plan',
-  'close',
-  'goals',
-  'assets',
-  'income_spend',
-  'calendar',
-] as const;
+// 2026-11-06: 지금 앱에 있는 화면만(‘월급 플랜’ plan은 month와 같은 데이터, ‘월말 정리’ close와 ‘월 수입·지출’ income_spend는 없앤 화면).
+// 예전 요청 기록의 키는 그대로 읽음.
+export const ACCESS_SCOPES = ['month', 'goals', 'assets', 'calendar'] as const;

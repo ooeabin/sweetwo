@@ -39,7 +39,7 @@ export const copy = {
   // AD-01
   alerts: '상시 경보', // [확인 필요]
   failedJobs: '실패 건수', // [확인 필요]
-  failedPlans: '플랜 생성 실패',
+  failedPlans: '체크리스트 생성 실패',
   failedNotis: '알림 발송 실패',
   openInquiries: '미처리 문의', // [확인 필요]
   received: '접수',
@@ -86,8 +86,34 @@ export const copy = {
   invite: (made: string, until: string, used: string | null) =>
     used ? `${made} 발급, ${used} 사용` : `${made} 발급, ${until} 만료`, // [확인 필요]
   counts: (a: number, est: number, g: number, c: number) =>
-    `자산 ${a}개, 그중 추정 ${est}개, 목표 ${g}개, 정리한 달 ${c}번`,
-  planStatus: '플랜 상태', // [확인 필요]
+    `자산 ${a}개, 그중 추정 ${est}개, 목표 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
+  planStatus: '이번 달 체크리스트', // [확인 필요]
+  checklistStates: { open: '진행 중', done: '다 했어요', closed: '끝남' } as Record<string, string>,
+  checklistLine: (label: string, state: string, checked: number, total: number) =>
+    `${label} ${state}, ${checked}/${total}줄 체크`, // [확인 필요]
+  salaryMode: '월급 관리 방식', // [확인 필요]
+  salaryModes: { separate: '각자', joint: '합쳐서' } as Record<string, string>,
+  devices: '기기·앱 버전', // [확인 필요]
+  deviceLine: (platform: string, version: string, seen: string) =>
+    `${platform} ${version}, ${seen} 마지막 실행`, // [확인 필요]
+  platforms: { desktop: '데스크톱', ios: 'iOS', android: 'Android', web: '웹' } as Record<
+    string,
+    string
+  >,
+  providers: { kakao: '카카오', google: '구글', apple: '애플', email: '이메일' } as Record<
+    string,
+    string
+  >,
+  consentKinds: {
+    terms: '이용약관',
+    privacy: '개인정보처리방침',
+    space_sharing: '부부 공간 공유',
+    family_info: '양가 가족 정보',
+    photo: '사진',
+    marketing: '마케팅 수신',
+    analytics: '분석 수집',
+    peer_stats: '통계 참여',
+  } as Record<string, string>,
   hoursLeft: (h: number) => `${h}시간 남음`,
   see: '보기',
 
@@ -105,11 +131,11 @@ export const copy = {
   l2: 'L2 사용자 동의',
   l2Scopes: {
     month: '이번 달 화면',
-    plan: '월급 플랜 화면',
-    close: '월말 정리 화면',
+    plan: '이번 달 화면', // 예전 키(지금은 month)
+    close: '월말 확인 화면', // 예전 키, 새 요청에는 없음
     goals: '목표 화면',
     assets: '우리 자산 화면',
-    income_spend: '월 수입·지출 화면',
+    income_spend: '월 수입·지출(없앤 화면)', // 예전 키, 새 요청에는 없음
     calendar: '캘린더 화면',
   } as Record<string, string>,
   raw: '금액 원값 요청',
@@ -130,7 +156,7 @@ export const copy = {
     fixed: '고정지출',
     living: '생활비 예산',
     loan: '대출 상환',
-    close: '월말 정리',
+    close: '월말 확인',
   }, // [확인 필요]
   agreedCol: '동의 여부', // [확인 필요]
   agreed: '동의',
@@ -154,7 +180,8 @@ export const copy = {
   confirmDelete: '이 회원의 계정 삭제를 접수할까요?', // [확인 필요]
   confirmDeleteHelp: '30일 뒤 지워져요. 그 전에 본인이 다시 로그인하면 취소돼요', // [확인 필요]
   newAccount: '새 계정 이메일 또는 사용자 ID', // [확인 필요]
-  newAccountHelp: '본인 확인이 끝난 뒤 사용자가 새 소셜 계정으로 한 번 로그인해요. 최고 관리자가 승인하면 옮겨요', // [확인 필요]
+  newAccountHelp:
+    '본인 확인이 끝난 뒤 사용자가 새 소셜 계정으로 한 번 로그인해요. 최고 관리자가 승인하면 옮겨요', // [확인 필요]
   moveRequested: '최고 관리자에게 승인을 요청했어요', // [확인 필요]
   moveErrors: {
     new_not_found: '새 계정을 찾지 못했어요',
@@ -177,7 +204,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '부부 연결',
-    calc: '계산·플랜',
+    calc: '목표·월급 체크리스트',
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
@@ -187,6 +214,25 @@ export const copy = {
   channels: { app: '앱', email: '이메일' } as Record<string, string>,
   noInquiry: '문의가 없어요', // [확인 필요]
   attach: '자동 첨부',
+  attachKeys: {
+    app_version: '앱 버전',
+    platform: '플랫폼',
+    os: 'OS',
+    couple_state: '부부 상태',
+    sync: '동기화',
+    error: '최근 오류 코드',
+  } as Record<string, string>,
+  attachValues: {
+    online: '온라인',
+    offline: '오프라인',
+    mac: 'macOS',
+    windows: 'Windows',
+    ios: 'iOS',
+    android: 'Android',
+    desktop: '데스크톱',
+    web: '웹',
+    other: '기타',
+  } as Record<string, string>,
   statusLabel: '상태', // [확인 필요]
   answer: '답변',
   sendAnswer: '답변 보내기',
@@ -223,6 +269,10 @@ export const copy = {
 
   // AD-20
   docSearch: '문서 검색',
+  docGroups: { spec: '기획서', design: '디자인', dev: '개발 가이드', adr: 'ADR' } as Record<
+    'spec' | 'design' | 'dev' | 'adr',
+    string
+  >, // [확인 필요]
   designPreview: '디자인 시스템 미리보기',
 };
 
@@ -263,7 +313,8 @@ export const ops = {
     importance: '중요도',
     platforms: '대상 플랫폼',
     email: '이메일로도 보내기',
-    emailHelp: '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
+    emailHelp:
+      '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
   }, // [확인 필요]
   saveDraft: '초안 저장', // [확인 필요]
   belowMin: (n: number) => `지금 최소 버전보다 낮은 기기 ${n}대(90일 안에 켠 기기)`, // [확인 필요]
@@ -318,7 +369,8 @@ export const ops = {
   holidayTitle: '공휴일', // [확인 필요]
   // AD-19 항목 이름 목록 [확인 필요]
   kindTitle: '항목 이름 목록',
-  kindHelp: '자산 추가 화면의 세부 항목 칩이에요. 새 칩은 고른 항목과 같은 질문을 해요. 앱 배포 없이 바로 바뀌어요',
+  kindHelp:
+    '자산 추가 화면의 세부 항목 칩이에요. 새 칩은 고른 항목과 같은 질문을 해요. 앱 배포 없이 바로 바뀌어요',
   kindCols: { name: '이름', base: '따르는 항목', hidden: '숨김' },
   kindDefault: '기본 항목',
   kindAdd: '칩 추가',

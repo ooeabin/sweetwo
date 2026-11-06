@@ -361,7 +361,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '부부 연결',
-    calc: '계산·플랜',
+    calc: '목표·월급 체크리스트', // [확인 필요] 27 AD-06
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',

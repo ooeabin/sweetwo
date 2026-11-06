@@ -139,9 +139,15 @@ export function AD06Inquiry() {
             {d.attach ? (
               Object.entries(d.attach).map(([k, v]) => (
                 <div key={k} className="hg-row" style={{ justifyContent: 'space-between' }}>
-                  <span className="hg-card__meta">{k}</span>
+                  <span className="hg-card__meta">{copy.attachKeys[k] ?? k}</span>
                   <span>
-                    {typeof v === 'string' || typeof v === 'number' ? v : JSON.stringify(v)}
+                    {k === 'couple_state' && typeof v === 'string'
+                      ? (copy.coupleStates[v] ?? v)
+                      : typeof v === 'string'
+                        ? (copy.attachValues[v] ?? v) || '—'
+                        : typeof v === 'number'
+                          ? v
+                          : JSON.stringify(v)}
                   </span>
                 </div>
               ))
