@@ -48,7 +48,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 - Capacitor: 모바일 앱. `apps/mobile`(Vite 빌드 + iOS·Android 프로젝트)이 packages/app을 감쌈. 모바일 전용 기능(로그인, 보안 저장소, 잠금·생체 인증, 푸시, 앱 링크)은 데스크톱과 같은 모양의 브리지(`window.sweetwo`)로만 열어 줌. 플랫폼 값은 `desktop` / `ios` / `android`, 데스크톱 전용(트레이, 단축키)은 플랫폼 플래그로 숨김
 - 같은 Vite 화면을 브라우저로 띄우는 건 개발과 e2e(흉내 Supabase)용뿐, 배포하지 않음
 - 서버 데이터: TanStack Query 캐시 + Realtime 변경 신호로 무효화. 끊기면 30초 폴링
-- 화면 상태: Zustand(잠금, 금액 가리기, 월말 정리 진행 단계 등 기기 안 상태)
+- 화면 상태: Zustand(잠금, 금액 가리기, 목표·자산 추가 중 입력값 등 기기 안 상태)
 
 ### 서버
 
@@ -203,8 +203,6 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 금액은 bigint 정수 원 단위(소수점 없음), 입력 상한 999억 원(Zod 입력 검증). 날짜는 KST 기준 date
 - goal.photo\_path text: 직접 만든 목표의 사진 Storage 경로. null이면 회색 기본 그림(goal-custom), 기본 목표 21종은 항상 null
 - app\_user.is\_internal\_tester bool: 내부 테스트 계정 표시, 기본 false. 공개 출시 직전 삭제 대상을 고를 때 씀(→ 운영 절차)
-- 통장 하나 모드(couple\_space.account\_mode): account.role과 saving\_deposit.asset\_id는 null 가능. saving\_deposit.goal\_id uuid(null), 연결 자산이 목표에 묶이면 그 목표로 셈
-- month\_close.status(초안/완료), step, mode(기본/꼼꼼), party(함께/혼자), locked\_by: 미리 적은 값은 초안으로 저장, 진행 잠금은 locked\_by. 저축 합계는 deposit\_total(W-04k), 꼼꼼 모드 잔액 기준 저축은 balance\_saving
 - 함께 모은 달(G-05 축하 문장, 20261101150000 `goal_story`): 그 목표 저금 줄을 체크한 체크리스트 달(‘9월 월급’) 수, 그중 각자 모드 우리 목표에서 두 사람 체크리스트 모두 체크한 달 수. 합쳐서·혼자 쓰기·내 목표는 “n개월 만에 모았어요”
 - 순자산 기간 탭의 마지막 선택: 기기별 로컬 저장(서버에 저장하지 않음), 값이 없으면 기본 1년(쓴 지 1년 미만이면 전체)
 
@@ -254,13 +252,12 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 자동 결혼기념일(20261029180000): `care_day.auto`·`auto_moves`, `couple_space` 트리거 → `sync_wedding_care(공간)`
 - 배우자 합류(20261030090000): `complete_join`, `set_join_salary_mode`, `discard_prefill`, `joining_space`(내부), `app_user` 트리거 `notify_first_goal`
 - 관리 방식(20261030120000): `set_salary_mode`, `set_joint_cycle_day`, `start_checklist`(방식을 바꾼 달은 옛 체크리스트 유지). 휴지통(20261030150000): `trash_rows`, `restore_trash` 제안 없이
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식), `fixed_expense`(O-36 그룹과 세부 항목), `goal`, `invite`, `account`(O-63 통장 역할), `invite_attempt`(초대 코드 오류 횟수), `asset`·`asset_history`(자산·부채와 금액 이력)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식. 재기획 뒤로는 옛 열), `fixed_expense`(옛 고정지출 그룹과 세부 항목), `goal`, `invite`, `account`(옛 통장 역할, 남은 옛 읽기), `invite_attempt`(초대 코드 오류 횟수), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
 - 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
 - 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://sweetwo.kr/i/{코드}`(모바일은 앱 링크로 앱이 바로 엶, (전환 전) app.sweetwo.kr), 데스크톱 딥링크는 `sweetwo://i/{코드}`
-- 월 플랜과 플랜 줄은 앱이 직접 못 만들고 못 고친다(읽기만). 첫 플랜은 `start_first_plan()`(O-66, 같은 사이클이면 있는 플랜 id), 이후 플랜은 기준일 작업이 만든다. 줄의 분담액은 신랑, 신부 쪽(`amount_groom`, `amount_bride`)으로 저장
-- 기준일은 `couple_space.base_day`(말일은 `base_day_last`), 없으면 두 월급날 중 늦은 날. 통장 방식은 `couple_space.account_mode`
+- 기준일(체크리스트 만드는 날)은 각자면 그 사람 월급날, 합쳐서면 `couple_space.joint_cycle_day`(기본 = 두 월급날 중 늦은 날, → 아래 S-11d). 옛 `base_day`·`base_day_last`·`account_mode` 열은 남겨 두고 새로 쓰지 않음
 - 만 18세 미만: 가입 때 A-05 ‘만 18세 이상이에요’ 체크로만 확인하고 가입 뒤 나이로 계정을 지우지 않음. 옛 `delete_minor_account`·`delete_underage_account`는 20261103210000에서 지움
 
 ### 마이그레이션과 RLS 규칙
@@ -321,7 +318,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 오류 코드
 
-- DB: `RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = '<code>'` (예: `proposal_already_open`)
+- DB: `RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = '<code>'` (예: `unlink_pending`)
 - api가 `AppError{code, retryable}`로 바꿈 → 화면은 기능 copy.ts의 문구 표에서 찾음
 - 오류 코드, 사용자 문구, 재시도 여부는 표 하나(docs/errors.md)로 관리하고 기획서 ‘공통 상태’ 탭과 연결
 
@@ -329,7 +326,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | --- | --- | --- |
 | `network_offline` | 공통 상태 탭 ‘오프라인’ 문구 | 자동 |
 | `version_conflict` | 충돌 선택 화면 | 사용자 선택 |
-| `proposal_already_open` | 제안 화면 문구 | 없음 |
+| `unlink_pending` | 연결 해제 대기 중 안내 문구 | 없음 |
 
 ## 동기화와 오프라인
 
@@ -353,13 +350,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 서버 함수가 change\_log에서 그 필드의 마지막 변경(누가, 언제)을 확인
 - 배우자가 1분 안에 같은 필드를 바꿨으면 `conflict{field, theirs}` 반환 → 선택 화면. 아니면 마지막 쓰기가 이김
 - 삭제와 수정이 부딪히면 삭제가 이기고 항목은 휴지통으로(복구 가능)
-- 월말 정리 초안(W-04j·k): 두 사람이 같은 항목을 동시에 적으면 항목별로 나중 저장이 이기고 Toast
 
-### 함께 모드
-
-- Realtime Presence와 Broadcast 채널로 서로의 단계와 커서를 맞춤
-- 진행자 잠금 = month\_close.locked\_by(30분 뒤 만료). 끊기면 5분 안에 이어서 하기
-- 함께 모드 안에서는 충돌 화면 없이 마지막 저장이 이김
+- 예전 월말 정리 함께 모드(진행자 잠금 `month_close.locked_by`, Presence)는 월말 정리와 함께 없앰(기획서 30 동기화). 월말 확인(W-05)은 체크리스트 줄 체크와 같은 규칙이라 잠금이 없음
 
 ## 인증과 세션
 
@@ -495,9 +487,9 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 그림과 장면 자리
 
-- 목표 사진 21장(2026-11-04 실사, `assets/goal-photos/{템플릿}-01.webp`, 정사각 512px), 빈 상태 그림 1장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
+- 목표 사진 21장(2026-11-04 실사, `assets/goal-photos/{템플릿}-01.webp`, 정사각 512px), 빈 상태 그림 1장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 오렌지 바탕 흰 ‘Two’라 그림체가 다름). `object-fit: contain`
 - 앱 아이콘(2026-11-06 오렌지 바탕 흰 워드마크 ‘Two’로 교체): `python3 scripts/brand-icons/two.py`가 워드마크 벡터(logo-cherry.svg 뒤 세 글자)에서 app-icon.png, app-icon-macos.png, apple-touch-icon.png, favicon-32/48.png, 데스크톱 build/icon.png와 resources/tray.png, iOS AppIcon, Android 런처(적응형 전경 48% + 바탕 #FF7716, 예전 방식 정사각·원형), 사이트·모바일 파비콘을 다시 만듦(node + playwright로 흰 Two 원본 two-master.png를 그림, `--render`면 다시). symbol.png·symbol.svg, 사이트 공유 이미지 og.png도 같이 만듦. 카카오·구글 로그인 콘솔 앱 아이콘은 손으로 바꿈. 예전 파이 차트 생성기(build.py, Blender)는 지움
-- 장면 그림 5장과 장면 영상 5개는 없앰(2026-10-19). W-04, P-11, P-01, H-T1, A-02의 장면 자리는 그림 없이 비워 둠
+- 장면 그림 5장과 장면 영상 5개는 없앰(2026-10-19). 그중 W-04 끝, H-T1은 재기획으로 화면도 없앰. P-11 `scene-clap`, P-01 `scene-invite`는 2026-11-05 새 3D 그림, A-02는 영어 워드마크
 - 그림은 앱에 포함해 배포(네트워크 없이도 보이게). 데스크톱·모바일 모두 앱 묶음 안에
 
 ### 자산 파일 규칙
@@ -622,7 +614,7 @@ supabase/
 | 화면 파일 | 화면 ID + 이름 | `w-02-checklist.tsx` |
 | React 컴포넌트 | PascalCase, 화면은 ID 붙임 | `GoalListPage`, `W04MonthCloseDone` |
 | 훅 | use + 동사나 명사 | `useGoals`, `useApplyProposal` |
-| DB 테이블, 컬럼 | snake\_case, 단수 | `monthly_plan.apply_on` |
+| DB 테이블, 컬럼 | snake\_case, 단수 | `pay_check_line.goal_id` |
 | DB 함수 | 동사\_대상 | `apply_proposal`, `close_month` |
 | 마이그레이션 | 시각\_동사\_대상 | `20261020093000_add_avatar_path.sql` |
 | Edge Function | kebab-case 동사 | `send-weekly-summary` |
@@ -638,13 +630,13 @@ supabase/
 
 ### 온보딩 구조
 
-재기획(ADR 0003, 0004, 0005) 온보딩 8~9화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → O-60 → 홈. O-32 다음 `onboarding/auto-split.ts`가 추천 월급 계획, 비상금 금액, 첫 체크리스트를 만듦. 홈 할 일 ‘월급 계획 확인’은 `shared/home-todo.ts`(기기 기록). 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로, O-50은 O-31로.
+재기획(ADR 0003, 0004, 0005) 온보딩 8~9화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → O-60 → 홈. O-32 다음 `onboarding/auto-split.ts`가 추천 월급 계획, 비상금 금액, 첫 체크리스트를 만듦. 홈 할 일 닫은 목록은 `shared/home-todo.ts`(기기 기록, 할 일 ‘월급 계획 확인’은 2026-11-03 없앰). 목표 금액·기한 질문(O-23 표)은 `onboarding/goal-question-input.tsx`에 남아 G-03b·G-03c가 씀. 예전 O-23·O-24에 멈춘 사람은 O-30으로, O-50은 O-31로.
 
-- `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 진행 막대 하나 `progressOf`: O-03~O-50 질문 중 지금까지, O-10·O-60 없음), `step.tsx`(진행, 뒤로, 저장 뒤 다음, 멈춘 화면 기록, `finish`), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 이어하기 `OnboardingGate`)
-- O-21에서 고른 목표는 모두 우리 목표(`goal.owner_user_id` null). 비상금은 자동으로 만들고 금액은 O-50 저장 때 (고정지출 + 생활비) × 3, 기한 1년 뒤
+- `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 진행 막대 하나 `progressOf`: O-03~O-32 질문 중 지금까지, O-10·O-60 없음), `step.tsx`(진행, 뒤로, 저장 뒤 다음, 멈춘 화면 기록, `finish`), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 이어하기 `OnboardingGate`)
+- O-21에서 고른 목표는 모두 우리 목표(`goal.owner_user_id` null). 비상금은 자동으로 만들고 금액은 O-32 다음 `auto-split.ts`가 (고정지출 + 생활비) × 3, 기한 1년 뒤
 - 결혼 비용은 보통 템플릿(가족 탭, 결혼 준비 중이면 ‘자주 고르는’ 맨 앞 + 추천). 질문 ② 모아둔 돈은 템플릿 `held` → `goal.other_held`, 기한 기본값은 O-12 예정일(없으면 1년 뒤 추정)
 - O-30 월급 관리 방식 `couple_space.salary_mode`(각자 `separate` / 합쳐서 `joint`), O-31 월급 `app_user.monthly_income`·`income_variable`·`payday`·`payday_last`
-- O-50 월급 계획: 추천값은 core `rules/salary-split.ts` `recommendSplit`(앱 쪽 순서·변환은 `split-draft.ts`). 줄을 누르면 같은 화면이 금액 입력(Q3)으로 바뀜, ‘+ 줄 추가’는 이름 + 금액. 저장은 RPC `save_split(p_lines, p_owner)`(각자면 내 id, 합쳐서면 생략)
+- O-50 월급 계획(온보딩에서는 안 보이고 추천값으로 자동 저장, 고치는 화면은 W-01): 추천값은 core `rules/salary-split.ts` `recommendSplit`(앱 쪽 순서·변환은 `split-draft.ts`). W-01에서 줄을 누르면 같은 화면이 금액 입력(Q3)으로 바뀜, ‘+ 줄 추가’는 이름 + 금액. 저장은 RPC `save_split(p_lines, p_owner)`(각자면 내 id, 합쳐서면 생략)
 - O-32 ‘다음’(월급 없음이면 O-31) → `auto-split.ts`(추천 월급 계획, 비상금 금액, RPC `start_checklist`: 지금이 든 사이클, 월급날이 없으면 만들지 않음) → O-60 준비 끝 ‘홈으로 가기’ → `useStep().finish`(onboarding_done_at) → 홈
 - 다른 화면에서 고치러 온 길(`?return=`)은 멈춘 화면으로 기록하지 않는다
 - 화면을 넘길 때마다 서버에 저장하고, `app_user.onboarding_step`에 멈춘 화면 ID. 다시 열면 `OnboardingGate`가 “이어서 할까요?”(실행마다 한 번, O-10·합류 중이면 안 물음, 분석 `onboarding_resumed`) 뒤 그 화면부터
@@ -798,7 +790,7 @@ supabase/
 ### 브랜치와 리뷰
 
 - main은 항상 배포 가능. 기능 브랜치는 `feat/`, `fix/`, `chore/`
-- 커밋 메시지는 Conventional Commits (`feat: 월말 정리 단계 동기화`)
+- 커밋 메시지는 Conventional Commits (`feat: 월급 체크리스트 줄 동기화`)
 - PR은 리뷰 1명 이상. DB 마이그레이션과 RLS를 바꾸는 PR도 같음(2026-11-04 2명 규칙 없앰, 대신 pgTAP 필수)
 - 스키마는 추가만. 이름 바꾸기와 지우기는 2단계(새 컬럼 추가 → 최소 지원 버전이 예전 앱을 넘어선 뒤 예전 컬럼 제거)
 - 큰 기술 결정은 docs/adr에 ADR 한 장으로 남김
@@ -813,7 +805,7 @@ supabase/
 
 ### 테스트 세부
 
-- 두 사람 흐름(합류, 충돌, 함께 모드): Playwright 브라우저 컨텍스트 2개로 찬우, 예빈을 동시에
+- 두 사람 흐름(합류, 충돌, 같은 줄 동시 체크): Playwright 브라우저 컨텍스트 2개로 찬우, 예빈을 동시에
 - 데스크톱: Playwright `_electron`으로 실제 앱 실행(딥링크, 트레이, 잠금)
 - 테스트마다 DB 초기화(seed 다시 넣기). 테스트끼리 데이터를 나눠 쓰지 않음
 - 음력: fixture를 천문연구원 표와 대조
@@ -1100,9 +1092,9 @@ supabase/
 1. 기반: 모노레포, CI, 디자인 시스템 패키지, Electron 껍데기와 Capacitor 껍데기, Supabase 환경 3개
 2. 로그인과 부부 연결: 소셜 로그인 3종, 딥링크, 잠금, 초대 링크와 6자리 코드, 합류 (A, P 화면)
 3. 동기화 뼈대: change\_log, Realtime 구독, 델타 동기화, 충돌 규칙, 휴지통
-4. 자산과 목표: 자산, 부채, 통장 역할(통장 하나 모드 포함), 목표 21종과 그림, 공개 범위
-5. 한 달 흐름: 월 계획 만들기(pg\_cron), 월급 나누기, 월말 정리(W-04j 지출 입력, W-04k 저축 확인, W-04g 정산 요약, spend\_category·item\_catalog, 꼼꼼 모드·함께 모드 포함)
-6. 제안: 제안 상태 6가지, 자동 적용, 함께 정하기, 연결 해제
+4. 자산과 목표: 자산, 부채, 목표 21종과 그림, 공개 범위
+5. 한 달 흐름: 월급 계획(W-01), 월급날 체크리스트(W-02, 기준일 0시 예약 작업 포함), 월말 확인(W-05), 관리 방식 각자·합쳐서
+6. 부부 권한: 바로 고치기 + 상대 알림·활동 기록 + 되돌리기(제안·승인 없음, ADR 0003), 연결 해제
 7. 알림과 캘린더: 데스크톱 로컬 알림, 이메일, 방해 금지 시간, 양가 캘린더와 음력, 트레이 위젯
 8. 어드민과 출시 준비: 어드민 필수 메뉴(AD-19 항목 이름 목록·계산 설정값 포함), 문서 메뉴(AD-20, 저장소 docs/ 읽기 전용), 내보내기(CSV, PDF), 웹사이트 L-01\~L-03, L-05, L-06과 다운로드 고정 주소, 서명과 업데이트, 보안 점검
 9. 내부 테스트와 정식 출시: 지인 20\~30쌍 내부 테스트(운영 환경), 출시 준비 탭의 QA 매트릭스와 출시 승인 기준을 넘으면 전체 공개로 출시(단계 배포는 이후 업데이트부터)
@@ -1133,13 +1125,13 @@ supabase/
 | 1 | 기반 | 앱 기본 틀(이번 달 탭의 공통 틀), 공통 상태 |
 | 2 | 로그인과 부부 연결 | A-01\~08, O-01, P-01\~11, S-12(초대·연결 해제) |
 | 3 | 동기화 뼈대 | 화면 없음(휴지통 S-21만) |
-| 4 | 자산과 목표 | O-03\~O-67(온보딩 ①②), F-(우리 자산, F-08 제외), G-(목표) |
-| 5 | 한 달 흐름 | H-(이번 달, 검색 포함), W-01\~03, W-04\~(기본 j·k·(h)·g, 꼼꼼 모드 b\~f·i, W-04p), W-07 |
-| 6 | 제안 | G-08, W-04p, 함께 정하기, S-12 해제 대기 |
+| 4 | 자산과 목표 | O-03\~O-32·O-60(온보딩), F-(우리 자산, F-08b 제외), G-(목표) |
+| 5 | 한 달 흐름 | H-(홈, 검색 포함), W-01, W-02, W-05 |
+| 6 | 부부 권한 | N-(활동 기록), S-12 해제 대기 |
 | 7 | 알림과 캘린더 | N-01\~03, Y-(캘린더), WG-01\~05(데스크톱 트레이 위젯 창만) |
 | 8 | 어드민과 출시 준비 | AD-(필수 메뉴, AD-19·AD-20 포함), S-01\~22 나머지, L-01\~03·L-05·L-06 |
 
-- 1차 밖: 비슷한 부부와 비교(F-08), 수익률 시뮬레이션, 계획 다시 세우기 비교, 월말 정리 심화, 양가 균형 리포트, 결제·체험(S-16·AD-08·AD-09), OS 기본 위젯, 모바일 앱, Windows Hello
+- 1차 밖: 비슷한 부부와 비교(F-08b), 수익률 시뮬레이션, 양가 균형 리포트, 결제·체험(S-16·AD-08·AD-09), OS 기본 위젯, 모바일 앱, Windows Hello
 
 ### 기술 준비
 
@@ -1153,12 +1145,12 @@ supabase/
 - [ ] 서명: Apple Developer(서명, 공증, 애플 로그인), Windows 클라우드 HSM OV 서명 계정(SSL.com eSigner, 기반 단계에서 신청)
 - [ ] 관측: Sentry, PostHog 자체 운영 서버, Better Stack(상태 페이지)
 - [ ] 메일: 네이버웍스 help@, privacy@ 그룹 메일, SPF는 TXT 한 줄에 네이버웍스와 SES
-- [ ] DB 마이그레이션 순서(테이블마다 공통 컬럼 + RLS 정책 4개 + pgTAP): ① 공통 틀(is\_space\_member, updated\_at·version·change\_log 트리거) ② couple\_space, app\_user, invite, income\_period, device\_session, consent ③ change\_log(seq, mutation\_id), amount\_history ④ account, asset, debt, fixed\_expense, annual\_event ⑤ goal, goal\_use, wedding\_cost\_item, monthly\_plan, plan\_line, month\_close, spend\_category, month\_spend, big\_expense, saving\_deposit, conversation\_card\_log, checklist\_item, checklist\_done ⑥ proposal, unlink\_request ⑦ family(암호화), care\_day, care\_round, family\_budget, photo ⑧ notification, todo, widget\_setting ⑨ inquiry, admin\_view\_request, holiday, notice, maintenance, app\_config, admin\_setting, item\_catalog, admin\_user, audit\_log, job\_run
-- [ ] seed.sql: 찬우, 예빈, 연결된 부부 공간, 이번 달 월 계획
-- [ ] 예약 작업 8개와 job\_run 기록, space별 advisory lock: create-monthly-plans, send-due-notifications, send-payday-reminders, send-evening-reminders, apply-unlink-defaults, send-weekly-summary, sync-holidays, purge-expired
+- [ ] DB 마이그레이션 순서(테이블마다 공통 컬럼 + RLS 정책 4개 + pgTAP): ① 공통 틀(is\_space\_member, updated\_at·version·change\_log 트리거) ② couple\_space, app\_user, invite, device\_session, consent ③ change\_log(seq, mutation\_id), amount\_history ④ account, asset, debt, fixed\_expense, annual\_event ⑤ goal, goal\_move, salary\_split, split\_line, pay\_checklist, pay\_check\_line, checklist\_done ⑥ couple\_unlink, partner\_change ⑦ care\_day, care\_record, photo ⑧ notification, widget\_setting ⑨ inquiry, admin\_view\_request, holiday, notice, maintenance, app\_config, admin\_setting, item\_catalog, admin\_user, audit\_log, job\_run
+- [ ] seed.sql: 찬우, 예빈, 연결된 부부 공간, 월급 계획과 이번 달 체크리스트
+- [ ] 예약 작업 8개와 job\_run 기록, space별 advisory lock: cycle-checklists, send-due-notifications, send-payday-reminders, send-evening-reminders, unlink-deadlines, send-weekly-summary, sync-holidays, purge-expired
 - [ ] 알림 키: notification.kind를 기획서 ‘알림’ 탭 표의 종류와 1:1로, SES 템플릿(supabase/functions/\_shared/mail-templates/), 메일 상한 월 6회
 - [ ] 분석 이벤트: 기획서 ‘성공 지표’ 4장 이벤트 이름과 속성, 공통 속성, 금액은 \_band 구간만, analytics\_off
-- [ ] 테스트 벡터: core/rules/vectors/\*.json에 계산·배분 예시(W-04g 정산 요약 예시 포함)를 넣어 Vitest와 pgTAP이 같이 읽음
+- [ ] 테스트 벡터: core/rules/vectors/\*.json에 계산·배분 예시를 넣어 Vitest와 pgTAP이 같이 읽음
 - [ ] 오류 코드 표(docs/errors.md)와 기획서 ‘공통 상태’ 문구 연결
 - [ ] 음력 fixture(천문연구원 표 대조), 공휴일 fixture
 - [ ] app\_config: min\_version\_desktop, min\_version\_ios·android, flags
@@ -1171,10 +1163,10 @@ supabase/
 | 화면 | 컴포넌트 |
 | --- | --- |
 | W-02, H-03, W-05 체크리스트 줄 | TransferRow(hg-transfer) |
-| F-01 16번, W-01 6번, O-63 통장 목록 | ListRow |
+| F-01 16번, W-01 6번 | ListRow |
 | 검색(⌘K, 좁은 창 검색) | CommandPalette |
 | 알림 센터 N-01·N-02 항목 | Avatar |
-| 월말 정리 동시 저장 알림 등 | Toast |
+| 바로 저장 뒤 ‘되돌리기’, 동시 저장 알림 등 | Toast |
 
 ### 착수 전 남은 일
 

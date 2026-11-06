@@ -136,7 +136,6 @@ export const copy = {
   pendingWait: (name: string) => `${name}님 답을 기다리고 있어요`,
   pendingReceived: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   seeRequest: '확인하기', // [확인 필요]
-  proposalsRow: '제안', // [확인 필요] 줄 이름
   frozen: '해제 전까지 월급 계획을 고칠 수 없어요', // [확인 필요]
   cancelRequest: '요청 취소',
   cancelled: '연결 해제 요청을 취소했어요', // [확인 필요]
