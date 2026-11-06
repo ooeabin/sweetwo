@@ -51,14 +51,14 @@ def main():
     mac.alpha_composite(shadow)
     mac.alpha_composite(tile(824, radius=185), (100, 100))
     mac.save(os.path.join(B, 'app-icon-macos.png'), optimize=True)
-    # 파비콘: 둥근 사각(작은 크기라 글자를 조금 크게)
+    # 파비콘: 둥근 사각, 글자 비율은 앱 아이콘과 같게(2026-11-06)
     for n in (32, 48):
-        f = tile(n * 8, frac=0.80, radius=n * 8 // 5).resize((n, n), Image.LANCZOS)
+        f = tile(n * 8, radius=n * 8 // 5).resize((n, n), Image.LANCZOS)
         f.save(os.path.join(B, f'favicon-{n}.png'), optimize=True)
     for q in ('apps/site/public/favicon-32.png', 'apps/mobile/public/favicon-32.png'):
         Image.open(os.path.join(B, 'favicon-32.png')).save(p(q), optimize=True)
     # 데스크톱 트레이 32px(16으로 줄여 씀)
-    tile(256, frac=0.80, radius=56).resize((32, 32), Image.LANCZOS).save(p('apps/desktop/resources/tray.png'), optimize=True)
+    tile(256, radius=56).resize((32, 32), Image.LANCZOS).save(p('apps/desktop/resources/tray.png'), optimize=True)
     # Android
     res = p('apps/mobile/android/app/src/main/res')
     for d, s in {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}.items():

@@ -63,7 +63,7 @@
 
 **앱 아이콘**
 
-- 앱 아이콘(2026-11-06 바꿈): 브랜드 오렌지(`brand` #FF7716) 꽉 찬 바탕 위에 흰 워드마크 ‘Two’(logo-cherry.svg의 뒤 세 글자 T·w·o, 그대로 흰색). 컬리처럼 워드마크 글자를 아이콘으로 씀. Two 폭은 아이콘 폭의 74%, 가운데. Android 적응형 전경은 안전 영역 때문에 폭 48%(바탕은 `ic_launcher_background` #FF7716), 원형 아이콘 66%, 파비콘·트레이는 작은 크기라 80%에 둥근 사각. 모두 `scripts/brand-icons/two.py`가 워드마크 벡터에서 만듦(AI로 다시 그리지 않음). 뜻: 둘(Two)이 함께. 예전 파이 차트 아이콘은 작게 줄이면 알아보기 어려워서 버림(레퍼런스 비교 후, 빗썸·토스·카카오 등 한국 앱 65개)
+- 앱 아이콘(2026-11-06 바꿈): 브랜드 오렌지(`brand` #FF7716) 꽉 찬 바탕 위에 흰 워드마크 ‘Two’(logo-cherry.svg의 뒤 세 글자 T·w·o, 그대로 흰색). 컬리처럼 워드마크 글자를 아이콘으로 씀. Two 폭은 아이콘 폭의 74%, 가운데. Android 적응형 전경은 안전 영역 때문에 폭 48%(바탕은 `ic_launcher_background` #FF7716), 원형 아이콘 66%, 파비콘·트레이는 앱 아이콘과 같은 비율(74%)에 둥근 사각. 모두 `scripts/brand-icons/two.py`가 워드마크 벡터에서 만듦(AI로 다시 그리지 않음). 뜻: 둘(Two)이 함께. 예전 파이 차트 아이콘은 작게 줄이면 알아보기 어려워서 버림(레퍼런스 비교 후, 빗썸·토스·카카오 등 한국 앱 65개)
 - 파일(디자인 시스템 Brand): app-icon.png(1024, 오렌지 바탕 + 흰 Two), app-icon-macos.png(Mac 독용, 824 둥근 사각 + 그림자), favicon-32/48.png, apple-touch-icon.png(180). 데스크톱 build/icon.png, 트레이, iOS AppIcon, Android 런처도 같은 스크립트가 만듦
 - 상태: 확정(2026-11-06 파이 차트에서 ‘Two’로 교체). 심볼(symbol.png, symbol.svg)과 SNS 공유 이미지(og), 랜딩(L-01)의 파이 차트는 아직 그대로, 새 심볼을 정할 때 같이 바꿈. 설치 파일용 .icns와 .ico는 app-icon-macos.png와 app-icon.png로 만듦
 
