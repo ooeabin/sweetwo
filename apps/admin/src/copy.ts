@@ -257,7 +257,8 @@ export const copy = {
   noSubject: '제목 없음', // [확인 필요]
   noMemberLink: '회원 연결 없음', // [확인 필요]
   attachmentsDropped: (n: number) => `${n}개는 받지 않았어요. 메일함에서 확인해 주세요`, // [확인 필요]
-  emailAnswerHelp: '답변은 help@sweetwo.kr에서 이 주소로 메일로 보내요', // [확인 필요]
+  emailAnswerHelp:
+    '답장 메일은 메일 발송을 연결한 뒤부터 자동으로 가요. 그 전에는 네이버웍스 help@에서 직접 답장해 주세요', // [확인 필요]
   elapsed: (h: number) => (h < 24 ? `${h}시간` : `${Math.floor(h / 24)}일 ${h % 24}시간`),
 
   // AD-17

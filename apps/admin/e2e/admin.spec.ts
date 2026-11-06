@@ -701,7 +701,9 @@ test('이메일 문의 상세: 제목, 가린 보낸 주소, 회원 연결 없�
   const msgs = page.locator('ol li');
   await expect(msgs.nth(0)).toContainText('요금이 있나요?');
   await expect(msgs.nth(1)).toContainText('답장 기다려요');
-  await expect(page.getByText('help@sweetwo.kr에서 이 주소로 메일로 보내요')).toBeVisible();
+  await expect(
+    page.getByText('그 전에는 네이버웍스 help@에서 직접 답장해 주세요', { exact: false }),
+  ).toBeVisible();
   await axe(page);
   await page.getByRole('textbox', { name: '답변' }).fill('지금은 무료예요');
   await page.getByRole('button', { name: '답변 보내기' }).click();

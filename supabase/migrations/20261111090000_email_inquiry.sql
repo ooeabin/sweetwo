@@ -1,7 +1,7 @@
 -- 이메일 문의(27 AD-06 2번·예외, 29 고객 메일 수신, 28 L-06 3번). 추가만.
 --
--- 흐름: 고객 → help@sweetwo.kr(네이버웍스) → 자동 전달 → Amazon SES 받기(서울) → 수신 규칙 SNS 동작 → SNS 주제
---   → Edge Function inbound-mail(HTTPS 구독) → ingest_inquiry_mail(service_role만).
+-- 흐름: 고객 → help@sweetwo.kr(네이버웍스) → 자동 전달 → inbound@in.sweetwo.kr(Cloudflare Email Routing)
+--   → 메일 Worker(apps/mail-worker) → Edge Function inbound-mail(원본 MIME) → ingest_inquiry_mail(service_role만).
 -- - 회원 연결: 보낸 주소와 auth.users 이메일이 정확히 일치(대소문자 무시)하는 계정이 1명일 때만. 없으면 회원 없이.
 -- - 같은 대화: In-Reply-To·References가 이 문의에서 받은·보낸 메일 ID와 같거나, 제목에 [A-10001] 같은 문의 번호가 있으면
 --   (둘 다 보낸 주소가 같을 때만) 새 문의 대신 그 문의에 덧붙임. 완료 뒤 7일 안이면 다시 열림, 7일 넘으면 새 문의.
@@ -9,6 +9,7 @@
 -- - 보낸 주소는 문의에만 두고 어드민에는 가려서(mask_email) 보여 줌. 첨부 파일은 받지 않고 개수만 남김.
 -- - 답변(admin_answer_inquiry): 이메일 문의면 help@sweetwo.kr에서 같은 주소로 답장 메일(mail_outbox → send-mail → SES),
 --   In-Reply-To·References를 넣고 제목은 “Re: 원래 제목 [문의 번호]”. 앱 알림은 보내지 않음(앱 ‘내 문의’에 안 보임).
+--   send-mail의 MAIL_DRIVER가 ses가 아니면(SES 연결 전) 메일은 실제로 나가지 않음 → 어드민이 안내하고 네이버웍스에서 직접 답장.
 -- - 앱 문의 사본(S-19a “동시에 help@로 사본 메일”): 사용자 메시지가 쌓이면 help@로 사본을 쌓음.
 --   제목 “[A-10001] 앱 문의 사본”, 머리글 X-Sweetwo-Copy, 보내는 주소 noti@ → 전달돼 돌아와도 위 규칙으로 무시.
 

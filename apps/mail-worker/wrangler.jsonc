@@ -1,0 +1,13 @@
+// 이메일 문의 받기 Worker(Cloudflare Email Routing → Email Worker, DEV_GUIDE ‘메일 4단계’). 대시보드 Worker 이름과 같아야 함
+// 배포: 저장소 루트에서 npx wrangler deploy --config apps/mail-worker/wrangler.jsonc
+// 비밀 값은 여기에 넣지 않음: npx wrangler secret put INBOUND_MAIL_SECRET --config apps/mail-worker/wrangler.jsonc
+// (Supabase 함수 비밀 값 INBOUND_MAIL_SECRET과 같은 값). 받는 규칙은 대시보드 Email Routing에서 inbound@in.sweetwo.kr → 이 Worker
+{
+  "name": "sweetwo-mail-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "vars": {
+    // Supabase Edge Function 주소(공개 값). 운영 프로젝트가 생기면 그 주소로
+    "INBOUND_URL": "https://xxofyzgzrjrcrcxvftpn.supabase.co/functions/v1/inbound-mail",
+  },
+}

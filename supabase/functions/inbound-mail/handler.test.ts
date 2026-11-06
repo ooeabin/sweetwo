@@ -1,17 +1,17 @@
 import { deepStrictEqual, strictEqual } from 'node:assert';
 import { addressOf, decodeWords, handle, parseMail, stripQuoted, type Env } from './handler.ts';
 
-const TOPIC = 'arn:aws:sns:ap-northeast-2:111122223333:sweetwo-inbound-mail';
 const env: Env = {
   SUPABASE_URL: 'http://db.test',
   SUPABASE_SERVICE_ROLE_KEY: 'svc',
   INBOUND_MAIL_SECRET: 's3cret',
-  INBOUND_MAIL_TOPIC_ARN: TOPIC,
 };
-const post = (body: unknown, token = 's3cret') =>
-  new Request(`http://f/inbound-mail?token=${token}`, {
+// 메일 Worker가 보내는 모양: 원본 MIME(UTF-8 바이트) + x-inbound-secret
+const post = (raw: string | Uint8Array<ArrayBuffer>, secret = 's3cret') =>
+  new Request('http://f/inbound-mail', {
     method: 'POST',
-    body: JSON.stringify(body),
+    headers: { 'content-type': 'message/rfc822', 'x-inbound-secret': secret },
+    body: typeof raw === 'string' ? new TextEncoder().encode(raw) : raw,
   });
 type Log = { url: string; body: Record<string, unknown> | null }[];
 function fakeFetch(log: Log, result = 'created') {
@@ -21,28 +21,6 @@ function fakeFetch(log: Log, result = 'created') {
     return url.includes('/rpc/') ? Response.json({ result, no: 'A-10001' }) : new Response('ok');
   }) as typeof fetch;
 }
-const pass = { status: 'PASS' };
-const received = (
-  content: string,
-  receipt: Record<string, unknown> = {},
-  encoding: 'UTF8' | 'BASE64' = 'UTF8',
-) => ({
-  Type: 'Notification',
-  TopicArn: TOPIC,
-  Message: JSON.stringify({
-    notificationType: 'Received',
-    mail: { messageId: 'ses-in-1' },
-    receipt: {
-      spamVerdict: pass,
-      virusVerdict: pass,
-      spfVerdict: pass,
-      dkimVerdict: pass,
-      action: { type: 'SNS', encoding },
-      ...receipt,
-    },
-    content,
-  }),
-});
 
 const simple = [
   'From: =?UTF-8?B?7LCs7Jqw?= <ChanWoo@Example.com>',
@@ -56,44 +34,24 @@ const simple = [
   '',
 ].join('\r\n');
 
-Deno.test('토큰이 다르거나 다른 주제면 거절', async () => {
+Deno.test('비밀 값이 다르거나 없으면 거절, 1MB 넘으면 413', async () => {
   const log: Log = [];
-  strictEqual((await handle(post(received(simple), 'x'), env, fakeFetch(log))).status, 403);
+  strictEqual((await handle(post(simple, 'x'), env, fakeFetch(log))).status, 403);
   strictEqual(
-    (await handle(post({ ...received(simple), TopicArn: 'arn:x' }), env, fakeFetch(log))).status,
+    (await handle(new Request('http://f', { method: 'POST', body: simple }), env, fakeFetch(log)))
+      .status,
     403,
+  );
+  strictEqual(
+    (await handle(post(new Uint8Array(1024 * 1024 + 1)), env, fakeFetch(log))).status,
+    413,
   );
   strictEqual(log.length, 0);
 });
 
-Deno.test('구독 확인은 sns.*.amazonaws.com 주소만 엶', async () => {
-  const log: Log = [];
-  const ok = await handle(
-    post({
-      Type: 'SubscriptionConfirmation',
-      TopicArn: TOPIC,
-      SubscribeURL: 'https://sns.ap-northeast-2.amazonaws.com/?Action=ConfirmSubscription&Token=t',
-    }),
-    env,
-    fakeFetch(log),
-  );
-  strictEqual(ok.status, 200);
-  const bad = await handle(
-    post({
-      Type: 'SubscriptionConfirmation',
-      TopicArn: TOPIC,
-      SubscribeURL: 'https://evil.example/',
-    }),
-    env,
-    fakeFetch(log),
-  );
-  strictEqual(bad.status, 400);
-  strictEqual(log.length, 1);
-});
-
 Deno.test('받은 메일 → ingest_inquiry_mail(주소 소문자, 제목·본문 풀기)', async () => {
   const log: Log = [];
-  const res = await handle(post(received(simple)), env, fakeFetch(log));
+  const res = await handle(post(simple), env, fakeFetch(log));
   deepStrictEqual(await res.json(), { result: 'created' });
   deepStrictEqual(log, [
     {
@@ -110,31 +68,32 @@ Deno.test('받은 메일 → ingest_inquiry_mail(주소 소문자, 제목·본�
   ]);
 });
 
-Deno.test('인코딩 BASE64도 같은 결과', async () => {
-  const log: Log = [];
-  const bytes = new TextEncoder().encode(simple);
-  const content = btoa(String.fromCharCode(...bytes));
-  await handle(post(received(content, {}, 'BASE64')), env, fakeFetch(log));
-  strictEqual(log[0].body?.p_body, '초대 코드가 안 보여요');
-});
-
 Deno.test(
-  '바이러스·스팸 FAIL, SPF와 DKIM 둘 다 FAIL이면 버림. SPF만 FAIL(전달)이면 받음',
+  '인증 결과: dmarc=fail이고 pass가 하나도 없으면 버림, SPF 실패(전달)만이면 받음',
   async () => {
-    const fail = { status: 'FAIL' };
-    for (const r of [
-      { virusVerdict: fail },
-      { spamVerdict: fail },
-      { spfVerdict: fail, dkimVerdict: fail },
-    ]) {
-      const log: Log = [];
-      const res = await handle(post(received(simple, r)), env, fakeFetch(log));
-      deepStrictEqual(await res.json(), { result: 'dropped' });
-      strictEqual(log.length, 0);
-    }
-    const log: Log = [];
-    await handle(post(received(simple, { spfVerdict: fail })), env, fakeFetch(log));
-    strictEqual(log.length, 1);
+    const head = (v: string) => simple.replace('To:', v + '\r\nTo:');
+    const bad = head('Authentication-Results: mx.cloudflare.net; spf=fail; dkim=fail; dmarc=fail');
+    const forwarded = head(
+      'Authentication-Results: mx.cloudflare.net; spf=fail smtp.mailfrom=example.com; dkim=pass header.d=example.com; dmarc=pass',
+    );
+    const arcPass = head(
+      'Authentication-Results: mx.cloudflare.net; dmarc=fail\r\nARC-Authentication-Results: i=1; worksmobile.com; dkim=pass',
+    );
+    const spam = head('X-Spam-Flag: YES');
+    let log: Log = [];
+    deepStrictEqual(await (await handle(post(bad), env, fakeFetch(log))).json(), {
+      result: 'skipped',
+      reason: 'auth',
+    });
+    deepStrictEqual(await (await handle(post(spam), env, fakeFetch(log))).json(), {
+      result: 'skipped',
+      reason: 'spam',
+    });
+    strictEqual(log.length, 0);
+    log = [];
+    await handle(post(forwarded), env, fakeFetch(log));
+    await handle(post(arcPass), env, fakeFetch(log));
+    strictEqual(log.length, 2);
   },
 );
 
@@ -148,7 +107,7 @@ Deno.test('앱 문의 사본(X-Sweetwo-Copy), 자동 응답, 반송은 넘기지
     [bounce, 'bounce'],
   ]) {
     const log: Log = [];
-    const res = await handle(post(received(m)), env, fakeFetch(log));
+    const res = await handle(post(m), env, fakeFetch(log));
     deepStrictEqual(await res.json(), { result: 'skipped', reason: why });
     strictEqual(log.length, 0);
   }
@@ -253,7 +212,7 @@ Deno.test('주소와 머리글 풀기', () => {
 
 Deno.test('DB 실패면 502(SNS가 다시 보냄)', async () => {
   const res = await handle(
-    post(received(simple)),
+    post(simple),
     env,
     (async () => new Response('x', { status: 500 })) as typeof fetch,
   );

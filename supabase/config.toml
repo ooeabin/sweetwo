@@ -443,7 +443,7 @@ verify_jwt = false
 [functions.mail-events]
 verify_jwt = false
 
-# 이메일 문의 받기(네이버웍스 전달 → SES 받기 → SNS HTTPS 구독). JWT 대신 주소의 ?token=(INBOUND_MAIL_SECRET)과 주제 ARN으로 확인
+# 이메일 문의 받기(네이버웍스 전달 → Cloudflare Email Routing → 메일 Worker apps/mail-worker). JWT 대신 x-inbound-secret(INBOUND_MAIL_SECRET)로 확인
 [functions.inbound-mail]
 verify_jwt = false
 

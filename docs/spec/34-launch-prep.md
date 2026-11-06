@@ -69,7 +69,7 @@
 - [ ] 항목 이름 기본 목록(자산 추가의 정책 상품 이름) 출시 직전 최신화 [확인 필요], 어드민 AD-19에 넣기(→ 핵심 규칙 › 데이터 항목 6장)
 - [x] 도메인: sweetwo.kr 등록(2026년 10월 12일 가비아, 개인 명의, 1년, 자동 연장, 만료 2027년 10월 12일). sweetwo.co.kr과 스위투.kr은 선택, sweetwo.com은 확보하지 않음(다른 소유자 등록)
 - [x] 네이버웍스 가입과 sweetwo.kr 메일 연결(TXT 인증, MX, SPF, DKIM, DMARC)(2026년 10월 12일 완료, DKIM 선택자 naverworks). SES 붙일 때 SPF는 새 레코드 없이 같은 TXT 줄에 추가
-- [ ] 이메일 문의 받기 설정(DEV_GUIDE ‘메일 4단계’): SES 받기 도메인 in.sweetwo.kr 확인과 MX(inbound-smtp.ap-northeast-2.amazonaws.com), SNS 주제와 HTTPS 구독(inbound-mail?token=), SES 수신 규칙(inbound@in.sweetwo.kr → SNS, UTF-8, 스팸·바이러스 검사), Edge Function 비밀 값 INBOUND_MAIL_SECRET·INBOUND_MAIL_TOPIC_ARN, 네이버웍스 help@ 자동 전달. 개인 메일로 보내고 답장까지 확인
+- [ ] 이메일 문의 받기 설정(DEV_GUIDE ‘메일 4단계’, AWS 없이): Cloudflare Email Routing을 하위 도메인 in.sweetwo.kr에 켜기(루트 MX는 네이버웍스 그대로), apps/mail-worker로 Worker 만들고 변수 INBOUND_URL·비밀 값 INBOUND_MAIL_SECRET, 라우팅 규칙 inbound@in.sweetwo.kr → Worker, Supabase 함수 비밀 값 INBOUND_MAIL_SECRET(같은 값), 네이버웍스 help@ 자동 전달 → inbound@in.sweetwo.kr, 개인 메일로 보내서 AD-06에 뜨는지 확인. 비용 없음(Email Routing 받기 무료, Workers 무료 요금제)
 - [ ] help@ 이름으로 답장 보내기 설정(답장 받을 주소를 help@sweetwo.kr로, 고객 답장이 관리자 주소로 가지 않게). 10월 12일 시도했으나 아직 관리자 주소로 돌아옴, 메일 헤더 From과 Reply-To 확인 필요
 - [ ] 장면 영상 P-01 다시 만들기(잘림): 보류(영상 5개 3D 재제작과 함께)
 - [x] 구현 기준 화면 그림 갱신(F-01 16·17, 앱 기본 틀 등). 그 밖의 화면은 2026-10-25 재기획으로 없어지거나 바뀜

@@ -1,10 +1,11 @@
 // 이메일 문의 받기(27 AD-06 예외 ‘이메일 문의’, 29 고객 메일 수신). help@sweetwo.kr(네이버웍스) → 자동 전달 →
-// Amazon SES 받기 → 수신 규칙 SNS 동작(인코딩 UTF-8, 150KB 넘는 메일은 SES가 되돌려 보냄) → SNS 주제 → 이 함수(HTTPS 구독).
-// 1) 주소의 ?token=이 함수 비밀 값 INBOUND_MAIL_SECRET과 같은지 2) TopicArn이 INBOUND_MAIL_TOPIC_ARN과 같은지
-// 3) 구독 확인은 SubscribeURL(sns.<지역>.amazonaws.com만)을 열어 확인 4) 바이러스·스팸 FAIL, SPF와 DKIM 둘 다 FAIL이면 버림
-//    (네이버웍스가 전달하면 SPF는 실패할 수 있어 하나만 FAIL이면 받음) 5) 앱 문의 사본(X-Sweetwo-Copy), 자동 응답, 반송 알림은 버림
-// 6) MIME에서 From, Subject, Message-ID, In-Reply-To, References, text/plain 본문만 꺼내 ingest_inquiry_mail로 넘김.
-// 첨부 파일은 받지 않고 개수만 넘김. 본문·주소는 로그에 남기지 않음.
+// inbound@in.sweetwo.kr(Cloudflare Email Routing) → 메일 Worker(apps/mail-worker) → 이 함수(원본 MIME, message/rfc822).
+// 1) 머리글 x-inbound-secret이 함수 비밀 값 INBOUND_MAIL_SECRET과 같은지(같은 시간 비교) 2) 1MB 넘으면 413
+// 3) 앱 문의 사본(X-Sweetwo-Copy), 자동 응답, 반송 알림, 스팸 표시(X-Spam-Flag), 인증 실패(Authentication-Results·
+//    ARC-Authentication-Results에 dmarc=fail이 있고 dkim=pass·dmarc=pass가 하나도 없음)는 버림. SPF 실패만으로는 버리지 않음
+//    (전달하면 SPF는 깨짐) 4) MIME에서 From, Subject, Message-ID, In-Reply-To, References, text/plain 본문만 꺼내
+//    ingest_inquiry_mail로 넘김. 첨부 파일은 받지 않고 개수만 넘김. 본문·주소는 로그에 남기지 않음.
+// 응답: 받음·버림은 200(Worker가 다시 보내지 않게), 비밀 값 틀림 403, 너무 큼 413, DB 실패 502(Worker가 오류로 남김).
 import { serverKey, type Env as MailEnv } from '../send-mail/handler.ts';
 
 export interface Env extends Pick<
@@ -12,7 +13,6 @@ export interface Env extends Pick<
   'SUPABASE_URL' | 'SUPABASE_SECRET_KEYS' | 'SUPABASE_SERVICE_ROLE_KEY'
 > {
   INBOUND_MAIL_SECRET?: string;
-  INBOUND_MAIL_TOPIC_ARN?: string;
 }
 
 const same = (a: string, b: string) => {
@@ -21,27 +21,6 @@ const same = (a: string, b: string) => {
   for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return d === 0;
 };
-
-interface SnsMessage {
-  Type?: string;
-  TopicArn?: string;
-  Message?: string;
-  SubscribeURL?: string;
-}
-interface Verdict {
-  status?: string;
-}
-interface SesReceived {
-  notificationType?: string;
-  receipt?: {
-    spamVerdict?: Verdict;
-    virusVerdict?: Verdict;
-    spfVerdict?: Verdict;
-    dkimVerdict?: Verdict;
-    action?: { type?: string; encoding?: string };
-  };
-  content?: string;
-}
 
 /** ingest_inquiry_mail에 넘길 값 */
 export interface Parsed {
@@ -53,7 +32,7 @@ export interface Parsed {
   attachments: number;
 }
 
-const MAX_RAW = 400_000; // 글자(바이트) 상한. SES SNS 동작은 150KB까지만 보냄
+export const MAX_RAW = 1024 * 1024; // 바이트 상한(Worker도 1MB 넘으면 거절)
 const MAX_BODY = 4000; // inquiry_message.body 상한
 const MAX_REFS = 30;
 
@@ -240,6 +219,14 @@ function skipReason(h: Headers, from: string): string | null {
   if (h.has('x-autoreply') || h.has('x-autorespond')) return 'auto';
   if (/^(mailer-daemon|postmaster)@/i.test(from)) return 'bounce';
   if (params(h1(h, 'content-type')).value === 'multipart/report') return 'bounce';
+  if (/^yes/i.test(h1(h, 'x-spam-flag') ?? '') || /^yes/i.test(h1(h, 'x-spam-status') ?? ''))
+    return 'spam';
+  // 전달 경로(네이버웍스, Cloudflare)가 붙인 인증 결과. 하나라도 dkim=pass나 dmarc=pass면 받음
+  const auth = [
+    ...(h.get('authentication-results') ?? []),
+    ...(h.get('arc-authentication-results') ?? []),
+  ].join(' ');
+  if (/\bdmarc=fail\b/i.test(auth) && !/\b(dkim|dmarc)=pass\b/i.test(auth)) return 'auth';
   return null;
 }
 
@@ -268,63 +255,22 @@ export function parseMail(raw: string): Parsed | { skip: string } {
   };
 }
 
-const SNS_HOST = /^sns\.[a-z0-9-]+\.amazonaws\.com$/;
-const failed = (v?: Verdict) => (v?.status ?? '').toUpperCase() === 'FAIL';
-
 export async function handle(
   req: Request,
   env: Env,
   fetchFn: typeof fetch = fetch,
 ): Promise<Response> {
-  const token = new URL(req.url).searchParams.get('token') ?? '';
-  if (!env.INBOUND_MAIL_SECRET || !same(token, env.INBOUND_MAIL_SECRET))
+  const secret = req.headers.get('x-inbound-secret') ?? '';
+  if (!env.INBOUND_MAIL_SECRET || !same(secret, env.INBOUND_MAIL_SECRET))
     return new Response('forbidden', { status: 403 });
   if (req.method !== 'POST') return new Response('method', { status: 405 });
-  let msg: SnsMessage;
-  try {
-    msg = (await req.json()) as SnsMessage;
-  } catch {
-    return new Response('bad', { status: 400 });
-  }
-  if (!env.INBOUND_MAIL_TOPIC_ARN || msg.TopicArn !== env.INBOUND_MAIL_TOPIC_ARN)
-    return new Response('topic', { status: 403 });
+  if (Number(req.headers.get('content-length') ?? 0) > MAX_RAW)
+    return new Response('too large', { status: 413 });
+  const bytes = new Uint8Array(await req.arrayBuffer());
+  if (bytes.byteLength > MAX_RAW) return new Response('too large', { status: 413 });
+  if (bytes.byteLength === 0) return new Response('empty', { status: 400 });
 
-  if (msg.Type === 'SubscriptionConfirmation') {
-    let u: URL;
-    try {
-      u = new URL(msg.SubscribeURL ?? '');
-    } catch {
-      return new Response('bad', { status: 400 });
-    }
-    if (u.protocol !== 'https:' || !SNS_HOST.test(u.hostname))
-      return new Response('bad', { status: 400 });
-    const res = await fetchFn(u.toString());
-    return new Response(res.ok ? 'confirmed' : 'failed', { status: res.ok ? 200 : 502 });
-  }
-  if (msg.Type !== 'Notification') return new Response('ignored');
-
-  let e: SesReceived;
-  try {
-    e = JSON.parse(msg.Message ?? '') as SesReceived;
-  } catch {
-    return new Response('bad', { status: 400 });
-  }
-  if (e.notificationType !== 'Received' || typeof e.content !== 'string')
-    return Response.json({ result: 'ignored' });
-  const r = e.receipt ?? {};
-  if (
-    failed(r.virusVerdict) ||
-    failed(r.spamVerdict) ||
-    (failed(r.spfVerdict) && failed(r.dkimVerdict))
-  )
-    return Response.json({ result: 'dropped' });
-
-  // 인코딩 BASE64면 바이트 그대로, UTF-8이면 UTF-8 바이트로 바꿔 같은 방식으로 읽음
-  const bytes =
-    (r.action?.encoding ?? '').toUpperCase() === 'BASE64'
-      ? b64(e.content)
-      : new TextEncoder().encode(e.content);
-  const p = parseMail(bin(bytes.subarray(0, MAX_RAW)));
+  const p = parseMail(bin(bytes));
   if ('skip' in p) return Response.json({ result: 'skipped', reason: p.skip });
 
   const key = serverKey(env);
@@ -345,7 +291,7 @@ export async function handle(
       p_attachments: p.attachments,
     }),
   });
-  // 실패하면 5xx → SNS가 다시 보냄(같은 Message-ID는 DB가 한 번만 받음)
+  // 실패하면 502 → Worker가 오류를 냄(같은 Message-ID는 DB가 한 번만 받음)
   if (!res.ok) return new Response('db', { status: 502 });
   const out = (await res.json().catch(() => ({}))) as { result?: string };
   return Response.json({ result: out.result ?? 'ok' });

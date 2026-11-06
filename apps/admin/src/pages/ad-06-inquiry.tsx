@@ -21,7 +21,8 @@ const STATUSES: InquiryStatus[] = ['received', 'in_progress', 'waiting_user', 'd
 // AD-06 문의 상세: 대화, 자동 첨부(사용자가 켠 경우만, 금액·메모 없음), 답변(해요체) + 상태, ‘답변 보내기’
 // (보내면 ‘사용자 답변 대기’ + 앱 ‘내 문의’ 알림). 화면 확인이 필요하면 AD-04 L2 동의 요청(CS만, 앱 문의만).
 // 이메일 문의: 제목, 가린 보낸 주소, 회원(정확히 일치한 경우만) 또는 ‘회원 연결 없음’, 받지 않은 첨부 수.
-// 답변은 help@sweetwo.kr에서 같은 주소로 메일로 감(앱 알림 없음).
+// 답변은 help@sweetwo.kr에서 같은 주소로 메일로 감(앱 알림 없음). 메일 발송(SES) 연결 전에는 실제로 나가지 않으므로
+// 이메일 문의에는 늘 안내 띠(‘네이버웍스 help@에서 직접 답장’)를 보여 줌. 서버는 발송 설정을 알려 주지 않음.
 export function AD06Inquiry() {
   const { id = '' } = useParams();
   const nav = useNavigate();
@@ -71,6 +72,11 @@ export function AD06Inquiry() {
     >
       <div className="hg-admin__grid">
         <div className="hg-admin__col">
+          {d.channel === 'email' && (
+            <div className="hg-banner hg-banner--info" role="note">
+              <span className="hg-banner__text">{copy.emailAnswerHelp}</span>
+            </div>
+          )}
           <ol className="hg-stack" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {d.messages.map((m, i) => (
               <li key={i} className="hg-card hg-stack" style={{ gap: 'var(--space-1)' }}>
@@ -124,7 +130,6 @@ export function AD06Inquiry() {
                   </Button>
                 )}
               </div>
-              {d.channel === 'email' && <p className="hg-help">{copy.emailAnswerHelp}</p>}
               {msg && (
                 <p className="hg-help" role="status">
                   {msg}
