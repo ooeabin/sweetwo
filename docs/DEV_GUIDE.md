@@ -496,7 +496,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 그림과 장면 자리
 
 - 목표 사진 21장(2026-11-04 실사, `assets/goal-photos/{템플릿}-01.webp`, 정사각 512px), 빈 상태 그림 1장: Illustrations 묶음, 배경을 지운 512px. 앱에는 webp(투명, 품질 90)로 넣음(`packages/ui/src/assets/illustrations`). 디자인 시스템 원본은 PNG. 모두 같은 무광 3D 그림체(심볼은 평면 파이 차트라 그림체가 다름). `object-fit: contain`
-- 앱 아이콘(평면 파이 차트, 2026-10-18 교체): app-icon.png(1024), app-icon-macos.png, symbol.png(바탕 없음 512, 트레이·공유 이미지·랜딩), favicon-32/48.png, apple-touch-icon.png(180). 설치 파일용 .icns와 .ico, macOS 트레이 템플릿(한 색 실루엣)은 개발할 때 만듦
+- 앱 아이콘(2026-11-06 오렌지 바탕 흰 워드마크 ‘Two’로 교체): `python3 scripts/brand-icons/two.py`가 워드마크 벡터(logo-cherry.svg 뒤 세 글자)에서 app-icon.png, app-icon-macos.png, apple-touch-icon.png, favicon-32/48.png, 데스크톱 build/icon.png와 resources/tray.png, iOS AppIcon, Android 런처(적응형 전경 48% + 바탕 #FF7716, 예전 방식 정사각·원형), 사이트·모바일 파비콘을 다시 만듦(node + playwright로 흰 Two 원본 two-master.png를 그림, `--render`면 다시). 카카오·구글 로그인 콘솔 앱 아이콘은 손으로 바꿈. symbol.png(파이 차트)와 og는 build.py 그대로
 - 장면 그림 5장과 장면 영상 5개는 없앰(2026-10-19). W-04, P-11, P-01, H-T1, A-02의 장면 자리는 그림 없이 비워 둠
 - 그림은 앱에 포함해 배포(네트워크 없이도 보이게). 데스크톱·모바일 모두 앱 묶음 안에
 
