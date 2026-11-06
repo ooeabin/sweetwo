@@ -191,6 +191,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-scrim { display: grid; place-items: center; padding: var(--space-6); background: var(--scrim); }
 .hg-modal { box-sizing: border-box; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-2xl); box-shadow: var(--shadow-3); }
 .hg-modal > * { margin: 0; }
+/* 2026-11-06 모달 열림 움직임(DESIGN.md ‘움직임’ 모달 dur-slow). 대비가 흔들리지 않게 투명도는 쓰지 않음: 뒤판 색만 차오르고 상자는 살짝 올라옴 */
+@media (prefers-reduced-motion: no-preference) {
+  .hg-scrim:not(.hg-scrim--sheet) { animation: hg-scrim-in var(--dur-slow) var(--ease-out); }
+  .hg-scrim:not(.hg-scrim--sheet) > .hg-modal { animation: hg-modal-in var(--dur-slow) var(--ease-out); }
+}
+@keyframes hg-scrim-in { from { background: transparent; } }
+@keyframes hg-modal-in { from { transform: translateY(12px) scale(0.98); } }
 .hg-modal__title { font: 600 22px/30px var(--font-sans); letter-spacing: -0.2px; }
 .hg-modal__body { font: 400 16px/24px var(--font-sans); color: var(--slate); }
 .hg-modal__actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
@@ -2018,3 +2025,31 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offse
 .hg-status--off { color: var(--stone); }
 
 .hg-admin__grid > .hg-admin__col:last-child .hg-admin__kv { grid-template-columns: 88px minmax(0, 1fr); }  /* 오른쪽 좁은 칸(340px) 카드는 이름표 칸을 좁게 */
+
+/* ── 어드민 인터랙션(2026-11-06 점검) ── */
+/* 버튼: 누르는 동안 로딩(aria-busy, 앱의 is-loading과 같은 모양), 마우스 올림, 누름 */
+.hg-admin .hg-btn, .hg-adminauth .hg-btn { transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.hg-admin .hg-btn--primary:hover:not(:disabled), .hg-adminauth .hg-btn--primary:hover:not(:disabled) { background: var(--brand-pressed); }
+.hg-admin .hg-btn:active:not(:disabled), .hg-adminauth .hg-btn:active:not(:disabled) { transform: scale(0.98); }
+.hg-admin .hg-btn--link:hover { text-decoration: underline; }
+.hg-admin .hg-btn--ghost:hover { background: var(--surface-sunk); }
+.hg-admin .hg-btn[aria-busy="true"], .hg-adminauth .hg-btn[aria-busy="true"] { position: relative; color: transparent; pointer-events: none; }
+.hg-admin .hg-btn[aria-busy="true"]::after, .hg-adminauth .hg-btn[aria-busy="true"]::after { content: ""; position: absolute; width: 16px; height: 16px; border-radius: var(--radius-full); border: 2px solid var(--on-brand); border-right-color: transparent; animation: hg-spin 0.8s linear infinite; }
+.hg-admin .hg-btn--secondary[aria-busy="true"]::after, .hg-admin .hg-btn--ghost[aria-busy="true"]::after, .hg-admin .hg-btn--link[aria-busy="true"]::after { border-color: var(--ink); border-right-color: transparent; }
+.hg-admin .hg-btn--link[aria-busy="true"] { min-width: 24px; }
+/* 메뉴, 탭, 칩, 표 줄, 카드 링크: 색이 부드럽게 바뀜 */
+.hg-admin .hg-nav, .hg-admin .hg-tab, .hg-admin .hg-chip, .hg-admin .hg-table tbody td, .hg-admin .hg-card.is-link, .hg-admin__alert { transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
+.hg-admin .hg-card.is-link:hover { box-shadow: var(--shadow-1); }
+.hg-admin__alert:hover { filter: brightness(0.98); }
+/* 화면이 바뀔 때 본문만 살짝 올라옴(사이드바는 그대로). 오른쪽 칸(편집, 열람)은 옆에서 들어옴. 펼친 줄은 아래로 */
+@media (prefers-reduced-motion: no-preference) {
+  .hg-admin__body { animation: hg-admin-in var(--dur-base) var(--ease-out); }
+  .hg-admin__grid > .hg-admin__col:nth-child(2):not(:empty) { animation: hg-admin-panel var(--dur-base) var(--ease-out); }
+  .hg-admin .hg-table__more > td { animation: hg-admin-in var(--dur-base) var(--ease-out); }
+  .hg-toasts .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
+}
+@keyframes hg-admin-in { from { transform: translateY(6px); } }
+@keyframes hg-admin-panel { from { transform: translateX(12px); } }
+@media (prefers-reduced-motion: reduce) { .hg-admin .hg-btn:active { transform: none; } .hg-admin .hg-btn[aria-busy="true"]::after { animation-duration: 2.4s; } }
+/* 표 뼈대 줄(DataTable loading) */
+.hg-table__skel td { height: 36px; }

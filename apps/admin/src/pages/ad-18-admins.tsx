@@ -8,11 +8,13 @@ import {
   type AdminUserRow,
 } from '@sweetwo/api';
 import { formatKstDateTime, type AdminRole } from '@sweetwo/core';
-import { Button, Chip, DataTable, Status } from '@sweetwo/ui';
+import { Chip, DataTable, Status } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { Frame, NoPermission } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
@@ -39,7 +41,7 @@ export function AD18Admins() {
     roles: ['cs'],
   });
   const [note, setNote] = useState('');
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const reauth = useReauth();
   if (!me.roles.includes('super')) return <NoPermission />;
   const run = async (p: Promise<unknown>, ok: string) => {
@@ -67,17 +69,13 @@ export function AD18Admins() {
   return (
     <Frame menu="system" title={ops.systemTitle}>
       <SysTabs current="admins" />
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <div className="hg-admin__grid">
         <div className="hg-admin__col">
           <DataTable<AdminUserRow>
             label={ops.sysTabs.admins}
             empty={copy.noRows}
             rows={list.data ?? []}
+            loading={list.isLoading}
             rowKey={(u) => u.email}
             columns={[
               { key: 'email', label: ops.adminCols.email, render: (u) => u.email },
@@ -112,8 +110,8 @@ export function AD18Admins() {
                       <Button
                         variant="link"
                         size="sm"
-                        onClick={() =>
-                          void run(
+                        onAct={() =>
+                          run(
                             reauth(() => adminSetLock(u.email, !u.locked)),
                             ops.saved,
                           )
@@ -132,6 +130,7 @@ export function AD18Admins() {
             label={ops.review}
             empty={copy.noRows}
             rows={reviews.data ?? []}
+            loading={reviews.isLoading}
             rowKey={(r) => r.at}
             columns={[
               { key: 'at', label: copy.auditCols.at, render: (r) => formatKstDateTime(r.at) },
@@ -175,9 +174,7 @@ export function AD18Admins() {
             <Button
               variant="primary"
               disabled={!f.email.includes('@') || !f.name.trim() || !f.roles.length}
-              onClick={() =>
-                void run(adminRequestUser(f.email, f.name, f.roles), ops.requestedApproval)
-              }
+              onAct={() => run(adminRequestUser(f.email, f.name, f.roles), ops.requestedApproval)}
             >
               {ops.requestApproval}
             </Button>
@@ -195,7 +192,7 @@ export function AD18Admins() {
             <Button
               variant="secondary"
               disabled={!note.trim()}
-              onClick={() => void run(adminAddReview(note), ops.saved)}
+              onAct={() => run(adminAddReview(note), ops.saved)}
             >
               {ops.addReview}
             </Button>

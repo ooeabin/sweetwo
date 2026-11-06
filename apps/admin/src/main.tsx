@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from './toast';
 import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -40,97 +41,99 @@ function Allow({ menu, children }: { menu: string; children: ReactNode }) {
 
 function App() {
   return (
-    <AdminGate>
-      <ReauthProvider>
-        <Routes>
-          <Route path="/" element={<AD01Dashboard />} />
-          <Route
-            path="/members"
-            element={
-              <Allow menu="members">
-                <AD02Members />
-              </Allow>
-            }
-          />
-          <Route
-            path="/members/:id"
-            element={
-              <Allow menu="members">
-                <AD03Member />
-              </Allow>
-            }
-          />
-          <Route
-            path="/inquiries"
-            element={
-              <Allow menu="inquiries">
-                <AD06Inquiries />
-              </Allow>
-            }
-          />
-          <Route
-            path="/inquiries/:id"
-            element={
-              <Allow menu="inquiries">
-                <AD06Inquiry />
-              </Allow>
-            }
-          />
-          <Route
-            path="/notices"
-            element={
-              <Allow menu="send">
-                <AD10Notices />
-              </Allow>
-            }
-          />
-          <Route
-            path="/content"
-            element={
-              <Allow menu="content">
-                <AD14Content />
-              </Allow>
-            }
-          />
-          <Route path="/system" element={<Navigate to="/system/approvals" replace />} />
-          <Route
-            path="/system/approvals"
-            element={
-              <Allow menu="system">
-                <AD18Approvals />
-              </Allow>
-            }
-          />
-          <Route
-            path="/system/app"
-            element={
-              <Allow menu="system">
-                <AD16App />
-              </Allow>
-            }
-          />
-          <Route
-            path="/system/admins"
-            element={
-              <Allow menu="system">
-                <AD18Admins />
-              </Allow>
-            }
-          />
-          <Route
-            path="/system/audit"
-            element={
-              <Allow menu="system">
-                <AD17Audit />
-              </Allow>
-            }
-          />
-          <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
-          <Route path="/docs" element={<AD20Docs />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </ReauthProvider>
-    </AdminGate>
+    <ToastProvider>
+      <AdminGate>
+        <ReauthProvider>
+          <Routes>
+            <Route path="/" element={<AD01Dashboard />} />
+            <Route
+              path="/members"
+              element={
+                <Allow menu="members">
+                  <AD02Members />
+                </Allow>
+              }
+            />
+            <Route
+              path="/members/:id"
+              element={
+                <Allow menu="members">
+                  <AD03Member />
+                </Allow>
+              }
+            />
+            <Route
+              path="/inquiries"
+              element={
+                <Allow menu="inquiries">
+                  <AD06Inquiries />
+                </Allow>
+              }
+            />
+            <Route
+              path="/inquiries/:id"
+              element={
+                <Allow menu="inquiries">
+                  <AD06Inquiry />
+                </Allow>
+              }
+            />
+            <Route
+              path="/notices"
+              element={
+                <Allow menu="send">
+                  <AD10Notices />
+                </Allow>
+              }
+            />
+            <Route
+              path="/content"
+              element={
+                <Allow menu="content">
+                  <AD14Content />
+                </Allow>
+              }
+            />
+            <Route path="/system" element={<Navigate to="/system/approvals" replace />} />
+            <Route
+              path="/system/approvals"
+              element={
+                <Allow menu="system">
+                  <AD18Approvals />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/app"
+              element={
+                <Allow menu="system">
+                  <AD16App />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/admins"
+              element={
+                <Allow menu="system">
+                  <AD18Admins />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/audit"
+              element={
+                <Allow menu="system">
+                  <AD17Audit />
+                </Allow>
+              }
+            />
+            <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
+            <Route path="/docs" element={<AD20Docs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ReauthProvider>
+      </AdminGate>
+    </ToastProvider>
   );
 }
 

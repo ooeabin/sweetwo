@@ -1,8 +1,10 @@
 import { Fragment, type ReactNode } from 'react';
+import { Skel, useDelayed } from './LoadingStates';
 
 // 어드민·내보내기용 표(docs/design/components/DataTable.md, hg-table). 사용자 화면에는 쓰지 않음.
 // 숫자 열은 오른쪽 정렬, 모르는 값은 “—”. 행을 누르면 onRow(키보드 Enter도).
 // expanded가 값을 주면 그 행 바로 아래에 펼친 줄(hg-table__more)을 그림.
+// loading이면 0.3초 뒤 뼈대 줄 5개(2026-11-06, 머리만 남은 빈 표 대신).
 export interface DataColumn<T> {
   key: string;
   label: string;
@@ -18,6 +20,7 @@ export function DataTable<T>({
   onRow,
   expanded,
   empty,
+  loading,
 }: {
   label: string;
   columns: DataColumn<T>[];
@@ -27,7 +30,10 @@ export function DataTable<T>({
   /** 행 아래 펼친 내용(없으면 null) */
   expanded?: (row: T) => ReactNode | null;
   empty?: ReactNode;
+  /** 불러오는 중이면 뼈대 줄 */
+  loading?: boolean;
 }) {
+  const late = useDelayed(300);
   return (
     <table className="hg-table" aria-label={label}>
       <thead>
@@ -39,8 +45,19 @@ export function DataTable<T>({
           ))}
         </tr>
       </thead>
-      <tbody>
-        {rows.length === 0 && empty ? (
+      <tbody aria-busy={loading || undefined}>
+        {loading && rows.length === 0 ? (
+          late &&
+          [0, 1, 2, 3, 4].map((i) => (
+            <tr key={i} className="hg-table__skel">
+              {columns.map((c, j) => (
+                <td key={c.key} className={c.num ? 'is-num' : undefined}>
+                  <Skel w={c.num ? 48 : `${[72, 56, 64, 48][(i + j) % 4]}%`} h={12} />
+                </td>
+              ))}
+            </tr>
+          ))
+        ) : rows.length === 0 && empty ? (
           <tr>
             <td colSpan={columns.length}>{empty}</td>
           </tr>

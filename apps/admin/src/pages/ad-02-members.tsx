@@ -1,8 +1,9 @@
 import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
 import { formatKstDateTime, toCsv } from '@sweetwo/core';
-import { Button, DataTable, Status } from '@sweetwo/ui';
+import { DataTable, Status } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '../act';
 import { copy } from '../copy';
 import { coupleTone } from '../tones';
 import { Frame } from '../frame';
@@ -114,11 +115,7 @@ export function AD02Members() {
                 onChange={(e) => setReason(e.target.value)}
                 style={{ flex: 1 }}
               />
-              <Button
-                variant="primary"
-                disabled={!reason.trim() || busy}
-                onClick={() => void download()}
-              >
+              <Button variant="primary" disabled={!reason.trim() || busy} onAct={() => download()}>
                 {copy.downloadGo}
               </Button>
             </>

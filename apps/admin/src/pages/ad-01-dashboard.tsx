@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { Frame } from '../frame';
+import { PageSkel } from '../skel';
 import { inquiryTone } from '../tones';
 
 // AD-01 대시보드. 1 상시 경보(없으면 숨김, 지금은 AD-19 평균 금리 90일 넘음만, 누르면 콘텐츠 › 계산·기준 데이터),
@@ -21,6 +22,12 @@ export function AD01Dashboard() {
   const v = (n: number | undefined | null) =>
     q.isError || n === undefined || n === null ? '—' : n.toLocaleString('ko-KR');
   const recent = d?.recent;
+  if (q.isLoading)
+    return (
+      <Frame menu="dashboard" title={copy.menus.dashboard}>
+        <PageSkel shape="stats" />
+      </Frame>
+    );
   return (
     <Frame menu="dashboard" title={copy.menus.dashboard}>
       {(d?.alerts.length ?? 0) > 0 && (

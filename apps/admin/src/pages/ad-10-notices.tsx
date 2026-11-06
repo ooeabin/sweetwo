@@ -16,12 +16,14 @@ import {
   NOTICE_VERSION,
   NoticeTarget,
 } from '@sweetwo/core';
-import { Button, Chip, DataTable, Icon, Status, Toggle } from '@sweetwo/ui';
+import { Chip, DataTable, Icon, Status, Toggle } from '@sweetwo/ui';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { noticeTone } from '../tones';
 import { Frame } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 
 // 웹 앱은 없다(ADR 0001). 예전 공지의 'web'은 고칠 때 빠진다.
@@ -60,9 +62,10 @@ export function AD10Notices() {
           <DataTable<Notice>
             label={ops.noticeTitle}
             rows={list.data ?? []}
+            loading={list.isLoading}
             rowKey={(n) => n.id}
             onRow={canEdit ? (n) => setEdit(n) : undefined}
-            empty={list.isLoading ? null : ops.noticeEmpty}
+            empty={ops.noticeEmpty}
             columns={[
               { key: 'title', label: ops.noticeCols.title, render: (n) => n.title },
               { key: 'kind', label: ops.noticeCols.kind, render: (n) => ops.noticeKinds[n.kind] },
@@ -131,7 +134,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
   const mail = mailable && email;
   const terms = kind === 'terms';
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
 
   // 대상 조건: 약관 개정은 빈 조건(모든 회원)
   const versionOk = version.trim() === '' || NOTICE_VERSION.test(version.trim());
@@ -314,29 +317,20 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
             onChange={(e) => setEnds(e.target.value)}
           />
         </label>
-        {msg && (
-          <p className="hg-help" role="status">
-            {msg}
-          </p>
-        )}
         {draft ? (
           <div className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-            <Button variant="secondary" disabled={!ready || busy} onClick={() => void save(false)}>
+            <Button variant="secondary" disabled={!ready || busy} onAct={() => save(false)}>
               {ops.saveDraft}
             </Button>
             {mail && (
-              <Button
-                variant="secondary"
-                disabled={!title.trim() || busy}
-                onClick={() => void test()}
-              >
+              <Button variant="secondary" disabled={!title.trim() || busy} onAct={() => test()}>
                 {ops.testSend}
               </Button>
             )}
             <Button
               variant="primary"
               disabled={!ready || busy || zero || audience.isFetching}
-              onClick={() => void save(true)}
+              onAct={() => save(true)}
             >
               {ops.requestApproval}
             </Button>

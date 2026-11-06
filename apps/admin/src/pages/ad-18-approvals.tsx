@@ -6,12 +6,14 @@ import {
   type ApprovalStatus,
 } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
-import { Button, DataTable, Status, Tabs } from '@sweetwo/ui';
+import { DataTable, Status, Tabs } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { decisionTone } from '../tones';
 import { Frame } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
@@ -28,7 +30,7 @@ export function AD18Approvals() {
     queryKey: ['admin', 'approvals', status],
     queryFn: () => fetchAdminApprovals(status),
   });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const decide = async (r: AdminApprovalRow, d: 'approve' | 'reject' | 'cancel') => {
     setMsg(null);
     try {
@@ -58,16 +60,12 @@ export function AD18Approvals() {
         value={status}
         onChange={setStatus}
       />
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <DataTable<AdminApprovalRow>
         label={ops.sysTabs.approvals}
         rows={q.data ?? []}
+        loading={q.isLoading}
         rowKey={(r) => r.id}
-        empty={q.isLoading ? null : ops.noApproval}
+        empty={ops.noApproval}
         columns={[
           { key: 'sum', label: ops.approvalCols.summary, render: (r) => r.summary },
           { key: 'by', label: ops.approvalCols.by, render: (r) => r.requested_by ?? '—' },
@@ -91,20 +89,16 @@ export function AD18Approvals() {
                 <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
                   {superAdmin && (
                     <>
-                      <Button variant="primary" size="sm" onClick={() => void decide(r, 'approve')}>
+                      <Button variant="primary" size="sm" onAct={() => decide(r, 'approve')}>
                         {ops.approve}
                       </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => void decide(r, 'reject')}
-                      >
+                      <Button variant="secondary" size="sm" onAct={() => decide(r, 'reject')}>
                         {ops.reject}
                       </Button>
                     </>
                   )}
                   {mine(r) && (
-                    <Button variant="secondary" size="sm" onClick={() => void decide(r, 'cancel')}>
+                    <Button variant="secondary" size="sm" onAct={() => decide(r, 'cancel')}>
                       {ops.cancelRequest}
                     </Button>
                   )}

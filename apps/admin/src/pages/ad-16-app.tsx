@@ -1,10 +1,11 @@
 import { adminRequestAppConfig, fetchAdminAppConfig } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
-import { Button } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { Frame } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 import { SysTabs } from '../sys-tabs';
 
@@ -27,7 +28,7 @@ export function AD16App() {
     ends: '',
     message: '',
   });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   useEffect(() => {
     if (!q.data) return;
     setF({
@@ -90,13 +91,8 @@ export function AD16App() {
         {field(ops.field.starts, 'starts', 'datetime-local')}
         {field(ops.field.ends, 'ends', 'datetime-local')}
         {field(ops.maintenanceMsg, 'message')}
-        {msg && (
-          <p className="hg-help" role="status">
-            {msg}
-          </p>
-        )}
         {canEdit && (
-          <Button variant="primary" disabled={!ready} onClick={() => void save()}>
+          <Button variant="primary" disabled={!ready} onAct={() => save()}>
             {ops.requestApproval}
           </Button>
         )}
