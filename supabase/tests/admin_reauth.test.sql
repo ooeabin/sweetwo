@@ -40,13 +40,13 @@ select throws_ok($$ select public.admin_set_lock('boss2@sweetwo.kr', true) $$, '
 select lives_ok($$ select public.admin_set_lock('cs01@sweetwo.kr', true) $$, '다른 관리자는 잠금');
 reset role;
 
--- 대시보드 경보: 평균 금리를 90일 넘게 안 고치면
-select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 600);
+-- 대시보드 경보(cs01은 위에서 잠겼으니 대표로): 평균 금리를 90일 넘게 안 고치면
+select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000002', 600);
 set local role authenticated;
 select is(jsonb_array_length(public.admin_dashboard()->'alerts'), 0, '갱신한 지 얼마 안 되면 경보 없음');
 reset role;
 update public.loan_rate set updated_at = now() - interval '100 days' where kind = 'credit';
-select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 600);
+select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000002', 600);
 set local role authenticated;
 select is(public.admin_dashboard()->'alerts'->0->>'kind', 'loan_rate_stale', '90일 넘으면 경보');
 reset role;
