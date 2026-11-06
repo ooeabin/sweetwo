@@ -506,8 +506,6 @@ async function mock(
         if (!db.fresh && body().p_decision !== 'cancel')
           return json(route, { message: 'reauth_required' }, 403);
         const a = db.approvals.find((x) => x.id === body().p_id);
-        if (a && a.requested_by === ADMIN.email && body().p_decision !== 'cancel')
-          return json(route, { message: 'self_approval' }, 403);
         if (a)
           a.status =
             body().p_decision === 'approve'
@@ -1031,7 +1029,17 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
   ]);
 });
 
-test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버전·점검은 승인 요청, 관리자 계정', async ({
+test('최고 관리자만 있어도 공지·콘텐츠를 쓸 수 있음(2026-11-06)', async ({ page }) => {
+  await mock(page, { roles: ['super'] });
+  await page.goto('/notices');
+  await heading(page, '공지');
+  await expect(page.getByRole('button', { name: '새 공지' })).toBeVisible();
+  await page.goto('/content');
+  await heading(page, '콘텐츠');
+  await expect(page.getByRole('button', { name: '버전 추가' })).toBeVisible();
+});
+
+test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 관리자 계정', async ({
   page,
 }) => {
   const db = await mock(page, { roles: ['super', 'ops'] });

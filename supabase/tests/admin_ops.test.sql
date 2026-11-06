@@ -21,9 +21,9 @@ select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000002');
 set local role authenticated;
 select is(public.admin_bootstrap(), true, '첫 최고 관리자');
 select is(public.admin_bootstrap(), false, '두 번째는 없음');
--- 관리자 추가는 승인 요청(본인 승인 불가)
-select set_config('test.a1', public.admin_request_user('boss2@sweetwo.kr', '대표2', array['super']::public.admin_role[])::text, true);
-select throws_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.a1')), '42501', 'self_approval', '본인 승인 불가');
+-- 관리자 추가는 승인 요청. 2026-11-06부터 요청한 최고 관리자 본인도 승인할 수 있음
+select set_config('test.a1', public.admin_request_user('cs09@sweetwo.kr', 'cs09', array['cs']::public.admin_role[])::text, true);
+select lives_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.a1')), '본인 요청도 승인');
 reset role;
 -- boss2가 없으니 흉내로 직접 넣고 승인
 insert into public.admin_user (id, email, name, roles) values ('aaaaaaaa-0000-0000-0000-000000000003', 'boss2@sweetwo.kr', '대표2', array['super']::public.admin_role[]);

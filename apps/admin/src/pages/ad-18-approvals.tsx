@@ -16,7 +16,7 @@ import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
 
-// 2인 승인(33 2·3장, AdminFrame hg-approve): 요청 → 최고 관리자 승인(작성자 본인 불가) → 적용.
+// 승인(33 2·3장, AdminFrame hg-approve): 요청 → 최고 관리자 승인(2026-11-06부터 요청한 본인도 승인 가능) → 적용.
 // 최고 관리자는 모든 요청, 나머지는 내가 낸 요청만 보고 취소할 수 있음.
 export function AD18Approvals() {
   const me = useAdmin();
@@ -38,11 +38,9 @@ export function AD18Approvals() {
       setMsg(
         e instanceof AdminError && e.code === 'reauth_cancelled'
           ? null
-          : e instanceof AdminError && e.code === 'self_approval'
-            ? ops.selfApproval
-            : e instanceof AdminError && e.code === 'super_min'
-              ? ops.superMin
-              : copy.failed,
+          : e instanceof AdminError && e.code === 'super_min'
+            ? ops.superMin
+            : copy.failed,
       );
     }
   };
@@ -91,7 +89,7 @@ export function AD18Approvals() {
                 </span>
               ) : (
                 <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                  {superAdmin && !mine(r) && (
+                  {superAdmin && (
                     <>
                       <Button variant="primary" size="sm" onClick={() => void decide(r, 'approve')}>
                         {ops.approve}

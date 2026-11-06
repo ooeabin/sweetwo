@@ -40,7 +40,7 @@ type Tab = 'guides' | 'terms' | 'data';
 // 운영이 쓰고, 약관 버전은 최고 관리자 승인.
 export function AD14Content() {
   const me = useAdmin();
-  const canEdit = me.roles.includes('ops');
+  const canEdit = me.roles.includes('ops') || me.roles.includes('super');
   // 대시보드 경보에서 오면 계산·기준 데이터 탭
   const from = (useLocation().state as { tab?: Tab } | null)?.tab;
   const [tab, setTab] = useState<Tab>(from ?? 'guides');
@@ -88,6 +88,7 @@ function Guides({ canEdit }: { canEdit: boolean }) {
     <div className="hg-admin__grid">
       <DataTable<ContentVersion>
         label={ops.tabs.guides}
+        empty={copy.noRows}
         rows={q.data ?? []}
         rowKey={(r) => r.id}
         columns={[
@@ -190,6 +191,7 @@ function Terms({ canEdit }: { canEdit: boolean }) {
     <div className="hg-admin__grid">
       <DataTable<TermsVersionRow>
         label={ops.tabs.terms}
+        empty={copy.noRows}
         rows={q.data ?? []}
         rowKey={(r) => r.id}
         columns={[
@@ -302,6 +304,7 @@ function RefData({ canEdit }: { canEdit: boolean }) {
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <DataTable<LoanRate>
         label={ops.loanTitle}
+        empty={copy.noRows}
         rows={rates.data ?? []}
         rowKey={(r) => r.kind}
         columns={[
@@ -361,6 +364,7 @@ function RefData({ canEdit }: { canEdit: boolean }) {
       <div className="hg-admin__grid">
         <DataTable
           label={ops.holidayTitle}
+          empty={copy.noRows}
           rows={(hol.data ?? []).filter((x) => x.date >= `${todayKst().slice(0, 4)}-01-01`)}
           rowKey={(x) => x.date}
           columns={[
@@ -494,6 +498,7 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
           <SectionHeader title={assetGroup(grp)?.name ?? grp} count={list(grp).length} />
           <DataTable<KindRow>
             label={assetGroup(grp)?.name ?? grp}
+            empty={copy.noRows}
             rows={list(grp)}
             rowKey={(x) => x.key}
             columns={[

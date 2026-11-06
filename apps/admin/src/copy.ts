@@ -42,6 +42,7 @@ export const copy = {
   toDashboard: '대시보드로',
   expired: '30분 동안 쓰지 않아 로그아웃했어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  noRows: '아직 기록이 없어요', // [확인 필요] 빈 표(2026-11-06 검수)
   retry: '다시 시도',
 
   // AD-01
@@ -333,7 +334,7 @@ export const copy = {
 
 export type Copy = typeof copy;
 
-// 운영(AD-10·14·15·16·18·19, 2인 승인)
+// 운영(AD-10·14·15·16·18·19, 승인)
 export const ops = {
   // AD-10
   noticeTitle: '공지',
@@ -500,8 +501,7 @@ export const ops = {
   reject: '거절', // [확인 필요]
   cancelRequest: '요청 취소', // [확인 필요]
   noApproval: '승인할 요청이 없어요', // [확인 필요]
-  selfApproval: '내가 요청한 건 다른 최고 관리자가 승인해요', // [확인 필요]
-  superMin: '최고 관리자는 2명 넘게 있어야 해요', // [확인 필요] 33 2장 최소 2명
+  superMin: '최고 관리자가 한 명은 있어야 해요', // [확인 필요] 33 2장 최소 1명(2026-11-06)
   appCols: {
     latest: '최신 버전(데스크톱)',
     minDesktop: '최소 지원 버전(데스크톱)',
