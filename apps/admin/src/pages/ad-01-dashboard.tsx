@@ -214,6 +214,7 @@ function Trend({ trend }: { trend: TrendRow[] }) {
         <summary>{copy.trendTable}</summary>
         <DataTable<TrendRow>
           label={copy.trendTable}
+          empty={copy.noRows}
           rows={trend}
           rowKey={(t) => t.day}
           columns={[

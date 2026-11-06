@@ -76,6 +76,7 @@ export function AD18Admins() {
         <div className="hg-admin__col">
           <DataTable<AdminUserRow>
             label={ops.sysTabs.admins}
+            empty={copy.noRows}
             rows={list.data ?? []}
             rowKey={(u) => u.email}
             columns={[
@@ -126,8 +127,10 @@ export function AD18Admins() {
               },
             ]}
           />
+          <span className="hg-card__label">{ops.review}</span>
           <DataTable
             label={ops.review}
+            empty={copy.noRows}
             rows={reviews.data ?? []}
             rowKey={(r) => r.at}
             columns={[

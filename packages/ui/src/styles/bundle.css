@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (c9009ab). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (189405c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1428,6 +1428,8 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__head { display: flex; align-items: center; gap: var(--space-3); min-height: 36px; }
 .hg-admin__title { flex: 1; margin: 0; font: 600 20px/28px var(--font-sans); letter-spacing: -0.2px; }
 .hg-admin__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); align-items: start; }
+.hg-admin__grid:not(:has(> :nth-child(2):not(:empty))) { grid-template-columns: minmax(0, 1fr); }  /* 2026-11-06 오른쪽 칸이 비면 왼쪽(표, 카드)이 화면 폭을 꽉 채움 */
+.hg-admin__grid > :empty { display: none; }
 .hg-admin__col { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 /* 항목-값 줄: 이름 왼쪽 고정 폭, 값은 바로 옆(왼쪽 정렬) */
 .hg-admin__kv { display: grid; grid-template-columns: minmax(72px, 132px) minmax(0, 1fr); align-items: baseline; gap: var(--space-3); min-height: 20px; padding: 0; font: 400 14px/20px var(--font-sans); }

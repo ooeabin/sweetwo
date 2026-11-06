@@ -195,6 +195,7 @@ export function AD03Member() {
           </section>
           <DataTable
             label={copy.consents}
+            empty={copy.noRows}
             rows={u.consents}
             rowKey={(c) => `${c.kind}-${c.at}`}
             columns={[
@@ -215,6 +216,7 @@ export function AD03Member() {
           {shown?.data.sign_ins && (
             <DataTable
               label={copy.l1Scopes.sign_ins}
+              empty={copy.noRows}
               rows={shown.data.sign_ins}
               rowKey={(s) => `${s.created_at}-${s.user_agent}`}
               columns={[
