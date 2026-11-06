@@ -2,7 +2,7 @@ import { TERMS_VERSION, type Json, type SplitLineDraft } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// 배우자 합류 서버 호출(docs/spec/18-partner-join.md, 15 A-07)
+// 파트너 합류 서버 호출(docs/spec/18-partner-join.md, 15 A-07)
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };

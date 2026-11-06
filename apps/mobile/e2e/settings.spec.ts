@@ -134,7 +134,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page).toHaveURL(/\/settings\/me$/);
   await expect(page.getByRole('button', { name: /알림 이메일/ })).toContainText('new@example.com');
   await expect(page.getByRole('button', { name: '월급 계획 열기' })).toBeVisible();
-  // 앞당기기 끄기(부부 공통)
+  // 앞당기기 끄기(두 사람 공통)
   const shift = page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여줘요' });
   await expect(shift).toHaveAttribute('aria-checked', 'true');
   await shift.click();
@@ -284,13 +284,13 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
   expect(db.me.birth_year).toBe(1993);
 });
 
-test('부부 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', async ({ page }, info) => {
+test('우리 둘 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', async ({ page }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   Object.assign(db.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-01-09' });
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple$/);
   await expect(page.getByText('찬우 예빈')).toBeVisible();
   await expect(page.getByText('연결됨', { exact: true })).toBeVisible();
@@ -301,15 +301,15 @@ test('부부 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', async
   await axe(page);
 });
 
-test('부부 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기, 만료', async ({ page }, info) => {
+test('우리 둘 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기, 만료', async ({ page }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
   db.partner = null;
   await open(page, info.project.name === 'narrow');
-  await expect(page.getByRole('button', { name: /부부 정보/ })).toContainText('초대 중');
-  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('초대 중');
+  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
 
   // 초대 전
   await expect(page.getByText('예빈님을 초대해 주세요')).toBeVisible();
@@ -345,7 +345,7 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await page.getByRole('button', { name: '연결 해제' }).click();
 
   // S-12a 안내: 나누지 않고 모두 지움
@@ -402,8 +402,10 @@ test('연결 해제 요청 받음(S-12, S-12d) → 확인했어요 → 해제 �
     confirmed_at: null,
   });
   await open(page, info.project.name === 'narrow');
-  await expect(page.getByRole('button', { name: /부부 정보/ })).toContainText('연결 해제 대기 중');
-  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText(
+    '연결 해제 대기 중',
+  );
+  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '요청 취소' })).toHaveCount(0);
   await axe(page);
@@ -457,7 +459,7 @@ test('혼자 쓰기(S-12): 다시 연결하기, 새로 초대하기', async ({ p
   seed(db);
   soloAfterUnlink(db);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /부부 정보/ }).click();
+  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('혼자 쓰는 중')).toBeVisible();
   await expect(page.getByText('10월 31일까지 다시 연결할 수 있어요')).toBeVisible();
   await axe(page);
@@ -467,7 +469,7 @@ test('혼자 쓰기(S-12): 다시 연결하기, 새로 초대하기', async ({ p
   await expect(page.getByRole('button', { name: '다시 연결하기' })).toHaveCount(0);
 
   await page.getByRole('button', { name: '새로 초대하기' }).click();
-  await expect(page.getByText('배우자를 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('파트너를 초대해 주세요')).toBeVisible();
   expect(db.space?.couple_state).toBe('not_joined');
   await axe(page);
 });
@@ -550,7 +552,7 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   await axe(page);
 });
 
-test('휴지통(S-21): 되살리기(연결된 부부 목표도 바로), 영구 삭제', async ({ page }, info) => {
+test('휴지통(S-21): 되살리기(연결된 두 사람 목표도 바로), 영구 삭제', async ({ page }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -707,7 +709,7 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await axe(page);
   const search = page.getByRole('searchbox', { name: '자주 묻는 질문에서 찾기' });
   await search.fill('초대 코드');
-  await expect(page.getByRole('button', { name: '배우자는 어떻게 초대하나요?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '파트너는 어떻게 초대하나요?' })).toBeVisible();
   await search.fill('우주선');
   await expect(page.getByText('찾는 답이 없어요')).toBeVisible();
   await page.getByRole('button', { name: '문의하기' }).first().click();
@@ -717,7 +719,7 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await page.getByRole('button', { name: /분류/ }).click();
   await page
     .getByRole('dialog', { name: '분류' })
-    .getByRole('radio', { name: '부부 연결' })
+    .getByRole('radio', { name: '우리 둘 연결' })
     .click();
   await page.getByLabel('내용').fill('예빈이 합류 코드를 넣었는데 연결이 안 돼요');
   await axe(page);

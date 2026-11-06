@@ -7,7 +7,7 @@ export const AUTO_GOALS = ['emergency'];
 export interface FlowState {
   me: Me | null | undefined;
   space: Space | null | undefined;
-  /** 합류한 배우자(합류 전 null) */
+  /** 합류한 파트너(합류 전 null) */
   partner?: {
     id: string;
     nickname: string | null;
@@ -63,5 +63,5 @@ export const prevOf = (id: string, list: string[]) => {
   return list[list.indexOf(id) - 1];
 };
 
-/** 배우자가 합류했는지 */
+/** 파트너가 합류했는지 */
 export const partnerJoined = (s: FlowState) => s.space?.couple_state === 'connected';

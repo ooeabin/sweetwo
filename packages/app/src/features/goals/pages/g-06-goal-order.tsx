@@ -18,7 +18,7 @@ import { copy } from '../copy';
 import { useGoalsModel } from '../model';
 
 // G-06 우선순위 바꾸기(22): 끌기, ↑↓, 비상금 맨 위 고정. 묶음(우리 목표 / 내 목표)마다 따로, 묶음을 넘어 옮기지 않음.
-// 저장 = 바로 반영 + 내 월급 계획 저금 줄 순서도 같이 + Toast ‘되돌리기’. 상대 월급 계획 줄 순서·상대 알림은 부부 단계에서.
+// 저장 = 바로 반영 + 내 월급 계획 저금 줄 순서도 같이 + Toast ‘되돌리기’. 상대 월급 계획 줄 순서·상대 알림은 커플 기능 단계에서.
 export function G06GoalOrder({ week = false }: { week?: boolean }) {
   const nav = useNavigate();
   const qc = useQueryClient();

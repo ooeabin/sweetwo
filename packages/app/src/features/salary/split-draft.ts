@@ -42,7 +42,7 @@ type Person = Pick<Me, 'id' | 'monthly_income'>;
  * 추천값(O-50 처음 채우기, W-01 ‘추천값으로 다시 채우기’, 20 W-01 6번).
  * - 각자: 월급 계획 주인 수입. 우리 목표 줄은 상대 월급 계획 같은 목표 줄만큼 빼고 채움(others)
  * - 합쳐서: 두 사람 수입 합, 용돈은 사람마다
- * - keep: 그대로 둘 줄(배우자 탭의 배우자 내 목표 줄)
+ * - keep: 그대로 둘 줄(파트너 탭의 파트너 내 목표 줄)
  */
 export function recommendedDraft(
   owner: Person,

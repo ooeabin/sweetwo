@@ -25,7 +25,7 @@ export function P03Name() {
         void s.done(async () => {
           if (name === saved) return;
           await saveMe({ nickname: name });
-          await saveSpace({ partner_nickname: name }); // 시작한 사람 화면의 배우자 이름
+          await saveSpace({ partner_nickname: name }); // 시작한 사람 화면의 파트너 이름
         })
       }
     >

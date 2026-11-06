@@ -9,7 +9,7 @@ import { copy } from '../copy';
 
 // S-19b 관리자 열람 동의(docs/spec/25-settings.md): “문의 #A-10234” / “동의하면 24시간만 봐요”,
 // 볼 수 있어요(요청 범위 + “금액은 구간으로” 또는 원값이면 “금액이 그대로 보여요”), 보지 않아요(고정 칩),
-// ‘동의해요’(24시간, 배우자에게 열람 알림) / ‘거절할게요’ → 내 문의.
+// ‘동의해요’(24시간, 파트너에게 열람 알림) / ‘거절할게요’ → 내 문의.
 export function S19bAccess() {
   const nav = useNavigate();
   const { id } = useParams();

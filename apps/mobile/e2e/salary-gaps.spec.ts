@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 월급 계획을 바꾼 안내, 배우자 탭(월급 계획 고치기, 내 목표 줄 잠금),
+// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 월급 계획을 바꾼 안내, 파트너 탭(월급 계획 고치기, 내 목표 줄 잠금),
 // 수입 줄 → 설정 내 월급, 직접 추가 줄 이름 바꾸기, 연결 해제 대기면 보기만. 찬우(시작), 예빈(합류), 각자.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -117,7 +117,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });
 
-test('W-01 배우자 탭: 고칠 수 있고 배우자 내 목표 줄은 잠금, 수입 줄 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
+test('W-01 파트너 탭: 고칠 수 있고 파트너 내 목표 줄은 잠금, 수입 줄 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);

@@ -52,9 +52,9 @@ reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select is((select count(*)::int from public.trash_rows() where kind = 'asset'), 0, '배우자 명의는 내 휴지통에 없음');
+select is((select count(*)::int from public.trash_rows() where kind = 'asset'), 0, '파트너 명의는 내 휴지통에 없음');
 update public.goal set deleted_at = now();
-select is(public.restore_trash('goal', (select id from public.goal)), 'restored', '연결된 부부도 제안 없이 바로 되살림');
+select is(public.restore_trash('goal', (select id from public.goal)), 'restored', '연결된 커플도 제안 없이 바로 되살림');
 select is((select count(*)::int from public.goal where deleted_at is null), 1, '목표가 되살아남');
 reset role;
 

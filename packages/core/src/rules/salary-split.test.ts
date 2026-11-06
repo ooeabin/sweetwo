@@ -103,7 +103,7 @@ describe('W-01 추천값으로 다시 채우기(20 W-01 6번)', () => {
     expect(l.find((x) => x.goalId === 'e')?.amount).toBe(0);
     expect(l.find((x) => x.goalId === 'h')?.amount).toBe(1_390_000);
   });
-  it('배우자 탭: 배우자 내 목표 줄은 그대로 두고 그만큼 빼고 채움', () => {
+  it('파트너 탭: 파트너 내 목표 줄은 그대로 두고 그만큼 빼고 채움', () => {
     const camera = goal({ id: 'c', template: 'hobby', priority: 1, target: 2_000_000 });
     const l = recommendSplit({
       income: 2_700_000,

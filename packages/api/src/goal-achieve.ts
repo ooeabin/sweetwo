@@ -23,7 +23,7 @@ export async function fetchGoalStory(
   return { months: r?.months ?? 0, together: r?.together ?? 0 };
 }
 
-/** 배우자가 먼저 기록함 */
+/** 파트너가 먼저 기록함 */
 export class GoalUsedError extends Error {
   constructor() {
     super('already_used');

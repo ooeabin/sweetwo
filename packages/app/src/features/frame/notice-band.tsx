@@ -19,7 +19,7 @@ const closedIds = (): string[] => {
 export function useNoticeBand() {
   const q = useQuery({
     queryKey: qk.notices,
-    // 대상 조건(부부 상태, 앱 버전, 가입 주차)은 서버가 봄. 앱 버전은 브리지 값(웹은 없음)
+    // 대상 조건(우리 둘 상태, 앱 버전, 가입 주차)은 서버가 봄. 앱 버전은 브리지 값(웹은 없음)
     queryFn: () => fetchActiveNotices(detectPlatform(), window.sweetwo?.appVersion),
     staleTime: 10 * 60_000,
   });

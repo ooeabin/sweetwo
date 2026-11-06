@@ -3,7 +3,7 @@ import { AuthCallError } from './auth';
 import { supabase } from './client';
 import { ensureSpace } from './onboarding';
 
-// 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 배우자 ‘합계만’은 묶음 합계로.
+// 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 파트너 ‘합계만’은 묶음 합계로.
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
@@ -12,10 +12,7 @@ export type Asset = Tables<'asset'>;
 
 /** AD-19 항목 이름 목록(F-03a 세부 항목 칩). 기본 칩에 입히는 건 core withKindNames */
 export async function fetchAssetKindNames(): Promise<Tables<'asset_kind_name'>[]> {
-  const { data, error } = await supabase()
-    .from('asset_kind_name')
-    .select('*')
-    .order('created_at');
+  const { data, error } = await supabase().from('asset_kind_name').select('*').order('created_at');
   fail(error);
   return data ?? [];
 }
@@ -85,7 +82,7 @@ export async function updateAsset(id: string, patch: TablesUpdate<'asset'>) {
 export const trashAsset = (id: string) => updateAsset(id, { deleted_at: new Date().toISOString() });
 export const restoreAsset = (id: string) => updateAsset(id, { deleted_at: null });
 
-/** 투자 원칙 답(O-53): 내 답과 배우자 답 */
+/** 투자 원칙 답(O-53): 내 답과 파트너 답 */
 export async function fetchInvestAnswers(): Promise<{
   mine: InvestAnswer | null;
   partner: InvestAnswer | null;

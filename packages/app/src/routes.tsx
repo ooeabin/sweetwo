@@ -380,7 +380,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-12 부부 정보
+      }, // S-12 우리 둘 정보
       {
         path: '/settings/couple/unlink',
         element: (
@@ -778,7 +778,7 @@ export const routes: RouteObject[] = [
       { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘코드 입력하기’)
       { path: '/i/:code', element: <P01JoinStart /> }, // A-07 초대 링크, P-01 합류 시작(로그인 전에도)
       {
-        path: '/join/:screen', // P-02b~P-11 배우자 합류
+        path: '/join/:screen', // P-02b~P-11 파트너 합류
         element: (
           <RequireAccount>
             <JoinRoute />

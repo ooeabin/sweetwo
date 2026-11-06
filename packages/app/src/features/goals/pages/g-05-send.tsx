@@ -39,7 +39,7 @@ export function G05Send() {
 
   if (step === 'pick') {
     if (d.loading || splits.isLoading) return <QuestionSkeleton />;
-    // 모으는 중인 목표(이 목표 빼고), 배우자 내 목표 빼고
+    // 모으는 중인 목표(이 목표 빼고), 파트너 내 목표 빼고
     const targets = d.goals.filter(
       (x) =>
         x.id !== id &&

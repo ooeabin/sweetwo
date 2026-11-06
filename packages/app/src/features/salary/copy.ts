@@ -27,12 +27,12 @@ export const copy = {
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
   checkLabel: (name: string) => `${name} 체크`,
   viewLabel: (name: string, done: boolean) =>
-    `${name} ${done ? '체크했어요' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(배우자 줄)
+    `${name} ${done ? '체크했어요' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄)
   otherAmount: '다른 금액으로 보냈어요',
   // 줄을 누르면 여는 시트(2026-11-03) [확인 필요]
   lineSheet: (name: string, amount: string) => `${name} ${amount}`,
   sent: '보냈어요',
-  // 체크한 사람·때(2026-11-03): 배우자가 체크했으면 이름 칩 + “08.26 체크”, 내가 체크했으면 날짜만
+  // 체크한 사람·때(2026-11-03): 파트너가 체크했으면 이름 칩 + “08.26 체크”, 내가 체크했으면 날짜만
   checkedAt: (date: string) => `${date} 체크`, // [확인 필요]
   // W-05 ‘이번 달은 못 했어요’ 뒤 Toast(2026-11-03)
   skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]

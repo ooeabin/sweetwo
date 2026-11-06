@@ -5,7 +5,7 @@ import { copy } from '../copy';
 import { saveMe } from '../data';
 import { useJoinStep } from '../join-step';
 
-// P-03a 출생연도(Q4 연도 휠, O-13과 같음). 1950 ~ (올해 − 18)년, 처음 위치 올해 − 30. 비슷한 부부 비교의 연령대에만 씀.
+// P-03a 출생연도(Q4 연도 휠, O-13과 같음). 1950 ~ (올해 − 18)년, 처음 위치 올해 − 30. 비슷한 커플 비교의 연령대에만 씀.
 export function P03aBirthYear() {
   const s = useJoinStep('p-03a');
   const d = s.d;

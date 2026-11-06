@@ -42,7 +42,7 @@ type Vis = 'all' | 'sum' | 'private';
 // F-04 항목 상세·수정(23 F-04 1·2·3·5·6·7번): 금액(누르면 그 자리에서 수정, Esc 취소), 공개 범위(내 명의만),
 // 안 판 수익(원금 있는 투자·부동산), 월별 기록(월말 정리 / 직접 수정), 삭제(휴지통 + 되돌리기).
 // 유형별 값(만기일, 납입 회차, 금리, 월 납입·상환액)도 누르면 그 자리에서 입력칸 + ‘저장’(3번, Esc 취소).
-// 배우자 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
+// 파트너 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
 // 고친 기록은 직접 고친 것만, 날짜와 고친 사람.
 type ValueField = 'maturity_date' | 'paid_count' | 'interest_rate' | 'monthly_payment';
 const RATE = /^\d{1,2}(\.\d{1,2})?$/;
@@ -56,7 +56,7 @@ export function F04Item() {
   const m = (v: number) => money(v, masked);
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
   const [editAmount, setEditAmountRaw] = useState<number | null | undefined>(undefined);
-  // 금액 고치기를 열 때의 값(30 동기화 2장 충돌 판정 기준)과 충돌(배우자가 1분 안에 바꿈)
+  // 금액 고치기를 열 때의 값(30 동기화 2장 충돌 판정 기준)과 충돌(파트너가 1분 안에 바꿈)
   const [openedAmount, setOpenedAmount] = useState<number | null>(null);
   const [conflict, setConflict] = useState<{ mine: number; theirs: number } | null>(null);
   const setEditAmount = (v: number | null | undefined) => {
@@ -97,7 +97,7 @@ export function F04Item() {
       setBusy(false);
     }
   };
-  // 금액 저장: 열 때 값이 서버에 그대로일 때만. 배우자가 1분 안에 바꿨으면 충돌 선택, 그 밖은 마지막 저장 우선
+  // 금액 저장: 열 때 값이 서버에 그대로일 때만. 파트너가 1분 안에 바꿨으면 충돌 선택, 그 밖은 마지막 저장 우선
   const saveAmount = (force = false) => {
     if (editAmount === undefined || editAmount === null) return;
     const patch = { amount: editAmount, estimated: false };

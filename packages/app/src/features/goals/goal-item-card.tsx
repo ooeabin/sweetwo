@@ -55,7 +55,7 @@ export function GoalItemCard({
   onOpen: () => void;
   /** 4a ‘월급 계획에서 저금 늘리기’ → W-01(카드 아래 글자 링크) */
   onLate?: () => void;
-  /** 배우자가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
+  /** 파트너가 방금 고친 것(카드 아래 회색 “예빈님이 기한을 바꿨어요”) */
   changed?: string;
 }) {
   const g = i.goal;
@@ -67,7 +67,7 @@ export function GoalItemCard({
   // 매달 목표·금액 미정 목표는 진행률과 칸 없이(22 G-01 5번, 2026-11-03)
   const bare = g.kind === 'monthly' || g.target_amount === null;
   // 2026-11-03 시안 B 타일: 위 사진(배지는 사진 위 왼쪽) → 이름 → 금액 → 막대(또는 “아직 모은 돈이 없어요”) → 한 줄.
-  // 한 줄은 늦어요 > 이번 달 > 매달·예상 순서로 하나만(타일이 빽빽해서). 링크·배우자 변경 안내는 타일 안 아래 칸
+  // 한 줄은 늦어요 > 이번 달 > 매달·예상 순서로 하나만(타일이 빽빽해서). 링크·파트너 변경 안내는 타일 안 아래 칸
   const line =
     late && i.lateMonths !== null
       ? copy.lateLine(lateText(i.lateMonths))

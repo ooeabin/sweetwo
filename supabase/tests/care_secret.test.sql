@@ -1,4 +1,4 @@
--- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 배우자에게는 날도 기록도 안 감, 낸 곳은 각자 돈, 숨기기 끄면 둘 다 봄
+-- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 각자 돈, 숨기기 끄면 둘 다 봄
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(9);
@@ -45,10 +45,10 @@ reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select count(*)::int from public.care_day) + (select count(*)::int from public.care_record), 0,
-  '배우자에게는 날도 기록도 안 감');
-select is_empty($$ update public.care_day set secret = false returning id $$, '배우자는 숨기기를 못 끔');
+  '파트너에게는 날도 기록도 안 감');
+select is_empty($$ update public.care_day set secret = false returning id $$, '파트너는 숨기기를 못 끔');
 select throws_ok(format($$ select public.record_care(%L, '2027-03-09', 1, 'personal', '{}', null, null, 0) $$,
-  current_setting('test.c')), '42501', null, '배우자는 기록 못 함');
+  current_setting('test.c')), '42501', null, '파트너는 기록 못 함');
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -57,7 +57,7 @@ update public.care_day set secret = false;
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select count(*)::int from public.care_day), 1, '숨기기 끄면 배우자도 봄');
+select is((select count(*)::int from public.care_day), 1, '숨기기 끄면 파트너도 봄');
 select is((select count(*)::int from public.care_record), 1, '그동안 기록도 함께');
 reset role;
 

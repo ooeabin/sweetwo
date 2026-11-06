@@ -14,7 +14,7 @@ import { PersonDot } from '../../../shared/person';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
 // 오른쪽 회색 요약 값(공개 범위, 알림 채널, 앱 잠금(데스크톱), 가이드 진행), 앱 정보 줄에 버전 + 확인 요청 배지(관리자 열람 요청이 있을 때만 → S-19a).
-// 공개 범위 줄은 배우자 미합류·혼자 쓰기면 숨김, 위젯 줄은 데스크톱만.
+// 공개 범위 줄은 파트너 미합류·혼자 쓰기면 숨김, 위젯 줄은 데스크톱만.
 export function S10Settings() {
   const nav = useNavigate();
   const d = useSettingsData();

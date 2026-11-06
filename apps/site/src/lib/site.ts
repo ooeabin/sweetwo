@@ -19,7 +19,7 @@ export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크하는 부부 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크하는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
   getApp: '앱 받기',
   heroLead: '둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크해요', // [확인 필요]

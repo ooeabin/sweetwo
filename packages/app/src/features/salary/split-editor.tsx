@@ -67,7 +67,7 @@ export function SplitEditor({
   onSave: () => void;
   /** 목록 아래 글자 링크(W-01 ‘추천값으로 다시 채우기’) */
   extra?: ReactNode;
-  /** 고칠 수 없는 줄(배우자 내 목표 줄) */
+  /** 고칠 수 없는 줄(파트너 내 목표 줄) */
   locked?: (l: SplitLineDraft) => boolean;
   /** 칸 막대(합류 P-06 5칸 등) */
   steps?: { total: number; now: number; fill?: number };

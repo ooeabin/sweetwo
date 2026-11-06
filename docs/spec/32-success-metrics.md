@@ -1,39 +1,39 @@
 # 성공 지표
 
-핵심 지표는 ‘월급 체크를 한 부부 수(월)’. 단계별 지표로 온보딩(11화면) → 첫 체크 → 배우자 초대·합류 → 매달 체크리스트 → 목표 진행 → 리텐션 → 유료 전환을 보고, 이벤트는 금액 원값 없이 구간으로만 수집함. 2026-10-25 재기획(`docs/adr/0003-replan-goal-checklist.md`)으로 월말 정리, 제안, 월급 나누기, 첫 주 할 일, 재정 진단 지표는 없앰. 목표치는 모두 출시 전 가설 [확인 필요], 첫 3개 사이클 코호트 확인 후 재설정.
+핵심 지표는 ‘월급 체크를 한 커플 수(월)’. 단계별 지표로 온보딩(11화면) → 첫 체크 → 파트너 초대·합류 → 매달 체크리스트 → 목표 진행 → 리텐션 → 유료 전환을 보고, 이벤트는 금액 원값 없이 구간으로만 수집함. 2026-10-25 재기획(`docs/adr/0003-replan-goal-checklist.md`)으로 월말 정리, 제안, 월급 나누기, 첫 주 할 일, 재정 진단 지표는 없앰. 목표치는 모두 출시 전 가설 [확인 필요], 첫 3개 사이클 코호트 확인 후 재설정.
 
 ## 1. 핵심 지표 (North Star)
 
-**월급 체크를 한 부부 수 (월)** [확인 필요]
+**월급 체크를 한 커플 수 (월)** [확인 필요]
 
 - 정의: 사이클(기준일 \~ 다음 기준일 전날)마다 `checklist_line_checked`가 1건 이상인 couple\_id 수. 각자 관리면 두 사람 중 한 사람만 체크해도, 합쳐서 관리면 누가 체크해도 셈(대신 체크는 2026-11-03 없앰)
-- 월 귀속: 부부마다 기준일이 달라 체크리스트 이름의 월(‘{기준일의 월}월 월급’) 기준으로 묶음. 각자 관리에서 두 사람 기준일이 다르면 먼저 시작한 사람 체크리스트의 월 기준 [확인 필요]
+- 월 귀속: 커플마다 기준일이 달라 체크리스트 이름의 월(‘{기준일의 월}월 월급’) 기준으로 묶음. 각자 관리에서 두 사람 기준일이 다르면 먼저 시작한 사람 체크리스트의 월 기준 [확인 필요]
 - 포함: 월말 확인(W-05)에서 한 체크. 제외: ‘이번 달은 못 했어요’만 누른 사이클
-- 왜: 체크 = 월급 계획대로 나눴는지 확인 + 저금이 목표에 쌓이는 유일한 지점. 수기 입력 앱에서 데이터가 살아 있는지 + 부부가 매달 정한 대로 돈을 나누는지를 함께 보여줌
+- 왜: 체크 = 월급 계획대로 나눴는지 확인 + 저금이 목표에 쌓이는 유일한 지점. 수기 입력 앱에서 데이터가 살아 있는지 + 커플이 매달 정한 대로 돈을 나누는지를 함께 보여줌
 - MAU를 쓰지 않는 이유: 매일 기록 없는 설계(월급날 체크 1\~2분, 월말 확인 30초)라 접속 빈도는 가치와 무관
-- 보조 분해: 연결 부부 비중, 월급 관리 방식(각자 / 합쳐서), 사이클 끝에 ‘다 했어요’인 비율(대신 체크 비율은 2026-11-03 없앰)
+- 보조 분해: 연결 커플 비중, 월급 관리 방식(각자 / 합쳐서), 사이클 끝에 ‘다 했어요’인 비율(대신 체크 비율은 2026-11-03 없앰)
 
 ## 2. 단계별 지표
 
 | 지표 | 정의(계산식) | 초기 목표치(가설) | 보는 이유 |
 | --- | --- | --- | --- |
-| 온보딩 완료율 | O-60 ‘시작하기’ 사용자 ÷ O-10 ‘시작하기’ 사용자 (초대받은 배우자 제외) | 80% [확인 필요] | 11화면 안에 첫 목표와 월급 계획까지 가야 가치 체험 시작 |
+| 온보딩 완료율 | O-60 ‘시작하기’ 사용자 ÷ O-10 ‘시작하기’ 사용자 (초대받은 파트너 제외) | 80% [확인 필요] | 11화면 안에 첫 목표와 월급 계획까지 가야 가치 체험 시작 |
 | 온보딩 소요 시간 | O-10 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 3분 이하 [확인 필요] | 약 2분·11화면 설계 검증 |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 월급 계획이 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 월급 계획 전체를 따라가는지 |
 | 월별 체크리스트 완료율 | 사이클이 끝날 때(다음 기준일 0시) ‘다 했어요’인 체크리스트 ÷ 그 사이클 체크리스트. 줄 기준 보조: 체크한 줄 ÷ 전체 줄(남는 돈 제외) | 60% (줄 기준 80%) [확인 필요] | 습관이 유지되는지. 월말 확인(W-05) 효과는 W-05에서 한 체크 비율로 따로 봄 |
 | 저금 줄 체크율 | 사이클이 끝날 때 체크한 저금 줄 ÷ 전체 저금 줄 | 80% [확인 필요] | 목표에 실제로 돈이 쌓이는지(‘못 함’은 목표에 더하지 않음) |
-| 목표 진행 | 기한이 있는 1순위 목표 중 예상 달성일이 기한 안인(‘지연’ 아닌) 비율, 사이클마다 1순위 목표 모은 돈이 늘어난 부부 비율 | 지연 아님 60%, 늘어난 부부 70% [확인 필요] | 목표가 주인공인지. 저금 줄 금액이 월 필요액보다 적거나 ‘못 함’이 쌓이면 지연 |
+| 목표 진행 | 기한이 있는 1순위 목표 중 예상 달성일이 기한 안인(‘지연’ 아닌) 비율, 사이클마다 1순위 목표 모은 돈이 늘어난 커플 비율 | 지연 아님 60%, 늘어난 커플 70% [확인 필요] | 목표가 주인공인지. 저금 줄 금액이 월 필요액보다 적거나 ‘못 함’이 쌓이면 지연 |
 | 목표 달성 | 사이클마다 G-05에 도달한 목표 수, 계획 대비(`early` / `on_time` / `late`) | 비교만(목표치 없음) | 달성 뒤 다음 목표로 이어지는지 |
-| 배우자 초대율 | O-06 ‘초대하기’ 또는 온보딩 완료 후 7일 안에 초대 발급(O-07, 홈 H-06, 설정 S-12 ‘부부 정보’)한 사용자 ÷ 온보딩 완료 사용자 | 70% [확인 필요] | 둘이 같이 쓰는 것이 핵심 차별점. O-06에서 바로 초대한 비율은 따로 봄 |
-| 배우자 합류율 | 초대 발급 후 7일 안에 합류 완료(→ 배우자 합류) ÷ 초대 발급 (재발급은 첫 발급 기준) | 50% [확인 필요] | 초대 유효기간 7일과 일치. 합류해야 배우자 체크리스트 보기, 합쳐서 같이 체크가 작동 |
+| 파트너 초대율 | O-06 ‘초대하기’ 또는 온보딩 완료 후 7일 안에 초대 발급(O-07, 홈 H-06, 설정 S-12 ‘우리 둘 정보’)한 사용자 ÷ 온보딩 완료 사용자 | 70% [확인 필요] | 둘이 같이 쓰는 것이 핵심 차별점. O-06에서 바로 초대한 비율은 따로 봄 |
+| 파트너 합류율 | 초대 발급 후 7일 안에 합류 완료(→ 파트너 합류) ÷ 초대 발급 (재발급은 첫 발급 기준) | 50% [확인 필요] | 초대 유효기간 7일과 일치. 합류해야 파트너 체크리스트 보기, 합쳐서 같이 체크가 작동 |
 | 합류 소요 시간 | `invite_sent` → `partner_joined` 중앙값 | 24시간 이내 | 휴대폰 초대 → 앱 설치 → 합류(약 7화면·1\~2분) 동선 검증 |
-| M1 유지 | 첫 사이클에 체크한 부부 중 바로 다음 사이클에도 1줄 이상 체크한 비율 | 70% [확인 필요] | 첫 체크가 일회성인지 |
-| M3 유지 | 첫 사이클에 체크한 부부 중 3번째 사이클에도 체크한 비율 | 50% [확인 필요] | 첫 분기(3사이클)까지 남는지 |
-| 유료 전환율 | 3사이클 이상 체크한 부부 중 프리미엄 구독 부부 비율 (부부 단위, 한 명 구독 = 둘 다 적용) | 5% | 핵심 기능은 무료(→ 사업 계획 6장)라 전환은 체크 습관 이후에 봄 |
-| 페이월 전환율 | `paywall_viewed` 후 30일 안에 `subscription_started` ÷ 페이월 본 부부 | 8% | 어느 진입점이 파는지. 진입점은 유료화 시점에 다시 정함 [확인 필요] |
-| 위젯 부부 체크 완료율 | 위젯을 둔(widget\_added) 부부의 월별 체크리스트 완료율 vs 위젯 없는 부부, 같은 가입 주차 코호트 | 비교만(목표치 없음) | 위젯이 체크 습관에 도움이 되는지 |
-| 비교 참여율 (출시 후, 2단계) | 통계 참여를 두 사람 모두 켠 부부 ÷ 연결 부부 | 30% | 그룹별 100쌍에 닿는 속도(→ 계산·배분 7장). 비교 기준(연령대 등)은 다시 정함 [확인 필요] |
+| M1 유지 | 첫 사이클에 체크한 커플 중 바로 다음 사이클에도 1줄 이상 체크한 비율 | 70% [확인 필요] | 첫 체크가 일회성인지 |
+| M3 유지 | 첫 사이클에 체크한 커플 중 3번째 사이클에도 체크한 비율 | 50% [확인 필요] | 첫 분기(3사이클)까지 남는지 |
+| 유료 전환율 | 3사이클 이상 체크한 커플 중 프리미엄 구독 커플 비율 (커플 단위, 한 명 구독 = 둘 다 적용) | 5% | 핵심 기능은 무료(→ 사업 계획 6장)라 전환은 체크 습관 이후에 봄 |
+| 페이월 전환율 | `paywall_viewed` 후 30일 안에 `subscription_started` ÷ 페이월 본 커플 | 8% | 어느 진입점이 파는지. 진입점은 유료화 시점에 다시 정함 [확인 필요] |
+| 위젯 커플 체크 완료율 | 위젯을 둔(widget\_added) 커플의 월별 체크리스트 완료율 vs 위젯 없는 커플, 같은 가입 주차 코호트 | 비교만(목표치 없음) | 위젯이 체크 습관에 도움이 되는지 |
+| 비교 참여율 (출시 후, 2단계) | 통계 참여를 두 사람 모두 켠 커플 ÷ 연결 커플 | 30% | 그룹별 100쌍에 닿는 속도(→ 계산·배분 7장). 비교 기준(연령대 등)은 다시 정함 [확인 필요] |
 
 ## 3. 위험 신호 지표
 
@@ -45,8 +45,8 @@
 | 저금 ‘못 함’ | 사이클이 끝날 때 ‘못 함’인 저금 줄 ÷ 전체 저금 줄 | 30% 초과 [확인 필요] | 월급 계획 저금이 과한지(남는 돈 음수 비율과 교차), W-02a 다른 금액 사용률 |
 | 월급 계획 모자람 | 남는 돈이 음수인 월급 계획 비율 | 20% 초과 [확인 필요] | O-50 추천값(고정지출·생활비 25%, 용돈 10%) 맞는지, “30만 원이 모자라요” 뒤 행동 |
 | 되돌리기 | 상대가 고친 월급 계획·목표 값을 7일 안에 되돌린 비율 | 15% 초과 [확인 필요] | 갈등 신호. 변경 알림 문구, 고친 항목 종류. 연결 해제와 교차 확인 |
-| 연결 해제 | 월 `unlink_requested` 부부 ÷ 연결 부부, 14일 기한으로 확정된 비율, 30일 안 다시 연결한 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
-| 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 부부 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선(O-06 ‘나중에 할게요’ 비율, 홈 H-06 초대 한 줄 닫기 비율) |
+| 연결 해제 | 월 `unlink_requested` 커플 ÷ 연결 커플, 14일 기한으로 확정된 비율, 30일 안 다시 연결한 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
+| 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 커플 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선(O-06 ‘나중에 할게요’ 비율, 홈 H-06 초대 한 줄 닫기 비율) |
 | 알림 피로 | 알림 종류별 열람률, 월 상한(메일 6회) 도달 사용자 비율, 종류별 알림 끄기 수(S-14) | 열람률 10% 미만 또는 상한 도달 30% 초과 | 급하지 않은 알림 우선순위 조정 |
 | 브라우저 로그인 이탈 | 데스크톱·모바일 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
 
@@ -65,16 +65,16 @@
 | 속성 | 값 | 비고 |
 | --- | --- | --- |
 | user\_id | 가명 내부 ID | 로그인 계정·이메일과 분리 |
-| couple\_id | 부부 공간 가명 ID | 해제 후 혼자 쓰기도 기존 couple\_id 유지, 새로 초대하면 새 ID |
+| couple\_id | 커플 공간 가명 ID | 해제 후 혼자 쓰기도 기존 couple\_id 유지, 새로 초대하면 새 ID |
 | role | `starter`(먼저 시작) / `partner`(초대받아 합류) |  |
-| couple\_state | `unjoined` 미합류 / `linked` 연결 / `unlink_pending` 해제 대기 / `solo` 혼자 쓰기 | → 핵심 규칙 › 부부·권한 |
+| couple\_state | `unjoined` 미합류 / `linked` 연결 / `unlink_pending` 해제 대기 / `solo` 혼자 쓰기 | → 핵심 규칙 › 커플·권한 |
 | marriage\_state | `married` 했어요 / `preparing` 준비 중이에요 | O-11 답 [확인 필요] |
 | salary\_mode | `separate` 각자 / `combined` 합쳐서 | O-30, 설정에서 바뀌면 바뀐 값 [확인 필요] |
 | platform | `desktop` / `ios` / `android` | 웹사이트 이벤트는 site |
 | os | `windows` / `macos` / `ios` / `android` |  |
 | app\_version | 앱 빌드 버전 |  |
 | cycle\_id | 사이클 ID (체크리스트 주인 + 기준일) | 첫 사이클은 `cycle_first=true` |
-| plan\_tier | `free` / `premium` | 부부 단위 |
+| plan\_tier | `free` / `premium` | 커플 단위 |
 | client\_time / server\_time | 기기 시각 / 수신 시각 | 오프라인 저장 후 동기화 전송 대비 |
 | source | `client` / `server` |  |
 | utm\_source, utm\_medium, utm\_campaign | 웹사이트 유입 UTM 값 | 웹사이트 이벤트에만 붙임. 스토어·데스크톱 설치 경로는 가입 이벤트까지 이어지지 않음(스토어 캠페인 값은 각 스토어 콘솔에서 봄). source(client / server)와는 다른 속성 |
@@ -89,28 +89,28 @@
 | login\_failed | A-02·A-03 예외 | method, reason(cancelled / timeout / provider\_error / email\_conflict / request\_mismatch / browser\_open\_failed) |
 | signup\_completed | A-05 ‘동의하고 계속하기’ 계정 생성 (서버) | method, email\_source(provider / manual: A-04 직접 입력), marketing\_opt\_in, role |
 | onboarding\_started | O-10 ‘시작하기’ [확인 필요] | entry(`direct` / `invite_link`) |
-| onboarding\_step\_viewed | O-10\~O-60, 배우자 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required, marriage\_state |
+| onboarding\_step\_viewed | O-10\~O-60, 파트너 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required, marriage\_state |
 | onboarding\_step\_completed | 각 화면 ‘다음’ | screen\_id, answer(`input` / `estimate` / `none`), duration\_sec, changed\_after\_back |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | “이어서 할까요?” | screen\_id, hours\_since\_last |
 | onboarding\_completed | O-60 ‘시작하기’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(남는 돈 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
-| invite\_sent | O-07, 홈 H-06, 설정 S-12 ‘부부 정보’ | channel(`code` / `link` / `kakao`), entry(`onboarding` / `home` / `settings`), issue\_seq(재발급 회차) |
+| invite\_sent | O-07, 홈 H-06, 설정 S-12 ‘우리 둘 정보’ | channel(`code` / `link` / `kakao`), entry(`onboarding` / `home` / `settings`), issue\_seq(재발급 회차) |
 | invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
-| partner\_joined | 합류 완료(→ 배우자 합류) | hours\_since\_invite, mid\_cycle, salary\_mode, moved\_records(혼자 쓰던 기록을 옮겼는지) |
+| partner\_joined | 합류 완료(→ 파트너 합류) | hours\_since\_invite, mid\_cycle, salary\_mode, moved\_records(혼자 쓰던 기록을 옮겼는지) |
 
 ### 4-4. 월급 체크리스트
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| checklist\_generated | 기준일 0시, 첫 사이클은 O-60 직후, 배우자 합류 직후 (서버) | cycle\_type(`first` / `regular` / `extended`(해제 대기 중)), owner(`self` / `joint`), lines\_count, saving\_lines\_count |
+| checklist\_generated | 기준일 0시, 첫 사이클은 O-60 직후, 파트너 합류 직후 (서버) | cycle\_type(`first` / `regular` / `extended`(해제 대기 중)), owner(`self` / `joint`), lines\_count, saving\_lines\_count |
 | checklist\_line\_checked | W-02, W-05, 홈 H-02 목표 이번 달 줄, 홈 H-03 줄 체크 | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), result(`as_planned` / `different`), diff\_band, checked\_by(`self` / `joint`, `on_behalf`는 2026-11-03 대신 체크 없앰), entry(`w02` / `w05` / `home` / `widget`), days\_from\_payday |
 | checklist\_line\_unchecked | 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원 | line\_kind |
 | checklist\_completed | 남는 돈 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
-| split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 배우자 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
+| split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 파트너 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
 | salary\_mode\_changed | 설정에서 월급 관리 방식 바꿈 | from, to(`separate` / `combined`) |
 
 ### 4-5. 목표·우리 자산·챙길 날
@@ -131,11 +131,11 @@
 
 ### 4-6. 둘이 같이 고치기
 
-제안·승인은 없음. 누구나 바로 고치고 상대에게 알림, 고친 사람에게 Toast ‘되돌리기’(→ 핵심 규칙 › 부부·권한).
+제안·승인은 없음. 누구나 바로 고치고 상대에게 알림, 고친 사람에게 Toast ‘되돌리기’(→ 핵심 규칙 › 커플·권한).
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감 | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 부부만 보냄) |
+| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감 | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
 | change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기 | item\_type, entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
 
 ### 4-7. 연결 해제·알림·구독·위젯
@@ -144,7 +144,7 @@
 | --- | --- | --- |
 | unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data |
 | unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`), days\_pending, exported\_data |
-| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월말 확인), 배우자가 고침, 챙길 날, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
+| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월말 확인), 파트너가 고침, 챙길 날, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
 | notification\_opened | 알림 클릭 → 진입 | type, channel, minutes\_to\_open, landing\_screen |
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
@@ -190,7 +190,7 @@
 | 주기 | 보는 것 | 결정 |
 | --- | --- | --- |
 | 상시 (자동 경보) | 3장 경보 기준 초과, 기준일 체크리스트 생성·알림 발송 실패 | 원인 확인, 긴급 수정 여부 |
-| 주간 | 핵심 지표 진행 상황(진행 중 사이클의 체크 진행률), 온보딩 완료율·소요 시간, 이탈 화면 상위 5, 첫 체크 완료율, 배우자 초대·합류율 | 문구·화면 수정 우선순위 |
+| 주간 | 핵심 지표 진행 상황(진행 중 사이클의 체크 진행률), 온보딩 완료율·소요 시간, 이탈 화면 상위 5, 첫 체크 완료율, 파트너 초대·합류율 | 문구·화면 수정 우선순위 |
 | 월간 (사이클 종료 7일 뒤) | 핵심 지표 월 추이, 가입 주차 코호트별 첫 체크 완료율·M1·M3, 월별 체크리스트 완료율·저금 줄 체크율, 목표 진행·지연, 되돌리기, 연결 해제, 유료·페이월 전환 | 기능 개선·알림 정책 조정 |
 | 분기 | 목표치(가설) 재설정, 지표·이벤트 정의 점검 | 다음 분기 목표 |
 

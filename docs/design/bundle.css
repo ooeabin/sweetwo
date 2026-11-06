@@ -478,7 +478,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar--sm { width: 24px; height: 24px; font-size: 12px; }
 .hg-avatar--lg { width: 40px; height: 40px; font-size: 15px; }
 .hg-avatars { display: inline-flex; }
-.hg-avatar--empty { background: var(--surface-alt); color: var(--stone); }  /* 2026-11-03 배우자 빈 자리 기본 그림 */
+.hg-avatar--empty { background: var(--surface-alt); color: var(--stone); }  /* 2026-11-03 파트너 빈 자리 기본 그림 */
 /* 2026-11-05 빈 자리도 같은 실루엣(회색) */
 .hg-avatar--empty { position: relative; overflow: hidden; }
 .hg-avatar--empty .hg-ico { display: none; }
@@ -884,7 +884,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-body__banners { gap: 1px; }
 }
 
-/* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 배우자 체크 현황) */
+/* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 파트너 체크 현황) */
 .hg-person { display: flex; align-items: center; gap: var(--space-3); width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 600 14px/20px var(--font-sans); text-align: left; cursor: pointer; }
 .hg-person:hover { background: var(--surface-alt); }
 .hg-person:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

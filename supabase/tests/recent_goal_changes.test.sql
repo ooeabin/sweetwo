@@ -1,4 +1,4 @@
--- pgTAP: 배우자가 고친 목표(22 G-01 예외) — 나에게 온 것만, 목표마다 마지막 하나
+-- pgTAP: 파트너가 고친 목표(22 G-01 예외) — 나에게 온 것만, 목표마다 마지막 하나
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(3);

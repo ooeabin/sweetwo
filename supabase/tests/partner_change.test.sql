@@ -1,4 +1,4 @@
--- pgTAP: 배우자 변경 알림(08 4장, 14). 10분 묶기, 되돌리면 안 알림, 바로 알림과 주간 요약에만 가는 변경, 내 목표 제외, 주간 요약.
+-- pgTAP: 파트너 변경 알림(08 4장, 14). 10분 묶기, 되돌리면 안 알림, 바로 알림과 주간 요약에만 가는 변경, 내 목표 제외, 주간 요약.
 -- 찬우(시작한 사람), 예빈(합류한 사람). 고친 사람은 request.jwt.claims로만 정함(권한 검사는 다른 테스트)
 begin;
 create extension if not exists pgtap with schema extensions;

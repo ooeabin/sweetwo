@@ -72,11 +72,11 @@ select is((select count(*) from public.split_line l join public.salary_split s o
   where l.goal_id = (select id from public.goal where template = 'hobby') and s.owner_user_id = auth.uid()),
   0::bigint, '찬우 내 목표는 예빈 월급 계획에 없음');
 select throws_ok($$ select public.move_goal((select id from public.goal where template = 'hobby'), 'in', 10000) $$,
-  '42501', 'not_owner', '배우자 내 목표는 넣기 못 함');
+  '42501', 'not_owner', '파트너 내 목표는 넣기 못 함');
 update public.goal set name = '바꿈' where template = 'hobby';
-select is((select name from public.goal where template = 'hobby'), '자기계발', '배우자 내 목표는 고칠 수 없음');
+select is((select name from public.goal where template = 'hobby'), '자기계발', '파트너 내 목표는 고칠 수 없음');
 select is((select saved from public.goal_saved_sums() where goal_id = (select id from public.goal where template = 'home')),
-  1500000::bigint, '배우자도 같은 모은 돈');
+  1500000::bigint, '파트너도 같은 모은 돈');
 reset role;
 
 select * from finish();

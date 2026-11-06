@@ -31,7 +31,7 @@ select is((select avatar_social_checked_at::text from public.app_user where id =
   '다시 불러도 처음 시각 그대로');
 reset role;
 select is((select avatar_social_checked_at from public.app_user where id = '22222222-2222-2222-2222-222222222222'), null,
-  '배우자 줄은 안 바뀜');
+  '파트너 줄은 안 바뀜');
 
 set local role anon;
 select throws_ok($$ select public.mark_social_avatar_checked() $$, '42501', null, '로그인 안 하면 부를 수 없음');

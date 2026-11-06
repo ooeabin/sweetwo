@@ -455,7 +455,7 @@ verify_jwt = false
 [functions.purge-storage]
 verify_jwt = false
 
-# 소셜 계정 프로필 사진 받기(앱이 부부 공간이 생긴 뒤 한 번 부름, 25 S-11e). 앱 사용자 JWT로 확인
+# 소셜 계정 프로필 사진 받기(앱이 우리 둘 공간이 생긴 뒤 한 번 부름, 25 S-11e). 앱 사용자 JWT로 확인
 [functions.social-avatar]
 verify_jwt = true
 

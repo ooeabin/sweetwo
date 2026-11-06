@@ -10,7 +10,7 @@ import { LoadingFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-18b 계정 삭제 확인(docs/spec/25-settings.md, 31 3-2): 삭제 대상(부부 상태별), ‘먼저 내보내기’,
+// S-18b 계정 삭제 확인(docs/spec/25-settings.md, 31 3-2): 삭제 대상(우리 둘 상태별), ‘먼저 내보내기’,
 // “카카오로 확인하고 삭제” → 확인 Modal → 가입 소셜로 다시 로그인(10분 안이면 생략) → 돌아오면(?go=1) 삭제 요청 →
 // 바로 로그아웃, A-02에 “계정 삭제 요청을 받았어요. 11월 17일까지 다시 로그인하면 취소할 수 있어요”.
 // 구독 해지 안내는 구독과 함께.

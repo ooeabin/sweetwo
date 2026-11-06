@@ -12,7 +12,7 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-/** 부부 공간의 월급 계획 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
+/** 우리 둘 공간의 월급 계획 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
 export async function fetchSplits(): Promise<SalarySplit[]> {
   const { data, error } = await supabase()
     .from('salary_split')
@@ -113,7 +113,7 @@ export async function fetchGoalSaved(): Promise<Record<string, number>> {
   return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.saved]));
 }
 
-/** 배우자가 고친 목표(22 G-01 예외): 목표마다 마지막 변경 하나, 30일 안 */
+/** 파트너가 고친 목표(22 G-01 예외): 목표마다 마지막 변경 하나, 30일 안 */
 export type GoalChange = { goalId: string; field: string; actorId: string; at: string };
 export async function fetchRecentGoalChanges(): Promise<GoalChange[]> {
   const { data, error } = await supabase().rpc('recent_goal_changes');

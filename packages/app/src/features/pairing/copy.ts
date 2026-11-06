@@ -1,9 +1,9 @@
-// 배우자 합류 문구(docs/spec/18-partner-join.md, 15 A-07). 기획서 “ ” 안 문장을 그대로.
+// 파트너 합류 문구(docs/spec/18-partner-join.md, 15 A-07). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   // P-11 합류 직후 푸시 허용(모바일, 1회) [확인 필요] 문구
   pushTitle: '알림을 받을까요?',
-  pushHelp: '배우자가 체크하거나 바꾸면 바로 알려 드려요',
+  pushHelp: '파트너가 체크하거나 바꾸면 바로 알려 드려요', // [확인 필요]
   pushAllow: '알림 받기',
   later: '나중에 할게요',
   next: '다음',
@@ -17,7 +17,7 @@ export const copy = {
   codeLabel: '초대 코드',
   // P-01 코드 직접 입력(O-01 ‘코드 입력하기’)
   codeTitle: '받은 초대 코드를 넣어 주세요',
-  codeHelp: '배우자가 보낸 6자리 코드예요',
+  codeHelp: '파트너가 보낸 6자리 코드예요', // [확인 필요]
   joinAs: (provider: string) => `${provider} 계정으로 합류해요`,
   otherAccount: '다른 계정',
   join: '합류하기',
@@ -27,7 +27,7 @@ export const copy = {
     expired: '초대가 만료됐어요. 새 코드를 요청해 주세요',
     invalid: '코드를 다시 확인해 주세요',
     locked: '10분 뒤에 다시 입력해 주세요',
-    already_connected: '이미 부부 공간이 연결돼 있어요',
+    already_connected: '이미 우리 둘 공간이 연결돼 있어요', // [확인 필요]
     own_code: '내가 만든 초대 코드예요',
     used: '이미 합류가 끝난 초대예요',
     unavailable: '사용할 수 없는 초대예요',
@@ -57,7 +57,7 @@ export const copy = {
 
   // P-03 내 이름
   nameTitle: '내 이름이나 애칭을 알려 주세요',
-  nameHelp: '배우자에게도 이 이름으로 보여요',
+  nameHelp: '파트너에게도 이 이름으로 보여요', // [확인 필요]
   namePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
 

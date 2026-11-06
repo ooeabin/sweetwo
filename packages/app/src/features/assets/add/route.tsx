@@ -244,7 +244,7 @@ export function AssetAddRoute() {
           onPick={(owner) => go({ owner })}
           options={[
             { value: 'me', label: copy.ownerMe },
-            // 배우자 명의는 합류 전 대신 입력만(합류 뒤 상대 명의 새로 만들기 불가)
+            // 파트너 명의는 합류 전 대신 입력만(합류 뒤 상대 명의 새로 만들기 불가)
             ...(!joined ? [{ value: 'partner' as const, label: d.couple.partnerName }] : []),
             { value: 'joint', label: copy.joint },
           ]}

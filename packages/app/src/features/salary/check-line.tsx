@@ -57,7 +57,7 @@ export function LineLead({
 
 /**
  * 저금 줄 목표 이름. 합쳐서 모드에서 내 목표 줄은 앞에 주인 이름(“찬우 자기계발”, 20 W-01 3번).
- * 배우자 내 목표가 ‘금액만 보여 주기’면 서버가 이미 “개인 목표”로 줌(space_goals)
+ * 파트너 내 목표가 ‘금액만 보여 주기’면 서버가 이미 “개인 목표”로 줌(space_goals)
  */
 export const goalLineName =
   (
@@ -115,7 +115,7 @@ export function CheckLine({
   meId: string | undefined;
   /** 지난 사이클(읽기 전용) */
   readOnly?: boolean;
-  /** 배우자 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 없이 상태만 */
+  /** 파트너 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 없이 상태만 */
   viewOnly?: boolean;
   /** ⋯ 다른 금액(W-02a) */
   onOther?: () => void;

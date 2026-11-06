@@ -1,4 +1,4 @@
--- pgTAP: 공지 대상 조건(부부 상태·플랫폼·앱 버전·가입 주차), 대상 수, 앱이 읽는 공지, 승인 요청(대상 0명 불가),
+-- pgTAP: 공지 대상 조건(커플 상태·플랫폼·앱 버전·가입 주차), 대상 수, 앱이 읽는 공지, 승인 요청(대상 0명 불가),
 -- 장애 고지 메일은 대상에 맞는 사람만(약관 개정은 모두), 테스트 발송은 관리자 본인 메일로만.
 -- 찬우(연결, 가입 5주차, 데스크톱 1.2.0), 예빈(연결, 1주차, iOS 1.5.0), 3번(혼자 쓰기, 1주차, 기기 없음, 메일 반송 2번)
 begin;
@@ -28,7 +28,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 
 -- 조건 모양
-select is(public.notice_target_valid('{"couple_states":["moon"]}'), false, '없는 부부 상태는 안 됨');
+select is(public.notice_target_valid('{"couple_states":["moon"]}'), false, '없는 커플 상태는 안 됨');
 select is(public.notice_target_valid('{"amount":1000}'), false, '금액 조건은 없음');
 select is(public.notice_target_valid('{"weeks_min":4,"weeks_max":2}'), false, '가입 주차 처음이 끝보다 늦으면 안 됨');
 select is(public.notice_target_valid('{"couple_states":["solo","connected"],"version_below":"1.3.0","weeks_min":1,"weeks_max":4}'), true, '조건 모두');
@@ -40,7 +40,7 @@ select throws_ok($$ insert into public.notice (kind, title, starts_at, ends_at, 
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000004');
 set local role authenticated;
 select is((public.admin_notice_audience('info', array['desktop','mobile'], '{}', false) ->> 'target')::int, 3, '조건 없음: 모두');
-select is((public.admin_notice_audience('info', array['desktop','mobile'], '{"couple_states":["solo"]}', false) ->> 'target')::int, 1, '부부 상태');
+select is((public.admin_notice_audience('info', array['desktop','mobile'], '{"couple_states":["solo"]}', false) ->> 'target')::int, 1, '커플 상태');
 select is((public.admin_notice_audience('info', array['mobile'], '{}', false) ->> 'target')::int, 1, '모바일 앱 기기가 있는 사람만');
 select is((public.admin_notice_audience('maintenance', array['desktop','mobile'], '{"version_below":"1.3.0"}', false) ->> 'target')::int, 1, '1.3.0보다 낮은 앱');
 select is((public.admin_notice_audience('info', array['desktop','mobile'], '{"weeks_max":1}', false) ->> 'target')::int, 2, '가입 1주차');

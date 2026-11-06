@@ -13,7 +13,7 @@ import {
 } from '../data';
 
 // W-02 끝 다 보냈어요(20, Q7): 큰 체크 + “이번 달 월급 체크를 다 했어요” + 이번 달 목표에 모은 돈(목표별 줄)
-// + 배우자 진행 “예빈님 3개 중 1개”(각자 모드 + 배우자 합류만, 누르면 W-02 그 사람 탭) → 확인 → 홈
+// + 파트너 진행 “예빈님 3개 중 1개”(각자 모드 + 파트너 합류만, 누르면 W-02 그 사람 탭) → 확인 → 홈
 export function W02Done() {
   const nav = useNavigate();
   const me = useMe();
@@ -41,7 +41,7 @@ export function W02Done() {
       center
       hero={<DoneMark art="celebrate" />}
     >
-      {/* 그림 → 제목은 가운데, 저금 요약과 배우자 진행은 버튼 바로 위(2026-11-05) */}
+      {/* 그림 → 제목은 가운데, 저금 요약과 파트너 진행은 버튼 바로 위(2026-11-05) */}
       <div className="hg-q__end">
         {total > 0 && (
           <InfoPlate

@@ -1,4 +1,4 @@
--- pgTAP: 계정 삭제(S-18b), 삭제 취소, 30일 뒤 지우기. 찬우(삭제), 예빈(배우자), 혼자 쓰는 K
+-- pgTAP: 계정 삭제(S-18b), 삭제 취소, 30일 뒤 지우기. 찬우(삭제), 예빈(파트너), 혼자 쓰는 K
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(17);

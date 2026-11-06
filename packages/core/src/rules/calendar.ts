@@ -3,7 +3,7 @@ import { baseDateIn } from '../onboarding/cycle';
 import type { BaseDay } from '../onboarding/cycle';
 
 // 캘린더 돈 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
-// 월급날(주말·공휴일이면 직전 영업일, 부부가 끄면 그대로), 월말 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
+// 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월말 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
 // 목표 기한(한 번 목표, 기한의 달 1일), 매년 목표 쓰는 달(그 달 1일), 자산·대출 만기.
 
 export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity';

@@ -1,4 +1,4 @@
--- pgTAP: 배우자 합류 재기획(18). 관리 방식 바꾸기(P-04), 합류 완료(P-06, 대기), 첫 목표 알림. 찬우, 예빈
+-- pgTAP: 파트너 합류 재기획(18). 관리 방식 바꾸기(P-04), 합류 완료(P-06, 대기), 첫 목표 알림. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(12);
@@ -62,7 +62,7 @@ select public.complete_join(jsonb_build_array(
 select is((select onboarding_step from public.app_user where id = auth.uid()), 'P-06', '합류 완료');
 reset role;
 select is((select couple_state::text from public.couple_space where created_by = '11111111-1111-1111-1111-111111111111'),
-  'connected', '부부 연결');
+  'connected', '커플 연결');
 select is((select body from public.notification where kind = 'partner_joined'), '이제 목표와 월급을 같이 봐요', '합류 알림');
 select is((select count(*) from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.owner_user_id is null and l.kind = 'allowance'), 2::bigint, '이번 체크리스트에 예빈 용돈 줄');

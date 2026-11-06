@@ -6,7 +6,7 @@ describe('NoticeTarget', () => {
   it('빈 객체는 모두', () => {
     expect(NoticeTarget.safeParse({}).success).toBe(true);
   });
-  it('부부 상태, 앱 버전, 가입 주차', () => {
+  it('커플 상태, 앱 버전, 가입 주차', () => {
     expect(
       NoticeTarget.safeParse({
         couple_states: ['solo', 'connected'],
@@ -19,7 +19,7 @@ describe('NoticeTarget', () => {
   it('금액 조건은 없음', () => {
     expect(NoticeTarget.safeParse({ amount: 1000 }).success).toBe(false);
   });
-  it('없는 부부 상태, 버전 모양, 주차 순서', () => {
+  it('없는 커플 상태, 버전 모양, 주차 순서', () => {
     expect(NoticeTarget.safeParse({ couple_states: ['moon'] }).success).toBe(false);
     expect(NoticeTarget.safeParse({ couple_states: [] }).success).toBe(false);
     expect(NoticeTarget.safeParse({ version_below: '1.3' }).success).toBe(false);

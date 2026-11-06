@@ -15,24 +15,24 @@ export interface MemDb {
   spends: Record<string, unknown>[];
   bigs: Record<string, unknown>[];
   deposits: Record<string, unknown>[];
-  /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
+  /** 합류 흐름: 파트너 프로필, 동의 기록, 다시 나눈 분담 */
   partner: Record<string, unknown> | null;
   /** 합류 서버 함수 호출 기록 */
   joinCalls: Record<string, unknown>[];
   /** 비상금 넣기, 꺼내기(emergency_move) */
   emergencyMoves: Record<string, unknown>[];
-  /** 배우자 생일(partner_birthday) */
+  /** 파트너 생일(partner_birthday) */
   partnerBirthday?: { month: number; day: number } | null;
   consents: Record<string, unknown>[];
   shares: Record<string, unknown> | null;
   /** 제안(08 6장) */
   proposals: Record<string, unknown>[];
-  /** 우리 자산: 내가 볼 수 있는 행, 이력, 배우자 합계만, 월말 순자산 */
+  /** 우리 자산: 내가 볼 수 있는 행, 이력, 파트너 합계만, 월말 순자산 */
   assets: Record<string, unknown>[];
   assetHistory: Record<string, unknown>[];
   partnerSums: Record<string, unknown>[];
   netWorth: Record<string, unknown>[];
-  /** 배우자 활동(H-08) rpc 결과 */
+  /** 파트너 활동(H-08) rpc 결과 */
   activity: Record<string, unknown>[];
   /** 달성 축하 문장 재료(goal_story) */
   goalStory: { months: number; together: number };
@@ -476,7 +476,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'note_device')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       if (fn === 'space_goals') {
-        // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
+        // 서버처럼 파트너 내 목표 ‘금액만 보여 주기’는 “개인 목표”
         return json(
           route,
           db.goals
@@ -705,7 +705,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           if (g.template === 'family_cost') g.target_amount = a.target_amount;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
-      // 신랑·신부(S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 같이 바꿈
+      // 신랑·신부(S-11b): 나와 파트너 쪽, 쪽으로 저장한 값을 같이 바꿈
       if (fn === 'set_my_side') {
         const side = String(body().p_side);
         const flip = (v: unknown) => (v === 'groom' ? 'bride' : v === 'bride' ? 'groom' : v);
@@ -895,7 +895,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, false);
       }
       if (fn === 'goal_story') return json(route, [db.goalStory]);
-      // G-07 예산 바꾸기: 연결된 부부는 제안, 아니면 바로
+      // G-07 예산 바꾸기: 연결된 두 사람은 제안, 아니면 바로
       if (fn === 'change_wedding_budget') {
         const b = body();
         const it = db.weddingItems.find((x) => x.id === b.p_item);

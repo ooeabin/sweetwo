@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockSupabase, SB } from './supabase-mock';
 
-// 배우자 합류(docs/spec/18-partner-join.md). 예빈이 찬우의 초대 링크로 합류한다.
+// 파트너 합류(docs/spec/18-partner-join.md). 예빈이 찬우의 초대 링크로 합류한다.
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -49,7 +49,7 @@ test('O-01 ‘코드 입력하기’ → P-01 코드 입력 → 초대 확인 �
   await page.goto('/');
   await page.getByRole('button', { name: '코드 입력하기' }).click();
   await heading(page, '받은 초대 코드를 넣어 주세요');
-  await expect(page.getByText('배우자가 보낸 6자리 코드예요')).toBeVisible();
+  await expect(page.getByText('파트너가 보낸 6자리 코드예요')).toBeVisible();
   const next = page.getByRole('button', { name: '다음' });
   const input = page.getByLabel('초대 코드');
   await expect(next).toBeDisabled();

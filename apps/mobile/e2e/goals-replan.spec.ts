@@ -47,7 +47,7 @@ test('G-01 목표 목록: 우리 목표 묶음, 매달·예상, 모은 돈이 �
   await axe(page);
 });
 
-test('G-01 배우자가 방금 고친 목표: 카드 아래 “예빈님이 기한을 바꿨어요”, 다음에 열면 사라짐', async ({
+test('G-01 파트너가 방금 고친 목표: 카드 아래 “예빈님이 기한을 바꿨어요”, 다음에 열면 사라짐', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -174,7 +174,7 @@ test('G-02 수정은 바로 저장: 기한, 이름, 보류·삭제는 되돌리�
   await expect(page.getByRole('button', { name: /우리 집/ })).toHaveCount(0);
 });
 
-test('G-02 기한 줄이기·늘리기(연결된 부부): 제안 없이 ‘저장’, Toast ‘되돌리기’, 이번 달 이전은 안 됨', async ({
+test('G-02 기한 줄이기·늘리기(연결된 두 사람): 제안 없이 ‘저장’, Toast ‘되돌리기’, 이번 달 이전은 안 됨', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -310,7 +310,7 @@ test('달성 지켜보기: 모은 돈(이미 모은 돈 + 체크한 저금 + 넣
   expect(db.goals.find((g) => g.id === 'goal-h')?.status).toBe('achieved');
 });
 
-test('배우자 내 목표 ‘금액만 보여 주기’: G-01 배우자 묶음에 이름 대신 개인 목표, S-13 내 목표 공개 범위', async ({
+test('파트너 내 목표 ‘금액만 보여 주기’: G-01 파트너 묶음에 이름 대신 개인 목표, S-13 내 목표 공개 범위', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -470,7 +470,7 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   await expect(page.locator('.hg-goalhero__photo.is-empty')).toBeVisible();
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await expect(page.getByRole('heading', { name: '목표 사진' }).first()).toBeVisible();
-  await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
+  await expect(page.getByText('올린 사진은 파트너와 나만 볼 수 있어요')).toBeVisible();
   // 직접 만든 목표: 지정 사진이 없어 기본 사진은 회색 빈 자리
   await expect(
     page.getByRole('list', { name: '고를 수 있는 사진' }).getByRole('button'),
@@ -512,7 +512,7 @@ test('목표 사진(22 G-02): 기본 목표는 지정 사진 1장, 직접 만든
   await expect(page.locator('.hg-goalhero__photo.is-empty')).toBeVisible();
 });
 
-test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 바꿨으면 “어느 쪽으로 할까요?”, 1분 넘었으면 덮음', async ({
+test('충돌 선택(30 동기화 2장): 파트너가 1분 안에 같은 칸을 바꿨으면 “어느 쪽으로 할까요?”, 1분 넘었으면 덮음', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -523,7 +523,7 @@ test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 �
   if (!home) throw new Error('seed');
   await page.goto('/goals/goal-h/edit/amount');
   await expect(page.getByRole('textbox').first()).toBeVisible();
-  // 화면을 연 뒤 배우자가 30초 전에 1억 2,000만 원으로 바꿈
+  // 화면을 연 뒤 파트너가 30초 전에 1억 2,000만 원으로 바꿈
   Object.assign(home, {
     target_amount: 120_000_000,
     updated_by: 'yebin-id',
@@ -541,7 +541,7 @@ test('충돌 선택(30 동기화 2장): 배우자가 1분 안에 같은 칸을 �
   await expect(page).toHaveURL(/\/goals\/goal-h$/);
   expect(home.target_amount).toBe(130_000_000);
 
-  // 1분 넘게 지난 배우자 변경은 마지막 저장 우선(묻지 않고 덮음)
+  // 1분 넘게 지난 파트너 변경은 마지막 저장 우선(묻지 않고 덮음)
   await page.goto('/goals/goal-h/edit/amount');
   await expect(page.getByRole('textbox').first()).toBeVisible();
   Object.assign(home, {

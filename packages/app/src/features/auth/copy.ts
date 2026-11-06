@@ -90,7 +90,7 @@ export const copy = {
   adult: '[필수] 만 18세 이상이에요',
   terms: '[필수] 이용약관',
   privacy: '[필수] 개인정보 수집·이용',
-  spaceSharing: '[필수] 배우자와 부부 공간 공유',
+  spaceSharing: '[필수] 파트너와 우리 둘 공간 공유', // [확인 필요]
   marketing: '[선택] 마케팅 정보 받기',
   view: '보기',
   agreeContinue: '동의하고 계속하기',

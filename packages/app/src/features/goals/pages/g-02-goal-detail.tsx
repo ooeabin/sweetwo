@@ -48,7 +48,7 @@ const HELP: Record<string, { label: string; to: string } | undefined> = {
 
 // G-02 목표 상세(22). 헤더(종류 이름표, 이름, ⋯, 그림) → 진행 → 숫자 블록 → 이번 달(체크) → 넣기·빼기, 꺼내 쓰기
 // → 기한 비교 → 모은 돈 기록 → 정보. ⋯ = 이름 변경, 보류·다시 모으기, 삭제(비상금 없음), 종류 바꾸기. 모두 바로 + 되돌리기.
-// 배우자의 내 목표는 보기만. 달성했으면 “400만 원 모았어요” + ‘이 돈을 썼나요?’. 매년 목표는 다음에 쓰는 달·회차.
+// 파트너의 내 목표는 보기만. 달성했으면 “400만 원 모았어요” + ‘이 돈을 썼나요?’. 매년 목표는 다음에 쓰는 달·회차.
 // 월별 기록(최근 12개월 + 더보기), 정보(만든 날·만든 사람·주인), 도움말(목표 유형별 1개). 진행 그래프·월별 막대·목표 사진은 다음 단계.
 export function G02GoalDetail() {
   const { id = '' } = useParams();
@@ -88,7 +88,7 @@ export function G02GoalDetail() {
       toast(copy.loadFailed);
     }
   };
-  // 내 목표로 바꾸기: 화면이 모르는 사이 배우자가 모았으면 서버가 막음(22 ‘목표 종류’)
+  // 내 목표로 바꾸기: 화면이 모르는 사이 파트너가 모았으면 서버가 막음(22 ‘목표 종류’)
   const toMine = async () => {
     try {
       const r = await setGoalOwner(g.id, d.meId, 999);
@@ -313,7 +313,7 @@ export function G02GoalDetail() {
             )}
           </div>
           {/* 2026-11-05 ‘사진 지우기’ 없앰: 사진 바꾸기(G-02p)에서 ‘기본 사진’을 골라 되돌림 */}
-          {/* 고칠 수 없는 목표(배우자 내 목표): 버튼 자리에 안내(2026-11-03) */}
+          {/* 고칠 수 없는 목표(파트너 내 목표): 버튼 자리에 안내(2026-11-03) */}
           {!i.canEdit && <p className="hg-help">{copy.viewOnly}</p>}
         </div>
       </section>
@@ -418,7 +418,7 @@ export function G02GoalDetail() {
               </button>
             )}
           </div>
-          {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 배우자 줄은 보기만).
+          {/* 2026-11-03: 사람별 줄에 이번 달 체크를 합침(체크리스트 저금 줄과 같음, 파트너 줄은 보기만).
             이번 달 줄이 없는 사람은 금액만 */}
           {i.thisMonth.length > 0 && <span className="hg-goalbox__sub">{copy.boxThisMonth}</span>}
           <div className="hg-checklist__list">
@@ -448,7 +448,7 @@ export function G02GoalDetail() {
                   lead={dot}
                   personName={(x) => d.nameOf(x)}
                   meId={d.meId}
-                  // 각자 모드에서 배우자 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
+                  // 각자 모드에서 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서 모드 공동 줄은 둘 다
                   viewOnly={!d.joint && p.userId !== d.meId}
                 />
               ) : (

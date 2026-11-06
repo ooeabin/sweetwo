@@ -9,14 +9,14 @@
 
 | 파일 | 내용 |
 | --- | --- |
-| [01-product-overview.md](01-product-overview.md) | sweeTwo 신혼부부 자산관리 앱 기획서 |
+| [01-product-overview.md](01-product-overview.md) | sweeTwo 커플 자산관리 앱 기획서 |
 | [02-business-plan.md](02-business-plan.md) | 사업 계획 |
 | [03-user-flow.md](03-user-flow.md) | 유저 플로우 |
 | [04-brand.md](04-brand.md) | 브랜드 |
 | [05-core-rules.md](05-core-rules.md) | 핵심 규칙 |
 | [06-calc-allocation.md](06-calc-allocation.md) | 계산·배분 |
 | [07-month-cycle.md](07-month-cycle.md) | 월 사이클 |
-| [08-couple-proposal-permission.md](08-couple-proposal-permission.md) | 부부·권한 |
+| [08-couple-proposal-permission.md](08-couple-proposal-permission.md) | 커플·권한 |
 | [09-data-items.md](09-data-items.md) | 데이터 항목 |
 | [10-screen-design.md](10-screen-design.md) | 화면 설계 |
 | [11-common.md](11-common.md) | 공통 |
@@ -26,7 +26,7 @@
 | [15-login-signup.md](15-login-signup.md) | 로그인·가입 |
 | [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 흐름과 목표 |
 | [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 월급과 월급 계획 |
-| [18-partner-join.md](18-partner-join.md) | 배우자 합류 |
+| [18-partner-join.md](18-partner-join.md) | 파트너 합류 |
 | [19-this-month.md](19-this-month.md) | 홈 |
 | [20-salary-plan.md](20-salary-plan.md) | 월급 체크리스트 |
 | [21-month-close.md](21-month-close.md) | 월말 확인 |

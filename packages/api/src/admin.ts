@@ -357,7 +357,7 @@ export async function adminSaveNotice(n: {
   fail(error);
   return data as string;
 }
-/** 대상 조건(부부 상태, 앱 버전, 가입 주차). 초안·승인 대기만, 약관 개정은 빈 조건만 */
+/** 대상 조건(커플 상태, 앱 버전, 가입 주차). 초안·승인 대기만, 약관 개정은 빈 조건만 */
 export async function adminSetNoticeTarget(id: string, target: NoticeTarget) {
   const { error } = await supabase().rpc('admin_set_notice_target', {
     p_id: id,
