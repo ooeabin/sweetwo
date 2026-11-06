@@ -328,7 +328,6 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
               <Button
                 variant="secondary"
                 disabled={!title.trim() || busy}
-                title={ops.testHelp}
                 onClick={() => void test()}
               >
                 {ops.testSend}
@@ -353,7 +352,6 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
             </Button>
           )
         )}
-        {draft && mail && <p className="hg-help">{ops.testHelp}</p>}
       </section>
 
       <section className="hg-card hg-stack" aria-label={ops.target.title}>

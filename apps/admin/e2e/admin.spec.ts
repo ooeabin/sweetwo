@@ -616,8 +616,8 @@ test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
   await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
   await axe(page);
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
-  await expect(page.getByText('메일함에서 링크를 눌러 주세요')).toBeVisible();
-  await expect(page.getByText(/초 뒤에 다시 받을 수 있어요/)).toBeVisible();
+  await expect(page.getByText('메일함에서 링크 열기')).toBeVisible();
+  await expect(page.getByText(/초 뒤 다시 받기 가능/)).toBeVisible();
   await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
   expect(db.rpc).toEqual([]);
 });
@@ -627,7 +627,7 @@ test('로그인: 너무 자주 누르면 조금 뒤에 다시', async ({ page })
   await page.goto('/');
   await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
-  await expect(page.getByText('조금 뒤에 다시 눌러 주세요')).toBeVisible();
+  await expect(page.getByText('잠시 뒤 다시 시도')).toBeVisible();
   await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
   await axe(page);
 });
@@ -635,10 +635,10 @@ test('로그인: 너무 자주 누르면 조금 뒤에 다시', async ({ page })
 test('2단계 인증: 인증 앱 숫자를 넣어야 들어감', async ({ page }) => {
   await mock(page, { aal: 'aal1' });
   await page.goto('/');
-  await heading(page, '인증 앱의 6자리 숫자를 넣어 주세요');
+  await heading(page, '인증 앱 6자리 입력');
   await page.getByLabel('6자리 숫자').fill('000000');
   await page.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('숫자가 맞지 않아요. 다시 넣어 주세요')).toBeVisible();
+  await expect(page.getByText('숫자 불일치')).toBeVisible();
   await page.getByLabel('6자리 숫자').fill('123456');
   await page.getByRole('button', { name: '확인' }).click();
   await heading(page, '대시보드');
@@ -655,7 +655,7 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   );
   await expect(page.getByRole('figure', { name: '가입' })).toContainText('12');
   await expect(page.getByRole('region', { name: '앱 버전' })).toContainText(
-    '최소 지원 버전보다 낮은 기기3',
+    '최소 버전 미만 기기(최근 7일 실행)3',
   );
   await expect(page.getByRole('region', { name: '최근 활동' })).toContainText('A-10001');
   await expect(page.getByRole('region', { name: '상시 경보' })).toContainText(
@@ -666,7 +666,7 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await page.getByRole('link', { name: '회원' }).click();
   await page.getByLabel('이메일, 사용자 ID, 문의 번호로 찾기').fill('chanwoo');
   await page.getByRole('button', { name: '보기' }).click();
-  await expect(page.getByText('일치하는 회원이 없어요')).toBeVisible();
+  await expect(page.getByText('일치하는 회원 없음')).toBeVisible();
   await page.getByLabel('이메일, 사용자 ID, 문의 번호로 찾기').fill('chanwoo@example.com');
   await page.getByRole('button', { name: '보기' }).click();
 
@@ -735,7 +735,7 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   await expect(page.getByRole('region', { name: '자동 첨부' })).toContainText('1.0.0');
   await page.getByRole('textbox', { name: '답변' }).fill('초대 코드를 다시 받아 주세요');
   await page.getByRole('button', { name: '답변 보내기' }).click();
-  await expect(page.getByText('답변을 보냈어요')).toBeVisible();
+  await expect(page.getByText('답변 보냄')).toBeVisible();
   expect(db.inquiryStatus).toBe('waiting_user');
 
   const ask = page.getByRole('region', { name: '동의 요청' });
@@ -743,7 +743,7 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   await ask.getByLabel('사유').fill('계산 확인');
   await axe(page);
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
-  await expect(page.getByText('동의를 요청했어요')).toBeVisible();
+  await expect(page.getByText('동의 요청됨')).toBeVisible();
   expect(db.rpc.find((r) => r.fn === 'admin_request_access')?.body).toMatchObject({
     p_inquiry: 'q1',
     p_scopes: ['month'],
@@ -754,11 +754,11 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   await ask.getByRole('button', { name: '목표' }).click();
   await ask.getByLabel('금액 원값 요청').check();
   await expect(
-    ask.getByText('최고 관리자가 승인하면 사용자에게 요청해요', { exact: false }),
+    ask.getByText('최고 관리자 승인 후 요청', { exact: false }),
   ).toBeVisible();
   await ask.getByLabel('사유').fill('목표 금액 확인');
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
-  await expect(page.getByText('최고 관리자에게 원값 승인을 요청했어요')).toBeVisible();
+  await expect(page.getByText('원값 승인 요청됨')).toBeVisible();
   expect(db.rpc.filter((r) => r.fn === 'admin_request_access').at(-1)?.body).toMatchObject({
     p_scopes: ['goals'],
     p_raw: true,
@@ -778,19 +778,19 @@ test('이메일 문의 상세: 제목, 가린 보낸 주소, 회원 연결 없�
   await expect(info).toContainText('가입 전 질문');
   await expect(info).toContainText('str***@example.net');
   await expect(info).toContainText('회원 연결 없음');
-  await expect(info).toContainText('1개는 받지 않았어요');
+  await expect(info).toContainText('1개 미수신');
   await expect(page.getByRole('region', { name: '자동 첨부' })).toHaveCount(0);
   await expect(page.getByRole('region', { name: '동의 요청' })).toHaveCount(0);
   const msgs = page.locator('ol li');
   await expect(msgs.nth(0)).toContainText('요금이 있나요?');
   await expect(msgs.nth(1)).toContainText('답장 기다려요');
   await expect(
-    page.getByText('그 전에는 네이버웍스 help@에서 직접 답장해 주세요', { exact: false }),
+    page.getByText('네이버웍스 help@에서 직접', { exact: false }),
   ).toBeVisible();
   await axe(page);
   await page.getByRole('textbox', { name: '답변' }).fill('지금은 무료예요');
   await page.getByRole('button', { name: '답변 보내기' }).click();
-  await expect(page.getByText('답변을 보냈어요')).toBeVisible();
+  await expect(page.getByText('답변 보냄')).toBeVisible();
   expect(db.rpc.find((r) => r.fn === 'admin_answer_inquiry')?.body).toMatchObject({
     p_id: 'q2',
     p_body: '지금은 무료예요',
@@ -826,10 +826,10 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
   await form.getByLabel('문의 번호').fill('A-10001');
   await form.getByRole('button', { name: '실행' }).click();
   const dialog = page.getByRole('alertdialog');
-  await expect(dialog).toContainText('30일 뒤 지워져요');
+  await expect(dialog).toContainText('30일 뒤 삭제');
   await axe(page);
   await dialog.getByRole('button', { name: '삭제 대리 접수' }).click();
-  await expect(form.getByRole('status')).toHaveText('처리했어요');
+  await expect(form.getByRole('status')).toHaveText('처리됨');
   expect(db.rpc.find((r) => r.fn === 'admin_account_action')?.body).toMatchObject({
     p_action: 'delete_request',
     p_inquiry_no: 'A-10001',
@@ -840,10 +840,10 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
   await expect(go).toBeDisabled();
   await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('nobody@example.com');
   await go.click();
-  await expect(form.getByRole('status')).toHaveText('새 계정을 찾지 못했어요');
+  await expect(form.getByRole('status')).toHaveText('새 계정 없음');
   await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('chanwoo.new@example.com');
   await go.click();
-  await expect(form.getByRole('status')).toHaveText('최고 관리자에게 승인을 요청했어요');
+  await expect(form.getByRole('status')).toHaveText('승인 요청됨');
   await axe(page);
   expect(db.rpc.filter((r) => r.fn === 'admin_request_login_move').at(-1)?.body).toMatchObject({
     p_user: CHANWOO,
@@ -905,7 +905,7 @@ test('공지 대상(AD-10 2·4·6번): 조건 바꾸면 대상 수 다시 셈, 0
   const counts = target.getByRole('group', { name: '대상 수' });
   await expect(counts).toContainText('3,214명');
   await target.getByLabel('이 버전보다 낮은 앱만').fill('1.4');
-  await expect(target.getByText('버전은 1.4.0처럼 숫자 세 개로 넣어 주세요')).toBeVisible();
+  await expect(target.getByText('버전 형식: 1.4.0')).toBeVisible();
   await expect(form.getByRole('button', { name: '승인 요청' })).toBeDisabled();
   await target.getByLabel('이 버전보다 낮은 앱만').fill('1.4.0');
   await expect(counts).toContainText('120명');
@@ -917,7 +917,7 @@ test('공지 대상(AD-10 2·4·6번): 조건 바꾸면 대상 수 다시 셈, 0
   // 커플 상태 ‘해제 대기’만 → 0명이면 승인 요청 막음
   await target.getByRole('button', { name: '해제 대기' }).click();
   await expect(counts.locator('.hg-admin__stat').first()).toHaveText(/^대상\s*0명$/);
-  await expect(target.getByText('대상이 0명이라 승인을 요청할 수 없어요')).toBeVisible();
+  await expect(target.getByText('대상 0명, 승인 요청 불가')).toBeVisible();
   await expect(form.getByRole('button', { name: '승인 요청' })).toBeDisabled();
   await target.getByRole('button', { name: '해제 대기' }).click();
   await target.getByRole('button', { name: '혼자 쓰기' }).click();
@@ -956,14 +956,14 @@ test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 �
   await expect(mail).toBeChecked();
   // 약관 개정은 조건 없이 모두, 메일은 막힌 주소를 제외로
   const target = page.getByRole('region', { name: '대상', exact: true });
-  await expect(target.getByText('약관 개정은 모든 회원에게 보여요')).toBeVisible();
+  await expect(target.getByText('약관 개정은 전체 회원')).toBeVisible();
   await expect(target.getByRole('group', { name: '대상 수' })).toContainText('412명');
   await expect(target).toContainText('반송·수신 거부');
   // 미리보기: 띠 + 메일. 테스트 발송은 내 관리자 메일로만
   const preview = page.getByRole('region', { name: '미리보기' });
   await expect(preview.getByText('보내는 곳 sweeTwo')).toBeVisible();
   await form.getByRole('button', { name: '테스트 발송' }).click();
-  await expect(form.getByText('내 관리자 메일로 보냈어요')).toBeVisible();
+  await expect(form.getByText('내 메일로 보냄')).toBeVisible();
   expect(db.rpc.find((r) => r.fn === 'admin_test_notice_mail')?.body).toMatchObject({
     p_kind: 'terms',
     p_title: '이용약관이 바뀌어요',
@@ -989,7 +989,7 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
   await expect(add.getByRole('button', { name: '승인 요청' })).toBeDisabled();
   await add.getByLabel('법률 검토 확인').check();
   await add.getByRole('button', { name: '승인 요청' }).click();
-  await expect(page.getByText('승인을 요청했어요')).toBeVisible();
+  await expect(page.getByText('승인 요청됨')).toBeVisible();
   await page.getByRole('tab', { name: '계산·기준 데이터' }).click();
   await page.getByLabel('신용 연 금리').fill('6.5');
   await page.getByRole('row', { name: /신용/ }).getByRole('button', { name: '저장' }).click();
@@ -1054,11 +1054,11 @@ test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
   await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
   await expect(
-    page.getByText('지금 최소 버전보다 낮은 기기 12대(90일 안에 켠 기기)'),
+    page.getByText('최소 버전 미만 기기 12대(90일 내 실행)'),
   ).toBeVisible();
   await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
-  await expect(page.getByText('승인을 요청했어요')).toBeVisible();
+  await expect(page.getByText('승인 요청됨')).toBeVisible();
   expect(db.rpc.find((r) => r.fn === 'admin_request_app_config')?.body.p).toMatchObject({
     min_version_desktop: '1.1.0',
     maintenance_starts_at: null,
@@ -1070,7 +1070,7 @@ test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 
     .getByRole('row', { name: /ops01@sweetwo.kr/ })
     .getByRole('button', { name: '잠그기' })
     .click();
-  await expect(page.getByText('저장했어요')).toBeVisible();
+  await expect(page.getByText('저장됨')).toBeVisible();
   await axe(page);
 });
 
@@ -1084,12 +1084,12 @@ test('재인증(33 3장): 승인 직전에 인증 앱 숫자를 다시 받고, �
     .getByRole('row', { name: /cs02@sweetwo.kr/ })
     .getByRole('button', { name: '승인' })
     .click();
-  const dlg = page.getByRole('dialog', { name: '인증 앱 숫자를 한 번 더 넣어 주세요' });
+  const dlg = page.getByRole('dialog', { name: '인증 앱 6자리 다시 입력' });
   await expect(dlg).toBeVisible();
   await axe(page);
   await dlg.getByLabel('6자리 숫자').fill('000000');
   await dlg.getByRole('button', { name: '확인' }).click();
-  await expect(dlg.getByText('숫자가 맞지 않아요. 다시 넣어 주세요')).toBeVisible();
+  await expect(dlg.getByText('숫자 불일치')).toBeVisible();
   expect(db.approvals[0]?.status).toBe('requested');
   await dlg.getByLabel('6자리 숫자').fill('123456');
   await dlg.getByRole('button', { name: '확인' }).click();
