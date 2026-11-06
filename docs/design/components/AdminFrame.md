@@ -18,6 +18,7 @@
 - 2인 승인 상태(`hg-approve`): 줄마다 표시 원 + 단계 이름 + 오른쪽 사람과 시각. 끝낸 단계 `success` 원 + `check`, 기다리는 단계 빈 원 + “기다리는 중”. 순서: 요청(CS) → 승인(최고 관리자) → 사용자 동의(L2만) → 열람 중(남은 시간).
 - 밀도(어드민 안에서만, 클래스 이름 그대로): 본문 글자 14px, 보조 13px. 버튼·입력 36px(작은 버튼 30px), 칩 30px, 카드는 그림자 없이 1px 선 + `radius-lg`, 안쪽 16·20px. 탭은 밑줄 탭(`hg-tab`, 지금 탭은 아래 2px `accent-ink` 선 + `ink` 글자 600). 고른 칩은 `accent-soft` + `accent-ink` + 1px `accent-ink` 테두리. 보조 버튼은 흰 바탕 + 1px `hairline`(회색 판 아님), 꺼진 주 버튼은 잉크 30% 투명(회색 위 회색 대신). 표 줄 마우스는 `surface-sunk`.
 - 어드민 색(2026-11-06, 단정하게): 포인트 색은 인디고 하나(`accent-soft`, `accent-ink`)를 지금 메뉴, 지금 탭, 고른 칩에만. 나머지 색은 상태에만: 경보 띠(`hg-admin__alert`, 노랑 `warning-soft` + `warning-ink`, 실패는 `is-bad`로 `danger-soft` + `danger`, 앞 `circle-alert` 아이콘, 끝 `chevron-right`), 0이 아닌 실패 숫자(`hg-admin__stat.is-bad`, `danger`), 표 상태 값([Status](Status.md) 점). 숫자 칸에 색 아이콘 칸, 색 판 배지는 두지 않음.
+- 대시보드(AD-01, 2026-11-06): 경보 띠 → ‘회원 현황’ 카드(숫자 넷, 아래 작은 글 `hg-admin__stat small`) → 실패 건수 | 미처리 문의 → ‘최근 7일’ 카드(`hg-admin__trend` 세 칸, 칸마다 `hg-admin__bars`: 제목 + 오늘 값, 막대 7개 한 색 `accent-ink` 35%, 오늘만 100%, 위 모서리 4px, 아래 1px `hairline` 기준선, 첫날·오늘 날짜만. 값은 막대 title과 `hg-admin__more` 접기 안 표) → 앱 버전 | 최근 활동(‘승인 대기’ 바로 가기 줄 `hg-admin__alert is-quiet`, 최근 문의 표, 최근 감사 로그 `hg-admin__log` 3칸 줄).
 - 항목-값 줄(`hg-admin__kv`): 이름 132px 왼쪽 고정(13px `stone`) + 값은 바로 옆 왼쪽 정렬. 오른쪽 끝 정렬은 쓰지 않음.
 - 대시보드 숫자(`hg-admin__stats`, `hg-admin__stat`): 이름 13px + 숫자 28px.
 - 표는 DataTable(`hg-table`): 머리 32px 12px, 줄 36px 13px. 색으로 좋고 나쁨을 칠하지 않음.

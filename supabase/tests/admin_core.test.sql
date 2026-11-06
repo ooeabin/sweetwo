@@ -1,7 +1,7 @@
 -- pgTAP: 어드민 기본(AD-01~06·17). 찬우(사용자), 관리자 cs01(CS), 관리자 boss(최고), 사용자 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(22);
+select plan(27);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -44,6 +44,10 @@ reset role;
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
 select is((public.admin_dashboard()->'inquiries'->>'received')::int, 1, '미처리 문의 집계');
+select is((public.admin_dashboard()->'members'->>'joined_today')::int, 1, '오늘 가입 집계');
+select is(jsonb_array_length(public.admin_dashboard()->'trend'), 7, '최근 7일 추이 7칸');
+select is(public.admin_dashboard()->'recent'->'inquiries'->0->>'no', current_setting('test.no'), '최근 문의(번호만, 본문 없음)');
+select ok(not (public.admin_dashboard()->'recent'->'inquiries'->0 ? 'body'), '최근 문의에 본문 없음');
 select results_eq($$ select email_masked, couple_state from public.admin_search('chanwoo@example.com') $$,
   $$ values ('cha***@example.com', 'not_joined') $$, '이메일 정확히 일치, 가림');
 select is((select count(*)::int from public.admin_search('chanwoo')), 0, '부분 일치 없음');
@@ -88,6 +92,14 @@ select public.admin_me();
 select throws_ok($$ select public.admin_request_access(current_setting('test.qid')::uuid, array['goals'], false, 'x') $$,
   '42501', 'no_permission', '최고 관리자는 L2 직접 요청 안 함');
 select is((select count(*)::int from public.admin_audit_rows()), (select count(*)::int from public.admin_audit_rows(p_admin => 'cs01@sweetwo.kr')), '최고 관리자는 다른 관리자 기록도');
+reset role;
+
+-- 분석 역할은 최근 활동(문의, 감사 로그) 없음
+reset role;
+update public.admin_user set roles = array['analyst']::public.admin_role[] where email = 'cs01@sweetwo.kr';
+select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
+set local role authenticated;
+select is(public.admin_dashboard()->'recent'->'inquiries', 'null'::jsonb, '분석 역할은 최근 문의 없음');
 reset role;
 
 select * from finish();

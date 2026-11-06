@@ -198,6 +198,49 @@ async function mock(
           inquiries: { received: 3, in_progress: 1 },
           failed: { plans: 0, notifications: 2 },
           alerts: [{ kind: 'loan_rate_stale', value: 95, limit: 90 }],
+          members: {
+            total: 1284,
+            joined_today: 12,
+            joined_yesterday: 9,
+            deletion_today: 1,
+            connected: 402,
+          },
+          trend: [12, 13, 14, 15, 16, 17, 18].map((d, i) => ({
+            day: `2026-10-${d}`,
+            joined: [8, 11, 7, 14, 10, 9, 12][i],
+            connected: [3, 4, 2, 5, 4, 3, 6][i],
+            checked: [40, 52, 31, 66, 48, 45, 58][i],
+          })),
+          versions: {
+            below_min: 3,
+            top: [
+              { platform: 'desktop', version: '1.0.0', devices: 820 },
+              { platform: 'ios', version: '1.0.0', devices: 310 },
+              { platform: 'android', version: '1.0.0', devices: 140 },
+              { platform: 'desktop', version: '0.9.2', devices: 3 },
+            ],
+          },
+          recent: {
+            approvals: 1,
+            inquiries: [
+              {
+                id: 'q1',
+                no: 'A-10001',
+                category: 'couple',
+                channel: 'app',
+                status: 'received',
+                created_at: '2026-10-17T01:00:00Z',
+              },
+            ],
+            audit: [
+              {
+                at: '2026-10-18T04:50:00Z',
+                admin_email: 'cs01@sweetwo.kr',
+                action: 'view',
+                screen: 'AD-03',
+              },
+            ],
+          },
           at: '2026-10-18T05:00:00Z',
         });
       case 'admin_inquiry_counts':
@@ -609,6 +652,14 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await heading(page, '대시보드');
   await expect(page.getByRole('region', { name: '실패 건수' })).toContainText('알림 발송 실패2');
   await expect(page.getByRole('link', { name: /미처리 문의/ })).toContainText('접수3');
+  await expect(page.getByRole('region', { name: '회원 현황' })).toContainText(
+    '오늘 가입12어제 9명',
+  );
+  await expect(page.getByRole('figure', { name: '가입' })).toContainText('12');
+  await expect(page.getByRole('region', { name: '앱 버전' })).toContainText(
+    '최소 지원 버전보다 낮은 기기3',
+  );
+  await expect(page.getByRole('region', { name: '최근 활동' })).toContainText('A-10001');
   await expect(page.getByRole('region', { name: '상시 경보' })).toContainText(
     '평균 금리 마지막 갱신95일 전 / 기준 90일',
   );

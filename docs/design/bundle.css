@@ -1443,7 +1443,24 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__alert > .hg-ico { width: 16px; height: 16px; flex: none; }
 .hg-admin__alert > .hg-ico:last-child { margin-left: auto; }
 .hg-admin__alert.is-bad { background: var(--danger-soft); color: var(--danger); }
+.hg-admin__alert.is-quiet { background: var(--surface-sunk); color: var(--ink); }  /* 경보가 아닌 바로 가기 줄(승인 대기) */
 .hg-admin__stat.is-bad > b { color: var(--danger); }
+.hg-admin__stat > small { font: 400 12px/16px var(--font-sans); color: var(--stone); }
+/* 대시보드 최근 7일(2026-11-06): 계열마다 작은 막대 7개, 한 색(accent-ink), 오늘만 진하게 */
+.hg-admin__trend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+.hg-admin__bars { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; }
+.hg-admin__bars figcaption { display: flex; align-items: baseline; justify-content: space-between; font: 400 13px/18px var(--font-sans); color: var(--stone); }
+.hg-admin__bars figcaption b { font: 600 20px/28px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; }
+.hg-admin__bars-plot { display: flex; align-items: flex-end; gap: var(--space-1); height: 64px; border-bottom: 1px solid var(--hairline); }
+.hg-admin__bars-plot > span { flex: 1; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--accent-ink); opacity: 0.35; }
+.hg-admin__bars-plot > span.is-today { opacity: 1; }
+.hg-admin__bars-x { display: flex; justify-content: space-between; font: 400 11px/14px var(--font-sans); color: var(--stone); }
+.hg-admin__more > summary { cursor: pointer; font: 500 13px/18px var(--font-sans); color: var(--slate); }
+.hg-admin__more[open] > summary { margin-bottom: var(--space-2); }
+.hg-admin__log { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.hg-admin__log li { display: grid; grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--hairline-soft); font: 400 13px/18px var(--font-sans); }
+.hg-admin__log li > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-admin__log time { color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-admin__alert:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-admin .hg-card.is-link:hover { border-color: var(--hairline); background: var(--surface-alt); }
 /* 밀도: 어드민 안에서만 컴포넌트를 작게(클래스 이름은 그대로) */
