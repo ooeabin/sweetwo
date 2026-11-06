@@ -10,6 +10,7 @@ export default tseslint.config(
   js.configs.recommended,
   { files: ['**/*.mjs', '**/*.cjs'], languageOptions: { globals: globals.node } },
   ...tseslint.configs.strict,
+  { files: ['**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
