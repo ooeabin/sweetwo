@@ -1069,6 +1069,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-table tr:last-child td { border-bottom: 0; }
 .hg-table tbody tr:hover td { background: var(--surface-alt); }
 .hg-table .is-num { text-align: right; }
+.hg-table tr.hg-table__more td { height: auto; padding: var(--space-3) var(--space-4); background: var(--surface-sunk); white-space: normal; }
+.hg-table tbody tr.hg-table__more:hover td { background: var(--surface-sunk); }
 
 /* Widget */
 .hg-wg { position: relative; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-2); flex: none; overflow: hidden; padding: var(--space-4); border-radius: var(--radius-2xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); text-decoration: none; font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
@@ -1403,6 +1405,9 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__stat > span { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-admin__stat > b { font: 600 28px/36px var(--font-sans); letter-spacing: -0.4px; font-variant-numeric: tabular-nums; }
 .hg-admin .hg-card.is-link { cursor: pointer; }
+.hg-admin__alert { box-sizing: border-box; width: 100%; border: 0; background: none; text-align: left; cursor: pointer; color: inherit; font: inherit; }
+.hg-admin__alert > :last-child { font-weight: 600; }
+.hg-admin__alert:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-admin .hg-card.is-link:hover { border-color: var(--hairline); background: var(--surface-alt); }
 /* 밀도: 어드민 안에서만 컴포넌트를 작게(클래스 이름은 그대로) */
 .hg-admin .hg-card, .hg-admin .hg-card.hg-stack { gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); }
@@ -1425,6 +1430,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin .hg-table { border-radius: var(--radius-lg); font: 400 13px/18px var(--font-sans); }
 .hg-admin .hg-table th { height: 32px; padding: 0 var(--space-3); font: 600 12px/16px var(--font-sans); }
 .hg-admin .hg-table td { height: 36px; padding: 0 var(--space-3); white-space: nowrap; }
+.hg-admin .hg-table tr.hg-table__more td { height: auto; padding: var(--space-3); white-space: normal; }
 .hg-admin .hg-body__banner { border-radius: var(--radius-md); font-size: 13px; }
 .hg-mask-text { letter-spacing: 0.5px; color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-approve { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }

@@ -12,7 +12,7 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
   ('kakao-c', '11111111-1111-1111-1111-111111111111', '{}', 'kakao'),
   ('google-k', '33333333-3333-3333-3333-333333333333', '{}', 'google');
 create function pg_temp.login_as(uid uuid, aal text default 'aal1') returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal)::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal, 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 
 -- 찬우: 가입 + 문의
@@ -64,18 +64,19 @@ select is((select count(*)::int from public.notification where kind = 'inquiry_a
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
 -- L2 요청 → 사용자 알림, 동의 전에는 못 봄
-select set_config('test.access', public.admin_request_access(current_setting('test.qid')::uuid, array['income_spend'], false, '계산 확인')::text, true);
+select set_config('test.access', public.admin_request_access(current_setting('test.qid')::uuid, array['assets'], false, '계산 확인')::text, true);
 select throws_ok(format($$ select public.admin_access_data(%L) $$, current_setting('test.access')), '42501', 'not_allowed', '동의 전에는 못 봄');
 reset role;
 -- 찬우 동의 → cs01 구간으로 봄
-update public.app_user set monthly_income = 3500000 where id = '11111111-1111-1111-1111-111111111111';
+insert into public.asset (space_id, side, grp, kind, name, amount, owner)
+  select space_id, 'asset', 'cash', 'bank', '공동 적금', 3500000, 'joint' from public.app_user where id = '11111111-1111-1111-1111-111111111111';
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.answer_access_request(current_setting('test.access')::uuid, true);
 reset role;
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
-select is(public.admin_access_data(current_setting('test.access')::uuid)->'income_spend'->>'monthly_income', '300만~1,000만 원', '금액은 구간');
+select is(public.admin_access_data(current_setting('test.access')::uuid)->'assets'->0->>'amount', '300만~1,000만 원', '금액은 구간');
 select results_eq($$ select array_agg(distinct action order by action) from public.admin_audit_rows() $$,
   $$ values (array['execute', 'request', 'reveal', 'search', 'view']) $$, '본인 기록(검색, 조회, 열람, 요청, 실행)');
 reset role;

@@ -17,6 +17,8 @@ export type AdminMe = z.infer<typeof AdminMe>;
 export const AdminDashboard = z.object({
   inquiries: z.object({ received: z.number(), in_progress: z.number() }),
   failed: z.object({ plans: z.number(), notifications: z.number() }),
+  // 상시 경보(27 AD-01 1번). 지금은 AD-19 평균 금리 90일 넘음만
+  alerts: z.array(z.object({ kind: z.string(), value: z.number(), limit: z.number() })).default([]),
   at: z.string(),
 });
 export type AdminDashboard = z.infer<typeof AdminDashboard>;

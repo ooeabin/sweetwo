@@ -54,6 +54,8 @@ const heading = (page: Page, name: string | RegExp) =>
 
 interface Db {
   rpc: { fn: string; body: Record<string, unknown> }[];
+  /** 최근 5분 안에 인증 앱으로 확인했는지(재인증, 33 3장) */
+  fresh: boolean;
   roles: string[];
   inquiryStatus: string;
   messages: { author: string; body: string; created_at: string }[];
@@ -82,10 +84,11 @@ const json = (route: Route, body: unknown, status = 200) =>
 
 async function mock(
   page: Page,
-  o: { aal?: 'aal1' | 'aal2' | null; roles?: string[]; otpError?: string } = {},
+  o: { aal?: 'aal1' | 'aal2' | null; roles?: string[]; otpError?: string; stale?: boolean } = {},
 ) {
   const db: Db = {
     rpc: [],
+    fresh: !o.stale,
     roles: o.roles ?? ['cs'],
     inquiryStatus: 'received',
     messages: [{ author: 'user', body: '연결이 안 돼요', created_at: '2026-10-17T01:00:00Z' }],
@@ -147,6 +150,7 @@ async function mock(
     if (p === '/auth/v1/factors/f1/verify') {
       if (body().code !== '123456')
         return json(route, { code: 'invalid', msg: 'Invalid TOTP code' }, 422);
+      db.fresh = true;
       return json(route, session('aal2'));
     }
     if (p === '/auth/v1/logout')
@@ -187,6 +191,7 @@ async function mock(
         return json(route, {
           inquiries: { received: 3, in_progress: 1 },
           failed: { plans: 0, notifications: 2 },
+          alerts: [{ kind: 'loan_rate_stale', value: 95, limit: 90 }],
           at: '2026-10-18T05:00:00Z',
         });
       case 'admin_inquiry_counts':
@@ -314,6 +319,7 @@ async function mock(
         });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       case 'admin_request_access':
+        if (!db.fresh) return json(route, { message: 'reauth_required' }, 403);
         return json(route, 'acc-1');
       case 'admin_audit_rows':
         return json(route, [
@@ -388,6 +394,8 @@ async function mock(
           db.approvals.filter((a) => a.status === body().p_status),
         );
       case 'admin_decide': {
+        if (!db.fresh && body().p_decision !== 'cancel')
+          return json(route, { message: 'reauth_required' }, 403);
         const a = db.approvals.find((x) => x.id === body().p_id);
         if (a && a.requested_by === ADMIN.email && body().p_decision !== 'cancel')
           return json(route, { message: 'self_approval' }, 403);
@@ -483,6 +491,8 @@ async function mock(
       case 'admin_reviews':
         return json(route, []);
       case 'admin_set_lock':
+        if (!db.fresh) return json(route, { message: 'reauth_required' }, 403);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       case 'admin_request_user':
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       default:
@@ -533,6 +543,9 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await heading(page, '대시보드');
   await expect(page.getByRole('region', { name: '실패 건수' })).toContainText('알림 발송 실패2');
   await expect(page.getByRole('link', { name: /미처리 문의/ })).toContainText('접수3');
+  await expect(page.getByRole('region', { name: '상시 경보' })).toContainText(
+    '평균 금리 마지막 갱신95일 전 / 기준 90일',
+  );
   await axe(page);
 
   await page.getByRole('link', { name: '회원' }).click();
@@ -645,7 +658,7 @@ test('감사 로그와 문서', async ({ page }) => {
   // 최고 관리자가 아니면 관리자 필터 없음
   await expect(page.getByLabel('관리자', { exact: true })).toHaveCount(0);
   await page.getByRole('row', { name: /열람/ }).click();
-  await expect(page.getByText('접속 IP: 10.0.0.1')).toBeVisible();
+  await expect(page.locator('tr.hg-table__more')).toContainText('10.0.0.1');
   await axe(page);
 
   await page.getByRole('link', { name: '문서' }).click();
@@ -827,5 +840,40 @@ test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버
     .getByRole('button', { name: '잠그기' })
     .click();
   await expect(page.getByText('저장했어요')).toBeVisible();
+  await axe(page);
+});
+
+test('재인증(33 3장): 승인 직전에 인증 앱 숫자를 다시 받고, 맞으면 그대로 승인', async ({
+  page,
+}) => {
+  const db = await mock(page, { roles: ['super', 'ops'], stale: true });
+  await page.goto('/system/approvals');
+  await heading(page, '시스템');
+  await page
+    .getByRole('row', { name: /cs02@sweetwo.kr/ })
+    .getByRole('button', { name: '승인' })
+    .click();
+  const dlg = page.getByRole('dialog', { name: '인증 앱 숫자를 한 번 더 넣어 주세요' });
+  await expect(dlg).toBeVisible();
+  await axe(page);
+  await dlg.getByLabel('6자리 숫자').fill('000000');
+  await dlg.getByRole('button', { name: '확인' }).click();
+  await expect(dlg.getByText('숫자가 맞지 않아요. 다시 넣어 주세요')).toBeVisible();
+  expect(db.approvals[0]?.status).toBe('requested');
+  await dlg.getByLabel('6자리 숫자').fill('123456');
+  await dlg.getByRole('button', { name: '확인' }).click();
+  await expect(dlg).toHaveCount(0);
+  await expect(page.getByRole('row', { name: /cs02@sweetwo.kr/ })).toHaveCount(0);
+  expect(db.approvals[0]?.status).toBe('approved');
+});
+
+test('감사 로그: 행을 누르면 그 아래에 IP, 화면, 바뀐 값', async ({ page }) => {
+  await mock(page, { roles: ['super', 'ops'] });
+  await page.goto('/system/audit');
+  await heading(page, '감사 로그');
+  await page.getByRole('row', { name: /열람/ }).first().click();
+  const more = page.locator('tr.hg-table__more');
+  await expect(more).toBeVisible();
+  await expect(more).toContainText('화면');
   await axe(page);
 });

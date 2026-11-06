@@ -17,7 +17,7 @@ insert into public.admin_user (email, name, roles) values
   ('cs01@sweetwo.kr', 'cs01', array['cs']::public.admin_role[]),
   ('super01@sweetwo.kr', 'super01', array['super']::public.admin_role[]);
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 
 -- 찬우(기존 계정), 예빈(삭제 대리 접수)

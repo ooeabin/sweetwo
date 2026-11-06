@@ -1,4 +1,5 @@
 import {
+  AdminError,
   adminAddReview,
   adminRequestUser,
   adminSetLock,
@@ -13,6 +14,7 @@ import { useState } from 'react';
 import { copy, ops } from '../copy';
 import { Frame, NoPermission } from '../frame';
 import { useAdmin } from '../gate';
+import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
 
 const ROLES: AdminRole[] = ['super', 'ops', 'cs', 'analyst'];
@@ -38,6 +40,7 @@ export function AD18Admins() {
   });
   const [note, setNote] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
+  const reauth = useReauth();
   if (!me.roles.includes('super')) return <NoPermission />;
   const run = async (p: Promise<unknown>, ok: string) => {
     setMsg(null);
@@ -46,8 +49,14 @@ export function AD18Admins() {
       setMsg(ok);
       void list.refetch();
       void reviews.refetch();
-    } catch {
-      setMsg(copy.failed);
+    } catch (e) {
+      setMsg(
+        e instanceof AdminError && e.code === 'reauth_cancelled'
+          ? null
+          : e instanceof AdminError && e.code === 'super_min'
+            ? ops.superMin
+            : copy.failed,
+      );
     }
   };
   const toggle = (r: AdminRole) =>
@@ -102,7 +111,12 @@ export function AD18Admins() {
                     <Button
                       variant="link"
                       size="sm"
-                      onClick={() => void run(adminSetLock(u.email, !u.locked), ops.saved)}
+                      onClick={() =>
+                        void run(
+                          reauth(() => adminSetLock(u.email, !u.locked)),
+                          ops.saved,
+                        )
+                      }
                     >
                       {u.locked ? ops.unlock : ops.lock}
                     </Button>
