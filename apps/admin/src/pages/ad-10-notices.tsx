@@ -16,14 +16,17 @@ import {
   NOTICE_VERSION,
   NoticeTarget,
 } from '@sweetwo/core';
-import { Button, Chip, DataTable, Icon, Toggle } from '@sweetwo/ui';
+import { Button, Chip, DataTable, Icon, Status, Toggle } from '@sweetwo/ui';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
+import { noticeTone } from '../tones';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 
-type Platform = 'desktop' | 'mobile' | 'web';
+// 웹 앱은 없다(ADR 0001). 예전 공지의 'web'은 고칠 때 빠진다.
+type Platform = 'desktop' | 'mobile';
+const PLATFORMS: readonly Platform[] = ['desktop', 'mobile'];
 type CoupleState = (typeof NOTICE_COUPLE_STATES)[number];
 const KINDS = ['info', 'maintenance', 'incident', 'terms'];
 // datetime-local(KST로 넣음) ↔ ISO
@@ -59,7 +62,7 @@ export function AD10Notices() {
             rows={list.data ?? []}
             rowKey={(n) => n.id}
             onRow={canEdit ? (n) => setEdit(n) : undefined}
-            empty={list.isLoading ? null : '—'}
+            empty={list.isLoading ? null : ops.noticeEmpty}
             columns={[
               { key: 'title', label: ops.noticeCols.title, render: (n) => n.title },
               { key: 'kind', label: ops.noticeCols.kind, render: (n) => ops.noticeKinds[n.kind] },
@@ -77,7 +80,9 @@ export function AD10Notices() {
               {
                 key: 'status',
                 label: ops.noticeCols.status,
-                render: (n) => ops.noticeStatus[n.status],
+                render: (n) => (
+                  <Status tone={noticeTone[n.status] ?? 'off'}>{ops.noticeStatus[n.status]}</Status>
+                ),
               },
             ]}
           />
@@ -113,7 +118,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
     (n?.importance as 'normal' | 'must' | undefined) ?? 'normal',
   );
   const [platforms, setPlatforms] = useState<Platform[]>(
-    (n?.platforms as Platform[] | undefined) ?? ['desktop', 'mobile'],
+    n?.platforms ? PLATFORMS.filter((p) => n.platforms.includes(p)) : [...PLATFORMS],
   );
   const [couples, setCouples] = useState<CoupleState[]>(t0.couple_states ?? []);
   const [version, setVersion] = useState(t0.version_below ?? '');
@@ -277,7 +282,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
           role="group"
           aria-label={ops.field.platforms}
         >
-          {(['desktop', 'mobile', 'web'] as const).map((p) => (
+          {PLATFORMS.map((p) => (
             <Chip
               key={p}
               small

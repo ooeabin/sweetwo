@@ -7,11 +7,12 @@ import {
   type InquiryStatus,
 } from '@sweetwo/api';
 import { ACCESS_SCOPES, formatKstDateTime } from '@sweetwo/core';
-import { Badge, Button, Chip } from '@sweetwo/ui';
+import { Button, Chip, Status } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { copy } from '../copy';
+import { inquiryTone } from '../tones';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
@@ -68,7 +69,9 @@ export function AD06Inquiry() {
     <Frame
       menu="inquiries"
       title={`${d.no} ${copy.categories[d.category] ?? d.category}`}
-      actions={<Badge kind="temp">{copy.statuses[d.status] ?? d.status}</Badge>}
+      actions={
+        <Status tone={inquiryTone[d.status] ?? 'off'}>{copy.statuses[d.status] ?? d.status}</Status>
+      }
     >
       <div className="hg-admin__grid">
         <div className="hg-admin__col">
@@ -113,14 +116,7 @@ export function AD06Inquiry() {
                     </option>
                   ))}
                 </select>
-                <Button
-                  variant="primary"
-                  aria-busy={busy}
-                  disabled={!body.trim()}
-                  onClick={() => void send()}
-                >
-                  {copy.sendAnswer}
-                </Button>
+                <span style={{ flex: 1 }} />
                 {d.status === 'received' && (
                   <Button
                     variant="secondary"
@@ -129,6 +125,14 @@ export function AD06Inquiry() {
                     {copy.statuses.in_progress}
                   </Button>
                 )}
+                <Button
+                  variant="primary"
+                  aria-busy={busy}
+                  disabled={!body.trim()}
+                  onClick={() => void send()}
+                >
+                  {copy.sendAnswer}
+                </Button>
               </div>
               {msg && (
                 <p className="hg-help" role="status">

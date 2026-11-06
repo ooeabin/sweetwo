@@ -42,7 +42,7 @@ export function AdminFrame({
     <div className="hg-admin">
       <nav className="hg-admin__side" aria-label="어드민 메뉴">
         <div className="hg-admin__brand">
-          <Wordmark height={24} />
+          <Wordmark height={24} ink />
           <span className="hg-tag">어드민</span>
         </div>
         {menus.map((m, i) => {
@@ -73,7 +73,8 @@ export function AdminFrame({
           </span>
           <span className="hg-admin__account-text">
             <b>{who.name}</b>
-            <span>{[who.role, who.sub].filter(Boolean).join(', ')}</span>
+            {who.role && <span>{who.role}</span>}
+            {who.sub && <span title={who.sub}>{who.sub}</span>}
           </span>
           {who.action}
         </div>

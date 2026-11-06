@@ -19,6 +19,58 @@ export const AdminDashboard = z.object({
   failed: z.object({ plans: z.number(), notifications: z.number() }),
   // 상시 경보(27 AD-01 1번). 지금은 AD-19 평균 금리 90일 넘음만
   alerts: z.array(z.object({ kind: z.string(), value: z.number(), limit: z.number() })).default([]),
+  // 2026-11-06 AD-01 4~7번: 회원 현황, 최근 7일 추이, 앱 버전, 최근 활동(운영·CS·최고 관리자만, 아니면 null)
+  members: z
+    .object({
+      total: z.number(),
+      joined_today: z.number(),
+      joined_yesterday: z.number(),
+      deletion_today: z.number(),
+      connected: z.number(),
+    })
+    .nullable()
+    .default(null),
+  trend: z
+    .array(
+      z.object({ day: z.string(), joined: z.number(), connected: z.number(), checked: z.number() }),
+    )
+    .nullable()
+    .default(null),
+  versions: z
+    .object({
+      below_min: z.number(),
+      top: z.array(z.object({ platform: z.string(), version: z.string(), devices: z.number() })),
+    })
+    .nullable()
+    .default(null),
+  recent: z
+    .object({
+      approvals: z.number().nullable(),
+      inquiries: z
+        .array(
+          z.object({
+            id: z.string(),
+            no: z.string(),
+            category: z.string(),
+            channel: z.string(),
+            status: z.string(),
+            created_at: z.string(),
+          }),
+        )
+        .nullable(),
+      audit: z
+        .array(
+          z.object({
+            at: z.string(),
+            admin_email: z.string().nullable(),
+            action: z.string(),
+            screen: z.string(),
+          }),
+        )
+        .nullable(),
+    })
+    .nullable()
+    .default(null),
   at: z.string(),
 });
 export type AdminDashboard = z.infer<typeof AdminDashboard>;

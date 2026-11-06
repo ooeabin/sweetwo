@@ -8,7 +8,7 @@ import {
   type AdminUserRow,
 } from '@sweetwo/api';
 import { formatKstDateTime, type AdminRole } from '@sweetwo/core';
-import { Button, Chip, DataTable } from '@sweetwo/ui';
+import { Button, Chip, DataTable, Status } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
@@ -100,27 +100,29 @@ export function AD18Admins() {
               {
                 key: 'lock',
                 label: ops.adminCols.locked,
-                render: (u) =>
-                  u.email === me.email ? (
-                    u.locked ? (
-                      ops.yes
+                render: (u) => (
+                  <span className="hg-row" style={{ gap: 'var(--space-3)' }}>
+                    {u.locked ? (
+                      <Status tone="bad">{ops.adminCols.locked}</Status>
                     ) : (
-                      ops.no
-                    )
-                  ) : (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={() =>
-                        void run(
-                          reauth(() => adminSetLock(u.email, !u.locked)),
-                          ops.saved,
-                        )
-                      }
-                    >
-                      {u.locked ? ops.unlock : ops.lock}
-                    </Button>
-                  ),
+                      <Status tone="off">{ops.no}</Status>
+                    )}
+                    {u.email !== me.email && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() =>
+                          void run(
+                            reauth(() => adminSetLock(u.email, !u.locked)),
+                            ops.saved,
+                          )
+                        }
+                      >
+                        {u.locked ? ops.unlock : ops.lock}
+                      </Button>
+                    )}
+                  </span>
+                ),
               },
             ]}
           />

@@ -56,6 +56,29 @@ export const copy = {
   received: '접수',
   inProgress: '처리 중',
   aggregatedAt: (t: string) => `${t} 집계`, // [확인 필요]
+  // AD-01 4~7번(2026-11-06) [확인 필요]
+  membersTitle: '회원 현황', // [확인 필요]
+  memberTotal: '전체 회원', // [확인 필요]
+  joinedToday: '오늘 가입', // [확인 필요]
+  vsYesterday: (n: number) => `어제 ${n.toLocaleString('ko-KR')}명`, // [확인 필요]
+  connectedCouples: '연결된 부부', // [확인 필요]
+  deletionToday: '오늘 삭제 요청', // [확인 필요]
+  trendTitle: '최근 7일', // [확인 필요]
+  trendKinds: { joined: '가입', connected: '부부 연결', checked: '체크한 줄' } as Record<
+    string,
+    string
+  >, // [확인 필요]
+  trendTable: '최근 7일 표', // [확인 필요] 표 보기 접기 제목
+  versionsTitle: '앱 버전', // [확인 필요]
+  belowMin: '최소 지원 버전보다 낮은 기기', // [확인 필요]
+  versionsHelp: '최근 7일 동안 켠 기기만 세요', // [확인 필요]
+  versionCols: { platform: '기기', version: '버전', devices: '기기 수' }, // [확인 필요]
+  recentTitle: '최근 활동', // [확인 필요]
+  approvalsWaiting: '승인 대기', // [확인 필요]
+  recentInquiries: '최근 문의', // [확인 필요]
+  recentAudit: '최근 감사 로그', // [확인 필요]
+  seeAll: '모두 보기', // [확인 필요]
+  none: '없어요', // [확인 필요]
 
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',
@@ -221,7 +244,13 @@ export const copy = {
     privacy: '개인정보',
     etc: '기타',
   } as Record<string, string>,
-  inqCols: { no: '문의 번호', category: '분류', elapsed: '경과 시간', channel: '채널' }, // [확인 필요] 채널
+  inqCols: {
+    no: '문의 번호',
+    category: '분류',
+    elapsed: '경과 시간',
+    channel: '채널',
+    created: '받은 시각',
+  }, // [확인 필요] 채널
   channels: { app: '앱', email: '이메일' } as Record<string, string>,
   noInquiry: '문의가 없어요', // [확인 필요]
   attach: '자동 첨부',
@@ -307,6 +336,7 @@ export type Copy = typeof copy;
 export const ops = {
   // AD-10
   noticeTitle: '공지',
+  noticeEmpty: '아직 만든 공지가 없어요', // [확인 필요]
   newNotice: '새 공지', // [확인 필요]
   noticeCols: {
     title: '제목',
@@ -328,7 +358,7 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱', web: '웹' } as Record<string, string>, // [확인 필요]
+  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',
