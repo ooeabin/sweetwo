@@ -35,6 +35,8 @@ export function AD03Member() {
   const nav = useNavigate();
   const me = useAdmin();
   const cs = me.roles.includes('cs') || me.roles.includes('super');
+  // L2 동의 범위 보기는 CS만(최고 관리자는 승인만, 33 2장)
+  const csOnly = me.roles.includes('cs');
   const q = useQuery({ queryKey: ['admin', 'user', id], queryFn: () => fetchAdminUser(id) });
   const [panel, setPanel] = useState<'reveal' | 'action' | null>(null);
   const [shown, setShown] = useState<{ data: AdminReveal; until: number } | null>(null);
@@ -93,13 +95,15 @@ export function AD03Member() {
           <small>
             {copy.hoursLeft(hoursBetween(new Date().toISOString(), new Date(approved.expires_at)))}
           </small>{' '}
-          <Button
-            variant="link"
-            size="sm"
-            onClick={() => void fetchAdminAccessData(approved.id).then(setAccess)}
-          >
-            {copy.see}
-          </Button>
+          {csOnly && (
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => void fetchAdminAccessData(approved.id).then(setAccess)}
+            >
+              {copy.see}
+            </Button>
+          )}
         </div>
       )}
       <div className="hg-admin__grid">

@@ -30,6 +30,9 @@ export const copy = {
   mfaTitle: '인증 앱의 6자리 숫자를 넣어 주세요', // [확인 필요]
   code: '6자리 숫자', // [확인 필요]
   verify: '확인', // [확인 필요]
+  reauthTitle: '인증 앱 숫자를 한 번 더 넣어 주세요', // [확인 필요] 재인증(33 3장)
+  reauthBody: '중요한 일이라 본인인지 다시 확인해요', // [확인 필요]
+  reauthGo: '확인',
   wrongCode: '숫자가 맞지 않아요. 다시 넣어 주세요', // [확인 필요]
   notAdmin: '권한이 없어요',
   noPermission: '권한이 없어요',
@@ -40,6 +43,9 @@ export const copy = {
 
   // AD-01
   alerts: '상시 경보', // [확인 필요]
+  alertKinds: { loan_rate_stale: '평균 금리 마지막 갱신' } as Record<string, string>, // [확인 필요]
+  alertValue: (kind: string, v: number, limit: number) =>
+    kind === 'loan_rate_stale' ? `${v}일 전 / 기준 ${limit}일` : `${v} / 기준 ${limit}`, // [확인 필요]
   failedJobs: '실패 건수', // [확인 필요]
   failedPlans: '체크리스트 생성 실패',
   failedNotis: '알림 발송 실패',
@@ -245,6 +251,7 @@ export const copy = {
 
   // AD-17
   auditTitle: '감사 로그',
+  change: '바뀐 값', // [확인 필요] 감사 로그 행 상세(전 → 후)
   auditCols: {
     at: '시각',
     admin: '관리자',
@@ -275,6 +282,7 @@ export const copy = {
     'spec' | 'design' | 'dev' | 'adr',
     string
   >, // [확인 필요]
+  docUpdated: (v: string) => `마지막 수정 ${v.split(' ').reverse().join(', 커밋 ')}`, // [확인 필요] ‘마지막 수정 2026-11-06, 커밋 af6ea4a’
   designPreview: '디자인 시스템 미리보기',
 };
 
@@ -367,7 +375,8 @@ export const ops = {
     student: '학자금',
     card_loan: '카드론·현금서비스',
   } as Record<string, string>,
-  loanCols: { kind: '유형', rate: '연 금리', applied: '적용일' },
+  loanCols: { kind: '유형', rate: '연 금리', applied: '적용일', updated: '마지막 갱신' }, // [확인 필요] 마지막 갱신
+  loanAppliedPick: '저장할 때 적용일', // [확인 필요],
   holidayTitle: '공휴일', // [확인 필요]
   // AD-19 항목 이름 목록 [확인 필요]
   kindTitle: '항목 이름 목록',
@@ -401,6 +410,7 @@ export const ops = {
   cancelRequest: '요청 취소', // [확인 필요]
   noApproval: '승인할 요청이 없어요', // [확인 필요]
   selfApproval: '내가 요청한 건 다른 최고 관리자가 승인해요', // [확인 필요]
+  superMin: '최고 관리자는 2명 넘게 있어야 해요', // [확인 필요] 33 2장 최소 2명
   appCols: {
     latest: '최신 버전(데스크톱)',
     minDesktop: '최소 지원 버전(데스크톱)',

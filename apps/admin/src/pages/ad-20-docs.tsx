@@ -82,7 +82,9 @@ export function AD20Docs() {
         <article aria-label={cur?.title} style={{ minWidth: 0 }}>
           <p className="hg-help">
             {cur?.path}
-            {__DOCS_COMMIT__ ? ` ${__DOCS_COMMIT__}` : ''}
+            {cur && (__DOCS_DATES__[cur.path] ?? __DOCS_COMMIT__)
+              ? ` ${copy.docUpdated(__DOCS_DATES__[cur.path] ?? __DOCS_COMMIT__)}`
+              : ''}
           </p>
           {cur && <Markdown text={cur.body} />}
         </article>

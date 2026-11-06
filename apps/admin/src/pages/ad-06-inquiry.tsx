@@ -1,4 +1,5 @@
 import {
+  AdminError,
   adminAnswerInquiry,
   adminRequestAccess,
   adminSetInquiryStatus,
@@ -13,6 +14,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { copy } from '../copy';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
+import { useReauth } from '../reauth';
 
 const STATUSES: InquiryStatus[] = ['received', 'in_progress', 'waiting_user', 'done'];
 
@@ -179,19 +181,20 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const reauth = useReauth();
   const toggle = (s: string) =>
     setScopes((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]));
   const go = async () => {
     setBusy(true);
     setMsg(null);
     try {
-      await adminRequestAccess(inquiryId, scopes, raw, reason);
+      await reauth(() => adminRequestAccess(inquiryId, scopes, raw, reason));
       setMsg(raw ? copy.rawRequested : copy.requested);
       setScopes([]);
       setRaw(false);
       onDone();
-    } catch {
-      setMsg(copy.failed);
+    } catch (e) {
+      setMsg(e instanceof AdminError && e.code === 'reauth_cancelled' ? null : copy.failed);
     } finally {
       setBusy(false);
     }

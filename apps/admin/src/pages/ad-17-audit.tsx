@@ -31,7 +31,6 @@ export function AD17Audit() {
   });
   const set = (k: keyof typeof draft) => (e: { target: { value: string } }) =>
     setDraft((x) => ({ ...x, [k]: e.target.value }));
-  const row = q.data?.find((r) => r.id === open) ?? null;
 
   return (
     <Frame menu="system" title={copy.auditTitle}>
@@ -101,6 +100,30 @@ export function AD17Audit() {
         rows={q.data ?? []}
         rowKey={(r) => String(r.id)}
         onRow={(r) => setOpen(open === r.id ? null : r.id)}
+        expanded={(r) =>
+          r.id === open ? (
+            <div
+              className="hg-stack"
+              style={{ gap: 0 }}
+              aria-label={`${formatKstDateTime(r.at)} ${r.action}`}
+            >
+              <div className="hg-admin__kv">
+                <span>{copy.ip}</span>
+                <span>{r.ip || '—'}</span>
+              </div>
+              <div className="hg-admin__kv">
+                <span>{copy.screen}</span>
+                <span>{r.screen}</span>
+              </div>
+              {detailLines(r.detail).map(([k, v]) => (
+                <div key={k} className="hg-admin__kv">
+                  <span>{k}</span>
+                  <span>{v}</span>
+                </div>
+              ))}
+            </div>
+          ) : null
+        }
         empty={q.isLoading ? null : copy.noAudit}
         columns={[
           { key: 'at', label: copy.auditCols.at, render: (r) => formatKstDateTime(r.at) },
@@ -115,22 +138,28 @@ export function AD17Audit() {
           { key: 'approver', label: copy.auditCols.approver, render: (r) => r.approver ?? '—' },
         ]}
       />
-      {row && (
-        <section
-          className="hg-card hg-stack"
-          aria-label={`${formatKstDateTime(row.at)} ${row.action}`}
-        >
-          <span>
-            {copy.ip}: {row.ip || '—'}
-          </span>
-          <span>
-            {copy.screen}: {row.screen}
-          </span>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(row.detail, null, 2)}
-          </pre>
-        </section>
-      )}
     </Frame>
   );
+}
+
+// 행 상세: 설정 전·후 값을 한 줄씩(before/after는 “전 → 후”), 나머지는 키: 값
+function detailLines(d: unknown): [string, string][] {
+  if (!d || typeof d !== 'object') return [];
+  const o = d as Record<string, unknown>;
+  const show = (v: unknown) =>
+    v === null || v === undefined ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v);
+  const out: [string, string][] = [];
+  if ('before' in o || 'after' in o) {
+    const obj = (v: unknown) =>
+      v && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+    const b = obj(o.before);
+    const a = obj(o.after);
+    if ((b || o.before == null) && (a || o.after == null) && (b || a)) {
+      const keys = new Set([...Object.keys(b ?? {}), ...Object.keys(a ?? {})]);
+      for (const k of keys) out.push([k, `${show(b?.[k])} → ${show(a?.[k])}`]);
+    } else out.push([copy.change, `${show(o.before)} → ${show(o.after)}`]);
+  }
+  for (const [k, v] of Object.entries(o))
+    if (k !== 'before' && k !== 'after') out.push([k, show(v)]);
+  return out;
 }

@@ -16,9 +16,17 @@ import {
   type LoanRate,
   type TermsVersionRow,
 } from '@sweetwo/api';
-import { KIND_NAME_GROUPS, addDays, assetGroup, daysBetween, todayKst } from '@sweetwo/core';
+import {
+  KIND_NAME_GROUPS,
+  addDays,
+  assetGroup,
+  daysBetween,
+  formatKstDateTime,
+  todayKst,
+} from '@sweetwo/core';
 import { Badge, Button, DataTable, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
 import { Frame } from '../frame';
@@ -32,7 +40,9 @@ type Tab = 'guides' | 'terms' | 'data';
 export function AD14Content() {
   const me = useAdmin();
   const canEdit = me.roles.includes('ops');
-  const [tab, setTab] = useState<Tab>('guides');
+  // 대시보드 경보에서 오면 계산·기준 데이터 탭
+  const from = (useLocation().state as { tab?: Tab } | null)?.tab;
+  const [tab, setTab] = useState<Tab>(from ?? 'guides');
   return (
     <Frame menu="content" title={ops.contentTitle}>
       <Tabs<Tab>
@@ -261,6 +271,8 @@ function RefData({ canEdit }: { canEdit: boolean }) {
   const rates = useQuery({ queryKey: ['admin', 'loan-rates'], queryFn: fetchLoanRates });
   const hol = useQuery({ queryKey: ['admin', 'holidays'], queryFn: fetchHolidays });
   const [edit, setEdit] = useState<Record<string, string>>({});
+  // 적용일(27 AD-19): 기본 오늘, 바꿀 수 있음
+  const [applied, setApplied] = useState(todayKst());
   const [h, setH] = useState({
     date: '',
     name: '',
@@ -271,7 +283,7 @@ function RefData({ canEdit }: { canEdit: boolean }) {
     const v = Math.round(Number(edit[r.kind]) * 100);
     if (!Number.isFinite(v)) return;
     try {
-      await adminSetLoanRate(r.kind, v, todayKst());
+      await adminSetLoanRate(r.kind, v, applied);
       setEdit((x) => ({ ...x, [r.kind]: '' }));
       void rates.refetch();
     } catch {
@@ -320,12 +332,29 @@ function RefData({ canEdit }: { canEdit: boolean }) {
               ),
           },
           { key: 'applied', label: ops.loanCols.applied, render: (r) => r.applied_on },
+          {
+            key: 'updated',
+            label: ops.loanCols.updated,
+            render: (r) => formatKstDateTime(r.updated_at).slice(0, 10),
+          },
         ]}
       />
+      {canEdit && (
+        <label className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+          <span className="hg-card__meta">{ops.loanAppliedPick}</span>
+          <input
+            className="hg-input"
+            type="date"
+            style={{ width: 'auto' }}
+            value={applied}
+            onChange={(e) => setApplied(e.target.value)}
+          />
+        </label>
+      )}
       <div className="hg-admin__grid">
         <DataTable
           label={ops.holidayTitle}
-          rows={(hol.data ?? []).filter((x) => x.date >= todayKst())}
+          rows={(hol.data ?? []).filter((x) => x.date >= `${todayKst().slice(0, 4)}-01-01`)}
           rowKey={(x) => x.date}
           columns={[
             { key: 'date', label: ops.date, render: (x) => x.date },

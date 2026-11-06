@@ -9,7 +9,7 @@ insert into auth.users (id, email) values
   ('aaaaaaaa-0000-0000-0000-000000000001', 'ops01@sweetwo.kr');
 insert into public.admin_user (email, name, roles) values ('ops01@sweetwo.kr', 'ops01', array['ops']::public.admin_role[]);
 create function pg_temp.login_as(uid uuid, aal text default 'aal1') returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal)::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal, 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 update public.app_config set min_version_desktop = '1.2.0', min_version_ios = '1.0.0', min_version_android = '1.1.0' where id = 1;
 

@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { copy, ops } from '../copy';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
+import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
 
 // 2인 승인(33 2·3장, AdminFrame hg-approve): 요청 → 최고 관리자 승인(작성자 본인 불가) → 적용.
@@ -19,6 +20,7 @@ import { SysTabs } from '../sys-tabs';
 export function AD18Approvals() {
   const me = useAdmin();
   const qc = useQueryClient();
+  const reauth = useReauth();
   const superAdmin = me.roles.includes('super');
   const [status, setStatus] = useState<ApprovalStatus>('requested');
   const q = useQuery({
@@ -29,11 +31,17 @@ export function AD18Approvals() {
   const decide = async (r: AdminApprovalRow, d: 'approve' | 'reject' | 'cancel') => {
     setMsg(null);
     try {
-      await adminDecide(r.id, d);
+      await (d === 'cancel' ? adminDecide(r.id, d) : reauth(() => adminDecide(r.id, d)));
       await qc.invalidateQueries({ queryKey: ['admin'] });
     } catch (e) {
       setMsg(
-        e instanceof AdminError && e.code === 'self_approval' ? ops.selfApproval : copy.failed,
+        e instanceof AdminError && e.code === 'reauth_cancelled'
+          ? null
+          : e instanceof AdminError && e.code === 'self_approval'
+            ? ops.selfApproval
+            : e instanceof AdminError && e.code === 'super_min'
+              ? ops.superMin
+              : copy.failed,
       );
     }
   };

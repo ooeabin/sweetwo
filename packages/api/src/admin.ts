@@ -41,6 +41,8 @@ const KNOWN = [
   'legal_check_required',
   'bad_value',
   'self_lock',
+  'reauth_required',
+  'super_min',
   // 로그인 링크(Supabase Auth 오류 코드)
   'over_email_send_rate_limit',
   'email_address_not_authorized',

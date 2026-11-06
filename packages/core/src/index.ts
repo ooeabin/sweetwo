@@ -17,6 +17,7 @@ export * from './rules/noti-prefs';
 export * from './rules/couple';
 export * from './rules/goal';
 export * from './rules/asset';
+export * from './rules/admin-inquiry';
 export * from './rules/networth-rank';
 export * from './zip';
 export * from './faq';

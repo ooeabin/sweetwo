@@ -9,7 +9,7 @@ insert into auth.users (id, email) values
   ('aaaaaaaa-0000-0000-0000-000000000004', 'ops01@sweetwo.kr'),
   ('aaaaaaaa-0000-0000-0000-000000000009', 'x@gmail.com');
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 
 -- 첫 최고 관리자: 회사 도메인만, 한 번만
