@@ -8,7 +8,7 @@
 - 타일: `surface` 바탕 + `hairline-soft` 테두리, 모서리 `radius-xl`. 전체가 버튼(→ G-02).
 - 위 사진 `hg-goaltile__photo`(4:3, 꽉 채움). 배지는 사진 위 왼쪽 `hg-goaltile__badges`.
 - 아래 `hg-goaltile__body`: 이름(15px 600, 한 줄 …) → 금액(13px `slate`) → 막대 `hg-goaltile__bar`(6px, `success`, 모은 돈이 없으면 “아직 모은 돈이 없어요”) → 보조 줄 하나(12px, 한 줄 …, 늦어요 > 이번 달 > 매달·예상).
-- 링크(‘월급 계획에서 저금 늘리기’)와 배우자 변경 안내는 타일 안 아래 칸 `hg-goaltile__foot`. 타일 본문은 `hg-goaltile__main` 버튼(→ G-02).
+- 링크(‘월급 계획에서 저금 늘리기’)와 파트너 변경 안내는 타일 안 아래 칸 `hg-goaltile__foot`. 타일 본문은 `hg-goaltile__main` 버튼(→ G-02).
 - 레퍼런스: Vivid, ANZ Plus 목표 고르기.
 
 ## GoalHero (`hg-goalhero`) + 묶음 카드(`hg-goalbox`)

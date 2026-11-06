@@ -51,7 +51,7 @@ export const copy = {
   proxy: '대신 입력',
   vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
   partnerPill: '금액만', // [확인 필요]
-  visShort: { all: '', sum: '금액만', private: '숨김' }, // 2026-11-04 목록 배지는 짧게(배우자 합계 줄 ‘금액만’과 같게) [확인 필요]
+  visShort: { all: '', sum: '금액만', private: '숨김' }, // 2026-11-04 목록 배지는 짧게(파트너 합계 줄 ‘금액만’과 같게) [확인 필요]
   partnerSum: (name: string, side: string, n: number) => `${name}님 ${side} ${n}개`,
   checkAmount: '금액이 맞나요?',
   updated: (date: string) => `${date} 수정`, // [확인 필요]
@@ -72,7 +72,7 @@ export const copy = {
   amountDebt: '남은 대출금은 얼마예요?',
   ownerTitle: '누구 명의예요?',
   ownerMe: '나',
-  visTitle: '배우자에게 공개할까요?',
+  visTitle: '파트너에게 공개할까요?', // [확인 필요]
   visOptions: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
   next: '다음',
   save: '추가하기', // [확인 필요]
@@ -141,7 +141,7 @@ export const copy = {
   diagFixed: (pct: number) => `월 수입의 ${pct}%가 고정지출이에요`,
   diagInvestNone: '아직 정하지 않았어요',
   diagInvestWait: (partner: string) => `${partner}님 답을 기다려요`,
-  diagInvestMine: '내 답을 기다려요', // [확인 필요] 배우자만 답했을 때
+  diagInvestMine: '내 답을 기다려요', // [확인 필요] 파트너만 답했을 때
   diagInvestBoth: (limit: number) =>
     limit === 0
       ? '공동자금은 원금을 지키기로 했어요'

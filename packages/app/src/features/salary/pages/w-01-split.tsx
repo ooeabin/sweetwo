@@ -13,7 +13,7 @@ import { SplitEditor, toDraft } from '../split-editor';
 
 // W-01 월급 계획(20). O-50과 같은 틀. 저장 = 바로 적용 + Toast “월급 계획을 바꿨어요” + 되돌리기, 상대 알림은 서버.
 // 이번 사이클 체크 안 한 줄도 새 금액으로(서버 sync_checklist).
-// 각자 + 배우자 합류: 사람 탭(내 탭 기본, `?who=`). 배우자 탭도 고칠 수 있음, 단 배우자 내 목표 줄 금액은 잠금(서버도 확인).
+// 각자 + 파트너 합류: 사람 탭(내 탭 기본, `?who=`). 파트너 탭도 고칠 수 있음, 단 파트너 내 목표 줄 금액은 잠금(서버도 확인).
 // 수입 줄 → 설정 내 월급(S-11, 내 탭만). 합쳐서면 내 목표 줄 앞에 주인 이름. 연결 해제 대기 중이면 보기만.
 export function W01Split() {
   const nav = useNavigate();
@@ -43,7 +43,7 @@ export function W01Split() {
   const splitOf = (id: string | null) => splits.data.find((x) => x.owner_user_id === id);
   const mine = splitOf(ownerId);
   const saved = mine ? toDraft(mine.split_line) : null;
-  /** 배우자 탭: 배우자 내 목표 줄은 잠금 */
+  /** 파트너 탭: 파트너 내 목표 줄은 잠금 */
   const lockedGoal = (goalId?: string) =>
     theirs && goals.data.some((g) => g.id === goalId && g.owner_user_id === ownerId);
   const recommend = () =>

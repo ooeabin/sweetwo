@@ -41,7 +41,7 @@ export interface RecommendInput {
   goals: AllocGoal[];
   /** 각자 모드 우리 목표: 상대 월급 계획의 같은 목표 줄 금액. 월 필요액에서 빼고 채움(0원 아래로 안 감, 20 W-01 6번) */
   others?: Record<string, Won>;
-  /** 금액을 그대로 두는 저금 줄(배우자 탭의 배우자 내 목표 줄, 20 W-01 6번) */
+  /** 금액을 그대로 두는 저금 줄(파트너 탭의 파트너 내 목표 줄, 20 W-01 6번) */
   keep?: Record<string, Won>;
   now?: Date;
 }

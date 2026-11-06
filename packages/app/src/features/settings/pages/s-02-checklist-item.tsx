@@ -12,7 +12,7 @@ import { LoadFailed } from '../load-failed';
 import { CHECKLIST, guidesPath, useChecklist } from '../guides';
 
 // S-02 체크리스트 항목(25 S-02): 제목·설명(3줄 이내), 해야 할 일 단계, 출처(공식 사이트)·확인일, 완료자 표시, 관련 기능 링크.
-// 이번 달 할 일에서 열면(?from=todo) “완료했어요”. 완료는 부부 공유.
+// 이번 달 할 일에서 열면(?from=todo) “완료했어요”. 완료는 두 사람 공유.
 export function S02ChecklistItem() {
   const { key = '' } = useParams();
   const [params] = useSearchParams();

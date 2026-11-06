@@ -15,7 +15,7 @@ export const homeText = {
   maturity: (name: string) => `${name} 만기`, // 캘린더 돈 일정과 같음
 };
 
-/** 할 일 한 줄 문구. partner = 지금 배우자(해제 요청), exPartner = 해제한 상대(다시 연결) */
+/** 할 일 한 줄 문구. partner = 지금 파트너(해제 요청), exPartner = 해제한 상대(다시 연결) */
 export function todoText(t: HomeTodo, n: { partner: string; exPartner: string }) {
   switch (t.kind) {
     case 'unlink':

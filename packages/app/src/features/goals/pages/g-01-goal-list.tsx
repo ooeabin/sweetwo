@@ -9,7 +9,7 @@ import { copy } from '../copy';
 import { GoalItemCard } from '../goal-item-card';
 import { useGoalsModel, type GoalItem } from '../model';
 
-// G-01 목표 목록(22). 상단 요약(매달 목표에 모으는 돈) → 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위)
+// G-01 목표 목록(22). 상단 요약(매달 목표에 모으는 돈) → 묶음(우리 목표 / 내 목표 / 파트너 목표, 비상금은 우리 목표 맨 위)
 // → 접힌 목록(보류, 달성). 혼자 쓰기면 묶음 제목 없이 한 목록. 데스크톱 2열(hg-cards), 좁은 창 1열.
 const SEEN = 'sweetwo.goalsSeenAt';
 const readSeen = () => {
@@ -32,7 +32,7 @@ export function G01GoalList() {
   const d = useGoalsModel();
   const { masked } = useMask();
   const [unfold, setUnfold] = useState(false);
-  // 배우자가 고친 목표: 지난번에 G-01을 연 뒤 생긴 것만 보이고, 다음에 열면 사라짐(본 시각은 기기에 기억)
+  // 파트너가 고친 목표: 지난번에 G-01을 연 뒤 생긴 것만 보이고, 다음에 열면 사라짐(본 시각은 기기에 기억)
   const changes = useQuery({ queryKey: qk.goalChanges, queryFn: fetchRecentGoalChanges });
   const [seenAt] = useState(readSeen);
   useEffect(() => writeSeen(new Date().toISOString()), []);

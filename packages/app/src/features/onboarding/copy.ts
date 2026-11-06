@@ -17,7 +17,7 @@ export const copy = {
 
   // O-03, O-05 (Q5)
   myNickname: '내 이름이나 애칭을 알려 주세요',
-  myNicknameHelp: '배우자에게도 이 이름으로 보여요',
+  myNicknameHelp: '파트너에게도 이 이름으로 보여요', // [확인 필요]
   nicknamePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
   // O-06, O-07

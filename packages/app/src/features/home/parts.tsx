@@ -26,7 +26,7 @@ const pctOf = (saved: number, target: number | null) =>
 /**
  * H-02 목표(2026-11-03 다시 짬, 카카오T·카카오페이 진행 막대처럼): 큰 카드 하나 대신 한 카드 안에 목표 줄 최대 4개.
  * 줄 = 그림 + 이름(내 목표는 작은 “나”) + “95만 / 1억 5,000만 원” + 오른쪽 % + 아래 얇은 막대(예상 달은 목표 탭).
- * 순서: 우리 목표 → 비상금 → 내 목표(배우자 미합류·혼자 쓰기면 우리 → 내 → 비상금). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
+ * 순서: 우리 목표 → 비상금 → 내 목표(파트너 미합류·혼자 쓰기면 우리 → 내 → 비상금). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
  * 이번 달 저금 체크는 위 이번 달 체크리스트에서만. 줄 → G-02. ‘지연’ 배지는 홈에 없음.
  */
 export function GoalsCard({
@@ -40,7 +40,7 @@ export function GoalsCard({
   goals: Goal[];
   savedOf: (g: Goal) => number;
   meId: string | undefined;
-  /** 배우자가 합류했는지(미합류·혼자 쓰기면 내 목표를 비상금보다 먼저) */
+  /** 파트너가 합류했는지(미합류·혼자 쓰기면 내 목표를 비상금보다 먼저) */
   joined?: boolean;
   solo?: boolean;
   go: (to: string) => void;
@@ -125,7 +125,7 @@ export function SalaryCard({
   list: PayChecklist | undefined;
   partnerList?: PayChecklist;
   partnerName: string;
-  /** 배우자가 시작한 사람인지(Avatar 색) */
+  /** 파트너가 시작한 사람인지(Avatar 색) */
   partnerStarter?: boolean;
   goalName: (id: string | null) => string;
   /** 저금 줄 목표 템플릿(아이콘) */
@@ -190,7 +190,7 @@ export function SalaryCard({
           </div>
         )}
         {partnerList && (
-          // 배우자 체크 현황(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원
+          // 파트너 체크 현황(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원
           <button
             type="button"
             className="hg-person"

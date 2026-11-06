@@ -43,7 +43,7 @@ export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefin
       useCacheInfo.getState().set(null);
     }
   });
-  // 부부 공간이 바뀌면(연결 해제 확정, 합류, 계정 삭제 뒤 새 공간) 예전 공간 데이터를 기기에서 지움(31 보안·개인정보 4장).
+  // 우리 둘 공간이 바뀌면(연결 해제 확정, 합류, 계정 삭제 뒤 새 공간) 예전 공간 데이터를 기기에서 지움(31 보안·개인정보 4장).
   // 그 뒤 저장에는 바뀐 다음에 받은 것만 넣음
   let spaceId: string | null | undefined = (
     qc.getQueryData<{ space_id?: string | null }>(['me']) ?? undefined

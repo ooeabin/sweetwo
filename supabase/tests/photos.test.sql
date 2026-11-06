@@ -1,4 +1,4 @@
--- pgTAP: 목표 사진(모든 목표, 바꾸면 옛 파일 지울 목록에), 기록 사진 10장까지, 다른 부부는 못 봄, 계정 삭제 요청 시 프로필 사진
+-- pgTAP: 목표 사진(모든 목표, 바꾸면 옛 파일 지울 목록에), 기록 사진 10장까지, 다른 커플은 못 봄, 계정 삭제 요청 시 프로필 사진
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(10);
@@ -60,12 +60,12 @@ reset role;
 select is((select array_agg(path) from public.storage_purge where bucket = 'photos'), array[('g' || '/' || lpad(1::text, 8, '0') || '-0000-4000-8000-000000000000.jpg')],
   '바꾼 옛 사진은 지울 목록에');
 
--- 다른 부부는 사진 행을 못 봄
+-- 다른 커플은 사진 행을 못 봄
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
-select is((select count(*)::int from public.photo), 0, '다른 부부는 못 봄');
+select is((select count(*)::int from public.photo), 0, '다른 커플은 못 봄');
 reset role;
 
 -- 기록을 지우면(휴지통 비우기·공간 삭제와 같음) 사진 10장도 지울 목록에

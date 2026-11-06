@@ -1,5 +1,5 @@
 -- pgTAP: 지정 그림(2026-11-03, 2026-11-05 지정 아바타는 없앰: 열·함수가 없는지).
--- 목표 지정 사진 고르기(올린 사진은 지울 목록에), 배우자 내 목표는 못 바꿈. 찬우, 예빈
+-- 목표 지정 사진 고르기(올린 사진은 지울 목록에), 파트너 내 목표는 못 바꿈. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(9);
@@ -55,7 +55,7 @@ select public.join_space(current_setting('test.code'));
 select is((select photo_preset from public.space_goals() where id = current_setting('test.mine')::uuid), null,
   '금액만 보여 주기면 지정 사진 이름도 숨김');
 select throws_ok(format($$ select public.set_goal_preset(%L, 'car-02') $$, current_setting('test.mine')),
-  '42501', 'not_allowed', '배우자 내 목표는 못 바꿈');
+  '42501', 'not_allowed', '파트너 내 목표는 못 바꿈');
 reset role;
 
 select hasnt_column('public', 'app_user', 'avatar_preset', '지정 아바타 열 없앰(2026-11-05)');

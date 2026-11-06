@@ -25,7 +25,7 @@ export function TransferRow({
   done: boolean;
   checkLabel: string;
   onToggle?: () => void;
-  /** 볼 수만(배우자 탭) */
+  /** 볼 수만(파트너 탭) */
   disabled?: boolean;
   /** 자동 줄 영역 배지 */
   badge?: ReactNode;

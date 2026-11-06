@@ -32,7 +32,7 @@ import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
 
 // 홈(19): 오늘 띠(인사 H-01 + ‘월급 체크하기’) → 할 일 한 줄(H-06) → 왼쪽 목표(H-02)·이번 달 월급(H-03),
-// 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 배우자 활동은 알림 센터.
+// 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 파트너 활동은 알림 센터.
 const PC_BAND = 'sweetwo.pcBandDone';
 const pcBandDone = () => {
   try {

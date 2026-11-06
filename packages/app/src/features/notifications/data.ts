@@ -108,7 +108,7 @@ export function useNotiRealtime(userId: string | undefined) {
     const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
     const off = subscribeNotifications(userId, (ev) => {
       void qc.invalidateQueries({ queryKey: qk.notifications });
-      // 연결 해제 요청·취소: 부부 상태가 바뀜. 확정이면 공간이 바뀌어 전부 다시 읽음
+      // 연결 해제 요청·취소: 우리 둘 상태가 바뀜. 확정이면 공간이 바뀌어 전부 다시 읽음
       if (
         ev.type === 'insert' &&
         (ev.row.kind === 'unlink_confirmed' || ev.row.kind === 'reconnected')

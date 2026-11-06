@@ -192,7 +192,7 @@ test('L-03 릴리스 노트, L-05 약관(시행일), L-06 고객센터 검색', 
   await expect(page).toHaveTitle('고객센터 - sweeTwo');
   await expect(page.getByRole('heading', { name: '둘이 쓰기' })).toBeVisible();
   await page.getByLabel('궁금한 걸 검색해 보세요').fill('초대');
-  await expect(page.getByRole('button', { name: '배우자는 어떻게 초대하나요?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '파트너는 어떻게 초대하나요?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '기기와 보안' })).toBeHidden();
   await page.getByLabel('궁금한 걸 검색해 보세요').fill('우주여행');
   await expect(page.getByText('찾는 답이 없어요. 메일로 물어봐 주세요')).toBeVisible();

@@ -7,7 +7,7 @@ import { copy } from '../copy';
 import { coupleTone } from '../tones';
 import { Frame } from '../frame';
 
-// AD-02 회원·부부 검색: 이메일, 사용자 ID, 부부 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
+// AD-02 회원·커플 검색: 이메일, 사용자 ID, 커플 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
 // 결과 표는 L0(이메일 앞 3자 외 가림). 검색도 감사 로그(서버).
 // 내려받기: 결과 표 그대로(L0 열만), 사유를 남긴 뒤(감사 로그), 파일 첫 줄에 관리자 ID와 시각.
 export function AD02Members() {

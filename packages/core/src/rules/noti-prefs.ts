@@ -1,6 +1,6 @@
 // 알림 설정(docs/spec/25-settings.md S-14, 14 알림). 센터 기록은 늘 남고, 이 설정은 OS 알림·메일을 보낼지에만 씀.
 
-/** 묶음(25 S-14): plan = 월급 체크리스트(월급날, 월말 확인), partner_change = 배우자가 바꾼 값 … (제안은 재기획으로 없앰) */
+/** 묶음(25 S-14): plan = 월급 체크리스트(월급날, 월말 확인), partner_change = 파트너가 바꾼 값 … (제안은 재기획으로 없앰) */
 export type NotiTopic =
   | 'plan'
   | 'partner_change'
@@ -55,7 +55,7 @@ export function inQuiet(hour: number, start: number, end: number) {
 }
 
 /** OS 알림을 띄울지: 받는 방법 OS 알림 켜짐 + 그 묶음 켜짐 + 방해 금지 밖. 설정에 없는 묶음(끌 수 없는 것)은 켜짐.
- *  silent(인앱만, 예: 배우자 체크 다 함)는 늘 띄우지 않음 */
+ *  silent(인앱만, 예: 파트너 체크 다 함)는 늘 띄우지 않음 */
 export function pushAllowed(
   prefs: NotiPrefs,
   topic: string | null,

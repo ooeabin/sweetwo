@@ -36,13 +36,13 @@ select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('google', null, false, 'v1');
 select public.ensure_my_space();
-select is((select count(*)::int from public.fixed_expense), 0, '다른 부부의 고정지출은 안 보인다');
+select is((select count(*)::int from public.fixed_expense), 0, '다른 커플의 고정지출은 안 보인다');
 select throws_ok(
   $$ insert into public.fixed_expense (space_id, group_key, name) values (current_setting('test.chanwoo_space')::uuid, 'housing', '월세') $$,
-  '42501', null, '다른 부부 공간에 고정지출을 못 넣는다');
+  '42501', null, '다른 커플 공간에 고정지출을 못 넣는다');
 update public.couple_space set fixed_total = 1 where id = current_setting('test.chanwoo_space')::uuid;
 reset role;
-select is((select fixed_total from public.couple_space where id = current_setting('test.chanwoo_space')::uuid), 1000000::bigint, '다른 부부는 공간 답을 못 바꾼다');
+select is((select fixed_total from public.couple_space where id = current_setting('test.chanwoo_space')::uuid), 1000000::bigint, '다른 커플은 공간 답을 못 바꾼다');
 
 set local role anon;
 select is((select count(*)::int from public.fixed_expense), 0, '익명은 고정지출을 못 본다');

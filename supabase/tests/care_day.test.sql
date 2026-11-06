@@ -1,4 +1,4 @@
--- pgTAP: 챙길 날. 같은 공간은 함께 보고 고침, 다른 부부는 못 봄, 영구 삭제 없음
+-- pgTAP: 챙길 날. 같은 공간은 함께 보고 고침, 다른 커플은 못 봄, 영구 삭제 없음
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(4);
@@ -31,7 +31,7 @@ reset role;
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
-select is((select count(*)::int from public.care_day), 0, '다른 부부는 못 봄');
+select is((select count(*)::int from public.care_day), 0, '다른 커플은 못 봄');
 reset role;
 
 select * from finish();

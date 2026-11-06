@@ -2,7 +2,7 @@ import type { Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// S-12 부부 정보: 초대 코드 보기, 새 코드 받기. 초대 코드는 부부 공간 사람만 봄(RLS), 만들기는 함수로만
+// S-12 우리 둘 정보: 초대 코드 보기, 새 코드 받기. 초대 코드는 우리 둘 공간 사람만 봄(RLS), 만들기는 함수로만
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };

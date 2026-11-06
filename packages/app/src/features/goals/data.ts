@@ -2,7 +2,7 @@ import { fetchGoals, fetchMe, fetchPartner, fetchSpace, qk } from '@sweetwo/api'
 import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 
-// 목표 화면 기본 데이터(나, 공간, 배우자, 목표). 화면 값(모은 돈, 매달 넣는 돈, 예상)은 model.ts. 키는 다른 기능과 같은 qk.
+// 목표 화면 기본 데이터(나, 공간, 파트너, 목표). 화면 값(모은 돈, 매달 넣는 돈, 예상)은 model.ts. 키는 다른 기능과 같은 qk.
 export function useGoalsData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });

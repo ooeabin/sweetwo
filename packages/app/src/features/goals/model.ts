@@ -14,7 +14,7 @@ export interface GoalItem {
   saved: number;
   /** 매달 넣는 돈 = 보이는 월급 계획의 이 목표 저금 줄 합 */
   monthly: number;
-  /** 사람별 저금 줄(우리 목표 + 각자 + 배우자 합류일 때 “찬우 60만 + 예빈 35만”) */
+  /** 사람별 저금 줄(우리 목표 + 각자 + 파트너 합류일 때 “찬우 60만 + 예빈 35만”) */
   perPerson: { userId: string; name: string; amount: number }[];
   expected: YearMonth | null;
   lateMonths: number | null;
@@ -77,15 +77,15 @@ export function useGoalsModel() {
     // 아직 모은 돈이 없으면 지연으로 보지 않음(첫 사이클 ‘지연’ 배지, 2026-11-03)
     const late = eta.lateMonths !== null && eta.lateMonths > 0 && s > 0;
     const state = // 2026-11-04 사용 완료 없앰: 옛 ‘used’ 목표도 달성으로 보임
-    (
-      g.status === 'used'
-        ? 'achieved'
-        : g.status === 'paused' || g.status === 'achieved'
-          ? g.status
-          : late
-            ? 'delayed'
-            : 'active'
-    ) as GoalItem['state'];
+      (
+        g.status === 'used'
+          ? 'achieved'
+          : g.status === 'paused' || g.status === 'achieved'
+            ? g.status
+            : late
+              ? 'delayed'
+              : 'active'
+      ) as GoalItem['state'];
     return {
       goal: g,
       group,
@@ -120,7 +120,7 @@ export function useGoalsModel() {
   const folded = items
     .filter((i) => !OPEN.has(i.goal.status) && i.state in FOLD_ORDER)
     .sort((a, b) => (FOLD_ORDER[a.state] ?? 2) - (FOLD_ORDER[b.state] ?? 2));
-  // 상단 요약: 내가 볼 수 있는 목표의 월급 계획 저금 줄 합(배우자 내 목표 포함)
+  // 상단 요약: 내가 볼 수 있는 목표의 월급 계획 저금 줄 합(파트너 내 목표 포함)
   const monthlyTotal = open.reduce((t, i) => t + i.monthly, 0);
   return {
     loading,

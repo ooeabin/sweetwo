@@ -57,7 +57,7 @@ export const copy = {
   heldFrom: (other: string, linked: string, deposits: string) =>
     `기타 보유액 ${other}, 연결 자산 ${linked}, 월말 정리에서 넣은 돈 ${deposits}`, // [확인 필요]
   records: '월별 기록', // [확인 필요] 요소 이름
-  // G-01 예외: 배우자가 방금 고친 목표 [확인 필요]
+  // G-01 예외: 파트너가 방금 고친 목표 [확인 필요]
   partnerChanged: (name: string, field: string) =>
     `${name}님이 ${
       field === 'deadline'
@@ -339,7 +339,7 @@ export const copy = {
   historyUse: '꺼내 썼어요',
   historySkipped: '못 했어요',
   noHistory: '아직 기록이 없어요', // [확인 필요]
-  viewOnly: '보기만 할 수 있어요', // [확인 필요] 배우자 내 목표
+  viewOnly: '보기만 할 수 있어요', // [확인 필요] 파트너 내 목표
   // G-02a 넣기·빼기, G-02b 꺼내 쓰기
   moveTitle: '모은 돈을 어떻게 고칠까요?', // [확인 필요]
   moveIn: '넣을게요',
@@ -373,11 +373,11 @@ export const copy = {
   photoDropNarrow: '사진을 골라 주세요', // 좁은 창(끌어 놓기 없음, 2026-11-03)
   photoPick: '사진 고르기',
   photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
-  // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]
+  // 파트너가 아직 합류 전이면 이름이 없어 ‘파트너와’로 [확인 필요]
   photoNotice: (partner: string) =>
     partner
       ? `올린 사진은 ${partner}님과 나만 볼 수 있어요`
-      : '올린 사진은 배우자와 나만 볼 수 있어요',
+      : '올린 사진은 파트너와 나만 볼 수 있어요', // [확인 필요]
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',

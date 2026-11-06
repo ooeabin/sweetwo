@@ -13,7 +13,7 @@ export const canAchieve = (g: { kind: string; template: string }) =>
   g.kind === 'once' && g.template !== 'wedding';
 
 // 달성 지켜보기(22 G-05 축하): 모은 돈(서버 goal_saved_sums: 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기) ≥ 목표 금액이 된
-// 한 번 목표를 서버에 달성으로 표시하고, 이 사람이 처음이면 축하 화면으로. 홈·목표 목록·상세에 붙음. 배우자는 다음에 앱을 열 때 한 번.
+// 한 번 목표를 서버에 달성으로 표시하고, 이 사람이 처음이면 축하 화면으로. 홈·목표 목록·상세에 붙음. 파트너는 다음에 앱을 열 때 한 번.
 export function AchieveWatch() {
   const d = useGoalsModel();
   const nav = useNavigate();

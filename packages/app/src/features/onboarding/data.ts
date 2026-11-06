@@ -32,9 +32,9 @@ export function useSpace() {
     },
   });
 }
-/** 합류한 배우자(합류 전 null). 시작한 사람이 온보딩 중에 배우자가 먼저 합류할 수 있음 */
+/** 합류한 파트너(합류 전 null). 시작한 사람이 온보딩 중에 파트너가 먼저 합류할 수 있음 */
 export function usePartner(joined: boolean) {
-  // 합류 전에는 부르지 않음(배우자 없음)
+  // 합류 전에는 부르지 않음(파트너 없음)
   return useQuery({ queryKey: qk.partner, queryFn: fetchPartner, enabled: joined });
 }
 export function useGoals() {
@@ -66,7 +66,7 @@ export function useRefresh() {
 export const saveMe = updateMe;
 export const saveSpace = updateSpace;
 
-/** O-06 답(서버에 저장하지 않음, 결과 뒤 할 일 ‘배우자 초대하기’는 할 일 단계에서) */
+/** O-06 답(서버에 저장하지 않음, 결과 뒤 할 일 ‘파트너 초대하기’는 할 일 단계에서) */
 interface Local {
   inviteNow: 'now' | 'later' | null;
   setInviteNow: (v: 'now' | 'later') => void;

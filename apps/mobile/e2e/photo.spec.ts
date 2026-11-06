@@ -139,7 +139,7 @@ test('소셜 계정 사진이 없으면(애플, 기본 사진) 시도만 남기�
   expect(db.socialCalls).toBe(1);
 });
 
-test('사진 고지: 배우자 합류 전이고 이름도 없으면 ‘배우자와 나만’', async ({ page }) => {
+test('사진 고지: 파트너 합류 전이고 이름도 없으면 ‘파트너와 나만’', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -147,6 +147,6 @@ test('사진 고지: 배우자 합류 전이고 이름도 없으면 ‘배우자
   await page.goto('/settings/me');
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await heading(page, '프로필 사진');
-  await expect(page.getByText('올린 사진은 배우자와 나만 볼 수 있어요')).toBeVisible();
+  await expect(page.getByText('올린 사진은 파트너와 나만 볼 수 있어요')).toBeVisible();
   await expect(page.getByText('님과 나만')).toHaveCount(0);
 });

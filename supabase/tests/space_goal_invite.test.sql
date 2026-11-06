@@ -1,5 +1,5 @@
--- pgTAP: 부부 공간, 목표, 초대 코드, 만 18세 미만 삭제(온보딩 파트 0~2)
--- 찬우(공간 있음), 다른 부부 K, 예빈(미성년 삭제 시험)
+-- pgTAP: 커플 공간, 목표, 초대 코드, 만 18세 미만 삭제(온보딩 파트 0~2)
+-- 찬우(공간 있음), 다른 커플 K, 예빈(미성년 삭제 시험)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(18);
@@ -32,7 +32,7 @@ select isnt(public.ensure_my_space(), null, '공간이 생긴다');
 select is(public.ensure_my_space(), (select space_id from public.app_user), '두 번 불러도 같은 공간');
 update public.couple_space set partner_nickname = '예빈', marriage_status = 'married', housing = 'jeonse';
 select is((select version from public.couple_space), 2, '공간 답 저장, version 증가');
-select throws_ok($$ update public.couple_space set couple_state = 'connected' $$, '42501', null, '부부 상태는 직접 못 바꾼다');
+select throws_ok($$ update public.couple_space set couple_state = 'connected' $$, '42501', null, '커플 상태는 직접 못 바꾼다');
 insert into public.goal (space_id, template, name, kind, target_amount, priority)
   select space_id, 'home', '내 집 마련', 'once', 150000000, 1 from public.app_user;
 select is((select created_by from public.goal), '11111111-1111-1111-1111-111111111111'::uuid, '목표 만든 사람 기록');
@@ -45,17 +45,17 @@ select throws_ok(
   '42501', null, '초대 코드는 직접 못 넣는다');
 reset role;
 
--- 다른 부부 K. 찬우 공간 id는 관리자 권한으로 미리 읽어 둔다(K는 찬우 행을 못 봄)
+-- 다른 커플 K. 찬우 공간 id는 관리자 권한으로 미리 읽어 둔다(K는 찬우 행을 못 봄)
 select set_config('test.chanwoo_space', (select space_id::text from public.app_user where id = '11111111-1111-1111-1111-111111111111'), true);
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select lives_ok($$ select public.complete_signup('google', null, false, 'v1') $$, 'K 가입');
-select is((select count(*)::int from public.goal), 0, '다른 부부의 목표는 안 보인다');
-select is((select count(*)::int from public.invite), 0, '다른 부부의 초대 코드는 안 보인다');
+select is((select count(*)::int from public.goal), 0, '다른 커플의 목표는 안 보인다');
+select is((select count(*)::int from public.invite), 0, '다른 커플의 초대 코드는 안 보인다');
 select throws_ok(
   $$ insert into public.goal (space_id, template, name, kind, priority)
      values (current_setting('test.chanwoo_space')::uuid, 'travel', '여행', 'once', 1) $$,
-  '42501', null, '다른 부부 공간에 목표를 못 넣는다');
+  '42501', null, '다른 커플 공간에 목표를 못 넣는다');
 reset role;
 
 select * from finish();

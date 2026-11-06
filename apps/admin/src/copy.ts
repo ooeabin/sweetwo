@@ -61,10 +61,11 @@ export const copy = {
   memberTotal: '전체 회원', // [확인 필요]
   joinedToday: '오늘 가입', // [확인 필요]
   vsYesterday: (n: number) => `어제 ${n.toLocaleString('ko-KR')}명`, // [확인 필요]
-  connectedCouples: '연결된 부부', // [확인 필요]
+  connectedCouples: '연결된 커플', // [확인 필요]
   deletionToday: '오늘 삭제 요청', // [확인 필요]
   trendTitle: '최근 7일', // [확인 필요]
-  trendKinds: { joined: '가입', connected: '부부 연결', checked: '체크한 줄' } as Record<
+  // [확인 필요] 커플 연결
+  trendKinds: { joined: '가입', connected: '커플 연결', checked: '체크한 줄' } as Record<
     string,
     string
   >, // [확인 필요]
@@ -93,7 +94,7 @@ export const copy = {
     userId: '사용자 ID',
     email: '이메일',
     joined: '가입일',
-    couple: '부부 상태',
+    couple: '커플 상태', // [확인 필요]
     sub: '구독',
   },
   coupleStates: {
@@ -109,14 +110,14 @@ export const copy = {
   askConsent: '동의 요청',
   action: '계정 조치',
   account: '계정', // [확인 필요]
-  space: '부부 공간', // [확인 필요]
+  space: '커플 공간', // [확인 필요]
   consents: '동의 내역', // [확인 필요]
   data: '데이터', // [확인 필요]
   provider: '로그인 수단', // [확인 필요]
   lastSeen: '최근 접속', // [확인 필요]
   sessions: (n: number) => `로그인된 기기 ${n}대`, // [확인 필요]
   deleting: (days: number) => `삭제 유예 중, ${days}일 남음`,
-  partner: '배우자 ID', // [확인 필요]
+  partner: '파트너 ID', // [확인 필요]
   invite: (made: string, until: string, used: string | null) =>
     used ? `${made} 발급, ${used} 사용` : `${made} 발급, ${until} 만료`, // [확인 필요]
   counts: (a: number, est: number, g: number, c: number) =>
@@ -141,7 +142,7 @@ export const copy = {
   consentKinds: {
     terms: '이용약관',
     privacy: '개인정보처리방침',
-    space_sharing: '부부 공간 공유',
+    space_sharing: '커플 공간 공유', // [확인 필요]
     family_info: '양가 가족 정보',
     photo: '사진',
     marketing: '마케팅 수신',
@@ -237,7 +238,7 @@ export const copy = {
   } as Record<string, string>,
   categories: {
     account: '계정·로그인',
-    couple: '부부 연결',
+    couple: '커플 연결', // [확인 필요]
     calc: '목표·월급 체크리스트',
     sync: '동기화',
     billing: '결제·환불',
@@ -258,7 +259,7 @@ export const copy = {
     app_version: '앱 버전',
     platform: '플랫폼',
     os: 'OS',
-    couple_state: '부부 상태',
+    couple_state: '커플 상태', // [확인 필요]
     sync: '동기화',
     error: '최근 오류 코드',
   } as Record<string, string>,
@@ -378,7 +379,7 @@ export const ops = {
   target: {
     title: '대상', // 27 AD-10 2번
     all: '약관 개정은 모든 회원에게 보여요', // [확인 필요]
-    coupleStates: '부부 상태', // 27 AD-10 2번
+    coupleStates: '커플 상태', // 27 AD-10 2번 [확인 필요]
     coupleHelp: '고르지 않으면 모두예요', // [확인 필요]
     versionBelow: '이 버전보다 낮은 앱만', // [확인 필요]
     versionHelp: '예: 1.4.0. 비우면 모든 버전이에요', // [확인 필요]

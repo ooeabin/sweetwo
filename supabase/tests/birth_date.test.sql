@@ -1,4 +1,4 @@
--- pgTAP: 생년월일(O-13, P-04). 월, 일 저장, 만 나이로 미성년 삭제, 배우자 생일은 월, 일만
+-- pgTAP: 생년월일(O-13, P-04). 월, 일 저장, 만 나이로 미성년 삭제, 파트너 생일은 월, 일만
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(5);
@@ -22,7 +22,7 @@ select public.ensure_my_space();
 select lives_ok($$ update public.app_user set nickname = '찬우', birth_year = 1994, birth_month = 2, birth_day = 18 $$,
   '생년월일 저장');
 select throws_ok($$ update public.app_user set birth_month = 13 $$, '23514', null, '월은 1~12');
-select is((select count(*)::int from public.partner_birthday()), 0, '배우자 없으면 생일 없음');
+select is((select count(*)::int from public.partner_birthday()), 0, '파트너 없으면 생일 없음');
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 

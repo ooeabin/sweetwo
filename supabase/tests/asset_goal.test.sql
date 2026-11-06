@@ -37,7 +37,7 @@ insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_
   select space_id, 'asset', 'deposit', 'saving', '비밀 적금', 3000000, 'person',
     '22222222-2222-2222-2222-222222222222', 'private', current_setting('test.goal')::uuid from public.app_user;
 select results_eq($$ select n, total from public.goal_asset_sums() $$, $$ values (1, 5000000::bigint) $$,
-  '배우자 합계만 포함, 비공개 제외');
+  '파트너 합계만 포함, 비공개 제외');
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

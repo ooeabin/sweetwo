@@ -252,7 +252,7 @@ async function mock(
         });
       case 'admin_search': {
         const q = String(body().p_q);
-        // 부부 공간 ID: 두 사람
+        // 커플 공간 ID: 두 사람
         if (q === 'space-1')
           return json(route, [
             {
@@ -705,7 +705,7 @@ test('회원 검색 내려받기(AD-02 5번): 사유를 남겨야 받음, L0 열
   await page.getByRole('button', { name: '내려받기' }).click();
   const go = page.getByRole('button', { name: '사유 남기고 내려받기' });
   await expect(go).toBeDisabled();
-  await page.getByLabel('내려받는 이유').fill('문의 A-10001 부부 확인');
+  await page.getByLabel('내려받는 이유').fill('문의 A-10001 커플 확인');
   await axe(page);
   const dl = page.waitForEvent('download');
   await go.click();
@@ -716,7 +716,7 @@ test('회원 검색 내려받기(AD-02 5번): 사유를 남겨야 받음, L0 열
   expect(text).not.toContain('chanwoo@'); // 가리지 않은 이메일 없음
   expect(db.rpc.find((r) => r.fn === 'admin_note_export')?.body).toMatchObject({
     p_screen: 'AD-02',
-    p_reason: '문의 A-10001 부부 확인',
+    p_reason: '문의 A-10001 커플 확인',
     p_rows: 2,
   });
 });
@@ -728,11 +728,11 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   await page.goto('/inquiries');
   await heading(page, '문의');
   const row = page.getByRole('row', { name: /A-10001/ });
-  await expect(row).toContainText('부부 연결');
+  await expect(row).toContainText('커플 연결');
   await expect(row.locator('.hg-status--bad')).toHaveText(/일 \d+시간/);
   await axe(page);
   await row.click();
-  await heading(page, 'A-10001 부부 연결');
+  await heading(page, 'A-10001 커플 연결');
   await expect(page.getByText('연결이 안 돼요')).toBeVisible();
   await expect(page.getByRole('region', { name: '자동 첨부' })).toContainText('1.0.0');
   await page.getByRole('textbox', { name: '답변' }).fill('초대 코드를 다시 받아 주세요');
@@ -916,7 +916,7 @@ test('공지 대상(AD-10 2·4·6번): 조건 바꾸면 대상 수 다시 셈, 0
     p_target: { version_below: '1.4.0' },
     p_email: false,
   });
-  // 부부 상태 ‘해제 대기’만 → 0명이면 승인 요청 막음
+  // 커플 상태 ‘해제 대기’만 → 0명이면 승인 요청 막음
   await target.getByRole('button', { name: '해제 대기' }).click();
   await expect(counts.locator('.hg-admin__stat').first()).toHaveText(/^대상\s*0명$/);
   await expect(target.getByText('대상이 0명이라 승인을 요청할 수 없어요')).toBeVisible();

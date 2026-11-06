@@ -48,7 +48,7 @@ select public.join_space(current_setting('test.code'));
 select public.finish_join();
 select is((select count(*)::int from public.account c join public.asset a on a.id = c.asset_id
   where c.deleted_at is null and a.deleted_at is null), 1,
-  '배우자도 통장 자산을 봄');
+  '파트너도 통장 자산을 봄');
 select throws_ok(
   $$ update public.account set asset_id = gen_random_uuid() where role = 'emergency' $$,
   '23503', null, '없는 자산에는 연결 못 함');

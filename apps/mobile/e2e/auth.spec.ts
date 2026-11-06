@@ -73,7 +73,7 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await page.getByRole('checkbox', { name: '[필수] 이용약관' }).click();
   await page.getByRole('checkbox', { name: '[필수] 개인정보 수집·이용' }).click();
   await expect(agree).toBeDisabled();
-  await page.getByRole('checkbox', { name: '[필수] 배우자와 부부 공간 공유' }).click();
+  await page.getByRole('checkbox', { name: '[필수] 파트너와 우리 둘 공간 공유' }).click();
   await expect(agree).toBeDisabled(); // 만 18세 확인도 필수(A-05 2a)
   await page.getByRole('checkbox', { name: '[필수] 만 18세 이상이에요' }).click();
   await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toHaveAttribute(

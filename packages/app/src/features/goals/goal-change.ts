@@ -13,11 +13,11 @@ export type GoalChange =
   | { item: 'goal_pause'; value: boolean }
   | { item: 'goal_delete' };
 
-/** 배우자가 1분 안에 같은 칸을 바꿈(30 동기화 2장): 고를 때까지 저장하지 않음 */
+/** 파트너가 1분 안에 같은 칸을 바꿈(30 동기화 2장): 고를 때까지 저장하지 않음 */
 export interface GoalConflict {
   goal: Goal;
   change: GoalChange;
-  /** 서버 지금 값(배우자 값) */
+  /** 서버 지금 값(파트너 값) */
   current: Goal;
 }
 class ConflictFound extends Error {
@@ -28,7 +28,7 @@ class ConflictFound extends Error {
 
 // 목표 바꾸기(22 목표 수정, G-02 ⋯). 재기획(ADR 0003): 제안 없이 늘 바로 적용 + Toast ‘되돌리기’. 상대 알림·활동 기록은 서버 `partner_change`(우리 목표만)
 // 금액·기한·이름은 ‘화면을 열 때 값’(opened)이 서버에 그대로일 때만 바꿈. 아니면 conflictDecision:
-// 이미 같은 값이면 끝, 배우자가 1분 안에 바꿨으면 “어느 쪽으로 할까요?”(conflict), 그 밖은 마지막 저장 우선으로 덮음.
+// 이미 같은 값이면 끝, 파트너가 1분 안에 바꿨으면 “어느 쪽으로 할까요?”(conflict), 그 밖은 마지막 저장 우선으로 덮음.
 // 저장 실패: “저장하지 못했어요” + ‘다시 시도’(화면 값은 서버 값으로 돌아감)
 export function useGoalChange(d: GoalsData) {
   const qc = useQueryClient();
@@ -135,7 +135,7 @@ export function useGoalChange(d: GoalsData) {
     }
   };
 
-  /** 충돌 고르기: 내 값이면 덮어 저장, 배우자 값이면 그대로 둠. 끝나면 true */
+  /** 충돌 고르기: 내 값이면 덮어 저장, 파트너 값이면 그대로 둠. 끝나면 true */
   const resolve = async (mine: boolean): Promise<boolean> => {
     if (!conflict) return true;
     if (mine) return send(conflict.goal, conflict.change, true);

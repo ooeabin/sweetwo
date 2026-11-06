@@ -12,7 +12,7 @@ MVP는 데스크톱 앱(Windows, macOS)과 모바일 앱(iOS, Android)을 React 
 
 - 만들 것: 데스크톱 앱, 모바일 앱(App Store, Google Play), 트레이 위젯, 웹사이트(sweetwo.kr), 다운로드(download.sweetwo.kr/latest/mac|win), 상태 페이지(status.sweetwo.kr), 어드민(웹 전용, ops.sweetwo.kr). 메일은 help@sweetwo.kr, privacy@sweetwo.kr
 - 데이터: 모두 직접 입력. 계좌 연동, 마이데이터, 스크래핑 없음
-- 사용자: 부부 2명이 한 공간을 같이 씀. 한국어, 원(KRW), KST만 지원
+- 사용자: 두 사람 2명이 한 공간을 같이 씀. 한국어, 원(KRW), KST만 지원
 - 기준 문서: 기획서 ‘기술·운영’, ‘동기화’, ‘보안·개인정보’ 탭과 디자인 시스템 sweeTwo
 
 | 영역 | 고른 것 |
@@ -110,7 +110,7 @@ sweetwo/
 1. 화면이 api 훅으로 읽음 (TanStack Query 캐시)
 2. 쓰기는 테이블 쓰기 또는 DB 함수 호출, version 값으로 충돌 확인
 3. 서버가 change\_log에 기록하고 Realtime으로 변경 신호를 보냄
-4. 배우자 기기는 마지막으로 받은 변경 번호 이후만 다시 받음(델타 동기화), 목표 1\~2초
+4. 파트너 기기는 마지막으로 받은 변경 번호 이후만 다시 받음(델타 동기화), 목표 1\~2초
 
 ## 개발 서버 (develop, Cloudflare Workers 정적 자산)
 
@@ -129,7 +129,7 @@ sweetwo/
 - 빌드가 Node 설치 단계에서 실패하면 한 번 더 Retry, 그래도 실패하면 Settings → Build → Build cache → Clear cache 뒤 Retry
 - 운영 브랜치를 바꾼 뒤에는 그 브랜치에 새 커밋이 들어와야 그 브랜치로 빌드됨(Retry는 원래 브랜치로 다시 돎)
 - 데스크톱 전용(트레이, PIN, 딥링크)과 모바일 전용(푸시, Face ID)은 여기서 확인 못 함. 그 부분은 e2e(흉내 브리지)와 기기 빌드로
-- 개발 서버 데이터는 실제로 가입해서 만듦. 부부 기능은 계정 두 개로 가입 → 초대 코드로 연결
+- 개발 서버 데이터는 실제로 가입해서 만듦. 두 사람 기능은 계정 두 개로 가입 → 초대 코드로 연결
 
 Worker 3개(대시보드 → Workers & Pages → Create → Import a repository → `ooeabin/sweetwo`). 배포 설정은 앱마다 `apps/{web,admin,site}/wrangler.jsonc`(Worker 이름, 정적 파일 폴더 `dist`, 없는 주소 처리). 출시 전까지 셋 다 운영 브랜치 = `develop`, 출시 준비 때 어드민·웹사이트만 `main` + 운영 Supabase 값으로 바꿈.
 
@@ -162,7 +162,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
   - 개발 서버와 같은 DB라 로컬에서 만든 데이터도 개발 서버에 보임. 로그인은 스테이징에 켠 구글, 카카오로
   - 스키마는 `develop`에 합쳐진 마이그레이션까지만 있음. 아직 합치지 않은 마이그레이션을 화면에서 써 보려면 아래 로컬 DB로
 - 로컬 DB(선택): 마이그레이션을 만들거나 pgTAP을 돌릴 때만. `pnpm db:start` 뒤 앱 폴더에 `.env.development.local`을 만들어 로컬 URL과 anon key를 넣음(Vite는 `.env.development.local` > `.env.development` > `.env.local` 순서라 `.env.local`로는 덮이지 않음). 다 쓰면 그 파일을 지우면 다시 스테이징
-- 로컬 DB에서는 seed.sql의 찬우, 예빈 부부 데이터가 든 앱이 뜸. e2e는 어느 쪽도 쓰지 않고 `.env.e2e`의 가짜 Supabase를 씀
+- 로컬 DB에서는 seed.sql의 찬우, 예빈 두 사람 데이터가 든 앱이 뜸. e2e는 어느 쪽도 쓰지 않고 `.env.e2e`의 가짜 Supabase를 씀
 
 ### 준비물
 
@@ -189,12 +189,12 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - `.env.example`은 앱마다 하나: apps/desktop, apps/mobile, apps/admin, apps/site, supabase/functions
 - 로컬 대체물: 메일 → Supabase Inbucket, KMS → 로컬 키 어댑터, 공휴일 → fixture 파일
-- seed.sql: auth 사용자 찬우, 예빈, 연결된 부부 공간, 이번 달 월 계획
+- seed.sql: auth 사용자 찬우, 예빈, 연결된 우리 둘 공간, 이번 달 월 계획
 - 이메일, 비밀번호 테스트 로그인: 로컬과 스테이징에서만 켬(E2E용). 운영은 소셜 로그인만
 
 ## 데이터 모델과 권한
 
-모든 데이터는 부부 공간(couple\_space) 하나에 속하고, 누가 무엇을 볼지는 서버 RLS가 정함. 상세 필드는 기획서 ‘기술·운영’ 2장과 ‘데이터 항목’ 탭이 기준.
+모든 데이터는 우리 둘 공간(couple\_space) 하나에 속하고, 누가 무엇을 볼지는 서버 RLS가 정함. 상세 필드는 기획서 ‘기술·운영’ 2장과 ‘데이터 항목’ 탭이 기준.
 
 ### 공통 필드
 
@@ -211,7 +211,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 | 묶음 | 테이블 |
 | --- | --- |
-| 부부와 사용자 | couple\_space, app\_user, invite, device\_session, consent, couple\_unlink |
+| 커플과 사용자 | couple\_space, app\_user, invite, device\_session, consent, couple\_unlink |
 | 자산 | account, asset, debt, fixed\_expense, annual\_event, amount\_history |
 | 목표와 월급 | goal, goal\_move, salary\_split, split\_line, pay\_checklist, pay\_check\_line |
 | 챙길 날 | care\_day, care\_record |
@@ -223,13 +223,13 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - RLS 기본값은 막힘. 테이블마다 ‘같은 space의 구성원’만 읽고 씀
 - 공개 범위 3단계(전체 공개, 합계만, 비공개)는 RLS와 security\_invoker = true 뷰로 걸러냄(이 옵션 없는 뷰는 소유자 권한으로 RLS를 건너뜀). 클라이언트에서 숨기지 않음
-- 목표(20261106090000): 읽기는 우리 목표·내 목표·배우자의 ‘모두 보여 주기’ 내 목표만(‘금액만 보여 주기’는 `space_goals()`가 이름을 가려서 줌), 추가·고치기는 우리 목표 둘 다·내 목표 주인만, 주인은 나 또는 없음(우리)으로만. 앱이 바로 고치는 열만 `grant update`(이름, 형태, 질문 답, 금액, 기한, 이미 모은 돈, 순서, 상태, 주인, 공개 범위, 휴지통). 상태는 진행·지연·보류 사이만(`goal_client_guard`), 달성·사용 완료·사진·템플릿은 함수로만
+- 목표(20261106090000): 읽기는 우리 목표·내 목표·파트너의 ‘모두 보여 주기’ 내 목표만(‘금액만 보여 주기’는 `space_goals()`가 이름을 가려서 줌), 추가·고치기는 우리 목표 둘 다·내 목표 주인만, 주인은 나 또는 없음(우리)으로만. 앱이 바로 고치는 열만 `grant update`(이름, 형태, 질문 답, 금액, 기한, 이미 모은 돈, 순서, 상태, 주인, 공개 범위, 휴지통). 상태는 진행·지연·보류 사이만(`goal_client_guard`), 달성·사용 완료·사진·템플릿은 함수로만
 - 제안·승인 없음(ADR 0003). 누구나 바로 고치고 상대에게 알림(partner\_change 묶음) + 고친 사람에게 Toast ‘되돌리기’
 - 오프라인은 볼 수만(30 동기화 4장): api `trackedFetch`가 `navigator.onLine`이 거짓이면 서버로 가는 쓰기(POST·PATCH·PUT·DELETE, auth 토큰 갱신 빼고)를 바로 실패시키고 `lastOfflineBlock()`을 남김 → `shared/toast`가 3초 안의 실패 안내를 “인터넷에 연결되면 할 수 있어요”(`shared/copy`)로 바꿈. 입력 대기열은 두지 않음(2026-10-27 결정)
 - 오프라인 조회 캐시: `packages/app/src/shared/offline-cache.ts`가 TanStack Query 캐시를 `dehydrate`해 브리지 `cache.save`로(3초 모아서), 켤 때 `cache.load` → `hydrate` 뒤에 그림. 데스크톱 `main/offline-cache.ts`(safeStorage로 파일 암호화), 모바일 `native/offline-cache.ts`(보안 저장소의 AES-GCM 키 + Filesystem 데이터 폴더). 로그아웃은 main·네이티브 `signOut`이 지움, 앱은 `signed_out` 뒤 저장을 멈춤. `me.space_id`가 바뀌면(연결 해제 확정 등) `cache.clear()` + 그 전에 받은 쿼리를 메모리에서도 빼고 새로 받음. 사진 서명 주소·기기 목록은 빼고, 모양이 바뀌면 `VERSION`을 올림
-- 사실 값(잔액 등)은 마지막 쓰기가 이김. 배우자가 1분 안에 같은 필드를 바꿨으면 선택 화면: api `updateIfUnchanged(table, id, patch, base)`가 ‘화면을 열 때 값’(base)이 그대로일 때만 고치고, 아니면 지금 행을 돌려줌 → core `conflictDecision`(same / choose: 배우자 `updated_by` + `updated_at` 1분 안 / overwrite) → 디자인 `ConflictChoice`. 지금은 목표 수정(금액·기한·이름)과 자산 금액(F-04). 월급 계획·체크리스트·오프라인 대기열은 다음 단계
+- 사실 값(잔액 등)은 마지막 쓰기가 이김. 파트너가 1분 안에 같은 필드를 바꿨으면 선택 화면: api `updateIfUnchanged(table, id, patch, base)`가 ‘화면을 열 때 값’(base)이 그대로일 때만 고치고, 아니면 지금 행을 돌려줌 → core `conflictDecision`(same / choose: 파트너 `updated_by` + `updated_at` 1분 안 / overwrite) → 디자인 `ConflictChoice`. 지금은 목표 수정(금액·기한·이름)과 자산 금액(F-04). 월급 계획·체크리스트·오프라인 대기열은 다음 단계
 - 기록(change\_log, amount\_history)은 추가만. 수정과 삭제 권한 없음
-- 어드민은 service role을 쓰지 않고 별도 함수로만 읽음. 문의한 사람의 동의(admin\_view\_request)가 있을 때만, 배우자에게 알림, 열람 기록 1년 보관
+- 어드민은 service role을 쓰지 않고 별도 함수로만 읽음. 문의한 사람의 동의(admin\_view\_request)가 있을 때만, 파트너에게 알림, 열람 기록 1년 보관
 
 ### 상태가 있는 것
 
@@ -238,12 +238,12 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 동의와 문의
 
-- consent 종류: 이용약관, 개인정보 처리, 배우자와 부부 공간 공유, 가족 정보, 사진(챙길 날), 마케팅 수신, 분석 수집, 통계 참여
+- consent 종류: 이용약관, 개인정보 처리, 파트너와 우리 둘 공간 공유, 가족 정보, 사진(챙길 날), 마케팅 수신, 분석 수집, 통계 참여
 - consent 행에는 종류, 약관 버전, 동의 여부, 시각. 철회도 새 행으로 추가
 - 문의: 데스크톱·모바일 앱에서 inquiry 테이블에 저장 + help@sweetwo.kr로 사본 메일(머리글 `X-Sweetwo-Copy`)
 - 이메일 문의: help@로 온 메일은 네이버웍스 자동 전달 → `inbound@in.sweetwo.kr`(Cloudflare Email Routing) → 메일 Worker(`apps/mail-worker`) → Edge Function `inbound-mail` → inquiry(채널 email). 앱 ‘내 문의’에는 앱 문의만 보임(보낸 주소는 꾸밀 수 있어서)
 - 답변: 어드민 AD-06에서 작성 → 앱 문의는 앱 ‘내 문의’ + 알림, 이메일 문의는 help@에서 같은 주소로 답장 메일
-- 문의 때문에 데이터를 봐야 하면 문의한 사람의 동의(admin\_view\_request)를 받고, 배우자에게 알림. 열람은 audit\_log에 기록
+- 문의 때문에 데이터를 봐야 하면 문의한 사람의 동의(admin\_view\_request)를 받고, 파트너에게 알림. 열람은 audit\_log에 기록
 
 ### 지금 있는 테이블과 함수
 
@@ -252,11 +252,11 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 재기획 새 테이블(20261029090000): `salary_split`·`split_line`(월급 계획, 쓰기는 `save_split`만), `pay_checklist`·`pay_check_line`(이번 달 월급 체크리스트, 만들기는 `start_checklist`만, 사이클은 `cycle_day`·`cycle_date`), `couple_space.salary_mode`·`joint_cycle_day`, `goal.owner_user_id`(null = 우리 목표)·`visibility`
 - 목표 돈 움직임(20261029150000): `goal_move`(넣기·빼기·꺼내 쓰기, 쓰기는 `move_goal`·`undo_goal_move`만), 모은 돈 `goal_saved_sums()`, 목표 ↔ 월급 계획 저금 줄 트리거 `goal_lines`
 - 자동 결혼기념일(20261029180000): `care_day.auto`·`auto_moves`, `couple_space` 트리거 → `sync_wedding_care(공간)`
-- 배우자 합류(20261030090000): `complete_join`, `set_join_salary_mode`, `discard_prefill`, `joining_space`(내부), `app_user` 트리거 `notify_first_goal`
+- 파트너 합류(20261030090000): `complete_join`, `set_join_salary_mode`, `discard_prefill`, `joining_space`(내부), `app_user` 트리거 `notify_first_goal`
 - 관리 방식(20261030120000): `set_salary_mode`, `set_joint_cycle_day`, `start_checklist`(방식을 바꾼 달은 옛 체크리스트 유지). 휴지통(20261030150000): `trash_rows`, `restore_trash` 제안 없이
-- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(배우자 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식. 재기획 뒤로는 옛 열), `fixed_expense`(옛 고정지출 그룹과 세부 항목), `goal`, `invite`, `account`(옛 통장 역할, 남은 옛 읽기), `invite_attempt`(초대 코드 오류 횟수), `asset`·`asset_history`(자산·부채와 금액 이력)
+- `app_config`, `app_user`(프로필: 호칭, 신랑/신부, 출생연도, 일 형태, `space_id`, 월 실수령, 월급날, 용돈), `consent`, `couple_space`(파트너 추정 수입, 고정지출 합계, 생활비, 대출 상환, 분담 방식. 재기획 뒤로는 옛 열), `fixed_expense`(옛 고정지출 그룹과 세부 항목), `goal`, `invite`, `account`(옛 통장 역할, 남은 옛 읽기), `invite_attempt`(초대 코드 오류 횟수), `asset`·`asset_history`(자산·부채와 금액 이력)
 - 공간 소속은 `app_user.space_id`. `is_space_member(space_id)`가 이걸 본다. 공간은 `ensure_my_space()`만 만든다
-- 사용자가 직접 못 바꾸는 열(부부 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
+- 사용자가 직접 못 바꾸는 열(우리 둘 상태, 계정 상태, 로그인 수단)은 열 단위 `grant update`에서 뺀다
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
 - 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://sweetwo.kr/i/{코드}`(모바일은 앱 링크로 앱이 바로 엶, (전환 전) app.sweetwo.kr), 데스크톱 딥링크는 `sweetwo://i/{코드}`
 - 기준일(체크리스트 만드는 날)은 각자면 그 사람 월급날, 합쳐서면 `couple_space.joint_cycle_day`(기본 = 두 월급날 중 늦은 날, → 아래 S-11d). 옛 `base_day`·`base_day_last`·`account_mode` 열은 남겨 두고 새로 쓰지 않음
@@ -271,7 +271,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - RLS 켬 + 이름 붙은 정책 4개(`<테이블>_select`, `_insert`, `_update`, `_delete`)
 - 정책은 `is_space_member(space_id)`만 씀. 이 함수는 `STABLE SECURITY DEFINER`, `SET search_path = ''`
 - 공개 범위 뷰는 반드시 `WITH (security_invoker = true)`
-- pgTAP: 테이블마다 본인, 배우자, 다른 부부, 익명 × 읽기, 추가, 수정, 삭제
+- pgTAP: 테이블마다 본인, 파트너, 다른 커플, 익명 × 읽기, 추가, 수정, 삭제
 - pgTAP 파일 안에서 `'ok'`·`'not ok'`로 시작하는 값을 돌려주는 함수를 맨 select로 부르지 않음(TAP 줄로 읽혀 계획 개수가 어긋남). `is(...)`로 감싸서 단언으로
 - 스키마 제거는 최소 지원 버전이 예전 앱을 넘어선 뒤에만
 
@@ -350,7 +350,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - 바뀐 필드만 + 기준 version을 보냄
 - 서버 함수가 change\_log에서 그 필드의 마지막 변경(누가, 언제)을 확인
-- 배우자가 1분 안에 같은 필드를 바꿨으면 `conflict{field, theirs}` 반환 → 선택 화면. 아니면 마지막 쓰기가 이김
+- 파트너가 1분 안에 같은 필드를 바꿨으면 `conflict{field, theirs}` 반환 → 선택 화면. 아니면 마지막 쓰기가 이김
 - 삭제와 수정이 부딪히면 삭제가 이기고 항목은 휴지통으로(복구 가능)
 
 - 예전 월말 정리 함께 모드(진행자 잠금 `month_close.locked_by`, Presence)는 월말 정리와 함께 없앰(기획서 30 동기화). 월말 확인(W-05)은 체크리스트 줄 체크와 같은 규칙이라 잠금이 없음
@@ -423,14 +423,14 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 작업(cron 이름) | KST | cron(UTC) | 함수 |
 | --- | --- | --- | --- |
 | 기준일 체크리스트(`cycle-checklists`): 지금 관리 방식의 월급 계획마다(각자 = 주인 것, 합쳐서 = 공동 것) 이번 사이클 체크리스트, 지난 사이클은 닫고 체크 안 한 줄은 ‘못 함’ | 매일 00:00 | `0 15 * * *` | `run_cycle_checklists()` → `make_checklist(공간, 주인)` |
-| 오전 알림(`send-morning-notifications`): 챙길 날 D-30·D-14·D-7·당일(두 사람), 월급날(그날 시작한 체크리스트 주인, 합쳐서 = 둘 다), 만기 D-60(명의자, 자산만), 만기일 당일 만기된 돈 정리(→ F-04a), 전세 계약 만기 6개월 전(둘 다), 연말정산 준비(1월 둘째 주 월요일, 결혼한 부부 둘 다 → 가이드 체크리스트 `year-end-tax`), 초대 코드 만료 3일·1일 전과 만료 다음 날(합류 전 공간, 가장 최근 코드) | 매일 09:00 | `0 0 * * *` | `send_morning_notifications()` |
+| 오전 알림(`send-morning-notifications`): 챙길 날 D-30·D-14·D-7·당일(두 사람), 월급날(그날 시작한 체크리스트 주인, 합쳐서 = 둘 다), 만기 D-60(명의자, 자산만), 만기일 당일 만기된 돈 정리(→ F-04a), 전세 계약 만기 6개월 전(둘 다), 연말정산 준비(1월 둘째 주 월요일, 결혼한 두 사람 모두 → 가이드 체크리스트 `year-end-tax`), 초대 코드 만료 3일·1일 전과 만료 다음 날(합류 전 공간, 가장 최근 코드) | 매일 09:00 | `0 0 * * *` | `send_morning_notifications()` |
 | 저녁 알림(`send-evening-notifications`): 월말 확인(사이클 끝 2일 전 = 다음 기준일 3일 전, 체크 안 한 줄이 있는 체크리스트 주인) | 매일 20:00 | `0 11 * * *` | `send_evening_notifications()` |
 | 연결 해제 확정(`unlink-deadlines`, 요청 + 14일) | 매일 09:00 | `0 0 * * *` | `run_unlink_deadlines()` |
 | 보관 기간 정리: 알림 90일, 해제한 원래 공간 30일, 삭제 계정 30일, 휴지통 30일 | 매일 04:00~04:45 | `0 19 * * *`부터 15분 간격 | `purge_notifications()`, `purge_unlinked_spaces()`, `purge_deleted_accounts()`, `purge_old_trash()` |
 | 앱 기기 기록 정리(`purge-app-devices`): 180일 안 켠 기기 | 매일 04:55 | `55 19 * * *` | `purge_app_devices()` |
 | 어드민 잠금, 열람 기간 끝 | 매일 04:50, 매시 5분 | `50 19 * * *`, `5 * * * *` | `lock_idle_admins()`, `run_access_expiry()` |
-| 배우자 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
-| 배우자 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
+| 파트너 변경 묶어 보내기(`flush-partner-changes`) | 매분 | `* * * * *` | `flush_partner_changes()` |
+| 파트너 변경 주간 요약(`send-weekly-summary`) | 월 09:00 | `0 0 * * 1` | `send_weekly_summary()` |
 | 공지 메일(`send-notice-mails`) | 5분마다 | `*/5 * * * *` | `send_notice_mails()` |
 | 메일 깨우기(`kick-mail`): 보낼 메일이 있으면 pg_net으로 `send-mail` | 매분 | `* * * * *` | `kick_mail()` |
 | 공휴일 받기(`kick-holidays`): pg_net으로 Edge Function `fetch-holidays` → 특일 정보 API 올해·다음 해 → `save_api_holidays`(어드민 날은 안 덮음, 빠진 API 날은 지움) | 월 03:00 | `0 18 * * 0` | `kick_holidays()` |
@@ -443,14 +443,14 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 알림
 
 - 테이블 `notification`(받는 사람, 종류, 문구, OS 알림 문구·숨김, 갈 화면, 아이콘, 한 사람, dedupe, 읽음). 앱은 내 것만 읽고 `mark_notifications_read`로 읽음만. 쓰기는 서버(트리거·예약 작업)만
-- 바로 만드는 알림: 배우자 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식(`set_salary_mode`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 각자 체크리스트는 주인만 체크(2026-11-03 대신 체크 없앰, `behalf_checked` 알림도 없앰), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
-- 배우자 변경(20261031120000): 바로 알리지 않고 `partner_change`(고친 사람, 받는 사람, 항목, 전 → 후 문구 값, 바로/주간)에 쌓음. 기록은 `log_partner_change`(연결·해제 대기, 고친 사람 = auth.uid(), 같은 값이면 안 남김). 쌓는 곳: 우리 목표 트리거(금액·기한·삭제 = 바로, 이름·순서·형태·보류·추가·되살리기 = 주간), 목표 넣기·빼기·꺼내 쓰기(`goal_move`, 되돌리기 = 빈 값), 자산 트리거(주간, 비공개 개인 항목 빼고, 합계만 보여 주는 개인 항목은 “개인 자산 금액이 바뀌었어요”), 챙길 날 추가·메모(주간), 월급 금액(바로), `save_split`(줄마다 전·후 비교 `log_split_changes`, 처음 만들 때는 빼고), `set_joint_cycle_day`(주간). 내 목표는 남기지 않음
+- 바로 만드는 알림: 파트너 합류(`couple_space` not_joined → connected 트리거), 첫 목표(`notify_first_goal`), 관리 방식(`set_salary_mode`), 목표 달성(`achieve_goal`, 두 사람), 연결 해제·다시 연결. `check_pay_line`: 각자 체크리스트는 주인만 체크(2026-11-03 대신 체크 없앰, `behalf_checked` 알림도 없앰), 각자 체크리스트를 주인이 다 하면 → 상대(`partner_done`, 인앱만, `/salary?who=주인` = W-02 그 사람 탭)
+- 파트너 변경(20261031120000): 바로 알리지 않고 `partner_change`(고친 사람, 받는 사람, 항목, 전 → 후 문구 값, 바로/주간)에 쌓음. 기록은 `log_partner_change`(연결·해제 대기, 고친 사람 = auth.uid(), 같은 값이면 안 남김). 쌓는 곳: 우리 목표 트리거(금액·기한·삭제 = 바로, 이름·순서·형태·보류·추가·되살리기 = 주간), 목표 넣기·빼기·꺼내 쓰기(`goal_move`, 되돌리기 = 빈 값), 자산 트리거(주간, 비공개 개인 항목 빼고, 합계만 보여 주는 개인 항목은 “개인 자산 금액이 바뀌었어요”), 챙길 날 추가·메모(주간), 월급 금액(바로), `save_split`(줄마다 전·후 비교 `log_split_changes`, 처음 만들 때는 빼고), `set_joint_cycle_day`(주간). 내 목표는 남기지 않음
 - 묶어 보내기 `flush_partner_changes()`(pg_cron `flush-partner-changes` 매분): (고친 사람, 받는 사람)마다 첫 변경부터 10분 지난 묶음을 같은 항목끼리 처음 전 값 → 마지막 후 값으로 합치고 같으면(되돌리기) 버림. 바로 알림은 `partner_change` 하나(여럿이면 “{이름}님이 n가지를 바꿨어요”), 주간은 `partner_activity`(silent) 하나. 월요일 09:00 `send_weekly_summary()`(`send-weekly-summary`): 지난 7일 합친 변경 수 “이번 주 {이름}님이 바꾼 게 n개 있어요” → `/notifications`. 같은 내용을 주간 요약 메일로도 쌓음(`enqueue_mail`, 20261101120000). 다른 묶음 메일·보안·문의 메일은 다음 단계
-- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(배우자 변경 묶음, 관리 방식, 주간 요약), silent에는 배우자 활동 기록(`partner_activity`)도, money(만기, 만기된 돈 정리, 전세 만기, 연말정산), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false: 배우자 체크 다 함, 활동 기록), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
+- 알림 묶음 `notification.topic`(생성 열, S-14 토글과 맞춤): plan(월급날, 월말 확인, 첫 목표), partner_change(파트너 변경 묶음, 관리 방식, 주간 요약), silent에는 파트너 활동 기록(`partner_activity`)도, money(만기, 만기된 돈 정리, 전세 만기, 연말정산), goal(달성), invite(합류, 초대 리마인드·만료), care_n(챙길 날), silent(인앱만, core `pushAllowed`가 늘 false: 파트너 체크 다 함, 활동 기록), 그 밖 other(끌 수 없음). 앱 아이콘은 `features/notifications/view.tsx` ICON(Phosphor 이름 → 디자인 시스템 아이콘, 없으면 종)
 - 챙길 날 날짜는 서버도 앱과 같게: 음력은 `lunar_date` 표(2025~2050년, korean-lunar-calendar로 만든 행, 윤달 행이 없으면 평달), `care_date_in_year`·`care_next_date`. 월급날 앞당기기는 `business_day_on_or_before`(holiday 표)
 - 문구는 기획서 14 표 그대로, 조사는 `ko_subj`·`ko_obj`·`ko_is`, 금액은 `read_won`(core readWon과 같음). 서프라이즈는 만든 사람에게만 + OS 알림 제목 “챙길 날 알림이 있어요”, 본문 숨김(`push_hidden`)
 - 앱: 종 점(`fetchHasUnread`), 넓은 창 N-01 패널(ui `NotificationPanel` 시트), 좁은 창 N-02 `/notifications`, 묶음·시간은 core `notiGroup`·`notiTime`, 금액 가리기는 `maskMoney`. 누르면 읽음 + 그 화면. Realtime으로 새 알림을 받아 목록·점을 고치고, 데스크톱이면 브리지 `notify.show`로 OS 알림(방해 금지 22~08시엔 센터에만). OS 알림을 누르면 main이 id만 렌더러로 보내고 렌더러가 갈 화면을 찾음
-- 메일(20261101120000): DB가 `mail_outbox`에 쌓고(`enqueue_mail(사람, 종류, 묶음, 제목, 글, HTML, 상한에 셈, dedupe)`: 받는 방법 이메일·그 묶음 이메일이 켜져 있고 월 6회 상한 안일 때만) → 1분마다 `kick_mail()`이 보낼 메일이 있으면 pg_net으로 Edge Function `send-mail` 호출 → 함수가 `claim_mail`로 꺼내 SES API v2 SendEmail(서명 v4는 `_shared/sigv4.ts`, AWS 서명 시험 get-vanilla로 확인)로 보내고 `finish_mail`(실패는 3번까지 다시). 지금 보내는 메일은 배우자 변경 주간 요약(상한 밖, 본문 `weekly_mail_body`: 바뀐 것 전 → 후 최대 20줄, 이번 달 월급 “n개 중 m개 완료” [확인 필요](2026-11-03 20261110100000), 남은 할 일(월말 확인), 앱에서 보기 `https://sweetwo.kr/n`, 알림 설정 `https://sweetwo.kr/n/settings`)
+- 메일(20261101120000): DB가 `mail_outbox`에 쌓고(`enqueue_mail(사람, 종류, 묶음, 제목, 글, HTML, 상한에 셈, dedupe)`: 받는 방법 이메일·그 묶음 이메일이 켜져 있고 월 6회 상한 안일 때만) → 1분마다 `kick_mail()`이 보낼 메일이 있으면 pg_net으로 Edge Function `send-mail` 호출 → 함수가 `claim_mail`로 꺼내 SES API v2 SendEmail(서명 v4는 `_shared/sigv4.ts`, AWS 서명 시험 get-vanilla로 확인)로 보내고 `finish_mail`(실패는 3번까지 다시). 지금 보내는 메일은 파트너 변경 주간 요약(상한 밖, 본문 `weekly_mail_body`: 바뀐 것 전 → 후 최대 20줄, 이번 달 월급 “n개 중 m개 완료” [확인 필요](2026-11-03 20261110100000), 남은 할 일(월말 확인), 앱에서 보기 `https://sweetwo.kr/n`, 알림 설정 `https://sweetwo.kr/n/settings`)
 - 알림 메일 링크: 웹사이트 `/n`, `/n/settings`가 `sweetwo://n`, `sweetwo://n/settings`로 앱을 열고(데스크톱 `deep-link-parse.ts` 허용 목록, 알림 센터·S-14만), 앱이 없으면 “sweeTwo 앱에서 열어 주세요” + ‘앱 받기’(→ /download)
 - 함수 드라이버 `MAIL_DRIVER`: `ses`면 보냄, 그 밖(기본)은 보내지 않고 보낸 것으로만 표시(로컬·스테이징에서 실수로 보내지 않게). 시험은 `deno test --no-config --no-lock supabase/functions/`(CI check)
 - 이메일 문의 받기(20261111180000): help@sweetwo.kr(네이버웍스)이 받은 메일을 `inbound@in.sweetwo.kr`로 자동 전달 → Cloudflare Email Routing(하위 도메인 in.sweetwo.kr만, sweetwo.kr MX는 네이버웍스 그대로) 규칙 → Email Worker `apps/mail-worker`(`email()`: `rawSize` 1MB 넘으면 `setReject`, 원본 MIME을 `INBOUND_URL`로 POST, 머리글 `x-inbound-secret` = Worker 비밀 값 `INBOUND_MAIL_SECRET`, `content-type: message/rfc822`. 함수가 4xx면 `setReject`, 5xx·네트워크 오류면 throw. Cloudflare 문서에 throw 뒤 다시 보내는지는 적혀 있지 않음, 원본은 네이버웍스 받은편지함에 남음) → Edge Function `inbound-mail`(`x-inbound-secret`을 함수 비밀 값 `INBOUND_MAIL_SECRET`과 같은 시간 비교, 1MB 넘으면 413). 함수는 스팸 표시(`X-Spam-Flag: YES`), 인증 실패(`Authentication-Results`·`ARC-Authentication-Results`에 `dmarc=fail`이 있고 `dkim=pass`·`dmarc=pass`가 하나도 없을 때. 전달하면 SPF는 깨지므로 SPF 실패만으로는 버리지 않음), `X-Sweetwo-Copy`(앱 문의 사본), 자동 응답(`Auto-Submitted`, `Precedence: bulk` 등), 반송 알림(MAILER-DAEMON, `multipart/report`)을 버림(200). MIME에서 From 주소, Subject, Message-ID, In-Reply-To·References, text/plain 본문(없으면 HTML을 글자로, quoted-printable·base64, charset은 TextDecoder)만 꺼내고 이전 대화(`>` 인용, ‘…님이 작성:’, ‘-----Original Message-----’ 아래)는 best-effort로 뺌. 본문 4,000자, 첨부는 받지 않고 개수만. 본문·주소는 로그에 남기지 않음 → `ingest_inquiry_mail`(service_role만): sweetwo.kr 주소에서 온 메일은 무시, 같은 Message-ID는 한 번만, 같은 대화(In-Reply-To·References가 이 문의에서 받은 메일 ID나 보낸 답장의 SES MessageId와 같음, 또는 제목에 `[A-10001]`, 둘 다 보낸 주소가 같을 때만)면 덧붙이고 완료 7일 안이면 다시 열림(7일 넘으면 새 문의), 아니면 새 문의(분류 기타, 회원 연결은 auth.users 이메일 정확히 일치 1명일 때만). 같은 주소 하루 새 문의 10건 넘으면 무시. 받은·보낸 메일 ID는 `inquiry_mail`. 비용: Email Routing 받기 무료, Workers 무료 요금제 안
@@ -460,8 +460,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 아직: 핵심 알림 메일(연결 해제 등)과 ‘푸시를 받을 수 없는 사람’ 판단, 방해 금지 끝나는 시각에 다시 보내기, 묶음 알림의 바뀐 것 목록 화면, 모바일 앱 링크(AASA·assetlinks)
 - 데스크톱 알림은 로컬: 앱이나 트레이가 켜져 있으면 Realtime을 받아 OS 알림으로 표시
 - 모바일 푸시는 서버(20261104120000): 기기 토큰은 `push_device`(앱이 `register_push_device`로 등록, 로그아웃 때 `unregister_push_device`, 같은 토큰은 마지막 등록한 사람 것). `kick_push()`(pg_cron `kick-push` 1분마다, 보낼 것이 있을 때만 pg_net, Vault `push_function_url`·`push_cron_secret`) → Edge Function `send-push`가 `claim_push`(12시간 안, `push_wanted` = S-14 받는 방법·묶음, 인앱만(silent) 빼고, 방해 금지는 끝날 때까지 미룸, 보안·계정은 바로, 꺼낼 때 `notification.pushed_at`) → iOS APNs HTTP/2(.p8 토큰, `_shared/push.ts`), Android FCM HTTP v1(서비스 계정 OAuth) → 410·UNREGISTERED 토큰은 `drop_push_tokens`. `PUSH_DRIVER`=`send`일 때만 보냄(그 밖은 로그만). 서프라이즈는 `push_title`과 본문 숨김 그대로
-- 사진(20261105090000): 저장소 `photos` 버킷(비공개, JPEG, 3MB). 경로는 무작위 `g/{uuid}.jpg`(목표, 정사각 512px)·`r/{uuid}.jpg`(챙길 날 기록, 긴 변 1600px). 앱이 줄이고 다시 그려 올린 뒤(`packages/app/src/shared/photo.ts`, EXIF 위치 정보 없음) `set_goal_photo`·`add_care_photo`로 붙임(내가 올린 파일만). 읽기는 `photo` 행을 볼 수 있을 때만(목표 공개 범위, 비밀 챙길 날 그대로), 보여 줄 때 1시간 서명 주소. 지우기: `photo` 행이 지워지면(목표·기록·부부 공간과 함께) `storage_purge`에 쌓고, 계정 삭제 요청 때 프로필 사진도 쌓음 → `kick_purge()`(pg_cron `kick-purge` 10분마다, 지울 것이 있을 때만, Vault `purge_function_url`·`purge_cron_secret`) → Edge Function `purge-storage`가 Storage API로 지움(하루 넘게 붙지 않은 파일 포함)
-- 소셜 프로필 사진(20261110160000, 2026-11-05 지정 아바타 없앰): 앱이 부부 공간이 생긴 뒤 `avatar_path`·`avatar_social_checked_at`이 비어 있으면 한 번만 Edge Function `social-avatar`(앱 사용자 JWT)를 부름. 함수는 `/auth/v1/user`의 identities `identity_data`(사용자가 고칠 수 있는 user_metadata가 아님)에서 카카오·구글 사진 주소를 꺼내 `*.googleusercontent.com`·`*.kakaocdn.net`(https)에서만 받고(그림만, 5MB 이하, 카카오 기본 프로필은 없음으로) 그대로 돌려줌. 앱이 `squarePhoto`로 가운데 정사각 512px JPEG로 다시 그려(EXIF 없음) `uploadAvatar`로 저장한 뒤 `mark_social_avatar_checked()`. 함수가 204(사진 없음)여도 남김, 함수 호출 자체가 실패하면 다음에 다시. 서버는 주소와 그림을 남기지 않음. `avatar_preset` 열과 `set_avatar_preset`·`space_people_art` 함수는 2단계로 지움(20261110170000)
+- 사진(20261105090000): 저장소 `photos` 버킷(비공개, JPEG, 3MB). 경로는 무작위 `g/{uuid}.jpg`(목표, 정사각 512px)·`r/{uuid}.jpg`(챙길 날 기록, 긴 변 1600px). 앱이 줄이고 다시 그려 올린 뒤(`packages/app/src/shared/photo.ts`, EXIF 위치 정보 없음) `set_goal_photo`·`add_care_photo`로 붙임(내가 올린 파일만). 읽기는 `photo` 행을 볼 수 있을 때만(목표 공개 범위, 비밀 챙길 날 그대로), 보여 줄 때 1시간 서명 주소. 지우기: `photo` 행이 지워지면(목표·기록·우리 둘 공간과 함께) `storage_purge`에 쌓고, 계정 삭제 요청 때 프로필 사진도 쌓음 → `kick_purge()`(pg_cron `kick-purge` 10분마다, 지울 것이 있을 때만, Vault `purge_function_url`·`purge_cron_secret`) → Edge Function `purge-storage`가 Storage API로 지움(하루 넘게 붙지 않은 파일 포함)
+- 소셜 프로필 사진(20261110160000, 2026-11-05 지정 아바타 없앰): 앱이 우리 둘 공간이 생긴 뒤 `avatar_path`·`avatar_social_checked_at`이 비어 있으면 한 번만 Edge Function `social-avatar`(앱 사용자 JWT)를 부름. 함수는 `/auth/v1/user`의 identities `identity_data`(사용자가 고칠 수 있는 user_metadata가 아님)에서 카카오·구글 사진 주소를 꺼내 `*.googleusercontent.com`·`*.kakaocdn.net`(https)에서만 받고(그림만, 5MB 이하, 카카오 기본 프로필은 없음으로) 그대로 돌려줌. 앱이 `squarePhoto`로 가운데 정사각 512px JPEG로 다시 그려(EXIF 없음) `uploadAvatar`로 저장한 뒤 `mark_social_avatar_checked()`. 함수가 204(사진 없음)여도 남김, 함수 호출 자체가 실패하면 다음에 다시. 서버는 주소와 그림을 남기지 않음. `avatar_preset` 열과 `set_avatar_preset`·`space_people_art` 함수는 2단계로 지움(20261110170000)
   - 앱: 브리지 `push`(`apps/mobile/src/native/push.ts`, `@capacitor/push-notifications`). 로그인한 뒤 허용돼 있으면 토큰 등록(`usePushRegistration`), 허용 묻기는 합류 직후 1회(P-11)와 S-14 ‘푸시 알림’ 켤 때. 앱이 화면에 떠 있으면 OS 알림 없이(capacitor.config `presentationOptions: []`) 앱 안 토스트, 누르면 그 알림 읽음 + 그 화면
 - 메일로 대신: 모바일 푸시 기기가 없고 데스크톱 presence 신호도 최근 10분간 없을 때(`mail_missed_notifications`가 `push_device`를 봄)
 - 앱 안 알림센터에는 항상 기록
@@ -611,7 +611,7 @@ supabase/
   functions/<이름>/index.ts
   functions/_shared/      함수끼리 같이 쓰는 코드
   tests/rls_goal.test.sql
-  seed.sql                찬우, 예빈 부부 테스트 데이터
+  seed.sql                찬우, 예빈 두 사람 테스트 데이터
 ```
 
 ### 이름 규칙
@@ -666,8 +666,8 @@ supabase/
 - 월급 계획 저장(`save_split`)은 서버 `sync_checklist`로 이번 사이클 체크 안 한 줄만 새 금액(체크한 줄, 못 함 줄은 그대로)
 - 할 일 한 줄·다가오는 일정·이번 달 월급 상태는 core `rules/home.ts`(`homeTodo`, `homeUpcoming`, `salaryState`)가 계산하고, 재료는 frame `useHomeInput()`(같은 qk 캐시, 닫은 할 일은 기기 저장), 문구는 frame `todoText`·`upcomingName`. 홈과 트레이 위젯이 같은 결과를 씀
 - 앱 기본 틀은 `features/frame`(ui `AppFrame`, 금액 가리기 `shared/mask.ts`). `command.tsx`: ⌘K(Windows Ctrl+K) 검색 화면(ui `CommandPalette`, ‘바로 하기’ + 목표·자산·부채·챙길 날 최대 5개씩), Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N(홈 = 오늘 띠 ‘추가’ 메뉴 `AddMenu`, 다른 메뉴 = 그 화면에 맞는 추가), 좁은 창 + 버튼(`addFor`). 오프라인이면 본문 맨 위 “연결이 끊겼어요” 띠(`shared/online.ts`, 입력 대기열은 아직 없음). 불러오는 중 0.3초 넘으면 스켈레톤(`LoadingFrame`). 홈 연결 해제 대기 띠(요청한 사람 → S-12, 받은 사람 → S-12d, 닫기 없음). ‘저장 중’ 표시와 충돌 선택은 아직 없음 트레이 위젯 값(26 트레이 위젯 창 = WG-01 이번 달 월급 + 다음 할 일 + 다가오는 날)은 데스크톱에서만 `useTraySync`가 만들어 브리지로 보냄(core `TraySnapshot`)
-- W-01(20261102090000): 각자 + 배우자 합류면 사람 탭(`?who=`), 배우자 월급 계획도 고칠 수 있고 배우자 내 목표 줄 금액은 잠금(`save_split`이 `locked_line`으로도 막음). 수입 줄 → S-11(내 탭). 합쳐서면 내 목표 줄 이름 앞에 주인 이름(`goalLineName`, 체크리스트·홈도 같음). 직접 추가 줄은 눌러서 이름·금액 바꾸기. ‘추천값으로 다시 채우기’는 core `recommendSplit`의 `others`(각자: 우리 목표는 상대 줄만큼 빼고)·`keep`(배우자 탭: 배우자 내 목표 줄 그대로), 합쳐서는 두 사람 수입·사람마다 용돈. 연결 해제 대기면 보기만
-- W-02: ‹ › 지난 달 보기(`fetchPastChecklists`, 읽기 전용), 기간 시작은 월급날이 주말·공휴일이면 직전 영업일로 표시(`holiday_shift`), 상대가 이번 사이클에 월급 계획을 바꿨으면 맨 위 안내(× 누르면 이 기기에서 숨김), 배우자 탭은 ‘다른 금액’ 없음
+- W-01(20261102090000): 각자 + 파트너 합류면 사람 탭(`?who=`), 파트너 월급 계획도 고칠 수 있고 파트너 내 목표 줄 금액은 잠금(`save_split`이 `locked_line`으로도 막음). 수입 줄 → S-11(내 탭). 합쳐서면 내 목표 줄 이름 앞에 주인 이름(`goalLineName`, 체크리스트·홈도 같음). 직접 추가 줄은 눌러서 이름·금액 바꾸기. ‘추천값으로 다시 채우기’는 core `recommendSplit`의 `others`(각자: 우리 목표는 상대 줄만큼 빼고)·`keep`(파트너 탭: 파트너 내 목표 줄 그대로), 합쳐서는 두 사람 수입·사람마다 용돈. 연결 해제 대기면 보기만
+- W-02: ‹ › 지난 달 보기(`fetchPastChecklists`, 읽기 전용), 기간 시작은 월급날이 주말·공휴일이면 직전 영업일로 표시(`holiday_shift`), 상대가 이번 사이클에 월급 계획을 바꿨으면 맨 위 안내(× 누르면 이 기기에서 숨김), 파트너 탭은 ‘다른 금액’ 없음
 - 월급날 바꾸기: `app_user` 트리거 `payday_cut_cycle` → `cut_cycle`로 이번 사이클 끝 = 새 기준일 전날(각자 = 내 체크리스트, 합쳐서 + 만드는 날 자동 = 공동)
 
 ### 캘린더 구조
@@ -693,78 +693,78 @@ supabase/
 > 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 연결 해제는 ADR 0003 11장(나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)대로 다시 씀(마이그레이션 20261030180000). 계정 삭제(S-18b, 20261101210000 `request_account_deletion`): 탈퇴 = 데이터 모두 지움. 연결·해제 대기면 연결 해제 확정과 같게 두 사람 모두 빈 새 공간(`unlinked_from` = 원래 공간, `onboarding_step` S-12H), 원래 공간은 30일 보관, `couple_unlink` `how = 'deleted'` 확정 행. 취소하면(`cancel_account_deletion`) 그때부터 30일 안 다시 연결 가능(해제와 같은 `answer_reconnect`).
 
 - features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11c·d·f·g·h·i `/settings/me/…`, S-12 `/settings/couple`, S-12a·c·d `/settings/couple/unlink`(`/confirm`, `/review`), S-12h `/settings/couple/unlinked`, S-12g `/settings/couple/reconnect`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}` (재기획으로 S-10a 통장 방식, S-11b 신랑·신부, S-17 내 답 다시 보기, 연결 해제 S-12b 자산 정리·S-12e 다르게 정리하기·S-12f 다른 안은 지움)
-- 공개 범위 줄은 합류한 부부만, 위젯 줄은 데스크톱만
-- 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(부부 공통, 바로)
-- S-11 내 정보와 월급(재기획): 이름 S-11a, 결혼 상태 S-11g `/settings/me/marriage`(바꾸면 S-11h에서 상태와 날짜를 함께 저장), 결혼한 날·예정일 S-11h `/settings/me/wedding`(O-12 규칙, 결혼기념일 챙길 날은 서버 `sync_wedding_care`), 출생연도 S-11i `/settings/me/birth-year`. 월급 묶음: 내 월급 S-11c `/settings/me/salary`(합류 뒤 배우자 값 보기만, Toast ‘되돌리기’), 관리 방식 S-11f `/settings/me/salary-mode`(혼자 쓰기면 숨김), 체크리스트 만드는 날 S-11d `/settings/me/plan-day`(합쳐서 + 합류만), 앞당기기 토글, ‘월급 계획 열기’ → W-01. 연결 해제 대기 중엔 관리 방식·만드는 날 비활성
-- 관리 방식 바꾸기 `set_salary_mode(mode)`(마이그레이션 20261030120000): 각자 → 합쳐서 = 같은 우리 목표 줄 더함, 고정지출·생활비 더해 1줄씩, 용돈은 사람마다, 내 목표·직접 추가 줄 그대로. 합쳐서 → 각자 = 우리 목표·고정지출·생활비·직접 추가 줄을 두 사람 수입 비율로(1만 원 단위, 남는 차이는 기준일 사람), 용돈·내 목표 줄은 주인에게. 체크리스트는 다음 월급날부터 새 방식(`start_checklist`가 옛 방식 체크리스트가 이번 사이클이면 새로 안 만들고, 끝나면 닫음). 배우자 알림 `salary_mode`, 해제 대기면 `unlink_pending`
-- 체크리스트 만드는 날 `set_joint_cycle_day(일)`: 두 사람 월급날 중 하나(말일 = 31)만, 이번 공동 체크리스트 끝 = 새 기준일 전날, 배우자에게는 주간 요약(활동 기록)만(20261031120000)
+- 공개 범위 줄은 합류한 두 사람만, 위젯 줄은 데스크톱만
+- 알림 이메일은 S-11에서 그 자리에서 고침(core `NotifyEmail`: 공백 제거·소문자·형식만). 주말·공휴일 앞당기기는 `couple_space.holiday_shift`(두 사람 공통, 바로)
+- S-11 내 정보와 월급(재기획): 이름 S-11a, 결혼 상태 S-11g `/settings/me/marriage`(바꾸면 S-11h에서 상태와 날짜를 함께 저장), 결혼한 날·예정일 S-11h `/settings/me/wedding`(O-12 규칙, 결혼기념일 챙길 날은 서버 `sync_wedding_care`), 출생연도 S-11i `/settings/me/birth-year`. 월급 묶음: 내 월급 S-11c `/settings/me/salary`(합류 뒤 파트너 값 보기만, Toast ‘되돌리기’), 관리 방식 S-11f `/settings/me/salary-mode`(혼자 쓰기면 숨김), 체크리스트 만드는 날 S-11d `/settings/me/plan-day`(합쳐서 + 합류만), 앞당기기 토글, ‘월급 계획 열기’ → W-01. 연결 해제 대기 중엔 관리 방식·만드는 날 비활성
+- 관리 방식 바꾸기 `set_salary_mode(mode)`(마이그레이션 20261030120000): 각자 → 합쳐서 = 같은 우리 목표 줄 더함, 고정지출·생활비 더해 1줄씩, 용돈은 사람마다, 내 목표·직접 추가 줄 그대로. 합쳐서 → 각자 = 우리 목표·고정지출·생활비·직접 추가 줄을 두 사람 수입 비율로(1만 원 단위, 남는 차이는 기준일 사람), 용돈·내 목표 줄은 주인에게. 체크리스트는 다음 월급날부터 새 방식(`start_checklist`가 옛 방식 체크리스트가 이번 사이클이면 새로 안 만들고, 끝나면 닫음). 파트너 알림 `salary_mode`, 해제 대기면 `unlink_pending`
+- 체크리스트 만드는 날 `set_joint_cycle_day(일)`: 두 사람 월급날 중 하나(말일 = 31)만, 이번 공동 체크리스트 끝 = 새 기준일 전날, 파트너에게는 주간 요약(활동 기록)만(20261031120000)
 - 알림 설정은 `app_user.noti_prefs`(받는 방법 + 묶음별 OS 알림·이메일, core `notiPrefs`가 기본값: 챙길 날 D-14·당일만 꺼짐)와 `quiet_start`·`quiet_end`(한국 시간 시). 토글은 바로 저장. 센터 기록은 설정과 상관없이 남고, 데스크톱 OS 알림은 `pushAllowed(설정, notification.topic, 방해 금지)`가 참일 때만. `notification.topic`은 kind와 dedupe로 만드는 생성 열(plan, proposal, invite, care_30 …). 웹은 이메일 토글만 묶음은 plan(“월급 체크리스트”), partner_change, care_30/14/7/0, money, goal, invite(제안·생활비 체크 토글은 재기획으로 없앰)
 - 약관 재동의(A-05r, 20261103150000): `pending_terms()`(terms·privacy는 재동의 필요 승인 버전이 KST로 시행됐고 그 버전 동의가 없을 때, marketing은 마지막 기록이 받기이고 2년 지남), `agree_terms(p_marketing)`(consent_source `reconsent`). 앱은 `RequireAccount`가 남은 게 있으면 `/terms/update`로 보냄(못 읽으면 막지 않음).
-- 배우자가 고친 목표(G-01, 20261103120000): `recent_goal_changes()`가 나에게 온 partner_change(goal, goal_meta, 30일 안) 중 목표마다 마지막 하나. 본 시각은 localStorage `sweetwo.goalsSeenAt`.
+- 파트너가 고친 목표(G-01, 20261103120000): `recent_goal_changes()`가 나에게 온 partner_change(goal, goal_meta, 30일 안) 중 목표마다 마지막 하나. 본 시각은 localStorage `sweetwo.goalsSeenAt`.
 - 알림 채널(20261102180000): 앱(데스크톱, 모바일)이 켜져 있는 동안 5분마다 `touch_app()`(`app_user.app_seen_at`). `mail_missed_notifications()`(pg_cron `mail-missed-notifications` 10분마다): 푸시로 갈 알림인데 만들어진 뒤 10분 안에 접속 신호가 없으면 메일 한 통(`noti_mail_body`, 상한 6회, 월말 확인은 상한 밖), 보안·계정·문의(`noti_always_mail`: 연결 해제 요청·완료, 상대 계정 삭제·복구, 관리자 열람, 문의 답변, 새 기기 로그인)는 접속과 상관없이 바로(상한 밖). 방해 금지 시간에는 미뤘다가 끝나면. 보낸 알림은 `notification.mailed_at`.
 - 데스크톱 OS 알림: 방해 금지 시간에 온 알림은 미뤄 두고 끝나면 띄움(1분마다 확인, 앱이 켜져 있는 동안)
 - 계정 삭제 접수 메일(트리거 `deletion_mail`)·완료 메일(`purge_deleted_accounts`가 지우기 직전, `user_id` 없이) 상한 밖. 새 기기 로그인: 로그인 뒤 `note_login()`이 다른 세션이 있으면 본인에게 ‘새 기기에서 로그인했어요’ → S-15(메일도). A-08 ‘나예요 / 내가 아니에요’ 화면은 아직 없음 알림 링크는 `/new-device/{새 세션 id}`(A-08 `a-08-new-device.tsx`, 20261103090000): ‘나예요’ → 홈, ‘내가 아니에요’ → `end_sessions(그 세션)` → S-15 + Toast “{제공자} 계정 보안도 확인해 주세요”.
 - 아직 없는 알림: 약관 개정 고지(AD-10 필독 공지와 메일), 마케팅 수신 동의 재확인 알림(재확인 화면은 A-05r)
-- S-12 부부 정보: 이름 + 상태(연결됨, 초대 중, 연결 해제 대기 중, 혼자 쓰는 중), 결혼 예정일(예비부부, D-day 알약)·결혼일(신혼, 보기만). 미합류면 가장 최근 초대 코드(api `fetchLatestInvite`, `invite` 테이블을 부부 공간 사람만 읽음)로 초대 전(“초대 코드 만들기” → `create_invite`) / 초대 중(코드 3+3자리, “10월 22일까지”, 코드 복사, 링크 복사, 새 코드 받기) / 만료를 나눔. 새 코드 받기 `renew_invite`는 쓸 수 있는 코드를 모두 지금 만료로 바꾸고 새로 만듦
+- S-12 우리 둘 정보: 이름 + 상태(연결됨, 초대 중, 연결 해제 대기 중, 혼자 쓰는 중), 결혼 예정일(예비부부, D-day 알약)·결혼일(신혼, 보기만). 미합류면 가장 최근 초대 코드(api `fetchLatestInvite`, `invite` 테이블을 우리 둘 공간 사람만 읽음)로 초대 전(“초대 코드 만들기” → `create_invite`) / 초대 중(코드 3+3자리, “10월 22일까지”, 코드 복사, 링크 복사, 새 코드 받기) / 만료를 나눔. 새 코드 받기 `renew_invite`는 쓸 수 있는 코드를 모두 지금 만료로 바꾸고 새로 만듦
 - 연결 해제 요청(S-12a → S-12c): `couple_unlink`(공간당 대기 1개, 쓰기는 함수로만). S-12a는 지울 것 목록과 ‘먼저 내보내기’(S-18), S-12c는 “연결 해제” 입력이 맞아야 버튼이 켜짐. `request_unlink('연결 해제')`가 기한(오늘 + 14일)과 함께 저장하고 해제 대기로 바꾼 뒤 상대 알림 `unlink_requested`(→ S-12d). 자산 몫·정리 안 없음(`plan` = `[]`). `cancel_unlink`는 요청한 사람만. 대기 중엔 `save_split`·`set_salary_mode`·`set_joint_cycle_day`가 `unlink_pending`으로 거절, S-12 대기 묶음(“{날짜}에 해제돼요”, 요청 보기)
 - 연결 해제 확정 `finish_unlink(id, how)`(내부): S-12d 받은 사람 ‘확인했어요’ → `agree_unlink`(how `agreed`), 또는 매일 오전 9시 `run_unlink_deadlines`가 기한 날 대기 요청을(how `deadline`, 2일 전 알림은 없앰). 같이 쓰던 데이터는 나누지 않음: 두 사람이 각자 빈 새 공간(혼자 쓰기, `unlinked_from` = 원래 공간)으로, `onboarding_step = 'S-12H'`, 원래 공간은 지운 표시로 30일 보관(구성원이 없어 아무도 못 봄), 원래 공간의 알림 기록은 지움. 알림 `unlink_confirmed`. 홈은 S-12H면 S-12h `/settings/couple/unlinked`로, ‘시작하기’ `start_after_unlink()` → 온보딩 O-11부터(이름·로그인은 남김). 분석 `unlink_requested`(`linked_months`), `unlink_resolved`(agreed, canceled. deadline은 서버)
 - 다시 연결(S-12g): 확정 뒤 30일 안, 두 사람이 모두 해제로 만든 공간에 혼자 있을 때(`reconnect_ok`). `request_reconnect` → 상대 알림 → `answer_reconnect(true)`면 원래 공간으로 돌아가고(`onboarding_step = 'O-60'`) 해제 뒤 새 공간에 만든 데이터는 버림(새 공간 지움), `false`면 요청만 닫힘. 혼자 쓰기 ‘새로 초대하기’ `start_new_invite`. 매일 `purge_unlinked_spaces`가 30일 지난 원래 공간을 지움. 해제 뒤 상대 호칭은 `unlink_partner_name()`. 행 타입 하나만 받는 SQL 함수는 PostgREST가 계산 열로 보여서 타입이 깨지므로 id로 받음
 - 공개 범위(S-13 `/settings/visibility`): `app_user.default_visibility`(내 자산·부채 새 항목 기본값, 기본 금액만 보여 주기)를 F-03·첫 주 자산 입력이 씀. 바꿀 때 기본값과 다른 내 명의 항목이 있으면 “이미 있는 항목 n개도 바꿀까요?”. 다시 연결하면 `?next=/`로 한 번 열고 ‘확인’ 이름은 “모두 보여 주기 / 금액만 보여 주기 / 숨기기”(값 all / sum / private), 고정 줄 “월급과 월급 계획은 늘 같이 봐요” 등
-- 휴지통(S-21 `/settings/trash`, 지금은 S-10 ‘데이터’ 줄에서): `trash_rows()`(자산·부채, 목표, 챙길 날.(가족은 20261101180000에서 지움) 30일 안, 배우자 명의·남의 서프라이즈 빼고), `restore_trash`(같이 지워진 것도 함께: 부모와 10초 안에 지운 자식), 연결된 부부의 목표는 `needs_proposal` → 제안 `goal_restore`. `purge_trash`(하나 또는 비우기), 매일 `purge_old_trash`. 확인은 ui `Modal`(영구 삭제만), Button `danger` 재기획(20261030150000): 연결된 부부의 목표도 제안 없이 바로 되살림, 배우자의 내 목표는 휴지통에 안 보임
-- 데이터(S-18 `/settings/data`): 내보내기는 앱에서 만듦(api `fetchExportData` → `features/settings/export.ts` → core `toCsv`(BOM, CRLF), `makeZip`(압축 없는 zip)). 범위 내 데이터 / 공동 데이터, 배우자 항목은 RLS가 거른 뒤 ‘합계만’은 합계 한 줄. 파일 이름은 영문(`sweetwo-joint-20261018.zip`). 형식 엑셀(CSV) / PDF 요약: PDF는 `features/settings/export-pdf.ts`(`buildPdfModel` → `renderPdf`, pdf-lib + @pdf-lib/fontkit, 처음 쓸 때만 불러옴). 한 파일에 자산 요약 + 연간 요약 두 쪽, 계산은 core `netWorth`·`netWorthSeries`·`yearlySavings`·`goalEta`. 글꼴은 가변 글꼴·woff2를 못 넣어서 `packages/app/src/assets/pdf-fonts/SUIT-{Regular,Bold}.ttf`(SUIT에서 400·700만 뽑음, `python3 scripts/pdf-fonts.py`, OFL), 색은 tokens.css 라이트 값을 화면에서 읽음. PDF는 글꼴을 통째로 넣어 0.5MB쯤(pdf-lib 부분 넣기가 이 글꼴에서 글자를 빠뜨림). 저장: 데스크톱·브라우저는 내려받기, 휴대폰 앱은 브리지 `saveFile` → @capacitor/filesystem 캐시 + @capacitor/share 공유 창. 본인 확인: 데스크톱·휴대폰 앱 PIN(있으면), 웹은 `reauthenticate(returnTo)`로 가입 소셜 다시 로그인 → `?export=범위&format=형식`으로 돌아와 이어서. 분석 `data_exported`. 사용 기록 보내기 = `app_user.analytics_off`
+- 휴지통(S-21 `/settings/trash`, 지금은 S-10 ‘데이터’ 줄에서): `trash_rows()`(자산·부채, 목표, 챙길 날.(가족은 20261101180000에서 지움) 30일 안, 파트너 명의·남의 서프라이즈 빼고), `restore_trash`(같이 지워진 것도 함께: 부모와 10초 안에 지운 자식), 연결된 두 사람의 목표는 `needs_proposal` → 제안 `goal_restore`. `purge_trash`(하나 또는 비우기), 매일 `purge_old_trash`. 확인은 ui `Modal`(영구 삭제만), Button `danger` 재기획(20261030150000): 연결된 두 사람의 목표도 제안 없이 바로 되살림, 파트너의 내 목표는 휴지통에 안 보임
+- 데이터(S-18 `/settings/data`): 내보내기는 앱에서 만듦(api `fetchExportData` → `features/settings/export.ts` → core `toCsv`(BOM, CRLF), `makeZip`(압축 없는 zip)). 범위 내 데이터 / 공동 데이터, 파트너 항목은 RLS가 거른 뒤 ‘합계만’은 합계 한 줄. 파일 이름은 영문(`sweetwo-joint-20261018.zip`). 형식 엑셀(CSV) / PDF 요약: PDF는 `features/settings/export-pdf.ts`(`buildPdfModel` → `renderPdf`, pdf-lib + @pdf-lib/fontkit, 처음 쓸 때만 불러옴). 한 파일에 자산 요약 + 연간 요약 두 쪽, 계산은 core `netWorth`·`netWorthSeries`·`yearlySavings`·`goalEta`. 글꼴은 가변 글꼴·woff2를 못 넣어서 `packages/app/src/assets/pdf-fonts/SUIT-{Regular,Bold}.ttf`(SUIT에서 400·700만 뽑음, `python3 scripts/pdf-fonts.py`, OFL), 색은 tokens.css 라이트 값을 화면에서 읽음. PDF는 글꼴을 통째로 넣어 0.5MB쯤(pdf-lib 부분 넣기가 이 글꼴에서 글자를 빠뜨림). 저장: 데스크톱·브라우저는 내려받기, 휴대폰 앱은 브리지 `saveFile` → @capacitor/filesystem 캐시 + @capacitor/share 공유 창. 본인 확인: 데스크톱·휴대폰 앱 PIN(있으면), 웹은 `reauthenticate(returnTo)`로 가입 소셜 다시 로그인 → `?export=범위&format=형식`으로 돌아와 이어서. 분석 `data_exported`. 사용 기록 보내기 = `app_user.analytics_off`
 - 계정 삭제(S-18b `/settings/data/delete`): `request_account_deletion`은 다시 로그인한 지 10분 안에만(`reauth_required`면 `reauthenticate('/settings/data/delete?go=1')`). 바로 이용 중지(status). 연결·해제 대기면 연결 해제 확정처럼 같이 쓰던 데이터를 모두 지움(위 참고, 상대 알림 `partner_deleted`). 30일 안 다시 로그인하면 A-02 `/account/restore` “계정 삭제를 취소할까요?” → `cancel_account_deletion`(빈 혼자 쓰기, 그때부터 30일 다시 연결, 상대 알림 `partner_restored`). 매일 `purge_deleted_accounts`
-- 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 배우자 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
+- 문의·도움말(S-19 `/settings/about`, S-20 `/settings/help`, S-19a `/settings/help/inquiry`·`/inquiries/:id`, S-19b `/settings/help/access/:id`): `inquiry`(번호 `A-10001`부터 서버 발급, 자동 첨부 키는 서버가 거름), `inquiry_message`(사용자·운영자 대화), `access_request`(L2 열람: 본인만 동의, 24시간, 파트너 알림 `access_partner`, 끝나면 `access_done`, 매시간 `run_access_expiry`). 운영자 쪽 답변·요청 만들기는 어드민 단계. FAQ 원본은 `apps/site/src/content/faq.md`(웹사이트와 같이 씀), `pnpm content:sync`로 `packages/app/src/content`에 복사, core `parseFaq`·`searchFaq`. ui `Accordion`, `Search`
 - 보안(S-15 `/settings/security`): 데스크톱 앱 잠금(브리지 lock: `clear`는 1분 안에 `verify`가 통과했을 때만, `setAutoLock` 0·1·5·15분, 기본 5분), PIN 바꾸기 = 현재 PIN 확인 → A-06 `?next=/settings/security`. 로그인된 기기 = `my_sessions()`(auth.sessions, 지금 기기 = 토큰의 session_id), `end_sessions(id)` / `end_sessions()`(이 기기 빼고 모두). 기기 이름은 core `deviceLabel(user_agent)`, 데스크톱 main은 토큰 요청에 `sweeTwo/버전 Electron` User-Agent
 - 트레이 위젯(26, S-22): 앱 창의 `useTraySync`(frame)가 홈과 같은 계산(core `homeTodo`·`homeUpcoming`·`salaryState`)으로 core `TraySnapshot`(이번 달 월급 상태·체크 개수·다음 월급날, 다음 할 일, 다가오는 날 3개)을 만들어 브리지 `widget.update`로 보냄. 위젯 창 `/widget/tray`(features/widget)는 WG-01 “9월 월급” / “2개” / “5개 중 2개 완료”, 월말 확인 기간이면 “체크 안 한 게 n개 있어요” → W-05. 트레이 창에는 금액이 없어 가림과 상관없음. 설정(트레이 켜기, 금액 보이기, 목표)은 S-22
 
-### 배우자 합류 구조
+### 파트너 합류 구조
 
 - 기획: 18(재기획 2026-10-25). features/pairing
 - 초대 링크 `/i/:code`(P-01, features/pairing)는 로그인 전에도 열림(A-01 공개 경로). `invite_preview()`(익명 가능)로 초대한 사람 호칭만 보여 줌
 - ‘합류하기’: 로그인 전이면 `prefs.returnTo = /i/{코드}?go=1`을 남기고 A-02로. 로그인(기존 계정) 또는 가입(A-05) 뒤 그 주소로 돌아와 바로 `join_space()`
 - `join_space()`: 초대 공간에 들어가고 코드를 이 사람 몫으로 잡아 둠(완료 전 이탈하면 같은 코드로 ‘resume’). 시작한 사람이 적은 호칭이 초기값. 5회 오류면 10분 제한(`invite_attempt`). 혼자 시작한 기록이 있으면 ‘has_records’ → “이미 시작한 기록이 있어요” 합류하기 / 취소 → P-02a(`p-02a-move-records.tsx`, P-01 안 단계): 월급·월급날과 내 명의 자산·부채(공개 범위 고르기, 기본 금액만)만 `join_moving_records(code, vis)`로 옮기고 합류(20261102150000). 목표·월급 계획·체크리스트는 안 옮김, 원래 공간은 `deleted_at` 표시 뒤 30일 지나 `purge_left_spaces`(매일)가 지움. ‘사본 내려받기’ → S-18
-- 두 사람 기준은 core `rules/couple.ts`(`coupleOf`): 합류 전 배우자 = 시작한 사람이 적은 호칭만(수입은 모름, 추정·분담 비율 없음, 08 9장), 합류 뒤 = `partner_profile()`. 기본 기준일 = 두 월급날 중 늦은 날. 아바타 색은 시작한 사람 1, 합류한 사람 2
+- 두 사람 기준은 core `rules/couple.ts`(`coupleOf`): 합류 전 파트너 = 시작한 사람이 적은 호칭만(수입은 모름, 추정·분담 비율 없음, 08 9장), 합류 뒤 = `partner_profile()`. 기본 기준일 = 두 월급날 중 늦은 날. 아바타 색은 시작한 사람 1, 합류한 사람 2
 - `join_space()`가 정하는 첫 화면: 시작한 사람이 대신 입력한 내 명의 자산·부채(owner person + 주인 없음)가 있으면 P-02b, 아니면 P-03
 - 합류 화면 `/join/:screen`(진행 막대 5칸, ‘나중에 할게요’ 없음): (P-02b) → P-03 이름 → P-03a 출생연도 → P-04 관리 방식 확인 → P-05 월급(금액·매달 달라요·월급날) → P-06 월급 계획 → 홈. 멈춘 화면은 `app_user.onboarding_step`(OnboardingGate가 이어서 엶)
 - P-02b: ‘확인하고 이어 쓸게요’ = 동의 기록(소유는 합류를 마칠 때 넘어감), ‘지우고 새로 입력할게요’ = `discard_prefill()`(그 항목 휴지통)
 - P-04: 바꾸면 `set_join_salary_mode(mode)`가 바로 적용(각자 → 합쳐서 = 시작한 사람 월급 계획·체크리스트가 공동 것, 반대는 시작한 사람 것) + 시작한 사람 알림 `salary_mode`
 - P-06(salary `SplitEditor`, `steps`·`noteOf`·`incomeSub`): 각자 = core `joinerSplit`(고정·생활 25%, 용돈 10%, 우리 목표에 아직 안 채운 월 필요액 = 필요액 − 시작한 사람 줄), 줄 옆 “찬우님이 매달 95만 원 넣어요”. 합쳐서 = core `jointRefill`(있던 줄은 그대로, 내 용돈 10% + 늘어난 수입을 저금 줄 순서대로 필요액까지), 바뀐 줄 “95만 원 → 250만 원”
-- 합류 완료 = `complete_join(줄, 버전)`: 각자 = 내 월급 계획 + 첫 체크리스트, 합쳐서 = 공동 월급 계획 저장(열 때 버전과 다르면 `split_changed` → “찬우님이 방금 월급 계획을 바꿨어요” 후 다시 계산) + 이번 체크리스트 맞춤. 부부 연결, 코드 사용됨, 대신 입력 항목 소유 넘김, 시작한 사람에게 “예빈님이 합류했어요 / 이제 목표와 월급을 같이 봐요”
+- 합류 완료 = `complete_join(줄, 버전)`: 각자 = 내 월급 계획 + 첫 체크리스트, 합쳐서 = 공동 월급 계획 저장(열 때 버전과 다르면 `split_changed` → “찬우님이 방금 월급 계획을 바꿨어요” 후 다시 계산) + 이번 체크리스트 맞춤. 우리 둘 연결, 코드 사용됨, 대신 입력 항목 소유 넘김, 시작한 사람에게 “예빈님이 합류했어요 / 이제 목표와 월급을 같이 봐요”
 - 시작한 사람이 아직 온보딩 중(공간에 월급 계획 없음): P-03 → P-03a → P-05 저장 = `complete_join()`(줄 없음, `onboarding_step = 'P-WAIT'`) → 홈 대기(“{찬우}님이 시작하고 있어요”). 시작한 사람이 온보딩을 마치면 트리거가 “{찬우}님이 첫 목표를 정했어요”(`first_goal`, → `/join/p-04`), 홈은 월급 계획이 생기면 P-04 → P-06으로(합쳐서면 확인만)
 - 재기획 전 코드: `update_pending_shares`, `notify_first_plan`은 20261101180000에서 지움. `finish_join`은 앱이 안 쓰지만(합류는 `complete_join`) pgTAP 준비용으로 남김
 
 ### 목표 구조
 
 - 기획: 22 G-01~G-06, 계산은 06. 화면 features/goals: G-01 `/goals`, G-02 `/goals/:id`. 메뉴 첫 화면 틀은 month `MainFrame`, 상세는 `PageHeader`
-- 목표 종류: 우리 목표(`goal.owner_user_id` null, 둘 다 고침) / 내 목표(주인 user id, 주인만 고침, 배우자는 보기만). RLS `goal_update`가 주인만 허용. 혼자 쓰기는 종류 없이 한 목록
-- 화면 값은 goals `model.ts`(`useGoalsModel`) 한 곳: 모은 돈(서버 `goal_saved_sums()`), 매달 넣는 돈(보이는 월급 계획의 이 목표 저금 줄 합, 각자 + 합류면 사람별), 예상 달성·늦어지는 달(core `goalEta`), 이번 달(이번 사이클 체크 줄), 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위), 접힌 목록(보류, 달성, 다 쓴 목표)
+- 목표 종류: 우리 목표(`goal.owner_user_id` null, 둘 다 고침) / 내 목표(주인 user id, 주인만 고침, 파트너는 보기만). RLS `goal_update`가 주인만 허용. 혼자 쓰기는 종류 없이 한 목록
+- 화면 값은 goals `model.ts`(`useGoalsModel`) 한 곳: 모은 돈(서버 `goal_saved_sums()`), 매달 넣는 돈(보이는 월급 계획의 이 목표 저금 줄 합, 각자 + 합류면 사람별), 예상 달성·늦어지는 달(core `goalEta`), 이번 달(이번 사이클 체크 줄), 묶음(우리 목표 / 내 목표 / 파트너 목표, 비상금은 우리 목표 맨 위), 접힌 목록(보류, 달성, 다 쓴 목표)
 - 모은 돈 = 이미 모은 돈(`other_held`) + 체크한 저금 줄 + 넣기 − 빼기 − 꺼내 쓰기, 0 아래로 안 감. 서버 `goal_saved(목표)`가 정본, 두 사람이 같은 값
-- 넣기·빼기·꺼내 쓰기(`goal_move` 표, 쓰기는 `move_goal(목표, in|out|use, 금액)`만, 모은 돈보다 많으면 `too_much`, 배우자 내 목표면 `not_owner`). G-02a `/goals/:id/move/:kind?`(넣을게요·뺄게요, `held`면 이미 모은 돈 고치기), G-02b `/goals/:id/spend`(꺼내 쓰기). 저장하면 Toast + ‘되돌리기’(`undo_goal_move`)
+- 넣기·빼기·꺼내 쓰기(`goal_move` 표, 쓰기는 `move_goal(목표, in|out|use, 금액)`만, 모은 돈보다 많으면 `too_much`, 파트너 내 목표면 `not_owner`). G-02a `/goals/:id/move/:kind?`(넣을게요·뺄게요, `held`면 이미 모은 돈 고치기), G-02b `/goals/:id/spend`(꺼내 쓰기). 저장하면 Toast + ‘되돌리기’(`undo_goal_move`)
 - 목표와 월급 계획 저금 줄은 DB 트리거(`goal_lines` → `goal_lines_sync`)가 맞춤: 진행 중 목표를 만들면 보이는 월급 계획마다 저금 묶음 맨 아래 0원 줄, 보류·달성·삭제하면 줄을 뺌, 다시 모으면 0원 줄. 우리 목표는 각자면 두 사람 월급 계획 모두, 내 목표는 주인 월급 계획만. 매달 넣는 돈은 월급 계획(W-01)에서만 고침
 - G-02: 종류 이름표, ⋯(이름 변경, 보류·다시 모으기, 우리 목표 ↔ 내 목표, 삭제. 비상금은 보류·삭제·종류 없음), 숫자 카드(목표 금액·기한은 `/goals/:id/edit/amount|deadline`), 이번 달 저금 줄(salary `CheckLine`), 넣기·빼기 / 꺼내 쓰기 / 매달 넣을 돈 바꾸기, 기한 비교, 모은 돈 기록(체크 줄 + `goal_move` + 이미 모은 돈)
-  - 우리 → 내 목표는 배우자가 넣은 돈(체크 줄, `goal_move`)이 있으면 막음(지금은 앱에서만 확인)
-- 바꾸기(`goal-change.ts`): 제안 없이 모두 바로 저장 + Toast(금액 “목표 금액을 바꿨어요”, 기한 “기한을 바꿨어요”, 이름 “이름을 바꿨어요”, 보류·다시 모으기, 모두 ‘되돌리기’). 연결된 부부도 버튼은 ‘저장’. 삭제는 휴지통(`deleted_at`)
-- 목표 수정 `/goals/:id/edit/amount|deadline|name`: 기한은 늘리기·줄이기 모두(이번 달 이전만 안 됨), 영향 미리보기는 이 목표만(예상 달성, 상태, 월 필요액 전 → 후), 배우자의 내 목표는 G-02로 돌려보냄
+  - 우리 → 내 목표는 파트너가 넣은 돈(체크 줄, `goal_move`)이 있으면 막음(지금은 앱에서만 확인)
+- 바꾸기(`goal-change.ts`): 제안 없이 모두 바로 저장 + Toast(금액 “목표 금액을 바꿨어요”, 기한 “기한을 바꿨어요”, 이름 “이름을 바꿨어요”, 보류·다시 모으기, 모두 ‘되돌리기’). 연결된 두 사람도 버튼은 ‘저장’. 삭제는 휴지통(`deleted_at`)
+- 목표 수정 `/goals/:id/edit/amount|deadline|name`: 기한은 늘리기·줄이기 모두(이번 달 이전만 안 됨), 영향 미리보기는 이 목표만(예상 달성, 상태, 월 필요액 전 → 후), 파트너의 내 목표는 G-02로 돌려보냄
 - 목표 추가 `/goals/new/:step?`(goals `add/`): G-03a 템플릿 → G-03e 누구 목표(혼자 쓰기 빼고) → G-03b 질문 → G-03c 기한 → G-03d 이미 모은 돈(매달·고금리 대출·템플릿이 묻는 것 빼고) → G-03f 확인 → 만든 목표 상세. 입력 중 값은 기기에 저장(`sweetwo.goal-add`)
 - G-06 `/goals/order`: 우리 목표와 내 목표 각각 `ReorderList`, 저장하면 우선순위 + 내 월급 계획 저금 줄 순서를 같이 바꿈
-- 우리 자산 순위(20261110140000, ADR 0006): 계산은 core `rankTopPct`·`rankState`(계산·배분 7-7, 2025 가계금융복지조사 순자산 분위 경계값 `RANK_BASIS.points`, 0원 아래만 2024 구간 분포). 연령대 비교는 core `rankAgeBand`(두 사람 출생연도 평균) + `RANK_AGE_MEDIAN`(연령대별 중앙값, 순위 없음), 배우자 출생연도는 DB 함수 `partner_birth_year()`(api `fetchPartnerBirthYear`, 키 `qk.partnerBirthYear`), 앱 훅 frame `useRankAge`. 그 밖에 core `rankNextStep`(다음 10% 칸까지), `rankChange`(지난달 월말 순자산으로 다시 계산), `debtRatioPct`, `financialPct` + `RANK_AGE_STATS`(연령대 부채 비율, 금융자산 비율). frame `useNetWorth`가 `prev`, `financialPct`도 돌려줌. 본 값은 사람마다 `app_user.rank_month`(그 달 1일)·`rank_pct`·`rank_net`에 저장(본인 행만, `updateMe`). 줄은 frame `RankBanner`(F-01 맨 위, 홈 우리 자산 H-04 바로 위), 레포트는 `/assets/rank`(F-08, ui `Distribution`). 광고는 브리지 `window.sweetwo.ads.rewarded()`(모바일 AdMob 보상형, 'rewarded'·'closed'·'failed'). 브리지가 없으면(데스크톱·브라우저) 광고 없이 바로, 'closed'면 Toast만, 'failed'면 광고 없이 바로. 모바일 AdMob 플러그인과 앱 ID·광고 단위 ID는 아직 없음(사람이 AdMob 계정을 만들어 넣음). 분석 이벤트 `rank_banner_tapped`, `rank_ad_result`, `rank_viewed`
+- 우리 자산 순위(20261110140000, ADR 0006): 계산은 core `rankTopPct`·`rankState`(계산·배분 7-7, 2025 가계금융복지조사 순자산 분위 경계값 `RANK_BASIS.points`, 0원 아래만 2024 구간 분포). 연령대 비교는 core `rankAgeBand`(두 사람 출생연도 평균) + `RANK_AGE_MEDIAN`(연령대별 중앙값, 순위 없음), 파트너 출생연도는 DB 함수 `partner_birth_year()`(api `fetchPartnerBirthYear`, 키 `qk.partnerBirthYear`), 앱 훅 frame `useRankAge`. 그 밖에 core `rankNextStep`(다음 10% 칸까지), `rankChange`(지난달 월말 순자산으로 다시 계산), `debtRatioPct`, `financialPct` + `RANK_AGE_STATS`(연령대 부채 비율, 금융자산 비율). frame `useNetWorth`가 `prev`, `financialPct`도 돌려줌. 본 값은 사람마다 `app_user.rank_month`(그 달 1일)·`rank_pct`·`rank_net`에 저장(본인 행만, `updateMe`). 줄은 frame `RankBanner`(F-01 맨 위, 홈 우리 자산 H-04 바로 위), 레포트는 `/assets/rank`(F-08, ui `Distribution`). 광고는 브리지 `window.sweetwo.ads.rewarded()`(모바일 AdMob 보상형, 'rewarded'·'closed'·'failed'). 브리지가 없으면(데스크톱·브라우저) 광고 없이 바로, 'closed'면 Toast만, 'failed'면 광고 없이 바로. 모바일 AdMob 플러그인과 앱 ID·광고 단위 ID는 아직 없음(사람이 AdMob 계정을 만들어 넣음). 분석 이벤트 `rank_banner_tapped`, `rank_ad_result`, `rank_viewed`
 - G-05 달성(20261101150000): `AchieveWatch`가 model의 모은 돈(서버 `goal_saved_sums`) ≥ 목표 금액이면 `achieve_goal` 후 축하 `/goals/:id/achieved`(사람마다 한 번)를 엶. 달성하면 `goal_lines_sync`가 저금 줄을 빼며 그 금액을 `goal.freed_lines`(월급 계획마다)에 남김 → 내 월급 계획 금액이 있으면 “매달 넣던 25만 원은 어디로 보낼까요?” `/goals/:id/achieved/send`(다른 목표 / 새 목표 만들기 / 월급 계획에서 정할게요) → 고른 곳(2026-11-04 사용 기록 `/goals/:id/use`와 사용 완료를 없앰. 옛 링크는 목표 상세로 보냄, `finish_goal_use`는 DB에 남지만 앱이 부르지 않음, 옛 `used` 목표는 앱 model이 달성으로 묶음): 다른 목표면 목표 고르기 후 내 월급 계획 그 저금 줄 + 금액(`save_split`, Toast ‘되돌리기’), 새 목표면 G-03a `?freed=`(추가하면 그 줄에), 월급 계획이면 W-01. 옛 `use_goal`·`move_goal_rest`·`goal_use`는 20261101180000에서 지움
 - 우리 목표 상대 알림·활동 기록은 `goal_partner_change`·`goal_move_partner_change`(20261031120000). 우리 ↔ 내 바꾸기도 상대 알림(20261102120000, 필드 `owner`). G-02: 달성했으면 “n원 모았어요” + ‘이 돈을 썼나요?’, 매년 목표는 다음에 쓰는 달·회차, 월별 기록 표(최근 12개월 + 더보기), 모은 돈 기록에 누가, 정보(만든 날·만든 사람·주인), 도움말(유형별 1개), 삭제 Toast ‘되돌리기’, ‘매달 넣을 돈 바꾸기’는 주인 탭으로(해제 대기면 꺼짐). 매년 목표 쓰는 달에 꺼내 쓰면 한 번 내년 금액을 물음(G-02a 안, 이 기기에서 한 해 한 번). G-01: 금액 없는 목표는 G-03b로, 늦으면 카드 아래 ‘월급 계획에서 저금 늘리기’, 접힌 목록은 보류 → 달성 → 사용 완료. G-03f 우선순위 위치 고르기. G-06은 두 사람 월급 계획 저금 줄 순서도 바꿈
-- 우리 → 내 목표(20261107090000 `goal_to_mine_guard`): 상대가 체크한 저금 줄이나 되돌리지 않은 넣기가 있으면 서버가 `partner_saved`로 막음, 비상금은 늘 우리 목표. 앱은 api `setGoalOwner`로 바꾸고 막히면 “{배우자}님도 모으고 있어서 바꿀 수 없어요”
-- 내 목표 공개(20261101233000): 앱은 목표를 `space_goals()`로 읽음. 배우자 내 목표가 `visibility = 'amount'`(금액만 보여 주기)면 서버가 이름 “개인 목표”, 종류 `custom`, 답 `{}`로 가려서 줌. 설정은 S-13 ‘내 목표’(모두 보여 주기 / 금액만 보여 주기). 테이블 직접 읽기(`goal_select`)는 아직 같은 공간이면 열려 있음 → 다음 단계에서 막기
+- 우리 → 내 목표(20261107090000 `goal_to_mine_guard`): 상대가 체크한 저금 줄이나 되돌리지 않은 넣기가 있으면 서버가 `partner_saved`로 막음, 비상금은 늘 우리 목표. 앱은 api `setGoalOwner`로 바꾸고 막히면 “{파트너}님도 모으고 있어서 바꿀 수 없어요”
+- 내 목표 공개(20261101233000): 앱은 목표를 `space_goals()`로 읽음. 파트너 내 목표가 `visibility = 'amount'`(금액만 보여 주기)면 서버가 이름 “개인 목표”, 종류 `custom`, 답 `{}`로 가려서 줌. 설정은 S-13 ‘내 목표’(모두 보여 주기 / 금액만 보여 주기). 테이블 직접 읽기(`goal_select`)는 아직 같은 공간이면 열려 있음 → 다음 단계에서 막기
 - 재기획으로 지운 화면(2026-10-26): G-04 충돌 조정, G-07 결혼 비용 전용 화면(결혼 비용은 보통 목표), G-08 제안, 첫 주 나머지 목표 `/goals/week`.
 
 ### 우리 자산 구조
 
 - 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`, F-04a `/assets/:id/matured/:step?`. 하위 탭은 “한눈에” “자산·부채” 2개, 기기에 기억
-- `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 배우자 명의 대신 입력 = person + `owner_user_id` null(모두 보여 주기만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
-- 공개 범위(`visibility` all / sum / private = “모두 보여 주기” / “금액만 보여 주기” / “숨기기”, 새 내 항목 기본 = 금액만)는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 모두 보여 주기, 내 명의, 내가 대신 입력한 것)만. 배우자 ‘금액만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘숨기기’는 아무것도 안 줌. 고치기는 `asset_editable()`
+- `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 파트너 명의 대신 입력 = person + `owner_user_id` null(모두 보여 주기만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
+- 공개 범위(`visibility` all / sum / private = “모두 보여 주기” / “금액만 보여 주기” / “숨기기”, 새 내 항목 기본 = 금액만)는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 모두 보여 주기, 내 명의, 내가 대신 입력한 것)만. 파트너 ‘금액만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘숨기기’는 아무것도 안 줌. 고치기는 `asset_editable()`
 - 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀)
-- 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 숨기기·판 항목 빼고 배우자 금액만 더함). 목표 모은 돈은 더하지 않음. 월말 순자산 `net_worth_history(개월)`
+- 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 숨기기·판 항목 빼고 파트너 금액만 더함). 목표 모은 돈은 더하지 않음. 월말 순자산 `net_worth_history(개월)`
 - F-01: 순자산 그래프(ui `LineChart`, 서버 `net_worth_history(120)` + 이번 달 지금 값, core `netWorthSeries`. 기간 탭 6개월·1년·3년·전체, 데이터보다 긴 기간 비활성, 고른 탭 기억 `sweetwo.networth-period`) + 자산·부채 합계(→ F-02)
-- F-02: 묶음(F-03a 그룹) 안 정렬 칩(이름, 명의, 금액, 수정일, 기억 `sweetwo.asset-sort`), 줄 배지는 공개 범위(내 항목)와 ‘대신 입력’만, 배우자 금액만 줄(알약 ‘금액만’), 투자 묶음 줄 core `investSummary`
+- F-02: 묶음(F-03a 그룹) 안 정렬 칩(이름, 명의, 금액, 수정일, 기억 `sweetwo.asset-sort`), 줄 배지는 공개 범위(내 항목)와 ‘대신 입력’만, 파트너 금액만 줄(알약 ‘금액만’), 투자 묶음 줄 core `investSummary`
 - F-03 유형별 질문(F-03f~h, 모두 ‘나중에 할게요’ 가능): 적금 = 만기일 → 월 납입액, 청약 = 납입 회차(`paid_count`) → 월 납입액, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액. 월 납입·상환액은 기록만(월급 계획과 연결 없음). 카드론·현금서비스·리볼빙은 끝나고 ‘목표 만들기’ Toast
-- F-04: 금액 수정(만기일·월 납입액 등은 보기만, 아래 F-04 참고), 공개 범위(내 명의만), 삭제는 휴지통 + 되돌리기. 배우자 명의는 보기만
+- F-04: 금액 수정(만기일·월 납입액 등은 보기만, 아래 F-04 참고), 공개 범위(내 명의만), 삭제는 휴지통 + 되돌리기. 파트너 명의는 보기만
 - F-04a 만기된 돈 정리(20261101090000): 만기일이 지난(오늘 포함) 내가 고칠 수 있는 자산(전세 보증금 빼고). a “만기된 돈은 어디로 옮겼어요?” 다른 통장으로 → 통장 고르기(현금성·예금·적금 중 내가 고칠 수 있는 것, 고르면 바로) / 다시 가입했어요 → 새 만기일(오늘 뒤). 서버 `settle_matured(항목, 통장 | 새 만기일)`: 통장 금액 + 만기 금액, 항목은 `asset_status` ‘matured’(만기 완료, `fetchAssets`·core `netWorth`에서 빠지고 지난 순자산 기록은 그대로)
 - 재기획으로 화면에서 뺀 것: 통장 역할 배지, 목표 연결(F-03f2 빠지는 통장 `pay_from`, F-03i·F-04 `goal_id`), F-01 비상금 카드·이번 달 카드·이번 달 계획·월 정산 요약, F-06 재정 진단 탭. `asset.pay_from`·`goal_id` 열은 남겨 두고(스키마는 2단계로 지움) 새로 쓰지 않음
 - 재기획으로 지운 화면(2026-10-26): F-05 월 수입·지출, F-05f 기간 수입, F-07 계획 다시 세우기, F-09 비상금 넣기·꺼내기, O-53 투자 원칙, 첫 주 O-34~47. 남은 옛 읽기: 통장(`account`)
@@ -806,8 +806,8 @@ supabase/
 ### 테스트
 
 - core 계산과 포맷: Vitest 단위 테스트. 계산·배분 탭의 예시를 그대로 테스트 케이스로
-- DB 함수와 RLS: pgTAP. ‘배우자가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
-- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 월급 체크, 배우자 체크리스트는 보기만(체크 칸은 누를 수 없음, 2026-11-03 대신 체크 없앰)
+- DB 함수와 RLS: pgTAP. ‘파트너가 비공개 항목을 못 본다’ 같은 권한 테스트는 필수
+- 화면 흐름: Playwright E2E. 두 계정(찬우, 예빈)으로 합류, 월급 체크, 파트너 체크리스트는 보기만(체크 칸은 누를 수 없음, 2026-11-03 대신 체크 없앰)
 - 화면 e2e는 `vite --mode e2e`(apps/mobile/.env.e2e, 가짜 Supabase 주소)로 브라우저에 띄우고 `e2e/supabase-mock.ts`가 응답을 흉내 낸다. 실제 DB 규칙은 pgTAP이 맡음
 - 테스트 데이터의 예시 이름은 찬우(시작한 사람), 예빈(합류한 사람)
 
@@ -827,6 +827,7 @@ supabase/
 - 화면 문구는 기획서 화면 요소 표의 “ ” 안 문장을 그대로. 해요체
 - 문구는 기능 폴더마다 copy.ts에 모음. 한국어만 지원, 다국어 프레임워크 없음
 - 오류 문구에 기술 용어와 오류 코드를 보이지 않음
+- 사용자에게 ‘배우자’, ‘부부’라고 쓰지 않음(결혼하지 않은 커플도 씀). 상대는 애칭, 없으면 ‘파트너’. 두 사람은 앱 ‘우리 둘’, 어드민 ‘커플’(2026-11-06). 서버 알림도 애칭이 없으면 “파트너가 합류했어요”처럼(‘파트너님이’ 아님). 결혼 상태 선택지(예비부부, 신혼)와 결혼 준비 내용은 그대로
 
 ### 단축키
 
@@ -878,7 +879,7 @@ supabase/
 - 로그: 금액, 메모, 이름을 남기지 않음. Sentry는 보내기 전에 걸러내기(beforeSend), PostHog는 금액을 구간으로만
 - 비밀 값: 코드와 저장소에 두지 않음. Supabase 비밀 값과 GitHub Actions secrets만. service role 키는 서버 밖으로 나가지 않음
 - 보관 기간: 휴지통 30일, 알림 90일, 변경 이력 13개월, 결제 기록 5년, 접속 기록 3개월. pg\_cron이 정리
-- 탈퇴: 30일 유예 후 삭제. 부부 상태에 따른 처리는 기획서 규칙 그대로
+- 탈퇴: 30일 유예 후 삭제. 우리 둘 상태에 따른 처리는 기획서 규칙 그대로
 
 ### 출시 전 확인
 
@@ -1016,7 +1017,7 @@ supabase/
 
 - 오류: Sentry (데스크톱, 모바일, Edge Functions)
 - 가용성과 상태 페이지: Better Stack. 목표 99.5%
-- 제품 지표: PostHog. North Star는 월급 체크를 한 부부 수(→ 기획서 성공 지표)
+- 제품 지표: PostHog. North Star는 월급 체크를 한 커플 수(→ 기획서 성공 지표)
 - 백업: 매일, 30일 보관, 분기마다 복구 훈련. RPO 24시간, RTO 4시간
 - 성능 목표: 앱 시작 2초, 화면 전환 0.3초, 동기화 p95 3초
 
@@ -1095,14 +1096,14 @@ supabase/
 
 ## MVP 순서
 
-두 사람이 같이 쓰는 흐름이 핵심이라, 부부 연결과 동기화를 먼저 만들고 그 위에 기능을 올림. 단계별 기간은 인원이 정해지면 채움.
+두 사람이 같이 쓰는 흐름이 핵심이라, 우리 둘 연결과 동기화를 먼저 만들고 그 위에 기능을 올림. 단계별 기간은 인원이 정해지면 채움.
 
 1. 기반: 모노레포, CI, 디자인 시스템 패키지, Electron 껍데기와 Capacitor 껍데기, Supabase 환경 3개
-2. 로그인과 부부 연결: 소셜 로그인 3종, 딥링크, 잠금, 초대 링크와 6자리 코드, 합류 (A, P 화면)
+2. 로그인과 우리 둘 연결: 소셜 로그인 3종, 딥링크, 잠금, 초대 링크와 6자리 코드, 합류 (A, P 화면)
 3. 동기화 뼈대: change\_log, Realtime 구독, 델타 동기화, 충돌 규칙, 휴지통
 4. 자산과 목표: 자산, 부채, 목표 21종과 그림, 공개 범위
 5. 한 달 흐름: 월급 계획(W-01), 월급날 체크리스트(W-02, 기준일 0시 예약 작업 포함), 월말 확인(W-05), 관리 방식 각자·합쳐서
-6. 부부 권한: 바로 고치기 + 상대 알림·활동 기록 + 되돌리기(제안·승인 없음, ADR 0003), 연결 해제
+6. 두 사람 권한: 바로 고치기 + 상대 알림·활동 기록 + 되돌리기(제안·승인 없음, ADR 0003), 연결 해제
 7. 알림과 캘린더: 데스크톱 로컬 알림, 이메일, 방해 금지 시간, 양가 캘린더와 음력, 트레이 위젯
 8. 어드민과 출시 준비: 어드민 필수 메뉴(AD-19 항목 이름 목록·계산 설정값 포함), 문서 메뉴(AD-20, 저장소 docs/ 읽기 전용), 내보내기(CSV, PDF), 웹사이트 L-01\~L-03, L-05, L-06과 다운로드 고정 주소, 서명과 업데이트, 보안 점검
 9. 내부 테스트와 정식 출시: 지인 20\~30쌍 내부 테스트(운영 환경), 출시 준비 탭의 QA 매트릭스와 출시 승인 기준을 넘으면 전체 공개로 출시(단계 배포는 이후 업데이트부터)
@@ -1131,15 +1132,15 @@ supabase/
 | 순서 | 단계 | 화면 |
 | --- | --- | --- |
 | 1 | 기반 | 앱 기본 틀(이번 달 탭의 공통 틀), 공통 상태 |
-| 2 | 로그인과 부부 연결 | A-01\~08, O-01, P-01\~11, S-12(초대·연결 해제) |
+| 2 | 로그인과 우리 둘 연결 | A-01\~08, O-01, P-01\~11, S-12(초대·연결 해제) |
 | 3 | 동기화 뼈대 | 화면 없음(휴지통 S-21만) |
 | 4 | 자산과 목표 | O-03\~O-32·O-60(온보딩), F-(우리 자산, F-08b 제외), G-(목표) |
 | 5 | 한 달 흐름 | H-(홈, 검색 포함), W-01, W-02, W-05 |
-| 6 | 부부 권한 | N-(활동 기록), S-12 해제 대기 |
+| 6 | 두 사람 권한 | N-(활동 기록), S-12 해제 대기 |
 | 7 | 알림과 캘린더 | N-01\~03, Y-(캘린더), WG-01\~05(데스크톱 트레이 위젯 창만) |
 | 8 | 어드민과 출시 준비 | AD-(필수 메뉴, AD-19·AD-20 포함), S-01\~22 나머지, L-01\~03·L-05·L-06 |
 
-- 1차 밖: 비슷한 부부와 비교(F-08b), 수익률 시뮬레이션, 양가 균형 리포트, 결제·체험(S-16·AD-08·AD-09), OS 기본 위젯, 모바일 앱, Windows Hello
+- 1차 밖: 비슷한 커플과 비교(F-08b), 수익률 시뮬레이션, 양가 균형 리포트, 결제·체험(S-16·AD-08·AD-09), OS 기본 위젯, 모바일 앱, Windows Hello
 
 ### 기술 준비
 
@@ -1154,7 +1155,7 @@ supabase/
 - [ ] 관측: Sentry, PostHog 자체 운영 서버, Better Stack(상태 페이지)
 - [ ] 메일: 네이버웍스 help@, privacy@ 그룹 메일, SPF는 TXT 한 줄에 네이버웍스와 SES
 - [ ] DB 마이그레이션 순서(테이블마다 공통 컬럼 + RLS 정책 4개 + pgTAP): ① 공통 틀(is\_space\_member, updated\_at·version·change\_log 트리거) ② couple\_space, app\_user, invite, device\_session, consent ③ change\_log(seq, mutation\_id), amount\_history ④ account, asset, debt, fixed\_expense, annual\_event ⑤ goal, goal\_move, salary\_split, split\_line, pay\_checklist, pay\_check\_line, checklist\_done ⑥ couple\_unlink, partner\_change ⑦ care\_day, care\_record, photo ⑧ notification, widget\_setting ⑨ inquiry, admin\_view\_request, holiday, notice, maintenance, app\_config, admin\_setting, item\_catalog, admin\_user, audit\_log, job\_run
-- [ ] seed.sql: 찬우, 예빈, 연결된 부부 공간, 월급 계획과 이번 달 체크리스트
+- [ ] seed.sql: 찬우, 예빈, 연결된 우리 둘 공간, 월급 계획과 이번 달 체크리스트
 - [ ] 예약 작업 8개와 job\_run 기록, space별 advisory lock: cycle-checklists, send-due-notifications, send-payday-reminders, send-evening-reminders, unlink-deadlines, send-weekly-summary, sync-holidays, purge-expired
 - [ ] 알림 키: notification.kind를 기획서 ‘알림’ 탭 표의 종류와 1:1로, SES 템플릿(supabase/functions/\_shared/mail-templates/), 메일 상한 월 6회
 - [ ] 분석 이벤트: 기획서 ‘성공 지표’ 4장 이벤트 이름과 속성, 공통 속성, 금액은 \_band 구간만, analytics\_off

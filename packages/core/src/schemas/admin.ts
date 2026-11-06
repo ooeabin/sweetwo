@@ -223,7 +223,7 @@ export type AdminAccessData = z.infer<typeof AdminAccessData>;
 export const ACCESS_SCOPES = ['month', 'goals', 'assets', 'calendar'] as const;
 
 // ── AD-10 공지 대상(27 AD-10·11 2·4번) ───────────────────────────────────
-/** 부부 상태: 미합류 / 연결 / 해제 대기 / 혼자 쓰기(AD-03과 같은 값) */
+/** 커플 상태: 미합류 / 연결 / 해제 대기 / 혼자 쓰기(AD-03과 같은 값) */
 export const NOTICE_COUPLE_STATES = ['not_joined', 'connected', 'unlink_pending', 'solo'] as const;
 export const NOTICE_VERSION = /^\d{1,4}\.\d{1,4}\.\d{1,4}$/;
 

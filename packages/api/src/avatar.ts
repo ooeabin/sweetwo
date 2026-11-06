@@ -65,7 +65,7 @@ export async function removeAvatar(spaceId: string, userId: string) {
     .remove([`${spaceId}/${userId}.jpg`]);
 }
 
-/** 소셜 사진을 가져올 차례인지: 부부 공간이 있고, 사진이 없고, 아직 시도하지 않았을 때(25 S-11e) */
+/** 소셜 사진을 가져올 차례인지: 우리 둘 공간이 있고, 사진이 없고, 아직 시도하지 않았을 때(25 S-11e) */
 export async function needsSocialAvatar(): Promise<boolean> {
   const { data, error } = await supabase()
     .from('app_user')

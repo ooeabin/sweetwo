@@ -119,7 +119,7 @@ const isFinancial = (grp: string, kind?: string) =>
 
 /**
  * 우리 금융자산 비율(F-08 6a): 금융자산 ÷ 자산(평가금액), 반올림 %. 비공개·판 항목 제외.
- * 배우자 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
+ * 파트너 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
  */
 export function financialPct(
   items: (NetWorthItem & { grp: string; kind?: string })[],

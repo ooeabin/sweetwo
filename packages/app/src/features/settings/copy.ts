@@ -15,7 +15,7 @@ export const copy = {
     solo: '혼자 쓰는 중',
   },
   rows: {
-    couple: '부부 정보',
+    couple: '우리 둘 정보', // [확인 필요]
     visibility: '공개 범위',
     visibilityValue: (v: string) => `내 자산 ${v}`, // [확인 필요]
     noti: '알림',
@@ -114,14 +114,14 @@ export const copy = {
   openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
   seeProposal: '제안 보기', // [확인 필요]
 
-  // S-12 부부 정보
-  coupleTitle: '부부 정보',
+  // S-12 우리 둘 정보
+  coupleTitle: '우리 둘 정보', // [확인 필요]
   connected: '연결됨',
   weddingPlanned: '결혼 예정일',
   weddingDone: '결혼일',
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
   inviteFirst: (name: string) => `${name}님을 초대해 주세요`,
-  inviteFirstAny: '배우자를 초대해 주세요', // [확인 필요] 새로 초대(호칭 없음)
+  inviteFirstAny: '파트너를 초대해 주세요', // [확인 필요] 새로 초대(호칭 없음)
   inviteMake: '초대 코드 만들기',
   inviteCode: '초대 코드', // [확인 필요] 줄 이름
   inviteUntil: (md: string) => `${md}까지`,
@@ -316,7 +316,7 @@ export const copy = {
       string,
       string
     >,
-    careCats: { family: '양가', couple: '부부', wedding: '결혼' } as Record<string, string>,
+    careCats: { family: '양가', couple: '우리 둘', wedding: '결혼' } as Record<string, string>, // [확인 필요]
     paidFrom: {
       goal_fund: '목표자금',
       living: '생활비',
@@ -329,7 +329,7 @@ export const copy = {
   // S-18b 계정 삭제
   deleteMine: (n: number) => `내 명의 항목 ${n}개는 지워져요`,
   deleteSharedGone: '같이 쓰던 데이터도 모두 지워져요',
-  deleteWholeSpace: '부부 공간 전체 삭제',
+  deleteWholeSpace: '우리 둘 공간 전체 삭제', // [확인 필요]
   deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
   deleteWith: (p: string) => `${p}로 확인하고 삭제`,
   deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목
@@ -359,7 +359,7 @@ export const copy = {
   categoryLabel: '분류', // [확인 필요]
   categories: {
     account: '계정·로그인',
-    couple: '부부 연결',
+    couple: '우리 둘 연결', // [확인 필요]
     calc: '목표·월급 체크리스트', // [확인 필요] 27 AD-06
     sync: '동기화',
     billing: '결제·환불',
@@ -369,7 +369,7 @@ export const copy = {
   bodyLabel: '내용',
   bodyHelp: '금액이나 계좌번호는 적지 않아도 돼요', // [확인 필요]
   attachApp: '앱 정보 함께 보내기',
-  attachAppSub: '앱 버전, OS, 부부 상태. 금액과 메모는 보내지 않아요', // [확인 필요]
+  attachAppSub: '앱 버전, OS, 우리 둘 상태. 금액과 메모는 보내지 않아요', // [확인 필요]
   sendInquiry: '보내기',
   inquirySent: (no: string) => `문의 #${no}를 받았어요`,
   inquiryStatus: {
@@ -460,7 +460,7 @@ export const copy = {
     care: '챙길 날',
     money: '돈 날짜',
     goal: '목표',
-    invite: '배우자 초대',
+    invite: '파트너 초대', // [확인 필요]
   },
   partnerChangeSub: '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
@@ -481,7 +481,7 @@ export const copy = {
   checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
   forUs: '우리 상황에 맞는 글', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름
-  talkCards: '부부 대화 카드 다시 보기',
+  talkCards: '우리 둘 대화 카드 다시 보기', // [확인 필요]
   steps: '해야 할 일', // [확인 필요] 요소 이름
   sources: '출처', // [확인 필요] 요소 이름
   checked: (date: string) => `확인일 ${date}`,
@@ -557,11 +557,11 @@ export const copy = {
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
   photoPick: '사진 고르기',
   photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
-  // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]
+  // 파트너가 아직 합류 전이면 이름이 없어 ‘파트너와’로 [확인 필요]
   photoNotice: (partner: string) =>
     partner
       ? `올린 사진은 ${partner}님과 나만 볼 수 있어요`
-      : '올린 사진은 배우자와 나만 볼 수 있어요',
+      : '올린 사진은 파트너와 나만 볼 수 있어요', // [확인 필요]
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',

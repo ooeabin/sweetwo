@@ -73,7 +73,7 @@ export async function fetchNotification(id: string): Promise<Notification | null
 }
 
 // ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것 중 나에게 맞는 것만 ──────────────
-// 대상 조건(플랫폼, 부부 상태, 앱 버전, 가입 주차)은 서버 my_notices가 봄. 앱 버전은 브리지 값(웹은 없음)
+// 대상 조건(플랫폼, 우리 둘 상태, 앱 버전, 가입 주차)은 서버 my_notices가 봄. 앱 버전은 브리지 값(웹은 없음)
 export async function fetchActiveNotices(
   platform: 'desktop' | 'ios' | 'android' | 'web',
   version?: string,

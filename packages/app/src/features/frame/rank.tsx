@@ -37,7 +37,7 @@ export function useRank(): { state: RankState; net: number; view: NetWorthView }
   };
 }
 
-/** 연령대 비교(계산·배분 7-7): 나와 배우자 출생연도 평균 나이. 아무도 안 적었으면 null */
+/** 연령대 비교(계산·배분 7-7): 나와 파트너 출생연도 평균 나이. 아무도 안 적었으면 null */
 export function useRankAge(): RankAgeBand | null {
   const me = useMe();
   const py = useQuery({ queryKey: qk.partnerBirthYear, queryFn: fetchPartnerBirthYear });

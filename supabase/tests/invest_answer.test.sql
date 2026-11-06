@@ -1,4 +1,4 @@
--- pgTAP: 투자 원칙 답(O-53). 내 답만 고치고, 배우자 답은 invest_answers()로만 봄
+-- pgTAP: 투자 원칙 답(O-53). 내 답만 고치고, 파트너 답은 invest_answers()로만 봄
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(4);
@@ -30,11 +30,11 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select public.finish_join();
 select results_eq($$ select mine::text, partner::text from public.invest_answers() $$,
-  $$ values (null::text, 'some') $$, '배우자 답이 보임');
+  $$ values (null::text, 'some') $$, '파트너 답이 보임');
 update public.app_user set invest_answer = 'keep' where id = '11111111-1111-1111-1111-111111111111';
 update public.app_user set invest_answer = 'keep' where id = '22222222-2222-2222-2222-222222222222';
 select results_eq($$ select mine::text, partner::text from public.invest_answers() $$,
-  $$ values ('keep', 'some') $$, '배우자 답은 못 고침, 내 답만');
+  $$ values ('keep', 'some') $$, '파트너 답은 못 고침, 내 답만');
 select throws_ok($$ update public.app_user set status = 'active' $$, '42501', null,
   '허용한 칸 말고는 못 고침');
 reset role;

@@ -117,7 +117,7 @@ export async function updateSpace(patch: SpacePatch) {
   fail(error);
 }
 
-// 서버 space_goals(): 배우자 내 목표가 ‘금액만 보여 주기’면 이름 대신 “개인 목표”(22 공개, 25 S-13)
+// 서버 space_goals(): 파트너 내 목표가 ‘금액만 보여 주기’면 이름 대신 “개인 목표”(22 공개, 25 S-13)
 export async function fetchGoals(): Promise<Goal[]> {
   const { data, error } = await supabase()
     .rpc('space_goals')
@@ -212,7 +212,7 @@ export async function fetchAccounts(): Promise<Account[]> {
   return data ?? [];
 }
 
-// 배우자 프로필(같은 공간 다른 사람). 없으면 null
+// 파트너 프로필(같은 공간 다른 사람). 없으면 null
 export type PartnerProfile = {
   id: string;
   nickname: string | null;
@@ -226,7 +226,7 @@ export type PartnerProfile = {
   /** 다른 수입 월 합계(O-35b) */
   other_income: number;
 };
-/** 배우자 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 배우자가 없거나 안 적었으면 null */
+/** 파트너 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 파트너가 없거나 안 적었으면 null */
 export async function fetchPartnerBirthYear(): Promise<number | null> {
   const { data, error } = await supabase().rpc('partner_birth_year');
   fail(error);

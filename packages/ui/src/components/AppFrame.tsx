@@ -82,7 +82,7 @@ export interface AppFrameProps {
   onNoti?: () => void;
   onSettings?: () => void;
   onAdd?: () => void;
-  /** 홈 머리 두 사람: 배우자가 아직 없으면 눌러서 초대(S-12) */
+  /** 홈 머리 두 사람: 파트너가 아직 없으면 눌러서 초대(S-12) */
   onInvite?: () => void;
   hasNewNoti?: boolean;
   people: AppFramePerson[];
@@ -96,7 +96,7 @@ export interface AppFrameProps {
 }
 
 function Person({ p }: { p: AppFramePerson }) {
-  // 배우자 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음(2026-11-05 그림 파일은 만들지 않음)
+  // 파트너 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음(2026-11-05 그림 파일은 만들지 않음)
   if (p.empty)
     return (
       <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
@@ -232,7 +232,7 @@ export function AppFrame(p: AppFrameProps) {
           {(() => {
             const body = (
               <>
-                {/* 배우자 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
+                {/* 파트너 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
                 <span className="hg-avatars" aria-hidden="true">
                   {p.people.map((x) => (
                     <Person key={x.no} p={x} />

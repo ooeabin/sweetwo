@@ -1,4 +1,4 @@
--- pgTAP: 알림 설정. 내 설정만 바꿈, 앞당기기는 부부 공통으로 바꿈, 알림 묶음 열
+-- pgTAP: 알림 설정. 내 설정만 바꿈, 앞당기기는 커플 공통으로 바꿈, 알림 묶음 열
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(5);

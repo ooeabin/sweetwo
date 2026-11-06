@@ -5,7 +5,7 @@ import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 import { setWheel } from './wheel';
 
-// 배우자 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
+// 파트너 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
 // 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 비상금 44만, 내 집 마련 95만).
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -51,7 +51,7 @@ async function answerBasics(page: Page, waiting = false) {
   await page.goto('/');
   await expect(page).toHaveURL(/\/join\/p-03$/);
   await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
-  await expect(page.getByText('배우자에게도 이 이름으로 보여요')).toBeVisible();
+  await expect(page.getByText('파트너에게도 이 이름으로 보여요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();

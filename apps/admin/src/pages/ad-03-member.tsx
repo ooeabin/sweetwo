@@ -27,7 +27,7 @@ import { useAdmin } from '../gate';
 type L1Scope = 'email' | 'sign_ins' | 'payments';
 const REVEAL_MS = 30 * 60_000;
 
-// AD-03 회원·부부 상세(L0: 구조 정보만, 금액·항목명·메모 없음). 글자 선택·복사 막음(hg-admin__main).
+// AD-03 회원·커플 상세(L0: 구조 정보만, 금액·항목명·메모 없음). 글자 선택·복사 막음(hg-admin__main).
 // ‘개인정보 보기’ = AD-04 L1(사유 + 문의 번호 → 30분 표시 후 다시 가림), ‘계정 조치’ = AD-05.
 // L2 동의 요청은 문의(AD-06)에서. 동의가 있으면 위 띠 + ‘보기’(동의 범위만, 읽기 전용). 운영 역할은 버튼 없음.
 export function AD03Member() {

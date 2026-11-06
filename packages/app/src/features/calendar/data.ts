@@ -46,7 +46,7 @@ export function useCalendarData() {
   const sp = space.data;
   const c = me.data && sp ? coupleOf(me.data, sp, partner.data ?? null) : null;
   const joint = sp?.salary_mode === 'joint';
-  // 월급날: 각자 = 사람마다(배우자는 합류했을 때), 합쳐서 = 체크리스트를 만드는 날 하나
+  // 월급날: 각자 = 사람마다(파트너는 합류했을 때), 합쳐서 = 체크리스트를 만드는 날 하나
   const paydays: { name: string; day: BaseDay | null }[] = !c
     ? []
     : joint

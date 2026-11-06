@@ -1,4 +1,4 @@
--- pgTAP: 다녀온 뒤 기록(Y-08). 다녀왔어요, 기록만(목표·월급 계획은 안 건드림), 다른 부부 막힘
+-- pgTAP: 다녀온 뒤 기록(Y-08). 다녀왔어요, 기록만(목표·월급 계획은 안 건드림), 다른 커플 막힘
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(5);
@@ -42,7 +42,7 @@ select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select throws_ok(format($$ select public.record_care(%L, '2026-10-14', 1, 'personal', '{}', null, null, 0) $$,
-  current_setting('test.c')), '42501', null, '다른 부부 챙길 날은 기록 못 함');
+  current_setting('test.c')), '42501', null, '다른 커플 챙길 날은 기록 못 함');
 reset role;
 
 select * from finish();

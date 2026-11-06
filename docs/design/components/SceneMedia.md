@@ -9,4 +9,4 @@
 
 - 2026-11-05 장면 3D 그림이 생김: P-01은 `scene-invite`(3:4, 열린 봉투), P-11은 `scene-clap`(박수, 2026-11-05 두 장 다 움직이는 그림 `Illustration motion`: 한 번 재생, 동작 줄이기면 정지)를 QuestionLayout 주인공 자리(`hero`)에 `Illustration` + `hg-sceneart`(120px, 초대는 `--tall` 120×160)로 넣음. SceneMedia 빈 칸은 그림이 없는 화면에만 남음.
 
-쓰는 곳: P-11 배우자 합류 완료(`scene-clap`), P-01 초대받은 사람 첫 화면(`scene-invite`, 3:4). A-02 로그인 첫 화면은 이 자리에 영어 워드마크(`Wordmark`)를 넣어 SceneMedia를 쓰지 않음.
+쓰는 곳: P-11 파트너 합류 완료(`scene-clap`), P-01 초대받은 사람 첫 화면(`scene-invite`, 3:4). A-02 로그인 첫 화면은 이 자리에 영어 워드마크(`Wordmark`)를 넣어 SceneMedia를 쓰지 않음.

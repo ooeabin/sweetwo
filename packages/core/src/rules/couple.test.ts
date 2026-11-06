@@ -25,7 +25,7 @@ const space: CoupleSpace = {
 };
 
 describe('두 사람 기준(18 예시값)', () => {
-  it('합류 전 찬우: 배우자 이름은 찬우가 적은 호칭, 수입은 모름', () => {
+  it('합류 전 찬우: 파트너 이름은 찬우가 적은 호칭, 수입은 모름', () => {
     const c = coupleOf(chanwoo, space, null);
     expect(c).toMatchObject({
       joined: false,
@@ -44,7 +44,7 @@ describe('두 사람 기준(18 예시값)', () => {
     });
     expect(coupleBaseDay(c)).toBe(25);
   });
-  it('예빈 화면: 배우자는 찬우(합류 중에도)', () => {
+  it('예빈 화면: 파트너는 찬우(합류 중에도)', () => {
     const c = coupleOf(yebin, space, chanwoo);
     expect(c).toMatchObject({
       starter: false,
