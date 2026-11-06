@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a344120). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (54cb336). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1369,24 +1369,61 @@ a.hg-btn { text-decoration: none; }
   .hg-site__h2 { font: 600 22px/30px var(--font-sans); letter-spacing: -0.2px; }
 }
 
+/* 어드민 주 색(2026-11-06): 어드민 안에서만 브랜드 오렌지 대신 잉크(밝은 화면 검정, 다크 화면 흰색). 워드마크도 흑백(Wordmark tone="mono") */
+.hg-admin, .hg-adminauth { --brand: var(--ink); --brand-pressed: var(--primary-pressed); --on-brand: var(--on-ink); --brand-soft: var(--surface-alt); --brand-ink: var(--ink); }
+.hg-wordmark--mono .hg-wordmark__dark { display: none; }
+[data-theme="dark"] .hg-wordmark--mono .hg-wordmark__light { display: none; }
+[data-theme="dark"] .hg-wordmark--mono .hg-wordmark__dark { display: block; }
+.hg-wordmark--mono img { display: block; }
+
+/* AdminAuth: 어드민 로그인·2단계 인증. 연회색 바탕 가운데 흰 카드 400px(Laravel Cloud, Stripe, Buffer) */
+.hg-adminauth { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); min-height: 100vh; padding: var(--space-8) var(--space-4); background: var(--surface-alt); color: var(--ink); font: 400 14px/20px var(--font-sans); }
+.hg-adminauth__card { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: 400px; padding: var(--space-8); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); }
+.hg-adminauth__brand { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-8); }
+.hg-adminauth__brand .hg-tag { height: 18px; padding: 0 6px; font-size: 11px; }
+.hg-adminauth__icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: var(--space-4); border-radius: var(--radius-md); background: var(--surface-alt); color: var(--ink); }
+.hg-adminauth__icon .hg-ico { width: 20px; height: 20px; }
+.hg-adminauth__title { margin: 0; font: 600 20px/28px var(--font-sans); letter-spacing: -0.2px; }
+.hg-adminauth__help { margin: var(--space-1) 0 0; font: 400 14px/20px var(--font-sans); color: var(--stone); }
+.hg-adminauth__body { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-6); }
+.hg-adminauth__body > form { display: flex; flex-direction: column; gap: var(--space-3); }
+.hg-adminauth .hg-field { max-width: none; gap: var(--space-1); }
+.hg-adminauth .hg-field__label { font: 600 13px/18px var(--font-sans); color: var(--ink); }
+.hg-adminauth .hg-input { height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-md); font: 400 14px/20px var(--font-sans); }
+.hg-adminauth .hg-input[inputmode="numeric"] { height: 48px; text-align: center; font: 600 22px/28px var(--font-sans); letter-spacing: 0.5em; font-variant-numeric: tabular-nums; }
+.hg-adminauth .hg-btn { width: 100%; height: 40px; border-radius: var(--radius-md); font: 600 14px/20px var(--font-sans); }
+.hg-adminauth .hg-help { margin: 0; font-size: 13px; line-height: 18px; }
+.hg-adminauth__qr { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3); border: 1px solid var(--hairline-soft); border-radius: var(--radius-md); }
+.hg-adminauth__qr { background: var(--surface); }  /* QR은 다크에서도 흰 바탕(요소에 data-theme="light") */
+.hg-adminauth__qr img { flex: none; }
+.hg-adminauth__qr code { min-width: 0; overflow-wrap: anywhere; font-size: 12px; line-height: 18px; }
+.hg-adminauth__foot { margin: 0; font: 400 12px/16px var(--font-sans); color: var(--stone); text-align: center; }
+
 /* AdminFrame: 어드민 틀. 기준 1440, 최소 1280.
    2026-11-06 업무 도구답게: 연회색 사이드바(묶음) + 흰 본문 한 판(상단 바: 전역 검색 + 관리자), 카드 대신 1px 테두리, 글자 13~14px, 표 줄 36px */
 .hg-admin { box-sizing: border-box; display: grid; grid-template-columns: 224px minmax(0, 1fr); width: 100%; min-width: 1280px; min-height: 100vh; background: var(--surface-alt); color: var(--ink); font: 400 14px/20px var(--font-sans); }
-.hg-admin__side { position: sticky; top: 0; display: flex; flex-direction: column; gap: 2px; height: 100vh; box-sizing: border-box; padding: var(--space-3) var(--space-3) var(--space-4); overflow-y: auto; }
-.hg-admin__brand { display: flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-2); margin-bottom: var(--space-2); }
+.hg-admin__side { position: sticky; top: 0; display: flex; flex-direction: column; gap: 1px; height: 100vh; box-sizing: border-box; padding: var(--space-3) var(--space-2) var(--space-2); overflow-y: auto; }
+.hg-admin__brand { display: flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-2); margin-bottom: var(--space-3); }
+.hg-admin__brand .hg-tag { height: 18px; padding: 0 6px; font-size: 11px; }
 .hg-admin__brand .hg-wordmark, .hg-admin__brand svg, .hg-admin__brand img { height: 22px; width: auto; }
-.hg-admin__group { margin: var(--space-4) 0 var(--space-1); padding: 0 var(--space-2); font: 600 12px/16px var(--font-sans); color: var(--stone); }
+.hg-admin__group { margin: var(--space-5) 0 var(--space-1); padding: 0 var(--space-2); font: 500 12px/16px var(--font-sans); color: var(--stone); }
 .hg-admin__group:first-of-type { margin-top: var(--space-1); }
-.hg-admin .hg-nav { gap: var(--space-2); height: 34px; padding: 0 var(--space-2); border-radius: var(--radius-md); font: 500 14px/20px var(--font-sans); color: var(--slate); }
-.hg-admin .hg-nav .hg-ico { width: 18px; height: 18px; }
+.hg-admin .hg-nav { gap: 10px; height: 32px; padding: 0 var(--space-2); border-radius: var(--radius-md); font: 500 14px/20px var(--font-sans); color: var(--ink-2); }
+.hg-admin .hg-nav .hg-ico { width: 16px; height: 16px; color: var(--slate); }
 .hg-admin .hg-nav:hover { background: var(--hairline-soft); color: var(--ink); }
-.hg-admin .hg-nav.is-active { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: inset 0 0 0 1px var(--hairline-soft); }
-.hg-admin .hg-nav__count { min-width: 18px; height: 18px; padding: 0 5px; background: var(--hairline); color: var(--slate); font-size: 11px; }
-.hg-admin .hg-nav.is-active .hg-nav__count { background: var(--ink); color: var(--on-ink); }
+.hg-admin .hg-nav.is-active { background: var(--hairline-soft); color: var(--ink); font-weight: 600; }
+.hg-admin .hg-nav.is-active .hg-ico { color: var(--ink); }
+.hg-admin .hg-nav__count { min-width: 18px; height: 18px; padding: 0 5px; background: none; color: var(--stone); font: 500 12px/1 var(--font-sans); }
+.hg-admin .hg-nav.is-active .hg-nav__count { background: none; color: var(--ink); }
 .hg-admin__main { position: relative; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; min-height: 100vh; border-left: 1px solid var(--hairline-soft); background: var(--surface); user-select: none; }
 .hg-admin__bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--space-4); height: 56px; padding: 0 var(--space-6); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); }
 .hg-admin__bar .hg-search { width: 440px; height: 36px; border-radius: var(--radius-md); background: var(--surface-alt); border-color: transparent; }
 .hg-admin__bar .hg-search input { font: 400 14px/20px var(--font-sans); }
+.hg-admin__account { display: flex; align-items: center; gap: var(--space-2); margin-top: auto; padding: var(--space-2); border-top: 1px solid var(--hairline-soft); }
+.hg-admin__account .hg-avatar { width: 28px; height: 28px; background: var(--ink); color: var(--on-ink); font-size: 12px; }
+.hg-admin__account-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.hg-admin__account-text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 13px/18px var(--font-sans); }
+.hg-admin__account-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12px/16px var(--font-sans); color: var(--stone); }
 .hg-admin__me { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; font: 600 13px/18px var(--font-sans); color: var(--ink); white-space: nowrap; }
 .hg-admin__me .hg-tag { height: 18px; padding: 0 6px; font-size: 11px; }
 .hg-admin__me small { font: 400 12px/16px var(--font-sans); color: var(--stone); }

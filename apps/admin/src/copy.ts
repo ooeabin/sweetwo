@@ -17,11 +17,14 @@ export const copy = {
   seenAt: (t: string) => `${t} 접속`,
 
   // 로그인
-  loginTitle: 'sweeTwo 어드민', // [확인 필요]
+  loginTitle: '어드민 로그인', // [확인 필요] 위에 흑백 워드마크 + ‘어드민’ 태그가 있음
   loginHelp: '회사 이메일로 로그인 링크를 보내요', // [확인 필요]
   email: '회사 이메일', // [확인 필요]
   sendLink: '로그인 링크 받기', // [확인 필요]
   linkSent: '메일함에서 링크를 눌러 주세요', // [확인 필요]
+  sentTo: (email: string) => `${email}로 로그인 링크를 보냈어요. 링크는 새 탭에서 열려도 돼요`, // [확인 필요]
+  otherEmail: '다른 이메일로 받기', // [확인 필요]
+  authFoot: '관리자만 쓸 수 있어요. 로그인과 조회는 모두 기록돼요', // [확인 필요]
   tooSoon: '조금 뒤에 다시 눌러 주세요', // [확인 필요]
   notAllowedEmail: '이 이메일로는 로그인 링크를 보낼 수 없어요', // [확인 필요]
   resendIn: (s: number) => `${s}초 뒤에 다시 받을 수 있어요`, // [확인 필요]

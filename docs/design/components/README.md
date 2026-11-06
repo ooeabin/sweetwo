@@ -54,6 +54,7 @@
 | [Selection](Selection.md) | Inputs | 켜기·끄기(Toggle), 여러 개 고르기(Checkbox), 하나 고르기(Radio) |
 | [Slider](Slider.md) | Inputs | 둘 사이 비율 나누기(분담, 자동차 현금 비율) |
 | [AdminFrame](AdminFrame.md) | Layout | 어드민 틀 |
+| [AdminAuth](AdminAuth.md) | Layout | 어드민 로그인·2단계 인증 |
 | [AppFrame](AppFrame.md) | Layout | 앱 화면 틀 |
 | [AuthLayout](AuthLayout.md) | Layout | 로그인, 가입 화면 틀 |
 | [LockScreen](LockScreen.md) | Layout | 앱 잠금 화면 |

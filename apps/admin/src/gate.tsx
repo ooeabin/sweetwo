@@ -10,7 +10,7 @@ import {
   fetchAdminMe,
 } from '@sweetwo/api';
 import type { AdminMe } from '@sweetwo/core';
-import { AuthLayout, Button, Field } from '@sweetwo/ui';
+import { AdminAuth, Button, Field } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { copy } from './copy';
@@ -59,11 +59,11 @@ export function AdminGate({ children }: { children: ReactNode }) {
   if (q.isLoading) return null;
   if (q.isError)
     return (
-      <AuthLayout title={copy.failed}>
+      <AdminAuth title={copy.failed} foot={copy.authFoot}>
         <Button variant="primary" onClick={again}>
           {copy.retry}
         </Button>
-      </AuthLayout>
+      </AdminAuth>
     );
   const step = q.data?.step ?? 'login';
   if (step === 'login') return <Login note={expired ? copy.expired : undefined} />;
@@ -71,11 +71,11 @@ export function AdminGate({ children }: { children: ReactNode }) {
   if (step === 'verify') return <Verify onDone={again} />;
   if (step === 'denied')
     return (
-      <AuthLayout title={copy.notAdmin}>
+      <AdminAuth icon="lock" title={copy.notAdmin} foot={copy.authFoot}>
         <Button variant="secondary" onClick={() => void adminSignOut().then(again)}>
           {copy.signOut}
         </Button>
-      </AuthLayout>
+      </AdminAuth>
     );
   return (
     <MeContext.Provider value={q.data?.me ?? null}>
@@ -122,34 +122,54 @@ function Login({ note }: { note?: string }) {
     }
   };
   return (
-    <AuthLayout title={copy.loginTitle}>
+    <AdminAuth
+      icon={sent ? 'envelope' : undefined}
+      title={sent ? copy.linkSent : copy.loginTitle}
+      help={sent ? copy.sentTo(email.trim().toLowerCase()) : copy.loginHelp}
+      foot={copy.authFoot}
+    >
       <form
-        className="hg-stack"
         onSubmit={(e) => {
           e.preventDefault();
           void send();
         }}
       >
         {note && <p className="hg-help">{note}</p>}
-        <p className="hg-help">{sent ? copy.linkSent : copy.loginHelp}</p>
-        {wait > 0 && <p className="hg-help">{copy.resendIn(wait)}</p>}
-        <Field
-          label={copy.email}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          error={err ?? undefined}
-        />
+        {!sent && (
+          <Field
+            label={copy.email}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            autoComplete="email"
+            error={err ?? undefined}
+          />
+        )}
+        {sent && err && <p className="hg-help is-error">{err}</p>}
         <Button
-          variant="primary"
+          variant={sent ? 'secondary' : 'primary'}
           type="submit"
           aria-busy={busy}
           disabled={!email.includes('@') || wait > 0}
         >
           {copy.sendLink}
         </Button>
+        {wait > 0 && <p className="hg-help">{copy.resendIn(wait)}</p>}
+        {sent && (
+          <Button
+            variant="link"
+            size="sm"
+            type="button"
+            onClick={() => {
+              setSent(false);
+              setErr(null);
+            }}
+          >
+            {copy.otherEmail}
+          </Button>
+        )}
       </form>
-    </AuthLayout>
+    </AdminAuth>
   );
 }
 
@@ -159,7 +179,6 @@ function CodeForm({ onSubmit }: { onSubmit: (code: string) => Promise<void> }) {
   const [err, setErr] = useState<string | null>(null);
   return (
     <form
-      className="hg-stack"
       onSubmit={(e) => {
         e.preventDefault();
         if (busy || !/^\d{6}$/.test(code)) return;
@@ -189,10 +208,11 @@ function Enroll({ onDone }: { onDone: () => void }) {
   const f = useQuery({ queryKey: ['admin', 'enroll'], queryFn: adminMfaEnroll, retry: false });
   if (f.isLoading) return null;
   return (
-    <AuthLayout title={copy.mfaEnrollTitle}>
-      <p className="hg-help">{copy.mfaEnrollHelp}</p>
-      {f.data?.qr && <img src={f.data.qr} alt="QR" width={180} height={180} />}
-      {f.data?.secret && <code className="hg-mask-text">{f.data.secret}</code>}
+    <AdminAuth title={copy.mfaEnrollTitle} help={copy.mfaEnrollHelp} foot={copy.authFoot}>
+      <div className="hg-adminauth__qr" data-theme="light">
+        {f.data?.qr && <img src={f.data.qr} alt="QR" width={120} height={120} />}
+        {f.data?.secret && <code className="hg-mask-text">{f.data.secret}</code>}
+      </div>
       <CodeForm
         onSubmit={async (code) => {
           if (!f.data) return;
@@ -200,13 +220,13 @@ function Enroll({ onDone }: { onDone: () => void }) {
           onDone();
         }}
       />
-    </AuthLayout>
+    </AdminAuth>
   );
 }
 
 function Verify({ onDone }: { onDone: () => void }) {
   return (
-    <AuthLayout title={copy.mfaTitle}>
+    <AdminAuth icon="lock" title={copy.mfaTitle} foot={copy.authFoot}>
       <CodeForm
         onSubmit={async (code) => {
           const m = await adminMfaState();
@@ -215,6 +235,6 @@ function Verify({ onDone }: { onDone: () => void }) {
           onDone();
         }}
       />
-    </AuthLayout>
+    </AdminAuth>
   );
 }

@@ -505,7 +505,7 @@ async function mock(
 test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
   const db = await mock(page, { aal: null });
   await page.goto('/');
-  await heading(page, 'sweeTwo 어드민');
+  await heading(page, '어드민 로그인');
   await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
   await axe(page);
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
