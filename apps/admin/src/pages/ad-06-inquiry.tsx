@@ -113,14 +113,7 @@ export function AD06Inquiry() {
                     </option>
                   ))}
                 </select>
-                <Button
-                  variant="primary"
-                  aria-busy={busy}
-                  disabled={!body.trim()}
-                  onClick={() => void send()}
-                >
-                  {copy.sendAnswer}
-                </Button>
+                <span style={{ flex: 1 }} />
                 {d.status === 'received' && (
                   <Button
                     variant="secondary"
@@ -129,6 +122,14 @@ export function AD06Inquiry() {
                     {copy.statuses.in_progress}
                   </Button>
                 )}
+                <Button
+                  variant="primary"
+                  aria-busy={busy}
+                  disabled={!body.trim()}
+                  onClick={() => void send()}
+                >
+                  {copy.sendAnswer}
+                </Button>
               </div>
               {msg && (
                 <p className="hg-help" role="status">

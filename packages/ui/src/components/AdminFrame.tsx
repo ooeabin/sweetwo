@@ -73,7 +73,8 @@ export function AdminFrame({
           </span>
           <span className="hg-admin__account-text">
             <b>{who.name}</b>
-            <span>{[who.role, who.sub].filter(Boolean).join(', ')}</span>
+            {who.role && <span>{who.role}</span>}
+            {who.sub && <span title={who.sub}>{who.sub}</span>}
           </span>
           {who.action}
         </div>

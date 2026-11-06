@@ -71,7 +71,7 @@ export function AdminGate({ children }: { children: ReactNode }) {
   if (step === 'verify') return <Verify onDone={again} />;
   if (step === 'denied')
     return (
-      <AdminAuth icon="lock" title={copy.notAdmin} foot={copy.authFoot}>
+      <AdminAuth title={copy.notAdmin} foot={copy.authFoot}>
         <Button variant="secondary" onClick={() => void adminSignOut().then(again)}>
           {copy.signOut}
         </Button>
@@ -123,7 +123,6 @@ function Login({ note }: { note?: string }) {
   };
   return (
     <AdminAuth
-      icon={sent ? 'envelope' : undefined}
       title={sent ? copy.linkSent : copy.loginTitle}
       help={sent ? copy.sentTo(email.trim().toLowerCase()) : copy.loginHelp}
       foot={copy.authFoot}
@@ -226,7 +225,7 @@ function Enroll({ onDone }: { onDone: () => void }) {
 
 function Verify({ onDone }: { onDone: () => void }) {
   return (
-    <AdminAuth icon="lock" title={copy.mfaTitle} foot={copy.authFoot}>
+    <AdminAuth title={copy.mfaTitle} foot={copy.authFoot}>
       <CodeForm
         onSubmit={async (code) => {
           const m = await adminMfaState();

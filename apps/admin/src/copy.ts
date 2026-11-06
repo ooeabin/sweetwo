@@ -307,6 +307,7 @@ export type Copy = typeof copy;
 export const ops = {
   // AD-10
   noticeTitle: '공지',
+  noticeEmpty: '아직 만든 공지가 없어요', // [확인 필요]
   newNotice: '새 공지', // [확인 필요]
   noticeCols: {
     title: '제목',
@@ -328,7 +329,7 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱', web: '웹' } as Record<string, string>, // [확인 필요]
+  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',

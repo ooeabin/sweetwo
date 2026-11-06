@@ -24,7 +24,7 @@ import {
   formatKstDateTime,
   todayKst,
 } from '@sweetwo/core';
-import { Badge, Button, DataTable, Tabs } from '@sweetwo/ui';
+import { Badge, Button, DataTable, SectionHeader, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -483,78 +483,80 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
       <p className="hg-help">{ops.kindHelp}</p>
       {msg && <p className="hg-help is-error">{msg}</p>}
       {KIND_NAME_GROUPS.map((grp) => (
-        <DataTable<KindRow>
-          key={grp}
-          label={assetGroup(grp)?.name ?? grp}
-          rows={list(grp)}
-          rowKey={(x) => x.key}
-          columns={[
-            {
-              key: 'name',
-              label: ops.kindCols.name,
-              render: (x) =>
-                canEdit ? (
+        <div key={grp} className="hg-stack">
+          <SectionHeader title={assetGroup(grp)?.name ?? grp} count={list(grp).length} />
+          <DataTable<KindRow>
+            label={assetGroup(grp)?.name ?? grp}
+            rows={list(grp)}
+            rowKey={(x) => x.key}
+            columns={[
+              {
+                key: 'name',
+                label: ops.kindCols.name,
+                render: (x) =>
+                  canEdit ? (
+                    <input
+                      className="hg-input"
+                      aria-label={`${assetGroup(grp)?.name ?? grp} ${nameOf(x) || ops.kindCols.name}`}
+                      value={nameOf(x)}
+                      maxLength={20}
+                      onChange={(e) =>
+                        setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], name: e.target.value } }))
+                      }
+                    />
+                  ) : (
+                    nameOf(x)
+                  ),
+              },
+              {
+                key: 'base',
+                label: ops.kindCols.base,
+                render: (x) => (x.added ? baseName(grp, x.base) : ops.kindDefault),
+              },
+              {
+                key: 'hidden',
+                label: ops.kindCols.hidden,
+                render: (x) => (
                   <input
-                    className="hg-input"
-                    aria-label={`${assetGroup(grp)?.name ?? grp} ${nameOf(x) || ops.kindCols.name}`}
-                    value={nameOf(x)}
-                    maxLength={20}
+                    type="checkbox"
+                    aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
+                    checked={hiddenOf(x)}
+                    disabled={!canEdit}
                     onChange={(e) =>
-                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], name: e.target.value } }))
+                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
                     }
                   />
-                ) : (
-                  nameOf(x)
                 ),
-            },
-            {
-              key: 'base',
-              label: ops.kindCols.base,
-              render: (x) => (x.added ? baseName(grp, x.base) : ops.kindDefault),
-            },
-            {
-              key: 'hidden',
-              label: ops.kindCols.hidden,
-              render: (x) => (
-                <input
-                  type="checkbox"
-                  aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
-                  checked={hiddenOf(x)}
-                  disabled={!canEdit}
-                  onChange={(e) =>
-                    setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
-                  }
-                />
-              ),
-            },
-            {
-              key: 'act',
-              label: '',
-              render: (x) =>
-                canEdit && (
-                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={!nameOf(x).trim() || edit[x.key] === undefined}
-                      onClick={() => void save(x)}
-                    >
-                      {ops.save}
-                    </Button>
-                    {x.row && (
+              },
+              {
+                key: 'act',
+                label: '',
+                render: (x) =>
+                  canEdit && (
+                    <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
                       <Button
-                        variant="link"
+                        variant="secondary"
                         size="sm"
-                        onClick={() => void run(adminDeleteKindName(x.row?.id ?? ''))}
+                        disabled={!nameOf(x).trim() || edit[x.key] === undefined}
+                        onClick={() => void save(x)}
                       >
-                        {x.added ? ops.remove : ops.kindReset}
+                        {ops.save}
                       </Button>
-                    )}
-                  </span>
-                ),
-            },
-          ]}
-        />
+                      {x.row && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => void run(adminDeleteKindName(x.row?.id ?? ''))}
+                        >
+                          {x.added ? ops.remove : ops.kindReset}
+                        </Button>
+                      )}
+                    </span>
+                  ),
+              },
+            ]}
+          />
+        </div>
       ))}
       {canEdit && (
         <section className="hg-card hg-stack" aria-label={ops.kindAdd} style={{ maxWidth: 520 }}>

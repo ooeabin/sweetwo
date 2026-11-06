@@ -1376,8 +1376,6 @@ a.hg-btn { text-decoration: none; }
 .hg-adminauth__card { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: 400px; padding: var(--space-8); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); }
 .hg-adminauth__brand { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-8); }
 .hg-adminauth__brand .hg-tag { height: 18px; padding: 0 6px; font-size: 11px; }
-.hg-adminauth__icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: var(--space-4); border-radius: var(--radius-md); background: var(--surface-alt); color: var(--ink); }
-.hg-adminauth__icon .hg-ico { width: 20px; height: 20px; }
 .hg-adminauth__title { margin: 0; font: 600 20px/28px var(--font-sans); letter-spacing: -0.2px; }
 .hg-adminauth__help { margin: var(--space-1) 0 0; font: 400 14px/20px var(--font-sans); color: var(--stone); }
 .hg-adminauth__body { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-6); }
