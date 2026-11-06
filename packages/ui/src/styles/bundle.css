@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (54cb336). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (c4815f0). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1369,12 +1369,8 @@ a.hg-btn { text-decoration: none; }
   .hg-site__h2 { font: 600 22px/30px var(--font-sans); letter-spacing: -0.2px; }
 }
 
-/* 어드민 주 색(2026-11-06): 어드민 안에서만 브랜드 오렌지 대신 잉크(밝은 화면 검정, 다크 화면 흰색). 워드마크도 흑백(Wordmark tone="mono") */
+/* 어드민 주 색(2026-11-06): 어드민 안에서만 버튼 주 색을 브랜드 오렌지 대신 잉크(밝은 화면 검정, 다크 화면 흰색). 워드마크는 그대로 브랜드 색 */
 .hg-admin, .hg-adminauth { --brand: var(--ink); --brand-pressed: var(--primary-pressed); --on-brand: var(--on-ink); --brand-soft: var(--surface-alt); --brand-ink: var(--ink); }
-.hg-wordmark--mono .hg-wordmark__dark { display: none; }
-[data-theme="dark"] .hg-wordmark--mono .hg-wordmark__light { display: none; }
-[data-theme="dark"] .hg-wordmark--mono .hg-wordmark__dark { display: block; }
-.hg-wordmark--mono img { display: block; }
 
 /* AdminAuth: 어드민 로그인·2단계 인증. 연회색 바탕 가운데 흰 카드 400px(Laravel Cloud, Stripe, Buffer) */
 .hg-adminauth { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4); min-height: 100vh; padding: var(--space-8) var(--space-4); background: var(--surface-alt); color: var(--ink); font: 400 14px/20px var(--font-sans); }

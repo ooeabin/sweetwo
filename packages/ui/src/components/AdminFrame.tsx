@@ -4,7 +4,7 @@ import { Icon, type IconName } from './Icon';
 import { Wordmark } from './Wordmark';
 
 // 어드민 틀(docs/design/components/AdminFrame.md). 2026-11-06 업무 도구답게:
-// 연회색 사이드바(흑백 워드마크, 메뉴 묶음, 아래 끝 보는 관리자) + 흰 본문 한 판. 본문 위 상단 바에 통합 검색.
+// 연회색 사이드바(워드마크, 메뉴 묶음, 아래 끝 보는 관리자) + 흰 본문 한 판. 본문 위 상단 바에 통합 검색.
 // 참고: Base44, Square, Shopify, Gumloop 사이드바.
 // 기준 1440, 최소 1280(더 좁으면 가로 스크롤). 본문은 글자 선택을 막음(개인정보 화면 복사 방지).
 export interface AdminMenu {
@@ -42,7 +42,7 @@ export function AdminFrame({
     <div className="hg-admin">
       <nav className="hg-admin__side" aria-label="어드민 메뉴">
         <div className="hg-admin__brand">
-          <Wordmark tone="mono" height={20} />
+          <Wordmark height={24} />
           <span className="hg-tag">어드민</span>
         </div>
         {menus.map((m, i) => {
