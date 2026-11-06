@@ -1792,8 +1792,8 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           dedupe: string
-          from_email: string | null
-          headers: Json | null
+          from_email?: string | null
+          headers?: Json | null
           id?: string
           kind: string
           last_error?: string | null
