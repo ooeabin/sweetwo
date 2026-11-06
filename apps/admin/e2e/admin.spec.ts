@@ -729,7 +729,7 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   await heading(page, '문의');
   const row = page.getByRole('row', { name: /A-10001/ });
   await expect(row).toContainText('부부 연결');
-  await expect(row.locator('b')).toHaveText(/일 \d+시간/);
+  await expect(row.locator('.hg-status--bad')).toHaveText(/일 \d+시간/);
   await axe(page);
   await row.click();
   await heading(page, 'A-10001 부부 연결');
