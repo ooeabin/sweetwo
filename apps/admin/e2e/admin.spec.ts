@@ -256,7 +256,12 @@ async function mock(
           ],
           consents: [{ kind: 'terms', version: 'v1', agreed: true, at: '2026-10-01T00:00:00Z' }],
           counts: { assets: 6, assets_estimated: 2, goals: 3, closes: 1 },
-          plan_status: 'splitting',
+          plan_status: 'open',
+          salary_mode: 'separate',
+          checklist: { state: 'open', label: '10월 월급', checked: 3, total: 5 },
+          devices: [
+            { platform: 'desktop', app_version: '1.0.0', last_seen_at: '2026-10-17T10:00:00Z' },
+          ],
           sessions: 2,
           access: [],
         });
@@ -539,7 +544,11 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
 
   await heading(page, '회원 상세');
   await expect(page.getByText('cha***@example.com')).toBeVisible();
-  await expect(page.getByText('자산 6개, 그중 추정 2개, 목표 3개, 정리한 달 1번')).toBeVisible();
+  await expect(
+    page.getByText('자산 6개, 그중 추정 2개, 목표 3개, 끝난 체크리스트 1번'),
+  ).toBeVisible();
+  await expect(page.getByText('10월 월급 진행 중, 3/5줄 체크')).toBeVisible();
+  await expect(page.getByText(/데스크톱 1\.0\.0/)).toBeVisible();
   await expect(page.locator('.hg-admin__main')).not.toContainText(/\d+원|만 원/);
   await axe(page);
   await page.getByRole('button', { name: '개인정보 보기' }).click();
@@ -602,14 +611,14 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   expect(db.inquiryStatus).toBe('waiting_user');
 
   const ask = page.getByRole('region', { name: '동의 요청' });
-  await ask.getByRole('button', { name: '월 수입·지출 화면' }).click();
+  await ask.getByRole('button', { name: '이번 달 화면' }).click();
   await ask.getByLabel('사유').fill('계산 확인');
   await axe(page);
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
   await expect(page.getByText('동의를 요청했어요')).toBeVisible();
   expect(db.rpc.find((r) => r.fn === 'admin_request_access')?.body).toMatchObject({
     p_inquiry: 'q1',
-    p_scopes: ['income_spend'],
+    p_scopes: ['month'],
     p_raw: false,
   });
 

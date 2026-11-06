@@ -21,6 +21,13 @@ import { AD20Docs } from './pages/ad-20-docs';
 // 어드민(ops.sweetwo.kr, 27 어드민 화면). 데스크톱 웹만, 기준 폭 1440·최소 1280.
 // 매직 링크는 새 탭에서 열리므로 세션·PKCE 값은 localStorage(최대 8시간은 session.ts가 지킴)
 
+// 다크 모드는 토큰이 처리한다([data-theme="dark"]). 앱과 같이 시스템 설정만 따라 붙인다(2026-11-06, 전에는 늘 밝게만 보였음)
+const themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const applyTheme = () =>
+  (document.documentElement.dataset.theme = themeQuery.matches ? 'dark' : 'light');
+applyTheme();
+themeQuery.addEventListener('change', applyTheme);
+
 const qc = new QueryClient({
   defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
 });

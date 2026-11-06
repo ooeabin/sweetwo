@@ -1,18 +1,27 @@
 import { Fragment, type ReactNode } from 'react';
 
 // AD-20 문서 보기용 작은 마크다운 렌더러(읽기 전용, HTML 문자열을 쓰지 않음).
-// 제목(#), 표(|), 목록(-, 1.), 인용(>), 코드 블록(```), 문단. 줄 안: **굵게**, `코드`.
+// 제목(#), 표(|), 목록(-, 1.), 인용(>), 코드 블록(```), 문단. 줄 안: **굵게**, `코드`, [링크](주소)(바깥 주소만 링크, 저장소 안 상대 경로는 글자만).
 function inline(s: string): ReactNode[] {
   const out: ReactNode[] = [];
-  const re = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+  const re = /(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
   let last = 0;
   let m: RegExpExecArray | null;
   let i = 0;
   while ((m = re.exec(s))) {
     if (m.index > last) out.push(s.slice(last, m.index));
     const t = m[0];
+    const link = t.startsWith('[') ? /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(t) : null;
     out.push(
-      t.startsWith('**') ? (
+      link ? (
+        /^https?:\/\//.test(link[2] ?? '') ? (
+          <a key={i++} href={link[2]} target="_blank" rel="noreferrer">
+            {link[1]}
+          </a>
+        ) : (
+          <span key={i++}>{link[1]}</span>
+        )
+      ) : t.startsWith('**') ? (
         <b key={i++}>{t.slice(2, -2)}</b>
       ) : (
         <code key={i++}>{t.slice(1, -1)}</code>

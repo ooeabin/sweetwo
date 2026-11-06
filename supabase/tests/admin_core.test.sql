@@ -1,7 +1,7 @@
 -- pgTAP: 어드민 기본(AD-01~06·17). 찬우(사용자), 관리자 cs01(CS), 관리자 boss(최고), 사용자 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(22);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -50,6 +50,8 @@ select is((select count(*)::int from public.admin_search('chanwoo')), 0, '부분
 select is((select count(*)::int from public.admin_search(current_setting('test.no'))), 1, '문의 번호로 찾기');
 select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'email_masked', 'cha***@example.com', '상세 L0');
 select ok(not (public.admin_user_detail('11111111-1111-1111-1111-111111111111') ? 'monthly_income'), '상세에 금액 없음');
+select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'salary_mode', 'separate', '상세에 월급 관리 방식');
+select is(jsonb_typeof(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->'devices'), 'array', '상세에 기기 목록');
 select throws_ok($$ select public.admin_reveal('11111111-1111-1111-1111-111111111111', '', 'A-1', array['email']) $$,
   '22023', 'reason_required', 'L1은 사유와 문의 번호');
 select is(public.admin_reveal('11111111-1111-1111-1111-111111111111', '본인 확인', current_setting('test.no'), array['email'])->>'email',

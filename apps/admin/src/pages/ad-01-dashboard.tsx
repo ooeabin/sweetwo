@@ -14,39 +14,39 @@ export function AD01Dashboard() {
     q.isError || n === undefined ? '—' : n.toLocaleString('ko-KR');
   return (
     <Frame menu="dashboard" title={copy.menus.dashboard}>
-      <div className="hg-row" style={{ gap: 'var(--space-5)', alignItems: 'stretch' }}>
-        <section className="hg-card hg-stack" aria-label={copy.failedJobs} style={{ flex: 1 }}>
+      <div className="hg-admin__grid2">
+        <section className="hg-card" aria-label={copy.failedJobs}>
           <span className="hg-card__label">{copy.failedJobs}</span>
-          <div className="hg-row" style={{ justifyContent: 'space-between' }}>
-            <span>{copy.failedPlans}</span>
-            <b>{v(q.data?.failed.plans)}</b>
-          </div>
-          <div className="hg-row" style={{ justifyContent: 'space-between' }}>
-            <span>{copy.failedNotis}</span>
-            <b>{v(q.data?.failed.notifications)}</b>
+          <div className="hg-admin__stats">
+            <Stat label={copy.failedPlans} value={v(q.data?.failed.plans)} />
+            <Stat label={copy.failedNotis} value={v(q.data?.failed.notifications)} />
           </div>
         </section>
         <section
-          className="hg-card hg-stack"
+          className="hg-card is-link"
           aria-label={copy.openInquiries}
-          style={{ flex: 1, cursor: 'pointer' }}
           role="link"
           tabIndex={0}
           onClick={() => nav('/inquiries')}
           onKeyDown={(e) => e.key === 'Enter' && nav('/inquiries')}
         >
           <span className="hg-card__label">{copy.openInquiries}</span>
-          <div className="hg-row" style={{ justifyContent: 'space-between' }}>
-            <span>{copy.received}</span>
-            <b>{v(q.data?.inquiries.received)}</b>
-          </div>
-          <div className="hg-row" style={{ justifyContent: 'space-between' }}>
-            <span>{copy.inProgress}</span>
-            <b>{v(q.data?.inquiries.in_progress)}</b>
+          <div className="hg-admin__stats">
+            <Stat label={copy.received} value={v(q.data?.inquiries.received)} />
+            <Stat label={copy.inProgress} value={v(q.data?.inquiries.in_progress)} />
           </div>
         </section>
       </div>
       {q.data && <p className="hg-help">{copy.aggregatedAt(formatKstDateTime(q.data.at))}</p>}
     </Frame>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="hg-admin__stat">
+      <span>{label}</span>
+      <b>{value}</b>
+    </div>
   );
 }
