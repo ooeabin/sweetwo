@@ -13,7 +13,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { usePhotoUrls } from '../../shared/photo';
-import { toast } from '../../shared/toast';
+import { quietly, toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useCheck } from './data';
 
@@ -127,26 +127,34 @@ export function CheckLine({
   const { masked } = useMask();
   const check = useCheck();
   const [sheet, setSheet] = useState(false);
+  // 저장하는 동안(2026-11-06): 누른 쪽 모양을 바로 보여 주고 두 번 누르기를 막음. 실패하면 원래대로
+  const [pending, setPending] = useState<'checked' | 'wait' | null>(null);
   const done = line.state === 'checked';
   const skipped = line.state === 'skipped';
   const amount = money(amountOf(line), masked);
 
   const toggle = async () => {
+    if (pending) return;
+    const to = done || skipped ? 'wait' : 'checked';
+    setPending(to);
     try {
-      const r = await check(line, done || skipped ? 'wait' : 'checked');
+      const r = await check(line, to);
       if (r === 'already_checked')
         return toast(copy.alreadyChecked(personName(line.checked_by) ?? ''));
       if (r === 'closed') return toast(copy.closed);
       if (done || skipped) return;
-      const undo = { label: copy.undo, onClick: () => void check(line, 'wait') };
+      const undo = { label: copy.undo, onClick: () => quietly(check(line, 'wait')) };
       toast(
         line.kind === 'saving' ? copy.addedToGoal(goalName ?? name, amount) : copy.checked,
         undo,
       );
     } catch {
       toast(copy.failed, { label: copy.retry, onClick: () => void toggle() });
+    } finally {
+      setPending(null);
     }
   };
+  const shownDone = pending ? pending === 'checked' : done || skipped;
 
   const when = line.checked_at ? formatDot2(line.checked_at.slice(0, 10)) : null;
   const meta = skipped ? (
@@ -171,7 +179,8 @@ export function CheckLine({
       <TransferRow
         label={name}
         amount={amount}
-        done={done || skipped}
+        done={shownDone}
+        busy={!!pending}
         checkLabel={viewOnly ? copy.viewLabel(name, done || skipped) : copy.checkLabel(name)}
         onToggle={readOnly || viewOnly ? undefined : () => void toggle()}
         disabled={readOnly}

@@ -1,4 +1,4 @@
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { copy } from '../copy';
 import { useOnboardingLocal } from '../data';
 import { useStep } from '../step';
@@ -10,7 +10,10 @@ export const inviteIcons = { now: 'users-three', later: 'calendar' } as const;
 export function O06InviteNow() {
   const s = useStep('o-06');
   const { inviteNow, setInviteNow } = useOnboardingLocal();
-  if (!s.ready) return null;
+  if (!s.ready)
+    return (
+      <QuestionSkeleton title={copy.inviteNow} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   return (
     <QuestionLayout
       chapter={s.chapter}

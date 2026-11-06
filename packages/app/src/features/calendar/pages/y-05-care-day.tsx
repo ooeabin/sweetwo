@@ -16,7 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
@@ -39,6 +39,8 @@ export function Y05CareDay() {
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [memo, setMemo] = useState<string | null>(null);
+  // 준비 상황 칩을 저장하는 동안 누른 칩을 바로 고른 것으로(2026-11-06)
+  const [picking, setPicking] = useState<'todo' | 'preparing' | null>(null);
   if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
@@ -73,7 +75,7 @@ export function Y05CareDay() {
       await refresh();
       toast(copy.removed, {
         label: copy.undo,
-        onClick: () => void restoreTrash('care_day', care.id).then(refresh),
+        onClick: () => quietly(restoreTrash('care_day', care.id).then(refresh)),
       });
       nav('/calendar/list', { replace: true });
     } catch {
@@ -151,8 +153,12 @@ export function Y05CareDay() {
               <Chip
                 key={s}
                 small
-                selected={st === s}
-                onClick={() => void patch({ status: s, status_on: date })}
+                selected={(picking ?? st) === s}
+                onClick={() => {
+                  if (picking) return;
+                  setPicking(s);
+                  void patch({ status: s, status_on: date }).finally(() => setPicking(null));
+                }}
               >
                 {copy.statuses[s]}
               </Chip>

@@ -14,3 +14,5 @@
 - 글자 앞에 마크가 필요하면 `hg-btn__mark`(20px)를 글자 앞에 둔다. 지금은 A-02 소셜 버튼(`ProviderMark`)에만. 구글 마크는 4색 고유색(워드마크처럼 토큰 예외), 카카오·애플 마크는 단색 `currentColor`.
 - 비활성은 `disabled`: 입력 전 주 버튼. `surface-alt` 바탕 + `muted` 글자(2026-11-02, 보조 버튼보다 진해 보이던 것을 배민·당근처럼 옅게).
 - 처리 중은 `is-loading` + `aria-busy`: 글자 자리에 도는 원, 너비 그대로, 두 번 누르기 막음. 0.3초 넘을 때만 보여 줌. 원 색: 주 버튼 `on-brand`, 보조·고스트·링크 `ink`.
+  - React(2026-11-06): `Button loading`. 누르는 순간 `aria-busy`와 누르기 막음(제출 포함), 0.3초가 넘으면 `is-loading`(`useLoadingShown`). 처리 중에 `disabled`를 같이 주지 않음(회색으로 바뀌어 도는 원이 안 보임). QuestionLayout `primary`·`later`·`secondary`의 `loading`도 같음(처리 중에는 Enter 제출도 막음). 한 화면에 서버 일을 하는 버튼이 여럿이면 누른 버튼에만 `loading`(나머지는 그대로 두고 부르는 쪽에서 중복 실행만 막음). Modal `busy`, ConflictChoice `busy`도 실행 버튼(누른 쪽)의 `loading`으로.
+- 움직임(2026-11-06): 색 바뀜 `dur-fast`. 마우스가 있는 기기에서 마우스 올림: 주 버튼 `brand-pressed`, 보조 `hairline-soft`(카드 안 옅은 오렌지는 조금 진하게), 고스트 `surface-alt`. 누르면 98% 크기(`dur-fast`). ‘동작 줄이기’면 크기 변화와 색 전환 없음.

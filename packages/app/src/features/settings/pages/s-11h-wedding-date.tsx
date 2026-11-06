@@ -4,7 +4,7 @@ import { DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sw
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -84,7 +84,7 @@ export function S11hWeddingDate() {
       toast(copy.saved, {
         label: copy.undo,
         onClick: () =>
-          void updateSpace(before).then(() => qc.invalidateQueries({ queryKey: qk.space })),
+          quietly(updateSpace(before).then(() => qc.invalidateQueries({ queryKey: qk.space }))),
       });
       nav('/settings/me', { replace: true });
     } catch {

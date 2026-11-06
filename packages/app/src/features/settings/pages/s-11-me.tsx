@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
 import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
 import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
@@ -19,6 +20,7 @@ export function S11Me() {
   const qc = useQueryClient();
   const d = useSettingsData();
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
+  const [clearing, setClearing] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
   const later = coupleBaseDay(c);
@@ -42,7 +44,8 @@ export function S11Me() {
   const photo = avatars.data?.photos[me.id] ?? null;
   const shown = photo;
   const clearPhoto = async () => {
-    if (!me.space_id) return;
+    if (!me.space_id || clearing) return;
+    setClearing(true);
     try {
       await removeAvatar(me.space_id, me.id);
       await qc.invalidateQueries({ queryKey: qk.avatars });
@@ -50,6 +53,8 @@ export function S11Me() {
       toast(copy.photoRemoved);
     } catch {
       toast(copy.failed);
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -95,7 +100,7 @@ export function S11Me() {
           </button>
         </span>
         {photo && (
-          <Button variant="ghost" size="sm" onClick={() => void clearPhoto()}>
+          <Button variant="ghost" size="sm" loading={clearing} onClick={() => void clearPhoto()}>
             {copy.photoRemove}
           </Button>
         )}

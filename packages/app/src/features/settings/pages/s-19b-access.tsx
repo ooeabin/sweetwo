@@ -15,7 +15,8 @@ export function S19bAccess() {
   const { id } = useParams();
   const qc = useQueryClient();
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
-  const [busy, setBusy] = useState(false);
+  // 누른 답(true 허용, false 거절), 처리 중 표시
+  const [busy, setBusy] = useState<boolean | null>(null);
   if (list.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const q = (list.data ?? []).find((x) => x.access_request.some((a) => a.id === id));
   const r = q?.access_request.find((a) => a.id === id);
@@ -24,8 +25,8 @@ export function S19bAccess() {
       <Navigate to={q ? `/settings/help/inquiries/${q.id}` : '/settings/help/inquiries'} replace />
     );
   const answer = async (accept: boolean) => {
-    if (busy) return;
-    setBusy(true);
+    if (busy !== null) return;
+    setBusy(accept);
     try {
       await answerAccessRequest(r.id, accept);
       await qc.invalidateQueries({ queryKey: qk.inquiries });
@@ -33,7 +34,7 @@ export function S19bAccess() {
       nav(`/settings/help/inquiries/${q.id}`, { replace: true });
     } catch {
       toast(copy.failed);
-      setBusy(false);
+      setBusy(null);
     }
   };
   const body = (
@@ -66,10 +67,10 @@ export function S19bAccess() {
         </div>
       </section>
       <div className="hg-row">
-        <Button variant="secondary" disabled={busy} onClick={() => void answer(false)}>
+        <Button variant="secondary" loading={busy === false} onClick={() => void answer(false)}>
           {copy.accessNo}
         </Button>
-        <Button variant="primary" disabled={busy} onClick={() => void answer(true)}>
+        <Button variant="primary" loading={busy === true} onClick={() => void answer(true)}>
           {copy.accessYes}
         </Button>
       </div>

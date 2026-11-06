@@ -13,7 +13,7 @@ import { Badge, Button, EmptyState, Menu, Modal, PageHeader } from '@sweetwo/ui'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -28,6 +28,7 @@ export function S21Trash() {
   const list = useQuery({ queryKey: qk.trash, queryFn: fetchTrash });
   const [confirm, setConfirm] = useState<TrashRow | 'all' | null>(null);
   const [busy, setBusy] = useState(false);
+  const [restoring, setRestoring] = useState<string | null>(null);
   if (d.loading || !d.me || !d.c || !d.space || list.isLoading)
     return <LoadingFrame sub="settings" current={null} />;
   const rows = list.data ?? [];
@@ -42,6 +43,7 @@ export function S21Trash() {
   const restore = async (r: TrashRow) => {
     if (busy) return;
     setBusy(true);
+    setRestoring(r.id);
     try {
       await restoreTrash(r.kind, r.id);
       await refresh();
@@ -49,18 +51,20 @@ export function S21Trash() {
       toast(copy.restored, {
         label: copy.undo,
         onClick: () =>
-          void (
-            r.kind === 'asset'
+          quietly(
+            (r.kind === 'asset'
               ? trashAsset(r.id)
               : r.kind === 'goal'
                 ? trashGoals([r.id])
                 : trashCareDay(r.id)
-          ).then(refresh),
+            ).then(refresh),
+          ),
       });
     } catch {
       toast(copy.failed);
     } finally {
       setBusy(false);
+      setRestoring(null);
     }
   };
   const purge = async () => {
@@ -128,7 +132,7 @@ export function S21Trash() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      disabled={busy}
+                      loading={restoring === r.id}
                       onClick={() => void restore(r)}
                     >
                       {copy.restore}

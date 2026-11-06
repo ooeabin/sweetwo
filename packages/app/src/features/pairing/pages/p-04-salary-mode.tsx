@@ -1,5 +1,5 @@
 import { setJoinSalaryMode } from '@sweetwo/api';
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
@@ -11,7 +11,8 @@ export function P04SalaryMode() {
   const s = useJoinStep('p-04');
   const d = s.d;
   const [v, setV] = useState<Mode | null>(null);
-  if (!d.ready || !d.space) return null;
+  if (!d.ready || !d.space)
+    return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
   const saved: Mode = d.space.salary_mode;
   const value = v ?? saved;
   const starter = d.couple?.partnerName ?? '';

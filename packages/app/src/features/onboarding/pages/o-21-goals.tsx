@@ -7,7 +7,7 @@ import {
   type GoalTab,
   defaultGoalPreset,
 } from '@sweetwo/core';
-import { GoalPick, QuestionLayout, Tabs, goalPhotoArt } from '@sweetwo/ui';
+import { goalPhotoArt, GoalPick, QuestionLayout, QuestionSkeleton, Tabs } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { pickedGoals } from '../flow';
@@ -22,7 +22,10 @@ export function O21Goals() {
   const s = useStep('o-21');
   const [tab, setTab] = useState<GoalTab | 'popular'>('popular');
   const [picks, setPicks] = useState<Pick[] | null>(null);
-  if (!s.ready) return null;
+  if (!s.ready)
+    return (
+      <QuestionSkeleton title={copy.goalsTitle} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   const sp = s.state.space;
   const engaged = sp?.marriage_status === 'engaged';
   const saved = pickedGoals(s.state.goals);

@@ -19,6 +19,7 @@ export function A05rReconsent() {
   const pending = useQuery({ queryKey: qk.pendingTerms, queryFn: fetchPendingTerms });
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [choice, setChoice] = useState<boolean | null>(null);
   if (pending.isLoading) return <QuestionSkeleton />;
   const list = pending.data ?? [];
   const required = list.filter((p) => p.kind !== 'marketing').map((p) => p.kind);
@@ -28,6 +29,7 @@ export function A05rReconsent() {
   const submit = async (marketing: boolean | null) => {
     if (saving) return;
     setSaving(true);
+    setChoice(marketing);
     try {
       await agreeTerms(marketing);
       await qc.invalidateQueries({ queryKey: qk.pendingTerms });
@@ -43,10 +45,14 @@ export function A05rReconsent() {
       <QuestionLayout
         title={copy.marketingAgainTitle}
         help={copy.marketingAgainHelp}
-        primary={{ label: copy.marketingKeep, loading: saving }}
+        primary={{ label: copy.marketingKeep, loading: saving && choice !== false }}
         onSubmit={() => void submit(true)}
       >
-        <Button variant="ghost" onClick={() => void submit(false)} disabled={saving}>
+        <Button
+          variant="ghost"
+          onClick={() => void submit(false)}
+          loading={saving && choice === false}
+        >
           {copy.marketingStop}
         </Button>
       </QuestionLayout>
@@ -57,7 +63,7 @@ export function A05rReconsent() {
     <QuestionLayout
       title={copy.reconsentTitle}
       help={copy.reconsentHelp}
-      primary={{ label: copy.agreeContinue, disabled: !ready || saving, loading: saving }}
+      primary={{ label: copy.agreeContinue, disabled: !ready, loading: saving }}
       onSubmit={() => void submit(askMarketing ? !!checked.marketing : null)}
     >
       <ConsentGroup

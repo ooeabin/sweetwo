@@ -31,7 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { lastAssetsTab } from '../assets-frame';
 import { copy } from '../copy';
@@ -129,7 +129,7 @@ export function F04Item() {
       await trashAsset(a.id);
       toast(copy.removed, {
         label: copy.undo,
-        onClick: () => void restoreAsset(a.id).then(refresh),
+        onClick: () => quietly(restoreAsset(a.id).then(refresh)),
       });
       back();
     });
@@ -212,7 +212,7 @@ export function F04Item() {
         />
       )}
       <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        <Button variant="primary" size="sm" disabled={busy || !valueOk} onClick={saveValue}>
+        <Button variant="primary" size="sm" disabled={!valueOk} loading={busy} onClick={saveValue}>
           {copy.saveEdit}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => setField(null)}>
@@ -265,7 +265,8 @@ export function F04Item() {
               <Button
                 variant="primary"
                 size="sm"
-                disabled={busy || editAmount === null}
+                disabled={editAmount === null}
+                loading={busy}
                 onClick={() => saveAmount()}
               >
                 {copy.saveEdit}

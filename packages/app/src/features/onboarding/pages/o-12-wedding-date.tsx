@@ -1,5 +1,5 @@
 import { todayKst } from '@sweetwo/core';
-import { DateWheel, QuestionLayout, YearMonthInput } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, QuestionSkeleton, YearMonthInput } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveSpace } from '../data';
@@ -30,7 +30,7 @@ export function O12WeddingDate() {
   const [date, setDate] = useState<string | null>(null);
   const [month, setMonth] = useState<string | null>(null);
   const [typed, setTyped] = useState(false);
-  if (!s.ready) return null;
+  if (!s.ready) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
 
   const saveDate = (patch: {
     wedding_date: string | null;

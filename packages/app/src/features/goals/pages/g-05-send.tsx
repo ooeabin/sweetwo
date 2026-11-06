@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { useSplits } from '../../salary';
 import { copy } from '../copy';
 import { useGoalsData } from '../data';
@@ -64,7 +64,7 @@ export function G05Send() {
                 const name = d.goals.find((x) => x.id === gid)?.name ?? '';
                 toast(copy.sendDone(name, m(monthly)), {
                   label: copy.undo,
-                  onClick: () => void undo().then(refresh),
+                  onClick: () => quietly(undo().then(refresh)),
                 });
                 nav(`/goals/${gid}`, { replace: true });
               } catch {

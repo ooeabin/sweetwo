@@ -1,5 +1,5 @@
 import { readWon } from '@sweetwo/core';
-import { DoneMark, InfoPlate, QuestionLayout } from '@sweetwo/ui';
+import { DoneMark, InfoPlate, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import {
@@ -21,7 +21,7 @@ export function W02Done() {
   const lists = useChecklists();
   const space = useSpace();
   const partner = usePartner();
-  if (!me.data || !goals.data || !lists.data) return null;
+  if (!me.data || !goals.data || !lists.data) return <QuestionSkeleton onBack={null} fields={2} />;
   const list = myChecklist(lists.data, me.data.id);
   const saved = (list?.pay_check_line ?? []).filter(
     (l) => l.kind === 'saving' && l.state === 'checked',

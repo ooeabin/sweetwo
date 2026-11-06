@@ -3,7 +3,7 @@ import { assetGroupsOf } from '@sweetwo/core';
 import { Button, Lead, List, ListRow, MonthBars, SectionHeader } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { RankBanner } from '../../frame';
+import { RankBanner, SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
@@ -28,7 +28,7 @@ export function F01Overview() {
       </div>
     );
   } else if (d.loading) {
-    body = null;
+    body = <SkelBody shape="cards" />;
   } else if (!d.items.length && !d.sums.length) {
     // 2026-11-04 항목별 등록 유도: 순위 줄 + 자산 묶음 타일 + 부채 묶음 타일(F-03a와 같은 타일, 누르면 그 묶음을 고른 F-03a)
     const tiles = (side: 'asset' | 'debt') => (

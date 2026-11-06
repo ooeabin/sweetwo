@@ -142,7 +142,7 @@ export function S12Couple() {
           >
             {copy.copyLink}
           </Button>
-          <Button variant="secondary" size="sm" disabled={busy} onClick={() => void make(true)}>
+          <Button variant="secondary" size="sm" loading={busy} onClick={() => void make(true)}>
             {copy.newCode}
           </Button>
         </div>
@@ -150,7 +150,7 @@ export function S12Couple() {
     ) : inv ? (
       <div className="hg-banner hg-banner--info" role="status">
         <span>{copy.inviteExpired}</span>
-        <Button variant="secondary" size="sm" disabled={busy} onClick={() => void make(true)}>
+        <Button variant="secondary" size="sm" loading={busy} onClick={() => void make(true)}>
           {copy.newCode}
         </Button>
       </div>
@@ -158,7 +158,7 @@ export function S12Couple() {
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-4)' }}>
         <p>{c.partnerName ? copy.inviteFirst(c.partnerName) : copy.inviteFirstAny}</p>
         <div className="hg-row">
-          <Button disabled={busy} onClick={() => void make(false)}>
+          <Button loading={busy} onClick={() => void make(false)}>
             {copy.inviteMake}
           </Button>
         </div>
@@ -180,7 +180,7 @@ export function S12Couple() {
         </p>
         <div className="hg-row" style={{ flexWrap: 'wrap' }}>
           {mine ? (
-            <Button variant="secondary" size="sm" disabled={busy} onClick={() => void cancel()}>
+            <Button variant="secondary" size="sm" loading={busy} onClick={() => void cancel()}>
               {copy.cancelRequest}
             </Button>
           ) : (
@@ -251,7 +251,7 @@ export function S12Couple() {
               <Button
                 variant="secondary"
                 size="sm"
-                disabled={busy}
+                loading={busy}
                 onClick={() => void reconnectAsk()}
               >
                 {copy.reconnect}

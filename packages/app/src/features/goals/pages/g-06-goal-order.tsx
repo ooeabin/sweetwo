@@ -1,18 +1,19 @@
 import { qk, saveSplit, updateGoal } from '@sweetwo/api';
 import {
   Button,
+  goalIcon,
   Lead,
   List,
   ListRow,
   QuestionLayout,
+  QuestionSkeleton,
   ReorderList,
   SectionHeader,
-  goalIcon,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { toDraft, useSplits } from '../../salary';
 import { copy } from '../copy';
 import { useGoalsModel } from '../model';
@@ -27,7 +28,7 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
   const [ours, setOurs] = useState<string[] | null>(null);
   const [mine, setMine] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
-  if (!d.ready || !splits.data) return null;
+  if (!d.ready || !splits.data) return <QuestionSkeleton fields={3} />;
   void week;
 
   const movable = (list: typeof d.groups.ours) =>
@@ -80,7 +81,10 @@ export function G06GoalOrder({ week = false }: { week?: boolean }) {
     ] as const;
     try {
       await apply(oursIds, mineIds);
-      toast(copy.orderSaved, { label: copy.undo, onClick: () => void apply(before[0], before[1]) });
+      toast(copy.orderSaved, {
+        label: copy.undo,
+        onClick: () => quietly(apply(before[0], before[1])),
+      });
       nav('/goals');
     } catch {
       toast(copy.loadFailed);

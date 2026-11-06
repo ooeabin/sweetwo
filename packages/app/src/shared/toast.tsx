@@ -25,6 +25,14 @@ export const toast = (message: string, action?: ToastItem['action']) => {
   useToastStore.getState().show(blocked ? { message: sharedCopy.needOnline } : { message, action });
 };
 
+/**
+ * 결과 알림이 없던 서버 동작(되돌리기 등, 2026-11-06): 실패하면 “저장하지 못했어요”(13 공통 상태 10번).
+ * `onClick: () => quietly(undo())`처럼 쓰고, 성공은 화면이 바로 바뀌어 따로 알리지 않음
+ */
+export const quietly = (p: Promise<unknown>) => {
+  void p.catch(() => toast(sharedCopy.saveFailed));
+};
+
 export function ToastHost() {
   const { current, hide } = useToastStore();
   useEffect(() => {

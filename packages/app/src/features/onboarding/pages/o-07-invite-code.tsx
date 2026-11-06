@@ -1,5 +1,12 @@
 import { createInvite } from '@sweetwo/api';
-import { BottomSheet, Button, ChoiceCards, Icon, QuestionLayout } from '@sweetwo/ui';
+import {
+  BottomSheet,
+  Button,
+  ChoiceCards,
+  Icon,
+  QuestionLayout,
+  QuestionSkeleton,
+} from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from '../../../shared/toast';
@@ -27,7 +34,7 @@ export function O07InviteCode() {
   const s = useStep('o-07');
   const invite = useQuery({ queryKey: ['invite'], queryFn: createInvite, retry: false });
   const [sent, setSent] = useState(false);
-  if (!s.ready) return null;
+  if (!s.ready) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
   const code = invite.data?.code;
   const next = () => void s.done();
   const copyAndMark = async (t: string) => {
@@ -96,7 +103,12 @@ export function O07InviteCode() {
         {invite.isError ? (
           <div className="hg-banner hg-banner--info" role="alert">
             <span>{copy.inviteFailed}</span>
-            <Button variant="secondary" size="sm" onClick={() => void invite.refetch()}>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={invite.isFetching}
+              onClick={() => void invite.refetch()}
+            >
               {copy.retry}
             </Button>
           </div>

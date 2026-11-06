@@ -1,4 +1,4 @@
-import { QuestionLayout, ShortText } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton, ShortText } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe, saveSpace } from '../data';
@@ -9,7 +9,10 @@ export function P03Name() {
   const s = useJoinStep('p-03');
   const d = s.d;
   const [v, setV] = useState<string | null>(null);
-  if (!d.ready || !d.me) return null;
+  if (!d.ready || !d.me)
+    return (
+      <QuestionSkeleton title={copy.nameTitle} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   const saved = d.me.nickname ?? '';
   const value = v ?? saved;
   const name = value.trim();

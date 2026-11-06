@@ -1,4 +1,4 @@
-import { DoneMark, Icon, QuestionLayout } from '@sweetwo/ui';
+import { DoneMark, Icon, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { copy } from '../copy';
 import { useStep } from '../step';
 
@@ -6,7 +6,7 @@ import { useStep } from '../step';
 // ‘홈으로 가기’ → 온보딩을 마치고 홈. 진행 막대, 뒤로 없음
 export function O60Ready() {
   const s = useStep('o-60');
-  if (!s.ready) return null;
+  if (!s.ready) return <QuestionSkeleton onBack={null} fields={0} />;
   const me = s.state.me;
   const day = me?.payday_last ? copy.paydayLast : me?.payday ? `${me.payday}일` : null;
   const items = me?.monthly_income

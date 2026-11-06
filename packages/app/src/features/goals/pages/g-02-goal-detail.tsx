@@ -27,7 +27,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { CheckLine } from '../../salary';
 import { checkPath, GUIDES, readPath } from '../../settings';
@@ -59,6 +59,7 @@ export function G02GoalDetail() {
   const lines = useQuery({ queryKey: qk.goalLines(id), queryFn: () => fetchGoalLines(id) });
   const moves = useQuery({ queryKey: qk.goalMoves(id), queryFn: () => fetchGoalMoves(id) });
   const [all, setAll] = useState(false);
+  const [resuming, setResuming] = useState(false);
   const m = (v: number) => money(v, masked);
   const back = () => nav('/goals');
   if (!d.ready) return <LoadingFrame current="goals" />;
@@ -81,7 +82,7 @@ export function G02GoalDetail() {
       await refresh();
       toast(done, {
         label: copy.undo,
-        onClick: () => void updateGoal(g.id, before).then(refresh),
+        onClick: () => quietly(updateGoal(g.id, before).then(refresh)),
       });
       after?.();
     } catch {
@@ -99,7 +100,7 @@ export function G02GoalDetail() {
       await refresh();
       toast(copy.changedKind, {
         label: copy.undo,
-        onClick: () => void setGoalOwner(g.id, null, g.priority).then(refresh),
+        onClick: () => quietly(setGoalOwner(g.id, null, g.priority).then(refresh)),
       });
     } catch {
       toast(copy.loadFailed);
@@ -156,10 +157,12 @@ export function G02GoalDetail() {
                 .then(() => {
                   toast(copy.removed, {
                     label: copy.undo,
-                    onClick: () => void restoreTrash('goal', g.id).then(refresh),
+                    onClick: () => quietly(restoreTrash('goal', g.id).then(refresh)),
                   });
                   back();
-                }),
+                })
+                // 2026-11-06 실패하면 알림(전에는 아무 일도 없었음)
+                .catch(() => toast(copy.loadFailed)),
           },
         ]),
   ];
@@ -327,7 +330,12 @@ export function G02GoalDetail() {
             <Button
               variant="secondary"
               block
-              onClick={() => void change({ status: 'active' }, copy.resumed)}
+              loading={resuming}
+              onClick={() => {
+                if (resuming) return;
+                setResuming(true);
+                void change({ status: 'active' }, copy.resumed).finally(() => setResuming(false));
+              }}
             >
               {copy.resume}
             </Button>

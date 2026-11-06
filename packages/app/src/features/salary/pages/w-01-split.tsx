@@ -1,11 +1,11 @@
 import { qk, saveSplit, updateGoal } from '@sweetwo/api';
 import { addMonths, thisMonth, ymToDate, type SplitLineDraft } from '@sweetwo/core';
-import { Modal, Tabs } from '@sweetwo/ui';
+import { Modal, QuestionSkeleton, Tabs } from '@sweetwo/ui';
 import { PersonDot } from '../../../shared/person';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
 import { emergencyGoalTarget, ourLinesOf, recommendedDraft } from '../split-draft';
@@ -28,7 +28,8 @@ export function W01Split() {
   const [drafts, setDrafts] = useState<Record<string, SplitLineDraft[]>>({});
   const [refill, setRefill] = useState(false);
   const [saving, setSaving] = useState(false);
-  if (!me.data || !space.data || !goals.data || !splits.data) return null;
+  if (!me.data || !space.data || !goals.data || !splits.data)
+    return <QuestionSkeleton fields={3} />;
   const m = me.data;
   const p = partner.data ?? null;
   const joint = space.data.salary_mode === 'joint';
@@ -92,11 +93,11 @@ export function W01Split() {
       const before = saved;
       toast(
         copy.saved,
-        before ? { label: copy.undo, onClick: () => void write(before) } : undefined,
+        before ? { label: copy.undo, onClick: () => quietly(write(before)) } : undefined,
       );
       back();
     } catch {
-      toast(copy.failed, { label: copy.retry, onClick: () => void save() });
+      toast(copy.failed, { label: copy.retry, onClick: () => quietly(save()) });
     } finally {
       setSaving(false);
     }

@@ -17,6 +17,7 @@ export function TransferRow({
   onOpen,
   lead,
   viewOnly = false,
+  busy = false,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -37,6 +38,8 @@ export function TransferRow({
   lead?: ReactNode;
   /** 남의 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 대신 상태 표시(한 줄은 작은 체크, 안 한 줄은 비움) */
   viewOnly?: boolean;
+  /** 체크를 서버에 저장하는 중(2026-11-06): 두 번 누르기 막음, aria-busy. 체크 모양은 부르는 쪽이 바로 바꿔 보여 줌 */
+  busy?: boolean;
 }) {
   const body = (
     <>
@@ -70,7 +73,8 @@ export function TransferRow({
           aria-label={checkLabel}
           className={cx('hg-check', done && 'is-on')}
           disabled={disabled}
-          onClick={onToggle}
+          aria-busy={busy || undefined}
+          onClick={busy ? undefined : onToggle}
         />
       )}
       {onOpen ? (
