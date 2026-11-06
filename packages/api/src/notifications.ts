@@ -1,4 +1,4 @@
-import type { Tables } from '@sweetwo/core';
+import { ActiveNotice, type Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -72,28 +72,19 @@ export async function fetchNotification(id: string): Promise<Notification | null
   return data;
 }
 
-// ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것만(RLS) ─────────────────────
-export type ActiveNotice = {
-  id: string;
-  kind: string;
-  title: string;
-  body: string;
-  importance: 'normal' | 'must';
-  platforms: string[];
-};
+// ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것 중 나에게 맞는 것만 ──────────────
+// 대상 조건(플랫폼, 부부 상태, 앱 버전, 가입 주차)은 서버 my_notices가 봄. 앱 버전은 브리지 값(웹은 없음)
 export async function fetchActiveNotices(
   platform: 'desktop' | 'ios' | 'android' | 'web',
+  version?: string,
 ): Promise<ActiveNotice[]> {
-  // 공지 대상(AD-10): 데스크톱 앱 / 모바일 앱(iOS·Android) / 웹
-  const target = platform === 'ios' || platform === 'android' ? 'mobile' : platform;
-  const { data, error } = await supabase()
-    .from('notice')
-    .select('id, kind, title, body, importance, platforms')
-    .order('starts_at', { ascending: false });
+  const { data, error } = await supabase().rpc('my_notices', {
+    p_platform: platform,
+    ...(version ? { p_version: version } : {}),
+  });
   if (error) return [];
-  return (data ?? [])
-    .filter((n) => n.platforms.includes(target))
-    .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
+  const r = ActiveNotice.array().safeParse(data ?? []);
+  return r.success ? r.data : [];
 }
 
 /** 새 기기 로그인 확인(로그인 뒤 한 번): 다른 세션이 있으면 서버가 본인에게 알림 + 메일 */

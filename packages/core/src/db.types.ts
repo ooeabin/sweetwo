@@ -1861,6 +1861,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
+          target: Json
           title: string
         }
         ComputedFields: never
@@ -1878,6 +1879,7 @@ export type Database = {
           published_at?: string | null
           starts_at: string
           status?: string
+          target?: Json
           title: string
         }
         Update: {
@@ -1894,6 +1896,7 @@ export type Database = {
           published_at?: string | null
           starts_at?: string
           status?: string
+          target?: Json
           title?: string
         }
         Relationships: []
@@ -2594,6 +2597,15 @@ export type Database = {
         Args: { p_reason: string; p_rows: number; p_screen: string }
         Returns: string
       }
+      admin_notice_audience: {
+        Args: {
+          p_email: boolean
+          p_kind: string
+          p_platforms: string[]
+          p_target: Json
+        }
+        Returns: Json
+      }
       admin_notices: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2610,6 +2622,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
+          target: Json
           title: string
         }[]
         SetofOptions: {
@@ -2650,6 +2663,7 @@ export type Database = {
         }
         Returns: string
       }
+      admin_request_notice: { Args: { p_id: string }; Returns: undefined }
       admin_request_user: {
         Args: {
           p_email: string
@@ -2758,6 +2772,10 @@ export type Database = {
         Args: { p_email: boolean; p_id: string }
         Returns: undefined
       }
+      admin_set_notice_target: {
+        Args: { p_id: string; p_target: Json }
+        Returns: undefined
+      }
       admin_terms_versions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2770,6 +2788,10 @@ export type Database = {
           status: string
           version: string
         }[]
+      }
+      admin_test_notice_mail: {
+        Args: { p_body: string; p_kind: string; p_title: string }
+        Returns: undefined
       }
       admin_user_detail: { Args: { p_user: string }; Returns: Json }
       admin_users: {
@@ -3142,6 +3164,10 @@ export type Database = {
       }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
+      my_notices: {
+        Args: { p_platform: string; p_version?: string }
+        Returns: Json
+      }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3209,6 +3235,18 @@ export type Database = {
           body_html: string
           body_text: string
         }[]
+      }
+      notice_target_valid: { Args: { p: Json }; Returns: boolean }
+      notice_user_match: {
+        Args: {
+          p_now?: string
+          p_platform?: string
+          p_platforms: string[]
+          p_target: Json
+          p_user: string
+          p_version?: string
+        }
+        Returns: boolean
       }
       notify: {
         Args: {
