@@ -1,8 +1,8 @@
 import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
 import { formatKstDateTime, toCsv } from '@sweetwo/core';
 import { Button, DataTable } from '@sweetwo/ui';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { Frame } from '../frame';
 
@@ -55,12 +55,12 @@ export function AD02Members() {
       setBusy(false);
     }
   };
-  const search = async () => {
-    if (!q.trim() || busy) return;
+  const search = async (text = q) => {
+    if (!text.trim() || busy) return;
     setBusy(true);
     setErr(false);
     try {
-      const r = await adminSearch(q.trim());
+      const r = await adminSearch(text.trim());
       if (r.length === 1 && r[0]) return nav(`/members/${r[0].user_id}`);
       setRows(r);
     } catch {
@@ -69,6 +69,15 @@ export function AD02Members() {
       setBusy(false);
     }
   };
+  // 상단 바 통합 검색에서 넘어오면 바로 찾음
+  const loc = useLocation();
+  const from = (loc.state as { q?: string; at?: number } | null) ?? null;
+  useEffect(() => {
+    if (!from?.q) return;
+    setQ(from.q);
+    void search(from.q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from?.at]);
   return (
     <Frame menu="members" title={copy.menus.members}>
       <form

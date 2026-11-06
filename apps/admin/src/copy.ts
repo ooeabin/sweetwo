@@ -10,6 +10,8 @@ export const copy = {
     system: '시스템',
     docs: '문서',
   },
+  menuGroups: { work: '운영', content: '발송과 콘텐츠', manage: '관리' }, // [확인 필요]
+  globalSearch: '전체에서 찾기', // [확인 필요] 상단 바 검색 이름(자리표시는 search)
   roles: { super: '최고 관리자', ops: '운영', cs: 'CS', analyst: '분석' } as Record<string, string>,
   signOut: '로그아웃',
   seenAt: (t: string) => `${t} 접속`,

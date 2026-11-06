@@ -251,8 +251,8 @@ export function AD03Member() {
 
 function KV({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="hg-row" style={{ justifyContent: 'space-between', gap: 'var(--space-4)' }}>
-      <span className="hg-card__meta">{k}</span>
+    <div className="hg-admin__kv">
+      <span>{k}</span>
       <span>{v}</span>
     </div>
   );
