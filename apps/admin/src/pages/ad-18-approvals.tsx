@@ -6,10 +6,11 @@ import {
   type ApprovalStatus,
 } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
-import { Button, DataTable, Tabs } from '@sweetwo/ui';
+import { Button, DataTable, Status, Tabs } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
+import { decisionTone } from '../tones';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 import { useReauth } from '../reauth';
@@ -82,7 +83,12 @@ export function AD18Approvals() {
             label: ops.approvalCols.status,
             render: (r) =>
               r.status !== 'requested' ? (
-                `${ops.approvalStatus[r.status] ?? r.status} ${r.decided_by ?? ''}`
+                <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                  <Status tone={decisionTone[r.status] ?? 'off'}>
+                    {ops.approvalStatus[r.status] ?? r.status}
+                  </Status>
+                  {r.decided_by && <span className="hg-card__meta">{r.decided_by}</span>}
+                </span>
               ) : (
                 <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
                   {superAdmin && !mine(r) && (

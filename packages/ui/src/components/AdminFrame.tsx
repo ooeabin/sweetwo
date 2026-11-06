@@ -42,7 +42,7 @@ export function AdminFrame({
     <div className="hg-admin">
       <nav className="hg-admin__side" aria-label="어드민 메뉴">
         <div className="hg-admin__brand">
-          <Wordmark height={24} />
+          <Wordmark height={24} ink />
           <span className="hg-tag">어드민</span>
         </div>
         {menus.map((m, i) => {

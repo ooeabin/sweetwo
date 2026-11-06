@@ -61,6 +61,7 @@
 | [PageHeader](PageHeader.md) | Layout | 상세 화면 머리 |
 | [QuestionLayout](QuestionLayout.md) | Layout | 한 화면 한 질문 틀 |
 | [SectionHeader](SectionHeader.md) | Layout | 본문 안 묶음 제목 |
+| [Status](Status.md) | Display | 어드민 표 상태 값(점 + 글자) |
 | [Ring](Ring.md) | Data | 묶음 진행 원(“2/4”) |
 | [WeekStrip](WeekStrip.md) | Data | 이번 주 날짜 띠 |
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |

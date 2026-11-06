@@ -24,11 +24,12 @@ import {
   formatKstDateTime,
   todayKst,
 } from '@sweetwo/core';
-import { Badge, Button, DataTable, SectionHeader, Tabs } from '@sweetwo/ui';
+import { Badge, Button, DataTable, SectionHeader, Status, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
+import { decisionTone } from '../tones';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 
@@ -206,7 +207,13 @@ function Terms({ canEdit }: { canEdit: boolean }) {
             num: true,
             render: (r) => r.agreed.toLocaleString('ko-KR'),
           },
-          { key: 's', label: ops.termsCols.status, render: (r) => ops.termsStatus[r.status] },
+          {
+            key: 's',
+            label: ops.termsCols.status,
+            render: (r) => (
+              <Status tone={decisionTone[r.status] ?? 'off'}>{ops.termsStatus[r.status]}</Status>
+            ),
+          },
         ]}
       />
       {canEdit && (

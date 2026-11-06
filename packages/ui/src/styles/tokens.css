@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (4662ba3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (73ad7c9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -43,6 +43,11 @@
   --on-success: #ffffff; /* success 바탕 위 글자. */
   --danger: #dc2626; /* 입력 오류·저장 실패에만. 기본 빨강(흰 바탕 4.8:1)으로 브랜드 오렌지와 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
+  --accent-soft: #eef1ff; /* 어드민 포인트 판(2026-11-06): 지금 메뉴 바탕, 고른 작은 칩 바탕. 위 글자는 accent-ink. 사용자 앱에는 쓰지 않음. */
+  --accent-ink: #2f45c4; /* 어드민 포인트 글자(2026-11-06): accent-soft 위 글자와 아이콘, 탭 밑줄. surface 위 4.5:1 이상. */
+  --warning-soft: #fff6e0; /* 주의 판(2026-11-06): 어드민 경보 띠 바탕. 위 글자는 warning-ink. */
+  --warning-ink: #8a5300; /* 주의 글자와 상태 점(2026-11-06): 승인 대기, 해제 대기, 접수처럼 손볼 것. warning-soft·surface 위 4.5:1 이상. */
+  --danger-soft: #fff6f6; /* 실패 판(2026-11-06): 어드민 실패 경보 띠 바탕. 위 글자는 danger. */
   --scrim: rgba(26,27,28,0.40); /* 모달·바텀시트 뒤를 덮는 막. 사진 위 ✕ 원과 올리는 중 띠 바탕(2026-11-04). */
   --chart-goal: #e3a15f; /* 차트 계열: 목표(살구). 계열 순서 1. 흰 바탕 3:1 미만이라 막대·면 등 넓은 면으로, 범례·라벨 필수. */
   --chart-together: #e7566b; /* 차트 계열: 우리 둘(공동 생활비). 계열 순서 2. */
@@ -97,6 +102,11 @@
   --on-success: #141312;
   --danger: #f87171;
   --on-danger: #141312;
+  --accent-soft: #1e2340; /* 어드민 포인트 판(2026-11-06): 지금 메뉴 바탕, 고른 작은 칩 바탕. 위 글자는 accent-ink. 사용자 앱에는 쓰지 않음. */
+  --accent-ink: #aab6ff; /* 어드민 포인트 글자(2026-11-06): accent-soft 위 글자와 아이콘, 탭 밑줄. surface 위 4.5:1 이상. */
+  --warning-soft: #2e2610; /* 주의 판(2026-11-06): 어드민 경보 띠 바탕. 위 글자는 warning-ink. */
+  --warning-ink: #f2c46b; /* 주의 글자와 상태 점(2026-11-06): 승인 대기, 해제 대기, 접수처럼 손볼 것. warning-soft·surface 위 4.5:1 이상. */
+  --danger-soft: #341b1b; /* 실패 판(2026-11-06): 어드민 실패 경보 띠 바탕. 위 글자는 danger. */
   --scrim: rgba(0,0,0,0.60);
   --chart-goal: #be8838;
   --chart-together: #e04f65;

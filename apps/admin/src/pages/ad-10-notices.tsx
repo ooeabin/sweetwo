@@ -16,10 +16,11 @@ import {
   NOTICE_VERSION,
   NoticeTarget,
 } from '@sweetwo/core';
-import { Button, Chip, DataTable, Icon, Toggle } from '@sweetwo/ui';
+import { Button, Chip, DataTable, Icon, Status, Toggle } from '@sweetwo/ui';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy, ops } from '../copy';
+import { noticeTone } from '../tones';
 import { Frame } from '../frame';
 import { useAdmin } from '../gate';
 
@@ -79,7 +80,9 @@ export function AD10Notices() {
               {
                 key: 'status',
                 label: ops.noticeCols.status,
-                render: (n) => ops.noticeStatus[n.status],
+                render: (n) => (
+                  <Status tone={noticeTone[n.status] ?? 'off'}>{ops.noticeStatus[n.status]}</Status>
+                ),
               },
             ]}
           />

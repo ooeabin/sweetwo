@@ -1,9 +1,10 @@
 import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
 import { formatKstDateTime, toCsv } from '@sweetwo/core';
-import { Button, DataTable } from '@sweetwo/ui';
+import { Button, DataTable, Status } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
+import { coupleTone } from '../tones';
 import { Frame } from '../frame';
 
 // AD-02 회원·부부 검색: 이메일, 사용자 ID, 부부 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
@@ -148,7 +149,14 @@ export function AD02Members() {
             {
               key: 'couple',
               label: copy.cols.couple,
-              render: (r) => copy.coupleStates[r.couple_state ?? ''] ?? '—',
+              render: (r) =>
+                r.couple_state ? (
+                  <Status tone={coupleTone[r.couple_state] ?? 'off'}>
+                    {copy.coupleStates[r.couple_state] ?? r.couple_state}
+                  </Status>
+                ) : (
+                  '—'
+                ),
             },
             { key: 'sub', label: copy.cols.sub, render: (r) => r.subscription },
           ]}

@@ -5,7 +5,7 @@ import {
   type InquiryStatus,
 } from '@sweetwo/api';
 import { hoursBetween, inquiryOverdue } from '@sweetwo/core';
-import { DataTable, Tabs } from '@sweetwo/ui';
+import { DataTable, Status, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -65,7 +65,11 @@ export function AD06Inquiries() {
             render: (r) => {
               const h = hoursBetween(r.created_at);
               const t = copy.elapsed(h);
-              return status !== 'done' && inquiryOverdue(r.created_at, holidays) ? <b>{t}</b> : t;
+              return status !== 'done' && inquiryOverdue(r.created_at, holidays) ? (
+                <Status tone="bad">{t}</Status>
+              ) : (
+                t
+              );
             },
           },
         ]}
