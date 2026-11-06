@@ -74,7 +74,7 @@ export function Modal({
           <Button variant="secondary" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button variant="danger" disabled={busy} onClick={onConfirm}>
+          <Button variant="danger" loading={busy} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>

@@ -64,7 +64,8 @@ export function A08NewDevice() {
           <Button
             variant="secondary"
             block
-            disabled={busy || s?.current}
+            disabled={s?.current}
+            loading={busy}
             onClick={() => void notMe()}
           >
             {copy.notMe}

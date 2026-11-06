@@ -1,4 +1,5 @@
 import { Children, useEffect, type ReactNode } from 'react';
+import { useLoadingShown } from './Button';
 import { Icon } from './Icon';
 import { Wordmark } from './Wordmark';
 
@@ -174,9 +175,10 @@ export function QuestionLayout({
     loading?: boolean;
     variant?: 'primary' | 'secondary' | 'danger';
   };
-  later?: { label: string; onClick: () => void };
+  /** loading: 이 글자 버튼이 서버 일을 기다리는 중(2026-11-06, 누르기 막고 0.3초 뒤 도는 원) */
+  later?: { label: string; onClick: () => void; loading?: boolean };
   /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */
-  secondary?: { label: string; onClick: () => void };
+  secondary?: { label: string; onClick: () => void; loading?: boolean };
   onBack?: () => void;
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
@@ -204,6 +206,11 @@ export function QuestionLayout({
         }
       : undefined);
   const centered = center ?? Children.toArray(children).length === 0;
+  // 처리 중(2026-11-06): 누르기와 Enter는 바로 막고, 도는 원은 0.3초 넘을 때만(Button.md)
+  const busy = !!(primary?.loading || later?.loading || secondary?.loading);
+  const primaryShown = useLoadingShown(primary?.loading);
+  const laterShown = useLoadingShown(later?.loading);
+  const secondShown = useLoadingShown(secondary?.loading);
   useEffect(() => {
     if (!onBack) return;
     const onKey = (e: KeyboardEvent) => {
@@ -227,7 +234,7 @@ export function QuestionLayout({
           .join(' ')}
         onSubmit={(e) => {
           e.preventDefault();
-          if (!primary?.disabled) onSubmit?.();
+          if (!primary?.disabled && !busy) onSubmit?.();
         }}
       >
         {chapter ? (
@@ -276,8 +283,9 @@ export function QuestionLayout({
             {later && (
               <button
                 type="button"
-                className="hg-btn hg-btn--link hg-btn--quiet"
-                onClick={later.onClick}
+                className={`hg-btn hg-btn--link hg-btn--quiet${laterShown ? ' is-loading' : ''}`}
+                aria-busy={later.loading || undefined}
+                onClick={() => !busy && later.onClick()}
               >
                 {later.label}
               </button>
@@ -286,8 +294,9 @@ export function QuestionLayout({
             {secondary && (
               <button
                 type="button"
-                className="hg-btn hg-btn--secondary hg-q__second"
-                onClick={secondary.onClick}
+                className={`hg-btn hg-btn--secondary hg-q__second${secondShown ? ' is-loading' : ''}`}
+                aria-busy={secondary.loading || undefined}
+                onClick={() => !busy && secondary.onClick()}
               >
                 {secondary.label}
               </button>
@@ -295,7 +304,7 @@ export function QuestionLayout({
             {primary && (
               <button
                 type="submit"
-                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primary.loading ? ' is-loading' : ''}`}
+                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primaryShown ? ' is-loading' : ''}`}
                 disabled={primary.disabled}
                 aria-busy={primary.loading || undefined}
               >

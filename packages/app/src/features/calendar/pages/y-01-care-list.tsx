@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { moneyLine, useCalendarData } from '../data';
+import { SkelBody } from '../../frame';
 import { CalendarFrame, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 import { reviewMonth } from '../data';
@@ -58,7 +59,7 @@ export function Y01CareList() {
       {children}
     </CalendarFrame>
   );
-  if (d.loading) return frame(null);
+  if (d.loading) return frame(<SkelBody shape="rows" />);
 
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const months: [number, number][] = [0, 1, 2].map((n) => {

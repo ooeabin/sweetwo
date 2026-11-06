@@ -1,8 +1,8 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { QuestionLayout } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { CheckLine, goalLineName, LineLead, lineName } from '../check-line';
 import { copy } from '../copy';
 import {
@@ -28,7 +28,8 @@ export function W05Review() {
   const check = useCheck();
   // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월말 확인’, 홈·트레이도 같음)
   const empty = useRef<boolean | null>(null);
-  if (!me.data || !space.data || !goals.data || !lists.data) return null;
+  if (!me.data || !space.data || !goals.data || !lists.data)
+    return <QuestionSkeleton onBack={() => nav('/')} fields={3} />;
   const list = myChecklist(lists.data, me.data.id);
   const meId = me.data.id;
   const personName = (id: string | null) =>
@@ -45,7 +46,7 @@ export function W05Review() {
       .then(() =>
         toast(copy.skippedDone(lineName(l, goalName, personName, joint)), {
           label: copy.undo,
-          onClick: () => void check(l, 'wait'),
+          onClick: () => quietly(check(l, 'wait')),
         }),
       )
       .catch(() => toast(copy.failed));

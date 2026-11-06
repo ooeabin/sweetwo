@@ -1,5 +1,5 @@
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
@@ -15,7 +15,8 @@ export function P05Salary() {
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
   const [asked, setAsked] = useState(false);
-  if (!d.ready || !me) return null;
+  if (!d.ready || !me)
+    return <QuestionSkeleton title={copy.salary} chapter={s.chapter} onBack={s.onBack ?? null} />;
   const value = amount === undefined ? (me.monthly_income ?? null) : amount;
   const isVariable = variable ?? me.income_variable ?? false;
   const valid = value !== null && value > 0;

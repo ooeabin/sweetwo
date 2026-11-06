@@ -28,6 +28,7 @@
 | 포커스 | 2px `focus` 링, 바깥 2px |
 
 - Toggle은 `button role="switch"` + `aria-checked`, 라벨 `label`로 감쌈. Checkbox·Radio는 줄에 `role="checkbox"`/`role="radio"` + `aria-checked`, 카드 묶음은 `role="radiogroup"`.
+- 서버에 저장하는 Toggle(2026-11-06): `onChange`가 Promise를 돌려주면 끝날 때까지 누른 쪽으로 바로 보여 주고(`aria-busy`) 다시 누르기를 막음. 실패해서 값이 그대로면 원래대로 돌아감.
 - 바뀌면 바로 적용, 저장 버튼 없음. `dur-fast`.
 - React 래퍼: `Toggle`(`packages/ui`, 라벨 + 작은 도움말).
 - ChoiceCards 처음 포커스(2026-11-04): 넓은 창에서 첫 카드에 주는 처음 포커스는 테두리 없이(`data-autofocus`). 키를 누르거나 포커스가 옮겨지면 보통 포커스 테두리. 들어오자마자 고른 것처럼 보이지 않게.

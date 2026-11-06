@@ -59,7 +59,7 @@ export function S19aInquiry() {
     <QuestionLayout
       title={copy.contact}
       onBack={() => nav('/settings/help')}
-      primary={{ label: copy.sendInquiry, disabled: !ok || busy, loading: busy }}
+      primary={{ label: copy.sendInquiry, disabled: !ok, loading: busy }}
       onSubmit={() => void send()}
     >
       <div className="hg-list">

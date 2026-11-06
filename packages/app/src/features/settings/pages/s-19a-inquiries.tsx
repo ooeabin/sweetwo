@@ -22,14 +22,14 @@ export function S19aInquiries() {
   const qc = useQueryClient();
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const [text, setText] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'stop' | 'reply' | null>(null);
   if (list.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const rows = list.data ?? [];
   const q: Inquiry | undefined = id ? rows.find((r) => r.id === id) : undefined;
 
-  const run = async (f: () => Promise<unknown>, done: string) => {
+  const run = async (key: 'stop' | 'reply', f: () => Promise<unknown>, done: string) => {
     if (busy) return;
-    setBusy(true);
+    setBusy(key);
     try {
       await f();
       await qc.invalidateQueries({ queryKey: qk.inquiries });
@@ -37,7 +37,7 @@ export function S19aInquiries() {
     } catch {
       toast(copy.failed);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -111,8 +111,8 @@ export function S19aInquiries() {
             <Button
               variant="secondary"
               size="sm"
-              disabled={busy}
-              onClick={() => void run(() => stopAccess(on.id), copy.accessStopped)}
+              loading={busy === 'stop'}
+              onClick={() => void run('stop', () => stopAccess(on.id), copy.accessStopped)}
             >
               {copy.accessStop}
             </Button>
@@ -153,12 +153,19 @@ export function S19aInquiries() {
             e.preventDefault();
             const t = text.trim();
             if (!t) return;
-            void run(() => addInquiryMessage(q.id, t), copy.replySent).then(() => setText(''));
+            void run('reply', () => addInquiryMessage(q.id, t), copy.replySent).then(() =>
+              setText(''),
+            );
           }}
         >
           <InquiryText label={copy.replyLabel} value={text} onChange={setText} />
           <div className="hg-row">
-            <Button variant="secondary" type="submit" disabled={!text.trim() || busy}>
+            <Button
+              variant="secondary"
+              type="submit"
+              disabled={!text.trim()}
+              loading={busy === 'reply'}
+            >
               {copy.reply}
             </Button>
           </div>

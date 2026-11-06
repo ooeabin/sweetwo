@@ -1,5 +1,5 @@
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useConfirmOnce } from '../confirm';
 import { copy } from '../copy';
@@ -17,7 +17,8 @@ export function O31Salary() {
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
   const ok = useConfirmOnce();
-  if (!s.ready) return null;
+  if (!s.ready)
+    return <QuestionSkeleton title={copy.salary} chapter={s.chapter} onBack={s.onBack ?? null} />;
   const value = amount === undefined ? (me?.monthly_income ?? null) : amount;
   const isVariable = variable ?? me?.income_variable ?? false;
   const valid = value !== null && value > 0;

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (b847ba2). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (a5eb6d5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -981,6 +981,44 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-btn--kakao.is-loading::after { border-color: rgba(0, 0, 0, 0.85); border-right-color: transparent; }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .hg-btn.is-loading::after { animation-duration: 2.4s; } }
+.hg-btn[aria-busy="true"] { cursor: progress; }
+
+/* ── 앱 인터랙션(2026-11-06 점검, DESIGN.md ‘움직임’). transform만 움직이고 글자가 있는 것의 투명도는 바꾸지 않음(나타나는 동안에도 글자 대비 유지) ── */
+/* 색이 바뀌는 것: dur-fast */
+:is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-dock__item, .hg-iconbtn, .hg-fab, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day) { transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.hg-transfer__label, .hg-transfer__amount, .hg-task__title { transition: color var(--dur-fast) var(--ease-out); }
+.hg-btn.is-loading { transition: none; }  /* 도는 원으로 바뀔 때 글자가 비쳐 보이지 않게 */
+/* 마우스 올림(마우스가 있는 기기만): 주 버튼은 누름색, 보조 버튼은 한 단계 진하게 */
+@media (hover: hover) {
+  .hg-btn--primary:hover:not(:disabled) { background: var(--brand-pressed); }
+  .hg-btn--secondary:hover:not(:disabled) { background: var(--hairline-soft); }
+  :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--brand-soft) 94%, var(--brand-ink)); }
+  .hg-btn--ghost:hover:not(:disabled) { background: var(--surface-alt); }
+  .hg-chip:hover { border-color: var(--slate); }
+  .hg-tab:not(.is-active):hover, .hg-seg__item:not(.is-active):hover { color: var(--ink); }
+  :is(button, a).hg-card:hover, .hg-goaltile:has(> .hg-goaltile__main:hover), .hg-pick__item:hover { box-shadow: var(--shadow-2); }
+  .hg-recband:hover, .hg-foldrow:hover, .hg-invite-code:hover { background: var(--hairline-soft); }
+  :is(.hg-goalrow, .hg-dayrow, button.hg-rankrow):hover { background: var(--surface-alt); }
+}
+/* 누름: 버튼·카드·타일·칩은 98%, 작은 원 버튼·체크는 92%, 꽉 찬 줄은 바탕색 */
+:is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item):active:not(:disabled) { transform: scale(0.98); }
+.hg-goaltile:has(> .hg-goaltile__main:active) { transform: scale(0.98); }
+:is(.hg-iconbtn, .hg-fab, .hg-check, .hg-dock__item):active:not(:disabled) { transform: scale(0.92); }
+:is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-daygrid__day):active { background: var(--hairline-soft); }
+:is(.hg-transfer__open, .hg-banner__main):active { transform: scale(0.99); }
+/* 들어옴: 화면 본문(앱 틀의 단, 질문 화면의 제목과 내용)은 6px 아래에서, 펼친 내용과 메뉴는 4px 위에서, 새로 넣은 입력 줄은 98%에서. dur-base, ease-out */
+@media (prefers-reduced-motion: no-preference) {
+  .hg-body__col, .hg-q > :not(.hg-q__nav, .hg-q__foot) { animation: hg-enter var(--dur-base) var(--ease-out); }
+  .hg-acc__a:not([hidden]), .hg-foldrow[aria-expanded="true"] ~ *, .hg-menu--actions { animation: hg-drop var(--dur-base) var(--ease-out); }
+  .hg-listin__row { animation: hg-grow var(--dur-base) var(--ease-out); transform-origin: top center; }
+}
+@keyframes hg-enter { from { transform: translateY(6px); } }
+@keyframes hg-drop { from { transform: translateY(-4px); } }
+@keyframes hg-grow { from { transform: scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-dock__item, .hg-iconbtn, .hg-fab, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
+  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-fab, .hg-check, .hg-dock__item, .hg-transfer__open, .hg-banner__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
+}
 
 /* 금액 가리기 */
 .hg-masked { letter-spacing: 2px; color: var(--stone); }

@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
 import { moneyLine, reviewMonth, useCalendarData } from '../data';
 import { money as won, useMask } from '../../../shared/mask';
+import { SkelBody } from '../../frame';
 import { CalendarFrame, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 
@@ -75,7 +76,7 @@ export function Y04Calendar() {
       {children}
     </CalendarFrame>
   );
-  if (d.loading) return frame(null);
+  if (d.loading) return frame(<SkelBody shape="calendar" />);
 
   const [y, m] = ym;
   const moneyOf = (date: string) => {

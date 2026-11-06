@@ -3,7 +3,7 @@ import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -36,7 +36,7 @@ export function S11fSalaryMode() {
       await refresh();
       toast(copy.salaryModeSaved, {
         label: copy.undo,
-        onClick: () => void setSalaryMode(saved).then(refresh),
+        onClick: () => quietly(setSalaryMode(saved).then(refresh)),
       });
       nav('/salary/split', { replace: true });
     } catch {

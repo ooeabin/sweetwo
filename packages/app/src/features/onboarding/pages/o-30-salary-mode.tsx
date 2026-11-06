@@ -1,4 +1,4 @@
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveSpace } from '../data';
@@ -11,7 +11,10 @@ type Mode = keyof typeof copy.salaryModes;
 export function O30SalaryMode() {
   const s = useStep('o-30');
   const [v, setV] = useState<Mode | null>(null);
-  if (!s.ready) return null;
+  if (!s.ready)
+    return (
+      <QuestionSkeleton title={copy.salaryMode} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   const value: Mode = v ?? s.state.space?.salary_mode ?? 'separate';
   return (
     <QuestionLayout

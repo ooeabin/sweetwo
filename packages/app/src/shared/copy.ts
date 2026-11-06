@@ -10,4 +10,6 @@ export const sharedCopy = {
   errorTitle: '잠시 문제가 생겼어요',
   errorBody: '다시 시도해 주세요',
   retry: '다시 시도',
+  /** 13 공통 상태 10번: 저장 실패(되돌리기 등 결과 알림이 없던 동작, 2026-11-06) */
+  saveFailed: '저장하지 못했어요',
 };

@@ -238,7 +238,7 @@ export function S18Data() {
           help={copy.analyticsSub}
           checked={!me.analytics_off}
           onChange={(on) =>
-            void updateMe({ analytics_off: !on })
+            updateMe({ analytics_off: !on })
               .then(() => qc.invalidateQueries({ queryKey: qk.me }))
               .catch(() => toast(copy.failed))
           }

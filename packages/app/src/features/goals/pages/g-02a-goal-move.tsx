@@ -1,10 +1,10 @@
 import { moveGoal, qk, undoGoalMove, updateGoal } from '@sweetwo/api';
 import { readWon, thisMonth } from '@sweetwo/core';
-import { AmountInput, ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoalsModel } from '../model';
 
@@ -30,7 +30,7 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [next, setNext] = useState<'ask' | 'amount' | null>(null);
   const [nextAmount, setNextAmount] = useState<number | null>(null);
-  if (!d.ready) return null;
+  if (!d.ready) return <QuestionSkeleton onBack={() => nav(`/goals/${id}`)} />;
   const i = d.byId(id);
   if (!i || !i.canEdit) return null;
   const g = i.goal;
@@ -74,7 +74,7 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
             .then(() => {
               toast(copy.nextYearDone, {
                 label: copy.undo,
-                onClick: () => void updateGoal(g.id, { target_amount: before }).then(refresh),
+                onClick: () => quietly(updateGoal(g.id, { target_amount: before }).then(refresh)),
               });
               back();
             })
@@ -127,7 +127,7 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
         await refresh();
         toast(copy.movedIn(g.name, readWon(amount)), {
           label: copy.undo,
-          onClick: () => void updateGoal(g.id, { other_held: before }).then(refresh),
+          onClick: () => quietly(updateGoal(g.id, { other_held: before }).then(refresh)),
         });
       } else {
         const r = await moveGoal(g.id, pick, amount);
@@ -142,7 +142,7 @@ export function G02aGoalMove({ spend = false }: { spend?: boolean }) {
             : pick === 'out'
               ? copy.movedOut(g.name, readWon(amount))
               : copy.used(g.name, readWon(amount));
-        toast(text, { label: copy.undo, onClick: () => void undoGoalMove(r.id).then(refresh) });
+        toast(text, { label: copy.undo, onClick: () => quietly(undoGoalMove(r.id).then(refresh)) });
         // 매년 목표를 쓰는 달에 꺼내 쓰면 내년 금액을 한 번 물음
         const ym = thisMonth();
         const key = `sweetwo.yearly-asked.${g.id}.${ym.slice(0, 4)}`;

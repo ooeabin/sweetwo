@@ -1,5 +1,5 @@
 import { fetchSocialName } from '@sweetwo/api';
-import { QuestionLayout, ShortText } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton, ShortText } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy } from '../copy';
@@ -17,7 +17,10 @@ export function O03MyNickname() {
   });
   const value = v ?? (s.state.me?.nickname || social.data || '');
   const trimmed = value.trim();
-  if (!s.ready) return null;
+  if (!s.ready)
+    return (
+      <QuestionSkeleton title={copy.myNickname} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   return (
     <QuestionLayout
       chapter={s.chapter}

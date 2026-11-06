@@ -11,7 +11,8 @@ import { session } from '../session';
 // ‘그대로 두기’ → 로그아웃
 export function A02Restore() {
   const nav = useNavigate();
-  const [busy, setBusy] = useState(false);
+  // 누른 버튼(yes 복구, no 그대로 두기)만 도는 원
+  const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
   return (
     <AuthLayout
       title={copy.restoreTitle}
@@ -21,13 +22,14 @@ export function A02Restore() {
           <Button
             variant="primary"
             block
-            disabled={busy}
+            loading={busy === 'yes'}
             onClick={() => {
-              setBusy(true);
+              if (busy) return;
+              setBusy('yes');
               void cancelAccountDeletion()
                 .then(() => routeAfterLogin())
                 .then((r) => nav(r.to, { replace: true, state: r.state }))
-                .catch(() => setBusy(false));
+                .catch(() => setBusy(null));
             }}
           >
             {copy.restoreYes}
@@ -35,8 +37,12 @@ export function A02Restore() {
           <Button
             variant="secondary"
             block
-            disabled={busy}
-            onClick={() => void session.signOut().then(() => nav(paths.login, { replace: true }))}
+            loading={busy === 'no'}
+            onClick={() => {
+              if (busy) return;
+              setBusy('no');
+              void session.signOut().then(() => nav(paths.login, { replace: true }));
+            }}
           >
             {copy.restoreNo}
           </Button>

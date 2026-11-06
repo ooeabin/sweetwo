@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { MainFrame } from '../../frame';
+import { MainFrame, SkelBody } from '../../frame';
 import { copy } from '../copy';
 import { GoalItemCard } from '../goal-item-card';
 import { useGoalsModel, type GoalItem } from '../model';
@@ -67,7 +67,7 @@ export function G01GoalList() {
             <p className="hg-card__meta">{copy.loadFailed}</p>
           </div>,
         ]
-      : [<div key="l" />];
+      : [<SkelBody key="l" shape="tiles" />];
     return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={columns} />;
   }
 

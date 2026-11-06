@@ -8,7 +8,7 @@ import type { LockStatus } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
 import { paths, prefs, session } from '../../auth';
-import { MainFrame } from '../../frame';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 
 type PinFor = 'off' | 'change';
@@ -25,15 +25,18 @@ export function S15Security() {
   const [pinFor, setPinFor] = useState<PinFor | null>(null);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [busy, setBusy] = useState(false);
+  // 처리 중인 버튼(기기 id 또는 'all'), 2026-11-06 버튼 안 로딩
+  const [busy, setBusy] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const refreshLock = () => bridge?.lock.status().then(setLock);
   useEffect(() => {
     void refreshLock();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkPin = async () => {
-    if (!bridge || !pinFor) return;
-    const r = await bridge.lock.verify(pin);
+    if (!bridge || !pinFor || checking) return;
+    setChecking(true);
+    const r = await bridge.lock.verify(pin).finally(() => setChecking(false));
     if (!r.ok) {
       if (r.signedOut) return void nav(paths.login, { replace: true });
       setPinError(true);
@@ -48,9 +51,9 @@ export function S15Security() {
       toast(copy.saved);
     } else nav(`${paths.pinSetup}?next=/settings/security`);
   };
-  const run = async (f: () => Promise<unknown>, done: string) => {
+  const run = async (key: string, f: () => Promise<unknown>, done: string) => {
     if (busy) return;
-    setBusy(true);
+    setBusy(key);
     try {
       await f();
       await qc.invalidateQueries({ queryKey: qk.sessions });
@@ -58,12 +61,12 @@ export function S15Security() {
     } catch {
       toast(copy.failed);
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
   const logoutAll = async () => {
     if (busy) return;
-    setBusy(true);
+    setBusy('all');
     try {
       await endSessions();
       await session.signOut();
@@ -71,10 +74,11 @@ export function S15Security() {
       nav(paths.login, { replace: true });
     } catch {
       toast(copy.failed);
-      setBusy(false);
+      setBusy(null);
     }
   };
 
+  if (sessions.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader
@@ -112,7 +116,7 @@ export function S15Security() {
                 <Toggle
                   label={copy.touchId(lock.bioKind ?? 'touch')}
                   checked={lock.touchIdEnabled}
-                  onChange={(on) => void bridge.lock.setTouchId(on).then(refreshLock)}
+                  onChange={(on) => bridge.lock.setTouchId(on).then(refreshLock)}
                 />
               )}
               <div className="hg-list">
@@ -147,7 +151,12 @@ export function S15Security() {
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 />
               </div>
-              <Button variant="primary" type="submit" disabled={pin.length !== 6}>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={pin.length !== 6}
+                loading={checking}
+              >
                 {copy.confirmMe}
               </Button>
               <Button variant="secondary" onClick={() => setPinFor(null)}>
@@ -174,8 +183,8 @@ export function S15Security() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    disabled={busy}
-                    onClick={() => void run(() => endSessions(s.id), copy.loggedOutDevice)}
+                    loading={busy === s.id}
+                    onClick={() => void run(s.id, () => endSessions(s.id), copy.loggedOutDevice)}
                   >
                     {copy.logoutDevice}
                   </Button>
@@ -186,7 +195,7 @@ export function S15Security() {
           ))}
         </div>
         <div className="hg-row">
-          <Button variant="secondary" disabled={busy} onClick={() => void logoutAll()}>
+          <Button variant="secondary" loading={busy === 'all'} onClick={() => void logoutAll()}>
             {copy.logoutAll}
           </Button>
         </div>

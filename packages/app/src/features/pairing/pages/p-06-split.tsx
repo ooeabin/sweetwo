@@ -1,3 +1,4 @@
+import { QuestionSkeleton } from '@sweetwo/ui';
 import { completeJoin } from '@sweetwo/api';
 import { formatManWon, readWon, type SplitLineDraft } from '@sweetwo/core';
 import { useState } from 'react';
@@ -19,7 +20,8 @@ export function P06Split() {
   const nav = useNavigate();
   const [draft, setDraft] = useState<SplitLineDraft[] | null>(null);
   const [busy, setBusy] = useState(false);
-  if (!d.ready || !d.me || !d.space || !d.couple) return null;
+  if (!d.ready || !d.me || !d.space || !d.couple)
+    return <QuestionSkeleton onBack={s.onBack ?? null} />;
   const me = d.me;
   const starter = d.couple.partnerName;
   const joint = d.space.salary_mode === 'joint';

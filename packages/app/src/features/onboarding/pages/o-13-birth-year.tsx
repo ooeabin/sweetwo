@@ -1,5 +1,5 @@
 import { birthYearRange } from '@sweetwo/core';
-import { DateWheel, QuestionLayout, type YMD } from '@sweetwo/ui';
+import { DateWheel, QuestionLayout, QuestionSkeleton, type YMD } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
@@ -11,7 +11,7 @@ export function O13BirthYear() {
   const s = useStep('o-13');
   const [b, setB] = useState<YMD | null>(null);
   const me = s.state.me;
-  if (!s.ready) return null;
+  if (!s.ready) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
   const range = birthYearRange();
   const title = copy.birthYear(me?.nickname ?? '');
   const initial: YMD = { y: me?.birth_year ?? range.max - 12, m: 1, d: 1 };

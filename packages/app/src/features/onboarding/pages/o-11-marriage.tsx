@@ -1,4 +1,4 @@
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { copy } from '../copy';
 import { saveSpace } from '../data';
 import { useStep } from '../step';
@@ -9,7 +9,8 @@ type Status = keyof typeof copy.marriedChoices;
 // 아직 안 정했어요 → O-12 없이 O-13(날짜는 비움)
 export function O11Marriage() {
   const s = useStep('o-11');
-  if (!s.ready) return null;
+  if (!s.ready)
+    return <QuestionSkeleton title={copy.married} chapter={s.chapter} onBack={s.onBack ?? null} />;
   const sp = s.state.space;
   return (
     <QuestionLayout chapter={s.chapter} title={copy.married} onBack={s.onBack}>

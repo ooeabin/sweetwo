@@ -61,7 +61,7 @@ export function S14Notifications() {
       if (t && (pf === 'ios' || pf === 'android'))
         await registerPushDevice(pf, t, window.sweetwo?.appVersion ?? '').catch(() => undefined);
     }
-    void save({ ...prefs, push: on });
+    await save({ ...prefs, push: on });
   };
   const topicRow = (t: NotiTopic, label: string, sub?: string) => (
     <Toggle
@@ -87,7 +87,7 @@ export function S14Notifications() {
           label={<b>{copy.push}</b>}
           help={prefs.push ? undefined : copy.pushOffHelp}
           checked={prefs.push}
-          onChange={(on) => void setPush(on)}
+          onChange={(on) => setPush(on)}
         />
       </section>
       <section className="hg-card hg-stack" aria-label={copy.notiTopics} style={{ gap: 0 }}>

@@ -11,6 +11,7 @@ import { Badge, Button, Chip, EmptyState, Icon, ListRow, SectionHeader, Tabs } f
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
+import { SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { ownerOf, useAssetsData } from '../data';
@@ -136,6 +137,7 @@ export function F02Items() {
           { value: 'debt', label: copy.debts(m(total('debt'))) },
         ]}
       />
+      {d.loading && <SkelBody shape="rows" />}
       {!d.loading && !groups.length && (
         // 2026-11-04 한눈에(F-01)와 같은 빈 상태 모양
         <EmptyState

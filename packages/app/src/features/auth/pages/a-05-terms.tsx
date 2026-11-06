@@ -53,7 +53,7 @@ export function A05Terms() {
   return (
     <QuestionLayout
       title={copy.termsTitle}
-      primary={{ label: copy.agreeContinue, disabled: !ready || saving, loading: saving }}
+      primary={{ label: copy.agreeContinue, disabled: !ready, loading: saving }}
       onSubmit={() => void submit()}
     >
       <ConsentGroup

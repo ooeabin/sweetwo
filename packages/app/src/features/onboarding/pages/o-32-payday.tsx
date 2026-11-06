@@ -1,4 +1,4 @@
-import { DayWheel, QuestionLayout } from '@sweetwo/ui';
+import { DayWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { saveRecommendedSplit } from '../auto-split';
 import { copy } from '../copy';
@@ -13,7 +13,8 @@ export function O32Payday() {
   const s = useStep('o-32');
   const me = s.state.me;
   const [day, setDay] = useState<Day | null | undefined>(undefined);
-  if (!s.ready) return null;
+  if (!s.ready)
+    return <QuestionSkeleton title={copy.payday} chapter={s.chapter} onBack={s.onBack ?? null} />;
   const saved: Day | null = me?.payday_last ? 'last' : (me?.payday ?? null);
   const payday = day === undefined ? saved : day;
   // 저장 → 추천 월급 계획, 비상금 금액, 첫 체크리스트 → O-60 준비 끝
