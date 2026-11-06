@@ -1471,6 +1471,8 @@ export type Database = {
           channel: string
           created_at: string
           done_at: string | null
+          email_from: string | null
+          email_subject: string | null
           id: string
           mail_copied_at: string | null
           no: string
@@ -1487,6 +1489,8 @@ export type Database = {
           channel?: string
           created_at?: string
           done_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
           id?: string
           mail_copied_at?: string | null
           no?: string
@@ -1502,6 +1506,8 @@ export type Database = {
           channel?: string
           created_at?: string
           done_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
           id?: string
           mail_copied_at?: string | null
           no?: string
@@ -1516,6 +1522,65 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiry_mail: {
+        Row: {
+          attachments: number
+          created_at: string
+          direction: string
+          id: string
+          inquiry_id: string
+          inquiry_message_id: string | null
+          message_id: string | null
+          outbox_id: string | null
+          refs: string[]
+        }
+        ComputedFields: never
+        Insert: {
+          attachments?: number
+          created_at?: string
+          direction: string
+          id?: string
+          inquiry_id: string
+          inquiry_message_id?: string | null
+          message_id?: string | null
+          outbox_id?: string | null
+          refs?: string[]
+        }
+        Update: {
+          attachments?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          inquiry_id?: string
+          inquiry_message_id?: string | null
+          message_id?: string | null
+          outbox_id?: string | null
+          refs?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_mail_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiry_mail_inquiry_message_id_fkey"
+            columns: ["inquiry_message_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry_message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiry_mail_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "mail_outbox"
             referencedColumns: ["id"]
           },
         ]
@@ -1707,6 +1772,8 @@ export type Database = {
           claimed_at: string | null
           created_at: string
           dedupe: string
+          from_email: string | null
+          headers: Json | null
           id: string
           kind: string
           last_error: string | null
@@ -1725,6 +1792,8 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           dedupe: string
+          from_email?: string | null
+          headers?: Json | null
           id?: string
           kind: string
           last_error?: string | null
@@ -1742,6 +1811,8 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           dedupe?: string
+          from_email?: string | null
+          headers?: Json | null
           id?: string
           kind?: string
           last_error?: string | null
@@ -2789,6 +2860,8 @@ export type Database = {
           claimed_at: string | null
           created_at: string
           dedupe: string
+          from_email: string | null
+          headers: Json | null
           id: string
           kind: string
           last_error: string | null
@@ -2976,6 +3049,17 @@ export type Database = {
         }[]
       }
       html_esc: { Args: { t: string }; Returns: string }
+      ingest_inquiry_mail: {
+        Args: {
+          p_attachments?: number
+          p_body: string
+          p_from: string
+          p_message_id: string
+          p_refs: string[]
+          p_subject: string
+        }
+        Returns: Json
+      }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {

@@ -250,6 +250,18 @@ export const copy = {
   answered: '답변을 보냈어요', // [확인 필요]
   user: '사용자', // [확인 필요]
   admin: '운영자', // [확인 필요]
+  emailInfo: '이메일', // [확인 필요] 이메일 문의 상세 묶음 이름
+  emailKeys: {
+    subject: '제목',
+    from: '보낸 사람',
+    member: '회원',
+    attachments: '첨부 파일',
+  }, // [확인 필요]
+  noSubject: '제목 없음', // [확인 필요]
+  noMemberLink: '회원 연결 없음', // [확인 필요]
+  attachmentsDropped: (n: number) => `${n}개는 받지 않았어요. 메일함에서 확인해 주세요`, // [확인 필요]
+  emailAnswerHelp:
+    '답장 메일은 메일 발송을 연결한 뒤부터 자동으로 가요. 그 전에는 네이버웍스 help@에서 직접 답장해 주세요', // [확인 필요]
   elapsed: (h: number) => (h < 24 ? `${h}시간` : `${Math.floor(h / 24)}일 ${h % 24}시간`),
 
   // AD-17

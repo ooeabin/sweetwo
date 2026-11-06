@@ -293,10 +293,42 @@ async function mock(
                   created_at: '2026-10-16T00:00:00Z',
                   updated_at: '2026-10-16T00:00:00Z',
                 },
+                ...(body().p_status === 'received'
+                  ? [
+                      {
+                        id: 'q2',
+                        no: 'A-10002',
+                        category: 'etc',
+                        status: 'received',
+                        channel: 'email',
+                        user_id: null,
+                        created_at: '2026-10-17T00:00:00Z',
+                        updated_at: '2026-10-17T00:00:00Z',
+                      },
+                    ]
+                  : []),
               ]
             : [],
         );
       case 'admin_inquiry':
+        if (body().p_id === 'q2')
+          return json(route, {
+            id: 'q2',
+            no: 'A-10002',
+            category: 'etc',
+            status: 'received',
+            channel: 'email',
+            user_id: null,
+            created_at: '2026-10-17T00:00:00Z',
+            done_at: null,
+            attach: null,
+            email: { from_masked: 'str***@example.net', subject: '가입 전 질문', attachments: 1 },
+            messages: [
+              { author: 'user', body: '요금이 있나요?', created_at: '2026-10-17T00:00:00Z' },
+              { author: 'user', body: '답장 기다려요', created_at: '2026-10-17T02:00:00Z' },
+            ],
+            access: [],
+          });
         return json(route, {
           id: 'q1',
           no: 'A-10001',
@@ -647,6 +679,38 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   expect(db.rpc.filter((r) => r.fn === 'admin_request_access').at(-1)?.body).toMatchObject({
     p_scopes: ['goals'],
     p_raw: true,
+  });
+});
+
+test('이메일 문의 상세: 제목, 가린 보낸 주소, 회원 연결 없음, 받지 않은 첨부, 메일로 답변', async ({
+  page,
+}) => {
+  const db = await mock(page);
+  await page.goto('/inquiries');
+  const row = page.getByRole('row', { name: /A-10002/ });
+  await expect(row).toContainText('이메일');
+  await row.click();
+  await heading(page, 'A-10002 기타');
+  const info = page.getByRole('region', { name: '이메일' });
+  await expect(info).toContainText('가입 전 질문');
+  await expect(info).toContainText('str***@example.net');
+  await expect(info).toContainText('회원 연결 없음');
+  await expect(info).toContainText('1개는 받지 않았어요');
+  await expect(page.getByRole('region', { name: '자동 첨부' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: '동의 요청' })).toHaveCount(0);
+  const msgs = page.locator('ol li');
+  await expect(msgs.nth(0)).toContainText('요금이 있나요?');
+  await expect(msgs.nth(1)).toContainText('답장 기다려요');
+  await expect(
+    page.getByText('그 전에는 네이버웍스 help@에서 직접 답장해 주세요', { exact: false }),
+  ).toBeVisible();
+  await axe(page);
+  await page.getByRole('textbox', { name: '답변' }).fill('지금은 무료예요');
+  await page.getByRole('button', { name: '답변 보내기' }).click();
+  await expect(page.getByText('답변을 보냈어요')).toBeVisible();
+  expect(db.rpc.find((r) => r.fn === 'admin_answer_inquiry')?.body).toMatchObject({
+    p_id: 'q2',
+    p_body: '지금은 무료예요',
   });
 });
 
