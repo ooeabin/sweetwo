@@ -14,45 +14,48 @@ it('주말 월급날은 직전 금요일', () => {
   expect(businessDayOnOrBefore('2026-10-23')).toBe('2026-10-23');
 });
 
-it('돈 날짜: 월급날, 정리 띠, 만기, 제안, 들어오는 돈(한 번이면 처음 오는 그 달), 매년 목표', () => {
+it('돈 일정: 월급날, 월말 확인 띠, 목표 기한, 매년 목표 쓰는 달, 만기', () => {
   const r = moneyDates(2026, 10, {
     paydays: [
       { name: '찬우', day: 25 },
       { name: '예빈', day: 10 },
     ],
-    baseDay: 25,
+    reviewDay: 25,
     maturities: [
       { id: 'a', name: '청년 적금', date: '2026-10-30' },
       { id: 'b', name: '예금', date: '2027-01-01' },
     ],
-    proposals: [{ id: 'p', date: '2026-10-25' }],
-    income: [
-      { name: '상여금', month: 10, yearly: true, createdOn: '2026-01-05' },
-      { name: '환급', month: 10, yearly: false, createdOn: '2026-11-01' },
+    goalDeadlines: [
+      { id: 'h', name: '내 집 마련', date: '2026-10-01' },
+      { id: 't', name: '여행', date: '2027-03-01' },
     ],
     yearlyGoals: [{ id: 'g', name: '자동차 유지비', month: 10 }],
   });
   expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
-    '2026-10-01 income 상여금',
+    '2026-10-01 deadline 내 집 마련',
     '2026-10-01 goal 자동차 유지비',
     '2026-10-09 payday 예빈',
-    '2026-10-22 close ',
+    '2026-10-22 review ',
     '2026-10-23 payday 찬우',
-    '2026-10-25 proposal ',
     '2026-10-30 maturity 청년 적금',
   ]);
   expect(r.bands).toEqual([{ start: '2026-10-22', end: '2026-10-24' }]);
-  // 한 번만 들어오는 돈은 다음 해 10월
-  expect(
-    moneyDates(2027, 10, {
-      paydays: [],
-      baseDay: null,
-      maturities: [],
-      proposals: [],
-      income: [{ name: '환급', month: 10, yearly: false, createdOn: '2026-11-01' }],
-      yearlyGoals: [],
-    }).dates,
-  ).toHaveLength(1);
+});
+
+it('합쳐서 모드: 월급날 하나(이름 없음), 월말 확인은 공동 사이클 날 기준', () => {
+  const r = moneyDates(2026, 11, {
+    paydays: [{ name: '', day: 10 }],
+    reviewDay: 10,
+    maturities: [],
+    goalDeadlines: [],
+    yearlyGoals: [],
+  });
+  expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
+    '2026-11-07 review ',
+    '2026-11-10 payday ',
+  ]);
+  // 12월 10일 앞 띠(12-07~09)는 11월에 걸치지 않음
+  expect(r.bands).toEqual([{ start: '2026-11-07', end: '2026-11-09' }]);
 });
 
 it('공휴일이면 직전 영업일(주말 넘어서까지)', () => {
@@ -77,10 +80,9 @@ it('설·추석 연휴 띠', () => {
 it('앞당기기를 끄면 월급날 그대로', () => {
   const o = {
     paydays: [{ name: '찬우', day: 25 as const }],
-    baseDay: null,
+    reviewDay: null,
     maturities: [],
-    proposals: [],
-    income: [],
+    goalDeadlines: [],
     yearlyGoals: [],
   };
   expect(moneyDates(2026, 10, o).dates[0]?.date).toBe('2026-10-23');

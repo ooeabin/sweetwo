@@ -8,6 +8,11 @@ export const providerName: Record<AuthProvider, string> = {
   apple: '애플',
 };
 
+type Bio = 'touch' | 'face' | 'fingerprint';
+/** “Touch ID로”, “Face ID로”, “지문으로” */
+const bioObj = (kind: Bio) =>
+  kind === 'fingerprint' ? '지문으' : kind === 'face' ? 'Face ID' : 'Touch ID';
+
 export const copy = {
   toStart: '처음으로', // [확인 필요] 넓은 창 A-02 뒤로 글자
   // A-01
@@ -16,17 +21,21 @@ export const copy = {
   updateTitle: '새 버전으로 업데이트해 주세요',
   updateSub: '지금 버전으로는 저장할 수 없어요',
   updateNow: '지금 업데이트',
+  downloadUrl: 'https://sweetwo.kr/download',
   viewOnly: '업데이트 없이 보기만 할게요',
   updateFailed: '업데이트를 받지 못했어요',
   offlineNoSession: '인터넷에 연결하면 로그인할 수 있어요',
   retry: '다시 시도',
 
   // O-01·A-02 공용 히어로 캐치프레이즈(04-brand.md 슬로건). 하나만 쓰고 새 표어를 만들지 않는다
-  catchphrase: '함께 구워 더 달콤한 자산파이',
+  catchphrase: '둘이 구워서 더 달콤한 자산파이',
+  // O-01 서브 2줄
+  startHelp: '함께 모을 목표부터 월급날 체크까지\n둘만의 재정 플랜을 세워 보세요',
 
   // O-01
   start: '시작하기',
-  invited: '초대받았어요',
+  invitedAsk: '초대를 받았나요?', // [확인 필요]
+  invitedLink: '코드 입력하기', // [확인 필요]
 
   // A-02
   recent: '최근 사용',
@@ -37,7 +46,6 @@ export const copy = {
     google: 'Google로 시작하기',
     apple: 'Apple로 시작하기',
   } satisfies Record<AuthProvider, string>,
-  keepLogin: '이 기기에서 로그인 유지',
   emailConflict: (p: AuthProvider) => `이미 ${providerName[p]}로 가입한 이메일이에요`,
   providerError: (p: AuthProvider) =>
     `${providerName[p]} 로그인에 문제가 생겼어요. 다른 방법으로 해볼까요?`,
@@ -68,7 +76,7 @@ export const copy = {
 
   // A-04
   emailTitle: '알림 받을 이메일을 알려주세요',
-  emailHelp: '주간 요약·초대·제안 메일을 보내요',
+  emailHelp: '계정 보안처럼 꼭 알아야 할 안내만 보내요', // [확인 필요] 2026-11-04 이메일은 자동 예비로만
   emailLabel: '알림 이메일', // 설정 이름
   emailPlaceholder: 'name@example.com',
   next: '다음',
@@ -79,25 +87,41 @@ export const copy = {
   agreeAll: '모두 동의해요',
   requiredAll: '[필수] 서비스 이용에 동의해요', // [확인 필요] 필수 약관 묶음
   foldRequired: '필수 약관 펼치기',
+  adult: '[필수] 만 18세 이상이에요',
   terms: '[필수] 이용약관',
   privacy: '[필수] 개인정보 수집·이용',
   spaceSharing: '[필수] 배우자와 부부 공간 공유',
   marketing: '[선택] 마케팅 정보 받기',
   view: '보기',
   agreeContinue: '동의하고 계속하기',
+  // A-05r 약관 개정 재동의(바뀐 필수 항목만)·마케팅 2년 재확인 [확인 필요]
+  reconsentTitle: '바뀐 약관을 확인해 주세요',
+  reconsentHelp: '바뀐 항목만 다시 동의하면 이어서 쓸 수 있어요',
+  marketingAgainTitle: '마케팅 정보를 계속 받을까요?',
+  marketingAgainHelp: '동의한 지 2년이 지나 다시 여쭤봐요',
+  marketingKeep: '계속 받을게요',
+  marketingStop: '그만 받을게요',
+  reconsentFailed: '저장하지 못했어요. 다시 시도해 주세요',
   signupFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
 
   // A-06
-  pinSetTitle: '앱을 열 때 쓸 PIN 6자리를 정해 주세요',
+  pinSetTitle: '앱을 열 때 쓸\nPIN 6자리를 정해 주세요',
   pinSetSub: '자리를 비우면 5분 뒤 잠겨요',
-  pinConfirm: '한 번 더 입력해 주세요',
+  pinConfirm: '한 번 더\n입력해 주세요',
   pinMismatch: 'PIN이 서로 달라요',
   pinWeak: '같은 숫자나 이어지는 숫자는 쓸 수 없어요', // [확인 필요] 기획서는 규칙만 있음
-  touchIdAsk: 'Touch ID로도 풀까요?',
-  touchIdYes: 'Touch ID 켜기', // [확인 필요] 버튼 문구
+  // 생체 인증 이름(15 A-06 1·5번): Mac·iPhone Touch ID, iPhone Face ID, Android 지문
+  bioName: { touch: 'Touch ID', face: 'Face ID', fingerprint: '지문' } as const,
+  touchIdAsk: (kind: Bio) => `${bioObj(kind)}로도 풀까요?`,
+  touchIdYes: (kind: Bio) => `${copy.bioName[kind]} 켜기`, // [확인 필요] 버튼 문구
+  // [확인 필요] 생체 질문 보조 1줄
+  touchIdHelp: (kind: Bio) =>
+    kind === 'face'
+      ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
+      : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
-  pinUnlockTitle: 'PIN을 입력해 주세요',
-  touchIdUnlock: 'Touch ID로 풀기',
+  pinUnlockTitle: 'PIN을\n입력해 주세요',
+  touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,
   forgotPin: 'PIN을 잊었어요',
   pinWrong: 'PIN이 맞지 않아요',
   pinRemaining: (n: number) => `${n}번 더 틀리면 다시 로그인해야 해요`,
@@ -105,12 +129,20 @@ export const copy = {
   // A-08
   expiredTitle: '다시 로그인해 주세요',
   expiredReason: {
-    days14: '로그인한 지 14일이 지났어요',
-    idle: '오래 자리를 비워서 잠갔어요',
     otherDevice: '다른 기기에서 로그아웃했어요',
   },
   loginAgain: '로그인하기',
   otherAccount: '다른 계정으로 로그인',
+  // A-08 4·5번 새 기기 알림
+  newDeviceTitle: '새 기기에서 로그인했어요',
+  newDeviceHelp: '본인이 아니면 바로 로그아웃해 주세요',
+  newDeviceAt: (device: string, at: string) => `${device}, ${at}`,
+  newDeviceGone: '이미 로그아웃된 기기예요', // [확인 필요]
+  itsMe: '나예요',
+  notMe: '내가 아니에요',
+  checkProvider: (p: string) => `${p} 계정 보안도 확인해 주세요`,
+  checkAccount: '로그인한 계정의 보안도 확인해 주세요', // [확인 필요]
+  newDeviceFailed: '지금은 로그아웃할 수 없어요. 잠시 뒤 다시 해 주세요', // [확인 필요]
 
   // 약관 보기(L-05). 웹사이트가 생기면 앱 안 보기로 연다.
   termsUrl: {

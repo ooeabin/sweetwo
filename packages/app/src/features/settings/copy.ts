@@ -20,10 +20,15 @@ export const copy = {
     visibilityValue: (v: string) => `내 자산 ${v}`, // [확인 필요]
     noti: '알림',
     security: '보안',
+    lockOn: '앱 잠금 켜짐',
+    lockOff: '앱 잠금 꺼짐', // [확인 필요]
+    asking: (n: number) => `확인 요청 ${n}`,
     answers: '내 답 다시 보기',
     guide: '가이드 모아보기',
     screen: '화면',
     screenValue: '기기 설정을 따라요',
+    mask: '금액 가리기',
+    maskHelp: '모든 금액을 •••로 가려요. 이 기기에서만', // [확인 필요]
     help: '도움말',
     data: '데이터',
     dataSub: '내보내기, 휴지통, 계정 삭제',
@@ -33,41 +38,79 @@ export const copy = {
   },
   later: '준비 중이에요', // [확인 필요] 아직 없는 화면 줄
 
-  // S-11 내 정보
+  // S-11 내 정보와 월급
   me: '내 정보',
-  nickname: '호칭', // [확인 필요] 줄 이름
+  nickname: '이름',
   notifyEmail: '알림 이메일',
+  notifyEmailQ: '알림 받을 이메일을 알려주세요', // S-11b, 가입(A-03) 질문과 같음
   emailError: '이메일 주소를 다시 확인해 주세요',
   save: '저장',
   saved: '저장했어요', // [확인 필요]
-  planDay: '월급 플랜 날짜',
-  planDayValue: (d: string) => d,
+  marriage: '결혼 상태',
+  marriageValue: {
+    married: '결혼했어요',
+    engaged: '결혼 준비 중이에요',
+    undecided: '아직 안 정했어요',
+  },
+  weddingDay: { married: '결혼한 날', engaged: '결혼 예정일' }, // [확인 필요]
+  weddingPlannedMonth: (y: number, m: number) => `${y}년 ${m}월 예정`, // [확인 필요]
+  undecidedValue: '미정', // [확인 필요]
+  birthYearRow: '출생연도',
+  birthYearValue: (y: number) => `${y}년생`, // [확인 필요]
+  salaryGroup: '월급',
+  mySalary: '내 월급',
+  salaryValue: (amount: string, day: string) => `${amount}, ${day}`,
+  variable: '매달 달라요',
+  partnerSalary: (name: string, amount: string, day: string) => `${name} ${amount}, ${day}`, // [확인 필요]
+  salaryMode: '월급 관리 방식',
+  salaryModeValue: { separate: '각자 관리해요', joint: '합쳐서 관리해요' }, // [확인 필요]
+  planDay: '체크리스트 만드는 날',
   lastDay: '말일',
+  paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
   holidayShift: '월급날이 쉬는 날이면 앞당겨 보여줘요',
   holidayShiftLabel: '주말·공휴일 앞당기기', // [확인 필요] 줄 이름
-  split: '분담 방식',
-  splitModes: { half: '반반', income: '버는 만큼', custom: '직접 정할게요' },
-  splitValue: (mode: string, a: number, b: number) => `${mode} ${a} : ${b}`,
+  openSplit: '월급 계획 열기',
   logout: '로그아웃',
   loggedOut: '로그아웃했어요',
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  unlinkPendingLocked: '연결 해제 대기 중에는 바꿀 수 없어요', // [확인 필요]
 
   // S-11a
   nicknameQ: '내 이름이나 애칭을 알려 주세요',
 
-  // S-11b
-  sideRow: '신랑·신부', // [확인 필요] 줄 이름
-  sideQ: '신랑·신부 중 누구예요?',
-  sides: { groom: '신랑', bride: '신부' },
+  // S-11c 내 월급(O-31과 같음)
+  salaryQ: '한 달 실수령액은 얼마예요?',
+  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
+  noSalary: '지금은 월급이 없어요',
+  payday: '월급날',
+  salarySaved: '월급을 바꿨어요', // [확인 필요]
 
-  // S-11d
-  planDayQ: '월급 플랜을 언제 세울까요?',
+  // S-11d 체크리스트 만드는 날
+  planDayQ: '체크리스트를 언제 만들까요?', // [확인 필요]
   paydayOf: (name: string, d: string) => `${name} 월급날 ${d}`,
-  proposeTo: (name: string) => `${name}님께 제안하기`,
-  proposed: (name: string) => `${name}님에게 제안했어요`,
-  applyNote: (date: string) => `좋아요면 바로, 반대 없으면 ${date}부터 적용돼요`,
+  planDaySaved: '체크리스트 만드는 날을 바꿨어요', // [확인 필요]
+
+  // S-11f 월급 관리 방식
+  salaryModeQ: '월급을 어떻게 관리해요?',
+  salaryModeHelp: '바꾸면 두 분 모두에게 적용되고, 체크리스트는 다음 월급날부터 바뀌어요', // [확인 필요]
+  salaryModes: {
+    separate: '각자 월급을 따로 관리해요',
+    joint: '합쳐서 같이 관리해요',
+  },
+  salaryModeSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
+
+  // S-11g·h·i
+  marriageQ: '두 사람은 어떤 사이예요?',
+  weddingDoneQ: '결혼한 날은 언제예요?',
+  weddingPlannedQ: '결혼 예정일은 언제예요?',
+  whenPlanned: '언제쯤 예정이에요?',
+  undecided: '아직 미정이에요',
+  pastOnly: '오늘까지의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
+  futureOnly: '내일부터의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
+  birthYearQ: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
   openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
   seeProposal: '제안 보기', // [확인 필요]
 
@@ -92,44 +135,27 @@ export const copy = {
   unlink: '연결 해제',
   pendingWait: (name: string) => `${name}님 답을 기다리고 있어요`,
   pendingReceived: (name: string) => `${name}님이 연결 해제를 요청했어요`,
-  seePlan: '자산 정리 안 보기',
+  seeRequest: '확인하기', // [확인 필요]
   proposalsRow: '제안', // [확인 필요] 줄 이름
-  frozen: '해제 전까지 멈춤',
+  frozen: '해제 전까지 월급 계획을 고칠 수 없어요', // [확인 필요]
   cancelRequest: '요청 취소',
   cancelled: '연결 해제 요청을 취소했어요', // [확인 필요]
-  deadline: (md: string) => `${md}까지 정하지 않으면 분담 비율로 정리해요`,
+  pendingWhen: (name: string, md: string) => `${name}님이 확인하거나 ${md}이 되면 해제돼요`, // [확인 필요]
 
-  // S-12a~c 연결 해제 요청
+  // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
-  unlinkHow: [
-    // [확인 필요] 정리되는 방식(31 보안·개인정보 4장을 해요체로)
-    '내 명의 자산, 수입, 용돈은 나에게 남아요',
-    '공동 목표와 통장 몫은 자산 정리 안대로 나눠요',
-    '월 플랜, 월말 정리, 제안 기록은 해제할 때까지의 사본이 둘 다에게 남아요',
-    '양가 가족 정보는 그 가족 쪽 사람에게 남아요',
-  ],
-  unlinkWedding: '결혼 비용은 각자 낸 돈 기준 요약을 둘 다에게 남겨요', // [확인 필요] 예비부부만
-  unlinkWhen: (name: string) => `${name}님이 동의하면 바로, 아니면 14일 뒤에 해제돼요`, // [확인 필요]
-  closeFirst: (month: number) => `${month}월 월급 플랜 정리부터 할까요?`,
-  closeStart: '정리 시작',
+  unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
+  unlinkList: ['목표', '월급 계획과 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
+  unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
+  unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
+  exportFirst: '먼저 내보내기',
   next: '다음',
-  planTitle: (a: number, b: number) => `분담 비율 ${a} : ${b}로 정리했어요`,
-  myShare: (name: string) => `${name} 내 몫`, // [확인 필요] 금액 칸 이름(화면 읽기)
-  theirShare: (name: string, v: string) => `${name}님 몫 ${v}`, // [확인 필요]
-  shareOver: '금액보다 많이 넣을 수 없어요', // [확인 필요]
-  assetsTotal: '자산', // [확인 필요] 합계 줄 이름
-  debtsTotal: '부채', // [확인 필요]
-  debtAmount: (v: string) => `부채 ${v}`, // [확인 필요]
-  agree: '동의해요',
-  differently: '다르게 정리하기',
-  counterQ: '어떻게 나눌지 다시 정해 주세요', // [확인 필요] S-12e 제목
-  counterSent: (name: string) => `${name}님에게 다르게 정리한 안을 보냈어요`, // [확인 필요]
-  counterDone: '다르게 정리한 안을 보냈어요', // [확인 필요] 받은 사람 S-12d
-  counterReceived: (name: string) => `${name}님이 자산 정리 안을 다르게 정리했어요`,
-  counterHelp: (md: string) => `동의하면 바로, 아니면 ${md}에 분담 비율로 정리돼요`,
-  seeCounter: '확인하기', // [확인 필요]
-  unlinkedTitle: '연결이 해제됐어요', // [확인 필요] S-12h 제목(알림 문구와 같음)
-  movedMine: (v: string) => `${v} 원은 각자 목표로 옮겨요`,
+  requestedBy: (name: string) => `${name}님이 연결 해제를 요청했어요`,
+  unlinkOn: (md: string) => `${md}에 해제돼요`, // [확인 필요]
+  acknowledge: '확인했어요', // [확인 필요]
+  unlinkedTitle: '연결이 해제됐어요', // [확인 필요]
+  unlinkedHelp: '같이 쓰던 데이터는 지웠어요. 혼자 쓰기로 처음부터 시작해요', // [확인 필요]
+  startSolo: '시작하기', // [확인 필요]
   reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
   reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
   ok: '확인', // [확인 필요]
@@ -137,32 +163,38 @@ export const copy = {
   reconnect: '다시 연결하기',
   reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
   reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
-  reconnectBack: '연결을 끊기 전 공동 목표·통장이 돌아와요',
+  reconnectBack: '연결을 끊기 전 같이 쓰던 목표와 월급 계획이 돌아와요', // [확인 필요]
+  reconnectDiscard: '해제 뒤 새로 적은 내용은 지워져요', // [확인 필요]
   reconnectYes: '다시 연결할게요',
   reconnectNo: '괜찮아요',
   reconnectExpired: '다시 연결할 수 있는 기간이 지났어요',
-  confirmQ: '확인을 위해 ‘연결 해제’를 입력해 주세요', // [확인 필요]
+  confirmQ: '확인을 위해 ‘연결 해제’라고 적어 주세요', // [확인 필요]
   confirmWord: '연결 해제',
-  send: '보내기', // [확인 필요]
+  send: '연결 해제 요청하기', // [확인 필요]
   sent: (name: string) => `${name}님에게 연결 해제를 요청했어요`, // [확인 필요]
 
   // S-13 공개 범위
   visTitle: '공개 범위',
-  vis: { all: '전체 공개', sum: '합계만', private: '비공개' } as Record<string, string>,
+  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<
+    string,
+    string
+  >,
   visDefault: '새 항목 기본값',
   visDefaultSub: '내 자산·내 부채', // [확인 필요]
   visApplyAll: (n: number) => `이미 있는 항목 ${n}개도 바꿀까요?`,
   visAll: '모두 바꾸기',
   visNewOnly: '새 항목만',
   visFixed: [
-    // [확인 필요] 기획서 “‘수입·용돈 금액 항상 공유’ 등 3줄”
-    '수입·용돈 금액 항상 공유',
-    '공동 명의 항목은 항상 전체 공개',
-    '목표와 양가 일정은 항상 전체 공개',
+    // [확인 필요] 기획서 25 S-13 2번 “월급과 월급 계획은 늘 같이 봐요” 등
+    '월급과 월급 계획은 늘 같이 봐요',
+    '우리 목표와 공동 명의 항목은 늘 같이 봐요',
+    '챙길 날은 늘 같이 봐요',
   ],
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
   visNone: '내 명의 항목이 없어요',
+  visGoals: '내 목표',
+  goalVis: { all: '모두 보여 주기', amount: '금액만 보여 주기' } as Record<string, string>,
   visDebt: '부채', // [확인 필요] 항목 이름표
   visLabel: (name: string) => `${name} 공개 범위`,
 
@@ -173,7 +205,6 @@ export const copy = {
     asset: '자산',
     debt: '부채',
     goal: '목표',
-    family: '가족',
     care_day: '챙길 날',
   } as Record<string, string>,
   trashWhen: (md: string) => `${md}에 지웠어요`,
@@ -182,6 +213,8 @@ export const copy = {
   restored: '되살렸어요',
   restoreProposed: (name: string) => `${name}님에게 되살리자고 제안했어요`, // [확인 필요]
   undo: '되돌리기',
+  marketing: '마케팅 정보 받기',
+  marketingAt: (date: string) => `${date} 동의`,
   more: '더보기', // [확인 필요] ⋯ 버튼 이름
   purge: '영구 삭제',
   purgeQ: '완전히 지울까요?',
@@ -198,9 +231,12 @@ export const copy = {
   scope: { mine: '내 데이터', joint: '공동 데이터' } as Record<string, string>,
   scopeLabel: '범위', // [확인 필요]
   formatCsv: '엑셀(CSV)',
+  formatPdf: 'PDF 요약',
+  formatLabel: '형식', // [확인 필요]
   noPhotos: '사진은 내보내기에 들어가지 않아요',
   doExport: '내보내기',
   exporting: '파일을 만들고 있어요',
+  exportingSub: '잠시만 기다려 주세요', // [확인 필요] 2026-11-04 처리 중 화면
   exportFailed: '파일을 만들지 못했어요',
   retry: '다시 시도',
   exported: '파일을 저장했어요', // [확인 필요]
@@ -213,6 +249,27 @@ export const copy = {
   deleteAccount: '계정 삭제',
   // 파일에 생성일. 이름은 영문(일부 브라우저가 한글·띄어쓰기 이름을 버림)
   fileName: (scope: string, date: string) => `sweetwo-${scope}-${date}.zip`,
+  pdfName: (scope: string, date: string) => `sweetwo-${scope}-${date}.pdf`,
+  // PDF 요약(25 S-18 ‘내보내기 명세’): ① 우리 자산 요약 ② 연간 요약, A4 세로, 맨 아래 생성일
+  pdf: {
+    assetsTitle: '우리 자산 요약',
+    myAssetsTitle: '내 자산 요약', // [확인 필요] 내 데이터
+    net: '순자산',
+    assets: '자산 합계', // [확인 필요]
+    debts: '부채 합계', // [확인 필요]
+    trend: '최근 12개월 순자산', // [확인 필요]
+    yearTitle: (y: number) => `${y}년 연간 요약`, // [확인 필요]
+    yearSaved: '올해 목표에 넣은 돈', // [확인 필요]
+    monthly: '월별 목표에 넣은 돈',
+    month: (m: number) => `${m}월`,
+    goals: '목표별 진행', // [확인 필요]
+    noGoals: '목표가 없어요', // [확인 필요]
+    savedOf: (saved: string, target: string) => `${saved} / ${target}`,
+    eta: (ym: string) => `${ym} 달성 예정`,
+    achieved: '달성', // [확인 필요]
+    paused: '보류',
+    made: (date: string) => `만든 날 ${date}`, // [확인 필요]
+  },
   ex: {
     joint: '공동',
     partnerSum: (name: string) => `${name}님 합계`,
@@ -220,27 +277,26 @@ export const copy = {
       assets: '자산.csv',
       debts: '부채.csv',
       goals: '목표.csv',
-      plans: '월급 플랜.csv',
-      closes: '월말 정리.csv',
+      splits: '월급 계획.csv',
+      checklists: '월급 체크리스트.csv',
       care: '챙길 날.csv',
-      proposals: '제안.csv',
     },
     heads: {
       assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
       debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
-      goals: ['이름', '형태', '목표 금액', '보유액', '기한', '우선순위', '상태', '월 배분액'],
-      plans: (a: string, b: string) => [
-        '플랜(월)',
-        '통장·목표',
-        '계획액',
-        `${a} 몫`,
-        `${b} 몫`,
-        '나누기 상태',
-        '실제 나눈 금액',
+      goals: [
+        '이름',
+        '형태',
+        '목표 금액',
+        '모은 돈',
+        '기한',
+        '우선순위',
+        '상태',
+        '월급 계획 저금 금액',
       ],
-      closes: ['플랜(월)', '실제 저축액', '실제 수입', '상태', '정리한 사람', '정리한 날'],
+      splits: ['사람', '줄 종류', '줄 이름·목표', '금액'],
+      checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
       care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
-      proposals: ['날짜', '종류', '전 → 후', '응답', '상태'],
     },
     goalKinds: { once: '한 번', yearly: '매년', monthly: '매달' } as Record<string, string>,
     goalStatus: {
@@ -249,17 +305,18 @@ export const copy = {
       achieved: '달성',
       used: '사용 완료',
       paused: '보류',
-      wrapping_up: '마무리 중',
     } as Record<string, string>,
-    roles: {
-      living: '공동 생활비',
-      goal_fund: '목표자금',
-      emergency: '비상금',
-      personal: '개인 통장',
-      wedding: '결혼 준비',
+    lineKinds: {
+      saving: '저금',
+      fixed: '고정지출',
+      living: '생활비',
+      allowance: '용돈',
+      custom: '직접 추가',
     } as Record<string, string>,
-    lineState: { pending: '나누기 전', done: '나눴어요' } as Record<string, string>,
-    closeStatus: { draft: '정리 중', done: '정리 끝' } as Record<string, string>,
+    checkState: { checked: '체크함', skipped: '못 함', wait: '체크 안 함' } as Record<
+      string,
+      string
+    >,
     careCats: { family: '양가', couple: '부부', wedding: '결혼' } as Record<string, string>,
     paidFrom: {
       goal_fund: '목표자금',
@@ -268,29 +325,13 @@ export const copy = {
       wedding_account: '결혼 준비 통장',
       personal_support: '각자 돈(지원)',
     } as Record<string, string>,
-    responses: { like: '좋아요', oppose: '반대', differently: '다르게 해볼래요' } as Record<
-      string,
-      string
-    >,
-    proposalStatus: {
-      open: '제안 중',
-      applied: '적용',
-      held: '보류',
-      withdrawn: '철회',
-      expired: '만료',
-      reverted: '되돌림',
-      superseded: '바뀜',
-    } as Record<string, string>,
   },
 
   // S-18b 계정 삭제
   deleteMine: (n: number) => `내 명의 항목 ${n}개는 지워져요`,
-  deleteJointStays: (name: string) => `공동 항목은 ${name}님에게 남아요`,
+  deleteSharedGone: '같이 쓰던 데이터도 모두 지워져요',
   deleteWholeSpace: '부부 공간 전체 삭제',
-  deletePendingNote: (name: string) =>
-    `자산 정리 안이 적용되지 않고 공동 항목은 ${name}님에게 남아요`,
   deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
-  exportFirst: '먼저 내보내기',
   deleteWith: (p: string) => `${p}로 확인하고 삭제`,
   deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목
   deletedNotice: (md: string) =>
@@ -299,8 +340,16 @@ export const copy = {
   // S-19 앱 정보
   about: '앱 정보',
   version: '버전',
-  whatsNew: '새 기능 보기',
   checkUpdate: '업데이트 확인',
+  update: {
+    checking: '확인하고 있어요', // [확인 필요]
+    latest: '최신 버전이에요', // [확인 필요]
+    downloading: (p: number) => `새 버전을 받고 있어요 ${p}%`, // [확인 필요]
+    ready: (v: string) => `${v} 버전을 받았어요. 다시 시작하면 바뀌어요`, // [확인 필요]
+    restart: '다시 시작', // [확인 필요]
+    error: '확인하지 못했어요. 잠시 뒤 다시 해 주세요', // [확인 필요]
+  },
+  whatsNew: '새 기능 보기',
   terms: '이용약관',
   privacy: '개인정보 처리방침',
   contact: '문의하기',
@@ -386,7 +435,9 @@ export const copy = {
   appLock: '앱 잠금',
   appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
   changePin: 'PIN 바꾸기',
-  touchId: 'Touch ID로 풀기', // [확인 필요]
+  pushDenied: '휴대폰 설정에서 sweeTwo 알림을 켜 주세요', // [확인 필요]
+  touchId: (kind: 'touch' | 'face' | 'fingerprint') =>
+    kind === 'fingerprint' ? '지문으로 풀기' : `${kind === 'face' ? 'Face ID' : 'Touch ID'}로 풀기`, // [확인 필요]
   autoLock: '자동 잠금',
   autoLockOptions: { 1: '1분', 5: '5분', 15: '15분', 0: '사용 안 함' } as Record<number, string>,
   currentPin: '지금 PIN을 입력해 주세요', // [확인 필요]
@@ -397,30 +448,28 @@ export const copy = {
   logoutAll: '모든 기기에서 로그아웃',
   loggedOutDevice: '그 기기에서 로그아웃했어요', // [확인 필요]
 
-  // S-14 알림
-  cap: '이메일은 한 달에 6번까지만 보내요',
-  push: 'OS 알림',
-  email: '이메일',
+  // S-14 알림(2026-11-04 이메일은 자동 예비로만: 이메일 설정 없음)
+  push: '푸시 알림',
+  pushOffHelp: '알림 센터에서만 볼 수 있어요', // [확인 필요]
+  notiTopics: '받을 알림', // [확인 필요]
+  mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
   livingCheck: '생활비 체크',
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
-    plan: '월급 플랜·월말 정리',
-    proposal: '제안',
+    plan: '월급 체크리스트',
     partner_change: (name: string) => `${name}님이 바꾼 값`,
     care: '챙길 날',
     money: '돈 날짜',
     goal: '목표',
     invite: '배우자 초대',
   },
-  partnerChangeSub: '주 1회 모아서, 수입 변경은 바로 알려요',
-  carePoints: { care_30: 'D-30', care_14: 'D-14', care_7: 'D-7', care_0: '당일' },
-  channels: '받는 방법',
-  noChannel: '알림을 받을 방법이 없어요',
-  turnOff: '끄기', // [확인 필요]
+  partnerChangeSub: '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
+  carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
+  careAlerts: '챙길 날 미리 알림', // [확인 필요]
   cancel: '취소',
   quiet: '방해 금지 시간',
   quietValue: (a: string, b: string) => `${a} ~ ${b}`,
-  channelsOn: (on: string[]) => (on.length ? on.join(', ') : '꺼짐'), // [확인 필요] 둘 다 끔
+  pushState: (on: boolean) => (on ? '푸시 알림 켜짐' : '꺼짐'), // [확인 필요] S-10 요약
 
   // S-14a
   quietQ: '알림을 받지 않을 시간을 정해 주세요',
@@ -429,6 +478,7 @@ export const copy = {
   // S-01~S-03 가이드
   guidesTitle: '가이드 모아보기',
   checklistProgress: (done: number, total: number) => `체크리스트 ${done}/${total}`,
+  checklistCount: (done: number, total: number) => `${done}/${total}`, // 2026-11-04 S-01은 제목에 ‘체크리스트’가 있어 숫자만
   checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
   forUs: '우리 상황에 맞는 글', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름
@@ -469,7 +519,11 @@ export const copy = {
     split: '분담 방식',
   },
   goalsCount: (n: number) => `${n}개`,
-  marriageState: { married: '결혼했어요', engaged: '준비 중이에요' } as Record<string, string>,
+  marriageState: {
+    married: '결혼했어요',
+    engaged: '결혼 준비 중이에요',
+    undecided: '아직 안 정했어요',
+  } as Record<string, string>,
   housingOptions: {
     jeonse: '전세',
     monthly_rent: '반전세·월세',
@@ -504,7 +558,11 @@ export const copy = {
   photoDrop: '사진을 끌어 놓거나 골라 주세요',
   photoPick: '사진 고르기',
   photoHelp: 'JPG, PNG, HEIC, WebP, 10MB 이하',
-  photoNotice: (partner: string) => `올린 사진은 ${partner}님과 나만 볼 수 있어요`,
+  // 배우자가 아직 합류 전이면 이름이 없어 ‘배우자와’로 [확인 필요]
+  photoNotice: (partner: string) =>
+    partner
+      ? `올린 사진은 ${partner}님과 나만 볼 수 있어요`
+      : '올린 사진은 배우자와 나만 볼 수 있어요',
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
   photoBadType: '이 형식은 올릴 수 없어요',

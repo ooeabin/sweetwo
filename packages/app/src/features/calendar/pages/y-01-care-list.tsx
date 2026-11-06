@@ -1,24 +1,64 @@
-import { dday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
-import { Button, EmptyState, ListRow, SectionHeader } from '@sweetwo/ui';
-import { money as won, useMask } from '../../../shared/mask';
+import {
+  dday,
+  formatDateWeekday,
+  formatMonthDay,
+  withinDays,
+  type MoneyDate,
+  type MoneyKind,
+} from '@sweetwo/core';
+import {
+  Button,
+  EmptyState,
+  Icon,
+  icon3d,
+  type IconName,
+  Lead,
+  ListRow,
+  SectionHeader,
+  StatBlock,
+} from '@sweetwo/ui';
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { money as won, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
-import { carerLabel, moneyLine, sideLabel, useCalendarData } from '../data';
-import { CalendarFrame, FilterChips, useCalFilter } from '../frame';
-import { startFamilyAdd } from './y-03-family';
-import { partnerBirthdayDismissed } from './y-surprise-partner-birthday';
+import { moneyLine, useCalendarData } from '../data';
+import { CalendarFrame, useCalFilter } from '../frame';
+import { startCareAdd } from './y-07-care-add';
+import { reviewMonth } from '../data';
 
-// Y-01 챙길 날 목록(docs/spec/24-calendar.md 4~9·12번): 보기 필터(전체·챙길 날·돈 날짜), 60일 안 돈 날짜는 같은 목록에 작은 줄
-// (누르면 해당 화면). 다음 챙길 날 카드(4번, 준비하기 → Y-05), 60일 안 챙길 날(5번, 행 → Y-05).
-// 기록 없이 7일 지난 날은 맨 위에 ‘기록하기’(→ Y-08). 가족(8번): 찬우 쪽 / 예빈 쪽 두 줄, 호칭 + 다음 생일 D-day(호칭 → Y-03 수정, ‘추가’ → Y-03).
-// 양가 비용(7번) → Y-06, 드린 기록(9번) → Y-09. 등록 전 빈 상태 + Y-02 처음 등록.
+// 2026-11-04 줄 앞 종류 아이콘(24 Y-01 6번): 챙길 날 선물(together 판), 돈 일정은 종류마다
+// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
+const MONEY_ART: Record<MoneyKind, string> = {
+  payday: 'line-custom',
+  review: 'line-fixed',
+  deadline: 'goal-deadline',
+  goal: 'goal-deadline',
+  maturity: 'asset-deposit',
+};
+const MONEY_ICON: Record<MoneyKind, IconName> = {
+  payday: 'wallet',
+  review: 'calendar-check',
+  deadline: 'target',
+  goal: 'target',
+  maturity: 'piggy-bank',
+};
+
+// Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
+// 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 챙길 날 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
+// “다가오는 일정” 한 목록(60일 안 챙길 날 + 돈 일정, 날짜순, 오른쪽 D-day, 챙길 날은 영역 색 막대, 돈 일정은 검정 점),
+// 드린 기록(→ Y-09). 챙길 날이 없으면 빈 상태 + ‘챙길 날 추가’(돈 일정은 그대로 보임). “돈 일정”이면 4·6번 숨김.
 export function Y01CareList() {
   const nav = useNavigate();
   const d = useCalendarData();
   const [filter, setFilter] = useCalFilter();
   const { masked } = useMask();
   const m = (x: number) => won(x, masked);
-  if (d.loading) return <CalendarFrame view="list">{null}</CalendarFrame>;
+  const frame = (children: ReactNode) => (
+    <CalendarFrame view="list" filter={filter} onFilter={setFilter}>
+      {children}
+    </CalendarFrame>
+  );
+  if (d.loading) return frame(null);
 
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const months: [number, number][] = [0, 1, 2].map((n) => {
@@ -28,198 +68,184 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  const thisMonth = d.monthOf(y, mo).dates;
+  // 8번 월말 확인 띠: 오늘이 다음 월급날 3일 전 ~ 전날이면 → W-05
+  const band = d.monthOf(y, mo).bands.find((b) => d.today >= b.start && d.today <= b.end);
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
-  // 서프라이즈 1번: 배우자 생일을 아직 안 넣었으면 한 번 물음(‘나중에 할게요’면 안 보임)
-  const askPartner =
-    !!d.couple &&
-    !d.couple.solo &&
-    !partnerBirthdayDismissed() &&
-    !d.cares.some((x) => x.kind === 'partner_birthday' && x.created_by === d.me?.id);
-  const birthdayOf = (id: string) =>
-    d.upcoming.find((x) => x.care.member_id === id && x.care.kind === 'birthday')?.date ?? null;
+  const add = () => {
+    startCareAdd();
+    nav('/calendar/add/a');
+  };
 
-  return (
-    <CalendarFrame view="list">
-      <FilterChips value={filter} onChange={setFilter} />
-      {filter !== 'money' &&
-        (!d.cares.length ? (
-          <EmptyState
-            title={copy.empty}
-            action={
-              <Button variant="primary" onClick={() => nav('/calendar/setup/a')}>
-                {copy.startSetup}
-              </Button>
+  // 다가오는 일정: 챙길 날과 돈 일정을 날짜순 한 목록으로
+  type Row = {
+    key: string;
+    date: string;
+    label: string;
+    sub: string;
+    care: boolean;
+    icon: IconName;
+    /** 3D 아이콘 이름(2026-11-05) */
+    art: string;
+    to: string;
+  };
+  const rows: Row[] = [
+    ...(filter === 'money'
+      ? []
+      : soon.map((x) => ({
+          key: `c-${x.care.id}`,
+          date: x.date,
+          label: x.care.name,
+          sub:
+            x.care.budget > 0
+              ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
+              : formatDateWeekday(x.date),
+          care: true,
+          icon: 'gift' as IconName,
+          art: 'care-gift',
+          to: `/calendar/day/${x.care.id}`,
+        }))),
+    ...(filter === 'care'
+      ? []
+      : money.map((x, i) => {
+          const l = moneyLine(x);
+          return {
+            key: `m-${x.date}-${x.kind}-${i}`,
+            date: x.date,
+            label: l.label,
+            sub: formatDateWeekday(x.date),
+            care: false,
+            icon: MONEY_ICON[x.kind],
+            art: MONEY_ART[x.kind],
+            to: l.to,
+          };
+        })),
+  ].sort((a, b) => a.date.localeCompare(b.date));
+  const first = d.overdue[0];
+
+  return frame(
+    <>
+      {band && filter !== 'care' && (
+        <button
+          type="button"
+          className="hg-banner hg-banner--info"
+          onClick={() => nav('/salary/review')}
+        >
+          <span>{copy.reviewBand(reviewMonth(band.end))}</span>
+        </button>
+      )}
+      {filter !== 'money' && first && (
+        <button
+          type="button"
+          className="hg-recband"
+          onClick={() => nav(`/calendar/day/${first.care.id}/record/a?on=${first.date}`)}
+        >
+          <span className="hg-recband__icon" aria-hidden="true">
+            <Icon name="pencil" />
+          </span>
+          <span className="hg-recband__text">
+            <b>{copy.recordCount(d.overdue.length)}</b>
+            <span>
+              {copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}
+            </span>
+          </span>
+          <span className="hg-chevron" aria-hidden="true" />
+        </button>
+      )}
+      {filter !== 'money' && !d.cares.length && (
+        <EmptyState
+          title={copy.empty}
+          action={
+            <Button variant="secondary" onClick={add}>
+              {copy.emptyAdd}
+            </Button>
+          }
+        />
+      )}
+      {filter !== 'money' && next && (
+        <section className="hg-card hg-stack" aria-label={copy.nextCare}>
+          {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}
+          <StatBlock
+            as="div"
+            big={copy.dday(dday(d.today, next.date))}
+            title={next.care.name}
+            sub={
+              next.care.budget > 0
+                ? `${formatMonthDay(next.date)}, ${copy.memoAmount(m(next.care.budget))}`
+                : formatMonthDay(next.date)
             }
           />
-        ) : (
-          <>
-            {!!d.overdue.length && (
-              <section className="hg-stack" aria-label={copy.overdueList}>
-                <SectionHeader title={copy.overdueList} />
-                <div className="hg-list">
-                  {d.overdue.map((x) => (
-                    <ListRow
-                      key={x.care.id}
-                      label={x.care.name}
-                      sub={`${formatMonthDay(x.date)}, ${copy.overdue}`}
-                      value={copy.recordNow}
-                      onClick={() => nav(`/calendar/day/${x.care.id}/record/a?on=${x.date}`)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-            {next && (
-              <section className="hg-card hg-stack" aria-label={copy.nextCare}>
-                <span className="hg-card__label">{copy.dday(dday(d.today, next.date))}</span>
-                <b>{next.care.name}</b>
-                <span className="hg-card__meta">
-                  {formatMonthDay(next.date)}, {carerLabel(next.care, d.names)}
-                </span>
-                <span>{next.care.budget ? copy.budget(m(next.care.budget)) : copy.zeroBudget}</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  style={{ alignSelf: 'flex-start' }}
-                  onClick={() => nav(`/calendar/day/${next.care.id}`)}
-                >
-                  {copy.prepare}
-                </Button>
-              </section>
-            )}
-            {askPartner && d.couple && (
-              <section
-                className="hg-card hg-stack"
-                aria-label={copy.partnerBirthdayQ(d.couple.partnerName)}
-              >
-                <b>{copy.partnerBirthdayQ(d.couple.partnerName)}</b>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  style={{ alignSelf: 'flex-start' }}
-                  onClick={() => nav('/calendar/partner-birthday')}
-                >
-                  {copy.askPartnerBirthday}
-                </Button>
-              </section>
-            )}
-            <section className="hg-card hg-stack" aria-label={copy.fcTitle}>
-              <span className="hg-card__label">{copy.fcTitle}</span>
-              <b>
-                {d.familyCost.engaged
-                  ? copy.fcSpentEngaged(m(d.familyCost.total), m(d.familyCost.spent))
-                  : copy.fcSpent(m(d.familyCost.total), m(d.familyCost.spent))}
-              </b>
-              {!d.familyCost.engaged && (
-                <span className="hg-card__meta">{copy.fcHeld(m(d.familyCost.held))}</span>
-              )}
+          <div className="hg-row">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => nav(`/calendar/day/${next.care.id}`)}
+            >
+              {copy.prepare}
+            </Button>
+            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+            {next.date <= d.today && (
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
-                style={{ alignSelf: 'flex-start' }}
-                onClick={() => nav('/calendar/family-cost')}
+                onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
               >
-                {copy.see}
+                {copy.statuses.done}
               </Button>
-            </section>
-            <section className="hg-stack" aria-label={copy.careList}>
-              <SectionHeader title={copy.careList} />
-              {!soon.length ? (
-                <p className="hg-card__meta" style={{ margin: 0 }}>
-                  {copy.none60}
-                </p>
-              ) : (
-                <div className="hg-list">
-                  {soon.map((x) => (
-                    <ListRow
-                      key={x.care.id}
-                      label={x.care.name}
-                      sub={`${formatMonthDay(x.date)}, ${sideLabel(x.care, d.names)}, ${carerLabel(x.care, d.names)}`}
-                      value={m(x.care.budget)}
-                      onClick={() => nav(`/calendar/day/${x.care.id}`)}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
-            <section className="hg-stack" aria-label={copy.familyTitle}>
-              <div className="hg-row" style={{ justifyContent: 'space-between' }}>
-                <SectionHeader title={copy.familyTitle} />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    startFamilyAdd();
-                    nav('/calendar/family/new/a');
-                  }}
-                >
-                  {copy.familyAdd}
-                </Button>
-              </div>
-              <div className="hg-card hg-stack">
-                {(['groom', 'bride'] as const).map((side) => {
-                  const people = d.family.filter((f) => f.side === side);
+            )}
+          </div>
+        </section>
+      )}
+      <section className="hg-stack" aria-label={copy.upcomingList}>
+        <SectionHeader title={copy.upcomingList} />
+        {!rows.length ? (
+          <p className="hg-card__meta" style={{ margin: 0 }}>
+            {filter === 'money' ? copy.noMoney60 : copy.none60}
+          </p>
+        ) : (
+          // 2026-11-04 달 머리로 묶음(토스 소비 목록처럼, 월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
+          Object.entries(
+            rows.reduce<Record<string, Row[]>>((acc, r) => {
+              (acc[r.date.slice(0, 7)] ??= []).push(r);
+              return acc;
+            }, {}),
+          ).map(([ym, list]) => (
+            <div key={ym} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+              <h3 className="hg-cal__monthhead">{copy.monthHead(Number(ym.slice(5, 7)))}</h3>
+              <div className="hg-list">
+                {list.map((r) => {
+                  const n = dday(d.today, r.date);
                   return (
-                    <div key={side} className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-                      <span className="hg-card__label">
-                        {copy.side(side === 'groom' ? d.names.groom : d.names.bride)}
-                      </span>
-                      {!people.length ? (
-                        <span className="hg-help">{copy.familyEmpty}</span>
-                      ) : (
-                        <div className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-                          {people.map((f) => {
-                            const b = birthdayOf(f.id);
-                            return (
-                              <Button
-                                key={f.id}
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => nav(`/calendar/family/${f.id}/c`)}
-                              >
-                                {copy.familyItem(f.title, b ? copy.dday(dday(d.today, b)) : null)}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                    <ListRow
+                      key={r.key}
+                      lead={
+                        <Lead
+                          icon={r.icon}
+                          tone={r.care ? 'together' : undefined}
+                          art3d={icon3d(r.art)}
+                        />
+                      }
+                      label={r.label}
+                      sub={r.sub}
+                      value={
+                        <span className={n <= 7 ? 'hg-cal__dday is-near' : 'hg-cal__dday'}>
+                          {copy.dday(n)}
+                        </span>
+                      }
+                      onClick={() => nav(r.to)}
+                    />
                   );
                 })}
               </div>
-            </section>
-            <div className="hg-list">
-              <ListRow label={copy.gifted} onClick={() => nav('/calendar/gifts')} />
             </div>
-          </>
-        ))}
-      {filter !== 'care' && (
-        <section className="hg-stack" aria-label={copy.listMoney}>
-          <SectionHeader title={copy.listMoney} />
-          {filter === 'money' && !thisMonth.length && !money.length ? (
-            <p className="hg-card__meta" style={{ margin: 0 }}>
-              {copy.noMoneyThisMonth}
-            </p>
-          ) : (
-            <div className="hg-list">
-              {money.map((x, i) => {
-                const l = moneyLine(x);
-                return (
-                  <ListRow
-                    key={`${x.date}-${x.kind}-${i}`}
-                    label={l.label}
-                    sub={formatMonthDay(x.date)}
-                    value={l.go}
-                    onClick={() => nav(l.to)}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
+          ))
+        )}
+      </section>
+      {filter !== 'money' && !!d.cares.length && (
+        <div className="hg-list">
+          <ListRow label={copy.gifted} onClick={() => nav('/calendar/gifts')} />
+        </div>
       )}
-    </CalendarFrame>
+    </>,
   );
 }

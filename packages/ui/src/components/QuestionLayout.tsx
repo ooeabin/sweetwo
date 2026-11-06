@@ -11,6 +11,8 @@ export interface ChapterProgress {
   fill: number | null;
   /** 넓은 창 칸 막대(Meetup식): 챕터 안 질문 수와 지금까지 연 질문 수 */
   steps?: { total: number; done: number };
+  /** 이름이 없을 때 화면 읽기 이름 앞말(기본 ‘온보딩’) */
+  label?: string;
 }
 
 /** 넓은 창 위 바 가운데: 챕터면 “목표” + 칸 막대(brand), 아니면 ProgressSteps */
@@ -25,12 +27,12 @@ function BarProgress({
     const s = chapter.fill === null ? undefined : chapter.steps;
     return (
       <div className="hg-qbar__mid">
-        <p className="hg-qbar__label">{chapter.name}</p>
+        {chapter.name && <p className="hg-qbar__label">{chapter.name}</p>}
         {s && s.total > 0 && (
           <div
             className="hg-segs"
             role="progressbar"
-            aria-label={`${chapter.name} 진행`}
+            aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
             aria-valuemin={0}
             aria-valuemax={s.total}
             aria-valuenow={s.done}
@@ -80,13 +82,13 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
             <Icon name="chevron-left" size={24} />
           </button>
         )}
-        <p className="hg-chapterbar__label">{chapter.name}</p>
+        {chapter.name && <p className="hg-chapterbar__label">{chapter.name}</p>}
       </div>
       {fill !== null && (
         <div
           className="hg-chapterbar__track"
           role="progressbar"
-          aria-label={`${chapter.name} 진행`}
+          aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={fill}
@@ -144,16 +146,20 @@ export function ChapterList({
 // 한 화면 한 질문 틀(docs/design/components/QuestionLayout.md). Enter = 다음(폼 제출), Esc = 뒤로.
 export function QuestionLayout({
   steps,
-  chapter,
+  chapter: chapterProp,
   title,
   help,
   children,
   primary,
   later,
+  secondary,
   onBack,
   onSubmit,
   wide,
   center,
+  summary,
+  note,
+  hero,
 }: {
   steps?: { total: number; now: number; fill?: number };
   /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
@@ -161,15 +167,42 @@ export function QuestionLayout({
   title: ReactNode;
   help?: ReactNode;
   children?: ReactNode;
-  primary?: { label: string; disabled?: boolean; loading?: boolean };
+  /** variant 기본 primary. 대답 성격(O-21 0개 ‘나중에 고를게요’)이면 secondary, 되돌릴 수 없는 삭제(S-18b)면 danger */
+  primary?: {
+    label: string;
+    disabled?: boolean;
+    loading?: boolean;
+    variant?: 'primary' | 'secondary' | 'danger';
+  };
   later?: { label: string; onClick: () => void };
+  /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */
+  secondary?: { label: string; onClick: () => void };
   onBack?: () => void;
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
   wide?: boolean;
   /** 안내 화면: 제목 가운데 정렬 + 세로 가운데(O-01, A-02와 같은 배치). 입력 영역이 없으면 기본으로 켬 */
   center?: boolean;
+  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
+  summary?: ReactNode;
+  /** 버튼 바로 위 가운데 정렬 안내 한 줄(2026-11-03, S-11e·G-02p ‘올린 사진은 …’) */
+  note?: ReactNode;
+  /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
+  hero?: ReactNode;
 }) {
+  // 2026-11-03 칸 막대(StepsBar) 대신 모든 질문 흐름을 온보딩과 같은 얇은 막대(ChapterBar)로
+  const chapter: ChapterProgress | undefined =
+    chapterProp ??
+    (steps && steps.total > 0
+      ? {
+          index: 1,
+          total: 1,
+          name: '',
+          label: '질문',
+          fill: ((steps.now + (steps.fill ?? 50) / 100) / steps.total) * 100,
+          steps: { total: steps.total, done: steps.now + 1 },
+        }
+      : undefined);
   const centered = center ?? Children.toArray(children).length === 0;
   useEffect(() => {
     if (!onBack) return;
@@ -180,7 +213,7 @@ export function QuestionLayout({
     return () => window.removeEventListener('keydown', onKey);
   }, [onBack]);
 
-  const backOnly = !primary && !later;
+  const backOnly = !primary && !later && !secondary;
   return (
     <main style={{ padding: '0 var(--space-4)' }}>
       <div className="hg-qbar">
@@ -201,25 +234,39 @@ export function QuestionLayout({
           <div className="hg-q__nav">
             <ChapterBar chapter={chapter} onBack={onBack} />
           </div>
+        ) : steps || onBack ? (
+          <div className="hg-q__nav">
+            {steps && <StepsBar steps={steps} />}
+            {onBack ? (
+              <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+                <Icon name="chevron-left" size={24} />
+              </button>
+            ) : (
+              <span className="hg-q__back-space" aria-hidden="true" />
+            )}
+          </div>
         ) : (
-          (steps || onBack) && (
-            <div className="hg-q__nav">
-              {steps && <StepsBar steps={steps} />}
-              {onBack && (
-                <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
-                  <Icon name="chevron-left" size={24} />
-                </button>
-              )}
-            </div>
-          )
+          // 뒤로가 없는 화면도 제목 자리를 같게(좁은 창에서 뒤로 버튼 높이만큼 비움)
+          <div className="hg-q__nav" aria-hidden="true">
+            <span className="hg-q__back-space" />
+          </div>
         )}
+        {hero && <div className="hg-q__hero">{hero}</div>}
         <div className="hg-q__head">
           <h1 className="hg-q__title">{title}</h1>
           {help && <p className="hg-q__help">{help}</p>}
         </div>
         {children}
-        {(primary || later || onBack) && (
-          <div className={`hg-q__foot${backOnly ? ' is-backonly' : ''}`}>
+        {(primary || later || secondary || onBack) && (
+          <div
+            className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}${note ? ' has-note' : ''}`}
+          >
+            {note && <p className="hg-q__note">{note}</p>}
+            {summary && (
+              <div className="hg-q__sum" aria-live="polite">
+                {summary}
+              </div>
+            )}
             {onBack && (
               <button type="button" className="hg-btn hg-btn--ghost hg-q__prev" onClick={onBack}>
                 <Icon name="chevron-left" size={16} />
@@ -227,15 +274,28 @@ export function QuestionLayout({
               </button>
             )}
             {later && (
-              <button type="button" className="hg-btn hg-btn--link" onClick={later.onClick}>
+              <button
+                type="button"
+                className="hg-btn hg-btn--link hg-btn--quiet"
+                onClick={later.onClick}
+              >
                 {later.label}
               </button>
             )}
             {primary && <span className="hg-q__hint">Enter 키를 눌러도 돼요</span>}
+            {secondary && (
+              <button
+                type="button"
+                className="hg-btn hg-btn--secondary hg-q__second"
+                onClick={secondary.onClick}
+              >
+                {secondary.label}
+              </button>
+            )}
             {primary && (
               <button
                 type="submit"
-                className={`hg-btn hg-btn--primary${primary.loading ? ' is-loading' : ''}`}
+                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primary.loading ? ' is-loading' : ''}`}
                 disabled={primary.disabled}
                 aria-busy={primary.loading || undefined}
               >

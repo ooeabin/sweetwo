@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { InquiryText } from './s-19a-inquiry';
 
@@ -23,7 +23,7 @@ export function S19aInquiries() {
   const list = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  if (list.isLoading) return <MainFrame current={null} columns={[null]} />;
+  if (list.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const rows = list.data ?? [];
   const q: Inquiry | undefined = id ? rows.find((r) => r.id === id) : undefined;
 
@@ -50,7 +50,15 @@ export function S19aInquiries() {
         onBack={() => nav('/settings/help')}
       />
       {rows.length === 0 ? (
-        <EmptyState title={copy.noInquiries} />
+        // 2026-11-04 비었으면 ‘문의하기’를 빈 화면 가운데에
+        <EmptyState
+          title={copy.noInquiries}
+          action={
+            <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
+              {copy.contact}
+            </Button>
+          }
+        />
       ) : (
         <div className="hg-list">
           {rows.map((r) => (
@@ -70,14 +78,16 @@ export function S19aInquiries() {
           ))}
         </div>
       )}
-      <div className="hg-row">
-        <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
-          {copy.contact}
-        </Button>
-      </div>
+      {rows.length > 0 && (
+        <div className="hg-row">
+          <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
+            {copy.contact}
+          </Button>
+        </div>
+      )}
     </div>
   );
-  if (!q) return <MainFrame current={null} page={{ title: copy.title }} columns={[listBody]} />;
+  if (!q) return <MainFrame sub="settings" current={null} columns={[listBody]} />;
 
   const asking = q.access_request.find((a) => a.status === 'requested');
   const on = q.access_request.find((a) => a.status === 'approved');
@@ -156,5 +166,5 @@ export function S19aInquiries() {
       )}
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[detail]} />;
+  return <MainFrame sub="settings" current={null} columns={[detail]} />;
 }

@@ -28,6 +28,11 @@ export function formatMonthDay(s: string): string {
   return `${m}월 ${d}일`;
 }
 
+/** '2026-08-26' → "08.26"(체크한 날, 월급 기간처럼 두 자리. 2026-11-03) */
+export function formatDot2(s: string): string {
+  return s.slice(5, 10).replace('-', '.');
+}
+
 /** '2026-10-24' → "10.24"(기록 줄 날짜) */
 export function formatDot(s: string): string {
   const { m, d } = ymd(s);
@@ -51,6 +56,12 @@ export const addDays = (s: string, n: number) =>
 export function formatKstDateTime(iso: string): string {
   const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString();
   return `${d.slice(0, 10)} ${d.slice(11, 16)}`;
+}
+
+/** 시각(ISO) → KST "10월 27일 15:05"(오프라인 띠 ‘마지막 저장’) */
+export function formatKstMonthDayTime(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString();
+  return `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일 ${d.slice(11, 16)}`;
 }
 
 /** 두 시각 사이 시간(시간 단위 내림) */

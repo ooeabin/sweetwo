@@ -32,7 +32,8 @@ const og = new URL('/og.png', Astro.site).toString();
       <nav class="hg-site__bar" aria-label="sweeTwo">
         <a href="/" class="hg-wordmark" aria-label="sweeTwo 처음으로"><img src={logo.src} alt="sweeTwo" height="32" /></a>
         <a class="hg-btn hg-btn--ghost hg-site__faq" href="/help">{t.faq}</a>
-        <a class="hg-btn hg-btn--secondary hg-btn--sm" href={URLS.app} data-web-start data-placement="top">{t.webStart}</a>
+        <!-- 앱 받기(L-01 1번): PC는 맨 아래 다운로드로, 휴대폰은 그 기기 스토어(lib/client.ts가 주소를 바꿈) -->
+        <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/#get" data-get-app data-placement="top">{t.getApp}</a>
       </nav>
     </header>
     <main class="hg-site__wrap">

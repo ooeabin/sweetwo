@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">sweeTwo</string>
+    <string name="title_activity_main">sweeTwo</string>
+    <string name="package_name">kr.sweetwo.app</string>
+    <string name="custom_url_scheme">kr.sweetwo.app</string>
+</resources>

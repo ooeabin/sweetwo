@@ -17,8 +17,8 @@ const ANDROID =
 test('접속 OS: Mac, Windows 10 64비트, 휴대폰', () => {
   expect(detectSiteOs(MAC)).toBe('mac');
   expect(detectSiteOs(WIN10)).toBe('win');
-  expect(detectSiteOs(IPHONE)).toBe('mobile');
-  expect(detectSiteOs(ANDROID)).toBe('mobile');
+  expect(detectSiteOs(IPHONE)).toBe('ios');
+  expect(detectSiteOs(ANDROID)).toBe('android');
 });
 
 test('지원하지 않는 OS: macOS 10.14 이하(알 수 있을 때만), Windows 7·8, 32비트', () => {

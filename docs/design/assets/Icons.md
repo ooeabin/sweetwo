@@ -2,10 +2,10 @@
 
 Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
 
-- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸, 켜진 상태를 보여 줄 때(`is-filled`).
+- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 좁은 창 하단 탭 막대의 네 칸 모두(2026-11-05 토스형, 고른 칸 `ink`, 나머지 `muted`)와, 그 밖에는 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸, 켜진 상태를 보여 줄 때(`is-filled`).
 - 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴, 독 칸 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
 - 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바, 하단 독, 떠 있는 추가 버튼).
-- 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 분홍, 영역색으로 칠하지 않음.
+- 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음.
 - 아이콘만으로 뜻을 전하지 않음: 라벨 또는 `aria-label`을 같이 둠.
 - 필요한 아이콘이 여기 없으면 같은 Phosphor 세트에서 bold와 fill을 함께 추가. 새 아이콘은 클래스 이름을 Phosphor 이름 그대로 씀.
 - 클래스 이름은 지금 것을 그대로 씀(바꾸지 않음). 아래 표가 클래스와 Phosphor 원래 이름의 짝.
@@ -38,7 +38,8 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--envelope` | `envelope` | 문의 메일, 이메일 |
 | `hg-ico--eye` | `eye` |  |
 | `hg-ico--eye-off` | `eye-slash` |  |
-| `hg-ico--fingerprint` | `fingerprint` | Touch ID로 풀기 |
+| `hg-ico--fingerprint` | `fingerprint` | Touch ID, 지문으로 풀기 |
+| `hg-ico--scan-smiley` | `scan-smiley` | Face ID로 풀기, Face ID 켜기(A-06) |
 | `hg-ico--flag-pennant` | `flag-pennant` | 직접 만든 목표의 회색 기본 그림 |
 | `hg-ico--gift` | `gift` |  |
 | `hg-ico--house` | `house` |  |
@@ -66,3 +67,24 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--wallet` | `wallet` |  |
 | `hg-ico--windows-logo` | `windows-logo` | 웹사이트 Windows용 다운로드 |
 | `hg-ico--x` | `x` |  |
+| `hg-ico--hand-coins` | `hand-coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--truck` | `truck` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--couch` | `couch` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--buildings` | `buildings` | 자산 묶음 부동산(F-03a, F-01 빈 상태, 2026-11-04) |
+| `hg-ico--baby` | `baby` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--graduation-cap` | `graduation-cap` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--users-three` | `users-three` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--paw-print` | `paw-print` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--airplane-tilt` | `airplane-tilt` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--heart` | `heart` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--shopping-bag` | `shopping-bag` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--palette` | `palette` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--car` | `car` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--wrench` | `wrench` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--calendar-check` | `calendar-check` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--plant` | `plant` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--coins` | `coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--diamond` | `diamond` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--first-aid-kit` | `first-aid-kit` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+

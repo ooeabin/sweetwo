@@ -1,0 +1,155 @@
+import { test, expect, type Page } from '@playwright/test';
+import { axe as runAxe } from './axe';
+import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { seed } from './seed-home';
+
+// 이미 쓰던 사람: 온보딩 뒤 ‘월급 계획 확인’(ADR 0005)은 끝낸 상태로
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('sweetwo:home:todo-closed', JSON.stringify(['split:split-1']));
+    } catch {
+      /* 없음 */
+    }
+  });
+});
+
+// 만기일 당일(23 F-04a, 19 H-06 ‘만기·챙길 날’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
+// 찬우 혼자, 10월 7일. 청년 적금 만기 10월 7일, 입출금 통장 300만.
+
+const axe = async (page: Page) => {
+  const r = await runAxe(page);
+  expect(
+    r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+  ).toEqual([]);
+};
+const NOW = new Date('2026-10-07T10:00:00+09:00');
+
+function seedAssets(db: MemDb) {
+  const base = {
+    side: 'asset',
+    principal: null,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    created_by: db.me.id,
+    visibility: 'all',
+    status: 'held',
+    deleted_at: null,
+  };
+  db.assets.push(
+    {
+      ...base,
+      id: 'a-sav',
+      grp: 'deposit',
+      kind: 'saving',
+      name: '청년 적금',
+      amount: 12_000_000,
+      maturity_date: '2026-10-07',
+    },
+    {
+      ...base,
+      id: 'a-bank',
+      grp: 'cash',
+      kind: 'bank',
+      name: '입출금 통장',
+      amount: 3_000_000,
+      maturity_date: null,
+    },
+  );
+}
+
+test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통장 + 만기 금액, 만기 완료)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  // 월말 확인·초대·목표 금액 할 일이 앞에 오지 않게
+  Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  seedAssets(db);
+  await page.goto('/');
+  const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
+  await expect(band).toBeVisible();
+  await expect(page.getByRole('region', { name: '다가오는 일정' })).toContainText('청년 적금 만기');
+  await band.getByRole('button').first().click();
+  await expect(page.getByRole('heading', { name: '만기된 돈은 어디로 옮겼어요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /다른 통장으로/ }).click();
+  await expect(page.getByRole('heading', { name: '어느 통장으로 옮겼어요?' })).toBeVisible();
+  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await expect(page).toHaveURL(/\/assets\/a-bank$/);
+  expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(15_000_000);
+  expect(db.assets.find((a) => a.id === 'a-sav')?.status).toBe('matured');
+});
+
+test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그날은 안 보임', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  seedAssets(db);
+  await page.goto('/assets/a-sav/matured');
+  await page.getByRole('radio', { name: /다시 가입했어요/ }).click();
+  await expect(page.getByRole('heading', { name: '만기일은 언제예요?' })).toBeVisible();
+  // 2026-11-04 날짜 휠: 처음 값이 1년 뒤 오늘(2027-10-07)이라 그대로 저장
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/assets\/a-sav$/);
+  expect(db.assets.find((a) => a.id === 'a-sav')?.maturity_date).toBe('2027-10-07');
+
+  // 닫기
+  const sav = db.assets.find((a) => a.id === 'a-sav');
+  if (sav) sav.maturity_date = '2026-10-07';
+  await page.goto('/');
+  const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
+  await band.getByRole('button', { name: '닫기' }).click();
+  await expect(band).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' })).toHaveCount(
+    0,
+  );
+});
+
+test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 고친 기록에 고친 사람', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedAssets(db);
+  const bank = db.assets.find((a) => a.id === 'a-bank') as Record<string, unknown>;
+  db.assets.push({
+    ...bank,
+    id: 'a-stock',
+    grp: 'invest',
+    kind: 'stock',
+    name: '찬우 주식',
+    amount: 10_000_000,
+    principal: 8_000_000,
+    monthly_payment: null,
+    interest_rate: null,
+    paid_count: null,
+    created_at: '2026-01-10T00:00:00Z',
+  });
+  await page.goto('/assets/a-stock');
+  await expect(page.getByRole('heading', { name: '찬우 주식' })).toBeVisible();
+  await page.getByRole('button', { name: '팔았어요' }).click();
+  // 먼저 묻기(전부 / 일부만) → 받은 금액 → 남은 평가금액, 화면마다 키패드 하나
+  await expect(page.getByRole('heading', { name: '얼마나 팔았어요?' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: /일부만 팔았어요/ }).click();
+  await expect(page.getByRole('heading', { name: '받은 금액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('받은 금액은 얼마예요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '남은 평가금액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('남은 평가금액은 얼마예요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
+  await expect(page.getByText('실현 손익 +100만 원')).toBeVisible();
+  await axe(page);
+  expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(8_000_000);
+  expect(db.assets.find((a) => a.id === 'a-stock')).toMatchObject({
+    amount: 5_000_000,
+    status: 'held',
+  });
+});

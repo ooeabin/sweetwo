@@ -2,7 +2,7 @@ import { fetchGoals, qk } from '@sweetwo/api';
 import { ChoiceCards, ListRow, PageHeader, QuestionLayout, Toggle } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useWidgetSettings } from '../widget-settings';
 
@@ -14,7 +14,7 @@ export function S22Widget() {
   const w = useWidgetSettings();
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   if (!w.desktop) return <Navigate to="/settings" replace />;
-  if (!w.settings || goals.isLoading) return <MainFrame current={null} columns={[null]} />;
+  if (!w.settings || goals.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const s = w.settings;
   // 휴지통·보류·사용 완료 목표는 고를 수 없음 → 우선순위 첫 목표
   const open = (goals.data ?? [])
@@ -67,5 +67,5 @@ export function S22Widget() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.widgetTitle }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

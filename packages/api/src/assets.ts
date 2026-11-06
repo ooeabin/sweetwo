@@ -1,7 +1,7 @@
 import type { InvestAnswer, Tables, TablesInsert, TablesUpdate } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
-import { ensureSpace, fetchMe } from './onboarding';
+import { ensureSpace } from './onboarding';
 
 // 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 배우자 ‘합계만’은 묶음 합계로.
 const fail = (e: { message?: string } | null) => {
@@ -9,6 +9,16 @@ const fail = (e: { message?: string } | null) => {
 };
 
 export type Asset = Tables<'asset'>;
+
+/** AD-19 항목 이름 목록(F-03a 세부 항목 칩). 기본 칩에 입히는 건 core withKindNames */
+export async function fetchAssetKindNames(): Promise<Tables<'asset_kind_name'>[]> {
+  const { data, error } = await supabase()
+    .from('asset_kind_name')
+    .select('*')
+    .order('created_at');
+  fail(error);
+  return data ?? [];
+}
 export type AssetInsert = Omit<TablesInsert<'asset'>, 'space_id'>;
 export type AssetHistory = Tables<'asset_history'>;
 export interface PartnerAssetSum {
@@ -75,22 +85,6 @@ export async function updateAsset(id: string, patch: TablesUpdate<'asset'>) {
 export const trashAsset = (id: string) => updateAsset(id, { deleted_at: new Date().toISOString() });
 export const restoreAsset = (id: string) => updateAsset(id, { deleted_at: null });
 
-/** 목표별 연결 자산 합계(원금 기준, 비공개 제외, 배우자 합계만 포함) */
-export async function fetchGoalAssetSums(): Promise<
-  { goal_id: string; n: number; total: number }[]
-> {
-  const { data, error } = await supabase().rpc('goal_asset_sums');
-  fail(error);
-  return (data ?? []) as { goal_id: string; n: number; total: number }[];
-}
-
-/** 자산들을 목표에 연결(null = 연결 해제) */
-export async function linkAssets(ids: string[], goalId: string | null) {
-  if (!ids.length) return;
-  const { error } = await supabase().from('asset').update({ goal_id: goalId }).in('id', ids);
-  fail(error);
-}
-
 /** 투자 원칙 답(O-53): 내 답과 배우자 답 */
 export async function fetchInvestAnswers(): Promise<{
   mine: InvestAnswer | null;
@@ -101,13 +95,30 @@ export async function fetchInvestAnswers(): Promise<{
   const row = Array.isArray(data) ? data[0] : null;
   return { mine: row?.mine ?? null, partner: row?.partner ?? null };
 }
-export async function saveInvestAnswer(answer: InvestAnswer) {
-  const me = await fetchMe();
-  if (!me) throw new AuthCallError('unknown');
-  const id = me.id;
-  const { error } = await supabase()
-    .from('app_user')
-    .update({ invest_answer: answer, invest_answered_at: new Date().toISOString() })
-    .eq('id', id);
+
+/** F-04a 만기된 돈 정리: 다른 통장으로(그 통장 + 만기 금액, 이 항목은 만기 완료) 또는 다시 가입(새 만기일) */
+/** F-04b~d 팔았어요: 받은 금액을 고른 통장에(일부만이면 남은 평가금액). 실현 손익(원금 없으면 null) */
+export async function sellAsset(
+  id: string,
+  o: { received: number; to: string; remain?: number | null },
+): Promise<number | null> {
+  const { data, error } = await supabase().rpc('sell_asset', {
+    p_asset: id,
+    p_received: o.received,
+    p_to: o.to,
+    ...(o.remain !== undefined && o.remain !== null ? { p_remain: o.remain } : {}),
+  });
+  fail(error);
+  return data === null ? null : Number(data);
+}
+
+export async function settleMatured(
+  id: string,
+  how: { to: string } | { newDate: string },
+): Promise<void> {
+  const { error } = await supabase().rpc(
+    'settle_matured',
+    'to' in how ? { p_asset: id, p_to: how.to } : { p_asset: id, p_new_date: how.newDate },
+  );
   fail(error);
 }

@@ -1,0 +1,217 @@
+import { test, expect, type Page } from '@playwright/test';
+import { axe as runAxe } from './axe';
+import { chanwoo } from './supabase-mock';
+import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { seed } from './seed-home';
+import { setWheel } from './wheel';
+
+// 배우자 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
+// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 비상금 44만, 내 집 마련 95만).
+const axe = async (page: Page) => {
+  const r = await runAxe(page);
+  expect(
+    r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+  ).toEqual([]);
+};
+const NOW = new Date('2026-10-07T10:00:00+09:00');
+const STARTER = 'starter-chanwoo';
+
+function joining(db: MemDb, starterReady = true) {
+  seed(db);
+  for (const sp of db.splits) {
+    sp.owner_user_id = STARTER;
+    for (const l of sp.split_line as Record<string, unknown>[])
+      if (l.user_id === chanwoo.id) l.user_id = STARTER;
+  }
+  for (const c of db.checklists) c.owner_user_id = STARTER;
+  if (!starterReady) db.splits.length = 0;
+  Object.assign(db.me, {
+    nickname: '예빈',
+    onboarding_done_at: null,
+    onboarding_step: 'P-03',
+    monthly_income: null,
+    payday: null,
+    birth_year: null,
+  });
+  Object.assign(db.space ?? {}, {
+    couple_state: 'not_joined',
+    partner_nickname: '예빈',
+    created_by: STARTER,
+  });
+  db.partner = {
+    id: STARTER,
+    nickname: '찬우',
+    monthly_income: 3_500_000,
+    payday: 25,
+    payday_last: false,
+  };
+}
+
+async function answerBasics(page: Page, waiting = false) {
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
+  await expect(page.getByText('배우자에게도 이 이름으로 보여요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();
+  await setWheel(page, '예빈님은 몇 년생이에요?', 1995);
+  await page.getByRole('button', { name: '다음' }).click();
+  if (!waiting)
+    await expect(
+      page.getByRole('heading', { name: '찬우님이 고른 월급 관리 방식이에요' }),
+    ).toBeVisible();
+}
+
+async function salary(page: Page) {
+  await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('2700000');
+  await page.getByRole('button', { name: '다음' }).click();
+  // 월급날은 따로 P-05b(2026-11-03), 휠 25일에서 시작 → 10일
+  await expect(page.getByRole('heading', { name: '월급날은 며칠이에요?' })).toBeVisible();
+  const day = page.getByRole('spinbutton', { name: '월급날은 며칠이에요?' });
+  await expect(day).toHaveAttribute('aria-valuetext', '25일');
+  await day.focus();
+  for (let i = 0; i < 15; i++) await day.press('ArrowUp');
+  await expect(day).toHaveAttribute('aria-valuetext', '10일');
+  await page.getByRole('button', { name: '다음' }).click();
+}
+
+test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급 계획(아직 안 채운 월 필요액)로 합류 완료 → 홈 할 일', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  await answerBasics(page);
+  await expect(page.getByRole('radio', { name: /각자 월급을 따로 관리해요/ })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await salary(page);
+
+  // 월급 계획 화면 없이 홈(온보딩 ADR 0005처럼). 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
+  const call = db.joinCalls.find((c) => c.fn === 'complete_join');
+  expect(call?.p_version).toBeUndefined();
+  expect(
+    (call?.p_lines as { kind: string; amount: number }[]).map((l) => [l.kind, l.amount]),
+  ).toEqual([
+    ['saving', 0],
+    ['saving', 1_070_000],
+    ['fixed', 680_000],
+    ['living', 680_000],
+    ['allowance', 270_000],
+  ]);
+  expect(db.me).toMatchObject({ birth_year: 1995, monthly_income: 2_700_000, payday: 10 });
+  expect(db.space?.couple_state).toBe('connected');
+});
+
+test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  await answerBasics(page);
+  await page.getByRole('radio', { name: /합쳐서 같이 관리해요/ }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect
+    .poll(() => db.joinCalls[0])
+    .toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });
+  await salary(page);
+
+  await expect(page).toHaveURL(/\/$/);
+  const lines = db.splits.find((x) => x.owner_user_id === null)?.split_line as {
+    kind: string;
+    amount: number;
+  }[];
+  expect(lines.some((l) => l.kind === 'allowance' && l.amount === 270_000)).toBe(true);
+  expect(db.splits.find((x) => x.owner_user_id === null)?.split_line).toHaveLength(6);
+});
+
+test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 → 월급날 저장 = 합류, 홈 대기, 월급 계획이 생기면 P-04부터', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db, false);
+  await answerBasics(page, true);
+  await salary(page);
+  await expect(page.getByText('찬우님이 시작하고 있어요')).toBeVisible();
+  await expect(page.getByText('찬우님이 첫 목표를 정하면 알려 드릴게요')).toBeVisible();
+  expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
+  expect(db.me.onboarding_step).toBe('P-WAIT');
+  await axe(page);
+
+  // 찬우가 월급 계획을 만들면 다음에 열 때 P-04 → 홈(월급 계획은 자동)
+  seed(db);
+  Object.assign(db.me, { nickname: '예빈', onboarding_step: 'P-WAIT' });
+  db.partner = {
+    id: STARTER,
+    nickname: '찬우',
+    monthly_income: 3_500_000,
+    payday: 25,
+    payday_last: false,
+  };
+  await page.reload();
+  await expect(page).toHaveURL(/\/join\/p-04$/);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
+  expect(db.joinCalls.at(-1)?.p_lines).toBeTruthy();
+});
+
+test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류하기 → 내 정보만(자산 공개 범위) → 다음 → P-03', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.me, {
+    nickname: '예빈',
+    space_id: 'space-solo',
+    monthly_income: 2_700_000,
+    payday: 10,
+    onboarding_done_at: '2026-10-01T00:00:00Z',
+  });
+  db.assets.push({
+    id: 'a-y',
+    space_id: 'space-solo',
+    side: 'asset',
+    grp: 'deposit',
+    kind: 'saving',
+    name: '예빈 적금',
+    amount: 5_000_000,
+    owner: 'person',
+    owner_user_id: db.me.id,
+    visibility: 'all',
+    deleted_at: null,
+  });
+  await page.goto('/i/K7M2QX');
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(page.getByRole('heading', { name: '이미 시작한 기록이 있어요' })).toBeVisible();
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(page.getByRole('heading', { name: '내 정보만 옮겨요' })).toBeVisible();
+  await expect(page.getByText('월급날 10일')).toBeVisible();
+  await expect(page.getByText('270만 원', { exact: true })).toBeVisible();
+  // 공개 범위: 줄 오른쪽 ‘금액만 보여 주기’ → 시트에서 고름(2026-11-03)
+  const row = page.getByRole('button', { name: /예빈 적금 500만 원/ });
+  await expect(row).toContainText('금액만 보여 주기');
+  await expect(page.getByText(/30일 보관 후 지워져요/)).toBeVisible();
+  await axe(page);
+  await row.click();
+  const sheet = page.getByRole('dialog', { name: '예빈 적금 공개 범위' });
+  await sheet.getByRole('radio', { name: '모두 보여 주기' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect(row).toContainText('모두 보여 주기');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  expect(db.assets.find((a) => a.id === 'a-y')).toMatchObject({
+    space_id: 'space-1',
+    visibility: 'all',
+  });
+});

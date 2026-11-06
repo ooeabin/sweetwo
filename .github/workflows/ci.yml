@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -23,8 +23,31 @@ jobs:
       - run: pnpm build
       - name: 그림과 영상 크기 상한
         run: pnpm check:assets
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - name: Edge Function 시험(Deno)
+        run: deno test --no-config --no-lock supabase/functions/
       - name: 비밀 값이 앱 코드에 없는지
         run: "! grep -rnE 'service_role|SUPABASE_SERVICE|AWS_SECRET' apps packages --include=*.ts --include=*.tsx"
+      - name: 커밋된 .env에 공개 키만 있는지(sb_secret_, service_role 토큰 금지)
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path");
+            let bad = 0;
+            for (const app of fs.readdirSync("apps")) {
+              const dir = path.join("apps", app);
+              if (!fs.statSync(dir).isDirectory()) continue;
+              for (const f of fs.readdirSync(dir).filter((n) => n.startsWith(".env"))) {
+                const text = fs.readFileSync(path.join(dir, f), "utf8");
+                if (/sb_secret_/.test(text)) { console.error(`${dir}/${f}: sb_secret_ 키`); bad++; }
+                for (const jwt of text.match(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g) ?? []) {
+                  const role = JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString()).role;
+                  if (role !== "anon") { console.error(`${dir}/${f}: role=${role} 토큰`); bad++; }
+                }
+              }
+            }
+            process.exit(bad ? 1 : 0);
+          '
 
   e2e-web:
     runs-on: ubuntu-latest
@@ -36,19 +59,37 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sweetwo/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @sweetwo/web e2e
+      - run: pnpm --filter @sweetwo/mobile exec playwright install --with-deps chromium
+      - run: pnpm --filter @sweetwo/mobile e2e
       - run: pnpm --filter @sweetwo/admin e2e
       - run: pnpm --filter @sweetwo/site e2e
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: e2e-web, path: apps/web/test-results, if-no-files-found: ignore }
+        with: { name: e2e-web, path: apps/mobile/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-admin, path: apps/admin/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-site, path: apps/site/test-results, if-no-files-found: ignore }
+
+  mobile-android:
+    runs-on: ubuntu-latest
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: pnpm install --frozen-lockfile
+      - name: 화면 묶음 → Android 프로젝트(cap sync)
+        run: pnpm --filter @sweetwo/mobile build && pnpm --filter @sweetwo/mobile exec cap sync android
+      - name: Android 디버그 빌드
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
 
   e2e-desktop:
     runs-on: ubuntu-latest
@@ -58,6 +99,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      # 캐시에서 되살린 electron에 실행 파일이 빠져 있으면 다시 받음(‘Electron failed to install correctly’)
+      - name: Electron 실행 파일 확인
+        run: test -f apps/desktop/node_modules/electron/path.txt || node apps/desktop/node_modules/electron/install.js
       - run: pnpm --filter @sweetwo/desktop build
       - run: xvfb-run -a pnpm --filter @sweetwo/desktop e2e
 
@@ -75,7 +119,13 @@ jobs:
       - name: 로컬 Supabase 시작(마이그레이션 + seed)
         run: pnpm supabase start -x studio,imgproxy,vector,logflare,edge-runtime
       - name: pgTAP(RLS, DB 함수)
-        run: pnpm db:test
+        # 실패한 테스트 줄을 주석(annotation)으로도 남겨, 로그를 못 받는 곳에서도 API로 볼 수 있게
+        run: |
+          set -o pipefail
+          if ! pnpm db:test 2>&1 | tee /tmp/pgtap.txt; then
+            grep -E 'not ok|# +(Failed|have|want|Looks)|ERROR|Dubious' /tmp/pgtap.txt | head -10 | sed 's/^/::error::/'
+            exit 1
+          fi
       - name: DB 타입이 마이그레이션과 같은지(pnpm db:types 결과와 비교)
         run: |
           cp packages/core/src/db.types.ts /tmp/committed.ts
@@ -83,6 +133,10 @@ jobs:
           # 줄바꿈 방식에 따라 공백, 줄바꿈, 한 줄로 접힐 때 붙는 ; , 가 달라질 수 있어 이것들은 빼고 비교한다
           if ! diff -q <(tr -d ' \n;,' < /tmp/committed.ts) <(tr -d ' \n;,' < packages/core/src/db.types.ts) > /dev/null; then
             diff -u /tmp/committed.ts packages/core/src/db.types.ts || true
+            # 다른 줄을 주석(annotation)으로도 남김(로그를 못 볼 때 gh api …/check-runs/{id}/annotations로 확인)
+            diff -u -w /tmp/committed.ts packages/core/src/db.types.ts > /tmp/db-types.diff || true
+            msg=$(awk '/^[-+][^-+]/ && n < 80 { n++; gsub(/%/, "%25"); printf "%s%%0A", $0 }' /tmp/db-types.diff)
+            echo "::error title=db.types 다른 줄::${msg}"
             echo '::error::db.types.ts가 마이그레이션과 달라요. pnpm db:types로 다시 만들거나 CI 결과물(db-types)을 받아 커밋하세요'
             exit 1
           fi

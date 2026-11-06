@@ -1,4 +1,4 @@
-import { fetchLoginState } from '@sweetwo/api';
+import { fetchLoginState, noteDevice, noteLogin } from '@sweetwo/api';
 import type { AuthProvider } from '@sweetwo/core';
 import { track } from '../../shared/analytics';
 import { copy } from './copy';
@@ -15,13 +15,16 @@ export const paths = {
   terms: '/signup/terms', // A-05
   pinSetup: '/lock/setup', // A-06 설정
   expired: '/session-expired', // A-08
+  newDevice: '/new-device', // A-08 새 기기 알림(/new-device/:session)
+  reconsent: '/terms/update', // A-05r 약관 개정 재동의·마케팅 재확인
   callback: '/auth/callback',
   restore: '/account/restore', // A-02 ‘계정 삭제를 취소할까요?’
   home: '/', // 이번 달(온보딩이 생기면 멈춘 화면부터)
 } as const;
 
 /** A-02로 갈 때 넘기는 안내 */
-export type LoginNotice = { notice?: string; conflict?: AuthProvider };
+/** notice: 버튼 위 띠(남아 있음). toast: true면 버튼 위 알약 토스트로 4초만(취소, 실패 같은 결과 안내). conflict: 가입한 방법 버튼에 말풍선 */
+export type LoginNotice = { notice?: string; toast?: boolean; conflict?: AuthProvider };
 
 /** 로그인이 끝난 뒤(또는 세션이 있는 재방문) 어디로 갈지. provider는 방금 누른 버튼. */
 export async function routeAfterLogin(
@@ -49,8 +52,14 @@ export async function routeAfterLogin(
   }
   // 삭제 요청 30일 안 계정: “계정 삭제를 취소할까요?”
   if (s.state === 'deletion_requested') return { to: paths.restore };
-  // existing
-  if (session.platform === 'desktop' && session.bridge) {
+  // existing: 다른 기기에 로그인돼 있으면 서버가 ‘새 기기에서 로그인했어요’ 알림·메일(15 A-08 4번)
+  void noteLogin().catch(() => undefined);
+  // 앱 기기 기록(AD-16). 웹(개발·e2e)은 기록 안 함
+  const b = session.bridge;
+  const pf = session.platform;
+  if (b && pf !== 'web' && /^\d+\.\d+\.\d+$/.test(b.appVersion))
+    void noteDevice(prefs.installId(), pf, b.appVersion).catch(() => undefined);
+  if (session.bridge) {
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };
   }

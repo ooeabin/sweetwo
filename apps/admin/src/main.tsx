@@ -1,4 +1,3 @@
-import { keepLogin } from '@sweetwo/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -21,7 +20,6 @@ import { AD20Docs } from './pages/ad-20-docs';
 
 // 어드민(ops.sweetwo.kr, 27 어드민 화면). 데스크톱 웹만, 기준 폭 1440·최소 1280.
 // 매직 링크는 새 탭에서 열리므로 세션·PKCE 값은 localStorage(최대 8시간은 session.ts가 지킴)
-keepLogin.set(true);
 
 const qc = new QueryClient({
   defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },

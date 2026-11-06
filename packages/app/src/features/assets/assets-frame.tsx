@@ -1,14 +1,13 @@
 import { Button, Tabs } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../month';
+import { MainFrame } from '../frame';
 import { copy } from './copy';
 
-type Tab = 'overview' | 'items' | 'diagnosis';
+type Tab = 'overview' | 'items';
 const PATH: Record<Tab, string> = {
   overview: '/assets',
   items: '/assets/items',
-  diagnosis: '/assets/diagnosis',
 };
 const KEY = 'sweetwo.assets-tab';
 
@@ -16,13 +15,13 @@ const KEY = 'sweetwo.assets-tab';
 export const lastAssetsTab = () => {
   try {
     const t = localStorage.getItem(KEY);
-    return t === 'items' ? '/assets/items' : t === 'diagnosis' ? '/assets/diagnosis' : '/assets';
+    return t === 'items' ? '/assets/items' : '/assets';
   } catch {
     return '/assets';
   }
 };
 
-// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채” “재정 진단”
+// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채”(23 1번, 2개 고정)
 export function AssetsFrame({
   tab,
   addSide = 'asset',
@@ -44,7 +43,12 @@ export function AssetsFrame({
       page={{
         title: copy.title,
         actions: (
-          <Button variant="primary" onClick={() => nav(`/assets/new?side=${addSide}`)}>
+          // 좁은 창은 + 버튼이 같은 일(2026-11-03 추가 입구 하나로)
+          <Button
+            variant="primary"
+            className="hg-wide-only"
+            onClick={() => nav(`/assets/new?side=${addSide}`)}
+          >
             {copy.add}
           </Button>
         ),
@@ -58,7 +62,6 @@ export function AssetsFrame({
             items={[
               { value: 'overview', label: copy.tabs.overview },
               { value: 'items', label: copy.tabs.items },
-              { value: 'diagnosis', label: copy.tabs.diagnosis },
             ]}
           />
           {children}

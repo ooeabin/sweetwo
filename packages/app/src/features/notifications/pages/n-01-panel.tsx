@@ -11,7 +11,7 @@ export function N01Panel() {
     const down = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
       // 종 버튼은 스스로 열고 닫음
-      if (box.current?.contains(t) || t.closest('.hg-topnav__tools, .hg-frame__mhead')) return;
+      if (box.current?.contains(t) || t.closest('.hg-appside__foot, .hg-frame__mhead')) return;
       set(false);
     };
     document.addEventListener('mousedown', down);

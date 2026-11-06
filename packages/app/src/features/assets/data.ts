@@ -1,5 +1,6 @@
 import {
   fetchAccounts,
+  fetchAssetKindNames,
   fetchAssets,
   fetchGoals,
   fetchInvestAnswers,
@@ -11,7 +12,16 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import { coupleOf, investPrinciple, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
+import {
+  assetGroupsOf,
+  coupleOf,
+  investPrinciple,
+  netWorth,
+  netWorthSeries,
+  todayKst,
+  withKindNames,
+  type AssetSide,
+} from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { copy } from './copy';
 
@@ -58,6 +68,16 @@ export function useAssetsData() {
   };
 }
 export type AssetsData = ReturnType<typeof useAssetsData>;
+
+/** F-03a 그룹·세부 항목 칩(AD-19 항목 이름 목록을 입힘). 못 받으면 기본 칩 그대로 */
+export function useAssetGroups(side: AssetSide) {
+  const names = useQuery({
+    queryKey: qk.assetKindNames,
+    queryFn: fetchAssetKindNames,
+    staleTime: 10 * 60_000,
+  });
+  return withKindNames(assetGroupsOf(side), names.data ?? []);
+}
 
 export function useRefreshAssets() {
   const qc = useQueryClient();

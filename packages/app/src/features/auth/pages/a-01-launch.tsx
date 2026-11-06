@@ -1,6 +1,7 @@
-import { fetchLaunchConfig } from '@sweetwo/api';
-import { formatKstDateTime, isBelowMin, WEB_IDLE_LOCK_MS } from '@sweetwo/core';
+import { fetchLaunchConfig, fetchPendingTerms, qk } from '@sweetwo/api';
+import { formatKstDateTime, isBelowMin } from '@sweetwo/core';
 import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ToastHost } from '../../../shared/toast';
@@ -59,11 +60,6 @@ export function A01Launch() {
         /* 설정을 못 읽으면 막지 않는다 */
       }
     }
-    if (session.webKeepExpired()) {
-      await session.signOut();
-      setPhase('ready');
-      return nav(paths.expired, { replace: true, state: { reason: 'days14' } });
-    }
     const has = await session.has();
     setSignedIn(has);
     if (!has) {
@@ -111,12 +107,11 @@ export function A01Launch() {
     });
   }, [nav]);
 
-  useWebIdleLock(signedIn && phase === 'ready');
-
   if (phase === 'maintenance') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="settings"
+        art="status-maintenance"
         title={copy.maintenanceTitle}
         help={
           maintenanceEnds
@@ -135,13 +130,23 @@ export function A01Launch() {
   if (phase === 'update') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="download"
+        art="status-update"
         title={copy.updateTitle}
         help={copy.updateSub}
         actions={
           <>
-            {/* 다운로드, 서명 검증, 설치는 배포 단계(자동 업데이트)에서 붙인다. 그 전까지는 실패 안내. */}
-            <Button variant="primary" block onClick={() => setUpdateFailed(true)}>
+            {/* 모바일: 스토어로(웹사이트 다운로드 페이지가 기기에 맞는 스토어로 보냄).
+                데스크톱: 다운로드, 서명 검증, 설치는 자동 업데이트 단계에서 붙인다. 그 전까지는 실패 안내. */}
+            <Button
+              variant="primary"
+              block
+              onClick={() =>
+                session.bridge?.openUrl
+                  ? void session.bridge.openUrl(copy.downloadUrl).catch(() => setUpdateFailed(true))
+                  : setUpdateFailed(true)
+              }
+            >
               {updateFailed ? copy.retry : copy.updateNow}
             </Button>
             <button
@@ -156,14 +161,15 @@ export function A01Launch() {
             </button>
           </>
         }
-        note={updateFailed ? copy.updateFailed : undefined}
+        alert={updateFailed ? copy.updateFailed : undefined}
       />
     );
   }
   if (phase === 'error') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="circle-alert"
+        art="status-error"
         title={copy.signupFailed}
         actions={
           <Button variant="secondary" block onClick={() => window.location.reload()}>
@@ -176,7 +182,8 @@ export function A01Launch() {
   if (phase === 'offline') {
     return (
       <AuthLayout
-        media={<Wordmark />}
+        icon="link"
+        art="status-offline"
         title={copy.offlineNoSession}
         actions={
           <Button variant="secondary" block onClick={() => void decide()}>
@@ -187,8 +194,8 @@ export function A01Launch() {
     );
   }
   if (phase === 'checking') {
-    // 데스크톱: 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
-    return session.platform === 'desktop' ? (
+    // 앱(데스크톱·모바일): 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
+    return session.bridge ? (
       <main className="hg-auth" aria-busy="true">
         <Wordmark height={40} />
         {slow && (
@@ -225,32 +232,17 @@ export function RequireAccount({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void session.has().then(setOk);
   }, [loc.pathname]);
+  // 약관 개정 재동의·마케팅 재확인(A-05r): 남은 게 있으면 먼저. 못 읽으면 막지 않음
+  const pending = useQuery({
+    queryKey: qk.pendingTerms,
+    queryFn: fetchPendingTerms,
+    enabled: ok === true,
+    retry: false,
+    staleTime: 10 * 60_000,
+  });
   if (ok === null) return null;
-  return ok ? <>{children}</> : <Navigate to={paths.login} replace />;
-}
-
-/** 웹: 30분 동안 아무 입력이 없으면 A-08(‘오래 자리를 비워서 잠갔어요’) */
-function useWebIdleLock(active: boolean) {
-  const nav = useNavigate();
-  const loc = useLocation();
-  const here = useRef(loc.pathname);
-  here.current = loc.pathname + loc.search;
-  useEffect(() => {
-    if (!active || session.platform !== 'web') return;
-    let last = Date.now();
-    const bump = () => (last = Date.now());
-    const evs = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
-    evs.forEach((e) => window.addEventListener(e, bump, { passive: true }));
-    const t = setInterval(() => {
-      if (Date.now() - last < WEB_IDLE_LOCK_MS) return;
-      prefs.setReturnTo(here.current);
-      void session
-        .signOut()
-        .then(() => nav(paths.expired, { replace: true, state: { reason: 'idle' } }));
-    }, 30_000);
-    return () => {
-      evs.forEach((e) => window.removeEventListener(e, bump));
-      clearInterval(t);
-    };
-  }, [active, nav]);
+  if (!ok) return <Navigate to={paths.login} replace />;
+  if (pending.data?.length && loc.pathname !== paths.reconsent)
+    return <Navigate to={paths.reconsent} replace state={{ back: loc.pathname + loc.search }} />;
+  return <>{children}</>;
 }

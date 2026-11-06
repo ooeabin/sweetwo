@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useGoals, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
-import { chapterProgress, joinedSpace, nextOf, prevOf, screens, type FlowState } from './flow';
+import { nextOf, prevOf, progressOf, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
 
-/** 화면 하나의 흐름: 챕터 진행, 뒤로, 저장 뒤 다음(또는 O-20 ‘수정’에서 왔으면 O-20으로) */
+/** 화면 하나의 흐름: 진행 막대, 뒤로, 저장 뒤 다음(?return=이 있으면 그 화면으로) */
 export function useStep(id: string) {
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -21,7 +21,7 @@ export function useStep(id: string) {
   const partner = usePartner(space.data?.couple_state === 'connected');
   const state: FlowState = {
     me: me.data,
-    space: joinedSpace(space.data, partner.data),
+    space: space.data,
     partner: partner.data,
     goals: goals.data,
     inviteNow,
@@ -51,7 +51,7 @@ export function useStep(id: string) {
       const [m, s, g] = await Promise.all([me.refetch(), space.refetch(), goals.refetch()]);
       const fresh: FlowState = {
         me: m.data,
-        space: joinedSpace(s.data, partner.data),
+        space: s.data,
         partner: partner.data,
         goals: g.data,
         inviteNow: useOnboardingLocal.getState().inviteNow,
@@ -65,11 +65,12 @@ export function useStep(id: string) {
     }
   };
 
-  /** 온보딩을 마치고 이번 달로(O-67). 완료 시각을 남기고 이어하기가 옛 값을 보지 않게 다시 읽는다 */
-  const finish = async () => {
+  /** 온보딩을 마치고 홈으로(O-31 다음). before(마지막 답 저장, 추천 월급 계획)를 먼저. 완료 시각을 남기고 다시 읽는다 */
+  const finish = async (before?: () => Promise<unknown>) => {
     if (saving) return;
     setSaving(true);
     try {
+      await before?.();
       await saveMe({
         onboarding_step: id.toUpperCase(),
         onboarding_done_at: new Date().toISOString(),
@@ -79,7 +80,7 @@ export function useStep(id: string) {
       nav('/', { replace: true });
     } catch {
       setSaving(false);
-      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish() });
+      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish(before) });
     }
   };
 
@@ -89,7 +90,7 @@ export function useStep(id: string) {
     ready,
     saving,
     list,
-    chapter: chapterProgress(id, list),
+    chapter: progressOf(id, list),
     done,
     finish,
     onBack: back ? () => nav(ret ? onboardingPath(ret) : onboardingPath(back)) : undefined,

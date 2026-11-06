@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, type ReactNode } from 'react';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 
 // 앱 잠금 화면, PIN 정하기(docs/design/components/LockScreen.md). 숫자는 보여 주지 않는다.
 // 키보드 숫자 입력 + 키패드. 값과 검사는 소비자가 맡는다(6자리가 차면 onComplete).
@@ -12,6 +12,7 @@ export function LockScreen({
   error,
   notice,
   touchId,
+  assist,
   footer,
 }: {
   title: string;
@@ -21,7 +22,9 @@ export function LockScreen({
   onComplete: (pin: string) => void;
   error?: string;
   notice?: string;
-  touchId?: { label: string; onClick: () => void };
+  touchId?: { label: string; onClick: () => void; icon?: IconName };
+  /** 점 바로 아래 글자 링크(“PIN을 잊었어요”) */
+  assist?: ReactNode;
   footer?: ReactNode;
 }) {
   const errId = useId();
@@ -49,7 +52,7 @@ export function LockScreen({
     <div
       className="hg-lock"
       role="group"
-      aria-label={title}
+      aria-label={title.replace(/\n/g, ' ')}
       aria-describedby={error ? errId : undefined}
     >
       <div className="hg-lock__head">
@@ -68,6 +71,7 @@ export function LockScreen({
         </p>
       )}
       {notice && <p className="hg-lock__sub">{notice}</p>}
+      {assist && <div className="hg-lock__assist">{assist}</div>}
       <div className="hg-keypad">
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
           <button key={d} type="button" className="hg-key" onClick={() => press(d)}>
@@ -82,13 +86,15 @@ export function LockScreen({
           <Icon name="delete" size={24} />
         </button>
       </div>
-      {touchId && (
-        <button type="button" className="hg-btn hg-btn--link" onClick={touchId.onClick}>
-          <Icon name="fingerprint" size={20} />
-          {touchId.label}
-        </button>
-      )}
-      {footer}
+      <div className="hg-lock__foot">
+        {touchId && (
+          <button type="button" className="hg-btn hg-btn--link" onClick={touchId.onClick}>
+            <Icon name={touchId.icon ?? 'fingerprint'} size={20} />
+            {touchId.label}
+          </button>
+        )}
+        {footer}
+      </div>
     </div>
   );
 }

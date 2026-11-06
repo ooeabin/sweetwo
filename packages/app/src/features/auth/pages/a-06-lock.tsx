@@ -7,6 +7,10 @@ import { paths } from '../flow';
 import { prefs } from '../prefs';
 import { session } from '../session';
 
+// Face ID는 얼굴 스캔, Touch ID와 지문은 지문 아이콘
+const bioIcon = (kind: 'touch' | 'face' | 'fingerprint') =>
+  kind === 'face' ? ('scan-smiley' as const) : ('fingerprint' as const);
+
 const Center = ({ children }: { children: ReactNode }) => (
   <main className="hg-auth">{children}</main>
 );
@@ -21,6 +25,7 @@ export function A06LockSetup() {
   const [first, setFirst] = useState('');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string>();
+  const [bioKind, setBioKind] = useState<'touch' | 'face' | 'fingerprint'>('touch');
 
   const finish = () => {
     prefs.setPinAsked(true);
@@ -31,18 +36,21 @@ export function A06LockSetup() {
   if (step === 'touch') {
     return (
       <AuthLayout
-        title={copy.touchIdAsk}
+        icon={bioIcon(bioKind)}
+        art={bioKind === 'face' ? 'status-faceid' : 'status-fingerprint'}
+        title={copy.touchIdAsk(bioKind)}
+        help={copy.touchIdHelp(bioKind)}
+        actionsRow
         actions={
           <>
+            <Button variant="secondary" onClick={finish}>
+              {copy.later}
+            </Button>
             <Button
               variant="primary"
-              block
               onClick={() => void bridge.lock.setTouchId(true).then(finish)}
             >
-              {copy.touchIdYes}
-            </Button>
-            <Button variant="ghost" block onClick={finish}>
-              {copy.later}
+              {copy.touchIdYes(bioKind)}
             </Button>
           </>
         }
@@ -73,6 +81,7 @@ export function A06LockSetup() {
     }
     await bridge.lock.setPin(pin);
     const s = await bridge.lock.status();
+    setBioKind(s.bioKind ?? 'touch');
     if (s.touchIdAvailable) setStep('touch');
     else finish();
   };
@@ -91,7 +100,7 @@ export function A06LockSetup() {
         error={error}
         footer={
           // ‘나중에 할게요’: 잠금 꺼진 채 시작(이번 달 ‘할 일’에 남기는 건 할 일 기능에서)
-          <button type="button" className="hg-btn hg-btn--link" onClick={finish}>
+          <button type="button" className="hg-btn hg-btn--link hg-btn--quiet" onClick={finish}>
             {copy.later}
           </button>
         }
@@ -106,6 +115,7 @@ export function LockGate({ active }: { active: boolean }) {
   const bridge = session.bridge;
   const [locked, setLocked] = useState(false);
   const [touchId, setTouchId] = useState(false);
+  const [bioKind, setBioKind] = useState<'touch' | 'face' | 'fingerprint'>('touch');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
@@ -120,6 +130,7 @@ export function LockGate({ active }: { active: boolean }) {
     void bridge.lock.status().then((s) => {
       setLocked(s.locked);
       setTouchId(s.touchIdEnabled);
+      setBioKind(s.bioKind ?? 'touch');
       if (s.locked && s.touchIdEnabled) void tryTouchId();
     });
     const off = bridge.lock.onLock(() => {
@@ -190,7 +201,7 @@ export function LockGate({ active }: { active: boolean }) {
       style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'var(--surface)' }}
       aria-modal="true"
       role="dialog"
-      aria-label={copy.pinUnlockTitle}
+      aria-label={copy.pinUnlockTitle.replace(/\n/g, ' ')}
     >
       <LockScreen
         title={copy.pinUnlockTitle}
@@ -203,9 +214,15 @@ export function LockGate({ active }: { active: boolean }) {
         error={error}
         notice={notice}
         touchId={
-          touchId ? { label: copy.touchIdUnlock, onClick: () => void tryTouchId() } : undefined
+          touchId
+            ? {
+                label: copy.touchIdUnlock(bioKind),
+                icon: bioIcon(bioKind),
+                onClick: () => void tryTouchId(),
+              }
+            : undefined
         }
-        footer={
+        assist={
           <button type="button" className="hg-btn hg-btn--link" onClick={() => void forgot()}>
             {copy.forgotPin}
           </button>

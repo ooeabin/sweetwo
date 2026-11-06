@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 앱 실행 화면 바탕(04 브랜드 ‘모바일 앱 실행 화면’): 디자인 토큰 surface 라이트 값 -->
+    <color name="splash_background">#FFFFFF</color>
+</resources>

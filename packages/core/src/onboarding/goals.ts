@@ -9,7 +9,16 @@ export type GoalKind = 'once' | 'yearly' | 'monthly';
 export type GoalTab = 'repay' | 'housing' | 'family' | 'fun' | 'life' | 'future';
 
 export type GoalQuestion =
-  | { id: string; type: 'amount'; title: string; quick: QuickKind; band?: BandKind; help?: string }
+  | {
+      id: string;
+      type: 'amount';
+      title: string;
+      quick: QuickKind;
+      band?: BandKind;
+      help?: string;
+      /** 0원으로 답하는 글자 링크(결혼 비용 ‘없어요’) */
+      zero?: string;
+    }
   | { id: string; type: 'percent'; title: string; initial: number }
   | { id: string; type: 'text'; title: string; max: 20 }
   | { id: string; type: 'choice'; title: string; options: { value: string; label: string }[] }
@@ -41,7 +50,6 @@ export interface GoalTemplate {
   key: string;
   name: string;
   tab: GoalTab | null; // null = 자동 생성(비상금, 결혼 비용, 양가 비용)
-  illustration: string | null; // packages/ui illustrations 키
   questions: GoalQuestion[];
   /** O-24(기한)를 묻는지 */
   asksDeadline: (a: Answers) => boolean;
@@ -50,6 +58,8 @@ export interface GoalTemplate {
   kind: (a: Answers) => GoalKind;
   /** 목표 금액(매달형은 월 납입액). 답이 모자라면 null */
   target: (a: Answers) => Won | null;
+  /** 이미 모은 돈(goal.other_held). 없으면 묻지 않음 */
+  held?: (a: Answers) => Won | null;
   defaultDeadline: (a: Answers, c: GoalContext) => DefaultDeadline;
 }
 
@@ -62,12 +72,14 @@ const amountQ = (
   title: string,
   quick: QuickKind = 'small',
   band: BandKind = 'goalAmount',
+  extra: { help?: string; zero?: string } = {},
 ): GoalQuestion => ({
   id,
   type: 'amount',
   title,
   quick,
   band,
+  ...extra,
 });
 const textQ = (id: string, title: string): GoalQuestion => ({ id, type: 'text', title, max: 20 });
 const yearsLater =
@@ -102,7 +114,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'emergency',
     name: '비상금',
     tab: null,
-    illustration: 'goal-01-emergency',
     questions: [],
     asksDeadline: never,
     kind: once,
@@ -110,21 +121,20 @@ export const goalTemplates: GoalTemplate[] = [
     defaultDeadline: yearsLater(1),
   },
   {
+    // 16 O-23: “갚을 대출이 얼마 남았어요?” 기한은 빈 칸(O-24)
     key: 'high_interest_loan',
     name: '고금리 대출 갚기',
     tab: 'repay',
-    illustration: 'goal-02-high-interest-loan',
-    questions: [],
-    asksDeadline: never,
+    questions: [amountQ('amount', '갚을 대출이 얼마 남았어요?')],
+    asksDeadline: always,
     kind: once,
-    target: () => null,
+    target: (a) => num(a, 'amount'),
     defaultDeadline: blank,
   },
   {
     key: 'prepay_mortgage',
     name: '전세·주택대출 중도상환',
     tab: 'repay',
-    illustration: 'goal-03-prepay-mortgage',
     questions: [amountQ('amount', '얼마를 먼저 갚고 싶어요?')],
     asksDeadline: always,
     kind: once,
@@ -135,7 +145,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'home',
     name: '내 집 마련',
     tab: 'housing',
-    illustration: 'goal-04-home',
     questions: [
       amountQ('price', '어느 정도 집을 생각하세요?', 'big'),
       { id: 'ratio', type: 'percent', title: '그중 얼마를 모아서 낼까요?', initial: 30 },
@@ -153,7 +162,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'moving',
     name: '전세 만기·이사 대비',
     tab: 'housing',
-    illustration: 'goal-05-moving',
     questions: [
       amountQ('deposit', '보증금이 얼마나 오를 것 같아요?'),
       amountQ('moving', '이사비는요?'),
@@ -167,7 +175,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'furniture',
     name: '가전·가구·인테리어',
     tab: 'housing',
-    illustration: 'goal-06-furniture',
     questions: [textQ('what', '무엇을 살 계획이에요?'), amountQ('amount', '얼마가 필요해요?')],
     asksDeadline: always,
     kind: once,
@@ -178,7 +185,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'baby',
     name: '출산 준비',
     tab: 'family',
-    illustration: 'goal-07-baby',
     questions: [amountQ('amount', '아이를 위해 얼마를 준비할까요?')],
     asksDeadline: always,
     kind: once,
@@ -189,7 +195,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'education',
     name: '아이 교육·양육',
     tab: 'family',
-    illustration: 'goal-08-education',
     questions: [
       { id: 'amount', type: 'amount', title: '한 달에 얼마씩 넣을까요?', quick: 'small' },
     ],
@@ -202,7 +207,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'family_event',
     name: '양가 큰 행사',
     tab: 'family',
-    illustration: 'goal-09-family-event',
     questions: [textQ('what', '누구의 어떤 행사예요?'), amountQ('amount', '얼마를 준비할까요?')],
     asksDeadline: always,
     deadlineYearMonth: true,
@@ -214,7 +218,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'pet',
     name: '반려동물',
     tab: 'family',
-    illustration: 'goal-10-pet',
     questions: [
       amountQ('adopt', '입양·준비에 얼마가 들까요?'),
       amountQ('vet', '병원비로 따로 모아둘 돈은요?'),
@@ -228,7 +231,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'travel',
     name: '여행',
     tab: 'fun',
-    illustration: 'goal-12-travel',
     questions: [
       {
         id: 'where',
@@ -263,7 +265,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'anniversary',
     name: '결혼기념일',
     tab: 'fun',
-    illustration: 'goal-13-anniversary',
     questions: [amountQ('amount', '기념일에 매년 얼마쯤 쓸까요?')],
     asksDeadline: never,
     kind: () => 'yearly',
@@ -277,7 +278,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'big_purchase',
     name: '명품·큰 물건 구입',
     tab: 'fun',
-    illustration: 'goal-14-big-purchase',
     questions: [textQ('what', '무엇을 사고 싶어요?'), amountQ('amount', '얼마예요?')],
     asksDeadline: always,
     kind: once,
@@ -288,7 +288,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'hobby',
     name: '취미·자기계발',
     tab: 'fun',
-    illustration: 'goal-15-hobby',
     questions: [textQ('what', '무엇을 위한 돈인가요?'), amountQ('amount', '얼마가 필요해요?')],
     asksDeadline: always,
     kind: once,
@@ -299,7 +298,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'car',
     name: '자동차 구입·교체',
     tab: 'life',
-    illustration: 'goal-16-car',
     questions: [
       amountQ('price', '차 가격은 얼마쯤 생각하세요?', 'big'),
       { id: 'ratio', type: 'percent', title: '그중 얼마를 현금으로 낼까요?', initial: 50 },
@@ -317,7 +315,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'car_upkeep',
     name: '자동차 유지비',
     tab: 'life',
-    illustration: 'goal-17-car-upkeep',
     questions: [
       amountQ('amount', '보험료·자동차세·정비로 1년에 얼마쯤 나가요?'),
       { id: 'month', type: 'month', title: '주로 몇 월에 나가요?' },
@@ -334,8 +331,7 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'annual_fixed',
     name: '연간 고정 지출',
     tab: 'life',
-    illustration: 'goal-18-annual-fixed',
-    questions: [{ id: 'items', type: 'list', title: '1년에 한 번 나가는 돈을 알려주세요' }],
+    questions: [{ id: 'items', type: 'list', title: '1년에 한 번 나가는 돈을 알려 주세요' }],
     asksDeadline: never,
     kind: () => 'yearly',
     target: (a) =>
@@ -352,7 +348,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'retirement',
     name: '노후·연금',
     tab: 'future',
-    illustration: 'goal-19-retirement',
     questions: [
       { id: 'amount', type: 'amount', title: '한 달에 얼마씩 넣을까요?', quick: 'small' },
     ],
@@ -365,7 +360,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'invest_seed',
     name: '투자 종잣돈',
     tab: 'future',
-    illustration: 'goal-20-invest',
     questions: [amountQ('amount', '얼마를 모아서 시작할까요?')],
     asksDeadline: always,
     kind: once,
@@ -376,7 +370,6 @@ export const goalTemplates: GoalTemplate[] = [
     key: 'custom',
     name: '직접 만들기',
     tab: null,
-    illustration: null,
     questions: [
       textQ('name', '무엇을 위한 돈인가요?'),
       amountQ('amount', '얼마가 필요해요?'),
@@ -396,22 +389,31 @@ export const goalTemplates: GoalTemplate[] = [
     defaultDeadline: blank,
   },
   {
+    // 16 O-23 목표별 표: ① 총 얼마(둘이 합한 금액) → ② 모아둔 돈(‘없어요’ = 0). 기한 = O-12 예정일의 연·월
     key: 'wedding',
     name: '결혼 비용',
-    tab: null,
-    illustration: 'goal-21-wedding',
-    questions: [],
-    asksDeadline: never,
+    tab: 'family',
+    questions: [
+      amountQ('total', '결혼 준비에 총 얼마를 생각하세요?', 'big', 'weddingBudget', {
+        help: '둘이 합한 금액이에요',
+      }),
+      amountQ('saved', '지금까지 모아둔 돈이 있나요?', 'small', 'goalAmount', { zero: '없어요' }),
+    ],
+    asksDeadline: always,
+    deadlineYearMonth: true,
     kind: once,
-    target: () => null,
-    defaultDeadline: blank,
+    target: (a) => num(a, 'total'),
+    held: (a) => num(a, 'saved'),
+    defaultDeadline: (_a, c) =>
+      c.weddingDate
+        ? { value: c.weddingDate.slice(0, 7) as YearMonth, estimated: false }
+        : { value: addYears(thisMonth(c.now), 1), estimated: true },
   },
   {
     // 캘린더 처음 등록(24 Y-02e)에서 자동 생성. 회차 = 결혼기념일 기준 1년, 목표 금액 = 이번 회차 챙길 날 예산 합계
     key: 'family_cost',
     name: '양가 비용',
     tab: null,
-    illustration: null,
     questions: [],
     asksDeadline: never,
     kind: () => 'yearly',
@@ -433,25 +435,24 @@ export const goalTabs: { key: GoalTab | 'popular'; label: string }[] = [
   { key: 'future', label: '미래' },
 ];
 export const popularGoals = ['home', 'travel', 'baby', 'car', 'high_interest_loan', 'retirement'];
-export const pickableGoals = (tab: GoalTab | 'popular') =>
-  tab === 'popular'
-    ? popularGoals.map((k) => templateByKey(k)).filter((t): t is GoalTemplate => !!t)
-    : goalTemplates.filter((t) => t.tab === tab);
+/** 결혼 준비 중이면 결혼 비용이 ‘자주 고르는’과 가족 탭 맨 앞(16 O-21) */
+export const pickableGoals = (tab: GoalTab | 'popular', engaged = false) => {
+  const list =
+    tab === 'popular'
+      ? (engaged ? ['wedding', ...popularGoals] : popularGoals)
+          .map((k) => templateByKey(k))
+          .filter((t): t is GoalTemplate => !!t)
+      : goalTemplates.filter((t) => t.tab === tab);
+  return tab === 'family'
+    ? [...list.filter((t) => t.key === 'wedding'), ...list.filter((t) => t.key !== 'wedding')]
+    : list;
+};
 
-/** O-21 추천 배지: 자가 외 → 내 집 마련, 아이 계획 ‘없어요’ 외 → 출산 준비 */
-export function recommendedGoals(
-  housing: string | null | undefined,
-  childPlan: string | null | undefined,
-) {
-  const r: string[] = [];
-  if (housing && housing !== 'own') r.push('home');
-  if (childPlan && childPlan !== 'none') r.push('baby');
-  return r;
-}
+/** O-21 추천 배지: 결혼 준비 중 → 결혼 비용(미리 선택 안 함) */
+export const recommendedGoals = (engaged: boolean) => (engaged ? ['wedding'] : []);
 
-/** O-23·O-24를 묻지 않는 경우: 1순위가 고금리 대출 갚기, 또는 예비 각자 관리 */
-export const skipsTopGoalQuestions = (top: string | undefined, separate: boolean) =>
-  !top || separate || top === 'high_interest_loan';
+/** O-23·O-24를 묻지 않는 경우: 고른 목표가 없음(비상금만) */
+export const skipsTopGoalQuestions = (top: string | undefined) => !top;
 
 /**
  * 월 필요액(06 5-3): (목표 금액 − 보유액) ÷ 남은 개월, 1만 원 단위 올림.
@@ -475,81 +476,8 @@ export const unsureDeadline = (now?: Date): DefaultDeadline => ({
   estimated: true,
 });
 
-/** 결혼 비용 목표(O-19a~c, 06 11장): 목표 = 총예산 − 양가 지원, 보유액 = 모아둔 돈 */
-export function weddingGoal(o: { budget: Won; support: Won; saved: Won }) {
-  return {
-    target: Math.max(o.budget - o.support, 0),
-    held: o.saved,
-    surplus: Math.max(o.support + o.saved - o.budget, 0),
-  };
-}
-
-/** O-13 만 18세 미만인지(KST 올해 기준) */
-export const isMinorBirthYear = (birthYear: number, now = new Date()) =>
-  birthYear > Number(thisMonth(now).slice(0, 4)) - 18;
-
-/** 만 나이(KST 오늘 기준). 생일이 아직 안 지났으면 한 살 적게 */
-export function manAge(b: { y: number; m: number; d: number }, now = new Date()): number {
-  const [ty = 0, tm = 1, td = 1] = todayKst(now).split('-').map(Number);
-  return ty - b.y - (tm < b.m || (tm === b.m && td < b.d) ? 1 : 0);
-}
 /** 생년월일 휠 범위: 1950년 ~ (올해 − 18)년(O-13, P-04) */
 export const birthYearRange = (now = new Date()) => ({
   min: 1950,
   max: Number(todayKst(now).slice(0, 4)) - 18,
 });
-/** {y,m,d} → 'YYYY-MM-DD' */
-export const ymdText = (b: { y: number; m: number; d: number }) =>
-  `${b.y}-${String(b.m).padStart(2, '0')}-${String(b.d).padStart(2, '0')}`;
-/** 만 18세 미만(O-13, P-04 생년월일). 서버 delete_underage_account와 같은 기준 */
-export const isUnderage = (b: { y: number; m: number; d: number }, now = new Date()) =>
-  manAge(b, now) < 18;
-
-/** 첫 주 5일째(16 O-22~25) 남은 화면 하나 */
-export type RestGoalScreen =
-  | { goalId: string; screen: 'q'; index: number }
-  | { goalId: string; screen: 'deadline' }
-  | { goalId: string; screen: 'held' };
-
-export interface RestGoal {
-  id: string;
-  template: string;
-  priority: number;
-  status: string;
-  deadline: string | null;
-  details: unknown;
-}
-
-const RESTING = ['paused', 'achieved', 'used'];
-/** O-22 순서 정하기 대상: 비상금·결혼 비용·양가 비용(자동 목표) 빼고 진행 중인 목표, 우선순위 순 */
-export const orderableGoals = <G extends RestGoal>(goals: G[]) =>
-  goals
-    .filter(
-      (g) =>
-        !['emergency', 'wedding', 'family_cost'].includes(g.template) &&
-        !RESTING.includes(g.status),
-    )
-    .sort((a, b) => a.priority - b.priority);
-
-/**
- * 아직 묻지 않은 O-23(질문마다) → O-24(기한을 묻는 목표인데 비어 있으면) → O-25(모아둔 돈, 매달 목표 빼고) 화면, 우선순위 순.
- * 고금리 대출 갚기는 묻지 않음, 각자 관리 예비부부는 결혼일 전환에서 물어 비움. O-25를 물었으면 details._held = true
- */
-export function restGoalScreens(goals: RestGoal[], separate: boolean): RestGoalScreen[] {
-  if (separate) return [];
-  const out: RestGoalScreen[] = [];
-  for (const g of orderableGoals(goals)) {
-    const t = templateByKey(g.template);
-    if (!t || g.template === 'high_interest_loan') continue;
-    const a = (g.details ?? {}) as Answers;
-    t.questions.forEach((q, i) => {
-      if (a[q.id] === undefined) out.push({ goalId: g.id, screen: 'q', index: i + 1 });
-    });
-    const answered = t.questions.every((q) => a[q.id] !== undefined);
-    if (answered && t.asksDeadline(a) && !g.deadline)
-      out.push({ goalId: g.id, screen: 'deadline' });
-    if (answered && t.kind(a) !== 'monthly' && a._held !== true)
-      out.push({ goalId: g.id, screen: 'held' });
-  }
-  return out;
-}

@@ -12,6 +12,8 @@ export function A08SessionExpired() {
   const reason = (useLocation().state as { reason?: ExpiredReason } | null)?.reason;
   return (
     <AuthLayout
+      icon="lock"
+      art="status-lock"
       title={copy.expiredTitle}
       help={reason ? copy.expiredReason[reason] : undefined}
       actions={

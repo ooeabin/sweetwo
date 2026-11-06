@@ -20,6 +20,9 @@ export const copy = {
   email: '회사 이메일', // [확인 필요]
   sendLink: '로그인 링크 받기', // [확인 필요]
   linkSent: '메일함에서 링크를 눌러 주세요', // [확인 필요]
+  tooSoon: '조금 뒤에 다시 눌러 주세요', // [확인 필요]
+  notAllowedEmail: '이 이메일로는 로그인 링크를 보낼 수 없어요', // [확인 필요]
+  resendIn: (s: number) => `${s}초 뒤에 다시 받을 수 있어요`, // [확인 필요]
   mfaEnrollTitle: '인증 앱을 등록해 주세요', // [확인 필요]
   mfaEnrollHelp: '인증 앱으로 QR을 찍고 6자리 숫자를 넣어 주세요', // [확인 필요]
   mfaTitle: '인증 앱의 6자리 숫자를 넣어 주세요', // [확인 필요]
@@ -46,6 +49,12 @@ export const copy = {
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',
   noMember: '일치하는 회원이 없어요',
+  // AD-02 내려받기(L0 열만, 사유 입력 후, 파일에 관리자 ID)
+  download: '내려받기',
+  downloadReason: '내려받는 이유', // [확인 필요]
+  downloadGo: '사유 남기고 내려받기', // [확인 필요]
+  downloadBy: (admin: string, at: string) => `내려받은 관리자 ${admin}, ${at}`, // [확인 필요] 파일 첫 줄
+  downloadName: (date: string) => `sweetwo-members-${date}.csv`,
   cols: {
     userId: '사용자 ID',
     email: '이메일',
@@ -104,6 +113,8 @@ export const copy = {
     calendar: '캘린더 화면',
   } as Record<string, string>,
   raw: '금액 원값 요청',
+  rawHelp: '화면 1개만. 최고 관리자가 승인하면 사용자에게 요청해요. 거절되면 구간으로만 요청해요', // [확인 필요]
+  rawRequested: '최고 관리자에게 원값 승인을 요청했어요', // [확인 필요]
   sendRequest: '동의 요청 보내기',
   requested: '동의를 요청했어요', // [확인 필요]
   accessStatus: {
@@ -129,7 +140,9 @@ export const copy = {
 
   // AD-05
   actions: {
+    login_move: '로그인 수단 이전',
     sign_out_all: '전체 기기 로그아웃',
+    delete_request: '삭제 대리 접수',
     rights_access: '권리 요구 기록: 열람',
     rights_fix: '권리 요구 기록: 정정',
     rights_delete: '권리 요구 기록: 삭제',
@@ -138,6 +151,20 @@ export const copy = {
   run: '실행', // [확인 필요]
   done: '처리했어요', // [확인 필요]
   confirmSignOut: '이 회원의 모든 기기에서 로그아웃할까요?', // [확인 필요]
+  confirmDelete: '이 회원의 계정 삭제를 접수할까요?', // [확인 필요]
+  confirmDeleteHelp: '30일 뒤 지워져요. 그 전에 본인이 다시 로그인하면 취소돼요', // [확인 필요]
+  newAccount: '새 계정 이메일 또는 사용자 ID', // [확인 필요]
+  newAccountHelp: '본인 확인이 끝난 뒤 사용자가 새 소셜 계정으로 한 번 로그인해요. 최고 관리자가 승인하면 옮겨요', // [확인 필요]
+  moveRequested: '최고 관리자에게 승인을 요청했어요', // [확인 필요]
+  moveErrors: {
+    new_not_found: '새 계정을 찾지 못했어요',
+    new_no_login: '새 계정에 로그인 수단이 없어요',
+    new_has_partner: '새 계정이 다른 사람과 연결돼 있어요',
+    same_account: '같은 계정이에요',
+    already_requested: '이미 승인 대기 중이에요',
+    not_active: '사용 중인 계정이 아니에요',
+    reason_required: '문의 번호를 확인해 주세요',
+  } as Record<string, string>, // [확인 필요]
   cancel: '취소',
 
   // AD-06
@@ -226,7 +253,7 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', web: '웹' } as Record<string, string>, // [확인 필요]
+  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱', web: '웹' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',
@@ -235,8 +262,11 @@ export const ops = {
     kind: '종류',
     importance: '중요도',
     platforms: '대상 플랫폼',
+    email: '이메일로도 보내기',
+    emailHelp: '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
   }, // [확인 필요]
   saveDraft: '초안 저장', // [확인 필요]
+  belowMin: (n: number) => `지금 최소 버전보다 낮은 기기 ${n}대(90일 안에 켠 기기)`, // [확인 필요]
   requestApproval: '승인 요청',
   endNotice: '내리기', // [확인 필요]
   quietHours: '밤 10시~아침 8시에는 시작할 수 없어요', // [확인 필요]
@@ -286,6 +316,13 @@ export const ops = {
   } as Record<string, string>,
   loanCols: { kind: '유형', rate: '연 금리', applied: '적용일' },
   holidayTitle: '공휴일', // [확인 필요]
+  // AD-19 항목 이름 목록 [확인 필요]
+  kindTitle: '항목 이름 목록',
+  kindHelp: '자산 추가 화면의 세부 항목 칩이에요. 새 칩은 고른 항목과 같은 질문을 해요. 앱 배포 없이 바로 바뀌어요',
+  kindCols: { name: '이름', base: '따르는 항목', hidden: '숨김' },
+  kindDefault: '기본 항목',
+  kindAdd: '칩 추가',
+  kindReset: '처음대로',
   holidayKinds: { holiday: '공휴일', substitute: '대체공휴일', temporary: '임시공휴일' } as Record<
     string,
     string
@@ -314,6 +351,8 @@ export const ops = {
     latest: '최신 버전(데스크톱)',
     minDesktop: '최소 지원 버전(데스크톱)',
     minWeb: '최소 지원 버전(웹)',
+    minIos: '최소 지원 버전(iOS)',
+    minAndroid: '최소 지원 버전(Android)',
   }, // [확인 필요]
   maintenance: '점검 예약', // [확인 필요]
   maintenanceMsg: '점검 문구', // [확인 필요]

@@ -12,6 +12,7 @@ import {
   periodEnabled,
   periodSlice,
   startPeriod,
+  withKindNames,
 } from './asset';
 
 it('분류: 자산 8묶음, 부채 6묶음, 모두 기타(직접 입력)', () => {
@@ -21,13 +22,14 @@ it('분류: 자산 8묶음, 부채 6묶음, 모두 기타(직접 입력)', () =>
     expect(g.kinds.at(-1)?.key).toBe('other');
 });
 
-it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항목 빼고 배우자 합계만 더함', () => {
+it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항목·만기 완료 항목 빼고 배우자 합계만 더함', () => {
   const n = netWorth(
     [
       { side: 'asset', amount: 3_000_000 },
       { side: 'asset', amount: 10_000_000, principal: 8_000_000 },
       { side: 'asset', amount: 500_000, visibility: 'private' },
       { side: 'asset', amount: 9_000_000, status: 'sold' },
+      { side: 'asset', amount: 5_000_000, status: 'matured' },
       { side: 'debt', amount: 1_000_000 },
     ],
     [{ side: 'asset', total: 4_400_000, principal_total: 4_000_000 }],
@@ -39,27 +41,6 @@ it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항�
     expected: 16_400_000,
     gain: 2_400_000,
   });
-});
-
-it('재정 진단: 비상금 몇 개월, 요약 순서(06 8장)', async () => {
-  const { emergencyMonths, diagnosisSummary } = await import('../onboarding/diagnosis');
-  expect(emergencyMonths(5_000_000, 1_550_000)).toBe(3.2);
-  expect(emergencyMonths(null, 1_000_000)).toBeNull();
-  const s = diagnosisSummary([
-    { key: 'savingRate', signal: 'good', pct: 33 },
-    { key: 'emergency', signal: 'caution', pct: 60 },
-    { key: 'loanBurden', signal: 'good', pct: 5 },
-    { key: 'fixedRatio', signal: 'danger', pct: 70 },
-    { key: 'investPrinciple', signal: 'unknown', pct: null },
-  ]);
-  expect(s.good).toBe(2);
-  expect(s.ordered.map((x) => x.key)).toEqual([
-    'fixedRatio',
-    'emergency',
-    'savingRate',
-    'loanBurden',
-    'investPrinciple',
-  ]);
 });
 
 it('순자산 그래프: 이번 달은 지금 값, 앞쪽 빈 달은 뺌', () => {
@@ -124,4 +105,30 @@ it('첫 주 정리 칩: 묶음과 세부 항목이 분류에 있고, 금리 평�
     4, 6, 2,
   ]);
   expect(avgRate('family_loan')).toBeNull();
+});
+
+it('AD-19 항목 이름 목록: 기본 항목 이름 바꾸기·숨기기, 새 칩은 기본 항목 동작, 기타는 마지막', () => {
+  const groups = withKindNames(assetGroupsOf('asset'), [
+    { id: 'a', grp: 'deposit', base: 'saving', name: '자유적금', added: false, hidden: false },
+    { id: 'b', grp: 'deposit', base: 'term_deposit', name: '정기예금', added: false, hidden: true },
+    {
+      id: 'c',
+      grp: 'deposit',
+      base: 'policy_saving',
+      name: '청년도약계좌',
+      added: true,
+      hidden: false,
+    },
+    { id: 'd', grp: 'deposit', base: 'etf', name: '그룹 밖', added: true, hidden: false },
+    { id: 'e', grp: 'cash', base: 'bank', name: '현금성은 안 고침', added: false, hidden: true },
+  ]);
+  const dep = groups.find((g) => g.key === 'deposit');
+  expect(dep?.kinds.map((k) => [k.key, k.name])).toEqual([
+    ['saving', '자유적금'],
+    ['policy_saving', '정책형 적금'],
+    ['policy_saving', '청년도약계좌'],
+    ['other', '기타(직접 입력)'],
+  ]);
+  expect(dep?.kinds[2]?.id).toBe('c');
+  expect(groups.find((g) => g.key === 'cash')).toBe(assetGroup('cash'));
 });

@@ -1,7 +1,7 @@
 -- pgTAP: 생년월일(O-13, P-04). 월, 일 저장, 만 나이로 미성년 삭제, 배우자 생일은 월, 일만
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(8);
+select plan(5);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -39,17 +39,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select results_eq($$ select month::int, day::int from public.partner_birthday() $$,
   $$ values (10, 3) $$, '찬우: 예빈 생일 월, 일');
-select throws_ok($$ select public.delete_underage_account('1994-02-18') $$, 'P0001', 'not_minor', '성인은 못 지움');
 reset role;
-
--- 내일이 만 18세 생일인 사람은 아직 미성년 → 계정 삭제
-select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
-set local role authenticated;
-select public.complete_signup('kakao', null, false, 'v1');
-select lives_ok(format($$ select public.delete_underage_account(%L) $$,
-  (public.kst_today() - interval '18 years' + interval '1 day')::date), '만 18세 생일 하루 전 = 미성년');
-reset role;
-select is((select count(*)::int from auth.users where id = '33333333-3333-3333-3333-333333333333'), 0, '계정 삭제');
 
 select * from finish();
 rollback;

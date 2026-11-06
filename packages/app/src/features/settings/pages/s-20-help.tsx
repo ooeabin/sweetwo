@@ -3,7 +3,7 @@ import { Accordion, Button, ListRow, PageHeader, Search, SectionHeader } from '@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import faqMd from '../../../content/faq.md?raw';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { openSite } from './s-19-about';
 
@@ -56,5 +56,5 @@ export function S20Help() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

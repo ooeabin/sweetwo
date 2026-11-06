@@ -1,6 +1,6 @@
 import { fetchAssets, qk } from '@sweetwo/api';
 import { formatManWon, quickChips } from '@sweetwo/core';
-import { AmountInput, ChoiceCards, Chip, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, ChoiceCards, Chip, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy } from '../copy';
@@ -36,7 +36,7 @@ export function G03dGoalHeld() {
   );
   const [amount, setAmount] = useState<number | null>(typeof saved === 'number' ? saved : null);
   const [ids, setIds] = useState<string[]>(s.draft.assetIds);
-  if (assets.isLoading) return null;
+  if (assets.isLoading) return <QuestionSkeleton />;
   const total = pickable
     .filter((a) => ids.includes(a.id))
     .reduce((t, a) => t + (a.principal ?? a.amount), 0);
@@ -65,7 +65,7 @@ export function G03dGoalHeld() {
         onChange={setPick}
         onPick={(v) => v === 'none' && s.next({ held: 'none', assetIds: [], assetTotal: 0 })}
         options={[
-          ...(pickable.length ? [{ value: 'assets' as const, label: copy.heldAssets }] : []),
+          // 재기획: 자산과 연결하지 않음(22 G-03d)
           { value: 'new', label: copy.heldNew },
           { value: 'none', label: copy.heldNone },
         ]}

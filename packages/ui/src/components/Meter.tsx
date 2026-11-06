@@ -14,6 +14,9 @@ export function Meter({
   tone = 'goal',
   badge,
   lead,
+  empty,
+  started,
+  bare = false,
 }: {
   name: string;
   /** 이름 아래 금액 줄(“390만 / 780만 원”) */
@@ -29,8 +32,14 @@ export function Meter({
   badge?: ReactNode;
   /** 이름 앞 아이콘 칸(Lead, 목표 3D 그림) */
   lead?: ReactNode;
+  /** 0%일 때 칸 대신 보일 한 줄(빈 칸 10개가 불러오는 중처럼 보여서, 2026-11-03) */
+  empty?: string;
+  /** 모은 돈이 있음: 1% 미만이라 0%여도 첫 칸을 조금 채움(빈 칸이 불러오는 중처럼 보여서, 2026-11-03) */
+  started?: boolean;
+  /** 진행률·칸 없이 이름과 금액 줄만(매달 목표, 금액 미정 목표, 2026-11-03) */
+  bare?: boolean;
 }) {
-  const p = Math.min(Math.max(pct, 0), 100);
+  const p = Math.min(Math.max(pct, started && pct < 2 ? 2 : pct, 0), 100);
   return (
     <div className={cx('hg-meter', tone !== 'goal' && `hg-meter--${tone}`)}>
       <div className="hg-meter__head">
@@ -41,28 +50,37 @@ export function Meter({
           </b>
           {sub && <span>{sub}</span>}
         </div>
-        <span className="hg-meter__pct">
-          {Math.round(pct)}
-          <small>%</small>
-        </span>
-      </div>
-      <div className="hg-meter__segs" role="img" aria-label={`${name} ${Math.round(pct)}%`}>
-        {Array.from({ length: 10 }, (_, i) => {
-          const f = Math.min(Math.max((p - i * 10) / 10, 0), 1);
-          return (
-            <i
-              key={i}
-              className={f >= 1 ? 'is-on' : f > 0 ? 'is-part' : undefined}
-              style={f > 0 && f < 1 ? ({ '--f': f } as CSSProperties) : undefined}
-            />
-          );
-        })}
-        {pace !== undefined && (
-          <span className="hg-meter__pace" style={{ left: `${Math.min(Math.max(pace, 0), 100)}%` }}>
-            <i>{paceLabel}</i>
+        {!bare && (
+          <span className="hg-meter__pct">
+            {Math.round(pct)}
+            <small>%</small>
           </span>
         )}
       </div>
+      {bare ? null : p === 0 && empty && !started ? (
+        <p className="hg-meter__empty">{empty}</p>
+      ) : (
+        <div className="hg-meter__segs" role="img" aria-label={`${name} ${Math.round(pct)}%`}>
+          {Array.from({ length: 10 }, (_, i) => {
+            const f = Math.min(Math.max((p - i * 10) / 10, 0), 1);
+            return (
+              <i
+                key={i}
+                className={f >= 1 ? 'is-on' : f > 0 ? 'is-part' : undefined}
+                style={f > 0 && f < 1 ? ({ '--f': f } as CSSProperties) : undefined}
+              />
+            );
+          })}
+          {pace !== undefined && (
+            <span
+              className="hg-meter__pace"
+              style={{ left: `${Math.min(Math.max(pace, 0), 100)}%` }}
+            >
+              <i>{paceLabel}</i>
+            </span>
+          )}
+        </div>
+      )}
       {chip && <span className="hg-meter__chip">{chip}</span>}
     </div>
   );

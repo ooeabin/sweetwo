@@ -180,8 +180,9 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
     setMsg(null);
     try {
       await adminRequestAccess(inquiryId, scopes, raw, reason);
-      setMsg(copy.requested);
+      setMsg(raw ? copy.rawRequested : copy.requested);
       setScopes([]);
+      setRaw(false);
       onDone();
     } catch {
       setMsg(copy.failed);
@@ -203,6 +204,7 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
         <input type="checkbox" checked={raw} onChange={(e) => setRaw(e.target.checked)} />
         {copy.raw}
       </label>
+      {raw && <p className="hg-help">{copy.rawHelp}</p>}
       <label className="hg-field">
         <span className="hg-field__label">{copy.l1Reason}</span>
         <input className="hg-input" value={reason} onChange={(e) => setReason(e.target.value)} />

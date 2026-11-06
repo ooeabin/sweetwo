@@ -1,0 +1,26 @@
+---
+// 스토어 버튼(28 공통 ‘주소’, design SiteLayout): App Store, Google Play. 누르면 site_store_clicked(store, placement).
+// 공식 배지 이미지(색, 비율 그대로)를 docs/design/assets에 넣기 전까지는 같은 자리에 글자 버튼 [확인 필요]
+import { URLS, t } from '../lib/site';
+interface Props {
+  placement: string;
+  /** both = 두 개, ios·android = 그 하나 */
+  which?: 'both' | 'ios' | 'android';
+  small?: boolean;
+  primary?: boolean;
+}
+const { placement, which = 'both', small = false, primary = false } = Astro.props;
+const cls = `hg-btn ${primary ? 'hg-btn--primary' : 'hg-btn--secondary'}${small ? ' hg-btn--sm' : ''}`;
+---
+<div class="hg-row" style="gap: var(--space-2); flex-wrap: wrap;">
+  {which !== 'android' && (
+    <a class={cls} href={URLS.appStore} rel="noopener" data-store="app_store" data-placement={placement}>
+      <span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.appStore}
+    </a>
+  )}
+  {which !== 'ios' && (
+    <a class={cls} href={URLS.playStore} rel="noopener" data-store="google_play" data-placement={placement}>
+      {t.googlePlay}
+    </a>
+  )}
+</div>

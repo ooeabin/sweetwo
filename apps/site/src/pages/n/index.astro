@@ -1,0 +1,9 @@
+---
+// 알림 메일 ‘앱에서 보기’ → 앱 알림 센터
+import OpenInApp from '../../components/OpenInApp.astro';
+import Site from '../../layouts/Site.astro';
+import { t } from '../../lib/site';
+---
+<Site title={t.title(t.openInSweetwo)} description={t.openInSweetwo}>
+  <OpenInApp path="n" />
+</Site>

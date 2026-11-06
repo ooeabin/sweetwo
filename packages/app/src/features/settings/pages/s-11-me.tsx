@@ -1,59 +1,55 @@
-import { fetchAvatars, qk, removeAvatar, updateMe, updateSpace } from '@sweetwo/api';
-import { coupleBaseDay, NotifyEmail, spaceBaseDay, splitPercent } from '@sweetwo/core';
-import { Button, Field, Icon, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
+import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
+import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
+import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { session } from '../../auth';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-11 내 정보(docs/spec/25-settings.md): 호칭(→ S-11a), 신랑·신부(→ S-11b), 로그인, 알림 이메일(그 자리에서 수정),
-// 월급 플랜 날짜(→ S-11d, 합류한 부부만), 주말·공휴일 앞당기기(부부 공통, 바로), 분담 방식(보기), 로그아웃.
-// 프로필 사진(1번 → S-11e). 비상금 기준, 남는 돈 넣을 목표, 배우자 대신 입력은 다음 단계.
+// S-11 내 정보와 월급(25, 재기획): 프로필 사진(→ S-11e), 이름(→ S-11a), 로그인, 알림 이메일(→ S-11b),
+// 결혼 상태(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
+// 월급: 내 월급(→ S-11c, 합류 뒤 배우자 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
+// 주말·공휴일 앞당기기(부부 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
 export function S11Me() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  const [email, setEmail] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
-  if (d.loading || !d.me || !d.c || !d.space) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
-  const value = email ?? me.notify_email ?? '';
-  const parsed = NotifyEmail.safeParse(value);
-  const changed = parsed.success && parsed.data !== me.notify_email;
-  const base = spaceBaseDay(sp, c);
-  const later = base !== null && base === coupleBaseDay(c) && c.joined;
-  const pct = splitPercent(sp.split_mode, c.myIncome, c.partnerIncome, c.myRatio);
-  const ratio = [pct, 100 - pct] as const;
+  const later = coupleBaseDay(c);
+  const base: BaseDay | null =
+    sp.joint_cycle_day === null ? later : sp.joint_cycle_day === 31 ? 'last' : sp.joint_cycle_day;
+  const dayText = (x: BaseDay | null) =>
+    x === null ? '' : x === 'last' ? copy.lastDay : copy.dayN(x);
+  const man = (v: number | null) => (v === null ? '' : `${formatManWon(v)} 원`);
+  const locked = sp.couple_state === 'unlink_pending';
+  const married = sp.marriage_status === 'married';
+  const weddingText = sp.wedding_date
+    ? formatDateFull(sp.wedding_date)
+    : sp.wedding_month
+      ? copy.weddingPlannedMonth(
+          Number(sp.wedding_month.slice(0, 4)),
+          Number(sp.wedding_month.slice(5, 7)),
+        )
+      : copy.undecidedValue;
 
-  const photo = avatars.data?.[me.id] ?? null;
+  // 프로필 사진(직접 올린 사진 또는 처음 가져온 소셜 계정 사진). 없으면 이름 첫 글자(2026-11-05 지정 아바타 없앰)
+  const photo = avatars.data?.photos[me.id] ?? null;
+  const shown = photo;
   const clearPhoto = async () => {
     if (!me.space_id) return;
     try {
       await removeAvatar(me.space_id, me.id);
       await qc.invalidateQueries({ queryKey: qk.avatars });
+      track('profile_photo_changed', { action: 'remove' });
       toast(copy.photoRemoved);
     } catch {
       toast(copy.failed);
-    }
-  };
-
-  const saveEmail = async () => {
-    if (!parsed.success || saving) return;
-    setSaving(true);
-    try {
-      await updateMe({ notify_email: parsed.data });
-      await qc.invalidateQueries({ queryKey: qk.me });
-      setEmail(null);
-      toast(copy.saved);
-    } catch {
-      toast(copy.failed);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -65,12 +61,21 @@ export function S11Me() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
-      {/* 1번 프로필 사진: 사진 있으면 사진, 없으면 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로 */}
+      {/* 1번 프로필 사진: 사진 → 이름 첫 글자. 바꾸기 → S-11e, 지우기는 바로(이름 첫 글자로, 소셜 사진을 다시 가져오지 않음) */}
       <div className="hg-row" style={{ gap: 'var(--space-4)', alignItems: 'center' }}>
-        <span className="hg-avatar-edit">
-          {photo ? (
+        <span
+          className="hg-avatar-edit"
+          // 1번: Avatar 자리에 사진을 끌어 놓으면 그 사진으로 S-11e(자르기)
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) nav('/settings/me/photo', { state: { file } });
+          }}
+        >
+          {shown ? (
             <span className="hg-avatar hg-avatar--xl hg-avatar--photo">
-              <img src={photo} alt={c.myName} />
+              <img src={shown} alt={c.myName} />
             </span>
           ) : (
             <span
@@ -101,91 +106,110 @@ export function S11Me() {
           value={c.myName}
           onClick={() => nav('/settings/me/nickname')}
         />
-        <ListRow
-          label={copy.sideRow}
-          value={me.side === 'groom' || me.side === 'bride' ? copy.sides[me.side] : ''}
-          onClick={() => nav('/settings/me/side')}
-        />
         <ListRow label={copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')} chevron={false} />
+        {/* 4번 알림 이메일: 2026-11-04 그 자리 입력칸 대신 줄 → S-11b */}
+        <ListRow
+          label={copy.notifyEmail}
+          value={me.notify_email ?? ''}
+          onClick={() => nav('/settings/me/email')}
+        />
       </div>
-      <form
-        className="hg-row"
-        style={{ gap: 'var(--space-2)', alignItems: 'flex-end' }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void saveEmail();
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <Field
-            label={copy.notifyEmail}
-            type="email"
-            autoComplete="email"
-            value={value}
-            onChange={(e) => setEmail(e.target.value)}
-            error={value.trim() && !parsed.success ? copy.emailError : undefined}
-          />
-        </div>
-        <Button type="submit" variant="secondary" disabled={!changed || saving}>
-          {copy.save}
-        </Button>
-      </form>
       <div className="hg-list">
-        {/* 배우자 미합류·혼자 쓰기면 고를 날이 내 월급날 하나라 줄 숨김(S-11d 예외) */}
-        {c.joined && (
+        {sp.marriage_status && (
           <ListRow
-            label={copy.planDay}
-            value={
-              <>
-                {base === null ? '' : base === 'last' ? copy.lastDay : copy.dayN(base)}
-                {later && (
-                  <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
-                    {copy.laterPayday}
-                  </span>
-                )}
-              </>
-            }
-            onClick={() => nav('/settings/me/plan-day')}
+            label={copy.marriage}
+            value={copy.marriageValue[sp.marriage_status]}
+            onClick={() => nav('/settings/me/marriage')}
           />
         )}
-        {!c.solo && (
+        {sp.marriage_status && sp.marriage_status !== 'undecided' && (
           <ListRow
-            label={copy.split}
-            value={copy.splitValue(
-              copy.splitModes[sp.split_mode ?? 'half'] ?? copy.splitModes.half,
-              ratio[0],
-              ratio[1],
-            )}
+            label={copy.weddingDay[married ? 'married' : 'engaged']}
+            value={weddingText}
+            onClick={() => nav('/settings/me/wedding')}
           />
         )}
+        <ListRow
+          label={copy.birthYearRow}
+          value={me.birth_year ? copy.birthYearValue(me.birth_year) : ''}
+          onClick={() => nav('/settings/me/birth-year')}
+        />
       </div>
-      <Toggle
-        label={copy.holidayShift}
-        checked={sp.holiday_shift}
-        onChange={async (on) => {
-          try {
-            await updateSpace({ holiday_shift: on });
-            await Promise.all(
-              [qk.space, ['monthly_plan']].map((k) => qc.invalidateQueries({ queryKey: k })),
-            );
-          } catch {
-            toast(copy.failed);
-          }
-        }}
-      />
-      <Button
-        variant="secondary"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={async () => {
-          await session.signOut();
-          qc.clear();
-          toast(copy.loggedOut);
-          nav('/login', { replace: true });
-        }}
-      >
-        {copy.logout}
-      </Button>
+      <section className="hg-stack" aria-label={copy.salaryGroup}>
+        <SectionHeader title={copy.salaryGroup} />
+        <div className="hg-list">
+          <ListRow
+            label={
+              <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                {copy.mySalary}
+                {me.income_variable && <span className="hg-tag">{copy.variable}</span>}
+              </span>
+            }
+            sub={
+              c.joined
+                ? copy.partnerSalary(c.partnerName, man(c.partnerIncome), dayText(c.partnerPayday))
+                : undefined
+            }
+            value={copy.salaryValue(man(me.monthly_income ?? 0), dayText(c.myPayday))}
+            onClick={() => nav('/settings/me/salary')}
+          />
+          {!c.solo && (
+            <ListRow
+              label={copy.salaryMode}
+              sub={locked ? copy.unlinkPendingLocked : undefined}
+              value={copy.salaryModeValue[sp.salary_mode]}
+              onClick={locked ? undefined : () => nav('/settings/me/salary-mode')}
+            />
+          )}
+          {/* 합쳐서 + 배우자 합류일 때만(고를 날이 두 월급날) */}
+          {sp.salary_mode === 'joint' && c.joined && (
+            <ListRow
+              label={copy.planDay}
+              value={
+                <>
+                  {dayText(base)}
+                  {base !== null && base === later && (
+                    <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
+                      {copy.laterPayday}
+                    </span>
+                  )}
+                </>
+              }
+              onClick={locked ? undefined : () => nav('/settings/me/plan-day')}
+            />
+          )}
+        </div>
+        <Toggle
+          label={copy.holidayShift}
+          checked={sp.holiday_shift}
+          onChange={async (on) => {
+            try {
+              await updateSpace({ holiday_shift: on });
+              await qc.invalidateQueries({ queryKey: qk.space });
+            } catch {
+              toast(copy.failed);
+            }
+          }}
+        />
+        {/* 10번 월급 계획: 2026-11-04 다른 줄과 같은 목록 줄로 */}
+        <div className="hg-list">
+          <ListRow label={copy.openSplit} onClick={() => nav('/salary/split')} />
+        </div>
+      </section>
+      {/* 11번 로그아웃: 2026-11-04 맨 아래 목록 줄 */}
+      <div className="hg-list">
+        <ListRow
+          label={copy.logout}
+          chevron={false}
+          onClick={async () => {
+            await session.signOut();
+            qc.clear();
+            toast(copy.loggedOut);
+            nav('/login', { replace: true });
+          }}
+        />
+      </div>
     </div>
   );
-  return <MainFrame current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

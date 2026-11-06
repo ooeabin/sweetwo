@@ -1,23 +1,39 @@
+import { fetchInquiries, qk } from '@sweetwo/api';
 import { notiPrefs } from '@sweetwo/core';
-import { ListRow } from '@sweetwo/ui';
+import { Badge, ListRow, Toggle } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { detectPlatform } from '../../../platform';
-import { MainFrame } from '../../month';
+import { detectPlatform, isApp } from '../../../platform';
+import { useMask } from '../../../shared/mask';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
 import { useWidgetSettings } from '../widget-settings';
+import { PersonDot } from '../../../shared/person';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
-// 지금 있는 화면: 내 정보(S-11), 부부 정보(S-12), 알림(S-14). 나머지 줄은 자리만(누르지 않음, “준비 중이에요”).
+// 오른쪽 회색 요약 값(공개 범위, 알림 채널, 앱 잠금(데스크톱), 가이드 진행), 앱 정보 줄에 버전 + 확인 요청 배지(관리자 열람 요청이 있을 때만 → S-19a).
 // 공개 범위 줄은 배우자 미합류·혼자 쓰기면 숨김, 위젯 줄은 데스크톱만.
 export function S10Settings() {
   const nav = useNavigate();
   const d = useSettingsData();
   const ck = useChecklist(d.space);
   const widget = useWidgetSettings();
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
-  const desktop = detectPlatform() === 'desktop';
+  const mask = useMask();
+  const platform = detectPlatform();
+  const desktop = platform === 'desktop';
+  const app = isApp(platform);
+  const lock = useQuery({
+    queryKey: ['lock-status'],
+    queryFn: () => window.sweetwo?.lock.status() ?? Promise.resolve(null),
+    enabled: app,
+  });
+  const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
+  const asking = (inquiries.data ?? []).filter((q) =>
+    q.access_request.some((a) => a.status === 'requested'),
+  ).length;
+  if (d.loading || !d.me || !d.c) return <LoadingFrame current={null} />;
   const c = d.c;
   const state = d.space?.couple_state ?? 'not_joined';
   const prefs = notiPrefs(d.me.noti_prefs);
@@ -27,13 +43,9 @@ export function S10Settings() {
         <ListRow
           lead={
             <span className="hg-avatars" aria-hidden="true">
-              <span className={c.starter ? 'hg-avatar hg-avatar--p1' : 'hg-avatar hg-avatar--p2'}>
-                {[...c.myName][0] ?? ''}
-              </span>
+              <PersonDot name={c.myName} starter={c.starter} userId={d.me.id} />
               {c.partnerName && !c.solo && (
-                <span className={c.starter ? 'hg-avatar hg-avatar--p2' : 'hg-avatar hg-avatar--p1'}>
-                  {[...c.partnerName][0] ?? ''}
-                </span>
+                <PersonDot name={c.partnerName} starter={!c.starter} userId={d.partner?.id} />
               )}
             </span>
           }
@@ -56,32 +68,32 @@ export function S10Settings() {
           />
         )}
         <ListRow
-          label={copy.accountMode}
-          value={copy.accountModeValue(
-            copy.accountModes[d.space?.account_mode ?? 'single'] ?? '',
-            d.space?.account_mode_next
-              ? (copy.accountModes[d.space.account_mode_next] ?? null)
-              : null,
-          )}
-          onClick={() => nav('/settings/account-mode')}
-        />
-        <ListRow
           label={copy.rows.noti}
-          value={copy.channelsOn(
-            [desktop && prefs.push ? copy.push : null, prefs.email ? copy.email : null].filter(
-              (x): x is string => !!x,
-            ),
-          )}
+          value={copy.pushState(prefs.push)}
           onClick={() => nav('/settings/notifications')}
         />
-        <ListRow label={copy.rows.security} onClick={() => nav('/settings/security')} />
-        <ListRow label={copy.rows.answers} onClick={() => nav('/settings/answers')} />
+        <ListRow
+          label={copy.rows.security}
+          value={
+            app && lock.data ? (lock.data.hasPin ? copy.rows.lockOn : copy.rows.lockOff) : undefined
+          }
+          onClick={() => nav('/settings/security')}
+        />
         <ListRow
           label={copy.rows.guide}
           value={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}
           onClick={() => nav('/settings/guides')}
         />
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
+        {/* 금액 가리기(2026-11-03 좁은 창 머리 눈 아이콘 대신 여기서. 기기마다 기억) */}
+        <div className="hg-listrow hg-listrow--toggle">
+          <Toggle
+            label={copy.rows.mask}
+            help={copy.rows.maskHelp}
+            checked={mask.masked}
+            onChange={() => mask.toggle()}
+          />
+        </div>
       </div>
       <div className="hg-list">
         <ListRow label={copy.rows.help} onClick={() => nav('/settings/help')} />
@@ -91,9 +103,18 @@ export function S10Settings() {
           onClick={() => nav('/settings/data')}
         />
         <ListRow
-          label={copy.rows.about}
-          value={desktop ? (window.sweetwo?.appVersion ?? '') : undefined}
-          onClick={() => nav('/settings/about')}
+          label={
+            asking ? (
+              <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                {copy.rows.about}
+                <Badge kind="temp">{copy.rows.asking(asking)}</Badge>
+              </span>
+            ) : (
+              copy.rows.about
+            )
+          }
+          value={app ? (window.sweetwo?.appVersion ?? '') : undefined}
+          onClick={() => nav(asking ? '/settings/help/inquiries' : '/settings/about')}
         />
         {desktop && (
           <ListRow

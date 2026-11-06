@@ -4,10 +4,11 @@ import { Button, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { LoadFailed } from '../load-failed';
 import { CHECKLIST, guidesPath, useChecklist } from '../guides';
 
 // S-02 체크리스트 항목(25 S-02): 제목·설명(3줄 이내), 해야 할 일 단계, 출처(공식 사이트)·확인일, 완료자 표시, 관련 기능 링크.
@@ -22,7 +23,16 @@ export function S02ChecklistItem() {
   const [saving, setSaving] = useState(false);
   const item = CHECKLIST.flatMap((s) => s.items).find((i) => i.key === key);
   if (!item) return <Navigate to={guidesPath} replace />;
-  if (d.loading || ck.loading || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.failed || ck.failed)
+    return (
+      <LoadFailed
+        onRetry={() => {
+          d.retry();
+          ck.retry();
+        }}
+      />
+    );
+  if (d.loading || ck.loading || !d.c) return <LoadingFrame sub="settings" current={null} />;
   const fromTodo = params.get('from') === 'todo';
   const done = ck.doneOf(key);
   const who = done ? (done.done_by === d.me?.id ? d.c.myName : d.c.partnerName) : null;
@@ -98,5 +108,5 @@ export function S02ChecklistItem() {
         ))}
     </div>
   );
-  return <MainFrame current={null} page={{ title: item.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

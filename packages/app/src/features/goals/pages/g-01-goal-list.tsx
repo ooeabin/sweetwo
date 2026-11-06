@@ -1,98 +1,165 @@
-import { Button, EmptyState } from '@sweetwo/ui';
-import { useState } from 'react';
+import { fetchRecentGoalChanges, qk } from '@sweetwo/api';
+import { Button, Icon, SectionHeader } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
-import { useGoalsData } from '../data';
-import { GoalCard } from '../goal-card';
+import { GoalItemCard } from '../goal-item-card';
+import { useGoalsModel, type GoalItem } from '../model';
 
-// G-01 목표 목록(docs/spec/22-goals.md G-01). 요약 + 진행 중 카드(배분 순서, 비상금 맨 위) + 접힌 목록(보류·달성·사용 완료).
-// 열린 제안이 있는 목표는 “제안 중” 배지(누르면 G-02의 제안 중 카드).
+// G-01 목표 목록(22). 상단 요약(매달 목표에 모으는 돈) → 묶음(우리 목표 / 내 목표 / 배우자 목표, 비상금은 우리 목표 맨 위)
+// → 접힌 목록(보류, 달성). 혼자 쓰기면 묶음 제목 없이 한 목록. 데스크톱 2열(hg-cards), 좁은 창 1열.
+const SEEN = 'sweetwo.goalsSeenAt';
+const readSeen = () => {
+  try {
+    return localStorage.getItem(SEEN) ?? '';
+  } catch {
+    return '';
+  }
+};
+const writeSeen = (v: string) => {
+  try {
+    localStorage.setItem(SEEN, v);
+  } catch {
+    /* 저장을 못 하면 다음에도 보임 */
+  }
+};
+
 export function G01GoalList() {
   const nav = useNavigate();
-  const d = useGoalsData();
+  const d = useGoalsModel();
   const { masked } = useMask();
   const [unfold, setUnfold] = useState(false);
+  // 배우자가 고친 목표: 지난번에 G-01을 연 뒤 생긴 것만 보이고, 다음에 열면 사라짐(본 시각은 기기에 기억)
+  const changes = useQuery({ queryKey: qk.goalChanges, queryFn: fetchRecentGoalChanges });
+  const [seenAt] = useState(readSeen);
+  useEffect(() => writeSeen(new Date().toISOString()), []);
+  const changedOf = (id: string) => {
+    const c = changes.data?.find((x) => x.goalId === id && x.at > seenAt);
+    return c ? copy.partnerChanged(d.partnerName ?? '', c.field) : undefined;
+  };
   const m = (v: number) => money(v, masked);
-  const v = d.view;
 
+  // 순서 바꾸기는 한 묶음에 옮길 목표가 2개 이상일 때만(비상금은 고정)
+  const canOrder =
+    d.ready &&
+    (d.groups.ours.filter((i) => i.goal.template !== 'emergency').length > 1 ||
+      d.groups.mine.length > 1);
   const actions = (
     <>
-      <Button variant="secondary" onClick={() => nav('/goals/order')}>
-        {copy.reorder}
-      </Button>
-      <Button variant="primary" onClick={() => nav('/goals/new')}>
+      {canOrder && (
+        <Button variant="secondary" onClick={() => nav('/goals/order')}>
+          {copy.reorder}
+        </Button>
+      )}
+      {/* 좁은 창은 + 버튼이 같은 일(2026-11-03 추가 입구 하나로) */}
+      <Button variant="primary" className="hg-wide-only" onClick={() => nav('/goals/new')}>
         {copy.add}
       </Button>
     </>
   );
-
-  let columns = [<div key="l" />];
-  if (d.failed) {
-    columns = [
-      <div key="l" className="hg-card hg-stack">
-        <p className="hg-card__meta">{copy.loadFailed}</p>
-        <Button variant="primary" onClick={d.retry}>
-          {copy.retry}
-        </Button>
-      </div>,
-    ];
-  } else if (v) {
-    const names = {
-      1: v.couple.starter ? v.couple.myName : v.couple.partnerName,
-      2: v.couple.starter ? v.couple.partnerName : v.couple.myName,
-    } as const;
-    const card = (g: (typeof v.lines)[number]) => (
-      <GoalCard
-        key={g.id}
-        g={g}
-        names={names}
-        masked={masked}
-        m={m}
-        proposing={d.openProposals.some((p) => p.target_id === g.id)}
-        onOpen={() => nav(g.template === 'wedding' ? '/goals/wedding' : `/goals/${g.id}`)}
-      />
-    );
-    const half = Math.ceil(v.open.length / 2);
-    columns =
-      !v.open.length && !v.folded.length
-        ? [<EmptyState key="e" title={copy.empty} />]
-        : [
-            <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-              <section className="hg-card" aria-label={copy.summary(m(v.monthly))}>
-                <p style={{ margin: 0 }}>
-                  <b>{copy.summary(m(v.monthly))}</b>
-                </p>
-                <p className="hg-card__meta">{copy.saveable(m(v.saveable))}</p>
-              </section>
-              {v.shortfall > 0 && (
-                <div className="hg-banner hg-banner--info">
-                  <span>{copy.short(m(v.shortfall))}</span>
-                  <Button variant="secondary" size="sm" onClick={() => nav('/goals/adjust')}>
-                    {copy.adjust}
-                  </Button>
-                </div>
-              )}
-              {v.open.slice(0, half).map(card)}
-            </div>,
-            <div key="r" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-              {v.open.slice(half).map(card)}
-              {v.folded.length > 0 && (
-                <button
-                  type="button"
-                  className="hg-btn hg-btn--link"
-                  style={{ alignSelf: 'flex-start' }}
-                  aria-expanded={unfold}
-                  onClick={() => setUnfold((x) => !x)}
-                >
-                  {copy.folded(v.folded.length)}
-                </button>
-              )}
-              {unfold && v.folded.map(card)}
-            </div>,
-          ];
+  if (!d.ready) {
+    const columns = d.failed
+      ? [
+          <div key="l" className="hg-card hg-stack">
+            <p className="hg-card__meta">{copy.loadFailed}</p>
+          </div>,
+        ]
+      : [<div key="l" />];
+    return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={columns} />;
   }
 
-  return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={columns} />;
+  const cards = (list: GoalItem[]) => (
+    // 2026-11-03 시안 B: 사진이 위인 2열 타일(Vivid·ANZ처럼, 넓은 창은 3~4열)
+    <div className="hg-goaltiles">
+      {list.map((i) => (
+        <GoalItemCard
+          key={i.goal.id}
+          i={i}
+          masked={masked}
+          onOpen={() =>
+            // 금액 없는 목표는 “금액 정하기” → G-03b(목표 금액)
+            nav(
+              i.goal.target_amount === null && i.canEdit && i.goal.kind !== 'monthly'
+                ? `/goals/${i.goal.id}/set-amount`
+                : `/goals/${i.goal.id}`,
+            )
+          }
+          onLate={i.canEdit ? () => nav('/salary/split') : undefined}
+          changed={changedOf(i.goal.id)}
+        />
+      ))}
+    </div>
+  );
+  const groups: [string, GoalItem[]][] = d.solo
+    ? [['', [...d.groups.ours, ...d.groups.mine]]]
+    : [
+        [copy.groups.ours, d.groups.ours],
+        [copy.groups.mine, d.groups.mine],
+        ...(d.joined
+          ? [[copy.partnerGroup(d.partnerName), d.groups.partner] as [string, GoalItem[]]]
+          : []),
+      ];
+  const onlyEmergency =
+    d.groups.ours.length === 1 &&
+    d.groups.ours[0]?.goal.template === 'emergency' &&
+    !d.groups.mine.length;
+
+  const column = (
+    <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+      <section className="hg-card hg-stack">
+        {d.monthlyTotal > 0 ? (
+          <b>{copy.monthlySummary(m(d.monthlyTotal))}</b>
+        ) : (
+          <span className="hg-card__meta">{copy.noSplit}</span>
+        )}
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav('/salary/split')}
+        >
+          {copy.editSplit}
+        </button>
+      </section>
+      {groups
+        .filter(([, list]) => list.length > 0)
+        .map(([title, list]) => (
+          <section key={title || 'all'} className="hg-stack" aria-label={title || copy.title}>
+            {title && <SectionHeader title={title} />}
+            {cards(list)}
+          </section>
+        ))}
+      {onlyEmergency && (
+        <Button variant="secondary" onClick={() => nav('/goals/new')}>
+          {copy.onlyEmergency}
+        </Button>
+      )}
+      {/* 접힌 목록(2026-11-03): 펼치기 줄 + 펼치면 상태별 묶음(보류, 달성) 제목. 2026-11-04 사용 완료 없앰(옛 사용 완료는 달성으로) */}
+      {d.folded.length > 0 && (
+        <button
+          type="button"
+          className="hg-foldrow"
+          aria-expanded={unfold}
+          onClick={() => setUnfold((x) => !x)}
+        >
+          <span>{copy.foldedNew(d.folded.length)}</span>
+          <Icon name={unfold ? 'chevron-up' : 'chevron-down'} size={16} />
+        </button>
+      )}
+      {unfold &&
+        (['paused', 'achieved'] as const).map((st) => {
+          const list = d.folded.filter((x) => x.state === st);
+          return list.length ? (
+            <section key={st} className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+              <SectionHeader title={copy.status[st]} count={list.length} />
+              {cards(list)}
+            </section>
+          ) : null;
+        })}
+    </div>
+  );
+  return <MainFrame current="goals" page={{ title: copy.title, actions }} columns={[column]} />;
 }

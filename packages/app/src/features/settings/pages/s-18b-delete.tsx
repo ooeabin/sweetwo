@@ -1,12 +1,12 @@
 import { fetchAssets, qk, requestAccountDeletion } from '@sweetwo/api';
 import { formatMonthDay } from '@sweetwo/core';
-import { Button, Modal, PageHeader } from '@sweetwo/ui';
+import { Button, Modal, QuestionLayout } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { paths, prefs, providerName, reauthenticate, session } from '../../auth';
-import { MainFrame } from '../../month';
+import { LoadingFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -54,41 +54,38 @@ export function S18bDelete() {
   }, [d.loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (d.loading || !d.me || !d.c || !d.space || assets.isLoading)
-    return <MainFrame current={null} columns={[null]} />;
-  const { me, c, space } = d;
+    return <LoadingFrame sub="settings" current={null} />;
+  const { me, space } = d;
   const n = (assets.data ?? []).filter(
     (a) => a.owner === 'person' && a.owner_user_id === me.id,
   ).length;
   const joined = space.couple_state === 'connected' || space.couple_state === 'unlink_pending';
   const lines = [
     copy.deleteMine(n),
-    joined ? copy.deleteJointStays(c.partnerName) : copy.deleteWholeSpace,
-    ...(space.couple_state === 'unlink_pending' ? [copy.deletePendingNote(c.partnerName)] : []),
+    joined ? copy.deleteSharedGone : copy.deleteWholeSpace,
     copy.deleteRestore,
   ];
   const provider = me.provider ? providerName[me.provider] : '';
 
-  const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader
-        title={copy.deleteAccount}
-        backLabel={copy.back}
-        backTo={copy.data}
-        onBack={() => nav('/settings/data')}
-      />
+  // 2026-11-04 ‘먼저 내보내기’는 위 보조 버튼, 빨간 삭제는 화면 아래 꽉 찬 버튼
+  return (
+    <QuestionLayout
+      title={copy.deleteAccount}
+      // 확인 대화상자가 열려 있으면 Esc는 대화상자만 닫음
+      onBack={ask ? undefined : () => nav('/settings/data')}
+      primary={{ label: copy.deleteWith(provider), variant: 'danger', disabled: busy }}
+      onSubmit={() => setAsk(true)}
+    >
+      <div className="hg-row">
+        <Button variant="secondary" onClick={() => nav('/settings/data')}>
+          {copy.exportFirst}
+        </Button>
+      </div>
       <ul className="hg-stack" style={{ gap: 'var(--space-2)', paddingLeft: 'var(--space-5)' }}>
         {lines.map((l) => (
           <li key={l}>{l}</li>
         ))}
       </ul>
-      <div className="hg-row" style={{ flexWrap: 'wrap' }}>
-        <Button variant="secondary" onClick={() => nav('/settings/data')}>
-          {copy.exportFirst}
-        </Button>
-        <Button variant="danger" disabled={busy} onClick={() => setAsk(true)}>
-          {copy.deleteWith(provider)}
-        </Button>
-      </div>
       {ask && (
         <Modal
           title={copy.deleteQ}
@@ -100,7 +97,6 @@ export function S18bDelete() {
           onCancel={() => setAsk(false)}
         />
       )}
-    </div>
+    </QuestionLayout>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
 }

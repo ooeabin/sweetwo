@@ -1,6 +1,6 @@
 // 그림 크기 상한 검사(docs/DEV_GUIDE.md ‘에셋’). CI에서 돈다.
 // 그림(webp) 150KB. 넘으면 실패.
-import { readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const LIMITS = { '.webp': 150 * 1024, '.png': 150 * 1024 };
@@ -9,6 +9,7 @@ const DIRS = ['packages/ui/src/assets/illustrations'];
 const bad = [];
 let count = 0;
 for (const dir of DIRS) {
+  if (!existsSync(dir)) continue; // 그림을 비워 둔 동안에도 통과
   for (const name of readdirSync(dir)) {
     const limit = LIMITS[extname(name)];
     if (!limit) continue;

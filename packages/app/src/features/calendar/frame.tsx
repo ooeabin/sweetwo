@@ -1,7 +1,7 @@
 import { Button, Chip, Tabs } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { MainFrame } from '../month';
+import { MainFrame } from '../frame';
 import { copy } from './copy';
 import { startCareAdd } from './pages/y-07-care-add';
 
@@ -64,8 +64,18 @@ export function FilterChips({
   );
 }
 
-// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 보기 전환 “목록” / “달력”
-export function CalendarFrame({ view, children }: { view: CalView; children: ReactNode }) {
+// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 탭 “목록” / “달력”(2026-11-04 맨 위, 우리 자산 탭과 같은 모양) + 그 아래 보기 필터 칩
+export function CalendarFrame({
+  view,
+  filter,
+  onFilter,
+  children,
+}: {
+  view: CalView;
+  filter: CalFilter;
+  onFilter: (f: CalFilter) => void;
+  children: ReactNode;
+}) {
   const nav = useNavigate();
   write(VIEW_KEY, view);
   return (
@@ -75,6 +85,7 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
         title: copy.title,
         actions: (
           <Button
+            className="hg-wide-only"
             variant="primary"
             onClick={() => {
               startCareAdd();
@@ -86,9 +97,9 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
         ),
       }}
       columns={[
-        <div key="c" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+          {/* 2026-11-04 우리 자산(한눈에/자산·부채)과 같은 탭을 맨 위에, 보기 필터 칩은 그 아래 */}
           <Tabs<CalView>
-            variant="seg"
             label={copy.viewsLabel}
             value={view}
             onChange={(v) => nav(v === 'month' ? '/calendar/month' : '/calendar/list')}
@@ -97,6 +108,7 @@ export function CalendarFrame({ view, children }: { view: CalView; children: Rea
               { value: 'month', label: copy.views.month },
             ]}
           />
+          <FilterChips value={filter} onChange={onFilter} />
           {children}
         </div>,
       ]}

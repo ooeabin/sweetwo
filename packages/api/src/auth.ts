@@ -31,6 +31,21 @@ export async function fetchLoginState(provider?: AuthProvider): Promise<LoginSta
   return LoginState.parse(data);
 }
 
+/** A-05r 약관 개정 재동의·마케팅 2년 재확인: 다시 물어볼 것(terms, privacy, marketing) */
+export async function fetchPendingTerms(): Promise<{ kind: string; version: string }[]> {
+  const { data, error } = await supabase().rpc('pending_terms');
+  if (error) throw toError(error.message);
+  return data ?? [];
+}
+/** 다시 동의(남은 필수 항목 모두 + 마케팅은 물어본 경우만) */
+export async function agreeTerms(marketing: boolean | null) {
+  const { error } = await supabase().rpc(
+    'agree_terms',
+    marketing === null ? {} : { p_marketing: marketing },
+  );
+  if (error) throw toError(error.message);
+}
+
 /** A-05: 계정 생성 + 동의 기록 */
 export async function completeSignup(input: {
   provider: AuthProvider;
@@ -67,21 +82,39 @@ export const webAuth = {
   },
 };
 
+/** O-03: 소셜 로그인이 알려 준 이름(미리 채움, 최대 10자). 없으면 null */
+export async function fetchSocialName(): Promise<string | null> {
+  const { data } = await supabase().auth.getSession();
+  const m: Record<string, unknown> = data.session?.user.user_metadata ?? {};
+  for (const k of ['name', 'full_name', 'nickname', 'preferred_username', 'user_name']) {
+    const v = m[k];
+    if (typeof v === 'string' && v.trim()) return [...v.trim()].slice(0, 10).join('');
+  }
+  return null;
+}
+
 /** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
-export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
+export async function fetchLaunchConfig(platform: 'desktop' | 'ios' | 'android' | 'web'): Promise<{
   min: string;
   maintenance: { starts: string; ends: string; message: string | null } | null;
 }> {
   const { data, error } = await supabase()
     .from('app_config')
     .select(
-      'min_version_desktop, min_version_web, maintenance_starts_at, maintenance_ends_at, maintenance_message',
+      'min_version_desktop, min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
     )
     .eq('id', 1)
     .single();
   if (error) throw toError(error.message);
   return {
-    min: platform === 'desktop' ? data.min_version_desktop : data.min_version_web,
+    min:
+      platform === 'desktop'
+        ? data.min_version_desktop
+        : platform === 'ios'
+          ? data.min_version_ios
+          : platform === 'android'
+            ? data.min_version_android
+            : data.min_version_web,
     maintenance:
       data.maintenance_starts_at && data.maintenance_ends_at
         ? {
@@ -91,15 +124,4 @@ export async function fetchLaunchConfig(platform: 'desktop' | 'web'): Promise<{
           }
         : null,
   };
-}
-
-/** A-01: 최소 지원 버전(로그인 전에도 읽을 수 있음) */
-export async function fetchMinVersion(platform: 'desktop' | 'web'): Promise<string> {
-  const { data, error } = await supabase()
-    .from('app_config')
-    .select('min_version_desktop, min_version_web')
-    .eq('id', 1)
-    .single();
-  if (error) throw toError(error.message);
-  return platform === 'desktop' ? data.min_version_desktop : data.min_version_web;
 }

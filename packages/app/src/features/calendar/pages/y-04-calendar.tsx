@@ -1,70 +1,228 @@
-import { isFestive, monthGrid } from '@sweetwo/core';
-import { Button, Calendar, Icon } from '@sweetwo/ui';
-import { useState } from 'react';
+import { dday, isFestive, monthGrid, type MoneyKind } from '@sweetwo/core';
+import {
+  Band,
+  Button,
+  type CalDay,
+  Calendar,
+  icon3d,
+  type IconName,
+  Lead,
+  ListRow,
+} from '@sweetwo/ui';
+import { Fragment, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
-import { markOf, moneyLine, useCalendarData } from '../data';
+import { moneyLine, reviewMonth, useCalendarData } from '../data';
 import { money as won, useMask } from '../../../shared/mask';
-import { CalendarFrame, FilterChips, useCalFilter } from '../frame';
+import { CalendarFrame, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
+const ymText = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-// Y-04 달력(월 보기, docs/spec/24-calendar.md 10~13번): 돈 날짜는 검정 점 + 고른 날 일정 목록에서 흐린 글자 + 갈 화면(읽기 전용),
-// 월말 정리 기간 띠, 챙길 날 막대(양가 family, 우리 둘 together). 날짜를 누르면 그날 일정, 챙길 날 → Y-05.
-// 고른 날 아래 ‘이 날에 챙길 날 추가’ → Y-07(날짜 채움). 공휴일은 빨간 숫자 + 이름(고른 날 목록 맨 위), 설·추석 연휴 띠.
+// 칸 안 짧은 이름과 고른 날 줄 아이콘(돈 일정 종류)
+const MONEY_SHORT: Record<MoneyKind, string> = {
+  payday: copy.short.payday,
+  review: copy.short.review,
+  deadline: copy.short.deadline,
+  goal: copy.short.goal,
+  maturity: copy.short.maturity,
+};
+// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
+const MONEY_ART: Record<MoneyKind, string> = {
+  payday: 'line-custom',
+  review: 'line-fixed',
+  deadline: 'goal-deadline',
+  goal: 'goal-deadline',
+  maturity: 'asset-deposit',
+};
+const MONEY_ICON: Record<MoneyKind, IconName> = {
+  payday: 'wallet',
+  review: 'calendar-check',
+  deadline: 'target',
+  goal: 'target',
+  maturity: 'piggy-bank',
+};
+let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
+
+/** 챙길 날 이름의 마지막 낱말(“어머니 생신” → “생신”) */
+const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
+
+// Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 토스 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
+// 칸마다 숫자 + 짧은 이름 한 줄, 월말 확인 기간은 칸 아래 이어진 한 줄 띠(“월말 확인”, 누르면 그 날 줄 → W-05).
+// 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달을 보고 있으면 ‘오늘’.
+// 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 챙길 날 추가’ → Y-07.
 export function Y04Calendar() {
   const nav = useNavigate();
   const d = useCalendarData();
   const [filter, setFilter] = useCalFilter();
   const [ty, tm] = ymd(d.today);
-  const [ym, setYm] = useState<[number, number]>([ty, tm]);
-  const [selected, setSelected] = useState<string>(d.today);
+  // 2026-11-04 일정을 보고 돌아와도 보던 달과 고른 날 그대로(앱을 쓰는 동안만, 날이 바뀌면 오늘로)
+  const kept = lastView?.today === d.today ? lastView : null;
+  const [ym, setYmRaw] = useState<[number, number]>(kept?.ym ?? [ty, tm]);
+  const [selected, setSelectedRaw] = useState<string>(kept?.selected ?? d.today);
+  const setYm = (v: [number, number]) => {
+    setYmRaw(v);
+    lastView = { today: d.today, ym: v, selected: lastView?.selected ?? selected };
+  };
+  const setSelected = (v: string) => {
+    setSelectedRaw(v);
+    lastView = { today: d.today, ym: lastView?.ym ?? ym, selected: v };
+  };
   const { masked } = useMask();
-  const [y, m] = ym;
-  if (d.loading) return <CalendarFrame view="month">{null}</CalendarFrame>;
+  const frame = (children: ReactNode) => (
+    <CalendarFrame view="month" filter={filter} onFilter={setFilter}>
+      {children}
+    </CalendarFrame>
+  );
+  if (d.loading) return frame(null);
 
-  const { dates, bands } = d.monthOf(y, m);
-  const shown = filter === 'care' ? [] : dates;
-  const cares = filter === 'money' ? [] : d.caresOf(y, m);
-  const inBand = (s: string) => filter !== 'care' && bands.some((b) => s >= b.start && s <= b.end);
-  const grid = monthGrid(y, m).map((c) => {
-    const cs = cares.filter((x) => x.date === c.date);
-    const n = shown.filter((x) => x.date === c.date).length + cs.length;
+  const [y, m] = ym;
+  const moneyOf = (date: string) => {
+    if (filter === 'care') return [];
+    const [cy, cm] = ymd(date);
+    return d.monthOf(cy, cm).dates.filter((x) => x.date === date);
+  };
+  const caresOn = (date: string) => {
+    if (filter === 'money') return [];
+    const [cy, cm] = ymd(date);
+    return d.caresOf(cy, cm).filter((x) => x.date === date);
+  };
+  const bandOn = (date: string) => {
+    if (filter === 'care') return undefined;
+    const [cy, cm] = ymd(date);
+    return d.monthOf(cy, cm).bands.find((b) => date >= b.start && date <= b.end);
+  };
+  const bandPos = (date: string, dow: number): CalDay['band'] => {
+    const b = bandOn(date);
+    if (!b) return undefined;
+    // 주가 바뀌면 띠도 그 줄에서 끊어 이어 그림
+    const first = date === b.start || dow === 0;
+    const last = date === b.end || dow === 6;
+    return first && last ? 'single' : first ? 'start' : last ? 'end' : 'mid';
+  };
+  // 그 달 주만(다음 달만 있는 마지막 주는 뺌)
+  const cells = monthGrid(y, m);
+  const weeks = Array.from({ length: 6 }, (_, i) => cells.slice(i * 7, i * 7 + 7)).filter((w) =>
+    w.some((c) => !c.muted),
+  );
+  const grid: CalDay[] = weeks.flat().map((c, i) => {
+    const cs = caresOn(c.date);
+    // 월말 확인은 띠로 보여 주니 칸 이름에서 뺌
+    const ms = moneyOf(c.date).filter((x) => x.kind !== 'review');
     const [, cm, cd] = ymd(c.date);
     const hol = d.holidayOf(c.date);
+    const names = [
+      ...cs.map((x) => ({ s: careShort(x.care.name), t: 'care' as const })),
+      ...ms.map((x) => ({ s: MONEY_SHORT[x.kind], t: 'money' as const })),
+    ];
+    const head = hol ? { s: hol.name.replace(/\(.*\)$/, ''), t: 'holiday' as const } : names[0];
+    const more = names.length - (hol ? 0 : 1);
     return {
-      ...c,
-      money: shown.some((x) => x.date === c.date),
-      marks: cs.map((x) => markOf(x.care)),
-      band: inBand(c.date),
-      // 칸에는 짧게(대체공휴일(개천절) → 대체공휴일), 전체 이름은 화면 읽기와 아래 목록
-      holiday: hol?.name.replace(/\(.*\)$/, ''),
+      date: c.date,
+      day: c.day,
+      muted: c.muted,
+      short: c.muted || !head ? undefined : more > 0 ? `${head.s} +${more}` : head.s,
+      tone: head?.t,
+      band: c.muted ? undefined : bandPos(c.date, i % 7),
+      holiday: !!hol,
       festive: !!hol && isFestive(hol.name),
-      label: copy.dayLabel(cm, cd, n, hol?.name),
+      label: copy.dayLabel(cm, cd, moneyOf(c.date).length + cs.length, hol?.name),
     };
   });
   const move = (n: number) => {
     const t = y * 12 + (m - 1) + n;
-    setYm([Math.floor(t / 12), (t % 12) + 1]);
+    const ny = Math.floor(t / 12);
+    const nm = (t % 12) + 1;
+    setYm([ny, nm]);
+    // 오늘이 든 달이면 오늘, 아니면 그 달 1일을 고름
+    setSelected(ny === ty && nm === tm ? d.today : `${ymText(ny, nm)}-01`);
+  };
+
+  /** 고른 날 일정 줄들(공휴일, 월말 확인, 챙길 날, 돈 일정) */
+  const items = (date: string) => {
+    const hol = d.holidayOf(date);
+    const band = bandOn(date);
+    const ms = moneyOf(date).filter((x) => x.kind !== 'review');
+    const cs = caresOn(date);
+    const rows: ReactNode[] = [];
+    if (hol)
+      rows.push(
+        <ListRow
+          key="hol"
+          lead={<Lead icon="flag-pennant" />}
+          label={hol.name}
+          sub={copy.holiday}
+          chevron={false}
+        />,
+      );
+    if (band)
+      rows.push(
+        <ListRow
+          key="band"
+          lead={<Lead icon="calendar-check" art3d={icon3d('line-fixed')} />}
+          label={copy.reviewBand(reviewMonth(band.end))}
+          sub={copy.go.review}
+          onClick={() => nav('/salary/review')}
+          chevron
+        />,
+      );
+    for (const x of cs) {
+      const n = dday(d.today, x.date);
+      rows.push(
+        <Fragment key={x.care.id}>
+          <ListRow
+            lead={<Lead icon="gift" tone="together" art3d={icon3d('care-gift')} />}
+            label={x.care.name}
+            sub={
+              x.care.budget > 0
+                ? `${copy.memoAmount(won(x.care.budget, masked))}, ${copy.dday(n)}`
+                : copy.dday(n)
+            }
+            onClick={() => nav(`/calendar/day/${x.care.id}`)}
+            chevron
+          />
+          {/* 그날이 된 챙길 날은 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+          {x.date <= d.today && !(x.care.status === 'done' && x.care.status_on === x.date) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => nav(`/calendar/day/${x.care.id}/record/a?on=${x.date}`)}
+            >
+              {copy.statuses.done}
+            </Button>
+          )}
+        </Fragment>,
+      );
+    }
+    ms.forEach((x, i) => {
+      const l = moneyLine(x);
+      rows.push(
+        <ListRow
+          key={`${x.kind}-${i}`}
+          lead={<Lead icon={MONEY_ICON[x.kind]} art3d={icon3d(MONEY_ART[x.kind])} />}
+          label={l.label}
+          sub={copy.goSub[x.kind]}
+          onClick={() => nav(l.to)}
+          chevron
+        />,
+      );
+    });
+    return rows;
   };
   const [, sm, sd] = ymd(selected);
   const dow = DOW[new Date(`${selected}T00:00:00Z`).getUTCDay()] ?? '';
-  const today = shown.filter((x) => x.date === selected);
-  const selHoliday = d.holidayOf(selected);
-  // 고른 날이 보이는 달 밖이면 그 달 챙길 날을 따로 계산
-  const [sy, smo] = ymd(selected);
-  const dayCares = (
-    sy === y && smo === m ? cares : filter === 'money' ? [] : d.caresOf(sy, smo)
-  ).filter((x) => x.date === selected);
+  const rows = items(selected);
 
-  return (
-    <CalendarFrame view="month">
+  return frame(
+    <>
       <Calendar
         year={y}
         month={m}
         yearLabel={copy.yearLabel(y)}
         monthLabel={copy.monthLabel(m)}
+        showYear={y !== ty}
         days={grid}
         today={d.today}
         selected={selected}
@@ -73,74 +231,37 @@ export function Y04Calendar() {
         onNext={() => move(1)}
         prevLabel={copy.prev}
         nextLabel={copy.next}
-        filter={<FilterChips value={filter} onChange={setFilter} />}
+        todayLabel={y !== ty || m !== tm ? copy.today : undefined}
+        onToday={() => {
+          setYm([ty, tm]);
+          setSelected(d.today);
+        }}
+        bandLabel={copy.short.band}
+      />
+      <Band />
+      <section
+        className="hg-cal__agenda"
+        aria-live="polite"
+        aria-label={copy.agendaDay(sm, sd, dow)}
       >
-        <div className="hg-cal__legend" aria-hidden="true">
-          <span>
-            <i className="hg-cal__mark hg-mark--family" />
-            {copy.legendCare}
-          </span>
-          <span>
-            <i className="hg-cal__dot" />
-            {copy.legendMoney}
-          </span>
+        <h2 className="hg-cal__date">{copy.agendaDay(sm, sd, dow)}</h2>
+        <div className="hg-list hg-list--plain">
+          {rows.length ? rows : <p className="hg-help">{copy.agendaEmpty}</p>}
         </div>
-        <div className="hg-cal__agenda" aria-live="polite">
-          <span className="hg-cal__date">{copy.agendaDate(sm, sd, dow)}</span>
-          {selHoliday && (
-            <div className="hg-cal__event is-holiday">
-              <i />
-              <span>{selHoliday.name}</span>
-            </div>
-          )}
-          {!today.length && !dayCares.length && !selHoliday && (
-            <span className="hg-help">{copy.agendaEmpty}</span>
-          )}
-          {dayCares.map((x) => (
-            <button
-              key={x.care.id}
-              type="button"
-              className="hg-cal__event"
-              onClick={() => nav(`/calendar/day/${x.care.id}`)}
-            >
-              <i className={`hg-mark--${markOf(x.care)}`} />
-              <span>{x.care.name}</span>
-              <b>{won(x.care.budget, masked)}</b>
-            </button>
-          ))}
-          {today.map((x, i) => {
-            const l = moneyLine(x);
-            return (
-              <button
-                key={`${x.kind}-${i}`}
-                type="button"
-                className="hg-cal__event is-money"
-                onClick={() => nav(l.to)}
-              >
-                <i />
-                <span>{l.label}</span>
-                <span className="hg-cal__go">
-                  {l.go}
-                  <Icon name="chevron-right" size={16} />
-                </span>
-              </button>
-            );
-          })}
-          {selected >= d.today && (
-            <Button
-              variant="ghost"
-              size="sm"
-              style={{ alignSelf: 'flex-start' }}
+        {selected >= d.today && (
+          <div className="hg-list hg-list--plain hg-cal__add">
+            <ListRow
+              lead={<Lead icon="plus" />}
+              label={copy.addOnDay}
+              chevron={false}
               onClick={() => {
                 startCareAdd(selected);
                 nav('/calendar/add/a');
               }}
-            >
-              {copy.addOnDay}
-            </Button>
-          )}
-        </div>
-      </Calendar>
-    </CalendarFrame>
+            />
+          </div>
+        )}
+      </section>
+    </>,
   );
 }

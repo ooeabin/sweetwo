@@ -1,11 +1,11 @@
 import { createInquiry, qk, type InquiryCategory } from '@sweetwo/api';
-import { Button, PageHeader, Toggle } from '@sweetwo/ui';
+import { QuestionLayout, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
+import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -18,7 +18,6 @@ export function S19aInquiry() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  const id = useId();
   const [cat, setCat] = useState<InquiryCategory>('etc');
   const [text, setText] = useState('');
   const [attach, setAttach] = useState(true);
@@ -31,13 +30,17 @@ export function S19aInquiry() {
       const platform = detectPlatform();
       const info = attach
         ? {
-            app_version: platform === 'desktop' ? (window.sweetwo?.appVersion ?? '') : 'web',
+            app_version: platform !== 'web' ? (window.sweetwo?.appVersion ?? '') : 'web',
             platform,
-            os: navigator.userAgent.includes('Mac')
-              ? 'mac'
-              : navigator.userAgent.includes('Win')
-                ? 'windows'
-                : 'other',
+            os: /iPhone|iPad/.test(navigator.userAgent)
+              ? 'ios'
+              : navigator.userAgent.includes('Android')
+                ? 'android'
+                : navigator.userAgent.includes('Mac')
+                  ? 'mac'
+                  : navigator.userAgent.includes('Win')
+                    ? 'windows'
+                    : 'other',
             couple_state: d.space?.couple_state ?? '',
             sync: navigator.onLine ? 'online' : 'offline',
           }
@@ -51,37 +54,23 @@ export function S19aInquiry() {
       setBusy(false);
     }
   };
-  const body = (
-    <form
-      className="hg-stack"
-      style={{ gap: 'var(--space-6)' }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        void send();
-      }}
+  // 2026-11-04 ‘보내기’는 화면 아래 꽉 찬 주 버튼(질문 화면과 같은 자리)
+  return (
+    <QuestionLayout
+      title={copy.contact}
+      onBack={() => nav('/settings/help')}
+      primary={{ label: copy.sendInquiry, disabled: !ok || busy, loading: busy }}
+      onSubmit={() => void send()}
     >
-      <PageHeader
-        title={copy.contact}
-        backLabel={copy.back}
-        backTo={copy.help}
-        onBack={() => nav('/settings/help')}
-      />
-      <div className="hg-field">
-        <label className="hg-field__label" htmlFor={id}>
-          {copy.categoryLabel}
-        </label>
-        <select
-          id={id}
-          className="hg-input"
+      <div className="hg-list">
+        <SheetSelect<InquiryCategory>
+          label={copy.categoryLabel}
+          rowLabel={copy.categoryLabel}
           value={cat}
-          onChange={(e) => setCat(e.target.value as InquiryCategory)}
-        >
-          {CATS.map((c) => (
-            <option key={c} value={c}>
-              {copy.categories[c]}
-            </option>
-          ))}
-        </select>
+          options={CATS}
+          nameOf={(c) => copy.categories[c] ?? c}
+          onChange={setCat}
+        />
       </div>
       <InquiryText value={text} onChange={setText} />
       <Toggle
@@ -90,14 +79,8 @@ export function S19aInquiry() {
         checked={attach}
         onChange={setAttach}
       />
-      <div className="hg-row">
-        <Button variant="primary" type="submit" disabled={!ok || busy}>
-          {copy.sendInquiry}
-        </Button>
-      </div>
-    </form>
+    </QuestionLayout>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
 }
 
 /** 여러 줄 내용 칸(입력 칸 모양 그대로, 높이만 늘림) */

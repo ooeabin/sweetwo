@@ -6,6 +6,8 @@ export type AssetSide = 'asset' | 'debt';
 export interface AssetKind {
   key: string;
   name: string;
+  /** 어드민이 더한 칩(AD-19)만. key는 따르는 기본 항목 */
+  id?: string;
 }
 export interface AssetGroup {
   key: string;
@@ -153,6 +155,38 @@ export const assetGroups: AssetGroup[] = [
 ];
 
 export const assetGroupsOf = (side: AssetSide) => assetGroups.filter((g) => g.side === side);
+
+/** AD-19 항목 이름 목록으로 고칠 수 있는 묶음 */
+export const KIND_NAME_GROUPS = ['deposit', 'subscription', 'invest', 'pension'];
+export interface KindNameRow {
+  id: string;
+  grp: string;
+  base: string;
+  name: string;
+  added: boolean;
+  hidden: boolean;
+}
+/**
+ * AD-19 항목 이름 목록을 기본 칩에 입힘(09 6-2): 기본 항목은 이름 바꾸기·숨기기, 새 칩은
+ * 기본 항목들 다음에(들어온 순서), ‘기타(직접 입력)’는 늘 마지막. 그룹에 없는 항목을 따르는 줄은 버림.
+ */
+export function withKindNames(groups: AssetGroup[], rows: KindNameRow[]): AssetGroup[] {
+  return groups.map((g) => {
+    if (!KIND_NAME_GROUPS.includes(g.key)) return g;
+    const mine = rows.filter((r) => r.grp === g.key);
+    if (!mine.length) return g;
+    const base = g.kinds.filter((x) => x.key !== 'other');
+    const kinds = base.flatMap((x) => {
+      const o = mine.find((r) => !r.added && r.base === x.key);
+      if (o?.hidden) return [];
+      return [o ? { ...x, name: o.name } : x];
+    });
+    const extra = mine
+      .filter((r) => r.added && !r.hidden && base.some((x) => x.key === r.base))
+      .map((r) => ({ key: r.base, name: r.name, id: r.id }));
+    return { ...g, kinds: [...kinds, ...extra, ...g.kinds.filter((x) => x.key === 'other')] };
+  });
+}
 export const assetGroup = (key: string) => assetGroups.find((g) => g.key === key);
 /** 원금을 넣을 수 있는 묶음(투자·부동산) */
 export const hasPrincipal = (grp: string) => grp === 'invest' || grp === 'real_estate';
@@ -164,18 +198,18 @@ export interface NetWorthItem {
   amount: Won;
   principal?: Won | null;
   visibility?: 'all' | 'sum' | 'private';
-  status?: 'held' | 'sold';
+  status?: 'held' | 'sold' | 'matured';
 }
 
 /**
  * 순자산(06 9장): 자산 − 부채, 원금이 있으면 원금(없으면 평가금액). 예상 순자산 = 평가금액 기준.
- * 안 판 수익 = 예상 − 순자산. 비공개·판 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
+ * 안 판 수익 = 예상 − 순자산. 비공개·판 항목·만기 완료 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
  */
 export function netWorth(
   items: NetWorthItem[],
   partnerSums: { side: AssetSide; total: Won; principal_total: Won }[] = [],
 ) {
-  const live = items.filter((i) => i.visibility !== 'private' && i.status !== 'sold');
+  const live = items.filter((i) => i.visibility !== 'private' && (i.status ?? 'held') === 'held');
   const sum = (side: AssetSide, f: (i: NetWorthItem) => Won) =>
     live.filter((i) => i.side === side).reduce((t, i) => t + f(i), 0) +
     partnerSums
@@ -248,7 +282,7 @@ export function investSummary(
   partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
 ) {
   const live = items.filter(
-    (i) => i.side === 'asset' && i.visibility !== 'private' && i.status !== 'sold',
+    (i) => i.side === 'asset' && i.visibility !== 'private' && (i.status ?? 'held') === 'held',
   );
   const partner = partnerSums.filter((p) => p.side === 'asset');
   const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);

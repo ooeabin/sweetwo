@@ -7,3 +7,7 @@ pnpm-lock.yaml
 
 # supabase gen types 결과(손대지 않음)
 packages/core/src/db.types.ts
+
+# Capacitor 네이티브 프로젝트(생성물, 화면 묶음 사본 포함)
+apps/mobile/android/
+apps/mobile/ios/

@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 
 // 어드민(27 어드민 화면): 매직 링크 + 인증 앱, 대시보드, 회원 검색·상세(L0·L1), 문의 답변·동의 요청, 감사 로그, 문서.
 // 가짜 Supabase(http://127.0.0.1:54399). 관리자 cs01(CS), ops01(운영).
@@ -44,7 +44,7 @@ const session = (aal: 'aal1' | 'aal2') => ({
 });
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
@@ -58,6 +58,7 @@ interface Db {
   inquiryStatus: string;
   messages: { author: string; body: string; created_at: string }[];
   notices: Record<string, unknown>[];
+  kindNames: Record<string, unknown>[];
   approvals: {
     id: string;
     kind: string;
@@ -79,13 +80,17 @@ const json = (route: Route, body: unknown, status = 200) =>
     headers: { 'Access-Control-Allow-Origin': '*' },
   });
 
-async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: string[] } = {}) {
+async function mock(
+  page: Page,
+  o: { aal?: 'aal1' | 'aal2' | null; roles?: string[]; otpError?: string } = {},
+) {
   const db: Db = {
     rpc: [],
     roles: o.roles ?? ['cs'],
     inquiryStatus: 'received',
     messages: [{ author: 'user', body: '연결이 안 돼요', created_at: '2026-10-17T01:00:00Z' }],
     notices: [],
+    kindNames: [],
     approvals: [
       {
         id: 'ap0',
@@ -124,7 +129,18 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
     const url = new URL(req.url());
     const p = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
-    if (p === '/auth/v1/otp') return json(route, {});
+    if (p === '/auth/v1/otp')
+      return o.otpError
+        ? json(
+            route,
+            {
+              code: 429,
+              error_code: o.otpError,
+              msg: 'For security purposes, you can only request this after 10 seconds.',
+            },
+            429,
+          )
+        : json(route, {});
     if (p === '/auth/v1/user') return json(route, user);
     if (p === '/auth/v1/factors/f1/challenge')
       return json(route, { id: 'c1', type: 'totp', expires_at: 9999999999 });
@@ -135,6 +151,7 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
     }
     if (p === '/auth/v1/logout')
       return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    if (p === '/rest/v1/asset_kind_name') return json(route, db.kindNames);
     if (p === '/rest/v1/loan_rate')
       return json(route, [
         {
@@ -181,6 +198,24 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
         });
       case 'admin_search': {
         const q = String(body().p_q);
+        // 부부 공간 ID: 두 사람
+        if (q === 'space-1')
+          return json(route, [
+            {
+              user_id: CHANWOO,
+              email_masked: 'cha***@example.com',
+              created_at: '2026-10-01T00:00:00Z',
+              couple_state: 'connected',
+              subscription: '무료',
+            },
+            {
+              user_id: 'yebin-0000',
+              email_masked: 'yeb***@example.com',
+              created_at: '2026-10-03T00:00:00Z',
+              couple_state: 'connected',
+              subscription: '무료',
+            },
+          ]);
         return json(
           route,
           q === 'chanwoo@example.com' || q === 'A-10001'
@@ -196,6 +231,8 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
             : [],
         );
       }
+      case 'admin_note_export':
+        return json(route, 'cs01@sweetwo.kr');
       case 'admin_user_detail':
         return json(route, {
           user_id: CHANWOO,
@@ -223,6 +260,12 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
           sessions: 2,
           access: [],
         });
+      case 'admin_account_action':
+        return json(route, null);
+      case 'admin_request_login_move':
+        return body().p_new === 'nobody@example.com'
+          ? json(route, { message: 'new_not_found' }, 400)
+          : json(route, 'ap9');
       case 'admin_reveal':
         return json(route, { email: 'chanwoo@example.com' });
       case 'admin_inquiries':
@@ -326,7 +369,13 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
             decided_by: null,
             decided_at: null,
           });
-        return json(route, 'n1');
+        return json(route, `n${db.notices.length}`);
+      }
+      case 'admin_set_notice_email': {
+        const b = body();
+        const n = db.notices.find((x) => x.id === b.p_id);
+        if (n) n.email = b.p_email;
+        return json(route, null);
       }
       case 'admin_approvals':
         return json(
@@ -375,16 +424,33 @@ async function mock(page: Page, o: { aal?: 'aal1' | 'aal2' | null; roles?: strin
         ]);
       case 'admin_add_terms_version':
         return json(route, 't2');
+      case 'admin_save_kind_name': {
+        const b = body();
+        const id = (b.p_id as string | undefined) ?? `k${db.kindNames.length + 1}`;
+        db.kindNames = db.kindNames.filter((x) => x.id !== id);
+        db.kindNames.push({
+          id,
+          grp: b.p_grp,
+          base: b.p_base,
+          name: b.p_name,
+          added: b.p_added,
+          hidden: b.p_hidden,
+        });
+        return json(route, id);
+      }
       case 'admin_set_loan_rate':
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       case 'admin_app_config':
         return json(route, {
           min_version_desktop: '1.0.0',
           min_version_web: '1.0.0',
+          min_version_ios: '1.0.0',
+          min_version_android: '1.0.0',
           latest_version_desktop: '1.1.0',
           maintenance_starts_at: null,
           maintenance_ends_at: null,
           maintenance_message: null,
+          below_min: { desktop: 12, ios: 0, android: 3 },
         });
       case 'admin_request_app_config':
         return json(route, 'ap9');
@@ -429,7 +495,19 @@ test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
   await axe(page);
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
   await expect(page.getByText('메일함에서 링크를 눌러 주세요')).toBeVisible();
+  await expect(page.getByText(/초 뒤에 다시 받을 수 있어요/)).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
   expect(db.rpc).toEqual([]);
+});
+
+test('로그인: 너무 자주 누르면 조금 뒤에 다시', async ({ page }) => {
+  await mock(page, { aal: null, otpError: 'over_email_send_rate_limit' });
+  await page.goto('/');
+  await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
+  await page.getByRole('button', { name: '로그인 링크 받기' }).click();
+  await expect(page.getByText('조금 뒤에 다시 눌러 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
+  await axe(page);
 });
 
 test('2단계 인증: 인증 앱 숫자를 넣어야 들어감', async ({ page }) => {
@@ -477,6 +555,33 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   });
 });
 
+test('회원 검색 내려받기(AD-02 5번): 사유를 남겨야 받음, L0 열만, 첫 줄에 관리자 ID', async ({
+  page,
+}) => {
+  const db = await mock(page);
+  await page.goto('/members');
+  await page.getByLabel('이메일, 사용자 ID, 문의 번호로 찾기').fill('space-1');
+  await page.getByRole('button', { name: '보기' }).click();
+  await expect(page.getByText('yeb***@example.com')).toBeVisible();
+  await page.getByRole('button', { name: '내려받기' }).click();
+  const go = page.getByRole('button', { name: '사유 남기고 내려받기' });
+  await expect(go).toBeDisabled();
+  await page.getByLabel('내려받는 이유').fill('문의 A-10001 부부 확인');
+  await axe(page);
+  const dl = page.waitForEvent('download');
+  await go.click();
+  const file = await dl;
+  const text = (await import('node:fs')).readFileSync(await file.path(), 'utf8');
+  expect(text).toContain('내려받은 관리자 cs01@sweetwo.kr');
+  expect(text).toContain('yeb***@example.com');
+  expect(text).not.toContain('chanwoo@'); // 가리지 않은 이메일 없음
+  expect(db.rpc.find((r) => r.fn === 'admin_note_export')?.body).toMatchObject({
+    p_screen: 'AD-02',
+    p_reason: '문의 A-10001 부부 확인',
+    p_rows: 2,
+  });
+});
+
 test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 답변 대기, 동의 요청', async ({
   page,
 }) => {
@@ -507,6 +612,20 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
     p_scopes: ['income_spend'],
     p_raw: false,
   });
+
+  // 금액 원값: 화면 1개만, 최고 관리자 승인 요청
+  await ask.getByRole('button', { name: '목표' }).click();
+  await ask.getByLabel('금액 원값 요청').check();
+  await expect(
+    ask.getByText('최고 관리자가 승인하면 사용자에게 요청해요', { exact: false }),
+  ).toBeVisible();
+  await ask.getByLabel('사유').fill('목표 금액 확인');
+  await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
+  await expect(page.getByText('최고 관리자에게 원값 승인을 요청했어요')).toBeVisible();
+  expect(db.rpc.filter((r) => r.fn === 'admin_request_access').at(-1)?.body).toMatchObject({
+    p_scopes: ['goals'],
+    p_raw: true,
+  });
 });
 
 test('감사 로그와 문서', async ({ page }) => {
@@ -524,6 +643,44 @@ test('감사 로그와 문서', async ({ page }) => {
   await page.getByLabel('문서 검색').fill('어드민 화면');
   await page.getByRole('button', { name: '어드민 화면' }).click();
   await expect(page.getByRole('heading', { name: 'AD-06 문의 처리' })).toBeVisible();
+});
+
+test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인 수단 이전은 승인 요청', async ({
+  page,
+}) => {
+  const db = await mock(page);
+  await page.goto(`/members/${CHANWOO}`);
+  await heading(page, '회원 상세');
+  await page.getByRole('button', { name: '계정 조치' }).click();
+  const form = page.getByRole('region', { name: '계정 조치' });
+  await form.getByLabel('계정 조치').selectOption('delete_request');
+  await form.getByLabel('문의 번호').fill('A-10001');
+  await form.getByRole('button', { name: '실행' }).click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText('30일 뒤 지워져요');
+  await axe(page);
+  await dialog.getByRole('button', { name: '삭제 대리 접수' }).click();
+  await expect(form.getByRole('status')).toHaveText('처리했어요');
+  expect(db.rpc.find((r) => r.fn === 'admin_account_action')?.body).toMatchObject({
+    p_action: 'delete_request',
+    p_inquiry_no: 'A-10001',
+  });
+
+  await form.getByLabel('계정 조치').selectOption('login_move');
+  const go = form.getByRole('button', { name: '승인 요청' });
+  await expect(go).toBeDisabled();
+  await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('nobody@example.com');
+  await go.click();
+  await expect(form.getByRole('status')).toHaveText('새 계정을 찾지 못했어요');
+  await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('chanwoo.new@example.com');
+  await go.click();
+  await expect(form.getByRole('status')).toHaveText('최고 관리자에게 승인을 요청했어요');
+  await axe(page);
+  expect(db.rpc.filter((r) => r.fn === 'admin_request_login_move').at(-1)?.body).toMatchObject({
+    p_user: CHANWOO,
+    p_new: 'chanwoo.new@example.com',
+    p_inquiry_no: 'A-10001',
+  });
 });
 
 test('운영 역할: 회원 상세에 열람·조치 버튼 없음', async ({ page }) => {
@@ -555,6 +712,28 @@ test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저
   });
 });
 
+test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 보내기’', async ({ page }) => {
+  const db = await mock(page, { roles: ['ops'] });
+  await page.goto('/notices');
+  await page.getByRole('button', { name: '새 공지' }).click();
+  const form = page.getByRole('region', { name: '새 공지' });
+  await expect(form.getByRole('switch', { name: '이메일로도 보내기' })).toHaveCount(0);
+  await form.getByLabel('종류').selectOption('terms');
+  await form.getByLabel('제목').fill('이용약관이 바뀌어요');
+  await form.getByLabel('시작', { exact: true }).fill('2026-10-20T10:00');
+  await form.getByLabel('끝', { exact: true }).fill('2026-11-20T10:00');
+  const mail = form.getByRole('switch', { name: '이메일로도 보내기' });
+  await mail.click();
+  await expect(mail).toBeChecked();
+  await axe(page);
+  await form.getByRole('button', { name: '승인 요청' }).click();
+  await expect(page.getByRole('row', { name: /이용약관이 바뀌어요/ })).toContainText('승인 대기');
+  expect(db.rpc.find((r) => r.fn === 'admin_set_notice_email')?.body).toMatchObject({
+    p_id: 'n1',
+    p_email: true,
+  });
+});
+
 test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요청), 평균 금리', async ({ page }) => {
   const db = await mock(page, { roles: ['ops'] });
   await page.goto('/content');
@@ -575,6 +754,36 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
     .poll(() => db.rpc.find((r) => r.fn === 'admin_set_loan_rate')?.body.p_rate_bp)
     .toBe(650);
   await axe(page);
+
+  // AD-19 항목 이름 목록: 새 칩은 기본 항목을 따름, 기본 항목은 숨김
+  const kinds = page.getByRole('region', { name: '칩 추가' });
+  await kinds.getByLabel('종류').selectOption({ label: '예금·적금' });
+  await kinds.getByLabel('따르는 항목').selectOption({ label: '정책형 적금' });
+  await kinds.getByLabel('이름').fill('청년도약계좌');
+  await kinds.getByRole('button', { name: '칩 추가' }).click();
+  await expect(page.getByRole('row', { name: /청년도약계좌/ })).toContainText('정책형 적금');
+  const term = page.getByRole('row', { name: /정기예금/ });
+  await term.getByRole('checkbox', { name: '정기예금 숨김' }).check();
+  await term.getByRole('button', { name: '저장' }).click();
+  await expect(term.getByRole('button', { name: '처음대로' })).toBeVisible();
+  await page.mouse.move(0, 0); // 줄 hover 바탕은 빼고 봄
+  await axe(page);
+  expect(db.rpc.filter((r) => r.fn === 'admin_save_kind_name').map((r) => r.body)).toEqual([
+    {
+      p_grp: 'deposit',
+      p_base: 'policy_saving',
+      p_name: '청년도약계좌',
+      p_added: true,
+      p_hidden: false,
+    },
+    {
+      p_grp: 'deposit',
+      p_base: 'term_deposit',
+      p_name: '정기예금',
+      p_added: false,
+      p_hidden: true,
+    },
+  ]);
 });
 
 test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버전·점검은 승인 요청, 관리자 계정', async ({
@@ -591,6 +800,9 @@ test('시스템(최고 관리자): 승인(내 요청은 승인 못 함), 앱 버
 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
   await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
+  await expect(
+    page.getByText('지금 최소 버전보다 낮은 기기 12대(90일 안에 켠 기기)'),
+  ).toBeVisible();
   await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인을 요청했어요')).toBeVisible();

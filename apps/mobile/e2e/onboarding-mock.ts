@@ -1,0 +1,2253 @@
+import type { Page, Route } from '@playwright/test';
+import { chanwoo, fakeJwt, SB } from './supabase-mock';
+
+// 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense, account, 첫 플랜). 테스트가 db를 들여다본다.
+export interface MemDb {
+  me: Record<string, unknown>;
+  space: Record<string, unknown> | null;
+  goals: Record<string, unknown>[];
+  fixed: Record<string, unknown>[];
+  accounts: Record<string, unknown>[];
+  plans: { args: Record<string, unknown> }[];
+  todos: Record<string, unknown>[];
+  categories: Record<string, unknown>[];
+  closes: Record<string, unknown>[];
+  spends: Record<string, unknown>[];
+  bigs: Record<string, unknown>[];
+  deposits: Record<string, unknown>[];
+  /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
+  partner: Record<string, unknown> | null;
+  /** 합류 서버 함수 호출 기록 */
+  joinCalls: Record<string, unknown>[];
+  /** 비상금 넣기, 꺼내기(emergency_move) */
+  emergencyMoves: Record<string, unknown>[];
+  /** 배우자 생일(partner_birthday) */
+  partnerBirthday?: { month: number; day: number } | null;
+  consents: Record<string, unknown>[];
+  shares: Record<string, unknown> | null;
+  /** 제안(08 6장) */
+  proposals: Record<string, unknown>[];
+  /** 우리 자산: 내가 볼 수 있는 행, 이력, 배우자 합계만, 월말 순자산 */
+  assets: Record<string, unknown>[];
+  assetHistory: Record<string, unknown>[];
+  partnerSums: Record<string, unknown>[];
+  netWorth: Record<string, unknown>[];
+  /** 배우자 활동(H-08) rpc 결과 */
+  activity: Record<string, unknown>[];
+  /** 달성 축하 문장 재료(goal_story) */
+  goalStory: { months: number; together: number };
+  /** 결혼 비용 항목·결제(G-07) */
+  weddingItems: Record<string, unknown>[];
+  weddingPayments: Record<string, unknown>[];
+  /** 기간 수입 변경(F-05f) */
+  incomePeriods: Record<string, unknown>[];
+  /** 체크리스트 완료(S-02). 없으면 404(이번 달 체크리스트 할 일 숨김) */
+  checklistDone?: Record<string, unknown>[];
+  /** 저장소에 올린 파일 경로 */
+  storage?: string[];
+  /** 소셜 계정 프로필 사진(함수 social-avatar가 돌려줄 그림, 25 S-11e). 없으면 204 */
+  socialPhoto?: Buffer;
+  /** 함수 social-avatar를 부른 횟수 */
+  socialCalls?: number;
+  /** 붙인 사진(목표·기록) */
+  photos?: { goal_id?: string; care_record_id?: string; path: string; sort: number }[];
+  /** 다른 수입(O-35b), 상여금(O-35) */
+  incomeItems: Record<string, unknown>[];
+  incomeEvents: Record<string, unknown>[];
+  /** 캘린더 가족·챙길 날 */
+  family: Record<string, unknown>[];
+  cares: Record<string, unknown>[];
+  /** 다녀온 뒤 기록(Y-08), 목표 사용 */
+  careRecords: Record<string, unknown>[];
+  goalUses: Record<string, unknown>[];
+  /** 공휴일(읽기만) */
+  holidays: { date: string; name: string; kind: string }[];
+  kindNames: Record<string, unknown>[];
+  /** 알림 센터(내 알림) */
+  notifications: Record<string, unknown>[];
+  invites: { code: string; expires_at: string; used_at: string | null }[];
+  unlinks: Record<string, unknown>[];
+  inquiries: Record<string, unknown>[];
+  sessions: Record<string, unknown>[];
+  goalChanges: Record<string, unknown>[];
+  pendingTerms: { kind: string; version: string }[];
+  mailBounced: boolean;
+  /** 생활비 체크 답(W-03) */
+  livingChecks: Record<string, unknown>[];
+  /** 앱 안 공지(AD-10, 게시된 것) */
+  notices: Record<string, unknown>[];
+  /** 꼼꼼 모드 통장 잔액(W-04b) */
+  balances: Record<string, unknown>[];
+  /** 월급 계획(save_split)와 이번 달 월급 체크리스트(start_checklist) */
+  splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
+  checklists: Record<string, unknown>[];
+  /** 목표 넣기·빼기·꺼내 쓰기(goal_move) */
+  goalMoves: Record<string, unknown>[];
+  rpc: string[];
+}
+
+const json = (route: Route, body: unknown, status = 200) =>
+  route.fulfill({
+    status,
+    contentType: 'application/json',
+    body: JSON.stringify(body),
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  });
+
+const eqId = (url: URL) => url.searchParams.get('id')?.replace(/^eq\./, '');
+
+/** PATCH·GET 조건(열=eq.값, 열=is.null)이 행과 맞는지(id·select·order·limit 빼고) */
+function matchesFilters(row: Record<string, unknown>, url: URL) {
+  for (const [k, v] of url.searchParams) {
+    if (['id', 'select', 'order', 'limit', 'offset'].includes(k)) continue;
+    if (
+      v === 'is.null' ? row[k] != null : v.startsWith('eq.') && String(row[k] ?? '') !== v.slice(3)
+    )
+      return false;
+  }
+  return true;
+}
+const inIds = (url: URL) =>
+  (url.searchParams.get('id') ?? '')
+    .replace(/^in\.\(|\)$/g, '')
+    .split(',')
+    .map((x) => x.replace(/"/g, ''));
+
+/** now: 화면 시계를 고정한 시각(첫 플랜을 만든 시각으로 씀) */
+export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Promise<MemDb> {
+  const db: MemDb = {
+    me: {
+      id: chanwoo.id,
+      provider: 'kakao',
+      noti_prefs: {},
+      quiet_start: 22,
+      quiet_end: 8,
+      default_visibility: 'sum',
+      nickname: null,
+      side: null,
+      birth_year: null,
+      employment: null,
+      space_id: null,
+      onboarding_step: null,
+      onboarding_done_at: null,
+      monthly_income: null,
+      income_variable: false,
+      payday: null,
+      payday_last: false,
+      allowance: null,
+    },
+    space: null,
+    goals: [],
+    fixed: [],
+    accounts: [],
+    plans: [],
+    todos: [],
+    categories: [],
+    closes: [],
+    spends: [],
+    bigs: [],
+    deposits: [],
+    partner: null,
+    consents: [],
+    shares: null,
+    proposals: [],
+    assets: [],
+    assetHistory: [],
+    partnerSums: [],
+    netWorth: [],
+    activity: [],
+    goalStory: { months: 0, together: 0 },
+    weddingItems: [],
+    weddingPayments: [],
+    incomePeriods: [],
+    incomeItems: [],
+    incomeEvents: [],
+    family: [],
+    cares: [],
+    joinCalls: [],
+    careRecords: [],
+    goalUses: [],
+    emergencyMoves: [],
+    holidays: [],
+    kindNames: [],
+    notifications: [],
+    invites: [],
+    unlinks: [],
+    inquiries: [],
+    livingChecks: [],
+    balances: [],
+    splits: [],
+    checklists: [],
+    goalMoves: [],
+    notices: [],
+    goalChanges: [],
+    pendingTerms: [],
+    mailBounced: false,
+    sessions: [
+      {
+        id: 's-this',
+        user_agent: 'Mozilla/5.0 (Macintosh) Chrome/130 Safari/537',
+        created_at: '2026-10-01T00:00:00Z',
+        last_used_at: '2026-10-07T00:00:00Z',
+        current: true,
+      },
+    ],
+    rpc: [],
+  };
+  // 서버 goal_saved 흉내: 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기
+  const goalSaved = (id: string) => {
+    const g = db.goals.find((x) => x.id === id);
+    let v = Number(g?.other_held ?? 0);
+    for (const c of db.checklists)
+      for (const l of c.pay_check_line as Record<string, unknown>[])
+        if (l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
+          v += Number(l.actual ?? l.planned);
+    for (const mv of db.goalMoves)
+      if (mv.goal_id === id && !mv.deleted_at)
+        v += mv.kind === 'in' ? Number(mv.amount) : -Number(mv.amount);
+    return Math.max(v, 0);
+  };
+  // 서버 goal_lines_sync 흉내: 모으는 목표만 월급 계획 저금 줄(각자: 우리 목표는 모든 월급 계획, 내 목표는 주인 것)
+  const goalLinesSync = (g: Record<string, unknown>) => {
+    const want = (sp: (typeof db.splits)[number]) =>
+      !g.deleted_at &&
+      ['active', 'delayed'].includes(String(g.status ?? 'active')) &&
+      (g.owner_user_id == null || g.owner_user_id === sp.owner_user_id);
+    for (const sp of db.splits) {
+      const has = sp.split_line.some((l) => l.goal_id === g.id);
+      if (want(sp) && !has) {
+        const last = Math.max(
+          -1,
+          ...sp.split_line.filter((l) => l.kind === 'saving').map((l) => Number(l.sort)),
+        );
+        for (const l of sp.split_line) if (Number(l.sort) > last) l.sort = Number(l.sort) + 1;
+        sp.split_line.push({
+          id: `${sp.id}-g-${String(g.id)}`,
+          split_id: sp.id,
+          kind: 'saving',
+          goal_id: g.id,
+          user_id: null,
+          name: null,
+          amount: 0,
+          sort: last + 1,
+        });
+        sp.split_line.sort((a, b) => Number(a.sort) - Number(b.sort));
+      } else if (!want(sp) && has) {
+        sp.split_line = sp.split_line.filter((l) => l.goal_id !== g.id);
+        for (const c of db.checklists)
+          c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
+            (l) => !(l.goal_id === g.id && l.state === 'wait'),
+          );
+      }
+    }
+  };
+  // 로그인된 세션(localStorage)
+  await page.addInitScript(
+    ({ token, user }) => {
+      const now = Math.floor(Date.now() / 1000);
+      localStorage.setItem(
+        'sb-session',
+        JSON.stringify({
+          access_token: token,
+          token_type: 'bearer',
+          expires_in: 3600,
+          expires_at: now + 3600,
+          refresh_token: 'rt',
+          user,
+        }),
+      );
+      localStorage.setItem('sweetwo.started', '1');
+    },
+    {
+      token: fakeJwt(chanwoo.id),
+      user: {
+        id: chanwoo.id,
+        aud: 'authenticated',
+        role: 'authenticated',
+        email: chanwoo.email,
+        app_metadata: { provider: 'kakao' },
+        user_metadata: {},
+        created_at: '2026-10-15T00:00:00Z',
+      },
+    },
+  );
+
+  await page.route(`${SB}/**`, async (route) => {
+    const req = route.request();
+    const method = req.method();
+    if (method === 'OPTIONS') {
+      return route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Methods': '*',
+        },
+      });
+    }
+    const url = new URL(req.url());
+    const path = url.pathname;
+    const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
+    // 개수만 읽기(HEAD, count=exact): P-02a ‘안 옮겨요’
+    if (method === 'HEAD') {
+      const n =
+        path === '/rest/v1/goal'
+          ? db.goals.filter((g) => !g.deleted_at && g.template !== 'emergency').length
+          : path === '/rest/v1/salary_split'
+            ? db.splits.length
+            : path === '/rest/v1/pay_checklist'
+              ? db.checklists.length
+              : 0;
+      return route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Expose-Headers': 'Content-Range',
+          'Content-Range': `*/${n}`,
+        },
+      });
+    }
+    // 소셜 계정 프로필 사진 받기(함수 social-avatar, 25 S-11e ‘처음 사진’)
+    if (path === '/functions/v1/social-avatar') {
+      db.socialCalls = (db.socialCalls ?? 0) + 1;
+      const cors = { 'Access-Control-Allow-Origin': '*' };
+      return db.socialPhoto
+        ? route.fulfill({
+            status: 200,
+            headers: { ...cors, 'Content-Type': 'application/octet-stream' },
+            body: db.socialPhoto,
+          })
+        : route.fulfill({ status: 204, headers: cors });
+    }
+    // 저장소(S-11e 프로필 사진): 올리기, 서명 주소, 사진 받기, 지우기
+    if (path.startsWith('/storage/v1/')) {
+      const cors = { 'Access-Control-Allow-Origin': '*' };
+      if (path.startsWith('/storage/v1/object/sign/') && method === 'POST') {
+        const b = body() as { paths?: string[] };
+        return json(
+          route,
+          (b.paths ?? []).map((p) => ({
+            path: p,
+            signedURL: `/object/sign/avatars/${p}?token=t`,
+            error: null,
+          })),
+        );
+      }
+      if (path.startsWith('/storage/v1/object/sign/'))
+        return route.fulfill({
+          status: 200,
+          headers: { ...cors, 'Content-Type': 'image/png' },
+          body: Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            'base64',
+          ),
+        });
+      if (method === 'POST' || method === 'PUT') {
+        db.storage = [...(db.storage ?? []).filter((x) => x !== path), path];
+        return json(route, { Key: path.replace('/storage/v1/object/', '') });
+      }
+      if (method === 'DELETE') {
+        db.storage = [];
+        return json(route, []);
+      }
+    }
+
+    if (path === '/rest/v1/app_config')
+      return json(route, { min_version_desktop: '0.0.0', min_version_web: '0.0.0' });
+    if (path === '/rest/v1/rpc/login_state') {
+      return json(route, {
+        state: db.me.status === 'deletion_requested' ? 'deletion_requested' : 'existing',
+        provider: 'kakao',
+        onboarding_done: !!db.me.onboarding_done_at,
+        onboarding_step: db.me.onboarding_step,
+      });
+    }
+    if (path.startsWith('/rest/v1/rpc/')) {
+      const fn = path.slice('/rest/v1/rpc/'.length);
+      db.rpc.push(fn);
+      if (fn === 'ensure_my_space') {
+        if (!db.space) {
+          db.space = {
+            id: 'space-1',
+            couple_state: 'not_joined',
+            partner_nickname: null,
+            marriage_status: null,
+            wedding_date: null,
+            wedding_month: null,
+            wedding_date_estimated: false,
+            housing: null,
+            child_plan: null,
+            wedding_budget: null,
+            wedding_budget_estimated: false,
+            family_support_answer: null,
+            family_support: null,
+            family_support_estimated: false,
+            wedding_saved: null,
+            newlywed_home: null,
+            newlywed_home_month: null,
+            prep_money_mode: null,
+            partner_income: null,
+            partner_income_estimated: false,
+            partner_income_unknown: false,
+            fixed_total: null,
+            fixed_total_estimated: false,
+            living_budget: null,
+            living_budget_estimated: false,
+            loan_repayment: null,
+            split_mode: null,
+            split_ratio: null,
+            split_deferred: false,
+            account_mode: null,
+            salary_mode: 'separate',
+            joint_cycle_day: null,
+            base_day: null,
+            base_day_last: false,
+            version: 1,
+          };
+          db.me.space_id = 'space-1';
+        }
+        return json(route, 'space-1');
+      }
+      if (fn === 'save_split') {
+        // 서버 흉내: 주인의 월급 계획 줄을 통째로 교체
+        const b = body() as unknown as { p_lines: Record<string, unknown>[]; p_owner?: string };
+        const owner = b.p_owner ?? null;
+        let sp = db.splits.find((x) => x.owner_user_id === owner);
+        if (!sp) {
+          sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
+          db.splits.push(sp);
+        }
+        sp.split_line = b.p_lines.map((l, i) => ({
+          id: `${sp.id}-line-${i}`,
+          split_id: sp.id,
+          kind: l.kind,
+          goal_id: l.goal_id ?? null,
+          user_id: l.kind === 'allowance' ? (l.user_id ?? owner ?? db.me.id) : null,
+          name: l.name ?? null,
+          amount: l.amount,
+          sort: i,
+        }));
+        // 이번 사이클 체크 안 한 줄만 새 금액(sync_checklist 흉내)
+        const cl = db.checklists.find((c) => c.owner_user_id === owner);
+        if (cl) {
+          const kept = (cl.pay_check_line as Record<string, unknown>[]).filter(
+            (x) => x.state !== 'wait',
+          );
+          const same = (a: Record<string, unknown>, b: Record<string, unknown>) =>
+            a.kind === b.kind &&
+            (a.goal_id ?? null) === (b.goal_id ?? null) &&
+            (a.name ?? null) === (b.name ?? null);
+          cl.pay_check_line = [
+            ...kept,
+            ...sp.split_line
+              .filter((l) => Number(l.amount) > 0 && !kept.some((k) => same(k, l)))
+              .map((l): Record<string, unknown> => ({
+                ...l,
+                id: `${String(l.id)}-c`,
+                planned: l.amount,
+                actual: null,
+                state: 'wait',
+              })),
+          ].sort((a, b) => Number(a.sort) - Number(b.sort));
+        }
+        return json(route, sp.id);
+      }
+      if (fn === 'check_pay_line') {
+        // 서버 흉내: 줄 상태, 다른 금액(0이면 못 함), 체크리스트 상태
+        const b = body() as unknown as { p_line: string; p_state: string; p_actual?: number };
+        for (const c of db.checklists) {
+          const lines = c.pay_check_line as Record<string, unknown>[];
+          const l = lines.find((x) => x.id === b.p_line);
+          if (!l) continue;
+          if (b.p_state === 'checked' && l.state === 'checked' && l.checked_by !== db.me.id)
+            return json(route, { message: 'already_checked', code: '40001' }, 409);
+          const zero = b.p_state === 'checked' && b.p_actual === 0;
+          l.state = zero ? 'skipped' : b.p_state;
+          l.actual = b.p_state === 'checked' && b.p_actual ? b.p_actual : null;
+          l.checked_by = b.p_state === 'wait' ? null : db.me.id;
+          l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
+          c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'touch_app')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (fn === 'note_login') return json(route, false);
+      if (fn === 'note_device')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (fn === 'space_goals') {
+        // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
+        return json(
+          route,
+          db.goals
+            .filter((g) => !g.deleted_at)
+            .sort((a, b) => Number(a.priority) - Number(b.priority))
+            .map((g) =>
+              g.owner_user_id && g.owner_user_id !== db.me.id && g.visibility === 'amount'
+                ? { ...g, name: '개인 목표', template: 'custom', details: {} }
+                : g,
+            ),
+        );
+      }
+      if (fn === 'goal_saved_sums') {
+        return json(
+          route,
+          db.goals
+            .filter((g) => !g.deleted_at)
+            .map((g) => ({ goal_id: g.id, saved: goalSaved(String(g.id)) })),
+        );
+      }
+      if (fn === 'move_goal') {
+        const b = body() as unknown as { p_goal: string; p_kind: string; p_amount: number };
+        if (b.p_kind !== 'in' && b.p_amount > goalSaved(b.p_goal))
+          return json(route, { message: 'too_much', code: '22023' }, 400);
+        const id = `move-${db.goalMoves.length + 1}`;
+        db.goalMoves.push({
+          id,
+          goal_id: b.p_goal,
+          kind: b.p_kind,
+          amount: b.p_amount,
+          created_by: db.me.id,
+          created_at: new Date().toISOString(),
+          deleted_at: null,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_goal_move') {
+        const b = body() as unknown as { p_id: string };
+        const mv = db.goalMoves.find((x) => x.id === b.p_id);
+        if (mv) mv.deleted_at = new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'goal_checked_sums') {
+        const sums: Record<string, number> = {};
+        for (const c of db.checklists)
+          for (const l of c.pay_check_line as Record<string, unknown>[])
+            if (l.kind === 'saving' && l.state === 'checked' && l.goal_id)
+              sums[String(l.goal_id)] =
+                (sums[String(l.goal_id)] ?? 0) + Number(l.actual ?? l.planned);
+        return json(
+          route,
+          Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
+        );
+      }
+      if (fn === 'start_checklist') {
+        const b = body() as unknown as { p_owner?: string };
+        const sp = db.splits.find((x) => x.owner_user_id === (b.p_owner ?? null));
+        if (!sp) return json(route, { message: 'no_split' }, 400);
+        if (!db.me.payday && !db.me.payday_last) return json(route, null);
+        const id = `checklist-${db.checklists.length + 1}`;
+        if (!db.checklists.some((c) => c.owner_user_id === sp.owner_user_id))
+          db.checklists.push({
+            id,
+            split_id: sp.id,
+            owner_user_id: sp.owner_user_id,
+            label: '9월 월급',
+            cycle_start: '2026-09-25',
+            cycle_end: '2026-10-24',
+            state: 'open',
+            pay_check_line: sp.split_line
+              .filter((l) => Number(l.amount) > 0)
+              .map((l) => ({
+                ...l,
+                id: `${l.id}-c`,
+                planned: l.amount,
+                actual: null,
+                state: 'wait',
+                checked_by: null,
+                checked_at: null,
+              })),
+          });
+        return json(route, id);
+      }
+      if (fn === 'start_first_plan') {
+        if (!db.plans.length) db.plans.push({ args: body() });
+        return json(route, 'plan-1');
+      }
+      if (fn === 'create_cycle_plan') {
+        // 서버 흉내: 같은 사이클이면 그대로, 통장 방식 예약 적용, 새 플랜이 맨 앞
+        const b = body();
+        if (!db.plans.some((p) => p.args.p_cycle_start === b.p_cycle_start)) {
+          db.plans.unshift({ args: b });
+          if (db.space?.account_mode_next) {
+            db.space.account_mode = db.space.account_mode_next;
+            db.space.account_mode_next = null;
+          }
+        }
+        return json(route, 'plan-1');
+      }
+      if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      if (fn === 'join_space' && db.me.onboarding_done_at && db.me.space_id === 'space-solo')
+        return json(route, 'has_records'); // 혼자 시작한 기록 있음(A-07 6번)
+      if (fn === 'join_moving_records') {
+        // P-02a: 내 명의 자산만 옮기고 합류
+        const vis = (body().p_vis ?? {}) as Record<string, string>;
+        for (const a of db.assets)
+          if (a.owner === 'person' && a.owner_user_id === db.me.id)
+            Object.assign(a, { space_id: 'space-1', visibility: vis[String(a.id)] ?? 'sum' });
+        Object.assign(db.me, {
+          space_id: 'space-1',
+          onboarding_step: 'P-03',
+          onboarding_done_at: null,
+        });
+        return json(route, 'joined');
+      }
+      if (fn === 'join_space') {
+        const sp = db.space ?? {};
+        Object.assign(db.me, {
+          space_id: 'space-1',
+          side: 'bride',
+          nickname: db.me.nickname ?? sp.partner_nickname,
+          monthly_income: db.me.monthly_income ?? sp.partner_income,
+          onboarding_step: sp.partner_income ? 'P-02B' : 'P-03',
+          onboarding_done_at: null,
+        });
+        return json(route, 'joined');
+      }
+      if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
+      if (fn === 'partner_birth_year')
+        return json(route, (db.partner as { birth_year?: number } | null)?.birth_year ?? null);
+      // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 월급 계획 또는 대기), 사전 입력 지우기
+      // 설정 S-11f·S-11d(서버가 월급 계획을 합치거나 나눔: 여기서는 방식만)
+      if (fn === 'set_salary_mode') {
+        if (db.space) db.space.salary_mode = body().p_mode;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_joint_cycle_day') {
+        if (db.space) db.space.joint_cycle_day = body().p_day;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_join_salary_mode') {
+        const mode = body().p_mode;
+        const starter = (db.partner?.id as string | undefined) ?? null;
+        if (db.space) db.space.salary_mode = mode;
+        for (const sp of db.splits)
+          if (mode === 'joint' && sp.owner_user_id === starter) sp.owner_user_id = null;
+          else if (mode === 'separate' && sp.owner_user_id === null) sp.owner_user_id = starter;
+        db.joinCalls.push({ fn, ...body() });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'complete_join') {
+        const b = body();
+        db.joinCalls.push({ fn, ...b });
+        const lines = b.p_lines as Record<string, unknown>[] | undefined;
+        if (lines) {
+          const owner = db.space?.salary_mode === 'joint' ? null : String(db.me.id);
+          const found = db.splits.find((x) => x.owner_user_id === owner);
+          const sp = found ?? {
+            id: `split-${db.splits.length + 1}`,
+            owner_user_id: owner,
+            split_line: [] as Record<string, unknown>[],
+          };
+          if (!found) db.splits.push(sp);
+          sp.split_line = lines.map((l, i) => ({
+            id: `${sp.id}-line-${i}`,
+            split_id: sp.id,
+            kind: l.kind,
+            goal_id: l.goal_id ?? null,
+            user_id: l.kind === 'allowance' ? (l.user_id ?? owner ?? db.me.id) : null,
+            name: l.name ?? null,
+            amount: l.amount,
+            sort: i,
+          }));
+        }
+        if (db.space) db.space.couple_state = 'connected';
+        Object.assign(db.me, {
+          onboarding_step: lines ? 'P-06' : 'P-WAIT',
+          onboarding_done_at: new Date().toISOString(),
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'discard_prefill') {
+        for (const a of db.assets)
+          if (a.owner === 'person' && a.owner_user_id === null && a.created_by !== db.me.id)
+            a.deleted_at = new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'finish_join') {
+        if (db.space) db.space.couple_state = 'connected';
+        Object.assign(db.me, {
+          onboarding_step: 'P-11',
+          onboarding_done_at: new Date().toISOString(),
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'update_pending_shares') {
+        db.shares = body();
+        const a = db.plans[0]?.args;
+        const shares = (db.shares.p_shares ?? []) as Record<string, unknown>[];
+        if (a)
+          a.p_lines = ((a.p_lines as Record<string, unknown>[]) ?? []).map((l) => ({
+            ...l,
+            ...(shares.find((x) => x.account_role === l.account_role) ?? {}),
+          }));
+        return json(route, shares.length);
+      }
+      // 제안: 서버 함수와 같은 규칙만 간단히(항목당 열린 제안 하나, 용돈은 사람마다)
+      // 양가 비용 예산 바로 저장(혼자): 같은 종류 챙길 날 쓸 돈, 양가 비용 목표 금액
+      if (fn === 'save_family_budget') {
+        const a = body().p_after as Record<string, number>;
+        const parent = (id: unknown) =>
+          db.family.some((f) => f.id === id && f.relation === 'parent');
+        for (const c of db.cares) {
+          if (c.category !== 'family' || c.deleted_at) continue;
+          const key =
+            c.kind === 'seollal' || c.kind === 'chuseok'
+              ? 'holiday'
+              : c.kind === 'birthday' && parent(c.member_id)
+                ? 'birthday'
+                : c.kind === 'parents_day'
+                  ? 'parents_day'
+                  : 'other';
+          if (a[key] !== undefined) c.budget = a[key];
+        }
+        for (const g of db.goals)
+          if (g.template === 'family_cost') g.target_amount = a.target_amount;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      // 신랑·신부(S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 같이 바꿈
+      if (fn === 'set_my_side') {
+        const side = String(body().p_side);
+        const flip = (v: unknown) => (v === 'groom' ? 'bride' : v === 'bride' ? 'groom' : v);
+        const had = db.me.side;
+        if (had !== side) {
+          db.me.side = side;
+          if (db.partner) (db.partner as Record<string, unknown>).side = flip(side);
+          if (had) {
+            for (const f of db.family) f.side = flip(f.side);
+            for (const c of db.cares)
+              Object.assign(c, { side: flip(c.side), carer: flip(c.carer) });
+          }
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'save_base_day') {
+        const a = body().p_after as { base_day: number | null; base_day_last: boolean };
+        Object.assign(db.space ?? {}, a);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'propose' || fn === 'propose_in_close') {
+        const b = body();
+        const me = String(db.me.id);
+        const item = String(b.p_item);
+        const target = (b.p_target as string | undefined) ?? null;
+        const goal = db.goals.find((g) => g.id === target);
+        const cur = db.proposals.find(
+          (p) =>
+            p.status === 'open' &&
+            p.item === item &&
+            (item !== 'allowance' || p.proposer === me) &&
+            (p.target_id ?? null) === target,
+        );
+        if (cur) cur.status = 'superseded';
+        const trips = cur ? Number(cur.round_trips) + (cur.proposer !== me ? 1 : 0) : 0;
+        const at = new Date(Date.now() + db.proposals.length * 1000).toISOString();
+        const before =
+          item === 'allowance'
+            ? { allowance: db.me.allowance ?? null }
+            : item === 'split'
+              ? { mode: db.space?.split_mode ?? null, starter_ratio: db.space?.split_ratio ?? null }
+              : item === 'goal_amount'
+                ? { target_amount: goal?.target_amount ?? null }
+                : item === 'goal_deadline'
+                  ? { deadline: goal?.deadline ?? null }
+                  : item === 'goal_pause'
+                    ? { paused: goal?.status === 'paused' }
+                    : item === 'base_day'
+                      ? {
+                          base_day: db.space?.base_day ?? null,
+                          base_day_last: !!db.space?.base_day_last,
+                        }
+                      : item === 'family_budget'
+                        ? {
+                            target_amount:
+                              db.goals.find((g) => g.template === 'family_cost')?.target_amount ??
+                              null,
+                          }
+                        : item === 'living_budget'
+                          ? { living_budget: db.space?.living_budget ?? null }
+                          : { deleted: false };
+        const row = {
+          id: `prop-${db.proposals.length + 1}`,
+          space_id: 'space-1',
+          item,
+          target_id: target,
+          proposer: me,
+          before,
+          after: item === 'goal_delete' ? { deleted: true } : b.p_after,
+          status: 'open',
+          apply_on: b.p_apply_on,
+          seen_at: null,
+          response: null,
+          responded_at: null,
+          oppose_count: cur?.oppose_count ?? 0,
+          round_trips: trips,
+          together: trips >= 2,
+          replaces: cur?.id ?? null,
+          month_close_id: (b.p_close as string | undefined) ?? null,
+          applied_at: null,
+          created_at: at,
+          updated_at: at,
+          version: 1,
+        };
+        db.proposals.push(row);
+        return json(route, row.id);
+      }
+      if (fn === 'respond_proposal' || fn === 'withdraw_proposal') {
+        const b = body();
+        const p = db.proposals.find((x) => x.id === b.p_id);
+        if (!p) return json(route, { code: '42501', message: 'not_allowed' }, 403);
+        if (p.status !== 'open') return json(route, p.status);
+        if (fn === 'withdraw_proposal') p.status = 'withdrawn';
+        else if (b.p_response === 'oppose') {
+          Object.assign(p, {
+            status: 'held',
+            response: 'oppose',
+            oppose_count: Number(p.oppose_count) + 1,
+          });
+        } else {
+          const after = p.after as Record<string, unknown>;
+          const goal = db.goals.find((g) => g.id === p.target_id);
+          if (p.item === 'goal_add') {
+            const gid = `goal-${db.goals.length + 1}`;
+            for (const a of db.assets)
+              if (((after.asset_ids as string[]) ?? []).includes(String(a.id))) a.goal_id = gid;
+            db.goals.push({
+              id: gid,
+              status: 'active',
+              priority: Math.max(0, ...db.goals.map((g) => Number(g.priority))) + 1,
+              created_by: p.proposer,
+              created_at: new Date().toISOString(),
+              after_marriage: false,
+              deleted_at: null,
+              ...after,
+            });
+          } else if (String(p.item).startsWith('goal_')) {
+            if (goal && p.item === 'goal_amount') goal.target_amount = after.target_amount;
+            if (goal && p.item === 'goal_deadline') goal.deadline = after.deadline;
+            if (goal && p.item === 'goal_pause') goal.status = after.paused ? 'paused' : 'active';
+            if (goal && p.item === 'goal_delete') goal.deleted_at = new Date().toISOString();
+          } else if (p.item === 'allowance') {
+            const who = p.proposer === db.me.id ? db.me : db.partner;
+            if (who) who.allowance = after.allowance;
+          } else if (db.space) {
+            Object.assign(db.space, {
+              split_mode: after.mode,
+              split_ratio: after.starter_ratio ?? null,
+              split_deferred: false,
+            });
+          }
+          Object.assign(p, { status: 'applied', response: 'like', together: false });
+        }
+        return json(route, p.status);
+      }
+      if (fn === 'mark_proposal_seen') {
+        const p = db.proposals.find((x) => x.id === body().p_id);
+        if (p && !p.seen_at) p.seen_at = new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'apply_due_proposals') return json(route, 0);
+      if (fn === 'partner_asset_sums') return json(route, db.partnerSums);
+      if (fn === 'net_worth_history') return json(route, db.netWorth);
+      if (fn === 'partner_activity') return json(route, db.activity);
+      // G-05 달성: 축하는 사람마다 한 번
+      // F-04a 만기된 돈 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
+      if (fn === 'sell_asset') {
+        // F-04b~d: 받은 금액을 통장에, 일부만이면 남은 평가금액, 다 팔면 매도 완료. 실현 손익 = 받은 금액 − 원금
+        const b = body();
+        const a = db.assets.find((x) => x.id === b.p_asset);
+        const t = db.assets.find((x) => x.id === b.p_to);
+        if (t) t.amount = Number(t.amount) + Number(b.p_received);
+        const p0 = a?.principal === null || a?.principal === undefined ? null : Number(a.principal);
+        const amt = Number(a?.amount ?? 0);
+        // 일부만: 판 만큼의 원금 = 원금 × 판 비율
+        const sold =
+          p0 === null
+            ? null
+            : b.p_remain === undefined
+              ? p0
+              : Math.round((p0 * (amt - Number(b.p_remain))) / (amt || 1));
+        if (a && b.p_remain === undefined) a.status = 'sold';
+        else if (a) a.amount = Number(b.p_remain);
+        return json(route, sold === null ? null : Number(b.p_received) - sold);
+      }
+      if (fn === 'settle_matured') {
+        const b = body();
+        const a = db.assets.find((x) => x.id === b.p_asset);
+        if (a && b.p_to) {
+          const t = db.assets.find((x) => x.id === b.p_to);
+          if (t) t.amount = Number(t.amount) + Number(a.amount);
+          a.status = 'matured';
+        } else if (a) a.maturity_date = b.p_new_date;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'achieve_goal') {
+        const g = db.goals.find((x) => x.id === body().p_goal);
+        const seen = (g?.achieved_seen as string[] | undefined) ?? [];
+        if (g && (g.status === 'active' || g.status === 'delayed')) {
+          Object.assign(g, { status: 'achieved', achieved_seen: [db.me.id] });
+          return json(route, true);
+        }
+        if (g && g.status === 'achieved' && !seen.includes(String(db.me.id))) {
+          g.achieved_seen = [...seen, db.me.id];
+          return json(route, true);
+        }
+        return json(route, false);
+      }
+      if (fn === 'goal_story') return json(route, [db.goalStory]);
+      // G-07 예산 바꾸기: 연결된 부부는 제안, 아니면 바로
+      if (fn === 'change_wedding_budget') {
+        const b = body();
+        const it = db.weddingItems.find((x) => x.id === b.p_item);
+        if (db.space?.couple_state === 'connected') {
+          db.proposals.push({
+            id: `p-${db.proposals.length + 1}`,
+            space_id: db.space.id,
+            item: it ? 'wedding_item_budget' : 'wedding_budget',
+            target_id: null,
+            wedding_item_id: it?.id ?? null,
+            proposer: db.me.id,
+            before: { budget: it ? it.budget : db.space.wedding_budget },
+            after: { budget: b.p_budget },
+            apply_on: b.p_apply_on,
+            status: 'open',
+            response: null,
+            round_trips: 0,
+            oppose_count: 0,
+            together: false,
+            created_at: new Date().toISOString(),
+          });
+          return json(route, 'proposed');
+        }
+        if (it) it.budget = b.p_budget;
+        else if (db.space) db.space.wedding_budget = b.p_budget;
+        return json(route, 'applied');
+      }
+      if (fn === 'space_avatars')
+        return json(
+          route,
+          [db.me, db.partner]
+            .filter((u): u is Record<string, unknown> => !!u)
+            .map((u) => ({
+              user_id: u.id,
+              path: u.avatar_path ?? null,
+              updated_at: u.avatar_updated_at ?? null,
+            })),
+        );
+      if (fn === 'mark_social_avatar_checked') {
+        db.me.avatar_social_checked_at ??= new Date().toISOString();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_avatar') {
+        const b = body();
+        Object.assign(db.me, {
+          avatar_path: b.p_path ?? null,
+          avatar_updated_at: new Date().toISOString(),
+        });
+        return json(route, null);
+      }
+      // 함께 모드(W-04a): 같이 하기·나감·함께 정하기 확정
+      if (fn === 'join_close_together' || fn === 'leave_close_together') {
+        const c = db.closes.find((x) => x.id === body().p_close);
+        if (c && fn === 'join_close_together')
+          Object.assign(c, {
+            together_by: db.me.id,
+            together_at: c.together_at ?? new Date().toISOString(),
+            together_left_at: null,
+          });
+        if (c && fn === 'leave_close_together') c.together_left_at = new Date().toISOString();
+        return json(route, null);
+      }
+      if (fn === 'confirm_together') {
+        const p = db.proposals.find((x) => x.id === body().p_id);
+        if (p) Object.assign(p, { status: 'applied', response: 'like', together: false });
+        return json(route, null);
+      }
+      if (fn === 'set_checklist_done') {
+        const b = body();
+        db.checklistDone = (db.checklistDone ?? []).filter((x) => x.key !== b.p_key);
+        if (b.p_done)
+          db.checklistDone.push({
+            space_id: db.space?.id,
+            key: b.p_key,
+            done_by: db.me.id,
+            done_at: new Date().toISOString(),
+          });
+        return json(route, null);
+      }
+      if (fn === 'set_income_period') {
+        const b = body();
+        const id = `ip-${db.incomePeriods.length + 1}`;
+        db.incomePeriods.push({
+          id,
+          user_id: db.me.id,
+          start_month: b.p_start,
+          end_month: b.p_end,
+          amount: b.p_amount,
+          base_income: db.me.monthly_income,
+          supplement: b.p_supplement,
+          split_apply_on: b.p_split_apply_on ?? null,
+          ended_at: null,
+          deleted_at: null,
+        });
+        if (b.p_split_apply_on)
+          db.proposals.push({
+            id: `p-${db.proposals.length + 1}`,
+            space_id: db.space?.id,
+            item: 'split',
+            target_id: null,
+            proposer: db.me.id,
+            before: { mode: db.space?.split_mode, starter_ratio: db.space?.split_ratio },
+            after: { mode: 'income' },
+            apply_on: b.p_split_apply_on,
+            status: 'open',
+            response: null,
+            round_trips: 0,
+            oppose_count: 0,
+            together: false,
+            created_at: new Date().toISOString(),
+          });
+        return json(route, id);
+      }
+      if (fn === 'record_wedding_payment') {
+        const b = body();
+        const it = db.weddingItems.find((x) => x.id === b.p_item);
+        if (!it) return json(route, { message: 'not_found' }, 400);
+        db.weddingPayments = db.weddingPayments.filter(
+          (x) => !(x.item_id === it.id && x.part === b.p_part),
+        );
+        db.weddingPayments.push({
+          id: `wp-${db.weddingPayments.length + 1}`,
+          item_id: it.id,
+          part: b.p_part,
+          amount: b.p_amount,
+          paid_on: new Date().toISOString().slice(0, 10),
+          paid_from: b.p_paid_from,
+          deleted_at: null,
+        });
+        const paid = (part: string, plan: unknown) =>
+          Number(
+            db.weddingPayments.find((x) => x.item_id === it.id && x.part === part)?.amount ??
+              plan ??
+              0,
+          );
+        return json(
+          route,
+          Math.max(
+            paid('deposit', it.deposit_amount) +
+              paid('balance', it.balance_amount) -
+              Number(it.budget),
+            0,
+          ),
+        );
+      }
+      // G-05 사용 기록: 쓴 돈만큼 꺼내 쓰기 + 사용 완료, 남은 돈 / 남은 돈 다른 목표로
+      if (fn === 'finish_goal_use') {
+        const b = body();
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g) return json(route, { message: 'no_goal' }, 400);
+        if (g.status === 'used') return json(route, { message: 'goal_used', code: '40001' }, 400);
+        const saved = goalSaved(String(g.id));
+        const use = Math.min(Number(b.p_spent), saved);
+        if (use > 0)
+          db.goalMoves.push({
+            id: `move-${db.goalMoves.length + 1}`,
+            goal_id: g.id,
+            kind: 'use',
+            amount: use,
+            created_by: db.me.id,
+            created_at: new Date().toISOString(),
+            deleted_at: null,
+          });
+        g.status = 'used';
+        return json(route, saved - use);
+      }
+      if (fn === 'move_goal_saved') {
+        const b = body();
+        const amt = goalSaved(String(b.p_goal));
+        const at = new Date().toISOString();
+        if (amt > 0)
+          db.goalMoves.push(
+            {
+              id: `move-${db.goalMoves.length + 1}`,
+              goal_id: b.p_goal,
+              kind: 'out',
+              amount: amt,
+              created_by: db.me.id,
+              created_at: at,
+              deleted_at: null,
+            },
+            {
+              id: `move-${db.goalMoves.length + 2}`,
+              goal_id: b.p_to,
+              kind: 'in',
+              amount: amt,
+              created_by: db.me.id,
+              created_at: at,
+              deleted_at: null,
+            },
+          );
+        return json(route, amt);
+      }
+      // 이번 달만 바꾸기(W-01a): 차이는 빠지는 곳 줄이 받고 몫은 비율대로, 기준값도
+      if (fn === 'adjust_plan') {
+        const a = body();
+        const args = db.plans[0]?.args;
+        const lines = (args?.p_lines as Record<string, unknown>[]) ?? [];
+        const A = lines.find((l) => l.account_role === a.p_role);
+        const B = lines.find((l) => l.account_role === a.p_counter);
+        if (!A || !B) return json(route, { message: 'no_line' }, 400);
+        const diff = Number(a.p_amount) - Number(A.amount);
+        const scale = (l: Record<string, unknown>, amt: number) => {
+          const g =
+            Number(l.amount) > 0
+              ? Math.round((amt * Number(l.amount_groom ?? 0)) / Number(l.amount))
+              : Math.round(amt / 2);
+          Object.assign(l, { amount: amt, amount_groom: g, amount_bride: amt - g });
+        };
+        const bAfter = Number(B.amount) - diff;
+        if (bAfter < 0) return json(route, { message: 'not_enough' }, 400);
+        scale(A, Number(a.p_amount));
+        scale(B, bAfter);
+        const key = (r: unknown) => (r === 'goal_fund' ? 'goalFund' : String(r));
+        const parts = (args?.p_snapshot as { parts?: Record<string, number> } | undefined)?.parts;
+        if (parts) {
+          parts[key(a.p_role)] = Number(a.p_amount);
+          parts[key(a.p_counter)] = bAfter;
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      // 월급 나누기 체크(W-02): 플랜 줄(p_lines)에 바로 기록
+      if (fn === 'check_split' || fn === 'uncheck_split') {
+        const a = body();
+        const lines = (db.plans[0]?.args.p_lines as Record<string, unknown>[]) ?? [];
+        const l = lines[Number(String(a.p_line).replace('line-', '')) - 1];
+        const side = String(a.p_side);
+        if (!l) return json(route, { message: 'not_member' }, 400);
+        if (fn === 'uncheck_split') {
+          l[`${side}_done_at`] = null;
+          l[`${side}_done_by`] = null;
+          l[`${side}_done_amount`] = null;
+          return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+        }
+        if (l[`${side}_done_at`] && a.p_amount === undefined) return json(route, 'already');
+        l[`${side}_done_at`] ??= new Date().toISOString();
+        l[`${side}_done_by`] ??= db.me.id;
+        l[`${side}_done_amount`] = a.p_amount ?? l[`amount_${side}`];
+        return json(route, 'ok');
+      }
+      // 다녀온 뒤 기록(Y-08): 기록, 다녀왔어요, 목표 사용, 생활비로 냈으면 ‘목표자금 → 공동 생활비’ 줄
+      // 사진(22 목표 사진, 24 Y-08c): 올린 파일만 붙임
+      if (fn === 'set_goal_photo') {
+        const a = body();
+        const g = db.goals.find((x) => x.id === a.p_goal);
+        if (!g) return json(route, { message: 'not_found' }, 400);
+        db.photos = (db.photos ?? []).filter((x) => x.goal_id !== g.id);
+        if (a.p_path) db.photos.push({ goal_id: String(g.id), path: String(a.p_path), sort: 0 });
+        g.photo_path = a.p_path ?? null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'set_goal_preset') {
+        const a = body();
+        const g = db.goals.find((x) => x.id === a.p_goal);
+        if (!g) return json(route, { message: 'not_found' }, 400);
+        db.photos = (db.photos ?? []).filter((x) => x.goal_id !== g.id);
+        g.photo_path = null;
+        g.photo_preset = a.p_preset;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'add_care_photo') {
+        const a = body();
+        const path = String(a.p_path);
+        if (!(db.storage ?? []).some((x) => x.endsWith(path)))
+          return json(route, { message: 'bad_path' }, 400);
+        const n = (db.photos ?? []).filter((x) => x.care_record_id === a.p_record).length;
+        db.photos = [...(db.photos ?? []), { care_record_id: String(a.p_record), path, sort: n }];
+        return json(route, `photo-${db.photos.length}`);
+      }
+      if (fn === 'record_care') {
+        const a = body();
+        const care = db.cares.find((c) => c.id === a.p_care);
+        if (!care) return json(route, { message: 'not_member' }, 400);
+        const rid = `rec-${db.careRecords.length + 1}`;
+        db.careRecords.push({
+          id: rid,
+          care_day_id: care.id,
+          member_id: care.member_id ?? null,
+          occurs_on: a.p_on,
+          amount: a.p_amount,
+          paid_from: a.p_paid_from,
+          gifts: a.p_gifts,
+          gift_name: a.p_gift_name || null,
+          memo: a.p_memo || null,
+          deleted_at: null,
+        });
+        Object.assign(care, { status: 'done', status_on: a.p_on });
+        const goal =
+          ['goal_fund', 'living'].includes(String(a.p_paid_from)) && care.category === 'family'
+            ? db.goals.find((g) => g.template === 'family_cost')
+            : undefined;
+        let line = 0;
+        if (goal && Number(a.p_amount) > 0) {
+          db.goalUses.push({
+            goal_id: goal.id,
+            amount: a.p_amount,
+            used_on: a.p_on,
+            deleted_at: null,
+          });
+          const lines = db.plans[0]?.args.p_lines as Record<string, unknown>[] | undefined;
+          line = Math.min(Number(a.p_move ?? 0), Number(a.p_amount));
+          if (a.p_paid_from === 'living' && lines && line > 0) {
+            const bride = db.me.side === 'bride';
+            lines.push({
+              target: 'account',
+              account_role: 'living',
+              goal_id: goal.id,
+              kind: 'goal_to_living',
+              amount: line,
+              amount_groom: bride ? 0 : line,
+              amount_bride: bride ? line : 0,
+            });
+          } else line = 0;
+        }
+        return json(route, { record: rid, line });
+      }
+      if (fn === 'mark_notifications_read') {
+        const ids = (body().p_ids as string[] | undefined) ?? null;
+        let n = 0;
+        for (const r of db.notifications)
+          if (!r.read_at && (!ids || ids.includes(String(r.id)))) {
+            r.read_at = new Date().toISOString();
+            n++;
+          }
+        return json(route, n);
+      }
+      if (fn === 'invest_answers')
+        return json(route, [
+          {
+            mine: db.me.invest_answer ?? null,
+            partner: (db.partner as Record<string, unknown> | null)?.invest_answer ?? null,
+          },
+        ]);
+      if (fn === 'goal_asset_sums') {
+        const t: Record<string, { goal_id: string; n: number; total: number }> = {};
+        for (const a of db.assets) {
+          if (!a.goal_id || a.deleted_at || a.side !== 'asset' || a.visibility === 'private')
+            continue;
+          const k = String(a.goal_id);
+          t[k] ??= { goal_id: k, n: 0, total: 0 };
+          t[k].n += 1;
+          t[k].total += Number(a.principal ?? a.amount);
+        }
+        return json(route, Object.values(t));
+      }
+      if (fn === 'request_unlink') {
+        // 서버 request_unlink 흉내(재기획): 나누지 않고 해제 대기만, 기한 + 14일
+        const body = JSON.parse(route.request().postData() ?? '{}') as { p_confirm: string };
+        if (body.p_confirm !== '연결 해제')
+          return json(route, { message: 'confirm_mismatch' }, 400);
+        const row = {
+          id: `unlink-${db.unlinks.length + 1}`,
+          space_id: 'space-1',
+          requested_by: db.me.id,
+          requested_at: new Date().toISOString(),
+          deadline: '2026-10-21',
+          ratio: 50,
+          plan: [],
+          status: 'pending',
+          cancelled_at: null,
+          confirmed_at: null,
+        };
+        db.unlinks.push(row);
+        if (db.space) db.space.couple_state = 'unlink_pending';
+        return json(route, row.id);
+      }
+      if (fn === 'agree_unlink') {
+        // 서버 confirm_unlink 흉내: 확정, 혼자 쓰기(새 공간 대신 같은 공간 상태만), 30일 다시 연결
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u)
+          Object.assign(u, {
+            status: 'confirmed',
+            how: 'agreed',
+            final_plan: u.plan,
+            confirmed_at: '2026-10-07T01:00:00Z',
+            reconnect_until: '2026-11-06T01:00:00Z',
+          });
+        if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
+        db.partner = null;
+        // 같이 쓰던 데이터는 모두 지움, 해제 안내(S-12h)부터
+        db.goals.length = 0;
+        db.splits.length = 0;
+        db.checklists.length = 0;
+        db.me.onboarding_step = 'S-12H';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'start_after_unlink') {
+        Object.assign(db.me, { onboarding_step: 'O-11', onboarding_done_at: null });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'counter_unlink') {
+        // 받은 사람 몫 → counter의 mine(요청한 사람 몫) = 금액 − 받은 사람 몫
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_shares: Record<string, number>;
+        };
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u) {
+          const plan = u.plan as { asset_id: string; amount: number; mine: number }[];
+          u.counter = plan.map((e) => {
+            const theirs = body.p_shares[e.asset_id];
+            return theirs === undefined ? e : { ...e, mine: e.amount - theirs };
+          });
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'accept_counter_unlink') {
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u)
+          Object.assign(u, {
+            status: 'confirmed',
+            how: 'counter',
+            final_plan: u.counter,
+            confirmed_at: '2026-10-07T01:00:00Z',
+            reconnect_until: '2026-11-06T01:00:00Z',
+          });
+        if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
+        db.partner = null;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_sessions') return json(route, db.sessions);
+      if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
+      if (fn === 'pending_terms') return json(route, db.pendingTerms);
+      if (fn === 'my_mail_bounced') return json(route, db.mailBounced);
+      if (fn === 'send_desktop_link') return json(route, true);
+      if (fn === 'agree_terms') {
+        const b = body();
+        const n = db.pendingTerms.filter(
+          (p) => p.kind !== 'marketing' || 'p_marketing' in b,
+        ).length;
+        db.pendingTerms = db.pendingTerms.filter(
+          (p) => p.kind === 'marketing' && !('p_marketing' in b),
+        );
+        return json(route, n);
+      }
+      if (fn === 'answer_goal_gap') {
+        const b = body();
+        db.goalUses = db.goalUses.filter((u) => u.month_close_id !== b.p_close);
+        if (b.p_goal)
+          db.goalUses.push({
+            id: `use-close-${db.goalUses.length + 1}`,
+            goal_id: b.p_goal,
+            amount: b.p_amount,
+            used_on: '2026-10-24',
+            paid_from: 'goal_fund',
+            source: 'close',
+            month_close_id: b.p_close,
+            care: null,
+            deleted_at: null,
+          });
+        for (const c of db.closes)
+          if (c.id === b.p_close)
+            Object.assign(c, {
+              goal_gap_amount: b.p_amount,
+              goal_gap_goal_id: b.p_goal ?? null,
+              goal_gap_not_goal: !b.p_goal,
+            });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'send_close_bundle') {
+        const b = body();
+        return json(
+          route,
+          db.proposals.filter((p) => p.month_close_id === b.p_close && p.status === 'open').length,
+        );
+      }
+      if (fn === 'answer_actual_income') {
+        const b = body();
+        const amount = Number(b.p_amount);
+        const base = Number(db.me.monthly_income ?? 0);
+        for (const c of db.closes)
+          if (c.id === b.p_close)
+            c[db.me.side === 'bride' ? 'income_actual_bride' : 'income_actual_groom'] = amount;
+        return json(route, amount - base);
+      }
+      if (fn === 'rest_missed_months') {
+        const b = body();
+        for (const p of db.plans)
+          if ((b.p_plans as string[]).includes(String(p.args.id ?? 'plan-1')))
+            p.args.status = 'skipped';
+        return json(route, (b.p_plans as string[]).length);
+      }
+      if (fn === 'set_living_check') {
+        if (db.space) db.space.living_check = body().p_on;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_living_check') {
+        const b = body();
+        if (db.livingChecks.some((x) => x.plan_id === b.p_plan))
+          return json(route, { message: 'already_answered', code: 'P0001' }, 400);
+        const id = `living-${db.livingChecks.length + 1}`;
+        db.livingChecks.push({
+          id,
+          plan_id: b.p_plan,
+          answer: b.p_answer,
+          over_amount: b.p_over ?? null,
+          cover_from: b.p_cover ?? null,
+          allowance_side: b.p_cover === 'allowance' ? (db.me.side ?? null) : null,
+          allowance_cut: b.p_cover === 'allowance' ? b.p_over : null,
+          answered_by: db.me.id,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_living_check') {
+        const b = body();
+        db.livingChecks = db.livingChecks.filter((x) => x.id !== b.p_id);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'end_sessions') {
+        const b = body();
+        const before = db.sessions.length;
+        db.sessions = db.sessions.filter((x) => (b.p_id ? x.id !== b.p_id : x.current));
+        return json(route, before - db.sessions.length);
+      }
+      if (fn === 'create_inquiry') {
+        const b = body();
+        const no = `A-${10001 + db.inquiries.length}`;
+        const id = `inq-${db.inquiries.length + 1}`;
+        db.inquiries.unshift({
+          id,
+          no,
+          category: b.p_category,
+          body: b.p_body,
+          attach: b.p_attach ?? null,
+          status: 'received',
+          created_at: '2026-10-07T01:00:00Z',
+          done_at: null,
+          inquiry_message: [
+            { id: `${id}-m1`, author: 'user', body: b.p_body, created_at: '2026-10-07T01:00:00Z' },
+          ],
+          access_request: [],
+        });
+        return json(route, no);
+      }
+      if (fn === 'add_inquiry_message') {
+        const b = body();
+        const q = db.inquiries.find((x) => x.id === b.p_inquiry);
+        if (q)
+          (q.inquiry_message as unknown[]).push({
+            id: `m-${Date.now()}`,
+            author: 'user',
+            body: b.p_body,
+            created_at: '2026-10-07T02:00:00Z',
+          });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_access_request' || fn === 'stop_access') {
+        const b = body();
+        for (const q of db.inquiries)
+          for (const a of q.access_request as Record<string, unknown>[])
+            if (a.id === b.p_id)
+              Object.assign(
+                a,
+                fn === 'stop_access'
+                  ? { status: 'done' }
+                  : b.p_accept
+                    ? { status: 'approved', expires_at: '2026-10-08T01:00:00Z' }
+                    : { status: 'declined' },
+              );
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'request_account_deletion') {
+        db.me.status = 'deletion_requested';
+        return json(route, '2026-11-06');
+      }
+      if (fn === 'cancel_account_deletion') {
+        db.me.status = 'active';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'trash_rows') {
+        // 서버 trash_rows 흉내: 지운 자산(내 명의·공동), 목표
+        const rows = [
+          ...db.assets
+            .filter((a) => a.deleted_at && (a.owner === 'joint' || a.owner_user_id === db.me.id))
+            .map((a) => ({
+              kind: 'asset',
+              id: a.id,
+              name: a.name,
+              sub: a.side,
+              deleted_at: a.deleted_at,
+              deleted_by: a.deleted_by ?? db.me.id,
+            })),
+          ...db.goals
+            .filter((g) => g.deleted_at)
+            .map((g) => ({
+              kind: 'goal',
+              id: g.id,
+              name: g.name,
+              sub: null,
+              deleted_at: g.deleted_at,
+              deleted_by: g.deleted_by ?? db.me.id,
+            })),
+        ].sort((a, b) => String(b.deleted_at).localeCompare(String(a.deleted_at)));
+        return json(route, rows);
+      }
+      if (fn === 'restore_trash') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_kind: string;
+          p_id: string;
+        };
+        const list =
+          body.p_kind === 'goal' ? db.goals : body.p_kind === 'care_day' ? db.cares : db.assets;
+        const r = list.find((x) => x.id === body.p_id);
+        if (r) r.deleted_at = null;
+        return json(route, 'restored');
+      }
+      if (fn === 'purge_trash') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as {
+          p_kind?: string;
+          p_id?: string;
+        };
+        const before = db.assets.length + db.goals.length;
+        const keep = (x: Record<string, unknown>) =>
+          !x.deleted_at || (body.p_id !== undefined && x.id !== body.p_id);
+        db.assets = db.assets.filter(keep);
+        db.goals = db.goals.filter(keep);
+        return json(route, before - db.assets.length - db.goals.length);
+      }
+      if (fn === 'unlink_partner_name') return json(route, '예빈');
+      if (fn === 'request_reconnect') {
+        const u = db.unlinks.find((x) => x.status === 'confirmed');
+        if (u) Object.assign(u, { reconnect_by: db.me.id, reconnect_answer: null });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'answer_reconnect') {
+        const body = JSON.parse(route.request().postData() ?? '{}') as { p_accept: boolean };
+        const u = db.unlinks.find((x) => x.status === 'confirmed');
+        if (u && !body.p_accept) u.reconnect_answer = 'declined';
+        if (u && body.p_accept) {
+          Object.assign(u, { reconnect_answer: 'accepted', status: 'reconnected' });
+          if (db.space)
+            Object.assign(db.space, { couple_state: 'connected', partner_nickname: '예빈' });
+        }
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'start_new_invite') {
+        if (db.space)
+          Object.assign(db.space, { couple_state: 'not_joined', partner_nickname: null });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_unlink')
+        return json(
+          route,
+          db.space?.couple_state === 'solo'
+            ? db.unlinks.filter((x) => x.status === 'confirmed')
+            : [],
+        );
+      if (fn === 'cancel_unlink') {
+        const u = db.unlinks.find((x) => x.status === 'pending');
+        if (u) u.status = 'cancelled';
+        if (db.space) db.space.couple_state = 'connected';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'create_invite' || fn === 'renew_invite') {
+        // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
+        const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';
+        const open = db.invites.find((i) => !i.used_at && !past(i));
+        if (fn === 'create_invite' && open) return json(route, [open]);
+        if (open) open.expires_at = '2026-10-01T00:00:00Z';
+        const row = {
+          code: db.invites.length ? `R${db.invites.length}NEWX`.slice(0, 6) : 'K7M2QX',
+          expires_at: '2026-10-22T00:00:00Z',
+          used_at: null,
+        };
+        db.invites.unshift(row);
+        return json(route, [row]);
+      }
+      if (fn === 'move_emergency') {
+        const a = body();
+        const id = `em-${db.emergencyMoves.length + 1}`;
+        db.emergencyMoves.unshift({
+          id,
+          kind: a.p_kind,
+          amount: a.p_amount,
+          reason: a.p_reason ?? null,
+          moved_on: '2026-10-07',
+          created_by: db.me.id,
+          deleted_at: null,
+        });
+        return json(route, id);
+      }
+      if (fn === 'undo_emergency_move') {
+        const m = db.emergencyMoves.find((x) => x.id === body().p_id);
+        if (m) m.deleted_at = 'now';
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'partner_birthday')
+        return json(route, db.partnerBirthday ? [db.partnerBirthday] : []);
+      return json(route, { message: `e2e: 모르는 함수 ${fn}` }, 404);
+    }
+    if (path === '/rest/v1/asset') {
+      if (method === 'GET' && url.searchParams.get('id'))
+        return json(
+          route,
+          db.assets.filter((a) => a.id === eqId(url)),
+        );
+      if (method === 'GET')
+        return json(
+          route,
+          db.assets
+            .filter((a) => !a.deleted_at && (a.status ?? 'held') === 'held')
+            .sort((a, b) => Number(b.amount) - Number(a.amount)),
+        );
+      if (method === 'POST') {
+        const now = new Date().toISOString();
+        const r: Record<string, unknown> = {
+          id: `asset-${db.assets.length + 1}`,
+          principal: null,
+          maturity_date: null,
+          monthly_payment: null,
+          interest_rate: null,
+          rate_estimated: false,
+          paid_count: null,
+          pay_from: null,
+          goal_id: null,
+          estimated: false,
+          status: 'held',
+          created_by: db.me.id,
+          created_at: now,
+          updated_at: now,
+          deleted_at: null,
+          ...(req.postDataJSON() as Record<string, unknown>),
+        };
+        db.assets.push(r);
+        db.assetHistory.push({
+          id: db.assetHistory.length + 1,
+          asset_id: r.id,
+          amount: r.amount,
+          source: 'manual',
+          recorded_at: now,
+        });
+        return json(route, { id: r.id }, 201);
+      }
+      if (method === 'PATCH' && url.searchParams.get('id')?.startsWith('in.')) {
+        const ids = inIds(url);
+        for (const a of db.assets) if (ids.includes(String(a.id))) Object.assign(a, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const a = db.assets.find((x) => x.id === eqId(url));
+        const b = body();
+        // 열 때 값이 그대로일 때만(updateIfUnchanged): 안 맞으면 0행
+        if (a && !matchesFilters(a, url)) return json(route, []);
+        if (a) {
+          const now = new Date().toISOString();
+          if ('amount' in b && b.amount !== a.amount)
+            db.assetHistory.push({
+              id: db.assetHistory.length + 1,
+              asset_id: a.id,
+              amount: b.amount,
+              source: 'manual',
+              recorded_at: now,
+            });
+          Object.assign(a, b, { updated_at: now, updated_by: db.me.id });
+        }
+        if (url.searchParams.get('select')) return json(route, a ? [{ id: a.id }] : []);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/asset_history') {
+      const id = url.searchParams.get('asset_id')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.assetHistory
+          .filter((h) => h.asset_id === id)
+          .sort((a, b) => String(b.recorded_at).localeCompare(String(a.recorded_at))),
+      );
+    }
+    if (path === '/rest/v1/proposal') {
+      return json(
+        route,
+        [...db.proposals].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+      );
+    }
+    if (path === '/rest/v1/app_user') {
+      if (method === 'GET') return json(route, db.me);
+      if (method === 'PATCH') Object.assign(db.me, body());
+      return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
+    if (path === '/rest/v1/wedding_item') {
+      if (method === 'GET')
+        return json(
+          route,
+          db.weddingItems.filter((x) => !x.deleted_at),
+        );
+      if (method === 'POST') {
+        const r: Record<string, unknown> = {
+          id: `wi-${db.weddingItems.length + 1}`,
+          deposit_amount: null,
+          deposit_on: null,
+          balance_amount: null,
+          balance_on: null,
+          deleted_at: null,
+          created_at: new Date().toISOString(),
+          ...body(),
+        };
+        db.weddingItems.push(r);
+        return json(route, { id: r.id }, 201);
+      }
+      if (method === 'PATCH') {
+        const it = db.weddingItems.find((x) => x.id === eqId(url));
+        if (it) Object.assign(it, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/income_period' && method === 'GET') return json(route, db.incomePeriods);
+    if (path === '/rest/v1/checklist_done' && method === 'GET')
+      return db.checklistDone
+        ? json(route, db.checklistDone)
+        : json(route, { message: 'off' }, 404);
+    if (path === '/rest/v1/wedding_payment' && method === 'GET')
+      return json(
+        route,
+        db.weddingPayments.filter((x) => !x.deleted_at),
+      );
+    if (path === '/rest/v1/salary_split' && method === 'GET') return json(route, db.splits);
+    if (path === '/rest/v1/goal_move' && method === 'GET') {
+      const gid = url.searchParams.get('goal_id')?.replace(/^eq\./, '');
+      return json(route, db.goalMoves.filter((x) => x.goal_id === gid && !x.deleted_at).reverse());
+    }
+    if (path === '/rest/v1/pay_check_line' && method === 'GET') {
+      const gid = url.searchParams.get('goal_id')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.checklists.flatMap((c) =>
+          (c.pay_check_line as Record<string, unknown>[])
+            .filter((l) => l.goal_id === gid)
+            .map((l) => ({ ...l, pay_checklist: { label: c.label, cycle_start: c.cycle_start } })),
+        ),
+      );
+    }
+    if (path === '/rest/v1/pay_checklist' && method === 'GET') {
+      // 지난 체크리스트(W-02 ‹ ›): cycle_end < before, 주인, 최근 것부터
+      const lt = url.searchParams.get('cycle_end')?.replace(/^lt\./, '');
+      if (url.searchParams.get('cycle_end')?.startsWith('lt.') && lt) {
+        const own = url.searchParams.get('owner_user_id') ?? '';
+        return json(
+          route,
+          (db.checklists as Record<string, unknown>[])
+            .filter((c) => String(c.cycle_end) < lt)
+            .filter((c) =>
+              own === 'is.null'
+                ? c.owner_user_id === null
+                : `eq.${String(c.owner_user_id)}` === own,
+            )
+            .sort((a, b) => (String(a.cycle_start) < String(b.cycle_start) ? 1 : -1)),
+        );
+      }
+      const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
+      return json(
+        route,
+        gte
+          ? (db.checklists as Record<string, unknown>[]).filter((c) => String(c.cycle_end) >= gte)
+          : db.checklists,
+      );
+    }
+    if (path === '/rest/v1/couple_space') {
+      if (method === 'GET') return json(route, db.space);
+      if (method === 'PATCH' && db.space) Object.assign(db.space, body());
+      return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
+    if (path === '/rest/v1/goal') {
+      if (method === 'GET' && url.searchParams.get('id'))
+        return json(
+          route,
+          db.goals.filter((g) => g.id === eqId(url)),
+        );
+      if (method === 'GET') {
+        return json(
+          route,
+          db.goals
+            .filter((g) => !g.deleted_at)
+            .sort((a, b) => Number(a.priority) - Number(b.priority)),
+        );
+      }
+      if (method === 'POST') {
+        const rows = req.postDataJSON() as Record<string, unknown>[];
+        for (const r of Array.isArray(rows) ? rows : [rows]) {
+          db.goals.push({
+            id: `goal-${db.goals.length + 1}`,
+            details: {},
+            other_held: 0,
+            deadline: null,
+            target_amount: null,
+            amount_estimated: false,
+            deadline_estimated: false,
+            after_marriage: false,
+            status: 'active',
+            owner: 'together',
+            owner_user_id: null,
+            visibility: 'all',
+            created_at: new Date().toISOString(),
+            created_by: db.me.id,
+            deleted_at: null,
+            ...r,
+          });
+        }
+        goalLinesSync(db.goals[db.goals.length - 1] as Record<string, unknown>);
+        // .select('id').single() → 만든 행 하나
+        if (url.searchParams.get('select'))
+          return json(route, { id: db.goals[db.goals.length - 1]?.id }, 201);
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
+        const hit: string[] = [];
+        for (const g of db.goals)
+          if (ids.includes(String(g.id)) && matchesFilters(g, url)) {
+            Object.assign(g, body(), {
+              updated_at: new Date().toISOString(),
+              updated_by: db.me.id,
+            });
+            goalLinesSync(g);
+            hit.push(String(g.id));
+          }
+        if (url.searchParams.get('select'))
+          return json(
+            route,
+            hit.map((id) => ({ id })),
+          );
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    // 가족·챙길 날(Y-02, Y-05)
+    for (const [tbl, rows, defaults] of [
+      [
+        'family_member',
+        db.family,
+        { birth_lunar: false, birth_leap: false, korean_age: true, memo: null },
+      ],
+      [
+        'care_day',
+        db.cares,
+        {
+          member_id: null,
+          side: null,
+          month: null,
+          day: null,
+          leap: false,
+          once_on: null,
+          budget: 0,
+          carer: 'together',
+          alerts: [30, 7],
+          status: 'todo',
+          status_on: null,
+          memo: null,
+          secret: false,
+          auto: null,
+          auto_moves: true,
+          created_by: db.me.id,
+        },
+      ],
+    ] as const) {
+      if (path !== `/rest/v1/${tbl}`) continue;
+      if (method === 'GET')
+        return json(
+          route,
+          rows.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+        const made = (Array.isArray(b) ? b : [b]).map((r) => {
+          const at = (opts.now ?? new Date()).toISOString();
+          const row = {
+            id: `${tbl}-${rows.length + 1}`,
+            deleted_at: null,
+            created_at: at,
+            updated_at: at,
+            ...defaults,
+            ...r,
+          };
+          rows.push(row);
+          return row;
+        });
+        return json(
+          route,
+          made.map((r) => ({ id: r.id })),
+          201,
+        );
+      }
+      if (method === 'PATCH') {
+        for (const r of rows) if (r.id === eqId(url)) Object.assign(r, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    // 다른 수입·상여금: 내 것 넣기·고치기, 다른 수입 합계는 서버 트리거처럼 app_user.other_income에
+    for (const [tbl, rows] of [
+      ['income_item', db.incomeItems],
+      ['income_event', db.incomeEvents],
+    ] as const) {
+      if (path !== `/rest/v1/${tbl}`) continue;
+      const resum = () => {
+        db.me.other_income = db.incomeItems
+          .filter((r) => !r.deleted_at && r.owner_user_id === db.me.id)
+          .reduce((t, r) => t + Number(r.monthly_amount), 0);
+      };
+      if (method === 'GET')
+        return json(
+          route,
+          rows.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const body = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+        for (const r of Array.isArray(body) ? body : [body])
+          rows.push({ id: `${tbl}-${rows.length + 1}`, deleted_at: null, ...r });
+        resum();
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('eq.') ? [eqId(url)] : inIds(url);
+        for (const r of rows) if (ids.includes(String(r.id))) Object.assign(r, body());
+        resum();
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/fixed_expense') {
+      if (method === 'GET') {
+        return json(
+          route,
+          db.fixed.filter((r) => !r.deleted_at).sort((a, b) => Number(a.sort) - Number(b.sort)),
+        );
+      }
+      if (method === 'POST') {
+        const rows = req.postDataJSON() as Record<string, unknown>[];
+        for (const r of Array.isArray(rows) ? rows : [rows]) {
+          db.fixed.push({
+            id: `fixed-${db.fixed.length + 1}`,
+            monthly_amount: null,
+            deleted_at: null,
+            ...r,
+          });
+        }
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('eq.') ? [eqId(url)] : inIds(url);
+        for (const r of db.fixed) if (ids.includes(String(r.id))) Object.assign(r, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/monthly_plan' && method === 'GET') {
+      // 가장 최근 플랜 끝(다음 사이클 플랜 만들기)
+      if (url.searchParams.get('select') === 'cycle_end') {
+        const ends = db.plans.map((p) => String(p.args.p_cycle_end)).sort();
+        return json(route, ends.length ? [{ cycle_end: ends[ends.length - 1] }] : []);
+      }
+      // 지난 플랜(놓친 달): cycle_end < 오늘, 최근 순 + 그 플랜의 정리
+      const lt = url.searchParams.get('cycle_end');
+      if (lt?.startsWith('lt.')) {
+        const day = lt.slice(3);
+        return json(
+          route,
+          db.plans
+            .map((p) => p.args)
+            .filter((a) => String(a.p_cycle_end) < day)
+            .sort((x, y) => String(y.p_cycle_start).localeCompare(String(x.p_cycle_start)))
+            .map((a) => ({
+              id: a.id ?? 'plan-1',
+              label_month: a.p_label_month,
+              cycle_start: a.p_cycle_start,
+              cycle_end: a.p_cycle_end,
+              status: a.status ?? 'created',
+              merged_close: !!a.p_merged_close,
+              closes: db.closes
+                .filter((c) => c.plan_id === (a.id ?? 'plan-1'))
+                .map((c) => ({ status: c.status, deleted_at: c.deleted_at ?? null })),
+            })),
+        );
+      }
+      // 오늘이 든 플랜만(cycle_start ≤ 오늘 ≤ cycle_end)
+      const lte = url.searchParams.get('cycle_start')?.replace(/^lte\./, '');
+      const gte = url.searchParams.get('cycle_end')?.replace(/^gte\./, '');
+      const a = db.plans.find(
+        (p) =>
+          (!lte || String(p.args.p_cycle_start) <= lte) &&
+          (!gte || String(p.args.p_cycle_end) >= gte),
+      )?.args;
+      if (!a) return json(route, null);
+      const lines = ((a.p_lines as Record<string, unknown>[]) ?? []).map((l, i) => ({
+        id: `line-${i + 1}`,
+        account_role: null,
+        goal_id: null,
+        kind: 'split',
+        sort: i,
+        groom_done_at: null,
+        groom_done_by: null,
+        groom_done_amount: null,
+        bride_done_at: null,
+        bride_done_by: null,
+        bride_done_amount: null,
+        amount_groom: null,
+        amount_bride: null,
+        state: 'pending',
+        deleted_at: null,
+        ...l,
+      }));
+      return json(route, {
+        id: a.id ?? 'plan-1',
+        label_month: a.p_label_month,
+        cycle_start: a.p_cycle_start,
+        cycle_end: a.p_cycle_end,
+        is_partial: true,
+        first_adjust: a.p_first_adjust,
+        merged_close: a.p_merged_close,
+        is_temp: a.p_is_temp,
+        snapshot: a.p_snapshot,
+        status: 'created',
+        created_at: (opts.now ?? new Date()).toISOString(),
+        deleted_at: null,
+        lines,
+      });
+    }
+    const ok204 = () =>
+      route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+    const rowsOf = () => {
+      const b = req.postDataJSON() as Record<string, unknown> | Record<string, unknown>[];
+      return Array.isArray(b) ? b : [b];
+    };
+    if (path === '/rest/v1/photo' && method === 'GET')
+      return json(
+        route,
+        (db.photos ?? []).filter((x) => x.care_record_id),
+      );
+    if (path === '/rest/v1/consent' && method === 'POST') {
+      db.consents.push(...rowsOf().map((r) => ({ created_at: new Date().toISOString(), ...r })));
+      return ok204();
+    }
+    if (path === '/rest/v1/consent' && method === 'GET') {
+      const kind = url.searchParams.get('kind')?.replace(/^eq\./, '');
+      return json(
+        route,
+        db.consents
+          .filter((c) => !kind || c.kind === kind)
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+      );
+    }
+    if (path === '/rest/v1/todo') {
+      if (method === 'GET') return json(route, db.todos);
+      if (method === 'POST') {
+        for (const r of rowsOf())
+          if (!db.todos.some((t) => t.kind === r.kind))
+            db.todos.push({
+              id: `todo-${db.todos.length + 1}`,
+              status: 'pending',
+              snoozed_until: null,
+              deleted_at: null,
+              ...r,
+            });
+        return ok204();
+      }
+      if (method === 'PATCH') {
+        const kind = url.searchParams.get('kind')?.replace(/^eq\./, '');
+        for (const t of db.todos)
+          if (kind ? t.kind === kind && t.status !== 'done' : t.id === eqId(url))
+            Object.assign(t, body());
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/spend_category') {
+      if (method === 'GET')
+        return json(
+          route,
+          [...db.categories].sort((a, b) => Number(a.sort) - Number(b.sort)),
+        );
+      if (method === 'POST') {
+        for (const r of rowsOf())
+          db.categories.push({
+            id: `cat-${db.categories.length + 1}`,
+            enabled: true,
+            deleted_at: null,
+            ...r,
+          });
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/month_close') {
+      // 끝낸 정리 최근 순(F-01 월 정산 요약, F-06): 정리마다 spends/bigs/deposits를 따로 가질 수 있음
+      if (method === 'GET' && url.searchParams.get('status') === 'eq.done') {
+        const live = (xs: unknown) =>
+          ((xs as { deleted_at?: string | null }[] | undefined) ?? []).filter((x) => !x.deleted_at);
+        return json(
+          route,
+          db.closes
+            .filter((c) => c.status === 'done' && !c.deleted_at)
+            .sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at)))
+            .map((c) => ({
+              ...c,
+              plan: { label_month: c.label_month ?? db.plans[0]?.args.p_label_month },
+              spends: live(c.spends ?? db.spends),
+              bigs: live(c.bigs ?? db.bigs),
+              deposits: live(c.deposits ?? db.deposits),
+            })),
+        );
+      }
+      if (method === 'GET') {
+        // 이 플랜의 정리(지난 정리를 심어 둔 테스트는 plan_id가 다름)
+        const pid = url.searchParams.get('plan_id')?.replace(/^eq\./, '');
+        const c =
+          db.closes.find((x) => pid && x.plan_id === pid) ??
+          db.closes.find((x) => !x.plan_id || x.plan_id === pid);
+        return json(
+          route,
+          c ? { ...c, spends: db.spends, bigs: db.bigs, deposits: db.deposits } : null,
+        );
+      }
+      if (method === 'POST') {
+        const c = {
+          id: 'close-1',
+          status: 'draft',
+          deleted_at: null,
+          ...(req.postDataJSON() as object),
+        };
+        db.closes.push(c);
+        return json(route, { id: c.id }, 201);
+      }
+      if (method === 'PATCH') {
+        for (const c of db.closes) if (c.id === eqId(url)) Object.assign(c, body());
+        return ok204();
+      }
+    }
+    if (path === '/rest/v1/big_expense') {
+      if (method === 'POST') {
+        for (const r of rowsOf()) {
+          const cur = db.bigs.find((x) => x.kind === r.kind);
+          if (cur) Object.assign(cur, r);
+          else db.bigs.push({ id: `big-${db.bigs.length + 1}`, ...r });
+        }
+        return ok204();
+      }
+      if (method === 'PATCH') {
+        const kinds = (url.searchParams.get('kind') ?? '').replace(/^in\.\(|\)$/g, '').split(',');
+        for (const b of db.bigs) if (kinds.includes(String(b.kind))) Object.assign(b, body());
+        db.bigs = db.bigs.filter((b) => !b.deleted_at);
+        return ok204();
+      }
+    }
+    // 목표 달별 기록(G-02): 플랜 목표 줄, 정리한 달 납입
+    if (path === '/rest/v1/plan_line' && method === 'GET') {
+      const a = db.plans[0]?.args;
+      const lines = ((a?.p_lines as Record<string, unknown>[]) ?? []).filter(
+        (l) => l.target === 'goal' && l.goal_id,
+      );
+      return json(
+        route,
+        lines.map((l) => ({
+          goal_id: l.goal_id,
+          amount: l.amount,
+          monthly_plan: { label_month: a?.p_label_month },
+        })),
+      );
+    }
+    if (path === '/rest/v1/care_record' && method === 'GET')
+      return json(
+        route,
+        [...db.careRecords].sort((a, b) => (String(a.occurs_on) < String(b.occurs_on) ? 1 : -1)),
+      );
+    if (path === '/rest/v1/goal_use' && method === 'GET') return json(route, db.goalUses);
+    if (path === '/rest/v1/emergency_move' && method === 'GET')
+      return json(
+        route,
+        db.emergencyMoves.filter((x) => !x.deleted_at),
+      );
+    if (path === '/rest/v1/notice' && method === 'GET') return json(route, db.notices);
+    if (path === '/rest/v1/close_balance') {
+      if (method === 'GET') return json(route, db.balances);
+      if (method === 'POST') {
+        for (const r of rowsOf()) {
+          const cur = db.balances.find(
+            (x) => x.month_close_id === r.month_close_id && x.account_id === r.account_id,
+          );
+          if (cur) Object.assign(cur, r);
+          else db.balances.push({ id: `bal-${db.balances.length + 1}`, deleted_at: null, ...r });
+        }
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    if (path === '/rest/v1/holiday' && method === 'GET') return json(route, db.holidays);
+    if (path === '/rest/v1/asset_kind_name' && method === 'GET') return json(route, db.kindNames);
+    if (path === '/rest/v1/inquiry' && method === 'GET') return json(route, db.inquiries);
+    if (path === '/rest/v1/living_check' && method === 'GET') {
+      const plan = url.searchParams.get('plan_id')?.replace(/^eq\./, '');
+      return json(route, db.livingChecks.find((x) => x.plan_id === plan) ?? null);
+    }
+    if (path === '/rest/v1/couple_unlink' && method === 'GET')
+      return json(
+        route,
+        db.unlinks.filter((u) => u.status === 'pending'),
+      );
+    if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
+    // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
+    if (path === '/rest/v1/notification') {
+      const rows = [...db.notifications].sort((a, b) =>
+        String(a.created_at) < String(b.created_at) ? 1 : -1,
+      );
+      if (method === 'GET') {
+        if (url.searchParams.get('read_at') === 'is.null')
+          return json(route, rows.filter((r) => !r.read_at).slice(0, 1));
+        if (url.searchParams.get('id')?.startsWith('eq.'))
+          return json(route, rows.find((r) => r.id === eqId(url)) ?? null);
+        const lt = url.searchParams.get('created_at')?.replace(/^lt\./, '');
+        return json(route, rows.filter((r) => !lt || String(r.created_at) < lt).slice(0, 30));
+      }
+    }
+    if (path === '/rest/v1/saving_deposit' && method === 'GET') {
+      const label = db.plans[0]?.args.p_label_month;
+      return json(
+        route,
+        db.deposits
+          .filter((d) => d.goal_id && !d.deleted_at)
+          .map((d) => ({
+            goal_id: d.goal_id,
+            amount: d.amount,
+            month_close: {
+              status: db.closes.find((c) => c.id === d.month_close_id)?.status ?? 'done',
+              monthly_plan: { label_month: d.label_month ?? label },
+            },
+          })),
+      );
+    }
+    if (path === '/rest/v1/saving_deposit' && method === 'POST') {
+      for (const r of rowsOf()) {
+        const cur = db.deposits.find((x) => x.name === r.name);
+        if (cur) Object.assign(cur, r);
+        else db.deposits.push({ id: `dep-${db.deposits.length + 1}`, deleted_at: null, ...r });
+      }
+      return ok204();
+    }
+    if (path === '/rest/v1/month_spend' && method === 'POST') {
+      for (const r of rowsOf()) {
+        const cur = db.spends.find((x) => x.category_id === r.category_id);
+        if (cur) Object.assign(cur, r);
+        else db.spends.push({ id: `spend-${db.spends.length + 1}`, deleted_at: null, ...r });
+      }
+      return ok204();
+    }
+    if (path === '/rest/v1/account') {
+      if (method === 'GET')
+        return json(
+          route,
+          db.accounts.filter((r) => !r.deleted_at),
+        );
+      if (method === 'POST') {
+        const r = req.postDataJSON() as Record<string, unknown>;
+        db.accounts.push({ id: `account-${db.accounts.length + 1}`, deleted_at: null, ...r });
+        return route.fulfill({ status: 201, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (method === 'PATCH') {
+        const ids = url.searchParams.get('id')?.startsWith('in.') ? inIds(url) : [eqId(url)];
+        for (const r of db.accounts) if (ids.includes(String(r.id))) Object.assign(r, body());
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+    }
+    return json(route, { message: `e2e: 흉내 내지 않은 요청 ${method} ${path}` }, 404);
+  });
+  return db;
+}

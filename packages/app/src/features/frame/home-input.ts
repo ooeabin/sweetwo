@@ -1,0 +1,109 @@
+import {
+  fetchAssets,
+  fetchCareDays,
+  fetchChecklistsEnsured,
+  fetchGoals,
+  fetchMyUnlink,
+  fetchUnlink,
+  qk,
+} from '@sweetwo/api';
+import { todayKst, type HomeCare, type HomeInput } from '@sweetwo/core';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { closeHomeTodo, readClosedTodos } from '../../shared/home-todo';
+import { useMe, useSpace } from './data';
+
+const INVITE_KEY = 'sweetwo:home:invite-closed'; // 초대 할 일 닫은 날(7일 동안 안 보임)
+
+const read = (k: string) => {
+  try {
+    return localStorage.getItem(k);
+  } catch {
+    return null;
+  }
+};
+const write = (k: string, v: string) => {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
+  }
+};
+const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 월급 계획 확인)
+
+// 홈(H-05·H-06)과 트레이 위젯이 같이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
+/** on = false면 읽지 않음(트레이 위젯이 없는 웹·모바일) */
+export function useHomeInput(on = true) {
+  const today = todayKst();
+  const me = useMe();
+  const space = useSpace();
+  const lists = useQuery({
+    queryKey: qk.checklists(today),
+    queryFn: () => fetchChecklistsEnsured(today),
+    enabled: on && !!me.data?.onboarding_done_at,
+  });
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals, enabled: on });
+  const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays, enabled: on });
+  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets, enabled: on });
+  const state = space.data?.couple_state;
+  const unlink = useQuery({
+    queryKey: qk.unlink,
+    queryFn: fetchUnlink,
+    enabled: on && state === 'unlink_pending',
+  });
+  const solo = state === 'solo';
+  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: on && solo });
+  const [inviteClosedOn, setInvite] = useState(() => read(INVITE_KEY));
+  const [closed, setClosed] = useState(readList);
+
+  const input: HomeInput | null =
+    on && me.data && space.data && goals.data && !lists.isLoading
+      ? {
+          today,
+          meId: me.data.id,
+          joint: space.data.salary_mode === 'joint',
+          coupleState: space.data.couple_state,
+          checklists: (lists.data ?? []).map((c) => ({
+            owner_user_id: c.owner_user_id,
+            label: c.label,
+            cycle_end: c.cycle_end,
+            lines: c.pay_check_line,
+          })),
+          goals: goals.data,
+          cares: (cares.data ?? []).map((c): HomeCare => ({
+            id: c.id,
+            name: c.name,
+            date_rule: c.date_rule as HomeCare['date_rule'],
+            month: c.month,
+            day: c.day,
+            leap: c.leap,
+            once_on: c.once_on,
+          })),
+          assets: assets.data ?? [],
+          unlinkRequestedBy:
+            state === 'unlink_pending' ? (unlink.data?.requested_by ?? null) : null,
+          reconnectFrom:
+            solo && myUnlink.data?.reconnect_by && !myUnlink.data.reconnect_answer
+              ? myUnlink.data.reconnect_by
+              : null,
+          inviteClosedOn,
+          closed,
+        }
+      : null;
+  return {
+    input,
+    /** 연결 해제 대기(19 홈 상태 3번 띠): 확정 날짜, 내가 요청했는지 */
+    unlink:
+      state === 'unlink_pending' && unlink.data
+        ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
+        : null,
+    /** 만기·챙길 날 할 일 닫기(그 항목·날짜만) */
+    closeTodo: (key: string) => setClosed(closeHomeTodo(key)),
+    /** 초대 할 일 닫기(7일) */
+    closeInvite: () => {
+      write(INVITE_KEY, today);
+      setInvite(today);
+    },
+  };
+}
+export type HomeInputState = ReturnType<typeof useHomeInput>;

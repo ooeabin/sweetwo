@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router-dom';
+import { Navigate, type RouteObject } from 'react-router-dom';
 import {
   A01Launch,
   A02Login,
@@ -7,6 +7,8 @@ import {
   A05Terms,
   A06LockSetup,
   A08SessionExpired,
+  A08NewDevice,
+  A05rReconsent,
   A02Restore,
   AuthCallback,
   O01Start,
@@ -18,27 +20,9 @@ import {
   F01Overview,
   F02Items,
   F04Item,
-  F05Edit,
-  F05fPeriod,
-  F07aReplan,
-  F07bReplanQuestion,
-  F07cReplanCompare,
-  F05Money,
-  F06Diagnosis,
-  F09EmergencyMove,
-  O53InvestPrinciple,
-  O34Bonus,
-  O35BonusList,
-  O35bOtherIncome,
-  O37FixedItems,
-  O38bCard,
-  O41AssetKinds,
-  O42AssetAmount,
-  O43LumpGoal,
-  O44LoanKinds,
-  O45LoanAmount,
-  O46LoanRate,
-  O47LoanPayment,
+  F08Rank,
+  F04aMatured,
+  F04bSold,
 } from './features/assets';
 import { TrayWidget } from './features/widget';
 import { DevUiGallery } from './features/dev';
@@ -48,55 +32,32 @@ import {
   G02GoalDetail,
   G05Achieved,
   G05Send,
-  G05Use,
-  G07Wedding,
-  G07WeddingBudget,
-  G07WeddingPay,
-  G07aWeddingItem,
   G02GoalEdit,
-  G04GoalAdjust,
+  G02pGoalPhoto,
   G06GoalOrder,
-  O23RestQuestion,
-  O24RestDeadline,
-  O25RestHeld,
-  RestGoalNext,
+  G02aGoalMove,
+  G02bGoalUse,
   GoalAddRoute,
+  GoalFillStart,
+  G03gGoalMonthly,
 } from './features/goals';
-import {
-  W01SalaryPlan,
-  W01aAdjust,
-  W03LivingCheck,
-  W02Split,
-  W02aOtherAmount,
-  W07Income,
-  W07IncomeAdd,
-} from './features/plan';
 import {
   CalendarHome,
   Y01CareList,
-  Y02FirstSetup,
   Y04Calendar,
   Y05Budget,
   Y05CareDay,
-  Y03Family,
   Y07CareAdd,
   Y08Record,
-  Y06Edit,
-  Y06FamilyCost,
   Y09GiftLog,
-  YSurprisePartnerBirthday,
 } from './features/calendar';
 import {
   S10Settings,
-  S10aAccountMode,
   S11Me,
   S12Couple,
   S12aUnlinkIntro,
-  S12bUnlinkPlan,
   S12cUnlinkConfirm,
   S12dUnlinkReview,
-  S12eUnlinkDifferently,
-  S12fUnlinkCounter,
   S12gReconnect,
   S13Visibility,
   S15Security,
@@ -110,83 +71,60 @@ import {
   S21Trash,
   S12hUnlinked,
   S11aNickname,
-  S11bSide,
+  S11bNotifyEmail,
   S11ePhoto,
   S22Widget,
   S01Guides,
-  S01Talk,
   S02ChecklistItem,
   S03Guide,
-  S17Answers,
-  S17aAnswer,
-  S17bSplit,
   S11dPlanDay,
+  S11cSalary,
+  S11fSalaryMode,
+  S11gMarriage,
+  S11hWeddingDate,
+  S11iBirthYear,
   S14Notifications,
   S14aQuiet,
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
-import { H01ThisMonth } from './features/month';
-import { CloseRoute, W04Missed, W04jSpendEntry, W04pBundle } from './features/month-close';
+import { H01Home } from './features/home';
+import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
-import { G08Proposal } from './features/proposals';
+import { CS19NotFound, RouteError } from './shared/cs-19-not-found';
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
   {
     element: <A01Launch />, // A-01 실행, 자동 로그인 판단 + 잠금(A-06 해제) + 토스트
+    errorElement: <RouteError />, // 13 공통 상태 7번(화면 오류), 19번(없는 주소)
     children: [
       {
         path: paths.home,
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <H01ThisMonth />
+              <H01Home />
               <AchieveWatch />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // H-01 이번 달
-      {
-        path: '/month/spend',
+      }, // 홈 H-01~06
+      ...(
+        [
+          ['/salary/split', <W01Split key="w01" />], // W-01 월급 계획
+          ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
+          ['/salary/done', <W02Done key="w02e" />], // W-02 끝
+          ['/salary/review', <W05Review key="w05" />], // W-05 월말 확인
+        ] as const
+      ).map(([path, el]) => ({
+        path,
         element: (
           <RequireAccount>
-            <OnboardingGate>
-              <W04jSpendEntry />
-            </OnboardingGate>
+            <OnboardingGate>{el}</OnboardingGate>
           </RequireAccount>
         ),
-      }, // W-04j 지출 적기(앞당겨 열기)
-      {
-        path: '/month/close/:step',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <CloseRoute />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-04a~W-04 끝 월말 정리
-      {
-        path: '/month/close/w-04p/:id',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W04pBundle />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-04p 월말 정리 제안 응답
-      {
-        path: '/month/missed',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W04Missed />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 놓친 달
+      })),
       {
         path: '/goals',
         element: (
@@ -209,16 +147,6 @@ export const routes: RouteObject[] = [
         ),
       }, // G-06 우선순위 바꾸기
       {
-        path: '/goals/adjust',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G04GoalAdjust />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-04 충돌 조정
-      {
         path: '/goals/new/:step?',
         element: (
           <RequireAccount>
@@ -229,45 +157,25 @@ export const routes: RouteObject[] = [
         ),
       }, // G-03a~f 목표 추가
       {
-        path: '/goals/wedding',
+        path: '/goals/:id/set-amount',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <G07Wedding />
+              <GoalFillStart />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // G-07 결혼 비용 상세
+      }, // 금액 정하기: G-03b → G-03c
       {
-        path: '/goals/wedding/budget',
+        path: '/goals/:id/monthly',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <G07WeddingBudget />
+              <G03gGoalMonthly />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // G-07 총예산
-      {
-        path: '/goals/wedding/item/:id/:step',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G07aWeddingItem />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-07a~d 결혼 비용 항목
-      {
-        path: '/goals/wedding/pay/:id/:part',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G07WeddingPay />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-07 결제 기록
+      }, // G-03g 매달 넣는 돈(금액 정하기 끝)
       {
         path: '/goals/:id',
         element: (
@@ -301,14 +209,28 @@ export const routes: RouteObject[] = [
       }, // G-05 보낼 곳
       {
         path: '/goals/:id/use',
+        element: <Navigate to=".." relative="path" replace />,
+      }, // 2026-11-04 사용 기록 없앰: 옛 링크는 목표 상세로
+      {
+        path: '/goals/:id/move/:kind?',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <G05Use />
+              <G02aGoalMove />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // G-05 사용 기록
+      }, // G-02a 넣기·빼기, 이미 모은 돈 넣기
+      {
+        path: '/goals/:id/spend',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02bGoalUse />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // G-02b 꺼내 쓰기
       {
         path: '/goals/:id/edit/:field',
         element: (
@@ -320,6 +242,16 @@ export const routes: RouteObject[] = [
         ),
       }, // 목표 수정(금액, 기한, 이름)
       {
+        path: '/goals/:id/photo',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <G02pGoalPhoto />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // 목표 사진 바꾸기(모든 목표, 지정 사진 고르기 + 올리기)
+      {
         path: '/assets',
         element: (
           <RequireAccount>
@@ -330,16 +262,6 @@ export const routes: RouteObject[] = [
         ),
       }, // F-01 우리 자산 한눈에
       {
-        path: '/assets/emergency/:kind',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F09EmergencyMove />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-09 비상금 넣기·꺼내기
-      {
         path: '/assets/items',
         element: (
           <RequireAccount>
@@ -349,196 +271,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-02 자산·부채 목록
-      {
-        path: '/assets/diagnosis',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F06Diagnosis />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-06 재정 진단
-      {
-        path: '/assets/principle',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O53InvestPrinciple />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-53 투자 원칙(첫 주 7일째, 재정 진단 ‘지금 정하기’)
-      {
-        path: '/assets/week/assets',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O41AssetKinds />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-41 가진 돈 종류(첫 주 2일째 자산 정리하기)
-      {
-        path: '/assets/week/assets/:n',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O42AssetAmount />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-42 자산 금액(고른 것마다)
-      {
-        path: '/assets/week/lump',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O43LumpGoal />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-43 목돈 넣을 목표
-      {
-        path: '/assets/week/loans',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O44LoanKinds />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-44 대출 종류(첫 주 3일째 대출 정리하기)
-      {
-        path: '/assets/week/loans/:n/amount',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O45LoanAmount />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-45 대출 남은 돈
-      {
-        path: '/assets/week/loans/:n/rate',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O46LoanRate />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-46 금리
-      {
-        path: '/assets/week/loans/:n/pay',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O47LoanPayment />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-47 대출 월 상환
-      {
-        path: '/assets/week/fixed',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O37FixedItems />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-37 세부 항목 고르기(첫 주 4일째)
-      {
-        path: '/assets/week/fixed/:n',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O37FixedItems />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-37 항목별 고정지출
-      {
-        path: '/assets/week/card',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O38bCard />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-38b 생활비 카드 사용
-      {
-        path: '/plan',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W01SalaryPlan />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-01 월급 플랜
-      {
-        path: '/plan/split',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W02Split />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-02 월급 나누기
-      {
-        path: '/plan/split/:lineId',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W02aOtherAmount />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-02a 다른 금액
-      {
-        path: '/plan/edit/:role',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W01aAdjust />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-01a 이번 달만 바꾸기
-      {
-        path: '/plan/living-check',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W03LivingCheck />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-03 생활비 체크
-      {
-        path: '/plan/income',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W07Income />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-07 들어오는 돈
-      {
-        path: '/plan/income/new/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <W07IncomeAdd />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // W-07 들어오는 돈 추가
       {
         path: '/calendar',
         element: (
@@ -570,16 +302,6 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-04 달력
       {
-        path: '/calendar/setup/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y02FirstSetup />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-02 처음 등록
-      {
         path: '/calendar/day/:id',
         element: (
           <RequireAccount>
@@ -610,26 +332,6 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-08 다녀온 뒤 기록
       {
-        path: '/calendar/family-cost',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y06FamilyCost />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-06 이번 회차 양가 비용
-      {
-        path: '/calendar/family-cost/edit',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y06Edit />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-06 양가 비용 예산 수정
-      {
         path: '/calendar/gifts',
         element: (
           <RequireAccount>
@@ -639,16 +341,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // Y-09 드린 기록
-      {
-        path: '/calendar/partner-birthday',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <YSurprisePartnerBirthday />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 서프라이즈 배우자 생일
       {
         path: '/notifications',
         element: (
@@ -669,16 +361,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-10 설정 홈
-      {
-        path: '/settings/account-mode',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S10aAccountMode />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-10a 통장 방식
       {
         path: '/settings/me',
         element: (
@@ -710,16 +392,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-12a 연결 해제 안내
       {
-        path: '/settings/couple/unlink/plan',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12bUnlinkPlan />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12b 자산 정리 안
-      {
         path: '/settings/couple/unlink/confirm',
         element: (
           <RequireAccount>
@@ -739,26 +411,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-12d 자산 정리 안 확인, 동의
-      {
-        path: '/settings/couple/unlink/differently',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12eUnlinkDifferently />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12e 다르게 정리하기
-      {
-        path: '/settings/couple/unlink/counter',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S12fUnlinkCounter />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-12f 다르게 정리한 안 확인
       {
         path: '/settings/couple/unlinked',
         element: (
@@ -870,6 +522,22 @@ export const routes: RouteObject[] = [
         ),
       }, // S-18 데이터
       {
+        path: paths.reconsent,
+        element: (
+          <RequireAccount>
+            <A05rReconsent />
+          </RequireAccount>
+        ),
+      }, // A-05r 약관 개정 재동의·마케팅 재확인
+      {
+        path: `${paths.newDevice}/:session`,
+        element: (
+          <RequireAccount>
+            <A08NewDevice />
+          </RequireAccount>
+        ),
+      }, // A-08 새 기기 알림(나예요 / 내가 아니에요)
+      {
         path: '/settings/security',
         element: (
           <RequireAccount>
@@ -900,6 +568,16 @@ export const routes: RouteObject[] = [
         ),
       }, // S-11a 호칭
       {
+        path: '/settings/me/email',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11bNotifyEmail />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11b 알림 이메일
+      {
         path: '/settings/me/photo',
         element: (
           <RequireAccount>
@@ -910,16 +588,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-11e 프로필 사진
       {
-        path: '/settings/me/side',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S11bSide />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-11b 신랑·신부
-      {
         path: '/settings/me/plan-day',
         element: (
           <RequireAccount>
@@ -928,37 +596,57 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-11d 월급 플랜 날짜
+      }, // S-11d 체크리스트 만드는 날
       {
-        path: '/settings/answers',
+        path: '/settings/me/salary',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17Answers />
+              <S11cSalary />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 내 답 다시 보기
+      }, // S-11c 내 월급
       {
-        path: '/settings/answers/split',
+        path: '/settings/me/salary-mode',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17bSplit />
+              <S11fSalaryMode />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 분담 다시 답하기
+      }, // S-11f 월급 관리 방식
       {
-        path: '/settings/answers/:field',
+        path: '/settings/me/marriage',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S17aAnswer />
+              <S11gMarriage />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-17 파트 1 다시 답하기
+      }, // S-11g 결혼 상태
+      {
+        path: '/settings/me/wedding',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11hWeddingDate />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11h 결혼한 날·예정일
+      {
+        path: '/settings/me/birth-year',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11iBirthYear />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11i 출생연도
       {
         path: '/settings/guides',
         element: (
@@ -969,16 +657,6 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-01 가이드 모아보기
-      {
-        path: '/settings/guides/talk',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S01Talk />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-01 부부 대화 카드
       {
         path: '/settings/guides/check/:key',
         element: (
@@ -1040,176 +718,6 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-07 챙길 날 추가
       {
-        path: '/calendar/family/new/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y03Family />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-03 가족 추가
-      {
-        path: '/calendar/family/:id/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y03Family />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-03 가족 수정
-      {
-        path: '/goals/week',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G06GoalOrder week />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-22 나머지 목표 순서(첫 주 5일째)
-      {
-        path: '/goals/week/next',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <RestGoalNext />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 첫 주 5일째 남은 화면으로
-      {
-        path: '/goals/week/:id/q/:i',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O23RestQuestion />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-23 나머지 목표 금액 질문
-      {
-        path: '/goals/week/:id/deadline',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O24RestDeadline />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-24 나머지 목표 기한
-      {
-        path: '/goals/week/:id/held',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O25RestHeld />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-25 이미 모아둔 돈
-      {
-        path: '/assets/week/bonus',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O34Bonus />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-34 상여금 여부(첫 주 5일째)
-      {
-        path: '/assets/week/bonus/list',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O35BonusList />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-35 상여금 월·금액
-      {
-        path: '/assets/week/income',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O35bOtherIncome />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-35b 다른 수입
-      {
-        path: '/assets/week/income/:n',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <O35bOtherIncome />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // O-35b 항목별 월 금액
-      {
-        path: '/assets/money',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F05Money />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-05 월 수입·지출
-      {
-        path: '/assets/money/period/:step',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F05fPeriod />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-05f·g 기간 수입 변경
-      {
-        path: '/assets/replan',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F07aReplan />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-07a 계획 다시 세우기
-      {
-        path: '/assets/replan/q/:q',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F07bReplanQuestion />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-07b 바뀐 부분 다시 묻기
-      {
-        path: '/assets/replan/compare/:mode',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F07cReplanCompare />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-07c 비교·적용
-      {
-        path: '/assets/money/:field',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <F05Edit />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // F-05a~d 수입, 월급날, 고정지출, 대출 상환, 용돈, 생활비
-      {
         path: '/assets/new/:step?',
         element: (
           <RequireAccount>
@@ -1219,6 +727,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-03 항목 추가
+      {
+        path: '/assets/rank',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F08Rank />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-08 우리 자산 순위(2026-11-04)
       {
         path: '/assets/:id',
         element: (
@@ -1230,15 +748,25 @@ export const routes: RouteObject[] = [
         ),
       }, // F-04 항목 상세·수정
       {
-        path: '/proposals/:id',
+        path: '/assets/:id/matured/:step?',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <G08Proposal />
+              <F04aMatured />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // G-08 제안 확인
+      }, // F-04a 만기된 돈 정리
+      {
+        path: '/assets/:id/sold',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F04bSold />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-04b~d 팔았어요
       {
         path: '/onboarding/:screen', // O-10~O-67 온보딩
         element: (
@@ -1247,7 +775,7 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       },
-      { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘초대받았어요’)
+      { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘코드 입력하기’)
       { path: '/i/:code', element: <P01JoinStart /> }, // A-07 초대 링크, P-01 합류 시작(로그인 전에도)
       {
         path: '/join/:screen', // P-02b~P-11 배우자 합류
@@ -1266,6 +794,7 @@ export const routes: RouteObject[] = [
       { path: paths.expired, element: <A08SessionExpired /> }, // A-08 세션 만료
       { path: paths.restore, element: <A02Restore /> }, // A-02 계정 삭제 취소
       { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 데스크톱 복귀 페이지)
+      { path: '*', element: <CS19NotFound /> }, // 13 공통 상태 19번 없는 주소
     ],
   },
   // 트레이 위젯 창(데스크톱, 26). 앱 틀·로그인 확인 없이 브리지 값만 그림

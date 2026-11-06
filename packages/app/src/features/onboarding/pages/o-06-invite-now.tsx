@@ -4,6 +4,7 @@ import { useOnboardingLocal } from '../data';
 import { useStep } from '../step';
 
 type Choice = keyof typeof copy.inviteChoices;
+export const inviteIcons = { now: 'users-three', later: 'calendar' } as const;
 
 // O-06 배우자 초대 여부(Q1). 지금 초대 → O-07 / 나 먼저 → O-11(결과 뒤 할 일 ‘배우자 초대하기’)
 export function O06InviteNow() {
@@ -28,6 +29,7 @@ export function O06InviteNow() {
         options={(Object.keys(copy.inviteChoices) as Choice[]).map((k) => ({
           value: k,
           label: copy.inviteChoices[k],
+          icon: inviteIcons[k],
         }))}
       />
     </QuestionLayout>

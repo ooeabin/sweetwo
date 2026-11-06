@@ -19,6 +19,13 @@ export class AdminError extends Error {
   }
 }
 const KNOWN = [
+  // 더 긴 코드가 먼저(new_not_found ⊃ not_found)
+  'new_not_found',
+  'new_no_login',
+  'new_has_partner',
+  'same_account',
+  'already_requested',
+  'not_active',
   'not_admin',
   'mfa_required',
   'no_permission',
@@ -34,10 +41,13 @@ const KNOWN = [
   'legal_check_required',
   'bad_value',
   'self_lock',
+  // 로그인 링크(Supabase Auth 오류 코드)
+  'over_email_send_rate_limit',
+  'email_address_not_authorized',
 ];
-const fail = (e: { message?: string } | null) => {
+const fail = (e: { message?: string; code?: string } | null) => {
   if (!e) return;
-  const code = KNOWN.find((k) => e.message?.includes(k));
+  const code = KNOWN.find((k) => e.code === k || e.message?.includes(k));
   throw new AdminError(code ?? (e.message?.includes('fetch') ? 'network' : 'unknown'));
 };
 
@@ -119,6 +129,20 @@ export type AdminSearchRow = {
   couple_state: string | null;
   subscription: string;
 };
+/** 내려받기 전 사유 기록(감사 로그). 돌려줌: 파일에 적을 관리자 ID */
+export async function adminNoteExport(
+  screen: 'AD-02',
+  reason: string,
+  rows: number,
+): Promise<string> {
+  const { data, error } = await supabase().rpc('admin_note_export', {
+    p_screen: screen,
+    p_reason: reason,
+    p_rows: rows,
+  });
+  fail(error);
+  return String(data ?? '');
+}
 export async function adminSearch(q: string): Promise<AdminSearchRow[]> {
   const { data, error } = await supabase().rpc('admin_search', { p_q: q });
   fail(error);
@@ -164,7 +188,12 @@ export async function fetchAdminAccessData(accessId: string): Promise<AdminAcces
   fail(error);
   return AdminAccessData.parse(data);
 }
-export type AdminAction = 'sign_out_all' | 'rights_access' | 'rights_fix' | 'rights_delete';
+export type AdminAction =
+  | 'sign_out_all'
+  | 'delete_request'
+  | 'rights_access'
+  | 'rights_fix'
+  | 'rights_delete';
 export async function adminAccountAction(
   id: string,
   action: AdminAction,
@@ -174,6 +203,21 @@ export async function adminAccountAction(
   const { error } = await supabase().rpc('admin_account_action', {
     p_user: id,
     p_action: action,
+    p_inquiry_no: inquiryNo,
+    p_note: note,
+  });
+  fail(error);
+}
+/** 로그인 수단 이전 승인 요청(최고 관리자 승인 때 옮김). newAccount = 새 계정 이메일 또는 사용자 ID */
+export async function adminRequestLoginMove(
+  id: string,
+  newAccount: string,
+  inquiryNo: string,
+  note: string,
+) {
+  const { error } = await supabase().rpc('admin_request_login_move', {
+    p_user: id,
+    p_new: newAccount,
     p_inquiry_no: inquiryNo,
     p_note: note,
   });
@@ -279,13 +323,18 @@ export async function fetchAdminNotices(): Promise<Notice[]> {
   fail(error);
   return data ?? [];
 }
+/** 약관 개정·장애 공지를 이메일로도(초안·승인 대기만) */
+export async function adminSetNoticeEmail(id: string, email: boolean) {
+  const { error } = await supabase().rpc('admin_set_notice_email', { p_id: id, p_email: email });
+  fail(error);
+}
 export async function adminSaveNotice(n: {
   id: string | null;
   kind: string;
   title: string;
   body: string;
   importance: 'normal' | 'must';
-  platforms: ('desktop' | 'web')[];
+  platforms: ('desktop' | 'mobile' | 'web')[];
   startsAt: string;
   endsAt: string;
   request: boolean;
@@ -371,10 +420,14 @@ export async function adminAddTermsVersion(v: {
 export type AppConfigRow = {
   min_version_desktop: string;
   min_version_web: string;
+  min_version_ios: string;
+  min_version_android: string;
   latest_version_desktop: string;
   maintenance_starts_at: string | null;
   maintenance_ends_at: string | null;
   maintenance_message: string | null;
+  /** 지금 최소 지원 버전보다 낮은 기기 수(90일 안에 켠 기기). 읽기만 */
+  below_min?: { desktop: number; ios: number; android: number };
 };
 export async function fetchAdminAppConfig(): Promise<AppConfigRow> {
   const { data, error } = await supabase().rpc('admin_app_config');
@@ -438,6 +491,31 @@ export async function adminSetLoanRate(kind: string, rateBp: number, applied: st
     p_rate_bp: rateBp,
     p_applied: applied,
   });
+  fail(error);
+}
+export type KindName = Tables<'asset_kind_name'>;
+/** AD-19 항목 이름 목록: 새 칩(added) 또는 기본 항목 한 줄. id가 있으면 그 줄을 고침 */
+export async function adminSaveKindName(r: {
+  id?: string;
+  grp: string;
+  base: string;
+  name: string;
+  added: boolean;
+  hidden: boolean;
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('admin_save_kind_name', {
+    p_grp: r.grp,
+    p_base: r.base,
+    p_name: r.name.trim(),
+    p_added: r.added,
+    p_hidden: r.hidden,
+    ...(r.id ? { p_id: r.id } : {}),
+  });
+  fail(error);
+  return data as string;
+}
+export async function adminDeleteKindName(id: string) {
+  const { error } = await supabase().rpc('admin_delete_kind_name', { p_id: id });
   fail(error);
 }
 export async function adminSetHoliday(

@@ -32,12 +32,18 @@ export function A03BrowserWait() {
         void routeAfterLogin(p)
           .then((r) => nav(r.to, { replace: true, state: r.state }))
           .catch(() =>
-            nav(paths.login, { replace: true, state: { notice: copy.providerError(p) } }),
+            nav(paths.login, {
+              replace: true,
+              state: { notice: copy.providerError(p), toast: true },
+            }),
           );
       } else if (ev.type === 'login_failed') {
         const reason = ev.reason === 'network' ? 'provider_error' : ev.reason;
         track('login_failed', { method: p, reason });
-        nav(paths.login, { replace: true, state: { notice: failNotice(ev.reason, p) } });
+        nav(paths.login, {
+          replace: true,
+          state: { notice: failNotice(ev.reason, p), toast: true },
+        });
       }
     });
     const onKey = (e: KeyboardEvent) => {
@@ -65,8 +71,12 @@ export function A03BrowserWait() {
 
   return (
     <AuthLayout
-      title={copy.waitTitle}
-      help={copy.waitHelp}
+      icon={openFailed ? 'circle-alert' : 'loader-circle'}
+      // 기다리는 동안은 다른 로딩과 같은 도는 아이콘(2026-11-05 모래시계 없앰), 실패면 오류 그림
+      art={openFailed ? 'status-error' : undefined}
+      busy={!openFailed}
+      title={openFailed ? copy.browserFailed : copy.waitTitle}
+      help={openFailed ? undefined : copy.waitHelp}
       actions={
         <>
           <p className="hg-auth__help">{copy.loginWith[p]}</p>
@@ -78,7 +88,6 @@ export function A03BrowserWait() {
           </Button>
         </>
       }
-      note={openFailed ? copy.browserFailed : undefined}
     />
   );
 }

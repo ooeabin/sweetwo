@@ -1,6 +1,6 @@
 import { Button, PageHeader } from '@sweetwo/ui';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { GUIDES, guidesPath } from '../guides';
 
@@ -31,5 +31,5 @@ export function S03Guide() {
       <p className="hg-card__meta">{copy.notAdvice}</p>
     </article>
   );
-  return <MainFrame current={null} page={{ title: g.title }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

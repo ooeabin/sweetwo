@@ -68,8 +68,5 @@ export function pinRemainingNotice(failedCount: number): number | null {
   return Math.max(PIN_MAX_ATTEMPTS - failedCount, 0);
 }
 
-// 웹 세션(A-02 ‘로그인 유지’, A-08)
-export const WEB_KEEP_LOGIN_MS = 14 * 24 * 60 * 60 * 1000;
-export const WEB_IDLE_LOCK_MS = 30 * 60 * 1000;
 /** 데스크톱 브라우저 로그인 대기 상한(A-03) */
 export const DESKTOP_LOGIN_TIMEOUT_MS = 5 * 60 * 1000;

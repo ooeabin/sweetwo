@@ -1,56 +1,35 @@
 import { qk, uploadAvatar } from '@sweetwo/api';
-import { Button, Icon, ImageCrop, PageHeader } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState, type DragEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
+import { PhotoPick } from '../../../shared/photo-pick';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-const TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp'];
-const MAX = 10 * 1024 * 1024;
-
-/** 고른 파일 검사(S-11e 예외): 10MB 초과, 지원하지 않는 형식 */
-export function photoError(f: Pick<File, 'type' | 'size' | 'name'>): string | null {
-  const heic = /\.(heic|heif)$/i.test(f.name);
-  if (!TYPES.includes(f.type) && !heic) return copy.photoBadType;
-  if (f.size > MAX) return copy.photoTooBig;
-  return null;
-}
-
 // S-11e 프로필 사진(25 S-11e, 디자인 ImageCrop): 올리기(고르기·끌어 놓기 + “올린 사진은 예빈님과 나만 볼 수 있어요”) → 자르기(정사각 틀, 확대,
 // 원형 미리보기) → “저장할게요”: 정사각 512px JPEG로 다시 그려(EXIF 위치 정보 없음) 저장 → S-11, “사진을 바꿨어요”.
+// 고르기·자르기는 목표 사진(22 G-02)과 같은 shared/photo-pick. 설정 하위 화면과 같은 QuestionLayout.
+// 2026-11-05 지정 아바타 고르기 격자 없앰(사진이 없으면 이름 첫 글자, 소셜 계정 사진은 처음 한 번 shared/person useSocialAvatar)
 export function S11ePhoto() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
-  const input = useRef<HTMLInputElement>(null);
-  const [src, setSrc] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [over, setOver] = useState(false);
   const [saving, setSaving] = useState(false);
-  useEffect(() => () => void (src && URL.revokeObjectURL(src)), [src]);
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
-  const me = d.me;
+  // S-11에서 Avatar에 끌어 놓은 사진이면 바로 받음
+  const dropped = (useLocation().state as { file?: unknown } | null)?.file;
   const back = () => nav('/settings/me');
-  const take = (f: File | undefined) => {
-    if (!f) return;
-    const e = photoError(f);
-    setError(e);
-    if (!e) setSrc(URL.createObjectURL(f));
-  };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setOver(false);
-    take(e.dataTransfer.files[0]);
-  };
+  if (d.loading || !d.me || !d.c) return <QuestionSkeleton title={copy.photo} onBack={back} />;
+  const me = d.me;
   const save = async (jpeg: Blob) => {
     if (saving || !me.space_id) return;
     setSaving(true);
     try {
       await uploadAvatar(me.space_id, me.id, jpeg);
       await qc.invalidateQueries({ queryKey: qk.avatars });
+      track('profile_photo_changed', { action: 'set' });
       toast(copy.photoSaved);
       back();
     } catch {
@@ -59,63 +38,28 @@ export function S11ePhoto() {
       setSaving(false);
     }
   };
-  const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={copy.photo} backLabel={copy.back} backTo={copy.me} onBack={back} />
-      {src ? (
-        <ImageCrop
-          src={src}
-          labels={{
-            stage: copy.photoStage,
-            zoom: copy.photoZoom,
-            preview: copy.photoPreview,
-            cancel: copy.photoAgain,
-            save: copy.photoSave,
-          }}
-          onCancel={() => setSrc(null)}
-          onSave={(b) => void save(b)}
-        />
-      ) : (
-        <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-          <div
-            className={['hg-drop', over && 'is-over', error && 'is-error']
-              .filter(Boolean)
-              .join(' ')}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setOver(true);
-            }}
-            onDragLeave={() => setOver(false)}
-            onDrop={onDrop}
-          >
-            <Icon name="image" />
-            <p className="hg-drop__title">{copy.photoDrop}</p>
-            <Button variant="secondary" size="sm" onClick={() => input.current?.click()}>
-              {copy.photoPick}
-            </Button>
-            <p className="hg-drop__help">{copy.photoHelp}</p>
-            <input
-              ref={input}
-              type="file"
-              accept=".jpg,.jpeg,.png,.heic,.heif,.webp,image/jpeg,image/png,image/heic,image/heif,image/webp"
-              hidden
-              aria-label={copy.photoPick}
-              onChange={(e) => take(e.target.files?.[0])}
-            />
-          </div>
-          {error && (
-            <p className="hg-help is-error" role="alert">
-              {error}
-            </p>
-          )}
-          <p className="hg-help">
-            {d.c.joined || d.space?.couple_state === 'not_joined'
+  return (
+    <QuestionLayout title={copy.photo} onBack={back}>
+      <PhotoPick
+        initial={dropped}
+        labels={{
+          drop: copy.photoDrop,
+          pick: copy.photoPick,
+          help: copy.photoHelp,
+          notice:
+            d.c.joined || d.space?.couple_state === 'not_joined'
               ? copy.photoNotice(d.c.partnerName)
-              : copy.photoNoticeSolo}
-          </p>
-        </div>
-      )}
-    </div>
+              : copy.photoNoticeSolo,
+          tooBig: copy.photoTooBig,
+          badType: copy.photoBadType,
+          stage: copy.photoStage,
+          zoom: copy.photoZoom,
+          preview: copy.photoPreview,
+          again: copy.photoAgain,
+          save: copy.photoSave,
+        }}
+        onSave={(b) => void save(b)}
+      />
+    </QuestionLayout>
   );
-  return <MainFrame current={null} page={{ title: copy.photo }} columns={[body]} />;
 }

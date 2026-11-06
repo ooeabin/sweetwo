@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axe as runAxe } from './axe';
 
 // 웹사이트 L-01·02·03·05·06과 초대 링크(docs/spec/28-website.md).
 const MAC =
@@ -12,7 +12,7 @@ const IPHONE =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
 
 const axe = async (page: Page) => {
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const r = await runAxe(page);
   expect(
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
@@ -43,15 +43,23 @@ test.describe('Mac', () => {
   }) => {
     await outside(page);
     await page.goto('/');
-    await expect(page).toHaveTitle('sweeTwo | 함께 구워 더 달콤한 자산파이');
+    await expect(page).toHaveTitle('sweeTwo | 둘이 구워서 더 달콤한 자산파이');
     await expect(
-      page.getByRole('heading', { level: 1, name: '함께 구워 더 달콤한 자산파이' }),
+      page.getByRole('heading', { level: 1, name: '둘이 구워서 더 달콤한 자산파이' }),
     ).toBeVisible();
     const hero = page.locator('[data-download]').first();
     await expect(hero.getByRole('link', { name: 'Mac용 다운로드' })).toBeVisible();
     await expect(hero.getByRole('link', { name: 'Windows용 다운로드' })).toBeHidden();
     await hero.getByRole('button', { name: '다른 OS용 받기' }).click();
     await expect(hero.getByRole('link', { name: 'Windows용 다운로드' })).toBeVisible();
+    // PC 버튼 아래 휴대폰 앱(스토어 2개), 상단 ‘앱 받기’는 맨 아래 다운로드로
+    await expect(hero.getByText('휴대폰 앱도 있어요')).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toHaveAttribute(
+      'href',
+      'https://play.google.com/store/apps/details?id=kr.sweetwo.app',
+    );
+    await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute('href', '/#get');
+    await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
     await expect(
       page.getByText('macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요').first(),
     ).toBeVisible();
@@ -86,8 +94,9 @@ test.describe('Mac', () => {
     await page.getByRole('button', { name: '보안 경고가 뜨나요?' }).click();
     await expect(page.getByText(/그래도 열기/)).toBeVisible();
     await expect(
-      page.getByText('앱에서 로그인하면 웹에서 쓰던 기록이 그대로 있어요'),
+      page.getByText('휴대폰 앱과 같은 계정으로 로그인하면 기록이 그대로 있어요'),
     ).toBeVisible();
+    await expect(page.getByText('휴대폰 앱도 있어요')).toBeVisible();
     await axe(page);
     await page.reload();
     await expect(page.getByRole('heading', { name: '다운로드를 시작했어요' })).toBeVisible();
@@ -106,10 +115,9 @@ test.describe('Mac', () => {
       'href',
       'sweetwo://i/K7M2QX',
     );
-    await expect(page.getByRole('link', { name: '웹에서 계속하기' })).toHaveAttribute(
-      'href',
-      'https://app.sweetwo.kr/i/K7M2QX',
-    );
+    // 앱이 열리지 않으면 같은 초대 화면(코드 + 다운로드)
+    await expect(page.getByRole('heading', { name: 'sweeTwo에 초대받았어요' })).toBeVisible();
+    await expect(page.getByText('K7M2QX', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: '페이지를 찾을 수 없어요' })).toBeHidden();
     await axe(page);
   });
@@ -132,28 +140,39 @@ test.describe('Windows', () => {
 
 test.describe('Windows 7', () => {
   test.use({ userAgent: WIN7 });
-  test('지원하지 않는 OS: 안내 + 웹에서 시작하기', async ({ page }) => {
+  test('지원하지 않는 컴퓨터: 안내 + 스토어 2개', async ({ page }) => {
     await outside(page);
     await page.goto('/');
     const hero = page.locator('[data-download]').first();
     await expect(
-      hero.getByText('이 기기에서는 앱을 쓸 수 없어요. 웹에서 시작할 수 있어요'),
+      hero.getByText('이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요'),
     ).toBeVisible();
-    await expect(hero.getByRole('link', { name: '웹에서 시작하기' })).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toBeVisible();
   });
 });
 
 test.describe('휴대폰', () => {
   test.use({ userAgent: IPHONE });
-  test('웹에서 시작하기 + 설치 안내 1줄, 초대 링크는 바로 웹 앱', async ({ page }) => {
+  test('iPhone: App Store 하나 + PC 안내, 상단 앱 받기 = 스토어, 초대 링크는 코드 + 스토어', async ({
+    page,
+  }) => {
     await outside(page);
     await page.goto('/?utm_source=insta');
     const hero = page.locator('[data-download]').first();
-    await expect(hero.getByText('Mac이나 Windows에서 설치할 수 있어요')).toBeVisible();
-    const web = hero.getByRole('link', { name: '웹에서 시작하기' });
-    await expect(web).toHaveAttribute('href', /utm_source=insta/);
+    await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toBeHidden();
+    await expect(hero.getByText('Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요')).toBeVisible();
+    await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute(
+      'href',
+      'https://apps.apple.com/kr/',
+    );
     await page.goto('/i/K7M2QX');
-    await expect(page).toHaveURL('https://app.sweetwo.kr/i/K7M2QX');
+    await expect(page.getByRole('heading', { name: 'sweeTwo에 초대받았어요' })).toBeVisible();
+    await expect(page.getByText('앱을 설치한 뒤 이 코드를 입력해 주세요')).toBeVisible();
+    await expect(page.getByText('K7M2QX', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'sweeTwo 앱으로 열까요?' })).toBeHidden();
+    await axe(page);
   });
 });
 
@@ -178,4 +197,18 @@ test('L-03 릴리스 노트, L-05 약관(시행일), L-06 고객센터 검색', 
   await page.getByLabel('궁금한 걸 검색해 보세요').fill('우주여행');
   await expect(page.getByText('찾는 답이 없어요. 메일로 물어봐 주세요')).toBeVisible();
   await axe(page);
+});
+
+test('로그인 복귀 페이지(A-03 5번): 앱이면 code와 state만 sweetwo://로, 주소창에 code가 남지 않음', async ({
+  page,
+}) => {
+  await page.addInitScript(() => Object.assign(window, { __sweetwoE2E: true }));
+  await page.goto('/auth/callback?from=app&state=st_1&code=co-2&next=https://evil.example');
+  await expect(page.getByRole('heading', { name: '로그인을 마쳤어요' })).toBeVisible();
+  const open = page.getByRole('link', { name: 'sweeTwo 열기' });
+  await expect(open).toHaveAttribute('href', 'sweetwo://auth/callback?state=st_1&code=co-2');
+  expect(page.url()).not.toContain('code=');
+  await axe(page);
+  await page.goto('/auth/callback?from=app&state=<x>&code=a');
+  await expect(page.getByRole('link', { name: 'sweeTwo 열기' })).toBeHidden();
 });

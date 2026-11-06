@@ -3,9 +3,10 @@ import { pickGuides } from '@sweetwo/core';
 import { ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { LoadFailed } from '../load-failed';
 import { GUIDES, TOPIC_KEYS, checkPath, readPath, useChecklist } from '../guides';
 
 // S-01 가이드 모아보기(25 S-01): 지금 단계 체크리스트(진행률, 항목은 보기만 → S-02), 우리 상황에 맞는 글 3개(목표·거주 형태·자녀 계획),
@@ -15,8 +16,18 @@ export function S01Guides() {
   const d = useSettingsData();
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const ck = useChecklist(d.space);
+  if (d.failed || ck.failed || goals.isError)
+    return (
+      <LoadFailed
+        onRetry={() => {
+          d.retry();
+          ck.retry();
+          void goals.refetch();
+        }}
+      />
+    );
   if (d.loading || ck.loading || goals.isLoading || !d.space)
-    return <MainFrame current={null} columns={[null]} />;
+    return <LoadingFrame sub="settings" current={null} />;
   const mine = pickGuides({
     housing: d.space.housing,
     childPlan: d.space.child_plan,
@@ -34,7 +45,7 @@ export function S01Guides() {
       <section className="hg-stack">
         <SectionHeader
           title={ck.stage ? copy.checklistStage(ck.stage.name) : copy.noStage}
-          count={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}
+          count={ck.stage ? copy.checklistCount(ck.count, ck.total) : undefined}
         />
         {ck.stage && (
           <div className="hg-list">
@@ -75,5 +86,5 @@ export function S01Guides() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.guidesTitle }} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

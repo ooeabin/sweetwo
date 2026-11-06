@@ -5,6 +5,7 @@ import {
   type AuthProviderName,
   type LockStatus,
   type OsNotice,
+  type UpdateState,
   type VerifyResult,
 } from '../shared/channels';
 
@@ -52,6 +53,17 @@ contextBridge.exposeInMainWorld('sweetwo', {
     onOpen: (cb: (id: string) => void) => listen(CH.notifyOpen, cb),
   },
   onNavigate: (cb: (path: string) => void) => listen(CH.navigate, cb),
+  cache: {
+    load: () => ipcRenderer.invoke(CH.cacheLoad) as Promise<string | null>,
+    save: (text: string) => ipcRenderer.invoke(CH.cacheSave, text) as Promise<boolean>,
+    clear: () => ipcRenderer.invoke(CH.cacheClear) as Promise<void>,
+  },
+  update: {
+    state: () => ipcRenderer.invoke(CH.updateState) as Promise<UpdateState>,
+    check: () => ipcRenderer.invoke(CH.updateCheck) as Promise<UpdateState>,
+    install: () => ipcRenderer.invoke(CH.updateInstall) as Promise<void>,
+    onState: (cb: (s: UpdateState) => void) => listen(CH.updateEvent, cb),
+  },
   widget: {
     update: (s: unknown) => ipcRenderer.invoke(CH.widgetUpdate, s) as Promise<void>,
     state: () => ipcRenderer.invoke(CH.widgetState) as Promise<unknown>,

@@ -40,7 +40,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select is(public.join_space(current_setting('test.code')), 'joined', '합류');
 select results_eq(
   $$ select nickname, side::text, monthly_income, onboarding_step from public.app_user $$,
-  $$ values ('예빈'::text, 'bride'::text, 2500000::bigint, 'P-02B'::text) $$,
+  $$ values ('예빈'::text, 'bride'::text, 2500000::bigint, 'P-03'::text) $$,
   '찬우가 적은 호칭, 추정 수입이 초기값, 반대쪽');
 select is(public.join_space(current_setting('test.code')), 'resume', '같은 코드로 다시 열면 이어서');
 select is((select nickname from public.partner_profile()), '찬우', '배우자 프로필');

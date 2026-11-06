@@ -81,40 +81,102 @@ export type ActiveNotice = {
   importance: 'normal' | 'must';
   platforms: string[];
 };
-export async function fetchActiveNotices(platform: 'desktop' | 'web'): Promise<ActiveNotice[]> {
+export async function fetchActiveNotices(
+  platform: 'desktop' | 'ios' | 'android' | 'web',
+): Promise<ActiveNotice[]> {
+  // 공지 대상(AD-10): 데스크톱 앱 / 모바일 앱(iOS·Android) / 웹
+  const target = platform === 'ios' || platform === 'android' ? 'mobile' : platform;
   const { data, error } = await supabase()
     .from('notice')
     .select('id, kind, title, body, importance, platforms')
     .order('starts_at', { ascending: false });
   if (error) return [];
   return (data ?? [])
-    .filter((n) => n.platforms.includes(platform))
+    .filter((n) => n.platforms.includes(target))
     .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
 }
 
-/** 배우자 활동(19 H-08) 한 건: 알림(notice) / 월급 나누기 끝(split_done) / 자산 추가·바꿈. name이 null이면 ‘합계만’ 항목 */
-const KINDS = [
-  'notice',
-  'split_done',
-  'asset_added',
-  'asset_changed',
-  'emergency_in',
-  'emergency_out',
-] as const;
-export interface PartnerActivity {
-  at: string;
-  kind: (typeof KINDS)[number];
-  name: string | null;
-  ref: string;
-  target: string;
+/** 새 기기 로그인 확인(로그인 뒤 한 번): 다른 세션이 있으면 서버가 본인에게 알림 + 메일 */
+export async function noteLogin(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('note_login');
+  if (error) throw new Error(error.message);
+  return data === true;
 }
 
-/** 최근 90일, 상대가 한 일 최근 5건(부부가 연결돼 있을 때만) */
-export async function fetchPartnerActivity(limit = 5): Promise<PartnerActivity[]> {
-  const { data, error } = await supabase().rpc('partner_activity', { p_limit: limit });
-  fail(error);
-  return (data ?? []).flatMap((r) => {
-    const kind = KINDS.find((k) => k === r.kind);
-    return kind ? [{ at: r.at, kind, name: r.name, ref: r.ref, target: r.target }] : [];
+/** 앱 기기 기록(AD-16 최소 지원 버전 미만 기기 수): 로그인된 채 켜질 때 설치 ID, 플랫폼, 앱 버전 */
+export async function noteDevice(
+  installId: string,
+  platform: 'desktop' | 'ios' | 'android',
+  version: string,
+): Promise<void> {
+  const { error } = await supabase().rpc('note_device', {
+    p_install: installId,
+    p_platform: platform,
+    p_version: version,
   });
+  if (error) throw new Error(error.message);
+}
+
+/** 데스크톱 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄 */
+export async function touchApp(): Promise<void> {
+  const { error } = await supabase().rpc('touch_app');
+  if (error) throw new Error(error.message);
+}
+
+/** S-14 마케팅 정보 받기: 가장 최근 동의 기록(없으면 null = 꺼짐) */
+export async function fetchMarketing(): Promise<{ agreed: boolean; at: string } | null> {
+  const { data, error } = await supabase()
+    .from('consent')
+    .select('agreed, created_at')
+    .eq('kind', 'marketing')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) throw new Error(error.message);
+  const r = data?.[0];
+  return r ? { agreed: r.agreed, at: r.created_at } : null;
+}
+
+/** S-14 마케팅 정보 받기 켜기·끄기(동의 기록은 추가만) */
+export async function setMarketing(userId: string, on: boolean, version: string): Promise<void> {
+  const { error } = await supabase().from('consent').insert({
+    user_id: userId,
+    kind: 'marketing',
+    terms_version: version,
+    agreed: on,
+    source: 'settings',
+  });
+  if (error) throw new Error(error.message);
+}
+
+/** 홈 띠: 내 알림 이메일로 보낸 메일이 반송됐는지(14 ‘알림 메일 반송’). 주소를 바꾸면 사라짐 */
+export async function fetchMailBounced(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('my_mail_bounced');
+  if (error) return false;
+  return data === true;
+}
+
+/** 모바일 푸시 기기 등록(로그인한 사람, 같은 토큰은 마지막 등록한 사람 것) */
+export async function registerPushDevice(
+  platform: 'ios' | 'android',
+  token: string,
+  appVersion: string,
+) {
+  const { error } = await supabase().rpc('register_push_device', {
+    p_platform: platform,
+    p_token: token,
+    p_app_version: /^\d+\.\d+\.\d+$/.test(appVersion) ? appVersion : undefined,
+  });
+  if (error) throw new Error(error.message);
+}
+/** 로그아웃 전에 이 기기 토큰을 지움(실패해도 로그아웃은 함) */
+export async function unregisterPushDevice(token: string) {
+  const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
+  if (error) throw new Error(error.message);
+}
+
+/** 18 ‘합류 뒤’: 데스크톱 앱 받기 링크를 알림 이메일로(하루 한 번) */
+export async function sendDesktopLink(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('send_desktop_link');
+  if (error) throw new Error(error.message);
+  return data === true;
 }

@@ -81,6 +81,7 @@ export function GoalQuestionInput({
           unsureLabel={copy.unsureLater}
           onBand={(b) => onAnswer(b.value, true)}
           monthly={t.kind({}) === 'monthly'}
+          zeroLink={q.zero ? { label: q.zero, onClick: () => onAnswer(0, false) } : undefined}
         />
       );
     case 'percent': {

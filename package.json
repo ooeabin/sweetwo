@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "turbo run dev --parallel --filter=@sweetwo/web --filter=@sweetwo/admin",
+    "dev": "turbo run dev --parallel --filter=@sweetwo/mobile --filter=@sweetwo/admin",
     "dev:desktop": "turbo run dev --filter=@sweetwo/desktop",
     "dev:site": "turbo run dev --filter=@sweetwo/site",
     "build": "turbo run build",

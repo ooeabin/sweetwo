@@ -6,6 +6,8 @@ export { A04NotifyEmail } from './pages/a-04-notify-email';
 export { A05Terms } from './pages/a-05-terms';
 export { A06LockSetup } from './pages/a-06-lock';
 export { A08SessionExpired } from './pages/a-08-session-expired';
+export { A08NewDevice } from './pages/a-08-new-device';
+export { A05rReconsent } from './pages/a-05r-reconsent';
 export { AuthCallback } from './pages/auth-callback';
 export { initSession, session } from './session';
 export { paths } from './flow';

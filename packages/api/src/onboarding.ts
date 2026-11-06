@@ -1,4 +1,4 @@
-import type { Database, Json, Tables, TablesUpdate } from '@sweetwo/core';
+import type { Database, Tables, TablesUpdate } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -29,6 +29,9 @@ export type Me = Pick<
   | 'quiet_end'
   | 'default_visibility'
   | 'analytics_off'
+  | 'rank_month'
+  | 'rank_pct'
+  | 'rank_net'
 >;
 export type Space = Tables<'couple_space'>;
 export type Goal = Tables<'goal'>;
@@ -42,7 +45,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off',
+      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off, rank_month, rank_pct, rank_net',
     )
     .maybeSingle();
   fail(error);
@@ -72,6 +75,9 @@ export async function updateMe(
     | 'quiet_end'
     | 'default_visibility'
     | 'analytics_off'
+    | 'rank_month'
+    | 'rank_pct'
+    | 'rank_net'
   >,
 ) {
   const me = await fetchMe();
@@ -111,10 +117,10 @@ export async function updateSpace(patch: SpacePatch) {
   fail(error);
 }
 
+// 서버 space_goals(): 배우자 내 목표가 ‘금액만 보여 주기’면 이름 대신 “개인 목표”(22 공개, 25 S-13)
 export async function fetchGoals(): Promise<Goal[]> {
   const { data, error } = await supabase()
-    .from('goal')
-    .select('*')
+    .rpc('space_goals')
     .is('deleted_at', null)
     .order('priority');
   fail(error);
@@ -147,6 +153,21 @@ export async function updateGoal(id: string, patch: TablesUpdate<'goal'>) {
   fail(error);
 }
 
+/** 우리 ↔ 내 목표 바꾸기(22 ‘목표 종류’). 상대가 체크한 저금 줄·직접 넣은 돈이 있으면 서버가 막음 */
+export async function setGoalOwner(
+  id: string,
+  owner: string | null,
+  priority: number,
+): Promise<'ok' | 'partner_saved'> {
+  const { error } = await supabase()
+    .from('goal')
+    .update({ owner_user_id: owner, priority })
+    .eq('id', id);
+  if (error?.message?.includes('partner_saved')) return 'partner_saved';
+  fail(error);
+  return 'ok';
+}
+
 /** 휴지통으로(영구 삭제는 30일 뒤 예약 작업) */
 export async function trashGoals(ids: string[]) {
   if (!ids.length) return;
@@ -166,25 +187,6 @@ export async function createInvite(): Promise<{ code: string; expiresAt: string 
   return { code: row.code, expiresAt: row.expires_at };
 }
 
-/** O-13, P-04 만 18세 미만(생년월일 'YYYY-MM-DD'): 계정 즉시 삭제 */
-export async function deleteUnderageAccount(birthDate: string) {
-  const { error } = await supabase().rpc('delete_underage_account', { p_birth_date: birthDate });
-  fail(error);
-}
-
-/** 배우자 생일(월, 일). 없으면 null. 캘린더 서프라이즈 생일 미리 채움 */
-export async function fetchPartnerBirthday(): Promise<{ month: number; day: number } | null> {
-  const { data, error } = await supabase().rpc('partner_birthday');
-  fail(error);
-  return Array.isArray(data) ? (data[0] ?? null) : null;
-}
-
-/** O-13 만 18세 미만: 계정 즉시 삭제 */
-export async function deleteMinorAccount(birthYear: number) {
-  const { error } = await supabase().rpc('delete_minor_account', { p_birth_year: birthYear });
-  fail(error);
-}
-
 // 고정지출 항목(O-36)
 export type FixedExpense = Tables<'fixed_expense'>;
 export async function fetchFixedExpenses(): Promise<FixedExpense[]> {
@@ -195,29 +197,6 @@ export async function fetchFixedExpenses(): Promise<FixedExpense[]> {
     .order('sort');
   fail(error);
   return data ?? [];
-}
-export async function insertFixedExpenses(
-  rows: Pick<FixedExpense, 'group_key' | 'name' | 'burden' | 'sort'>[],
-) {
-  if (!rows.length) return;
-  const space_id = await ensureSpace();
-  const { error } = await supabase()
-    .from('fixed_expense')
-    .insert(rows.map((r) => ({ ...r, space_id })));
-  fail(error);
-}
-/** O-37 항목별 금액 */
-export async function updateFixedExpense(id: string, patch: Pick<FixedExpense, 'monthly_amount'>) {
-  const { error } = await supabase().from('fixed_expense').update(patch).eq('id', id);
-  fail(error);
-}
-export async function trashFixedExpenses(ids: string[]) {
-  if (!ids.length) return;
-  const { error } = await supabase()
-    .from('fixed_expense')
-    .update({ deleted_at: new Date().toISOString() })
-    .in('id', ids);
-  fail(error);
 }
 
 // 통장(O-63)
@@ -231,114 +210,6 @@ export async function fetchAccounts(): Promise<Account[]> {
     .order('sort');
   fail(error);
   return data ?? [];
-}
-type AccountPatch = Pick<Account, 'role' | 'name' | 'is_existing' | 'start_balance' | 'sort'>;
-/** 역할마다 하나: 있으면 고치고 없으면 추가 */
-export async function saveAccounts(rows: AccountPatch[], existing: Account[]) {
-  const space_id = await ensureSpace();
-  for (const r of rows) {
-    const cur = existing.find((a) => a.role === r.role);
-    const { error } = cur
-      ? await supabase().from('account').update(r).eq('id', cur.id)
-      : await supabase()
-          .from('account')
-          .insert({ ...r, space_id });
-    fail(error);
-  }
-}
-export async function trashAccounts(ids: string[]) {
-  if (!ids.length) return;
-  const { error } = await supabase()
-    .from('account')
-    .update({ deleted_at: new Date().toISOString() })
-    .in('id', ids);
-  fail(error);
-}
-
-// 첫 월급 플랜(O-66). 같은 사이클이면 서버가 이미 있는 플랜 id를 돌려준다.
-export interface FirstPlanLine {
-  target: 'account' | 'goal';
-  account_role?: AccountRole;
-  goal_id?: string;
-  amount: number;
-  amount_groom?: number;
-  amount_bride?: number;
-}
-export async function startFirstPlan(p: {
-  labelMonth: string;
-  cycleStart: string;
-  cycleEnd: string;
-  firstAdjust: number;
-  mergedClose: boolean;
-  isTemp: boolean;
-  snapshot: Json;
-  lines: FirstPlanLine[];
-}): Promise<string> {
-  const { data, error } = await supabase().rpc('start_first_plan', {
-    p_label_month: p.labelMonth,
-    p_cycle_start: p.cycleStart,
-    p_cycle_end: p.cycleEnd,
-    p_first_adjust: p.firstAdjust,
-    p_merged_close: p.mergedClose,
-    p_is_temp: p.isTemp,
-    p_snapshot: p.snapshot,
-    p_lines: p.lines as unknown as Json,
-  });
-  fail(error);
-  return data as string;
-}
-
-/** 다음 사이클 플랜(07 3장). 기준일이 지나 처음 앱을 연 사람이 만듦. 같은 사이클이면 있던 것 */
-export async function createCyclePlan(p: {
-  labelMonth: string;
-  cycleStart: string;
-  cycleEnd: string;
-  isTemp: boolean;
-  snapshot: Json;
-  lines: FirstPlanLine[];
-}): Promise<string> {
-  const { data, error } = await supabase().rpc('create_cycle_plan', {
-    p_label_month: p.labelMonth,
-    p_cycle_start: p.cycleStart,
-    p_cycle_end: p.cycleEnd,
-    p_is_temp: p.isTemp,
-    p_snapshot: p.snapshot,
-    p_lines: p.lines as unknown as Json,
-  });
-  fail(error);
-  return data as string;
-}
-
-/** 가장 최근 플랜의 끝 날(없으면 null = 첫 플랜 전) */
-export async function fetchLastPlanEnd(): Promise<string | null> {
-  const { data, error } = await supabase()
-    .from('monthly_plan')
-    .select('cycle_end')
-    .is('deleted_at', null)
-    .order('cycle_end', { ascending: false })
-    .limit(1);
-  fail(error);
-  return Array.isArray(data) ? (data[0]?.cycle_end ?? null) : null;
-}
-
-// 이번 달: 오늘이 든 월 플랜과 줄(H-01, H-03)
-export type MonthlyPlan = Tables<'monthly_plan'>;
-export type PlanLine = Tables<'plan_line'>;
-export async function fetchCurrentPlan(
-  today: string,
-): Promise<(MonthlyPlan & { lines: PlanLine[] }) | null> {
-  const { data, error } = await supabase()
-    .from('monthly_plan')
-    .select('*, lines:plan_line(*)')
-    .is('deleted_at', null)
-    .lte('cycle_start', today)
-    .gte('cycle_end', today)
-    .order('cycle_start', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  fail(error);
-  if (!data) return null;
-  return { ...data, lines: (data.lines ?? []).filter((l) => !l.deleted_at) };
 }
 
 // 배우자 프로필(같은 공간 다른 사람). 없으면 null
@@ -355,15 +226,15 @@ export type PartnerProfile = {
   /** 다른 수입 월 합계(O-35b) */
   other_income: number;
 };
+/** 배우자 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 배우자가 없거나 안 적었으면 null */
+export async function fetchPartnerBirthYear(): Promise<number | null> {
+  const { data, error } = await supabase().rpc('partner_birth_year');
+  fail(error);
+  return typeof data === 'number' ? data : null;
+}
 export async function fetchPartner(): Promise<PartnerProfile | null> {
   const { data, error } = await supabase().rpc('partner_profile');
   fail(error);
   const row = Array.isArray(data) ? data[0] : null;
   return (row as PartnerProfile | undefined) ?? null;
-}
-
-/** 신랑·신부(25 S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 함께 바꿈 */
-export async function setMySide(side: 'groom' | 'bride') {
-  const { error } = await supabase().rpc('set_my_side', { p_side: side });
-  fail(error);
 }

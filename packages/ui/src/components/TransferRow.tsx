@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { Icon } from './Icon';
 
-// 월급 나누기 줄(docs/design/components/TransferRow.md). 은행 앱에서 옮긴 뒤 체크하면 나눈 것으로 기록.
-// 체크 = button role="checkbox" + aria-checked, aria-label “{받는 곳} 옮겼어요”. 옮긴 줄은 글자를 stone으로.
+// 월급 체크리스트 줄(docs/design/components/TransferRow.md). 은행 앱에서 보낸 뒤 체크하면 한 것으로 기록.
+// 체크 = button role="checkbox" + aria-checked, aria-label “{줄 이름} 체크”. 체크한 줄은 글자를 stone으로.
 export function TransferRow({
   label,
   meta,
@@ -13,6 +14,9 @@ export function TransferRow({
   disabled,
   badge,
   actions,
+  onOpen,
+  lead,
+  viewOnly = false,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -27,19 +31,16 @@ export function TransferRow({
   badge?: ReactNode;
   /** 줄 아래 글자 링크(취소, 다른 금액) */
   actions?: ReactNode;
+  /** 줄(이름·금액)을 누르면 여는 선택 시트(W-02 ‘다른 금액’, W-05 ‘못 했어요’, 2026-11-03) */
+  onOpen?: () => void;
+  /** 줄 앞 아이콘 칸(홈 이번 달 체크리스트, 2026-11-03) */
+  lead?: ReactNode;
+  /** 남의 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 대신 상태 표시(한 줄은 작은 체크, 안 한 줄은 비움) */
+  viewOnly?: boolean;
 }) {
-  return (
-    <div className={cx('hg-transfer', done && 'is-done')}>
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={done}
-        aria-label={checkLabel}
-        className={cx('hg-check', done && 'is-on')}
-        disabled={disabled}
-        onClick={onToggle}
-      />
-      <div className="hg-stack" style={{ gap: 0 }}>
+  const body = (
+    <>
+      <span className="hg-stack" style={{ gap: 0 }}>
         <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
           <span className="hg-transfer__label">{label}</span>
           {badge}
@@ -50,8 +51,35 @@ export function TransferRow({
             {actions}
           </span>
         )}
-      </div>
+      </span>
       <span className="hg-transfer__amount">{amount}</span>
+    </>
+  );
+  return (
+    <div className={cx('hg-transfer', done && 'is-done', !!lead && 'hg-transfer--lead')}>
+      {lead}
+      {viewOnly ? (
+        <span className="hg-transfer__state" role="img" aria-label={checkLabel}>
+          {done && <Icon name="check" size={20} />}
+        </span>
+      ) : (
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={done}
+          aria-label={checkLabel}
+          className={cx('hg-check', done && 'is-on')}
+          disabled={disabled}
+          onClick={onToggle}
+        />
+      )}
+      {onOpen ? (
+        <button type="button" className="hg-transfer__open" aria-haspopup="dialog" onClick={onOpen}>
+          {body}
+        </button>
+      ) : (
+        body
+      )}
     </div>
   );
 }

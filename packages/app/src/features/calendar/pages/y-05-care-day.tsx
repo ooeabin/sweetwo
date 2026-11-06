@@ -1,4 +1,4 @@
-import { qk, updateCareDay, type CareDay } from '@sweetwo/api';
+import { qk, restoreTrash, trashCareDay, updateCareDay, type CareDay } from '@sweetwo/api';
 import { dday, formatMonthDay, nextCareDate, quickChips, solarToLunar } from '@sweetwo/core';
 import {
   AmountInput,
@@ -6,20 +6,21 @@ import {
   Chip,
   Field,
   ListRow,
+  Menu,
   PageHeader,
   QuestionLayout,
-  Tabs,
-  Toggle,
+  StatBlock,
+  QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { toast } from '../../../shared/toast';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
-import { syncFamilyGoal } from '../sync';
-import { carerLabel, sideLabel, useCalendarData } from '../data';
+import { useCalendarData } from '../data';
+import { startCareEdit } from './y-07-care-add';
 
 const ALERTS = [30, 14, 7, 0];
 
@@ -27,9 +28,9 @@ const ALERTS = [30, 14, 7, 0];
 const statusOf = (c: CareDay, date: string | null) =>
   c.status_on && date && c.status_on === date ? c.status : 'todo';
 
-// Y-05 챙길 날 상세(docs/spec/24-calendar.md): 제목 + 구분, 날짜(음력이면 “(음력 8월 3일)”), D-day, 쓸 돈(수정 → Q3),
-// 챙길 사람, 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요 → Y-08), 기록 없이 7일 지나면 ‘지남’ + ‘기록하기’,
-// 작년에는(지난 회차 기록), 미리 알림 칩, 메모. 내가 만든 ‘우리 둘’ 날은 “{배우자}님에게 숨기기”(끄기 전 한 번 확인). 이름·날짜 수정, 명절 할 일 목록, 알림 보내기는 다음 단계.
+// Y-05 챙길 날 상세(24 Y-05, 재기획): 제목(이름, 날짜, 음력이면 “(음력 8월 3일)”, D-day) + ‘수정’(이름·날짜 → Y-07 화면),
+// 금액 메모(수정 = Q3, 계산에 안 들어감), 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요 → Y-08, 기록 없이 7일 지나면 ‘지남’ + ‘기록하기’),
+// 미리 알림 칩, 작년에는(지난 회차 기록), 메모(두 사람이 같이 봄), ⋯ → 지우기(휴지통 + ‘되돌리기’).
 export function Y05CareDay() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -38,18 +39,15 @@ export function Y05CareDay() {
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [memo, setMemo] = useState<string | null>(null);
-  const [confirmShow, setConfirmShow] = useState(false);
-  if (c.loading) return <MainFrame current="calendar" columns={[null]} />;
+  if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
   const date = nextCareDate(care, c.today);
   const lunar = care.date_rule === 'lunar_yearly' && date ? solarToLunar(date) : null;
   const st = statusOf(care, date);
-  // 숨기기는 만든 사람의 ‘우리 둘’ 날만(24 서프라이즈 2·6번)
-  const mine = care.category === 'couple' && care.created_by === c.me?.id;
   const overdue = c.overdue.find((x) => x.care.id === care.id)?.date ?? null;
   const record = (on?: string) => nav(`/calendar/day/${care.id}/record/a${on ? `?on=${on}` : ''}`);
-  // 작년에는(7번): 지난 회차 기록
+  // 작년에는(6번): 지난 회차 기록
   const last = c.records.find((r) => r.care_day_id === care.id && (!date || r.occurs_on < date));
   const lastGift = last
     ? (last.gift_name ??
@@ -60,32 +58,69 @@ export function Y05CareDay() {
           : null))
     : null;
 
+  const refresh = () => qc.invalidateQueries({ queryKey: qk.careDays });
   const patch = async (p: Parameters<typeof updateCareDay>[1]) => {
     try {
       await updateCareDay(care.id, p);
-      await qc.invalidateQueries({ queryKey: qk.careDays });
+      await refresh();
     } catch {
       toast(copy.loadFailed);
     }
   };
-  const names = c.names;
+  const remove = async () => {
+    try {
+      await trashCareDay(care.id);
+      await refresh();
+      toast(copy.removed, {
+        label: copy.undo,
+        onClick: () => void restoreTrash('care_day', care.id).then(refresh),
+      });
+      nav('/calendar/list', { replace: true });
+    } catch {
+      toast(copy.loadFailed);
+    }
+  };
 
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader title={care.name} backLabel={copy.back} onBack={() => nav(-1)} />
-      <section className="hg-card hg-stack" aria-label={care.name}>
-        <span className="hg-card__label">{sideLabel(care, names)}</span>
-        <b>
-          {date ? formatMonthDay(date) : copy.noDate}
-          {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
-        </b>
-        {date && <span className="hg-card__meta">{copy.dday(dday(c.today, date))}</span>}
+      <PageHeader
+        title={care.name}
+        backLabel={copy.back}
+        onBack={() => nav(-1)}
+        action={
+          <Menu
+            label={copy.menu}
+            actions={[
+              {
+                label: copy.edit,
+                icon: 'pencil',
+                onSelect: () => {
+                  startCareEdit(care, c.today);
+                  nav('/calendar/add/a');
+                },
+              },
+              { label: copy.remove, icon: 'trash-2', danger: true, onSelect: () => void remove() },
+            ]}
+          />
+        }
+      />
+      {/* 1 제목(2026-11-04): 이름은 머리에 있으니 카드는 큰 D-day + 날짜만 */}
+      <section className="hg-card" aria-label={care.name}>
+        <StatBlock
+          as="div"
+          big={date ? copy.dday(dday(c.today, date)) : undefined}
+          sub={
+            <>
+              {date ? formatMonthDay(date) : copy.noDate}
+              {lunar && ` ${copy.lunarOf(lunar.month, lunar.day, lunar.leap)}`}
+            </>
+          }
+        />
       </section>
       <div className="hg-list">
         <ListRow
-          label={copy.spend}
-          sub={care.budget === 0 ? copy.zeroBudget : undefined}
-          value={m(care.budget)}
+          label={copy.amountMemo}
+          value={care.budget > 0 ? m(care.budget) : copy.noAmount}
           onClick={() => nav(`/calendar/day/${care.id}/budget`)}
         />
         <ListRow
@@ -93,21 +128,6 @@ export function Y05CareDay() {
           value={care.date_rule === 'once' ? copy.repeatOnce : copy.repeatYearly}
         />
       </div>
-      <section className="hg-stack" aria-label={copy.carerLabel}>
-        <span className="hg-card__label">{copy.carerLabel}</span>
-        <Tabs<CareDay['carer']>
-          variant="seg"
-          label={copy.carerLabel}
-          value={care.carer}
-          onChange={(carer) => void patch({ carer })}
-          items={[
-            { value: 'groom', label: names.groom },
-            { value: 'bride', label: names.bride },
-            { value: 'together', label: copy.together },
-          ]}
-        />
-        <span className="hg-help">{carerLabel(care, names)}</span>
-      </section>
       <section className="hg-stack" aria-label={copy.status}>
         <span className="hg-card__label">{copy.status}</span>
         {overdue ? (
@@ -126,48 +146,38 @@ export function Y05CareDay() {
             aria-label={copy.status}
             style={{ gap: 'var(--space-2)' }}
           >
-            {(['todo', 'preparing', 'done'] as const).map((s) => (
+            {/* 2026-11-04 칩은 ‘아직’ ‘준비 중’만. ‘다녀왔어요’는 그날부터 아래 주 버튼(누르면 기록 화면이라 칩과 다르게) */}
+            {(['todo', 'preparing'] as const).map((s) => (
               <Chip
                 key={s}
                 small
                 selected={st === s}
-                onClick={() =>
-                  s === 'done' ? record() : void patch({ status: s, status_on: date })
-                }
+                onClick={() => void patch({ status: s, status_on: date })}
               >
                 {copy.statuses[s]}
               </Chip>
             ))}
           </div>
         )}
+        {!overdue && date && date <= c.today && st !== 'done' && (
+          <Button variant="primary" block onClick={() => record(date)}>
+            {copy.statuses.done}
+          </Button>
+        )}
       </section>
-      {last && lastGift && (
-        <p className="hg-help" style={{ margin: 0 }}>
-          {copy.lastYear(lastGift, m(last.amount))}
-        </p>
-      )}
       <section className="hg-stack" aria-label={copy.alerts}>
-        <span className="hg-card__label">
-          {copy.alerts}
-          {care.secret && c.couple && (
-            <span className="hg-tag" style={{ marginLeft: 'var(--space-2)' }}>
-              {copy.onlyMe(c.couple.myName)}
-            </span>
-          )}
-        </span>
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.alerts}
-          style={{ gap: 'var(--space-2)' }}
-        >
+        <span className="hg-card__label">{copy.alerts}</span>
+        {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름, iOS 미리 알림·Rodeo처럼) */}
+        <div className="hg-list" role="group" aria-label={copy.alerts}>
           {ALERTS.map((n) => {
             const on = care.alerts.includes(n);
             return (
-              <Chip
+              <button
                 key={n}
-                small
-                selected={on}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                className="hg-listrow"
                 onClick={() =>
                   void patch({
                     alerts: on
@@ -176,43 +186,25 @@ export function Y05CareDay() {
                   })
                 }
               >
-                {copy.alertChip(n)}
-              </Chip>
+                <span />
+                <span className="hg-listrow__text">
+                  <span className="hg-listrow__label">{copy.alertRow(n)}</span>
+                </span>
+                <span className={on ? 'hg-check is-on' : 'hg-check'} aria-hidden="true" />
+                <span />
+              </button>
             );
           })}
         </div>
       </section>
-      {mine && c.couple && !c.couple.solo && (
-        <section className="hg-stack" aria-label={copy.hideFrom(c.couple.partnerName)}>
-          <Toggle
-            label={copy.hideFrom(c.couple.partnerName)}
-            checked={care.secret}
-            onChange={(on) => (on ? void patch({ secret: true }) : setConfirmShow(true))}
-          />
-          {confirmShow && (
-            <div className="hg-card hg-stack" role="alertdialog" aria-label={copy.showOk}>
-              <span>{copy.showConfirm(c.couple.partnerName)}</span>
-              <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
-                    setConfirmShow(false);
-                    void patch({ secret: false });
-                  }}
-                >
-                  {copy.showOk}
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => setConfirmShow(false)}>
-                  {copy.cancel}
-                </Button>
-              </div>
-            </div>
-          )}
-        </section>
+      {last && lastGift && (
+        <p className="hg-help" style={{ margin: 0 }}>
+          {copy.lastYear(lastGift, m(last.amount))}
+        </p>
       )}
       <Field
         label={copy.memo}
+        placeholder={copy.dayMemoPlaceholder}
         value={memo ?? care.memo ?? ''}
         maxLength={200}
         onChange={(e) => setMemo(e.target.value)}
@@ -222,10 +214,10 @@ export function Y05CareDay() {
       />
     </div>
   );
-  return <MainFrame current="calendar" columns={[body]} />;
+  return <MainFrame sub="detail" current="calendar" columns={[body]} />;
 }
 
-/** Y-05 쓸 돈 수정(Q3) */
+/** Y-05 금액 메모 수정(Q3, 비워 둘 수 있음) */
 export function Y05Budget() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -233,22 +225,21 @@ export function Y05Budget() {
   const c = useCalendarData();
   const [value, setValue] = useState<number | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
-  if (c.loading) return null;
+  if (c.loading) return <QuestionSkeleton />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
-  const v = value === undefined ? care.budget : value;
+  const v = value === undefined ? care.budget || null : value;
   return (
     <QuestionLayout
-      title={copy.budgetQ}
+      title={copy.amountQ}
       help={care.name}
       onBack={() => nav(`/calendar/day/${care.id}`)}
-      primary={{ label: copy.save, disabled: v === null, loading: saving }}
+      primary={{ label: copy.save, loading: saving }}
       onSubmit={async () => {
-        if (v === null || saving) return;
+        if (saving) return;
         setSaving(true);
         try {
-          await updateCareDay(care.id, { budget: v });
-          await syncFamilyGoal(qc).catch(() => undefined);
+          await updateCareDay(care.id, { budget: v ?? 0 });
           await qc.invalidateQueries({ queryKey: qk.careDays });
           nav(`/calendar/day/${care.id}`, { replace: true });
         } catch {
@@ -259,7 +250,7 @@ export function Y05Budget() {
       }}
     >
       <AmountInput
-        label={copy.budgetQ}
+        label={copy.amountQ}
         value={v}
         onChange={setValue}
         quick={quickChips.small}

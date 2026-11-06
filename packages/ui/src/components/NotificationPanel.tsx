@@ -26,7 +26,8 @@ export function NotificationPanel(p: {
     close: string;
     back: string;
     emptyTitle: string;
-    emptySub: string;
+    /** N-03 빈 상태는 제목 한 줄(13 공통 상태): 없으면 보조 문구 없음 */
+    emptySub?: string;
     /** 새 알림 점(화면 읽기) */
     unread: string;
   };
@@ -51,12 +52,25 @@ export function NotificationPanel(p: {
   const unread = items.some((x) => !x.read);
   const hasItems = items.length > 0;
 
-  // 열리면 첫 줄 포커스(목록이 처음 올 때 한 번)
+  // 열리면 첫 줄 포커스(목록이 처음 올 때 한 번). 좁은 창(손가락)에서는 포커스 테두리가 고른 것처럼 보여 목록 칸에만(2026-11-03)
   const focused = useRef(false);
   useEffect(() => {
     if (p.loading || !hasItems || focused.current) return;
     focused.current = true;
-    body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item')?.focus();
+    if (window.matchMedia?.('(min-width: 768px)').matches) {
+      // 2026-11-04 처음 포커스는 테두리 없이(열자마자 고른 것처럼 보여서). 키를 누르거나 떠나면 보통대로
+      const el = body.current?.querySelector<HTMLButtonElement>('button.hg-noti__item');
+      if (!el) return;
+      el.dataset.autofocus = '';
+      el.focus({ preventScroll: true });
+      const clear = () => {
+        delete el.dataset.autofocus;
+        el.removeEventListener('keydown', clear);
+        el.removeEventListener('blur', clear);
+      };
+      el.addEventListener('keydown', clear);
+      el.addEventListener('blur', clear);
+    } else body.current?.focus({ preventScroll: true });
   }, [p.loading, hasItems]);
 
   // Esc 닫기(시트)
@@ -138,7 +152,7 @@ export function NotificationPanel(p: {
         )}
       </div>
       {p.notice}
-      <div className="hg-noti__body" ref={body} onKeyDown={move}>
+      <div className="hg-noti__body" ref={body} tabIndex={-1} onKeyDown={move}>
         {p.loading ? (
           skeleton(3)
         ) : p.error ? (
@@ -152,7 +166,7 @@ export function NotificationPanel(p: {
           <div className="hg-noti__empty">
             <Icon name="bell" />
             <b>{p.labels.emptyTitle}</b>
-            <span>{p.labels.emptySub}</span>
+            {p.labels.emptySub && <span>{p.labels.emptySub}</span>}
           </div>
         ) : (
           <>

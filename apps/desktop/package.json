@@ -15,12 +15,13 @@
     "@sweetwo/app": "workspace:*",
     "@sweetwo/core": "workspace:*",
     "@sweetwo/ui": "workspace:*",
+    "electron-updater": "6.8.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.64.1",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

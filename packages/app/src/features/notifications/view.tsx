@@ -18,6 +18,10 @@ const ICON: Record<string, IconName> = {
   'shield-check': 'shield-check',
   heart: 'gift',
   house: 'house',
+  trophy: 'flag-pennant',
+  'user-plus': 'user',
+  'user-minus': 'user',
+  'envelope-simple': 'envelope',
 };
 
 /** N-01·N-02 공통 내용: 묶음(오늘·이번 주·이전), 줄, 모두 읽음, 더 불러오기, 실패·오프라인 */
@@ -74,7 +78,6 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
         close: copy.close,
         back: copy.back,
         emptyTitle: copy.empty,
-        emptySub: copy.emptySub,
         unread: copy.unread,
       }}
       groups={groups}

@@ -35,4 +35,5 @@
 - 좋은 점: 휴대폰 초대 → 앱 설치 → 합류 → 데스크톱과 같은 계정, 한 길로 정리. 화면과 로직은 그대로 재사용.
 - 나쁜 점: 설치 없이 써 보는 길이 없어짐. 스토어 계정, 심사(금융 앱 1~2주 가능), iOS·Android 기기 테스트, 푸시 인증서가 1차 일정에 들어옴.
 - 고친 문서: 기획서 01, 02, 03, 04, 08, 11, 13, 14, 15, 18, 19, 20, 25, 26, 28, 29, 30, 31, 32, 34, 36 / DEV_GUIDE / CLAUDE.md(스택, 구조) / design SiteLayout, AuthLayout / apps/site FAQ 원본.
-- 고칠 코드: apps/web → apps/mobile 이름 바꾸기 + Capacitor, apps/site(다운로드, 초대 페이지), auth-callback(웹 로그인 경로), O-07 초대 문구, CI(모바일 빌드), 배포(app.sweetwo.kr 제거).
+- 고친 코드: apps/web → apps/mobile 이름 바꾸기 + Capacitor 뼈대, CI Android 빌드.
+- 고칠 코드: apps/site(다운로드, 초대 페이지), auth-callback(웹 로그인 경로), O-07 초대 문구, CI(iOS 빌드), 배포(app.sweetwo.kr 제거).

@@ -1,5 +1,5 @@
-import { adminSearch, type AdminSearchRow } from '@sweetwo/api';
-import { formatKstDateTime } from '@sweetwo/core';
+import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
+import { formatKstDateTime, toCsv } from '@sweetwo/core';
 import { Button, DataTable } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,13 +7,54 @@ import { copy } from '../copy';
 import { Frame } from '../frame';
 
 // AD-02 회원·부부 검색: 이메일, 사용자 ID, 부부 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
-// 결과 표는 L0(이메일 앞 3자 외 가림). 검색도 감사 로그(서버). 내려받기(L0, 사유)는 다음 단계.
+// 결과 표는 L0(이메일 앞 3자 외 가림). 검색도 감사 로그(서버).
+// 내려받기: 결과 표 그대로(L0 열만), 사유를 남긴 뒤(감사 로그), 파일 첫 줄에 관리자 ID와 시각.
 export function AD02Members() {
   const nav = useNavigate();
   const [q, setQ] = useState('');
   const [rows, setRows] = useState<AdminSearchRow[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [reason, setReason] = useState('');
+  const download = async () => {
+    if (!rows?.length || !reason.trim() || busy) return;
+    setBusy(true);
+    setErr(false);
+    try {
+      const admin = await adminNoteExport('AD-02', reason.trim(), rows.length);
+      const now = formatKstDateTime(new Date().toISOString());
+      const head = [
+        copy.cols.userId,
+        copy.cols.email,
+        copy.cols.joined,
+        copy.cols.couple,
+        copy.cols.sub,
+      ];
+      const body = rows.map((r) => [
+        r.user_id,
+        r.email_masked,
+        formatKstDateTime(r.created_at).slice(0, 10),
+        copy.coupleStates[r.couple_state ?? ''] ?? '',
+        r.subscription,
+      ]);
+      const csv = toCsv([copy.downloadBy(admin, now)], [head, ...body]);
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = copy.downloadName(now.slice(0, 10).replace(/-/g, ''));
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setAsking(false);
+      setReason('');
+    } catch {
+      setErr(true);
+    } finally {
+      setBusy(false);
+    }
+  };
   const search = async () => {
     if (!q.trim() || busy) return;
     setBusy(true);
@@ -51,6 +92,31 @@ export function AD02Members() {
         </Button>
       </form>
       {err && <p className="hg-help is-error">{copy.failed}</p>}
+      {rows && rows.length > 0 && (
+        <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
+          {asking ? (
+            <>
+              <input
+                className="hg-input"
+                aria-label={copy.downloadReason}
+                placeholder={copy.downloadReason}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <Button
+                variant="primary"
+                disabled={!reason.trim() || busy}
+                onClick={() => void download()}
+              >
+                {copy.downloadGo}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setAsking(true)}>{copy.download}</Button>
+          )}
+        </div>
+      )}
       {rows && (
         <DataTable
           label={copy.menus.members}

@@ -1,75 +1,86 @@
-import { insertGoal, linkAssets, propose, qk } from '@sweetwo/api';
-import { formatManWon, formatMonthDay, formatYm, proposalApplyOn } from '@sweetwo/core';
-import { QuestionLayout } from '@sweetwo/ui';
+import { fetchSplits, insertGoal, qk, updateGoal } from '@sweetwo/api';
+import { formatManWon, formatYm, goalNeed } from '@sweetwo/core';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { proposalCopy } from '../../proposals';
+import { toAllocGoal } from '../../salary';
 import { copy } from '../copy';
 import { useAddDraft } from '../add/draft';
 import { addPath } from '../add/flow';
-import { addPayload, pickedAssets, previewGoal } from '../add/payload';
+import { addPayload, previewGoal } from '../add/payload';
 import { useAddStep } from '../add/step';
+import { addToGoalLine, mySplit, takeFreed } from '../freed';
 
 const man = (v: number) => `${formatManWon(v)} 원`;
 
-// G-03f 미리보기(Q7): “매달 25만 원씩 모으면 2028년 3월에 달성해요”. 우선순위는 맨 아래(위치 고르기는 G-06과 함께).
-// 연결된 부부 = “{배우자}님께 제안하기”(goal_add), 아니면 “추가하기”. 저축 가능 금액이 모자라지면 안내, 바로 추가했으면 G-04로.
+// G-03f 미리보기(Q7, 22): “매달 25만 원씩 모으면 2028년 3월에 이뤄요”(월 필요액 기준) /
+// 추가하기 → 바로 저장, 월급 계획에 0원 저금 줄(서버 트리거) → G-03g 매달 넣는 돈 → G-02(2026-11-03, 0원 보조 문구 없앰).
+// 우선순위는 그 종류 묶음 맨 아래.
 export function G03fGoalConfirm() {
   const s = useAddStep('confirm');
   const nav = useNavigate();
   const qc = useQueryClient();
   const clear = useAddDraft((x) => x.clear);
   const [saving, setSaving] = useState(false);
+  const [pos, setPos] = useState<number | null>(null);
+  const posId = useId();
   const d = s.data;
-  const p = addPayload(s.draft, d.connected);
+  const solo = d.space?.couple_state === 'solo';
+  const meId = d.me?.id ?? null;
+  const p = addPayload(solo ? { ...s.draft, owner: 'me' } : s.draft, meId);
   if (!p) return <Navigate to={addPath()} replace />;
-  if (d.loading || !d.me) return null;
+  if (d.loading || !d.me) return <QuestionSkeleton />;
 
-  const priority = Math.max(0, ...d.goals.map((g) => g.priority)) + 1;
-  const after = d.viewAdd(
-    previewGoal(p, {
-      spaceId: d.me.space_id ?? '',
-      me: d.me.id,
-      priority,
-      linked: s.draft.held === 'assets' ? s.draft.assetTotal : 0,
-    }),
+  const group = d.goals.filter(
+    (g) => g.owner_user_id === p.owner_user_id && g.template !== 'emergency',
   );
-  const line = after?.lines.find((l) => l.id === 'new');
+  // 우선순위 위치(기본 맨 아래, 22 G-03f): 고른 자리부터 뒤 목표를 한 칸씩 밀어 냄
+  const ordered = [...group].sort((a, b) => a.priority - b.priority);
+  const last = Math.max(0, ...group.map((g) => g.priority)) + 1;
+  const priority =
+    pos === null || pos > ordered.length ? last : (ordered[pos - 1]?.priority ?? last);
+  const draft = previewGoal(p, { spaceId: d.me.space_id ?? '', me: d.me.id, priority, linked: 0 });
+  const need = p.target_amount !== null ? goalNeed(toAllocGoal(draft)) : null;
   const title =
-    line && p.kind === 'monthly' && line.alloc > 0
-      ? copy.confirmMonthly(man(line.alloc))
-      : line && line.alloc > 0 && line.expected
-        ? copy.confirmTitle(man(line.alloc), formatYm(line.expected))
+    p.kind === 'monthly' && p.target_amount
+      ? copy.confirmMonthly(man(p.target_amount))
+      : need && p.deadline
+        ? copy.confirmTitle(man(need), formatYm(p.deadline))
         : copy.confirmUnknown(p.name);
-  const shortNow = d.view?.shortfall ?? 0;
-  const shortAfter = after?.shortfall ?? 0;
 
   const submit = async () => {
     if (saving) return;
     setSaving(true);
     try {
-      if (d.connected && d.base !== null) {
-        await propose(
-          'goal_add',
-          { ...p, asset_ids: pickedAssets(s.draft) },
-          proposalApplyOn(d.base),
+      if (priority !== last)
+        await Promise.all(
+          ordered
+            .filter((g) => g.priority >= priority)
+            .map((g) => updateGoal(g.id, { priority: g.priority + 1 })),
         );
-        toast(copy.proposed(d.couple?.partnerName ?? ''));
-      } else {
-        const id = await insertGoal({ ...p, priority });
-        await linkAssets(pickedAssets(s.draft), id);
-        toast(copy.added);
+      const id = await insertGoal({ ...p, priority });
+      // G-05 매달 넣던 돈으로 만든 목표면 그 금액을 이 목표 저금 줄에(서버가 만든 0원 줄)
+      const freed = takeFreed();
+      if (freed > 0) {
+        const split = mySplit(
+          await fetchSplits(),
+          meId ?? undefined,
+          d.space?.salary_mode === 'joint',
+        );
+        if (split?.split_line.some((l) => l.goal_id === id)) await addToGoalLine(split, id, freed);
       }
+      toast(copy.added);
       clear();
       await Promise.all(
-        [qk.goals, qk.proposals, qk.assets, qk.goalAssetSums].map((k) =>
-          qc.invalidateQueries({ queryKey: k }),
-        ),
+        [qk.goals, qk.splits, qk.goalSaved].map((k) => qc.invalidateQueries({ queryKey: k })),
       );
-      // 바로 추가했는데 저축 가능 금액이 모자라지면 G-04
-      nav(!d.connected && shortAfter > 0 ? '/goals/adjust' : '/goals', { replace: true });
+      await qc.invalidateQueries({ queryKey: ['pay_checklist'] });
+      // 금액이 있는 목표는 매달 넣는 돈(G-03g)까지 묻고 상세로(2026-11-03). 넘겨받은 돈으로 채웠으면 바로 상세
+      nav(freed > 0 || p.target_amount === null ? `/goals/${id}` : `/goals/${id}/monthly`, {
+        replace: true,
+      });
     } catch {
       toast(copy.loadFailed);
     } finally {
@@ -81,27 +92,34 @@ export function G03fGoalConfirm() {
     <QuestionLayout
       steps={s.steps}
       title={title}
-      help={
-        d.connected && d.base !== null
-          ? proposalCopy.applyNote(formatMonthDay(proposalApplyOn(d.base)))
-          : undefined
-      }
       onBack={s.onBack}
-      primary={{
-        label: d.connected ? copy.proposeTo(d.couple?.partnerName ?? '') : copy.addDone,
-        loading: saving,
-      }}
+      primary={{ label: copy.addDone, loading: saving }}
       onSubmit={() => void submit()}
     >
       <section className="hg-card hg-stack" aria-label={p.name}>
         <span className="hg-card__label">{p.name}</span>
         {p.target_amount !== null && <span className="hg-card__value">{man(p.target_amount)}</span>}
-        <span className="hg-card__meta">{copy.confirmPosition}</span>
+        {ordered.length === 0 && <span className="hg-card__meta">{copy.confirmPosition}</span>}
       </section>
-      {shortAfter > shortNow && (
-        <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
-          <span>{copy.shortAfterAdd(man(shortAfter))}</span>
-        </p>
+      {ordered.length > 0 && (
+        <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <label htmlFor={posId} className="hg-field__label">
+            {copy.positionLabel}
+          </label>
+          <select
+            id={posId}
+            className="hg-input"
+            value={pos ?? ordered.length + 1}
+            onChange={(e) => setPos(Number(e.target.value))}
+          >
+            {ordered.map((g, i) => (
+              <option key={g.id} value={i + 1}>
+                {copy.positionBefore(g.name)}
+              </option>
+            ))}
+            <option value={ordered.length + 1}>{copy.positionLast}</option>
+          </select>
+        </div>
       )}
     </QuestionLayout>
   );

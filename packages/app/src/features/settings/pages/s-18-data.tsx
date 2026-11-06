@@ -1,27 +1,48 @@
-import { fetchExportData, fetchTrash, qk, updateMe } from '@sweetwo/api';
+import {
+  fetchExportData,
+  fetchNetWorthHistory,
+  fetchPartnerAssetSums,
+  fetchTrash,
+  qk,
+  updateMe,
+} from '@sweetwo/api';
 import { makeZip, todayKst } from '@sweetwo/core';
 import {
   Button,
   ChoiceCards,
   Field,
+  hasIllustration,
+  Illustration,
   ListRow,
   PageHeader,
+  ProcessingState,
   SectionHeader,
   Toggle,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { reauthenticate, session } from '../../auth';
-import { MainFrame } from '../../month';
+import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { buildExport, type Scope } from '../export';
+import { buildPdfModel, renderPdf } from '../export-pdf';
 
-/** 브라우저(웹)·Electron 공통: 내려받기(저장 위치는 브라우저·OS가 고르게 함) */
-function saveFile(name: string, bytes: Uint8Array) {
-  const url = URL.createObjectURL(new Blob([bytes.slice().buffer], { type: 'application/zip' }));
+type Format = 'csv' | 'pdf';
+
+/** 저장: 모바일은 OS 공유 창(‘파일에 저장’), 데스크톱·브라우저는 내려받기(저장 위치는 OS가 고르게 함) */
+async function saveFile(name: string, bytes: Uint8Array, mime: string) {
+  const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
+  if (bridge?.saveFile) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000)
+      bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return bridge.saveFile({ name, base64: btoa(bin), mime });
+  }
+  const url = URL.createObjectURL(new Blob([bytes.slice().buffer], { type: mime }));
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
@@ -29,12 +50,13 @@ function saveFile(name: string, bytes: Uint8Array) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return 'saved' as const;
 }
 
 // S-18 데이터(docs/spec/25-settings.md): 내보내기(내 데이터 / 공동 데이터, 엑셀 CSV zip, 본인 확인 뒤),
+// 형식: 엑셀(CSV zip) / PDF 요약(① 자산 요약 ② 연간 요약, export-pdf).
 // 휴지통(→ S-21, 개수), 사용 기록 보내기 토글, 계정 삭제(→ S-18b).
-// 본인 확인: 데스크톱은 PIN(있으면), 웹은 가입 소셜로 다시 로그인 → 돌아오면 이어서 내보냄(?export=범위).
-// PDF 요약 3종은 다음 단계.
+// 본인 확인: 데스크톱·모바일 앱은 PIN(있으면), 웹은 가입 소셜로 다시 로그인 → 돌아오면 이어서 내보냄(?export=범위&format=형식).
 export function S18Data() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -42,27 +64,41 @@ export function S18Data() {
   const d = useSettingsData();
   const trash = useQuery({ queryKey: qk.trash, queryFn: fetchTrash });
   const [scope, setScope] = useState<Scope>((params.get('export') as Scope | null) ?? 'joint');
+  const [format, setFormat] = useState<Format>(params.get('format') === 'pdf' ? 'pdf' : 'csv');
   const [state, setState] = useState<'idle' | 'pin' | 'busy' | 'failed'>('idle');
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
   const auto = useRef(false);
 
-  const run = async (s: Scope) => {
+  const run = async (s: Scope, f: Format = format) => {
     if (!d.me || !d.c) return;
     setState('busy');
+    const names = { myId: d.me.id, myName: d.c.myName, partnerName: d.c.partnerName };
+    const today = todayKst();
+    const date = today.replace(/-/g, '');
     try {
       const data = await fetchExportData();
-      const files = buildExport(data, s, {
-        myId: d.me.id,
-        myName: d.c.myName,
-        partnerName: d.c.partnerName,
-        starter: d.c.starter,
-        mySide: d.me.side === 'groom' || d.me.side === 'bride' ? d.me.side : null,
-      });
-      saveFile(copy.fileName(s, todayKst().replace(/-/g, '')), makeZip(files));
+      let r: 'saved' | 'cancelled';
+      if (f === 'pdf') {
+        const [history, partnerSums] = await Promise.all([
+          fetchNetWorthHistory(12),
+          fetchPartnerAssetSums(),
+        ]);
+        const pdf = await renderPdf(buildPdfModel(data, { history, partnerSums }, s, names, today));
+        r = await saveFile(copy.pdfName(s, date), pdf, 'application/pdf');
+      } else {
+        const zip = makeZip(buildExport(data, s, names));
+        r = await saveFile(copy.fileName(s, date), zip, 'application/zip');
+      }
       setState('idle');
-      toast(copy.exported);
+      track('data_exported', { format: f, scope: s === 'mine' ? 'mine' : 'joint', result: 'done' });
+      if (r === 'saved') toast(copy.exported);
     } catch {
+      track('data_exported', {
+        format: f,
+        scope: s === 'mine' ? 'mine' : 'joint',
+        result: 'failed',
+      });
       setState('failed');
     }
   };
@@ -72,15 +108,17 @@ export function S18Data() {
     const s = params.get('export') as Scope | null;
     if (!s || auto.current || !d.me || !d.c) return;
     auto.current = true;
-    void run(s).then(() => setParams({}, { replace: true }));
+    void run(s, params.get('format') === 'pdf' ? 'pdf' : 'csv').then(() =>
+      setParams({}, { replace: true }),
+    );
   }, [d.me, d.c]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (d.loading || !d.me || !d.c) return <MainFrame current={null} columns={[null]} />;
+  if (d.loading || !d.me || !d.c) return <LoadingFrame sub="settings" current={null} />;
   const me = d.me;
 
   const start = async () => {
     const bridge = session.bridge;
-    if (session.platform === 'desktop' && bridge) {
+    if (bridge) {
       const lock = await bridge.lock.status();
       if (lock.hasPin) {
         setPin('');
@@ -91,7 +129,7 @@ export function S18Data() {
       return void run(scope);
     }
     try {
-      const r = await reauthenticate(`/settings/data?export=${scope}`);
+      const r = await reauthenticate(`/settings/data?export=${scope}&format=${format}`);
       if (r.wait) nav(r.wait);
     } catch {
       setState('failed');
@@ -113,6 +151,8 @@ export function S18Data() {
       />
       <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
         <SectionHeader title={copy.exportTitle} />
+        {/* 2026-11-03 범위와 형식이 한 묶음처럼 보여서 이름을 붙이고, 내보내기는 가득 너비 버튼 */}
+        <p className="hg-field__label">{copy.scopeLabel}</p>
         <ChoiceCards<Scope>
           label={copy.scopeLabel}
           value={scope}
@@ -123,9 +163,20 @@ export function S18Data() {
             { value: 'joint', label: copy.scope.joint ?? '' },
           ]}
         />
-        <p className="hg-q__help">
-          {copy.formatCsv}. {copy.noPhotos}
-        </p>
+        <p className="hg-field__label">{copy.formatLabel}</p>
+        <ChoiceCards<Format>
+          label={copy.formatLabel}
+          autoFocus={false}
+          shortcuts={false}
+          value={format}
+          onChange={setFormat}
+          autoAdvance={false}
+          options={[
+            { value: 'csv', label: copy.formatCsv },
+            { value: 'pdf', label: copy.formatPdf },
+          ]}
+        />
+        <p className="hg-q__help">{copy.noPhotos}</p>
         {state === 'pin' && (
           <form
             className="hg-row"
@@ -163,6 +214,7 @@ export function S18Data() {
             <div className="hg-row">
               <Button
                 variant="primary"
+                block
                 disabled={state === 'busy'}
                 aria-busy={state === 'busy'}
                 onClick={() => void start()}
@@ -197,5 +249,14 @@ export function S18Data() {
       </div>
     </div>
   );
-  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
+  // 2026-11-04 파일을 만드는 동안은 처리 중 화면(그림 자리 + 한 문장, 카카오페이·토스처럼)
+  const busy = (
+    <ProcessingState
+      icon="download"
+      art={hasIllustration('busy-file') ? <Illustration name="busy-file" motion /> : undefined}
+      title={copy.exporting}
+      sub={copy.exportingSub}
+    />
+  );
+  return <MainFrame sub="settings" current={null} columns={[state === 'busy' ? busy : body]} />;
 }

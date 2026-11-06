@@ -12,7 +12,7 @@ import {
 import type { AdminMe } from '@sweetwo/core';
 import { AuthLayout, Button, Field } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { copy } from './copy';
 import { clearSessionClock, useSessionGuard } from './session';
 
@@ -89,21 +89,34 @@ function Guard({ onExpire, children }: { onExpire: () => void; children: ReactNo
   return <>{children}</>;
 }
 
+const RESEND_S = 60; // 같은 주소로 다시 보내기까지(Supabase 기본 메일 제한과 두 번 누르기 막기)
+
 function Login({ note }: { note?: string }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [wait, setWait] = useState(0);
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = window.setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [wait]);
   const send = async () => {
-    if (busy || !email.includes('@')) return;
+    if (busy || wait > 0 || !email.includes('@')) return;
     setBusy(true);
     setErr(null);
     try {
       clearSessionClock();
       await adminSendLink(email.trim().toLowerCase(), window.location.origin);
       setSent(true);
-    } catch {
-      setErr(copy.failed);
+      setWait(RESEND_S);
+    } catch (e) {
+      const code = e instanceof AdminError ? e.code : '';
+      if (code === 'over_email_send_rate_limit') {
+        setErr(copy.tooSoon);
+        setWait(RESEND_S);
+      } else setErr(code === 'email_address_not_authorized' ? copy.notAllowedEmail : copy.failed);
     } finally {
       setBusy(false);
     }
@@ -119,6 +132,7 @@ function Login({ note }: { note?: string }) {
       >
         {note && <p className="hg-help">{note}</p>}
         <p className="hg-help">{sent ? copy.linkSent : copy.loginHelp}</p>
+        {wait > 0 && <p className="hg-help">{copy.resendIn(wait)}</p>}
         <Field
           label={copy.email}
           value={email}
@@ -126,7 +140,12 @@ function Login({ note }: { note?: string }) {
           type="email"
           error={err ?? undefined}
         />
-        <Button variant="primary" type="submit" aria-busy={busy} disabled={!email.includes('@')}>
+        <Button
+          variant="primary"
+          type="submit"
+          aria-busy={busy}
+          disabled={!email.includes('@') || wait > 0}
+        >
           {copy.sendLink}
         </Button>
       </form>

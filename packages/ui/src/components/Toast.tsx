@@ -8,7 +8,7 @@ export function Toast({
 }) {
   return (
     <div className="hg-toast" role="status">
-      {message}
+      <span className="hg-toast__msg">{message}</span>
       {action && (
         <button type="button" className="hg-btn hg-btn--link" onClick={action.onClick}>
           {action.label}
