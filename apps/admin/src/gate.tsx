@@ -59,7 +59,7 @@ export function AdminGate({ children }: { children: ReactNode }) {
   if (q.isLoading) return null;
   if (q.isError)
     return (
-      <AdminAuth title={copy.failed} foot={copy.authFoot}>
+      <AdminAuth title={copy.failed}>
         <Button variant="primary" onClick={again}>
           {copy.retry}
         </Button>
@@ -71,7 +71,7 @@ export function AdminGate({ children }: { children: ReactNode }) {
   if (step === 'verify') return <Verify onDone={again} />;
   if (step === 'denied')
     return (
-      <AdminAuth title={copy.notAdmin} foot={copy.authFoot}>
+      <AdminAuth title={copy.notAdmin}>
         <Button variant="secondary" onClick={() => void adminSignOut().then(again)}>
           {copy.signOut}
         </Button>
@@ -124,8 +124,7 @@ function Login({ note }: { note?: string }) {
   return (
     <AdminAuth
       title={sent ? copy.linkSent : copy.loginTitle}
-      help={sent ? copy.sentTo(email.trim().toLowerCase()) : copy.loginHelp}
-      foot={copy.authFoot}
+      help={sent ? copy.sentTo(email.trim().toLowerCase()) : undefined}
     >
       <form
         onSubmit={(e) => {
@@ -207,7 +206,7 @@ function Enroll({ onDone }: { onDone: () => void }) {
   const f = useQuery({ queryKey: ['admin', 'enroll'], queryFn: adminMfaEnroll, retry: false });
   if (f.isLoading) return null;
   return (
-    <AdminAuth title={copy.mfaEnrollTitle} help={copy.mfaEnrollHelp} foot={copy.authFoot}>
+    <AdminAuth title={copy.mfaEnrollTitle} help={copy.mfaEnrollHelp}>
       <div className="hg-adminauth__qr" data-theme="light">
         {f.data?.qr && <img src={f.data.qr} alt="QR" width={120} height={120} />}
         {f.data?.secret && <code className="hg-mask-text">{f.data.secret}</code>}
@@ -225,7 +224,7 @@ function Enroll({ onDone }: { onDone: () => void }) {
 
 function Verify({ onDone }: { onDone: () => void }) {
   return (
-    <AdminAuth title={copy.mfaTitle} foot={copy.authFoot}>
+    <AdminAuth title={copy.mfaTitle}>
       <CodeForm
         onSubmit={async (code) => {
           const m = await adminMfaState();

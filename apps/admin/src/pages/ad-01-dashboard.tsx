@@ -116,7 +116,6 @@ export function AD01Dashboard() {
                 },
               ]}
             />
-            <p className="hg-help">{copy.versionsHelp}</p>
           </section>
         )}
         {recent?.inquiries && (

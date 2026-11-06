@@ -87,7 +87,6 @@ function ReauthDialog({ onDone }: { onDone: (ok: boolean) => void }) {
         <h2 id={`${id}-t`} className="hg-modal__title">
           {copy.reauthTitle}
         </h2>
-        <p className="hg-modal__body">{copy.reauthBody}</p>
         <Field
           label={copy.code}
           value={code}

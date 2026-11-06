@@ -491,7 +491,6 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
   return (
     <section className="hg-stack" aria-label={ops.kindTitle}>
       <span className="hg-card__label">{ops.kindTitle}</span>
-      <p className="hg-help">{ops.kindHelp}</p>
       {msg && <p className="hg-help is-error">{msg}</p>}
       {KIND_NAME_GROUPS.map((grp) => (
         <div key={grp} className="hg-stack">
