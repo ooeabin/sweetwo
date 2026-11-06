@@ -16,7 +16,7 @@ const local = (iso: string | null) => (iso ? formatKstDateTime(iso).replace(' ',
 // 최소 지원 버전마다 지금 저장된 버전보다 낮은 기기 수(90일 안에 켠 기기, app_device)를 칸 아래에.
 export function AD16App() {
   const me = useAdmin();
-  const canEdit = me.roles.includes('ops');
+  const canEdit = me.roles.includes('ops') || me.roles.includes('super');
   const q = useQuery({ queryKey: ['admin', 'app-config'], queryFn: fetchAdminAppConfig });
   const [f, setF] = useState({
     latest: '',

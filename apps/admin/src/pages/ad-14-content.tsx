@@ -40,7 +40,7 @@ type Tab = 'guides' | 'terms' | 'data';
 // 운영이 쓰고, 약관 버전은 최고 관리자 승인.
 export function AD14Content() {
   const me = useAdmin();
-  const canEdit = me.roles.includes('ops');
+  const canEdit = me.roles.includes('ops') || me.roles.includes('super');
   // 대시보드 경보에서 오면 계산·기준 데이터 탭
   const from = (useLocation().state as { tab?: Tab } | null)?.tab;
   const [tab, setTab] = useState<Tab>(from ?? 'guides');

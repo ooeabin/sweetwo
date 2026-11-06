@@ -1,7 +1,7 @@
--- pgTAP: 어드민 재인증(33 3장)과 최고 관리자 최소 2명. boss·boss2(최고), cs01(CS)
+-- pgTAP: 어드민 재인증(33 3장)과 최고 관리자 최소 1명(2026-11-06 2명에서 바꿈). boss·boss2(최고), cs01(CS)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(8);
+select plan(9);
 
 insert into auth.users (id, email) values
   ('aaaaaaaa-0000-0000-0000-000000000001', 'cs01@sweetwo.kr'),
@@ -29,14 +29,16 @@ set local role authenticated;
 select throws_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.ap')), '42501', 'reauth_required', '승인은 재인증');
 reset role;
 
--- 방금 인증: 승인 됨, 최고 관리자가 2명뿐이면 잠그거나 역할을 뺄 수 없음
+-- 방금 인증: 승인 됨. 최고 관리자가 2명이면 한 명은 잠글 수 있고, 마지막 한 명의 역할은 뺄 수 없음
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000003', 10);
 set local role authenticated;
 select lives_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.ap')), '방금 인증하면 승인');
 reset role;
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000002', 10);
 set local role authenticated;
-select throws_ok($$ select public.admin_set_lock('boss2@sweetwo.kr', true) $$, '22023', 'super_min', '최고 관리자 최소 2명(잠금)');
+select lives_ok($$ select public.admin_set_lock('boss2@sweetwo.kr', true) $$, '최고 관리자가 2명이면 한 명 잠금');
+select set_config('test.last', public.admin_request_user('boss@sweetwo.kr', '대표', array['ops']::public.admin_role[])::text, true);
+select throws_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.last')), '22023', 'super_min', '마지막 최고 관리자의 역할은 못 뺌');
 select lives_ok($$ select public.admin_set_lock('cs01@sweetwo.kr', true) $$, '다른 관리자는 잠금');
 reset role;
 

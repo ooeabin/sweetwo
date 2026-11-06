@@ -20,7 +20,7 @@ import { SysTabs } from '../sys-tabs';
 const ROLES: AdminRole[] = ['super', 'ops', 'cs', 'analyst'];
 
 // AD-18 관리자 계정(최고 관리자만): 표(ID, 역할, 마지막 접속, 2단계 인증, 잠금), 관리자 추가·역할 바꾸기(승인 요청),
-// 잠금·풀기(본인 불가, 90일 미접속은 자동 잠금), 분기 점검 기록. 최고 관리자는 2명 이상 유지.
+// 잠금·풀기(본인 불가, 90일 미접속은 자동 잠금), 분기 점검 기록. 최고 관리자는 1명 이상 유지.
 export function AD18Admins() {
   const me = useAdmin();
   const list = useQuery({
