@@ -68,13 +68,13 @@
 | asset 자산 | kind enum(통장/투자/부동산 등), name text, amount bigint, owner\_user\_id, visibility enum, maturity\_date, monthly\_payment bigint, principal bigint, status enum(보유/매도 완료), realized\_pl bigint, estimated bool, entered\_by uuid(대신 입력) | 1 : N 금액 이력 |
 | debt 부채 | kind enum, name, balance bigint, rate numeric(5,3), monthly\_payment bigint, maturity\_date, owner\_user\_id, entered\_by uuid, visibility enum | 1 : N 금액 이력 |
 | annual\_event 연간 이벤트 | name, amount bigint, month smallint, repeat bool | N : 1 커플 공간 |
-| goal 목표 | category enum, template\_id, name, shape enum(한 번/매년/매달), target\_amount bigint(null이면 ‘금액 정하기’), target\_estimated bool, due date, priority smallint(주인 묶음마다 따로), owner\_user\_id(null = 우리 목표, 사용자 id = 그 사람의 내 목표) [확인 필요], visibility enum(내 목표만: 모두 보여 주기/금액만 보여 주기), status enum, round smallint, carryover bigint, initial\_saved bigint(이미 모은 돈) [확인 필요], photo\_path text(직접 만든 목표의 사진 Storage 경로, null이면 회색 기본 그림 goal-custom, 기본 목표는 항상 null). 모은 돈 = initial\_saved + 체크한 저금 줄 + 직접 넣은 돈 − 꺼내 쓴 돈(DB 함수 계산, → 목표). 없앤 필드: post\_wedding. vehicle\_asset\_id·other\_holding은 남길지 [확인 필요] | 1 : N 넣기·꺼내 쓰기, 0\~N 월급 계획 저금 줄 |
+| goal 저금 항목(예전 목표, 2026-11-08 ADR 0007) | 테이블 이름은 그대로(스키마 추가만). 쓰는 필드: name, target\_amount(null = 목표 금액 없음), deadline(null 가능), owner\_user\_id(null = 합쳐서 우리 둘, 사용자 id = 각자 모드 주인), visibility(주인 있는 항목만), status(active / achieved), closed\_at(그만 모음, 2026-11-08 추가), achieved\_at·achieved\_seen(축하 1회). 모은 돈 = 체크한 저금 줄 합(DB 함수 goal\_saved). 안 쓰는 필드(template, kind, priority, other\_held, photo, freed\_lines 등)는 남겨 두고 2단계로 지움 | 0\~1 월급 계획 저금 줄(주인 월급 계획 또는 공동) |
 | salary\_split 월급 계획 (W-01, O-50) | owner\_user\_id(각자 = 그 사람, 합쳐서 = null 공동), income bigint(합쳐서면 두 사람 실수령 합, 서버 계산), updated\_by. 남는 돈 = income − 줄 합계(저장 안 함, 계산) [확인 필요] | 각자 = 사람마다 1, 합쳐서 = 커플 공간에 1. 1 : N 월급 계획 줄 |
 | split\_line 월급 계획 줄 | split\_id, kind enum(저금/고정지출/생활비/용돈/직접 추가), goal\_id(저금 줄만), user\_id(용돈 줄만, 합쳐서면 사람마다 1줄), name text(직접 추가 줄, 최대 10줄), amount bigint(1만 원 단위, 0 가능), sort smallint [확인 필요] | N : 1 월급 계획, N : 0\~1 목표 |
 | pay\_checklist 이번 달 월급 체크리스트 (W-02) | split\_id, owner\_user\_id(null이면 합쳐서 공동), cycle\_start·cycle\_end date, label text(‘10월 월급’), state enum(진행 중/다 했어요/끝남). 기준일 0시 서버 작업이 월급 계획을 복사해 만듦, 첫 사이클은 O-60 직후 [확인 필요] | 1 : N 체크 줄 |
 | pay\_check\_line 체크 줄 | checklist\_id, split\_line\_id(null 가능, 줄을 지워도 기록 유지), kind enum, goal\_id(저금 줄), planned bigint, actual bigint(W-02a 다른 금액), state enum(대기/체크/못 함), checked\_by, checked\_at, on\_behalf bool(옛 대신 체크. 2026-11-03 대신 체크 없앰, 새 체크에는 쓰지 않음, 스키마는 추가만이라 열은 둠) [확인 필요]. 저금 줄 체크·풀기 = 목표 모은 돈 더하기·빼기 | N : 1 체크리스트, N : 0\~1 목표 |
 | item\_catalog 항목 이름 목록 | kind enum(저축·투자), group text, key, name, sort, hidden bool. 어드민 AD-19에서 수정, 앱 배포 없이 반영. 고정·변동·큰 지출 종류는 지출 입력이 없어져 없앰 [확인 필요] | 전체 공통(커플 공간 없음) |
-| goal\_use 목표 넣기·꺼내 쓰기 | goal\_id, direction enum(직접 넣기/꺼내 쓰기), amount bigint, used\_on date, memo, source enum [확인 필요]. 체크리스트 저금 줄은 여기 넣지 않고 체크 줄에서 셈(한 돈은 한 곳에서만). 없앤 필드: paid\_from, account\_id, overflow, linked\_line\_id | N : 1 목표, 0\~1 챙길 날 회차 |
+| goal\_move 넣기·빼기·꺼내 쓰기 | 2026-11-08 새 코드에서 쓰지 않음(ADR 0007). 모은 돈에도 세지 않음. 쓰는 곳 0 확인 뒤 다음 마이그레이션에서 지움 | — |
 | family 가족 | side enum, relation enum, nickname 암호, birthday\_md 암호, lunar bool, leap bool, birth\_year 암호, age\_rule enum(세는 나이/만 나이, 환갑·칠순 계산), memo 암호 | 1 : N 챙길 날. 챙길 날을 한 종류로 합치면서 가족 등록을 남길지 [확인 필요] |
 | care\_day 챙길 날 | 종류 구분 없음(생일·기념일·명절·양가 행사 모두 같은 챙길 날, ADR 0003), name, family\_id(null), date\_rule enum, budget bigint, owner enum, notify\_rule jsonb(기본 D-30·D-7), private bool, auto\_wedding bool(O-12·S-11h 결혼한 날로 자동으로 만든 결혼기념일, 기본 false. 날짜를 직접 고치면 false) [확인 필요]. 없앤 필드: kind(우리 둘/양가/결혼 준비), wedding\_item\_id | 1 : N 회차 |
 | care\_round 챙길 날 회차 | care\_day\_id, year smallint, solar\_date date, prep\_state enum, actual bigint, paid\_from enum, gift text, memo 암호 | N : 1 챙길 날, 1 : 0\~1 목표 사용 |
@@ -161,5 +161,5 @@
 | 딥링크 | 위젯을 누르면 앱 딥링크(화면 ID + 대상 ID)로 해당 화면. 앱이 꺼져 있으면 실행 → 앱 잠금 해제 뒤 이동 |
 | 갱신 | 앱에서 값이 바뀌거나 Realtime으로 상대 변경을 받으면 즉시, 그 밖에는 30분마다. 오프라인이면 마지막 값 + 저장 시각 |
 | 위젯 캐시 | 위젯에 필요한 값만 모은 작은 스냅샷을 기기에 암호화 저장(키는 OS 키 저장소). 공개 범위를 거친 값만 담음. 로그아웃·세션 만료 시 삭제 |
-| 위젯 설정 저장 | 트레이 아이콘 켜기·위젯에 금액 보이기는 기기별, WG-02 목표는 계정별(모든 기기 공통). 필드 → 2장 widget\_setting, 핵심 규칙 › 데이터 항목 ‘위젯 설정’ |
+| 위젯 설정 저장 | 트레이 아이콘 켜기·위젯에 금액 보이기는 기기별, WG-02 저금 항목은 계정별(모든 기기 공통). 필드 → 2장 widget\_setting, 핵심 규칙 › 데이터 항목 ‘위젯 설정’ |
 | 네이티브 위젯 (이후) | macOS·iOS: WidgetKit 확장 + App Group으로 앱과 캐시 공유. Android: Glance(AppWidget). Windows 11 위젯 보드: Adaptive Cards 기반 위젯 공급자. Electron 밖 네이티브 코드라 출시 범위 밖 |

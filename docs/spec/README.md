@@ -7,6 +7,7 @@
 - 페이지 사본(그림 포함): https://claude.ai/artifact/SScTBJAdLvP7tFJz3RwJWe (2026-10-25 재기획 전 내용)
 - 그림(2026-11-08): 3D 그림, 목표 사진, 종류 아이콘을 모두 지우고 2D 플랫으로 다시 만들 때까지 빈 자리. 화면 표에 적힌 그림·아이콘 설명은 다시 만들 때의 주제로 읽어요(→ `docs/design/assets/Illustrations.md` ‘나중 과제’).
 - 2026-10-25 재기획: 목표 중심, 월급 체크리스트, 9화면 온보딩(2026-10-26 출생연도·결혼한 날을 다시 물어 11화면) → `docs/adr/0003-replan-goal-checklist.md`
+- 2026-11-08: 목표 탭과 ‘목표’를 없애고 월급 탭 저금 항목(목표 금액·기한, 달성 축하)으로, 온보딩 목표 고르기(O-21)·비상금 없앰 → `docs/adr/0007-goal-into-saving-line.md`
 
 | 파일 | 내용 |
 | --- | --- |
@@ -25,13 +26,13 @@
 | [13-common-states.md](13-common-states.md) | 공통 상태 |
 | [14-notifications.md](14-notifications.md) | 알림 |
 | [15-login-signup.md](15-login-signup.md) | 로그인·가입 |
-| [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 흐름과 목표 |
+| [16-onboarding-1.md](16-onboarding-1.md) | 온보딩 ① 흐름 |
 | [17-onboarding-2.md](17-onboarding-2.md) | 온보딩 ② 월급과 월급 계획 |
 | [18-partner-join.md](18-partner-join.md) | 파트너 합류 |
 | [19-this-month.md](19-this-month.md) | 홈 |
-| [20-salary-plan.md](20-salary-plan.md) | 월급 체크리스트 |
+| [20-salary-plan.md](20-salary-plan.md) | 월급 탭: 월급 체크리스트와 저금 항목 |
 | [21-month-close.md](21-month-close.md) | 월말 확인 |
-| [22-goals.md](22-goals.md) | 목표 |
+| [22-goals.md](22-goals.md) | 목표 (없앰, 바뀐 곳 표만) |
 | [23-assets.md](23-assets.md) | 우리 자산 |
 | [24-calendar.md](24-calendar.md) | 캘린더 |
 | [25-settings.md](25-settings.md) | 설정 |

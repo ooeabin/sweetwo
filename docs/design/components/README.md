@@ -7,8 +7,8 @@
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
-| [GoalTile](GoalTile.md) | Cards | 목표 사진 타일(G-01)과 상세 머리(G-02) |
-| [GoalRow](GoalRow.md) | Charts | 홈 목표 목록 줄(그림 + 금액 + 얇은 막대) |
+| [GoalTile](GoalTile.md) | Cards | 없앰(2026-11-08 목표 탭 없음). 묶음 카드 `hg-goalbox`만 저금 항목 상세(W-10)에서 씀 |
+| [GoalRow](GoalRow.md) | Charts | 홈 저금 항목 줄(아이콘 + 금액 + 얇은 막대, H-02) |
 | [DayRow](DayRow.md) | Lists | 홈 다가오는 일정 줄(색 날짜 칸 + D-day) |
 | [MonthBars](MonthBars.md) | Charts | 달마다 값(F-01 순자산 6달), 이번 달만 진하게 |
 | [Breakdown](Breakdown.md) | Charts | 전체를 나눈 구성(월급 플랜 배분, 자산 구성) |
@@ -17,11 +17,11 @@
 | [Band](Band.md) | Layout | 구역을 나누는 굵은 회색 띠(F-08, 2026-11-04) |
 | [StatBlock](StatBlock.md) | Content | 토스형 구역 머리: 라벨 + 큰 숫자 문장 + 보조 줄(F-08, 2026-11-04) |
 | [LineChart](LineChart.md) | Charts | 시간에 따른 금액 변화(순자산 추이) |
-| [Meter](Meter.md) | Charts | 목표 진행 |
+| [Meter](Meter.md) | Charts | 칸 진행 막대(지금 쓰는 화면 없음) |
 | [Accordion](Accordion.md) | Containers | 가이드·자주 묻는 질문을 접었다 폈다 |
 | [Card](Card.md) | Containers | 정보 묶음 |
 | [ActivityFeed](ActivityFeed.md) | Data | 파트너 활동과 변경 이력 |
-| [ArtPick](ArtPick.md) | Data | 지정 그림 고르기(목표 지정 사진) |
+| [ArtPick](ArtPick.md) | Data | 지정 그림 고르기(프로필 사진. 목표 사진은 2026-11-08 없앰) |
 | [Avatar](Avatar.md) | Data | 사람 표시 |
 | [Calendar](Calendar.md) | Data | ‘캘린더’ 메뉴의 달력 |
 | [Checklist](Checklist.md) | Data | 첫 주 할 일처럼 끝내야 할 일 목록 카드 |
@@ -30,7 +30,7 @@
 | [NetWorth](NetWorth.md) | Data | 순자산 2줄 표시 |
 | [Banner](Banner.md) | Feedback | 화면 위 안내 띠 |
 | [ConflictChoice](ConflictChoice.md) | Feedback | 같은 칸 충돌 때 “어느 쪽으로 할까요?” |
-| [Celebration](Celebration.md) | Feedback | 목표 달성 화면 |
+| [Celebration](Celebration.md) | Feedback | 목표 금액 달성 화면(W-12) |
 | [EmptyState](EmptyState.md) | Feedback | 내용이 없을 때의 화면 |
 | [SceneMedia](SceneMedia.md) | Feedback | 비워 둔 장면 자리 |
 | [Skeleton](Skeleton.md) | Feedback | 불러오는 동안 자리를 잡는 회색 틀, 질문 화면 뼈대(QuestionSkeleton), 처리 중(ProcessingState) |
@@ -38,7 +38,7 @@
 | [Tooltip](Tooltip.md) | Feedback | 용어·아이콘 짧은 설명 |
 | [AmountInput](AmountInput.md) | Inputs | 금액 넣기 |
 | [Chip](Chip.md) | Inputs | 선택 칩 |
-| [GoalPick](GoalPick.md) | Inputs | 그림 카드로 목표 고르기(O-21, 순번 = 우선순위) |
+| [GoalPick](GoalPick.md) | Inputs | 그림 카드 고르기(묶음 타일 `hg-pick--tiles`, F-03a. O-21 목표 고르기는 2026-11-08 없앰) |
 | [ResultCard](ResultCard.md) | Data | 결과 요약 카드(큰 금액 + 체크 줄) |
 | [InfoPlate](InfoPlate.md) | Data | 조건 요약 판(이름–값 두 열), 완료 표시 DoneMark |
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
@@ -69,7 +69,7 @@
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |
 | [TransferRow](TransferRow.md) | Lists | 월급 체크리스트 줄 한 행 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |
-| [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(“목표” + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |
+| [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(챕터 이름 + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |
 | [Tabs](Tabs.md) | Navigation | 같은 화면 안에서 묶음을 바꾸는 알약 탭(hg-tabs)과, 보기 방식을 바꾸는 세그먼트(hg-seg) |
 | [BottomSheet](BottomSheet.md) | Overlays | 좁은 창(768px 미만)에서 아래에서 올라오는 시트 |
 | [ListInput](ListInput.md) | Inputs | Q6 목록 입력(이름 + 월 + 금액 여러 줄) |
