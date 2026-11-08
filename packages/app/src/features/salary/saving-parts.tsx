@@ -2,7 +2,7 @@ import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
 import { Badge, Lead, ListRow } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../shared/mask';
 import { hideToast } from '../../shared/toast';
@@ -108,6 +108,10 @@ export function AchieveWatch() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const tried = useRef(new Set<string>());
+  // 한 번에 하나만(2026-11-09 round 3 ‘모두 보냈어요’로 여러 항목이 한 번에 닿을 때): 축하로 넘어가는 동안 다른 항목을
+  // 서버에 ‘봄’으로 남기지 않음. 남은 항목은 다음에 홈·월급 탭을 열 때 한 번씩
+  const inflight = useRef(false);
+  const [tick, setTick] = useState(0);
   const meId = d.ready ? d.meId : null;
   const items = useRef<SavingItem[] | null>(null);
   items.current = d.ready ? d.live : null;
@@ -117,7 +121,7 @@ export function AchieveWatch() {
     .join('|');
   useEffect(() => {
     const list = items.current;
-    if (!meId || !list) return;
+    if (!meId || !list || inflight.current) return;
     // 체크를 풀어 목표 금액 아래로 내려가면 서버가 ‘모으는 중’으로 되돌림(2026-11-09). 다시 닿으면 또 축하
     for (const i of list)
       if (i.state === 'saving' && !reachedTarget(i.goal, i.saved)) tried.current.delete(i.goal.id);
@@ -130,15 +134,24 @@ export function AchieveWatch() {
     );
     if (!next) return;
     tried.current.add(next.goal.id);
+    inflight.current = true;
     void achieveGoal(next.goal.id)
       .then(async (show) => {
-        await qc.invalidateQueries({ queryKey: qk.goals });
-        if (!show) return;
+        if (!show) {
+          inflight.current = false;
+          await qc.invalidateQueries({ queryKey: qk.goals });
+          setTick((x) => x + 1);
+          return;
+        }
         // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않게 닫고 넘어감(2026-11-09)
         hideToast(1500);
         nav(savingPaths.achieved(next.goal.id));
+        void qc.invalidateQueries({ queryKey: qk.goals });
       })
-      .catch(() => undefined);
-  }, [meId, key, nav, qc]);
+      .catch(() => {
+        inflight.current = false;
+        setTick((x) => x + 1);
+      });
+  }, [meId, key, tick, nav, qc]);
   return null;
 }
