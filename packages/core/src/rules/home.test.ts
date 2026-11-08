@@ -158,3 +158,48 @@ it('다가오는 일정: 월급날, 월급 전 확인, 챙길 날, 목표 기한
   ]);
   expect(u.find((x) => x.kind === 'goal')?.to).toBe('/salary/items/g');
 });
+
+it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초대 다음, 7일 안, 내 저금이 없을 때만', () => {
+  const goal = (over: Partial<HomeInput['goals'][number]> = {}) => ({
+    id: 'g1',
+    name: '여행',
+    status: 'active',
+    target_amount: null,
+    deadline: null,
+    owner_user_id: 'c',
+    closed_at: null,
+    ...over,
+  });
+  const first = base({ onboardedOn: '2026-10-01' });
+  expect(homeTodo(first)).toEqual({
+    kind: 'saving',
+    key: 'saving-first',
+    to: '/salary/items/new/a?from=home',
+  });
+  // 초대가 먼저
+  expect(homeTodo({ ...first, coupleState: 'not_joined' })?.kind).toBe('invite');
+  expect(
+    homeTodo({ ...first, coupleState: 'not_joined', inviteClosedOn: '2026-10-06' })?.kind,
+  ).toBe('saving');
+  // 7일째(온보딩 날 + 7)부터는 없음
+  expect(homeTodo({ ...first, today: '2026-10-08' })).toBeNull();
+  expect(homeTodo({ ...first, onboardedOn: null })).toBeNull();
+  // 내 저금이 있으면 없음, 파트너 저금·그만 모은 저금·휴지통은 셈하지 않음
+  expect(homeTodo({ ...first, goals: [goal()] })).toBeNull();
+  expect(homeTodo({ ...first, goals: [goal({ owner_user_id: 'y' })] })?.kind).toBe('saving');
+  expect(homeTodo({ ...first, goals: [goal({ closed_at: '2026-10-02' })] })?.kind).toBe('saving');
+  expect(homeTodo({ ...first, goals: [goal({ deleted_at: '2026-10-02' })] })?.kind).toBe('saving');
+  // 합쳐서: 공동 월급 계획 저금(누구 것이든)이 있으면 없음, 공동 체크리스트가 없으면 없음
+  expect(
+    homeTodo({
+      ...first,
+      joint: true,
+      checklists: [{ owner_user_id: null, label: '9월 월급', cycle_end: '2026-10-24', lines: [] }],
+      goals: [goal({ owner_user_id: 'y' })],
+    }),
+  ).toBeNull();
+  expect(homeTodo({ ...first, joint: true })).toBeNull();
+  // 닫으면, 연결 해제 대기면 없음
+  expect(homeTodo({ ...first, closed: ['saving-first'] })).toBeNull();
+  expect(homeTodo({ ...first, coupleState: 'unlink_pending' })).toBeNull();
+});

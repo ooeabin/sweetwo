@@ -105,22 +105,25 @@
 | --- | --- | --- |
 | checklist\_generated | 기준일 0시, 첫 사이클은 O-60 직후, 파트너 합류 직후 (서버) | cycle\_type(`first` / `regular` / `extended`(해제 대기 중)), owner(`self` / `joint`), lines\_count, saving\_lines\_count |
 | checklist\_line\_checked | W-02, W-05, W-10 이번 달 줄, 홈 H-03 줄 체크 | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), result(`as_planned` / `different`), diff\_band, checked\_by(`self` / `joint`, `on_behalf`는 2026-11-03 대신 체크 없앰), entry(`w02` / `w05` / `home` / `widget`), days\_from\_payday |
+| checklist\_group\_checked | W-02 묶음 ‘모두 보냈어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
 | checklist\_line\_unchecked | 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원 | line\_kind |
 | checklist\_completed | 남는 돈 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
 | split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 파트너 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
-| salary\_mode\_changed | 설정에서 월급 관리 방식 바꿈 | from, to(`separate` / `combined`) |
+| salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·우리 자산·챙길 날
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home` / `salary` / `split` / `palette`), monthly\_band, has\_target, has\_deadline, target\_band(목표 금액이 있을 때) |
+| saving\_list\_viewed | W-13 저금 목록 열림 (2026-11-09 round 3) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
+| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home` / `salary` / `split` / `palette` / `list`), monthly\_band, has\_target, has\_deadline, target\_band(목표 금액이 있을 때) |
 | saving\_item\_target\_set | W-10a 목표 금액 저장 | had\_target(고치기인지), has\_deadline, target\_band |
 | saving\_item\_achieved | W-12 | months\_taken |
-| saving\_item\_after\_achieve | W-12a 고름 | choice(`keep` / `stop`) |
+| saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |
+| saving\_monthly\_changed | W-10a 매달 금액 저장 (2026-11-09 round 3) | monthly\_band, direction(`up` / `down`) |
 | (없앰) goal\_created, goal\_amount\_set, goal\_money\_moved, goal\_delayed, goal\_achieved | 2026-11-08 ADR 0007 | — |
 | asset\_added | F-03 저장 | kind(`account` / `invest` / `real_estate` / `debt` 등), entry(`home` / `assets` / `palette`), is\_first |
 | rank\_banner\_tapped | F-01 0번·H-01 순위 배너 (2026-11-04) | state(`unseen` / `seen` / `stale` / `empty`), entry(`home` / `assets`) |

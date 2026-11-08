@@ -115,8 +115,20 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채�
   const db = await mockOnboarding(page, { now: NOW });
   joining(db);
   await answerBasics(page);
+  // 각자 그대로면 결과 한 줄 없음
+  await expect(page.getByText(/월급 계획이 두 분의 월급 계획 하나가 돼요/)).toHaveCount(0);
   await page.getByRole('radio', { name: /합쳐서 같이 관리해요/ }).click();
+  // 다른 방식을 고르면 주 버튼 위 결과 한 줄 + ‘다음’은 확인 Modal(2026-11-09 round 3)
+  await expect(page.getByText('찬우님 월급 계획이 두 분의 월급 계획 하나가 돼요')).toBeVisible();
   await page.getByRole('button', { name: '다음' }).click();
+  const dialog = page.getByRole('alertdialog', { name: '월급 관리 방식을 바꿀까요?' });
+  await expect(dialog).toContainText('찬우님에게도 바로 적용되고 알림이 가요');
+  await axe(page);
+  await dialog.getByRole('button', { name: '다시 고를게요' }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(db.joinCalls).toHaveLength(0);
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: '바꿀게요' }).click();
   await expect
     .poll(() => db.joinCalls[0])
     .toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });

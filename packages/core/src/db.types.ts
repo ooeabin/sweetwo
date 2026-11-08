@@ -3433,6 +3433,10 @@ export type Database = {
       saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
       saving_item_keep: { Args: { p_goal: string }; Returns: undefined }
       saving_item_reopen: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_retarget: {
+        Args: { p_goal: string; p_target: number }
+        Returns: undefined
+      }
       saving_item_stop: { Args: { p_goal: string }; Returns: undefined }
       saving_item_unkeep: {
         Args: { p_deadline?: string; p_goal: string; p_target: number }

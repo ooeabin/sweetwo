@@ -41,6 +41,11 @@ export const copy = {
   skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]
   skipped: '이번 달은 못 했어요',
   editSplit: '월급 계획 고치기',
+  // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
+  groupAllSent: '모두 보냈어요',
+  groupAllSentLabel: (group: string) => `${group} 모두 보냈어요`,
+  groupSavingDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 더했어요`,
+  groupSpendDone: (n: number) => `쓰는 돈 ${n}개를 체크했어요`,
   // 토스트는 한 줄(Toast.md): 저금 항목 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게
   addedToGoal: (goal: string, amount: string) =>
     `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,
@@ -101,6 +106,12 @@ export const copy = {
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
   closedFold: (n: number) => `그만 모은 저금 ${n}개`, // [확인 필요]
+  // W-13 저금 목록(2026-11-09 round 3) [확인 필요]
+  listTitle: '저금',
+  listOpen: '저금 목록 보기', // 저금 묶음 머리(누르는 제목) 화면 읽기 이름
+  listSaved: (amount: string) => `모은 돈 ${amount}`,
+  listEmpty: '아직 저금이 없어요',
+  listAdd: '저금 추가',
   // W-10 저금 항목 상세
   back: '뒤로',
   thisMonth: '이번 달', // [확인 필요] 매달 카드의 이번 달 줄
@@ -142,6 +153,11 @@ export const copy = {
   deadlineCleared: '기한을 지웠어요', // [확인 필요]
   clearTarget: '목표 금액 지우기', // [확인 필요]
   clearDeadline: '기한 지우기', // [확인 필요]
+  // W-10a 매달 금액·새 목표 금액(2026-11-09 round 3) [확인 필요]
+  monthlyChanged: '매달 금액을 바꿨어요',
+  retargetQ: '새 목표 금액은 얼마예요?',
+  retargetHelp: (saved: string) => `지금 모은 돈 ${saved}`,
+  retargetLow: '지금 모은 돈보다 크게 넣어 주세요',
   notBeforeThisMonth: '이번 달부터 고를 수 있어요', // [확인 필요]
   nameRequired: '이름을 넣어 주세요',
   saveFailed: '저장하지 못했어요',
@@ -177,6 +193,11 @@ export const copy = {
   afterQ: '이 저금을 어떻게 할까요?', // [확인 필요]
   afterKeep: '계속 모을게요', // [확인 필요]
   afterStop: '그만할게요', // [확인 필요]
+  // W-12a 선택지 보조 한 줄, 셋째 선택지(2026-11-09 round 3) [확인 필요]
+  afterKeepSub: '목표 금액만 지우고 지금처럼 모아요',
+  afterStopSub: '월급 계획에서 빠지고 모은 기록은 남아요',
+  afterRetarget: '목표 금액을 새로 정할게요',
+  afterRetargetSub: '모은 돈은 그대로 두고 더 큰 목표로 이어서 모아요',
   keptToast: '목표 금액을 지우고 계속 모아요', // [확인 필요]
   stoppedToast: '그만 모으기로 했어요', // [확인 필요]
 };

@@ -999,6 +999,22 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         syncChecklist(sp);
         return json(route, id);
       }
+      if (fn === 'saving_item_retarget') {
+        // 서버 흉내(2026-11-09 round 3): 달성(고르기 전)만, 모은 돈보다 큰 새 목표 금액 → 모으는 중 + 기한 지움
+        const b = body() as unknown as { p_goal: string; p_target: number };
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g || g.status !== 'achieved' || g.closed_at)
+          return json(route, { message: 'not_achieved', code: '22023' }, 400);
+        if (b.p_target <= goalSaved(String(g.id)))
+          return json(route, { message: 'not_above', code: '22023' }, 400);
+        Object.assign(g, {
+          target_amount: b.p_target,
+          deadline: null,
+          status: 'active',
+          achieved_seen: [],
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'saving_item_editable')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       if (

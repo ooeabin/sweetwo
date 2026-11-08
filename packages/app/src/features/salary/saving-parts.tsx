@@ -1,14 +1,59 @@
 import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
-import { ListRow } from '@sweetwo/ui';
+import { Badge, Lead, ListRow } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../shared/mask';
 import { hideToast } from '../../shared/toast';
 import { copy } from './copy';
 import { savingPaths } from './paths';
 import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
+
+/**
+ * 저금 항목 줄(GoalRow, 홈 H-02와 저금 목록 W-13): 저금통 + 이름(파트너 항목은 이름 칩) + 오른쪽 %(달성이면 ‘달성’ 배지)
+ * + “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면(W-13만) % 자리 비우고 “모은 돈 300만 원”, 막대 없음.
+ */
+export function SavingGoalRow({
+  item: i,
+  masked,
+  onClick,
+}: {
+  item: SavingItem;
+  masked: boolean;
+  onClick: () => void;
+}) {
+  const m = (v: number) => money(v, masked);
+  return (
+    <button type="button" className="hg-goalrow" onClick={onClick}>
+      <Lead icon="piggy-bank" />
+      <span className="hg-goalrow__name">
+        {i.goal.name}
+        {i.owner === 'partner' && i.ownerName && <Badge kind="temp">{i.ownerName}</Badge>}
+      </span>
+      <span className="hg-goalrow__pct">
+        {i.target === null ? null : i.state === 'achieved' ? (
+          <Badge kind="achieved">{copy.achieved}</Badge>
+        ) : (
+          <>
+            {i.pct ?? 0}
+            <small>%</small>
+          </>
+        )}
+      </span>
+      <span className="hg-goalrow__sub">
+        {i.target === null
+          ? copy.listSaved(m(i.saved))
+          : copy.itemProgress(m(i.saved), m(i.target))}
+      </span>
+      {i.target !== null && i.state !== 'achieved' && (
+        <span className="hg-goalrow__bar" aria-hidden="true">
+          <i style={{ width: `${i.bar}%` }} />
+        </span>
+      )}
+    </button>
+  );
+}
 
 /** 저금 줄 아래 진행(20 W-02 4번): “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면 없음 */
 export function SavingMeta({ item, masked }: { item: SavingItem | undefined; masked: boolean }) {
@@ -28,7 +73,13 @@ export function SavingMeta({ item, masked }: { item: SavingItem | undefined; mas
  * 파트너가 저금이 있으면(각자) 제목 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?” + 보조 “남는 돈 {n}”.
  * 홈 H-03과 W-02에서 씀(H-02 회색 제안 문장 대신). 보여 줄 때가 아니면 null
  */
-export function FirstSavingRow({ from, go }: { from: 'home' | 'salary'; go: (to: string) => void }) {
+export function FirstSavingRow({
+  from,
+  go,
+}: {
+  from: 'home' | 'salary';
+  go: (to: string) => void;
+}) {
   const f = useFirstSaving();
   const { masked } = useMask();
   if (!f.show) return null;
@@ -57,6 +108,10 @@ export function AchieveWatch() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const tried = useRef(new Set<string>());
+  // 한 번에 하나만(2026-11-09 round 3 ‘모두 보냈어요’로 여러 항목이 한 번에 닿을 때): 축하로 넘어가는 동안 다른 항목을
+  // 서버에 ‘봄’으로 남기지 않음. 남은 항목은 다음에 홈·월급 탭을 열 때 한 번씩
+  const inflight = useRef(false);
+  const [tick, setTick] = useState(0);
   const meId = d.ready ? d.meId : null;
   const items = useRef<SavingItem[] | null>(null);
   items.current = d.ready ? d.live : null;
@@ -66,7 +121,7 @@ export function AchieveWatch() {
     .join('|');
   useEffect(() => {
     const list = items.current;
-    if (!meId || !list) return;
+    if (!meId || !list || inflight.current) return;
     // 체크를 풀어 목표 금액 아래로 내려가면 서버가 ‘모으는 중’으로 되돌림(2026-11-09). 다시 닿으면 또 축하
     for (const i of list)
       if (i.state === 'saving' && !reachedTarget(i.goal, i.saved)) tried.current.delete(i.goal.id);
@@ -79,15 +134,24 @@ export function AchieveWatch() {
     );
     if (!next) return;
     tried.current.add(next.goal.id);
+    inflight.current = true;
     void achieveGoal(next.goal.id)
       .then(async (show) => {
-        await qc.invalidateQueries({ queryKey: qk.goals });
-        if (!show) return;
+        if (!show) {
+          inflight.current = false;
+          await qc.invalidateQueries({ queryKey: qk.goals });
+          setTick((x) => x + 1);
+          return;
+        }
         // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않게 닫고 넘어감(2026-11-09)
         hideToast(1500);
         nav(savingPaths.achieved(next.goal.id));
+        void qc.invalidateQueries({ queryKey: qk.goals });
       })
-      .catch(() => undefined);
-  }, [meId, key, nav, qc]);
+      .catch(() => {
+        inflight.current = false;
+        setTick((x) => x + 1);
+      });
+  }, [meId, key, tick, nav, qc]);
   return null;
 }

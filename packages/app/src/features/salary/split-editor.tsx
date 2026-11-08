@@ -51,6 +51,7 @@ export function SplitEditor({
   savedOf,
   onItem,
   onAddItem,
+  onSavingList,
 }: {
   lines: SplitLineDraft[];
   onChange: (lines: SplitLineDraft[]) => void;
@@ -90,6 +91,8 @@ export function SplitEditor({
   onItem?: (goalId: string) => void;
   /** 저금 묶음 아래 ‘+ 저금 항목 추가’(W-11a, W-01 3a) */
   onAddItem?: () => void;
+  /** 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3). O-50은 없음 */
+  onSavingList?: () => void;
 }) {
   const [edit, setEdit] = useState<Edit>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -242,7 +245,11 @@ export function SplitEditor({
           onClick={onIncome}
         />
       </List>
-      <SectionHeader title={copy.savingGroup} />
+      <SectionHeader
+        title={copy.savingGroup}
+        onTitle={onSavingList}
+        titleLabel={onSavingList ? copy.listOpen : undefined}
+      />
       <List label={copy.savingGroup}>
         {indexed.filter(({ l }) => l.kind === 'saving').map(({ l, i }) => row(l, i))}
         {!readOnly && onAddItem && (

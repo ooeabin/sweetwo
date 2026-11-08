@@ -1,4 +1,5 @@
 import {
+  checkPayLine,
   fetchHolidays,
   fetchPastChecklists,
   qk,
@@ -16,12 +17,13 @@ import {
   Tabs,
 } from '@sweetwo/ui';
 import { LoadingFrame, MainFrame } from '../../frame';
-import { useMask } from '../../../shared/mask';
+import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { track } from '../../../shared/analytics';
+import { quietly, toast } from '../../../shared/toast';
 import { CheckLine, goalLineName, isPast, LineLead, lineName, periodText } from '../check-line';
 import { copy } from '../copy';
 import {
@@ -65,6 +67,7 @@ export function W02Checklist() {
   const saving = useSavingItems();
   const first = useFirstSaving();
   const { masked } = useMask();
+  const group = useGroupCheck(masked);
 
   const meId = me.data?.id;
   const joint = space.data?.salary_mode === 'joint';
@@ -253,6 +256,7 @@ export function W02Checklist() {
     />
   );
   const more = (past.data?.length ?? 0) > ago;
+  const openList = () => nav(`${savingPaths.list}?from=checklist`);
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <AchieveWatch />
@@ -332,30 +336,121 @@ export function W02Checklist() {
           if (!first.show || partnerTab || readOnly) return null;
           return (
             <section key={title} className="hg-checkgroup" aria-label={title}>
-              <SectionHeader title={title} />
+              <SectionHeader title={title} onTitle={openList} titleLabel={copy.listOpen} />
               <FirstSavingRow from="salary" go={nav} />
             </section>
           );
         }
+        const kind = title === copy.savingGroup ? 'saving' : 'spend';
+        // 묶음 ‘모두 보냈어요’(2026-11-09 round 3): 이번 달 내(합쳐서면 공동) 체크리스트에서 체크 안 한 줄이 있을 때만
+        const canAll = !readOnly && !partnerTab && n < ls.length;
         return (
           <section key={title} className="hg-checkgroup" aria-label={title}>
             <SectionHeader
               title={title}
               lead={<Ring done={n} total={ls.length} label={copy.progress(ls.length, n)} />}
+              // 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3)
+              onTitle={kind === 'saving' ? openList : undefined}
+              titleLabel={kind === 'saving' ? copy.listOpen : undefined}
+              action={
+                canAll ? (
+                  <button
+                    type="button"
+                    className="hg-btn hg-btn--link"
+                    aria-label={copy.groupAllSentLabel(title)}
+                    aria-busy={group.busy === kind || undefined}
+                    disabled={!!group.busy}
+                    onClick={() => void group.run(kind, ls)}
+                  >
+                    {copy.groupAllSent}
+                  </button>
+                ) : undefined
+              }
             />
             <div className="hg-checklist__list">{ls.map(row)}</div>
           </section>
         );
       })}
-      <button
-        type="button"
-        className="hg-btn hg-btn--link"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={() => nav(salaryPaths.split)}
-      >
-        {copy.editSplit}
-      </button>
+      {/* 파트너 탭(각자)은 보기만이라 고치는 링크 없음(2026-11-09 round 3) */}
+      {!partnerTab && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav(salaryPaths.split)}
+        >
+          {copy.editSplit}
+        </button>
+      )}
     </div>
   );
   return <MainFrame current="salary" page={page} columns={[column]} />;
+}
+
+/**
+ * 묶음 ‘모두 보냈어요’(20 W-02 3a, 2026-11-09 round 3): 묶음의 체크 안 한 줄을 차례로 체크(줄마다 서버 check_pay_line,
+ * 막히면 거기서 멈춤), 다 끝난 뒤 한 번만 다시 읽음(달성 축하는 AchieveWatch가 한 번에 봄).
+ * Toast 한 번: 저금 묶음은 더한 금액 합, 쓰는 돈은 개수 + ‘되돌리기’(이번에 체크한 줄만 풂).
+ * 오프라인이면 첫 줄에서 막혀 “인터넷에 연결되면 할 수 있어요”
+ */
+function useGroupCheck(masked: boolean) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState<string | null>(null);
+  const refresh = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
+      qc.invalidateQueries({ queryKey: qk.goalSaved }),
+    ]);
+  const undo = (ids: string[]) =>
+    quietly(
+      (async () => {
+        for (const id of ids) await checkPayLine(id, 'wait');
+        await refresh();
+      })(),
+    );
+  const run = async (group: 'saving' | 'spend', lines: PayCheckLine[]) => {
+    if (busy) return;
+    const todo = lines.filter((l) => l.state === 'wait');
+    if (!todo.length) return;
+    setBusy(group);
+    const done: PayCheckLine[] = [];
+    let stop: string | null = null;
+    try {
+      for (const l of todo) {
+        const r = await checkPayLine(l.id, 'checked');
+        if (r === 'closed') {
+          stop = copy.closed;
+          break;
+        }
+        // 합쳐서 모드에서 상대가 먼저 체크한 줄은 건너뜀
+        if (r === 'ok') done.push(l);
+      }
+    } catch {
+      stop = copy.failed;
+    }
+    await refresh().catch(() => undefined);
+    setBusy(null);
+    if (done.length)
+      track('checklist_group_checked', {
+        group,
+        lines_count: done.length,
+        all: done.length === todo.length,
+      });
+    if (stop && !done.length) return toast(stop);
+    if (!done.length) return;
+    const ids = done.map((l) => l.id);
+    toast(
+      group === 'saving'
+        ? copy.groupSavingDone(
+            done.length,
+            money(
+              done.reduce((t, l) => t + l.planned, 0),
+              masked,
+            ),
+          )
+        : copy.groupSpendDone(done.length),
+      { label: copy.undo, onClick: () => undo(ids) },
+    );
+  };
+  return { busy, run };
 }

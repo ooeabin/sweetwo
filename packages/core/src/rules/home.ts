@@ -20,6 +20,7 @@ export interface HomeGoal {
   deadline: string | null;
   owner_user_id: string | null;
   closed_at: string | null;
+  deleted_at?: string | null;
 }
 export interface HomeCare extends CareRule {
   id: string;
@@ -50,8 +51,10 @@ export interface HomeInput {
   reconnectFrom: string | null;
   /** 초대 할 일을 닫은 날(7일 동안 안 보임) */
   inviteClosedOn: string | null;
-  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
+  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’, ‘saving-first’) */
   closed: string[];
+  /** 온보딩을 마친 날(KST). 첫 주(7일 안) 할 일 ‘첫 저금 추가’에 씀(2026-11-09 round 3). 없으면 그 할 일 없음 */
+  onboardedOn?: string | null;
 }
 
 export type HomeTodo =
@@ -59,6 +62,7 @@ export type HomeTodo =
   | { kind: 'reconnect'; to: string }
   | { kind: 'review'; label: string; left: number; key: string; to: string }
   | { kind: 'invite'; to: string }
+  | { kind: 'saving'; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
   | { kind: 'care'; name: string; date: string; key: string; to: string };
 
@@ -108,6 +112,23 @@ export function salaryState(
   return { state, label: c.label, done, total, left, nextPayday };
 }
 
+export const SAVING_TODO_KEY = 'saving-first';
+
+/**
+ * 첫 저금 추가 할 일(19 H-06 4b): 온보딩을 마친 날부터 7일 안 + 내 월급 계획(이번 달 체크리스트)이 있고 연결 해제 대기가 아님
+ * + 내 저금이 없음(각자 = 내가 주인인 저금, 합쳐서 = 공동 저금. 그만 모은 것·휴지통 빼고) + 닫지 않음
+ */
+export function firstSavingTodo(i: HomeInput): boolean {
+  if (!i.onboardedOn) return false;
+  const d = daysBetween(i.onboardedOn, i.today);
+  if (d < 0 || d >= 7) return false;
+  if (!myList(i) || i.coupleState === 'unlink_pending') return false;
+  if (i.closed.includes(SAVING_TODO_KEY)) return false;
+  return !i.goals.some(
+    (g) => !g.deleted_at && !g.closed_at && (i.joint || g.owner_user_id === i.meId),
+  );
+}
+
 /** 할 일 한 줄(19 ‘할 일 한 줄 순서’, 맨 앞 하나) */
 export function homeTodo(i: HomeInput): HomeTodo | null {
   if (i.unlinkRequestedBy && i.unlinkRequestedBy !== i.meId)
@@ -128,6 +149,9 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
     (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)
   )
     return { kind: 'invite', to: '/settings/couple' };
+  // 첫 주 ‘첫 저금 추가’(2026-11-09 round 3, 초대 다음): 온보딩 뒤 7일 안, 내 저금이 없을 때(월급 탭 ‘첫 저금’과 같은 조건)
+  if (firstSavingTodo(i))
+    return { kind: 'saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' };
   // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 대신 홈 H-02 저금 항목 제안 줄)
   const matured = i.assets.find(
     (a) =>

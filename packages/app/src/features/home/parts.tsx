@@ -1,6 +1,6 @@
 import type { PayChecklist } from '@sweetwo/api';
 import { formatDateWeekday } from '@sweetwo/core';
-import { Badge, Icon, Lead, Ring, SectionHeader } from '@sweetwo/ui';
+import { Icon, Ring, SectionHeader } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
@@ -9,7 +9,7 @@ import {
   doneCount,
   LineLead,
   lineName,
-  salaryPaths,
+  SavingGoalRow,
   savingPaths,
   type SavingItem,
 } from '../salary';
@@ -23,46 +23,24 @@ import { copy } from './copy';
  */
 export function SavingCard({ items, go }: { items: SavingItem[]; go: (to: string) => void }) {
   const { masked } = useMask();
-  const m = (v: number) => money(v, masked);
   const list = items.slice(0, 4);
   if (!list.length) return null;
   return (
     <section className="hg-stack" aria-label={copy.savings}>
-      <SectionHeader title={copy.savings} more={{ label: copy.toSplit, href: salaryPaths.split }} />
+      {/* 머리 링크 → 저금 목록(W-13, 2026-11-09 round 3, 예전 ‘월급 계획 ›’) */}
+      <SectionHeader
+        title={copy.savings}
+        more={{ label: copy.allSavings, href: `${savingPaths.list}?from=home` }}
+      />
       <div className="hg-card hg-goallist">
-        {list.map((i) => {
-          const target = i.target ?? 0;
-          return (
-            <button
-              key={i.goal.id}
-              type="button"
-              className="hg-goalrow"
-              onClick={() => go(savingPaths.item(i.goal.id))}
-            >
-              <Lead icon="piggy-bank" />
-              <span className="hg-goalrow__name">
-                {i.goal.name}
-                {i.owner === 'partner' && i.ownerName && <Badge kind="temp">{i.ownerName}</Badge>}
-              </span>
-              <span className="hg-goalrow__pct">
-                {i.state === 'achieved' ? (
-                  <Badge kind="achieved">{copy.achieved}</Badge>
-                ) : (
-                  <>
-                    {i.pct ?? 0}
-                    <small>%</small>
-                  </>
-                )}
-              </span>
-              <span className="hg-goalrow__sub">{copy.goalAmount(m(i.saved), m(target))}</span>
-              {i.state !== 'achieved' && (
-                <span className="hg-goalrow__bar" aria-hidden="true">
-                  <i style={{ width: `${i.bar}%` }} />
-                </span>
-              )}
-            </button>
-          );
-        })}
+        {list.map((i) => (
+          <SavingGoalRow
+            key={i.goal.id}
+            item={i}
+            masked={masked}
+            onClick={() => go(savingPaths.item(i.goal.id))}
+          />
+        ))}
       </div>
     </section>
   );

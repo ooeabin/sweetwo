@@ -88,6 +88,10 @@ export function useHomeInput(on = true) {
               : null,
           inviteClosedOn,
           closed,
+          // 첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b): 온보딩을 마친 날(KST)
+          onboardedOn: me.data.onboarding_done_at
+            ? todayKst(new Date(me.data.onboarding_done_at))
+            : null,
         }
       : null;
   return {

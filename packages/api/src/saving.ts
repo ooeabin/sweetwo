@@ -69,3 +69,20 @@ export async function reopenSavingItem(id: string) {
   const { error } = await supabase().rpc('saving_item_reopen', { p_goal: id });
   fail(error);
 }
+
+/** 새 목표 금액이 지금 모은 돈 이하라 못 바꿈(W-12a ‘목표 금액을 새로 정할게요’) */
+export class SavingTargetTooLow extends Error {
+  constructor() {
+    super('not_above');
+  }
+}
+
+/**
+ * W-12a ‘목표 금액을 새로 정할게요’(2026-11-09 round 3): 달성(고르기 전) 항목의 목표 금액을 모은 돈보다 큰 새 금액으로,
+ * 기한은 지우고 모으는 중으로. 되돌리기는 unkeepSavingItem(예전 목표 금액·기한)
+ */
+export async function retargetSavingItem(id: string, target: number) {
+  const { error } = await supabase().rpc('saving_item_retarget', { p_goal: id, p_target: target });
+  if (error?.message?.includes('not_above')) throw new SavingTargetTooLow();
+  fail(error);
+}

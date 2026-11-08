@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
+import { hideToast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
@@ -46,9 +47,11 @@ export function W12SavingAchieved() {
         </>
       }
       primary={{ label: copy.next }}
-      onSubmit={() =>
-        nav(i.canEdit ? savingPaths.after(id) : savingPaths.item(id), { replace: true })
-      }
+      onSubmit={() => {
+        // 축하로 넘어올 때 건 1.5초 토스트 막기(AchieveWatch hideToast)를 풂: 곧바로 고른 W-12a Toast가 보이게
+        hideToast();
+        nav(i.canEdit ? savingPaths.after(id) : savingPaths.item(id), { replace: true });
+      }}
     >
       <div className="hg-celebrate__body hg-celebrate__body--plain">
         <p className="hg-celebrate__value">{money(i.saved, masked)}</p>

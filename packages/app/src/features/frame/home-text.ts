@@ -6,6 +6,7 @@ export const homeText = {
   todoReconnect: (name: string) => `${name}님이 다시 연결하자고 했어요`,
   todoReview: (label: string, n: number) => `${label}에서 체크 안 한 게 ${n}개 있어요`,
   todoInvite: '함께할 사람을 초대해 주세요',
+  todoSaving: '첫 저금을 만들어 볼까요?', // [확인 필요] 2026-11-09 round 3 첫 주 할 일(19 H-06 4b)
   todoMatured: (name: string) => `${subject(name)} 만기됐어요`, // [확인 필요] 알림 문구와 같게
   todoCare: (date: string, name: string) => `${date} ${isWord(name)}`,
   payday: (who: string) => `${who}님 월급날`, // [확인 필요]
@@ -25,6 +26,8 @@ export function todoText(t: HomeTodo, n: { partner: string; exPartner: string })
       return homeText.todoReview(t.label, t.left);
     case 'invite':
       return homeText.todoInvite;
+    case 'saving':
+      return homeText.todoSaving;
     case 'matured':
       return homeText.todoMatured(t.asset);
     case 'care':

@@ -68,7 +68,7 @@ const writeDraft = (d: Draft | null) => {
     /* 기억 못 해도 이번 화면은 그대로 */
   }
 };
-const ENTRIES = ['home', 'salary', 'split', 'palette'] as const;
+const ENTRIES = ['home', 'salary', 'split', 'palette', 'list'] as const;
 type Entry = (typeof ENTRIES)[number];
 
 export function W11SavingAdd() {
@@ -250,21 +250,19 @@ export function W11SavingAdd() {
               <span className="hg-consent__label">{copy.addHasStart}</span>
             </button>
           }
+          // 이미 모은 돈 칸은 체크 칸 아래, 키패드는 하나로 화면 아래(2026-11-09 round 3, 칸 사이에 끼지 않게)
+          second={
+            draft.hasStart
+              ? {
+                  label: copy.addStart,
+                  value: draft.start,
+                  onChange: (x) => setDraft({ ...draft, start: x }),
+                  allowZero: true,
+                  error: startOver ? copy.addStartOver : undefined,
+                }
+              : undefined
+          }
         />
-        {draft.hasStart && (
-          <AmountInput
-            label={copy.addStart}
-            value={draft.start}
-            onChange={(x) => setDraft({ ...draft, start: x })}
-            allowZero
-            embedded
-          />
-        )}
-        {draft.hasStart && startOver && (
-          <p className="hg-help is-error" role="alert">
-            {copy.addStartOver}
-          </p>
-        )}
       </QuestionLayout>
     );
   if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;

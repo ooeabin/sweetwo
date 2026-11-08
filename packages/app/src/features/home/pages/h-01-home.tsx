@@ -1,4 +1,10 @@
-import { fetchMailBounced, fetchUnlinkPartnerName, qk, sendDesktopLink } from '@sweetwo/api';
+import {
+  fetchMailBounced,
+  fetchPastChecklists,
+  fetchUnlinkPartnerName,
+  qk,
+  sendDesktopLink,
+} from '@sweetwo/api';
 import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
 import { Button, Icon, IconButton, type IconName } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -56,6 +62,7 @@ const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconNa
   reconnect: 'link',
   review: 'check',
   invite: 'user',
+  saving: 'piggy-bank',
   matured: 'piggy-bank',
   care: 'gift',
 };
@@ -83,6 +90,22 @@ export function H01Home() {
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
   // 18 ‘합류 뒤’: 모바일 앱으로 합류한 사람의 첫 홈 띠 1회(PC에서도)
   const [pcBand, setPcBand] = useState(() => isMobile(detectPlatform()) && !pcBandDone());
+  // H-04 1a 순위 줄은 첫 체크 뒤에만(2026-11-09 round 3): 이번 달 체크리스트에 체크·못 함 줄이 있거나 지난 체크리스트가 있으면
+  const checkedAny = (lists.data ?? []).some((c) =>
+    c.pay_check_line.some((l) => l.state !== 'wait'),
+  );
+  const mineNow =
+    me.data && space.data
+      ? myChecklist(lists.data, space.data.salary_mode === 'joint' ? undefined : me.data.id)
+      : undefined;
+  const pastOwner = space.data?.salary_mode === 'joint' ? null : (me.data?.id ?? null);
+  const pastLists = useQuery({
+    queryKey: qk.pastChecklists(pastOwner, mineNow?.cycle_start ?? ''),
+    queryFn: () => fetchPastChecklists(pastOwner, mineNow?.cycle_start ?? ''),
+    enabled: !checkedAny && !!mineNow,
+  });
+  // 체크할 체크리스트가 없으면(월급 없음) 그대로 보임
+  const showRank = !mineNow || checkedAny || (pastLists.data?.length ?? 0) > 0;
   if (!me.data || !space.data || !goals.data || lists.isLoading)
     return <LoadingFrame current="month" />;
 
@@ -130,7 +153,10 @@ export function H01Home() {
         close:
           t.kind === 'invite'
             ? h.closeInvite
-            : t.kind === 'matured' || t.kind === 'care' || t.kind === 'review'
+            : t.kind === 'matured' ||
+                t.kind === 'care' ||
+                t.kind === 'review' ||
+                t.kind === 'saving'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -269,7 +295,7 @@ export function H01Home() {
         </div>,
         <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
           {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}
-          <RankBanner entry="home" />
+          {showRank && <RankBanner entry="home" />}
           {assetsCard}
           <UpcomingCard items={items.slice(0, 3)} go={go} />
         </div>,

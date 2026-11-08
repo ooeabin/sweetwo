@@ -91,7 +91,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target).toContainText('지금대로면 기한보다 1개월 늦어요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
+  // 2026-11-09 round 3: W-01 전체 대신 이 줄 금액만
+  await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}\/edit\/monthly$/);
   await page.goBack();
   const g = db.goals.find((x) => x.name === '제주 여행');
   expect(g).toMatchObject({
@@ -166,6 +167,45 @@ test('W-11c 이미 모은 돈(2026-11-09): 만들 때만, 목표 금액보다 �
   // 체크하면 시작값에 더해짐
   await page.getByRole('checkbox', { name: /이번 달/ }).click();
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
+});
+
+test('W-11b 바꾸기 칩 고른 표시, W-11c 키패드는 하나로 맨 아래(2026-11-09 round 3)', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/salary/items/new');
+  await page.getByLabel('무엇을 위해 모을까요?').fill('여행');
+  await page.getByRole('button', { name: '다음' }).click();
+  const chip = page.getByRole('button', { name: '30만 원' });
+  await chip.click();
+  await expect(chip).toHaveAttribute('aria-pressed', 'true');
+  // 고른 칩은 잉크 테두리(안쪽 그림자)로 보임. 고르지 않은 칩은 없음
+  expect(await chip.evaluate((e) => getComputedStyle(e).boxShadow)).not.toBe('none');
+  expect(
+    await page
+      .getByRole('button', { name: '10만 원' })
+      .evaluate((e) => getComputedStyle(e).boxShadow),
+  ).toBe('none');
+  await page.getByRole('button', { name: '다음' }).click();
+  if (info.project.name !== 'narrow') return;
+  // 좁은 창: 키패드로 목표 금액 → 체크 칸을 켜면 이미 모은 돈 칸이 활성, 키패드는 그 칸 아래
+  for (const k of ['5', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
+  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
+  await page.getByRole('checkbox', { name: '이미 모은 돈이 있어요' }).click();
+  for (const k of ['1', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
+  await expect(page.getByLabel('이미 모은 돈')).toHaveValue('1,000,000');
+  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
+  const startBox = await page.getByLabel('이미 모은 돈').boundingBox();
+  const padBox = await page.getByLabel('숫자 키패드').boundingBox();
+  expect(startBox && padBox && padBox.y > startBox.y).toBe(true);
+  await expect(page.getByLabel('숫자 키패드')).toHaveCount(1);
+  // 목표 금액 칸을 누르면 키패드가 다시 그 칸에
+  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').click();
+  await page.getByRole('button', { name: '지우기' }).click();
+  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('500,000');
+  await axe(page);
 });
 
 test('W-10a 고치기: 이름 바로 저장 + 되돌리기, 목표 금액 지우기, 지우기(휴지통) 되돌리기', async ({

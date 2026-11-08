@@ -67,8 +67,8 @@ export function W10SavingItem() {
           .catch(() => toast(copy.loadFailed)),
     },
   ];
-  // 매달 금액 바꾸기 → W-01 이 항목 주인 탭
-  const splitTo = `${salaryPaths.split}${g.owner_user_id && g.owner_user_id !== d.meId ? `?who=${g.owner_user_id}` : ''}`;
+  // 매달 금액 바꾸기 → 이 줄 금액만(W-10a monthly, 2026-11-09 round 3 W-01 전체 대신)
+  const splitTo = savingPaths.edit(id, 'monthly');
   // 모은 기록: 체크리스트 달마다(최근 것부터), 체크 안 한 이번 달 줄은 빼고
   const records = (lines.data ?? [])
     .filter((l) => l.pay_checklist && l.state !== 'wait')
