@@ -18,3 +18,5 @@
 - React 래퍼: `NotificationPanel`(packages/ui).
 
 쓰는 곳: 앱 상단 줄 알림(N-01), 좁은 창 알림 화면(N-02). 알림 설정은 S-14.
+
+- 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’).

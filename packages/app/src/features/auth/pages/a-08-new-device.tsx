@@ -38,6 +38,7 @@ export function A08NewDevice() {
   };
   return (
     <AuthLayout
+      art="status-newdevice"
       title={copy.newDeviceTitle}
       help={
         <>

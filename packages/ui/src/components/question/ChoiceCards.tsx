@@ -116,9 +116,8 @@ export function ChoiceCards<T extends string>({
             onClick={() => pick(o.value)}
           >
             {o.icon && (
-              <span className="hg-option__icon" aria-hidden="true">
-                <Icon name={o.icon} />
-              </span>
+              // 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 자리(Illustrations ‘나중 과제’ 5번)
+              <span className="hg-option__icon" aria-hidden="true" />
             )}
             <span className="hg-option__body">
               <span className="hg-option__label">

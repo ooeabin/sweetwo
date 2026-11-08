@@ -56,6 +56,7 @@ export function Lead({
   art,
   photo,
   art3d,
+  action,
 }: {
   tone?: 'together' | 'family' | 'goal' | 'safety' | 'invest';
   icon?: IconName;
@@ -65,13 +66,16 @@ export function Lead({
   photo?: string;
   /** 작은 3D 아이콘 주소(icon3d, 2026-11-05). 원 판 없이 사물만, 있으면 icon 대신 */
   art3d?: string;
+  /** UI 동작 아이콘(‘+ 추가’ 줄 등)이면 true: 2026-11-08부터 그림 자리 아이콘은 그리지 않고 빈 원, 동작 아이콘만 그림 */
+  action?: boolean;
 }) {
+  // 2026-11-08 그림 아이콘(3D, 종류 아이콘)은 2D 플랫으로 다시 만들 때까지 빈 원(Illustrations ‘나중 과제’)
   const flat = !photo && !art && !!art3d;
   return (
     <span
       className={cx(
         'hg-lead',
-        !flat && tone && `hg-lead--${tone}`,
+        !flat && tone && (action || !!art) && `hg-lead--${tone}`,
         photo && 'hg-lead--photo',
         flat && 'hg-lead--art',
       )}
@@ -80,7 +84,7 @@ export function Lead({
       {photo ? (
         <img src={photo} alt="" />
       ) : (
-        (art ?? (art3d ? <img src={art3d} alt="" /> : icon ? <Icon name={icon} /> : null))
+        (art ?? (art3d ? <img src={art3d} alt="" /> : action && icon ? <Icon name={icon} /> : null))
       )}
     </span>
   );

@@ -11,7 +11,6 @@ import {
   Button,
   ChoiceCards,
   Field,
-  hasIllustration,
   Illustration,
   ListRow,
   PageHeader,
@@ -253,7 +252,7 @@ export function S18Data() {
   const busy = (
     <ProcessingState
       icon="download"
-      art={hasIllustration('busy-file') ? <Illustration name="busy-file" motion /> : undefined}
+      art={<Illustration name="busy-file" motion />}
       title={copy.exporting}
       sub={copy.exportingSub}
     />

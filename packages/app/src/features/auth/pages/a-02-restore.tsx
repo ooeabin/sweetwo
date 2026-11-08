@@ -23,6 +23,7 @@ export function A02Restore() {
   }, [failed]);
   return (
     <AuthLayout
+      art="status-restore"
       title={copy.restoreTitle}
       help={copy.restoreHelp}
       toast={failed ? copy.restoreFailed : undefined}
