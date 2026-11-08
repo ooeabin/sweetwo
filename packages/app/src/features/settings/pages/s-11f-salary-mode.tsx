@@ -1,9 +1,12 @@
 import { qk, setSalaryMode } from '@sweetwo/api';
+import { addDays, formatMonthDay } from '@sweetwo/core';
 import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { quietly, toast } from '../../../shared/toast';
+import { myChecklist, useChecklists } from '../../salary';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -17,10 +20,15 @@ export function S11fSalaryMode() {
   const d = useSettingsData();
   const [v, setV] = useState<Mode | null>(null);
   const [saving, setSaving] = useState(false);
+  const lists = useChecklists();
   if (d.loading || !d.space) return <QuestionSkeleton />;
   const saved: Mode = d.space.salary_mode;
   const value = v ?? saved;
   const locked = d.space.couple_state === 'unlink_pending';
+  // 미리보기 날짜 = 지금 내(합쳐서면 공동) 체크리스트 다음 시작일(기간 끝 다음 날, 2026-11-09 round 3)
+  const cur = myChecklist(lists.data, saved === 'joint' ? undefined : d.me?.id);
+  const when = cur ? formatMonthDay(addDays(cur.cycle_end, 1)) : copy.nextPayday;
+  const preview = value !== saved && !locked ? copy.salaryModePreview[value](when) : undefined;
   const refresh = () =>
     Promise.all(
       [qk.space, qk.splits, ['pay_checklist']].map((k) => qc.invalidateQueries({ queryKey: k })),
@@ -33,6 +41,11 @@ export function S11fSalaryMode() {
         toast(copy.unlinkPendingLocked);
         return;
       }
+      track('salary_mode_changed', {
+        from: saved === 'joint' ? 'combined' : 'separate',
+        to: value === 'joint' ? 'combined' : 'separate',
+        entry: 's11f',
+      });
       await refresh();
       toast(copy.salaryModeSaved, {
         label: copy.undo,
@@ -50,6 +63,7 @@ export function S11fSalaryMode() {
       title={copy.salaryModeQ}
       help={locked ? copy.unlinkPendingLocked : copy.salaryModeHelp}
       onBack={() => nav('/settings/me')}
+      note={preview}
       primary={{ label: copy.save, disabled: value === saved || locked, loading: saving }}
       onSubmit={() => void save()}
     >

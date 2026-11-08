@@ -86,6 +86,15 @@ export type AnalyticsEvent =
       props: { had_target: boolean; has_deadline: boolean; target_band: AmountBand };
     }
   | {
+      // 월급 관리 방식 바꿈(32 4-4). S-11f 저장, P-04 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3 entry)
+      name: 'salary_mode_changed';
+      props: {
+        from: 'separate' | 'combined';
+        to: 'separate' | 'combined';
+        entry: 's11f' | 'p04';
+      };
+    }
+  | {
       // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3). all = 남은 줄을 모두 체크했는지(상대가 먼저 체크한 줄은 빠짐)
       name: 'checklist_group_checked';
       props: { group: 'saving' | 'spend'; lines_count: number; all: boolean };

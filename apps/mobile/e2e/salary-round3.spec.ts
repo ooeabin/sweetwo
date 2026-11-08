@@ -215,3 +215,72 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await expect.poll(() => g.status).toBe('achieved');
   expect(g).toMatchObject({ target_amount: 440_000, deadline: '2026-12-01' });
 });
+
+test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대 다음, H-04 1a 순위 줄은 첫 체크 뒤에만', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  // 내 저금이 없음(첫 주: 온보딩 10월 1일, 오늘 10월 7일)
+  db.goals.length = 0;
+  for (const sp of db.splits) sp.split_line = sp.split_line.filter((l) => l.kind !== 'saving');
+  for (const c of db.checklists)
+    c.pay_check_line = (c.pay_check_line as unknown as Line[]).filter(
+      (l) => l.kind !== 'saving',
+    ) as never;
+  await page.goto('/');
+  // 초대가 먼저
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
+  // 첫 체크 전에는 순위 줄 없음
+  await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
+  await page.locator('.hg-banner--todo').getByRole('button', { name: '닫기' }).click();
+  const todo = page.getByRole('button', { name: '첫 저금을 만들어 볼까요?' });
+  await expect(todo).toBeVisible();
+  await axe(page);
+  // 체크하면 순위 줄이 보임
+  await page.locator('.hg-transfer').first().getByRole('checkbox').click();
+  await expect(page.getByRole('button', { name: /상위 몇 %/ })).toBeVisible();
+  await todo.click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
+  // 닫으면 다시 안 보임
+  await page.goto('/');
+  await page.locator('.hg-banner--todo').getByRole('button', { name: '닫기' }).click();
+  await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
+});
+
+test('S-11f 저장 전 미리보기 한 줄: 다른 방식을 고르면 “{다음 시작일}부터 체크리스트가 …”', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    monthly_income: 2_700_000,
+    payday: 10,
+    payday_last: false,
+  };
+  await page.goto('/settings/me/salary-mode');
+  await expect(page.getByRole('heading', { name: '월급을 어떻게 관리해요?' })).toBeVisible();
+  await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
+  await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
+  // 9월 월급 기간 끝 10월 24일 → 10월 25일부터
+  await expect(page.getByText('10월 25일부터 체크리스트가 하나가 돼요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('radio', { name: '각자 월급을 따로 관리해요' }).click();
+  await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
+  await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/salary\/split$/);
+  expect(db.space?.salary_mode).toBe('joint');
+  // 합쳐서 → 각자 미리보기
+  await page.goto('/settings/me/salary-mode');
+  await page.getByRole('radio', { name: '각자 월급을 따로 관리해요' }).click();
+  await expect(page.getByText(/부터 체크리스트가 사람마다 생겨요$/)).toBeVisible();
+});

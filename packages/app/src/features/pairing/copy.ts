@@ -74,6 +74,15 @@ export const copy = {
     }, // [확인 필요]
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
+  // P-04 다른 방식을 고르면 결과 한 줄 + 확인 Modal(2026-11-09 round 3) [확인 필요]
+  modeResult: {
+    joint: (starter: string) => `${starter}님 월급 계획이 두 분의 월급 계획 하나가 돼요`,
+    separate: () => '월급 계획과 체크리스트가 사람마다 따로 생겨요',
+  },
+  modeConfirmTitle: '월급 관리 방식을 바꿀까요?',
+  modeConfirmBody: (starter: string) => `${starter}님에게도 바로 적용되고 알림이 가요`,
+  modeConfirmOk: '바꿀게요',
+  modeConfirmCancel: '다시 고를게요',
 
   // P-05 내 월급(O-31과 같음)
   salary: '한 달 실수령액은 얼마예요?',

@@ -112,7 +112,7 @@
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
 | split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 파트너 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
-| salary\_mode\_changed | 설정에서 월급 관리 방식 바꿈 | from, to(`separate` / `combined`) |
+| salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·우리 자산·챙길 날
 

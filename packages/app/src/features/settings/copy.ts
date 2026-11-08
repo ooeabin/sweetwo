@@ -101,6 +101,12 @@ export const copy = {
     joint: '합쳐서 같이 관리해요',
   },
   salaryModeSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
+  // S-11f 저장 전 미리보기 한 줄(2026-11-09 round 3) [확인 필요]. when = “11월 25일” 또는 “다음 월급날”
+  salaryModePreview: {
+    joint: (when: string) => `${when}부터 체크리스트가 하나가 돼요`,
+    separate: (when: string) => `${when}부터 체크리스트가 사람마다 생겨요`,
+  },
+  nextPayday: '다음 월급날',
 
   // S-11g·h·i
   marriageQ: '두 사람은 어떤 사이예요?',
