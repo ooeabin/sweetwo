@@ -37,7 +37,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 항목 보기’ → W-10 상세(
 
   // 목표 금액이 없는 항목: 진행 대신 ‘목표 금액 정하기’
   await page.goto('/salary/items/goal-e');
-  await expect(page.getByRole('heading', { name: '비상금' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '청약' })).toBeVisible();
   await expect(page.getByText('목표 금액을 정하면 얼마나 모았는지 보여 드려요')).toBeVisible();
   await page.getByRole('button', { name: '목표 금액 정하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?first=1$/);
@@ -60,6 +60,14 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
+  // 처음 값은 빈 칸(남는 돈 전부를 채우지 않음, 2026-11-09), 보조는 지금 남는 돈
+  await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await expect(page.getByText(/^지금 남는 돈/)).toBeVisible();
+  // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
+  await page.getByRole('button', { name: '30만 원' }).click();
+  await page.getByRole('button', { name: '10만 원' }).click();
+  await expect(page.getByRole('button', { name: '10만 원' })).toHaveAttribute('aria-pressed', 'true');
   await page.getByLabel('매달 얼마씩 모을까요?').fill('200000');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(
@@ -68,10 +76,23 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('2000000');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
+  // 처음 값 = 1년 뒤(2027년 10월, 13개월) → 200만 ÷ 13 = 16만(올림), 매달 20만이면 늦지 않음
+  await expect(page.getByText('매달 16만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText(/기한보다/)).toHaveCount(0);
+  // 2027년 6월(9개월) → 23만 > 20만 → 10개월째 2027년 7월, 1개월 늦어요
   await setYearMonth(page, 2027, 6);
+  await expect(page.getByText('매달 23만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText('지금대로면 기한보다 1개월 늦어요')).toBeVisible();
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { name: '제주 여행' })).toBeVisible();
+  // W-10: 늦어지는 사실 한 줄 + 할 일(2026-11-09)
+  const target = page.getByRole('region', { name: '목표 금액 정하기' });
+  await expect(target).toContainText('지금대로면 기한보다 1개월 늦어요');
+  await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
+  await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
+  await expect(page).toHaveURL(/\/salary\/split$/);
+  await page.goBack();
   const g = db.goals.find((x) => x.name === '제주 여행');
   expect(g).toMatchObject({
     target_amount: 2_000_000,
@@ -93,6 +114,22 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
   await expect(page.getByRole('heading', { name: '적금' })).toBeVisible();
   expect(db.goals.find((x) => x.name === '적금')?.target_amount).toBeNull();
+
+  // 휠을 건드리지 않고 추가하면 기한 = 1년 뒤(20 W-11d, 다음 달로 잡히던 것 고침)
+  await page.goto('/salary/items/new');
+  await page.getByLabel('무엇을 위해 모을까요?').fill('노트북');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '50만 원' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('1500000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page.getByRole('heading', { name: '노트북' })).toBeVisible();
+  expect(db.goals.find((x) => x.name === '노트북')).toMatchObject({ deadline: '2027-10-01' });
+  expect(
+    db.splits[0]?.split_line.find((l) => l.goal_id === db.goals.find((x) => x.name === '노트북')?.id)
+      ?.amount,
+  ).toBe(500_000);
 });
 
 test('W-10a 고치기: 이름 바로 저장 + 되돌리기, 목표 금액 지우기, 지우기(휴지통) 되돌리기', async ({
@@ -184,6 +221,9 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   await page.getByRole('checkbox', { name: /가전 바꾸기/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-tv\/achieved$/);
   await expect(page.getByText('4개월 만에 모았어요')).toBeVisible();
+  // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않음(2026-11-09)
+  await expect(page.getByText('가전 바꾸기에 30만 원 더했어요')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '되돌리기' })).toHaveCount(0);
   expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('achieved');
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
@@ -194,6 +234,33 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   expect(tv?.target_amount).toBeNull();
   expect(tv?.closed_at ?? null).toBeNull();
   expect(sp.split_line.some((l) => l.goal_id === 'goal-tv')).toBe(true);
+});
+
+test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아래로 내려가면 모으는 중, 다시 체크하면 다시 축하', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const home = db.goals.find((g) => g.id === 'goal-h');
+  if (!home) throw new Error('seed');
+  // 목표 금액 95만: 이번 달 줄을 체크하면 달성
+  Object.assign(home, { target_amount: 950_000, deadline: null });
+  await page.goto('/salary');
+  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved$/);
+  expect(home.status).toBe('achieved');
+  await page.goto('/salary');
+  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await expect.poll(() => home.status).toBe('active');
+  expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
+  await page.goto('/salary/items/goal-h');
+  await expect(page.getByText('목표 95만 원의 0%')).toBeVisible();
+  await expect(page.getByRole('region', { name: '목표 금액 정하기' }).getByText('달성')).toHaveCount(0);
+  // 다시 체크하면 다시 축하
+  await page.goto('/salary');
+  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved$/);
 });
 
 test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 묶음, 되돌리기로 다시 모음', async ({

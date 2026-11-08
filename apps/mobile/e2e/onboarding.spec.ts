@@ -116,7 +116,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지(목표 고르기 없�
   // 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
   await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
 
-  // 홈 H-02 제안 줄 → W-11a 저금 항목 추가 → 매달 금액 추천 = 남는 돈 139만
+  // 홈 H-02 제안 줄 → W-11a 저금 항목 추가 → 매달 금액은 빈 칸, 보조 = 남는 돈 139만(2026-11-09)
   await page
     .getByRole('button', { name: /모으고 싶은 돈이 있으면 저금 항목으로 만들어 보세요/ })
     .click();
@@ -125,7 +125,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지(목표 고르기 없�
   await next(page);
   await heading(page, '매달 얼마씩 모을까요?');
   await expect(page.getByText('지금 남는 돈 139만 원')).toBeVisible();
-  await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('1,390,000');
+  await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
   await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
   await axe(page);
   await next(page);

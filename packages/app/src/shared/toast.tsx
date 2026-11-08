@@ -25,6 +25,9 @@ export const toast = (message: string, action?: ToastItem['action']) => {
   useToastStore.getState().show(blocked ? { message: sharedCopy.needOnline } : { message, action });
 };
 
+/** 떠 있는 토스트 닫기(2026-11-09 W-12: 달성 축하로 넘어가기 전에 체크 ‘되돌리기’ 토스트를 닫음) */
+export const hideToast = () => useToastStore.getState().hide();
+
 /**
  * 결과 알림이 없던 서버 동작(되돌리기 등, 2026-11-06): 실패하면 “저장하지 못했어요”(13 공통 상태 10번).
  * `onClick: () => quietly(undo())`처럼 쓰고, 성공은 화면이 바로 바뀌어 따로 알리지 않음

@@ -58,5 +58,11 @@ export const quickChips = {
     { label: '+5,000만', value: 5_000 * M },
     { label: '+1억', value: 10_000 * M },
   ],
+  /** W-11b 매달 금액(2026-11-09, 누르면 그 금액으로 바꿈) [확인 필요] */
+  monthly: [
+    { label: '10만 원', value: 10 * M },
+    { label: '30만 원', value: 30 * M },
+    { label: '50만 원', value: 50 * M },
+  ],
 } as const;
 export type QuickKind = keyof typeof quickChips;

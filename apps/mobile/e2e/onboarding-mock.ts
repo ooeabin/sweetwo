@@ -489,6 +489,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           l.checked_by = b.p_state === 'wait' ? null : db.me.id;
           l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
           c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
+          // 서버 saving_unachieve 흉내(2026-11-09): 고르기 전 달성 항목이 목표 금액 아래로 내려가면 모으는 중 + 달성 알림 지움
+          const g = l.kind === 'saving' ? db.goals.find((x) => x.id === l.goal_id) : undefined;
+          if (
+            g &&
+            g.status === 'achieved' &&
+            !g.closed_at &&
+            g.target_amount != null &&
+            goalSaved(String(g.id)) < Number(g.target_amount)
+          ) {
+            Object.assign(g, { status: 'active', achieved_seen: [] });
+            if (db.notifications)
+              db.notifications = db.notifications.filter((n) => n.id !== `n-ach-${String(g.id)}`);
+          }
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }

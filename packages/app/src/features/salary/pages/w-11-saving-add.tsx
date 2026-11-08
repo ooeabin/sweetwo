@@ -1,9 +1,12 @@
 import { addSavingItem, qk, SavingItemBlocked } from '@sweetwo/api';
 import {
   amountBand,
+  defaultDeadline,
   leftover,
+  quickChips,
   readWon,
   savingItemInput,
+  savingLate,
   savingNeed,
   thisMonth,
   ymToDate,
@@ -172,27 +175,27 @@ export function W11SavingAdd() {
     );
   if (!draft.name.trim()) return <Navigate to={`${savingPaths.add}/a`} replace />;
   if (s === 'b') {
-    const v = draft.monthly ?? Math.max(Math.floor(left / 10_000) * 10_000, 0);
+    // 처음 값은 빈 칸(필수, 2026-11-09). 남는 돈 전부를 채우지 않음. 빠른 칩은 그 금액으로 바꿈
+    const v = draft.monthly;
     return (
       <QuestionLayout
         steps={steps}
         title={copy.addMonthlyQ}
         help={copy.addMonthlyHelp(readWon(Math.max(left, 0)))}
         onBack={back}
-        primary={{ label: copy.next, disabled: v % 10_000 !== 0 }}
-        onSubmit={() => {
-          setDraft({ ...draft, monthly: v });
-          go('c');
-        }}
+        primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
+        onSubmit={() => go('c')}
       >
         <AmountInput
           label={copy.addMonthlyQ}
           value={v}
-          onChange={(x) => setDraft({ ...draft, monthly: x ?? 0 })}
+          onChange={(x) => setDraft({ ...draft, monthly: x })}
+          quick={quickChips.monthly}
+          quickSet
           monthly
           allowZero
         />
-        {v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
+        {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
       </QuestionLayout>
     );
   }
@@ -219,17 +222,33 @@ export function W11SavingAdd() {
       </QuestionLayout>
     );
   if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;
-  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? null;
-  const err = ym && ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
-  const need = ym ? savingNeed({ target: draft.target, saved: 0, deadline: ym }) : null;
+  // 처음 값 = 1년 뒤(20 W-11d). 휠이 처음 값을 다시 올려도 같은 값
+  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
+  const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
+  const plan = { target: draft.target, saved: 0, deadline: ym };
+  const need = savingNeed(plan);
+  // 월 필요액 > 매달 금액이면 사실 한 줄(2026-11-09, 06 5-4)
+  const late = savingLate(plan, draft.monthly ?? 0);
   return (
     <QuestionLayout
       steps={steps}
       title={copy.addDeadlineQ}
-      help={need !== null ? copy.needPerMonth(readWon(need)) : undefined}
+      help={
+        need !== null ? (
+          <>
+            {copy.needPerMonth(readWon(need))}
+            {late !== null && (
+              <>
+                <br />
+                {copy.lateBy(late)}
+              </>
+            )}
+          </>
+        ) : undefined
+      }
       onBack={back}
-      primary={{ label: copy.addDone, disabled: !ym || !!err, loading: saving }}
-      onSubmit={() => void save(draft)}
+      primary={{ label: copy.addDone, disabled: !!err, loading: saving }}
+      onSubmit={() => void save({ ...draft, deadline: ym })}
       later={{
         label: copy.addNoDeadline,
         loading: saving,

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (608687f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (89b8690). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -283,6 +283,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-chapterbar__label { grid-column: 2; margin: 0; text-align: center; font: 600 15px/22px var(--font-sans); color: var(--ink); }
 .hg-chapterbar__track { position: relative; height: 4px; border-radius: var(--radius-full); background: var(--hairline); overflow: hidden; }
 .hg-chapterbar__fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: var(--radius-full); background: var(--brand); transition: width var(--dur-base) var(--ease-out); }
+/* 온보딩 밖 질문 흐름(W-11, F-03, Y-07, S-12a 등)은 ink 채움(2026-11-09) */
+.hg-chapterbar--ink .hg-chapterbar__fill { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .hg-chapterbar__fill { transition: none; } }
 /* 온보딩 첫 화면(O-10) 챕터 목록(ChapterList): 회색 판 위 번호 원 + 챕터 이름 + 한 줄 */
 .hg-chapters { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: var(--space-5); list-style: none; background: var(--plate); border-radius: var(--radius-xl); }
@@ -348,6 +350,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-segs { display: flex; gap: 4px; width: 100%; }
 .hg-segs__seg { flex: 1; height: 4px; border-radius: var(--radius-full); background: var(--hairline); transition: background-color var(--dur-base) var(--ease-out); }
 .hg-segs__seg.is-on { background: var(--brand); }
+.hg-segs--ink .hg-segs__seg.is-on { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .hg-segs__seg { transition: none; } }
 @media (min-width: 768px) {
   .hg-qbar { position: sticky; top: 0; z-index: 2; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 64px; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-6); background: var(--surface); }

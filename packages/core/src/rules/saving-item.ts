@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ceilTo10k, MAX_WON, type Won } from '../money';
-import { addMonths, monthsBetween, thisMonth, type YearMonth } from '../onboarding/month';
+import { addMonths, monthsBetween, parseYm, thisMonth, type YearMonth } from '../onboarding/month';
 
 // 저금 항목(docs/spec/20-salary-plan.md ‘저금 항목’, 06-calc-allocation.md 4장·5장, ADR 0007).
 // 모은 돈은 서버 goal_saved(체크한 저금 줄 합)가 정본, 여기 savedFromLines는 같은 식(테스트·미리보기용).
@@ -21,6 +21,16 @@ export function savedFromLines(id: string, lines: SavingCheckLine[]): Won {
     .reduce((t, l) => t + (l.actual ?? l.planned), 0);
 }
 
+/** 기한의 날(06 5-2, 2026-11-09): 고른 달의 말일 'YYYY-MM-DD'. ‘2026년 11월까지’ = 11월 30일까지 */
+export function deadlineDay(deadline: string): string {
+  const { y, m } = parseYm(deadline.slice(0, 7));
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return `${deadline.slice(0, 7)}-${String(last).padStart(2, '0')}`;
+}
+
+/** W-11d 기한 처음 값(20): 1년 뒤 같은 달 */
+export const defaultDeadline = (now = new Date()): YearMonth => addMonths(thisMonth(now), 12);
+
 /** 진행률(06 5-1): 모은 돈 ÷ 목표 금액, 내림 정수 %, 100 상한. 목표 금액이 없으면 null */
 export function savingPct(saved: Won, target: Won | null): number | null {
   if (target === null || target <= 0) return null;
@@ -33,21 +43,28 @@ export function savingBar(saved: Won, target: Won | null): number {
   return saved > 0 ? Math.max(p, 2) : p;
 }
 
+/** 남은 개월(06 5-2): 이번 달부터 기한 달까지(기한 = 그 달 말일이라 기한 달도 셈), 최소 1 */
+export const monthsLeft = (deadline: YearMonth, now = new Date()) =>
+  Math.max(monthsBetween(thisMonth(now), deadline) + 1, 1);
+
 /**
  * 월 필요액(06 5-2, 기한이 있을 때만): (목표 금액 − 모은 돈) ÷ 남은 개월, 1만 원 단위 올림. 0 아래면 0.
- * 남은 개월 = 이번 달부터 기한 달 전까지(최소 1). 목표 금액이나 기한이 없으면 null
+ * 목표 금액이나 기한이 없으면 null
  */
 export function savingNeed(
   o: { target: Won | null; saved: Won; deadline: YearMonth | null },
   now = new Date(),
 ): Won | null {
   if (o.target === null || !o.deadline) return null;
-  const months = Math.max(monthsBetween(thisMonth(now), o.deadline), 1);
+  const months = monthsLeft(o.deadline, now);
   const left = Math.max(o.target - o.saved, 0);
   return ceilTo10k(Math.ceil(left / months));
 }
 
-/** 예상 달성 월(06 5-3): 이번 달 + (목표 금액 − 모은 돈) ÷ 매달 금액(올림). 매달 금액이 0원이거나 목표 금액이 없으면 null */
+/**
+ * 예상 달성 월(06 5-3): 이번 달부터 매달 모아 (목표 금액 − 모은 돈) ÷ 매달 금액(올림)째 달.
+ * = 이번 달 + 개월 − 1(월 필요액의 남은 개월과 같은 셈). 매달 금액이 0원이거나 목표 금액이 없으면 null
+ */
 export function savingEta(
   o: { target: Won | null; saved: Won },
   monthly: Won,
@@ -57,7 +74,24 @@ export function savingEta(
   const left = Math.max(o.target - o.saved, 0);
   if (left === 0) return thisMonth(now);
   if (monthly <= 0) return null;
-  return addMonths(thisMonth(now), Math.ceil(left / monthly));
+  return addMonths(thisMonth(now), Math.ceil(left / monthly) - 1);
+}
+
+/**
+ * 기한보다 늦어지는 개월(06 5-4, 20 W-10 3번): 월 필요액 > 매달 금액이면 예상 달성 월 − 기한 월.
+ * 목표 금액·기한이 없거나, 매달 금액이 0원이거나, 늦지 않으면 null
+ */
+export function savingLate(
+  o: { target: Won | null; saved: Won; deadline: YearMonth | null },
+  monthly: Won,
+  now = new Date(),
+): number | null {
+  const need = savingNeed(o, now);
+  if (need === null || !o.deadline || monthly <= 0 || need <= monthly) return null;
+  const eta = savingEta(o, monthly, now);
+  if (!eta) return null;
+  const late = monthsBetween(o.deadline, eta);
+  return late > 0 ? late : null;
 }
 
 export type SavingState = 'saving' | 'achieved' | 'closed';

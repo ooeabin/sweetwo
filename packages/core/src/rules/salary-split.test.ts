@@ -61,9 +61,9 @@ describe('recommendSplit: 추천값으로 다시 채우기(06 3-2 두 번째 예
   });
   it('목표 금액 없는 적금은 지금 금액 그대로 30만', () =>
     expect(lines.find((l) => l.goalId === 's')?.amount).toBe(300_000));
-  it('남은 109만 → 내 집 마련 109만(월 필요액 250만 중)', () => {
+  it('남은 109만 → 내 집 마련 109만(월 필요액 246만 중)', () => {
     expect(lines.find((l) => l.goalId === 'h')?.amount).toBe(1_090_000);
-    expect(lines.find((l) => l.goalId === 'h')?.need).toBe(2_500_000);
+    expect(lines.find((l) => l.goalId === 'h')?.need).toBe(2_460_000);
   });
   it('남는 돈 0원, 저금 줄이 쓰는 돈 줄보다 먼저', () => {
     expect(leftover(3_500_000, lines)).toBe(0);
@@ -95,7 +95,7 @@ describe('합류 P-06 각자: joinerSplit', () => {
 });
 
 describe('합류 P-06 합쳐서: jointRefill', () => {
-  it('620만: 있던 줄은 그대로, 예빈 용돈 27, 내 집 95 → 250, 적금 30 그대로, 남는 돈 102', () => {
+  it('620만: 있던 줄은 그대로, 예빈 용돈 27, 내 집 95 → 246, 적금 30 그대로, 남는 돈 106', () => {
     const lines = [
       { kind: 'saving' as const, goalId: 'h', amount: 950_000 },
       { kind: 'saving' as const, goalId: 's', amount: 300_000 },
@@ -111,9 +111,9 @@ describe('합류 P-06 합쳐서: jointRefill', () => {
       now,
     });
     expect(r.map((l) => l.amount)).toEqual([
-      2_500_000, 300_000, 880_000, 880_000, 350_000, 270_000,
+      2_460_000, 300_000, 880_000, 880_000, 350_000, 270_000,
     ]);
     expect(r.at(-1)).toMatchObject({ kind: 'allowance', userId: 'yebin' });
-    expect(leftover(6_200_000, r)).toBe(1_020_000);
+    expect(leftover(6_200_000, r)).toBe(1_060_000);
   });
 });

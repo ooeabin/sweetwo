@@ -41,10 +41,10 @@ test('홈: 저금 항목(H-02), 이번 달 월급 체크 → 모은 돈에 더�
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
   // 홈에서는 3줄까지만(나머지는 W-02)
   await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(3);
-  // H-02 저금 항목(ADR 0007): 목표 금액이 있는 항목만(비상금은 목표 금액이 없어 없음). 이번 달 체크는 위 체크리스트에서만
+  // H-02 저금 항목(ADR 0007): 목표 금액이 있는 항목만(청약은 목표 금액이 없어 없음). 이번 달 체크는 위 체크리스트에서만
   const savings = page.getByRole('region', { name: '저금 항목' });
   await expect(savings).toContainText('내 집 마련');
-  await expect(savings).not.toContainText('비상금');
+  await expect(savings).not.toContainText('청약');
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
     '0원 / 1억 5,000만 원',
   );
@@ -68,7 +68,7 @@ test('홈: 저금 항목(H-02), 이번 달 월급 체크 → 모은 돈에 더�
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
   await expect(page.getByText(/09\.25 ~ 10\.24\. 5개 중 1개 완료/)).toBeVisible();
   await axe(page);
-  for (const name of ['비상금', '고정지출', '생활비', '용돈'])
+  for (const name of ['청약', '고정지출', '생활비', '용돈'])
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
   await expect(page.getByText('이번 달 저금 139만 원을 보냈어요')).toBeVisible();
@@ -110,7 +110,9 @@ test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 �
   await expect(page.getByRole('dialog', { name: '생활비 88만 원' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다른 금액으로 보냈어요' }).click();
-  await expect(page.getByRole('heading', { name: '얼마를 보냈어요?' })).toBeVisible();
+  // 어느 줄인지 제목에, 보조는 계획 금액(2026-11-09)
+  await expect(page.getByRole('heading', { name: '생활비, 얼마를 보냈어요?' })).toBeVisible();
+  await expect(page.getByText('계획 88만 원')).toBeVisible();
   await page.getByLabel('얼마를 보냈어요?').fill('780000');
   await expect(page.getByText('계획보다 10만 원 적어요')).toBeVisible();
   await page.getByRole('button', { name: '다음' }).click();
@@ -138,7 +140,7 @@ test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 �
     state: 'checked',
     actual: 780_000,
   });
-  // 비상금 기본 항목·자동 목표 금액은 없음(ADR 0007): 목표 금액 없는 비상금은 그대로
+  // 비상금 기본 항목·자동 목표 금액은 없음(ADR 0007): 목표 금액 없는 저금 항목은 그대로
   expect(db.goals.find((g) => g.id === 'goal-e')?.target_amount).toBeNull();
 });
 
@@ -159,12 +161,12 @@ test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → �
   await expect(page.getByRole('heading', { name: '9월 월급, 빠진 게 있나요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('checkbox', { name: '내 집 마련 체크' }).click();
-  await page.getByRole('button', { name: /^비상금/ }).click();
+  await page.getByRole('button', { name: /^청약/ }).click();
   await page.getByRole('button', { name: '이번 달은 못 했어요' }).click();
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   await expect.poll(() => lines.find((l) => l.goal_id === 'goal-e')?.state).toBe('skipped');
   // 줄이 빠지니 Toast로 알림 + 되돌리기(2026-11-03)
-  await expect(page.getByText('비상금, 이번 달은 못 한 걸로 했어요')).toBeVisible();
+  await expect(page.getByText('청약, 이번 달은 못 한 걸로 했어요')).toBeVisible();
   expect(lines.find((l) => l.goal_id === 'goal-h')?.state).toBe('checked');
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page).toHaveURL(/\/$/);

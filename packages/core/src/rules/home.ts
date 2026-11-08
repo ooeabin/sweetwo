@@ -1,5 +1,6 @@
 import { addDays, daysBetween } from '../date';
 import { nextCareDate, type CareRule } from './care';
+import { deadlineDay } from './saving-item';
 
 // 홈(19)과 트레이 위젯(26)이 같이 쓰는 계산: 할 일 한 줄(H-06), 다가오는 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
 // 문구는 앱 copy가 만들고, 여기서는 종류와 값, 갈 화면만 정함.
@@ -189,16 +190,18 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
         to: `/calendar/day/${c.id}`,
       });
   }
-  // 목표 기한: 목표 금액과 기한이 있는, 모으는 중인 저금 항목만(24, ADR 0007)
-  for (const g of i.goals)
-    if (g.status === 'active' && !g.closed_at && g.target_amount !== null && within(g.deadline))
+  // 목표 기한: 목표 금액과 기한이 있는, 모으는 중인 저금 항목만(24, ADR 0007). 기한 = 그 달 말일(2026-11-09)
+  for (const g of i.goals) {
+    const due = g.deadline ? deadlineDay(g.deadline) : null;
+    if (g.status === 'active' && !g.closed_at && g.target_amount !== null && within(due))
       add({
         key: `goal-${g.id}`,
         kind: 'goal',
-        date: g.deadline,
+        date: due,
         name: g.name,
         to: `/salary/items/${g.id}`,
       });
+  }
   for (const a of i.assets)
     if (a.side === 'asset' && within(a.maturity_date))
       add({

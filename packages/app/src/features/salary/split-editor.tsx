@@ -70,11 +70,11 @@ export function SplitEditor({
   onSave: () => void;
   /** 목록 아래 글자 링크(W-01 ‘추천값으로 다시 채우기’) */
   extra?: ReactNode;
-  /** 고칠 수 없는 줄(파트너 내 목표 줄) */
+  /** 고칠 수 없는 줄(각자 모드 파트너 탭의 줄, 2026-11-09 모두 보기만) */
   locked?: (l: SplitLineDraft) => boolean;
   /** 칸 막대(합류 P-06 5칸 등) */
   steps?: { total: number; now: number; fill?: number };
-  /** 줄 오른쪽 회색 글(있으면 기본 보조 글 대신, 합류 P-06 “찬우님이 매달 95만 원 넣어요”, “95만 원 → 250만 원”) */
+  /** 줄 오른쪽 회색 글(있으면 기본 보조 글 대신, 합류 P-06 “찬우님이 매달 95만 원 넣어요”, “95만 원 → 246만 원”) */
   noteOf?: (l: SplitLineDraft) => string | undefined;
   /** 수입 줄 아래 회색 글(합쳐서 “찬우 350만 원, 예빈 270만 원”) */
   incomeSub?: string;
@@ -105,7 +105,7 @@ export function SplitEditor({
         : l.kind === 'allowance' && joint
           ? `${personName(l.userId)} ${copy.lineNames.allowance}`
           : copy.lineNames[l.kind];
-  /** 저금 줄 보조 글: 목표 금액이 있으면 “120만 / 500만 원”, 기한도 있으면 + “매달 250만 원이 필요해요”(06 5-2) */
+  /** 저금 줄 보조 글: 목표 금액이 있으면 “120만 / 500만 원”, 기한도 있으면 + “매달 246만 원이 필요해요”(06 5-2) */
   const savingSub = (l: SplitLineDraft) => {
     const g = goalOf(l.goalId);
     if (!g || g.target_amount === null) return undefined;

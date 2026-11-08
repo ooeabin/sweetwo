@@ -121,7 +121,8 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목
           name: '여행',
           status: 'active',
           target_amount: 1,
-          deadline: '2026-11-01',
+          // 기한 2026년 10월 = 10월 31일(그 달 말일, 2026-11-09)
+          deadline: '2026-10-01',
           owner_user_id: null,
           closed_at: null,
         },
@@ -153,7 +154,7 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목
     ['care', '2026-10-25', 18],
     ['payday', '2026-10-25', 18],
     ['maturity', '2026-10-30', 23],
-    ['goal', '2026-11-01', 25],
+    ['goal', '2026-10-31', 24],
   ]);
   expect(u.find((x) => x.kind === 'goal')?.to).toBe('/salary/items/g');
 });

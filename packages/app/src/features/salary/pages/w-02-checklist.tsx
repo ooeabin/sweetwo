@@ -93,19 +93,19 @@ export function W02Checklist() {
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
 
-  // W-02a 다른 금액
+  // W-02a 다른 금액. 어느 줄인지 제목에(2026-11-09 “생활비, 얼마를 보냈어요?”), 보조는 계획 금액과 차이
   if (other) {
     const v = amount ?? other.planned;
     const diff = v - other.planned;
     return (
       <QuestionLayout
-        title={copy.howMuch}
+        title={copy.howMuchFor(lineName(other, goalName, personName, joint))}
         help={
           diff < 0
             ? copy.lessThanPlan(readWon(-diff))
             : diff > 0
               ? copy.moreThanPlan(readWon(diff))
-              : undefined
+              : copy.planned(readWon(other.planned))
         }
         onBack={() => setOther(null)}
         primary={{ label: copy.next }}
@@ -155,20 +155,23 @@ export function W02Checklist() {
         ]
       : null;
   const pending = space.data.couple_state === 'unlink_pending';
-  // 제목 줄 ‘+ 저금 항목 추가’(넓은 창만, 좁은 창은 + 버튼, 20 W-02). 월급이 없거나 해제 대기 중이면 없음
+  // 제목 줄 ‘+ 저금 추가’(넓은 창만, 좁은 창은 + 버튼, 20 W-02). 다른 메뉴 제목 줄 추가처럼 보조 버튼(2026-11-09).
+  // 월급이 없거나 해제 대기 중이면 없음
   const page = {
     title: copy.tabTitle,
     actions:
       list && !pending ? (
-        <Button variant="primary" className="hg-wide-only" onClick={() => nav(savingPaths.add)}>
+        <Button variant="secondary" className="hg-wide-only" onClick={() => nav(savingPaths.add)}>
           {copy.addItem}
         </Button>
       ) : undefined,
   };
   if (!list) {
+    // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’, 좁은 창 + 버튼 없음(20 W-11)
     return (
       <MainFrame
         current="salary"
+        noAdd
         page={page}
         columns={[
           <section key="l" className="hg-card hg-card--fill hg-stack">

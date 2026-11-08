@@ -3,6 +3,7 @@ import {
   dateToYm,
   savingBar,
   savingEta,
+  savingLate,
   savingNeed,
   savingPct,
   savingState,
@@ -42,6 +43,8 @@ export interface SavingItem {
   need: number | null;
   /** 예상 달성 월 */
   eta: YearMonth | null;
+  /** 기한보다 늦어지는 개월(월 필요액 > 매달 금액일 때만) */
+  late: number | null;
   owner: SavingOwner;
   /** 주인 이름(파트너 항목, 합쳐서 모드 줄 이름 앞) */
   ownerName: string;
@@ -101,6 +104,7 @@ export function useSavingItems() {
       bar: savingBar(s, target),
       need: savingNeed({ target, saved: s, deadline }),
       eta: savingEta({ target, saved: s }, monthly),
+      late: savingLate({ target, saved: s, deadline }, monthly),
       owner,
       ownerName: owner === 'partner' ? partnerName : owner === 'mine' ? myName : '',
       canEdit: owner !== 'partner' && !pending,

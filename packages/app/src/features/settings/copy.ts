@@ -387,8 +387,8 @@ export const copy = {
   accessNever: ['메모', '가족 정보', '사진', '비공개 항목', '용돈 내역'],
   accessScopes: {
     month: '이번 달 화면',
-    plan: '월급 플랜 화면',
-    close: '월말 정리 화면',
+    plan: '월급 계획 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘플랜’ 대신)
+    close: '월급 화면', // 예전 요청 기록 키(없앤 화면, 2026-11-09 없앤 말 대신)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
     assets: '우리 자산 화면',
     income_spend: '월 수입·지출 화면',
@@ -411,7 +411,6 @@ export const copy = {
     string,
     string
   >,
-  accountModeNext: '다음 월급 플랜부터 바뀌어요', // [확인 필요]
   accountModeValue: (now: string, next: string | null) => (next ? `${now} → ${next}` : now),
 
   // S-15 보안

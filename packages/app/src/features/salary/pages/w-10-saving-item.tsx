@@ -159,6 +159,30 @@ export function W10SavingItem() {
             {i.state !== 'achieved' && i.need !== null && (
               <span className="hg-goalbox__sub">{copy.needPerMonth(m(i.need))}</span>
             )}
+            {/* 월 필요액 > 매달 금액이면 사실 한 줄 + 할 일(2026-11-09, 배지 아님) */}
+            {i.state !== 'achieved' && i.late !== null && (
+              <>
+                <span className="hg-goalbox__sub">{copy.lateBy(i.late)}</span>
+                {i.canEdit && (
+                  <span className="hg-row" style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      onClick={() => nav(splitTo)}
+                    >
+                      {copy.changeMonthly}
+                    </button>
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                    >
+                      {copy.changeDeadline}
+                    </button>
+                  </span>
+                )}
+              </>
+            )}
           </section>
         ) : (
           <section className="hg-card hg-card--fill hg-stack" aria-label={copy.setTarget}>

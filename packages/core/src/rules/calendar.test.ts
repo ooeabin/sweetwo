@@ -32,12 +32,13 @@ it('돈 일정: 월급날, 월말 확인 띠, 목표 기한, 매년 목표 쓰�
     yearlyGoals: [{ id: 'g', name: '자동차 유지비', month: 10 }],
   });
   expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
-    '2026-10-01 deadline 내 집 마련',
     '2026-10-01 goal 자동차 유지비',
     '2026-10-09 payday 예빈',
     '2026-10-22 review ',
     '2026-10-23 payday 찬우',
     '2026-10-30 maturity 청년 적금',
+    // 기한은 그 달 말일(2026-11-09)
+    '2026-10-31 deadline 내 집 마련',
   ]);
   expect(r.bands).toEqual([{ start: '2026-10-22', end: '2026-10-24' }]);
 });

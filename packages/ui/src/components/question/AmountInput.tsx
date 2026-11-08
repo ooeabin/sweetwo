@@ -36,6 +36,7 @@ export function AmountInput({
   value,
   onChange,
   quick,
+  quickSet = false,
   bands,
   unsureLabel = '잘 모르겠어요',
   onBand,
@@ -50,6 +51,8 @@ export function AmountInput({
   value: number | null;
   onChange: (v: number | null) => void;
   quick?: readonly { label: string; value: number }[];
+  /** 빠른 칩이 더하기 대신 그 금액으로 바꾸기(W-11b ‘10만 원’, 2026-11-09). 지금 값과 같은 칩은 고른 표시 */
+  quickSet?: boolean;
   /** ‘잘 모르겠어요’ 구간 칩. 고르면 onBand(중간값) */
   bands?: readonly AmountBand[];
   unsureLabel?: string;
@@ -149,7 +152,8 @@ export function AmountInput({
             <Chip
               key={q.label}
               small
-              onClick={() => set(Math.min((value ?? 0) + q.value, MAX_WON))}
+              selected={quickSet && value === q.value}
+              onClick={() => set(quickSet ? q.value : Math.min((value ?? 0) + q.value, MAX_WON))}
             >
               {q.label}
             </Chip>

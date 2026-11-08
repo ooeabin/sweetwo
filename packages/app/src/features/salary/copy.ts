@@ -50,6 +50,8 @@ export const copy = {
   tellSalary: '월급 알려 주기',
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
+  howMuchFor: (line: string) => `${line}, 얼마를 보냈어요?`, // [확인 필요] 2026-11-09
+  planned: (amount: string) => `계획 ${amount}`, // [확인 필요] 2026-11-09
   lessThanPlan: (amount: string) => `계획보다 ${amount} 적어요`,
   moreThanPlan: (amount: string) => `계획보다 ${amount} 많아요`, // [확인 필요]
   next: '다음',
@@ -72,6 +74,10 @@ export const copy = {
   fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
   livingSub: '식비·장보기처럼 쓰는 대로 나가는 돈', // [확인 필요]
   needPerMonth: (amount: string) => `매달 ${amount}이 필요해요`,
+  // 월 필요액 > 매달 금액(2026-11-09, W-10 3번, W-11d 보조) [확인 필요]
+  lateBy: (n: number) => `지금대로면 기한보다 ${n}개월 늦어요`,
+  changeMonthly: '매달 금액 바꾸기', // [확인 필요]
+  changeDeadline: '기한 바꾸기', // [확인 필요]
   addLine: '+ 줄 추가',
   addLineTitle: '줄 추가',
   newLineName: '줄 이름', // [확인 필요]

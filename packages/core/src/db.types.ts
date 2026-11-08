@@ -3434,6 +3434,7 @@ export type Database = {
         Args: { p_deadline?: string; p_goal: string; p_target: number }
         Returns: undefined
       }
+      saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
       sell_asset: {
         Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
         Returns: number

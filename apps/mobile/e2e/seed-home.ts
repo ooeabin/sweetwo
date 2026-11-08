@@ -1,7 +1,7 @@
 import { chanwoo } from './supabase-mock';
 import type { MemDb } from './onboarding-mock';
 
-// 홈·월급 e2e 공통 준비: 온보딩을 마친 찬우(혼자, 각자, 실수령 350만, 월급날 25일), 저금 항목 비상금(목표 금액 없음)·내 집 마련,
+// 홈·월급 e2e 공통 준비: 온보딩을 마친 찬우(혼자, 각자, 실수령 350만, 월급날 25일), 저금 항목 청약(목표 금액 없음)·내 집 마련,
 // 월급 계획과 9월 월급 체크리스트(9월 25일 ~ 10월 24일).
 const LINES: [string, string | null, number][] = [
   ['saving', 'goal-e', 440_000],
@@ -11,7 +11,7 @@ const LINES: [string, string | null, number][] = [
   ['allowance', null, 350_000],
 ];
 
-/** 온보딩을 마친 찬우: 저금 항목(비상금, 내 집 마련), 월급 계획, 9월 월급 체크리스트 */
+/** 온보딩을 마친 찬우: 저금 항목(청약, 내 집 마련), 월급 계획, 9월 월급 체크리스트 */
 export function seed(db: MemDb) {
   Object.assign(db.me, {
     nickname: '찬우',
@@ -40,7 +40,7 @@ export function seed(db: MemDb) {
     base_day_last: false,
     version: 1,
   };
-  // 저금 항목(ADR 0007): 각자 모드라 찬우 것. 비상금은 목표 금액 없이 모으는 항목
+  // 저금 항목(ADR 0007): 각자 모드라 찬우 것. 청약은 목표 금액 없이 모으는 항목
   const goal = (
     id: string,
     name: string,
@@ -66,7 +66,7 @@ export function seed(db: MemDb) {
     created_at: '2026-10-01T00:00:00Z',
   });
   db.goals.push(
-    goal('goal-e', '비상금', 0, null, null),
+    goal('goal-e', '청약', 0, null, null),
     goal('goal-h', '내 집 마련', 1, 150_000_000, '2031-10-01'),
   );
   const split_line = LINES.map(([kind, goal_id, amount], i) => ({
