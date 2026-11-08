@@ -1,6 +1,7 @@
 import type { PayChecklist } from '@sweetwo/api';
 import { formatDateWeekday } from '@sweetwo/core';
-import { Badge, Icon, Lead, ListRow, Ring, SectionHeader } from '@sweetwo/ui';
+import { Badge, Icon, Lead, Ring, SectionHeader } from '@sweetwo/ui';
+import type { ReactNode } from 'react';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
 import {
@@ -15,45 +16,16 @@ import {
 import { copy } from './copy';
 
 /**
- * H-02 저금 항목(19, ADR 0007): 한 카드 안 목표 금액이 있는 저금 항목 줄 최대 4개.
+ * H-02 저금(19, ADR 0007): 한 카드 안 목표 금액이 있는 저금 항목 줄 최대 4개.
  * 줄 = 저금통 아이콘 + 이름(파트너 항목은 작은 이름 칩) + “2,700만 / 1억 5,000만 원” + 오른쪽 %(달성이면 ‘달성’ 배지) + 아래 얇은 막대.
  * 순서는 useSavingItems(내 것 → 파트너 것 → 우리 둘 것). 줄 → W-10. 이번 달 체크는 H-03에서만.
- * 목표 금액이 있는 항목이 없으면 제안 한 줄(→ W-11a). 월급 계획이 없으면 둘 다 없음.
+ * 목표 금액이 있는 항목이 없으면 없음(2026-11-09 회색 제안 문장 대신 H-03 저금 묶음 빈 줄 ‘+ 저금 추가’).
  */
-export function SavingCard({
-  items,
-  hasPlan,
-  go,
-}: {
-  items: SavingItem[];
-  /** 월급 계획이 있는지(없으면 제안 줄도 숨김) */
-  hasPlan: boolean;
-  go: (to: string) => void;
-}) {
+export function SavingCard({ items, go }: { items: SavingItem[]; go: (to: string) => void }) {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const list = items.slice(0, 4);
-  if (!list.length) {
-    if (!hasPlan) return null;
-    return (
-      <section className="hg-stack" aria-label={copy.savings}>
-        <div className="hg-list">
-          <ListRow
-            lead={<Lead icon="piggy-bank" />}
-            label={copy.suggestSaving}
-            onClick={() => go(`${savingPaths.add}/a?from=home`)}
-            chevron={false}
-            // 줄 전체가 버튼이라 오른쪽은 보조 버튼 모양만(버튼 안 버튼을 두지 않음)
-            value={
-              <span className="hg-btn hg-btn--secondary hg-btn--sm" aria-hidden="true">
-                {copy.suggestAdd}
-              </span>
-            }
-          />
-        </div>
-      </section>
-    );
-  }
+  if (!list.length) return null;
   return (
     <section className="hg-stack" aria-label={copy.savings}>
       <SectionHeader title={copy.savings} more={{ label: copy.toSplit, href: salaryPaths.split }} />
@@ -99,7 +71,7 @@ export function SavingCard({
 const SHOW = 3;
 
 /**
- * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 완료” + 줄 목록(저금 먼저) + ‘월급 계획 고치기’.
+ * H-03 이번 달 월급: “10월 월급” + “5개 중 2개 완료” + (내 저금이 없으면 첫 저금 빈 줄) + 줄 목록(저금 먼저) + ‘월급 계획 고치기’.
  * 다 했으면 “10월 월급 체크를 다 했어요” + 저금 합계, 줄은 숨김(펼치기 없음, 머리 링크 → W-02). 월급이 없으면 ‘월급 알려 주기’.
  */
 export function SalaryCard({
@@ -113,6 +85,7 @@ export function SalaryCard({
   joint,
   go,
   locked = false,
+  firstSaving,
 }: {
   list: PayChecklist | undefined;
   partnerList?: PayChecklist;
@@ -126,6 +99,8 @@ export function SalaryCard({
   go: (to: string) => void;
   /** 연결 해제 대기 중: 월급 계획을 고칠 수 없어서 ‘월급 계획 고치기’ 숨김(2026-11-03) */
   locked?: boolean;
+  /** 첫 저금 빈 줄(salary FirstSavingRow, 2026-11-09): 내 저금이 없을 때 줄 목록 맨 위(저금 묶음 자리) */
+  firstSaving?: ReactNode;
 }) {
   const { masked } = useMask();
   if (!list) {
@@ -157,6 +132,7 @@ export function SalaryCard({
         more={{ label: copy.progress(total, done), href: '/salary' }}
       />
       <div className="hg-card hg-stack hg-salarycard">
+        {firstSaving}
         {finished && (
           <p className="hg-card__meta">
             <Icon name="check" size={16} /> {copy.allDone(list.label)}.{' '}
@@ -222,7 +198,7 @@ export interface UpcomingItem {
   label: string;
   dday: number;
   to: string;
-  /** 날짜 칸 색(월급날 초록, 월말 확인 청록, 챙길 날 분홍, 저금 항목 기한 베이지, 만기 보라) */
+  /** 날짜 칸 색(월급날 초록, 월급 전 확인 청록, 챙길 날 분홍, 저금 항목 기한 베이지, 만기 보라) */
   kind: 'payday' | 'review' | 'care' | 'goal' | 'maturity';
 }
 
@@ -235,7 +211,7 @@ const KIND_TONE = {
 } as const;
 
 /**
- * H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 저금 항목 기한, 날짜순 최대 3개.
+ * H-05 다가오는 일정: 30일 안 월급날, 월급 전 확인, 챙길 날, 저금 항목 기한, 날짜순 최대 3개.
  * 2026-11-03 카카오톡 일정처럼 왼쪽 날짜 칸(“10월” / “22”, 종류별 옅은 영역 색) + 이름 + 요일, 오른쪽 D-day. 주 띠는 없앰.
  */
 export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {

@@ -28,7 +28,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('option', { name: /월급 체크하기/ })).toBeVisible();
   await expect(dialog.getByRole('option', { name: /금액 가리기/ })).toBeVisible();
-  await expect(dialog.getByRole('option', { name: /저금 항목 추가/ })).toBeVisible();
+  await expect(dialog.getByRole('option', { name: /저금 추가/ })).toBeVisible();
   await axe(page);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
@@ -43,7 +43,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   await expect(page.getByText('찾는 게 없어요')).toBeVisible();
 });
 
-test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 항목 추가', async ({ page }, info) => {
+test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 추가', async ({ page }, info) => {
   test.skip(info.project.name === 'narrow');
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });

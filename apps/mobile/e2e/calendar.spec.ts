@@ -147,7 +147,7 @@ const care = (o: Record<string, unknown>) => ({
   ...o,
 });
 
-test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 저금 항목 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
+test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 전 확인, 저금 항목 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -158,13 +158,13 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 저금 항목
   await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toBeVisible();
   // 챙길 날과 돈 일정은 “다가오는 일정” 한 목록, 오른쪽 D-day(2026-11-03)
   const money = page.getByRole('region', { name: '다가오는 일정' });
-  // 예빈 월급날 10일(토) → 9일(금), 월급 확인 22일, 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 1일
+  // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 22일, 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
   const rows = await money.getByRole('button').allTextContents();
   expect(rows[0]).toContain('예빈 월급날');
   expect(rows[0]).toContain('10월 9일');
   expect(rows[0]).toContain('D-2');
   const all = rows.join('|');
-  expect(all).toContain('월급 확인');
+  expect(all).toContain('월급 전 확인');
   expect(all).toContain('청년 적금 만기');
   expect(all).toContain('여행 기한');
   // 달성한 저금 항목 기한은 없음
@@ -182,7 +182,7 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 저금 항목
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
 });
 
-test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일정 → 화면, 달 넘기기, 보기 기억', async ({
+test('달력(Y-04): 돈 일정 점, 월급 전 확인 띠(→ W-05), 고른 날 일정 → 화면, 달 넘기기, 보기 기억', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -204,11 +204,11 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
   await axe(page);
 
   const d23 = page.getByRole('button', { name: '10월 23일, 일정 1개' });
-  // 월말 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름
+  // 월급 전 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름
   await expect(d23.locator('.hg-cal__band')).toHaveCount(1);
   await expect(
     page.getByRole('button', { name: '10월 22일, 일정 1개' }).locator('.hg-cal__band'),
-  ).toHaveText('월말 확인');
+  ).toHaveText('월급 전 확인');
   await page.getByRole('button', { name: '10월 22일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
   await expect(page).toHaveURL(/\/salary\/review$/);
@@ -224,11 +224,12 @@ test('달력(Y-04): 돈 일정 점, 월말 확인 띠(→ W-05), 고른 날 일�
   await expect(page.getByRole('region', { name: '2026년 11월' })).toBeVisible();
   // 다른 달이면 ‘오늘’로 돌아오기
   await expect(page.getByRole('button', { name: '오늘' })).toBeVisible();
-  await page.getByRole('button', { name: '11월 1일, 일정 1개' }).click();
+  // 기한은 그 달 말일(2026-11-09)
+  await page.getByRole('button', { name: '11월 30일, 일정 1개' }).click();
   await expect(page.getByRole('button', { name: /여행 기한/ })).toBeVisible();
   // 챙길 날만 보면 돈 일정 점·띠 없음
   await page.getByRole('button', { name: '챙길 날', exact: true }).click();
-  await expect(page.getByRole('button', { name: '11월 1일' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '11월 30일' })).toBeVisible();
 });
 
 test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너뜀, 지난 날 안내, 달력에서 날짜 채움', async ({

@@ -26,7 +26,7 @@ const base = (over: Partial<HomeInput> = {}): HomeInput => ({
   ...over,
 });
 
-it('이번 달 월급 상태: 진행 중 → 월말 확인 기간(다음 기준일 3일 전) → 다 했어요', () => {
+it('이번 달 월급 상태: 진행 중 → 월급 전 확인 기간(다음 기준일 3일 전) → 다 했어요', () => {
   expect(salaryState(base())).toEqual({
     state: 'progress',
     label: '9월 월급',
@@ -39,7 +39,7 @@ it('이번 달 월급 상태: 진행 중 → 월말 확인 기간(다음 기준�
   expect(salaryState(base({ joint: true })).state).toBe('none');
 });
 
-it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 → 초대 → 만기 → 챙길 날(7일 안). 목표 금액 정하기는 없음(ADR 0007)', () => {
+it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월급 전 확인 → 초대 → 만기 → 챙길 날(7일 안). 목표 금액 정하기는 없음(ADR 0007)', () => {
   const goal = {
     id: 'g',
     name: '여행',
@@ -80,7 +80,7 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   expect(homeTodo({ ...all, unlinkRequestedBy: 'c' })?.kind).toBe('reconnect');
   const review = homeTodo({ ...all, unlinkRequestedBy: null, reconnectFrom: null });
   expect(review).toMatchObject({ kind: 'review', left: 2 });
-  // 월말 확인은 닫으면 이번 달만 안 보임
+  // 월급 전 확인은 닫으면 이번 달만 안 보임
   const closedReview = homeTodo({
     ...all,
     unlinkRequestedBy: null,
@@ -101,7 +101,7 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07', 'care:m:2026-10-12'] })).toBeNull();
 });
 
-it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목표 금액·기한이 있는 저금 항목만), 만기를 날짜순(같은 날은 챙길 날 먼저)', () => {
+it('다가오는 일정: 월급날, 월급 전 확인, 챙길 날, 목표 기한(목표 금액·기한이 있는 저금 항목만), 만기를 날짜순(같은 날은 챙길 날 먼저)', () => {
   const u = homeUpcoming(
     base({
       cares: [
@@ -121,7 +121,8 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목
           name: '여행',
           status: 'active',
           target_amount: 1,
-          deadline: '2026-11-01',
+          // 기한 2026년 10월 = 10월 31일(그 달 말일, 2026-11-09)
+          deadline: '2026-10-01',
           owner_user_id: null,
           closed_at: null,
         },
@@ -153,7 +154,7 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목
     ['care', '2026-10-25', 18],
     ['payday', '2026-10-25', 18],
     ['maturity', '2026-10-30', 23],
-    ['goal', '2026-11-01', 25],
+    ['goal', '2026-10-31', 24],
   ]);
   expect(u.find((x) => x.kind === 'goal')?.to).toBe('/salary/items/g');
 });

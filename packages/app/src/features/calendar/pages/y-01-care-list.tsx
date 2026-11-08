@@ -69,7 +69,7 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  // 8번 월말 확인 띠: 오늘이 다음 월급날 3일 전 ~ 전날이면 → W-05
+  // 8번 월급 전 확인 띠: 오늘이 다음 월급날 3일 전 ~ 전날이면 → W-05
   const band = d.monthOf(y, mo).bands.find((b) => d.today >= b.start && d.today <= b.end);
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];

@@ -1,8 +1,10 @@
 import type { Goal, PayCheckLine } from '@sweetwo/api';
 import {
   dateToYm,
+  leftover,
   savingBar,
   savingEta,
+  savingLate,
   savingNeed,
   savingPct,
   savingState,
@@ -42,6 +44,8 @@ export interface SavingItem {
   need: number | null;
   /** 예상 달성 월 */
   eta: YearMonth | null;
+  /** 기한보다 늦어지는 개월(월 필요액 > 매달 금액일 때만) */
+  late: number | null;
   owner: SavingOwner;
   /** 주인 이름(파트너 항목, 합쳐서 모드 줄 이름 앞) */
   ownerName: string;
@@ -101,6 +105,7 @@ export function useSavingItems() {
       bar: savingBar(s, target),
       need: savingNeed({ target, saved: s, deadline }),
       eta: savingEta({ target, saved: s }, monthly),
+      late: savingLate({ target, saved: s, deadline }, monthly),
       owner,
       ownerName: owner === 'partner' ? partnerName : owner === 'mine' ? myName : '',
       canEdit: owner !== 'partner' && !pending,
@@ -139,3 +144,36 @@ export function useSavingItems() {
   };
 }
 export type SavingModel = Extract<ReturnType<typeof useSavingItems>, { ready: true }>;
+
+/**
+ * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’, 19 H-03): 내 저금이 없으면 체크리스트 저금 묶음에
+ * “+ 저금 추가 (남는 돈 {n})” → W-11. ‘내 저금’ = 각자면 내가 주인인 것, 합쳐서면 공동 월급 계획의 것(그만 모은 것 빼고).
+ * 각자 모드에서 파트너는 저금이 있으면 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?”. 월급 계획이 없거나 해제 대기면 없음.
+ */
+export function useFirstSaving():
+  | { show: false }
+  | { show: true; left: number; partnerName: string | null } {
+  const d = useSavingItems();
+  const splits = useSplits();
+  const me = useMe();
+  const partner = usePartner();
+  if (!d.ready || !splits.data || !me.data) return { show: false };
+  const mine = splits.data.find((x) =>
+    d.joint ? x.owner_user_id === null : x.owner_user_id === d.meId,
+  );
+  if (!mine || d.pending) return { show: false };
+  const has = d.live.some((i) => (d.joint ? true : i.owner === 'mine'));
+  if (has) return { show: false };
+  const income = d.joint
+    ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
+    : (me.data.monthly_income ?? 0);
+  const left = Math.max(
+    leftover(
+      income,
+      mine.split_line.map((l) => ({ amount: l.amount })),
+    ),
+    0,
+  );
+  const partnerHas = !d.joint && d.joined && d.live.some((i) => i.owner === 'partner');
+  return { show: true, left, partnerName: partnerHas ? d.partnerName : null };
+}

@@ -1,5 +1,6 @@
 import { addDays, daysBetween } from '../date';
 import { nextCareDate, type CareRule } from './care';
+import { deadlineDay } from './saving-item';
 
 // 홈(19)과 트레이 위젯(26)이 같이 쓰는 계산: 할 일 한 줄(H-06), 다가오는 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
 // 문구는 앱 copy가 만들고, 여기서는 종류와 값, 갈 화면만 정함.
@@ -93,7 +94,7 @@ export function myList(i: Pick<HomeInput, 'checklists' | 'meId' | 'joint'>) {
   );
 }
 
-/** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월말 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
+/** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월급 전 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
 export function salaryState(
   i: Pick<HomeInput, 'checklists' | 'meId' | 'joint' | 'today'>,
 ): SalaryState {
@@ -163,7 +164,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   return null;
 }
 
-/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월말 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
+/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월급 전 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
 export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;
@@ -189,16 +190,18 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
         to: `/calendar/day/${c.id}`,
       });
   }
-  // 목표 기한: 목표 금액과 기한이 있는, 모으는 중인 저금 항목만(24, ADR 0007)
-  for (const g of i.goals)
-    if (g.status === 'active' && !g.closed_at && g.target_amount !== null && within(g.deadline))
+  // 목표 기한: 목표 금액과 기한이 있는, 모으는 중인 저금 항목만(24, ADR 0007). 기한 = 그 달 말일(2026-11-09)
+  for (const g of i.goals) {
+    const due = g.deadline ? deadlineDay(g.deadline) : null;
+    if (g.status === 'active' && !g.closed_at && g.target_amount !== null && within(due))
       add({
         key: `goal-${g.id}`,
         kind: 'goal',
-        date: g.deadline,
+        date: due,
         name: g.name,
         to: `/salary/items/${g.id}`,
       });
+  }
   for (const a of i.assets)
     if (a.side === 'asset' && within(a.maturity_date))
       add({

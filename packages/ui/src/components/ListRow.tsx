@@ -12,6 +12,7 @@ export function ListRow({
   unit,
   onClick,
   chevron = Boolean(onClick),
+  locked = false,
 }: {
   icon?: IconName;
   lead?: ReactNode;
@@ -21,6 +22,8 @@ export function ListRow({
   unit?: string;
   onClick?: () => void;
   chevron?: boolean;
+  /** 고칠 수 없는 줄(각자 모드 파트너 월급 계획, 2026-11-09): 꺾쇠 자리에 자물쇠 */
+  locked?: boolean;
 }) {
   const inner = (
     <>
@@ -37,7 +40,13 @@ export function ListRow({
       ) : (
         <span />
       )}
-      {chevron ? <span className="hg-chevron" aria-hidden="true" /> : <span />}
+      {locked ? (
+        <Icon name="lock" size={16} className="hg-listrow__lock" />
+      ) : chevron ? (
+        <span className="hg-chevron" aria-hidden="true" />
+      ) : (
+        <span />
+      )}
     </>
   );
   return onClick ? (

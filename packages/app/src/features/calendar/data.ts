@@ -25,7 +25,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { copy } from './copy';
 
-// 캘린더 재료(24, 재기획): 챙길 날과 기록, 공휴일, 돈 일정(월급날, 월말 확인 띠, 저금 항목 기한, 자산·대출 만기).
+// 캘린더 재료(24, 재기획): 챙길 날과 기록, 공휴일, 돈 일정(월급날, 월급 전 확인 띠, 저금 항목 기한, 자산·대출 만기).
 // 돈 일정 계산은 core rules/calendar `moneyDates`.
 export function useCalendarData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
@@ -145,7 +145,7 @@ export function moneyLine(d: MoneyDate) {
   return { label, go: copy.go[d.kind], to };
 }
 
-/** 월말 확인 띠가 보는 월급(띠 끝 다음 날 = 다음 월급날, 보는 체크리스트는 그 전 달 월급) */
+/** 월급 전 확인 띠가 보는 월급(띠 끝 다음 날 = 다음 월급날, 보는 체크리스트는 그 전 달 월급) */
 export const reviewMonth = (bandEnd: string) => {
   const m = Number(addDays(bandEnd, 1).slice(5, 7));
   return m === 1 ? 12 : m - 1;

@@ -249,7 +249,7 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
   seed(db);
   await fakeIosBridge(page, true);
   await page.goto('/');
-  await expect(page.getByRole('region', { name: '저금 항목' })).toContainText('내 집 마련');
+  await expect(page.getByRole('region', { name: '저금', exact: true })).toContainText('내 집 마련');
   // 홈이 쓰는 데이터(저금 항목, 체크리스트)가 모두 기기에 들어간 뒤
   await expect
     .poll(
@@ -272,7 +272,7 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
     Object.defineProperty(Navigator.prototype, 'onLine', { get: () => false }),
   );
   await page.reload();
-  await expect(page.getByRole('region', { name: '저금 항목' })).toContainText('내 집 마련');
+  await expect(page.getByRole('region', { name: '저금', exact: true })).toContainText('내 집 마련');
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toContainText(
     /마지막 저장 10월 7일 \d{2}:\d{2}/,
   );
@@ -286,7 +286,7 @@ test('우리 둘 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예
   seed(db);
   await fakeIosBridge(page, true);
   await page.goto('/');
-  await expect(page.getByRole('region', { name: '저금 항목' })).toContainText('내 집 마련');
+  await expect(page.getByRole('region', { name: '저금', exact: true })).toContainText('내 집 마련');
   await expect
     .poll(
       () => page.evaluate(() => (localStorage.getItem('e2e-cache') ?? '').includes('내 집 마련')),

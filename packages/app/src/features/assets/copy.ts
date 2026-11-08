@@ -40,7 +40,6 @@ export const copy = {
   periods: ['6개월', '1년', '3년', '전체'],
   expectedName: '예상 순자산',
   expectedShort: (amount: string) => `예상 ${amount}`,
-  summaryEmpty: '첫 월말 정리 뒤에 보여드려요',
   addAsset: '자산 추가',
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
@@ -99,40 +98,14 @@ export const copy = {
   shortAsk: '어느 항목을 줄여볼까요?',
   periodChange: '기간 정해서 바꾸기',
   savedRecalc: '저장했어요. 안 나눈 돈을 다시 계산했어요',
-  savedNoPending: '안 나눈 돈이 없어 월말 정리에서 맞춰요',
   previewUp: (amount: string) => `저축 가능 금액이 월 ${amount} 늘어요`, // [확인 필요] 기획서는 줄어요만
   previewDown: (amount: string) => `저축 가능 금액이 월 ${amount} 줄어요`,
-  proposeTo: (name: string) => `${name}님께 제안하기`,
-  proposed: (name: string) => `${name}님에게 제안했어요`,
   editMoney: '월 수입·지출 수정',
 
   // F-06 재정 진단
   diagTitle: '재정 진단',
   diagSummary: (good: number, total: number) => `${total}개 중 ${good}개 양호`,
   diagSaving: (pct: number) => `월 수입의 ${pct}%를 저축하고 있어요`,
-  diagSavingUnknown: '월말 정리를 하면 계산해요', // [확인 필요]
-  // 비상금 카드, F-09 넣기·꺼내기 [확인 필요]
-  emergencyTitle: '비상금',
-  emergencyOf: (held: string, base: string) => `${held} / 기준 ${base}`,
-  emergencyIn: '+ 넣기',
-  emergencyInBtn: '넣기',
-  emergencyOut: '- 꺼내기',
-  emergencyInQ: '비상금에 얼마 넣었어요?',
-  emergencyOutQ: '비상금에서 얼마 꺼냈어요?',
-  emergencyWhy: '어디에 썼어요?',
-  emergencyReasons: {
-    hospital: '병원',
-    repair: '수리',
-    family_event: '경조사',
-    living_short: '생활비 부족',
-    etc: '기타',
-  },
-  emergencySkipWhy: '건너뛰기',
-  emergencyMoved: (kind: 'in' | 'out', amount: string) =>
-    kind === 'in' ? `비상금에 ${amount}을 넣었어요` : `비상금에서 ${amount}을 꺼냈어요`,
-  emergencyOver: (balance: string) => `지금 비상금은 ${balance}이에요`,
-  diagEmergency: (months: number) => `비상금으로 ${months}개월 생활할 수 있어요`,
-  diagEmergencyMore: (months: number) => `${months}개월분까지 모아봐요`,
   diagLoan: (pct: number) => `월 수입의 ${pct}%를 대출 상환에 쓰고 있어요`,
   diagNoLoan: '대출이 없어요',
   diagFixed: (pct: number) => `월 수입의 ${pct}%가 고정지출이에요`,
@@ -265,8 +238,6 @@ export const copy = {
   historyEmpty: '아직 고친 기록이 없어요', // [확인 필요]
   createdLabel: '처음 적은 날', // [확인 필요]
   menu: '항목 메뉴',
-  fromClose: '월말 정리',
-  fromManual: '직접 수정',
   principal: (amount: string) => `원금 ${amount}`,
   owner: '명의', // [확인 필요]
   maturityLabel: '만기일', // [확인 필요]
@@ -297,20 +268,15 @@ export const copy = {
   comparePeriod: (range: string) => range,
   compareRows: {
     income: '월 수입',
-    supplement: '비상금에서 보충',
     saveable: '저축 가능 금액',
-    emergency: '비상금 잔액',
     split: '분담',
     allowance: '용돈',
   },
   tagNow: '바로 반영',
-  tagPropose: '제안',
   perMonth: (amount: string) => `월 ${amount}`,
-  emergencyShort: (amount: string) => `비상금이 ${amount} 모자라요`,
   splitIncome: (a: number, b: number) => `버는 만큼 ${a}:${b}`,
   apply: '적용하기',
   applied: '적용했어요',
-  appliedSplit: (name: string) => `적용했어요. 분담은 ${name}님에게 제안했어요`,
   overlap: '이미 바꾼 기간과 겹쳐요', // [확인 필요]
   noChange: '바뀌는 점이 없어요', // [확인 필요]
   unknown: '아직 몰라요',

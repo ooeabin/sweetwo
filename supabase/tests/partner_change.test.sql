@@ -53,7 +53,7 @@ select is(public.flush_partner_changes(now() + interval '5 minutes'), 0, '10분 
 select is(public.flush_partner_changes(now() + interval '11 minutes'), 1, '10분 지나면 보냄(내 목표는 없음)');
 select results_eq(
   $$ select user_id, title, body, target, topic from public.notification $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '예빈님이 내 집 마련 저금 항목을 바꿨어요', '목표 금액 1억 원 → 1억 5,000만 원',
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '예빈님이 내 집 마련 저금을 바꿨어요', '목표 금액 1억 원 → 1억 5,000만 원',
              '/salary/items/' || (select id from public.goal where template = 'home'), 'partner_change') $$,
   '목표 변경 알림');
 

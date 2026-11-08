@@ -6,7 +6,7 @@ import { seed } from './seed-home';
 import { setWheel } from './wheel';
 
 // 파트너 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
-// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 저금 항목 비상금 44만, 내 집 마련 95만).
+// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 저금 항목 청약 44만, 내 집 마련 95만).
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(

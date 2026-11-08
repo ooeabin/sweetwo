@@ -44,7 +44,7 @@ export const copy = {
   readyDone: {
     split: '월급을 추천값으로 나눠 뒀어요',
     checklist: (day: string) => `${day} 월급 체크리스트를 만들었어요`,
-    goal: '저금 항목은 홈에서 추가해요', // 2026-11-08
+    goal: '첫 저금은 체크리스트 ‘+ 저금 추가’에서 만들어요', // [확인 필요] 2026-11-09
     salary: '월급이 생기면 홈에서 알려 주세요',
   },
   readyGo: '홈으로 가기',

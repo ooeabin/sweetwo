@@ -8,6 +8,9 @@ export const copy = {
   saved: '월급 계획을 바꿨어요',
   undo: '되돌리기',
   splitPending: '연결 해제 대기 중에는 월급 계획을 고칠 수 없어요', // [확인 필요]
+  // 각자 모드 파트너 것은 보기만(2026-11-09) [확인 필요]
+  partnerSplitView: (name: string) => `${name}님 월급 계획이에요. 보기만 할 수 있어요`,
+  partnerChecklistView: (name: string) => `${name}님 체크리스트예요. 보기만 할 수 있어요`,
   refill: '추천값으로 다시 채우기',
   refillTitle: '추천값으로 다시 채울까요?', // [확인 필요]
   refillBody: '지금 적은 금액은 추천값으로 바뀌어요', // [확인 필요]
@@ -50,6 +53,8 @@ export const copy = {
   tellSalary: '월급 알려 주기',
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
+  howMuchFor: (line: string) => `${line}, 얼마를 보냈어요?`, // [확인 필요] 2026-11-09
+  planned: (amount: string) => `계획 ${amount}`, // [확인 필요] 2026-11-09
   lessThanPlan: (amount: string) => `계획보다 ${amount} 적어요`,
   moreThanPlan: (amount: string) => `계획보다 ${amount} 많아요`, // [확인 필요]
   next: '다음',
@@ -59,7 +64,7 @@ export const copy = {
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
   ok: '확인',
-  // W-05 월말 확인
+  // W-05 월급 전 확인
   reviewTitle: (label: string) => `${label}, 빠진 게 있나요?`,
   reviewNone: '빠진 게 없어요', // [확인 필요]
   // 월급 계획 목록(O-50, W-01 같은 틀), W-02 묶음 이름도 같이 씀
@@ -72,6 +77,10 @@ export const copy = {
   fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
   livingSub: '식비·장보기처럼 쓰는 대로 나가는 돈', // [확인 필요]
   needPerMonth: (amount: string) => `매달 ${amount}이 필요해요`,
+  // 월 필요액 > 매달 금액(2026-11-09, W-10 3번, W-11d 보조) [확인 필요]
+  lateBy: (n: number) => `지금대로면 기한보다 ${n}개월 늦어요`,
+  changeMonthly: '매달 금액 바꾸기', // [확인 필요]
+  changeDeadline: '기한 바꾸기', // [확인 필요]
   addLine: '+ 줄 추가',
   addLineTitle: '줄 추가',
   newLineName: '줄 이름', // [확인 필요]
@@ -84,10 +93,14 @@ export const copy = {
   shortHelp: '쓰는 돈이나 저금을 줄여 주세요',
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
-  addItem: '+ 저금 항목 추가', // [확인 필요]
-  seeItem: '저금 항목 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래
+  addItem: '+ 저금 추가', // [확인 필요] 2026-11-09 사용자에게는 ‘저금’
+  // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
+  firstSaving: (left: string) => `저금 추가 (남는 돈 ${left})`,
+  firstSavingLike: (partner: string) => `${partner}님처럼 나도 모을 곳을 만들어 볼까요?`,
+  firstSavingLeft: (left: string) => `남는 돈 ${left}`,
+  seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
-  closedFold: (n: number) => `그만 모은 저금 항목 ${n}개`, // [확인 필요]
+  closedFold: (n: number) => `그만 모은 저금 ${n}개`, // [확인 필요]
   // W-10 저금 항목 상세
   back: '뒤로',
   thisMonth: '이번 달', // [확인 필요] 매달 카드의 이번 달 줄
@@ -107,13 +120,14 @@ export const copy = {
   historyChecked: (label: string, amount: string) => `${label} ${amount}`,
   historyOther: (label: string, amount: string) => `${label} 다른 금액 ${amount}`,
   historySkipped: (label: string) => `${label} 못 함`,
+  historyStart: (amount: string) => `시작할 때 모은 돈 ${amount}`, // [확인 필요] 2026-11-09
   noHistory: '아직 기록이 없어요', // [확인 필요]
   more: '더보기',
   info: '정보',
   createdOn: (date: string) => `${date}에 만들었어요`, // [확인 필요]
   createdBy: (name: string) => `만든 사람 ${name}`, // [확인 필요]
-  closedNote: '그만 모은 저금 항목이에요', // [확인 필요]
-  partnerItem: (name: string) => `${name}님 저금 항목이에요`, // [확인 필요]
+  closedNote: '그만 모은 저금이에요', // [확인 필요]
+  partnerItem: (name: string) => `${name}님 저금이에요. 보기만 할 수 있어요`, // [확인 필요] 2026-11-09
   menu: '더보기',
   rename: '이름 바꾸기',
   remove: '지우기',
@@ -144,19 +158,23 @@ export const copy = {
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
+  // W-11c 선택 칸(2026-11-09, 만들 때만) [확인 필요]
+  addHasStart: '이미 모은 돈이 있어요',
+  addStart: '이미 모은 돈',
+  addStartOver: '목표 금액보다 적게 넣어 주세요',
   addDeadlineQ: '언제까지 모을까요?',
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
-  added: '저금 항목을 추가했어요', // [확인 필요]
+  added: '저금을 추가했어요', // [확인 필요]
   addShort: '남는 돈이 모자라요. 쓰는 돈이나 저금을 줄여 주세요', // [확인 필요]
-  addBlocked: '연결 해제 대기 중에는 저금 항목을 추가할 수 없어요', // [확인 필요]
-  addNoSplit: '월급이 생기면 저금 항목을 추가할 수 있어요', // [확인 필요]
+  addBlocked: '연결 해제 대기 중에는 저금을 추가할 수 없어요', // [확인 필요]
+  addNoSplit: '월급이 생기면 저금을 추가할 수 있어요', // [확인 필요]
   // W-12 달성 축하, W-12a
-  achievedEyebrow: '목표 달성',
+  achievedEyebrow: '다 모았어요', // [확인 필요] 2026-11-09 ‘목표 달성’ 대신
   storyAll: (n: number) => `${n}개월 동안 매달 둘이 함께 모았어요`,
   storySome: (n: number, m: number) => `${n}개월 중 ${m}번은 둘이 함께 모았어요`,
   storySolo: (n: number) => `${n}개월 만에 모았어요`,
-  afterQ: '이 저금 항목을 어떻게 할까요?', // [확인 필요]
+  afterQ: '이 저금을 어떻게 할까요?', // [확인 필요]
   afterKeep: '계속 모을게요', // [확인 필요]
   afterStop: '그만할게요', // [확인 필요]
   keptToast: '목표 금액을 지우고 계속 모아요', // [확인 필요]

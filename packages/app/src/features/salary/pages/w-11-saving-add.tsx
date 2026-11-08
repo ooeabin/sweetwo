@@ -1,9 +1,12 @@
 import { addSavingItem, qk, SavingItemBlocked } from '@sweetwo/api';
 import {
   amountBand,
+  defaultDeadline,
   leftover,
+  quickChips,
   readWon,
   savingItemInput,
+  savingLate,
   savingNeed,
   thisMonth,
   ymToDate,
@@ -28,6 +31,7 @@ import { salaryPaths, savingPaths } from '../paths';
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
+// W-11c 아래 선택 칸 ‘이미 모은 돈이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
 const STEPS = ['a', 'b', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
 const KEY = 'sweetwo.savingDraft';
@@ -36,8 +40,18 @@ type Draft = {
   monthly: number | null;
   target: number | null;
   deadline: string | null;
+  /** 이미 모은 돈 칸을 켰는지, 그 금액 */
+  hasStart: boolean;
+  start: number | null;
 };
-const EMPTY: Draft = { name: '', monthly: null, target: null, deadline: null };
+const EMPTY: Draft = {
+  name: '',
+  monthly: null,
+  target: null,
+  deadline: null,
+  hasStart: false,
+  start: null,
+};
 const readDraft = (): Draft => {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<Draft> | null;
@@ -111,6 +125,7 @@ export function W11SavingAdd() {
       monthly: d.monthly ?? 0,
       target: d.target,
       deadline: d.target !== null ? (d.deadline?.slice(0, 7) ?? null) : null,
+      start: d.hasStart ? (d.start ?? 0) : 0,
     });
     if (!input.success) return;
     setSaving(true);
@@ -121,12 +136,14 @@ export function W11SavingAdd() {
         monthly: v.monthly,
         target: v.target,
         deadline: v.deadline ? ymToDate(v.deadline) : null,
+        start: v.start,
       });
       track('saving_item_created', {
         entry,
         monthly_band: amountBand(v.monthly),
         has_target: v.target !== null,
         has_deadline: v.deadline !== null,
+        has_start: v.start > 0,
         ...(v.target !== null ? { target_band: amountBand(v.target) } : {}),
       });
       writeDraft(null);
@@ -172,30 +189,33 @@ export function W11SavingAdd() {
     );
   if (!draft.name.trim()) return <Navigate to={`${savingPaths.add}/a`} replace />;
   if (s === 'b') {
-    const v = draft.monthly ?? Math.max(Math.floor(left / 10_000) * 10_000, 0);
+    // 처음 값은 빈 칸(필수, 2026-11-09). 남는 돈 전부를 채우지 않음. 빠른 칩은 그 금액으로 바꿈
+    const v = draft.monthly;
     return (
       <QuestionLayout
         steps={steps}
         title={copy.addMonthlyQ}
         help={copy.addMonthlyHelp(readWon(Math.max(left, 0)))}
         onBack={back}
-        primary={{ label: copy.next, disabled: v % 10_000 !== 0 }}
-        onSubmit={() => {
-          setDraft({ ...draft, monthly: v });
-          go('c');
-        }}
+        primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
+        onSubmit={() => go('c')}
       >
         <AmountInput
           label={copy.addMonthlyQ}
           value={v}
-          onChange={(x) => setDraft({ ...draft, monthly: x ?? 0 })}
+          onChange={(x) => setDraft({ ...draft, monthly: x })}
+          quick={quickChips.monthly}
+          quickSet
           monthly
           allowZero
         />
-        {v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
+        {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
       </QuestionLayout>
     );
   }
+  // 시작할 때 모은 돈(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
+  const start = draft.hasStart ? (draft.start ?? 0) : 0;
+  const startOver = draft.target !== null && start >= draft.target;
   if (s === 'c')
     return (
       <QuestionLayout
@@ -203,7 +223,7 @@ export function W11SavingAdd() {
         title={copy.addTargetQ}
         help={copy.addTargetHelp}
         onBack={back}
-        primary={{ label: copy.next, disabled: !draft.target }}
+        primary={{ label: copy.next, disabled: !draft.target || startOver }}
         onSubmit={() => go('d')}
         later={{
           label: copy.addNoTarget,
@@ -215,21 +235,66 @@ export function W11SavingAdd() {
           label={copy.addTargetQ}
           value={draft.target}
           onChange={(x) => setDraft({ ...draft, target: x && x > 0 ? x : null })}
+          extra={
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={draft.hasStart}
+              className="hg-consent__check"
+              onClick={() => setDraft({ ...draft, hasStart: !draft.hasStart })}
+            >
+              <span
+                className={draft.hasStart ? 'hg-checkbox is-on' : 'hg-checkbox'}
+                aria-hidden="true"
+              />
+              <span className="hg-consent__label">{copy.addHasStart}</span>
+            </button>
+          }
         />
+        {draft.hasStart && (
+          <AmountInput
+            label={copy.addStart}
+            value={draft.start}
+            onChange={(x) => setDraft({ ...draft, start: x })}
+            allowZero
+            embedded
+          />
+        )}
+        {draft.hasStart && startOver && (
+          <p className="hg-help is-error" role="alert">
+            {copy.addStartOver}
+          </p>
+        )}
       </QuestionLayout>
     );
   if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;
-  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? null;
-  const err = ym && ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
-  const need = ym ? savingNeed({ target: draft.target, saved: 0, deadline: ym }) : null;
+  // 처음 값 = 1년 뒤(20 W-11d). 휠이 처음 값을 다시 올려도 같은 값
+  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
+  const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
+  const plan = { target: draft.target, saved: start, deadline: ym };
+  const need = savingNeed(plan);
+  // 월 필요액 > 매달 금액이면 사실 한 줄(2026-11-09, 06 5-4)
+  const late = savingLate(plan, draft.monthly ?? 0);
   return (
     <QuestionLayout
       steps={steps}
       title={copy.addDeadlineQ}
-      help={need !== null ? copy.needPerMonth(readWon(need)) : undefined}
+      help={
+        need !== null ? (
+          <>
+            {copy.needPerMonth(readWon(need))}
+            {late !== null && (
+              <>
+                <br />
+                {copy.lateBy(late)}
+              </>
+            )}
+          </>
+        ) : undefined
+      }
       onBack={back}
-      primary={{ label: copy.addDone, disabled: !ym || !!err, loading: saving }}
-      onSubmit={() => void save(draft)}
+      primary={{ label: copy.addDone, disabled: !!err, loading: saving }}
+      onSubmit={() => void save({ ...draft, deadline: ym })}
       later={{
         label: copy.addNoDeadline,
         loading: saving,

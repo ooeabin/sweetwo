@@ -19,14 +19,14 @@
 
 ## 그림 자리 (2026-11-08 목표 카드 없앰, 지금은 쓰는 화면 없음)
 
-- `hg-card--art` + `hg-card__art`: 오른쪽 위 56px(좁은 창 48px) 둥근 칸에 목표 그림 1개. 그림이 있으면 배지는 빼도 됨. 상단 줄과 안에 넣은 Meter 머리는 그림 칸만큼 오른쪽을 비움(목표 카드 G-01 = 상단 줄 배지 + Meter + 보조 줄).
-- 그림은 목표마다 1장: 올린 사진 → 그 종류 실사 지정 사진(2026-11-04, 21장) → 회색 기본 자리 + 아이콘. 사진은 칸을 꽉 채움(`hg-card__art--photo`).
-- 직접 만든 목표: 사진이 없으면 회색 기본 그림 `hg-card__art--custom`(`hairline-soft` 회색 바탕, `stone` 색 `flag-pennant`(깃발) 아이콘). 사진을 올리면 `hg-card__art--photo`로 칸을 꽉 채움(`object-fit: cover`, 정사각형으로 자른 512px). 위젯 `hg-wg__art`, 큰 자리 `hg-art`도 같은 이름의 `--custom`, `--photo`.
+- `hg-card--art` + `hg-card__art`: 오른쪽 위 56px(좁은 창 48px) 둥근 칸에 그림 1개. 그림이 있으면 배지는 빼도 됨. 상단 줄과 안에 넣은 Meter 머리는 그림 칸만큼 오른쪽을 비움.
+- 사진은 칸을 꽉 채움(`hg-card__art--photo`, `object-fit: cover`), 그림이 없으면 회색 기본 자리 `hg-card__art--custom`(`hairline-soft` 바탕, `stone` 아이콘). 위젯 `hg-wg__art`, 큰 자리 `hg-art`도 같은 이름의 `--custom`, `--photo`.
+- 예전 목표 카드(G-01)·목표 사진(올린 사진, 지정 사진 21장)은 2026-11-08 ADR 0007로 없앰. 클래스는 남겨 두고 새로 쓸 때 이 문서를 고침.
 - 그림은 장식이라 `alt=""`. 뜻은 라벨이 전함.
 
 ## 종류
 
-- 틴트는 뜻대로: `together` 우리 둘, `family` 양가, `goal` 저금 항목, `safety` 비상금, `invest` 투자. 한 화면에 틴트 2가지까지. 틴트 위 보조 줄은 `ink-2`.
+- 틴트는 뜻대로: `together` 우리 둘, `family` 양가, `goal` 저금 항목, `safety` 월급 전 확인(2026-11-09), `invest` 투자. 한 화면에 틴트 2가지까지. 틴트 위 보조 줄은 `ink-2`.
 - 카드 바탕에 브랜드 색을 쓰지 않음. 달성한 저금 항목도 기본 줄에 `hg-badge--achieved`(작은 오렌지 배지)만 붙임.
 - 누를 수 있는 카드는 `hg-card--raised`. `button`이나 `a`로 써도 글자색(`ink`), 글꼴, 왼쪽 정렬은 카드 그대로, 포커스 테두리 `focus`.
 

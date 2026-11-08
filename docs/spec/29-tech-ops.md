@@ -77,8 +77,8 @@
 | goal\_move 넣기·빼기·꺼내 쓰기 | 2026-11-08 새 코드에서 쓰지 않음(ADR 0007). 모은 돈에도 세지 않음. 쓰는 곳 0 확인 뒤 다음 마이그레이션에서 지움 | — |
 | family 가족 | side enum, relation enum, nickname 암호, birthday\_md 암호, lunar bool, leap bool, birth\_year 암호, age\_rule enum(세는 나이/만 나이, 환갑·칠순 계산), memo 암호 | 1 : N 챙길 날. 챙길 날을 한 종류로 합치면서 가족 등록을 남길지 [확인 필요] |
 | care\_day 챙길 날 | 종류 구분 없음(생일·기념일·명절·양가 행사 모두 같은 챙길 날, ADR 0003), name, family\_id(null), date\_rule enum, budget bigint, owner enum, notify\_rule jsonb(기본 D-30·D-7), private bool, auto\_wedding bool(O-12·S-11h 결혼한 날로 자동으로 만든 결혼기념일, 기본 false. 날짜를 직접 고치면 false) [확인 필요]. 없앤 필드: kind(우리 둘/양가/결혼 준비), wedding\_item\_id | 1 : N 회차 |
-| care\_round 챙길 날 회차 | care\_day\_id, year smallint, solar\_date date, prep\_state enum, actual bigint, paid\_from enum, gift text, memo 암호 | N : 1 챙길 날, 1 : 0\~1 목표 사용 |
-| family\_budget 양가 예산 | holiday·birthday·parents\_day·etc 단가 bigint, round\_year smallint, goal\_id(null) | 1 : 1 커플 공간, 0\~1 목표. 월급 플랜 배분이 없어져 남길지 [확인 필요] |
+| care\_round 챙길 날 회차 | care\_day\_id, year smallint, solar\_date date, prep\_state enum, actual bigint, paid\_from enum, gift text, memo 암호 | N : 1 챙길 날(예전 목표 사용 연결은 2026-11-08 꺼내 쓰기와 함께 없앰) |
+| family\_budget 양가 예산 | holiday·birthday·parents\_day·etc 단가 bigint, round\_year smallint, goal\_id(null) | 1 : 1 커플 공간(goal\_id는 새 코드에서 쓰지 않음, 2026-11-08). 월급 계획 배분이 없어져 남길지 [확인 필요] |
 | holiday 공휴일 | date date(unique), name text, kind enum(공휴일/대체공휴일/임시공휴일), source enum(특일 API/어드민), fetched\_at timestamptz | 관계 없음. 앱은 읽기만, 쓰기는 서버 작업과 어드민 |
 | checklist\_done 가이드 체크리스트 완료 | item\_id(운영자 본문), done\_by, done\_at | N : 1 커플 공간 |
 | notification 알림 | user\_id(받는 사람), kind enum, capped bool, digest bool, scheduled\_at, channels enum\[\](os/email/inapp), sent\_at, read\_at, target\_screen text, target\_id uuid, text\_snapshot text, expires\_at(생성 + 90일) | N : 1 사용자 |

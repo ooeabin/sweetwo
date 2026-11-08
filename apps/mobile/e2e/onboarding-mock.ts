@@ -194,9 +194,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     ],
     rpc: [],
   };
-  // 서버 goal_saved 흉내(ADR 0007): 모은 돈 = 그 저금 항목을 체크한 금액의 합
+  // 서버 goal_saved 흉내(ADR 0007, 2026-11-09): 모은 돈 = 시작할 때 모은 돈 + 그 저금 항목을 체크한 금액의 합
   const goalSaved = (id: string) => {
-    let v = 0;
+    let v = Number(db.goals.find((g) => g.id === id)?.start_saved ?? 0);
     for (const c of db.checklists)
       for (const l of c.pay_check_line as Record<string, unknown>[])
         if (l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
@@ -434,6 +434,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         // 서버 흉내: 주인의 월급 계획 줄을 통째로 교체
         const b = body() as unknown as { p_lines: Record<string, unknown>[]; p_owner?: string };
         const owner = b.p_owner ?? null;
+        // 각자 모드 파트너 월급 계획은 보기만(2026-11-09 서버 not_owner)
+        if (db.space?.salary_mode !== 'joint' && owner && owner !== db.me.id)
+          return json(route, { message: 'not_owner', code: '42501' }, 403);
         let sp = db.splits.find((x) => x.owner_user_id === owner);
         if (!sp) {
           sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
@@ -489,6 +492,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           l.checked_by = b.p_state === 'wait' ? null : db.me.id;
           l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
           c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
+          // 서버 saving_unachieve 흉내(2026-11-09): 고르기 전 달성 항목이 목표 금액 아래로 내려가면 모으는 중 + 달성 알림 지움
+          const g = l.kind === 'saving' ? db.goals.find((x) => x.id === l.goal_id) : undefined;
+          if (
+            g &&
+            g.status === 'achieved' &&
+            !g.closed_at &&
+            g.target_amount != null &&
+            goalSaved(String(g.id)) < Number(g.target_amount)
+          ) {
+            Object.assign(g, { status: 'active', achieved_seen: [] });
+            if (db.notifications)
+              db.notifications = db.notifications.filter((n) => n.id !== `n-ach-${String(g.id)}`);
+          }
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
@@ -941,8 +957,12 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           p_monthly: number;
           p_target?: number | null;
           p_deadline?: string | null;
+          p_start?: number;
         };
         const joint = db.space?.salary_mode === 'joint';
+        const start = Number(b.p_start ?? 0);
+        if (start < 0 || (b.p_target != null && start >= b.p_target))
+          return json(route, { message: 'bad_start', code: '22023' }, 400);
         if (db.space?.couple_state === 'unlink_pending')
           return json(route, { message: 'unlink_pending', code: '55000' }, 400);
         const sp = db.splits.find((x) => x.owner_user_id === (joint ? null : db.me.id));
@@ -958,6 +978,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           priority: Math.max(0, ...db.goals.map((x) => Number(x.priority))) + 1,
           details: {},
           other_held: 0,
+          start_saved: start,
           target_amount: b.p_target ?? null,
           deadline: b.p_deadline ? `${b.p_deadline.slice(0, 7)}-01` : null,
           amount_estimated: false,

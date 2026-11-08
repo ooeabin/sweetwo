@@ -40,6 +40,8 @@ export function MainFrame(
     sub?: 'detail' | 'settings';
     /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
     narrowTitle?: string;
+    /** 좁은 창 + 버튼 숨김(월급 탭에 월급 계획이 없을 때, 20 W-11 ‘+ 버튼 대신 월급 알려 주기’) */
+    noAdd?: boolean;
   },
 ) {
   const nav = useNavigate();
@@ -118,7 +120,9 @@ export function MainFrame(
         // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
         // + 버튼은 월급(저금 항목 추가), 우리 자산, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
         onAdd={
-          p.current && p.current !== 'month' && !p.sub ? () => nav(addFor(p.current)) : undefined
+          p.current && p.current !== 'month' && !p.sub && !p.noAdd
+            ? () => nav(addFor(p.current))
+            : undefined
         }
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}

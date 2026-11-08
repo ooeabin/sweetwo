@@ -20,6 +20,7 @@ import {
 } from '../../frame';
 import {
   AchieveWatch,
+  FirstSavingRow,
   goalLineName,
   myChecklist,
   useChecklists,
@@ -262,8 +263,9 @@ export function H01Home() {
             joint={joint}
             go={go}
             locked={space.data.couple_state === 'unlink_pending'}
+            firstSaving={<FirstSavingRow from="home" go={go} />}
           />
-          <SavingCard items={saving.ready ? saving.withTarget : []} hasPlan={!!list} go={go} />
+          <SavingCard items={saving.ready ? saving.withTarget : []} go={go} />
         </div>,
         <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
           {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}

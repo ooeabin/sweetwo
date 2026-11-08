@@ -159,6 +159,30 @@ export function W10SavingItem() {
             {i.state !== 'achieved' && i.need !== null && (
               <span className="hg-goalbox__sub">{copy.needPerMonth(m(i.need))}</span>
             )}
+            {/* 월 필요액 > 매달 금액이면 사실 한 줄 + 할 일(2026-11-09, 배지 아님) */}
+            {i.state !== 'achieved' && i.late !== null && (
+              <>
+                <span className="hg-goalbox__sub">{copy.lateBy(i.late)}</span>
+                {i.canEdit && (
+                  <span className="hg-row" style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      onClick={() => nav(splitTo)}
+                    >
+                      {copy.changeMonthly}
+                    </button>
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                    >
+                      {copy.changeDeadline}
+                    </button>
+                  </span>
+                )}
+              </>
+            )}
           </section>
         ) : (
           <section className="hg-card hg-card--fill hg-stack" aria-label={copy.setTarget}>
@@ -203,7 +227,7 @@ export function W10SavingItem() {
       {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
       <section className="hg-stack" aria-label={copy.history}>
         <SectionHeader title={copy.history} />
-        {records.length ? (
+        {records.length || g.start_saved > 0 ? (
           <div className="hg-list">
             {(all ? records : records.slice(0, 12)).map((l) => (
               <ListRow
@@ -218,6 +242,13 @@ export function W10SavingItem() {
                 }
               />
             ))}
+            {/* 시작할 때 모은 돈(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
+            {g.start_saved > 0 && (
+              <ListRow
+                label={copy.historyStart(m(g.start_saved))}
+                sub={formatDateFull(g.created_at.slice(0, 10))}
+              />
+            )}
           </div>
         ) : (
           <p className="hg-help" style={{ margin: 0 }}>

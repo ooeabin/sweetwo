@@ -14,6 +14,8 @@ export interface ChapterProgress {
   steps?: { total: number; done: number };
   /** 이름이 없을 때 화면 읽기 이름 앞말(기본 ‘온보딩’) */
   label?: string;
+  /** 채움 색. 온보딩 챕터만 brand, 다른 질문 흐름(steps로 그린 막대)은 ink(2026-11-09, DESIGN.md) */
+  tone?: 'brand' | 'ink';
 }
 
 /** 넓은 창 위 바 가운데: 챕터면 “목표” + 칸 막대(brand), 아니면 ProgressSteps */
@@ -31,7 +33,7 @@ function BarProgress({
         {chapter.name && <p className="hg-qbar__label">{chapter.name}</p>}
         {s && s.total > 0 && (
           <div
-            className="hg-segs"
+            className={`hg-segs${chapter.tone === 'ink' ? ' hg-segs--ink' : ''}`}
             role="progressbar"
             aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
             aria-valuemin={0}
@@ -76,7 +78,7 @@ function StepsBar({ steps }: { steps: { total: number; now: number; fill?: numbe
 export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBack?: () => void }) {
   const fill = chapter.fill === null ? null : Math.min(Math.max(Math.round(chapter.fill), 0), 100);
   return (
-    <div className="hg-chapterbar">
+    <div className={`hg-chapterbar${chapter.tone === 'ink' ? ' hg-chapterbar--ink' : ''}`}>
       <div className="hg-chapterbar__top">
         {onBack && (
           <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
@@ -201,6 +203,7 @@ export function QuestionLayout({
           total: 1,
           name: '',
           label: '질문',
+          tone: 'ink',
           fill: ((steps.now + (steps.fill ?? 50) / 100) / steps.total) * 100,
           steps: { total: steps.total, done: steps.now + 1 },
         }

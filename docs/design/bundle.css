@@ -146,6 +146,8 @@
 .hg-transfer__who { display: inline-flex; align-items: center; height: 20px; margin-right: var(--space-1); padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); font: 600 12px/16px var(--font-sans); vertical-align: 1px; }  /* 체크한 사람 이름 칩(2026-11-03) */
 .hg-transfer__amount { font: 600 16px/24px var(--font-sans); }
 .hg-transfer.is-done .hg-transfer__label, .hg-transfer.is-done .hg-transfer__amount { color: var(--stone); }
+/* 2026-11-09 보기만 하는 줄(파트너 체크리스트)은 취소선 없이 흐린 글자 + 오른쪽 체크 표시만(‘지운 줄’처럼 보이지 않게) */
+.hg-transfer.is-view.is-done .hg-transfer__label { text-decoration: none; }
 
 /* NetWorth: 순자산 2줄 */
 .hg-networth__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
@@ -282,6 +284,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-chapterbar__label { grid-column: 2; margin: 0; text-align: center; font: 600 15px/22px var(--font-sans); color: var(--ink); }
 .hg-chapterbar__track { position: relative; height: 4px; border-radius: var(--radius-full); background: var(--hairline); overflow: hidden; }
 .hg-chapterbar__fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: var(--radius-full); background: var(--brand); transition: width var(--dur-base) var(--ease-out); }
+/* 온보딩 밖 질문 흐름(W-11, F-03, Y-07, S-12a 등)은 ink 채움(2026-11-09) */
+.hg-chapterbar--ink .hg-chapterbar__fill { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .hg-chapterbar__fill { transition: none; } }
 /* 온보딩 첫 화면(O-10) 챕터 목록(ChapterList): 회색 판 위 번호 원 + 챕터 이름 + 한 줄 */
 .hg-chapters { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: var(--space-5); list-style: none; background: var(--plate); border-radius: var(--radius-xl); }
@@ -347,6 +351,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-segs { display: flex; gap: 4px; width: 100%; }
 .hg-segs__seg { flex: 1; height: 4px; border-radius: var(--radius-full); background: var(--hairline); transition: background-color var(--dur-base) var(--ease-out); }
 .hg-segs__seg.is-on { background: var(--brand); }
+.hg-segs--ink .hg-segs__seg.is-on { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .hg-segs__seg { transition: none; } }
 @media (min-width: 768px) {
   .hg-qbar { position: sticky; top: 0; z-index: 2; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 64px; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-6); background: var(--surface); }
@@ -392,6 +397,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-listrow__label { font: 400 16px/24px var(--font-sans); }
 .hg-listrow__sub { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-listrow__value { font: 600 16px/24px var(--font-sans); text-align: right; }
+.hg-listrow__lock { color: var(--stone); }  /* 2026-11-09 고칠 수 없는 줄(각자 모드 파트너 월급 계획) 꺾쇠 자리 */
 .hg-chevron { width: 8px; height: 8px; border-right: 1.5px solid var(--stone); border-top: 1.5px solid var(--stone); transform: rotate(45deg); margin-right: var(--space-1); }
 
 /* Selection: Toggle, Checkbox, Radio */
@@ -512,7 +518,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-menu__item--danger { color: var(--danger); }
 .hg-menu__sep { height: 1px; margin: var(--space-1) var(--space-2); background: var(--hairline-soft); }
 
-/* Calendar(2026-11-04 토스 소비 달력형): 카드 없이 가운데 ‘‹ 10월 ›’ + 그 달 주만, 칸 = 숫자 + 짧은 이름 + 월말 확인 이어진 띠 */
+/* Calendar(2026-11-04 소비 달력형): 카드 없이 가운데 ‘‹ 10월 ›’ + 그 달 주만, 칸 = 숫자 + 짧은 이름 + 월급 전 확인 이어진 띠 */
 .hg-cal { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); width: 100%; max-width: 520px; }
 .hg-cal__head { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-3); min-height: 40px; }
 .hg-cal__month { display: inline-flex; align-items: baseline; gap: var(--space-1); }
@@ -533,7 +539,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__short { max-width: 100%; padding: 0 2px; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 10px/13px var(--font-sans); color: var(--slate); }
 .hg-cal__short.is-care { color: var(--together-ink); }
 .hg-cal__short.is-holiday { color: var(--holiday-ink); }
-/* 월말 확인 기간: 칸 아래 이어진 한 줄 띠(칸마다 회색 판이 아니라). 시작 칸에 이름 */
+/* 월급 전 확인 기간: 칸 아래 이어진 한 줄 띠(칸마다 회색 판이 아니라). 시작 칸에 이름 */
 .hg-cal__band { position: absolute; left: 0; right: 0; bottom: 4px; height: 14px; background: var(--surface-alt); font: 600 9px/14px var(--font-sans); color: var(--slate); text-align: left; padding-left: 6px; white-space: nowrap; overflow: visible; z-index: 1; }
 .hg-cal__band.is-start, .hg-cal__band.is-single { left: 4px; border-top-left-radius: var(--radius-full); border-bottom-left-radius: var(--radius-full); }
 .hg-cal__band.is-end, .hg-cal__band.is-single { right: 4px; border-top-right-radius: var(--radius-full); border-bottom-right-radius: var(--radius-full); }

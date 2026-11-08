@@ -51,7 +51,7 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 
 - 월급 줄 5: 저금 항목(저금통, 2026-11-08 새: W-01·W-02 저금 줄, 홈 H-02 저금 항목 줄과 제안 줄, W-10, 위젯 WG-02), 고정지출(달력), 생활비(장바구니), 용돈(동전), 직접 추가(지갑)
 - 자산·부채 12: 현금성(지갑), 예적금(통장), 투자(차트), 연금, 보험(방패), 부동산(집), 자동차, 신용대출(카드), 할부, 학자금(학사모), 기타 대출, 개인 간 빌린 돈
-- 캘린더 5: 챙길 날(선물), 목표 기한(달력과 깃발, Y-01·Y-04 같은 그림으로, 기한을 정한 저금 항목만), 월급날(새), 월급 확인(새), 만기(새)
+- 캘린더 5: 챙길 날(선물), 목표 기한(달력과 깃발, Y-01·Y-04 같은 그림으로, 기한을 정한 저금 항목만), 월급날(새), 월급 전 확인(새), 만기(새)
 
 ### 5. 선택지·안내 아이콘 9장(2026-11-08 13장에서 줄임)
 
@@ -140,7 +140,7 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 | `goal-photos/` | `{템플릿}-01` 21장 | 1200 | 목표 사진(→ 아래 ‘목표 사진 주제’). 직접 만든 목표는 없음(회색 기본 자리 + 깃발) |
 | `icons3d/` | `line-fixed` · `line-living` · `line-allowance` · `line-custom` | 160 | 월급 체크리스트 쓰는 돈 줄(고정지출 달력, 생활비 장바구니, 용돈 동전, 직접 추가 지갑) |
 | | `asset-cash` · `asset-deposit` · `asset-invest` · `asset-pension` · `asset-insurance` · `asset-real-estate` · `asset-car` · `asset-credit` · `asset-installment` · `asset-student` · `asset-other-loan` · `asset-personal` | 160 | 자산·부채 묶음(F-01 빈 상태, F-03a 묶음 타일, `assetIcon3d`). 현금성은 `asset-cash`(밝은 민트 지갑, 2026-11-05), 청약·주택대출은 `asset-real-estate` |
-| | `care-gift` · `goal-deadline` | 160 | 캘린더 챙길 날, 목표 기한(월급날 `line-custom`, 월급 확인 `line-fixed`, 만기 `asset-deposit`) |
+| | `care-gift` · `goal-deadline` | 160 | 캘린더 챙길 날, 목표 기한(월급날 `line-custom`, 월급 전 확인 `line-fixed`, 만기 `asset-deposit`) |
 
 - 3D 이모지: 바탕 투명, 그림이 칸의 약 85%(여백을 맞춰 잘라 줄임). 작은 3D 아이콘: 원 판 없이 사물만(`hg-lead--art`), 사물마다 색 계열 하나. 목표 사진: 실사, 주제가 가운데(16:10 배너·40px 원으로 잘려도 보이게).
 - 하단 탭 아이콘은 3D로 바꾸지 않음(고른 탭이 보이게 단색 Phosphor 그대로, 2026-11-05).

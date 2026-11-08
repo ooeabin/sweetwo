@@ -8,12 +8,10 @@ export const copy = {
   add: '추가',
   check: '월급 체크하기',
   // H-02 저금 항목(2026-11-08 ADR 0007)
-  savings: '저금 항목',
+  savings: '저금', // 2026-11-09 사용자에게는 ‘저금’
   toSplit: '월급 계획', // [확인 필요] 제목 줄 오른쪽 → W-01
   goalAmount: (saved: string, target: string) => `${saved} / ${target}`,
   achieved: '달성',
-  suggestSaving: '모으고 싶은 돈이 있으면 저금 항목으로 만들어 보세요', // [확인 필요]
-  suggestAdd: '추가하기', // [확인 필요]
   // H-03 이번 달 월급
   progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
   partnerProgress: (name: string, total: number, done: number) =>

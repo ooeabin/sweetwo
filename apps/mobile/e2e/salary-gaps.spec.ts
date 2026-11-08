@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 월급 계획을 바꾼 안내, 파트너 탭(월급 계획 고치기, 내 목표 줄 잠금),
+// W-01·W-02 빠진 것(20): 지난 달 보기(‹ ›, 읽기 전용), 상대가 월급 계획을 바꾼 안내, 파트너 탭(보기만, 2026-11-09),
 // 수입 줄 → 설정 내 월급, 직접 추가 줄 이름 바꾸기, 연결 해제 대기면 보기만. 찬우(시작), 예빈(합류), 각자.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -13,7 +13,7 @@ const axe = async (page: Page) => {
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-/** 예빈 합류: 예빈 월급 계획(내 집 마련 + 예빈 카메라(내 목표) + 생활비) */
+/** 예빈 합류: 예빈 월급 계획(내 집 마련 + 예빈 카메라(예빈 저금) + 생활비) */
 function joinYebin(db: MemDb) {
   Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
   db.partner = {
@@ -117,7 +117,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });
 
-test('W-01 파트너 탭: 고칠 수 있고 파트너 내 목표 줄은 잠금, 수입 줄 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
+test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 추천값·저장·줄 추가 없음 / 내 탭은 고침, 수입 줄 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -129,17 +129,19 @@ test('W-01 파트너 탭: 고칠 수 있고 파트너 내 목표 줄은 잠금, 
   await expect(page.getByRole('heading', { name: '월급 계획' })).toBeVisible();
   await page.getByRole('tab', { name: '예빈' }).click();
   await expect(page.getByText('월급 270만 원')).toBeVisible();
+  await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
+  // 줄은 누를 수 없고 자물쇠
+  await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
-  await expect(page.getByText('예빈 카메라')).toBeVisible();
-  await page.getByRole('button', { name: /^생활비/ }).click();
-  await page.getByLabel('생활비 금액').fill('700000');
-  await page.getByRole('button', { name: '확인' }).click();
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
+  await expect(page.locator('.hg-listrow__lock')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: '추천값으로 다시 채우기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '줄 추가' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await axe(page);
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
     (y?.split_line as Record<string, unknown>[]).find((l) => l.kind === 'living')?.amount,
-  ).toBe(700_000);
+  ).toBe(680_000);
 
   // 내 탭: 직접 추가 줄 → 이름 바꾸기, 수입 줄 → S-11
   await page.goto('/salary/split');
@@ -152,6 +154,44 @@ test('W-01 파트너 탭: 고칠 수 있고 파트너 내 목표 줄은 잠금, 
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
   await page.getByRole('button', { name: /월급 350만 원/ }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
+});
+
+test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄은 취소선 없이 흐린 글자 + 체크 표시', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  joinYebin(db);
+  const ys = db.splits.find((x) => x.owner_user_id === 'yebin');
+  db.checklists.push({
+    id: 'checklist-y',
+    split_id: 'split-y',
+    owner_user_id: 'yebin',
+    label: '9월 월급',
+    cycle_start: '2026-09-10',
+    cycle_end: '2026-10-09',
+    state: 'open',
+    pay_check_line: (ys?.split_line ?? []).map((l, i) => ({
+      ...l,
+      id: `${String(l.id)}-c`,
+      planned: l.amount,
+      actual: null,
+      state: i === 2 ? 'checked' : 'wait',
+      checked_by: i === 2 ? 'yebin' : null,
+      checked_at: i === 2 ? '2026-09-11T01:00:00Z' : null,
+    })),
+  });
+  await page.goto('/salary?who=yebin');
+  await expect(page.getByText('예빈님 체크리스트예요. 보기만 할 수 있어요')).toBeVisible();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  const done = page.locator('.hg-transfer.is-view.is-done').first();
+  await expect(done).toBeVisible();
+  await expect(done.locator('.hg-transfer__label')).toHaveCSS('text-decoration-line', 'none');
+  await expect(done.locator('.hg-transfer__state .hg-ico--check')).toHaveCount(1);
+  await axe(page);
+  // 첫 저금 빈 줄은 파트너 탭에 없음
+  await expect(page.getByRole('button', { name: /저금 추가 \(남는 돈/ })).toHaveCount(0);
 });
 
 test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
