@@ -34,7 +34,7 @@ select public.finish_join();
 select results_eq($$ select name from public.goal order by name $$, $$ values ('자기계발'), ('집') $$,
   '‘금액만 보여 주기’ 파트너 목표는 표에서 안 보임');
 select results_eq($$ select name from public.space_goals() where owner_user_id is not null order by name $$,
-  $$ values ('개인 목표'), ('자기계발') $$, 'space_goals로는 이름 가려서 보임');
+  $$ values ('개인 저금'), ('자기계발') $$, 'space_goals로는 이름 가려서 보임');
 update public.goal set target_amount = 1 where name = '자기계발';
 select is((select target_amount from public.goal where name = '자기계발'), 2000000::bigint, '파트너 내 목표는 못 고침');
 update public.goal set name = '우리 집' where name = '집';

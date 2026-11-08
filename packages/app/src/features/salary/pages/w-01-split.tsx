@@ -1,20 +1,23 @@
-import { qk, saveSplit, updateGoal } from '@sweetwo/api';
-import { addMonths, thisMonth, ymToDate, type SplitLineDraft } from '@sweetwo/core';
-import { Modal, QuestionSkeleton, Tabs } from '@sweetwo/ui';
+import { qk, saveSplit } from '@sweetwo/api';
+import { type SplitLineDraft } from '@sweetwo/core';
+import { Icon, ListRow, Modal, QuestionSkeleton, Tabs } from '@sweetwo/ui';
+import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
-import { emergencyGoalTarget, ourLinesOf, recommendedDraft } from '../split-draft';
+import { useGoalSaved, useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
+import { savingPaths } from '../paths';
+import { recommendedDraft } from '../split-draft';
 import { SplitEditor, toDraft } from '../split-editor';
 
 // W-01 월급 계획(20). O-50과 같은 틀. 저장 = 바로 적용 + Toast “월급 계획을 바꿨어요” + 되돌리기, 상대 알림은 서버.
 // 이번 사이클 체크 안 한 줄도 새 금액으로(서버 sync_checklist).
-// 각자 + 파트너 합류: 사람 탭(내 탭 기본, `?who=`). 파트너 탭도 고칠 수 있음, 단 파트너 내 목표 줄 금액은 잠금(서버도 확인).
-// 수입 줄 → 설정 내 월급(S-11, 내 탭만). 합쳐서면 내 목표 줄 앞에 주인 이름. 연결 해제 대기 중이면 보기만.
+// 각자 + 파트너 합류: 사람 탭(내 탭 기본, `?who=`). 파트너 탭은 쓰는 돈 줄만, 파트너 저금 줄 금액은 잠금(서버도 확인).
+// 저금 묶음 아래 ‘+ 저금 항목 추가’(W-11a, 내 탭·합쳐서만), 저금 줄 금액 입력 아래 ‘저금 항목 보기’(W-10).
+// 맨 아래 접힌 줄 ‘그만 모은 저금 항목 n개’ → W-10. 수입 줄 → 설정 내 월급(S-11, 내 탭만). 연결 해제 대기 중이면 보기만.
 export function W01Split() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -24,6 +27,9 @@ export function W01Split() {
   const goals = useGoals();
   const splits = useSplits();
   const partner = usePartner();
+  const saved = useGoalSaved();
+  const { masked } = useMask();
+  const [fold, setFold] = useState(false);
   const [who, setWho] = useState<string | null>(() => params.get('who'));
   const [drafts, setDrafts] = useState<Record<string, SplitLineDraft[]>>({});
   const [refill, setRefill] = useState(false);
@@ -43,42 +49,39 @@ export function W01Split() {
   const key = ownerId ?? 'joint';
   const splitOf = (id: string | null) => splits.data.find((x) => x.owner_user_id === id);
   const mine = splitOf(ownerId);
-  const saved = mine ? toDraft(mine.split_line) : null;
-  /** 파트너 탭: 파트너 내 목표 줄은 잠금 */
+  const stored = mine ? toDraft(mine.split_line) : null;
+  const draftOrSaved = () => drafts[key] ?? stored ?? [];
+  /** 파트너 탭: 파트너 저금 줄은 잠금(저금 항목은 주인 것, ADR 0007) */
   const lockedGoal = (goalId?: string) =>
     theirs && goals.data.some((g) => g.id === goalId && g.owner_user_id === ownerId);
   const recommend = () =>
     recommendedDraft(owner, goals.data, {
       joint,
       partner: p,
-      others:
-        joint || !p ? undefined : ourLinesOf(splitOf(ownerId === m.id ? p.id : m.id), goals.data),
+      saved: saved.data,
+      current: draftOrSaved(),
       keep: theirs
         ? Object.fromEntries(
-            (saved ?? [])
+            (stored ?? [])
               .filter((l) => l.kind === 'saving' && lockedGoal(l.goalId))
               .map((l) => [l.goalId ?? '', l.amount]),
           )
         : undefined,
     });
   const draft = drafts[key] ?? null;
-  const lines = draft ?? saved ?? recommend();
+  const lines = draft ?? stored ?? recommend();
   const income = joint
     ? (m.monthly_income ?? 0) + (p?.monthly_income ?? 0)
     : (owner.monthly_income ?? 0);
   const payday = owner.payday_last ? 'last' : owner.payday;
   const back = () => (window.history.length > 1 ? nav(-1) : nav('/'));
+  // 이 월급 계획에서 그만 모은 저금 항목(각자 = 이 탭 주인 것, 합쳐서 = 모두)
+  const closed = goals.data.filter(
+    (g) => !g.deleted_at && !!g.closed_at && (joint || g.owner_user_id === ownerId),
+  );
 
   const write = async (next: SplitLineDraft[]) => {
     await saveSplit(next, ownerId ?? undefined);
-    const emergency = goals.data.find((g) => g.template === 'emergency');
-    const target = emergencyGoalTarget(next);
-    if (!theirs && emergency && target !== emergency.target_amount) {
-      await updateGoal(emergency.id, {
-        target_amount: target,
-        deadline: emergency.deadline ?? ymToDate(addMonths(thisMonth(), 12)),
-      });
-    }
     await Promise.all([
       qc.invalidateQueries({ queryKey: qk.splits }),
       qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
@@ -90,7 +93,7 @@ export function W01Split() {
     setSaving(true);
     try {
       await write(lines);
-      const before = saved;
+      const before = stored;
       toast(
         copy.saved,
         before ? { label: copy.undo, onClick: () => quietly(write(before)) } : undefined,
@@ -124,6 +127,9 @@ export function W01Split() {
         onSave={() => void save()}
         locked={(l) => l.kind === 'saving' && lockedGoal(l.goalId)}
         readOnly={pending}
+        savedOf={(id) => saved.data?.[id] ?? 0}
+        onItem={(id) => nav(savingPaths.item(id))}
+        onAddItem={!theirs && !pending ? () => nav(`${savingPaths.add}/a?from=split`) : undefined}
         onIncome={ownerId === m.id || joint ? () => nav('/settings/me') : undefined}
         notice={
           <>
@@ -149,16 +155,39 @@ export function W01Split() {
           </>
         }
         extra={
-          !pending && (
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => setRefill(true)}
-            >
-              {copy.refill}
-            </button>
-          )
+          <>
+            {!pending && (
+              <button
+                type="button"
+                className="hg-btn hg-btn--link"
+                style={{ alignSelf: 'flex-start' }}
+                onClick={() => setRefill(true)}
+              >
+                {copy.refill}
+              </button>
+            )}
+            {/* 그만 모은 저금 항목(20 W-01 8번): 접힌 줄, 펼치면 이름 + 모은 돈 → W-10 */}
+            {closed.length > 0 && (
+              <button
+                type="button"
+                className="hg-foldrow"
+                aria-expanded={fold}
+                onClick={() => setFold((x) => !x)}
+              >
+                <span>{copy.closedFold(closed.length)}</span>
+                <Icon name={fold ? 'chevron-up' : 'chevron-down'} size={16} />
+              </button>
+            )}
+            {fold &&
+              closed.map((g) => (
+                <ListRow
+                  key={g.id}
+                  label={g.name}
+                  value={money(saved.data?.[g.id] ?? 0, masked)}
+                  onClick={() => nav(savingPaths.item(g.id))}
+                />
+              ))}
+          </>
         }
       />
       {refill && (

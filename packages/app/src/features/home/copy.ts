@@ -3,21 +3,17 @@ export const copy = {
   noSavedYet: '아직 모은 돈이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
   // H-01 기다리는 화면
   waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
-  waitCard: (starter: string) => `${starter}님이 첫 목표를 정하면 알려 드릴게요`,
+  waitCard: (starter: string) => `${starter}님이 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 2026-11-08,
   // 오늘 띠
   add: '추가',
   check: '월급 체크하기',
-  // H-02 목표
-  goals: '목표',
+  // H-02 저금 항목(2026-11-08 ADR 0007)
+  savings: '저금 항목',
+  toSplit: '월급 계획', // [확인 필요] 제목 줄 오른쪽 → W-01
   goalAmount: (saved: string, target: string) => `${saved} / ${target}`,
-  expected: (ym: string) => `예상 ${ym}`,
-  delayed: '지연',
-  thisMonthTodo: (amount: string) => `이번 달 ${amount} 넣을 차례예요`,
-  thisMonthDone: (amount: string) => `이번 달 ${amount} 넣었어요`,
-  setAmount: '금액 정하기',
-  moreGoals: '목표 더보기',
-  seeGoal: '자세히 보기', // [확인 필요] 1순위 카드 → G-02
-  addGoal: '다른 목표 추가하기',
+  achieved: '달성',
+  suggestSaving: '모으고 싶은 돈이 있으면 저금 항목으로 만들어 보세요', // [확인 필요]
+  suggestAdd: '추가하기', // [확인 필요]
   // H-03 이번 달 월급
   progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
   partnerProgress: (name: string, total: number, done: number) =>
@@ -25,7 +21,7 @@ export const copy = {
   inviteNow: '초대하기', // 2026-11-03 할 일 띠 초대 버튼
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
   allDone: (label: string) => `${label} 체크를 다 했어요`,
-  savedThisMonth: (amount: string) => `목표에 ${amount} 모았어요`,
+  savedThisMonth: (amount: string) => `저금 ${amount}을 보냈어요`, // [확인 필요] 19 홈 상태 변형 1번,
   editSplit: '월급 계획 고치기',
   noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
@@ -43,7 +39,6 @@ export const copy = {
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
   unlinkCheck: '확인하기',
-  mineMark: '나', // [확인 필요]
   mailBounced: '알림 메일이 전달되지 않았어요',
   mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
   mailCheck: '확인하기', // [확인 필요]

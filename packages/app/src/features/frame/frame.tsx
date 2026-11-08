@@ -22,7 +22,7 @@ import { LineBand } from './notice-band';
 
 const HREF: Record<AppTab, string | undefined> = {
   month: '/',
-  goals: '/goals',
+  salary: '/salary',
   assets: '/assets',
   calendar: '/calendar',
 };
@@ -35,7 +35,7 @@ export function MainFrame(
   p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'> & {
     /**
      * 메뉴 첫 화면이 아닌 화면(2026-11-03 추가 입구 하나로): + 버튼 없음.
-     * detail = 목표 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면. 둘 다 좁은 창은 앱 머리와 탭 막대 없이 ‘‹ 제목’ 한 줄(2026-11-04 토스 구조)
+     * detail = 저금 항목 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면. 둘 다 좁은 창은 앱 머리와 탭 막대 없이 ‘‹ 제목’ 한 줄(2026-11-04)
      */
     sub?: 'detail' | 'settings';
     /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
@@ -67,11 +67,11 @@ export function MainFrame(
   const partnerSrc = art(partner.data?.id);
   const label: Record<AppTab, string> = {
     month: copy.tabMonth,
-    goals: copy.tabGoals,
+    salary: copy.tabSalary,
     assets: copy.tabAssets,
     calendar: copy.tabCalendar,
   };
-  const keys: AppTab[] = ['month', 'goals', 'assets', 'calendar'];
+  const keys: AppTab[] = ['month', 'salary', 'assets', 'calendar'];
   const [palette, setPalette] = useState(false);
   // 데스크톱 앱 접속 신호(14 규칙: 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄)
   const signedIn = !!me.data;
@@ -116,7 +116,7 @@ export function MainFrame(
         onSearch={() => setPalette(true)}
         // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
         // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
-        // + 버튼은 목표, 우리 자산, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
+        // + 버튼은 월급(저금 항목 추가), 우리 자산, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
         onAdd={
           p.current && p.current !== 'month' && !p.sub ? () => nav(addFor(p.current)) : undefined
         }

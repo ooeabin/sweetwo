@@ -4,7 +4,7 @@ import { chanwoo } from './supabase-mock';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// 앱 기본 틀(19): ⌘K 검색 화면(바로 하기, 목표 찾기), Ctrl+1~4 탭, Ctrl+N·‘추가’ 메뉴, 좁은 창 + 버튼,
+// 앱 기본 틀(19): ⌘K 검색 화면(바로 하기, 저금 항목 찾기), Ctrl+1~4 탭, Ctrl+N·‘추가’ 메뉴, 좁은 창 + 버튼,
 // 오프라인 띠, 연결 해제 대기 띠.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -14,7 +14,9 @@ const axe = async (page: Page) => {
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-test('검색 화면(⌘K): 바로 하기, 목표 찾기 → 목표 상세, Esc 닫기', async ({ page }, info) => {
+test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목 상세(W-10), Esc 닫기', async ({
+  page,
+}, info) => {
   test.skip(info.project.name === 'narrow');
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -26,6 +28,7 @@ test('검색 화면(⌘K): 바로 하기, 목표 찾기 → 목표 상세, Esc �
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('option', { name: /월급 체크하기/ })).toBeVisible();
   await expect(dialog.getByRole('option', { name: /금액 가리기/ })).toBeVisible();
+  await expect(dialog.getByRole('option', { name: /저금 항목 추가/ })).toBeVisible();
   await axe(page);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
@@ -33,14 +36,14 @@ test('검색 화면(⌘K): 바로 하기, 목표 찾기 → 목표 상세, Esc �
   await page.getByRole('combobox', { name: '검색' }).fill('내 집');
   await expect(dialog.getByRole('option', { name: '내 집 마련' })).toBeVisible();
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
   // 찾는 게 없으면 빈 상태
   await page.keyboard.press('ControlOrMeta+k');
   await page.getByRole('combobox', { name: '검색' }).fill('없는 이름');
   await expect(page.getByText('찾는 게 없어요')).toBeVisible();
 });
 
-test('Ctrl+2 목표 탭, Ctrl+N 홈은 추가 메뉴, 목표 화면은 목표 추가', async ({ page }, info) => {
+test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 항목 추가', async ({ page }, info) => {
   test.skip(info.project.name === 'narrow');
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -55,10 +58,10 @@ test('Ctrl+2 목표 탭, Ctrl+N 홈은 추가 메뉴, 목표 화면은 목표 �
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.keyboard.press('ControlOrMeta+2');
-  await expect(page).toHaveURL(/\/goals$/);
-  await expect(page.getByRole('heading', { name: '목표' }).first()).toBeVisible();
+  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page.getByRole('heading', { name: '월급' }).first()).toBeVisible();
   await page.keyboard.press('ControlOrMeta+n');
-  await expect(page).toHaveURL(/\/goals\/new/);
+  await expect(page).toHaveURL(/\/salary\/items\/new/);
 });
 
 test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d)', async ({ page, context }) => {

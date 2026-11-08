@@ -10,11 +10,8 @@ import { formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetw
 import {
   AmountInput,
   Chip,
-  ChoiceCards,
   ConsentCard,
   FileAttach,
-  Lead,
-  ListRow,
   QuestionLayout,
   ShortText,
   QuestionSkeleton,
@@ -28,10 +25,10 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
-// Y-08 다녀온 뒤 기록(24 Y-08, 재기획): a 쓴 돈(금액 메모 채움, 건너뛰기) + 목표 돈을 썼다면 ‘목표 고르기’
+// Y-08 다녀온 뒤 기록(24 Y-08, 재기획): a 쓴 돈(금액 메모 채움, 건너뛰기) (2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰, ADR 0007)
 // → b 무엇을 드렸어요(현금 / 선물 / 식사, 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”) → c 기억(메모) → 저장.
 // → c 기억(메모 + 사진, JPG·PNG·HEIC·WebP, 장당 10MB 이하, 10장까지, 긴 변 1600px로 줄여 저장. 처음 사진을 넣을 때 사진 동의) → 저장.
-// 기록만, 목표·월급 계획·자산 변화 없음. 낸 곳은 묻지 않음. 목표를 골랐으면 저장 뒤 그 목표 G-02b(금액 채움)로.
+// 기록만, 저금 항목·월급 계획·자산 변화 없음. 낸 곳은 묻지 않음.
 // 저장 = 기록 → 사진 하나씩 올려 붙임. 사진이 실패하면 기록은 그대로 두고 그 사진만 ‘다시 시도’.
 
 type Gift = 'cash' | 'gift' | 'meal';
@@ -44,7 +41,6 @@ interface Photo {
 interface Draft {
   key: string; // 챙길 날 + 회차
   amount: number | null;
-  goalId: string | null;
   gifts: Gift[];
   giftName: string;
   memo: string;
@@ -56,7 +52,6 @@ const MAX_PHOTOS = 10;
 const blank = (key: string, amount: number | null): Draft => ({
   key,
   amount,
-  goalId: null,
   gifts: [],
   giftName: '',
   memo: '',
@@ -77,7 +72,6 @@ export function Y08Record() {
   const c = useCalendarData();
   const { d, set } = useDraft();
   const [saving, setSaving] = useState(false);
-  const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [pending, setPending] = useState<File[] | null>(null);
   const [agreeing, setAgreeing] = useState(false);
@@ -101,7 +95,6 @@ export function Y08Record() {
   const go = (n: number) => nav(`${base}/${STEPS[n] ?? 'a'}${q}`);
   const back = () => (i > 0 ? go(i - 1) : nav(-1));
   const help = `${care.name}, ${formatMonthDay(on)}`;
-  const goal = c.goals.find((g) => g.id === d.goalId);
 
   const setPhoto = (k: string, state: Photo['state']) =>
     set({ photos: useDraft.getState().d.photos.map((p) => (p.key === k ? { ...p, state } : p)) });
@@ -147,9 +140,7 @@ export function Y08Record() {
       x.photos.forEach((p) => URL.revokeObjectURL(p.url));
       set(blank('', null));
       toast(copy.recorded);
-      if (x.goalId && x.amount)
-        nav(`/goals/${x.goalId}/spend?amount=${x.amount}`, { replace: true });
-      else nav(`/calendar/day/${care.id}`, { replace: true });
+      nav(`/calendar/day/${care.id}`, { replace: true });
     } catch {
       toast(copy.loadFailed);
     } finally {
@@ -222,7 +213,7 @@ export function Y08Record() {
         later={{
           label: copy.skip,
           onClick: () => {
-            set({ amount: null, goalId: null });
+            set({ amount: null });
             go(1);
           },
         }}
@@ -236,32 +227,6 @@ export function Y08Record() {
           quick={quickChips.small}
           allowZero
         />
-        {c.goals.length > 0 && (
-          <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-            <p className="hg-help" style={{ margin: 0 }}>
-              {copy.goalHelp}
-            </p>
-            {picking ? (
-              <ChoiceCards<string>
-                label={copy.pickGoalQ}
-                value={d.goalId}
-                onChange={(goalId) => set({ goalId })}
-                onPick={() => setPicking(false)}
-                options={c.goals.map((g) => ({ value: g.id, label: g.name }))}
-              />
-            ) : (
-              // 2026-11-04 고르기 전에도 고른 뒤와 같은 줄 모양(누를 수 있다는 게 보이게)
-              <div className="hg-list">
-                <ListRow
-                  lead={<Lead icon="target" tone="goal" />}
-                  label={goal ? goal.name : copy.pickGoal}
-                  onClick={() => setPicking(true)}
-                  chevron
-                />
-              </div>
-            )}
-          </div>
-        )}
       </QuestionLayout>
     );
 

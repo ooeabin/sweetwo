@@ -2,7 +2,7 @@
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   tabMonth: '홈', // [확인 필요] 재기획 탭 이름(19 앱 기본 틀 3번)
-  tabGoals: '목표',
+  tabSalary: '월급', // 2026-11-08 ADR 0007 목표 자리
   tabAssets: '우리 자산',
   tabCalendar: '캘린더',
   search: '검색',
@@ -29,7 +29,7 @@ export const copy = {
   grew: '늘었어요',
   shrank: '줄었어요',
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
-  addGoal: '목표',
+  addSaving: '저금 항목', // [확인 필요] 2026-11-08
   addAsset: '자산·부채',
   addCare: '챙길 날',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
@@ -40,12 +40,12 @@ export const copy = {
   cmdKeyClose: '닫기', // [확인 필요]
   cmdQuick: '바로 하기',
   cmdCheck: '월급 체크하기',
-  cmdGoal: '목표 추가',
+  cmdSaving: '저금 항목 추가', // [확인 필요] 2026-11-08
   cmdAsset: '자산 추가',
   cmdMask: '금액 가리기',
   cmdUnmask: '금액 보이기',
   cmdLock: '잠그기',
-  cmdGoals: '목표',
+  cmdSavings: '저금 항목',
   cmdAssets: '자산·부채',
   cmdCares: '챙길 날',
   offlineTitle: '연결이 끊겼어요',

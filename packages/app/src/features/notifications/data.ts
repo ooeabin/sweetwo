@@ -61,16 +61,17 @@ export function useNotiPeople() {
 /** 지금 한국 시간 시(0~23) */
 export const kstHour = (now = new Date()) => (now.getUTCHours() + 9) % 24;
 
-/** 알림 대상(목표·자산·챙길 날)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
+/** 알림 대상(저금 항목·자산·챙길 날)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
 async function targetGone(
   target: string,
   qc: ReturnType<typeof useQueryClient>,
 ): Promise<'deleted' | 'hidden' | null> {
-  const m = /^\/(goals|assets|calendar\/day)\/([0-9a-f-]{36})(?:[/?]|$)/.exec(target);
+  // 지난 알림의 /goals/<id>도 저금 항목(2026-11-08 ADR 0007)
+  const m = /^\/(goals|salary\/items|assets|calendar\/day)\/([0-9a-f-]{36})(?:[/?]|$)/.exec(target);
   if (!m) return null;
   const [, kind, id] = m;
   const rows: { id: string }[] =
-    kind === 'goals'
+    kind === 'goals' || kind === 'salary/items'
       ? await qc.fetchQuery({ queryKey: qk.goals, queryFn: fetchGoals })
       : kind === 'assets'
         ? await qc.fetchQuery({ queryKey: qk.assets, queryFn: fetchAssets })

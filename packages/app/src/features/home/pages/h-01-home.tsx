@@ -19,19 +19,19 @@ import {
   useNoticeBand,
 } from '../../frame';
 import {
+  AchieveWatch,
   goalLineName,
   myChecklist,
-  savedOf,
   useChecklists,
-  useGoalSaved,
+  useSavingItems,
   useSplits,
 } from '../../salary';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
-import { GoalsCard, SalaryCard, UpcomingCard, type UpcomingItem } from '../parts';
+import { SalaryCard, SavingCard, UpcomingCard, type UpcomingItem } from '../parts';
 
-// 홈(19): 오늘 띠(인사 H-01 + ‘월급 체크하기’) → 할 일 한 줄(H-06) → 왼쪽 목표(H-02)·이번 달 월급(H-03),
+// 홈(19): 할 일 한 줄(H-06) → 왼쪽 이번 달 월급(H-03)·저금 항목(H-02, ADR 0007),
 // 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 파트너 활동은 알림 센터.
 const PC_BAND = 'sweetwo.pcBandDone';
 const pcBandDone = () => {
@@ -55,7 +55,6 @@ const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconNa
   reconnect: 'link',
   review: 'check',
   invite: 'user',
-  amount: 'pencil',
   matured: 'piggy-bank',
   care: 'gift',
 };
@@ -68,7 +67,7 @@ export function H01Home() {
   const goals = useGoals();
   const lists = useChecklists();
   const splits = useSplits();
-  const sums = useGoalSaved();
+  const saving = useSavingItems();
   const nw = useNetWorth(true);
   // 할 일 한 줄·다가오는 일정은 트레이 위젯과 같은 계산(core homeTodo·homeUpcoming)
   const h = useHomeInput();
@@ -118,7 +117,6 @@ export function H01Home() {
   const personName = (id: string | null) =>
     id === meId ? myName : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
-  const saved = (g: (typeof goals.data)[number]) => savedOf(g, sums.data);
 
   // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
@@ -131,10 +129,7 @@ export function H01Home() {
         close:
           t.kind === 'invite'
             ? h.closeInvite
-            : t.kind === 'matured' ||
-                t.kind === 'care' ||
-                t.kind === 'review' ||
-                t.kind === 'amount'
+            : t.kind === 'matured' || t.kind === 'care' || t.kind === 'review'
               ? () => h.closeTodo(t.key)
               : undefined,
       }
@@ -245,7 +240,7 @@ export function H01Home() {
         title: copy.homeTitle,
         actions: (
           <>
-            {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 목표·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}
+            {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 월급·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}
             <span className="hg-wide-only">
               <AddMenu />
             </span>
@@ -255,6 +250,7 @@ export function H01Home() {
       banner={banner}
       columns={[
         <div key="l" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
+          <AchieveWatch />
           <SalaryCard
             list={list}
             partnerList={partnerList}
@@ -264,18 +260,10 @@ export function H01Home() {
             personName={personName}
             meId={meId}
             joint={joint}
-            goalOf={(id) => goals.data.find((g) => g.id === id) ?? null}
             go={go}
             locked={space.data.couple_state === 'unlink_pending'}
           />
-          <GoalsCard
-            goals={goals.data}
-            savedOf={saved}
-            meId={meId}
-            joined={joined}
-            solo={space.data.couple_state === 'solo'}
-            go={go}
-          />
+          <SavingCard items={saving.ready ? saving.withTarget : []} hasPlan={!!list} go={go} />
         </div>,
         <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
           {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}

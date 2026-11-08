@@ -1,4 +1,4 @@
--- pgTAP: 내 목표 ‘금액만 보여 주기’는 파트너에게 이름 대신 “개인 목표”(22 공개, 25 S-13)
+-- pgTAP: 내 목표 ‘금액만 보여 주기’는 파트너에게 이름 대신 “개인 저금”(20 저금 항목, 25 S-13, 2026-11-08)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(4);
@@ -35,8 +35,8 @@ select public.join_space(current_setting('test.code'));
 select public.finish_join();
 select results_eq(
   $$ select name, template, target_amount from public.space_goals() where owner_user_id is not null order by priority $$,
-  $$ values ('개인 목표', 'custom', 2000000::bigint), ('혼자 여행', 'travel', 1000000::bigint) $$,
-  '파트너: 금액만 보여 주기는 “개인 목표” + 금액, 모두 보여 주기는 그대로');
+  $$ values ('개인 저금', 'custom', 2000000::bigint), ('혼자 여행', 'travel', 1000000::bigint) $$,
+  '파트너: 금액만 보여 주기는 “개인 저금” + 금액, 모두 보여 주기는 그대로');
 select is((select details from public.space_goals() where target_amount = 2000000), '{}'::jsonb, '답도 가림');
 reset role;
 

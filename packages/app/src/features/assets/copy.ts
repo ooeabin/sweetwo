@@ -80,8 +80,6 @@ export const copy = {
   addedUp: (amount: string) => `추가했어요. 순자산이 ${amount} 늘었어요`,
   addedDown: (amount: string) => `추가했어요. 순자산이 ${amount} 줄었어요`, // [확인 필요] 부채
   added: '추가했어요', // [확인 필요] 숨기기는 합계에 없음
-  highInterest: '금리가 높은 대출이에요. 이 대출부터 갚는 목표를 만들까요?',
-  makeGoal: '목표 만들기', // [확인 필요]
 
   // F-05 월 수입·지출
   moneyTitle: '월 수입·지출', // [확인 필요] 화면 이름
@@ -135,7 +133,6 @@ export const copy = {
   emergencyOver: (balance: string) => `지금 비상금은 ${balance}이에요`,
   diagEmergency: (months: number) => `비상금으로 ${months}개월 생활할 수 있어요`,
   diagEmergencyMore: (months: number) => `${months}개월분까지 모아봐요`,
-  diagEmergencyUnknown: '비상금 목표에 모아둔 돈을 적으면 계산해요', // [확인 필요]
   diagLoan: (pct: number) => `월 수입의 ${pct}%를 대출 상환에 쓰고 있어요`,
   diagNoLoan: '대출이 없어요',
   diagFixed: (pct: number) => `월 수입의 ${pct}%가 고정지출이에요`,
@@ -151,7 +148,6 @@ export const copy = {
   weekAssets: '지금 자산을 골라주세요',
   weekAccountsIn: (n: number) => `쓰던 통장 ${n}개는 이미 넣어뒀어요`,
   weekAssetAmount: (name: string) => `${topic(name)} 얼마예요?`,
-  weekLumpGoal: '이 돈을 어느 목표에 넣을까요?',
   weekLumpNone: '아직 정하지 않았어요',
   weekRecommend: '추천',
   weekLoans: '갚고 있는 대출이 있나요?',
@@ -207,7 +203,6 @@ export const copy = {
     `${partner}님은 ‘${answer}’를 골랐어요. 다르면 더 조심스러운 쪽으로 정해요`, // [확인 필요]
   principleSaved: '투자 원칙을 정했어요', // [확인 필요]
   diagPrivate: '비공개 항목은 계산에서 빠졌어요',
-  diagGoEmergency: '비상금 보기', // [확인 필요] 비상금이 목표에서 빠짐
   diagGoDebt: '부채 목록',
   diagGoMoney: '월 수입·지출',
   diagGoInvest: '지금 정하기',
@@ -292,7 +287,6 @@ export const copy = {
   replanAsk: '계획을 다시 세워볼까요?',
   replanGo: '다시 세우기', // [확인 필요] 토스트 버튼
   replanWhat: '어떤 게 바뀌었나요?',
-  replanKinds: { move: '이사', baby: '출산', job: '이직·수입 변화', goals: '목표 변화' },
   replanIncome: (name: string) => `${name}님 한 달 수입은 얼마예요?`, // [확인 필요] O-31과 같은 질문
   replanFixed: '고정지출은 한 달에 얼마예요?', // [확인 필요] 이사: O-36과 같은 질문
   replanLiving: '생활비는 한 달에 얼마로 할까요?', // [확인 필요] 출산: O-37과 같은 질문
@@ -309,7 +303,6 @@ export const copy = {
     split: '분담',
     allowance: '용돈',
   },
-  goalWhen: (name: string) => `${name} 달성`, // [확인 필요] 목표 달성 시기 줄
   tagNow: '바로 반영',
   tagPropose: '제안',
   perMonth: (amount: string) => `월 ${amount}`,

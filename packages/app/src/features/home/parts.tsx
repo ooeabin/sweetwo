@@ -1,104 +1,97 @@
-import type { Goal, PayChecklist } from '@sweetwo/api';
-import { defaultGoalPreset, formatDateWeekday } from '@sweetwo/core';
-import {
-  Badge,
-  Button,
-  Icon,
-  goalPhotoArt,
-  Lead,
-  Ring,
-  SectionHeader,
-  goalIcon,
-} from '@sweetwo/ui';
+import type { PayChecklist } from '@sweetwo/api';
+import { formatDateWeekday } from '@sweetwo/core';
+import { Badge, Icon, Lead, ListRow, Ring, SectionHeader } from '@sweetwo/ui';
 import { PersonDot } from '../../shared/person';
 import { money, useMask } from '../../shared/mask';
-import { CheckLine, doneCount, LineLead, lineName } from '../salary';
+import {
+  CheckLine,
+  doneCount,
+  LineLead,
+  lineName,
+  salaryPaths,
+  savingPaths,
+  type SavingItem,
+} from '../salary';
 import { copy } from './copy';
 
-/** 목표 그림(2026-11-04 그 종류 지정 사진. 사진이 없으면 O-21과 같은 템플릿 아이콘) */
-function GoalLead({ template }: { template: string }) {
-  const photo = goalPhotoArt(defaultGoalPreset(template));
-  return photo ? <Lead photo={photo} /> : <Lead icon={goalIcon(template)} />;
-}
-const pctOf = (saved: number, target: number | null) =>
-  target ? Math.min(Math.floor((saved * 100) / target), 100) : 0;
-
 /**
- * H-02 목표(2026-11-03 다시 짬, 카카오T·카카오페이 진행 막대처럼): 큰 카드 하나 대신 한 카드 안에 목표 줄 최대 4개.
- * 줄 = 그림 + 이름(내 목표는 작은 “나”) + “95만 / 1억 5,000만 원” + 오른쪽 % + 아래 얇은 막대(예상 달은 목표 탭).
- * 순서: 우리 목표 → 비상금 → 내 목표(파트너 미합류·혼자 쓰기면 우리 → 내 → 비상금). 금액 없는 목표는 % 대신 ‘금액 정하기’(→ G-03 금액).
- * 이번 달 저금 체크는 위 이번 달 체크리스트에서만. 줄 → G-02. ‘지연’ 배지는 홈에 없음.
+ * H-02 저금 항목(19, ADR 0007): 한 카드 안 목표 금액이 있는 저금 항목 줄 최대 4개.
+ * 줄 = 저금통 아이콘 + 이름(파트너 항목은 작은 이름 칩) + “2,700만 / 1억 5,000만 원” + 오른쪽 %(달성이면 ‘달성’ 배지) + 아래 얇은 막대.
+ * 순서는 useSavingItems(내 것 → 파트너 것 → 우리 둘 것). 줄 → W-10. 이번 달 체크는 H-03에서만.
+ * 목표 금액이 있는 항목이 없으면 제안 한 줄(→ W-11a). 월급 계획이 없으면 둘 다 없음.
  */
-export function GoalsCard({
-  goals,
-  savedOf,
-  meId,
-  joined = true,
-  solo = false,
+export function SavingCard({
+  items,
+  hasPlan,
   go,
 }: {
-  goals: Goal[];
-  savedOf: (g: Goal) => number;
-  meId: string | undefined;
-  /** 파트너가 합류했는지(미합류·혼자 쓰기면 내 목표를 비상금보다 먼저) */
-  joined?: boolean;
-  solo?: boolean;
+  items: SavingItem[];
+  /** 월급 계획이 있는지(없으면 제안 줄도 숨김) */
+  hasPlan: boolean;
   go: (to: string) => void;
 }) {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
-  const live = goals.filter((g) => g.status === 'active' || g.status === 'delayed');
-  const ours = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === null);
-  const mine = live.filter((g) => g.template !== 'emergency' && g.owner_user_id === meId);
-  const emergency = live.filter((g) => g.template === 'emergency');
-  const list = (joined ? [...ours, ...emergency, ...mine] : [...ours, ...mine, ...emergency]).slice(
-    0,
-    4,
-  );
-  if (!list.length) return null;
+  const list = items.slice(0, 4);
+  if (!list.length) {
+    if (!hasPlan) return null;
+    return (
+      <section className="hg-stack" aria-label={copy.savings}>
+        <div className="hg-list">
+          <ListRow
+            lead={<Lead icon="piggy-bank" />}
+            label={copy.suggestSaving}
+            onClick={() => go(`${savingPaths.add}/a?from=home`)}
+            chevron={false}
+            // 줄 전체가 버튼이라 오른쪽은 보조 버튼 모양만(버튼 안 버튼을 두지 않음)
+            value={
+              <span className="hg-btn hg-btn--secondary hg-btn--sm" aria-hidden="true">
+                {copy.suggestAdd}
+              </span>
+            }
+          />
+        </div>
+      </section>
+    );
+  }
   return (
-    <section className="hg-stack" aria-label={copy.goals}>
-      <SectionHeader title={copy.goals} more={{ label: copy.moreGoals, href: '/goals' }} />
+    <section className="hg-stack" aria-label={copy.savings}>
+      <SectionHeader title={copy.savings} more={{ label: copy.toSplit, href: salaryPaths.split }} />
       <div className="hg-card hg-goallist">
-        {list.map((g) => {
-          const saved = savedOf(g);
-          const pct = pctOf(saved, g.target_amount);
-          const to = g.target_amount ? `/goals/${g.id}` : `/goals/${g.id}/set-amount`;
+        {list.map((i) => {
+          const target = i.target ?? 0;
           return (
-            <button key={g.id} type="button" className="hg-goalrow" onClick={() => go(to)}>
-              <GoalLead template={g.template} />
+            <button
+              key={i.goal.id}
+              type="button"
+              className="hg-goalrow"
+              onClick={() => go(savingPaths.item(i.goal.id))}
+            >
+              <Lead icon="piggy-bank" />
               <span className="hg-goalrow__name">
-                {g.name}
-                {g.owner_user_id === meId && !solo && <Badge kind="temp">{copy.mineMark}</Badge>}
+                {i.goal.name}
+                {i.owner === 'partner' && i.ownerName && <Badge kind="temp">{i.ownerName}</Badge>}
               </span>
               <span className="hg-goalrow__pct">
-                {g.target_amount ? (
+                {i.state === 'achieved' ? (
+                  <Badge kind="achieved">{copy.achieved}</Badge>
+                ) : (
                   <>
-                    {pct}
+                    {i.pct ?? 0}
                     <small>%</small>
                   </>
-                ) : (
-                  <span className="hg-goalrow__set">{copy.setAmount}</span>
                 )}
               </span>
-              <span className="hg-goalrow__sub">
-                {/* 금액만(한 줄). 예상 달은 목표 탭에서 */}
-                {g.target_amount ? copy.goalAmount(m(saved), m(g.target_amount)) : m(saved)}
-              </span>
-              {g.target_amount ? (
+              <span className="hg-goalrow__sub">{copy.goalAmount(m(i.saved), m(target))}</span>
+              {i.state !== 'achieved' && (
                 <span className="hg-goalrow__bar" aria-hidden="true">
-                  <i style={{ width: `${saved > 0 ? Math.max(pct, 2) : 0}%` }} />
+                  <i style={{ width: `${i.bar}%` }} />
                 </span>
-              ) : null}
+              )}
             </button>
           );
         })}
       </div>
-      {!ours.length && !mine.length && (
-        <Button variant="secondary" onClick={() => go('/goals/new')}>
-          {copy.addGoal}
-        </Button>
-      )}
     </section>
   );
 }
@@ -115,7 +108,6 @@ export function SalaryCard({
   partnerName,
   partnerStarter = false,
   goalName,
-  goalOf,
   personName,
   meId,
   joint,
@@ -128,8 +120,6 @@ export function SalaryCard({
   /** 파트너가 시작한 사람인지(Avatar 색) */
   partnerStarter?: boolean;
   goalName: (id: string | null) => string;
-  /** 저금 줄 목표 템플릿(아이콘) */
-  goalOf: (id: string | null) => { template: string; photo_path: string | null } | null;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
   joint: boolean;
@@ -184,7 +174,7 @@ export function SalaryCard({
                 name={lineName(l, goalName, personName, joint)}
                 personName={personName}
                 meId={meId}
-                lead={<LineLead line={l} goalOf={goalOf} />}
+                lead={<LineLead line={l} />}
               />
             ))}
           </div>
@@ -232,7 +222,7 @@ export interface UpcomingItem {
   label: string;
   dday: number;
   to: string;
-  /** 날짜 칸 색(월급날 초록, 월말 확인 청록, 챙길 날 분홍, 목표 기한 베이지, 만기 보라) */
+  /** 날짜 칸 색(월급날 초록, 월말 확인 청록, 챙길 날 분홍, 저금 항목 기한 베이지, 만기 보라) */
   kind: 'payday' | 'review' | 'care' | 'goal' | 'maturity';
 }
 
@@ -245,7 +235,7 @@ const KIND_TONE = {
 } as const;
 
 /**
- * H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 목표 기한, 날짜순 최대 3개.
+ * H-05 다가오는 일정: 30일 안 월급날, 월말 확인, 챙길 날, 저금 항목 기한, 날짜순 최대 3개.
  * 2026-11-03 카카오톡 일정처럼 왼쪽 날짜 칸(“10월” / “22”, 종류별 옅은 영역 색) + 이름 + 요일, 오른쪽 D-day. 주 띠는 없앰.
  */
 export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {

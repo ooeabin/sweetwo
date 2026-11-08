@@ -1,8 +1,7 @@
-import type { Goal, Me, Space } from './data';
+import type { Me, Space } from './data';
 
 // 온보딩 화면 순서(docs/spec/16-onboarding-1.md 흐름 요약, 재기획 ADR 0003). 답에 따라 목록이 바뀐다.
 // 화면 id는 경로에 그대로: /onboarding/o-10
-export const AUTO_GOALS = ['emergency'];
 
 export interface FlowState {
   me: Me | null | undefined;
@@ -14,16 +13,10 @@ export interface FlowState {
     monthly_income: number | null;
     allowance: number | null;
   } | null;
-  goals: Goal[] | undefined;
   inviteNow: 'now' | 'later' | null;
 }
 
-/** 고른 목표(자동 목표 제외), 우선순위 순 */
-export const pickedGoals = (goals: Goal[] | undefined) =>
-  (goals ?? []).filter((g) => !AUTO_GOALS.includes(g.template));
-export const topGoal = (goals: Goal[] | undefined) => pickedGoals(goals)[0];
-
-/** O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-21 → O-30 → O-31 → O-32 → O-60 → 홈 */
+/** O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-30 → O-31 → O-32 → O-60 → 홈 */
 export function screens(s: FlowState): string[] {
   // 연결 해제 뒤 다시(16 흐름 요약): O-11부터, O-10·O-03·O-06 건너뜀, O-13 출생연도는 남아 있으면 건너뜀
   const afterUnlink = !!s.space?.unlinked_from;
@@ -33,9 +26,9 @@ export function screens(s: FlowState): string[] {
   // 아직 안 정했어요면 결혼한 날·예정일(O-12)을 묻지 않음
   if (s.space?.marriage_status !== 'undecided') list.push('o-12');
   if (!(afterUnlink && s.me?.birth_year)) list.push('o-13');
-  // 목표는 고르기만(2026-11-02, ADR 0004). 금액·기한은 홈 할 일 ‘목표 금액 정하기’ → G-03b·G-03c
-  // 월급 계획(O-50)와 결과(O-60)는 온보딩에서 뺌(ADR 0005). O-31 다음에 추천 월급 계획을 만들고 홈으로
-  list.push('o-21', 'o-30', 'o-31', 'o-32', 'o-60');
+  // 목표 고르기(O-21)는 없앰(2026-11-08, ADR 0007): 저금 항목은 홈 제안 줄·월급 탭에서
+  // 월급 계획(O-50)와 결과(O-60)는 온보딩에서 뺌(ADR 0005). O-32 다음에 추천 월급 계획을 만들고 홈으로
+  list.push('o-30', 'o-31', 'o-32', 'o-60');
   return list;
 }
 

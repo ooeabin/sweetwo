@@ -9,7 +9,7 @@ import { useSettingsData } from '../data';
 import { LoadFailed } from '../load-failed';
 import { GUIDES, TOPIC_KEYS, checkPath, readPath, useChecklist } from '../guides';
 
-// S-01 가이드 모아보기(25 S-01): 지금 단계 체크리스트(진행률, 항목은 보기만 → S-02), 우리 상황에 맞는 글 3개(목표·거주 형태·자녀 계획),
+// S-01 가이드 모아보기(25 S-01): 지금 단계 체크리스트(진행률, 항목은 보기만 → S-02), 우리 상황에 맞는 글 3개(저금 항목 이름·거주 형태·자녀 계획),
 // 주제별 가이드 6개(→ S-03), 우리 둘 대화 카드 다시 보기(W-04i). 완료는 이번 달 할 일에서만.
 export function S01Guides() {
   const nav = useNavigate();
@@ -31,7 +31,8 @@ export function S01Guides() {
   const mine = pickGuides({
     housing: d.space.housing,
     childPlan: d.space.child_plan,
-    templates: (goals.data ?? []).map((g) => g.template),
+    templates: (goals.data ?? []).filter((g) => !g.deleted_at).map((g) => g.template),
+    names: (goals.data ?? []).filter((g) => !g.deleted_at).map((g) => g.name),
   });
   const guide = (key: string) => GUIDES.find((g) => g.key === key);
   const body = (

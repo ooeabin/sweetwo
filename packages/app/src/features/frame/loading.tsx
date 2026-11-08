@@ -5,7 +5,7 @@ import { MainFrame } from './frame';
  * 뼈대 모양(docs/design/components/Skeleton.md). 2026-11-04 화면 모양별(당근·토스처럼):
  * list = 설정·상세 하위(머리 + 줄 카드), home = 홈(숫자 자리 + 카드), cards = 그 밖.
  * 2026-11-06 화면 제목 줄(page)이 따로 있는 화면의 본문만: rows = 줄 카드(자산·부채, 캘린더 목록),
- * tiles = 요약 카드 + 2열 타일(G-01 목표), calendar = 달력 카드 + 줄 카드(Y-04)
+ * tiles = 요약 카드 + 2열 타일, calendar = 달력 카드 + 줄 카드(Y-04)
  */
 export type SkelShape = 'list' | 'home' | 'cards' | 'rows' | 'tiles' | 'calendar';
 

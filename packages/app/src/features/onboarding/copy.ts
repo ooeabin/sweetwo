@@ -1,5 +1,3 @@
-import { object } from '@sweetwo/core';
-
 // 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
@@ -22,7 +20,7 @@ export const copy = {
   nameRequired: '이름을 넣어 주세요',
   // O-06, O-07
   inviteNow: '같이 쓸 사람을 초대할까요?',
-  inviteNowHelp: '목표와 월급을 둘이 같이 볼 수 있어요', // [확인 필요]
+  inviteNowHelp: '월급과 저금을 둘이 같이 볼 수 있어요', // [확인 필요] 2026-11-08
   inviteChoices: { now: '초대하기', later: '나중에 할게요' },
   inviteTitle: '이 코드를 보내 주세요',
   copyLink: '링크 복사',
@@ -33,11 +31,11 @@ export const copy = {
   copied: '복사했어요', // [확인 필요] 복사 토스트
 
   // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
-  overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
+  overviewTitle: '2분이면 우리 월급 계획이 생겨요', // [확인 필요] 2026-11-08
   // [확인 필요] O-10 3단계 안내(2026-11-02, 배민 커넥트·GCOO 시작 화면처럼)
   overviewSteps: [
-    { icon: 'flag-pennant', text: '같이 이룰 목표를 골라요' },
     { icon: 'wallet', text: '월급과 월급날을 알려 줘요' },
+    { icon: 'hand-coins', text: '월급 계획을 추천으로 만들어 드려요' },
     { icon: 'calendar-check', text: '월급날마다 보낸 돈을 체크해요' },
   ] as const,
   // O-60 준비 끝(2026-11-02 다시 둠) [확인 필요]
@@ -46,7 +44,7 @@ export const copy = {
   readyDone: {
     split: '월급을 추천값으로 나눠 뒀어요',
     checklist: (day: string) => `${day} 월급 체크리스트를 만들었어요`,
-    goal: '목표 금액은 홈에서 정해요',
+    goal: '저금 항목은 홈에서 추가해요', // 2026-11-08
     salary: '월급이 생기면 홈에서 알려 주세요',
   },
   readyGo: '홈으로 가기',
@@ -76,25 +74,6 @@ export const copy = {
 
   // O-13
   birthYear: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
-  // O-21
-  goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
-  goalsHelp: '모으고 싶은 순서대로 골라 주세요', // [확인 필요]
-  recommended: '추천',
-  makeOwn: '직접 만들기',
-  picked: (n: number) => `${n}개 골랐어요`,
-  goalsLater: '나중에 고를게요', // [확인 필요] O-21 하나도 안 골랐을 때
-  goalTabsLabel: '목표 분류',
-
-  // O-23, O-24
-  first: '1순위',
-  saveRatio: (manText: string) => `${manText}을 모아요`,
-  yearsLater: (n: number) => `${n}년 뒤`,
-  monthlyNeed: (manText: string) => `매달 ${manText}씩 모으면 돼요`,
-  needFormula: (left: string, months: number) => `${left} ÷ ${months}개월`,
-  goalDeadline: '언제까지 모을까요?', // [확인 필요] O-24 질문 문구
-  notBeforeThisYear: (y: number) => `${y}년부터 넣어 주세요`, // [확인 필요]
-  yearTotal: (manText: string) => `1년에 모두 ${manText} 원`,
-
   // O-32, O-33
   payday: '월급날은 며칠이에요?',
   paydayLast: '말일',
@@ -148,14 +127,4 @@ export const copy = {
   short: (man: string) => `${man}이 모자라요`,
   shortHelp: '쓰는 돈이나 저금을 줄여 주세요',
   splitDone: '이대로 저장하기',
-  resultTitle: (monthly: string, when: string, goal: string) =>
-    `매달 ${monthly}씩 모으면 ${when}에 ${object(goal)} 이뤄요`, // [확인 필요]
-  resultNoSaving: '월급 계획에서 저금을 정하면 언제 이룰지 알려 드려요',
-  resultLate: (n: string) => `목표 기한보다 ${n} 늦어요`,
-  resultOnTime: '목표 기한 안에 이뤄요',
-  resultLateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
-  resultTodo: (day: string) => `월급날(${day})에 월급 계획대로 보내고 체크해 주세요`, // [확인 필요]
-  resultStart: '시작하기',
-  years: (n: number) => `${n}년`,
-  months: (n: number) => `${n}개월`,
 };

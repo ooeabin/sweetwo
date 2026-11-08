@@ -1,14 +1,17 @@
 import { completeJoin, type Goal } from '@sweetwo/api';
 import { jointRefill, joinerSplit, type SplitLineDraft } from '@sweetwo/core';
-import { savingGoals, toAllocGoal, toDraft } from '../salary';
+import { savingGoals, toDraft, toPlanItem } from '../salary';
 import type { JoinData } from './data';
 
-type Snap = Pick<JoinData, 'me' | 'space' | 'partner' | 'splits' | 'resumed'> & { goals: Goal[] };
+type Snap = Pick<JoinData, 'me' | 'space' | 'partner' | 'splits' | 'resumed'> & {
+  goals: Goal[];
+  saved?: Record<string, number>;
+};
 
 /**
  * 합류한 사람의 월급 계획 초안(18 P-06 규칙, O-50 추천과 같은 자리).
- * 각자: core joinerSplit(고정 25%, 생활 25%, 용돈 10%, 우리 목표에 아직 안 채운 월 필요액만큼).
- * 합쳐서: core jointRefill(있던 줄 그대로, 내 용돈 줄 + 늘어난 수입을 저금 줄 순서대로). 대기 뒤 이어서면 시작한 사람이 만든 그대로.
+ * 각자: core joinerSplit(고정 25%, 생활 25%, 용돈 10%. 저금 줄은 없음, 저금 항목은 각자 자기 월급 계획에만, ADR 0007).
+ * 합쳐서: core jointRefill(있던 줄 그대로, 내 용돈 줄 + 늘어난 수입을 저금 줄 순서대로 월 필요액까지). 대기 뒤 이어서면 시작한 사람이 만든 그대로.
  */
 export function joinDraft(x: Snap) {
   const me = x.me;
@@ -20,7 +23,12 @@ export function joinDraft(x: Snap) {
     const current = jointSplit ? toDraft(jointSplit.split_line) : [];
     const lines: SplitLineDraft[] = x.resumed
       ? current
-      : jointRefill({ lines: current, income, userId: me.id, goals: x.goals.map(toAllocGoal) });
+      : jointRefill({
+          lines: current,
+          income,
+          userId: me.id,
+          items: savingGoals(x.goals, null).map((g) => toPlanItem(g, x.saved)),
+        });
     return {
       joint,
       lines,
@@ -29,21 +37,8 @@ export function joinDraft(x: Snap) {
       others: {} as Record<string, number>,
     };
   }
-  const theirs = x.splits.find((s) => s.owner_user_id === x.partner?.id);
-  const others: Record<string, number> = Object.fromEntries(
-    (theirs?.split_line ?? [])
-      .filter((l) => l.kind === 'saving' && l.goal_id)
-      .map((l) => [l.goal_id ?? '', l.amount]),
-  );
-  const lines = joinerSplit({
-    income,
-    userId: me.id,
-    // 우리 목표만(시작한 사람의 내 목표는 줄이 없음)
-    goals: savingGoals(x.goals, me.id)
-      .filter((g) => g.owner_user_id === null)
-      .map(toAllocGoal),
-    others,
-  });
+  const lines = joinerSplit({ income, userId: me.id });
+  const others: Record<string, number> = {};
   return { joint, lines, current: [] as SplitLineDraft[], version: undefined, others };
 }
 
@@ -62,6 +57,7 @@ export async function finishJoin(d: JoinData) {
       partner: partner.data ?? null,
       splits: list,
       goals: d.goals,
+      saved: d.saved,
       resumed: me.data?.onboarding_step === 'P-WAIT',
     });
     if (!draft) return 'ok' as const;

@@ -2,6 +2,7 @@
 export const qk = {
   me: ['me'] as const,
   space: ['space'] as const,
+  /** 저금 항목(goal 행, space_goals) */
   goals: ['goals'] as const,
   partner: ['partner'] as const,
   partnerBirthYear: ['partner', 'birth-year'] as const,
@@ -13,11 +14,8 @@ export const qk = {
   todos: ['todo'] as const,
   spendCategories: ['spend_category'] as const,
   monthClose: (planId: string) => ['month_close', planId] as const,
-  goalRecords: ['goal_records'] as const,
-  emergencyMoves: ['emergency_move'] as const,
   recentCloses: ['recent_closes'] as const,
   assets: ['asset'] as const,
-  goalAssetSums: ['goal_asset_sums'] as const,
   partnerAssetSums: ['partner_asset_sums'] as const,
   netWorthHistory: ['net_worth_history'] as const,
   investAnswers: ['invest_answers'] as const,
@@ -52,17 +50,15 @@ export const qk = {
   weddingPayments: ['wedding_payment'] as const,
   pastPlans: (today: string) => ['monthly_plan', 'past', today] as const,
   recentClosesLong: ['recent_closes', 'long'] as const,
-  cycleGoalUses: (start: string, end: string) => ['goal_use', start, end] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
   splits: ['salary_split'] as const,
   checklists: (today: string) => ['pay_checklist', today] as const,
   pastChecklists: (owner: string | null, before: string) =>
     ['pay_checklist', 'past', owner ?? 'joint', before] as const,
-  goalCheckedSums: ['goal_checked_sums'] as const,
+  /** 저금 항목별 모은 돈 */
   goalSaved: ['goal_saved'] as const,
-  goalMoves: (id: string) => ['goal_move', id] as const,
-  goalChanges: ['goal_changes'] as const,
   pendingTerms: ['pending_terms'] as const,
   mailBounced: ['mail_bounced'] as const,
+  /** 저금 항목 하나의 체크 줄(W-10 모은 기록) */
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };

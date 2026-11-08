@@ -219,7 +219,7 @@ export type AdminAccessData = z.infer<typeof AdminAccessData>;
 
 /** 사용자 화면 범위(S-19b와 같은 키) */
 // 2026-11-06: 지금 앱에 있는 화면만(‘월급 플랜’ plan은 month와 같은 데이터, ‘월말 정리’ close와 ‘월 수입·지출’ income_spend는 없앤 화면).
-// 예전 요청 기록의 키는 그대로 읽음.
+// 예전 요청 기록의 키는 그대로 읽음. goals = 월급 화면(2026-11-08 ADR 0007, 목표 탭 자리, 키는 그대로).
 export const ACCESS_SCOPES = ['month', 'goals', 'assets', 'calendar'] as const;
 
 // ── AD-10 공지 대상(27 AD-10·11 2·4번) ───────────────────────────────────

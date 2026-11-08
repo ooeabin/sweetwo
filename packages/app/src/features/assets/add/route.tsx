@@ -1,12 +1,5 @@
 import { insertAsset } from '@sweetwo/api';
-import {
-  assetGroup,
-  bands,
-  isHighInterestKind,
-  quickChips,
-  todayKst,
-  type AssetSide,
-} from '@sweetwo/core';
+import { assetGroup, bands, quickChips, todayKst, type AssetSide } from '@sweetwo/core';
 import {
   AmountInput,
   ChoiceCards,
@@ -111,8 +104,6 @@ export function AssetAddRoute() {
             : copy.addedDown(money(x.amount, masked)),
       );
       nav(`/assets/items?side=${x.side}`, { replace: true });
-      if (x.side === 'debt' && isHighInterestKind(x.kind))
-        toast(copy.highInterest, { label: copy.makeGoal, onClick: () => nav('/goals/new') });
     } catch {
       toast(copy.loadFailed);
     } finally {

@@ -2,7 +2,6 @@ import { fetchAssets, fetchCareDays, fetchGoals, qk } from '@sweetwo/api';
 import {
   CommandPalette,
   Menu,
-  goalIcon,
   type CommandGroup,
   type CommandItem,
   type MenuAction,
@@ -15,28 +14,32 @@ import { session } from '../auth';
 import { copy } from './copy';
 
 // 앱 기본 틀 동작(19 앱 기본 틀 3·4·7·11·12번):
-// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 목표, 자산·부채, 챙길 날(최대 5개씩)
+// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 저금 항목, 자산·부채, 챙길 날(최대 5개씩)
 // - Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N 추가(홈은 추가 메뉴를 엶, 다른 메뉴는 그 화면에 맞는 추가)
-// - 추가 = 목표 / 자산·부채 / 챙길 날
+// - 추가 = 저금 항목 / 자산·부채 / 챙길 날(2026-11-08 목표 대신 저금 항목, ADR 0007)
 
-export const ADD_TO = { goal: '/goals/new', asset: '/assets/new', care: '/calendar/add' } as const;
-const TABS = ['/', '/goals', '/assets', '/calendar'] as const;
-type Tab = 'month' | 'goals' | 'assets' | 'calendar';
-/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·목표 = 목표, 우리 자산 = 자산·부채, 캘린더 = 챙길 날 */
+export const ADD_TO = {
+  saving: '/salary/items/new',
+  asset: '/assets/new',
+  care: '/calendar/add',
+} as const;
+const TABS = ['/', '/salary', '/assets', '/calendar'] as const;
+type Tab = 'month' | 'salary' | 'assets' | 'calendar';
+/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·월급 = 저금 항목, 우리 자산 = 자산·부채, 캘린더 = 챙길 날 */
 export const addFor = (t: Tab | null) =>
-  t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.goal;
+  t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.saving;
 
 const Ctx = createContext<{ addOpen: boolean; setAddOpen: (v: boolean) => void }>({
   addOpen: false,
   setAddOpen: () => undefined,
 });
 
-/** 오늘 띠 ‘추가’(보조 버튼): 목표 / 자산·부채 / 챙길 날. Ctrl(⌘)+N으로도 열림 */
+/** 오늘 띠 ‘추가’(보조 버튼): 저금 항목 / 자산·부채 / 챙길 날. Ctrl(⌘)+N으로도 열림 */
 export function AddMenu() {
   const nav = useNavigate();
   const { addOpen, setAddOpen } = useContext(Ctx);
   const actions: MenuAction[] = [
-    { label: copy.addGoal, onSelect: () => nav(ADD_TO.goal) },
+    { label: copy.addSaving, onSelect: () => nav(ADD_TO.saving) },
     { label: copy.addAsset, onSelect: () => nav(ADD_TO.asset) },
     { label: copy.addCare, onSelect: () => nav(ADD_TO.care) },
   ];
@@ -137,7 +140,12 @@ function Palette({
   // 줄 앞 아이콘(2026-11-03)
   const all: CommandItem[] = [
     { key: 'check', icon: 'check', label: copy.cmdCheck, onRun: () => nav('/salary') },
-    { key: 'goal', icon: 'target', label: copy.cmdGoal, onRun: () => nav(ADD_TO.goal) },
+    {
+      key: 'saving',
+      icon: 'piggy-bank',
+      label: copy.cmdSaving,
+      onRun: () => nav(`${ADD_TO.saving}/a?from=palette`),
+    },
     { key: 'asset', icon: 'wallet', label: copy.cmdAsset, onRun: () => nav(ADD_TO.asset) },
     {
       key: 'mask',
@@ -161,15 +169,15 @@ function Palette({
   if (q) {
     groups.push(
       {
-        label: copy.cmdGoals,
+        label: copy.cmdSavings,
         items: (goals.data ?? [])
-          .filter((g) => hit(g.name))
+          .filter((g) => !g.deleted_at && hit(g.name))
           .slice(0, 5)
           .map((g) => ({
             key: g.id,
-            icon: goalIcon(g.template),
+            icon: 'piggy-bank' as const,
             label: g.name,
-            onRun: () => nav(`/goals/${g.id}`),
+            onRun: () => nav(`/salary/items/${g.id}`),
           })),
       },
       {

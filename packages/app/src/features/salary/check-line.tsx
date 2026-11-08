@@ -1,18 +1,8 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { defaultGoalPreset, formatDot2, todayKst } from '@sweetwo/core';
-import {
-  BottomSheet,
-  Button,
-  goalIcon,
-  goalPhotoArt,
-  icon3d,
-  type IconName,
-  Lead,
-  TransferRow,
-} from '@sweetwo/ui';
+import { formatDot2, todayKst } from '@sweetwo/core';
+import { BottomSheet, Button, icon3d, type IconName, Lead, TransferRow } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
-import { usePhotoUrls } from '../../shared/photo';
 import { quietly, toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useCheck } from './data';
@@ -35,29 +25,16 @@ const LINE_ART = {
   custom: 'line-custom',
 } as const;
 
-/** 줄 앞 아이콘(2026-11-03): 저금은 그 목표 사진(올린 사진 → 종류 지정 사진 → 목표 아이콘), 쓰는 돈은 종류 3D 아이콘(2026-11-05) */
-export function LineLead({
-  line,
-  goalOf,
-}: {
-  line: Pick<PayCheckLine, 'kind' | 'goal_id'>;
-  /** 저금 줄의 목표(종류, 올린 사진 경로) */
-  goalOf: (id: string | null) => { template: string; photo_path: string | null } | null;
-}) {
-  const g = line.kind === 'saving' ? goalOf(line.goal_id) : null;
-  // 올린 사진(서명 주소) → 그 종류 지정 사진 → 목표 아이콘(2026-11-05)
-  const uploaded = usePhotoUrls([g?.photo_path])[g?.photo_path ?? ''];
-  if (line.kind === 'saving') {
-    const t = g?.template ?? 'custom';
-    return <Lead icon={goalIcon(t)} photo={uploaded ?? goalPhotoArt(defaultGoalPreset(t))} />;
-  }
+/** 줄 앞 아이콘: 저금 항목은 저금통(2026-11-08 ADR 0007, 목표 사진 없음), 쓰는 돈은 종류 아이콘. 그림 자리는 2D로 다시 만들 때까지 빈 원 */
+export function LineLead({ line }: { line: Pick<PayCheckLine, 'kind'> }) {
+  if (line.kind === 'saving') return <Lead icon="piggy-bank" />;
   const k = line.kind as keyof typeof LINE_ICON;
   return <Lead icon={LINE_ICON[k]} art3d={icon3d(LINE_ART[k])} />;
 }
 
 /**
- * 저금 줄 목표 이름. 합쳐서 모드에서 내 목표 줄은 앞에 주인 이름(“찬우 자기계발”, 20 W-01 3번).
- * 파트너 내 목표가 ‘금액만 보여 주기’면 서버가 이미 “개인 목표”로 줌(space_goals)
+ * 저금 줄 이름 = 저금 항목 이름. 합쳐서 모드에서 각자일 때 만든 항목 줄은 앞에 주인 이름(“찬우 적금”, 20 W-01 3번).
+ * 파트너 저금 항목이 ‘금액만 보여 주기’면 서버가 이미 “개인 저금”으로 줌(space_goals)
  */
 export const goalLineName =
   (
@@ -73,7 +50,7 @@ export const goalLineName =
       : g.name;
   };
 
-/** 줄 이름: 저금은 목표 이름, 용돈은 “{이름} 용돈”(합쳐서), 직접 추가 줄은 그 이름 */
+/** 줄 이름: 저금은 저금 항목 이름, 용돈은 “{이름} 용돈”(합쳐서), 직접 추가 줄은 그 이름 */
 export function lineName(
   l: Pick<PayCheckLine, 'kind' | 'goal_id' | 'user_id' | 'name'>,
   goalName: (id: string | null) => string,
@@ -90,10 +67,11 @@ export function lineName(
 const amountOf = (l: PayCheckLine) => l.actual ?? l.planned;
 
 /**
- * 체크리스트 줄 하나(W-02, H-03, W-05). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
- * 체크 = 바로 완료, 저금이면 목표에 더하고 Toast “{목표}에 {금액} 더했어요” + 되돌리기. 다시 누르면 풀림.
- * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02) / ‘이번 달은 못 했어요’(W-05).
- * 줄마다 링크를 반복하지 않음(2026-11-03).
+ * 체크리스트 줄 하나(W-02, H-03, W-05, W-10). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
+ * 체크 = 바로 완료, 저금이면 저금 항목 모은 돈에 더하고 Toast “{이름}에 {금액} 더했어요” + 되돌리기. 다시 누르면 풀림.
+ * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02) / ‘이번 달은 못 했어요’(W-05)
+ * + 저금 줄은 ‘저금 항목 보기’(W-10, 체크한 줄도). 줄마다 링크를 반복하지 않음(2026-11-03).
+ * 목표 금액이 있는 저금 줄은 줄 아래 진행(progress).
  */
 export function CheckLine({
   line,
@@ -105,11 +83,13 @@ export function CheckLine({
   viewOnly = false,
   onOther,
   onSkip,
+  onItem,
+  progress,
   lead,
 }: {
   line: PayCheckLine;
   name: string;
-  /** 토스트 “{목표}에 {금액} 더했어요”의 목표 이름(줄 글자가 목표 이름이 아닌 곳: 홈 큰 카드, 목표 상세) */
+  /** 토스트 “{이름}에 {금액} 더했어요”의 저금 항목 이름(줄 글자가 이름이 아닌 곳: 저금 항목 상세) */
   goalName?: string;
   personName: (id: string | null) => string | null;
   meId: string | undefined;
@@ -121,6 +101,10 @@ export function CheckLine({
   onOther?: () => void;
   /** W-05 ‘이번 달은 못 했어요’ */
   onSkip?: () => void;
+  /** 저금 줄 시트 ‘저금 항목 보기’(W-10) */
+  onItem?: () => void;
+  /** 저금 줄 진행(목표 금액이 있을 때, 체크한 사람·때 자리) */
+  progress?: ReactNode;
   /** 줄 앞 아이콘(홈) */
   lead?: ReactNode;
 }) {
@@ -157,7 +141,7 @@ export function CheckLine({
   const shownDone = pending ? pending === 'checked' : done || skipped;
 
   const when = line.checked_at ? formatDot2(line.checked_at.slice(0, 10)) : null;
-  const meta = skipped ? (
+  const checkMeta = skipped ? (
     copy.skipped
   ) : done && when ? (
     line.checked_by && line.checked_by !== meId ? (
@@ -169,7 +153,9 @@ export function CheckLine({
       copy.checkedAt(when)
     )
   ) : undefined;
+  const meta = progress ?? checkMeta;
   const open = !done && !skipped && !readOnly && !viewOnly;
+  const canSheet = (open && (onOther || onSkip)) || !!onItem;
   const pick = (f: () => void) => () => {
     setSheet(false);
     f();
@@ -187,7 +173,7 @@ export function CheckLine({
         viewOnly={viewOnly}
         meta={meta}
         lead={lead}
-        onOpen={open && (onOther || onSkip) ? () => setSheet(true) : undefined}
+        onOpen={canSheet ? () => setSheet(true) : undefined}
       />
       {sheet && (
         <BottomSheet
@@ -195,17 +181,24 @@ export function CheckLine({
           onClose={() => setSheet(false)}
           actions={
             <>
-              <Button block variant="primary" onClick={pick(() => void toggle())}>
-                {copy.sent}
-              </Button>
-              {onOther && (
+              {open && (
+                <Button block variant="primary" onClick={pick(() => void toggle())}>
+                  {copy.sent}
+                </Button>
+              )}
+              {open && onOther && (
                 <Button block variant="secondary" onClick={pick(onOther)}>
                   {copy.otherAmount}
                 </Button>
               )}
-              {onSkip && (
+              {open && onSkip && (
                 <Button block variant="secondary" onClick={pick(onSkip)}>
                   {copy.skipped}
+                </Button>
+              )}
+              {onItem && (
+                <Button block variant="ghost" onClick={pick(onItem)}>
+                  {copy.seeItem}
                 </Button>
               )}
             </>

@@ -1,5 +1,5 @@
 import type { Goal } from '@sweetwo/api';
-import { emergencyMonthly, goalNeed, leftover, readWon, type SplitLineDraft } from '@sweetwo/core';
+import { dateToYm, leftover, readWon, savingNeed, type SplitLineDraft } from '@sweetwo/core';
 import {
   AmountInput,
   Button,
@@ -13,7 +13,6 @@ import {
 import { useState, type ReactNode } from 'react';
 import { copy } from './copy';
 import { goalLineName } from './check-line';
-import { toAllocGoal } from './split-draft';
 
 const MAX_CUSTOM = 10;
 const NAME_MAX = 20; // 직접 추가 줄 이름
@@ -21,8 +20,9 @@ const NAME_MAX = 20; // 직접 추가 줄 이름
 type Edit = { index: number } | { add: true } | null;
 
 /**
- * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음 → 쓰는 돈 묶음 → ‘+ 줄 추가’,
+ * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음(+ 저금 항목 추가) → 쓰는 돈 묶음 → ‘+ 줄 추가’,
  * 주 버튼 위에 남는 돈(음수면 “{n}이 모자라요”, 막지 않음). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜.
+ * 저금 줄 금액 입력 아래 ‘저금 항목 보기’ → W-10(onItem). 저금 줄 보조 글 = 진행 “120만 / 500만 원” + 월 필요액(기한이 있을 때)
  */
 export function SplitEditor({
   lines,
@@ -48,6 +48,9 @@ export function SplitEditor({
   onIncome,
   notice,
   readOnly,
+  savedOf,
+  onItem,
+  onAddItem,
 }: {
   lines: SplitLineDraft[];
   onChange: (lines: SplitLineDraft[]) => void;
@@ -81,13 +84,17 @@ export function SplitEditor({
   notice?: ReactNode;
   /** 모든 줄 고치기 막음(연결 해제 대기, 20 예외) */
   readOnly?: boolean;
+  /** 저금 항목 모은 돈(진행·월 필요액) */
+  savedOf?: (goalId: string) => number;
+  /** 저금 줄 금액 입력 아래 ‘저금 항목 보기’(W-10) */
+  onItem?: (goalId: string) => void;
+  /** 저금 묶음 아래 ‘+ 저금 항목 추가’(W-11a, W-01 3a) */
+  onAddItem?: () => void;
 }) {
   const [edit, setEdit] = useState<Edit>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const [name, setName] = useState('');
   const left = leftover(income, lines);
-  const sum = (k: SplitLineDraft['kind']) =>
-    lines.filter((l) => l.kind === k).reduce((s, l) => s + l.amount, 0);
   const goalOf = (id?: string) => goals.find((g) => g.id === id);
   const goalName = goalLineName(goals, (id) => personName(id ?? undefined), joint);
   const nameOf = (l: SplitLineDraft) =>
@@ -98,12 +105,18 @@ export function SplitEditor({
         : l.kind === 'allowance' && joint
           ? `${personName(l.userId)} ${copy.lineNames.allowance}`
           : copy.lineNames[l.kind];
-  /** 저금 줄 오른쪽 회색 “매달 {n}이 필요해요”(금액이 정해진 목표만, 비상금은 (고정 + 생활) × 3 ÷ 12) */
-  const needOf = (l: SplitLineDraft) => {
+  /** 저금 줄 보조 글: 목표 금액이 있으면 “120만 / 500만 원”, 기한도 있으면 + “매달 250만 원이 필요해요”(06 5-2) */
+  const savingSub = (l: SplitLineDraft) => {
     const g = goalOf(l.goalId);
-    if (!g) return null;
-    if (g.template === 'emergency') return emergencyMonthly(sum('fixed'), sum('living')) || null;
-    return goalNeed(toAllocGoal(g));
+    if (!g || g.target_amount === null) return undefined;
+    const saved = l.goalId ? (savedOf?.(l.goalId) ?? 0) : 0;
+    const need = savingNeed({
+      target: g.target_amount,
+      saved,
+      deadline: g.deadline ? dateToYm(g.deadline) : null,
+    });
+    const progress = copy.itemProgress(readWon(saved), readWon(g.target_amount));
+    return need ? `${progress}, ${copy.needPerMonth(readWon(need))}` : progress;
   };
   const paydayText = payday === 'last' ? copy.paydayLast : payday ? copy.payday(payday) : '';
 
@@ -153,6 +166,11 @@ export function SplitEditor({
         )}
         <AmountInput label={head} value={v} onChange={setAmount} monthly allowZero />
         {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
+        {!isAdd && line?.kind === 'saving' && line.goalId && onItem && (
+          <Button variant="ghost" onClick={() => onItem(line.goalId ?? '')}>
+            {copy.seeItem}
+          </Button>
+        )}
         {!isAdd && line?.kind === 'custom' && (
           <Button
             variant="ghost"
@@ -169,14 +187,13 @@ export function SplitEditor({
   }
 
   const row = (l: SplitLineDraft, i: number) => {
-    const need = l.kind === 'saving' ? needOf(l) : null;
     const sub =
       l.kind === 'fixed'
         ? copy.fixedSub
         : l.kind === 'living'
           ? copy.livingSub
-          : need
-            ? copy.needPerMonth(readWon(need))
+          : l.kind === 'saving'
+            ? savingSub(l)
             : undefined;
     const fixed = readOnly || locked?.(l);
     return (
@@ -227,6 +244,14 @@ export function SplitEditor({
       <SectionHeader title={copy.savingGroup} />
       <List label={copy.savingGroup}>
         {indexed.filter(({ l }) => l.kind === 'saving').map(({ l, i }) => row(l, i))}
+        {!readOnly && onAddItem && (
+          <ListRow
+            icon="plus"
+            label={copy.addItem.replace(/^\+\s*/, '')}
+            chevron={false}
+            onClick={onAddItem}
+          />
+        )}
       </List>
       <SectionHeader title={copy.spendGroup} />
       <List label={copy.spendGroup}>

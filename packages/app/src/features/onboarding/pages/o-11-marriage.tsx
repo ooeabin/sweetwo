@@ -5,7 +5,7 @@ import { useStep } from '../step';
 
 type Status = keyof typeof copy.marriedChoices;
 
-// O-11 결혼 상태(Q1) → O-12(했어요 / 준비 중에 따라 질문이 다름). 준비 중 → O-21 ‘결혼 비용’ 추천 배지 + 맨 앞.
+// O-11 결혼 상태(Q1) → O-12(했어요 / 준비 중에 따라 질문이 다름). 결혼 비용 추천은 2026-11-08 O-21과 함께 없앰.
 // 아직 안 정했어요 → O-12 없이 O-13(날짜는 비움)
 export function O11Marriage() {
   const s = useStep('o-11');

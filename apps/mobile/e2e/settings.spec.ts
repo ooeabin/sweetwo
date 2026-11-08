@@ -180,7 +180,7 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 챙길 날 체�
     .toBe(true);
   await expect(card.getByRole('switch', { name: /예빈님이 바꾼 값/ })).toBeVisible();
   await expect(card).toContainText(
-    '월급 계획·관리 방식·목표 변경은 바로, 나머지는 월요일에 모아서 알려요',
+    '월급 계획·관리 방식·저금 항목 변경은 바로, 나머지는 월요일에 모아서 알려요',
   );
   await expect(card.getByRole('switch', { name: '월급 체크리스트' })).toBeVisible();
   await expect(page.getByText('계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요')).toBeVisible();
@@ -489,7 +489,7 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
     page.getByText(
-      '연결을 끊기 전 같이 쓰던 목표와 월급 계획이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
+      '연결을 끊기 전 같이 쓰던 월급 계획과 저금 항목이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
     ),
   ).toBeVisible();
   await axe(page);
@@ -552,7 +552,9 @@ test('공개 범위(S-13): 새 항목 기본값, 이미 있는 항목도 바꾸�
   await axe(page);
 });
 
-test('휴지통(S-21): 되살리기(연결된 두 사람 목표도 바로), 영구 삭제', async ({ page }, info) => {
+test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로), 영구 삭제', async ({
+  page,
+}, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -843,8 +845,8 @@ test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려�
 
   // 마케팅만 남은 경우
   db.pendingTerms = [{ kind: 'marketing', version: '' }];
-  await page.goto('/goals');
+  await page.goto('/calendar/list');
   await expect(page.getByRole('heading', { name: '마케팅 정보를 계속 받을까요?' })).toBeVisible();
   await page.getByRole('button', { name: '그만 받을게요' }).click();
-  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page).toHaveURL(/\/calendar\/list$/);
 });

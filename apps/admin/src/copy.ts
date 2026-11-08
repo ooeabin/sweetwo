@@ -118,7 +118,7 @@ export const copy = {
   invite: (made: string, until: string, used: string | null) =>
     used ? `${made} 발급, ${used} 사용` : `${made} 발급, ${until} 만료`, // [확인 필요]
   counts: (a: number, est: number, g: number, c: number) =>
-    `자산 ${a}개, 그중 추정 ${est}개, 목표 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
+    `자산 ${a}개, 그중 추정 ${est}개, 저금 항목 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
   planStatus: '이번 달 체크리스트', // [확인 필요]
   checklistStates: { open: '진행 중', done: '다 했어요', closed: '끝남' } as Record<string, string>,
   checklistLine: (label: string, state: string, checked: number, total: number) =>
@@ -165,7 +165,7 @@ export const copy = {
     month: '이번 달 화면',
     plan: '이번 달 화면', // 예전 키(지금은 month)
     close: '월말 확인 화면', // 예전 키, 새 요청에는 없음
-    goals: '목표 화면',
+    goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
     assets: '우리 자산 화면',
     income_spend: '월 수입·지출(없앤 화면)', // 예전 키, 새 요청에는 없음
     calendar: '캘린더 화면',
@@ -235,7 +235,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '커플 연결', // [확인 필요]
-    calc: '목표·월급 체크리스트',
+    calc: '저금 항목·월급 체크리스트', // 2026-11-08 ADR 0007
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',

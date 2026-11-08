@@ -673,7 +673,7 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await heading(page, '회원 상세');
   await expect(page.getByText('cha***@example.com')).toBeVisible();
   await expect(
-    page.getByText('자산 6개, 그중 추정 2개, 목표 3개, 끝난 체크리스트 1번'),
+    page.getByText('자산 6개, 그중 추정 2개, 저금 항목 3개, 끝난 체크리스트 1번'),
   ).toBeVisible();
   await expect(page.getByText('10월 월급 진행 중, 3/5줄 체크')).toBeVisible();
   await expect(page.getByText(/데스크톱 1\.0\.0/)).toBeVisible();
@@ -751,11 +751,9 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
   });
 
   // 금액 원값: 화면 1개만, 최고 관리자 승인 요청
-  await ask.getByRole('button', { name: '목표' }).click();
+  await ask.getByRole('button', { name: '월급 화면' }).click();
   await ask.getByLabel('금액 원값 요청').check();
-  await expect(
-    ask.getByText('최고 관리자 승인 후 요청', { exact: false }),
-  ).toBeVisible();
+  await expect(ask.getByText('최고 관리자 승인 후 요청', { exact: false })).toBeVisible();
   await ask.getByLabel('사유').fill('목표 금액 확인');
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
   await expect(page.getByText('원값 승인 요청됨')).toBeVisible();
@@ -784,9 +782,7 @@ test('이메일 문의 상세: 제목, 가린 보낸 주소, 회원 연결 없�
   const msgs = page.locator('ol li');
   await expect(msgs.nth(0)).toContainText('요금이 있나요?');
   await expect(msgs.nth(1)).toContainText('답장 기다려요');
-  await expect(
-    page.getByText('네이버웍스 help@에서 직접', { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByText('네이버웍스 help@에서 직접', { exact: false })).toBeVisible();
   await axe(page);
   await page.getByRole('textbox', { name: '답변' }).fill('지금은 무료예요');
   await page.getByRole('button', { name: '답변 보내기' }).click();
@@ -1039,9 +1035,7 @@ test('최고 관리자만 있어도 공지·콘텐츠를 쓸 수 있음(2026-11-
   await expect(page.getByRole('button', { name: '버전 추가' })).toBeVisible();
 });
 
-test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 관리자 계정', async ({
-  page,
-}) => {
+test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 관리자 계정', async ({ page }) => {
   const db = await mock(page, { roles: ['super', 'ops'] });
   await page.goto('/system');
   await heading(page, '시스템');
@@ -1053,9 +1047,7 @@ test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 
 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
   await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
-  await expect(
-    page.getByText('최소 버전 미만 기기 12대(90일 내 실행)'),
-  ).toBeVisible();
+  await expect(page.getByText('최소 버전 미만 기기 12대(90일 내 실행)')).toBeVisible();
   await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인 요청됨')).toBeVisible();

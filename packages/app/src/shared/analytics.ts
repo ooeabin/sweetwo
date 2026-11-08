@@ -69,6 +69,23 @@ export type AnalyticsEvent =
       props: { top_band: number; basis: 'public_2025'; age_band: string | null };
     }
   | {
+      // 저금 항목(32 4-5, 2026-11-08 ADR 0007)
+      name: 'saving_item_created';
+      props: {
+        entry: 'home' | 'salary' | 'split' | 'palette';
+        monthly_band: AmountBand;
+        has_target: boolean;
+        has_deadline: boolean;
+        target_band?: AmountBand;
+      };
+    }
+  | {
+      name: 'saving_item_target_set';
+      props: { had_target: boolean; has_deadline: boolean; target_band: AmountBand };
+    }
+  | { name: 'saving_item_achieved'; props: { months_taken: number } }
+  | { name: 'saving_item_after_achieve'; props: { choice: 'keep' | 'stop' } }
+  | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {

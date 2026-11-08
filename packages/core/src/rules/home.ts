@@ -10,14 +10,15 @@ export interface HomeChecklist {
   cycle_end: string;
   lines: { state: string }[];
 }
+/** 저금 항목(예전 목표 행, ADR 0007) */
 export interface HomeGoal {
   id: string;
   name: string;
-  template: string;
   status: string;
   target_amount: number | null;
   deadline: string | null;
   owner_user_id: string | null;
+  closed_at: string | null;
 }
 export interface HomeCare extends CareRule {
   id: string;
@@ -48,7 +49,7 @@ export interface HomeInput {
   reconnectFrom: string | null;
   /** 초대 할 일을 닫은 날(7일 동안 안 보임) */
   inviteClosedOn: string | null;
-  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘amount:{목표 id}’, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
+  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’) */
   closed: string[];
 }
 
@@ -57,7 +58,6 @@ export type HomeTodo =
   | { kind: 'reconnect'; to: string }
   | { kind: 'review'; label: string; left: number; key: string; to: string }
   | { kind: 'invite'; to: string }
-  | { kind: 'amount'; goal: string; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
   | { kind: 'care'; name: string; date: string; key: string; to: string };
 
@@ -127,30 +127,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
     (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)
   )
     return { kind: 'invite', to: '/settings/couple' };
-  const noAmount =
-    i.goals.find(
-      (g) =>
-        g.template !== 'emergency' &&
-        g.status === 'active' &&
-        g.target_amount === null &&
-        !g.owner_user_id &&
-        !i.closed.includes(`amount:${g.id}`),
-    ) ??
-    i.goals.find(
-      (g) =>
-        g.template !== 'emergency' &&
-        g.status === 'active' &&
-        g.target_amount === null &&
-        g.owner_user_id === i.meId &&
-        !i.closed.includes(`amount:${g.id}`),
-    );
-  if (noAmount)
-    return {
-      kind: 'amount',
-      goal: noAmount.name,
-      key: `amount:${noAmount.id}`,
-      to: `/goals/${noAmount.id}/set-amount`,
-    };
+  // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 대신 홈 H-02 저금 항목 제안 줄)
   const matured = i.assets.find(
     (a) =>
       a.side === 'asset' &&
@@ -186,7 +163,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   return null;
 }
 
-/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월말 확인, 챙길 날, 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
+/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월말 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
 export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;
@@ -212,14 +189,15 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
         to: `/calendar/day/${c.id}`,
       });
   }
+  // 목표 기한: 목표 금액과 기한이 있는, 모으는 중인 저금 항목만(24, ADR 0007)
   for (const g of i.goals)
-    if (g.status === 'active' && within(g.deadline))
+    if (g.status === 'active' && !g.closed_at && g.target_amount !== null && within(g.deadline))
       add({
         key: `goal-${g.id}`,
         kind: 'goal',
         date: g.deadline,
         name: g.name,
-        to: `/goals/${g.id}`,
+        to: `/salary/items/${g.id}`,
       });
   for (const a of i.assets)
     if (a.side === 'asset' && within(a.maturity_date))

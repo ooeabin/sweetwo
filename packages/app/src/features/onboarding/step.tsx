@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
-import { saveMe, useGoals, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
+import { saveMe, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
 import { nextOf, prevOf, progressOf, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
@@ -14,7 +14,6 @@ export function useStep(id: string) {
   const ret = params.get('return');
   const me = useMe();
   const space = useSpace();
-  const goals = useGoals();
   const inviteNow = useOnboardingLocal((s) => s.inviteNow);
   const [saving, setSaving] = useState(false);
 
@@ -23,10 +22,9 @@ export function useStep(id: string) {
     me: me.data,
     space: space.data,
     partner: partner.data,
-    goals: goals.data,
     inviteNow,
   };
-  const ready = !me.isLoading && !space.isLoading && !goals.isLoading && !partner.isLoading;
+  const ready = !me.isLoading && !space.isLoading && !partner.isLoading;
   const list = screens(state);
 
   // 멈춘 화면 기록(이어하기). 화면마다 들어올 때 한 번만.
@@ -48,12 +46,11 @@ export function useStep(id: string) {
     setSaving(true);
     try {
       await save?.();
-      const [m, s, g] = await Promise.all([me.refetch(), space.refetch(), goals.refetch()]);
+      const [m, s] = await Promise.all([me.refetch(), space.refetch()]);
       const fresh: FlowState = {
         me: m.data,
         space: s.data,
         partner: partner.data,
-        goals: g.data,
         inviteNow: useOnboardingLocal.getState().inviteNow,
       };
       const to = ret ?? next?.(fresh) ?? nextOf(id, screens(fresh));

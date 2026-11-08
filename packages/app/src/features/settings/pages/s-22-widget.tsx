@@ -1,25 +1,22 @@
-import { fetchGoals, qk } from '@sweetwo/api';
 import { ChoiceCards, ListRow, PageHeader, QuestionLayout, Toggle } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { LoadingFrame, MainFrame } from '../../frame';
+import { savingPaths, useSavingItems } from '../../salary';
 import { copy } from '../copy';
 import { useWidgetSettings } from '../widget-settings';
 
 // S-22 위젯(25 S-22): 트레이 아이콘(기본 켜짐, 끄면 트레이 위젯 창도 없음), 위젯에 금액 보이기(기본 꺼짐, 기기마다),
-// 목표 위젯에 보일 목표(기본 = 우선순위 첫 목표, 목표가 없으면 “목표 없음” → G-03). 데스크톱만.
+// 위젯에 보일 저금 항목(목표 금액이 있는 것, 기본 = 홈 H-02 순서 첫 항목, 없으면 “저금 항목 없음” → W-11a, ADR 0007). 데스크톱만.
 export function S22Widget() {
   const { step } = useParams();
   const nav = useNavigate();
   const w = useWidgetSettings();
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  const items = useSavingItems();
   if (!w.desktop) return <Navigate to="/settings" replace />;
-  if (!w.settings || goals.isLoading) return <LoadingFrame sub="settings" current={null} />;
+  if (!w.settings || !items.ready) return <LoadingFrame sub="settings" current={null} />;
   const s = w.settings;
-  // 휴지통·보류·사용 완료 목표는 고를 수 없음 → 우선순위 첫 목표
-  const open = (goals.data ?? [])
-    .filter((g) => g.status !== 'paused' && g.status !== 'used')
-    .sort((a, b) => a.priority - b.priority);
+  // 휴지통·그만 모은 항목은 고를 수 없음 → 첫 항목
+  const open = items.withTarget.map((i) => i.goal);
   const cur = open.find((g) => g.id === s.goalId) ?? open[0] ?? null;
 
   if (step === 'goal')
@@ -62,7 +59,7 @@ export function S22Widget() {
         <ListRow
           label={copy.widgetGoal}
           value={cur?.name ?? copy.widgetNoGoal}
-          onClick={() => nav(cur ? '/settings/widget/goal' : '/goals/new')}
+          onClick={() => nav(cur ? '/settings/widget/goal' : `${savingPaths.add}/a`)}
         />
       </div>
     </div>

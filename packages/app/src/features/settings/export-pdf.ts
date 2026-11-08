@@ -3,21 +3,22 @@ import {
   formatDateFull,
   formatManWon,
   formatYm,
-  goalEta,
   netWorth,
   netWorthSeries,
   readWon,
+  savingEta,
+  savingPct,
+  savingState,
   yearlySavings,
   type Won,
 } from '@sweetwo/core';
-import { toAllocGoal } from '../salary';
 import { copy } from './copy';
 import type { Names, Scope } from './export';
 
 // S-18 PDF 요약(25 ‘내보내기 명세’): A4 세로, 맨 아래 만든 날.
 // ① 우리 자산 요약: 순자산, 자산·부채 합계, 최근 12개월 순자산 그래프(공동 데이터만. 계산은 F-01과 같은 core netWorth)
-// ② 연간 요약: 올해 1~12월 목표에 넣은 돈(체크한 저금 줄, core yearlySavings), 목표별 진행 막대와 예상 달성
-// 범위: 공동 = 보이는 항목 전부(파트너 ‘합계만’은 합계로), 내 데이터 = 내 명의 항목, 내 월급 계획·체크리스트, 내 목표.
+// ② 연간 요약: 올해 1~12월 저금한 돈(체크한 저금 줄, core yearlySavings), 저금 항목별 진행 막대와 예상 달성(ADR 0007)
+// 범위: 공동 = 보이는 항목 전부(파트너 ‘합계만’은 합계로), 내 데이터 = 내 명의 항목, 내 월급 계획·체크리스트, 내 저금 항목.
 // 글꼴은 디자인 글꼴 SUIT에서 뽑은 고정 굵기(assets/pdf-fonts), 색은 디자인 토큰(라이트) 값을 읽어 씀.
 
 export interface PdfModel {
@@ -82,24 +83,22 @@ export function buildPdfModel(
       .filter((l) => l.kind === 'saving' && l.goal_id === gid)
       .reduce((t, l) => t + l.amount, 0);
   const goals = d.goals
-    .filter((g) => g.status !== 'used' && (joint || g.owner_user_id === n.myId))
+    .filter((g) => !g.deleted_at && (joint || g.owner_user_id === n.myId))
     .map((g) => {
-      const saved = d.saved[g.id] ?? g.other_held;
-      const target = g.kind === 'monthly' ? null : g.target_amount;
-      const eta =
-        g.status === 'active' || g.status === 'delayed'
-          ? goalEta(toAllocGoal({ ...g, other_held: saved }), monthlyOf(g.id)).expected
-          : null;
+      const saved = d.saved[g.id] ?? 0;
+      const target = g.target_amount;
+      const state = savingState(g);
+      const eta = state === 'saving' ? savingEta({ target, saved }, monthlyOf(g.id)) : null;
       return {
         name: g.name,
         saved,
         target,
-        pct: target ? Math.min(Math.floor((saved * 100) / target), 100) : null,
+        pct: savingPct(saved, target),
         note:
-          g.status === 'achieved'
+          state === 'achieved'
             ? copy.pdf.achieved
-            : g.status === 'paused'
-              ? copy.pdf.paused
+            : state === 'closed'
+              ? copy.pdf.closed
               : eta && target
                 ? copy.pdf.eta(formatYm(eta))
                 : null,

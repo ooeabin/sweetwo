@@ -18,8 +18,8 @@ import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-21 휴지통(docs/spec/25-settings.md): 지운 지 30일 안의 내 명의·공동 항목(자산·부채, 목표, 가족, 챙길 날), 최근 지운 순.
-// 되살리기는 묻지 않고 바로 + Toast “되살렸어요”(같이 지워진 것도 함께, 서버). 파트너의 내 목표는 안 보임.
+// S-21 휴지통(docs/spec/25-settings.md): 지운 지 30일 안의 내 명의·공동 항목(자산·부채, 저금 항목, 가족, 챙길 날), 최근 지운 순.
+// 되살리기는 묻지 않고 바로 + Toast “되살렸어요”(같이 지워진 것도 함께, 서버). 파트너의 저금 항목은 안 보임.
 // 영구 삭제(⋯)와 비우기만 Modal. 30일 지나면 서버가 매일 자동 영구 삭제.
 export function S21Trash() {
   const nav = useNavigate();

@@ -223,7 +223,7 @@ export function F04Item() {
   );
   const body = (
     <div className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
-      {/* 2026-11-04 목표 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
+      {/* 2026-11-04 저금 항목 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
       <PageHeader
         title={a.name}
         backLabel={copy.back}

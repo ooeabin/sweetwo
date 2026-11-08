@@ -83,7 +83,7 @@ export function useRefreshAssets() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory, qk.goalAssetSums].map((k) =>
+      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory].map((k) =>
         qc.invalidateQueries({ queryKey: k }),
       ),
     );
