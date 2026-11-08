@@ -1290,6 +1290,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          closed_at: string | null
           created_at: string
           created_by: string | null
           deadline: string | null
@@ -1322,6 +1323,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline?: string | null
@@ -1353,6 +1355,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline?: string | null
@@ -2450,6 +2453,15 @@ export type Database = {
         Args: { p_body: string; p_inquiry: string }
         Returns: undefined
       }
+      add_saving_item: {
+        Args: {
+          p_deadline?: string
+          p_monthly: number
+          p_name: string
+          p_target?: number
+        }
+        Returns: string
+      }
       admin_access_data: { Args: { p_access: string }; Returns: Json }
       admin_account_action: {
         Args: {
@@ -3414,6 +3426,14 @@ export type Database = {
         Args: { p_lines: Json; p_owner?: string }
         Returns: string
       }
+      saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_keep: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_reopen: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_stop: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_unkeep: {
+        Args: { p_deadline?: string; p_goal: string; p_target: number }
+        Returns: undefined
+      }
       sell_asset: {
         Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
         Returns: number
@@ -3470,6 +3490,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          closed_at: string | null
           created_at: string
           created_by: string | null
           deadline: string | null

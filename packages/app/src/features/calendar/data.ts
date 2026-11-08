@@ -25,7 +25,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { copy } from './copy';
 
-// 캘린더 재료(24, 재기획): 챙길 날과 기록, 공휴일, 돈 일정(월급날, 월말 확인 띠, 목표 기한·쓰는 달, 자산·대출 만기).
+// 캘린더 재료(24, 재기획): 챙길 날과 기록, 공휴일, 돈 일정(월급날, 월말 확인 띠, 저금 항목 기한, 자산·대출 만기).
 // 돈 일정 계산은 core rules/calendar `moneyDates`.
 export function useCalendarData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
@@ -61,9 +61,14 @@ export function useCalendarData() {
   const holidaySet = new Set(holidayList.map((h) => h.date));
   /** 그 날 공휴일 */
   const holidayOf = (date: string) => holidayList.find((h) => h.date === date) ?? null;
-  // 목표: 진행 중(진행·지연)만. 달성·보류·사용 완료는 기한을 표시하지 않음
+  // 저금 항목 기한(ADR 0007): 목표 금액과 기한이 있고 모으는 중인 것만. 달성·그만 모음은 표시하지 않음
   const openGoals = (goals.data ?? []).filter(
-    (g) => g.status === 'active' || g.status === 'delayed',
+    (g) =>
+      !g.deleted_at &&
+      !g.closed_at &&
+      g.status !== 'achieved' &&
+      g.target_amount !== null &&
+      !!g.deadline,
   );
   const monthOf = (y: number, m: number) =>
     moneyDates(y, m, {
@@ -74,12 +79,8 @@ export function useCalendarData() {
       maturities: (assets.data ?? [])
         .filter((a) => a.maturity_date)
         .map((a) => ({ id: a.id, name: a.name, date: a.maturity_date ?? '' })),
-      goalDeadlines: openGoals
-        .filter((g) => g.kind === 'once' && g.deadline)
-        .map((g) => ({ id: g.id, name: g.name, date: g.deadline ?? '' })),
-      yearlyGoals: openGoals
-        .filter((g) => g.kind === 'yearly' && g.deadline)
-        .map((g) => ({ id: g.id, name: g.name, month: Number((g.deadline ?? '').slice(5, 7)) })),
+      goalDeadlines: openGoals.map((g) => ({ id: g.id, name: g.name, date: g.deadline ?? '' })),
+      yearlyGoals: [],
     });
   const today = todayKst();
   const careList = cares.data ?? [];
@@ -140,7 +141,7 @@ export function moneyLine(d: MoneyDate) {
         ? '/salary/review'
         : d.kind === 'maturity'
           ? `/assets/${d.ref ?? ''}`
-          : `/goals/${d.ref ?? ''}`;
+          : `/salary/items/${d.ref ?? ''}`;
   return { label, go: copy.go[d.kind], to };
 }
 

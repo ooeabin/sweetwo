@@ -1,12 +1,11 @@
 export { SplitEditor, toDraft } from './split-editor';
-export { emergencyGoalTarget, recommendedDraft, savingGoals, toAllocGoal } from './split-draft';
+export { recommendedDraft, savingGoals, toPlanItem } from './split-draft';
 export { CheckLine, goalLineName, LineLead, lineName, periodText } from './check-line';
 export {
   doneCount,
   myChecklist,
   savedOf,
   useChecklists,
-  useGoalCheckedSums,
   useGoalSaved,
   useSplits,
   waiting,
@@ -16,4 +15,11 @@ export { W01Split } from './pages/w-01-split';
 export { W02Checklist } from './pages/w-02-checklist';
 export { W02Done } from './pages/w-02-done';
 export { W05Review } from './pages/w-05-review';
-export { salaryPaths } from './paths';
+export { W10SavingItem } from './pages/w-10-saving-item';
+export { W10aSavingEdit } from './pages/w-10a-saving-edit';
+export { W11SavingAdd } from './pages/w-11-saving-add';
+export { W12SavingAchieved } from './pages/w-12-saving-achieved';
+export { W12aSavingAfter } from './pages/w-12a-saving-after';
+export { useSavingItems, type SavingItem, type SavingModel } from './saving';
+export { AchieveWatch, SavingMeta } from './saving-parts';
+export { salaryPaths, savingPaths } from './paths';

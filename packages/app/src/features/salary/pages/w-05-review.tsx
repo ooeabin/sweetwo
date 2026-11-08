@@ -17,7 +17,7 @@ import {
 } from '../data';
 
 // W-05 월말 확인(20). 다음 월급날 3일 전 ~ 전날, 체크 안 한 줄만. 체크하면 W-02와 같음,
-// 줄마다 ‘이번 달은 못 했어요’ = 그 줄을 못 함으로 닫음(저금이면 목표에 더하지 않음). 확인 = 남은 줄은 그대로 닫힘.
+// 줄마다 ‘이번 달은 못 했어요’ = 그 줄을 못 함으로 닫음(저금이면 모은 돈에 더하지 않음). 확인 = 남은 줄은 그대로 닫힘.
 export function W05Review() {
   const nav = useNavigate();
   const me = useMe();
@@ -36,7 +36,6 @@ export function W05Review() {
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const joint = space.data.salary_mode === 'joint';
   const goalName = goalLineName(goals.data, personName, joint);
-  const goalOf = (id: string | null) => goals.data.find((g) => g.id === id) ?? null;
   const left = list ? waiting(list) : [];
   if (empty.current === null) empty.current = !!list && left.length === 0;
   if (empty.current) return <Navigate to="/salary" replace />;
@@ -66,7 +65,7 @@ export function W05Review() {
               name={lineName(l, goalName, personName, joint)}
               personName={personName}
               meId={meId}
-              lead={<LineLead line={l} goalOf={goalOf} />}
+              lead={<LineLead line={l} />}
               onSkip={() => skip(l)}
             />
           ))}

@@ -6,7 +6,7 @@ export interface Push {
   token: string;
   title: string;
   body: string | null;
-  /** 누르면 갈 앱 화면(/goals/…)과 알림 id */
+  /** 누르면 갈 앱 화면(/salary/items/…)과 알림 id */
   target: string;
   id: string;
 }

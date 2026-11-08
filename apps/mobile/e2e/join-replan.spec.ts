@@ -6,7 +6,7 @@ import { seed } from './seed-home';
 import { setWheel } from './wheel';
 
 // 파트너 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
-// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 비상금 44만, 내 집 마련 95만).
+// 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 저금 항목 비상금 44만, 내 집 마련 95만).
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(
@@ -77,7 +77,7 @@ async function salary(page: Page) {
   await page.getByRole('button', { name: '다음' }).click();
 }
 
-test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급 계획(아직 안 채운 월 필요액)로 합류 완료 → 홈 할 일', async ({
+test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급 계획(저금 줄 없음, ADR 0007)로 합류 완료 → 홈 할 일', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -100,8 +100,6 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급
   expect(
     (call?.p_lines as { kind: string; amount: number }[]).map((l) => [l.kind, l.amount]),
   ).toEqual([
-    ['saving', 0],
-    ['saving', 1_070_000],
     ['fixed', 680_000],
     ['living', 680_000],
     ['allowance', 270_000],
@@ -142,7 +140,7 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월�
   await answerBasics(page, true);
   await salary(page);
   await expect(page.getByText('찬우님이 시작하고 있어요')).toBeVisible();
-  await expect(page.getByText('찬우님이 첫 목표를 정하면 알려 드릴게요')).toBeVisible();
+  await expect(page.getByText('찬우님이 월급 계획을 만들면 알려 드릴게요')).toBeVisible();
   expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
   expect(db.me.onboarding_step).toBe('P-WAIT');
   await axe(page);

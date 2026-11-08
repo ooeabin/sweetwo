@@ -39,15 +39,15 @@ it('이번 달 월급 상태: 진행 중 → 월말 확인 기간(다음 기준�
   expect(salaryState(base({ joint: true })).state).toBe('none');
 });
 
-it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 → 초대 → 목표 금액 → 만기 → 챙길 날(7일 안)', () => {
+it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 → 초대 → 만기 → 챙길 날(7일 안). 목표 금액 정하기는 없음(ADR 0007)', () => {
   const goal = {
     id: 'g',
     name: '여행',
-    template: 'travel',
     status: 'active',
     target_amount: null,
     deadline: null,
     owner_user_id: null,
+    closed_at: null,
   };
   const asset = {
     id: 'a',
@@ -90,16 +90,8 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   expect(closedReview?.kind).toBe('invite');
   const noReview = { ...all, unlinkRequestedBy: null, reconnectFrom: null, today: '2026-10-07' };
   expect(homeTodo(noReview)?.kind).toBe('invite');
-  const amount = homeTodo({ ...noReview, inviteClosedOn: '2026-10-05' });
-  expect(amount).toMatchObject({ kind: 'amount', goal: '여행' });
-  // 목표 금액 정하기도 닫을 수 있음
-  expect(
-    homeTodo({
-      ...noReview,
-      inviteClosedOn: '2026-10-05',
-      closed: [amount?.kind === 'amount' ? amount.key : ''],
-    })?.kind,
-  ).toBe('matured');
+  // 목표 금액이 없는 저금 항목이 있어도 할 일은 바로 만기로
+  expect(homeTodo({ ...noReview, inviteClosedOn: '2026-10-05' })?.kind).toBe('matured');
   const noGoal = { ...noReview, inviteClosedOn: '2026-10-05', goals: [] };
   expect(homeTodo(noGoal)).toMatchObject({ kind: 'matured', to: '/assets/a/matured' });
   expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07'] })).toMatchObject({
@@ -109,7 +101,7 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07', 'care:m:2026-10-12'] })).toBeNull();
 });
 
-it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, 만기를 날짜순(같은 날은 챙길 날 먼저)', () => {
+it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한(목표 금액·기한이 있는 저금 항목만), 만기를 날짜순(같은 날은 챙길 날 먼저)', () => {
   const u = homeUpcoming(
     base({
       cares: [
@@ -127,11 +119,20 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, �
         {
           id: 'g',
           name: '여행',
-          template: 'travel',
           status: 'active',
           target_amount: 1,
           deadline: '2026-11-01',
           owner_user_id: null,
+          closed_at: null,
+        },
+        {
+          id: 'x',
+          name: '그만 모은 여행',
+          status: 'active',
+          target_amount: 1,
+          deadline: '2026-11-01',
+          owner_user_id: null,
+          closed_at: '2026-10-01',
         },
       ],
       assets: [
@@ -154,4 +155,5 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, �
     ['maturity', '2026-10-30', 23],
     ['goal', '2026-11-01', 25],
   ]);
+  expect(u.find((x) => x.kind === 'goal')?.to).toBe('/salary/items/g');
 });

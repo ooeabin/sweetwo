@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, useParams, type RouteObject } from 'react-router-dom';
 import {
   A01Launch,
   A02Login,
@@ -26,21 +26,6 @@ import {
 } from './features/assets';
 import { TrayWidget } from './features/widget';
 import { DevUiGallery } from './features/dev';
-import {
-  AchieveWatch,
-  G01GoalList,
-  G02GoalDetail,
-  G05Achieved,
-  G05Send,
-  G02GoalEdit,
-  G02pGoalPhoto,
-  G06GoalOrder,
-  G02aGoalMove,
-  G02bGoalUse,
-  GoalAddRoute,
-  GoalFillStart,
-  G03gGoalMonthly,
-} from './features/goals';
 import {
   CalendarHome,
   Y01CareList,
@@ -88,10 +73,27 @@ import {
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01Home } from './features/home';
-import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
+import {
+  AchieveWatch,
+  W01Split,
+  W02Checklist,
+  W02Done,
+  W05Review,
+  W10SavingItem,
+  W10aSavingEdit,
+  W11SavingAdd,
+  W12SavingAchieved,
+  W12aSavingAfter,
+} from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
 import { CS19NotFound, RouteError } from './shared/cs-19-not-found';
+
+/** 옛 목표 상세 주소(/goals/:id…) → 저금 항목 상세(W-10) */
+function GoalRedirect() {
+  const { id = '' } = useParams();
+  return <Navigate to={/^[0-9a-f-]{36}$/.test(id) ? `/salary/items/${id}` : '/salary'} replace />;
+}
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
@@ -116,6 +118,11 @@ export const routes: RouteObject[] = [
           ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
           ['/salary/done', <W02Done key="w02e" />], // W-02 끝
           ['/salary/review', <W05Review key="w05" />], // W-05 월말 확인
+          ['/salary/items/new/:step?', <W11SavingAdd key="w11" />], // W-11a~d 저금 항목 추가
+          ['/salary/items/:id', <W10SavingItem key="w10" />], // W-10 저금 항목 상세
+          ['/salary/items/:id/edit/:field', <W10aSavingEdit key="w10a" />], // W-10a 고치기
+          ['/salary/items/:id/achieved', <W12SavingAchieved key="w12" />], // W-12 달성 축하
+          ['/salary/items/:id/after', <W12aSavingAfter key="w12a" />], // W-12a 달성 뒤
         ] as const
       ).map(([path, el]) => ({
         path,
@@ -125,132 +132,9 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       })),
-      {
-        path: '/goals',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G01GoalList />
-              <AchieveWatch />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-01 목표 목록
-      {
-        path: '/goals/order',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G06GoalOrder />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-06 우선순위 바꾸기
-      {
-        path: '/goals/new/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <GoalAddRoute />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-03a~f 목표 추가
-      {
-        path: '/goals/:id/set-amount',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <GoalFillStart />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 금액 정하기: G-03b → G-03c
-      {
-        path: '/goals/:id/monthly',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G03gGoalMonthly />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-03g 매달 넣는 돈(금액 정하기 끝)
-      {
-        path: '/goals/:id',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02GoalDetail />
-              <AchieveWatch />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02 목표 상세
-      {
-        path: '/goals/:id/achieved',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G05Achieved />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-05 달성 축하
-      {
-        path: '/goals/:id/achieved/send',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G05Send />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-05 보낼 곳
-      {
-        path: '/goals/:id/use',
-        element: <Navigate to=".." relative="path" replace />,
-      }, // 2026-11-04 사용 기록 없앰: 옛 링크는 목표 상세로
-      {
-        path: '/goals/:id/move/:kind?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02aGoalMove />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02a 넣기·빼기, 이미 모은 돈 넣기
-      {
-        path: '/goals/:id/spend',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02bGoalUse />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02b 꺼내 쓰기
-      {
-        path: '/goals/:id/edit/:field',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02GoalEdit />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 목표 수정(금액, 기한, 이름)
-      {
-        path: '/goals/:id/photo',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02pGoalPhoto />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 목표 사진 바꾸기(모든 목표, 지정 사진 고르기 + 올리기)
+      // 2026-11-08 목표 탭 없앰(ADR 0007): 옛 주소(알림 링크 등)는 월급 탭으로
+      { path: '/goals', element: <Navigate to="/salary" replace /> },
+      { path: '/goals/:id/*', element: <GoalRedirect /> },
       {
         path: '/assets',
         element: (

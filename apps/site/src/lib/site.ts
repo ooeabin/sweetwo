@@ -19,10 +19,10 @@ export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크하는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 같이 체크하고, 모은 돈을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
   getApp: '앱 받기',
-  heroLead: '둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크해요', // [확인 필요]
+  heroLead: '월급날 정한 대로 나눴는지 같이 체크하고, 모은 돈을 같이 봐요', // [확인 필요]
   macDownload: 'Mac용 다운로드',
   winDownload: 'Windows용 다운로드',
   otherOs: '다른 OS용 받기',
@@ -35,7 +35,7 @@ export const t = {
   googlePlay: 'Google Play에서 받기',
   // [확인 필요] 기능 4개(28 L-01 3번)
   features: [
-    { title: '우리 목표', body: '내 집 마련, 여행, 비상금까지 얼마나 모았는지 한눈에 봐요' },
+    { title: '저금 항목', body: '목표 금액을 정하면 얼마나 모았는지 한눈에 봐요' }, // [확인 필요] 2026-11-08
     {
       title: '월급 계획과 체크리스트',
       body: '월급을 어디에 얼마씩 보낼지 한 번 정하고, 월급날 보냈는지 체크만 해요',

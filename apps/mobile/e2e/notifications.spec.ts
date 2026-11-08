@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
-// 알림 센터(docs/spec/14-notifications.md N-01~N-03). 찬우(시작한 사람)의 센터, 예빈(합류)이 바꾼 목표·챙길 날·월말 확인
+// 알림 센터(docs/spec/14-notifications.md N-01~N-03). 찬우(시작한 사람)의 센터, 예빈(합류)이 바꾼 저금 항목·챙길 날·월말 확인
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -96,8 +96,8 @@ function seedNotis(db: MemDb) {
     noti({
       id: '00000000-0000-4000-8000-000000000001',
       kind: 'partner_change',
-      title: '예빈님이 내 집 마련 목표를 바꿨어요',
-      target: '/goals',
+      title: '예빈님이 내 집 마련 저금 항목을 바꿨어요',
+      target: '/salary/split',
       actor_id: 'yebin',
       created_at: '2026-10-07T00:48:00Z', // 오늘 09:48 → 12분 전
     }),
@@ -141,7 +141,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   const panel = page.getByRole('complementary', { name: '알림' });
   await expect(panel).toBeVisible();
   const today = panel.getByRole('region', { name: '오늘' });
-  await expect(today).toContainText('예빈님이 내 집 마련 목표를 바꿨어요');
+  await expect(today).toContainText('예빈님이 내 집 마련 저금 항목을 바꿨어요');
   await expect(today).toContainText('12분 전');
   await expect(today.locator('.hg-avatar--p2')).toHaveText('예');
   await expect(panel.getByRole('region', { name: '이번 주' })).toContainText(
@@ -160,7 +160,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
 
   // 누르면 읽음 + 그 화면
   await today.getByRole('button').first().click();
-  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page).toHaveURL(/\/salary\/split$/);
   await expect.poll(() => db.notifications[0]?.read_at).not.toBeNull();
   await expect(page.getByRole('complementary', { name: '알림' })).toHaveCount(0);
 

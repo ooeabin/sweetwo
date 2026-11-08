@@ -18,3 +18,4 @@ export * from './avatar';
 export * from './photos';
 export * from './guarded';
 export * from './salary';
+export * from './saving';

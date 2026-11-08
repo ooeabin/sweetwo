@@ -43,7 +43,7 @@ export const copy = {
   moveDo: '옮겨요', // [확인 필요] 옮길 항목 묶음 이름(2026-11-03)
   moveSalaryLabel: '월급',
   moveDay: (day: string) => `월급날 ${day}`,
-  moveSkipItems: { goals: '목표', splits: '월급 계획', lists: '체크리스트' },
+  moveSkipItems: { goals: '저금 항목', splits: '월급 계획', lists: '체크리스트' }, // 2026-11-08 [확인 필요]
   moveCount: (n: number) => `${n}개`,
   moveSkip: '안 옮겨요',
   moveKeep: '30일 보관 후 지워져요',

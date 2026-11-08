@@ -38,7 +38,7 @@ export async function joinSpace(code: string): Promise<JoinResult> {
   return data as JoinResult;
 }
 
-/** P-02a ‘안 옮겨요’ 개수: 목표(비상금 빼고), 월급 계획, 체크리스트 */
+/** P-02a ‘안 옮겨요’ 개수: 저금 항목, 월급 계획, 체크리스트 */
 export async function fetchRecordCounts(): Promise<{
   goals: number;
   splits: number;
@@ -46,11 +46,7 @@ export async function fetchRecordCounts(): Promise<{
 }> {
   const db = supabase();
   const [g, sp, l] = await Promise.all([
-    db
-      .from('goal')
-      .select('id', { count: 'exact', head: true })
-      .is('deleted_at', null)
-      .neq('template', 'emergency'),
+    db.from('goal').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     db.from('salary_split').select('id', { count: 'exact', head: true }),
     db.from('pay_checklist').select('id', { count: 'exact', head: true }),
   ]);

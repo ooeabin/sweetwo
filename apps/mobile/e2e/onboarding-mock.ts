@@ -194,25 +194,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     ],
     rpc: [],
   };
-  // 서버 goal_saved 흉내: 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기
+  // 서버 goal_saved 흉내(ADR 0007): 모은 돈 = 그 저금 항목을 체크한 금액의 합
   const goalSaved = (id: string) => {
-    const g = db.goals.find((x) => x.id === id);
-    let v = Number(g?.other_held ?? 0);
+    let v = 0;
     for (const c of db.checklists)
       for (const l of c.pay_check_line as Record<string, unknown>[])
         if (l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
           v += Number(l.actual ?? l.planned);
-    for (const mv of db.goalMoves)
-      if (mv.goal_id === id && !mv.deleted_at)
-        v += mv.kind === 'in' ? Number(mv.amount) : -Number(mv.amount);
-    return Math.max(v, 0);
+    return v;
   };
-  // 서버 goal_lines_sync 흉내: 모으는 목표만 월급 계획 저금 줄(각자: 우리 목표는 모든 월급 계획, 내 목표는 주인 것)
+  // 서버 goal_lines_sync 흉내(ADR 0007): 지우지 않고 그만 모으지 않은 저금 항목만 월급 계획 저금 줄.
+  // 합쳐서 = 공동 월급 계획, 각자 = 주인(없으면 만든 사람) 월급 계획 하나
   const goalLinesSync = (g: Record<string, unknown>) => {
+    const joint = db.space?.salary_mode === 'joint';
+    const owner = g.owner_user_id ?? g.created_by ?? null;
     const want = (sp: (typeof db.splits)[number]) =>
       !g.deleted_at &&
-      ['active', 'delayed'].includes(String(g.status ?? 'active')) &&
-      (g.owner_user_id == null || g.owner_user_id === sp.owner_user_id);
+      !g.closed_at &&
+      ['active', 'delayed', 'achieved'].includes(String(g.status ?? 'active')) &&
+      (joint ? sp.owner_user_id == null : sp.owner_user_id === owner);
     for (const sp of db.splits) {
       const has = sp.split_line.some((l) => l.goal_id === g.id);
       if (want(sp) && !has) {
@@ -228,11 +228,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           goal_id: g.id,
           user_id: null,
           name: null,
-          amount: 0,
+          amount: Number((g.freed as number | undefined) ?? 0),
           sort: last + 1,
         });
         sp.split_line.sort((a, b) => Number(a.sort) - Number(b.sort));
       } else if (!want(sp) && has) {
+        // 다시 모을 때 매달 금액을 되살리려고 기억(서버 freed_lines)
+        g.freed = sp.split_line.find((l) => l.goal_id === g.id)?.amount ?? 0;
         sp.split_line = sp.split_line.filter((l) => l.goal_id !== g.id);
         for (const c of db.checklists)
           c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
@@ -240,6 +242,26 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           );
       }
     }
+  };
+  /** 이번 사이클 체크리스트에 월급 계획 새 줄 넣기(sync_checklist 흉내, 체크 안 한 줄만 새 금액) */
+  const syncChecklist = (sp: (typeof db.splits)[number]) => {
+    const cl = db.checklists.find((c) => c.owner_user_id === sp.owner_user_id);
+    if (!cl) return;
+    const lines = cl.pay_check_line as Record<string, unknown>[];
+    for (const l of sp.split_line) {
+      if (l.kind !== 'saving' || Number(l.amount) <= 0) continue;
+      const cur = lines.find((x) => x.goal_id === l.goal_id);
+      if (cur && cur.state === 'wait') cur.planned = l.amount;
+      if (!cur)
+        lines.push({
+          ...l,
+          id: `${String(l.id)}-c`,
+          planned: l.amount,
+          actual: null,
+          state: 'wait',
+        });
+    }
+    lines.sort((a, b) => Number(a.sort) - Number(b.sort));
   };
   // 로그인된 세션(localStorage)
   await page.addInitScript(
@@ -292,7 +314,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     if (method === 'HEAD') {
       const n =
         path === '/rest/v1/goal'
-          ? db.goals.filter((g) => !g.deleted_at && g.template !== 'emergency').length
+          ? db.goals.filter((g) => !g.deleted_at).length
           : path === '/rest/v1/salary_split'
             ? db.splits.length
             : path === '/rest/v1/pay_checklist'
@@ -476,7 +498,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'note_device')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       if (fn === 'space_goals') {
-        // 서버처럼 파트너 내 목표 ‘금액만 보여 주기’는 “개인 목표”
+        // 서버처럼 파트너 저금 항목 ‘금액만 보여 주기’는 “개인 저금”
         return json(
           route,
           db.goals
@@ -484,7 +506,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             .sort((a, b) => Number(a.priority) - Number(b.priority))
             .map((g) =>
               g.owner_user_id && g.owner_user_id !== db.me.id && g.visibility === 'amount'
-                ? { ...g, name: '개인 목표', template: 'custom', details: {} }
+                ? { ...g, name: '개인 저금', template: 'custom', details: {} }
                 : g,
             ),
         );
@@ -882,10 +904,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'achieve_goal') {
+        // 서버 흉내(ADR 0007): 목표 금액이 있고 모은 돈이 닿으면 달성 + 알림, 처음 본 사람이면 true
         const g = db.goals.find((x) => x.id === body().p_goal);
         const seen = (g?.achieved_seen as string[] | undefined) ?? [];
-        if (g && (g.status === 'active' || g.status === 'delayed')) {
+        if (
+          g &&
+          !g.closed_at &&
+          (g.status === 'active' || g.status === 'delayed') &&
+          g.target_amount != null &&
+          goalSaved(String(g.id)) >= Number(g.target_amount)
+        ) {
           Object.assign(g, { status: 'achieved', achieved_seen: [db.me.id] });
+          db.notifications?.unshift({
+            id: `n-ach-${String(g.id)}`,
+            kind: 'goal_achieved',
+            title: `${String(g.name)} 목표 금액을 다 모았어요!`,
+            body: null,
+            target: `/salary/items/${String(g.id)}`,
+            icon: 'trophy',
+            actor_id: db.me.id,
+            read_at: null,
+            created_at: new Date().toISOString(),
+          });
           return json(route, true);
         }
         if (g && g.status === 'achieved' && !seen.includes(String(db.me.id))) {
@@ -893,6 +933,85 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           return json(route, true);
         }
         return json(route, false);
+      }
+      if (fn === 'add_saving_item') {
+        // 서버 흉내(20 W-11, ADR 0007): 내 월급 계획(합쳐서면 공동) 저금 줄 + 이번 사이클 체크리스트
+        const b = body() as unknown as {
+          p_name: string;
+          p_monthly: number;
+          p_target?: number | null;
+          p_deadline?: string | null;
+        };
+        const joint = db.space?.salary_mode === 'joint';
+        if (db.space?.couple_state === 'unlink_pending')
+          return json(route, { message: 'unlink_pending', code: '55000' }, 400);
+        const sp = db.splits.find((x) => x.owner_user_id === (joint ? null : db.me.id));
+        if (!sp) return json(route, { message: 'no_split', code: '22023' }, 400);
+        // 앱이 uuid로 검사(savingItemId)해서 uuid 모양
+        const id = `00000000-0000-4000-8000-${String(db.goals.length + 1).padStart(12, '0')}`;
+        const g: Record<string, unknown> = {
+          id,
+          space_id: 'space-1',
+          template: 'custom',
+          name: String(b.p_name).trim(),
+          kind: 'once',
+          priority: Math.max(0, ...db.goals.map((x) => Number(x.priority))) + 1,
+          details: {},
+          other_held: 0,
+          target_amount: b.p_target ?? null,
+          deadline: b.p_deadline ? `${b.p_deadline.slice(0, 7)}-01` : null,
+          amount_estimated: false,
+          deadline_estimated: false,
+          after_marriage: false,
+          status: 'active',
+          owner: joint ? 'together' : 'me',
+          owner_user_id: joint ? null : db.me.id,
+          visibility: 'all',
+          created_at: new Date().toISOString(),
+          created_by: db.me.id,
+          closed_at: null,
+          deleted_at: null,
+          freed: b.p_monthly,
+        };
+        db.goals.push(g);
+        goalLinesSync(g);
+        syncChecklist(sp);
+        return json(route, id);
+      }
+      if (fn === 'saving_item_editable')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (
+        fn === 'saving_item_keep' ||
+        fn === 'saving_item_unkeep' ||
+        fn === 'saving_item_stop' ||
+        fn === 'saving_item_reopen'
+      ) {
+        const b = body() as unknown as {
+          p_goal: string;
+          p_target?: number;
+          p_deadline?: string | null;
+        };
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g) return json(route, { message: 'not_found', code: 'P0002' }, 404);
+        if (fn === 'saving_item_keep')
+          Object.assign(g, {
+            target_amount: null,
+            deadline: null,
+            status: 'active',
+            achieved_seen: [],
+          });
+        if (fn === 'saving_item_unkeep')
+          Object.assign(g, {
+            target_amount: b.p_target,
+            deadline: b.p_deadline ?? null,
+            status: 'achieved',
+            achieved_seen: [db.me.id],
+          });
+        if (fn === 'saving_item_stop') g.closed_at = new Date().toISOString();
+        if (fn === 'saving_item_reopen') g.closed_at = null;
+        goalLinesSync(g);
+        for (const sp of db.splits) syncChecklist(sp);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'goal_story') return json(route, [db.goalStory]);
       // G-07 예산 바꾸기: 연결된 두 사람은 제안, 아니면 바로

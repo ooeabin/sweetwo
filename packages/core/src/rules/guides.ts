@@ -105,10 +105,13 @@ export function pickGuides(o: {
   housing: string | null;
   childPlan: string | null;
   templates: string[];
+  /** 저금 항목 이름(2026-11-08 ADR 0007, 이름에 ‘집’이 있으면 내 집 마련 글) [확인 필요] */
+  names?: string[];
 }): string[] {
   const keys: string[] = [];
   if (o.housing === 'jeonse') keys.push('lease-end');
-  if (o.templates.includes('home')) keys.push('home');
+  if (o.templates.includes('home') || (o.names ?? []).some((n) => n.includes('집')))
+    keys.push('home');
   if (o.childPlan === 'within_1y' || o.childPlan === 'in_1_3y') keys.push('baby');
   for (const k of ['emergency', 'money-merge', 'family', 'retirement'])
     if (!keys.includes(k)) keys.push(k);

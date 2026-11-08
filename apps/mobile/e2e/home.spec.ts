@@ -28,7 +28,9 @@ const REVIEW = new Date('2026-10-22T10:00:00+09:00');
 
 const salaryCard = (page: Page) => page.getByRole('region', { name: '9월 월급' });
 
-test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 다 보냈어요', async ({ page }) => {
+test('홈: 저금 항목(H-02), 이번 달 월급 체크 → 모은 돈에 더해짐 → 다 보냈어요', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -39,8 +41,10 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
   // 홈에서는 3줄까지만(나머지는 W-02)
   await expect(salaryCard(page).locator('.hg-transfer')).toHaveCount(3);
-  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
-  // 목표는 한 카드 안 목표 줄(그림 + 금액 + 얇은 막대, 2026-11-03). 이번 달 체크는 위 체크리스트에서만
+  // H-02 저금 항목(ADR 0007): 목표 금액이 있는 항목만(비상금은 목표 금액이 없어 없음). 이번 달 체크는 위 체크리스트에서만
+  const savings = page.getByRole('region', { name: '저금 항목' });
+  await expect(savings).toContainText('내 집 마련');
+  await expect(savings).not.toContainText('비상금');
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
     '0원 / 1억 5,000만 원',
   );
@@ -50,7 +54,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
   await axe(page);
 
-  // 홈 카드에서 바로 체크 → Toast, 목표 카드도 “넣었어요”
+  // 홈 카드에서 바로 체크 → Toast, 저금 항목 줄도 모은 돈이 늘어남
   await salaryCard(page).getByRole('checkbox', { name: '내 집 마련 체크' }).click();
   await expect(page.getByText('내 집 마련에 95만 원 더했어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toContainText(
@@ -67,7 +71,7 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   for (const name of ['비상금', '고정지출', '생활비', '용돈'])
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
-  await expect(page.getByText('이번 달 목표에 139만 원 모았어요')).toBeVisible();
+  await expect(page.getByText('이번 달 저금 139만 원을 보냈어요')).toBeVisible();
   // 축하 그림 자리(2026-11-08 2D 플랫으로 다시 만들 때까지 빈 자리)
   await expect(page.locator('.hg-doneart.hg-artslot')).toBeVisible();
   await axe(page);
@@ -75,6 +79,24 @@ test('홈: 인사, 목표, 이번 달 월급 체크 → 목표에 더해짐 → 
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
   await expect(page.getByText('9월 월급 체크를 다 했어요', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: '월급 체크하기' })).toHaveCount(0);
+});
+
+test('H-02 저금 항목 제안: 목표 금액이 있는 항목이 없으면 한 줄 → W-11a', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const home = db.goals.find((g) => g.id === 'goal-h');
+  if (home) Object.assign(home, { target_amount: null, deadline: null });
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: '9월 월급' })).toBeVisible();
+  const suggest = page.getByRole('button', {
+    name: /모으고 싶은 돈이 있으면 저금 항목으로 만들어 보세요/,
+  });
+  await expect(suggest).toBeVisible();
+  await axe(page);
+  await suggest.click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
+  await expect(page.getByRole('heading', { name: '무엇을 위해 모을까요?' })).toBeVisible();
 });
 
 test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 새 금액)', async ({ page }) => {
@@ -116,8 +138,8 @@ test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 �
     state: 'checked',
     actual: 780_000,
   });
-  // 비상금 목표 금액 = (90만 + 88만) × 3
-  expect(db.goals.find((g) => g.template === 'emergency')?.target_amount).toBe(5_340_000);
+  // 비상금 기본 항목·자동 목표 금액은 없음(ADR 0007): 목표 금액 없는 비상금은 그대로
+  expect(db.goals.find((g) => g.id === 'goal-e')?.target_amount).toBeNull();
 });
 
 test('W-05 월말 확인: 다음 월급날 3일 전부터 할 일 한 줄 → 빠진 줄 체크, 이번 달은 못 했어요', async ({
@@ -198,10 +220,10 @@ test('H-04 우리 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 �
   await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
   await axe(page);
   await page
-    .getByRole('region', { name: '목표' })
+    .getByRole('region', { name: '저금 항목' })
     .getByRole('button', { name: /^내 집 마련/ })
     .click();
-  await expect(page).toHaveURL(/\/goals\/goal-h$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
 
 test('알림 메일 반송(14): 홈 상단 띠 → S-11b 알림 이메일', async ({ page }) => {

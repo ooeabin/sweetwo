@@ -28,7 +28,7 @@ it('가이드 원본: 주제 6개 + 상황 글, 문단과 적용', () => {
   expect(g.map((x) => x.key)).toContain('money-merge');
   const e = g.find((x) => x.key === 'emergency');
   expect(e?.paragraphs).toHaveLength(3);
-  expect(e?.apply).toEqual({ label: '비상금 목표 보기', path: '/goals' });
+  expect(e?.apply).toEqual({ label: '비상금 저금 항목 만들기', path: '/salary/items/new' });
 });
 
 it('단계: 예비부부, 신혼 첫해, 2~3년차, 그 뒤', () => {
@@ -52,6 +52,10 @@ it('맞춤 글 3개: 전세 + 내 집 마련 → 전세 만기, 내 집 마련, 
     'home',
     'emergency',
   ]);
+  // 2026-11-08 저금 항목 이름에 ‘집’
+  expect(
+    pickGuides({ housing: 'own', childPlan: 'none', templates: ['custom'], names: ['내 집 마련'] }),
+  ).toEqual(['home', 'emergency', 'money-merge']);
   expect(pickGuides({ housing: 'own', childPlan: 'within_1y', templates: [] })).toEqual([
     'baby',
     'emergency',

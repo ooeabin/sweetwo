@@ -12,7 +12,6 @@ import { O10Overview } from './pages/o-10-overview';
 import { O11Marriage } from './pages/o-11-marriage';
 import { O12WeddingDate } from './pages/o-12-wedding-date';
 import { O13BirthYear } from './pages/o-13-birth-year';
-import { O21Goals } from './pages/o-21-goals';
 import { O30SalaryMode } from './pages/o-30-salary-mode';
 import { O31Salary } from './pages/o-31-salary';
 import { O32Payday } from './pages/o-32-payday';
@@ -27,15 +26,14 @@ const SCREENS: Record<string, () => ReactNode> = {
   'o-11': () => <O11Marriage />,
   'o-12': () => <O12WeddingDate />,
   'o-13': () => <O13BirthYear />,
-  'o-21': () => <O21Goals />,
   'o-30': () => <O30SalaryMode />,
   'o-31': () => <O31Salary />,
   'o-32': () => <O32Payday />,
   'o-60': () => <O60Ready />,
 };
 
-// 온보딩에서 뺀 화면(2026-11-02, ADR 0004·0005)에 멈춰 있던 사람: O-23·O-24 → O-30, O-50·O-60 → O-31
-const RETIRED = /^o-23-\d+$|^o-24$|^o-50$/;
+// 온보딩에서 뺀 화면(2026-11-02 ADR 0004·0005, 2026-11-08 ADR 0007)에 멈춰 있던 사람: O-21·O-23·O-24 → O-30, O-50 → O-31
+const RETIRED = /^o-21$|^o-23-\d+$|^o-24$|^o-50$/;
 const current = (id: string) => (RETIRED.test(id) ? (id === 'o-50' ? 'o-31' : 'o-30') : id);
 
 export const isOnboardingScreen = (id: string) => current(id) in SCREENS;

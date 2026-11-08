@@ -64,7 +64,7 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
-  // 월말 확인·초대·목표 금액 할 일이 앞에 오지 않게
+  // 월말 확인·초대 할 일이 앞에 오지 않게
   Object.assign(db.space ?? {}, { couple_state: 'solo' });
   seedAssets(db);
   await page.goto('/');

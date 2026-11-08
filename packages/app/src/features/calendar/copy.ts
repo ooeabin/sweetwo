@@ -29,8 +29,8 @@ export const copy = {
   go: {
     payday: '체크리스트', // [확인 필요]
     review: '월말 확인', // [확인 필요]
-    deadline: '목표',
-    goal: '목표',
+    deadline: '저금 항목', // [확인 필요] ADR 0007
+    goal: '저금 항목',
     maturity: '자산',
   },
   // 2026-11-04 토스 소비 달력형: 칸 안 짧은 이름, 월말 확인 띠 이름, 오늘로 [확인 필요]
@@ -47,8 +47,8 @@ export const copy = {
   goSub: {
     payday: '체크리스트 보기',
     review: '월말 확인하기',
-    deadline: '목표 보기',
-    goal: '목표 보기',
+    deadline: '저금 항목 보기', // [확인 필요] ADR 0007
+    goal: '저금 항목 보기',
     maturity: '자산 보기',
   },
   monthHead: (m: number) => `${m}월`,
@@ -133,9 +133,6 @@ export const copy = {
 
   // Y-08 다녀온 뒤 기록
   spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
-  goalHelp: '목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요', // [확인 필요]
-  pickGoal: '목표에서 꺼내 쓰기', // [확인 필요] 2026-11-04 ‘목표 고르기’에서, 줄 모양
-  pickGoalQ: '어느 목표에서 꺼내 썼어요?', // [확인 필요]
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },
   giftName: '어떤 선물이에요?', // [확인 필요]

@@ -19,7 +19,7 @@ import { useSettingsData } from '../data';
 
 type Vis = 'all' | 'sum' | 'private';
 const VIS: Vis[] = ['all', 'sum', 'private'];
-/** 내 목표는 두 가지(숨기기 없음): 모두 보여 주기 / 금액만 보여 주기(25 S-13 3번, 22 공개) */
+/** 내 저금 항목은 두 가지(숨기기 없음): 모두 보여 주기 / 금액만 보여 주기(25 S-13 3번, 22 공개) */
 type GoalVis = 'all' | 'amount';
 const GOAL_VIS: GoalVis[] = ['all', 'amount'];
 
@@ -39,9 +39,9 @@ export function S13Visibility() {
     return <LoadingFrame sub="settings" current={null} />;
   const me = d.me;
   const mine = (assets.data ?? []).filter((a) => a.owner === 'person' && a.owner_user_id === me.id);
-  // 내 목표(비상금은 늘 우리 목표). 혼자 쓰기·미합류면 볼 사람이 없어 묶음을 숨김
+  // 내 저금 항목(각자 모드, ADR 0007). 혼자 쓰기·미합류면 볼 사람이 없어 묶음을 숨김
   const myGoals = d.c?.joined
-    ? (goals.data ?? []).filter((g) => g.owner_user_id === me.id && g.template !== 'emergency')
+    ? (goals.data ?? []).filter((g) => g.owner_user_id === me.id && !g.deleted_at)
     : [];
   const run = async (f: () => Promise<unknown>, keys: readonly (readonly string[])[]) => {
     if (busy) return;

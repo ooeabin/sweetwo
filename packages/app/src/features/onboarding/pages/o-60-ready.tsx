@@ -13,11 +13,11 @@ export function O60Ready() {
     ? [
         { icon: 'wallet' as const, text: copy.readyDone.split },
         ...(day ? [{ icon: 'calendar-check' as const, text: copy.readyDone.checklist(day) }] : []),
-        { icon: 'flag-pennant' as const, text: copy.readyDone.goal },
+        { icon: 'piggy-bank' as const, text: copy.readyDone.goal },
       ]
     : [
         { icon: 'wallet' as const, text: copy.readyDone.salary },
-        { icon: 'flag-pennant' as const, text: copy.readyDone.goal },
+        { icon: 'piggy-bank' as const, text: copy.readyDone.goal },
       ];
   return (
     <QuestionLayout

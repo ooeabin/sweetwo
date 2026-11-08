@@ -9,7 +9,7 @@ import {
 } from '@sweetwo/api';
 import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
-import { useSplits } from '../salary';
+import { useGoalSaved, useSplits } from '../salary';
 
 // 합류 흐름 데이터(18). 키는 다른 기능과 같은 qk.
 export function useJoinData() {
@@ -18,7 +18,8 @@ export function useJoinData() {
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
   const splits = useSplits();
-  const ready = [me, space, partner, goals, splits].every((q) => !q.isLoading);
+  const saved = useGoalSaved();
+  const ready = [me, space, partner, goals, splits, saved].every((q) => !q.isLoading);
   const couple = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   return {
     ready,
@@ -26,6 +27,7 @@ export function useJoinData() {
     space: space.data ?? null,
     partner: partner.data ?? null,
     goals: goals.data ?? [],
+    saved: saved.data,
     splits: splits.data ?? [],
     /** 시작한 사람이 아직 온보딩 중(월급 계획이 없음): P-03 → P-03a → P-05 → 홈 대기 */
     waiting: !splits.isLoading && !(splits.data ?? []).length,

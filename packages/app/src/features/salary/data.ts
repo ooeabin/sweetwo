@@ -1,7 +1,6 @@
 import {
   checkPayLine,
   fetchChecklistsEnsured,
-  fetchGoalCheckedSums,
   fetchGoalSaved,
   fetchGoals,
   fetchMe,
@@ -22,9 +21,7 @@ export const useSpace = () => useQuery({ queryKey: qk.space, queryFn: fetchSpace
 export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
 export const useSplits = () => useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
-export const useGoalCheckedSums = () =>
-  useQuery({ queryKey: qk.goalCheckedSums, queryFn: fetchGoalCheckedSums });
-/** 목표별 모은 돈(이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기) */
+/** 저금 항목별 모은 돈(체크한 저금 합, 06 4장) */
 export const useGoalSaved = () => useQuery({ queryKey: qk.goalSaved, queryFn: fetchGoalSaved });
 
 /**
@@ -44,23 +41,21 @@ export const waiting = (c: PayChecklist) => c.pay_check_line.filter((l) => l.sta
 export const doneCount = (c: PayChecklist) =>
   c.pay_check_line.filter((l) => l.state !== 'wait').length;
 
-/** 체크 뒤 새로 읽을 것: 체크리스트, 목표 모은 돈 */
+/** 체크 뒤 새로 읽을 것: 체크리스트, 저금 항목 모은 돈 */
 export function useCheck() {
   const qc = useQueryClient();
   return async (line: PayCheckLine, state: 'checked' | 'wait' | 'skipped', actual?: number) => {
     const r = await checkPayLine(line.id, state, actual);
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
-      qc.invalidateQueries({ queryKey: qk.goalCheckedSums }),
       qc.invalidateQueries({ queryKey: qk.goalSaved }),
     ]);
     return r;
   };
 }
 
-/** 모은 돈(서버 goal_saved_sums, 아직 못 읽었으면 이미 모은 돈) */
-export const savedOf = (g: Goal, saved: Record<string, number> | undefined) =>
-  saved?.[g.id] ?? g.other_held;
+/** 모은 돈(서버 goal_saved_sums, 아직 못 읽었으면 0) */
+export const savedOf = (g: Goal, saved: Record<string, number> | undefined) => saved?.[g.id] ?? 0;
 
 /** 내 체크리스트: 각자면 내 것, 합쳐서면 공동 */
 export const myChecklist = (list: PayChecklist[] | undefined, meId: string | undefined) =>

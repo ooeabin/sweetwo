@@ -7,10 +7,11 @@ import { Wordmark } from './Wordmark';
 // 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 회색 바탕 위 (홈만) 인사 카드 + 두 단 본문.
 // 좁은 창(768px 미만): 머리(홈은 워드마크, 다른 메뉴는 큰 제목 + 아이콘 4개) + 인사 카드 + 하단 탭 막대와 + 버튼.
 
-export type AppTab = 'month' | 'goals' | 'assets' | 'calendar';
+// 2026-11-08 ADR 0007: 목표 탭 자리에 월급 탭(손 위 동전 hand-coins)
+export type AppTab = 'month' | 'salary' | 'assets' | 'calendar';
 const TAB_ICON: Record<AppTab, IconName> = {
   month: 'house',
-  goals: 'target',
+  salary: 'hand-coins',
   assets: 'wallet',
   calendar: 'calendar',
 };

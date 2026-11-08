@@ -19,7 +19,7 @@ const snapshot = {
     left: 3,
     payday: '2026-10-25',
   },
-  task: { title: '여행 목표 금액을 정해 주세요', to: '/goals/g-trip/edit/amount' },
+  task: { title: '청년 적금이 만기됐어요', to: '/assets/a-sav/mature' },
   days: [
     { dday: 4, name: '어머니 생신', date: '10월 11일', money: false, to: '/calendar/day/c-mom' },
     { dday: 18, name: '찬우님 월급날', date: '10월 25일', money: true, to: '/calendar/list' },
@@ -55,17 +55,17 @@ test('트레이 위젯: 이번 달 월급(WG-01) 체크 개수와 다음 월급�
   });
   await expect(sum).toBeVisible();
   await expect(page.getByRole('button', { name: /다음 할 일/ })).toContainText(
-    '여행 목표 금액을 정해 주세요',
+    '청년 적금이 만기됐어요',
   );
   await expect(page.getByText('어머니 생신')).toBeVisible();
   await expect(page.getByText('방금 업데이트')).toBeVisible();
   await axe(page);
   await sum.click();
-  await page.getByRole('button', { name: /여행 목표 금액을 정해 주세요/ }).click();
+  await page.getByRole('button', { name: /청년 적금이 만기됐어요/ }).click();
   await page.getByRole('button', { name: /어머니 생신/ }).click();
   await page.getByRole('button', { name: '앱 열기' }).click();
   expect(await page.evaluate(() => (window as unknown as { __opened: string[] }).__opened)).toEqual(
-    ['/salary', '/goals/g-trip/edit/amount', '/calendar/day/c-mom', '/'],
+    ['/salary', '/assets/a-sav/mature', '/calendar/day/c-mom', '/'],
   );
 });
 

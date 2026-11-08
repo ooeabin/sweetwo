@@ -2,7 +2,6 @@ import {
   ensureSpace,
   fetchAccounts,
   fetchFixedExpenses,
-  fetchGoals,
   fetchMe,
   fetchPartner,
   fetchSpace,
@@ -12,7 +11,6 @@ import {
   updateSpace,
   type Account,
   type FixedExpense,
-  type Goal,
   type Me,
   type Space,
 } from '@sweetwo/api';
@@ -37,9 +35,6 @@ export function usePartner(joined: boolean) {
   // 합류 전에는 부르지 않음(파트너 없음)
   return useQuery({ queryKey: qk.partner, queryFn: fetchPartner, enabled: joined });
 }
-export function useGoals() {
-  return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
-}
 
 /** 월급 계획(O-50에서 다시 열면 저장한 값부터) */
 export function useSplits() {
@@ -59,7 +54,6 @@ export function useRefresh() {
   return {
     me: () => qc.invalidateQueries({ queryKey: qk.me }),
     space: () => qc.invalidateQueries({ queryKey: qk.space }),
-    goals: () => qc.invalidateQueries({ queryKey: qk.goals }),
   };
 }
 
@@ -76,4 +70,4 @@ export const useOnboardingLocal = create<Local>((set) => ({
   setInviteNow: (v) => set({ inviteNow: v }),
 }));
 
-export type { Account, FixedExpense, Goal, Me, Space };
+export type { Account, FixedExpense, Me, Space };

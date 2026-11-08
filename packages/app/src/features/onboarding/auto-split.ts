@@ -6,15 +6,13 @@ import {
   fetchSplits,
   saveSplit,
   startChecklist,
-  updateGoal,
 } from '@sweetwo/api';
-import { addMonths, thisMonth, ymToDate } from '@sweetwo/core';
-import { emergencyGoalTarget, recommendedDraft } from '../salary';
+import { recommendedDraft } from '../salary';
 
 /**
- * 온보딩 끝(O-31 다음, ADR 0005): 월급 계획을 추천값으로 바로 만들고 첫 체크리스트를 연다.
- * 사용자는 홈 할 일 ‘월급 계획 확인’에서 W-01로 고친다. 이미 월급 계획이 있으면(다시 온보딩) 그대로 둔다.
- * 비상금 목표 금액 = (고정지출 + 생활비) × 3, 기한 1년 뒤(17 O-50과 같음).
+ * 온보딩 끝(O-32 다음, ADR 0005): 월급 계획을 추천값으로 바로 만들고 첫 체크리스트를 연다.
+ * 사용자는 홈 H-03 ‘월급 계획 고치기’ → W-01에서 고친다. 이미 월급 계획이 있으면(다시 온보딩) 그대로 둔다.
+ * 2026-11-08 ADR 0007: 비상금 기본 항목 없음. 저금 항목이 없으면 저금 줄 없이(남은 금액은 남는 돈)
  */
 export async function saveRecommendedSplit() {
   const [me, space, goals, partner, splits] = await Promise.all([
@@ -30,15 +28,6 @@ export async function saveRecommendedSplit() {
   if (mine?.split_line.length) return;
   const lines = recommendedDraft(me, goals, { partner: joint ? partner : null, joint });
   await saveSplit(lines, joint ? undefined : me.id);
-  const emergency = goals.find((g) => g.template === 'emergency');
-  if (emergency) {
-    await updateGoal(emergency.id, {
-      target_amount: emergencyGoalTarget(lines),
-      amount_estimated: false,
-      deadline: ymToDate(addMonths(thisMonth(), 12)),
-      deadline_estimated: false,
-    });
-  }
   // 월급날이 있어야 체크리스트가 생김(월급이 없으면 홈 할 일만)
   if (me.payday || me.payday_last) await startChecklist(joint ? undefined : me.id);
 }

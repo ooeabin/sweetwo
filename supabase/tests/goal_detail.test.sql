@@ -1,4 +1,4 @@
--- pgTAP: 우리 ↔ 내 목표 바꾸기, 결혼한 날 바꾸기는 상대에게 알림(22 G-02 ⋯, 25 S-11h)
+-- pgTAP: 저금 항목 주인 바꾸기는 알리지 않음(2026-11-08 ADR 0007, 관리 방식 바꾸기 알림으로 충분), 결혼한 날 바꾸기는 상대에게 알림(25 S-11h)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(3);
@@ -34,10 +34,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 update public.goal set owner_user_id = auth.uid() where name = '여행';
 reset role;
-select results_eq(
-  $$ select receiver_id, field, before_v, after_v from public.partner_change $$,
-  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, 'owner', '우리 목표', '내 목표') $$,
-  '우리 → 내: 예빈에게 알림');
+select is_empty($$ select 1 from public.partner_change $$, '주인 바꾸기: 알림 없음');
 select is(public.partner_change_line('goal', 'owner', '여행', '우리 목표', '내 목표'), '종류 우리 목표 → 내 목표',
   '알림 줄 이름');
 

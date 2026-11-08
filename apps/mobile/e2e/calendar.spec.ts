@@ -108,7 +108,7 @@ function seed(db: MemDb) {
       other_held: 1_000_000,
       deadline: '2026-10-20',
       status: 'achieved',
-      // 축하는 이미 봄(목표 화면에서 축하로 넘어가지 않게)
+      // 축하는 이미 봄(월급 탭에서 축하로 넘어가지 않게)
       achieved_seen: [db.me.id],
       owner_user_id: null,
       details: {},
@@ -147,7 +147,7 @@ const care = (o: Record<string, unknown>) => ({
   ...o,
 });
 
-test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 목표 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
+test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 저금 항목 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -167,7 +167,7 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 목표 기한
   expect(all).toContain('월급 확인');
   expect(all).toContain('청년 적금 만기');
   expect(all).toContain('여행 기한');
-  // 달성한 목표 기한은 없음
+  // 달성한 저금 항목 기한은 없음
   expect(all).not.toContain('자동차 기한');
   await axe(page);
 
@@ -176,7 +176,7 @@ test('목록(Y-01): 60일 안 돈 일정(월급날, 월급 확인, 목표 기한
   await page.getByRole('button', { name: '돈 일정', exact: true }).click();
   await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: /여행 기한/ }).click();
-  await expect(page).toHaveURL(/\/goals\/g-trip$/);
+  await expect(page).toHaveURL(/\/salary\/items\/g-trip$/);
   await page.goto('/calendar/list');
   await page.getByRole('button', { name: /청년 적금 만기/ }).click();
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
@@ -314,7 +314,7 @@ test('챙길 날 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건�
   );
 });
 
-test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기, 목표 고르기 → 꺼내 쓰기(금액 채움), 수정, 지우기 되돌리기', async ({
+test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 없음, ADR 0007), 수정, 지우기 되돌리기', async ({
   page,
 }) => {
   const DAY = new Date('2026-10-14T20:00:00+09:00');
@@ -347,19 +347,15 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기, 목표 고르�
   await overdue.click();
   await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
   await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('100,000');
-  await expect(
-    page.getByText('목표에 모은 돈으로 냈다면 목표에서 꺼내 쓰기로 적어 주세요'),
-  ).toBeVisible();
-  await page.getByRole('button', { name: '목표에서 꺼내 쓰기' }).click();
-  await page.getByRole('radio', { name: '여행' }).click();
+  // 2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰(ADR 0007)
+  await expect(page.getByRole('button', { name: '목표에서 꺼내 쓰기' })).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '선물' }).click();
   await page.getByLabel('어떤 선물이에요?').fill('꽃');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '건너뛰기' }).click();
-  await expect(page).toHaveURL(/\/goals\/g-trip\/spend\?amount=100000$/);
-  await expect(page.getByLabel('여행에서 얼마를 꺼내 썼어요?')).toHaveValue('100,000');
+  await expect(page).toHaveURL(/\/calendar\/day\/c-wed$/);
   expect(db.careRecords.at(-1)).toMatchObject({
     care_day_id: 'c-wed',
     occurs_on: '2026-10-05',

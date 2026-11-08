@@ -19,28 +19,3 @@ export function useConfirmOnce(message: string = copy.checkValue) {
     ) : null,
   };
 }
-
-/** 목표 칩: 이름표 + 이름 + “1/3”(질문이 1개뿐이면 순서 숨김) */
-export function GoalChip({
-  tag,
-  name,
-  index,
-  total,
-}: {
-  tag?: string;
-  name: string;
-  index?: number;
-  total?: number;
-}) {
-  return (
-    <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-      {tag && <span className="hg-tag">{tag}</span>}
-      <b>{name}</b>
-      {index !== undefined && total !== undefined && total > 1 && (
-        <span className="hg-help">
-          {index}/{total}
-        </span>
-      )}
-    </div>
-  );
-}
