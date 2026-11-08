@@ -84,6 +84,7 @@ import {
   W11SavingAdd,
   W12SavingAchieved,
   W12aSavingAfter,
+  W13SavingList,
 } from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
@@ -118,6 +119,7 @@ export const routes: RouteObject[] = [
           ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
           ['/salary/done', <W02Done key="w02e" />], // W-02 끝
           ['/salary/review', <W05Review key="w05" />], // W-05 월급 전 확인
+          ['/salary/items', <W13SavingList key="w13" />], // W-13 저금 목록(2026-11-09 round 3)
           ['/salary/items/new/:step?', <W11SavingAdd key="w11" />], // W-11a~d 저금 항목 추가
           ['/salary/items/:id', <W10SavingItem key="w10" />], // W-10 저금 항목 상세
           ['/salary/items/:id/edit/:field', <W10aSavingEdit key="w10a" />], // W-10a 고치기

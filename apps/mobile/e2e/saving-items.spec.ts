@@ -91,7 +91,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target).toContainText('지금대로면 기한보다 1개월 늦어요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
+  // 2026-11-09 round 3: W-01 전체 대신 이 줄 금액만
+  await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}\/edit\/monthly$/);
   await page.goBack();
   const g = db.goals.find((x) => x.name === '제주 여행');
   expect(g).toMatchObject({

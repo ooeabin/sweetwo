@@ -68,7 +68,7 @@ const writeDraft = (d: Draft | null) => {
     /* 기억 못 해도 이번 화면은 그대로 */
   }
 };
-const ENTRIES = ['home', 'salary', 'split', 'palette'] as const;
+const ENTRIES = ['home', 'salary', 'split', 'palette', 'list'] as const;
 type Entry = (typeof ENTRIES)[number];
 
 export function W11SavingAdd() {

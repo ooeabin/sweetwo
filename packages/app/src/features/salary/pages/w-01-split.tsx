@@ -121,6 +121,7 @@ export function W01Split() {
         savedOf={(id) => saved.data?.[id] ?? 0}
         onItem={(id) => nav(savingPaths.item(id))}
         onAddItem={!theirs && !pending ? () => nav(`${savingPaths.add}/a?from=split`) : undefined}
+        onSavingList={() => nav(`${savingPaths.list}?from=split`)}
         onIncome={ownerId === m.id || joint ? () => nav('/settings/me') : undefined}
         notice={
           <>

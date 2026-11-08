@@ -8,9 +8,11 @@ export const salaryPaths = {
 
 // 저금 항목(20 W-10~W-12, ADR 0007)
 export const savingPaths = {
+  list: '/salary/items', // W-13 저금 목록(2026-11-09 round 3)
   add: '/salary/items/new', // W-11a~d
   item: (id: string) => `/salary/items/${id}`, // W-10
-  edit: (id: string, field: 'name' | 'amount' | 'deadline') => `/salary/items/${id}/edit/${field}`, // W-10a
+  edit: (id: string, field: 'name' | 'amount' | 'deadline' | 'monthly') =>
+    `/salary/items/${id}/edit/${field}`, // W-10a(monthly = 매달 금액, 2026-11-09 round 3)
   achieved: (id: string) => `/salary/items/${id}/achieved`, // W-12
   after: (id: string) => `/salary/items/${id}/after`, // W-12a
 };

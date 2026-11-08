@@ -118,10 +118,12 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home` / `salary` / `split` / `palette`), monthly\_band, has\_target, has\_deadline, target\_band(목표 금액이 있을 때) |
+| saving\_list\_viewed | W-13 저금 목록 열림 (2026-11-09 round 3) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
+| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home` / `salary` / `split` / `palette` / `list`), monthly\_band, has\_target, has\_deadline, target\_band(목표 금액이 있을 때) |
 | saving\_item\_target\_set | W-10a 목표 금액 저장 | had\_target(고치기인지), has\_deadline, target\_band |
 | saving\_item\_achieved | W-12 | months\_taken |
-| saving\_item\_after\_achieve | W-12a 고름 | choice(`keep` / `stop`) |
+| saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |
+| saving\_monthly\_changed | W-10a 매달 금액 저장 (2026-11-09 round 3) | monthly\_band, direction(`up` / `down`) |
 | (없앰) goal\_created, goal\_amount\_set, goal\_money\_moved, goal\_delayed, goal\_achieved | 2026-11-08 ADR 0007 | — |
 | asset\_added | F-03 저장 | kind(`account` / `invest` / `real_estate` / `debt` 등), entry(`home` / `assets` / `palette`), is\_first |
 | rank\_banner\_tapped | F-01 0번·H-01 순위 배너 (2026-11-04) | state(`unseen` / `seen` / `stale` / `empty`), entry(`home` / `assets`) |

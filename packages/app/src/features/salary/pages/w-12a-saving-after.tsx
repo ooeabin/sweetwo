@@ -15,7 +15,14 @@ import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems, type SavingItem } from '../saving';
 
-type After = 'keep' | 'stop';
+type After = 'keep' | 'stop' | 'retarget';
+
+/** 선택지(2026-11-09 round 3): 보조 한 줄씩, 셋째 ‘목표 금액을 새로 정할게요’ = 저장하지 않고 W-10a 새 목표 금액으로 */
+const OPTIONS: { value: After; label: string; sub: string }[] = [
+  { value: 'keep', label: copy.afterKeep, sub: copy.afterKeepSub },
+  { value: 'stop', label: copy.afterStop, sub: copy.afterStopSub },
+  { value: 'retarget', label: copy.afterRetarget, sub: copy.afterRetargetSub },
+];
 
 /**
  * W-12a 달성 뒤(20): “이 저금 항목을 어떻게 할까요?” ‘계속 모을게요’(목표 금액·기한만 지우고 줄은 그대로) /
@@ -23,6 +30,7 @@ type After = 'keep' | 'stop';
  */
 function useAfter(item: SavingItem) {
   const qc = useQueryClient();
+  const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const refresh = () =>
     Promise.all(
@@ -32,6 +40,11 @@ function useAfter(item: SavingItem) {
     );
   const choose = async (v: After) => {
     if (busy) return false;
+    // 새 목표 금액: 여기서는 저장하지 않고 W-10a로(저장·되돌리기·분석은 그 화면)
+    if (v === 'retarget') {
+      nav(`${savingPaths.edit(item.goal.id, 'amount')}?retarget=1`);
+      return false;
+    }
     setBusy(true);
     const g = item.goal;
     try {
@@ -81,10 +94,7 @@ export function AfterChoice({ item }: { item: SavingItem }) {
         autoAdvance={false}
         autoFocus={false}
         shortcuts={false}
-        options={[
-          { value: 'keep', label: copy.afterKeep },
-          { value: 'stop', label: copy.afterStop },
-        ]}
+        options={OPTIONS}
       />
     </section>
   );
@@ -112,10 +122,7 @@ function AfterPage({ item, onDone }: { item: SavingItem; onDone: () => void }) {
         value={v}
         onChange={setV}
         onPick={(x) => void a.choose(x).then((ok) => ok && onDone())}
-        options={[
-          { value: 'keep', label: copy.afterKeep },
-          { value: 'stop', label: copy.afterStop },
-        ]}
+        options={OPTIONS}
       />
     </QuestionLayout>
   );

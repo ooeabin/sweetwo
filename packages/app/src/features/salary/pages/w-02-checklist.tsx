@@ -256,6 +256,7 @@ export function W02Checklist() {
     />
   );
   const more = (past.data?.length ?? 0) > ago;
+  const openList = () => nav(`${savingPaths.list}?from=checklist`);
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <AchieveWatch />
@@ -335,7 +336,7 @@ export function W02Checklist() {
           if (!first.show || partnerTab || readOnly) return null;
           return (
             <section key={title} className="hg-checkgroup" aria-label={title}>
-              <SectionHeader title={title} />
+              <SectionHeader title={title} onTitle={openList} titleLabel={copy.listOpen} />
               <FirstSavingRow from="salary" go={nav} />
             </section>
           );
@@ -348,6 +349,9 @@ export function W02Checklist() {
             <SectionHeader
               title={title}
               lead={<Ring done={n} total={ls.length} label={copy.progress(ls.length, n)} />}
+              // 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3)
+              onTitle={kind === 'saving' ? openList : undefined}
+              titleLabel={kind === 'saving' ? copy.listOpen : undefined}
               action={
                 canAll ? (
                   <button

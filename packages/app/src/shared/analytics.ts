@@ -72,7 +72,7 @@ export type AnalyticsEvent =
       // 저금 항목(32 4-5, 2026-11-08 ADR 0007)
       name: 'saving_item_created';
       props: {
-        entry: 'home' | 'salary' | 'split' | 'palette';
+        entry: 'home' | 'salary' | 'split' | 'palette' | 'list';
         monthly_band: AmountBand;
         has_target: boolean;
         has_deadline: boolean;
@@ -90,8 +90,18 @@ export type AnalyticsEvent =
       name: 'checklist_group_checked';
       props: { group: 'saving' | 'spend'; lines_count: number; all: boolean };
     }
+  | {
+      // W-13 저금 목록 열림(2026-11-09 round 3)
+      name: 'saving_list_viewed';
+      props: { entry: 'checklist' | 'split' | 'home' | 'direct'; items_count: number };
+    }
   | { name: 'saving_item_achieved'; props: { months_taken: number } }
-  | { name: 'saving_item_after_achieve'; props: { choice: 'keep' | 'stop' } }
+  | { name: 'saving_item_after_achieve'; props: { choice: 'keep' | 'stop' | 'retarget' } }
+  | {
+      // W-10 매달 금액 바로 바꾸기(2026-11-09 round 3, W-10a monthly)
+      name: 'saving_monthly_changed';
+      props: { monthly_band: AmountBand; direction: 'up' | 'down' };
+    }
   | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
