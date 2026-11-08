@@ -18,19 +18,21 @@ export class SavingItemBlocked extends Error {
 
 /**
  * W-11 저장: 저금 항목 + 내(합쳐서면 공동) 월급 계획 저금 묶음 맨 아래 줄(매달 금액) + 이번 사이클 체크리스트 줄.
- * deadline은 'YYYY-MM-01'. 새 항목 id
+ * deadline은 'YYYY-MM-01'. start = 시작할 때 모은 돈(W-11c ‘이미 모은 돈이 있어요’, 만들 때만, 2026-11-09). 새 항목 id
  */
 export async function addSavingItem(o: {
   name: string;
   monthly: number;
   target: number | null;
   deadline: string | null;
+  start?: number;
 }): Promise<string> {
   const { data, error } = await supabase().rpc('add_saving_item', {
     p_name: o.name,
     p_monthly: o.monthly,
     p_target: o.target ?? undefined,
     p_deadline: o.deadline ?? undefined,
+    p_start: o.start ?? 0,
   });
   if (error?.message?.includes('unlink_pending')) throw new SavingItemBlocked('unlink_pending');
   if (error?.message?.includes('no_split')) throw new SavingItemBlocked('no_split');

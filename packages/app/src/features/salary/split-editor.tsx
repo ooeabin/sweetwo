@@ -202,6 +202,7 @@ export function SplitEditor({
         label={nameOf(l)}
         sub={noteOf?.(l) ?? sub}
         value={readWon(l.amount)}
+        locked={!!locked?.(l)}
         onClick={
           fixed
             ? undefined

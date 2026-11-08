@@ -16,7 +16,7 @@ import {
   waiting,
 } from '../data';
 
-// W-05 월말 확인(20). 다음 월급날 3일 전 ~ 전날, 체크 안 한 줄만. 체크하면 W-02와 같음,
+// W-05 월급 전 확인(20). 다음 월급날 3일 전 ~ 전날, 체크 안 한 줄만. 체크하면 W-02와 같음,
 // 줄마다 ‘이번 달은 못 했어요’ = 그 줄을 못 함으로 닫음(저금이면 모은 돈에 더하지 않음). 확인 = 남은 줄은 그대로 닫힘.
 export function W05Review() {
   const nav = useNavigate();
@@ -26,7 +26,7 @@ export function W05Review() {
   const partner = usePartner();
   const lists = useChecklists();
   const check = useCheck();
-  // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월말 확인’, 홈·트레이도 같음)
+  // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월급 전 확인’, 홈·트레이도 같음)
   const empty = useRef<boolean | null>(null);
   if (!me.data || !space.data || !goals.data || !lists.data)
     return <QuestionSkeleton onBack={() => nav('/')} fields={3} />;

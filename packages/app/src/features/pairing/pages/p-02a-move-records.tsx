@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 
-type Vis = 'all' | 'sum';
+type Vis = 'all' | 'sum' | 'private';
 
 // P-02a 혼자 쓰던 기록 옮기기(18): 월급·월급날, 내 명의 자산·부채(공개 범위 한 번, 기본 금액만 보여 주기)만 옮김.
 // 목표·월급 계획·체크리스트는 안 옮김(원래 공간은 30일 보관 후 지움, 합류 전에 ‘사본 내려받기’ → S-18).
@@ -120,7 +120,7 @@ export function P02aMoveRecords({
             value={vis[open] ?? 'sum'}
             onChange={(v) => setVis({ ...vis, [open]: v })}
             onPick={() => setOpen(null)}
-            options={(['all', 'sum'] as Vis[]).map((v) => ({
+            options={(['all', 'sum', 'private'] as Vis[]).map((v) => ({
               value: v,
               label: copy.moveVis[v] ?? v,
             }))}

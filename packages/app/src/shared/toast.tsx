@@ -20,13 +20,22 @@ const useToastStore = create<{
  * 인터넷이 없어 방금 쓰기가 막혔으면(api lastOfflineBlock, 3초 안) 화면의 실패 안내 대신
  * “인터넷에 연결되면 할 수 있어요”(다시 시도 없음). 오프라인은 볼 수만 있음(30 동기화 4장)
  */
+let quiet: ReturnType<typeof setTimeout> | null = null;
 export const toast = (message: string, action?: ToastItem['action']) => {
+  if (quiet) return;
   const blocked = Date.now() - lastOfflineBlock() < 3000;
   useToastStore.getState().show(blocked ? { message: sharedCopy.needOnline } : { message, action });
 };
 
-/** 떠 있는 토스트 닫기(2026-11-09 W-12: 달성 축하로 넘어가기 전에 체크 ‘되돌리기’ 토스트를 닫음) */
-export const hideToast = () => useToastStore.getState().hide();
+/**
+ * 떠 있는 토스트 닫기(2026-11-09 W-12: 달성 축하로 넘어가기 전에 체크 ‘되돌리기’ 토스트를 닫음).
+ * quietMs를 주면 그동안 새 토스트도 띄우지 않음(체크 토스트가 축하로 넘어간 뒤에 늦게 뜨지 않게)
+ */
+export const hideToast = (quietMs = 0) => {
+  if (quiet) clearTimeout(quiet);
+  quiet = quietMs > 0 ? setTimeout(() => (quiet = null), quietMs) : null;
+  useToastStore.getState().hide();
+};
 
 /**
  * 결과 알림이 없던 서버 동작(되돌리기 등, 2026-11-06): 실패하면 “저장하지 못했어요”(13 공통 상태 10번).

@@ -35,6 +35,8 @@ describe('모은 돈(06 4장)', () => {
       ]),
     ).toBe(1_550_000);
   });
+  it('시작할 때 모은 돈 2,000만 + 95만 체크 = 2,095만(2026-11-09)', () =>
+    expect(savedFromLines('h', [line('checked', 950_000)], 20_000_000)).toBe(20_950_000));
   it('체크 안 한 줄과 다른 항목 줄은 더하지 않음', () => {
     expect(savedFromLines('h', [line('wait', 950_000), line('checked', 300_000, null, 's')])).toBe(
       0,
@@ -144,6 +146,16 @@ describe('저금 항목 추가 입력(W-11)', () => {
     expect(savingItemInput(now).safeParse({ ...ok, monthly: 955_000 }).success).toBe(false));
   it('기한은 목표 금액이 있을 때만', () =>
     expect(savingItemInput(now).safeParse({ ...ok, target: null }).success).toBe(false));
+  it('시작할 때 모은 돈: 없으면 0, 목표 금액보다 적어야 함(2026-11-09)', () => {
+    expect(savingItemInput(now).parse(ok).start).toBe(0);
+    expect(savingItemInput(now).safeParse({ ...ok, start: 20_000_000 }).success).toBe(true);
+    expect(savingItemInput(now).safeParse({ ...ok, start: 150_000_000 }).success).toBe(false);
+    expect(savingItemInput(now).safeParse({ ...ok, start: -1 }).success).toBe(false);
+    expect(
+      savingItemInput(now).safeParse({ ...ok, target: null, deadline: null, start: 5_000_000 })
+        .success,
+    ).toBe(true);
+  });
   it('이번 달 이전 기한은 안 됨', () =>
     expect(savingItemInput(now).safeParse({ ...ok, deadline: '2026-09' }).success).toBe(false));
   it('이름은 20자까지', () =>

@@ -227,7 +227,7 @@ export function W10SavingItem() {
       {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
       <section className="hg-stack" aria-label={copy.history}>
         <SectionHeader title={copy.history} />
-        {records.length ? (
+        {records.length || g.start_saved > 0 ? (
           <div className="hg-list">
             {(all ? records : records.slice(0, 12)).map((l) => (
               <ListRow
@@ -242,6 +242,13 @@ export function W10SavingItem() {
                 }
               />
             ))}
+            {/* 시작할 때 모은 돈(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
+            {g.start_saved > 0 && (
+              <ListRow
+                label={copy.historyStart(m(g.start_saved))}
+                sub={formatDateFull(g.created_at.slice(0, 10))}
+              />
+            )}
           </div>
         ) : (
           <p className="hg-help" style={{ margin: 0 }}>

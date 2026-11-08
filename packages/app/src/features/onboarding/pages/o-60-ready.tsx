@@ -15,10 +15,8 @@ export function O60Ready() {
         ...(day ? [{ icon: 'calendar-check' as const, text: copy.readyDone.checklist(day) }] : []),
         { icon: 'piggy-bank' as const, text: copy.readyDone.goal },
       ]
-    : [
-        { icon: 'wallet' as const, text: copy.readyDone.salary },
-        { icon: 'piggy-bank' as const, text: copy.readyDone.goal },
-      ];
+    : // 월급이 없으면 저금을 추가할 수 없어(20 W-11) 저금 줄 없음(2026-11-09)
+      [{ icon: 'wallet' as const, text: copy.readyDone.salary }];
   return (
     <QuestionLayout
       title={copy.readyTitle(me?.nickname ?? '')}

@@ -164,7 +164,7 @@ export const copy = {
   l2Scopes: {
     month: '이번 달 화면',
     plan: '이번 달 화면', // 예전 키(지금은 month)
-    close: '월말 확인 화면', // 예전 키, 새 요청에는 없음
+    close: '월급 전 확인 화면', // 예전 키, 새 요청에는 없음(2026-11-09 이름)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
     assets: '우리 자산 화면',
     income_spend: '월 수입·지출(없앤 화면)', // 예전 키, 새 요청에는 없음
@@ -188,7 +188,7 @@ export const copy = {
     fixed: '고정지출',
     living: '생활비 예산',
     loan: '대출 상환',
-    close: '월말 확인',
+    close: '월급 전 확인',
   }, // [확인 필요]
   agreedCol: '동의 여부', // [확인 필요]
   agreed: '동의',
@@ -235,7 +235,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '커플 연결', // [확인 필요]
-    calc: '저금 항목·월급 체크리스트', // 2026-11-08 ADR 0007
+    calc: '저금·월급 체크리스트', // 2026-11-09 사용자 앱 분류와 같게
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',

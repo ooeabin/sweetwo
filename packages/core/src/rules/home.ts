@@ -94,7 +94,7 @@ export function myList(i: Pick<HomeInput, 'checklists' | 'meId' | 'joint'>) {
   );
 }
 
-/** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월말 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
+/** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월급 전 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
 export function salaryState(
   i: Pick<HomeInput, 'checklists' | 'meId' | 'joint' | 'today'>,
 ): SalaryState {
@@ -164,7 +164,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   return null;
 }
 
-/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월말 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
+/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월급 전 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
 export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;

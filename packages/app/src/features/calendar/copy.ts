@@ -21,34 +21,34 @@ export const copy = {
     more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
   money: {
     payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
-    review: '월급 확인', // [확인 필요]
+    review: '월급 전 확인', // [확인 필요] 2026-11-09 한 이름으로
     deadline: (name: string) => `${name} 기한`,
     goal: (name: string) => `${name} 쓰는 달`,
     maturity: (name: string) => `${name} 만기`,
   },
   go: {
     payday: '체크리스트', // [확인 필요]
-    review: '월말 확인', // [확인 필요]
-    deadline: '저금 항목', // [확인 필요] ADR 0007
-    goal: '저금 항목',
+    review: '월급 전 확인', // [확인 필요]
+    deadline: '저금', // [확인 필요] ADR 0007, 2026-11-09
+    goal: '저금',
     maturity: '자산',
   },
-  // 2026-11-04 토스 소비 달력형: 칸 안 짧은 이름, 월말 확인 띠 이름, 오늘로 [확인 필요]
+  // 2026-11-04 칸 안 짧은 이름, 월급 전 확인 띠 이름, 오늘로 [확인 필요]
   short: {
     payday: '월급',
-    review: '월급 확인',
+    review: '월급 전 확인',
     deadline: '기한',
     goal: '쓰는 달',
     maturity: '만기',
-    band: '월말 확인',
+    band: '월급 전 확인',
   },
   today: '오늘',
   // 달력 고른 날 돈 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
   goSub: {
     payday: '체크리스트 보기',
-    review: '월말 확인하기',
-    deadline: '저금 항목 보기', // [확인 필요] ADR 0007
-    goal: '저금 항목 보기',
+    review: '월급 전 확인하기',
+    deadline: '저금 보기', // [확인 필요] ADR 0007, 2026-11-09
+    goal: '저금 보기',
     maturity: '자산 보기',
   },
   monthHead: (m: number) => `${m}월`,

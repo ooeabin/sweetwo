@@ -15,7 +15,7 @@ const axe = async (page: Page) => {
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-test('W-02 저금 줄 진행, 시트 ‘저금 항목 보기’ → W-10 상세(목표 금액, 기한, 월 필요액, 매달)', async ({
+test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 금액, 기한, 월 필요액, 매달)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -132,6 +132,42 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   ).toBe(500_000);
 });
 
+test('W-11c 이미 모은 돈(2026-11-09): 만들 때만, 목표 금액보다 적게, 모은 돈 = 시작값 + 체크, 모은 기록 맨 아래', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/salary/items/new');
+  await page.getByLabel('무엇을 위해 모을까요?').fill('결혼 비용');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '30만 원' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('30000000');
+  const has = page.getByRole('checkbox', { name: '이미 모은 돈이 있어요' });
+  await expect(has).toHaveAttribute('aria-checked', 'false');
+  await has.click();
+  await page.getByLabel('이미 모은 돈').fill('30000000');
+  await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await page.getByLabel('이미 모은 돈').fill('20000000');
+  await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  // 월 필요액은 남은 1,000만 기준: 1년 뒤(13개월) → 77만(올림)
+  await expect(page.getByText('매달 77만 원이 필요해요')).toBeVisible();
+  await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await expect(page.getByRole('heading', { name: '결혼 비용' })).toBeVisible();
+  const g = db.goals.find((x) => x.name === '결혼 비용');
+  expect(g).toMatchObject({ start_saved: 20_000_000, target_amount: 30_000_000 });
+  await expect(page.getByText('2,000만 원', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('목표 3,000만 원의 66%')).toBeVisible();
+  await expect(page.getByText('시작할 때 모은 돈 2,000만 원')).toBeVisible();
+  // 체크하면 시작값에 더해짐
+  await page.getByRole('checkbox', { name: /이번 달/ }).click();
+  await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
+});
+
 test('W-10a 고치기: 이름 바로 저장 + 되돌리기, 목표 금액 지우기, 지우기(휴지통) 되돌리기', async ({
   page,
 }) => {
@@ -227,7 +263,7 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('achieved');
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '이 저금 항목을 어떻게 할까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '계속 모을게요' }).click();
   await expect(page.getByText('목표 금액을 지우고 계속 모아요')).toBeVisible();
   const tv = db.goals.find((g) => g.id === 'goal-tv');
@@ -273,15 +309,15 @@ test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 �
   if (!home) throw new Error('seed');
   Object.assign(home, { status: 'achieved', achieved_seen: [chanwoo.id] });
   await page.goto('/salary/items/goal-h/after');
-  await expect(page.getByRole('heading', { name: '이 저금 항목을 어떻게 할까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '그만할게요' }).click();
   await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
   expect(home.closed_at).toBeTruthy();
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('그만 모은 저금 항목이에요')).toBeVisible();
+  await expect(page.getByText('그만 모은 저금이에요')).toBeVisible();
   await page.goto('/salary/split');
-  await expect(page.getByText('그만 모은 저금 항목 1개')).toBeVisible();
+  await expect(page.getByText('그만 모은 저금 1개')).toBeVisible();
 });
 
 test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주기’면 “개인 저금”, S-13 내 저금 항목 공개 범위', async ({
@@ -325,7 +361,7 @@ test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주�
   );
   await page.goto('/salary/items/goal-y');
   await expect(page.getByRole('heading', { name: '개인 저금' })).toBeVisible();
-  await expect(page.getByText('예빈님 저금 항목이에요')).toBeVisible();
+  await expect(page.getByText('예빈님 저금이에요. 보기만 할 수 있어요')).toBeVisible();
   // 보기만: ⋯ 메뉴, 고치기 버튼 없음
   await expect(page.getByRole('button', { name: '더보기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '고치기' })).toHaveCount(0);

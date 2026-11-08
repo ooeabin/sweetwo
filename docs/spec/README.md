@@ -31,7 +31,7 @@
 | [18-partner-join.md](18-partner-join.md) | 파트너 합류 |
 | [19-this-month.md](19-this-month.md) | 홈 |
 | [20-salary-plan.md](20-salary-plan.md) | 월급 탭: 월급 체크리스트와 저금 항목 |
-| [21-month-close.md](21-month-close.md) | 월말 확인 |
+| [21-month-close.md](21-month-close.md) | 월급 전 확인 |
 | [22-goals.md](22-goals.md) | 목표 (없앰, 바뀐 곳 표만) |
 | [23-assets.md](23-assets.md) | 우리 자산 |
 | [24-calendar.md](24-calendar.md) | 캘린더 |

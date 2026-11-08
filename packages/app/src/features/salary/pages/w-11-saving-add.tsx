@@ -31,6 +31,7 @@ import { salaryPaths, savingPaths } from '../paths';
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
+// W-11c 아래 선택 칸 ‘이미 모은 돈이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
 const STEPS = ['a', 'b', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
 const KEY = 'sweetwo.savingDraft';
@@ -39,8 +40,18 @@ type Draft = {
   monthly: number | null;
   target: number | null;
   deadline: string | null;
+  /** 이미 모은 돈 칸을 켰는지, 그 금액 */
+  hasStart: boolean;
+  start: number | null;
 };
-const EMPTY: Draft = { name: '', monthly: null, target: null, deadline: null };
+const EMPTY: Draft = {
+  name: '',
+  monthly: null,
+  target: null,
+  deadline: null,
+  hasStart: false,
+  start: null,
+};
 const readDraft = (): Draft => {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<Draft> | null;
@@ -114,6 +125,7 @@ export function W11SavingAdd() {
       monthly: d.monthly ?? 0,
       target: d.target,
       deadline: d.target !== null ? (d.deadline?.slice(0, 7) ?? null) : null,
+      start: d.hasStart ? (d.start ?? 0) : 0,
     });
     if (!input.success) return;
     setSaving(true);
@@ -124,12 +136,14 @@ export function W11SavingAdd() {
         monthly: v.monthly,
         target: v.target,
         deadline: v.deadline ? ymToDate(v.deadline) : null,
+        start: v.start,
       });
       track('saving_item_created', {
         entry,
         monthly_band: amountBand(v.monthly),
         has_target: v.target !== null,
         has_deadline: v.deadline !== null,
+        has_start: v.start > 0,
         ...(v.target !== null ? { target_band: amountBand(v.target) } : {}),
       });
       writeDraft(null);
@@ -199,6 +213,9 @@ export function W11SavingAdd() {
       </QuestionLayout>
     );
   }
+  // 시작할 때 모은 돈(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
+  const start = draft.hasStart ? (draft.start ?? 0) : 0;
+  const startOver = draft.target !== null && start >= draft.target;
   if (s === 'c')
     return (
       <QuestionLayout
@@ -206,7 +223,7 @@ export function W11SavingAdd() {
         title={copy.addTargetQ}
         help={copy.addTargetHelp}
         onBack={back}
-        primary={{ label: copy.next, disabled: !draft.target }}
+        primary={{ label: copy.next, disabled: !draft.target || startOver }}
         onSubmit={() => go('d')}
         later={{
           label: copy.addNoTarget,
@@ -218,14 +235,43 @@ export function W11SavingAdd() {
           label={copy.addTargetQ}
           value={draft.target}
           onChange={(x) => setDraft({ ...draft, target: x && x > 0 ? x : null })}
+          extra={
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={draft.hasStart}
+              className="hg-consent__check"
+              onClick={() => setDraft({ ...draft, hasStart: !draft.hasStart })}
+            >
+              <span
+                className={draft.hasStart ? 'hg-checkbox is-on' : 'hg-checkbox'}
+                aria-hidden="true"
+              />
+              <span className="hg-consent__label">{copy.addHasStart}</span>
+            </button>
+          }
         />
+        {draft.hasStart && (
+          <AmountInput
+            label={copy.addStart}
+            value={draft.start}
+            onChange={(x) => setDraft({ ...draft, start: x })}
+            allowZero
+            embedded
+          />
+        )}
+        {draft.hasStart && startOver && (
+          <p className="hg-help is-error" role="alert">
+            {copy.addStartOver}
+          </p>
+        )}
       </QuestionLayout>
     );
   if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;
   // 처음 값 = 1년 뒤(20 W-11d). 휠이 처음 값을 다시 올려도 같은 값
   const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
   const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
-  const plan = { target: draft.target, saved: 0, deadline: ym };
+  const plan = { target: draft.target, saved: start, deadline: ym };
   const need = savingNeed(plan);
   // 월 필요액 > 매달 금액이면 사실 한 줄(2026-11-09, 06 5-4)
   const late = savingLate(plan, draft.monthly ?? 0);

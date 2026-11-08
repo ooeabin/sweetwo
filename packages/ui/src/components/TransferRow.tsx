@@ -59,7 +59,14 @@ export function TransferRow({
     </>
   );
   return (
-    <div className={cx('hg-transfer', done && 'is-done', !!lead && 'hg-transfer--lead')}>
+    <div
+      className={cx(
+        'hg-transfer',
+        done && 'is-done',
+        viewOnly && 'is-view',
+        !!lead && 'hg-transfer--lead',
+      )}
+    >
       {lead}
       {viewOnly ? (
         <span className="hg-transfer__state" role="img" aria-label={checkLabel}>

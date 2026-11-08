@@ -1309,6 +1309,7 @@ export type Database = {
           photo_preset: string | null
           priority: number
           space_id: string
+          start_saved: number
           status: Database["public"]["Enums"]["goal_status"]
           target_amount: number | null
           template: string
@@ -1342,6 +1343,7 @@ export type Database = {
           photo_preset?: string | null
           priority: number
           space_id: string
+          start_saved?: number
           status?: Database["public"]["Enums"]["goal_status"]
           target_amount?: number | null
           template: string
@@ -1374,6 +1376,7 @@ export type Database = {
           photo_preset?: string | null
           priority?: number
           space_id?: string
+          start_saved?: number
           status?: Database["public"]["Enums"]["goal_status"]
           target_amount?: number | null
           template?: string
@@ -2458,6 +2461,7 @@ export type Database = {
           p_deadline?: string
           p_monthly: number
           p_name: string
+          p_start?: number
           p_target?: number
         }
         Returns: string
@@ -3510,6 +3514,7 @@ export type Database = {
           photo_preset: string | null
           priority: number
           space_id: string
+          start_saved: number
           status: Database["public"]["Enums"]["goal_status"]
           target_amount: number | null
           template: string

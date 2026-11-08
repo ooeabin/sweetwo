@@ -3,7 +3,7 @@ import { ceilTo10k, MAX_WON, type Won } from '../money';
 import { addMonths, monthsBetween, parseYm, thisMonth, type YearMonth } from '../onboarding/month';
 
 // 저금 항목(docs/spec/20-salary-plan.md ‘저금 항목’, 06-calc-allocation.md 4장·5장, ADR 0007).
-// 모은 돈은 서버 goal_saved(체크한 저금 줄 합)가 정본, 여기 savedFromLines는 같은 식(테스트·미리보기용).
+// 모은 돈은 서버 goal_saved(시작할 때 모은 돈 + 체크한 저금 줄 합)가 정본, 여기 savedFromLines는 같은 식(테스트·미리보기용).
 
 /** 체크리스트 저금 줄 한 줄(체크 상태와 실제 보낸 금액) */
 export interface SavingCheckLine {
@@ -14,11 +14,17 @@ export interface SavingCheckLine {
   actual: Won | null;
 }
 
-/** 모은 돈 = 그 저금 항목 저금 줄을 체크한 금액 합(다른 금액이면 그 금액). ‘못 함’·체크 안 함은 더하지 않음(06 4-1) */
-export function savedFromLines(id: string, lines: SavingCheckLine[]): Won {
-  return lines
-    .filter((l) => l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
-    .reduce((t, l) => t + (l.actual ?? l.planned), 0);
+/**
+ * 모은 돈 = 시작할 때 모은 돈 + 그 저금 항목 저금 줄을 체크한 금액 합(다른 금액이면 그 금액).
+ * ‘못 함’·체크 안 함은 더하지 않음(06 4-1, 시작할 때 모은 돈은 2026-11-09 ADR 0007 고침)
+ */
+export function savedFromLines(id: string, lines: SavingCheckLine[], start: Won = 0): Won {
+  return (
+    start +
+    lines
+      .filter((l) => l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
+      .reduce((t, l) => t + (l.actual ?? l.planned), 0)
+  );
 }
 
 /** 기한의 날(06 5-2, 2026-11-09): 고른 달의 말일 'YYYY-MM-DD'. ‘2026년 11월까지’ = 11월 30일까지 */
@@ -114,7 +120,8 @@ const ym = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) as unknown as z.ZodType<Y
 
 /**
  * 저금 항목 추가(W-11) 입력. 이름 1~20자, 매달 금액 1만 원 단위(0원 가능), 목표 금액은 선택,
- * 기한은 목표 금액이 있을 때만 이번 달부터(서버 add_saving_item과 같은 검사)
+ * 기한은 목표 금액이 있을 때만 이번 달부터, 시작할 때 모은 돈은 0원 이상이고 목표 금액보다 적게
+ * (서버 add_saving_item과 같은 검사, bad_start)
  */
 export const savingItemInput = (now = new Date()) =>
   z
@@ -128,10 +135,12 @@ export const savingItemInput = (now = new Date()) =>
         .refine((v) => v % 10_000 === 0),
       target: z.number().int().min(1).max(MAX_WON).nullable(),
       deadline: ym.nullable(),
+      start: z.number().int().min(0).max(MAX_WON).default(0),
     })
     .refine((v) => v.deadline === null || (v.target !== null && v.deadline >= thisMonth(now)), {
       path: ['deadline'],
-    });
+    })
+    .refine((v) => v.target === null || v.start < v.target, { path: ['start'] });
 export type SavingItemInput = z.infer<ReturnType<typeof savingItemInput>>;
 
 /** add_saving_item 응답(새 저금 항목 id) */

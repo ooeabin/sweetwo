@@ -36,8 +36,8 @@ import {
   waiting,
 } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
-import { useSavingItems } from '../saving';
-import { AchieveWatch, SavingMeta } from '../saving-parts';
+import { useFirstSaving, useSavingItems } from '../saving';
+import { AchieveWatch, FirstSavingRow, SavingMeta } from '../saving-parts';
 
 // W-02 이번 달 월급(20) = 월급 탭 첫 화면(2026-11-08 ADR 0007, 앱 틀 안. 넓은 창 제목 줄 ‘+ 저금 항목 추가’, 좁은 창 + 버튼).
 // 디자인 시스템 Checklist 틀(TransferRow 줄). 저금 줄 먼저(목표 금액이 있으면 진행), 쓰는 돈 다음. 저금 줄 시트 ‘저금 항목 보기’ → W-10.
@@ -63,6 +63,7 @@ export function W02Checklist() {
   const splits = useSplits();
   const holidays = useQuery({ queryKey: qk.holidays, queryFn: fetchHolidays });
   const saving = useSavingItems();
+  const first = useFirstSaving();
   const { masked } = useMask();
 
   const meId = me.data?.id;
@@ -312,6 +313,12 @@ export function W02Checklist() {
           items={people}
         />
       )}
+      {/* 각자 모드 파트너 탭은 보기만(2026-11-09): 맨 위 회색 한 줄 */}
+      {partnerTab && (
+        <p className="hg-q__help" style={{ margin: 0 }}>
+          {copy.partnerChecklistView(partner.data?.nickname ?? '')}
+        </p>
+      )}
       {(
         [
           [copy.savingGroup, shown.pay_check_line.filter((l) => l.kind === 'saving')],
@@ -320,7 +327,16 @@ export function W02Checklist() {
       ).map(([title, ls]) => {
         // 묶음 카드(카카오뱅크 체크리스트처럼 머리에 한 개수/전체 원). 저금 줄이 없으면 저금 묶음 없음
         const n = ls.filter((l) => l.state !== 'wait').length;
-        if (!ls.length && title === copy.savingGroup) return null;
+        if (!ls.length && title === copy.savingGroup) {
+          // 내 저금이 없으면 저금 묶음에 빈 줄 ‘+ 저금 추가’(2026-11-09, 이번 달 내 탭·합쳐서만)
+          if (!first.show || partnerTab || readOnly) return null;
+          return (
+            <section key={title} className="hg-checkgroup" aria-label={title}>
+              <SectionHeader title={title} />
+              <FirstSavingRow from="salary" go={nav} />
+            </section>
+          );
+        }
         return (
           <section key={title} className="hg-checkgroup" aria-label={title}>
             <SectionHeader

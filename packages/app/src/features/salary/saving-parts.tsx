@@ -1,13 +1,14 @@
 import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
+import { ListRow } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { money } from '../../shared/mask';
+import { money, useMask } from '../../shared/mask';
 import { hideToast } from '../../shared/toast';
 import { copy } from './copy';
 import { savingPaths } from './paths';
-import { useSavingItems, type SavingItem } from './saving';
+import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
 
 /** 저금 줄 아래 진행(20 W-02 4번): “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면 없음 */
 export function SavingMeta({ item, masked }: { item: SavingItem | undefined; masked: boolean }) {
@@ -19,6 +20,29 @@ export function SavingMeta({ item, masked }: { item: SavingItem | undefined; mas
         <i style={{ width: `${item.bar}%` }} />
       </span>
     </span>
+  );
+}
+
+/**
+ * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’): 내 저금이 없을 때 체크리스트 저금 묶음 자리에 “+ 저금 추가 (남는 돈 {n})” → W-11a.
+ * 파트너가 저금이 있으면(각자) 제목 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?” + 보조 “남는 돈 {n}”.
+ * 홈 H-03과 W-02에서 씀(H-02 회색 제안 문장 대신). 보여 줄 때가 아니면 null
+ */
+export function FirstSavingRow({ from, go }: { from: 'home' | 'salary'; go: (to: string) => void }) {
+  const f = useFirstSaving();
+  const { masked } = useMask();
+  if (!f.show) return null;
+  const left = money(f.left, masked);
+  return (
+    <div className="hg-list">
+      <ListRow
+        icon="plus"
+        label={f.partnerName ? copy.firstSavingLike(f.partnerName) : copy.firstSaving(left)}
+        sub={f.partnerName ? copy.firstSavingLeft(left) : undefined}
+        chevron={false}
+        onClick={() => go(`${savingPaths.add}/a?from=${from}`)}
+      />
+    </div>
   );
 }
 
@@ -60,7 +84,7 @@ export function AchieveWatch() {
         await qc.invalidateQueries({ queryKey: qk.goals });
         if (!show) return;
         // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않게 닫고 넘어감(2026-11-09)
-        hideToast();
+        hideToast(1500);
         nav(savingPaths.achieved(next.goal.id));
       })
       .catch(() => undefined);

@@ -57,7 +57,7 @@ export async function fetchRecordCounts(): Promise<{
 /** P-02a 혼자 쓰던 기록 옮기기 + 합류. vis = 내 명의 자산 id → 공개 범위(기본 금액만) */
 export async function joinMovingRecords(
   code: string,
-  vis: Record<string, 'all' | 'sum'>,
+  vis: Record<string, 'all' | 'sum' | 'private'>,
 ): Promise<JoinResult> {
   const { data, error } = await supabase().rpc('join_moving_records', {
     p_code: code,

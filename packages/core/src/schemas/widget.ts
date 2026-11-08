@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const TraySnapshot = z.object({
   /** 만든 시각(ISO). 오프라인이면 “오전 10:30 기준” */
   at: z.string(),
-  /** 이번 달 월급(WG-01): none = 온보딩 전, no_salary = 월급 없음, progress·review(월말 확인 기간)·done */
+  /** 이번 달 월급(WG-01): none = 온보딩 전, no_salary = 월급 없음, progress·review(월급 전 확인 기간)·done */
   salary: z.object({
     state: z.enum(['none', 'no_salary', 'progress', 'review', 'done']),
     label: z.string(),

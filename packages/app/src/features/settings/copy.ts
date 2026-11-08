@@ -144,7 +144,7 @@ export const copy = {
   // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
   unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
-  unlinkList: ['저금 항목', '월급 계획과 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
+  unlinkList: ['저금', '월급 계획과 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
   unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
   exportFirst: '먼저 내보내기',
@@ -162,7 +162,7 @@ export const copy = {
   reconnect: '다시 연결하기',
   reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
   reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
-  reconnectBack: '연결을 끊기 전 같이 쓰던 월급 계획과 저금 항목이 돌아와요', // [확인 필요]
+  reconnectBack: '연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요', // [확인 필요]
   reconnectDiscard: '해제 뒤 새로 적은 내용은 지워져요', // [확인 필요]
   reconnectYes: '다시 연결할게요',
   reconnectNo: '괜찮아요',
@@ -186,13 +186,13 @@ export const copy = {
   visFixed: [
     // [확인 필요] 기획서 25 S-13 2번 “월급과 월급 계획은 늘 같이 봐요” 등
     '월급과 월급 계획은 늘 같이 봐요',
-    '우리 둘 저금 항목과 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
+    '우리 둘 저금과 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
     '챙길 날은 늘 같이 봐요',
   ],
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
   visNone: '내 명의 항목이 없어요',
-  visGoals: '내 저금 항목', // [확인 필요]
+  visGoals: '내 저금', // [확인 필요]
   goalVis: { all: '모두 보여 주기', amount: '금액만 보여 주기' } as Record<string, string>,
   visDebt: '부채', // [확인 필요] 항목 이름표
   visLabel: (name: string) => `${name} 공개 범위`,
@@ -203,7 +203,7 @@ export const copy = {
   trashKinds: {
     asset: '자산',
     debt: '부채',
-    goal: '저금 항목',
+    goal: '저금',
     care_day: '챙길 날',
   } as Record<string, string>,
   trashWhen: (md: string) => `${md}에 지웠어요`,
@@ -261,8 +261,8 @@ export const copy = {
     yearSaved: '올해 저금한 돈', // [확인 필요] 2026-11-08 ADR 0007
     monthly: '월별 저금한 돈', // [확인 필요]
     month: (m: number) => `${m}월`,
-    goals: '저금 항목별 진행', // [확인 필요]
-    noGoals: '저금 항목이 없어요', // [확인 필요]
+    goals: '저금별 진행', // [확인 필요]
+    noGoals: '저금이 없어요', // [확인 필요]
     savedOf: (saved: string, target: string) => `${saved} / ${target}`,
     eta: (ym: string) => `${ym} 달성 예정`,
     achieved: '달성', // [확인 필요]
@@ -275,7 +275,7 @@ export const copy = {
     files: {
       assets: '자산.csv',
       debts: '부채.csv',
-      goals: '저금 항목.csv',
+      goals: '저금.csv',
       splits: '월급 계획.csv',
       checklists: '월급 체크리스트.csv',
       care: '챙길 날.csv',
@@ -345,7 +345,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '우리 둘 연결', // [확인 필요]
-    calc: '저금 항목·월급 체크리스트', // [확인 필요] 27 AD-06, 2026-11-08
+    calc: '저금·월급 체크리스트', // [확인 필요] 27 AD-06, 2026-11-09
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
@@ -388,7 +388,7 @@ export const copy = {
   accessScopes: {
     month: '이번 달 화면',
     plan: '월급 계획 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘플랜’ 대신)
-    close: '월급 화면', // 예전 요청 기록 키(없앤 화면, 2026-11-09 없앤 말 대신)
+    close: '월급 전 확인 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘월말 정리’ 대신, 어드민과 같음)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
     assets: '우리 자산 화면',
     income_spend: '월 수입·지출 화면',
@@ -443,10 +443,10 @@ export const copy = {
     partner_change: (name: string) => `${name}님이 바꾼 값`,
     care: '챙길 날',
     money: '돈 날짜',
-    goal: '저금 항목', // [확인 필요]
+    goal: '저금', // [확인 필요]
     invite: '파트너 초대', // [확인 필요]
   },
-  partnerChangeSub: '월급 계획·관리 방식·저금 항목 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
+  partnerChangeSub: '월급 계획·관리 방식·저금 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
   careAlerts: '챙길 날 미리 알림', // [확인 필요]
   cancel: '취소',
@@ -560,8 +560,8 @@ export const copy = {
   widgetTray: '트레이 아이콘',
   widgetTrayHelp: '앱 창을 닫아도 트레이에 남아요',
   widgetAmounts: '위젯에 금액 보이기',
-  widgetGoal: '위젯에 보일 저금 항목', // [확인 필요]
-  widgetNoGoal: '저금 항목 없음', // [확인 필요]
+  widgetGoal: '위젯에 보일 저금', // [확인 필요]
+  widgetNoGoal: '저금 없음', // [확인 필요]
   widgetTrayOn: '트레이 켜짐',
   widgetTrayOff: '트레이 꺼짐', // [확인 필요]
 };

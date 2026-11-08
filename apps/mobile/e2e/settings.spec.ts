@@ -180,7 +180,7 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 챙길 날 체�
     .toBe(true);
   await expect(card.getByRole('switch', { name: /예빈님이 바꾼 값/ })).toBeVisible();
   await expect(card).toContainText(
-    '월급 계획·관리 방식·저금 항목 변경은 바로, 나머지는 월요일에 모아서 알려요',
+    '월급 계획·관리 방식·저금 변경은 바로, 나머지는 월요일에 모아서 알려요',
   );
   await expect(card.getByRole('switch', { name: '월급 체크리스트' })).toBeVisible();
   await expect(page.getByText('계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요')).toBeVisible();
@@ -489,7 +489,7 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
     page.getByText(
-      '연결을 끊기 전 같이 쓰던 월급 계획과 저금 항목이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
+      '연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
     ),
   ).toBeVisible();
   await axe(page);

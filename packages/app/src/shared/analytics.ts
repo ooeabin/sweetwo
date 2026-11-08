@@ -76,6 +76,8 @@ export type AnalyticsEvent =
         monthly_band: AmountBand;
         has_target: boolean;
         has_deadline: boolean;
+        /** W-11c 이미 모은 돈을 넣었는지(2026-11-09) */
+        has_start: boolean;
         target_band?: AmountBand;
       };
     }

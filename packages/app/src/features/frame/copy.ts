@@ -29,7 +29,7 @@ export const copy = {
   grew: '늘었어요',
   shrank: '줄었어요',
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
-  addSaving: '저금 항목', // [확인 필요] 2026-11-08
+  addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
   addCare: '챙길 날',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
@@ -40,12 +40,12 @@ export const copy = {
   cmdKeyClose: '닫기', // [확인 필요]
   cmdQuick: '바로 하기',
   cmdCheck: '월급 체크하기',
-  cmdSaving: '저금 항목 추가', // [확인 필요] 2026-11-08
+  cmdSaving: '저금 추가', // [확인 필요] 2026-11-09
   cmdAsset: '자산 추가',
   cmdMask: '금액 가리기',
   cmdUnmask: '금액 보이기',
   cmdLock: '잠그기',
-  cmdSavings: '저금 항목',
+  cmdSavings: '저금',
   cmdAssets: '자산·부채',
   cmdCares: '챙길 날',
   offlineTitle: '연결이 끊겼어요',

@@ -15,7 +15,8 @@ import { SplitEditor, toDraft } from '../split-editor';
 
 // W-01 월급 계획(20). O-50과 같은 틀. 저장 = 바로 적용 + Toast “월급 계획을 바꿨어요” + 되돌리기, 상대 알림은 서버.
 // 이번 사이클 체크 안 한 줄도 새 금액으로(서버 sync_checklist).
-// 각자 + 파트너 합류: 사람 탭(내 탭 기본, `?who=`). 파트너 탭은 쓰는 돈 줄만, 파트너 저금 줄 금액은 잠금(서버도 확인).
+// 각자 + 파트너 합류: 사람 탭(내 탭 기본, `?who=`). 파트너 탭은 보기만(2026-11-09, 서버 save_split not_owner):
+// 맨 위 회색 한 줄 “{파트너}님 월급 계획이에요. 보기만 할 수 있어요”, 줄마다 자물쇠, 추천값·저장·줄 추가 없음.
 // 저금 묶음 아래 ‘+ 저금 항목 추가’(W-11a, 내 탭·합쳐서만), 저금 줄 금액 입력 아래 ‘저금 항목 보기’(W-10).
 // 맨 아래 접힌 줄 ‘그만 모은 저금 항목 n개’ → W-10. 수입 줄 → 설정 내 월급(S-11, 내 탭만). 연결 해제 대기 중이면 보기만.
 export function W01Split() {
@@ -51,22 +52,12 @@ export function W01Split() {
   const mine = splitOf(ownerId);
   const stored = mine ? toDraft(mine.split_line) : null;
   const draftOrSaved = () => drafts[key] ?? stored ?? [];
-  /** 파트너 탭: 파트너 저금 줄은 잠금(저금 항목은 주인 것, ADR 0007) */
-  const lockedGoal = (goalId?: string) =>
-    theirs && goals.data.some((g) => g.id === goalId && g.owner_user_id === ownerId);
   const recommend = () =>
     recommendedDraft(owner, goals.data, {
       joint,
       partner: p,
       saved: saved.data,
       current: draftOrSaved(),
-      keep: theirs
-        ? Object.fromEntries(
-            (stored ?? [])
-              .filter((l) => l.kind === 'saving' && lockedGoal(l.goalId))
-              .map((l) => [l.goalId ?? '', l.amount]),
-          )
-        : undefined,
     });
   const draft = drafts[key] ?? null;
   const lines = draft ?? stored ?? recommend();
@@ -121,12 +112,12 @@ export function W01Split() {
         title={copy.splitTitle}
         help={copy.splitHelp}
         primaryLabel={copy.save}
-        primaryDisabled={!draft || pending}
+        primaryDisabled={!draft || pending || theirs}
         saving={saving}
         onBack={back}
         onSave={() => void save()}
-        locked={(l) => l.kind === 'saving' && lockedGoal(l.goalId)}
-        readOnly={pending}
+        locked={() => theirs}
+        readOnly={pending || theirs}
         savedOf={(id) => saved.data?.[id] ?? 0}
         onItem={(id) => nav(savingPaths.item(id))}
         onAddItem={!theirs && !pending ? () => nav(`${savingPaths.add}/a?from=split`) : undefined}
@@ -151,12 +142,13 @@ export function W01Split() {
                 }))}
               />
             )}
+            {theirs && <p className="hg-q__help">{copy.partnerSplitView(owner.nickname ?? '')}</p>}
             {pending && <p className="hg-q__help">{copy.splitPending}</p>}
           </>
         }
         extra={
           <>
-            {!pending && (
+            {!pending && !theirs && (
               <button
                 type="button"
                 className="hg-btn hg-btn--link"

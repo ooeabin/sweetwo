@@ -28,7 +28,7 @@ it('가이드 원본: 주제 6개 + 상황 글, 문단과 적용', () => {
   expect(g.map((x) => x.key)).toContain('money-merge');
   const e = g.find((x) => x.key === 'emergency');
   expect(e?.paragraphs).toHaveLength(3);
-  expect(e?.apply).toEqual({ label: '비상금 저금 항목 만들기', path: '/salary/items/new' });
+  expect(e?.apply).toEqual({ label: '비상금 저금 만들기', path: '/salary/items/new' });
 });
 
 it('단계: 예비부부, 신혼 첫해, 2~3년차, 그 뒤', () => {
