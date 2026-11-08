@@ -85,6 +85,11 @@ export type AnalyticsEvent =
       name: 'saving_item_target_set';
       props: { had_target: boolean; has_deadline: boolean; target_band: AmountBand };
     }
+  | {
+      // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3). all = 남은 줄을 모두 체크했는지(상대가 먼저 체크한 줄은 빠짐)
+      name: 'checklist_group_checked';
+      props: { group: 'saving' | 'spend'; lines_count: number; all: boolean };
+    }
   | { name: 'saving_item_achieved'; props: { months_taken: number } }
   | { name: 'saving_item_after_achieve'; props: { choice: 'keep' | 'stop' } }
   | {

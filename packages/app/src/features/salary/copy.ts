@@ -41,6 +41,11 @@ export const copy = {
   skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]
   skipped: '이번 달은 못 했어요',
   editSplit: '월급 계획 고치기',
+  // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
+  groupAllSent: '모두 보냈어요',
+  groupAllSentLabel: (group: string) => `${group} 모두 보냈어요`,
+  groupSavingDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 더했어요`,
+  groupSpendDone: (n: number) => `쓰는 돈 ${n}개를 체크했어요`,
   // 토스트는 한 줄(Toast.md): 저금 항목 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게
   addedToGoal: (goal: string, amount: string) =>
     `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,

@@ -78,11 +78,7 @@ function AmountBox({
   const zero = value === 0 && !allowZero;
   const error =
     pasteError ??
-    (over
-      ? '999억 원까지 넣을 수 있어요'
-      : zero
-        ? '0원보다 큰 금액을 넣어 주세요'
-        : outerError);
+    (over ? '999억 원까지 넣을 수 있어요' : zero ? '0원보다 큰 금액을 넣어 주세요' : outerError);
   const put = (v: number | null) => {
     setPasteError(undefined);
     set(v);
@@ -210,9 +206,7 @@ export function AmountInput({
 
   const set = (v: number | null) => onChange(v);
   const target =
-    active === 1 && second
-      ? { value: second.value, set: second.onChange }
-      : { value, set };
+    active === 1 && second ? { value: second.value, set: second.onChange } : { value, set };
   // 키패드: 누른 숫자는 끝에 붙음. 빈 값에서 0, 00은 무시(맨 앞 0 지움)
   const append = (d: string) => {
     const n = Number(digitsOnly(`${target.value ?? ''}${d}`));
