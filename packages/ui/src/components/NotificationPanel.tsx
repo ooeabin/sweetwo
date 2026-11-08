@@ -194,9 +194,8 @@ export function NotificationPanel(p: {
                           {[...x.person.name][0] ?? ''}
                         </span>
                       ) : (
-                        <span className="hg-noti__icon" aria-hidden="true">
-                          <Icon name={x.icon ?? 'bell'} size={16} />
-                        </span>
+                        // 2026-11-08 알림 아이콘은 다시 만들 때까지 빈 원(Illustrations ‘나중 과제’ 7번)
+                        <span className="hg-noti__icon" aria-hidden="true" />
                       )}
                       <span className="hg-noti__text">
                         <span className="hg-noti__msg">{x.msg}</span>

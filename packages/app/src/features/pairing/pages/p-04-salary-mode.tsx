@@ -35,6 +35,8 @@ export function P04SalaryMode() {
         options={(['separate', 'joint'] as const).map((k) => ({
           value: k,
           label: copy.modes[k].label,
+          // 2026-11-08 온보딩과 같은 선택지 아이콘 자리(지금은 빈 자리, Illustrations ‘나중 과제’ 5번)
+          icon: k === 'separate' ? 'user' : 'users-three',
           sub: copy.modes[k].sub,
         }))}
       />

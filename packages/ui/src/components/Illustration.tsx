@@ -1,5 +1,5 @@
-// 그림(Illustrations, 512px webp). 2026-11-02 새 3D 이모지로 다시 뽑기 전까지 파일을 비워 둠(docs/design/assets/Illustrations.md ‘다시 만들기 계획’).
-// 파일이 없으면 아무것도 그리지 않고, 소비자는 hasIllustration으로 빈 자리 모양을 고른다.
+// 그림(Illustrations, 512px webp). 2026-11-08 3D 그림을 모두 지우고 2D 플랫으로 다시 만들 때까지 빈 자리(docs/design/assets/Illustrations.md ‘나중 과제’).
+// 파일이 없으면 같은 크기의 빈 자리(hg-artslot, 회색 판)를 그린다.
 const files = import.meta.glob('../assets/illustrations/*.webp', {
   eager: true,
   import: 'default',
@@ -43,7 +43,10 @@ export function Illustration({
   motion?: boolean;
 }) {
   const src = illustrations[name];
-  if (!src) return null;
+  if (!src)
+    return (
+      <span className={className ? `${className} hg-artslot` : 'hg-artslot'} aria-hidden="true" />
+    );
   const moving = motion ? motionIllustrations[name] : undefined;
   if (moving)
     return (

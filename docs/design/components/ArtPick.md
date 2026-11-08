@@ -13,3 +13,5 @@
 - 앱 묶음: `shared/art-choose.tsx` ArtChoose. 설정 하위 화면과 같은 QuestionLayout 안에 미리보기 + 격자, 아래 고정 영역에 고지(`note`, 가운데) + 주 버튼 “저장하기”. 올리기 → 같은 틀 안 ImageCrop.
 - 키보드: 칸마다 버튼(Tab으로 이동, Enter·Space로 고름), 포커스 고리 `focus`.
 - 쓰는 곳: G-02p(둥근 네모, [사진 올리기][내 사진][기본 사진]. 직접 만든 목표의 기본 사진은 회색 빈 자리 + 깃발). 레퍼런스: WhatsApp·Snapchat 아바타, Monarch·PayPal 목표 커버.
+
+- 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’).

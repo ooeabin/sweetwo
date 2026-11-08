@@ -2091,3 +2091,8 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offse
 @media (prefers-reduced-motion: reduce) { .hg-admin .hg-btn:active { transform: none; } .hg-admin .hg-btn[aria-busy="true"]::after { animation-duration: 2.4s; } }
 /* 표 뼈대 줄(DataTable loading) */
 .hg-table__skel td { height: 36px; }
+
+/* ── 그림 빈 자리(2026-11-08): 3D 그림을 지우고 2D 플랫으로 다시 만들 때까지 같은 크기의 회색 판(Illustrations ‘나중 과제’) ── */
+.hg-artslot { display: block; background: var(--surface-alt); border-radius: var(--radius-lg); }
+.hg-artslot--sm { display: inline-block; flex: none; width: 24px; height: 24px; border-radius: var(--radius-full); }
+.hg-pick__art.hg-artslot { width: 40px; height: 40px; border-radius: var(--radius-full); }

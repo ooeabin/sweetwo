@@ -46,7 +46,8 @@ const pick = [1, 2, 22, 4, 10].flatMap((n) => all.filter((f) => f.n === n));
     <ul class="hg-site__safe">
       {t.safe.map((s) => (
         <li>
-          <span class={`hg-ico hg-ico--${s.icon}`} aria-hidden="true"></span>
+          {/* 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 자리(Illustrations ‘나중 과제’ 8번) */}
+          <span class="hg-artslot hg-artslot--sm" aria-hidden="true"></span>
           {s.text}
         </li>
       ))}

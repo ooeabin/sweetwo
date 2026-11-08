@@ -5,6 +5,7 @@
 - 화면 ID(A-02, W-02a 등)로 검색하면 정의를 찾을 수 있어요.
 - 계산식과 화면 문구는 이 폴더가 기준이에요. 생김새는 `docs/DESIGN.md`, 코드 규칙은 `docs/DEV_GUIDE.md`.
 - 페이지 사본(그림 포함): https://claude.ai/artifact/SScTBJAdLvP7tFJz3RwJWe (2026-10-25 재기획 전 내용)
+- 그림(2026-11-08): 3D 그림, 목표 사진, 종류 아이콘을 모두 지우고 2D 플랫으로 다시 만들 때까지 빈 자리. 화면 표에 적힌 그림·아이콘 설명은 다시 만들 때의 주제로 읽어요(→ `docs/design/assets/Illustrations.md` ‘나중 과제’).
 - 2026-10-25 재기획: 목표 중심, 월급 체크리스트, 9화면 온보딩(2026-10-26 출생연도·결혼한 날을 다시 물어 11화면) → `docs/adr/0003-replan-goal-checklist.md`
 
 | 파일 | 내용 |

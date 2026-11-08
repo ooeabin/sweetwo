@@ -17,3 +17,6 @@
 - 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 값 17px, 보조 14px `slate`. 토스형 구역(StatBlock 아래)에서만.
 
 - 3D 아이콘 앞 칸(2026-11-05): `Lead art3d={icon3d(이름)}`이면 원 판 없이 사물만(`hg-lead--art`, 40px 칸을 꽉 채움, 영역 색 없음). 월급 체크리스트 쓰는 돈 줄(`line-*`, 저금 줄은 그 목표 사진 `Lead photo`(올린 사진 → 종류 지정 사진)), 캘린더 돈 일정·챙길 날(`goal-deadline`, `asset-deposit`, `line-*`, `care-gift`). 파일이 없으면 `icon`.
+
+- 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’).
+- `Lead action`(2026-11-08): ‘+ 추가’ 같은 동작 아이콘만 그대로 그림. 종류 아이콘(`icon`, `art3d`)은 빈 원.

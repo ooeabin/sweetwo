@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
-import { goalIcon } from './goal-icons';
 import { Icon } from './Icon';
 
 // 그림 카드로 목표 고르기(docs/design/components/GoalPick.md). 고른 순서 = 순번 원, 해제하면 당겨짐.
@@ -61,9 +60,7 @@ export function GoalPick({
             </span>
           ) : (
             // 사진이 아직 없으면 아이콘(2026-11-02, 쿠팡플레이 장르 고르기처럼)
-            <span className="hg-pick__art hg-pick__art--icon" aria-hidden="true">
-              <Icon name={goalIcon(t.key)} size={24} />
-            </span>
+            <span className="hg-pick__art hg-pick__art--icon" aria-hidden="true" />
           ),
           t.recommended,
         ),

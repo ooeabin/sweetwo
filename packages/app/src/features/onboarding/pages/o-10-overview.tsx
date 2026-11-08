@@ -1,4 +1,4 @@
-import { Icon, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { copy } from '../copy';
 import { useStep } from '../step';
 
@@ -17,9 +17,8 @@ export function O10Overview() {
       <ol className="hg-intro-steps">
         {copy.overviewSteps.map((x) => (
           <li key={x.text}>
-            <span className="hg-intro-steps__icon" aria-hidden="true">
-              <Icon name={x.icon} />
-            </span>
+            {/* 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 원 */}
+            <span className="hg-intro-steps__icon" aria-hidden="true" />
             <span>{x.text}</span>
           </li>
         ))}

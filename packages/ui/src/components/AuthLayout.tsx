@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
-import { hasIllustration, Illustration } from './Illustration';
+import { Illustration } from './Illustration';
 
 // 로그인, 가입 화면 틀(docs/design/components/AuthLayout.md)
 export function AuthLayout({
@@ -55,7 +55,7 @@ export function AuthLayout({
           </button>
         </div>
       )}
-      {hasIllustration(art) ? (
+      {art ? (
         <Illustration name={art} className="hg-auth__art" />
       ) : (
         icon && (
