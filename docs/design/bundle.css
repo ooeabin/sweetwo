@@ -926,6 +926,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-amountin > .hg-quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-2); }
 .hg-amountin > .hg-quick > .hg-chip { justify-content: center; height: 40px; border-color: transparent; background: var(--surface-alt); color: var(--ink); font: 600 14px/20px var(--font-sans); border-radius: var(--radius-md); }
 .hg-amountin > .hg-quick > .hg-chip:hover { background: var(--hairline-soft); }
+.hg-amountin > .hg-quick > .hg-chip.is-selected, .hg-amountin > .hg-quick > .hg-chip.is-selected:hover { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: var(--surface); color: var(--ink); }  /* 2026-11-09 round 3 바꾸기 칩(quickSet) 고른 표시: 잉크 테두리(브랜드 오렌지 아님) */
+.hg-amountin .hg-amount.is-idle { border-bottom-color: var(--border-control); }  /* 2026-11-09 round 3 두 칸(second)일 때 키패드가 쓰지 않는 칸은 밑줄을 옅게 */
 /* 날짜 한 칸(DateInput): 글자 칸 하나 안에 연·월·일 조각 */
 .hg-datefield { display: flex; align-items: center; gap: var(--space-1); max-width: 280px; }
 .hg-datefield:focus-within { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }

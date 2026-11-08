@@ -1,5 +1,5 @@
 import { MAX_WON, readWon } from '@sweetwo/core';
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode, type Ref } from 'react';
 import { Chip } from '../Chip';
 import { Icon } from '../Icon';
 import { useNarrow } from './useNarrow';
@@ -31,6 +31,117 @@ export function parseKoreanAmount(text: string): number | null {
   return v > 0 ? v : null;
 }
 
+/** 한 화면 두 번째 금액 칸(W-11c ‘이미 모은 돈’, 2026-11-09). 첫 칸과 같은 키패드를 씀 */
+export interface SecondAmount {
+  label: string;
+  value: number | null;
+  onChange: (v: number | null) => void;
+  allowZero?: boolean;
+  /** 칸 아래 오류(목표 금액보다 큼 등). 있으면 만 원 읽기 대신 */
+  error?: string;
+}
+
+/** 금액 칸 하나(큰 숫자 + 원 + 아래 만 원 읽기). 붙여넣기 단위 환산 */
+function AmountBox({
+  id,
+  label,
+  showLabel,
+  value,
+  set,
+  allowZero,
+  narrow,
+  placeholder,
+  idle,
+  error: outerError,
+  inputRef,
+  onFocus,
+}: {
+  id: string;
+  label: string;
+  /** 칸 위에 이름을 보임(두 번째 칸) */
+  showLabel?: boolean;
+  value: number | null;
+  set: (v: number | null) => void;
+  allowZero: boolean;
+  narrow: boolean;
+  placeholder: string;
+  /** 키패드가 이 칸에 쓰지 않음(두 칸일 때 다른 칸이 활성): 밑줄을 옅게 */
+  idle?: boolean;
+  error?: string;
+  inputRef?: Ref<HTMLInputElement>;
+  onFocus?: () => void;
+}) {
+  const [pasteError, setPasteError] = useState<string>();
+  // 칩·키패드로 값이 바뀌면 붙여넣기 오류는 지움
+  useEffect(() => setPasteError(undefined), [value]);
+  const over = value !== null && value > MAX_WON;
+  const zero = value === 0 && !allowZero;
+  const error =
+    pasteError ??
+    (over
+      ? '999억 원까지 넣을 수 있어요'
+      : zero
+        ? '0원보다 큰 금액을 넣어 주세요'
+        : outerError);
+  const put = (v: number | null) => {
+    setPasteError(undefined);
+    set(v);
+  };
+  return (
+    <>
+      <label htmlFor={id} className={showLabel ? 'hg-field__label' : 'hg-sr'}>
+        {label}
+      </label>
+      <div
+        className={idle ? 'hg-amount is-idle' : 'hg-amount'}
+        style={error ? { borderColor: 'var(--danger)' } : undefined}
+      >
+        <input
+          ref={inputRef}
+          id={id}
+          className="hg-amount__value"
+          style={{
+            border: 0,
+            outline: 0,
+            background: 'transparent',
+            width: '100%',
+            minWidth: 0,
+            color: 'var(--ink)',
+            padding: 0,
+          }}
+          // 좁은 창은 앱 키패드를 쓰므로 OS 키보드만 숨긴다(물리 키보드 입력은 그대로)
+          inputMode={narrow ? 'none' : 'numeric'}
+          autoComplete="off"
+          placeholder={placeholder}
+          aria-invalid={!!error || undefined}
+          aria-describedby={`${id}-read`}
+          value={value === null ? '' : value.toLocaleString('ko-KR')}
+          onFocus={onFocus}
+          onChange={(e) => {
+            const d = digitsOnly(e.target.value);
+            put(d === '' ? null : Number(d));
+          }}
+          onPaste={(e) => {
+            e.preventDefault();
+            const v = parseKoreanAmount(e.clipboardData.getData('text'));
+            if (v === null) setPasteError('숫자만 붙여넣을 수 있어요');
+            else put(v);
+          }}
+        />
+        <span className="hg-amount__unit">원</span>
+      </div>
+      <span
+        id={`${id}-read`}
+        className={error ? 'hg-help is-error' : 'hg-help'}
+        aria-live="polite"
+        role={outerError && error === outerError ? 'alert' : undefined}
+      >
+        {error ?? (value ? readWon(value) : ' ')}
+      </span>
+    </>
+  );
+}
+
 export function AmountInput({
   label,
   value,
@@ -42,6 +153,7 @@ export function AmountInput({
   onBand,
   zeroLink,
   extra,
+  second,
   monthly,
   placeholder = '0',
   allowZero = false,
@@ -61,6 +173,11 @@ export function AmountInput({
   zeroLink?: { label: string; onClick: () => void };
   /** 빠른 금액·링크 바로 아래(키패드 위)에 둘 것(O-31 ‘매달 금액이 달라요’) */
   extra?: ReactNode;
+  /**
+   * 두 번째 금액 칸(W-11c ‘이미 모은 돈’, 2026-11-09 round 3): extra 아래, 키패드 위.
+   * 키패드는 하나로 화면 아래에 두고 마지막으로 누른 칸에 씀. 칸이 생기면 그 칸이 활성
+   */
+  second?: SecondAmount;
   /** 월 금액이면 1~9,999원에 “{n}만 원인가요?” */
   monthly?: boolean;
   placeholder?: string;
@@ -71,71 +188,52 @@ export function AmountInput({
   const id = useId();
   const narrow = useNarrow() && !embedded;
   const ref = useRef<HTMLInputElement>(null);
+  const secondRef = useRef<HTMLInputElement>(null);
   const [showBands, setShowBands] = useState(false);
-  const [pasteError, setPasteError] = useState<string>();
+  // 키패드가 쓰는 칸: 0 = 첫 칸, 1 = 두 번째 칸
+  const [active, setActive] = useState<0 | 1>(0);
+  const hasSecond = !!second;
 
   useEffect(() => {
     if (!narrow && !embedded) ref.current?.focus();
   }, [narrow, embedded]);
+  // 두 번째 칸이 생기면 그 칸으로, 없어지면 첫 칸으로
+  const prevSecond = useRef(hasSecond);
+  useEffect(() => {
+    if (hasSecond && !prevSecond.current) {
+      setActive(1);
+      if (!narrow) secondRef.current?.focus();
+    }
+    if (!hasSecond) setActive(0);
+    prevSecond.current = hasSecond;
+  }, [hasSecond, narrow]);
 
-  const over = value !== null && value > MAX_WON;
-  const zero = value === 0 && !allowZero;
-  const error =
-    pasteError ??
-    (over ? '999억 원까지 넣을 수 있어요' : zero ? '0원보다 큰 금액을 넣어 주세요' : undefined);
-  const set = (v: number | null) => {
-    setPasteError(undefined);
-    onChange(v);
-  };
+  const set = (v: number | null) => onChange(v);
+  const target =
+    active === 1 && second
+      ? { value: second.value, set: second.onChange }
+      : { value, set };
   // 키패드: 누른 숫자는 끝에 붙음. 빈 값에서 0, 00은 무시(맨 앞 0 지움)
   const append = (d: string) => {
-    const n = Number(digitsOnly(`${value ?? ''}${d}`));
-    if (value === null && n === 0) return;
-    set(n);
+    const n = Number(digitsOnly(`${target.value ?? ''}${d}`));
+    if (target.value === null && n === 0) return;
+    target.set(n);
   };
 
   return (
     <div className="hg-amountin">
-      <label htmlFor={id} className="hg-sr">
-        {label}
-      </label>
-      <div className="hg-amount" style={error ? { borderColor: 'var(--danger)' } : undefined}>
-        <input
-          ref={ref}
-          id={id}
-          className="hg-amount__value"
-          style={{
-            border: 0,
-            outline: 0,
-            background: 'transparent',
-            width: '100%',
-            minWidth: 0,
-            color: 'var(--ink)',
-            padding: 0,
-          }}
-          // 좁은 창은 앱 키패드를 쓰므로 OS 키보드만 숨긴다(물리 키보드 입력은 그대로)
-          inputMode={narrow ? 'none' : 'numeric'}
-          autoComplete="off"
-          placeholder={placeholder}
-          aria-invalid={!!error || undefined}
-          aria-describedby={`${id}-read`}
-          value={value === null ? '' : value.toLocaleString('ko-KR')}
-          onChange={(e) => {
-            const d = digitsOnly(e.target.value);
-            set(d === '' ? null : Number(d));
-          }}
-          onPaste={(e) => {
-            e.preventDefault();
-            const v = parseKoreanAmount(e.clipboardData.getData('text'));
-            if (v === null) setPasteError('숫자만 붙여넣을 수 있어요');
-            else set(v);
-          }}
-        />
-        <span className="hg-amount__unit">원</span>
-      </div>
-      <span id={`${id}-read`} className={error ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
-        {error ?? (value ? readWon(value) : ' ')}
-      </span>
+      <AmountBox
+        id={id}
+        label={label}
+        value={value}
+        set={set}
+        allowZero={allowZero}
+        narrow={narrow}
+        placeholder={placeholder}
+        idle={hasSecond && active !== 0}
+        inputRef={ref}
+        onFocus={() => setActive(0)}
+      />
       {monthly && value !== null && value >= 1 && value <= 9_999 && (
         <button
           type="button"
@@ -189,6 +287,22 @@ export function AmountInput({
         </div>
       )}
       {extra}
+      {second && (
+        <AmountBox
+          id={`${id}-2`}
+          label={second.label}
+          showLabel
+          value={second.value}
+          set={second.onChange}
+          allowZero={!!second.allowZero}
+          narrow={narrow}
+          placeholder={placeholder}
+          idle={active !== 1}
+          error={second.error}
+          inputRef={secondRef}
+          onFocus={() => setActive(1)}
+        />
+      )}
       {narrow && (
         <div className="hg-keypad" aria-label="숫자 키패드">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0'].map((k) => (
@@ -201,8 +315,8 @@ export function AmountInput({
             className="hg-key hg-key--fn"
             aria-label="지우기"
             onClick={() => {
-              const s = String(value ?? '').slice(0, -1);
-              set(s === '' ? null : Number(s));
+              const s = String(target.value ?? '').slice(0, -1);
+              target.set(s === '' ? null : Number(s));
             }}
           >
             <Icon name="delete" size={24} />
