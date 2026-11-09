@@ -18,4 +18,4 @@
 - 그룹 칩(예전 O-36 고정지출에서 쓰던 모양, O-36은 재기획으로 없앰): 40px 칩 3열 격자, 여러 개 고름. 고른 그룹 아래 세부 항목을 `hg-chip--sm` 한 줄(`hg-quick`)로 펼침. 마지막 칸 “직접 추가”는 이름 칸(ShortText) + “추가”.
 - 월급날은 칩이 아니라 숫자 판 `DayChips`(→ DayChips.md). 월 칩(`MonthChips`)은 `hg-chip--sm` 그대로.
 - 고른 칩(2026-11-02): 검은 바탕 대신 흰 바탕 + `ink` 2px 테두리(안쪽 1px 그림자 포함) + 600 글자(카카오톡·현대카드처럼). 탭(Tabs)의 현재 탭은 그대로 `ink` 바탕.
-- 작은 칩(`hg-chip--sm`, 2026-11-04): 테두리 없는 회색 알약(`surface-alt` + `slate` 600), 고르면 옅은 파랑 판(`success-soft`) + 파란 글자(`success`). 레퍼런스 토스·MyFitnessPal. 캘린더 필터, Y-07 이름 칩, Y-05 준비 상황·미리 알림, S-14 알림 시간. 큰 칩(질문 화면)은 테두리만.
+- 작은 칩(`hg-chip--sm`, 2026-11-04): 테두리 없는 회색 알약(`surface-alt` + `slate` 600), 고르면 옅은 오렌지 판(`accent-app-soft`) + `accent-app-ink`(= `brand-ink`) 글자(2026-11-09 파랑에서 바꿈, 13px라 오렌지 글자 대신 AA를 지키는 `brand-ink`). 레퍼런스 토스·MyFitnessPal. 캘린더 필터, Y-07 이름 칩, Y-05 준비 상황·미리 알림, S-14 알림 시간. 큰 칩(질문 화면)은 테두리만(고르면 `ink` 테두리, 브랜드 오렌지 아님). AmountInput 바꾸기 칩(W-11b)만 고르면 오렌지(AmountInput).

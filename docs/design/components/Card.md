@@ -15,7 +15,7 @@
 - 칸 사이 `space-2`, 안쪽 여백 위아래 `space-5`(2026-11-09 밀도, 20px), 옆 `space-6`(좁은 창 앱 틀 안 `space-5`). 카드 사이 `space-3`(12px, `hg-cards`). 자식에 margin 쓰지 않음.
 - 모두 왼쪽 정렬. 카드 안 금액도 왼쪽.
 - 나란히 놓는 카드는 `hg-cards`로 묶고 같은 구성으로 씀: 같은 높이, 값이 같은 높이에서 시작.
-- 숫자만 여러 개 보여 줄 때는 카드 대신 숫자 칸 `hg-stat`(라벨 `hg-stat__label`, 값 `hg-stat__value`, 보조 `hg-stat__sub`)을 `hg-stats`로 묶음: 3열, 좁은 창(768px 미만)은 2열 + 값 18px. 값은 줄바꿈 없음. 누르면 고치는 칸은 `button.hg-stat`(hover `hairline-soft`, 포커스 테두리 `focus`).
+- 숫자만 여러 개 보여 줄 때는 카드 대신 숫자 칸 `hg-stat`(라벨 `hg-stat__label`, 값 `hg-stat__value`, 보조 `hg-stat__sub`)을 `hg-stats`로 묶음: 3열, 좁은 창(768px 미만)은 2열 + 값 18px. 값은 줄바꿈 없음. 누르면 고치는 칸은 `button.hg-stat`(hover `hairline-soft`, 포커스 테두리 `focus-ring`).
 
 ## 그림 자리 (2026-11-08 목표 카드 없앰, 지금은 쓰는 화면 없음)
 
@@ -27,8 +27,8 @@
 ## 종류
 
 - 틴트는 뜻대로: `together` 우리 둘, `family` 양가, `goal` 저금 항목, `safety` 월급 전 확인(2026-11-09), `invest` 투자. 한 화면에 틴트 2가지까지. 틴트 위 보조 줄은 `ink-2`.
-- 카드 바탕에 브랜드 색을 쓰지 않음. 달성한 저금 항목도 기본 줄에 `hg-badge--achieved`(작은 오렌지 배지)만 붙임.
-- 누를 수 있는 카드는 `hg-card--raised`. `button`이나 `a`로 써도 글자색(`ink`), 글꼴, 왼쪽 정렬은 카드 그대로, 포커스 테두리 `focus`.
+- 카드 바탕에 브랜드 색을 쓰지 않음. 달성한 저금 항목도 기본 줄에 `hg-badge--achieved`(작은 옅은 오렌지 배지)만 붙임.
+- 누를 수 있는 카드는 `hg-card--raised`. `button`이나 `a`로 써도 글자색(`ink`), 글꼴, 왼쪽 정렬은 카드 그대로, 포커스 테두리 `focus-ring`(`ink`).
 
 소비자가 주는 것: 라벨, 배지(선택), 그림(선택), 값, 보조 줄.
 

@@ -4,7 +4,7 @@
 
 - 소비자가 주는 것: 장면 자리(선택, SceneMedia, 지금은 비어 있음), 상태 아이콘(선택), 제목, 보조 1줄(선택), 안내 띠(선택), 버튼 묶음, 뒤로(선택), 아래 안내 1줄(선택).
 - 가운데 한 열, 글자 가운데 정렬. 제목 `hg-auth__title`(24px 700, 줄바꿈 `\n` 그대로, 낱말 중간에서 끊지 않음 `keep-all`), 보조 `hg-auth__help`.
-- 글자 링크(`hg-btn--link`, ‘업데이트 없이 보기만 할게요’ 등)는 파랑이 아니라 `slate`. O-01 ‘코드 입력하기’만 `ink` 700 밑줄(당근 ‘로그인’ 링크처럼 눈에 띄게).
+- 글자 링크(`hg-btn--link`, ‘업데이트 없이 보기만 할게요’ 등)는 오렌지가 아니라 `slate`(2026-11-09 다른 화면 글자 버튼은 오렌지). O-01 ‘코드 입력하기’만 `ink` 700 밑줄(당근 ‘로그인’ 링크처럼 눈에 띄게).
 - 상태 이모지 `art`(2026-11-05): Illustrations 이름을 주면 그 3D 그림을 96px `hg-auth__art`로(원 판 없음, ‘동작 줄이기’가 아니면 한 번 톡 커짐), 아이콘 원 대신. A-03은 기다리는 동안 그림 없이 아래 도는 아이콘(다른 로딩과 같음, 2026-11-05 모래시계 없앰), 실패면 `status-error`, A-01 업데이트 `status-update`, 점검 `status-maintenance`, 오프라인 `status-offline`, 오류 `status-error`, A-08 `status-lock`, A-06 Face ID `status-faceid`, Touch ID·지문 `status-fingerprint`. 그림 파일이 없으면 아래 아이콘 원.
 - 상태 아이콘 `hg-auth__icon`(2026-11-02, 그림이 없을 때): 제목 위 72px `surface-alt` 원 + `ink` 아이콘 32px(`aria-hidden`). 글자만 있던 상태 화면을 하나의 모양으로 맞춤. 로그인 대기(A-03) `loader-circle`(천천히 돎 `is-busy`, ‘동작 줄이기’면 멈춤, 브라우저 열기 실패면 `circle-alert`로 바꾸고 제목에 실패 문구), 업데이트 필요 `download`, 점검 중 `settings`, 오프라인(로그인 전) `link`, 실행 오류 `circle-alert`, 세션 만료(A-08) `lock`, Touch ID, 지문 켜기(A-06) `fingerprint`, Face ID 켜기 `scan-smiley`. 상태 화면 머리에 워드마크는 두지 않음.
 - 안내 띠 `hg-auth__alert`(2026-11-02 당근 안내 상자): `plate` 바탕, `radius-lg`, 안쪽 12px 16px, `info` 16px `ink-2`(첫 줄에 맞춤) + 14px `ink-2` 글자, 최대 360px, `role="status"`. 버튼 묶음 바로 위. 상황이 풀릴 때까지 남는 안내만: 오프라인, 다시 로그인해 주세요, PIN 5번 틀림, 브라우저 열기 실패, 업데이트 실패.
