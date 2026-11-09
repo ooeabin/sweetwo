@@ -66,12 +66,19 @@ test('홈: 저금 항목(H-02), 이번 달 월급 체크 → 모은 금액에 �
   // W-02: 남은 줄 체크 → 마지막 줄이면 W-02 끝(카드 머리 ‘5개 중 1개 완료 ›’)
   await salaryCard(page).getByRole('link', { name: '5개 중 1개 완료' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
-  await expect(page.getByText(/09\.25 ~ 10\.24\. 5개 중 1개 완료/)).toBeVisible();
+  await expect(page.getByText('09.25 ~ 10.24', { exact: true })).toBeVisible();
+  // 2026-11-09 잇기: 개수는 진행 막대 화면 읽기 이름, 아래 “보낸 금액”
+  await expect(page.getByRole('img', { name: '5개 중 1개 완료' })).toBeVisible();
+  await expect(page.getByText('보낸 금액 95만 원 / 350만 원')).toBeVisible();
   await axe(page);
   for (const name of ['청약', '고정지출', '생활비', '용돈'])
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
-  await expect(page.getByText('이번 달 저금 139만 원을 보냈어요')).toBeVisible();
+  // 달 결과 카드(2026-11-09, 저금 요약 대신): 저금 소계 139만, 보낸 금액 350만
+  const result = page.locator('.hg-receipt');
+  await expect(result.getByText('9월 월급', { exact: true })).toBeVisible();
+  await expect(result.locator('.hg-receipt__subtotal').first()).toHaveText('139만 원');
+  await expect(result.getByText('보낸 금액', { exact: true })).toBeVisible();
   // 축하 그림 자리(2026-11-08 2D 플랫으로 다시 만들 때까지 빈 자리)
   await expect(page.locator('.hg-doneart.hg-artslot')).toBeVisible();
   await axe(page);
@@ -183,7 +190,8 @@ test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 �
   await page.getByRole('textbox', { name: '고정지출 금액' }).fill('900000');
   await expect(page.getByRole('dialog').getByText('2만 원이 모자라요')).toBeVisible();
   await page.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('고정지출을 90만 원으로 바꿨어요')).toBeVisible();
+  // 이번 달 체크 안 한 고정지출 줄도 바뀌어 Toast가 그 말로(2026-11-09)
+  await expect(page.getByText('이번 달 체크 안 한 줄도 바꿨어요')).toBeVisible();
   await expect(page.locator('.hg-receipt__row.is-short')).toContainText('2만 원이 모자라요');
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   expect(lines.find((l) => l.kind === 'fixed')).toMatchObject({ planned: 900_000, state: 'wait' });

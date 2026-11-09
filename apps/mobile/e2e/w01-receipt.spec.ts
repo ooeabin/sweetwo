@@ -107,7 +107,8 @@ test('금액 바꾸기: 시트(여유 자금 미리보기) → 바로 저장 + �
   await expect(sheet.getByLabel('줄 이름')).toHaveCount(0);
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('생활비를 80만 원으로 바꿨어요')).toBeVisible();
+  // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
+  await expect(page.getByText('이번 달 체크 안 한 줄도 바꿨어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '생활비 80만 원' })).toBeVisible();
   expect(lineOf(db, 'living')?.amount).toBe(800_000);
   expect(waitLine(db, 'living')?.planned).toBe(800_000);
@@ -224,7 +225,8 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(card.getByText('매달 10일')).toBeVisible();
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
-  await expect(card.getByRole('button')).toHaveCount(0);
+  // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 보냈어요 ›’ 링크 하나(2026-11-09)
+  await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 보냈어요']);
   for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저금 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
