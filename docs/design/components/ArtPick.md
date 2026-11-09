@@ -8,7 +8,7 @@
 - 모양: `hg-artpick` 격자 4열(사이 `space-3`, 고르기 묶음 `hg-artchoose` 최대 440px). 칸 `hg-artpick__item`은 정사각, 둥근 네모 `radius-lg`, `hg-artpick--round`면 원.
 - 그림: `<img>`로 꽉 채움(`object-fit: cover`). 그림 파일이 없으면 `hairline-soft` 회색 바탕 + `stone` 아이콘 24px(아바타는 사람, 목표는 템플릿 아이콘).
 - 고른 칸: `aria-pressed="true"`, 바깥 고리(`surface` 2px + `ink` 2px, Avatar 끌어 놓기와 같음) + 오른쪽 아래 `ink` 원 체크(`hg-artpick__check`). 브랜드 오렌지는 쓰지 않음.
-- 칸 아래 이름(2026-11-05) `hg-artpick__name`: 13px `slate` 가운데, 고른 칸은 `ink` 600. 항목에 `name`을 주면 화면 읽기 이름도 같음. G-02p는 “사진 올리기” “내 사진”(올린 사진이 있을 때) “기본 사진”.
+- 칸 아래 이름(2026-11-05) `hg-artpick__name`: 12px `slate` 가운데, 고른 칸은 `ink` 600. 항목에 `name`을 주면 화면 읽기 이름도 같음. G-02p는 “사진 올리기” “내 사진”(올린 사진이 있을 때) “기본 사진”.
 - 맨 앞 칸(`lead`): ‘사진 올리기’ `hg-artpick__upload`(투명 바탕 + `border-control` 점선 1.5px + 카메라, 아래 이름). 누르면 파일 고르기, 끌어 놓기도 됨.
 - 미리보기 `hg-artprev`: 격자 위에 고른 그림을 크게. 프로필 `--round` 원 120px, 목표 16:10 `radius-xl`. 그림 없으면 회색 바탕 + 아이콘 44px.
 - 누르면 고르기만, 아래 주 버튼 “저장하기”로 저장(바꿨을 때만 누를 수 있음). 저장 중에는 칸을 모두 막음.

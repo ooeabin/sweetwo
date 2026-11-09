@@ -9,7 +9,7 @@
 
 - Small 158×158(`hg-wg--s`), Medium 338×158(`hg-wg--m`), Large 338×354(`hg-wg--l`). 기기 크기에 맞춰 비율 유지.
 - 모서리 `radius-2xl`, 안쪽 16px(Large 20px). 흰 위젯은 `hairline-soft` 테두리 + `shadow-1`.
-- 위 → 아래 순서 고정: 라벨(`hg-wg__label`) → 값(`hg-wg__value`, 28px) → 보조 1줄(`hg-wg__meta`, `hg-wg__note`).
+- 위 → 아래 순서 고정: 라벨(`hg-wg__label`) → 값(`hg-wg__value`, 24px) → 보조 1줄(`hg-wg__meta`, `hg-wg__note`).
 
 ## 내용
 

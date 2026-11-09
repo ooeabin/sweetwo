@@ -15,4 +15,4 @@
 - React 래퍼 `FileAttach`(packages/ui): 라벨, 끌어 놓기 글자, 고르기 글자, 한도 줄, 받는 형식, 여러 개, 다 채움, 오류, 파일 목록(이름, 보조 줄, 미리보기, 진행, 오류, 다시 시도), 빼기.
 
 쓰는 곳: 경조사 기록 사진(Y-08c), 문의하기(S-19a) 첨부(아직 없음). 프로필 사진과 목표 사진은 ImageCrop.
-- 사진 칸 3열(`grid`, 2026-11-04 Y-08c, 레퍼런스 Stoic·AllTrails): 라벨 옆 개수(`hg-attach__count`, “2/10”) → 3열 정사각 칸(`hg-photos`, 간격 `space-2`). 첫 칸 `hg-photos__add`: 1.5px 점선 `hairline` + 가운데 세로로 + 아이콘 22px과 “사진 추가”(13px 600 `slate`), 끌어 놓기도 받음(올리면 `ink` 테두리), 한도를 채우면 숨김. 올린 사진 `hg-photos__item`: 꽉 채운 사진 + 오른쪽 위 26px ✕ 원(`scrim` 바탕), 올리는 중·실패는 아래 띠(`hg-photos__state`, 실패면 ‘다시 시도’ + 칸 `danger` 2px 안쪽 테두리). 한도 줄과 오류는 칸 아래.
+- 사진 칸 3열(`grid`, 2026-11-04 Y-08c, 레퍼런스 Stoic·AllTrails): 라벨 옆 개수(`hg-attach__count`, “2/10”) → 3열 정사각 칸(`hg-photos`, 간격 `space-2`). 첫 칸 `hg-photos__add`: 1.5px 점선 `hairline` + 가운데 세로로 + 아이콘 22px과 “사진 추가”(12px 600 `slate`), 끌어 놓기도 받음(올리면 `ink` 테두리), 한도를 채우면 숨김. 올린 사진 `hg-photos__item`: 꽉 채운 사진 + 오른쪽 위 26px ✕ 원(`scrim` 바탕), 올리는 중·실패는 아래 띠(`hg-photos__state`, 실패면 ‘다시 시도’ + 칸 `danger` 2px 안쪽 테두리). 한도 줄과 오류는 칸 아래.

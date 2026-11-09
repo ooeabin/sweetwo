@@ -16,7 +16,7 @@
 
 ## ChapterList
 
-온보딩 첫 화면(O-10) 챕터 목록(`hg-chapters`, `ol`). `plate` 판 위에 챕터마다 번호 원(28px, `surface` 바탕, `ink` 숫자) + 이름(16px 600) + 한 줄 설명(14px `slate`). 줄 사이 16px, 판 안쪽 20px, `radius-xl`. `brand` 쓰지 않음.
+온보딩 첫 화면(O-10) 챕터 목록(`hg-chapters`, `ol`). `plate` 판 위에 챕터마다 번호 원(28px, `surface` 바탕, `ink` 숫자) + 이름(15px 600) + 한 줄 설명(13px `slate`). 줄 사이 16px, 판 안쪽 20px, `radius-xl`. `brand` 쓰지 않음.
 
 - O-10은 상태 없이 네 줄 모두 설명까지.
 - 챕터 시작 안내(예전 O-20·O-30·O-50, 재기획으로 없앰. 지금 쓰는 곳 없음)는 상태를 보여 줌(`now`): 끝난 챕터 `ink` 원 + 흰 체크, 이름 `slate`(화면 읽기 “끝남”) / 지금 챕터 2px `ink` 테두리 원 + 이름 진하게 + 설명(`aria-current="step"`) / 남은 챕터 이름과 숫자 `stone`, 설명 없음.

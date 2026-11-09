@@ -3,7 +3,7 @@
 자산 순위 줄(2026-11-04, 23 F-01 0번, 19 H-01 1a). 토스 혜택 줄처럼 한 줄: 왼쪽 44px 원 + 제목 + 오렌지 글자(2026-11-09).
 
 - 원 `hg-rankrow__badge`: `invest` 바탕 + `invest-ink` 13px 800. 안 봄·자산 없음 “?%”, 본 뒤 “38%”.
-- 제목 `hg-rankrow__title`: 16px 600 `ink`, 줄바꿈 keep-all.
+- 제목 `hg-rankrow__title`: 15px 600 `ink`, 줄바꿈 keep-all.
 - 오렌지 글자 `hg-rankrow__action`: 14px 600 `accent-app-text`(2026-11-09, 500 `focus` 파랑에서 바꿈)(“확인하기”, “10월 기준, 자세히 보기”, “새로 확인하기”). 자산이 없으면 F-01에서는 없음, 홈에서는 “자산 입력하기”(2026-11-04).
 - 광고 표시 `hg-rankrow__ad`: 광고가 나오는 상태(안 봄, 지난번)에만 오렌지 글자 앞 작은 회색 ‘광고’(`surface-alt` 바탕, 11px 600 `slate`). AdMob 보상형 광고 정책상 누르기 전에 광고를 알림(ADR 0006).
 - 누를 수 있으면 `button`(포커스 링 2px `focus-ring`), 누를 수 없으면(자산 관리 빈 상태) `div`.
