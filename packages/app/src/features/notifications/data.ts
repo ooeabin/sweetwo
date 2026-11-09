@@ -61,7 +61,7 @@ export function useNotiPeople() {
 /** 지금 한국 시간 시(0~23) */
 export const kstHour = (now = new Date()) => (now.getUTCHours() + 9) % 24;
 
-/** 알림 대상(저금 항목·자산·챙길 날)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
+/** 알림 대상(저금 항목·자산·경조사)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
 async function targetGone(
   target: string,
   qc: ReturnType<typeof useQueryClient>,

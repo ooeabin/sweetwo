@@ -25,7 +25,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { copy } from './copy';
 
-// 우리 자산 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 파트너 합계만 = 묶음 합계)
+// 자산 관리 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 파트너 합계만 = 묶음 합계)
 export function useAssetsData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });

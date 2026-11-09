@@ -18,7 +18,7 @@ export class SavingItemBlocked extends Error {
 
 /**
  * W-11 저장: 저금 항목 + 내(합쳐서면 공동) 월급 계획 저금 묶음 맨 아래 줄(매달 금액) + 이번 사이클 체크리스트 줄.
- * deadline은 'YYYY-MM-01'. start = 시작할 때 모은 돈(W-11c ‘이미 모은 돈이 있어요’, 만들 때만, 2026-11-09). 새 항목 id
+ * deadline은 'YYYY-MM-01'. start = 시작할 때 모은 금액(W-11c ‘이미 모은 금액이 있어요’, 만들 때만, 2026-11-09). 새 항목 id
  */
 export async function addSavingItem(o: {
   name: string;
@@ -70,7 +70,7 @@ export async function reopenSavingItem(id: string) {
   fail(error);
 }
 
-/** 새 목표 금액이 지금 모은 돈 이하라 못 바꿈(W-12a ‘목표 금액을 새로 정할게요’) */
+/** 새 목표 금액이 지금 모은 금액 이하라 못 바꿈(W-12a ‘목표 금액을 새로 정할게요’) */
 export class SavingTargetTooLow extends Error {
   constructor() {
     super('not_above');
@@ -78,7 +78,7 @@ export class SavingTargetTooLow extends Error {
 }
 
 /**
- * W-12a ‘목표 금액을 새로 정할게요’(2026-11-09 round 3): 달성(고르기 전) 항목의 목표 금액을 모은 돈보다 큰 새 금액으로,
+ * W-12a ‘목표 금액을 새로 정할게요’(2026-11-09 round 3): 달성(고르기 전) 항목의 목표 금액을 모은 금액보다 큰 새 금액으로,
  * 기한은 지우고 모으는 중으로. 되돌리기는 unkeepSavingItem(예전 목표 금액·기한)
  */
 export async function retargetSavingItem(id: string, target: number) {

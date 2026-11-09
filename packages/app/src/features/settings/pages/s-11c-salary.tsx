@@ -17,7 +17,7 @@ import { useSettingsData } from '../data';
 type Day = number | 'last';
 
 // S-11c 내 월급(O-31과 같음): 금액 + 매달 달라요 + 월급날, ‘지금은 월급이 없어요’. 본인만.
-// 저장 = 바로 적용 + Toast ‘되돌리기’(상대 알림은 서버). 금액이 바뀌면 남는 돈만, 월급날은 다음 체크리스트부터(20 ‘다시 계산되는 때’).
+// 저장 = 바로 적용 + Toast ‘되돌리기’(상대 알림은 서버). 금액이 바뀌면 여유 자금만, 월급날은 다음 체크리스트부터(20 ‘다시 계산되는 때’).
 export function S11cSalary() {
   const nav = useNavigate();
   const qc = useQueryClient();

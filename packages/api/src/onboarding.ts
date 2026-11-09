@@ -190,7 +190,7 @@ export type PartnerProfile = {
   /** 다른 수입 월 합계(O-35b) */
   other_income: number;
 };
-/** 파트너 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 파트너가 없거나 안 적었으면 null */
+/** 파트너 출생연도(자산 순위 연령대 비교, 계산·배분 7-7). 파트너가 없거나 안 적었으면 null */
 export async function fetchPartnerBirthYear(): Promise<number | null> {
   const { data, error } = await supabase().rpc('partner_birth_year');
   fail(error);

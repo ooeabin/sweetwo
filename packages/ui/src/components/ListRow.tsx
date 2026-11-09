@@ -72,7 +72,7 @@ export function Lead({
 }: {
   tone?: LeadTone;
   icon?: IconName;
-  /** 진행 원(0~100 정수 %, 저금 줄 모은 돈 ÷ 목표 금액). 있으면 icon 대신, 바탕은 저금 영역(goal) */
+  /** 진행 원(0~100 정수 %, 저금 줄 모은 금액 ÷ 목표 금액). 있으면 icon 대신, 바탕은 저금 영역(goal) */
   progress?: number;
   /** 그림(Illustration 등, 지금 쓰는 곳 없음) */
   art?: ReactNode;

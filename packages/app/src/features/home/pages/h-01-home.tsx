@@ -39,7 +39,7 @@ import { useGoals, useMe, usePartner, useSpace } from '../data';
 import { SalaryCard, SavingCard, UpcomingCard, type UpcomingItem } from '../parts';
 
 // 홈(19): 할 일 한 줄(H-06) → 왼쪽 이번 달 월급(H-03)·저금 항목(H-02, ADR 0007),
-// 오른쪽 우리 자산(H-04)·다가오는 일정(H-05). 좁은 창은 한 단. 파트너 활동은 알림 센터.
+// 오른쪽 자산(H-04)·일정(H-05). 좁은 창은 한 단. 파트너 활동은 알림 센터.
 const PC_BAND = 'sweetwo.pcBandDone';
 const pcBandDone = () => {
   try {
@@ -77,7 +77,7 @@ export function H01Home() {
   const splits = useSplits();
   const saving = useSavingItems();
   const nw = useNetWorth(true);
-  // 할 일 한 줄·다가오는 일정은 트레이 위젯과 같은 계산(core homeTodo·homeUpcoming)
+  // 할 일 한 줄·일정은 트레이 위젯과 같은 계산(core homeTodo·homeUpcoming)
   const h = useHomeInput();
   const solo = space.data?.couple_state === 'solo';
   const exName = useQuery({
@@ -142,7 +142,7 @@ export function H01Home() {
     id === meId ? myName : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);
 
-  // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·챙길 날은 그 항목·날짜만 닫힘
+  // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·경조사는 그 항목·날짜만 닫힘
   const t0 = h.input ? homeTodo(h.input) : null;
   // 해제 대기 띠가 있으면 같은 할 일 줄은 빼고 띠만
   const t = t0?.kind === 'unlink' && h.unlink ? null : t0;
@@ -243,7 +243,7 @@ export function H01Home() {
       </>
     ) : undefined;
 
-  // H-05 다가오는 일정(30일 안, 날짜순 최대 3개)
+  // H-05 일정(30일 안, 날짜순 최대 3개)
   const items: UpcomingItem[] = (h.input ? homeUpcoming(h.input) : []).map((u) => ({
     key: u.key,
     date: u.date,
@@ -254,7 +254,7 @@ export function H01Home() {
   }));
 
   const go = (to: string) => nav(to);
-  // 자산을 하나도 안 적었으면 카드 없음(2026-11-03, ‘자산 추가하기’ 빈 카드가 어색해서. 추가는 우리 자산 탭)
+  // 자산을 하나도 안 적었으면 카드 없음(2026-11-03, ‘자산 추가하기’ 빈 카드가 어색해서. 추가는 자산 관리 탭)
   const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} /> : null;
   return (
     <MainFrame
@@ -294,7 +294,7 @@ export function H01Home() {
           <SavingCard items={saving.ready ? saving.withTarget : []} go={go} />
         </div>,
         <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-6)' }}>
-          {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}
+          {/* 19 H-01 1a 자산 순위 줄(2026-11-04): 자산(H-04) 바로 위 */}
           {showRank && <RankBanner entry="home" />}
           {assetsCard}
           <UpcomingCard items={items.slice(0, 3)} go={go} />

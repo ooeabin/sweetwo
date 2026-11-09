@@ -52,7 +52,7 @@ class ConflictFound extends Error {
 // 저장 = 바로 반영 + Toast ‘되돌리기’. 우리 둘 항목(합쳐서)은 상대 알림·활동 기록(서버).
 // 목표 금액을 처음 정할 때(`?first=1`)는 저장 뒤 기한으로 이어짐. 매달 금액은 W-01에서.
 // 매달 금액(2026-11-09 round 3, W-10 ‘바꾸기’): 그 항목이 있는 월급 계획의 이 줄만 바꿔 save_split(W-01 저장과 같음) + 되돌리기.
-// 새 목표 금액(`?retarget=1`, W-12a ‘목표 금액을 새로 정할게요’): 달성 항목, 모은 돈보다 커야 함 → saving_item_retarget → 기한으로.
+// 새 목표 금액(`?retarget=1`, W-12a ‘목표 금액을 새로 정할게요’): 달성 항목, 모은 금액보다 커야 함 → saving_item_retarget → 기한으로.
 // 합쳐서 모드에서 파트너가 1분 안에 같은 칸을 바꿨으면 충돌 선택(ConflictChoice, 30 동기화 2장). 비교 기준은 이 화면을 열 때 값
 export function W10aSavingEdit() {
   const { id = '', field = 'amount' } = useParams();

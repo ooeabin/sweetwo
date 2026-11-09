@@ -118,7 +118,7 @@ export function MainFrame(
         onSearch={() => setPalette(true)}
         // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
         // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
-        // + 버튼은 월급(저금 항목 추가), 우리 자산, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
+        // + 버튼은 월급(저금 항목 추가), 자산 관리, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
         onAdd={
           p.current && p.current !== 'month' && !p.sub && !p.noAdd
             ? () => nav(addFor(p.current))

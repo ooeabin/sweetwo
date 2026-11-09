@@ -104,7 +104,7 @@ export const copy = {
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
   salary: '한 달 실수령액은 얼마예요?',
-  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
   salaryVariableHelp: '가장 적게 들어온 달 기준으로 적어 주세요', // [확인 필요]
   noSalary: '지금은 월급이 없어요',
@@ -112,10 +112,10 @@ export const copy = {
   splitTableHelp: '눌러서 금액을 바꿔요', // [확인 필요]
   splitIncome: (man: string) => `월급 ${man}`,
   savingGroup: '저금',
-  spendGroup: '쓰는 돈',
+  spendGroup: '지출',
   lineNames: { fixed: '고정지출', living: '생활비', allowance: '용돈' },
   fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
-  livingSub: '식비·장보기처럼 쓰는 대로 나가는 돈', // [확인 필요]
+  livingSub: '식비·장보기처럼 그때그때 쓰는 지출', // [확인 필요]
   needPerMonth: (man: string) => `매달 ${man}이 필요해요`,
   addLine: '+ 줄 추가',
   newLineName: '줄 이름', // [확인 필요] 직접 추가 줄 이름 칸
@@ -123,8 +123,8 @@ export const copy = {
   removeLine: '줄 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
-  leftover: (man: string) => `남는 돈 ${man}`,
+  leftover: (man: string) => `여유 자금 ${man}`,
   short: (man: string) => `${man}이 모자라요`,
-  shortHelp: '쓰는 돈이나 저금을 줄여 주세요',
+  shortHelp: '지출이나 저금을 줄여 주세요',
   splitDone: '이대로 저장하기',
 };

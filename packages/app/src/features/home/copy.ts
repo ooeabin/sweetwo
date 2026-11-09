@@ -1,6 +1,6 @@
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
-  noSavedYet: '아직 모은 돈이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
+  noSavedYet: '아직 모은 금액이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
   // H-01 기다리는 화면
   waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
   waitCard: (starter: string) => `${starter}님이 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 2026-11-08,
@@ -21,11 +21,11 @@ export const copy = {
   editSplit: '월급 계획 고치기',
   noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
-  // H-04 우리 자산
-  assets: '우리 자산',
-  // H-05 다가오는 일정
-  upcoming: '다가오는 일정',
-  moreCalendar: '캘린더', // 다가오는 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)
+  // H-04 자산
+  assets: '자산',
+  // H-05 일정
+  upcoming: '일정',
+  moreCalendar: '캘린더', // 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)
   noUpcoming: '30일 안에 일정이 없어요', // [확인 필요]
   monthShort: (m: number) => `${m}월`,
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]

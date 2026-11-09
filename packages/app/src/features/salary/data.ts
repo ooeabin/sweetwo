@@ -21,7 +21,7 @@ export const useSpace = () => useQuery({ queryKey: qk.space, queryFn: fetchSpace
 export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
 export const useSplits = () => useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
-/** 저금 항목별 모은 돈(체크한 저금 합, 06 4장) */
+/** 저금 항목별 모은 금액(체크한 저금 합, 06 4장) */
 export const useGoalSaved = () => useQuery({ queryKey: qk.goalSaved, queryFn: fetchGoalSaved });
 
 /**
@@ -36,12 +36,12 @@ export function useChecklists() {
   });
 }
 
-/** 줄 상태: 체크 안 한 줄이 남았는지(남는 돈 줄은 없음) */
+/** 줄 상태: 체크 안 한 줄이 남았는지(여유 자금 줄은 없음) */
 export const waiting = (c: PayChecklist) => c.pay_check_line.filter((l) => l.state === 'wait');
 export const doneCount = (c: PayChecklist) =>
   c.pay_check_line.filter((l) => l.state !== 'wait').length;
 
-/** 체크 뒤 새로 읽을 것: 체크리스트, 저금 항목 모은 돈 */
+/** 체크 뒤 새로 읽을 것: 체크리스트, 저금 항목 모은 금액 */
 export function useCheck() {
   const qc = useQueryClient();
   return async (line: PayCheckLine, state: 'checked' | 'wait' | 'skipped', actual?: number) => {
@@ -54,7 +54,7 @@ export function useCheck() {
   };
 }
 
-/** 모은 돈(서버 goal_saved_sums, 아직 못 읽었으면 0) */
+/** 모은 금액(서버 goal_saved_sums, 아직 못 읽었으면 0) */
 export const savedOf = (g: Goal, saved: Record<string, number> | undefined) => saved?.[g.id] ?? 0;
 
 /** 내 체크리스트: 각자면 내 것, 합쳐서면 공동 */

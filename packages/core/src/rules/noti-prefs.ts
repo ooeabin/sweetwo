@@ -30,7 +30,7 @@ export interface NotiPrefs extends Channels {
   topics: Record<NotiTopic, Channels>;
 }
 
-/** 기본: 모두 켜짐, 챙길 날 D-14·당일만 꺼짐(S-14 종류별 토글 표) */
+/** 기본: 모두 켜짐, 경조사 D-14·당일만 꺼짐(S-14 종류별 토글 표) */
 const DEFAULT_OFF: NotiTopic[] = ['care_14', 'care_0'];
 
 /** 저장된 값(빈 객체일 수 있음)을 기본값으로 채움 */

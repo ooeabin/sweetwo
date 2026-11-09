@@ -20,8 +20,8 @@ const readView = (): View => {
   }
 };
 
-// Y-09 드린 기록(24 Y-09, 재기획): 무엇을, 언제, 얼마 드렸는지. 챙길 날별 / 연도별 보기(기기에 기억).
-// 같은 챙길 날에 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 챙길 날 상세(Y-05).
+// Y-09 선물 기록(24 Y-09, 재기획): 무엇을, 언제, 얼마 드렸는지. 경조사별 / 연도별 보기(기기에 기억).
+// 같은 경조사에 2년 안 같은 선물이면 “작년에도 드렸어요”. 행 → 그 경조사 상세(Y-05).
 // 사진(Y-08c)이 있으면 행 앞에 첫 사진 미리보기 + “사진 3장” [확인 필요]
 export function Y09GiftLog() {
   const nav = useNavigate();
@@ -47,7 +47,7 @@ export function Y09GiftLog() {
         .map((g) => (g === 'gift' && r.gift_name ? r.gift_name : copy.gifts[g])),
     );
 
-  // 묶음: 챙길 날별(가장 최근 기록 순) / 연도별(최근 해부터)
+  // 묶음: 경조사별(가장 최근 기록 순) / 연도별(최근 해부터)
   const groups: { key: string; title: string; items: typeof rows }[] = [];
   const push = (key: string, title: string, r: (typeof rows)[number]) => {
     const g = groups.find((x) => x.key === key);

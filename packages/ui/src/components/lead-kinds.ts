@@ -36,13 +36,13 @@ const LEADS = {
     other_loan: { icon: 'hand-coins' },
     personal: { icon: 'handshake' },
   },
-  /** F-01 한눈에 아래 줄(자산 합계, 부채 합계, 예상 순자산) */
+  /** F-01 요약 아래 줄(자산 합계, 부채 합계, 예상 순자산) */
   summary: {
     assets: { icon: 'wallet', tone: 'invest' },
     debts: { icon: 'bank' },
     expected: { icon: 'chart-line-up', tone: 'invest' },
   },
-  /** 캘린더 돈 일정(core MoneyKind) + 공휴일. 영역 색은 홈 H-05 날짜 칸과 같음 */
+  /** 캘린더 금융 일정(core MoneyKind) + 공휴일. 영역 색은 홈 H-05 날짜 칸과 같음 */
   money: {
     payday: { icon: 'money', tone: 'invest' },
     review: { icon: 'calendar-check', tone: 'safety' },
@@ -51,7 +51,7 @@ const LEADS = {
     maturity: { icon: 'hourglass', tone: 'family' },
     holiday: { icon: 'flag-pennant' },
   },
-  /** 챙길 날(care_day.kind). 챙길 날은 한 종류라 영역 색은 모두 together, 아이콘만 이름 칩에 따라 */
+  /** 경조사(care_day.kind). 경조사는 한 종류라 영역 색은 모두 together, 아이콘만 이름 칩에 따라 */
   care: {
     birthday: { icon: 'cake', tone: 'together' },
     anniversary: { icon: 'heart', tone: 'together' },

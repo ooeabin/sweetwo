@@ -7,7 +7,7 @@
 - 누르면 이동하는 줄만 화살표(`hg-chevron`)이고 줄 전체가 `button`(또는 `a`). 토글 줄은 화살표 없음.
 - 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 56px 이상(2026-11-09 60px에서). 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
 - 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 영역 색 원 + Phosphor 아이콘 18px(2026-11-09, 아래 ‘Lead 종류 표’). 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음.
-- 사진 미리보기 `hg-thumb`(40px, `radius-md`, 잘라 채움): 챙길 날 드린 기록(Y-09)에서 첫 사진. 장식이라 `aria-hidden`, 사진 수는 보조 줄 “사진 3장”.
+- 사진 미리보기 `hg-thumb`(40px, `radius-md`, 잘라 채움): 경조사 선물 기록(Y-09)에서 첫 사진. 장식이라 `aria-hidden`, 사진 수는 보조 줄 “사진 3장”.
 
 ## 설정 줄
 
@@ -43,15 +43,15 @@
 | | 학자금(`student`) | `graduation-cap` | 회색 | 〃 |
 | | 기타 대출(`other_loan`) | `hand-coins` | 회색 | 〃 |
 | | 개인 간(`personal`) | `handshake` | 회색 | 〃 |
-| 우리 자산 요약 `summary` | 자산(`assets`) | `wallet` | `invest` | F-01 한눈에 아래 줄 |
+| 자산 요약 `summary` | 자산(`assets`) | `wallet` | `invest` | F-01 요약 아래 줄 |
 | | 부채(`debts`) | `bank` | 회색 | 〃 |
 | | 예상 순자산(`expected`) | `chart-line-up` | `invest` | 〃 |
-| 돈 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-01 다가오는 일정, Y-04 고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
+| 금융 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-01 일정, Y-04 고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
 | | 월급 전 확인(`review`) | `calendar-check` | `safety` | 〃 |
 | | 저금 기한(`deadline`), 쓰는 달(`goal`) | `target` | `goal` | 〃 |
 | | 만기(`maturity`) | `hourglass` | `family` | 〃 |
 | | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
-| 챙길 날 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-01, Y-04 |
+| 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-01, Y-04 |
 | | 기념일(`anniversary`) | `heart` | `together` | 〃 |
 | | 명절(`seollal`, `chuseok`) | `moon-stars` | `together` | 〃 |
 | | 어버이날(`parents_day`) | `flower-tulip` | `together` | 〃 |
@@ -71,7 +71,7 @@
 ## 진행 원 (2026-11-09)
 
 - `Lead progress={0~100}`: 목표 금액이 있는 저금 줄(체크리스트 W-02, 홈 H-03, W-05)의 앞 칸. 저금 아이콘 대신 앞 칸과 같은 32px 고리(`hg-lead--ring`, 2026-11-09 밀도): 굵기 `space-1`, 빈 둘레 `surface-alt`(조용한 바탕), 채움 `accent-app` 브랜드 오렌지(2026-11-09 브랜드 색 규칙, `goal`·`goal-ink`에서 바꿈), 가운데는 비움(다크 모드는 토큰이 바꿈).
-- 값 = core `savingBar`(모은 돈 × 100 ÷ 목표 금액, 내림 정수 %, 100 상한, 모은 돈이 있으면 최소 2%). 정수만 받고 0~100으로 자름.
+- 값 = core `savingBar`(모은 금액 × 100 ÷ 목표 금액, 내림 정수 %, 100 상한, 모은 금액이 있으면 최소 2%). 정수만 받고 0~100으로 자름.
 - 장식(`aria-hidden`). 진행은 보조 줄 “2,700만 / 1억 5,000만 원”이 글자로 말함. 그래서 이 줄들에는 이름 아래 얇은 막대를 두지 않음(줄 높이가 다른 줄과 같음).
 - 목표 금액이 없는 저금 줄은 저금통 아이콘(`goal` 원).
 - 진행 원을 쓰지 않는 곳: % 숫자와 막대가 줄의 주인공인 GoalRow(홈 H-02, W-13)는 저금통 아이콘 + 막대 그대로, 저금 항목 상세(W-10)는 큰 막대 그대로. 묶음 머리의 “2/4” 원은 Ring(따로).

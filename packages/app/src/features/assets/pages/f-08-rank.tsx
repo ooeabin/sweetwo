@@ -19,7 +19,7 @@ import { money, useMask } from '../../../shared/mask';
 import { LoadingFrame, MainFrame, useRank, useRankAge } from '../../frame';
 import { copy } from '../copy';
 
-// F-08 우리 자산 순위(23 F-08, 계산·배분 7-7, 2026-11-04 1단계 공공 통계): 상위 n% + 분포 그림 + 중앙값 + 우리 값 + 기준.
+// F-08 자산 순위(23 F-08, 계산·배분 7-7, 2026-11-04 1단계 공공 통계): 상위 n% + 분포 그림 + 중앙값 + 우리 값 + 기준.
 // 순위 배너에서 엶(광고는 배너에서). 이번 달에 저장한 값이 아니면(직접 연 경우) 지금 순자산으로 계산해 보여 줌
 export function F08Rank() {
   const nav = useNavigate();

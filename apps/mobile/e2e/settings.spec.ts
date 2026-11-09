@@ -153,7 +153,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 챙길 날 체크 목록, 푸시 끄면 줄도 꺼짐, 방해 금지 시간', async ({
+test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크 목록, 푸시 끄면 줄도 꺼짐, 방해 금지 시간', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -166,9 +166,9 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 챙길 날 체�
   // 2026-11-04 이메일은 자동 예비로만: 이메일 설정 없음
   await expect(page.getByText('이메일은 한 달에 6번까지만 보내요')).toHaveCount(0);
   await expect(page.getByRole('switch', { name: '이메일' })).toHaveCount(0);
-  const card = page.getByRole('region', { name: '받을 알림' });
+  const card = page.getByRole('region', { name: '알림 종류' });
   const d14 = card
-    .getByRole('group', { name: '챙길 날 미리 알림' })
+    .getByRole('group', { name: '경조사 미리 알림' })
     .getByRole('checkbox', { name: '14일 전' });
   await expect(d14).toHaveAttribute('aria-checked', 'false');
   await d14.click();

@@ -24,7 +24,7 @@
   --focus: #3d5afe; /* 어드민 전용(2026-11-09): 어드민 키보드 포커스 링과 글자 버튼. 사용자 앱은 focus-ring(ink)과 accent-app-text를 씀. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
-  --family: #efe7fb; /* ‘양가’ 영역 틴트: 챙길 날의 양가 일정, 양가 비용. */
+  --family: #efe7fb; /* ‘양가’ 영역 틴트: 경조사의 양가 일정, 양가 비용. */
   --family-ink: #5b3a9a; /* family 위 라벨·배지 글자. */
   --holiday-ink: #c42f26; /* 캘린더 공휴일 숫자·이름만. 오류 danger, 오렌지 브랜드와 따로 둠. surface·family 위 4.5:1 이상. */
   --goal: #f6eee5; /* 목표 영역 틴트: 목표 카드, 목표자금. 따뜻한 모래색으로 오렌지 브랜드 색과 구분. */

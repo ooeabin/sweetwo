@@ -21,7 +21,7 @@ export const lastAssetsTab = () => {
   }
 };
 
-// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채”(23 1번, 2개 고정)
+// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산·부채”(23 1번, 2개 고정)
 export function AssetsFrame({
   tab,
   addSide = 'asset',

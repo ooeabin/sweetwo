@@ -10,7 +10,7 @@ const addEntry = (page: Page, name: string) =>
     .locator('visible=true')
     .first();
 
-// 우리 자산 F-01 한눈에, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
+// 자산 관리 F-01 요약, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -176,7 +176,7 @@ function seed(db: MemDb, joined = true) {
   });
 }
 
-test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
+test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -184,7 +184,7 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(�
   seed(db);
 
   await page.goto('/');
-  await page.getByRole('link', { name: '우리 자산' }).filter({ visible: true }).first().click();
+  await page.getByRole('link', { name: '자산 관리' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/assets$/);
   // 자산(원금 기준) 3 + 8 + 2 + 파트너 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
   const nw = page.getByRole('region', { name: '우리 순자산' });
@@ -206,7 +206,7 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(�
   await expect(page.getByRole('button', { name: /신용대출/ })).toContainText('금액이 맞나요?');
 });
 
-test('한눈에: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 값)', async ({ page }) => {
+test('요약: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 값)', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -354,15 +354,15 @@ test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범�
   await expect(page.getByRole('region', { name: '금액' })).toContainText(
     '+200만 원, 원금 800만 원',
   );
-  // 고친 기록은 직접 고친 것만(23 F-04 5번)
-  await expect(page.getByRole('region', { name: '고친 기록' })).not.toContainText('월말 정리');
+  // 수정 내역은 직접 고친 것만(23 F-04 5번)
+  await expect(page.getByRole('region', { name: '수정 내역' })).not.toContainText('월말 정리');
   await axe(page);
   await page.getByRole('button', { name: '시세 바꾸기' }).click();
   await page.getByRole('textbox', { name: '금액' }).fill('12000000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('저장했어요')).toBeVisible();
   expect(db.assets.find((a) => a.id === 'a2')?.amount).toBe(12_000_000);
-  await expect(page.getByRole('region', { name: '고친 기록' })).toContainText('1,200만 원');
+  await expect(page.getByRole('region', { name: '수정 내역' })).toContainText('1,200만 원');
 
   await page.getByRole('button', { name: /공개 범위/ }).click();
   await page.getByRole('radio', { name: /숨기기/ }).click();
@@ -612,7 +612,7 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
 });
 
-test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈에도 같은 줄', async ({
+test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈에도 같은 줄', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -669,7 +669,7 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await expect(stale).toContainText('광고');
 });
 
-test('우리 자산 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
+test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);

@@ -1,6 +1,6 @@
 import { formatMonthDay, isWord, subject, type HomeTodo, type HomeUpcoming } from '@sweetwo/core';
 
-// 홈 할 일 한 줄(19 H-06)과 다가오는 일정(H-05, 트레이 WG-03) 문구. 홈과 트레이 위젯이 같이 씀.
+// 홈 할 일 한 줄(19 H-06)과 일정(H-05, 트레이 WG-03) 문구. 홈과 트레이 위젯이 같이 씀.
 export const homeText = {
   todoUnlink: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   todoReconnect: (name: string) => `${name}님이 다시 연결하자고 했어요`,
@@ -12,7 +12,7 @@ export const homeText = {
   payday: (who: string) => `${who}님 월급날`, // [확인 필요]
   review: '월급 전 확인', // 2026-11-09 ‘월급 전 확인’ 대신
   deadline: (goal: string) => `${goal} 기한`, // [확인 필요]
-  maturity: (name: string) => `${name} 만기`, // 캘린더 돈 일정과 같음
+  maturity: (name: string) => `${name} 만기`, // 캘린더 금융 일정과 같음
 };
 
 /** 할 일 한 줄 문구. partner = 지금 파트너(해제 요청), exPartner = 해제한 상대(다시 연결) */
@@ -35,7 +35,7 @@ export function todoText(t: HomeTodo, n: { partner: string; exPartner: string })
   }
 }
 
-/** 다가오는 일정 줄 이름 */
+/** 일정 줄 이름 */
 export function upcomingName(u: HomeUpcoming, myName: string) {
   switch (u.kind) {
     case 'payday':

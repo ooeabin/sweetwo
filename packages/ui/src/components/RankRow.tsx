@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// 우리 자산 순위 줄(docs/design/components/RankRow.md, 2026-11-04 토스 혜택 줄처럼): 40px 원(“?%”, “38%”) + 제목 + 오렌지 글자(2026-11-09).
+// 자산 순위 줄(docs/design/components/RankRow.md, 2026-11-04 토스 혜택 줄처럼): 40px 원(“?%”, “38%”) + 제목 + 오렌지 글자(2026-11-09).
 // 광고가 나오면 오렌지 글자 앞에 작은 ‘광고’ 표시(AdMob 보상형 광고 정책: 누르기 전 알림). 누를 수 없으면 onClick 없이
 export function RankRow({
   badge,

@@ -53,7 +53,7 @@ export interface RecommendInput {
 /**
  * 처음 채우는 값(O-50, W-01 ‘추천값으로 다시 채우기’).
  * 고정지출·생활비 = 수입 × 25%, 용돈 = 사람마다 실수령 × 10%. 그대로 두는 저금 줄(keep, 월 필요액이 없는 항목의 지금 금액)을
- * 먼저 떼고, 남은 금액을 저금 묶음 순서대로 월 필요액만큼(모자라면 남은 만큼, 그다음은 0원). 저금 항목이 없으면 남는 돈.
+ * 먼저 떼고, 남은 금액을 저금 묶음 순서대로 월 필요액만큼(모자라면 남은 만큼, 그다음은 0원). 저금 항목이 없으면 여유 자금.
  */
 export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);
@@ -86,7 +86,7 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   ];
 }
 
-/** 남는 돈 = 수입 − 모든 줄 합계. 음수면 모자람 */
+/** 여유 자금 = 수입 − 모든 줄 합계. 음수면 모자람 */
 export const leftover = (income: Won, lines: Pick<SplitLineDraft, 'amount'>[]): Won =>
   income - lines.reduce((s, l) => s + l.amount, 0);
 
@@ -98,7 +98,7 @@ export interface JoinerSplitInput {
 
 /**
  * 각자: 합류한 사람 월급 계획 추천값(18 P-06 각자). 고정지출·생활비 = 실수령 × 25%, 용돈 = × 10%.
- * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 남는 돈
+ * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 여유 자금
  */
 export function joinerSplit(o: JoinerSplitInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);
@@ -122,7 +122,7 @@ export interface JointRefillInput {
 
 /**
  * 합쳐서: 공동 월급 계획 다시 채우기(18 P-06 합쳐서). 있던 줄은 줄이지 않음. 합류한 사람 용돈 줄(실수령 × 10%)을 더하고,
- * 늘어난 수입 − 그 용돈을 저금 묶음 순서대로 목표 금액·기한이 있는 항목의 월 필요액까지 더함. 남으면 남는 돈.
+ * 늘어난 수입 − 그 용돈을 저금 묶음 순서대로 목표 금액·기한이 있는 항목의 월 필요액까지 더함. 남으면 여유 자금.
  */
 export function jointRefill(o: JointRefillInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);

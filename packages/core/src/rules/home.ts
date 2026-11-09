@@ -2,7 +2,7 @@ import { addDays, daysBetween } from '../date';
 import { nextCareDate, type CareRule } from './care';
 import { deadlineDay } from './saving-item';
 
-// 홈(19)과 트레이 위젯(26)이 같이 쓰는 계산: 할 일 한 줄(H-06), 다가오는 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
+// 홈(19)과 트레이 위젯(26)이 같이 쓰는 계산: 할 일 한 줄(H-06), 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
 // 문구는 앱 copy가 만들고, 여기서는 종류와 값, 갈 화면만 정함.
 
 export interface HomeChecklist {
@@ -188,7 +188,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   return null;
 }
 
-/** 다가오는 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월급 전 확인, 챙길 날, 저금 항목 목표 기한, 만기. 같은 날이면 챙길 날 먼저 */
+/** 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월급 전 확인, 경조사, 저금 항목 목표 기한, 만기. 같은 날이면 경조사 먼저 */
 export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;
