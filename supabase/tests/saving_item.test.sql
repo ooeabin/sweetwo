@@ -1,5 +1,5 @@
 -- pgTAP: 저금 항목(ADR 0007, 20 ‘저금 항목’, W-10~W-12, 06 4장). 찬우, 예빈
--- 모은 돈 = 체크한 저금 합, 저금 항목 추가(W-11), 달성 축하(W-12), 계속 모을게요 / 그만할게요(W-12a)와 되돌리기,
+-- 모은 금액 = 체크한 저금 합, 저금 항목 추가(W-11), 달성 축하(W-12), 계속 모을게요 / 그만할게요(W-12a)와 되돌리기,
 -- 각자 모드는 주인 월급 계획에만, 합쳐서 → 각자는 만든 사람에게 통째로
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -47,7 +47,7 @@ select results_eq(
 select is((select count(*)::int from public.pay_check_line where goal_id = pg_temp.item('적금') and state = 'wait'), 1,
   '이번 사이클 체크리스트에도 줄');
 
--- 모은 돈 = 체크한 금액 합(06 4-1)
+-- 모은 금액 = 체크한 금액 합(06 4-1)
 select public.check_pay_line((select id from public.pay_check_line where goal_id = pg_temp.item('여행')), 'checked', 600000);
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('여행')), 600000::bigint,
   '다른 금액으로 보낸 60만 원');
@@ -57,14 +57,14 @@ select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.it
 select public.check_pay_line((select id from public.pay_check_line where goal_id = pg_temp.item('적금')), 'skipped');
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('적금')), 0::bigint, '못 함은 더하지 않음');
 reset role;
--- 예전 넣기·이미 모은 돈은 세지 않음
+-- 예전 넣기·이미 모은 금액은 세지 않음
 update public.goal set other_held = 5000000 where id = pg_temp.item('적금');
 insert into public.goal_move (space_id, goal_id, kind, amount, created_by)
   select space_id, id, 'in', 700000, '11111111-1111-1111-1111-111111111111' from public.goal where id = pg_temp.item('적금');
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('적금')), 0::bigint,
-  '이미 모은 돈·넣기는 모은 돈이 아님');
+  '이미 모은 금액·넣기는 모은 금액이 아님');
 
--- 달성(W-12): 모은 돈 ≥ 목표 금액, 줄은 그대로, 두 사람(지금은 찬우만)에게 알림
+-- 달성(W-12): 모은 금액 ≥ 목표 금액, 줄은 그대로, 두 사람(지금은 찬우만)에게 알림
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.check_pay_line((select id from public.pay_check_line where goal_id = pg_temp.item('여행')), 'checked', 1000000);
@@ -89,7 +89,7 @@ select is((select status::text from public.goal where id = pg_temp.item('여행'
 -- W-12a 그만할게요: 월급 계획에서 줄이 빠짐, 기록은 남김 → 되돌리면 그 금액으로
 select public.saving_item_stop(pg_temp.item('여행'));
 select is((select count(*)::int from public.split_line where goal_id = pg_temp.item('여행')), 0, '그만하면 월급 계획 줄 빠짐');
-select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('여행')), 1000000::bigint, '모은 기록은 남음');
+select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('여행')), 1000000::bigint, '저금 내역은 남음');
 select public.saving_item_reopen(pg_temp.item('여행'));
 select is((select amount from public.split_line where goal_id = pg_temp.item('여행')), 500000::bigint, '되돌리면 그만두기 전 금액');
 reset role;

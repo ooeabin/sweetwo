@@ -1,4 +1,4 @@
--- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 돈 합, 월급 계획을 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
+-- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 금액 합, 월급 계획을 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(11);

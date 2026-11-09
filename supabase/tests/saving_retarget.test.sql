@@ -1,5 +1,5 @@
 -- pgTAP: W-12a ‘목표 금액을 새로 정할게요’(2026-11-09 round 3, 20 W-12a·‘달성과 그만 모음’). 찬우(시작), 예빈(합류), 각자
--- 달성하고 고르기 전에만, 모은 돈보다 큰 새 목표 금액 → 모으는 중 + 기한 지움, 지난 달성 알림은 남기고 새로 닿으면 한 번 더.
+-- 달성하고 고르기 전에만, 모은 금액보다 큰 새 목표 금액 → 모으는 중 + 기한 지움, 지난 달성 알림은 남기고 새로 닿으면 한 번 더.
 -- 되돌리기(saving_item_unkeep) = 예전 목표 금액·기한, 달성. 파트너 저금(각자)은 못 바꿈
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -43,7 +43,7 @@ select throws_ok($$ select public.saving_item_retarget(pg_temp.item('여행'), 3
 select public.check_pay_line(pg_temp.line('가전 바꾸기'), 'checked');
 select is(public.achieve_goal(pg_temp.item('가전 바꾸기')), true, '체크로 달성');
 select throws_ok($$ select public.saving_item_retarget(pg_temp.item('가전 바꾸기'), 300000) $$, '22023', 'not_above',
-  '새 목표 금액은 모은 돈보다 커야 함');
+  '새 목표 금액은 모은 금액보다 커야 함');
 select throws_ok($$ select public.saving_item_retarget(pg_temp.item('가전 바꾸기'), 0) $$, '22023', 'bad_amount',
   '0원은 안 됨');
 select lives_ok($$ select public.saving_item_retarget(pg_temp.item('가전 바꾸기'), 600000) $$, '새 목표 60만 원');
@@ -53,7 +53,7 @@ select results_eq(
   $$ values ('active', 600000::bigint, null::date, true, 0, true) $$, '모으는 중 + 새 목표 금액, 기한은 지움');
 select is((select count(*)::int from public.split_line where goal_id = pg_temp.item('가전 바꾸기')), 1, '줄은 그대로');
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('가전 바꾸기')), 300000::bigint,
-  '모은 돈 그대로');
+  '모은 금액 그대로');
 reset role;
 select is((select count(*)::int from public.notification where kind = 'goal_achieved'), 1, '지난 달성 알림은 남김');
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

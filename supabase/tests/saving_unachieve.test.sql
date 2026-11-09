@@ -78,7 +78,7 @@ select public.check_pay_line(pg_temp.line('가전 바꾸기'), 'wait');
 select results_eq(
   $$ select status::text, target_amount from public.goal where id = pg_temp.item('가전 바꾸기') $$,
   $$ values ('active', null::bigint) $$, '계속 모을게요 뒤에는 목표 금액이 없어 그대로');
-select lives_ok($$ select public.check_pay_line(pg_temp.line('가전 바꾸기'), 'checked') $$, '쓰는 돈·목표 금액 없는 줄도 그대로 체크');
+select lives_ok($$ select public.check_pay_line(pg_temp.line('가전 바꾸기'), 'checked') $$, '지출·목표 금액 없는 줄도 그대로 체크');
 
 select * from finish();
 rollback;

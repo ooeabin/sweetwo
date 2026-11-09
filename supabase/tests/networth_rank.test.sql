@@ -1,4 +1,4 @@
--- pgTAP: 우리 자산 순위(F-08, 계산·배분 7-7). 본인 행에 본 달, 상위 n%, 그때 순자산 저장. 범위 검사, 남의 행은 못 고침.
+-- pgTAP: 자산 순위(F-08, 계산·배분 7-7). 본인 행에 본 달, 상위 n%, 그때 순자산 저장. 범위 검사, 남의 행은 못 고침.
 -- 연령대 비교용 파트너 출생연도(partner_birth_year): 같은 커플 공간의 파트너만
 begin;
 create extension if not exists pgtap with schema extensions;
