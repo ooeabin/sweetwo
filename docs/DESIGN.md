@@ -19,7 +19,7 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 두 사�
   1. + 버튼(FAB): `accent-app` 바탕 + `on-accent-app` 아이콘(주 버튼과 같은 흰 아이콘, 다크는 어두운 아이콘). 마우스 올림 `brand-pressed`.
   2. 체크한 원과 고른 표시: 체크리스트 원(`hg-check.is-on`), 여러 개 고르는 체크 상자(`hg-checkbox.is-on`, ConsentCard 포함), 고른 선택지 원(`hg-option__mark`, O-30·설정), 캘린더·S-14 미리 알림 체크, 고른 바꾸기 칩(W-11b, 오렌지 테두리 + 오렌지 글자). 모두 `accent-app` 채움 + `on-accent-app` 체크. 알약·구간 탭(목록/달력, 자산/부채, 한눈에), 일반 칩 고른 표시, 고른 카드 테두리는 `ink` 그대로.
   3. 저금 진행: 줄 앞 진행 원(`hg-lead--ring`), Ring, GoalRow(H-02, W-13) 막대, W-10 막대(`hg-goalbox__bar`), 온보딩 ChapterBar. 채움 `accent-app`, 빈 둘레·바탕은 조용한 `surface-alt`(ChapterBar는 `hairline`). 자산 순자산 차트는 그대로.
-  4. 글자 버튼: `hg-btn--link`(‘모두 보냈어요’, ‘월급 계획 고치기’, ‘바꾸기’, ‘고치기’), 묶음 머리 `hg-sechead__more`(‘전체 보기’), GoalRow ‘금액 정하기’, RankRow 글자. `accent-app-text` 600 이상. 건너뛰기·미루기(`hg-btn--quiet`, ‘나중에 할게요’, ‘건너뛰기’)는 `slate`.
+  4. 글자 버튼: `hg-btn--link`(‘모두 보냈어요’, ‘월급 계획 고치기’, ‘바꾸기’, ‘고치기’), GoalRow ‘금액 정하기’, RankRow 글자. `accent-app-text` 600 이상. 머리 이동 링크 `hg-sechead__more`(‘전체 보기 ›’, ‘캘린더 ›’, ‘5개 중 0개 완료 ›’)는 당근 ‘더보기’처럼 `slate` 500. 건너뛰기·미루기(`hg-btn--quiet`, ‘나중에 할게요’, ‘건너뛰기’)는 `slate`.
   5. 짧은 강조: 묶음 머리 “저금 1/2”에서 한 개수만(`hg-sechead__count b`, 600, 0이면 강조 없음). 긴 문장은 오렌지로 칠하지 않음. 14px 미만 상태 글자(달성·완료 배지, 고른 작은 칩)는 `brand-soft` 판 + `brand-ink` 글자.
   6. 띠: 홈 할 일 띠, 초대 띠(“함께할 사람을 초대해 주세요”), 공지 띠는 `accent-app-soft`(= `brand-soft`) 바탕 + `ink` 글자, 앞 아이콘·꺾쇠·빈 자리 점선 원·흰 작은 버튼 글자만 오렌지, 닫기는 `slate`. 안 읽은 알림 줄도 `accent-app-soft` 바탕 + 오른쪽 `brand` 점.
   7. 그 밖: 주 버튼, 새 알림 점, 워드마크, 순자산 차트 끝점.

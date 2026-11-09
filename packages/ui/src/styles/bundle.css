@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (0ad6076). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (722c45e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -948,7 +948,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
 .hg-sechead__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.2px; }
 .hg-sechead__count { font: 600 18px/26px var(--font-sans); color: var(--stone); font-variant-numeric: tabular-nums; }
-.hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: 600 14px/20px var(--font-sans); color: var(--accent-app-text); text-decoration: none; }  /* 2026-11-09 ‘전체 보기’ 같은 글자 버튼은 오렌지 600 */
+.hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: 500 14px/20px var(--font-sans); color: var(--slate); text-decoration: none; }  /* 2026-11-09 머리 이동 링크(‘전체 보기 ›’ ‘캘린더 ›’ ‘5개 중 0개 완료 ›’)는 당근 ‘더보기’처럼 회색. 오렌지는 동작 글자 버튼만 */
 .hg-sechead__more:hover { background: var(--surface-alt); }
 .hg-sechead__action { margin-left: auto; display: inline-flex; align-items: center; flex: none; }  /* 2026-11-09 round 3 묶음 머리 오른쪽 글자 버튼(W-02 ‘모두 보냈어요’) */
 .hg-sechead__link { display: inline-flex; align-items: center; gap: 2px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }  /* 2026-11-09 round 3 누르는 제목(저금 묶음 → W-13) */

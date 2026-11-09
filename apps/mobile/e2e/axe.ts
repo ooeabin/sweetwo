@@ -11,7 +11,6 @@ const BRAND_FILL = /hg-btn--primary|hg-badge--achieved/;
 // 이 선택자에 걸리는 요소(또는 그 안의 글자)만 color-contrast에서 뺌. 나머지 규칙과 요소는 그대로 검사함.
 const ORANGE_TEXT = [
   '.hg-btn--link:not(.hg-btn--quiet)', // 글자 버튼(‘모두 보냈어요’, ‘월급 계획 고치기’, ‘바꾸기’ 등)
-  '.hg-sechead__more', // 묶음 머리 ‘전체 보기’
   '.hg-sechead__count b', // “저금 1/2”의 한 개수
   '.hg-goalrow__set', // GoalRow ‘금액 정하기’
   '.hg-rankrow__action', // RankRow 글자
