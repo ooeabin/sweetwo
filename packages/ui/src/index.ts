@@ -29,7 +29,14 @@ export * from './components/BarChart';
 export * from './components/MonthBars';
 export * from './components/GoalPick';
 export { goalIcon } from './components/goal-icons';
-export { assetIcon } from './components/asset-icons';
+export {
+  leadOf,
+  leadTable,
+  type LeadGroup,
+  type LeadKind,
+  type LeadSpec,
+  type LeadTone,
+} from './components/lead-kinds';
 export { Distribution } from './components/Distribution';
 export { RankRow } from './components/RankRow';
 export * from './components/FileAttach';
@@ -60,6 +67,5 @@ export * from './components/DataTable';
 export * from './components/CommandPalette';
 export { ArtPick } from './components/ArtPick';
 export { goalPhotoArt } from './components/preset-art';
-export { assetIcon3d, icon3d } from './components/icons3d';
 export { Band } from './components/Band';
 export { StatBlock } from './components/StatBlock';

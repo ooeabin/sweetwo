@@ -1,6 +1,7 @@
 import { cx } from './cx';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
+import type { LeadTone } from './lead-kinds';
 
 // 목록 한 줄(docs/design/components/ListRow.md). 누를 수 있으면 button, 아니면 div.
 export function ListRow({
@@ -58,43 +59,39 @@ export function ListRow({
   );
 }
 
-/** 행 앞 아이콘 칸(hg-lead): 영역 색 원 + 아이콘, 3D 그림, 또는 원 판 없는 3D 아이콘(art3d) */
+/**
+ * 행 앞 아이콘 칸(hg-lead, docs/design/components/ListRow.md ‘Lead’). 2026-11-09: 영역 색 원 + Phosphor 아이콘(종류는 lead-kinds.ts 표),
+ * 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(progress). 장식이라 aria-hidden(금액·진행은 줄 글자가 말함).
+ */
 export function Lead({
   tone,
   icon,
+  progress,
   art,
   photo,
-  art3d,
-  action,
 }: {
-  tone?: 'together' | 'family' | 'goal' | 'safety' | 'invest';
+  tone?: LeadTone;
   icon?: IconName;
-  /** 3D 그림(Illustration 등) */
+  /** 진행 원(0~100 정수 %, 저금 줄 모은 돈 ÷ 목표 금액). 있으면 icon 대신, 바탕은 저금 영역(goal) */
+  progress?: number;
+  /** 그림(Illustration 등, 지금 쓰는 곳 없음) */
   art?: ReactNode;
-  /** 사진 주소(목표 사진, 원 안을 꽉 채움, 2026-11-04) */
+  /** 사진 주소(원 안을 꽉 채움, 지금 쓰는 곳 없음) */
   photo?: string;
-  /** 작은 3D 아이콘 주소(icon3d, 2026-11-05). 원 판 없이 사물만, 있으면 icon 대신 */
-  art3d?: string;
-  /** UI 동작 아이콘(‘+ 추가’ 줄 등)이면 true: 2026-11-08부터 그림 자리 아이콘은 그리지 않고 빈 원, 동작 아이콘만 그림 */
-  action?: boolean;
 }) {
-  // 2026-11-08 그림 아이콘(3D, 종류 아이콘)은 2D 플랫으로 다시 만들 때까지 빈 원(Illustrations ‘나중 과제’)
-  const flat = !photo && !art && !!art3d;
+  const ring = progress !== undefined && !photo && !art;
+  const p = ring ? Math.min(Math.max(Math.trunc(progress), 0), 100) : 0;
   return (
     <span
       className={cx(
         'hg-lead',
-        !flat && tone && (action || !!art) && `hg-lead--${tone}`,
+        ring ? 'hg-lead--ring' : tone && `hg-lead--${tone}`,
         photo && 'hg-lead--photo',
-        flat && 'hg-lead--art',
       )}
+      style={ring ? ({ '--p': p } as CSSProperties) : undefined}
       aria-hidden="true"
     >
-      {photo ? (
-        <img src={photo} alt="" />
-      ) : (
-        (art ?? (art3d ? <img src={art3d} alt="" /> : action && icon ? <Icon name={icon} /> : null))
-      )}
+      {photo ? <img src={photo} alt="" /> : (art ?? (!ring && icon ? <Icon name={icon} /> : null))}
     </span>
   );
 }

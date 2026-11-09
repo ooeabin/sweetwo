@@ -12,6 +12,7 @@
 - 체크 안 한 원(2026-11-03): 테두리와 안 체크를 같이 아주 흐리게(둘 다 `hairline`, 카카오뱅크 체크리스트처럼). 마우스를 올리면 테두리만 `border-control`. 빈 원이 비어 보이지 않게. 모든 `hg-check`에 같음.
 - 줄 시트(2026-11-03): `onOpen`을 주면 이름·금액 부분이 버튼(`hg-transfer__open`, `aria-haspopup="dialog"`)이 되고, 누르면 소비자가 BottomSheet를 엶. W-02 ‘보냈어요’ + ‘다른 금액으로 보냈어요’(W-02a), W-05 ‘보냈어요’ + ‘이번 달은 못 했어요’. 줄 아래 링크를 줄마다 반복하지 않음.
 - 줄 아래 글자 링크(`actions`): 지금은 쓰지 않음(남겨 둠).
-- React 래퍼 `TransferRow`(packages/ui): `label`, `meta`(보조 줄), `amount`, `done`, `checkLabel`, `onToggle`, `disabled`(볼 수만), `badge`, `actions`(줄 아래 글자 링크), `onOpen`(줄을 누르면 시트), `lead`(줄 앞 아이콘 칸, `hg-transfer--lead`: 40px Lead + 이름·금액 + 체크 원, 홈 이번 달 체크리스트).
+- React 래퍼 `TransferRow`(packages/ui): `label`, `meta`(보조 줄), `amount`, `done`, `checkLabel`, `onToggle`, `disabled`(볼 수만), `badge`, `actions`(줄 아래 글자 링크), `onOpen`(줄을 누르면 시트), `lead`(줄 앞 아이콘 칸, `hg-transfer--lead`: 40px Lead + 이름·금액 + 체크 원. 홈 H-03, W-02, W-05).
+- 줄 앞 칸(2026-11-09, 앱 `LineLead`): 종류 아이콘 + 영역 색 원(ListRow ‘Lead 종류 표’ `line`). 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(ListRow ‘진행 원’)이고, 보조 줄은 “2,700만 / 1억 5,000만 원” 글자만(이름 아래 얇은 막대 없음, 모든 줄 높이가 같음).
 - 체크한 사람 칩(2026-11-03): 보조 줄 앞 `hg-transfer__who`(높이 20px, `surface-alt` 알약, 12px 600 `ink`) + “08.26 체크”. 내가 체크한 줄은 칩 없이 날짜만.
 - `viewOnly`(2026-11-03 대신 체크 없앰): 파트너 줄 보기만. 체크 칸 대신 상태 칸 `hg-transfer__state`(한 줄은 `success` 체크 아이콘, 안 한 줄은 비움). 화면 읽기 “예빈 체크했어요 / 아직 체크 안 했어요” [확인 필요].

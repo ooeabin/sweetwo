@@ -1,6 +1,6 @@
 import { formatYm, readWon } from '@sweetwo/core';
 import { assetGroupsOf } from '@sweetwo/core';
-import { Button, Lead, List, ListRow, MonthBars, SectionHeader } from '@sweetwo/ui';
+import { Button, Lead, leadOf, List, ListRow, MonthBars, SectionHeader } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { RankBanner, SkelBody } from '../../frame';
@@ -109,20 +109,20 @@ export function F01Overview() {
         </section>
         <List>
           <ListRow
-            lead={<Lead icon="wallet" />}
+            lead={<Lead {...leadOf('summary', 'assets')} />}
             label={copy.assetsLabel}
             value={m(nw.assets)}
             onClick={() => nav('/assets/items?side=asset')}
           />
           <ListRow
-            lead={<Lead icon="bank" />}
+            lead={<Lead {...leadOf('summary', 'debts')} />}
             label={copy.debtsLabel}
             value={nw.debts ? m(nw.debts) : readWon(0)}
             onClick={() => nav('/assets/items?side=debt')}
           />
           {nw.gain !== 0 && (
             <ListRow
-              lead={<Lead icon="trending-up" />}
+              lead={<Lead {...leadOf('summary', 'expected')} />}
               label={copy.expectedName}
               sub={copy.gainIncl(`${nw.gain > 0 ? '+' : '−'}${m(Math.abs(nw.gain))}`)}
               value={m(nw.expected)}

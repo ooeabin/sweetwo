@@ -14,7 +14,7 @@ export interface Choice<T extends string> {
   tag?: string;
   /** 고를 수 없음(is-disabled) */
   disabled?: boolean;
-  /** 라벨 왼쪽 작은 아이콘 칸(2026-11-03 지그재그처럼) */
+  /** 선택지 그림 주제(2D 플랫 그림 자리, Illustrations ‘나중 과제’ 5번). 2026-11-09부터 그리지 않음(빈 칸 없음) */
   icon?: IconName;
 }
 
@@ -115,10 +115,7 @@ export function ChoiceCards<T extends string>({
             aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
-            {o.icon && (
-              // 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 자리(Illustrations ‘나중 과제’ 5번)
-              <span className="hg-option__icon" aria-hidden="true" />
-            )}
+            {/* 선택지 아이콘(o.icon)은 2D 플랫 그림이 들어올 때까지 그리지 않음(2026-11-09 빈 칸 없앰, 글자가 왼쪽 끝) */}
             <span className="hg-option__body">
               <span className="hg-option__label">
                 {o.label}

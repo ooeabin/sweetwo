@@ -1,14 +1,5 @@
 import { dday, isFestive, monthGrid, type MoneyKind } from '@sweetwo/core';
-import {
-  Band,
-  Button,
-  type CalDay,
-  Calendar,
-  icon3d,
-  type IconName,
-  Lead,
-  ListRow,
-} from '@sweetwo/ui';
+import { Band, Button, type CalDay, Calendar, Lead, leadOf, ListRow } from '@sweetwo/ui';
 import { Fragment, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
@@ -21,28 +12,13 @@ import { startCareAdd } from './y-07-care-add';
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
 const ymText = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-// 칸 안 짧은 이름과 고른 날 줄 아이콘(돈 일정 종류)
+// 칸 안 짧은 이름(돈 일정 종류). 고른 날 줄 아이콘은 ui lead-kinds.ts ‘money’·‘care’ 표(2026-11-09)
 const MONEY_SHORT: Record<MoneyKind, string> = {
   payday: copy.short.payday,
   review: copy.short.review,
   deadline: copy.short.deadline,
   goal: copy.short.goal,
   maturity: copy.short.maturity,
-};
-// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
-const MONEY_ART: Record<MoneyKind, string> = {
-  payday: 'line-custom',
-  review: 'line-fixed',
-  deadline: 'goal-deadline',
-  goal: 'goal-deadline',
-  maturity: 'asset-deposit',
-};
-const MONEY_ICON: Record<MoneyKind, IconName> = {
-  payday: 'wallet',
-  review: 'calendar-check',
-  deadline: 'target',
-  goal: 'target',
-  maturity: 'piggy-bank',
 };
 let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
 
@@ -151,7 +127,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key="hol"
-          lead={<Lead icon="flag-pennant" />}
+          lead={<Lead {...leadOf('money', 'holiday')} />}
           label={hol.name}
           sub={copy.holiday}
           chevron={false}
@@ -161,7 +137,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key="band"
-          lead={<Lead icon="calendar-check" art3d={icon3d('line-fixed')} />}
+          lead={<Lead {...leadOf('money', 'review')} />}
           label={copy.reviewBand(reviewMonth(band.end))}
           sub={copy.go.review}
           onClick={() => nav('/salary/review')}
@@ -173,7 +149,7 @@ export function Y04Calendar() {
       rows.push(
         <Fragment key={x.care.id}>
           <ListRow
-            lead={<Lead icon="gift" tone="together" art3d={icon3d('care-gift')} />}
+            lead={<Lead {...leadOf('care', x.care.kind)} />}
             label={x.care.name}
             sub={
               x.care.budget > 0
@@ -202,7 +178,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key={`${x.kind}-${i}`}
-          lead={<Lead icon={MONEY_ICON[x.kind]} art3d={icon3d(MONEY_ART[x.kind])} />}
+          lead={<Lead {...leadOf('money', x.kind)} />}
           label={l.label}
           sub={copy.goSub[x.kind]}
           onClick={() => nav(l.to)}
@@ -252,7 +228,7 @@ export function Y04Calendar() {
         {selected >= d.today && (
           <div className="hg-list hg-list--plain hg-cal__add">
             <ListRow
-              lead={<Lead icon="plus" action />}
+              lead={<Lead icon="plus" />}
               label={copy.addOnDay}
               chevron={false}
               onClick={() => {

@@ -16,11 +16,7 @@ export function O10Overview() {
     >
       <ol className="hg-intro-steps">
         {copy.overviewSteps.map((x) => (
-          <li key={x.text}>
-            {/* 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 원 */}
-            <span className="hg-intro-steps__icon" aria-hidden="true" />
-            <span>{x.text}</span>
-          </li>
+          <li key={x.text}>{x.text}</li>
         ))}
       </ol>
     </QuestionLayout>
