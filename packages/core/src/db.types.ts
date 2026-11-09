@@ -3534,6 +3534,47 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      split_amount_ok: { Args: { p: number }; Returns: boolean }
+      split_editable: {
+        Args: { p_split: string }
+        Returns: {
+          created_at: string
+          id: string
+          owner_user_id: string | null
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "salary_split"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      split_line_add: {
+        Args: {
+          p_amount: number
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_name?: string
+          p_sort?: number
+          p_split: string
+          p_user?: string
+        }
+        Returns: string
+      }
+      split_line_delete: { Args: { p_line: string }; Returns: undefined }
+      split_line_set: {
+        Args: { p_amount?: number; p_line: string; p_name?: string }
+        Returns: undefined
+      }
+      split_lines_json: {
+        Args: { p_amount?: number; p_line?: string; p_split: string }
+        Returns: Json
+      }
+      split_reorder: { Args: { p_ids: string[]; p_split: string }; Returns: undefined }
+      split_touch: { Args: { p_split: string }; Returns: undefined }
       start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
