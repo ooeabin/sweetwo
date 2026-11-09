@@ -25,7 +25,7 @@ export const ADD_TO = {
 } as const;
 const TABS = ['/', '/salary', '/assets', '/calendar'] as const;
 type Tab = 'month' | 'salary' | 'assets' | 'calendar';
-/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·월급 = 저금 항목, 자산 관리 = 자산·부채, 캘린더 = 경조사 */
+/** 그 화면에 맞는 추가(Ctrl+N, 2026-11-09 좁은 창 + 버튼은 없앰): 홈·월급 = 저금 항목, 자산 관리 = 자산·부채, 캘린더 = 경조사 */
 export const addFor = (t: Tab | null) =>
   t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.saving;
 

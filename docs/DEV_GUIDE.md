@@ -486,7 +486,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지킬 것
 
-- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색(당근처럼): 주 버튼, + 버튼(FAB), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + `brand-ink`, 2026-11-04)
+- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색(당근처럼): 주 버튼, 홈 할 일 띠 채움(2026-11-09 사용자 승인 예외, 글자는 `on-accent-app-text`. + 버튼 FAB는 없앰), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + `brand-ink`, 2026-11-04)
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -641,7 +641,7 @@ supabase/
 재기획(ADR 0003, 0004, 0005, 0007) 온보딩 8화면: O-10 → O-03 → O-06 (→ O-07) → O-11 (→ O-12) → O-13 → O-30 → O-31 → O-32 → O-60 → 홈. O-32 다음 `onboarding/auto-split.ts`가 추천 월급 계획(저금 줄 없음)과 첫 체크리스트를 만듦. 홈 할 일 닫은 목록은 `shared/home-todo.ts`(기기 기록, 할 일 ‘월급 계획 확인’은 2026-11-03 없앰). 예전 O-21·O-23·O-24에 멈춘 사람은 O-30으로, O-50은 O-31로(`onboarding-route.tsx` `RETIRED`).
 
 - `packages/app/src/features/onboarding`: `flow.ts`(답에 따라 화면 목록, 진행 막대 하나 `progressOf`: O-03~O-32 질문 중 지금까지, O-10·O-60 없음), `step.tsx`(진행, 뒤로, 저장 뒤 다음, 멈춘 화면 기록, `finish`), `pages/o-xx-*.tsx`(화면 하나 = 파일 하나), `onboarding-route.tsx`(경로 `/onboarding/o-10` → 화면, 이어하기 `OnboardingGate`)
-- 목표 고르기(O-21)와 비상금 자동 항목은 없앰(2026-11-08 ADR 0007). 저금 항목은 체크리스트·홈 H-03 첫 저금 빈 줄(salary `FirstSavingRow`, `useFirstSaving`, 2026-11-09)·월급 탭(W-11)에서 직접 만듦
+- 목표 고르기(O-21)와 비상금 자동 항목은 없앰(2026-11-08 ADR 0007). 저금 항목은 체크리스트 첫 저금 빈 줄(salary `FirstSavingRow`, `useFirstSaving`, 2026-11-09)·월급 탭(W-11)에서 직접 만듦
 - O-30 월급 관리 방식 `couple_space.salary_mode`(각자 `separate` / 합쳐서 `joint`), O-31 월급 `app_user.monthly_income`·`income_variable`·`payday`·`payday_last`
 - O-50 월급 계획(온보딩에서는 안 보이고 추천값으로 자동 저장, 고치는 화면은 W-01): 추천값은 core `rules/salary-split.ts` `recommendSplit`(앱 쪽 순서·변환은 `split-draft.ts`). O-50 틀(`SplitEditor`)에서 줄을 누르면 같은 화면이 금액 입력(Q3)으로 바뀜, ‘+ 줄 추가’는 이름 + 금액. 저장은 RPC `save_split(p_lines, p_owner)`(각자면 내 id, 합쳐서면 생략). W-01은 2026-11-09부터 영수증(줄 RPC)
 - O-32 ‘다음’(월급 없음이면 O-31) → `auto-split.ts`(추천 월급 계획, RPC `start_checklist`: 지금이 든 사이클, 월급날이 없으면 만들지 않음) → O-60 준비 끝 ‘홈으로 가기’ → `useStep().finish`(onboarding_done_at) → 홈
@@ -657,7 +657,7 @@ supabase/
 
 재기획(ADR 0003) 홈과 W 화면. 기획 → 19 홈, 20 월급 체크리스트, 07 월 사이클.
 
-- `packages/app/src/features/home`: `pages/h-01-home.tsx`(앱 틀 `MainFrame` + 오늘 띠(인사 H-01, ‘월급 체크하기’) + 할 일 한 줄 H-06(연결 해제 요청 받음 → 다시 연결 요청 받음 → 월급 전 확인 → 초대(7일 닫기, 기기 저장) → 첫 저금 추가(2026-11-09 round 3, core `firstSavingTodo`: 온보딩 뒤 7일 안 + 내 저금 없음, 닫으면 `saving-first`) → 만기(F-04a)·경조사(7일 안). 만기·경조사 닫기는 항목 + 날짜로 기기 저장) + 두 단(이번 달 월급 H-03, 저금 H-02(목표 금액이 있는 항목 최대 4줄, 없으면 없음. 내 저금이 없으면 H-03 카드 맨 위 salary `FirstSavingRow`, 2026-11-09) / 자산 관리 H-04(순위 줄 1a는 첫 체크 뒤에만: 이번 달 체크·못 함 줄이나 지난 체크리스트가 있을 때, 2026-11-09 round 3), 일정 H-05)), `parts.tsx`(카드들). 순자산은 month의 `useNetWorth`·`H06NetWorth`를 그대로 씀
+- `packages/app/src/features/home`: `pages/h-01-home.tsx`(2026-11-09 홈 허브, ui `Hub`·`HubHero`·`HubBand`·`HubTile`·`HubSaving`, `MainFrame tone="alt"`): 큰 상자 H-03(다음 월급날 = 체크리스트 `cycle_end` 다음 날, core `monthProgress`로 보낸 줄·보낸 금액, 모은 금액 = 내(합쳐서면 공동) 저금 합) → 할 일 띠 H-06(core `homeTodo` 맨 앞 하나: 연결 해제 요청 받음 → 다시 연결 요청 받음 → 월급 전 확인 → 월급날 체크(core `checkTodo`, 월급날부터 7일 안 + 체크 안 한 줄, 닫으면 `check:{이름}:{기간 첫날}`) → 초대(옅은 띠로 맨 위, 7일 닫기) → 첫 저금 추가(`firstSavingTodo`) → 만기·경조사) → 타일 H-07 월급 계획·H-08 캘린더(가장 가까운 경조사, `homeUpcoming(i, 365)`) → 저금 상자 H-02(목표 금액에 가장 가까운 달성 전 저금) → 작은 타일 H-04 자산 관리(`useNetWorth`)·H-09 저금(W-13 범위) → 순위 줄 1a(첫 체크 뒤에만). 분석 `home_box_tapped`. 예전 `parts.tsx`(체크 목록·저금 줄·일정 카드)는 지움. 순자산은 month의 `useNetWorth`·`H06NetWorth`를 그대로 씀
 - `packages/app/src/features/salary`: `split-editor.tsx`(O-50·W-01 같은 목록 틀 `SplitEditor`, 줄을 누르면 같은 틀이 금액 입력, 여유 자금은 QuestionLayout `summary`), `split-draft.ts`(추천값 순서·변환), `check-line.tsx`(체크 줄 `CheckLine` = ui `TransferRow`, 체크하면 Toast + 되돌리기), `pages/w-01-receipt.tsx`(영수증, 아래 ‘W-01 영수증 앱’), `w-02-checklist.tsx`(W-02a 다른 금액은 같은 화면 모드), `w-02-done.tsx`, `w-05-review.tsx`, 저금 항목 `w-10`~`w-12a`(아래 ‘저금 항목 구조’). 경로 `/salary`(월급 탭 첫 화면 ‘이번 달’, `?view=plan` = ‘계획’ W-01), `/salary/split`(→ `?view=plan`), `/salary/done`, `/salary/review`, `/salary/items/…`
 - 체크리스트는 `useChecklists`가 읽을 때 월급 계획마다 `start_checklist`를 불러 이번 사이클 것을 만듦(같은 사이클이면 서버가 그대로, 새 사이클이면 지난 것은 끝남 + 체크 안 한 줄 ‘못 함’). 앱을 안 열어도 기준일 0시 예약 작업 `run_cycle_checklists`가 같은 함수(`make_checklist`)로 만듦
 - 체크는 RPC `check_pay_line(줄, checked|wait|skipped, 다른 금액)`. 먼저 저장된 체크 유지(`already_checked`), 지난 사이클은 읽기 전용(`closed`)
@@ -669,7 +669,7 @@ supabase/
 - 영수증 이미지 공유: `receipt-image.ts`(`renderReceiptPng`: 화면과 같은 문구·숫자, 지금 테마 토큰을 `getComputedStyle`로 읽어 canvas에 그림, 3배, 의존성 없음. 사진 Avatar는 다른 출처라 canvas가 막혀서 사람 색 원으로), `shareReceipt`: 브리지 `shareImage({ name, base64 })`가 있으면 그것(모바일 `apps/mobile/src/native/bridge.ts`: Filesystem 캐시 + `Share.share` 공유 창 → 'shared'·'cancelled', 데스크톱 `apps/desktop/src/main/share-image.ts`: IPC `sweetwo:share-image`, 이름·PNG 머리 검사 후 저장 창(기본 ‘다운로드’) → 'saved'·'cancelled'), 없으면(브라우저) 내려받기. 금액 가리기면 이미지 금액도 “•••”(화면 그대로). 분석 `plan_shared`
 - W-01 ↔ W-02 잇기(2026-11-09): 계산은 core `rules/month-progress.ts`(`monthProgress`: 칸 너비 = 계획 금액 비율(planRatio), 칸 안 채움 = 보낸 금액 ÷ 계획, 보낸 금액·여유 자금 / `planChangeTouchesMonth`: W-01 금액 바꾸기가 이번 달 체크 안 한 줄도 바꾸는지, 서버 `sync_checklist` 맞춤과 같음, 06 3-6 예시가 Vitest). 앱 `features/salary/month-parts.tsx`: `MonthBar`(W-02 머리 ui `PlanBar` 진행 모드 + “보낸 금액 …”), `MonthResult`(달 결과 카드: W-02 끝, 다 끝난 W-02(‘체크 고치기’로 줄 목록), 지난 달 보기. 공유는 `receipt-image.ts` 같은 canvas에 `title`·`progress`·줄 `sub`·`muted`, 분석 `month_result_shared`), `incomeOf`(체크리스트 주인 수입). W-01 머리 아래 ‘이번 달 3/5 보냈어요 ›’(`plan_link_tapped`). W-02 새 사이클 한 줄은 localStorage `sweetwo.made-notice.{체크리스트 id}`(기기마다, 서버 없음)
 - 할 일 한 줄·일정·이번 달 월급 상태는 core `rules/home.ts`(`homeTodo`, `homeUpcoming`, `salaryState`)가 계산하고, 재료는 frame `useHomeInput()`(같은 qk 캐시, 닫은 할 일은 기기 저장), 문구는 frame `todoText`·`upcomingName`. 홈과 트레이 위젯이 같은 결과를 씀
-- 앱 기본 틀은 `features/frame`(ui `AppFrame`, 금액 가리기 `shared/mask.ts`). `command.tsx`: ⌘K(Windows Ctrl+K) 검색 화면(ui `CommandPalette`, ‘바로 하기’ + 저금 항목·자산·부채·경조사 최대 5개씩), Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N(홈 = 오늘 띠 ‘추가’ 메뉴 `AddMenu`, 다른 메뉴 = 그 화면에 맞는 추가), 좁은 창 + 버튼(`addFor`). 오프라인이면 본문 맨 위 “연결이 끊겼어요” 띠(`shared/online.ts`, 입력 대기열은 아직 없음). 불러오는 중 0.3초 넘으면 스켈레톤(`LoadingFrame`). 홈 연결 해제 대기 띠(요청한 사람 → S-12, 받은 사람 → S-12d, 닫기 없음). ‘저장 중’ 표시와 충돌 선택은 아직 없음 트레이 위젯 값(26 트레이 위젯 창 = WG-01 이번 달 월급 + 다음 할 일 + 다가오는 날)은 데스크톱에서만 `useTraySync`가 만들어 브리지로 보냄(core `TraySnapshot`)
+- 앱 기본 틀은 `features/frame`(ui `AppFrame`, 금액 가리기 `shared/mask.ts`). `command.tsx`: ⌘K(Windows Ctrl+K) 검색 화면(ui `CommandPalette`, ‘바로 하기’ + 저금 항목·자산·부채·경조사 최대 5개씩), Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N(홈 = 오늘 띠 ‘추가’ 메뉴 `AddMenu`, 다른 메뉴 = 그 화면에 맞는 추가 `addFor`). 좁은 창(2026-11-09): 하단 탭 막대·+ 버튼 없음, `MainFrame`이 홈 머리 ☰ 메뉴 서랍(ui `Drawer`, 분석 `menu_item_tapped`)과 홈 밖 메뉴 첫 화면 ‹(홈으로, 바꿔치기 이동)을 그림. 안드로이드 하드웨어 뒤로는 브리지 `window.sweetwo.onBack`(모바일 `CapApp` `backButton`, 앱이 처리하지 않으면 웹뷰 뒤로 / 앱 닫기)로 서랍 닫기·홈으로. 추가는 화면 안 ui `AddRow`. 오프라인이면 본문 맨 위 “연결이 끊겼어요” 띠(`shared/online.ts`, 입력 대기열은 아직 없음). 불러오는 중 0.3초 넘으면 스켈레톤(`LoadingFrame`). 홈 연결 해제 대기 띠(요청한 사람 → S-12, 받은 사람 → S-12d, 닫기 없음). ‘저장 중’ 표시와 충돌 선택은 아직 없음 트레이 위젯 값(26 트레이 위젯 창 = WG-01 이번 달 월급 + 다음 할 일 + 다가오는 날)은 데스크톱에서만 `useTraySync`가 만들어 브리지로 보냄(core `TraySnapshot`)
 - W-01(20261102090000, 2026-11-09 영수증으로 다시 만듦): 각자 + 파트너 합류면 사람 탭(`?who=`), 파트너 탭은 보기만(영수증 줄마다 자물쇠 `hg-receipt__lock`, 회색 한 줄 `partnerSplitView`, 서버 `save_split`·줄 RPC가 파트너 월급 계획이면 `not_owner`). 큰 금액 → S-11(내 탭). 합쳐서면 각자일 때 만든 저금 줄 이름 앞에 주인 이름(`goalLineName`, 체크리스트·홈도 같음). 저금 줄 금액 시트 아래 ‘저금 보기’ → W-10, 그만 모은 항목은 접힌 묶음, ‘+ 저금 추가’ → W-11a. 직접 추가 줄은 시트에서 이름·금액 바꾸기. ‘추천값으로 다시 채우기’는 core `recommendSplit`(`items` 저금 항목: 목표 금액·기한이 있으면 월 필요액, 없으면 지금 금액 `current`, `keep` 줄 그대로), 합쳐서는 두 사람 수입·사람마다 용돈. 연결 해제 대기면 보기만
 - W-02: ‹ › 지난 달 보기(`fetchPastChecklists`, 읽기 전용), 기간 시작은 월급날이 주말·공휴일이면 직전 영업일로 표시(`holiday_shift`), 상대가 이번 사이클에 월급 계획을 바꿨으면 맨 위 안내(× 누르면 이 기기에서 숨김), 파트너 탭은 ‘다른 금액’ 없음. 묶음 머리 오른쪽 ‘모두 보냈어요’(2026-11-09 round 3, ui `SectionHeader action`): 남은 줄을 차례로 `checkPayLine`(줄마다 서버 `check_pay_line`, 일괄 RPC 없음), 끝난 뒤 한 번만 무효화해 `AchieveWatch`가 한 번에 봄, Toast 한 번 + 되돌리기(이번에 체크한 줄만 `wait`). 파트너 탭(각자)은 ‘모두 보냈어요’와 ‘월급 계획 고치기’ 없음. 저금 묶음 머리 제목(`SectionHeader onTitle`) → W-13
 - 월급날 바꾸기: `app_user` 트리거 `payday_cut_cycle` → `cut_cycle`로 이번 사이클 끝 = 새 기준일 전날(각자 = 내 체크리스트, 합쳐서 + 만드는 날 자동 = 공동)
@@ -1176,7 +1176,10 @@ supabase/
 
 | 화면 | 컴포넌트 |
 | --- | --- |
-| W-02, H-03, W-05 체크리스트 줄 | TransferRow(hg-transfer) |
+| W-02, W-05 체크리스트 줄 | TransferRow(hg-transfer) |
+| 홈 H-02·H-03·H-04·H-06~H-09 (2026-11-09) | HomeHub(hg-hub, hg-hubhero, hg-hubband, hg-hubtile, hg-hubsave) |
+| 좁은 창 홈 머리 ☰ 메뉴 (2026-11-09) | Drawer(hg-drawer) |
+| W-02·F-02·Y-01 ‘+ … 추가’ 줄 (2026-11-09) | AddRow(hg-addrow) |
 | F-01 16번, W-01 6번 | ListRow |
 | 검색(⌘K, 좁은 창 검색) | CommandPalette |
 | 알림 센터 N-01·N-02 항목 | Avatar |

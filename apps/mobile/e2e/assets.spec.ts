@@ -2,11 +2,11 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 
-/** 추가 입구(2026-11-03): 넓은 창은 제목 줄 버튼, 좁은 창은 + 버튼 */
+/** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
   page
     .getByRole('button', { name, exact: true })
-    .or(page.locator('.hg-fab'))
+    .or(page.locator('.hg-addrow'))
     .locator('visible=true')
     .first();
 
@@ -184,7 +184,13 @@ test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재�
   seed(db);
 
   await page.goto('/');
-  await page.getByRole('link', { name: '자산 관리' }).filter({ visible: true }).first().click();
+  // 넓은 창은 사이드바 탭, 좁은 창은 홈 자산 관리 타일(2026-11-09 하단 탭 막대 없앰)
+  await page
+    .getByRole('link', { name: '자산 관리' })
+    .or(page.getByRole('button', { name: /^자산 관리/ }))
+    .locator('visible=true')
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/assets$/);
   // 자산(원금 기준) 3 + 8 + 2 + 파트너 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
   const nw = page.getByRole('region', { name: '순자산', exact: true });

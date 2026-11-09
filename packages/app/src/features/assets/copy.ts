@@ -46,6 +46,9 @@ export const copy = {
   // F-02
   noDebt: '갚을 돈이 없어요',
   addDebt: '+ 부채 추가',
+  // 2026-11-09 F-02 목록 끝 추가 줄(+ 아이콘이 글자 앞 ‘+’를 대신) [확인 필요]
+  addAssetRow: '자산 추가',
+  addDebtRow: '부채 추가',
   joint: '공동',
   proxy: '대신 입력',
   vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },

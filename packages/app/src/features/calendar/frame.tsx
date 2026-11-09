@@ -1,4 +1,4 @@
-import { Button, Chip, Tabs } from '@sweetwo/ui';
+import { Button, Chip, Icon, PageHeader, WeekStrip } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MainFrame } from '../frame';
@@ -7,7 +7,6 @@ import { startCareAdd } from './pages/y-07-care-add';
 
 export type CalView = 'list' | 'month';
 export type CalFilter = 'all' | 'care' | 'money';
-const VIEW_KEY = 'sweetwo.cal-view';
 const FILTER_KEY = 'sweetwo.cal-filter';
 const read = (k: string) => {
   try {
@@ -23,12 +22,9 @@ const write = (k: string, v: string) => {
     /* 기억 못 해도 됨 */
   }
 };
-/** 마지막 보기(Y-01 2번), 기기에만 */
-export const lastCalPath = () =>
-  read(VIEW_KEY) === 'month' ? '/calendar/month' : '/calendar/list';
-/** /calendar: 마지막으로 본 보기로 */
+/** /calendar: 늘 일정 목록(Y-01). 2026-11-09 ‘목록/달력’ 탭 대신 주 띠 + ‘달력 ›’ 링크라 마지막 보기는 기억하지 않음 */
 export function CalendarHome() {
-  return <Navigate to={lastCalPath()} replace />;
+  return <Navigate to="/calendar/list" replace />;
 }
 
 /** 보기 필터(12번): 목록·달력 공통, 기본 전체, 마지막 선택 기억 */
@@ -64,26 +60,50 @@ export function FilterChips({
   );
 }
 
-// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 탭 “목록” / “달력”(2026-11-04 맨 위, 자산 관리 탭과 같은 모양) + 그 아래 보기 필터 칩
+// 캘린더 메뉴 틀(24 Y-01 1~3번, 2026-11-09 다시 짬).
+// 목록(Y-01, 캘린더 첫 화면): “캘린더” + ‘+ 추가’(넓은 창만) + 맨 위 이번 주 띠(WeekStrip) + 보기 필터 칩과 오른쪽 ‘달력 ›’ 링크.
+// 달력(Y-04): ‘달력 ›’로 들어가는 안쪽 화면(‘‹ 캘린더’ + 제목 “달력”) + 보기 필터 칩. 예전 ‘목록 / 달력’ 탭은 없앰
 export function CalendarFrame({
   view,
   filter,
   onFilter,
+  week,
   children,
 }: {
   view: CalView;
   filter: CalFilter;
   onFilter: (f: CalFilter) => void;
+  /** 목록 맨 위 이번 주 띠(오늘, 일정 있는 날). 불러오는 중이면 없음 */
+  week?: { today: string; marked: ReadonlySet<string> };
   children: ReactNode;
 }) {
   const nav = useNavigate();
-  write(VIEW_KEY, view);
+  if (view === 'month')
+    return (
+      <MainFrame
+        sub="detail"
+        current="calendar"
+        columns={[
+          <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+            <PageHeader
+              title={copy.views.month}
+              backLabel={copy.back}
+              backTo={copy.title}
+              onBack={() => nav('/calendar/list')}
+            />
+            <FilterChips value={filter} onChange={onFilter} />
+            {children}
+          </div>,
+        ]}
+      />
+    );
   return (
     <MainFrame
       current="calendar"
       page={{
         title: copy.title,
         actions: (
+          // 넓은 창만. 좁은 창은 ‘일정’ 머리 오른쪽 ‘+ 경조사 추가’(2026-11-09 + 버튼 대신)
           <Button
             className="hg-wide-only"
             variant="primary"
@@ -98,17 +118,21 @@ export function CalendarFrame({
       }}
       columns={[
         <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-          {/* 2026-11-04 자산 관리(요약/자산·부채)와 같은 탭을 맨 위에, 보기 필터 칩은 그 아래 */}
-          <Tabs<CalView>
-            label={copy.viewsLabel}
-            value={view}
-            onChange={(v) => nav(v === 'month' ? '/calendar/month' : '/calendar/list')}
-            items={[
-              { value: 'list', label: copy.views.list },
-              { value: 'month', label: copy.views.month },
-            ]}
-          />
-          <FilterChips value={filter} onChange={onFilter} />
+          {week && <WeekStrip today={week.today} marked={week.marked} />}
+          <div className="hg-cal__tools">
+            <FilterChips value={filter} onChange={onFilter} />
+            <a
+              className="hg-sechead__more"
+              href="/calendar/month"
+              onClick={(e) => {
+                e.preventDefault();
+                nav('/calendar/month');
+              }}
+            >
+              {copy.monthLink}
+              <Icon name="chevron-right" size={16} />
+            </a>
+          </div>
           {children}
         </div>,
       ]}

@@ -1,4 +1,4 @@
-// 앱 기본 틀 문구(docs/spec/19-this-month.md ‘앱 기본 틀’, H-04 순자산, 공지 띠). 기획서 “ ” 안 문장을 그대로.
+// 앱 기본 틀 문구(docs/spec/19-this-month.md ‘앱 기본 틀’, 메뉴 서랍, 공지 띠). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   tabMonth: '홈', // [확인 필요] 재기획 탭 이름(19 앱 기본 틀 3번)
@@ -10,6 +10,24 @@ export const copy = {
   noti: '알림',
   settings: '설정',
   add: '추가',
+  // 2026-11-09 좁은 창 홈 머리 ☰와 메뉴 서랍(19 앱 기본 틀 11번) [확인 필요]
+  menu: '메뉴',
+  home: '홈으로',
+  close: '닫기',
+  drawer: {
+    home: '홈',
+    salary: '월급',
+    assets: '자산 관리',
+    calendar: '캘린더',
+    me: '내 정보',
+    settings: '설정',
+    couple: '우리 둘',
+    invite: '초대하기',
+    notice: '공지',
+    inquiry: '문의',
+    help: '도움말',
+  },
+  version: (v: string) => `버전 ${v}`, // [확인 필요] 서랍 맨 아래
   me: '설정 열기', // [확인 필요] 아바타 버튼 이름(화면 읽기용)
   saved: '모두 저장됨',
   saving: '저장 중',
@@ -18,16 +36,6 @@ export const copy = {
   noticeOpen: '보기', // [확인 필요]
   noticeFold: '접기', // [확인 필요]
   noticeClose: '닫기', // [확인 필요]
-  // H-04 순자산(F-01과 같은 표기)
-  netWorth: '순자산',
-  // 2026-11-03 H-04 F-01과 같게 [확인 필요]
-  ourNetWorth: '순자산',
-  assetsTitle: '자산', // 2026-11-09 홈 H-04 머리(탭 이름은 ‘자산 관리’)
-  assetsMore: '자산 더보기',
-  lastMonth: '지난달보다',
-  grew: '늘었어요',
-  shrank: '줄었어요',
-  netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
   addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
   addCare: '경조사',

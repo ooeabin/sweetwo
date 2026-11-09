@@ -7,7 +7,17 @@ import {
   todayKst,
   type AssetSide,
 } from '@sweetwo/core';
-import { Badge, Button, Chip, EmptyState, Icon, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  AddRow,
+  Badge,
+  Button,
+  Chip,
+  EmptyState,
+  Icon,
+  ListRow,
+  SectionHeader,
+  Tabs,
+} from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -206,6 +216,14 @@ export function F02Items() {
           </div>
         </section>
       ))}
+      {/* 2026-11-09 + 버튼(FAB) 대신 목록 끝 회색 ‘+ 자산 추가’ / ‘+ 부채 추가’(보던 쪽 그대로 F-03a) */}
+      {groups.length > 0 && (
+        <AddRow
+          block
+          label={side === 'debt' ? copy.addDebtRow : copy.addAssetRow}
+          onClick={() => nav(`/assets/new?side=${side}`)}
+        />
+      )}
     </AssetsFrame>
   );
 }

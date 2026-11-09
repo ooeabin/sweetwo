@@ -6,6 +6,8 @@ export const copy = {
   title: '캘린더',
   add: '+ 추가',
   views: { list: '목록', month: '달력' },
+  monthLink: '달력', // 2026-11-09 Y-01 ‘목록/달력’ 탭 대신 오른쪽 ‘달력 ›’ 링크 [확인 필요]
+  addCareRow: '경조사 추가', // 2026-11-09 ‘일정’ 머리 오른쪽 + 줄(+ 아이콘이 글자 앞 ‘+’) [확인 필요]
   viewsLabel: '보기', // [확인 필요] 화면 읽기용
   filters: { all: '전체', care: '경조사', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용

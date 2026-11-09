@@ -83,12 +83,23 @@ function seed(db: MemDb) {
   });
 }
 
+// 좁은 창은 홈 머리 ☰ 메뉴 서랍 ‘설정’(2026-11-09 머리 톱니 없앰), 넓은 창은 사이드바 아바타 줄
 const open = async (page: Page, narrow: boolean) => {
-  await page.goto('/calendar/list');
-  await page
-    .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
-    .getByRole('button', { name: narrow ? '설정' : '설정 열기', exact: true })
-    .click();
+  if (narrow) {
+    await page.goto('/');
+    await expect(page.locator('.hg-hubhero, .hg-hub .hg-card--fill').first()).toBeVisible();
+    await page.getByRole('button', { name: '메뉴', exact: true }).click();
+    await page
+      .getByRole('dialog', { name: '메뉴' })
+      .getByRole('button', { name: '설정', exact: true })
+      .click();
+  } else {
+    await page.goto('/calendar/list');
+    await page
+      .locator('.hg-appside')
+      .getByRole('button', { name: '설정 열기', exact: true })
+      .click();
+  }
   await expect(page).toHaveURL(/\/settings$/);
 };
 
@@ -481,7 +492,7 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   soloAfterUnlink(db, 'yebin');
   await page.goto('/');
   await page
-    .locator('.hg-body__banner', { hasText: '예빈님이 다시 연결하자고 했어요' })
+    .locator('.hg-hubband', { hasText: '예빈님이 다시 연결하자고 했어요' })
     .getByRole('button')
     .first()
     .click();

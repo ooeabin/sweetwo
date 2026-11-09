@@ -6,10 +6,13 @@
 | [ProviderButton](ProviderButton.md) | Actions | 소셜 로그인 버튼(마크 + 문구 + 최근 사용) |
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
+| [AddRow](AddRow.md) | Actions | 목록 끝·묶음 머리의 회색 ‘+ … 추가’ 줄(2026-11-09 + 버튼 대신) |
+| [Drawer](Drawer.md) | Navigation | 좁은 창 홈 머리 ☰ 메뉴 서랍(2026-11-09 하단 탭 막대 대신) |
+| [HomeHub](HomeHub.md) | Layout | 홈 허브: 회색 바탕 위 큰 상자, 할 일 띠, 타일, 저금 상자(2026-11-09) |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
 | [GoalTile](GoalTile.md) | Cards | 없앰(2026-11-08 목표 탭 없음). 묶음 카드 `hg-goalbox`만 저금 항목 상세(W-10)에서 씀 |
-| [GoalRow](GoalRow.md) | Charts | 홈 저금 항목 줄(아이콘 + 금액 + 얇은 막대, H-02) |
-| [DayRow](DayRow.md) | Lists | 홈 일정 줄(색 날짜 칸 + D-day) |
+| [GoalRow](GoalRow.md) | Charts | 저금 줄(아이콘 + 금액 + 얇은 막대, W-13. 홈 H-02 줄 목록은 2026-11-09 없앰) |
+| [DayRow](DayRow.md) | Lists | 홈 일정 줄(색 날짜 칸 + D-day). 2026-11-09 홈 일정 카드 없앰, 지금 쓰는 화면 없음 |
 | [MonthBars](MonthBars.md) | Charts | 달마다 값(F-01 순자산 6달), 이번 달만 진하게 |
 | [Breakdown](Breakdown.md) | Charts | 전체를 나눈 구성(월급 플랜 배분, 자산 구성) |
 | [Distribution](Distribution.md) | Charts | F-08 분포 그림 |

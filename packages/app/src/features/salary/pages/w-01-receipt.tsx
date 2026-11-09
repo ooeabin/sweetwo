@@ -736,7 +736,7 @@ export function W01Receipt() {
   );
   return (
     <>
-      <MainFrame current="salary" noAdd page={{ title: copy.tabTitle }} columns={[column]} />
+      <MainFrame current="salary" page={{ title: copy.tabTitle }} columns={[column]} />
       {sheetEl}
       {stop && (
         <Modal

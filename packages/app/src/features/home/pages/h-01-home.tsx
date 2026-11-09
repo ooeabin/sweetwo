@@ -5,41 +5,52 @@ import {
   qk,
   sendDesktopLink,
 } from '@sweetwo/api';
-import { formatDateWeekday, formatMonthDay, homeTodo, homeUpcoming, todayKst } from '@sweetwo/core';
-import { Button, Icon, IconButton, type IconName } from '@sweetwo/ui';
+import {
+  addDays,
+  daysBetween,
+  formatDateWeekday,
+  formatMonthDay,
+  homeTodo,
+  homeUpcoming,
+  monthProgress,
+  todayKst,
+  type HomeTodo,
+} from '@sweetwo/core';
+import { Button, Hub, HubBand, HubHero, HubSaving, HubTile, Icon, IconButton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { detectPlatform, isMobile } from '../../../platform';
+import { track } from '../../../shared/analytics';
+import { money, useMask } from '../../../shared/mask';
+import { PersonDot } from '../../../shared/person';
+import { toast } from '../../../shared/toast';
 import {
   AddMenu,
-  H06NetWorth,
   LineBand,
   LoadingFrame,
   MainFrame,
   RankBanner,
   todoText,
-  upcomingName,
   useHomeInput,
   useNetWorth,
   useNoticeBand,
 } from '../../frame';
 import {
   AchieveWatch,
-  FirstSavingRow,
-  goalLineName,
   myChecklist,
+  salaryCopy,
   useChecklists,
   useSavingItems,
   useSplits,
 } from '../../salary';
-import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
-import { SalaryCard, SavingCard, UpcomingCard, type UpcomingItem } from '../parts';
 
-// 홈(19): 할 일 한 줄(H-06) → 왼쪽 이번 달 월급(H-03)·저금 항목(H-02, ADR 0007),
-// 오른쪽 자산(H-04)·일정(H-05). 좁은 창은 한 단. 파트너 활동은 알림 센터.
+// 홈(19, 2026-11-09 홈 허브: GCOO 홈처럼 회색 바탕 위 크기가 다른 흰 상자).
+// 위에서부터 큰 상자(다음 월급날까지 + 이번 달 보낸 줄 + 보낸 금액 | 모은 금액, → W-02) → 할 일 띠(오렌지 채움, 있을 때만)
+// → 반 칸 타일 둘(월급 계획 → W-01, 캘린더 → Y-01) → 저금 상자(목표 금액에 가장 가까운 저금 하나, → W-10)
+// → 작은 타일 둘(자산 관리 → F-01, 저금 → W-13) → 자산 순위 줄. 초대·공지·해제 대기 띠는 맨 위 옅은 띠 그대로.
 const PC_BAND = 'sweetwo.pcBandDone';
 const pcBandDone = () => {
   try {
@@ -56,16 +67,11 @@ const markPcBand = () => {
   }
 };
 
-// 할 일 띠 앞 그림(docs/design/components/Banner.md ‘할 일 카드’)
-const TODO_ICON: Record<NonNullable<ReturnType<typeof homeTodo>>['kind'], IconName> = {
-  unlink: 'link',
-  reconnect: 'link',
-  review: 'check',
-  invite: 'user',
-  saving: 'piggy-bank',
-  matured: 'piggy-bank',
-  care: 'gift',
-};
+type Box = 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
+
+/** 할 일 띠 오른쪽 이동 글자(없으면 꺾쇠만) */
+const bandGo = (t: HomeTodo) =>
+  t.kind === 'check' ? copy.bandCheck : t.kind === 'review' ? copy.bandReview : undefined;
 
 export function H01Home() {
   const nav = useNavigate();
@@ -77,6 +83,7 @@ export function H01Home() {
   const splits = useSplits();
   const saving = useSavingItems();
   const nw = useNetWorth(true);
+  const { masked } = useMask();
   // 할 일 한 줄·일정은 트레이 위젯과 같은 계산(core homeTodo·homeUpcoming)
   const h = useHomeInput();
   const solo = space.data?.couple_state === 'solo';
@@ -90,7 +97,7 @@ export function H01Home() {
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
   // 18 ‘합류 뒤’: 모바일 앱으로 합류한 사람의 첫 홈 띠 1회(PC에서도)
   const [pcBand, setPcBand] = useState(() => isMobile(detectPlatform()) && !pcBandDone());
-  // H-04 1a 순위 줄은 첫 체크 뒤에만(2026-11-09 round 3): 이번 달 체크리스트에 체크·못 함 줄이 있거나 지난 체크리스트가 있으면
+  // H-01 1a 순위 줄은 첫 체크 뒤에만(2026-11-09 round 3): 이번 달 체크리스트에 체크·못 함 줄이 있거나 지난 체크리스트가 있으면
   const checkedAny = (lists.data ?? []).some((c) =>
     c.pay_check_line.some((l) => l.state !== 'wait'),
   );
@@ -120,6 +127,7 @@ export function H01Home() {
     return (
       <MainFrame
         current="month"
+        tone="alt"
         columns={[
           <section key="w" className="hg-card hg-stack" aria-label={copy.waitTitle(starter)}>
             <b>{copy.waitTitle(starter)}</b>
@@ -132,66 +140,63 @@ export function H01Home() {
 
   const today = todayKst();
   const meId = me.data.id;
-  const myName = me.data.nickname ?? '';
-  const joined = space.data.couple_state === 'connected';
   const joint = space.data.salary_mode === 'joint';
+  const joined =
+    space.data.couple_state === 'connected' || space.data.couple_state === 'unlink_pending';
   const list = myChecklist(lists.data, meId);
-  const partnerList =
-    !joint && joined ? lists.data?.find((c) => c.owner_user_id === partner.data?.id) : undefined;
-  const personName = (id: string | null) =>
-    id === meId ? myName : (partner.data?.nickname ?? null);
-  const goalName = goalLineName(goals.data, personName, joint);
+  const m = (v: number) => money(v, masked);
+  const go = (box: Box, to: string) => {
+    track('home_box_tapped', { box });
+    nav(to);
+  };
 
-  // H-06 할 일 한 줄(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 7일, 만기·경조사는 그 항목·날짜만 닫힘
+  // H-06 할 일(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 옅은 띠(맨 위), 나머지는 오렌지 할 일 띠(큰 상자 아래)
   const t0 = h.input ? homeTodo(h.input) : null;
   // 해제 대기 띠가 있으면 같은 할 일 줄은 빼고 띠만
   const t = t0?.kind === 'unlink' && h.unlink ? null : t0;
-  const todo = t
-    ? {
-        text: todoText(t, { partner: partner.data?.nickname ?? '', exPartner: exName.data ?? '' }),
-        to: t.to,
-        close:
-          t.kind === 'invite'
-            ? h.closeInvite
-            : t.kind === 'matured' ||
-                t.kind === 'care' ||
-                t.kind === 'review' ||
-                t.kind === 'saving'
-              ? () => h.closeTodo(t.key)
-              : undefined,
-      }
-    : null;
-  const todoBand = todo ? (
-    <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
-      {/* 띠 전체(그림 + 글자 + 화살표)가 이동 버튼(2026-11-02, 네이버·GCOO 홈처럼). 초대는 ‘코드 복사’가 따로 */}
-      <button type="button" className="hg-banner__main" onClick={() => nav(todo.to)}>
-        {t?.kind === 'invite' ? (
-          // 초대: 빈 자리(점선 +) 하나(2026-11-03, 머리 줄에 내 아바타가 이미 있어 겹치지 않게)
+  const todoLabel = t
+    ? todoText(t, { partner: partner.data?.nickname ?? '', exPartner: exName.data ?? '' })
+    : '';
+  const closeTodo = !t
+    ? undefined
+    : t.kind === 'invite'
+      ? h.closeInvite
+      : t.kind === 'matured' || t.kind === 'care' || t.kind === 'review' || t.kind === 'saving'
+        ? () => h.closeTodo(t.key)
+        : t.kind === 'check'
+          ? () => h.closeTodo(t.key)
+          : undefined;
+  const inviteBand =
+    t?.kind === 'invite' ? (
+      <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
+        {/* 초대 띠는 옅은 오렌지 그대로(2026-11-09). 띠 전체가 이동 버튼, ‘초대하기’ → S-12 */}
+        <button type="button" className="hg-banner__main" onClick={() => nav(t.to)}>
           <span className="hg-banner__pair" aria-hidden="true">
             <span className="hg-banner__slot">
               <Icon name="plus" size={16} />
             </span>
           </span>
-        ) : (
-          t && (
-            <span className="hg-banner__icon" aria-hidden="true">
-              <Icon name={TODO_ICON[t.kind]} />
-            </span>
-          )
-        )}
-        <span className="hg-banner__text">{todo.text}</span>
-        {t?.kind !== 'invite' && <span className="hg-chevron" aria-hidden="true" />}
-      </button>
-      {t?.kind === 'invite' && (
-        // H-06 초대: ‘초대하기’ → 초대 화면 S-12(2026-11-03 ‘코드 복사’ 대신)
-        <Button variant="secondary" size="sm" onClick={() => nav(todo.to)}>
+          <span className="hg-banner__text">{todoLabel}</span>
+        </button>
+        <Button variant="secondary" size="sm" onClick={() => nav(t.to)}>
           {copy.inviteNow}
         </Button>
-      )}
-      {todo.close && <IconButton icon="x" label={copy.close} ghost small onClick={todo.close} />}
-    </div>
-  ) : undefined;
-  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d. 2026-11-03 공지 띠와 같은 한 줄 파랑
+        {closeTodo && <IconButton icon="x" label={copy.close} ghost small onClick={closeTodo} />}
+      </div>
+    ) : undefined;
+  const todoBand =
+    t && t.kind !== 'invite' ? (
+      <HubBand
+        text={todoLabel}
+        go={bandGo(t)}
+        onClick={() => {
+          track('home_box_tapped', { box: 'band', todo: t.kind });
+          nav(t.to);
+        }}
+        close={closeTodo ? { label: copy.close, onClick: closeTodo } : undefined}
+      />
+    ) : null;
+  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
   const unlinkBand = h.unlink ? (
     <LineBand
       icon="link"
@@ -203,7 +208,7 @@ export function H01Home() {
       }}
     />
   ) : undefined;
-  // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-11b(2026-11-04 이메일 고치는 곳)
+  // 14 ‘알림 메일 반송’: 홈 상단 띠(닫기 없음, 알림 이메일을 바꾸면 사라짐) → S-11b
   const bounceBand = bounced.data ? (
     <LineBand
       icon="envelope"
@@ -233,71 +238,183 @@ export function H01Home() {
       />
     ) : undefined;
   const banner =
-    notice || todoBand || unlinkBand || bounceBand || pcBandEl ? (
+    notice || inviteBand || unlinkBand || bounceBand || pcBandEl ? (
       <>
         {unlinkBand}
         {notice}
         {bounceBand}
-        {todoBand}
+        {inviteBand}
         {pcBandEl}
       </>
     ) : undefined;
 
-  // H-05 일정(30일 안, 날짜순 최대 3개)
-  const items: UpcomingItem[] = (h.input ? homeUpcoming(h.input) : []).map((u) => ({
-    key: u.key,
-    date: u.date,
-    label: upcomingName(u, myName),
-    dday: u.dday,
-    to: u.to,
-    kind: u.kind,
-  }));
+  // 1. 큰 상자: 다음 월급날까지 + 이번 달 보낸 줄(W-02와 같은 셈) + 보낸 금액 | 모은 금액(내 저금, 합쳐서면 공동)
+  const ready = saving.ready ? saving : null;
+  const mySavings = ready
+    ? ready.live.filter((i) => (ready.joint ? i.owner === 'ours' : i.owner === 'mine'))
+    : [];
+  const savedMine = mySavings.reduce((s, i) => s + i.saved, 0);
+  const people = (
+    <span className="hg-avatars" aria-hidden="true">
+      {(() => {
+        const starter = space.data.created_by;
+        const meDot = (
+          <PersonDot
+            key="me"
+            name={me.data.nickname ?? ''}
+            starter={starter === meId}
+            userId={meId}
+          />
+        );
+        if (!joined || !partner.data) return meDot;
+        const pDot = (
+          <PersonDot
+            key="p"
+            name={partner.data.nickname ?? ''}
+            starter={starter === partner.data.id}
+            userId={partner.data.id}
+          />
+        );
+        return starter === meId ? [meDot, pDot] : [pDot, meDot];
+      })()}
+    </span>
+  );
+  let hero;
+  if (list) {
+    const p = monthProgress({ income: 0, lines: list.pay_check_line });
+    const next = addDays(list.cycle_end, 1);
+    const left = Math.max(0, daysBetween(today, next));
+    const caption = copy.untilPayday(formatMonthDay(next));
+    const title = left === 0 ? copy.paydayToday : copy.daysLeft(left);
+    hero = (
+      <HubHero
+        caption={caption}
+        title={title}
+        people={people}
+        percent={p.total ? Math.round((p.done / p.total) * 100) : 0}
+        meterLabel={copy.sentLines}
+        done={p.done}
+        total={p.total}
+        split={[
+          [copy.sentAmount, m(p.sent)],
+          [copy.savedAmount, m(savedMine)],
+        ]}
+        label={copy.heroLabel({
+          caption,
+          title,
+          total: p.total,
+          done: p.done,
+          sent: m(p.sent),
+          saved: m(savedMine),
+        })}
+        onClick={() => go('hero', '/salary')}
+      />
+    );
+  } else {
+    // 월급 없음(19 상태 변형 2): 큰 상자 자리에 빈 카드 + ‘월급 알려 주기’
+    hero = (
+      <section className="hg-card hg-card--fill hg-stack hg-hub__wide">
+        <p className="hg-card__meta">{copy.noSalary}</p>
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav('/settings/me')}
+        >
+          {copy.tellSalary}
+        </button>
+      </section>
+    );
+  }
 
-  const go = (to: string) => nav(to);
-  // 자산을 하나도 안 적었으면 카드 없음(2026-11-03, ‘자산 추가하기’ 빈 카드가 어색해서. 추가는 자산 관리 탭)
-  const assetsCard = nw && !nw.empty ? <H06NetWorth n={nw} /> : null;
+  // 3. 반 칸 타일: 월급 계획(매달 며칠) / 캘린더(가장 가까운 경조사)
+  const dayOf = (u: { payday: number | null; payday_last: boolean } | null | undefined) =>
+    !u ? null : u.payday_last ? copy.paydayLast : u.payday ? copy.payday(u.payday) : null;
+  const jointDay = space.data.joint_cycle_day;
+  const planDay =
+    joint && jointDay !== null
+      ? jointDay === 31
+        ? copy.paydayLast
+        : copy.payday(jointDay)
+      : dayOf(me.data);
+  const care = (h.input ? homeUpcoming(h.input, 365) : []).find((u) => u.kind === 'care');
+  // 4. 저금 상자: 목표 금액에 가장 가까운 저금(달성 전, 비율이 가장 높은 것). 목표 금액이 있는 저금이 없으면 없음
+  const near = ready?.withTarget
+    .filter((i) => i.state === 'saving' && i.target !== null && i.target > 0 && i.saved < i.target)
+    .sort((a, b) => b.saved / (b.target ?? 1) - a.saved / (a.target ?? 1))[0];
+  // 5. 작은 타일: 순자산 / 저금(저금 목록 W-13과 같은 범위: 그만 모은 것 빼고 모두)
+  const liveAll = ready?.live ?? [];
+  const savedAll = liveAll.reduce((s, i) => s + i.saved, 0);
+
   return (
     <MainFrame
       current="month"
-      // 2026-11-03 인사 카드(날짜, 인사, 큰 숫자, 진행 막대, ‘월급 체크하기’)를 없애고 맨 위에 이번 달 체크리스트.
-      // 인사 문장은 화면 읽기용 제목으로만, 넓은 창은 오른쪽 ‘추가’ 한 줄
+      tone="alt"
+      // 넓은 창은 제목 줄 “홈” + 오른쪽 ‘추가’, 좁은 창은 제목을 화면 읽기용으로만
       today={{
         plain: true,
         date: formatDateWeekday(today),
         title: copy.homeTitle,
         actions: (
-          <>
-            {/* ‘추가’는 넓은 창만(Ctrl+N). 좁은 창은 무엇을 추가하는지 알기 어렵고, 월급·자산·캘린더 탭에 + 버튼이 있어서(2026-11-03) */}
-            <span className="hg-wide-only">
-              <AddMenu />
-            </span>
-          </>
+          <span className="hg-wide-only">
+            <AddMenu />
+          </span>
         ),
       }}
       banner={banner}
       columns={[
-        <div key="l" className="hg-stack hg-homecol" style={{ gap: 'var(--space-6)' }}>
+        <div key="hub" className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <AchieveWatch />
-          <SalaryCard
-            list={list}
-            partnerList={partnerList}
-            partnerName={partner.data?.nickname ?? ''}
-            partnerStarter={!!partner.data && partner.data.id === space.data.created_by}
-            goalName={goalName}
-            personName={personName}
-            meId={meId}
-            joint={joint}
-            go={go}
-            locked={space.data.couple_state === 'unlink_pending'}
-            firstSaving={<FirstSavingRow from="home" go={go} />}
-          />
-          <SavingCard items={saving.ready ? saving.withTarget : []} go={go} />
-        </div>,
-        <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-6)' }}>
-          {/* 19 H-01 1a 자산 순위 줄(2026-11-04): 자산(H-04) 바로 위 */}
-          {showRank && <RankBanner entry="home" />}
-          {assetsCard}
-          <UpcomingCard items={items.slice(0, 3)} go={go} />
+          <Hub label={copy.hubLabel}>
+            {hero}
+            {todoBand}
+            <HubTile
+              title={copy.planTile}
+              sub={planDay ? copy.everyMonth(planDay) : undefined}
+              art
+              onClick={() => go('plan', '/salary?view=plan')}
+            />
+            <HubTile
+              title={copy.calendarTile}
+              sub={care ? `${care.name} ${copy.dday(care.dday)}` : copy.noCare}
+              art
+              onClick={() => go('calendar', '/calendar')}
+            />
+            {near && (
+              <HubSaving
+                name={near.goal.name}
+                percent={near.pct ?? 0}
+                sub={salaryCopy.itemProgress(m(near.saved), m(near.target ?? 0))}
+                bar={near.bar}
+                label={copy.savingLabel(
+                  near.goal.name,
+                  near.pct ?? 0,
+                  salaryCopy.itemProgress(m(near.saved), m(near.target ?? 0)),
+                )}
+                onClick={() => go('saving', `/salary/items/${near.goal.id}`)}
+              />
+            )}
+            <HubTile
+              small
+              title={copy.assetsTile}
+              sub={copy.netWorth}
+              value={nw ? m(nw.nw.net) : undefined}
+              onClick={() => go('assets', '/assets')}
+            />
+            <HubTile
+              small
+              title={copy.savingsTile}
+              sub={liveAll.length ? copy.savingCount(liveAll.length) : copy.noSavings}
+              value={liveAll.length ? m(savedAll) : undefined}
+              onClick={() => go('savings', '/salary/items?from=home')}
+            />
+            {/* 19 H-01 1a 자산 순위 줄: 타일 아래(2026-11-09) */}
+            {showRank && (
+              <div className="hg-hub__full">
+                <RankBanner entry="home" />
+              </div>
+            )}
+          </Hub>
         </div>,
       ]}
     />

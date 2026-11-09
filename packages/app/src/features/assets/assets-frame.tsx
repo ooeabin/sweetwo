@@ -21,7 +21,8 @@ export const lastAssetsTab = () => {
   }
 };
 
-// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산·부채”(23 1번, 2개 고정)
+// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산·부채”(23 1번, 2개 고정).
+// 2026-11-09 회색 바탕(tone="alt") 위 흰 상자, 좁은 창 추가는 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄
 export function AssetsFrame({
   tab,
   addSide = 'asset',
@@ -40,10 +41,11 @@ export function AssetsFrame({
   return (
     <MainFrame
       current="assets"
+      tone="alt"
       page={{
         title: copy.title,
         actions: (
-          // 좁은 창은 + 버튼이 같은 일(2026-11-03 추가 입구 하나로)
+          // 넓은 창만. 좁은 창은 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄(2026-11-09 + 버튼 대신)
           <Button
             variant="primary"
             className="hg-wide-only"
