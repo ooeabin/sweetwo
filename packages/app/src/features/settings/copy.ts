@@ -82,7 +82,7 @@ export const copy = {
 
   // S-11c 내 월급(O-31과 같음)
   salaryQ: '한 달 실수령액은 얼마예요?',
-  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
   noSalary: '지금은 월급이 없어요',
   payday: '월급날',
@@ -150,7 +150,7 @@ export const copy = {
   // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
   unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
-  unlinkList: ['저금', '월급 계획과 체크리스트', '자산과 부채', '챙길 날', '활동과 알림 기록'], // [확인 필요]
+  unlinkList: ['저금', '월급 계획과 체크리스트', '자산과 부채', '경조사', '활동과 알림 기록'], // [확인 필요]
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
   unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
   exportFirst: '먼저 내보내기',
@@ -193,7 +193,7 @@ export const copy = {
     // [확인 필요] 기획서 25 S-13 2번 “월급과 월급 계획은 늘 같이 봐요” 등
     '월급과 월급 계획은 늘 같이 봐요',
     '우리 둘 저금과 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
-    '챙길 날은 늘 같이 봐요',
+    '경조사는 늘 같이 봐요',
   ],
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
@@ -210,7 +210,7 @@ export const copy = {
     asset: '자산',
     debt: '부채',
     goal: '저금',
-    care_day: '챙길 날',
+    care_day: '경조사',
   } as Record<string, string>,
   trashWhen: (md: string) => `${md}에 지웠어요`,
   trashLeft: (n: number) => `${n}일 남음`,
@@ -255,9 +255,9 @@ export const copy = {
   // 파일에 생성일. 이름은 영문(일부 브라우저가 한글·띄어쓰기 이름을 버림)
   fileName: (scope: string, date: string) => `sweetwo-${scope}-${date}.zip`,
   pdfName: (scope: string, date: string) => `sweetwo-${scope}-${date}.pdf`,
-  // PDF 요약(25 S-18 ‘내보내기 명세’): ① 우리 자산 요약 ② 연간 요약, A4 세로, 맨 아래 생성일
+  // PDF 요약(25 S-18 ‘내보내기 명세’): ① 자산 요약 ② 연간 요약, A4 세로, 맨 아래 생성일
   pdf: {
-    assetsTitle: '우리 자산 요약',
+    assetsTitle: '자산 요약',
     myAssetsTitle: '내 자산 요약', // [확인 필요] 내 데이터
     net: '순자산',
     assets: '자산 합계', // [확인 필요]
@@ -284,12 +284,12 @@ export const copy = {
       goals: '저금.csv',
       splits: '월급 계획.csv',
       checklists: '월급 체크리스트.csv',
-      care: '챙길 날.csv',
+      care: '경조사.csv',
     },
     heads: {
       assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
       debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
-      goals: ['이름', '목표 금액', '모은 돈', '기한', '상태', '월급 계획 저금 금액'],
+      goals: ['이름', '목표 금액', '모은 금액', '기한', '상태', '월급 계획 저금 금액'],
       splits: ['사람', '줄 종류', '줄 이름', '금액'],
       checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
       care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
@@ -311,9 +311,9 @@ export const copy = {
     paidFrom: {
       goal_fund: '목표자금',
       living: '생활비',
-      personal: '각자 돈',
+      personal: '개인 지출',
       wedding_account: '결혼 준비 통장',
-      personal_support: '각자 돈(지원)',
+      personal_support: '개인 지출(지원)',
     } as Record<string, string>,
   },
 
@@ -396,7 +396,7 @@ export const copy = {
     plan: '월급 계획 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘플랜’ 대신)
     close: '월급 전 확인 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘월말 정리’ 대신, 어드민과 같음)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
-    assets: '우리 자산 화면',
+    assets: '자산 관리 화면',
     income_spend: '월 수입·지출 화면',
     calendar: '캘린더 화면',
   } as Record<string, string>,
@@ -440,21 +440,21 @@ export const copy = {
   // S-14 알림(2026-11-04 이메일은 자동 예비로만: 이메일 설정 없음)
   push: '푸시 알림',
   pushOffHelp: '알림 센터에서만 볼 수 있어요', // [확인 필요]
-  notiTopics: '받을 알림', // [확인 필요]
+  notiTopics: '알림 종류', // [확인 필요]
   mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
   livingCheck: '생활비 체크',
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
     plan: '월급 체크리스트',
     partner_change: (name: string) => `${name}님이 바꾼 값`,
-    care: '챙길 날',
-    money: '돈 날짜',
+    care: '경조사',
+    money: '금융 일정',
     goal: '저금', // [확인 필요]
     invite: '파트너 초대', // [확인 필요]
   },
   partnerChangeSub: '월급 계획·관리 방식·저금 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
-  careAlerts: '챙길 날 미리 알림', // [확인 필요]
+  careAlerts: '경조사 미리 알림', // [확인 필요]
   cancel: '취소',
   quiet: '방해 금지 시간',
   quietValue: (a: string, b: string) => `${a} ~ ${b}`,
@@ -469,7 +469,7 @@ export const copy = {
   checklistProgress: (done: number, total: number) => `체크리스트 ${done}/${total}`,
   checklistCount: (done: number, total: number) => `${done}/${total}`, // 2026-11-04 S-01은 제목에 ‘체크리스트’가 있어 숫자만
   checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
-  forUs: '우리 상황에 맞는 글', // [확인 필요] 요소 이름
+  forUs: '맞춤 정보', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름
   talkCards: '우리 둘 대화 카드 다시 보기', // [확인 필요]
   steps: '해야 할 일', // [확인 필요] 요소 이름
@@ -484,7 +484,7 @@ export const copy = {
   answersTitle: '내 답 다시 보기',
   parts: {
     p0: '우리', // [확인 필요] 파트 이름
-    p1: '우리 상황',
+    p1: '맞춤 정보',
     p2: '목표',
     p3: '수입과 지출',
     p4: '자산과 부채',
@@ -497,7 +497,7 @@ export const copy = {
     side: '신랑·신부',
     marriage: '결혼 상태',
     housing: '사는 집',
-    employment: '일하는 방식',
+    employment: '고용 형태',
     child: '아이 계획',
     goals: '고른 목표',
     income: '월 수입',
@@ -536,7 +536,7 @@ export const copy = {
   askHousing: '지금 어떤 집에 사세요?',
   askEmployment: (name: string) => `${name}님은 어떻게 일하고 계세요?`,
   askChild: '아이 계획이 있으세요?',
-  askSplit: '같이 쓰는 돈 나누는 방식, 괜찮아요?',
+  askSplit: '공동 지출 나누는 방식, 괜찮아요?', // [확인 필요] 2026-11-09 ‘같이 쓰는 돈’ 대신
   savedAnswer: '바꿨어요',
   proposedTo: (name: string) => `${name}님에게 제안했어요`,
   // S-11e 프로필 사진

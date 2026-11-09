@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-// 만기일 당일(23 F-04a, 19 H-06 ‘만기·챙길 날’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
+// 만기일 당일(23 F-04a, 19 H-06 ‘만기·경조사’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
 // 찬우 혼자, 10월 7일. 청년 적금 만기 10월 7일, 입출금 통장 300만.
 
 const axe = async (page: Page) => {
@@ -70,7 +70,7 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   await page.goto('/');
   const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
   await expect(band).toBeVisible();
-  await expect(page.getByRole('region', { name: '다가오는 일정' })).toContainText('청년 적금 만기');
+  await expect(page.getByRole('region', { name: '일정' })).toContainText('청년 적금 만기');
   await band.getByRole('button').first().click();
   await expect(page.getByRole('heading', { name: '만기된 돈은 어디로 옮겼어요?' })).toBeVisible();
   await axe(page);
@@ -109,7 +109,7 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   );
 });
 
-test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 고친 기록에 고친 사람', async ({
+test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 수정 내역에 고친 사람', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);

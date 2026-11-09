@@ -25,7 +25,7 @@ const line = (state: string, planned: number, actual: number | null = null, goal
   actual,
 });
 
-describe('모은 돈(06 4장)', () => {
+describe('모은 금액(06 4장)', () => {
   it('10월 95만 체크, 11월 다른 금액 60만, 12월 못 함 → 155만', () => {
     expect(
       savedFromLines('h', [
@@ -35,7 +35,7 @@ describe('모은 돈(06 4장)', () => {
       ]),
     ).toBe(1_550_000);
   });
-  it('시작할 때 모은 돈 2,000만 + 95만 체크 = 2,095만(2026-11-09)', () =>
+  it('시작할 때 모은 금액 2,000만 + 95만 체크 = 2,095만(2026-11-09)', () =>
     expect(savedFromLines('h', [line('checked', 950_000)], 20_000_000)).toBe(20_950_000));
   it('체크 안 한 줄과 다른 항목 줄은 더하지 않음', () => {
     expect(savedFromLines('h', [line('wait', 950_000), line('checked', 300_000, null, 's')])).toBe(
@@ -48,7 +48,7 @@ describe('진행(06 5-1)', () => {
   it('2,700만 ÷ 1억 5,000만 = 18%', () => expect(savingPct(27_000_000, 150_000_000)).toBe(18));
   it('목표 금액이 없으면 진행률 없음', () => expect(savingPct(1_000_000, null)).toBeNull());
   it('100% 상한', () => expect(savingPct(2_000_000, 1_000_000)).toBe(100));
-  it('막대는 모은 돈이 있으면 최소 2%', () => {
+  it('막대는 모은 금액이 있으면 최소 2%', () => {
     expect(savingBar(10_000, 150_000_000)).toBe(2);
     expect(savingBar(0, 150_000_000)).toBe(0);
   });
@@ -123,7 +123,7 @@ describe('기한보다 늦어짐(06 5-4, 20 W-10 3번)', () => {
 
 describe('달성과 그만 모음(20)', () => {
   const g = { status: 'active', closed_at: null, target_amount: 1_000_000 };
-  it('모은 돈이 목표 금액에 닿으면 달성 축하', () => {
+  it('모은 금액이 목표 금액에 닿으면 달성 축하', () => {
     expect(reachedTarget(g, 1_000_000)).toBe(true);
     expect(reachedTarget(g, 999_999)).toBe(false);
   });
@@ -146,7 +146,7 @@ describe('저금 항목 추가 입력(W-11)', () => {
     expect(savingItemInput(now).safeParse({ ...ok, monthly: 955_000 }).success).toBe(false));
   it('기한은 목표 금액이 있을 때만', () =>
     expect(savingItemInput(now).safeParse({ ...ok, target: null }).success).toBe(false));
-  it('시작할 때 모은 돈: 없으면 0, 목표 금액보다 적어야 함(2026-11-09)', () => {
+  it('시작할 때 모은 금액: 없으면 0, 목표 금액보다 적어야 함(2026-11-09)', () => {
     expect(savingItemInput(now).parse(ok).start).toBe(0);
     expect(savingItemInput(now).safeParse({ ...ok, start: 20_000_000 }).success).toBe(true);
     expect(savingItemInput(now).safeParse({ ...ok, start: 150_000_000 }).success).toBe(false);

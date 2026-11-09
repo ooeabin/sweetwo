@@ -18,7 +18,7 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
-// Y-07 챙길 날 추가(24 Y-07, 화면별 정의, 재기획): 모든 챙길 날을 같은 3화면으로.
+// Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
 // → c “언제예요?” 날짜 + 양력/음력 + “매년 돌아와요”(설날·추석·어버이날은 날짜를 채우고 건너뜀)
 // → d “쓸 돈을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-01.
@@ -34,7 +34,7 @@ const FIXED: Partial<Record<ChipKey, { lunar: boolean; month: number; day: numbe
   parents_day: { lunar: false, month: 5, day: 8 },
 };
 interface Draft {
-  /** 고친다면 그 챙길 날 id */
+  /** 고친다면 그 경조사 id */
   editId: string | null;
   chip: ChipKey | null;
   name: string;
@@ -64,9 +64,9 @@ const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, ge
   d: start(),
   set: (p) => set({ d: { ...get().d, ...p } }),
 }));
-/** 챙길 날 추가 시작(‘+ 추가’, 달력 고른 날) */
+/** 경조사 추가 시작(‘+ 추가’, 달력 고른 날) */
 export const startCareAdd = (date: string | null = null) => useDraft.getState().set(start(date));
-/** 챙길 날 수정 시작(Y-05 ‘수정’): 이름과 날짜(다음 회차 날짜, 음력이면 음력 원본) */
+/** 경조사 수정 시작(Y-05 ‘수정’): 이름과 날짜(다음 회차 날짜, 음력이면 음력 원본) */
 export const startCareEdit = (c: CareDay, today: string) => {
   const y = today.slice(0, 4);
   const pad = (n: number | null) => String(n ?? 1).padStart(2, '0');

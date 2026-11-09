@@ -24,7 +24,7 @@ export async function cancelAccountDeletion() {
 export type ExportData = {
   assets: Tables<'asset'>[];
   goals: Tables<'goal'>[];
-  /** 목표별 모은 돈 */
+  /** 목표별 모은 금액 */
   saved: Record<string, number>;
   splits: (Tables<'salary_split'> & { split_line: Tables<'split_line'>[] })[];
   checklists: (Tables<'pay_checklist'> & { pay_check_line: Tables<'pay_check_line'>[] })[];

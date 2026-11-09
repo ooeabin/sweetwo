@@ -11,7 +11,7 @@ import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
 
-// W-12 달성 축하(20): 축하 그림(DoneMark celebrate, 그림 파일이 생기기 전까지 빈 자리) → “다 모았어요” → 이름 → 모은 돈
+// W-12 달성 축하(20): 축하 그림(DoneMark celebrate, 그림 파일이 생기기 전까지 빈 자리) → “다 모았어요” → 이름 → 모은 금액
 // → 함께 모은 달 문장 → “다음”(→ W-12a). 사람마다 한 번(AchieveWatch가 엶)
 export function W12SavingAchieved() {
   const { id = '' } = useParams();

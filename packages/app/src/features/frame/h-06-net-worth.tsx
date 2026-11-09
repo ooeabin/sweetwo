@@ -4,14 +4,14 @@ import { money, useMask } from '../../shared/mask';
 import { copy } from './copy';
 import type { NetWorthView } from './data';
 
-// H-04 우리 자산(19 이번 달 5번, 2026-11-03 F-01과 같게): “우리 순자산” + 큰 숫자 + “지난달보다 180만 원 늘었어요”
-// + 최근 6달 막대(MonthBars, 이번 달만 진한 초록) + ‘우리 자산 보기’ → F-01. 계산은 F-01과 같음(core netWorth).
+// H-04 자산(19 이번 달 5번, 2026-11-03 F-01과 같게): “우리 순자산” + 큰 숫자 + “지난달보다 180만 원 늘었어요”
+// + 최근 6달 막대(MonthBars, 이번 달만 진한 초록) + ‘자산 더보기’ → F-01. 계산은 F-01과 같음(core netWorth).
 // 자산이 하나도 없으면 홈에서 카드 자체를 숨김(소비자).
 export function H06NetWorth({ n }: { n: NetWorthView }) {
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const now = n.series[n.series.length - 1];
-  // 다른 영역처럼 카드 위 제목 줄 “우리 자산” + “더보기 ›”(2026-11-03)
+  // 다른 영역처럼 카드 위 제목 줄 “자산” + “자산 더보기 ›”(2026-11-03)
   return (
     <section className="hg-stack" aria-label={copy.assetsTitle}>
       <SectionHeader title={copy.assetsTitle} more={{ label: copy.assetsMore, href: '/assets' }} />

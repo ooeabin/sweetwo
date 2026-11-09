@@ -20,8 +20,8 @@ const NAME_MAX = 20; // 직접 추가 줄 이름
 type Edit = { index: number } | { add: true } | null;
 
 /**
- * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음(+ 저금 항목 추가) → 쓰는 돈 묶음 → ‘+ 줄 추가’,
- * 주 버튼 위에 남는 돈(음수면 “{n}이 모자라요”, 막지 않음). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜.
+ * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음(+ 저금 항목 추가) → 지출 묶음 → ‘+ 줄 추가’,
+ * 주 버튼 위에 여유 자금(음수면 “{n}이 모자라요”, 막지 않음). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜.
  * 저금 줄 금액 입력 아래 ‘저금 항목 보기’ → W-10(onItem). 저금 줄 보조 글 = 진행 “120만 / 500만 원” + 월 필요액(기한이 있을 때)
  */
 export function SplitEditor({
@@ -85,7 +85,7 @@ export function SplitEditor({
   notice?: ReactNode;
   /** 모든 줄 고치기 막음(연결 해제 대기, 20 예외) */
   readOnly?: boolean;
-  /** 저금 항목 모은 돈(진행·월 필요액) */
+  /** 저금 항목 모은 금액(진행·월 필요액) */
   savedOf?: (goalId: string) => number;
   /** 저금 줄 금액 입력 아래 ‘저금 항목 보기’(W-10) */
   onItem?: (goalId: string) => void;
@@ -264,7 +264,7 @@ export function SplitEditor({
       <SectionHeader title={copy.spendGroup} />
       <List label={copy.spendGroup}>
         {indexed.filter(({ l }) => l.kind !== 'saving').map(({ l, i }) => row(l, i))}
-        {/* 줄 추가는 쓰는 돈 묶음 맨 아래 한 줄(+ 아이콘이 글자 앞 ‘+’를 대신) */}
+        {/* 줄 추가는 지출 묶음 맨 아래 한 줄(+ 아이콘이 글자 앞 ‘+’를 대신) */}
         {!readOnly && customs < MAX_CUSTOM && (
           <ListRow
             icon="plus"

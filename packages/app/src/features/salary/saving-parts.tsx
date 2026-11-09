@@ -12,7 +12,7 @@ import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
 
 /**
  * 저금 항목 줄(GoalRow, 홈 H-02와 저금 목록 W-13): 저금통 아이콘(goal 원, 진행 원 아님: %와 막대가 진행을 말함) + 이름(파트너 항목은 이름 칩) + 오른쪽 %(달성이면 ‘달성’ 배지)
- * + “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면(W-13만) % 자리 비우고 “모은 돈 300만 원”, 막대 없음.
+ * + “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면(W-13만) % 자리 비우고 “모은 금액 300만 원”, 막대 없음.
  */
 export function SavingGoalRow({
   item: i,
@@ -65,8 +65,8 @@ export function SavingMeta({ item, masked }: { item: SavingItem | undefined; mas
 }
 
 /**
- * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’): 내 저금이 없을 때 체크리스트 저금 묶음 자리에 “+ 저금 추가 (남는 돈 {n})” → W-11a.
- * 파트너가 저금이 있으면(각자) 제목 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?” + 보조 “남는 돈 {n}”.
+ * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’): 내 저금이 없을 때 체크리스트 저금 묶음 자리에 “+ 저금 추가 (여유 자금 {n})” → W-11a.
+ * 파트너가 저금이 있으면(각자) 제목 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?” + 보조 “여유 자금 {n}”.
  * 홈 H-03과 W-02에서 씀(H-02 회색 제안 문장 대신). 보여 줄 때가 아니면 null
  */
 export function FirstSavingRow({
@@ -94,10 +94,10 @@ export function FirstSavingRow({
 }
 
 /**
- * 달성 지켜보기(20 W-12): 고칠 수 있는 저금 항목의 모은 돈(서버 goal_saved_sums) ≥ 목표 금액이 되면 서버에 달성 표시(achieve_goal)하고,
+ * 달성 지켜보기(20 W-12): 고칠 수 있는 저금 항목의 모은 금액(서버 goal_saved_sums) ≥ 목표 금액이 되면 서버에 달성 표시(achieve_goal)하고,
  * 이 사람이 처음이면 축하 화면으로. 합쳐서 모드 다른 사람은 다음에 앱을 열 때 한 번. 파트너 저금 항목(각자)은 알림만.
  * 홈과 월급 탭 화면에 붙음. 축하로 넘어갈 때 떠 있는 토스트(체크 ‘되돌리기’)를 닫음. 그 전에 되돌리거나
- * 다른 곳에서 체크를 풀어 모은 돈이 목표 금액 아래로 내려가면 서버(check_pay_line)가 달성을 되돌림.
+ * 다른 곳에서 체크를 풀어 모은 금액이 목표 금액 아래로 내려가면 서버(check_pay_line)가 달성을 되돌림.
  */
 export function AchieveWatch() {
   const d = useSavingItems();
@@ -111,7 +111,7 @@ export function AchieveWatch() {
   const meId = d.ready ? d.meId : null;
   const items = useRef<SavingItem[] | null>(null);
   items.current = d.ready ? d.live : null;
-  // 상태·모은 돈이 바뀔 때만 다시 봄
+  // 상태·모은 금액이 바뀔 때만 다시 봄
   const key = (items.current ?? [])
     .map((i) => `${i.goal.id}:${i.goal.status}:${i.saved}:${(i.goal.achieved_seen ?? []).length}`)
     .join('|');

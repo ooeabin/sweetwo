@@ -1,7 +1,7 @@
 import { addDays, daysBetween } from '../date';
 import { lunarToSolar } from './lunar';
 
-// 챙길 날(docs/spec/24-calendar.md). 매년 양력 / 매년 음력 / 한 번. 화면은 다음 날짜, 달력 달의 날짜, D-day를 여기서.
+// 경조사(docs/spec/24-calendar.md). 매년 양력 / 매년 음력 / 한 번. 화면은 다음 날짜, 달력 달의 날짜, D-day를 여기서.
 export interface CareRule {
   date_rule: 'solar_yearly' | 'lunar_yearly' | 'once';
   month: number | null;
@@ -102,7 +102,7 @@ export function birthdayInYear(
 
 export type MilestoneKind = 'hwangap' | 'chilsun' | 'palsun';
 /**
- * 환갑·칠순·팔순(24 참고 ‘챙길 날 전체 목록’): 태어난 해 기준, 오늘 이후만.
+ * 환갑·칠순·팔순(24 참고 ‘경조사 전체 목록’): 태어난 해 기준, 오늘 이후만.
  * 환갑 = 만 60세 생일. 칠순·팔순은 가족 방식: 세는 나이(기본) 70·80 = 만 69·79, 만 나이면 만 70·80
  */
 export function milestones(
@@ -195,8 +195,8 @@ export function overdueDate(
 }
 
 /**
- * 같은 챙길 날에 2년 안 같은 선물(24 Y-08b, Y-09 “작년에도 드렸어요”, 재기획: 가족 목록 없이 챙길 날 기준):
- * 그 날보다 앞선 730일 안 기록 중 같은 챙길 날, 같은 선물 이름(앞뒤 공백 무시)
+ * 같은 경조사에 2년 안 같은 선물(24 Y-08b, Y-09 “작년에도 드렸어요”, 재기획: 가족 목록 없이 경조사 기준):
+ * 그 날보다 앞선 730일 안 기록 중 같은 경조사, 같은 선물 이름(앞뒤 공백 무시)
  */
 export function giftRepeated(
   records: { care_day_id: string; gift_name: string | null; occurs_on: string }[],

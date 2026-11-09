@@ -1,4 +1,4 @@
--- pgTAP: F-04b~d 팔았어요(일부·전부), 고친 기록에 고친 사람
+-- pgTAP: F-04b~d 팔았어요(일부·전부), 수정 내역에 고친 사람
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(6);
@@ -27,7 +27,7 @@ select is(public.sell_asset(current_setting('test.s')::uuid, 6000000, current_se
   2000000::bigint, '다 팔면 남은 원금 기준');
 select is((select status::text from public.asset where name = '주식'), 'sold', '매도 완료로 보관');
 select is((select count(*)::int from public.asset_history where recorded_by = auth.uid()), 5,
-  '고친 기록에 고친 사람(추가 2 + 통장 2 + 주식 1)');
+  '수정 내역에 고친 사람(추가 2 + 통장 2 + 주식 1)');
 reset role;
 
 select * from finish();

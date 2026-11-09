@@ -25,13 +25,13 @@ insert into public.care_day (space_id, category, kind, name, side, date_rule, mo
   select space_id, 'family', 'birthday', '어머니 생신', 'groom', 'solar_yearly', 5, 1, 'groom' from public.app_user;
 insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id)
   select space_id, 'asset', 'cash', 'bank', '청약 통장', 1000000, 'person', id from public.app_user;
--- 챙길 날, 목표, 자산을 지움
+-- 경조사, 목표, 자산을 지움
 update public.care_day set deleted_at = now();
 update public.goal set deleted_at = now();
 update public.asset set deleted_at = now();
 select results_eq($$ select kind from public.trash_rows() order by kind $$,
-  $$ values ('asset'), ('care_day'), ('goal') $$, '휴지통: 자산, 챙길 날, 목표');
-select is(public.restore_trash('care_day', (select id from public.care_day)), 'restored', '챙길 날 되살리기');
+  $$ values ('asset'), ('care_day'), ('goal') $$, '휴지통: 자산, 경조사, 목표');
+select is(public.restore_trash('care_day', (select id from public.care_day)), 'restored', '경조사 되살리기');
 select is(public.restore_trash('goal', (select id from public.goal)), 'restored', '혼자면 목표도 바로 되살림');
 select is(public.purge_trash('asset', (select id from public.asset)), 1, '영구 삭제');
 select is((select count(*)::int from public.asset), 0, '자산이 사라짐');

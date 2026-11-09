@@ -176,7 +176,7 @@ export interface UpcomingItem {
   label: string;
   dday: number;
   to: string;
-  /** 날짜 칸 색(월급날 초록, 월급 전 확인 청록, 챙길 날 분홍, 저금 항목 기한 베이지, 만기 보라) */
+  /** 날짜 칸 색(월급날 초록, 월급 전 확인 청록, 경조사 분홍, 저금 항목 기한 베이지, 만기 보라) */
   kind: 'payday' | 'review' | 'care' | 'goal' | 'maturity';
 }
 
@@ -189,7 +189,7 @@ const KIND_TONE = {
 } as const;
 
 /**
- * H-05 다가오는 일정: 30일 안 월급날, 월급 전 확인, 챙길 날, 저금 항목 기한, 날짜순 최대 3개.
+ * H-05 일정: 30일 안 월급날, 월급 전 확인, 경조사, 저금 항목 기한, 날짜순 최대 3개.
  * 2026-11-03 카카오톡 일정처럼 왼쪽 날짜 칸(“10월” / “22”, 종류별 옅은 영역 색) + 이름 + 요일, 오른쪽 D-day. 주 띠는 없앰.
  */
 export function UpcomingCard({ items, go }: { items: UpcomingItem[]; go: (to: string) => void }) {

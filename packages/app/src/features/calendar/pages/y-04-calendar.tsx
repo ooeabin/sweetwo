@@ -12,7 +12,7 @@ import { startCareAdd } from './y-07-care-add';
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
 const ymText = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-// 칸 안 짧은 이름(돈 일정 종류). 고른 날 줄 아이콘은 ui lead-kinds.ts ‘money’·‘care’ 표(2026-11-09)
+// 칸 안 짧은 이름(금융 일정 종류). 고른 날 줄 아이콘은 ui lead-kinds.ts ‘money’·‘care’ 표(2026-11-09)
 const MONEY_SHORT: Record<MoneyKind, string> = {
   payday: copy.short.payday,
   review: copy.short.review,
@@ -22,13 +22,13 @@ const MONEY_SHORT: Record<MoneyKind, string> = {
 };
 let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
 
-/** 챙길 날 이름의 마지막 낱말(“어머니 생신” → “생신”) */
+/** 경조사 이름의 마지막 낱말(“어머니 생신” → “생신”) */
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
 // Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 토스 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
 // 칸마다 숫자 + 짧은 이름 한 줄, 월급 전 확인 기간은 칸 아래 이어진 한 줄 띠(“월급 전 확인”, 누르면 그 날 줄 → W-05).
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달을 보고 있으면 ‘오늘’.
-// 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 챙길 날 추가’ → Y-07.
+// 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 경조사 추가’ → Y-07.
 export function Y04Calendar() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -116,7 +116,7 @@ export function Y04Calendar() {
     setSelected(ny === ty && nm === tm ? d.today : `${ymText(ny, nm)}-01`);
   };
 
-  /** 고른 날 일정 줄들(공휴일, 월급 전 확인, 챙길 날, 돈 일정) */
+  /** 고른 날 일정 줄들(공휴일, 월급 전 확인, 경조사, 금융 일정) */
   const items = (date: string) => {
     const hol = d.holidayOf(date);
     const band = bandOn(date);
@@ -159,7 +159,7 @@ export function Y04Calendar() {
             onClick={() => nav(`/calendar/day/${x.care.id}`)}
             chevron
           />
-          {/* 그날이 된 챙길 날은 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+          {/* 그날이 된 경조사는 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
           {x.date <= d.today && !(x.care.status === 'done' && x.care.status_on === x.date) && (
             <Button
               variant="ghost"

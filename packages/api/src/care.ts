@@ -3,7 +3,7 @@ import { AuthCallError } from './auth';
 import { supabase } from './client';
 import { ensureSpace } from './onboarding';
 
-// 캘린더 가족·챙길 날(24 Y-01~Y-05). 같은 공간이면 같이 보고 고침, 지우기는 휴지통
+// 캘린더 가족·경조사(24 Y-01~Y-05). 같은 공간이면 같이 보고 고침, 지우기는 휴지통
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
@@ -18,7 +18,7 @@ export async function fetchCareDays(): Promise<CareDay[]> {
   return data ?? [];
 }
 
-/** 챙길 날 여러 개 추가, 만든 id를 넣은 순서대로 */
+/** 경조사 여러 개 추가, 만든 id를 넣은 순서대로 */
 export async function insertCareDays(
   rows: Omit<TablesInsert<'care_day'>, 'space_id'>[],
 ): Promise<string[]> {
@@ -35,7 +35,7 @@ export async function updateCareDay(id: string, patch: TablesUpdate<'care_day'>)
   const { error } = await supabase().from('care_day').update(patch).eq('id', id);
   fail(error);
 }
-/** 챙길 날 지우기(휴지통, Y-05 8번). 되살리기는 restoreTrash('care_day', id) */
+/** 경조사 지우기(휴지통, Y-05 8번). 되살리기는 restoreTrash('care_day', id) */
 export async function trashCareDay(id: string) {
   const { error } = await supabase()
     .from('care_day')

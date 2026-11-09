@@ -31,7 +31,7 @@ import { salaryPaths, savingPaths } from '../paths';
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
-// W-11c 아래 선택 칸 ‘이미 모은 돈이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
+// W-11c 아래 선택 칸 ‘이미 모은 금액이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
 const STEPS = ['a', 'b', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
 const KEY = 'sweetwo.savingDraft';
@@ -40,7 +40,7 @@ type Draft = {
   monthly: number | null;
   target: number | null;
   deadline: string | null;
-  /** 이미 모은 돈 칸을 켰는지, 그 금액 */
+  /** 이미 모은 금액 칸을 켰는지, 그 금액 */
   hasStart: boolean;
   start: number | null;
 };
@@ -109,7 +109,7 @@ export function W11SavingAdd() {
         onBack={() => nav(salaryPaths.checklist)}
       />
     );
-  // 지금 남는 돈(W-11b 보조, 0원 아래면 0원)
+  // 지금 여유 자금(W-11b 보조, 0원 아래면 0원)
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
@@ -189,7 +189,7 @@ export function W11SavingAdd() {
     );
   if (!draft.name.trim()) return <Navigate to={`${savingPaths.add}/a`} replace />;
   if (s === 'b') {
-    // 처음 값은 빈 칸(필수, 2026-11-09). 남는 돈 전부를 채우지 않음. 빠른 칩은 그 금액으로 바꿈
+    // 처음 값은 빈 칸(필수, 2026-11-09). 여유 자금 전부를 채우지 않음. 빠른 칩은 그 금액으로 바꿈
     const v = draft.monthly;
     return (
       <QuestionLayout
@@ -213,7 +213,7 @@ export function W11SavingAdd() {
       </QuestionLayout>
     );
   }
-  // 시작할 때 모은 돈(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
+  // 시작할 때 모은 금액(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
   const start = draft.hasStart ? (draft.start ?? 0) : 0;
   const startOver = draft.target !== null && start >= draft.target;
   if (s === 'c')
@@ -250,7 +250,7 @@ export function W11SavingAdd() {
               <span className="hg-consent__label">{copy.addHasStart}</span>
             </button>
           }
-          // 이미 모은 돈 칸은 체크 칸 아래, 키패드는 하나로 화면 아래(2026-11-09 round 3, 칸 사이에 끼지 않게)
+          // 이미 모은 금액 칸은 체크 칸 아래, 키패드는 하나로 화면 아래(2026-11-09 round 3, 칸 사이에 끼지 않게)
           second={
             draft.hasStart
               ? {

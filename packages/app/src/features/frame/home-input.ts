@@ -101,7 +101,7 @@ export function useHomeInput(on = true) {
       state === 'unlink_pending' && unlink.data
         ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
         : null,
-    /** 만기·챙길 날 할 일 닫기(그 항목·날짜만) */
+    /** 만기·경조사 할 일 닫기(그 항목·날짜만) */
     closeTodo: (key: string) => setClosed(closeHomeTodo(key)),
     /** 초대 할 일 닫기(7일) */
     closeInvite: () => {

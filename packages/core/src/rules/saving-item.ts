@@ -3,7 +3,7 @@ import { ceilTo10k, MAX_WON, type Won } from '../money';
 import { addMonths, monthsBetween, parseYm, thisMonth, type YearMonth } from '../onboarding/month';
 
 // 저금 항목(docs/spec/20-salary-plan.md ‘저금 항목’, 06-calc-allocation.md 4장·5장, ADR 0007).
-// 모은 돈은 서버 goal_saved(시작할 때 모은 돈 + 체크한 저금 줄 합)가 정본, 여기 savedFromLines는 같은 식(테스트·미리보기용).
+// 모은 금액은 서버 goal_saved(시작할 때 모은 금액 + 체크한 저금 줄 합)가 정본, 여기 savedFromLines는 같은 식(테스트·미리보기용).
 
 /** 체크리스트 저금 줄 한 줄(체크 상태와 실제 보낸 금액) */
 export interface SavingCheckLine {
@@ -15,8 +15,8 @@ export interface SavingCheckLine {
 }
 
 /**
- * 모은 돈 = 시작할 때 모은 돈 + 그 저금 항목 저금 줄을 체크한 금액 합(다른 금액이면 그 금액).
- * ‘못 함’·체크 안 함은 더하지 않음(06 4-1, 시작할 때 모은 돈은 2026-11-09 ADR 0007 고침)
+ * 모은 금액 = 시작할 때 모은 금액 + 그 저금 항목 저금 줄을 체크한 금액 합(다른 금액이면 그 금액).
+ * ‘못 함’·체크 안 함은 더하지 않음(06 4-1, 시작할 때 모은 금액은 2026-11-09 ADR 0007 고침)
  */
 export function savedFromLines(id: string, lines: SavingCheckLine[], start: Won = 0): Won {
   return (
@@ -37,13 +37,13 @@ export function deadlineDay(deadline: string): string {
 /** W-11d 기한 처음 값(20): 1년 뒤 같은 달 */
 export const defaultDeadline = (now = new Date()): YearMonth => addMonths(thisMonth(now), 12);
 
-/** 진행률(06 5-1): 모은 돈 ÷ 목표 금액, 내림 정수 %, 100 상한. 목표 금액이 없으면 null */
+/** 진행률(06 5-1): 모은 금액 ÷ 목표 금액, 내림 정수 %, 100 상한. 목표 금액이 없으면 null */
 export function savingPct(saved: Won, target: Won | null): number | null {
   if (target === null || target <= 0) return null;
   return Math.min(Math.floor((Math.max(saved, 0) * 100) / target), 100);
 }
 
-/** 막대 채움 %: 모은 돈이 있으면 최소 2%(빈 막대가 안 모은 것처럼 보여서, GoalRow) */
+/** 막대 채움 %: 모은 금액이 있으면 최소 2%(빈 막대가 안 모은 것처럼 보여서, GoalRow) */
 export function savingBar(saved: Won, target: Won | null): number {
   const p = savingPct(saved, target) ?? 0;
   return saved > 0 ? Math.max(p, 2) : p;
@@ -54,7 +54,7 @@ export const monthsLeft = (deadline: YearMonth, now = new Date()) =>
   Math.max(monthsBetween(thisMonth(now), deadline) + 1, 1);
 
 /**
- * 월 필요액(06 5-2, 기한이 있을 때만): (목표 금액 − 모은 돈) ÷ 남은 개월, 1만 원 단위 올림. 0 아래면 0.
+ * 월 필요액(06 5-2, 기한이 있을 때만): (목표 금액 − 모은 금액) ÷ 남은 개월, 1만 원 단위 올림. 0 아래면 0.
  * 목표 금액이나 기한이 없으면 null
  */
 export function savingNeed(
@@ -68,7 +68,7 @@ export function savingNeed(
 }
 
 /**
- * 예상 달성 월(06 5-3): 이번 달부터 매달 모아 (목표 금액 − 모은 돈) ÷ 매달 금액(올림)째 달.
+ * 예상 달성 월(06 5-3): 이번 달부터 매달 모아 (목표 금액 − 모은 금액) ÷ 매달 금액(올림)째 달.
  * = 이번 달 + 개월 − 1(월 필요액의 남은 개월과 같은 셈). 매달 금액이 0원이거나 목표 금액이 없으면 null
  */
 export function savingEta(
@@ -108,7 +108,7 @@ export function savingState(g: { status: string; closed_at: string | null }): Sa
   return g.status === 'achieved' ? 'achieved' : 'saving';
 }
 
-/** 달성 축하를 띄울 때(W-12): 모으는 중이고 목표 금액이 있고 모은 돈이 닿음 */
+/** 달성 축하를 띄울 때(W-12): 모으는 중이고 목표 금액이 있고 모은 금액이 닿음 */
 export function reachedTarget(
   g: { status: string; closed_at: string | null; target_amount: Won | null },
   saved: Won,
@@ -120,7 +120,7 @@ const ym = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) as unknown as z.ZodType<Y
 
 /**
  * 저금 항목 추가(W-11) 입력. 이름 1~20자, 매달 금액 1만 원 단위(0원 가능), 목표 금액은 선택,
- * 기한은 목표 금액이 있을 때만 이번 달부터, 시작할 때 모은 돈은 0원 이상이고 목표 금액보다 적게
+ * 기한은 목표 금액이 있을 때만 이번 달부터, 시작할 때 모은 금액은 0원 이상이고 목표 금액보다 적게
  * (서버 add_saving_item과 같은 검사, bad_start)
  */
 export const savingItemInput = (now = new Date()) =>

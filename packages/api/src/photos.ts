@@ -74,7 +74,7 @@ export async function fetchPhotoUrls(paths: string[]): Promise<Record<string, st
   return out;
 }
 
-/** 사진(챙길 날) 동의를 했는지(31 동의 8종, 처음 사진 추가 시). 가장 최근 기록 */
+/** 사진(경조사) 동의를 했는지(31 동의 8종, 처음 사진 추가 시). 가장 최근 기록 */
 export async function fetchPhotoConsent(): Promise<boolean> {
   const { data, error } = await supabase()
     .from('consent')
@@ -86,7 +86,7 @@ export async function fetchPhotoConsent(): Promise<boolean> {
   return data?.[0]?.agreed === true;
 }
 
-/** 사진(챙길 날) 동의 기록(추가만) */
+/** 사진(경조사) 동의 기록(추가만) */
 export async function agreePhotoConsent(userId: string, version: string) {
   const { error } = await supabase().from('consent').insert({
     user_id: userId,

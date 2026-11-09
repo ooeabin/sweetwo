@@ -191,14 +191,14 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   await expect(done.locator('.hg-transfer__state .hg-ico--check')).toHaveCount(1);
   await axe(page);
   // 첫 저금 빈 줄은 파트너 탭에 없음
-  await expect(page.getByRole('button', { name: /저금 추가 \(남는 돈/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /저금 추가 \(여유 자금/ })).toHaveCount(0);
   // 고치는 것 없음(2026-11-09 round 3): ‘월급 계획 고치기’, 묶음 ‘모두 보냈어요’
   await expect(page.getByRole('button', { name: '월급 계획 고치기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /모두 보냈어요/ })).toHaveCount(0);
   // 내 탭으로 돌아가면 있음
   await page.getByRole('tab', { name: '찬우' }).click();
   await expect(page.getByRole('button', { name: '월급 계획 고치기' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '쓰는 돈 모두 보냈어요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '지출 모두 보냈어요' })).toBeVisible();
 });
 
 test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {

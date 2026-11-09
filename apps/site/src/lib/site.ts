@@ -19,10 +19,10 @@ export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 같이 체크하고, 모은 돈을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 같이 체크하고, 모은 금액을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
   getApp: '앱 받기',
-  heroLead: '월급날 정한 대로 나눴는지 같이 체크하고, 모은 돈을 같이 봐요', // [확인 필요]
+  heroLead: '월급날 정한 대로 나눴는지 같이 체크하고, 모은 금액을 같이 봐요', // [확인 필요]
   macDownload: 'Mac용 다운로드',
   winDownload: 'Windows용 다운로드',
   otherOs: '다른 OS용 받기',

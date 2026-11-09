@@ -159,7 +159,7 @@ export function W01Split() {
                 {copy.refill}
               </button>
             )}
-            {/* 그만 모은 저금 항목(20 W-01 8번): 접힌 줄, 펼치면 이름 + 모은 돈 → W-10 */}
+            {/* 그만 모은 저금 항목(20 W-01 8번): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
             {closed.length > 0 && (
               <button
                 type="button"

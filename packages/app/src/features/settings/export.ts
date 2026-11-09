@@ -3,7 +3,7 @@ import { assetGroup, formatDot, savingState, toCsv, todayKst } from '@sweetwo/co
 import { copy } from './copy';
 
 // S-18 내보내기(엑셀 CSV, zip 하나에 시트별, 25 S-18). 범위: 내 데이터(내 명의 항목, 내 월급 계획·체크리스트, 내가 쓴 기록)
-// / 공동 데이터(공동 항목·저금 항목·월급 계획·체크리스트·챙길 날 + 파트너 항목은 공개 범위대로: 전체 공개는 행, 합계만은 합계 한 줄).
+// / 공동 데이터(공동 항목·저금 항목·월급 계획·체크리스트·경조사 + 파트너 항목은 공개 범위대로: 전체 공개는 행, 합계만은 합계 한 줄).
 // 서프라이즈·비공개는 서버(RLS)가 이미 거름. 사진은 빠짐.
 
 export type Scope = 'mine' | 'joint';
@@ -138,7 +138,7 @@ export function buildExport(
     return files;
   }
 
-  // 공동: 저금 항목(모은 돈, 월급 계획 저금 금액 = 보이는 월급 계획의 그 항목 줄 합), 챙길 날
+  // 공동: 저금 항목(모은 금액, 월급 계획 저금 금액 = 보이는 월급 계획의 그 항목 줄 합), 경조사
   const monthly = (gid: string) =>
     d.splits
       .flatMap((x) => x.split_line)

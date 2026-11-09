@@ -14,7 +14,7 @@ const ENTRIES = ['checklist', 'split', 'home'] as const;
 type Entry = (typeof ENTRIES)[number] | 'direct';
 
 // W-13 저금 목록(20, 2026-11-09 round 3): 월급 탭 저금 전체를 한곳에서. W-02·W-01 저금 묶음 머리, 홈 H-02 ‘전체 보기’에서 열림.
-// 줄 = 홈 H-02와 같은 GoalRow(모은 돈 포함, 목표 금액이 없는 저금도). 순서 내 것 → 파트너 것(각자, 이름 칩, 보기만) → 우리 둘 것.
+// 줄 = 홈 H-02와 같은 GoalRow(모은 금액 포함, 목표 금액이 없는 저금도). 순서 내 것 → 파트너 것(각자, 이름 칩, 보기만) → 우리 둘 것.
 // 아래 ‘+ 저금 추가’(내 월급 계획이 있고 해제 대기가 아닐 때) → W-11a, 맨 아래 접힌 “그만 모은 저금 n개”(W-01 8번과 같음) → W-10.
 export function W13SavingList() {
   const nav = useNavigate();

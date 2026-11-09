@@ -57,8 +57,8 @@ async function watchAd(): Promise<'rewarded' | 'closed' | 'failed' | 'none'> {
 }
 
 /**
- * 우리 자산 순위 줄(RankRow, 23 F-01 0번·19 H-01 1a): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
- * 이번 달에 봤으면 바로 F-08. 자산이 없으면 홈에서는 우리 자산(F-01)로, F-01에서는 누를 수 없음
+ * 자산 순위 줄(RankRow, 23 F-01 0번·19 H-01 1a): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
+ * 이번 달에 봤으면 바로 F-08. 자산이 없으면 홈에서는 자산 관리(F-01)로, F-01에서는 누를 수 없음
  */
 export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
   const r = useRank();

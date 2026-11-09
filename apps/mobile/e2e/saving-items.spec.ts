@@ -6,7 +6,7 @@ import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
 // 저금 항목(20 W-10~W-12, ADR 0007): 목표 탭 없이 월급 탭 저금 줄이 목표 금액(+ 기한)을 가짐.
-// 모은 돈 = 체크한 저금 합. 달성하면 축하 1회 → ‘계속 모을게요’ / ‘그만할게요’.
+// 모은 금액 = 체크한 저금 합. 달성하면 축하 1회 → ‘계속 모을게요’ / ‘그만할게요’.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(
@@ -60,10 +60,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 처음 값은 빈 칸(남는 돈 전부를 채우지 않음, 2026-11-09), 보조는 지금 남는 돈
+  // 처음 값은 빈 칸(여유 자금 전부를 채우지 않음, 2026-11-09), 보조는 지금 여유 자금
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await expect(page.getByText(/^지금 남는 돈/)).toBeVisible();
+  await expect(page.getByText(/^지금 여유 자금/)).toBeVisible();
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
@@ -133,7 +133,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   ).toBe(500_000);
 });
 
-test('W-11c 이미 모은 돈(2026-11-09): 만들 때만, 목표 금액보다 적게, 모은 돈 = 시작값 + 체크, 모은 기록 맨 아래', async ({
+test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다 적게, 모은 금액 = 시작값 + 체크, 저금 내역 맨 아래', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -145,13 +145,13 @@ test('W-11c 이미 모은 돈(2026-11-09): 만들 때만, 목표 금액보다 �
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('30000000');
-  const has = page.getByRole('checkbox', { name: '이미 모은 돈이 있어요' });
+  const has = page.getByRole('checkbox', { name: '이미 모은 금액이 있어요' });
   await expect(has).toHaveAttribute('aria-checked', 'false');
   await has.click();
-  await page.getByLabel('이미 모은 돈').fill('30000000');
+  await page.getByLabel('이미 모은 금액').fill('30000000');
   await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toBeVisible();
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await page.getByLabel('이미 모은 돈').fill('20000000');
+  await page.getByLabel('이미 모은 금액').fill('20000000');
   await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
@@ -163,7 +163,7 @@ test('W-11c 이미 모은 돈(2026-11-09): 만들 때만, 목표 금액보다 �
   expect(g).toMatchObject({ start_saved: 20_000_000, target_amount: 30_000_000 });
   await expect(page.getByText('2,000만 원', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('목표 3,000만 원의 66%')).toBeVisible();
-  await expect(page.getByText('시작할 때 모은 돈 2,000만 원')).toBeVisible();
+  await expect(page.getByText('시작할 때 모은 금액 2,000만 원')).toBeVisible();
   // 체크하면 시작값에 더해짐
   await page.getByRole('checkbox', { name: /이번 달/ }).click();
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
@@ -190,14 +190,14 @@ test('W-11b 바꾸기 칩 고른 표시, W-11c 키패드는 하나로 맨 아래
   ).toBe('none');
   await page.getByRole('button', { name: '다음' }).click();
   if (info.project.name !== 'narrow') return;
-  // 좁은 창: 키패드로 목표 금액 → 체크 칸을 켜면 이미 모은 돈 칸이 활성, 키패드는 그 칸 아래
+  // 좁은 창: 키패드로 목표 금액 → 체크 칸을 켜면 이미 모은 금액 칸이 활성, 키패드는 그 칸 아래
   for (const k of ['5', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
   await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
-  await page.getByRole('checkbox', { name: '이미 모은 돈이 있어요' }).click();
+  await page.getByRole('checkbox', { name: '이미 모은 금액이 있어요' }).click();
   for (const k of ['1', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
-  await expect(page.getByLabel('이미 모은 돈')).toHaveValue('1,000,000');
+  await expect(page.getByLabel('이미 모은 금액')).toHaveValue('1,000,000');
   await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
-  const startBox = await page.getByLabel('이미 모은 돈').boundingBox();
+  const startBox = await page.getByLabel('이미 모은 금액').boundingBox();
   const padBox = await page.getByLabel('숫자 키패드').boundingBox();
   expect(startBox && padBox && padBox.y > startBox.y).toBe(true);
   await expect(page.getByLabel('숫자 키패드')).toHaveCount(1);

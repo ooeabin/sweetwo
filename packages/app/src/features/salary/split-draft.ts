@@ -3,7 +3,7 @@ import type { Goal, Me } from '@sweetwo/api';
 
 // 월급 계획 초안(O-50 추천값, W-01 ‘추천값으로 다시 채우기’, 20·06 3-2). 2026-11-08 ADR 0007: 비상금 없음, 저금 줄 = 저금 항목.
 
-/** 저금 항목 → 추천값 재료(모은 돈은 서버 값) */
+/** 저금 항목 → 추천값 재료(모은 금액은 서버 값) */
 export const toPlanItem = (g: Goal, saved: Record<string, number> | undefined): SavingPlanItem => ({
   id: g.id,
   target: g.target_amount,

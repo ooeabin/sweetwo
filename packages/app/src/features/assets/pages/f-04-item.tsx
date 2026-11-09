@@ -43,7 +43,7 @@ type Vis = 'all' | 'sum' | 'private';
 // 안 판 수익(원금 있는 투자·부동산), 월별 기록, 삭제(휴지통 + 되돌리기).
 // 유형별 값(만기일, 납입 회차, 금리, 월 납입·상환액)도 누르면 그 자리에서 입력칸 + ‘저장’(3번, Esc 취소).
 // 파트너 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
-// 고친 기록은 직접 고친 것만, 날짜와 고친 사람.
+// 수정 내역은 직접 고친 것만, 날짜와 고친 사람.
 type ValueField = 'maturity_date' | 'paid_count' | 'interest_rate' | 'monthly_payment';
 const RATE = /^\d{1,2}(\.\d{1,2})?$/;
 
@@ -352,7 +352,7 @@ export function F04Item() {
           />
         )}
         {field === 'paid_count' && editor}
-        {/* 매달 나가는 돈이 금리보다 먼저(23 F-03g) */}
+        {/* 매달 내는 돈이 금리보다 먼저(23 F-03g) */}
         {a.monthly_payment !== null && (
           <ListRow
             label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}

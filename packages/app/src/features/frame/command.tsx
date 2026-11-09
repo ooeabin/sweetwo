@@ -14,9 +14,9 @@ import { session } from '../auth';
 import { copy } from './copy';
 
 // 앱 기본 틀 동작(19 앱 기본 틀 3·4·7·11·12번):
-// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 저금 항목, 자산·부채, 챙길 날(최대 5개씩)
+// - ⌘K(Windows Ctrl+K) 검색 화면(CommandPalette): ‘바로 하기’ + 저금 항목, 자산·부채, 경조사(최대 5개씩)
 // - Ctrl(⌘)+1~4 탭, Ctrl(⌘)+N 추가(홈은 추가 메뉴를 엶, 다른 메뉴는 그 화면에 맞는 추가)
-// - 추가 = 저금 항목 / 자산·부채 / 챙길 날(2026-11-08 목표 대신 저금 항목, ADR 0007)
+// - 추가 = 저금 항목 / 자산·부채 / 경조사(2026-11-08 목표 대신 저금 항목, ADR 0007)
 
 export const ADD_TO = {
   saving: '/salary/items/new',
@@ -25,7 +25,7 @@ export const ADD_TO = {
 } as const;
 const TABS = ['/', '/salary', '/assets', '/calendar'] as const;
 type Tab = 'month' | 'salary' | 'assets' | 'calendar';
-/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·월급 = 저금 항목, 우리 자산 = 자산·부채, 캘린더 = 챙길 날 */
+/** 그 화면에 맞는 추가(좁은 창 + 버튼, Ctrl+N): 홈·월급 = 저금 항목, 자산 관리 = 자산·부채, 캘린더 = 경조사 */
 export const addFor = (t: Tab | null) =>
   t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.saving;
 
@@ -34,7 +34,7 @@ const Ctx = createContext<{ addOpen: boolean; setAddOpen: (v: boolean) => void }
   setAddOpen: () => undefined,
 });
 
-/** 오늘 띠 ‘추가’(보조 버튼): 저금 항목 / 자산·부채 / 챙길 날. Ctrl(⌘)+N으로도 열림 */
+/** 오늘 띠 ‘추가’(보조 버튼): 저금 항목 / 자산·부채 / 경조사. Ctrl(⌘)+N으로도 열림 */
 export function AddMenu() {
   const nav = useNavigate();
   const { addOpen, setAddOpen } = useContext(Ctx);

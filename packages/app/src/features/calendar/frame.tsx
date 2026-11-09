@@ -64,7 +64,7 @@ export function FilterChips({
   );
 }
 
-// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 탭 “목록” / “달력”(2026-11-04 맨 위, 우리 자산 탭과 같은 모양) + 그 아래 보기 필터 칩
+// 캘린더 메뉴 틀(Y-01 1~3번): “캘린더” + ‘+ 추가’(Y-07) + 탭 “목록” / “달력”(2026-11-04 맨 위, 자산 관리 탭과 같은 모양) + 그 아래 보기 필터 칩
 export function CalendarFrame({
   view,
   filter,
@@ -98,7 +98,7 @@ export function CalendarFrame({
       }}
       columns={[
         <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-          {/* 2026-11-04 우리 자산(한눈에/자산·부채)과 같은 탭을 맨 위에, 보기 필터 칩은 그 아래 */}
+          {/* 2026-11-04 자산 관리(요약/자산·부채)와 같은 탭을 맨 위에, 보기 필터 칩은 그 아래 */}
           <Tabs<CalView>
             label={copy.viewsLabel}
             value={view}

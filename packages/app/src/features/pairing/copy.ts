@@ -86,7 +86,7 @@ export const copy = {
 
   // P-05 내 월급(O-31과 같음)
   salary: '한 달 실수령액은 얼마예요?',
-  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
   salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
   noSalary: '지금은 월급이 없어요',

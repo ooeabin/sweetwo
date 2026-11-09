@@ -1,4 +1,4 @@
--- pgTAP: 챙길 날. 같은 공간은 함께 보고 고침, 다른 커플은 못 봄, 영구 삭제 없음
+-- pgTAP: 경조사. 같은 공간은 함께 보고 고침, 다른 커플은 못 봄, 영구 삭제 없음
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(4);
@@ -20,7 +20,7 @@ select public.ensure_my_space();
 select lives_ok($$
   insert into public.care_day (space_id, category, kind, name, side, date_rule, month, day, budget, carer)
   select space_id, 'family', 'birthday', '어머니 생신', 'groom', 'lunar_yearly', 8, 3, 300000, 'groom'
-  from public.app_user $$, '챙길 날 추가');
+  from public.app_user $$, '경조사 추가');
 select throws_ok($$ delete from public.care_day $$, '42501', null, '영구 삭제 없음');
 select throws_ok($$
   insert into public.care_day (space_id, category, kind, name, date_rule)

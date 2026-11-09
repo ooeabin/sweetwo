@@ -25,8 +25,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { copy } from './copy';
 
-// 캘린더 재료(24, 재기획): 챙길 날과 기록, 공휴일, 돈 일정(월급날, 월급 전 확인 띠, 저금 항목 기한, 자산·대출 만기).
-// 돈 일정 계산은 core rules/calendar `moneyDates`.
+// 캘린더 재료(24, 재기획): 경조사와 기록, 공휴일, 금융 일정(월급날, 월급 전 확인 띠, 저금 항목 기한, 자산·대출 만기).
+// 금융 일정 계산은 core rules/calendar `moneyDates`.
 export function useCalendarData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
@@ -84,7 +84,7 @@ export function useCalendarData() {
     });
   const today = todayKst();
   const careList = cares.data ?? [];
-  /** 그 달 챙길 날(날짜, 챙길 날) */
+  /** 그 달 경조사(날짜, 경조사) */
   const caresOf = (y: number, m: number) =>
     careList
       .flatMap((x) => careDatesInMonth(x, y, m).map((date) => ({ date, care: x })))
@@ -122,7 +122,7 @@ export function useCalendarData() {
   };
 }
 
-/** 돈 일정 한 줄: 라벨, 갈 곳 이름, 경로(24 ‘캘린더 범위’ 표) */
+/** 금융 일정 한 줄: 라벨, 갈 곳 이름, 경로(24 ‘캘린더 범위’ 표) */
 export function moneyLine(d: MoneyDate) {
   const label =
     d.kind === 'payday'

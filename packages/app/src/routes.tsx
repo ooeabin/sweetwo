@@ -146,7 +146,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-01 우리 자산 한눈에
+      }, // F-01 자산 관리 요약
       {
         path: '/assets/items',
         element: (
@@ -176,7 +176,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-01 챙길 날 목록
+      }, // Y-01 경조사 목록
       {
         path: '/calendar/month',
         element: (
@@ -196,7 +196,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-05 챙길 날 상세
+      }, // Y-05 경조사 상세
       {
         path: '/calendar/day/:id/budget',
         element: (
@@ -226,7 +226,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-09 드린 기록
+      }, // Y-09 선물 기록
       {
         path: '/notifications',
         element: (
@@ -602,7 +602,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-07 챙길 날 추가
+      }, // Y-07 경조사 추가
       {
         path: '/assets/new/:step?',
         element: (
@@ -622,7 +622,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-08 우리 자산 순위(2026-11-04)
+      }, // F-08 자산 순위(2026-11-04)
       {
         path: '/assets/:id',
         element: (

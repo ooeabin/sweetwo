@@ -95,12 +95,12 @@ Phosphor 아이콘(MIT 라이선스) 89개(2026-11-09, `Icon`의 `IconName`). �
 | `hg-ico--umbrella` | `umbrella` | 줄 앞 칸(Lead, 2026-11-09): 자산 연금 |
 | `hg-ico--credit-card` | `credit-card` | 줄 앞 칸(Lead, 2026-11-09): 부채 신용 |
 | `hg-ico--handshake` | `handshake` | 줄 앞 칸(Lead, 2026-11-09): 부채 개인 간 |
-| `hg-ico--money` | `money` | 줄 앞 칸(Lead, 2026-11-09): 월급날(돈 일정, 알림) |
-| `hg-ico--hourglass` | `hourglass` | 줄 앞 칸(Lead, 2026-11-09): 만기(돈 일정) |
-| `hg-ico--cake` | `cake` | 줄 앞 칸(Lead, 2026-11-09): 챙길 날 생일 |
-| `hg-ico--moon-stars` | `moon-stars` | 줄 앞 칸(Lead, 2026-11-09): 챙길 날 명절 |
-| `hg-ico--flower-tulip` | `flower-tulip` | 줄 앞 칸(Lead, 2026-11-09): 챙길 날 어버이날 |
-| `hg-ico--confetti` | `confetti` | 줄 앞 칸(Lead, 2026-11-09): 챙길 날 양가 행사 |
+| `hg-ico--money` | `money` | 줄 앞 칸(Lead, 2026-11-09): 월급날(금융 일정, 알림) |
+| `hg-ico--hourglass` | `hourglass` | 줄 앞 칸(Lead, 2026-11-09): 만기(금융 일정) |
+| `hg-ico--cake` | `cake` | 줄 앞 칸(Lead, 2026-11-09): 경조사 생일 |
+| `hg-ico--moon-stars` | `moon-stars` | 줄 앞 칸(Lead, 2026-11-09): 경조사 명절 |
+| `hg-ico--flower-tulip` | `flower-tulip` | 줄 앞 칸(Lead, 2026-11-09): 경조사 어버이날 |
+| `hg-ico--confetti` | `confetti` | 줄 앞 칸(Lead, 2026-11-09): 경조사 양가 행사 |
 | `hg-ico--trophy` | `trophy` | 줄 앞 칸(Lead, 2026-11-09): 목표 금액 달성 알림 |
 | `hg-ico--user-plus` | `user-plus` | 줄 앞 칸(Lead, 2026-11-09): 초대 알림 |
 | `hg-ico--user-minus` | `user-minus` | 줄 앞 칸(Lead, 2026-11-09): 계정 삭제·연결 해제 알림 |

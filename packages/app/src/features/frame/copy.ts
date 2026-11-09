@@ -3,7 +3,7 @@
 export const copy = {
   tabMonth: '홈', // [확인 필요] 재기획 탭 이름(19 앱 기본 틀 3번)
   tabSalary: '월급', // 2026-11-08 ADR 0007 목표 자리
-  tabAssets: '우리 자산',
+  tabAssets: '자산 관리',
   tabCalendar: '캘린더',
   search: '검색',
   mask: '금액 가리기',
@@ -23,7 +23,7 @@ export const copy = {
   netWorth: '순자산',
   // 2026-11-03 H-04 F-01과 같게 [확인 필요]
   ourNetWorth: '우리 순자산',
-  assetsTitle: '우리 자산',
+  assetsTitle: '자산', // 2026-11-09 홈 H-04 머리(탭 이름은 ‘자산 관리’)
   assetsMore: '자산 더보기',
   lastMonth: '지난달보다',
   grew: '늘었어요',
@@ -31,7 +31,7 @@ export const copy = {
   netWorthGraph: '최근 6개월 순자산', // [확인 필요] 화면 읽기용
   addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
-  addCare: '챙길 날',
+  addCare: '경조사',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
   cmdEmpty: '찾는 게 없어요',
   // 검색 아래 키 안내(넓은 창, 2026-11-03)
@@ -47,12 +47,12 @@ export const copy = {
   cmdLock: '잠그기',
   cmdSavings: '저금',
   cmdAssets: '자산·부채',
-  cmdCares: '챙길 날',
+  cmdCares: '경조사',
   offlineTitle: '연결이 끊겼어요',
   offlineBody: '다시 연결되면 이어서 볼 수 있어요',
   offlineCached: '오프라인',
   lastSaved: (at: string) => `마지막 저장 ${at}`,
-  // 우리 자산 순위 줄(23 F-01 0번, 19 H-01 1a, 2026-11-04)
+  // 자산 순위 줄(23 F-01 0번, 19 H-01 1a, 2026-11-04)
   rankQ: '우리 자산은 상위 몇 %일까요?', // [확인 필요]
   rankCheck: '확인하기', // [확인 필요] 앞에 ‘광고’ 표시
   rankAd: '광고',
@@ -62,6 +62,6 @@ export const copy = {
   rankStale: (pct: number) => `지난번엔 상위 ${pct}%였어요`, // [확인 필요]
   rankRefresh: '새로 확인하기', // [확인 필요]
   rankEmpty: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요]
-  rankEmptyGo: '우리 자산 입력하기', // 2026-11-04 홈에서만(누르면 F-01)
+  rankEmptyGo: '자산 입력하기', // 2026-11-04 홈에서만(누르면 F-01)
   rankAdClosed: '광고를 끝까지 보면 볼 수 있어요', // [확인 필요]
 };

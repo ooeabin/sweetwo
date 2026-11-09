@@ -23,7 +23,7 @@ import { copy, hourLabel } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-14 알림(docs/spec/25-settings.md). 2026-11-04 이메일은 자동 예비로만이라 이메일 설정 없음.
-// 카드 ‘푸시 알림’(켜고 끄기) + 묶음 줄마다 토글 + 챙길 날 미리 알림 체크 목록, 방해 금지 시간(→ S-14a). 바뀌면 바로 저장.
+// 카드 ‘푸시 알림’(켜고 끄기) + 묶음 줄마다 토글 + 경조사 미리 알림 체크 목록, 방해 금지 시간(→ S-14a). 바뀌면 바로 저장.
 // 센터 기록은 설정과 상관없이 남음. 끌 수 없는 종류(보안·결정 기한)는 목록에 없음.
 // 마케팅 정보 받기(기본 꺼짐): 켜고 끌 때마다 동의 기록(consent, 추가만), 켜면 “{날짜} 동의”.
 const CARE: NotiTopic[] = ['care_30', 'care_14', 'care_7', 'care_0'];
@@ -105,7 +105,7 @@ export function S14Notifications() {
         <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
           {copy.careAlerts}
         </span>
-        {/* 챙길 날은 시점 체크 목록(Y-05 미리 알림과 같은 모양) */}
+        {/* 경조사는 시점 체크 목록(Y-05 미리 알림과 같은 모양) */}
         <div className="hg-list hg-list--plain" role="group" aria-label={copy.careAlerts}>
           {CARE.map((t) => {
             const on = prefs.topics[t].push;

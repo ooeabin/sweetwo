@@ -53,7 +53,7 @@ test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 추�
   await page.keyboard.press('ControlOrMeta+n');
   const menu = page.getByRole('menu', { name: '추가' });
   await expect(menu.getByRole('menuitem', { name: '자산·부채' })).toBeVisible();
-  await menu.getByRole('menuitem', { name: '챙길 날' }).click();
+  await menu.getByRole('menuitem', { name: '경조사' }).click();
   await expect(page).toHaveURL(/\/calendar\/add/);
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

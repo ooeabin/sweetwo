@@ -1,5 +1,5 @@
 -- pgTAP: 기획 검토 2차(2026-11-09). 찬우(시작), 예빈(합류), 각자
--- 1) 시작할 때 모은 돈(W-11c ‘이미 모은 돈이 있어요’): 만들 때만, 모은 돈 = 시작값 + 체크한 저금 합, 앱이 바로 못 고침
+-- 1) 시작할 때 모은 금액(W-11c ‘이미 모은 금액이 있어요’): 만들 때만, 모은 금액 = 시작값 + 체크한 저금 합, 앱이 바로 못 고침
 -- 2) 각자 모드 파트너 것은 모두 보기만: 월급 계획(save_split), 체크리스트(check_pay_line), 저금(goal 고치기, 달성 뒤 선택)
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -32,7 +32,7 @@ select public.save_split(jsonb_build_array(
 select public.start_checklist(auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 
--- 1) 시작할 때 모은 돈
+-- 1) 시작할 때 모은 금액
 select throws_ok($$ select public.add_saving_item('내 집 마련', 950000, 150000000, null, -1) $$, '22023', 'bad_start',
   '시작값은 0원 이상');
 select throws_ok($$ select public.add_saving_item('내 집 마련', 950000, 150000000, null, 150000000) $$, '22023', 'bad_start',
@@ -43,10 +43,10 @@ select lives_ok($$ select public.add_saving_item('적금', 300000, null, null, 5
 select lives_ok($$ select public.add_saving_item('여행', 100000) $$, '시작값 없이(기본 0, 예전 호출과 같음)');
 select is((select start_saved from public.goal where id = pg_temp.item('내 집 마련')), 20000000::bigint, '시작값 저장');
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('내 집 마련')), 20000000::bigint,
-  '체크 전 모은 돈 = 시작값');
+  '체크 전 모은 금액 = 시작값');
 select public.check_pay_line((select id from public.pay_check_line where goal_id = pg_temp.item('내 집 마련')), 'checked');
 select is((select saved from public.goal_saved_sums() where goal_id = pg_temp.item('내 집 마련')), 20950000::bigint,
-  '모은 돈 = 시작값 + 체크한 저금');
+  '모은 금액 = 시작값 + 체크한 저금');
 select throws_ok($$ update public.goal set start_saved = 0 where id = pg_temp.item('내 집 마련') $$, '42501', null,
   '시작값은 만들 때만(앱이 바로 못 고침)');
 reset role;
@@ -70,7 +70,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'living', 'amount', 500000)), '22222222-2222-2222-2222-222222222222') $$,
-  '42501', 'not_owner', '파트너 월급 계획 쓰는 돈 줄은 못 고침');
+  '42501', 'not_owner', '파트너 월급 계획 지출 줄은 못 고침');
 select throws_ok($$ select public.check_pay_line((select l.id from public.pay_check_line l
     join public.pay_checklist c on c.id = l.checklist_id
     where c.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 'checked') $$,

@@ -3,7 +3,7 @@ import { AuthCallError } from './auth';
 import { supabase } from './client';
 import { ensureSpace } from './onboarding';
 
-// 우리 자산(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 파트너 ‘합계만’은 묶음 합계로.
+// 자산 관리(docs/spec/23-assets.md). 공개 범위는 서버가 거름: 행은 내가 볼 수 있는 것만, 파트너 ‘합계만’은 묶음 합계로.
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };

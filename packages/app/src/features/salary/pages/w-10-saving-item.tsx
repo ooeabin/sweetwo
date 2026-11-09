@@ -22,8 +22,8 @@ import { useSavingItems } from '../saving';
 import { AchieveWatch } from '../saving-parts';
 import { AfterChoice } from './w-12a-saving-after';
 
-// W-10 저금 항목 상세(20, ADR 0007). 머리(‹ 이름 ⋯) → 모은 돈 → 목표 금액 카드(진행, 기한, 월 필요액)
-// → 매달 카드(매달 금액 + 이번 달 줄) → (달성했는데 아직 고르지 않았으면) 달성 뒤 질문 → 모은 기록 → 정보.
+// W-10 저금 항목 상세(20, ADR 0007). 머리(‹ 이름 ⋯) → 모은 금액 → 목표 금액 카드(진행, 기한, 월 필요액)
+// → 매달 카드(매달 금액 + 이번 달 줄) → (달성했는데 아직 고르지 않았으면) 달성 뒤 질문 → 저금 내역 → 정보.
 // ⋯ = 이름 바꾸기, 지우기(묻지 않고 휴지통 + 되돌리기). 파트너 저금 항목(각자)은 보기만. 그만 모은 항목은 기록만.
 export function W10SavingItem() {
   const { id = '' } = useParams();
@@ -69,7 +69,7 @@ export function W10SavingItem() {
   ];
   // 매달 금액 바꾸기 → 이 줄 금액만(W-10a monthly, 2026-11-09 round 3 W-01 전체 대신)
   const splitTo = savingPaths.edit(id, 'monthly');
-  // 모은 기록: 체크리스트 달마다(최근 것부터), 체크 안 한 이번 달 줄은 빼고
+  // 저금 내역: 체크리스트 달마다(최근 것부터), 체크 안 한 이번 달 줄은 빼고
   const records = (lines.data ?? [])
     .filter((l) => l.pay_checklist && l.state !== 'wait')
     .sort((a, b) =>
@@ -242,7 +242,7 @@ export function W10SavingItem() {
                 }
               />
             ))}
-            {/* 시작할 때 모은 돈(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
+            {/* 시작할 때 모은 금액(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
             {g.start_saved > 0 && (
               <ListRow
                 label={copy.historyStart(m(g.start_saved))}

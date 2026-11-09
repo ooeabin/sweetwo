@@ -1,4 +1,4 @@
--- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 각자 돈, 숨기기 끄면 둘 다 봄
+-- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 개인 지출, 숨기기 끄면 둘 다 봄
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(9);
@@ -38,8 +38,8 @@ select throws_ok($$
 select set_config('test.c', (select id::text from public.care_day), true);
 select is(
   (public.record_care(current_setting('test.c')::uuid, '2026-03-09', 150000, 'living', '{gift}', '향수', null, 150000))->>'line',
-  '0', '낸 곳은 각자 돈, 줄 없음');
-select is((select paid_from::text from public.care_record), 'personal', '기록은 각자 돈');
+  '0', '낸 곳은 개인 지출, 줄 없음');
+select is((select paid_from::text from public.care_record), 'personal', '기록은 개인 지출');
 reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');

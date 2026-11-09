@@ -3,7 +3,7 @@ import { baseDateIn } from '../onboarding/cycle';
 import type { BaseDay } from '../onboarding/cycle';
 import { deadlineDay } from './saving-item';
 
-// 캘린더 돈 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
+// 캘린더 금융 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
 // 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
 // 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
@@ -64,7 +64,7 @@ export interface MoneyInput {
   yearlyGoals: { id: string; name: string; month: number }[];
 }
 
-/** 그 달(y, m)의 돈 일정과 월급 전 확인 띠 */
+/** 그 달(y, m)의 금융 일정과 월급 전 확인 띠 */
 export function moneyDates(y: number, m: number, o: MoneyInput) {
   const ym = ymOf(y, m);
   const first = `${ym}-01`;

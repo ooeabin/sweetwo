@@ -55,10 +55,10 @@ export const qk = {
   checklists: (today: string) => ['pay_checklist', today] as const,
   pastChecklists: (owner: string | null, before: string) =>
     ['pay_checklist', 'past', owner ?? 'joint', before] as const,
-  /** 저금 항목별 모은 돈 */
+  /** 저금 항목별 모은 금액 */
   goalSaved: ['goal_saved'] as const,
   pendingTerms: ['pending_terms'] as const,
   mailBounced: ['mail_bounced'] as const,
-  /** 저금 항목 하나의 체크 줄(W-10 모은 기록) */
+  /** 저금 항목 하나의 체크 줄(W-10 저금 내역) */
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };

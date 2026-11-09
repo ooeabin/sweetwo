@@ -22,14 +22,14 @@ import {
 } from './data';
 
 // 저금 항목 화면 값(docs/spec/20-salary-plan.md ‘저금 항목’, W-10, 홈 H-02, ADR 0007).
-// 행은 goal(space_goals), 모은 돈은 서버 goal_saved_sums(체크한 저금 합), 매달 금액은 그 항목 월급 계획 줄,
+// 행은 goal(space_goals), 모은 금액은 서버 goal_saved_sums(체크한 저금 합), 매달 금액은 그 항목 월급 계획 줄,
 // 이번 달 줄은 이번 사이클 체크리스트. 계산은 core(savingPct·savingNeed·savingEta)만 부른다.
 
 export type SavingOwner = 'mine' | 'partner' | 'ours';
 
 export interface SavingItem {
   goal: Goal;
-  /** 모은 돈 = 체크한 저금 합 */
+  /** 모은 금액 = 체크한 저금 합 */
   saved: number;
   /** 매달 금액 = 월급 계획의 이 항목 줄(그만 모음이면 0) */
   monthly: number;
@@ -38,7 +38,7 @@ export interface SavingItem {
   deadline: YearMonth | null;
   /** 진행률(목표 금액이 없으면 null) */
   pct: number | null;
-  /** 막대 채움(모은 돈이 있으면 최소 2%) */
+  /** 막대 채움(모은 금액이 있으면 최소 2%) */
   bar: number;
   /** 월 필요액(목표 금액과 기한이 있을 때만) */
   need: number | null;
@@ -147,7 +147,7 @@ export type SavingModel = Extract<ReturnType<typeof useSavingItems>, { ready: tr
 
 /**
  * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’, 19 H-03): 내 저금이 없으면 체크리스트 저금 묶음에
- * “+ 저금 추가 (남는 돈 {n})” → W-11. ‘내 저금’ = 각자면 내가 주인인 것, 합쳐서면 공동 월급 계획의 것(그만 모은 것 빼고).
+ * “+ 저금 추가 (여유 자금 {n})” → W-11. ‘내 저금’ = 각자면 내가 주인인 것, 합쳐서면 공동 월급 계획의 것(그만 모은 것 빼고).
  * 각자 모드에서 파트너는 저금이 있으면 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?”. 월급 계획이 없거나 해제 대기면 없음.
  */
 export function useFirstSaving():

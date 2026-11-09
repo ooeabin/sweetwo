@@ -8,4 +8,4 @@
 - 목표 상세 숫자 칸 `hg-stat`(회색 판)과는 다른 것.
 - React: `StatBlock({ label, big, title, sub, as, ariaLabel })`. 기본은 `section`, 다른 `section` 안이면 `as="div"`.
 
-쓰는 곳: 우리 자산 순위(F-08) 다음 칸까지, 연령대 비교.
+쓰는 곳: 자산 순위(F-08) 다음 칸까지, 연령대 비교.

@@ -166,7 +166,7 @@ export const copy = {
     plan: '이번 달 화면', // 예전 키(지금은 month)
     close: '월급 전 확인 화면', // 예전 키, 새 요청에는 없음(2026-11-09 이름)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
-    assets: '우리 자산 화면',
+    assets: '자산 관리 화면',
     income_spend: '월 수입·지출(없앤 화면)', // 예전 키, 새 요청에는 없음
     calendar: '캘린더 화면',
   } as Record<string, string>,

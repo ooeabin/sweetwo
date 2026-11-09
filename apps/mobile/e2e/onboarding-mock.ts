@@ -27,7 +27,7 @@ export interface MemDb {
   shares: Record<string, unknown> | null;
   /** 제안(08 6장) */
   proposals: Record<string, unknown>[];
-  /** 우리 자산: 내가 볼 수 있는 행, 이력, 파트너 합계만, 월말 순자산 */
+  /** 자산 관리: 내가 볼 수 있는 행, 이력, 파트너 합계만, 월말 순자산 */
   assets: Record<string, unknown>[];
   assetHistory: Record<string, unknown>[];
   partnerSums: Record<string, unknown>[];
@@ -54,7 +54,7 @@ export interface MemDb {
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
-  /** 캘린더 가족·챙길 날 */
+  /** 캘린더 가족·경조사 */
   family: Record<string, unknown>[];
   cares: Record<string, unknown>[];
   /** 다녀온 뒤 기록(Y-08), 목표 사용 */
@@ -194,7 +194,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     ],
     rpc: [],
   };
-  // 서버 goal_saved 흉내(ADR 0007, 2026-11-09): 모은 돈 = 시작할 때 모은 돈 + 그 저금 항목을 체크한 금액의 합
+  // 서버 goal_saved 흉내(ADR 0007, 2026-11-09): 모은 금액 = 시작할 때 모은 금액 + 그 저금 항목을 체크한 금액의 합
   const goalSaved = (id: string) => {
     let v = Number(db.goals.find((g) => g.id === id)?.start_saved ?? 0);
     for (const c of db.checklists)
@@ -722,7 +722,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, shares.length);
       }
       // 제안: 서버 함수와 같은 규칙만 간단히(항목당 열린 제안 하나, 용돈은 사람마다)
-      // 양가 비용 예산 바로 저장(혼자): 같은 종류 챙길 날 쓸 돈, 양가 비용 목표 금액
+      // 양가 비용 예산 바로 저장(혼자): 같은 종류 경조사 쓸 돈, 양가 비용 목표 금액
       if (fn === 'save_family_budget') {
         const a = body().p_after as Record<string, number>;
         const parent = (id: unknown) =>
@@ -920,7 +920,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'achieve_goal') {
-        // 서버 흉내(ADR 0007): 목표 금액이 있고 모은 돈이 닿으면 달성 + 알림, 처음 본 사람이면 true
+        // 서버 흉내(ADR 0007): 목표 금액이 있고 모은 금액이 닿으면 달성 + 알림, 처음 본 사람이면 true
         const g = db.goals.find((x) => x.id === body().p_goal);
         const seen = (g?.achieved_seen as string[] | undefined) ?? [];
         if (
@@ -1000,7 +1000,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, id);
       }
       if (fn === 'saving_item_retarget') {
-        // 서버 흉내(2026-11-09 round 3): 달성(고르기 전)만, 모은 돈보다 큰 새 목표 금액 → 모으는 중 + 기한 지움
+        // 서버 흉내(2026-11-09 round 3): 달성(고르기 전)만, 모은 금액보다 큰 새 목표 금액 → 모으는 중 + 기한 지움
         const b = body() as unknown as { p_goal: string; p_target: number };
         const g = db.goals.find((x) => x.id === b.p_goal);
         if (!g || g.status !== 'achieved' || g.closed_at)
@@ -1976,7 +1976,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
-    // 가족·챙길 날(Y-02, Y-05)
+    // 가족·경조사(Y-02, Y-05)
     for (const [tbl, rows, defaults] of [
       [
         'family_member',

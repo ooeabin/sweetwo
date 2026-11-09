@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (22275f6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (3551f53). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -315,7 +315,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__foot { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-4); margin-top: auto; padding-top: var(--space-4); }  /* 주 버튼은 틀 아래 끝 */
 .hg-q__foot :is(.hg-btn--primary, .hg-btn--danger, button[type="submit"].hg-btn--secondary) { flex: 1; }
 .hg-q__foot .hg-q__second { flex: 1; }  /* 주 버튼 옆 회색 보조(‘취소’, 2026-11-03). 좁은 창에서 반씩 */  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
-.hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 남는 돈) */
+.hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 여유 자금) */
 .hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: 600 16px/24px var(--font-sans); color: var(--ink); }
 .hg-q__sum .hg-help { font-weight: 400; }
 .hg-q__foot.has-note { flex-wrap: wrap; row-gap: var(--space-3); }
@@ -864,7 +864,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* Ring: 묶음 진행 원(카카오뱅크 체크리스트 머리 “2/4”). 둘레를 한 만큼 오렌지로 채움(2026-11-09) */
 .hg-ring { position: relative; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ink); }
 .hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--accent-app) calc(var(--p, 0) * 1%), var(--surface-alt) 0);  /* 2026-11-09 체크 원과 같은 오렌지 */ -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
-/* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
+/* 체크 묶음 카드(W-02 저금·지출): 머리(Ring + 제목) + 줄 목록 */
 .hg-checkgroup { display: flex; flex-direction: column; gap: 0; padding: var(--space-3) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
 /* 2026-11-03 홈 이번 달 체크리스트: 머리를 카드 안에, 줄마다 아이콘(Lead 40px), 마지막 줄 선 없음 */
 .hg-transfer--lead { grid-template-columns: 32px minmax(0, 1fr) auto 28px; }
@@ -882,7 +882,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-goalrow__sub { grid-column: 2; font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-goalrow__bar { grid-column: 2 / 4; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
 .hg-goalrow__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 저금 진행 막대는 조용한 바탕 위 오렌지(2026-11-09, 체크·진행 원과 같음) */
-/* 2026-11-03 홈 다가오는 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
+/* 2026-11-03 홈 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
 .hg-daylist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
 .hg-dayrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
 .hg-dayrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-md); }
@@ -1081,7 +1081,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-side__foot:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-side__foot .hg-side__who b { color: var(--ink); }
 
-/* 캘린더: 돈 날짜(읽기 전용) */
+/* 캘린더: 금융 일정(읽기 전용) */
 .hg-cal__filter { display: flex; gap: var(--space-2); }
 .hg-cal__dot { display: inline-block; width: 5px; height: 5px; margin: 0 2px; border-radius: var(--radius-full); background: var(--ink); align-self: center; }
 .hg-cal__legend .hg-cal__dot { margin: 0 4px 0 2px; }
@@ -1301,7 +1301,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-crop__preview { display: flex; align-items: center; gap: var(--space-3); font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-crop__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
 
-/* FileAttach: 문의 첨부, 챙길 날 사진 */
+/* FileAttach: 문의 첨부, 경조사 사진 */
 .hg-attach { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 480px; }
 .hg-files { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .hg-file { box-sizing: border-box; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); }
@@ -1762,7 +1762,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-pill-down { font-style: normal; font-weight: 600; padding: 0 8px; border-radius: var(--radius-full); background: var(--goal); color: var(--goal-ink); } /* 줄어든 변화(살구, 빨강 없음) */
 .hg-body { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6) var(--space-8) 48px; display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: var(--space-6); align-items: start; }  /* 단 수는 AppFrame이 --cols로(맨 위 띠가 있어도 단 너비가 같게) */
 @media (max-width: 1099px) { .hg-body { grid-template-columns: minmax(0, 1fr); } }  /* 1100px 미만은 한 단(19 앱 기본 틀 8번) */
-/* 2026-11-03 홈이 한 단이면 두 단 사이(목표 → 우리 자산)도 영역 사이와 같은 간격(space-8) */
+/* 2026-11-03 홈이 한 단이면 두 단 사이(목표 → 자산)도 영역 사이와 같은 간격(space-8) */
 @media (max-width: 1099px) { .hg-body:has(.hg-homecol) { row-gap: var(--space-6); } }  /* 2026-11-09 밀도: 영역 사이 24px */
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
@@ -1819,7 +1819,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
   /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
-  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 토스 구조: 상세·설정 하위·알림은 앱 머리와 탭 막대 없이 맨 위 ‘‹ 제목 ⋯’ 한 줄. 앱 머리는 메뉴 첫 화면(홈, 목표, 우리 자산, 캘린더, 설정)에만 */
+  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 토스 구조: 상세·설정 하위·알림은 앱 머리와 탭 막대 없이 맨 위 ‘‹ 제목 ⋯’ 한 줄. 앱 머리는 메뉴 첫 화면(홈, 목표, 자산 관리, 캘린더, 설정)에만 */
   .hg-frame--sub .hg-body { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
 }
 
@@ -1982,9 +1982,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-goalhero__name { margin: 0; font: 700 22px/30px var(--font-sans); }
 .hg-goalhero__amount { margin: 0; font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalhero__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
-/* 금액 줄(2026-11-04): 왼쪽 ‘모은 돈’ 이름표 + 금액, 오른쪽 − + 둥근 버튼(넣기·빼기) */
+/* 금액 줄(2026-11-04): 왼쪽 ‘모은 금액’ 이름표 + 금액, 오른쪽 − + 둥근 버튼(넣기·빼기) */
 .hg-goalhero__amountrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-.hg-goalhero__label { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 금액 위 ‘모은 돈’ 이름표: − +가 목표 금액이 아니라 모은 돈을 고친다는 걸 보임 */
+.hg-goalhero__label { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }  /* 금액 위 ‘모은 금액’ 이름표: − +가 목표 금액이 아니라 모은 금액을 고친다는 걸 보임 */
 .hg-goalhero__steps { display: inline-flex; gap: var(--space-2); flex: none; }
 .hg-iconbtn.hg-goalhero__step { width: 44px; height: 44px; border: 0; background: var(--surface-alt); color: var(--ink); }
 .hg-iconbtn.hg-goalhero__step:hover { background: var(--hairline-soft); }
@@ -2053,7 +2053,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
 /* 상세 화면 폭(2026-11-04 F-04): 넓은 창에서 본문을 720px 안으로(금액, 버튼이 한쪽에 몰리지 않게) */
 @media (min-width: 768px) { .hg-detail { width: 100%; max-width: 720px; } }
-/* RankRow 우리 자산 순위 줄(2026-11-04 F-01·H-01, 토스 혜택 줄처럼): 원 44px(invest 바탕 + invest-ink 13px 800) + 제목 16px 600 + 오렌지 글자 14px 600(2026-11-09). 광고가 나오면 파란 글자 앞 작은 ‘광고’ 표시 */
+/* RankRow 자산 순위 줄(2026-11-04 F-01·H-01, 토스 혜택 줄처럼): 원 44px(invest 바탕 + invest-ink 13px 800) + 제목 16px 600 + 오렌지 글자 14px 600(2026-11-09). 광고가 나오면 파란 글자 앞 작은 ‘광고’ 표시 */
 .hg-rankrow { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; margin: 0; padding: var(--space-2) 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; }
 button.hg-rankrow { cursor: pointer; border-radius: var(--radius-lg); }
 button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
@@ -2092,7 +2092,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 
 /* 공통 상태 화면(2026-11-04 13 공통 상태 19번 없는 주소, 7번 화면 오류): 앱 틀 없이 화면 가운데 EmptyState */
 .hg-state-page { box-sizing: border-box; display: grid; place-items: center; min-height: 100vh; min-height: 100dvh; padding: var(--space-6) var(--space-4); background: var(--surface); }
-.hg-cal__monthhead { margin: var(--space-2) 0 0; font: 600 14px/20px var(--font-sans); color: var(--slate); }  /* 2026-11-04 Y-01 다가오는 일정 달 머리 */
+.hg-cal__monthhead { margin: var(--space-2) 0 0; font: 600 14px/20px var(--font-sans); color: var(--slate); }  /* 2026-11-04 Y-01 일정 달 머리 */
 
 /* FileAttach 사진 칸 3열(2026-11-04 Y-08c, Stoic·AllTrails): 첫 칸 ‘+ 사진 추가’(점선, + 와 글자 가운데 세로 정렬), 올린 사진 정사각 + ✕ */
 .hg-attach__count { font-weight: 400; color: var(--stone); }

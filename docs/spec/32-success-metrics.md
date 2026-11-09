@@ -21,9 +21,9 @@
 | 온보딩 소요 시간 | O-10 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 3분 이하 [확인 필요] | 약 2분·8~9화면 설계 검증 |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 월급 계획이 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 월급 계획 전체를 따라가는지 |
-| 월별 체크리스트 완료율 | 사이클이 끝날 때(다음 기준일 0시) ‘다 했어요’인 체크리스트 ÷ 그 사이클 체크리스트. 줄 기준 보조: 체크한 줄 ÷ 전체 줄(남는 돈 제외) | 60% (줄 기준 80%) [확인 필요] | 습관이 유지되는지. 월급 전 확인(W-05) 효과는 W-05에서 한 체크 비율로 따로 봄 |
+| 월별 체크리스트 완료율 | 사이클이 끝날 때(다음 기준일 0시) ‘다 했어요’인 체크리스트 ÷ 그 사이클 체크리스트. 줄 기준 보조: 체크한 줄 ÷ 전체 줄(여유 자금 제외) | 60% (줄 기준 80%) [확인 필요] | 습관이 유지되는지. 월급 전 확인(W-05) 효과는 W-05에서 한 체크 비율로 따로 봄 |
 | 저금 줄 체크율 | 사이클이 끝날 때 체크한 저금 줄 ÷ 전체 저금 줄 | 80% [확인 필요] | 저금 항목에 실제로 돈이 쌓이는지(‘못 함’은 더하지 않음) |
-| 저금 항목 만들기 | 온보딩 완료 후 30일 안에 저금 항목을 1개 이상 만든 사용자 ÷ 온보딩 완료 사용자(첫 저금 빈 줄에서 만든 비율은 따로: `saving_item_created` entry home·salary, 이미 모은 돈을 넣은 비율 `has_start`) | 60% [확인 필요] | 온보딩에서 목표 고르기를 뺀 뒤(ADR 0007) 홈 제안이 저금 항목으로 이어지는지 |
+| 저금 항목 만들기 | 온보딩 완료 후 30일 안에 저금 항목을 1개 이상 만든 사용자 ÷ 온보딩 완료 사용자(첫 저금 빈 줄에서 만든 비율은 따로: `saving_item_created` entry home·salary, 이미 모은 금액을 넣은 비율 `has_start`) | 60% [확인 필요] | 온보딩에서 목표 고르기를 뺀 뒤(ADR 0007) 홈 제안이 저금 항목으로 이어지는지 |
 | 목표 금액 달성 | 사이클마다 W-12에 도달한 저금 항목 수, W-12a 선택(`keep` / `stop` / 고르지 않음) | 비교만(목표치 없음) | 달성 뒤 계속 모으는지 |
 | 파트너 초대율 | O-06 ‘초대하기’ 또는 온보딩 완료 후 7일 안에 초대 발급(O-07, 홈 H-06, 설정 S-12 ‘우리 둘 정보’)한 사용자 ÷ 온보딩 완료 사용자 | 70% [확인 필요] | 둘이 같이 쓰는 것이 핵심 차별점. O-06에서 바로 초대한 비율은 따로 봄 |
 | 파트너 합류율 | 초대 발급 후 7일 안에 합류 완료(→ 파트너 합류) ÷ 초대 발급 (재발급은 첫 발급 기준) | 50% [확인 필요] | 초대 유효기간 7일과 일치. 합류해야 파트너 체크리스트 보기, 합쳐서 같이 체크가 작동 |
@@ -42,8 +42,8 @@
 | 온보딩 이탈 화면 | 화면별 `onboarding_step_viewed` 중 다음 화면에 도달 못 한 비율, 상위 5개 | 한 화면 이탈 10% 초과 | 금액 질문(O-23·O-31·O-50) 우선 점검. 문구·추천값·‘잘 모르겠어요’ 사용률 |
 | 첫 체크 없음 | 첫 체크리스트 생성 후 7일 안에 체크 0줄인 사용자 비율 | 40% 초과 [확인 필요] | 월급날 알림 열람률, 첫 체크리스트 기준(지난 월급날로 만듦) 이해도, H-03 카드 노출 |
 | 체크리스트 방치 | 사이클이 끝날 때 체크한 줄이 절반 미만인 체크리스트 비율 | 30% 초과 [확인 필요] | 월급 전 확인(W-05) 알림 열람률, 기준일 위치(월급날 대비), 줄 수 |
-| 저금 ‘못 함’ | 사이클이 끝날 때 ‘못 함’인 저금 줄 ÷ 전체 저금 줄 | 30% 초과 [확인 필요] | 월급 계획 저금이 과한지(남는 돈 음수 비율과 교차), W-02a 다른 금액 사용률 |
-| 월급 계획 모자람 | 남는 돈이 음수인 월급 계획 비율 | 20% 초과 [확인 필요] | O-50 추천값(고정지출·생활비 25%, 용돈 10%) 맞는지, “30만 원이 모자라요” 뒤 행동 |
+| 저금 ‘못 함’ | 사이클이 끝날 때 ‘못 함’인 저금 줄 ÷ 전체 저금 줄 | 30% 초과 [확인 필요] | 월급 계획 저금이 과한지(여유 자금 음수 비율과 교차), W-02a 다른 금액 사용률 |
+| 월급 계획 모자람 | 여유 자금이 음수인 월급 계획 비율 | 20% 초과 [확인 필요] | O-50 추천값(고정지출·생활비 25%, 용돈 10%) 맞는지, “30만 원이 모자라요” 뒤 행동 |
 | 되돌리기 | 상대가 고친 월급 계획·저금 항목 값을 7일 안에 되돌린 비율 | 15% 초과 [확인 필요] | 갈등 신호. 변경 알림 문구, 고친 항목 종류. 연결 해제와 교차 확인 |
 | 연결 해제 | 월 `unlink_requested` 커플 ÷ 연결 커플, 14일 기한으로 확정된 비율, 30일 안 다시 연결한 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
 | 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 커플 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선(O-06 ‘나중에 할게요’ 비율, 홈 H-06 초대 한 줄 닫기 비율) |
@@ -93,7 +93,7 @@
 | onboarding\_step\_completed | 각 화면 ‘다음’ | screen\_id, answer(`input` / `estimate` / `none`), duration\_sec, changed\_after\_back |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | “이어서 할까요?” | screen\_id, hours\_since\_last |
-| onboarding\_completed | O-60 ‘시작하기’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(남는 돈 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
+| onboarding\_completed | O-60 ‘시작하기’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(여유 자금 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
 | invite\_sent | O-07, 홈 H-06, 설정 S-12 ‘우리 둘 정보’ | channel(`code` / `link` / `kakao`), entry(`onboarding` / `home` / `settings`), issue\_seq(재발급 회차) |
 | invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
@@ -108,13 +108,13 @@
 | checklist\_group\_checked | W-02 묶음 ‘모두 보냈어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
 | checklist\_line\_unchecked | 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원 | line\_kind |
-| checklist\_completed | 남는 돈 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
+| checklist\_completed | 여유 자금 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
 | split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 파트너 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
-### 4-5. 저금 항목·우리 자산·챙길 날
+### 4-5. 저금 항목·자산 관리·경조사
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
@@ -130,7 +130,7 @@
 | rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform |
 | rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
 | fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면 | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
-| event\_recorded | Y-08 챙길 날 기록 | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요], amount\_band, vs\_budget(`under` / `on` / `over`), is\_secret(서프라이즈면 event\_type 미전송) |
+| event\_recorded | Y-08 경조사 기록 | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요], amount\_band, vs\_budget(`under` / `on` / `over`), is\_secret(서프라이즈면 event\_type 미전송) |
 
 ### 4-6. 둘이 같이 고치기
 
@@ -147,7 +147,7 @@
 | --- | --- | --- |
 | unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data |
 | unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`), days\_pending, exported\_data |
-| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월급 전 확인), 파트너가 고침, 챙길 날, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
+| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월급 전 확인), 파트너가 고침, 경조사, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
 | notification\_opened | 알림 클릭 → 진입 | type, channel, minutes\_to\_open, landing\_screen |
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
@@ -180,8 +180,8 @@
 
 ## 5. 수집 원칙
 
-- 금액 원값은 이벤트에 넣지 않음. 구간만: 월 수입은 → 핵심 규칙 › 데이터 항목 구간, 그 밖의 금액(월급 계획 줄, 남는 돈, 목표 금액) `_band` = `<10만` / `10-50만` / `50-100만` / `100-300만` / `300-1000만` / `1000만+`, 비율·변동률은 %구간
-- 자유 텍스트 미수집: 이름(애칭), 자산 이름, 저금 항목 이름, 월급 계획에 직접 추가한 줄 이름, 챙길 날 이름, 메모, ‘기타’ 사유. 선택지 코드·템플릿 ID만
+- 금액 원값은 이벤트에 넣지 않음. 구간만: 월 수입은 → 핵심 규칙 › 데이터 항목 구간, 그 밖의 금액(월급 계획 줄, 여유 자금, 목표 금액) `_band` = `<10만` / `10-50만` / `50-100만` / `100-300만` / `300-1000만` / `1000만+`, 비율·변동률은 %구간
+- 자유 텍스트 미수집: 이름(애칭), 자산 이름, 저금 항목 이름, 월급 계획에 직접 추가한 줄 이름, 경조사 이름, 메모, ‘기타’ 사유. 선택지 코드·템플릿 ID만
 - 가족 정보는 제3자 정보라 이벤트에 넣지 않음 (event\_type 수준만)
 - 서프라이즈·숨기기 항목: 항목 유형도 보내지 않고 is\_secret만. 공개 범위 ‘숨기기’ 항목은 금액 구간도 미전송
 - 식별자 최소화: user\_id·couple\_id는 가명 ID, 이메일·소셜 계정 ID·기기 고유 ID 미포함. 계좌·카드 번호는 원래 수집하지 않음

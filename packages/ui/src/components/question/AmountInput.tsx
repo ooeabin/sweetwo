@@ -31,7 +31,7 @@ export function parseKoreanAmount(text: string): number | null {
   return v > 0 ? v : null;
 }
 
-/** 한 화면 두 번째 금액 칸(W-11c ‘이미 모은 돈’, 2026-11-09). 첫 칸과 같은 키패드를 씀 */
+/** 한 화면 두 번째 금액 칸(W-11c ‘이미 모은 금액’, 2026-11-09). 첫 칸과 같은 키패드를 씀 */
 export interface SecondAmount {
   label: string;
   value: number | null;
@@ -170,7 +170,7 @@ export function AmountInput({
   /** 빠른 금액·링크 바로 아래(키패드 위)에 둘 것(O-31 ‘매달 금액이 달라요’) */
   extra?: ReactNode;
   /**
-   * 두 번째 금액 칸(W-11c ‘이미 모은 돈’, 2026-11-09 round 3): extra 아래, 키패드 위.
+   * 두 번째 금액 칸(W-11c ‘이미 모은 금액’, 2026-11-09 round 3): extra 아래, 키패드 위.
    * 키패드는 하나로 화면 아래에 두고 마지막으로 누른 칸에 씀. 칸이 생기면 그 칸이 활성
    */
   second?: SecondAmount;

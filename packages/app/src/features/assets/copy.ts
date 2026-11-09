@@ -1,6 +1,6 @@
 import { topic } from '@sweetwo/core';
 
-// 우리 자산 문구(docs/spec/23-assets.md F-01~F-04). 기획서 “ ” 안 문장을 그대로.
+// 자산 관리 문구(docs/spec/23-assets.md F-01~F-04). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   // 충돌 선택(13 공통 상태 11번)
@@ -8,13 +8,13 @@ export const copy = {
   conflictBody: (partner: string) => `${partner}님이 방금 이 값을 바꿨어요`,
   conflictMine: '내 값',
   conflictTheirs: (partner: string) => `${partner}님 값`,
-  title: '우리 자산',
+  title: '자산 관리',
   add: '+ 추가',
   retry: '다시 시도',
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   back: '뒤로',
-  tabs: { overview: '한눈에', items: '자산·부채', diagnosis: '재정 진단' },
-  tabsLabel: '우리 자산 보기', // [확인 필요] 화면 읽기용
+  tabs: { overview: '요약', items: '자산·부채', diagnosis: '재정 진단' },
+  tabsLabel: '자산 관리 보기', // [확인 필요] 화면 읽기용
 
   // F-01
   netWorth: '순자산',
@@ -139,7 +139,7 @@ export const copy = {
   weekLoansDone: '대출을 정리했어요', // [확인 필요]
 
   // 첫 주 고정지출 나누기·생활비 카드(17 O-37, O-38b)
-  weekFixedPick: '어디에 나가는 돈이에요?', // [확인 필요] O-37 세부 항목 고르기
+  weekFixedPick: '어떤 지출이에요?', // [확인 필요] O-37 세부 항목 고르기
   weekFixedPickHelp: '고른 항목마다 금액을 물어요', // [확인 필요]
   weekFixedAmount: (name: string) => `${name}에 한 달에 얼마 나가요?`,
   weekFixedNone: '같이 내는 고정지출이 없어요', // [확인 필요] 물을 항목이 없을 때
@@ -155,16 +155,16 @@ export const copy = {
   weekBonusList: '보통 몇 월에 얼마쯤 받아요?',
   weekBonusTotal: (man: string) => `1년에 ${man} 원 받아요`,
   weekBonusName: '상여금',
-  weekIncome: '월급 말고 들어오는 돈이 또 있나요?',
+  weekIncome: '월급 말고 다른 수입이 또 있나요?', // [확인 필요] 2026-11-09
   weekIncomeKinds: { side_job: '부업·N잡', rent: '월세·임대 수입', support: '정부 지원금' },
   weekIncomeAmount: (name: string) => `${topic(name)} 한 달에 얼마쯤이에요?`, // [확인 필요] 항목별 월 금액
   weekIncomeLow: '들쭉날쭉하면 적게 벌 때 기준으로 적어 주세요', // [확인 필요] 변동 수입 기준
-  weekRestDone: '들어오는 돈을 정리했어요', // [확인 필요]
-  incomeEvents: '들어오는 돈', // W-07
+  weekRestDone: '수입을 정리했어요', // [확인 필요]
+  incomeEvents: '수입', // W-07
   otherIncomeIn: (amount: string) => `다른 수입 ${amount} 포함`, // [확인 필요] F-05 내 수입 보조 줄
 
   // O-53 투자 원칙
-  principleTitle: '같이 모은 돈, 투자는 어느 정도까지 괜찮아요?',
+  principleTitle: '같이 모은 금액, 투자는 어느 정도까지 괜찮아요?',
   principleOptions: {
     keep: '원금은 지켜야 해요',
     some: '조금은 괜찮아요',
@@ -234,8 +234,8 @@ export const copy = {
   undo: '되돌리기',
   saved: '저장했어요', // [확인 필요]
   readOnly: (name: string) => `${name}님 항목이라 볼 수만 있어요`,
-  history: '고친 기록', // 23 F-04 5번
-  historyEmpty: '아직 고친 기록이 없어요', // [확인 필요]
+  history: '수정 내역', // 23 F-04 5번
+  historyEmpty: '아직 수정 내역이 없어요', // [확인 필요]
   createdLabel: '처음 적은 날', // [확인 필요]
   menu: '항목 메뉴',
   principal: (amount: string) => `원금 ${amount}`,
@@ -280,8 +280,8 @@ export const copy = {
   overlap: '이미 바꾼 기간과 겹쳐요', // [확인 필요]
   noChange: '바뀌는 점이 없어요', // [확인 필요]
   unknown: '아직 몰라요',
-  // F-08 우리 자산 순위(23 F-08, 2026-11-04 토스형: 카드 없이 문장 + 곡선 + 굵은 띠 + 이름·값 줄)
-  rankTitle: '우리 자산 순위', // [확인 필요]
+  // F-08 자산 순위(23 F-08, 2026-11-04 토스형: 카드 없이 문장 + 곡선 + 굵은 띠 + 이름·값 줄)
+  rankTitle: '자산 순위', // [확인 필요]
   rankHero1: '우리 자산은 전체 가구 중', // [확인 필요]
   rankHero2: (pct: number, open = false) => (open ? `상위 ${pct}% 안이에요` : `상위 ${pct}%예요`), // [확인 필요] open = P90 이상
   rankAxis: { low: '하위', mid: '중간', high: '상위' },

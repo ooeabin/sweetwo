@@ -13,7 +13,7 @@ import { useSettingsData } from '../data';
 type Mode = 'separate' | 'joint';
 
 // S-11f 월급 관리 방식(Q1, O-30과 같음): 바꾸면 둘 다에게 적용(월급 계획 합치기·나누기는 서버) + 상대 알림 + Toast ‘되돌리기’
-// → 바로 새 월급 계획 확인(W-01). 체크리스트는 다음 월급날부터 새 방식, 저금 항목의 모은 돈은 그대로. 연결 해제 대기 중에는 못 바꿈.
+// → 바로 새 월급 계획 확인(W-01). 체크리스트는 다음 월급날부터 새 방식, 저금 항목의 모은 금액은 그대로. 연결 해제 대기 중에는 못 바꿈.
 export function S11fSalaryMode() {
   const nav = useNavigate();
   const qc = useQueryClient();

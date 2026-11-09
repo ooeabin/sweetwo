@@ -7,15 +7,15 @@ export const copy = {
   add: '+ 추가',
   views: { list: '목록', month: '달력' },
   viewsLabel: '보기', // [확인 필요] 화면 읽기용
-  filters: { all: '전체', care: '챙길 날', money: '돈 일정' }, // [확인 필요]
+  filters: { all: '전체', care: '경조사', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
   empty: '생일, 기념일, 명절을 적어 두면 미리 알려 드려요', // [확인 필요]
-  emptyAdd: '챙길 날 추가',
-  noMoneyThisMonth: '이번 달은 돈 일정이 없어요', // [확인 필요]
-  none60: '60일 안에는 챙길 날이 없어요',
+  emptyAdd: '경조사 추가',
+  noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // [확인 필요]
+  none60: '60일 안에는 경조사가 없어요',
   // 2026-11-03 Y-01 한 목록 [확인 필요]
-  noMoney60: '60일 안에는 돈 일정이 없어요',
-  upcomingList: '다가오는 일정',
+  noMoney60: '60일 안에는 금융 일정이 없어요',
+  upcomingList: '일정',
   recordCount: (n: number) => `기록할 날이 ${n}개 있어요`,
   recordWhich: (name: string, date: string, more: number) =>
     more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
@@ -43,7 +43,7 @@ export const copy = {
     band: '월급 전 확인',
   },
   today: '오늘',
-  // 달력 고른 날 돈 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
+  // 달력 고른 날 금융 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
   goSub: {
     payday: '체크리스트 보기',
     review: '월급 전 확인하기',
@@ -55,8 +55,8 @@ export const copy = {
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
-  legendCare: '챙길 날',
-  legendMoney: '돈 일정',
+  legendCare: '경조사',
+  legendMoney: '금융 일정',
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',
@@ -64,20 +64,20 @@ export const copy = {
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
-  listMoney: '돈 일정', // [확인 필요] 목록 섹션 이름
+  listMoney: '금융 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
   // Y-01
   memoAmount: (amount: string) => `${amount} 생각해 뒀어요`, // [확인 필요]
   prepare: '준비하기',
-  nextCare: '다음 챙길 날', // [확인 필요] 화면 읽기용
-  careList: '60일 안 챙길 날', // [확인 필요] 섹션 이름
-  gifted: '드린 기록',
+  nextCare: '다음 경조사', // [확인 필요] 화면 읽기용
+  careList: '60일 안 경조사', // [확인 필요] 섹션 이름
+  gifted: '선물 기록',
   overdue: '지남',
   recordNow: '기록하기',
   overdueList: '기록하기', // [확인 필요] 목록 맨 위 섹션 이름
 
-  // Y-07 챙길 날 추가
+  // Y-07 경조사 추가
   nameQ: '어떤 날이에요?',
   namePlaceholder: '예: 어머니 생신', // [확인 필요]
   chips: {
@@ -102,9 +102,9 @@ export const copy = {
   skip: '건너뛰기',
   sameDay: '같은 날이 있어요. 그래도 추가할까요?', // [확인 필요]
   addOk: '추가하기',
-  addOnDay: '이 날에 챙길 날 추가', // [확인 필요] 달력 고른 날 → Y-07
+  addOnDay: '이 날에 경조사 추가', // [확인 필요] 달력 고른 날 → Y-07
   nextStep: '다음',
-  saved: '챙길 날을 넣어뒀어요', // [확인 필요]
+  saved: '경조사를 넣어뒀어요', // [확인 필요]
   edited: '고쳤어요', // [확인 필요]
 
   // Y-05 상세
@@ -113,7 +113,7 @@ export const copy = {
   amountMemo: '금액 메모', // [확인 필요] 줄 이름
   noAmount: '비어 있어요', // [확인 필요]
   edit: '수정',
-  menu: '챙길 날 메뉴', // [확인 필요] 화면 읽기용
+  menu: '경조사 메뉴', // [확인 필요] 화면 읽기용
   remove: '지우기',
   removed: '휴지통으로 옮겼어요',
   undo: '되돌리기',
@@ -153,7 +153,7 @@ export const copy = {
   photoRemove: (name: string) => `${name} 빼기`,
   photoAlt: (n: number) => `사진 ${n}`, // [확인 필요] 화면 읽기용
   giftedPhotos: (n: number) => `사진 ${n}장`, // [확인 필요] Y-09 행
-  // 사진(챙길 날) 동의: 처음 사진 추가 시(31 동의 8종)
+  // 사진(경조사) 동의: 처음 사진 추가 시(31 동의 8종)
   photoConsentTitle: '사진을 저장해도 될까요?', // [확인 필요]
   photoConsentBody: '기억하고 싶은 사진을 기록과 함께 보관해요', // [확인 필요]
   // 파트너가 아직 합류 전이면 이름이 없어 ‘파트너와’로 [확인 필요]
@@ -167,11 +167,11 @@ export const copy = {
   photoConsentOk: '동의할게요', // [확인 필요]
   recorded: '기록했어요', // [확인 필요]
 
-  // Y-09 드린 기록
-  giftedViews: { care: '챙길 날별', year: '연도별' },
+  // Y-09 선물 기록
+  giftedViews: { care: '경조사별', year: '연도별' },
   giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
-  giftedEmpty: '아직 드린 기록이 없어요', // [확인 필요]
-  giftedEmptyBody: '챙길 날에 ‘다녀왔어요’를 누르고 기록하면 여기에 모여요', // [확인 필요] 2026-11-04
+  giftedEmpty: '아직 선물 기록이 없어요', // [확인 필요]
+  giftedEmptyBody: '경조사에 ‘다녀왔어요’를 누르고 기록하면 여기에 모여요', // [확인 필요] 2026-11-04
   giftedYear: (y: number) => `${y}년`,
   giftedWhat: (items: string[]) => items.join(', '),
   giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]

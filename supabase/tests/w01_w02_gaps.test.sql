@@ -37,7 +37,7 @@ select public.save_split(jsonb_build_array(
 ), auth.uid());
 reset role;
 
--- 찬우가 예빈 월급 계획을 고침: 각자 모드 파트너 월급 계획은 보기만(2026-11-09, 쓰는 돈 줄도)
+-- 찬우가 예빈 월급 계획을 고침: 각자 모드 파트너 월급 계획은 보기만(2026-11-09, 지출 줄도)
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok(format($$ select public.save_split(jsonb_build_array(
@@ -47,7 +47,7 @@ select throws_ok(format($$ select public.save_split(jsonb_build_array(
 select throws_ok(format($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', %L, 'amount', 100000),
   jsonb_build_object('kind', 'living', 'amount', 700000)), '22222222-2222-2222-2222-222222222222') $$,
-  current_setting('test.g')), '42501', 'not_owner', '파트너 쓰는 돈 줄도 못 바꿈(보기만)');
+  current_setting('test.g')), '42501', 'not_owner', '파트너 지출 줄도 못 바꿈(보기만)');
 reset role;
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 680000::bigint,

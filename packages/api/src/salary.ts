@@ -99,14 +99,14 @@ export async function checkPayLine(
   return 'ok';
 }
 
-/** 저금 항목별 모은 돈 = 그 항목 저금 줄을 체크한 금액 합(06 4장, 서버 goal_saved) */
+/** 저금 항목별 모은 금액 = 그 항목 저금 줄을 체크한 금액 합(06 4장, 서버 goal_saved) */
 export async function fetchGoalSaved(): Promise<Record<string, number>> {
   const { data, error } = await supabase().rpc('goal_saved_sums');
   fail(error);
   return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.saved]));
 }
 
-/** 한 저금 항목의 체크 줄(W-10 6번 모은 기록) */
+/** 한 저금 항목의 체크 줄(W-10 6번 저금 내역) */
 export async function fetchGoalLines(
   goal: string,
 ): Promise<(PayCheckLine & { pay_checklist: { label: string; cycle_start: string } | null })[]> {

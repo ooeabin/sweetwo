@@ -187,7 +187,7 @@ export function QuestionLayout({
   wide?: boolean;
   /** 안내 화면: 제목 가운데 정렬 + 세로 가운데(O-01, A-02와 같은 배치). 입력 영역이 없으면 기본으로 켬 */
   center?: boolean;
-  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
+  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 여유 자금) */
   summary?: ReactNode;
   /** 버튼 바로 위 가운데 정렬 안내 한 줄(2026-11-03, S-11e·G-02p ‘올린 사진은 …’) */
   note?: ReactNode;

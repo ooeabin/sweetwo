@@ -13,7 +13,7 @@ const axe = async (page: Page) => {
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 type Line = { kind: string; state: string; goal_id: string | null };
 
-test('W-02 묶음 ‘모두 보냈어요’: 쓰는 돈 체크 + 되돌리기, 저금은 더한 금액 Toast 한 번, 다 하면 W-02 끝', async ({
+test('W-02 묶음 ‘모두 보냈어요’: 지출 체크 + 되돌리기, 저금은 더한 금액 Toast 한 번, 다 하면 W-02 끝', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -21,11 +21,11 @@ test('W-02 묶음 ‘모두 보냈어요’: 쓰는 돈 체크 + 되돌리기, �
   seed(db);
   const lines = () => db.checklists[0]?.pay_check_line as unknown as Line[];
   await page.goto('/salary');
-  const spend = page.getByRole('button', { name: '쓰는 돈 모두 보냈어요' });
+  const spend = page.getByRole('button', { name: '지출 모두 보냈어요' });
   await expect(spend).toBeVisible();
   await axe(page);
   await spend.click();
-  await expect(page.getByText('쓰는 돈 3개를 체크했어요')).toBeVisible();
+  await expect(page.getByText('지출 3개를 체크했어요')).toBeVisible();
   expect(
     lines()
       .filter((l) => l.kind !== 'saving')
@@ -87,7 +87,7 @@ test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이
   await expect(page).toHaveURL(new RegExp(`/salary/items/${second}/achieved$`));
   await page.goto('/salary');
   // 두 항목 모두 본 뒤에는 다시 축하하지 않음
-  await expect(page.getByRole('button', { name: '쓰는 돈 모두 보냈어요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '지출 모두 보냈어요' })).toBeVisible();
   await expect(page).toHaveURL(/\/salary$/);
   expect(
     db.goals
@@ -116,8 +116,8 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, W-01 저금 머리, 홈 H-0
   await page.getByRole('button', { name: '저금 목록 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=checklist$/);
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
-  // 목표 금액이 없는 청약도 모은 돈과 함께
-  await expect(page.getByRole('button', { name: /청약.*모은 돈 0원/ })).toBeVisible();
+  // 목표 금액이 없는 청약도 모은 금액과 함께
+  await expect(page.getByRole('button', { name: /청약.*모은 금액 0원/ })).toBeVisible();
   await expect(
     page.getByRole('button', { name: /내 집 마련.*0원 \/ 1억 5,000만 원/ }),
   ).toBeVisible();
@@ -142,7 +142,7 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, W-01 저금 머리, 홈 H-0
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
 });
 
-test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 남는 돈 미리보기', async ({
+test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 여유 자금 미리보기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -156,14 +156,14 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
     .click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/edit\/monthly$/);
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 지금 남는 돈 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
-  await expect(page.getByText('남는 돈 0원')).toBeVisible();
+  // 지금 여유 자금 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
+  await expect(page.getByText('여유 자금 0원')).toBeVisible();
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('950,000');
   await axe(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('1000000');
   await expect(page.getByText('5만 원이 모자라요')).toBeVisible();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('800000');
-  await expect(page.getByText('남는 돈 15만 원')).toBeVisible();
+  await expect(page.getByText('여유 자금 15만 원')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
@@ -178,7 +178,7 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
   expect(amountOf()).toBe(950_000);
 });
 
-test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요’ → 새 목표 금액(모은 돈보다 크게) → 기한, 되돌리기', async ({
+test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요’ → 새 목표 금액(모은 금액보다 크게) → 기한, 되돌리기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -193,17 +193,17 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await expect(page.getByText('목표 금액만 지우고 지금처럼 모아요')).toBeVisible();
-  await expect(page.getByText('월급 계획에서 빠지고 모은 기록은 남아요')).toBeVisible();
-  await expect(page.getByText('모은 돈은 그대로 두고 더 큰 목표로 이어서 모아요')).toBeVisible();
+  await expect(page.getByText('월급 계획에서 빠지고 저금 내역은 남아요')).toBeVisible();
+  await expect(page.getByText('모은 금액은 그대로 두고 더 큰 목표로 이어서 모아요')).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: /목표 금액을 새로 정할게요/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?retarget=1$/);
   await expect(page.getByRole('heading', { name: '새 목표 금액은 얼마예요?' })).toBeVisible();
-  await expect(page.getByText('지금 모은 돈 44만 원')).toBeVisible();
+  await expect(page.getByText('지금 모은 금액 44만 원')).toBeVisible();
   // 고르기 전이라 아직 달성 그대로
   expect(g.status).toBe('achieved');
   await page.getByLabel('새 목표 금액은 얼마예요?').fill('400000');
-  await expect(page.getByText('지금 모은 돈보다 크게 넣어 주세요')).toBeVisible();
+  await expect(page.getByText('지금 모은 금액보다 크게 넣어 주세요')).toBeVisible();
   await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
   await page.getByLabel('새 목표 금액은 얼마예요?').fill('2000000');
   await page.getByRole('button', { name: '저장' }).click();
