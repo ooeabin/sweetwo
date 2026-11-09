@@ -141,6 +141,25 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         );
       }
     },
+    // 이미지 공유(W-01 영수증 ‘공유하기’, 2026-11-09): 앱 캐시에 PNG를 쓰고 OS 공유 창. 끝나면 캐시 파일은 지움
+    shareImage: async (f) => {
+      const name = f.name.replace(/[^\w.-]/g, '_');
+      const w = await Filesystem.writeFile({
+        path: name,
+        data: f.base64,
+        directory: Directory.Cache,
+      });
+      try {
+        await Share.share({ files: [w.uri] });
+        return 'shared';
+      } catch {
+        return 'cancelled';
+      } finally {
+        await Filesystem.deleteFile({ path: name, directory: Directory.Cache }).catch(
+          () => undefined,
+        );
+      }
+    },
   };
   window.sweetwo = bridge;
   return platform;

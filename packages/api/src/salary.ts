@@ -138,11 +138,7 @@ export async function setJointCycleDay(day: number) {
 
 /** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개 */
 export type SplitBlockReason =
-  | 'duplicate_line'
-  | 'not_owner'
-  | 'unlink_pending'
-  | 'keep_allowance'
-  | 'too_many_custom';
+  'duplicate_line' | 'not_owner' | 'unlink_pending' | 'keep_allowance' | 'too_many_custom';
 export class SplitBlocked extends Error {
   constructor(readonly reason: SplitBlockReason) {
     super(reason);

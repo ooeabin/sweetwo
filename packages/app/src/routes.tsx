@@ -75,8 +75,8 @@ import { N02Notifications } from './features/notifications';
 import { H01Home } from './features/home';
 import {
   AchieveWatch,
-  W01Split,
-  W02Checklist,
+  SalaryTab,
+  SplitRedirect,
   W02Done,
   W05Review,
   W10SavingItem,
@@ -115,8 +115,8 @@ export const routes: RouteObject[] = [
       }, // 홈 H-01~06
       ...(
         [
-          ['/salary/split', <W01Split key="w01" />], // W-01 월급 계획
-          ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
+          ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary?view=plan(2026-11-09)
+          ['/salary', <SalaryTab key="w02" />], // 월급 탭: ‘이번 달’ W-02 / ‘계획’ W-01 영수증(?view=plan)
           ['/salary/done', <W02Done key="w02e" />], // W-02 끝
           ['/salary/review', <W05Review key="w05" />], // W-05 월급 전 확인
           ['/salary/items', <W13SavingList key="w13" />], // W-13 저금 목록(2026-11-09 round 3)

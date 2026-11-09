@@ -2197,7 +2197,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__row.is-short .hg-receipt__name, .hg-receipt__row.is-short .hg-receipt__amt { color: var(--danger); }
 .hg-receipt__add { display: inline-flex; align-items: center; min-height: 36px; margin-top: var(--space-1); padding: 0; border: 0; background: none; color: var(--stone); font: 500 14px/20px var(--font-sans); cursor: pointer; }
 .hg-receipt__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
-.hg-receipt__chips .hg-input { flex: 1 1 160px; }
+.hg-receipt__chips .hg-input { flex: 1 1 160px; height: 40px; font-size: 14px; }  /* 칩 줄 높이(hg-chip 40px)에 맞춤 */
 :is(.hg-receipt__amount, .hg-receipt__main, .hg-receipt__add, .hg-receipt__handle):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 편집 모드: 손잡이(끌기), 포커스가 오면 보이는 위·아래, 지우기(마우스 = 늘 보임, 터치 = 왼쪽으로 밀면) */
 .hg-receipt__handle { display: inline-grid; place-items: center; flex: none; width: 24px; height: 40px; padding: 0; border: 0; background: none; color: var(--stone); cursor: grab; touch-action: none; }

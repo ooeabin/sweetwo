@@ -17,6 +17,7 @@ test('데스크톱 실행', async () => {
     'notify',
     'onInvite',
     'onNavigate',
+    'shareImage',
     'update',
     'version',
     'widget',

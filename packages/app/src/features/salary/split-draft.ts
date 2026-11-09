@@ -54,3 +54,19 @@ export function recommendedDraft(
     keep: o.keep,
   });
 }
+
+/**
+ * 추천값을 지금 줄 순서대로(W-01 ‘추천값으로 다시 채우기’는 순서를 그대로, 2026-11-09).
+ * 저금 줄이 먼저, 각 묶음 안은 지금 순서, 지금 없던 줄은 그 묶음 맨 아래
+ */
+export function keepOrder(next: SplitLineDraft[], current: SplitLineDraft[]): SplitLineDraft[] {
+  const key = (l: SplitLineDraft) =>
+    `${l.kind}:${l.goalId ?? ''}:${l.userId ?? ''}:${l.name ?? ''}`;
+  const pos = new Map(current.map((l, i) => [key(l), i]));
+  const rank = (l: SplitLineDraft) => pos.get(key(l)) ?? Number.MAX_SAFE_INTEGER;
+  const group = (l: SplitLineDraft) => (l.kind === 'saving' ? 0 : 1);
+  return next
+    .map((l, i) => ({ l, i }))
+    .sort((a, b) => group(a.l) - group(b.l) || rank(a.l) - rank(b.l) || a.i - b.i)
+    .map(({ l }) => l);
+}

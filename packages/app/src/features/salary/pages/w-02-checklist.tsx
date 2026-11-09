@@ -30,6 +30,7 @@ import {
   waiting,
 } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
+import { SalarySeg } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
 import { AchieveWatch, FirstSavingRow, SavingMeta } from '../saving-parts';
 
@@ -170,17 +171,20 @@ export function W02Checklist() {
         noAdd
         page={page}
         columns={[
-          <section key="l" className="hg-card hg-card--fill hg-stack">
-            <p className="hg-card__meta">{copy.noChecklist}</p>
-            <button
-              type="button"
-              className="hg-btn hg-btn--link hg-btn--accent"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => nav('/settings/me')}
-            >
-              {copy.tellSalary}
-            </button>
-          </section>,
+          <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+            <SalarySeg value="month" />
+            <section className="hg-card hg-card--fill hg-stack">
+              <p className="hg-card__meta">{copy.noChecklist}</p>
+              <button
+                type="button"
+                className="hg-btn hg-btn--link hg-btn--accent"
+                style={{ alignSelf: 'flex-start' }}
+                onClick={() => nav('/settings/me')}
+              >
+                {copy.tellSalary}
+              </button>
+            </section>
+          </div>,
         ]}
       />
     );
@@ -252,6 +256,8 @@ export function W02Checklist() {
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <AchieveWatch />
+      {/* 월급 탭 구간 탭 ‘이번 달 / 계획’(2026-11-09, 20 W-01 1번) */}
+      <SalarySeg value="month" />
       {/* 2026-11-09 밀도: 제목 + 아래 기간·진행 한 줄, 지난 달·다음 달 ‹ ›는 같은 머리 오른쪽(진행 원 없음, 진행은 글자와 묶음 머리 개수) */}
       <section aria-label={copy.cycleTitle(shown.label)}>
         <SectionHeader
@@ -383,7 +389,7 @@ export function W02Checklist() {
           type="button"
           className="hg-btn hg-btn--link"
           style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav(salaryPaths.split)}
+          onClick={() => nav(salaryPaths.plan)}
         >
           {copy.editSplit}
         </button>

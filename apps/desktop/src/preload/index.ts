@@ -64,6 +64,8 @@ contextBridge.exposeInMainWorld('sweetwo', {
     install: () => ipcRenderer.invoke(CH.updateInstall) as Promise<void>,
     onState: (cb: (s: UpdateState) => void) => listen(CH.updateEvent, cb),
   },
+  shareImage: (f: { name: string; base64: string }) =>
+    ipcRenderer.invoke(CH.shareImage, f) as Promise<'saved' | 'cancelled'>,
   widget: {
     update: (s: unknown) => ipcRenderer.invoke(CH.widgetUpdate, s) as Promise<void>,
     state: () => ipcRenderer.invoke(CH.widgetState) as Promise<unknown>,

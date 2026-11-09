@@ -1,5 +1,7 @@
 // 월급 탭 문구(docs/spec/20-salary-plan.md 체크리스트·저금 항목 W-10~W-12, 홈 19-this-month.md H-03). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
+import { object } from '@sweetwo/core';
+
 export const copy = {
   // W-01 월급 계획
   splitTitle: '월급 계획',
@@ -16,6 +18,53 @@ export const copy = {
   refillBody: '지금 적은 금액은 추천값으로 바뀌어요', // [확인 필요]
   refillOk: '다시 채우기', // [확인 필요]
   cancel: '취소',
+  // W-01 영수증(2026-11-09) [확인 필요]
+  segMonth: '이번 달',
+  segPlan: '계획',
+  segLabel: '월급 보기',
+  everyMonth: (day: string) => `매달 ${day}`,
+  jointPaydays: (parts: string[]) => parts.join(', '),
+  personPayday: (name: string, day: string) => `${name} ${day}`,
+  incomeLabel: (amount: string) => `월급 ${amount}, 내 월급 고치기`,
+  ratioLabel: (saving: number, spend: number, free: string) =>
+    `저금 ${saving}%, 지출 ${spend}%, ${free}`,
+  legendSaving: (n: number) => `저금 ${n}%`,
+  legendSpend: (n: number) => `지출 ${n}%`,
+  legendFree: (n: number) => `여유 자금 ${n}%`,
+  legendShort: (amount: string) => `여유 자금 ${amount}`,
+  allocated: '배분',
+  leftoverLabel: '여유 자금',
+  addSpend: '+ 지출 추가',
+  spendChips: [
+    { name: '관리비', code: 'maintenance' },
+    { name: '통신비', code: 'phone' },
+    { name: '보험료', code: 'insurance' },
+    { name: '구독료', code: 'subscription' },
+    { name: '교통비', code: 'transport' },
+    { name: '부모님 용돈', code: 'parents' },
+  ] as const,
+  spendChipsLabel: '지출 이름',
+  ownName: '직접 입력',
+  editPlan: '편집하기',
+  share: '공유하기',
+  editTitle: '월급 계획 편집',
+  editDone: '완료',
+  rowLabel: (name: string, amount: string) => `${name} ${amount}`,
+  handle: (name: string) => `${name} 끌어서 순서 바꾸기`,
+  moveUp: (name: string) => `${name} 위로`,
+  moveDown: (name: string) => `${name} 아래로`,
+  moved: (name: string, pos: number) => `${name}, ${pos}번째`,
+  removeLabel: (name: string) => `${name} 지우기`,
+  locked: '보기만 할 수 있어요',
+  lineChanged: (name: string, amount: string) => `${object(name)} ${amount}으로 바꿨어요`,
+  lineAdded: (name: string) => `${object(name)} 추가했어요`,
+  lineDeleted: (name: string) => `${object(name)} 지웠어요`,
+  stopQ: (name: string) => `${name} 저금을 그만 모을까요?`,
+  orderChanged: '순서를 바꿨어요',
+  duplicateName: '이미 있는 이름이에요',
+  tooManyLines: '직접 추가한 지출은 10개까지예요',
+  imageSaved: '이미지를 저장했어요',
+  imageName: (date: string) => `sweetwo-plan-${date}.png`,
   // W-02 이번 달 월급
   cycleTitle: (label: string) => label,
   period: (start: string, end: string) => `${start} ~ ${end}`,

@@ -51,7 +51,7 @@ export function S11fSalaryMode() {
         label: copy.undo,
         onClick: () => quietly(setSalaryMode(saved).then(refresh)),
       });
-      nav('/salary/split', { replace: true });
+      nav('/salary?view=plan', { replace: true });
     } catch {
       toast(copy.failed);
     } finally {

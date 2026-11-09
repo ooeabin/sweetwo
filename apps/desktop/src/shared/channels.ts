@@ -50,6 +50,8 @@ export const CH = {
   updateInstall: 'sweetwo:update-install',
   /** main → 렌더러: UpdateState */
   updateEvent: 'sweetwo:update-event',
+  // 이미지 공유(W-01 영수증 ‘공유하기’, 2026-11-09): 저장 창으로 PNG 저장
+  shareImage: 'sweetwo:share-image',
 } as const;
 
 /** 자동 업데이트 상태. idle = 아직 확인 안 함(개발 실행이거나 켠 직후) */

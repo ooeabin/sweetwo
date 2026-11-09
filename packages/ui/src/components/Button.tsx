@@ -1,7 +1,7 @@
 import { useEffect, useState, type ButtonHTMLAttributes, type MouseEvent } from 'react';
 
 // 디자인 Button(docs/design/components/Button.md). 클래스 이름은 디자인 시스템 그대로.
-type Variant = 'primary' | 'secondary' | 'ghost' | 'link' | 'danger' | 'kakao';
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'link' | 'danger' | 'kakao';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;

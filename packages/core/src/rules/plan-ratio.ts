@@ -19,7 +19,11 @@ export function largestRemainder(values: number[]): number[] {
   const total = values.reduce((s, v) => s + v, 0);
   if (total <= 0) return values.map(() => 0);
   // 정수 원 단위라 v * 100도 정수: 몫·나머지를 정수로 계산(부동소수점 비교 없음)
-  const parts = values.map((v, i) => ({ i, floor: Math.floor((v * 100) / total), rem: (v * 100) % total }));
+  const parts = values.map((v, i) => ({
+    i,
+    floor: Math.floor((v * 100) / total),
+    rem: (v * 100) % total,
+  }));
   let short = 100 - parts.reduce((s, p) => s + p.floor, 0);
   const order = [...parts].sort((a, b) => b.rem - a.rem || a.i - b.i);
   const out = parts.map((p) => p.floor);

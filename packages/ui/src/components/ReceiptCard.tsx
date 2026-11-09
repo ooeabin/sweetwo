@@ -178,9 +178,13 @@ export function ReceiptRows({
 }) {
   const list = useRef<HTMLUListElement>(null);
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [drag, setDrag] = useState<{ id: string; from: number; y: number; dy: number; to: number } | null>(
-    null,
-  );
+  const [drag, setDrag] = useState<{
+    id: string;
+    from: number;
+    y: number;
+    dy: number;
+    to: number;
+  } | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [said, setSaid] = useState('');
   const touch = useRef<{ id: string; x: number; y: number } | null>(null);
@@ -220,11 +224,11 @@ export function ReceiptRows({
           const dragging = drag?.id === l.id;
           const shift =
             drag && !dragging && drag.from !== drag.to
-              ? (drag.from < drag.to && i > drag.from && i <= drag.to
-                  ? -1
-                  : drag.from > drag.to && i >= drag.to && i < drag.from
-                    ? 1
-                    : 0)
+              ? drag.from < drag.to && i > drag.from && i <= drag.to
+                ? -1
+                : drag.from > drag.to && i >= drag.to && i < drag.from
+                  ? 1
+                  : 0
               : 0;
           const main = (
             <>
@@ -235,7 +239,11 @@ export function ReceiptRows({
           return (
             <li
               key={l.id}
-              className={cx('hg-receipt__row', dragging && 'is-dragging', open === l.id && 'is-open')}
+              className={cx(
+                'hg-receipt__row',
+                dragging && 'is-dragging',
+                open === l.id && 'is-open',
+              )}
               style={
                 dragging
                   ? { transform: `translateY(${drag.dy}px)` }

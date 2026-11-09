@@ -107,6 +107,12 @@ export interface DesktopBridge {
   /** 모바일: 만든 파일을 OS 공유 창으로(‘파일에 저장’ 등 저장 위치는 사람이 고름). 데스크톱은 없음(내려받기 창) */
   saveFile?: (f: { name: string; base64: string; mime: string }) => Promise<'saved' | 'cancelled'>;
   /**
+   * 이미지 공유(W-01 영수증 ‘공유하기’, 2026-11-09). PNG base64(머리 없이).
+   * 모바일: OS 공유 창 → 'shared' | 'cancelled'. 데스크톱: 저장 창(기본 ‘다운로드’) → 'saved' | 'cancelled'.
+   * 없으면(브라우저) 앱이 내려받기
+   */
+  shareImage?: (f: { name: string; base64: string }) => Promise<'shared' | 'saved' | 'cancelled'>;
+  /**
    * 모바일: 보상형 동영상 광고(AdMob, 자산 순위 F-08 앞, ADR 0006). 끝까지 보면 'rewarded', 닫으면 'closed',
    * 못 불러오면 'failed'. 데스크톱·브라우저는 없음(광고 없이 바로)
    */
