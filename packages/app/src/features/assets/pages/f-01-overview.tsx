@@ -9,7 +9,7 @@ import { copy } from '../copy';
 import { useAssetsData } from '../data';
 import { AssetArt } from '../asset-art';
 
-// F-01 요약(23 F-01·F-02 2~4번, 2026-11-03 다시 짬): “우리 순자산” 큰 숫자 + 지난달 대비 문장,
+// F-01 요약(23 F-01·F-02 2~4번, 2026-11-03 다시 짬): “순자산” 큰 숫자 + 지난달 대비 문장,
 // 달마다 순자산 막대(MonthBars, 최근 6달), 목록(자산 → F-02, 부채 → F-02, 예상 순자산과 안 판 수익). 비상금 카드, 이번 달 카드·계획, 월 정산 요약, 재정 진단은 재기획으로 없앰(ADR 0003).
 export function F01Overview() {
   const nav = useNavigate();

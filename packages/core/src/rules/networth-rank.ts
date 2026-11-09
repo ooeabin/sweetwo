@@ -29,7 +29,7 @@ export const RANK_BASIS = {
   ] as { net: Won; below: number }[],
 };
 
-/** 우리 순자산이 들어가는 칸 번호: 0 = −1억 미만, 1~10 = 점 사이, 11 = P90(11억 20만 원) 이상 */
+/** 순자산이 들어가는 칸 번호: 0 = −1억 미만, 1~10 = 점 사이, 11 = P90(11억 20만 원) 이상 */
 export function rankBracket(net: Won): number {
   const p = RANK_BASIS.points;
   const i = p.findIndex((x) => net < x.net);
