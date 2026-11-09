@@ -2,7 +2,7 @@
 
 Phosphor 아이콘(MIT 라이선스) 89개(2026-11-09, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
 
-- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 좁은 창 하단 탭 막대의 네 칸 모두(2026-11-05 토스형, 고른 칸 `ink`, 나머지 `muted`)와, 그 밖에는 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸, 켜진 상태를 보여 줄 때(`is-filled`).
+- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸(2026-11-09 독은 아이콘만이라 고른 칸 채운 모양 `ink`, 나머지 굵은 선 `stone`), 켜진 상태를 보여 줄 때(`is-filled`).
 - 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴, 독 칸 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
 - 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바, 하단 독, 떠 있는 추가 버튼).
 - 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음. 예외: 줄 앞 칸(Lead)과 알림 아이콘 원은 영역 색 원 위 짝 글자색(`*-ink`, 2026-11-09, ListRow ‘Lead 종류 표’).
@@ -68,7 +68,7 @@ Phosphor 아이콘(MIT 라이선스) 89개(2026-11-09, `Icon`의 `IconName`). �
 | `hg-ico--wallet` | `wallet` |  |
 | `hg-ico--windows-logo` | `windows-logo` | 웹사이트 Windows용 다운로드 |
 | `hg-ico--x` | `x` |  |
-| `hg-ico--hand-coins` | `hand-coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--hand-coins` | `hand-coins` | 월급 탭(사이드바, 하단 독. 2026-11-09 채운 모양 추가), 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--truck` | `truck` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--couch` | `couch` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
