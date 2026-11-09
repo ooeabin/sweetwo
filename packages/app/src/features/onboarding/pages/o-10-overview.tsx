@@ -16,7 +16,11 @@ export function O10Overview() {
     >
       <ol className="hg-intro-steps">
         {copy.overviewSteps.map((x) => (
-          <li key={x.text}>{x.text}</li>
+          <li key={x.text}>
+            {/* 2D 안내 그림(Illustrations ‘나중 과제’ 5번)이 들어올 때까지 40px 회색 빈 원(hg-artslot, 2026-11-09 다시 붙임) */}
+            <span className="hg-intro-steps__icon hg-artslot" aria-hidden="true" />
+            <span>{x.text}</span>
+          </li>
         ))}
       </ol>
     </QuestionLayout>

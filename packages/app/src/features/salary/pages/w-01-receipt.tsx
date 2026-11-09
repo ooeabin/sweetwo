@@ -551,7 +551,7 @@ export function W01Receipt() {
           action={
             <button
               type="button"
-              className="hg-btn hg-btn--link hg-btn--accent"
+              className="hg-btn hg-btn--link"
               aria-busy={busy || undefined}
               onClick={finish}
             >
@@ -602,7 +602,7 @@ export function W01Receipt() {
           <p className="hg-card__meta">{copy.noChecklist}</p>
           <button
             type="button"
-            className="hg-btn hg-btn--link hg-btn--accent"
+            className="hg-btn hg-btn--link"
             style={{ alignSelf: 'flex-start' }}
             onClick={() => nav('/settings/me')}
           >

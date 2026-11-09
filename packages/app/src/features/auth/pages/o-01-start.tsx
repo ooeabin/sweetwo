@@ -1,4 +1,4 @@
-import { AuthLayout, Button, Wordmark } from '@sweetwo/ui';
+import { AuthLayout, Button, Illustration, Wordmark } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths } from '../flow';
@@ -15,7 +15,13 @@ export function O01Start() {
   return (
     <AuthLayout
       className="hg-auth--hero hg-auth--start"
-      media={<Wordmark height={40} />}
+      media={
+        <>
+          {/* 시작 그림(Illustrations ‘나중 과제’ 1-17 scene-start, 120px)이 들어올 때까지 회색 빈 자리(2026-11-09) */}
+          <Illustration name="scene-start" className="hg-sceneart" />
+          <Wordmark height={40} />
+        </>
+      }
       title={copy.catchphrase}
       help={copy.startHelp}
       actions={

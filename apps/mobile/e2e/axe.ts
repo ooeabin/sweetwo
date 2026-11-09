@@ -6,14 +6,11 @@ import type { Page } from '@playwright/test';
 const BRAND_FILL = /hg-btn--primary|hg-badge--achieved/;
 
 // 2026-11-09 브랜드 색 규칙(당근처럼 오렌지 하나): 흰 바탕 위 오렌지 글자(약 2.7:1)도 알고 씀.
-// 예외는 14px 이상 + 600 이상의 짧은 글자 버튼과 강조 숫자만(tokens.css `--brand` 주석, DESIGN.md 색, CLAUDE.md 브랜드 색).
+// 예외는 14px 이상 + 600 이상의 짧은 강조 숫자, 띠 안 흰 작은 버튼, 고른 바꾸기 칩만(2026-11-09 글자 버튼은 모두 회색이라 예외 없음. tokens.css `--brand` 주석, DESIGN.md 색, CLAUDE.md 브랜드 색).
 // 체크 원, 진행 원·막대, + 버튼(FAB)은 글자가 없는 그래픽이라 axe color-contrast 대상이 아님.
 // 이 선택자에 걸리는 요소(또는 그 안의 글자)만 color-contrast에서 뺌. 나머지 규칙과 요소는 그대로 검사함.
 const ORANGE_TEXT = [
-  '.hg-btn--link.hg-btn--accent', // 오렌지 글자 버튼(그 자리의 다음 할 일 하나: ‘모두 보냈어요’, ‘월급 알려 주기’, ‘기한 정하기’)
   '.hg-sechead__count b', // “저금 1/2”의 한 개수
-  '.hg-goalrow__set', // GoalRow ‘금액 정하기’
-  '.hg-rankrow__action', // RankRow 글자
   '.hg-amountin > .hg-quick > .hg-chip.is-selected', // 고른 바꾸기 칩(W-11b)
   ':is(.hg-banner--todo, .hg-banner--line) .hg-btn--secondary', // 띠 안 흰 작은 버튼의 오렌지 글자
 ].join(', ');
