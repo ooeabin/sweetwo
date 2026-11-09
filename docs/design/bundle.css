@@ -508,19 +508,20 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); font: 600 13px/1 var(--font-sans); flex: none; box-sizing: border-box; }
 .hg-avatar--p1 { background: var(--person-1); color: var(--person-1-ink); }
 .hg-avatar--p2 { background: var(--person-2); color: var(--person-2-ink); }
-/* 2026-11-05 사진이 없으면 사람 색 원 + 실루엣(글자는 DOM에만 남기고 숨김). 실루엣은 사람 글자색을 원 색에 섞어 옅게 */
+/* 2026-11-09 사진이 없으면 사람 색 원 + 빵모자 실루엣(머리, 어깨, 하나로 이은 모자, 모자와 머리 사이 가는 틈). 글자는 DOM에만 남기고 숨김.
+   모양은 packages/ui/src/components/avatar-figure.ts의 AVATAR_FIGURE_PATH와 같은 path(64 칸). 바꾸면 둘 다 고친다. 색은 person-*-figure(라이트 흰색, 다크 person-*-ink) */
 .hg-avatar--p1, .hg-avatar--p2 { position: relative; overflow: hidden; font-size: 0 !important; }
-.hg-avatar--p1::after, .hg-avatar--p2::after { content: ""; position: absolute; inset: 0; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='12.5' r='6.2'/%3E%3Cpath d='M3.5 33c0-7.6 5.6-12.4 12.5-12.4S28.5 25.4 28.5 33z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='12.5' r='6.2'/%3E%3Cpath d='M3.5 33c0-7.6 5.6-12.4 12.5-12.4S28.5 25.4 28.5 33z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
-.hg-avatar--p1::after { background: color-mix(in srgb, var(--person-1-ink) 45%, var(--person-1)); }
-.hg-avatar--p2::after { background: color-mix(in srgb, var(--person-2-ink) 45%, var(--person-2)); }
+.hg-avatar--p1::after, .hg-avatar--p2::after, .hg-avatar--empty::after { content: ""; position: absolute; inset: 0; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M22.63%2029.73Q32%2027.17%2041.37%2029.73A10.7%2010.7%200%201%201%2022.63%2029.73ZM10.7%2067.7A21.3%2022.1%200%201%201%2053.3%2067.7A21.3%2022.1%200%201%201%2010.7%2067.7ZM21.8%2028.67V22.8A5.6%205.6%200%201%201%2025.61%2013.29A6.5%206.5%200%201%201%2038.39%2013.29A5.6%205.6%200%201%201%2042.2%2022.8V28.67Q32%2025.63%2021.8%2028.67Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M22.63%2029.73Q32%2027.17%2041.37%2029.73A10.7%2010.7%200%201%201%2022.63%2029.73ZM10.7%2067.7A21.3%2022.1%200%201%201%2053.3%2067.7A21.3%2022.1%200%201%201%2010.7%2067.7ZM21.8%2028.67V22.8A5.6%205.6%200%201%201%2025.61%2013.29A6.5%206.5%200%201%201%2038.39%2013.29A5.6%205.6%200%201%201%2042.2%2022.8V28.67Q32%2025.63%2021.8%2028.67Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.hg-avatar--p1::after { background: var(--person-1-figure); }
+.hg-avatar--p2::after { background: var(--person-2-figure); }
 .hg-avatar--sm { width: 24px; height: 24px; font-size: 12px; }
 .hg-avatar--lg { width: 40px; height: 40px; font-size: 15px; }
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--stone); }  /* 2026-11-03 파트너 빈 자리 기본 그림 */
-/* 2026-11-05 빈 자리도 같은 실루엣(회색) */
+/* 2026-11-05 빈 자리도 같은 실루엣(surface-alt 원 + muted), 2026-11-09 빵모자 실루엣 */
 .hg-avatar--empty { position: relative; overflow: hidden; }
 .hg-avatar--empty .hg-ico { display: none; }
-.hg-avatar--empty::after { content: ""; position: absolute; inset: 0; background: var(--muted); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='12.5' r='6.2'/%3E%3Cpath d='M3.5 33c0-7.6 5.6-12.4 12.5-12.4S28.5 25.4 28.5 33z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='12.5' r='6.2'/%3E%3Cpath d='M3.5 33c0-7.6 5.6-12.4 12.5-12.4S28.5 25.4 28.5 33z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.hg-avatar--empty::after { background: var(--muted); }
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
 
 /* Slider */

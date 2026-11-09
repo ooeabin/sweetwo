@@ -1,6 +1,7 @@
 // 스타일은 앱 진입점에서 한 번: import '@sweetwo/ui/styles.css'
 // 컴포넌트 이름은 디자인 시스템(docs/design/components) 이름 그대로.
 export * from './components/cx';
+export * from './components/avatar-figure';
 export * from './components/Icon';
 export * from './components/Button';
 export * from './components/ProviderMark';
