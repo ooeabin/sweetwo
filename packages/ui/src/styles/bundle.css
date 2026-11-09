@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (44487dd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (d173fb3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2180,6 +2180,8 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 .hg-receipt__amount { margin: 0; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: var(--text-number-lg); font-variant-numeric: tabular-nums; }
 button.hg-receipt__amount { cursor: pointer; }
 .hg-receipt__sub { margin: 0; font: var(--text-caption); color: var(--stone); }
+.hg-receipt__headtitle { margin: 0; font: var(--text-body-strong); color: var(--ink); }  /* 달 결과 카드 제목(“11월 월급”) */
+.hg-receipt__link { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; margin-top: var(--space-2); padding: 0 var(--space-1) 0 var(--space-2); border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 500 14px/20px var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }  /* W-01 ‘이번 달 3/5 보냈어요 ›’(머리 이동 링크처럼 slate) */
 .hg-receipt__bar { display: flex; gap: 3px; height: 12px; margin-top: var(--space-6); }  /* 막대 12px, 칸 사이 3px(W-01 확정 모양) */
 .hg-receipt__bar:empty { border-radius: var(--radius-full); background: var(--hairline-soft); }
 .hg-receipt__seg { min-width: 12px; border-radius: var(--radius-full); }
@@ -2190,6 +2192,15 @@ button.hg-receipt__amount { cursor: pointer; }
 .hg-receipt__legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
 .hg-receipt__legend li.is-short { color: var(--danger); }
 .hg-receipt__sw { width: 10px; height: 10px; flex: none; border-radius: calc(var(--radius-xs) / 2); }
+/* PlanBar 진행 모드(2026-11-09 W-02 머리, 달 결과 카드): 칸 안을 보낸 만큼 채움, 나머지는 조용한 칸. 다 채우면 계획 막대와 같음 */
+.hg-planbar--flat .hg-receipt__bar { margin-top: var(--space-3); }  /* 카드 밖(W-02 머리 아래)은 가까이 */
+.hg-receipt__seg.is-progress { display: flex; overflow: hidden; }
+.hg-receipt__seg--saving.is-progress { background: var(--accent-app-soft); }
+.hg-receipt__seg--spend.is-progress { background: transparent; box-shadow: inset 0 0 0 1px var(--hairline); }
+.hg-receipt__fill { display: block; height: 100%; min-width: 12px; border-radius: var(--radius-full); }
+.hg-receipt__seg--saving .hg-receipt__fill { background: var(--accent-app); }
+.hg-receipt__seg--spend .hg-receipt__fill { background: var(--hairline); }
+.hg-receipt__caption { margin: var(--space-2) 0 0; font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-receipt__sec { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--hairline-soft); }
 .hg-receipt__sechead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin: 0 0 var(--space-1); }
 .hg-receipt__title { margin: 0; font: var(--text-body-strong); color: var(--ink); }
@@ -2201,12 +2212,15 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__name { min-width: 0; font: var(--text-body); font-weight: 500; color: var(--slate); overflow-wrap: anywhere; }
 .hg-receipt__amt { flex: none; font: var(--text-body); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .hg-receipt__lock { display: inline-flex; flex: none; color: var(--stone); }
+.hg-receipt__amtcol { display: flex; flex: none; flex-direction: column; align-items: flex-end; }
+.hg-receipt__amt.is-muted { color: var(--stone); font-weight: 400; }  /* 달 결과 카드 ‘못 함’ */
+.hg-receipt__plan { font: var(--text-body-sm); color: var(--stone); font-variant-numeric: tabular-nums; white-space: nowrap; }  /* 다른 금액 줄 아래 “계획 80만 원” */
 .hg-receipt__row--strong .hg-receipt__amt { font: var(--text-body-strong); font-weight: 700; }
 .hg-receipt__row.is-short .hg-receipt__name, .hg-receipt__row.is-short .hg-receipt__amt { color: var(--danger); }
 .hg-receipt__add { display: inline-flex; align-items: center; min-height: 36px; margin-top: var(--space-1); padding: 0; border: 0; background: none; color: var(--stone); font: var(--text-label); font-weight: 500; cursor: pointer; }
 .hg-receipt__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 .hg-receipt__chips .hg-input { flex: 1 1 160px; height: 40px; font-size: 14px; }  /* 칩 줄 높이(hg-chip 40px)에 맞춤 */
-:is(.hg-receipt__amount, .hg-receipt__main, .hg-receipt__add, .hg-receipt__handle):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:is(.hg-receipt__amount, .hg-receipt__main, .hg-receipt__add, .hg-receipt__handle, .hg-receipt__link):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 편집 모드: 손잡이(끌기), 포커스가 오면 보이는 위·아래, 지우기(마우스 = 늘 보임, 터치 = 왼쪽으로 밀면) */
 .hg-receipt__handle { display: inline-grid; place-items: center; flex: none; width: 24px; height: 40px; padding: 0; border: 0; background: none; color: var(--stone); cursor: grab; touch-action: none; }
 .hg-receipt__row.is-dragging { z-index: 1; background: var(--surface); box-shadow: var(--shadow-1); border-radius: var(--radius-md); }

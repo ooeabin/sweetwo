@@ -8,14 +8,14 @@ import {
   SplitBlocked,
   type SplitLine,
 } from '@sweetwo/api';
-import { amountBand, leftover, planRatio, todayKst } from '@sweetwo/core';
+import { amountBand, leftover, planChangeTouchesMonth, planRatio, todayKst } from '@sweetwo/core';
 import {
   Button,
   Icon,
   ListRow,
   Modal,
+  PlanBar,
   ReceiptAdd,
-  ReceiptBar,
   ReceiptCard,
   ReceiptHead,
   ReceiptRows,
@@ -37,6 +37,7 @@ import { LoadingFrame, MainFrame } from '../../frame';
 import { goalLineName } from '../check-line';
 import { copy } from '../copy';
 import {
+  useChecklists,
   useGoalSaved,
   useGoals,
   useMe,
@@ -45,7 +46,7 @@ import {
   useSplits,
   useSplitWrite,
 } from '../data';
-import { savingPaths } from '../paths';
+import { salaryPaths, savingPaths } from '../paths';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
 import { PlanSheet, SpendChips } from '../receipt-parts';
 import { SalarySeg } from '../salary-tab';
@@ -70,6 +71,7 @@ export function W01Receipt() {
   const splits = useSplits();
   const partner = usePartner();
   const saved = useGoalSaved();
+  const lists = useChecklists();
   const write = useSplitWrite();
   const { masked } = useMask();
   const [edit, setEdit] = useState(false);
@@ -95,6 +97,8 @@ export function W01Receipt() {
   const owner = p && ownerId === p.id ? p : m;
   const theirs = !joint && !!m && ownerId !== m.id;
   const split = splits.data?.find((x) => x.owner_user_id === ownerId);
+  // 이번 사이클 그 사람(합쳐서면 공동) 체크리스트(링크 줄, 금액 바꾸기 Toast)
+  const month = lists.data?.find((c) => c.owner_user_id === ownerId);
   const canEdit = !!split && !theirs && !pending;
   const serverLines = [...(split?.split_line ?? [])].sort((a, b) => a.sort - b.sort);
   // 편집 모드에서 옮긴 순서(‘완료’ 전까지 화면에만). 새로 생긴 줄은 뒤에
@@ -201,6 +205,8 @@ export function W01Receipt() {
       const renamed = l.kind === 'custom' && rawName !== '' && rawName !== l.name;
       const moved = amount !== l.amount;
       if (!renamed && !moved) return setSheet(null);
+      // 이번 달 체크 안 한 줄도 바뀌는지(서버 sync_checklist와 같은 맞춤, 바꾸기 전 체크리스트로)
+      const monthToo = moved && planChangeTouchesMonth(l, amount, month?.pay_check_line);
       await write(() =>
         setSplitLine(l.id, {
           amount: moved ? amount : undefined,
@@ -217,18 +223,25 @@ export function W01Receipt() {
         joint,
         entry: edit ? 'edit' : lineParam ? 'saving_detail' : 'receipt',
       });
-      toast(moved ? copy.lineChanged(name, won(amount)) : copy.nameChanged, {
-        label: copy.undo,
-        onClick: () =>
-          quietly(
-            write(() =>
-              setSplitLine(l.id, {
-                amount: moved ? l.amount : undefined,
-                name: renamed ? (l.name ?? undefined) : undefined,
-              }),
+      toast(
+        monthToo
+          ? copy.monthLineToo
+          : moved
+            ? copy.lineChanged(name, won(amount))
+            : copy.nameChanged,
+        {
+          label: copy.undo,
+          onClick: () =>
+            quietly(
+              write(() =>
+                setSplitLine(l.id, {
+                  amount: moved ? l.amount : undefined,
+                  name: renamed ? (l.name ?? undefined) : undefined,
+                }),
+              ),
             ),
-          ),
-      });
+        },
+      );
     });
 
   const add = (name: string, chip: string | null, amount: number) =>
@@ -510,6 +523,25 @@ export function W01Receipt() {
     />
   ) : null;
 
+  // 머리 아래 한 줄 ‘이번 달 3/5 보냈어요 ›’(2026-11-09) → 그 사람 이번 달(W-02). 이번 체크리스트가 없거나 편집 중이면 없음
+  const monthChecked = month?.pay_check_line.filter((l) => l.state === 'checked').length ?? 0;
+  const monthTotal = month?.pay_check_line.length ?? 0;
+  const monthLink =
+    month && monthTotal > 0 && !edit ? (
+      <button
+        type="button"
+        className="hg-receipt__link"
+        aria-label={copy.monthLinkLabel(monthChecked, monthTotal)}
+        onClick={() => {
+          track('plan_link_tapped', { whose, checked: monthChecked, total: monthTotal });
+          nav(theirs && p ? `${salaryPaths.checklist}?who=${p.id}` : salaryPaths.checklist);
+        }}
+      >
+        {copy.monthLink(monthChecked, monthTotal)}
+        <Icon name="chevron-right" size={16} />
+      </button>
+    ) : undefined;
+
   const noSplit = !split && !theirs;
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
@@ -586,8 +618,9 @@ export function W01Receipt() {
               sub={sub}
               onAmount={!theirs && !edit ? () => nav('/settings/me') : undefined}
               amountLabel={copy.incomeLabel(won(income))}
+              extra={monthLink}
             />
-            <ReceiptBar
+            <PlanBar
               label={copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? '')}
               parts={bar}
               legend={legend}

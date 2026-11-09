@@ -5,12 +5,21 @@
 export interface ReceiptImageModel {
   /** 사람 색 번호(시작한 사람 1, 합류한 사람 2). 합쳐서면 둘 */
   people: (1 | 2)[];
+  /** 금액 위 제목(달 결과 카드 “11월 월급”, 2026-11-09) */
+  title?: string;
   amount: string;
   sub?: string;
-  /** 비율 막대 칸(0%는 그리지 않음) */
-  bar: { kind: 'saving' | 'spend' | 'free'; percent: number }[];
+  /** 비율 막대 칸(0%는 그리지 않음). progress면 저금·지출 칸 안을 fill(0~100)만큼 채움(PlanBar 진행 모드) */
+  bar: { kind: 'saving' | 'spend' | 'free'; percent: number; fill?: number }[];
+  progress?: boolean;
+  /** 비면 범례 없음 */
   legend: { kind: 'saving' | 'spend' | 'free'; text: string; short?: boolean }[];
-  sections: { title: string; subtotal: string; rows: { name: string; amount: string }[] }[];
+  /** 줄 sub = 금액 아래 조용한 줄(“계획 80만 원”), muted = 금액 stone(‘못 함’) */
+  sections: {
+    title: string;
+    subtotal: string;
+    rows: { name: string; amount: string; sub?: string; muted?: boolean }[];
+  }[];
   totals: { label: string; amount: string; strong?: boolean; short?: boolean }[];
 }
 
@@ -29,6 +38,7 @@ type Tokens = Record<
   | 'hairline'
   | 'hairlineSoft'
   | 'accent'
+  | 'accentSoft'
   | 'danger'
   | 'person1'
   | 'person1Ink'
@@ -50,6 +60,7 @@ function readTokens(): Tokens {
     hairline: v('--hairline'),
     hairlineSoft: v('--hairline-soft'),
     accent: v('--accent-app'),
+    accentSoft: v('--accent-app-soft'),
     danger: v('--danger'),
     person1: v('--person-1'),
     person1Ink: v('--person-1-ink'),
@@ -115,6 +126,10 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     ctx.restore();
   });
   y += 40 + 12;
+  if (m.title) {
+    text(m.title, mid, y + 11, { weight: 600, size: 15, color: t.ink, align: 'center' });
+    y += 22 + 4;
+  }
   text(m.amount, mid, y + 18, { weight: 700, size: 28, color: t.ink, align: 'center' });
   y += 36;
   if (m.sub) {
@@ -138,15 +153,42 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     }
     for (const b of shown) {
       const w = Math.max((width * b.percent) / 100, 12);
-      ctx.fillStyle = color(b.kind);
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, 12, 6);
-      ctx.fill();
+      if (m.progress && b.kind !== 'free') {
+        // 진행 모드: 조용한 칸(저금 옅은 판, 지출 테두리) 위에 보낸 만큼 채움
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, 12, 6);
+        ctx.clip();
+        if (b.kind === 'saving') {
+          ctx.fillStyle = t.accentSoft;
+          ctx.fillRect(x, y, w, 12);
+        } else {
+          ctx.strokeStyle = t.hairline;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, 12, 6);
+          ctx.stroke();
+        }
+        const f = Math.max(0, Math.min(100, b.fill ?? 0));
+        if (f > 0) {
+          ctx.fillStyle = color(b.kind);
+          ctx.beginPath();
+          ctx.roundRect(x, y, Math.min(Math.max((w * f) / 100, 12), w), 12, 6);
+          ctx.fill();
+        }
+        ctx.restore();
+      } else {
+        ctx.fillStyle = color(b.kind);
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, 12, 6);
+        ctx.fill();
+      }
       x += w + 3;
     }
   }
-  y += 12 + 14;
-  // 범례(가운데)
+  y += 12;
+  // 범례(가운데). 없으면 건너뜀
+  if (m.legend.length) y += 14;
   ctx.font = font(500, 13);
   const items = m.legend.map((l) => ({ ...l, w: 10 + 8 + ctx.measureText(l.text).width }));
   const gap = 16;
@@ -162,7 +204,7 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     text(l.text, lx + 18, y + 9, { weight: 500, size: 13, color: l.short ? t.danger : t.slate });
     lx += l.w + gap;
   }
-  y += 18;
+  if (m.legend.length) y += 18;
 
   const rule = () => {
     y += 24;
@@ -187,7 +229,21 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
         color: t.slate,
         max: right - left - aw - 12,
       });
-      text(row.amount, right, y + 20, { weight: 500, size: 15, color: t.ink, align: 'right' });
+      if (row.sub) {
+        text(row.amount, right, y + 11, {
+          weight: row.muted ? 400 : 500,
+          size: 15,
+          color: row.muted ? t.stone : t.ink,
+          align: 'right',
+        });
+        text(row.sub, right, y + 31, { weight: 400, size: 13, color: t.stone, align: 'right' });
+      } else
+        text(row.amount, right, y + 20, {
+          weight: row.muted ? 400 : 500,
+          size: 15,
+          color: row.muted ? t.stone : t.ink,
+          align: 'right',
+        });
       y += 40;
     }
   }

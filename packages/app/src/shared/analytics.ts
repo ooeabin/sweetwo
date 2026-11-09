@@ -164,6 +164,20 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'month_result_shared';
+      props: {
+        result: 'shared' | 'saved' | 'downloaded' | 'cancelled' | 'failed';
+        masked: boolean;
+        whose: 'self' | 'partner' | 'joint';
+        screen: 'done' | 'checklist' | 'past';
+        skipped: number;
+      };
+    }
+  | {
+      name: 'plan_link_tapped';
+      props: { whose: 'self' | 'partner' | 'joint'; checked: number; total: number };
+    }
+  | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {

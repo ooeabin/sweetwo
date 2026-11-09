@@ -29,6 +29,7 @@ import {
   useSplits,
   waiting,
 } from '../data';
+import { incomeOf, MonthBar, MonthResult } from '../month-parts';
 import { salaryPaths, savingPaths } from '../paths';
 import { SalarySeg } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
@@ -54,6 +55,8 @@ export function W02Checklist() {
   const [amount, setAmount] = useState<number | null>(null);
   const [ago, setAgo] = useState(0);
   const [hidden, setHidden] = useState<string | null>(null);
+  const [madeHidden, setMadeHidden] = useState<string | null>(null);
+  const [fixing, setFixing] = useState(false);
   const prevLeft = useRef<number | null>(null);
   const splits = useSplits();
   const holidays = useQuery({ queryKey: qk.holidays, queryFn: fetchHolidays });
@@ -190,6 +193,8 @@ export function W02Checklist() {
     );
   }
   const shown = ago > 0 ? (past.data?.[ago - 1] ?? list) : list;
+  // 줄은 월급 계획 순서(서버 sort, 20 ‘줄 순서’). 서버가 이미 정렬해 주지만 묶음을 나눌 때 한 번 더 맞춤
+  const ordered = [...shown.pay_check_line].sort((a, b) => a.sort - b.sort);
   const total = shown.pay_check_line.length;
   const done = doneCount(shown);
   const readOnly = ago > 0 || isPast(shown.cycle_end);
@@ -225,6 +230,37 @@ export function W02Checklist() {
     }
   };
   const partnerTab = !joint && tab !== meId;
+  // 새 사이클 첫 화면 한 줄 “11월 계획대로 체크리스트를 만들었어요”(2026-11-09): 지난 체크리스트가 있을 때(첫 달 아님),
+  // 이번 달 내(합쳐서면 공동) 탭, ×로 닫으면 그 체크리스트에서는 다시 안 보임(기기마다)
+  const madeKey = `sweetwo.made-notice.${list.id}`;
+  const madeSeen = (() => {
+    if (madeHidden === list.id) return true;
+    try {
+      return localStorage.getItem(madeKey) === '1';
+    } catch {
+      return false;
+    }
+  })();
+  const showMade = ago === 0 && !partnerTab && (past.data?.length ?? 0) > 0 && !madeSeen;
+  const dismissMade = () => {
+    setMadeHidden(list.id);
+    try {
+      localStorage.setItem(madeKey, '1');
+    } catch {
+      /* 저장 못 해도 이번 화면에서는 숨김 */
+    }
+  };
+  // 진행 막대·달 결과 카드(2026-11-09): 수입은 체크리스트 주인(합쳐서면 두 사람 합)
+  const income = incomeOf(owner, me.data, partner.data);
+  const complete = done === total;
+  // 다 끝난 달(이번 달 다 함, 지난 달)은 결과 카드. 이번 달은 ‘체크 고치기’로 줄 목록을 다시 엶
+  const result = total > 0 && (complete || readOnly);
+  const showGroups = !result || fixing;
+  const ownerPeople = (
+    owner === null ? [me.data, partner.data] : [owner === meId ? me.data : partner.data]
+  )
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .map((x) => ({ id: x.id, name: x.nickname ?? '', starter: x.id === space.data?.created_by }));
   const itemOf = (id: string | null) => (saving.ready && id ? saving.byId(id) : undefined);
   const row = (l: PayCheckLine) => (
     <CheckLine
@@ -262,7 +298,8 @@ export function W02Checklist() {
       <section aria-label={copy.cycleTitle(shown.label)}>
         <SectionHeader
           title={copy.cycleTitle(shown.label)}
-          meta={`${periodText(start, shown.cycle_end)}. ${done === total ? copy.allDone : copy.progress(total, done)}`}
+          // 2026-11-09 잇기: 개수 글자 대신 아래 진행 막대(화면 읽기 문장은 막대 이름)
+          meta={periodText(start, shown.cycle_end)}
           action={
             <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
               <IconButton
@@ -270,19 +307,41 @@ export function W02Checklist() {
                 label={copy.prevMonth}
                 small
                 disabled={!more}
-                onClick={() => setAgo(ago + 1)}
+                onClick={() => {
+                  setAgo(ago + 1);
+                  setFixing(false);
+                }}
               />
               <IconButton
                 icon="chevron-right"
                 label={copy.nextMonth}
                 small
                 disabled={ago === 0}
-                onClick={() => setAgo(ago - 1)}
+                onClick={() => {
+                  setAgo(ago - 1);
+                  setFixing(false);
+                }}
               />
             </span>
           }
         />
+        {!result && <MonthBar list={shown} income={income} masked={masked} />}
       </section>
+      {showMade && (
+        <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+          <p className="hg-q__help" style={{ flex: 1 }}>
+            {copy.madeFromPlan(Number(list.cycle_start.slice(5, 7)))}
+          </p>
+          <button
+            type="button"
+            className="hg-btn hg-btn--ghost hg-btn--sm"
+            aria-label={copy.close}
+            onClick={dismissMade}
+          >
+            ×
+          </button>
+        </div>
+      )}
       {changedBy && !dismissed && (
         <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
           <p className="hg-q__help" style={{ flex: 1 }}>
@@ -305,6 +364,7 @@ export function W02Checklist() {
           onChange={(v) => {
             setWho(v);
             setAgo(0);
+            setFixing(false);
           }}
           items={people}
         />
@@ -315,74 +375,100 @@ export function W02Checklist() {
           {copy.partnerChecklistView(partner.data?.nickname ?? '')}
         </p>
       )}
+      {/* 다 끝난 달 결과 카드(W-02 끝과 같은 모양, 2026-11-09) */}
+      {result && (
+        <MonthResult
+          list={shown}
+          income={income}
+          received={start}
+          people={ownerPeople}
+          nameOf={(l) => lineName(l, goalName, personName, joint)}
+          masked={masked}
+          whose={joint ? 'joint' : partnerTab ? 'partner' : 'self'}
+          screen={readOnly ? 'past' : 'checklist'}
+        />
+      )}
+      {result && !readOnly && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          aria-expanded={fixing}
+          onClick={() => setFixing((x) => !x)}
+        >
+          {copy.editChecks}
+        </button>
+      )}
       {/* 묶음 카드 사이 12px(2026-11-09 밀도), 영역 사이는 24px */}
-      <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-        {(
-          [
-            [copy.savingGroup, shown.pay_check_line.filter((l) => l.kind === 'saving')],
-            [copy.spendGroup, shown.pay_check_line.filter((l) => l.kind !== 'saving')],
-          ] as const
-        ).map(([title, ls]) => {
-          // 묶음 카드(머리 “저금 0/2”). 저금 줄이 없으면 저금 묶음 없음
-          const n = ls.filter((l) => l.state !== 'wait').length;
-          if (!ls.length && title === copy.savingGroup) {
-            // 내 저금이 없으면 저금 묶음에 빈 줄 ‘+ 저금 추가’(2026-11-09, 이번 달 내 탭·합쳐서만)
-            if (!first.show || partnerTab || readOnly) return null;
+      {showGroups && (
+        <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+          {(
+            [
+              [copy.savingGroup, ordered.filter((l) => l.kind === 'saving')],
+              [copy.spendGroup, ordered.filter((l) => l.kind !== 'saving')],
+            ] as const
+          ).map(([title, ls]) => {
+            // 묶음 카드(머리 “저금 0/2”). 저금 줄이 없으면 저금 묶음 없음
+            const n = ls.filter((l) => l.state !== 'wait').length;
+            if (!ls.length && title === copy.savingGroup) {
+              // 내 저금이 없으면 저금 묶음에 빈 줄 ‘+ 저금 추가’(2026-11-09, 이번 달 내 탭·합쳐서만)
+              if (!first.show || partnerTab || readOnly) return null;
+              return (
+                <section key={title} className="hg-checkgroup" aria-label={title}>
+                  <SectionHeader
+                    variant="group"
+                    title={title}
+                    onTitle={openList}
+                    titleLabel={copy.listOpen}
+                  />
+                  <FirstSavingRow from="salary" go={nav} />
+                </section>
+              );
+            }
+            const kind = title === copy.savingGroup ? 'saving' : 'spend';
+            // 묶음 ‘모두 보냈어요’(2026-11-09 round 3): 이번 달 내(합쳐서면 공동) 체크리스트에서 체크 안 한 줄이 있을 때만
+            const canAll = !readOnly && !partnerTab && n < ls.length;
             return (
               <section key={title} className="hg-checkgroup" aria-label={title}>
                 <SectionHeader
+                  // 2026-11-09 밀도: 진행 원 대신 한 줄 “저금 0/2 ›”(개수는 조용한 글자, 화면 읽기는 문장)
                   variant="group"
                   title={title}
-                  onTitle={openList}
-                  titleLabel={copy.listOpen}
+                  // 한 개수만 오렌지 600(브랜드 색 규칙 2026-11-09, `hg-sechead__count b`). 0이면 강조 없음
+                  count={
+                    n > 0 ? (
+                      <>
+                        <b>{n}</b>/{ls.length}
+                      </>
+                    ) : (
+                      `${n}/${ls.length}`
+                    )
+                  }
+                  countLabel={copy.progress(ls.length, n)}
+                  // 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3)
+                  onTitle={kind === 'saving' ? openList : undefined}
+                  titleLabel={kind === 'saving' ? copy.listOpen : undefined}
+                  action={
+                    canAll ? (
+                      <button
+                        type="button"
+                        className="hg-btn hg-btn--link hg-btn--accent"
+                        aria-label={copy.groupAllSentLabel(title)}
+                        aria-busy={group.busy === kind || undefined}
+                        disabled={!!group.busy}
+                        onClick={() => void group.run(kind, ls)}
+                      >
+                        {copy.groupAllSent}
+                      </button>
+                    ) : undefined
+                  }
                 />
-                <FirstSavingRow from="salary" go={nav} />
+                <div className="hg-checklist__list">{ls.map(row)}</div>
               </section>
             );
-          }
-          const kind = title === copy.savingGroup ? 'saving' : 'spend';
-          // 묶음 ‘모두 보냈어요’(2026-11-09 round 3): 이번 달 내(합쳐서면 공동) 체크리스트에서 체크 안 한 줄이 있을 때만
-          const canAll = !readOnly && !partnerTab && n < ls.length;
-          return (
-            <section key={title} className="hg-checkgroup" aria-label={title}>
-              <SectionHeader
-                // 2026-11-09 밀도: 진행 원 대신 한 줄 “저금 0/2 ›”(개수는 조용한 글자, 화면 읽기는 문장)
-                variant="group"
-                title={title}
-                // 한 개수만 오렌지 600(브랜드 색 규칙 2026-11-09, `hg-sechead__count b`). 0이면 강조 없음
-                count={
-                  n > 0 ? (
-                    <>
-                      <b>{n}</b>/{ls.length}
-                    </>
-                  ) : (
-                    `${n}/${ls.length}`
-                  )
-                }
-                countLabel={copy.progress(ls.length, n)}
-                // 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3)
-                onTitle={kind === 'saving' ? openList : undefined}
-                titleLabel={kind === 'saving' ? copy.listOpen : undefined}
-                action={
-                  canAll ? (
-                    <button
-                      type="button"
-                      className="hg-btn hg-btn--link hg-btn--accent"
-                      aria-label={copy.groupAllSentLabel(title)}
-                      aria-busy={group.busy === kind || undefined}
-                      disabled={!!group.busy}
-                      onClick={() => void group.run(kind, ls)}
-                    >
-                      {copy.groupAllSent}
-                    </button>
-                  ) : undefined
-                }
-              />
-              <div className="hg-checklist__list">{ls.map(row)}</div>
-            </section>
-          );
-        })}
-      </div>
+          })}
+        </div>
+      )}
       {/* 파트너 탭(각자)은 보기만이라 고치는 링크 없음(2026-11-09 round 3) */}
       {!partnerTab && (
         <button
