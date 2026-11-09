@@ -8,7 +8,7 @@
 - 질문 화면의 하나 고르기(결혼 여부 묻기)는 카드형 `hg-option--card`(2026-11-03 지그재그 선택 카드처럼 바꿈).
   - 안 고른 카드: `surface` 바탕 + 1px `hairline` 테두리, `radius-lg`, 안쪽 16px, 높이 64px 이상. 올리면 테두리 `border-control`.
   - 왼쪽 아이콘 칸(`hg-option__icon`): 2026-11-09 그리지 않음. 2D 선택지 그림(Illustrations ‘나중 과제’ 5번)이 들어올 때까지 빈 칸 없이 글자가 카드 왼쪽 끝에서 시작. `icon`은 그림 주제로만 남김.
-  - 가운데 `hg-option__body`: 라벨(`hg-option__label`, 16px 600) 아래 회색 1줄(`hg-help`)이나 미리보기.
+  - 가운데 `hg-option__body`: 라벨(`hg-option__label`, 15px 600) 아래 회색 1줄(`hg-help`)이나 미리보기.
   - 오른쪽 끝: 누르면 바로 다음으로 가는 카드(자동 다음)는 `chevron-right`(`hg-option__go`, `stone`). 고른 뒤 ‘다음’을 누르는 카드(O-30, 설정)는 `hg-option__mark`(24px 원): 안 고르면 `border-control` 테두리 빈 원, 고르면 `accent-app` 오렌지 원 + `on-accent-app` 체크(2026-11-09, 체크 목록 `hg-check`와 같은 오렌지 원, 2026-11-04 파랑에서 바꿈. 카드 테두리는 `ink` 그대로). 화면 읽기는 `aria-checked`(표시는 `aria-hidden`).
   - 고른 카드: 1px `ink` 테두리 + 안쪽 1px `ink` 그림자(고른 칩과 같음). 바뀔 때 `dur-fast`(‘동작 줄이기’면 없음).
   - React: `ChoiceCards` 선택지의 `icon`, 오른쪽 표시는 `go`(기본은 자동 다음이면 ›).
