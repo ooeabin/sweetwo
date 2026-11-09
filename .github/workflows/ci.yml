@@ -83,7 +83,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: 21 }
+        with: { distribution: temurin, java-version: 21, cache: gradle }
       - run: pnpm install --frozen-lockfile
       - name: 화면 묶음 → Android 프로젝트(cap sync)
         run: pnpm --filter @sweetwo/mobile build && pnpm --filter @sweetwo/mobile exec cap sync android

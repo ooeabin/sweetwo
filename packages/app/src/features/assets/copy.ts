@@ -19,7 +19,7 @@ export const copy = {
   // F-01
   netWorth: '순자산',
   // 2026-11-03 F-01 다시 짬 [확인 필요]
-  ourNetWorth: '우리 순자산',
+  ourNetWorth: '순자산',
   lastMonth: '지난달보다',
   grew: '늘었어요',
   shrank: '줄었어요',
@@ -288,7 +288,7 @@ export const copy = {
   rankYou: '우리',
   rankAria: (pct: number) => `우리나라 전체 가구 중 상위 ${pct}%`,
   rankBasis: (label: string, ym: string) => `${label}, ${ym} 말 기준`,
-  rankOurs: (month: number) => `${month}월 우리 순자산`,
+  rankOurs: (month: number) => `${month}월 순자산`,
   rankMedian: '전체 가구 중앙값', // [확인 필요]
   rankBracket: (i: number) => `순자산 구간 ${i + 1}번째`,
   // 지난달 대비(히어로 아래 한 줄): ‘9월보다 [3%p] 올랐어요’

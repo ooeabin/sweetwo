@@ -187,7 +187,7 @@ test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재�
   await page.getByRole('link', { name: '자산 관리' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/assets$/);
   // 자산(원금 기준) 3 + 8 + 2 + 파트너 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
-  const nw = page.getByRole('region', { name: '우리 순자산' });
+  const nw = page.getByRole('region', { name: '순자산', exact: true });
   await expect(nw).toContainText('1,600만 원');
   await expect(nw).toContainText('지난달보다 180만 원 늘었어요');
   // 예상 순자산과 안 판 수익은 목록 한 줄(2026-11-03)

@@ -22,7 +22,7 @@ export const copy = {
   // H-04 순자산(F-01과 같은 표기)
   netWorth: '순자산',
   // 2026-11-03 H-04 F-01과 같게 [확인 필요]
-  ourNetWorth: '우리 순자산',
+  ourNetWorth: '순자산',
   assetsTitle: '자산', // 2026-11-09 홈 H-04 머리(탭 이름은 ‘자산 관리’)
   assetsMore: '자산 더보기',
   lastMonth: '지난달보다',

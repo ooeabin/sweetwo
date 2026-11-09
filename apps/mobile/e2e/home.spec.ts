@@ -255,7 +255,7 @@ test('H-04 자산: 순자산과 지난달 대비, 공지 띠(AD-10)는 할 일 �
   });
   await page.goto('/');
   // F-01과 같은 모양(2026-11-03): 문장 + 최근 달 막대. 예상·안 판 수익은 F-01에서
-  const card = page.getByRole('region', { name: '우리 순자산' });
+  const card = page.getByRole('region', { name: '순자산', exact: true });
   await expect(card).toContainText('3,000만 원');
   await expect(card).toContainText('지난달보다 210만 원 늘었어요');
   await expect(
