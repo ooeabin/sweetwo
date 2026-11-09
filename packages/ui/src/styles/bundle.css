@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (722c45e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (22275f6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -23,7 +23,8 @@
 /* 카드 안 보조 버튼은 옅은 오렌지 바탕 + 진한 오렌지 글자 */
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--brand-ink); }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
-.hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--accent-app-text); font: 600 14px/20px var(--font-sans); }  /* 2026-11-09 글자 버튼은 브랜드 오렌지 600(당근처럼, 대비 예외는 tokens.css brand) */
+.hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--link-sub, var(--ink-2)); font: 600 14px/20px var(--font-sans); }  /* 2026-11-09 글자 버튼 기본은 진한 회색(ink-2 600): 고치기, 바꾸기, 월급 계획 고치기, 더 보기 */
+.hg-btn--link.hg-btn--accent { color: var(--accent-app-text); }  /* 2026-11-09 그 자리의 ‘다음 할 일’ 하나만 오렌지(‘모두 보냈어요’, ‘월급 알려 주기’, ‘기한 정하기’). 대비 예외는 tokens.css brand */
 .hg-btn--quiet, .hg-btn--link.hg-btn--quiet { color: var(--slate); font-weight: 500; }  /* 건너뛰기·미루기 글자 버튼(‘나중에 할게요’ ‘건너뛸게요’, 2026-11-03). 오렌지가 아니라 slate(2026-11-09) */
 .hg-btn--sm { height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-btn-sm); font: 600 14px/20px var(--font-sans); }
 .hg-btn--block { width: 100%; }
@@ -1466,6 +1467,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin, .hg-adminauth { --accent-app: var(--success); --accent-app-soft: var(--success-soft); --accent-app-ink: var(--success); --on-accent-app: var(--on-success); --accent-app-text: var(--focus); --focus-ring: var(--focus); }
 /* 2026-11-09 웹사이트(hg-site)는 앱 포인트 규칙 밖: 브랜드 색은 워드마크와 주 버튼에만(SiteLayout), 글자 버튼·포커스는 예전 그대로 */
 .hg-site { --accent-app-text: var(--focus); --focus-ring: var(--focus); }
+.hg-admin, .hg-adminauth, .hg-site { --link-sub: var(--focus); }  /* 어드민·웹사이트 글자 버튼은 예전 파랑 그대로 */
 .hg-admin :is(.hg-banner--todo, .hg-banner--line), .hg-admin :is(.hg-banner--todo .hg-banner__text, .hg-banner--line strong) { color: var(--success); }  /* 어드민 공지 미리보기 띠는 예전 파란 글자 그대로 */
 .hg-admin :is(.hg-banner--todo, .hg-banner--line) .hg-btn--secondary { color: var(--ink); }
 .hg-admin :is(.hg-banner--todo .hg-iconbtn, .hg-banner--line .hg-btn--ghost) { color: var(--success); }
