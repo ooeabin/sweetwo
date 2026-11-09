@@ -66,6 +66,7 @@ export function useHomeInput(on = true) {
           checklists: (lists.data ?? []).map((c) => ({
             owner_user_id: c.owner_user_id,
             label: c.label,
+            cycle_start: c.cycle_start,
             cycle_end: c.cycle_end,
             lines: c.pay_check_line,
           })),

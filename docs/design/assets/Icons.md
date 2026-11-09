@@ -1,10 +1,10 @@
 # Icons
 
-Phosphor 아이콘(MIT 라이선스) 89개(2026-11-09, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
+Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
 
-- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸(2026-11-09 독은 아이콘만이라 고른 칸 채운 모양 `ink`, 나머지 굵은 선 `stone`), 켜진 상태를 보여 줄 때(`is-filled`).
-- 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴, 독 칸 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
-- 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바, 하단 독, 떠 있는 추가 버튼).
+- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 켜진 상태를 보여 줄 때(`is-filled`). 하단 독은 2026-11-09 없앰(좁은 창은 홈 머리 ☰ 메뉴 서랍).
+- 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
+- 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바), 22(좁은 창 머리와 메뉴 서랍 머리).
 - 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음. 예외: 줄 앞 칸(Lead)과 알림 아이콘 원은 영역 색 원 위 짝 글자색(`*-ink`, 2026-11-09, ListRow ‘Lead 종류 표’).
 - 줄 앞 종류 아이콘(2026-11-09): 줄 앞 칸은 2D 그림 대신 이 세트로 확정. 종류와 아이콘의 짝은 `packages/ui/src/components/lead-kinds.ts` 한 곳.
 - 아이콘만으로 뜻을 전하지 않음: 라벨 또는 `aria-label`을 같이 둠.
@@ -47,6 +47,7 @@ Phosphor 아이콘(MIT 라이선스) 89개(2026-11-09, `Icon`의 `IconName`). �
 | `hg-ico--image` | `image` |  |
 | `hg-ico--info` | `info` |  |
 | `hg-ico--link` | `link` | 초대 링크, 링크 복사 |
+| `hg-ico--list` | `list` | 2026-11-09 좁은 창 홈 머리 메뉴(☰) 버튼 → Drawer |
 | `hg-ico--list-filter` | `funnel-simple` |  |
 | `hg-ico--loader-circle` | `circle-notch` |  |
 | `hg-ico--lock` | `lock` |  |

@@ -117,6 +117,11 @@ export interface DesktopBridge {
    * 못 불러오면 'failed'. 데스크톱·브라우저는 없음(광고 없이 바로)
    */
   ads?: { rewarded: () => Promise<'rewarded' | 'closed' | 'failed'> };
+  /**
+   * 안드로이드 하드웨어 뒤로(2026-11-09). 받는 쪽이 true를 돌려주면 처리한 것, false면 브리지가 기본 동작
+   * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS·데스크톱은 없음
+   */
+  onBack?: (cb: () => boolean) => () => void;
   /** main이 앱 창에 이 화면으로 가라고 할 때(트레이 위젯, 위젯 설정 메뉴) */
   onNavigate: (cb: (path: string) => void) => () => void;
   /** 트레이 위젯(26)·위젯 설정(S-22). 값은 core TraySnapshot·TrayState·WidgetSettings로 검사해서 씀 */

@@ -131,7 +131,8 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   seedNotis(db);
   const narrow = info.project.name === 'narrow';
 
-  await page.goto('/calendar/list');
+  // 좁은 창 알림 종은 홈 머리에만(2026-11-09, 홈 밖 메뉴 머리는 ‹ + 제목)
+  await page.goto(narrow ? '/' : '/calendar/list');
   const bell = page
     .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
     .getByRole('button', { name: '알림', exact: true });

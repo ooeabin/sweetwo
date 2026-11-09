@@ -35,7 +35,7 @@ async function start(page: Page) {
   await page.getByRole('radio', { name: '나중에 할게요' }).click();
 }
 
-test('신혼부부: 이름부터 첫 체크리스트까지(목표 고르기 없음), 홈 저금 항목 제안 → W-11', async ({
+test('신혼부부: 이름부터 첫 체크리스트까지(목표 고르기 없음), 홈 큰 상자 → W-02 첫 저금 빈 줄 → W-11', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -116,7 +116,8 @@ test('신혼부부: 이름부터 첫 체크리스트까지(목표 고르기 없�
   // 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
   await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
 
-  // 홈 H-03 첫 저금 빈 줄 → W-11a 저금 추가 → 매달 금액은 빈 칸, 보조 = 여유 자금 139만(2026-11-09)
+  // 홈 큰 상자(2026-11-09 홈 허브) → W-02 첫 저금 빈 줄 → W-11a 저금 추가 → 매달 금액은 빈 칸, 보조 = 여유 자금 139만
+  await page.locator('.hg-hubhero').click();
   await page.getByRole('button', { name: '저금 추가 (여유 자금 139만 원)' }).click();
   await heading(page, '무엇을 위해 모을까요?');
   await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');

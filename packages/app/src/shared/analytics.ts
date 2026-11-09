@@ -174,6 +174,19 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만)
+      name: 'home_box_tapped';
+      props: {
+        box: 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
+        todo?: string;
+      };
+    }
+  | {
+      // 좁은 창 메뉴 서랍 줄을 누름(19 앱 기본 틀 11번, 2026-11-09)
+      name: 'menu_item_tapped';
+      props: { item: string };
+    }
+  | {
       name: 'plan_link_tapped';
       props: { whose: 'self' | 'partner' | 'joint'; checked: number; total: number };
     }

@@ -42,24 +42,22 @@ function shapeBody(s: SkelShape) {
     case 'rows':
       return rows;
     case 'home':
+      // 2026-11-09 홈 허브 모양: 큰 상자(다음 월급날 + 막대) + 반 칸 타일 둘
       return (
-        <>
-          <div className="hg-stack" style={{ gap: 'var(--space-2)' }} aria-hidden="true">
+        <div className="hg-hub" aria-hidden="true">
+          <div className="hg-card hg-stack hg-hub__wide">
             <Skel w={120} />
-            <Skel w={200} h={32} />
-          </div>
-          <div className="hg-card hg-stack" aria-hidden="true">
-            <Skel w="50%" h={18} />
+            <Skel w={160} h={28} />
             <Skel h={10} round />
             <SkelRowsInline />
           </div>
-          <SkelRows
-            rows={[
-              [140, 80],
-              [110, 80],
-            ]}
-          />
-        </>
+          {['a', 'b'].map((k) => (
+            <div key={k} className="hg-card hg-stack" style={{ minHeight: 164 }}>
+              <Skel w="60%" h={18} />
+              <Skel w="40%" />
+            </div>
+          ))}
+        </div>
       );
     case 'tiles':
       return (
@@ -123,7 +121,11 @@ export function LoadingFrame({
   shape?: SkelShape;
 }) {
   const s = shape ?? (sub ? 'list' : current === 'month' ? 'home' : 'cards');
-  return <MainFrame current={current} sub={sub} columns={[<SkelBody key="l" shape={s} />]} />;
+  // 홈·자산 관리 첫 화면은 회색 바탕(2026-11-09)
+  const tone = !sub && (current === 'month' || current === 'assets') ? 'alt' : undefined;
+  return (
+    <MainFrame current={current} sub={sub} tone={tone} columns={[<SkelBody key="l" shape={s} />]} />
+  );
 }
 
 function SkelRowsInline() {

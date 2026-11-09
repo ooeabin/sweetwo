@@ -51,6 +51,7 @@ export type IconName =
   | 'image'
   | 'info'
   | 'link'
+  | 'list'
   | 'list-filter'
   | 'loader-circle'
   | 'lock'

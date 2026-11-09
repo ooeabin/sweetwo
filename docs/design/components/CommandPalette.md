@@ -6,7 +6,7 @@ Ctrl/⌘+K로 여는 검색, 빠른 실행.
 - 위 입력 줄(60px) + 오른쪽 Esc 표시. 결과는 묶음 이름(`stone`) 아래 52px 줄: 앞 아이콘 원 32px(`hg-cmd__lead`, `plate` 바탕) + 이름(보조 정보는 아래 12px), 고른 줄 `surface-alt` 가득 차게.
 - 안쪽 여백(2026-11-03, Devin·Base44 팔레트처럼 넉넉히): 입력 줄, 묶음 이름, 줄 아이콘이 왼쪽 24px에 맞음(좁은 창 20px). 카드 최대 560px, 결과는 화면 60%까지 스크롤.
 - 아래 키 안내 줄(`hg-cmd__foot`, 넓은 창만): “↑ ↓ 이동” “Enter 열기” “Esc 닫기” [확인 필요].
-- 뒤 막은 body에 붙여(portal) 좁은 창 탭 막대까지 어둡게.
+- 뒤 막은 body에 붙여(portal) 화면 전체를 어둡게.
 - ↑↓로 이동, Enter 실행, Esc 닫기. 결과 목록 `role="listbox"`, 고른 줄 `aria-selected`.
 - 다크에서 보이도록 `hairline` 테두리. 모달과 같은 층(`z-modal`), 뒤 막 `scrim`.
 

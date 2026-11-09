@@ -1,8 +1,18 @@
 import { coupleOf, formatDateWeekday, formatKstMonthDayTime, todayKst } from '@sweetwo/core';
-import { AppFrame, useNarrow, type AppFrameProps, type AppTab } from '@sweetwo/ui';
+import {
+  AppFrame,
+  Drawer,
+  IconButton,
+  useNarrow,
+  type AppFrameProps,
+  type AppTab,
+  type DrawerItem,
+} from '@sweetwo/ui';
 import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { create } from 'zustand';
+import { track } from '../../shared/analytics';
 import { useMask } from '../../shared/mask';
 import { usePeopleArt, useSocialAvatar } from '../../shared/person';
 import { useCacheInfo } from '../../shared/offline-cache';
@@ -14,7 +24,7 @@ import {
   useNotiRealtime,
   usePushRegistration,
 } from '../notifications';
-import { addFor, FrameCommands } from './command';
+import { FrameCommands } from './command';
 import { copy } from './copy';
 import { useTraySync } from './tray-sync';
 import { useMe, usePartner, useSpace } from './data';
@@ -27,24 +37,68 @@ const HREF: Record<AppTab, string | undefined> = {
   calendar: '/calendar',
 };
 
+/** 웹사이트 페이지 열기(앱은 앱 안 브라우저, 웹은 새 창). 서랍 ‘공지’ → L-03 */
+const openSite = (path: string) => {
+  const url = `${SITE}${path}`;
+  const b = window.sweetwo;
+  if (b?.openUrl) void b.openUrl(url);
+  else window.open(url, '_blank', 'noopener');
+};
+const SITE = 'https://sweetwo.kr';
+
+const useMenuStore = create<{ open: boolean; set: (v: boolean) => void }>((set) => ({
+  open: false,
+  set: (open) => set({ open }),
+}));
+
+/** 홈이 마지막으로 그려졌을 때의 기록 위치(react-router history.state.idx). ‹·하드웨어 뒤로가 홈 바로 다음이면 뒤로 가기 */
+let homeIdx: number | null = null;
+const histIdx = () => {
+  const st: unknown = window.history.state;
+  return st && typeof st === 'object' && 'idx' in st && typeof st.idx === 'number' ? st.idx : null;
+};
+
+/** 안드로이드 뒤로(하드웨어) 처리 순서: 나중에 붙은 것이 먼저. true면 처리함 */
+const backHandlers: (() => boolean)[] = [];
+let backBound = false;
+function useHardwareBack(fn: (() => boolean) | null) {
+  const ref = useRef(fn);
+  ref.current = fn;
+  useEffect(() => {
+    if (!ref.current) return;
+    const h = () => ref.current?.() ?? false;
+    backHandlers.push(h);
+    const b = window.sweetwo;
+    if (!backBound && b?.onBack) {
+      backBound = true;
+      b.onBack(() => [...backHandlers].reverse().some((h) => h()));
+    }
+    return () => {
+      const i = backHandlers.indexOf(h);
+      if (i >= 0) backHandlers.splice(i, 1);
+    };
+  }, [!!fn]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 /**
- * 메뉴 첫 화면 틀(AppFrame): 탭 4개, 도구, 두 사람 아바타(넓은 창 사이드바), 금액 가리기.
- * 이번 달은 오늘 띠(today), 다른 메뉴는 화면 제목 줄(page).
+ * 메뉴 첫 화면 틀(AppFrame): 넓은 창은 탭 4개 사이드바, 좁은 창(2026-11-09)은 홈 머리 ☰ 메뉴 서랍 + 홈 밖 메뉴 ‘‹ 홈으로’.
+ * 홈은 제목 줄(today), 다른 메뉴는 화면 제목 줄(page).
  */
 export function MainFrame(
-  p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner'> & {
+  p: Pick<AppFrameProps, 'current' | 'today' | 'page' | 'columns' | 'banner' | 'tone'> & {
     /**
-     * 메뉴 첫 화면이 아닌 화면(2026-11-03 추가 입구 하나로): + 버튼 없음.
-     * detail = 저금 항목 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면. 둘 다 좁은 창은 앱 머리와 탭 막대 없이 ‘‹ 제목’ 한 줄(2026-11-04)
+     * 메뉴 첫 화면이 아닌 화면. detail = 저금 항목 상세, 항목 상세 같은 안쪽 화면. settings = 설정 하위·알림 화면.
+     * 둘 다 좁은 창은 앱 머리 없이 ‘‹ 제목’ 한 줄(2026-11-04)
      */
     sub?: 'detail' | 'settings';
     /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
     narrowTitle?: string;
-    /** 좁은 창 + 버튼 숨김(월급 탭에 월급 계획이 없을 때, 20 W-11 ‘+ 버튼 대신 월급 알려 주기’) */
-    noAdd?: boolean;
   },
 ) {
   const nav = useNavigate();
+  const loc = useLocation();
+  // 서랍 열림은 틀 밖에 둠(불러오는 중 틀 → 홈 틀로 바뀌어도 열린 채)
+  const { open: menu, set: setMenu } = useMenuStore();
   const me = useMe();
   const space = useSpace();
   const partner = usePartner();
@@ -83,6 +137,76 @@ export function MainFrame(
     const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
     return () => clearInterval(t);
   }, [signedIn]);
+  // 서랍 줄(19 앱 기본 틀 11번): 메뉴 4개 / 내 정보, 설정 / 우리 둘(+ 초대하기, 파트너 합류 전만) / 공지, 문의, 도움말
+  const go = (to: string, replace = false, key?: string) => {
+    setMenu(false);
+    if (key) track('menu_item_tapped', { item: key });
+    // 홈 밖 메뉴끼리 옮길 때는 바꿔치기(뒤로가 늘 홈으로 오게, 2026-11-09)
+    nav(to, { replace: replace && loc.pathname !== '/' });
+  };
+  const path = loc.pathname;
+  if (path === '/') homeIdx = histIdx();
+  // ‹(홈으로): 홈에서 바로 왔으면 뒤로(기록이 쌓이지 않게), 아니면 홈으로 바꿔치기
+  const goHome = () => {
+    const i = histIdx();
+    if (homeIdx !== null && i !== null && i === homeIdx + 1) nav(-1);
+    else nav('/', { replace: true });
+  };
+  const d = copy.drawer;
+  const item = (key: string, label: string, to: string, on: boolean): DrawerItem => ({
+    key,
+    label,
+    current: on,
+    onSelect: () => go(to, to !== '/', key),
+  });
+  const groups: DrawerItem[][] = [
+    [
+      item('home', d.home, '/', path === '/'),
+      item('salary', d.salary, '/salary', path === '/salary'),
+      item('assets', d.assets, '/assets', path === '/assets' || path === '/assets/items'),
+      item('calendar', d.calendar, '/calendar', path === '/calendar/list'),
+    ],
+    [
+      item('me', d.me, '/settings/me', path === '/settings/me'),
+      item('settings', d.settings, '/settings', path === '/settings'),
+    ],
+    [
+      item('couple', d.couple, '/settings/couple', path === '/settings/couple'),
+      ...(space.data?.couple_state === 'not_joined'
+        ? [item('invite', d.invite, '/settings/couple', false)]
+        : []),
+    ],
+    [
+      {
+        key: 'notice',
+        label: d.notice,
+        onSelect: () => {
+          setMenu(false);
+          track('menu_item_tapped', { item: 'notice' });
+          openSite('/releases');
+        },
+      },
+      item('inquiry', d.inquiry, '/settings/help/inquiries', path === '/settings/help/inquiries'),
+      item('help', d.help, '/settings/help', path === '/settings/help'),
+    ],
+  ];
+  const version =
+    window.sweetwo?.appVersion ?? (import.meta.env.VITE_APP_VERSION as string | undefined);
+  // 좁은 창 홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹ = 홈으로, 안드로이드 뒤로도 홈으로(2026-11-09)
+  const hubSub = !p.sub && p.current !== 'month';
+  useHardwareBack(
+    menu
+      ? () => {
+          setMenu(false);
+          return true;
+        }
+      : narrow && hubSub
+        ? () => {
+            goHome();
+            return true;
+          }
+        : null,
+  );
   const online = useOnline();
   // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”
   const savedAt = useCacheInfo((s) => s.savedAt);
@@ -107,6 +231,7 @@ export function MainFrame(
         page={p.page}
         columns={p.columns}
         sub={!!p.sub}
+        tone={p.tone}
         banner={
           offline || p.banner ? (
             <>
@@ -116,14 +241,10 @@ export function MainFrame(
           ) : undefined
         }
         onSearch={() => setPalette(true)}
-        // 좁은 창 + 버튼: 그 화면에 맞는 추가(설정에서는 숨김)
-        // 홈은 오늘 띠 ‘추가’ 메뉴가 같은 일을 해서 + 버튼 없음(2026-11-03)
-        // + 버튼은 월급(저금 항목 추가), 자산 관리, 캘린더 첫 화면에만(상세, 하위 화면은 없음, 2026-11-03)
-        onAdd={
-          p.current && p.current !== 'month' && !p.sub && !p.noAdd
-            ? () => nav(addFor(p.current))
-            : undefined
-        }
+        // 2026-11-09 좁은 창 + 버튼(FAB)과 하단 탭 막대 없앰: 추가는 화면 안 ‘+ … 추가’ 줄, 메뉴는 홈 머리 ☰ 서랍
+        onMenu={() => setMenu(true)}
+        menuOpen={menu}
+        onHome={goHome}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
@@ -144,7 +265,8 @@ export function MainFrame(
           mask: copy.mask,
           noti: copy.noti,
           settings: copy.settings,
-          add: copy.add,
+          menu: copy.menu,
+          home: copy.home,
           me: copy.me,
           stats: copy.stats,
         }}
@@ -165,6 +287,24 @@ export function MainFrame(
         saveState={saving ? copy.saving : copy.saved}
       />
       <N01Panel />
+      {menu && (
+        <Drawer
+          label={copy.menu}
+          closeLabel={copy.close}
+          groups={groups}
+          tools={
+            <IconButton
+              icon="bell"
+              label={copy.noti}
+              ghost
+              dot={!!unread.data}
+              onClick={() => go('/notifications')}
+            />
+          }
+          foot={version ? copy.version(version) : undefined}
+          onClose={() => setMenu(false)}
+        />
+      )}
     </FrameCommands>
   );
 }

@@ -7,7 +7,15 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import { businessDayOnOrBefore, readWon, todayKst } from '@sweetwo/core';
-import { AmountInput, Button, IconButton, QuestionLayout, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  AddRow,
+  AmountInput,
+  Button,
+  IconButton,
+  QuestionLayout,
+  SectionHeader,
+  Tabs,
+} from '@sweetwo/ui';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
@@ -155,7 +163,8 @@ export function W02Checklist() {
         ]
       : null;
   const pending = space.data.couple_state === 'unlink_pending';
-  // 제목 줄 ‘+ 저금 추가’(넓은 창만, 좁은 창은 + 버튼, 20 W-02). 다른 메뉴 제목 줄 추가처럼 보조 버튼(2026-11-09).
+  // 제목 줄 ‘+ 저금 추가’(넓은 창만, 20 W-02). 다른 메뉴 제목 줄 추가처럼 보조 버튼(2026-11-09).
+  // 좁은 창은 저금 묶음 끝 ‘+ 저금 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신)
   // 월급이 없거나 해제 대기 중이면 없음
   const page = {
     title: copy.tabTitle,
@@ -167,11 +176,10 @@ export function W02Checklist() {
       ) : undefined,
   };
   if (!list) {
-    // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’, 좁은 창 + 버튼 없음(20 W-11)
+    // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’, 추가 입구 없음(20 W-11)
     return (
       <MainFrame
         current="salary"
-        noAdd
         page={page}
         columns={[
           <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
@@ -464,6 +472,10 @@ export function W02Checklist() {
                   }
                 />
                 <div className="hg-checklist__list">{ls.map(row)}</div>
+                {/* 2026-11-09 + 버튼(FAB) 대신 저금 묶음 끝 회색 ‘+ 저금 추가’(이번 달 내 탭·합쳐서만, 해제 대기면 없음) */}
+                {kind === 'saving' && !readOnly && !partnerTab && !pending && (
+                  <AddRow block label={copy.listAdd} onClick={() => nav(savingPaths.add)} />
+                )}
               </section>
             );
           })}

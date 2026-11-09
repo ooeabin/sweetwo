@@ -4,9 +4,9 @@ import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 import { Wordmark } from './Wordmark';
 
-// 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 회색 바탕 위 (홈만) 인사 카드 + 두 단 본문.
-// 좁은 창(768px 미만): 머리(왼쪽 지금 자리: 홈은 워드마크, 다른 메뉴는 메뉴 이름 굵은 제목 + 오른쪽 알림·설정 아이콘, 2026-11-09)
-// + 하단 탭 막대(아이콘만, 이름은 화면 읽기용)와 + 버튼.
+// 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 본문(홈·자산 관리는 회색 바탕, tone="alt").
+// 좁은 창(768px 미만, 2026-11-09 GCOO 홈처럼): 하단 탭 막대와 + 버튼 없음. 홈 머리 = 워드마크 + 알림 + ☰(메뉴 서랍),
+// 다른 메뉴 첫 화면 머리 = ‹(홈으로) + 굵은 제목. 서랍(Drawer)은 소비자가 onMenu로 엶.
 
 // 2026-11-08 ADR 0007: 목표 탭 자리에 월급 탭(손 위 동전 hand-coins)
 export type AppTab = 'month' | 'salary' | 'assets' | 'calendar';
@@ -71,7 +71,10 @@ export interface AppFrameProps {
     mask: string;
     noti: string;
     settings: string;
-    add: string;
+    /** ☰ 버튼 이름(“메뉴”) */
+    menu: string;
+    /** ‹ 버튼 이름(“홈으로”) */
+    home: string;
     me: string;
     /** 숫자 타일 묶음(좁은 창에서 가로로 넘김) */
     stats: string;
@@ -81,7 +84,12 @@ export interface AppFrameProps {
   onSearch?: () => void;
   onNoti?: () => void;
   onSettings?: () => void;
-  onAdd?: () => void;
+  /** 좁은 창 홈 머리 ☰(메뉴 서랍 열기) */
+  onMenu?: () => void;
+  /** ☰가 연 서랍이 열려 있음(aria-expanded) */
+  menuOpen?: boolean;
+  /** 좁은 창 홈 밖 메뉴 첫 화면 머리 ‹ = 홈으로 */
+  onHome?: () => void;
   hasNewNoti?: boolean;
   people: AppFramePerson[];
   saveState?: string;
@@ -89,8 +97,10 @@ export interface AppFrameProps {
   columns: ReactNode[];
   /** 본문 맨 위 띠(해제 대기 등) */
   banner?: ReactNode;
-  /** 하위 화면(설정 안쪽 등): 좁은 창에서 앱 머리와 탭 막대를 숨기고 본문의 ‘‹ 제목’ 한 줄만(2026-11-03) */
+  /** 하위 화면(설정 안쪽 등): 좁은 창에서 앱 머리를 숨기고 본문의 ‘‹ 제목’ 한 줄만(2026-11-03) */
   sub?: boolean;
+  /** 바탕(2026-11-09): alt = 회색(surface-alt) 바탕 + 테두리·그림자 없는 흰 상자(홈, 자산 관리). 기본은 흰 바탕 */
+  tone?: 'alt';
 }
 
 function Person({ p }: { p: AppFramePerson }) {
@@ -172,8 +182,9 @@ export function AppFrame(p: AppFrameProps) {
     </>
   );
   const focus = p.today?.focus;
+  const home = p.current === 'month';
   return (
-    <div className={cx('hg-frame', p.sub && 'hg-frame--sub')}>
+    <div className={cx('hg-frame', p.sub && 'hg-frame--sub', p.tone === 'alt' && 'hg-frame--alt')}>
       <aside className="hg-appside">
         <div className="hg-appside__in">
           <span className="hg-appside__logo">
@@ -225,41 +236,58 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리(2026-11-09): 왼쪽은 지금 자리. 홈은 워드마크(사이드바와 같은 그림), 다른 메뉴는 메뉴 이름이 보이는 제목(h1).
-            두 사람 아바타와 이름은 뺌(초대는 홈 할 일 띠와 설정 S-12). 오른쪽은 알림, 설정 */}
+        {/* 좁은 창 머리(2026-11-09 GCOO 홈처럼). 홈: 왼쪽 워드마크, 오른쪽 알림 + ☰(메뉴 서랍, 설정은 서랍 안).
+            홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹(홈으로) + 메뉴 이름 굵은 제목(h1), 오른쪽 버튼 없음 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
           <div className="hg-mhead__place">
-            {p.current === 'month' ? (
+            {home ? (
               <>
                 <span className="hg-mhead__logo">
                   <Wordmark height={24} />
                 </span>
-                {/* 홈 제목은 인사 카드나 제목 줄(today)이 h1. 그것이 없는 홈(합류 대기, 불러오는 중)만 여기서 화면 읽기용 h1 */}
+                {/* 홈 제목은 제목 줄(today)이 h1. 그것이 없는 홈(합류 대기, 불러오는 중)만 여기서 화면 읽기용 h1 */}
                 {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
               </>
-            ) : p.today ? (
-              <span className="hg-mhead__title">{p.narrowTitle}</span>
             ) : (
-              <h1 className="hg-mhead__title">{p.narrowTitle}</h1>
+              <>
+                {p.onHome && (
+                  <IconButton
+                    icon="chevron-left"
+                    label={p.labels.home}
+                    ghost
+                    className="hg-mhead__back"
+                    onClick={p.onHome}
+                  />
+                )}
+                {p.today ? (
+                  <span className="hg-mhead__title">{p.narrowTitle}</span>
+                ) : (
+                  <h1 className="hg-mhead__title">{p.narrowTitle}</h1>
+                )}
+              </>
             )}
           </div>
-          {/* 검색 버튼은 좁은 창 머리에서 뺌(2026-11-09, 넓은 창 사이드바 검색 칸과 ⌘K는 그대로) */}
-          {/* 금액 가리기 눈은 좁은 창 머리에서 뺌(설정 S-10, ⌘K, Ctrl+Shift+H, 2026-11-03) */}
-          <IconButton
-            icon="bell"
-            label={p.labels.noti}
-            ghost
-            dot={p.hasNewNoti}
-            disabled={!p.onNoti}
-            onClick={p.onNoti}
-          />
-          <IconButton
-            icon="settings"
-            label={p.labels.settings}
-            ghost
-            disabled={!p.onSettings}
-            onClick={p.onSettings}
-          />
+          {home && (
+            <>
+              <IconButton
+                icon="bell"
+                label={p.labels.noti}
+                ghost
+                dot={p.hasNewNoti}
+                disabled={!p.onNoti}
+                onClick={p.onNoti}
+              />
+              <IconButton
+                icon="list"
+                label={p.labels.menu}
+                ghost
+                aria-haspopup="dialog"
+                aria-expanded={!!p.menuOpen}
+                disabled={!p.onMenu}
+                onClick={p.onMenu}
+              />
+            </>
+          )}
         </div>
 
         {p.today?.plain ? (
@@ -331,26 +359,6 @@ export function AppFrame(p: AppFrameProps) {
           ))}
         </main>
       </div>
-
-      {/* 좁은 창 하단 탭 막대(아이콘만, 2026-11-09) + 추가 */}
-      <nav className="hg-dock" aria-label={p.narrowTitle}>
-        {p.tabs.map((t) => (
-          <TabLink
-            key={t.key}
-            t={t}
-            current={p.current}
-            onTab={p.onTab}
-            className="hg-dock__item"
-            activeClass="is-active"
-            showLabel={false}
-          />
-        ))}
-      </nav>
-      {p.onAdd !== undefined && (
-        <button type="button" className="hg-fab" aria-label={p.labels.add} onClick={p.onAdd}>
-          <Icon name="plus" size={24} />
-        </button>
-      )}
     </div>
   );
 }

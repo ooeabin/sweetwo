@@ -68,9 +68,8 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   Object.assign(db.space ?? {}, { couple_state: 'solo' });
   seedAssets(db);
   await page.goto('/');
-  const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
+  const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
   await expect(band).toBeVisible();
-  await expect(page.getByRole('region', { name: '일정' })).toContainText('청년 적금 만기');
   await band.getByRole('button').first().click();
   await expect(page.getByRole('heading', { name: '만기된 돈은 어디로 옮겼어요?' })).toBeVisible();
   await axe(page);
@@ -100,13 +99,11 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   const sav = db.assets.find((a) => a.id === 'a-sav');
   if (sav) sav.maturity_date = '2026-10-07';
   await page.goto('/');
-  const band = page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' });
+  const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
   await band.getByRole('button', { name: '닫기' }).click();
   await expect(band).toHaveCount(0);
   await page.reload();
-  await expect(page.locator('.hg-body__banner', { hasText: '청년 적금이 만기됐어요' })).toHaveCount(
-    0,
-  );
+  await expect(page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' })).toHaveCount(0);
 });
 
 test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 수정 내역에 고친 사람', async ({

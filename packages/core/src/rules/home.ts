@@ -8,6 +8,8 @@ import { deadlineDay } from './saving-item';
 export interface HomeChecklist {
   owner_user_id: string | null;
   label: string;
+  /** 기간 첫날(= 월급날, 체크리스트가 생긴 날). 없으면 ‘월급날 체크’ 할 일 없음 */
+  cycle_start?: string;
   cycle_end: string;
   lines: { state: string }[];
 }
@@ -61,6 +63,7 @@ export type HomeTodo =
   | { kind: 'unlink'; to: string }
   | { kind: 'reconnect'; to: string }
   | { kind: 'review'; label: string; left: number; key: string; to: string }
+  | { kind: 'check'; label: string; left: number; key: string; to: string }
   | { kind: 'invite'; to: string }
   | { kind: 'saving'; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
@@ -113,6 +116,22 @@ export function salaryState(
 }
 
 export const SAVING_TODO_KEY = 'saving-first';
+/** 월급날 체크 할 일이 보이는 날 수(월급날 포함, 19 H-06 3a, 2026-11-09) */
+export const CHECK_TODO_DAYS = 7;
+
+/**
+ * 월급날 체크 할 일(19 H-06 3a, 2026-11-09 홈 허브): 내(합쳐서면 공동) 이번 달 체크리스트에 체크 안 한 줄이 있고
+ * 오늘이 월급날(기간 첫날)부터 7일 안. 닫으면 이번 기간만 안 보임. 그 뒤 체크는 홈 큰 상자 → W-02, 월급 전 확인(W-05)
+ */
+export function checkTodo(i: HomeInput): Extract<HomeTodo, { kind: 'check' }> | null {
+  const c = myList(i);
+  if (!c?.cycle_start) return null;
+  const left = c.lines.filter((l) => l.state === 'wait').length;
+  const d = daysBetween(c.cycle_start, i.today);
+  const key = `check:${c.label}:${c.cycle_start}`;
+  if (!left || d < 0 || d >= CHECK_TODO_DAYS || i.closed.includes(key)) return null;
+  return { kind: 'check', label: c.label, left, key, to: PATHS.checklist };
+}
 
 /**
  * 첫 저금 추가 할 일(19 H-06 4b): 온보딩을 마친 날부터 7일 안 + 내 월급 계획(이번 달 체크리스트)이 있고 연결 해제 대기가 아님
@@ -129,7 +148,7 @@ export function firstSavingTodo(i: HomeInput): boolean {
   );
 }
 
-/** 할 일 한 줄(19 ‘할 일 한 줄 순서’, 맨 앞 하나) */
+/** 할 일 한 줄(19 ‘할 일 한 줄 순서’, 맨 앞 하나): 해제 요청 → 다시 연결 → 월급 전 확인 → 월급날 체크 → 초대 → 첫 저금 → 만기 → 경조사 */
 export function homeTodo(i: HomeInput): HomeTodo | null {
   if (i.unlinkRequestedBy && i.unlinkRequestedBy !== i.meId)
     return { kind: 'unlink', to: '/settings/couple/unlink/review' };
@@ -144,6 +163,9 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       key: `review:${s.label}:${s.nextPayday}`,
       to: PATHS.review,
     };
+  // 월급날 체크(2026-11-09, 월급 전 확인 다음·초대 앞): 월급날부터 7일 안, 체크 안 한 줄이 있을 때
+  const check = checkTodo(i);
+  if (check) return check;
   if (
     i.coupleState === 'not_joined' &&
     (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)

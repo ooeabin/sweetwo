@@ -46,6 +46,8 @@ const navigates = emitter<string>();
 // 앱이 화면을 그리기 전에 들어온 링크(처음 실행)는 받는 쪽이 생길 때 넘김
 let pendingInvite: string | null = null;
 let pendingPath: string | null = null;
+const backs = new Set<() => boolean>();
+let backBound = false;
 
 export async function installBridge(): Promise<'ios' | 'android'> {
   const platform = Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
@@ -93,6 +95,19 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       clear: () => clearPinVerified(),
       setAutoLock: (min) => setAutoLock(min),
       onLock: (cb) => lockEvents.on(() => cb()),
+    },
+    // 안드로이드 하드웨어 뒤로(2026-11-09): 앱(홈 밖 메뉴 → 홈, 열린 메뉴 서랍 닫기)이 먼저, 아니면 웹뷰 뒤로 / 앱 닫기
+    onBack: (cb) => {
+      backs.add(cb);
+      if (!backBound) {
+        backBound = true;
+        void CapApp.addListener('backButton', ({ canGoBack }) => {
+          if ([...backs].reverse().some((f) => f())) return;
+          if (canGoBack) window.history.back();
+          else void CapApp.exitApp();
+        });
+      }
+      return () => void backs.delete(cb);
     },
     onNavigate: (cb) => {
       if (pendingPath) {

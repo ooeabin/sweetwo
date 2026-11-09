@@ -4,9 +4,9 @@
 .hg-row--fill > * { flex: 1; }  /* 버튼 두 개를 반씩 */
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
-:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 /* 키보드 포커스: 2px focus 링, 바깥 2px */
-:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-dock__item, .hg-nav, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-fab, .hg-cal__event):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 잘리는 묶음 안의 줄은 안쪽 링 */
 :is(.hg-menu__item, .hg-cmd__item, .hg-listrow, .hg-result):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 /* 터치 화면 좁은 창: 누르는 대상 44px */
@@ -186,9 +186,7 @@
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
-@media (max-width: 767px) { body:has(.hg-frame:not(.hg-frame--sub) > .hg-dock) .hg-toasts { bottom: calc(var(--space-22) + env(safe-area-inset-bottom, 0px)); } }
-/* 떠 있는 추가 버튼(FAB)이 있으면 그 위로(겹치지 않게) */
-@media (max-width: 767px) { body:has(.hg-frame > .hg-fab) .hg-toasts { bottom: calc(var(--space-3) * 3 + 66px + 56px + env(safe-area-inset-bottom, 0px)); } }
+/* 2026-11-09 좁은 창 하단 탭 막대와 + 버튼(FAB)을 없애 토스트는 늘 화면 아래(space-8 + 안전 영역) */
 /* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
 @media (max-width: 767px) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(52px + var(--space-4) * 2 + var(--space-3) + env(safe-area-inset-bottom, 0px)); } }
 body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); bottom: auto; }
@@ -253,7 +251,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-nav > span:not(.hg-ico):not(.hg-nav__count) { flex: 1; }
 .hg-nav.is-active { background: var(--ink); color: var(--on-ink); }
 .hg-nav__count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
-.hg-nav.is-active .hg-nav__count, .hg-dock__item.is-active .hg-nav__count { background: var(--on-ink); color: var(--ink); }
+.hg-nav.is-active .hg-nav__count { background: var(--on-ink); color: var(--ink); }
 .hg-side__who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .hg-side__who b { font: var(--text-label); }
 .hg-side__who span { display: flex; align-items: center; gap: 6px; font: var(--text-micro); font-weight: 400; color: var(--stone); }
@@ -271,9 +269,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-mapp .hg-topbar { gap: 0; padding: var(--space-5) var(--space-4) 0; }
 .hg-mapp .hg-topbar__title { font-size: 22px; }
 .hg-mapp .hg-content { padding: var(--space-4); gap: var(--space-3); }
-.hg-dock { position: absolute; left: var(--space-4); right: auto; bottom: var(--space-4); display: flex; align-items: center; justify-content: flex-start; gap: var(--space-1); height: 56px; padding: 0 var(--space-2); box-sizing: border-box; border-radius: var(--radius-full); background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow-2); }
-.hg-dock__item { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; height: 40px; padding: 0 var(--space-2); box-sizing: border-box; border-radius: var(--radius-full); color: var(--stone); font: 600 12px/1 var(--font-sans); white-space: nowrap; }
-.hg-dock__item.is-active { padding: 0 var(--space-4) 0 var(--space-3); background: var(--ink); color: var(--on-ink); }
 
 /* QuestionLayout */
 .hg-q { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-6); width: 100%; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: var(--space-6) 0; }
@@ -689,6 +684,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-ico--lock { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,76H180V56A52,52,0,0,0,76,56V76H48A20,20,0,0,0,28,96V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V96A20,20,0,0,0,208,76ZM100,56a28,28,0,0,1,56,0V76H100ZM204,204H52V100H204Zm-60-52a16,16,0,1,1-16-16A16,16,0,0,1,144,152Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm-80,84a12,12,0,1,1,12-12A12,12,0,0,1,128,164Zm32-84H96V56a32,32,0,0,1,64,0Z%22/%3E%3C/svg%3E"); }
 .hg-ico--image { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M144,96a16,16,0,1,1,16,16A16,16,0,0,1,144,96Zm92-40V200a20,20,0,0,1-20,20H40a20,20,0,0,1-20-20V56A20,20,0,0,1,40,36H216A20,20,0,0,1,236,56ZM44,60v79.72l33.86-33.86a20,20,0,0,1,28.28,0L147.31,147l17.18-17.17a20,20,0,0,1,28.28,0L212,149.09V60Zm0,136H162.34L92,125.66l-48,48Zm168,0V183l-33.37-33.37L164.28,164l32,32Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM156,88a12,12,0,1,1-12,12A12,12,0,0,1,156,88Zm60,112H40V160.69l46.34-46.35a8,8,0,0,1,11.32,0h0L165,181.66a8,8,0,0,0,11.32-11.32l-17.66-17.65L173,138.34a8,8,0,0,1,11.31,0L216,170.07V200Z%22/%3E%3C/svg%3E"); }
 .hg-ico--camera { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,52H182.42L170,33.34A12,12,0,0,0,160,28H96a12,12,0,0,0-10,5.34L73.57,52H48A28,28,0,0,0,20,80V192a28,28,0,0,0,28,28H208a28,28,0,0,0,28-28V80A28,28,0,0,0,208,52Zm4,140a4,4,0,0,1-4,4H48a4,4,0,0,1-4-4V80a4,4,0,0,1,4-4H80a12,12,0,0,0,10-5.34L102.42,52h51.15L166,70.66A12,12,0,0,0,176,76h32a4,4,0,0,1,4,4ZM128,84a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,84Zm0,72a24,24,0,1,1,24-24A24,24,0,0,1,128,156Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z%22/%3E%3C/svg%3E"); }
+.hg-ico--list { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128ZM40,76H216a12,12,0,0,0,0-24H40a12,12,0,0,0,0,24ZM216,180H40a12,12,0,0,0,0,24H216a12,12,0,0,0,0-24Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM192,184H64a8,8,0,0,1,0-16H192a8,8,0,0,1,0,16Zm0-48H64a8,8,0,0,1,0-16H192a8,8,0,0,1,0,16Zm0-48H64a8,8,0,0,1,0-16H192a8,8,0,0,1,0,16Z%22/%3E%3C/svg%3E"); }  /* 2026-11-09 좁은 창 홈 머리 메뉴(☰) 버튼 */
 .hg-ico--list-filter { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M204,136a12,12,0,0,1-12,12H64a12,12,0,0,1,0-24H192A12,12,0,0,1,204,136Zm28-60H24a12,12,0,0,0,0,24H232a12,12,0,0,0,0-24Zm-80,96H104a12,12,0,0,0,0,24h48a12,12,0,0,0,0-24Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM144,176H112a8,8,0,0,1,0-16h32a8,8,0,0,1,0,16Zm32-40H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Zm32-40H48a8,8,0,0,1,0-16H208a8,8,0,0,1,0,16Z%22/%3E%3C/svg%3E"); }
 .hg-ico--sun { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M116,36V20a12,12,0,0,1,24,0V36a12,12,0,0,1-24,0Zm80,92a68,68,0,1,1-68-68A68.07,68.07,0,0,1,196,128Zm-24,0a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,128ZM51.51,68.49a12,12,0,1,0,17-17l-12-12a12,12,0,0,0-17,17Zm0,119-12,12a12,12,0,0,0,17,17l12-12a12,12,0,1,0-17-17ZM196,72a12,12,0,0,0,8.49-3.51l12-12a12,12,0,0,0-17-17l-12,12A12,12,0,0,0,196,72Zm8.49,115.51a12,12,0,0,0-17,17l12,12a12,12,0,0,0,17-17ZM48,128a12,12,0,0,0-12-12H20a12,12,0,0,0,0,24H36A12,12,0,0,0,48,128Zm80,80a12,12,0,0,0-12,12v16a12,12,0,0,0,24,0V220A12,12,0,0,0,128,208Zm108-92H220a12,12,0,0,0,0,24h16a12,12,0,0,0,0-24Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm8,24a64,64,0,1,0,64,64A64.07,64.07,0,0,0,128,64ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z%22/%3E%3C/svg%3E"); }
 .hg-ico--download { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M71.51,88.49a12,12,0,0,1,17-17L116,99V24a12,12,0,0,1,24,0V99l27.51-27.52a12,12,0,0,1,17,17l-48,48a12,12,0,0,1-17,0ZM224,116H188a12,12,0,0,0,0,24h32v56H36V140H68a12,12,0,0,0,0-24H32a20,20,0,0,0-20,20v64a20,20,0,0,0,20,20H224a20,20,0,0,0,20-20V136A20,20,0,0,0,224,116Zm-20,52a16,16,0,1,0-16,16A16,16,0,0,0,204,168Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M74.34,85.66A8,8,0,0,1,85.66,74.34L120,108.69V24a8,8,0,0,1,16,0v84.69l34.34-34.35a8,8,0,0,1,11.32,11.32l-48,48a8,8,0,0,1-11.32,0ZM240,136v64a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V136a16,16,0,0,1,16-16H84.4a4,4,0,0,1,2.83,1.17L111,145A24,24,0,0,0,145,145l23.8-23.8A4,4,0,0,1,171.6,120H224A16,16,0,0,1,240,136Zm-40,32a12,12,0,1,0-12,12A12,12,0,0,0,200,168Z%22/%3E%3C/svg%3E"); }
@@ -741,8 +737,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-ico--chat-circle-text { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M172,108a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,108Zm-12,28H96a12,12,0,0,0,0,24h64a12,12,0,0,0,0-24Zm76-8A108,108,0,0,1,78.77,224.15L46.34,235A20,20,0,0,1,21,209.66l10.81-32.43A108,108,0,1,1,236,128Zm-24,0A84,84,0,1,0,55.27,170.06a12,12,0,0,1,1,9.81l-9.93,29.79,29.79-9.93a12.1,12.1,0,0,1,3.8-.62,12,12,0,0,1,6,1.62A84,84,0,0,0,212,128Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm32,128H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z%22/%3E%3C/svg%3E"); }
 .hg-ico--megaphone { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M252,120a52.06,52.06,0,0,0-52-52H160.32c-3.44-.21-52.6-4-99.46-43.3A20,20,0,0,0,28,40V200a19.8,19.8,0,0,0,11.54,18.12,19.86,19.86,0,0,0,21.32-2.81A192.92,192.92,0,0,1,144,174.47v26.2a20,20,0,0,0,8.9,16.64,11.35,11.35,0,0,0,1.39.8l14.44,7.06A20,20,0,0,0,198.37,213l11.09-41.82A52.07,52.07,0,0,0,252,120ZM52,191.63V48.4c36.17,28.07,72.17,38.1,92,41.66V150C124.17,153.52,88.17,163.55,52,191.63ZM176.39,202.2,168,198.1V172h16.4ZM200,148H168V92h32a28,28,0,1,1,0,56Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M200,72H160.2c-2.91-.17-53.62-3.74-101.91-44.24A16,16,0,0,0,32,40V200a16,16,0,0,0,26.29,12.25c37.77-31.68,77-40.76,93.71-43.3v31.72A16,16,0,0,0,159.12,214l11,7.33A16,16,0,0,0,194.5,212l11.77-44.36A48,48,0,0,0,200,72ZM179,207.89l0,.11-11-7.33V168h21.6ZM200,152H168V88h32a32,32,0,1,1,0,64Z%22/%3E%3C/svg%3E"); }
 .hg-ico--shield-warning { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M116,132V96a12,12,0,0,1,24,0v36a12,12,0,0,1-24,0Zm12,56a16,16,0,1,0-16-16A16,16,0,0,0,128,188ZM228,56v56c0,54.29-26.32,87.22-48.4,105.29-23.71,19.39-47.44,26-48.44,26.29a12.1,12.1,0,0,1-6.32,0c-1-.28-24.73-6.9-48.44-26.29C54.32,199.22,28,166.29,28,112V56A20,20,0,0,1,48,36H208A20,20,0,0,1,228,56Zm-24,4H52v52c0,35.71,13.09,64.69,38.91,86.15A126.14,126.14,0,0,0,128,219.38a126.28,126.28,0,0,0,37.09-21.23C190.91,176.69,204,147.71,204,112Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.27,47,25.53a8,8,0,0,0,4.2,0c1-.26,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40ZM120,96a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z%22/%3E%3C/svg%3E"); }
-/* 채운 모양: 현재 메뉴, 하단 독의 현재 칸, is-filled */
-.hg-nav.is-active .hg-ico, .hg-dock__item.is-active .hg-ico, .hg-ico.is-filled { -webkit-mask-image: var(--ico-fill, var(--ico)); mask-image: var(--ico-fill, var(--ico)); }
+/* 채운 모양: 현재 메뉴(넓은 창 사이드바), is-filled. 2026-11-09 하단 탭 막대(hg-dock)는 없앰 */
+.hg-nav.is-active .hg-ico, .hg-ico.is-filled { -webkit-mask-image: var(--ico-fill, var(--ico)); mask-image: var(--ico-fill, var(--ico)); }
 
 /* Checklist */
 .hg-checklist { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); max-width: 420px; padding: var(--space-6); background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); }
@@ -971,7 +967,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-week__day.is-past b { color: var(--stone); }
 .hg-week__day.is-today b { background: var(--ink); color: var(--on-ink); }
 .hg-week__day i { width: 5px; height: 5px; border-radius: var(--radius-full); }
-.hg-week__day i.is-on { background: var(--ink); }
+.hg-week__day i.is-on { background: var(--accent-app); }  /* 2026-11-09 캘린더 맨 위 주 띠: 일정 있는 날은 작은 오렌지 점(그래픽, 뜻은 아래 목록이 글자로) */
 /* 사람 탭(W-01·W-02 찬우·예빈): 이름 앞 작은 Avatar */
 .hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
 .hg-sechead__title { margin: 0; font: var(--text-title-3); letter-spacing: -0.2px; }
@@ -1055,13 +1051,15 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 
 /* ── 앱 인터랙션(2026-11-06 점검, DESIGN.md ‘움직임’). transform만 움직이고 글자가 있는 것의 투명도는 바꾸지 않음(나타나는 동안에도 글자 대비 유지) ── */
 /* 색이 바뀌는 것: dur-fast */
-:is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-dock__item, .hg-iconbtn, .hg-fab, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day) { transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+:is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day) { transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
 .hg-transfer__label, .hg-transfer__amount, .hg-task__title { transition: color var(--dur-fast) var(--ease-out); }
 .hg-btn.is-loading { transition: none; }  /* 도는 원으로 바뀔 때 글자가 비쳐 보이지 않게 */
 /* 마우스 올림(마우스가 있는 기기만): 주 버튼은 누름색, 보조 버튼은 한 단계 진하게 */
 @media (hover: hover) {
   .hg-btn--primary:hover:not(:disabled) { background: var(--brand-pressed); }
-  .hg-fab:hover { background: var(--brand-pressed); }  /* 2026-11-09 + 버튼은 주 버튼과 같은 오렌지 */
+  .hg-hubband__main:hover { background: var(--brand-pressed); }  /* 2026-11-09 홈 할 일 띠는 주 버튼과 같은 누름색 */
+  .hg-addrow:hover { color: var(--ink); }
+  .hg-drawer__item:hover { background: var(--surface-alt); }
   .hg-btn--secondary:hover:not(:disabled) { background: var(--hairline-soft); }
   :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--brand-soft) 94%, var(--brand-ink)); }
   .hg-btn--ghost:hover:not(:disabled) { background: var(--surface-alt); }
@@ -1075,7 +1073,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* 누름: 버튼·카드·타일·칩은 98%, 작은 원 버튼·체크는 92%, 꽉 찬 줄은 바탕색 */
 :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item):active:not(:disabled) { transform: scale(0.98); }
 .hg-goaltile:has(> .hg-goaltile__main:active) { transform: scale(0.98); }
-:is(.hg-iconbtn, .hg-fab, .hg-check, .hg-dock__item):active:not(:disabled) { transform: scale(0.92); }
+:is(.hg-iconbtn, .hg-check):active:not(:disabled) { transform: scale(0.92); }
+:is(.hg-hubhero, .hg-hubtile, .hg-hubsave, .hg-hubband__main):active { transform: scale(0.98); }
 :is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-daygrid__day):active { background: var(--hairline-soft); }
 :is(.hg-transfer__open, .hg-banner__main):active { transform: scale(0.99); }
 /* 들어옴: 화면 본문(앱 틀의 단, 질문 화면의 제목과 내용)은 6px 아래에서, 펼친 내용과 메뉴는 4px 위에서, 새로 넣은 입력 줄은 98%에서. dur-base, ease-out */
@@ -1088,8 +1087,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 @keyframes hg-drop { from { transform: translateY(-4px); } }
 @keyframes hg-grow { from { transform: scale(0.98); } }
 @media (prefers-reduced-motion: reduce) {
-  :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-dock__item, .hg-iconbtn, .hg-fab, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
-  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-fab, .hg-check, .hg-dock__item, .hg-transfer__open, .hg-banner__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
+  :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
+  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main, .hg-hubhero, .hg-hubtile, .hg-hubsave, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
 }
 
 /* 금액 가리기 */
@@ -1122,8 +1121,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__event.is-holiday i { background: var(--holiday-ink); }
 .hg-cal__event.is-holiday span { color: var(--holiday-ink); }
 
-/* 좁은 창 떠 있는 추가 버튼: 독 오른쪽 위 */
-.hg-fab { position: absolute; right: var(--space-4); bottom: calc(var(--space-4) + 2px); display: inline-grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 0; border-radius: var(--radius-full); background: var(--accent-app); color: var(--on-accent-app); box-shadow: var(--shadow-2); cursor: pointer; }
 
 /* PageHeader: 상세 화면 머리 */
 .hg-pagehead { display: flex; align-items: center; gap: var(--space-2); min-height: 56px; }
@@ -1804,7 +1801,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-pagetitle:has(.hg-frame__actions):not(:has(.hg-frame__actions > :not(.hg-wide-only))) { display: none; }
   .hg-pagetitle:not(.hg-today--plain):not(:has(.hg-frame__actions)) { display: none; }  /* 2026-11-04 제목은 앱 머리에 있어 동작 없는 제목 줄은 숨김(머리와 ‘‹ 제목’ 줄 사이 거리를 모든 화면 같게) */
 }
-.hg-frame > .hg-dock, .hg-frame > .hg-fab { display: none; }
 /* 다른 메뉴 첫 화면 제목 줄(인사 카드 대신): 제목 24px + 오른쪽 동작, 본문과 같은 1120px 안쪽 */
 .hg-pagetitle__in { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-8) var(--space-8) 0; display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .hg-pagetitle__title { flex: 1; min-width: 200px; margin: 0; font: 700 22px/30px var(--font-sans); letter-spacing: -0.3px; color: var(--ink); }
@@ -1821,7 +1817,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-today__value { font-size: 32px; line-height: 40px; }
   .hg-today__stats { display: flex; overflow-x: auto; }
   .hg-today__stats .hg-stat { flex: none; width: 150px; }
-  .hg-body { padding: var(--space-4) var(--space-4) calc(var(--space-22) + 24px + env(safe-area-inset-bottom, 0px)); gap: var(--space-4); }
+  .hg-body { padding: var(--space-4) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); gap: var(--space-4); }  /* 2026-11-09 하단 탭 막대가 없어 아래 여백은 space-8 + 안전 영역 */
   .hg-body__col { gap: var(--space-4); }
   .hg-frame :is(.hg-card, .hg-checklist, .hg-chart):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { padding-inline: var(--space-5); }
   .hg-frame__mhead { display: flex; align-items: center; gap: var(--space-1); min-height: 56px; box-sizing: border-box; padding: var(--space-3) var(--space-2) 0 var(--space-4); }
@@ -1831,21 +1827,13 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-mhead__title { margin: 0; min-width: 0; color: var(--ink); font: var(--text-title-2); letter-spacing: -0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hg-frame__mhead .hg-iconbtn { color: var(--stone); }  /* 2026-11-04 앱 머리 아이콘은 회색 22px */
   .hg-frame__mhead .hg-iconbtn .hg-ico { width: 22px; height: 22px; }
-  /* 하단 탭 막대(배민 느낌): 화면 아래 가운데 떠 있는 흰 알약, 탭 4칸 아이콘만(2026-11-09 이름은 aria-label로만). 칸 64×52(누름 영역 44 이상), 막대 높이 그대로 */
-  .hg-frame > .hg-dock { display: flex; position: fixed; z-index: 10; left: 50%; right: auto; bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); height: auto; gap: 2px; padding: 6px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-full); background: var(--surface); box-shadow: var(--shadow-2); }
-  .hg-frame > .hg-dock .hg-dock__item, .hg-frame > .hg-dock .hg-dock__item.is-active { position: relative; flex: none; width: 64px; height: 52px; padding: 0; border-radius: var(--radius-full); background: none; color: var(--stone); }
-  /* 2026-11-09 이름이 없어서 고른 칸은 모양과 색 둘 다로: 고른 칸 채운 아이콘 + ink, 나머지 굵은 선 아이콘 + stone(오렌지 아님) */
-  .hg-frame > .hg-dock .hg-dock__item.is-active { color: var(--ink); }
-  .hg-frame > .hg-dock .hg-dock__item:not(.is-active) .hg-ico { -webkit-mask-image: var(--ico); mask-image: var(--ico); }
-  .hg-frame > .hg-dock .hg-dock__item .hg-nav__count { position: absolute; top: 4px; left: calc(50% + 6px); }  /* 숫자 알약은 아이콘 오른쪽 위 */
-  .hg-frame > .hg-dock .hg-dock__item.is-active .hg-nav__count { background: var(--ink); color: var(--on-ink); }
-  .hg-frame > .hg-fab { display: inline-grid; position: fixed; z-index: 10; bottom: calc(var(--space-3) + 66px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }
-  .hg-frame:has(> .hg-fab) .hg-body { padding-bottom: calc(var(--space-22) + 24px + 52px + var(--space-3) + env(safe-area-inset-bottom, 0px)); }  /* 2026-11-04 + 버튼이 목록 마지막 줄을 가리지 않게 */
   .hg-frame__actions { width: 100%; }
   .hg-frame__actions .hg-btn--primary { flex: 1; }
   /* 설정 하위 화면(AppFrame sub, 2026-11-03): 앱 머리 아이콘과 탭 막대 없이 본문의 ‘‹ 제목’ 한 줄만 */
-  .hg-frame--sub .hg-frame__mhead, .hg-frame--sub > .hg-dock { display: none; }  /* 2026-11-04 토스 구조: 상세·설정 하위·알림은 앱 머리와 탭 막대 없이 맨 위 ‘‹ 제목 ⋯’ 한 줄. 앱 머리는 메뉴 첫 화면(홈, 목표, 자산 관리, 캘린더, 설정)에만 */
-  .hg-frame--sub .hg-body { padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); }
+  .hg-frame--sub .hg-frame__mhead { display: none; }  /* 2026-11-04 토스 구조: 상세·설정 하위·알림은 앱 머리 없이 맨 위 ‘‹ 제목 ⋯’ 한 줄(PageHeader) */
+  /* 2026-11-09 홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈) 머리: ‹(홈으로) + 굵은 제목. 알림·메뉴 버튼은 홈 머리에만 */
+  .hg-mhead__back { margin-left: calc(var(--space-2) * -1); margin-right: var(--space-1); }
+  .hg-frame__mhead .hg-mhead__back.hg-iconbtn { color: var(--ink); }
 }
 
 /* 로그인, 가입 화면 틀(AuthLayout: A-01~A-08, O-01). 가운데 한 열, 좁은 창은 버튼 묶음을 아래로 */
@@ -2246,3 +2234,92 @@ button.hg-receipt__main { cursor: pointer; }
 @media (pointer: coarse) { .hg-receipt__row:not(.is-open):not(:focus-within) .hg-receipt__del { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 @media (prefers-reduced-motion: no-preference) { .hg-receipt__row { transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); } }
 .hg-receipt-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-6); }
+
+/* ── 2026-11-09 홈 허브와 메뉴 서랍(GCOO 홈처럼): 좁은 창 하단 탭 막대·+ 버튼 대신 ☰ 서랍, 회색 바탕 위 크기가 다른 흰 상자 ── */
+/* 회색 바탕 틀(AppFrame tone="alt"): 홈, 자산 관리. 흰 카드는 테두리·그림자 없이 바탕색으로만 구분. 넓은 창 사이드바는 흰색 그대로 */
+.hg-frame--alt { background: var(--surface-alt); }
+.hg-frame--alt :is(.hg-card, .hg-list, .hg-checklist, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(.hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: transparent; box-shadow: none; }
+.hg-frame--alt .hg-card--fill { background: var(--surface); }  /* 회색 판 카드도 회색 바탕 위에서는 흰 상자 */
+.hg-frame--alt .hg-pagetitle .hg-btn--secondary { background: var(--surface); }  /* 넓은 창 제목 줄 보조 버튼(‘추가’)은 회색 바탕 위라 흰 판 */
+
+/* Drawer(메뉴 서랍): 오른쪽에서 들어오는 흰 판(좁은 창 80%, 최대 360px) + 뒤 막 */
+.hg-drawer-scrim { position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end; background: var(--scrim); }
+.hg-drawer { box-sizing: border-box; display: flex; flex-direction: column; width: 80%; max-width: 360px; height: 100%; padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) 0 calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); background: var(--surface); box-shadow: var(--shadow-3); overflow-y: auto; outline: none; }
+.hg-drawer__head { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-1); min-height: 44px; padding: 0 var(--space-2); }
+.hg-drawer__head .hg-iconbtn { color: var(--ink); }
+.hg-drawer__head .hg-iconbtn .hg-ico { width: 22px; height: 22px; }
+.hg-drawer__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-2) 0; }
+.hg-drawer__group { margin: 0; padding: var(--space-2) 0; list-style: none; }
+.hg-drawer__group + .hg-drawer__group { border-top: 1px solid var(--hairline-soft); }
+.hg-drawer__item { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 var(--space-6); box-sizing: border-box; font: 500 17px/24px var(--font-sans); color: var(--ink-2); }
+.hg-drawer__item.is-current { font-weight: 700; color: var(--ink); }
+.hg-drawer__item:focus-visible { outline-offset: -2px; }
+.hg-drawer__foot { margin: 0; padding: var(--space-4) var(--space-6) 0; font: var(--text-caption); color: var(--stone); }
+@media (prefers-reduced-motion: no-preference) {
+  .hg-drawer-scrim { animation: hg-scrim-in var(--dur-slow) var(--ease-out); }
+  .hg-drawer { animation: hg-drawer-in var(--dur-slow) var(--ease-out); }
+}
+@keyframes hg-drawer-in { from { transform: translateX(100%); } }
+
+/* 홈 허브(hg-hub): 상자 사이 12px. 좁은 창 2열(큰 상자는 두 칸), 넓은 창(1100px 이상) 4열 */
+.hg-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: stretch; }
+.hg-hub > .hg-hub__full { grid-column: 1 / -1; }
+.hg-hub > .hg-hub__wide { grid-column: span 2; }
+@media (min-width: 1100px) {
+  .hg-hub { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .hg-hub > .hg-hubband { order: -1; }  /* 넓은 창은 할 일 띠를 맨 위 한 줄로 */
+}
+/* 큰 상자(HubHero): 다음 월급날까지 + 진행 막대 + 아래 두 칸(보낸 금액 | 모은 금액). 누르면 월급 이번 달 */
+.hg-hubhero { display: flex; flex-direction: column; width: 100%; padding: var(--space-5) var(--space-5) 0; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
+.hg-hubhero__top { display: flex; align-items: flex-start; gap: var(--space-3); }
+.hg-hubhero__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hg-hubhero__cap { font: 500 13px/18px var(--font-sans); color: var(--slate); }
+.hg-hubhero__title { font: var(--text-title-2); letter-spacing: -0.4px; word-break: keep-all; }
+.hg-hubhero .hg-avatars .hg-avatar { width: 36px; height: 36px; }
+.hg-hubhero__progress { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
+.hg-hubhero__meter { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.hg-hubhero__track { height: 10px; border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
+.hg-hubhero__track > i { display: block; height: 100%; width: calc(var(--p, 0) * 1%); border-radius: inherit; background: var(--accent-app); }
+.hg-hubhero__label { font: 500 13px/18px var(--font-sans); color: var(--slate); }
+.hg-hubhero__count { flex: none; font: var(--text-number-lg); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hg-hubhero__count small { font: 500 15px/22px var(--font-sans); color: var(--slate); }
+.hg-hubhero__split { display: flex; margin: var(--space-4) calc(var(--space-5) * -1) 0; border-top: 1px solid var(--hairline-soft); }
+.hg-hubhero__split > span { flex: 1; min-width: 0; display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; gap: 0 6px; padding: 14px var(--space-2); font: 500 14px/20px var(--font-sans); color: var(--slate); text-align: center; }
+.hg-hubhero__split > span + span { border-left: 1px solid var(--hairline-soft); }
+.hg-hubhero__split b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* 할 일 띠(HubBand): 2026-11-09 사용자 승인 브랜드 예외, accent-app 채움 + on-accent-app-text 글자(라이트 ink, 다크 어두운 글자). 흰 글자는 대비 2.7:1이라 쓰지 않음 */
+.hg-hubband { display: flex; align-items: center; min-width: 0; border-radius: var(--radius-lg); background: var(--accent-app); color: var(--on-accent-app-text); }
+.hg-hubband__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: var(--space-3) var(--space-4) var(--space-3) 18px; box-sizing: border-box; border: 0; border-radius: inherit; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-hubband__text { flex: 1; min-width: 0; font: 600 15px/22px var(--font-sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-hubband__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 500 15px/22px var(--font-sans); white-space: nowrap; }
+.hg-hubband__main:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-hubband > .hg-iconbtn { flex: none; margin-right: var(--space-1); color: inherit; }
+/* 타일(HubTile): 반 칸 상자. 큰 타일 164px(오른쪽 아래 72px 그림 자리), 작은 타일(--sm) 104px(값 한 줄) */
+.hg-hubtile { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 164px; padding: 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
+.hg-hubtile--sm { min-height: 104px; }
+.hg-hubtile__title { font: var(--text-title-3); }
+.hg-hubtile__sub { margin-top: 2px; font: 500 13px/18px var(--font-sans); color: var(--slate); }
+.hg-hubtile__value { margin-top: var(--space-2); font: 700 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-hubtile > .hg-artslot { position: absolute; right: var(--space-3); bottom: var(--space-3); width: 72px; height: 72px; border-radius: var(--radius-xl); }
+/* 저금 상자(HubSaving): 56px 그림 자리 + 이름·% + “6,000만 / 1억 5,000만 원” + 얇은 막대(ink-2) */
+.hg-hubsave { display: flex; align-items: center; gap: 14px; width: 100%; padding: var(--space-5); box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.hg-hubsave > .hg-artslot { flex: none; width: 56px; height: 56px; border-radius: var(--radius-lg); }
+.hg-hubsave__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hg-hubsave__row { display: flex; justify-content: space-between; gap: var(--space-2); font: var(--text-title-3); }
+.hg-hubsave__row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-hubsave__row > span:last-child { flex: none; font-variant-numeric: tabular-nums; }
+.hg-hubsave__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
+.hg-hubsave__bar { height: 8px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
+.hg-hubsave__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--ink-2); }
+.hg-hub :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (hover: hover) { :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):hover { box-shadow: var(--shadow-2); } }
+
+/* AddRow(+ 추가 줄): 2026-11-09 + 버튼(FAB) 대신 목록 끝이나 묶음 머리 오른쪽의 회색 글자 줄. hg-btn--link와 같은 ink-2 600 + Phosphor plus */
+.hg-addrow { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-1); box-sizing: border-box; border: 0; border-radius: var(--radius-btn-sm); background: none; color: var(--ink-2); font: var(--text-label); cursor: pointer; }
+.hg-addrow--block { display: flex; width: 100%; padding: 0 var(--space-4); }
+.hg-sechead .hg-addrow { margin-left: auto; min-height: 32px; }
+.hg-checkgroup > .hg-addrow--block { padding-inline: 0; }  /* W-02 저금 묶음 끝: + 아이콘을 줄 앞 칸과 같은 선에 */
+/* 캘린더 목록 도구 줄(2026-11-09): 왼쪽 보기 필터 칩, 오른쪽 ‘달력 ›’ 링크(hg-sechead__more, slate 500). 예전 ‘목록/달력’ 탭 대신 */
+.hg-cal__tools { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.hg-cal__tools > .hg-cal__filter { flex: 1; min-width: 0; flex-wrap: wrap; }
+.hg-cal__tools > .hg-sechead__more { flex: none; }

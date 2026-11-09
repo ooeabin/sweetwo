@@ -97,7 +97,7 @@ test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이
   ).toEqual(['goal-e', 'goal-h']);
 });
 
-test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 H-02 ‘전체 보기’에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
+test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -137,8 +137,9 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 H-02 ‘전체 보기�
   await expect(page.locator('.hg-receipt').getByRole('heading', { name: '저금' })).toBeVisible();
   await expect(page.getByRole('button', { name: '저금 목록 보기' })).toHaveCount(0);
 
+  // 2026-11-09 홈 허브: 저금 타일(H-09) → W-13
   await page.goto('/');
-  await page.getByRole('link', { name: '전체 보기' }).click();
+  await page.getByRole('button', { name: /^저금/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=home$/);
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
 });
@@ -237,17 +238,22 @@ test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대 다음, H-04 1a
   // 첫 체크 전에는 순위 줄 없음
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await page.locator('.hg-banner--todo').getByRole('button', { name: '닫기' }).click();
-  const todo = page.getByRole('button', { name: '첫 저금을 만들어 볼까요?' });
+  // 2026-11-09 초대 밖의 할 일은 큰 상자 아래 오렌지 띠
+  const todo = page
+    .locator('.hg-hubband')
+    .getByRole('button', { name: '첫 저금을 만들어 볼까요?' });
   await expect(todo).toBeVisible();
   await axe(page);
-  // 체크하면 순위 줄이 보임
+  // 체크하면 순위 줄이 보임(2026-11-09 홈에서는 체크하지 않아 W-02에서)
+  await page.goto('/salary');
   await page.locator('.hg-transfer').first().getByRole('checkbox').click();
+  await page.goto('/');
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toBeVisible();
   await todo.click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
   // 닫으면 다시 안 보임
   await page.goto('/');
-  await page.locator('.hg-banner--todo').getByRole('button', { name: '닫기' }).click();
+  await page.locator('.hg-hubband').getByRole('button', { name: '닫기' }).click();
   await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);

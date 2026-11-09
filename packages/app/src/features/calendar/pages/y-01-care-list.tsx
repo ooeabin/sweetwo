@@ -1,5 +1,13 @@
-import { dday, formatDateWeekday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
 import {
+  addDays,
+  dday,
+  formatDateWeekday,
+  formatMonthDay,
+  withinDays,
+  type MoneyDate,
+} from '@sweetwo/core';
+import {
+  AddRow,
   Button,
   EmptyState,
   Icon,
@@ -30,12 +38,25 @@ export function Y01CareList() {
   const [filter, setFilter] = useCalFilter();
   const { masked } = useMask();
   const m = (x: number) => won(x, masked);
-  const frame = (children: ReactNode) => (
-    <CalendarFrame view="list" filter={filter} onFilter={setFilter}>
+  const frame = (children: ReactNode, week?: { today: string; marked: ReadonlySet<string> }) => (
+    <CalendarFrame view="list" filter={filter} onFilter={setFilter} week={week}>
       {children}
     </CalendarFrame>
   );
   if (d.loading) return frame(<SkelBody shape="rows" />);
+
+  // 맨 위 이번 주 띠(2026-11-09): 일~토 중 일정(보기 필터대로)이 있는 날에 점
+  const [ty, tm, td] = d.today.split('-').map(Number) as [number, number, number];
+  const sunday = addDays(d.today, -new Date(Date.UTC(ty, tm - 1, td)).getUTCDay());
+  const marked = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    const day = addDays(sunday, i);
+    const [dy, dm] = day.split('-').map(Number) as [number, number];
+    const has =
+      (filter !== 'money' && d.caresOf(dy, dm).some((x) => x.date === day)) ||
+      (filter !== 'care' && d.monthOf(dy, dm).dates.some((x) => x.date === day));
+    if (has) marked.add(day);
+  }
 
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const months: [number, number][] = [0, 1, 2].map((n) => {
@@ -171,7 +192,11 @@ export function Y01CareList() {
         </section>
       )}
       <section className="hg-stack" aria-label={copy.upcomingList}>
-        <SectionHeader title={copy.upcomingList} />
+        {/* 2026-11-09 + 버튼(FAB) 대신 머리 오른쪽 회색 ‘+ 경조사 추가’ → Y-07 */}
+        <SectionHeader
+          title={copy.upcomingList}
+          action={<AddRow label={copy.addCareRow} onClick={add} />}
+        />
         {!rows.length ? (
           <p className="hg-card__meta" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
@@ -215,5 +240,6 @@ export function Y01CareList() {
         </div>
       )}
     </>,
+    { today: d.today, marked },
   );
 }

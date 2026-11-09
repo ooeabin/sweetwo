@@ -1,36 +1,48 @@
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
-  noSavedYet: '아직 모은 금액이 없어요', // [확인 필요] 0%일 때 진행 칸 대신(2026-11-03)
   // H-01 기다리는 화면
   waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
   waitCard: (starter: string) => `${starter}님이 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 2026-11-08,
-  // 오늘 띠
-  add: '추가',
-  check: '월급 체크하기',
-  // H-02 저금 항목(2026-11-08 ADR 0007)
-  savings: '저금', // 2026-11-09 사용자에게는 ‘저금’
-  allSavings: '전체 보기', // [확인 필요] 2026-11-09 round 3 제목 줄 오른쪽 → W-13 저금 목록(예전 ‘월급 계획’ → W-01)
-  // H-03 이번 달 월급
-  progress: (total: number, done: number) => `${total}개 중 ${done}개 완료`,
-  partnerProgress: (name: string, total: number, done: number) =>
-    `${name}님 ${total}개 중 ${done}개`,
-  inviteNow: '초대하기', // 2026-11-03 할 일 띠 초대 버튼
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
-  allDone: (label: string) => `${label} 체크를 다 했어요`,
-  savedThisMonth: (amount: string) => `저금 ${amount}을 보냈어요`, // [확인 필요] 19 홈 상태 변형 1번,
-  editSplit: '월급 계획 고치기',
+  hubLabel: '한눈에 보기', // [확인 필요] 2026-11-09 홈 상자 묶음 이름(화면 읽기용)
+  // H-03 큰 상자(2026-11-09 홈 허브) [확인 필요]
+  untilPayday: (date: string) => `${date} 월급날까지`,
+  daysLeft: (n: number) => `${n}일 남았어요`,
+  paydayToday: '오늘이 월급날이에요',
+  sentLines: '이번 달 보낸 줄',
+  sentAmount: '보낸 금액',
+  savedAmount: '모은 금액',
+  heroLabel: (p: {
+    caption: string;
+    title: string;
+    total: number;
+    done: number;
+    sent: string;
+    saved: string;
+  }) =>
+    `${p.caption} ${p.title}. 이번 달 ${p.total}개 중 ${p.done}개 보냈어요. 보낸 금액 ${p.sent}, 모은 금액 ${p.saved}`, // 화면 읽기용
   noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
-  // H-04 자산
-  assets: '자산',
-  // H-05 일정
-  upcoming: '일정',
-  moreCalendar: '캘린더', // 일정 오른쪽 링크(제목과 같은 말이라 2026-11-03 바꿈)
-  noUpcoming: '30일 안에 일정이 없어요', // [확인 필요]
-  monthShort: (m: number) => `${m}월`,
+  // H-06 할 일 띠(오렌지) 오른쪽 이동 글자 [확인 필요]
+  bandCheck: '체크하기',
+  bandReview: '확인하기',
+  // 반 칸 타일(2026-11-09) [확인 필요]
+  planTile: '월급 계획',
+  everyMonth: (day: string) => `매달 ${day}`,
+  payday: (d: number) => `${d}일`,
+  paydayLast: '말일',
+  calendarTile: '캘린더',
+  noCare: '다가오는 일정 없어요',
   dday: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
-  // H-06 할 일 한 줄(19 ‘할 일 한 줄 순서’)
-  open: '열기', // [확인 필요] 할 일 이동 버튼
+  // H-02 저금 상자(목표 금액에 가장 가까운 저금 하나)
+  savingLabel: (name: string, pct: number, progress: string) => `${name}, ${pct}%, ${progress}`, // 화면 읽기용
+  // 작은 타일 [확인 필요]
+  assetsTile: '자산 관리',
+  netWorth: '순자산',
+  savingsTile: '저금', // 2026-11-09 사용자에게는 ‘저금’
+  savingCount: (n: number) => `${n}개 모으는 중`,
+  noSavings: '아직 없어요',
+  inviteNow: '초대하기', // 2026-11-03 할 일 띠 초대 버튼
   close: '닫기',
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { homeTodo, homeUpcoming, salaryState, type HomeInput } from './home';
+import { checkTodo, homeTodo, homeUpcoming, salaryState, type HomeInput } from './home';
 
 // 찬우(혼자, 각자, 월급날 25일), 9월 월급 사이클 9월 25일 ~ 10월 24일
 const base = (over: Partial<HomeInput> = {}): HomeInput => ({
@@ -202,4 +202,41 @@ it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초
   // 닫으면, 연결 해제 대기면 없음
   expect(homeTodo({ ...first, closed: ['saving-first'] })).toBeNull();
   expect(homeTodo({ ...first, coupleState: 'unlink_pending' })).toBeNull();
+});
+
+it('월급날 체크 할 일(19 H-06 3a, 2026-11-09): 월급날부터 7일 안, 체크 안 한 줄이 있을 때, 월급 전 확인 다음·초대 앞', () => {
+  const mine = (over: Partial<HomeInput['checklists'][number]> = {}) => ({
+    owner_user_id: 'c',
+    label: '10월 월급',
+    cycle_start: '2026-10-05',
+    cycle_end: '2026-11-04',
+    lines: [{ state: 'checked' }, { state: 'wait' }],
+    ...over,
+  });
+  // 찬우 월급날 10월 5일, 오늘 7일: 체크할 차례
+  expect(homeTodo(base({ checklists: [mine()] }))).toEqual({
+    kind: 'check',
+    label: '10월 월급',
+    left: 1,
+    key: 'check:10월 월급:2026-10-05',
+    to: '/salary',
+  });
+  // 초대보다 먼저
+  expect(homeTodo(base({ checklists: [mine()], coupleState: 'not_joined' }))?.kind).toBe('check');
+  // 7일째(11일)까지, 8일째(12일)부터는 없음
+  expect(homeTodo(base({ today: '2026-10-11', checklists: [mine()] }))?.kind).toBe('check');
+  expect(homeTodo(base({ today: '2026-10-12', checklists: [mine()] }))).toBeNull();
+  // 다 체크했거나(‘못 함’ 포함) 닫았으면 없음
+  expect(
+    homeTodo(base({ checklists: [mine({ lines: [{ state: 'checked' }, { state: 'skipped' }] })] })),
+  ).toBeNull();
+  expect(
+    homeTodo(base({ checklists: [mine()], closed: ['check:10월 월급:2026-10-05'] })),
+  ).toBeNull();
+  // 예빈 체크리스트만 남았으면(각자) 찬우에게는 없음
+  expect(checkTodo(base({ checklists: [{ ...mine(), owner_user_id: 'y' }] }))).toBeNull();
+  // 합쳐서: 공동 체크리스트
+  expect(
+    checkTodo(base({ joint: true, checklists: [{ ...mine(), owner_user_id: null }] }))?.kind,
+  ).toBe('check');
 });
