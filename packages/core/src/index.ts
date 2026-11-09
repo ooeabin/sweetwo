@@ -9,6 +9,7 @@ export * from './onboarding';
 export * from './josa';
 export * from './rules/salary-split';
 export * from './rules/saving-item';
+export * from './rules/plan-ratio';
 export * from './rules/home';
 export * from './rules/calendar';
 export * from './rules/lunar';

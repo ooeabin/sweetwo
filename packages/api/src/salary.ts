@@ -1,4 +1,4 @@
-import type { Json, SplitLineDraft, Tables } from '@sweetwo/core';
+import { splitLineId, type Json, type SplitLineDraft, type Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -131,4 +131,97 @@ export async function setSalaryMode(mode: 'separate' | 'joint'): Promise<'ok' | 
 export async function setJointCycleDay(day: number) {
   const { error } = await supabase().rpc('set_joint_cycle_day', { p_day: day });
   fail(error);
+}
+
+// ── W-01 영수증: 줄마다 바로 저장(2026-11-09, docs/spec/20-salary-plan.md W-01) ─────────────
+// 서버 split_line_set / split_line_add / split_line_delete / split_reorder. 이번 달 체크 안 한 줄은 서버가 맞춤.
+
+/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개 */
+export type SplitBlockReason =
+  | 'duplicate_line'
+  | 'not_owner'
+  | 'unlink_pending'
+  | 'keep_allowance'
+  | 'too_many_custom';
+export class SplitBlocked extends Error {
+  constructor(readonly reason: SplitBlockReason) {
+    super(reason);
+  }
+}
+const REASONS: SplitBlockReason[] = [
+  'duplicate_line',
+  'not_owner',
+  'unlink_pending',
+  'keep_allowance',
+  'too_many_custom',
+];
+const failSplit = (e: { message?: string } | null) => {
+  const r = REASONS.find((x) => e?.message?.includes(x));
+  if (r) throw new SplitBlocked(r);
+  fail(e);
+};
+
+/** 줄 하나 금액·이름(이름은 직접 추가 줄만) */
+export async function setSplitLine(line: string, o: { amount?: number; name?: string }) {
+  const { error } = await supabase().rpc('split_line_set', {
+    p_line: line,
+    p_amount: o.amount,
+    p_name: o.name,
+  });
+  failSplit(error);
+}
+
+/** 지출 줄 추가(직접 추가 줄, 되돌리기면 지운 기본 줄도). sort = 넣을 자리(없으면 맨 아래). 새 줄 id */
+export async function addSplitLine(
+  split: string,
+  o: {
+    kind: Exclude<SplitLineDraft['kind'], 'saving'>;
+    amount: number;
+    name?: string;
+    userId?: string;
+    sort?: number;
+  },
+): Promise<string> {
+  const { data, error } = await supabase().rpc('split_line_add', {
+    p_split: split,
+    p_kind: o.kind,
+    p_amount: o.amount,
+    p_name: o.name,
+    p_user: o.userId,
+    p_sort: o.sort,
+  });
+  failSplit(error);
+  const id = splitLineId.safeParse(data);
+  if (!id.success) throw new AuthCallError('unknown');
+  return id.data;
+}
+
+/** 줄 지우기(저금 줄 = 그만 모음, 기록은 남음) */
+export async function deleteSplitLine(line: string) {
+  const { error } = await supabase().rpc('split_line_delete', { p_line: line });
+  failSplit(error);
+}
+
+/** 순서(그 월급 계획의 모든 줄 id, 저금 줄이 앞) */
+export async function reorderSplit(split: string, ids: string[]) {
+  const { error } = await supabase().rpc('split_reorder', { p_split: split, p_ids: ids });
+  failSplit(error);
+}
+
+/**
+ * 월급 계획 변경 신호(Realtime postgres_changes, salary_split 행: 서버 RPC마다 updated_at·version이 오름).
+ * 받으면 splitKeys를 무효화. 돌려준 함수로 끊음
+ */
+export function subscribeSplits(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`salary_split:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'salary_split', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
 }
