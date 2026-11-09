@@ -247,7 +247,7 @@ test('월급(S-11c), 관리 방식(S-11f → W-01), 체크리스트 만드는 �
   await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
   expect(db.space?.salary_mode).toBe('joint');
 
   // 체크리스트 만드는 날(합쳐서 + 합류): 늦은 월급날이 기본

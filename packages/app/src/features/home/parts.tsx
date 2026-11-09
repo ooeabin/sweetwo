@@ -85,7 +85,11 @@ export function SalaryCard({
     return (
       <section className="hg-card hg-card--fill hg-stack">
         <p className="hg-card__meta">{copy.noSalary}</p>
-        <button type="button" className="hg-btn hg-btn--link hg-btn--accent" onClick={() => go('/settings/me')}>
+        <button
+          type="button"
+          className="hg-btn hg-btn--link hg-btn--accent"
+          onClick={() => go('/settings/me')}
+        >
           {copy.tellSalary}
         </button>
       </section>
@@ -161,7 +165,11 @@ export function SalaryCard({
           </button>
         )}
         {!locked && (
-          <button type="button" className="hg-btn hg-btn--link" onClick={() => go('/salary/split')}>
+          <button
+            type="button"
+            className="hg-btn hg-btn--link"
+            onClick={() => go('/salary?view=plan')}
+          >
             {copy.editSplit}
           </button>
         )}

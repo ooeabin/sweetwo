@@ -112,6 +112,58 @@ export type AnalyticsEvent =
       props: { monthly_band: AmountBand; direction: 'up' | 'down' };
     }
   | {
+      // W-01 영수증(32 4-4, 2026-11-09)
+      name: 'split_saved';
+      props: {
+        changed_lines_count: number;
+        editor: 'self';
+        left_band: AmountBand | 'short';
+        reset_to_recommended: true;
+        entry: 'split';
+      };
+    }
+  | {
+      name: 'plan_line_changed';
+      props: {
+        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        field: 'amount' | 'name' | 'both';
+        direction: 'up' | 'down' | 'same';
+        left_band: AmountBand | 'short';
+        joint: boolean;
+        entry: 'receipt' | 'edit' | 'saving_detail';
+      };
+    }
+  | {
+      name: 'plan_line_added';
+      props: {
+        source: 'chip' | 'text';
+        chip: string | null;
+        amount_band: AmountBand;
+        joint: boolean;
+      };
+    }
+  | {
+      name: 'plan_line_deleted';
+      props: {
+        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        default_line: boolean;
+        entry: 'sheet' | 'edit';
+        joint: boolean;
+      };
+    }
+  | {
+      name: 'plan_reordered';
+      props: { sections: 'saving' | 'spend' | 'both'; lines_count: number; joint: boolean };
+    }
+  | {
+      name: 'plan_shared';
+      props: {
+        result: 'shared' | 'saved' | 'downloaded' | 'cancelled' | 'failed';
+        masked: boolean;
+        whose: 'self' | 'partner' | 'joint';
+      };
+    }
+  | {
       name: 'unlink_resolved';
       // deadline(요청 + 14일 확정)은 서버가 보냄
       props: {

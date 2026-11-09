@@ -263,6 +263,39 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     }
     lines.sort((a, b) => Number(a.sort) - Number(b.sort));
   };
+  /** 서버 sync_checklist 흉내(2026-11-09): 체크 안 한 줄은 월급 계획대로 다시, 체크한 줄은 그대로(줄 id나 종류·이름으로 맞춤), 순서는 월급 계획 */
+  const resync = (sp: (typeof db.splits)[number]) => {
+    const cl = db.checklists.find((c) => c.owner_user_id === sp.owner_user_id);
+    if (!cl) return;
+    const kept = (cl.pay_check_line as Record<string, unknown>[]).filter((x) => x.state !== 'wait');
+    const lineOf = (x: Record<string, unknown>) =>
+      sp.split_line.find((l) => `${String(l.id)}-c` === x.id || l.id === x.split_line_id);
+    const same = (a: Record<string, unknown>, c: Record<string, unknown>) =>
+      lineOf(a) === c ||
+      (a.kind === c.kind &&
+        (a.goal_id ?? null) === (c.goal_id ?? null) &&
+        (a.name ?? null) === (c.name ?? null) &&
+        (a.kind !== 'allowance' || (a.user_id ?? null) === (c.user_id ?? null)));
+    for (const k of kept) {
+      const l = lineOf(k);
+      if (l) k.sort = l.sort;
+    }
+    cl.pay_check_line = [
+      ...kept,
+      ...sp.split_line
+        .filter((l) => Number(l.amount) > 0 && !kept.some((k) => same(k, l)))
+        .map((l): Record<string, unknown> => ({
+          ...l,
+          id: `${String(l.id)}-c`,
+          split_line_id: l.id,
+          planned: l.amount,
+          actual: null,
+          state: 'wait',
+          checked_by: null,
+          checked_at: null,
+        })),
+    ].sort((a, c) => Number(a.sort) - Number(c.sort));
+  };
   // 로그인된 세션(localStorage)
   await page.addInitScript(
     ({ token, user }) => {
@@ -476,6 +509,95 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           ].sort((a, b) => Number(a.sort) - Number(b.sort));
         }
         return json(route, sp.id);
+      }
+      // W-01 영수증 줄 RPC(2026-11-09, 서버 20261116090000_w01_receipt 흉내): 권한, 이번 달 체크 안 한 줄만 따름
+      if (
+        fn === 'split_line_set' ||
+        fn === 'split_line_add' ||
+        fn === 'split_line_delete' ||
+        fn === 'split_reorder'
+      ) {
+        const b = body() as unknown as {
+          p_line?: string;
+          p_split?: string;
+          p_amount?: number;
+          p_name?: string;
+          p_kind?: string;
+          p_user?: string;
+          p_sort?: number;
+          p_ids?: string[];
+        };
+        const sp = b.p_split
+          ? db.splits.find((x) => x.id === b.p_split)
+          : db.splits.find((x) => x.split_line.some((l) => l.id === b.p_line));
+        const line = sp?.split_line.find((l) => l.id === b.p_line);
+        const err = (message: string, code = '22023') =>
+          json(route, { message, code }, code === '42501' ? 403 : 400);
+        if (!sp || (b.p_line && !line)) return err('no_split', '42501');
+        if (db.space?.couple_state === 'unlink_pending') return err('unlink_pending', '42501');
+        const joint = db.space?.salary_mode === 'joint';
+        if ((!joint && sp.owner_user_id !== db.me.id) || (joint && sp.owner_user_id !== null))
+          return err('not_owner', '42501');
+        const touch = () =>
+          Object.assign(sp, { updated_by: db.me.id, updated_at: new Date().toISOString() });
+        const dupe = (name: string, except?: unknown) =>
+          sp.split_line.some((l) => l.kind === 'custom' && l.name === name && l.id !== except);
+        if (fn === 'split_line_set' && line) {
+          const name = b.p_name?.trim();
+          if (name && dupe(name, line.id)) return err('duplicate_line');
+          if (b.p_amount !== undefined && b.p_amount !== null) line.amount = b.p_amount;
+          if (name) line.name = name;
+        }
+        if (fn === 'split_line_add') {
+          const name = b.p_name?.trim() ?? null;
+          if (b.p_kind === 'custom' && name && dupe(name)) return err('duplicate_line');
+          if (
+            b.p_kind === 'custom' &&
+            sp.split_line.filter((l) => l.kind === 'custom').length >= 10
+          )
+            return err('too_many_custom');
+          const last = Math.max(-1, ...sp.split_line.map((l) => Number(l.sort)));
+          const pos =
+            b.p_sort === undefined || b.p_sort === null ? last + 1 : Math.min(b.p_sort, last + 1);
+          for (const l of sp.split_line) if (Number(l.sort) >= pos) l.sort = Number(l.sort) + 1;
+          const id = `${sp.id}-add-${db.rpc.length}`;
+          sp.split_line.push({
+            id,
+            split_id: sp.id,
+            kind: b.p_kind,
+            goal_id: null,
+            user_id: b.p_kind === 'allowance' ? (b.p_user ?? sp.owner_user_id ?? db.me.id) : null,
+            name: b.p_kind === 'custom' ? name : null,
+            amount: b.p_amount ?? 0,
+            sort: pos,
+          });
+          sp.split_line.sort((a, c) => Number(a.sort) - Number(c.sort));
+          touch();
+          resync(sp);
+          return json(route, id);
+        }
+        if (fn === 'split_line_delete' && line) {
+          if (line.kind === 'saving') {
+            const g = db.goals.find((x) => x.id === line.goal_id);
+            if (g) {
+              g.closed_at = new Date().toISOString();
+              goalLinesSync(g);
+            }
+          } else {
+            if (line.kind === 'allowance' && sp.owner_user_id === null)
+              return err('keep_allowance');
+            sp.split_line = sp.split_line.filter((l) => l !== line);
+          }
+        }
+        if (fn === 'split_reorder') {
+          const ids = b.p_ids ?? [];
+          if (ids.length !== sp.split_line.length) return err('bad_lines');
+          for (const l of sp.split_line) l.sort = ids.indexOf(String(l.id));
+          sp.split_line.sort((a, c) => Number(a.sort) - Number(c.sort));
+        }
+        touch();
+        resync(sp);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'check_pay_line') {
         // 서버 흉내: 줄 상태, 다른 금액(0이면 못 함), 체크리스트 상태

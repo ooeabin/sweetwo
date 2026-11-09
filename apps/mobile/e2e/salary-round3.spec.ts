@@ -97,7 +97,7 @@ test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이
   ).toEqual(['goal-e', 'goal-h']);
 });
 
-test('W-13 저금 목록: W-02 저금 묶음 머리, W-01 저금 머리, 홈 H-02 ‘전체 보기’에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
+test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 H-02 ‘전체 보기’에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -132,9 +132,10 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, W-01 저금 머리, 홈 H-0
   await page.getByRole('button', { name: '저금 추가' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=list$/);
 
-  await page.goto('/salary/split');
-  await page.getByRole('button', { name: '저금 목록 보기' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\?from=split$/);
+  // W-01 영수증 저금 머리는 소계만(2026-11-09), 저금 목록은 W-02 저금 묶음 머리에서
+  await page.goto('/salary?view=plan');
+  await expect(page.locator('.hg-receipt').getByRole('heading', { name: '저금' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '저금 목록 보기' })).toHaveCount(0);
 
   await page.goto('/');
   await page.getByRole('link', { name: '전체 보기' }).click();
@@ -277,7 +278,7 @@ test('S-11f 저장 전 미리보기 한 줄: 다른 방식을 고르면 “{다�
   await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
   await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
   expect(db.space?.salary_mode).toBe('joint');
   // 합쳐서 → 각자 미리보기
   await page.goto('/settings/me/salary-mode');

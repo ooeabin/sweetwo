@@ -93,7 +93,10 @@ test('첫 저금 빈 줄(2026-11-09): 내 저금이 없으면 홈 H-03·W-02 저
   if (!sp) throw new Error('seed');
   sp.split_line = sp.split_line.filter((l) => l.kind !== 'saving');
   const c = db.checklists[0];
-  if (c) c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter((l) => l.kind !== 'saving');
+  if (c)
+    c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
+      (l) => l.kind !== 'saving',
+    );
   await page.goto('/');
   const card = page.getByRole('region', { name: '9월 월급' });
   const row = card.getByRole('button', { name: '저금 추가 (여유 자금 139만 원)' });
@@ -135,7 +138,10 @@ test('첫 저금 빈 줄: 합류한 파트너(각자)에게 파트너 저금이 
   if (!sp) throw new Error('seed');
   sp.split_line = sp.split_line.filter((l) => l.kind !== 'saving');
   const c = db.checklists[0];
-  if (c) c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter((l) => l.kind !== 'saving');
+  if (c)
+    c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
+      (l) => l.kind !== 'saving',
+    );
   await page.goto('/');
   const row = page
     .getByRole('region', { name: '9월 월급' })
@@ -169,17 +175,16 @@ test('W-02a 다른 금액, W-01 월급 계획 고치기(체크 안 한 줄만 �
     actual: 780_000,
   });
 
-  // W-01: 고정지출 88만 → 90만, 저장 → Toast, 체크 안 한 고정지출 줄만 새 금액
+  // W-01 영수증(2026-11-09): 고정지출 88만 → 90만, 확인 = 바로 저장 + Toast, 체크 안 한 고정지출 줄만 새 금액
   await page.getByRole('button', { name: '월급 계획 고치기' }).click();
-  await expect(page.getByRole('heading', { name: '월급 계획' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
   await axe(page);
-  await page.getByRole('button', { name: /^고정지출/ }).click();
-  await page.getByLabel('고정지출 금액').fill('900000');
+  await page.getByRole('button', { name: '고정지출 88만 원' }).click();
+  await page.getByRole('textbox', { name: '고정지출 금액' }).fill('900000');
+  await expect(page.getByRole('dialog').getByText('2만 원이 모자라요')).toBeVisible();
   await page.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('2만 원이 모자라요')).toBeVisible();
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
+  await expect(page.getByText('고정지출을 90만 원으로 바꿨어요')).toBeVisible();
+  await expect(page.locator('.hg-receipt__row.is-short')).toContainText('2만 원이 모자라요');
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   expect(lines.find((l) => l.kind === 'fixed')).toMatchObject({ planned: 900_000, state: 'wait' });
   expect(lines.find((l) => l.kind === 'living')).toMatchObject({

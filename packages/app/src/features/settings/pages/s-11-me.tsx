@@ -198,7 +198,7 @@ export function S11Me() {
         />
         {/* 10번 월급 계획: 2026-11-04 다른 줄과 같은 목록 줄로 */}
         <div className="hg-list">
-          <ListRow label={copy.openSplit} onClick={() => nav('/salary/split')} />
+          <ListRow label={copy.openSplit} onClick={() => nav('/salary?view=plan')} />
         </div>
       </section>
       {/* 11번 로그아웃: 2026-11-04 맨 아래 목록 줄 */}

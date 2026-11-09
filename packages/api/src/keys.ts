@@ -62,3 +62,6 @@ export const qk = {
   /** 저금 항목 하나의 체크 줄(W-10 저금 내역) */
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };
+
+/** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
+export const splitKeys = [qk.splits, ['pay_checklist'], qk.goals, qk.goalSaved] as const;

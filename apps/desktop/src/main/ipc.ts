@@ -14,6 +14,7 @@ import {
   verifyPin,
 } from './lock';
 import { showNotice } from './notify';
+import { ShareImage, saveImage } from './share-image';
 import { offlineCache } from './offline-cache';
 import type { Updater } from './updater';
 import { TraySnapshot, WidgetSettings } from '@sweetwo/core';
@@ -90,6 +91,8 @@ export function registerIpc(
   handle(CH.widgetSetSettings, z.tuple([WidgetSettings.partial()]), ([p]) =>
     setWidgetSettings(p, w.setTray),
   );
+  // 이미지 공유(W-01 ‘공유하기’): 저장 창(기본 ‘다운로드’) → PNG 저장
+  handle(CH.shareImage, z.tuple([ShareImage]), ([f]) => saveImage(f, getWindow()));
   handle(CH.cacheLoad, none, () => offlineCache.load());
   handle(CH.cacheSave, z.tuple([z.string().max(20 * 1024 * 1024)]), ([t]) => offlineCache.save(t));
   handle(CH.cacheClear, none, () => offlineCache.clear());

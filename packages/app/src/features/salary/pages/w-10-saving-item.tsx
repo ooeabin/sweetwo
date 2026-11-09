@@ -17,7 +17,7 @@ import { quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { CheckLine } from '../check-line';
 import { copy } from '../copy';
-import { salaryPaths, savingPaths } from '../paths';
+import { planPath, salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
 import { AchieveWatch } from '../saving-parts';
 import { AfterChoice } from './w-12a-saving-after';
@@ -67,8 +67,8 @@ export function W10SavingItem() {
           .catch(() => toast(copy.loadFailed)),
     },
   ];
-  // 매달 금액 바꾸기 → 이 줄 금액만(W-10a monthly, 2026-11-09 round 3 W-01 전체 대신)
-  const splitTo = savingPaths.edit(id, 'monthly');
+  // ‘매달 금액 바꾸기’ → W-01 영수증에서 이 저금 줄 금액 시트를 연 채(2026-11-09, 여유 자금을 같이 봄)
+  const splitTo = planPath({ line: id });
   // 저금 내역: 체크리스트 달마다(최근 것부터), 체크 안 한 이번 달 줄은 빼고
   const records = (lines.data ?? [])
     .filter((l) => l.pay_checklist && l.state !== 'wait')
@@ -203,7 +203,11 @@ export function W10SavingItem() {
           <div className="hg-goalbox__head">
             <b>{copy.monthlyOf(m(i.monthly))}</b>
             {i.canEdit && (
-              <button type="button" className="hg-btn hg-btn--link" onClick={() => nav(splitTo)}>
+              <button
+                type="button"
+                className="hg-btn hg-btn--link"
+                onClick={() => nav(savingPaths.edit(id, 'monthly'))}
+              >
                 {copy.change}
               </button>
             )}
