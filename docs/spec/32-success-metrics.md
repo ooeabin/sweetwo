@@ -117,6 +117,8 @@
 | plan\_line\_deleted | W-01 ‘지우기’(시트, 편집 모드 줄) (2026-11-09) | line\_kind, default\_line(고정지출·생활비·용돈인지), entry(`sheet` / `edit`), joint |
 | plan\_reordered | W-01 편집 ‘완료’에서 순서가 바뀜 (2026-11-09) | sections(`saving` / `spend` / `both`), lines\_count, joint |
 | plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `saved` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
+| plan\_link\_tapped | W-01 머리 아래 ‘이번 달 3/5 보냈어요 ›’를 누름 (2026-11-09) | whose(`self` / `partner` / `joint`), checked(체크한 줄 수), total(줄 수) |
+| month\_result\_shared | 달 결과 카드 ‘공유하기’(W-02 끝, 다 끝난 W-02, 지난 달) (2026-11-09) | result(`shared` / `saved` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`done` / `checklist` / `past`), skipped(‘못 함’ 줄 수) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·자산 관리·경조사

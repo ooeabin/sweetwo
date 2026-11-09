@@ -103,16 +103,19 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
     page.getByText('예빈님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요'),
   ).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '닫기' }).click();
+  // 지난 달이 있어 새 사이클 한 줄도 있음(2026-11-09): 안내마다 ×
+  await page
+    .locator('.hg-row', { hasText: '예빈님이 월급 계획을 바꿔서' })
+    .getByRole('button', { name: '닫기' })
+    .click();
   await expect(page.getByText('예빈님이 월급 계획을 바꿔서')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
-  // 체크한 사람 이름 칩 + 두 자리 날짜(2026-11-03)
-  await expect(page.locator('.hg-transfer__who', { hasText: '예빈' }).first()).toBeVisible();
-  await expect(page.getByText('08.25 ~ 09.24. 다 보냈어요')).toBeVisible();
-  // 지난 달은 읽기 전용: 줄을 눌러 여는 시트 없음
-  await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
+  // 지난 달은 달 결과 카드(2026-11-09, 읽기 전용: 줄 체크·시트 없음)
+  await expect(page.getByText('08.25 ~ 09.24', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: '8월 월급 요약' })).toBeVisible();
+  await expect(page.locator('.hg-transfer')).toHaveCount(0);
   await page.getByRole('button', { name: '다음 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });

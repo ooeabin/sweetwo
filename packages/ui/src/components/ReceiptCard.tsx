@@ -23,21 +23,28 @@ export function ReceiptCard({ children, className }: { children: ReactNode; clas
 /** 머리: Avatar(40px, 둘이면 겹쳐서) + 큰 금액 + 아래 stone 한 줄. onAmount가 있으면 금액이 버튼 */
 export function ReceiptHead({
   lead,
+  title,
   amount,
   sub,
   onAmount,
   amountLabel,
+  extra,
 }: {
   lead?: ReactNode;
+  /** 금액 위 제목(달 결과 카드 “11월 월급”, 2026-11-09) */
+  title?: string;
   amount: string;
   sub?: string;
   onAmount?: () => void;
   /** 금액 버튼 화면 읽기 이름(“월급 350만 원, 내 월급 고치기”) */
   amountLabel?: string;
+  /** 아래 한 줄 다음(W-01 ‘이번 달 3/5 보냈어요 ›’ 링크) */
+  extra?: ReactNode;
 }) {
   return (
     <header className="hg-receipt__head">
       {lead}
+      {title && <p className="hg-receipt__headtitle">{title}</p>}
       {onAmount ? (
         <button
           type="button"
@@ -51,43 +58,72 @@ export function ReceiptHead({
         <p className="hg-receipt__amount">{amount}</p>
       )}
       {sub && <p className="hg-receipt__sub">{sub}</p>}
+      {extra}
     </header>
   );
 }
 
 export type ReceiptPartKind = 'saving' | 'spend' | 'free';
 
-/** 비율 막대(12px, 칸 사이 3px) + 가운데 범례. 칸 너비는 percent, 0이면 칸 없음 */
-export function ReceiptBar({
+/**
+ * 비율 막대 PlanBar(12px, 칸 사이 3px) + 가운데 범례(W-01 영수증, W-02 진행, 달 결과 카드 같은 마크업).
+ * 칸 너비는 percent, 0이면 칸 없음. progress 모드(2026-11-09 W-02): 칸마다 fill(0~100)만큼 채우고
+ * 나머지는 조용한 칸(저금 accent-app-soft, 지출 hairline 테두리). fill이 모두 100이면 계획 막대와 똑같음.
+ * legend가 비면 범례 없음, caption은 막대 아래 한 줄(“보낸 금액 142만 원 / 342만 원”)
+ */
+export function PlanBar({
   label,
   parts,
-  legend,
+  legend = [],
+  progress,
+  caption,
+  flat,
 }: {
   label: string;
-  parts: { kind: ReceiptPartKind; percent: number }[];
-  legend: { kind: ReceiptPartKind; text: string; short?: boolean }[];
+  parts: { kind: ReceiptPartKind; percent: number; fill?: number }[];
+  legend?: { kind: ReceiptPartKind; text: string; short?: boolean }[];
+  /** 진행 모드: 저금·지출 칸 안을 fill만큼 채움(여유 자금은 늘 stone) */
+  progress?: boolean;
+  caption?: ReactNode;
+  /** 카드 밖(W-02 머리 아래): 막대 위 여백을 좁게 */
+  flat?: boolean;
 }) {
   return (
-    <div>
+    <div className={cx('hg-planbar', flat && 'hg-planbar--flat')}>
       <div className="hg-receipt__bar" role="img" aria-label={label}>
         {parts
           .filter((p) => p.percent > 0)
-          .map((p) => (
-            <i
-              key={p.kind}
-              className={`hg-receipt__seg hg-receipt__seg--${p.kind}`}
-              style={{ flexGrow: p.percent, flexBasis: 0 }}
-            />
-          ))}
+          .map((p) => {
+            const partial = progress && p.kind !== 'free';
+            const fill = Math.max(0, Math.min(100, p.fill ?? 0));
+            return (
+              <i
+                key={p.kind}
+                className={cx(
+                  'hg-receipt__seg',
+                  `hg-receipt__seg--${p.kind}`,
+                  partial && 'is-progress',
+                )}
+                style={{ flexGrow: p.percent, flexBasis: 0 }}
+              >
+                {partial && fill > 0 && (
+                  <b className="hg-receipt__fill" style={{ width: `${fill}%` }} />
+                )}
+              </i>
+            );
+          })}
       </div>
-      <ul className="hg-receipt__legend" aria-hidden="true">
-        {legend.map((l) => (
-          <li key={l.kind} className={cx(l.short && 'is-short')}>
-            <i className={`hg-receipt__sw hg-receipt__seg--${l.kind}`} />
-            {l.text}
-          </li>
-        ))}
-      </ul>
+      {legend.length > 0 && (
+        <ul className="hg-receipt__legend" aria-hidden="true">
+          {legend.map((l) => (
+            <li key={l.kind} className={cx(l.short && 'is-short')}>
+              <i className={`hg-receipt__sw hg-receipt__seg--${l.kind}`} />
+              {l.text}
+            </li>
+          ))}
+        </ul>
+      )}
+      {caption && <p className="hg-receipt__caption">{caption}</p>}
     </div>
   );
 }
@@ -146,6 +182,10 @@ export interface ReceiptLine {
   onDelete?: () => void;
   /** 화면 읽기 이름(없으면 “이름 금액”) */
   label?: string;
+  /** 금액 아래 조용한 한 줄(달 결과 카드 “계획 80만 원”) */
+  sub?: string;
+  /** 금액 자리를 stone으로(달 결과 카드 ‘못 함’) */
+  muted?: boolean;
 }
 
 export interface ReceiptEditLabels {
@@ -233,7 +273,14 @@ export function ReceiptRows({
           const main = (
             <>
               <span className="hg-receipt__name">{l.name}</span>
-              <span className="hg-receipt__amt">{l.amount}</span>
+              {l.sub ? (
+                <span className="hg-receipt__amtcol">
+                  <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
+                  <span className="hg-receipt__plan">{l.sub}</span>
+                </span>
+              ) : (
+                <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
+              )}
             </>
           );
           return (

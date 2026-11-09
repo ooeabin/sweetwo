@@ -90,6 +90,19 @@ export const copy = {
   skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]
   skipped: '이번 달은 못 했어요',
   editSplit: '월급 계획 고치기',
+  // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
+  sentOfPlan: (sent: string, planned: string) => `보낸 금액 ${sent} / ${planned}`,
+  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 보냈어요`,
+  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 보냈어요`,
+  monthLineToo: '이번 달 체크 안 한 줄도 바꿨어요',
+  madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
+  // 달 결과 카드(W-02 끝, 다 끝난 W-02, 지난 달) [확인 필요]
+  received: (date: string) => `${date} 받음`,
+  sentTotal: '보낸 금액',
+  skippedShort: '못 함',
+  resultLabel: (label: string) => `${label} 요약`,
+  editChecks: '체크 고치기',
+  monthImageName: (ym: string) => `sweetwo-${ym}.png`,
   // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
   groupAllSent: '모두 보냈어요',
   groupAllSentLabel: (group: string) => `${group} 모두 보냈어요`,
@@ -114,7 +127,6 @@ export const copy = {
   next: '다음',
   // W-02 끝
   doneTitle: '이번 달 월급 체크를 다 했어요', // [확인 필요] 2026-11-03 ‘나눴어요’ 대신
-  doneSaved: (amount: string) => `이번 달 저금 ${amount}을 보냈어요`, // [확인 필요] 2026-11-08
   partnerProgress: (name: string, total: number, done: number) =>
     `${name}님 ${total}개 중 ${done}개`,
   ok: '확인',
