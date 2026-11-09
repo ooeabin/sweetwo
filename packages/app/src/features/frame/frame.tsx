@@ -28,7 +28,7 @@ const HREF: Record<AppTab, string | undefined> = {
 };
 
 /**
- * 메뉴 첫 화면 틀(AppFrame): 탭 4개, 도구, 두 사람 아바타, 금액 가리기.
+ * 메뉴 첫 화면 틀(AppFrame): 탭 4개, 도구, 두 사람 아바타(넓은 창 사이드바), 금액 가리기.
  * 이번 달은 오늘 띠(today), 다른 메뉴는 화면 제목 줄(page).
  */
 export function MainFrame(
@@ -127,7 +127,6 @@ export function MainFrame(
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
-        onInvite={() => nav('/settings/couple')}
         tabs={keys.map((key) => ({
           key,
           label: label[key],
@@ -148,7 +147,6 @@ export function MainFrame(
           add: copy.add,
           me: copy.me,
           stats: copy.stats,
-          invite: copy.invite,
         }}
         masked={masked}
         onMask={toggle}

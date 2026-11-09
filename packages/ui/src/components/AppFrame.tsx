@@ -5,7 +5,8 @@ import { IconButton } from './IconButton';
 import { Wordmark } from './Wordmark';
 
 // 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 회색 바탕 위 (홈만) 인사 카드 + 두 단 본문.
-// 좁은 창(768px 미만): 머리(홈은 워드마크, 다른 메뉴는 큰 제목 + 아이콘 4개) + 인사 카드 + 하단 탭 막대와 + 버튼.
+// 좁은 창(768px 미만): 머리(왼쪽 지금 자리: 홈은 워드마크, 다른 메뉴는 메뉴 이름 굵은 제목 + 오른쪽 알림·설정 아이콘, 2026-11-09)
+// + 하단 탭 막대(아이콘만, 이름은 화면 읽기용)와 + 버튼.
 
 // 2026-11-08 ADR 0007: 목표 탭 자리에 월급 탭(손 위 동전 hand-coins)
 export type AppTab = 'month' | 'salary' | 'assets' | 'calendar';
@@ -62,7 +63,7 @@ export interface AppFrameProps {
   };
   /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리가 홈과 같아(메뉴 이름은 화면 읽기용) 동작만 */
   page?: { title: ReactNode; actions?: ReactNode };
-  /** 좁은 창 머리의 큰 제목(메뉴 이름) */
+  /** 좁은 창 머리 왼쪽 제목(메뉴 이름, 홈은 워드마크라 화면 읽기용). 탭 막대 이름표로도 씀 */
   narrowTitle: string;
   date: string;
   labels: {
@@ -74,8 +75,6 @@ export interface AppFrameProps {
     me: string;
     /** 숫자 타일 묶음(좁은 창에서 가로로 넘김) */
     stats: string;
-    /** 홈 머리 두 사람을 눌러 초대할 때 이름 */
-    invite?: string;
   };
   masked: boolean;
   onMask: () => void;
@@ -83,8 +82,6 @@ export interface AppFrameProps {
   onNoti?: () => void;
   onSettings?: () => void;
   onAdd?: () => void;
-  /** 홈 머리 두 사람: 파트너가 아직 없으면 눌러서 초대(S-12) */
-  onInvite?: () => void;
   hasNewNoti?: boolean;
   people: AppFramePerson[];
   saveState?: string;
@@ -142,13 +139,14 @@ function TabLink({
       role="link" // href 없는(아직 없는) 메뉴도 링크로 읽히게
       aria-current={on ? 'page' : undefined}
       aria-disabled={t.disabled || undefined}
+      // 하단 탭 막대는 아이콘만(2026-11-09): 이름은 화면 읽기용(aria-label)
       aria-label={showLabel ? undefined : t.label}
       onClick={(e) => {
         e.preventDefault();
         if (!t.disabled) onTab?.(t.key);
       }}
     >
-      <Icon name={TAB_ICON[t.key]} size={className === 'hg-dock__item' ? 24 : 20} />
+      <Icon name={TAB_ICON[t.key]} size={showLabel ? 20 : 24} />
       {showLabel && t.label}
       {t.badge ? (
         <span className="hg-nav__count" aria-label={t.badgeLabel ?? `${t.badge}`}>
@@ -227,46 +225,25 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리: 모든 화면이 홈과 같음(두 사람 아바타 + 이름, 2026-11-04 머리 공통화). 메뉴 이름은 화면 읽기용 제목으로만 */}
+        {/* 좁은 창 머리(2026-11-09): 왼쪽은 지금 자리. 홈은 워드마크(사이드바와 같은 그림), 다른 메뉴는 메뉴 이름이 보이는 제목(h1).
+            두 사람 아바타와 이름은 뺌(초대는 홈 할 일 띠와 설정 S-12). 오른쪽은 알림, 설정 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
-          {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
-          {(() => {
-            const body = (
+          <div className="hg-mhead__place">
+            {p.current === 'month' ? (
               <>
-                {/* 파트너 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
-                <span className="hg-avatars" aria-hidden="true">
-                  {p.people.map((x) => (
-                    <Person key={x.no} p={x} />
-                  ))}
+                <span className="hg-mhead__logo">
+                  <Wordmark height={24} />
                 </span>
-                <span className="hg-mhead__names">
-                  {p.people
-                    .filter((x) => !x.empty && x.name)
-                    .map((x) => x.name)
-                    .join(', ')}
-                </span>
+                {/* 홈 제목은 인사 카드나 제목 줄(today)이 h1. 그것이 없는 홈(합류 대기, 불러오는 중)만 여기서 화면 읽기용 h1 */}
+                {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
               </>
-            );
-            return p.onInvite && p.people.some((x) => x.empty) ? (
-              <button
-                type="button"
-                className="hg-mhead__people"
-                aria-label={p.labels.invite}
-                onClick={p.onInvite}
-              >
-                {body}
-              </button>
+            ) : p.today ? (
+              <span className="hg-mhead__title">{p.narrowTitle}</span>
             ) : (
-              <span className="hg-mhead__people">{body}</span>
-            );
-          })()}
-          <IconButton
-            icon="search"
-            label={p.labels.search}
-            ghost
-            disabled={!p.onSearch}
-            onClick={p.onSearch}
-          />
+              <h1 className="hg-mhead__title">{p.narrowTitle}</h1>
+            )}
+          </div>
+          {/* 검색 버튼은 좁은 창 머리에서 뺌(2026-11-09, 넓은 창 사이드바 검색 칸과 ⌘K는 그대로) */}
           {/* 금액 가리기 눈은 좁은 창 머리에서 뺌(설정 S-10, ⌘K, Ctrl+Shift+H, 2026-11-03) */}
           <IconButton
             icon="bell"
@@ -355,7 +332,7 @@ export function AppFrame(p: AppFrameProps) {
         </main>
       </div>
 
-      {/* 좁은 창 하단 탭 막대 + 추가 */}
+      {/* 좁은 창 하단 탭 막대(아이콘만, 2026-11-09) + 추가 */}
       <nav className="hg-dock" aria-label={p.narrowTitle}>
         {p.tabs.map((t) => (
           <TabLink
@@ -365,7 +342,7 @@ export function AppFrame(p: AppFrameProps) {
             onTab={p.onTab}
             className="hg-dock__item"
             activeClass="is-active"
-            showLabel
+            showLabel={false}
           />
         ))}
       </nav>

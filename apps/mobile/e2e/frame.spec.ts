@@ -32,7 +32,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   await axe(page);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
-  await page.getByRole('button', { name: '검색' }).first().click();
+  await page.getByRole('button', { name: '검색' }).click();
   await page.getByRole('combobox', { name: '검색' }).fill('내 집');
   await expect(dialog.getByRole('option', { name: '내 집 마련' })).toBeVisible();
   await page.keyboard.press('Enter');
@@ -110,4 +110,50 @@ test('없는 주소(13 공통 상태 19번): “찾는 화면이 없어요” + 
   await axe(page);
   await page.getByRole('button', { name: '홈으로 가기' }).click();
   await expect(page).toHaveURL(/\/$/);
+});
+
+test('좁은 창 머리와 탭 막대(2026-11-09): 왼쪽 지금 자리(홈 워드마크, 다른 탭 제목 h1), 검색·두 사람 없음, 탭은 아이콘만', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'narrow');
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/');
+  const head = page.locator('.hg-frame__mhead');
+  const dock = page.locator('.hg-frame > .hg-dock');
+  // 홈: 워드마크, h1은 화면 읽기용 “홈” 하나
+  await expect(head.getByRole('img', { name: 'sweeTwo' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
+  // 오른쪽은 알림, 설정만. 검색 버튼, 두 사람 아바타·초대 버튼 없음
+  await expect(head.getByRole('button')).toHaveCount(2);
+  await expect(head.getByRole('button', { name: '알림', exact: true })).toBeVisible();
+  await expect(head.getByRole('button', { name: '설정', exact: true })).toBeVisible();
+  await expect(head.getByRole('button', { name: '검색' })).toHaveCount(0);
+  await expect(head.locator('.hg-avatar')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '함께할 사람 초대하기' })).toHaveCount(0);
+  // 초대는 할 일 띠에 남음
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  // 탭 막대: 이름은 화면 읽기용(aria-label)만, 보이는 글자 없음
+  await expect(dock).toHaveText('');
+  await expect(dock.getByRole('link', { name: '홈' })).toHaveAttribute('aria-current', 'page');
+  await expect(dock.getByRole('link', { name: '월급' })).not.toHaveAttribute('aria-current');
+  const box = await dock.getByRole('link', { name: '월급' }).boundingBox();
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  // 다른 탭: 머리 왼쪽 제목이 그 화면의 h1(보임), 워드마크 없음
+  for (const [name, url] of [
+    ['월급', /\/salary$/],
+    ['자산 관리', /\/assets/],
+    ['캘린더', /\/calendar/],
+  ] as const) {
+    await dock.getByRole('link', { name }).click();
+    await expect(page).toHaveURL(url);
+    await expect(head.getByRole('heading', { level: 1, name })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(head.getByRole('img', { name: 'sweeTwo' })).toHaveCount(0);
+    await expect(dock.getByRole('link', { name })).toHaveAttribute('aria-current', 'page');
+  }
+  await axe(page);
 });
