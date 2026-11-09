@@ -12,7 +12,7 @@
 2. 값 `hg-card__value`: 카드의 핵심 숫자 1개.
 3. 보조 줄 `hg-card__meta`: 1줄. 없으면 비워 둠.
 
-- 칸 사이 `space-2`, 안쪽 여백 `space-6`(좁은 창 `space-4`). 자식에 margin 쓰지 않음.
+- 칸 사이 `space-2`, 안쪽 여백 위아래 `space-5`(2026-11-09 밀도, 20px), 옆 `space-6`(좁은 창 앱 틀 안 `space-5`). 카드 사이 `space-3`(12px, `hg-cards`). 자식에 margin 쓰지 않음.
 - 모두 왼쪽 정렬. 카드 안 금액도 왼쪽.
 - 나란히 놓는 카드는 `hg-cards`로 묶고 같은 구성으로 씀: 같은 높이, 값이 같은 높이에서 시작.
 - 숫자만 여러 개 보여 줄 때는 카드 대신 숫자 칸 `hg-stat`(라벨 `hg-stat__label`, 값 `hg-stat__value`, 보조 `hg-stat__sub`)을 `hg-stats`로 묶음: 3열, 좁은 창(768px 미만)은 2열 + 값 18px. 값은 줄바꿈 없음. 누르면 고치는 칸은 `button.hg-stat`(hover `hairline-soft`, 포커스 테두리 `focus`).

@@ -3,6 +3,7 @@ import { cx } from './cx';
 import { Button } from './Button';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
+import type { LeadTone } from './lead-kinds';
 
 // 알림 패널(docs/design/components/NotificationPanel.md, 기획서 14 N-01~N-03). 넓은 창은 오른쪽 시트, 좁은 창은 전체 화면.
 // 묶음(오늘·이번 주·이전) → 줄(사람 Avatar 또는 아이콘, 문구, 시간, 새 알림 점). 열리면 첫 줄 포커스, ↑↓ 이동, Enter 열기.
@@ -15,6 +16,8 @@ export interface NotiItem {
   person?: { name: string; no: 1 | 2 };
   /** 앱 안내 아이콘(사람이 없을 때) */
   icon?: IconName;
+  /** 아이콘 원 영역 색(lead-kinds.ts noti) */
+  tone?: LeadTone;
 }
 
 export function NotificationPanel(p: {
@@ -194,8 +197,13 @@ export function NotificationPanel(p: {
                           {[...x.person.name][0] ?? ''}
                         </span>
                       ) : (
-                        // 2026-11-08 알림 아이콘은 다시 만들 때까지 빈 원(Illustrations ‘나중 과제’ 7번)
-                        <span className="hg-noti__icon" aria-hidden="true" />
+                        // 2026-11-09 알림 종류 아이콘(Phosphor, lead-kinds.ts noti) + 영역 색 원
+                        <span
+                          className={cx('hg-noti__icon', x.tone && `hg-lead--${x.tone}`)}
+                          aria-hidden="true"
+                        >
+                          {x.icon && <Icon name={x.icon} />}
+                        </span>
                       )}
                       <span className="hg-noti__text">
                         <span className="hg-noti__msg">{x.msg}</span>

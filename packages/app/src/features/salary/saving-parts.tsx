@@ -1,6 +1,6 @@
 import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
-import { Badge, Lead, ListRow } from '@sweetwo/ui';
+import { Badge, Lead, leadOf, ListRow } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,7 @@ import { savingPaths } from './paths';
 import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
 
 /**
- * 저금 항목 줄(GoalRow, 홈 H-02와 저금 목록 W-13): 저금통 + 이름(파트너 항목은 이름 칩) + 오른쪽 %(달성이면 ‘달성’ 배지)
+ * 저금 항목 줄(GoalRow, 홈 H-02와 저금 목록 W-13): 저금통 아이콘(goal 원, 진행 원 아님: %와 막대가 진행을 말함) + 이름(파트너 항목은 이름 칩) + 오른쪽 %(달성이면 ‘달성’ 배지)
  * + “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면(W-13만) % 자리 비우고 “모은 돈 300만 원”, 막대 없음.
  */
 export function SavingGoalRow({
@@ -26,7 +26,7 @@ export function SavingGoalRow({
   const m = (v: number) => money(v, masked);
   return (
     <button type="button" className="hg-goalrow" onClick={onClick}>
-      <Lead icon="piggy-bank" />
+      <Lead {...leadOf('line', 'saving')} />
       <span className="hg-goalrow__name">
         {i.goal.name}
         {i.owner === 'partner' && i.ownerName && <Badge kind="temp">{i.ownerName}</Badge>}
@@ -55,17 +55,13 @@ export function SavingGoalRow({
   );
 }
 
-/** 저금 줄 아래 진행(20 W-02 4번): “2,700만 / 1억 5,000만 원” + 얇은 막대. 목표 금액이 없으면 없음 */
+/**
+ * 저금 줄 보조 줄(20 W-02 4번): “2,700만 / 1억 5,000만 원”. 목표 금액이 없으면 없음.
+ * 진행은 줄 앞 진행 원(LineLead, 2026-11-09 줄 아래 얇은 막대 대신, 줄 높이가 다른 줄과 같게)
+ */
 export function SavingMeta({ item, masked }: { item: SavingItem | undefined; masked: boolean }) {
   if (!item || item.target === null) return null;
-  return (
-    <span className="hg-stack" style={{ gap: 'var(--space-1)' }}>
-      <span>{copy.itemProgress(money(item.saved, masked), money(item.target, masked))}</span>
-      <span className="hg-goalbox__bar" style={{ display: 'block', height: 'var(--space-1)' }}>
-        <i style={{ width: `${item.bar}%` }} />
-      </span>
-    </span>
-  );
+  return <>{copy.itemProgress(money(item.saved, masked), money(item.target, masked))}</>;
 }
 
 /**
