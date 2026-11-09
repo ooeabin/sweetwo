@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (02faaf6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (48386da). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -341,6 +341,17 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sceneart { display: block; width: 120px; height: 120px; object-fit: contain; }
 .hg-sceneart--tall { width: 120px; height: 160px; }
 @media (prefers-reduced-motion: no-preference) { .hg-doneart, .hg-sceneart { animation: hg-pop .32s ease-out both; } }
+/* 2026-11-09 2D 그림 빈 자리(hg-artslot): 그림이 들어올 때까지 같은 크기의 회색 판으로 자리를 잡음(Illustrations ‘나중 과제’ 자리 표시 열).
+   surface-alt를 연하게 해서 흰 바탕 위에서도 보이게 안쪽 1px hairline-soft 테두리. 어드민·웹사이트는 예전 그대로(테두리 없음) */
+.hg-artslot { box-shadow: inset 0 0 0 1px var(--hairline-soft); }
+:where(.hg-admin, .hg-adminauth, .hg-site) .hg-artslot { box-shadow: none; }
+.hg-option__icon.hg-artslot { display: inline-block; width: 36px; height: 36px; border-radius: var(--radius-md); }  /* 선택지 카드 왼쪽 그림 자리(36px 둥근 네모) */
+.hg-intro-steps__icon.hg-artslot { display: inline-block; border-radius: var(--radius-full); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--hairline); }  /* O-10·O-60 목록 앞 그림 자리(40px 원). 회색 판(plate) 위라 hairline 테두리 */
+.hg-busy__art > .hg-artslot { width: 100%; height: 100%; border-radius: inherit; }  /* S-18 처리 중 그림 자리 = 112px 원 전체 */
+.hg-auth--start > .hg-sceneart + img { margin-top: 0; }  /* O-01 시작 그림 자리(120px) 아래 워드마크 */
+@media (max-width: 767px) {
+  .hg-auth--start > .hg-sceneart { margin-top: max(var(--space-16), calc(30dvh - 120px - var(--space-6))); }  /* 워드마크는 A-02와 같은 높이 그대로, 그림 자리는 그 위 */
+}
 /* 2026-11-05 W-02 끝 축하(폭죽): 그림 자체가 한 번 터지는 움직이는 WebP(assets/motion)라 톡 커짐은 끔. 동작 줄이기면 정지 그림(Illustration motion) */
 .hg-motion-wrap { display: contents; }
 .hg-motion { animation: none; }
