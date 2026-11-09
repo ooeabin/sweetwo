@@ -174,7 +174,7 @@ export function W02Checklist() {
             <p className="hg-card__meta">{copy.noChecklist}</p>
             <button
               type="button"
-              className="hg-btn hg-btn--link"
+              className="hg-btn hg-btn--link hg-btn--accent"
               style={{ alignSelf: 'flex-start' }}
               onClick={() => nav('/settings/me')}
             >
@@ -343,7 +343,16 @@ export function W02Checklist() {
                 // 2026-11-09 밀도: 진행 원 대신 한 줄 “저금 0/2 ›”(개수는 조용한 글자, 화면 읽기는 문장)
                 variant="group"
                 title={title}
-                count={`${n}/${ls.length}`}
+                // 한 개수만 오렌지 600(브랜드 색 규칙 2026-11-09, `hg-sechead__count b`). 0이면 강조 없음
+                count={
+                  n > 0 ? (
+                    <>
+                      <b>{n}</b>/{ls.length}
+                    </>
+                  ) : (
+                    `${n}/${ls.length}`
+                  )
+                }
                 countLabel={copy.progress(ls.length, n)}
                 // 저금 묶음 머리를 누르면 저금 목록(W-13, 2026-11-09 round 3)
                 onTitle={kind === 'saving' ? openList : undefined}
@@ -352,7 +361,7 @@ export function W02Checklist() {
                   canAll ? (
                     <button
                       type="button"
-                      className="hg-btn hg-btn--link"
+                      className="hg-btn hg-btn--link hg-btn--accent"
                       aria-label={copy.groupAllSentLabel(title)}
                       aria-busy={group.busy === kind || undefined}
                       disabled={!!group.busy}

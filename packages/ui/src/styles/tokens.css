@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (e02fdaf). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (22275f6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -17,12 +17,12 @@
   --muted: #a4a5a7; /* 비활성 글자·아이콘(비활성 버튼 글자 포함)에만. 자리표시·다른 달 날짜는 stone. 읽어야 하는 정보에는 쓰지 않음. */
   --on-ink: #ffffff; /* 주 버튼(ink 바탕) 위 글자. */
   --primary-pressed: #37383a; /* 주 버튼 누름 상태 바탕. 글자는 on-ink. */
-  --brand: #ff7716; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 주 버튼 바탕과 작은 점, 글자: 워드마크, 주 버튼, 새 알림 점, 순자산 차트 끝점, 온보딩 챕터 진행 막대. 카드·띠·패널 같은 넓은 면에는 쓰지 않음. 오류 버튼(danger, 짙은 빨강)과는 아이콘·문구로 구분. 흰 글자 대비 2.7:1로 WCAG AA 미달을 알고 씀(주 버튼, 달성 배지만 axe color-contrast 예외). */
-  --brand-soft: #fff2e8; /* 브랜드 색의 옅은 판. 달력의 오늘 날짜 칸에만. */
-  --brand-ink: #b33f00; /* brand-soft 위 글자(오늘 날짜), 축하 화면 머리글 글자. */
+  --brand: #ff7716; /* sweeTwo 브랜드 색(비비드 오렌지, 심볼 원 고리 색). 2026-11-09 당근처럼 사용자 앱의 하나뿐인 포인트 색: 주 버튼, + 버튼(FAB), 체크한 원·고른 표시, 저금 진행 원·막대, 글자 버튼, 짧은 강조 숫자, 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 accent-app 계열 토큰으로 씀. 카드·패널 같은 넓은 면에는 쓰지 않음(채움은 주 버튼, FAB, 체크 원만). 대비 예외(알고 씀, WCAG AA 미달): 흰 바탕 위 오렌지 글자 약 2.7:1, 오렌지 위 흰 글자 2.7:1. 오렌지 글자는 14px 이상 + 굵기 600 이상의 짧은 말(글자 버튼, 강조 숫자)만, 긴 문장에는 쓰지 않음. 체크 원·진행 원·막대·FAB는 그래픽. 뜻은 늘 모양이나 글자(체크 표시, 숫자, 이름)로도 전함. e2e axe color-contrast는 이 요소들만 선택자로 예외(apps/mobile/e2e/axe.ts). */
+  --brand-soft: #fff2e8; /* 브랜드 색의 옅은 판(accent-app-soft): 달력의 오늘 날짜 칸, 카드 안 보조 버튼, 홈 할 일 띠·초대 띠·공지 띠 바탕, 안 읽은 알림 줄 바탕, 고른 작은 칩, 결과 카드 체크 동그라미(2026-11-09). */
+  --brand-ink: #b33f00; /* brand-soft 위 작은 글자(14px 미만: 오늘 날짜, 배지, 작은 칩, 카드 안 보조 버튼), 축하 화면 머리글 글자. brand-soft 위 4.5:1 이상. */
   --brand-pressed: #ec6a08; /* 주 버튼 누름 상태 바탕. */
   --on-brand: #ffffff; /* brand 바탕 위 글자(주 버튼). 라이트는 흰 글자, 다크는 어두운 글자. */
-  --focus: #3d5afe; /* 키보드 포커스 링(2px)과 글자 링크. surface·surface-alt 위 4.5:1 이상. */
+  --focus: #3d5afe; /* 어드민 전용(2026-11-09): 어드민 키보드 포커스 링과 글자 버튼. 사용자 앱은 focus-ring(ink)과 accent-app-text를 씀. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
   --family: #efe7fb; /* ‘양가’ 영역 틴트: 챙길 날의 양가 일정, 양가 비용. */
@@ -38,9 +38,15 @@
   --person-1-ink: #8f3a22; /* person-1 위 이니셜. */
   --person-2: #c9d8ff; /* 합류한 사람(예빈)의 Avatar 바탕. */
   --person-2-ink: #1f3a99; /* person-2 위 이니셜. */
-  --success-soft: #edf3fc; /* success의 옅은 판(2026-11-03). 홈 할 일 띠, 공지 띠 바탕, 고른 작은 칩 바탕(2026-11-04). 위 글자는 success. */
-  --success: #1b64da; /* 완료·확정 표시(체크, ‘확정’ 배지 바탕). 글자는 on-success. 2026-11-03 초록에서 파랑으로. */
-  --on-success: #ffffff; /* success 바탕 위 글자. */
+  --success-soft: #edf3fc; /* 어드민 전용(2026-11-09): success의 옅은 판(어드민 공지 미리보기 띠). 사용자 앱은 accent-app-soft. */
+  --success: #1b64da; /* 어드민 전용(2026-11-09): 어드민 완료 표시(승인 단계 원). 사용자 앱의 체크·완료는 accent-app(브랜드 오렌지)로 바꿈, 파랑은 사용자 앱 포인트가 아님. */
+  --on-success: #ffffff; /* success 바탕 위 글자(어드민). */
+  --accent-app: var(--brand); /* 2026-11-09 사용자 앱 포인트(= brand): FAB 바탕, 체크한 원(hg-check, hg-checkbox, 고른 선택지 원), 고른 카드·바꾸기 칩 테두리, 저금 진행 원·막대 채움, 띠 아이콘, 묶음 머리 한 숫자. 어드민(hg-admin)은 예전 success로 되돌림. */
+  --accent-app-soft: var(--brand-soft); /* 2026-11-09 사용자 앱 포인트 옅은 판: 할 일·초대·공지 띠, 안 읽은 알림 줄, 고른 작은 칩, 달성·완료 배지 바탕. 위 글자는 ink(긴 글자) 또는 accent-app-ink(작은 글자). */
+  --accent-app-ink: var(--brand-ink); /* 2026-11-09 accent-app-soft 위 14px 미만 글자(작은 칩, 배지). */
+  --on-accent-app: var(--on-brand); /* 2026-11-09 accent-app 채움 위 체크·아이콘(주 버튼과 같은 on-brand). */
+  --accent-app-text: var(--brand); /* 2026-11-09 글자 버튼(hg-btn--link, 묶음 머리 ‘전체 보기’ 등) 글자: 14px 이상 600 이상만. 어드민은 focus. */
+  --focus-ring: var(--ink); /* 2026-11-09 키보드 포커스 링(2px, 바깥 2px 간격): 사용자 앱은 ink(밝은 화면 검정, 다크 흰색), surface 위 15:1 이상으로 늘 잘 보임. 어드민은 focus. */
   --danger: #dc2626; /* 입력 오류·저장 실패에만. 기본 빨강(흰 바탕 4.8:1)으로 브랜드 오렌지와 구분, 항상 아이콘·문구와 같이. 손실·미달 금액에는 쓰지 않음. */
   --on-danger: #ffffff; /* danger 바탕 버튼 위 글자(영구 삭제 확인 버튼만). */
   --accent-soft: #eef1ff; /* 어드민 포인트 판(2026-11-06): 지금 메뉴 바탕, 고른 작은 칩 바탕. 위 글자는 accent-ink. 사용자 앱에는 쓰지 않음. */
@@ -100,6 +106,12 @@
   --success-soft: #1f2836;
   --success: #6ea8ff;
   --on-success: #141312;
+  --accent-app: var(--brand);
+  --accent-app-soft: var(--brand-soft);
+  --accent-app-ink: var(--brand-ink);
+  --on-accent-app: var(--on-brand);
+  --accent-app-text: var(--brand);
+  --focus-ring: var(--ink);
   --danger: #f87171;
   --on-danger: #141312;
   --accent-soft: #1e2340; /* 어드민 포인트 판(2026-11-06): 지금 메뉴 바탕, 고른 작은 칩 바탕. 위 글자는 accent-ink. 사용자 앱에는 쓰지 않음. */
