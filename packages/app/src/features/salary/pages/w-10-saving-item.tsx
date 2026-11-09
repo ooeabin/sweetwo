@@ -145,7 +145,7 @@ export function W10SavingItem() {
                 ) : i.canEdit ? (
                   <button
                     type="button"
-                    className="hg-btn hg-btn--link hg-btn--accent"
+                    className="hg-btn hg-btn--link"
                     onClick={() => nav(savingPaths.edit(id, 'deadline'))}
                   >
                     {copy.setDeadline}

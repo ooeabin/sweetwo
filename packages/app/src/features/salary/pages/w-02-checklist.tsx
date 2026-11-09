@@ -180,7 +180,7 @@ export function W02Checklist() {
               <p className="hg-card__meta">{copy.noChecklist}</p>
               <button
                 type="button"
-                className="hg-btn hg-btn--link hg-btn--accent"
+                className="hg-btn hg-btn--link"
                 style={{ alignSelf: 'flex-start' }}
                 onClick={() => nav('/settings/me')}
               >
@@ -452,7 +452,7 @@ export function W02Checklist() {
                     canAll ? (
                       <button
                         type="button"
-                        className="hg-btn hg-btn--link hg-btn--accent"
+                        className="hg-btn hg-btn--link"
                         aria-label={copy.groupAllSentLabel(title)}
                         aria-busy={group.busy === kind || undefined}
                         disabled={!!group.busy}
