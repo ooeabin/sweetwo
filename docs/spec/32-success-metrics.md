@@ -111,7 +111,12 @@
 | checklist\_completed | 여유 자금 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
-| split\_saved | W-01 ‘저장’ (O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self` / `partner`: 각자 관리에서 파트너 월급 계획을 고침), left\_band, reset\_to\_recommended, entry(`home` / `goal_detail` / `settings`) |
+| split\_saved | W-01 ‘추천값으로 다시 채우기’ 저장(2026-11-09 영수증부터 ‘저장’ 버튼이 없어 추천값으로 채울 때만, O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self`), left\_band, reset\_to\_recommended(늘 true), entry(`split`) |
+| plan\_line\_changed | W-01 금액 시트 ‘확인’으로 줄 금액·이름을 바꿈 (2026-11-09) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), field(`amount` / `name` / `both`), direction(`up` / `down` / `same`), left\_band(바꾼 뒤 여유 자금 구간, 모자라면 `short`), joint(합쳐서 공동 월급 계획인지), entry(`receipt` / `edit` / `saving_detail`: W-10 ‘매달 금액 바꾸기’) |
+| plan\_line\_added | W-01 ‘+ 지출 추가’로 줄을 더함 (2026-11-09) | source(`chip` / `text`), chip(칩 이름 영문 코드 `maintenance` / `phone` / `insurance` / `subscription` / `transport` / `parents`, 글자로 넣었으면 null), amount\_band, joint |
+| plan\_line\_deleted | W-01 ‘지우기’(시트, 편집 모드 줄) (2026-11-09) | line\_kind, default\_line(고정지출·생활비·용돈인지), entry(`sheet` / `edit`), joint |
+| plan\_reordered | W-01 편집 ‘완료’에서 순서가 바뀜 (2026-11-09) | sections(`saving` / `spend` / `both`), lines\_count, joint |
+| plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `saved` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·자산 관리·경조사
