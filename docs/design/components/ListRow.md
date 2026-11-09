@@ -3,10 +3,10 @@
 목록 한 줄. 설정 항목, 자산 항목, 파트너 활동에 씀.
 
 - 소비자가 주는 것: 앞 요소(아이콘·Avatar·Toggle, 선택), 라벨, 보조 1줄(선택), 값(선택), 이동 표시(선택).
-- 높이 56px 이상, 세로 가운데 정렬. 값은 오른쪽 정렬 `tabular-nums`.
+- 높이 56px 이상(위아래 `space-3` 12px, 2026-11-09 밀도: 한 줄 56px, 두 줄 64~68px), 세로 가운데 정렬. 값은 오른쪽 정렬 `tabular-nums`. 이름 16px 400(캘린더 고른 날 줄은 17px 500, 2026-11-09 700에서), 보조 줄 13px `stone`.
 - 누르면 이동하는 줄만 화살표(`hg-chevron`)이고 줄 전체가 `button`(또는 `a`). 토글 줄은 화살표 없음.
-- 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 60px 이상. 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
-- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 40px 원): 영역 색 원 + Phosphor 아이콘 20px(2026-11-09, 아래 ‘Lead 종류 표’). 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음.
+- 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 56px 이상(2026-11-09 60px에서). 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
+- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 영역 색 원 + Phosphor 아이콘 18px(2026-11-09, 아래 ‘Lead 종류 표’). 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음.
 - 사진 미리보기 `hg-thumb`(40px, `radius-md`, 잘라 채움): 챙길 날 드린 기록(Y-09)에서 첫 사진. 장식이라 `aria-hidden`, 사진 수는 보조 줄 “사진 3장”.
 
 ## 설정 줄
@@ -14,7 +14,7 @@
 - 값 + 화살표: 오른쪽에 현재 값(`hg-listrow__value is-soft`, `slate` 400) + `hg-chevron`. 누르면 고르는 화면·BottomSheet.
 - 스위치 줄: 오른쪽 Toggle(`button role="switch"` + `aria-checked`, 라벨을 `aria-labelledby`로). 줄 자체는 누르는 대상 아님, 바로 적용.
 - 앞 아이콘은 20px `ink`, 보조 1줄은 지금 설정을 사실로(“월요일 오전 9시”).
-- 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 값 17px, 보조 14px `slate`. 토스형 구역(StatBlock 아래)에서만.
+- 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 줄 높이 56px 이상(2026-11-09 64px에서), 값 17px, 보조 14px `slate`. 토스형 구역(StatBlock 아래)에서만.
 
 - 잠긴 줄(`locked`, 2026-11-09): 고칠 수 없는 줄(각자 모드 파트너 월급 계획 W-01)은 꺾쇠 자리에 Phosphor `lock` 16px(`hg-listrow__lock`, `stone`). 누를 수 없음(div). 왜 잠겼는지는 목록 위 회색 한 줄로 알림(“{파트너}님 월급 계획이에요. 보기만 할 수 있어요”).
 
@@ -66,11 +66,11 @@
 | | `shield-check`, `shield-warning`, `user-plus`, `user-minus`, `envelope-simple`(→ `envelope`), `chat-circle-text`, `megaphone`, `bell`(모를 때) | 같은 이름 | 회색 | 〃 |
 
 - ‘+ 추가’ 같은 동작 줄은 `Lead icon="plus"`(회색 원, Y-04는 점선 원 `hg-cal__add`). 종류 표에 넣지 않음.
-- 묶음 타일(`hg-pick--tiles`) 안의 Lead는 48px 원 + 24px 아이콘.
+- 묶음 타일(`hg-pick--tiles`) 안의 Lead는 48px 원 + 24px 아이콘(타일이라 밀도 대상 아님). Meter 머리 Lead도 48px 그대로.
 
 ## 진행 원 (2026-11-09)
 
-- `Lead progress={0~100}`: 목표 금액이 있는 저금 줄(체크리스트 W-02, 홈 H-03, W-05)의 앞 칸. 저금 아이콘 대신 `goal` 원 안에 고리(`hg-lead--ring`): 안쪽 `space-2` 들여 24px, 굵기 `space-1`, 빈 둘레 `surface`, 채움 `goal-ink`(다크 모드는 토큰이 바꿈).
+- `Lead progress={0~100}`: 목표 금액이 있는 저금 줄(체크리스트 W-02, 홈 H-03, W-05)의 앞 칸. 저금 아이콘 대신 앞 칸과 같은 32px 고리(`hg-lead--ring`, 2026-11-09 밀도): 굵기 `space-1`, 빈 둘레 `goal`, 채움 `goal-ink`, 가운데는 비움(다크 모드는 토큰이 바꿈).
 - 값 = core `savingBar`(모은 돈 × 100 ÷ 목표 금액, 내림 정수 %, 100 상한, 모은 돈이 있으면 최소 2%). 정수만 받고 0~100으로 자름.
 - 장식(`aria-hidden`). 진행은 보조 줄 “2,700만 / 1억 5,000만 원”이 글자로 말함. 그래서 이 줄들에는 이름 아래 얇은 막대를 두지 않음(줄 높이가 다른 줄과 같음).
 - 목표 금액이 없는 저금 줄은 저금통 아이콘(`goal` 원).

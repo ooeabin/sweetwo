@@ -13,7 +13,7 @@
 - 오늘 `is-today`: 숫자 800. 고른 날 `is-selected`: 떠 있는 흰 칸(`surface` + `shadow-2` + `hairline-soft` 1px 고리, `radius-lg`). 처음 고른 날은 오늘.
 - 월급 전 확인 기간(다음 월급날 3일 전 ~ 전날): 칸마다 회색 판이 아니라 칸 아래 이어진 한 줄 띠 `hg-cal__band`(높이 14px `surface-alt`, 시작·끝 둥글게, 시작 칸에 “월급 전 확인” 9px 600 `slate`). 주가 바뀌면 그 줄에서 끊고 다음 줄에서 다시 시작.
 - 공휴일 `is-holiday`: 숫자 `holiday-ink`. 설·추석 연휴 `is-festive`: 칸 바탕 `family`(고른 날 흰 칸이 이김).
-- 달력 아래 굵은 회색 띠(Band) → 고른 날 일정 `hg-cal__agenda`: 날짜 “10월 20일 화요일”(14px `slate`) → 줄만 목록(`hg-list--plain`): 40px 종류 아이콘(Lead, 2026-11-09 영역 색 원 + Phosphor: ListRow ‘Lead 종류 표’의 `care`(생일 케이크, 기념일 하트, 명절 달과 별 등, 모두 `together`)와 `money`(월급날 지폐, 월급 전 확인 달력 체크, 기한 과녁, 만기 모래시계, 공휴일 깃발)) + 굵은 이름 17px 700 + 회색 보조 줄(금액 메모·D-day, 갈 화면). 없으면 “이 날은 일정이 없어요”. 오늘 이후면 맨 아래 점선 원 + ‘이 날에 챙길 날 추가’(15px `slate`, `hg-cal__add`).
+- 달력 아래 굵은 회색 띠(Band) → 고른 날 일정 `hg-cal__agenda`: 날짜 “10월 20일 화요일”(14px `slate`) → 줄만 목록(`hg-list--plain`): 40px 종류 아이콘(Lead, 2026-11-09 영역 색 원 + Phosphor: ListRow ‘Lead 종류 표’의 `care`(생일 케이크, 기념일 하트, 명절 달과 별 등, 모두 `together`)와 `money`(월급날 지폐, 월급 전 확인 달력 체크, 기한 과녁, 만기 모래시계, 공휴일 깃발)) + 이름 17px 500(2026-11-09 밀도, 700에서) + 회색 보조 줄(금액 메모·D-day, 갈 화면). 없으면 “이 날은 일정이 없어요”. 오늘 이후면 맨 아래 점선 원 + ‘이 날에 챙길 날 추가’(15px `slate`, `hg-cal__add`).
 - 보기 필터 칩(“전체” “챙길 날” “돈 일정”)은 회색 알약(`surface-alt` + `slate`), 고르면 검정. 그 위에 우리 자산과 같은 탭 “목록” / “달력”.
 - 날짜 칸 `aria-label`에 날짜, 공휴일 이름, 일정 수. 고른 날 `aria-pressed`, 오늘 `aria-current="date"`.
 - React 래퍼 `Calendar`(packages/ui): `days`(`short`, `tone`, `band`, `holiday`, `festive`), `today`, `selected`, 이전·다음, `todayLabel`·`onToday`, `bandLabel`, `showYear`.

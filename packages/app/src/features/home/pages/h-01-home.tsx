@@ -276,7 +276,7 @@ export function H01Home() {
       }}
       banner={banner}
       columns={[
-        <div key="l" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
+        <div key="l" className="hg-stack hg-homecol" style={{ gap: 'var(--space-6)' }}>
           <AchieveWatch />
           <SalaryCard
             list={list}
@@ -293,7 +293,7 @@ export function H01Home() {
           />
           <SavingCard items={saving.ready ? saving.withTarget : []} go={go} />
         </div>,
-        <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-8)' }}>
+        <div key="r" className="hg-stack hg-homecol" style={{ gap: 'var(--space-6)' }}>
           {/* 19 H-01 1a 우리 자산 순위 줄(2026-11-04): 우리 자산(H-04) 바로 위 */}
           {showRank && <RankBanner entry="home" />}
           {assetsCard}

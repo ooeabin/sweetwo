@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a5d9254). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e9ec888). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -44,13 +44,13 @@
 .hg-chip.hg-chip--sm.is-selected { border-color: transparent; box-shadow: none; background: var(--success-soft); color: var(--success); }
 
 /* Card */
-.hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-6); }
+.hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); }  /* 2026-11-09 밀도: 위아래 20px(좁은 창 옆 20px은 앱 틀 규칙) */
 /* 회색 판 카드: 안내, 빈 상태, 요약처럼 가볍게 둘 내용. 테두리 없음 */
 .hg-card--fill { background: var(--plate); border-color: transparent; }
 .hg-card > * { margin: 0; }
 .hg-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 24px; }
 .hg-card__label { font: 600 14px/20px var(--font-sans); color: var(--slate); }
-.hg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-5); align-items: stretch; }
+.hg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); align-items: stretch; }
 .hg-card--raised { box-shadow: var(--shadow-1); }
 /* 누를 수 있는 카드를 button·a로 쓸 때: 글자색, 글꼴, 정렬은 카드 그대로 */
 :is(button, a).hg-card { width: 100%; margin: 0; color: var(--ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
@@ -128,12 +128,14 @@
 
 /* TransferRow: 월급 플랜 이체 줄 */
 /* 체크 줄(카카오뱅크 체크리스트 느낌): 왼쪽 이름·보조 줄, 오른쪽 금액 → 체크 원. 한 줄은 취소선 + stone */
-.hg-transfer { display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--hairline-soft); }
-.hg-transfer > .hg-check { order: 2; width: 28px; height: 28px; }
+.hg-transfer { display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; }  /* 2026-11-09 밀도: 위아래 12px, 줄 사이 선 없음 */
+.hg-transfer > .hg-check { order: 2; position: relative; width: 28px; height: 28px; }
+.hg-transfer > .hg-check::before { content: ""; position: absolute; inset: calc(-1 * var(--space-2)); border-radius: var(--radius-full); }  /* 2026-11-09 누르는 칸 44px(보이는 원은 28px) */
 .hg-transfer > .hg-transfer__state { order: 2; display: grid; place-items: center; width: 28px; height: 28px; color: var(--success); }  /* 남의 줄 보기만: 체크 칸 없이 상태(2026-11-03) */
 .hg-transfer > .hg-transfer__amount { order: 1; }
 /* 2026-11-03 줄(이름·금액)을 누르면 선택 시트. 줄 아래 링크를 줄마다 반복하지 않음 */
 .hg-transfer__open { grid-column: 1 / 3; order: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
+.hg-transfer__open { margin-block: calc(-1 * var(--space-3)); padding-block: var(--space-3); }  /* 2026-11-09 누르는 높이를 줄 높이만큼(44px 이상) */
 .hg-transfer__open:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .hg-transfer.is-done .hg-transfer__label { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .hg-check { width: 24px; height: 24px; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); display: grid; place-items: center; }
@@ -388,7 +390,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 
 /* ListRow */
 .hg-list { border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); overflow: hidden; }
-.hg-listrow { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--space-3); min-height: 60px; padding: var(--space-2) var(--space-4); }
+.hg-listrow { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-3) var(--space-4); }  /* 2026-11-09 밀도: 한 줄 56px, 위아래 12px */
 .hg-listrow--toggle { display: block; }  /* 2026-11-03 목록 안 스위치 한 줄(설정 금액 가리기) */
 .hg-listrow--toggle > label { margin-left: var(--space-3); }  /* 다른 줄의 빈 앞 칸 + 간격과 글자 줄을 맞춤 */
 .hg-listrow:last-child { border-bottom: 0; }
@@ -548,7 +550,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__agenda { display: flex; flex-direction: column; gap: var(--space-1); max-width: 520px; }
 .hg-cal__agenda .hg-cal__date { margin: 0; font: 400 14px/20px var(--font-sans); color: var(--slate); }
 .hg-cal__agenda .hg-list--plain .hg-listrow { column-gap: var(--space-3); }
-.hg-cal__agenda .hg-listrow__label { font: 700 17px/24px var(--font-sans); }
+.hg-cal__agenda .hg-listrow__label { font: 500 17px/24px var(--font-sans); }
 .hg-cal__agenda .hg-cal__add .hg-listrow__label { font: 500 15px/22px var(--font-sans); color: var(--slate); }
 .hg-cal__add .hg-lead { background: none; border: 1.5px dashed var(--hairline); }
 .hg-cal__agenda .hg-help { margin: var(--space-3) 0; }
@@ -847,24 +849,31 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 
 /* SectionHeader */
 .hg-sechead { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; }
+/* 2026-11-09 카드 안 묶음 머리(W-02 ‘저금 0/2 ›’): 진행 원 없이 한 줄, 제목 15px 600 + 개수 조용한 글자, 높이 40px */
+.hg-sechead--group { min-height: 40px; }
+.hg-sechead--group .hg-sechead__title { font: 600 15px/22px var(--font-sans); letter-spacing: 0; }
+.hg-sechead--group .hg-sechead__count { font: 400 15px/22px var(--font-sans); color: var(--stone); }
+.hg-sechead--group .hg-sechead__link, .hg-sechead--group .hg-sechead__title { gap: var(--space-1); }
+.hg-sechead--group .hg-sechead__title { display: inline-flex; align-items: center; }
+.hg-sechead--group .hg-sechead__link { padding-block: var(--space-3); margin-block: calc(-1 * var(--space-3)); }  /* 누르는 높이 44px 이상, 머리 높이는 그대로 */
+/* 2026-11-09 제목 + 아래 조용한 한 줄(W-02 기간·진행), 오른쪽 ‹ ›와 같은 줄 */
+.hg-sechead__titles { display: flex; flex-direction: column; min-width: 0; }
+.hg-sechead__meta { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 /* Ring: 묶음 진행 원(카카오뱅크 체크리스트 머리 “2/4”). 둘레를 한 만큼 ink로 채움 */
 .hg-ring { position: relative; flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; font: 600 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ink); }
 .hg-ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--success) calc(var(--p, 0) * 1%), var(--surface-alt) 0);  /* 2026-11-03 체크 원과 같은 파랑 */ -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
 /* 체크 묶음 카드(W-02 저금·쓰는 돈): 머리(Ring + 제목) + 줄 목록 */
-.hg-checkgroup { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
-.hg-checkgroup .hg-checklist__list > :last-child { border-bottom: 0; }
+.hg-checkgroup { display: flex; flex-direction: column; gap: 0; padding: var(--space-3) var(--space-5) var(--space-2); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); }
 /* 2026-11-03 홈 이번 달 체크리스트: 머리를 카드 안에, 줄마다 아이콘(Lead 40px), 마지막 줄 선 없음 */
-.hg-salarycard .hg-checklist__list > :last-child { border-bottom: 0; }
-.hg-transfer--lead { grid-template-columns: 40px minmax(0, 1fr) auto 28px; }
-.hg-transfer--lead > .hg-lead { width: 40px; height: 40px; }
+.hg-transfer--lead { grid-template-columns: 32px minmax(0, 1fr) auto 28px; }
+.hg-transfer--lead > .hg-lead { width: 32px; height: 32px; }
 .hg-transfer--lead > .hg-transfer__open { grid-column: 2 / 4; }
 /* 2026-11-03 홈 목표 목록(카카오T 진행 막대처럼): 그림 + 이름 + % / 금액 줄 / 얇은 막대 */
 .hg-goallist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
-.hg-goalrow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; column-gap: var(--space-3); row-gap: 2px; align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
-.hg-goalrow + .hg-goalrow { border-top: 1px solid var(--hairline-soft); }
+.hg-goalrow { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: var(--space-3); row-gap: 2px; align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
 .hg-goalrow:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-md); }
-.hg-goalrow > .hg-lead { grid-row: 1 / 3; width: 40px; height: 40px; }
-.hg-goalrow__name { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; font: 600 16px/24px var(--font-sans); }
+.hg-goalrow > .hg-lead { grid-row: 1 / 3; width: 32px; height: 32px; }
+.hg-goalrow__name { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; font: 500 16px/24px var(--font-sans); }
 .hg-goalrow__pct { grid-row: 1 / 3; grid-column: 3; font: 700 20px/26px var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-goalrow__pct small { font-size: 13px; }
 .hg-goalrow__set { font: 600 14px/20px var(--font-sans); color: var(--focus); }
@@ -874,7 +883,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* 2026-11-03 홈 다가오는 일정(카카오톡 일정처럼): 왼쪽 날짜 칸(종류별 옅은 영역 색) + 이름·요일 + D-day */
 .hg-daylist { display: flex; flex-direction: column; padding-top: var(--space-1); padding-bottom: var(--space-1); }
 .hg-dayrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; width: 100%; margin: 0; padding: var(--space-3) 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
-.hg-dayrow + .hg-dayrow { border-top: 1px solid var(--hairline-soft); }
 .hg-dayrow:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-md); }
 .hg-dayrow__date { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48px; height: 52px; border-radius: var(--radius-lg); background: var(--surface-alt); color: var(--ink); }
 .hg-dayrow__date small { font: 600 11px/14px var(--font-sans); }
@@ -885,7 +893,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-dayrow__date--goal { background: var(--goal); color: var(--goal-ink); }
 .hg-dayrow__date--family { background: var(--family); color: var(--family-ink); }
 .hg-dayrow__text { display: flex; flex-direction: column; min-width: 0; }
-.hg-dayrow__text b { font: 600 16px/24px var(--font-sans); }
+.hg-dayrow__text b { font: 500 16px/24px var(--font-sans); }
 .hg-dayrow__text small { font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-dayrow__dday { font: 600 14px/20px var(--font-sans); color: var(--slate); }
 /* 2026-11-03 할 일 띠·공지 띠: 연한 파랑(success-soft) 바탕 + 파랑 글자. 좁은 창은 한 줄 높이로 양옆 여백 없이 꽉 차게 */
@@ -1741,7 +1749,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-body { max-width: 1120px; margin: 0 auto; box-sizing: border-box; padding: var(--space-6) var(--space-8) 48px; display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: var(--space-6); align-items: start; }  /* 단 수는 AppFrame이 --cols로(맨 위 띠가 있어도 단 너비가 같게) */
 @media (max-width: 1099px) { .hg-body { grid-template-columns: minmax(0, 1fr); } }  /* 1100px 미만은 한 단(19 앱 기본 틀 8번) */
 /* 2026-11-03 홈이 한 단이면 두 단 사이(목표 → 우리 자산)도 영역 사이와 같은 간격(space-8) */
-@media (max-width: 1099px) { .hg-body:has(.hg-homecol) { row-gap: var(--space-8); } }
+@media (max-width: 1099px) { .hg-body:has(.hg-homecol) { row-gap: var(--space-6); } }  /* 2026-11-09 밀도: 영역 사이 24px */
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 /* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
@@ -1899,8 +1907,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 }
 
 /* 행 앞 아이콘 칸: 영역 색 원 + Phosphor 아이콘(2026-11-09, ListRow.md ‘Lead 종류 표’) */
-.hg-lead { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); overflow: hidden; }
-.hg-lead img { width: 34px; height: 34px; object-fit: contain; }
+.hg-lead { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); overflow: hidden; }  /* 2026-11-09 밀도: 40 → 32px */
+.hg-lead > .hg-ico { width: 18px; height: 18px; }
+.hg-lead img { width: 28px; height: 28px; object-fit: contain; }
 .hg-lead--photo { overflow: hidden; }
 .hg-lead--photo img { width: 100%; height: 100%; object-fit: cover; }  /* 2026-11-04 목표 사진 */
 .hg-lead--together { background: var(--together); color: var(--together-ink); }
@@ -1908,9 +1917,9 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus); outline-offset: 
 .hg-lead--goal { background: var(--goal); color: var(--goal-ink); }
 .hg-lead--safety { background: var(--safety); color: var(--safety-ink); }
 .hg-lead--invest { background: var(--invest); color: var(--invest-ink); }
-/* 2026-11-09 진행 원(Lead progress): 목표 금액이 있는 저금 줄(W-02, H-03, W-05)은 아이콘 대신. 바탕 goal 원 + 안쪽 고리(빈 둘레 surface, 채움 goal-ink). 장식(aria-hidden) */
-.hg-lead--ring { position: relative; background: var(--goal); }
-.hg-lead--ring::before { content: ""; position: absolute; inset: var(--space-2); border-radius: var(--radius-full); background: conic-gradient(var(--goal-ink) calc(var(--p, 0) * 1%), var(--surface) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--space-1)), #000 calc(100% - var(--space-1))); mask: radial-gradient(farthest-side, transparent calc(100% - var(--space-1)), #000 calc(100% - var(--space-1))); }
+/* 2026-11-09 진행 원(Lead progress): 목표 금액이 있는 저금 줄(W-02, H-03, W-05)은 아이콘 대신. 앞 칸과 같은 32px 고리(굵기 space-1, 빈 둘레 goal, 채움 goal-ink). 장식(aria-hidden) */
+.hg-lead--ring { position: relative; background: none; }
+.hg-lead--ring::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius-full); background: conic-gradient(var(--goal-ink) calc(var(--p, 0) * 1%), var(--goal) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--space-1)), #000 calc(100% - var(--space-1))); mask: radial-gradient(farthest-side, transparent calc(100% - var(--space-1)), #000 calc(100% - var(--space-1))); }
 /* 2026-11-09 묶음 타일(F-03a, F-01 빈 상태)의 종류 아이콘 원: 타일이 커서 48px + 24px 아이콘 */
 .hg-pick--tiles .hg-pick__item > .hg-lead { width: 48px; height: 48px; }
 .hg-pick--tiles .hg-pick__item > .hg-lead .hg-ico { width: 24px; height: 24px; }
@@ -2063,7 +2072,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus); outline-offse
 
 /* 목록 줄만(2026-11-04 F-08): 테두리·바탕 없이 왼쪽 이름 + 오른쪽 값 */
 .hg-list--plain { border: 0; border-radius: 0; background: none; }
-.hg-list--plain .hg-listrow { column-gap: 0; padding: var(--space-2) 0; min-height: 64px; }
+.hg-list--plain .hg-listrow { column-gap: 0; padding: var(--space-3) 0; min-height: 56px; }
 .hg-list--plain .hg-listrow__value { padding-left: var(--space-3); font-size: 17px; font-variant-numeric: tabular-nums; }
 .hg-list--plain .hg-listrow__sub { font-size: 14px; line-height: 20px; color: var(--slate); }
 
