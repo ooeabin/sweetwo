@@ -1,6 +1,8 @@
 // W-01 영수증 이미지(‘공유하기’, docs/spec/20-salary-plan.md W-01 ‘영수증 이미지 공유’, 2026-11-09).
 // 화면과 같은 숫자·문구(금액 가리기, 공개 범위는 부르는 쪽에서 이미 적용)를 같은 디자인 토큰 색으로 canvas에 그림.
-// 의존성 없음. 사진 Avatar는 다른 출처라 canvas가 막히므로(tainted) 사람 색 원 + 사람 모양으로 그림.
+// 사진 Avatar는 다른 출처라 canvas가 막히므로(tainted) 사람 색 원 + 빵모자 실루엣(화면 Avatar와 같은 path, 2026-11-09)으로 그림.
+
+import { AVATAR_FIGURE_PATH, AVATAR_FIGURE_VIEWBOX } from '@sweetwo/ui';
 
 export interface ReceiptImageModel {
   /** 사람 색 번호(시작한 사람 1, 합류한 사람 2). 합쳐서면 둘 */
@@ -41,9 +43,9 @@ type Tokens = Record<
   | 'accentSoft'
   | 'danger'
   | 'person1'
-  | 'person1Ink'
+  | 'person1Figure'
   | 'person2'
-  | 'person2Ink',
+  | 'person2Figure',
   string
 > & { font: string };
 
@@ -63,9 +65,9 @@ function readTokens(): Tokens {
     accentSoft: v('--accent-app-soft'),
     danger: v('--danger'),
     person1: v('--person-1'),
-    person1Ink: v('--person-1-ink'),
+    person1Figure: v('--person-1-figure'),
     person2: v('--person-2'),
-    person2Ink: v('--person-2-ink'),
+    person2Figure: v('--person-2-figure'),
     font: v('--font-sans') || 'sans-serif',
   };
 }
@@ -110,19 +112,15 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     ctx.beginPath();
     ctx.arc(cx, y + r, r, 0, Math.PI * 2);
     ctx.fill();
-    // 사람 모양(머리 + 어깨), 사람 글자색을 옅게
+    // 빵모자 실루엣(라이트 흰색, 다크 person-*-ink), 원 밖은 잘라 냄
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, y + r, r, 0, Math.PI * 2);
     ctx.clip();
-    ctx.globalAlpha = 0.45;
-    ctx.fillStyle = p === 1 ? t.person1Ink : t.person2Ink;
-    ctx.beginPath();
-    ctx.arc(cx, y + r * 0.78, r * 0.39, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx, y + r * 2.05, r * 0.78, r * 0.78, 0, Math.PI, 0);
-    ctx.fill();
+    ctx.translate(cx - r, y);
+    ctx.scale((r * 2) / AVATAR_FIGURE_VIEWBOX, (r * 2) / AVATAR_FIGURE_VIEWBOX);
+    ctx.fillStyle = p === 1 ? t.person1Figure : t.person2Figure;
+    ctx.fill(new Path2D(AVATAR_FIGURE_PATH));
     ctx.restore();
   });
   y += 40 + 12;

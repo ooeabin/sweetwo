@@ -57,7 +57,7 @@ export function useSocialAvatar(
   }, [userId, spaceId, qc]);
 }
 
-// 사람 원(Avatar). 사진이 있으면 사진, 없으면 첫 글자. 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
+// 사람 원(Avatar). 사진이 있으면 사진, 없으면 사람 색 원 + 빵모자 실루엣(첫 글자는 DOM에만, CSS로 숨김). 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
 export function PersonDot({
   name,
   starter,
