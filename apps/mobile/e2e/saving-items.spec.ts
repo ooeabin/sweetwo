@@ -67,7 +67,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
-  await expect(page.getByRole('button', { name: '10만 원' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '10만 원' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await page.getByLabel('매달 얼마씩 모을까요?').fill('200000');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(
@@ -91,8 +94,9 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target).toContainText('지금대로면 기한보다 1개월 늦어요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
-  // 2026-11-09 round 3: W-01 전체 대신 이 줄 금액만
-  await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}\/edit\/monthly$/);
+  // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(여유 자금을 같이 봄)
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page.getByRole('dialog', { name: '제주 여행 금액' })).toBeVisible();
   await page.goBack();
   const g = db.goals.find((x) => x.name === '제주 여행');
   expect(g).toMatchObject({
@@ -128,8 +132,9 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(page.getByRole('heading', { name: '노트북' })).toBeVisible();
   expect(db.goals.find((x) => x.name === '노트북')).toMatchObject({ deadline: '2027-10-01' });
   expect(
-    db.splits[0]?.split_line.find((l) => l.goal_id === db.goals.find((x) => x.name === '노트북')?.id)
-      ?.amount,
+    db.splits[0]?.split_line.find(
+      (l) => l.goal_id === db.goals.find((x) => x.name === '노트북')?.id,
+    )?.amount,
   ).toBe(500_000);
 });
 
@@ -191,10 +196,12 @@ test('W-11b 바꾸기 칩 고른 표시, W-11c 키패드는 하나로 맨 아래
   await page.getByRole('button', { name: '다음' }).click();
   if (info.project.name !== 'narrow') return;
   // 좁은 창: 키패드로 목표 금액 → 체크 칸을 켜면 이미 모은 금액 칸이 활성, 키패드는 그 칸 아래
-  for (const k of ['5', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
+  for (const k of ['5', '00', '00', '00'])
+    await page.getByRole('button', { name: k, exact: true }).click();
   await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
   await page.getByRole('checkbox', { name: '이미 모은 금액이 있어요' }).click();
-  for (const k of ['1', '00', '00', '00']) await page.getByRole('button', { name: k, exact: true }).click();
+  for (const k of ['1', '00', '00', '00'])
+    await page.getByRole('button', { name: k, exact: true }).click();
   await expect(page.getByLabel('이미 모은 금액')).toHaveValue('1,000,000');
   await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
   const startBox = await page.getByLabel('이미 모은 금액').boundingBox();
@@ -332,7 +339,9 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
   await page.goto('/salary/items/goal-h');
   await expect(page.getByText('목표 95만 원의 0%')).toBeVisible();
-  await expect(page.getByRole('region', { name: '목표 금액 정하기' }).getByText('달성')).toHaveCount(0);
+  await expect(
+    page.getByRole('region', { name: '목표 금액 정하기' }).getByText('달성'),
+  ).toHaveCount(0);
   // 다시 체크하면 다시 축하
   await page.goto('/salary');
   await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
@@ -356,7 +365,7 @@ test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 �
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.goto('/salary/items/goal-h');
   await expect(page.getByText('그만 모은 저금이에요')).toBeVisible();
-  await page.goto('/salary/split');
+  await page.goto('/salary?view=plan');
   await expect(page.getByText('그만 모은 저금 1개')).toBeVisible();
 });
 

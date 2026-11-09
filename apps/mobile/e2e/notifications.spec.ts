@@ -160,7 +160,8 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
 
   // 누르면 읽음 + 그 화면
   await today.getByRole('button').first().click();
-  await expect(page).toHaveURL(/\/salary\/split$/);
+  // 옛 링크 /salary/split → 월급 탭 ‘계획’(2026-11-09)
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
   await expect.poll(() => db.notifications[0]?.read_at).not.toBeNull();
   await expect(page.getByRole('complementary', { name: '알림' })).toHaveCount(0);
 

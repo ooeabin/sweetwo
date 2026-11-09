@@ -117,7 +117,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });
 
-test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 추천값·저장·줄 추가 없음 / 내 탭은 고침, 수입 줄 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
+test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 편집·추천값·추가 없음 / 내 탭은 고침, 큰 금액 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -126,30 +126,30 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   joinYebin(db);
   await page.goto('/salary');
   await page.getByRole('button', { name: '월급 계획 고치기' }).click();
-  await expect(page.getByRole('heading', { name: '월급 계획' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
   await page.getByRole('tab', { name: '예빈' }).click();
-  await expect(page.getByText('월급 270만 원')).toBeVisible();
+  await expect(page.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
   // 줄은 누를 수 없고 자물쇠
   await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
-  await expect(page.locator('.hg-listrow__lock')).toHaveCount(3);
-  await expect(page.getByRole('button', { name: '추천값으로 다시 채우기' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '줄 추가' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await expect(page.locator('.hg-receipt__lock')).toHaveCount(3);
+  for (const n of ['추천값으로 다시 채우기', '+ 지출 추가', '편집하기'])
+    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await axe(page);
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
     (y?.split_line as Record<string, unknown>[]).find((l) => l.kind === 'living')?.amount,
   ).toBe(680_000);
 
-  // 내 탭: 직접 추가 줄 → 이름 바꾸기, 수입 줄 → S-11
-  await page.goto('/salary/split');
-  await page.getByRole('button', { name: '줄 추가' }).click();
-  await page.getByLabel('줄 이름').fill('운동');
-  await page.getByRole('button', { name: '확인' }).click();
+  // 내 탭: 직접 추가 줄 → 이름 바꾸기, 큰 금액 → S-11
+  await page.getByRole('tab', { name: '찬우' }).click();
+  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await page.getByRole('textbox', { name: '줄 이름' }).fill('운동');
+  await page.getByRole('textbox', { name: '줄 이름' }).press('Enter');
+  await page.getByRole('button', { name: '추가하기' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();
-  await page.getByLabel('줄 이름').fill('헬스');
+  await page.getByRole('dialog').getByLabel('줄 이름').fill('헬스');
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
   await page.getByRole('button', { name: /월급 350만 원/ }).click();
@@ -208,8 +208,9 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
   joinYebin(db);
   Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
   await page.goto('/salary/split');
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
   await expect(page.getByText('연결 해제 대기 중에는 월급 계획을 고칠 수 없어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /^고정지출/ })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '추천값으로 다시 채우기' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  for (const n of ['추천값으로 다시 채우기', '편집하기', '+ 지출 추가', '+ 저금 추가'])
+    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
 });
