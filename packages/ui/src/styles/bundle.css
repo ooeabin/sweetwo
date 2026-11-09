@@ -389,7 +389,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-tab.is-active { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
 .hg-seg { display: inline-flex; width: fit-content; align-self: flex-start; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-full); background: var(--surface-alt); }
 .hg-seg__item { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-full); font: var(--text-label); color: var(--slate); }
-.hg-seg__item.is-active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1); }
+.hg-seg__item.is-active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1), 0 0 0 1px var(--hairline); }  /* 2026-11-09 surface-alt를 연하게 하며 고른 칸이 흐려지지 않게 1px hairline 테두리를 더함 */
+:where(.hg-admin, .hg-adminauth, .hg-site) .hg-seg__item.is-active { box-shadow: var(--shadow-1); }  /* 어드민·웹사이트는 예전 그대로(2026-11-09) */
 
 /* ListRow */
 .hg-list { border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); background: var(--surface); overflow: hidden; }
