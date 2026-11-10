@@ -47,7 +47,7 @@ export const copy = {
   joinTitle: (inviter: string) => `${inviter}님 공간에 합류할 계정을 골라요`,
   // 2026-11-10 제공자 공식 문구 그대로(카카오 로그인 디자인 가이드, Google·Apple 브랜드 가이드). ‘3초’는 뺌
   continueWith: {
-    kakao: '카카오 로그인',
+    kakao: '카카오로 3초 만에 로그인', // 2026-11-10 사용자 결정
     google: 'Google로 계속하기',
     apple: 'Apple로 계속하기',
   } satisfies Record<AuthProvider, string>,
