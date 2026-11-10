@@ -133,7 +133,7 @@ export const copy = {
       ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
       : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
-  pinUnlockTitle: 'PIN을\n입력해 주세요',
+  pinUnlockTitle: 'PIN을 입력해 주세요', // 2026-11-10 한 줄로
   touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,
   forgotPin: 'PIN을 잊었어요',
   // ‘PIN을 잊었어요’ 확인 Modal(2026-11-10) [확인 필요]
