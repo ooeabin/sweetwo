@@ -12,6 +12,10 @@ export interface AmountBand {
 }
 
 const digitsOnly = (s: string) => s.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
+/** 직접 친 값: 소수점 뒤는 버림(“3500000.5” → 3,500,000, 2026-11-10 S2-18). 쉼표 등 숫자 아닌 것은 지움 */
+const typedDigits = (s: string) => digitsOnly(s.split('.')[0] ?? '');
+/** 입력 자리 수 한도: 999억(11자리) 넘는 값은 한 자리까지만 받아 오류를 보여 주고 그 뒤는 멈춤(12자리) */
+const MAX_DIGITS = 12;
 
 /** 붙여넣기 “320만”, “1억 2천만” 단위 환산. 해석 못 하면 null */
 export function parseKoreanAmount(text: string): number | null {
@@ -89,22 +93,12 @@ function AmountBox({
         {label}
       </label>
       <div
-        className={idle ? 'hg-amount is-idle' : 'hg-amount'}
-        style={error ? { borderColor: 'var(--danger)' } : undefined}
+        className={['hg-amount', idle && 'is-idle', error && 'is-error'].filter(Boolean).join(' ')}
       >
         <input
           ref={inputRef}
           id={id}
           className="hg-amount__value"
-          style={{
-            border: 0,
-            outline: 0,
-            background: 'transparent',
-            width: '100%',
-            minWidth: 0,
-            color: 'var(--ink)',
-            padding: 0,
-          }}
           // 좁은 창은 앱 키패드를 쓰므로 OS 키보드만 숨긴다(물리 키보드 입력은 그대로)
           inputMode={narrow ? 'none' : 'numeric'}
           autoComplete="off"
@@ -114,13 +108,15 @@ function AmountBox({
           value={value === null ? '' : value.toLocaleString('ko-KR')}
           onFocus={onFocus}
           onChange={(e) => {
-            const d = digitsOnly(e.target.value);
+            const d = typedDigits(e.target.value);
+            if (d.length > MAX_DIGITS) return;
             put(d === '' ? null : Number(d));
           }}
           onPaste={(e) => {
             e.preventDefault();
             const v = parseKoreanAmount(e.clipboardData.getData('text'));
             if (v === null) setPasteError('숫자만 붙여넣을 수 있어요');
+            else if (String(v).length > MAX_DIGITS) setPasteError('999억 원까지 넣을 수 있어요');
             else put(v);
           }}
         />
@@ -154,6 +150,7 @@ export function AmountInput({
   placeholder = '0',
   allowZero = false,
   embedded = false,
+  autoFocus,
 }: {
   label: string;
   value: number | null;
@@ -178,8 +175,10 @@ export function AmountInput({
   monthly?: boolean;
   placeholder?: string;
   allowZero?: boolean;
-  /** 한 화면에 입력이 여럿일 때(O-63 통장 잔액): 처음 포커스와 좁은 창 앱 키패드 없이 기기 숫자 자판 */
+  /** 한 화면에 입력이 여럿일 때(O-31 ‘매달 금액이 달라요’, F-04): 좁은 창 앱 키패드 없이 기기 숫자 자판, 처음 포커스 없음 */
   embedded?: boolean;
+  /** embedded여도 처음 포커스(O-31, 2026-11-10 S2-12: 기기 숫자 자판이 바로 올라옴). 기본은 embedded가 아니고 넓은 창일 때만 */
+  autoFocus?: boolean;
 }) {
   const id = useId();
   const narrow = useNarrow() && !embedded;
@@ -191,8 +190,8 @@ export function AmountInput({
   const hasSecond = !!second;
 
   useEffect(() => {
-    if (!narrow && !embedded) ref.current?.focus();
-  }, [narrow, embedded]);
+    if (autoFocus ?? (!narrow && !embedded)) ref.current?.focus();
+  }, [narrow, embedded, autoFocus]);
   // 두 번째 칸이 생기면 그 칸으로, 없어지면 첫 칸으로
   const prevSecond = useRef(hasSecond);
   useEffect(() => {
@@ -209,7 +208,9 @@ export function AmountInput({
     active === 1 && second ? { value: second.value, set: second.onChange } : { value, set };
   // 키패드: 누른 숫자는 끝에 붙음. 빈 값에서 0, 00은 무시(맨 앞 0 지움)
   const append = (d: string) => {
-    const n = Number(digitsOnly(`${target.value ?? ''}${d}`));
+    const str = digitsOnly(`${target.value ?? ''}${d}`);
+    if (str.length > MAX_DIGITS) return;
+    const n = Number(str);
     if (target.value === null && n === 0) return;
     target.set(n);
   };
@@ -229,12 +230,7 @@ export function AmountInput({
         onFocus={() => setActive(0)}
       />
       {monthly && value !== null && value >= 1 && value <= 9_999 && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => set(value * 10_000)}
-        >
+        <button type="button" className="hg-btn hg-btn--link" onClick={() => set(value * 10_000)}>
           {value.toLocaleString('ko-KR')}만 원인가요?
         </button>
       )}
@@ -253,7 +249,7 @@ export function AmountInput({
         </div>
       )}
       {(bands || zeroLink) && (
-        <div className="hg-stack" style={{ gap: 'var(--space-2)', alignItems: 'flex-start' }}>
+        <div className="hg-amountin__links">
           {bands && (
             <button
               type="button"

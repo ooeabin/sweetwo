@@ -40,8 +40,47 @@ export type AnalyticsEvent =
       props: { action: 'set' | 'remove' | 'imported' };
     }
   | {
+      // 온보딩(32 4-3, 2026-11-10 QA 2구간 S2-04). 시작한 사람 흐름. 합류(P-)는 파트너 합류 쪽에서
+      name: 'onboarding_started';
+      props: { entry: 'direct' | 'invite_link' };
+    }
+  | {
+      name: 'onboarding_step_viewed';
+      props: {
+        screen_id: string;
+        flow: 'starter' | 'partner';
+        required: boolean;
+        marriage_state: 'married' | 'engaged' | 'undecided' | null;
+      };
+    }
+  | {
+      name: 'onboarding_step_completed';
+      props: {
+        screen_id: string;
+        answer: 'input' | 'none';
+        duration_sec: number;
+        changed_after_back: boolean;
+      };
+    }
+  | { name: 'onboarding_step_skipped'; props: { screen_id: string } }
+  | {
       name: 'onboarding_resumed';
       props: { screen_id: string; hours_since_last: number };
+    }
+  | {
+      name: 'onboarding_completed';
+      props: {
+        duration_sec: number;
+        salary_mode: 'separate' | 'combined';
+        income_band: AmountBand | 'none';
+        split_left_band: AmountBand | 'short';
+        no_income: boolean;
+      };
+    }
+  | {
+      // O-07 초대 코드 보내기(32 4-3). share = 기기 공유 창(카카오톡 등)
+      name: 'invite_sent';
+      props: { channel: 'code' | 'link' | 'share'; entry: 'onboarding' | 'home' | 'settings' };
     }
   | {
       name: 'unlink_requested';

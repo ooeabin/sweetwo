@@ -9,6 +9,7 @@ import {
 } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useStep } from '../step';
@@ -27,29 +28,41 @@ async function copyText(t: string) {
   }
 }
 
-// O-07 초대 코드 보내기(선택, 넘기면 첫 주 할 일). O-06 화면 위에 올라오는 시트(16 O-07 ‘시트’).
+// O-07 초대 코드 보내기(선택, 넘기면 홈 할 일). O-06 화면 위에 올라오는 시트(16 O-07 ‘시트’).
 // 2026-11-03 주 버튼 = 카톡으로 보내기, 보조 = 링크 복사, 맨 아래 글자 버튼 = 보내기 전 ‘나중에 보낼게요’, 보내거나 복사한 뒤 ‘다음’.
-// 맨 아래 버튼은 처음부터 활성. 닫아도(막, Esc, 닫기) 같이 O-11로.
+// 맨 아래 버튼은 처음부터 활성. 닫아도(막, Esc, 닫기) 같이 O-11로(2026-11-10 S2-03: 이어하기로 다시 열어도 늘 O-11).
+// 공유(2026-11-10 S2-05): 모바일 앱은 브리지 shareText(Android WebView에는 navigator.share가 없음), 브라우저는 navigator.share, 둘 다 없으면 링크 복사
 export function O07InviteCode() {
   const s = useStep('o-07');
   const invite = useQuery({ queryKey: ['invite'], queryFn: createInvite, retry: false });
   const [sent, setSent] = useState(false);
   if (!s.ready) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
   const code = invite.data?.code;
-  const next = () => void s.done();
-  const copyAndMark = async (t: string) => {
-    if (await copyText(t)) setSent(true);
+  const next = () => void s.done(undefined, () => 'o-11', { answer: sent ? 'input' : 'none' });
+  const sentBy = (channel: 'code' | 'link' | 'share') => {
+    setSent(true);
+    track('invite_sent', { channel, entry: 'onboarding' });
   };
-  const share = () => {
+  const copyAndMark = async (t: string, channel: 'code' | 'link') => {
+    if (await copyText(t)) sentBy(channel);
+  };
+  const share = async () => {
     if (!code) return;
     const url = inviteLink(code);
-    // 카카오톡 공유(카카오 JS SDK)는 앱 키, 도메인 등록 뒤 붙인다. 지금은 기기 공유 창 또는 링크 복사.
-    if (navigator.share)
-      void navigator
-        .share({ url, text: code })
-        .then(() => setSent(true))
+    const text = copy.shareText(s.state.me?.nickname ?? '', code, url);
+    const bridge = typeof window === 'undefined' ? undefined : window.sweetwo;
+    if (bridge?.shareText) {
+      if ((await bridge.shareText({ text })) === 'shared') sentBy('share');
+      return;
+    }
+    if (typeof navigator.share === 'function') {
+      await navigator
+        .share({ text })
+        .then(() => sentBy('share'))
         .catch(() => undefined);
-    else void copyAndMark(url);
+      return;
+    }
+    await copyAndMark(url, 'link');
   };
   return (
     <>
@@ -85,11 +98,11 @@ export function O07InviteCode() {
                 <Button
                   variant="secondary"
                   disabled={!code}
-                  onClick={() => code && void copyAndMark(inviteLink(code))}
+                  onClick={() => code && void copyAndMark(inviteLink(code), 'link')}
                 >
                   {copy.copyLink}
                 </Button>
-                <Button variant="primary" disabled={!code} onClick={share}>
+                <Button variant="primary" disabled={!code} onClick={() => void share()}>
                   {copy.sendKakao}
                 </Button>
               </div>
@@ -122,7 +135,7 @@ export function O07InviteCode() {
                   ? `초대 코드 ${code.split('').join(' ')}, 누르면 복사`
                   : '초대 코드를 만드는 중'
               }
-              onClick={() => code && void copyAndMark(code)}
+              onClick={() => code && void copyAndMark(code, 'code')}
             >
               <span className="hg-invite-code__code">{code ?? '······'}</span>
               <span className="hg-invite-code__tap" aria-hidden="true">

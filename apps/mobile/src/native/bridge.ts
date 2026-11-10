@@ -180,6 +180,15 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         );
       }
     },
+    // 글 공유(O-07 초대 코드, 2026-11-10): Android WebView에는 navigator.share가 없어 @capacitor/share로
+    shareText: async (t) => {
+      try {
+        await Share.share({ text: t.text, url: t.url, dialogTitle: t.text });
+        return 'shared';
+      } catch {
+        return 'cancelled';
+      }
+    },
   };
   window.sweetwo = bridge;
   return platform;

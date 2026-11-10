@@ -52,6 +52,15 @@ export async function startChecklist(owner?: string): Promise<string | null> {
   return (data as string | null) ?? null;
 }
 
+/**
+ * 온보딩 중 추천 월급 계획 다시 만들기 전(17 O-32, 2026-11-10 S2-01): 내 월급 계획과 공동 월급 계획, 그 체크리스트를 지움.
+ * 온보딩을 마친 뒤에는 서버가 거부. 체크한 기록이 있으면 서버가 아무것도 지우지 않음
+ */
+export async function resetOnboardingPlan(): Promise<void> {
+  const { error } = await supabase().rpc('onboarding_reset_plan');
+  fail(error);
+}
+
 /** 지금 사이클 체크리스트들(오늘이 든 것). 줄은 순서대로 */
 export async function fetchCurrentChecklists(today: string): Promise<PayChecklist[]> {
   const { data, error } = await supabase()

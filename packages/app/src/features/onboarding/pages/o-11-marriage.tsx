@@ -5,8 +5,8 @@ import { useStep } from '../step';
 
 type Status = keyof typeof copy.marriedChoices;
 
-// O-11 결혼 상태(Q1) → O-12(했어요 / 준비 중에 따라 질문이 다름). 결혼 비용 추천은 2026-11-08 O-21과 함께 없앰.
-// 아직 안 정했어요 → O-12 없이 O-13(날짜는 비움)
+// O-11 결혼 상태(Q1) → O-30. 2026-11-10 QA 2구간: 결혼한 날·예정일(O-12)은 온보딩에서 묻지 않음(설정 S-11h, 캘린더 결혼기념일).
+// 상태를 바꾸면 전에 적은 날짜는 지움(결혼했어요가 아니게 되면 서버가 자동 결혼기념일도 지움)
 export function O11Marriage() {
   const s = useStep('o-11');
   if (!s.ready)

@@ -642,7 +642,7 @@ export const routes: RouteObject[] = [
         ),
       }, // F-04b~d 팔았어요
       {
-        path: '/onboarding/:screen', // O-10~O-67 온보딩
+        path: '/onboarding/:screen', // O-03~O-60 온보딩(2026-11-10 O-10·O-12·O-13 없앰)
         element: (
           <RequireAccount>
             <OnboardingRoute />
