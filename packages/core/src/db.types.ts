@@ -2996,6 +2996,63 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      complete_signup_v2: {
+        Args: {
+          p_marketing: boolean
+          p_notify_email: string
+          p_provider: Database["public"]["Enums"]["auth_provider"]
+          p_versions: Json
+        }
+        Returns: {
+          adult_confirmed_at: string | null
+          allowance: number | null
+          analytics_off: boolean
+          app_seen_at: string | null
+          avatar_path: string | null
+          avatar_social_checked_at: string | null
+          avatar_updated_at: string | null
+          birth_day: number | null
+          birth_month: number | null
+          birth_year: number | null
+          card_main: boolean | null
+          created_at: string
+          default_visibility: Database["public"]["Enums"]["asset_visibility"]
+          deletion_requested_at: string | null
+          employment: Database["public"]["Enums"]["employment"] | null
+          id: string
+          income_variable: boolean
+          invest_answer: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at: string | null
+          is_internal_tester: boolean
+          monthly_income: number | null
+          nickname: string | null
+          noti_prefs: NonNullable<Json>
+          notify_email: string
+          notify_email_source: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at: string | null
+          onboarding_step: string | null
+          other_income: number
+          payday: number | null
+          payday_last: boolean
+          provider: Database["public"]["Enums"]["auth_provider"]
+          quiet_end: number
+          quiet_start: number
+          rank_month: string | null
+          rank_net: number | null
+          rank_pct: number | null
+          side: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string | null
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "app_user"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_inquiry: {
         Args: {
           p_attach?: Json
@@ -3087,6 +3144,7 @@ export type Database = {
         }[]
       }
       html_esc: { Args: { t: string }; Returns: string }
+      in_force_terms_version: { Args: { p_kind: string }; Returns: string }
       ingest_inquiry_mail: {
         Args: {
           p_attachments?: number
@@ -3354,6 +3412,7 @@ export type Database = {
           version: string
         }[]
       }
+      purge_abandoned_signups: { Args: { p_now?: string }; Returns: number }
       purge_app_devices: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_deleted_accounts: {
         Args: Record<PropertyKey, never>
