@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { initSession } from './features/auth';
 import { restoreCache, startCacheSaver } from './shared/offline-cache';
+import { onSessionReset } from './shared/session-reset';
 import type { Platform } from './platform';
 import { routes } from './routes';
 
@@ -24,6 +25,8 @@ export function App({ platform }: { platform: Platform }) {
     return new QueryClient();
   });
   const [router] = useState(() => createBrowserRouter(routes));
+  // 로그아웃하면 앞 계정 화면 데이터를 메모리에서 모두 비움(features/auth sign-out.ts, 2026-11-10)
+  useEffect(() => onSessionReset(() => queryClient.clear()), [queryClient]);
   useSystemTheme();
   // 앱: 기기에 둔 마지막 데이터를 먼저 채우고(오프라인 조회) 그린 뒤, 받은 데이터를 계속 기기에 둠
   const [restored, setRestored] = useState(() => !window.sweetwo?.cache);

@@ -1,4 +1,4 @@
-import { lastOfflineBlock } from '@sweetwo/api';
+import { lastOfflineBlock, lastReadOnlyBlock } from '@sweetwo/api';
 import { Toast, TOAST_MS } from '@sweetwo/ui';
 import { useEffect } from 'react';
 import { create } from 'zustand';
@@ -24,8 +24,29 @@ let quiet: ReturnType<typeof setTimeout> | null = null;
 export const toast = (message: string, action?: ToastItem['action']) => {
   if (quiet) return;
   const blocked = Date.now() - lastOfflineBlock() < 3000;
-  useToastStore.getState().show(blocked ? { message: sharedCopy.needOnline } : { message, action });
+  // 보기만 모드(A-01 ‘업데이트 없이 보기만 할게요’)에서 막힌 쓰기: 실패 안내 대신 13-12 문구 + ‘지금 업데이트’
+  const readOnly = Date.now() - lastReadOnlyBlock() < 3000;
+  useToastStore
+    .getState()
+    .show(
+      blocked
+        ? { message: sharedCopy.needOnline }
+        : readOnly
+          ? { message: sharedCopy.readOnly, action: updateAction() }
+          : { message, action },
+    );
 };
+
+/** 앱 받기 페이지(스토어 버튼)로. 모바일은 앱 안 브라우저 */
+const DOWNLOAD_URL = 'https://sweetwo.kr/download';
+const updateAction = (): ToastItem['action'] => ({
+  label: sharedCopy.updateNow,
+  onClick: () => {
+    const b = typeof window === 'undefined' ? undefined : window.sweetwo;
+    if (b?.openUrl) void b.openUrl(DOWNLOAD_URL);
+    else window.open(DOWNLOAD_URL, '_blank', 'noopener');
+  },
+});
 
 /**
  * 떠 있는 토스트 닫기(2026-11-09 W-12: 달성 축하로 넘어가기 전에 체크 ‘되돌리기’ 토스트를 닫음).

@@ -87,6 +87,10 @@
 | login\_started | A-02 소셜 버튼 | method(kakao / google / apple), entry(first\_run / revisit / invite / session\_expired), flow(browser) |
 | login\_completed | 제공자 로그인 후 앱 복귀(A-03 딥링크·앱 링크) (서버) | method, is\_new\_account, wait\_sec(브라우저 로그인 대기 시간), reopened(A-03 ‘다시 열기’ 사용) |
 | login\_failed | A-02·A-03 예외 | method, reason(cancelled / timeout / provider\_error / email\_conflict / request\_mismatch / browser\_open\_failed) |
+| signup\_cancelled | A-04·A-05 뒤로(가입 취소, 2026-11-10) | screen\_id(A-04 / A-05), via(back / hardware\_back) |
+| pin\_forgot\_confirmed | A-06 ‘PIN을 잊었어요’ 확인 Modal ‘로그아웃할게요’(2026-11-10) | — |
+| invite\_link\_opened | 초대 앱 링크로 앱이 A-07을 엶(2026-11-10) | signed\_in |
+| update\_view\_only | A-01 ‘업데이트 없이 보기만 할게요’(2026-11-10) | app\_version |
 | signup\_completed | A-05 ‘동의하고 계속하기’ 계정 생성 (서버) | method, email\_source(provider / manual: A-04 직접 입력), marketing\_opt\_in, role |
 | onboarding\_started | O-10 ‘시작하기’ [확인 필요] | entry(`direct` / `invite_link`) |
 | onboarding\_step\_viewed | O-10\~O-60, 파트너 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required, marriage\_state |

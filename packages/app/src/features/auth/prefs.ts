@@ -41,7 +41,10 @@ export const prefs = {
     const v = get('sweetwo.last-provider');
     return isProvider(v) ? v : null;
   },
-  setLastProvider: (p: AuthProvider) => set('sweetwo.last-provider', p),
+  setLastProvider: (p: AuthProvider | null) => set('sweetwo.last-provider', p),
+  /** 이 기기에서 마지막으로 로그인한 계정(사용자 ID). 다른 계정이 로그인하면 앞 계정 PIN을 지움(2026-11-10) */
+  lastUser: () => get('sweetwo.last-user'),
+  setLastUser: (id: string | null) => set('sweetwo.last-user', id),
   /** O-01은 첫 실행에만 */
   started: () => get('sweetwo.started') === '1',
   setStarted: () => set('sweetwo.started', '1'),

@@ -16,12 +16,29 @@ export function initSession(p: Platform) {
   );
 }
 
+const jwtSub = (token: string): string | null => {
+  try {
+    const part = token.split('.')[1] ?? '';
+    const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+    const sub: unknown = (JSON.parse(json) as { sub?: unknown }).sub;
+    return typeof sub === 'string' ? sub : null;
+  } catch {
+    return null;
+  }
+};
+
 export const session = {
   get platform() {
     return platform;
   },
   get bridge() {
     return bridge;
+  },
+  /** 로그인한 사용자 ID(토큰의 sub). 세션이 없으면 null */
+  async userId(): Promise<string | null> {
+    if (!bridge) return webAuth.userId();
+    const t = await bridge.auth.getAccessToken();
+    return t ? jwtSub(t) : null;
   },
   async has(): Promise<boolean> {
     if (bridge) return (await bridge.auth.getAccessToken()) !== null;

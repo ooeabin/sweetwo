@@ -1,6 +1,7 @@
 import { dehydrate, hydrate, type QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
 import type { AppBridge } from '../platform';
+import { onSessionReset } from './session-reset';
 
 // 오프라인 조회(30 동기화 1·4장): 모바일 앱은 마지막으로 받은 화면 데이터를 기기에 암호화해 두고(브리지 cache),
 // 켤 때 먼저 채워서 인터넷이 없어도 볼 수 있게 함. 서버가 원본이라 연결되면 늘 새로 받음.
@@ -14,6 +15,7 @@ const SKIP = new Set(['photo_urls', 'avatars', 'sessions']);
 export const useCacheInfo = create<{ savedAt: string | null; set: (at: string | null) => void }>(
   (set) => ({ savedAt: null, set: (savedAt) => set({ savedAt }) }),
 );
+onSessionReset(() => useCacheInfo.getState().set(null));
 
 export async function restoreCache(qc: QueryClient, bridge: AppBridge | undefined) {
   if (!bridge?.cache) return;

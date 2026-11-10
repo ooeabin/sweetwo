@@ -16,6 +16,7 @@ import {
 } from '@sweetwo/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
+import { onSessionReset } from '../../shared/session-reset';
 
 // 온보딩 데이터: 서버 값(react-query) + 이 탭에서만 쓰는 값(zustand).
 export function useMe() {
@@ -69,5 +70,6 @@ export const useOnboardingLocal = create<Local>((set) => ({
   inviteNow: null,
   setInviteNow: (v) => set({ inviteNow: v }),
 }));
+onSessionReset(() => useOnboardingLocal.setState({ inviteNow: null }));
 
 export type { Account, FixedExpense, Me, Space };

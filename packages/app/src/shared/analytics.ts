@@ -29,6 +29,13 @@ export type AnalyticsEvent =
       };
     }
   | {
+      name: 'signup_cancelled';
+      props: { screen_id: 'A-04' | 'A-05'; via: 'back' | 'hardware_back' };
+    }
+  | { name: 'pin_forgot_confirmed'; props: Record<string, never> }
+  | { name: 'invite_link_opened'; props: { signed_in: boolean } }
+  | { name: 'update_view_only'; props: { app_version: string } }
+  | {
       name: 'profile_photo_changed';
       props: { action: 'set' | 'remove' | 'imported' };
     }

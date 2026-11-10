@@ -2,20 +2,22 @@ import { AuthLayout, Button } from '@sweetwo/ui';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths } from '../flow';
-import { prefs } from '../prefs';
+import { signOut } from '../sign-out';
 
 export type ExpiredReason = keyof typeof copy.expiredReason;
 
-// A-08 세션 만료. 같은 계정으로 다시 로그인하면 하던 화면으로(returnTo).
+// A-08 세션 만료. 보조 = 사유(출시는 “로그인이 만료됐어요” 한 줄, 2026-11-10).
+// ‘로그인하기’ → A-02 → 같은 계정이면 하던 화면으로(만료 때 A-01이 returnTo를 남김).
+// ‘다른 계정으로 로그인’ → 이 기기 데이터(캐시, 최근 사용 방법, PIN, 돌아갈 화면)를 지우고 A-02.
 export function A08SessionExpired() {
   const nav = useNavigate();
-  const reason = (useLocation().state as { reason?: ExpiredReason } | null)?.reason;
+  const reason = (useLocation().state as { reason?: ExpiredReason } | null)?.reason ?? 'expired';
   return (
     <AuthLayout
       icon="lock"
       art="status-lock"
       title={copy.expiredTitle}
-      help={reason ? copy.expiredReason[reason] : undefined}
+      help={copy.expiredReason[reason]}
       actions={
         <>
           <Button
@@ -28,12 +30,11 @@ export function A08SessionExpired() {
           <Button
             variant="secondary"
             block
-            onClick={() => {
-              // 다른 계정: 이 기기 로컬 데이터 삭제 후 A-02(오프라인 캐시가 생기면 여기서 같이 지운다)
-              prefs.setReturnTo(null);
-              prefs.setPinAsked(false);
-              nav(paths.login, { replace: true, state: { entry: 'session_expired' } });
-            }}
+            onClick={() =>
+              void signOut({ accountChange: true }).finally(() =>
+                nav(paths.login, { replace: true, state: { entry: 'session_expired' } }),
+              )
+            }
           >
             {copy.otherAccount}
           </Button>

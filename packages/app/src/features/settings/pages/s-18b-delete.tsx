@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
-import { paths, prefs, providerName, reauthenticate, session } from '../../auth';
+import { paths, providerName, reauthenticate, signOut } from '../../auth';
 import { LoadingFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -32,8 +32,8 @@ export function S18bDelete() {
         if (w.wait) nav(w.wait);
         return;
       }
-      await session.signOut();
-      prefs.setReturnTo(null);
+      // 기기 로컬 데이터는 요청 즉시 삭제(31 3-2): 캐시, 최근 사용 방법, 이 기기 PIN까지
+      await signOut({ accountChange: true });
       nav(paths.login, {
         replace: true,
         state: { notice: copy.deletedNotice(formatMonthDay(r.until)) },
