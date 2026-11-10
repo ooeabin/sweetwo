@@ -48,7 +48,7 @@
 | 연결 해제 | 월 `unlink_requested` 커플 ÷ 연결 커플, 14일 기한으로 확정된 비율, 30일 안 다시 연결한 비율 | 월 1% 초과 | 직전 60일 되돌리기 횟수와 교차 확인 (사유는 묻지 않음) |
 | 미합류 고착 | 온보딩 완료 30일 후에도 미합류인 커플 비율 (초대 리마인드 2회·코드 만료 포함) | 40% 초과 | 혼자 쓰는 가치 vs 초대 동선(O-06 ‘나중에 할게요’ 비율, 홈 H-06 초대 한 줄 닫기 비율) |
 | 알림 피로 | 알림 종류별 열람률, 월 상한(메일 6회) 도달 사용자 비율, 종류별 알림 끄기 수(S-14) | 열람률 10% 미만 또는 상한 도달 30% 초과 | 급하지 않은 알림 우선순위 조정 |
-| 브라우저 로그인 이탈 | 데스크톱·모바일 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
+| 브라우저 로그인 이탈 | 앱 login\_started 중 login\_completed 없이 끝난 비율(취소·시간 초과·앱 종료 포함), method별 | 20% 초과 | 딥링크 복귀 실패(브라우저 앱 열기 확인), 제공자별 동의 화면, A-03 ‘다시 열기’ 사용률, login\_failed reason 분포 |
 
 ## 4. 이벤트 정의
 
@@ -70,20 +70,20 @@
 | couple\_state | `unjoined` 미합류 / `linked` 연결 / `unlink_pending` 해제 대기 / `solo` 혼자 쓰기 | → 핵심 규칙 › 커플·권한 |
 | marriage\_state | `married` 했어요 / `preparing` 준비 중이에요 | O-11 답 [확인 필요] |
 | salary\_mode | `separate` 각자 / `combined` 합쳐서 | O-30, 설정에서 바뀌면 바뀐 값 [확인 필요] |
-| platform | `desktop` / `ios` / `android` | 웹사이트 이벤트는 site |
+| platform | `ios` / `android` | 웹사이트 이벤트는 site. `desktop`은 없앰 2026-11-10, ADR 0008 |
 | os | `windows` / `macos` / `ios` / `android` |  |
 | app\_version | 앱 빌드 버전 |  |
 | cycle\_id | 사이클 ID (체크리스트 주인 + 기준일) | 첫 사이클은 `cycle_first=true` |
 | plan\_tier | `free` / `premium` | 커플 단위 |
 | client\_time / server\_time | 기기 시각 / 수신 시각 | 오프라인 저장 후 동기화 전송 대비 |
 | source | `client` / `server` |  |
-| utm\_source, utm\_medium, utm\_campaign | 웹사이트 유입 UTM 값 | 웹사이트 이벤트에만 붙임. 스토어·데스크톱 설치 경로는 가입 이벤트까지 이어지지 않음(스토어 캠페인 값은 각 스토어 콘솔에서 봄). source(client / server)와는 다른 속성 |
+| utm\_source, utm\_medium, utm\_campaign | 웹사이트 유입 UTM 값 | 웹사이트 이벤트에만 붙임. 스토어 설치 경로는 가입 이벤트까지 이어지지 않음(스토어 캠페인 값은 각 스토어 콘솔에서 봄). source(client / server)와는 다른 속성 |
 
 ### 4-3. 로그인·온보딩·합류
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| app\_first\_launch | 설치 후 앱 첫 실행(A-01). 데스크톱은 첫 로그인 딥링크 도착 때, 모바일은 첫 실행 때 전송 | download\_id(L-02가 발급해 브라우저 로그인 딥링크로 넘긴 값, 없으면 null), os, app\_version |
+| app\_first\_launch | 설치 후 앱 첫 실행(A-01) | download\_id(늘 null. L-02 발급은 데스크톱 다운로드와 함께 없앰 2026-11-10, ADR 0008), os, app\_version |
 | login\_started | A-02 소셜 버튼 | method(kakao / google / apple), entry(first\_run / revisit / invite / session\_expired), flow(browser) |
 | login\_completed | 제공자 로그인 후 앱 복귀(A-03 딥링크·앱 링크) (서버) | method, is\_new\_account, wait\_sec(브라우저 로그인 대기 시간), reopened(A-03 ‘다시 열기’ 사용) |
 | login\_failed | A-02·A-03 예외 | method, reason(cancelled / timeout / provider\_error / email\_conflict / request\_mismatch / browser\_open\_failed) |
@@ -116,9 +116,9 @@
 | plan\_line\_added | W-01 ‘+ 지출 추가’로 줄을 더함 (2026-11-09) | source(`chip` / `text`), chip(칩 이름 영문 코드 `maintenance` / `phone` / `insurance` / `subscription` / `transport` / `parents`, 글자로 넣었으면 null), amount\_band, joint |
 | plan\_line\_deleted | W-01 ‘지우기’(시트, 편집 모드 줄) (2026-11-09) | line\_kind, default\_line(고정지출·생활비·용돈인지), entry(`sheet` / `edit`), joint |
 | plan\_reordered | W-01 편집 ‘완료’에서 순서가 바뀜 (2026-11-09) | sections(`saving` / `spend` / `both`), lines\_count, joint |
-| plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `saved` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
+| plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
 | plan\_link\_tapped | W-01 머리 아래 ‘이번 달 3/5 보냈어요 ›’를 누름 (2026-11-09) | whose(`self` / `partner` / `joint`), checked(체크한 줄 수), total(줄 수) |
-| month\_result\_shared | 달 결과 카드 ‘공유하기’(W-02 끝, 다 끝난 W-02, 지난 달) (2026-11-09) | result(`shared` / `saved` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`done` / `checklist` / `past`), skipped(‘못 함’ 줄 수) |
+| month\_result\_shared | 달 결과 카드 ‘공유하기’(W-02 끝, 다 끝난 W-02, 지난 달) (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`done` / `checklist` / `past`), skipped(‘못 함’ 줄 수) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·자산 관리·경조사
@@ -159,7 +159,7 @@
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
 | subscription\_canceled | 설정 › 구독 해지, 연결 해제로 상대 무료 전환 | reason\_path(`user` / `unlink`), months\_subscribed |
-| widget\_added | 위젯을 처음 놓음(트레이 아이콘 켜짐 포함) | widget(tray / wg01\~wg05), size(small / medium / large / lock), amounts\_shown |
+| widget\_added | 위젯을 처음 놓음(트레이는 없앰 2026-11-10, ADR 0008) | widget(wg01\~wg05), size(small / medium / large / lock), amounts\_shown |
 | widget\_tapped | 위젯 누름 → 딥링크 진입 | widget, element, landing\_screen, app\_was\_running |
 | peer\_stats\_viewed | F-08 지표 카드 표시 (출시 후) | metric(net\_worth / saving\_rate / saving\_amount / emergency\_months / debt\_ratio), group\_level [확인 필요], source(public / app) |
 | peer\_stats\_consent\_changed | F-08 참여 안내, 설정 S-18 통계 참여 토글 (출시 후) | state(on / off), entry(f08 / settings), couple\_both\_on |
@@ -182,9 +182,9 @@
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | `site_landing_viewed` | L-01 열림 | os, utm\_source, utm\_medium, utm\_campaign |
-| `site_download_clicked` | L-01 2번, 7번, L-02 “다시 받기” | os(`mac` / `win`), placement(`hero` / `bottom` / `install_guide`) |
-| `site_store_clicked` | L-01 상단 바, 2번(휴대폰), 7번, L-02 5번 | store(`app_store` / `google_play`), placement(`topbar` / `hero` / `bottom` / `install_guide`), os |
-| `site_install_guide_viewed` | L-02 열림 | os, entry(`landing` / `app`) |
+| `site_download_clicked` (없앰 2026-11-10, ADR 0008) | L-01 2번, 7번, L-02 “다시 받기” | os(`mac` / `win`), placement(`hero` / `bottom` / `install_guide`) |
+| `site_store_clicked` | L-01 상단 바, 2번, 7번, L-02, 초대 페이지 | store(`app_store` / `google_play`), placement(`top` / `hero` / `bottom` / `install` / `invite`), utm |
+| `site_install_guide_viewed` (없앰 2026-11-10, ADR 0008) | L-02 열림 | os, entry(`landing` / `app`) |
 | `site_faq_opened` | L-01 6번, L-06 질문 펼침 | faq\_no(FAQ 탭 번호), page(`landing` / `help`) |
 
 ## 5. 수집 원칙
@@ -206,5 +206,5 @@
 | 월간 (사이클 종료 7일 뒤) | 핵심 지표 월 추이, 가입 주차 코호트별 첫 체크 완료율·M1·M3, 월별 체크리스트 완료율·저금 줄 체크율, 저금 항목 만들기·달성, 되돌리기, 연결 해제, 유료·페이월 전환 | 기능 개선·알림 정책 조정 |
 | 분기 | 목표치(가설) 재설정, 지표·이벤트 정의 점검 | 다음 분기 목표 |
 
-- 기본 분해: couple\_state, marriage\_state(결혼했어요 / 준비 중 / 아직 안 정함), salary\_mode(각자 / 합쳐서), platform(desktop / ios / android), 변동 수입 여부, 가입 경로(starter / partner)
+- 기본 분해: couple\_state, marriage\_state(결혼했어요 / 준비 중 / 아직 안 정함), salary\_mode(각자 / 합쳐서), platform(ios / android), 변동 수입 여부, 가입 경로(starter / partner)
 - 코호트 단위: 온보딩 완료 주차. 유지율은 연결·혼자 쓰기·미합류로 나눠서도 표시

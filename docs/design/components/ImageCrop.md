@@ -12,6 +12,6 @@
 - 키보드: 무대에 포커스하면 ←↑→↓로 8px씩 옮김, +와 −로 확대. 무대 `aria-label` “사진 위치, 화살표로 옮겨요”.
 - 사진 지우기는 S-11 Menu의 “사진 지우기”, 지우면 빵모자 실루엣 Avatar(2026-11-05, 그림은 2026-11-09).
 
-쓰는 곳: 설정 S-11 내 정보 → S-11e 사진 바꾸기. 좁은 창은 BottomSheet, 데스크톱은 Modal 안.
+쓰는 곳: 설정 S-11 내 정보 → S-11e 사진 바꾸기. 좁은 창은 BottomSheet, 넓은 창은 Modal 안.
 
 - React 래퍼 `ImageCrop`(packages/ui): `src`(object URL), `labels`, `size`(기본 512), `onCancel`, `onSave(jpeg)`. 올리기 칸(`hg-drop`)은 화면(S-11e)이 그림.
