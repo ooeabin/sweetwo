@@ -48,7 +48,7 @@ export function AuthLayout({
     <main className={className ? `hg-auth ${className}` : 'hg-auth'}>
       {onBack && (
         <div className="hg-auth__back">
-          <IconButton icon="chevron-left" label="뒤로" ghost onClick={onBack} />
+          <IconButton icon="chevron-left" label="뒤로" ghost className="hg-back" onClick={onBack} />
           <button type="button" className="hg-btn hg-btn--ghost hg-auth__backtext" onClick={onBack}>
             <Icon name="chevron-left" size={16} />
             {backLabel}

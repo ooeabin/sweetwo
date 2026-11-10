@@ -255,7 +255,7 @@ export function AppFrame(p: AppFrameProps) {
                     icon="chevron-left"
                     label={p.labels.home}
                     ghost
-                    className="hg-mhead__back"
+                    className="hg-mhead__back hg-back"
                     onClick={p.onHome}
                   />
                 )}

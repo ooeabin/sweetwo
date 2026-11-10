@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (40d8d3f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (46ba05f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -278,7 +278,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
 .hg-q__back { display: inline-flex; align-items: center; justify-content: flex-start; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: var(--radius-md); }
 .hg-q__back:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-q__back-space { display: block; width: 36px; height: 36px; }
+.hg-q__back-space { display: block; width: 40px; height: 40px; }  /* 2026-11-10 hg-back 40px와 같게 */
 /* 온보딩 챕터 진행(ChapterBar): 뒤로 + 가운데 “2/4 목표” + 챕터 안에서만 차는 얇은 막대(brand). 챕터가 바뀌면 처음부터 */
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
@@ -1879,7 +1879,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-auth__actions--row > .hg-btn--primary { flex: 2; }
 /* 히어로 배치(hg-auth--hero): 워드마크 + 캐치프레이즈(태그라인 18px). O-01 시작·A-02 로그인 공용 */
 .hg-auth--hero .hg-auth__title { font-size: 20px; line-height: 28px; letter-spacing: -0.3px; }
-.hg-auth--hero .hg-auth__help { font-size: 15px; line-height: 22px; white-space: pre-line; word-break: keep-all; }
+.hg-auth--hero .hg-auth__help { font-size: 14px; line-height: 20px; white-space: pre-line; word-break: keep-all; }  /* 2026-11-10 15 → 14px(O-01, A-02 설명이 커 보임) */
 /* O-01 버튼 아래 한 줄(당근 ‘이미 계정이 있나요? 로그인’): 회색 글자 + 글자 링크 */
 .hg-auth__alt { margin: var(--space-1) 0 0; text-align: center; font: var(--text-body-sm); color: var(--slate); }
 /* 로그인·잠금 화면의 글자 링크(‘나중에 할게요’, ‘업데이트 없이 보기만 할게요’)는 파랑 대신 회색 */
@@ -2326,3 +2326,14 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-cal__tools { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .hg-cal__tools > .hg-cal__filter { flex: 1; min-width: 0; flex-wrap: wrap; }
 .hg-cal__tools > .hg-sechead__more { flex: none; }
+
+/* 2026-11-10 뒤로 버튼 하나로(hg-back): 로그인(A-02), 앱 틀 ‹ 홈으로, PageHeader, 질문 화면, 알림 화면이 같은 모양.
+   40px 누르는 자리, Phosphor chevron-left 24px ink, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px(앱 틀 ‹ 홈으로와 같은 자리). */
+/* display는 두지 않음: 각 자리의 좁은·넓은 창 숨김 규칙(hg-auth__back, hg-pagehead__icon)을 그대로 따름 */
+.hg-back, .hg-iconbtn.hg-back { box-sizing: border-box; place-items: center; align-items: center; flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--ink); cursor: pointer; justify-content: center; }
+.hg-back > .hg-ico, .hg-iconbtn.hg-back > .hg-ico { width: 24px; height: 24px; }
+.hg-back:hover { background: var(--surface-alt); }
+.hg-back:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (max-width: 767px) {
+  :is(.hg-auth__back, .hg-q__nav, .hg-chapterbar__top, .hg-noti__head) > .hg-back, .hg-pagehead > .hg-back { margin-left: -8px; }
+}
