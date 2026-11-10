@@ -102,6 +102,11 @@ export interface AppBridge {
    */
   shareImage?: (f: { name: string; base64: string }) => Promise<'shared' | 'cancelled'>;
   /**
+   * 글 공유(O-07 초대 코드, 2026-11-10 QA 2구간 S2-05). OS 공유 창(카카오톡 등) → 'shared' | 'cancelled'.
+   * Android WebView에는 navigator.share가 없어 브리지로. 없으면(브라우저) 앱이 링크 복사
+   */
+  shareText?: (t: { text: string; url?: string }) => Promise<'shared' | 'cancelled'>;
+  /**
    * 모바일: 보상형 동영상 광고(AdMob, 자산 순위 F-08 앞, ADR 0006). 끝까지 보면 'rewarded', 닫으면 'closed',
    * 못 불러오면 'failed'. 브라우저는 없음(광고 없이 바로)
    */

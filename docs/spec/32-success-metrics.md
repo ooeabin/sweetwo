@@ -17,8 +17,8 @@
 
 | 지표 | 정의(계산식) | 초기 목표치(가설) | 보는 이유 |
 | --- | --- | --- | --- |
-| 온보딩 완료율 | O-60 ‘시작하기’ 사용자 ÷ O-10 ‘시작하기’ 사용자 (초대받은 파트너 제외) | 80% [확인 필요] | 8~9화면 안에 월급 계획까지 가야 가치 체험 시작 |
-| 온보딩 소요 시간 | O-10 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 3분 이하 [확인 필요] | 약 2분·8~9화면 설계 검증 |
+| 온보딩 완료율 | O-60 ‘홈으로 가기’ 사용자 ÷ O-03 첫 표시 사용자 (초대받은 파트너 제외, 2026-11-10 O-10 없앰) | 80% [확인 필요] | 질문 6~7화면 안에 월급 계획까지 가야 가치 체험 시작 |
+| 온보딩 소요 시간 | O-03 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 2분 이하 [확인 필요] | 약 1분·질문 6~7화면 설계 검증(2026-11-10) |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 월급 계획이 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 월급 계획 전체를 따라가는지 |
 | 월별 체크리스트 완료율 | 사이클이 끝날 때(다음 기준일 0시) ‘다 했어요’인 체크리스트 ÷ 그 사이클 체크리스트. 줄 기준 보조: 체크한 줄 ÷ 전체 줄(여유 자금 제외) | 60% (줄 기준 80%) [확인 필요] | 습관이 유지되는지. 월급 전 확인(W-05) 효과는 W-05에서 한 체크 비율로 따로 봄 |
@@ -92,13 +92,13 @@
 | invite\_link\_opened | 초대 앱 링크로 앱이 A-07을 엶(2026-11-10) | signed\_in |
 | update\_view\_only | A-01 ‘업데이트 없이 보기만 할게요’(2026-11-10) | app\_version |
 | signup\_completed | A-05 ‘동의하고 계속하기’ 계정 생성 (서버) | method, email\_source(provider / manual: A-04 직접 입력), marketing\_opt\_in, role |
-| onboarding\_started | O-10 ‘시작하기’ [확인 필요] | entry(`direct` / `invite_link`) |
-| onboarding\_step\_viewed | O-10\~O-60, 파트너 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required, marriage\_state |
-| onboarding\_step\_completed | 각 화면 ‘다음’ | screen\_id, answer(`input` / `estimate` / `none`), duration\_sec, changed\_after\_back |
+| onboarding\_started | O-03 처음 표시(이어하기 기록이 없을 때, 2026-11-10 O-10 없앰) | entry(`direct` / `invite_link`) |
+| onboarding\_step\_viewed | O-03\~O-60, 파트너 합류 P 화면 각 화면 표시 | screen\_id, flow(`starter` / `partner`), required(O-07만 false), marriage\_state(`married` / `engaged` / `undecided` / null) |
+| onboarding\_step\_completed | 각 화면 ‘다음’(선택지, 시트 닫기 포함) | screen\_id, answer(`input` / `none`: O-06 나중에, O-07 보내지 않고 닫음, O-31 월급 없음. 2026-11-10 ‘잘 모르겠어요’ 추정이 없어 `estimate` 뺌), duration\_sec, changed\_after\_back(이번 실행에서 그 화면을 이미 한 번 넘겼는지) |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
-| onboarding\_resumed | “이어서 할까요?” | screen\_id, hours\_since\_last |
-| onboarding\_completed | O-60 ‘시작하기’ | duration\_sec, has\_estimate, goals\_count, first\_goal\_template, salary\_mode, income\_band, split\_left\_band(여유 자금 구간, 모자라면 `short`), split\_edited(O-50 추천값을 고쳤는지), no\_income(‘지금은 월급이 없어요’) |
-| invite\_sent | O-07, 홈 H-06, 설정 S-12 ‘우리 둘 정보’ | channel(`code` / `link` / `kakao`), entry(`onboarding` / `home` / `settings`), issue\_seq(재발급 회차) |
+| onboarding\_resumed | 앱을 다시 열어 멈춘 화면으로 바로 감(실행마다 한 번, 2026-11-10 질문 화면 없앰) | screen\_id, hours\_since\_last |
+| onboarding\_completed | O-60 ‘홈으로 가기’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(여유 자금 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
+| invite\_sent | O-07 코드 복사·링크 복사·공유(지금은 O-07만, 2026-11-10), 홈 H-06, 설정 S-12 ‘우리 둘 정보’ | channel(`code` / `link` / `share`: 기기 공유 창, 카카오톡 등), entry(`onboarding` / `home` / `settings`). issue\_seq(재발급 회차)는 서버만 알아 서버 이벤트로 [확인 필요] |
 | invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
 | partner\_joined | 합류 완료(→ 파트너 합류) | hours\_since\_invite, mid\_cycle, salary\_mode, moved\_records(혼자 쓰던 기록을 옮겼는지) |

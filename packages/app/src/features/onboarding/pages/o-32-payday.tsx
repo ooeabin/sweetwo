@@ -8,7 +8,8 @@ import { useStep } from '../step';
 type Day = number | 'last';
 
 // O-32 월급날(17 온보딩 ②, 2026-11-02 O-31에서 나눔). 온보딩 마지막 질문 → O-60 준비 끝
-// 2026-11-03 달력 판 → 1열 휠(카카오페이처럼). 처음 값 25일, 맨 아래 ‘말일’
+// 2026-11-03 달력 판 → 1열 휠(카카오페이처럼). 처음 값 25일, 맨 아래 ‘말일’.
+// ‘다음’마다 추천 월급 계획과 첫 체크리스트를 다시 만듦(2026-11-10 S2-01, 뒤로 와서 바꿔도 맞게)
 export function O32Payday() {
   const s = useStep('o-32');
   const me = s.state.me;
@@ -36,7 +37,10 @@ export function O32Payday() {
         value={payday}
         onChange={setDay}
         lastLabel={copy.paydayLast}
-        hint={copy.paydayLastHint}
+        // 29~31일은 없는 달이 있어 ‘말일’과 같아질 수 있음(2026-11-10 S2-24, 12 Q4 예외)
+        hint={
+          typeof payday === 'number' && payday >= 29 ? copy.paydayShortMonth : copy.paydayLastHint
+        }
       />
     </QuestionLayout>
   );

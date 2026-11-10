@@ -15,6 +15,8 @@ export type FakeState = {
   pendingLogin: boolean;
   invite: string | null;
   cacheCleared: number;
+  /** 글 공유(shareText)로 보낸 것 */
+  shared: { text: string; url?: string }[];
 };
 export interface FakeOptions {
   signedIn?: boolean;
@@ -53,6 +55,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       pendingLogin: !o.noPendingLogin,
       invite: o.invite ?? null,
       cacheCleared: 0,
+      shared: [],
     };
     const cbs: {
       auth: Set<(e: unknown) => void>;
@@ -80,6 +83,10 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
         onBack: (cb: () => boolean) => {
           cbs.back.add(cb);
           return () => void cbs.back.delete(cb);
+        },
+        shareText: async (t: { text: string; url?: string }) => {
+          f.shared.push(t);
+          return 'shared';
         },
         openUrl: async (u: string) => {
           if (o.openFail) throw new Error('open');

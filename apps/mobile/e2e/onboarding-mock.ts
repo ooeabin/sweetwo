@@ -691,20 +691,50 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
         );
       }
+      if (fn === 'onboarding_reset_plan') {
+        // 서버 흉내(2026-11-10 S2-01): 온보딩 중에만, 내 것과 공동 것을 지움. 체크한 줄이 있으면 그대로
+        if (db.me.onboarding_done_at)
+          return json(route, { message: 'onboarding_done', code: '42501' }, 403);
+        const mine = (o: unknown) => o === db.me.id || o === null;
+        const checked = db.checklists.some(
+          (c) =>
+            mine(c.owner_user_id) &&
+            (c.pay_check_line as Record<string, unknown>[]).some((l) => l.state !== 'wait'),
+        );
+        if (!checked) {
+          for (let i = db.checklists.length - 1; i >= 0; i--)
+            if (mine(db.checklists[i]?.owner_user_id)) db.checklists.splice(i, 1);
+          for (let i = db.splits.length - 1; i >= 0; i--)
+            if (mine(db.splits[i]?.owner_user_id)) db.splits.splice(i, 1);
+        }
+        return json(route, null);
+      }
       if (fn === 'start_checklist') {
         const b = body() as unknown as { p_owner?: string };
         const sp = db.splits.find((x) => x.owner_user_id === (b.p_owner ?? null));
         if (!sp) return json(route, { message: 'no_split' }, 400);
         if (!db.me.payday && !db.me.payday_last) return json(route, null);
         const id = `checklist-${db.checklists.length + 1}`;
+        // 사이클(서버 make_checklist 흉내): 이번 달 월급날, 아직 안 왔으면 지난달(KST 날짜, 짧은 달은 말일)
+        const kst = new Date((opts.now ?? new Date()).getTime() + 9 * 3_600_000);
+        const dayOf = (y: number, m: number) => {
+          const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+          return db.me.payday_last ? last : Math.min(Number(db.me.payday), last);
+        };
+        let y = kst.getUTCFullYear();
+        let m = kst.getUTCMonth();
+        if (dayOf(y, m) > kst.getUTCDate()) [y, m] = m === 0 ? [y - 1, 11] : [y, m - 1];
+        const start = new Date(Date.UTC(y, m, dayOf(y, m)));
+        const [ny, nm] = m === 11 ? [y + 1, 0] : [y, m + 1];
+        const end = new Date(Date.UTC(ny, nm, dayOf(ny, nm) - 1));
         if (!db.checklists.some((c) => c.owner_user_id === sp.owner_user_id))
           db.checklists.push({
             id,
             split_id: sp.id,
             owner_user_id: sp.owner_user_id,
-            label: '9월 월급',
-            cycle_start: '2026-09-25',
-            cycle_end: '2026-10-24',
+            label: `${m + 1}월 월급`,
+            cycle_start: start.toISOString().slice(0, 10),
+            cycle_end: end.toISOString().slice(0, 10),
             state: 'open',
             pay_check_line: sp.split_line
               .filter((l) => Number(l.amount) > 0)
