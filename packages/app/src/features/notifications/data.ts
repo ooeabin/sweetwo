@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
+import { onSessionReset } from '../../shared/session-reset';
 
 // 알림 센터 데이터: 목록(30개씩), 읽지 않음 점, Realtime(새 알림 → 목록·점), 모바일 푸시, 누르면 읽음 + 그 화면.
 
@@ -30,6 +31,7 @@ export const useNotiPanel = create<{ open: boolean; set: (open: boolean) => void
   open: false,
   set: (open) => set({ open }),
 }));
+onSessionReset(() => useNotiPanel.setState({ open: false }));
 
 export function useNotiList(enabled = true) {
   return useInfiniteQuery({

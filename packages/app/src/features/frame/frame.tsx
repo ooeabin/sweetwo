@@ -28,6 +28,7 @@ import { FrameCommands } from './command';
 import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
 import { LineBand } from './notice-band';
+import { onSessionReset } from '../../shared/session-reset';
 
 const HREF: Record<AppTab, string | undefined> = {
   month: '/',
@@ -49,6 +50,7 @@ const useMenuStore = create<{ open: boolean; set: (v: boolean) => void }>((set) 
   open: false,
   set: (open) => set({ open }),
 }));
+onSessionReset(() => useMenuStore.setState({ open: false }));
 
 /** 홈이 마지막으로 그려졌을 때의 기록 위치(react-router history.state.idx). ‹·하드웨어 뒤로가 홈 바로 다음이면 뒤로 가기 */
 let homeIdx: number | null = null;

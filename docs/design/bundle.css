@@ -35,6 +35,10 @@
 .hg-btn--kakao { background: #fee500; color: rgba(0, 0, 0, 0.85); border-color: transparent; }
 .hg-btn--kakao:active, .hg-btn--kakao.is-pressed { background: #efd900; }
 .hg-btn:disabled, .hg-btn.is-disabled { background: var(--surface-alt); color: var(--muted); border-color: transparent; cursor: not-allowed; }
+/* 2026-11-10 카카오 버튼은 비활성이어도 공식 노랑 그대로 + 흐리게(카카오 디자인 가이드: 버튼 색을 바꾸지 않음) */
+.hg-btn--kakao:disabled, .hg-btn--kakao.is-disabled { background: #fee500; color: rgba(0, 0, 0, 0.85); opacity: 0.45; }
+/* 링크(a)로 쓴 버튼도 버튼(button)과 같은 크기 계산(A-03 복귀 페이지 ‘sweeTwo 열기’가 넘쳐 가로로 밀리던 것) */
+a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 
 /* Chip */
 .hg-chip { display: inline-flex; align-items: center; gap: var(--space-1); height: 40px; padding: 0 var(--space-4); border-radius: var(--radius-full); border: 1px solid var(--border-control); background: var(--surface); color: var(--ink); font: var(--text-label); cursor: pointer; }
@@ -188,7 +192,7 @@
 .hg-toasts > * { pointer-events: auto; }
 /* 2026-11-09 좁은 창 하단 탭 막대와 + 버튼(FAB)을 없애 토스트는 늘 화면 아래(space-8 + 안전 영역) */
 /* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
-@media (max-width: 767px) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(52px + var(--space-4) * 2 + var(--space-3) + env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 767px), (hover: none), (pointer: coarse) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(52px + var(--space-4) * 2 + var(--space-3) + env(safe-area-inset-bottom, 0px)); } }
 body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); bottom: auto; }
 @media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
@@ -271,6 +275,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-mapp .hg-content { padding: var(--space-4); gap: var(--space-3); }
 
 /* QuestionLayout */
+.hg-qmain { padding: env(safe-area-inset-top, 0px) calc(var(--space-4) + env(safe-area-inset-right, 0px)) 0 calc(var(--space-4) + env(safe-area-inset-left, 0px)); }  /* 질문 화면 바깥(2026-11-10 안전 영역) */
 .hg-q { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-6); width: 100%; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: var(--space-6) 0; }
 .hg-q > * { margin: 0; }
 .hg-q__nav { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
@@ -317,7 +322,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__foot.has-note { flex-wrap: wrap; row-gap: var(--space-3); }
 .hg-q__note { flex-basis: 100%; margin: 0; text-align: center; font: var(--text-caption); color: var(--slate); }  /* 버튼 위 가운데 안내 한 줄(2026-11-03) */
 /* 좁은 창: 요약이 있는 아래 고정 영역은 위에 옅은 선을 둬 목록이 그 밑으로 지나가는 게 보이게 */
-@media (max-width: 767px) { .hg-q__foot.has-sum { border-top: 1px solid var(--hairline-soft); padding-top: var(--space-3); } }
+@media (max-width: 767px), (hover: none), (pointer: coarse) { .hg-q__foot.has-sum { border-top: 1px solid var(--hairline-soft); padding-top: var(--space-3); } }
 /* 안내 화면(입력 없음, hg-q--center): 제목을 가운데 정렬하고 세로 가운데로. O-01 시작, A-02 로그인과 같은 배치 */
 .hg-q--center .hg-q__head { align-items: center; text-align: center; margin-top: auto; }
 .hg-q--center .hg-q__help { word-break: keep-all; }
@@ -357,7 +362,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q--center > .hg-q__end { display: flex; flex-direction: column; gap: var(--space-3); margin-top: auto; margin-bottom: 0; }
 .hg-q--center > .hg-q__end + .hg-q__foot { margin-top: 0; }
 /* 넓은 창(태블릿 등 768px 이상, Meetup식): 위 바 = 왼쪽 워드마크 + 가운데 진행, 아래 바 = 왼쪽 ‘이전’ + 오른쪽 Enter 안내와 주 버튼(글자 길이만큼).
-   헤더 꺾쇠(hg-q__nav)는 숨김. 좁은 창은 위 규칙 그대로(꺾쇠, 꽉 찬 주 버튼) */
+   헤더 꺾쇠(hg-q__nav)는 숨김. 좁은 창은 위 규칙 그대로(꺾쇠, 꽉 찬 주 버튼).
+   2026-11-10 이 위 바·아래 바와 ‘Enter 키를 눌러도 돼요’는 마우스·트랙패드가 있는 넓은 화면만. 태블릿(터치)은 휴대폰처럼 가운데 열 */
 .hg-qbar, .hg-q__prev, .hg-q__hint { display: none; }
 .hg-q__foot.is-backonly { display: none; }
 .hg-segs { display: flex; gap: 4px; width: 100%; }
@@ -365,7 +371,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-segs__seg.is-on { background: var(--brand); }
 .hg-segs--ink .hg-segs__seg.is-on { background: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .hg-segs__seg { transition: none; } }
-@media (min-width: 768px) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .hg-qbar { position: sticky; top: 0; z-index: 2; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 64px; margin: 0 calc(-1 * var(--space-4)); padding: 0 var(--space-6); background: var(--surface); }
   .hg-qbar__mid { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); width: 360px; }
   .hg-qbar__label { margin: 0; font: var(--text-caption); font-weight: 600; color: var(--ink); }
@@ -1338,7 +1344,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-consent__row { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; }
 .hg-consent__row--all { min-height: 56px; border-bottom: 1px solid var(--hairline-soft); }
 .hg-consent__check { flex: 1; display: flex; align-items: center; gap: var(--space-3); min-width: 0; min-height: 44px; }
-.hg-consent__label { min-width: 0; font: var(--text-body); color: var(--ink); }
+.hg-consent__label { min-width: 0; font: var(--text-body); color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; }  /* 2026-11-10 좁은 창·큰 글자에서 낱말 중간에 끊기지 않게 */
 .hg-consent__row--all .hg-consent__label { font: var(--text-title-3); }
 .hg-consent__label b { font-weight: 600; color: var(--slate); }
 .hg-consent__label b.is-optional { font-weight: 400; color: var(--stone); }
@@ -1356,10 +1362,17 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-consent__sub .hg-checkbox::after { content: ""; width: 9px; height: 5px; border-left: 2px solid var(--border-control); border-bottom: 2px solid var(--border-control); transform: rotate(-45deg) translate(1px, -1px); }
 .hg-consent__sub .hg-checkbox.is-on { background: none; }
 .hg-consent__sub .hg-checkbox.is-on::after { border-color: var(--ink); }
+.hg-consent__sub .hg-checkbox:not(.is-on)::after { content: none; }  /* 2026-11-10 안 고른 하위 약관은 표시 없음(색만으로 구분하지 않음, WCAG 1.4.1). 고르면 ink ✓ */
 .hg-consent__sub .hg-consent__label { font-size: 15px; line-height: 22px; color: var(--slate); }
 .hg-consent__view { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; margin: 0 calc(var(--space-2) * -1) 0 0; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--stone); cursor: pointer; }
 .hg-consent__view:hover { background: var(--surface-alt); }
 .hg-consent__view:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* 동의 문서 보기(A-05·A-05r ‘보기’, 2026-11-10): 시트 안 본문. 제목(h2) + 문단 + 목록만 */
+.hg-doc { display: flex; flex-direction: column; gap: var(--space-3); text-align: left; font: var(--text-body-sm); color: var(--ink-2); word-break: keep-all; overflow-wrap: anywhere; }
+.hg-doc > * { margin: 0; }
+.hg-doc h2 { margin-top: var(--space-2); font: var(--text-body-strong); color: var(--ink); }
+.hg-doc :is(ol, ul) { display: flex; flex-direction: column; gap: var(--space-1); padding-left: var(--space-5); }
+.hg-doc__meta { font: var(--text-caption); color: var(--slate); }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-consent-card > * { margin: 0; }
 .hg-consent-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
@@ -1721,10 +1734,10 @@ a.hg-btn { text-decoration: none; }
 .hg-meter__chip { align-self: flex-start; margin-top: var(--space-3); padding: 3px 10px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: 600 12px/18px var(--font-sans); }
 
 /* AppFrame: 넓은 창 = 왼쪽 사이드바 + 흰 바탕(canvas) 위 테두리·옅은 그림자 카드, 좁은 창 = 머리 + 하단 탭 막대 */
-.hg-frame { min-height: 100vh; min-height: 100dvh; background: var(--canvas); display: grid; grid-template-columns: 232px minmax(0, 1fr); align-items: start; }
+.hg-frame { box-sizing: border-box; min-height: 100vh; min-height: 100dvh; background: var(--canvas); display: grid; grid-template-columns: 232px minmax(0, 1fr); align-items: start; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); }  /* 2026-11-10 안전 영역 */
 .hg-frame__main { min-width: 0; }
 .hg-appside { align-self: stretch; background: var(--surface); border-right: 1px solid var(--hairline-soft); }
-.hg-appside__in { position: sticky; top: 0; height: 100vh; height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-6) var(--space-3) var(--space-4); overflow-y: auto; }
+.hg-appside__in { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; height: calc(100dvh - env(safe-area-inset-top, 0px)); box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-6) var(--space-3) var(--space-4); overflow-y: auto; }
 .hg-appside__logo { display: flex; padding: 0 var(--space-3) var(--space-6); }
 .hg-appside__search { display: flex; align-items: center; gap: var(--space-2); height: 40px; margin: 0 0 var(--space-4); padding: 0 var(--space-2) 0 var(--space-3); border: 0; border-radius: var(--radius-btn-sm); background: var(--surface-alt); color: var(--stone); font: var(--text-body-sm); text-align: left; cursor: pointer; }
 .hg-appside__search > span:not(.hg-ico):not(.hg-kbd) { flex: 1; }
@@ -1817,11 +1830,12 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 }
 
 /* 로그인, 가입 화면 틀(AuthLayout: A-01~A-08, O-01). 가운데 한 열, 좁은 창은 버튼 묶음을 아래로 */
-.hg-auth { position: relative; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-6); padding: var(--space-10) var(--space-4) var(--space-8); text-align: center; }
+.hg-auth { position: relative; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-6); padding: calc(var(--space-10) + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)) calc(var(--space-4) + env(safe-area-inset-left, 0px)); text-align: center; }  /* 2026-11-10 안전 영역(노치·홈 막대) 안쪽 */
 .hg-auth > * { margin: 0; }
-.hg-auth__back { position: absolute; top: var(--space-4); left: var(--space-4); }
+.hg-auth__back { position: absolute; top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); left: calc(var(--space-4) + env(safe-area-inset-left, 0px)); }
 .hg-auth__back .hg-auth__backtext { display: none; }
-@media (min-width: 768px) {
+/* 넓은 창 글자 뒤로(‘처음으로’)는 마우스·트랙패드가 있는 넓은 화면만. 태블릿(터치)은 휴대폰처럼 꺾쇠(2026-11-10) */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .hg-auth__back .hg-iconbtn { display: none; }
   .hg-auth__back .hg-auth__backtext { display: inline-flex; }
 }
@@ -1834,7 +1848,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-auth__actions .hg-tag { position: absolute; right: var(--space-3); }
 .hg-auth__note { font: var(--text-caption); color: var(--slate); }
 /* 상태 화면(로그인 대기, 업데이트, 점검, 세션 만료, 오프라인, Face ID) 제목 위 아이콘 원 */
-.hg-auth__icon { display: grid; place-items: center; flex: none; width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); }
+.hg-auth__icon { display: grid; place-items: center; flex: none; width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); }  /* 2026-11-10 상태 화면 그림(2D)이 들어올 때까지 이 아이콘 원(ink-2 on surface-alt, 72px 원 + 32px 아이콘) */
 .hg-auth__icon .hg-ico { width: 32px; height: 32px; }
 .hg-auth__icon.is-busy .hg-ico { animation: hg-spin 1.2s linear infinite; }
 /* 2026-11-05 상태 이모지(3D 그림, 96px, 원 판 없음). 그림이 있으면 hg-auth__icon 대신 */
@@ -1861,11 +1875,15 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-auth--hero .hg-auth__help { font-size: 14px; line-height: 20px; white-space: pre-line; word-break: keep-all; }  /* 2026-11-10 15 → 14px(O-01, A-02 설명이 커 보임) */
 /* O-01 버튼 아래 한 줄(당근 ‘이미 계정이 있나요? 로그인’): 회색 글자 + 글자 링크 */
 .hg-auth__alt { margin: var(--space-1) 0 0; text-align: center; font: var(--text-body-sm); color: var(--slate); }
+/* A-03 로그인 중인 방법(15 A-03 1번 ‘로고 + 카카오로 로그인’): 제목 위 제공자 마크 + 이름 한 줄(2026-11-10) */
+.hg-auth__provider { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; font: var(--text-label); color: var(--ink); }
+.hg-auth__provider .hg-btn__mark { width: 20px; height: 20px; }
 /* 로그인·잠금 화면의 글자 링크(‘나중에 할게요’, ‘업데이트 없이 보기만 할게요’)는 파랑 대신 회색 */
 :is(.hg-auth, .hg-lock) .hg-btn--link { color: var(--slate); }
 .hg-auth__alt .hg-btn--link { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 /* A-02 로그인 전용(hg-auth--login): ZIGZAG 톤 — 굵은 글자, 제공자 마크 왼쪽 고정, 카카오 마크 크게, 최근 사용 말풍선, 로그인 유지 작게 */
 .hg-auth--login .hg-auth__actions .hg-btn { font-weight: 700; }
+.hg-auth--login .hg-auth__actions .hg-btn--provider { padding-inline: 56px; }  /* 2026-11-10 왼쪽 고정 마크(24 + 24px)가 큰 글자에서 글자를 덮지 않게 좌우 56px */
 /* 구글·애플(secondary)은 로그인에선 회색 채움 대신 중간 회색 테두리 버튼으로(border-control~hairline 사이) */
 .hg-auth--login .hg-btn--secondary { background: transparent; border-color: color-mix(in srgb, var(--border-control) 20%, var(--hairline)); }
 .hg-auth--login .hg-auth__actions .hg-btn__mark { position: absolute; left: var(--space-6); top: 50%; transform: translateY(-50%); }
@@ -1877,10 +1895,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 /* 이메일 충돌 말풍선(지그재그 ‘지금 가입하고…’): 버튼 위 가운데 흰 말풍선, 13px, 넉넉한 여백, 꼬리 아래 */
 .hg-auth--login .hg-auth__bubble { position: absolute; left: 50%; bottom: calc(100% + var(--space-3)); transform: translateX(-50%); z-index: 1; padding: var(--space-2) var(--space-4); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); font: 500 12px/18px var(--font-sans); white-space: nowrap; pointer-events: none; }
 .hg-auth--login .hg-auth__bubble::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-right: 1px solid var(--hairline-soft); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); transform: rotate(45deg); }
-@media (min-width: 768px) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .hg-auth--hero .hg-auth__actions { margin-top: var(--space-16); }  /* 버튼 위 토스트·말풍선 자리 */
 }
-@media (max-width: 767px) {
+/* 2026-11-10 휴대폰과 태블릿(터치)은 같은 배치: 가운데 휴대폰 너비 열, 제목 세로 가운데, 버튼은 아래 끝 */
+@media (max-width: 767px), (hover: none), (pointer: coarse) {
   .hg-auth { justify-content: flex-start; }
   .hg-auth__head { margin-top: auto; }     /* 제목을 세로 가운데로 */
   .hg-auth__actions { margin-top: auto; }  /* 버튼 묶음은 아래 끝 기준 */
@@ -1890,13 +1909,14 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   /* 상태 화면: 아이콘 원 + 제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-auth__icon { margin-top: auto; }
   .hg-auth > .hg-auth__icon + .hg-auth__head { margin-top: 0; }
+  .hg-auth > .hg-auth__icon + .hg-auth__provider + .hg-auth__head { margin-top: 0; }  /* A-03 아이콘 원 + 제공자 줄 + 제목을 한 묶음으로 */
   .hg-auth > .hg-auth__art { margin-top: auto; }
   .hg-auth > .hg-auth__art + .hg-auth__head { margin-top: 0; }
   .hg-auth__alert + .hg-auth__actions { margin-top: 0; }
   .hg-auth > .hg-auth__alert { margin-top: auto; }
   /* PIN 정하기·잠금: 카드 없이 화면 전체, 키패드는 아래 */
   .hg-auth:has(> .hg-lock) { padding: 0; }
-  .hg-auth > .hg-lock { flex: 1; align-self: stretch; width: auto; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px) var(--space-4) var(--space-6); border: 0; border-radius: 0; box-shadow: none; }
+  .hg-auth > .hg-lock { box-sizing: border-box; flex: 1; align-self: center; width: 100%; max-width: 480px; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) calc(var(--space-4) + env(safe-area-inset-left, 0px)); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
   /* 제목과 보조 줄은 질문 화면 제목(hg-q__title)과 같은 자리: 왼쪽 정렬, 같은 높이. 점은 가운데 */
   .hg-auth > .hg-lock .hg-lock__head { align-self: stretch; align-items: flex-start; }
@@ -1906,7 +1926,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
   /* 좁은 창: 주 버튼은 화면 아래 끝(내용이 짧아도), 길면 따라 내려오다 아래에 붙음 */
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
-  .hg-q__foot { position: sticky; bottom: 0; padding-bottom: var(--space-4); background: var(--surface); }
+  .hg-q__foot { position: sticky; bottom: 0; padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
   /* 2026-11-03: 아래 고정 영역 위로 목록이 지나갈 때 잘려 겹쳐 보이지 않게 위쪽을 바탕색으로 흐리게(토스 하단 버튼처럼). 선 대신 */
   .hg-q__foot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-6); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
   .hg-q__foot.has-sum { border-top: 0; }

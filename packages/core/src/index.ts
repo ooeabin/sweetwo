@@ -22,6 +22,7 @@ export * from './rules/admin-inquiry';
 export * from './rules/networth-rank';
 export * from './zip';
 export * from './faq';
+export * from './consent-doc';
 export * from './device';
 export * from './rules/living-check';
 export * from './schemas/admin';

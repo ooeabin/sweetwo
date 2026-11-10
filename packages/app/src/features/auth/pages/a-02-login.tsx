@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { copy } from '../copy';
-import { paths, type LoginNotice } from '../flow';
+import { paths, type LoginEntryState, type LoginNotice } from '../flow';
 import { prefs } from '../prefs';
 import { useOnline } from '../../../shared/online';
 import { session } from '../session';
@@ -16,11 +16,7 @@ type Entry = 'first_run' | 'revisit' | 'invite' | 'session_expired';
 export function A02Login() {
   const nav = useNavigate();
   const loc = useLocation();
-  const st = (loc.state ?? {}) as LoginNotice & {
-    fromStart?: boolean;
-    entry?: Entry;
-    inviter?: string;
-  };
+  const st = (loc.state ?? {}) as LoginNotice & LoginEntryState;
   const online = useOnline();
   const recent = prefs.lastProvider();
   const [busy, setBusy] = useState<AuthProvider | null>(null);
@@ -42,7 +38,13 @@ export function A02Login() {
       track('login_started', { method: p, entry, flow: 'browser' });
       const r = await session.bridge.auth.start(p);
       if (!r.ok) track('login_failed', { method: p, reason: 'browser_open_failed' });
-      nav(paths.wait, { state: { provider: p, failed: !r.ok } });
+      // A-03이 실패·취소 때 이 화면 상태(초대 문구, 뒤로, 진입)를 그대로 돌려줌(2026-11-10 S1-10)
+      const back: LoginEntryState = {
+        fromStart: st.fromStart,
+        entry: st.entry,
+        inviter: st.inviter,
+      };
+      nav(paths.wait, { state: { provider: p, failed: !r.ok, back } });
       return;
     }
     // 웹: 지금은 리다이렉트만(넓은 창 팝업은 아직)

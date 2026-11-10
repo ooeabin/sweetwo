@@ -1,5 +1,6 @@
 import type { AssetSide } from '@sweetwo/core';
 import { create } from 'zustand';
+import { onSessionReset } from '../../../shared/session-reset';
 
 // 항목 추가 중인 값(F-03a~e). 이번 실행에서만
 export interface AssetDraft {
@@ -69,3 +70,5 @@ export function assetSteps(d: AssetDraft, solo: boolean) {
     ...((saving || sub || d.side === 'debt') && d.grp !== 'housing_loan' ? ['payment'] : []),
   ];
 }
+// 로그아웃하면 쓰던 자산 입력도 비움(sign-out.ts)
+onSessionReset(() => useAssetDraft.setState({ draft: empty }));

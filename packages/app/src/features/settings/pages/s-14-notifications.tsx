@@ -9,7 +9,7 @@ import {
 import {
   formatDateFull,
   notiPrefs,
-  TERMS_VERSION,
+  CONSENT_VERSIONS,
   todayKst,
   type NotiPrefs,
   type NotiTopic,
@@ -17,6 +17,7 @@ import {
 import { ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { sharedCopy } from '../../../shared/copy';
 import { toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy, hourLabel } from '../copy';
@@ -150,8 +151,12 @@ export function S14Notifications() {
               : undefined
           }
           onChange={(on) =>
-            void setMarketing(me.id, on, TERMS_VERSION)
-              .then(() => qc.invalidateQueries({ queryKey: ['consent', 'marketing'] }))
+            void setMarketing(me.id, on, CONSENT_VERSIONS.marketing)
+              .then(() => {
+                // 결과 통지(31 5-1): 날짜 + 동의·거부 + 보낸 곳. 알림 센터에도 남음(서버)
+                toast(sharedCopy.marketingResult(on, formatDateFull(todayKst())));
+                return qc.invalidateQueries({ queryKey: ['consent', 'marketing'] });
+              })
               .catch(() => toast(copy.failed))
           }
         />

@@ -21,7 +21,14 @@ export const copy = {
   joinAs: (provider: string) => `${provider} 계정으로 합류해요`,
   otherAccount: '다른 계정',
   join: '합류하기',
-  toMonth: '이번 달로',
+  toHome: '홈으로 가기', // 2026-11-10 ‘이번 달로’ 대신(15 A-07 7번 ‘홈으로’, 주 버튼 말투)
+  reenterCode: '코드 다시 입력하기', // [확인 필요] 로그인 전 합류 불가(2026-11-10)
+  toStart: '처음으로', // [확인 필요] 로그인 전 합류 불가 보조 버튼
+  // 초대 정보를 못 불러옴(13 공통 상태 6·7번)
+  offlineTitle: '연결이 끊겼어요',
+  offlineHelp: '다시 연결되면 이어서 볼 수 있어요',
+  errorTitle: '잠시 문제가 생겼어요',
+  errorHelp: '다시 시도해 주세요',
   cancel: '취소',
   errors: {
     expired: '초대가 만료됐어요. 새 코드를 요청해 주세요',
@@ -38,7 +45,10 @@ export const copy = {
   moveTitle: '내 정보만 옮겨요',
   paydayDay: (d: number) => `${d}일`,
   moveVisLabel: (name: string) => `${name} 공개 범위`,
-  moveVis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<string, string>, // 2026-11-09 3단계
+  moveVis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<
+    string,
+    string
+  >, // 2026-11-09 3단계
   moveNone: '옮길 정보가 없어요',
   moveDo: '옮겨요', // [확인 필요] 옮길 항목 묶음 이름(2026-11-03)
   moveSalaryLabel: '월급',

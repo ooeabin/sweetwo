@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { LockStatus } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
-import { paths, prefs, session } from '../../auth';
+import { paths, session, signOut } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 
@@ -69,8 +69,7 @@ export function S15Security() {
     setBusy('all');
     try {
       await endSessions();
-      await session.signOut();
-      prefs.setReturnTo(null);
+      await signOut();
       nav(paths.login, { replace: true });
     } catch {
       toast(copy.failed);

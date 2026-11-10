@@ -40,7 +40,7 @@ export const copy = {
   me: '내 정보',
   nickname: '이름',
   notifyEmail: '알림 이메일',
-  notifyEmailQ: '알림 받을 이메일을 알려주세요', // S-11b, 가입(A-03) 질문과 같음
+  notifyEmailQ: '알림 받을 이메일을 알려 주세요', // S-11b, 가입(A-04) 질문과 같음(2026-11-10 띄어쓰기)
   emailError: '이메일 주소를 다시 확인해 주세요',
   save: '저장',
   saved: '저장했어요', // [확인 필요]

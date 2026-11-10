@@ -1,5 +1,5 @@
 import { endSessions, fetchSessions, qk } from '@sweetwo/api';
-import { deviceLabel, formatKstDateTime } from '@sweetwo/core';
+import { deviceLabel, formatKstMonthDayTime } from '@sweetwo/core';
 import { AuthLayout, Button } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { prefs } from '../prefs';
 
 // A-08 4·5번 새 기기 알림(15). 알림 ‘새 기기에서 로그인했어요’를 누르면 옴(:session = 새 기기 세션).
 // ‘나예요’ → 홈. ‘내가 아니에요’ → 그 기기 로그아웃 → S-15 기기 목록 + “{제공자} 계정 보안도 확인해 주세요”.
-// 이미 로그아웃된 기기면 안내만 하고 S-15로.
+// 이미 로그아웃된 기기면 안내 + ‘기기 목록 보기’ 버튼 하나(S-15, 2026-11-10). 시각은 “10월 7일 10:00”.
 export function A08NewDevice() {
   const { session = '' } = useParams();
   const nav = useNavigate();
@@ -38,6 +38,7 @@ export function A08NewDevice() {
   };
   return (
     <AuthLayout
+      icon="shield-warning"
       art="status-newdevice"
       title={copy.newDeviceTitle}
       help={
@@ -46,7 +47,7 @@ export function A08NewDevice() {
           {s && (
             <>
               <br />
-              {copy.newDeviceAt(deviceLabel(s.userAgent), formatKstDateTime(s.createdAt))}
+              {copy.newDeviceAt(deviceLabel(s.userAgent), formatKstMonthDayTime(s.createdAt))}
             </>
           )}
           {gone && (
@@ -58,20 +59,30 @@ export function A08NewDevice() {
         </>
       }
       actions={
-        <>
-          <Button variant="primary" block onClick={() => nav('/', { replace: true })}>
-            {copy.itsMe}
-          </Button>
+        gone ? (
           <Button
-            variant="secondary"
+            variant="primary"
             block
-            disabled={s?.current}
-            loading={busy}
-            onClick={() => void notMe()}
+            onClick={() => nav('/settings/security', { replace: true })}
           >
-            {copy.notMe}
+            {copy.deviceList}
           </Button>
-        </>
+        ) : (
+          <>
+            <Button variant="primary" block onClick={() => nav('/', { replace: true })}>
+              {copy.itsMe}
+            </Button>
+            <Button
+              variant="secondary"
+              block
+              disabled={s?.current}
+              loading={busy}
+              onClick={() => void notMe()}
+            >
+              {copy.notMe}
+            </Button>
+          </>
+        )
       }
     />
   );

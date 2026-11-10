@@ -134,7 +134,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
   await page.getByRole('button', { name: /알림 이메일/ }).click();
   await expect(page).toHaveURL(/\/settings\/me\/email$/);
-  await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려주세요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려 주세요' })).toBeVisible();
   const email = page.getByLabel('알림 이메일');
   await email.fill('chanwoo@');
   await expect(page.getByText('이메일 주소를 다시 확인해 주세요')).toBeVisible();

@@ -1,8 +1,8 @@
 import {
   LoginState,
   NotifyEmail,
+  CONSENT_VERSIONS,
   SignupError,
-  TERMS_VERSION,
   type AuthProvider,
 } from '@sweetwo/core';
 import { supabase } from './client';
@@ -46,18 +46,18 @@ export async function agreeTerms(marketing: boolean | null) {
   if (error) throw toError(error.message);
 }
 
-/** A-05: 계정 생성 + 동의 기록 */
+/** A-05: 계정 생성 + 동의 기록. 버전은 앱이 보여 준 문서 것(이용약관·개인정보는 서버가 시행 중 버전으로 고름) */
 export async function completeSignup(input: {
   provider: AuthProvider;
   notifyEmail: string | null;
   marketing: boolean;
 }) {
   const email = input.notifyEmail === null ? null : NotifyEmail.parse(input.notifyEmail);
-  const { error } = await supabase().rpc('complete_signup', {
+  const { error } = await supabase().rpc('complete_signup_v2', {
     p_provider: input.provider,
     p_notify_email: email ?? '', // 빈 값이면 소셜 이메일을 쓴다
     p_marketing: input.marketing,
-    p_terms_version: TERMS_VERSION,
+    p_versions: { ...CONSENT_VERSIONS },
   });
   if (error) throw toError(error.message);
 }
@@ -72,6 +72,10 @@ export const webAuth = {
   async exchange(code: string) {
     const { error } = await supabase().auth.exchangeCodeForSession(code);
     if (error) throw toError(error.message);
+  },
+  async userId(): Promise<string | null> {
+    const { data } = await supabase().auth.getSession();
+    return data.session?.user.id ?? null;
   },
   async hasSession() {
     const { data } = await supabase().auth.getSession();

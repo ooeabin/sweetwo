@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
 import { paths, routeAfterLogin } from '../flow';
-import { session } from '../session';
+import { signOut } from '../sign-out';
 
 // A-02 예외(docs/spec/15-login-signup.md): 삭제 요청 30일 안 계정이 다시 로그인하면 “계정 삭제를 취소할까요?”
 // ‘취소하고 계속 쓰기’ → 혼자 쓰기로 복구(연결돼 있던 파트너에게 ‘계정 복구’ 알림, 30일 안 다시 연결 가능),
@@ -23,6 +23,7 @@ export function A02Restore() {
   }, [failed]);
   return (
     <AuthLayout
+      icon="user"
       art="status-restore"
       title={copy.restoreTitle}
       help={copy.restoreHelp}
@@ -54,8 +55,7 @@ export function A02Restore() {
             onClick={() => {
               if (busy) return;
               setBusy('no');
-              void session
-                .signOut()
+              void signOut()
                 .then(() => nav(paths.login, { replace: true }))
                 .catch(() => {
                   setBusy(null);

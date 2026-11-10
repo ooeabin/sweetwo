@@ -1,5 +1,5 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { NotifyEmail } from '@sweetwo/core';
+import { EMAIL_MAX, NotifyEmail } from '@sweetwo/core';
 import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -45,6 +45,9 @@ export function S11bNotifyEmail() {
         label={copy.notifyEmail}
         type="email"
         autoComplete="email"
+        autoCapitalize="none"
+        spellCheck={false}
+        maxLength={EMAIL_MAX}
         value={v}
         onChange={(e) => setValue(e.target.value)}
         error={v.trim() && !parsed.success ? copy.emailError : undefined}

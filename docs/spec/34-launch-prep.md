@@ -78,6 +78,7 @@
 - [ ] 애플 로그인 설정(조직 계정): App ID `kr.sweetwo.app`(Sign in with Apple), 웹용 Services ID `kr.sweetwo.web`(도메인 Supabase 프로젝트, Return URL Supabase 콜백), 키(.p8) → Supabase 비밀값(6개월마다 새로). 식별자 이름은 만들기 전 확정 [확인 필요]. iOS 앱에 구글·카카오 로그인이 있으면 App Store 심사 규정상 애플 로그인도 있어야 해서 iOS 출시 전 필수
 - [x] 카카오 디벨로퍼스 동의 항목 ‘프로필 사진’(profile_image) 선택 동의: 스테이징 앱(sweeTwo (staging))에 이미 켜져 있음 확인(2026-11-05). 운영 앱을 만들 때도 같은 설정. 동의 목적 “내 프로필 사진으로 쓰기”(2026-11-06 스테이징 앱에 넣음, 운영 앱도 같게)
 - [ ] 개인정보 처리방침 v2(초안 `apps/site/src/content/drafts/privacy-v2.md`, 출시일에 시행. 출시일이 정해지면 `privacy/{출시일}.md`로 옮기고 시행일 고침, 출시 전이라 7일 전 알림 없음 2026-11-06): 선택 항목 ‘프로필 사진’에 카카오·구글 계정 프로필 사진(2026-11-05 → 설정 S-11e). 법률 검토 때 같이 확인 [확인 필요]
+- [ ] 출시 전 할 일 — 앱 링크 값 넣기(2026-11-10, 초대 링크 `/i/코드`와 알림 메일 링크가 앱으로 열리게): 애플 개발자 계정 만들기 → Team ID를 apple-app-site-association(`TEAMID.kr.sweetwo.app`, 웹사이트 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`)과 iOS associated-domains(`apps/mobile/ios/App/App/App.entitlements`, Xcode 서명 팀)에 넣기; 플레이 콘솔에 앱 등록 → 앱 무결성 > 앱 서명의 ‘앱 서명 키’와 ‘업로드 키’ SHA-256을 assetlinks.json(웹사이트 빌드 환경 변수 `PUBLIC_ANDROID_CERT_SHA256`, 쉼표로 둘)에 넣기; 둘 다 넣은 뒤 실기기에서 초대 링크(`/i/코드`)가 앱으로 열리는지 확인. 이 값들은 비밀이 아니라 공개 값(확인 파일로 누구나 봄)이라 저장소·빌드 설정에 그대로 둬도 됨. 지금은 비어 있어 확인 파일이 빈 목록이고 링크는 웹사이트 초대 페이지로 열림(→ DEV_GUIDE ‘모바일 세션’)
 - [ ] 사업자 등록 후 도메인 명의 변경: 가비아 ‘소유자 변경’으로 sweetwo.kr(그때까지 등록한 다른 도메인 포함)을 개인 명의에서 회사 명의로 옮김. 상표 출원 명의와 맞춤. 등록자 이메일도 help@sweetwo.kr로 바꿈.
 
 ## 5. 랜딩·앱 받기 페이지
