@@ -316,6 +316,9 @@ export const copy = {
   rankAgeAvg: (band: string, pct: number) => `${band} 가구 평균 ${pct}%`,
   rankPct: (pct: number) => `${pct}%`,
   rankAgeNote: '가구주 나이별 공공 통계 기준', // [확인 필요]
+  // 2026-11-10 QA 2구간: 출생연도를 온보딩에서 묻지 않고 F-08에서(23 F-08 7번)
+  rankAskBirth: '출생연도 알려 주기', // [확인 필요]
+  rankAskBirthSub: '또래와 비교해 드려요', // [확인 필요]
   // F-01 빈 상태 항목별 등록(2026-11-04)
   emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
   emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]

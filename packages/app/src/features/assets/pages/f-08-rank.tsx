@@ -11,7 +11,9 @@ import {
   rankTopPct,
   todayKst,
 } from '@sweetwo/core';
+import { fetchMe, qk } from '@sweetwo/api';
 import { Band, Distribution, ListRow, PageHeader, StatBlock } from '@sweetwo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -25,6 +27,7 @@ export function F08Rank() {
   const nav = useNavigate();
   const r = useRank();
   const age = useRankAge();
+  const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const { masked } = useMask();
   const pct = r ? rankTopPct(r.net) : null;
   useEffect(() => {
@@ -136,6 +139,19 @@ export function F08Rank() {
               )}
             </div>
           </section>
+        </>
+      )}
+      {/* 2026-11-10 QA 2구간: 출생연도는 온보딩에서 묻지 않고 여기서(쓰는 자리). 내 출생연도가 없으면 S-11i로 */}
+      {!me.data?.birth_year && (
+        <>
+          <Band />
+          <div className="hg-list hg-list--plain">
+            <ListRow
+              label={copy.rankAskBirth}
+              sub={copy.rankAskBirthSub}
+              onClick={() => nav('/settings/me/birth-year?from=rank')}
+            />
+          </div>
         </>
       )}
       <Band />

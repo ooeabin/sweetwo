@@ -130,6 +130,8 @@ export function S11hWeddingDate() {
         minYear={engaged ? Number(today.slice(0, 4)) : 1950}
         maxYear={Number(today.slice(0, 4)) + (engaged ? 5 : 0)}
         onChange={(v) => setDate(textOf(v))}
+        // 2026-11-10 QA 2구간: 처음 넣는 날짜면 처음 값(오늘·내일)이 그대로 답이 되지 않게 휠을 움직여야 저장
+        commitInitial={!!dv}
       />
       {rangeError && (
         <p className="hg-help is-error" role="alert">

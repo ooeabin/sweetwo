@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { setWheel } from './wheel';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
@@ -695,4 +696,31 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   await heading(page, '무엇을 추가할까요?');
   await expect(page.getByRole('button', { name: '예금·적금', pressed: true })).toBeVisible();
   await expect(page.getByRole('button', { name: '적금', exact: true })).toBeVisible();
+});
+
+test('자산 순위(F-08): 출생연도가 없으면 ‘출생연도 알려 주기’ → S-11i(휠을 움직여야 저장) → F-08 연령대 비교(2026-11-10 온보딩 O-13 뺌)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.birth_year = null;
+  if (db.partner) Object.assign(db.partner, { birth_year: null });
+  await page.goto('/assets/rank');
+  await expect(page.getByText(/상위 \d+%예요/).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /가구와 비교/ })).toHaveCount(0);
+  const ask = page.getByRole('button', { name: /출생연도 알려 주기/ });
+  await expect(ask).toContainText('또래와 비교해 드려요');
+  await axe(page);
+  await ask.click();
+  await expect(page).toHaveURL(/\/settings\/me\/birth-year\?from=rank$/);
+  await expect(page.getByRole('heading', { name: '찬우님은 몇 년생이에요?' })).toBeVisible();
+  // 처음 위치(올해 − 30)가 그대로 답이 되지 않게: 움직이기 전에는 저장 못 함
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/assets\/rank$/);
+  expect(db.me.birth_year).toBe(1993);
+  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /출생연도 알려 주기/ })).toHaveCount(0);
 });
