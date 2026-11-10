@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
-import { Illustration } from './Illustration';
+import { hasIllustration, Illustration } from './Illustration';
 
 // 로그인, 가입 화면 틀(docs/design/components/AuthLayout.md)
 export function AuthLayout({
@@ -24,7 +24,10 @@ export function AuthLayout({
   media?: ReactNode;
   /** 상태 화면 제목 위 아이콘 원(72px) */
   icon?: IconName;
-  /** 상태 이모지(Illustrations 이름, 96px, 2026-11-05). 그림 파일이 있으면 아이콘 원 대신 */
+  /**
+   * 상태 그림(Illustrations 이름, 96px). 그림 파일이 있을 때만 아이콘 원 대신 그림.
+   * 2026-11-10 그림 파일이 아직 없으면(2D 그림 ‘나중 과제’) 회색 빈 자리 대신 icon 원을 보여 줌(icon이 없을 때만 빈 자리)
+   */
   art?: string;
   /** 아이콘을 천천히 돌림(기다리는 중). ‘동작 줄이기’면 멈춤 */
   busy?: boolean;
@@ -55,7 +58,7 @@ export function AuthLayout({
           </button>
         </div>
       )}
-      {art ? (
+      {art && (hasIllustration(art) || !icon) ? (
         <Illustration name={art} className="hg-auth__art" />
       ) : (
         icon && (

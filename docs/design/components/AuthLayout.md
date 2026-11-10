@@ -5,14 +5,16 @@
 - 소비자가 주는 것: 장면 자리(선택, SceneMedia, 지금은 비어 있음), 상태 아이콘(선택), 제목, 보조 1줄(선택), 안내 띠(선택), 버튼 묶음, 뒤로(선택), 아래 안내 1줄(선택).
 - 가운데 한 열, 글자 가운데 정렬. 제목 `hg-auth__title`(`title-1` 24px/32px 700, 줄바꿈 `\n` 그대로, 낱말 중간에서 끊지 않음 `keep-all`), 보조 `hg-auth__help`.
 - 글자 링크(`hg-btn--link`, ‘업데이트 없이 보기만 할게요’ 등)는 오렌지가 아니라 `slate`(2026-11-09 다른 화면 글자 버튼은 `ink-2`). O-01 ‘코드 입력하기’만 `ink` 700 밑줄(당근 ‘로그인’ 링크처럼 눈에 띄게).
-- 상태 이모지 `art`(2026-11-05): Illustrations 이름을 주면 그 3D 그림을 96px `hg-auth__art`로(원 판 없음, ‘동작 줄이기’가 아니면 한 번 톡 커짐), 아이콘 원 대신. A-03은 기다리는 동안 그림 없이 아래 도는 아이콘(다른 로딩과 같음, 2026-11-05 모래시계 없앰), 실패면 `status-error`, A-01 업데이트 `status-update`, 점검 `status-maintenance`, 오프라인 `status-offline`, 오류 `status-error`, A-08 `status-lock`, A-06 Face ID `status-faceid`, Touch ID·지문 `status-fingerprint`. 그림 파일이 없으면 아래 아이콘 원.
-- 상태 아이콘 `hg-auth__icon`(2026-11-02, 그림이 없을 때): 제목 위 72px `surface-alt` 원 + `ink` 아이콘 32px(`aria-hidden`). 글자만 있던 상태 화면을 하나의 모양으로 맞춤. 로그인 대기(A-03) `loader-circle`(천천히 돎 `is-busy`, ‘동작 줄이기’면 멈춤, 브라우저 열기 실패면 `circle-alert`로 바꾸고 제목에 실패 문구), 업데이트 필요 `download`, 점검 중 `settings`, 오프라인(로그인 전) `link`, 실행 오류 `circle-alert`, 세션 만료(A-08) `lock`, Touch ID, 지문 켜기(A-06) `fingerprint`, Face ID 켜기 `scan-smiley`. 상태 화면 머리에 워드마크는 두지 않음.
-- 안내 띠 `hg-auth__alert`(2026-11-02 당근 안내 상자): `plate` 바탕, `radius-lg`, 안쪽 12px 16px, `info` 16px `ink-2`(첫 줄에 맞춤) + 13px `ink-2` 글자, 최대 360px, `role="status"`. 버튼 묶음 바로 위. 상황이 풀릴 때까지 남는 안내만: 오프라인, 다시 로그인해 주세요, PIN 5번 틀림, 브라우저 열기 실패, 업데이트 실패.
+- 상태 그림 `art`(2026-11-05): Illustrations 이름을 주면 **그 그림 파일이 있을 때만** 96px `hg-auth__art`로(원 판 없음, ‘동작 줄이기’가 아니면 한 번 톡 커짐), 아이콘 원 대신. 2026-11-10부터 그림 파일이 아직 없으면(2D 그림 ‘나중 과제’) 회색 빈 판 대신 `icon` 아이콘 원을 보여 줌(`icon`이 없을 때만 빈 판). 상태 화면에는 늘 `icon`도 같이 줌. A-03은 기다리는 동안 그림 없이 아래 도는 아이콘(다른 로딩과 같음, 2026-11-05 모래시계 없앰), 실패면 `status-error`, A-01 업데이트 `status-update`, 점검 `status-maintenance`, 오프라인 `status-offline`, 오류 `status-error`, A-08 `status-lock`, A-06 Face ID `status-faceid`, Touch ID·지문 `status-fingerprint`. 그림 파일이 없으면 아래 아이콘 원.
+- 상태 아이콘 `hg-auth__icon`(2026-11-02, 그림이 없을 때): 제목 위 72px `surface-alt` 원 + `ink-2` 아이콘 32px(2026-11-10 `ink`에서, `aria-hidden`). 글자만 있던 상태 화면을 하나의 모양으로 맞춤. 로그인 대기(A-03) `loader-circle`(천천히 돎 `is-busy`, ‘동작 줄이기’면 멈춤, 브라우저 열기 실패면 `circle-alert`로 바꾸고 제목에 실패 문구), 업데이트 필요 `download`, 점검 중 `wrench`(2026-11-10 `settings`에서), 오프라인(로그인 전) `link`, 실행 오류 `circle-alert`, 세션 만료(A-08) `lock`, 새 기기 로그인 `shield-warning`, 계정 삭제 취소(A-02) `user`, Touch ID, 지문 켜기(A-06) `fingerprint`, Face ID 켜기 `scan-smiley`. A-07 합류 불가(QuestionLayout `hero`에 같은 원): 만료 `hourglass`, 잘못된 코드 `circle-alert`, 10분 제한 `lock`, 이미 연결 `users-three`, 내가 만든 코드 `user`, 이미 합류 끝남 `handshake`, 사용할 수 없음 `user-minus`, 불러오기 실패 `circle-alert`(오프라인 `link`). 상태 화면 머리에 워드마크는 두지 않음.
+- 안내 띠 `hg-auth__alert`(2026-11-02 당근 안내 상자): `plate` 바탕, `radius-lg`, 안쪽 12px 16px, `info` 16px `ink-2`(첫 줄에 맞춤) + 13px `ink-2` 글자, 최대 360px, `role="status"`. 버튼 묶음 바로 위. 상황이 풀릴 때까지 남는 안내만: 오프라인, 다시 로그인해 주세요(요청 불일치), PIN 5번 틀림, PIN을 잊었어요 뒤 “다시 로그인하면 새 PIN을 정할 수 있어요”, A-01 판단이 10초 넘음 “연결이 느려요” + 글자 버튼 ‘다시 시도’(스플래시 아래). 2026-11-10 ‘업데이트를 받지 못했어요’ 띠는 없앰(기획서에 없음, 버튼이 ‘다시 시도’로 바뀌는 것만).
 - 버튼 위 알약 토스트 `hg-auth__toast`(포켓CU): 결과만 알리는 안내(로그인 취소, 제공자 오류, 시간 초과)는 버튼 묶음 위 16px에 `ink` 알약(14px 500)으로 4초 떴다 사라짐. 자리를 차지하지 않아 화면이 흔들리지 않음. 아래 버튼을 가리지 않으려고 전역 Toast 대신 씀.
 - 두 갈래 질문(A-06 Face ID 켜기): 버튼 두 개를 가로로(`hg-auth__actions--row`, 보조 ‘나중에 할게요’ 1 : 주 2). 현대카드 ‘다음에 | 설정’.
-- 버튼 묶음 `hg-auth__actions`: 세로로 쌓고 최대 360px. 버튼은 꽉 차게(`hg-btn--block`). ‘최근 사용’ 배지는 버튼 안 오른쪽 `hg-tag`.
-- 뒤로 `hg-auth__back`: 왼쪽 위. 좁은 창은 IconButton `chevron-left`(뒤로 버튼은 `hg-back` 하나로 통일(2026-11-10: 40px 누르는 자리, `chevron-left` 24px `ink`, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px. IconButton.md ‘뒤로’)), 넓은 창은 고스트 버튼 “‹ 이전”(`backLabel`, A-02는 “‹ 처음으로”).
-- 좁은 창(768px 미만): 상태 화면은 아이콘 원 + 제목을 묶어 세로 가운데, 버튼 묶음(위 안내 띠 포함)은 아래 끝으로. 머리 자리에 아바타(`hg-avatar`)를 두면 아바타+제목을 묶어 세로 가운데로(A-02 초대로 들어왔을 때).
+- 버튼 묶음 `hg-auth__actions`: 세로로 쌓고 최대 360px. 버튼은 꽉 차게(`hg-btn--block`). 상태 화면의 ‘다시 시도’는 모두 주 버튼(2026-11-10, 화면마다 색이 다르던 것).
+- A-03 로그인 중인 방법 `hg-auth__provider`(2026-11-10, `media` 자리): 아이콘 원과 제목 사이에 제공자 마크 20px + “카카오로 로그인”(14px 600 `ink`). 좁은 창에서 아이콘 원 + 이 줄 + 제목이 한 묶음으로 세로 가운데.
+- 뒤로 `hg-auth__back`: 왼쪽 위(안전 영역 안쪽). 좁은 창과 태블릿(터치)은 IconButton `chevron-left`(뒤로 버튼은 `hg-back` 하나로 통일(2026-11-10: 40px 누르는 자리, `chevron-left` 24px `ink`, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px. IconButton.md ‘뒤로’)), 마우스·트랙패드가 있는 넓은 화면(`(min-width: 768px) and (hover: hover) and (pointer: fine)`, 개발 브라우저)은 고스트 버튼 “‹ 이전”(`backLabel`, A-02는 “‹ 처음으로”).
+- 안전 영역(2026-11-10): `hg-auth` 안쪽 여백에 `env(safe-area-inset-*)`를 더함(노치, 홈 막대, 가로 화면 옆). 잠금 화면(`hg-lock`)도 같음.
+- 좁은 창(768px 미만)과 태블릿(터치, `(hover: none)` 또는 `(pointer: coarse)`, 2026-11-10): 같은 배치(가운데 휴대폰 너비 열). 상태 화면은 아이콘 원 + 제목을 묶어 세로 가운데, 버튼 묶음(위 안내 띠 포함)은 아래 끝으로. 머리 자리에 아바타(`hg-avatar`)를 두면 아바타+제목을 묶어 세로 가운데로(A-02 초대로 들어왔을 때).
 - 입력이 있는 화면(P-01 코드 직접 입력)은 입력 칸(`hg-field`)과 주 버튼을 함께 버튼 묶음 안에 둔다(좁은 창에서 같이 아래로).
 - 소셜 버튼 왼쪽에 제공자 마크 `ProviderMark`(`hg-btn__mark`, 20px)를 글자 앞에 둔다.
   - 카카오는 공식 노란 브랜드 버튼 `hg-btn--kakao`(바탕 `#fee500` + 글자 `rgba(0,0,0,.85)`, 라이트·다크 모두 노랑). 마크는 말풍선 심볼로 `currentColor`(버튼의 어두운 글자색)를 따른다.
@@ -23,4 +25,4 @@
 
 쓰는 곳: A-01, O-01, A-02, A-03, A-08, P-01, 웹 로그인 콜백.
 
-- 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’).
+- 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’). 2026-11-10부터 상태 화면은 빈 판 대신 아이콘 원(위 ‘상태 그림’).

@@ -225,7 +225,7 @@ export function QuestionLayout({
 
   const backOnly = !primary && !later && !secondary;
   return (
-    <main style={{ padding: '0 var(--space-4)' }}>
+    <main className="hg-qmain">
       <div className="hg-qbar">
         <Wordmark height={24} />
         <BarProgress chapter={chapter} steps={steps} />
@@ -248,7 +248,12 @@ export function QuestionLayout({
           <div className="hg-q__nav">
             {steps && <StepsBar steps={steps} />}
             {onBack ? (
-              <button type="button" className="hg-q__back hg-back" aria-label="뒤로" onClick={onBack}>
+              <button
+                type="button"
+                className="hg-q__back hg-back"
+                aria-label="뒤로"
+                onClick={onBack}
+              >
                 <Icon name="chevron-left" size={24} />
               </button>
             ) : (

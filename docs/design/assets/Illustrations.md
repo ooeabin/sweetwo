@@ -6,6 +6,7 @@
 
 - 빈 자리 모양(2026-11-09 다시 정함): 아래 ‘나중 과제’의 모든 자리는 그림이 들어올 때까지 같은 크기·모양의 회색 판(`hg-artslot`, `surface-alt` + 안쪽 1px `hairline-soft`, 회색 판 `plate` 위는 `hairline`)으로 자리를 잡음. 크기와 모양은 표의 ‘자리 표시’ 열. 선택지 카드와 시작 안내(O-10, O-60) 목록의 빈 자리도 2026-11-09 다시 붙임(오전에 없앴다가 사용자 요청으로 되돌림). 움직이는 그림 자리도 같은 정지 회색 판. 줄 앞 칸(Lead)과 알림은 Phosphor라 빈 자리를 두지 않음. 사용자가 직접 올린 목표 사진도 2026-11-08 목표와 함께 쓰지 않음(ADR 0007). ‘+ 추가’ 같은 동작 아이콘(`Lead action`)과 버튼·탭·띠의 UI 아이콘은 Phosphor 그대로.
 - 코드: 파일을 `packages/ui/src/assets/{illustrations,motion,goal-photos}/{이름}.webp`에 넣으면 빈 자리 대신 보임(`Illustration`, `goalPhotoArt`). 작은 3D 아이콘 코드(`icon3d`, `assetIcon3d`, `Lead art3d`)는 2026-11-09 지움(줄 앞은 Phosphor). 선택지(`ChoiceCards` `icon`, `hg-option__icon hg-artslot`)와 시작 안내(`hg-intro-steps__icon hg-artslot`)는 지금 빈 자리만 그림. 새 2D 그림을 넣을 때 그 자리에 `Illustration`을 붙임.
+- **2026-11-10 상태 화면은 아이콘 원(사용자 결정)**: 상태 화면(AuthLayout `art` 자리: A-01 업데이트·점검·오프라인·오류, A-03 실패, A-06 Face ID·지문 묻기, A-08 만료·새 기기, A-02 계정 삭제 취소, A-07 합류 불가·불러오기 실패)은 2D 그림이 들어올 때까지 회색 빈 판 대신 **Phosphor 아이콘 원**(72px `surface-alt` 원 + 32px `ink-2` 아이콘, `hg-auth__icon`)을 보여 줌. 그림 파일이 들어오면 그 자리는 96px 그림으로 바뀜. 나머지 ‘나중 과제’ 자리(빈 상태, 완료, 장면, 선택지, 안내 목록, 홈, 줄 앞 칸)는 그대로 회색 빈 자리.
 - 아래 ‘나중 과제’ 표가 다시 만들 목록. 그 아래는 3D 때의 기록(주제는 다시 만들 때 참고).
 
 ## 나중 과제: 2D 플랫으로 다시 만들기(2026-11-10 다시 셈, 새로 67장 + 움직이는 그림 6)
@@ -18,24 +19,24 @@
 
 ### 1. 상태·장면 그림 16장(512px, 2026-11-10 17번 없앰)
 
-| # | 파일 | 그림 | 쓰는 곳 | 자리 표시(2026-11-09, 그림이 들어올 때까지) |
+| # | 파일 | 그림 | 쓰는 곳 | 자리 표시(2026-11-09, 그림이 들어올 때까지. 상태 화면은 2026-11-10 아이콘 원) |
 | --- | --- | --- | --- | --- |
 | 1 | empty-plate | 빈 접시와 포크 | 모든 빈 상태(CS-19, F-02, S-19a, S-21, Y-01, Y-09), 한 장으로 | EmptyState 제목 위 `hg-empty__art` 120px 둥근 네모(`radius-lg`) |
-| 2 | status-lock | 자물쇠 | A-08 다시 로그인 | AuthLayout `art` 제목 위 `hg-auth__art` 96px 둥근 네모 |
-| 3 | status-faceid | 얼굴 인식 틀 + 웃는 얼굴 | A-06 Face ID | `hg-auth__art` 96px 둥근 네모 |
-| 4 | status-fingerprint | 지문 | A-06 지문 기기 | `hg-auth__art` 96px 둥근 네모 |
-| 5 | status-update | 반짝이는 새 상자 | A-01 업데이트 필요 | `hg-auth__art` 96px 둥근 네모 |
-| 6 | status-maintenance | 렌치와 스패너 | A-01 점검 중 | `hg-auth__art` 96px 둥근 네모 |
-| 7 | status-offline | 끊어진 와이파이 | A-01 오프라인 | `hg-auth__art` 96px 둥근 네모 |
-| 8 | status-error | 경고 표지판 | A-01 오류, A-03 실패 | `hg-auth__art` 96px 둥근 네모(A-03 대기 중은 그림 없이 도는 아이콘) |
+| 2 | status-lock | 자물쇠 | A-08 다시 로그인 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 3 | status-faceid | 얼굴 인식 틀 + 웃는 얼굴 | A-06 Face ID | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 4 | status-fingerprint | 지문 | A-06 지문 기기 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 5 | status-update | 반짝이는 새 상자 | A-01 업데이트 필요 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 6 | status-maintenance | 렌치와 스패너 | A-01 점검 중 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 7 | status-offline | 끊어진 와이파이 | A-01 오프라인 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 8 | status-error | 경고 표지판 | A-01 오류, A-03 실패 | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px, A-03 대기 중은 도는 아이콘) |
 | 9 | done-check | 체크 원 | O-60 준비 끝 | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 10 | done-sold | 동전 더미 | F-04b 팔았어요 | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 11 | busy-file | 서류와 폴더 | S-18 내보내기 중 | ProcessingState `hg-busy__art` 112px 원 전체(2026-11-09 전에는 0px라 원 판만 보였음) |
 | 12 | scene-clap | 박수 치는 두 손 | P-11 합류 완료 | 제목 위 `hg-sceneart` 120px 둥근 네모 |
 | 13 | scene-invite | 초대장 봉투와 편지(3:4) | P-01 초대받은 첫 화면 | 제목 위 `hg-sceneart--tall` 120×160px 둥근 네모 |
 | 14 | celebrate | 폭죽 | W-02 월급 체크 끝, W-12 목표 금액 달성(2026-11-08) | DoneMark `hg-doneart` 96px 둥근 네모 |
-| 15 | status-newdevice(새) | 새 기기(폰과 노트북) | A-08 새 기기 로그인 확인(빈 자리 넣어 둠) | `hg-auth__art` 96px 둥근 네모 |
-| 16 | status-restore(새) | 되돌리는 화살표 | A-02 계정 삭제 취소(빈 자리 넣어 둠) | `hg-auth__art` 96px 둥근 네모 |
+| 15 | status-newdevice(새) | 새 기기(폰과 노트북) | A-08 새 기기 로그인 확인(빈 자리 넣어 둠) | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
+| 16 | status-restore(새) | 되돌리는 화살표 | A-02 계정 삭제 취소(빈 자리 넣어 둠) | 아이콘 원 72px(`hg-auth__icon`, 2026-11-10. 그림이 들어오면 `hg-auth__art` 96px) |
 | 17 | ~~scene-start~~ | ~~함께 시작~~ | 2026-11-10 없앰(O-01은 그림 없이 워드마크만) | 없음 |
 
 ### 2. 움직이는 그림 6개(1번 새 그림을 조각내 움직임, 생성 크레딧 없음)

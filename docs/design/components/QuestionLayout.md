@@ -8,10 +8,12 @@
 - 질문이 아니어도 아래 꽉 찬 주 버튼이 필요한 짧은 입력 화면도 이 틀을 씀(2026-11-04 S-11b 알림 이메일, S-19a 문의하기).
 - 주 버튼 옆 회색 보조(`secondary`, `hg-q__second`, 2026-11-03): 왼쪽에 회색 ‘취소’ 같은 대답 버튼, 좁은 창에서는 주 버튼과 반씩. P-01 ‘이미 시작한 기록이 있어요’.
 - 좁은 창(모바일 앱): 위에 진행 막대(ProgressSteps, 글자 없음)를 열 너비 그대로, 그 아래 뒤로 꺾쇠(`hg-q__back hg-back`). 뒤로 버튼은 `hg-back` 하나로 통일(2026-11-10: 40px 누르는 자리, `chevron-left` 24px `ink`, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px. IconButton.md ‘뒤로’). 가운데 480px 한 열.
-- 넓은 창(태블릿 등 768px 이상. 레퍼런스 Meetup, Calendly, Perplexity):
+- 태블릿(터치, 2026-11-10): 768px 이상이어도 마우스·트랙패드가 없으면(`(hover: none)` 또는 `(pointer: coarse)`) 아래 넓은 창 바(`hg-qbar`, ‘‹ 이전’, Enter 안내, 120px 주 버튼) 없이 좁은 창과 같은 배치: 가운데 480px 한 열, 위 꺾쇠, 열 너비 주 버튼이 화면 아래 끝.
+- 안전 영역(2026-11-10): 바깥 `hg-qmain`이 좌우·위 여백에 `env(safe-area-inset-*)`를 더하고, 아래에 붙는 주 버튼 바는 홈 막대 높이(`safe-area-inset-bottom`)만큼 더 띄움.
+- 넓은 창(마우스·트랙패드가 있는 768px 이상 화면 `(min-width: 768px) and (hover: hover) and (pointer: fine)`: 키보드를 붙인 태블릿, 개발 브라우저. 레퍼런스 Meetup, Calendly, Perplexity):
   - 위 바 `hg-qbar`(64px, 위에 붙음): 왼쪽 워드마크(24px), 가운데 진행(360px), 오른쪽 비움. 진행은 온보딩이면 “목표” + 칸 막대(`hg-segs`: 챕터 안 질문마다 1칸, 연 질문까지 `brand`, 칸 높이 4px, 사이 4px), 그 밖은 ProgressSteps.
   - 헤더 꺾쇠(`hg-q__nav`)는 숨김.
-  - 아래 바 `hg-q__foot`(아래에 붙음, 위에 `hairline-soft` 선 1줄을 창 너비로): 왼쪽 “‹ 이전”(고스트 버튼 `hg-q__prev`), 오른쪽 ‘나중에 할게요’ 링크 → “Enter 키를 눌러도 돼요”(12px `stone`, `hg-q__hint`, 주 버튼이 있을 때만) → 주 버튼(글자 길이만큼, 최소 120px). 버튼 자리는 열(480px, 넓은 결과 960px)의 양 끝.
+  - 아래 바 `hg-q__foot`(아래에 붙음, 위에 `hairline-soft` 선 1줄을 창 너비로): 왼쪽 “‹ 이전”(고스트 버튼 `hg-q__prev`), 오른쪽 ‘나중에 할게요’ 링크 → “Enter 키를 눌러도 돼요”(12px `stone`, `hg-q__hint`, 주 버튼이 있을 때만. 2026-11-10 하드웨어 키보드·마우스가 있는 화면만) → 주 버튼(글자 길이만큼, 최소 120px). 버튼 자리는 열(480px, 넓은 결과 960px)의 양 끝.
   - Q1(주 버튼 없음)도 아래 바에 ‘이전’만. 좁은 창에서는 이 바를 숨김(`is-backonly`).
   - 온보딩은 `chapter`를 주면 ProgressSteps 대신 ChapterBar: 뒤로와 “목표”가 한 줄, 그 아래 챕터 안 막대(brand).
 - 뒤로(‘<’)가 없는 화면도 좁은 창에서 그 자리(40px, 2026-11-10 hg-back과 같게)를 비워 두어 제목 높이를 맞춤(`hg-q__back-space`, 2026-11-02). PIN(LockScreen) 제목도 같은 높이.
