@@ -68,5 +68,5 @@ export function pinRemainingNotice(failedCount: number): number | null {
   return Math.max(PIN_MAX_ATTEMPTS - failedCount, 0);
 }
 
-/** 데스크톱 브라우저 로그인 대기 상한(A-03) */
-export const DESKTOP_LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
+/** 로그인 창 대기 상한(A-03) */
+export const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;

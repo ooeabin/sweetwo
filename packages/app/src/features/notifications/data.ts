@@ -13,10 +13,9 @@ import {
   qk,
   registerPushDevice,
   subscribeNotifications,
-  type Me,
   type Notification,
 } from '@sweetwo/api';
-import { coupleOf, inQuiet, notiPrefs, pushAllowed } from '@sweetwo/core';
+import { coupleOf } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +23,7 @@ import { create } from 'zustand';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 
-// 알림 센터 데이터: 목록(30개씩), 읽지 않음 점, Realtime(새 알림 → 목록·점, 데스크톱이면 OS 알림), 누르면 읽음 + 그 화면.
+// 알림 센터 데이터: 목록(30개씩), 읽지 않음 점, Realtime(새 알림 → 목록·점), 모바일 푸시, 누르면 읽음 + 그 화면.
 
 /** 넓은 창 패널(N-01) 열림 */
 export const useNotiPanel = create<{ open: boolean; set: (open: boolean) => void }>((set) => ({
@@ -57,9 +56,6 @@ export function useNotiPeople() {
     return { name, no: actor === starterId ? (1 as const) : (2 as const) };
   };
 }
-
-/** 지금 한국 시간 시(0~23) */
-export const kstHour = (now = new Date()) => (now.getUTCHours() + 9) % 24;
 
 /** 알림 대상(저금 항목·자산·경조사)이 지금 없는지: 휴지통에 있으면 deleted, 아예 안 보이면 hidden */
 async function targetGone(
@@ -100,7 +96,7 @@ export function useOpenNotification() {
   };
 }
 
-/** 앱 틀에 한 번: Realtime 구독, 데스크톱 OS 알림과 그 클릭 */
+/** 앱 틀에 한 번: Realtime 구독, 모바일 푸시를 눌러 들어옴·앱이 떠 있을 때 온 푸시 */
 export function useNotiRealtime(userId: string | undefined) {
   const qc = useQueryClient();
   const open = useOpenNotification();
@@ -123,35 +119,6 @@ export function useNotiRealtime(userId: string | undefined) {
         void qc.invalidateQueries({ queryKey: qk.space });
         void qc.invalidateQueries({ queryKey: qk.unlink });
       }
-      if (ev.type !== 'insert' || !bridge?.notify) return;
-      const n = ev.row;
-      // S-14 설정: 받는 방법·묶음 토글·방해 금지(그때는 센터에만)
-      const me = qc.getQueryData<Me | null>(qk.me);
-      const prefs = notiPrefs(me?.noti_prefs);
-      // 방해 금지만 아니면 띄울 알림은 끝나는 시각에(14 규칙): 미뤄 두고 1분마다 확인
-      if (!pushAllowed(prefs, n.topic, { hour: 0, start: 0, end: 0 })) return;
-      const quiet = { hour: kstHour(), start: me?.quiet_start ?? 22, end: me?.quiet_end ?? 8 };
-      if (!pushAllowed(prefs, n.topic, quiet)) {
-        deferred.push(n);
-        return;
-      }
-      show(n);
-    });
-    const show = (n: Notification) =>
-      void bridge?.notify?.show({
-        id: n.id,
-        title: n.push_title ?? n.title,
-        ...(n.push_hidden || !n.body ? {} : { body: n.body }),
-      });
-    const deferred: Notification[] = [];
-    const tick = setInterval(() => {
-      if (!deferred.length) return;
-      const me = qc.getQueryData<Me | null>(qk.me);
-      if (inQuiet(kstHour(), me?.quiet_start ?? 22, me?.quiet_end ?? 8)) return;
-      deferred.splice(0).forEach(show);
-    }, 60_000);
-    const offOpen = bridge?.notify?.onOpen((id) => {
-      void fetchNotification(id).then((n) => n && open(n));
     });
     // 모바일 푸시를 눌러 들어옴: 그 알림을 읽음 + 그 화면(알림이 없으면 받은 경로로)
     const offPushOpen = bridge?.push?.onOpen((p) => {
@@ -163,10 +130,8 @@ export function useNotiRealtime(userId: string | undefined) {
     const offPushIn = bridge?.push?.onReceive((p) => p.title && toast(p.title));
     return () => {
       off();
-      offOpen?.();
       offPushOpen?.();
       offPushIn?.();
-      clearInterval(tick);
     };
     // open은 매 렌더 새로 만들어지지만 구독은 사람마다 한 번
     // eslint-disable-next-line react-hooks/exhaustive-deps

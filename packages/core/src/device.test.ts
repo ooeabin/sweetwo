@@ -3,9 +3,6 @@ import { deviceLabel } from './device';
 
 describe('기기 이름', () => {
   it('앱, 브라우저, OS', () => {
-    expect(
-      deviceLabel('Mozilla/5.0 (Macintosh) AppleWebKit Chrome/130 Electron/33 sweeTwo/1.0'),
-    ).toBe('컴퓨터 앱(Mac)');
     expect(deviceLabel('Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537')).toBe(
       'Chrome(Windows)',
     );
@@ -22,5 +19,9 @@ describe('기기 이름', () => {
     expect(
       deviceLabel('Mozilla/5.0 (Linux; Android 15) Chrome/130 Mobile Safari/537 sweeTwo'),
     ).toBe('휴대폰 앱(Android)');
+    // iPad 앱 웹뷰(Mac처럼 알려 줌)
+    expect(deviceLabel('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit sweeTwo')).toBe(
+      '휴대폰 앱(iOS)',
+    );
   });
 });

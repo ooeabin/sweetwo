@@ -33,8 +33,6 @@ export const copy = {
     data: '데이터',
     dataSub: '내보내기, 휴지통, 계정 삭제',
     about: '앱 정보·문의',
-    widget: '위젯',
-    widgetSub: '트레이 켜짐',
   },
   later: '준비 중이에요', // [확인 필요] 아직 없는 화면 줄
 
@@ -330,15 +328,6 @@ export const copy = {
   // S-19 앱 정보
   about: '앱 정보',
   version: '버전',
-  checkUpdate: '업데이트 확인',
-  update: {
-    checking: '확인하고 있어요', // [확인 필요]
-    latest: '최신 버전이에요', // [확인 필요]
-    downloading: (p: number) => `새 버전을 받고 있어요 ${p}%`, // [확인 필요]
-    ready: (v: string) => `${v} 버전을 받았어요. 다시 시작하면 바뀌어요`, // [확인 필요]
-    restart: '다시 시작', // [확인 필요]
-    error: '확인하지 못했어요. 잠시 뒤 다시 해 주세요', // [확인 필요]
-  },
   whatsNew: '새 기능 보기',
   terms: '이용약관',
   privacy: '개인정보 처리방침',
@@ -561,15 +550,6 @@ export const copy = {
   photoAgain: '다시 고르기',
   photoSave: '저장할게요',
   photoSaved: '사진을 바꿨어요',
-  // S-22 위젯
-  widgetTitle: '위젯',
-  widgetTray: '트레이 아이콘',
-  widgetTrayHelp: '앱 창을 닫아도 트레이에 남아요',
-  widgetAmounts: '위젯에 금액 보이기',
-  widgetGoal: '위젯에 보일 저금', // [확인 필요]
-  widgetNoGoal: '저금 없음', // [확인 필요]
-  widgetTrayOn: '트레이 켜짐',
-  widgetTrayOff: '트레이 꺼짐', // [확인 필요]
 };
 
 /** 시각 이름(“밤 10시”, “아침 8시”) [확인 필요] 0~5시 새벽, 6~11시 아침, 12시 낮, 13~17시 오후, 18~20시 저녁, 21~23시 밤 */

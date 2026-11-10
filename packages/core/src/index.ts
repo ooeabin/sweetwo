@@ -3,7 +3,6 @@ export * from './date';
 export type { Database, Json, Tables, TablesInsert, TablesUpdate } from './db.types';
 export * from './schemas/auth';
 export * from './schemas/plan';
-export * from './schemas/widget';
 export * from './version';
 export * from './onboarding';
 export * from './josa';

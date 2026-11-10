@@ -15,7 +15,7 @@ const Center = ({ children }: { children: ReactNode }) => (
   <main className="hg-auth">{children}</main>
 );
 
-// A-06 앱 잠금 설정(데스크톱, 이 기기에 PIN이 없을 때 첫 로그인 직후 1회). S-15에서 열면 ?next=/settings/security
+// A-06 앱 잠금 설정(모바일 앱, 이 기기에 PIN이 없을 때 첫 로그인 직후 1회). S-15에서 열면 ?next=/settings/security
 export function A06LockSetup() {
   const nav = useNavigate();
   const [params] = useSearchParams();

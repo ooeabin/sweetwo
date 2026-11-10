@@ -1,6 +1,6 @@
 import { formatMonthDay, isWord, subject, type HomeTodo, type HomeUpcoming } from '@sweetwo/core';
 
-// 홈 할 일 한 줄(19 H-06)과 일정(H-05, 트레이 WG-03) 문구. 홈과 트레이 위젯이 같이 씀.
+// 홈 할 일 한 줄(19 H-06)과 일정(H-05) 문구.
 export const homeText = {
   todoUnlink: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   todoReconnect: (name: string) => `${name}님이 다시 연결하자고 했어요`,

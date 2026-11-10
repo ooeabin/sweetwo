@@ -111,7 +111,7 @@ export const copy = {
   pinConfirm: '한 번 더\n입력해 주세요',
   pinMismatch: 'PIN이 서로 달라요',
   pinWeak: '같은 숫자나 이어지는 숫자는 쓸 수 없어요', // [확인 필요] 기획서는 규칙만 있음
-  // 생체 인증 이름(15 A-06 1·5번): Mac·iPhone Touch ID, iPhone Face ID, Android 지문
+  // 생체 인증 이름(15 A-06 1·5번): iPhone Touch ID, iPhone Face ID, Android 지문
   bioName: { touch: 'Touch ID', face: 'Face ID', fingerprint: '지문' } as const,
   touchIdAsk: (kind: Bio) => `${bioObj(kind)}로도 풀까요?`,
   touchIdYes: (kind: Bio) => `${copy.bioName[kind]} 켜기`, // [확인 필요] 버튼 문구

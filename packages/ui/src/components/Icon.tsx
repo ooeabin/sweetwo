@@ -89,7 +89,6 @@ export type IconName =
   | 'users-three'
   | 'vault'
   | 'wallet'
-  | 'windows-logo'
   | 'wrench'
   | 'x';
 

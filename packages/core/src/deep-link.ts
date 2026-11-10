@@ -1,4 +1,4 @@
-// 앱으로 들어오는 링크 허용 목록(DEV_GUIDE ‘데스크톱 로그인과 딥링크’, ‘모바일 세션’). 데스크톱 main과 모바일 브리지가 같이 씀.
+// 앱으로 들어오는 링크 허용 목록(DEV_GUIDE ‘모바일 세션’). 모바일 브리지가 씀.
 // - sweetwo://auth/callback?code=…&state=… : code, state만 받는다
 // - sweetwo://auth/callback?error=…&state=… : 브라우저에서 취소, 동의 거부(error는 영문 소문자와 _만)
 // - sweetwo://i/{code} : 초대
@@ -57,6 +57,3 @@ export function parseDeepLink(raw: string): DeepLink | null {
   if (m?.[1] && INVITE.test(m[1])) return { kind: 'invite', code: m[1] };
   return null;
 }
-
-export const findDeepLink = (argv: readonly string[]) =>
-  argv.find((a) => a.startsWith('sweetwo://'));

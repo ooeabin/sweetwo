@@ -171,7 +171,7 @@ export function MonthResult({
         screen,
         skipped: p.done - p.checked,
       });
-      if (r === 'saved' || r === 'downloaded') toast(copy.imageSaved);
+      if (r === 'downloaded') toast(copy.imageSaved);
     } catch {
       track('month_result_shared', {
         result: 'failed',

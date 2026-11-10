@@ -35,7 +35,7 @@ export function A05Terms() {
         marketing: !!checked.marketing,
       });
       clearSignup();
-      // 데스크톱은 이 기기 PIN 정하기(A-06), 웹은 온보딩 O-10(온보딩 단계에서 붙임)
+      // 앱은 이 기기 PIN 정하기(A-06), 웹은 온보딩 O-10(온보딩 단계에서 붙임)
       if (session.bridge && !(await session.bridge.lock.status()).hasPin && !prefs.pinAsked()) {
         nav(paths.pinSetup, { replace: true });
       } else {

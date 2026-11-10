@@ -32,7 +32,7 @@ import { buildPdfModel, renderPdf } from '../export-pdf';
 
 type Format = 'csv' | 'pdf';
 
-/** 저장: 모바일은 OS 공유 창(‘파일에 저장’), 데스크톱·브라우저는 내려받기(저장 위치는 OS가 고르게 함) */
+/** 저장: 모바일 앱은 OS 공유 창(‘파일에 저장’), 브라우저(개발·e2e)는 내려받기 */
 async function saveFile(name: string, bytes: Uint8Array, mime: string) {
   const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
   if (bridge?.saveFile) {
@@ -55,7 +55,7 @@ async function saveFile(name: string, bytes: Uint8Array, mime: string) {
 // S-18 데이터(docs/spec/25-settings.md): 내보내기(내 데이터 / 공동 데이터, 엑셀 CSV zip, 본인 확인 뒤),
 // 형식: 엑셀(CSV zip) / PDF 요약(① 자산 요약 ② 연간 요약, export-pdf).
 // 휴지통(→ S-21, 개수), 사용 기록 보내기 토글, 계정 삭제(→ S-18b).
-// 본인 확인: 데스크톱·모바일 앱은 PIN(있으면), 웹은 가입 소셜로 다시 로그인 → 돌아오면 이어서 내보냄(?export=범위&format=형식).
+// 본인 확인: 모바일 앱은 PIN(있으면), 웹은 가입 소셜로 다시 로그인 → 돌아오면 이어서 내보냄(?export=범위&format=형식).
 export function S18Data() {
   const nav = useNavigate();
   const qc = useQueryClient();

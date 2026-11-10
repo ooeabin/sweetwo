@@ -94,7 +94,7 @@ export function A01Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 실행할 때 한 번
   }, []);
 
-  // 로그인 이벤트로 바뀐 세션 상태 반영(데스크톱)
+  // 로그인 이벤트로 바뀐 세션 상태 반영(앱)
   useEffect(() => {
     const b = session.bridge;
     if (!b) return;
@@ -136,8 +136,7 @@ export function A01Launch() {
         help={copy.updateSub}
         actions={
           <>
-            {/* 모바일: 스토어로(웹사이트 다운로드 페이지가 기기에 맞는 스토어로 보냄).
-                데스크톱: 다운로드, 서명 검증, 설치는 자동 업데이트 단계에서 붙인다. 그 전까지는 실패 안내. */}
+            {/* 스토어로(웹사이트 앱 받기 페이지가 기기에 맞는 스토어 버튼을 보여 줌). 브리지가 없으면 실패 안내 */}
             <Button
               variant="primary"
               block
@@ -194,7 +193,7 @@ export function A01Launch() {
     );
   }
   if (phase === 'checking') {
-    // 앱(데스크톱·모바일): 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
+    // 앱: 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤.
     return session.bridge ? (
       <main className="hg-auth" aria-busy="true">
         <Wordmark height={40} />

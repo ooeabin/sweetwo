@@ -75,7 +75,7 @@ export async function fetchNotification(id: string): Promise<Notification | null
 // ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것 중 나에게 맞는 것만 ──────────────
 // 대상 조건(플랫폼, 우리 둘 상태, 앱 버전, 가입 주차)은 서버 my_notices가 봄. 앱 버전은 브리지 값(웹은 없음)
 export async function fetchActiveNotices(
-  platform: 'desktop' | 'ios' | 'android' | 'web',
+  platform: 'ios' | 'android' | 'web',
   version?: string,
 ): Promise<ActiveNotice[]> {
   const { data, error } = await supabase().rpc('my_notices', {
@@ -97,7 +97,7 @@ export async function noteLogin(): Promise<boolean> {
 /** 앱 기기 기록(AD-16 최소 지원 버전 미만 기기 수): 로그인된 채 켜질 때 설치 ID, 플랫폼, 앱 버전 */
 export async function noteDevice(
   installId: string,
-  platform: 'desktop' | 'ios' | 'android',
+  platform: 'ios' | 'android',
   version: string,
 ): Promise<void> {
   const { error } = await supabase().rpc('note_device', {
@@ -108,7 +108,7 @@ export async function noteDevice(
   if (error) throw new Error(error.message);
 }
 
-/** 데스크톱 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄 */
+/** 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없고 푸시 기기도 없으면 서버가 월급 전 확인 알림을 메일로 대신 보냄 */
 export async function touchApp(): Promise<void> {
   const { error } = await supabase().rpc('touch_app');
   if (error) throw new Error(error.message);
@@ -163,11 +163,4 @@ export async function registerPushDevice(
 export async function unregisterPushDevice(token: string) {
   const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
   if (error) throw new Error(error.message);
-}
-
-/** 18 ‘합류 뒤’: 데스크톱 앱 받기 링크를 알림 이메일로(하루 한 번) */
-export async function sendDesktopLink(): Promise<boolean> {
-  const { data, error } = await supabase().rpc('send_desktop_link');
-  if (error) throw new Error(error.message);
-  return data === true;
 }

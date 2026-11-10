@@ -26,7 +26,6 @@ import {
 } from '../notifications';
 import { FrameCommands } from './command';
 import { copy } from './copy';
-import { useTraySync } from './tray-sync';
 import { useMe, usePartner, useSpace } from './data';
 import { LineBand } from './notice-band';
 
@@ -102,9 +101,7 @@ export function MainFrame(
   const me = useMe();
   const space = useSpace();
   const partner = usePartner();
-  // 트레이 위젯 값(데스크톱만)
-  useTraySync();
-  // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime(데스크톱 OS 알림)
+  // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime, 푸시
   useNotiRealtime(me.data?.id);
   usePushRegistration(me.data?.id);
   // 소셜 계정 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-05)
@@ -129,7 +126,7 @@ export function MainFrame(
   };
   const keys: AppTab[] = ['month', 'salary', 'assets', 'calendar'];
   const [palette, setPalette] = useState(false);
-  // 데스크톱 앱 접속 신호(14 규칙: 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄)
+  // 앱 접속 신호(14 규칙: 10분 넘게 없고 푸시 기기도 없으면 서버가 월급 전 확인 알림을 메일로 대신 보냄)
   const signedIn = !!me.data;
   useEffect(() => {
     if (!signedIn || !window.sweetwo) return;

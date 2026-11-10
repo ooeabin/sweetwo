@@ -180,65 +180,21 @@ test('모바일 푸시(S-14): 켜면 OS 허용 → 기기 등록, 푸시를 누�
   await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('모바일로 합류한 사람의 첫 홈: “PC에서도” 띠 1회 → 링크 메일 보내기', async ({ page }) => {
+test('앱 정보(S-19): 업데이트는 스토어가 해서 ‘업데이트 확인’ 줄이 없음, 합류한 사람 홈에 PC 안내 띠 없음(ADR 0008)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   if (db.space) db.space.created_by = 'starter-other';
   await fakeIosBridge(page, true);
   await page.goto('/');
-  const band = page.getByText('PC에서도 같은 계정으로 쓸 수 있어요');
-  await expect(band).toBeVisible();
-  await page.getByRole('button', { name: '데스크톱 앱 받기 링크 보내기' }).click();
-  await expect(page.getByText('알림 이메일로 링크를 보냈어요')).toBeVisible();
-  expect(db.rpc).toContain('send_desktop_link');
-  await expect(band).toHaveCount(0);
-  await page.reload();
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-  await expect(band).toHaveCount(0);
-});
-
-test('앱 정보(S-19): 업데이트 확인 → 받는 중 → 다 받으면 “다시 시작”(자동 업데이트가 있는 앱)', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  await fakeIosBridge(page, true);
-  // 데스크톱 자동 업데이트 브리지 흉내(main updater.ts가 보내는 상태)
-  await page.addInitScript(() => {
-    const w = window as unknown as {
-      sweetwo: Record<string, unknown>;
-      __update: { cb: ((s: unknown) => void) | null; installed: number };
-    };
-    w.__update = { cb: null, installed: 0 };
-    w.sweetwo.update = {
-      state: async () => ({ status: 'latest' }),
-      check: async () => {
-        setTimeout(() => w.__update.cb?.({ status: 'ready', version: '1.2.0' }), 50);
-        return { status: 'downloading', version: '1.2.0', percent: 42 };
-      },
-      install: async () => void w.__update.installed++,
-      onState: (cb: (s: unknown) => void) => {
-        w.__update.cb = cb;
-        return () => undefined;
-      },
-    };
-  });
+  await expect(page.getByText('PC에서도 같은 계정으로 쓸 수 있어요')).toHaveCount(0);
   await page.goto('/settings/about');
-  const row = page.getByRole('button', { name: /업데이트 확인/ });
-  await expect(row).toContainText('최신 버전이에요');
-  await row.click();
-  await expect(page.getByText('1.2.0 버전을 받았어요. 다시 시작하면 바뀌어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '새 기능 보기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /업데이트 확인/ })).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '다시 시작' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => (window as unknown as { __update: { installed: number } }).__update.installed,
-      ),
-    )
-    .toBe(1);
 });
 
 test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기에 두고, 인터넷이 끊겨도 홈을 보여 줌 + “오프라인”', async ({

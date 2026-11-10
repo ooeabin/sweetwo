@@ -13,7 +13,7 @@ import { copy } from '../copy';
 
 type PinFor = 'off' | 'change';
 
-// S-15 보안(docs/spec/25-settings.md): 데스크톱은 앱 잠금 켜기·끄기, PIN 바꾸기(A-06), Touch ID(Mac), 자동 잠금
+// S-15 보안(docs/spec/25-settings.md): 앱은 앱 잠금 켜기·끄기, PIN 바꾸기(A-06), 생체 인증(Face ID·Touch ID·지문), 자동 잠금
 // 1·5·15분·사용 안 함(기본 5분). 잠금 끄기·PIN 바꾸기 전 현재 PIN 확인. 로그인된 기기 목록(웹도): 기기별 ‘로그아웃’,
 // “모든 기기에서 로그아웃”(이 기기도 로그아웃 → A-02).
 export function S15Security() {

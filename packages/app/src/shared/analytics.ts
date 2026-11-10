@@ -158,7 +158,7 @@ export type AnalyticsEvent =
   | {
       name: 'plan_shared';
       props: {
-        result: 'shared' | 'saved' | 'downloaded' | 'cancelled' | 'failed';
+        result: 'shared' | 'downloaded' | 'cancelled' | 'failed';
         masked: boolean;
         whose: 'self' | 'partner' | 'joint';
       };
@@ -166,7 +166,7 @@ export type AnalyticsEvent =
   | {
       name: 'month_result_shared';
       props: {
-        result: 'shared' | 'saved' | 'downloaded' | 'cancelled' | 'failed';
+        result: 'shared' | 'downloaded' | 'cancelled' | 'failed';
         masked: boolean;
         whose: 'self' | 'partner' | 'joint';
         screen: 'done' | 'checklist' | 'past';
