@@ -354,7 +354,6 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',
@@ -362,7 +361,6 @@ export const ops = {
     ends: '끝',
     kind: '종류',
     importance: '중요도',
-    platforms: '대상 플랫폼',
     email: '이메일로도 보내기',
     emailHelp: '노출 시작 때 전체 회원에게 1회 발송(메일 상한 무관)',
     // 장애 고지는 영향받은 회원(대상 조건)에게만(33 ‘1등급 장애 뒤 고지’)
@@ -492,8 +490,6 @@ export const ops = {
   noApproval: '승인할 요청 없음', // [확인 필요]
   superMin: '최고 관리자 최소 1명 필요', // [확인 필요] 33 2장 최소 1명(2026-11-06)
   appCols: {
-    latest: '최신 버전(데스크톱)',
-    minDesktop: '최소 지원 버전(데스크톱)',
     minWeb: '최소 지원 버전(웹)',
     minIos: '최소 지원 버전(iOS)',
     minAndroid: '최소 지원 버전(Android)',

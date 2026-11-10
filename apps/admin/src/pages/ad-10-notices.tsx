@@ -26,9 +26,10 @@ import { Frame } from '../frame';
 import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 
-// 웹 앱은 없다(ADR 0001). 예전 공지의 'web'은 고칠 때 빠진다.
-type Platform = 'desktop' | 'mobile';
-const PLATFORMS: readonly Platform[] = ['desktop', 'mobile'];
+// 대상 플랫폼은 고르지 않음(2026-11-10 데스크톱 앱 없앰, ADR 0008. 남은 앱은 모바일 하나). 웹 앱은 없다(ADR 0001).
+// 서버 notice_user_match는 ['desktop', 'mobile']을 ‘기기 기록과 상관없이 모두’로 보므로 그 값을 그대로 저장한다.
+// notice.platforms 열과 'desktop' 값은 나중에 2단계로 정리(ADR 0008).
+const PLATFORMS: ('desktop' | 'mobile')[] = ['desktop', 'mobile'];
 type CoupleState = (typeof NOTICE_COUPLE_STATES)[number];
 const KINDS = ['info', 'maintenance', 'incident', 'terms'];
 // datetime-local(KST로 넣음) ↔ ISO
@@ -120,9 +121,7 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
   const [importance, setImportance] = useState<'normal' | 'must'>(
     (n?.importance as 'normal' | 'must' | undefined) ?? 'normal',
   );
-  const [platforms, setPlatforms] = useState<Platform[]>(
-    n?.platforms ? PLATFORMS.filter((p) => n.platforms.includes(p)) : [...PLATFORMS],
-  );
+  const platforms = PLATFORMS;
   const [couples, setCouples] = useState<CoupleState[]>(t0.couple_states ?? []);
   const [version, setVersion] = useState(t0.version_below ?? '');
   const [weeksMin, setWeeksMin] = useState(t0.weeks_min?.toString() ?? '');
@@ -155,13 +154,12 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
   const audience = useQuery({
     queryKey: ['admin', 'notice-audience', kind, platforms, target, mail],
     queryFn: () => fetchNoticeAudience({ kind, platforms, target: target ?? {}, email: mail }),
-    enabled: !!target && platforms.length > 0,
+    enabled: !!target,
     placeholderData: keepPreviousData,
   });
   const zero = audience.data?.target === 0;
 
-  const ready =
-    !!title.trim() && !!starts && !!ends && ends > starts && platforms.length > 0 && !!target;
+  const ready = !!title.trim() && !!starts && !!ends && ends > starts && !!target;
   const save = async (request: boolean) => {
     if (!target) return;
     setBusy(true);
@@ -209,8 +207,6 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
       setBusy(false);
     }
   };
-  const toggle = (p: Platform) =>
-    setPlatforms((x) => (x.includes(p) ? x.filter((y) => y !== p) : [...x, p]));
   const toggleCouple = (c: CoupleState) =>
     setCouples((x) => (x.includes(c) ? x.filter((y) => y !== c) : [...x, c]));
   return (
@@ -276,24 +272,6 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
               onClick={() => setImportance(i)}
             >
               {ops.importance[i]}
-            </Chip>
-          ))}
-        </div>
-        <div
-          className="hg-row"
-          style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
-          role="group"
-          aria-label={ops.field.platforms}
-        >
-          {PLATFORMS.map((p) => (
-            <Chip
-              key={p}
-              small
-              selected={platforms.includes(p)}
-              disabled={!draft}
-              onClick={() => toggle(p)}
-            >
-              {ops.platforms[p]}
             </Chip>
           ))}
         </div>

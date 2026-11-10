@@ -1046,15 +1046,19 @@ test('시스템(최고 관리자): 승인, 앱 버전·점검은 승인 요청, 
   expect(db.approvals[0]?.status).toBe('approved');
 
   await page.getByRole('tab', { name: '앱 버전·점검' }).click();
-  await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveValue('1.1.0');
-  await expect(page.getByText('최소 버전 미만 기기 12대(90일 내 실행)')).toBeVisible();
-  await page.getByLabel('최소 지원 버전(데스크톱)').fill('1.1.0');
+  // 데스크톱 칸은 없음(2026-11-10, ADR 0008). 서버가 데스크톱 값을 돌려줘도 보이지 않고 보내지 않음
+  await expect(page.getByLabel('최신 버전(데스크톱)')).toHaveCount(0);
+  await expect(page.getByLabel('최소 지원 버전(데스크톱)')).toHaveCount(0);
+  await expect(page.getByLabel('최소 지원 버전(Android)')).toHaveValue('1.0.0');
+  await expect(page.getByText('최소 버전 미만 기기 3대(90일 내 실행)')).toBeVisible();
+  await expect(page.getByText('최소 버전 미만 기기 12대(90일 내 실행)')).toHaveCount(0);
+  await page.getByLabel('최소 지원 버전(iOS)').fill('1.1.0');
   await page.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인 요청됨')).toBeVisible();
-  expect(db.rpc.find((r) => r.fn === 'admin_request_app_config')?.body.p).toMatchObject({
-    min_version_desktop: '1.1.0',
-    maintenance_starts_at: null,
-  });
+  const sent = db.rpc.find((r) => r.fn === 'admin_request_app_config')?.body.p;
+  expect(sent).toMatchObject({ min_version_ios: '1.1.0', maintenance_starts_at: null });
+  expect(sent).not.toHaveProperty('min_version_desktop');
+  expect(sent).not.toHaveProperty('latest_version_desktop');
 
   await page.getByRole('tab', { name: '관리자 계정' }).click();
   await expect(page.getByRole('row', { name: /ops01@sweetwo.kr/ })).toContainText('첫 로그인 전');
