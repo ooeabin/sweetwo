@@ -175,7 +175,7 @@
   --font-sans: "SUIT Variable", SUIT, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --text-display: 700 32px/40px var(--font-sans); /* 온보딩 결과·순자산 같은 화면의 핵심 숫자 1개. 2026-11-09 40/48 → 32/40. */
   --text-number-lg: 700 24px/32px var(--font-sans); /* 카드 안 대표 금액. tabular-nums. 2026-11-09 28/36 → 24/32. */
-  --text-title-1: 700 20px/28px var(--font-sans); /* 한 화면 한 질문의 질문 제목(질문·로그인·잠금·상태 화면). 2026-11-09 28/38 → 24/32, 2026-11-10 → 20/28(시작 화면 캐치프레이즈와 같게, 사용자 결정). */
+  --text-title-1: 700 22px/30px var(--font-sans); /* 한 화면 한 질문의 질문 제목(질문·로그인·잠금·상태 화면). 2026-11-09 28/38 → 24/32, 2026-11-10 → 22/30(토스·당근·카카오뱅크 질문 제목 22~24px의 아래쪽, 섹션 제목 20보다 한 단계 위. 시작 화면 캐치프레이즈는 20 그대로, 사용자 결정). */
   --text-title-2: 700 20px/28px var(--font-sans); /* 화면 제목, 섹션 제목, 좁은 창 머리 탭 제목, 시트·모달 제목. 2026-11-09 22/30 → 20/28. */
   --text-title-3: 600 17px/24px var(--font-sans); /* 카드 제목, 목록 묶음 제목. 2026-11-09 18/26 → 17/24. */
   --text-body: 400 15px/22px var(--font-sans); /* 기본 본문, 목록 줄 이름(500으로), 안내 문장. 2026-11-09 16/24 → 15/22. */
