@@ -42,7 +42,6 @@ export function A06LockSetup() {
   if (step === 'touch') {
     return (
       <AuthLayout
-        icon={bioIcon(bioKind)}
         art={bioKind === 'face' ? 'status-faceid' : 'status-fingerprint'}
         title={copy.touchIdAsk(bioKind)}
         help={copy.touchIdHelp(bioKind)}

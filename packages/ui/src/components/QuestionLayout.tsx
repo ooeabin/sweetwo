@@ -217,7 +217,8 @@ export function QuestionLayout({
   useEffect(() => {
     if (!onBack) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onBack();
+      // 시트·대화상자가 열려 있으면 Esc는 그것만 닫음(2026-11-10: 소비자가 onBack을 빼면 뒤로가 사라져 제목이 움직이던 것)
+      if (e.key === 'Escape' && !document.querySelector('[aria-modal="true"]')) onBack();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -232,7 +233,12 @@ export function QuestionLayout({
         <span />
       </div>
       <form
-        className={['hg-q', wide && 'hg-q--wide', centered && 'hg-q--center']
+        className={[
+          'hg-q',
+          wide && 'hg-q--wide',
+          centered && 'hg-q--center',
+          !chapter && !steps && !onBack && 'hg-q--top',
+        ]
           .filter(Boolean)
           .join(' ')}
         onSubmit={(e) => {
@@ -244,27 +250,23 @@ export function QuestionLayout({
           <div className="hg-q__nav">
             <ChapterBar chapter={chapter} onBack={onBack} />
           </div>
-        ) : steps || onBack ? (
-          <div className="hg-q__nav">
-            {steps && <StepsBar steps={steps} />}
-            {onBack ? (
-              <button
-                type="button"
-                className="hg-q__back hg-back"
-                aria-label="뒤로"
-                onClick={onBack}
-              >
-                <Icon name="chevron-left" size={24} />
-              </button>
-            ) : (
-              <span className="hg-q__back-space" aria-hidden="true" />
-            )}
-          </div>
         ) : (
-          // 뒤로가 없는 화면도 제목 자리를 같게(좁은 창에서 뒤로 버튼 높이만큼 비움)
-          <div className="hg-q__nav" aria-hidden="true">
-            <span className="hg-q__back-space" />
-          </div>
+          // 2026-11-10 뒤로가 없는 화면은 뒤로 자리를 비워 두지 않음: 제목이 위 여백(hg-q--top, 48px)에서 바로 시작
+          (steps || onBack) && (
+            <div className="hg-q__nav">
+              {steps && <StepsBar steps={steps} />}
+              {onBack && (
+                <button
+                  type="button"
+                  className="hg-q__back hg-back"
+                  aria-label="뒤로"
+                  onClick={onBack}
+                >
+                  <Icon name="chevron-left" size={24} />
+                </button>
+              )}
+            </div>
+          )
         )}
         {hero && <div className="hg-q__hero">{hero}</div>}
         <div className="hg-q__head">

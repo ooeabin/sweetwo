@@ -71,8 +71,8 @@ export function S18bDelete() {
   return (
     <QuestionLayout
       title={copy.deleteAccount}
-      // 확인 대화상자가 열려 있으면 Esc는 대화상자만 닫음
-      onBack={ask ? undefined : () => nav('/settings/data')}
+      // 확인 대화상자가 열려 있으면 Esc는 대화상자만 닫음(QuestionLayout이 aria-modal을 보고 거름)
+      onBack={() => nav('/settings/data')}
       primary={{ label: copy.deleteWith(provider), variant: 'danger', disabled: busy }}
       onSubmit={() => setAsk(true)}
     >

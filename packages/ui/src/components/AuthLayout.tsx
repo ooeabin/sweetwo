@@ -1,14 +1,12 @@
 import type { ReactNode } from 'react';
-import { Icon, type IconName } from './Icon';
+import { Icon } from './Icon';
 import { IconButton } from './IconButton';
-import { hasIllustration, Illustration } from './Illustration';
+import { Illustration } from './Illustration';
 
 // 로그인, 가입 화면 틀(docs/design/components/AuthLayout.md)
 export function AuthLayout({
   media,
-  icon,
   art,
-  busy,
   alert,
   toast,
   actionsRow,
@@ -22,15 +20,11 @@ export function AuthLayout({
   className,
 }: {
   media?: ReactNode;
-  /** 상태 화면 제목 위 아이콘 원(72px) */
-  icon?: IconName;
   /**
-   * 상태 그림(Illustrations 이름, 96px). 그림 파일이 있을 때만 아이콘 원 대신 그림.
-   * 2026-11-10 그림 파일이 아직 없으면(2D 그림 ‘나중 과제’) 회색 빈 자리 대신 icon 원을 보여 줌(icon이 없을 때만 빈 자리)
+   * 상태 그림(Illustrations 이름, 96px). 그림 파일이 아직 없으면(2D 그림 ‘나중 과제’) 같은 크기의 회색 빈 자리(hg-artslot).
+   * 2026-11-10 아이콘 원(hg-auth__icon)을 없애고 빈 자리로 되돌림(사용자 결정, 그림은 나중에 만듦)
    */
   art?: string;
-  /** 아이콘을 천천히 돌림(기다리는 중). ‘동작 줄이기’면 멈춤 */
-  busy?: boolean;
   /** 버튼 묶음 바로 위 안내 띠(취소, 충돌, 오프라인, 실패) */
   alert?: ReactNode;
   /** 버튼 묶음 바로 위에 잠깐 뜨는 알약(소비자가 시간이 지나면 지움) */
@@ -58,15 +52,7 @@ export function AuthLayout({
           </button>
         </div>
       )}
-      {art && (hasIllustration(art) || !icon) ? (
-        <Illustration name={art} className="hg-auth__art" />
-      ) : (
-        icon && (
-          <span className={busy ? 'hg-auth__icon is-busy' : 'hg-auth__icon'} aria-hidden="true">
-            <Icon name={icon} />
-          </span>
-        )
-      )}
+      {art && <Illustration name={art} className="hg-auth__art" />}
       {media}
       <div className="hg-auth__head">
         <h1 className="hg-auth__title">{title}</h1>

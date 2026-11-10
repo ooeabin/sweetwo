@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (518372f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (c274973). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -287,7 +287,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__nav .hg-steps { width: 100%; max-width: none; }
 .hg-q__back { display: inline-flex; align-items: center; justify-content: flex-start; width: 36px; height: 36px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; border-radius: var(--radius-md); }
 .hg-q__back:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-q__back-space { display: block; width: 40px; height: 40px; }  /* 2026-11-10 hg-back 40px와 같게 */
 /* 온보딩 챕터 진행(ChapterBar): 뒤로 + 가운데 “2/4 목표” + 챕터 안에서만 차는 얇은 막대(brand). 챕터가 바뀌면 처음부터 */
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
@@ -332,6 +331,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q--center .hg-q__head { align-items: center; text-align: center; margin-top: auto; }
 .hg-q--center .hg-q__help { word-break: keep-all; }
 .hg-q--center .hg-banner { text-align: left; }
+.hg-q--center > .hg-help { text-align: center; word-break: keep-all; }  /* 가운데 배치 안 짧은 안내(A-07 ‘○○ 계정으로 합류해요 · 다른 계정’) */
 /* 안내 화면 단계 목록(O-10): 회색 판 위 아이콘 원 + 한 줄, 번호는 화면 읽기만 */
 .hg-intro-steps { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: var(--space-5); border-radius: var(--radius-xl); background: var(--plate); list-style: none; text-align: left; }
 .hg-intro-steps li { display: flex; align-items: center; gap: var(--space-3); font: var(--text-body); font-weight: 500; color: var(--ink); }
@@ -1069,6 +1069,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-addrow:hover { color: var(--ink); }
   .hg-drawer__item:hover { background: var(--surface-alt); }
   .hg-btn--secondary:hover:not(:disabled) { background: var(--hairline-soft); }
+  .hg-btn--secondary.hg-btn--apple:hover:not(:disabled) { background: var(--ink); }  /* 2026-11-10 애플 채움 버튼은 마우스를 올려도 검정(다크 흰색) 그대로. 회색이 되면 흰 글자가 안 보임 */
   :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--brand-soft) 94%, var(--brand-ink)); }
   .hg-btn--ghost:hover:not(:disabled) { background: var(--surface-alt); }
   .hg-btn--outline:hover:not(:disabled) { background: var(--hairline-soft); }
@@ -1843,6 +1844,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .hg-auth__back .hg-iconbtn { display: none; }
   .hg-auth__back .hg-auth__backtext { display: inline-flex; }
+  /* 2026-11-10 질문 화면 넓은 창 위 바(64px, 왼쪽 24px)와 같은 줄에 */
+  .hg-auth__back { top: calc(var(--space-3) + env(safe-area-inset-top, 0px)); left: calc(var(--space-6) + env(safe-area-inset-left, 0px)); }
 }
 .hg-auth__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-auth__head > * { margin: 0; }
@@ -1852,15 +1855,15 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-auth__actions .hg-btn { position: relative; }
 .hg-auth__actions .hg-tag { position: absolute; right: var(--space-3); }
 .hg-auth__note { font: var(--text-caption); color: var(--slate); }
-/* 상태 화면(로그인 대기, 업데이트, 점검, 세션 만료, 오프라인, Face ID) 제목 위 아이콘 원 */
-.hg-auth__icon { display: grid; place-items: center; flex: none; width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); }  /* 2026-11-10 상태 화면 그림(2D)이 들어올 때까지 이 아이콘 원(ink-2 on surface-alt, 72px 원 + 32px 아이콘) */
-.hg-auth__icon .hg-ico { width: 32px; height: 32px; }
-.hg-auth__icon.is-busy .hg-ico { animation: hg-spin 1.2s linear infinite; }
-/* 2026-11-05 상태 이모지(3D 그림, 96px, 원 판 없음). 그림이 있으면 hg-auth__icon 대신 */
+/* 상태 화면(업데이트, 점검, 오프라인, 오류, 로그인 대기·실패, Face ID, 세션 만료, 새 기기, 계정 삭제 취소, 합류 불가) 제목 위 그림 96px.
+   2026-11-10 그림 파일이 들어올 때까지 같은 크기의 회색 빈 자리(hg-artslot 96px 둥근 네모). 아이콘 원(hg-auth__icon)은 없앰(사용자 결정) */
 .hg-auth__art { display: block; flex: none; width: 96px; height: 96px; object-fit: contain; }
 @media (prefers-reduced-motion: no-preference) { .hg-auth__art { animation: hg-pop .32s ease-out both; } }
-@media (prefers-reduced-motion: reduce) { .hg-auth__icon.is-busy .hg-ico { animation: none; } }
-@keyframes hg-spin { to { transform: rotate(360deg); } }
+/* A-01 스플래시(hg-auth--splash, 2026-11-10): 워드마크는 화면 한가운데(가로·세로), 0.3초 넘으면 그 아래 진행 막대, 10초 넘으면 ‘연결이 느려요’ 띠는 화면 아래.
+   막대와 띠는 자리를 차지하지 않아 워드마크가 움직이지 않음 */
+.hg-auth.hg-auth--splash { justify-content: center; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.hg-auth--splash > .hg-auth__splashbar { position: absolute; left: 50%; top: calc(50% + var(--space-10)); transform: translateX(-50%); }
+.hg-auth--splash > .hg-auth__alert { position: absolute; left: 50%; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); width: calc(100% - var(--space-4) * 2); transform: translateX(-50%); }
 /* 버튼 묶음 위 안내 띠(로그인 취소, 다른 소셜로 가입함, 오프라인, 열기 실패) */
 /* 안내 띠(당근 안내 상자): 회색 판, 아이콘은 첫 줄에 맞춤, 글자 14px ink-2 */
 .hg-auth__alert { box-sizing: border-box; width: 100%; max-width: 360px; align-items: flex-start; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--plate); color: var(--ink-2); font: var(--text-body-sm); text-align: left; }
@@ -1900,9 +1903,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 /* 이메일 충돌 말풍선(지그재그 ‘지금 가입하고…’): 버튼 위 가운데 흰 말풍선, 13px, 넉넉한 여백, 꼬리 아래 */
 .hg-auth--login .hg-auth__bubble { position: absolute; left: 50%; bottom: calc(100% + var(--space-3)); transform: translateX(-50%); z-index: 1; padding: var(--space-2) var(--space-4); border: 1px solid var(--hairline-soft); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2); font: 500 12px/18px var(--font-sans); white-space: nowrap; pointer-events: none; }
 .hg-auth--login .hg-auth__bubble::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-right: 1px solid var(--hairline-soft); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); transform: rotate(45deg); }
-@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-  .hg-auth--hero .hg-auth__actions { margin-top: var(--space-16); }  /* 버튼 위 토스트·말풍선 자리 */
-}
 /* 2026-11-10 휴대폰과 태블릿(터치)은 같은 배치: 가운데 휴대폰 너비 열, 제목 세로 가운데, 버튼은 아래 끝 */
 @media (max-width: 767px), (hover: none), (pointer: coarse) {
   .hg-auth { justify-content: flex-start; }
@@ -1911,19 +1911,17 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   /* 히어로(O-01·A-02)는 워드마크+캐치프레이즈를 묶어 함께 세로 가운데로 */
   .hg-auth--hero > img { margin-top: max(var(--space-16), 30vh); margin-top: max(var(--space-16), 30dvh); }  /* O-01·A-02 같은 높이(버튼 수와 상관없이) */
   .hg-auth--hero .hg-auth__head { margin-top: 0; }
-  /* 상태 화면: 아이콘 원 + 제목을 묶어 세로 가운데로 */
-  .hg-auth > .hg-auth__icon { margin-top: auto; }
-  .hg-auth > .hg-auth__icon + .hg-auth__head { margin-top: 0; }
-  .hg-auth > .hg-auth__icon + .hg-auth__provider + .hg-auth__head { margin-top: 0; }  /* A-03 아이콘 원 + 제공자 줄 + 제목을 한 묶음으로 */
+  /* 상태 화면: 그림 자리 + 제목을 묶어 세로 가운데로 */
   .hg-auth > .hg-auth__art { margin-top: auto; }
   .hg-auth > .hg-auth__art + .hg-auth__head { margin-top: 0; }
+  .hg-auth > .hg-auth__art + .hg-auth__provider + .hg-auth__head { margin-top: 0; }  /* A-03 그림 자리 + 제공자 줄 + 제목을 한 묶음으로 */
   .hg-auth__alert + .hg-auth__actions { margin-top: 0; }
   .hg-auth > .hg-auth__alert { margin-top: auto; }
   /* PIN 정하기·잠금: 카드 없이 화면 전체, 키패드는 아래 */
   .hg-auth:has(> .hg-lock) { padding: 0; }
-  .hg-auth > .hg-lock { box-sizing: border-box; flex: 1; align-self: center; width: 100%; max-width: 480px; min-height: 100%; padding: calc(var(--space-6) * 2 + 36px + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) calc(var(--space-4) + env(safe-area-inset-left, 0px)); border: 0; border-radius: 0; box-shadow: none; }
+  .hg-auth > .hg-lock { box-sizing: border-box; flex: 1; align-self: center; width: 100%; max-width: 480px; min-height: 100%; padding: calc(var(--space-6) * 2 + env(safe-area-inset-top, 0px)) calc(var(--space-4) + env(safe-area-inset-right, 0px)) calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) calc(var(--space-4) + env(safe-area-inset-left, 0px)); border: 0; border-radius: 0; box-shadow: none; }
   .hg-auth > .hg-lock .hg-keypad { margin-top: auto; }
-  /* 제목과 보조 줄은 질문 화면 제목(hg-q__title)과 같은 자리: 왼쪽 정렬, 같은 높이. 점은 가운데 */
+  /* 제목과 보조 줄은 뒤로 없는 질문 화면 제목(hg-q--top)과 같은 자리: 왼쪽 정렬, 화면 위 48px. 점은 가운데 */
   .hg-auth > .hg-lock .hg-lock__head { align-self: stretch; align-items: flex-start; }
   .hg-auth > .hg-lock .hg-lock__head > * { text-align: left; }
   /* 아바타가 머리 자리인 화면(A-02 초대로 들어왔을 때)도 아바타+제목을 묶어 세로 가운데로 */
@@ -1931,11 +1929,25 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-auth > .hg-avatar + .hg-auth__head { margin-top: 0; }
   /* 좁은 창: 주 버튼은 화면 아래 끝(내용이 짧아도), 길면 따라 내려오다 아래에 붙음 */
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
+  /* 2026-11-10 제목 위치 규칙: 뒤로(‹)가 있으면 뒤로 줄(40px) 아래 24px(화면 위에서 88px), 없으면 뒤로 자리를 비워 두지 않고 화면 위에서 48px(space-6 × 2).
+     PIN(hg-lock)도 뒤로가 없어 같은 48px */
+  .hg-q.hg-q--top { padding-top: calc(var(--space-6) * 2); }
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
   /* 2026-11-03: 아래 고정 영역 위로 목록이 지나갈 때 잘려 겹쳐 보이지 않게 위쪽을 바탕색으로 흐리게(토스 하단 버튼처럼). 선 대신 */
   .hg-q__foot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-6); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
   .hg-q__foot.has-sum { border-top: 0; }
   .hg-q__cols { grid-template-columns: minmax(0, 1fr); }
+}
+/* 2026-11-10 히어로(O-01·A-02, A-02 초대 포함) 넓은 창(768px 이상, 태블릿 포함): 버튼을 화면 아래 끝에 두면 태블릿 세로에서 문구와 버튼 사이가 400px 넘게 비어
+   워드마크 + 문구 + 버튼을 한 묶음으로. 워드마크 높이는 두 화면이 같게(화면 가운데 − 176px, 최소 64px) 고정하고 버튼은 문구 아래 64px(gap 24 + 40, 토스트·말풍선 자리).
+   A-02 묶음(약 380px)이 화면 세로 가운데쯤, O-01은 같은 워드마크 높이에서 버튼이 짧게. 휴대폰(768px 미만)은 위 규칙(워드마크 30%, 버튼 아래 끝) */
+@media (min-width: 768px) {
+  .hg-auth:is(.hg-auth--hero, .hg-auth--login) { justify-content: flex-start; }
+  :is(.hg-auth--hero > img, .hg-auth--login > .hg-avatar) { margin-top: max(var(--space-16), calc(50vh - var(--space-22) * 2)); margin-top: max(var(--space-16), calc(50dvh - var(--space-22) * 2)); }  /* A-02 초대(아바타)도 같은 높이 */
+  :is(.hg-auth--hero, .hg-auth--login) .hg-auth__head { margin-top: 0; }
+  :is(.hg-auth--hero, .hg-auth--login) .hg-auth__actions { margin-top: var(--space-10); }
+  :is(.hg-auth--hero, .hg-auth--login) > .hg-auth__alert { margin-top: var(--space-10); }  /* 오프라인 띠도 버튼 바로 위 같은 자리 */
+  :is(.hg-auth--hero, .hg-auth--login) .hg-auth__alert + .hg-auth__actions { margin-top: 0; }
 }
 
 /* 행 앞 아이콘 칸: 영역 색 원 + Phosphor 아이콘(2026-11-09, ListRow.md ‘Lead 종류 표’) */
