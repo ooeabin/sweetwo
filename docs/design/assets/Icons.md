@@ -11,14 +11,14 @@ Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `
 - 필요한 아이콘이 여기 없으면 같은 Phosphor 세트에서 bold와 fill을 함께 추가. 새 아이콘은 클래스 이름을 Phosphor 이름 그대로 씀.
 - 클래스 이름은 지금 것을 그대로 씀(바꾸지 않음). 아래 표가 클래스와 Phosphor 원래 이름의 짝.
 - 뒤로는 모든 화면 `chevron-left`(꺾쇠 <). `arrow-left`는 뒤로에 쓰지 않음. 화면 모드는 `sun`, `moon`.
-- `apple-logo`, `windows-logo`는 웹사이트 다운로드 버튼과 OS 표시에만. 브랜드 로고라 모양을 바꾸지 않음.
+- `apple-logo`는 웹사이트 App Store 버튼에만. 브랜드 로고라 모양을 바꾸지 않음. `windows-logo`는 데스크톱 다운로드와 함께 없앰(2026-11-10, ADR 0008).
 - 빈 상태, 카테고리, 축하 같은 큰 자리 그림은 이 아이콘이 아니라 실사 제품 사진(README ‘그림’ 장).
 
 ## 클래스와 Phosphor 이름
 
 | 클래스 | Phosphor 이름 | 새로 쓰는 곳 |
 | --- | --- | --- |
-| `hg-ico--apple-logo` | `apple-logo` | 웹사이트 Mac용 다운로드 |
+| `hg-ico--apple-logo` | `apple-logo` | 웹사이트 App Store 버튼 |
 | `hg-ico--arrow-left` | `arrow-left` |  |
 | `hg-ico--arrow-right` | `arrow-right` |  |
 | `hg-ico--bell` | `bell` |  |
@@ -67,7 +67,6 @@ Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `
 | `hg-ico--undo-2` | `arrow-u-up-left` |  |
 | `hg-ico--user` | `user` |  |
 | `hg-ico--wallet` | `wallet` |  |
-| `hg-ico--windows-logo` | `windows-logo` | 웹사이트 Windows용 다운로드 |
 | `hg-ico--x` | `x` |  |
 | `hg-ico--hand-coins` | `hand-coins` | 월급 탭(사이드바, 하단 독. 2026-11-09 채운 모양 추가), 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |

@@ -6,8 +6,6 @@ const MAC =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
 const WIN =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
-const WIN7 =
-  'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109 Safari/537.36';
 const IPHONE =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148';
 
@@ -18,7 +16,7 @@ const axe = async (page: Page) => {
   ).toEqual([]);
 };
 
-/** 바깥 주소(다운로드, 웹 앱)는 흉내: 받은 요청을 셈 */
+/** 바깥 주소(예전 다운로드, 웹 앱)는 흉내: 받은 요청을 셈 */
 async function outside(page: Page) {
   const hits: string[] = [];
   await page.route('https://download.sweetwo.kr/**', (r) => {
@@ -36,9 +34,9 @@ async function outside(page: Page) {
   return hits;
 }
 
-test.describe('Mac', () => {
+test.describe('PC', () => {
   test.use({ userAgent: MAC });
-  test('L-01 랜딩: 제목, Mac용 다운로드, 다른 OS용 받기, 자주 묻는 질문, 하단', async ({
+  test('L-01 랜딩: 제목, 스토어 2개(데스크톱 다운로드 없음), 자주 묻는 질문, 하단', async ({
     page,
   }) => {
     await outside(page);
@@ -48,21 +46,19 @@ test.describe('Mac', () => {
       page.getByRole('heading', { level: 1, name: '둘이 구워서 더 달콤한 자산파이' }),
     ).toBeVisible();
     const hero = page.locator('[data-download]').first();
-    await expect(hero.getByRole('link', { name: 'Mac용 다운로드' })).toBeVisible();
-    await expect(hero.getByRole('link', { name: 'Windows용 다운로드' })).toBeHidden();
-    await hero.getByRole('button', { name: '다른 OS용 받기' }).click();
-    await expect(hero.getByRole('link', { name: 'Windows용 다운로드' })).toBeVisible();
-    // PC 버튼 아래 휴대폰 앱(스토어 2개), 상단 ‘앱 받기’는 맨 아래 다운로드로
-    await expect(hero.getByText('휴대폰 앱도 있어요')).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
     await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toHaveAttribute(
       'href',
       'https://play.google.com/store/apps/details?id=kr.sweetwo.app',
     );
+    // 2026-11-10 데스크톱 앱 없앰(ADR 0008)
+    await expect(page.getByRole('link', { name: /Mac용 다운로드|Windows용 다운로드/ })).toHaveCount(
+      0,
+    );
+    await expect(page.getByRole('button', { name: '다른 OS용 받기' })).toHaveCount(0);
+    // 상단 ‘앱 받기’는 맨 아래 앱 받기로
     await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute('href', '/#get');
     await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
-    await expect(
-      page.getByText('macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요').first(),
-    ).toBeVisible();
     await expect(page.getByText('직접 입력해요, 계좌를 연결하지 않아요')).toBeVisible();
     const q = page.getByRole('button', { name: '계좌를 연결하지 않나요?' });
     await q.click();
@@ -77,47 +73,29 @@ test.describe('Mac', () => {
     await axe(page);
   });
 
-  test('L-02 설치 안내: 받기 시작, 3단계, 보안 경고 접기, 새로고침하면 다시 받지 않음', async ({
+  test('L-02 앱 받기(/download): 파일을 받지 않고 스토어 2개, 예전 ?os= 주소도 같음', async ({
     page,
   }) => {
     const hits = await outside(page);
-    await page.goto('/');
-    await page
-      .locator('[data-download]')
-      .first()
-      .getByRole('link', { name: 'Mac용 다운로드' })
-      .click();
-    await expect(page.getByRole('heading', { name: '다운로드를 시작했어요' })).toBeVisible();
-    await expect.poll(() => hits.filter((h) => h.includes('/latest/mac')).length).toBe(1);
-    await expect(page.getByText('dmg 파일을 열어요')).toBeVisible();
-    await expect(page.getByText('설치 파일을 실행해요')).toBeHidden();
-    await page.getByRole('button', { name: '보안 경고가 뜨나요?' }).click();
-    await expect(page.getByText(/그래도 열기/)).toBeVisible();
-    await expect(
-      page.getByText('휴대폰 앱과 같은 계정으로 로그인하면 기록이 그대로 있어요'),
-    ).toBeVisible();
-    await expect(page.getByText('휴대폰 앱도 있어요')).toBeVisible();
-    await axe(page);
-    await page.reload();
-    await expect(page.getByRole('heading', { name: '다운로드를 시작했어요' })).toBeVisible();
+    await page.goto('/download?os=mac');
+    await expect(page.getByRole('heading', { level: 1, name: '앱 받기' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Google Play에서 받기' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '다운로드를 시작했어요' })).toHaveCount(0);
     await page.waitForTimeout(300);
-    expect(hits.filter((h) => h.includes('/latest/mac')).length).toBe(1);
-    await page.getByRole('button', { name: '다시 받기' }).click();
-    await expect.poll(() => hits.filter((h) => h.includes('/latest/mac')).length).toBe(2);
+    expect(hits.filter((h) => h.includes('download.sweetwo.kr'))).toEqual([]);
+    await axe(page);
   });
 
-  test('초대 링크: 앱을 받은 브라우저면 앱으로 열까요', async ({ page }) => {
+  test('초대 링크: PC는 코드 + 스토어 2개, ‘앱으로 열까요?’ 없음', async ({ page }) => {
     await outside(page);
     await page.addInitScript(() => localStorage.setItem('sweetwo-app-seen', '1'));
     await page.goto('/i/K7M2QX');
-    await expect(page.getByRole('heading', { name: 'sweeTwo 앱으로 열까요?' })).toBeVisible();
-    await expect(page.getByRole('link', { name: '앱으로 열기' })).toHaveAttribute(
-      'href',
-      'sweetwo://i/K7M2QX',
-    );
-    // 앱이 열리지 않으면 같은 초대 화면(코드 + 다운로드)
     await expect(page.getByRole('heading', { name: 'sweeTwo에 초대받았어요' })).toBeVisible();
     await expect(page.getByText('K7M2QX', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'sweeTwo 앱으로 열까요?' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Google Play에서 받기' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '페이지를 찾을 수 없어요' })).toBeHidden();
     await axe(page);
   });
@@ -125,28 +103,10 @@ test.describe('Mac', () => {
 
 test.describe('Windows', () => {
   test.use({ userAgent: WIN });
-  test('Windows용 다운로드, 설치 안내는 Windows 단계', async ({ page }) => {
-    await outside(page);
-    await page.goto('/');
-    await expect(
-      page.locator('[data-download]').first().getByRole('link', { name: 'Windows용 다운로드' }),
-    ).toBeVisible();
-    await page.goto('/download?os=win');
-    await expect(page.getByText('시작 메뉴에서 sweeTwo를 열어요')).toBeVisible();
-    await page.getByRole('button', { name: '보안 경고가 뜨나요?' }).click();
-    await expect(page.getByText(/SmartScreen/)).toBeVisible();
-  });
-});
-
-test.describe('Windows 7', () => {
-  test.use({ userAgent: WIN7 });
-  test('지원하지 않는 컴퓨터: 안내 + 스토어 2개', async ({ page }) => {
+  test('Windows도 스토어 2개', async ({ page }) => {
     await outside(page);
     await page.goto('/');
     const hero = page.locator('[data-download]').first();
-    await expect(
-      hero.getByText('이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요'),
-    ).toBeVisible();
     await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
     await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toBeVisible();
   });
@@ -154,7 +114,7 @@ test.describe('Windows 7', () => {
 
 test.describe('휴대폰', () => {
   test.use({ userAgent: IPHONE });
-  test('iPhone: App Store 하나 + PC 안내, 상단 앱 받기 = 스토어, 초대 링크는 코드 + 스토어', async ({
+  test('iPhone: App Store 하나, 상단 앱 받기 = 스토어, 초대 링크는 코드 + 스토어', async ({
     page,
   }) => {
     await outside(page);
@@ -162,7 +122,7 @@ test.describe('휴대폰', () => {
     const hero = page.locator('[data-download]').first();
     await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
     await expect(hero.getByRole('link', { name: 'Google Play에서 받기' })).toBeHidden();
-    await expect(hero.getByText('Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요')).toBeVisible();
+    await expect(hero.getByText('Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요')).toHaveCount(0);
     await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute(
       'href',
       'https://apps.apple.com/kr/',

@@ -1,6 +1,6 @@
 ---
-// 소셜 로그인 복귀 페이지(15 A-03 5번, DEV_GUIDE ‘데스크톱 로그인과 딥링크’, ‘모바일 세션’).
-// from=desktop(데스크톱), from=app(모바일 로그인 창): code(또는 error)와 state만 sweetwo://auth/callback으로 넘김.
+// 소셜 로그인 복귀 페이지(15 A-03 5번, DEV_GUIDE ‘모바일 세션’).
+// from=app(모바일 로그인 창): code(또는 error)와 state만 sweetwo://auth/callback으로 넘김.
 // 모바일은 로그인 창이 sweetwo://를 받자마자 닫혀 이 화면이 거의 보이지 않음. 값은 형식을 확인하고 넘기며 저장하지 않음.
 import Site from '../../layouts/Site.astro';
 import { t } from '../../lib/site';
@@ -22,7 +22,7 @@ import { t } from '../../lib/site';
   const state = pick('state');
   const code = pick('code');
   const error = pick('error');
-  if ((from === 'desktop' || from === 'app') && TOKEN.test(state)) {
+  if (from === 'app' && TOKEN.test(state)) {
     const u = new URL('sweetwo://auth/callback');
     u.searchParams.set('state', state);
     if (error && ERROR.test(error)) u.searchParams.set('error', error);
