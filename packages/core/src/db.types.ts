@@ -3338,6 +3338,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      onboarding_reset_plan: { Args: Record<PropertyKey, never>; Returns: undefined }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
