@@ -1,4 +1,4 @@
-import { Children, useEffect, type ReactNode } from 'react';
+import { Children, useEffect, useRef, type ReactNode } from 'react';
 import { useLoadingShown } from './Button';
 import { Icon } from './Icon';
 import { Wordmark } from './Wordmark';
@@ -223,6 +223,31 @@ export function QuestionLayout({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onBack]);
+
+  // Enter = 주 버튼(12 공통 ‘키보드’, 2026-11-10 QA 2구간 S2-08): 입력 칸이 없거나 휠·빈 곳에 포커스가 있어도.
+  // 입력 칸은 form 제출이 처리하고, 다른 버튼·링크·선택지에 포커스가 있으면 그것을 누름. 한글 조합 중, 시트·대화상자가 열려 있으면 무시
+  const submitRef = useRef<() => void>();
+  submitRef.current = primary && !primary.disabled && !busy ? onSubmit : undefined;
+  useEffect(() => {
+    if (!primary) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.isComposing || e.defaultPrevented) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      const a = document.activeElement;
+      if (
+        a &&
+        a !== document.body &&
+        a.closest(
+          'button, a, input, textarea, select, [role="checkbox"], [role="radio"], [role="switch"]',
+        )
+      )
+        return;
+      e.preventDefault();
+      submitRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [!!primary]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const backOnly = !primary && !later && !secondary;
   return (

@@ -4,7 +4,8 @@
 
 - 소비자가 주는 것: 라벨, 상태.
 - 켜진 Toggle과 고른 카드 테두리는 `ink`. 체크한 Checkbox(`hg-checkbox`)와 고른 표시 원(`hg-option__mark`)은 브랜드 오렌지 `accent-app` + `on-accent-app` 체크(2026-11-09, 체크리스트 `hg-check`와 같음). 꺼진 상태 테두리는 `border-control`.
-- Toggle: 설정 알림처럼 바로 적용되는 것. Checkbox: 약관 동의. Radio: 한 화면 안 하나 고르기.
+- Toggle: 설정 알림처럼 바로 적용되는 것. Checkbox: 약관 동의(ConsentCard), 질문 화면의 켜고 끄는 한 줄. Radio: 한 화면 안 하나 고르기.
+- Checkbox 줄(`Checkbox`, `hg-checkrow`, 2026-11-10): 체크 상자 20px(`hg-checkbox`) + 12px + 글자 15px(`text-body`, `ink`), 줄 전체가 누르는 곳(높이 44px 이상), 포커스 링은 `focus-ring`. O-31 ‘매달 금액이 달라요’. 동의 묶음 안 줄은 그대로 `hg-consent__check`.
 - 질문 화면의 하나 고르기(결혼 여부 묻기)는 카드형 `hg-option--card`(2026-11-03 지그재그 선택 카드처럼 바꿈).
   - 안 고른 카드: `surface` 바탕 + 1px `hairline` 테두리, `radius-lg`, 안쪽 16px, 높이 64px 이상. 올리면 테두리 `border-control`.
   - 왼쪽 그림 칸(`hg-option__icon`): 2D 선택지 그림(Illustrations ‘나중 과제’ 5번)이 들어올 때까지 36px 회색 빈 자리(`hg-option__icon hg-artslot`, `surface-alt` + 안쪽 1px `hairline-soft`, `radius-md` 둥근 네모, 화면 읽기에서 숨김). `ChoiceCards` 선택지에 `icon`(그림 주제)이 있을 때만 그림(O-30, O-06, O-07, O-11, P-04, S-11f, S-11g). 2026-11-09 오전에 없앴다가 같은 날 사용자 요청으로 되돌림.

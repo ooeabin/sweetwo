@@ -132,6 +132,7 @@ export function DateWheel({
   yearOnly,
   yearMonth,
   lunar,
+  commitInitial = true,
 }: {
   label: string;
   value: YMD | null;
@@ -146,12 +147,17 @@ export function DateWheel({
   yearMonth?: boolean;
   /** 음력(2026-11-04 Y-07c): 어느 달이든 1~30일(맞는 날인지는 화면이 따로 확인) */
   lunar?: boolean;
+  /**
+   * 처음 값을 바로 답으로 알려 줄지(기본 true). false면 사람이 휠을 움직일 때까지 value가 null로 남음
+   * (2026-11-10 QA 2구간 Q3: 출생연도·결혼한 날을 처음 묻는 자리에서 처음 값이 그대로 답이 되지 않게)
+   */
+  commitInitial?: boolean;
 }) {
   const dim = (y: number, m: number) => (lunar ? 30 : daysIn(y, m));
   const start = initial ?? { y: maxYear - 12, m: 1, d: 1 };
   const v = value ?? start;
   useEffect(() => {
-    if (!value) onChange(start);
+    if (!value && commitInitial) onChange(start);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);

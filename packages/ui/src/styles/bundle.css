@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (2f07832). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (01375a1). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -995,6 +995,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-amountin > .hg-quick > .hg-chip:hover { background: var(--hairline-soft); }
 .hg-amountin > .hg-quick > .hg-chip.is-selected, .hg-amountin > .hg-quick > .hg-chip.is-selected:hover { border-color: var(--accent-app); box-shadow: inset 0 0 0 1px var(--accent-app); background: var(--surface); color: var(--accent-app-text); }  /* 2026-11-09 바꾸기 칩(quickSet) 고른 표시: 오렌지 테두리 + 오렌지 글자 600(브랜드 색 규칙 2026-11-09) */
 .hg-amountin .hg-amount.is-idle { border-bottom-color: var(--border-control); }  /* 2026-11-09 round 3 두 칸(second)일 때 키패드가 쓰지 않는 칸은 밑줄을 옅게 */
+/* 2026-11-10 QA 2구간 S2-21: 금액 칸 인라인 스타일을 클래스로. 입력 칸 자체는 틀 없이, 오류면 밑줄 danger, 링크 줄은 왼쪽 정렬 */
+input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 100%; min-width: 0; color: var(--ink); padding: 0; }
+.hg-amountin .hg-amount.is-error { border-bottom-color: var(--danger); }
+.hg-amountin__links { display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-start; }
+.hg-amountin > .hg-btn--link { align-self: flex-start; }
+/* Checkbox 줄(Selection.md, 2026-11-10): 체크 상자 + 글자, 줄 전체가 누르는 곳(44px). O-31 ‘매달 금액이 달라요’ */
+.hg-checkrow { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; font: var(--text-body); color: var(--ink); }
 /* 날짜 한 칸(DateInput): 글자 칸 하나 안에 연·월·일 조각 */
 .hg-datefield { display: flex; align-items: center; gap: var(--space-1); max-width: 280px; }
 .hg-datefield:focus-within { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
@@ -1292,8 +1299,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-lock__foot { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-height: 44px; }
 
 /* 공통 버튼 지우기: 새 컴포넌트의 누르는 줄 */
-:where(button):where(.hg-noti__item, .hg-consent__check, .hg-reorder__handle, .hg-file__remove) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-:is(.hg-noti__item, .hg-consent__check, .hg-reorder__handle):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:where(button):where(.hg-noti__item, .hg-consent__check, .hg-checkrow, .hg-reorder__handle, .hg-file__remove) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+:is(.hg-noti__item, .hg-consent__check, .hg-checkrow, .hg-reorder__handle):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ImageCrop: 사진 올리기와 자르기(S-11e) */

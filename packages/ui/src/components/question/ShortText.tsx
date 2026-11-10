@@ -6,18 +6,38 @@ import { IconButton } from '../IconButton';
 export const normalizeShortText = (s: string) =>
   s.replace(/[\t\r\n]+/g, ' ').replace(/ {2,}/g, ' ');
 
+/**
+ * 보이는 글자 단위로 나눔(2026-11-10 QA 2구간 S2-19: 커플 이모지 👩‍❤️‍👨 하나 = 1자). Intl.Segmenter가 없으면 코드 포인트
+ */
+export function graphemes(s: string): string[] {
+  const Seg = (Intl as unknown as { Segmenter?: typeof Intl.Segmenter }).Segmenter;
+  if (!Seg) return [...s];
+  return [...new Seg('ko', { granularity: 'grapheme' }).segment(s)].map((x) => x.segment);
+}
+
+/** 보이는 글자 max자 + 코드 포인트 codeMax 안으로 자름(서버 한도는 코드 포인트) */
+function clip(v: string[], max: number, codeMax: number) {
+  const out = v.slice(0, max);
+  while (out.length && [...out.join('')].length > codeMax) out.pop();
+  return out;
+}
+
 export function ShortText({
   label,
   value,
   onChange,
   max,
+  codeMax = max,
   placeholder,
   error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  /** 보이는 글자 수 한도(글자 수 표시도 이 단위) */
   max: number;
+  /** 서버 한도(코드 포인트, char_length). 기본은 max와 같음. O-03 이름은 40(2026-11-10) */
+  codeMax?: number;
   placeholder?: string;
   error?: string;
 }) {
@@ -25,7 +45,7 @@ export function ShortText({
   const ref = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<string>();
   useEffect(() => ref.current?.focus(), []);
-  const chars = [...value];
+  const chars = graphemes(value);
   return (
     <div className="hg-field">
       <label htmlFor={id} className="hg-sr">
@@ -42,10 +62,11 @@ export function ShortText({
           aria-invalid={!!error || undefined}
           aria-describedby={`${id}-count`}
           onChange={(e) => {
-            const v = [...normalizeShortText(e.target.value)];
-            if (v.length > max) setNotice(`${max}자까지만 넣었어요`);
+            const v = graphemes(normalizeShortText(e.target.value));
+            const kept = clip(v, max, codeMax);
+            if (kept.length < v.length) setNotice(`${max}자까지만 넣었어요`);
             else setNotice(undefined);
-            onChange(v.slice(0, max).join(''));
+            onChange(kept.join(''));
           }}
         />
         {value && (
