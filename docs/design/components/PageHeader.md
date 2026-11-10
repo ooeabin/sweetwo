@@ -3,7 +3,7 @@
 상세 화면 머리. 뒤로 + 제목 + 동작 1개(선택). 저금 항목 상세(W-10), 월급 계획(W-01), 알림, 설정 하위 화면.
 
 - 소비자가 주는 것: 제목, 보조 1줄(선택), 동작(선택: 더보기 IconButton 또는 고스트 버튼 1개).
-- 높이 56px 이상, 세로 가운데 정렬. 좁은 창(모바일 앱): 왼쪽 뒤로 IconButton `--ghost` + `chevron-left`(`aria-label="뒤로"`, `hg-pagehead__icon`).
+- 높이 56px 이상, 세로 가운데 정렬. 좁은 창(모바일 앱): 왼쪽 뒤로 IconButton `--ghost` + `chevron-left`(`aria-label="뒤로"`, `hg-pagehead__icon hg-back`). 뒤로 버튼은 `hg-back` 하나로 통일(2026-11-10: 40px 누르는 자리, `chevron-left` 24px `ink`, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px. IconButton.md ‘뒤로’).
 - 넓은 창(데스크톱 앱): 꺾쇠 아이콘 대신 제목 위에 돌아갈 화면 이름 “‹ 설정”(`hg-pagehead__crumb`, 12px 600 `slate`, 마우스 올리면 `ink`). 화면 읽기는 “뒤로, 설정”. 돌아갈 곳이 정해지지 않은 화면(브라우저 기록으로 돌아감)은 “‹ 이전”.
 - 제목 `title-3`(17px 600) 왼쪽 정렬, 한 줄 말줄임, `h1`. 보조 줄은 `caption` `stone`.
 - 오른쪽 동작은 1개만: ⋯(Menu로 수정·지우기) 또는 “수정”. 주 버튼은 두지 않음.

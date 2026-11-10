@@ -81,7 +81,7 @@ export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBa
     <div className={`hg-chapterbar${chapter.tone === 'ink' ? ' hg-chapterbar--ink' : ''}`}>
       <div className="hg-chapterbar__top">
         {onBack && (
-          <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+          <button type="button" className="hg-q__back hg-back" aria-label="뒤로" onClick={onBack}>
             <Icon name="chevron-left" size={24} />
           </button>
         )}
@@ -248,7 +248,7 @@ export function QuestionLayout({
           <div className="hg-q__nav">
             {steps && <StepsBar steps={steps} />}
             {onBack ? (
-              <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+              <button type="button" className="hg-q__back hg-back" aria-label="뒤로" onClick={onBack}>
                 <Icon name="chevron-left" size={24} />
               </button>
             ) : (

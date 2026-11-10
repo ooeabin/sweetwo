@@ -28,7 +28,7 @@ export function PageHeader({
         label={backLabel}
         ghost
         onClick={onBack}
-        className="hg-pagehead__icon"
+        className="hg-pagehead__icon hg-back"
       />
       <div className="hg-pagehead__text">
         <button
