@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (c274973). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (fdb5910). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -312,7 +312,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-chapters__item.is-next .hg-chapters__num { color: var(--stone); }
 .hg-q__head { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-q__head > * { margin: 0; }
-.hg-q__title { font: var(--text-title-1); letter-spacing: -0.4px; word-break: keep-all; }
+.hg-q__title { font: var(--text-title-1); letter-spacing: -0.3px; word-break: keep-all; }
 .hg-q__help { font: var(--text-body); color: var(--slate); }
 /* 제목 묶음과 입력 사이는 한 단계 넓게(24 + 16 = 40px), 입력은 열 너비를 꽉 채움(버튼과 같은 양옆) */
 .hg-q > .hg-q__head { margin-bottom: var(--space-4); }
@@ -1179,7 +1179,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-lock > * { margin: 0; }
 .hg-lock__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-lock__head > * { margin: 0; }
-.hg-lock__title { font: var(--text-title-1); letter-spacing: -0.4px; text-align: center; word-break: keep-all; white-space: pre-line; }
+.hg-lock__title { font: var(--text-title-1); letter-spacing: -0.3px; text-align: center; word-break: keep-all; white-space: pre-line; }
 .hg-pin { display: flex; gap: var(--space-5); }
 .hg-lock__head + .hg-pin { margin-top: var(--space-4); }  /* 제목과 점 사이 40px */
 .hg-pin i { width: 18px; height: 18px; box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--border-control); }
@@ -1849,7 +1849,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 }
 .hg-auth__head { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
 .hg-auth__head > * { margin: 0; }
-.hg-auth__title { font: var(--text-title-1); letter-spacing: -0.4px; white-space: pre-line; word-break: keep-all; }
+.hg-auth__title { font: var(--text-title-1); letter-spacing: -0.3px; white-space: pre-line; word-break: keep-all; }
 .hg-auth__help { font: var(--text-body); color: var(--slate); }
 .hg-auth__actions { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 360px; }
 .hg-auth__actions .hg-btn { position: relative; }
