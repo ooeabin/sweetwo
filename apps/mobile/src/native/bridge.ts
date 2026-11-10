@@ -10,6 +10,7 @@ import {
   cancelLogin,
   getAccessToken,
   listenAppUrls,
+  loginPending,
   reopenLogin,
   signOut,
   startLogin,
@@ -27,6 +28,7 @@ import {
   takePendingOpen,
 } from './push';
 import {
+  clearPin,
   clearPinVerified,
   lockEvents,
   lockNow,
@@ -81,6 +83,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       start: (p) => startLogin(p),
       reopen: () => reopenLogin(),
       cancel: () => cancelLogin(),
+      pending: async () => loginPending(),
       getAccessToken: () => getAccessToken(),
       signOut: () => signOut('user'),
       onEvent: (cb) => authEvents.on(cb),
@@ -93,6 +96,8 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       setTouchId: (on) => setBiometric(on),
       unlockWithTouchId: () => unlockWithBiometric(),
       clear: () => clearPinVerified(),
+      // ‘PIN을 잊었어요’(곧 로그아웃), 다른 계정 로그인 때만 앱이 부름(platform.ts AppBridge.lock.reset)
+      reset: () => clearPin(),
       setAutoLock: (min) => setAutoLock(min),
       onLock: (cb) => lockEvents.on(() => cb()),
     },

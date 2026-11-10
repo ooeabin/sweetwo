@@ -38,7 +38,10 @@ export interface AppBridge {
   version: string;
   /** 앱 버전(package.json) */
   appVersion: string;
-  /** 초대 링크(sweetwo://i/{code})를 받는다. 돌려준 함수로 해제. */
+  /**
+   * 초대 링크(sweetwo://i/{code}, https://sweetwo.kr/i/{code} 앱 링크)를 받는다. 받는 쪽이 생기기 전에 온 링크(처음 실행)는
+   * 구독할 때 한 번 넘김. 돌려준 함수로 해제. 앱은 A-01 판단이 끝난 뒤 구독해 A-07(/i/{code})로(잠겨 있으면 풀린 뒤 보임)
+   */
   onInvite: (cb: (code: string) => void) => () => void;
   auth: {
     /** 시스템 로그인 창으로 소셜 로그인을 연다(A-03) */
@@ -47,6 +50,8 @@ export interface AppBridge {
     ) => Promise<{ ok: true } | { ok: false; reason: 'browser_open_failed' }>;
     reopen: () => Promise<{ ok: boolean }>;
     cancel: () => Promise<void>;
+    /** 이 기기가 시작한 로그인 요청이 아직 기다리는 중인지(A-03 새로 고침·재실행 때, 2026-11-10). 없으면 모름 */
+    pending?: () => Promise<boolean>;
     /** 세션이 없으면 null */
     getAccessToken: () => Promise<string | null>;
     signOut: () => Promise<void>;
@@ -61,6 +66,11 @@ export interface AppBridge {
     unlockWithTouchId: () => Promise<boolean>;
     /** S-15 잠금 끄기(1분 안에 verify한 뒤만) */
     clear: () => Promise<boolean>;
+    /**
+     * 이 기기 PIN·생체 인증 지우기(확인 없이, 2026-11-10). ‘PIN을 잊었어요’(바로 로그아웃과 함께), 다른 계정으로
+     * 로그인했을 때만 앱이 부른다. 잠금 해제 대신 쓰지 않음
+     */
+    reset?: () => Promise<void>;
     /** 자동 잠금 분: 0·1·5·15 */
     setAutoLock: (min: number) => Promise<boolean>;
     onLock: (cb: () => void) => () => void;

@@ -151,6 +151,9 @@ export async function reopenLogin() {
   }
 }
 
+/** 이 기기가 시작한 로그인 요청이 아직 기다리는 중인지(A-03 새로 고침·다시 실행 때 끝없이 기다리지 않게) */
+export const loginPending = () => pending !== null;
+
 export async function cancelLogin() {
   clearPending();
   if (ios()) await WebAuth.cancel().catch(() => undefined);
