@@ -17,7 +17,7 @@ const failNotice = (reason: LoginFailReason, p: AuthProvider) =>
         ? copy.relogin
         : copy.providerError(p);
 
-// A-03 브라우저 로그인 대기(데스크톱만). 결과는 main이 딥링크로 받아 알려 준다.
+// A-03 로그인 창 대기(모바일 앱). 결과는 네이티브 브리지가 앱 링크로 받아 알려 준다.
 export function A03BrowserWait() {
   const nav = useNavigate();
   const st = (useLocation().state ?? {}) as { provider?: AuthProvider; failed?: boolean };

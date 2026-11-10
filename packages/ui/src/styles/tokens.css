@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (a0c3960). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (fac61d5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -146,7 +146,7 @@
   --space-8: 32px; /* 섹션 사이, 강조 카드 안쪽. */
   --space-10: 40px; /* 질문 화면 위 여백. */
   --space-14: 56px; /* 하단 독 높이, 키패드 키, 목록 행 최소 높이. */
-  --space-16: 64px; /* 큰 구획 사이(데스크톱). */
+  --space-16: 64px; /* 큰 구획 사이(넓은 창). */
   --space-22: 88px; /* 좁은 창 본문 아래 여백(독 56 + 띄움 16 + 16). */
   --content-max: 720px; /* 본문 최대 너비. */
   --question-max: 480px; /* 질문 화면 한 열 너비, 입력 칸 최대 너비. */

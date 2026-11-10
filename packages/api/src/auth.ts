@@ -62,7 +62,7 @@ export async function completeSignup(input: {
   if (error) throw toError(error.message);
 }
 
-// 웹 전용 세션 동작(데스크톱은 main 프로세스가 한다)
+// 웹 전용 세션 동작(개발·e2e. 모바일 앱은 네이티브 브리지가 한다)
 export const webAuth = {
   /** 제공자 로그인 페이지로 이동(리다이렉트) */
   async start(provider: AuthProvider, redirectTo: string) {
@@ -94,27 +94,25 @@ export async function fetchSocialName(): Promise<string | null> {
 }
 
 /** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
-export async function fetchLaunchConfig(platform: 'desktop' | 'ios' | 'android' | 'web'): Promise<{
+export async function fetchLaunchConfig(platform: 'ios' | 'android' | 'web'): Promise<{
   min: string;
   maintenance: { starts: string; ends: string; message: string | null } | null;
 }> {
   const { data, error } = await supabase()
     .from('app_config')
     .select(
-      'min_version_desktop, min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
+      'min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
     )
     .eq('id', 1)
     .single();
   if (error) throw toError(error.message);
   return {
     min:
-      platform === 'desktop'
-        ? data.min_version_desktop
-        : platform === 'ios'
-          ? data.min_version_ios
-          : platform === 'android'
-            ? data.min_version_android
-            : data.min_version_web,
+      platform === 'ios'
+        ? data.min_version_ios
+        : platform === 'android'
+          ? data.min_version_android
+          : data.min_version_web,
     maintenance:
       data.maintenance_starts_at && data.maintenance_ends_at
         ? {

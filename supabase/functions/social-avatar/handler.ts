@@ -48,7 +48,7 @@ export function pictureUrl(identities: Identity[]): string | null {
   return null;
 }
 
-// 앱(데스크톱, 모바일 웹뷰, 개발 브라우저)에서 바로 부르므로 CORS
+// 앱(모바일 웹뷰, 개발 브라우저)에서 바로 부르므로 CORS
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',

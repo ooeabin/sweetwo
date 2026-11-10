@@ -1,41 +1,14 @@
 ---
-// 다운로드 버튼(L-01 2·7번): OS를 알아서 하나만. Mac, Windows = 다운로드(→ L-02가 받기 시작) + 아래 “휴대폰 앱도 있어요” + 스토어 2개,
-// iPhone = App Store, Android = Google Play(+ “Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요”), 모름 = 스토어 2개,
-// 지원 안 하는 컴퓨터 = 안내 + 스토어 2개. ‘다른 OS용 받기’를 누르면 두 OS 버튼을 펼침. 스크립트 전에는 ‘모름’ 모양.
+// 앱 받기 버튼(L-01 2·7번, L-02): 기기에 맞는 스토어. iPhone·iPad = App Store, Android = Google Play(주 버튼 하나),
+// 그 밖(PC, 모름) = 스토어 2개. 스크립트 전에는 ‘그 밖’ 모양. 2026-11-10 데스크톱 다운로드 없앰(ADR 0008).
 import StoreBadges from './StoreBadges.astro';
-import { t } from '../lib/site';
 interface Props {
-  placement: 'hero' | 'bottom' | 'invite';
+  placement: 'hero' | 'bottom' | 'invite' | 'install';
 }
 const { placement } = Astro.props;
-const id = `both-${placement}`;
 ---
 <div class="hg-site__text" data-download>
-  <a class="hg-btn hg-btn--primary" data-os="mac" hidden href="/download?os=mac" data-dl="mac" data-placement={placement}>
-    <span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.macDownload}
-  </a>
-  <a class="hg-btn hg-btn--primary" data-os="win" hidden href="/download?os=win" data-dl="win" data-placement={placement}>
-    <span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}
-  </a>
-  <p data-os="unsupported" hidden>{t.unsupported}</p>
   <div data-os="ios" hidden><StoreBadges placement={placement} which="ios" primary /></div>
   <div data-os="android" hidden><StoreBadges placement={placement} which="android" primary /></div>
-  <div data-os="unknown unsupported"><StoreBadges placement={placement} /></div>
-  <p data-os="ios android" hidden class="hg-site__lead">{t.phoneAlso}</p>
-  <div class="hg-site__os" data-os="mac win unknown unsupported">
-    <button type="button" class="hg-btn hg-btn--link" data-other-os aria-expanded="false" aria-controls={id}>{t.otherOs}</button>
-    <span>{t.supported}</span>
-  </div>
-  <div id={id} data-both hidden class="hg-row" style="gap: var(--space-2); flex-wrap: wrap;">
-    <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/download?os=mac" data-dl="mac" data-placement={placement}>
-      <span class="hg-ico hg-ico--apple-logo" aria-hidden="true"></span>{t.macDownload}
-    </a>
-    <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/download?os=win" data-dl="win" data-placement={placement}>
-      <span class="hg-ico hg-ico--windows-logo" aria-hidden="true"></span>{t.winDownload}
-    </a>
-  </div>
-  <div class="hg-stack" data-os="mac win" hidden style="gap: var(--space-2);">
-    <span class="hg-site__lead">{t.mobileToo}</span>
-    <StoreBadges placement={placement} small />
-  </div>
+  <div data-os="other"><StoreBadges placement={placement} /></div>
 </div>

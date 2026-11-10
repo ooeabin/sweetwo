@@ -3,7 +3,7 @@ import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import type { DesktopBridge } from '@sweetwo/app';
+import type { AppBridge } from '@sweetwo/app';
 import { parseDeepLink } from '@sweetwo/core';
 import {
   authEvents,
@@ -39,7 +39,7 @@ import {
   verifyPin,
 } from './lock';
 
-// 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts DesktopBridge와 같음(위젯·OS 알림 없음).
+// 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
 // 웹뷰에는 access token만. refresh token, code_verifier, 로그인 콜백 code는 이 파일 밖(웹뷰 화면 코드)에서 못 봄.
 const invites = emitter<string>();
 const navigates = emitter<string>();
@@ -66,7 +66,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
   startPush();
   await startAutoLock();
 
-  const bridge: DesktopBridge = {
+  const bridge: AppBridge = {
     platform,
     version: Capacitor.getPlatform(),
     appVersion: info.version,

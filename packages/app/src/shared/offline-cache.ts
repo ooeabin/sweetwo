@@ -1,8 +1,8 @@
 import { dehydrate, hydrate, type QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
-import type { DesktopBridge } from '../platform';
+import type { AppBridge } from '../platform';
 
-// 오프라인 조회(30 동기화 1·4장): 데스크톱·모바일 앱은 마지막으로 받은 화면 데이터를 기기에 암호화해 두고(브리지 cache),
+// 오프라인 조회(30 동기화 1·4장): 모바일 앱은 마지막으로 받은 화면 데이터를 기기에 암호화해 두고(브리지 cache),
 // 켤 때 먼저 채워서 인터넷이 없어도 볼 수 있게 함. 서버가 원본이라 연결되면 늘 새로 받음.
 // - 저장: 받은 데이터가 바뀌면 3초 모아서 한 번. 성공한 조회만, 서명 주소(사진)처럼 곧 만료되는 것은 뺌
 // - 버전이 다르면(앱 업데이트로 모양이 바뀜) 버리고 서버에서 다시 받음
@@ -15,7 +15,7 @@ export const useCacheInfo = create<{ savedAt: string | null; set: (at: string | 
   (set) => ({ savedAt: null, set: (savedAt) => set({ savedAt }) }),
 );
 
-export async function restoreCache(qc: QueryClient, bridge: DesktopBridge | undefined) {
+export async function restoreCache(qc: QueryClient, bridge: AppBridge | undefined) {
   if (!bridge?.cache) return;
   try {
     const text = await bridge.cache.load();
@@ -29,7 +29,7 @@ export async function restoreCache(qc: QueryClient, bridge: DesktopBridge | unde
   }
 }
 
-export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefined) {
+export function startCacheSaver(qc: QueryClient, bridge: AppBridge | undefined) {
   const cache = bridge?.cache;
   if (!cache) return () => undefined;
   let timer: ReturnType<typeof setTimeout> | null = null;

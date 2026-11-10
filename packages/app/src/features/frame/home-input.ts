@@ -31,33 +31,32 @@ const write = (k: string, v: string) => {
 };
 const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 월급 계획 확인)
 
-// 홈(H-05·H-06)과 트레이 위젯이 같이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
-/** on = false면 읽지 않음(트레이 위젯이 없는 웹·모바일) */
-export function useHomeInput(on = true) {
+// 홈(H-05·H-06)이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
+export function useHomeInput() {
   const today = todayKst();
   const me = useMe();
   const space = useSpace();
   const lists = useQuery({
     queryKey: qk.checklists(today),
     queryFn: () => fetchChecklistsEnsured(today),
-    enabled: on && !!me.data?.onboarding_done_at,
+    enabled: !!me.data?.onboarding_done_at,
   });
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals, enabled: on });
-  const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays, enabled: on });
-  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets, enabled: on });
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
+  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const state = space.data?.couple_state;
   const unlink = useQuery({
     queryKey: qk.unlink,
     queryFn: fetchUnlink,
-    enabled: on && state === 'unlink_pending',
+    enabled: state === 'unlink_pending',
   });
   const solo = state === 'solo';
-  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: on && solo });
+  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
   const [inviteClosedOn, setInvite] = useState(() => read(INVITE_KEY));
   const [closed, setClosed] = useState(readList);
 
   const input: HomeInput | null =
-    on && me.data && space.data && goals.data && !lists.isLoading
+    me.data && space.data && goals.data && !lists.isLoading
       ? {
           today,
           meId: me.data.id,

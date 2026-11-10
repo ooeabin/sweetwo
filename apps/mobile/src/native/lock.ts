@@ -8,7 +8,7 @@ import { signOut } from './auth';
 import { emitter } from './events';
 import { secureStore } from './store';
 
-// 모바일 앱 잠금(기획서 A-06, DEV_GUIDE ‘잠금’). 데스크톱 apps/desktop/src/main/lock.ts와 같은 규칙.
+// 모바일 앱 잠금(기획서 A-06, DEV_GUIDE ‘잠금’).
 // PIN은 PBKDF2(SHA-256) 해시로 Keychain·Keystore에, 틀린 횟수도 같이. 생체 인증은 iPhone Face ID·Touch ID, Android 지문.
 // 자동 잠금 = 앱이 뒤로 간 지 N분(S-15, 기본 5분). 최근 앱 화면에는 가림 화면(PrivacyScreen).
 type Stored = { salt: string; hash: string; failed: number; touchId: boolean };

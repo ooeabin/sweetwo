@@ -111,9 +111,9 @@ test('제공자 화면에서 취소하면 A-02에 안내', async ({ page }) => {
   await expect(page.getByText('로그인을 취소했어요')).toBeVisible();
 });
 
-test('데스크톱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다', async ({ page }) => {
+test('앱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다', async ({ page }) => {
   await mockSupabase(page);
-  await page.goto('/auth/callback?from=desktop&state=s1&code=c1');
+  await page.goto('/auth/callback?from=app&state=s1&code=c1');
   await expect(page.getByRole('heading', { name: '로그인을 마쳤어요' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'sweeTwo 열기' })).toHaveAttribute(
     'href',

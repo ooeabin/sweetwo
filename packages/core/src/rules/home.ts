@@ -2,7 +2,7 @@ import { addDays, daysBetween } from '../date';
 import { nextCareDate, type CareRule } from './care';
 import { deadlineDay } from './saving-item';
 
-// 홈(19)과 트레이 위젯(26)이 같이 쓰는 계산: 할 일 한 줄(H-06), 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
+// 홈(19)이 쓰는 계산(위젯 26도 같은 규칙): 할 일 한 줄(H-06), 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
 // 문구는 앱 copy가 만들고, 여기서는 종류와 값, 갈 화면만 정함.
 
 export interface HomeChecklist {

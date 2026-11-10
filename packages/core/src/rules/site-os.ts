@@ -1,36 +1,12 @@
-// 웹사이트 다운로드 버튼(docs/spec/28-website.md L-01 2번, L-02): 접속 OS를 알아서 하나만(휴대폰은 그 기기 스토어).
-// 지원: macOS 12 이상, Windows 10 64비트 이상. 브라우저가 macOS 버전을 10_15_7로 고정해 알려 주는 일이 많아
-// 11 이하 판정은 알 수 있을 때(10_14 이하)만.
-export type SiteOs = 'mac' | 'win' | 'ios' | 'android' | 'unsupported' | 'unknown';
-/** 휴대폰(스토어 배지 쪽) */
+// 웹사이트 앱 받기 버튼(docs/spec/28-website.md L-01 2번, L-02): 휴대폰은 그 기기 스토어 하나, 그 밖(PC, 모름)은 스토어 2개.
+// 2026-11-10 데스크톱 앱을 없애 Mac·Windows 판정과 지원 OS 판정을 뺌(ADR 0008). iPad는 Mac처럼 알려 주기도 해 ‘그 밖’(스토어 2개).
+export type SiteOs = 'ios' | 'android' | 'other';
+/** 휴대폰(그 기기 스토어 하나) */
 export const isPhoneOs = (os: SiteOs) => os === 'ios' || os === 'android';
 
 export function detectSiteOs(ua: string): SiteOs {
   const s = ua || '';
   if (/Android/i.test(s)) return 'android';
   if (/iPhone|iPad|iPod/i.test(s)) return 'ios';
-  if (/Mobile/i.test(s)) return 'unknown';
-  const mac = /Mac OS X (\d+)[_.](\d+)/.exec(s);
-  if (mac) {
-    const major = Number(mac[1]);
-    const minor = Number(mac[2]);
-    if (major === 10 && minor < 15) return 'unsupported';
-    return 'mac';
-  }
-  if (/Macintosh/.test(s)) return 'mac';
-  const win = /Windows NT (\d+)\.(\d+)/.exec(s);
-  if (win) {
-    if (Number(win[1]) < 10) return 'unsupported'; // Windows 7, 8, 8.1
-    // 64비트: Win64·x64·WOW64(64비트 OS의 32비트 브라우저). 셋 다 없으면 32비트 Windows
-    if (!/Win64|x64|WOW64/i.test(s)) return 'unsupported';
-    return 'win';
-  }
-  return 'unknown';
-}
-
-/** L-02 ?os= 값: 맞으면 그 값, 아니면 접속 OS(Mac, Windows일 때만) */
-export function installOs(param: string | null, ua: string): 'mac' | 'win' | null {
-  if (param === 'mac' || param === 'win') return param;
-  const os = detectSiteOs(ua);
-  return os === 'mac' || os === 'win' ? os : null;
+  return 'other';
 }

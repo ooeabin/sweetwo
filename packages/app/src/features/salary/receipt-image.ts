@@ -322,13 +322,13 @@ const toBase64 = (b: Blob) =>
   });
 
 /**
- * 공유: 브리지 shareImage(모바일 공유 창, 데스크톱 저장 창)가 있으면 그것, 없으면(브라우저) 내려받기.
- * 결과: shared / saved / downloaded / cancelled
+ * 공유: 브리지 shareImage(모바일 공유 창)가 있으면 그것, 없으면(브라우저) 내려받기.
+ * 결과: shared / downloaded / cancelled
  */
 export async function shareReceipt(
   m: ReceiptImageModel,
   name: string,
-): Promise<'shared' | 'saved' | 'downloaded' | 'cancelled'> {
+): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const png = await renderReceiptPng(m);
   const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
   if (bridge?.shareImage) return bridge.shareImage({ name, base64: await toBase64(png) });

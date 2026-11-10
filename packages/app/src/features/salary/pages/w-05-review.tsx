@@ -26,7 +26,7 @@ export function W05Review() {
   const partner = usePartner();
   const lists = useChecklists();
   const check = useCheck();
-  // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월급 전 확인’, 홈·트레이도 같음)
+  // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월급 전 확인’, 홈도 같음)
   const empty = useRef<boolean | null>(null);
   if (!me.data || !space.data || !goals.data || !lists.data)
     return <QuestionSkeleton onBack={() => nav('/')} fields={3} />;

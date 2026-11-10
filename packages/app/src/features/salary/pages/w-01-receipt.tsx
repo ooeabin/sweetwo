@@ -427,7 +427,7 @@ export function W01Receipt() {
     try {
       const r = await shareReceipt(model, copy.imageName(todayKst()));
       track('plan_shared', { result: r, masked, whose });
-      if (r === 'saved' || r === 'downloaded') toast(copy.imageSaved);
+      if (r === 'downloaded') toast(copy.imageSaved);
     } catch {
       track('plan_shared', { result: 'failed', masked, whose });
       toast(copy.failed);

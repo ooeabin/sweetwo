@@ -1,10 +1,4 @@
-import {
-  fetchMailBounced,
-  fetchPastChecklists,
-  fetchUnlinkPartnerName,
-  qk,
-  sendDesktopLink,
-} from '@sweetwo/api';
+import { fetchMailBounced, fetchPastChecklists, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
 import {
   addDays,
   daysBetween,
@@ -18,13 +12,10 @@ import {
 } from '@sweetwo/core';
 import { Button, Hub, HubBand, HubHero, HubSaving, HubTile, Icon, IconButton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { detectPlatform, isMobile } from '../../../platform';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
-import { toast } from '../../../shared/toast';
 import {
   AddMenu,
   LineBand,
@@ -51,21 +42,6 @@ import { useGoals, useMe, usePartner, useSpace } from '../data';
 // 위에서부터 큰 상자(다음 월급날까지 + 이번 달 보낸 줄 + 보낸 금액 | 모은 금액, → W-02) → 할 일 띠(오렌지 채움, 있을 때만)
 // → 반 칸 타일 둘(월급 계획 → W-01, 캘린더 → Y-01) → 저금 상자(목표 금액에 가장 가까운 저금 하나, → W-10)
 // → 작은 타일 둘(자산 관리 → F-01, 저금 → W-13) → 자산 순위 줄. 초대·공지·해제 대기 띠는 맨 위 옅은 띠 그대로.
-const PC_BAND = 'sweetwo.pcBandDone';
-const pcBandDone = () => {
-  try {
-    return localStorage.getItem(PC_BAND) === '1';
-  } catch {
-    return true;
-  }
-};
-const markPcBand = () => {
-  try {
-    localStorage.setItem(PC_BAND, '1');
-  } catch {
-    /* 기억 못 하면 다음에 한 번 더 보일 수 있음 */
-  }
-};
 
 type Box = 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
 
@@ -84,7 +60,7 @@ export function H01Home() {
   const saving = useSavingItems();
   const nw = useNetWorth(true);
   const { masked } = useMask();
-  // 할 일 한 줄·일정은 트레이 위젯과 같은 계산(core homeTodo·homeUpcoming)
+  // 할 일 한 줄·일정은 core homeTodo·homeUpcoming
   const h = useHomeInput();
   const solo = space.data?.couple_state === 'solo';
   const exName = useQuery({
@@ -95,8 +71,6 @@ export function H01Home() {
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
-  // 18 ‘합류 뒤’: 모바일 앱으로 합류한 사람의 첫 홈 띠 1회(PC에서도)
-  const [pcBand, setPcBand] = useState(() => isMobile(detectPlatform()) && !pcBandDone());
   // H-01 1a 순위 줄은 첫 체크 뒤에만(2026-11-09 round 3): 이번 달 체크리스트에 체크·못 함 줄이 있거나 지난 체크리스트가 있으면
   const checkedAny = (lists.data ?? []).some((c) =>
     c.pay_check_line.some((l) => l.state !== 'wait'),
@@ -217,34 +191,13 @@ export function H01Home() {
       action={{ label: copy.mailCheck, onClick: () => nav('/settings/me/email') }}
     />
   ) : undefined;
-  const closePc = () => {
-    markPcBand();
-    setPcBand(false);
-  };
-  const pcBandEl =
-    pcBand && space.data.created_by && space.data.created_by !== me.data.id ? (
-      <LineBand
-        icon="info"
-        title={copy.pcAlso}
-        action={{
-          label: copy.pcSend,
-          onClick: () =>
-            void sendDesktopLink()
-              .then(() => toast(copy.pcSent))
-              .catch(() => toast(copy.pcFailed))
-              .finally(closePc),
-        }}
-        close={{ label: copy.close, onClick: closePc }}
-      />
-    ) : undefined;
   const banner =
-    notice || inviteBand || unlinkBand || bounceBand || pcBandEl ? (
+    notice || inviteBand || unlinkBand || bounceBand ? (
       <>
         {unlinkBand}
         {notice}
         {bounceBand}
         {inviteBand}
-        {pcBandEl}
       </>
     ) : undefined;
 

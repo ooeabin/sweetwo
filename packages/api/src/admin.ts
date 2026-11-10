@@ -458,17 +458,16 @@ export async function adminAddTermsVersion(v: {
 }
 
 // ── AD-16 앱 버전·점검 ───────────────────────────────────────────────
+// 데스크톱 열(min_version_desktop, latest_version_desktop)은 DB에 남았지만 쓰지 않음(ADR 0008)
 export type AppConfigRow = {
-  min_version_desktop: string;
   min_version_web: string;
   min_version_ios: string;
   min_version_android: string;
-  latest_version_desktop: string;
   maintenance_starts_at: string | null;
   maintenance_ends_at: string | null;
   maintenance_message: string | null;
   /** 지금 최소 지원 버전보다 낮은 기기 수(90일 안에 켠 기기). 읽기만 */
-  below_min?: { desktop: number; ios: number; android: number };
+  below_min?: { ios: number; android: number };
 };
 export async function fetchAdminAppConfig(): Promise<AppConfigRow> {
   const { data, error } = await supabase().rpc('admin_app_config');

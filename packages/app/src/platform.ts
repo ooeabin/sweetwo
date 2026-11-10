@@ -1,12 +1,11 @@
-// 플랫폼 차이는 여기서만. 앱(데스크톱 Electron, 모바일 Capacitor) 전용 기능은 window.sweetwo 브리지로만 쓴다.
-// 데스크톱은 apps/desktop/src/preload/index.ts, 모바일은 apps/mobile/src/native/bridge.ts가 같은 모양으로 노출(e2e가 키를 검사).
-// 위젯·OS 알림은 데스크톱만(모바일은 없음), 플랫폼 값은 bridge.platform(없으면 데스크톱).
+// 플랫폼 차이는 여기서만. 모바일 앱(Capacitor) 전용 기능은 window.sweetwo 브리지로만 쓴다.
+// apps/mobile/src/native/bridge.ts가 이 모양으로 노출. 브리지가 없으면 브라우저(개발·e2e용, ADR 0001).
+// 데스크톱 앱(Electron)은 ADR 0008(2026-11-10)로 없앰.
 import type { AuthProvider } from '@sweetwo/core';
 
-export type Platform = 'desktop' | 'ios' | 'android' | 'web';
-/** 앱(브리지가 있는 곳): 데스크톱·모바일 */
+export type Platform = 'ios' | 'android' | 'web';
+/** 앱(브리지가 있는 곳): 모바일 앱 */
 export const isApp = (p: Platform) => p !== 'web';
-export const isMobile = (p: Platform) => p === 'ios' || p === 'android';
 
 export type LoginFailReason =
   | 'cancelled'
@@ -26,30 +25,23 @@ export interface LockStatus {
   locked: boolean;
   touchIdAvailable: boolean;
   touchIdEnabled: boolean;
-  /** 생체 인증 종류(문구): Mac·iPhone Touch ID, iPhone Face ID, Android 지문. 없으면 touch */
+  /** 생체 인증 종류(문구): iPhone Touch ID, iPhone Face ID, Android 지문. 없으면 touch */
   bioKind?: 'touch' | 'face' | 'fingerprint';
   /** 자동 잠금(분). 0 = 사용 안 함 */
   autoLockMin: number;
 }
 export type VerifyResult = { ok: true } | { ok: false; failed: number; signedOut: boolean };
 
-/** 자동 업데이트 상태(apps/desktop shared/channels.ts와 같은 모양) */
-export type UpdateState =
-  | { status: 'idle' | 'checking' | 'latest' | 'error' }
-  | { status: 'downloading'; version: string; percent: number }
-  | { status: 'ready'; version: string };
-
-export interface DesktopBridge {
-  /** 모바일 브리지는 'ios' | 'android', 데스크톱은 없음 */
-  platform?: 'desktop' | 'ios' | 'android';
-  /** Electron 버전(모바일은 Capacitor 버전) */
+export interface AppBridge {
+  platform: 'ios' | 'android';
+  /** Capacitor 플랫폼 이름 */
   version: string;
   /** 앱 버전(package.json) */
   appVersion: string;
   /** 초대 링크(sweetwo://i/{code})를 받는다. 돌려준 함수로 해제. */
   onInvite: (cb: (code: string) => void) => () => void;
   auth: {
-    /** 기본 브라우저(모바일은 시스템 로그인 창)로 소셜 로그인을 연다(A-03) */
+    /** 시스템 로그인 창으로 소셜 로그인을 연다(A-03) */
     start: (
       p: AuthProvider,
     ) => Promise<{ ok: true } | { ok: false; reason: 'browser_open_failed' }>;
@@ -73,11 +65,6 @@ export interface DesktopBridge {
     setAutoLock: (min: number) => Promise<boolean>;
     onLock: (cb: () => void) => () => void;
   };
-  /** OS 알림(14). 누르면 그 알림 id */
-  notify?: {
-    show: (n: { id: string; title: string; body?: string }) => Promise<void>;
-    onOpen: (cb: (id: string) => void) => () => void;
-  };
   /** 모바일 푸시(14). 토큰은 앱이 서버에 등록(register_push_device), 누르면 그 알림 화면 */
   push?: {
     status: () => Promise<'granted' | 'denied' | 'prompt'>;
@@ -89,7 +76,7 @@ export interface DesktopBridge {
     /** 앱이 화면에 떠 있을 때 온 푸시(OS 알림 대신 앱 안 토스트) */
     onReceive: (cb: (n: { title: string; body: string | null }) => void) => () => void;
   };
-  /** 웹사이트 열기(A-01 업데이트 → 다운로드·스토어 안내). 모바일만, sweetwo.kr 주소만 */
+  /** 웹사이트 열기(A-01 업데이트 → 스토어 안내). sweetwo.kr 주소만 */
   openUrl?: (url: string) => Promise<void>;
   /** 오프라인 조회 캐시(30 동기화 4장): 기기에 암호화해 둔 마지막 화면 데이터(JSON 글). 로그아웃하면 기기가 지움 */
   cache?: {
@@ -97,52 +84,34 @@ export interface DesktopBridge {
     save: (text: string) => Promise<boolean>;
     clear: () => Promise<void>;
   };
-  /** 데스크톱 자동 업데이트(S-19 ‘업데이트 확인’). 모바일은 스토어 업데이트라 없음 */
-  update?: {
-    state: () => Promise<UpdateState>;
-    check: () => Promise<UpdateState>;
-    install: () => Promise<void>;
-    onState: (cb: (s: UpdateState) => void) => () => void;
-  };
-  /** 모바일: 만든 파일을 OS 공유 창으로(‘파일에 저장’ 등 저장 위치는 사람이 고름). 데스크톱은 없음(내려받기 창) */
+  /** 만든 파일을 OS 공유 창으로(‘파일에 저장’ 등 저장 위치는 사람이 고름). 없으면(브라우저) 내려받기 */
   saveFile?: (f: { name: string; base64: string; mime: string }) => Promise<'saved' | 'cancelled'>;
   /**
    * 이미지 공유(W-01 영수증 ‘공유하기’, 2026-11-09). PNG base64(머리 없이).
-   * 모바일: OS 공유 창 → 'shared' | 'cancelled'. 데스크톱: 저장 창(기본 ‘다운로드’) → 'saved' | 'cancelled'.
-   * 없으면(브라우저) 앱이 내려받기
+   * OS 공유 창 → 'shared' | 'cancelled'. 없으면(브라우저) 앱이 내려받기
    */
-  shareImage?: (f: { name: string; base64: string }) => Promise<'shared' | 'saved' | 'cancelled'>;
+  shareImage?: (f: { name: string; base64: string }) => Promise<'shared' | 'cancelled'>;
   /**
    * 모바일: 보상형 동영상 광고(AdMob, 자산 순위 F-08 앞, ADR 0006). 끝까지 보면 'rewarded', 닫으면 'closed',
-   * 못 불러오면 'failed'. 데스크톱·브라우저는 없음(광고 없이 바로)
+   * 못 불러오면 'failed'. 브라우저는 없음(광고 없이 바로)
    */
   ads?: { rewarded: () => Promise<'rewarded' | 'closed' | 'failed'> };
   /**
    * 안드로이드 하드웨어 뒤로(2026-11-09). 받는 쪽이 true를 돌려주면 처리한 것, false면 브리지가 기본 동작
-   * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS·데스크톱은 없음
+   * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS는 없음
    */
   onBack?: (cb: () => boolean) => () => void;
-  /** main이 앱 창에 이 화면으로 가라고 할 때(트레이 위젯, 위젯 설정 메뉴) */
+  /** 앱 링크(sweetwo://open…)로 이 화면으로 가라고 할 때 */
   onNavigate: (cb: (path: string) => void) => () => void;
-  /** 트레이 위젯(26)·위젯 설정(S-22). 값은 core TraySnapshot·TrayState·WidgetSettings로 검사해서 씀 */
-  widget?: {
-    update: (s: unknown) => Promise<void>;
-    state: () => Promise<unknown>;
-    onChange: (cb: (s: unknown) => void) => () => void;
-    open: (path: string) => Promise<void>;
-    hide: () => Promise<void>;
-    settings: () => Promise<unknown>;
-    setSettings: (p: unknown) => Promise<unknown>;
-  };
 }
 
 declare global {
   interface Window {
-    sweetwo?: DesktopBridge;
+    sweetwo?: AppBridge;
   }
 }
 
 export function detectPlatform(): Platform {
   if (typeof window === 'undefined' || !window.sweetwo) return 'web';
-  return window.sweetwo.platform ?? 'desktop';
+  return window.sweetwo.platform;
 }

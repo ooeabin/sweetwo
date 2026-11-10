@@ -45,7 +45,7 @@ export function useRankAge(): RankAgeBand | null {
   return rankAgeBand([me.data.birth_year, py.data ?? null], Number(todayKst().slice(0, 4)));
 }
 
-// 모바일 앱이면 보상형 광고(ADR 0006). 데스크톱·브라우저(브리지 없음)와 못 불러오면 광고 없이 바로
+// 모바일 앱이면 보상형 광고(ADR 0006). 브라우저(브리지 없음)와 못 불러오면 광고 없이 바로
 async function watchAd(): Promise<'rewarded' | 'closed' | 'failed' | 'none'> {
   const ads = typeof window !== 'undefined' ? window.sweetwo?.ads : undefined;
   if (!ads) return 'none';

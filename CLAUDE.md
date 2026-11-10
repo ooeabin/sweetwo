@@ -27,14 +27,15 @@
 
 ## 스택 (확정, 바꾸려면 docs/adr에 ADR)
 
-Electron(데스크톱) + Capacitor(iOS, Android) + React 18 + TypeScript + Vite, TanStack Query + Zustand, React Router, Zod + React Hook Form, Supabase(Postgres, Auth, Realtime, Edge Functions, Storage, pg_cron, RLS), pnpm + Turborepo, Vitest, Playwright, pgTAP, GitHub Actions. 웹사이트는 Astro.
+Capacitor(iOS, Android, 태블릿 포함) + React 18 + TypeScript + Vite, TanStack Query + Zustand, React Router, Zod + React Hook Form, Supabase(Postgres, Auth, Realtime, Edge Functions, Storage, pg_cron, RLS), pnpm + Turborepo, Vitest, Playwright, pgTAP, GitHub Actions. 웹사이트는 Astro.
 
 ## 구조
 
-- 한 저장소(pnpm + Turborepo 모노레포): `apps/desktop`, `apps/mobile`, `apps/admin`, `apps/site`, `apps/mail-worker`(이메일 문의 받기 Worker), `packages/app`, `packages/api`, `packages/core`, `packages/ui`, `supabase/`, `docs/`.
+- 한 저장소(pnpm + Turborepo 모노레포): `apps/mobile`, `apps/admin`, `apps/site`, `apps/mail-worker`(이메일 문의 받기 Worker), `packages/app`, `packages/api`, `packages/core`, `packages/ui`, `supabase/`, `docs/`.
 - import 방향은 한쪽만: apps → app → (api, ui, core), api → core, ui → core. 거꾸로 가면 안 된다.
 - 기능 폴더끼리는 서로의 `index.ts`로만 부른다.
-- `packages/app`은 Electron과 Capacitor를 모른다. 데스크톱, 모바일 전용은 `window.sweetwo` 브리지로만.
+- `packages/app`은 Capacitor를 모른다. 모바일 전용은 `window.sweetwo` 브리지로만.
+- 데스크톱 앱(Electron)은 없다(ADR 0008, 2026-11-10). 출시물은 모바일 앱(iOS, Android)뿐이고 태블릿(iPad, Galaxy Tab)도 지원한다. 넓은 창(768px 이상) 레이아웃은 태블릿용으로 그대로 둔다.
 - 웹 앱은 없다(ADR 0001). 브라우저 실행은 개발과 e2e용뿐.
 - 화면 하나 = 파일 하나, 파일 이름은 기획서 화면 ID로 시작: `w-04j-spend-entry.tsx`.
 
@@ -74,7 +75,7 @@ Electron(데스크톱) + Capacitor(iOS, Android) + React 18 + TypeScript + Vite,
 ## 제품 핵심 규칙 (자주 틀리는 것)
 
 - 기준: `docs/adr/0003-replan-goal-checklist.md`, `docs/adr/0007-goal-into-saving-line.md`. 월급 계획(W-01) → 월급날 체크리스트(W-02) → 다음 월급날 3일 전 월급 전 확인(W-05). 앱은 돈을 옮기지 않는다.
-- 메뉴는 홈, 월급, 자산 관리, 캘린더(넓은 창 왼쪽 사이드바 탭). 2026-11-09 홈이 허브(GCOO 앱 홈처럼): 좁은 창은 하단 탭 막대와 + 버튼(FAB) 없이 홈 머리(워드마크 + 알림 + ☰)의 메뉴 서랍(Drawer: 홈, 월급, 자산 관리, 캘린더 / 내 정보, 설정 / 우리 둘(+ 초대하기) / 공지, 문의, 도움말)과 홈 상자(HomeHub)로 이동, 홈 밖 메뉴 첫 화면 좁은 창 머리는 ‹(홈으로, 하드웨어 뒤로도 홈) + 제목, 추가는 화면 안 회색 ‘+ … 추가’ 줄(AddRow). 바탕은 홈·자산 관리 회색(`surface-alt`) + 흰 상자, 월급·캘린더 흰색. 목표 탭과 ‘목표’ 개념은 없다(2026-11-08). 목표는 저금 항목의 ‘목표 금액’(+ 선택 기한)으로만 쓰고, ‘우리 목표’·‘내 목표’는 쓰지 않는다. 비상금 기본 항목, 매달 넣기·빼기, 꺼내 쓰기, 목표 템플릿, 우선순위는 없다(매달 체크리스트의 틀은 월급 계획 W-01). 이미 모은 금액은 만들 때(W-11c)만 한 번 넣는다(2026-11-09).
+- 메뉴는 홈, 월급, 자산 관리, 캘린더(넓은 창(태블릿) 왼쪽 사이드바 탭). 2026-11-09 홈이 허브(GCOO 앱 홈처럼): 좁은 창은 하단 탭 막대와 + 버튼(FAB) 없이 홈 머리(워드마크 + 알림 + ☰)의 메뉴 서랍(Drawer: 홈, 월급, 자산 관리, 캘린더 / 내 정보, 설정 / 우리 둘(+ 초대하기) / 공지, 문의, 도움말)과 홈 상자(HomeHub)로 이동, 홈 밖 메뉴 첫 화면 좁은 창 머리는 ‹(홈으로, 하드웨어 뒤로도 홈) + 제목, 추가는 화면 안 회색 ‘+ … 추가’ 줄(AddRow). 바탕은 홈·자산 관리 회색(`surface-alt`) + 흰 상자, 월급·캘린더 흰색. 목표 탭과 ‘목표’ 개념은 없다(2026-11-08). 목표는 저금 항목의 ‘목표 금액’(+ 선택 기한)으로만 쓰고, ‘우리 목표’·‘내 목표’는 쓰지 않는다. 비상금 기본 항목, 매달 넣기·빼기, 꺼내 쓰기, 목표 템플릿, 우선순위는 없다(매달 체크리스트의 틀은 월급 계획 W-01). 이미 모은 금액은 만들 때(W-11c)만 한 번 넣는다(2026-11-09).
 - 사용자에게는 ‘저금’(버튼 ‘+ 저금 추가’, 홈 ‘저금’, ‘저금 보기’). ‘저금 항목’은 기획서·코드 안 말(2026-11-09). W-05는 ‘월급 전 확인’(‘월말 확인’, 캘린더 ‘월급 확인’ 대신).
 - 저금 줄(저금 항목)을 체크하면 그 금액이 그 저금 항목의 모은 금액에 바로 더해진다. 체크를 풀면 뺀다. ‘못 함’은 더하지 않는다.
 - 모은 금액 = 시작할 때 모은 금액(만들 때만) + 그 저금 항목을 체크한 금액의 합. 목표 금액에 닿으면 달성 축하 1회 → ‘계속 모을게요’ / ‘그만할게요’. 고르기 전에 체크를 풀어 목표 금액 아래로 내려가면 달성도 되돌린다. 순자산 = 자산 − 부채, 모은 금액은 더하지 않는다.

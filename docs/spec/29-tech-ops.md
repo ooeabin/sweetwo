@@ -1,17 +1,17 @@
 # 기술·운영
 
-클라이언트는 Electron + React 데스크톱 앱과 같은 React 코드를 Capacitor로 감싼 모바일 앱(iOS·Android, ADR 0001), 서버는 Supabase(Postgres + Auth + Realtime) 서울 리전 하나로 계정·DB·실시간 동기화를 처리함. 개인정보를 다루는 서버·도구는 모두 서울 리전, 국외 이전 없음. 보안 기준은 → 보안·개인정보, 충돌·오프라인 규칙은 → 동기화.
+클라이언트는 React 코드를 Capacitor로 감싼 모바일 앱(iOS·Android, 태블릿 포함, ADR 0001. 데스크톱 Electron 앱은 없앰 2026-11-10, ADR 0008), 서버는 Supabase(Postgres + Auth + Realtime) 서울 리전 하나로 계정·DB·실시간 동기화를 처리함. 개인정보를 다루는 서버·도구는 모두 서울 리전, 국외 이전 없음. 보안 기준은 → 보안·개인정보, 충돌·오프라인 규칙은 → 동기화.
 
 ## 1. 스택
 
 | 영역 | 선택 | 용도 |
 | --- | --- | --- |
-| 클라이언트 | React + TypeScript 화면 하나를 데스크톱은 Electron, 모바일은 Capacitor로 감쌈 | 화면·계산 패키지 공용 |
-| 빌드 | electron-vite, Vite + Capacitor | 데스크톱 앱 개발 서버와 빌드. 모바일은 Vite로 만든 화면 묶음을 Capacitor가 iOS·Android 앱에 넣음(Xcode, Android Studio·Gradle) |
+| 클라이언트 | React + TypeScript 화면 하나를 Capacitor로 감쌈(좁은 창 휴대폰, 넓은 창 태블릿. 데스크톱 Electron은 없앰 2026-11-10, ADR 0008) | 화면·계산 패키지 공용 |
+| 빌드 | Vite + Capacitor | Vite로 만든 화면 묶음을 Capacitor가 iOS·Android 앱에 넣음(Xcode, Android Studio·Gradle) |
 | 상태·데이터 | TanStack Query + Zustand | 서버 데이터 캐시·다시 불러오기는 TanStack Query, 화면 상태는 Zustand |
-| 화면 이동 | React Router | 메뉴·화면 이동. 앱 안 경로(데스크톱 해시 주소, 모바일은 앱 링크로 같은 경로를 엶) |
+| 화면 이동 | React Router | 메뉴·화면 이동. 앱 안 경로(앱 링크로 같은 경로를 엶) |
 | 입력·검증 | React Hook Form + Zod | 질문 화면 입력과 값 검증 |
-| 저장소 구조 | pnpm + Turborepo | 데스크톱 앱, 모바일 앱, 공용 패키지를 한 저장소에서 관리·빌드 |
+| 저장소 구조 | pnpm + Turborepo | 모바일 앱, 어드민, 웹사이트, 공용 패키지를 한 저장소에서 관리·빌드 |
 | 테스트 | Vitest, Playwright, pgTAP | 계산 함수 단위 테스트, 화면 흐름 E2E, DB 함수·RLS 테스트 |
 | CI/CD | GitHub Actions | 테스트·빌드·배포 자동 실행 |
 | 서버(DB·인증·실시간) | Supabase: Postgres + Auth + Realtime + Edge Functions, 서울 리전(ap-northeast-2) | 커플 공간·항목·월급 계획·체크리스트·이력 저장. 행 단위 보안(RLS)으로 공개 범위 필터를 서버에서 적용, Realtime으로 상대 변경 1\~2초 수신. DB 전체 암호화(저장·백업), 금액 합계·여유 자금·목표 모은 금액은 DB 함수가 계산 |
@@ -27,26 +27,26 @@
 | 공휴일 | 공공데이터포털 ‘한국천문연구원 특일 정보’ API | 서버가 매주 1회(월 03:00) 올해와 다음 해를 받아 임시공휴일·대체공휴일 반영, holiday 테이블에 저장(다음 해가 나오면 그 주에 들어옴). 어드민 AD-19에서 직접 넣은 날은 덮지 않고, API가 빼면 지움(취소된 임시공휴일). 앱은 테이블만 읽음 |
 | 결제 | 결제대행사 미정(→ 사업 계획 9장 ‘결정 필요’) | 프리미엄 구독 결제·갱신·해지. 카드 정보는 결제대행사에만 저장 |
 | 분석 | PostHog 자체 운영(서울 리전 서버) | 퍼널·코호트(→ 성공 지표). 금액 원값 없음 |
-| 에러 수집 | Sentry 자체 운영(서울 리전 서버), Electron·React·Capacitor SDK | 크래시·오류 코드. 금액·메모 제거 후 전송 |
+| 에러 수집 | Sentry 자체 운영(서울 리전 서버), React·Capacitor SDK | 크래시·오류 코드. 금액·메모 제거 후 전송 |
 | 모니터링·상태 페이지 | Better Stack | 외부 가동 확인 1분 간격 + 상태 페이지(status.sweetwo.kr). 개인정보 없음 |
-| 설치·업데이트 파일 | S3 서울 + CloudFront | 데스크톱 설치 파일, 자동 업데이트(electron-updater). 개인정보 없음 |
+| 설치·업데이트 파일 (없앰 2026-11-10, ADR 0008) | S3 서울 + CloudFront | 데스크톱 설치 파일, 자동 업데이트(electron-updater). 개인정보 없음 |
 | 모바일 푸시 | APNs(iOS), FCM(Android). 보내는 쪽은 Edge Functions | 알림 제목과 앞부분만(서프라이즈는 본문 숨김 → 알림), 금액 원값은 넣지 않음 [확인 필요]. 기기 토큰은 서버에 기기별 저장 |
 
 폴더 구조, 코드 규칙, 테스트·배포 절차 → 개발 가이드(별도 문서)
 
-- 코드 관리: 모노레포(데스크톱·모바일·공용 패키지·DB 마이그레이션·Edge Functions, 웹사이트는 apps/site Astro 정적 사이트)
+- 코드 관리: 모노레포(모바일·어드민·공용 패키지·DB 마이그레이션·Edge Functions, 웹사이트는 apps/site Astro 정적 사이트)
 
 **주소 구조**
 
 | 주소 | 용도 |
 | --- | --- |
 | sweetwo.kr | 웹사이트(→ 화면 설계 › 웹사이트 L-01\~L-03, L-05, L-06). Astro 정적 사이트, Cloudflare Workers 정적 자산 |
-| sweetwo.kr/i/{코드} | 초대 링크. 앱이 있으면 앱이 바로 엶(유니버설 링크·앱 링크, 데스크톱은 sweetwo://), 없으면 웹사이트 초대 페이지(코드 + 스토어·다운로드) → 화면 설계 › 웹사이트 |
+| sweetwo.kr/i/{코드} | 초대 링크. 앱이 있으면 앱이 바로 엶(유니버설 링크·앱 링크), 없으면 웹사이트 초대 페이지(코드 + 스토어) → 화면 설계 › 웹사이트 |
 | sweetwo.kr/.well-known/apple-app-site-association, /.well-known/assetlinks.json | iOS 유니버설 링크·Android 앱 링크 확인 파일(/i/*, 로그인 복귀, 알림 메일 링크 경로만) |
-| download.sweetwo.kr/latest/mac, /latest/win | 다운로드 고정 주소. CloudFront가 최신 정식 파일로 보냄(Mac universal dmg 1개, Windows x64) |
+| download.sweetwo.kr/latest/mac, /latest/win | (없앰 2026-11-10, ADR 0008) 다운로드 고정 주소. CloudFront가 최신 정식 파일로 보냄(Mac universal dmg 1개, Windows x64) |
 | status.sweetwo.kr | 상태 페이지(Better Stack) |
 | 어드민 | 별도 도메인(→ 어드민) |
-| sweetwo:// | 데스크톱 앱 딥링크(초대 코드 전달, 로그인 복귀, 위젯 화면 이동) |
+| sweetwo:// | 앱 스킴 링크(로그인 복귀, 초대 코드 전달, 알림 메일 링크. 데스크톱 딥링크는 없앰 2026-11-10, ADR 0008) |
 | sweetwo.co.kr, 스위투.kr | 선택: 나중에 등록하면 sweetwo.kr로 연결(사칭 방지) |
 
 ## 2. 데이터 모델
@@ -98,7 +98,7 @@
 | checklist\_item 가이드 체크리스트 항목(S-02, 월급 체크리스트와 다름) | item\_key text, stage enum(결혼 준비/신혼 첫해/2\~3년차/이후, 커플 공간 단계가 없어져 기준 다시 정함 [확인 필요]), version text, checked\_on date(출처 확인일), sort\_order int, active bool. 제목·본문·출처는 저장소 마크다운(코드 배포) | 1 : N checklist\_done. 버전·확인일은 어드민 AD-14 |
 | notice 공지 | title text, body text, audience jsonb(대상 조건), starts\_at, ends\_at, must\_read bool(필독), kind enum(공지/장애 고지/광고), created\_by | 관계 없음(AD-10·11) |
 | maintenance 점검 | starts\_at, ends\_at, message text, state enum(예정/진행/끝), notice\_id(null) | 0\~1 공지(AD-16) |
-| app\_config 앱 설정 | min\_version\_desktop text, min\_version\_web text, flags jsonb(기능 플래그: 이름·켜짐·대상), updated\_by, updated\_at | 한 줄. 앱이 시작할 때 읽음(A-01) |
+| app\_config 앱 설정 | min\_version\_ios·android text, min\_version\_web text(min\_version\_desktop·latest\_version\_desktop은 없앰 2026-11-10, ADR 0008, 열은 나중에 2단계로 지움), flags jsonb(기능 플래그: 이름·켜짐·대상), updated\_by, updated\_at | 한 줄. 앱이 시작할 때 읽음(A-01) |
 | job\_run 예약 작업 실행 | job text(함수 이름), started\_at, ended\_at, space\_count int, failures jsonb(실패한 space와 오류 코드) | 관계 없음. 실패 1건이면 개발 채널 경보 |
 | admin\_setting 계산·기준 데이터 | key text(대출 유형별 평균 금리, 공공 통계 연도·연령대·지표 등), value jsonb, valid\_from date, updated\_by, updated\_at | 관계 없음(AD-19) |
 | admin\_user 관리자 | email text, role enum, mfa\_on bool, last\_login\_at, active bool | 1 : N audit\_log |
@@ -139,14 +139,14 @@
 
 | 항목 | 기준 |
 | --- | --- |
-| 다운로드 채널 | 데스크톱: 공식 웹사이트(L-01, L-02) 직접 배포, 고정 주소 download.sweetwo.kr/latest/mac, /latest/win. Mac App Store·Microsoft Store는 출시 뒤 검토. 모바일: App Store, Google Play |
-| 최소 OS | macOS 12 이상(Apple Silicon·Intel 유니버설 빌드), Windows 10 64비트 이상, iOS 16 이상, Android 8(API 26) 이상 [확인 필요] |
-| 설치 파일 | macOS universal dmg 1개, Windows x64 설치 프로그램(NSIS). Windows ARM은 이후 |
-| 코드 서명·공증 | macOS Developer ID 서명 + Apple 공증, Windows 코드 서명 인증서(SmartScreen 경고 줄이려 EV 검토). iOS·Android는 스토어 서명(Apple 개발자 계정, Google Play 앱 서명) |
+| 다운로드 채널 | App Store, Google Play(태블릿 포함). 데스크톱 직접 배포는 없앰 2026-11-10, ADR 0008 |
+| 최소 OS | iOS·iPadOS 16 이상, Android 8(API 26) 이상 [확인 필요] |
+| 설치 파일 (없앰 2026-11-10, ADR 0008) | macOS universal dmg 1개, Windows x64 설치 프로그램(NSIS). Windows ARM은 이후 |
+| 코드 서명 | iOS·Android 스토어 서명(macOS·Windows 서명·공증은 없앰 2026-11-10, ADR 0008)(Apple 개발자 계정, Google Play 앱 서명) |
 | 스토어 심사 | 출시 2주 전 첫 제출(금융 범주 심사 지연 대비). 심사용 데모 계정은 흉내 데이터 공간으로 [확인 필요]. 개인정보 라벨(App Store), 데이터 보안 양식(Google Play) |
-| 자동 업데이트 | 모바일은 스토어 업데이트(코드 바꿔 넣기 업데이트는 쓰지 않음). 데스크톱은 electron-updater. 백그라운드 다운로드 → 서명 검증 → 다음 실행 때 적용. 최소 지원 버전 미만은 업데이트 화면만(→ 동기화 6장) |
+| 자동 업데이트 | 모바일은 스토어 업데이트(코드 바꿔 넣기 업데이트는 쓰지 않음). 데스크톱 electron-updater는 없앰 2026-11-10, ADR 0008. 최소 지원 버전 미만은 업데이트 화면만(→ 동기화 6장) |
 | 단계 배포 | 업데이트 채널은 하나. 첫 출시는 바로 모두 보여 주기, 단계 배포는 업데이트부터: 10% → 50% → 100%(24시간 간격, 크래시 없는 세션 99% 이상일 때 다음 단계). 출시 승인 기준 99.5%(출시 준비 3장)보다 낮은 것은 의도된 차이: 승인은 출시 품질 기준, 단계 배포는 멈추는 선 |
-| 롤백 | 데스크톱: 단계 배포 중지 + 이전 코드를 더 높은 버전 번호로 재배포(앱은 아래 버전으로 내리지 않음). 모바일: 스토어 단계 출시 중지(App Store 단계적 출시, Google Play 비율 출시) + 고친 버전 긴급 심사. 서버: DB 변경은 추가형이라 코드만 되돌림 |
+| 롤백 | 모바일: 스토어 단계 출시 중지(App Store 단계적 출시, Google Play 비율 출시) + 고친 버전 긴급 심사. 서버: DB 변경은 추가형이라 코드만 되돌림 |
 | 버전 표기 | 주.부.수(예: 1.2.3), S-19에 표시 |
 | 릴리스 노트 | 버전마다 웹사이트 L-03에 ‘새 기능’ ‘고친 것’ 게시. 이전 버전 다운로드는 두지 않음 |
 | 웹사이트 지원 브라우저 | Chrome·Edge·Safari·Firefox 최신 2개 버전, iOS Safari 16 이상, Android Chrome·삼성 인터넷 최신 2개 버전 |
@@ -157,9 +157,9 @@
 
 | 항목 | 기준 |
 | --- | --- |
-| 트레이 위젯 창 (출시) | Electron Tray + 작은 BrowserWindow(폭 340px, 테두리 없음, 포커스를 잃으면 숨김). 앱 창을 닫아도 프로세스는 트레이에 남음(S-22에서 끔) |
+| 트레이 위젯 창 (없앰 2026-11-10, ADR 0008) | Electron Tray + 작은 BrowserWindow(폭 340px, 테두리 없음, 포커스를 잃으면 숨김). 앱 창을 닫아도 프로세스는 트레이에 남음(S-22에서 끔) |
 | 딥링크 | 위젯을 누르면 앱 딥링크(화면 ID + 대상 ID)로 해당 화면. 앱이 꺼져 있으면 실행 → 앱 잠금 해제 뒤 이동 |
 | 갱신 | 앱에서 값이 바뀌거나 Realtime으로 상대 변경을 받으면 즉시, 그 밖에는 30분마다. 오프라인이면 마지막 값 + 저장 시각 |
 | 위젯 캐시 | 위젯에 필요한 값만 모은 작은 스냅샷을 기기에 암호화 저장(키는 OS 키 저장소). 공개 범위를 거친 값만 담음. 로그아웃·세션 만료 시 삭제 |
-| 위젯 설정 저장 | 트레이 아이콘 켜기·위젯에 금액 보이기는 기기별, WG-02 저금 항목은 계정별(모든 기기 공통). 필드 → 2장 widget\_setting, 핵심 규칙 › 데이터 항목 ‘위젯 설정’ |
-| 네이티브 위젯 (이후) | macOS·iOS: WidgetKit 확장 + App Group으로 앱과 캐시 공유. Android: Glance(AppWidget). Windows 11 위젯 보드: Adaptive Cards 기반 위젯 공급자. Electron 밖 네이티브 코드라 출시 범위 밖 |
+| 위젯 설정 저장 | 위젯에 금액 보이기는 기기별(트레이 아이콘 켜기는 없앰 2026-11-10, ADR 0008), WG-02 저금 항목은 계정별(모든 기기 공통). 필드 → 2장 widget\_setting, 핵심 규칙 › 데이터 항목 ‘위젯 설정’ |
+| 네이티브 위젯 (이후) | iOS: WidgetKit 확장 + App Group으로 앱과 캐시 공유. Android: Glance(AppWidget). Capacitor 밖 네이티브 코드라 출시 범위 밖(macOS·Windows 위젯은 없앰 2026-11-10, ADR 0008) |
