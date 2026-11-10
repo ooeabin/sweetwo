@@ -2328,7 +2328,8 @@ button.hg-receipt__main { cursor: pointer; }
 
 /* 2026-11-10 뒤로 버튼 하나로(hg-back): 로그인(A-02), 앱 틀 ‹ 홈으로, PageHeader, 질문 화면, 알림 화면이 같은 모양.
    40px 누르는 자리, Phosphor chevron-left 24px ink, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px(앱 틀 ‹ 홈으로와 같은 자리). */
-.hg-back, .hg-iconbtn.hg-back { box-sizing: border-box; display: inline-grid; place-items: center; flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--ink); cursor: pointer; justify-content: center; }
+/* display는 두지 않음: 각 자리의 좁은·넓은 창 숨김 규칙(hg-auth__back, hg-pagehead__icon)을 그대로 따름 */
+.hg-back, .hg-iconbtn.hg-back { box-sizing: border-box; place-items: center; align-items: center; flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--ink); cursor: pointer; justify-content: center; }
 .hg-back > .hg-ico, .hg-iconbtn.hg-back > .hg-ico { width: 24px; height: 24px; }
 .hg-back:hover { background: var(--surface-alt); }
 .hg-back:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
