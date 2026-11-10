@@ -23,7 +23,6 @@ export function A02Restore() {
   }, [failed]);
   return (
     <AuthLayout
-      icon="user"
       art="status-restore"
       title={copy.restoreTitle}
       help={copy.restoreHelp}

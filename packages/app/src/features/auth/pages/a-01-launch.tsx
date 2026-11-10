@@ -201,7 +201,6 @@ export function A01Launch() {
   if (phase === 'maintenance') {
     return (
       <AuthLayout
-        icon="wrench"
         art="status-maintenance"
         title={copy.maintenanceTitle}
         help={
@@ -217,7 +216,6 @@ export function A01Launch() {
   if (phase === 'update') {
     return (
       <AuthLayout
-        icon="download"
         art="status-update"
         title={copy.updateTitle}
         help={copy.updateSub}
@@ -259,7 +257,6 @@ export function A01Launch() {
   if (phase === 'error') {
     return (
       <AuthLayout
-        icon="circle-alert"
         art="status-error"
         title={copy.errorTitle}
         help={copy.errorHelp}
@@ -272,14 +269,7 @@ export function A01Launch() {
     );
   }
   if (phase === 'offline') {
-    return (
-      <AuthLayout
-        icon="link"
-        art="status-offline"
-        title={copy.offlineNoSession}
-        actions={retryButton}
-      />
-    );
+    return <AuthLayout art="status-offline" title={copy.offlineNoSession} actions={retryButton} />;
   }
   if (phase === 'checking') {
     // 앱: 워드마크 + (0.3초 넘으면) 진행 막대. 웹: 스플래시 없이 스켈레톤. 10초 넘으면 “연결이 느려요” + 다시 시도
@@ -298,11 +288,12 @@ export function A01Launch() {
       </div>
     );
     return session.bridge ? (
-      <main className="hg-auth" aria-busy="true">
+      // 2026-11-10 워드마크는 화면 한가운데(가로·세로), 진행 막대는 그 아래, 느림 띠는 화면 아래(hg-auth--splash)
+      <main className="hg-auth hg-auth--splash" aria-busy="true">
         <Wordmark height={40} />
         {slow && (
           <span
-            className="hg-skel"
+            className="hg-skel hg-auth__splashbar"
             style={{ width: 'var(--space-22)', height: 'var(--space-1)' }}
           />
         )}

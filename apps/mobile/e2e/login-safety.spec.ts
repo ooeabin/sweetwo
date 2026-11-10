@@ -18,7 +18,7 @@ const signedInHome = async (page: Page, o: Parameters<typeof fakeBridge>[1] = {}
 };
 const lockHeading = (page: Page) => page.getByRole('heading', { name: 'PIN을 입력해 주세요' });
 const login = async (page: Page, sub = chanwoo.id) => {
-  await page.getByRole('button', { name: '카카오 로그인', exact: true }).click();
+  await page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true }).click();
   await expect(page).toHaveURL(/\/login\/wait$/);
   await emitAuth(
     page,
@@ -308,10 +308,10 @@ test('A-02 소셜 버튼(S1-30): 공식 문구, ‘최근 사용’은 이름이
   await page.goto('/login');
   const apple = page.getByRole('button', { name: 'Apple로 계속하기', exact: true });
   await expect(apple).toHaveAccessibleDescription('최근 사용');
-  await expect(page.getByRole('button', { name: '카카오 로그인', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true })).toBeVisible();
   await page.context().setOffline(true);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
-  const kakao = page.getByRole('button', { name: '카카오 로그인', exact: true });
+  const kakao = page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true });
   await expect(kakao).toBeDisabled();
   await expect(kakao).toHaveCSS('background-color', 'rgb(254, 229, 0)');
   await page.context().setOffline(false);

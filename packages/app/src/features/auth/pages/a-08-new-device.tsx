@@ -38,7 +38,6 @@ export function A08NewDevice() {
   };
   return (
     <AuthLayout
-      icon="shield-warning"
       art="status-newdevice"
       title={copy.newDeviceTitle}
       help={

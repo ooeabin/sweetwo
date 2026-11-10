@@ -19,7 +19,7 @@ test('첫 방문: O-01 → A-02', async ({ page }) => {
   await page.getByRole('button', { name: '시작하기' }).click();
   await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
   // 제공자 공식 문구 그대로(2026-11-10). ‘최근 사용’ 말풍선은 이름에 붙지 않음
-  for (const name of ['카카오 로그인', 'Google로 계속하기', 'Apple로 계속하기']) {
+  for (const name of ['카카오로 3초 만에 로그인', 'Google로 계속하기', 'Apple로 계속하기']) {
     await expect(page.getByRole('button', { name, exact: true })).toBeEnabled();
   }
   await expect(page.getByRole('checkbox', { name: '이 기기에서 로그인 유지' })).toHaveCount(0);
@@ -100,7 +100,7 @@ test('다른 소셜로 가입된 계정이면 막고 가입한 방법을 알려 
   await page.goto('/auth/callback?code=e2e-code');
   await expect(page.getByText('이미 카카오로 가입한 이메일이에요')).toBeVisible();
   // 카카오 버튼은 노란색 그대로, 안내는 그 버튼 위 말풍선
-  const kakao = page.getByRole('button', { name: '카카오 로그인', exact: true });
+  const kakao = page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true });
   await expect(kakao).toHaveAccessibleDescription('이미 카카오로 가입한 이메일이에요');
   await expect(kakao).toHaveClass(/hg-btn--kakao/);
   await expect(kakao.locator('.hg-auth__bubble')).toHaveText('이미 카카오로 가입한 이메일이에요');
@@ -121,4 +121,19 @@ test('앱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다'
     'href',
     'sweetwo://auth/callback?state=s1&code=c1',
   );
+});
+
+// 2026-11-10 워드마크는 번들 안 data: URL이라 네트워크가 끊겨도 보임(전에는 깨진 이미지에 “sweeTwo” 글자)
+test('A-02 오프라인: 워드마크가 네트워크 없이 보임', async ({ page, context }) => {
+  await mockSupabase(page);
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: '시작하기' })).toBeVisible();
+  await context.setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await page.getByRole('button', { name: '시작하기' }).click();
+  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
+  const mark = page.getByRole('img', { name: 'sweeTwo' }).first();
+  await expect(mark).toBeVisible();
+  expect(await mark.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+  expect(await mark.getAttribute('src')).toMatch(/^data:image\/svg/);
 });

@@ -136,7 +136,7 @@ test('모바일(iOS): 로그인 창 → 돌아오면 다음 화면, PIN 뒤 “F
     },
   });
   await page.goto('/login');
-  await page.getByRole('button', { name: '카카오 로그인' }).click();
+  await page.getByRole('button', { name: '카카오로 3초 만에 로그인' }).click();
   await expect.poll(async () => (await fake(page)).started).toEqual(['kakao']);
   await expect(page).toHaveURL(/\/login\/wait$/);
   // 로그인 창이 닫히며 결과가 옴(네이티브 브리지 → 앱)

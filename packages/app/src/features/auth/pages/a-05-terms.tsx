@@ -67,7 +67,7 @@ export function A05Terms() {
     <>
       <QuestionLayout
         title={copy.termsTitle}
-        onBack={doc ? undefined : () => cancel()}
+        onBack={() => cancel()}
         primary={{ label: copy.agreeContinue, disabled: !ready, loading: saving }}
         onSubmit={() => void submit()}
       >

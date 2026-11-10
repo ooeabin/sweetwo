@@ -47,7 +47,7 @@ export const copy = {
   joinTitle: (inviter: string) => `${inviter}님 공간에 합류할 계정을 골라요`,
   // 2026-11-10 제공자 공식 문구 그대로(카카오 로그인 디자인 가이드, Google·Apple 브랜드 가이드). ‘3초’는 뺌
   continueWith: {
-    kakao: '카카오 로그인',
+    kakao: '카카오로 3초 만에 로그인', // 2026-11-10 사용자 결정
     google: 'Google로 계속하기',
     apple: 'Apple로 계속하기',
   } satisfies Record<AuthProvider, string>,
@@ -133,7 +133,7 @@ export const copy = {
       ? '다음부터 PIN 대신 얼굴로 열 수 있어요'
       : '다음부터 PIN 대신 지문으로 열 수 있어요',
   later: '나중에 할게요',
-  pinUnlockTitle: 'PIN을\n입력해 주세요',
+  pinUnlockTitle: 'PIN을 입력해 주세요', // 2026-11-10 한 줄로
   touchIdUnlock: (kind: Bio) => `${bioObj(kind)}로 풀기`,
   forgotPin: 'PIN을 잊었어요',
   // ‘PIN을 잊었어요’ 확인 Modal(2026-11-10) [확인 필요]

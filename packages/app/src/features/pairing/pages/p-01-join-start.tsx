@@ -1,5 +1,5 @@
 import { fetchMe, invitePreview, joinSpace, type JoinResult } from '@sweetwo/api';
-import { Icon, Illustration, QuestionLayout, QuestionSkeleton, type IconName } from '@sweetwo/ui';
+import { Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -13,20 +13,9 @@ type ErrorKey = keyof typeof copy.errors;
 
 // 초대 코드 형식(P-01 코드 입력과 같음, DB 검사와 같은 규칙). 형식이 아니면 서버에 묻지 않고 바로 ‘잘못된 코드’(2026-11-10)
 const CODE = /^[A-HJ-NP-Z2-9]{6}$/;
-// 합류 불가 상태 화면 아이콘(그림이 들어올 때까지, 2026-11-10 상태 화면 = 아이콘 원)
-const BLOCKED_ICON: Record<ErrorKey, IconName> = {
-  expired: 'hourglass',
-  invalid: 'circle-alert',
-  locked: 'lock',
-  already_connected: 'users-three',
-  own_code: 'user',
-  used: 'handshake',
-  unavailable: 'user-minus',
-};
-const StatusIcon = ({ name }: { name: IconName }) => (
-  <span className="hg-auth__icon" aria-hidden="true">
-    <Icon name={name} />
-  </span>
+// 상태 그림 자리(96px, 그림이 들어올 때까지 회색 빈 자리 hg-artslot, 2026-11-10 아이콘 원에서 되돌림. Illustrations ‘나중 과제’)
+const StatusArt = ({ name }: { name: string }) => (
+  <Illustration name={name} className="hg-auth__art" />
 );
 
 // P-01 합류 시작(A-07 초대 링크 진입). 로그인 전에도 초대한 사람을 보여 주고, ‘합류하기’ → 로그인(P-02) 뒤 이어서.
@@ -102,7 +91,7 @@ export function P01JoinStart() {
     const off = typeof navigator !== 'undefined' && navigator.onLine === false;
     return (
       <QuestionLayout
-        hero={<StatusIcon name={off ? 'link' : 'circle-alert'} />}
+        hero={<StatusArt name={off ? 'status-offline' : 'status-error'} />}
         title={off ? copy.offlineTitle : copy.errorTitle}
         help={off ? copy.offlineHelp : copy.errorHelp}
         primary={{ label: copy.retry }}
@@ -133,14 +122,15 @@ export function P01JoinStart() {
     );
   }
 
-  // 합류 불가(15 A-07 7번, 2026-11-10 S1-06): 제목 = 예외 문구, 상태 아이콘 원. 막다른 화면 없이
+  // 합류 불가(15 A-07 7번, 2026-11-10 S1-06): 제목 = 예외 문구, 위에 상태 그림 자리. 막다른 화면 없이
   // 로그인 전 = ‘코드 다시 입력하기’(P-01 코드 입력) + ‘처음으로’(A-02), 로그인됨 = ‘홈으로 가기’.
   // 잘못된 코드면 코드 상자를 보이지 않음(이상한 글자를 크게 보여 주지 않게)
   if (blocked) {
     return (
       <QuestionLayout
-        hero={<StatusIcon name={BLOCKED_ICON[blocked]} />}
+        hero={<StatusArt name="status-invite-blocked" />}
         title={copy.errors[blocked]}
+        center
         primary={{ label: loggedIn ? copy.toHome : copy.reenterCode }}
         secondary={loggedIn ? undefined : { label: copy.toStart, onClick: () => nav(paths.login) }}
         onSubmit={() => (loggedIn ? goHome() : nav(paths.joinCode))}
@@ -157,13 +147,14 @@ export function P01JoinStart() {
     );
   }
 
-  // 2026-11-03 질문 화면 틀: 제목 위, 코드는 바로 아래 회색 상자(O-07과 같은 모양)
+  // 2026-11-03 질문 화면 틀: 제목 위, 코드는 바로 아래 회색 상자(O-07과 같은 모양).
+  // 2026-11-10 그림 + 제목 + 코드 상자 + 안내를 가운데 정렬(다른 상태 화면과 같게)
   return (
     <QuestionLayout
       hero={<Illustration name="scene-invite" className="hg-sceneart hg-sceneart--tall" motion />}
       title={p?.inviter ? copy.invited(p.inviter) : copy.join}
       help={copy.invitedHelp}
-      center={false}
+      center
       primary={{ label: copy.join, loading: busy }}
       onSubmit={() => void join()}
     >
@@ -174,7 +165,7 @@ export function P01JoinStart() {
         </span>
       </p>
       {signedIn.data && me.data && (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help">
           {copy.joinAs(providerName[me.data.provider])}{' '}
           <button
             type="button"

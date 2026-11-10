@@ -95,10 +95,8 @@ export function A03BrowserWait() {
 
   return (
     <AuthLayout
-      icon={openFailed ? 'circle-alert' : 'loader-circle'}
-      // 기다리는 동안은 다른 로딩과 같은 도는 아이콘(2026-11-05 모래시계 없앰), 실패면 오류 그림
-      art={openFailed ? 'status-error' : undefined}
-      busy={!openFailed}
+      // 상태 그림 자리(2026-11-10 아이콘 원 대신 회색 빈 자리, 그림은 나중에): 기다리는 중 = 브라우저 대기, 실패 = 오류
+      art={openFailed ? 'status-error' : 'status-wait'}
       // 로그인 중인 방법: 제공자 마크 + “카카오로 로그인”(15 A-03 1번)
       media={
         <p className="hg-auth__provider">
