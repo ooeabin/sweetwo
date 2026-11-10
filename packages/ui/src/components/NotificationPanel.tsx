@@ -197,13 +197,8 @@ export function NotificationPanel(p: {
                           {[...x.person.name][0] ?? ''}
                         </span>
                       ) : (
-                        // 2026-11-09 알림 종류 아이콘(Phosphor, lead-kinds.ts noti) + 영역 색 원
-                        <span
-                          className={cx('hg-noti__icon', x.tone && `hg-lead--${x.tone}`)}
-                          aria-hidden="true"
-                        >
-                          {x.icon && <Icon name={x.icon} />}
-                        </span>
+                        // 2026-11-10 알림 종류 자리: 2D 그림이 들어올 때까지 회색 빈 원(종류는 data-art, lead-kinds.ts noti)
+                        <span className="hg-noti__icon hg-lead--slot" data-art={x.icon} aria-hidden="true" />
                       )}
                       <span className="hg-noti__text">
                         <span className="hg-noti__msg">{x.msg}</span>
