@@ -228,7 +228,7 @@ export function Y04Calendar() {
         {selected >= d.today && (
           <div className="hg-list hg-list--plain hg-cal__add">
             <ListRow
-              lead={<Lead icon="plus" />}
+              lead={<Lead icon="plus" uiIcon />}
               label={copy.addOnDay}
               chevron={false}
               onClick={() => {

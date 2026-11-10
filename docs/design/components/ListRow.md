@@ -6,7 +6,7 @@
 - 높이 56px 이상(위아래 `space-3` 12px, 2026-11-09 밀도: 한 줄 56px, 두 줄 64~68px), 세로 가운데 정렬. 값은 오른쪽 정렬 `tabular-nums`. 이름 15px 500(2026-11-09 글자 단계: 16px 400에서. 캘린더 고른 날 줄도 15px 500, 700에서), 값 15px 600, 보조 줄 13px `stone`(`body-sm`).
 - 누르면 이동하는 줄만 화살표(`hg-chevron`)이고 줄 전체가 `button`(또는 `a`). 토글 줄은 화살표 없음.
 - 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 56px 이상(2026-11-09 60px에서). 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
-- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 영역 색 원 + Phosphor 아이콘 18px(2026-11-09, 아래 ‘Lead 종류 표’). 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음.
+- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 2D 그림이 들어올 때까지 회색 빈 원(`hg-lead--slot`, `surface-alt` + 안쪽 1px `hairline-soft`, 2026-11-10. 그 전 2026-11-09는 영역 색 원 + Phosphor 아이콘). 종류는 아래 ‘Lead 종류 표’, 나중 그림 이름은 `data-art`(표의 아이콘 이름). UI 아이콘(캘린더 ‘+’ 추가 칸)은 `uiIcon`으로 아이콘 그대로. 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음.
 - 사진 미리보기 `hg-thumb`(40px, `radius-md`, 잘라 채움): 경조사 선물 기록(Y-09)에서 첫 사진. 장식이라 `aria-hidden`, 사진 수는 보조 줄 “사진 3장”.
 
 ## 설정 줄
@@ -20,7 +20,7 @@
 
 ## Lead 종류 표 (2026-11-09)
 
-줄 앞 칸은 2D 그림이 아니라 Phosphor 아이콘 + 영역 색 원(`hg-lead--together`·`family`·`goal`·`safety`·`invest`, 원은 틴트 바탕, 아이콘은 짝 `*-ink`). 영역 색이 없는 종류는 회색 원(`surface-alt` + `ink-2`). 한 종류 = 아이콘 하나, 표는 코드 한 곳(`packages/ui/src/components/lead-kinds.ts`, `leadOf(묶음, 종류)`)에만 두고 화면은 그 표로만 그림. 새 종류는 표에 한 줄 더하고 여기도 고침. 모르는 종류는 묶음의 기본(맨 아래 ‘모를 때’).
+2026-11-10부터 줄 앞 칸은 회색 빈 원이고, 아래 표는 종류와 나중 2D 그림(Illustrations 4·6·7번)의 짝이다. 아이콘 열은 그림 주제 이름. (2026-11-09 기록: Phosphor 아이콘 + 영역 색 원(`hg-lead--together`·`family`·`goal`·`safety`·`invest`, 원은 틴트 바탕, 아이콘은 짝 `*-ink`). 영역 색이 없는 종류는 회색 원(`surface-alt` + `ink-2`).) 한 종류 = 아이콘 하나, 표는 코드 한 곳(`packages/ui/src/components/lead-kinds.ts`, `leadOf(묶음, 종류)`)에만 두고 화면은 그 표로만 그림. 새 종류는 표에 한 줄 더하고 여기도 고침. 모르는 종류는 묶음의 기본(맨 아래 ‘모를 때’).
 
 | 묶음 | 종류 | 아이콘 | 영역 색 | 쓰는 곳 |
 | --- | --- | --- | --- | --- |

@@ -60,18 +60,22 @@ export function ListRow({
 }
 
 /**
- * 행 앞 아이콘 칸(hg-lead, docs/design/components/ListRow.md ‘Lead’). 2026-11-09: 영역 색 원 + Phosphor 아이콘(종류는 lead-kinds.ts 표),
- * 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(progress). 장식이라 aria-hidden(금액·진행은 줄 글자가 말함).
+ * 행 앞 칸(hg-lead, docs/design/components/ListRow.md ‘Lead’). 2026-11-10: 종류 아이콘 자리는 2D 그림이 들어올 때까지
+ * 회색 빈 원(hg-lead--slot). 종류는 lead-kinds.ts 표 그대로(data-art = 나중 그림 이름). UI 아이콘(+ 등)은 uiIcon으로 그대로.
+ * 목표 금액이 있는 저금 줄은 진행 원(progress). 장식이라 aria-hidden(금액·진행은 줄 글자가 말함).
  */
 export function Lead({
   tone,
   icon,
+  uiIcon,
   progress,
   art,
   photo,
 }: {
   tone?: LeadTone;
   icon?: IconName;
+  /** icon이 종류 표시가 아니라 UI 아이콘(+ 추가 등)이면 true: 빈 자리 대신 아이콘을 그린다 */
+  uiIcon?: boolean;
   /** 진행 원(0~100 정수 %, 저금 줄 모은 금액 ÷ 목표 금액). 있으면 icon 대신, 바탕은 저금 영역(goal) */
   progress?: number;
   /** 그림(Illustration 등, 지금 쓰는 곳 없음) */
@@ -81,17 +85,19 @@ export function Lead({
 }) {
   const ring = progress !== undefined && !photo && !art;
   const p = ring ? Math.min(Math.max(Math.trunc(progress), 0), 100) : 0;
+  const slot = !ring && !photo && !art && !uiIcon;
   return (
     <span
       className={cx(
         'hg-lead',
-        ring ? 'hg-lead--ring' : tone && `hg-lead--${tone}`,
+        ring ? 'hg-lead--ring' : slot ? 'hg-lead--slot' : tone && `hg-lead--${tone}`,
         photo && 'hg-lead--photo',
       )}
       style={ring ? ({ '--p': p } as CSSProperties) : undefined}
+      data-art={slot && icon ? icon : undefined}
       aria-hidden="true"
     >
-      {photo ? <img src={photo} alt="" /> : (art ?? (!ring && icon ? <Icon name={icon} /> : null))}
+      {photo ? <img src={photo} alt="" /> : (art ?? (uiIcon && icon ? <Icon name={icon} /> : null))}
     </span>
   );
 }
