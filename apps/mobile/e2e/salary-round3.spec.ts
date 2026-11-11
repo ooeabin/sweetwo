@@ -237,8 +237,11 @@ test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대 다음, H-04 1a
   await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
   // 첫 체크 전에는 순위 줄 없음
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
-  await page.locator('.hg-banner--todo').getByRole('button', { name: '닫기' }).click();
-  // 2026-11-09 초대 밖의 할 일은 큰 상자 아래 오렌지 띠
+  await page
+    .locator('.hg-hubband', { hasText: '함께할 사람을 초대해 주세요' })
+    .getByRole('button', { name: '닫기' })
+    .click();
+  // 닫으면 다음 할 일이 같은 코코아 띠(2026-11-11)
   const todo = page
     .locator('.hg-hubband')
     .getByRole('button', { name: '첫 저금을 만들어 볼까요?' });

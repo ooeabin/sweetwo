@@ -4,8 +4,8 @@ import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 
 // 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 GCOO 홈처럼): 회색 바탕 위 크기가 다른 흰 상자.
-// Hub(격자) > HubHero(다음 월급날까지 + 보낸 줄 막대 + 보낸 금액 | 모은 금액), HubBand(할 일 띠, 오렌지 채움),
-// HubTile(반 칸 타일, 큰 것은 72px 그림 자리), HubSaving(목표 금액에 가장 가까운 저금 하나). 모두 누르면 그 화면.
+// Hub(격자) > HubHero(다음 월급날까지 + 보낸 줄 막대 + 보낸 금액 | 모은 금액), HubBand(할 일·초대 띠, 코코아 채움, 2026-11-11),
+// HubTile(반 칸 타일, 큰 것은 72px 그림 자리, point = 오렌지 채운 포인트 상자 하나), HubSaving(목표 금액에 가장 가까운 저금 하나). 모두 누르면 그 화면.
 
 export function Hub({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -110,6 +110,7 @@ export function HubTile({
   value,
   art,
   small,
+  point,
   label,
   onClick,
 }: {
@@ -119,6 +120,8 @@ export function HubTile({
   /** 72px 그림 자리(큰 타일만, 2D 그림이 들어올 때까지 hg-artslot) */
   art?: boolean;
   small?: boolean;
+  /** 홈 포인트 상자(오렌지 채움, 홈 ‘월급 계획’ 하나만, 2026-11-11) */
+  point?: boolean;
   /** 화면 읽기 이름(없으면 보이는 글자) */
   label?: string;
   onClick: () => void;
@@ -126,7 +129,7 @@ export function HubTile({
   return (
     <button
       type="button"
-      className={cx('hg-hubtile', small && 'hg-hubtile--sm')}
+      className={cx('hg-hubtile', small && 'hg-hubtile--sm', point && 'hg-hubtile--point')}
       aria-label={label}
       onClick={onClick}
     >
