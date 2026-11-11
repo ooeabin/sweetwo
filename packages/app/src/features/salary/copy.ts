@@ -91,14 +91,14 @@ export const copy = {
   skipped: '이번 달은 못 했어요',
   editSplit: '월급 계획 고치기',
   // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
-  sentOfPlan: (sent: string, planned: string) => `보낸 금액 ${sent} / ${planned}`,
-  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 보냈어요`,
-  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 보냈어요`,
+  sentOfPlan: (sent: string, planned: string) => `체크한 금액 ${sent} / ${planned}`,
+  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 체크했어요`,
+  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 체크했어요`,
   monthLineToo: '이번 달 체크 안 한 줄도 바꿨어요',
   madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
   // 달 결과 카드(W-02 끝, 다 끝난 W-02, 지난 달) [확인 필요]
   received: (date: string) => `${date} 받음`,
-  sentTotal: '보낸 금액',
+  sentTotal: '체크한 금액',
   skippedShort: '못 함',
   resultLabel: (label: string) => `${label} 요약`,
   editChecks: '체크 고치기',
