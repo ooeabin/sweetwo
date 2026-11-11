@@ -144,7 +144,8 @@ test('L-03 릴리스 노트, L-05 약관(시행일), L-06 고객센터 검색', 
   await expect(page.locator('#\\31 \\.0\\.0')).toContainText('새 기능');
   await page.goto('/terms');
   await expect(page.getByRole('heading', { name: '이용약관', level: 1 })).toBeVisible();
-  await expect(page.getByText('시행일 2026년 11월 1일')).toBeVisible();
+  // 시행 중인 판의 시행일(새 판이 시행되면 날짜가 바뀌므로 형식만 확인, 2026-11-11)
+  await expect(page.getByText(/^시행일 \d{4}년 \d{1,2}월 \d{1,2}일/).first()).toBeVisible();
   await axe(page);
   await page.goto('/privacy');
   await expect(page.getByRole('heading', { name: '개인정보처리방침', level: 1 })).toBeVisible();
