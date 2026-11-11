@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (52779d9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (17891bf). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1083,6 +1083,12 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-key { display: grid; place-items: center; height: 64px; border: 0; border-radius: var(--radius-lg); background: transparent; color: var(--ink); font: 600 26px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
 .hg-key:active, .hg-key.is-pressed { background: var(--surface-alt); }
 .hg-key--fn { font-size: 18px; color: var(--slate); }
+/* 낮은 화면(높이 700px 이하, 예: 320×640) 시트 안 키패드는 한 단계 낮게: 키패드 아래 주 버튼·‘지우기’가 스크롤 없이 보이게(2026-11-12 QA 5구간 S5-14). 누르는 칸은 44px 이상 */
+@media (max-height: 700px) {
+  .hg-sheet .hg-key { height: 44px; font-size: 22px; }
+  .hg-sheet .hg-key--fn { font-size: 16px; }
+  .hg-sheet { gap: var(--space-2); }
+}
 
 /* Button 로딩 */
 .hg-btn.is-loading { position: relative; color: transparent; pointer-events: none; }
@@ -2269,7 +2275,7 @@ button.hg-receipt__amount { cursor: pointer; }
 .hg-receipt__bar:empty { border-radius: var(--radius-full); background: var(--hairline-soft); }
 .hg-receipt__seg { min-width: 12px; border-radius: var(--radius-full); }
 .hg-receipt__seg--saving { background: var(--accent-app); }
-.hg-receipt__seg--spend { background: var(--hairline); }
+.hg-receipt__seg--spend { background: var(--spend); }
 .hg-receipt__seg--free { background: var(--stone); }
 .hg-receipt__legend { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-1) var(--space-4); margin: var(--space-3) 0 0; padding: 0; list-style: none; font: var(--text-caption); font-weight: 500; color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-receipt__legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
@@ -2279,10 +2285,10 @@ button.hg-receipt__amount { cursor: pointer; }
 .hg-planbar--flat .hg-receipt__bar { margin-top: var(--space-3); }  /* 카드 밖(W-02 머리 아래)은 가까이 */
 .hg-receipt__seg.is-progress { display: flex; overflow: hidden; }
 .hg-receipt__seg--saving.is-progress { background: var(--accent-app-soft); }
-.hg-receipt__seg--spend.is-progress { background: transparent; box-shadow: inset 0 0 0 1px var(--hairline); }
+.hg-receipt__seg--spend.is-progress { background: transparent; box-shadow: inset 0 0 0 1px var(--spend); }
 .hg-receipt__fill { display: block; height: 100%; min-width: 12px; border-radius: var(--radius-full); }
 .hg-receipt__seg--saving .hg-receipt__fill { background: var(--accent-app); }
-.hg-receipt__seg--spend .hg-receipt__fill { background: var(--hairline); }
+.hg-receipt__seg--spend .hg-receipt__fill { background: var(--spend); }
 .hg-receipt__caption { margin: var(--space-2) 0 0; font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-receipt__sec { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--hairline-soft); }
 .hg-receipt__sechead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin: 0 0 var(--space-1); }

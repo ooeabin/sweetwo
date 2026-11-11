@@ -205,6 +205,23 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // 32 4-6 둘이 같이 고치기(2026-11-12 QA 5구간 S5-07). W-01 합쳐서 공동 월급 계획(연결된 커플)에서 보냄
+      name: 'shared_item_changed';
+      props: {
+        item_type: 'split' | 'goal' | 'goal_priority' | 'salary_mode' | 'care_day';
+        linked: boolean;
+      };
+    }
+  | {
+      name: 'change_reverted';
+      props: {
+        item_type: 'split' | 'goal' | 'goal_priority' | 'salary_mode' | 'care_day';
+        entry: 'toast' | 'history';
+        reverted_whose: 'self' | 'partner';
+        hours_since_change: number;
+      };
+    }
+  | {
       name: 'plan_line_added';
       props: {
         source: 'chip' | 'text';

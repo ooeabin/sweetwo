@@ -39,6 +39,7 @@ type Tokens = Record<
   | 'stone'
   | 'hairline'
   | 'hairlineSoft'
+  | 'spend'
   | 'accent'
   | 'accentSoft'
   | 'danger'
@@ -61,6 +62,8 @@ function readTokens(): Tokens {
     stone: v('--stone'),
     hairline: v('--hairline'),
     hairlineSoft: v('--hairline-soft'),
+    // 지출 칸(2026-11-12 S5-15, 다크는 hairline보다 한 단계 밝게)
+    spend: v('--spend'),
     accent: v('--accent-app'),
     accentSoft: v('--accent-app-soft'),
     danger: v('--danger'),
@@ -139,7 +142,7 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
   y += 20;
   const shown = m.bar.filter((b) => b.percent > 0);
   const color = (k: 'saving' | 'spend' | 'free') =>
-    k === 'saving' ? t.accent : k === 'spend' ? t.hairline : t.stone;
+    k === 'saving' ? t.accent : k === 'spend' ? t.spend : t.stone;
   if (draw) {
     const width = right - left - 3 * Math.max(shown.length - 1, 0);
     let x = left;
@@ -161,7 +164,7 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
           ctx.fillStyle = t.accentSoft;
           ctx.fillRect(x, y, w, 12);
         } else {
-          ctx.strokeStyle = t.hairline;
+          ctx.strokeStyle = t.spend;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.roundRect(x, y, w, 12, 6);

@@ -1,14 +1,16 @@
 import { readWon } from '@sweetwo/core';
 import { AmountInput, BottomSheet, Button, Chip, ShortText } from '@sweetwo/ui';
 import { useState } from 'react';
+import { MASKED } from '../../shared/mask';
+import { speakMasked } from '../../shared/masked-text';
 import { copy } from './copy';
 
 const NAME_MAX = 20;
 
 /**
  * W-01 금액 시트(20 W-01 7번): 이름(직접 추가 줄만) + 금액(1만 원 단위, 0원 가능, 좁은 창 키패드)
- * + 바뀐 뒤 여유 자금. 주 버튼(확인/추가하기), 저금 줄은 ‘저금 보기’, 지울 수 있으면 danger 글자 ‘지우기’.
- * left0 = 이 줄을 뺀 여유 자금(수입 − 다른 줄 합)
+ * + 바뀐 뒤 여유 자금. 주 버튼(확인/추가하기), 저금 줄은 회색 글자 버튼 ‘저금 보기’, 지울 수 있으면 danger 글자 ‘지우기’.
+ * left0 = 이 줄을 뺀 여유 자금(수입 − 다른 줄 합). masked면 바뀐 뒤 여유 자금도 “•••”(금액 칸은 그대로, 11 8장)
  */
 export function PlanSheet({
   title,
@@ -23,6 +25,7 @@ export function PlanSheet({
   onDelete,
   deleteLabel,
   onItem,
+  masked,
 }: {
   title: string;
   amount: number;
@@ -37,12 +40,14 @@ export function PlanSheet({
   /** ‘지우기’ 화면 읽기 이름(좁은 창 키패드 ‘지우기’와 구분: “생활비 지우기”) */
   deleteLabel?: string;
   onItem?: () => void;
+  masked?: boolean;
 }) {
   const [v, setV] = useState<number | null>(initial);
   const [name, setName] = useState(initialName ?? '');
   const left = left0 - (v ?? 0);
   const unit = v !== null && v % 10_000 !== 0;
   const valid = v !== null && !unit && (!renamable || name.trim().length > 0);
+  const won = (x: number) => (masked ? MASKED : readWon(x));
   return (
     <BottomSheet
       title={title}
@@ -60,9 +65,14 @@ export function PlanSheet({
             {confirmLabel}
           </Button>
           {onItem && (
-            <Button block variant="ghost" onClick={onItem}>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'center', minHeight: 'var(--space-10)' }}
+              onClick={onItem}
+            >
               {copy.seeItem}
-            </Button>
+            </button>
           )}
           {onDelete && (
             <button
@@ -93,7 +103,7 @@ export function PlanSheet({
             <>
               {unit && <p className="hg-help is-error">{copy.tenThousandUnit}</p>}
               <p className={left < 0 ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
-                {left >= 0 ? copy.leftover(readWon(left)) : copy.short(readWon(-left))}
+                {speakMasked(left >= 0 ? copy.leftover(won(left)) : copy.short(won(-left)))}
               </p>
             </>
           }

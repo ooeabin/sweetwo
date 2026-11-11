@@ -82,6 +82,88 @@ describe('recommendSplit: 추천값으로 다시 채우기(06 3-2 두 번째 예
   it('1만 원 반올림', () => expect(round10k(875_000)).toBe(880_000));
 });
 
+describe('recommendSplit: 직접 추가한 지출 줄은 금액 그대로(06 3-2, 2026-11-12 D1)', () => {
+  const custom = [{ name: '관리비', amount: 150_000 }];
+  it('찬우 350만 + 관리비 15만: 기준 335만 → 고정 84, 생활 84, 용돈 35, 관리비 15, 여유 자금 132', () => {
+    const lines = recommendSplit({
+      income: 3_500_000,
+      people: [{ userId: 'chanwoo', income: 3_500_000 }],
+      items: [],
+      custom,
+      now,
+    });
+    expect(lines.map((l) => [l.kind, l.name ?? '', l.amount])).toEqual([
+      ['fixed', '', 840_000],
+      ['living', '', 840_000],
+      ['allowance', '', 350_000],
+      ['custom', '관리비', 150_000],
+    ]);
+    expect(leftover(3_500_000, lines)).toBe(1_320_000);
+  });
+  it('저금은 직접 추가 줄을 뺀 남은 금액에서: 적금 30 그대로, 내 집 마련 102, 여유 자금 0', () => {
+    const lines = recommendSplit({
+      income: 3_500_000,
+      people: [{ userId: 'chanwoo', income: 3_500_000 }],
+      items: [savings, home],
+      current: { s: 300_000, h: 0 },
+      custom,
+      now,
+    });
+    expect(lines.find((l) => l.goalId === 'h')?.amount).toBe(1_020_000);
+    expect(lines.find((l) => l.goalId === 's')?.amount).toBe(300_000);
+    expect(lines.find((l) => l.kind === 'custom')?.amount).toBe(150_000);
+    expect(leftover(3_500_000, lines)).toBe(0);
+  });
+  it('여러 줄, 0원 줄도 그대로(순서 그대로)', () => {
+    const lines = recommendSplit({
+      income: 3_000_000,
+      people: [{ userId: 'chanwoo', income: 3_000_000 }],
+      items: [],
+      custom: [
+        { name: '통신비', amount: 100_000 },
+        { name: '구독료', amount: 0 },
+        { name: '보험료', amount: 200_000 },
+      ],
+      now,
+    });
+    expect(lines.filter((l) => l.kind === 'custom').map((l) => [l.name, l.amount])).toEqual([
+      ['통신비', 100_000],
+      ['구독료', 0],
+      ['보험료', 200_000],
+    ]);
+    // 기준 270만 × 25% = 67.5만 → 68만
+    expect(lines.find((l) => l.kind === 'fixed')?.amount).toBe(680_000);
+  });
+  it('직접 추가 줄이 수입보다 크면 고정지출·생활비 0원, 저금 0원, 모자람 그대로', () => {
+    const lines = recommendSplit({
+      income: 1_000_000,
+      people: [{ userId: 'chanwoo', income: 1_000_000 }],
+      items: [home],
+      custom: [{ name: '대출 상환', amount: 1_200_000 }],
+      now,
+    });
+    expect(lines.find((l) => l.kind === 'fixed')?.amount).toBe(0);
+    expect(lines.find((l) => l.goalId === 'h')?.amount).toBe(0);
+    expect(leftover(1_000_000, lines)).toBe(-300_000);
+  });
+  it('직접 추가 줄이 없으면 예전과 같음(06 3-2 첫 예시)', () => {
+    const a = recommendSplit({
+      income: 3_500_000,
+      people: [{ userId: 'c', income: 3_500_000 }],
+      items: [],
+      now,
+    });
+    const b = recommendSplit({
+      income: 3_500_000,
+      people: [{ userId: 'c', income: 3_500_000 }],
+      items: [],
+      custom: [],
+      now,
+    });
+    expect(b).toEqual(a);
+  });
+});
+
 describe('합류 P-06 각자: joinerSplit', () => {
   it('예빈 270만: 고정 68, 생활 68, 용돈 27, 저금 줄 없음, 여유 자금 107', () => {
     const r = joinerSplit({ income: 2_700_000, userId: 'yebin' });

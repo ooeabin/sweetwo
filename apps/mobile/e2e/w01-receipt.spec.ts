@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type Route } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
@@ -225,7 +225,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(card.getByText('매달 10일')).toBeVisible();
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
-  // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 보냈어요 ›’ 링크 하나(2026-11-09)
+  // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 체크했어요 ›’ 링크 하나(2026-11-09)
   await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 체크했어요']);
   for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저금 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
@@ -357,4 +357,129 @@ test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await context.setOffline(false);
+});
+
+// ── QA 5구간(2026-11-12) ────────────────────────────────────────────
+
+test('추천값으로 다시 채우기(D1): 직접 추가 줄은 금액 그대로, 고정지출·생활비는 남은 금액에서, 확인 창은 바뀌는 것을', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  const sp = db.splits[0];
+  sp?.split_line.push({
+    id: 'c-m',
+    split_id: sp.id,
+    kind: 'custom',
+    goal_id: null,
+    user_id: null,
+    name: '관리비',
+    amount: 150_000,
+    sort: sp.split_line.length,
+  });
+  await go();
+  await page.getByRole('button', { name: '추천값으로 다시 채우기' }).click();
+  const modal = page.getByRole('alertdialog', { name: '추천값으로 다시 채울까요?' });
+  await expect(
+    modal.getByText(
+      '고정지출, 생활비, 용돈과 기한을 정한 저금 금액이 바뀌어요. 직접 추가한 지출은 그대로예요',
+    ),
+  ).toBeVisible();
+  await modal.getByRole('button', { name: '다시 채우기' }).click();
+  await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
+  // 06 3-2: 기준 350만 − 15만 = 335만 → 고정지출·생활비 84만
+  await expect.poll(() => lineOf(db, 'custom', '관리비')?.amount).toBe(150_000);
+  expect(lineOf(db, 'fixed')?.amount).toBe(840_000);
+  expect(lineOf(db, 'living')?.amount).toBe(840_000);
+  expect(await names(page, '지출')).toEqual(['고정지출', '생활비', '용돈', '관리비']);
+});
+
+test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async ({ page }) => {
+  const { db, go } = await open(page);
+  await go();
+  await page.getByRole('button', { name: '생활비 88만 원' }).click();
+  const sheet = page.getByRole('dialog', { name: '생활비 금액' });
+  await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
+  await sheet.getByRole('button', { name: '확인' }).click();
+  const undo = page.getByRole('button', { name: '되돌리기' });
+  await undo.click();
+  await expect(page.locator('.hg-toast')).toHaveCount(0);
+  await expect.poll(() => lineOf(db, 'living')?.amount).toBe(880_000);
+});
+
+test('파트너 탭(각자)인데 파트너 월급 계획이 없으면 빈 카드(D3)', async ({ page }) => {
+  const { db, go } = await open(page, '/salary?view=plan&who=yebin');
+  joinYebin(db);
+  db.splits = db.splits.filter((s) => s.owner_user_id !== 'yebin');
+  await go();
+  await expect(page.getByText('예빈님은 아직 월급 계획이 없어요')).toBeVisible();
+  await expect(page.locator('.hg-receipt')).toHaveCount(0);
+  await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toHaveCount(0);
+});
+
+test('못 불러오면 오류 카드 + 다시 시도, 구간 탭은 그대로(S5-02)', async ({ page }) => {
+  const { go } = await open(page);
+  let fail = true;
+  await page.route('**/rest/v1/salary_split*', (r) =>
+    fail
+      ? r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' })
+      : r.fallback(),
+  );
+  await go();
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('tab', { name: '계획' })).toBeVisible();
+  fail = false;
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(page.locator('.hg-receipt')).toBeVisible();
+});
+
+test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', async ({ page, context }) => {
+  const { go } = await open(page);
+  await go();
+  await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
+  await context.setOffline(true);
+  await page.getByRole('button', { name: '+ 저금 추가' }).click();
+  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await context.setOffline(false);
+});
+
+test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page }) => {
+  const { go } = await open(page);
+  await go();
+  await page.getByRole('button', { name: '청약 44만 원' }).click();
+  await page
+    .getByRole('dialog', { name: '청약 금액' })
+    .getByRole('button', { name: '청약 지우기' })
+    .click();
+  await page
+    .getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' })
+    .getByRole('button', { name: '그만할게요' })
+    .click();
+  await expect.poll(() => names(page, '저금')).toEqual(['내 집 마련']);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => names(page, '저금')).toEqual(['청약', '내 집 마련']);
+});
+
+test('금액 가리기: 화면 읽기는 “가려진 금액”, 시트 미리보기도 가림(S5-12)', async ({ page }) => {
+  const { go } = await open(page);
+  await page.addInitScript(() => localStorage.setItem('sweetwo.masked', '1'));
+  await go();
+  await page.getByRole('button', { name: '생활비 가려진 금액' }).click();
+  const sheet = page.getByRole('dialog', { name: '생활비 금액' });
+  await expect(sheet.locator('.hg-help', { hasText: '여유 자금' })).toHaveText(
+    '여유 자금 •••가려진 금액',
+  );
+});
+
+test('W-02 ‘이번 달’도 못 불러오면 오류 카드(‘월급 없음’ 카드가 아님, S5-02)', async ({ page }) => {
+  const { go } = await open(page, '/salary');
+  const fail = (r: Route) =>
+    r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' });
+  await page.route('**/rest/v1/pay_checklist*', fail);
+  await page.route('**/rest/v1/rpc/ensure*', fail);
+  await go();
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
+  await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: '이번 달' })).toBeVisible();
 });

@@ -116,12 +116,12 @@
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home` / `other`: 월급 탭·캘린더 등, 2026-11-11), open\_lines\_count(체크 안 한 줄 수) |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
 | split\_saved | W-01 ‘추천값으로 다시 채우기’ 저장(2026-11-09 영수증부터 ‘저장’ 버튼이 없어 추천값으로 채울 때만, O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self`), left\_band, reset\_to\_recommended(늘 true), entry(`split`) |
-| plan\_line\_changed | W-01 금액 시트 ‘확인’으로 줄 금액·이름을 바꿈 (2026-11-09) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), field(`amount` / `name` / `both`), direction(`up` / `down` / `same`), left\_band(바꾼 뒤 여유 자금 구간, 모자라면 `short`), joint(합쳐서 공동 월급 계획인지), entry(`receipt` / `edit` / `saving_detail`: W-10 ‘매달 금액 바꾸기’) |
+| plan\_line\_changed | W-01 금액 시트 ‘확인’으로 줄 금액·이름을 바꿈 (2026-11-09) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), field(`amount` / `name` / `both`), direction(`up` / `down` / `same`), left\_band(바꾼 뒤 여유 자금 구간, 모자라면 `short`), joint(합쳐서 공동 월급 계획인지), entry(`receipt` / `edit` / `saving_detail`: W-10 ‘매달 금액 바꾸기’로 연 시트, 주소의 `line`을 지운 뒤에도 그 시트는 `saving_detail`, 2026-11-12) |
 | plan\_line\_added | W-01 ‘+ 지출 추가’로 줄을 더함 (2026-11-09) | source(`chip` / `text`), chip(칩 이름 영문 코드 `maintenance` / `phone` / `insurance` / `subscription` / `transport` / `parents`, 글자로 넣었으면 null), amount\_band, joint |
 | plan\_line\_deleted | W-01 ‘지우기’(시트, 편집 모드 줄) (2026-11-09) | line\_kind, default\_line(고정지출·생활비·용돈인지), entry(`sheet` / `edit`), joint |
 | plan\_reordered | W-01 편집 ‘완료’에서 순서가 바뀜 (2026-11-09) | sections(`saving` / `spend` / `both`), lines\_count, joint |
 | plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
-| plan\_link\_tapped | W-01 머리 아래 ‘이번 달 3/5 보냈어요 ›’를 누름 (2026-11-09) | whose(`self` / `partner` / `joint`), checked(체크한 줄 수), total(줄 수) |
+| plan\_link\_tapped | W-01 머리 아래 ‘이번 달 3/5 체크했어요 ›’를 누름 (2026-11-09) | whose(`self` / `partner` / `joint`), checked(체크한 줄 수), total(줄 수) |
 | month\_result\_shared | 달 결과 카드 ‘공유하기’(W-02 끝, 다 끝난 W-02, 지난 달) (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`done` / `checklist` / `past`), skipped(‘못 함’ 줄 수) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
@@ -149,8 +149,8 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감 | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
-| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기 | item\_type, entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
+| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감(2026-11-12 W-01: 합쳐서 공동 월급 계획을 연결된 상대와 쓸 때 줄 금액·이름·추가·지우기·‘추천값으로 다시 채우기’마다 `split`. 순서 바꾸기는 활동 기록만이라 보내지 않음) | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
+| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기(2026-11-12 W-01: 위 shared\_item\_changed를 보낸 동작의 Toast ‘되돌리기’) | item\_type, entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
 
 ### 4-7. 연결 해제·알림·구독·위젯
 

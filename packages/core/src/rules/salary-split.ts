@@ -47,18 +47,31 @@ export interface RecommendInput {
   current?: Record<string, Won>;
   /** 금액을 그대로 두는 저금 줄(파트너 탭의 파트너 저금 줄, 20 W-01 6번) */
   keep?: Record<string, Won>;
+  /**
+   * 직접 추가한 지출 줄(W-01 ‘추천값으로 다시 채우기’, 2026-11-12 QA 5구간 D1). 금액 그대로 두고 지출 줄 맨 뒤에 그대로 돌려줌.
+   * 고정지출·생활비는 수입에서 이 줄들을 뺀 금액의 25%, 저금은 그 뒤 남은 금액에서(06 3-2)
+   */
+  custom?: { name: string; amount: Won }[];
   now?: Date;
 }
 
 /**
  * 처음 채우는 값(O-50, W-01 ‘추천값으로 다시 채우기’).
- * 고정지출·생활비 = 수입 × 25%, 용돈 = 사람마다 실수령 × 10%. 그대로 두는 저금 줄(keep, 월 필요액이 없는 항목의 지금 금액)을
+ * 직접 추가한 지출 줄(custom)은 금액 그대로 두고 먼저 뗌. 고정지출·생활비 = (수입 − 직접 추가 줄 합) × 25%,
+ * 용돈 = 사람마다 실수령 × 10%. 그대로 두는 저금 줄(keep, 월 필요액이 없는 항목의 지금 금액)을
  * 먼저 떼고, 남은 금액을 저금 묶음 순서대로 월 필요액만큼(모자라면 남은 만큼, 그다음은 0원). 저금 항목이 없으면 여유 자금.
  */
 export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);
-  const fixed = round10k(income * FIXED_RATE);
-  const living = round10k(income * LIVING_RATE);
+  const custom = (o.custom ?? []).map((c) => ({
+    kind: 'custom' as const,
+    name: c.name,
+    amount: Math.max(c.amount, 0),
+  }));
+  const customSum = custom.reduce((t, c) => t + c.amount, 0);
+  const base = Math.max(income - customSum, 0);
+  const fixed = round10k(base * FIXED_RATE);
+  const living = round10k(base * LIVING_RATE);
   const allowances = o.people.map((p) => ({
     kind: 'allowance' as const,
     userId: p.userId,
@@ -70,7 +83,8 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     return { it, need, fixedAmount };
   });
   const kept = plan.reduce((t, p) => t + (p.fixedAmount ?? 0), 0);
-  let left = income - fixed - living - allowances.reduce((s, a) => s + a.amount, 0) - kept;
+  let left =
+    income - customSum - fixed - living - allowances.reduce((s, a) => s + a.amount, 0) - kept;
   const savings: SplitLineDraft[] = plan.map(({ it, need, fixedAmount }) => {
     if (fixedAmount !== undefined)
       return { kind: 'saving', goalId: it.id, amount: fixedAmount, need };
@@ -83,6 +97,7 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     { kind: 'fixed', amount: fixed },
     { kind: 'living', amount: living },
     ...allowances,
+    ...custom,
   ];
 }
 

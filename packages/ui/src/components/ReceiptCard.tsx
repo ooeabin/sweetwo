@@ -33,12 +33,13 @@ export function ReceiptHead({
   lead?: ReactNode;
   /** 금액 위 제목(달 결과 카드 “11월 월급”, 2026-11-09) */
   title?: string;
-  amount: string;
+  /** 금액 글자(금액 가리기면 앱이 화면 읽기 글자를 붙인 노드로, 2026-11-12) */
+  amount: ReactNode;
   sub?: string;
   onAmount?: () => void;
   /** 금액 버튼 화면 읽기 이름(“월급 350만 원, 내 월급 고치기”) */
   amountLabel?: string;
-  /** 아래 한 줄 다음(W-01 ‘이번 달 3/5 보냈어요 ›’ 링크) */
+  /** 아래 한 줄 다음(W-01 ‘이번 달 3/5 체크했어요 ›’ 링크) */
   extra?: ReactNode;
 }) {
   return (
@@ -136,7 +137,7 @@ export function ReceiptSection({
   label,
 }: {
   title?: string;
-  subtotal?: string;
+  subtotal?: ReactNode;
   children: ReactNode;
   label?: string;
 }) {
@@ -409,7 +410,7 @@ export function ReceiptRows({
 export function ReceiptTotal({
   rows,
 }: {
-  rows: { label: string; amount: string; strong?: boolean; short?: boolean }[];
+  rows: { label: string; amount: ReactNode; strong?: boolean; short?: boolean }[];
 }) {
   return (
     <section className="hg-receipt__sec">
