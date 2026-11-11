@@ -2356,6 +2356,9 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubtile__title { font: var(--text-title-3); font-weight: 700; }  /* 2026-11-10 목업처럼 700 */
 .hg-hubtile__sub { margin-top: 2px; font: 500 13px/18px var(--font-sans); color: var(--slate); }
 .hg-hubtile__value { margin-top: var(--space-2); font: 700 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-hubtile__subrow { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-2); margin-top: 2px; min-width: 0; }
+.hg-hubtile__subrow > .hg-hubtile__sub { margin-top: 0; white-space: nowrap; }  /* 좁으면 알약이 다음 줄로 */
+.hg-hubtile__badge { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--plate); color: var(--ink-2); font: 600 12px/18px var(--font-sans); font-variant-numeric: tabular-nums; white-space: nowrap; }  /* 2026-11-11 자산 관리 타일 ‘순자산 [상위 38%]’(HubTile badge), 보조 줄 바로 옆(좁은 반 칸에서도 제목과 겹치지 않게) */
 .hg-hubtile > .hg-artslot { position: absolute; right: var(--space-3); bottom: var(--space-3); width: 72px; height: 72px; border-radius: var(--radius-xl); }
 /* 포인트 상자(hg-hubtile--point): 2026-11-11 사용자 결정, 홈 ‘월급 계획’ 하나만 브랜드 오렌지 채움(accent-app). 제목 on-accent-app-text(라이트 ink 6.5:1, 다크 어두운 글자 7.6:1, 흰 글자 금지),
    보조 줄 on-accent-app-sub(라이트 4.7:1, 다크 5.3:1), 그림 빈 자리는 반투명 밝은 네모(accent-app-slot, 선 없음). 누름 brand-pressed */

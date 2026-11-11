@@ -619,7 +619,7 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
 });
 
-test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈에도 같은 줄', async ({
+test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈은 자산 관리 타일 “상위 n%”', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -663,10 +663,15 @@ test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순�
   await expect(seen).not.toContainText('광고');
   await expect(seen).toContainText('10월 기준, 자세히 보기');
 
+  // 홈(2026-11-11): 순위 줄 대신 자산 관리 타일 오른쪽 위 “상위 n%”
   await page.goto('/');
-  await expect(
-    page.getByRole('button', { name: new RegExp(`우리 자산 상위 ${pct}%예요`) }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /우리 자산 상위/ })).toHaveCount(0);
+  const tile = page.getByRole('button', {
+    name: new RegExp(`^자산 관리, 순자산 .+, 상위 ${pct}%$`),
+  });
+  await expect(tile.locator('.hg-hubtile__badge')).toHaveText(`상위 ${pct}%`);
+  await tile.click();
+  await expect(page).toHaveURL(/\/assets$/);
 
   // 순자산이 바뀌면 지난번 값 + 새로 확인하기(광고)
   db.me.rank_net = 1;
