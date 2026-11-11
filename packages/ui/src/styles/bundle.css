@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a1ac675). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (6d3ef8d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -250,7 +250,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-invite-code--static { cursor: default; }  /* 보여 주기만(P-01 합류 시작, A-07) */
 /* 코드 칸(CodeCells, 2026-11-11): 6칸 한 줄, 칸마다 회색 판 + 굵은 글자. 넓이는 줄을 나눠 갖되 52px까지 */
 .hg-codecells { display: flex; justify-content: center; gap: var(--space-2); width: 100%; }
-.hg-codecell { box-sizing: border-box; display: grid; place-items: center; flex: 1 1 0; min-width: 0; max-width: 52px; height: 60px; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 700 26px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-codecell { box-sizing: border-box; display: grid; place-items: center; flex: 1 1 0; min-width: 0; max-width: 52px; height: auto; aspect-ratio: 13 / 15; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: 700 26px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+@media (max-width: 359px) { .hg-codecells { gap: var(--space-1); } .hg-codecell { font-size: 22px; } }  /* 2026-11-11 320px에서 칸이 좁고 길어 보여 사이를 줄이고 칸은 넓이에 맞춰 낮게(13:15) */
 .hg-invite-code:hover .hg-codecell { background: var(--hairline-soft); }
 /* 코드 넣기(CodeInput): 진짜 입력 칸을 칸 위에 투명하게 겹침. 넣을 칸은 흰 판 + 잉크 테두리 */
 .hg-codeinput { position: relative; display: block; width: 100%; }
