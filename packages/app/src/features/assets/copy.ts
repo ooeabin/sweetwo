@@ -227,7 +227,7 @@ export const copy = {
   amountLabel: '금액', // [확인 필요]
   visLabel: '공개 범위', // [확인 필요]
   edit: '수정',
-  amountEdit: '금액 고치기', // [확인 필요] 2026-11-04 F-04 1번 보조 버튼
+  amountEdit: '금액 고치기', // [확인 필요] 2026-11-04 F-04 1번 버튼(2026-11-11 주 버튼)
   cancel: '취소',
   rateInvalid: '0~30% 사이로 적어 주세요', // [확인 필요]
   countInvalid: '숫자만 적어 주세요', // [확인 필요]
