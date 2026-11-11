@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (e461ae3). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8b3b328). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1033,7 +1033,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-wheel:has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: inset 0 0 0 2px var(--ink); }
 .hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day):has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: none; }
 .hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { box-shadow: inset 0 0 0 2px var(--focus-ring); border-radius: var(--radius-md); }  /* 2026-11-04 키보드 초점: 숫자와 ‘월’에 따로 밑줄이 그어지던 것을 칸 테두리로 */
-.hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(O-13, P-03a): 한 줄이 판 너비 */
+.hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(S-11i 출생연도): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
 .hg-wheel--day .hg-wheel__col { border-radius: var(--radius-xl); }
