@@ -16,11 +16,10 @@ export function P04SalaryMode() {
   const d = s.d;
   const [v, setV] = useState<Mode | null>(null);
   const [confirm, setConfirm] = useState(false);
-  if (!d.ready || !d.space)
-    return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
-  const saved: Mode = d.space.salary_mode;
+  if (!d.ready || !d.ctx) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
+  const saved: Mode = d.salaryMode;
   const value = v ?? saved;
-  const starter = d.couple?.partnerName ?? '';
+  const starter = d.starterName;
   const changed = value !== saved;
   const apply = () =>
     void s.done(() => {

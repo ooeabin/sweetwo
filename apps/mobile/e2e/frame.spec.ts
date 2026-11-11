@@ -89,7 +89,9 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d)', asyn
     requested_at: '2026-10-06T01:00:00Z',
   });
   await page.goto('/');
-  await expect(page.getByText('연결 해제를 기다리고 있어요')).toBeVisible();
+  // 받은 사람 띠는 요청 문구(2026-11-11 D5), 요청한 사람만 “연결 해제를 기다리고 있어요”
+  await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
+  await expect(page.getByText('연결 해제를 기다리고 있어요')).toHaveCount(0);
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
   await context.setOffline(true);
   await expect(page.getByText('연결이 끊겼어요')).toBeVisible();
@@ -223,7 +225,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     ['내 정보', /\/settings\/me$/],
     ['설정', /\/settings$/],
     ['우리 둘', /\/settings\/couple$/],
-    ['초대하기', /\/settings\/couple$/],
+    ['초대하기', /\/settings\/couple\?invite=1$/],
     ['문의', /\/settings\/help\/inquiries$/],
     ['도움말', /\/settings\/help$/],
   ] as const) {

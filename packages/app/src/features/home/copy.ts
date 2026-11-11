@@ -1,8 +1,9 @@
 // 홈 문구(docs/spec/19-this-month.md). 기획서 “ ” 안 문장 그대로. [확인 필요]는 기획서에 문구가 없거나 확인 중인 것.
 export const copy = {
   // H-01 기다리는 화면
-  waitTitle: (starter: string) => `${starter}님이 시작하고 있어요`,
-  waitCard: (starter: string) => `${starter}님이 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 2026-11-08,
+  waitTitle: (starter: string) => `${starter ? `${starter}님이` : '파트너가'} 시작하고 있어요`,
+  waitCard: (starter: string) =>
+    `${starter ? `${starter}님이` : '파트너가'} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 2026-11-08,
   homeTitle: '홈', // 2026-11-03 넓은 창 제목 줄(다른 메뉴와 같음)
   hubLabel: '한눈에 보기', // [확인 필요] 2026-11-09 홈 상자 묶음 이름(화면 읽기용)
   // H-03 큰 상자(2026-11-09 홈 허브) [확인 필요]
@@ -45,7 +46,9 @@ export const copy = {
   savingCount: (n: number) => `${n}개 모으는 중`,
   noSavings: '아직 없어요',
   inviteNow: '초대하기', // 2026-11-11 초대 띠(코코아 HubBand) 오른쪽 이동 글자
-  unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
+  unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요] 요청한 사람
+  /** 받은 사람 띠 제목(2026-11-11 D5) */
+  unlinkRequested: (name: string) => `${name ? `${name}님이` : '파트너가'} 연결 해제를 요청했어요`,
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
   unlinkCheck: '확인하기',
   mailBounced: '알림 메일이 전달되지 않았어요',

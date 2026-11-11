@@ -1,8 +1,16 @@
-import { fetchMe, invitePreview, joinSpace, type JoinResult } from '@sweetwo/api';
+import {
+  AuthCallError,
+  fetchMe,
+  invitePreview,
+  joinSpace,
+  qk,
+  type JoinResult,
+} from '@sweetwo/api';
 import { Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { paths, prefs, providerName, session, signOut } from '../../auth';
 import { copy } from '../copy';
@@ -26,10 +34,16 @@ export function P01JoinStart() {
   const wellFormed = CODE.test(code);
   const [params] = useSearchParams();
   const nav = useNavigate();
+  const loc = useLocation();
+  const qc = useQueryClient();
+  // 코드 직접 입력(P-01 코드 입력)에서 왔으면 'code', 링크면 'link'(32 invite_accepted channel)
+  const typed = (loc.state as { typed?: boolean } | null)?.typed === true;
+  // 다시 시도는 1번만(2026-11-11 S3-21, 7초 동안 뼈대만 보이던 것)
   const preview = useQuery({
     queryKey: ['invite-preview', code],
     queryFn: () => invitePreview(code),
     enabled: wellFormed,
+    retry: 1,
   });
   const signedIn = useQuery({ queryKey: ['session-has'], queryFn: () => session.has() });
   const me = useQuery({ queryKey: ['me'], queryFn: fetchMe, enabled: signedIn.data === true });
@@ -39,6 +53,9 @@ export function P01JoinStart() {
 
   const afterJoin = async (r: JoinResult) => {
     if (r === 'joined' || r === 'resume') {
+      if (r === 'joined')
+        track('invite_accepted', { hours_since_sent: null, channel: typed ? 'code' : 'link' });
+      await qc.invalidateQueries({ queryKey: qk.joinContext });
       const fresh = await me.refetch();
       nav(joinPath((fresh.data?.onboarding_step ?? 'P-03').toLowerCase()), { replace: true });
       return;
@@ -88,7 +105,9 @@ export function P01JoinStart() {
 
   // 초대 정보를 못 불러옴(13 공통 상태 6·7번): 정상인 척 ‘합류하기’를 보이지 않음(2026-11-10 S1-07)
   if (wellFormed && preview.isError && !blocked) {
-    const off = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const off =
+      (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+      (preview.error instanceof AuthCallError && preview.error.code === 'network');
     return (
       <QuestionLayout
         hero={<StatusArt name={off ? 'status-offline' : 'status-error'} />}
@@ -111,10 +130,12 @@ export function P01JoinStart() {
     );
   if (result === 'has_records') {
     return (
+      // 2026-11-11 S3-15: 다른 상태 화면처럼 96px 그림 자리 + 가운데
       <QuestionLayout
+        hero={<StatusArt name="status-has-records" />}
         title={copy.hasRecords}
         help={copy.hasRecordsHelp}
-        center={false}
+        center
         primary={{ label: copy.join }}
         secondary={{ label: copy.cancel, onClick: () => nav('/', { replace: true }) }}
         onSubmit={() => setMoving(true)}
@@ -123,7 +144,7 @@ export function P01JoinStart() {
   }
 
   // 합류 불가(15 A-07 7번, 2026-11-10 S1-06): 제목 = 예외 문구, 위에 상태 그림 자리. 막다른 화면 없이
-  // 로그인 전 = ‘코드 다시 입력하기’(P-01 코드 입력) + ‘처음으로’(A-02), 로그인됨 = ‘홈으로 가기’.
+  // ‘코드 다시 입력하기’(P-01 코드 입력) + 로그인 전 ‘처음으로’(A-02), 로그인됨 ‘홈으로 가기’(2026-11-11 D4).
   // 잘못된 코드면 코드 상자를 보이지 않음(이상한 글자를 크게 보여 주지 않게)
   if (blocked) {
     return (
@@ -131,9 +152,13 @@ export function P01JoinStart() {
         hero={<StatusArt name="status-invite-blocked" />}
         title={copy.errors[blocked]}
         center
-        primary={{ label: loggedIn ? copy.toHome : copy.reenterCode }}
-        secondary={loggedIn ? undefined : { label: copy.toStart, onClick: () => nav(paths.login) }}
-        onSubmit={() => (loggedIn ? goHome() : nav(paths.joinCode))}
+        primary={{ label: copy.reenterCode }}
+        secondary={
+          loggedIn
+            ? { label: copy.toHome, onClick: goHome }
+            : { label: copy.toStart, onClick: () => nav(paths.login) }
+        }
+        onSubmit={() => nav(paths.joinCode, { state: { from: loggedIn ? '/' : paths.login } })}
       >
         {blocked !== 'invalid' && (
           <p className="hg-invite-code hg-invite-code--static">

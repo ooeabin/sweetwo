@@ -10,7 +10,7 @@ import {
   todayKst,
   type HomeTodo,
 } from '@sweetwo/core';
-import { Hub, HubBand, HubHero, HubSaving, HubTile } from '@sweetwo/ui';
+import { Hub, HubBand, HubHero, HubSaving, HubTile, Illustration } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -86,12 +86,19 @@ export function H01Home() {
     if (splits.isLoading) return <LoadingFrame current="month" />;
     if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
     const starter = partner.data?.nickname ?? space.data.partner_nickname ?? '';
+    // 2026-11-11 S3-32: 카드 하나뿐인 빈 화면처럼 보이지 않게 96px 그림 자리(그림이 들어올 때까지 회색 빈 자리) + 가운데
     return (
       <MainFrame
         current="month"
         tone="alt"
         columns={[
-          <section key="w" className="hg-card hg-stack" aria-label={copy.waitTitle(starter)}>
+          <section
+            key="w"
+            className="hg-card hg-stack"
+            style={{ alignItems: 'center', textAlign: 'center', gap: 'var(--space-3)' }}
+            aria-label={copy.waitTitle(starter)}
+          >
+            <Illustration name="status-waiting" className="hg-auth__art" />
             <b>{copy.waitTitle(starter)}</b>
             <span className="hg-card__meta">{copy.waitCard(starter)}</span>
           </section>,
@@ -131,11 +138,12 @@ export function H01Home() {
       }}
     />
   ) : null;
-  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
+  // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 “연결 해제를 기다리고 있어요” → S-12,
+  // 받은 사람 “{이름}님이 연결 해제를 요청했어요” → S-12d(2026-11-11 D5). 아래 줄은 둘 다 “{날짜}에 해제돼요”
   const unlinkBand = h.unlink ? (
     <LineBand
       icon="link"
-      title={copy.unlinkWait}
+      title={h.unlink.mine ? copy.unlinkWait : copy.unlinkRequested(partner.data?.nickname ?? '')}
       sub={copy.unlinkOn(formatMonthDay(h.unlink.deadline))}
       action={{
         label: copy.unlinkCheck,

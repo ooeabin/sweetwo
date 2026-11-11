@@ -187,7 +187,7 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 /* Toast */
 /* 작은 알약, 화면 아래 가운데(2026-11-02, 포켓CU처럼). 글자 길이만큼, 되돌리기는 글자 옆 굵은 링크 */
 .hg-toast { box-sizing: border-box; display: inline-flex; align-items: center; gap: var(--space-3); width: fit-content; max-width: min(440px, 100%); align-self: center; margin-inline: auto; min-height: 44px; padding: var(--space-2) var(--space-5); border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-3); font: 500 14px/20px var(--font-sans); }
-.hg-toast__msg { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: center; }  /* 늘 한 줄, 넘치면 말줄임(화면 읽기는 전체를 읽음) */
+.hg-toast__msg { display: -webkit-box; min-width: 0; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-align: center; word-break: keep-all; }  /* 2026-11-11 QA 3구간 S3-33: 두 줄까지(320px에서 오류 문구가 잘리던 것), 넘치면 말줄임(화면 읽기는 전체를 읽음) */
 .hg-toast .hg-btn--link { flex: none; color: var(--on-ink); font: var(--text-label); font-weight: 700; text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
 @keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
@@ -326,6 +326,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-q__foot :is(.hg-btn--primary, .hg-btn--danger, button[type="submit"].hg-btn--secondary) { flex: 1; }
 .hg-q__foot .hg-q__second { flex: 1; }  /* 주 버튼 옆 회색 보조(‘취소’, 2026-11-03). 좁은 창에서 반씩 */  /* 주 버튼은 열 너비 꽉 차게(O-01, A-02 버튼 묶음과 같음) */
 .hg-q__foot.has-sum { flex-wrap: wrap; }  /* 버튼 위 요약 한 줄(O-50 여유 자금) */
+.hg-q__foot > .hg-btn--link { flex: 0 1 auto; min-width: 0; white-space: normal; word-break: keep-all; text-align: center; }  /* 2026-11-11 S3-13: 주 버튼 옆 글자 버튼(P-02b ‘지우고 새로 입력할게요’)이 좁은 창에서 잘리지 않고 줄바꿈 */
 .hg-q__sum { flex-basis: 100%; display: flex; flex-direction: column; gap: var(--space-1); font: var(--text-body-strong); color: var(--ink); }
 .hg-q__sum .hg-help { font-weight: 400; }
 .hg-q__foot.has-note { flex-wrap: wrap; row-gap: var(--space-3); }
@@ -356,8 +357,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 :where(.hg-admin, .hg-adminauth, .hg-site) .hg-artslot { box-shadow: none; }
 .hg-option__icon.hg-artslot { display: inline-block; width: 36px; height: 36px; border-radius: var(--radius-md); }  /* 선택지 카드 왼쪽 그림 자리(36px 둥근 네모) */
 .hg-intro-steps__icon.hg-artslot { display: inline-block; border-radius: var(--radius-full); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--hairline); }  /* O-10·O-60 목록 앞 그림 자리(40px 원). 회색 판(plate) 위라 hairline 테두리 */
-/* 2026-11-09 축하 화면 배경(사용자 승인, DESIGN.md ‘색’ 예외): 움직이는 그림 자리가 있는 축하·보상 화면(W-12, W-02 끝, O-60, P-11)의
-   화면 위 40~50%만 brand-soft → surface 세로 그라데이션(경계 없음). 카드·띠·다른 화면에는 쓰지 않음. 아직 어느 화면에도 붙이지 않음(그림이 들어올 때) */
+/* 2026-11-09 축하 화면 배경(사용자 승인, DESIGN.md ‘색’ 예외): 움직이는 그림 자리가 있는 축하·보상 화면(W-12, W-02 끝, O-60, P-10 합류 축하)의
+   화면 위 40~50%만 brand-soft → surface 세로 그라데이션(경계 없음). 카드·띠·다른 화면에는 쓰지 않음.
+   2026-11-11 P-10 합류 축하에 먼저 붙임(QuestionLayout celebrate, D7). 나머지는 그림이 들어올 때 */
 .hg-celebrate-bg { background: linear-gradient(180deg, var(--brand-soft) 0, var(--surface) 45%) no-repeat, var(--surface); }
 .hg-busy__art > .hg-artslot { width: 100%; height: 100%; border-radius: inherit; }  /* S-18 처리 중 그림 자리 = 112px 원 전체 */
 @media (max-width: 767px) {

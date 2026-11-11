@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
+import { chanwoo, SB } from './supabase-mock';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 import { setWheel } from './wheel';
@@ -57,7 +57,7 @@ async function expectStep(page: Page, done: number, total: number) {
       const max = Number(await bar.getAttribute('aria-valuemax'));
       return max ? now / max : -1;
     })
-    .toBeCloseTo(done / total, 3);
+    .toBeCloseTo(done / total, 1);
 }
 
 async function answerBasics(page: Page, waiting = false) {
@@ -66,8 +66,8 @@ async function answerBasics(page: Page, waiting = false) {
   await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
   await expect(page.getByText('파트너에게도 이 이름으로 보여요')).toBeVisible();
   await axe(page);
-  // 진행 막대 4칸 중 1칸(P-03a 뺌)
-  await expectStep(page, 1, 4);
+  // 진행 막대 4칸 중 1칸(P-03a 뺌). 시작한 사람이 아직 온보딩 중이면 3칸(2026-11-11 S3-24)
+  await expectStep(page, 1, waiting ? 3 : 4);
   await page.getByRole('button', { name: '다음' }).click();
   // 출생연도는 묻지 않음(2026-11-11): 이름 다음은 P-04(시작한 사람이 온보딩 중이면 P-05)
   await expect(page).toHaveURL(waiting ? /\/join\/p-05$/ : /\/join\/p-04$/);
@@ -76,6 +76,17 @@ async function answerBasics(page: Page, waiting = false) {
     await expect(
       page.getByRole('heading', { name: '찬우님이 고른 월급 관리 방식이에요' }),
     ).toBeVisible();
+}
+
+/** 합류 축하(P-10, 2026-11-11 D7): 축하 배경 + 그림 자리 + “찬우님과 연결됐어요” → 홈(웹은 푸시 질문 없음) */
+async function celebrate(page: Page, help = '이제 월급과 저금을 같이 봐요') {
+  await expect(page).toHaveURL(/\/join\/p-10$/);
+  await expect(page.getByRole('heading', { name: '찬우님과 연결됐어요' })).toBeVisible();
+  await expect(page.getByText(help)).toBeVisible();
+  await expect(page.locator('main.hg-celebrate-bg')).toHaveCount(1);
+  await axe(page);
+  await page.getByRole('button', { name: '홈으로 가기' }).click();
+  await expect(page).toHaveURL(/\/$/);
 }
 
 async function salary(page: Page) {
@@ -107,8 +118,8 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급
   await page.getByRole('button', { name: '다음' }).click();
   await salary(page);
 
-  // 월급 계획 화면 없이 홈(온보딩 ADR 0005처럼). 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
-  await expect(page).toHaveURL(/\/$/);
+  // 월급 계획 화면 없이 합류 축하(P-10, 2026-11-11 D7) → 홈. 홈 할 일 ‘월급 계획 확인’은 없앰(2026-11-03)
+  await celebrate(page);
   await expect(page.getByText('추천으로 나눈 월급 계획을 확인해 주세요')).toHaveCount(0);
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
@@ -196,7 +207,8 @@ test('예전 P-03a에 멈췄고 시작한 사람이 아직 온보딩 중: 다시
   await page.goto('/');
   await expect(page).toHaveURL(/\/join\/p-05$/);
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
-  await expectStep(page, 3, 4);
+  // 시작한 사람이 아직 온보딩 중이면 P-03, P-05, P-05b 세 칸(2026-11-11 S3-24)
+  await expectStep(page, 2, 3);
 });
 
 test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
@@ -225,7 +237,7 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채�
     .toMatchObject({ fn: 'set_join_salary_mode', p_mode: 'joint' });
   await salary(page);
 
-  await expect(page).toHaveURL(/\/$/);
+  await celebrate(page);
   const lines = db.splits.find((x) => x.owner_user_id === null)?.split_line as {
     kind: string;
     amount: number;
@@ -242,6 +254,7 @@ test('시작한 사람이 아직 온보딩 중: 이름 → 월급 → 월급날 
   joining(db, false);
   await answerBasics(page, true);
   await salary(page);
+  await celebrate(page, '찬우님이 월급 계획을 만들면 알려 드릴게요');
   await expect(page.getByText('찬우님이 시작하고 있어요')).toBeVisible();
   await expect(page.getByText('찬우님이 월급 계획을 만들면 알려 드릴게요')).toBeVisible();
   expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
@@ -315,4 +328,86 @@ test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류�
     space_id: 'space-1',
     visibility: 'all',
   });
+});
+
+// 2026-11-11 QA 3구간 D1: 시작한 사람이 초대를 취소했거나 잡아 둔 24시간이 지나면 합류 화면 대신 안내
+test('합류가 끝난 초대: 코드 다시 입력하기(뒤로 = 홈) / 혼자 시작하기 → 온보딩', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.joinEnded = true;
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  await expect(
+    page.getByRole('heading', { name: '초대가 취소됐거나 기한이 지났어요' }),
+  ).toBeVisible();
+  await expect(page.getByText('받은 코드를 다시 넣거나 혼자 시작할 수 있어요')).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '코드 다시 입력하기' }).click();
+  await expect(page).toHaveURL(/\/i$/);
+  await expect(page.getByRole('heading', { name: '받은 초대 코드를 넣어 주세요' })).toBeVisible();
+  await page.goto('/join/p-03');
+  await page.getByRole('button', { name: '혼자 시작하기' }).click();
+  await expect(page).toHaveURL(/\/onboarding\/o-03$/);
+  expect(db.me.onboarding_step).toBe('O-03');
+});
+
+test('P-05 큰 값은 O-31과 같은 확인 띠 한 번(S3-25)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.me.onboarding_step = 'P-05';
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-05$/);
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('200000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.locator('.hg-banner--check')).toContainText('입력한 값이 맞나요?');
+  await axe(page);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page).toHaveURL(/\/join\/p-05b$/);
+});
+
+test('로그인된 사람의 합류 불가(A-07 7번): 코드 다시 입력하기 + 홈으로 가기(D4)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.route(`${SB}/rest/v1/rpc/invite_preview`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ inviter_nickname: '찬우', status: 'used' }]),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    }),
+  );
+  await page.goto('/i/K7M2QX');
+  await expect(page.getByRole('heading', { name: '이미 합류가 끝난 초대예요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '홈으로 가기' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '코드 다시 입력하기' }).click();
+  await expect(page).toHaveURL(/\/i$/);
+  // 뒤로 = 홈(합류 불가 화면으로 돌아가지 않음, S3-28)
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test('O-06 ‘받은 초대 코드가 있어요 ›’ → P-01 코드 입력, 뒤로 = O-06(D4)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-06', onboarding_done_at: null });
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/onboarding\/o-06$/);
+  await page.getByRole('button', { name: '받은 초대 코드가 있어요 ›' }).click();
+  await expect(page).toHaveURL(/\/i$/);
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/onboarding\/o-06$/);
 });

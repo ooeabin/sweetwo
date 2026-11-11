@@ -20,7 +20,7 @@ import {
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
 import { reauthenticate, session } from '../../auth';
@@ -28,6 +28,7 @@ import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { buildExport, type Scope } from '../export';
+import { markExported, type DataBack } from '../unlink';
 import { buildPdfModel, renderPdf } from '../export-pdf';
 
 type Format = 'csv' | 'pdf';
@@ -58,6 +59,8 @@ async function saveFile(name: string, bytes: Uint8Array, mime: string) {
 // 본인 확인: 모바일 앱은 PIN(있으면), 웹은 가입 소셜로 다시 로그인 → 돌아오면 이어서 내보냄(?export=범위&format=형식).
 export function S18Data() {
   const nav = useNavigate();
+  // 연결 해제 안내(S-12a·d)나 합류 옮기기(P-02a)에서 왔으면 뒤로 = 그 화면(2026-11-11 S3-07)
+  const from = (useLocation().state as DataBack | null) ?? null;
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
   const d = useSettingsData();
@@ -91,7 +94,10 @@ export function S18Data() {
       }
       setState('idle');
       track('data_exported', { format: f, scope: s === 'mine' ? 'mine' : 'joint', result: 'done' });
-      if (r === 'saved') toast(copy.exported);
+      if (r === 'saved') {
+        markExported();
+        toast(copy.exported);
+      }
     } catch {
       track('data_exported', {
         format: f,
@@ -145,8 +151,8 @@ export function S18Data() {
       <PageHeader
         title={copy.data}
         backLabel={copy.back}
-        backTo={copy.title}
-        onBack={() => nav('/settings')}
+        backTo={from?.backLabel ?? copy.title}
+        onBack={() => nav(from?.back ?? '/settings', { replace: !!from })}
       />
       <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
         <SectionHeader title={copy.exportTitle} />

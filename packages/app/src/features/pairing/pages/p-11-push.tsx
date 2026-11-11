@@ -27,7 +27,8 @@ export async function shouldAskPush() {
   return (await push.status().catch(() => 'denied')) === 'prompt';
 }
 
-// P-11 합류 완료 직후 푸시 허용(18 앞부분, 1회). ‘알림 받기’ = OS 허용 창 → 허용되면 기기 등록. 어느 쪽이든 홈으로
+// P-11 합류 완료 직후 푸시 허용(18 앞부분, 1회). 합류 축하(P-10) 다음, 아직 안 물었을 때만(2026-11-11 D7).
+// ‘알림 받기’ = OS 허용 창 → 허용되면 기기 등록. 어느 쪽이든 홈으로. 축하 배경은 P-10에만
 export function P11Push() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -49,7 +50,7 @@ export function P11Push() {
   };
   return (
     <QuestionLayout
-      hero={<Illustration name="scene-clap" className="hg-sceneart" motion />}
+      hero={<Illustration name="status-push" className="hg-auth__art" />}
       title={copy.pushTitle}
       help={copy.pushHelp}
       primary={{ label: copy.pushAllow, loading: busy }}

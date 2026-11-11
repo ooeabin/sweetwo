@@ -104,7 +104,8 @@ export function Lead({
 
 export function List({ label, children }: { label?: string; children: ReactNode }) {
   return (
-    <div className="hg-list" aria-label={label}>
+    // 이름이 있으면 묶음(group): 역할 없는 div에는 aria-label을 못 씀(axe aria-prohibited-attr, QA 3구간 S3-23)
+    <div className="hg-list" role={label ? 'group' : undefined} aria-label={label}>
       {children}
     </div>
   );

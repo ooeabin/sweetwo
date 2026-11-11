@@ -32,14 +32,18 @@
 | 9 | done-check | 체크 원 | O-60 준비 끝 | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 10 | done-sold | 동전 더미 | F-04b 팔았어요 | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 11 | busy-file | 서류와 폴더 | S-18 내보내기 중 | ProcessingState `hg-busy__art` 112px 원 전체(2026-11-09 전에는 0px라 원 판만 보였음) |
-| 12 | scene-clap | 박수 치는 두 손 | P-11 합류 완료 | 제목 위 `hg-sceneart` 120px 둥근 네모 |
+| 12 | scene-clap | 박수 치는 두 손 | P-10 합류 축하(2026-11-11 D7, 예전 P-11 자리) | 제목 위 96px 둥근 네모(`hg-auth__art hg-artslot`, 움직이는 그림 자리), 화면은 축하 배경 `hg-celebrate-bg` |
 | 13 | scene-invite | 초대장 봉투와 편지(3:4) | P-01 초대받은 첫 화면 | 제목 위 `hg-sceneart--tall` 120×160px 둥근 네모 |
 | 14 | celebrate | 폭죽 | W-02 월급 체크 끝, W-12 목표 금액 달성(2026-11-08) | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 15 | status-newdevice(새) | 새 기기(폰과 노트북) | A-08 새 기기 로그인 확인(빈 자리 넣어 둠) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 16 | status-restore(새) | 되돌리는 화살표 | A-02 계정 삭제 취소(빈 자리 넣어 둠) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 17 | ~~scene-start~~ | ~~함께 시작~~ | 2026-11-10 없앰(O-01은 그림 없이 워드마크만) | 없음 |
 | 18 | status-wait(새) | 브라우저 창과 돌아오는 화살표 | A-03 브라우저 로그인 대기(2026-11-10, 도는 아이콘 대신) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
-| 19 | status-invite-blocked(새) | 닫힌 초대장 봉투 | A-07 합류 불가(만료, 잘못된 코드, 10분 제한, 이미 연결, 내가 만든 코드, 이미 합류 끝남, 사용할 수 없음), 한 장(2026-11-10) | QuestionLayout `hero` 안 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 19 | status-invite-blocked(새) | 닫힌 초대장 봉투 | A-07 합류 불가(만료, 잘못된 코드, 10분 제한, 이미 연결, 내가 만든 코드, 이미 합류 끝남, 사용할 수 없음), 한 장(2026-11-10). 2026-11-11 합류가 끝난 초대(취소, 잡아 둔 24시간 지남)도 같은 그림 | QuestionLayout `hero` 안 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 20 | status-push(새, 2026-11-11) | 종과 알림 점 | P-11 푸시 알림 허용(합류 축하 P-10 다음) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 21 | status-has-records(새, 2026-11-11) | 상자 두 개가 하나로 | A-07 6번 이미 시작한 기록이 있어요(S3-15) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 22 | status-unlinked(새, 2026-11-11) | 풀린 고리 두 개 | S-12h 연결이 해제됐어요(S3-16) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 23 | status-waiting(새, 2026-11-11) | 모래시계 | 홈 대기(P-WAIT, 시작한 사람이 아직 온보딩 중, S3-32) | 카드 안 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 
 ### 2. 움직이는 그림 6개(1번 새 그림을 조각내 움직임, 생성 크레딧 없음)
 
@@ -60,8 +64,8 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
   - 한 번 재생하고 마지막 장면에서 멈춤. 반복 없음.
   - ‘동작 줄이기’면 마지막 장면만.
 - 크기와 형식: DESIGN.md ‘움직이는 그림’ 규칙 그대로(96px 이상 주인공 자리, 화면당 1개). 조각이 들어가게 캔버스는 물건 크기의 약 2배, 바탕 투명. 형식은 지금 규칙대로 한 번 재생하는 움직이는 WebP(`packages/ui/src/assets/motion/`, 같은 이름의 정지 WebP와 짝).
-- 바탕: 레퍼런스는 주인공 뒤에 옅은 민트 → 흰색 그라데이션이 있음. 우리는 2026-11-09 사용자 승인으로 축하 화면 배경 규칙(DESIGN.md ‘색’ 예외, CLAUDE.md 브랜드 색)을 따름: 화면 위 40~50%만 `brand-soft`(위) → `surface`(아래) 세로 그라데이션, 경계 없음, 다크는 다크 값, 위 글자는 `ink`. 클래스 `hg-celebrate-bg`(화면 틀에 붙임). 그림이 들어올 때 붙이고 지금은 어느 화면에도 붙이지 않음.
-- 배경을 쓸 화면(움직이는 그림 자리가 있는 축하·보상 화면만): W-12 다 모았어요(`celebrate`), W-02 끝 월급 체크 다 했어요(`celebrate`), O-60 준비 끝(`done-check`), P-11 합류 완료(`scene-clap`). 움직이는 그림 자리가 있어도 축하가 아닌 P-01 초대받은 첫 화면, S-18 처리 중, F-04b 팔았어요는 쓰지 않음.
+- 바탕: 레퍼런스는 주인공 뒤에 옅은 민트 → 흰색 그라데이션이 있음. 우리는 2026-11-09 사용자 승인으로 축하 화면 배경 규칙(DESIGN.md ‘색’ 예외, CLAUDE.md 브랜드 색)을 따름: 화면 위 40~50%만 `brand-soft`(위) → `surface`(아래) 세로 그라데이션, 경계 없음, 다크는 다크 값, 위 글자는 `ink`. 클래스 `hg-celebrate-bg`(화면 틀에 붙임, QuestionLayout `celebrate`). 2026-11-11 P-10 합류 축하에 먼저 붙임(D7), 나머지는 그림이 들어올 때.
+- 배경을 쓸 화면(움직이는 그림 자리가 있는 축하·보상 화면만): W-12 다 모았어요(`celebrate`), W-02 끝 월급 체크 다 했어요(`celebrate`), O-60 준비 끝(`done-check`), P-10 합류 축하(`scene-clap`, 2026-11-11 예전 P-11 자리에서 옮김). 움직이는 그림 자리가 있어도 축하가 아닌 P-01 초대받은 첫 화면, S-18 처리 중, F-04b 팔았어요는 쓰지 않음.
 
 ### 3. ~~목표 아이콘 22장~~ 필요 없어짐(2026-11-08 ADR 0007)
 

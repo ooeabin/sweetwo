@@ -172,7 +172,7 @@ export function MainFrame(
     [
       item('couple', d.couple, '/settings/couple', path === '/settings/couple'),
       ...(space.data?.couple_state === 'not_joined'
-        ? [item('invite', d.invite, '/settings/couple', false)]
+        ? [item('invite', d.invite, '/settings/couple?invite=1', false)]
         : []),
     ],
     [
