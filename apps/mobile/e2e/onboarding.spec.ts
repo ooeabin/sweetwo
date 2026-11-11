@@ -519,3 +519,25 @@ test('O-60 ‘홈으로 가기’ 저장 실패 → 토스트 다시 시도, 체
   expect(db.splits).toHaveLength(1);
   expect(db.checklists).toHaveLength(1);
 });
+
+test('O-32 휠 둘레 링은 키보드로 왔을 때만(손가락·마우스로 고르면 없음, 2026-11-11)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-32', monthly_income: 3_500_000 });
+  await page.goto('/onboarding/o-32');
+  await heading(page, '월급날은 며칠이에요?');
+  const wheel = page.locator('.hg-wheel');
+  const col = wheel.getByRole('spinbutton');
+  const ring = () => wheel.evaluate((el) => getComputedStyle(el).outlineStyle);
+  await col.getByText('26일').click();
+  await expect(col).toHaveAttribute('aria-valuenow', '26');
+  await expect(col).toBeFocused();
+  expect(await ring()).toBe('none');
+  await col.press('ArrowDown');
+  await expect(col).toHaveAttribute('aria-valuenow', '27');
+  expect(await ring()).toBe('solid');
+  await col.getByText('25일').click();
+  expect(await ring()).toBe('none');
+});

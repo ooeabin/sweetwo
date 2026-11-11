@@ -1031,7 +1031,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
 .hg-wheel__col::-webkit-scrollbar { display: none; }
 .hg-wheel__col:focus, .hg-wheel__col:focus-visible { outline: none; }
-.hg-wheel:has(.hg-wheel__col:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 4px; }  /* 2026-11-11 고른 줄은 늘 회색 알약(plate) + ink 700 한 모양. 키보드 초점은 띠·칸 테두리 대신 휠 전체 둘레 링(:focus-visible만) */
+.hg-wheel:has(.hg-wheel__col[data-kbd]:focus) { outline: 2px solid var(--focus-ring); outline-offset: 4px; }  /* 2026-11-11 고른 줄은 늘 회색 알약(plate) + ink 700 한 모양. 키보드로 왔을 때만(Tab, 화살표, data-kbd) 휠 전체 둘레 링. 손가락·마우스로 고르거나 화면이 열리며 초점이 와도 링 없음 */
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(S-11i 출생연도): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
