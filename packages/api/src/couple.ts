@@ -7,18 +7,48 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type LatestInvite = { code: string; expiresAt: string; usedAt: string | null };
+export type LatestInvite = {
+  code: string;
+  expiresAt: string;
+  usedAt: string | null;
+  /** 합류하는 중(누가 ‘합류하기’를 눌러 24시간 잡아 둠)이면 그 기한(D1) */
+  reservedUntil: string | null;
+};
 
 /** 가장 최근 초대 코드(없으면 null). 만료됐는지는 화면이 expiresAt으로 판단 */
 export async function fetchLatestInvite(): Promise<LatestInvite | null> {
   const { data, error } = await supabase()
     .from('invite')
-    .select('code, expires_at, used_at')
+    .select('code, expires_at, used_at, used_by, reserved_by, reserved_until')
     .order('created_at', { ascending: false })
     .limit(1);
   fail(error);
   const row = data?.[0];
-  return row ? { code: row.code, expiresAt: row.expires_at, usedAt: row.used_at } : null;
+  if (!row) return null;
+  const now = Date.now();
+  const reserved =
+    !row.used_at &&
+    ((row.reserved_by && row.reserved_until && Date.parse(row.reserved_until) > now) ||
+      !!row.used_by);
+  return {
+    code: row.code,
+    expiresAt: row.expires_at,
+    usedAt: row.used_at,
+    reservedUntil: reserved ? (row.reserved_until ?? null) : null,
+  };
+}
+
+/** 초대 취소(S-12 ‘합류하는 중’): 합류하는 중인 사람을 풀고 지금 코드도 못 쓰게 */
+export async function cancelInvite() {
+  const { error } = await supabase().rpc('cancel_invite');
+  fail(error);
+}
+
+/** 다시 연결할 수 있는지(서버 기준, S3-20) */
+export async function fetchReconnectOk(): Promise<boolean> {
+  const { data, error } = await supabase().rpc('my_reconnect_ok');
+  fail(error);
+  return data === true;
 }
 
 /** 새 코드 받기: 이전 코드는 바로 못 씀 */

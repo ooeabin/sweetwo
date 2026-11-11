@@ -1,7 +1,7 @@
 -- pgTAP: 파트너 합류 재기획(18). 관리 방식 바꾸기(P-04), 합류 완료(P-06, 대기), 첫 월급 계획 알림. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -50,11 +50,12 @@ select is((select title from public.notification where kind = 'salary_mode'), '�
 -- P-06: 연 뒤에 월급 계획이 바뀌었으면 거절, 맞으면 저장 + 연결
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select set_config('test.v', (select version::text from public.salary_split where owner_user_id is null), true);
+select is((select count(*)::int from public.salary_split), 0, '합류를 마치기 전에는 공동 월급 계획을 직접 못 읽음(D1)');
+select set_config('test.v', public.join_context()->'joint'->>'version', true);
 select throws_ok(format($$ select public.complete_join('[]'::jsonb, %s) $$, current_setting('test.v')::int - 1),
   '40001', 'split_changed', '월급 계획이 바뀌었으면 다시');
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 2500000),
+  jsonb_build_object('kind', 'saving', 'goal_id', (public.join_context()->'joint'->'items'->0->>'id')::uuid, 'amount', 2500000),
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'user_id', '11111111-1111-1111-1111-111111111111', 'amount', 350000),
   jsonb_build_object('kind', 'allowance', 'user_id', '22222222-2222-2222-2222-222222222222', 'amount', 270000)
@@ -63,7 +64,7 @@ select is((select onboarding_step from public.app_user where id = auth.uid()), '
 reset role;
 select is((select couple_state::text from public.couple_space where created_by = '11111111-1111-1111-1111-111111111111'),
   'connected', '커플 연결');
-select is((select body from public.notification where kind = 'partner_joined'), '이제 목표와 월급을 같이 봐요', '합류 알림');
+select is((select body from public.notification where kind = 'partner_joined'), '이제 월급과 저금을 같이 봐요', '합류 알림');
 select is((select count(*) from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.owner_user_id is null and l.kind = 'allowance'), 2::bigint, '이번 체크리스트에 예빈 용돈 줄');
 

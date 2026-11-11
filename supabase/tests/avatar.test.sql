@@ -29,6 +29,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select is((select count(*) from public.space_avatars() where path is not null), 1::bigint, '파트너 사진 경로를 봄');
 select public.set_avatar(null);
 select is((select count(*) from public.space_avatars()), 2::bigint, '두 사람');

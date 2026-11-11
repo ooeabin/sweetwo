@@ -30,6 +30,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 update public.app_user set nickname = '예빈', birth_year = 1996, birth_month = 10, birth_day = 3;
 select results_eq($$ select month::int, day::int from public.partner_birthday() $$,
   $$ values (2, 18) $$, '예빈: 찬우 생일 월, 일');

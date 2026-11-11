@@ -1634,6 +1634,9 @@ export type Database = {
           created_by: string | null
           expires_at: string
           id: string
+          reserved_by: string | null
+          reserved_until: string | null
+          reserved_vis: Json | null
           space_id: string
           used_at: string | null
           used_by: string | null
@@ -1645,6 +1648,9 @@ export type Database = {
           created_by?: string | null
           expires_at: string
           id?: string
+          reserved_by?: string | null
+          reserved_until?: string | null
+          reserved_vis?: Json | null
           space_id: string
           used_at?: string | null
           used_by?: string | null
@@ -1655,6 +1661,9 @@ export type Database = {
           created_by?: string | null
           expires_at?: string
           id?: string
+          reserved_by?: string | null
+          reserved_until?: string | null
+          reserved_vis?: Json | null
           space_id?: string
           used_at?: string | null
           used_by?: string | null
@@ -1685,6 +1694,28 @@ export type Database = {
           created_at?: string
           id?: never
           user_id?: string
+        }
+        Relationships: []
+      }
+      invite_guard_attempt: {
+        Row: {
+          created_at: string
+          id: number
+          key_hash: string
+          kind: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          id?: never
+          key_hash: string
+          kind: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          key_hash?: string
+          kind?: string
         }
         Relationships: []
       }
@@ -2433,6 +2464,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _accept_join: { Args: { p_space: string }; Returns: undefined }
+      _detach_pending_member: { Args: { p_space: string; p_user: string }; Returns: undefined }
+      _join_reserve: { Args: { p_code: string; p_moving: boolean; p_vis: Json }; Returns: string }
+      _release_expired: { Args: { p_space: string }; Returns: undefined }
+      _release_invite: { Args: { p_invite: string }; Returns: undefined }
       access_send: {
         Args: {
           p_admin: string
@@ -2863,6 +2899,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cancel_invite: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cancel_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       care_date_in_year: {
         Args: {
@@ -2935,6 +2975,7 @@ export type Database = {
           path: string
         }[]
       }
+      client_ip_key: { Args: Record<PropertyKey, never>; Returns: string }
       complete_join: {
         Args: { p_lines?: Json; p_version?: number }
         Returns: undefined
@@ -3163,18 +3204,31 @@ export type Database = {
           partner: Database["public"]["Enums"]["invest_answer"]
         }[]
       }
-      invite_preview: {
-        Args: { p_code: string }
-        Returns: {
-          inviter_nickname: string
-          status: string
-        }[]
+      invite_guard_hit: {
+        Args: { p_key: string; p_kind: string; p_limit: number }
+        Returns: boolean
       }
+      invite_preview:
+        | {
+            Args: { p_code: string }
+            Returns: {
+              inviter_nickname: string
+              status: string
+            }[]
+          }
+        | {
+            Args: { p_code: string; p_device: string }
+            Returns: {
+              inviter_nickname: string
+              status: string
+            }[]
+          }
       is_own_space_row: {
         Args: { p_owner: string; p_space_id: string }
         Returns: boolean
       }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
+      join_context: { Args: Record<PropertyKey, never>; Returns: Json }
       join_moving_records: {
         Args: { p_code: string; p_vis?: Json }
         Returns: string
@@ -3242,6 +3296,7 @@ export type Database = {
         Args: { p_platform: string; p_version?: string }
         Returns: Json
       }
+      my_reconnect_ok: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
