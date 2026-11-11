@@ -3,17 +3,6 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// 이미 쓰던 사람: 온보딩 뒤 ‘월급 계획 확인’(ADR 0005)은 끝낸 상태로
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    try {
-      localStorage.setItem('sweetwo:home:todo-closed', JSON.stringify(['split:split-1']));
-    } catch {
-      /* 없음 */
-    }
-  });
-});
-
 // 만기일 당일(23 F-04a, 19 H-06 ‘만기·경조사’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
 // 찬우 혼자, 10월 7일. 청년 적금 만기 10월 7일, 입출금 통장 300만.
 
@@ -95,15 +84,15 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
   expect(db.assets.find((a) => a.id === 'a-sav')?.maturity_date).toBe('2027-10-07');
 
-  // 닫기
+  // 2026-11-11 띠 닫기(✕) 없음: 정리하면(새 만기일) 홈 띠가 사라짐
+  await page.goto('/');
+  await expect(page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' })).toHaveCount(0);
   const sav = db.assets.find((a) => a.id === 'a-sav');
   if (sav) sav.maturity_date = '2026-10-07';
-  await page.goto('/');
-  const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
-  await band.getByRole('button', { name: '닫기' }).click();
-  await expect(band).toHaveCount(0);
   await page.reload();
-  await expect(page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' })).toHaveCount(0);
+  const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
+  await expect(band).toHaveCount(1);
+  await expect(band.getByRole('button', { name: '닫기' })).toHaveCount(0);
 });
 
 test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 수정 내역에 고친 사람', async ({

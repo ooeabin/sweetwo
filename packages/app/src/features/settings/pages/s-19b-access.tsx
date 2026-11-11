@@ -3,7 +3,7 @@ import { Badge, Button, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 
@@ -30,7 +30,7 @@ export function S19bAccess() {
     try {
       await answerAccessRequest(r.id, accept);
       await qc.invalidateQueries({ queryKey: qk.inquiries });
-      if (!accept) toast(copy.accessDeclined);
+      if (!accept) carryToast(copy.accessDeclined);
       nav(`/settings/help/inquiries/${q.id}`, { replace: true });
     } catch {
       toast(copy.failed);

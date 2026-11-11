@@ -33,7 +33,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useMe, usePartner, useSplits } from '../data';
@@ -142,7 +142,7 @@ export function W10aSavingEdit() {
     try {
       await write(patch, force);
       setConflict(null);
-      toast(text, {
+      carryToast(text, {
         label: copy.undo,
         onClick: () => void updateGoal(g.id, before).then(refresh),
       });
@@ -175,7 +175,7 @@ export function W10aSavingEdit() {
         monthly_band: amountBand(v),
         direction: v > item.monthly ? 'up' : 'down',
       });
-      toast(copy.monthlyChanged, { label: copy.undo, onClick: () => quietly(write(before)) });
+      carryToast(copy.monthlyChanged, { label: copy.undo, onClick: () => quietly(write(before)) });
       return true;
     } catch {
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void sendMonthly(v) });
@@ -193,7 +193,7 @@ export function W10aSavingEdit() {
     try {
       await retargetSavingItem(g.id, v);
       track('saving_item_after_achieve', { choice: 'retarget' });
-      toast(copy.amountChanged, {
+      carryToast(copy.amountChanged, {
         label: copy.undo,
         onClick: () => quietly(unkeepSavingItem(g.id, oldTarget, oldDeadline).then(refresh)),
       });

@@ -4,7 +4,7 @@ import { AuthLayout, Button } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy, providerName } from '../copy';
 import { prefs } from '../prefs';
 
@@ -28,7 +28,7 @@ export function A08NewDevice() {
       await qc.cancelQueries({ queryKey: qk.sessions });
       qc.removeQueries({ queryKey: qk.sessions });
       const p = prefs.lastProvider();
-      toast(p ? copy.checkProvider(providerName[p]) : copy.checkAccount);
+      carryToast(p ? copy.checkProvider(providerName[p]) : copy.checkAccount);
       nav('/settings/security', { replace: true });
     } catch {
       toast(copy.newDeviceFailed);

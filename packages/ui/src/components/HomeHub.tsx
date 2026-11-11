@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
-import { IconButton } from './IconButton';
 
 // 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 GCOO 홈처럼): 회색 바탕 위 크기가 다른 흰 상자.
 // Hub(격자) > HubHero(다음 월급날까지 + 보낸 줄 막대 + 보낸 금액 | 모은 금액), HubBand(할 일·초대 띠, 코코아 채움, 2026-11-11),
@@ -78,17 +77,16 @@ export function HubHero({
   );
 }
 
+/** 홈 할 일·초대 띠(코코아). 띠 전체가 이동 버튼, 닫기(✕) 없음(2026-11-11: 끝내거나 기간이 지나면 사라짐) */
 export function HubBand({
   text,
   go,
   onClick,
-  close,
 }: {
   text: string;
   /** 오른쪽 이동 글자(“체크하기”). 없으면 꺾쇠만 */
   go?: string;
   onClick: () => void;
-  close?: { label: string; onClick: () => void };
 }) {
   return (
     <div className="hg-hubband hg-hub__full">
@@ -99,7 +97,6 @@ export function HubBand({
           <Icon name="chevron-right" size={16} />
         </span>
       </button>
-      {close && <IconButton icon="x" label={close.label} ghost small onClick={close.onClick} />}
     </div>
   );
 }

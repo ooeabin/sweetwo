@@ -14,7 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
@@ -170,7 +170,7 @@ export function Y07CareAdd() {
       if (editing) {
         await updateCareDay(editing.id, { name, ...rule });
         await qc.invalidateQueries({ queryKey: qk.careDays });
-        toast(copy.edited);
+        carryToast(copy.edited);
         nav(`/calendar/day/${editing.id}`, { replace: true });
         return;
       }
@@ -182,7 +182,7 @@ export function Y07CareAdd() {
       if (record && id && rule.once_on)
         nav(`/calendar/day/${id}/record/a?on=${rule.once_on}`, { replace: true });
       else {
-        toast(copy.saved);
+        carryToast(copy.saved);
         nav('/calendar/list', { replace: true });
       }
     } catch {

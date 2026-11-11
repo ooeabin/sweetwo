@@ -4,7 +4,7 @@ import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -51,7 +51,7 @@ export function S11dPlanDay() {
           await Promise.all(
             [qk.space, ['pay_checklist']].map((k) => qc.invalidateQueries({ queryKey: k })),
           );
-          toast(copy.planDaySaved);
+          carryToast(copy.planDaySaved);
           nav('/settings/me', { replace: true });
         } catch {
           toast(copy.failed);

@@ -4,7 +4,7 @@ import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -32,7 +32,7 @@ export function S11bNotifyEmail() {
         try {
           await updateMe({ notify_email: parsed.data });
           await qc.invalidateQueries({ queryKey: qk.me });
-          toast(copy.saved);
+          carryToast(copy.saved);
           nav('/settings/me', { replace: true });
         } catch {
           toast(copy.failed);

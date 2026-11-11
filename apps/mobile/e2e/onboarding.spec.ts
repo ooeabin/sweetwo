@@ -157,7 +157,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 7화면(결혼한 날
   await expect(page).not.toHaveURL(/onboarding/);
 });
 
-test('O-07 초대 코드 시트: 링크 복사 = invite_sent, 앱은 브리지 공유 글(S2-05), 시트를 닫으면 O-11, O-11 뒤로는 O-06(S2-15)', async ({
+test('O-07 초대 코드 시트: 링크 복사 = invite_sent, 앱은 브리지 공유 글(S2-05), 시트를 닫으면 O-11(복사 토스트는 닫힘), O-11 뒤로는 O-06(S2-15)', async ({
   page,
   context,
 }) => {
@@ -187,8 +187,11 @@ test('O-07 초대 코드 시트: 링크 복사 = invite_sent, 앱은 브리지 �
   await expect
     .poll(() => ev.filter((e) => e.name === 'invite_sent').map((e) => e.props.channel))
     .toEqual(['share', 'link']);
+  await expect(page.locator('.hg-toast', { hasText: '복사했어요' })).toBeVisible();
   await sheet.getByRole('button', { name: '다음' }).click();
   await heading(page, '두 사람은 어떤 사이예요?');
+  // 2026-11-11 화면이 바뀌면 그 화면의 토스트(‘복사했어요’)는 닫힘
+  await expect(page.locator('.hg-toast')).toHaveCount(0);
   await back(page);
   await heading(page, '같이 쓸 사람을 초대할까요?');
   await expect(sheet).toHaveCount(0);

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { PhotoPick } from '../../../shared/photo-pick';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -30,7 +30,7 @@ export function S11ePhoto() {
       await uploadAvatar(me.space_id, me.id, jpeg);
       await qc.invalidateQueries({ queryKey: qk.avatars });
       track('profile_photo_changed', { action: 'set' });
-      toast(copy.photoSaved);
+      carryToast(copy.photoSaved);
       back();
     } catch {
       toast(copy.failed);

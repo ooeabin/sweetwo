@@ -31,7 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { lastAssetsTab } from '../assets-frame';
 import { copy } from '../copy';
@@ -127,7 +127,7 @@ export function F04Item() {
   const remove = () =>
     void run(async () => {
       await trashAsset(a.id);
-      toast(copy.removed, {
+      carryToast(copy.removed, {
         label: copy.undo,
         onClick: () => quietly(restoreAsset(a.id).then(refresh)),
       });

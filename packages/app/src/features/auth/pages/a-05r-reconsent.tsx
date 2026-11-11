@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { sharedCopy } from '../../../shared/copy';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { ConsentDocSheet, openPolicy } from '../consent-doc';
 import { copy } from '../copy';
 import { paths } from '../flow';
@@ -37,7 +37,7 @@ export function A05rReconsent() {
       await agreeTerms(marketing);
       // 마케팅을 물었으면 처리 결과 통지(31 5-1): 날짜, 동의·거부, 보낸 곳. 알림 센터에도 남음(서버)
       if (marketing !== null)
-        toast(sharedCopy.marketingResult(marketing, formatDateFull(todayKst())));
+        carryToast(sharedCopy.marketingResult(marketing, formatDateFull(todayKst())));
       await qc.invalidateQueries({ queryKey: qk.pendingTerms });
       nav(back, { replace: true });
     } catch {

@@ -10,7 +10,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -52,7 +52,7 @@ export function S11cSalary() {
         payday_last: dd === 'last',
       });
       await qc.invalidateQueries({ queryKey: qk.me });
-      toast(copy.salarySaved, {
+      carryToast(copy.salarySaved, {
         label: copy.undo,
         onClick: () =>
           quietly(updateMe(before).then(() => qc.invalidateQueries({ queryKey: qk.me }))),

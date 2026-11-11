@@ -23,7 +23,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useMe, usePartner, useSpace, useSplits } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
@@ -152,7 +152,7 @@ export function W11SavingAdd() {
           qc.invalidateQueries({ queryKey: k }),
         ),
       );
-      toast(left - v.monthly < 0 ? copy.addShort : copy.added);
+      carryToast(left - v.monthly < 0 ? copy.addShort : copy.added);
       nav(savingPaths.item(id), { replace: true });
     } catch (e) {
       toast(

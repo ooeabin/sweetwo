@@ -30,7 +30,6 @@ export const copy = {
 
   // O-60 준비 끝(2026-11-02 다시 둠) [확인 필요]
   readyTitle: (name: string) => `${name}님, 준비가 끝났어요`,
-  readyHelp: '이제 홈에서 하나씩 해 볼게요',
   readyDone: {
     split: '월급을 추천값으로 나눠 뒀어요',
     checklist: (day: string) => `${day} 월급 체크리스트를 만들었어요`,

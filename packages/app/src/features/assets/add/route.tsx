@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetSteps, useAssetDraft } from './draft';
@@ -96,7 +96,7 @@ export function AssetAddRoute() {
       });
       await refresh();
       const counted = !(owner === 'me' && !solo && x.visibility === 'private');
-      toast(
+      carryToast(
         !counted
           ? copy.added
           : x.side === 'asset'

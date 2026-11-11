@@ -4,7 +4,7 @@ import { ChoiceCards, DateWheel, QuestionLayout, QuestionSkeleton } from '@sweet
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { canEdit, useAssetsData, useRefreshAssets } from '../data';
 
@@ -41,7 +41,7 @@ export function F04aMatured() {
     try {
       await settleMatured(a.id, how);
       await refresh();
-      toast(copy.maturedDone);
+      carryToast(copy.maturedDone);
       nav('to' in how ? `/assets/${how.to}` : `/assets/${a.id}`, { replace: true });
     } catch {
       toast(copy.loadFailed);
