@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (132897f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (c00af44). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2320,7 +2320,7 @@ button.hg-receipt__main { cursor: pointer; }
 @keyframes hg-drawer-in { from { transform: translateX(100%); } }
 
 /* 홈 허브(hg-hub): 상자 사이 12px. 좁은 창 2열(큰 상자는 두 칸), 넓은 창(1100px 이상) 4열 */
-.hg-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: stretch; }
+.hg-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: stretch; word-break: keep-all; overflow-wrap: anywhere; }  /* 2026-11-11 좁은 반 칸에서 글자가 음절 단위로 깨지지 않게 말 단위로 줄바꿈(아주 긴 말만 아무 데서나) */
 .hg-hub > .hg-hub__full { grid-column: 1 / -1; }
 .hg-hub > .hg-hub__wide { grid-column: span 2; }
 @media (min-width: 1100px) {
@@ -2352,11 +2352,11 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubband__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 500 15px/22px var(--font-sans); white-space: nowrap; }
 .hg-hubband__main:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 타일(HubTile): 반 칸 상자. 큰 타일 164px(오른쪽 아래 72px 그림 자리), 작은 타일(--sm) 104px(값 한 줄) */
-.hg-hubtile { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 164px; padding: 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
+.hg-hubtile { position: relative; container-type: inline-size; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 164px; padding: 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
 .hg-hubtile--sm { min-height: 104px; }
 .hg-hubtile__title { font: var(--text-title-3); font-weight: 700; }  /* 2026-11-10 목업처럼 700 */
 .hg-hubtile__sub { margin-top: 2px; font: 500 13px/18px var(--font-sans); color: var(--slate); }
-.hg-hubtile__value { margin-top: var(--space-2); font: 700 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-hubtile__value { margin-top: var(--space-2); font: 700 17px/24px var(--font-sans); font-size: clamp(14px, 13cqi, 17px); font-variant-numeric: tabular-nums; }  /* 2026-11-11 좁은 칸(320px 휴대폰 반 칸)에서는 14px까지 줄여 금액이 한 줄에 */
 .hg-hubtile__subrow { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-2); margin-top: 2px; min-width: 0; }
 .hg-hubtile__subrow > .hg-hubtile__sub { margin-top: 0; white-space: nowrap; }  /* 좁으면 알약이 다음 줄로 */
 .hg-hubtile__badge { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--plate); color: var(--ink-2); font: 600 12px/18px var(--font-sans); font-variant-numeric: tabular-nums; white-space: nowrap; }  /* 2026-11-11 자산 관리 타일 ‘순자산 [상위 38%]’(HubTile badge), 보조 줄 바로 옆(좁은 반 칸에서도 제목과 겹치지 않게) */

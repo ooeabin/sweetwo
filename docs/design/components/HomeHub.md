@@ -11,3 +11,5 @@
 - 저금 상자(`hg-hubsave`, HubSaving, 두 칸): 안쪽 20px. 왼쪽 56px 그림 자리(`hg-artslot`, `radius-lg`) + 이름(17px 600, 넘치면 …)과 오른쪽 % + 회색 “6,000만 / 1억 5,000만 원” + 얇은 막대(8px, 바탕 `surface-alt`, 채움 `ink-2`, 2026-11-09 사용자 그림대로 오렌지가 아님).
 - 다크: 토큰 그대로(회색 바탕 `surface-alt` 다크 #232325, 상자 `surface`).
 - React 래퍼(packages/ui `HomeHub.tsx`): `Hub`(`label`), `HubHero`(`caption`, `title`, `people`, `percent`, `meterLabel`, `done`, `total`, `split`, `label`, `onClick`), `HubBand`(`text`, `go`, `onClick`. 2026-11-11 `close` 없앰), `HubTile`(`title`, `sub`, `value`, `art`, `small`, `point`, `badge`, `label`, `onClick`), `HubSaving`(`name`, `percent`, `sub`, `bar`, `label`, `onClick`).
+
+- 좁은 화면 글자(2026-11-11): 허브 안 글자는 말 단위로 줄바꿈(`word-break: keep-all`, 아주 긴 말만 `overflow-wrap: anywhere`). 타일 값(`hg-hubtile__value`)은 타일 너비에 맞춰 17px에서 14px까지 줄어듦(`container-type: inline-size`, `clamp(14px, 13cqi, 17px)`), 320px 휴대폰 반 칸에서도 “2억 1,000만 원”이 한 줄.
