@@ -22,7 +22,9 @@ const dropOldKeys = () => {
   }
 };
 
-// 홈(H-05·H-06)이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
+// 홈(H-06 할 일 띠, H-08 캘린더 타일)이 쓰는 core homeTodo·homeUpcoming 재료. 키는 다른 화면과 같은 qk.
+// 재료(체크리스트, 저금, 경조사, 자산, 해제 기록)가 다 온 뒤에만 input을 만듦(2026-11-11 QA 4구간 S4-13):
+// 일부만 온 채로 계산하면 할 일 띠가 초대 → 만기처럼 잠깐 바뀌어 보임. 실패한 재료는 빈 값으로 셈
 export function useHomeInput() {
   const today = todayKst();
   const me = useMe();
@@ -45,8 +47,10 @@ export function useHomeInput() {
   const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
   useEffect(dropOldKeys, []);
 
+  // 켜진 쿼리가 아직 처음 받는 중이면 기다림(꺼진 쿼리·실패한 쿼리는 기다리지 않음)
+  const waiting = [lists, goals, cares, assets, unlink, myUnlink].some((q) => q.isLoading);
   const input: HomeInput | null =
-    me.data && space.data && goals.data && !lists.isLoading
+    me.data && space.data && goals.data && !waiting
       ? {
           today,
           meId: me.data.id,

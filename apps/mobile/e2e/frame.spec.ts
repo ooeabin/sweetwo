@@ -64,7 +64,10 @@ test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 추�
   await expect(page).toHaveURL(/\/salary\/items\/new/);
 });
 
-test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d)', async ({ page, context }) => {
+test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d), 맨 위 띠는 하나만(오프라인 먼저)', async ({
+  page,
+  context,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -95,8 +98,12 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d)', asyn
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
   await context.setOffline(true);
   await expect(page.getByText('연결이 끊겼어요')).toBeVisible();
+  // 맨 위 띠는 하나만, 오프라인이 먼저(2026-11-11 QA 4구간 D3): 해제 대기 띠는 다시 연결되면 보임
+  await expect(page.getByText('10월 20일에 해제돼요')).toHaveCount(0);
+  await expect(page.locator('.hg-body__banners .hg-banner')).toHaveCount(1);
   await context.setOffline(false);
   await expect(page.getByText('연결이 끊겼어요')).toHaveCount(0);
+  await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
   await page.getByRole('button', { name: '확인하기' }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/unlink\/review$/);
 });
@@ -301,6 +308,38 @@ test('메뉴 서랍 키보드만으로(2026-11-09): Enter로 열고, Tab은 서�
   await drawer.getByRole('button', { name: '자산 관리', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/assets$/);
+});
+
+test('메뉴 서랍(2026-11-11 QA 4구간 S4-09·S4-15·S4-20): 열린 동안 뒤 화면 inert + 스크롤 잠금, 줄 묶음 이름은 “메뉴 목록”, 넓은 창이 되면 닫힘', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'narrow');
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/');
+  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await page.getByRole('button', { name: '메뉴', exact: true }).click();
+  const drawer = page.getByRole('dialog', { name: '메뉴' });
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole('navigation', { name: '메뉴 목록' })).toBeVisible();
+  expect(
+    await page.evaluate(() => ({
+      inert: !!document.querySelector('.hg-frame')?.closest('[inert]'),
+      drawerInert: !!document.querySelector('.hg-drawer')?.closest('[inert]'),
+      overflow: getComputedStyle(document.body).overflow,
+    })),
+  ).toEqual({ inert: true, drawerInert: false, overflow: 'hidden' });
+  await axe(page);
+  // 넓은 창(태블릿 가로)이 되면 닫히고 뒤 화면이 돌아옴
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await expect(drawer).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      inert: !!document.querySelector('.hg-frame')?.closest('[inert]'),
+      overflow: getComputedStyle(document.body).overflow,
+    })),
+  ).toEqual({ inert: false, overflow: 'visible' });
 });
 
 test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월급 저금 묶음 끝, 자산·부채 목록 끝, 캘린더 일정 머리', async ({

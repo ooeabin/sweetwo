@@ -113,7 +113,7 @@
 | checklist\_line\_unchecked | 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원 | line\_kind |
 | checklist\_completed | 여유 자금 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
-| month\_check\_viewed | W-05 열림 | entry(`notification` / `home`), open\_lines\_count |
+| month\_check\_viewed | W-05 열림 | entry(`notification` / `home` / `other`: 월급 탭·캘린더 등, 2026-11-11), open\_lines\_count(체크 안 한 줄 수) |
 | checklist\_closed | 다음 기준일 0시 (서버) | done(‘다 했어요’였는지), checked\_ratio\_band(`<50` / `50-99` / `100`%), missed\_saving\_lines, missed\_saving\_band |
 | split\_saved | W-01 ‘추천값으로 다시 채우기’ 저장(2026-11-09 영수증부터 ‘저장’ 버튼이 없어 추천값으로 채울 때만, O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self`), left\_band, reset\_to\_recommended(늘 true), entry(`split`) |
 | plan\_line\_changed | W-01 금액 시트 ‘확인’으로 줄 금액·이름을 바꿈 (2026-11-09) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), field(`amount` / `name` / `both`), direction(`up` / `down` / `same`), left\_band(바꾼 뒤 여유 자금 구간, 모자라면 `short`), joint(합쳐서 공동 월급 계획인지), entry(`receipt` / `edit` / `saving_detail`: W-10 ‘매달 금액 바꾸기’) |
@@ -137,7 +137,7 @@
 | saving\_monthly\_changed | W-10a 매달 금액 저장 (2026-11-09 round 3) | monthly\_band, direction(`up` / `down`) |
 | (없앰) goal\_created, goal\_amount\_set, goal\_money\_moved, goal\_delayed, goal\_achieved | 2026-11-08 ADR 0007 | — |
 | asset\_added | F-03 저장 | kind(`account` / `invest` / `real_estate` / `debt` 등), entry(`home` / `assets` / `palette`), is\_first |
-| rank\_banner\_tapped | F-01 0번·H-01 순위 배너 (2026-11-04) | state(`unseen` / `seen` / `stale` / `empty`), entry(`home` / `assets`) |
+| rank\_banner\_tapped | F-01 0번 순위 줄 (2026-11-04. 2026-11-11 홈 순위 줄 1a 없앰, 홈은 H-04 타일 배지라 이벤트 없음) | state(`unseen` / `seen` / `stale` / `empty`), entry(`assets`) |
 | rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform |
 | rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
 | fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면 | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
@@ -174,7 +174,8 @@
 | trash\_restored | S-21 되살리기, 되돌리기 토스트 | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
 | rejoin\_requested | S-12 “다시 연결하기”(2026-11-11 앱에 넣음) | days\_since\_unlink |
 | rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |
-| home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings`), todo(할 일 띠 종류, band일 때만: `check` / `review` / `saving` / `matured` / `care` / `unlink` / `reconnect`) |
+| home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings` / `retry`: 큰 상자 오류 카드 ‘다시 시도’, 2026-11-11), todo(할 일 띠 종류, band일 때만: `unlink` / `reconnect` / `review` / `check` / `saving` / `matured` / `care` / `invite`, 2026-11-11 초대 띠도 같은 띠) |
+| home\_banner\_tapped | 홈 맨 위 띠의 버튼을 누름 (19 ‘맨 위 띠’, 2026-11-11) | banner(`unlink` / `must_notice` / `mail_bounced` / `notice`), action(`open`: ‘확인하기’·공지 ‘보기’ / `close`: 일반 공지 ‘닫기’) |
 | menu\_item\_tapped | 좁은 창 메뉴 서랍 줄을 누름 (19 앱 기본 틀 11번, 2026-11-09) | item(`home` / `salary` / `assets` / `calendar` / `me` / `settings` / `couple` / `invite` / `notice` / `inquiry` / `help`) |
 | amounts\_hidden\_toggled | 눈 아이콘, 단축키, ⌘K 바로 하기 | state(on / off), entry(icon / shortcut / palette) |
 | search\_used | 검색 화면(⌘K, 좁은 창 검색) 닫을 때 | result\_count\_band, picked(goal / asset / debt / care\_day / quick\_action / none), quick\_action(salary\_check / add\_goal / add\_asset / hide\_amounts / lock). 검색어는 보내지 않음 |

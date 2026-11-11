@@ -217,6 +217,24 @@ export async function reorderSplit(split: string, ids: string[]) {
  * 월급 계획 변경 신호(Realtime postgres_changes, salary_split 행: 서버 RPC마다 updated_at·version이 오름).
  * 받으면 splitKeys를 무효화. 돌려준 함수로 끊음
  */
+/**
+ * 체크리스트 줄이 바뀌면 신호(Realtime pay_check_line, 같은 공간만. RLS가 읽을 수 있는 줄만 보냄).
+ * 합쳐서 모드에서 상대가 공동 체크리스트를 체크하면 홈 큰 상자·W-02가 바로 바뀜(2026-11-11 QA 4구간 S4-02)
+ */
+export function subscribeCheckLines(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`pay_check_line:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'pay_check_line', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
 export function subscribeSplits(spaceId: string, on: () => void) {
   const ch = supabase()
     .channel(`salary_split:${spaceId}`)

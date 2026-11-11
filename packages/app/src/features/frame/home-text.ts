@@ -1,9 +1,12 @@
 import { formatMonthDay, isWord, subject, type HomeTodo, type HomeUpcoming } from '@sweetwo/core';
 
-// 홈 할 일 한 줄(19 H-06)과 일정(H-05) 문구.
+/** “{이름}님이”, 이름(애칭)이 없으면 “파트너가”(19 홈 상태 변형 3·4번, 2026-11-11 QA 4구간 S4-11) */
+export const whoDid = (name: string) => (name ? `${name}님이` : '파트너가');
+
+// 홈 할 일 한 줄(19 H-06)과 일정(캘린더 타일 H-08, 위젯) 문구.
 export const homeText = {
-  todoUnlink: (name: string) => `${name}님이 연결 해제를 요청했어요`,
-  todoReconnect: (name: string) => `${name}님이 다시 연결하자고 했어요`,
+  todoUnlink: (name: string) => `${whoDid(name)} 연결 해제를 요청했어요`,
+  todoReconnect: (name: string) => `${whoDid(name)} 다시 연결하자고 했어요`,
   todoReview: (label: string, n: number) => `${label}에서 체크 안 한 게 ${n}개 있어요`,
   todoCheck: '월급날 체크할 차례예요', // [확인 필요] 2026-11-09 홈 할 일 띠(19 H-06 3a)
   todoInvite: '함께할 사람을 초대해 주세요',

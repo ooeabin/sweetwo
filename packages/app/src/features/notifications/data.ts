@@ -23,6 +23,7 @@ import { create } from 'zustand';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { onSessionReset } from '../../shared/session-reset';
+import { notiKeys } from './noti-keys';
 
 // 알림 센터 데이터: 목록(30개씩), 읽지 않음 점, Realtime(새 알림 → 목록·점), 모바일 푸시, 누르면 읽음 + 그 화면.
 
@@ -90,7 +91,8 @@ export function useOpenNotification() {
     // 대상 항목이 지워졌거나 볼 수 없으면 이동 없이 Toast(14 N-01 예외)
     const gone = await targetGone(n.target, qc).catch(() => null);
     if (gone) toast(gone === 'deleted' ? copy.targetDeleted : copy.targetHidden);
-    else nav(n.target);
+    // 알림에서 왔음(분석 entry, 예: W-05 month_check_viewed)
+    else nav(n.target, { state: { from: 'notification' } });
     if (!n.read_at) {
       await markNotificationsRead([n.id]).catch(() => undefined);
       await qc.invalidateQueries({ queryKey: qk.notifications });
@@ -107,20 +109,11 @@ export function useNotiRealtime(userId: string | undefined) {
     const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
     const off = subscribeNotifications(userId, (ev) => {
       void qc.invalidateQueries({ queryKey: qk.notifications });
-      // 연결 해제 요청·취소: 우리 둘 상태가 바뀜. 확정이면 공간이 바뀌어 전부 다시 읽음
-      if (
-        ev.type === 'insert' &&
-        (ev.row.kind === 'unlink_confirmed' || ev.row.kind === 'reconnected')
-      )
-        void qc.invalidateQueries();
-      else if (ev.type === 'insert' && /^(access|inquiry)_/.test(ev.row.kind))
-        void qc.invalidateQueries({ queryKey: qk.inquiries });
-      else if (ev.type === 'insert' && ev.row.kind === 'reconnect_requested')
-        void qc.invalidateQueries({ queryKey: qk.myUnlink });
-      else if (ev.type === 'insert' && ev.row.kind.startsWith('unlink_')) {
-        void qc.invalidateQueries({ queryKey: qk.space });
-        void qc.invalidateQueries({ queryKey: qk.unlink });
-      }
+      if (ev.type !== 'insert') return;
+      const keys = notiKeys(ev.row.kind);
+      // 확정·다시 연결이면 공간이 바뀌어 전부 다시 읽음
+      if (keys === 'all') void qc.invalidateQueries();
+      else for (const k of keys) void qc.invalidateQueries({ queryKey: [...k] });
     });
     // 모바일 푸시를 눌러 들어옴: 그 알림을 읽음 + 그 화면(알림이 없으면 받은 경로로)
     const offPushOpen = bridge?.push?.onOpen((p) => {

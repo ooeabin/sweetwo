@@ -52,7 +52,7 @@ export function F01Overview() {
     );
     body = (
       <>
-        <RankBanner entry="assets" />
+        <RankBanner />
         <section
           className="hg-stack"
           style={{ gap: 'var(--space-3)' }}
@@ -78,7 +78,7 @@ export function F01Overview() {
     body = (
       <>
         {/* 2026-11-04 순위 줄(23 F-01 0번)은 요약 맨 위 */}
-        <RankBanner entry="assets" />
+        <RankBanner />
         <section
           className="hg-stack"
           style={{ gap: 'var(--space-1)' }}

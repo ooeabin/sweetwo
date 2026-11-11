@@ -9,12 +9,13 @@ import {
   fetchSplits,
   qk,
   splitKeys,
+  subscribeCheckLines,
   subscribeSplits,
   type Goal,
   type PayChecklist,
   type PayCheckLine,
 } from '@sweetwo/api';
-import { todayKst } from '@sweetwo/core';
+import { pickMyChecklist, todayKst } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 
@@ -60,9 +61,9 @@ export function useCheck() {
 /** 모은 금액(서버 goal_saved_sums, 아직 못 읽었으면 0) */
 export const savedOf = (g: Goal, saved: Record<string, number> | undefined) => saved?.[g.id] ?? 0;
 
-/** 내 체크리스트: 각자면 내 것, 합쳐서면 공동 */
+/** 내 체크리스트: 내 것 → 공동(core pickMyChecklist, 홈 H-03·H-06과 같은 함수, 2026-11-11 S4-12) */
 export const myChecklist = (list: PayChecklist[] | undefined, meId: string | undefined) =>
-  list?.find((c) => c.owner_user_id === meId) ?? list?.find((c) => c.owner_user_id === null);
+  pickMyChecklist(list, meId);
 
 /** 월급 계획이 바뀐 뒤 다시 읽기(W-01 줄 RPC, Realtime 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
 export function useSplitRefresh() {
@@ -90,11 +91,26 @@ export function useSplitWrite() {
   );
 }
 
-/** 상대가 월급 계획을 바꾸면(Realtime salary_split) 바로 다시 읽음. 월급 탭에서 한 번 */
+/** 상대가 월급 계획을 바꾸면(Realtime salary_split) 바로 다시 읽음. 월급 탭과 홈(P-WAIT 대기 포함)에서 한 번 */
 export function useSplitRealtime(spaceId: string | null | undefined) {
   const refresh = useSplitRefresh();
   useEffect(() => {
     if (!spaceId) return;
     return subscribeSplits(spaceId, () => void refresh());
   }, [spaceId, refresh]);
+}
+
+/**
+ * 상대가 체크하면(Realtime pay_check_line, 합쳐서 모드 공동 체크리스트) 체크리스트와 모은 금액을 바로 다시 읽음.
+ * 홈 큰 상자(H-03)와 월급 탭(W-02)에서 한 번(2026-11-11 QA 4구간 S4-02)
+ */
+export function useCheckRealtime(spaceId: string | null | undefined) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!spaceId) return;
+    return subscribeCheckLines(spaceId, () => {
+      void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
+      void qc.invalidateQueries({ queryKey: qk.goalSaved });
+    });
+  }, [spaceId, qc]);
 }
