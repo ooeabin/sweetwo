@@ -6,7 +6,9 @@ export {
   myChecklist,
   savedOf,
   useChecklists,
+  useCheckRealtime,
   useGoalSaved,
+  useSplitRealtime,
   useSplits,
   waiting,
 } from './data';

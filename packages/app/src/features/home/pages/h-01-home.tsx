@@ -7,15 +7,17 @@ import {
   homeTodo,
   homeUpcoming,
   monthProgress,
+  pickTopBanner,
   todayKst,
   type HomeTodo,
 } from '@sweetwo/core';
 import { Hub, HubBand, HubHero, HubSaving, HubTile, Illustration } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
+import { sharedCopy } from '../../../shared/copy';
 import {
   AddMenu,
   LineBand,
@@ -32,16 +34,20 @@ import {
   myChecklist,
   salaryCopy,
   useChecklists,
+  useCheckRealtime,
   useSavingItems,
+  useSplitRealtime,
   useSplits,
 } from '../../salary';
 import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 
 // 홈(19, 2026-11-09 홈 허브: GCOO 홈처럼 회색 바탕 위 크기가 다른 흰 상자).
-// 위에서부터 큰 상자(다음 월급날까지 + 이번 달 보낸 줄 + 보낸 금액 | 모은 금액, → W-02) → 할 일·초대 띠(코코아 채움, 있을 때만, 2026-11-11)
+// 위에서부터 큰 상자(다음 월급날까지 + 이번 달 체크 + 체크한 금액 | 모은 금액, → W-02) → 할 일·초대 띠(코코아 채움, 있을 때만, 2026-11-11)
 // → 반 칸 타일 둘(월급 계획 → W-01, 오렌지 채운 포인트 상자 / 캘린더 → Y-01) → 저금 상자(목표 금액에 가장 가까운 저금 하나, → W-10)
-// → 작은 타일 둘(자산 관리 → F-01, 저금 → W-13) → 자산 순위 줄. 공지·해제 대기·메일 반송 띠는 맨 위 옅은 띠 그대로.
+// → 작은 타일 둘(자산 관리 → F-01, 순위 배지 / 저금 → W-13).
+// 본문 맨 위 띠(해제 대기, 공지, 메일 반송)는 하나만(core pickTopBanner, 2026-11-11 D3, 오프라인은 앱 틀이 먼저).
+// 상대가 바꾸면 Realtime으로 바로 다시 읽음(월급 계획 salary_split, 체크 pay_check_line, 알림 종류별, 2026-11-11 S4-02).
 
 type Box = 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
 
@@ -51,6 +57,7 @@ const bandGo = (t: HomeTodo) =>
 
 export function H01Home() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const me = useMe();
   const space = useSpace();
   const partner = usePartner();
@@ -75,7 +82,13 @@ export function H01Home() {
   const rank = useRank();
   const rankPct =
     rank && (rank.state.kind === 'seen' || rank.state.kind === 'stale') ? rank.state.pct : null;
-  if (!me.data || !space.data || !goals.data || lists.isLoading)
+  // P-WAIT 대기(시작한 사람이 월급 계획을 만들면 P-04로)와 합쳐서 모드 상대 체크를 바로 받음
+  useSplitRealtime(space.data?.id);
+  useCheckRealtime(space.data?.id);
+  // 체크리스트는 처음 받을 때만 기다림. 한 번 실패한 뒤 다시 받는 동안은 홈을 그대로 두고 큰 상자만 오류 카드
+  // (데이터가 없는 쿼리는 다시 받을 때 pending으로 돌아가 불러오는 중 틀 ↔ 홈이 계속 바뀌지 않게, S4-01)
+  const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;
+  if (!me.data || !space.data || !goals.data || listsFirstLoad)
     return <LoadingFrame current="month" />;
 
   // 연결 해제 확정 뒤 처음 열면 해제 안내(25 S-12h)
@@ -86,7 +99,8 @@ export function H01Home() {
     if (splits.isLoading) return <LoadingFrame current="month" />;
     if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
     const starter = partner.data?.nickname ?? space.data.partner_nickname ?? '';
-    // 2026-11-11 S3-32: 96px 그림 자리(그림이 들어올 때까지 회색 빈 자리). 2026-11-11 사용자 결정: 카드 없이 화면 가운데(다른 상태 화면처럼, hg-hubwait)
+    // 2026-11-11 S3-32: 96px 그림 자리(그림이 들어올 때까지 회색 빈 자리). 2026-11-11 사용자 결정: 카드 없이 화면 가운데(다른 상태 화면처럼, hg-hubwait).
+    // 시작한 사람이 월급 계획을 만들면 Realtime(salary_split, plan_ready 알림)으로 splits가 다시 읽혀 P-04로 넘어감
     return (
       <MainFrame
         current="month"
@@ -133,12 +147,20 @@ export function H01Home() {
       go={t.kind === 'invite' ? copy.inviteNow : bandGo(t)}
       onClick={() => {
         track('home_box_tapped', { box: 'band', todo: t.kind });
-        nav(t.to);
+        // 월급 전 확인은 홈에서 왔다고 남김(32 month_check_viewed entry)
+        nav(t.kind === 'review' ? `${t.to}?from=home` : t.to);
       }}
     />
   ) : null;
   // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 “연결 해제를 기다리고 있어요” → S-12,
   // 받은 사람 “{이름}님이 연결 해제를 요청했어요” → S-12d(2026-11-11 D5). 아래 줄은 둘 다 “{날짜}에 해제돼요”
+  // 맨 위 띠는 하나만(2026-11-11 D3): 해제 대기 > 필독 공지 > 메일 반송 > 일반 공지
+  const top = pickTopBanner({
+    unlink: !!h.unlink,
+    must_notice: !!notice?.must,
+    mail_bounced: !!bounced.data,
+    notice: !!notice && !notice.must,
+  });
   const unlinkBand = h.unlink ? (
     <LineBand
       icon="link"
@@ -146,7 +168,10 @@ export function H01Home() {
       sub={copy.unlinkOn(formatMonthDay(h.unlink.deadline))}
       action={{
         label: copy.unlinkCheck,
-        onClick: () => nav(h.unlink?.mine ? '/settings/couple' : '/settings/couple/unlink/review'),
+        onClick: () => {
+          track('home_banner_tapped', { banner: 'unlink', action: 'open' });
+          nav(h.unlink?.mine ? '/settings/couple' : '/settings/couple/unlink/review');
+        },
       }}
     />
   ) : undefined;
@@ -156,19 +181,25 @@ export function H01Home() {
       icon="envelope"
       title={copy.mailBounced}
       sub={copy.mailBouncedSub}
-      action={{ label: copy.mailCheck, onClick: () => nav('/settings/me/email') }}
+      action={{
+        label: copy.mailCheck,
+        onClick: () => {
+          track('home_banner_tapped', { banner: 'mail_bounced', action: 'open' });
+          nav('/settings/me/email');
+        },
+      }}
     />
   ) : undefined;
   const banner =
-    notice || unlinkBand || bounceBand ? (
-      <>
-        {unlinkBand}
-        {notice}
-        {bounceBand}
-      </>
-    ) : undefined;
+    top === 'unlink'
+      ? unlinkBand
+      : top === 'mail_bounced'
+        ? bounceBand
+        : top === 'must_notice' || top === 'notice'
+          ? notice?.node
+          : undefined;
 
-  // 1. 큰 상자: 다음 월급날까지 + 이번 달 보낸 줄(W-02와 같은 셈) + 보낸 금액 | 모은 금액(내 저금, 합쳐서면 공동)
+  // 1. 큰 상자: 다음 월급날까지 + 이번 달 체크(W-02와 같은 셈) + 체크한 금액 | 모은 금액(내 저금, 합쳐서면 공동)
   const ready = saving.ready ? saving : null;
   const mySavings = ready
     ? ready.live.filter((i) => (ready.joint ? i.owner === 'ours' : i.owner === 'mine'))
@@ -199,8 +230,12 @@ export function H01Home() {
       })()}
     </span>
   );
+  // 월급 없음(19 상태 변형 2): 내(합쳐서면 두 사람) 월급이 0원이거나 없음(O-31 ‘지금은 월급이 없어요’)
+  const noSalary = joint
+    ? !me.data.monthly_income && !partner.data?.monthly_income
+    : !me.data.monthly_income;
   let hero;
-  if (list) {
+  if (list && !lists.isError) {
     const p = monthProgress({ income: 0, lines: list.pay_check_line });
     const next = addDays(list.cycle_end, 1);
     const left = Math.max(0, daysBetween(today, next));
@@ -230,8 +265,8 @@ export function H01Home() {
         onClick={() => go('hero', '/salary')}
       />
     );
-  } else {
-    // 월급 없음(19 상태 변형 2): 큰 상자 자리에 빈 카드 + ‘월급 알려 주기’
+  } else if (noSalary) {
+    // 월급 없음(19 상태 변형 2): 큰 상자 자리에 흰 카드 + ‘월급 알려 주기’. 월급이 있는데 체크리스트가 없으면 아래 오류 카드(2026-11-11 S4-01)
     hero = (
       <section className="hg-card hg-card--fill hg-stack hg-hub__wide">
         <p className="hg-card__meta">{copy.noSalary}</p>
@@ -242,6 +277,26 @@ export function H01Home() {
           onClick={() => nav('/settings/me')}
         >
           {copy.tellSalary}
+        </button>
+      </section>
+    );
+  } else {
+    // 체크리스트를 못 불러옴(실패, 또는 월급이 있는데 이번 사이클 체크리스트가 없음): 13 공통 상태 7번 문구 + ‘다시 시도’(2026-11-11 S4-01)
+    hero = (
+      <section className="hg-card hg-card--fill hg-stack hg-hub__wide" role="status">
+        <p className="hg-card__title">{sharedCopy.errorTitle}</p>
+        <p className="hg-card__meta">{sharedCopy.errorBody}</p>
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => {
+            track('home_box_tapped', { box: 'retry' });
+            void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
+            void qc.invalidateQueries({ queryKey: qk.splits });
+          }}
+        >
+          {sharedCopy.retry}
         </button>
       </section>
     );
@@ -258,7 +313,8 @@ export function H01Home() {
         : copy.payday(jointDay)
       : dayOf(me.data);
   const care = (h.input ? homeUpcoming(h.input, 365) : []).find((u) => u.kind === 'care');
-  // 4. 저금 상자: 목표 금액에 가장 가까운 저금(달성 전, 비율이 가장 높은 것). 목표 금액이 있는 저금이 없으면 없음
+  // 4. 저금 상자: 목표 금액에 가장 가까운 저금(달성 전, 비율이 가장 높은 것). 목표 금액이 있는 저금이 없으면 없음.
+  // 파트너 저금이면 이름 옆 파트너 이름 배지(애칭, 없으면 ‘파트너’, 2026-11-11 D4)
   const near = ready?.withTarget
     .filter((i) => i.state === 'saving' && i.target !== null && i.target > 0 && i.saved < i.target)
     .sort((a, b) => b.saved / (b.target ?? 1) - a.saved / (a.target ?? 1))[0];
@@ -304,11 +360,14 @@ export function H01Home() {
             {near && (
               <HubSaving
                 name={near.goal.name}
+                badge={near.owner === 'partner' ? copy.ownerBadge(near.ownerName) : undefined}
                 percent={near.pct ?? 0}
                 sub={salaryCopy.itemProgress(m(near.saved), m(near.target ?? 0))}
                 bar={near.bar}
                 label={copy.savingLabel(
-                  near.goal.name,
+                  near.owner === 'partner'
+                    ? `${near.goal.name}, ${copy.ownerBadge(near.ownerName)}`
+                    : near.goal.name,
                   near.pct ?? 0,
                   salaryCopy.itemProgress(m(near.saved), m(near.target ?? 0)),
                 )}
@@ -318,10 +377,12 @@ export function H01Home() {
             <HubTile
               small
               title={copy.assetsTile}
-              value={nw ? m(nw.nw.net) : undefined}
-              badge={rankPct === null ? undefined : copy.rankBadge(rankPct)}
+              // 자산·부채가 하나도 없으면 “아직 없어요”(저금 타일과 같음, 2026-11-11 D5)
+              sub={nw?.empty ? copy.noAssets : undefined}
+              value={nw && !nw.empty ? m(nw.nw.net) : undefined}
+              badge={rankPct === null || nw?.empty ? undefined : copy.rankBadge(rankPct)}
               label={
-                nw
+                nw && !nw.empty
                   ? copy.assetsTileLabel(
                       m(nw.nw.net),
                       rankPct === null ? null : copy.rankBadge(rankPct),

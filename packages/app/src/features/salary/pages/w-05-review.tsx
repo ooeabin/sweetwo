@@ -1,7 +1,8 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
-import { useRef } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { quietly, toast } from '../../../shared/toast';
 import { CheckLine, goalLineName, LineLead, lineName } from '../check-line';
 import { copy } from '../copy';
@@ -28,6 +29,23 @@ export function W05Review() {
   const check = useCheck();
   // 처음 열 때 체크 안 한 줄이 없으면 W-02로(24 캘린더 ‘월급 전 확인’, 홈도 같음)
   const empty = useRef<boolean | null>(null);
+  // 열림 분석(32 month_check_viewed, 2026-11-11 QA 4구간 S4-08): 홈 할 일 띠는 ?from=home, 알림은 state.from
+  const [params] = useSearchParams();
+  const loc = useLocation();
+  const viewed = useRef(false);
+  const ready = !!(me.data && lists.data);
+  const openLines = ready ? (myChecklist(lists.data, me.data?.id)?.pay_check_line ?? []) : [];
+  const openCount = openLines.filter((l) => l.state === 'wait').length;
+  useEffect(() => {
+    if (!ready || viewed.current) return;
+    viewed.current = true;
+    const from = (loc.state as { from?: string } | null)?.from;
+    track('month_check_viewed', {
+      entry:
+        params.get('from') === 'home' ? 'home' : from === 'notification' ? 'notification' : 'other',
+      open_lines_count: openCount,
+    });
+  }, [ready, openCount, params, loc.state]);
   if (!me.data || !space.data || !goals.data || !lists.data)
     return <QuestionSkeleton onBack={() => nav('/')} fields={3} />;
   const list = myChecklist(lists.data, me.data.id);

@@ -135,8 +135,10 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   await page.goto(narrow ? '/' : '/calendar/list');
   const bell = page
     .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
-    .getByRole('button', { name: '알림', exact: true });
+    .getByRole('button', { name: /^알림/ });
   await expect(bell).toHaveClass(/hg-iconbtn--dot/);
+  // 점은 그림이라 화면 읽기 이름에도(2026-11-11 QA 4구간 S4-06)
+  await expect(bell).toHaveAccessibleName('알림, 새 알림 있음');
   await bell.click();
   if (narrow) await expect(page).toHaveURL(/\/notifications$/);
   const panel = page.getByRole('complementary', { name: '알림' });
@@ -176,6 +178,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
     await page.keyboard.press('Escape');
     await expect(panel).toHaveCount(0);
     await expect(bell).not.toHaveClass(/hg-iconbtn--dot/);
+    await expect(bell).toHaveAccessibleName('알림');
   }
 });
 

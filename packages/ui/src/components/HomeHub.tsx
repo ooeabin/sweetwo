@@ -3,8 +3,8 @@ import { cx } from './cx';
 import { Icon } from './Icon';
 
 // 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 GCOO 홈처럼): 회색 바탕 위 크기가 다른 흰 상자.
-// Hub(격자) > HubHero(다음 월급날까지 + 보낸 줄 막대 + 보낸 금액 | 모은 금액), HubBand(할 일·초대 띠, 코코아 채움, 2026-11-11),
-// HubTile(반 칸 타일, 큰 것은 72px 그림 자리, point = 오렌지 채운 포인트 상자 하나), HubSaving(목표 금액에 가장 가까운 저금 하나). 모두 누르면 그 화면.
+// Hub(격자) > HubHero(다음 월급날까지 + 이번 달 체크 막대 + 체크한 금액 | 모은 금액), HubBand(할 일·초대 띠, 코코아 채움, 2026-11-11),
+// HubTile(반 칸 타일, 큰 것은 72px 그림 자리, point = 오렌지 채운 포인트 상자 하나), HubSaving(목표 금액에 가장 가까운 저금 하나, 파트너 것이면 이름 배지). 모두 누르면 그 화면.
 
 export function Hub({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -150,6 +150,7 @@ export function HubTile({
 
 export function HubSaving({
   name,
+  badge,
   percent,
   sub,
   bar,
@@ -157,6 +158,8 @@ export function HubSaving({
   onClick,
 }: {
   name: string;
+  /** 이름 옆 작은 회색 알약(파트너 저금이면 파트너 이름, 2026-11-11 QA 4구간 D4) */
+  badge?: string;
   percent: number;
   sub: ReactNode;
   /** 막대 채움 0~100 */
@@ -169,7 +172,10 @@ export function HubSaving({
       <span className="hg-artslot" aria-hidden="true" />
       <span className="hg-hubsave__text">
         <span className="hg-hubsave__row">
-          <span>{name}</span>
+          <span className="hg-hubsave__name">
+            <span>{name}</span>
+            {badge && <span className="hg-hubtile__badge">{badge}</span>}
+          </span>
           <span>{percent}%</span>
         </span>
         <span className="hg-hubsave__sub">{sub}</span>

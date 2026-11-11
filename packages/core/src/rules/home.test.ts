@@ -1,5 +1,13 @@
 import { expect, it } from 'vitest';
-import { checkTodo, homeTodo, homeUpcoming, salaryState, type HomeInput } from './home';
+import {
+  checkTodo,
+  homeTodo,
+  homeUpcoming,
+  pickMyChecklist,
+  pickTopBanner,
+  salaryState,
+  type HomeInput,
+} from './home';
 
 // 찬우(혼자, 각자, 월급날 25일), 9월 월급 사이클 9월 25일 ~ 10월 24일
 const base = (over: Partial<HomeInput> = {}): HomeInput => ({
@@ -34,7 +42,41 @@ it('이번 달 월급 상태: 진행 중 → 월급 전 확인 기간(다음 기
     nextPayday: '2026-10-25',
   });
   expect(salaryState(base({ today: '2026-10-22' })).state).toBe('review');
-  expect(salaryState(base({ joint: true })).state).toBe('none');
+  // 합쳐서로 바꿔도 이번 달 체크리스트는 그대로(25 S-11f): 이번 사이클에 내 것이 있으면 내 것
+  expect(salaryState(base({ joint: true })).state).toBe('progress');
+  expect(salaryState(base({ meId: 'x' })).state).toBe('none');
+});
+
+it('내 체크리스트 고르기(2026-11-11 QA 4구간 S4-12): 내 것 → 공동, 홈과 월급 탭이 같은 함수', () => {
+  const mine = { owner_user_id: 'c', id: 'm' };
+  const hers = { owner_user_id: 'y', id: 'y' };
+  const ours = { owner_user_id: null, id: 'o' };
+  // 각자: 내 것
+  expect(pickMyChecklist([hers, mine], 'c')?.id).toBe('m');
+  // 합쳐서: 공동
+  expect(pickMyChecklist([ours], 'c')?.id).toBe('o');
+  // 이번 달에 둘 다 있으면(방식을 바꾼 사이클) 내 것이 먼저
+  expect(pickMyChecklist([ours, mine], 'c')?.id).toBe('m');
+  // 사람을 모르면 공동만, 없으면 undefined
+  expect(pickMyChecklist([mine, ours], undefined)?.id).toBe('o');
+  expect(pickMyChecklist([hers], 'c')).toBeUndefined();
+  expect(pickMyChecklist(undefined, 'c')).toBeUndefined();
+});
+
+it('맨 위 띠는 하나만(2026-11-11 QA 4구간 D3): 오프라인 > 해제 대기 > 필독 공지 > 메일 반송 > 일반 공지', () => {
+  const all = {
+    offline: true,
+    unlink: true,
+    must_notice: true,
+    mail_bounced: true,
+    notice: true,
+  };
+  expect(pickTopBanner(all)).toBe('offline');
+  expect(pickTopBanner({ ...all, offline: false })).toBe('unlink');
+  expect(pickTopBanner({ ...all, offline: false, unlink: false })).toBe('must_notice');
+  expect(pickTopBanner({ mail_bounced: true, notice: true })).toBe('mail_bounced');
+  expect(pickTopBanner({ notice: true })).toBe('notice');
+  expect(pickTopBanner({})).toBeNull();
 });
 
 it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월급 전 확인 → 만기 → 경조사(7일 안) → 초대(맨 끝, 2026-11-11). 닫기 없음, 목표 금액 정하기는 없음(ADR 0007)', () => {
@@ -190,7 +232,7 @@ it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초
   expect(homeTodo({ ...first, goals: [goal({ owner_user_id: 'y' })] })?.kind).toBe('saving');
   expect(homeTodo({ ...first, goals: [goal({ closed_at: '2026-10-02' })] })?.kind).toBe('saving');
   expect(homeTodo({ ...first, goals: [goal({ deleted_at: '2026-10-02' })] })?.kind).toBe('saving');
-  // 합쳐서: 공동 월급 계획 저금(누구 것이든)이 있으면 없음, 공동 체크리스트가 없으면 없음
+  // 합쳐서: 공동 월급 계획 저금(누구 것이든)이 있으면 없음
   expect(
     homeTodo({
       ...first,
@@ -199,7 +241,8 @@ it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초
       goals: [goal({ owner_user_id: 'y' })],
     }),
   ).toBeNull();
-  expect(homeTodo({ ...first, joint: true })).toBeNull();
+  // 이번 달 체크리스트가 없으면 없음(내 것도 공동 것도 없음)
+  expect(homeTodo({ ...first, joint: true, meId: 'x' })).toBeNull();
   // 연결 해제 대기면 없음
   expect(homeTodo({ ...first, coupleState: 'unlink_pending' })).toBeNull();
 });

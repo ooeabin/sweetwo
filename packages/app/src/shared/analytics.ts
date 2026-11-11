@@ -1,4 +1,4 @@
-import type { AmountBand, AuthProvider } from '@sweetwo/core';
+import type { AmountBand, AuthProvider, HomeTodo } from '@sweetwo/core';
 
 // 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
@@ -129,7 +129,7 @@ export type AnalyticsEvent =
     }
   | {
       name: 'rank_banner_tapped';
-      props: { state: 'empty' | 'unseen' | 'seen' | 'stale'; entry: 'home' | 'assets' };
+      props: { state: 'empty' | 'unseen' | 'seen' | 'stale'; entry: 'assets' };
     }
   | {
       name: 'rank_ad_result';
@@ -245,12 +245,25 @@ export type AnalyticsEvent =
       };
     }
   | {
-      // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만)
+      // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
       name: 'home_box_tapped';
       props: {
-        box: 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
-        todo?: string;
+        box: 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings' | 'retry';
+        todo?: HomeTodo['kind'];
       };
+    }
+  | {
+      // 홈 맨 위 띠의 버튼을 누름(2026-11-11 QA 4구간 S4-08). action: open = ‘확인하기’·‘보기’, close = 공지 ‘닫기’
+      name: 'home_banner_tapped';
+      props: {
+        banner: 'unlink' | 'must_notice' | 'mail_bounced' | 'notice';
+        action: 'open' | 'close';
+      };
+    }
+  | {
+      // W-05 월급 전 확인 열림(32 4-4). entry: home = 홈 할 일 띠, notification = 알림, other = 그 밖(월급 탭 등)
+      name: 'month_check_viewed';
+      props: { entry: 'notification' | 'home' | 'other'; open_lines_count: number };
     }
   | {
       // 좁은 창 메뉴 서랍 줄을 누름(19 앱 기본 틀 11번, 2026-11-09)

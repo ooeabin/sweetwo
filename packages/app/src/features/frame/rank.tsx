@@ -57,10 +57,10 @@ async function watchAd(): Promise<'rewarded' | 'closed' | 'failed' | 'none'> {
 }
 
 /**
- * 자산 순위 줄(RankRow, 23 F-01 0번·19 H-01 1a): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
- * 이번 달에 봤으면 바로 F-08. 자산이 없으면 홈에서는 자산 관리(F-01)로, F-01에서는 누를 수 없음
+ * 자산 순위 줄(RankRow, 23 F-01 0번): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
+ * 이번 달에 봤으면 바로 F-08. 자산이 없으면 누를 수 없음. 2026-11-11 홈 순위 줄(19 H-01 1a)은 없앰(홈은 H-04 타일 배지)
  */
-export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
+export function RankBanner() {
   const r = useRank();
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -69,8 +69,7 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
   const s = r.state;
   const open = async () => {
     if (busy) return;
-    track('rank_banner_tapped', { state: s.kind, entry });
-    if (s.kind === 'empty') return nav('/assets');
+    track('rank_banner_tapped', { state: s.kind, entry: 'assets' });
     if (s.kind === 'seen') return nav(RANK_PATH);
     setBusy(true);
     try {
@@ -87,15 +86,7 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
       setBusy(false);
     }
   };
-  if (s.kind === 'empty')
-    return (
-      <RankRow
-        badge="?%"
-        title={copy.rankEmpty}
-        action={entry === 'home' ? copy.rankEmptyGo : undefined}
-        onClick={entry === 'home' ? () => void open() : undefined}
-      />
-    );
+  if (s.kind === 'empty') return <RankRow badge="?%" title={copy.rankEmpty} />;
   if (s.kind === 'seen')
     return (
       <RankRow

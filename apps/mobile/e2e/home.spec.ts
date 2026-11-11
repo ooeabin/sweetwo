@@ -2,6 +2,8 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
+import { chanwoo } from './supabase-mock';
+import { mockRealtime } from './realtime-mock';
 
 // 홈(19)과 월급 체크리스트(20 W-01·W-02·W-02a·W-02 끝·W-05). 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 월급 사이클 = 9월 25일 ~ 10월 24일, 월급 전 확인은 10월 22일부터.
@@ -169,7 +171,7 @@ test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 코코아 띠(2
   await expect(band.getByRole('button', { name: '닫기' })).toHaveCount(0);
 });
 
-test('두 사람(찬우·예빈, 각자): 큰 상자 Avatar 둘, 저금 상자는 목표 금액에 가장 가까운 저금(예빈 것도), 모은 금액은 내 저금만', async ({
+test('두 사람(찬우·예빈, 각자): 큰 상자 Avatar 둘, 저금 상자는 목표 금액에 가장 가까운 저금(예빈 것도, 이름 배지), 모은 금액은 내 저금만', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -193,10 +195,10 @@ test('두 사람(찬우·예빈, 각자): 큰 상자 Avatar 둘, 저금 상자�
   await expect(h.locator('.hg-avatar')).toHaveCount(2);
   // 모은 금액 = 찬우 저금(내 집 마련 6,000만 + 청약 0)
   await expect(h).toContainText('모은 금액6,000만 원');
-  // 저금 상자: 여행 80% > 내 집 마련 40%
-  await expect(page.getByRole('button', { name: /^여행, 80%/ })).toContainText(
-    '400만 원 / 500만 원',
-  );
+  // 저금 상자: 여행 80% > 내 집 마련 40%. 파트너 저금이라 이름 옆 “예빈” 배지(2026-11-11 D4)
+  const save = page.getByRole('button', { name: /^여행, 예빈, 80%/ });
+  await expect(save).toContainText('400만 원 / 500만 원');
+  await expect(save.locator('.hg-hubtile__badge')).toHaveText('예빈');
   // 저금 타일은 W-13 범위(예빈 것 포함)
   await expect(page.getByRole('button', { name: /^저금/ })).toContainText('3개 모으는 중');
   await expect(page.getByRole('button', { name: /^저금/ })).toContainText('6,400만 원');
@@ -426,4 +428,192 @@ test('오프라인(30 동기화 4장): 볼 수만 있고, 체크를 누르면 �
   await expect(box).not.toBeChecked();
   expect(db.rpc.filter((x) => x === 'check_pay_line')).toHaveLength(0);
   await axe(page);
+});
+
+// ---- QA 4구간(2026-11-11): 맨 위 띠, 큰 상자 오류, 자산 없음, Realtime ----
+
+const pendingUnlink = (db: Awaited<ReturnType<typeof mockOnboarding>>, by: string) => {
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending', partner_nickname: '예빈' });
+  db.partner = PARTNER;
+  db.unlinks.push({
+    id: 'u1',
+    space_id: 'space-1',
+    requested_by: by,
+    partner_id: by === 'yebin' ? chanwoo.id : 'yebin',
+    status: 'pending',
+    deadline: '2026-10-20',
+    requested_at: '2026-10-06T01:00:00Z',
+  });
+};
+const mustNotice = {
+  id: 'n2',
+  kind: 'maintenance',
+  title: '10월 20일 새벽 점검이 있어요. 오전 2시부터 4시까지 저장이 안 돼요',
+  body: '점검 중에는 볼 수만 있어요',
+  importance: 'must',
+  platforms: ['desktop', 'web', 'ios', 'android'],
+};
+
+test('맨 위 띠는 하나만(D3): 해제 대기 > 필독 공지 > 메일 반송 > 일반 공지. 회색 바탕 위 회색 띠는 흰 판(D1), 두 줄까지(D2)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  pendingUnlink(db, 'yebin');
+  db.mailBounced = true;
+  db.notices.push(mustNotice, { ...mustNotice, id: 'n3', title: '새 기능', importance: 'normal' });
+  await page.goto('/');
+  const bands = page.locator('.hg-body__banners .hg-banner');
+  await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
+  await expect(bands).toHaveCount(1);
+  // 흰 판: 큰 상자와 같은 바탕(surface), 회색 바탕(frame)과 다름
+  const bg = (sel: string) =>
+    page
+      .locator(sel)
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(await bg('.hg-banner--strip')).toBe(await bg('.hg-hubhero'));
+  expect(await bg('.hg-banner--strip')).not.toBe(await bg('.hg-frame'));
+  // 두 줄까지 보이고 그 뒤 말줄임
+  expect(
+    await page
+      .locator('.hg-banner--strip strong')
+      .evaluate((el) =>
+        [el, el.closest('.hg-banner__one')].some(
+          (e) => !!e && getComputedStyle(e).webkitLineClamp === '2',
+        ),
+      ),
+  ).toBe(true);
+  await axe(page);
+  // 해제가 풀리면 필독 공지 → 메일 반송 → 일반 공지 순으로 하나씩
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  db.unlinks.length = 0;
+  await page.reload();
+  await expect(bands).toHaveCount(1);
+  await expect(bands.first()).toContainText('10월 20일 새벽 점검');
+  db.notices.splice(0, 1);
+  await page.reload();
+  await expect(bands).toHaveCount(1);
+  await expect(bands.first()).toContainText('알림 메일이 전달되지 않았어요');
+  db.mailBounced = false;
+  await page.reload();
+  await expect(bands).toHaveCount(1);
+  await expect(bands.first()).toContainText('새 기능');
+});
+
+test('큰 상자(S4-01): 월급이 있는데 체크리스트를 못 불러오면 오류 카드 + 다시 시도, 월급이 없을 때만 ‘월급 알려 주기’', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  let fail = true;
+  await page.route('**/rest/v1/pay_checklist*', (r) =>
+    fail && r.request().method() === 'GET'
+      ? r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' })
+      : r.fallback(),
+  );
+  await page.goto('/');
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toHaveCount(0);
+  await axe(page);
+  fail = false;
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(hero(page)).toBeVisible();
+  // 월급이 없음(O-31 ‘지금은 월급이 없어요’): 월급 알려 주기 카드
+  Object.assign(db.me, { monthly_income: 0, payday: null });
+  db.splits.length = 0;
+  db.checklists.length = 0;
+  await page.reload();
+  await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toBeVisible();
+  await expect(page.getByText('잠시 문제가 생겼어요')).toHaveCount(0);
+});
+
+test('자산 관리 타일(D5): 자산·부채가 없으면 “0원” 대신 “아직 없어요”', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/');
+  const tile = page.getByRole('button', { name: /^자산 관리/ });
+  await expect(tile).toContainText('아직 없어요');
+  await expect(tile).not.toContainText('0원');
+});
+
+test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라짐', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const rt = await mockRealtime(page);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/');
+  await expect(page.locator('.hg-hubband')).toContainText('함께할 사람을 초대해 주세요');
+  await expect.poll(() => rt.subscribed('notification')).toBeGreaterThan(0);
+  Object.assign(db.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+  db.partner = PARTNER;
+  rt.emit('notification', 'INSERT', {
+    id: '00000000-0000-4000-8000-000000000301',
+    user_id: 'me',
+    kind: 'partner_joined',
+    title: '예빈님이 합류했어요',
+    target: '/',
+    read_at: null,
+    created_at: '2026-10-07T01:00:00Z',
+  });
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toHaveCount(0);
+  await expect(hero(page).locator('.hg-avatar')).toHaveCount(2);
+});
+
+test('Realtime(S4-02): P-WAIT 대기 중 시작한 사람이 월급 계획을 만들면 바로 다음 화면', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const rt = await mockRealtime(page);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const splits = [...db.splits];
+  db.splits.length = 0;
+  db.checklists.length = 0;
+  Object.assign(db.space ?? {}, {
+    couple_state: 'connected',
+    created_by: 'starter',
+    partner_nickname: '예빈',
+  });
+  db.partner = { ...PARTNER, id: 'starter', nickname: '찬우' };
+  Object.assign(db.me, { nickname: '예빈', onboarding_step: 'P-WAIT' });
+  await page.goto('/');
+  await expect(page.getByText('찬우님이 시작하고 있어요')).toBeVisible();
+  await expect.poll(() => rt.subscribed('salary_split')).toBeGreaterThan(0);
+  db.splits.push(...splits);
+  rt.emit('salary_split', 'INSERT', { id: 'split-new', space_id: 'space-1' });
+  await expect(page).toHaveURL(/\/join\/p-04/);
+});
+
+test('Realtime(S4-02): 합쳐서 모드에서 상대가 체크하면 큰 상자 숫자가 바로 바뀜', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const rt = await mockRealtime(page);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, {
+    couple_state: 'connected',
+    partner_nickname: '예빈',
+    salary_mode: 'joint',
+    joint_cycle_day: 25,
+  });
+  db.partner = PARTNER;
+  for (const sp of db.splits) sp.owner_user_id = null;
+  for (const c of db.checklists) c.owner_user_id = null;
+  for (const g of db.goals) g.owner_user_id = null;
+  await page.goto('/');
+  await expect(page.locator('.hg-hubhero__count')).toHaveText('0 / 5');
+  await expect.poll(() => rt.subscribed('pay_check_line')).toBeGreaterThan(0);
+  const line = (db.checklists[0]?.pay_check_line as Record<string, unknown>[])[2] ?? {};
+  Object.assign(line, {
+    state: 'checked',
+    checked_by: 'yebin',
+    checked_at: '2026-10-07T01:00:00Z',
+  });
+  rt.emit('pay_check_line', 'UPDATE', { id: line.id, space_id: 'space-1', state: 'checked' });
+  await expect(page.locator('.hg-hubhero__count')).toHaveText('1 / 5');
 });

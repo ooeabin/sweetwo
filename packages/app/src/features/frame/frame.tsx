@@ -109,8 +109,14 @@ export function MainFrame(
   // 소셜 계정 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-05)
   useSocialAvatar(me.data?.id, me.data?.space_id);
   const unread = useHasUnread();
+  // 종 화면 읽기 이름: 새 알림 점이 있으면 “알림, 새 알림 있음”(2026-11-11 QA 4구간 S4-06)
+  const notiLabel = unread.data ? copy.notiNew : copy.noti;
   const panel = useNotiPanel();
   const narrow = useNarrow();
+  // 서랍은 좁은 창만: 열린 채 넓은 창(태블릿 가로 돌림 등)이 되면 닫음(2026-11-11 S4-15)
+  useEffect(() => {
+    if (!narrow && useMenuStore.getState().open) setMenu(false);
+  }, [narrow, setMenu]);
   const { masked, toggle } = useMask();
   // 6번 툴팁: 쓰기가 진행 중이면 “저장 중”
   const saving = useSyncExternalStore(subscribeSaving, isSaving);
@@ -209,7 +215,7 @@ export function MainFrame(
   const online = useOnline();
   // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”
   const savedAt = useCacheInfo((s) => s.savedAt);
-  // 2026-11-03 공지 띠와 같은 한 줄 파랑(LineBand)
+  // 회색 띠(LineBand). 맨 위 띠는 하나만이고 오프라인이 가장 먼저(core pickTopBanner, 2026-11-11 D3): 오프라인이면 화면이 준 띠는 숨김
   const offline = !online && (
     <LineBand
       icon="circle-alert"
@@ -231,14 +237,7 @@ export function MainFrame(
         columns={p.columns}
         sub={!!p.sub}
         tone={p.tone}
-        banner={
-          offline || p.banner ? (
-            <>
-              {offline}
-              {p.banner}
-            </>
-          ) : undefined
-        }
+        banner={offline || p.banner || undefined}
         onSearch={() => setPalette(true)}
         // 2026-11-09 좁은 창 + 버튼(FAB)과 하단 탭 막대 없앰: 추가는 화면 안 ‘+ … 추가’ 줄, 메뉴는 홈 머리 ☰ 서랍
         onMenu={() => setMenu(true)}
@@ -262,7 +261,7 @@ export function MainFrame(
         labels={{
           search: copy.search,
           mask: copy.mask,
-          noti: copy.noti,
+          noti: notiLabel,
           settings: copy.settings,
           menu: copy.menu,
           home: copy.home,
@@ -289,12 +288,13 @@ export function MainFrame(
       {menu && (
         <Drawer
           label={copy.menu}
+          navLabel={copy.menuList}
           closeLabel={copy.close}
           groups={groups}
           tools={
             <IconButton
               icon="bell"
-              label={copy.noti}
+              label={notiLabel}
               ghost
               dot={!!unread.data}
               onClick={() => go('/notifications')}

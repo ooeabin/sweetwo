@@ -1,7 +1,7 @@
 import { Tabs } from '@sweetwo/ui';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { copy } from './copy';
-import { useSpace, useSplitRealtime } from './data';
+import { useCheckRealtime, useSpace, useSplitRealtime } from './data';
 import { W01Receipt } from './pages/w-01-receipt';
 import { W02Checklist } from './pages/w-02-checklist';
 
@@ -11,6 +11,7 @@ export function SalaryTab() {
   const [params] = useSearchParams();
   const space = useSpace();
   useSplitRealtime(space.data?.id);
+  useCheckRealtime(space.data?.id);
   return params.get('view') === 'plan' ? <W01Receipt /> : <W02Checklist />;
 }
 

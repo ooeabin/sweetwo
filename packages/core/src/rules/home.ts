@@ -1,12 +1,13 @@
 import { addDays, daysBetween } from '../date';
-
-/** 만기 할 일 띠를 띄우는 날 수(만기일 = 0일째부터 30일째까지, 2026-11-11) */
-export const MATURED_TODO_DAYS = 30;
 import { nextCareDate, type CareRule } from './care';
 import { deadlineDay } from './saving-item';
 
-// 홈(19)이 쓰는 계산(위젯 26도 같은 규칙): 할 일 한 줄(H-06), 일정(H-05·WG-03), 이번 달 월급 상태(WG-01).
+// 홈(19)이 쓰는 계산(위젯 26도 같은 규칙): 할 일 한 줄(H-06), 일정(WG-03, 캘린더 타일 H-08), 이번 달 월급 상태(H-03, WG-01),
+// 내 체크리스트 고르기(홈·월급 탭이 같이 씀), 맨 위 띠 하나 고르기(2026-11-11 QA 4구간 D3).
 // 문구는 앱 copy가 만들고, 여기서는 종류와 값, 갈 화면만 정함.
+
+/** 만기 할 일 띠를 띄우는 날 수(만기일 = 0일째부터 30일째까지, 2026-11-11) */
+export const MATURED_TODO_DAYS = 30;
 
 export interface HomeChecklist {
   owner_user_id: string | null;
@@ -93,17 +94,48 @@ const PATHS = {
   checklist: '/salary',
 };
 
-/** 내 이번 달 체크리스트(각자 = 내 것, 합쳐서 = 공동) */
-export function myList(i: Pick<HomeInput, 'checklists' | 'meId' | 'joint'>) {
-  return i.checklists.find((c) =>
-    i.joint ? c.owner_user_id === null : c.owner_user_id === i.meId,
+/**
+ * 내 이번 달 체크리스트(홈 H-03·H-06, 월급 탭 W-02·W-05, 설정 S-11f가 모두 이것 하나로, 2026-11-11 QA 4구간 S4-12):
+ * 내가 주인인 것(각자) → 없으면 공동(합쳐서). 월급 관리 방식을 바꿔도 이번 달 체크리스트는 그대로라(25 S-11f)
+ * 지금 방식이 아니라 이번 사이클에 실제로 있는 체크리스트로 고름. meId가 없으면 공동만
+ */
+export function pickMyChecklist<T extends { owner_user_id: string | null }>(
+  lists: readonly T[] | undefined,
+  meId: string | null | undefined,
+): T | undefined {
+  if (!lists) return undefined;
+  return (
+    (meId ? lists.find((c) => c.owner_user_id === meId) : undefined) ??
+    lists.find((c) => c.owner_user_id === null)
   );
 }
 
+/** 내 이번 달 체크리스트(pickMyChecklist) */
+export function myList(i: Pick<HomeInput, 'checklists' | 'meId'>) {
+  return pickMyChecklist(i.checklists, i.meId);
+}
+
+/** 맨 위 띠 종류(19 홈 상태 변형, 13 공통 상태 9번) */
+export type TopBanner = 'offline' | 'unlink' | 'must_notice' | 'mail_bounced' | 'notice';
+/** 맨 위 띠 순서(앞이 먼저, 2026-11-11 QA 4구간 D3) */
+export const TOP_BANNER_ORDER: readonly TopBanner[] = [
+  'offline',
+  'unlink',
+  'must_notice',
+  'mail_bounced',
+  'notice',
+];
+
+/**
+ * 본문 맨 위 띠는 하나만(2026-11-11 QA 4구간 D3, Banner ‘화면당 1개’): 오프라인 > 연결 해제 대기 > 필독 공지 > 알림 메일 반송 > 일반 공지.
+ * 지금 해당하는 띠 종류를 받아 하나를 고름. 없으면 null. 할 일·초대 띠(H-06)는 큰 상자 아래라 따로
+ */
+export function pickTopBanner(on: Partial<Record<TopBanner, boolean>>): TopBanner | null {
+  return TOP_BANNER_ORDER.find((k) => on[k]) ?? null;
+}
+
 /** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월급 전 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
-export function salaryState(
-  i: Pick<HomeInput, 'checklists' | 'meId' | 'joint' | 'today'>,
-): SalaryState {
+export function salaryState(i: Pick<HomeInput, 'checklists' | 'meId' | 'today'>): SalaryState {
   const c = myList(i);
   if (!c) return { state: 'none' };
   const total = c.lines.length;
@@ -171,7 +203,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   // 첫 주 ‘첫 저금 추가’(2026-11-09 round 3): 온보딩 뒤 7일 안, 내 저금이 없을 때(월급 탭 ‘첫 저금’과 같은 조건)
   if (firstSavingTodo(i))
     return { kind: 'saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' };
-  // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 대신 홈 H-02 저금 항목 제안 줄)
+  // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 첫 저금은 위 ‘첫 저금 추가’와 W-02 첫 저금 빈 줄)
   // 만기 띠는 만기일부터 30일 안만(2026-11-11 사용자 결정). 그 뒤에도 자산 관리 그 항목에는 ‘만기됨’이 남음
   const matured = i.assets.find(
     (a) =>
@@ -211,7 +243,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   return null;
 }
 
-/** 일정(H-05 30일 안, WG-03 가까운 3개): 월급날, 월급 전 확인, 경조사, 저금 항목 목표 기한, 만기. 같은 날이면 경조사 먼저 */
+/** 일정(캘린더 타일 H-08 가장 가까운 경조사, WG-03 가까운 3개. 예전 H-05 일정 카드는 2026-11-09 없앰): 월급날, 월급 전 확인, 경조사, 저금 항목 목표 기한, 만기. 같은 날이면 경조사 먼저 */
 export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   const within = (d: string | null): d is string =>
     !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= days;
