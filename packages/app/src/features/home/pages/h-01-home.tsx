@@ -1,4 +1,4 @@
-import { fetchMailBounced, fetchPastChecklists, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
+import { fetchMailBounced, fetchUnlinkPartnerName, qk } from '@sweetwo/api';
 import {
   addDays,
   daysBetween,
@@ -21,7 +21,7 @@ import {
   LineBand,
   LoadingFrame,
   MainFrame,
-  RankBanner,
+  useRank,
   todoText,
   useHomeInput,
   useNetWorth,
@@ -71,22 +71,10 @@ export function H01Home() {
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
-  // H-01 1a 순위 줄은 첫 체크 뒤에만(2026-11-09 round 3): 이번 달 체크리스트에 체크·못 함 줄이 있거나 지난 체크리스트가 있으면
-  const checkedAny = (lists.data ?? []).some((c) =>
-    c.pay_check_line.some((l) => l.state !== 'wait'),
-  );
-  const mineNow =
-    me.data && space.data
-      ? myChecklist(lists.data, space.data.salary_mode === 'joint' ? undefined : me.data.id)
-      : undefined;
-  const pastOwner = space.data?.salary_mode === 'joint' ? null : (me.data?.id ?? null);
-  const pastLists = useQuery({
-    queryKey: qk.pastChecklists(pastOwner, mineNow?.cycle_start ?? ''),
-    queryFn: () => fetchPastChecklists(pastOwner, mineNow?.cycle_start ?? ''),
-    enabled: !checkedAny && !!mineNow,
-  });
-  // 체크할 체크리스트가 없으면(월급 없음) 그대로 보임
-  const showRank = !mineNow || checkedAny || (pastLists.data?.length ?? 0) > 0;
+  // H-04 자산 관리 타일 “순자산” 옆 “상위 38%”(2026-11-11, 홈 순위 줄 1a 대신): 순위를 본 적이 있을 때만
+  const rank = useRank();
+  const rankPct =
+    rank && (rank.state.kind === 'seen' || rank.state.kind === 'stale') ? rank.state.pct : null;
   if (!me.data || !space.data || !goals.data || lists.isLoading)
     return <LoadingFrame current="month" />;
 
@@ -325,6 +313,15 @@ export function H01Home() {
               title={copy.assetsTile}
               sub={copy.netWorth}
               value={nw ? m(nw.nw.net) : undefined}
+              badge={rankPct === null ? undefined : copy.rankBadge(rankPct)}
+              label={
+                nw
+                  ? copy.assetsTileLabel(
+                      m(nw.nw.net),
+                      rankPct === null ? null : copy.rankBadge(rankPct),
+                    )
+                  : undefined
+              }
               onClick={() => go('assets', '/assets')}
             />
             <HubTile
@@ -334,12 +331,6 @@ export function H01Home() {
               value={liveAll.length ? m(savedAll) : undefined}
               onClick={() => go('savings', '/salary/items?from=home')}
             />
-            {/* 19 H-01 1a 자산 순위 줄: 타일 아래(2026-11-09) */}
-            {showRank && (
-              <div className="hg-hub__full">
-                <RankBanner entry="home" />
-              </div>
-            )}
           </Hub>
         </div>,
       ]}

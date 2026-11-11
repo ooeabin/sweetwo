@@ -16,7 +16,7 @@
 | [MonthBars](MonthBars.md) | Charts | 달마다 값(F-01 순자산 6달), 이번 달만 진하게 |
 | [Breakdown](Breakdown.md) | Charts | 전체를 나눈 구성(월급 플랜 배분, 자산 구성) |
 | [Distribution](Distribution.md) | Charts | F-08 분포 그림 |
-| [RankRow](RankRow.md) | Content | 자산 순위 줄(F-01 0번, H-01 1a, 2026-11-04) |
+| [RankRow](RankRow.md) | Content | 자산 순위 줄(F-01 0번, 2026-11-04) |
 | [Band](Band.md) | Layout | 구역을 나누는 굵은 회색 띠(F-08, 2026-11-04) |
 | [StatBlock](StatBlock.md) | Content | 토스형 구역 머리: 라벨 + 큰 숫자 문장 + 보조 줄(F-08, 2026-11-04) |
 | [LineChart](LineChart.md) | Charts | 시간에 따른 금액 변화(순자산 추이) |

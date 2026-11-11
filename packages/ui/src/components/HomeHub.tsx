@@ -108,6 +108,7 @@ export function HubTile({
   art,
   small,
   point,
+  badge,
   label,
   onClick,
 }: {
@@ -119,6 +120,8 @@ export function HubTile({
   small?: boolean;
   /** 홈 포인트 상자(오렌지 채움, 홈 ‘월급 계획’ 하나만, 2026-11-11) */
   point?: boolean;
+  /** 보조 줄 오른쪽 작은 회색 알약(자산 관리 타일 “상위 38%”, 2026-11-11) */
+  badge?: string;
   /** 화면 읽기 이름(없으면 보이는 글자) */
   label?: string;
   onClick: () => void;
@@ -131,7 +134,14 @@ export function HubTile({
       onClick={onClick}
     >
       <span className="hg-hubtile__title">{title}</span>
-      {sub && <span className="hg-hubtile__sub">{sub}</span>}
+      {badge ? (
+        <span className="hg-hubtile__subrow">
+          {sub && <span className="hg-hubtile__sub">{sub}</span>}
+          <span className="hg-hubtile__badge">{badge}</span>
+        </span>
+      ) : (
+        sub && <span className="hg-hubtile__sub">{sub}</span>
+      )}
       {value !== undefined && <span className="hg-hubtile__value">{value}</span>}
       {art && <span className="hg-artslot" aria-hidden="true" />}
     </button>

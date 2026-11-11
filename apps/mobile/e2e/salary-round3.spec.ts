@@ -218,7 +218,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   expect(g).toMatchObject({ target_amount: 440_000, deadline: '2026-12-01' });
 });
 
-test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(2026-11-11 초대는 맨 끝), H-04 1a 순위 줄은 첫 체크 뒤에만', async ({
+test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(2026-11-11 초대는 맨 끝), 홈 순위 줄 없음(2026-11-11 H-04 타일 배지로)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -235,18 +235,19 @@ test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(20
   // 첫 저금이 먼저, 초대는 다른 할 일이 없을 때만(2026-11-11 띠 닫기 없음)
   await expect(page.getByText('함께할 사람을 초대해 주세요')).toHaveCount(0);
   await expect(page.locator('.hg-hubband').getByRole('button', { name: '닫기' })).toHaveCount(0);
-  // 첫 체크 전에는 순위 줄 없음
+  // 홈에는 순위 줄이 없음(2026-11-11), 순위를 본 적이 없으면 자산 관리 타일 배지도 없음
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
+  await expect(page.locator('.hg-hubtile__badge')).toHaveCount(0);
   const todo = page
     .locator('.hg-hubband')
     .getByRole('button', { name: '첫 저금을 만들어 볼까요?' });
   await expect(todo).toBeVisible();
   await axe(page);
-  // 체크하면 순위 줄이 보임(2026-11-09 홈에서는 체크하지 않아 W-02에서)
+  // 체크해도 홈에 순위 줄은 없음
   await page.goto('/salary');
   await page.locator('.hg-transfer').first().getByRole('checkbox').click();
   await page.goto('/');
-  await expect(page.getByRole('button', { name: /상위 몇 %/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await todo.click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
   // 첫 주가 끝나면(온보딩한 날 + 7일) 사라지고 초대 띠(맨 끝)
