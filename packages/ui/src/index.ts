@@ -75,3 +75,4 @@ export { ArtPick } from './components/ArtPick';
 export { goalPhotoArt } from './components/preset-art';
 export { Band } from './components/Band';
 export { StatBlock } from './components/StatBlock';
+export { trackInputModality } from './input-modality';

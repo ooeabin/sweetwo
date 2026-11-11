@@ -383,3 +383,36 @@ test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월�
     .click();
   await expect(page).toHaveURL(/\/calendar\/add/);
 });
+
+test('포커스 테두리(2026-11-11): 손가락·마우스로 서랍을 닫아 ☰로 포커스가 돌아와도 테두리 없음, 키보드(Tab)면 보임', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'narrow');
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/');
+  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  const menuBtn = page.getByRole('button', { name: '메뉴', exact: true });
+  const ring = () => menuBtn.evaluate((el) => getComputedStyle(el).outlineStyle);
+  await menuBtn.click();
+  const drawer = page.getByRole('dialog', { name: '메뉴' });
+  await expect(drawer).toBeVisible();
+  // 서랍 안 첫 칸에도 테두리 없음
+  const focusedRing = () =>
+    page.evaluate(() =>
+      document.activeElement ? getComputedStyle(document.activeElement).outlineStyle : 'none',
+    );
+  expect(await focusedRing()).toBe('none');
+  await drawer.getByRole('button', { name: '닫기' }).click();
+  await expect(drawer).toBeHidden();
+  await expect(menuBtn).toBeFocused();
+  await expect(page.locator('html')).toHaveAttribute('data-input', 'pointer');
+  expect(await ring()).toBe('none');
+  // 키보드로 옮기면 테두리 보임
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('html')).toHaveAttribute('data-input', 'keyboard');
+  await expect(menuBtn).toBeFocused();
+  expect(await ring()).toBe('solid');
+});
