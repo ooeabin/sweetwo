@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (c00af44). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (6d69dbb). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -34,12 +34,12 @@
   --safety-ink: #0e5d6b; /* safety 위 라벨·배지 글자. */
   --invest: #dcf5e2; /* 투자·부동산 영역 틴트(평가 손익 줄 포함). */
   --invest-ink: #1e6b38; /* invest 위 라벨·배지 글자. */
-  --person-1: #fecdbb; /* 먼저 시작한 사람(찬우)의 Avatar 바탕(코랄). 보는 사람과 상관없이 사람마다 고정. 2026-11-09 빵모자 실루엣과 함께 진하게(#ffe0d6 → #fecdbb). */
-  --person-1-ink: #8f3a22; /* person-1과 짝인 진한 색. 다크 모드 빵모자 실루엣 색(person-1-figure). 이니셜은 2026-11-05부터 보이지 않음. person-1 위 5.2:1. */
-  --person-1-figure: #ffffff; /* 2026-11-09 person-1 원 위 빵모자 실루엣(머리, 어깨, 모자) 색. 라이트 흰색(surface), 다크 person-1-ink. 꾸밈 그림(aria-hidden), 이름은 alt·aria-label이나 옆 글자로. */
-  --person-2: #bacefe; /* 합류한 사람(예빈)의 Avatar 바탕(하늘). 2026-11-09 진하게(#c9d8ff → #bacefe). */
-  --person-2-ink: #1f3a99; /* person-2와 짝인 진한 색. 다크 모드 실루엣 색(person-2-figure). person-2 위 6.3:1. */
-  --person-2-figure: #ffffff; /* 2026-11-09 person-2 원 위 빵모자 실루엣 색. 라이트 흰색, 다크 person-2-ink. */
+  --person-1: #cdeee4; /* 먼저 시작한 사람(찬우)의 Avatar 바탕(민트). 보는 사람과 상관없이 사람마다 고정. 2026-11-11 코랄(#fecdbb)에서 시원한 민트로(사용자 결정, C 민트 + 라벤더), 실루엣은 같은 색의 진한 톤(person-1-figure)이라 흰 바탕에서도 원 모양이 온전히 보임. */
+  --person-1-ink: #1d5c4a; /* person-1과 짝인 진한 글자 색(이니셜은 2026-11-05부터 보이지 않음). person-1 위 6.3:1. */
+  --person-1-figure: #7fcfb8; /* 2026-11-11 person-1 원 위 빵모자 실루엣(머리, 어깨, 모자) 색. 라이트·다크 모두 바탕과 같은 색의 다른 톤(라이트 진한 민트, 다크 옅은 민트). 흰색은 쓰지 않음(흰 바탕에서 어깨가 녹아 원이 잘려 보임). 꾸밈 그림(aria-hidden), 이름은 alt·aria-label이나 옆 글자로. */
+  --person-2: #e2dbfc; /* 합류한 사람(예빈)의 Avatar 바탕(라벤더). 2026-11-11 하늘(#bacefe)에서 라벤더로(사용자 결정, 민트와 작은 크기에서도 구분). */
+  --person-2-ink: #4b3a99; /* person-2와 짝인 진한 글자 색. person-2 위 6.7:1. */
+  --person-2-figure: #a996f2; /* 2026-11-11 person-2 원 위 빵모자 실루엣 색. 라이트 진한 라벤더, 다크 옅은 라벤더(흰색 쓰지 않음). */
   --success-soft: #edf3fc; /* 어드민 전용(2026-11-09): success의 옅은 판(어드민 공지 미리보기 띠). 사용자 앱은 accent-app-soft. */
   --success: #1b64da; /* 어드민 전용(2026-11-09): 어드민 완료 표시(승인 단계 원). 사용자 앱의 체크·완료는 accent-app(브랜드 오렌지)로 바꿈, 파랑은 사용자 앱 포인트가 아님. */
   --on-success: #ffffff; /* success 바탕 위 글자(어드민). */
@@ -106,12 +106,12 @@
   --safety-ink: #9fe0ec;
   --invest: #183324;
   --invest-ink: #a5e2b6;
-  --person-1: #4a2620;
-  --person-1-ink: #ffc2b3;
-  --person-1-figure: #ffc2b3;
-  --person-2: #1e2c55;
-  --person-2-ink: #b3c7ff;
-  --person-2-figure: #b3c7ff;
+  --person-1: #173a31;
+  --person-1-ink: #a6e3d0;
+  --person-1-figure: #a6e3d0;
+  --person-2: #2a2450;
+  --person-2-ink: #c9beff;
+  --person-2-figure: #c9beff;
   --success-soft: #1f2836;
   --success: #6ea8ff;
   --on-success: #141312;
