@@ -40,7 +40,6 @@ export function O60Ready() {
   return (
     <QuestionLayout
       title={copy.readyTitle(me?.nickname ?? '')}
-      help={copy.readyHelp}
       primary={{ label: copy.readyGo, loading: s.saving }}
       onSubmit={() => void s.finish(undefined, completed)}
       center

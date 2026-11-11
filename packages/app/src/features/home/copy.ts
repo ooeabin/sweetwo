@@ -43,7 +43,6 @@ export const copy = {
   savingCount: (n: number) => `${n}개 모으는 중`,
   noSavings: '아직 없어요',
   inviteNow: '초대하기', // 2026-11-11 초대 띠(코코아 HubBand) 오른쪽 이동 글자
-  close: '닫기',
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요]
   unlinkOn: (date: string) => `${date}에 해제돼요`, // [확인 필요]
   unlinkCheck: '확인하기',

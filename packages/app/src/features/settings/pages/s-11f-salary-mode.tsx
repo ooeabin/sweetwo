@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { myChecklist, useChecklists } from '../../salary';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -47,7 +47,7 @@ export function S11fSalaryMode() {
         entry: 's11f',
       });
       await refresh();
-      toast(copy.salaryModeSaved, {
+      carryToast(copy.salaryModeSaved, {
         label: copy.undo,
         onClick: () => quietly(setSalaryMode(saved).then(refresh)),
       });

@@ -6,11 +6,17 @@
 - `hg-banner--info`(`surface-alt`): 오프라인, 연결 해제 대기, 혼자 쓰기, 월급 전 확인할 때(“10월 월급, 빠진 게 있는지 확인할 때예요”). 띠에는 브랜드 색을 쓰지 않음.
 - 화면당 1개. 닫기는 상태가 풀리면 저절로.
 
+## 한 번 확인 띠 (`hg-banner--check`, 2026-11-11)
+
+- 질문 화면에서 ‘말이 안 되는 값’을 한 번 확인할 때(O-31 “한 달에 {금액}이 맞나요?”, P 화면 “입력한 값이 맞나요?”). 막지 않음: 주 버튼을 다시 누르면 넘어감. 값을 바꾸면 사라짐.
+- 입력 칸 아래, 본문 폭. `surface-alt` 판, `radius-lg`, 안쪽 12px 16px, 앞 Phosphor `circle-alert` 20px `ink` + 문장 `ink` 15px 600(`text-body-strong`). 작은 회색 글(`hg-banner--info` 13px)로 두지 않음. 오렌지·노랑 판을 쓰지 않음(사용자 앱 포인트는 오렌지 하나, 경고색은 어드민만).
+- `role="alert"`로 나타날 때 바로 읽음. 아이콘은 `aria-hidden`.
+
 ## 할 일 카드 (`hg-banner--todo`, 2026-10-27, 카카오뱅크 알림 카드 느낌)
 
 - 홈 할 일 한 줄(H-06)만. 2026-11-09부터 홈 할 일은 HomeHub 할 일 띠(`hg-hubband`)이고, 2026-11-11부터 초대 할 일도 같은 코코아 HomeHub 띠라 홈에서는 이 옅은 띠를 쓰지 않음(어드민 공지 미리보기 등 남은 곳만). 흰 카드(`hairline-soft` 테두리 + `shadow-1`, `radius-xl`, 안쪽 16px 20px, 좁은 창 16px), 글자 15px 600.
 - 맨 앞 그림 원(`hg-banner__icon`, 40px `surface-alt` 원 + `ink` 아이콘): 연결 해제·다시 연결 `link`, 월급 전 확인 `check`, 초대 `user`, 금액 정하기 `pencil`, 만기 `piggy-bank`, 경조사 `gift`. 그림은 `aria-hidden`.
-- 오른쪽 보조 버튼 1개(‘열기’, 초대는 ‘코드 복사’) → 닫을 수 있는 것만 끝에 X 아이콘 버튼(`IconButton` ghost small, 이름 “닫기”).
+- 오른쪽 보조 버튼 1개(‘열기’, 초대는 ‘코드 복사’) → 닫을 수 있는 것만 끝에 X 아이콘 버튼(`IconButton` ghost small, 이름 “닫기”). 홈 할 일·초대 띠(HomeHub `hg-hubband`)는 2026-11-11부터 닫기 없음.
 
 ## 공지 한 줄 (`hg-banner--line`, 현대카드 공지 띠 느낌)
 

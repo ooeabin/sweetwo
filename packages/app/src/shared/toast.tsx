@@ -1,19 +1,34 @@
 import { lastOfflineBlock, lastReadOnlyBlock } from '@sweetwo/api';
 import { Toast, TOAST_MS } from '@sweetwo/ui';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { create } from 'zustand';
 import { sharedCopy } from './copy';
 
 // 토스트 하나씩(새 것이 이전 것을 바꿈). 시간은 디자인 Toast 규칙.
-type ToastItem = { id: number; message: string; action?: { label: string; onClick: () => void } };
+// 2026-11-11 화면(경로)이 바뀌면 닫음(O-07 ‘복사했어요’가 다음 화면까지 남던 문제). carry면 바로 다음 화면 하나까지만 가져감
+type ToastItem = {
+  id: number;
+  message: string;
+  action?: { label: string; onClick: () => void };
+  /** 결과를 알리고 다른 화면으로 옮기는 동작(저장 뒤 돌아가기, 지우고 목록으로): 다음 화면 하나까지 남김 */
+  carry?: boolean;
+};
 const useToastStore = create<{
   current: ToastItem | null;
   show: (t: Omit<ToastItem, 'id'>) => void;
   hide: () => void;
-}>((set) => ({
+  /** 경로가 바뀜: carry면 한 번 넘기고(carry 끔) 아니면 닫음 */
+  routeChanged: () => void;
+}>((set, get) => ({
   current: null,
   show: (t) => set({ current: { ...t, id: Date.now() } }),
   hide: () => set({ current: null }),
+  routeChanged: () => {
+    const c = get().current;
+    if (!c) return;
+    set({ current: c.carry ? { ...c, carry: false } : null });
+  },
 }));
 
 /**
@@ -21,7 +36,7 @@ const useToastStore = create<{
  * “인터넷에 연결되면 할 수 있어요”(다시 시도 없음). 오프라인은 볼 수만 있음(30 동기화 4장)
  */
 let quiet: ReturnType<typeof setTimeout> | null = null;
-export const toast = (message: string, action?: ToastItem['action']) => {
+export const toast = (message: string, action?: ToastItem['action'], carry = false) => {
   if (quiet) return;
   const blocked = Date.now() - lastOfflineBlock() < 3000;
   // 보기만 모드(A-01 ‘업데이트 없이 보기만 할게요’)에서 막힌 쓰기: 실패 안내 대신 13-12 문구 + ‘지금 업데이트’
@@ -33,9 +48,16 @@ export const toast = (message: string, action?: ToastItem['action']) => {
         ? { message: sharedCopy.needOnline }
         : readOnly
           ? { message: sharedCopy.readOnly, action: updateAction() }
-          : { message, action },
+          : { message, action, carry },
     );
 };
+
+/**
+ * 결과를 알린 뒤 바로 다른 화면으로 옮길 때(저장하고 돌아가기, 지우고 목록으로): 다음 화면까지 남는 토스트.
+ * 그다음 화면 이동에서는 다른 토스트처럼 닫힌다
+ */
+export const carryToast = (message: string, action?: ToastItem['action']) =>
+  toast(message, action, true);
 
 /** 앱 받기 페이지(스토어 버튼)로. 모바일은 앱 안 브라우저 */
 const DOWNLOAD_URL = 'https://sweetwo.kr/download';
@@ -67,7 +89,14 @@ export const quietly = (p: Promise<unknown>) => {
 };
 
 export function ToastHost() {
-  const { current, hide } = useToastStore();
+  const { current, hide, routeChanged } = useToastStore();
+  const { pathname } = useLocation();
+  const last = useRef(pathname);
+  useEffect(() => {
+    if (last.current === pathname) return;
+    last.current = pathname;
+    routeChanged();
+  }, [pathname, routeChanged]);
   useEffect(() => {
     if (!current) return;
     const t = setTimeout(hide, current.action ? TOAST_MS.withAction : TOAST_MS.plain);

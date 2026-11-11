@@ -16,7 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
@@ -73,7 +73,7 @@ export function Y05CareDay() {
     try {
       await trashCareDay(care.id);
       await refresh();
-      toast(copy.removed, {
+      carryToast(copy.removed, {
         label: copy.undo,
         onClick: () => quietly(restoreTrash('care_day', care.id).then(refresh)),
       });

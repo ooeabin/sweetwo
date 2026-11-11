@@ -10,7 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems, type SavingItem } from '../saving';
@@ -50,7 +50,7 @@ function useAfter(item: SavingItem) {
     try {
       if (v === 'keep') {
         await keepSavingItem(g.id);
-        toast(copy.keptToast, {
+        carryToast(copy.keptToast, {
           label: copy.undo,
           onClick: () =>
             quietly(
@@ -61,7 +61,7 @@ function useAfter(item: SavingItem) {
         });
       } else {
         await stopSavingItem(g.id);
-        toast(copy.stoppedToast, {
+        carryToast(copy.stoppedToast, {
           label: copy.undo,
           onClick: () => quietly(reopenSavingItem(g.id).then(refresh)),
         });

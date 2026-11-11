@@ -1,3 +1,4 @@
+import { Icon } from '@sweetwo/ui';
 import { useState } from 'react';
 
 /** ‘말이 안 되는 값’ 한 번 확인(막지 않음). 처음 제출 때 안내를 띄우고, 다시 누르면 통과. */
@@ -12,7 +13,8 @@ export function useConfirmOnce() {
     },
     reset: () => setShown(null),
     banner: shown ? (
-      <div className="hg-banner hg-banner--info" role="alert">
+      <div className="hg-banner hg-banner--check" role="alert">
+        <Icon name="circle-alert" />
         <span>{shown}</span>
       </div>
     ) : null,

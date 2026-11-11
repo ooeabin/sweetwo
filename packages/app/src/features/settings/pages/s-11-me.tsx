@@ -5,7 +5,7 @@ import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweet
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { signOut } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
@@ -209,7 +209,7 @@ export function S11Me() {
           onClick={async () => {
             // 로그아웃은 하나로(쿼리 캐시, 기기 캐시, 가입 중 값, 돌아갈 화면까지, DEV_GUIDE ‘로그아웃’)
             await signOut();
-            toast(copy.loggedOut);
+            carryToast(copy.loggedOut);
             nav('/login', { replace: true });
           }}
         />

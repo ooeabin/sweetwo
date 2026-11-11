@@ -131,16 +131,8 @@ export function H01Home() {
   const todoLabel = t
     ? todoText(t, { partner: partner.data?.nickname ?? '', exPartner: exName.data ?? '' })
     : '';
-  const closeTodo = !t
-    ? undefined
-    : t.kind === 'invite'
-      ? h.closeInvite
-      : t.kind === 'matured' || t.kind === 'care' || t.kind === 'review' || t.kind === 'saving'
-        ? () => h.closeTodo(t.key)
-        : t.kind === 'check'
-          ? () => h.closeTodo(t.key)
-          : undefined;
-  // 2026-11-11 초대 띠도 할 일 띠와 같은 코코아 띠(HubBand), 큰 상자 바로 아래. “초대하기 ›” → S-12. 할 일은 한 번에 하나라 둘이 같이 나오지 않음
+  // 2026-11-11 초대 띠도 할 일 띠와 같은 코코아 띠(HubBand), 큰 상자 바로 아래. “초대하기 ›” → S-12. 할 일은 한 번에 하나라 둘이 같이 나오지 않음.
+  // 닫기(✕) 없음(2026-11-11): 할 일은 끝내거나 기간이 지나면 사라지고, 초대는 다른 할 일이 없을 때만(순서 맨 끝)
   const todoBand = t ? (
     <HubBand
       text={todoLabel}
@@ -149,7 +141,6 @@ export function H01Home() {
         track('home_box_tapped', { box: 'band', todo: t.kind });
         nav(t.to);
       }}
-      close={closeTodo ? { label: copy.close, onClick: closeTodo } : undefined}
     />
   ) : null;
   // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d

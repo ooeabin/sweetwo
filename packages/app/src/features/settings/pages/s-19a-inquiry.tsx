@@ -5,7 +5,7 @@ import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -47,7 +47,7 @@ export function S19aInquiry() {
         : null;
       const no = await createInquiry(cat, text.trim(), info);
       await qc.invalidateQueries({ queryKey: qk.inquiries });
-      toast(copy.inquirySent(no));
+      carryToast(copy.inquirySent(no));
       nav('/settings/help/inquiries', { replace: true });
     } catch {
       toast(copy.failed);

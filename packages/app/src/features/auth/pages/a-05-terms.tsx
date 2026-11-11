@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { sharedCopy } from '../../../shared/copy';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { useHardwareBack } from '../back';
 import { ConsentDocSheet, openPolicy, type ConsentDocKey } from '../consent-doc';
 import { copy } from '../copy';
@@ -47,7 +47,7 @@ export function A05Terms() {
       });
       clearSignup();
       // 마케팅 받기에 동의했으면 처리 결과(날짜, 동의, 보낸 곳)를 알림(31 5-1). 알림 센터에도 남음(서버)
-      if (checked.marketing) toast(sharedCopy.marketingResult(true, formatDateFull(todayKst())));
+      if (checked.marketing) carryToast(sharedCopy.marketingResult(true, formatDateFull(todayKst())));
       // 앱은 이 기기 PIN 정하기(A-06), 웹은 온보딩 O-03(2026-11-10 O-10 없앰)
       if (session.bridge && !(await session.bridge.lock.status()).hasPin && !prefs.pinAsked()) {
         nav(paths.pinSetup, { replace: true });

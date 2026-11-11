@@ -51,10 +51,6 @@ export interface HomeInput {
   unlinkRequestedBy: string | null;
   /** 해제 뒤 다시 연결 요청(상대가 보냈고 아직 답 안 함) */
   reconnectFrom: string | null;
-  /** 초대 할 일을 닫은 날(7일 동안 안 보임) */
-  inviteClosedOn: string | null;
-  /** 닫은 할 일(‘review:{체크리스트 이름}’ 이번 달만, ‘matured:{id}:{날짜}’, ‘care:{id}:{날짜}’, ‘saving-first’) */
-  closed: string[];
   /** 온보딩을 마친 날(KST). 첫 주(7일 안) 할 일 ‘첫 저금 추가’에 씀(2026-11-09 round 3). 없으면 그 할 일 없음 */
   onboardedOn?: string | null;
 }
@@ -121,7 +117,8 @@ export const CHECK_TODO_DAYS = 7;
 
 /**
  * 월급날 체크 할 일(19 H-06 3a, 2026-11-09 홈 허브): 내(합쳐서면 공동) 이번 달 체크리스트에 체크 안 한 줄이 있고
- * 오늘이 월급날(기간 첫날)부터 7일 안. 닫으면 이번 기간만 안 보임. 그 뒤 체크는 홈 큰 상자 → W-02, 월급 전 확인(W-05)
+ * 오늘이 월급날(기간 첫날)부터 7일 안. 닫기 없음(2026-11-11): 다 체크하거나 7일이 지나면 사라짐.
+ * 그 뒤 체크는 홈 큰 상자 → W-02, 월급 전 확인(W-05)
  */
 export function checkTodo(i: HomeInput): Extract<HomeTodo, { kind: 'check' }> | null {
   const c = myList(i);
@@ -129,33 +126,35 @@ export function checkTodo(i: HomeInput): Extract<HomeTodo, { kind: 'check' }> | 
   const left = c.lines.filter((l) => l.state === 'wait').length;
   const d = daysBetween(c.cycle_start, i.today);
   const key = `check:${c.label}:${c.cycle_start}`;
-  if (!left || d < 0 || d >= CHECK_TODO_DAYS || i.closed.includes(key)) return null;
+  if (!left || d < 0 || d >= CHECK_TODO_DAYS) return null;
   return { kind: 'check', label: c.label, left, key, to: PATHS.checklist };
 }
 
 /**
  * 첫 저금 추가 할 일(19 H-06 4b): 온보딩을 마친 날부터 7일 안 + 내 월급 계획(이번 달 체크리스트)이 있고 연결 해제 대기가 아님
- * + 내 저금이 없음(각자 = 내가 주인인 저금, 합쳐서 = 공동 저금. 그만 모은 것·휴지통 빼고) + 닫지 않음
+ * + 내 저금이 없음(각자 = 내가 주인인 저금, 합쳐서 = 공동 저금. 그만 모은 것·휴지통 빼고). 닫기 없음(2026-11-11)
  */
 export function firstSavingTodo(i: HomeInput): boolean {
   if (!i.onboardedOn) return false;
   const d = daysBetween(i.onboardedOn, i.today);
   if (d < 0 || d >= 7) return false;
   if (!myList(i) || i.coupleState === 'unlink_pending') return false;
-  if (i.closed.includes(SAVING_TODO_KEY)) return false;
   return !i.goals.some(
     (g) => !g.deleted_at && !g.closed_at && (i.joint || g.owner_user_id === i.meId),
   );
 }
 
-/** 할 일 한 줄(19 ‘할 일 한 줄 순서’, 맨 앞 하나): 해제 요청 → 다시 연결 → 월급 전 확인 → 월급날 체크 → 초대 → 첫 저금 → 만기 → 경조사 */
+/**
+ * 할 일 한 줄(19 ‘할 일 한 줄 순서’, 맨 앞 하나): 해제 요청 → 다시 연결 → 월급 전 확인 → 월급날 체크 → 첫 저금 → 만기 → 경조사 → 초대.
+ * 2026-11-11 띠 닫기(✕)를 없앰: 할 일은 끝내거나 그 기간이 지나야 사라짐. 그래서 닫을 수 없는 초대는 맨 끝(다른 할 일을 막지 않게)
+ */
 export function homeTodo(i: HomeInput): HomeTodo | null {
   if (i.unlinkRequestedBy && i.unlinkRequestedBy !== i.meId)
     return { kind: 'unlink', to: '/settings/couple/unlink/review' };
   if (i.reconnectFrom && i.reconnectFrom !== i.meId)
     return { kind: 'reconnect', to: '/settings/couple/reconnect' };
   const s = salaryState(i);
-  if (s.state === 'review' && !i.closed.includes(`review:${s.label}:${s.nextPayday}`))
+  if (s.state === 'review')
     return {
       kind: 'review',
       label: s.label,
@@ -163,15 +162,10 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       key: `review:${s.label}:${s.nextPayday}`,
       to: PATHS.review,
     };
-  // 월급날 체크(2026-11-09, 월급 전 확인 다음·초대 앞): 월급날부터 7일 안, 체크 안 한 줄이 있을 때
+  // 월급날 체크(2026-11-09, 월급 전 확인 다음): 월급날부터 7일 안, 체크 안 한 줄이 있을 때
   const check = checkTodo(i);
   if (check) return check;
-  if (
-    i.coupleState === 'not_joined' &&
-    (!i.inviteClosedOn || daysBetween(i.inviteClosedOn, i.today) >= 7)
-  )
-    return { kind: 'invite', to: '/settings/couple' };
-  // 첫 주 ‘첫 저금 추가’(2026-11-09 round 3, 초대 다음): 온보딩 뒤 7일 안, 내 저금이 없을 때(월급 탭 ‘첫 저금’과 같은 조건)
+  // 첫 주 ‘첫 저금 추가’(2026-11-09 round 3): 온보딩 뒤 7일 안, 내 저금이 없을 때(월급 탭 ‘첫 저금’과 같은 조건)
   if (firstSavingTodo(i))
     return { kind: 'saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' };
   // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 대신 홈 H-02 저금 항목 제안 줄)
@@ -181,8 +175,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       a.kind !== 'deposit_money' &&
       !!a.maturity_date &&
       a.maturity_date <= i.today &&
-      (a.owner === 'joint' || a.owner_user_id === i.meId) &&
-      !i.closed.includes(`matured:${a.id}:${a.maturity_date}`),
+      (a.owner === 'joint' || a.owner_user_id === i.meId),
   );
   if (matured)
     return {
@@ -196,7 +189,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
     .filter((x): x is { c: HomeCare; d: string } => {
       if (!x.d) return false;
       const n = daysBetween(i.today, x.d);
-      return n >= 0 && n <= 7 && !i.closed.includes(`care:${x.c.id}:${x.d}`);
+      return n >= 0 && n <= 7;
     })
     .sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0))[0];
   if (care)
@@ -207,6 +200,8 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       key: `care:${care.c.id}:${care.d}`,
       to: `/calendar/day/${care.c.id}`,
     };
+  // 파트너 초대(2026-11-11 맨 끝): 다른 할 일이 없을 때만, 파트너가 합류할 때까지
+  if (i.coupleState === 'not_joined') return { kind: 'invite', to: '/settings/couple' };
   return null;
 }
 

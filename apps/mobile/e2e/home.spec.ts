@@ -3,17 +3,6 @@ import { axe as runAxe } from './axe';
 import { mockOnboarding } from './onboarding-mock';
 import { seed } from './seed-home';
 
-// 이미 쓰던 사람: 온보딩 뒤 ‘월급 계획 확인’(ADR 0005)은 끝낸 상태로
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    try {
-      localStorage.setItem('sweetwo:home:todo-closed', JSON.stringify(['split:split-1']));
-    } catch {
-      /* 없음 */
-    }
-  });
-});
-
 // 홈(19)과 월급 체크리스트(20 W-01·W-02·W-02a·W-02 끝·W-05). 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 월급 사이클 = 9월 25일 ~ 10월 24일, 월급 전 확인은 10월 22일부터.
 
@@ -146,7 +135,7 @@ test('홈 상자 → 화면(2026-11-09): 월급 계획 W-01, 캘린더 Y-01, 저
   await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 코코아 띠(2026-11-11) “월급날 체크할 차례예요” → W-02, 닫으면 이번 기간 안 보이고 초대 띠', async ({
+test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 코코아 띠(2026-11-11) “월급날 체크할 차례예요” → W-02, 닫기 없이 다 체크하면 사라지고 초대 띠(맨 끝)', async ({
   page,
 }) => {
   const PAY = new Date('2026-09-28T10:00:00+09:00');
@@ -166,14 +155,17 @@ test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 코코아 띠(2
   await band.getByRole('button', { name: /월급날 체크할 차례예요/ }).click();
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/');
-  await band.getByRole('button', { name: '닫기' }).click();
-  // 닫으면 같은 자리에 초대 띠(2026-11-11 같은 코코아 띠)
+  // 2026-11-11 띠 닫기(✕) 없음: 띠 전체 버튼 하나뿐
+  await expect(band.getByRole('button')).toHaveCount(1);
+  await expect(band.getByRole('button', { name: '닫기' })).toHaveCount(0);
+  // 다 체크하면(‘못 함’ 포함) 사라지고, 다른 할 일이 없으니 같은 자리에 초대 띠(맨 끝 순서)
+  for (const c of db.checklists)
+    for (const l of c.pay_check_line as unknown as { state: string }[]) l.state = 'checked';
+  await page.reload();
   await expect(band).toHaveCount(1);
   await expect(band).toContainText('함께할 사람을 초대해 주세요');
   await expect(band).not.toContainText('월급날 체크할 차례예요');
-  expect(
-    await page.evaluate(() => localStorage.getItem('sweetwo:home:todo-closed') ?? ''),
-  ).toContain('check:9월 월급:2026-09-25');
+  await expect(band.getByRole('button', { name: '닫기' })).toHaveCount(0);
 });
 
 test('두 사람(찬우·예빈, 각자): 큰 상자 Avatar 둘, 저금 상자는 목표 금액에 가장 가까운 저금(예빈 것도), 모은 금액은 내 저금만', async ({

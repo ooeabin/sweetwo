@@ -4,7 +4,7 @@ import { DateWheel, QuestionLayout, type YMD, QuestionSkeleton } from '@sweetwo/
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -33,7 +33,7 @@ export function S11iBirthYear() {
         try {
           await updateMe({ birth_year: y });
           await qc.invalidateQueries({ queryKey: qk.me });
-          toast(copy.saved);
+          carryToast(copy.saved);
           nav(backTo, { replace: true });
         } catch {
           toast(copy.failed);

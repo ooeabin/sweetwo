@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -35,7 +35,7 @@ export function S12cUnlinkConfirm() {
       await requestUnlink(copy.confirmWord);
       track('unlink_requested', { linked_months: monthsSince(d.space?.created_at) });
       await Promise.all([qk.space, qk.unlink].map((k) => qc.invalidateQueries({ queryKey: k })));
-      toast(copy.sent(c.partnerName));
+      carryToast(copy.sent(c.partnerName));
       nav('/settings/couple', { replace: true });
     } catch {
       toast(copy.failed);

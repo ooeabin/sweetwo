@@ -13,7 +13,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { quietly, toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { CheckLine } from '../check-line';
 import { copy } from '../copy';
@@ -58,7 +58,7 @@ export function W10SavingItem() {
         void trashGoals([g.id])
           .then(refresh)
           .then(() => {
-            toast(copy.removed, {
+            carryToast(copy.removed, {
               label: copy.undo,
               onClick: () => quietly(restoreTrash('goal', g.id).then(refresh)),
             });

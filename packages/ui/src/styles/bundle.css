@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (8b3b328). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8f6a393). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -464,6 +464,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-banner > span { flex: 1; min-width: 0; }
 .hg-banner > .hg-ico { flex: none; }  /* 아이콘도 span이라 위 규칙에서 빼기 */
 .hg-banner--info { background: var(--surface-alt); color: var(--ink); }
+.hg-banner--check { align-items: flex-start; background: var(--surface-alt); color: var(--ink); font: var(--text-body-strong); word-break: keep-all; }  /* 2026-11-11 질문 화면 ‘한 번 확인’(O-31 “한 달에 {금액}이 맞나요?”, P 화면 “입력한 값이 맞나요?”): 회색 판 + ink 15px 600 + 앞 circle-alert 20px ink */
+.hg-banner--check > .hg-ico { color: var(--ink); margin-top: 1px; }
 .hg-banner .hg-btn--link { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .hg-banner--todo { gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); border: 1px solid var(--hairline-soft); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink); font: var(--text-body-strong); }
 :where(.hg-admin, .hg-adminauth, .hg-site) .hg-banner--todo { font: 600 15px/22px var(--font-sans); }  /* 어드민·웹사이트는 예전 글자 그대로(2026-11-09) */
@@ -1025,14 +1027,12 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
 .hg-daygrid__day:focus-visible, .hg-daygrid__last:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
-.hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
+.hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
 .hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
-.hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); }
+.hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
 .hg-wheel__col::-webkit-scrollbar { display: none; }
-.hg-wheel__col:focus-visible { outline: none; }  /* 2026-11-03 줄 테두리 대신 가운데 띠에 ink 테두리(파란 세로선이 거슬림) */
-.hg-wheel:has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: inset 0 0 0 2px var(--ink); }
-.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day):has(.hg-wheel__col:focus-visible) .hg-wheel__band { box-shadow: none; }
-.hg-wheel:not(.hg-wheel--year):not(.hg-wheel--day) .hg-wheel__col:focus-visible .hg-wheel__item.is-on { box-shadow: inset 0 0 0 2px var(--focus-ring); border-radius: var(--radius-md); }  /* 2026-11-04 키보드 초점: 숫자와 ‘월’에 따로 밑줄이 그어지던 것을 칸 테두리로 */
+.hg-wheel__col:focus, .hg-wheel__col:focus-visible { outline: none; }
+.hg-wheel:has(.hg-wheel__col:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 4px; }  /* 2026-11-11 고른 줄은 늘 회색 알약(plate) + ink 700 한 모양. 키보드 초점은 띠·칸 테두리 대신 휠 전체 둘레 링(:focus-visible만) */
 .hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(S-11i 출생연도): 한 줄이 판 너비 */
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
@@ -1945,7 +1945,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-q { padding-bottom: 0; }  /* 아래 여백은 바(16px)만: 내용이 짧든 길든 주 버튼 위치가 같음 */
   /* 2026-11-10 제목 위치 규칙: 뒤로(‹)가 있으면 뒤로 줄(40px) 아래 24px(화면 위에서 88px), 없으면 뒤로 자리를 비워 두지 않고 화면 위에서 48px(space-6 × 2).
      PIN(hg-lock)도 뒤로가 없어 같은 48px */
-  .hg-q.hg-q--top { padding-top: calc(var(--space-6) * 2); }
   .hg-q__foot { position: sticky; bottom: 0; padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
   /* 2026-11-03: 아래 고정 영역 위로 목록이 지나갈 때 잘려 겹쳐 보이지 않게 위쪽을 바탕색으로 흐리게(토스 하단 버튼처럼). 선 대신 */
   .hg-q__foot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-6); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
@@ -1962,6 +1961,32 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   :is(.hg-auth--hero, .hg-auth--login) .hg-auth__actions { margin-top: var(--space-10); }
   :is(.hg-auth--hero, .hg-auth--login) > .hg-auth__alert { margin-top: var(--space-10); }  /* 오프라인 띠도 버튼 바로 위 같은 자리 */
   :is(.hg-auth--hero, .hg-auth--login) .hg-auth__alert + .hg-auth__actions { margin-top: 0; }
+}
+/* 2026-11-11 태블릿(터치, 768px 이상이고 마우스·트랙패드가 없는 화면): 질문·로그인·가입·잠금·합류 화면은 휴대폰과 같은 가운데 열이지만
+   큰 화면에서 비어 보이지 않게 한 단계 크게. 열 480px(로그인 버튼 묶음·안내 띠도 360 → 480), 제목 24/32(휴대폰 22/30 그대로), 본문·선택지·입력 글자 한 단계 위,
+   세로 간격 한 단계 넓게, 제목 묶음은 화면 맨 위에 붙이지 않고 위 3분의 1쯤(진행 막대 아래 10vh, 최소 24 최대 120px). 휴대폰과 마우스 넓은 창은 그대로 */
+@media (min-width: 768px) and (hover: none), (min-width: 768px) and (pointer: coarse) {
+  .hg-qmain, .hg-auth {
+    --text-title-1: 700 24px/32px var(--font-sans);
+    --text-body: 400 16px/24px var(--font-sans);
+    --text-body-strong: 600 16px/24px var(--font-sans);
+    --text-body-sm: 400 14px/21px var(--font-sans);
+    --text-caption: 400 13px/18px var(--font-sans);
+    --text-label: 600 15px/22px var(--font-sans);
+  }
+  .hg-q { gap: var(--space-8); }
+  .hg-q > .hg-q__head { margin-bottom: var(--space-4); }  /* 제목 묶음과 입력 사이 32 + 16 = 48px */
+  .hg-q:not(.hg-q--center) > .hg-q__head { margin-top: clamp(var(--space-6), 10vh, var(--space-16) + var(--space-14)); }
+  .hg-q .hg-input { height: 56px; font-size: 17px; line-height: 26px; }
+  .hg-q .hg-option--card { min-height: 72px; padding: var(--space-5); }
+  .hg-q .hg-amountin { max-width: none; }
+  .hg-q .hg-amountin > .hg-quick > .hg-chip { height: 48px; }
+  .hg-q .hg-wheel__item { font-size: 20px; }  /* 휠 줄 높이(44px)는 그대로(DateWheel 굴리기 셈과 같음) */
+  .hg-q .hg-wheel__item.is-on { font-size: 22px; }
+  .hg-q__foot :is(.hg-btn--primary, .hg-btn--danger, button[type="submit"].hg-btn--secondary, .hg-q__second) { height: 56px; }
+  .hg-auth { gap: var(--space-8); }
+  .hg-auth__actions, .hg-auth__alert { max-width: 480px; }
+  .hg-auth > .hg-lock { padding-top: calc(clamp(var(--space-10) + var(--space-8), 14vh, var(--space-16) * 2) + env(safe-area-inset-top, 0px)); }
 }
 
 /* 행 앞 아이콘 칸: 영역 색 원 + Phosphor 아이콘(2026-11-09, ListRow.md ‘Lead 종류 표’) */
@@ -2326,7 +2351,6 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubband__text { flex: 1; min-width: 0; font: 600 15px/22px var(--font-sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hg-hubband__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 500 15px/22px var(--font-sans); white-space: nowrap; }
 .hg-hubband__main:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-hubband > .hg-iconbtn { flex: none; margin-right: var(--space-1); color: inherit; }
 /* 타일(HubTile): 반 칸 상자. 큰 타일 164px(오른쪽 아래 72px 그림 자리), 작은 타일(--sm) 104px(값 한 줄) */
 .hg-hubtile { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 164px; padding: 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
 .hg-hubtile--sm { min-height: 104px; }

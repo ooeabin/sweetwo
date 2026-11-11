@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { create } from 'zustand';
 import { checkPhoto, shrinkPhoto } from '../../../shared/photo';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
 
@@ -139,7 +139,7 @@ export function Y08Record() {
       if (failed) return;
       x.photos.forEach((p) => URL.revokeObjectURL(p.url));
       set(blank('', null));
-      toast(copy.recorded);
+      carryToast(copy.recorded);
       nav(`/calendar/day/${care.id}`, { replace: true });
     } catch {
       toast(copy.loadFailed);

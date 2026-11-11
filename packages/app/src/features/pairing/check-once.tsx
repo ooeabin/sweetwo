@@ -1,3 +1,4 @@
+import { Icon } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from './copy';
 
@@ -12,7 +13,8 @@ export function useCheckOnce() {
     },
     reset: () => setShown(false),
     banner: shown ? (
-      <div className="hg-banner hg-banner--info" role="alert">
+      <div className="hg-banner hg-banner--check" role="alert">
+        <Icon name="circle-alert" />
         <span>{copy.checkValue}</span>
       </div>
     ) : null,
