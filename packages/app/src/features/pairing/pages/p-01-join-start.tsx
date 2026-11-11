@@ -6,7 +6,7 @@ import {
   qk,
   type JoinResult,
 } from '@sweetwo/api';
-import { Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { CodeCells, Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -163,9 +163,7 @@ export function P01JoinStart() {
         {blocked !== 'invalid' && (
           <p className="hg-invite-code hg-invite-code--static">
             <span className="hg-sr">{`${copy.codeLabel} ${code.split('').join(' ')}`}</span>
-            <span className="hg-invite-code__code" aria-hidden="true">
-              {code}
-            </span>
+            <CodeCells value={code} />
           </p>
         )}
       </QuestionLayout>
@@ -185,9 +183,7 @@ export function P01JoinStart() {
     >
       <p className="hg-invite-code hg-invite-code--static">
         <span className="hg-sr">{`${copy.codeLabel} ${code.split('').join(' ')}`}</span>
-        <span className="hg-invite-code__code" aria-hidden="true">
-          {code}
-        </span>
+        <CodeCells value={code} />
       </p>
       {signedIn.data && me.data && (
         <p className="hg-help">

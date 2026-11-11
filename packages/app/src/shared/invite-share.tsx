@@ -1,4 +1,4 @@
-import { Button, Icon } from '@sweetwo/ui';
+import { Button, CodeCells, Icon } from '@sweetwo/ui';
 import { track } from './analytics';
 import { toast } from './toast';
 
@@ -74,7 +74,7 @@ export function inviteActions(o: {
   };
 }
 
-/** 6자 코드 상자(O-07과 같은 모양, 6자를 붙여서, D9). 누르면 복사 */
+/** 6자 코드 상자(O-07과 같은 모양, D9). 2026-11-11 한 글자씩 칸(CodeCells, 넣는 칸과 같은 모양). 누르면 복사 */
 export function InviteCodeBox({ code, onCopy }: { code: string | undefined; onCopy: () => void }) {
   return (
     <button
@@ -87,7 +87,7 @@ export function InviteCodeBox({ code, onCopy }: { code: string | undefined; onCo
       }
       onClick={() => code && onCopy()}
     >
-      <span className="hg-invite-code__code">{code ?? '······'}</span>
+      <CodeCells value={code ?? ''} />
       <span className="hg-invite-code__tap" aria-hidden="true">
         <Icon name="copy" size={16} />
         {inviteCopy.tapToCopy}

@@ -86,21 +86,20 @@ export function H01Home() {
     if (splits.isLoading) return <LoadingFrame current="month" />;
     if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
     const starter = partner.data?.nickname ?? space.data.partner_nickname ?? '';
-    // 2026-11-11 S3-32: 카드 하나뿐인 빈 화면처럼 보이지 않게 96px 그림 자리(그림이 들어올 때까지 회색 빈 자리) + 가운데
+    // 2026-11-11 S3-32: 96px 그림 자리(그림이 들어올 때까지 회색 빈 자리). 2026-11-11 사용자 결정: 카드 없이 화면 가운데(다른 상태 화면처럼, hg-hubwait)
     return (
       <MainFrame
         current="month"
-        tone="alt"
         columns={[
           <section
             key="w"
-            className="hg-card hg-stack"
-            style={{ alignItems: 'center', textAlign: 'center', gap: 'var(--space-3)' }}
+            className="hg-hubwait"
+            role="status"
             aria-label={copy.waitTitle(starter)}
           >
             <Illustration name="status-waiting" className="hg-auth__art" />
-            <b>{copy.waitTitle(starter)}</b>
-            <span className="hg-card__meta">{copy.waitCard(starter)}</span>
+            <b className="hg-hubwait__title">{copy.waitTitle(starter)}</b>
+            <span className="hg-hubwait__sub">{copy.waitCard(starter)}</span>
           </section>,
         ]}
       />
