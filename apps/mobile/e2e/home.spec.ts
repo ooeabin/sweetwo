@@ -27,7 +27,7 @@ const PARTNER = {
   allowance: 270_000,
 };
 
-test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 보낸 줄, 보낸 금액·모은 금액), 타일, 저금 상자 → 체크하면 상자 숫자가 바뀜', async ({
+test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 이번 달 체크, 체크한 금액·모은 금액), 타일, 저금 상자 → 체크하면 상자 숫자가 바뀜', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -44,10 +44,10 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 보낸 줄, 보�
   await expect(h).toContainText('10월 25일 월급날까지');
   await expect(h).toContainText('18일 남았어요');
   await expect(h.locator('.hg-hubhero__count')).toHaveText('0 / 5');
-  await expect(h).toContainText('이번 달 보낸 줄');
-  await expect(h).toContainText('보낸 금액0원');
+  await expect(h).toContainText('이번 달 체크');
+  await expect(h).toContainText('체크한 금액0원');
   await expect(h).toHaveAccessibleName(
-    '10월 25일 월급날까지 18일 남았어요. 이번 달 5개 중 0개 보냈어요. 보낸 금액 0원, 모은 금액 0원',
+    '10월 25일 월급날까지 18일 남았어요. 이번 달 5개 중 0개 체크했어요. 체크한 금액 0원, 모은 금액 0원',
   );
   // 혼자(예빈 미합류)면 Avatar 하나
   await expect(h.locator('.hg-avatar')).toHaveCount(1);
@@ -84,7 +84,7 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 보낸 줄, 보�
     .click();
   await expect(page).toHaveURL(/\/$/);
   await expect(h.locator('.hg-hubhero__count')).toHaveText('1 / 5');
-  await expect(h).toContainText('보낸 금액95만 원');
+  await expect(h).toContainText('체크한 금액95만 원');
   await expect(h).toContainText('모은 금액95만 원');
   await expect(page.getByRole('button', { name: /^내 집 마련, \d+%/ })).toContainText(
     '95만 원 / 1억 5,000만 원',
@@ -104,7 +104,7 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 보낸 줄, 보�
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
   await expect(h.locator('.hg-hubhero__count')).toHaveText('5 / 5');
-  await expect(h).toContainText('보낸 금액350만 원');
+  await expect(h).toContainText('체크한 금액350만 원');
 });
 
 test('홈 상자 → 화면(2026-11-09): 월급 계획 W-01, 캘린더 Y-01, 저금 상자 W-10, 자산 관리 F-01, 저금 W-13', async ({

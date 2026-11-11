@@ -9,8 +9,8 @@ export const copy = {
   untilPayday: (date: string) => `${date} 월급날까지`,
   daysLeft: (n: number) => `${n}일 남았어요`,
   paydayToday: '오늘이 월급날이에요',
-  sentLines: '이번 달 보낸 줄',
-  sentAmount: '보낸 금액',
+  sentLines: '이번 달 체크', // 2026-11-11 ‘보낸 줄’에서 바꿈(사용자 결정),
+  sentAmount: '체크한 금액',
   savedAmount: '모은 금액',
   heroLabel: (p: {
     caption: string;
@@ -20,7 +20,7 @@ export const copy = {
     sent: string;
     saved: string;
   }) =>
-    `${p.caption} ${p.title}. 이번 달 ${p.total}개 중 ${p.done}개 보냈어요. 보낸 금액 ${p.sent}, 모은 금액 ${p.saved}`, // 화면 읽기용
+    `${p.caption} ${p.title}. 이번 달 ${p.total}개 중 ${p.done}개 체크했어요. 체크한 금액 ${p.sent}, 모은 금액 ${p.saved}`, // 화면 읽기용
   noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
   tellSalary: '월급 알려 주기',
   // H-06 할 일 띠(오렌지) 오른쪽 이동 글자 [확인 필요]

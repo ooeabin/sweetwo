@@ -74,14 +74,14 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('진행 막대: 체크할수록 칸 안이 차고 “보낸 금액”이 늘어남, 개수는 화면 읽기 이름', async ({
+test('진행 막대: 체크할수록 칸 안이 차고 “체크한 금액”이 늘어남, 개수는 화면 읽기 이름', async ({
   page,
 }) => {
   await open(page);
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
   await expect(page.getByText('09.25 ~ 10.24', { exact: true })).toBeVisible();
-  await expect(page.getByText('보낸 금액 0원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 0원 / 350만 원')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 0개 완료' })).toBeVisible();
   // 개수 글자는 머리에서 빠짐
   await expect(page.getByText(/5개 중 0개 완료/)).toHaveCount(0);
@@ -92,9 +92,9 @@ test('진행 막대: 체크할수록 칸 안이 차고 “보낸 금액”이 �
   ]);
   await axe(page);
   await page.getByRole('checkbox', { name: /청약/ }).click();
-  await expect(page.getByText('보낸 금액 44만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 44만 원 / 350만 원')).toBeVisible();
   await page.getByRole('checkbox', { name: /고정지출/ }).click();
-  await expect(page.getByText('보낸 금액 132만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 132만 원 / 350만 원')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 2개 완료' })).toBeVisible();
   // 44 ÷ 139 = 31, 88 ÷ 211 = 41
   expect(await bar(page)).toEqual([
@@ -103,7 +103,7 @@ test('진행 막대: 체크할수록 칸 안이 차고 “보낸 금액”이 �
   ]);
   // 체크 풀면 다시 줄어듦
   await page.getByRole('checkbox', { name: /청약/ }).click();
-  await expect(page.getByText('보낸 금액 88만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 88만 원 / 350만 원')).toBeVisible();
 });
 
 test('묶음은 월급 계획 순서(sort)대로', async ({ page }) => {
@@ -142,7 +142,7 @@ test('모두 체크: W-02 끝 결과 카드(막대 = 계획 막대), W-02도 결
   expect(full.map(([k, g]) => [k, g])).toEqual(plan.map(([k, g]) => [k, g]));
   expect(full.map(([, , f]) => f)).toEqual(['100%', '100%']);
   await expect(card.locator('.hg-receipt__row--strong')).toContainText('여유 자금0원');
-  await expect(card.getByText('보낸 금액', { exact: true })).toBeVisible();
+  await expect(card.getByText('체크한 금액', { exact: true })).toBeVisible();
   await expect(page.getByText('영수증')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '확인' }).click();
@@ -155,7 +155,7 @@ test('모두 체크: W-02 끝 결과 카드(막대 = 계획 막대), W-02도 결
   await expect(page.locator('.hg-checkgroup')).toHaveCount(2);
   await page.getByRole('checkbox', { name: /용돈/ }).click();
   // 하나 풀면 다시 진행 막대
-  await expect(page.getByText('보낸 금액 315만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 315만 원 / 350만 원')).toBeVisible();
   await expect(page.getByRole('region', { name: '9월 월급 요약' })).toHaveCount(0);
 });
 
@@ -187,7 +187,7 @@ test('결과 카드: 다른 금액은 “계획 88만 원”, ‘못 함’은 s
   await expect(page.getByText('이미지를 저장했어요')).toBeVisible();
 });
 
-test('W-01 링크 줄 “이번 달 2/5 보냈어요 ›” → 이번 달, 체크리스트가 없으면 없음', async ({
+test('W-01 링크 줄 “이번 달 2/5 체크했어요 ›” → 이번 달, 체크리스트가 없으면 없음', async ({
   page,
 }) => {
   const db = await open(page);
@@ -195,8 +195,8 @@ test('W-01 링크 줄 “이번 달 2/5 보냈어요 ›” → 이번 달, 체�
   mark(linesOf(db)[2], 'checked');
   mark(linesOf(db)[1], 'skipped'); // 못 함은 보낸 것으로 세지 않음
   await page.goto('/salary?view=plan');
-  const link = page.getByRole('button', { name: '이번 달 5개 중 2개 보냈어요' });
-  await expect(link).toHaveText('이번 달 2/5 보냈어요');
+  const link = page.getByRole('button', { name: '이번 달 5개 중 2개 체크했어요' });
+  await expect(link).toHaveText('이번 달 2/5 체크했어요');
   await axe(page);
   await page.getByRole('button', { name: '편집하기' }).click();
   await expect(link).toHaveCount(0);
@@ -286,11 +286,11 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 결�
   joinYebin(db);
   await page.goto('/salary?view=plan&who=yebin');
   const link = page.locator('.hg-receipt__link');
-  await expect(link).toHaveText('이번 달 0/2 보냈어요');
+  await expect(link).toHaveText('이번 달 0/2 체크했어요');
   await link.click();
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);
   await expect(page.getByText('예빈님 체크리스트예요. 보기만 할 수 있어요')).toBeVisible();
-  await expect(page.getByText('보낸 금액 0원 / 95만 원')).toBeVisible();
+  await expect(page.getByText('체크한 금액 0원 / 95만 원')).toBeVisible();
   // 95 ÷ 270 → 지출 35%, 여유 자금 65%
   expect(await bar(page)).toEqual([
     ['spend', 35, '0%'],
