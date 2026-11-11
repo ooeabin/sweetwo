@@ -268,7 +268,7 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 두 사�
 
 ## 포커스·키보드
 
-- 포커스 링: 2px `focus-ring`(사용자 앱 `ink`, 어드민 `focus`, 2026-11-09), 바깥 2px 간격. 마우스 클릭에는 숨기고 키보드에만(`:focus-visible`). 잘리는 묶음 안 줄(목록·메뉴)은 안쪽 2px.
+- 포커스 링: 2px `focus-ring`(사용자 앱 `ink`, 어드민 `focus`, 2026-11-09), 바깥 2px 간격. 마우스 클릭에는 숨기고 키보드에만(`:focus-visible`). 2026-11-11 사용자 결정: 손가락·마우스로 누른 뒤에는 대화상자·시트·서랍이 포커스를 돌려줘도 테두리 없음(앱이 마지막 입력을 `<html data-input="pointer|keyboard">`에 적고 pointer면 숨김, `@sweetwo/ui` `trackInputModality`). 입력 칸 포커스는 그대로. 잘리는 묶음 안 줄(목록·메뉴)은 안쪽 2px.
 - 누를 수 있는 것은 `button`·`a`. 상태는 `aria-pressed`·`aria-checked`·`aria-selected`·`aria-expanded`·`aria-current`로.
 - Tab 순서 = 읽는 순서(위 → 아래, 왼쪽 → 오른쪽). 숨은 요소는 Tab에서 빠짐.
 - 단축키: Ctrl/⌘+K 명령 팔레트, Enter 다음·확인, Esc 뒤로·닫기, ←/→ 슬라이더·달력, Ctrl/⌘+L 앱 잠금.

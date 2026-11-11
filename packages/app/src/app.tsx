@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { trackInputModality } from '@sweetwo/ui';
 import { initSession } from './features/auth';
 import { restoreCache, startCacheSaver } from './shared/offline-cache';
 import { onSessionReset } from './shared/session-reset';
@@ -28,6 +29,8 @@ export function App({ platform }: { platform: Platform }) {
   // 로그아웃하면 앞 계정 화면 데이터를 메모리에서 모두 비움(features/auth sign-out.ts, 2026-11-10)
   useEffect(() => onSessionReset(() => queryClient.clear()), [queryClient]);
   useSystemTheme();
+  // 누른 뒤 포커스 테두리 숨김(손가락·마우스), 키보드면 보임(@sweetwo/ui input-modality, 2026-11-11)
+  useEffect(() => trackInputModality(), []);
   // 앱: 기기에 둔 마지막 데이터를 먼저 채우고(오프라인 조회) 그린 뒤, 받은 데이터를 계속 기기에 둠
   const [restored, setRestored] = useState(() => !window.sweetwo?.cache);
   useEffect(() => {

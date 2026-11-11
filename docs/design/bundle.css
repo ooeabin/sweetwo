@@ -2431,3 +2431,9 @@ button.hg-receipt__main { cursor: pointer; }
 @media (max-width: 767px) {
   :is(.hg-auth__back, .hg-q__nav, .hg-chapterbar__top, .hg-noti__head) > .hg-back, .hg-pagehead > .hg-back { margin-left: -8px; }
 }
+
+/* 포커스 테두리는 키보드로 왔을 때만(2026-11-11 사용자 결정: 손가락·마우스로 누른 뒤 테두리가 남는 게 이상함).
+   iPad·iPhone은 눌러도 버튼에 포커스가 안 가서 시트·대화상자·서랍이 닫히며 포커스를 돌려줄 때 :focus-visible이 켜진다.
+   앱이 마지막 입력을 <html data-input>에 적음(@sweetwo/ui trackInputModality). 입력 칸 포커스(.hg-input:focus, 코드 칸)는 그대로 */
+:root[data-input='pointer'] :focus-visible:not(input, textarea, select, [contenteditable]) { outline: none !important; }
+:root[data-input='pointer'] .hg-sheet__close { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
