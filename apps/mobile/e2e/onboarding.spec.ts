@@ -520,7 +520,9 @@ test('O-60 ‘홈으로 가기’ 저장 실패 → 토스트 다시 시도, 체
   expect(db.checklists).toHaveLength(1);
 });
 
-test('O-32 휠 둘레 링은 키보드로 왔을 때만(손가락·마우스로 고르면 없음, 2026-11-11)', async ({ page }) => {
+test('O-32 휠 둘레 링은 키보드로 왔을 때만(손가락·마우스로 고르면 없음, 2026-11-11)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-32', monthly_income: 3_500_000 });
