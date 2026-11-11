@@ -12,6 +12,7 @@ const BRAND_FILL = /hg-btn--primary|hg-badge--achieved/;
 const ORANGE_TEXT = [
   '.hg-sechead__count b', // “저금 1/2”의 한 개수
   '.hg-amountin > .hg-quick > .hg-chip.is-selected', // 고른 바꾸기 칩(W-11b)
+  ':is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary', // 카드 안 보조 버튼의 오렌지 글자(‘초대 취소’, ‘링크 복사’ 등, 2026-11-11 사용자 결정, 14px 이상 700)
   '.hg-banner--line .hg-btn--secondary', // 공지 띠 안 흰 작은 버튼의 오렌지 글자(‘펼치기’). 홈 초대 띠는 2026-11-11부터 코코아 HubBand라 예외 없음
 ].join(', ');
 
