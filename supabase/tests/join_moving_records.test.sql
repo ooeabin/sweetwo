@@ -1,7 +1,7 @@
 -- pgTAP: P-02a 혼자 쓰던 기록 옮기기(18). 예빈이 혼자 쓰다가 찬우 초대로 합류: 내 명의 자산만 옮김
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(7);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -36,7 +36,13 @@ select set_config('test.old', (select space_id::text from public.app_user where 
 select set_config('test.a', (select id::text from public.asset where name = '예빈 적금'), true);
 select is(public.join_space(current_setting('test.code')), 'has_records', '그냥 합류하면 기록 있음');
 select is(public.join_moving_records(current_setting('test.code'),
-  jsonb_build_object(current_setting('test.a'), 'all')), 'joined', '옮기고 합류');
+  jsonb_build_object(current_setting('test.a'), 'all')), 'joined', '옮기기를 고르고 합류 시작');
+reset role;
+select is((select space_id::text from public.app_user where nickname = '예빈'), current_setting('test.old'),
+  '합류를 마치기 전에는 아무것도 옮기지 않음(D1)');
+select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
+set local role authenticated;
+select public.finish_join();
 reset role;
 
 select is((select space_id from public.app_user where nickname = '예빈'),

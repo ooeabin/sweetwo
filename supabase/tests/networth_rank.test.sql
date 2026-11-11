@@ -47,6 +47,7 @@ reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select is(public.partner_birth_year()::int, 1993, '합류한 파트너의 출생연도');
 reset role;
 

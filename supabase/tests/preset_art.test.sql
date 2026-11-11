@@ -52,6 +52,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select is((select photo_preset from public.space_goals() where id = current_setting('test.mine')::uuid), null,
   '금액만 보여 주기면 지정 사진 이름도 숨김');
 select throws_ok(format($$ select public.set_goal_preset(%L, 'car-02') $$, current_setting('test.mine')),

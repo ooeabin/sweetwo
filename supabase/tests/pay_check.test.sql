@@ -63,6 +63,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select throws_ok($$ select public.check_pay_line(pg_temp.line('living'), 'checked') $$, '42501', 'not_owner', '파트너 체크리스트는 체크 못 함');
 select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'skipped', '파트너 줄은 그대로');
 reset role;

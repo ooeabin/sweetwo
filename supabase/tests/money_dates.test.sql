@@ -62,6 +62,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select throws_ok($$ select public.settle_matured((select id from public.asset where name = '정기 예금'), null, '2099-04-02') $$,
   '42501', 'not_found', '파트너 개인 항목은 못 고침');
 reset role;
