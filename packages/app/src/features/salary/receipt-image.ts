@@ -112,7 +112,7 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     ctx.beginPath();
     ctx.arc(cx, y + r, r, 0, Math.PI * 2);
     ctx.fill();
-    // 빵모자 실루엣(라이트 흰색, 다크 person-*-ink), 원 밖은 잘라 냄
+    // 빵모자 실루엣(person-*-figure, 2026-11-11 원과 같은 색의 다른 톤), 원 밖은 잘라 냄
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, y + r, r, 0, Math.PI * 2);
