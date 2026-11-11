@@ -155,7 +155,10 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   seed(db);
   await page.goto('/calendar');
   await expect(page).toHaveURL(/\/calendar\/list$/);
-  await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toBeVisible();
+  await expect(page.locator('.hg-empty')).toBeVisible();
+  await expect(
+    page.locator('.hg-empty').getByRole('button', { name: '경조사 추가' }),
+  ).toBeVisible();
   // 경조사와 금융 일정은 “일정” 한 목록, 오른쪽 D-day(2026-11-03)
   const money = page.getByRole('region', { name: '일정' });
   // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 22일, 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
@@ -175,7 +178,7 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   await page.getByRole('button', { name: '경조사', exact: true }).click();
   await expect(money.locator('.hg-list').getByRole('button')).toHaveCount(0);
   await page.getByRole('button', { name: '금융 일정', exact: true }).click();
-  await expect(page.getByText('생일, 기념일, 명절을 적어 두면 미리 알려 드려요')).toHaveCount(0);
+  await expect(page.locator('.hg-empty')).toHaveCount(0);
   await page.getByRole('button', { name: /여행 기한/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/g-trip$/);
   await page.goto('/calendar/list');
