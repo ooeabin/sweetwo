@@ -5,7 +5,8 @@ import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 import { setWheel } from './wheel';
 
-// 파트너 합류 재기획(18): P-03 이름 → P-03a 출생연도 → P-04 관리 방식 → P-05 월급 → P-06 월급 계획.
+// 파트너 합류 재기획(18): P-03 이름 → P-04 관리 방식 → P-05 월급 → P-05b 월급날(P-06 월급 계획은 추천값으로 자동).
+// 2026-11-11 P-03a 출생연도를 뺌: 합류한 사람도 출생연도는 자산 순위 F-08 ‘출생연도 알려 주기’ → S-11i에서.
 // 이 테스트의 나(로그인 계정) = 합류하는 예빈, 시작한 사람 = 찬우(월급 계획 저금 항목 청약 44만, 내 집 마련 95만).
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -47,16 +48,30 @@ function joining(db: MemDb, starterReady = true) {
   };
 }
 
+/** 진행 막대 칸: 넓은 창은 칸 수(aria-valuenow/max = 칸), 좁은 창은 %라 비율로 봄 */
+async function expectStep(page: Page, done: number, total: number) {
+  const bar = page.getByRole('progressbar');
+  await expect
+    .poll(async () => {
+      const now = Number(await bar.getAttribute('aria-valuenow'));
+      const max = Number(await bar.getAttribute('aria-valuemax'));
+      return max ? now / max : -1;
+    })
+    .toBeCloseTo(done / total, 3);
+}
+
 async function answerBasics(page: Page, waiting = false) {
   await page.goto('/');
   await expect(page).toHaveURL(/\/join\/p-03$/);
   await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
   await expect(page.getByText('파트너에게도 이 이름으로 보여요')).toBeVisible();
   await axe(page);
+  // 진행 막대 4칸 중 1칸(P-03a 뺌)
+  await expectStep(page, 1, 4);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();
-  await setWheel(page, '예빈님은 몇 년생이에요?', 1995);
-  await page.getByRole('button', { name: '다음' }).click();
+  // 출생연도는 묻지 않음(2026-11-11): 이름 다음은 P-04(시작한 사람이 온보딩 중이면 P-05)
+  await expect(page).toHaveURL(waiting ? /\/join\/p-05$/ : /\/join\/p-04$/);
+  await expect(page.getByRole('heading', { name: /몇 년생이에요/ })).toHaveCount(0);
   if (!waiting)
     await expect(
       page.getByRole('heading', { name: '찬우님이 고른 월급 관리 방식이에요' }),
@@ -104,8 +119,84 @@ test('각자: 관리 방식 그대로 → 월급 → 월급날 → 추천 월급
     ['living', 680_000],
     ['allowance', 270_000],
   ]);
-  expect(db.me).toMatchObject({ birth_year: 1995, monthly_income: 2_700_000, payday: 10 });
+  expect(db.me).toMatchObject({ birth_year: null, monthly_income: 2_700_000, payday: 10 });
   expect(db.space?.couple_state).toBe('connected');
+
+  // 출생연도는 자산 순위(F-08)를 처음 열 때 물음: ‘출생연도 알려 주기’ → S-11i → F-08(시작한 사람과 같음).
+  // 순위는 자산이 있어야 보여서 공동 통장 하나
+  db.assets.push({
+    id: 'join-a1',
+    side: 'asset',
+    grp: 'cash',
+    kind: 'bank',
+    name: '생활비 통장',
+    amount: 30_000_000,
+    owner: 'joint',
+    owner_user_id: null,
+    created_by: STARTER,
+    principal: null,
+    rate_estimated: false,
+    maturity_date: null,
+    monthly_payment: null,
+    interest_rate: null,
+    paid_count: null,
+    pay_from: null,
+    goal_id: null,
+    estimated: false,
+    visibility: 'all',
+    status: 'held',
+    created_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-10-01T00:00:00Z',
+    deleted_at: null,
+  });
+  await page.goto('/assets/rank');
+  const ask = page.getByRole('button', { name: /출생연도 알려 주기/ });
+  await expect(ask).toContainText('또래와 비교해 드려요');
+  await ask.click();
+  await expect(page).toHaveURL(/\/settings\/me\/birth-year\?from=rank$/);
+  await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await setWheel(page, '예빈님은 몇 년생이에요?', 1995);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/assets\/rank$/);
+  expect(db.me.birth_year).toBe(1995);
+  await expect(page.getByRole('button', { name: /출생연도 알려 주기/ })).toHaveCount(0);
+});
+
+test('예전 P-03a(출생연도)에 멈춘 사람: 다시 열면 다음 화면 P-04', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.me.onboarding_step = 'P-03A';
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-04$/);
+  await expect(
+    page.getByRole('heading', { name: '찬우님이 고른 월급 관리 방식이에요' }),
+  ).toBeVisible();
+  // 진행 막대 4칸 중 2칸, 뒤로는 P-03
+  await expectStep(page, 2, 4);
+  await expect.poll(() => db.me.onboarding_step).toBe('P-04');
+  // 좁은 창은 머리 ‘뒤로’, 넓은 창은 아래 바 ‘이전’
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+
+  // 주소로 바로 와도 같음
+  await page.goto('/join/p-03a');
+  await expect(page).toHaveURL(/\/join\/p-04$/);
+});
+
+test('예전 P-03a에 멈췄고 시작한 사람이 아직 온보딩 중: 다시 열면 P-05', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db, false);
+  db.me.onboarding_step = 'P-03A';
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-05$/);
+  await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
+  await expectStep(page, 3, 4);
 });
 
 test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)로 합류 완료', async ({
@@ -143,7 +234,7 @@ test('합쳐서로 바꾸면 바로 적용 → 공동 월급 계획 다시 채�
   expect(db.splits.find((x) => x.owner_user_id === null)?.split_line).toHaveLength(6);
 });
 
-test('시작한 사람이 아직 온보딩 중: 이름 → 출생연도 → 월급 → 월급날 저장 = 합류, 홈 대기, 월급 계획이 생기면 P-04부터', async ({
+test('시작한 사람이 아직 온보딩 중: 이름 → 월급 → 월급날 저장 = 합류, 홈 대기, 월급 계획이 생기면 P-04부터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);

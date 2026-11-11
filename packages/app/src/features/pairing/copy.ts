@@ -71,9 +71,6 @@ export const copy = {
   namePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
 
-  // P-03a 출생연도
-  birthYear: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
-
   // P-04 관리 방식 확인
   modeTitle: (starter: string) => `${starter}님이 고른 월급 관리 방식이에요`, // [확인 필요]
   modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]

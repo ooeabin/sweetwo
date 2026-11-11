@@ -141,7 +141,7 @@ export function DateWheel({
   maxYear: number;
   initial?: YMD;
   className?: string;
-  /** 연도만 1열(O-13, P-03a 출생연도). 값의 월·일은 1 */
+  /** 연도만 1열(S-11i 출생연도). 값의 월·일은 1 */
   yearOnly?: boolean;
   /** 연·월 2열(예정 연·월, 여행 가는 달, 기한). 값의 일은 1 */
   yearMonth?: boolean;
