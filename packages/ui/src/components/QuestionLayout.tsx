@@ -163,6 +163,7 @@ export function QuestionLayout({
   summary,
   note,
   hero,
+  celebrate,
 }: {
   steps?: { total: number; now: number; fill?: number };
   /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
@@ -193,6 +194,8 @@ export function QuestionLayout({
   note?: ReactNode;
   /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
   hero?: ReactNode;
+  /** 축하·보상 화면 배경(화면 위 40~50% brand-soft → surface, `hg-celebrate-bg`, DESIGN.md ‘색’ 예외). 움직이는 그림 자리가 있는 축하 화면만 */
+  celebrate?: boolean;
 }) {
   // 2026-11-03 칸 막대(StepsBar) 대신 모든 질문 흐름을 온보딩과 같은 얇은 막대(ChapterBar)로
   const chapter: ChapterProgress | undefined =
@@ -251,7 +254,7 @@ export function QuestionLayout({
 
   const backOnly = !primary && !later && !secondary;
   return (
-    <main className="hg-qmain">
+    <main className={celebrate ? 'hg-qmain hg-celebrate-bg' : 'hg-qmain'}>
       <div className="hg-qbar">
         <Wordmark height={24} />
         <BarProgress chapter={chapter} steps={steps} />

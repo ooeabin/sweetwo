@@ -3,6 +3,7 @@ import { todayKst } from '@sweetwo/core';
 import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useOnline } from '../../../shared/online';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
@@ -25,11 +26,13 @@ export function S12cUnlinkConfirm() {
   const d = useSettingsData();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  // 오프라인이면 요청 비활성 + 이유 한 줄(25 예외, 2026-11-11 S3-08)
+  const online = useOnline();
   if (d.loading || !d.c) return <QuestionSkeleton />;
   const c = d.c;
   const ok = text.trim() === copy.confirmWord;
   const send = async () => {
-    if (!ok || busy) return;
+    if (!ok || busy || !online) return;
     setBusy(true);
     try {
       await requestUnlink(copy.confirmWord);
@@ -48,7 +51,8 @@ export function S12cUnlinkConfirm() {
       steps={{ total: 2, now: 1 }}
       title={copy.confirmQ}
       onBack={() => nav('/settings/couple/unlink')}
-      primary={{ label: copy.send, disabled: !ok, loading: busy }}
+      primary={{ label: copy.send, disabled: !ok || !online, loading: busy }}
+      note={online ? undefined : copy.needOnline}
       onSubmit={() => void send()}
     >
       <Field

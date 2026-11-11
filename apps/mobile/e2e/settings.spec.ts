@@ -312,29 +312,36 @@ test('우리 둘 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', a
   await axe(page);
 });
 
-test('우리 둘 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받기, 만료', async ({ page }, info) => {
+test('우리 둘 정보(S-12): 미합류 초대하기(코드 상자, 링크 복사, 카톡), 새 코드 받기, 만료', async ({
+  page,
+}, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
   db.partner = null;
   await open(page, info.project.name === 'narrow');
-  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('초대 중');
+  // 미합류 상태 나눔(S3-18): 코드가 없으면 ‘초대 전’
+  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('초대 전');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
 
-  // 초대 전
-  await expect(page.getByText('예빈님을 초대해 주세요')).toBeVisible();
+  // 초대 전: 기획 문장 그대로 + ‘초대하기’ = 바로 코드 상자(D6, D9)
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '받은 초대 코드가 있어요' })).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '초대 코드 만들기' }).click();
-  await expect(page.getByText('K7M 2QX')).toBeVisible();
+  await page.getByRole('button', { name: '초대하기' }).click();
+  const box = page.getByRole('button', { name: /초대 코드 K 7 M 2 Q X/ });
+  await expect(box).toContainText('K7M2QX');
   await expect(page.getByText('10월 22일까지')).toBeVisible();
+  await expect(page.getByRole('button', { name: '링크 복사' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '카톡으로 보내기' })).toBeVisible();
   await axe(page);
 
   // 새 코드 받기: 이전 코드는 바로 만료
   await page.getByRole('button', { name: '새 코드 받기' }).click();
   await expect(page.getByText('새 코드를 받았어요. 이전 코드는 이제 못 써요')).toBeVisible();
-  await expect(page.getByText('K7M 2QX')).toHaveCount(0);
-  await expect(page.getByText('R1N EWX')).toBeVisible();
+  await expect(page.getByRole('button', { name: /초대 코드 K 7 M/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /초대 코드 R 1 N E W X/ })).toBeVisible();
   expect(db.invites.map((i) => i.code)).toEqual(['R1NEWX', 'K7M2QX']);
   expect(db.invites[1]?.expires_at).toBe('2026-10-01T00:00:00Z');
 
@@ -347,6 +354,49 @@ test('우리 둘 정보(S-12): 미합류 초대 코드 만들기, 새 코드 받
   await expect(page.getByText('초대가 만료됐어요')).toHaveCount(0);
   await expect(page.getByText('10월 22일까지')).toBeVisible();
   await axe(page);
+});
+
+test('우리 둘 정보(S-12): 합류하는 중 → 초대 취소(확인 Modal), 받은 코드 입구(D1, D4)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'not_joined' });
+  db.partner = null;
+  db.invites.push({
+    code: 'K7M2QX',
+    expires_at: '2026-10-22T00:00:00Z',
+    used_at: null,
+    reserved_by: 'yebin',
+    reserved_until: '2026-10-09T00:00:00Z',
+  });
+  await page.goto('/settings');
+  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('합류하는 중');
+  await page.goto('/settings/couple');
+  await expect(page.getByText('파트너가 합류하는 중이에요')).toBeVisible();
+  // 합류하는 중에는 코드 상자도, 받은 코드 입구도 없음
+  await expect(page.getByRole('button', { name: /초대 코드 K/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '받은 초대 코드가 있어요' })).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '초대 취소' }).click();
+  const dialog = page.getByRole('alertdialog', { name: '초대를 취소할까요?' });
+  await expect(dialog).toContainText('지금 코드는 더 못 써요');
+  await axe(page);
+  await dialog.getByRole('button', { name: '취소할게요' }).click();
+  await expect(page.getByText('초대를 취소했어요')).toBeVisible();
+  await expect(page.getByText('초대가 만료됐어요')).toBeVisible();
+  expect(db.invites[0]?.reserved_by).toBeNull();
+
+  // 받은 코드가 있어요 → P-01 코드 입력, 뒤로 = S-12
+  await page.getByRole('button', { name: '받은 초대 코드가 있어요' }).click();
+  await expect(page).toHaveURL(/\/i$/);
+  await expect(page.getByRole('heading', { name: '받은 초대 코드를 넣어 주세요' })).toBeVisible();
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
 });
 
 test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입력, 대기(월급 계획 멈춤), 요청 취소', async ({
@@ -364,7 +414,16 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   await expect(page.getByText('해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요')).toBeVisible();
   await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 14일이 지나면 해제돼요')).toBeVisible();
+  await expect(page.getByText('해제된 뒤 30일 안에는 다시 연결할 수 있어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '먼저 내보내기' })).toBeVisible();
+  // 먼저 내보내기 → S-18, 뒤로 = 이 화면(S3-07)
+  await page.getByRole('button', { name: '먼저 내보내기' }).click();
+  await expect(page).toHaveURL(/\/settings\/data$/);
+  await page
+    .getByRole('button', { name: /연결 해제|뒤로/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/settings\/couple\/unlink$/);
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
 
@@ -418,6 +477,9 @@ test('연결 해제 요청 받음(S-12, S-12d) → 확인했어요 → 해제 �
   );
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
+  // 받은 사람에게는 날짜만(S3-03: “예빈님이 확인하거나 …”이던 것)
+  await expect(page.getByText('10월 19일에 해제돼요')).toBeVisible();
+  await expect(page.getByText(/확인하거나/)).toHaveCount(0);
   await expect(page.getByRole('button', { name: '요청 취소' })).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '확인하기' }).click();
@@ -427,15 +489,25 @@ test('연결 해제 요청 받음(S-12, S-12d) → 확인했어요 → 해제 �
   await expect(page.getByText('10월 19일에 해제돼요')).toBeVisible();
   await expect(page.getByText('해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요')).toBeVisible();
   await expect(page.getByRole('button', { name: '다르게 정리하기' })).toHaveCount(0);
+  await expect(page.getByText('해제된 뒤 30일 안에는 다시 연결할 수 있어요')).toBeVisible();
   await axe(page);
 
-  await page.getByRole('button', { name: '확인했어요' }).click();
+  // 2026-11-11 D3: ‘지금 해제하기’ → 확인 Modal(되돌릴 수 없음) → 확정
+  await page.getByRole('button', { name: '지금 해제하기' }).click();
+  const dialog = page.getByRole('alertdialog', { name: '지금 연결을 해제할까요?' });
+  await expect(dialog).toContainText('10월 19일을 기다리지 않고 바로 해제돼요');
+  await axe(page);
+  await dialog.getByRole('button', { name: '다시 생각할게요' }).click();
+  expect(db.unlinks[0]?.status).toBe('pending');
+  await page.getByRole('button', { name: '지금 해제하기' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: '해제할게요' }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/unlinked$/);
   await expect(page.getByRole('heading', { name: '연결이 해제됐어요' })).toBeVisible();
   await expect(
     page.getByText('같이 쓰던 데이터는 지웠어요. 혼자 쓰기로 처음부터 시작해요'),
   ).toBeVisible();
   await expect(page.getByText('30일 안에 다시 연결하면 되돌릴 수 있어요')).toBeVisible();
+  await expect(page.getByText('설정 › 우리 둘 정보에서 다시 연결할 수 있어요')).toBeVisible();
   expect(db.unlinks[0]?.status).toBe('confirmed');
   expect(db.goals).toHaveLength(0);
   await axe(page);
@@ -480,7 +552,7 @@ test('혼자 쓰기(S-12): 다시 연결하기, 새로 초대하기', async ({ p
   await expect(page.getByRole('button', { name: '다시 연결하기' })).toHaveCount(0);
 
   await page.getByRole('button', { name: '새로 초대하기' }).click();
-  await expect(page.getByText('파트너를 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
   expect(db.space?.couple_state).toBe('not_joined');
   await axe(page);
 });
@@ -499,12 +571,17 @@ test('다시 연결 요청 받음: 할 일 → S-12g → 다시 연결할게요'
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);
   await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await expect(
-    page.getByText(
-      '연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요. 해제 뒤 새로 적은 내용은 지워져요',
-    ),
+    page.getByText('연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요'),
   ).toBeVisible();
+  // 지워지는 것은 따로 경고 띠(S3-19)
+  await expect(page.getByRole('note')).toContainText('해제 뒤 새로 적은 내용은 지워져요');
   await axe(page);
   await page.getByRole('button', { name: '다시 연결할게요' }).click();
+  // 수락 확인 Modal(S3-19)
+  const ask = page.getByRole('alertdialog', { name: '다시 연결할까요?' });
+  await expect(ask).toBeVisible();
+  await axe(page);
+  await ask.getByRole('button', { name: '다시 연결할게요' }).click();
   await expect(page).toHaveURL(/\/$/);
   expect(db.unlinks[0]?.status).toBe('reconnected');
 });
@@ -860,4 +937,35 @@ test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려�
   await expect(page.getByRole('heading', { name: '마케팅 정보를 계속 받을까요?' })).toBeVisible();
   await page.getByRole('button', { name: '그만 받을게요' }).click();
   await expect(page).toHaveURL(/\/calendar\/list$/);
+});
+
+test('연결 해제 요청 받음(S-12d) 오프라인: ‘지금 해제하기’ 비활성 + 이유 한 줄(S3-08)', async ({
+  page,
+  context,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  db.unlinks.push({
+    id: 'u1',
+    space_id: 'space-1',
+    requested_by: 'yebin',
+    requested_at: '2026-10-05T01:00:00Z',
+    deadline: '2026-10-19',
+    ratio: 50,
+    plan: [],
+    status: 'pending',
+    cancelled_at: null,
+    confirmed_at: null,
+  });
+  await page.goto('/settings/couple/unlink/review');
+  const go = page.getByRole('button', { name: '지금 해제하기' });
+  await expect(go).toBeEnabled();
+  await context.setOffline(true);
+  await expect(go).toBeDisabled();
+  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
+  await axe(page);
+  await context.setOffline(false);
+  await expect(go).toBeEnabled();
 });

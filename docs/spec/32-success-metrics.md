@@ -98,10 +98,10 @@
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | 앱을 다시 열어 멈춘 화면으로 바로 감(실행마다 한 번, 2026-11-10 질문 화면 없앰) | screen\_id, hours\_since\_last |
 | onboarding\_completed | O-60 ‘홈으로 가기’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(여유 자금 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
-| invite\_sent | O-07 코드 복사·링크 복사·공유(지금은 O-07만, 2026-11-10), 홈 H-06, 설정 S-12 ‘우리 둘 정보’ | channel(`code` / `link` / `share`: 기기 공유 창, 카카오톡 등), entry(`onboarding` / `home` / `settings`). issue\_seq(재발급 회차)는 서버만 알아 서버 이벤트로 [확인 필요] |
-| invite\_accepted | P-01 코드·링크 확인 | hours\_since\_sent, channel |
+| invite\_sent | O-07 코드 복사·링크 복사·공유, 설정 S-12 ‘우리 둘 정보’(홈 초대 띠·서랍 ‘초대하기’로 왔으면 entry home, 2026-11-11 D6) | channel(`code` / `link` / `share`: 기기 공유 창, 카카오톡 등), entry(`onboarding` / `home` / `settings`). issue\_seq(재발급 회차)는 서버만 알아 서버 이벤트로 [확인 필요] |
+| invite\_accepted | P-01 ‘합류하기’로 코드를 잡음(2026-11-11 D1, 처음 잡을 때만) | hours\_since\_sent(앱은 모름: null, 서버 이벤트로 [확인 필요]), channel(`link` 링크로 연 경우 / `code` 코드 직접 입력) |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
-| partner\_joined | 합류 완료(→ 파트너 합류) | hours\_since\_invite, mid\_cycle, salary\_mode, moved\_records(혼자 쓰던 기록을 옮겼는지) |
+| partner\_joined | 합류 완료(→ 파트너 합류, 앱이 합류를 마친 순간 보냄 2026-11-11) | hours\_since\_invite(앱은 모름: null [확인 필요]), mid\_cycle(시작한 사람 월급 계획이 이미 있음), salary\_mode(`separate` / `combined`), moved\_records(혼자 쓰던 기록을 옮겼는지) |
 
 ### 4-4. 월급 체크리스트
 
@@ -172,7 +172,7 @@
 | account\_restored | 유예 중 재로그인 ‘취소하고 계속 쓰기’ (서버) | days\_pending, was\_linked |
 | data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |
 | trash\_restored | S-21 되살리기, 되돌리기 토스트 | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
-| rejoin\_requested | S-12 “다시 연결하기” | days\_since\_unlink |
+| rejoin\_requested | S-12 “다시 연결하기”(2026-11-11 앱에 넣음) | days\_since\_unlink |
 | rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |
 | home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings`), todo(할 일 띠 종류, band일 때만: `check` / `review` / `saving` / `matured` / `care` / `unlink` / `reconnect`) |
 | menu\_item\_tapped | 좁은 창 메뉴 서랍 줄을 누름 (19 앱 기본 틀 11번, 2026-11-09) | item(`home` / `salary` / `assets` / `calendar` / `me` / `settings` / `couple` / `invite` / `notice` / `inquiry` / `help`) |

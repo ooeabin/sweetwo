@@ -124,17 +124,28 @@ export const copy = {
   weddingPlanned: '결혼 예정일',
   weddingDone: '결혼일',
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
-  inviteFirst: (name: string) => `${name}님을 초대해 주세요`,
-  inviteFirstAny: '파트너를 초대해 주세요', // [확인 필요] 새로 초대(호칭 없음)
-  inviteMake: '초대 코드 만들기',
-  inviteCode: '초대 코드', // [확인 필요] 줄 이름
+  // 2026-11-11 S3-18 기획 문장 그대로(호칭과 상관없이)
+  inviteFirstAny: '함께할 사람을 초대해 주세요',
+  // 2026-11-11 D6: 누르면 코드를 바로 만들고 O-07과 같은 상자 + 링크 복사 + 카톡으로 보내기
+  inviteMake: '초대하기', // [확인 필요] ‘초대 코드 만들기’ 대신
   inviteUntil: (md: string) => `${md}까지`,
   inviteExpired: '초대가 만료됐어요',
-  copyCode: '코드 복사',
-  copyLink: '링크 복사',
   newCode: '새 코드 받기',
-  copied: '복사했어요', // [확인 필요] O-07과 같음
   newCodeDone: '새 코드를 받았어요. 이전 코드는 이제 못 써요', // [확인 필요]
+  // 2026-11-11 D4: 받은 코드로 합류(→ P-01 코드 입력)
+  haveCode: '받은 초대 코드가 있어요', // [확인 필요]
+  // 2026-11-11 D1 합류하는 중(누가 ‘합류하기’를 눌러 코드를 24시간 잡아 둠) [확인 필요]
+  joiningTitle: '파트너가 합류하는 중이에요',
+  joiningHelp: '합류를 마치면 알려 드릴게요. 24시간 안에 마치지 않으면 다시 초대할 수 있어요',
+  inviteCancel: '초대 취소',
+  inviteCancelQ: '초대를 취소할까요?',
+  inviteCancelBody: '합류하던 사람은 처음부터 다시 해야 하고, 지금 코드는 더 못 써요',
+  inviteCancelOk: '취소할게요',
+  inviteCancelKeep: '그대로 둘게요',
+  inviteCancelled: '초대를 취소했어요',
+  /** S-10·S-12 미합류 상태(S3-18: 만료돼도 ‘초대 중’이던 것) */
+  inviteState: (k: 'before' | 'inviting' | 'joining' | 'expired') =>
+    ({ before: '초대 전', inviting: '초대 중', joining: '합류하는 중', expired: '초대 만료' })[k], // [확인 필요] 초대 전, 합류하는 중, 초대 만료
 
   unlink: '연결 해제',
   pendingWait: (name: string) => `${name}님 답을 기다리고 있어요`,
@@ -151,15 +162,24 @@ export const copy = {
   unlinkList: ['저금', '월급 계획과 체크리스트', '자산과 부채', '경조사', '활동과 알림 기록'], // [확인 필요]
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
   unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
+  unlinkReconnect: '해제된 뒤 30일 안에는 다시 연결할 수 있어요', // [확인 필요] 2026-11-11 D8 S-12a·d
   exportFirst: '먼저 내보내기',
   next: '다음',
   requestedBy: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   unlinkOn: (md: string) => `${md}에 해제돼요`, // [확인 필요]
-  acknowledge: '확인했어요', // [확인 필요]
+  acknowledge: '지금 해제하기', // [확인 필요] 2026-11-11 D3 ‘확인했어요’ 대신, 확인 Modal 뒤에 확정
+  unlinkNowQ: '지금 연결을 해제할까요?', // [확인 필요] D3 확인 Modal
+  unlinkNowBody: (md: string) =>
+    `${md}을 기다리지 않고 바로 해제돼요. 같이 쓰던 데이터는 모두 지워져요`, // [확인 필요]
+  unlinkNowOk: '해제할게요', // [확인 필요]
+  unlinkNowKeep: '다시 생각할게요', // [확인 필요]
+  /** 13 공통 상태 9번(오프라인에서 막힌 동작, 버튼 위 한 줄) */
+  needOnline: '인터넷에 연결되면 할 수 있어요',
   unlinkedTitle: '연결이 해제됐어요', // [확인 필요]
   unlinkedHelp: '같이 쓰던 데이터는 지웠어요. 혼자 쓰기로 처음부터 시작해요', // [확인 필요]
   startSolo: '시작하기', // [확인 필요]
   reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
+  reconnectWhere: '설정 › 우리 둘 정보에서 다시 연결할 수 있어요', // [확인 필요] 2026-11-11 S3-16 S-12h
   reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
   ok: '확인', // [확인 필요]
   newInvite: '새로 초대하기',
@@ -171,6 +191,11 @@ export const copy = {
   reconnectYes: '다시 연결할게요',
   reconnectNo: '괜찮아요',
   reconnectExpired: '다시 연결할 수 있는 기간이 지났어요',
+  // 2026-11-11 S3-19: 수락 확인 Modal [확인 필요]
+  reconnectQ: '다시 연결할까요?',
+  reconnectQBody: '해제 뒤 새로 적은 내용은 지워지고 해제 전 데이터로 돌아가요',
+  reconnectOk: '다시 연결할게요',
+  reconnectKeep: '다시 생각할게요',
   confirmQ: '확인을 위해 ‘연결 해제’라고 적어 주세요', // [확인 필요]
   confirmWord: '연결 해제',
   send: '연결 해제 요청하기', // [확인 필요]

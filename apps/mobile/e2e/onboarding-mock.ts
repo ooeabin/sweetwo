@@ -65,7 +65,18 @@ export interface MemDb {
   kindNames: Record<string, unknown>[];
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
-  invites: { code: string; expires_at: string; used_at: string | null }[];
+  invites: {
+    code: string;
+    expires_at: string;
+    used_at: string | null;
+    /** 누가 ‘합류하기’로 잡아 둠(2026-11-11 D1) */
+    reserved_until?: string | null;
+    reserved_by?: string | null;
+  }[];
+  /** 합류가 끝난 초대(시작한 사람이 취소, 24시간 지남): join_context가 null(2026-11-11 D1) */
+  joinEnded: boolean;
+  /** 다시 연결할 수 있는지(my_reconnect_ok). 기본은 확정 해제 기록의 reconnect_until로 */
+  reconnectOk?: boolean;
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
@@ -172,6 +183,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     kindNames: [],
     notifications: [],
     invites: [],
+    joinEnded: false,
     unlinks: [],
     inquiries: [],
     livingChecks: [],
@@ -767,6 +779,60 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'plan-1');
       }
       if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      // 합류 흐름에 필요한 것만(2026-11-11 D1): 합류를 마치기 전에는 공간을 직접 못 읽음
+      if (fn === 'join_context') {
+        if (db.joinEnded) return json(route, null);
+        const sp = db.space ?? {};
+        const meId = String(db.me.id);
+        const jointSplit =
+          sp.salary_mode === 'joint' ? db.splits.find((x) => x.owner_user_id === null) : undefined;
+        const lines = (jointSplit?.split_line ?? []) as Record<string, unknown>[];
+        return json(route, {
+          space_id: 'space-1',
+          member: !!db.me.onboarding_done_at && db.me.onboarding_step === 'P-WAIT',
+          reserved_until: '2026-10-09T00:00:00Z',
+          starter_id: (db.partner?.id as string | undefined) ?? null,
+          starter_nickname: (db.partner?.nickname as string | undefined) ?? '찬우',
+          salary_mode: sp.salary_mode ?? 'separate',
+          // 흉내: 합류하는 사람의 월급 계획은 합류를 마칠 때 생기므로 그 전 월급 계획은 모두 시작한 사람 것
+          has_plan: db.splits.length > 0,
+          prefill: db.assets
+            .filter(
+              (a) =>
+                a.owner === 'person' &&
+                a.owner_user_id === null &&
+                a.created_by !== meId &&
+                !a.deleted_at,
+            )
+            .map((a) => ({
+              id: a.id,
+              name: a.name,
+              amount: a.amount,
+              estimated: !!a.estimated,
+            })),
+          joint: jointSplit
+            ? {
+                version:
+                  ((jointSplit as Record<string, unknown>).version as number | undefined) ?? 1,
+                lines: lines.map((l) => ({
+                  kind: l.kind,
+                  amount: l.amount,
+                  goal_id: l.goal_id ?? null,
+                  user_id: l.user_id ?? null,
+                  name: l.name ?? null,
+                })),
+                items: db.goals
+                  .filter((g) => !g.deleted_at && !g.closed_at)
+                  .map((g) => ({
+                    id: g.id,
+                    target: g.target_amount ?? null,
+                    deadline: g.deadline ?? null,
+                    saved: 0,
+                  })),
+              }
+            : null,
+        });
+      }
       if (fn === 'join_space' && db.me.onboarding_done_at && db.me.space_id === 'space-solo')
         return json(route, 'has_records'); // 혼자 시작한 기록 있음(A-07 6번)
       if (fn === 'join_moving_records') {
@@ -1857,6 +1923,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (db.space) db.space.couple_state = 'connected';
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'cancel_invite') {
+        // 초대 취소(S-12 ‘합류하는 중’): 잡아 둔 것 풀고 코드도 못 쓰게
+        for (const i of db.invites)
+          if (!i.used_at)
+            Object.assign(i, {
+              reserved_until: null,
+              reserved_by: null,
+              expires_at: '2026-10-01T00:00:00Z',
+            });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_reconnect_ok')
+        return json(
+          route,
+          db.reconnectOk ??
+            db.unlinks.some(
+              (x) =>
+                x.status === 'confirmed' &&
+                typeof x.reconnect_until === 'string' &&
+                x.reconnect_until > (opts.now ?? new Date()).toISOString(),
+            ),
+        );
       if (fn === 'create_invite' || fn === 'renew_invite') {
         // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
         const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';

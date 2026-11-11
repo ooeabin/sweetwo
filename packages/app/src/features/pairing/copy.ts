@@ -1,6 +1,18 @@
 // 파트너 합류 문구(docs/spec/18-partner-join.md, 15 A-07). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
+/** 호칭이 있으면 “찬우님이”, 없으면 “파트너가”(2026-11-11 S3-29) */
+const who = (name: string) => (name ? `${name}님이` : '파트너가');
+
 export const copy = {
+  // P-10 합류 축하(2026-11-11 D7) [확인 필요] 문구
+  joinedTitle: (starter: string) => (starter ? `${starter}님과 연결됐어요` : '파트너와 연결됐어요'),
+  joinedHelp: '이제 월급과 저금을 같이 봐요', // [확인 필요] 합류 알림 본문(14)과 같음
+  joinedWaitHelp: (starter: string) => `${who(starter)} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 홈 대기 카드와 같음
+  toHomeAfter: '홈으로 가기',
+  // 합류가 끝난 초대(취소, 잡아 둔 24시간 지남, 2026-11-11 D1) [확인 필요]
+  endedTitle: '초대가 취소됐거나 기한이 지났어요',
+  endedHelp: '받은 코드를 다시 넣거나 혼자 시작할 수 있어요',
+  startSolo: '혼자 시작하기',
   // P-11 합류 직후 푸시 허용(모바일, 1회) [확인 필요] 문구
   pushTitle: '알림을 받을까요?',
   pushHelp: '파트너가 체크하거나 바꾸면 바로 알려 드려요', // [확인 필요]
@@ -60,7 +72,7 @@ export const copy = {
   moveCopy: '사본 내려받기',
 
   // P-02b
-  prefillTitle: (starter: string) => `${starter}님이 미리 적어 둔 내 정보가 있어요`,
+  prefillTitle: (starter: string) => `${who(starter)} 미리 적어 둔 내 정보가 있어요`,
   prefillIncome: '월 수입', // [확인 필요] 항목명
   prefillOk: '확인하고 이어 쓸게요',
   prefillClear: '지우고 새로 입력할게요',
@@ -72,7 +84,7 @@ export const copy = {
   nameRequired: '이름을 넣어 주세요',
 
   // P-04 관리 방식 확인
-  modeTitle: (starter: string) => `${starter}님이 고른 월급 관리 방식이에요`, // [확인 필요]
+  modeTitle: (starter: string) => `${who(starter)} 고른 월급 관리 방식이에요`, // [확인 필요]
   modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]
   modes: {
     separate: {
@@ -83,11 +95,13 @@ export const copy = {
   },
   // P-04 다른 방식을 고르면 결과 한 줄 + 확인 Modal(2026-11-09 round 3) [확인 필요]
   modeResult: {
-    joint: (starter: string) => `${starter}님 월급 계획이 두 분의 월급 계획 하나가 돼요`,
+    joint: (starter: string) =>
+      `${starter ? `${starter}님` : '파트너'} 월급 계획이 두 분의 월급 계획 하나가 돼요`,
     separate: () => '월급 계획과 체크리스트가 사람마다 따로 생겨요',
   },
   modeConfirmTitle: '월급 관리 방식을 바꿀까요?',
-  modeConfirmBody: (starter: string) => `${starter}님에게도 바로 적용되고 알림이 가요`,
+  modeConfirmBody: (starter: string) =>
+    `${starter ? `${starter}님` : '파트너'}에게도 바로 적용되고 알림이 가요`,
   modeConfirmOk: '바꿀게요',
   modeConfirmCancel: '다시 고를게요',
 
@@ -113,5 +127,5 @@ export const copy = {
   incomes: (a: string, b: string) => `${a}, ${b}`, // [확인 필요] 합쳐서 수입 줄 아래
   personIncome: (name: string, amount: string) => `${name} ${amount}`,
   changed: (before: string, after: string) => `${before} → ${after}`,
-  splitChanged: (starter: string) => `${starter}님이 방금 월급 계획을 바꿨어요`, // [확인 필요]
+  splitChanged: (starter: string) => `${who(starter)} 방금 월급 계획을 바꿨어요`, // [확인 필요]
 };

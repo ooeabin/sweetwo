@@ -83,6 +83,31 @@ export type AnalyticsEvent =
       props: { channel: 'code' | 'link' | 'share'; entry: 'onboarding' | 'home' | 'settings' };
     }
   | {
+      // P-01 ‘합류하기’로 코드를 잡음(32 4-3). hours_since_sent는 앱이 모름(null, 서버 이벤트로)
+      name: 'invite_accepted';
+      props: { hours_since_sent: number | null; channel: 'link' | 'code' };
+    }
+  | {
+      // 합류 완료(32 4-3). hours_since_invite는 앱이 모름(null)
+      name: 'partner_joined';
+      props: {
+        hours_since_invite: number | null;
+        mid_cycle: boolean;
+        salary_mode: 'separate' | 'combined';
+        moved_records: boolean;
+      };
+    }
+  | {
+      // S-12 ‘다시 연결하기’(32 4-x)
+      name: 'rejoin_requested';
+      props: { days_since_unlink: number };
+    }
+  | {
+      // S-12g ‘다시 연결할게요’ / ‘괜찮아요’
+      name: 'rejoin_responded';
+      props: { response: 'accept' | 'decline'; hours_since_request: number };
+    }
+  | {
       name: 'unlink_requested';
       props: { linked_months: number };
     }

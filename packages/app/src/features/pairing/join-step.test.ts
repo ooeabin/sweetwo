@@ -20,6 +20,14 @@ describe('joinScreens', () => {
     expect(joinChapter('p-03').steps).toEqual({ total: 4, done: 1 });
     expect(joinChapter('p-05b').steps).toEqual({ total: 4, done: 4 });
   });
+  it('시작한 사람이 아직 온보딩 중이면 3칸, P-05가 2/3(2026-11-11 S3-24)', () => {
+    const list = joinScreens(st({ waiting: true }));
+    expect(joinChapter('p-05', list).steps).toEqual({ total: 3, done: 2 });
+    expect(joinChapter('p-05b', list).fill).toBe(100);
+  });
+  it('예전 P-06은 막대 끝까지(S3-23)', () => {
+    expect(joinChapter('p-06', ['p-06']).fill).toBe(100);
+  });
 });
 
 describe('movedJoinScreen', () => {

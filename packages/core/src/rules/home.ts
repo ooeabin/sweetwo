@@ -206,7 +206,8 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       to: `/calendar/day/${care.c.id}`,
     };
   // 파트너 초대(2026-11-11 맨 끝): 다른 할 일이 없을 때만, 파트너가 합류할 때까지
-  if (i.coupleState === 'not_joined') return { kind: 'invite', to: '/settings/couple' };
+  // 2026-11-11 D6: S-12에서 코드를 바로 만들어 보여 줌(?invite=1)
+  if (i.coupleState === 'not_joined') return { kind: 'invite', to: '/settings/couple?invite=1' };
   return null;
 }
 

@@ -30,6 +30,10 @@ export const qk = {
   holidays: ['holiday'] as const,
   assetKindNames: ['asset_kind_name'] as const,
   latestInvite: ['invite', 'latest'] as const,
+  /** 합류 흐름에 필요한 것(join_context, 2026-11-11 D1) */
+  joinContext: ['join_context'] as const,
+  /** 다시 연결할 수 있는지(my_reconnect_ok) */
+  reconnectOk: ['couple_unlink', 'reconnect_ok'] as const,
   unlink: ['couple_unlink'] as const,
   myUnlink: ['couple_unlink', 'mine'] as const,
   unlinkPartner: ['couple_unlink', 'partner'] as const,

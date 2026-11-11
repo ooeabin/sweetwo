@@ -16,17 +16,12 @@ export const copy = {
   inviteNowHelp: '월급과 저금을 둘이 같이 볼 수 있어요', // [확인 필요] 2026-11-08
   // 2026-11-10 S2-17: 선택지는 대답이라 해요체(버튼 말투 규칙)
   inviteChoices: { now: '지금 초대할게요', later: '나중에 할게요' }, // [확인 필요] now
+  haveCode: '받은 초대 코드가 있어요 ›', // [확인 필요] 2026-11-11 D4 O-06·S-12 → P-01 코드 입력
   inviteTitle: '이 코드를 보내 주세요',
-  copyLink: '링크 복사',
-  tapToCopy: '눌러서 복사', // [확인 필요] 코드 상자 아래
+  // 링크 복사, 눌러서 복사, 카톡으로 보내기, 공유 글, 복사 토스트는 shared/invite-share(S-12와 같이 씀, 2026-11-11)
   sendLater: '나중에 보낼게요', // [확인 필요] 보내기 전 ‘다음’ 대신
-  // 2026-11-10 S2-05: 기기 공유 창(카카오톡 등)으로 보냄
-  sendKakao: '카톡으로 보내기',
-  /** 공유 글(2026-11-10 S2-05) */
-  shareText: (name: string, code: string, link: string) =>
-    `${name}님이 sweeTwo에 초대했어요. 초대 코드 ${code} ${link}`, // [확인 필요]
   inviteFailed: '지금은 코드를 만들 수 없어요',
-  copied: '복사했어요', // [확인 필요] 복사 토스트
+  inviteFailedTitle: '초대 코드를 만들지 못했어요', // [확인 필요] 2026-11-11 S3-27 발급 실패 시트 제목
 
   // O-60 준비 끝(2026-11-02 다시 둠) [확인 필요]
   readyTitle: (name: string) => `${name}님, 준비가 끝났어요`,
