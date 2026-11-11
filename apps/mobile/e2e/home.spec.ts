@@ -64,7 +64,8 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 이번 달 체크
   await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('다가오는 일정 없어요');
   const box = page.getByRole('button', { name: /^내 집 마련, 0%/ });
   await expect(box).toContainText('0원 / 1억 5,000만 원');
-  await expect(page.getByRole('button', { name: /^자산 관리/ })).toContainText('순자산');
+  // 2026-11-11 보조 줄 ‘순자산’은 없앰(값만)
+  await expect(page.getByRole('button', { name: /^자산 관리/ })).not.toContainText('순자산');
   await expect(page.getByRole('button', { name: /^저금/ })).toContainText('2개 모으는 중');
   // 2D 그림이 들어올 때까지 회색 빈 자리(타일 72px 둘 + 저금 상자 56px)
   await expect(page.locator('.hg-hub .hg-artslot')).toHaveCount(3);
@@ -333,7 +334,7 @@ test('W-05 월급 전 확인: 다음 월급날 3일 전부터 할 일 한 줄 �
   await expect(page).toHaveURL(/\/$/);
 });
 
-test('H-04 자산 관리 타일(2026-11-09): 순자산, 공지 띠(AD-10)는 맨 위, 초대 띠는 큰 상자 아래', async ({
+test('H-04 자산 관리 타일(2026-11-09): 순자산 값(보조 줄 없음, 2026-11-11), 공지 띠(AD-10)는 맨 위, 초대 띠는 큰 상자 아래', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -368,7 +369,7 @@ test('H-04 자산 관리 타일(2026-11-09): 순자산, 공지 띠(AD-10)는 맨
   });
   await page.goto('/');
   const tile = page.getByRole('button', { name: /^자산 관리/ });
-  await expect(tile).toContainText('순자산');
+  await expect(tile).not.toContainText('순자산');
   await expect(tile).toContainText('3,000만 원');
   // 예전 순자산 카드(지난달 대비, 6달 막대)는 없음
   await expect(page.getByRole('region', { name: '순자산', exact: true })).toHaveCount(0);

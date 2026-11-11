@@ -89,6 +89,11 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월급 전 확�
   ).toBe('matured');
   // 목표 금액이 없는 저금 항목이 있어도 할 일은 바로 만기로(초대보다 먼저)
   expect(homeTodo(noReview)).toMatchObject({ kind: 'matured', to: '/assets/a/matured' });
+  // 만기 띠는 만기일부터 30일째까지, 31일째부터는 없음(2026-11-11)
+  expect(homeTodo({ ...noReview, checklists: allDone, today: '2026-11-06' })?.kind).toBe('matured');
+  expect(homeTodo({ ...noReview, checklists: allDone, today: '2026-11-07' })?.kind).not.toBe(
+    'matured',
+  );
   // 만기는 정리하면(보관돼 목록에서 빠짐) 사라짐 → 경조사(7일 안)
   const noMatured = { ...noReview, assets: [] };
   expect(homeTodo(noMatured)).toMatchObject({ kind: 'care', date: '2026-10-12' });

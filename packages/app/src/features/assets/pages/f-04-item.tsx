@@ -80,6 +80,14 @@ export function F04Item() {
   if (!a) return <Navigate to={lastAssetsTab()} replace />;
   const o = ownerOf(a, d);
   const editable = canEdit(a, d.me?.id);
+  // 만기일이 지났는데 아직 정리 안 함(2026-11-11): 홈 띠는 30일 뒤 내려가니 상세에서도 F-04a로
+  const maturedOpen =
+    editable &&
+    a.side === 'asset' &&
+    a.kind !== 'deposit_money' &&
+    a.status === 'held' &&
+    !!a.maturity_date &&
+    a.maturity_date <= todayKst();
   const mine = a.owner_user_id === d.me?.id;
   const back = () => nav(`/assets/items?side=${a.side}`);
 
@@ -241,6 +249,14 @@ export function F04Item() {
         <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
           <span>{copy.readOnly(o.name)}</span>
         </p>
+      )}
+      {maturedOpen && (
+        <div className="hg-banner hg-banner--info" role="status">
+          <span>{copy.maturedPast}</span>
+          <Button variant="link" size="sm" onClick={() => nav(`/assets/${a.id}/matured`)}>
+            {copy.maturedSettle}
+          </Button>
+        </div>
       )}
       <section className="hg-card hg-stack" aria-label={copy.amountLabel}>
         <span className="hg-card__label">

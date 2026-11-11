@@ -1,4 +1,7 @@
 import { addDays, daysBetween } from '../date';
+
+/** 만기 할 일 띠를 띄우는 날 수(만기일 = 0일째부터 30일째까지, 2026-11-11) */
+export const MATURED_TODO_DAYS = 30;
 import { nextCareDate, type CareRule } from './care';
 import { deadlineDay } from './saving-item';
 
@@ -169,12 +172,14 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   if (firstSavingTodo(i))
     return { kind: 'saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' };
   // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 대신 홈 H-02 저금 항목 제안 줄)
+  // 만기 띠는 만기일부터 30일 안만(2026-11-11 사용자 결정). 그 뒤에도 자산 관리 그 항목에는 ‘만기됨’이 남음
   const matured = i.assets.find(
     (a) =>
       a.side === 'asset' &&
       a.kind !== 'deposit_money' &&
       !!a.maturity_date &&
       a.maturity_date <= i.today &&
+      daysBetween(a.maturity_date, i.today) <= MATURED_TODO_DAYS &&
       (a.owner === 'joint' || a.owner_user_id === i.meId),
   );
   if (matured)

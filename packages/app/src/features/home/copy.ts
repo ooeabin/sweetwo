@@ -38,8 +38,7 @@ export const copy = {
   savingLabel: (name: string, pct: number, progress: string) => `${name}, ${pct}%, ${progress}`, // 화면 읽기용
   // 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
-  netWorth: '순자산',
-  rankBadge: (pct: number) => `상위 ${pct}%`, // [확인 필요] 2026-11-11 H-04 타일 “순자산” 옆(홈 순위 줄 대신)
+  rankBadge: (pct: number) => `상위 ${pct}%`, // [확인 필요] 2026-11-11 H-04 타일 제목 아래(홈 순위 줄 대신)
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
   savingsTile: '저금', // 2026-11-09 사용자에게는 ‘저금’

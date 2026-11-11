@@ -151,8 +151,7 @@ export type SavingModel = Extract<ReturnType<typeof useSavingItems>, { ready: tr
  * 각자 모드에서 파트너는 저금이 있으면 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?”. 월급 계획이 없거나 해제 대기면 없음.
  */
 export function useFirstSaving():
-  | { show: false }
-  | { show: true; left: number; partnerName: string | null } {
+  { show: false } | { show: true; left: number; partnerName: string | null } {
   const d = useSavingItems();
   const splits = useSplits();
   const me = useMe();
