@@ -16,7 +16,7 @@ import {
   SectionHeader,
   Tabs,
 } from '@sweetwo/ui';
-import { LoadingFrame, MainFrame } from '../../frame';
+import { MainFrame } from '../../frame';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,7 +39,7 @@ import {
 } from '../data';
 import { incomeOf, MonthBar, MonthResult } from '../month-parts';
 import { salaryPaths, savingPaths } from '../paths';
-import { SalarySeg } from '../salary-tab';
+import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
 import { AchieveWatch, FirstSavingRow, SavingMeta } from '../saving-parts';
 
@@ -95,8 +95,20 @@ export function W02Checklist() {
     prevLeft.current = left;
   }, [left, nav]);
 
+  // 못 불러오면 오류 카드 + 다시 시도(13 공통 상태 7번, 2026-11-12 S5-02: 예전에는 ‘월급 없음’ 카드가 떴음),
+  // 불러오는 중은 구간 탭 + 본문 뼈대(13-5, S5-11)
+  const loads = [me, space, goals, lists];
+  if (loads.some((q) => q.isError && !q.data))
+    return (
+      <SalaryLoadError
+        value="month"
+        onRetry={() => {
+          for (const q of loads) if (!q.data) void q.refetch();
+        }}
+      />
+    );
   if (!me.data || !space.data || !goals.data || lists.isLoading)
-    return <LoadingFrame current="salary" />;
+    return <SalaryLoading value="month" />;
   const personName = (id: string | null) =>
     id === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const goalName = goalLineName(goals.data, personName, joint);

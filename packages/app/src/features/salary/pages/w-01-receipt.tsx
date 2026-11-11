@@ -31,9 +31,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { sharedCopy } from '../../../shared/copy';
 import { money, useMask } from '../../../shared/mask';
+import { speakMasked, spoken } from '../../../shared/masked-text';
 import { PersonDot } from '../../../shared/person';
 import { quietly, toast } from '../../../shared/toast';
-import { LoadingFrame, MainFrame } from '../../frame';
+import { MainFrame } from '../../frame';
 import { goalLineName } from '../check-line';
 import { copy } from '../copy';
 import {
@@ -49,11 +50,13 @@ import {
 import { salaryPaths, savingPaths } from '../paths';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
 import { PlanSheet, SpendChips } from '../receipt-parts';
-import { SalarySeg } from '../salary-tab';
+import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { keepOrder, recommendedDraft } from '../split-draft';
 import { toDraft } from '../split-editor';
 
-type Sheet = { line: SplitLine } | { add: string; chip: string | null } | null;
+// from: W-10 ‘매달 금액 바꾸기’(?line=)로 연 시트(분석 entry saving_detail, 주소의 line은 열자마자 지움)
+type Sheet =
+  { line: SplitLine; from?: 'saving_detail' } | { add: string; chip: string | null } | null;
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
 const MAX_CUSTOM = 10;
@@ -114,13 +117,24 @@ export function W01Receipt() {
   useEffect(() => {
     if (!lineParam || !split) return;
     const l = split.split_line.find((x) => x.goal_id === lineParam);
-    if (l && canEdit) setSheet({ line: l });
+    if (l && canEdit) setSheet({ line: l, from: 'saving_detail' });
     const next = new URLSearchParams(params);
     next.delete('line');
     setParams(next, { replace: true });
   }, [lineParam, split, canEdit, params, setParams]);
 
-  if (!m || !sp || !goals.data || !splits.data) return <LoadingFrame current="salary" />;
+  // 못 불러오면 오류 카드 + 다시 시도(13 공통 상태 7번, S5-02), 불러오는 중은 구간 탭 + 본문 뼈대(13-5, S5-11)
+  const loads = [me, space, goals, splits];
+  if (loads.some((q) => q.isError && !q.data))
+    return (
+      <SalaryLoadError
+        value="plan"
+        onRetry={() => {
+          for (const q of loads) if (!q.data) void q.refetch();
+        }}
+      />
+    );
+  if (!m || !sp || !goals.data || !splits.data) return <SalaryLoading value="plan" />;
 
   const personName = (id: string | null | undefined) =>
     id === m.id ? (m.nickname ?? '') : (p?.nickname ?? '');
@@ -134,6 +148,8 @@ export function W01Receipt() {
           ? `${personName(l.user_id)} ${copy.lineNames.allowance}`
           : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
+  // 보이는 금액 글자(가리기면 화면 읽기는 “가려진 금액”, 11 9장)
+  const shown = (text: string) => speakMasked(text);
   const income = joint
     ? (m.monthly_income ?? 0) + (p?.monthly_income ?? 0)
     : (owner?.monthly_income ?? 0);
@@ -199,8 +215,30 @@ export function W01Receipt() {
     }
   };
   const bandOrShort = (v: number) => (v < 0 ? ('short' as const) : amountBand(v));
+  // 32 4-6 둘이 같이 고치기(S5-07): 합쳐서 공동 월급 계획을 연결된 상대와 같이 쓰면(상대에게 알림이 감)
+  const shared = joint && sp.couple_state === 'connected';
+  const sharedChanged = () => {
+    if (shared) track('shared_item_changed', { item_type: 'split', linked: true });
+  };
+  /** Toast ‘되돌리기’: 서버 되돌리기 + 공동 월급 계획이면 change_reverted */
+  const undo = (job: () => Promise<unknown>) => {
+    const at = Date.now();
+    return {
+      label: copy.undo,
+      onClick: () => {
+        if (shared)
+          track('change_reverted', {
+            item_type: 'split',
+            entry: 'toast',
+            reverted_whose: 'self',
+            hours_since_change: Math.floor((Date.now() - at) / 3_600_000),
+          });
+        quietly(job());
+      },
+    };
+  };
 
-  const change = (l: SplitLine, amount: number, rawName: string) =>
+  const change = (l: SplitLine, amount: number, rawName: string, from?: 'saving_detail') =>
     run(async () => {
       const renamed = l.kind === 'custom' && rawName !== '' && rawName !== l.name;
       const moved = amount !== l.amount;
@@ -221,26 +259,23 @@ export function W01Receipt() {
         direction: amount > l.amount ? 'up' : amount < l.amount ? 'down' : 'same',
         left_band: bandOrShort(left + l.amount - amount),
         joint,
-        entry: edit ? 'edit' : lineParam ? 'saving_detail' : 'receipt',
+        entry: edit ? 'edit' : (from ?? 'receipt'),
       });
+      sharedChanged();
       toast(
         monthToo
           ? copy.monthLineToo
           : moved
             ? copy.lineChanged(name, won(amount))
             : copy.nameChanged,
-        {
-          label: copy.undo,
-          onClick: () =>
-            quietly(
-              write(() =>
-                setSplitLine(l.id, {
-                  amount: moved ? l.amount : undefined,
-                  name: renamed ? (l.name ?? undefined) : undefined,
-                }),
-              ),
-            ),
-        },
+        undo(() =>
+          write(() =>
+            setSplitLine(l.id, {
+              amount: moved ? l.amount : undefined,
+              name: renamed ? (l.name ?? undefined) : undefined,
+            }),
+          ),
+        ),
       );
     });
 
@@ -256,10 +291,11 @@ export function W01Receipt() {
         amount_band: amountBand(amount),
         joint,
       });
-      toast(copy.lineAdded(name), {
-        label: copy.undo,
-        onClick: () => quietly(write(() => deleteSplitLine(id))),
-      });
+      sharedChanged();
+      toast(
+        copy.lineAdded(name),
+        undo(() => write(() => deleteSplitLine(id))),
+      );
     });
 
   const remove = (l: SplitLine, entry: 'sheet' | 'edit') => {
@@ -280,21 +316,21 @@ export function W01Receipt() {
         joint,
       });
       const kind = l.kind as Exclude<Kind, 'saving'>;
-      toast(copy.lineDeleted(nameOf(l)), {
-        label: copy.undo,
-        onClick: () =>
-          quietly(
-            write(() =>
-              addSplitLine(split.id, {
-                kind,
-                amount: l.amount,
-                name: l.name ?? undefined,
-                userId: l.user_id ?? undefined,
-                sort: l.sort,
-              }),
-            ),
+      sharedChanged();
+      toast(
+        copy.lineDeleted(nameOf(l)),
+        undo(() =>
+          write(() =>
+            addSplitLine(split.id, {
+              kind,
+              amount: l.amount,
+              name: l.name ?? undefined,
+              userId: l.user_id ?? undefined,
+              sort: l.sort,
+            }),
           ),
-      });
+        ),
+      );
     });
   };
   const stopSaving = (l: SplitLine) =>
@@ -376,10 +412,11 @@ export function W01Receipt() {
         reset_to_recommended: true,
         entry: 'split',
       });
-      toast(copy.saved, {
-        label: copy.undo,
-        onClick: () => quietly(write(() => saveSplit(current, ownerId ?? undefined))),
-      });
+      sharedChanged();
+      toast(
+        copy.saved,
+        undo(() => write(() => saveSplit(current, ownerId ?? undefined))),
+      );
     });
 
   // ── 공유(이미지) ─────────────────────────────────────────────────────
@@ -401,6 +438,7 @@ export function W01Receipt() {
       ? { label: copy.leftoverLabel, amount: won(left), strong: true }
       : { label: copy.leftoverLabel, amount: copy.short(won(-left)), strong: true, short: true },
   ];
+  const totalRows = totals.map((r) => ({ ...r, amount: shown(r.amount) }));
   const share = async () => {
     if (sharing) return;
     setSharing(true);
@@ -448,7 +486,7 @@ export function W01Receipt() {
         id: l.id,
         name: nameOf(l),
         amount: won(l.amount),
-        label: copy.rowLabel(nameOf(l), won(l.amount)),
+        label: spoken(copy.rowLabel(nameOf(l), won(l.amount))),
         locked: theirs,
         onOpen: canEdit
           ? () => {
@@ -499,10 +537,13 @@ export function W01Receipt() {
       name={sheetLine.name ?? undefined}
       renamable={sheetLine.kind === 'custom'}
       left0={left + sheetLine.amount}
+      masked={masked}
       confirmLabel={copy.ok}
       busy={busy}
       onClose={() => setSheet(null)}
-      onConfirm={(v, n) => void change(sheetLine, v, n)}
+      onConfirm={(v, n) =>
+        void change(sheetLine, v, n, sheet && 'line' in sheet ? sheet.from : undefined)
+      }
       onDelete={rowsOf([sheetLine])[0]?.onDelete ? () => remove(sheetLine, 'sheet') : undefined}
       deleteLabel={copy.removeLabel(nameOf(sheetLine))}
       onItem={
@@ -516,6 +557,7 @@ export function W01Receipt() {
       title={copy.lineAmount(sheetAdd.add)}
       amount={0}
       left0={left}
+      masked={masked}
       confirmLabel={copy.addDone}
       busy={busy}
       onClose={() => setSheet(null)}
@@ -523,7 +565,7 @@ export function W01Receipt() {
     />
   ) : null;
 
-  // 머리 아래 한 줄 ‘이번 달 3/5 보냈어요 ›’(2026-11-09) → 그 사람 이번 달(W-02). 이번 체크리스트가 없거나 편집 중이면 없음
+  // 머리 아래 한 줄 ‘이번 달 3/5 체크했어요 ›’(2026-11-09) → 그 사람 이번 달(W-02). 이번 체크리스트가 없거나 편집 중이면 없음
   const monthChecked = month?.pay_check_line.filter((l) => l.state === 'checked').length ?? 0;
   const monthTotal = month?.pay_check_line.length ?? 0;
   const monthLink =
@@ -543,6 +585,8 @@ export function W01Receipt() {
     ) : undefined;
 
   const noSplit = !split && !theirs;
+  // 파트너 탭(각자)인데 파트너 월급 계획이 없음: 0원 영수증 대신 회색 빈 카드(2026-11-12 D3)
+  const partnerNoSplit = !split && theirs;
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
       {edit ? (
@@ -584,7 +628,7 @@ export function W01Receipt() {
               }))}
             />
           )}
-          {theirs && (
+          {theirs && !partnerNoSplit && (
             <p className="hg-q__help" style={{ margin: 0 }}>
               {copy.partnerSplitView(owner?.nickname ?? '')}
             </p>
@@ -596,7 +640,11 @@ export function W01Receipt() {
           )}
         </>
       )}
-      {noSplit ? (
+      {partnerNoSplit ? (
+        <section className="hg-card hg-card--fill hg-stack">
+          <p className="hg-card__meta">{copy.partnerNoPlan(owner?.nickname ?? '')}</p>
+        </section>
+      ) : noSplit ? (
         // 월급 없음: W-02와 같은 빈 카드
         <section className="hg-card hg-card--fill hg-stack">
           <p className="hg-card__meta">{copy.noChecklist}</p>
@@ -614,18 +662,19 @@ export function W01Receipt() {
           <ReceiptCard className={edit ? 'is-edit' : undefined}>
             <ReceiptHead
               lead={lead}
-              amount={won(income)}
+              // 누를 수 있으면 버튼 이름(amountLabel)이 읽히고, 아니면 글자(가리기면 “가려진 금액”)
+              amount={!theirs && !edit ? won(income) : shown(won(income))}
               sub={sub}
               onAmount={!theirs && !edit ? () => nav('/settings/me') : undefined}
-              amountLabel={copy.incomeLabel(won(income))}
+              amountLabel={spoken(copy.incomeLabel(won(income)))}
               extra={monthLink}
             />
             <PlanBar
-              label={copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? '')}
+              label={spoken(copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? ''))}
               parts={bar}
               legend={legend}
             />
-            <ReceiptSection title={copy.savingGroup} subtotal={won(savingSum)}>
+            <ReceiptSection title={copy.savingGroup} subtotal={shown(won(savingSum))}>
               <ReceiptRows
                 label={copy.savingGroup}
                 lines={rowsOf(savingLines)}
@@ -634,12 +683,17 @@ export function W01Receipt() {
                 labels={rowLabels}
               />
               {canEdit && (
-                <ReceiptAdd onClick={() => nav(`${savingPaths.add}/a?from=split`)}>
+                <ReceiptAdd
+                  onClick={() => {
+                    // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
+                    if (!offline()) nav(`${savingPaths.add}/a?from=split`);
+                  }}
+                >
                   {copy.addItem}
                 </ReceiptAdd>
               )}
             </ReceiptSection>
-            <ReceiptSection title={copy.spendGroup} subtotal={won(spendSum)}>
+            <ReceiptSection title={copy.spendGroup} subtotal={shown(won(spendSum))}>
               <ReceiptRows
                 label={copy.spendGroup}
                 lines={rowsOf(spendLines)}
@@ -668,7 +722,7 @@ export function W01Receipt() {
                 />
               )}
             </ReceiptSection>
-            <ReceiptTotal rows={totals} />
+            <ReceiptTotal rows={totalRows} />
           </ReceiptCard>
           {!edit && (
             <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>

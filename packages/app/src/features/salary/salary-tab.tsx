@@ -1,5 +1,7 @@
 import { Tabs } from '@sweetwo/ui';
 import { Navigate, useSearchParams } from 'react-router-dom';
+import { sharedCopy } from '../../shared/copy';
+import { MainFrame, SkelBody } from '../frame';
 import { copy } from './copy';
 import { useCheckRealtime, useSpace, useSplitRealtime } from './data';
 import { W01Receipt } from './pages/w-01-receipt';
@@ -33,6 +35,60 @@ export function SalarySeg({ value }: { value: 'month' | 'plan' }) {
       items={[
         { value: 'month', label: copy.segMonth },
         { value: 'plan', label: copy.segPlan },
+      ]}
+    />
+  );
+}
+
+/**
+ * 월급 탭 불러오는 중(13 공통 상태 5번, 2026-11-12 QA 5구간 S5-11): 구간 탭은 그대로 두고 본문 자리만 뼈대
+ */
+export function SalaryLoading({ value }: { value: 'month' | 'plan' }) {
+  return (
+    <MainFrame
+      current="salary"
+      page={{ title: copy.tabTitle }}
+      columns={[
+        <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+          <SalarySeg value={value} />
+          <SkelBody shape="cards" />
+        </div>,
+      ]}
+    />
+  );
+}
+
+/**
+ * 월급 탭을 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 5구간 S5-02): 구간 탭 + 오류 카드 “잠시 문제가 생겼어요” + ‘다시 시도’.
+ * 홈 큰 상자 오류 카드(H-03)와 같은 모양. 월급이 없을 때의 ‘월급 알려 주기’ 카드와 다름
+ */
+export function SalaryLoadError({
+  value,
+  onRetry,
+}: {
+  value: 'month' | 'plan';
+  onRetry: () => void;
+}) {
+  return (
+    <MainFrame
+      current="salary"
+      page={{ title: copy.tabTitle }}
+      columns={[
+        <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+          <SalarySeg value={value} />
+          <section className="hg-card hg-card--fill hg-stack" role="status">
+            <p className="hg-card__title">{sharedCopy.errorTitle}</p>
+            <p className="hg-card__meta">{sharedCopy.errorBody}</p>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={onRetry}
+            >
+              {sharedCopy.retry}
+            </button>
+          </section>
+        </div>,
       ]}
     />
   );

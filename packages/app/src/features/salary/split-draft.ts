@@ -28,7 +28,8 @@ type Person = Pick<Me, 'id' | 'monthly_income'>;
  * 추천값(O-50 처음 채우기, W-01 ‘추천값으로 다시 채우기’, 20 W-01 6번).
  * - 각자: 월급 계획 주인 수입, 그 사람 저금 항목만
  * - 합쳐서: 두 사람 수입 합, 용돈은 사람마다, 공동 월급 계획의 저금 항목
- * - current: 지금 저금 줄 금액(목표 금액·기한이 없는 항목은 그대로), keep: 그대로 둘 줄(파트너 탭)
+ * - current: 지금 줄. 저금 줄 금액(목표 금액·기한이 없는 항목은 그대로), 직접 추가한 지출 줄(금액 그대로, 2026-11-12 D1)
+ * - keep: 그대로 둘 줄(파트너 탭)
  */
 export function recommendedDraft(
   owner: Person,
@@ -46,12 +47,16 @@ export function recommendedDraft(
   const current: Record<string, number> = {};
   for (const l of o.current ?? [])
     if (l.kind === 'saving' && l.goalId) current[l.goalId] = (current[l.goalId] ?? 0) + l.amount;
+  const custom = (o.current ?? [])
+    .filter((l) => l.kind === 'custom')
+    .map((l) => ({ name: l.name ?? '', amount: l.amount }));
   return recommendSplit({
     income: incomes.reduce((s, p) => s + p.income, 0),
     people: incomes,
     items: savingGoals(goals, o.joint ? null : owner.id).map((g) => toPlanItem(g, o.saved)),
     current,
     keep: o.keep,
+    custom,
   });
 }
 

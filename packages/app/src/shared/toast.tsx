@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { create } from 'zustand';
 import { sharedCopy } from './copy';
+import { speakMasked } from './masked-text';
 
 // 토스트 하나씩(새 것이 이전 것을 바꿈). 시간은 디자인 Toast 규칙.
 // 2026-11-11 화면(경로)이 바뀌면 닫음(O-07 ‘복사했어요’가 다음 화면까지 남던 문제). carry면 바로 다음 화면 하나까지만 가져감
@@ -103,9 +104,23 @@ export function ToastHost() {
     return () => clearTimeout(t);
   }, [current, hide]);
   if (!current) return null;
+  // 행동(‘되돌리기’ 등)을 누르면 바로 닫음(2026-11-12 QA 5구간 S5-03: 남아 있으면 두 번 눌려 같은 줄이 두 번 생김)
+  const action = current.action;
   return (
     <div aria-live="polite" className="hg-toasts">
-      <Toast key={current.id} message={current.message} action={current.action} />
+      <Toast
+        key={current.id}
+        message={speakMasked(current.message)}
+        action={
+          action && {
+            label: action.label,
+            onClick: () => {
+              hide();
+              action.onClick();
+            },
+          }
+        }
+      />
     </div>
   );
 }

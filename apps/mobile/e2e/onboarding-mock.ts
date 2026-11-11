@@ -83,11 +83,11 @@ export interface MemDb {
   goalChanges: Record<string, unknown>[];
   pendingTerms: { kind: string; version: string }[];
   mailBounced: boolean;
-  /** 생활비 체크 답(W-03) */
+  /** 생활비 체크 답(예전 화면, 서버 흉내만 남김) */
   livingChecks: Record<string, unknown>[];
   /** 앱 안 공지(AD-10, 게시된 것) */
   notices: Record<string, unknown>[];
-  /** 꼼꼼 모드 통장 잔액(W-04b) */
+  /** 꼼꼼 모드 통장 잔액(예전 월말 화면, 서버 흉내만 남김) */
   balances: Record<string, unknown>[];
   /** 월급 계획(save_split)와 이번 달 월급 체크리스트(start_checklist) */
   splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
@@ -232,7 +232,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           -1,
           ...sp.split_line.filter((l) => l.kind === 'saving').map((l) => Number(l.sort)),
         );
-        for (const l of sp.split_line) if (Number(l.sort) > last) l.sort = Number(l.sort) + 1;
+        // 그만 모음 되돌리기는 원래 자리(서버 freed_lines의 sort 키, 2026-11-12), 새 항목은 저금 묶음 맨 아래
+        const pos = Math.min(Number((g.freedSort as number | undefined) ?? last + 1), last + 1);
+        for (const l of sp.split_line) if (Number(l.sort) >= pos) l.sort = Number(l.sort) + 1;
+        delete g.freedSort;
         sp.split_line.push({
           id: `${sp.id}-g-${String(g.id)}`,
           split_id: sp.id,
@@ -241,12 +244,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           user_id: null,
           name: null,
           amount: Number((g.freed as number | undefined) ?? 0),
-          sort: last + 1,
+          sort: pos,
         });
         sp.split_line.sort((a, b) => Number(a.sort) - Number(b.sort));
       } else if (!want(sp) && has) {
         // 다시 모을 때 매달 금액을 되살리려고 기억(서버 freed_lines)
         g.freed = sp.split_line.find((l) => l.goal_id === g.id)?.amount ?? 0;
+        g.freedSort = sp.split_line.find((l) => l.goal_id === g.id)?.sort ?? null;
         sp.split_line = sp.split_line.filter((l) => l.goal_id !== g.id);
         for (const c of db.checklists)
           c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
@@ -1320,7 +1324,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         });
         return json(route, null);
       }
-      // 함께 모드(W-04a): 같이 하기·나감·함께 정하기 확정
+      // 함께 모드(예전 월말 화면): 같이 하기·나감·함께 정하기 확정
       if (fn === 'join_close_together' || fn === 'leave_close_together') {
         const c = db.closes.find((x) => x.id === body().p_close);
         if (c && fn === 'join_close_together')
