@@ -508,14 +508,19 @@ test('큰 상자(S4-01): 월급이 있는데 체크리스트를 못 불러오면
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  test.setTimeout(90_000);
   let fail = true;
-  await page.route('**/rest/v1/pay_checklist*', (r) =>
-    fail && r.request().method() === 'GET'
-      ? r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' })
-      : r.fallback(),
-  );
+  let tries = 0;
+  await page.route('**/rest/v1/pay_checklist*', (r) => {
+    if (!fail || r.request().method() !== 'GET') return r.fallback();
+    tries += 1;
+    return r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' });
+  });
   await page.goto('/');
-  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 30_000 });
+  // 홈이 그려지며 붙은 쿼리가 한 번 더 받아 보는 것(재시도 4번)까지 끝난 뒤 확인(그동안도 오류 카드 그대로)
+  await expect.poll(() => tries, { timeout: 30_000 }).toBeGreaterThanOrEqual(8);
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await axe(page);
   fail = false;
