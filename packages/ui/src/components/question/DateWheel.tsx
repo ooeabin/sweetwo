@@ -82,7 +82,15 @@ function Column({
                   : null;
     if (n === null) return;
     e.preventDefault();
+    kbd(true);
     step(n);
+  };
+  // 둘레 링은 키보드로 왔을 때만(2026-11-11): Tab으로 들어오거나 화살표를 누르면 켜고, 손가락·마우스·휠이면 끔
+  const kbd = (on: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    if (on) el.dataset.kbd = '';
+    else delete el.dataset.kbd;
   };
 
   return (
@@ -98,6 +106,10 @@ function Column({
       aria-valuetext={format ? format(value) : `${value}${unit}`}
       onScroll={onScroll}
       onKeyDown={onKey}
+      onKeyUp={(e) => e.key === 'Tab' && kbd(true)}
+      onPointerDown={() => kbd(false)}
+      onWheel={() => kbd(false)}
+      onBlur={() => kbd(false)}
     >
       {items.map((v) => (
         <div
