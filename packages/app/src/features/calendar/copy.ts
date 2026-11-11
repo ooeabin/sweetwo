@@ -11,7 +11,6 @@ export const copy = {
   viewsLabel: '보기', // [확인 필요] 화면 읽기용
   filters: { all: '전체', care: '경조사', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
-  empty: '생일, 기념일, 명절을 적어 두면 미리 알려 드려요', // [확인 필요]
   emptyAdd: '경조사 추가',
   noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // [확인 필요]
   none60: '60일 안에는 경조사가 없어요',

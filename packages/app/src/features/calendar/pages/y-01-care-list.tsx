@@ -149,7 +149,6 @@ export function Y01CareList() {
       )}
       {filter !== 'money' && !d.cares.length && (
         <EmptyState
-          title={copy.empty}
           action={
             <Button variant="secondary" onClick={add}>
               {copy.emptyAdd}
