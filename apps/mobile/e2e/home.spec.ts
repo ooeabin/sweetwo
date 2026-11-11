@@ -62,9 +62,14 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 보낸 줄, 보�
   );
   // 혼자(예빈 미합류)면 Avatar 하나
   await expect(h.locator('.hg-avatar')).toHaveCount(1);
-  // 2. 할 일: 월급날(9월 25일)에서 7일이 지나 ‘월급날 체크’ 없음, 초대는 맨 위 옅은 띠
-  await expect(page.locator('.hg-hubband')).toHaveCount(0);
-  await expect(page.locator('.hg-banner--todo')).toContainText('함께할 사람을 초대해 주세요');
+  // 2. 할 일: 월급날(9월 25일)에서 7일이 지나 ‘월급날 체크’ 없음, 초대는 큰 상자 아래 코코아 띠(2026-11-11)
+  await expect(page.locator('.hg-hubband')).toHaveCount(1);
+  await expect(page.locator('.hg-hubband')).toContainText('함께할 사람을 초대해 주세요');
+  await expect(page.locator('.hg-hubband')).toContainText('초대하기');
+  await expect(page.locator('.hg-banner--todo')).toHaveCount(0);
+  // 월급 계획 타일은 오렌지 포인트 상자(2026-11-11), 캘린더는 흰 상자
+  await expect(page.locator('.hg-hubtile--point')).toHaveCount(1);
+  await expect(page.locator('.hg-hubtile--point')).toContainText('월급 계획');
   // 3~5. 타일과 저금 상자(목표 금액이 있는 내 집 마련, 청약은 목표 금액이 없어 상자에 없음)
   await expect(page.getByRole('button', { name: /^월급 계획/ })).toContainText('매달 25일');
   await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('다가오는 일정 없어요');
@@ -141,7 +146,7 @@ test('홈 상자 → 화면(2026-11-09): 월급 계획 W-01, 캘린더 Y-01, 저
   await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 오렌지 띠 “월급날 체크할 차례예요” → W-02, 닫으면 이번 기간 안 보이고 초대 띠', async ({
+test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 코코아 띠(2026-11-11) “월급날 체크할 차례예요” → W-02, 닫으면 이번 기간 안 보이고 초대 띠', async ({
   page,
 }) => {
   const PAY = new Date('2026-09-28T10:00:00+09:00');
@@ -154,15 +159,18 @@ test('할 일 띠(H-06 3a, 2026-11-09): 월급날부터 7일 안 오렌지 띠 �
   await expect(band).toContainText('체크하기');
   await expect(hero(page)).toContainText('27일 남았어요');
   // 한 번에 하나: 초대 띠는 아직 없음
-  await expect(page.locator('.hg-banner--todo')).toHaveCount(0);
-  // 오렌지 채움 위 글자는 ink(라이트)/어두운 글자(다크) → axe 대비 통과
+  await expect(page.locator('.hg-hubband')).toHaveCount(1);
+  await expect(page.getByText('함께할 사람을 초대해 주세요')).toHaveCount(0);
+  // 코코아 띠 위 밝은 글자, 오렌지 포인트 상자 위 ink(라이트)/어두운 글자(다크) → axe 대비 통과
   await axe(page);
   await band.getByRole('button', { name: /월급날 체크할 차례예요/ }).click();
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/');
   await band.getByRole('button', { name: '닫기' }).click();
-  await expect(band).toHaveCount(0);
-  await expect(page.locator('.hg-banner--todo')).toContainText('함께할 사람을 초대해 주세요');
+  // 닫으면 같은 자리에 초대 띠(2026-11-11 같은 코코아 띠)
+  await expect(band).toHaveCount(1);
+  await expect(band).toContainText('함께할 사람을 초대해 주세요');
+  await expect(band).not.toContainText('월급날 체크할 차례예요');
   expect(
     await page.evaluate(() => localStorage.getItem('sweetwo:home:todo-closed') ?? ''),
   ).toContain('check:9월 월급:2026-09-25');
@@ -314,7 +322,7 @@ test('W-05 월급 전 확인: 다음 월급날 3일 전부터 할 일 한 줄 �
   const db = await mockOnboarding(page, { now: REVIEW });
   seed(db);
   await page.goto('/');
-  // 2026-11-09 오렌지 할 일 띠(H-06) + “확인하기 ›”
+  // 코코아 할 일 띠(H-06, 2026-11-11) + “확인하기 ›”
   const band = page.locator('.hg-hubband');
   await expect(band).toContainText('9월 월급에서 체크 안 한 게 5개 있어요');
   await expect(band).toContainText('확인하기');
@@ -333,7 +341,7 @@ test('W-05 월급 전 확인: 다음 월급날 3일 전부터 할 일 한 줄 �
   await expect(page).toHaveURL(/\/$/);
 });
 
-test('H-04 자산 관리 타일(2026-11-09): 순자산, 공지 띠(AD-10)는 맨 위 초대 띠 위', async ({
+test('H-04 자산 관리 타일(2026-11-09): 순자산, 공지 띠(AD-10)는 맨 위, 초대 띠는 큰 상자 아래', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -374,7 +382,11 @@ test('H-04 자산 관리 타일(2026-11-09): 순자산, 공지 띠(AD-10)는 맨
   await expect(page.getByRole('region', { name: '순자산', exact: true })).toHaveCount(0);
   const bands = page.locator('.hg-body__banner');
   await expect(bands.first()).toContainText('10월 20일 새벽 점검');
-  await expect(bands.nth(1)).toContainText('함께할 사람을 초대해 주세요');
+  // 2026-11-11 초대 띠는 맨 위 띠 묶음이 아니라 큰 상자 아래 코코아 띠
+  await expect(
+    page.locator('.hg-body__banner', { hasText: '함께할 사람을 초대해 주세요' }),
+  ).toHaveCount(0);
+  await expect(page.locator('.hg-hubband')).toContainText('함께할 사람을 초대해 주세요');
   await bands.first().getByRole('button', { name: '보기' }).click();
   await expect(page.getByText('오전 2시부터 4시까지 저장이 안 돼요')).toBeVisible();
   await axe(page);

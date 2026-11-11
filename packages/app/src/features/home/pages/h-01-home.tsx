@@ -10,7 +10,7 @@ import {
   todayKst,
   type HomeTodo,
 } from '@sweetwo/core';
-import { Button, Hub, HubBand, HubHero, HubSaving, HubTile, Icon, IconButton } from '@sweetwo/ui';
+import { Hub, HubBand, HubHero, HubSaving, HubTile } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -39,9 +39,9 @@ import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace } from '../data';
 
 // 홈(19, 2026-11-09 홈 허브: GCOO 홈처럼 회색 바탕 위 크기가 다른 흰 상자).
-// 위에서부터 큰 상자(다음 월급날까지 + 이번 달 보낸 줄 + 보낸 금액 | 모은 금액, → W-02) → 할 일 띠(오렌지 채움, 있을 때만)
-// → 반 칸 타일 둘(월급 계획 → W-01, 캘린더 → Y-01) → 저금 상자(목표 금액에 가장 가까운 저금 하나, → W-10)
-// → 작은 타일 둘(자산 관리 → F-01, 저금 → W-13) → 자산 순위 줄. 초대·공지·해제 대기 띠는 맨 위 옅은 띠 그대로.
+// 위에서부터 큰 상자(다음 월급날까지 + 이번 달 보낸 줄 + 보낸 금액 | 모은 금액, → W-02) → 할 일·초대 띠(코코아 채움, 있을 때만, 2026-11-11)
+// → 반 칸 타일 둘(월급 계획 → W-01, 오렌지 채운 포인트 상자 / 캘린더 → Y-01) → 저금 상자(목표 금액에 가장 가까운 저금 하나, → W-10)
+// → 작은 타일 둘(자산 관리 → F-01, 저금 → W-13) → 자산 순위 줄. 공지·해제 대기·메일 반송 띠는 맨 위 옅은 띠 그대로.
 
 type Box = 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings';
 
@@ -124,7 +124,7 @@ export function H01Home() {
     nav(to);
   };
 
-  // H-06 할 일(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대는 옅은 띠(맨 위), 나머지는 오렌지 할 일 띠(큰 상자 아래)
+  // H-06 할 일(맨 앞 하나, 19 ‘할 일 한 줄 순서’). 초대와 다른 할 일 모두 큰 상자 아래 코코아 띠(2026-11-11)
   const t0 = h.input ? homeTodo(h.input) : null;
   // 해제 대기 띠가 있으면 같은 할 일 줄은 빼고 띠만
   const t = t0?.kind === 'unlink' && h.unlink ? null : t0;
@@ -140,36 +140,18 @@ export function H01Home() {
         : t.kind === 'check'
           ? () => h.closeTodo(t.key)
           : undefined;
-  const inviteBand =
-    t?.kind === 'invite' ? (
-      <div className="hg-banner hg-banner--todo hg-body__banner" role="status">
-        {/* 초대 띠는 옅은 오렌지 그대로(2026-11-09). 띠 전체가 이동 버튼, ‘초대하기’ → S-12 */}
-        <button type="button" className="hg-banner__main" onClick={() => nav(t.to)}>
-          <span className="hg-banner__pair" aria-hidden="true">
-            <span className="hg-banner__slot">
-              <Icon name="plus" size={16} />
-            </span>
-          </span>
-          <span className="hg-banner__text">{todoLabel}</span>
-        </button>
-        <Button variant="secondary" size="sm" onClick={() => nav(t.to)}>
-          {copy.inviteNow}
-        </Button>
-        {closeTodo && <IconButton icon="x" label={copy.close} ghost small onClick={closeTodo} />}
-      </div>
-    ) : undefined;
-  const todoBand =
-    t && t.kind !== 'invite' ? (
-      <HubBand
-        text={todoLabel}
-        go={bandGo(t)}
-        onClick={() => {
-          track('home_box_tapped', { box: 'band', todo: t.kind });
-          nav(t.to);
-        }}
-        close={closeTodo ? { label: copy.close, onClick: closeTodo } : undefined}
-      />
-    ) : null;
+  // 2026-11-11 초대 띠도 할 일 띠와 같은 코코아 띠(HubBand), 큰 상자 바로 아래. “초대하기 ›” → S-12. 할 일은 한 번에 하나라 둘이 같이 나오지 않음
+  const todoBand = t ? (
+    <HubBand
+      text={todoLabel}
+      go={t.kind === 'invite' ? copy.inviteNow : bandGo(t)}
+      onClick={() => {
+        track('home_box_tapped', { box: 'band', todo: t.kind });
+        nav(t.to);
+      }}
+      close={closeTodo ? { label: copy.close, onClick: closeTodo } : undefined}
+    />
+  ) : null;
   // 19 홈 상태 3번: 연결 해제 대기 띠(닫기 없음). 요청한 사람 → S-12, 받은 사람 → S-12d
   const unlinkBand = h.unlink ? (
     <LineBand
@@ -192,12 +174,11 @@ export function H01Home() {
     />
   ) : undefined;
   const banner =
-    notice || inviteBand || unlinkBand || bounceBand ? (
+    notice || unlinkBand || bounceBand ? (
       <>
         {unlinkBand}
         {notice}
         {bounceBand}
-        {inviteBand}
       </>
     ) : undefined;
 
@@ -325,6 +306,7 @@ export function H01Home() {
               title={copy.planTile}
               sub={planDay ? copy.everyMonth(planDay) : undefined}
               art
+              point
               onClick={() => go('plan', '/salary?view=plan')}
             />
             <HubTile
