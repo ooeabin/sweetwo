@@ -197,6 +197,8 @@ export const copy = {
 
   // F-04a 만기된 돈 정리
   maturedTitle: '만기된 돈은 어디로 옮겼어요?',
+  maturedPast: '만기일이 지났어요', // [확인 필요] 2026-11-11 F-04 상세 띠(정리 전)
+  maturedSettle: '정리하기', // [확인 필요]
   maturedMoved: '다른 통장으로', // [확인 필요]
   maturedRejoin: '다시 가입했어요', // [확인 필요]
   maturedPick: '어느 통장으로 옮겼어요?', // [확인 필요]

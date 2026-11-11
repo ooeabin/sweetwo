@@ -139,3 +139,41 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
     status: 'held',
   });
 });
+
+test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지났어요” + ‘정리하기’ → F-04a(2026-11-11)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  seedAssets(db);
+  const sav = db.assets.find((a) => a.id === 'a-sav');
+  // 오늘(10월 7일)은 만기일 다음 31일째. 상세 화면은 만든 날·고친 날도 씀
+  for (const x of db.assets)
+    Object.assign(x, {
+      rate_estimated: false,
+      monthly_payment: null,
+      interest_rate: null,
+      paid_count: null,
+      pay_from: null,
+      goal_id: null,
+      estimated: false,
+      created_at: '2025-10-07T00:00:00Z',
+      updated_at: '2026-09-01T00:00:00Z',
+    });
+  if (sav) sav.maturity_date = '2026-09-06';
+  await page.goto('/');
+  await expect(page.locator('.hg-hubtile').first()).toBeVisible();
+  await expect(page.getByText('청년 적금이 만기됐어요')).toHaveCount(0);
+  await page.goto('/assets/a-sav');
+  const note = page.getByRole('status').filter({ hasText: '만기일이 지났어요' });
+  await expect(note).toBeVisible();
+  await axe(page);
+  await note.getByRole('button', { name: '정리하기' }).click();
+  await expect(page.getByRole('heading', { name: '만기된 돈은 어디로 옮겼어요?' })).toBeVisible();
+  // 만기 전 항목에는 띠 없음
+  await page.goto('/assets/a-bank');
+  await expect(page.getByRole('heading', { name: '입출금 통장' })).toBeVisible();
+  await expect(page.getByText('만기일이 지났어요')).toHaveCount(0);
+});

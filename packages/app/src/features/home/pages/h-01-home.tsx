@@ -71,7 +71,7 @@ export function H01Home() {
   // 공지 띠(AD-10): 필독이 먼저, 할 일 한 줄 위
   const notice = useNoticeBand();
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
-  // H-04 자산 관리 타일 “순자산” 옆 “상위 38%”(2026-11-11, 홈 순위 줄 1a 대신): 순위를 본 적이 있을 때만
+  // H-04 자산 관리 타일 제목 아래 “상위 38%”(2026-11-11, 홈 순위 줄 1a 대신): 순위를 본 적이 있을 때만
   const rank = useRank();
   const rankPct =
     rank && (rank.state.kind === 'seen' || rank.state.kind === 'stale') ? rank.state.pct : null;
@@ -311,7 +311,6 @@ export function H01Home() {
             <HubTile
               small
               title={copy.assetsTile}
-              sub={copy.netWorth}
               value={nw ? m(nw.nw.net) : undefined}
               badge={rankPct === null ? undefined : copy.rankBadge(rankPct)}
               label={
