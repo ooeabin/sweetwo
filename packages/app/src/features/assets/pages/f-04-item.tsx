@@ -298,10 +298,10 @@ export function F04Item() {
             {`${gain >= 0 ? '+' : '−'}${m(Math.abs(gain))}`}, {copy.principal(m(a.principal))}
           </span>
         )}
-        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 보조 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일) */}
+        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일). 2026-11-11 주 버튼(오렌지 채움, 사용자 결정), ‘팔았어요’는 보조 그대로 */}
         {editable && editAmount === undefined && (
           <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <Button variant="secondary" size="sm" onClick={() => startEdit(a.amount)}>
+            <Button variant="primary" size="sm" onClick={() => startEdit(a.amount)}>
               {market ? copy.marketEdit : copy.amountEdit}
             </Button>
             {market && (
