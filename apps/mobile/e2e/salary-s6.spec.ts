@@ -236,3 +236,18 @@ test('W-05 Realtime(합쳐서): 상대가 체크하면 바로 바뀌고 2초 강
   });
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
 });
+
+test('저금 묶음 끝 ‘+ 저금 추가’는 좁은 창만(넓은 창은 제목 줄 버튼, S6-16)', async ({
+  page,
+}, info) => {
+  await open(page);
+  await page.goto('/salary');
+  await expect(page.locator('.hg-checkgroup').first()).toBeVisible();
+  const row = page.locator('.hg-checkgroup .hg-addrow');
+  const narrow = (info.project.use.viewport?.width ?? 1280) < 768;
+  if (narrow) await expect(row).toBeVisible();
+  else {
+    await expect(row).toBeHidden();
+    await expect(page.getByRole('button', { name: '+ 저금 추가' })).toBeVisible();
+  }
+});
