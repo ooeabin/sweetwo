@@ -1,6 +1,7 @@
 import { Button, Chip, Icon, PageHeader, WeekStrip } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { sharedCopy } from '../../shared/copy';
 import { MainFrame } from '../frame';
 import { copy } from './copy';
 import { startCareAdd } from './pages/y-07-care-add';
@@ -73,8 +74,8 @@ export function CalendarFrame({
   view: CalView;
   filter: CalFilter;
   onFilter: (f: CalFilter) => void;
-  /** 목록 맨 위 이번 주 띠(오늘, 일정 있는 날). 불러오는 중이면 없음 */
-  week?: { today: string; marked: ReadonlySet<string> };
+  /** 목록 맨 위 이번 주 띠(오늘, 일정 있는 날, 공휴일). 불러오는 중이면 없음 */
+  week?: { today: string; marked: ReadonlySet<string>; holidays: ReadonlySet<string> };
   children: ReactNode;
 }) {
   const nav = useNavigate();
@@ -119,7 +120,7 @@ export function CalendarFrame({
       }}
       columns={[
         <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-          {week && <WeekStrip today={week.today} marked={week.marked} />}
+          {week && <WeekStrip today={week.today} marked={week.marked} holidays={week.holidays} />}
           <div className="hg-cal__tools">
             <FilterChips value={filter} onChange={onFilter} />
             <a
@@ -138,5 +139,26 @@ export function CalendarFrame({
         </div>,
       ]}
     />
+  );
+}
+
+/**
+ * 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 9구간 S9-02): “잠시 문제가 생겼어요” / “다시 시도해 주세요” + ‘다시 시도’.
+ * Y-01·Y-04 본문 자리, Y-05 머리 아래(목록으로 튕기지 않음). 저금(W-10 SavingLoadError)과 같은 카드
+ */
+export function CalendarLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section className="hg-card hg-card--fill hg-stack" role="status">
+      <p className="hg-card__title">{sharedCopy.errorTitle}</p>
+      <p className="hg-card__meta">{sharedCopy.errorBody}</p>
+      <button
+        type="button"
+        className="hg-btn hg-btn--link"
+        style={{ alignSelf: 'flex-start' }}
+        onClick={onRetry}
+      >
+        {sharedCopy.retry}
+      </button>
+    </section>
   );
 }

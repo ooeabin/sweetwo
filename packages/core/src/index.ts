@@ -5,6 +5,7 @@ export * from './schemas/auth';
 export * from './schemas/plan';
 export * from './schemas/join';
 export * from './schemas/asset';
+export * from './schemas/care';
 export * from './version';
 export * from './onboarding';
 export * from './josa';

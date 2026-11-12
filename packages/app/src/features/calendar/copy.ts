@@ -5,16 +5,15 @@ import { object } from '@sweetwo/core';
 export const copy = {
   title: '캘린더',
   add: '+ 추가',
-  views: { list: '목록', month: '달력' },
+  views: { month: '달력' },
   monthLink: '달력', // 2026-11-09 Y-01 ‘목록/달력’ 탭 대신 오른쪽 ‘달력 ›’ 링크 [확인 필요]
   addCareRow: '경조사 추가', // 2026-11-09 ‘일정’ 머리 오른쪽 + 줄(+ 아이콘이 글자 앞 ‘+’) [확인 필요]
-  viewsLabel: '보기', // [확인 필요] 화면 읽기용
   filters: { all: '전체', care: '경조사', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
   emptyAdd: '경조사 추가',
-  noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // [확인 필요]
+  noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // 13 공통 상태 18번, Y-04(2026-11-12 D3)
   none60: '60일 안에는 경조사가 없어요',
-  // 2026-11-03 Y-01 한 목록 [확인 필요]
+  // Y-01 ‘금융 일정’ 필터 빈 목록(2026-11-12 D3) [확인 필요]
   noMoney60: '60일 안에는 금융 일정이 없어요',
   upcomingList: '일정',
   recordCount: (n: number) => `기록할 날이 ${n}개 있어요`,
@@ -55,9 +54,8 @@ export const copy = {
   monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
-  reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`, // [확인 필요]
-  legendCare: '경조사',
-  legendMoney: '금융 일정',
+  // Y-04 고른 날 줄(Y-01 맨 위 띠는 2026-11-12 D1로 없앰) [확인 필요]
+  reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',
@@ -65,18 +63,15 @@ export const copy = {
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
-  listMoney: '금융 일정', // [확인 필요] 목록 섹션 이름
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
   // Y-01
   memoAmount: (amount: string) => `${amount} 생각해 뒀어요`, // [확인 필요]
   prepare: '준비하기',
   nextCare: '다음 경조사', // [확인 필요] 화면 읽기용
-  careList: '60일 안 경조사', // [확인 필요] 섹션 이름
   gifted: '선물 기록',
   overdue: '지남',
   recordNow: '기록하기',
-  overdueList: '기록하기', // [확인 필요] 목록 맨 위 섹션 이름
 
   // Y-07 경조사 추가
   nameQ: '어떤 날이에요?',
@@ -106,7 +101,7 @@ export const copy = {
   addOnDay: '이 날에 경조사 추가', // [확인 필요] 달력 고른 날 → Y-07
   nextStep: '다음',
   saved: '경조사를 넣어뒀어요', // [확인 필요]
-  edited: '고쳤어요', // [확인 필요]
+  edited: '고쳤어요', // [확인 필요] Y-07 수정, Y-05 고치기 Toast(+ ‘되돌리기’, 2026-11-12 S9-04)
 
   // Y-05 상세
   lunarOf: (m: number, d: number, leap: boolean) => `(음력 ${leap ? '윤' : ''}${m}월 ${d}일)`,

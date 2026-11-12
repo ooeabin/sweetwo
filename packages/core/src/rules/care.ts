@@ -166,13 +166,14 @@ export function prevCareDate(c: CareRule, today: string): string | null {
 
 /**
  * 기록할 회차(24 Y-05 5번 ‘다녀왔어요’, Y-08): 지난 60일 안에 기록 없는 날이 있으면 그 날, 아니면 다음 날.
- * 만든 날보다 앞선 회차는 기록 대상이 아님
+ * 만든 날보다 앞선 회차는 기록 대상이 아님. 한 번인 날을 이미 기록했으면 null(2026-11-12 QA 9구간 S9-01: 다시 ‘지남’·‘기록하기’가 뜨지 않게)
  */
 export function recordDate(
   c: CareRule & { created_at: string },
   today: string,
   recorded: (date: string) => boolean,
 ): string | null {
+  if (c.date_rule === 'once' && c.once_on && recorded(c.once_on)) return null;
   const prev = prevCareDate(c, today);
   if (
     prev &&

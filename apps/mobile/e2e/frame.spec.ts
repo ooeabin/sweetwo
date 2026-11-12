@@ -381,12 +381,16 @@ test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월�
   await page.goto('/assets/items');
   await page.getByRole('button', { name: '자산 추가', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/new\?side=asset/);
-  // 캘린더 Y-01: ‘일정’ 머리 오른쪽
+  // 캘린더 Y-01: ‘일정’ 머리 오른쪽(좁은 창만, 넓은 창은 제목 줄 ‘+ 추가’, 2026-11-12 S9-11)
   await page.goto('/calendar/list');
-  await page
+  const careAdd = page
     .getByRole('region', { name: '일정' })
-    .getByRole('button', { name: '경조사 추가', exact: true })
-    .click();
+    .getByRole('button', { name: '경조사 추가', exact: true });
+  if ((info.project.use.viewport?.width ?? 1280) < 768) await careAdd.click();
+  else {
+    await expect(careAdd).toBeHidden();
+    await page.getByRole('button', { name: '+ 추가', exact: true }).click();
+  }
   await expect(page).toHaveURL(/\/calendar\/add/);
 });
 

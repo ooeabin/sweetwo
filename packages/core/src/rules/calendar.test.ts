@@ -92,3 +92,20 @@ it('앞당기기를 끄면 월급날 그대로', () => {
     moneyDates(2026, 9, { ...o, holidays: new Set(['2026-09-24', '2026-09-25']) }).dates[0]?.date,
   ).toBe('2026-09-23'); // 추석 25일, 연휴 24일 → 23일
 });
+
+it('각자 모드 파트너 월급날은 그 사람 id를 같이 줌(S9-10)', () => {
+  const r = moneyDates(2026, 10, {
+    paydays: [
+      { name: '찬우', day: 25 },
+      { name: '예빈', day: 10, who: 'yebin-id' },
+    ],
+    reviewDay: null,
+    maturities: [],
+    goalDeadlines: [],
+    yearlyGoals: [],
+  });
+  expect(r.dates.map((d) => [d.name, d.who])).toEqual([
+    ['예빈', 'yebin-id'],
+    ['찬우', undefined],
+  ]);
+});

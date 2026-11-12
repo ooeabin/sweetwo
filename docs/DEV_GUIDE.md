@@ -665,14 +665,15 @@ supabase/
 
 - 기획: 24(재기획 2026-10-25). features/calendar: `/calendar`(마지막 보기로, 기기에 기억), Y-01 `/calendar/list`, Y-04 `/calendar/month`. 보기 필터 “전체” “경조사” “금융 일정”은 목록·달력 공통, 기기에 기억
 - 금융 일정(읽기 전용, 누르면 해당 화면)은 core `rules/calendar.ts` `moneyDates(연, 월, 재료)`: 월급날(각자 = 사람마다 “찬우 월급날”, 합쳐서 = `joint_cycle_day` 하나 “월급날”, 주말·공휴일이면 직전 영업일) → W-02, 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, 각자 = 내 월급날 기준, 첫날 “월급 전 확인”) → W-05, 저금 항목 기한(목표 금액과 기한이 있고 모으는 중만) → W-10, 자산·대출 만기(서버가 공개 범위로 거른 행) → F-04
-- 달력 칸은 ui `Calendar`(일요일 시작 6주, `monthGrid`). 금융 일정 = 검정 점, 월급 전 확인 = `is-band`, 경조사 = `together` 점 한 가지. 고른 날이 띠 안이면 “{n}월 월급, 빠진 게 있는지 확인할 때예요” 줄(→ W-05, 목록은 오늘이 띠 안일 때 맨 위)
+- 달력 칸은 ui `Calendar`(일요일 시작 6주, `monthGrid`). 금융 일정 = 검정 점, 월급 전 확인 = `is-band`, 경조사 = `together` 점 한 가지. 고른 날이 띠 안이면 “{n}월 월급, 빠진 게 있는지 확인할 때예요” 줄(→ W-05). 목록 맨 위 띠는 2026-11-12 D1로 없앰(일정 줄 하나)
 - 목록: 기록 없이 7일 지난 날(맨 위 ‘기록하기’) → 다음 경조사 카드(D-day, 날짜, 금액 메모 “30만 원 생각해 뒀어요”, ‘준비하기’) → 60일 안 경조사 → 금융 일정 작은 줄 → 선물 기록. 경조사가 없으면 빈 상태 + ‘경조사 추가’(금융 일정은 그대로)
+- QA 9구간(2026-11-12): `useCalendarData`가 `failed`·`retry`를 주고 Y-01·Y-04·Y-05(+ 금액 메모)는 frame `CalendarLoadError`(13-7 카드 + ‘다시 시도’, S9-02). Realtime은 api `subscribeCares`(care_day + care_record) → `useCareRealtime`(경조사·기록·사진 키 다시 읽음, S9-03). 고치기 Toast ‘되돌리기’는 `careUndo`(고치기 전 값으로 `updateCareDay` + `change_reverted` care_day, S9-04), 상대 알림이 가는 동작(추가, 메모)은 `trackCareShared`(S9-05). 경조사 응답은 core `CareDaySchema`·`CareRecordSchema`·`RecordCareResultSchema`(S9-15). 금융 일정 월급날은 `who`(파트너 id)를 실어 `/salary?who=`(S9-10). 이번 주 띠 `WeekStrip holidays`(S9-07)
 - 경조사는 한 종류(`care_day`, 새로 만드는 것은 category `couple`). 금액(`budget`)은 메모일 뿐 계산에 안 들어감. 가족 목록, 양가·우리 둘 구분, 챙길 사람, 서프라이즈(`secret`), 양가 비용(Y-06)·낸 곳은 재기획으로 없앰(열은 남기고 새로 안 씀)
 - 날짜 계산은 core `rules/care.ts`(`careDateInYear`, `nextCareDate`, `careDatesInMonth`, `dday`). 음력은 `rules/lunar.ts`(`lunarToSolar`: 윤달이 없으면 평달, 30일이 없으면 29일)
 - Y-07 `/calendar/add/:step`: a 이름(최대 20자) + 이름 칩(생일, 결혼기념일, 설날, 추석, 어버이날, 행사, 직접 쓰기 = 이름·날짜·반복 기본값만, `kind`로 저장) → c 날짜 + 양력/음력(+ 윤달) + “매년 돌아와요”(행사만 기본 꺼짐, 설날·추석·어버이날은 건너뜀) → d 금액 메모(건너뛰기) → ‘추가하기’(알림 D-30 + D-7). 한 번인 지난 날은 ‘기록으로 남기기’ → Y-08. 같은 이름·날짜면 한 번 확인. ‘+ 추가’, 달력 고른 날(날짜 채움)에서 시작. 수정(Y-05 ⋯ ‘수정’, `startCareEdit`)은 같은 a → c에서 이름·날짜만 ‘저장’
 - Y-05 `/calendar/day/:id`(+ `/budget` 금액 메모 Q3): 제목·날짜(음력이면 음력 함께)·D-day, 금액 메모, 반복, 준비 상황(그 해 날짜에만), 알림 일수, 작년에는, 메모, ⋯ 수정·지우기(휴지통 `trashCareDay` + ‘되돌리기’ = `restore_trash`)
-- Y-08 `/calendar/day/:id/record/:step?on=`(a 쓴 돈 → b 드린 것 → c 메모, 모두 건너뛸 수 있음. ‘목표에서 꺼내 쓰기’는 2026-11-08 없앰). 저장은 RPC `record_care`(낸 곳 = `personal`, 줄 0)로 기록만
-- 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후), 7일 지나면 `overdueDate`. 다음 경조사는 오늘 이후만
+- Y-08 `/calendar/day/:id/record/:step?on=`(a 쓴 돈 → b 드린 것 → c 메모, 모두 건너뛸 수 있음. ‘목표에서 꺼내 쓰기’는 2026-11-08 없앰). 저장은 RPC `record_care`(낸 곳 = `personal`, 줄 0)로 기록만. api `recordCare`는 낸 곳·옮길 금액을 받지 않고 서버 옛 인자(`p_paid_from`, `p_move`, 기본값 없음)에 고정값만 보냄(2026-11-12 S9-15). 저장하면 `event_recorded`
+- 기록할 회차는 core `recordDate`(지난 60일 안 기록 없는 날, 만든 날 이후. 한 번인 날을 기록했으면 null, 2026-11-12 S9-01), 7일 지나면 `overdueDate`. 다음 경조사는 오늘 이후만
 - Y-09 `/calendar/gifts`: 경조사별 / 연도별(기기에 기억), 같은 경조사에 2년 안 같은 선물이면 “작년에도 드렸어요”(core `giftRepeated`, Y-08b도 같은 규칙)
 - 자동 결혼기념일(마이그레이션 20261029180000): `couple_space` 트리거가 결혼했고(married) 결혼한 날이 있으면 `sync_wedding_care`로 경조사 “결혼기념일”(매년 양력, `auto = 'wedding'`) 하나를 만듦. 공간마다 하나(지운 것도 셈, 지우면 다시 안 만듦). 결혼한 날이 바뀌면 날짜를 옮기되 사람이 날짜를 고쳤으면(`auto_moves = false`, 트리거가 표시) 그대로. 예정일(engaged)은 만들지 않음
 - 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function `fetch-holidays` + pg_cron `kick-holidays`(20261107120000, 키는 사람이 할 일)

@@ -6,7 +6,7 @@ import {
   recordCare,
   uploadPhoto,
 } from '@sweetwo/api';
-import { formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetwo/core';
+import { amountBand, formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetwo/core';
 import {
   AmountInput,
   Chip,
@@ -23,7 +23,8 @@ import { create } from 'zustand';
 import { checkPhoto, shrinkPhoto } from '../../../shared/photo';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useCalendarData } from '../data';
+import { track } from '../../../shared/analytics';
+import { careEventType, useCalendarData, vsBudget } from '../data';
 
 // Y-08 다녀온 뒤 기록(24 Y-08, 재기획): a 쓴 돈(금액 메모 채움, 건너뛰기) (2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰, ADR 0007)
 // → b 무엇을 드렸어요(현금 / 선물 / 식사, 같은 경조사에 2년 안 같은 선물이면 “작년에도 드렸어요”) → c 기억(메모) → 저장.
@@ -111,14 +112,20 @@ export function Y08Record() {
             careId: care.id,
             on,
             amount: x.amount ?? 0,
-            paidFrom: 'personal',
             gifts: x.gifts,
             giftName: x.gifts.includes('gift') ? x.giftName.trim() || null : null,
             memo: x.memo.trim() || null,
-            move: 0,
           })
         ).record;
         set({ recordId });
+        // 32 4-5 event_recorded(2026-11-12 S9-05). 서프라이즈(옛 행)는 종류를 보내지 않음
+        const spent = x.amount ?? 0;
+        track('event_recorded', {
+          ...(care.secret ? {} : { event_type: careEventType(care.kind) }),
+          amount_band: amountBand(spent),
+          vs_budget: vsBudget(spent, care.budget),
+          is_secret: care.secret,
+        });
         await Promise.all(
           [qk.careDays, qk.careRecords].map((k) => qc.invalidateQueries({ queryKey: k })),
         );
