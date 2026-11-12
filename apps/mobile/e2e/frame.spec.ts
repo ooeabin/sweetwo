@@ -345,7 +345,7 @@ test('메뉴 서랍(2026-11-11 QA 4구간 S4-09·S4-15·S4-20): 열린 동안 �
 
 test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월급 저금 묶음 끝, 자산·부채 목록 끝, 캘린더 일정 머리', async ({
   page,
-}) => {
+}, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -366,11 +366,16 @@ test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월�
     updated_at: '2026-10-01T00:00:00Z',
     deleted_at: null,
   });
-  // 월급 W-02: 저금 묶음 끝
+  // 월급 W-02: 저금 묶음 끝(좁은 창만, 넓은 창은 제목 줄 ‘+ 저금 추가’, 2026-11-12 S6-16)
   await page.goto('/salary');
   await expect(page.locator('.hg-fab, .hg-dock')).toHaveCount(0);
   const saving = page.getByRole('region', { name: '저금', exact: true });
-  await saving.getByRole('button', { name: '저금 추가', exact: true }).click();
+  if ((info.project.use.viewport?.width ?? 1280) < 768)
+    await saving.getByRole('button', { name: '저금 추가', exact: true }).click();
+  else {
+    await expect(saving.getByRole('button', { name: '저금 추가', exact: true })).toBeHidden();
+    await page.getByRole('button', { name: '+ 저금 추가' }).click();
+  }
   await expect(page).toHaveURL(/\/salary\/items\/new/);
   // 자산 관리 F-02: 보던 쪽 목록 끝
   await page.goto('/assets/items');
