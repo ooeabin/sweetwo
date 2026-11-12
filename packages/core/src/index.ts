@@ -29,6 +29,7 @@ export * from './consent-doc';
 export * from './device';
 export * from './rules/living-check';
 export * from './schemas/admin';
+export * from './schemas/notification';
 export * from './rules/site-os';
 export * from './rules/guides';
 export * from './rules/year-summary';

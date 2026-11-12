@@ -367,6 +367,17 @@ export type AnalyticsEvent =
       props: { entry: 'notification' | 'home' | 'other'; open_lines_count: number };
     }
   | {
+      // 알림을 눌러 들어옴(32 4-7, 2026-11-12 QA 10구간 S10-03). type = 알림 종류(kind), channel inapp = 알림 센터, os = 푸시.
+      // minutes_to_open = 알림이 생긴 뒤 분(모르면 null), landing_screen = 간 화면 ID(대상이 없어 Toast면 none)
+      name: 'notification_opened';
+      props: {
+        type: string;
+        channel: 'inapp' | 'os';
+        minutes_to_open: number | null;
+        landing_screen: string;
+      };
+    }
+  | {
       // 좁은 창 메뉴 서랍 줄을 누름(19 앱 기본 틀 11번, 2026-11-09)
       name: 'menu_item_tapped';
       props: { item: string };
