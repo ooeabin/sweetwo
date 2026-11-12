@@ -250,7 +250,8 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-05), 고른 �
   ).toHaveText('월급 전 확인');
   await page.getByRole('button', { name: '10월 22일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
-  await expect(page).toHaveURL(/\/salary\/review$/);
+  // 오늘(10월 7일)은 아직 월급 전 확인 기간 전이라 W-05가 W-02로 보냄(2026-11-12 D3)
+  await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/calendar/month');
   await page.getByRole('button', { name: '10월 23일, 일정 1개' }).click();
   await expect(page.getByText('10월 23일 금요일')).toBeVisible();
