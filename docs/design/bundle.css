@@ -2396,7 +2396,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubtile--point .hg-hubtile__sub { color: var(--on-accent-app-sub); }
 .hg-hubtile--point > .hg-artslot { background: var(--accent-app-slot); box-shadow: none; border: 0; }
 .hg-hubtile--point:active { background: var(--brand-pressed); }
-/* 저금 상자(HubSaving): 56px 그림 자리 + 이름·% + “6,000만 / 1억 5,000만 원” + 얇은 막대(ink-2) */
+/* 저금 상자(HubSaving): 56px 그림 자리 + 이름·% + “6,000만 / 1억 5,000만 원” + 얇은 막대(오렌지 accent-app, 2026-11-12) */
 .hg-hubsave { display: flex; align-items: center; gap: 14px; width: 100%; padding: var(--space-5); box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
 .hg-hubsave > .hg-artslot { flex: none; width: 56px; height: 56px; border-radius: var(--radius-lg); }
 .hg-hubsave__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -2407,7 +2407,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubsave__row > span:last-child { flex: none; font-variant-numeric: tabular-nums; }
 .hg-hubsave__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-hubsave__bar { height: 8px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
-.hg-hubsave__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--ink-2); }
+.hg-hubsave__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 2026-11-12 사용자 결정: 저금 진행 막대는 오렌지(W-10 막대·진행 원과 같음), 내 것·파트너 것 같음 */
 .hg-hub :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (hover: hover) { :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):hover { box-shadow: var(--shadow-2); } }
 
