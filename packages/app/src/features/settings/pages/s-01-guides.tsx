@@ -10,7 +10,7 @@ import { LoadFailed } from '../load-failed';
 import { GUIDES, TOPIC_KEYS, checkPath, readPath, useChecklist } from '../guides';
 
 // S-01 가이드 모아보기(25 S-01): 지금 단계 체크리스트(진행률, 항목은 보기만 → S-02), 맞춤 정보 3개(저금 항목 이름·거주 형태·자녀 계획),
-// 주제별 가이드 6개(→ S-03), 우리 둘 대화 카드 다시 보기. 완료는 이번 달 할 일에서만.
+// 주제별 가이드 6개(→ S-03). 대화 카드 줄은 화면이 없어 지움(2026-11-12 QA 11구간 D1). 완료는 이번 달 할 일에서만.
 export function S01Guides() {
   const nav = useNavigate();
   const d = useSettingsData();
@@ -82,9 +82,6 @@ export function S01Guides() {
           ))}
         </div>
       </section>
-      <div className="hg-list">
-        <ListRow label={copy.talkCards} onClick={() => nav('/settings/guides/talk')} />
-      </div>
     </div>
   );
   return <MainFrame sub="settings" current={null} columns={[body]} />;

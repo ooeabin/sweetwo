@@ -440,7 +440,8 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   await send.click();
   await expect(page.getByText('예빈님에게 연결 해제를 요청했어요')).toBeVisible();
   await expect(page).toHaveURL(/\/settings\/couple$/);
-  await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
+  // 요청한 사람 제목은 “연결 해제 대기 중”(2026-11-12 QA 11구간 D3)
+  await expect(page.getByRole('strong').filter({ hasText: /^연결 해제 대기 중$/ })).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 10월 21일이 되면 해제돼요')).toBeVisible();
   await expect(page.getByText('해제 전까지 월급 계획을 고칠 수 없어요')).toBeVisible();
   await axe(page);
@@ -672,6 +673,7 @@ test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로
     status: 'active',
     target_amount: 3_000_000,
     deleted_at: '2026-10-05T01:00:00Z',
+    unlinked: true,
   });
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /데이터/ }).click();
@@ -690,6 +692,15 @@ test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로
 
   await rowOf('여행').getByRole('button', { name: '되살리기' }).click();
   await expect.poll(() => db.goals.find((g) => g.id === 'g-trip')?.deleted_at).toBeNull();
+  // 넣을 월급 계획이 없으면 연결 없이 되살리고 안내(25 S-21 3번, S11-10)
+  await expect(page.getByText('연결된 항목이 없어 따로 되살렸어요')).toBeVisible();
+
+  // 오프라인: 영구 삭제·비우기 비활성(S11-10)
+  await page.context().setOffline(true);
+  await expect(page.getByRole('button', { name: '휴지통 비우기' })).toBeDisabled();
+  await expect(rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' })).toBeDisabled();
+  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
+  await page.context().setOffline(false);
 
   await rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' }).click();
   await page.getByRole('menuitem', { name: '영구 삭제' }).click();
@@ -765,7 +776,7 @@ test('계정 삭제(S-18b) → 로그아웃, 다시 로그인하면 삭제 취�
   const dialog = page.getByRole('alertdialog', { name: '계정을 삭제할까요?' });
   await expect(dialog).toBeVisible();
   await axe(page);
-  await dialog.getByRole('button', { name: '카카오로 확인하고 삭제' }).click();
+  await dialog.getByRole('button', { name: '계정을 삭제할게요' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(
     page.getByText('계정 삭제 요청을 받았어요. 11월 6일까지 다시 로그인하면 취소할 수 있어요'),
@@ -844,6 +855,10 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await expect(page.getByText('동의하면 24시간만 봐요')).toBeVisible();
   await expect(page.getByText('월 수입·지출 화면')).toBeVisible();
   await expect(page.getByText('금액은 구간으로')).toBeVisible();
+  // 보지 않아요 칩은 기획서 그대로(25 S-19b 3번, S11-09)
+  for (const chip of ['메모', '가족 정보', '사진', '숨긴 항목'])
+    await expect(page.locator('.hg-badge', { hasText: chip }).first()).toBeVisible();
+  await expect(page.getByText('용돈 내역')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '동의해요' }).click();
   await expect(page.getByText('상담원이 확인 중이에요')).toBeVisible();
@@ -968,4 +983,58 @@ test('연결 해제 요청 받음(S-12d) 오프라인: ‘지금 해제하기’
   await axe(page);
   await context.setOffline(false);
   await expect(go).toBeEnabled();
+});
+
+// QA 11구간(2026-11-12)
+test('가이드(S-01·S-03): 대화 카드 줄 없음, 돈 합치기 적용은 월급 계획, 끝 고지(S11-01, S11-12)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.checklistDone = [];
+  await page.goto('/settings/guides');
+  const topic = page.getByRole('button', { name: '돈 합치기 돈 합치기, 어디까지 할까요' });
+  await expect(topic).toBeVisible();
+  await expect(page.getByText('우리 둘 대화 카드 다시 보기')).toHaveCount(0);
+  await axe(page);
+  await topic.click();
+  await expect(
+    page.getByText(
+      'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
+    ),
+  ).toBeVisible();
+  await page.getByRole('button', { name: /우리에게 적용하기/ }).click();
+  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+});
+
+test('계정 삭제(S-18b) ‘먼저 내보내기’ → 내보내면 S-18b로 돌아옴(S11-13)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/settings/data/delete');
+  await page.getByRole('button', { name: '먼저 내보내기' }).click();
+  await expect(page).toHaveURL(/\/settings\/data\?from=delete$/);
+  await expect(page.getByRole('button', { name: '계정 삭제', exact: true }).first()).toBeVisible();
+  // 웹 본인 확인(다시 로그인) 뒤 돌아온 것처럼
+  const dl = page.waitForEvent('download');
+  await page.goto('/settings/data?export=joint&format=csv&from=delete');
+  await dl;
+  await expect(page).toHaveURL(/\/settings\/data\/delete$/);
+  await expect(page.getByText('파일을 저장했어요')).toBeVisible();
+});
+
+test('내 정보(S-11): 로그인 줄은 제공자 배지 + 소셜 계정 이메일, ‘사진 바꾸기’ 글자 버튼(S11-11)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/settings/me');
+  await expect(page.getByText('chanwoo@kakao.example')).toBeVisible();
+  await expect(page.locator('.hg-badge', { hasText: '카카오' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '사진 바꾸기' })).toBeVisible();
+  await axe(page);
+  await page.getByRole('button', { name: '사진 바꾸기' }).click();
+  await expect(page).toHaveURL(/\/settings\/me\/photo$/);
 });

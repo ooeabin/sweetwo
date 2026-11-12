@@ -9,6 +9,7 @@ import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { exportedRecently } from '../unlink';
 
 /** 함께 쓴 개월 수(공간 만든 달부터). 값이 없거나 깨졌으면 0 */
 function monthsSince(at: string | undefined): number {
@@ -36,7 +37,10 @@ export function S12cUnlinkConfirm() {
     setBusy(true);
     try {
       await requestUnlink(copy.confirmWord);
-      track('unlink_requested', { linked_months: monthsSince(d.space?.created_at) });
+      track('unlink_requested', {
+        linked_months: monthsSince(d.space?.created_at),
+        exported_data: exportedRecently(),
+      });
       await Promise.all([qk.space, qk.unlink].map((k) => qc.invalidateQueries({ queryKey: k })));
       carryToast(copy.sent(c.partnerName));
       nav('/settings/couple', { replace: true });

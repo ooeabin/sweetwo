@@ -33,7 +33,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { track } from '../../../shared/analytics';
+import { changeBand, track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { lastAssetsTab, LoadingFrame, MainFrame } from '../../frame';
@@ -49,13 +49,6 @@ type Vis = 'all' | 'sum' | 'private';
 // 수정 내역은 직접 고친 것만, 날짜와 고친 사람.
 type ValueField = 'maturity_date' | 'paid_count' | 'interest_rate' | 'monthly_payment';
 type Patch = Parameters<typeof updateAsset>[1];
-
-/** 금액 바뀐 정도(32 fact_value_changed change_band): 변동률 <5 / 5-20 / 20+ % */
-const changeBand = (from: number, to: number): '<5' | '5-20' | '20+' => {
-  if (from === 0) return to === 0 ? '<5' : '20+';
-  const pct = (Math.abs(to - from) * 100) / Math.abs(from);
-  return pct < 5 ? '<5' : pct < 20 ? '5-20' : '20+';
-};
 
 export function F04Item() {
   const { id = '' } = useParams();

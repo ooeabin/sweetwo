@@ -63,6 +63,7 @@ const READ_RPC = new Set([
   'invest_answers',
   'invite_preview',
   'join_context',
+  'my_login_email',
   'my_mail_bounced',
   'my_notices',
   'my_reconnect_ok',

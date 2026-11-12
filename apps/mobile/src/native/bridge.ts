@@ -23,6 +23,7 @@ import {
   pushReceives,
   pushStatus,
   pushToken,
+  openPushSettings,
   requestPush,
   startPush,
   takePendingOpen,
@@ -125,6 +126,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       status: () => pushStatus(),
       request: () => requestPush(),
       token: () => pushToken(),
+      openSettings: () => openPushSettings(),
       onOpen: (cb) => {
         const p = takePendingOpen();
         if (p) cb(p);

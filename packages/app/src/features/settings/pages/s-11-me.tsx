@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
+import { fetchAvatars, fetchLoginEmail, qk, removeAvatar, updateSpace } from '@sweetwo/api';
 import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
-import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import { Badge, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -20,6 +20,7 @@ export function S11Me() {
   const qc = useQueryClient();
   const d = useSettingsData();
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
+  const loginEmail = useQuery({ queryKey: qk.loginEmail, queryFn: fetchLoginEmail });
   const [clearing, setClearing] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
@@ -90,20 +91,28 @@ export function S11Me() {
               {c.myName.slice(0, 1)}
             </span>
           )}
+          {/* 사진 위 카메라는 누르기 쉬운 지름길. 같은 일은 옆 글자 버튼 “사진 바꾸기”가 하므로 보조 기술·Tab에서는 뺌 */}
           <button
             type="button"
             className="hg-avatar-edit__btn"
-            aria-label={copy.photoChange}
+            aria-hidden="true"
+            tabIndex={-1}
             onClick={() => nav('/settings/me/photo')}
           >
             <Icon name="camera" />
           </button>
         </span>
-        {photo && (
-          <Button variant="ghost" size="sm" loading={clearing} onClick={() => void clearPhoto()}>
-            {copy.photoRemove}
+        {/* 1번 “사진 바꾸기” / 사진이 있으면 “사진 지우기”도(글자 버튼, 2026-11-12 QA 11구간 S11-11) */}
+        <span className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <Button variant="ghost" size="sm" onClick={() => nav('/settings/me/photo')}>
+            {copy.photoChange}
           </Button>
-        )}
+          {photo && (
+            <Button variant="ghost" size="sm" loading={clearing} onClick={() => void clearPhoto()}>
+              {copy.photoRemove}
+            </Button>
+          )}
+        </span>
       </div>
       <div className="hg-list">
         <ListRow
@@ -111,7 +120,18 @@ export function S11Me() {
           value={c.myName}
           onClick={() => nav('/settings/me/nickname')}
         />
-        <ListRow label={copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')} chevron={false} />
+        {/* 3번 로그인: 제공자 배지 + 소셜 계정 이메일, 보기만(이메일을 못 읽으면 “카카오로 로그인했어요”) */}
+        <ListRow
+          label={
+            <span className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+              <Badge kind="temp">{copy.providers[me.provider ?? ''] ?? ''}</Badge>
+              <span>
+                {loginEmail.data ?? copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')}
+              </span>
+            </span>
+          }
+          chevron={false}
+        />
         {/* 4번 알림 이메일: 2026-11-04 그 자리 입력칸 대신 줄 → S-11b */}
         <ListRow
           label={copy.notifyEmail}

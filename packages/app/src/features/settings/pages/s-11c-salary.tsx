@@ -10,6 +10,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { changeBand, track } from '../../../shared/analytics';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
@@ -52,6 +53,22 @@ export function S11cSalary() {
         payday_last: dd === 'last',
       });
       await qc.invalidateQueries({ queryKey: qk.me });
+      // 32 4-5 fact_value_changed(2026-11-12 QA 11구간 S11-06): 바뀐 값마다. 월급날은 날짜 숫자(말일 31)로 변동률
+      const dayNum = (n: number | null, last: boolean) => (last ? 31 : (n ?? 0));
+      if ((me.monthly_income ?? 0) !== income)
+        track('fact_value_changed', {
+          field: 'income',
+          change_band: changeBand(me.monthly_income ?? 0, income),
+          source_screen: 'S-11c',
+        });
+      const fromDay = dayNum(me.payday, !!me.payday_last);
+      const toDay = dayNum(typeof dd === 'number' ? dd : null, dd === 'last');
+      if (fromDay !== toDay)
+        track('fact_value_changed', {
+          field: 'payday',
+          change_band: changeBand(fromDay, toDay),
+          source_screen: 'S-11c',
+        });
       carryToast(copy.salarySaved, {
         label: copy.undo,
         onClick: () =>

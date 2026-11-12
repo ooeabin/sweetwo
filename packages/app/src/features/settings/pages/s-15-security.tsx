@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { LockStatus } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
-import { paths, session, signOut } from '../../auth';
+import { lockedOutState, paths, session, signOut } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 
@@ -38,7 +38,11 @@ export function S15Security() {
     setChecking(true);
     const r = await bridge.lock.verify(pin).finally(() => setChecking(false));
     if (!r.ok) {
-      if (r.signedOut) return void nav(paths.login, { replace: true });
+      if (r.signedOut) {
+        // 5번 틀림: 이 기기 데이터 비우고 A-02 + 안내(A-06과 같음, 2026-11-12 QA 11구간 S11-07)
+        await signOut({ forgetPin: true });
+        return void nav(paths.login, { replace: true, state: lockedOutState });
+      }
       setPinError(true);
       return;
     }

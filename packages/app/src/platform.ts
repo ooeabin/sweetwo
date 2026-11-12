@@ -82,6 +82,8 @@ export interface AppBridge {
     request: () => Promise<boolean>;
     /** 허용돼 있으면 기기 토큰, 아니면 null */
     token: () => Promise<string | null>;
+    /** 휴대폰 설정 앱의 이 앱 알림 화면 열기(S-14 ‘설정 열기’, 2026-11-12). 옛 앱(네이티브 플러그인 없음)은 없음 */
+    openSettings?: () => Promise<void>;
     onOpen: (cb: (n: { id: string; target: string }) => void) => () => void;
     /** 앱이 화면에 떠 있을 때 온 푸시(OS 알림 대신 앱 안 토스트) */
     onReceive: (cb: (n: { title: string; body: string | null }) => void) => () => void;

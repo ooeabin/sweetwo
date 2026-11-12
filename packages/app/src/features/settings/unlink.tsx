@@ -47,5 +47,15 @@ export function exportedSince(requestedAt: string): boolean {
   }
 }
 
+/** 최근(기본 24시간) 이 기기에서 내보낸 적이 있는지(분석 unlink_requested exported_data, account_delete_requested exported_before) */
+export function exportedRecently(ms = 24 * 60 * 60 * 1000): boolean {
+  try {
+    const t = Number(localStorage.getItem(EXPORTED));
+    return !!t && Date.now() - t <= ms;
+  } catch {
+    return false;
+  }
+}
+
 /** S-18로 갔다가 돌아올 곳(S-12a, S-12d, P-02a ‘먼저 내보내기’·‘사본 내려받기’) */
 export type DataBack = { back: string; backLabel: string };

@@ -17,6 +17,7 @@ import { create } from 'zustand';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { careUndo, trackCareShared, useCalendarData } from '../data';
+import { onSessionReset } from '../../../shared/session-reset';
 
 // Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
@@ -64,6 +65,8 @@ const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, ge
   d: start(),
   set: (p) => set({ d: { ...get().d, ...p } }),
 }));
+// 로그아웃하면 입력 중이던 경조사 이름·날짜를 비움(2026-11-12 QA 11구간 S11-08)
+onSessionReset(() => useDraft.setState({ d: start() }));
 /** 경조사 추가 시작(‘+ 추가’, 달력 고른 날) */
 export const startCareAdd = (date: string | null = null) => useDraft.getState().set(start(date));
 /** 경조사 수정 시작(Y-05 ‘수정’): 이름과 날짜(다음 회차 날짜, 음력이면 음력 원본) */

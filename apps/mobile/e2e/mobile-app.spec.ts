@@ -138,7 +138,10 @@ test('모바일(iOS): 로그인 창 → 돌아오면 다음 화면, PIN 뒤 “F
   await page.goto('/login');
   await page.getByRole('button', { name: '카카오로 3초 만에 로그인' }).click();
   await expect.poll(async () => (await fake(page)).started).toEqual(['kakao']);
-  await expect(page).toHaveURL(/\/login\/wait$/);
+  // 다시 로그인하고 돌아오면 이어서 내보냄
+  expect(await page.evaluate(() => sessionStorage.getItem('sweetwo.return-to'))).toBe(
+    '/settings/data?export=joint&format=csv',
+  );
   // 로그인 창이 닫히며 결과가 옴(네이티브 브리지 → 앱)
   await page.evaluate((jwt) => {
     const f = (window as unknown as { __fake: Fake }).__fake;
@@ -264,4 +267,69 @@ test('우리 둘 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예
       },
     )
     .toBe(false);
+});
+
+// QA 11구간(2026-11-12): 휴대폰 알림 권한, S-18 본인 확인
+test('S-14 휴대폰 알림이 꺼져 있으면 “휴대폰 설정에서 알림을 켜 주세요” + ‘설정 열기’, 푸시·묶음은 꺼짐으로(S11-04)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.noti_prefs = { push: true };
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    const w = window as unknown as {
+      __fake: Fake;
+      sweetwo: { push: Record<string, unknown> };
+    };
+    w.__fake.push = 'denied';
+    w.sweetwo.push.request = async () => false;
+    w.sweetwo.push.openSettings = async () => void w.__fake.opened.push('os-settings');
+  });
+  await page.goto('/settings/notifications');
+  await expect(page.getByText('휴대폰 설정에서 알림을 켜 주세요')).toBeVisible();
+  await expect(page.getByRole('switch', { name: /^푸시 알림/ }).first()).not.toBeChecked();
+  await expect(page.getByRole('switch', { name: /^월급 체크리스트/ })).not.toBeChecked();
+  await axe(page);
+  await page.locator('main').getByRole('button', { name: '설정 열기' }).click();
+  await expect.poll(async () => (await fake(page)).opened).toContain('os-settings');
+});
+
+test('S-18 앱 잠금이 꺼진 모바일 앱도 내보내기 전 가입 소셜로 다시 로그인(S11-02)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    (window as unknown as { __fake: Fake }).__fake.pinSet = null;
+    localStorage.setItem('sweetwo.last-provider', 'kakao');
+    localStorage.setItem('sweetwo.pin-asked', '1');
+  });
+  await page.goto('/settings/data');
+  await page.getByRole('button', { name: '내보내기', exact: true }).click();
+  await expect.poll(async () => (await fake(page)).started).toEqual(['kakao']);
+  // 다시 로그인하고 돌아오면 이어서 내보냄
+  expect(await page.evaluate(() => sessionStorage.getItem('sweetwo.return-to'))).toBe(
+    '/settings/data?export=joint&format=csv',
+  );
+});
+
+test('S-18 PIN을 5번 틀리면 A-02 + 안내(S-15와 같음, S11-07)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    const w = window as unknown as { sweetwo: { lock: Record<string, unknown> } };
+    w.sweetwo.lock.verify = async () => ({ ok: false, failed: 5, signedOut: true });
+  });
+  await page.goto('/settings/data');
+  await page.getByRole('button', { name: '내보내기', exact: true }).click();
+  await page.getByLabel('PIN을 입력해 주세요').fill('111111');
+  await page.getByRole('button', { name: '확인' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText('PIN을 5번 틀려서 다시 로그인해 주세요')).toBeVisible();
 });
