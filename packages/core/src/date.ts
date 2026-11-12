@@ -6,6 +6,9 @@ export function todayKst(now: Date = new Date()): string {
   return new Date(now.getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
+/** 서버 시각(ISO) → 그때의 KST 날짜 'YYYY-MM-DD'(2026-11-12 S6-10: UTC 날짜로 비교하면 KST 0~9시가 하루 앞으로 읽힘) */
+export const kstDateOf = (iso: string): string => todayKst(new Date(iso));
+
 const WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
 const ymd = (s: string) => {
   const [y = 0, m = 1, d = 1] = s.slice(0, 10).split('-').map(Number);

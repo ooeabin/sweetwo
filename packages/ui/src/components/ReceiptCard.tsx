@@ -70,7 +70,8 @@ export type ReceiptPartKind = 'saving' | 'spend' | 'free';
  * 비율 막대 PlanBar(12px, 칸 사이 3px) + 가운데 범례(W-01 영수증, W-02 진행, 달 결과 카드 같은 마크업).
  * 칸 너비는 percent, 0이면 칸 없음. progress 모드(2026-11-09 W-02): 칸마다 fill(0~100)만큼 채우고
  * 나머지는 조용한 칸(저금 accent-app-soft, 지출 hairline 테두리). fill이 모두 100이면 계획 막대와 똑같음.
- * legend가 비면 범례 없음, caption은 막대 아래 한 줄(“보낸 금액 142만 원 / 342만 원”)
+ * legend가 비면 범례 없음, caption은 막대 아래 한 줄(“체크한 금액 142만 원 / 342만 원”).
+ * title·action(2026-11-12 W-02 다 끝난 달): 막대 아래 왼쪽 굵은 한 줄 + caption, 오른쪽 글자 버튼(‘공유하기’)
  */
 export function PlanBar({
   label,
@@ -79,6 +80,8 @@ export function PlanBar({
   progress,
   caption,
   flat,
+  title,
+  action,
 }: {
   label: string;
   parts: { kind: ReceiptPartKind; percent: number; fill?: number }[];
@@ -88,6 +91,10 @@ export function PlanBar({
   caption?: ReactNode;
   /** 카드 밖(W-02 머리 아래): 막대 위 여백을 좁게 */
   flat?: boolean;
+  /** 막대 아래 굵은 한 줄(W-02 다 끝난 달 “10월 월급 체크를 다 했어요”, 2026-11-12). caption 위 */
+  title?: ReactNode;
+  /** 막대 아래 오른쪽 글자 버튼(W-02 ‘공유하기’, 2026-11-12) */
+  action?: ReactNode;
 }) {
   return (
     <div className={cx('hg-planbar', flat && 'hg-planbar--flat')}>
@@ -124,7 +131,17 @@ export function PlanBar({
           ))}
         </ul>
       )}
-      {caption && <p className="hg-receipt__caption">{caption}</p>}
+      {title || action ? (
+        <div className="hg-planbar__foot">
+          <div className="hg-planbar__text">
+            {title && <p className="hg-planbar__title">{title}</p>}
+            {caption && <p className="hg-receipt__caption">{caption}</p>}
+          </div>
+          {action}
+        </div>
+      ) : (
+        caption && <p className="hg-receipt__caption">{caption}</p>
+      )}
     </div>
   );
 }

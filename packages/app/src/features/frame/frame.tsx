@@ -9,6 +9,7 @@ import {
   type DrawerItem,
 } from '@sweetwo/ui';
 import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
@@ -199,6 +200,7 @@ export function MainFrame(
     window.sweetwo?.appVersion ?? (import.meta.env.VITE_APP_VERSION as string | undefined);
   // 좁은 창 홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹ = 홈으로, 안드로이드 뒤로도 홈으로(2026-11-09)
   const hubSub = !p.sub && p.current !== 'month';
+  const online = useOnline();
   useHardwareBack(
     menu
       ? () => {
@@ -212,9 +214,12 @@ export function MainFrame(
           }
         : null,
   );
-  const online = useOnline();
-  // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”
-  const savedAt = useCacheInfo((s) => s.savedAt);
+  // 오프라인(13 공통 상태 6·9번): 기기에 둔 데이터가 있으면 “오프라인” + 마지막 저장 시각, 없으면 “연결이 끊겼어요”.
+  // 기기 저장(모바일 브리지 cache)이 없어도 이미 받아 둔 화면 데이터가 있으면 9번(마지막으로 받은 시각, 2026-11-12 S6-17)
+  const qc = useQueryClient();
+  const cachedAt = useCacheInfo((s) => s.savedAt);
+  const fetchedAt = online ? 0 : lastFetched(qc);
+  const savedAt = cachedAt ?? (fetchedAt ? new Date(fetchedAt).toISOString() : null);
   // 회색 띠(LineBand). 맨 위 띠는 하나만이고 오프라인이 가장 먼저(core pickTopBanner, 2026-11-11 D3): 오프라인이면 화면이 준 띠는 숨김
   const offline = !online && (
     <LineBand
@@ -306,4 +311,12 @@ export function MainFrame(
       )}
     </FrameCommands>
   );
+}
+
+/** 받아 둔 화면 데이터 중 가장 최근에 받은 때(ms, 없으면 0) */
+function lastFetched(qc: ReturnType<typeof useQueryClient>) {
+  let at = 0;
+  for (const q of qc.getQueryCache().getAll())
+    if (q.state.status === 'success' && q.state.dataUpdatedAt > at) at = q.state.dataUpdatedAt;
+  return at;
 }

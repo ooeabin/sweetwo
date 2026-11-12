@@ -5,7 +5,7 @@ import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { quietly, toast } from '../../shared/toast';
 import { copy } from './copy';
-import { useCheck } from './data';
+import { useCheck, type CheckEntry, type CheckResult } from './data';
 import { useSavingItems } from './saving';
 
 const LINE_NAMES = { fixed: '고정지출', living: '생활비', allowance: '용돈' } as const;
@@ -61,11 +61,41 @@ export function lineName(
 const amountOf = (l: PayCheckLine) => l.actual ?? l.planned;
 
 /**
- * 체크리스트 줄 하나(W-02, H-03, W-05, W-10). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
- * 체크 = 바로 완료, 저금이면 저금 항목 모은 금액에 더하고 Toast “{이름}에 {금액} 더했어요” + 되돌리기. 다시 누르면 풀림.
- * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02) / ‘이번 달은 못 했어요’(W-05)
- * + 저금 줄은 ‘저금 항목 보기’(W-10, 체크한 줄도). 줄마다 링크를 반복하지 않음(2026-11-03).
- * 목표 금액이 있는 저금 줄은 보조 줄에 “2,700만 / 1억 5,000만 원”(progress), 진행은 줄 앞 진행 원(LineLead, 2026-11-09 막대 없앰).
+ * 체크가 끝난 뒤 Toast(20 W-02 4·5번, 2026-11-12): 체크리스트가 이번에 끝났으면 그 하나만 “{월}월 월급 체크를 다 했어요”
+ * (‘못 함’이 섞이면 “…마쳤어요”), 아니면 줄 Toast(저금 “{이름}에 {금액} 더했어요”, 지출 “체크했어요”, 못 함 “{이름}, 이번 달은 못 한 걸로 했어요”).
+ * 모두 ‘되돌리기’ = 이 줄을 바꾸기 전 상태로
+ */
+export function checkToast(
+  res: CheckResult,
+  o: {
+    line: PayCheckLine;
+    name: string;
+    goalName?: string;
+    amount: string;
+    to: 'checked' | 'skipped';
+    personName: (id: string | null) => string | null;
+    undo: () => void;
+  },
+) {
+  if (res.r === 'already_checked')
+    return toast(copy.alreadyChecked(o.personName(o.line.checked_by) ?? ''));
+  if (res.r === 'closed') return toast(copy.closed);
+  const undo = { label: copy.undo, onClick: o.undo };
+  if (res.finish) return toast(copy.monthFinished(res.finish.month, res.finish.kind), undo);
+  if (o.to === 'skipped') return toast(copy.skippedDone(o.name), undo);
+  toast(
+    o.line.kind === 'saving' ? copy.addedToGoal(o.goalName ?? o.name, o.amount) : copy.checked,
+    undo,
+  );
+}
+
+/**
+ * 체크리스트 줄 하나(W-02, W-05, W-10). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
+ * 체크 = 바로 완료, 저금이면 저금 항목 모은 금액에 더하고 Toast + 되돌리기. 다시 누르면 풀림.
+ * ‘못 함’ 줄(2026-11-12 D2)은 빈 원·취소선 없음 + 보조 줄 “이번 달은 못 했어요”, 화면 읽기 “{이름} 못 함”. 체크 칸을 누르면 체크.
+ * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02a) + W-05는 ‘이번 달은 못 했어요’
+ * + 저금 줄은 글자 버튼 ‘저금 보기’(W-10, 체크한 줄도). 줄마다 링크를 반복하지 않음(2026-11-03).
+ * 목표 금액이 있는 저금 줄은 보조 줄에 “2,700만 / 1억 5,000만 원”(progress), 진행은 줄 앞 진행 원(LineLead).
  */
 export function CheckLine({
   line,
@@ -80,6 +110,8 @@ export function CheckLine({
   onItem,
   progress,
   lead,
+  entry = 'w02',
+  changed = false,
 }: {
   line: PayCheckLine;
   name: string;
@@ -91,19 +123,23 @@ export function CheckLine({
   readOnly?: boolean;
   /** 파트너 줄 보기만(2026-11-03 대신 체크 없앰): 체크 칸 없이 상태만 */
   viewOnly?: boolean;
-  /** ⋯ 다른 금액(W-02a) */
+  /** 시트 ‘다른 금액으로 보냈어요’(W-02a) */
   onOther?: () => void;
   /** W-05 ‘이번 달은 못 했어요’ */
   onSkip?: () => void;
-  /** 저금 줄 시트 ‘저금 항목 보기’(W-10) */
+  /** 저금 줄 시트 ‘저금 보기’(W-10) */
   onItem?: () => void;
   /** 저금 줄 진행 글자(목표 금액이 있을 때, 체크한 사람·때 자리) */
   progress?: ReactNode;
   /** 줄 앞 아이콘(홈) */
   lead?: ReactNode;
+  /** 분석 checklist_line_checked entry */
+  entry?: CheckEntry;
+  /** 상대가 방금 바꿈(2초 강조) */
+  changed?: boolean;
 }) {
   const { masked } = useMask();
-  const check = useCheck();
+  const check = useCheck(entry);
   const [sheet, setSheet] = useState(false);
   // 저장하는 동안(2026-11-06): 누른 쪽 모양을 바로 보여 주고 두 번 누르기를 막음. 실패하면 원래대로
   const [pending, setPending] = useState<'checked' | 'wait' | null>(null);
@@ -111,28 +147,31 @@ export function CheckLine({
   const skipped = line.state === 'skipped';
   const amount = money(amountOf(line), masked);
 
+  // 체크 칸: 체크한 줄은 풂, 체크 안 한 줄과 ‘못 함’ 줄은 체크(2026-11-12 D2)
   const toggle = async () => {
     if (pending) return;
-    const to = done || skipped ? 'wait' : 'checked';
+    const to = done ? 'wait' : 'checked';
+    const from = line.state as 'checked' | 'wait' | 'skipped';
     setPending(to);
     try {
-      const r = await check(line, to);
-      if (r === 'already_checked')
-        return toast(copy.alreadyChecked(personName(line.checked_by) ?? ''));
-      if (r === 'closed') return toast(copy.closed);
-      if (done || skipped) return;
-      const undo = { label: copy.undo, onClick: () => quietly(check(line, 'wait')) };
-      toast(
-        line.kind === 'saving' ? copy.addedToGoal(goalName ?? name, amount) : copy.checked,
-        undo,
-      );
+      const res = await check(line, to);
+      if (to === 'wait' && res.r === 'ok') return;
+      checkToast(res, {
+        line,
+        name,
+        goalName,
+        amount: money(line.planned, masked),
+        to: 'checked',
+        personName,
+        undo: () => quietly(check(line, from, undefined, 'toast')),
+      });
     } catch {
       toast(copy.failed, { label: copy.retry, onClick: () => void toggle() });
     } finally {
       setPending(null);
     }
   };
-  const shownDone = pending ? pending === 'checked' : done || skipped;
+  const shownDone = pending ? pending === 'checked' : done;
 
   const when = line.checked_at ? formatDot2(line.checked_at.slice(0, 10)) : null;
   const checkMeta = skipped ? (
@@ -147,8 +186,9 @@ export function CheckLine({
       copy.checkedAt(when)
     )
   ) : undefined;
-  const meta = progress ?? checkMeta;
-  const open = !done && !skipped && !readOnly && !viewOnly;
+  // ‘못 함’은 목표 금액 진행 글자보다 먼저(체크 안 한 줄처럼 보이므로 이유를 보여 줌)
+  const meta = skipped ? checkMeta : (progress ?? checkMeta);
+  const open = !done && !readOnly && !viewOnly;
   const canSheet = (open && (onOther || onSkip)) || !!onItem;
   const pick = (f: () => void) => () => {
     setSheet(false);
@@ -161,12 +201,19 @@ export function CheckLine({
         amount={amount}
         done={shownDone}
         busy={!!pending}
-        checkLabel={viewOnly ? copy.viewLabel(name, done || skipped) : copy.checkLabel(name)}
+        checkLabel={
+          viewOnly
+            ? copy.viewLabel(name, line.state)
+            : skipped && !pending
+              ? copy.skippedLabel(name)
+              : copy.checkLabel(name)
+        }
         onToggle={readOnly || viewOnly ? undefined : () => void toggle()}
         disabled={readOnly}
         viewOnly={viewOnly}
         meta={meta}
         lead={lead}
+        changed={changed}
         onOpen={canSheet ? () => setSheet(true) : undefined}
       />
       {sheet && (
@@ -185,13 +232,14 @@ export function CheckLine({
                   {copy.otherAmount}
                 </Button>
               )}
-              {open && onSkip && (
+              {open && !skipped && onSkip && (
                 <Button block variant="secondary" onClick={pick(onSkip)}>
                   {copy.skipped}
                 </Button>
               )}
+              {/* 저금 보기는 글자 버튼(2026-11-12 S6-15, 20 W-02 6번) */}
               {onItem && (
-                <Button block variant="ghost" onClick={pick(onItem)}>
+                <Button block variant="link" onClick={pick(onItem)}>
                   {copy.seeItem}
                 </Button>
               )}

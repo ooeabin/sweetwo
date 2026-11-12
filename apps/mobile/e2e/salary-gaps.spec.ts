@@ -112,10 +112,12 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
-  // 지난 달은 달 결과 카드(2026-11-09, 읽기 전용: 줄 체크·시트 없음)
+  // 지난 달은 막대 아래 끝남 한 줄 + 줄은 읽기 전용(2026-11-12 결과 카드 대신: 체크 칸은 누를 수 없고 시트 없음)
   await expect(page.getByText('08.25 ~ 09.24', { exact: true })).toBeVisible();
-  await expect(page.getByRole('region', { name: '8월 월급 요약' })).toBeVisible();
-  await expect(page.locator('.hg-transfer')).toHaveCount(0);
+  await expect(page.locator('.hg-planbar__title')).toContainText('8월 월급 체크를');
+  await expect(page.locator('.hg-transfer').first()).toBeVisible();
+  await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
+  for (const c of await page.getByRole('checkbox').all()) await expect(c).toBeDisabled();
   await page.getByRole('button', { name: '다음 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });

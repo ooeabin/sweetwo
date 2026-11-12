@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { monthProgress, planChangeTouchesMonth, type MonthLine } from './month-progress';
+import * as mp from './month-progress';
 
 // 기획서 06 3-6 예시 표 그대로(찬우 350만, 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·생활비 80만·용돈 35만)
 const man = (n: number) => n * 10_000;
@@ -95,5 +96,27 @@ describe('W-01 금액 바꾸기가 이번 달 줄도 바꾸는지(sync_checklist
   });
   it('0원이라 체크리스트에 없던 줄도 금액이 생기면 새로 생김', () => {
     expect(planChangeTouchesMonth({ ...plan, amount: 0 }, man(10), [])).toBe(true);
+  });
+});
+
+// 07 5장 사이클 상태(2026-11-12 D4): 체크 또는 ‘못 함’이면 끝남. 모두 체크 = 다 했어요, ‘못 함’ 섞임 = 마쳤어요
+describe('체크리스트 다 끝남(checklistFinish, finishAfter)', () => {
+  const ls = (...states: string[]) => states.map((state, i) => ({ id: `l${i}`, state }));
+  it('체크 안 한 줄이 있으면 안 끝남, 모두 체크면 all, 못 함이 섞이면 mixed', () => {
+    const { checklistFinish } = mp;
+    expect(checklistFinish(ls('checked', 'wait'))).toBeNull();
+    expect(checklistFinish(ls('checked', 'checked'))).toBe('all');
+    expect(checklistFinish(ls('checked', 'skipped'))).toBe('mixed');
+    expect(checklistFinish(ls('skipped', 'skipped'))).toBe('mixed');
+    expect(checklistFinish([])).toBeNull();
+  });
+  it('마지막 줄을 바꿀 때만 끝남(이미 끝났거나 풀면 null), 다른 금액 0원은 못 함', () => {
+    const { finishAfter } = mp;
+    expect(finishAfter(ls('checked', 'wait'), 'l1', 'checked')).toBe('all');
+    expect(finishAfter(ls('checked', 'wait'), 'l1', 'skipped')).toBe('mixed');
+    expect(finishAfter(ls('checked', 'wait'), 'l1', 'checked', 0)).toBe('mixed');
+    expect(finishAfter(ls('wait', 'wait'), 'l1', 'checked')).toBeNull();
+    expect(finishAfter(ls('checked', 'checked'), 'l1', 'wait')).toBeNull();
+    expect(finishAfter(ls('checked', 'skipped'), 'l1', 'checked')).toBeNull();
   });
 });

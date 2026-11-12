@@ -94,6 +94,16 @@ export function SalaryLoadError({
   );
 }
 
+/**
+ * 옛 W-02 끝 주소 /salary/done(2026-11-12 화면 없앰, 옛 링크·알림) → W-02(/salary, who는 그대로).
+ * 다 끝난 달은 W-02 막대 아래 한 줄로 보임
+ */
+export function DoneRedirect() {
+  const [params] = useSearchParams();
+  const who = params.get('who');
+  return <Navigate to={who ? `/salary?who=${encodeURIComponent(who)}` : '/salary'} replace />;
+}
+
 /** 옛 주소 /salary/split(알림 링크 등) → /salary?view=plan(who는 그대로) */
 export function SplitRedirect() {
   const [params] = useSearchParams();

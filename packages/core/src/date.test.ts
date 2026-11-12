@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 import { formatDot2, formatKstDateTime, formatKstMonthDayTime, hoursBetween } from './date';
+import * as dt from './date';
 
 test('어드민 시각은 KST', () => {
   expect(formatKstDateTime('2026-10-18T05:05:00Z')).toBe('2026-10-18 14:05');
@@ -18,4 +19,11 @@ test('오프라인 띠 마지막 저장 시각은 KST 월·일 + 시각', () => 
 
 test('formatDot2: 두 자리 월.일', () => {
   expect(formatDot2('2026-08-26')).toBe('08.26');
+});
+
+test('서버 시각의 KST 날짜(S6-10): UTC 전날 15시 이후는 KST 다음 날', () => {
+  const { kstDateOf } = dt;
+  expect(kstDateOf('2026-10-24T14:59:59Z')).toBe('2026-10-24');
+  expect(kstDateOf('2026-10-24T15:00:00Z')).toBe('2026-10-25');
+  expect(kstDateOf('2026-10-25T00:30:00+09:00')).toBe('2026-10-25');
 });

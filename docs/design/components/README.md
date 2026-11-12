@@ -70,7 +70,7 @@
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |
 | [ListRow](ListRow.md) | Lists | 목록 한 줄 |
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |
-| [ReceiptCard](ReceiptCard.md) | Cards | 영수증 카드(W-01 월급 계획, 달 결과 카드, 톱니 아래 가장자리, 비율 막대 PlanBar(진행 모드), 편집 모드) |
+| [ReceiptCard](ReceiptCard.md) | Cards | 영수증 카드(W-01 월급 계획, 달 결과 공유 이미지, W-02 다 끝난 달 한 줄 `title`·`action`, 톱니 아래 가장자리, 비율 막대 PlanBar(진행 모드), 편집 모드) |
 | [TransferRow](TransferRow.md) | Lists | 월급 체크리스트 줄 한 행 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |
 | [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(챕터 이름 + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |

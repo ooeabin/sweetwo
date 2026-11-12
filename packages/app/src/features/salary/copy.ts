@@ -82,8 +82,10 @@ export const copy = {
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
   checkLabel: (name: string) => `${name} 체크`,
-  viewLabel: (name: string, done: boolean) =>
-    `${name} ${done ? '체크했어요' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄)
+  viewLabel: (name: string, state: string) =>
+    `${name} ${state === 'checked' ? '체크했어요' : state === 'skipped' ? '못 함' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), ‘못 함’ 2026-11-12 D2
+  // ‘못 함’ 줄 체크 칸 화면 읽기(2026-11-12 D2: 빈 원 + “이번 달은 못 했어요”) [확인 필요]
+  skippedLabel: (name: string) => `${name} 못 함`,
   otherAmount: '다른 금액으로 보냈어요',
   // 줄을 누르면 여는 시트(2026-11-03) [확인 필요]
   lineSheet: (name: string, amount: string) => `${name} ${amount}`,
@@ -100,12 +102,13 @@ export const copy = {
   monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 체크했어요`,
   monthLineToo: '이번 달 체크 안 한 줄도 바꿨어요',
   madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
-  // 달 결과 카드(W-02 끝, 다 끝난 W-02, 지난 달) [확인 필요]
+  // 다 끝난 달(2026-11-12 W-02 끝 화면 대신 W-02 막대 아래 한 줄 + Toast, D4: ‘못 함’이 섞이면 ‘마쳤어요’) [확인 필요]
+  monthFinished: (month: number, kind: 'all' | 'mixed') =>
+    `${month}월 월급 체크를 ${kind === 'all' ? '다 했어요' : '마쳤어요'}`,
+  // 공유 이미지(달 결과, W-01과 같은 canvas) [확인 필요]
   received: (date: string) => `${date} 받음`,
   sentTotal: '체크한 금액',
   skippedShort: '못 함',
-  resultLabel: (label: string) => `${label} 요약`,
-  editChecks: '체크 고치기',
   monthImageName: (ym: string) => `sweetwo-${ym}.png`,
   // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
   groupAllSent: '모두 보냈어요',
@@ -129,10 +132,6 @@ export const copy = {
   lessThanPlan: (amount: string) => `계획보다 ${amount} 적어요`,
   moreThanPlan: (amount: string) => `계획보다 ${amount} 많아요`, // [확인 필요]
   next: '다음',
-  // W-02 끝
-  doneTitle: '이번 달 월급 체크를 다 했어요', // [확인 필요] 2026-11-03 ‘나눴어요’ 대신
-  partnerProgress: (name: string, total: number, done: number) =>
-    `${name}님 ${total}개 중 ${done}개`,
   ok: '확인',
   // W-05 월급 전 확인
   reviewTitle: (label: string) => `${label}, 빠진 게 있나요?`,

@@ -14,9 +14,8 @@ export {
 } from './data';
 export { copy as salaryCopy } from './copy';
 export { W01Receipt } from './pages/w-01-receipt';
-export { SalaryTab, SalarySeg, SplitRedirect } from './salary-tab';
+export { DoneRedirect, SalaryTab, SalarySeg, SplitRedirect } from './salary-tab';
 export { W02Checklist } from './pages/w-02-checklist';
-export { W02Done } from './pages/w-02-done';
 export { W05Review } from './pages/w-05-review';
 export { W10SavingItem } from './pages/w-10-saving-item';
 export { W10aSavingEdit } from './pages/w-10a-saving-edit';

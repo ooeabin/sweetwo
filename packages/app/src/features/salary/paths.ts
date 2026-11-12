@@ -2,7 +2,6 @@
 export const salaryPaths = {
   plan: '/salary?view=plan', // W-01 월급 계획 영수증(옛 /salary/split은 여기로 넘김)
   checklist: '/salary', // W-02
-  done: '/salary/done', // W-02 끝
   review: '/salary/review', // W-05
 };
 

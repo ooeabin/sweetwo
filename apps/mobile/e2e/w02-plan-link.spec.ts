@@ -4,7 +4,7 @@ import { mockOnboarding, type MemDb } from './onboarding-mock';
 import { seed } from './seed-home';
 import { chanwoo } from './supabase-mock';
 
-// W-01 ↔ W-02 잇기(20 W-02 1a·1b·W-02 끝 3번·W-01 3a·7번 Toast, 06 3-6, 2026-11-09).
+// W-01 ↔ W-02 잇기(20 W-02 1a·1c·W-01 3a·7번 Toast, 06 3-6, 2026-11-09, 2026-11-12 W-02 끝 대신 1c 한 줄).
 // 찬우 350만 원 25일, 9월 월급 체크리스트: 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·생활비 88만·용돈 35만(합 350만).
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const axe = async (page: Page) => {
@@ -120,7 +120,7 @@ test('묶음은 월급 계획 순서(sort)대로', async ({ page }) => {
   ]);
 });
 
-test('모두 체크: W-02 끝 결과 카드(막대 = 계획 막대), W-02도 결과 카드 + ‘체크 고치기’', async ({
+test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “다 했어요” 한 줄 + Toast + 되돌리기, 막대 = 계획 막대, 줄은 남고 풀면 한 줄 사라짐', async ({
   page,
 }) => {
   const db = await open(page);
@@ -130,61 +130,71 @@ test('모두 체크: W-02 끝 결과 카드(막대 = 계획 막대), W-02도 결
   await page.goto('/salary?view=plan');
   const plan = await bar(page);
   await page.getByRole('tab', { name: '이번 달' }).click();
+  await expect(page.locator('.hg-planbar__title')).toHaveCount(0);
   await page.getByRole('checkbox', { name: /용돈/ }).click();
-  await expect(page).toHaveURL(/\/salary\/done$/);
-  await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
-  const card = page.locator('.hg-receipt');
-  await expect(card.getByText('9월 월급', { exact: true })).toBeVisible();
-  await expect(card.locator('.hg-receipt__amount')).toHaveText('350만 원');
-  await expect(card.getByText('9월 25일 받음')).toBeVisible();
+  await expect(page).toHaveURL(/\/salary$/);
+  // 마지막 줄 = 줄 Toast 대신 끝남 Toast 하나
+  const toast = page.locator('.hg-toast');
+  await expect(toast).toContainText('9월 월급 체크를 다 했어요');
+  await expect(toast).not.toContainText('체크했어요 ');
+  const title = page.locator('.hg-planbar__title');
+  await expect(title).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-planbar__foot')).toContainText('체크한 금액 350만 원 / 350만 원');
+  await expect(
+    page.locator('.hg-planbar__foot').getByRole('button', { name: '공유하기' }),
+  ).toBeVisible();
   // 다 채운 막대 = W-01 막대(같은 칸, 같은 너비, 같은 색)
   const full = await bar(page);
   expect(full.map(([k, g]) => [k, g])).toEqual(plan.map(([k, g]) => [k, g]));
   expect(full.map(([, , f]) => f)).toEqual(['100%', '100%']);
-  await expect(card.locator('.hg-receipt__row--strong')).toContainText('여유 자금0원');
-  await expect(card.getByText('체크한 금액', { exact: true })).toBeVisible();
+  // 결과 카드·‘체크 고치기’ 없음, 묶음 카드는 그대로(체크 모양)
+  await expect(page.locator('.hg-receipt')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '체크 고치기' })).toHaveCount(0);
+  await expect(page.locator('.hg-checkgroup')).toHaveCount(2);
   await expect(page.getByText('영수증')).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '확인' }).click();
-  await expect(page).toHaveURL(/\/$/);
-  // W-02 다 끝난 상태: 결과 카드, ‘체크 고치기’로 줄 목록
-  await page.goto('/salary');
-  await expect(page.getByRole('region', { name: '9월 월급 요약' })).toBeVisible();
-  await expect(page.locator('.hg-checkgroup')).toHaveCount(0);
-  await page.getByRole('button', { name: '체크 고치기' }).click();
-  await expect(page.locator('.hg-checkgroup')).toHaveCount(2);
-  await page.getByRole('checkbox', { name: /용돈/ }).click();
-  // 하나 풀면 다시 진행 막대
+  // 되돌리기 = 마지막 줄을 풂 → 한 줄 사라짐
+  await toast.getByRole('button', { name: '되돌리기' }).click();
+  await expect(title).toHaveCount(0);
   await expect(page.getByText('체크한 금액 315만 원 / 350만 원')).toBeVisible();
-  await expect(page.getByRole('region', { name: '9월 월급 요약' })).toHaveCount(0);
+  // 다시 체크 → 한 줄, 체크 칸으로 풀어도 같음
+  await page.getByRole('checkbox', { name: /용돈/ }).click();
+  await expect(title).toBeVisible();
+  await page.getByRole('checkbox', { name: /용돈/ }).click();
+  await expect(title).toHaveCount(0);
+  // 옛 W-02 끝 주소는 W-02로
+  await page.goto('/salary/done');
+  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
 });
 
-test('결과 카드: 다른 금액은 “계획 88만 원”, ‘못 함’은 stone “못 함”이고 합에서 빠짐, 공유하기 = 내려받기', async ({
+test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어요”, ‘못 함’ 줄은 빈 원 + “이번 달은 못 했어요”(D2), 공유하기 = 내려받기', async ({
   page,
 }) => {
   const db = await open(page);
   linesOf(db).forEach((l) => mark(l, 'checked'));
   mark(linesOf(db)[0], 'skipped');
   mark(linesOf(db)[3], 'checked', 700_000);
-  await page.goto('/salary/done');
-  const card = page.locator('.hg-receipt');
-  const saving = card.getByRole('list', { name: '저금' });
-  await expect(saving.getByLabel('청약 못 함')).toBeVisible();
-  await expect(saving.locator('.hg-receipt__amt.is-muted')).toHaveText('못 함');
-  const spend = card.getByRole('list', { name: '지출' });
-  await expect(spend.getByLabel('생활비, 70만 원, 계획 88만 원')).toBeVisible();
-  await expect(spend.locator('.hg-receipt__plan')).toHaveText('계획 88만 원');
-  // 소계 = 보낸 금액: 저금 95만, 지출 88 + 70 + 35 = 193만, 합 288만, 여유 자금 62만
-  await expect(card.locator('.hg-receipt__subtotal')).toHaveText(['95만 원', '193만 원']);
-  await expect(card.getByText('288만 원', { exact: true })).toBeVisible();
-  await expect(card.locator('.hg-receipt__row--strong')).toContainText('여유 자금62만 원');
+  await page.goto('/salary');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 마쳤어요');
+  // ‘못 함’ 줄: 체크 안 된 빈 원, 취소선 없음, 화면 읽기 “청약 못 함”
+  const skipped = page.getByRole('checkbox', { name: '청약 못 함' });
+  await expect(skipped).toHaveAttribute('aria-checked', 'false');
+  const row = page.locator('.hg-transfer', { hasText: '청약' });
+  await expect(row).not.toHaveClass(/is-done/);
+  await expect(row).toContainText('이번 달은 못 했어요');
   // 못 함이 있으면 저금 칸은 다 차지 않음(95 ÷ 139 = 68)
   expect((await bar(page)).map(([, , f]) => f)).toEqual(['68%', '100%']);
+  await expect(page.locator('.hg-planbar__foot')).toContainText('체크한 금액 288만 원 / 350만 원');
   await axe(page);
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();
   expect((await dl).suggestedFilename()).toBe('sweetwo-2026-09.png');
   await expect(page.getByText('이미지를 저장했어요')).toBeVisible();
+  // ‘못 함’ 줄 체크 칸을 누르면 체크(보냈어요) → “다 했어요”
+  await skipped.click();
+  await expect.poll(() => linesOf(db)[0]?.state).toBe('checked');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
 });
 
 test('W-01 링크 줄 “이번 달 2/5 체크했어요 ›” → 이번 달, 체크리스트가 없으면 없음', async ({
@@ -266,10 +276,10 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
   const note = page.getByText('9월 계획대로 체크리스트를 만들었어요');
   await expect(note).toBeVisible();
   await axe(page);
-  // 지난 달 보기에서는 없음, 지난 달은 결과 카드(읽기 전용, ‘체크 고치기’ 없음)
+  // 지난 달 보기에서는 없음, 지난 달은 같은 한 줄(읽기 전용, 2026-11-12)
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(note).toHaveCount(0);
-  await expect(page.getByRole('region', { name: '8월 월급 요약' })).toBeVisible();
+  await expect(page.locator('.hg-planbar__title')).toHaveText('8월 월급 체크를 다 했어요');
   await expect(page.getByRole('button', { name: '체크 고치기' })).toHaveCount(0);
   await page.getByRole('button', { name: '다음 달 보기' }).click();
   await page.locator('.hg-row', { has: note }).getByRole('button', { name: '닫기' }).click();
@@ -279,7 +289,7 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
   await expect(note).toHaveCount(0);
 });
 
-test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 결과 카드, W-01 파트너 링크 → 예빈 이번 달', async ({
+test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같은 한 줄, W-01 파트너 링크 → 예빈 이번 달', async ({
   page,
 }) => {
   const db = await open(page);
@@ -298,14 +308,12 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 결�
   ]);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await axe(page);
-  // 예빈이 다 체크하면 결과 카드(보기만, 공유는 있음)
+  // 예빈이 다 체크하면 같은 한 줄(보기만, 공유는 있음, 2026-11-12)
   const yl = db.checklists.find((c) => c.owner_user_id === 'yebin')?.pay_check_line as Line[];
   yl.forEach((l) => mark(l, 'checked', null, 'yebin'));
   await page.reload();
-  const card = page.getByRole('region', { name: '9월 월급 요약' });
-  await expect(card).toBeVisible();
-  await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
-  await expect(card.locator('.hg-receipt__row--strong')).toContainText('여유 자금175만 원');
-  await expect(card.getByRole('button', { name: '공유하기' })).toBeVisible();
-  await expect(card.locator('.hg-receipt__lock')).toHaveCount(0);
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/salary\?who=yebin$/);
 });

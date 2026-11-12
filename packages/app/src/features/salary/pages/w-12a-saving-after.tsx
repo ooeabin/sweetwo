@@ -7,8 +7,8 @@ import {
 } from '@sweetwo/api';
 import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useRef, useState } from 'react';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -103,16 +103,36 @@ export function AfterChoice({ item }: { item: SavingItem }) {
 export function W12aSavingAfter() {
   const { id = '' } = useParams();
   const nav = useNavigate();
+  const [params] = useSearchParams();
   const d = useSavingItems();
   const i = d.ready ? d.byId(id) : undefined;
+  // 체크리스트(W-02·W-05)에서 닿았으면 고른 뒤·닫은 뒤 W-02로(2026-11-12 S6-09, W-02 끝 화면 대신), 아니면 저금 상세
+  const back = params.get('from') === 'checklist' ? salaryPaths.checklist : savingPaths.item(id);
+  // 고르는 중이면 다시 읽은 상태(이제 달성 아님)로 상세에 먼저 가지 않게(한 번에 갈 곳으로, Toast가 그 화면에 남게)
+  const leaving = useRef(false);
   if (!d.ready) return <QuestionSkeleton title={copy.afterQ} />;
   if (!i) return <Navigate to={salaryPaths.checklist} replace />;
   // 이미 골랐거나 고칠 수 없으면 상세로
-  if (i.state !== 'achieved' || !i.canEdit) return <Navigate to={savingPaths.item(id)} replace />;
-  return <AfterPage item={i} onDone={() => nav(savingPaths.item(id), { replace: true })} />;
+  if (!leaving.current && (i.state !== 'achieved' || !i.canEdit))
+    return <Navigate to={savingPaths.item(id)} replace />;
+  return (
+    <AfterPage
+      item={i}
+      onStart={(on) => (leaving.current = on)}
+      onDone={() => nav(back, { replace: true })}
+    />
+  );
 }
 
-function AfterPage({ item, onDone }: { item: SavingItem; onDone: () => void }) {
+function AfterPage({
+  item,
+  onStart,
+  onDone,
+}: {
+  item: SavingItem;
+  onStart: (on: boolean) => void;
+  onDone: () => void;
+}) {
   const a = useAfter(item);
   const [v, setV] = useState<After | null>(null);
   return (
@@ -121,7 +141,13 @@ function AfterPage({ item, onDone }: { item: SavingItem; onDone: () => void }) {
         label={copy.afterQ}
         value={v}
         onChange={setV}
-        onPick={(x) => void a.choose(x).then((ok) => ok && onDone())}
+        onPick={(x) => {
+          if (x !== 'retarget') onStart(true);
+          void a.choose(x).then((ok) => {
+            if (ok) onDone();
+            else onStart(false);
+          });
+        }}
         options={OPTIONS}
       />
     </QuestionLayout>

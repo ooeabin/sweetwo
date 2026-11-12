@@ -257,9 +257,38 @@ export type AnalyticsEvent =
         result: 'shared' | 'downloaded' | 'cancelled' | 'failed';
         masked: boolean;
         whose: 'self' | 'partner' | 'joint';
-        screen: 'done' | 'checklist' | 'past';
+        // 2026-11-12 W-02 끝 화면을 없애 ‘done’ 없음(W-02 다 끝난 달 한 줄 = checklist, 지난 달 = past)
+        screen: 'checklist' | 'past';
         skipped: number;
       };
+    }
+  | {
+      // 월급 체크리스트 줄(32 4-4, 2026-11-12 QA 6구간 S6-02). 금액은 구간만
+      name: 'checklist_line_checked';
+      props: {
+        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        result: 'as_planned' | 'different';
+        diff_band: AmountBand | null;
+        checked_by: 'self' | 'joint';
+        entry: 'w02' | 'w05' | 'w10';
+        days_from_payday: number | null;
+      };
+    }
+  | {
+      name: 'checklist_line_unchecked';
+      props: {
+        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        minutes_since_checked: number | null;
+        entry: 'checkbox' | 'toast';
+      };
+    }
+  | {
+      name: 'checklist_line_skipped';
+      props: { line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom' };
+    }
+  | {
+      name: 'checklist_completed';
+      props: { hours_since_generated: number; checked_by_partner_count: number };
     }
   | {
       // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
