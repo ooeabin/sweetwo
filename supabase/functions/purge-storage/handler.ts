@@ -70,7 +70,11 @@ export async function handle(
       const res = await fetchFn(`${env.SUPABASE_URL}/storage/v1/object/copy`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ bucketId: m.bucket, sourceKey: m.from_path, destinationKey: m.to_path }),
+        body: JSON.stringify({
+          bucketId: m.bucket,
+          sourceKey: m.from_path,
+          destinationKey: m.to_path,
+        }),
       });
       if (res.ok) moved.push(m.id);
     } catch {

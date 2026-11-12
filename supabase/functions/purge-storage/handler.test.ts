@@ -48,18 +48,21 @@ Deno.test('버킷마다 지우고, 지운 것만 끝냄', async () => {
   deepStrictEqual(JSON.parse(done?.body ?? '{}'), { p_ids: [1, 2] });
 });
 
-Deno.test('공간이 바뀐 프로필 사진: 옮길 곳을 비우고 복사한 뒤 done_storage_move(S11-03)', async () => {
-  const log: Log[] = [];
-  const move = { id: 7, bucket: 'avatars', from_path: 'old/u.jpg', to_path: 'new/u.jpg' };
-  const res = await handle(req('purge-secret'), env, fake(log, false, [move]));
-  deepStrictEqual(await res.json(), { claimed: 3, removed: 3, moved: 1 });
-  const i = log.findIndex((l) => l.url.endsWith('/storage/v1/object/copy'));
-  deepStrictEqual(JSON.parse(log[i]?.body ?? '{}'), {
-    bucketId: 'avatars',
-    sourceKey: 'old/u.jpg',
-    destinationKey: 'new/u.jpg',
-  });
-  deepStrictEqual(JSON.parse(log[i - 1]?.body ?? '{}'), { prefixes: ['new/u.jpg'] });
-  const done = log.find((l) => l.url.endsWith('/rpc/done_storage_move'));
-  deepStrictEqual(JSON.parse(done?.body ?? '{}'), { p_ids: [7] });
-});
+Deno.test(
+  '공간이 바뀐 프로필 사진: 옮길 곳을 비우고 복사한 뒤 done_storage_move(S11-03)',
+  async () => {
+    const log: Log[] = [];
+    const move = { id: 7, bucket: 'avatars', from_path: 'old/u.jpg', to_path: 'new/u.jpg' };
+    const res = await handle(req('purge-secret'), env, fake(log, false, [move]));
+    deepStrictEqual(await res.json(), { claimed: 3, removed: 3, moved: 1 });
+    const i = log.findIndex((l) => l.url.endsWith('/storage/v1/object/copy'));
+    deepStrictEqual(JSON.parse(log[i]?.body ?? '{}'), {
+      bucketId: 'avatars',
+      sourceKey: 'old/u.jpg',
+      destinationKey: 'new/u.jpg',
+    });
+    deepStrictEqual(JSON.parse(log[i - 1]?.body ?? '{}'), { prefixes: ['new/u.jpg'] });
+    const done = log.find((l) => l.url.endsWith('/rpc/done_storage_move'));
+    deepStrictEqual(JSON.parse(done?.body ?? '{}'), { p_ids: [7] });
+  },
+);
