@@ -6,7 +6,7 @@
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
 :where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 /* 키보드 포커스: 2px focus 링, 바깥 2px */
-:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event, .hg-foldrow, .hg-goalbox__metabtn, .hg-goalbox__jump):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }  /* 2026-11-12 S7-14 hg-foldrow·hg-goalbox__metabtn·__jump 더함 */
 /* 잘리는 묶음 안의 줄은 안쪽 링 */
 :is(.hg-menu__item, .hg-cmd__item, .hg-listrow, .hg-result):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 /* 터치 화면 좁은 창: 누르는 대상 44px */
@@ -2098,6 +2098,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-goalbox__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 2026-11-09 W-10 막대: 조용한 바탕 위 오렌지 */
 .hg-goalbox__meta { display: flex; justify-content: space-between; gap: var(--space-3); font: var(--text-caption); color: var(--slate); }
 .hg-goalbox__metabtn { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.hg-goalbox__metabtn:disabled { text-decoration: none; cursor: default; }  /* 연결 해제 대기 중(2026-11-12 S7-09) */
+.hg-goalbox__jump { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); width: 100%; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }  /* W-10 모은 금액: 누르면 저금 내역으로(2026-11-12 S7-10) */
 .hg-goalbox__person { display: flex; align-items: center; gap: var(--space-2); font: var(--text-body); }
 .hg-goalbox__person > span:not(.hg-avatar) { flex: 1; }
 .hg-goalbox__person > b { font-weight: 600; font-variant-numeric: tabular-nums; }

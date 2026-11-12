@@ -143,7 +143,18 @@ export type AnalyticsEvent =
       // 저금 항목(32 4-5, 2026-11-08 ADR 0007)
       name: 'saving_item_created';
       props: {
-        entry: 'home' | 'salary' | 'split' | 'palette' | 'list';
+        // 2026-11-12 S7-16 salary_row(W-02 ‘+ 저금 추가’ 줄)·salary_wide(W-02 넓은 창 제목 줄)·add_menu·shortcut·direct
+        entry:
+          | 'home'
+          | 'salary'
+          | 'salary_row'
+          | 'salary_wide'
+          | 'split'
+          | 'palette'
+          | 'list'
+          | 'add_menu'
+          | 'shortcut'
+          | 'direct';
         monthly_band: AmountBand;
         has_target: boolean;
         has_deadline: boolean;

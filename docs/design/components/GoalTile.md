@@ -18,7 +18,7 @@
 - 사진 `hg-goalhero__photo`: 16:10, 최대 320px, 넓은 창 모서리 `radius-2xl`, 좁은 창은 양옆 여백 없이 모서리 없음.
 - ‘사진 바꾸기’ `hg-goalhero__change`: 사진 오른쪽 아래 흰 알약(카메라 + 글자).
 - 판 `hg-goalhero__sheet`: 사진 위로 24px 올라오는 둥근 판. 배지 → 이름(20px 700) → 금액 줄 `hg-goalhero__amountrow`(2026-11-04: 왼쪽 모은 금액 24px 700, 오른쪽 `hg-goalhero__steps` 안 44px 둥근 버튼 `hg-goalhero__step` − + (`surface-alt`, 테두리 없음, IconButton 이름 ‘빼기’ ‘넣기’)). 금액 위 ‘모은 금액’ 이름표 `hg-goalhero__label`(12px `slate`). 판에 다른 버튼 없음(2026-11-04). 보류면 판 배지에 ‘보류’, 판 아래 보류 카드(머리 글 + 보조 버튼 ‘다시 모으기’). 달성·보류는 매달 카드 없음.
-- 묶음 카드 `hg-goalbox`: 머리(15px 600 + 오른쪽 글자 링크) → 막대 8px → 보조 줄(12px `slate`, 기한은 밑줄 버튼 `hg-goalbox__metabtn`). 사람별 줄 `hg-goalbox__person`(Avatar 24px + 이름 + 금액).
+- 묶음 카드 `hg-goalbox`: 머리(15px 600 + 오른쪽 글자 링크) → 막대 8px → 보조 줄(12px `slate`, 기한은 밑줄 버튼 `hg-goalbox__metabtn`). 사람별 줄 `hg-goalbox__person`(Avatar 24px + 이름 + 금액). 2026-11-12(QA 7구간): W-10 모은 금액은 누르는 버튼 `hg-goalbox__jump`(바탕·테두리 없음, 왼쪽 맞춤, 누르면 저금 내역으로, S7-10). `hg-goalbox__metabtn`·`hg-goalbox__jump`·`hg-foldrow`도 다른 버튼과 같은 잉크 포커스 링(2px, 2px 떨어짐, S7-14). 연결 해제 대기 중 `hg-goalbox__metabtn:disabled`는 밑줄 없음.
 - 영역 사이 32px.
 - 레퍼런스: ANZ Plus(사진 히어로), Monzo(묶음 카드).
 - 상태 배지(2026-11-03): 사진 위 왼쪽, 달성 `achieved`(옅은 오렌지 판 + `brand-ink` 글자, 2026-11-09), 보류 `temp`(2026-11-04 사용 완료 없앰). 막대 색은 `accent-app` 오렌지(바탕 `surface-alt`, 2026-11-09, 홈 GoalRow와 W-10 `hg-goalbox__bar`도 같음).

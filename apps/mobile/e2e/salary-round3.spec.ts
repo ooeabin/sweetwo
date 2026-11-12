@@ -213,7 +213,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('목표 금액을 바꿨어요')).toBeVisible();
   // 기한은 지우고 기한 화면으로 이어짐
-  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline\?first=1$/);
   expect(g).toMatchObject({ target_amount: 2_000_000, deadline: null, status: 'active' });
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => g.status).toBe('achieved');

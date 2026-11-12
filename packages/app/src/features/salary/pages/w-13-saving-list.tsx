@@ -5,10 +5,10 @@ import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
-import { useSplits } from '../data';
+import { useSavingRealtime, useSplits } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
-import { SavingGoalRow } from '../saving-parts';
+import { SavingGoalRow, SavingLoadError } from '../saving-parts';
 
 const ENTRIES = ['checklist', 'split', 'home'] as const;
 type Entry = (typeof ENTRIES)[number] | 'direct';
@@ -32,7 +32,11 @@ export function W13SavingList() {
   useEffect(() => {
     if (ready) track('saving_list_viewed', { entry, items_count: count });
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 상대가 저금을 고치면 바로 다시 읽음(2026-11-12 S7-02)
+  useSavingRealtime(d.ready ? d.space.id : null);
   const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
+  // 못 불러오면 오류 카드 + 다시 시도(2026-11-12 S7-04)
+  if (!d.ready && d.failed) return <SavingLoadError onBack={back} onRetry={d.retry} />;
   if (!d.ready) return <LoadingFrame current="salary" sub="detail" />;
   // 추가는 내(합쳐서면 공동) 월급 계획이 있고 해제 대기가 아닐 때만(20 W-11 예외)
   const mine = (splits.data ?? []).some((x) =>

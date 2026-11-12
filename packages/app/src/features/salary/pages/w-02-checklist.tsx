@@ -167,7 +167,11 @@ export function W02Checklist() {
     title: copy.tabTitle,
     actions:
       list && !pending ? (
-        <Button variant="secondary" className="hg-wide-only" onClick={() => nav(savingPaths.add)}>
+        <Button
+          variant="secondary"
+          className="hg-wide-only"
+          onClick={() => nav(`${savingPaths.add}/a?from=salary_wide`)}
+        >
           {copy.addItem}
         </Button>
       ) : undefined,
@@ -456,7 +460,7 @@ export function W02Checklist() {
                     block
                     className="hg-narrow-only"
                     label={copy.listAdd}
-                    onClick={() => nav(savingPaths.add)}
+                    onClick={() => nav(`${savingPaths.add}/a?from=salary_row`)}
                   />
                 )}
               </section>

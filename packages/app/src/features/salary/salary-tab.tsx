@@ -3,7 +3,7 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { sharedCopy } from '../../shared/copy';
 import { MainFrame, SkelBody } from '../frame';
 import { copy } from './copy';
-import { useCheckRealtime, useSpace, useSplitRealtime } from './data';
+import { useCheckRealtime, useGoalRealtime, useSpace, useSplitRealtime } from './data';
 import { W01Receipt } from './pages/w-01-receipt';
 import { W02Checklist } from './pages/w-02-checklist';
 
@@ -14,6 +14,7 @@ export function SalaryTab() {
   const space = useSpace();
   useSplitRealtime(space.data?.id);
   useCheckRealtime(space.data?.id);
+  useGoalRealtime(space.data?.id);
   return params.get('view') === 'plan' ? <W01Receipt /> : <W02Checklist />;
 }
 

@@ -44,7 +44,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await page.getByRole('textbox').first().fill('5000000');
   await page.getByRole('button', { name: '저장' }).click();
   // 처음 정하면 기한으로 이어짐
-  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline\?first=1$/);
   expect(db.goals.find((g) => g.id === 'goal-e')?.target_amount).toBe(5_000_000);
 });
 
