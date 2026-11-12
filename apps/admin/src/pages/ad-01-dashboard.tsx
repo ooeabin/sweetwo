@@ -2,21 +2,28 @@ import { fetchAdminDashboard } from '@sweetwo/api';
 import { formatKstDateTime, formatMonthDay, type AdminDashboard } from '@sweetwo/core';
 import { Button, DataTable, Icon, Status } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
+import type { KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { copy } from '../copy';
-import { Frame } from '../frame';
+import { canSee, Frame } from '../frame';
+import { useAdmin } from '../gate';
 import { PageSkel } from '../skel';
 import { inquiryTone } from '../tones';
 
 // AD-01 대시보드. 1 상시 경보(없으면 숨김, 지금은 AD-19 평균 금리 90일 넘음만, 누르면 콘텐츠 › 계산·기준 데이터),
 // 2 실패 건수, 3 미처리 문의, 4 회원 현황, 5 최근 7일 추이, 6 앱 버전, 7 최근 활동(2026-11-06).
 // 집계 실패면 칸 “—” + 마지막 집계 시각. 최근 활동은 운영·CS·최고 관리자만(서버가 null로 줌).
+// 누르는 곳(경보, 미처리 문의, 승인 대기)은 그 메뉴를 볼 수 있는 역할만 누름. 분석 역할은 숫자만(2026-11-12).
 type Recent = NonNullable<AdminDashboard['recent']>;
 type RecentInquiry = NonNullable<Recent['inquiries']>[number];
 const TREND = ['joined', 'connected', 'checked'] as const;
 
 export function AD01Dashboard() {
   const nav = useNavigate();
+  const me = useAdmin();
+  const toContent = canSee(me.roles, 'content');
+  const toInquiries = canSee(me.roles, 'inquiries');
+  const toSystem = canSee(me.roles, 'system');
   const q = useQuery({ queryKey: ['admin', 'dashboard'], queryFn: fetchAdminDashboard });
   const d = q.data;
   const v = (n: number | undefined | null) =>
@@ -32,19 +39,27 @@ export function AD01Dashboard() {
     <Frame menu="dashboard" title={copy.menus.dashboard}>
       {(d?.alerts.length ?? 0) > 0 && (
         <section className="hg-stack" style={{ gap: 'var(--space-2)' }} aria-label={copy.alerts}>
-          {d?.alerts.map((x) => (
-            <button
-              key={x.kind}
-              type="button"
-              className="hg-admin__alert"
-              onClick={() => nav('/content', { state: { tab: 'data' } })}
-            >
-              <Icon name="circle-alert" />
-              <b>{copy.alertKinds[x.kind] ?? x.kind}</b>
-              <span>{copy.alertValue(x.kind, x.value, x.limit)}</span>
-              <Icon name="chevron-right" />
-            </button>
-          ))}
+          {d?.alerts.map((x) =>
+            toContent ? (
+              <button
+                key={x.kind}
+                type="button"
+                className="hg-admin__alert"
+                onClick={() => nav('/content', { state: { tab: 'data' } })}
+              >
+                <Icon name="circle-alert" />
+                <b>{copy.alertKinds[x.kind] ?? x.kind}</b>
+                <span>{copy.alertValue(x.kind, x.value, x.limit)}</span>
+                <Icon name="chevron-right" />
+              </button>
+            ) : (
+              <div key={x.kind} className="hg-admin__alert" role="status">
+                <Icon name="circle-alert" />
+                <b>{copy.alertKinds[x.kind] ?? x.kind}</b>
+                <span>{copy.alertValue(x.kind, x.value, x.limit)}</span>
+              </div>
+            ),
+          )}
         </section>
       )}
 
@@ -75,12 +90,14 @@ export function AD01Dashboard() {
           </div>
         </section>
         <section
-          className="hg-card is-link"
+          className={toInquiries ? 'hg-card is-link' : 'hg-card'}
           aria-label={copy.openInquiries}
-          role="link"
-          tabIndex={0}
-          onClick={() => nav('/inquiries')}
-          onKeyDown={(e) => e.key === 'Enter' && nav('/inquiries')}
+          {...(toInquiries && {
+            role: 'link',
+            tabIndex: 0,
+            onClick: () => nav('/inquiries'),
+            onKeyDown: (e: KeyboardEvent) => e.key === 'Enter' && nav('/inquiries'),
+          })}
         >
           <span className="hg-card__label">{copy.openInquiries}</span>
           <div className="hg-admin__stats">
@@ -127,7 +144,7 @@ export function AD01Dashboard() {
         )}
         {recent?.inquiries && (
           <section className="hg-card" aria-label={copy.recentTitle}>
-            {recent.approvals !== null && (
+            {recent.approvals !== null && toSystem && (
               <button
                 type="button"
                 className="hg-admin__alert is-quiet"

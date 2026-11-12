@@ -5,7 +5,7 @@ import Download from '../components/Download.astro';
 import Site from '../layouts/Site.astro';
 import { t } from '../lib/site';
 ---
-<Site title={t.title(t.getApp)} description={t.getApp}>
+<Site title={t.title(t.getApp)} description={t.desc.download}>
   <section class="hg-site__sec" style="border-top: 0;">
     <h1 class="hg-site__h2">{t.getApp}</h1>
     <Download placement="install" />

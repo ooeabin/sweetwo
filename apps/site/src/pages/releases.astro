@@ -17,18 +17,18 @@ for (const raw of md.replace(/<!--[\s\S]*?-->/g, '').split('\n')) {
   else if (i?.[1]) releases[releases.length - 1]?.groups.at(-1)?.items.push(i[1]);
 }
 ---
-<Site title={t.title(t.releasesPage)} description={t.releasesTitle}>
+<Site title={t.title(t.releasesPage)} description={t.desc.releases}>
   <section class="hg-site__sec" style="border-top: 0;">
     <h1 class="hg-site__h2">{t.releasesTitle}</h1>
     {releases.map((r) => (
       <article class="hg-release" id={r.version}>
-        <div class="hg-release__head">
+        <h2 class="hg-release__head">
           <a class="hg-release__ver" href={`#${r.version}`}>{r.version}</a>
           <span class="hg-release__date">{formatDateFull(r.date)}</span>
-        </div>
+        </h2>
         {r.groups.map((g) => (
           <>
-            <h4>{g.title}</h4>
+            <h3>{g.title}</h3>
             <ul>{g.items.map((x) => <li>{x}</li>)}</ul>
           </>
         ))}

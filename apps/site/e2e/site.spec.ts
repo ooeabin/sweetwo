@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { axe as runAxe } from './axe';
 
 // 웹사이트 L-01·02·03·05·06과 초대 링크(docs/spec/28-website.md).
@@ -172,4 +173,145 @@ test('로그인 복귀 페이지(A-03 5번): 앱이면 code와 state만 sweetwo:
   await axe(page);
   await page.goto('/auth/callback?from=app&state=<x>&code=a');
   await expect(page.getByRole('link', { name: 'sweeTwo 열기' })).toBeHidden();
+});
+
+// QA 12구간(2026-11-12)
+test('L-01 머리(S12-09·10): canonical, og:url·type, 메타 설명, 파비콘 32·48·apple-touch-icon', async ({
+  page,
+  request,
+}) => {
+  await outside(page);
+  await page.goto('/?utm_source=insta');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://sweetwo.kr/',
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    'content',
+    'https://sweetwo.kr/',
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /^둘이 구워서 더 달콤한 자산파이\. /,
+  );
+  for (const [sel, href] of [
+    ['link[rel="icon"][sizes="32x32"]', '/favicon-32.png'],
+    ['link[rel="icon"][sizes="48x48"]', '/favicon-48.png'],
+    ['link[rel="apple-touch-icon"]', '/apple-touch-icon.png'],
+  ] as const) {
+    await expect(page.locator(sel)).toHaveAttribute('href', href);
+    expect((await request.get(href)).status()).toBe(200);
+  }
+  await page.goto('/help');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://sweetwo.kr/help/',
+  );
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'sweeTwo 자주 묻는 질문을 찾아보고, 답이 없으면 메일로 물어볼 수 있어요',
+  );
+});
+
+test('L-01(S12-01·12·13): 좁은 창 가로 스크롤 없음, 기능 2열 2줄, 사업자 정보는 값이 없으면 숨김', async ({
+  page,
+}) => {
+  await outside(page);
+  for (const width of [320, 360]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+  }
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const cols = await page
+    .locator('.hg-site__cols')
+    .evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(' ').length);
+  expect(cols).toBe(2);
+  await expect(page.getByText('[확인 필요]')).toHaveCount(0);
+  await expect(page.locator('footer')).not.toContainText('사업자등록번호');
+  // 하단 메일 링크는 토큰 색(ink-2), 브라우저 기본 파랑 아님
+  const mail = page.getByRole('link', { name: '고객센터 help@sweetwo.kr' });
+  const [link, ink2] = await mail.evaluate((e) => [
+    getComputedStyle(e).color,
+    getComputedStyle(document.querySelector('.hg-site__links a') as Element).color,
+  ]);
+  expect(link).toBe(ink2);
+});
+
+test('다크 모드(S12-03): 기기 설정을 따라 바탕이 어두워짐', async ({ page }, info) => {
+  await outside(page);
+  await page.goto('/');
+  const theme = await page.evaluate(() => document.documentElement.dataset.theme);
+  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const [r, g, b] = (bg.match(/\d+/g) ?? []).map(Number);
+  const light = ((r ?? 0) + (g ?? 0) + (b ?? 0)) / 3 > 128;
+  if (info.project.name === 'dark') {
+    expect(theme).toBe('dark');
+    expect(light).toBe(false);
+    // 그림 카드는 다크에서도 흰 카드
+    const art = await page
+      .locator('.hg-site__art')
+      .evaluate((e) => getComputedStyle(e).backgroundColor);
+    expect(art).toBe('rgb(255, 255, 255)');
+  } else {
+    expect(theme).toBe('light');
+    expect(light).toBe(true);
+  }
+  await axe(page);
+});
+
+test('초대 링크(S12-05): /i/는 코드 없이 안내 + 초대 제목, /i/{코드}는 _redirects로 200', async ({
+  page,
+}) => {
+  await outside(page);
+  await page.goto('/i/');
+  await expect(page).toHaveTitle('sweeTwo에 초대받았어요');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+    'content',
+    'sweeTwo에 초대받았어요',
+  );
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'sweeTwo에 초대받았어요' }),
+  ).toBeVisible();
+  await expect(page.getByText('앱을 설치한 뒤 받은 초대 코드를 입력해 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '복사' })).toBeHidden();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+  await axe(page);
+  // astro preview는 _redirects를 모름: 빌드에 규칙이 있는지 확인(실제 200은 Cloudflare)
+  const rules = readFileSync(new URL('../dist/_redirects', import.meta.url), 'utf8');
+  expect(rules).toMatch(/^\/i\/\* \/i\/ 200$/m);
+  await page.goto('/i/K7M2QX');
+  await expect(page).toHaveTitle('sweeTwo에 초대받았어요');
+  await expect(page.getByText('앱을 설치한 뒤 이 코드를 입력해 주세요')).toBeVisible();
+});
+
+test('L-05(S12-04·07): 시행일 YYYY-MM-DD, ?v= 이전 판, 개인정보처리방침 v2 시행', async ({
+  page,
+}) => {
+  await outside(page);
+  await page.goto('/privacy');
+  await expect(page.getByText('시행일 2026년 11월 12일')).toBeVisible();
+  await expect(page.getByRole('link', { name: /2026년 11월 1일/ })).toHaveAttribute(
+    'href',
+    '/privacy?v=2026-11-01',
+  );
+  await page.goto('/privacy?v=2026-11-01');
+  await expect(page.getByText('시행일 2026년 11월 1일')).toBeVisible();
+  await expect(page.getByText('시행일 2026년 11월 12일')).toBeHidden();
+  await expect(page.getByRole('link', { name: '지금 버전 보기' })).toBeVisible();
+  // 예전 링크 형식(ISO 시각)도 그 날짜 판
+  await page.goto('/terms?v=2026-11-01T00:00:00.000Z');
+  await expect(page.getByText('시행일 2026년 11월 1일')).toBeVisible();
+  await axe(page);
+});
+
+test('L-03(S12-11): 버전 h2, 묶음 h3(제목 단계를 건너뛰지 않음)', async ({ page }) => {
+  await page.goto('/releases');
+  await expect(page.getByRole('heading', { level: 2, name: /1\.0\.0/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: '새 기능' }).first()).toBeVisible();
+  expect(await page.locator('h4').count()).toBe(0);
 });

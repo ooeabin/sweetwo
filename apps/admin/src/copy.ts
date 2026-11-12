@@ -1,4 +1,5 @@
-// 어드민 문구(docs/spec/27-admin-screens.md, 33-admin.md). 기획서 “ ” 안 문장을 그대로, 해요체.
+// 어드민 문구(docs/spec/27-admin-screens.md, 33-admin.md). 기획서 “ ” 안 문장 그대로.
+// 어드민은 해요체 대신 짧게(2026-11-06): 명사형, ‘~됨’, ‘~불가’. 사용자에게 가는 글(공지, 답변, 메일)과 앱 문구를 그대로 보여 주는 곳만 해요체.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   menus: {
@@ -490,7 +491,6 @@ export const ops = {
   noApproval: '승인할 요청 없음', // [확인 필요]
   superMin: '최고 관리자 최소 1명 필요', // [확인 필요] 33 2장 최소 1명(2026-11-06)
   appCols: {
-    minWeb: '최소 지원 버전(웹)',
     minIos: '최소 지원 버전(iOS)',
     minAndroid: '최소 지원 버전(Android)',
   }, // [확인 필요]

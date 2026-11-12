@@ -52,14 +52,24 @@ export const t = {
     status: '상태 페이지',
     contact: '고객센터 help@sweetwo.kr',
     privacyOfficer: '개인정보 보호책임자 privacy@sweetwo.kr',
-    // 사업자 정보 값은 출시 준비(34 4장)에서 정함
+    // 사업자 정보 값은 출시 준비(34 4장)에서 정함 [확인 필요]. 빈 값인 줄은 하단에 보이지 않음(2026-11-12)
     business: [
-      ['상호', '[확인 필요]'],
-      ['대표', '[확인 필요]'],
-      ['사업자등록번호', '[확인 필요]'],
-      ['주소', '[확인 필요]'],
+      ['상호', ''],
+      ['대표', ''],
+      ['사업자등록번호', ''],
+      ['주소', ''],
     ] as [string, string][],
     notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
+  },
+
+  // 페이지마다 메타 설명 1줄(28 공통 ‘주소’, 2026-11-12) [확인 필요]
+  desc: {
+    releases: 'sweeTwo 새 버전에서 달라진 점을 버전별로 모았어요',
+    terms: 'sweeTwo 이용약관 전문과 이전 버전을 볼 수 있어요',
+    privacy: 'sweeTwo 개인정보처리방침 전문과 이전 버전을 볼 수 있어요',
+    help: 'sweeTwo 자주 묻는 질문을 찾아보고, 답이 없으면 메일로 물어볼 수 있어요',
+    download: 'iPhone과 iPad는 App Store, Android는 Google Play에서 sweeTwo를 받아요',
+    invite: '앱을 설치한 뒤 초대 코드를 입력하면 같이 쓸 수 있어요',
   },
 
   // L-03
@@ -87,6 +97,8 @@ export const t = {
   // [확인 필요] 초대 페이지(28 공통 ‘초대 링크’)
   invited: 'sweeTwo에 초대받았어요',
   invitedSub: '앱을 설치한 뒤 이 코드를 입력해 주세요',
+  // [확인 필요] 코드 없이 /i/로 들어옴(2026-11-12)
+  invitedNoCode: '앱을 설치한 뒤 받은 초대 코드를 입력해 주세요',
   copyCode: '복사',
   copied: '복사했어요',
 

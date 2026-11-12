@@ -1,17 +1,23 @@
 ---
-// 없는 주소. 초대 링크(/i/{코드})는 정적 파일이 없어 여기로 오므로 초대 화면을 보여 줌(CloudFront 오류 페이지 = 이 페이지).
+// 없는 주소(Cloudflare Workers 정적 자산 wrangler.jsonc `404-page` = 이 페이지, 404 응답).
+// 초대 링크(/i/{코드})는 public/_redirects가 /i/ 페이지로 200 응답하므로 보통 여기 오지 않음. _redirects를 모르는
+// 미리보기 서버(astro preview 등)에서도 같은 초대 화면이 보이게 /i/로 시작하면 초대 화면을 보여 줌.
 import Invite from '../components/Invite.astro';
 import Site from '../layouts/Site.astro';
 import { t } from '../lib/site';
 ---
-<Site title={t.title(t.notFound)} description={t.notFound}>
+<Site title={t.title(t.notFound)} description={t.notFound} noindex>
   <section class="hg-site__sec" style="border-top: 0;" data-not-found>
     <h1 class="hg-site__h2">{t.notFound}</h1>
     <a class="hg-btn hg-btn--secondary" href="/">{t.home}</a>
   </section>
   <Invite />
   <script>
+    import { t } from '../lib/site';
     const nf = document.querySelector<HTMLElement>('[data-not-found]');
-    if (nf && location.pathname.startsWith('/i/')) nf.hidden = true;
+    if (nf && location.pathname.startsWith('/i/')) {
+      nf.hidden = true;
+      document.title = t.invited;
+    }
   </script>
 </Site>

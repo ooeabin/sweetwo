@@ -2,7 +2,7 @@
 
 python3 scripts/brand-icons/two.py   (pillow, node + playwright 필요)
 만드는 것: symbol.png(512, 둥근 사각 앱 아이콘, 모서리 투명)와 symbol.svg(같은 그림 벡터), og.png(공유 이미지), app-icon.png, apple-touch-icon.png, favicon-32/48.png(디자인 시스템 Brand),
-iOS AppIcon, Android 런처(적응형 전경 + 바탕 색, 예전 방식 정사각·원형), 사이트·모바일 파비콘.
+iOS AppIcon, Android 런처(적응형 전경 + 바탕 색, 예전 방식 정사각·원형), 사이트(32·48·apple-touch-icon)·어드민(32·48)·모바일 파비콘.
 글자 크기는 아래 FRAC(캔버스 폭 대비 Two 폭). 바꾸면 docs/spec/04-brand.md ‘앱 아이콘’도 같이 고침.
 """
 import os, subprocess, sys
@@ -48,8 +48,15 @@ def main():
     for n in (32, 48):
         f = tile(n * 8, radius=n * 8 // 5).resize((n, n), Image.LANCZOS)
         f.save(os.path.join(B, f'favicon-{n}.png'), optimize=True)
-    for q in ('apps/site/public/favicon-32.png', 'apps/mobile/public/favicon-32.png'):
-        Image.open(os.path.join(B, 'favicon-32.png')).save(p(q), optimize=True)
+    # 사이트(32, 48, apple-touch-icon 180)·어드민(32, 48)·모바일(32) 파비콘은 위 원본을 그대로 복사(2026-11-12)
+    for name, dests in {
+        'favicon-32.png': ('apps/site/public', 'apps/admin/public', 'apps/mobile/public'),
+        'favicon-48.png': ('apps/site/public', 'apps/admin/public'),
+        'apple-touch-icon.png': ('apps/site/public',),
+    }.items():
+        for d in dests:
+            os.makedirs(p(d), exist_ok=True)
+            Image.open(os.path.join(B, name)).save(p(f'{d}/{name}'), optimize=True)
     # Android
     res = p('apps/mobile/android/app/src/main/res')
     for d, s in {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}.items():

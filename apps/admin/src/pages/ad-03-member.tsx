@@ -74,6 +74,7 @@ export function AD03Member() {
     <Frame
       menu="members"
       title={copy.memberTitle}
+      protect
       actions={
         cs && (
           <div className="hg-row" style={{ gap: 'var(--space-2)' }}>

@@ -1,6 +1,9 @@
 ---
 // L-05 약관과 개인정보처리방침: 제목 + “시행일 {날짜}” → 본문 → “이전 버전” 목록(시행일). ?v={시행일}이면 그 본문 + “지금 버전 보기”.
 // 원본은 src/content/{terms,privacy}/{시행일}.md 하나씩(앱 가입 화면·S-19가 같은 원본).
+// 시행일은 YYYY-MM-DD(KST)로 맞춤: frontmatter의 날짜(YAML이 Date로 읽음)를 그 날짜 그대로 문자열로(2026-11-12).
+// 지금 시행 중 = 시행일이 오늘(KST) 이전인 것 중 가장 최근. 빌드 때 한 번 고르고, 브라우저가 KST 오늘로 다시 고름
+// (시행일 전에 빌드한 페이지도 시행일부터 새 판). 그래도 시행일에 사이트를 다시 빌드함(DEV_GUIDE ‘웹사이트’).
 import { formatDateFull, todayKst } from '@sweetwo/core';
 import type { MarkdownInstance } from 'astro';
 import { t } from '../lib/site';
@@ -8,16 +11,16 @@ import { t } from '../lib/site';
 interface Props {
   name: string;
   path: string;
-  files: Record<string, MarkdownInstance<{ version: string; effective: string }>>;
+  files: Record<string, MarkdownInstance<{ version: string; effective: string | Date }>>;
 }
 const { name, path, files } = Astro.props;
+const ymd = (v: unknown) => (v instanceof Date ? v.toISOString() : String(v)).slice(0, 10);
 const today = todayKst();
 const all = Object.values(files)
-  .map((m) => ({ ...m, effective: String(m.frontmatter.effective) }))
+  .map((m) => ({ ...m, effective: ymd(m.frontmatter.effective) }))
+  .filter((m) => /^\d{4}-\d{2}-\d{2}$/.test(m.effective))
   .sort((a, b) => b.effective.localeCompare(a.effective));
-// 지금 시행 중 = 시행일이 오늘 이전인 것 중 가장 최근(없으면 가장 이른 것)
 const current = all.find((m) => m.effective <= today) ?? all[all.length - 1];
-const older = all.filter((m) => m !== current && m.effective < (current?.effective ?? ''));
 ---
 <section class="hg-site__sec" style="border-top: 0;" data-policy>
   <a class="hg-btn hg-btn--link" href={path} data-current-link hidden>{t.currentVersion}</a>
@@ -28,12 +31,12 @@ const older = all.filter((m) => m !== current && m.effective < (current?.effecti
       <div class="hg-stack hg-policy"><m.Content /></div>
     </article>
   ))}
-  {older.length > 0 && (
-    <nav class="hg-stack" aria-label={t.prevVersions}>
+  {all.length > 1 && (
+    <nav class="hg-stack" aria-label={t.prevVersions} data-older hidden={!all.some((m) => m.effective < (current?.effective ?? ''))}>
       <h2 class="hg-site__h2">{t.prevVersions}</h2>
       <div class="hg-list">
-        {older.map((m) => (
-          <a class="hg-listrow" href={`${path}?v=${m.effective}`}>
+        {all.map((m) => (
+          <a class="hg-listrow" href={`${path}?v=${m.effective}`} data-older-row={m.effective} hidden={!(m.effective < (current?.effective ?? ''))}>
             <span class="hg-listrow__text"><span class="hg-listrow__label">{formatDateFull(m.effective)}</span></span>
             <span class="hg-chevron" aria-hidden="true"></span>
           </a>
@@ -43,11 +46,23 @@ const older = all.filter((m) => m !== current && m.effective < (current?.effecti
   )}
 </section>
 <script>
-  const v = new URLSearchParams(location.search).get('v');
-  const target = v && document.querySelector<HTMLElement>(`[data-version="${CSS.escape(v)}"]`);
-  if (target) {
-    document.querySelectorAll<HTMLElement>('[data-version]').forEach((e) => (e.hidden = e !== target));
+  // 오늘(KST) 기준으로 시행 중인 판을 다시 고름. ?v=는 YYYY-MM-DD(예전 링크의 ISO 시각도 앞 10자로 받음)
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  const arts = [...document.querySelectorAll<HTMLElement>('[data-version]')].sort((a, b) =>
+    (b.dataset.version ?? '').localeCompare(a.dataset.version ?? ''),
+  );
+  const live = arts.find((e) => (e.dataset.version ?? '') <= today) ?? arts[arts.length - 1];
+  const v = (new URLSearchParams(location.search).get('v') ?? '').slice(0, 10);
+  const asked = /^\d{4}-\d{2}-\d{2}$/.test(v) ? arts.find((e) => e.dataset.version === v) : undefined;
+  const shown = asked ?? live;
+  if (shown && live) {
+    arts.forEach((e) => (e.hidden = e !== shown));
     const link = document.querySelector<HTMLElement>('[data-current-link]');
-    if (link) link.hidden = false;
+    if (link) link.hidden = shown === live;
+    const lv = live.dataset.version ?? '';
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-older-row]')];
+    rows.forEach((r) => (r.hidden = !((r.dataset.olderRow ?? '') < lv)));
+    const older = document.querySelector<HTMLElement>('[data-older]');
+    if (older) older.hidden = rows.every((r) => r.hidden);
   }
 </script>

@@ -5,7 +5,7 @@
 import Site from '../../layouts/Site.astro';
 import { t } from '../../lib/site';
 ---
-<Site title={t.title(t.loginDone)} description={t.loginDone}>
+<Site title={t.title(t.loginDone)} description={t.loginDone} noindex>
   <section class="hg-site__sec" style="border-top: 0;" data-auth-done>
     <h1 class="hg-site__h2">{t.loginDone}</h1>
     <p class="hg-site__lead">{t.backToApp}</p>
