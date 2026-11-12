@@ -751,7 +751,9 @@ supabase/
 - 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`, F-04a `/assets/:id/matured/:step?`. 하위 탭은 “요약” “자산·부채” 2개, 기기에 기억
 - `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 파트너 명의 대신 입력 = person + `owner_user_id` null(모두 보여 주기만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
 - 공개 범위(`visibility` all / sum / private = “모두 보여 주기” / “금액만 보여 주기” / “숨기기”, 새 내 항목 기본 = 금액만)는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 모두 보여 주기, 내 명의, 내가 대신 입력한 것)만. 파트너 ‘금액만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘숨기기’는 아무것도 안 줌. 고치기는 `asset_editable()`
-- 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀)
+- 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀). `source`(2026-11-12 QA 8구간 D3, 20261124090000): 처음 적은 값 `created`, 직접 고친 것 `manual`, 팔았어요 `sell`(`sell_asset`), 만기 정리 `matured`(`settle_matured`), 옛 월말 정리 `close`. 함수는 `sweetwo.asset_source` 설정으로 정하고 끝나면 비움. 수정 내역(F-04 5번)은 `manual`만
+- 명의 잠금(S8-03, `asset_client_guard`): 앱이 바로 고칠 때 `owner`·`owner_user_id`·`created_by`·`space_id`는 못 바꿈(`not_owner`). RLS update는 새 행만 봐서 공동 자산을 내 명의로 가져갈 수 있었음. 합류 넘김(`finish_join`), 연결 해제·다시 연결 같은 함수 안(security definer)은 그대로
+- Realtime(S8-06): asset은 발행에 있음(읽기 권한은 `asset_select` 그대로라 상대 ‘금액만’·‘숨기기’ 행은 신호도 안 감).
 - 순자산: core `netWorth`(원금 기준, 예상 = 평가금액 기준, 숨기기·판 항목 빼고 파트너 금액만 더함). 저금 항목 모은 금액은 더하지 않음. 월말 순자산 `net_worth_history(개월)`
 - F-01: 순자산 그래프(ui `LineChart`, 서버 `net_worth_history(120)` + 이번 달 지금 값, core `netWorthSeries`. 기간 탭 6개월·1년·3년·전체, 데이터보다 긴 기간 비활성, 고른 탭 기억 `sweetwo.networth-period`) + 자산·부채 합계(→ F-02)
 - F-02: 묶음(F-03a 그룹) 안 정렬 칩(이름, 명의, 금액, 수정일, 기억 `sweetwo.asset-sort`), 줄 배지는 공개 범위(내 항목)와 ‘대신 입력’만, 파트너 금액만 줄(알약 ‘금액만’), 투자 묶음 줄 core `investSummary`
@@ -761,7 +763,7 @@ supabase/
 - 재기획으로 화면에서 뺀 것: 통장 역할 배지, 목표 연결(F-03f2 빠지는 통장 `pay_from`, F-03i·F-04 `goal_id`), F-01 비상금 카드·이번 달 카드·이번 달 계획·월 정산 요약, F-06 재정 진단 탭. `asset.pay_from`·`goal_id` 열은 남겨 두고(스키마는 2단계로 지움) 새로 쓰지 않음
 - 재기획으로 지운 화면(2026-10-26): F-05 월 수입·지출, F-05f 기간 수입, F-07 계획 다시 세우기, F-09 비상금 넣기·꺼내기, O-53 투자 원칙, 첫 주 O-34~47. 남은 옛 읽기: 통장(`account`)
 - F-03 금액 ‘잘 모르겠어요’: 구간 칩(core `bands.goalAmount`, 중간값) → `asset.estimated`, 목록·상세에 ‘추정’ 알약, 금액을 고치면 사라짐
-- F-04(20261102210000): 금액 그래프(달마다 마지막 기록, `LineChart`), 투자·부동산은 ‘시세 바꾸기’(금액 그 자리 수정)·‘팔았어요’ → F-04b~d `/assets/:id/sold`(받은 금액, ‘일부만 팔았어요’ 남은 평가금액, 받은 통장, 결과: 통장 +금액, 실현 손익 = 받은 금액 − 판 비율만큼 원금). 서버 `sell_asset`(다 팔면 `sold`). 수정 내역은 직접 고친 것만 + 고친 사람(`asset_history.recorded_by`)
+- F-04(20261102210000): 금액 그래프(달마다 마지막 기록, `LineChart`), 투자·부동산은 ‘시세 바꾸기’(금액 그 자리 수정)·‘팔았어요’ → F-04b~d `/assets/:id/sold`(받은 금액, ‘일부만 팔았어요’ 남은 평가금액, 받은 통장, 결과: 통장 +금액, 실현 손익 = 받은 금액 − 판 비율만큼 원금). 서버 `sell_asset`(다 팔면 `sold`, 전·월세 보증금은 거절 S8-15). 수정 내역은 직접 고친 것만 + 고친 사람(`asset_history.recorded_by`)
 - 다음 단계: F-08(출시 후)
 
 ### 기능 하나 만드는 순서
