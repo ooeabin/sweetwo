@@ -115,8 +115,6 @@ export const copy = {
   pastOnly: '오늘까지의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
   futureOnly: '내일부터의 날짜를 넣어 주세요', // [확인 필요] O-12와 같음
   birthYearQ: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
-  openProposal: '답을 기다리는 제안이 있어요', // [확인 필요]
-  seeProposal: '제안 보기', // [확인 필요]
 
   // S-12 우리 둘 정보
   coupleTitle: '우리 둘 정보', // [확인 필요]
@@ -239,7 +237,7 @@ export const copy = {
   trashLeft: (n: number) => `${n}일 남음`,
   restore: '되살리기',
   restored: '되살렸어요',
-  restoreProposed: (name: string) => `${name}님에게 되살리자고 제안했어요`, // [확인 필요]
+  restoredUnlinked: '연결된 항목이 없어 따로 되살렸어요', // 25 S-21 3번, 09 ‘삭제 연결 처리’
   undo: '되돌리기',
   marketing: '마케팅 정보 받기',
   marketingAt: (date: string) => `${date} 동의`,
@@ -332,7 +330,7 @@ export const copy = {
     >,
     careCats: { family: '양가', couple: '우리 둘', wedding: '결혼' } as Record<string, string>, // [확인 필요]
     paidFrom: {
-      goal_fund: '목표자금',
+      goal_fund: '저금', // [확인 필요] 옛 값(2026-11-12 QA 11구간 S11-14, ‘목표자금’ 대신)
       living: '생활비',
       personal: '개인 지출',
       wedding_account: '결혼 준비 통장',
@@ -347,6 +345,7 @@ export const copy = {
   deleteRestore: '30일 안에 다시 로그인하면 복구돼요',
   deleteWith: (p: string) => `${p}로 확인하고 삭제`,
   deleteQ: '계정을 삭제할까요?', // [확인 필요] 확인 Modal 제목
+  deleteConfirm: '계정을 삭제할게요', // 13 15번, 2026-11-12 QA 11구간 D3
   deletedNotice: (md: string) =>
     `계정 삭제 요청을 받았어요. ${md}까지 다시 로그인하면 취소할 수 있어요`,
 
@@ -404,7 +403,7 @@ export const copy = {
   accessCannot: '보지 않아요', // [확인 필요]
   accessRange: '금액은 구간으로',
   accessRaw: '금액이 그대로 보여요',
-  accessNever: ['메모', '가족 정보', '사진', '비공개 항목', '용돈 내역'],
+  accessNever: ['메모', '가족 정보', '사진', '숨긴 항목'], // 25 S-19b 3번(2026-11-12 QA 11구간 S11-09)
   accessScopes: {
     month: '이번 달 화면',
     plan: '월급 계획 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘플랜’ 대신)
@@ -424,21 +423,13 @@ export const copy = {
   faqSearch: '자주 묻는 질문에서 찾기', // [확인 필요] 검색 칸
   faqNone: '찾는 답이 없어요',
 
-  // S-10a 통장 방식
-  accountMode: '통장 방식',
-  accountModeQ: '통장을 어떻게 쓸까요?', // [확인 필요] 질문 문구
-  accountModes: { single: '통장 하나로 써요', roles: '역할별로 나눠 쓸래요' } as Record<
-    string,
-    string
-  >,
-  accountModeValue: (now: string, next: string | null) => (next ? `${now} → ${next}` : now),
-
   // S-15 보안
   security: '보안',
   appLock: '앱 잠금',
   appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
   changePin: 'PIN 바꾸기',
-  pushDenied: '휴대폰 설정에서 sweeTwo 알림을 켜 주세요', // [확인 필요]
+  pushDenied: '휴대폰 설정에서 알림을 켜 주세요', // [확인 필요] 25 S-14 1번
+  openOsSettings: '설정 열기', // [확인 필요] 25 S-14 1번
   touchId: (kind: 'touch' | 'face' | 'fingerprint') =>
     kind === 'fingerprint' ? '지문으로 풀기' : `${kind === 'face' ? 'Face ID' : 'Touch ID'}로 풀기`, // [확인 필요]
   autoLock: '자동 잠금',
@@ -456,7 +447,6 @@ export const copy = {
   pushOffHelp: '알림 센터에서만 볼 수 있어요', // [확인 필요]
   notiTopics: '알림 종류', // [확인 필요]
   mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
-  livingCheck: '생활비 체크',
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
     plan: '월급 체크리스트',
@@ -485,42 +475,15 @@ export const copy = {
   checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
   forUs: '맞춤 정보', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름
-  talkCards: '우리 둘 대화 카드 다시 보기', // [확인 필요]
   steps: '해야 할 일', // [확인 필요] 요소 이름
   sources: '출처', // [확인 필요] 요소 이름
   checked: (date: string) => `확인일 ${date}`,
   doneBy: (name: string) => `${name}님이 완료했어요`,
   markDone: '완료했어요',
   applyToUs: '우리에게 적용하기',
-  notAdvice: '투자·금융 자문이 아니에요. 제도와 개념만 설명해요', // [확인 필요] 고지 문구
+  notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요', // 31 5-3
   noStage: '지금 단계의 체크리스트가 없어요', // [확인 필요]
-  // S-17 내 답 다시 보기
-  answersTitle: '내 답 다시 보기',
-  parts: {
-    p0: '우리', // [확인 필요] 파트 이름
-    p1: '맞춤 정보',
-    p2: '목표',
-    p3: '수입과 지출',
-    p4: '자산과 부채',
-    p5: '용돈과 분담',
-  },
-  reanswer: '다시 답하기',
-  replan: '계획 다시 세우기',
-  answerRows: {
-    nickname: '내 호칭',
-    side: '신랑·신부',
-    marriage: '결혼 상태',
-    housing: '사는 집',
-    employment: '고용 형태',
-    child: '아이 계획',
-    goals: '고른 목표',
-    income: '월 수입',
-    fixed: '고정지출',
-    living: '생활비',
-    assets: '자산과 부채',
-    allowance: '내 용돈',
-    split: '분담 방식',
-  },
+
   goalsCount: (n: number) => `${n}개`,
   marriageState: {
     married: '결혼했어요',
@@ -552,7 +515,6 @@ export const copy = {
   askChild: '아이 계획이 있으세요?',
   askSplit: '공동 지출 나누는 방식, 괜찮아요?', // [확인 필요] 2026-11-09 ‘같이 쓰는 돈’ 대신
   savedAnswer: '바꿨어요',
-  proposedTo: (name: string) => `${name}님에게 제안했어요`,
   // S-11e 프로필 사진
   photo: '프로필 사진',
   photoChange: '사진 바꾸기',

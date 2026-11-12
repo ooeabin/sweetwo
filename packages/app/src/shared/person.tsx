@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { track } from './analytics';
 import { squarePhoto } from './photo';
+import { onSessionReset } from './session-reset';
 
 /** 같은 공간 사람 프로필 사진: 사람 id → 사진 주소(없으면 없음 → 첫 글자). 2026-11-05 지정 아바타 없앰 */
 export function usePeopleArt(): (userId: string | null | undefined) => string | undefined {
@@ -24,6 +25,10 @@ export function usePeopleArt(): (userId: string | null | undefined) => string | 
  */
 // 앱을 켤 때마다 한 번만 확인(화면마다 앱 틀이 새로 그려져도)
 let socialChecked = false;
+// 같은 실행에서 다른 계정으로 로그인하면 그 계정도 한 번 확인(2026-11-12 QA 11구간 S11-08)
+onSessionReset(() => {
+  socialChecked = false;
+});
 export function useSocialAvatar(
   userId: string | null | undefined,
   spaceId: string | null | undefined,

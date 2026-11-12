@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { emitter } from './events';
 
@@ -44,6 +44,18 @@ export function pushToken(): Promise<string | null> {
     return t;
   });
   return token;
+}
+
+/** 앱 안 플러그인(ios SceneDelegate.swift AppSettingsPlugin, android AppSettingsPlugin.java): 휴대폰 설정의 이 앱 알림 화면 */
+const AppSettings = registerPlugin<{ openNotifications: () => Promise<void> }>('AppSettings');
+
+/** S-14 ‘설정 열기’(2026-11-12 QA 11구간 S11-04). 열지 못하면 조용히 넘어감 */
+export async function openPushSettings(): Promise<void> {
+  try {
+    await AppSettings.openNotifications();
+  } catch {
+    /* 옛 네이티브 빌드 등 */
+  }
 }
 
 /** 허용을 묻고(처음 한 번은 OS 창) 허용되면 true */

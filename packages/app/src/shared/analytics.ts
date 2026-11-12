@@ -108,8 +108,17 @@ export type AnalyticsEvent =
       props: { response: 'accept' | 'decline'; hours_since_request: number };
     }
   | {
+      // S-12c 요청. exported_data = 요청 전 24시간 안에 이 기기에서 S-18 내보내기를 끝냈는지(2026-11-12 QA 11구간 S11-06)
       name: 'unlink_requested';
-      props: { linked_months: number };
+      props: { linked_months: number; exported_data: boolean };
+    }
+  | {
+      // S-18b 삭제 요청이 받아들여짐(32 4-7, 2026-11-12 QA 11구간 S11-06). exported_before = 24시간 안 이 기기 내보내기
+      name: 'account_delete_requested';
+      props: {
+        couple_state: 'unjoined' | 'linked' | 'unlink_pending' | 'solo';
+        exported_before: boolean;
+      };
     }
   | {
       name: 'living_check_answered';
@@ -388,13 +397,21 @@ export type AnalyticsEvent =
     }
   | {
       name: 'unlink_resolved';
-      // deadline(요청 + 14일 확정)은 서버가 보냄
+      // 상대 확인(S-12d) acknowledged, 요청자 취소 canceled(32 4-7, 2026-11-12 S11-06 ‘agreed’에서 맞춤).
+      // timeout(요청 + 14일 확정)은 서버가 보냄
       props: {
-        path: 'agreed' | 'canceled';
+        path: 'acknowledged' | 'canceled';
         days_pending: number;
         exported_data: boolean;
       };
     };
+
+/** 값이 바뀐 정도(32 fact_value_changed change_band): 변동률 <5 / 5-20 / 20+ %. F-04 금액, S-11c 월급·월급날 */
+export const changeBand = (from: number, to: number): '<5' | '5-20' | '20+' => {
+  if (from === 0) return to === 0 ? '<5' : '20+';
+  const pct = (Math.abs(to - from) * 100) / Math.abs(from);
+  return pct < 5 ? '<5' : pct < 20 ? '5-20' : '20+';
+};
 
 type Sink = (e: AnalyticsEvent) => void;
 let sink: Sink | null = null;

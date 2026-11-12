@@ -25,6 +25,7 @@ import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { track } from '../../../shared/analytics';
 import { careEventType, useCalendarData, vsBudget } from '../data';
+import { onSessionReset } from '../../../shared/session-reset';
 
 // Y-08 다녀온 뒤 기록(24 Y-08, 재기획): a 쓴 돈(금액 메모 채움, 건너뛰기) (2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰, ADR 0007)
 // → b 무엇을 드렸어요(현금 / 선물 / 식사, 같은 경조사에 2년 안 같은 선물이면 “작년에도 드렸어요”) → c 기억(메모) → 저장.
@@ -63,6 +64,8 @@ const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, ge
   d: blank('', null),
   set: (p) => set({ d: { ...get().d, ...p } }),
 }));
+// 로그아웃하면 입력 중이던 기록(금액·선물·메모·사진)을 비움(2026-11-12 QA 11구간 S11-08)
+onSessionReset(() => useDraft.setState({ d: blank('', null) }));
 const STEPS = ['a', 'b', 'c'];
 
 export function Y08Record() {

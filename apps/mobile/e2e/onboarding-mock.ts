@@ -1699,6 +1699,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
       if (fn === 'my_mail_bounced') return json(route, db.mailBounced);
+      // S-11 로그인 줄 소셜 계정 이메일(2026-11-12 QA 11구간 S11-11)
+      if (fn === 'my_login_email') return json(route, 'chanwoo@kakao.example');
       if (fn === 'agree_terms') {
         const b = body();
         const n = db.pendingTerms.filter(
@@ -1878,7 +1880,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           body.p_kind === 'goal' ? db.goals : body.p_kind === 'care_day' ? db.cares : db.assets;
         const r = list.find((x) => x.id === body.p_id);
         if (r) r.deleted_at = null;
-        return json(route, 'restored');
+        // 넣을 월급 계획이 없는 저금 항목(테스트가 unlinked 표시)은 서버처럼 'unlinked'(S11-10)
+        return json(route, r && (r as { unlinked?: boolean }).unlinked ? 'unlinked' : 'restored');
       }
       if (fn === 'purge_trash') {
         const body = JSON.parse(route.request().postData() ?? '{}') as {

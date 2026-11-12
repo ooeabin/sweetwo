@@ -1,6 +1,7 @@
 // TanStack Query 키는 여기에만 모은다.
 export const qk = {
   me: ['me'] as const,
+  loginEmail: ['me', 'login-email'] as const,
   space: ['space'] as const,
   /** 저금 항목(goal 행, space_goals) */
   goals: ['goals'] as const,

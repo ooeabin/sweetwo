@@ -172,3 +172,6 @@ export const copy = {
     privacy: 'https://sweetwo.kr/privacy',
   },
 };
+
+/** PIN 5번 틀려 로그아웃된 뒤 A-02로 갈 때 넘기는 안내(A-06, S-15, S-18 같은 문구) */
+export const lockedOutState = { notice: copy.pinLockedOut };

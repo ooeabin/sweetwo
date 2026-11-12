@@ -140,7 +140,7 @@
 | rank\_banner\_tapped | F-01 0번 순위 줄 (2026-11-04. 2026-11-11 홈 순위 줄 1a 없앰, 홈은 H-04 타일 배지라 이벤트 없음) | state(`unseen` / `seen` / `stale` / `empty`), entry(`assets`) |
 | rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform(`ios` / `android` / `web`: 브리지 없음, 2026-11-12 S8-07) |
 | rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
-| fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면(2026-11-12 S8-07: F-04 금액 고치기·시세 바꾸기 저장, `source_screen` = `F-04`) | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
+| fact\_value\_changed | 설정 S-11c 월급(2026-11-12: 저장된 값이 바뀌면 `income`·`payday`마다, 월급날은 날짜 숫자(말일 31)로 변동률, `source_screen` = `S-11c`), 자산·부채 화면(2026-11-12 S8-07: F-04 금액 고치기·시세 바꾸기 저장, `source_screen` = `F-04`) | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
 | event\_recorded | Y-08 경조사 기록(2026-11-12 S9-05: 기록을 저장한 순간) | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요](이름 칩 kind: 생일 = birthday, 설날·추석·어버이날 = holiday, 결혼기념일 = anniversary, 행사 = family\_event, 그 밖 = etc), amount\_band, vs\_budget(`under` / `on` / `over`, 금액 메모가 없으면 null [확인 필요]), is\_secret(서프라이즈 옛 행이면 event\_type 미전송) |
 
 ### 4-6. 둘이 같이 고치기
@@ -156,8 +156,8 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data |
-| unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`), days\_pending, exported\_data |
+| unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data(요청 전 24시간 안에 이 기기에서 S-18 내보내기를 끝냈는지, 2026-11-12) |
+| unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`, 2026-11-12 앱이 보내던 `agreed`를 `acknowledged`로 맞춤), days\_pending, exported\_data |
 | notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월급 전 확인), 파트너가 고침, 경조사, 주간 요약, 초대 리마인드 (서버). 2026-11-12 QA 10구간 S10-03: 알림 종류 모두, 채널마다 1번(알림 센터에 쌓일 때 `inapp`, 푸시를 꺼낼 때 `os`(기기 수와 상관없이 1번), 대신 메일을 쌓을 때 `email`) | type(알림 종류 kind), channel(`os` / `email` / `inapp`), cap\_scope(`in_cap` / `out_of_cap` = 상한 밖 보안·계정 종류), cap\_used(월 누적, 2026-11-04 메일 상한을 없애 지금은 보내지 않음) |
 | notification\_opened | 알림 클릭 → 진입(알림 센터 줄, 푸시. 2026-11-12 QA 10구간 S10-03) | type(알림 종류 kind), channel(`inapp` = 알림 센터 / `os` = 푸시), minutes\_to\_open(알림이 생긴 뒤 분, 모르면 null), landing\_screen(간 화면 ID, 예: `W-02`, 대상이 지워졌거나 볼 수 없어 Toast면 `none`, 모르는 경로는 `other`) |
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
@@ -168,10 +168,10 @@
 | peer\_stats\_viewed | F-08 지표 카드 표시 (출시 후) | metric(net\_worth / saving\_rate / saving\_amount / emergency\_months / debt\_ratio), group\_level [확인 필요], source(public / app) |
 | peer\_stats\_consent\_changed | F-08 참여 안내, 설정 S-18 통계 참여 토글 (출시 후) | state(on / off), entry(f08 / settings), couple\_both\_on |
 | profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’, 소셜 계정 사진을 처음 가져왔을 때(2026-11-05) | action(set / remove / imported) |
-| account\_delete\_requested | S-18b 삭제 확인 | couple\_state, exported\_before |
+| account\_delete\_requested | S-18b 삭제 요청이 받아들여짐(2026-11-12 앱에 넣음) | couple\_state, exported\_before(24시간 안에 이 기기에서 S-18 내보내기를 끝냈는지) |
 | account\_restored | 유예 중 재로그인 ‘취소하고 계속 쓰기’ (서버) | days\_pending, was\_linked |
 | data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |
-| trash\_restored | S-21 되살리기, Toast ‘되돌리기’(2026-11-12 S8-07: F-04 삭제 Toast ‘되돌리기’, item\_type `asset`, days\_in\_trash 0) | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
+| trash\_restored | S-21 되살리기(2026-11-12 앱에 넣음, entry `trash`, relinked = 서버가 ‘따로 되살렸어요’가 아님), Toast ‘되돌리기’(2026-11-12 S8-07: F-04 삭제 Toast ‘되돌리기’, item\_type `asset`, days\_in\_trash 0) | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
 | rejoin\_requested | S-12 “다시 연결하기”(2026-11-11 앱에 넣음) | days\_since\_unlink |
 | rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |
 | home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings` / `retry`: 큰 상자 오류 카드 ‘다시 시도’, 2026-11-11), todo(할 일 띠 종류, band일 때만: `unlink` / `reconnect` / `review` / `check` / `saving` / `matured` / `care` / `invite`, 2026-11-11 초대 띠도 같은 띠) |

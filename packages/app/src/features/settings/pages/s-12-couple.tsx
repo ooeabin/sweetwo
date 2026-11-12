@@ -228,7 +228,8 @@ export function S12Couple() {
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
         <p>
           <strong>
-            {mine ? copy.pendingWait(c.partnerName) : copy.pendingReceived(c.partnerName)}
+            {/* 요청한 사람은 “연결 해제 대기 중”(25 ‘연결 해제, 대기와 혼자 쓰기’ 1번, 2026-11-12 QA 11구간 D3) */}
+            {mine ? copy.state.unlink_pending : copy.pendingReceived(c.partnerName)}
           </strong>
         </p>
         <p className="hg-q__help">

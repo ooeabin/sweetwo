@@ -35,7 +35,7 @@ export function S12dUnlinkReview() {
     try {
       await agreeUnlink();
       track('unlink_resolved', {
-        path: 'agreed',
+        path: 'acknowledged',
         days_pending: daysPending(req.requested_at),
         exported_data: exportedSince(req.requested_at),
       });

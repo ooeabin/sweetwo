@@ -74,3 +74,10 @@ export async function needsSocialAvatar(): Promise<boolean> {
   fail(error);
   return !!data?.space_id && !data.avatar_path && !data.avatar_social_checked_at;
 }
+
+/** S-11 ‘로그인’ 줄: 가입한 소셜 계정 이메일(없으면 null, 25 S-11 3번, 2026-11-12 QA 11구간 S11-11) */
+export async function fetchLoginEmail(): Promise<string | null> {
+  const { data, error } = await supabase().rpc('my_login_email');
+  fail(error);
+  return typeof data === 'string' && data ? data : null;
+}

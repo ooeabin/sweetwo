@@ -28,6 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 class MainViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(WebAuthPlugin())
+        bridge?.registerPluginInstance(AppSettingsPlugin())
     }
 }
 
@@ -82,5 +83,31 @@ public class WebAuthPlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPres
 
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         return bridge?.viewController?.view.window ?? ASPresentationAnchor()
+    }
+}
+
+/// 휴대폰 설정의 이 앱 알림 화면 열기(기획서 S-14 ‘설정 열기’, 2026-11-12). iOS 16+는 알림 설정, 그 전은 앱 설정
+@objc(AppSettingsPlugin)
+public class AppSettingsPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "AppSettingsPlugin"
+    public let jsName = "AppSettings"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "openNotifications", returnType: CAPPluginReturnPromise)
+    ]
+
+    @objc func openNotifications(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            var raw = UIApplication.openSettingsURLString
+            if #available(iOS 16.0, *) {
+                raw = UIApplication.openNotificationSettingsURLString
+            }
+            guard let url = URL(string: raw) else {
+                call.reject("no_url")
+                return
+            }
+            UIApplication.shared.open(url, options: [:]) { ok in
+                if ok { call.resolve() } else { call.reject("open_failed") }
+            }
+        }
     }
 }
