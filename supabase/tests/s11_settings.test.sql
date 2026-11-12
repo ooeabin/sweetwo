@@ -106,9 +106,10 @@ select is((select count(*) from public.storage_purge
     || '/11111111-1111-1111-1111-111111111111.jpg' and done_at is null), 1::bigint, '지운 사진 파일은 지울 목록에');
 
 -- S11-05 계정 삭제: 모든 기기 로그아웃(probe1 시나리오)
-insert into auth.sessions (user_id, user_agent) values
-  ('33333333-3333-3333-3333-333333333333', 'phone'), ('33333333-3333-3333-3333-333333333333', 'tablet'),
-  ('22222222-2222-2222-2222-222222222222', 'phone');
+insert into auth.sessions (id, user_id, user_agent) values
+  (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'phone'),
+  (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'tablet'),
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'phone');
 insert into auth.refresh_tokens (user_id, token, revoked)
   values ('33333333-3333-3333-3333-333333333333', 't1', false), ('22222222-2222-2222-2222-222222222222', 't2', false);
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
