@@ -11,6 +11,7 @@ import {
   type SavingState,
   type YearMonth,
 } from '@sweetwo/core';
+import { track } from '../../shared/analytics';
 import {
   useChecklists,
   useGoalSaved,
@@ -49,7 +50,12 @@ export interface SavingItem {
   owner: SavingOwner;
   /** 주인 이름(파트너 항목, 합쳐서 모드 줄 이름 앞) */
   ownerName: string;
-  /** 내가 고칠 수 있음(각자 = 내 것, 합쳐서 = 우리 둘 것) */
+  /**
+   * 내 몫으로 고칠 수 있음(해제 대기와 상관없이): 각자 = 내 것, 합쳐서 = 모두(주인이 있는 저금도, 2026-11-12 D1).
+   * 합쳐서여도 파트너가 ‘금액만 보여 주기’로 둔 것은 이름이 가려져 보기만(서버 goal RLS와 같음)
+   */
+  mayEdit: boolean;
+  /** 지금 고칠 수 있음 = mayEdit이고 연결 해제 대기가 아님 */
   canEdit: boolean;
   /** 이번 사이클 이 항목 줄 */
   thisMonth: PayCheckLine | undefined;
@@ -108,7 +114,8 @@ export function useSavingItems() {
       late: savingLate({ target, saved: s, deadline }, monthly),
       owner,
       ownerName: owner === 'partner' ? partnerName : owner === 'mine' ? myName : '',
-      canEdit: owner !== 'partner' && !pending,
+      mayEdit: owner !== 'partner' || (joint && g.visibility === 'all'),
+      canEdit: (owner !== 'partner' || (joint && g.visibility === 'all')) && !pending,
       thisMonth: lines.find((l) => l.kind === 'saving' && l.goal_id === g.id),
     };
   };
@@ -144,6 +151,14 @@ export function useSavingItems() {
   };
 }
 export type SavingModel = Extract<ReturnType<typeof useSavingItems>, { ready: true }>;
+
+/**
+ * 같이 쓰는 저금을 고침(32 4-6 shared_item_changed goal, 2026-11-12 S7-16): 합쳐서 모드 + 연결된 커플일 때만
+ * (합쳐서면 모든 저금이 같이 쓰는 것, D1). 추가(W-11), 이름·목표 금액·기한(W-10a), 지우기(W-10), 달성 뒤 선택(W-12a)
+ */
+export function trackSharedGoal(m: { joint: boolean; joined: boolean } | null | undefined) {
+  if (m?.joint && m.joined) track('shared_item_changed', { item_type: 'goal', linked: true });
+}
 
 /**
  * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’, 19 H-03): 내 저금이 없으면 체크리스트 저금 묶음에

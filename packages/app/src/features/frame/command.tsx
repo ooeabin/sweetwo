@@ -27,7 +27,11 @@ const TABS = ['/', '/salary', '/assets', '/calendar'] as const;
 type Tab = 'month' | 'salary' | 'assets' | 'calendar';
 /** 그 화면에 맞는 추가(Ctrl+N, 2026-11-09 좁은 창 + 버튼은 없앰): 홈·월급 = 저금 항목, 자산 관리 = 자산·부채, 캘린더 = 경조사 */
 export const addFor = (t: Tab | null) =>
-  t === 'assets' ? ADD_TO.asset : t === 'calendar' ? ADD_TO.care : ADD_TO.saving;
+  t === 'assets'
+    ? ADD_TO.asset
+    : t === 'calendar'
+      ? ADD_TO.care
+      : `${ADD_TO.saving}/a?from=shortcut`;
 
 const Ctx = createContext<{ addOpen: boolean; setAddOpen: (v: boolean) => void }>({
   addOpen: false,
@@ -39,7 +43,8 @@ export function AddMenu() {
   const nav = useNavigate();
   const { addOpen, setAddOpen } = useContext(Ctx);
   const actions: MenuAction[] = [
-    { label: copy.addSaving, onSelect: () => nav(ADD_TO.saving) },
+    // 들어온 곳 분석(32 saving_item_created entry add_menu, 2026-11-12 S7-16)
+    { label: copy.addSaving, onSelect: () => nav(`${ADD_TO.saving}/a?from=add_menu`) },
     { label: copy.addAsset, onSelect: () => nav(ADD_TO.asset) },
     { label: copy.addCare, onSelect: () => nav(ADD_TO.care) },
   ];

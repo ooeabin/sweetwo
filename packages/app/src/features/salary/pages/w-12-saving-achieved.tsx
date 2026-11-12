@@ -10,6 +10,7 @@ import { hideToast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
+import { SavingQuestionError } from '../saving-parts';
 
 // W-12 달성 축하(20): 축하 그림(DoneMark celebrate, 그림 파일이 생기기 전까지 빈 자리) → “다 모았어요” → 이름 → 모은 금액
 // → 함께 모은 달 문장 → “다음”(→ W-12a). 사람마다 한 번(AchieveWatch가 엶, 달성 알림도 고칠 수 있는 사람은 여기로).
@@ -28,12 +29,28 @@ export function W12SavingAchieved() {
   useEffect(() => {
     if (i && story.isSuccess) track('saving_item_achieved', { months_taken: months });
   }, [i?.goal.id, story.isSuccess, months]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 못 불러오면 오류 + 다시 시도(2026-11-12 S7-04)
+  if ((!d.ready && d.failed) || (story.isError && !story.data))
+    return (
+      <SavingQuestionError
+        onBack={() => nav(savingPaths.item(id), { replace: true })}
+        onRetry={() => {
+          if (!d.ready) d.retry();
+          if (!story.data) void story.refetch();
+        }}
+      />
+    );
   if (!d.ready || story.isLoading) return <QuestionSkeleton />;
   if (!i) return <Navigate to={salaryPaths.checklist} replace />;
   if (i.state !== 'achieved' && !reachedTarget(i.goal, i.saved))
     return <Navigate to={savingPaths.item(id)} replace />;
-  // 합쳐서 모드에서 두 사람이 모두 체크한 달(서버 goal_story)이 없으면 늘 “n개월 만에 모았어요”
-  const s = celebrationStory(months, story.data?.together ?? 0, !d.joined || i.owner !== 'ours');
+  // 합쳐서 모드에서 두 사람이 모두 체크한 달(서버 goal_story)이 없으면 늘 “n개월 만에 모았어요”.
+  // 합쳐서면 주인이 있는 저금도 같이 모으는 것(2026-11-12 D1)
+  const s = celebrationStory(
+    months,
+    story.data?.together ?? 0,
+    !d.joined || (!d.joint && i.owner !== 'ours'),
+  );
   const line =
     s === null
       ? undefined

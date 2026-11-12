@@ -235,6 +235,21 @@ export function subscribeCheckLines(spaceId: string, on: () => void) {
   };
 }
 
+/** 저금 항목(goal) 변경 신호(2026-11-12 QA 7구간 S7-02, 20261123090000 발행). 읽기 권한은 goal_select 그대로 */
+export function subscribeGoals(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`goal:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'goal', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
 export function subscribeSplits(spaceId: string, on: () => void) {
   const ch = supabase()
     .channel(`salary_split:${spaceId}`)

@@ -10,6 +10,7 @@ import {
   qk,
   splitKeys,
   subscribeCheckLines,
+  subscribeGoals,
   subscribeSplits,
   type Goal,
   type PayChecklist,
@@ -54,10 +55,14 @@ export const waiting = (c: PayChecklist) => c.pay_check_line.filter((l) => l.sta
 export const doneCount = (c: PayChecklist) =>
   c.pay_check_line.filter((l) => l.state !== 'wait').length;
 
-/** 체크 뒤 새로 읽을 것: 체크리스트, 저금 항목 모은 금액, 저금 항목(달성 되돌림·다시 달성, 2026-11-12 S6-04) */
+/**
+ * 체크 뒤 새로 읽을 것: 체크리스트, 저금 항목 모은 금액, 저금 항목(달성 되돌림·다시 달성, 2026-11-12 S6-04),
+ * W-10 저금 내역(qk.goalLines, 2026-11-12 S7-03: 체크·풀기·되돌리기·다른 금액·Realtime 뒤 바로 바뀜)
+ */
 export const refreshChecks = (qc: QueryClient) =>
   Promise.all([
     qc.invalidateQueries({ queryKey: ['pay_checklist'] }),
+    qc.invalidateQueries({ queryKey: ['pay_check_line'] }),
     qc.invalidateQueries({ queryKey: qk.goalSaved }),
     qc.invalidateQueries({ queryKey: qk.goals }),
   ]);
@@ -259,4 +264,26 @@ export function useCheckRealtime(spaceId: string | null | undefined) {
     if (!spaceId) return;
     return subscribeCheckLines(spaceId, () => void refreshChecks(qc));
   }, [spaceId, qc]);
+}
+
+/**
+ * 상대가 저금을 고치거나 지우면(Realtime goal, 2026-11-12 QA 7구간 S7-02) 저금 항목, 모은 금액, 저금 내역을 바로 다시 읽음.
+ * 월급 탭, W-10, W-13에서 한 번
+ */
+export function useGoalRealtime(spaceId: string | null | undefined) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!spaceId) return;
+    return subscribeGoals(spaceId, () => {
+      for (const k of [qk.goals, qk.goalSaved, ['pay_check_line', 'goal']])
+        void qc.invalidateQueries({ queryKey: k });
+    });
+  }, [spaceId, qc]);
+}
+
+/** 저금 화면(W-10, W-13) Realtime: 저금 항목, 체크리스트 줄, 월급 계획(매달 금액) */
+export function useSavingRealtime(spaceId: string | null | undefined) {
+  useGoalRealtime(spaceId);
+  useCheckRealtime(spaceId);
+  useSplitRealtime(spaceId);
 }

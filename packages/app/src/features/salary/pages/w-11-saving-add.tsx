@@ -4,7 +4,6 @@ import {
   defaultDeadline,
   leftover,
   quickChips,
-  readWon,
   savingItemInput,
   savingLate,
   savingNeed,
@@ -20,13 +19,16 @@ import {
   YearMonthInput,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
+import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { useMe, usePartner, useSpace, useSplits } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
+import { trackSharedGoal } from '../saving';
+import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
 
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
@@ -34,42 +36,22 @@ import { salaryPaths, savingPaths } from '../paths';
 // W-11c 아래 선택 칸 ‘이미 모은 금액이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
 const STEPS = ['a', 'b', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
-const KEY = 'sweetwo.savingDraft';
-type Draft = {
-  name: string;
-  monthly: number | null;
-  target: number | null;
-  deadline: string | null;
-  /** 이미 모은 금액 칸을 켰는지, 그 금액 */
-  hasStart: boolean;
-  start: number | null;
-};
-const EMPTY: Draft = {
-  name: '',
-  monthly: null,
-  target: null,
-  deadline: null,
-  hasStart: false,
-  start: null,
-};
-const readDraft = (): Draft => {
-  try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<Draft> | null;
-    return { ...EMPTY, ...(v ?? {}) };
-  } catch {
-    return EMPTY;
-  }
-};
-const writeDraft = (d: Draft | null) => {
-  try {
-    if (d) localStorage.setItem(KEY, JSON.stringify(d));
-    else localStorage.removeItem(KEY);
-  } catch {
-    /* 기억 못 해도 이번 화면은 그대로 */
-  }
-};
-const ENTRIES = ['home', 'salary', 'split', 'palette', 'list'] as const;
-type Entry = (typeof ENTRIES)[number];
+type Draft = SavingDraft;
+// 들어온 곳(32 saving_item_created entry, 2026-11-12 S7-16): home·salary = 첫 저금 빈 줄(홈·W-02), salary_row = W-02 저금 묶음
+// ‘+ 저금 추가’ 줄, salary_wide = W-02 넓은 창 제목 줄 버튼, split = W-01, list = W-13, add_menu = 홈 ‘추가’ 메뉴,
+// palette = 검색 ‘바로 하기’, shortcut = Ctrl(⌘)+N, 그 밖 direct
+const ENTRIES = [
+  'home',
+  'salary',
+  'salary_row',
+  'salary_wide',
+  'split',
+  'palette',
+  'list',
+  'add_menu',
+  'shortcut',
+] as const;
+type Entry = (typeof ENTRIES)[number] | 'direct';
 
 export function W11SavingAdd() {
   const { step = 'a' } = useParams();
@@ -82,6 +64,7 @@ export function W11SavingAdd() {
   const splits = useSplits();
   const [draft, setDraftState] = useState<Draft>(readDraft);
   const [saving, setSaving] = useState(false);
+  const { masked } = useMask();
   const setDraft = (d: Draft) => {
     setDraftState(d);
     writeDraft(d);
@@ -90,7 +73,7 @@ export function W11SavingAdd() {
   const now = STEPS.indexOf(s);
   const entry: Entry = (ENTRIES as readonly string[]).includes(params.get('from') ?? '')
     ? (params.get('from') as Entry)
-    : 'salary';
+    : 'direct';
   const go = (to: Step) => nav(`${savingPaths.add}/${to}${params.size ? `?${params}` : ''}`);
   const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
   const title = { a: copy.addNameQ, b: copy.addMonthlyQ, c: copy.addTargetQ, d: copy.addDeadlineQ }[
@@ -101,14 +84,10 @@ export function W11SavingAdd() {
   const mine = splits.data.find((x) =>
     joint ? x.owner_user_id === null : x.owner_user_id === me.data?.id,
   );
-  // 월급 계획이 없거나(월급 없음) 해제 대기 중이면 추가할 수 없음(20 W-11, 예외)
+  // 월급 계획이 없거나(월급 없음) 해제 대기 중이면 추가할 수 없음(20 W-11 예외): W-02로 + Toast(2026-11-12 S7-15).
+  // W-02가 그 상태 카드(‘월급 알려 주기’)·회색 한 줄을 보여 줌
   if (!mine || space.data.couple_state === 'unlink_pending')
-    return (
-      <QuestionLayout
-        title={mine ? copy.addBlocked : copy.addNoSplit}
-        onBack={() => nav(salaryPaths.checklist)}
-      />
-    );
+    return <Blocked text={mine ? copy.addBlocked : copy.addNoSplit} />;
   // 지금 여유 자금(W-11b 보조, 0원 아래면 0원)
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
@@ -145,6 +124,11 @@ export function W11SavingAdd() {
         has_deadline: v.deadline !== null,
         has_start: v.start > 0,
         ...(v.target !== null ? { target_band: amountBand(v.target) } : {}),
+      });
+      // 같이 쓰는 저금(합쳐서 + 연결, 32 4-6, 2026-11-12 S7-16)
+      trackSharedGoal({
+        joint,
+        joined: space.data?.couple_state === 'connected',
       });
       writeDraft(null);
       await Promise.all(
@@ -195,7 +179,7 @@ export function W11SavingAdd() {
       <QuestionLayout
         steps={steps}
         title={copy.addMonthlyQ}
-        help={copy.addMonthlyHelp(readWon(Math.max(left, 0)))}
+        help={copy.addMonthlyHelp(money(Math.max(left, 0), masked))}
         onBack={back}
         primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
         onSubmit={() => go('c')}
@@ -280,7 +264,7 @@ export function W11SavingAdd() {
       help={
         need !== null ? (
           <>
-            {copy.needPerMonth(readWon(need))}
+            {copy.needPerMonth(money(need, masked))}
             {late !== null && (
               <>
                 <br />
@@ -307,4 +291,14 @@ export function W11SavingAdd() {
       />
     </QuestionLayout>
   );
+}
+
+/** 추가할 수 없을 때 W-02로 옮기며 이유 Toast(다음 화면까지, S7-15) */
+function Blocked({ text }: { text: string }) {
+  const nav = useNavigate();
+  useEffect(() => {
+    carryToast(text);
+    nav(salaryPaths.checklist, { replace: true });
+  }, [text, nav]);
+  return <QuestionSkeleton />;
 }

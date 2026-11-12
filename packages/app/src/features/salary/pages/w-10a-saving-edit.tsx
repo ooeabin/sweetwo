@@ -11,9 +11,12 @@ import {
 import {
   amountBand,
   conflictDecision,
+  defaultDeadline,
   formatYm,
   leftover,
   readWon,
+  savingLate,
+  savingNeed,
   thisMonth,
   ymToDate,
   type SplitLineDraft,
@@ -21,7 +24,6 @@ import {
 } from '@sweetwo/core';
 import {
   AmountInput,
-  Button,
   ConflictChoice,
   QuestionLayout,
   QuestionSkeleton,
@@ -37,7 +39,8 @@ import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useMe, usePartner, useSplits } from '../data';
-import { useSavingItems } from '../saving';
+import { trackSharedGoal, useSavingItems } from '../saving';
+import { SavingQuestionError } from '../saving-parts';
 import { toDraft } from '../split-editor';
 
 type Field = 'amount' | 'deadline' | 'name' | 'monthly';
@@ -74,11 +77,16 @@ export function W10aSavingEdit() {
   const [ym, setYm] = useState<YearMonth | null | undefined>(undefined);
   const [name, setName] = useState<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
-  const [conflict, setConflict] = useState<{ patch: Patch; current: Goal } | null>(null);
+  // 충돌 선택(30 동기화 2장): ‘내 값’을 고르면 처음 보내려던 Toast 문장 그대로(2026-11-12 S7-11)
+  const [conflict, setConflict] = useState<{ patch: Patch; current: Goal; text: string } | null>(
+    null,
+  );
   useEffect(() => {
     if (live && opened?.field !== field) setOpened({ field, goal: live });
   }, [live, opened, field]);
   const back = () => nav(savingPaths.item(id), { replace: true });
+  // 못 불러오면 오류 + 다시 시도(13 공통 상태 7번, 2026-11-12 S7-04)
+  if (!d.ready && d.failed) return <SavingQuestionError onBack={() => nav(-1)} onRetry={d.retry} />;
   if (!d.ready) return <QuestionSkeleton />;
   const g = (opened?.field === field ? opened.goal : undefined) ?? live;
   const f = field as Field;
@@ -110,8 +118,11 @@ export function W10aSavingEdit() {
     ? (me.data?.monthly_income ?? 0) + (partnerQ.data?.monthly_income ?? 0)
     : (me.data?.monthly_income ?? 0);
   const leftAfter = leftover(income, nextLines(curMonthly ?? 0));
+  // 기한 처음 값: 지금 기한, 없으면 1년 뒤(W-11d와 같음, 2026-11-12 S7-07)
   const curYm =
-    ym === undefined ? ((g.deadline?.slice(0, 7) as YearMonth | undefined) ?? null) : ym;
+    ym === undefined
+      ? ((g.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline())
+      : ym;
   const curName = name ?? g.name;
   const err =
     f === 'deadline' && curYm && curYm < thisMonth() ? copy.notBeforeThisMonth : undefined;
@@ -122,6 +133,12 @@ export function W10aSavingEdit() {
       ),
     );
 
+  const trackTarget = (v: number) =>
+    track('saving_item_target_set', {
+      had_target: g.target_amount !== null,
+      has_deadline: g.deadline !== null,
+      target_band: amountBand(v),
+    });
   /** 열 때 값이 그대로면 바꿈. force면 묻지 않고 덮음(‘내 값’ 고름) */
   const write = async (patch: Patch, force: boolean) => {
     if (force) return updateGoal(g.id, patch);
@@ -142,6 +159,7 @@ export function W10aSavingEdit() {
     try {
       await write(patch, force);
       setConflict(null);
+      trackSharedGoal(d.ready ? d : null);
       carryToast(text, {
         label: copy.undo,
         onClick: () => void updateGoal(g.id, before).then(refresh),
@@ -150,7 +168,7 @@ export function W10aSavingEdit() {
       return true;
     } catch (e) {
       if (e instanceof ConflictFound) {
-        setConflict({ patch, current: e.current });
+        setConflict({ patch, current: e.current, text });
         return false;
       }
       toast(copy.saveFailed, { label: copy.retry, onClick: () => void send(patch, text, force) });
@@ -193,6 +211,7 @@ export function W10aSavingEdit() {
     try {
       await retargetSavingItem(g.id, v);
       track('saving_item_after_achieve', { choice: 'retarget' });
+      trackSharedGoal(d.ready ? d : null);
       carryToast(copy.amountChanged, {
         label: copy.undo,
         onClick: () => quietly(unkeepSavingItem(g.id, oldTarget, oldDeadline).then(refresh)),
@@ -210,9 +229,11 @@ export function W10aSavingEdit() {
   const after = (ok: boolean) => {
     if (!ok) return;
     // 새 목표 금액은 기한을 지웠으니 기한으로 이어짐(처음 정할 때와 같음)
-    if (retarget) return nav(savingPaths.edit(id, 'deadline'), { replace: true });
+    // ?first=1을 넘겨 기한 화면에 ‘기한 없이 모을게요’(W-11d와 같음, 2026-11-12 S7-07)
+    if (retarget) return nav(`${savingPaths.edit(id, 'deadline')}?first=1`, { replace: true });
     // 목표 금액을 처음 정했으면 기한으로 이어짐(20 W-10a)
-    if (f === 'amount' && first) nav(savingPaths.edit(id, 'deadline'), { replace: true });
+    if (f === 'amount' && first)
+      nav(`${savingPaths.edit(id, 'deadline')}?first=1`, { replace: true });
     else back();
   };
 
@@ -236,12 +257,10 @@ export function W10aSavingEdit() {
     }
     if (!changed || err) return after(true);
     if (f === 'amount') {
-      track('saving_item_target_set', {
-        had_target: g.target_amount !== null,
-        has_deadline: g.deadline !== null,
-        target_band: amountBand(curAmount ?? 0),
-      });
-      return after(await send({ target_amount: curAmount }, copy.amountChanged));
+      const ok = await send({ target_amount: curAmount }, copy.amountChanged);
+      // 저장이 된 뒤에만(2026-11-12 S7-16)
+      if (ok) trackTarget(curAmount ?? 0);
+      return after(ok);
     }
     if (f === 'deadline')
       return after(await send({ deadline: ymToDate(curYm as YearMonth) }, copy.deadlineChanged));
@@ -256,13 +275,29 @@ export function W10aSavingEdit() {
         : f === 'deadline'
           ? copy.addDeadlineQ
           : copy.addNameQ;
-  const help = retarget
-    ? copy.retargetHelp(money(item.saved, masked))
-    : f === 'monthly'
-      ? leftAfter >= 0
-        ? copy.leftover(money(leftAfter, masked))
-        : copy.short(money(-leftAfter, masked))
-      : undefined;
+  // 기한: W-11d와 같은 보조 줄 “매달 n이 필요해요” + 늦어지면 “지금대로면 기한보다 n개월 늦어요”(2026-11-12 S7-07)
+  const plan = { target: g.target_amount, saved: item.saved, deadline: curYm };
+  const need = f === 'deadline' && curYm ? savingNeed(plan) : null;
+  const late = f === 'deadline' && curYm ? savingLate(plan, item.monthly) : null;
+  const help = retarget ? (
+    copy.retargetHelp(money(item.saved, masked))
+  ) : f === 'monthly' ? (
+    leftAfter >= 0 ? (
+      copy.leftover(money(leftAfter, masked))
+    ) : (
+      copy.short(money(-leftAfter, masked))
+    )
+  ) : need !== null ? (
+    <>
+      {copy.needPerMonth(money(need, masked))}
+      {late !== null && (
+        <>
+          <br />
+          {copy.lateBy(late)}
+        </>
+      )}
+    </>
+  ) : undefined;
   const show = (x: Goal) =>
     f === 'amount'
       ? x.target_amount === null
@@ -297,6 +332,12 @@ export function W10aSavingEdit() {
         loading: busy,
       }}
       onSubmit={() => void submit()}
+      // 목표 금액을 처음(또는 새로) 정한 뒤 이어진 기한: ‘기한 없이 모을게요’ = 기한 없이 W-10으로(S7-07)
+      later={
+        f === 'deadline' && first && g.deadline === null
+          ? { label: copy.addNoDeadline, onClick: back }
+          : undefined
+      }
     >
       {f === 'amount' && (
         <AmountInput label={title} value={curAmount} onChange={(v) => setAmount(v)} />
@@ -319,15 +360,17 @@ export function W10aSavingEdit() {
         <p className="hg-help">{copy.tenThousandUnit}</p>
       )}
       {f === 'amount' && !retarget && g.target_amount !== null && (
-        // 목표 금액을 지우면 기한도 같이 지움(20 W-10a 2번)
-        <Button
-          variant="ghost"
+        // 목표 금액을 지우면 기한도 같이 지움(20 W-10a 2번). 회색 글자 버튼(2026-11-12 S7-12)
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
           onClick={() =>
             void send({ target_amount: null, deadline: null }, copy.targetCleared).then(after)
           }
         >
           {copy.clearTarget}
-        </Button>
+        </button>
       )}
       {f === 'deadline' && (
         <YearMonthInput
@@ -338,12 +381,14 @@ export function W10aSavingEdit() {
         />
       )}
       {f === 'deadline' && g.deadline !== null && (
-        <Button
-          variant="ghost"
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
           onClick={() => void send({ deadline: null }, copy.deadlineCleared).then(after)}
         >
           {copy.clearDeadline}
-        </Button>
+        </button>
       )}
       {f === 'name' && (
         <ShortText
@@ -361,7 +406,7 @@ export function W10aSavingEdit() {
           mine={{ label: copy.conflictMine, value: show({ ...g, ...current }) }}
           theirs={{ label: copy.conflictTheirs(partner), value: show(conflict.current) }}
           busy={busy}
-          onMine={() => void send(conflict.patch, copy.amountChanged, true).then(after)}
+          onMine={() => void send(conflict.patch, conflict.text, true).then(after)}
           onTheirs={() => {
             setConflict(null);
             void refresh().then(back);

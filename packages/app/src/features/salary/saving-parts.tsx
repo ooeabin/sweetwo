@@ -1,11 +1,13 @@
 import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
-import { Badge, Lead, leadOf, ListRow } from '@sweetwo/ui';
+import { Badge, Lead, leadOf, ListRow, PageHeader, QuestionLayout } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { sharedCopy } from '../../shared/copy';
 import { money, useMask } from '../../shared/mask';
 import { hideToast } from '../../shared/toast';
+import { MainFrame } from '../frame';
 import { copy } from './copy';
 import { savingPaths } from './paths';
 import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
@@ -153,4 +155,58 @@ export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
       });
   }, [meId, key, tick, nav, qc, from]);
   return null;
+}
+
+/**
+ * 저금 화면을 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 7구간 S7-04): W-10·W-13 = ‘‹ 저금’ 머리 + 오류 카드
+ * “잠시 문제가 생겼어요” + ‘다시 시도’(월급 탭 SalaryLoadError와 같은 모양)
+ */
+export function SavingLoadError({ onBack, onRetry }: { onBack: () => void; onRetry: () => void }) {
+  return (
+    <MainFrame
+      sub="detail"
+      current="salary"
+      columns={[
+        <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+          <PageHeader
+            title={copy.listTitle}
+            backLabel={copy.back}
+            backTo={copy.tabTitle}
+            onBack={onBack}
+          />
+          <section className="hg-card hg-card--fill hg-stack" role="status">
+            <p className="hg-card__title">{sharedCopy.errorTitle}</p>
+            <p className="hg-card__meta">{sharedCopy.errorBody}</p>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={onRetry}
+            >
+              {sharedCopy.retry}
+            </button>
+          </section>
+        </div>,
+      ]}
+    />
+  );
+}
+
+/** 질문 화면(W-10a, W-12, W-12a)을 못 불러옴(S7-04): W-05와 같은 오류 질문 화면 + ‘다시 시도’ */
+export function SavingQuestionError({
+  onBack,
+  onRetry,
+}: {
+  onBack: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <QuestionLayout
+      title={sharedCopy.errorTitle}
+      help={sharedCopy.errorBody}
+      onBack={onBack}
+      primary={{ label: sharedCopy.retry }}
+      onSubmit={onRetry}
+    />
+  );
 }

@@ -481,7 +481,13 @@ export function W01Receipt() {
       const deletable =
         canEdit &&
         !(joint && l.kind === 'allowance') &&
-        !(l.kind === 'saving' && g?.owner_user_id && g.owner_user_id !== m.id);
+        // 합쳐서면 주인이 있는 저금 줄도 누구나 지움(= 그만 모음, 2026-11-12 D1). ‘금액만 보여 주기’ 파트너 것은 빼고
+        !(
+          l.kind === 'saving' &&
+          g?.owner_user_id &&
+          g.owner_user_id !== m.id &&
+          !(joint && g.visibility === 'all')
+        );
       return {
         id: l.id,
         name: nameOf(l),

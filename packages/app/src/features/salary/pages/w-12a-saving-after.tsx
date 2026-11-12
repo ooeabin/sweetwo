@@ -13,7 +13,8 @@ import { track } from '../../../shared/analytics';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
-import { useSavingItems, type SavingItem } from '../saving';
+import { trackSharedGoal, useSavingItems, type SavingItem } from '../saving';
+import { SavingQuestionError } from '../saving-parts';
 
 type After = 'keep' | 'stop' | 'retarget';
 
@@ -30,6 +31,7 @@ const OPTIONS: { value: After; label: string; sub: string }[] = [
  */
 function useAfter(item: SavingItem) {
   const qc = useQueryClient();
+  const d = useSavingItems();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const refresh = () =>
@@ -67,6 +69,7 @@ function useAfter(item: SavingItem) {
         });
       }
       track('saving_item_after_achieve', { choice: v });
+      trackSharedGoal(d.ready ? d : null);
       await refresh();
       return true;
     } catch {
@@ -110,6 +113,9 @@ export function W12aSavingAfter() {
   const back = params.get('from') === 'checklist' ? salaryPaths.checklist : savingPaths.item(id);
   // 고르는 중이면 다시 읽은 상태(이제 달성 아님)로 상세에 먼저 가지 않게(한 번에 갈 곳으로, Toast가 그 화면에 남게)
   const leaving = useRef(false);
+  // 못 불러오면 오류 + 다시 시도(2026-11-12 S7-04)
+  if (!d.ready && d.failed)
+    return <SavingQuestionError onBack={() => nav(back, { replace: true })} onRetry={d.retry} />;
   if (!d.ready) return <QuestionSkeleton title={copy.afterQ} />;
   if (!i) return <Navigate to={salaryPaths.checklist} replace />;
   // 이미 골랐거나 고칠 수 없으면 상세로

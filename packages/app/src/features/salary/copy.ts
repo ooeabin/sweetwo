@@ -203,6 +203,7 @@ export const copy = {
   createdBy: (name: string) => `만든 사람 ${name}`, // [확인 필요]
   closedNote: '그만 모은 저금이에요', // [확인 필요]
   partnerItem: (name: string) => `${name}님 저금이에요. 보기만 할 수 있어요`, // [확인 필요] 2026-11-09
+  itemPending: '연결 해제 대기 중에는 저금을 고칠 수 없어요', // [확인 필요] 2026-11-12 S7-09 W-10 맨 위 회색 한 줄
   menu: '더보기',
   rename: '이름 바꾸기',
   remove: '지우기',
