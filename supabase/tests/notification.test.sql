@@ -53,9 +53,11 @@ set local role authenticated;
 -- 경조사: 음력 8월 15일(2026 추석 = 9월 25일) D-7 같이, 서프라이즈는 만든 사람만
 insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer)
   select space_id, 'family', 'chuseok', '추석', 'lunar_yearly', 8, 15, 500000, 'together' from public.app_user;
-insert into public.care_day (space_id, category, kind, name, date_rule, month, day, carer, secret, alerts)
-  select space_id, 'couple', 'partner_birthday', '찬우 생일', 'solar_yearly', 9, 18, 'bride', true, '{30,7,0}' from public.app_user;
 reset role;
+-- 서프라이즈는 2026-11-12 D2부터 앱이 못 만듦. 지금 있는 옛 행으로 확인(서버로 넣음)
+insert into public.care_day (space_id, category, kind, name, date_rule, month, day, carer, secret, alerts, created_by)
+  select space_id, 'couple', 'partner_birthday', '찬우 생일', 'solar_yearly', 9, 18, 'bride', true, '{30,7,0}', id
+  from public.app_user where id = '22222222-2222-2222-2222-222222222222';
 
 select is(public.send_morning_notifications('2026-09-18'), 3, '추석 D-7 둘 + 서프라이즈 당일 하나');
 select public.send_morning_notifications('2026-09-18');

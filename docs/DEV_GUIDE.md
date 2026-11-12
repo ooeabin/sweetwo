@@ -677,6 +677,7 @@ supabase/
 - 자동 결혼기념일(마이그레이션 20261029180000): `couple_space` 트리거가 결혼했고(married) 결혼한 날이 있으면 `sync_wedding_care`로 경조사 “결혼기념일”(매년 양력, `auto = 'wedding'`) 하나를 만듦. 공간마다 하나(지운 것도 셈, 지우면 다시 안 만듦). 결혼한 날이 바뀌면 날짜를 옮기되 사람이 날짜를 고쳤으면(`auto_moves = false`, 트리거가 표시) 그대로. 예정일(engaged)은 만들지 않음
 - 공휴일: `holiday` 테이블, 앱은 읽기만(`fetchHolidays`, 하루 캐시). 달력 칸 `holiday`(빨간 숫자 + 짧은 이름), 설날·추석은 `festive` 띠(core `isFestive`). 특일 API 받기는 Edge Function `fetch-holidays` + pg_cron `kick-holidays`(20261107120000, 키는 사람이 할 일)
 - 월급날 앞당기기: core `businessDayOnOrBefore`, `couple_space.holiday_shift`(기본 켜짐)가 false면 그대로
+- 서버 막기(20261125090000, 2026-11-12 QA 9구간 D2): `care_day_client_guard`가 앱이 바로 쓸 때 새 서프라이즈(`secret = true`, 넣기나 켜기)와 21자 넘는 이름(앞뒤 공백 빼고, 넣을 때와 이름을 바꿀 때만)을 거절(`23514` `care_secret_removed`·`care_name_too_long`). 지금 있는 옛 서프라이즈·긴 이름 행은 그대로라 CHECK가 아닌 트리거(서프라이즈 끄기, 메모·준비 상황, 기록은 됨). 함수 안(security definer)은 걸리지 않음. care_day·care_record는 Realtime 발행(S9-03, 읽기 권한은 select 정책 그대로). pgTAP `s9_calendar.test.sql`
 - 미리 알림(D-30·14·7·당일)과 상대 알림(`care_partner_change`)은 있음. 옛 `family_member`·`apply_family_budget`는 20261101180000에서 지움. 다녀온 뒤 기록 `record_care`는 기록만
 
 ### 설정 구조

@@ -1,4 +1,5 @@
--- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 개인 지출, 숨기기 끄면 둘 다 봄
+-- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 개인 지출, 숨기기 끄면 둘 다 봄.
+-- 2026-11-12 QA 9구간 D2: 앱은 새 서프라이즈를 못 만듦(care_day_client_guard). 지금 있는 옛 행은 그대로라 옛 행을 서버로 넣고 확인
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(9);
@@ -28,14 +29,21 @@ reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select lives_ok($$
+select throws_ok($$
   insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer, secret)
   select space_id, 'couple', 'partner_birthday', '예빈 생일', 'solar_yearly', 3, 9, 200000, 'groom', true from public.app_user $$,
-  '서프라이즈 추가');
+  '23514', 'care_secret_removed', '앱은 새 서프라이즈를 못 만듦(D2)');
+reset role;
+insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer, secret, created_by)
+  select space_id, 'couple', 'partner_birthday', '예빈 생일', 'solar_yearly', 3, 9, 200000, 'groom', true, id
+  from public.app_user where id = '11111111-1111-1111-1111-111111111111';
 select throws_ok($$
   insert into public.care_day (space_id, category, kind, name, date_rule, month, day, secret)
-  select space_id, 'family', 'birthday', '어머니 생신', 'solar_yearly', 3, 9, true from public.app_user $$,
+  select space_id, 'family', 'birthday', '어머니 생신', 'solar_yearly', 3, 9, true from public.app_user
+  where id = '11111111-1111-1111-1111-111111111111' $$,
   '23514', null, '양가 날은 숨기지 못함');
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
 select set_config('test.c', (select id::text from public.care_day), true);
 select is(
   (public.record_care(current_setting('test.c')::uuid, '2026-03-09', 150000, 'living', '{gift}', '향수', null, 150000))->>'line',
