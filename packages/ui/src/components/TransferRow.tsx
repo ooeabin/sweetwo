@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 
 // 월급 체크리스트 줄(docs/design/components/TransferRow.md). 은행 앱에서 보낸 뒤 체크하면 한 것으로 기록.
 // 체크 = button role="checkbox" + aria-checked, aria-label “{줄 이름} 체크”. 체크한 줄은 글자를 stone으로.
+// ‘못 함’ 줄은 부르는 쪽이 done=false(빈 원, 취소선 없음) + 보조 줄 “이번 달은 못 했어요”, 이름 “{줄 이름} 못 함”(2026-11-12 D2)
 export function TransferRow({
   label,
   meta,
@@ -18,6 +19,7 @@ export function TransferRow({
   lead,
   viewOnly = false,
   busy = false,
+  changed = false,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -40,6 +42,8 @@ export function TransferRow({
   viewOnly?: boolean;
   /** 체크를 서버에 저장하는 중(2026-11-06): 두 번 누르기 막음, aria-busy. 체크 모양은 부르는 쪽이 바로 바꿔 보여 줌 */
   busy?: boolean;
+  /** 상대가 방금 바꾼 줄(30 동기화 ‘바뀐 칸 2초 강조’, 2026-11-12): 2초 옅은 판. 부르는 쪽이 2초 뒤 끔 */
+  changed?: boolean;
 }) {
   const body = (
     <>
@@ -64,6 +68,7 @@ export function TransferRow({
         'hg-transfer',
         done && 'is-done',
         viewOnly && 'is-view',
+        changed && 'is-changed',
         !!lead && 'hg-transfer--lead',
       )}
     >

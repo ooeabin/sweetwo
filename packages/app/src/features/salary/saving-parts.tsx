@@ -96,10 +96,10 @@ export function FirstSavingRow({
 /**
  * 달성 지켜보기(20 W-12): 고칠 수 있는 저금 항목의 모은 금액(서버 goal_saved_sums) ≥ 목표 금액이 되면 서버에 달성 표시(achieve_goal)하고,
  * 이 사람이 처음이면 축하 화면으로. 합쳐서 모드 다른 사람은 다음에 앱을 열 때 한 번. 파트너 저금 항목(각자)은 알림만.
- * 홈과 월급 탭 화면에 붙음. 축하로 넘어갈 때 떠 있는 토스트(체크 ‘되돌리기’)를 닫음. 그 전에 되돌리거나
+ * 홈, 월급 탭(W-02), 월급 전 확인(W-05, 2026-11-12 S6-09), 저금 상세에 붙음. 축하로 넘어갈 때 떠 있는 Toast(체크 ‘되돌리기’)를 닫음. 그 전에 되돌리거나
  * 다른 곳에서 체크를 풀어 모은 금액이 목표 금액 아래로 내려가면 서버(check_pay_line)가 달성을 되돌림.
  */
-export function AchieveWatch() {
+export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
   const d = useSavingItems();
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -118,9 +118,11 @@ export function AchieveWatch() {
   useEffect(() => {
     const list = items.current;
     if (!meId || !list || inflight.current) return;
-    // 체크를 풀어 목표 금액 아래로 내려가면 서버가 ‘모으는 중’으로 되돌림(2026-11-09). 다시 닿으면 또 축하
+    // 체크를 풀어 목표 금액 아래로 내려가면 서버가 ‘모으는 중’으로 되돌림(2026-11-09). 다시 닿으면 또 축하.
+    // 상태를 다시 읽기 전에 모은 금액이 먼저 내려와도 잊음(2026-11-12 S6-04: 같은 화면에서 바로 다시 체크)
     for (const i of list)
-      if (i.state === 'saving' && !reachedTarget(i.goal, i.saved)) tried.current.delete(i.goal.id);
+      if (i.goal.target_amount !== null && i.saved < i.goal.target_amount)
+        tried.current.delete(i.goal.id);
     const next = list.find(
       (i) =>
         i.canEdit &&
@@ -141,13 +143,14 @@ export function AchieveWatch() {
         }
         // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않게 닫고 넘어감(2026-11-09)
         hideToast(1500);
-        nav(savingPaths.achieved(next.goal.id));
+        // 체크리스트(W-02·W-05)에서 닿았으면 W-12a 뒤 W-02로 돌아옴(2026-11-12 S6-09)
+        nav(`${savingPaths.achieved(next.goal.id)}${from ? `?from=${from}` : ''}`);
         void qc.invalidateQueries({ queryKey: qk.goals });
       })
       .catch(() => {
         inflight.current = false;
         setTick((x) => x + 1);
       });
-  }, [meId, key, tick, nav, qc]);
+  }, [meId, key, tick, nav, qc, from]);
   return null;
 }

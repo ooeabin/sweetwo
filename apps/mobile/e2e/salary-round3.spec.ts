@@ -13,7 +13,7 @@ const axe = async (page: Page) => {
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 type Line = { kind: string; state: string; goal_id: string | null };
 
-test('W-02 묶음 ‘모두 보냈어요’: 지출 체크 + 되돌리기, 저금은 더한 금액 Toast 한 번, 다 하면 W-02 끝', async ({
+test('W-02 묶음 ‘모두 보냈어요’: 지출 체크 + 되돌리기, 저금은 더한 금액 Toast 한 번, 다 하면 이동 없이 “다 했어요” 한 줄 + Toast', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -50,9 +50,11 @@ test('W-02 묶음 ‘모두 보냈어요’: 지출 체크 + 되돌리기, 저�
       .every((l) => l.state === 'checked'),
   ).toBe(true);
   await expect(page.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
-  // 마지막 묶음까지 다 하면 W-02 끝
+  // 마지막 묶음까지 다 하면 이동 없이 막대 아래 한 줄 + 끝남 Toast 하나(2026-11-12 W-02 끝 없앰)
   await spend.click();
-  await expect(page).toHaveURL(/\/salary\/done$/);
+  await expect(page.locator('.hg-toast')).toContainText('9월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page).toHaveURL(/\/salary$/);
 });
 
 test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이 한 번에 목표 금액에 닿아도 축하는 한 번씩', async ({
@@ -76,7 +78,7 @@ test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이
 
   await page.getByRole('button', { name: '저금 모두 보냈어요' }).click();
   // 첫 항목 축하 한 번(체크 Toast는 닫힘)
-  await expect(page).toHaveURL(/\/salary\/items\/goal-[eh]\/achieved$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-[eh]\/achieved(\?from=checklist)?$/);
   const first = /goal-e/.test(page.url()) ? 'goal-e' : 'goal-h';
   const second = first === 'goal-e' ? 'goal-h' : 'goal-e';
   await expect(page.getByText('저금 2개에')).toHaveCount(0);
@@ -84,7 +86,7 @@ test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   // 고르지 않고 닫고 월급 탭으로 돌아오면 다른 항목 축하 한 번
   await page.goto('/salary');
-  await expect(page).toHaveURL(new RegExp(`/salary/items/${second}/achieved$`));
+  await expect(page).toHaveURL(new RegExp(`/salary/items/${second}/achieved(\\?from=checklist)?$`));
   await page.goto('/salary');
   // 두 항목 모두 본 뒤에는 다시 축하하지 않음
   await expect(page.getByRole('button', { name: '지출 모두 보냈어요' })).toBeVisible();
@@ -191,7 +193,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   Object.assign(g, { target_amount: 440_000, deadline: '2026-12-01' });
   await page.goto('/salary');
   await page.getByRole('checkbox', { name: /청약/ }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/achieved$/);
+  await expect(page).toHaveURL(/\/salary\/items\/goal-e\/achieved(\?from=checklist)?$/);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await expect(page.getByText('목표 금액만 지우고 지금처럼 모아요')).toBeVisible();

@@ -148,7 +148,7 @@ export function H01Home() {
       onClick={() => {
         track('home_box_tapped', { box: 'band', todo: t.kind });
         // 월급 전 확인은 홈에서 왔다고 남김(32 month_check_viewed entry)
-        nav(t.kind === 'review' ? `${t.to}?from=home` : t.to);
+        nav(t.kind === 'review' ? `${t.to}${t.to.includes('?') ? '&' : '?'}from=home` : t.to);
       }}
     />
   ) : null;

@@ -108,11 +108,11 @@
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | checklist\_generated | 기준일 0시, 첫 사이클은 O-60 직후, 파트너 합류 직후 (서버, 2026-11-12 `server_event`: 체크리스트가 생긴 트랜잭션 끝, 분석 수집을 끈 사람 것은 안 남김) | cycle\_type(`first` / `regular` / `extended`(해제 대기 중)), owner(`self` / `joint`), lines\_count, saving\_lines\_count |
-| checklist\_line\_checked | W-02, W-05, W-10 이번 달 줄 체크(홈 H-03 줄 체크는 2026-11-09 없앰) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), result(`as_planned` / `different`), diff\_band, checked\_by(`self` / `joint`, `on_behalf`는 2026-11-03 대신 체크 없앰), entry(`w02` / `w05` / `home` / `widget`), days\_from\_payday |
+| checklist\_line\_checked | W-02, W-05, W-10 이번 달 줄 체크(체크 칸, 시트 ‘보냈어요’, W-02a 다른 금액. 홈 H-03 줄 체크는 2026-11-09 없앰, 2026-11-12 앱 연결) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), result(`as_planned` / `different`), diff\_band, checked\_by(`self` / `joint`, `on_behalf`는 2026-11-03 대신 체크 없앰), entry(`w02` / `w05` / `w10` / `home` / `widget`), days\_from\_payday(기간 시작부터 날 수) |
 | checklist\_group\_checked | W-02 묶음 ‘모두 보냈어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
-| checklist\_line\_unchecked | 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
-| checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원 | line\_kind |
-| checklist\_completed | 여유 자금 줄을 뺀 모든 줄 체크(W-02 끝 “다 보냈어요”) | hours\_since\_generated, checked\_by\_partner\_count |
+| checklist\_line\_unchecked | 체크한 줄의 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
+| checklist\_line\_skipped | W-05 ‘이번 달은 못 했어요’, W-02a 0원, ‘못 함’으로 되돌리기 | line\_kind |
+| checklist\_completed | 이 기기에서 마지막 줄을 끝내 여유 자금 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이 됨(W-02·W-05 “…체크를 다 했어요/마쳤어요” Toast, 2026-11-12 D4. 예전 W-02 끝 화면은 없앰) | hours\_since\_generated(체크리스트가 생긴 뒤), checked\_by\_partner\_count(상대가 체크한 줄 수) |
 | month\_check\_viewed | W-05 열림 | entry(`notification` / `home` / `other`: 월급 탭·캘린더 등, 2026-11-11), open\_lines\_count(체크 안 한 줄 수) |
 | checklist\_closed | 다음 기준일 0시 (서버, 2026-11-12 `server_event`) | done(닫히기 전에 모든 줄이 체크 또는 ‘못 함’으로 끝났는지, 2026-11-12 D4), checked\_ratio\_band(체크한 줄 비율 `<50` / `50-99` / `100`%), missed\_saving\_lines(체크하지 않은 저금 줄 수), missed\_saving\_band(그 줄 계획 금액 합 구간, 없으면 null) |
 | split\_saved | W-01 ‘추천값으로 다시 채우기’ 저장(2026-11-09 영수증부터 ‘저장’ 버튼이 없어 추천값으로 채울 때만, O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self`), left\_band, reset\_to\_recommended(늘 true), entry(`split`) |
@@ -122,7 +122,7 @@
 | plan\_reordered | W-01 편집 ‘완료’에서 순서가 바뀜 (2026-11-09) | sections(`saving` / `spend` / `both`), lines\_count, joint |
 | plan\_shared | W-01 ‘공유하기’ (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked(금액 가리기였는지), whose(`self` / `partner` / `joint`) |
 | plan\_link\_tapped | W-01 머리 아래 ‘이번 달 3/5 체크했어요 ›’를 누름 (2026-11-09) | whose(`self` / `partner` / `joint`), checked(체크한 줄 수), total(줄 수) |
-| month\_result\_shared | 달 결과 카드 ‘공유하기’(W-02 끝, 다 끝난 W-02, 지난 달) (2026-11-09) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`done` / `checklist` / `past`), skipped(‘못 함’ 줄 수) |
+| month\_result\_shared | 다 끝난 달 한 줄 ‘공유하기’(W-02 1c 이번 달, 지난 달) (2026-11-09, 2026-11-12 W-02 끝 없앰) | result(`shared` / `downloaded` / `cancelled` / `failed`), masked, whose(`self` / `partner` / `joint`), screen(`checklist` / `past`, 예전 `done`은 없앰), skipped(‘못 함’ 줄 수) |
 | salary\_mode\_changed | 설정 S-11f에서 월급 관리 방식 바꿈, 합류 P-04에서 다른 방식으로 ‘바꿀게요’(2026-11-09 round 3) | from, to(`separate` / `combined`), entry(`s11f` / `p04`) |
 
 ### 4-5. 저금 항목·자산 관리·경조사

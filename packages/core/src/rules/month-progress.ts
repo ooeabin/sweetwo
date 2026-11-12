@@ -117,3 +117,29 @@ export function planChangeTouchesMonth(
   );
   return !closed;
 }
+
+/**
+ * 체크리스트 다 끝남(07 5장, 2026-11-12 D4): 여유 자금 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이면 끝남.
+ * 모두 체크면 'all'(“{월}월 월급 체크를 다 했어요”), ‘못 함’이 섞이면 'mixed'(“…체크를 마쳤어요”).
+ * 체크 안 한 줄이 있거나 줄이 없으면 null. 서버 check_pay_line의 체크리스트 상태·파트너 알림과 같은 판단
+ */
+export type ChecklistFinish = 'all' | 'mixed';
+export function checklistFinish(lines: readonly { state: string }[]): ChecklistFinish | null {
+  if (!lines.length || lines.some((l) => l.state === 'wait')) return null;
+  return lines.every((l) => l.state === 'checked') ? 'all' : 'mixed';
+}
+
+/**
+ * 줄 하나를 바꾸면 체크리스트가 이번에 끝나는지(W-02·W-05 마지막 줄 Toast, 2026-11-12): 바꾸기 전에는 안 끝났고 바꾼 뒤 끝나면
+ * 그 끝남, 아니면 null. 다른 금액 0원은 ‘못 함’(서버와 같음)
+ */
+export function finishAfter(
+  lines: readonly { id: string; state: string }[],
+  id: string,
+  next: 'checked' | 'wait' | 'skipped',
+  actual?: number | null,
+): ChecklistFinish | null {
+  if (checklistFinish(lines)) return null;
+  const to = next === 'checked' && actual === 0 ? 'skipped' : next;
+  return checklistFinish(lines.map((l) => (l.id === id ? { ...l, state: to } : l)));
+}

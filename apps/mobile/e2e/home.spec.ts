@@ -94,17 +94,15 @@ test('홈 허브(19, 2026-11-09): 큰 상자(다음 월급날, 이번 달 체크
   );
   await expect(page.getByRole('button', { name: /^저금/ })).toContainText('95만 원');
 
-  // W-02에서 나머지 체크 → W-02 끝 → 홈 큰 상자 5 / 5
+  // W-02에서 나머지 체크 → 이동 없이 막대 아래 “다 했어요” 한 줄 + Toast(2026-11-12 W-02 끝 없앰) → 홈 큰 상자 5 / 5
   await h.click();
   for (const name of ['청약', '고정지출', '생활비', '용돈'])
     await page.getByRole('checkbox', { name: `${name} 체크` }).click();
-  await expect(page.getByRole('heading', { name: '이번 달 월급 체크를 다 했어요' })).toBeVisible();
-  const result = page.locator('.hg-receipt');
-  await expect(result.getByText('9월 월급', { exact: true })).toBeVisible();
-  await expect(result.locator('.hg-receipt__subtotal').first()).toHaveText('139만 원');
-  await expect(page.locator('.hg-doneart.hg-artslot')).toBeVisible();
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-toast')).toContainText('9월 월급 체크를 다 했어요');
+  await expect(page).toHaveURL(/\/salary$/);
   await axe(page);
-  await page.getByRole('button', { name: '확인' }).click();
+  await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
   await expect(h.locator('.hg-hubhero__count')).toHaveText('5 / 5');
   await expect(h).toContainText('체크한 금액350만 원');
@@ -322,6 +320,8 @@ test('W-05 월급 전 확인: 다음 월급날 3일 전부터 할 일 한 줄 �
   await expect(band).toContainText('9월 월급에서 체크 안 한 게 5개 있어요');
   await expect(band).toContainText('확인하기');
   await band.getByRole('button', { name: /체크 안 한 게/ }).click();
+  // 할 일 띠는 그 체크리스트만(2026-11-12 D3)
+  await expect(page).toHaveURL(/\/salary\/review\?checklist=checklist-1&from=home$/);
   await expect(page.getByRole('heading', { name: '9월 월급, 빠진 게 있나요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('checkbox', { name: '내 집 마련 체크' }).click();
@@ -332,6 +332,12 @@ test('W-05 월급 전 확인: 다음 월급날 3일 전부터 할 일 한 줄 �
   // 줄이 빠지니 Toast로 알림 + 되돌리기(2026-11-03)
   await expect(page.getByText('청약, 이번 달은 못 한 걸로 했어요')).toBeVisible();
   expect(lines.find((l) => l.goal_id === 'goal-h')?.state).toBe('checked');
+  // 체크한 줄은 목록에 남고 체크 모양(2026-11-12 D6), ‘못 함’ 줄은 빠짐
+  await expect(page.getByRole('checkbox', { name: '내 집 마련 체크' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(page.locator('.hg-transfer', { hasText: '청약' })).toHaveCount(0);
   await page.getByRole('button', { name: '확인' }).click();
   await expect(page).toHaveURL(/\/$/);
 });
@@ -421,7 +427,8 @@ test('오프라인(30 동기화 4장): 볼 수만 있고, 체크를 누르면 �
     (window as unknown as { __offline: boolean }).__offline = true;
     window.dispatchEvent(new Event('offline'));
   });
-  await expect(page.getByRole('status').filter({ hasText: '연결이 끊겼어요' })).toBeVisible();
+  // 받아 둔 화면이 있으면 13-9 “오프라인 / 마지막 저장 {시각}”(2026-11-12 S6-17, 처음 받기 전이면 “연결이 끊겼어요”)
+  await expect(page.getByRole('status').filter({ hasText: '마지막 저장' })).toBeVisible();
   const box = page.getByRole('checkbox', { name: '내 집 마련 체크' });
   await box.click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();

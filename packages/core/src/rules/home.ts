@@ -10,6 +10,8 @@ import { deadlineDay } from './saving-item';
 export const MATURED_TODO_DAYS = 30;
 
 export interface HomeChecklist {
+  /** 체크리스트 id(월급 전 확인 할 일 링크 `?checklist=`, 2026-11-12 D3). 없으면 링크에 넣지 않음 */
+  id?: string;
   owner_user_id: string | null;
   label: string;
   /** 기간 첫날(= 월급날, 체크리스트가 생긴 날). 없으면 ‘월급날 체크’ 할 일 없음 */
@@ -134,6 +136,16 @@ export function pickTopBanner(on: Partial<Record<TopBanner, boolean>>): TopBanne
   return TOP_BANNER_ORDER.find((k) => on[k]) ?? null;
 }
 
+/**
+ * 월급 전 확인 기간(07 4장): 다음 기준일 3일 전(= 기간 끝 2일 전) ~ 기간 끝(기준일 전날). W-05가 열리는 기간(2026-11-12 D3)
+ */
+export const inReviewWindow = (today: string, cycleEnd: string) =>
+  today >= addDays(cycleEnd, -2) && today <= cycleEnd;
+
+/** 월급 전 확인(W-05) 주소: 그 체크리스트만(2026-11-12 D3) */
+export const reviewPath = (checklistId?: string | null) =>
+  checklistId ? `${PATHS.review}?checklist=${encodeURIComponent(checklistId)}` : PATHS.review;
+
 /** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월급 전 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
 export function salaryState(i: Pick<HomeInput, 'checklists' | 'meId' | 'today'>): SalaryState {
   const c = myList(i);
@@ -142,7 +154,7 @@ export function salaryState(i: Pick<HomeInput, 'checklists' | 'meId' | 'today'>)
   const left = c.lines.filter((l) => l.state === 'wait').length;
   const done = c.lines.filter((l) => l.state === 'checked').length;
   const nextPayday = addDays(c.cycle_end, 1);
-  const state = left === 0 ? 'done' : i.today >= addDays(c.cycle_end, -2) ? 'review' : 'progress';
+  const state = left === 0 ? 'done' : inReviewWindow(i.today, c.cycle_end) ? 'review' : 'progress';
   return { state, label: c.label, done, total, left, nextPayday };
 }
 
@@ -195,7 +207,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       label: s.label,
       left: s.left,
       key: `review:${s.label}:${s.nextPayday}`,
-      to: PATHS.review,
+      to: reviewPath(myList(i)?.id),
     };
   // 월급날 체크(2026-11-09, 월급 전 확인 다음): 월급날부터 7일 안, 체크 안 한 줄이 있을 때
   const check = checkTodo(i);

@@ -57,6 +57,7 @@ export function useHomeInput() {
           joint: space.data.salary_mode === 'joint',
           coupleState: space.data.couple_state,
           checklists: (lists.data ?? []).map((c) => ({
+            id: c.id,
             owner_user_id: c.owner_user_id,
             label: c.label,
             cycle_start: c.cycle_start,

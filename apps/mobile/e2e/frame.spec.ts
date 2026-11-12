@@ -97,7 +97,8 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d), 맨 �
   await expect(page.getByText('연결 해제를 기다리고 있어요')).toHaveCount(0);
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
   await context.setOffline(true);
-  await expect(page.getByText('연결이 끊겼어요')).toBeVisible();
+  // 받아 둔 화면이 있으면 13-9 “오프라인 / 마지막 저장 {시각}”(2026-11-12 S6-17)
+  await expect(page.getByText('마지막 저장', { exact: false })).toBeVisible();
   // 맨 위 띠는 하나만, 오프라인이 먼저(2026-11-11 QA 4구간 D3): 해제 대기 띠는 다시 연결되면 보임
   await expect(page.getByText('10월 20일에 해제돼요')).toHaveCount(0);
   await expect(page.locator('.hg-body__banners .hg-banner')).toHaveCount(1);
