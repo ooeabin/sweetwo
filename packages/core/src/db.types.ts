@@ -3306,6 +3306,7 @@ export type Database = {
           body_text: string
         }[]
       }
+      noti_send_window: { Args: { p_quiet_end: number; p_quiet_start: number }; Returns: string }
       notice_target_valid: { Args: { p: Json }; Returns: boolean }
       notice_user_match: {
         Args: {
@@ -3603,6 +3604,10 @@ export type Database = {
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
       sync_wedding_care: { Args: { p_space: string }; Returns: undefined }
       touch_app: { Args: Record<PropertyKey, never>; Returns: undefined }
+      track_noti_sent: {
+        Args: { p_channel: string; p_kind: string; p_space: string; p_user: string }
+        Returns: undefined
+      }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {
