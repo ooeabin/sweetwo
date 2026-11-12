@@ -158,7 +158,7 @@
 | --- | --- | --- |
 | unlink\_requested | S-12c 연결 해제 요청 | linked\_months, exported\_data |
 | unlink\_resolved | 상대 확인(S-12d) / 14일 기한(서버) / 요청자 취소 | path(`acknowledged` / `timeout` / `canceled`), days\_pending, exported\_data |
-| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월급 전 확인), 파트너가 고침, 경조사, 주간 요약, 초대 리마인드 (서버) | type, channel(`os` / `email` / inapp), cap\_scope(`in_cap` / `out_of_cap`), cap\_used(월 누적) |
+| notification\_sent | 월급날 오전 9시, 다음 월급날 3일 전 오후 8시(월급 전 확인), 파트너가 고침, 경조사, 주간 요약, 초대 리마인드 (서버). 2026-11-12 QA 10구간 S10-03: 알림 종류 모두, 채널마다 1번(알림 센터에 쌓일 때 `inapp`, 푸시를 꺼낼 때 `os`(기기 수와 상관없이 1번), 대신 메일을 쌓을 때 `email`) | type(알림 종류 kind), channel(`os` / `email` / `inapp`), cap\_scope(`in_cap` / `out_of_cap` = 상한 밖 보안·계정 종류), cap\_used(월 누적, 2026-11-04 메일 상한을 없애 지금은 보내지 않음) |
 | notification\_opened | 알림 클릭 → 진입 | type, channel, minutes\_to\_open, landing\_screen |
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
