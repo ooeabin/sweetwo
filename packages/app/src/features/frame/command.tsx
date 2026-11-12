@@ -1,4 +1,5 @@
 import { fetchAssets, fetchCareDays, fetchGoals, qk } from '@sweetwo/api';
+import { lastAssetsTab } from './assets-tab';
 import {
   CommandPalette,
   Menu,
@@ -23,7 +24,7 @@ export const ADD_TO = {
   asset: '/assets/new',
   care: '/calendar/add',
 } as const;
-const TABS = ['/', '/salary', '/assets', '/calendar'] as const;
+const TABS = ['/', '/salary', '/assets', '/calendar'] as const; // 자산 관리는 마지막 본 하위 탭(S8-10)
 type Tab = 'month' | 'salary' | 'assets' | 'calendar';
 /** 그 화면에 맞는 추가(Ctrl+N, 2026-11-09 좁은 창 + 버튼은 없앰): 홈·월급 = 저금 항목, 자산 관리 = 자산·부채, 캘린더 = 경조사 */
 export const addFor = (t: Tab | null) =>
@@ -45,7 +46,7 @@ export function AddMenu() {
   const actions: MenuAction[] = [
     // 들어온 곳 분석(32 saving_item_created entry add_menu, 2026-11-12 S7-16)
     { label: copy.addSaving, onSelect: () => nav(`${ADD_TO.saving}/a?from=add_menu`) },
-    { label: copy.addAsset, onSelect: () => nav(ADD_TO.asset) },
+    { label: copy.addAsset, onSelect: () => nav(`${ADD_TO.asset}?from=home`) },
     { label: copy.addCare, onSelect: () => nav(ADD_TO.care) },
   ];
   return (
@@ -93,7 +94,8 @@ export function FrameCommands({
         setPaletteOpen(true);
       } else if (['1', '2', '3', '4'].includes(k)) {
         e.preventDefault();
-        nav(TABS[Number(k) - 1] ?? '/');
+        const to = TABS[Number(k) - 1] ?? '/';
+        nav(to === '/assets' ? lastAssetsTab() : to);
       } else if (k === 'n') {
         e.preventDefault();
         if (current === 'month') setAddOpen(true);
@@ -151,7 +153,12 @@ function Palette({
       label: copy.cmdSaving,
       onRun: () => nav(`${ADD_TO.saving}/a?from=palette`),
     },
-    { key: 'asset', icon: 'wallet', label: copy.cmdAsset, onRun: () => nav(ADD_TO.asset) },
+    {
+      key: 'asset',
+      icon: 'wallet',
+      label: copy.cmdAsset,
+      onRun: () => nav(`${ADD_TO.asset}?from=palette`),
+    },
     {
       key: 'mask',
       icon: masked ? 'eye' : 'eye-off',

@@ -133,7 +133,39 @@ export type AnalyticsEvent =
     }
   | {
       name: 'rank_ad_result';
-      props: { result: 'rewarded' | 'closed' | 'failed' | 'none' };
+      // platform: 브리지 플랫폼, 없으면 web(개발 브라우저, 2026-11-12 S8-07)
+      props: {
+        result: 'rewarded' | 'closed' | 'failed' | 'none';
+        platform: 'ios' | 'android' | 'web';
+      };
+    }
+  | {
+      // F-03 저장(32 4-5, 2026-11-12 QA 8구간 S8-07). kind = 통장류(현금성, 예금·적금, 청약) account, 부채 debt, 그 밖은 묶음 이름
+      name: 'asset_added';
+      props: {
+        kind: 'account' | 'invest' | 'pension' | 'insurance' | 'real_estate' | 'other' | 'debt';
+        entry: 'home' | 'assets' | 'palette';
+        is_first: boolean;
+      };
+    }
+  | {
+      // 자산·부채 금액을 바꿈(32 4-5, F-04 금액 고치기·시세 바꾸기 저장, 2026-11-12 S8-07)
+      name: 'fact_value_changed';
+      props: {
+        field: 'income' | 'payday' | 'asset' | 'debt';
+        change_band: '<5' | '5-20' | '20+';
+        source_screen: string;
+      };
+    }
+  | {
+      // 되살리기(32 4-7). 지금은 F-04 삭제 Toast ‘되돌리기’(2026-11-12 S8-07)
+      name: 'trash_restored';
+      props: {
+        item_type: 'asset' | 'goal' | 'care_day';
+        days_in_trash: number;
+        relinked: boolean;
+        entry: 'trash' | 'toast';
+      };
     }
   | {
       name: 'rank_viewed';
@@ -226,7 +258,8 @@ export type AnalyticsEvent =
   | {
       name: 'change_reverted';
       props: {
-        item_type: 'split' | 'goal' | 'goal_priority' | 'salary_mode' | 'care_day';
+        // asset: F-04 저장 Toast ‘되돌리기’(2026-11-12 S8-05)
+        item_type: 'split' | 'goal' | 'goal_priority' | 'salary_mode' | 'care_day' | 'asset';
         entry: 'toast' | 'history';
         reverted_whose: 'self' | 'partner';
         hours_since_change: number;

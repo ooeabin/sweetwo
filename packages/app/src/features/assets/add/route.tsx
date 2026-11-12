@@ -1,5 +1,13 @@
 import { insertAsset } from '@sweetwo/api';
-import { assetGroup, bands, quickChips, todayKst, type AssetSide } from '@sweetwo/core';
+import {
+  assetGroup,
+  bands,
+  parsePaidCount,
+  parseRate,
+  quickChips,
+  todayKst,
+  type AssetSide,
+} from '@sweetwo/core';
 import {
   AmountInput,
   ChoiceCards,
@@ -13,6 +21,7 @@ import {
 } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -45,6 +54,12 @@ export function AssetAddRoute() {
   const [dupOk, setDupOk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rateText, setRateText] = useState<string | null>(null);
+  const [countText, setCountText] = useState<string | null>(null);
+  // 분석 asset_added entry(홈 ‘추가’ 메뉴 ?from=home, 검색 ‘바로 하기’ ?from=palette, 그 밖 자산 관리). 단계가 바뀌어도 그대로
+  const [entry] = useState<'home' | 'assets' | 'palette'>(() => {
+    const f = params.get('from');
+    return f === 'home' || f === 'palette' ? f : 'assets';
+  });
 
   // 처음 열면 진입한 탭(자산/부채)으로 새로 시작
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
@@ -79,6 +94,7 @@ export function AssetAddRoute() {
     setSaving(true);
     try {
       const owner = solo ? 'me' : (x.owner ?? 'me');
+      const isFirst = d.items.length === 0 && d.sums.length === 0;
       await insertAsset({
         side: x.side,
         grp: x.grp,
@@ -94,6 +110,22 @@ export function AssetAddRoute() {
         paid_count: x.paidCount,
         interest_rate: x.rate,
       });
+      // 32 4-5 asset_added(2026-11-12 S8-07)
+      track('asset_added', {
+        kind:
+          x.side === 'debt'
+            ? 'debt'
+            : x.grp === 'cash' || x.grp === 'deposit' || x.grp === 'subscription'
+              ? 'account'
+              : x.grp === 'invest' ||
+                  x.grp === 'pension' ||
+                  x.grp === 'insurance' ||
+                  x.grp === 'real_estate'
+                ? x.grp
+                : 'other',
+        entry,
+        is_first: isFirst,
+      });
       await refresh();
       const counted = !(owner === 'me' && !solo && x.visibility === 'private');
       carryToast(
@@ -105,7 +137,8 @@ export function AssetAddRoute() {
       );
       nav(`/assets/items?side=${x.side}`, { replace: true });
     } catch {
-      toast(copy.loadFailed);
+      // 13 공통 상태 10번 저장 실패(2026-11-12 S8-16). 입력값은 그대로라 다시 누르면 됨
+      toast(copy.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -304,23 +337,29 @@ export function AssetAddRoute() {
   }
 
   if (step === 'count') {
+    // 회차 0~999: F-04와 같은 core 규칙(2026-11-12 S8-12)
+    const text = countText ?? (draft.paidCount === null ? '' : String(draft.paidCount));
+    const v = parsePaidCount(text);
     return (
       <QuestionLayout
         steps={progress}
         title={copy.paidCount}
         onBack={back}
         later={skip}
-        primary={{ label: lastLabel, disabled: draft.paidCount === null, loading: saving }}
-        onSubmit={() => draft.paidCount !== null && go({})}
+        primary={{ label: lastLabel, disabled: v === null || v === 'bad', loading: saving }}
+        onSubmit={() => typeof v === 'number' && go({ paidCount: v })}
       >
         <Field
           label={copy.paidCount}
           inputMode="numeric"
-          value={draft.paidCount ?? ''}
+          value={text}
           onChange={(e) => {
-            const n = e.target.value.replace(/\D/g, '').slice(0, 4);
-            set({ paidCount: n ? Number(n) : null });
+            const t = e.target.value.replace(/\D/g, '').slice(0, 3);
+            setCountText(t);
+            const n = parsePaidCount(t);
+            set({ paidCount: typeof n === 'number' ? n : null });
           }}
+          error={v === 'bad' ? copy.countInvalid : undefined}
           help={copy.paidCountUnit}
         />
       </QuestionLayout>
@@ -328,9 +367,10 @@ export function AssetAddRoute() {
   }
 
   if (step === 'rate') {
+    // 금리 0~30%, 소수 1자리: F-04와 같은 core 규칙(2026-11-12 D5 = A, S8-12)
     const text = rateText ?? (draft.rate === null ? '' : String(draft.rate));
-    const v = text.trim() === '' ? null : Number(text);
-    const bad = v !== null && (!Number.isFinite(v) || v < 0 || v > 100);
+    const v = parseRate(text);
+    const bad = v === 'bad';
     return (
       <QuestionLayout
         steps={progress}
@@ -338,14 +378,14 @@ export function AssetAddRoute() {
         onBack={back}
         later={skip}
         primary={{ label: lastLabel, disabled: v === null || bad, loading: saving }}
-        onSubmit={() => v !== null && !bad && go({ rate: Math.round(v * 100) / 100 })}
+        onSubmit={() => typeof v === 'number' && go({ rate: v })}
       >
         <Field
           label={copy.rate}
           inputMode="decimal"
           value={text}
-          onChange={(e) => setRateText(e.target.value.replace(/[^\d.]/g, '').slice(0, 6))}
-          error={bad ? copy.rateError : undefined}
+          onChange={(e) => setRateText(e.target.value.replace(/[^\d.]/g, '').slice(0, 4))}
+          error={bad ? copy.rateInvalid : undefined}
           help="%"
         />
       </QuestionLayout>

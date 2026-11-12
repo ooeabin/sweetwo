@@ -136,11 +136,11 @@
 | saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |
 | saving\_monthly\_changed | W-10a 매달 금액 저장 (2026-11-09 round 3) | monthly\_band, direction(`up` / `down`) |
 | (없앰) goal\_created, goal\_amount\_set, goal\_money\_moved, goal\_delayed, goal\_achieved | 2026-11-08 ADR 0007 | — |
-| asset\_added | F-03 저장 | kind(`account` / `invest` / `real_estate` / `debt` 등), entry(`home` / `assets` / `palette`), is\_first |
+| asset\_added | F-03 저장(2026-11-12 QA 8구간 S8-07 앱에 넣음) | kind(`account`: 현금성·예금·적금·청약 / `invest` / `pension` / `insurance` / `real_estate` / `other` / `debt`), entry(`home`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `assets`: 자산 관리 화면과 그 밖), is\_first(자산·부채가 하나도 없을 때 추가) |
 | rank\_banner\_tapped | F-01 0번 순위 줄 (2026-11-04. 2026-11-11 홈 순위 줄 1a 없앰, 홈은 H-04 타일 배지라 이벤트 없음) | state(`unseen` / `seen` / `stale` / `empty`), entry(`assets`) |
-| rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform |
+| rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform(`ios` / `android` / `web`: 브리지 없음, 2026-11-12 S8-07) |
 | rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
-| fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면 | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
+| fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면(2026-11-12 S8-07: F-04 금액 고치기·시세 바꾸기 저장, `source_screen` = `F-04`) | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
 | event\_recorded | Y-08 경조사 기록 | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요], amount\_band, vs\_budget(`under` / `on` / `over`), is\_secret(서프라이즈면 event\_type 미전송) |
 
 ### 4-6. 둘이 같이 고치기
@@ -150,7 +150,7 @@
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감(2026-11-12 W-01: 합쳐서 공동 월급 계획을 연결된 상대와 쓸 때 줄 금액·이름·추가·지우기·‘추천값으로 다시 채우기’마다 `split`. 순서 바꾸기는 활동 기록만이라 보내지 않음. 2026-11-12 S7-16 저금: 합쳐서 + 연결이면 W-11 추가, W-10a 이름·목표 금액·기한·새 목표 금액, W-10 지우기, W-12a 계속 모을게요·그만할게요마다 `goal`(합쳐서면 각자일 때 만든 저금도, D1)) | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
-| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기(2026-11-12 W-01: 위 shared\_item\_changed를 보낸 동작의 Toast ‘되돌리기’) | item\_type, entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
+| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기(2026-11-12 W-01: 위 shared\_item\_changed를 보낸 동작의 Toast ‘되돌리기’) | item\_type(2026-11-12 S8-05 F-04 저장 Toast ‘되돌리기’는 `asset`), entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
 
 ### 4-7. 연결 해제·알림·구독·위젯
 
@@ -171,7 +171,7 @@
 | account\_delete\_requested | S-18b 삭제 확인 | couple\_state, exported\_before |
 | account\_restored | 유예 중 재로그인 ‘취소하고 계속 쓰기’ (서버) | days\_pending, was\_linked |
 | data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |
-| trash\_restored | S-21 되살리기, 되돌리기 토스트 | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
+| trash\_restored | S-21 되살리기, Toast ‘되돌리기’(2026-11-12 S8-07: F-04 삭제 Toast ‘되돌리기’, item\_type `asset`, days\_in\_trash 0) | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
 | rejoin\_requested | S-12 “다시 연결하기”(2026-11-11 앱에 넣음) | days\_since\_unlink |
 | rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |
 | home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings` / `retry`: 큰 상자 오류 카드 ‘다시 시도’, 2026-11-11), todo(할 일 띠 종류, band일 때만: `unlink` / `reconnect` / `review` / `check` / `saving` / `matured` / `care` / `invite`, 2026-11-11 초대 띠도 같은 띠) |

@@ -30,7 +30,11 @@ import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
 import { LineBand } from './notice-band';
 import { onSessionReset } from '../../shared/session-reset';
+import { lastAssetsTab } from './assets-tab';
 
+// 자산 관리는 마지막 본 하위 탭으로(lastAssetsTab, 2026-11-12 S8-10)
+const hrefOf = (key: AppTab): string | undefined =>
+  key === 'assets' ? lastAssetsTab() : HREF[key];
 const HREF: Record<AppTab, string | undefined> = {
   month: '/',
   salary: '/salary',
@@ -169,7 +173,7 @@ export function MainFrame(
     [
       item('home', d.home, '/', path === '/'),
       item('salary', d.salary, '/salary', path === '/salary'),
-      item('assets', d.assets, '/assets', path === '/assets' || path === '/assets/items'),
+      item('assets', d.assets, lastAssetsTab(), path === '/assets' || path === '/assets/items'),
       item('calendar', d.calendar, '/calendar', path === '/calendar/list'),
     ],
     [
@@ -254,11 +258,11 @@ export function MainFrame(
         tabs={keys.map((key) => ({
           key,
           label: label[key],
-          href: HREF[key],
+          href: hrefOf(key),
           disabled: !HREF[key],
         }))}
         onTab={(key) => {
-          const to = HREF[key];
+          const to = hrefOf(key);
           if (to) nav(to);
         }}
         date={formatDateWeekday(todayKst())}

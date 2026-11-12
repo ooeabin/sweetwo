@@ -74,7 +74,7 @@ export function RankBanner() {
     setBusy(true);
     try {
       const ad = await watchAd();
-      track('rank_ad_result', { result: ad });
+      track('rank_ad_result', { result: ad, platform: window.sweetwo?.platform ?? 'web' });
       if (ad === 'closed') return toast(copy.rankAdClosed);
       const month = `${todayKst().slice(0, 7)}-01`;
       await updateMe({ rank_month: month, rank_pct: rankTopPct(r.net), rank_net: r.net });

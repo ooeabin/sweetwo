@@ -1,4 +1,4 @@
-import { settleMatured } from '@sweetwo/api';
+import { AssetForbiddenError, settleMatured } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import { ChoiceCards, DateWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
@@ -40,11 +40,17 @@ export function F04aMatured() {
     setBusy(true);
     try {
       await settleMatured(a.id, how);
-      await refresh();
+      // 옮긴 뒤 새로 읽기(만기 완료 항목이 목록에서 빠져도 이 화면의 확인에 걸리지 않게)
       carryToast(copy.maturedDone);
       nav('to' in how ? `/assets/${how.to}` : `/assets/${a.id}`, { replace: true });
-    } catch {
-      toast(copy.loadFailed);
+      await refresh();
+    } catch (e) {
+      // 13 공통 상태 10번·8번(2026-11-12 S8-16)
+      toast(
+        e instanceof AssetForbiddenError
+          ? copy.readOnly(d.couple?.partnerName ?? '')
+          : copy.saveFailed,
+      );
     } finally {
       setBusy(false);
     }
