@@ -2422,6 +2422,48 @@ export type Database = {
           },
         ]
       }
+      storage_move: {
+        Row: {
+          attempts: number
+          bucket: string
+          created_at: string
+          done_at: string | null
+          from_path: string
+          id: number
+          to_path: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          done_at?: string | null
+          from_path: string
+          id?: never
+          to_path: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          done_at?: string | null
+          from_path?: string
+          id?: never
+          to_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_move_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storage_purge: {
         Row: {
           attempts: number
@@ -2947,6 +2989,15 @@ export type Database = {
           token: string
         }[]
       }
+      claim_storage_move: {
+        Args: { p_limit?: number }
+        Returns: {
+          bucket: string
+          from_path: string
+          id: number
+          to_path: string
+        }[]
+      }
       claim_storage_purge: {
         Args: { p_limit?: number }
         Returns: {
@@ -3090,6 +3141,7 @@ export type Database = {
       cycle_date: { Args: { m: number; p_day: number; y: number }; Returns: string }
       cycle_day: { Args: { p_owner: string; p_space: string }; Returns: number }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
+      done_storage_move: { Args: { p_ids: number[] }; Returns: undefined }
       done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
       emergency_asset_add: { Args: { d: number; p_space: string }; Returns: undefined }
@@ -3238,6 +3290,7 @@ export type Database = {
       md_label: { Args: { d: string }; Returns: string }
       move_goal: { Args: { p_amount: number; p_goal: string; p_kind: string }; Returns: string }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
+      my_login_email: { Args: Record<PropertyKey, never>; Returns: string }
       my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_notices: { Args: { p_platform: string; p_version?: string }; Returns: Json }
       my_reconnect_ok: { Args: Record<PropertyKey, never>; Returns: boolean }
