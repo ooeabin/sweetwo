@@ -1,4 +1,4 @@
-import { ActiveNotice, type Tables } from '@sweetwo/core';
+import { ActiveNotice, NotiRow, parseNotiRows, type NotiCursor } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -7,20 +7,24 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type Notification = Tables<'notification'>;
+/** 앱이 쓰는 알림 칸(Zod로 검사한 행, core NotiRow) */
+export type Notification = NotiRow;
 export const NOTI_PAGE = 30;
+const NOTI_COLS = 'id, kind, title, body, target, icon, actor_id, created_at, read_at';
 
-/** 최신순 30개. before = 그보다 오래된 것(더 불러오기) */
-export async function fetchNotifications(before?: string): Promise<Notification[]> {
+/** 최신순(같은 시각이면 id 내림차순) 30개. before = 그 커서보다 뒤(더 불러오기, 같은 시각 알림도 빠지지 않게 S10-13) */
+export async function fetchNotifications(before?: NotiCursor): Promise<Notification[]> {
   let q = supabase()
     .from('notification')
-    .select('*')
+    .select(NOTI_COLS)
     .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(NOTI_PAGE);
-  if (before) q = q.lt('created_at', before);
+  if (before)
+    q = q.or(`created_at.lt."${before.at}",and(created_at.eq."${before.at}",id.lt.${before.id})`);
   const { data, error } = await q;
   fail(error);
-  return data ?? [];
+  return parseNotiRows(data);
 }
 
 /** 읽지 않은 알림이 있는지(종 아이콘 점) */
@@ -51,8 +55,10 @@ export function subscribeNotifications(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'notification', filter: `user_id=eq.${userId}` },
       (p) => {
-        if (p.eventType === 'INSERT') on({ type: 'insert', row: p.new as Notification });
-        else if (p.eventType === 'UPDATE') on({ type: 'update', row: p.new as Notification });
+        const r = NotiRow.safeParse(p.new);
+        if (!r.success) return;
+        if (p.eventType === 'INSERT') on({ type: 'insert', row: r.data });
+        else if (p.eventType === 'UPDATE') on({ type: 'update', row: r.data });
       },
     )
     .subscribe();
@@ -65,11 +71,12 @@ export function subscribeNotifications(
 export async function fetchNotification(id: string): Promise<Notification | null> {
   const { data, error } = await supabase()
     .from('notification')
-    .select('*')
+    .select(NOTI_COLS)
     .eq('id', id)
     .maybeSingle();
   fail(error);
-  return data;
+  const r = NotiRow.safeParse(data);
+  return r.success ? r.data : null;
 }
 
 // ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것 중 나에게 맞는 것만 ──────────────

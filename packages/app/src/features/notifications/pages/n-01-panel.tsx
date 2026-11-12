@@ -6,6 +6,18 @@ import { NotiView } from '../view';
 export function N01Panel() {
   const { open, set } = useNotiPanel();
   const box = useRef<HTMLDivElement>(null);
+  // 연 버튼(종). Esc·닫기로 닫으면 포커스를 돌려줌(2026-11-12 QA 10구간 S10-09, NotificationPanel.md)
+  // 패널이 첫 줄에 포커스를 주기 전(그리는 때)에 잡아 둠
+  const opener = useRef<HTMLElement | null>(null);
+  const wasOpen = useRef(false);
+  if (open && !wasOpen.current && typeof document !== 'undefined')
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  wasOpen.current = open;
+  const close = () => {
+    set(false);
+    const el = opener.current;
+    if (el && el !== document.body && el.isConnected) el.focus();
+  };
   useEffect(() => {
     if (!open) return;
     const down = (e: MouseEvent) => {
@@ -20,7 +32,7 @@ export function N01Panel() {
   if (!open) return null;
   return (
     <div ref={box}>
-      <NotiView variant="sheet" onClose={() => set(false)} />
+      <NotiView variant="sheet" onClose={close} />
     </div>
   );
 }

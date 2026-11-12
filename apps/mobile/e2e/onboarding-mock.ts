@@ -2586,18 +2586,30 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.unlinks.filter((u) => u.status === 'pending'),
       );
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
-    // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
+    // 알림: 최신순(같은 시각이면 id 내림차순), (만든 때, id) 커서(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {
       const rows = [...db.notifications].sort((a, b) =>
-        String(a.created_at) < String(b.created_at) ? 1 : -1,
+        String(a.created_at) === String(b.created_at)
+          ? String(a.id) < String(b.id)
+            ? 1
+            : -1
+          : String(a.created_at) < String(b.created_at)
+            ? 1
+            : -1,
       );
       if (method === 'GET') {
         if (url.searchParams.get('read_at') === 'is.null')
           return json(route, rows.filter((r) => !r.read_at).slice(0, 1));
         if (url.searchParams.get('id')?.startsWith('eq.'))
           return json(route, rows.find((r) => r.id === eqId(url)) ?? null);
-        const lt = url.searchParams.get('created_at')?.replace(/^lt\./, '');
-        return json(route, rows.filter((r) => !lt || String(r.created_at) < lt).slice(0, 30));
+        // or=(created_at.lt."at",and(created_at.eq."at",id.lt.id))
+        const cur = /created_at\.lt\."([^"]+)",and\(created_at\.eq\."[^"]+",id\.lt\.([^)]+)\)/.exec(
+          url.searchParams.get('or') ?? '',
+        );
+        const [, at = '', id = ''] = cur ?? [];
+        const after = (r: Record<string, unknown>) =>
+          !cur || String(r.created_at) < at || (String(r.created_at) === at && String(r.id) < id);
+        return json(route, rows.filter(after).slice(0, 30));
       }
     }
     if (path === '/rest/v1/saving_deposit' && method === 'GET') {

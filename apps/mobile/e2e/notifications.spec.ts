@@ -188,6 +188,9 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
   seed(db);
   await page.goto('/notifications');
   await expect(page.getByText('새 알림이 없어요')).toBeVisible();
+  // N-03 그림 자리 120px(2026-11-12 D2)
+  const art = page.locator('.hg-noti__empty .hg-empty__art.hg-artslot');
+  await expect(art).toHaveCSS('width', '120px');
   await axe(page);
 
   db.notifications.push(
@@ -215,4 +218,82 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
   }
   await page.goto('/notifications');
   await expect(page.getByRole('complementary', { name: '알림' })).toContainText('예산은 •••이에요');
+});
+
+// 2026-11-12 QA 10구간: 같은 시각 알림도 더 불러오기에서 빠지지 않음(S10-13), 달성 줄은 아이콘 자리(S10-05),
+// 문구 1줄 + 말줄임 + 툴팁(D4), 빈 상태 그림 자리(D2), Esc로 닫으면 종으로 포커스(S10-09), 오프라인 읽음은 연결되면 보냄(S10-14)
+test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1줄 말줄임, Esc 포커스, 오프라인 읽음', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const narrow = info.project.name === 'narrow';
+  // 같은 시각 31개(30개 경계에 걸림) + 맨 위 달성 알림(사람 + 아이콘)
+  for (let i = 0; i < 31; i++)
+    db.notifications.push(
+      noti({
+        id: `00000000-0000-4000-8000-${String(100 + i).padStart(12, '0')}`,
+        kind: 'care_day',
+        title: `경조사 ${i + 1}번이 한 달 남았어요`,
+        target: '/calendar/list',
+        icon: 'gift',
+        read_at: '2026-10-01T00:00:00Z',
+        created_at: '2026-10-01T00:00:00Z',
+      }),
+    );
+  db.notifications.push(
+    noti({
+      id: '00000000-0000-4000-8000-000000000050',
+      kind: 'goal_achieved',
+      title: '우리 할머니 팔순 잔치와 가족 여행 겸 기념 행사 저금 목표 금액을 다 모았어요!',
+      target: '/calendar/list',
+      icon: 'trophy',
+      actor_id: 'yebin',
+      created_at: '2026-10-07T00:30:00Z',
+    }),
+  );
+
+  await page.goto(narrow ? '/' : '/calendar/list');
+  const bell = page
+    .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
+    .getByRole('button', { name: /^알림/ });
+  await expect(bell).toHaveClass(/hg-iconbtn--dot/);
+  if (narrow) await bell.click();
+  else {
+    await bell.focus();
+    await page.keyboard.press('Enter');
+  }
+  const panel = page.getByRole('complementary', { name: '알림' });
+  const first = panel.locator('.hg-noti__item').first();
+  await expect(first).toContainText('목표 금액을 다 모았어요!');
+  await expect(first.locator('.hg-avatar')).toHaveCount(0);
+  await expect(first.locator('.hg-noti__icon.hg-lead--slot')).toHaveAttribute('data-art', 'trophy');
+  const msg = first.locator('.hg-noti__msg');
+  await expect(msg).toHaveCSS('white-space', 'nowrap');
+  await expect(msg).toHaveCSS('text-overflow', 'ellipsis');
+  await expect(first).toHaveAttribute('title', /행사 저금 목표 금액을 다 모았어요!$/);
+  expect(await first.evaluate((e) => Math.round(e.getBoundingClientRect().height))).toBe(64);
+
+  // 끝까지 내리면 31개 모두(같은 시각이 빠지지 않음)
+  await panel.locator('.hg-noti__item').nth(29).scrollIntoViewIfNeeded();
+  await expect(panel.locator('.hg-noti__item')).toHaveCount(32);
+  await expect(panel).toContainText('경조사 31번이 한 달 남았어요');
+
+  if (!narrow) {
+    await page.keyboard.press('Escape');
+    await expect(panel).toHaveCount(0);
+    await expect(bell).toBeFocused();
+    await bell.click();
+  }
+
+  // 오프라인에서 누르면 줄은 읽음으로 보이고, 연결되면 서버에 보냄
+  await page.context().setOffline(true);
+  await panel.locator('.hg-noti__item').first().click();
+  await page.waitForTimeout(300);
+  expect(db.notifications.find((n) => n.kind === 'goal_achieved')?.read_at ?? null).toBeNull();
+  await page.context().setOffline(false);
+  await expect
+    .poll(() => db.notifications.find((n) => n.kind === 'goal_achieved')?.read_at ?? null)
+    .not.toBeNull();
 });
