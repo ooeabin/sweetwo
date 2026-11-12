@@ -3214,6 +3214,10 @@ export type Database = {
         }
         Returns: Json
       }
+      inquiry_is_about: {
+        Args: { p_inquiry_no: string; p_user: string }
+        Returns: boolean
+      }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {

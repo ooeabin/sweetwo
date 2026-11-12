@@ -31,7 +31,8 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 reset role;
-with i as (insert into public.inquiry (category, body) values ('account', '로그인 못 해요') returning no)
+-- 문의는 예빈 것(AD-05는 그 회원의 문의 번호만, 2026-11-12)
+with i as (insert into public.inquiry (user_id, category, body) values ('22222222-2222-2222-2222-222222222222', 'account', '로그인 못 해요') returning no)
 select set_config('test.no', (select no from i), true);
 
 -- 고객 지원
