@@ -8,6 +8,7 @@
 .hg-policy th { padding: var(--space-2) var(--space-4); background: var(--surface-sunk); border-bottom: 1px solid var(--hairline-soft); font: 600 13px/18px var(--font-sans); color: var(--slate); text-align: left; }
 .hg-policy td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--hairline-soft); vertical-align: top; }
 .hg-policy tr:last-child td { border-bottom: 0; }
+.hg-policy :is(th, td):first-child { white-space: nowrap; }  /* 2026-11-12 ‘필수’·‘선택’ 같은 짧은 첫 칸이 좁은 창에서 한 글자씩 꺾이지 않게 */
 
 /* hidden 속성은 hg- 클래스의 display보다 먼저(스크립트가 OS·검색에 따라 숨김) */
 [hidden] { display: none !important; }
