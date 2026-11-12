@@ -13,7 +13,7 @@ export type AuthProvider = z.infer<typeof AuthProvider>;
  */
 export const CONSENT_VERSIONS = {
   terms: 'v2',
-  privacy: 'v1',
+  privacy: 'v2',
   space_sharing: 'v1',
   marketing: 'v1',
 } as const;

@@ -19,14 +19,14 @@ const pick = [1, 2, 22, 4, 10].flatMap((n) => all.filter((f) => f.n === n));
       <p class="hg-site__lead">{t.heroLead}</p>
       <Download placement="hero" />
     </div>
-    <div class="hg-card" style="background: var(--surface); display: grid; place-items: center; gap: var(--space-4);">
+    <div class="hg-card hg-site__art" data-theme="light">
       <img src={symbol.src} alt="" width="320" height="320" loading="eager" />
     </div>
   </section>
 
   <section class="hg-site__sec" aria-labelledby="features">
     <h2 id="features" class="hg-site__h2">{t.featuresTitle}</h2>
-    <div class="hg-site__cols">
+    <div class="hg-site__cols hg-site__cols--2">
       {t.features.map((f) => (
         <div class="hg-site__feature">
           <b>{f.title}</b>

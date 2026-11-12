@@ -1,18 +1,25 @@
 ---
-// 초대 링크 화면(28 공통 ‘초대 링크’). /i/{코드}는 정적 파일이 없어 404 페이지와 /i/가 이 컴포넌트를 씀.
+// 초대 링크 화면(28 공통 ‘초대 링크’). /i/{코드}는 public/_redirects가 /i/ 페이지를 200으로 보여 줌(주소는 그대로, 2026-11-12).
+// 404 페이지도 /i/로 시작하는 주소면 같은 화면을 보여 줌(되돌림 장치: _redirects를 모르는 미리보기 서버 등).
 // 앱이 깔린 휴대폰은 앱 링크로 앱이 바로 열려 이 화면을 보지 않음.
 // - 앱이 없는 휴대폰: “sweeTwo에 초대받았어요” + 코드(크게, ‘복사’) + 그 기기 스토어 버튼
 // - PC: 같은 초대 화면 + 스토어 버튼 2개(2026-11-10 데스크톱 앱과 ‘앱으로 열까요?’ 없앰, ADR 0008)
+// - 코드 없이 /i/: 제목 + “앱을 설치한 뒤 받은 초대 코드를 입력해 주세요” + 스토어 버튼(코드 줄 없음)
 // 코드가 유효한지는 확인하지 않음(로그인 없이 검증하지 않음, 만료·사용은 앱 P-01 규칙)
 import Download from './Download.astro';
 import { t } from '../lib/site';
+interface Props {
+  /** /i/ 페이지는 늘 보임. 404 페이지는 /i/로 시작하는 주소일 때만 */
+  always?: boolean;
+}
+const { always = false } = Astro.props;
 ---
 
-<div data-invite hidden>
+<div data-invite hidden={!always}>
   <section class="hg-site__sec" style="border-top: 0;">
     <h1 class="hg-site__h2">{t.invited}</h1>
-    <p class="hg-site__lead">{t.invitedSub}</p>
-    <div class="hg-row" style="gap: var(--space-3); align-items: center;">
+    <p class="hg-site__lead" data-invite-sub>{t.invitedNoCode}</p>
+    <div class="hg-row" style="gap: var(--space-3); align-items: center;" data-code-row hidden>
       <b class="hg-site__h2" style="letter-spacing: var(--space-1);" data-code></b>
       <button type="button" class="hg-btn hg-btn--secondary hg-btn--sm" data-copy>{t.copyCode}</button>
       <span class="hg-help" role="status" data-copied></span>
@@ -25,15 +32,21 @@ import { t } from '../lib/site';
   const isInvite = location.pathname.startsWith('/i/');
   const code = (location.pathname.split('/i/')[1] ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 12);
   const box = document.querySelector<HTMLElement>('[data-invite]');
-  if (isInvite && code && box) {
+  if (isInvite && box) {
     box.hidden = false;
-    const c = document.querySelector<HTMLElement>('[data-code]');
-    if (c) c.textContent = code;
-    document.querySelector('[data-copy]')?.addEventListener('click', () => {
-      void navigator.clipboard?.writeText(code).then(() => {
-        const s = document.querySelector<HTMLElement>('[data-copied]');
-        if (s) s.textContent = t.copied;
+    if (code) {
+      const sub = document.querySelector<HTMLElement>('[data-invite-sub]');
+      if (sub) sub.textContent = t.invitedSub;
+      const row = document.querySelector<HTMLElement>('[data-code-row]');
+      if (row) row.hidden = false;
+      const c = document.querySelector<HTMLElement>('[data-code]');
+      if (c) c.textContent = code;
+      document.querySelector('[data-copy]')?.addEventListener('click', () => {
+        void navigator.clipboard?.writeText(code).then(() => {
+          const s = document.querySelector<HTMLElement>('[data-copied]');
+          if (s) s.textContent = t.copied;
+        });
       });
-    });
+    }
   }
 </script>

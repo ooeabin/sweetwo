@@ -143,7 +143,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 - Build variables(세 Worker 공통): `NODE_VERSION=22.20.0`(22만 쓰면 최신판을 골라 설치에 실패할 수 있음), `PNPM_VERSION=10.12.1`, `ELECTRON_SKIP_BINARY_DOWNLOAD=1`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`. 화면 값은 빌드 때 들어가므로 Runtime variables가 아니라 Build variables에
 - 앱·어드민 Build variables: `VITE_SUPABASE_URL=https://xxofyzgzrjrcrcxvftpn.supabase.co`, `VITE_SUPABASE_ANON_KEY`(스테이징 anon key, 공개 값. Supabase → Project Settings → API). service role은 넣지 않음
-- 화면 주소(라우팅): 앱·어드민은 `not_found_handling: single-page-application`(모든 경로에 index.html), 웹사이트는 `404-page`(404.html이 초대 링크 `/i/{코드}`를 맡음)
+- 화면 주소(라우팅): 앱·어드민은 `not_found_handling: single-page-application`(모든 경로에 index.html), 웹사이트는 `404-page`(없는 주소는 404.html, 404 응답). 웹사이트 초대 링크 `/i/{코드}`는 `apps/site/public/_redirects`(`/i/* /i/ 200`)가 초대 페이지를 200으로 줌(2026-11-12). 응답 헤더는 앱마다 dist의 `_headers`(웹사이트 `public/_headers`, 어드민은 빌드가 만듦 → ‘어드민 인증’)
 - 접근 보호: Zero Trust(무료) → Access → Applications → Self-hosted, 앱마다 1개(sweetwo-app, sweetwo-admin, sweetwo-site). 도메인 `dev-app.sweetwo.kr`, `sweetwo-app.yeabin0909.workers.dev`(미리보기까지 막으려면 `*-sweetwo-app.yeabin0909.workers.dev`도). 어드민·웹사이트도 같은 식(`dev-ops`, `dev`). 정책 Allow + Include Emails(허용 이메일). Identity 탭에서 ‘Select all’을 지우고 One-time PIN만, Apply instant authentication 켬. One-time PIN이 목록에 없으면 Zero Trust → Settings → Authentication → Login methods에서 먼저 추가. Cloudflare 계정 로그인은 쓰지 않음(동의 단계에서 ‘Application authorization failed’)
 - 스테이징 Supabase → Authentication → URL Configuration: Site URL `https://dev-app.sweetwo.kr`, Redirect URLs `https://dev-app.sweetwo.kr/**`, `https://dev-ops.sweetwo.kr/**`, `https://sweetwo-app.yeabin0909.workers.dev/**`, `https://*-sweetwo-app.yeabin0909.workers.dev/**`, `https://sweetwo-admin.yeabin0909.workers.dev/**`, `https://*-sweetwo-admin.yeabin0909.workers.dev/**`, 로컬 실행용 `http://localhost:5173/**`, `http://localhost:5174/**`
 - 스테이징 소셜 로그인: Supabase → Authentication → Providers에서 켜고, 각 콘솔 앱에 콜백 `https://xxofyzgzrjrcrcxvftpn.supabase.co/auth/v1/callback` 등록
@@ -1042,16 +1042,26 @@ supabase/
 
 ### 웹사이트(apps/site)
 
-- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(OS별 다운로드·스토어 버튼, 다른 OS용 받기, 접기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). OS 판정은 core `detectSiteOs`·`installOs`(Vitest)
-- L-02 `/download?os=`: 보이지 않는 iframe으로 고정 주소(download.sweetwo.kr/latest/mac|win)를 받음(페이지를 떠나지 않음), 한 번 받은 뒤 주소에 `started=1`(새로고침해도 다시 받지 않음), 이 브라우저에 `sweetwo-app-seen`·`sweetwo-download-id` 저장. download_id를 앱 첫 실행으로 넘기는 방법(다른 도메인)은 기획 확인 뒤
-- 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective, 지금 시행 중 = 시행일이 오늘 이전 중 최근, `?v={시행일}`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
-- 초대 링크 `/i/{코드}`: 정적 파일이 없어 404 페이지(Cloudflare가 404.html을 줌, wrangler.jsonc `404-page`)가 초대 화면(`components/Invite.astro`)을 보여 줌. 앱이 깔린 휴대폰은 앱 링크로 이 페이지까지 오지 않음. PC·앱이 없는 기기는 코드 + 스토어 버튼(2026-11-10 ‘sweeTwo 앱으로 열까요?’와 다운로드 버튼 없앰, ADR 0008)
+- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보, 페이지 머리의 canonical·og·파비콘), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(기기별 스토어 버튼, 접기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). 기기 판정은 core `detectSiteOs`(Vitest)
+- 다크 모드(2026-11-12): `Site.astro` 머리의 인라인 스크립트가 그리기 전에 기기 설정(`prefers-color-scheme`)으로 `<html data-theme>`을 붙이고 바뀌면 따라감(어드민 `main.tsx`와 같은 방식, 토큰이 `[data-theme]`로 바꿈). 첫 화면 그림 카드는 `data-theme="light"`로 다크에서도 흰 카드
+- L-02 `/download`: 제목 + 기기별 스토어 버튼(예전 `?os=` 주소도 같은 화면, 데스크톱 다운로드는 ADR 0008로 없앰)
+- 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective `YYYY-MM-DD`, `?v=YYYY-MM-DD`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
+- 지금 시행 중인 판(2026-11-12): 시행일이 오늘(KST) 이전 중 가장 최근. 빌드 때 한 번 고르고(`components/Policy.astro`), 브라우저가 KST 오늘로 다시 골라 시행일 전에 빌드한 페이지도 시행일부터 새 판을 보여 줌. 그래도 새 판의 시행일 당일에 웹사이트를 다시 빌드함(develop·main에 커밋이 들어가면 Workers Builds가 빌드. 커밋이 없으면 대시보드 Deployments에서 다시 빌드): 스크립트가 없는 검색·공유 미리보기는 빌드 때 판을 봄
+- 초대 링크 `/i/{코드}`(2026-11-12): `public/_redirects`의 `/i/* /i/ 200`이 `/i/` 초대 페이지(`pages/i/index.astro`, 제목·og:title “sweeTwo에 초대받았어요”)를 200으로 줌. 주소는 그대로라 `components/Invite.astro`가 주소에서 코드를 읽음, 코드 없이 `/i/`면 코드 줄 없이 안내. 404 페이지도 `/i/`로 시작하면 같은 화면(`_redirects`를 모르는 `astro preview` 등). 앱이 깔린 휴대폰은 앱 링크로 이 페이지까지 오지 않음. PC·앱이 없는 기기는 코드 + 스토어 버튼(2026-11-10 ‘sweeTwo 앱으로 열까요?’와 다운로드 버튼 없앰, ADR 0008)
+- 검색·공유(2026-11-12): 페이지마다 canonical·og:url(`astro.config.mjs` `site` + 경로), og:type·site_name·locale, 메타 설명(`t.desc`). 초대·404·로그인 복귀·알림 메일 링크는 `noindex`(Site `noindex`). 파비콘 32·48·apple-touch-icon 180(`public/`, 원본 `packages/ui/src/assets/brand`, `scripts/brand-icons/two.py`가 같이 복사)
+- 사업자 정보는 `t.foot.business`에서 값이 빈 줄은 하단에 안 보임(출시 준비 34 4장에서 값을 넣음)
 - 공유 이미지 `public/og.png`(1200×630, 흰 바탕 + 심볼 + 워드마크). 앱 화면 캡처(라이트, 캡처용 흔한 이름 한 쌍, 기획서 28)는 화면 디자인을 다듬은 뒤로 미룸(2026-10-27), 지금은 심볼과 워드마크
-- e2e `apps/site/e2e`(빌드 + 미리보기, PC(Mac·Windows)·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이
+- e2e `apps/site/e2e`(빌드 + `astro preview`, PC·휴대폰 UA, 라이트·다크·좁은 창), CI e2e-web 잡에서 같이. `astro preview`는 `_redirects`를 모르므로 `/i/{코드}`의 200 응답은 e2e가 `dist/_redirects` 규칙을 확인하고, 실제 응답은 배포 뒤 개발 서버에서 확인
 
 ### 어드민 인증
 
-- 주소 ops.sweetwo.kr. CloudFront WAF IP 허용 목록과 2단계 인증 필수
+- 주소 ops.sweetwo.kr(개발 서버 dev-ops.sweetwo.kr). Cloudflare Workers 정적 자산(Worker `sweetwo-admin`) + IP 허용 목록 + 2단계 인증 필수(2026-11-12 CloudFront에서 고침)
+- 보안 헤더(2026-11-12): 빌드가 `dist/_headers`를 만듦(`apps/admin/vite.config.ts` `adminHeaders`, Supabase 주소가 빌드 값 `VITE_SUPABASE_URL`이라 public/에 두지 않음). CSP(어드민 자신 + Supabase https·wss, 인증 앱 QR `data:`, 내려받기 `blob:`, 인라인 스크립트·eval 금지, `frame-ancestors 'none'`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin`, `X-Robots-Tag: noindex`. 새 외부 출처(이미지, API)를 쓰면 `adminHeaders`에 더함
+- IP 허용 목록은 저장소 밖 Cloudflare 대시보드 설정이라 담당자가 확인함(코드·이 문서에 IP 값은 적지 않음) [확인 필요]:
+  - Zero Trust → Access → Applications의 sweetwo-admin 앱이 `dev-ops.sweetwo.kr`, `sweetwo-admin.yeabin0909.workers.dev`, 미리보기 `*-sweetwo-admin.yeabin0909.workers.dev`, 운영 때 `ops.sweetwo.kr`을 모두 덮는지
+  - 그 정책에 허용 이메일(Include Emails)과 함께 사무실·회사 VPN IP(Require 또는 Include IP ranges)가 들어 있는지, 아니면 Security → WAF 사용자 지정 규칙으로 위 주소의 목록 밖 IP를 막는지(33 3장 ‘접속 위치’: 로그인 화면 전에 차단)
+  - Workers & Pages → sweetwo-admin → Settings → Domains & Routes에서 `workers.dev`·미리보기 주소를 끄지 않았다면 그 주소도 같은 Access·WAF 아래인지
+  - 배포 뒤 개발 서버 응답에 위 보안 헤더가 붙는지(브라우저 개발자 도구 Network → 응답 헤더)
 - 어드민 권한: 같은 Supabase 프로젝트, 관리자 role claim + RLS
 - 열람과 변경은 모두 audit\_log에
 - 관리자 계정: `admin_user`(회사 이메일, 역할 `super/ops/cs/analyst` 여러 개, 잠금). 최고 관리자가 이메일을 넣으면 그 사람이 매직 링크(PKCE, `?code=` → `exchangeCodeForSession`)로 처음 로그인할 때 `admin_me`가 연결. 인증 앱(TOTP) 등록·확인으로 aal2가 돼야 어드민 함수가 열림(`admin_require`: 관리자 + 잠금 아님 + `aal2` + 역할). 30분 무활동·최대 8시간은 어드민 앱(`apps/admin/src/session.ts`), 세션은 localStorage(매직 링크가 새 탭에서 열려서). 무활동 시각도 localStorage에 남겨 브라우저를 닫았다 열어도 이어서 셈. 로그인 링크는 보낸 뒤 60초 동안 다시 못 보냄, Supabase 오류 코드(`over_email_send_rate_limit`, `email_address_not_authorized`)는 화면 문구로 바꿈

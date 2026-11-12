@@ -75,11 +75,14 @@ export function Frame({
   menu,
   title,
   actions,
+  protect,
   children,
 }: {
   menu: string;
   title: string;
   actions?: ReactNode;
+  /** 복사 방지(AD-03만) */
+  protect?: boolean;
   children: ReactNode;
 }) {
   const me = useAdmin();
@@ -118,6 +121,7 @@ export function Frame({
       }}
       title={title}
       actions={actions}
+      protect={protect}
     >
       {children}
     </AdminFrame>

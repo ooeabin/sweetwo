@@ -856,6 +856,38 @@ test('운영 역할: 회원 상세에 열람·조치 버튼 없음', async ({ pa
   await expect(page.getByRole('button', { name: '계정 조치' })).toHaveCount(0);
 });
 
+test('분석 역할 대시보드(QA S12-14): 볼 수 없는 메뉴로 가는 경보·문의 카드·승인 대기는 누를 수 없음', async ({
+  page,
+}) => {
+  await mock(page, { roles: ['analyst'] });
+  await page.goto('/');
+  await heading(page, '대시보드');
+  const alerts = page.getByRole('region', { name: '상시 경보' });
+  await expect(alerts).toContainText('평균 금리 마지막 갱신95일 전 / 기준 90일');
+  await expect(alerts.getByRole('button')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /미처리 문의/ })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: '미처리 문의' })).toContainText('접수3');
+  await expect(page.getByRole('button', { name: /승인 대기/ })).toHaveCount(0);
+  await axe(page);
+});
+
+test('복사 방지(QA S12-08): 회원 상세만 글자 선택 막음, 다른 화면은 복사 가능', async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto(`/members/${CHANWOO}`);
+  await heading(page, '회원 상세');
+  const sel = (p: Page) =>
+    p.locator('.hg-admin__body').evaluate((e) => getComputedStyle(e).userSelect);
+  expect(await sel(page)).toBe('none');
+  await page.goto('/inquiries');
+  await heading(page, '문의');
+  expect(await sel(page)).not.toBe('none');
+  expect(
+    await page.locator('.hg-admin__main').evaluate((e) => getComputedStyle(e).userSelect),
+  ).not.toBe('none');
+});
+
 test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저장', async ({ page }) => {
   const db = await mock(page, { roles: ['ops'] });
   await page.goto('/notices');

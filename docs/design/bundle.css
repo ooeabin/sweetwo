@@ -1500,6 +1500,9 @@ a.hg-btn { text-decoration: none; }
 .hg-site__h2 { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; word-break: keep-all; }
 .hg-site__lead { font: 400 18px/26px var(--font-sans); color: var(--slate); }
 .hg-site__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+.hg-site__cols--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-8); }  /* 2026-11-12 L-01 기능 4개는 넓은 창 2열 2줄(28 L-01 3번) */
+.hg-site__art { display: grid; place-items: center; gap: var(--space-4); background: var(--surface); }  /* L-01 첫 화면 그림 카드. 다크에서도 흰 카드(요소에 data-theme="light", 28 공통 ‘디자인’) */
+.hg-site__art img { display: block; max-width: 100%; height: auto; }  /* 2026-11-12 좁은 창(320·360)에서 그림이 카드 밖으로 나가지 않게 */
 .hg-site__two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-10); align-items: start; }
 .hg-site__feature { display: flex; flex-direction: column; gap: var(--space-2); }
 .hg-site__feature > * { margin: 0; }
@@ -1513,22 +1516,25 @@ a.hg-btn { text-decoration: none; }
 .hg-site__safe .hg-ico { width: 24px; height: 24px; color: var(--ink); }
 .hg-release { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5) 0; border-top: 1px solid var(--hairline-soft); scroll-margin-top: 80px; }
 .hg-release > * { margin: 0; }
-.hg-release__head { display: flex; align-items: center; gap: var(--space-3); }
+.hg-release__head { display: flex; align-items: center; gap: var(--space-3); font: inherit; }  /* 2026-11-12 버전 줄은 h2, 묶음은 h3(제목 단계를 건너뛰지 않음) */
 .hg-release__ver { font: var(--text-title-3); color: var(--ink); text-decoration: none; }
 .hg-release__ver:hover { text-decoration: underline; text-underline-offset: 3px; }
 .hg-release__date { font: var(--text-caption); color: var(--stone); }
-.hg-release h4 { margin: var(--space-2) 0 0; font: var(--text-caption); font-weight: 600; color: var(--slate); }
+.hg-release h3 { margin: var(--space-2) 0 0; font: var(--text-caption); font-weight: 600; color: var(--slate); }
 .hg-release ul { margin: 0; padding-left: 18px; font: var(--text-body-sm); color: var(--ink-2); }
 .hg-site__foot { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-10) 0; border-top: 1px solid var(--hairline); font: 400 13px/18px var(--font-sans); color: var(--stone); }
 .hg-site__foot > * { margin: 0; }
 .hg-site__links { display: flex; flex-wrap: wrap; column-gap: var(--space-5); row-gap: var(--space-2); }
 .hg-site__links a { font: 400 14px/20px var(--font-sans); color: var(--ink-2); text-decoration: none; }
+.hg-site__foot p a { color: var(--ink-2); text-decoration: none; }  /* 2026-11-12 메일 링크도 토큰 색(브라우저 기본 파랑 아님) */
+.hg-site__foot p a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .hg-site__links a.is-strong { font-weight: 600; color: var(--ink); }
 .hg-site__links a:hover { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 767px) {
   .hg-site__wrap { padding: 0 var(--space-4); }
   .hg-site__bar .hg-site__faq { display: none; }
-  .hg-site__hero, .hg-site__two, .hg-site__cols, .hg-site__steps, .hg-site__safe { grid-template-columns: minmax(0, 1fr); }
+  .hg-site__hero, .hg-site__two, .hg-site__cols, .hg-site__cols--2, .hg-site__steps, .hg-site__safe { grid-template-columns: minmax(0, 1fr); }
+  .hg-site__cols--2 { row-gap: var(--space-5); }
   .hg-site__hero { gap: var(--space-8); padding: var(--space-10) 0; }
   .hg-site__sec { padding: var(--space-10) 0; }
   .hg-site__h1 { font: 600 28px/38px var(--font-sans); letter-spacing: -0.4px; }
@@ -1583,7 +1589,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin .hg-nav.is-active .hg-ico { color: var(--accent-ink); }
 .hg-admin .hg-nav__count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: 500 12px/1 var(--font-sans); }
 .hg-admin .hg-nav.is-active .hg-nav__count { background: var(--surface); color: var(--accent-ink); }
-.hg-admin__main { position: relative; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; min-height: 100vh; border-left: 1px solid var(--hairline-soft); background: var(--surface); user-select: none; }
+.hg-admin__main { position: relative; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; min-height: 100vh; border-left: 1px solid var(--hairline-soft); background: var(--surface); }
 .hg-admin__bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--space-4); height: 56px; padding: 0 var(--space-6); border-bottom: 1px solid var(--hairline-soft); background: var(--surface); }
 .hg-admin__bar .hg-search { width: 440px; height: 36px; border-radius: var(--radius-md); background: var(--surface); border-color: var(--hairline); }
 .hg-admin__bar .hg-search:focus-within { outline-color: var(--focus); }
@@ -1598,6 +1604,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__me .hg-tag { height: 18px; padding: 0 6px; font-size: 11px; }
 .hg-admin__me small { font: 400 12px/16px var(--font-sans); color: var(--stone); }
 .hg-admin__body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5) var(--space-6) var(--space-10); max-width: 1216px; box-sizing: border-box; width: 100%; }
+.hg-admin__body--protect { user-select: none; }  /* 2026-11-12 복사 방지는 회원 상세(AD-03)만(27 AD-03 3번, 33 ‘화면 보호’). 입력 칸은 그대로 */
 .hg-admin__head { display: flex; align-items: center; gap: var(--space-3); min-height: 36px; }
 .hg-admin__title { flex: 1; margin: 0; font: 600 20px/28px var(--font-sans); letter-spacing: -0.2px; }
 .hg-admin__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); align-items: start; }
@@ -1617,6 +1624,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin .hg-card.is-link { cursor: pointer; }
 .hg-admin__alert { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 40px; padding: var(--space-2) var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--warning-soft); color: var(--warning-ink); text-align: left; cursor: pointer; font: 400 13px/18px var(--font-sans); }  /* 2026-11-06 경보는 카드 대신 노란 띠 */
 .hg-admin__alert > b { font-weight: 600; }
+div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 없는 역할(분석)에게는 누를 수 없는 띠 */
 .hg-admin__alert > .hg-ico { width: 16px; height: 16px; flex: none; }
 .hg-admin__alert > .hg-ico:last-child { margin-left: auto; }
 .hg-admin__alert.is-bad { background: var(--danger-soft); color: var(--danger); }
