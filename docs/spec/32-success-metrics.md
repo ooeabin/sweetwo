@@ -141,7 +141,7 @@
 | rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform(`ios` / `android` / `web`: 브리지 없음, 2026-11-12 S8-07) |
 | rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
 | fact\_value\_changed | 설정 S-11 월급, 자산·부채 화면(2026-11-12 S8-07: F-04 금액 고치기·시세 바꾸기 저장, `source_screen` = `F-04`) | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
-| event\_recorded | Y-08 경조사 기록 | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요], amount\_band, vs\_budget(`under` / `on` / `over`), is\_secret(서프라이즈면 event\_type 미전송) |
+| event\_recorded | Y-08 경조사 기록(2026-11-12 S9-05: 기록을 저장한 순간) | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요](이름 칩 kind: 생일 = birthday, 설날·추석·어버이날 = holiday, 결혼기념일 = anniversary, 행사 = family\_event, 그 밖 = etc), amount\_band, vs\_budget(`under` / `on` / `over`, 금액 메모가 없으면 null [확인 필요]), is\_secret(서프라이즈 옛 행이면 event\_type 미전송) |
 
 ### 4-6. 둘이 같이 고치기
 
@@ -149,8 +149,8 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감(2026-11-12 W-01: 합쳐서 공동 월급 계획을 연결된 상대와 쓸 때 줄 금액·이름·추가·지우기·‘추천값으로 다시 채우기’마다 `split`. 순서 바꾸기는 활동 기록만이라 보내지 않음. 2026-11-12 S7-16 저금: 합쳐서 + 연결이면 W-11 추가, W-10a 이름·목표 금액·기한·새 목표 금액, W-10 지우기, W-12a 계속 모을게요·그만할게요마다 `goal`(합쳐서면 각자일 때 만든 저금도, D1)) | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
-| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기(2026-11-12 W-01: 위 shared\_item\_changed를 보낸 동작의 Toast ‘되돌리기’) | item\_type(2026-11-12 S8-05 F-04 저장 Toast ‘되돌리기’는 `asset`), entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
+| shared\_item\_changed | 공동 항목을 고쳐 상대에게 알림이 감(2026-11-12 W-01: 합쳐서 공동 월급 계획을 연결된 상대와 쓸 때 줄 금액·이름·추가·지우기·‘추천값으로 다시 채우기’마다 `split`. 순서 바꾸기는 활동 기록만이라 보내지 않음. 2026-11-12 S7-16 저금: 합쳐서 + 연결이면 W-11 추가, W-10a 이름·목표 금액·기한·새 목표 금액, W-10 지우기, W-12a 계속 모을게요·그만할게요마다 `goal`(합쳐서면 각자일 때 만든 저금도, D1). 2026-11-12 S9-05 경조사: 연결이면 Y-07 추가, Y-05 메모마다 `care_day`(서버가 상대 알림을 보내는 동작만)) | item\_type(`split` / `goal` / `goal_priority` / `salary_mode` / `care_day`), linked(연결 커플만 보냄) |
+| change\_reverted | Toast ‘되돌리기’, 항목 상세 ‘변경 기록’에서 되돌리기(2026-11-12 W-01: 위 shared\_item\_changed를 보낸 동작의 Toast ‘되돌리기’) | item\_type(2026-11-12 S8-05 F-04 저장 Toast ‘되돌리기’는 `asset`, S9-04 Y-05·Y-07 경조사 고치기 Toast ‘되돌리기’는 `care_day`), entry(`toast` / `history`), reverted\_whose(`self` / `partner`), hours\_since\_change |
 
 ### 4-7. 연결 해제·알림·구독·위젯
 

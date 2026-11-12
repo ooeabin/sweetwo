@@ -16,7 +16,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useCalendarData } from '../data';
+import { careUndo, trackCareShared, useCalendarData } from '../data';
 
 // Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
@@ -168,9 +168,18 @@ export function Y07CareAdd() {
     setSaving(true);
     try {
       if (editing) {
+        // 2026-11-12 S9-04 Toast ‘되돌리기’: 고치기 전 이름·날짜로
+        const prev = {
+          name: editing.name,
+          date_rule: editing.date_rule,
+          month: editing.month,
+          day: editing.day,
+          leap: editing.leap,
+          once_on: editing.once_on,
+        };
         await updateCareDay(editing.id, { name, ...rule });
         await qc.invalidateQueries({ queryKey: qk.careDays });
-        carryToast(copy.edited);
+        carryToast(copy.edited, careUndo(qc, editing.id, prev));
         nav(`/calendar/day/${editing.id}`, { replace: true });
         return;
       }
@@ -178,6 +187,7 @@ export function Y07CareAdd() {
         { category: 'couple', kind: KIND[d.chip ?? 'custom'], name, budget: amount, ...rule },
       ]);
       await qc.invalidateQueries({ queryKey: qk.careDays });
+      trackCareShared(!!c.couple?.joined); // 상대 알림이 감(32 4-6, S9-05)
       // 초안은 다음 시작(startCareAdd)에서 비움(여기서 비우면 a로 되돌아감)
       if (record && id && rule.once_on)
         nav(`/calendar/day/${id}/record/a?on=${rule.once_on}`, { replace: true });
@@ -315,7 +325,14 @@ export function Y07CareAdd() {
       title={copy.amountQ}
       help={name}
       onBack={back}
-      later={{ label: copy.skip, onClick: () => void save(0) }}
+      // 건너뛰기도 같은 날 확인을 한 번(2026-11-12 S9-09)
+      later={{
+        label: copy.skip,
+        onClick: () => {
+          if (dup && !asked) return setAsked(true);
+          void save(0);
+        },
+      }}
       primary={{ label: copy.addOk, loading: saving }}
       onSubmit={() => {
         if (dup && !asked) return setAsked(true);

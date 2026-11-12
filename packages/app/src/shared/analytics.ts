@@ -248,6 +248,17 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // Y-08 경조사 기록(32 4-5, 2026-11-12 QA 9구간 S9-05). 서프라이즈(옛 행)면 event_type을 보내지 않음.
+      // vs_budget은 금액 메모와 비교, 금액 메모가 없으면 null [확인 필요]
+      name: 'event_recorded';
+      props: {
+        event_type?: 'birthday' | 'holiday' | 'anniversary' | 'family_event' | 'etc';
+        amount_band: AmountBand;
+        vs_budget: 'under' | 'on' | 'over' | null;
+        is_secret: boolean;
+      };
+    }
+  | {
       // 32 4-6 둘이 같이 고치기(2026-11-12 QA 5구간 S5-07). W-01 합쳐서 공동 월급 계획(연결된 커플)에서 보냄
       name: 'shared_item_changed';
       props: {

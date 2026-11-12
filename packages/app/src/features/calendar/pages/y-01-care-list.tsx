@@ -24,9 +24,8 @@ import { money as won, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { moneyLine, useCalendarData } from '../data';
 import { SkelBody } from '../../frame';
-import { CalendarFrame, useCalFilter } from '../frame';
+import { CalendarFrame, CalendarLoadError, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
-import { reviewMonth } from '../data';
 
 // Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
 // 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 경조사 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
@@ -38,11 +37,16 @@ export function Y01CareList() {
   const [filter, setFilter] = useCalFilter();
   const { masked } = useMask();
   const m = (x: number) => won(x, masked);
-  const frame = (children: ReactNode, week?: { today: string; marked: ReadonlySet<string> }) => (
+  const frame = (
+    children: ReactNode,
+    week?: { today: string; marked: ReadonlySet<string>; holidays: ReadonlySet<string> },
+  ) => (
     <CalendarFrame view="list" filter={filter} onFilter={setFilter} week={week}>
       {children}
     </CalendarFrame>
   );
+  // 못 불러오면 빈 상태 대신 오류 카드 + ‘다시 시도’(2026-11-12 S9-02)
+  if (d.failed) return frame(<CalendarLoadError onRetry={d.retry} />);
   if (d.loading) return frame(<SkelBody shape="rows" />);
 
   // 맨 위 이번 주 띠(2026-11-09): 일~토 중 일정(보기 필터대로)이 있는 날에 점
@@ -66,8 +70,7 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  // 8번 월급 전 확인 띠: 오늘이 다음 월급날 3일 전 ~ 전날이면 → W-05
-  const band = d.monthOf(y, mo).bands.find((b) => d.today >= b.start && d.today <= b.end);
+  // 맨 위 ‘월급 전 확인’ 띠는 없앰(2026-11-12 QA 9구간 D1 = A): 일정 목록의 ‘월급 전 확인’ 줄과 홈 할 일 띠가 같은 일을 함
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
   const add = () => {
@@ -120,15 +123,6 @@ export function Y01CareList() {
 
   return frame(
     <>
-      {band && filter !== 'care' && (
-        <button
-          type="button"
-          className="hg-banner hg-banner--info"
-          onClick={() => nav('/salary/review')}
-        >
-          <span>{copy.reviewBand(reviewMonth(band.end))}</span>
-        </button>
-      )}
       {filter !== 'money' && first && (
         <button
           type="button"
@@ -177,31 +171,32 @@ export function Y01CareList() {
             >
               {copy.prepare}
             </Button>
-            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
-            {next.date <= d.today && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
-              >
-                {copy.statuses.done}
-              </Button>
-            )}
+            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번). 이번 회차를 기록했으면 숨김(Y-04·Y-05와 같은 조건, S9-12) */}
+            {next.date <= d.today &&
+              !(next.care.status === 'done' && next.care.status_on === next.date) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
+                >
+                  {copy.statuses.done}
+                </Button>
+              )}
           </div>
         </section>
       )}
       <section className="hg-stack" aria-label={copy.upcomingList}>
-        {/* 2026-11-09 + 버튼(FAB) 대신 머리 오른쪽 회색 ‘+ 경조사 추가’ → Y-07 */}
+        {/* 2026-11-09 + 버튼(FAB) 대신 머리 오른쪽 회색 ‘+ 경조사 추가’ → Y-07. 좁은 창만(넓은 창은 제목 줄 ‘+ 추가’, S9-11) */}
         <SectionHeader
           title={copy.upcomingList}
-          action={<AddRow label={copy.addCareRow} onClick={add} />}
+          action={<AddRow className="hg-narrow-only" label={copy.addCareRow} onClick={add} />}
         />
         {!rows.length ? (
           <p className="hg-card__meta" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
           </p>
         ) : (
-          // 2026-11-04 달 머리로 묶음(토스 소비 목록처럼, 월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
+          // 2026-11-04 달 머리로 묶음(월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
           Object.entries(
             rows.reduce<Record<string, Row[]>>((acc, r) => {
               (acc[r.date.slice(0, 7)] ??= []).push(r);
@@ -239,6 +234,6 @@ export function Y01CareList() {
         </div>
       )}
     </>,
-    { today: d.today, marked },
+    { today: d.today, marked, holidays: d.holidays },
   );
 }

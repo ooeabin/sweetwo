@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { setWheel } from './wheel';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { mockRealtime } from './realtime-mock';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
@@ -407,6 +408,13 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
     paid_from: 'personal',
     gift_name: '꽃',
   });
+  // 한 번인 날을 기록하면 ‘지남’·‘기록하기’와 목록 ‘기록할 날’ 띠가 사라짐(2026-11-12 S9-01)
+  await expect(page.getByRole('heading', { name: '민지 결혼식' })).toBeVisible();
+  await expect(page.getByText(/^지남/)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '기록하기' })).toHaveCount(0);
+  await page.goto('/calendar/list');
+  await expect(page.getByRole('region', { name: '다음 경조사' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /기록할 날이/ })).toHaveCount(0);
 
   // 상세: 수정(이름), 지우기 → 되돌리기
   await page.goto('/calendar/day/c-mom');
@@ -586,4 +594,129 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
     '예: 무릎이 안 좋으시다고 하셨음',
   );
   await axe(page);
+});
+
+test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날 → 그 사람 체크리스트(S9-10), 맨 위 월급 전 확인 띠 없음(D1)', async ({
+  page,
+}) => {
+  // 10월 22일 = 찬우 월급 전 확인 기간(22~24일)
+  const DAY = new Date('2026-10-22T10:00:00+09:00');
+  await page.clock.setFixedTime(DAY);
+  const db = await mockOnboarding(page, { now: DAY });
+  seed(db);
+  db.cares.push(care({ id: 'c-mom', month: 11, day: 3 }));
+
+  await page.goto('/calendar/list');
+  const list = page.getByRole('region', { name: '일정' });
+  await expect(list.getByRole('button', { name: /월급 전 확인/ }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /빠진 게 있는지 확인할 때예요/ })).toHaveCount(0);
+  await expect(page.locator('.hg-banner')).toHaveCount(0);
+  // 넓은 창은 제목 줄 ‘+ 추가’만, 좁은 창은 ‘+ 경조사 추가’만(S9-11)
+  await expect(page.locator('.hg-addrow').locator('visible=true')).toHaveCount(
+    (page.viewportSize()?.width ?? 0) >= 768 ? 0 : 1,
+  );
+  await list
+    .getByRole('button', { name: /예빈 월급날/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/salary\?who=yebin$/);
+
+  // Y-05 준비 상황 → “고쳤어요” + 되돌리기
+  await page.goto('/calendar/day/c-mom');
+  await page.getByRole('button', { name: '준비 중', exact: true }).click();
+  await expect(page.getByText('고쳤어요')).toBeVisible();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.status).toBe('preparing');
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.status).toBe('todo');
+
+  // 미리 알림 끄기 → 되돌리기
+  await page.getByRole('checkbox', { name: '7일 전' }).click();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.alerts).toEqual([30]);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.alerts).toEqual([30, 7]);
+
+  // 메모 → 되돌리기
+  await page.getByLabel('메모').fill('케이크 예약');
+  await page.getByLabel('메모').blur();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.memo).toBe('케이크 예약');
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.memo).toBeNull();
+  await expect(page.getByLabel('메모')).toHaveValue('');
+
+  // 금액 메모 → 상세로 돌아와 Toast + 되돌리기
+  await page.getByRole('button', { name: /금액 메모/ }).click();
+  await page.getByLabel('쓸 돈을 메모해 둘까요?').fill('500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('고쳤어요')).toBeVisible();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.budget).toBe(500_000);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.budget).toBe(300_000);
+  await axe(page);
+});
+
+test('QA 9구간: Y-07d 건너뛰기도 같은 날 확인(S9-09), 못 불러오면 오류 카드 + 다시 시도(S9-02)', async ({
+  page,
+}) => {
+  // 못 불러옴은 쿼리 재시도(3번)가 끝난 뒤라 두 화면이면 30초를 넘음
+  test.setTimeout(90_000);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.cares.push(
+    care({
+      id: 'c-chu',
+      kind: 'chuseok',
+      name: '추석',
+      date_rule: 'lunar_yearly',
+      month: 8,
+      day: 15,
+    }),
+  );
+
+  await page.goto('/calendar/list');
+  await addEntry(page, '+ 추가').click();
+  await page.getByRole('button', { name: '추석', exact: true }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await expect(page.getByText('같은 날이 있어요. 그래도 추가할까요?')).toBeVisible();
+  expect(db.cares).toHaveLength(1);
+  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await expect(page).toHaveURL(/\/calendar\/list$/);
+  expect(db.cares).toHaveLength(2);
+
+  let fail = true;
+  await page.route('**/rest/v1/care_day?*', (route) =>
+    fail && route.request().method() === 'GET'
+      ? route.fulfill({ status: 500, body: '{}' })
+      : route.fallback(),
+  );
+  await page.goto('/calendar/day/c-chu');
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 15_000 });
+  await expect(page).toHaveURL(/\/calendar\/day\/c-chu$/);
+  await axe(page);
+  fail = false;
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(page.getByRole('heading', { name: '추석' })).toBeVisible();
+
+  fail = true;
+  await page.goto('/calendar/list');
+  await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('.hg-empty')).toHaveCount(0);
+  fail = false;
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(page.getByRole('region', { name: '다음 경조사' })).toContainText('추석');
+});
+
+test('Realtime: 상대가 경조사를 넣거나 기록하면 목록이 바로 바뀜(S9-03)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const rt = await mockRealtime(page);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar/list');
+  await expect(page.locator('.hg-empty')).toBeVisible();
+  await expect.poll(() => rt.subscribed('care_day')).toBeGreaterThan(0);
+  await expect.poll(() => rt.subscribed('care_record')).toBeGreaterThan(0);
+  db.cares.push(care({ id: 'c-y', name: '할머니 생신', month: 10, day: 30, created_by: 'yebin' }));
+  rt.emit('care_day', 'INSERT', { id: 'c-y', space_id: 'space-1' });
+  await expect(page.getByRole('region', { name: '다음 경조사' })).toContainText('할머니 생신');
 });

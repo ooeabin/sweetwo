@@ -15,6 +15,8 @@ export interface MoneyDate {
   name: string;
   /** 누르면 갈 곳의 id(만기 자산, 목표) */
   ref?: string;
+  /** 월급날의 사람 id(각자 모드 파트너 월급날 → W-02 그 사람 탭, 2026-11-12 QA 9구간 S9-10) */
+  who?: string;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -50,7 +52,7 @@ export function monthGrid(y: number, m: number) {
 
 export interface MoneyInput {
   /** 각자 모드 = 사람마다(이름), 합쳐서 모드 = 체크리스트를 만드는 날 하나(이름 '') */
-  paydays: { name: string; day: BaseDay | null }[];
+  paydays: { name: string; day: BaseDay | null; who?: string }[];
   /** 공휴일 날짜. 월급날 앞당기기에 씀 */
   holidays?: ReadonlySet<string>;
   /** 월급날 주말·공휴일 앞당겨 표시(기본 켜짐) */
@@ -78,6 +80,7 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
           : businessDayOnOrBefore(baseDateIn(y, m, p.day), o.holidays),
       kind: 'payday',
       name: p.name,
+      ...(p.who ? { who: p.who } : {}),
     });
   }
   // 월급 전 확인: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만
