@@ -20,11 +20,13 @@ import { PersonDot } from '../../../shared/person';
 import { sharedCopy } from '../../../shared/copy';
 import {
   AddMenu,
+  lastAssetsTab,
   LineBand,
   LoadingFrame,
   MainFrame,
   useRank,
   todoText,
+  useAssetRealtime,
   useHomeInput,
   useNetWorth,
   useNoticeBand,
@@ -85,6 +87,7 @@ export function H01Home() {
   // P-WAIT 대기(시작한 사람이 월급 계획을 만들면 P-04로)와 합쳐서 모드 상대 체크를 바로 받음
   useSplitRealtime(space.data?.id);
   useCheckRealtime(space.data?.id);
+  useAssetRealtime(space.data?.id);
   // 체크리스트는 처음 받을 때만 기다림. 한 번 실패한 뒤 다시 받는 동안은 홈을 그대로 두고 큰 상자만 오류 카드
   // (데이터가 없는 쿼리는 다시 받을 때 pending으로 돌아가 불러오는 중 틀 ↔ 홈이 계속 바뀌지 않게, S4-01)
   const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;
@@ -389,7 +392,8 @@ export function H01Home() {
                     )
                   : undefined
               }
-              onClick={() => go('assets', '/assets')}
+              // 자산 관리 마지막 본 하위 탭으로(2026-11-12 S8-10)
+              onClick={() => go('assets', lastAssetsTab())}
             />
             <HubTile
               small

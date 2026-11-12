@@ -1,4 +1,4 @@
-import { sellAsset } from '@sweetwo/api';
+import { AssetForbiddenError, sellAsset } from '@sweetwo/api';
 import { hasPrincipal } from '@sweetwo/core';
 import { AmountInput, ChoiceCards, DoneMark, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
@@ -27,11 +27,8 @@ export function F04bSold() {
   const [result, setResult] = useState<{ to: string; gain: number | null } | null>(null);
   const [busy, setBusy] = useState(false);
   if (d.loading) return <QuestionSkeleton />;
-  const a = d.items.find((x) => x.id === id);
-  if (!a || !canEdit(a, d.me?.id) || a.side !== 'asset' || !hasPrincipal(a.grp))
-    return <Navigate to="/assets" replace />;
-  const back = () => nav(`/assets/${a.id}`);
 
+  // 결과(F-04d)는 확인 전에 그림: 전부 팔면 항목이 ‘매도 완료’로 목록에서 빠져 아래 확인에 걸리기 때문(2026-11-12 S8-01)
   if (step === 'done' && result && received !== null) {
     const to = d.items.find((x) => x.id === result.to);
     return (
@@ -55,6 +52,18 @@ export function F04bSold() {
     );
   }
 
+  const a = d.items.find((x) => x.id === id);
+  // 전·월세 보증금은 팔기 흐름이 없음(F-04 8번, 서버 sell_asset도 거절, 2026-11-12 S8-15)
+  if (
+    !a ||
+    !canEdit(a, d.me?.id) ||
+    a.side !== 'asset' ||
+    !hasPrincipal(a.grp) ||
+    a.kind === 'deposit_money'
+  )
+    return <Navigate to="/assets" replace />;
+  const back = () => nav(`/assets/${a.id}`);
+
   // 2026-11-04 진행 막대(F-04a 만기 정리와 같음): 얼마나 → 받은 금액 → (남은 평가금액) → 받은 통장
   const order = part ? ['how', 'amount', 'remain', 'to'] : ['how', 'amount', 'to'];
   const now = Math.max(order.indexOf(step), 0);
@@ -73,11 +82,17 @@ export function F04bSold() {
       setBusy(true);
       try {
         const gain = await sellAsset(a.id, { received, to, remain: part ? remain : null });
-        await refresh();
+        // 결과 먼저, 그다음 새로 읽기(다 팔면 항목이 목록에서 빠짐, 2026-11-12 S8-01)
         setResult({ to, gain });
         setStep('done');
-      } catch {
-        toast(copy.loadFailed);
+        await refresh();
+      } catch (e) {
+        // 13 공통 상태 10번·8번(2026-11-12 S8-16)
+        toast(
+          e instanceof AssetForbiddenError
+            ? copy.readOnly(d.couple?.partnerName ?? '')
+            : copy.saveFailed,
+        );
       } finally {
         setBusy(false);
       }

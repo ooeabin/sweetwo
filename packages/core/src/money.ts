@@ -40,5 +40,14 @@ export function readWon(value: Won): string {
   return won ? parts.join(' ') : `${parts.join(' ')} 원`;
 }
 
+/**
+ * 합계 표기(docs/spec/11-common.md 6장 ‘음수·큰 금액’, 2026-11-12 QA 8구간 S8-02): 999억 원 안이면 readWon,
+ * 넘으면 “999억+”(음수는 “−999억+”). 항목 하나는 999억까지라 여러 항목의 합계(순자산, 자산·부채 합계)에 씀
+ */
+export function readWonCap(value: number): string {
+  if (Number.isFinite(value) && Math.abs(value) > MAX_WON) return `${value < 0 ? '−' : ''}999억+`;
+  return readWon(value);
+}
+
 /** 1만 원 단위 올림(월 필요액, docs/spec/06-calc-allocation.md 5-3) */
 export const ceilTo10k = (v: Won): Won => Math.ceil(assertWon(v) / 10_000) * 10_000;

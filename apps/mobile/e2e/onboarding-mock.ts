@@ -2024,7 +2024,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           id: db.assetHistory.length + 1,
           asset_id: r.id,
           amount: r.amount,
-          source: 'manual',
+          // 처음 적은 값은 created(2026-11-12 D3, 수정 내역에 안 보임)
+          source: 'created',
           recorded_at: now,
         });
         return json(route, { id: r.id }, 201);

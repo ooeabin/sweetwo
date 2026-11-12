@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (5d8e4d4). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (6ce9415). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -188,6 +188,13 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-mbars__col small { font: var(--text-micro); font-weight: 500; color: var(--stone); }
 .hg-mbars__col.is-now small { font-weight: 600; color: var(--bar-now); }
 .hg-mbars__v { min-height: 16px; font: var(--text-micro); color: var(--bar-now); white-space: nowrap; }
+.hg-mbars--neg { align-items: start; }  /* 2026-11-12 QA 8구간 S8-08: 음수 달이 있으면 칸마다 같은 높이 그림 자리 + 0선, 음수 막대는 0선 아래로 */
+.hg-mbars__plot { position: relative; display: flex; justify-content: center; width: 100%; }
+.hg-mbars__plot i { position: absolute; }
+.hg-mbars__plot i.is-neg { border-radius: var(--radius-xs) var(--radius-xs) var(--radius-sm) var(--radius-sm); }
+.hg-mbars__zero { position: absolute; left: calc(var(--space-3) / -2); right: calc(var(--space-3) / -2); border-top: 1px solid var(--hairline); }
+.hg-mbars__col:first-child .hg-mbars__zero { left: 0; }
+.hg-mbars__col:last-child .hg-mbars__zero { right: 0; }
 
 /* Toast */
 /* 작은 알약, 화면 아래 가운데(2026-11-02, 포켓CU처럼). 글자 길이만큼, 되돌리기는 글자 옆 굵은 링크 */

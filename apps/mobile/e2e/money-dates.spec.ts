@@ -140,6 +140,39 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
   });
 });
 
+test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 보이고 목록에서 빠짐(2026-11-12 S8-01)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedAssets(db);
+  const bank = db.assets.find((a) => a.id === 'a-bank') as Record<string, unknown>;
+  db.assets.push({
+    ...bank,
+    id: 'a-stock',
+    grp: 'invest',
+    kind: 'stock',
+    name: '찬우 주식',
+    amount: 10_000_000,
+    principal: 8_000_000,
+    created_at: '2026-01-10T00:00:00Z',
+  });
+  await page.goto('/assets/a-stock/sold');
+  await page.getByRole('radio', { name: /전부 팔았어요/ }).click();
+  await page.getByLabel('받은 금액은 얼마예요?').fill('11000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await expect(page.getByRole('heading', { name: '팔았어요' })).toBeVisible();
+  await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
+  await expect(page.getByText('실현 손익 +300만 원')).toBeVisible();
+  await axe(page);
+  expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
+  await page.getByRole('button', { name: '목록으로 가기' }).click();
+  await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
+  await expect(page.getByRole('button', { name: /찬우 주식/ })).toHaveCount(0);
+});
+
 test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지났어요” + ‘정리하기’ → F-04a(2026-11-11)', async ({
   page,
 }) => {

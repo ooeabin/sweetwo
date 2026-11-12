@@ -103,10 +103,11 @@ export function CalendarFrame({
       page={{
         title: copy.title,
         actions: (
-          // 넓은 창만. 좁은 창은 ‘일정’ 머리 오른쪽 ‘+ 경조사 추가’(2026-11-09 + 버튼 대신)
+          // 넓은 창만. 좁은 창은 ‘일정’ 머리 오른쪽 ‘+ 경조사 추가’(2026-11-09 + 버튼 대신).
+          // 메뉴 제목 줄 ‘추가’는 보조 버튼(DESIGN.md 브랜드 색 ‘바꾸지 않는 것’, 2026-11-12 QA 8구간 S8-11)
           <Button
             className="hg-wide-only"
-            variant="primary"
+            variant="secondary"
             onClick={() => {
               startCareAdd();
               nav('/calendar/add/a');
