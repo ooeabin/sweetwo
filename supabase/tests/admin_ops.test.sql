@@ -72,7 +72,7 @@ select throws_ok($$ select public.admin_add_terms_version('terms', 'v2', current
 select isnt(public.admin_add_terms_version('terms', 'v2', current_date + 30, true, true), null, '약관 버전 요청');
 -- 앱 버전·점검: 저장 = 승인 요청, 모르는 키 거절
 select throws_ok($$ select public.admin_request_app_config('{"flags":{}}') $$, '22023', 'bad_value', '정해진 값만');
-select set_config('test.cfg', public.admin_request_app_config(jsonb_build_object('min_version_desktop', '1.2.0',
+select set_config('test.cfg', public.admin_request_app_config(jsonb_build_object('min_version_ios', '1.2.0',
   'maintenance_starts_at', now() + interval '1 day', 'maintenance_ends_at', now() + interval '1 day 2 hours', 'maintenance_message', '저장 기능 점검'))::text, true);
 -- 기준 데이터
 select lives_ok($$ select public.admin_set_loan_rate('credit', 650, current_date) $$, '평균 금리 바꿈');
@@ -84,7 +84,7 @@ set local role authenticated;
 select public.admin_decide((select id from public.admin_approvals() where kind = 'app_version'), 'approve');
 select public.admin_decide((select id from public.admin_approvals() where kind = 'terms_version'), 'approve');
 reset role;
-select results_eq($$ select min_version_desktop, maintenance_message from public.app_config $$,
+select results_eq($$ select min_version_ios, maintenance_message from public.app_config $$,
   $$ values ('1.2.0', '저장 기능 점검') $$, '앱 버전·점검 적용');
 set local role anon;
 select results_eq($$ select version, reconsent from public.terms_version $$, $$ values ('v2', true) $$, '승인된 약관 버전');
