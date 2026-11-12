@@ -3306,10 +3306,7 @@ export type Database = {
           body_text: string
         }[]
       }
-      noti_send_window: {
-        Args: { p_quiet_end: number; p_quiet_start: number }
-        Returns: unknown
-      }
+      noti_send_window: { Args: { p_quiet_end: number; p_quiet_start: number }; Returns: string }
       notice_target_valid: { Args: { p: Json }; Returns: boolean }
       notice_user_match: {
         Args: {
