@@ -47,7 +47,29 @@ jobs:
             process.exit(bad ? 1 : 0);
           '
 
-  e2e-web:
+  # 앱 e2e는 4대로 나눠 돈다(2026-11-13 사용자 요청: CI 대기 줄이기). 이름 e2e-web 판정은 맨 아래 묶음 작업이 한다.
+  e2e-app:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sweetwo/mobile exec playwright install --with-deps chromium
+      - run: pnpm --filter @sweetwo/mobile e2e --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-web-${{ matrix.shard }}
+          path: apps/mobile/test-results
+          if-no-files-found: ignore
+
+  e2e-admin-site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,18 +78,23 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sweetwo/mobile exec playwright install --with-deps chromium
-      - run: pnpm --filter @sweetwo/mobile e2e
       - run: pnpm --filter @sweetwo/admin e2e
       - run: pnpm --filter @sweetwo/site e2e
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with: { name: e2e-web, path: apps/mobile/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-admin, path: apps/admin/test-results, if-no-files-found: ignore }
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: e2e-site, path: apps/site/test-results, if-no-files-found: ignore }
+
+  e2e-web:
+    if: always()
+    needs: [e2e-app, e2e-admin-site]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          test "${{ needs.e2e-app.result }}" = success
+          test "${{ needs.e2e-admin-site.result }}" = success
 
   mobile-android:
     runs-on: ubuntu-latest
