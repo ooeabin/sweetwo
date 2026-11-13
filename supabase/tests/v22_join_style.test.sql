@@ -1,4 +1,4 @@
--- pgTAP: v2.2 합류 보완(20261205090000 계약 1~3). 합류 전 ‘파트너가 주로 해요’ → 합류한 사람이 관리하는 사람,
+-- pgTAP: v2.2 합류 보완(20261206090000 계약 1~3). 합류 전 ‘파트너가 주로 해요’ → 합류한 사람이 관리하는 사람,
 -- join_context 관리 형태, 대기 ‘알려 주기’ 24시간 1번
 begin;
 create extension if not exists pgtap with schema extensions;

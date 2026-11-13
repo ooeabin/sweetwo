@@ -774,7 +774,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
         );
       }
-      // v2.2 관리 형태(서버 20261202090000·20261205090000 흉내): 2-5 표, 연결된 각자 → 합쳐서는 요청
+      // v2.2 관리 형태(서버 20261202090000·20261206090000 흉내): 2-5 표, 연결된 각자 → 합쳐서는 요청
       if (fn === 'request_mode_change') {
         const b = body();
         const living = !!b.p_shared_living;
@@ -785,7 +785,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const mode = living && mgr !== 'each' ? 'joint' : 'separate';
         const other = (db.partner?.id as string | undefined) ?? null;
         const connected = db.space?.couple_state === 'connected' && !!other;
-        // 온보딩 중 답은 바로(20261205090000 계약 4)
+        // 온보딩 중 답은 바로(20261206090000 계약 4)
         if (
           connected &&
           db.me.onboarding_done_at &&
@@ -961,7 +961,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
                     ? 'saving_only'
                     : 'separate',
           // 흉내: 합류하는 사람의 월급 계획은 합류를 마칠 때 생기므로 그 전 월급 계획은 모두 시작한 사람 것.
-          // 줄이 있는 월급 계획만(관리 형태를 고를 때 생긴 빈 공동 월급 계획은 없는 것, 20261205090000)
+          // 줄이 있는 월급 계획만(관리 형태를 고를 때 생긴 빈 공동 월급 계획은 없는 것, 20261206090000)
           has_plan: db.splits.some((x) => x.split_line.length > 0),
           prefill: db.assets
             .filter(
@@ -1137,7 +1137,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const b = body();
         db.joinCalls.push({ fn, ...b });
         const lines = b.p_lines as Record<string, unknown>[] | undefined;
-        // 합류 전 ‘파트너가 주로 해요’면 합류한 사람이 관리하는 사람(20261205090000 계약 1)
+        // 합류 전 ‘파트너가 주로 해요’면 합류한 사람이 관리하는 사람(20261206090000 계약 1)
         if (db.space?.manager_pending_partner && db.space.salary_mode === 'joint') {
           db.space.manager_user_id = db.me.id;
           db.space.manager_pending_partner = false;
