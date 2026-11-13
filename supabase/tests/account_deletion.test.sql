@@ -71,7 +71,7 @@ select results_eq(
   $$ select (select couple_state::text from public.couple_space where id = current_setting('test.s')::uuid),
             (select count(*)::int from public.asset where space_id = current_setting('test.s')::uuid),
             (select count(*)::int from public.app_user where space_id = current_setting('test.s')::uuid) $$,
-  $$ values ('connected', 2, 2) $$, '다시 연결: 원래 공간과 데이터가 돌아옴');
+  $$ values ('solo', 2, 0) $$, 'v2.2 다시 연결은 복구 없음(원래 공간은 보관만, D10)');
 
 -- 혼자 쓰는 K: 삭제 → 30일 뒤 공간과 계정까지 지움
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');

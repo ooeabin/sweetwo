@@ -2508,6 +2508,121 @@ export type Database = {
         }
         Relationships: []
       }
+      rank_consent_request: {
+        Row: {
+          answered_at: string | null
+          created_at: string
+          expires_at: string
+          from_user: string
+          id: string
+          space_id: string
+          status: string
+        }
+        ComputedFields: never
+        Insert: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          from_user: string
+          id?: string
+          space_id: string
+          status?: string
+        }
+        Update: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          from_user?: string
+          id?: string
+          space_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rank_consent_request_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rank_view: {
+        Row: {
+          id: string
+          mode: string
+          net: number | null
+          paid_by_ad: boolean
+          space_id: string | null
+          top_pct: number | null
+          user_id: string
+          viewed_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          id?: string
+          mode: string
+          net?: number | null
+          paid_by_ad?: boolean
+          space_id?: string | null
+          top_pct?: number | null
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          mode?: string
+          net?: number | null
+          paid_by_ad?: boolean
+          space_id?: string | null
+          top_pct?: number | null
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rank_view_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reconnect_request: {
+        Row: {
+          answered_at: string | null
+          blocked: boolean
+          created_at: string
+          from_user: string
+          id: string
+          invite_code: string | null
+          status: string
+          to_user: string
+        }
+        ComputedFields: never
+        Insert: {
+          answered_at?: string | null
+          blocked?: boolean
+          created_at?: string
+          from_user: string
+          id?: string
+          invite_code?: string | null
+          status?: string
+          to_user: string
+        }
+        Update: {
+          answered_at?: string | null
+          blocked?: boolean
+          created_at?: string
+          from_user?: string
+          id?: string
+          invite_code?: string | null
+          status?: string
+          to_user?: string
+        }
+        Relationships: []
+      }
       salary_change: {
         Row: {
           amount: number
@@ -3492,7 +3607,14 @@ export type Database = {
         Args: { p_accept: boolean; p_request: string }
         Returns: string
       }
-      answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
+      answer_rank_consent: {
+        Args: { p_accept: boolean; p_request: string }
+        Returns: string
+      }
+      answer_reconnect: {
+        Args: { p_accept: boolean; p_block?: boolean }
+        Returns: string
+      }
       answer_split: {
         Args: { p_accept: boolean; p_id: string }
         Returns: string
@@ -3972,6 +4094,7 @@ export type Database = {
       ko_obj: { Args: { w: string }; Returns: string }
       ko_subj: { Args: { w: string }; Returns: string }
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
+      last_unlinked_partner: { Args: { p_user: string }; Returns: string }
       late_check_until: { Args: { p_checklist: string }; Returns: string }
       lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
       log_money_in: {
@@ -4034,6 +4157,10 @@ export type Database = {
       money_in_visible: { Args: { p_owner: string }; Returns: boolean }
       move_goal: { Args: { p_amount: number; p_goal: string; p_kind: string }; Returns: string }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
+      move_owned_rows: {
+        Args: { p_from: string; p_to: string; p_user: string }
+        Returns: undefined
+      }
       my_login_email: { Args: Record<PropertyKey, never>; Returns: string }
       my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_manage_style: {
@@ -4098,6 +4225,8 @@ export type Database = {
           net: number
         }[]
       }
+      networth_rank_pair: { Args: Record<PropertyKey, never>; Returns: Json }
+      networth_summary: { Args: Record<PropertyKey, never>; Returns: Json }
       next_base_after: { Args: { d: string; day: number; last: boolean }; Returns: string }
       note_device: {
         Args: { p_install: string; p_platform: string; p_version: string }
@@ -4107,6 +4236,7 @@ export type Database = {
       note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
       noti_inapp_only: { Args: { p_kind: string }; Returns: boolean }
+      noti_lock_generic: { Args: { p_kind: string }; Returns: boolean }
       noti_mail_body: {
         Args: { p_body: string; p_title: string }
         Returns: {
@@ -4217,6 +4347,7 @@ export type Database = {
         }
         Returns: string
       }
+      peer_median: { Args: { p_birth_year: number }; Returns: Json }
       pending_terms: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4255,6 +4386,7 @@ export type Database = {
       purge_left_spaces: { Args: Record<PropertyKey, never>; Returns: number }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
+      purge_proxy_entries: { Args: { p_today?: string }; Returns: number }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
       purge_unlinked_spaces: { Args: Record<PropertyKey, never>; Returns: undefined }
       push_kind_key: { Args: { p_kind: string }; Returns: string }
@@ -4263,6 +4395,12 @@ export type Database = {
         Returns: boolean
       }
       push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
+      rank_age_band: {
+        Args: { p_birth_year: number; p_year: number }
+        Returns: string
+      }
+      rank_pair_consented: { Args: { p_space: string }; Returns: boolean }
+      rank_top_pct: { Args: { p_net: number }; Returns: number }
       read_won: { Args: { v: number }; Returns: string }
       recalc_send_line: { Args: { p_space: string }; Returns: undefined }
       recent_goal_changes: {
@@ -4289,6 +4427,7 @@ export type Database = {
         }
         Returns: Json
       }
+      record_rank_view: { Args: { p_paid_by_ad?: boolean }; Returns: Json }
       register_push_device: {
         Args: { p_app_version?: string; p_platform: string; p_token: string }
         Returns: undefined
@@ -4308,6 +4447,10 @@ export type Database = {
           p_shared_living: boolean
           p_shared_saving: boolean
         }
+        Returns: string
+      }
+      request_rank_consent: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       request_reconnect: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -4372,6 +4515,10 @@ export type Database = {
         Args: { p_name: string; p_props: Json; p_space: string; p_user: string }
         Returns: undefined
       }
+      set_asset_share_default: {
+        Args: { p_vis: Database["public"]["Enums"]["asset_visibility"] }
+        Returns: undefined
+      }
       set_avatar: { Args: { p_path?: string }; Returns: undefined }
       set_checklist_done: { Args: { p_done: boolean; p_key: string }; Returns: undefined }
       set_goal_photo: {
@@ -4384,6 +4531,7 @@ export type Database = {
         Returns: undefined
       }
       set_joint_cycle_day: { Args: { p_day: number }; Returns: undefined }
+      set_rank_consent: { Args: { p_on: boolean }; Returns: undefined }
       set_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
