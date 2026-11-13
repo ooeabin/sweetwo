@@ -1,5 +1,12 @@
 import type { PayChecklist, PayCheckLine } from '@sweetwo/api';
-import { checklistFinish, formatMonthDay, monthProgress, type MonthProgress } from '@sweetwo/core';
+import {
+  checklistFinish,
+  confirmFinish,
+  formatMonthDay,
+  manualCount,
+  monthProgress,
+  type MonthProgress,
+} from '@sweetwo/core';
 import { PlanBar } from '@sweetwo/ui';
 import { useState } from 'react';
 import { track } from '../../shared/analytics';
@@ -55,7 +62,11 @@ export function MonthBar({
   share?: MonthShare;
 }) {
   const p = monthProgress({ income, lines: list.pay_check_line });
-  const finish = checklistFinish(list.pay_check_line);
+  // 확인 끝(07 7장, 2026-11-13): 손 줄이 있으면 손 줄만, 자동 줄뿐이면 모두 확인됐을 때
+  const finish =
+    manualCount(list.pay_check_line) > 0
+      ? confirmFinish(list.pay_check_line)
+      : checklistFinish(list.pay_check_line);
   const [sharing, setSharing] = useState(false);
   const caption = copy.sentOfPlan(money(p.sent, masked), money(p.planned, masked));
   const run = async () => {
@@ -82,7 +93,7 @@ export function MonthBar({
       progress
       label={p.complete ? copy.allDone : copy.progress(p.total, p.done)}
       parts={partsOf(p)}
-      title={finish ? copy.monthFinished(Number(list.cycle_start.slice(5, 7)), finish) : undefined}
+      title={finish ? copy.monthFinished(list.cycle_start, finish) : undefined}
       caption={caption}
       action={
         finish && share ? (
@@ -136,7 +147,7 @@ function monthImage(
   ].filter((x) => x.ls.length > 0);
   return {
     people: share.people.map((x) => (x.starter ? 1 : 2)),
-    title: list.label,
+    title: copy.cycleOf(list.cycle_start),
     amount: won(income),
     sub: copy.received(formatMonthDay(share.received)),
     bar: partsOf(p),

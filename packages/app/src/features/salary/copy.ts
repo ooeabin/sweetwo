@@ -1,6 +1,6 @@
 // 월급 탭 문구(docs/spec/20-salary-plan.md 체크리스트·저금 항목 W-10~W-12, 홈 19-this-month.md H-03). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
-import { object } from '@sweetwo/core';
+import { formatMonthDay, object } from '@sweetwo/core';
 
 export const copy = {
   // W-01 월급 계획
@@ -83,18 +83,19 @@ export const copy = {
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
   checkLabel: (name: string) => `${name} 체크`,
   viewLabel: (name: string, state: string) =>
-    `${name} ${state === 'checked' ? '체크했어요' : state === 'skipped' ? '못 함' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), ‘못 함’ 2026-11-12 D2
+    `${name} ${state === 'checked' ? '체크했어요' : state === 'skipped' ? '건너뜀' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), 2026-11-13 ‘못 함’ → ‘건너뜀’
   // ‘못 함’ 줄 체크 칸 화면 읽기(2026-11-12 D2: 빈 원 + “이번 달은 못 했어요”) [확인 필요]
-  skippedLabel: (name: string) => `${name} 못 함`,
-  otherAmount: '다른 금액으로 보냈어요',
+  skippedLabel: (name: string) => `${name} 건너뜀`, // 2026-11-13 ‘못 함’ → ‘건너뜀’
+  otherAmount: '다른 금액으로 했어요', // 2026-11-13 W-02 5번
   // 줄을 누르면 여는 시트(2026-11-03) [확인 필요]
   lineSheet: (name: string, amount: string) => `${name} ${amount}`,
-  sent: '보냈어요',
+  sent: '계획대로 했어요', // 2026-11-13 W-02 5번(줄 시트 주 버튼)
   // 체크한 사람·때(2026-11-03): 파트너가 체크했으면 이름 칩 + “08.26 체크”, 내가 체크했으면 날짜만
   checkedAt: (date: string) => `${date} 체크`, // [확인 필요]
   // W-05 ‘이번 달은 못 했어요’ 뒤 Toast(2026-11-03)
-  skippedDone: (name: string) => `${name}, 이번 달은 못 한 걸로 했어요`, // [확인 필요]
-  skipped: '이번 달은 못 했어요',
+  skippedDone: (name: string) => `${name}, 이번 달은 건너뛰었어요`, // [확인 필요] 2026-11-13
+  skipped: '이번 달은 건너뛰었어요', // [확인 필요] 2026-11-13 W-02 6번 건너뛴 줄 보조 줄
+  skipThis: '이번 달은 건너뛸게요', // [확인 필요] 2026-11-13 W-02 5번 줄 시트
   editSplit: '월급 계획 고치기',
   // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
   sentOfPlan: (sent: string, planned: string) => `체크한 금액 ${sent} / ${planned}`,
@@ -103,12 +104,13 @@ export const copy = {
   monthLineToo: '이번 달 체크 안 한 줄도 바꿨어요',
   madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
   // 다 끝난 달(2026-11-12 W-02 끝 화면 대신 W-02 막대 아래 한 줄 + Toast, D4: ‘못 함’이 섞이면 ‘마쳤어요’) [확인 필요]
-  monthFinished: (month: number, kind: 'all' | 'mixed') =>
-    `${month}월 월급 체크를 ${kind === 'all' ? '다 했어요' : '마쳤어요'}`,
+  // 2026-11-13 W-02 7번: “11월 25일 월급, 계획대로 됐어요” / 건너뜀이 섞이면 “…확인을 마쳤어요” [확인 필요]
+  monthFinished: (start: string, kind: 'all' | 'mixed') =>
+    `${formatMonthDay(start)} 월급, ${kind === 'all' ? '계획대로 됐어요' : '확인을 마쳤어요'}`,
   // 공유 이미지(달 결과, W-01과 같은 canvas) [확인 필요]
   received: (date: string) => `${date} 받음`,
   sentTotal: '체크한 금액',
-  skippedShort: '못 함',
+  skippedShort: '건너뜀',
   monthImageName: (ym: string) => `sweetwo-${ym}.png`,
   // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
   groupAllSent: '모두 보냈어요',
@@ -127,14 +129,14 @@ export const copy = {
   tellSalary: '월급 알려 주기',
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
-  howMuchFor: (line: string) => `${line}, 얼마를 보냈어요?`, // [확인 필요] 2026-11-09
+  howMuchFor: (line: string) => `${line}, 이번 달은 얼마였어요?`, // [확인 필요] 2026-11-13 W-02a
   planned: (amount: string) => `계획 ${amount}`, // [확인 필요] 2026-11-09
   lessThanPlan: (amount: string) => `계획보다 ${amount} 적어요`,
   moreThanPlan: (amount: string) => `계획보다 ${amount} 많아요`, // [확인 필요]
   next: '다음',
   ok: '확인',
   // W-05 월급 전 확인
-  reviewTitle: (label: string) => `${label}, 빠진 게 있나요?`,
+  reviewTitle: (start: string) => `${formatMonthDay(start)} 월급, 확인할 게 남았어요`, // [확인 필요] 2026-11-13 W-05
   reviewNone: '빠진 게 없어요', // [확인 필요]
   // 월급 계획 목록(O-50, W-01 같은 틀), W-02 묶음 이름도 같이 씀
   splitIncome: (amount: string) => `월급 ${amount}`,
@@ -194,7 +196,7 @@ export const copy = {
   history: '저금 내역', // [확인 필요]
   historyChecked: (label: string, amount: string) => `${label} ${amount}`,
   historyOther: (label: string, amount: string) => `${label} 다른 금액 ${amount}`,
-  historySkipped: (label: string) => `${label} 못 함`,
+  historySkipped: (label: string) => `${label} 건너뜀`,
   historyStart: (amount: string) => `시작할 때 모은 금액 ${amount}`, // [확인 필요] 2026-11-09
   noHistory: '아직 기록이 없어요', // [확인 필요]
   more: '더보기',
@@ -265,4 +267,53 @@ export const copy = {
   afterRetargetSub: '모은 금액은 그대로 두고 더 큰 목표로 이어서 모아요',
   keptToast: '목표 금액을 지우고 계속 모아요', // [확인 필요]
   stoppedToast: '그만 모으기로 했어요', // [확인 필요]
+
+  // ── v2.2 확인 루프(20 ‘월급 탭 v2.2’, 2026-11-13) [모두 확인 필요] ──
+  cycleOf: (start: string) => `${formatMonthDay(start)} 월급`, // 07 1장 확인 목록 이름
+  autoPayday: '월급날',
+  autoPill: (day: string) => `자동 ${day}`, // W-01 5c “자동 26일”, “자동 월급날”
+  autoWait: (day: string) => `${day} 자동`, // W-02 2번 “26일 자동”
+  autoDone: '자동 확인',
+  autoLabel: (name: string, day: string) => `${name}, 자동, ${day}에 나가요`, // 화면 읽기
+  autoDoneLabel: (name: string) => `${name}, 자동으로 확인했어요`,
+  autoGroup: (n: number) => `자동으로 나가는 것 ${n}개`,
+  autoGroupHelp: '안 나갔으면 눌러서 바꿔요',
+  manualGroup: (n: number) => `확인할 것 ${n}개`,
+  confirmAll: '모두 계획대로 됐어요', // W-02 4번(버튼 말투 예외 Q2)
+  lateHelp: '다음 월급날 전까지 늦게 확인할 수 있어요', // W-02 8번
+  lateTitle: (start: string) => `${formatMonthDay(start)} 월급`,
+  firstWait: (start: string) => `${formatMonthDay(start)} 첫 월급날에 확인해요`, // W-02 첫 확인 목록 전
+  firstWaitNoDate: '첫 월급날에 확인해요',
+  moneyInGo: '돈 들어왔어요',
+  // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
+  inChecklist: '체크리스트에 넣기',
+  autoPay: '은행에서 자동으로 나가요',
+  autoDay: '나가는 날',
+  chipPayday: '월급날',
+  chipNextDay: '다음 날',
+  autoDayChips: '나가는 날 고르기',
+  lineSettingChanged: (name: string) => `${name} 설정을 바꿨어요`,
+  sendName: '보내기',
+  sendNote: '월급 − 용돈',
+  sharedAccountName: '같이 쓰는 통장',
+  addSharedAccount: '+ 같이 쓰는 통장',
+  allowanceNotify: (name: string) => `${name || '파트너'}님에게 알려 드려요`,
+  noPaydayHead: '돈이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)
+  // W-01d 자동으로 나가는 것 고르기
+  autoPickTitle: '자동으로 나가는 걸 골라 주세요',
+  autoPickSave: '저장하기',
+  autoPickNone: '자동으로 나가는 게 없어요',
+  autoPickSaved: '자동으로 나가는 걸 정했어요',
+  autoPickEmpty: '고를 줄이 없어요',
+  autoPickLine: (name: string) => `${name} 자동으로 나가요`,
+  // H-13 기간 한 줄(07 6장, 홈 H-11 자리와 월급 탭 ‘이번 달’ 자리가 같이 씀) [모두 확인 필요]
+  periodNone: '돈이 들어오면 알려 주세요',
+  periodEarly: (amount: string) => `이번 기간 들어온 돈 ${amount}`,
+  periodIn: (amount: string) => `들어온 돈 ${amount}`,
+  periodNeed: (amount: string) => `필요한 돈 ${amount}`,
+  periodSince: (date: string) => `${formatMonthDay(date)}부터`,
+  periodFull: '남는 돈은 저금에 넣을 수 있어요',
+  periodGap: (n: number) => `지난번 돈이 들어온 지 ${n}일 됐어요`,
+  periodBarLabel: (inn: string, need: string, since: string) =>
+    `이번 기간 들어온 돈 ${inn}, 필요한 돈 ${need}, ${since}`,
 };

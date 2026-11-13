@@ -62,6 +62,8 @@ export * from './components/Modal';
 export * from './components/BottomSheet';
 export * from './components/Drawer';
 export * from './components/HomeHub';
+export * from './components/SaveTogether';
+export * from './components/PeriodBar';
 export * from './components/AddRow';
 export * from './components/Accordion';
 export * from './components/Search';

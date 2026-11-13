@@ -164,6 +164,8 @@ export function useOpenNotification() {
         : Math.max(0, Math.floor((Date.now() - made) / 60000)),
       landing_screen: gone ? 'none' : landingScreen(n.target),
     });
+    // 진행 소식(14, G13): 손 줄이 없는 달 월급날 푸시(금액 없이 %), 열람률(32 0-4 progress_news_opened)
+    if (n.kind === 'progress_news') track('progress_news_opened', {});
     if (!n.read_at) await markRead(qc, [n.id]);
   };
 }

@@ -4,9 +4,9 @@
 .hg-row--fill > * { flex: 1; }  /* 버튼 두 개를 반씩 */
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
-:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-together__slide, .hg-together__more, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 /* 키보드 포커스: 2px focus 링, 바깥 2px */
-:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubhero, .hg-hubband__main, .hg-hubtile, .hg-hubsave, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event, .hg-foldrow, .hg-goalbox__metabtn, .hg-goalbox__jump):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }  /* 2026-11-12 S7-14 hg-foldrow·hg-goalbox__metabtn·__jump 더함 */
+:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-together__slide, .hg-together__more, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event, .hg-foldrow, .hg-goalbox__metabtn, .hg-goalbox__jump):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }  /* 2026-11-12 S7-14 hg-foldrow·hg-goalbox__metabtn·__jump 더함 */
 /* 잘리는 묶음 안의 줄은 안쪽 링 */
 :is(.hg-menu__item, .hg-cmd__item, .hg-listrow, .hg-result):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 /* 터치 화면 좁은 창: 누르는 대상 44px */
@@ -690,6 +690,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-ico--16 { width: 16px; height: 16px; }
 .hg-ico--24 { width: 24px; height: 24px; }
 .hg-ico--arrow-right { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M221.66,133.66l-72,72A8,8,0,0,1,136,200V136H40a8,8,0,0,1,0-16h96V56a8,8,0,0,1,13.66-5.66l72,72A8,8,0,0,1,221.66,133.66Z%22/%3E%3C/svg%3E"); }
+.hg-ico--arrows-clockwise { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M228,48V96a12,12,0,0,1-12,12H168a12,12,0,0,1,0-24h19l-7.8-7.8a75.55,75.55,0,0,0-53.32-22.26h-.43A75.49,75.49,0,0,0,72.39,75.57,12,12,0,1,1,55.61,58.41a99.38,99.38,0,0,1,69.87-28.47H126A99.42,99.42,0,0,1,196.2,59.23L204,67V48a12,12,0,0,1,24,0ZM183.61,180.43a75.49,75.49,0,0,1-53.09,21.63h-.43A75.55,75.55,0,0,1,76.77,179.8L69,172H88a12,12,0,0,0,0-24H40a12,12,0,0,0-12,12v48a12,12,0,0,0,24,0V189l7.8,7.8A99.42,99.42,0,0,0,130,226.06h.56a99.38,99.38,0,0,0,69.87-28.47,12,12,0,0,0-16.78-17.16Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1-5.66-13.66L180.65,72a79.48,79.48,0,0,0-54.72-22.09h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27,96,96,0,0,1,192,60.7l18.36-18.36A8,8,0,0,1,224,48ZM186.41,183.29A80,80,0,0,1,75.35,184l18.31-18.31A8,8,0,0,0,88,152H40a8,8,0,0,0-8,8v48a8,8,0,0,0,13.66,5.66L64,195.3a95.42,95.42,0,0,0,66,26.76h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z%22/%3E%3C/svg%3E"); }
 .hg-ico--bell { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M225.29,165.93C216.61,151,212,129.57,212,104a84,84,0,0,0-168,0c0,25.58-4.59,47-13.27,61.93A20.08,20.08,0,0,0,30.66,186,19.77,19.77,0,0,0,48,196H84.18a44,44,0,0,0,87.64,0H208a19.77,19.77,0,0,0,17.31-10A20.08,20.08,0,0,0,225.29,165.93ZM128,212a20,20,0,0,1-19.6-16h39.2A20,20,0,0,1,128,212ZM54.66,172C63.51,154,68,131.14,68,104a60,60,0,0,1,120,0c0,27.13,4.48,50,13.33,68Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216Z%22/%3E%3C/svg%3E"); }
 .hg-ico--calendar { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,48H48V48H72v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24Z%22/%3E%3C/svg%3E"); }
 .hg-ico--check { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z%22/%3E%3C/svg%3E"); --ico-fill: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM205.66,85.66l-96,96a8,8,0,0,1-11.32,0l-40-40a8,8,0,0,1,11.32-11.32L104,164.69l90.34-90.35a8,8,0,0,1,11.32,11.32Z%22/%3E%3C/svg%3E"); }
@@ -1133,7 +1134,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item):active:not(:disabled) { transform: scale(0.98); }
 .hg-goaltile:has(> .hg-goaltile__main:active) { transform: scale(0.98); }
 :is(.hg-iconbtn, .hg-check):active:not(:disabled) { transform: scale(0.92); }
-:is(.hg-hubhero, .hg-hubtile, .hg-hubsave, .hg-hubband__main):active { transform: scale(0.98); }
+:is(.hg-hubtile, .hg-hubline, .hg-together__slide, .hg-together__more, .hg-hubband__main):active { transform: scale(0.98); }
 :is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-daygrid__day):active { background: var(--hairline-soft); }
 :is(.hg-transfer__open, .hg-banner__main):active { transform: scale(0.99); }
 /* 들어옴: 화면 본문(앱 틀의 단, 질문 화면의 제목과 내용)은 6px 아래에서, 펼친 내용과 메뉴는 4px 위에서, 새로 넣은 입력 줄은 98%에서. dur-base, ease-out */
@@ -1147,7 +1148,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 @keyframes hg-grow { from { transform: scale(0.98); } }
 @media (prefers-reduced-motion: reduce) {
   :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
-  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main, .hg-hubhero, .hg-hubtile, .hg-hubsave, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
+  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main,  .hg-hubtile, .hg-hubline, .hg-together__slide, .hg-together__more, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
 }
 
 /* 금액 가리기 */
@@ -2383,24 +2384,6 @@ button.hg-receipt__main { cursor: pointer; }
   .hg-hub { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .hg-hub > .hg-hubband { order: -1; }  /* 넓은 창은 할 일 띠를 맨 위 한 줄로 */
 }
-/* 큰 상자(HubHero): 다음 월급날까지 + 진행 막대 + 아래 두 칸(체크한 금액 | 모은 금액). 누르면 월급 이번 달 */
-.hg-hubhero { display: flex; flex-direction: column; width: 100%; padding: var(--space-5) var(--space-5) 0; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
-.hg-hubhero__top { display: flex; align-items: flex-start; gap: var(--space-3); }
-.hg-hubhero__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.hg-hubhero__cap { font: 500 13px/18px var(--font-sans); color: var(--slate); }
-.hg-hubhero__title { font: var(--text-title-2); letter-spacing: -0.4px; word-break: keep-all; }
-.hg-hubhero .hg-avatars .hg-avatar { width: 36px; height: 36px; }
-.hg-hubhero__progress { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
-.hg-hubhero__meter { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-.hg-hubhero__track { height: 10px; border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
-.hg-hubhero__track > i { display: block; height: 100%; width: calc(var(--p, 0) * 1%); border-radius: inherit; background: var(--accent-app); }
-.hg-hubhero__label { font: 500 13px/18px var(--font-sans); color: var(--slate); }
-.hg-hubhero__count { flex: none; font: var(--text-number-lg); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.hg-hubhero__count small { font: 500 15px/22px var(--font-sans); color: var(--slate); }
-.hg-hubhero__split { display: flex; margin: var(--space-4) calc(var(--space-5) * -1) 0; border-top: 1px solid var(--hairline-soft); }
-.hg-hubhero__split > span { flex: 1; min-width: 0; display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; gap: 0 6px; padding: 14px var(--space-2); font: 500 14px/20px var(--font-sans); color: var(--slate); text-align: center; }
-.hg-hubhero__split > span + span { border-left: 1px solid var(--hairline-soft); }
-.hg-hubhero__split b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* 할 일·초대 띠(HubBand): 2026-11-11 사용자 결정, 코코아 채움(band-cocoa) + on-band-cocoa 글자(라이트 12.5:1, 다크 10.1:1). 오렌지·brand-soft가 아님. 다른 띠(Banner, LineBand)는 그대로 */
 .hg-hubband { display: flex; align-items: center; min-width: 0; border-radius: var(--radius-lg); background: var(--band-cocoa); color: var(--on-band-cocoa); }
 .hg-hubband__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); min-height: 52px; padding: var(--space-3) var(--space-4) var(--space-3) 18px; box-sizing: border-box; border: 0; border-radius: inherit; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -2423,20 +2406,65 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubtile--point .hg-hubtile__sub { color: var(--on-accent-app-sub); }
 .hg-hubtile--point > .hg-artslot { background: var(--accent-app-slot); box-shadow: none; border: 0; }
 .hg-hubtile--point:active { background: var(--brand-pressed); }
-/* 저금 상자(HubSaving): 56px 그림 자리 + 이름·% + “6,000만 / 1억 5,000만 원” + 얇은 막대(오렌지 accent-app, 2026-11-12) */
-.hg-hubsave { display: flex; align-items: center; gap: 14px; width: 100%; padding: var(--space-5); box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
-.hg-hubsave > .hg-artslot { flex: none; width: 56px; height: 56px; border-radius: var(--radius-lg); }
-.hg-hubsave__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.hg-hubsave__row { display: flex; justify-content: space-between; gap: var(--space-2); font: var(--text-title-3); font-weight: 700; }
-.hg-hubsave__name { min-width: 0; display: flex; align-items: center; gap: var(--space-2); }
-.hg-hubsave__name > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hg-hubsave__name > .hg-hubtile__badge { flex: none; }  /* 2026-11-11 D4 파트너 저금이면 이름 옆 파트너 이름 알약(타일 배지와 같은 모양) */
-.hg-hubsave__row > span:last-child { flex: none; font-variant-numeric: tabular-nums; }
-.hg-hubsave__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
-.hg-hubsave__bar { height: 8px; margin-top: var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
-.hg-hubsave__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 2026-11-12 사용자 결정: 저금 진행 막대는 오렌지(W-10 막대·진행 원과 같음), 내 것·파트너 것 같음 */
-.hg-hub :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-@media (hover: hover) { :is(.hg-hubhero, .hg-hubtile, .hg-hubsave):hover { box-shadow: var(--shadow-2); } }
+.hg-hub :is(.hg-hubtile, .hg-hubline):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (hover: hover) { :is(.hg-hubtile, .hg-hubline):hover, .hg-together:has(:is(.hg-together__slide, .hg-together__more):hover) { box-shadow: var(--shadow-2); } }
+/* 2026-11-13 v2.2(ADR 0009, HomeHub v2.2): H-02 저금 상자(hg-hubsave)·H-03 큰 상자(hg-hubhero)는 없앰. 아래 H-10 같이 모으기, H-11 이번 달 한 줄, 띠 글자 버튼 둘 */
+/* 같이 모으기(SaveTogether, H-10): 흰 상자 두 칸(넓은 창 두 줄 높이). 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸(최대 3 + ‘저금 모두 보기’) + 점 → ‘+ 돈 들어왔어요’ */
+.hg-together { display: flex; flex-direction: column; min-width: 0; padding: var(--space-5) var(--space-5) var(--space-2); box-sizing: border-box; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
+.hg-hub > .hg-together { grid-column: span 2; }
+@media (min-width: 1100px) { .hg-hub > .hg-together { grid-row: span 2; } }
+.hg-together__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 24px; }
+.hg-together__title { margin: 0; font: 600 13px/18px var(--font-sans); color: var(--slate); }
+.hg-together__head > .hg-btn--link { min-height: 32px; padding: 0; }
+.hg-together__track { display: flex; gap: var(--space-4); margin-top: var(--space-1); overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.hg-together__track::-webkit-scrollbar { display: none; }
+.hg-together__slide, .hg-together__more { flex: 0 0 100%; min-width: 0; box-sizing: border-box; scroll-snap-align: start; border: 0; border-radius: var(--radius-lg); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-together__slide { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) 0; }
+.hg-together__more { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 120px; background: var(--surface-alt); color: var(--ink-2); font: var(--text-label); }
+:is(.hg-together__slide, .hg-together__more):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.hg-together__people { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.hg-together__people .hg-avatar { width: 28px; height: 28px; font-size: 12px; }
+.hg-together__name { flex: 1; min-width: 0; font: 600 15px/22px var(--font-sans); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-together__people > .hg-badge { flex: none; }
+.hg-together__amount { font: var(--text-number-lg); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.hg-together__bar { height: 10px; margin-top: var(--space-1); border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
+.hg-together__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 저금 진행이라 오렌지(CLAUDE.md 색 규칙) */
+.hg-together--paused .hg-together__bar > i { background: var(--slate); }  /* 해제 대기: 멈춤 */
+.hg-together__line { margin: 0; font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.hg-together__dots { display: flex; justify-content: center; gap: 6px; margin-top: var(--space-2); }
+.hg-together__dots > i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--hairline); }
+.hg-together__dots > i.is-on { background: var(--ink-2); }
+.hg-together > .hg-addrow { align-self: flex-start; }
+/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 3개 + ‘+ 저금 만들기’. 그림 자리 없음 */
+.hg-together__ask { margin: var(--space-2) 0 0; font: var(--text-title-3); font-weight: 700; }
+.hg-together__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+@media (prefers-reduced-motion: no-preference) { .hg-together__track { scroll-behavior: smooth; } }
+/* 이번 달 한 줄(HubLine, H-11·H-13): 흰 얇은 상자 두 칸. 왼쪽 문장(15px 600, 두 줄까지) + 회색 보조 + 오른쪽 이동 글자(13px 600 ink-2). 오렌지 없음 */
+.hg-hubline { display: flex; align-items: center; gap: var(--space-3); min-width: 0; min-height: 56px; padding: 14px 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.hg-hub > .hg-hubline { grid-column: span 2; }
+.hg-hubline__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.hg-hubline__main { font: 600 15px/22px var(--font-sans); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.hg-hubline__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
+.hg-hubline__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 600 13px/18px var(--font-sans); color: var(--ink-2); white-space: nowrap; }
+/* 기간 막대(PeriodBar, H-13 날짜 없는 사람 16일째부터): “들어온 돈 / 필요한 돈” + 8px 막대(채움 ink-2 중립, 오렌지 아님) + “10월 3일부터”. 판정 문장 없음 */
+.hg-periodbar { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hg-periodbar__text { font: 600 15px/22px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; }
+.hg-periodbar__bar { height: 8px; border-radius: var(--radius-full); background: var(--surface-alt); overflow: hidden; }
+.hg-periodbar__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--ink-2); }
+.hg-periodbar__since { font: 500 13px/18px var(--font-sans); color: var(--slate); }
+/* 할 일 띠 글자 버튼 둘(hg-hubband--two, H-06 8번만): 띠 전체가 버튼이 아니라 둘째 ‘이미 정했어요’ + 첫째 이동 글자가 따로(각 44px 이상) */
+.hg-hubband--two { flex-wrap: wrap; gap: 0 var(--space-2); padding: var(--space-1) var(--space-2) var(--space-1) 18px; }
+.hg-hubband--two > .hg-hubband__text { flex: 1 1 160px; padding: var(--space-2) 0; }
+.hg-hubband__btns { display: flex; flex: none; align-items: center; gap: var(--space-1); margin-left: auto; }
+.hg-hubband__btn { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-md); background: none; color: inherit; font: 500 15px/22px var(--font-sans); white-space: nowrap; cursor: pointer; }
+.hg-hubband__btn--quiet { font-size: 13px; }
+.hg-hubband__btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (hover: hover) { .hg-hubband__btn:hover { background: color-mix(in srgb, var(--band-cocoa) 90%, var(--on-band-cocoa)); } }
+/* 자동 표시(hg-autopill, ListRow ‘자동 표시’): 자동 줄 금액 왼쪽·보조 줄 자리의 작은 회색 알약 “자동 26일”. 오렌지·파랑 없음 */
+.hg-autopill { display: inline-flex; flex: none; align-items: center; gap: 2px; height: 18px; padding: 0 6px; border-radius: var(--radius-full); background: var(--plate); color: var(--ink-2); font: 600 12px/18px var(--font-sans); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hg-autopill > .hg-ico { width: 12px; height: 12px; }
+.hg-receipt__autocol { display: inline-flex; flex: none; align-items: center; gap: var(--space-2); }
+.hg-receipt__note { display: block; font: var(--text-body-sm); color: var(--stone); }  /* 보내기 줄 아래 “월급 − 용돈” */
 
 /* AddRow(+ 추가 줄): 2026-11-09 + 버튼(FAB) 대신 목록 끝이나 묶음 머리 오른쪽의 회색 글자 줄. hg-btn--link와 같은 ink-2 600 + Phosphor plus */
 .hg-addrow { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-1); box-sizing: border-box; border: 0; border-radius: var(--radius-btn-sm); background: none; color: var(--ink-2); font: var(--text-label); cursor: pointer; }

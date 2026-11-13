@@ -52,7 +52,7 @@ test('잠금 뒤 화면(S1-05): 보이지 않고 Tab·화면 읽기가 닿지 �
   await signedInHome(page, { locked: true });
   await page.goto('/');
   await expect(lockHeading(page)).toBeVisible();
-  await expect(page.locator('.hg-hubsave')).toBeHidden();
+  await expect(page.locator('.hg-together')).toBeHidden();
   for (let i = 0; i < 16; i++) {
     await page.keyboard.press('Tab');
     const inside = await page.evaluate(
@@ -64,7 +64,7 @@ test('잠금 뒤 화면(S1-05): 보이지 않고 Tab·화면 읽기가 닿지 �
   }
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1); // 잠금 제목만
   await page.keyboard.type('258036');
-  await expect(page.locator('.hg-hubsave')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
 });
 
 test('PIN을 잊었어요(S1-02·S1-32): 확인 → PIN 지우고 로그아웃 → A-02 안내 → 로그인 → 새 PIN 정하기', async ({
@@ -141,7 +141,11 @@ test('가입 취소(S1-11): A-04 뒤로, A-05 하드웨어 뒤로 = 로그아웃
   await page.goto('/auth/callback?code=e2e-code');
   await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려 주세요' })).toBeVisible();
   // 좁은 창은 꺾쇠(뒤로), 넓은 창(마우스)은 아래 바 ‘이전’
-  await page.getByRole('button', { name: /^(뒤로|이전)$/ }).locator('visible=true').first().click();
+  await page
+    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .locator('visible=true')
+    .first()
+    .click();
   await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('sb-session'))).toBeNull();
 });
@@ -308,7 +312,9 @@ test('A-02 소셜 버튼(S1-30): 공식 문구, ‘최근 사용’은 이름이
   await page.goto('/login');
   const apple = page.getByRole('button', { name: 'Apple로 계속하기', exact: true });
   await expect(apple).toHaveAccessibleDescription('최근 사용');
-  await expect(page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true }),
+  ).toBeVisible();
   await page.context().setOffline(true);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
   const kakao = page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true });

@@ -137,7 +137,7 @@ test('신혼부부: 이름부터 첫 체크리스트까지 7화면(결혼한 날
   });
 
   // 홈 큰 상자 → W-02 첫 저금 빈 줄 → W-11a 저금 추가 → 매달 금액은 빈 칸, 보조 = 여유 자금 139만
-  await page.locator('.hg-hubhero').click();
+  await page.locator('.hg-hubline').click();
   await page.getByRole('button', { name: '저금 추가 (여유 자금 139만 원)' }).click();
   await heading(page, '무엇을 위해 모을까요?');
   await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');

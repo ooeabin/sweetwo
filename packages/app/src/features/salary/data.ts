@@ -114,8 +114,8 @@ export function trackCompleted(
 export type CheckEntry = 'w02' | 'w05' | 'w10';
 export type CheckResult = {
   r: 'ok' | 'already_checked' | 'closed';
-  /** 이번 체크로 체크리스트가 다 끝났으면(마지막 줄, 2026-11-12) 그 끝남과 달(기간 시작 달) */
-  finish: { kind: ChecklistFinish; month: number } | null;
+  /** 이번 체크로 확인이 끝났으면(마지막 손 줄, 2026-11-13 자동 줄은 셈하지 않음) 그 끝남과 사이클 시작일 */
+  finish: { kind: ChecklistFinish; start: string } | null;
 };
 
 /**
@@ -137,6 +137,16 @@ export function useCheck(entry: CheckEntry = 'w02') {
     let finish: CheckResult['finish'] = null;
     if (r === 'ok') {
       const to = state === 'checked' && actual === 0 ? 'skipped' : state;
+      const today = todayKst();
+      // 늦은 확인(07 4장, 32 0-4 pay_line_late_checked): 지난 사이클 줄을 체크
+      if (list && list.cycle_end < today && to === 'checked')
+        track('pay_line_late_checked', {
+          kind: line.kind,
+          days_late: daysBetween(list.cycle_end, today),
+        });
+      // 자동 줄을 사람이 바꿈(32 0-4 auto_line_changed): 건너뜀 또는 다른 금액
+      if (line.auto && (to === 'skipped' || (to === 'checked' && actual !== undefined)))
+        track('auto_line_changed', { to: to === 'skipped' ? 'skipped' : 'other_amount' });
       if (to === 'checked') {
         const sent = actual ?? line.planned;
         track('checklist_line_checked', {
@@ -156,11 +166,17 @@ export function useCheck(entry: CheckEntry = 'w02') {
             : null,
           entry: via,
         });
-      if (list) {
-        const before = withLocal(list.pay_check_line);
+      if (list && !line.auto) {
+        // 확인 끝은 손 줄만(07 7장, 2026-11-13): 자동 줄은 나가는 날 앱이 확인
+        const before = withLocal(list.pay_check_line).filter((l) => !l.auto);
         const kind = finishAfter(before, line.id, state, actual);
         if (kind) {
-          finish = { kind, month: Number(list.cycle_start.slice(5, 7)) };
+          finish = { kind, start: list.cycle_start };
+          track('payday_confirmed', {
+            method: entry === 'w05' ? 'w05' : 'line_by_line',
+            manual_lines: before.length,
+            late: list.cycle_end < today,
+          });
           trackCompleted(
             list,
             before.map((l) => (l.id === line.id ? { ...l, state: to } : l)),
@@ -179,13 +195,13 @@ export function useCheck(entry: CheckEntry = 'w02') {
 export function finishOfMany(list: PayChecklist | undefined, ids: string[]) {
   if (!list) return null;
   // 이번에 체크한 줄은 ‘전’에는 체크 안 한 줄, 다른 줄은 이 기기가 방금 저장한 상태를 덧씌움
-  const before = withLocal(list.pay_check_line).map((l) =>
-    ids.includes(l.id) ? { ...l, state: 'wait' } : l,
-  );
+  const before = withLocal(list.pay_check_line)
+    .filter((l) => !l.auto)
+    .map((l) => (ids.includes(l.id) ? { ...l, state: 'wait' } : l));
   if (checklistFinish(before)) return null;
   const lines = before.map((l) => (ids.includes(l.id) ? { ...l, state: 'checked' } : l));
   const kind = checklistFinish(lines);
-  return kind ? { kind, month: Number(list.cycle_start.slice(5, 7)), lines } : null;
+  return kind ? { kind, start: list.cycle_start, lines } : null;
 }
 
 /**

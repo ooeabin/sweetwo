@@ -98,7 +98,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   });
   Object.assign(db.splits[0] ?? {}, { updated_by: 'yebin', updated_at: '2026-10-01T03:00:00Z' });
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(
     page.getByText('예빈님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요'),
   ).toBeVisible();
@@ -111,15 +111,15 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await expect(page.getByText('예빈님이 월급 계획을 바꿔서')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
   await page.getByRole('button', { name: '지난 달 보기' }).click();
-  await expect(page.getByRole('heading', { name: '8월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '8월 25일 월급' })).toBeVisible();
   // 지난 달은 막대 아래 끝남 한 줄 + 줄은 읽기 전용(2026-11-12 결과 카드 대신: 체크 칸은 누를 수 없고 시트 없음)
   await expect(page.getByText('08.25 ~ 09.24', { exact: true })).toBeVisible();
-  await expect(page.locator('.hg-planbar__title')).toContainText('8월 월급 체크를');
+  await expect(page.locator('.hg-planbar__title')).toContainText('8월 25일 월급,');
   await expect(page.locator('.hg-transfer').first()).toBeVisible();
   await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
   for (const c of await page.getByRole('checkbox').all()) await expect(c).toBeDisabled();
   await page.getByRole('button', { name: '다음 달 보기' }).click();
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
 });
 
 test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 편집·추천값·추가 없음 / 내 탭은 고침, 큰 금액 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
@@ -197,13 +197,13 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   await axe(page);
   // 첫 저금 빈 줄은 파트너 탭에 없음
   await expect(page.getByRole('button', { name: /저금 추가 \(여유 자금/ })).toHaveCount(0);
-  // 고치는 것 없음(2026-11-09 round 3): ‘월급 계획 고치기’, 묶음 ‘모두 보냈어요’
+  // 고치는 것 없음(2026-11-09 round 3): ‘월급 계획 고치기’, 2026-11-13 “모두 계획대로 됐어요”
   await expect(page.getByRole('button', { name: '월급 계획 고치기' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /모두 보냈어요/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   // 내 탭으로 돌아가면 있음
   await page.getByRole('tab', { name: '찬우' }).click();
   await expect(page.getByRole('button', { name: '월급 계획 고치기' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '지출 모두 보냈어요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toBeVisible();
 });
 
 test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {

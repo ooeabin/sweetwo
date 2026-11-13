@@ -87,7 +87,7 @@ function seed(db: MemDb) {
 const open = async (page: Page, narrow: boolean) => {
   if (narrow) {
     await page.goto('/');
-    await expect(page.locator('.hg-hubhero, .hg-hub .hg-card--fill').first()).toBeVisible();
+    await expect(page.locator('.hg-together, .hg-hub .hg-card--fill').first()).toBeVisible();
     await page.getByRole('button', { name: '메뉴', exact: true }).click();
     await page
       .getByRole('dialog', { name: '메뉴' })

@@ -36,7 +36,11 @@ export function ProviderButton({
       aria-describedby={note ? noteId : undefined}
       {...rest}
       // 2026-11-10 애플은 채움 버튼(라이트 검정 바탕 흰 글자, 다크 흰 바탕 검정 글자: ink/on-ink 토큰), 이메일 충돌 강조 때는 덮지 않음
-      className={['hg-btn--provider', provider === 'apple' && !variant && 'hg-btn--apple', rest.className]
+      className={[
+        'hg-btn--provider',
+        provider === 'apple' && !variant && 'hg-btn--apple',
+        rest.className,
+      ]
         .filter(Boolean)
         .join(' ')}
     >

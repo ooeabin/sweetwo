@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
 import { IconButton } from './IconButton';
+import { AutoPill } from './TransferRow';
 
 // 영수증 카드(docs/design/components/ReceiptCard.md, 2026-11-09 W-01 월급 계획).
 // 바탕(ReceiptStage, surface-alt) 위 카드(ReceiptCard, 위 xl 모서리 + 아래 톱니) 안에 머리, 비율 막대, 묶음, 합계.
@@ -204,6 +205,10 @@ export interface ReceiptLine {
   sub?: string;
   /** 금액 자리를 stone으로(달 결과 카드 ‘못 함’) */
   muted?: boolean;
+  /** 자동 줄 알약(2026-11-13 hg-autopill “자동 26일”), 금액 왼쪽 */
+  auto?: string;
+  /** 이름 아래 회색 한 줄(2026-11-13 보내기 줄 “월급 − 용돈”) */
+  note?: string;
 }
 
 export interface ReceiptEditLabels {
@@ -288,16 +293,27 @@ export function ReceiptRows({
                   ? 1
                   : 0
               : 0;
+          const amt = l.sub ? (
+            <span className="hg-receipt__amtcol">
+              <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
+              <span className="hg-receipt__plan">{l.sub}</span>
+            </span>
+          ) : (
+            <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
+          );
           const main = (
             <>
-              <span className="hg-receipt__name">{l.name}</span>
-              {l.sub ? (
-                <span className="hg-receipt__amtcol">
-                  <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
-                  <span className="hg-receipt__plan">{l.sub}</span>
+              <span className="hg-receipt__name">
+                {l.name}
+                {l.note && <span className="hg-receipt__note">{l.note}</span>}
+              </span>
+              {l.auto ? (
+                <span className="hg-receipt__autocol">
+                  <AutoPill text={l.auto} />
+                  {amt}
                 </span>
               ) : (
-                <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
+                amt
               )}
             </>
           );

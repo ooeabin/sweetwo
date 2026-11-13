@@ -79,7 +79,7 @@ test('진행 막대: 체크할수록 칸 안이 차고 “체크한 금액”이
 }) => {
   await open(page);
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(page.getByText('09.25 ~ 10.24', { exact: true })).toBeVisible();
   await expect(page.getByText('체크한 금액 0원 / 350만 원')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 0개 완료' })).toBeVisible();
@@ -135,10 +135,10 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   await expect(page).toHaveURL(/\/salary$/);
   // 마지막 줄 = 줄 Toast 대신 끝남 Toast 하나
   const toast = page.locator('.hg-toast');
-  await expect(toast).toContainText('9월 월급 체크를 다 했어요');
+  await expect(toast).toContainText('9월 25일 월급, 계획대로 됐어요');
   await expect(toast).not.toContainText('체크했어요 ');
   const title = page.locator('.hg-planbar__title');
-  await expect(title).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(title).toHaveText('9월 25일 월급, 계획대로 됐어요');
   await expect(page.locator('.hg-planbar__foot')).toContainText('체크한 금액 350만 원 / 350만 원');
   await expect(
     page.locator('.hg-planbar__foot').getByRole('button', { name: '공유하기' }),
@@ -165,7 +165,7 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   // 옛 W-02 끝 주소는 W-02로
   await page.goto('/salary/done');
   await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
 });
 
 test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어요”, ‘못 함’ 줄은 빈 원 + “이번 달은 못 했어요”(D2), 공유하기 = 내려받기', async ({
@@ -176,13 +176,13 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   mark(linesOf(db)[0], 'skipped');
   mark(linesOf(db)[3], 'checked', 700_000);
   await page.goto('/salary');
-  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 마쳤어요');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 확인을 마쳤어요');
   // ‘못 함’ 줄: 체크 안 된 빈 원, 취소선 없음, 화면 읽기 “청약 못 함”
-  const skipped = page.getByRole('checkbox', { name: '청약 못 함' });
+  const skipped = page.getByRole('checkbox', { name: '청약 건너뜀' });
   await expect(skipped).toHaveAttribute('aria-checked', 'false');
   const row = page.locator('.hg-transfer', { hasText: '청약' });
   await expect(row).not.toHaveClass(/is-done/);
-  await expect(row).toContainText('이번 달은 못 했어요');
+  await expect(row).toContainText('이번 달은 건너뛰었어요');
   // 못 함이 있으면 저금 칸은 다 차지 않음(95 ÷ 139 = 68)
   expect((await bar(page)).map(([, , f]) => f)).toEqual(['68%', '100%']);
   await expect(page.locator('.hg-planbar__foot')).toContainText('체크한 금액 288만 원 / 350만 원');
@@ -194,7 +194,7 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   // ‘못 함’ 줄 체크 칸을 누르면 체크(보냈어요) → “다 했어요”
   await skipped.click();
   await expect.poll(() => linesOf(db)[0]?.state).toBe('checked');
-  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 계획대로 됐어요');
 });
 
 test('W-01 링크 줄 “이번 달 2/5 체크했어요 ›” → 이번 달, 체크리스트가 없으면 없음', async ({
@@ -253,7 +253,7 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
 }) => {
   const db = await open(page);
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   // 첫 체크리스트(지난 달 없음)에는 없음
   await expect(page.getByText('계획대로 체크리스트를 만들었어요')).toHaveCount(0);
   const cur = db.checklists[0] as Line;
@@ -279,13 +279,13 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
   // 지난 달 보기에서는 없음, 지난 달은 같은 한 줄(읽기 전용, 2026-11-12)
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(note).toHaveCount(0);
-  await expect(page.locator('.hg-planbar__title')).toHaveText('8월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('8월 25일 월급, 계획대로 됐어요');
   await expect(page.getByRole('button', { name: '체크 고치기' })).toHaveCount(0);
   await page.getByRole('button', { name: '다음 달 보기' }).click();
   await page.locator('.hg-row', { has: note }).getByRole('button', { name: '닫기' }).click();
   await expect(note).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(note).toHaveCount(0);
 });
 
@@ -312,7 +312,7 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같�
   const yl = db.checklists.find((c) => c.owner_user_id === 'yebin')?.pay_check_line as Line[];
   yl.forEach((l) => mark(l, 'checked', null, 'yebin'));
   await page.reload();
-  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
+  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 계획대로 됐어요');
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);

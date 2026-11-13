@@ -666,6 +666,8 @@ supabase/
 ### 홈과 월급 체크리스트 구조
 
 > 2026-11-13(ADR 0009): 홈은 H-10 같이 모으기(`h-10-save-together.tsx`) + H-11 이번 달 한 줄(`h-11-month-line.tsx`, 날짜 없음 기간 막대 H-13 포함) + H-12(`h-12-wedding.tsx`) + 할 일 띠 16순서(core `pickTopTask`, 닫기·끝냄은 서버 `home_task_state`, 기기 저장 아님) + 타일. H-03 큰 상자·H-02 저금 상자는 없앰(아래는 그 전 구조 기록). W-02는 `w-02-payday-confirm.tsx`(자동 묶음 + “모두 계획대로 됐어요” = `confirm_payday`), 지난 달 늦은 확인 `w-02-last-month.tsx`, W-05는 손 줄만. 새 W 화면 파일 → 20 ‘월급 탭 v2.2’.
+>
+> 2026-11-13 PR 9 구현: 홈 `h-01-home.tsx`가 재료를 모아 core `pickHeroes`(H-10)·`pickMonthLine`(H-11)·`pickTopTask`(H-06)를 부름. 홈 쿼리 훅은 `features/home/data.ts`(묶음 `bundle_view`, 기간 `money_in_period`, 띠 닫기 `home_task_state`, 관리 형태 요청, 분담, 순위 요청, 월급 변경, 쓸 곳 메모, 대표 저금 돈 움직임 `goal_move_public`, 지난 확인 목록) + `useHomeRealtime`(묶음·돈 들어왔어요·메모·분담·관리 형태 요청·월급 변경·순위 요청 구독 → api `*Keys` 무효화). 경조사·만기·해제 기록은 예전 frame `useHomeInput` 그대로. H-13 기간 한 줄은 홈과 월급 탭이 salary `period-line.tsx` `PeriodLine` 하나로. 확인 루프 화면 값은 salary `cycle.ts`(`baseDayOf` 기준일, `firstPaydayOf` 첫 월급날, `salaryChangedDay` 띠 6번 날, 자동 알약 글자). W-01 줄 설정은 `receipt-parts.tsx` `LineSettingsFields`·`AutoDayPick`(W-01d도 씀) → api `configureSplitLines`. W-01d는 `/salary/auto-lines`(W-01 위 BottomSheet). 체크 결과 `finish`는 손 줄만 셈(자동 줄 빼고), 분석 `payday_confirmed`·`pay_line_late_checked`·`auto_line_changed`는 salary `data.ts` `useCheck`. ui: `SaveTogether`·`SaveTogetherSlide`·`SaveTogetherEmpty`, `PeriodBar`, `HubLine`, `HubBand secondary`, `AutoPill`(TransferRow·ReceiptLine `auto`). `HubHero`·`HubSaving`은 지움. e2e 가짜 서버의 v2.2 표·RPC는 `apps/mobile/e2e/v22-mock.ts`(`db.v22`, onboarding-mock이 먼저 부름)
 
 재기획(ADR 0003) 홈과 W 화면. 기획 → 19 홈, 20 월급 체크리스트, 07 월 사이클.
 

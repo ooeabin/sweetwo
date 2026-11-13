@@ -1,4 +1,4 @@
-import type { AmountBand, AuthProvider, HomeTodo, SplitKind } from '@sweetwo/core';
+import type { AmountBand, AuthProvider, SplitKind, TopTask } from '@sweetwo/core';
 
 // 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
@@ -380,8 +380,23 @@ export type AnalyticsEvent =
       // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
       name: 'home_box_tapped';
       props: {
-        box: 'hero' | 'band' | 'plan' | 'calendar' | 'saving' | 'assets' | 'savings' | 'retry';
-        todo?: HomeTodo['kind'];
+        // 2026-11-13 v2.2: together = H-10 칸, month_line = H-11, wedding = H-12, money_in = ‘+ 돈 들어왔어요’,
+        // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 만들기’, dday = ‘결혼식 날짜 알려 주기’
+        box:
+          | 'together'
+          | 'month_line'
+          | 'wedding'
+          | 'money_in'
+          | 'more'
+          | 'chip'
+          | 'dday'
+          | 'band'
+          | 'plan'
+          | 'calendar'
+          | 'assets'
+          | 'savings'
+          | 'retry';
+        todo?: TopTask['kind'];
       };
     }
   | {
@@ -426,7 +441,48 @@ export type AnalyticsEvent =
         days_pending: number;
         exported_data: boolean;
       };
-    };
+    }
+  // ── v2.2(32 0-4, 2026-11-13) 홈·월급날 확인 ──
+  | {
+      // 알림 허용 묻기(O-55, P-11, H-06 띠 10번). answered result: granted/denied/later
+      name: 'push_permission_asked';
+      props: { screen_id: 'O-55' | 'P-11' | 'H-06' };
+    }
+  | {
+      name: 'push_permission_answered';
+      props: {
+        screen_id: 'O-55' | 'P-11' | 'H-06';
+        result: 'granted' | 'denied' | 'later';
+        kinds_on: number | null;
+      };
+    }
+  | {
+      // W-01 줄 설정(7a), W-01d. auto_day_band: payday(월급날) / next(다음 날) / other / none(자동 아님)
+      name: 'split_line_setting_changed';
+      props: {
+        kind: SplitKind;
+        in_checklist: boolean;
+        auto_pay: boolean;
+        auto_day_band: 'payday' | 'next' | 'other' | 'none';
+      };
+    }
+  | {
+      // W-02 확인 끝: one_tap = “모두 계획대로 됐어요”, line_by_line = 줄마다 마지막 손 줄, w05 = 월급 전 확인에서
+      name: 'payday_confirmed';
+      props: { method: 'one_tap' | 'line_by_line' | 'w05'; manual_lines: number; late: boolean };
+    }
+  | { name: 'pay_line_late_checked'; props: { kind: SplitKind; days_late: number } }
+  | { name: 'auto_line_changed'; props: { to: 'skipped' | 'other_amount' } }
+  | {
+      name: 'auto_pay_asked';
+      props: { screen_id: 'W-11e' | 'W-01d' | 'W-01'; answer: 'yes' | 'no' };
+    }
+  | { name: 'home_task_dismissed'; props: { task_key: string } }
+  | {
+      name: 'money_in_period_viewed';
+      props: { state: 'early' | 'bar' | 'gap'; filled_band: number | null };
+    }
+  | { name: 'progress_news_opened'; props: Record<string, never> };
 
 /** 값이 바뀐 정도(32 fact_value_changed change_band): 변동률 <5 / 5-20 / 20+ %. F-04 금액, S-11c 월급·월급날 */
 export const changeBand = (from: number, to: number): '<5' | '5-20' | '20+' => {

@@ -88,7 +88,7 @@ test('보기: 구간 탭 ‘계획’, 머리·비율·묶음·합계, + 버튼 
   await page.goto('/salary/split');
   await expect(page).toHaveURL(/\/salary\?view=plan$/);
   await page.getByRole('tab', { name: '이번 달' }).click();
-  await expect(page.getByRole('heading', { name: '9월 월급' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await page.getByRole('button', { name: '월급 계획 고치기' }).click();
   await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
 });

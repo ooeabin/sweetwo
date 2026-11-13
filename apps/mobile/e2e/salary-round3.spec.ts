@@ -13,91 +13,7 @@ const axe = async (page: Page) => {
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 type Line = { kind: string; state: string; goal_id: string | null };
 
-test('W-02 묶음 ‘모두 보냈어요’: 지출 체크 + 되돌리기, 저금은 더한 금액 Toast 한 번, 다 하면 이동 없이 “다 했어요” 한 줄 + Toast', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  const lines = () => db.checklists[0]?.pay_check_line as unknown as Line[];
-  await page.goto('/salary');
-  const spend = page.getByRole('button', { name: '지출 모두 보냈어요' });
-  await expect(spend).toBeVisible();
-  await axe(page);
-  await spend.click();
-  await expect(page.getByText('지출 3개를 체크했어요')).toBeVisible();
-  expect(
-    lines()
-      .filter((l) => l.kind !== 'saving')
-      .every((l) => l.state === 'checked'),
-  ).toBe(true);
-  // 남은 줄이 없으면 버튼 없음
-  await expect(spend).toHaveCount(0);
-  await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(spend).toBeVisible();
-  expect(
-    lines()
-      .filter((l) => l.kind !== 'saving')
-      .every((l) => l.state === 'wait'),
-  ).toBe(true);
-
-  // 저금 묶음: 청약 44만 + 내 집 마련 95만 = 139만, Toast 한 번
-  await page.getByRole('button', { name: '저금 모두 보냈어요' }).click();
-  await expect(page.getByText('저금 2개에 139만 원 더했어요')).toBeVisible();
-  expect(
-    lines()
-      .filter((l) => l.kind === 'saving')
-      .every((l) => l.state === 'checked'),
-  ).toBe(true);
-  await expect(page.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
-  // 마지막 묶음까지 다 하면 이동 없이 막대 아래 한 줄 + 끝남 Toast 하나(2026-11-12 W-02 끝 없앰)
-  await spend.click();
-  await expect(page.locator('.hg-toast')).toContainText('9월 월급 체크를 다 했어요');
-  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 월급 체크를 다 했어요');
-  await expect(page).toHaveURL(/\/salary$/);
-});
-
-test('W-02 ‘모두 보냈어요’ 오프라인이면 막음, 여러 저금이 한 번에 목표 금액에 닿아도 축하는 한 번씩', async ({
-  page,
-  context,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  // 두 저금 모두 이번 달 줄로 목표 금액에 닿게
-  Object.assign(db.goals.find((g) => g.id === 'goal-h') ?? {}, { target_amount: 950_000 });
-  Object.assign(db.goals.find((g) => g.id === 'goal-e') ?? {}, { target_amount: 440_000 });
-  const lines = () => db.checklists[0]?.pay_check_line as unknown as Line[];
-  await page.goto('/salary');
-  await expect(page.getByRole('button', { name: '저금 모두 보냈어요' })).toBeVisible();
-  await context.setOffline(true);
-  await page.getByRole('button', { name: '저금 모두 보냈어요' }).click();
-  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
-  expect(lines().every((l) => l.state === 'wait')).toBe(true);
-  await context.setOffline(false);
-
-  await page.getByRole('button', { name: '저금 모두 보냈어요' }).click();
-  // 첫 항목 축하 한 번(체크 Toast는 닫힘)
-  await expect(page).toHaveURL(/\/salary\/items\/goal-[eh]\/achieved(\?from=checklist)?$/);
-  const first = /goal-e/.test(page.url()) ? 'goal-e' : 'goal-h';
-  const second = first === 'goal-e' ? 'goal-h' : 'goal-e';
-  await expect(page.getByText('저금 2개에')).toHaveCount(0);
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
-  // 고르지 않고 닫고 월급 탭으로 돌아오면 다른 항목 축하 한 번
-  await page.goto('/salary');
-  await expect(page).toHaveURL(new RegExp(`/salary/items/${second}/achieved(\\?from=checklist)?$`));
-  await page.goto('/salary');
-  // 두 항목 모두 본 뒤에는 다시 축하하지 않음
-  await expect(page.getByRole('button', { name: '지출 모두 보냈어요' })).toBeVisible();
-  await expect(page).toHaveURL(/\/salary$/);
-  expect(
-    db.goals
-      .filter((g) => g.status === 'achieved')
-      .map((g) => g.id)
-      .sort(),
-  ).toEqual(['goal-e', 'goal-h']);
-});
+// 2026-11-13 묶음 ‘모두 보냈어요’(3a)는 없앰: 주 버튼 “모두 계획대로 됐어요”가 대신(home.spec.ts)
 
 test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
   page,
@@ -141,7 +57,7 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
 
   // 2026-11-09 홈 허브: 저금 타일(H-09) → W-13
   await page.goto('/');
-  await page.getByRole('button', { name: /^저금/ }).click();
+  await page.getByRole('button', { name: /^저금 (\d|아직)/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=home$/);
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
 });
@@ -220,7 +136,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   expect(g).toMatchObject({ target_amount: 440_000, deadline: '2026-12-01' });
 });
 
-test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(2026-11-11 초대는 맨 끝), 홈 순위 줄 없음(2026-11-11 H-04 타일 배지로)', async ({
+test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초대는 맨 끝), 홈 순위 줄 없음(2026-11-11 H-04 타일 배지로)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -235,14 +151,14 @@ test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(20
     ) as never;
   await page.goto('/');
   // 첫 저금이 먼저, 초대는 다른 할 일이 없을 때만(2026-11-11 띠 닫기 없음)
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toHaveCount(0);
+  await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toHaveCount(0);
   await expect(page.locator('.hg-hubband').getByRole('button', { name: '닫기' })).toHaveCount(0);
   // 홈에는 순위 줄이 없음(2026-11-11), 순위를 본 적이 없으면 자산 관리 타일 배지도 없음
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await expect(page.locator('.hg-hubtile__badge')).toHaveCount(0);
   const todo = page
     .locator('.hg-hubband')
-    .getByRole('button', { name: '첫 저금을 만들어 볼까요?' });
+    .getByRole('button', { name: '무엇을 같이 모을지 정해 볼까요?' });
   await expect(todo).toBeVisible();
   await axe(page);
   // 체크해도 홈에 순위 줄은 없음
@@ -252,11 +168,11 @@ test('홈 H-06 첫 주 할 일 ‘첫 저금 추가’는 초대보다 먼저(20
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await todo.click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
-  // 첫 주가 끝나면(온보딩한 날 + 7일) 사라지고 초대 띠(맨 끝)
-  db.me.onboarding_done_at = '2026-09-20T01:00:00Z';
+  // 첫 30일이 끝나면(2026-11-13 v2.2 띠 7번) 사라지고 초대 띠(맨 끝)
+  db.me.onboarding_done_at = '2026-09-01T01:00:00Z';
   await page.goto('/');
-  await expect(page.getByText('첫 저금을 만들어 볼까요?')).toHaveCount(0);
-  await expect(page.locator('.hg-hubband')).toContainText('함께할 사람을 초대해 주세요');
+  await expect(page.getByText('무엇을 같이 모을지 정해 볼까요?')).toHaveCount(0);
+  await expect(page.locator('.hg-hubband')).toContainText('같이 모을 사람을 초대해 보세요');
 });
 
 test('S-11f 저장 전 미리보기 한 줄: 다른 방식을 고르면 “{다음 시작일}부터 체크리스트가 …”', async ({
