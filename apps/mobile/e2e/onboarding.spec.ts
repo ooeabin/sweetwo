@@ -162,6 +162,10 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/\/welcome$/);
+  // 코드를 받아 버튼이 켜지고 시트가 다 올라온 뒤 접근성 검사(올라오는 중에는 글자가 흐림)
+  await expect(sheet.getByText('눌러서 복사')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: '링크 복사' })).toBeEnabled();
+  await page.waitForTimeout(400);
   await axe(page);
   await sheet.getByRole('button', { name: '나중에 보낼게요' }).click();
   await expect(page).toHaveURL(/\/$/);
