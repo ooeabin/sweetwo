@@ -44,7 +44,8 @@ export function S11fManageStyle() {
   const [manager, setManager] = useState<ManagerAnswer | null>(null);
   const [busy, setBusy] = useState(false);
   const lists = useChecklists();
-  if (d.loading || !d.space || !d.me || !d.c || open.isLoading) return <QuestionSkeleton />;
+  // 열린 요청은 기다리지 않음(못 읽어도 세 질문은 그대로)
+  if (d.loading || !d.space || !d.me || !d.c) return <QuestionSkeleton />;
   const sp = d.space;
   const me = d.me;
   const c = d.c;
