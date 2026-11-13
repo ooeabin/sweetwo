@@ -1,4 +1,4 @@
-import { insertAsset } from '@sweetwo/api';
+import { insertAsset, qk, setAssetShareDefault } from '@sweetwo/api';
 import {
   assetGroup,
   bands,
@@ -14,11 +14,14 @@ import {
   Chip,
   DateWheel,
   Field,
+  List,
+  ListRow,
   QuestionLayout,
   ShortText,
   Tabs,
   QuestionSkeleton,
 } from '@sweetwo/ui';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -28,6 +31,7 @@ import { copy } from '../copy';
 import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetSteps, useAssetDraft } from './draft';
 import { AssetArt } from '../asset-art';
+import { F03eShare } from '../pages/f-03e-share';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ymdText = (v: { y: number; m: number; d: number }) => `${v.y}-${pad(v.m)}-${pad(v.d)}`;
@@ -47,6 +51,7 @@ export function AssetAddRoute() {
   const nav = useNavigate();
   const d = useAssetsData();
   const refresh = useRefreshAssets();
+  const qc = useQueryClient();
   const { draft, set, reset } = useAssetDraft();
   const { masked } = useMask();
   const [name, setName] = useState<string | null>(null);
@@ -65,7 +70,8 @@ export function AssetAddRoute() {
   const startSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   useEffect(() => {
     if (step === 'kind' && !params.get('keep')) {
-      reset(startSide, d.me?.default_visibility);
+      // 2026-11-13 F-03e: 처음 적는 사람(asset_share_default null)은 미리 고른 값 없음
+      reset(startSide, d.me?.asset_share_default ?? null);
       // F-01 빈 상태 묶음 타일에서 오면 그 묶음을 고른 채로(2026-11-04)
       const grp = params.get('grp');
       if (grp) set({ grp, kind: null });
@@ -95,6 +101,12 @@ export function AssetAddRoute() {
     try {
       const owner = solo ? 'me' : (x.owner ?? 'me');
       const isFirst = d.items.length === 0 && d.sums.length === 0;
+      const vis = owner === 'me' && !solo ? (x.visibility ?? 'sum') : 'all';
+      // F-03e 처음 고른 값 = 내 새 항목 기본값(서버도 첫 저장 행으로 정하지만 명시)
+      if (owner === 'me' && !solo && !d.me?.asset_share_default && x.visibility) {
+        await setAssetShareDefault(x.visibility);
+        void qc.invalidateQueries({ queryKey: qk.me });
+      }
       await insertAsset({
         side: x.side,
         grp: x.grp,
@@ -104,7 +116,7 @@ export function AssetAddRoute() {
         estimated: x.estimated,
         owner: owner === 'joint' ? 'joint' : 'person',
         owner_user_id: owner === 'me' ? (d.me?.id ?? null) : null,
-        visibility: owner === 'me' && !solo ? x.visibility : 'all',
+        visibility: vis,
         maturity_date: x.maturity,
         monthly_payment: x.payment,
         paid_count: x.paidCount,
@@ -127,7 +139,7 @@ export function AssetAddRoute() {
         is_first: isFirst,
       });
       await refresh();
-      const counted = !(owner === 'me' && !solo && x.visibility === 'private');
+      const counted = vis !== 'private';
       carryToast(
         !counted
           ? copy.added
@@ -148,6 +160,10 @@ export function AssetAddRoute() {
     const g = draft.grp ? groups.find((x) => x.key === draft.grp) : undefined;
     return (
       <QuestionLayout steps={progress} title={copy.addTitle} onBack={back}>
+        {/* 2026-11-13 F-03q 입구: 맨 위 “큰 묶음만 빠르게 적기 ›” */}
+        <List>
+          <ListRow label={copy.quickEntry} onClick={() => nav('/assets/quick')} />
+        </List>
         <Tabs<AssetSide>
           variant="seg"
           label={copy.sideLabel}
@@ -278,27 +294,16 @@ export function AssetAddRoute() {
   }
 
   if (step === 'visibility') {
-    type V = 'all' | 'sum' | 'private';
     return (
-      <QuestionLayout
+      <F03eShare
         steps={progress}
-        title={copy.visTitle}
+        value={draft.visibility}
+        onChange={(visibility) => set({ visibility })}
         onBack={back}
-        primary={{ label: steps[i + 1] ? copy.next : copy.save, loading: saving }}
+        primaryLabel={steps[i + 1] ? copy.next : copy.save}
+        loading={saving}
         onSubmit={() => go({})}
-      >
-        <ChoiceCards<V>
-          label={copy.visTitle}
-          value={draft.visibility}
-          onChange={(visibility) => set({ visibility })}
-          autoAdvance={false}
-          options={[
-            { value: 'all', label: copy.visOptions.all },
-            { value: 'sum', label: copy.visOptions.sum },
-            { value: 'private', label: copy.visOptions.private },
-          ]}
-        />
-      </QuestionLayout>
+      />
     );
   }
 

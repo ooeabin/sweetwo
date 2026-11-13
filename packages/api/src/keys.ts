@@ -95,6 +95,8 @@ export const qk = {
   networthSummary: ['asset', 'summary'] as const,
   rankPair: ['asset', 'rank_pair'] as const,
   rankRequest: ['rank_consent_request'] as const,
+  /** 내가 순위를 본 적이 있나(rank_view, 첫 조회 무료 판단) */
+  rankViewed: ['rank_view'] as const,
 };
 
 /** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
@@ -119,4 +121,4 @@ export const moneyInKeys = [qk.moneyIns, ...savingKeys] as const;
 /** 분담이 바뀌면(propose/answer_split 뒤, Realtime shared_account): 분담, 월급 계획 쪽 */
 export const splitAccountKeys = [qk.sharedAccounts, ...splitKeys] as const;
 /** 순위·동의가 바뀌면(request/answer/turnOff, record_rank_view, Realtime rank_consent_request) */
-export const rankKeys = [qk.rankRequest, qk.rankPair, qk.me, qk.partner] as const;
+export const rankKeys = [qk.rankRequest, qk.rankPair, qk.rankViewed, qk.me, qk.partner] as const;

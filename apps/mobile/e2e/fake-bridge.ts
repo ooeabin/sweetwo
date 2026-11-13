@@ -17,6 +17,8 @@ export type FakeState = {
   cacheCleared: number;
   /** 글 공유(shareText)로 보낸 것 */
   shared: { text: string; url?: string }[];
+  /** 보상형 광고를 부른 횟수(ads.rewarded) */
+  ads: number;
 };
 export interface FakeOptions {
   signedIn?: boolean;
@@ -38,6 +40,11 @@ export interface FakeOptions {
   tokenError?: boolean;
   /** PIN 저장 실패(A-06) */
   setPinFails?: boolean;
+  /**
+   * 보상형 광고(ads.rewarded, F-08 ‘새로 확인하기’): 결과를 정함. 'throw' = 브리지 오류(앱은 failed로 셈).
+   * 없으면 브리지에 ads가 없음(광고 SDK 없는 앱, 광고 없이 바로)
+   */
+  ad?: 'rewarded' | 'closed' | 'failed' | 'throw';
 }
 
 export async function fakeBridge(page: Page, o: FakeOptions = {}) {
@@ -56,6 +63,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       invite: o.invite ?? null,
       cacheCleared: 0,
       shared: [],
+      ads: 0,
     };
     const cbs: {
       auth: Set<(e: unknown) => void>;
@@ -84,6 +92,17 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
           cbs.back.add(cb);
           return () => void cbs.back.delete(cb);
         },
+        ...(o.ad
+          ? {
+              ads: {
+                rewarded: async () => {
+                  f.ads++;
+                  if (o.ad === 'throw') throw new Error('ad');
+                  return o.ad;
+                },
+              },
+            }
+          : {}),
         shareText: async (t: { text: string; url?: string }) => {
           f.shared.push(t);
           return 'shared';

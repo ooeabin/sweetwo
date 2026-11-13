@@ -82,8 +82,8 @@ export function H01Home() {
   const bounced = useQuery({ queryKey: qk.mailBounced, queryFn: fetchMailBounced });
   // H-04 자산 관리 타일 제목 아래 “상위 38%”(2026-11-11, 홈 순위 줄 1a 대신): 순위를 본 적이 있을 때만
   const rank = useRank();
-  const rankPct =
-    rank && (rank.state.kind === 'seen' || rank.state.kind === 'stale') ? rank.state.pct : null;
+  // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2)
+  const rankPct = rank?.homeBadge ?? null;
   // P-WAIT 대기(시작한 사람이 월급 계획을 만들면 P-04로)와 합쳐서 모드 상대 체크를 바로 받음
   useSplitRealtime(space.data?.id);
   useCheckRealtime(space.data?.id);

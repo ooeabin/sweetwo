@@ -37,6 +37,7 @@ import { changeBand, track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { lastAssetsTab, LoadingFrame, MainFrame } from '../../frame';
+import { shareOptions } from './f-03e-share';
 import { copy } from '../copy';
 import { canEdit, ownerOf, useAssetsData, useRefreshAssets } from '../data';
 
@@ -488,11 +489,7 @@ export function F04Item() {
             });
           }}
           autoAdvance={false}
-          options={[
-            { value: 'all', label: copy.visOptions.all },
-            { value: 'sum', label: copy.visOptions.sum },
-            { value: 'private', label: copy.visOptions.private },
-          ]}
+          options={shareOptions()}
         />
       )}
       <section className="hg-stack" aria-label={copy.history}>

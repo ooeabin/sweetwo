@@ -54,6 +54,7 @@ function seed(db: MemDb, joined = true) {
     onboarding_step: 'O-67',
     onboarding_done_at: '2026-08-20T01:00:00Z',
     space_id: 'space-1',
+    asset_share_default: 'sum', // 자산 공개를 이미 고른 사람(F-03e 처음 선택은 assets-v22.spec.ts)
   });
   db.space = {
     id: 'space-1',
@@ -178,7 +179,7 @@ function seed(db: MemDb, joined = true) {
   });
 }
 
-test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
+test('요약: 순자산(평가금액 기준, 원금으로 보기), 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -194,15 +195,16 @@ test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재�
     .first()
     .click();
   await expect(page).toHaveURL(/\/assets$/);
-  // 자산(원금 기준) 3 + 8 + 2 + 파트너 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
+  // 2026-11-13 평가금액 기준: 3 + 10 + 2 + 파트너 총액만 440 = 1,940만, 부채 100만 → 1,840만(지난달 평가 1,600만)
   const nw = page.getByRole('region', { name: '순자산', exact: true });
+  await expect(nw).toContainText('1,840만 원');
+  await expect(nw).toContainText('지난달보다 240만 원 늘었어요');
+  // 예전 ‘예상 순자산’ 줄은 한 숫자 + 전환으로
+  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toHaveCount(0);
+  // 원금으로 보기: 3 + 8 + 2 + 400 − 100 = 1,600만(지난달 원금 1,420만)
+  await page.getByRole('switch', { name: /원금으로 보기/ }).click();
   await expect(nw).toContainText('1,600만 원');
   await expect(nw).toContainText('지난달보다 180만 원 늘었어요');
-  // 예상 순자산과 안 판 수익은 목록 한 줄(2026-11-03)
-  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText('1,840만 원');
-  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText(
-    '안 판 수익 +240만 원 포함',
-  );
   await expect(page.getByRole('button', { name: /^자산\s*1,940만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^부채\s*100만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /이번 달 계획/ })).toHaveCount(0);
@@ -263,7 +265,7 @@ test('요약: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 
   );
 
   await page.goto('/assets');
-  const bars = page.getByRole('img', { name: '달마다 순자산, 2026년 10월 1,600만 원' });
+  const bars = page.getByRole('img', { name: '달마다 순자산, 2026년 10월 1,840만 원' });
   await expect(bars).toBeVisible();
   await expect(bars.locator('.hg-mbars__col small')).toHaveText([
     '5월',
@@ -273,7 +275,7 @@ test('요약: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 
     '9월',
     '10월',
   ]);
-  await expect(bars.locator('.hg-mbars__col.is-now')).toContainText('1,600만');
+  await expect(bars.locator('.hg-mbars__col.is-now')).toContainText('1,840만');
   await axe(page);
 });
 
@@ -345,7 +347,7 @@ test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범�
     'true',
   );
   const invest = page.getByRole('region', { name: '투자' });
-  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('금액만');
+  await expect(invest.getByRole('button', { name: /내 주식/ })).toContainText('총액만');
   await expect(invest).toContainText('예빈님 자산 2개');
   await expect(invest).toContainText('440만 원');
   await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('공동');
@@ -426,8 +428,9 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   // 합류 뒤에는 파트너 명의 새로 만들기 없음
   await expect(page.getByRole('radio', { name: /예빈/ })).toHaveCount(0);
   await page.getByRole('radio', { name: /^나/ }).click();
-  await heading(page, '파트너에게 공개할까요?');
-  await expect(page.getByRole('radio', { name: /금액만 보여 주기/ })).toHaveAttribute(
+  // 이미 고른 내 기본값(asset_share_default)이 골라진 채로(2026-11-13)
+  await heading(page, '파트너에게 어떻게 보여 줄까요?');
+  await expect(page.getByRole('radio', { name: /총액만 보여 주기/ })).toHaveAttribute(
     'aria-checked',
     'true',
   );
@@ -620,68 +623,6 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
 });
 
-test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈은 자산 관리 타일 “상위 n%”', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  // 연령대 비교: 찬우 1993년생 + 예빈 1995년생 → 평균 32세(2026년) → 30대
-  db.me.birth_year = 1993;
-  if (db.partner) Object.assign(db.partner, { birth_year: 1995 });
-  await page.goto('/assets');
-  const row = page.getByRole('button', { name: /우리 자산은 상위 몇 %일까요\?/ });
-  await expect(row).toBeVisible();
-  await expect(row).toContainText('광고'); // 누르기 전 광고 알림(AdMob 정책)
-  await axe(page);
-  // 브라우저는 광고 브리지가 없어 바로 순위
-  await row.click();
-  await expect(page).toHaveURL(/\/assets\/rank$/);
-  await expect(page.getByText(/상위 \d+%예요/).first()).toBeVisible();
-  await expect(page.getByText('우리 자산은 전체 가구 중')).toBeVisible();
-  await expect(page.getByText('전체 가구 중앙값')).toBeVisible();
-  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
-  await expect(page.getByText('30대 가구 중앙값')).toBeVisible();
-  await expect(
-    page.getByText(/30대 가구 (중간보다 .+ 많아요|가운데 중간보다 아래예요)/),
-  ).toBeVisible();
-  await expect(page.getByText(/^상위 \d+%까지$/)).toBeVisible();
-  await expect(page.getByText(/남았어요$/)).toBeVisible();
-  await expect(page.getByText(/\d+월(보다 .+(올랐어요|내려갔어요)|과 같아요)/)).toBeVisible(); // 지난달 기록이 있음
-  await expect(page.getByText('부채 비율')).toBeVisible();
-  await expect(page.getByText('30대 가구 평균 30%')).toBeVisible();
-  await expect(page.getByText('자산 중 금융자산')).toBeVisible();
-  await expect(page.getByText('가구주 나이별 공공 통계 기준')).toBeVisible();
-  await axe(page);
-  await expect.poll(() => db.me.rank_month).toBe('2026-10-01');
-  const pct = Number(db.me.rank_pct);
-  expect(pct).toBeGreaterThanOrEqual(1);
-  expect(pct).toBeLessThanOrEqual(99);
-
-  await page.goto('/assets');
-  const seen = page.getByRole('button', { name: new RegExp(`우리 자산 상위 ${pct}%예요`) });
-  await expect(seen).toBeVisible();
-  await expect(seen).not.toContainText('광고');
-  await expect(seen).toContainText('10월 기준, 자세히 보기');
-
-  // 홈(2026-11-11): 순위 줄 대신 자산 관리 타일 오른쪽 위 “상위 n%”
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: /우리 자산 상위/ })).toHaveCount(0);
-  const tile = page.getByRole('button', {
-    name: new RegExp(`^자산 관리, 순자산 .+, 상위 ${pct}%$`),
-  });
-  await expect(tile.locator('.hg-hubtile__badge')).toHaveText(`상위 ${pct}%`);
-  await tile.click();
-  await expect(page).toHaveURL(/\/assets$/);
-
-  // 순자산이 바뀌면 지난번 값 + 새로 확인하기(광고)
-  db.me.rank_net = 1;
-  await page.goto('/assets');
-  const stale = page.getByRole('button', { name: new RegExp(`지난번엔 상위 ${pct}%였어요`) });
-  await expect(stale).toContainText('새로 확인하기');
-  await expect(stale).toContainText('광고');
-});
-
 test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
   page,
 }) => {
@@ -704,17 +645,15 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   await expect(page.getByRole('button', { name: '적금', exact: true })).toBeVisible();
 });
 
-test('자산 순위(F-08): 출생연도가 없으면 ‘출생연도 알려 주기’ → S-11i(휠을 움직여야 저장) → F-08 연령대 비교(2026-11-10 온보딩 O-13 뺌)', async ({
+test('자산 순위(F-08 (나)): 출생연도가 없으면 ‘출생연도 알려 주기’ → S-11i(휠을 움직여야 저장) → 또래 가구 중간값(2026-11-13 v2.2)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   db.me.birth_year = null;
-  if (db.partner) Object.assign(db.partner, { birth_year: null });
   await page.goto('/assets/rank');
-  await expect(page.getByText(/상위 \d+%예요/).first()).toBeVisible();
-  await expect(page.getByRole('heading', { name: /가구와 비교/ })).toHaveCount(0);
+  await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   const ask = page.getByRole('button', { name: /출생연도 알려 주기/ });
   await expect(ask).toContainText('또래와 비교해 드려요');
   await axe(page);
@@ -727,7 +666,7 @@ test('자산 순위(F-08): 출생연도가 없으면 ‘출생연도 알려 주�
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   expect(db.me.birth_year).toBe(1993);
-  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
+  await expect(page.getByText('또래 가구 중간값은 1억 5,585만 원이에요')).toBeVisible();
   await expect(page.getByRole('button', { name: /출생연도 알려 주기/ })).toHaveCount(0);
 });
 

@@ -190,6 +190,13 @@ export async function recordRankView(paidByAd = false): Promise<RankPairResponse
   return RankPairSchema.parse(data);
 }
 
+/** 내가 순위를 본 적이 있나(rank_view 내 행, F-08 첫 조회 무료). 있으면 다음부터 광고 */
+export async function fetchRankViewed(): Promise<boolean> {
+  const { data, error } = await supabase().from('rank_view').select('id').limit(1);
+  if (error) throw new AuthCallError(error.message.includes('fetch') ? 'network' : 'unknown');
+  return (data ?? []).length > 0;
+}
+
 /** 순위 같이 보기 요청(request_rank_consent, 내 동의 켬 + 상대에게 요청). 연결 전이면 'not_connected'. 요청 id */
 export async function requestRankConsent(): Promise<string> {
   const { data, error } = await supabase().rpc('request_rank_consent');

@@ -12,7 +12,8 @@ export interface AssetDraft {
   /** ‘잘 모르겠어요’ 구간 중간값으로 정함(F-03 6번) */
   estimated: boolean;
   owner: 'me' | 'partner' | 'joint' | null;
-  visibility: 'all' | 'sum' | 'private';
+  /** F-03e 고른 값. 처음(asset_share_default null)이면 null = 미리 고른 값 없음(2026-11-13) */
+  visibility: 'all' | 'sum' | 'private' | null;
   /** F-03f~i 유형별 질문(나중에 해도 됨) */
   maturity: string | null;
   payment: number | null;
@@ -27,7 +28,7 @@ const empty: AssetDraft = {
   amount: null,
   estimated: false,
   owner: null,
-  visibility: 'sum', // 기본 = 금액만 보여 주기
+  visibility: null, // 2026-11-13 미리 고른 값 없음(예전 기본 ‘금액만 보여 주기’ 없앰)
   maturity: null,
   payment: null,
   paidCount: null,
@@ -37,12 +38,12 @@ const empty: AssetDraft = {
 export const useAssetDraft = create<{
   draft: AssetDraft;
   set: (p: Partial<AssetDraft>) => void;
-  /** visibility = 내 새 항목 기본값(S-13, 없으면 합계만) */
+  /** visibility = 내 새 항목 기본값(asset_share_default, S-13 ③). 아직 안 골랐으면 null */
   reset: (side: AssetSide, visibility?: AssetDraft['visibility']) => void;
 }>((set, get) => ({
   draft: empty,
   set: (p) => set({ draft: { ...get().draft, ...p } }),
-  reset: (side, visibility = 'sum') => set({ draft: { ...empty, side, visibility } }),
+  reset: (side, visibility = null) => set({ draft: { ...empty, side, visibility } }),
 }));
 
 const SAVINGS = ['saving', 'policy_saving'];

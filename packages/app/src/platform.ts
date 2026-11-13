@@ -109,8 +109,9 @@ export interface AppBridge {
    */
   shareText?: (t: { text: string; url?: string }) => Promise<'shared' | 'cancelled'>;
   /**
-   * 모바일: 보상형 동영상 광고(AdMob, 자산 순위 F-08 앞, ADR 0006). 끝까지 보면 'rewarded', 닫으면 'closed',
-   * 못 불러오면 'failed'. 브라우저는 없음(광고 없이 바로)
+   * 모바일: 보상형 동영상 광고(AdMob, F-08 ‘새로 확인하기’만, 첫 결과는 광고 없음, ADR 0006·0009 결정 11).
+   * 비맞춤형만(npa=1, ATT 묻지 않음), 금융 카테고리는 AdMob 콘솔에서 차단. 끝까지 보면 'rewarded', 닫으면 'closed',
+   * 못 불러오면 'failed'(앱은 광고 없이 바로 결과). 브라우저와 플러그인이 아직 없는 앱은 ads 없음(광고 없이 바로)
    */
   ads?: { rewarded: () => Promise<'rewarded' | 'closed' | 'failed'> };
   /**

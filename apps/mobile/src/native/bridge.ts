@@ -191,6 +191,9 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         return 'cancelled';
       }
     },
+    // TODO(v2.2 PR 13 native): 보상형 광고 ads.rewarded()(AdMob 플러그인, 34 출시 체크). 요청은 비맞춤형만(npa=1, iOS ATT
+    // 묻지 않음), 금융 카테고리 차단은 AdMob 콘솔에서. 앱 ID·광고 단위 ID는 공개 값이라 앱 설정(capacitor.config, Info.plist,
+    // AndroidManifest)에 넣음. 그때까지 ads가 없어 앱은 광고 없이 바로 결과(packages/app frame rank.tsx 'none')
   };
   window.sweetwo = bridge;
   return platform;
