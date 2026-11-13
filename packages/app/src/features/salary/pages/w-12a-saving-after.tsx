@@ -12,7 +12,7 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import { track } from '../../../shared/analytics';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { salaryPaths, savingPaths } from '../paths';
+import { salaryPaths, savingPaths, togetherPaths } from '../paths';
 import { trackSharedGoal, useSavingItems, type SavingItem } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
 
@@ -85,6 +85,7 @@ function useAfter(item: SavingItem) {
 /** W-10 5번: 달성했는데 아직 고르지 않았으면 같은 질문 카드 */
 export function AfterChoice({ item }: { item: SavingItem }) {
   const a = useAfter(item);
+  const nav = useNavigate();
   return (
     <section className="hg-goalbox" aria-label={copy.afterQ}>
       <div className="hg-goalbox__head">
@@ -93,7 +94,12 @@ export function AfterChoice({ item }: { item: SavingItem }) {
       <ChoiceCards<After>
         label={copy.afterQ}
         value={null}
-        onChange={(v) => void a.choose(v)}
+        onChange={(v) =>
+          void a.choose(v).then((ok) => {
+            // 고른 뒤 다음 저금 권유(W-12b, 2026-11-13 G4)
+            if (ok) nav(`${togetherPaths.next(item.goal.id)}?why=achieved`);
+          })
+        }
         autoAdvance={false}
         autoFocus={false}
         shortcuts={false}
@@ -110,7 +116,10 @@ export function W12aSavingAfter() {
   const d = useSavingItems();
   const i = d.ready ? d.byId(id) : undefined;
   // 체크리스트(W-02·W-05)에서 닿았으면 고른 뒤·닫은 뒤 W-02로(2026-11-12 S6-09, W-02 끝 화면 대신), 아니면 저금 상세
-  const back = params.get('from') === 'checklist' ? salaryPaths.checklist : savingPaths.item(id);
+  const fromList = params.get('from') === 'checklist';
+  const back = fromList ? salaryPaths.checklist : savingPaths.item(id);
+  // 고른 뒤 다음 저금 권유(W-12b, 2026-11-13 G4). 닫으면(뒤로) 예전처럼 back
+  const next = `${togetherPaths.next(id)}?why=achieved${fromList ? '&back=checklist' : ''}`;
   // 고르는 중이면 다시 읽은 상태(이제 달성 아님)로 상세에 먼저 가지 않게(한 번에 갈 곳으로, Toast가 그 화면에 남게)
   const leaving = useRef(false);
   // 못 불러오면 오류 + 다시 시도(2026-11-12 S7-04)
@@ -125,7 +134,8 @@ export function W12aSavingAfter() {
     <AfterPage
       item={i}
       onStart={(on) => (leaving.current = on)}
-      onDone={() => nav(back, { replace: true })}
+      onClose={() => nav(back, { replace: true })}
+      onDone={() => nav(next, { replace: true })}
     />
   );
 }
@@ -134,15 +144,17 @@ function AfterPage({
   item,
   onStart,
   onDone,
+  onClose,
 }: {
   item: SavingItem;
   onStart: (on: boolean) => void;
   onDone: () => void;
+  onClose: () => void;
 }) {
   const a = useAfter(item);
   const [v, setV] = useState<After | null>(null);
   return (
-    <QuestionLayout title={copy.afterQ} onBack={onDone}>
+    <QuestionLayout title={copy.afterQ} onBack={onClose}>
       <ChoiceCards<After>
         label={copy.afterQ}
         value={v}

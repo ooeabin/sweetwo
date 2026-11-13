@@ -263,6 +263,18 @@ export async function markNotePaid(id: string, subtract: boolean): Promise<strin
   return typeof data === 'string' ? data : null;
 }
 
+/** 바로잡기 되돌리기(Toast, undo_saving_adjust): 내가 넣은 바로잡기 한 줄을 지우고 상대 한 줄도 지움 */
+export async function undoSavingAdjust(moveId: string) {
+  const { error } = await supabase().rpc('undo_saving_adjust', { p_move: moveId });
+  failAdjust(error);
+}
+
+/** 냈어요 되돌리기(Toast, unpay_saving_note): 뺀 바로잡기도 되돌리고 메모는 안 냄으로 */
+export async function unpaySavingNote(id: string) {
+  const { error } = await supabase().rpc('unpay_saving_note', { p_note: id });
+  failAdjust(error);
+}
+
 /** 쓸 곳 메모 신호(Realtime saving_note, 서버 발행이 있어야 옴) */
 export function subscribeSavingNotes(spaceId: string, on: () => void) {
   const ch = supabase()

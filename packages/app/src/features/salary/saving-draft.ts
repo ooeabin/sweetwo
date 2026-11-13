@@ -11,6 +11,9 @@ export type SavingDraft = {
   /** 이미 모은 금액 칸을 켰는지, 그 금액 */
   hasStart: boolean;
   start: number | null;
+  /** W-11e “은행에서 자동으로 나가요?”(2026-11-13): null = 아직 안 고름. autoDay null = 월급날, 31 = 말일 */
+  auto: boolean | null;
+  autoDay: number | null;
 };
 export const EMPTY_DRAFT: SavingDraft = {
   name: '',
@@ -19,6 +22,8 @@ export const EMPTY_DRAFT: SavingDraft = {
   deadline: null,
   hasStart: false,
   start: null,
+  auto: null,
+  autoDay: null,
 };
 export const readDraft = (): SavingDraft => {
   try {

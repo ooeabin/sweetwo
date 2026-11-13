@@ -103,8 +103,12 @@ test('달성 되돌린 뒤 같은 화면에서 다시 체크하면 다시 W-12(�
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '계속 모을게요' }).click();
-  await expect(page).toHaveURL(/\/salary$/);
+  // 2026-11-13: 고른 뒤 W-12b(다음 저금) → ‘나중에 할게요’면 W-02
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h\/next\?why=achieved&back=checklist$/);
   await expect(page.getByText('목표 금액을 지우고 계속 모아요')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '다음엔 뭘 같이 모을까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/salary$/);
   // 이제 달성이 아니면 W-12 주소는 저금 상세로
   await page.goto('/salary/items/goal-h/achieved');
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);

@@ -79,6 +79,18 @@ import {
   AchieveWatch,
   DoneRedirect,
   SalaryTab,
+  BundleEntry,
+  W10bAdjust,
+  W10cReconcile,
+  W12BundleAchieved,
+  W12bNextSaving,
+  W14Notes,
+  W14aNoteEdit,
+  W15Bundle,
+  W15aBundleEdit,
+  W15aBundleField,
+  W20aDistribute,
+  W20MoneyIn,
   SplitRedirect,
   W01dAutoLines,
   W05PrePayday,
@@ -149,6 +161,22 @@ export const routes: RouteObject[] = [
           ['/salary/items/:id/edit/:field', <W10aSavingEdit key="w10a" />], // W-10a 고치기
           ['/salary/items/:id/achieved', <W12SavingAchieved key="w12" />], // W-12 달성 축하
           ['/salary/items/:id/after', <W12aSavingAfter key="w12a" />], // W-12a 달성 뒤
+          // v2.2 같이 모으기와 돈 기록(20 ‘월급 탭 v2.2’, PR 10)
+          ['/salary/items/:id/adjust/:step?', <W10bAdjust key="w10b" />], // W-10b 모은 금액 바로잡기
+          ['/salary/reconcile', <W10cReconcile key="w10c" />], // W-10c 실제 잔액 맞추기
+          ['/salary/items/:id/next', <W12bNextSaving key="w12b" />], // W-12b 다음엔 뭘 같이 모을까요
+          ['/salary/items/:id/notes', <W14Notes key="w14" kind="goal" />], // W-14 쓸 곳 메모(저금)
+          ['/salary/items/:id/notes/:note', <W14aNoteEdit key="w14a" kind="goal" />], // W-14a
+          ['/salary/bundles/new', <W15Bundle key="w15" />], // W-15 같이 모으기로 묶기
+          ['/salary/bundles/:id', <BundleEntry key="w15e" />], // 묶음 알림 링크
+          ['/salary/bundles/:id/join', <W15Bundle key="w15j" join />], // W-15 들어가기(2~4단계)
+          ['/salary/bundles/:id/edit', <W15aBundleEdit key="w15a" />], // W-15a 묶음 고치기
+          ['/salary/bundles/:id/edit/:field', <W15aBundleField key="w15af" />], // W-15a 이름·목표 금액·기한
+          ['/salary/bundles/:id/notes', <W14Notes key="w14b" kind="bundle" />], // W-14 쓸 곳 메모(묶음)
+          ['/salary/bundles/:id/notes/:note', <W14aNoteEdit key="w14ab" kind="bundle" />], // W-14a
+          ['/salary/bundles/:id/achieved', <W12BundleAchieved key="w12m" />], // W-12 묶음 달성
+          ['/salary/money-in', <W20MoneyIn key="w20" />], // W-20 돈 들어왔어요
+          ['/salary/money-in/:id', <W20aDistribute key="w20a" />], // W-20a 저금에 나눠 넣기
         ] as const
       ).map(([path, el]) => ({
         path,

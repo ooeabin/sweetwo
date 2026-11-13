@@ -3,6 +3,7 @@ import {
   fetchCareDays,
   fetchCareRecords,
   fetchGoals,
+  fetchUpcomingNotes,
   fetchHolidays,
   fetchMe,
   fetchPartner,
@@ -45,6 +46,10 @@ export function useCareRealtime(spaceId: string | null | undefined) {
   }, [spaceId, qc]);
 }
 
+/** 쓸 곳 메모 날짜를 읽는 범위(앞뒤로 넉넉히, KST 날짜) */
+const NOTE_FROM = '2000-01-01';
+const NOTE_TO = '2099-12-31';
+
 // 캘린더 재료(24, 재기획): 경조사와 기록, 공휴일, 금융 일정(월급날, 월급 전 확인 띠, 저금 항목 기한, 자산·대출 만기).
 // 금융 일정 계산은 core rules/calendar `moneyDates`.
 export function useCalendarData() {
@@ -53,6 +58,11 @@ export function useCalendarData() {
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  // 안 낸 쓸 곳 메모 날짜(W-14, 24 v2.2). 날짜가 있는 것 모두(달력은 앞뒤 달로 넘겨 봄). 못 읽어도 캘린더는 그대로
+  const notes = useQuery({
+    queryKey: qk.upcomingNotes(NOTE_FROM, NOTE_TO),
+    queryFn: () => fetchUpcomingNotes(NOTE_FROM, NOTE_TO),
+  });
   const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
   const records = useQuery({ queryKey: qk.careRecords, queryFn: fetchCareRecords });
   const holidays = useQuery({
@@ -113,6 +123,9 @@ export function useCalendarData() {
         .map((a) => ({ id: a.id, name: a.name, date: a.maturity_date ?? '' })),
       goalDeadlines: openGoals.map((g) => ({ id: g.id, name: g.name, date: g.deadline ?? '' })),
       yearlyGoals: [],
+      notes: (notes.data ?? [])
+        .filter((n) => n.due_on)
+        .map((n) => ({ name: n.name, date: n.due_on ?? '', goal: n.goal_id, bundle: n.bundle_id })),
     });
   const today = todayKst();
   const careList = cares.data ?? [];
@@ -168,7 +181,9 @@ export function moneyLine(d: MoneyDate) {
           ? copy.money.deadline(d.name)
           : d.kind === 'goal'
             ? copy.money.goal(d.name)
-            : copy.money.maturity(d.name);
+            : d.kind === 'note'
+              ? copy.money.note(d.name)
+              : copy.money.maturity(d.name);
   const to =
     d.kind === 'payday'
       ? d.who
@@ -178,7 +193,11 @@ export function moneyLine(d: MoneyDate) {
         ? '/salary/review'
         : d.kind === 'maturity'
           ? `/assets/${d.ref ?? ''}`
-          : `/salary/items/${d.ref ?? ''}`;
+          : d.kind === 'note'
+            ? d.bundle
+              ? `/salary/bundles/${d.bundle}/notes`
+              : `/salary/items/${d.ref ?? ''}/notes`
+            : `/salary/items/${d.ref ?? ''}`;
   return { label, go: copy.go[d.kind], to };
 }
 

@@ -4670,7 +4670,9 @@ export type Database = {
         }[]
       }
       undo_goal_move: { Args: { p_id: string }; Returns: undefined }
+      undo_saving_adjust: { Args: { p_move: string }; Returns: undefined }
       unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
+      unpay_saving_note: { Args: { p_note: string }; Returns: undefined }
       unregister_push_device: { Args: { p_token: string }; Returns: undefined }
       version_below: { Args: { p_min: string; p_version: string }; Returns: boolean }
       weekly_mail_body: {

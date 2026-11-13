@@ -15,6 +15,7 @@ import {
   formatYm,
   leftover,
   readWon,
+  savingEta,
   savingLate,
   savingNeed,
   thisMonth,
@@ -279,6 +280,7 @@ export function W10aSavingEdit() {
   const plan = { target: g.target_amount, saved: item.saved, deadline: curYm };
   const need = f === 'deadline' && curYm ? savingNeed(plan) : null;
   const late = f === 'deadline' && curYm ? savingLate(plan, item.monthly) : null;
+  const eta = late !== null ? savingEta(plan, item.monthly) : null;
   const help = retarget ? (
     copy.retargetHelp(money(item.saved, masked))
   ) : f === 'monthly' ? (
@@ -290,10 +292,10 @@ export function W10aSavingEdit() {
   ) : need !== null ? (
     <>
       {copy.needPerMonth(money(need, masked))}
-      {late !== null && (
+      {late !== null && eta && (
         <>
           <br />
-          {copy.lateBy(late)}
+          {copy.etaAt(formatYm(eta))}
         </>
       )}
     </>

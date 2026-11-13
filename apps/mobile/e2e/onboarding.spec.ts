@@ -156,6 +156,8 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await next(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
   await next(page);
+  // W-11e 은행에서 자동으로 나가요?(2026-11-13)
+  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
   await next(page);
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();

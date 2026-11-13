@@ -25,6 +25,7 @@ export const copy = {
     deadline: (name: string) => `${name} 기한`,
     goal: (name: string) => `${name} 쓰는 달`,
     maturity: (name: string) => `${name} 만기`,
+    note: (name: string) => name, // 쓸 곳 메모 날짜(W-14, 24 v2.2) [확인 필요]
   },
   go: {
     payday: '체크리스트', // [확인 필요]
@@ -32,6 +33,7 @@ export const copy = {
     deadline: '저금', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금',
     maturity: '자산',
+    note: '쓸 곳 메모', // [확인 필요] 2026-11-13
   },
   // 2026-11-04 칸 안 짧은 이름, 월급 전 확인 띠 이름, 오늘로 [확인 필요]
   short: {
@@ -40,6 +42,7 @@ export const copy = {
     deadline: '기한',
     goal: '쓰는 달',
     maturity: '만기',
+    note: '쓸 곳', // [확인 필요] 2026-11-13 칸 안 짧은 이름
     band: '월급 전 확인',
   },
   today: '오늘',
@@ -50,6 +53,7 @@ export const copy = {
     deadline: '저금 보기', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금 보기',
     maturity: '자산 보기',
+    note: '쓸 곳 메모 보기', // [확인 필요] 2026-11-13
   },
   monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',
