@@ -120,7 +120,7 @@ select is((select target from public.notification where kind = 'mail_bounced'), 
 -- S10-08 D3: 관리 방식 변경 본문, 합류 중 링크
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 reset role;
 select is((select title || ' / ' || body || ' | ' || target from public.notification where kind = 'salary_mode'
   and user_id = '22222222-2222-2222-2222-222222222222'),

@@ -45,7 +45,7 @@ select lives_ok($$ select public.request_unlink('연결 해제') $$, '해제 요
 select is((select couple_state::text from public.couple_space), 'unlink_pending', '해제 대기');
 select throws_ok($$ select public.save_split('[{"kind":"fixed","amount":900000}]', auth.uid()) $$, '42501', 'unlink_pending',
   '대기 중엔 월급 계획 못 고침');
-select throws_ok($$ select public.set_salary_mode('joint') $$, '42501', 'unlink_pending', '대기 중엔 관리 방식 못 바꿈');
+select throws_ok($$ select public.request_mode_change(true, null, 'together') $$, '42501', 'unlink_pending', '대기 중엔 관리 방식 못 바꿈');
 -- 취소하면 연결로, 다시 요청
 select lives_ok($$ select public.cancel_unlink() $$, '요청 취소');
 select public.request_unlink('연결 해제');

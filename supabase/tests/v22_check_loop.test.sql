@@ -154,7 +154,7 @@ reset role;
 -- ④ 합쳐서: 누구나 한 번 확인, 남의 용돈 줄은 건너뜀
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select public.split_lines_configure((select jsonb_agg(jsonb_build_object('id', l.id, 'in_checklist', true, 'auto_pay', false))
   from public.split_line l join public.salary_split s on s.id = l.split_id where s.owner_user_id is null));
 reset role;
