@@ -3,6 +3,20 @@ import { JoinContextSchema } from './join';
 
 // join_context RPC 응답(18 합류 흐름, 2026-11-11 D1)
 describe('JoinContextSchema', () => {
+  it('공간 없는 합류자의 member null은 false로(B1)', () => {
+    const v = JoinContextSchema.parse({
+      space_id: 's1',
+      member: null,
+      reserved_until: null,
+      starter_id: 'u1',
+      starter_nickname: '찬우',
+      salary_mode: 'separate',
+      has_plan: false,
+      prefill: [],
+      joint: null,
+    });
+    expect(v?.member).toBe(false);
+  });
   it('합류 중이 아니면 null', () => {
     expect(JoinContextSchema.parse(null)).toBeNull();
   });

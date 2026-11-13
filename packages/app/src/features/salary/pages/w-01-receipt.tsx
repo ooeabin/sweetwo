@@ -799,7 +799,8 @@ export function W01Receipt() {
                   key={l.id}
                   label={
                     l.kind === 'saving'
-                      ? (l.name ?? goalName(l.goal_id))
+                      ? (l.name ??
+                        (pv.share === 'done_only' ? copy.privateSaving : goalName(l.goal_id)))
                       : l.kind === 'shared_account'
                         ? (l.name ?? copy.sharedAccountName)
                         : (l.name ?? copy.lineNames[l.kind as keyof typeof copy.lineNames] ?? '')

@@ -26,7 +26,7 @@ export function partnerLineVisible(kind: SplitKind, c: ShareContext): boolean {
   return kind === 'saving';
 }
 
-/** 줄 금액이 보이나(done_only는 이름 + 확인 여부만) */
+/** 줄 금액이 보이나(done_only는 확인 여부만) */
 export const partnerAmountVisible = (c: ShareContext) =>
   !c.unlinkPending && (c.joint || c.share !== 'done_only');
 
@@ -88,7 +88,12 @@ export function partnerPlanView(o: {
     payday: partnerIncomeVisible(c) ? o.payday : null,
     lines: o.lines
       .filter((l) => partnerLineVisible(l.kind, c))
-      .map((l) => ({ ...l, amount: showAmount ? l.amount : null })),
+      // done_only는 저금 이름도 주지 않음(2026-11-13 P1 = A, 서버 20261208090000 계약 1)
+      .map((l) => ({
+        ...l,
+        name: showAmount ? l.name : null,
+        amount: showAmount ? l.amount : null,
+      })),
   };
 }
 

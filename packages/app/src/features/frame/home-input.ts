@@ -3,7 +3,7 @@ import {
   fetchCareDays,
   fetchChecklistsEnsured,
   fetchGoals,
-  fetchMyUnlink,
+  fetchReconnectRequests,
   fetchUnlink,
   qk,
 } from '@sweetwo/api';
@@ -44,11 +44,16 @@ export function useHomeInput() {
     enabled: state === 'unlink_pending',
   });
   const solo = state === 'solo';
-  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
+  // 띠 2번 다시 연결(19, D10): 받은 열린 요청(reconnect_request). 옛 couple_unlink.reconnect_*는 읽지 않음(2단계로 지움)
+  const reconnects = useQuery({
+    queryKey: qk.reconnectRequests,
+    queryFn: fetchReconnectRequests,
+    enabled: solo,
+  });
   useEffect(dropOldKeys, []);
 
   // 켜진 쿼리가 아직 처음 받는 중이면 기다림(꺼진 쿼리·실패한 쿼리는 기다리지 않음)
-  const waiting = [lists, goals, cares, assets, unlink, myUnlink].some((q) => q.isLoading);
+  const waiting = [lists, goals, cares, assets, unlink, reconnects].some((q) => q.isLoading);
   const input: HomeInput | null =
     me.data && space.data && goals.data && !waiting
       ? {
@@ -77,10 +82,10 @@ export function useHomeInput() {
           assets: assets.data ?? [],
           unlinkRequestedBy:
             state === 'unlink_pending' ? (unlink.data?.requested_by ?? null) : null,
-          reconnectFrom:
-            solo && myUnlink.data?.reconnect_by && !myUnlink.data.reconnect_answer
-              ? myUnlink.data.reconnect_by
-              : null,
+          reconnectFrom: solo
+            ? ((reconnects.data ?? []).find((r) => r.to_user === me.data?.id && r.status === 'open')
+                ?.from_user ?? null)
+            : null,
           // 첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b): 온보딩을 마친 날(KST)
           onboardedOn: me.data.onboarding_done_at
             ? todayKst(new Date(me.data.onboarding_done_at))

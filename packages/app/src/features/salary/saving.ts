@@ -18,6 +18,7 @@ import {
   useGoals,
   useMe,
   usePartner,
+  usePartnerPlanView,
   useSpace,
   useSplits,
 } from './data';
@@ -59,6 +60,13 @@ export interface SavingItem {
   canEdit: boolean;
   /** 이번 사이클 이 항목 줄 */
   thisMonth: PayCheckLine | undefined;
+  /**
+   * 상대가 공개 ‘했어요만’인 상대 저금(08 6장, 2026-11-13 P1 = A): 서버가 이름(“개인 저금”)·금액 없이 줌.
+   * 화면은 금액 대신 이번 달 확인 여부만(doneThisMonth), 눌러서 열지 않음
+   */
+  private: boolean;
+  /** private일 때 이번 달 확인 여부(partner_plan_view 줄 state) */
+  doneThisMonth: boolean;
 }
 
 /** 저금 항목 줄 순서(홈 H-02, W-01 접힌 목록): 내 것 → 파트너 것 → 우리 둘 것, 묶음 안은 만든 순서 */
@@ -72,6 +80,8 @@ export function useSavingItems() {
   const splits = useSplits();
   const lists = useChecklists();
   const saved = useGoalSaved();
+  const separate = space.data?.salary_mode === 'separate' && !!partner.data;
+  const pv = usePartnerPlanView(separate);
   const all = [me, space, goals, splits, lists, saved];
   const loading = all.some((q) => q.isLoading);
   /** 저금 항목을 다시 받는 중(방금 추가한 항목이 아직 목록에 없을 수 있음) */
@@ -90,6 +100,7 @@ export function useSavingItems() {
   const pending = space.data.couple_state === 'unlink_pending';
   const splitLines = (splits.data ?? []).flatMap((s) => s.split_line);
   const lines = (lists.data ?? []).flatMap((c) => c.pay_check_line);
+  const partnerDoneOnly = !joint && !!pv.data && !pv.data.hidden && pv.data.share === 'done_only';
 
   const item = (g: Goal): SavingItem => {
     const s = saved.data?.[g.id] ?? 0;
@@ -117,6 +128,11 @@ export function useSavingItems() {
       mayEdit: owner !== 'partner' || (joint && g.visibility === 'all'),
       canEdit: (owner !== 'partner' || (joint && g.visibility === 'all')) && !pending,
       thisMonth: lines.find((l) => l.kind === 'saving' && l.goal_id === g.id),
+      private: owner === 'partner' && partnerDoneOnly,
+      doneThisMonth:
+        owner === 'partner' &&
+        partnerDoneOnly &&
+        !!pv.data?.lines.some((l) => l.goal_id === g.id && l.state === 'checked'),
     };
   };
 

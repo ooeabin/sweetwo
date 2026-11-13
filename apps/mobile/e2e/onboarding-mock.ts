@@ -793,6 +793,31 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           mode === 'joint'
         ) {
           db.modeRequests.push({ ...b, to_mode: mode, status: 'open' });
+          // 20261208090000 계약 6: ‘보내요’(p04_send)를 요청한 사람의 각자 월급 계획에 서버가 ‘보내기’ 자동 줄
+          const mine = db.splits.find((x) => x.owner_user_id === db.me.id);
+          if (
+            b.p_phrase === 'p04_send' &&
+            mine &&
+            !mine.split_line.some((l) => l.kind === 'send')
+          ) {
+            const a = mine.split_line
+              .filter((l) => l.kind === 'allowance')
+              .reduce((n, l) => n + Number(l.amount), 0);
+            mine.split_line.push({
+              id: `${mine.id}-send`,
+              split_id: mine.id,
+              kind: 'send',
+              goal_id: null,
+              user_id: db.me.id,
+              name: null,
+              amount:
+                Math.floor(Math.max(0, Number(db.me.monthly_income ?? 0) - a) / 10_000) * 10_000,
+              sort: mine.split_line.length,
+              in_checklist: true,
+              auto_pay: true,
+              auto_day: db.me.payday_last ? 31 : (db.me.payday ?? null),
+            });
+          }
           return json(route, 'requested');
         }
         if (db.space) {
@@ -1921,7 +1946,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'start_after_unlink') {
-        Object.assign(db.me, { onboarding_step: 'O-11', onboarding_done_at: null });
+        // 20261208090000 계약 7: 다시 시작은 O-30부터
+        Object.assign(db.me, { onboarding_step: 'O-30', onboarding_done_at: null });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'counter_unlink') {
@@ -2855,6 +2881,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         route,
         db.unlinks.filter((u) => u.status === 'pending'),
       );
+    // 다시 연결 요청(홈 띠 2번, 혼자 쓰기). 요청을 넣는 테스트는 v22-settings-mock이 먼저 받음
+    if (path === '/rest/v1/reconnect_request' && method === 'GET') return json(route, []);
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
     // 알림: 최신순(같은 시각이면 id 내림차순), (만든 때, id) 커서(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {

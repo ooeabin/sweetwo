@@ -127,7 +127,7 @@ export const BundleViewSchema = z.object({
   target: nullableWon,
   mine: nullableWon,
   partner: nullableWon,
-  goals: z.array(z.object({ id: z.string(), mine: z.boolean(), name: z.string() })),
+  goals: z.array(z.object({ id: z.string(), mine: z.boolean(), name: nullableText })),
 });
 export const BundleViewListSchema = z.array(BundleViewSchema);
 export type BundleViewResponse = z.infer<typeof BundleViewSchema>;

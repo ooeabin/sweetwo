@@ -1,7 +1,7 @@
 -- pgTAP: 합류 잡아 두기(2026-11-11 QA 3구간 D1, D2, S3-06, S3-20). 찬우(시작한 사람), 예빈(합류한 사람), 셋째·넷째 사람
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(39);
+select plan(41);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -42,6 +42,8 @@ select is((select count(*)::int from public.invite), 0, 'RLS: 초대 코드 행�
 select is(public.join_context()->>'starter_nickname', '찬우', 'join_context: 시작한 사람 호칭');
 select is(jsonb_array_length(public.join_context()->'prefill'), 1, 'join_context: 대신 입력한 내 명의 항목만');
 select is((public.join_context()->>'has_plan')::boolean, false, 'join_context: 찬우 월급 계획 없음(대기 흐름)');
+select is(public.join_context()->'member', 'false'::jsonb, 'join_context: 아직 구성원이 아니면 member = false(null 아님, B1)');
+select is((select space_id from public.app_user where id = auth.uid()), null, '공간 없는 합류자(B1 경우)');
 select is(public.join_space(current_setting('test.code')), 'resume', '같은 코드로 다시 = 이어서');
 reset role;
 

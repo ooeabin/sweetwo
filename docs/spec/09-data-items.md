@@ -200,13 +200,13 @@
 | 엔티티 | 추가 |
 | --- | --- |
 | 우리 둘 공간 `couple_space` | `shared_living` bool, `shared_saving` bool, `manager_user_id`(엔진 `salary_mode`는 기존) |
-| 사용자 `app_user` | `plan_share`(enum all/saving_only/done_only, 기본 saving_only), `rank_badge_home`(기본 false), `rank_consent`(기본 false), `asset_share_default`(null = 아직 안 고름), `last_reconciled_at`, `push_asked_at`, `push_kinds` jsonb(키 care, payday, achieved, shared_change, my_allowance, progress_news), `payday_none` bool, `marriage_state` 값 `dating`·`living_together` |
+| 사용자 `app_user` | `plan_share`(enum all/saving_only/done_only, 기본 saving_only), `rank_badge_home`(기본 false), `rank_consent`(기본 false), `asset_share_default`(null = 아직 안 고름, 첫 자산으로 정하는 것은 연결된 뒤만), `send_intent_space`(18 P-04 ‘보내요’를 보낸 공간, 각자 계열 내 월급 계획 ‘보내기’ 줄, 2026-11-13), `last_reconciled_at`, `push_asked_at`, `push_kinds` jsonb(키 care, payday, achieved, shared_change, my_allowance, progress_news), `payday_none` bool, `marriage_state` 값 `dating`·`living_together` |
 | 월급 계획 줄 `split_line` | `in_checklist`, `auto_pay`, `auto_day`, kind 값 `send`·`shared_account`(+ `shared_account_id`) |
 | 체크리스트 줄 `pay_check_line` | `auto`, `auto_due`, `late` |
 | 월급 체크리스트 `pay_checklist` | `confirmed_at`, `confirmed_by` |
 | 저금 항목 `goal` | `bundle_id`. 저금 공개 열은 새 코드에서 읽지 않음(2단계로 지움) |
 | 저금 움직임 `goal_move` | `reason` text(40자, 주인만 읽는 뷰. 상대용은 `goal_move_public`), `reason_code`(enum `goal_move_reason`: fix/used/interest/reconcile/note_paid/custom/auto), `hide_from_summary` bool, `money_in_id`, `note_id`. kind는 기존 in / out만 |
-| 자산 `asset` | `quick` bool(빠르게 적기). 공개 enum 값은 그대로(화면 이름만 ‘총액만’) |
+| 자산 `asset` | `quick` bool(빠르게 적기, 기본 false, 2026-11-13 열 추가). 공개 enum 값은 그대로(화면 이름만 ‘총액만’) |
 | 경조사 `care_day` | kind 값 `dating_anniversary`(사귄 날) |
 | 초대 `invite` | `autofill_source`(referrer/clipboard/manual) |
 | 순위 조회 `rank_view` | `paid_by_ad`(첫 조회 무료) |

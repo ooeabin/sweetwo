@@ -63,14 +63,17 @@ export async function saveSplit(
   lines: (SplitLineDraft & SplitLineSettings)[],
   owner?: string,
 ): Promise<string> {
-  const p_lines = lines.map((l) => ({
-    kind: l.kind,
-    amount: l.amount,
-    goal_id: l.goalId ?? null,
-    user_id: l.userId ?? null,
-    name: l.name ?? null,
-    ...settingsJson(l),
-  })) as unknown as Json;
+  // ‘보내기’ 줄은 서버만 만듦(save_split send_locked, recalc_send_line). 읽은 줄을 그대로 다시 저장해도 빼고 보냄
+  const p_lines = lines
+    .filter((l) => l.kind !== 'send')
+    .map((l) => ({
+      kind: l.kind,
+      amount: l.amount,
+      goal_id: l.goalId ?? null,
+      user_id: l.userId ?? null,
+      name: l.name ?? null,
+      ...settingsJson(l),
+    })) as unknown as Json;
   const { data, error } = await supabase().rpc('save_split', { p_lines, p_owner: owner });
   fail(error);
   return data as string;

@@ -66,12 +66,12 @@ select is(pg_temp.rls_kinds(), 'saving', '저금만: RLS도 저금 줄만');
 select is((select monthly_income from public.partner_profile()), null, '저금만: partner_profile 수입 없음');
 reset role;
 
--- 2. ‘했어요만’: 저금 이름 + 확인 여부만(금액 없음), RLS 행 없음
+-- 2. ‘했어요만’: 확인 여부만(이름·금액 없음, 2026-11-13 P1 = A), RLS 행 없음
 update public.app_user set plan_share = 'done_only' where id = '11111111-1111-1111-1111-111111111111';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is(pg_temp.view_kinds(), 'saving:-', '했어요만: 금액 없음');
-select is((public.partner_plan_view()->'lines'->0->>'name'), '내 집 마련', '했어요만: 저금 이름');
+select is((public.partner_plan_view()->'lines'->0->>'name'), null, '했어요만: 저금 이름도 없음');
 select is(pg_temp.rls_kinds(), '', '했어요만: RLS 행 없음');
 reset role;
 

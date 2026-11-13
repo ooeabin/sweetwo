@@ -26,6 +26,20 @@ export function SavingGoalRow({
   onClick: () => void;
 }) {
   const m = (v: number) => money(v, masked);
+  // 상대 ‘했어요만’ 저금: 이름 “개인 저금” + 이번 달 확인 여부만, 열지 않음(08 6장, 2026-11-13)
+  if (i.private)
+    return (
+      <div className="hg-goalrow">
+        <Lead {...leadOf('line', 'saving')} />
+        <span className="hg-goalrow__name">
+          {i.goal.name}
+          {i.ownerName && <Badge kind="temp">{i.ownerName}</Badge>}
+        </span>
+        <span className="hg-goalrow__sub">
+          {i.doneThisMonth ? copy.doneThisMonth : copy.notDoneYet}
+        </span>
+      </div>
+    );
   return (
     <button type="button" className="hg-goalrow" onClick={onClick}>
       <Lead {...leadOf('line', 'saving')} />

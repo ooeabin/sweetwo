@@ -391,6 +391,7 @@ export type Database = {
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
+          send_intent_space: string | null
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -442,6 +443,7 @@ export type Database = {
           rank_month?: string | null
           rank_net?: number | null
           rank_pct?: number | null
+          send_intent_space?: string | null
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -492,6 +494,7 @@ export type Database = {
           rank_month?: string | null
           rank_net?: number | null
           rank_pct?: number | null
+          send_intent_space?: string | null
           side?: Database["public"]["Enums"]["couple_side"] | null
           space_id?: string | null
           status?: Database["public"]["Enums"]["account_status"]
@@ -499,6 +502,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "app_user_send_intent_space_fkey"
+            columns: ["send_intent_space"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "app_user_space_id_fkey"
             columns: ["space_id"]
@@ -529,6 +539,7 @@ export type Database = {
           paid_count: number | null
           pay_from: string | null
           principal: number | null
+          quick: boolean
           rate_estimated: boolean
           realized_gain: number | null
           side: Database["public"]["Enums"]["asset_side"]
@@ -564,6 +575,7 @@ export type Database = {
           paid_count?: number | null
           pay_from?: string | null
           principal?: number | null
+          quick?: boolean
           rate_estimated?: boolean
           realized_gain?: number | null
           side: Database["public"]["Enums"]["asset_side"]
@@ -595,6 +607,7 @@ export type Database = {
           paid_count?: number | null
           pay_from?: string | null
           principal?: number | null
+          quick?: boolean
           rate_estimated?: boolean
           realized_gain?: number | null
           side?: Database["public"]["Enums"]["asset_side"]
@@ -3632,6 +3645,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_salary_change_row: { Args: { p_id: string }; Returns: boolean }
       apply_salary_changes: {
         Args: { p_today?: string; p_user?: string }
         Returns: number
@@ -3679,6 +3693,7 @@ export type Database = {
         }
         Returns: string
       }
+      bundle_each_open: { Args: { p_bundle: string }; Returns: boolean }
       bundle_join: {
         Args: { p_bundle: string; p_goal: string }
         Returns: undefined
@@ -3855,6 +3870,7 @@ export type Database = {
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
+          send_intent_space: string | null
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -3919,6 +3935,7 @@ export type Database = {
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
+          send_intent_space: string | null
           side: Database["public"]["Enums"]["couple_side"] | null
           space_id: string | null
           status: Database["public"]["Enums"]["account_status"]
@@ -3993,6 +4010,7 @@ export type Database = {
       }
       finish_unlink: { Args: { p_how: string; p_id: string }; Returns: undefined }
       flush_partner_changes: { Args: { p_now?: string }; Returns: number }
+      goal_amount_visible: { Args: { p_goal: string }; Returns: boolean }
       goal_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4501,6 +4519,7 @@ export type Database = {
         Args: { p_bundle: string; p_goal: string }
         Returns: boolean
       }
+      saving_owner_hidden: { Args: { p_owner: string; p_space: string }; Returns: boolean }
       saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
       schedule_salary_change: {
         Args: { p_amount: number; p_from: string; p_until?: string }
