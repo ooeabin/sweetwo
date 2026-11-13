@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 홈 화면 위젯 색(26 ‘디자인’). docs/design/tokens.css 값 그대로 옮김(바꾸면 같이). 다크는 values-night -->
+<resources>
+    <color name="widget_surface">#ffffff</color>      <!-- surface -->
+    <color name="widget_track">#f3f4f6</color>        <!-- surface-alt -->
+    <color name="widget_goal">#f6eee5</color>         <!-- goal 틴트(저금) -->
+    <color name="widget_goal_ink">#6b4a2b</color>     <!-- goal-ink -->
+    <color name="widget_ink">#1a1b1c</color>          <!-- ink -->
+    <color name="widget_slate">#545557</color>        <!-- slate -->
+    <color name="widget_brand">#ff7716</color>        <!-- brand(진행 막대, 달성 배지) -->
+    <color name="widget_brand_soft">#fff2e8</color>   <!-- brand-soft(달성 배지 바탕) -->
+</resources>

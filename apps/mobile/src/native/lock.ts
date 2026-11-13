@@ -7,6 +7,7 @@ import { AUTO_LOCK_MS, Pin, PIN_MAX_ATTEMPTS } from '@sweetwo/core';
 import { signOut } from './auth';
 import { emitter } from './events';
 import { secureStore } from './store';
+import { setWidgetLock } from './widget';
 
 // 모바일 앱 잠금(기획서 A-06, DEV_GUIDE ‘잠금’).
 // PIN은 PBKDF2(SHA-256) 해시로 Keychain·Keystore에, 틀린 횟수도 같이. 생체 인증은 iPhone Face ID·Touch ID, Android 지문.
@@ -91,6 +92,7 @@ export async function setPin(pin: string): Promise<boolean> {
   if (!Pin.safeParse(pin).success) return false;
   const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
   locked = false;
+  void setWidgetLock(null);
   return write({ salt, hash: await hashPin(pin, salt), failed: 0, touchId: false });
 }
 
@@ -102,6 +104,7 @@ export async function verifyPin(pin: string): Promise<VerifyResult> {
     await write({ ...s, failed: 0 });
     locked = false;
     verifiedAt = Date.now();
+    void setWidgetLock(null);
     return { ok: true };
   }
   const failed = s.failed + 1;
@@ -131,11 +134,13 @@ export async function setAutoLock(min: number): Promise<boolean> {
 export async function clearPin() {
   await secureStore.remove(KEY);
   locked = false;
+  await setWidgetLock(null);
 }
 
 export async function lockNow() {
   if (!(await read())) return;
   locked = true;
+  void setWidgetLock(Date.now());
   lockEvents.emit(null);
 }
 
@@ -158,6 +163,7 @@ export async function unlockWithBiometric(): Promise<boolean> {
     });
     await write({ ...s, failed: 0 });
     locked = false;
+    void setWidgetLock(null);
     return true;
   } catch {
     return false; // 실패, 취소 → PIN
@@ -166,7 +172,11 @@ export async function unlockWithBiometric(): Promise<boolean> {
 
 /** 실행 시 잠금 + 앱이 뒤로 간 지 N분이면 돌아올 때 잠금. 최근 앱 화면 가림 */
 export async function startAutoLock() {
-  if (await read()) locked = true;
+  // 위젯(26 ‘앱이 잠겨 있으면’): 잠긴 동안과, 뒤로 간 뒤 자동 잠금 시각부터 값 없이 “잠겨 있어요”
+  if (await read()) {
+    locked = true;
+    void setWidgetLock(Date.now());
+  } else void setWidgetLock(null);
   await PrivacyScreen.enable({
     android: { privacyModeOnActivityHidden: 'splash', preventScreenshots: false },
     ios: { blurEffect: 'light' },
@@ -174,6 +184,10 @@ export async function startAutoLock() {
   void CapApp.addListener('appStateChange', ({ isActive }) => {
     if (!isActive) {
       hiddenAt = Date.now();
+      const at = hiddenAt;
+      void Promise.all([read(), autoMin()]).then(([pin, min]) => {
+        if (pin && !locked && min > 0) void setWidgetLock(at + min * 60_000);
+      });
       return;
     }
     const since = hiddenAt;
@@ -181,6 +195,8 @@ export async function startAutoLock() {
     void autoMin().then((min) => {
       if (!locked && since !== null && min > 0 && Date.now() - since >= min * 60_000)
         void lockNow();
+      // 잠기지 않고 돌아왔으면 위젯 잠금 예약을 거둠
+      else if (!locked) void setWidgetLock(null);
     });
   });
 }

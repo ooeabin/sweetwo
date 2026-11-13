@@ -59,4 +59,24 @@ describe('parseDeepLink 모바일 앱 링크', () => {
     expect(parseDeepLink('https://sweetwo.kr:8443/i/AB12CD')).toBeNull();
     expect(parseDeepLink('https://sweetwo.kr/settings')).toBeNull();
   });
+  it('위젯 링크(26)는 정한 화면만, sweetwo://로만', () => {
+    const id = '0b9c1d2e-3f40-4a5b-8c6d-7e8f90a1b2c3';
+    expect(parseDeepLink(`sweetwo://widget?to=/salary/items/${id}`)).toEqual({
+      kind: 'open',
+      path: `/salary/items/${id}`,
+    });
+    expect(parseDeepLink(`sweetwo://widget?to=/salary/bundles/${id}/notes`)).toEqual({
+      kind: 'open',
+      path: `/salary/bundles/${id}/notes`,
+    });
+    expect(parseDeepLink(`sweetwo://widget?to=/calendar/day/${id}`)).toEqual({
+      kind: 'open',
+      path: `/calendar/day/${id}`,
+    });
+    expect(parseDeepLink('sweetwo://widget?to=/')).toEqual({ kind: 'open', path: '/' });
+    expect(parseDeepLink('sweetwo://widget?to=/settings/delete')).toBeNull();
+    expect(parseDeepLink('sweetwo://widget?to=//evil.example')).toBeNull();
+    expect(parseDeepLink(`sweetwo://widget?to=/salary/items/${id}&x=1`)).toBeNull();
+    expect(parseDeepLink(`https://sweetwo.kr/widget?to=/salary/items/${id}`)).toBeNull();
+  });
 });

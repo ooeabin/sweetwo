@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { emitter } from './events';
 import { authorizeUrl, randomToken } from './pkce';
 import { offlineCache } from './offline-cache';
+import { clearWidget } from './widget';
 import { secureStore } from './store';
 
 // 모바일 로그인(DEV_GUIDE ‘모바일 세션’, 기획서 A-02, A-03).
@@ -240,6 +241,8 @@ export async function signOut(reason: SignOutReason, o: { remote: boolean } = { 
   await secureStore.remove('refresh-token');
   // 로그아웃(직접, 만료, 다른 기기, PIN 실패)이면 기기 캐시도 지움
   await offlineCache.clear();
+  // 위젯 값도 지움(26 예외 ‘세션 만료·다른 계정’ → 로그인 전 카드)
+  await clearWidget();
   if (o.remote && s && env.url && env.key) {
     // 이 기기 세션만 끊는다. 실패해도 로컬은 지운다.
     await fetch(`${env.url}/auth/v1/logout?scope=local`, {

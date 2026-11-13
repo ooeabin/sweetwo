@@ -8,5 +8,10 @@
 	<array>
 		<string>applinks:sweetwo.kr</string>
 	</array>
+	<!-- 홈 화면 위젯(26)과 값을 나누는 App Group. 위젯 확장(SweetwoWidget.entitlements)과 같은 이름 -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.kr.sweetwo.app</string>
+	</array>
 </dict>
 </plist>

@@ -21,6 +21,8 @@ export type FakeState = {
   ads: number;
   /** 푸시 허용 창을 띄운 횟수(O-55·P-11) */
   pushRequests: number;
+  /** 홈 화면 위젯에 넘긴 값(widget.update, 26 v2.2). 마지막 것이 끝 */
+  widget: unknown[];
 };
 export interface FakeOptions {
   signedIn?: boolean;
@@ -71,6 +73,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       shared: [],
       ads: 0,
       pushRequests: 0,
+      widget: [],
     };
     const cbs: {
       auth: Set<(e: unknown) => void>;
@@ -117,6 +120,9 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
         openUrl: async (u: string) => {
           if (o.openFail) throw new Error('open');
           f.opened.push(u);
+        },
+        widget: {
+          update: async (d: unknown) => void f.widget.push(d),
         },
         ...(o.inviteCode ? { inviteCode: { firstRun: async () => o.inviteCode } } : {}),
         push: {

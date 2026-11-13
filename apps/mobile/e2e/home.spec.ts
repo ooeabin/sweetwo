@@ -5,6 +5,7 @@ import { seed } from './seed-home';
 import { chanwoo } from './supabase-mock';
 import { mockRealtime } from './realtime-mock';
 import { emptyV22 } from './v22-mock';
+import { fakeBridge } from './fake-bridge';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
 // H-07 월급 계획 + 여유 자금, H-12 결혼 준비, H-04·H-09. 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
@@ -742,4 +743,42 @@ test('두 계정(찬우·예빈, 합쳐서): 예빈이 “모두 계획대로 �
   await expect(monthLine(c)).toContainText('확인할 게 1개 있어요');
   await cCtx.close();
   await yCtx.close();
+});
+
+test('홈 화면 위젯(26 v2.2): 홈 값으로 WG-01 대표 저금 %·기한 달, WG-04 다가오는 날을 금액 없이 브리지에 넘김', async ({
+  page,
+}) => {
+  await fakeBridge(page, { signedIn: true, pin: null });
+  await page.addInitScript(() => localStorage.setItem('sweetwo.pin-asked', '1'));
+  await open(page);
+  await expect(together(page).locator('.hg-together__slide').first()).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __fb: { widget: unknown[] } }).__fb.widget.length,
+      ),
+    )
+    .toBeGreaterThan(0);
+  const last = await page.evaluate(() => {
+    const w = (window as unknown as { __fb: { widget: unknown[] } }).__fb.widget;
+    return w[w.length - 1] as {
+      save: {
+        name: string;
+        big: string;
+        pct: number | null;
+        line: string | null;
+        to: string;
+      } | null;
+      next: { name: string; date: string; to: string } | null;
+    };
+  });
+  // H-10 첫 칸과 같은 저금, 금액은 없음
+  expect(last.save).toMatchObject({
+    name: '내 집 마련',
+    big: '0%',
+    pct: 0,
+    line: '2031년 10월까지',
+  });
+  expect(last.save?.to).toMatch(/^\/salary\/items\//);
+  expect(JSON.stringify(last)).not.toMatch(/원/);
 });

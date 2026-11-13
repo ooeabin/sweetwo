@@ -101,6 +101,7 @@ export const t = {
   invitedNoCode: '앱을 설치한 뒤 받은 초대 코드를 입력해 주세요',
   copyCode: '복사',
   copied: '복사했어요',
+  getAndJoin: '앱 받고 합류하기', // [확인 필요] 28 L-07(2026-11-13) 휴대폰 주 버튼
 
   // 알림 메일 링크(14 ‘센터와 푸시·메일’): 앱이 없으면 안내 + 앱 받기
   openInSweetwo: 'sweeTwo 앱에서 열어 주세요',

@@ -17,6 +17,8 @@ import {
   watchBrowserClosed,
 } from './auth';
 import { emitter } from './events';
+import { showRewarded } from './ads';
+import { firstRunInviteCode } from './invite-code';
 import { offlineCache } from './offline-cache';
 import {
   pushOpens,
@@ -41,6 +43,7 @@ import {
   unlockWithBiometric,
   verifyPin,
 } from './lock';
+import { writeWidget } from './widget';
 
 // 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
 // 웹뷰에는 access token만. refresh token, code_verifier, 로그인 콜백 code는 이 파일 밖(웹뷰 화면 코드)에서 못 봄.
@@ -191,9 +194,12 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         return 'cancelled';
       }
     },
-    // TODO(v2.2 PR 13 native): 보상형 광고 ads.rewarded()(AdMob 플러그인, 34 출시 체크). 요청은 비맞춤형만(npa=1, iOS ATT
-    // 묻지 않음), 금융 카테고리 차단은 AdMob 콘솔에서. 앱 ID·광고 단위 ID는 공개 값이라 앱 설정(capacitor.config, Info.plist,
-    // AndroidManifest)에 넣음. 그때까지 ads가 없어 앱은 광고 없이 바로 결과(packages/app frame rank.tsx 'none')
+    // 보상형 광고(F-08 ‘새로 확인하기’, ads.ts): 비맞춤형(npa=1), ATT 묻지 않음
+    ads: { rewarded: () => showRewarded() },
+    // 첫 실행 초대 코드(O-01, invite-code.ts): Android 설치 리퍼러, iOS 클립보드 1회
+    inviteCode: { firstRun: () => firstRunInviteCode() },
+    // 홈 화면 위젯(26 WG-01·WG-04, widget.ts): 금액 없는 글만
+    widget: { update: (d) => writeWidget(d) },
   };
   window.sweetwo = bridge;
   return platform;

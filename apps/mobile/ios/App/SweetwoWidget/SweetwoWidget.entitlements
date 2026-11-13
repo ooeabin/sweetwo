@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 앱과 같은 App Group(위젯 값 읽기, 26). Apple Developer에서 group.kr.sweetwo.app을 만들어 두 App ID에 켬 -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.kr.sweetwo.app</string>
+	</array>
+</dict>
+</plist>

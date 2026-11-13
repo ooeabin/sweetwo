@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 홈 화면 위젯 고정 문구(26 ‘위젯 v2.2’, ‘상태’). 값 문구(이름, %, 기한)는 앱이 copy.ts로 만들어 넘김. iOS SweetwoWidget.swift와 같게 -->
+<resources>
+    <string name="widget_save_name">같이 모으기</string>
+    <string name="widget_save_desc">같이 모으는 저금이 얼마나 모였는지 봐요</string> <!-- [확인 필요] 위젯 고르기 설명 -->
+    <string name="widget_next_name">다가오는 날</string>
+    <string name="widget_next_desc">가장 가까운 경조사나 쓸 곳 메모 날짜를 봐요</string> <!-- [확인 필요] -->
+    <string name="widget_login">sweeTwo를 열어 로그인해 주세요</string>
+    <string name="widget_locked">잠겨 있어요</string>
+    <string name="widget_open">앱 열기</string>
+    <string name="widget_save_empty">무엇을 같이 모을까요?</string> <!-- [확인 필요] H-10 빈 상태 질문 -->
+    <string name="widget_next_empty">다가오는 날이 없어요</string>
+    <string name="widget_dday">D-day</string>
+    <string name="widget_dn">D-%1$d</string>
+    <string name="widget_stamp">%1$s 기준</string>
+    <string name="widget_amount_hidden">금액 가림</string> <!-- 눈 끔 아이콘 읽기 -->
+</resources>
