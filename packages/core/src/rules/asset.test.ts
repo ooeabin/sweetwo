@@ -9,6 +9,7 @@ import {
   investSummary,
   netWorth,
   netWorthSeries,
+  netWorthSummary,
   periodEnabled,
   periodSlice,
   startPeriod,
@@ -131,4 +132,15 @@ it('AD-19 항목 이름 목록: 기본 항목 이름 바꾸기·숨기기, 새 �
   ]);
   expect(dep?.kinds[2]?.id).toBe('c');
   expect(groups.find((g) => g.key === 'cash')).toBe(assetGroup('cash'));
+});
+
+it('순자산 v2.2(06 6장, 서버 networth_summary): 평가금액 기본, 원금으로 보기', () => {
+  expect(
+    netWorthSummary([
+      { side: 'asset', amount: 12_000_000, principal: 10_000_000 },
+      { side: 'asset', amount: 5_000_000 },
+      { side: 'asset', amount: 9_000_000, status: 'sold' },
+      { side: 'debt', amount: 3_000_000 },
+    ]),
+  ).toEqual({ assets: 17_000_000, debts: 3_000_000, net: 14_000_000, principalNet: 12_000_000 });
 });

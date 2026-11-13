@@ -50,3 +50,57 @@ export function planRatio(o: { income: Won; saving: Won; spend: Won }): PlanRati
 
 /** 서버 split_line_add가 돌려준 새 줄 id(검사용) */
 export const splitLineId = z.string().min(1);
+
+// ───────── 분담 도우미(06 3-7, W-01b, R3) ─────────
+// 서버 propose_split(마이그레이션 20261203090000_v22_saving_together 계약 7)과 같은 결과. a = 제안한 사람(나).
+
+export type SplitRule = 'half' | 'income_ratio' | 'custom';
+
+/** 1만 원 단위 반올림(정수, 0.5는 올림: 서버 round(numeric)과 같음, 양수만) num ÷ den */
+function roundDiv10k(num: bigint, den: bigint): number {
+  // round(num / den / 10000) × 10000 = floor((2·num + den·10000) / (2·den·10000)) × 10000
+  const unit = den * 10_000n;
+  return Number(((2n * num + unit) / (2n * unit)) * 10_000n);
+}
+
+export interface SplitShares {
+  /** 제안한 사람 몫 */
+  mine: Won;
+  /** 상대 몫 = 합계 − 내 몫 */
+  partner: Won;
+  /** 내 몫 비율 % = 반올림(내 몫 × 100 ÷ 합계)(서버 ratio_a) */
+  ratioPct: number;
+  /** 10을 합으로 한 비율(“6 : 4”, 06 3-7): [반올림(내 몫 × 10 ÷ 합계), 10 − 그것] */
+  ratioTen: [number, number];
+}
+
+/**
+ * 분담 몫(06 3-7). total = 한 달 넣을 금액(1만 원 단위). half = 반올림(total ÷ 2).
+ * income_ratio = 반올림(total × 내 실수령 ÷ 두 실수령 합)(앱은 서버 응답을 쓰고, 이 계산은 테스트·미리 보기용).
+ * custom = 내가 적은 몫. 결과가 0 아래거나 total을 넘으면 null(서버 'bad_amount'), 월급이 없으면 income_ratio는 null
+ */
+export function splitShares(
+  total: Won,
+  rule: SplitRule,
+  o: { mineIncome?: Won | null; partnerIncome?: Won | null; mine?: Won | null } = {},
+): SplitShares | null {
+  if (!Number.isInteger(total) || total <= 0 || total % 10_000 !== 0) return null;
+  let mine: number;
+  if (rule === 'half') mine = roundDiv10k(BigInt(total), 2n);
+  else if (rule === 'income_ratio') {
+    const a = o.mineIncome ?? 0;
+    const b = o.partnerIncome ?? 0;
+    if (a <= 0 || b <= 0) return null;
+    mine = roundDiv10k(BigInt(total) * BigInt(a), BigInt(a + b));
+  } else {
+    if (o.mine == null || o.mine < 0 || o.mine > total || o.mine % 10_000 !== 0) return null;
+    mine = o.mine;
+  }
+  const ten = Number((BigInt(mine) * 20n + BigInt(total)) / (2n * BigInt(total)));
+  return {
+    mine,
+    partner: total - mine,
+    ratioPct: Number((BigInt(mine) * 200n + BigInt(total)) / (2n * BigInt(total))),
+    ratioTen: [ten, 10 - ten],
+  };
+}

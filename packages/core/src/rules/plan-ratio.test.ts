@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { largestRemainder, planRatio } from './plan-ratio';
+import { largestRemainder, planRatio, splitShares } from './plan-ratio';
 
 // 기획서 06 3-5 예시 표 그대로
 const man = (n: number) => n * 10_000;
@@ -69,5 +69,41 @@ describe('가장 큰 나머지 방식', () => {
   });
   it('합이 0이면 모두 0', () => {
     expect(largestRemainder([0, 0])).toEqual([0, 0]);
+  });
+});
+
+describe('분담 도우미(06 3-7, 서버 propose_split)', () => {
+  it('월급 비율: 생활비 통장 100만, 찬우 350만 / 예빈 280만 → 56만 / 44만, “6 : 4”', () => {
+    expect(
+      splitShares(1_000_000, 'income_ratio', { mineIncome: 3_500_000, partnerIncome: 2_800_000 }),
+    ).toEqual({
+      mine: 560_000,
+      partner: 440_000,
+      ratioPct: 56,
+      ratioTen: [6, 4],
+    });
+  });
+  it('반반: 1만 원 반올림(15만 → 8만 / 7만), 직접: 내 몫 그대로', () => {
+    expect(splitShares(150_000, 'half')).toMatchObject({
+      mine: 80_000,
+      partner: 70_000,
+      ratioPct: 53,
+    });
+    expect(splitShares(1_000_000, 'custom', { mine: 700_000 })).toMatchObject({
+      mine: 700_000,
+      partner: 300_000,
+    });
+    expect(splitShares(1_000_000, 'custom', { mine: 1_100_000 })).toBeNull();
+    expect(splitShares(1_000_000, 'custom', { mine: 5_000 })).toBeNull();
+  });
+  it('월급이 없거나 금액이 1만 원 단위가 아니면 null, 999억 상한도 정수로', () => {
+    expect(splitShares(1_000_000, 'income_ratio', { mineIncome: 0, partnerIncome: 1 })).toBeNull();
+    expect(splitShares(15_000, 'half')).toBeNull();
+    const big = splitShares(99_999_990_000, 'income_ratio', {
+      mineIncome: 99_999_999_999,
+      partnerIncome: 99_999_999_999,
+    });
+    expect(big?.mine).toBe(50_000_000_000);
+    expect(big && big.mine + big.partner).toBe(99_999_990_000);
   });
 });

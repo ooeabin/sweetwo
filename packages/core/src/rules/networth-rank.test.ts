@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   debtRatioPct,
   financialPct,
+  pairRankBand,
+  peerMedian,
   rankAgeBand,
+  rankBandOf,
+  rankPair,
+  rankPairNet,
   rankBracket,
   rankChange,
   rankNextStep,
@@ -100,4 +105,40 @@ describe('순위 배너 상태', () => {
     expect(
       rankState({ ...base, seen: { month: '2026-10-01', pct: 93, net: 16_000_000 } }).kind,
     ).toBe('stale'));
+});
+
+describe('순위 v2.2(06 7-8, 서버 networth_rank_pair)', () => {
+  it('연령대 = 먼저 태어난 사람(찬우 1993 + 예빈 1995, 2026년 → 33세 → 30대)', () => {
+    expect(pairRankBand([1993, 1995], 2026)).toBe('30s');
+    expect(pairRankBand([1997, null], 2026)).toBe('20s');
+    expect(pairRankBand([], 2026)).toBeNull();
+    expect(rankBandOf(1966, 2026)).toBe('60s');
+  });
+  it('두 사람 모두 동의면 둘의 합 순위(숨기기 빼고), 아니면 또래 중간값', () => {
+    const net = rankPairNet([
+      { side: 'asset', amount: 300_000_000 },
+      { side: 'asset', amount: 50_000_000, visibility: 'private' },
+      { side: 'asset', amount: 10_000_000, status: 'sold' },
+      { side: 'debt', amount: 61_400_000 },
+    ]);
+    expect(net).toBe(238_600_000);
+    expect(
+      rankPair({ consented: true, net, birthYears: [1993, 1995], myBirthYear: 1995, year: 2026 }),
+    ).toEqual({
+      mode: 'pair',
+      net,
+      top_pct: 50,
+      top_open: false,
+      band: '30s',
+      basis: 'all',
+    });
+    expect(
+      rankPair({ consented: false, net, birthYears: [1993, 1995], myBirthYear: 1995, year: 2026 }),
+    ).toEqual({
+      mode: 'peer',
+      band: '30s',
+      median: 155_850_000,
+    });
+    expect(peerMedian(null, 2026)).toEqual({ band: null, median: null });
+  });
 });

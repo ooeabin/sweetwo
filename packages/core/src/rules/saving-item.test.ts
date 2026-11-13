@@ -6,6 +6,9 @@ import {
   monthsLeft,
   reachedTarget,
   savedFromLines,
+  savedTotal,
+  savingMonthGain,
+  savingRemain,
   savingBar,
   savingEta,
   savingItemInput,
@@ -79,9 +82,7 @@ describe('월 필요액(06 5-2)', () => {
   it('1만 원 단위 올림: 100만 ÷ 4개월(10월~1월) = 25만', () =>
     expect(savingNeed({ target: 1_000_000, saved: 0, deadline: '2027-01' }, now)).toBe(250_000));
   it('기한이 이번 달이면 남은 금액 전부', () =>
-    expect(savingNeed({ target: 2_000_000, saved: 0, deadline: '2026-10' }, now)).toBe(
-      2_000_000,
-    ));
+    expect(savingNeed({ target: 2_000_000, saved: 0, deadline: '2026-10' }, now)).toBe(2_000_000));
   it('기한이 없으면 없음', () =>
     expect(savingNeed({ target: 150_000_000, saved: 0, deadline: null }, now)).toBeNull());
   it('이미 다 모았으면 0', () =>
@@ -107,9 +108,9 @@ describe('기한보다 늦어짐(06 5-4, 20 W-10 3번)', () => {
     expect(savingLate(o, 200_000, now)).toBe(8);
   });
   it('내 집 마련 매달 95만, 2031년 10월까지(필요 246만) → 2039년 11월, 97개월 늦어요', () =>
-    expect(
-      savingLate({ target: 150_000_000, saved: 0, deadline: '2031-10' }, 950_000, now),
-    ).toBe(97));
+    expect(savingLate({ target: 150_000_000, saved: 0, deadline: '2031-10' }, 950_000, now)).toBe(
+      97,
+    ));
   it('월 필요액 이하로 모으면 없음', () => {
     expect(savingLate(o, 1_000_000, now)).toBeNull();
     expect(savingLate(o, 2_000_000, now)).toBeNull();
@@ -168,4 +169,85 @@ it('달성 축하 문장: 모두 함께 / 일부 / 혼자, 모은 달이 없으�
   expect(celebrationStory(16, 0, false)).toEqual({ kind: 'solo', months: 16, together: 0 });
   expect(celebrationStory(16, 14, true)).toEqual({ kind: 'solo', months: 16, together: 0 });
   expect(celebrationStory(0, 0, false)).toBeNull();
+});
+
+describe('v2.2 모은 금액·남은 금액(06 4-1, 5-3b)', () => {
+  const MAN = 10_000;
+  it('기한까지 남은 금액(G5): “2027년 5월까지 1,400만 원 더 필요해요”, 다 모았으면 없음', () => {
+    expect(savingRemain({ target: 5_000 * MAN, saved: 3_600 * MAN, deadline: '2027-05' })).toEqual({
+      deadline: '2027-05',
+      remain: 1_400 * MAN,
+    });
+    expect(
+      savingRemain({ target: 5_000 * MAN, saved: 5_000 * MAN, deadline: '2027-05' }),
+    ).toBeNull();
+    expect(savingRemain({ target: 5_000 * MAN, saved: 0, deadline: null })).toBeNull();
+    expect(savingRemain({ target: null, saved: 0, deadline: '2027-05' })).toBeNull();
+  });
+
+  it('06 4-2 예(2026-11-13): 2,095만 + 넣기 200만 − 냈어요 250만 = 2,045만 → 잔액 맞추기 −15만 = 2,030만', () => {
+    const lines = [
+      { goal_id: 'h', kind: 'saving', state: 'checked', planned: 95 * MAN, actual: null },
+      { goal_id: 'h', kind: 'saving', state: 'skipped', planned: 95 * MAN, actual: null },
+    ];
+    const moves = [
+      {
+        goal_id: 'h',
+        kind: 'in' as const,
+        amount: 200 * MAN,
+        reason_code: 'custom',
+        money_in_id: 'm',
+      },
+      { goal_id: 'h', kind: 'out' as const, amount: 250 * MAN, reason_code: 'note_paid' },
+      // 옛 넣기(reason_code 없음)와 지운 움직임은 셈하지 않음
+      { goal_id: 'h', kind: 'in' as const, amount: 999 * MAN, reason_code: null },
+      { goal_id: 'h', kind: 'in' as const, amount: 999 * MAN, reason_code: 'fix', deleted_at: 'x' },
+    ];
+    expect(savedTotal('h', { start: 2_000 * MAN, lines, moves })).toBe(2_045 * MAN);
+    expect(
+      savedTotal('h', {
+        start: 2_000 * MAN,
+        lines,
+        moves: [
+          ...moves,
+          { goal_id: 'h', kind: 'out', amount: 15 * MAN, reason_code: 'reconcile' },
+        ],
+      }),
+    ).toBe(2_030 * MAN);
+  });
+
+  it('이번 달 +(06 5-6): 확인·자동·돈 들어왔어요만, 바로잡기 빼고', () => {
+    const lines = [
+      { goal_id: 'h', kind: 'saving', state: 'checked', planned: 95 * MAN, actual: 90 * MAN },
+      { goal_id: 'x', kind: 'saving', state: 'checked', planned: 10 * MAN, actual: null },
+    ];
+    const moves = [
+      {
+        goal_id: 'h',
+        kind: 'in' as const,
+        amount: 100 * MAN,
+        reason_code: 'custom',
+        money_in_id: 'm',
+        on: '2026-11-03',
+      },
+      {
+        goal_id: 'h',
+        kind: 'in' as const,
+        amount: 30 * MAN,
+        reason_code: 'auto',
+        on: '2026-11-01',
+      },
+      { goal_id: 'h', kind: 'in' as const, amount: 50 * MAN, reason_code: 'fix', on: '2026-11-03' },
+      {
+        goal_id: 'h',
+        kind: 'in' as const,
+        amount: 70 * MAN,
+        reason_code: 'auto',
+        on: '2026-10-31',
+      },
+    ];
+    expect(savingMonthGain(['h'], { lines, moves, from: '2026-11-01', to: '2026-11-30' })).toBe(
+      220 * MAN,
+    );
+  });
 });

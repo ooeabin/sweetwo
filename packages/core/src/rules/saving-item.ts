@@ -100,6 +100,82 @@ export function savingLate(
   return late > 0 ? late : null;
 }
 
+/**
+ * 기한까지 남은 금액(06 5-3b, G5, H-10·W-10 “2027년 5월까지 1,200만 원 더 필요해요”):
+ * 기한과 목표 금액이 있고 다 모으지 않았으면 {기한 달, 남은 금액 = 목표 금액 − 모은 금액}. 묶음은 합계로 부름. 다 모았으면 null
+ */
+export function savingRemain(o: {
+  target: Won | null;
+  saved: Won;
+  deadline: string | null;
+}): { deadline: YearMonth; remain: Won } | null {
+  if (o.target === null || !o.deadline) return null;
+  const remain = o.target - Math.max(o.saved, 0);
+  if (remain <= 0) return null;
+  return { deadline: o.deadline.slice(0, 7) as YearMonth, remain };
+}
+
+/** v2.2 돈 움직임(goal_move). reason_code가 null이면 옛 넣기·빼기라 셈하지 않음(서버 goal_saved 계약 6) */
+export interface SavingMove {
+  goal_id: string;
+  kind: 'in' | 'out';
+  amount: Won;
+  reason_code: string | null;
+  money_in_id?: string | null;
+  created_at?: string;
+  deleted_at?: string | null;
+}
+
+/** 모은 금액에 셈하는 움직임 합(in +, out −). 지운 것·옛 기록(reason_code 없음) 빼고 */
+export const savedFromMoves = (id: string, moves: readonly SavingMove[]): Won =>
+  moves
+    .filter((m) => m.goal_id === id && !m.deleted_at && m.reason_code !== null)
+    .reduce((t, m) => t + (m.kind === 'in' ? m.amount : -m.amount), 0);
+
+/**
+ * 모은 금액(06 4-1, 서버 goal_saved): 이미 모은 금액 + 확인한 저금 줄(자동 확인 포함) + 돈 움직임(돈 들어왔어요,
+ * 자동 넣기, 바로잡기, 잔액 맞추기, 냈어요 −)
+ */
+export const savedTotal = (
+  id: string,
+  o: { start?: Won; lines?: SavingCheckLine[]; moves?: readonly SavingMove[] },
+): Won => savedFromLines(id, o.lines ?? [], o.start ?? 0) + savedFromMoves(id, o.moves ?? []);
+
+/**
+ * 이번 달 +(06 5-6, H-10 “이번 달 +190만 원”, 북극성 ‘모음’ 8-1): 그 달 늘어난 것 중 저금 줄 확인(자동 포함) +
+ * 날짜 없는 사람 자동 넣기(auto) + 돈 들어왔어요로 넣은 금액. 바로잡기·잔액 맞추기·냈어요·이미 모은 금액은 뺌.
+ * lines는 이번 달(대표 사이클) 확인 목록 줄, moves는 그 기간(from~to, KST 날짜) 안의 움직임
+ */
+export function savingMonthGain(
+  ids: readonly string[],
+  o: {
+    lines: SavingCheckLine[];
+    moves: readonly (SavingMove & { on: string })[];
+    from: string;
+    to: string;
+  },
+): Won {
+  const set = new Set(ids);
+  const fromLines = o.lines
+    .filter(
+      (l) =>
+        l.goal_id !== null && set.has(l.goal_id) && l.kind === 'saving' && l.state === 'checked',
+    )
+    .reduce((t, l) => t + (l.actual ?? l.planned), 0);
+  const fromMoves = o.moves
+    .filter(
+      (m) =>
+        set.has(m.goal_id) &&
+        !m.deleted_at &&
+        m.kind === 'in' &&
+        m.on >= o.from &&
+        m.on <= o.to &&
+        (m.reason_code === 'auto' || !!m.money_in_id),
+    )
+    .reduce((t, m) => t + m.amount, 0);
+  return fromLines + fromMoves;
+}
+
 export type SavingState = 'saving' | 'achieved' | 'closed';
 
 /** 상태(20 ‘달성과 그만 모음’): 그만 모음 > 달성 > 모으는 중 */
