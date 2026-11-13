@@ -112,11 +112,10 @@ const ok2xx = (r: Reply, what: string) => expect(r.status, what).toBeLessThan(30
 const rowsOf = (r: Reply) => (Array.isArray(r.body) ? (r.body as unknown[]) : []);
 
 // 브라우저가 없어 한 프로젝트에서만
-test.beforeEach(({}, info) => {
-  test.skip(info.project.name !== 'light', '브라우저 없이 한 번만');
-});
+const onlyOnce = () => test.skip(test.info().project.name !== 'light', '브라우저 없이 한 번만');
 
 test('같이 모으기·돈 기록(mocks/saving): bundle_view, money_in, 남은 기간 = 서버 모양', async () => {
+  onlyOnce();
   const { page, db } = await pair('saving');
   const h = db.goals.find((g) => g.id === 'goal-h') as MemDb['goals'][number];
   ok2xx(await page.rpc('bundle_create', { p_goal: h.id, p_name: '내 집 마련' }), 'bundle_create');
@@ -141,6 +140,7 @@ test('같이 모으기·돈 기록(mocks/saving): bundle_view, money_in, 남은 
 });
 
 test('공개·관계·설정(mocks/v22-settings): 관리 형태 요청, 분담 제안, 월급 변경, 상대 보기 = 서버 모양', async () => {
+  onlyOnce();
   const { page } = await pair('settings');
   const style = await page.rpc('my_manage_style');
   expect(rowsOf(style).length).toBeGreaterThan(0);
@@ -189,6 +189,7 @@ test('공개·관계·설정(mocks/v22-settings): 관리 형태 요청, 분담 �
 });
 
 test('홈·자산(mocks/app-db, v22-pay): 홈 띠 상태, 순위, 답 결과 = 서버 모양', async () => {
+  onlyOnce();
   const { page, db } = await pair('settings');
   ok2xx(await page.rpc('dismiss_home_task', { p_key: 'push_reask', p_state: 'done' }), 'dismiss');
   const tasks = await page.rows('home_task_state');

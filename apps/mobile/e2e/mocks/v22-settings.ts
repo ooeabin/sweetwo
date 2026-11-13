@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { json, rpcError } from './http';
 import type { MemDb } from './app-db';
 import { SB, YEBIN } from './supabase';

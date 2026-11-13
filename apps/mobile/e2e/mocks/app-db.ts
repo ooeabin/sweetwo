@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { json } from './http';
 import { chanwoo, fakeJwt, SB } from './supabase';
 import { handleV22Pay, type V22PayDb } from './v22-pay';

@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { json } from './http';
 
 // 가짜 Supabase(http://127.0.0.1:54399). 테스트마다 응답을 정한다.
