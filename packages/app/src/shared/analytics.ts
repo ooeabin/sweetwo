@@ -492,7 +492,7 @@ export type AnalyticsEvent =
       name: 'salary_change_scheduled' | 'salary_change_cancelled';
       props: { months_ahead: number; has_until: boolean };
     }
-  | { name: 'rank_consent_requested' | 'rank_consent_turned_off'; props: { screen_id: string } }
+  | { name: 'rank_consent_turned_off'; props: { result: 'off' } }
   | {
       name: 'bundle_show_each_toggled';
       props: { entry: string; has_target: boolean; on: boolean };

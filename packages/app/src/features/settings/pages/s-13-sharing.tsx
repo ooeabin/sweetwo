@@ -250,7 +250,7 @@ export function S13Sharing() {
                 on
                   ? nav('/assets/rank/consent')
                   : run(turnOffRankConsent, rankKeys).then(() =>
-                      track('rank_consent_turned_off', { screen_id: 'S-13' }),
+                      track('rank_consent_turned_off', { result: 'off' }),
                     )
               }
             />
