@@ -30,6 +30,7 @@ export const copy = {
   moneyIn: '돈 들어왔어요', // AddRow(+ 아이콘이 ‘+’)
   emptyAsk: '무엇을 같이 모을까요?',
   emptyAdd: '저금 만들기', // AddRow(+ 아이콘이 ‘+’)
+  widgetSaving: '모으는 중', // [확인 필요] 26 WG-01 목표 금액이 없고 금액 가림
   /** 화면 읽기 문장 하나(“같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, …”) */
   togetherLabel: (parts: string[]) => ['같이 모으기', ...parts].filter(Boolean).join(', '),
   targetPctLabel: (pct: number) => `목표 금액의 ${pct}%`,

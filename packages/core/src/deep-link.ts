@@ -3,6 +3,7 @@
 // - sweetwo://auth/callback?error=…&state=… : 브라우저에서 취소, 동의 거부(error는 영문 소문자와 _만)
 // - sweetwo://i/{code} : 초대
 // - sweetwo://n, sweetwo://n/settings : 알림 메일 링크(알림 센터, 알림 설정). 정한 화면만
+// - sweetwo://widget?to=… : 홈 화면 위젯(26 WG-01·WG-04, 2026-11-13). 정한 화면 모양(WIDGET_TO)만, sweetwo://로만
 // - 모바일 앱 링크: https://sweetwo.kr/i/{code}, /n, /n/settings(같은 규칙. 로그인 콜백은 sweetwo://로만)
 // 나머지는 모두 버린다(null).
 export type DeepLink =
@@ -16,6 +17,12 @@ const OPEN: Record<string, string> = {
   n: '/notifications',
   'n/settings': '/settings/notifications',
 };
+
+/** 위젯이 여는 화면: 홈, W-10 저금, W-14 쓸 곳 메모(저금·묶음), Y-01 캘린더, Y-05 경조사 */
+const ID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+const WIDGET_TO = new RegExp(
+  `^/(|salary/items/${ID}(/notes)?|salary/bundles/${ID}/notes|calendar|calendar/day/${ID})$`,
+);
 
 const TOKEN = /^[A-Za-z0-9._~-]{1,512}$/;
 const INVITE = /^[A-Za-z0-9]{4,32}$/;
@@ -50,6 +57,12 @@ export function parseDeepLink(raw: string): DeepLink | null {
     if (!TOKEN.test(state)) return null;
     if (error) return ERROR.test(error) ? { kind: 'auth_error', error, state } : null;
     return TOKEN.test(code) ? { kind: 'auth', code, state } : null;
+  }
+  if (path === 'widget' && url.protocol === 'sweetwo:') {
+    const to = url.searchParams.get('to') ?? '';
+    return WIDGET_TO.test(to) && [...url.searchParams.keys()].length === 1
+      ? { kind: 'open', path: to }
+      : null;
   }
   const open = OPEN[path];
   if (open && !url.search) return { kind: 'open', path: open };

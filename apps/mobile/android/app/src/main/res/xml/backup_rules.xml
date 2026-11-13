@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 백업에서 뺄 것(Android 11 이하): 위젯 값(26, 기기 캐시, 로그아웃 때 지움) -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="sweetwo_widget.xml" />
+</full-backup-content>

@@ -75,6 +75,7 @@ import {
   useUpcomingNotes,
 } from '../data';
 import { H10SaveTogether } from './h-10-save-together';
+import { useWidgetSync, widgetNext, widgetSave } from '../widget-sync';
 import { H11MonthLine } from './h-11-month-line';
 import { H12Wedding } from './h-12-wedding';
 
@@ -184,6 +185,19 @@ export function H01Home() {
         : { goalId: first.goal.id }
       : null,
   );
+
+  // 홈 화면 위젯(26 v2.2): H-10 첫 칸과 H-08 다가오는 날을 금액 없이 브리지로(모바일 앱만, 값이 바뀔 때만)
+  useWidgetSync(!!meId && !!sp && saving.ready && !bundles.isLoading && !!notes.data && !!h.input, {
+    save: widgetSave({
+      hero: first,
+      savedOf: (id) => (saving.ready ? (saving.byId(id)?.saved ?? 0) : 0),
+    }),
+    next: widgetNext({
+      today,
+      care: (h.input ? homeUpcoming(h.input, 365) : []).find((u) => u.kind === 'care'),
+      note: (notes.data ?? []).find((n) => !n.paid && n.due_on),
+    }),
+  });
 
   // 처음 받을 때만 기다림(다시 받는 동안은 홈을 그대로, S4-01)
   const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;

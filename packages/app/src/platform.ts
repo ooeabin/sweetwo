@@ -30,6 +30,27 @@ export interface LockStatus {
   /** 자동 잠금(분). 0 = 사용 안 함 */
   autoLockMin: number;
 }
+/**
+ * 위젯에 둘 값(26 v2.2). 금액은 없음(26 ‘금액 표시’: 기본 가림, S-22 ‘위젯에 금액 보이기’는 아직 없음).
+ * 글은 앱 copy가 만든 그대로, D-n은 위젯이 그날(KST) 다시 셈
+ */
+export interface WidgetData {
+  /** WG-01 같이 모으기: 대표 저금(core pickHeroes 첫 칸). 저금이 없으면 null */
+  save: {
+    name: string;
+    /** 큰 숫자: “62%”, 목표 금액이 없으면 “모으는 중” */
+    big: string;
+    /** 중 크기 막대(0~100). 목표 금액이 없으면 null */
+    pct: number | null;
+    /** 중 크기 한 줄 “2027년 5월까지”. 없으면 null */
+    line: string | null;
+    /** 다 모았으면 배지 글(“다 모았어요”) */
+    done: string | null;
+    to: string;
+  } | null;
+  /** WG-04 다가오는 날: 가장 가까운 경조사 또는 쓸 곳 메모(금액 없음). 없으면 null */
+  next: { name: string; date: string; to: string } | null;
+}
 export type VerifyResult = { ok: true } | { ok: false; failed: number; signedOut: boolean };
 
 export interface AppBridge {
@@ -121,6 +142,14 @@ export interface AppBridge {
    * 못 불러오면 'failed'(앱은 광고 없이 바로 결과). 브라우저와 플러그인이 아직 없는 앱은 ads 없음(광고 없이 바로)
    */
   ads?: { rewarded: () => Promise<'rewarded' | 'closed' | 'failed'> };
+  /**
+   * 홈 화면 위젯(26 WG-01 같이 모으기, WG-04 다가오는 날, 2026-11-13). 앱이 홈 값을 받을 때마다 보여 줄 글만 넘기고
+   * 네이티브가 기기 공유 저장소(iOS App Group, Android 앱 전용 SharedPreferences)에 둔다. 금액·토큰은 넘기지 않음.
+   * 잠금(PIN)·로그아웃은 네이티브가 스스로 처리. 옛 앱·브라우저는 없음
+   */
+  widget?: {
+    update: (d: WidgetData) => Promise<void>;
+  };
   /**
    * 안드로이드 하드웨어 뒤로(2026-11-09). 받는 쪽이 true를 돌려주면 처리한 것, false면 브리지가 기본 동작
    * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS는 없음

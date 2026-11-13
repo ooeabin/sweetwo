@@ -5,6 +5,8 @@
 // - 앱이 없는 휴대폰: “sweeTwo에 초대받았어요” + 코드(크게, ‘복사’) + 그 기기 스토어 버튼
 // - PC: 같은 초대 화면 + 스토어 버튼 2개(2026-11-10 데스크톱 앱과 ‘앱으로 열까요?’ 없앰, ADR 0008)
 // - 코드 없이 /i/: 제목 + “앱을 설치한 뒤 받은 초대 코드를 입력해 주세요” + 스토어 버튼(코드 줄 없음)
+// - 2026-11-13 L-07(28, PR 13): 코드가 있으면 휴대폰 주 버튼을 “앱 받고 합류하기”로. 누르면 코드를 클립보드에 복사하고
+//   (실패해도 그대로) 스토어로. Google Play 링크에는 설치 리퍼러 referrer=invite_{코드}(앱이 첫 실행에 읽음, 15 O-01)
 // 코드가 유효한지는 확인하지 않음(로그인 없이 검증하지 않음, 만료·사용은 앱 P-01 규칙)
 import Download from './Download.astro';
 import { t } from '../lib/site';
@@ -41,6 +43,23 @@ const { always = false } = Astro.props;
       if (row) row.hidden = false;
       const c = document.querySelector<HTMLElement>('[data-code]');
       if (c) c.textContent = code;
+      // 스토어 버튼: 코드 복사(iOS는 앱이 첫 실행에 클립보드를 한 번 읽음) + Play 링크에 설치 리퍼러
+      box.querySelectorAll<HTMLAnchorElement>('a[data-store]').forEach((a) => {
+        if (a.dataset.store === 'google_play') {
+          try {
+            const u = new URL(a.href);
+            u.searchParams.set('referrer', `invite_${code}`);
+            a.href = u.toString();
+          } catch {
+            /* 그대로 */
+          }
+        }
+        const label = a.lastChild;
+        if (a.classList.contains('hg-btn--primary') && label) label.textContent = t.getAndJoin;
+        a.addEventListener('click', () => {
+          void navigator.clipboard?.writeText(code).catch(() => undefined);
+        });
+      });
       document.querySelector('[data-copy]')?.addEventListener('click', () => {
         void navigator.clipboard?.writeText(code).then(() => {
           const s = document.querySelector<HTMLElement>('[data-copied]');

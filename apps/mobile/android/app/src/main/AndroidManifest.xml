@@ -3,6 +3,8 @@
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -41,6 +43,38 @@
             </intent-filter>
 
         </activity>
+
+        <!-- 보상형 광고(AdMob, 23 F-08). 앱 ID는 build.gradle admobAppId(개발은 Google 테스트 앱 ID) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
+        <!-- 홈 화면 위젯(26 WG-01 같이 모으기, WG-04 다가오는 날). 값은 앱이 쓴 것만(WidgetStore) -->
+        <receiver
+            android:name=".SaveTogetherWidget"
+            android:exported="true"
+            android:label="@string/widget_save_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_save_info" />
+        </receiver>
+        <receiver
+            android:name=".UpcomingWidget"
+            android:exported="true"
+            android:label="@string/widget_next_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_next_info" />
+        </receiver>
+        <receiver
+            android:name=".WidgetLockReceiver"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

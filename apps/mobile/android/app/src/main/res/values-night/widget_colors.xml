@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 홈 화면 위젯 색 다크(docs/design/tokens.css 다크 값 그대로) -->
+<resources>
+    <color name="widget_surface">#121315</color>
+    <color name="widget_track">#232325</color>
+    <color name="widget_goal">#2e2620</color>
+    <color name="widget_goal_ink">#e8cfb2</color>
+    <color name="widget_ink">#eff0f2</color>
+    <color name="widget_slate">#afb0b2</color>
+    <color name="widget_brand">#ff9045</color>
+    <color name="widget_brand_soft">#3a2214</color>
+</resources>

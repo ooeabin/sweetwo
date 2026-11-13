@@ -33,6 +33,18 @@
 			</array>
 		</dict>
 	</array>
+	<!-- 보상형 광고(AdMob, 23 F-08). 지금은 Google 테스트 앱 ID. 운영 앱 ID(ca-app-pub-…~…)로 바꿈 [확인 필요].
+	     비맞춤형만(npa=1)이라 앱 추적(ATT)을 묻지 않음: NSUserTrackingUsageDescription을 넣지 않음 -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<!-- Google 광고 네트워크(SKAdNetwork). Google 문서의 목록으로 늘릴 수 있음 [확인 필요] -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>앱 잠금을 Face ID로 풀어요</string>
 	<key>LSRequiresIPhoneOS</key>
