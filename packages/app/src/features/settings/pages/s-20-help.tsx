@@ -10,6 +10,10 @@ import { openSite } from './s-19-about';
 // S-20 도움말(docs/spec/25-settings.md): 자주 묻는 질문(웹사이트 L-06과 같은 원본 apps/site/src/content/faq.md,
 // pnpm content:sync로 복사) + 위에 검색, 문의하기(S-19a), 내 문의, 약관·처리방침, 버전(S-19).
 // 검색 결과가 없으면 “찾는 답이 없어요” + 문의하기.
+// v2.2(Q4): 항목 “상대가 돈을 통제하거나 위협할 때”(1366 등)는 기관 검토 뒤 게시. 검토 전엔 이 플래그로 숨기고 출시
+// (본문은 기관 검토를 받은 뒤 기획서 25 S-20에 넣고 플래그를 켬).
+const HELP_ABUSE_ENABLED = false as boolean;
+
 export function S20Help() {
   const nav = useNavigate();
   const groups = useMemo(() => parseFaq(faqMd), []);
@@ -48,6 +52,7 @@ export function S20Help() {
         ))
       )}
       <div className="hg-list">
+        {HELP_ABUSE_ENABLED && <ListRow label={copy.helpAbuse} chevron={false} />}
         <ListRow label={copy.contact} onClick={() => nav('/settings/help/inquiry')} />
         <ListRow label={copy.myInquiries} onClick={() => nav('/settings/help/inquiries')} />
         <ListRow label={copy.terms} onClick={() => openSite('/terms')} />

@@ -1,22 +1,25 @@
 import { daysBetween, todayKst } from '@sweetwo/core';
 import { copy } from './copy';
 
-// 연결 해제 공통(25 S-12a·d): 같이 쓰던 데이터는 나누지 않고 모두 지움(2026-10-26 결정).
+// 연결 해제 공통(25 S-12a·d, 08 7장 v2.2): 내 것은 남기고 같이 쓰던 것만 지움(2026-11-13, ADR 0009 결정 9).
 
-/** 지워지는 것(S-12a 2번, S-12d 2번) */
+/** 남는 것 / 지워지는 것(S-12a, S-12d) */
 export function UnlinkDeleted() {
   return (
-    <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-      <b>{copy.unlinkAll}</b>
-      <ul
-        className="hg-stack"
-        style={{ gap: 'var(--space-1)', paddingLeft: 'var(--space-5)', margin: 0 }}
-      >
-        {copy.unlinkList.map((x) => (
-          <li key={x}>{x}</li>
-        ))}
-      </ul>
-    </div>
+    <dl className="hg-stack" style={{ gap: 'var(--space-3)', margin: 0 }}>
+      <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+        <dt>
+          <b>{copy.unlinkKeepTitle}</b>
+        </dt>
+        <dd style={{ margin: 0 }}>{copy.unlinkKeep}</dd>
+      </div>
+      <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+        <dt>
+          <b>{copy.unlinkGoneTitle}</b>
+        </dt>
+        <dd style={{ margin: 0 }}>{copy.unlinkGone}</dd>
+      </div>
+    </dl>
   );
 }
 

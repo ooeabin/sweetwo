@@ -120,10 +120,10 @@ reset role;
 -- 합쳐서: 새 항목은 우리 둘 것(공동 월급 계획) → 다시 각자: 만든 사람 월급 계획으로 통째로 + 그 사람이 주인
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select public.add_saving_item('이사', 400000);
 select is((select owner_user_id from public.goal where id = pg_temp.item('이사')), null, '합쳐서: 주인 없음(우리 둘)');
-select public.set_salary_mode('separate');
+reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select results_eq(
   $$ select s.owner_user_id, l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
      where l.goal_id = pg_temp.item('이사') $$,

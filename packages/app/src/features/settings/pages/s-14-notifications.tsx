@@ -1,12 +1,17 @@
 import {
   fetchMarketing,
+  fetchSplits,
   qk,
   registerPushDevice,
   setMarketing,
+  setPushKinds,
   updateMe,
   type Me,
 } from '@sweetwo/api';
 import {
+  isNonManager,
+  pushKindOn,
+  type PushKind,
   formatDateFull,
   notiPrefs,
   CONSENT_VERSIONS,
@@ -30,6 +35,15 @@ import { useSettingsData } from '../data';
 // 마케팅 정보 받기(기본 꺼짐): 켜고 끌 때마다 동의 기록(consent, 추가만), 켜면 “{날짜} 동의”.
 // 모바일 앱에서 휴대폰 알림 권한이 꺼져 있으면(브리지 push.status) “휴대폰 설정에서 알림을 켜 주세요” + ‘설정 열기’, 푸시 토글은 꺼짐으로.
 // 푸시가 꺼져 있으면 묶음 줄·경조사 체크도 꺼짐으로 보임(저장된 묶음 값은 그대로, 2026-11-12 QA 11구간 S11-04).
+// v2.2(2026-11-13): ‘알림 종류’ = P-11과 같은 목록(app_user.push_kinds: care, payday(손 줄이 있을 때만), achieved,
+// shared_change(같이 계열만, 관리하지 않는 쪽 기본 끔), my_allowance(관리하지 않는 쪽만), progress_news) + 잠금 화면 한 줄.
+// 같은 일을 하는 옛 묶음(plan, partner_change, goal)도 같은 값으로 맞춤(서버 claim_push가 둘 다 봄).
+// 금융 일정·파트너 초대와 경조사 시점은 ‘그 밖의 알림’으로 그대로.
+const KIND_TOPIC: Partial<Record<PushKind, NotiTopic>> = {
+  payday: 'plan',
+  shared_change: 'partner_change',
+  achieved: 'goal',
+};
 const CARE: NotiTopic[] = ['care_30', 'care_14', 'care_7', 'care_0'];
 
 export function S14Notifications() {
@@ -37,6 +51,7 @@ export function S14Notifications() {
   const qc = useQueryClient();
   const d = useSettingsData();
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
+  const splits = useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
   // 휴대폰 알림 권한(모바일 앱만). 설정 앱에서 바꾸고 돌아오면 다시 읽음
   const [osDenied, setOsDenied] = useState(false);
   useEffect(() => {
@@ -52,7 +67,16 @@ export function S14Notifications() {
     document.addEventListener('visibilitychange', onShow);
     return () => document.removeEventListener('visibilitychange', onShow);
   }, []);
-  if (d.loading || !d.me || !d.c) return <LoadingFrame sub="settings" current={null} />;
+  // 관리하지 않는 쪽은 ‘같이 쓰는 걸 바꿨을 때’ 기본 끔(18 P-11 표). 서버는 없는 키 = 켬이라 한 번 적어 둠
+  const nonManagerMe = !!d.me && !!d.space && isNonManager(d.space, d.me.id);
+  const kindsRaw = (d.me?.push_kinds ?? {}) as Record<string, boolean>;
+  useEffect(() => {
+    if (!d.me || !nonManagerMe || 'shared_change' in kindsRaw) return;
+    void setPushKinds(d.me.id, kindsRaw, { shared_change: false })
+      .then(() => qc.invalidateQueries({ queryKey: qk.me }))
+      .catch(() => undefined);
+  }, [d.me?.id, nonManagerMe]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const prefs = notiPrefs(d.me.noti_prefs);
   // 보이는 푸시 상태: 내 설정이 켜져 있고 휴대폰도 허용
   const pushOn = prefs.push && !osDenied;
@@ -71,6 +95,43 @@ export function S14Notifications() {
       await qc.invalidateQueries({ queryKey: qk.me });
     }
   };
+  const kinds = kindsRaw;
+  const joint = d.space.salary_mode === 'joint';
+  // 손 줄(체크리스트에 넣고 자동이 아닌 줄)이 있는 월급 계획(내 것 또는 공동)
+  const manual = (splits.data ?? []).some(
+    (sp) =>
+      (sp.owner_user_id === me.id || sp.owner_user_id === null) &&
+      sp.split_line.some((l) => l.in_checklist && !l.auto_pay && l.amount > 0),
+  );
+  const setKind = async (k: PushKind, on: boolean) => {
+    qc.setQueryData<Me | null>(qk.me, (m) =>
+      m ? { ...m, push_kinds: { ...kinds, [k]: on } as never } : m,
+    );
+    try {
+      await setPushKinds(me.id, kinds, { [k]: on });
+      const t = KIND_TOPIC[k];
+      if (t)
+        await updateMe({
+          noti_prefs: {
+            ...prefs,
+            topics: { ...prefs.topics, [t]: { ...prefs.topics[t], push: on } },
+          } as never,
+        });
+    } catch {
+      toast(copy.failed);
+    } finally {
+      await qc.invalidateQueries({ queryKey: qk.me });
+    }
+  };
+  const kindRow = (k: PushKind, label: string) => (
+    <Toggle
+      key={k}
+      label={label}
+      checked={pushOn && pushKindOn(kinds, k)}
+      disabled={!pushOn}
+      onChange={(on) => setKind(k, on)}
+    />
+  );
   const setTopic = (t: NotiTopic, on: boolean) =>
     void save({ ...prefs, topics: { ...prefs.topics, [t]: { ...prefs.topics[t], push: on } } });
   const setPush = async (on: boolean) => {
@@ -130,15 +191,19 @@ export function S14Notifications() {
       </section>
       <section className="hg-card hg-stack" aria-label={copy.notiTopics} style={{ gap: 0 }}>
         <span className="hg-card__label">{copy.notiTopics}</span>
-        {topicRow('plan', copy.groups.plan)}
-        {c.joined &&
-          topicRow(
-            'partner_change',
-            copy.groups.partner_change(c.partnerName),
-            copy.partnerChangeSub,
-          )}
+        {kindRow('care', copy.kinds.care)}
+        {manual && kindRow('payday', copy.kinds.payday)}
+        {kindRow('achieved', copy.kinds.achieved)}
+        {joint && c.joined && kindRow('shared_change', copy.kinds.shared_change(c.partnerName))}
+        {nonManagerMe && kindRow('my_allowance', copy.kinds.my_allowance)}
+        {kindRow('progress_news', copy.kinds.progress_news)}
+        <p className="hg-help" style={{ margin: 0 }}>
+          {copy.lockScreenNote}
+        </p>
+        <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
+          {copy.otherAlerts}
+        </span>
         {topicRow('money', copy.groups.money)}
-        {topicRow('goal', copy.groups.goal)}
         {topicRow('invite', copy.groups.invite)}
         <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
           {copy.careAlerts}

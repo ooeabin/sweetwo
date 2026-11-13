@@ -97,6 +97,8 @@ export const qk = {
   rankRequest: ['rank_consent_request'] as const,
   /** 내가 순위를 본 적이 있나(rank_view, 첫 조회 무료 판단) */
   rankViewed: ['rank_view'] as const,
+  /** 다시 연결 요청(reconnect_request, 보낸 것·받은 것). 해제 기록 키 아래라 해제가 바뀌면 같이 */
+  reconnectRequests: ['couple_unlink', 'reconnect_request'] as const,
 };
 
 /** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */

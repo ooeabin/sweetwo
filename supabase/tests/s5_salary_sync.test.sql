@@ -99,7 +99,7 @@ select public.complete_join(jsonb_build_array(
 ));
 
 -- 각자 → 합쳐서(예빈이 바꿈)
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select amount from public.split_line where kind = 'custom' and name = '관리비'), 200000::bigint,
   '같은 이름 직접 추가 줄은 금액을 더해 한 줄(15만 + 5만)');
 select is((select count(*)::int from public.split_line where kind = 'custom' and name = '관리비'), 1, '관리비는 한 줄');

@@ -1,6 +1,24 @@
 import { useState } from 'react';
-import { fetchAvatars, fetchLoginEmail, qk, removeAvatar, updateSpace } from '@sweetwo/api';
-import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
+import {
+  cancelSalaryChange,
+  fetchAvatars,
+  fetchLoginEmail,
+  fetchSalaryChanges,
+  qk,
+  removeAvatar,
+  salaryChangeKeys,
+  updateSpace,
+} from '@sweetwo/api';
+import {
+  coupleBaseDay,
+  formatDateFull,
+  formatManWon,
+  manageStyleOf,
+  salaryChangeMonthsAhead,
+  salaryChangeState,
+  todayKst,
+  type BaseDay,
+} from '@sweetwo/core';
 import { Badge, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -15,13 +33,16 @@ import { useSettingsData } from '../data';
 // 결혼 상태(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
 // 월급: 내 월급(→ S-11c, 합류 뒤 파트너 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
 // 주말·공휴일 앞당기기(두 사람 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
+// v2.2: 관리 방식 값은 관리 형태 이름(08 2장), 예약한 월급 변경은 월급 줄 아래 회색 “2027년 3월부터 160만 원” + ‘취소’(S-11c 4번).
 export function S11Me() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
   const loginEmail = useQuery({ queryKey: qk.loginEmail, queryFn: fetchLoginEmail });
+  const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
   const [clearing, setClearing] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
   const later = coupleBaseDay(c);
@@ -40,6 +61,28 @@ export function S11Me() {
           Number(sp.wedding_month.slice(5, 7)),
         )
       : copy.undecidedValue;
+
+  // 예약한(아직 적용 안 한) 내 월급 변경 중 가장 가까운 것
+  const scheduled = (changes.data ?? [])
+    .filter((x) => x.user_id === me.id && salaryChangeState(x) === 'scheduled')
+    .sort((a, b) => a.effective_from.localeCompare(b.effective_from))[0];
+  const cancelChange = async () => {
+    if (!scheduled || cancelling) return;
+    setCancelling(true);
+    try {
+      await cancelSalaryChange(scheduled.id);
+      track('salary_change_cancelled', {
+        months_ahead: salaryChangeMonthsAhead(todayKst().slice(0, 7), scheduled.effective_from),
+        has_until: !!scheduled.until_month,
+      });
+      await Promise.all(salaryChangeKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
+      toast(copy.salaryChangeCancelled);
+    } catch {
+      toast(copy.failed);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   // 프로필 사진(직접 올린 사진 또는 처음 가져온 소셜 계정 사진). 없으면 이름 첫 글자(2026-11-05 지정 아바타 없앰)
   const photo = avatars.data?.photos[me.id] ?? null;
@@ -178,12 +221,44 @@ export function S11Me() {
             value={copy.salaryValue(man(me.monthly_income ?? 0), dayText(c.myPayday))}
             onClick={() => nav('/settings/me/salary')}
           />
+          {scheduled && (
+            <div
+              className="hg-row"
+              style={{
+                gap: 'var(--space-2)',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <p className="hg-help" style={{ margin: 0 }}>
+                {copy.salaryScheduled(
+                  Number(scheduled.effective_from.slice(0, 4)),
+                  Number(scheduled.effective_from.slice(5, 7)),
+                  man(scheduled.amount),
+                )}
+                {scheduled.until_month &&
+                  ` ${copy.salaryScheduledUntil(
+                    Number(scheduled.until_month.slice(0, 4)),
+                    Number(scheduled.until_month.slice(5, 7)),
+                  )}`}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hg-btn--link"
+                loading={cancelling}
+                onClick={() => void cancelChange()}
+              >
+                {copy.cancelChange}
+              </Button>
+            </div>
+          )}
           {!c.solo && (
             <ListRow
               label={copy.salaryMode}
               sub={locked ? copy.unlinkPendingLocked : undefined}
-              value={copy.salaryModeValue[sp.salary_mode]}
-              onClick={locked ? undefined : () => nav('/settings/me/salary-mode')}
+              value={copy.styleNames[manageStyleOf(sp)]}
+              onClick={locked ? undefined : () => nav('/settings/couple/style')}
             />
           )}
           {/* 합쳐서 + 파트너 합류일 때만(고를 날이 두 월급날) */}

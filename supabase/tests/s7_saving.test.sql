@@ -72,7 +72,7 @@ select is((select name from public.goal where id = current_setting('test.trip'):
 -- 합쳐서로 바꿈: 찬우 저금은 주인(찬우) 그대로, 공동 월급 계획 줄
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 reset role;
 select is((select owner_user_id from public.goal where id = current_setting('test.trip')::uuid),
   '11111111-1111-1111-1111-111111111111'::uuid, '합쳐서: 각자일 때 만든 저금은 주인 그대로');
@@ -121,7 +121,7 @@ select is((select name from public.goal where id = current_setting('test.secret'
 -- 다시 각자: 파트너 저금은 다시 보기만
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.set_salary_mode('separate');
+reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 select throws_ok($$ select public.saving_item_stop(current_setting('test.trip')::uuid) $$, '42501', 'not_owner',
   '다시 각자: 파트너 저금은 보기만');

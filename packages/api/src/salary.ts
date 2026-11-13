@@ -159,13 +159,7 @@ export async function fetchGoalLines(
   return (data ?? []) as never;
 }
 
-/** S-11f 월급 관리 방식 바꾸기(월급 계획 합치기·나누기는 서버, 체크리스트는 다음 월급날부터). 해제 대기 중이면 'unlink_pending' */
-export async function setSalaryMode(mode: 'separate' | 'joint'): Promise<'ok' | 'unlink_pending'> {
-  const { error } = await supabase().rpc('set_salary_mode', { p_mode: mode });
-  if (error?.message?.includes('unlink_pending')) return 'unlink_pending';
-  fail(error);
-  return 'ok';
-}
+// 옛 set_salary_mode는 앱 역할 권한을 회수함(20261205090000). 관리 형태 바꾸기는 couple.ts requestModeChange만
 
 /** S-11d 체크리스트 만드는 날(합쳐서 + 합류): 두 사람 월급날 중 하나(말일 = 31) */
 export async function setJointCycleDay(day: number) {

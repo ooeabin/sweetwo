@@ -15,7 +15,7 @@ type PinFor = 'off' | 'change';
 
 // S-15 보안(docs/spec/25-settings.md): 앱은 앱 잠금 켜기·끄기, PIN 바꾸기(A-06), 생체 인증(Face ID·Touch ID·지문), 자동 잠금
 // 1·5·15분·사용 안 함(기본 5분). 잠금 끄기·PIN 바꾸기 전 현재 PIN 확인. 로그인된 기기 목록(웹도): 기기별 ‘로그아웃’,
-// “모든 기기에서 로그아웃”(이 기기도 로그아웃 → A-02).
+// “모든 기기에서 로그아웃”(이 기기도 로그아웃 → A-02). 2026-11-13 PIN은 선택: 꺼져 있으면 맨 위 권장 한 줄 + ‘켜기’.
 export function S15Security() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -90,6 +90,24 @@ export function S15Security() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
+      {/* v2.2(R1): 앱 잠금은 권장, 꺼져 있으면 맨 위 권장 한 줄 + ‘켜기’(25 S-15) */}
+      {bridge && lock && !lock.hasPin && (
+        <div
+          className="hg-row"
+          style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <p className="hg-help" style={{ margin: 0 }}>
+            {copy.lockRecommend}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => nav(`${paths.pinSetup}?next=/settings/security`)}
+          >
+            {copy.lockTurnOn}
+          </Button>
+        </div>
+      )}
       {bridge && lock && (
         <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <Toggle

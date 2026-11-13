@@ -181,7 +181,8 @@ export function QuestionLayout({
   /** loading: 이 글자 버튼이 서버 일을 기다리는 중(2026-11-06, 누르기 막고 0.3초 뒤 도는 원) */
   later?: { label: string; onClick: () => void; loading?: boolean };
   /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */
-  secondary?: { label: string; onClick: () => void; loading?: boolean };
+  /** disabled: 오프라인 등으로 못 누름(2026-11-13 S-12d ‘해제할게요’) */
+  secondary?: { label: string; onClick: () => void; loading?: boolean; disabled?: boolean };
   onBack?: () => void;
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
@@ -334,6 +335,7 @@ export function QuestionLayout({
                 type="button"
                 className={`hg-btn hg-btn--secondary hg-q__second${secondShown ? ' is-loading' : ''}`}
                 aria-busy={secondary.loading || undefined}
+                disabled={secondary.disabled}
                 onClick={() => !busy && secondary.onClick()}
               >
                 {secondary.label}

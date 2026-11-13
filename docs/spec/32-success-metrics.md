@@ -91,7 +91,7 @@
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
-| `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음 |
+| `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음. 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11) |
 
 ## 1. 핵심 지표 (North Star)
 
@@ -264,7 +264,7 @@
 | data\_exported | S-18 내보내기 끝 | format(csv / pdf), scope(mine / joint), result(done / failed / async) |
 | trash\_restored | S-21 되살리기(2026-11-12 앱에 넣음, entry `trash`, relinked = 서버가 ‘따로 되살렸어요’가 아님), Toast ‘되돌리기’(2026-11-12 S8-07: F-04 삭제 Toast ‘되돌리기’, item\_type `asset`, days\_in\_trash 0) | item\_type, days\_in\_trash, relinked(연결 대상이 남아 있었는지), entry(trash / toast) |
 | rejoin\_requested | S-12 “다시 연결하기”(2026-11-11 앱에 넣음) | days\_since\_unlink |
-| rejoin\_responded | S-12g “다시 연결할게요” / “괜찮아요” | response(accept / decline), hours\_since\_request |
+| rejoin\_responded | S-12g “연결할게요” / “괜찮아요” / “다시 받지 않을게요”(2026-11-13) | response(accept / decline / block), hours\_since\_request |
 | home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings` / `retry`: 큰 상자 오류 카드 ‘다시 시도’, 2026-11-11), todo(할 일 띠 종류, band일 때만: `unlink` / `reconnect` / `review` / `check` / `saving` / `matured` / `care` / `invite`, 2026-11-11 초대 띠도 같은 띠) |
 | home\_banner\_tapped | 홈 맨 위 띠의 버튼을 누름 (19 ‘맨 위 띠’, 2026-11-11) | banner(`unlink` / `must_notice` / `mail_bounced` / `notice`), action(`open`: ‘확인하기’·공지 ‘보기’ / `close`: 일반 공지 ‘닫기’) |
 | menu\_item\_tapped | 좁은 창 메뉴 서랍 줄을 누름 (19 앱 기본 틀 11번, 2026-11-09) | item(`home` / `salary` / `assets` / `calendar` / `me` / `settings` / `couple` / `invite` / `notice` / `inquiry` / `help`) |

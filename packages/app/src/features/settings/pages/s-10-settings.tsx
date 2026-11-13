@@ -73,7 +73,12 @@ export function S10Settings() {
         {c.joined && (
           <ListRow
             label={copy.rows.visibility}
-            value={copy.rows.visibilityValue(copy.vis[d.me.default_visibility] ?? '')}
+            value={
+              // v2.2: 요약 값은 내 월급 계획 공개 단계(같이 계열은 늘 모두)
+              d.space?.salary_mode === 'joint'
+                ? copy.planShareJoint
+                : (copy.planShares[d.me.plan_share] ?? '')
+            }
             onClick={() => nav('/settings/visibility')}
           />
         )}

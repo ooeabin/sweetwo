@@ -369,7 +369,7 @@ test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 �
   await expect(page.getByText('그만 모은 저금 1개')).toBeVisible();
 });
 
-test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주기’면 “개인 저금”, S-13 내 저금 항목 공개 범위', async ({
+test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주기’면 “개인 저금”, S-13에는 저금마다 공개 없음', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -416,15 +416,10 @@ test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주�
   await expect(page.getByRole('button', { name: '고치기' })).toHaveCount(0);
   await expect(page.getByText('예빈 카메라')).toHaveCount(0);
 
+  // 2026-11-13 v2.2: 저금마다 공개는 없앰(S-13 ① 내 월급 계획 한 곳)
   await page.goto('/settings/visibility');
-  const pick = page.getByRole('button', { name: /찬우 자전거/ });
-  await expect(pick).toContainText('모두 보여 주기');
-  await pick.click();
-  await page
-    .getByRole('dialog', { name: '찬우 자전거 공개 범위' })
-    .getByRole('radio', { name: '금액만 보여 주기' })
-    .click();
-  await expect.poll(() => db.goals.find((g) => g.id === 'goal-c')?.visibility).toBe('amount');
+  await expect(page.getByRole('button', { name: /^내 월급 계획/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /찬우 자전거/ })).toHaveCount(0);
   await axe(page);
 });
 

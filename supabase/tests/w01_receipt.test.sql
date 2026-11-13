@@ -185,7 +185,7 @@ update public.app_user set plan_share = 'all'; -- v2.2 공개 단계: 예빈 월
 -- 관리 방식 각자 → 합쳐서: 찬우는 고정지출이 없음(0원으로 셈) → 공동 고정지출 = 예빈 것만
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select amount from public.split_line where id = pg_temp.sl(null, 'fixed')), 680000::bigint,
   '한쪽에 없는 고정지출은 0원으로 더함');
 select is((select count(*)::int from public.split_line where split_id = pg_temp.split(null) and kind = 'allowance'), 2,
@@ -201,7 +201,7 @@ set local role authenticated;
 select lives_ok(format('select public.split_line_add(%L, %L, 300000, %L)', pg_temp.split(null), 'custom', '보험료'),
   '찬우도 공동 월급 계획에 추가');
 -- 합쳐서 → 각자: 공동에 고정지출이 없으면 각자에도 없음, 용돈은 사람마다
-select public.set_salary_mode('separate');
+reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select count(*)::int from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.space_id = (select space_id from public.app_user where id = auth.uid()) and l.kind = 'fixed'), 0,
   '없는 고정지출은 각자에도 없음');

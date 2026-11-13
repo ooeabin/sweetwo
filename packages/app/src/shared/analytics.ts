@@ -105,7 +105,7 @@ export type AnalyticsEvent =
   | {
       // S-12g ‘다시 연결할게요’ / ‘괜찮아요’
       name: 'rejoin_responded';
-      props: { response: 'accept' | 'decline'; hours_since_request: number };
+      props: { response: 'accept' | 'decline' | 'block'; hours_since_request: number };
     }
   | {
       // S-12c 요청. exported_data = 요청 전 24시간 안에 이 기기에서 S-18 내보내기를 끝냈는지(2026-11-12 QA 11구간 S11-06)
@@ -431,6 +431,71 @@ export type AnalyticsEvent =
   | {
       name: 'plan_link_tapped';
       props: { whose: 'self' | 'partner' | 'joint'; checked: number; total: number };
+    }
+  // ── v2.2 PR 11 공개·관계·설정(32 0-4) ──
+  | {
+      name: 'reconnect_blocked';
+      props: { reason: 'too_soon' | 'reconnect_closed' };
+    }
+  | {
+      name: 'mode_change_requested';
+      props: {
+        phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
+        to_mode: 'separate' | 'joint';
+        result: 'applied' | 'requested';
+      };
+    }
+  | {
+      name: 'mode_change_answered';
+      props: {
+        phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
+        to_mode: 'separate' | 'joint';
+        result: 'accepted' | 'declined' | 'expired';
+      };
+    }
+  | {
+      name: 'mode_change_cancelled';
+      props: {
+        phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
+        to_mode: 'separate' | 'joint';
+      };
+    }
+  | {
+      name: 'manage_answers_saved';
+      props: {
+        shared_living: boolean;
+        shared_saving: boolean | null;
+        manager: 'self' | 'partner' | 'both' | 'each' | null;
+        salary_mode: 'separate' | 'joint';
+        screen_id: string;
+      };
+    }
+  | {
+      name: 'plan_share_changed';
+      props: { from: string; to: string; screen_id: string };
+    }
+  | { name: 'share_preview_viewed'; props: Record<string, never> }
+  | {
+      // name_code: 칩 ‘생활비 통장’ living, ‘데이트 통장’ date, 직접 쓴 이름 custom(이름은 보내지 않음)
+      name: 'split_proposed';
+      props: { name_code: 'living' | 'date' | 'custom'; rule: 'half' | 'income_ratio' | 'custom' };
+    }
+  | {
+      name: 'split_answered';
+      props: {
+        name_code: 'living' | 'date' | 'custom';
+        rule: 'half' | 'income_ratio' | 'custom';
+        result: 'accepted' | 'declined' | 'expired';
+      };
+    }
+  | {
+      name: 'salary_change_scheduled' | 'salary_change_cancelled';
+      props: { months_ahead: number; has_until: boolean };
+    }
+  | { name: 'rank_consent_turned_off'; props: { result: 'off' } }
+  | {
+      name: 'bundle_show_each_toggled';
+      props: { entry: string; has_target: boolean; on: boolean };
     }
   | {
       name: 'unlink_resolved';

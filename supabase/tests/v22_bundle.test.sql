@@ -127,7 +127,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.bundle_leave(current_setting('test.b')::uuid);
 select is((select count(*)::int from public.goal where bundle_id is not null), 0, '풀면 저금은 각자에게');
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select throws_ok(format('select public.bundle_create(%L)', current_setting('test.cg')), '22023', 'joint_engine', '합쳐서 엔진은 거절');
 reset role;
 

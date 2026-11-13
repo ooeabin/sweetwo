@@ -1,4 +1,4 @@
-import { qk, splitKeys } from '@sweetwo/api';
+import { manageKeys, qk, salaryChangeKeys, splitAccountKeys, splitKeys } from '@sweetwo/api';
 
 /** 우리 둘·월급 계획이 바뀌는 알림이면 같이 다시 읽을 것(우리 둘 상태, 파트너, 나, 월급 계획, 체크리스트, 저금, 모은 금액) */
 const COUPLE_KEYS = [qk.space, qk.partner, qk.me, ...splitKeys] as const;
@@ -13,7 +13,12 @@ export function notiKeys(kind: string): readonly Key[] | 'all' {
   if (kind === 'unlink_confirmed' || kind === 'reconnected') return 'all';
   // 파트너 합류(시작한 사람에게): 우리 둘 상태·파트너·초대 코드·공동 데이터
   if (kind === 'partner_joined') return [...COUPLE_KEYS, qk.latestInvite, qk.partnerAssetSums];
-  if (kind === 'reconnect_requested') return [qk.myUnlink];
+  if (kind === 'reconnect_requested') return [qk.myUnlink, qk.reconnectRequests];
+  // v2.2: 관리 형태 요청·결과(S-11j), 분담 제안·결과(W-01c), 월급이 바뀐 달, 내 용돈(한 사람 관리형)
+  if (kind === 'mode_request' || kind === 'mode_result') return manageKeys;
+  if (kind === 'split_request' || kind === 'split_result') return splitAccountKeys;
+  if (kind === 'salary_changed') return salaryChangeKeys;
+  if (kind === 'my_allowance') return splitKeys;
   // 해제 요청·취소·기한: 우리 둘 상태와 해제 기록, 파트너
   if (kind.startsWith('unlink_')) return [qk.space, qk.unlink, qk.partner];
   if (/^(access|inquiry)_/.test(kind)) return [qk.inquiries];

@@ -54,7 +54,7 @@ select public.complete_join(jsonb_build_array(
 ));
 
 -- 합쳐서로: 같은 목표 더하고, 고정·생활 더하고, 용돈은 사람마다, 내 목표 줄 그대로
-select public.set_salary_mode('joint');
+reset role; select public.set_salary_mode('joint'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select count(*) from public.salary_split), 1::bigint, '월급 계획 하나');
 select is((select amount from public.split_line where goal_id = (select id from public.goal where template = 'home')),
   2020000::bigint, '같은 목표 줄은 더함');
@@ -74,7 +74,7 @@ select throws_ok($$ select public.set_joint_cycle_day(15::smallint) $$, '22023',
 select lives_ok($$ select public.set_joint_cycle_day(10::smallint) $$, '예빈 월급날로');
 
 -- 다시 각자로: 수입 비율로 나눔(남는 차이는 기준일 사람), 용돈·내 목표는 주인에게
-select public.set_salary_mode('separate');
+reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select count(*) from public.salary_split), 2::bigint, '월급 계획 둘');
 select is((select array_agg(l.amount order by s.owner_user_id) from public.split_line l join public.salary_split s on s.id = l.split_id
   where l.kind = 'fixed'), array[880000, 680000]::bigint[], '고정지출을 수입 비율로(156만 × 270/620 = 68만, 나머지 88만)');

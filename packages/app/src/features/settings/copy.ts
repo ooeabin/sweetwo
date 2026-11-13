@@ -17,7 +17,6 @@ export const copy = {
   rows: {
     couple: '우리 둘 정보', // [확인 필요]
     visibility: '공개 범위',
-    visibilityValue: (v: string) => `내 자산 ${v}`, // [확인 필요]
     noti: '알림',
     security: '보안',
     lockOn: '앱 잠금 켜짐',
@@ -159,44 +158,41 @@ export const copy = {
 
   // S-12a·c·d 연결 해제(같이 쓰던 데이터는 나누지 않고 모두 지움)
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
-  unlinkAll: '해제되면 두 분이 같이 쓰던 데이터가 모두 지워져요', // [확인 필요]
-  unlinkList: ['저금', '월급 계획과 체크리스트', '자산과 부채', '경조사', '활동과 알림 기록'], // [확인 필요]
+  // 2026-11-13 v2.2(08 7장): 내 것은 남기고 같이 쓰던 것만 지움 [확인 필요]
+  unlinkKeepTitle: '남는 것',
+  unlinkKeep: '내 명의 자산과 대출, 내 저금과 저금 내역',
+  unlinkGoneTitle: '지워지는 것',
+  unlinkGone: '같이 쓰던 월급 계획과 저금, 공동 명의, 경조사',
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
-  unlinkRestart: '해제되면 혼자 쓰기로 처음부터 다시 시작해요', // [확인 필요]
-  unlinkReconnect: '해제된 뒤 30일 안에는 다시 연결할 수 있어요', // [확인 필요] 2026-11-11 D8 S-12a·d
   exportFirst: '먼저 내보내기',
   next: '다음',
   requestedBy: (name: string) => `${name}님이 연결 해제를 요청했어요`,
   unlinkOn: (md: string) => `${md}에 해제돼요`, // [확인 필요]
-  acknowledge: '지금 해제하기', // [확인 필요] 2026-11-11 D3 ‘확인했어요’ 대신, 확인 Modal 뒤에 확정
+  unlinkYes: '해제할게요', // [확인 필요] 2026-11-13 S-12d 보조(주 버튼은 ‘먼저 내보내기’)
   unlinkNowQ: '지금 연결을 해제할까요?', // [확인 필요] D3 확인 Modal
   unlinkNowBody: (md: string) =>
-    `${md}을 기다리지 않고 바로 해제돼요. 같이 쓰던 데이터는 모두 지워져요`, // [확인 필요]
+    `${md}을 기다리지 않고 바로 해제돼요. 같이 쓰던 것만 지워지고 각자 것은 남아요`, // [확인 필요] 2026-11-13
   unlinkNowOk: '해제할게요', // [확인 필요]
   unlinkNowKeep: '다시 생각할게요', // [확인 필요]
   /** 13 공통 상태 9번(오프라인에서 막힌 동작, 버튼 위 한 줄) */
   needOnline: '인터넷에 연결되면 할 수 있어요',
   unlinkedTitle: '연결이 해제됐어요', // [확인 필요]
-  unlinkedHelp: '같이 쓰던 데이터는 지웠어요. 혼자 쓰기로 처음부터 시작해요', // [확인 필요]
+  unlinkedHelp: '같이 쓰던 것만 지웠어요. 내 저금과 자산은 그대로예요', // [확인 필요] 2026-11-13 v2.2
   startSolo: '시작하기', // [확인 필요]
-  reconnectNote: '30일 안에 다시 연결하면 되돌릴 수 있어요',
   reconnectWhere: '설정 › 우리 둘 정보에서 다시 연결할 수 있어요', // [확인 필요] 2026-11-11 S3-16 S-12h
-  reconnectUntil: (md: string) => `${md}까지 다시 연결할 수 있어요`, // [확인 필요] 혼자 쓰기 S-12
   ok: '확인', // [확인 필요]
   newInvite: '새로 초대하기',
   reconnect: '다시 연결하기',
   reconnectSent: (name: string) => `${name}님에게 다시 연결하자고 했어요`, // [확인 필요]
   reconnectAsked: (name: string) => `${name}님이 다시 연결하자고 해요`,
-  reconnectBack: '연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요', // [확인 필요]
-  reconnectDiscard: '해제 뒤 새로 적은 내용은 지워져요', // [확인 필요]
-  reconnectYes: '다시 연결할게요',
+  // 2026-11-13 v2.2 S-12g: 복구 없는 새 연결(D10), 7일에 1번 [확인 필요]
+  reconnectFresh: '연결하면 새로 같이 시작해요',
+  reconnectYes: '연결할게요',
   reconnectNo: '괜찮아요',
-  reconnectExpired: '다시 연결할 수 있는 기간이 지났어요',
-  // 2026-11-11 S3-19: 수락 확인 Modal [확인 필요]
-  reconnectQ: '다시 연결할까요?',
-  reconnectQBody: '해제 뒤 새로 적은 내용은 지워지고 해제 전 데이터로 돌아가요',
-  reconnectOk: '다시 연결할게요',
-  reconnectKeep: '다시 생각할게요',
+  reconnectBlock: '다시 받지 않을게요',
+  reconnectGone: '지금은 받은 요청이 없어요',
+  reconnectTooSoon: '다시 연결 요청은 7일에 한 번 보낼 수 있어요',
+  reconnectClosed: '지금은 다시 연결할 수 없어요',
   confirmQ: '확인을 위해 ‘연결 해제’라고 적어 주세요', // [확인 필요]
   confirmWord: '연결 해제',
   send: '연결 해제 요청하기', // [확인 필요]
@@ -540,6 +536,150 @@ export const copy = {
   photoAgain: '다시 고르기',
   photoSave: '저장할게요',
   photoSaved: '사진을 바꿨어요',
+
+  // ───────── v2.2(2026-11-13, ADR 0009, 25 ‘설정 v2.2’) ─────────
+  // S-11·S-11f 관리 형태 이름(08 2장 표) [확인 필요]
+  styleNames: {
+    one_manager: '한 사람이 관리해요',
+    together: '합쳐서 관리해요',
+    living_saving: '생활비와 저금을 같이 해요',
+    living_only: '생활비만 같이 해요',
+    saving_only: '저금만 같이 해요',
+    separate: '각자 따로 해요',
+  } as Record<string, string>,
+  // S-11c 예약 표시(S-11 월급 줄 아래 회색) [확인 필요]
+  salaryScheduled: (y: number, m: number, amount: string) => `${y}년 ${m}월부터 ${amount}`,
+  salaryScheduledUntil: (y: number, m: number) => `${y}년 ${m}월까지`,
+  cancelChange: '취소',
+  salaryChangeCancelled: '월급 변경을 취소했어요', // [확인 필요]
+  // S-11c 1 공개 고지(O-31과 같음, 17 O-31 5번) + ‘바꾸기’. 저금만 말고 두 단계 문구는 [확인 필요]
+  shareNote: {
+    saving_only: '파트너에게는 저금만 보여요',
+    all: '파트너에게는 월급 계획이 모두 보여요', // [확인 필요]
+    done_only: '파트너에게는 했어요만 보여요', // [확인 필요]
+    joint: '같이 관리하면 파트너도 이 금액을 봐요', // [확인 필요]
+  },
+  change: '바꾸기',
+  // S-11c 2·3·5 [확인 필요]
+  fromQ: '언제부터 이 금액이에요?',
+  fromThis: '이번 달부터',
+  fromNext: '다음 달부터',
+  fromLabel: '언제부터',
+  untilQ: '언제까지예요?',
+  untilLabel: '언제까지',
+  fromPast: '이번 달부터 고를 수 있어요', // [확인 필요]
+  untilBefore: '시작하는 달부터 고를 수 있어요', // [확인 필요]
+  sendRecalc: '보내기도 같이 다시 계산해요',
+  salaryScheduledToast: (y: number, m: number) => `${y}년 ${m}월부터 바꿀게요`, // [확인 필요]
+
+  // S-11f 관리 형태(O-30·30b·30c와 같은 세 질문, 17·08 2장) [확인 필요]
+  livingQ: '같이 쓰는 생활비가 있어요?',
+  livingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 돈이에요',
+  savingQ: '같이 모으는 저금이 있어요?',
+  managerQ: '누가 주로 관리해요?',
+  yes: '네',
+  no: '아니요',
+  notYet: '아직 없어요',
+  managerMe: '제가 주로 해요',
+  managerPartner: (name: string) => (name ? `${name}가 주로 해요` : '파트너가 주로 해요'),
+  managerTogether: '둘이 같이 해요',
+  managerEach: '각자 자기 월급으로 해요',
+  styleWaiting: (name: string) => `${name}님 답을 기다려요`,
+  styleCancel: '요청 취소',
+  styleCancelled: '요청을 취소했어요', // [확인 필요]
+  styleAsked: (name: string) => `${name}님에게 물어봤어요`, // [확인 필요]
+  styleSaved: '관리 형태를 바꿨어요', // [확인 필요]
+  styleReceived: (name: string) => `${name}님이 보낸 요청이 있어요`, // [확인 필요]
+  styleSame: '지금과 같아요', // [확인 필요] 저장 버튼 위(바뀐 게 없을 때)
+  styleAskNote: (name: string) => `${name}님이 ‘좋아요’를 누르면 바뀌어요`, // [확인 필요]
+
+  // S-11j 관리 형태 요청 확인(상대) [확인 필요]
+  styleReqSend: (name: string, me: string) =>
+    `${name}님이 월급은 대부분 ${me}님에게 보낸다고 했어요`,
+  styleReqSendSub: (me: string) => `${me}님이 관리하는 걸로 바꿀까요?`,
+  styleReqCombine: (name: string) => `${name}님이 월급을 합쳐서 관리하자고 해요`,
+  styleReqManager: (name: string, me: string) =>
+    `${name}님이 월급 관리를 ${me}님에게 맡기고 싶어 해요`, // [확인 필요] 기획서에 없는 경우
+  styleChangesTitle: '이렇게 바뀌어요',
+  styleChangeOne: '월급 계획이 하나로 합쳐져요',
+  styleChangeSend: (name: string) => `${name}님 줄은 보내기와 용돈이 돼요`,
+  styleChangeMine: (me: string) => `${me}님이 월급 계획을 관리해요`, // [확인 필요]
+  styleChangeAllowance: '용돈은 사람마다 한 줄씩 남아요', // [확인 필요]
+  styleChangeBundle: '같이 모으기 묶음은 공동 저금이 돼요',
+  styleYes: '좋아요',
+  styleNo: '지금처럼 할게요',
+  styleExpired: '요청 기한이 지났어요', // [확인 필요]
+  styleGone: '지금은 받은 요청이 없어요', // [확인 필요]
+
+  // S-13 공개 범위(한 목록 ①~④) [확인 필요]
+  previewLink: (name: string) => `${name}님에게 보이는 모습 보기 ›`,
+  planShareTitle: '내 월급 계획',
+  planShares: {
+    all: '모두 보여 주기',
+    saving_only: '저금만 보여 주기',
+    done_only: '했어요만 보여 주기',
+  } as Record<string, string>,
+  planShareJoint: '같이 관리해서 모두 보여요',
+  bundlesTitle: '같이 모으기',
+  bundleShowEach: '각자 모은 금액 보여 주기',
+  assetsTitle: '자산·부채',
+  assetVis: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' } as Record<
+    string,
+    string
+  >,
+  assetVisHelp: {
+    sum: '항목은 안 보이고 총액에만 더해요',
+    private: '총액에도 안 더해요',
+  } as Record<string, string>,
+  assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 적기 전
+  rankTitle: '자산 순위 같이 보기',
+  rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]
+  rankWaiting: (name: string) => `${name}님 답을 기다려요`, // [확인 필요]
+  alwaysShared: '경조사, 공동 명의, 같이 관리하는 월급 계획과 저금은 늘 같이 봐요', // [확인 필요]
+
+  // S-13p 상대에게 보이는 모습 [확인 필요]
+  previewTitle: (name: string) => `${name}님에게 보이는 모습`,
+  previewTop: (name: string) => `${name}님 화면에서는 이렇게 보여요`,
+  previewSaving: '같이 모으기',
+  previewPlan: '월급 계획',
+  previewAssets: '자산 관리',
+  previewNothing: '보이는 게 없어요', // [확인 필요]
+  previewHidden: '연결 해제 대기 중이라 지금은 아무것도 보이지 않아요', // [확인 필요]
+  previewSavingOnly: (me: string) => `${me}님은 저금만 보여 줘요`, // 20 W-01 3b
+  previewDoneOnly: (me: string) => `${me}님은 했어요만 보여 줘요`, // [확인 필요]
+  previewIncome: (amount: string, day: string) => `월급 ${amount}, ${day}`,
+  previewDone: '이번 달 했어요',
+  previewNotYet: '아직이에요', // [확인 필요]
+  previewOf: (saved: string, target: string) => `${saved} / ${target}`,
+  previewSum: (group: string, n: number) => `${group} ${n}개`, // [확인 필요] 총액만 보여 주기 묶음
+  previewJoint: '공동', // [확인 필요]
+  previewNoPartner: '파트너가 합류하면 볼 수 있어요', // [확인 필요]
+  lineNames: {
+    fixed: '고정지출',
+    living: '생활비',
+    allowance: '용돈',
+    send: '보내기',
+    shared_account: '같이 쓰는 통장',
+  } as Record<string, string>,
+
+  // S-14 알림 종류(18 P-11 표와 같은 목록) [확인 필요]
+  kinds: {
+    care: '경조사 일주일 전',
+    payday: '월급날 확인할 게 있을 때',
+    achieved: '같이 모으기를 다 모았을 때',
+    shared_change: (name: string) => `${name}님이 같이 쓰는 걸 바꿨을 때`,
+    my_allowance: '내 용돈이 바뀌었을 때',
+    progress_news: '진행 소식',
+  },
+  lockScreenNote: '잠금 화면에서는 금액을 늘 가려요', // [확인 필요]
+  otherAlerts: '그 밖의 알림', // [확인 필요]
+
+  // S-15 앱 잠금 권장 줄 [확인 필요]
+  lockRecommend: '앱 잠금을 켜면 한 번 더 지켜 줘요',
+  lockTurnOn: '켜기',
+
+  // S-20 1366 항목(기관 검토 전에는 플래그로 숨김, Q4)
+  helpAbuse: '상대가 돈을 통제하거나 위협할 때',
 };
 
 /** 시각 이름(“밤 10시”, “아침 8시”) [확인 필요] 0~5시 새벽, 6~11시 아침, 12시 낮, 13~17시 오후, 18~20시 저녁, 21~23시 밤 */
