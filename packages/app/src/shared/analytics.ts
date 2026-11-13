@@ -1,4 +1,4 @@
-import type { AmountBand, AuthProvider, HomeTodo } from '@sweetwo/core';
+import type { AmountBand, AuthProvider, HomeTodo, SplitKind } from '@sweetwo/core';
 
 // 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
@@ -50,7 +50,7 @@ export type AnalyticsEvent =
         screen_id: string;
         flow: 'starter' | 'partner';
         required: boolean;
-        marriage_state: 'married' | 'engaged' | 'undecided' | null;
+        marriage_state: 'married' | 'engaged' | 'undecided' | 'dating' | 'living_together' | null;
       };
     }
   | {
@@ -248,7 +248,7 @@ export type AnalyticsEvent =
   | {
       name: 'plan_line_changed';
       props: {
-        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        line_kind: SplitKind;
         field: 'amount' | 'name' | 'both';
         direction: 'up' | 'down' | 'same';
         left_band: AmountBand | 'short';
@@ -297,7 +297,7 @@ export type AnalyticsEvent =
   | {
       name: 'plan_line_deleted';
       props: {
-        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        line_kind: SplitKind;
         default_line: boolean;
         entry: 'sheet' | 'edit';
         joint: boolean;
@@ -330,7 +330,7 @@ export type AnalyticsEvent =
       // 월급 체크리스트 줄(32 4-4, 2026-11-12 QA 6구간 S6-02). 금액은 구간만
       name: 'checklist_line_checked';
       props: {
-        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        line_kind: SplitKind;
         result: 'as_planned' | 'different';
         diff_band: AmountBand | null;
         checked_by: 'self' | 'joint';
@@ -341,14 +341,14 @@ export type AnalyticsEvent =
   | {
       name: 'checklist_line_unchecked';
       props: {
-        line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+        line_kind: SplitKind;
         minutes_since_checked: number | null;
         entry: 'checkbox' | 'toast';
       };
     }
   | {
       name: 'checklist_line_skipped';
-      props: { line_kind: 'saving' | 'fixed' | 'living' | 'allowance' | 'custom' };
+      props: { line_kind: SplitKind };
     }
   | {
       name: 'checklist_completed';

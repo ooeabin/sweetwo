@@ -5,7 +5,10 @@ import { savingNeed } from './saving-item';
 // 월급 계획 추천값(docs/spec/17-onboarding-2.md O-50, 06-calc-allocation.md 3장, 18 P-06).
 // 2026-11-08 ADR 0007: 비상금 기본 항목 없음, 저금 줄 = 저금 항목(목표 금액·기한이 있으면 월 필요액까지).
 
-export type SplitKind = 'saving' | 'fixed' | 'living' | 'allowance' | 'custom';
+// v2.2(ADR 0009) DB enum에 'send'(한 사람 관리형 ‘보내기’), 'shared_account'(같이 쓰는 통장) 추가.
+// 이 둘은 서버가 만들고(앱 화면은 v2.2 app PR에서), 지금 추천·계산 규칙은 만들지 않는다.
+export type SplitKind =
+  'saving' | 'fixed' | 'living' | 'allowance' | 'custom' | 'send' | 'shared_account';
 
 export interface SplitLineDraft {
   kind: SplitKind;
