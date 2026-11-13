@@ -175,3 +175,77 @@ export function rankState(o: {
     return { kind: 'seen', pct, month };
   return { kind: 'stale', pct, month };
 }
+
+// ───────── 자산 순위 v2.2(06 7-8, 23 F-08, G3, Q15) ─────────
+// 서버 networth_rank_pair()·peer_median()·rank_age_band()(마이그레이션 20261204090000_v22_unlink_rank 계약 6)와 같은 결과.
+
+/** 한 사람 나이(올해 − 출생연도)로 연령대(서버 rank_age_band): 30 미만 20s, 60 이상 60s. 출생연도가 없으면 null */
+export function rankBandOf(birthYear: number | null | undefined, year: number): RankAgeBand | null {
+  if (typeof birthYear !== 'number') return null;
+  const age = year - birthYear;
+  if (age < 30) return '20s';
+  if (age < 40) return '30s';
+  if (age < 50) return '40s';
+  if (age < 60) return '50s';
+  return '60s';
+}
+
+/** 둘의 합 순위 연령대(Q15): 먼저 태어난(출생연도가 작은) 사람 기준. 예: 1993년생 + 1995년생, 2026년 → 33세 → 30s */
+export function pairRankBand(
+  birthYears: readonly (number | null | undefined)[],
+  year: number,
+): RankAgeBand | null {
+  const ys = birthYears.filter((y): y is number => typeof y === 'number');
+  return ys.length ? rankBandOf(Math.min(...ys), year) : null;
+}
+
+/** 또래 가구 중간값(서버 peer_median): 내 출생연도 연령대의 순자산 중앙값. 출생연도가 없으면 둘 다 null */
+export function peerMedian(
+  birthYear: number | null | undefined,
+  year: number,
+): { band: RankAgeBand | null; median: Won | null } {
+  const band = rankBandOf(birthYear, year);
+  return { band, median: band ? RANK_AGE_MEDIAN[band] : null };
+}
+
+export type RankPair =
+  | {
+      mode: 'pair';
+      net: Won;
+      top_pct: number;
+      top_open: boolean;
+      band: RankAgeBand | null;
+      /** 연령대별 분위 표가 아직 없어 전체 가구 표로 계산('all', 06 7-8 “전체 가구 기준이에요”) */
+      basis: 'all' | 'age';
+    }
+  | { mode: 'peer'; band: RankAgeBand | null; median: Won | null };
+
+/**
+ * 순위 결과(서버 networth_rank_pair): 연결 + 두 사람 모두 동의면 둘의 합(숨기기 제외, 평가금액) 순위,
+ * 그 밖(혼자, 미합류, 한 사람만 동의, 해제 대기)은 내 연령대 중간값 한 줄
+ */
+export function rankPair(o: {
+  consented: boolean;
+  net: Won;
+  birthYears: readonly (number | null | undefined)[];
+  myBirthYear: number | null | undefined;
+  year: number;
+}): RankPair {
+  if (!o.consented) return { mode: 'peer', ...peerMedian(o.myBirthYear, o.year) };
+  return {
+    mode: 'pair',
+    net: o.net,
+    top_pct: rankTopPct(o.net),
+    top_open: rankTopOpen(o.net),
+    band: pairRankBand(o.birthYears, o.year),
+    basis: 'all',
+  };
+}
+
+/** 순위에 넣는 둘의 합(서버 networth_rank_pair): 보유 중, 숨기기(private) 빼고, 평가금액 자산 − 부채 */
+export const rankPairNet = (
+  items: readonly { side: AssetSide; amount: Won; visibility?: string; status?: string }[],
+): Won =>
+  items
+    .filter((i) => i.visibility !== 'private' && (i.status ?? 'held') === 'held')
+    .reduce((t, i) => t + (i.side === 'asset' ? i.amount : -i.amount), 0);

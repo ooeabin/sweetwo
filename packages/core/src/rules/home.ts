@@ -1,6 +1,22 @@
 import { addDays, daysBetween } from '../date';
 import { nextCareDate, type CareRule } from './care';
 import { deadlineDay } from './saving-item';
+import { inReviewWindow } from './review-window';
+import type { BaseDay } from '../onboarding/cycle';
+import { periodDisplay, periodFillPct, periodFull, type MoneyInPeriod } from './money-in-period';
+import {
+  canLateCheck,
+  confirmFinish,
+  isManual,
+  manualCount,
+  manualLeft,
+  nextAutoDue,
+  reviewDue,
+  type ConfirmLine,
+} from './pay-confirm';
+import type { BundleView } from './saving-bundle';
+import { salaryChangedTaskOpen } from './salary-change';
+import { nextSavingTaskOpen, type NextSavingGoal } from './next-saving';
 
 // 홈(19)이 쓰는 계산(위젯 26도 같은 규칙): 할 일 한 줄(H-06), 일정(WG-03, 캘린더 타일 H-08), 이번 달 월급 상태(H-03, WG-01),
 // 내 체크리스트 고르기(홈·월급 탭이 같이 씀), 맨 위 띠 하나 고르기(2026-11-11 QA 4구간 D3).
@@ -136,11 +152,7 @@ export function pickTopBanner(on: Partial<Record<TopBanner, boolean>>): TopBanne
   return TOP_BANNER_ORDER.find((k) => on[k]) ?? null;
 }
 
-/**
- * 월급 전 확인 기간(07 4장): 다음 기준일 3일 전(= 기간 끝 2일 전) ~ 기간 끝(기준일 전날). W-05가 열리는 기간(2026-11-12 D3)
- */
-export const inReviewWindow = (today: string, cycleEnd: string) =>
-  today >= addDays(cycleEnd, -2) && today <= cycleEnd;
+export { inReviewWindow };
 
 /** 월급 전 확인(W-05) 주소: 그 체크리스트만(2026-11-12 D3) */
 export const reviewPath = (checklistId?: string | null) =>
@@ -306,4 +318,535 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
   return out.sort((a, b) =>
     a.date < b.date ? -1 : a.date > b.date ? 1 : rank(a.kind) - rank(b.kind),
   );
+}
+
+// ─────────────────────────── 홈 v2.2 (docs/spec/19 ‘홈 v2.2’, ADR 0009 결정 1) ───────────────────────────
+// H-10 대표 저금 pickHero, H-11 이번 달 한 줄 pickMonthLine, H-06 할 일 띠 16순서 pickTopTask.
+// 예전 homeTodo·salaryState·checkTodo·firstSavingTodo는 v2.2 홈 화면 PR(PR 9)이 바꿀 때까지 남김.
+
+export interface HeroGoal {
+  id: string;
+  name: string;
+  status: string;
+  closed_at: string | null;
+  deleted_at?: string | null;
+  owner_user_id: string | null;
+  bundle_id?: string | null;
+  target_amount: number | null;
+  deadline: string | null;
+  saved: number;
+}
+
+export type HeroItem = { kind: 'bundle'; bundle: BundleView } | { kind: 'goal'; goal: HeroGoal };
+
+/** H-10 가로 넘김 최대 칸 수(+ ‘저금 모두 보기’) */
+export const HERO_MAX = 3;
+
+const goalPct = (g: HeroGoal) =>
+  g.target_amount && g.target_amount > 0 ? (Math.max(g.saved, 0) * 10_000) / g.target_amount : 0;
+/** 목표 금액에 가장 가까운 것 먼저(진행률 큰 순, 같으면 남은 금액 적은 순, 그다음 이름) */
+const closest = (a: HeroGoal, b: HeroGoal) =>
+  goalPct(b) - goalPct(a) ||
+  (a.target_amount ?? 0) - a.saved - ((b.target_amount ?? 0) - b.saved) ||
+  a.name.localeCompare(b.name);
+
+/**
+ * 대표 저금 순서(19 H-10 ‘pickHero’ [확인 필요]): 묶음(달성 전) → 같이 계열 공동 저금 중 목표 금액에 가장 가까운 것
+ * → 내 저금 중 가장 가까운 것 → 목표 금액 없는 저금 중 모은 금액이 가장 큰 것. 모으는 중(닫히지 않고 달성 전)만,
+ * 묶음에 든 저금은 묶음으로만. 각자 계열에서 상대 개인 저금은 대표가 되지 않음. 최대 HERO_MAX개
+ */
+export function pickHeroes(
+  i: { meId: string; joint: boolean; goals: readonly HeroGoal[]; bundles: readonly BundleView[] },
+  max = HERO_MAX,
+): HeroItem[] {
+  const live = i.goals.filter(
+    (g) => !g.deleted_at && !g.closed_at && g.status !== 'achieved' && !g.bundle_id,
+  );
+  const mineOrShared = live.filter(
+    (g) => i.joint || g.owner_user_id === i.meId || g.owner_user_id === null,
+  );
+  const withTarget = mineOrShared.filter((g) => g.target_amount !== null && g.target_amount > 0);
+  const shared = withTarget.filter((g) => i.joint || g.owner_user_id === null).sort(closest);
+  const mine = withTarget.filter((g) => !shared.includes(g)).sort(closest);
+  const rest = mineOrShared
+    .filter((g) => !withTarget.includes(g))
+    .sort((a, b) => b.saved - a.saved || a.name.localeCompare(b.name));
+  return [
+    ...i.bundles
+      .filter((b) => b.status === 'active')
+      .map((b) => ({ kind: 'bundle' as const, bundle: b })),
+    ...[...shared, ...mine, ...rest].map((g) => ({ kind: 'goal' as const, goal: g })),
+  ].slice(0, max);
+}
+
+/** 대표 저금 하나(위젯 WG-01, 진행 소식도 같은 순서). 없으면 null */
+export const pickHero = (i: Parameters<typeof pickHeroes>[0]): HeroItem | null =>
+  pickHeroes(i, 1)[0] ?? null;
+
+export interface MonthChecklist {
+  id: string;
+  cycle_start: string;
+  cycle_end: string;
+  lines: ConfirmLine[];
+}
+
+export interface MonthLineInput {
+  today: string;
+  /** 확인 목록을 못 불러옴(공통 상태 7번) */
+  error?: boolean;
+  /** 월급 없음(‘지금은 월급이 없어요’) */
+  noSalary: boolean;
+  /** 날짜 없음(O-32, payday_none): H-13 기간 */
+  paydayNone: boolean;
+  /** 한 사람 관리형의 관리하지 않는 쪽 */
+  nonManager: boolean;
+  /** 날짜 없는 사람의 기간(moneyInPeriod) */
+  period?: MoneyInPeriod | null;
+  /** 내 이번 사이클 확인 목록(pickMyChecklist) */
+  current?: MonthChecklist | null;
+  /** 내 지난 사이클 확인 목록(늦은 확인) */
+  previous?: MonthChecklist | null;
+  /** 기준일(늦은 확인 마지막 날 계산) */
+  base: BaseDay | null;
+  /** 아직 확인 목록이 없을 때 첫 월급날(firstChecklistStart) */
+  firstPayday?: string | null;
+}
+
+export type HomeMonthLine =
+  | { kind: 'error' }
+  | { kind: 'no_salary'; to: string }
+  | {
+      kind: 'period';
+      display: MoneyInPeriod['status'];
+      period: MoneyInPeriod;
+      fillPct: number | null;
+      full: boolean;
+      to: string;
+    }
+  | { kind: 'non_manager'; to: string }
+  | { kind: 'first'; date: string | null; to: string }
+  | { kind: 'review'; cycleStart: string; left: number; late: number; to: string }
+  | { kind: 'payday'; cycleStart: string; left: number; late: number; to: string }
+  | {
+      kind: 'auto_only';
+      cycleStart: string;
+      next: { date: string; count: number } | null;
+      late: number;
+      to: string;
+    }
+  | {
+      kind: 'done';
+      cycleStart: string;
+      finish: 'all' | 'mixed';
+      nextPayday: string;
+      daysLeft: number;
+      late: number;
+      to: string;
+    };
+
+/** 지난 달 늦게 확인할 수 있는 손 줄 수(07 4장): 사이클이 끝났고 늦은 확인 기간 안, 건너뜀으로 닫힌 손 줄 */
+export function lateLeft(
+  prev: MonthChecklist | null | undefined,
+  today: string,
+  base: BaseDay | null,
+) {
+  if (!prev || !canLateCheck(today, prev.cycle_end, base)) return 0;
+  return prev.lines.filter((l) => isManual(l) && l.state === 'skipped').length;
+}
+
+const SALARY_PATHS = {
+  checklist: '/salary',
+  last: '/salary?cycle=last',
+  plan: '/salary?view=plan',
+  moneyIn: '/salary/money-in',
+  salary: '/settings/me/salary',
+};
+
+/**
+ * H-11 이번 달 한 줄(19 ‘H-11 상태’): 못 불러옴 → 월급 없음 → 날짜 없음(H-13 기간) → 관리하지 않는 쪽 →
+ * 첫 월급날 전 → 월급 전 확인(손 줄 남음) → 월급날(손 줄 남음) → 자동 줄뿐 → 지난 달 끝(계획대로 됐어요).
+ * 늦은 확인 수(late)는 모든 확인 목록 상태에 붙고, 있으면 이동이 지난 달
+ */
+export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
+  if (i.error) return { kind: 'error' };
+  if (i.noSalary) return { kind: 'no_salary', to: SALARY_PATHS.salary };
+  if (i.paydayNone) {
+    const period: MoneyInPeriod = i.period ?? {
+      status: 'none',
+      start: null,
+      end: null,
+      day: null,
+      received: 0,
+      needed: null,
+      gapDays: null,
+    };
+    return {
+      kind: 'period',
+      display: periodDisplay(period),
+      period,
+      fillPct: period.status === 'bar' ? periodFillPct(period.received, period.needed) : null,
+      full: periodFull(period),
+      to: SALARY_PATHS.moneyIn,
+    };
+  }
+  if (i.nonManager) return { kind: 'non_manager', to: SALARY_PATHS.checklist };
+  const c = i.current;
+  if (!c) return { kind: 'first', date: i.firstPayday ?? null, to: SALARY_PATHS.plan };
+  const late = lateLeft(i.previous, i.today, i.base);
+  const left = manualLeft(c.lines);
+  if (reviewDue(i.today, c.cycle_end, c.lines))
+    return { kind: 'review', cycleStart: c.cycle_start, left, late, to: reviewPath(c.id) };
+  if (left > 0)
+    return { kind: 'payday', cycleStart: c.cycle_start, left, late, to: SALARY_PATHS.checklist };
+  const lateTo = late > 0 ? SALARY_PATHS.last : SALARY_PATHS.checklist;
+  if (manualCount(c.lines) === 0)
+    return {
+      kind: 'auto_only',
+      cycleStart: c.cycle_start,
+      next: nextAutoDue(c.lines),
+      late,
+      to: lateTo,
+    };
+  const nextPayday = addDays(c.cycle_end, 1);
+  return {
+    kind: 'done',
+    cycleStart: c.cycle_start,
+    finish: confirmFinish(c.lines) ?? 'all',
+    nextPayday,
+    daysLeft: daysBetween(i.today, nextPayday),
+    late,
+    to: lateTo,
+  };
+}
+
+/** 잔액 맞추기 주기와 띠 날 수(H-06 12번, G7) */
+export const RECONCILE_EVERY_DAYS = 90;
+export const RECONCILE_TASK_DAYS = 14;
+
+/**
+ * 잔액 맞추기 띠(H-06 12번): 저금이 있고 마지막 맞추기(없으면 첫 저금 만든 날)부터 90일마다, 그날부터 14일 동안.
+ * 열려 있으면 그 회차 띠 키(`reconcile:YYYY-MM-DD`, 닫으면 dismiss_home_task)와 날짜, 아니면 null
+ */
+export function reconcileTask(o: {
+  today: string;
+  hasSaving: boolean;
+  /** 마지막 잔액 맞추기 날(KST) */
+  lastReconciledOn: string | null;
+  /** 첫 저금 만든 날(KST) */
+  firstSavingOn: string | null;
+}): { key: string; due: string } | null {
+  const base = o.lastReconciledOn ?? o.firstSavingOn;
+  if (!o.hasSaving || !base) return null;
+  const d = daysBetween(base, o.today);
+  if (d < RECONCILE_EVERY_DAYS) return null;
+  const k = Math.floor(d / RECONCILE_EVERY_DAYS);
+  const due = addDays(base, k * RECONCILE_EVERY_DAYS);
+  if (daysBetween(due, o.today) >= RECONCILE_TASK_DAYS) return null;
+  return { key: `reconcile:${due}`, due };
+}
+
+/** 첫 저금·생활비 나누기 띠가 뜨는 날 수(H-06 7·8번, 온보딩 끝부터) */
+export const FIRST_TASK_DAYS = 30;
+/** 요청 띠(3·4·5번)와 파트너 저금 띠(13번)가 뜨는 날 수 */
+export const REQUEST_TASK_DAYS = 7;
+/** 홈 할 일 띠 키(home_task_state.task_key) */
+export const TASK_KEYS = { splitSuggest: 'split_suggest', autoPick: 'auto_pick' } as const;
+
+interface OpenRequest {
+  id: string;
+  from: string;
+  status: string;
+  expires_at: string;
+}
+
+export interface TopTaskInput {
+  today: string;
+  /** 지금 시각 ISO(요청 만료 비교). 없으면 만료일(KST 날짜)만 비교 */
+  now?: string;
+  meId: string;
+  coupleState: string;
+  joint: boolean;
+  unlinkRequestedBy: string | null;
+  reconnectFrom: string | null;
+  /** 관리 형태 요청(mode_change_request, from = from_user) */
+  modeRequest?: (OpenRequest & { phrase: string }) | null;
+  /** 분담 제안(shared_account, from = proposed_by) */
+  splitProposal?: (OpenRequest & { name: string }) | null;
+  /** 순위 같이 보기 요청(rank_consent_request) */
+  rankRequest?: OpenRequest | null;
+  /** 월급이 바뀐 사이클 시작일(내 salary_change 마지막 적용·되돌림의 적용일)과 W-01을 열었나 */
+  salaryChanged?: { appliedDay: string | null; done: boolean } | null;
+  /** 온보딩을 마친 날(KST) */
+  onboardedOn?: string | null;
+  /** 내가 볼 수 있는 모으는 중 저금(각자 = 내 것과 묶음, 합쳐서 = 공동) 개수 */
+  savingCount: number;
+  /** 생활비 ‘네’(couple_space.shared_living) */
+  sharedLiving?: boolean | null;
+  /** 정한(accepted) 분담이 있음 */
+  hasSplit?: boolean;
+  /** 닫았거나 끝낸 띠 키(home_task_state) */
+  closedKeys?: readonly string[];
+  /** 자동 줄 고르기 띠(autoPickTaskOpen 결과) */
+  autoPickOpen?: boolean;
+  /** 알림 다시 묻기(O-55를 거절했고 아직 다시 묻지 않음) */
+  pushReask?: boolean;
+  paydayNone?: boolean;
+  /** 다음 저금 띠 후보(기한이 있는 내 저금·공동 저금) */
+  deadlineGoals?: readonly (NextSavingGoal & { id: string; name: string })[];
+  /** 잔액 맞추기(reconcileTask 결과) */
+  reconcile?: { key: string; due: string } | null;
+  /** 상대 개인 저금(각자 계열, 묶음에 안 든 것) */
+  partnerGoals?: readonly {
+    id: string;
+    name: string;
+    created_at: string;
+    bundle_id: string | null;
+  }[];
+  /** 만기(예전 homeTodo와 같은 입력), 경조사, 쓸 곳 메모 */
+  assets?: readonly HomeAsset[];
+  cares?: readonly HomeCare[];
+  notes?: readonly {
+    id: string;
+    name: string;
+    due_on: string | null;
+    paid: boolean;
+    goal_id: string | null;
+    bundle_id: string | null;
+  }[];
+  /** 기다리는 합류자(같이 계열 합류자가 시작한 사람을 기다림, 시작한 사람 쪽) */
+  waitingJoiner?: { name: string | null } | null;
+}
+
+export type TopTask =
+  | { kind: 'unlink'; key: string; to: string }
+  | { kind: 'reconnect'; key: string; to: string }
+  | { kind: 'mode_request'; id: string; phrase: string; key: string; to: string }
+  | { kind: 'split_request'; id: string; name: string; key: string; to: string }
+  | { kind: 'rank_request'; id: string; key: string; to: string }
+  | { kind: 'salary_changed'; key: string; to: string }
+  | { kind: 'first_saving'; key: string; to: string }
+  | { kind: 'split_suggest'; key: string; to: string }
+  | { kind: 'auto_pick'; key: string; to: string }
+  | { kind: 'push_reask'; paydayNone: boolean; key: string; to: null }
+  | { kind: 'next_saving'; goalId: string; name: string; key: string; to: string }
+  | { kind: 'reconcile'; key: string; to: string }
+  | { kind: 'bundle_invite'; goalId: string; name: string; key: string; to: string }
+  | { kind: 'matured'; asset: string; key: string; to: string }
+  | { kind: 'care'; name: string; date: string; key: string; to: string }
+  | { kind: 'note'; name: string; date: string; key: string; to: string }
+  | { kind: 'invite'; key: string; to: string }
+  | { kind: 'waiting_joiner'; name: string | null; key: string; to: string };
+
+const openReq = (r: OpenRequest | null | undefined, i: TopTaskInput): r is OpenRequest => {
+  if (!r || r.status !== 'open' || r.from === i.meId) return false;
+  if (i.now) return Date.parse(r.expires_at) > Date.parse(i.now);
+  return r.expires_at.slice(0, 10) >= i.today;
+};
+
+/** 할 일 띠에서 고를 수 있는 날짜 할 일(14번): 만기(만기일부터 30일, 예전 규칙) → 경조사·쓸 곳 메모(7일 안, 이른 순) */
+function datedTask(i: TopTaskInput): TopTask | null {
+  const matured = (i.assets ?? []).find(
+    (a) =>
+      a.side === 'asset' &&
+      a.kind !== 'deposit_money' &&
+      !!a.maturity_date &&
+      a.maturity_date <= i.today &&
+      daysBetween(a.maturity_date, i.today) <= MATURED_TODO_DAYS &&
+      (a.owner === 'joint' || a.owner_user_id === i.meId),
+  );
+  if (matured)
+    return {
+      kind: 'matured',
+      asset: matured.name,
+      key: `matured:${matured.id}:${matured.maturity_date ?? ''}`,
+      to: `/assets/${matured.id}/matured`,
+    };
+  const soon = (d: string | null | undefined): d is string =>
+    !!d && daysBetween(i.today, d) >= 0 && daysBetween(i.today, d) <= 7;
+  const dated: { date: string; t: TopTask }[] = [];
+  for (const c of i.cares ?? []) {
+    const d = nextCareDate(c, i.today);
+    if (soon(d))
+      dated.push({
+        date: d,
+        t: {
+          kind: 'care',
+          name: c.name,
+          date: d,
+          key: `care:${c.id}:${d}`,
+          to: `/calendar/day/${c.id}`,
+        },
+      });
+  }
+  for (const n of i.notes ?? []) {
+    if (n.paid || !soon(n.due_on)) continue;
+    const to = n.bundle_id
+      ? `/salary/bundles/${n.bundle_id}/notes`
+      : `/salary/items/${n.goal_id ?? ''}/notes`;
+    dated.push({
+      date: n.due_on,
+      t: { kind: 'note', name: n.name, date: n.due_on, key: `note:${n.id}:${n.due_on}`, to },
+    });
+  }
+  // 같은 날이면 경조사 먼저(일정 규칙과 같음)
+  dated.sort((a, b) =>
+    a.date < b.date
+      ? -1
+      : a.date > b.date
+        ? 1
+        : (a.t.kind === 'care' ? 0 : 1) - (b.t.kind === 'care' ? 0 : 1),
+  );
+  return dated[0]?.t ?? null;
+}
+
+/**
+ * 할 일 띠 하나(19 ‘할 일 띠 순서 v2.2’ 1~16번, 정본). 월급날 확인·월급 전 확인은 띠가 아니라 H-11(pickMonthLine).
+ * 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름. 없으면 null.
+ * 이동 주소 중 v2.2 새 화면 주소는 화면 PR(8~12)에서 routes.tsx와 맞춤(서버 알림 링크와 같은 모양)
+ */
+export function pickTopTask(i: TopTaskInput): TopTask | null {
+  const closed = new Set(i.closedKeys ?? []);
+  const ok = (t: TopTask | null): t is TopTask => !!t && !closed.has(t.key);
+  const separate = !i.joint;
+  const connected = i.coupleState === 'connected';
+  const inFirst = (days: number) => {
+    if (!i.onboardedOn) return false;
+    const d = daysBetween(i.onboardedOn, i.today);
+    return d >= 0 && d < days;
+  };
+  const steps: (() => TopTask | null)[] = [
+    // 1 해제 요청 받음(맨 위 띠가 대신 보여 주지만 순서는 첫째)
+    () =>
+      i.unlinkRequestedBy && i.unlinkRequestedBy !== i.meId
+        ? { kind: 'unlink', key: 'unlink', to: '/settings/couple/unlink/review' }
+        : null,
+    // 2 다시 연결 요청 받음
+    () =>
+      i.reconnectFrom && i.reconnectFrom !== i.meId
+        ? { kind: 'reconnect', key: 'reconnect', to: '/settings/couple/reconnect' }
+        : null,
+    // 3 관리 형태 바꾸기 요청 받음(7일)
+    () => {
+      const r = i.modeRequest;
+      return openReq(r, i) && r
+        ? {
+            kind: 'mode_request',
+            id: r.id,
+            phrase: r.phrase,
+            key: `mode_request:${r.id}`,
+            to: `/settings/couple/style/request/${r.id}`,
+          }
+        : null;
+    },
+    // 4 분담 제안 받음(7일)
+    () => {
+      const r = i.splitProposal;
+      return openReq(r, i) && r
+        ? {
+            kind: 'split_request',
+            id: r.id,
+            name: r.name,
+            key: `split_request:${r.id}`,
+            to: `/salary/split/${r.id}`,
+          }
+        : null;
+    },
+    // 5 순위 같이 보기 요청 받음(7일)
+    () =>
+      openReq(i.rankRequest, i) && i.rankRequest
+        ? {
+            kind: 'rank_request',
+            id: i.rankRequest.id,
+            key: `rank_request:${i.rankRequest.id}`,
+            to: `/assets/rank/consent/${i.rankRequest.id}`,
+          }
+        : null,
+    // 6 월급이 바뀐 달(적용된 사이클 첫 7일, W-01을 열 때까지)
+    () =>
+      i.salaryChanged && salaryChangedTaskOpen({ ...i.salaryChanged, today: i.today })
+        ? {
+            kind: 'salary_changed',
+            key: `salary_changed:${i.salaryChanged.appliedDay ?? ''}`,
+            to: SALARY_PATHS.plan,
+          }
+        : null,
+    // 7 첫 저금(저금 0개, 첫 30일, 해제 대기 아님)
+    () =>
+      i.savingCount === 0 && inFirst(FIRST_TASK_DAYS) && i.coupleState !== 'unlink_pending'
+        ? { kind: 'first_saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' }
+        : null,
+    // 8 생활비 나누기(각자 계열 + 생활비 ‘네’ + 연결 + 분담 없음, 첫 30일, ‘이미 정했어요’로 영구히 닫음)
+    () =>
+      separate && connected && i.sharedLiving && !i.hasSplit && inFirst(FIRST_TASK_DAYS)
+        ? { kind: 'split_suggest', key: TASK_KEYS.splitSuggest, to: '/salary/split/new' }
+        : null,
+    // 9 자동으로 나가는 것 고르기(autoPickTaskOpen)
+    () =>
+      i.autoPickOpen
+        ? { kind: 'auto_pick', key: TASK_KEYS.autoPick, to: '/salary/auto-lines' }
+        : null,
+    // 10 알림 다시 묻기(O-55 거절, 1회)
+    () =>
+      i.pushReask
+        ? { kind: 'push_reask', paydayNone: !!i.paydayNone, key: 'push_reask', to: null }
+        : null,
+    // 11 다음 저금(기한 지난 달 다음 달 1일부터 14일)
+    () => {
+      const g = (i.deadlineGoals ?? []).find((x) => nextSavingTaskOpen(x, i.today));
+      return g
+        ? {
+            kind: 'next_saving',
+            goalId: g.id,
+            name: g.name,
+            key: `next_saving:${g.id}`,
+            to: `/salary/items/${g.id}/next`,
+          }
+        : null;
+    },
+    // 12 실제 잔액 맞추기(90일마다 14일 동안)
+    () =>
+      i.reconcile ? { kind: 'reconcile', key: i.reconcile.key, to: '/salary/reconcile' } : null,
+    // 13 파트너 저금에 같이 모으기(각자 계열, 상대가 만든 지 7일 안, 묶음에 안 듦)
+    () => {
+      if (!separate || !connected) return null;
+      const g = (i.partnerGoals ?? [])
+        .filter((x) => !x.bundle_id)
+        .filter((x) => {
+          const d = daysBetween(x.created_at.slice(0, 10), i.today);
+          return d >= 0 && d < REQUEST_TASK_DAYS;
+        })
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+      return g
+        ? {
+            kind: 'bundle_invite',
+            goalId: g.id,
+            name: g.name,
+            key: `bundle_invite:${g.id}`,
+            to: `/salary/bundles/new?goal=${encodeURIComponent(g.id)}`,
+          }
+        : null;
+    },
+    // 14 만기·경조사·쓸 곳 메모 날짜
+    () => datedTask(i),
+    // 15 초대(미합류)
+    () =>
+      i.coupleState === 'not_joined'
+        ? { kind: 'invite', key: 'invite', to: '/settings/couple?invite=1' }
+        : null,
+    // 16 기다리는 합류자
+    () =>
+      i.waitingJoiner
+        ? {
+            kind: 'waiting_joiner',
+            name: i.waitingJoiner.name,
+            key: 'waiting_joiner',
+            to: '/onboarding/resume',
+          }
+        : null,
+  ];
+  for (const step of steps) {
+    const t = step();
+    if (ok(t)) return t;
+  }
+  return null;
 }

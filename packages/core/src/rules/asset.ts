@@ -339,3 +339,20 @@ export const QUICK_LOANS: QuickPick[] = [
   { key: 'other_loan', grp: 'other_loan', kind: 'other', name: '기타 대출' },
   { key: 'personal', grp: 'personal', kind: 'family_loan', name: '가족·지인에게 빌린 돈' },
 ];
+
+/**
+ * 순자산 요약 v2.2(06 6장, 2026-11-13 N11, 서버 networth_summary): 평가금액 기준이 기본, principalNet은 ‘원금으로 보기’
+ * (원금이 있는 자산은 원금, 부채는 그대로). 보유 중인 행만(받은 행은 이미 내가 볼 수 있는 것).
+ * TODO(v2.2 PR 12 F-01): 화면이 netWorth(원금 기본) 대신 이 값을 쓰게 바꿈
+ */
+export function netWorthSummary(
+  items: readonly Pick<NetWorthItem, 'side' | 'amount' | 'principal' | 'status'>[],
+) {
+  const live = items.filter((i) => (i.status ?? 'held') === 'held');
+  const assets = live.filter((i) => i.side === 'asset').reduce((t, i) => t + i.amount, 0);
+  const debts = live.filter((i) => i.side === 'debt').reduce((t, i) => t + i.amount, 0);
+  const principalAssets = live
+    .filter((i) => i.side === 'asset')
+    .reduce((t, i) => t + (i.principal ?? i.amount), 0);
+  return { assets, debts, net: assets - debts, principalNet: principalAssets - debts };
+}

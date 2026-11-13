@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   jointRefill,
   joinerSplit,
+  equalAllowance,
   leftover,
+  sendAmount,
+  splitLineDefaults,
   recommendSplit,
   round10k,
   type SavingPlanItem,
@@ -197,5 +200,59 @@ describe('합류 P-06 합쳐서: jointRefill', () => {
     ]);
     expect(r.at(-1)).toMatchObject({ kind: 'allowance', userId: 'yebin' });
     expect(leftover(6_200_000, r)).toBe(1_060_000);
+  });
+});
+
+describe('v2.2 용돈·보내기·줄 설정(06 3-1, 3-2)', () => {
+  it('합쳐서 같은 용돈: 찬우 350만 + 예빈 280만 = 630만 × 10% ÷ 2 = 31.5만 → 32만 원씩', () => {
+    expect(equalAllowance([3_500_000, 2_800_000])).toBe(320_000);
+    expect(equalAllowance([])).toBe(0);
+    const lines = recommendSplit({
+      income: 6_300_000,
+      people: [
+        { userId: 'c', income: 3_500_000 },
+        { userId: 'y', income: 2_800_000 },
+      ],
+      items: [],
+      equalAllowance: true,
+    });
+    expect(lines.filter((l) => l.kind === 'allowance').map((l) => l.amount)).toEqual([
+      320_000, 320_000,
+    ]);
+  });
+
+  it('보내기 = 월급 − 용돈, 1만 원 내림, 0 아래면 0(서버 recalc_send_line)', () => {
+    expect(sendAmount(2_800_000, 400_000)).toBe(2_400_000);
+    expect(sendAmount(1_500_000, 400_000)).toBe(1_100_000);
+    expect(sendAmount(1_505_000, 400_000)).toBe(1_100_000);
+    expect(sendAmount(300_000, 400_000)).toBe(0);
+    expect(sendAmount(null, 0)).toBe(0);
+  });
+
+  it('여유 자금은 보내기 줄을 셈하지 않음([확인 필요] 추천 기본값)', () => {
+    expect(
+      leftover(6_300_000, [
+        { kind: 'fixed', amount: 1_000_000 },
+        { kind: 'send', amount: 2_400_000 },
+        { kind: 'allowance', amount: 400_000 },
+      ]),
+    ).toBe(4_900_000);
+  });
+
+  it('줄 설정 기본값(서버 split_line_defaults)', () => {
+    expect(splitLineDefaults('saving')).toEqual({
+      inChecklist: true,
+      autoPay: false,
+      autoDay: null,
+    });
+    expect(splitLineDefaults('living').inChecklist).toBe(false);
+    expect(splitLineDefaults('allowance').inChecklist).toBe(false);
+    expect(splitLineDefaults('send')).toEqual({ inChecklist: true, autoPay: true, autoDay: null });
+    expect(splitLineDefaults('shared_account').autoPay).toBe(true);
+    expect(splitLineDefaults('custom')).toEqual({
+      inChecklist: true,
+      autoPay: false,
+      autoDay: null,
+    });
   });
 });
