@@ -76,6 +76,25 @@ export const qk = {
   salaryChanges: ['salary_change'] as const,
   /** 홈 띠 닫기·끝냄(home_task_state) */
   homeTasks: ['home_task_state'] as const,
+  /** 같이 모으기 묶음(bundle_view) */
+  bundles: ['saving_bundle'] as const,
+  /** 돈 들어왔어요 기록(money_in) */
+  moneyIns: ['money_in'] as const,
+  /** 날짜 없는 사람의 기간(money_in_period). 돈 들어왔어요 키 아래 */
+  moneyInPeriod: (today: string) => ['money_in', 'period', today] as const,
+  /** 한 저금의 돈 움직임(goal_move_public)과 내 사유 글 */
+  goalMoves: (id: string) => ['goal_move', id] as const,
+  goalMoveReasons: (id: string) => ['goal_move', id, 'reasons'] as const,
+  /** 쓸 곳 메모(저금 또는 묶음 하나, 다가오는 것) */
+  savingNotes: (o: { goalId?: string; bundleId?: string }) =>
+    ['saving_note', o.goalId ?? '', o.bundleId ?? ''] as const,
+  upcomingNotes: (from: string, to: string) => ['saving_note', 'upcoming', from, to] as const,
+  /** 분담(shared_account) */
+  sharedAccounts: ['shared_account'] as const,
+  /** 순자산 요약(networth_summary), 순위 미리 보기(networth_rank_pair), 열린 순위 요청 */
+  networthSummary: ['asset', 'summary'] as const,
+  rankPair: ['asset', 'rank_pair'] as const,
+  rankRequest: ['rank_consent_request'] as const,
 };
 
 /** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
@@ -85,3 +104,19 @@ export const splitKeys = [qk.splits, ['pay_checklist'], qk.goals, qk.goalSaved] 
 export const manageKeys = [qk.space, qk.modeRequests, ...splitKeys, ['partner_plan_view']] as const;
 /** 월급 변경이 바뀌면 다시 읽을 것(schedule/cancel_salary_change 뒤, Realtime salary_change): 변경 목록, 나, 상대, 월급 계획 쪽 */
 export const salaryChangeKeys = [qk.salaryChanges, qk.me, qk.partner, ...splitKeys] as const;
+/** 모은 금액이 바뀌면 다시 읽을 것(바로잡기, 잔액 맞추기, 냈어요, 돈 나눠 넣기 뒤): 저금, 모은 금액, 움직임, 묶음, 메모 */
+export const savingKeys = [
+  qk.goals,
+  qk.goalSaved,
+  ['goal_move'],
+  qk.bundles,
+  ['saving_note'],
+] as const;
+/** 묶음이 바뀌면(묶음 RPC 뒤, Realtime saving_bundle) */
+export const bundleKeys = [qk.bundles, qk.goals, qk.goalSaved] as const;
+/** 돈 들어왔어요가 바뀌면(기록·고치기·지우기·나눠 넣기 뒤, Realtime money_in) */
+export const moneyInKeys = [qk.moneyIns, ...savingKeys] as const;
+/** 분담이 바뀌면(propose/answer_split 뒤, Realtime shared_account): 분담, 월급 계획 쪽 */
+export const splitAccountKeys = [qk.sharedAccounts, ...splitKeys] as const;
+/** 순위·동의가 바뀌면(request/answer/turnOff, record_rank_view, Realtime rank_consent_request) */
+export const rankKeys = [qk.rankRequest, qk.rankPair, qk.me, qk.partner] as const;

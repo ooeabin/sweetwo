@@ -1,5 +1,9 @@
 import {
   SalaryChangeRowSchema,
+  SharedAccountRowSchema,
+  AnswerResult,
+  type SharedAccountRow,
+  type SplitRule,
   savingItemId,
   splitLineId,
   type Json,
@@ -406,4 +410,75 @@ export function subscribeSalaryChanges(spaceId: string, on: () => void) {
 export async function setPaydayNone(userId: string, on: boolean) {
   const { error } = await supabase().from('app_user').update({ payday_none: on }).eq('id', userId);
   fail(error);
+}
+
+// ─────────────────────────── v2.2 분담 도우미(06 3-7, W-01b·W-01c, 서버 propose_split·answer_split) ───────────────────────────
+
+/** 분담 제안을 못 함: 연결 전, 금액(1만 원 단위), 월급 비율 조건(두 사람 ‘모두’ 공개 + 월급), 나누는 법 */
+export class SplitProposeBlocked extends Error {
+  constructor(
+    readonly reason: 'not_connected' | 'bad_amount' | 'not_allowed' | 'bad_rule' | 'not_open',
+  ) {
+    super(reason);
+  }
+}
+const failPropose = (e: { message?: string } | null) => {
+  for (const r of ['not_connected', 'bad_amount', 'not_allowed', 'bad_rule', 'not_open'] as const)
+    if (e?.message?.includes(r)) throw new SplitProposeBlocked(r);
+  fail(e);
+};
+
+/**
+ * W-01b ‘{이름}님에게 제안하기’(propose_split). total = 한 달 넣을 금액(1만 원 단위), mine = 직접(custom)일 때 내 몫.
+ * 월급 비율 몫은 서버만 계산(응답·표에 월급 원값 없음). 공간마다 열린 제안 1개(새 제안이 옛 제안을 대신함). 제안 id
+ */
+export async function proposeSplit(o: {
+  name: string;
+  total: number;
+  rule: SplitRule;
+  mine?: number;
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('propose_split', {
+    p_name: o.name,
+    p_monthly_total: o.total,
+    p_rule: o.rule,
+    p_share_mine: o.mine,
+  });
+  failPropose(error);
+  if (typeof data !== 'string') throw new AuthCallError('unknown');
+  return data;
+}
+
+/** W-01c 답(answer_split): ‘좋아요’ → 두 사람(합쳐서는 공동) 월급 계획에 같이 쓰는 통장 줄. 만료면 'expired' */
+export async function answerSplit(id: string, accept: boolean): Promise<AnswerResult> {
+  const { data, error } = await supabase().rpc('answer_split', { p_id: id, p_accept: accept });
+  if (error?.message?.includes('not_open')) return 'expired';
+  failPropose(error);
+  return AnswerResult.parse(data);
+}
+
+/** 우리 공간 분담 기록(shared_account): 최근 것부터. 열린 제안은 status 'proposed' */
+export async function fetchSharedAccounts(): Promise<SharedAccountRow[]> {
+  const { data, error } = await supabase()
+    .from('shared_account')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(30);
+  fail(error);
+  return (data ?? []).map((r) => SharedAccountRowSchema.parse(r));
+}
+
+/** 분담 신호(Realtime shared_account). 받으면 splitAccountKeys 무효화 */
+export function subscribeSharedAccounts(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`shared_account:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'shared_account', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
 }
