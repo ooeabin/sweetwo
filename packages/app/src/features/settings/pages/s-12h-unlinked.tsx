@@ -32,8 +32,8 @@ export function S12hUnlinked() {
             await qc.invalidateQueries();
             nav('/', { replace: true });
           } else {
+            // 서버가 O-30부터로 둠(20261208090000 계약 7)
             await startAfterUnlink();
-            await updateMe({ onboarding_step: 'O-30' });
             await qc.invalidateQueries({ queryKey: qk.me });
             nav('/onboarding/o-30', { replace: true });
           }

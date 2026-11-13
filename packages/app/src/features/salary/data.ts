@@ -5,6 +5,7 @@ import {
   fetchGoals,
   fetchMe,
   fetchPartner,
+  fetchPartnerPlanView,
   fetchSpace,
   fetchSplits,
   qk,
@@ -35,6 +36,16 @@ export const useSpace = () => useQuery({ queryKey: qk.space, queryFn: fetchSpace
 export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
 export const useSplits = () => useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
+/**
+ * 상대(각자 계열)의 공개 단계대로 서버가 자른 월급 계획(partner_plan_view). W-01 파트너 탭과 같은 캐시.
+ * ‘했어요만’이면 상대 저금은 이름·금액 없이 이번 달 확인 여부만(08 6장, 2026-11-13 P1 = A)
+ */
+export const usePartnerPlanView = (on: boolean) =>
+  useQuery({
+    queryKey: qk.partnerPlanView(null),
+    queryFn: () => fetchPartnerPlanView(),
+    enabled: on,
+  });
 /** 저금 항목별 모은 금액(체크한 저금 합, 06 4장) */
 export const useGoalSaved = () => useQuery({ queryKey: qk.goalSaved, queryFn: fetchGoalSaved });
 

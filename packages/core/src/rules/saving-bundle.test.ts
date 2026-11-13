@@ -54,6 +54,25 @@ it('각자 금액은 두 사람이 모두 켰을 때만', () => {
   });
 });
 
+it('한 사람이라도 했어요만이면 둘 다 켜도 각자 금액 없음, 그 사람 저금 이름은 상대에게 없음(20261208090000)', () => {
+  const both = { ...b, show_each_a: true, show_each_b: true };
+  const c = bundleView(both, goals, 'c', false, ['y']);
+  expect(c).toMatchObject({
+    total: 3_600 * MAN,
+    mine: 2_100 * MAN,
+    partner: null,
+    show_each: false,
+  });
+  expect(c.goals).toEqual([
+    { id: 'gc', mine: true, name: '결혼 비용' },
+    { id: 'gy', mine: false, name: null },
+  ]);
+  // 했어요만인 예빈 화면도 같게(상대 금액 없음, 자기 저금 이름은 그대로)
+  const y = bundleView(both, goals, 'y', false, ['y']);
+  expect(y).toMatchObject({ partner: null, show_each: false });
+  expect(y.goals.find((g) => g.mine)?.name).toBe('결혼 비용');
+});
+
 it('하나라도 퍼센트만이면 둘 모두에게 %만', () => {
   for (const me of ['c', 'y']) {
     const v = bundleView(

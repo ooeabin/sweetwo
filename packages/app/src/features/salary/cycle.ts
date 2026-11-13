@@ -1,7 +1,7 @@
 import type { SalarySplit, SplitLine } from '@sweetwo/api';
 import {
   firstChecklistStart,
-  salaryChangeApplyDay,
+  salaryChangeAppliedDay,
   salaryChangeRevertDay,
   type BaseDay,
   type SalaryChangeRowResponse,
@@ -30,7 +30,8 @@ export const firstPaydayOf = (
 ) => (split ? firstChecklistStart(split.checklist_from ?? today, base) : null);
 
 /**
- * 월급이 바뀐 사이클 시작일(띠 6번, 07 5장): 내 월급 변경 중 가장 최근에 적용되거나 되돌린 것의 그날.
+ * 월급이 바뀐 날(띠 6번, 07 5장): 내 월급 변경 중 가장 최근에 적용되거나 되돌린 것의 그날(‘이번 달부터’를 월급날 전에
+ * 바로 적용했으면 적용한 날).
  * 띠 키는 core `salary_changed:{날}`(W-01을 열면 done)
  */
 export function salaryChangedDay(
@@ -41,7 +42,7 @@ export function salaryChangedDay(
   const days = (changes ?? [])
     .filter((c) => c.user_id === meId && !c.cancelled_at)
     .flatMap((c) => [
-      c.applied_at ? salaryChangeApplyDay(c, base) : null,
+      salaryChangeAppliedDay(c, base),
       c.reverted_at ? salaryChangeRevertDay(c, base) : null,
     ])
     .filter((d): d is string => !!d)

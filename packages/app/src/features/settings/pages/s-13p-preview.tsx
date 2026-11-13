@@ -19,8 +19,10 @@ import { useSettingsData } from '../data';
 // S-13p 상대에게 보이는 모습(25 ‘S-13p’, 08 6장): 상대 기기에서 나를 보는 화면을 읽기 전용으로.
 // 월급 계획(W-01 파트너 탭)은 서버 필터 partner_plan_view를 ‘상대로서’(p_viewer = 상대) 부른 결과 그대로.
 // 같이 모으기(H-10)와 자산은 상대가 실제로 받는 값과 같은 규칙으로 보여 줌(가리는 척 하지 않음):
-// - 저금: 저금 이름·목표 금액·모은 금액은 공개 단계와 상관없이 상대에게 보임(goal 읽기, goal_saved_sums).
-//   묶음에 넣은 내 저금 금액은 두 사람 모두 ‘각자 모은 금액 보여 주기’를 켰을 때만. 묶음은 합계(퍼센트만이면 %).
+// - 저금: ‘모두’·‘저금만’이면 저금 이름·목표 금액·모은 금액이 상대에게 보임(goal 읽기, goal_saved_sums).
+//   ‘했어요만’이면 서버가 이름·금액을 주지 않아(20261208090000 계약 1) “개인 저금” + 이번 달 확인 여부만.
+//   묶음에 넣은 내 저금 금액은 두 사람 모두 ‘각자 모은 금액 보여 주기’를 켰고 둘 다 ‘했어요만’이 아닐 때만
+//   (서버 bundle_view show_each). 묶음은 합계(퍼센트만이면 %).
 // - 자산: 모두 = 항목·금액, 총액만 = 묶음(종류)별 합계만(partner_asset_sums), 숨기기 = 없음. 공동 명의는 늘 보임.
 // 연결 해제 대기면 상대에게는 아무것도 안 보임. 분석 share_preview_viewed(한 번).
 export function S13pPreview() {
@@ -95,6 +97,10 @@ export function S13pPreview() {
       (!g.bundle_id || bundleOpen.get(g.bundle_id)),
   );
   const amountOf = (n: number | null | undefined) => (n == null ? '' : readWon(n));
+  // 했어요만(각자 계열): 상대는 내 개인 저금을 “개인 저금” + 이번 달 확인 여부로만 받음
+  const doneOnly = !joint && v.share === 'done_only';
+  const doneOf = (goalId: string) =>
+    v.lines.some((l) => l.goal_id === goalId && l.state === 'checked');
   const savingSection = (
     <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
       <SectionHeader title={copy.previewSaving} />
@@ -119,6 +125,15 @@ export function S13pPreview() {
             />
           ))}
           {myGoals.map((g) => {
+            if (doneOnly && g.owner_user_id === me.id)
+              return (
+                <ListRow
+                  key={g.id}
+                  label={copy.previewPrivate}
+                  value={doneOf(g.id) ? copy.previewDone : copy.previewNotYet}
+                  chevron={false}
+                />
+              );
             const s = saved.data?.[g.id] ?? 0;
             return (
               <ListRow
@@ -139,7 +154,8 @@ export function S13pPreview() {
   );
 
   // 월급 계획(W-01 파트너 탭): 서버가 자른 줄 그대로
-  const lineName = (l: (typeof v.lines)[number]) => l.name ?? copy.lineNames[l.kind] ?? l.kind;
+  const lineName = (l: (typeof v.lines)[number]) =>
+    l.name ?? (l.kind === 'saving' ? copy.previewPrivate : (copy.lineNames[l.kind] ?? l.kind));
   const planNote =
     joint || v.share === 'all'
       ? null

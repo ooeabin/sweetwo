@@ -61,7 +61,7 @@ select isnt((select space_id::text from public.app_user where id = auth.uid()), 
 select is((select count(*) from public.goal where owner_user_id is null), 0::bigint, '같이 쓰던 저금은 안 보임');
 select is((select onboarding_step from public.app_user where id = auth.uid()), 'S-12H', '해제 안내 먼저');
 select public.start_after_unlink();
-select is((select onboarding_step from public.app_user where id = auth.uid()), 'O-11', '시작하기 → O-11');
+select is((select onboarding_step from public.app_user where id = auth.uid()), 'O-30', '시작하기 → O-30(v2.2 20261208090000)');
 -- 해제 뒤 새로 만든 목표(다시 연결하면 버림)
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'travel', '혼자 여행', 'once', 1 from public.app_user where id = auth.uid();

@@ -51,10 +51,10 @@ it('저금만(기본): 저금·같이 쓰는 통장 줄 금액, 수입 없음', 
   ]);
 });
 
-it('했어요만: 저금 줄 이름 + 확인 여부만', () => {
+it('했어요만: 저금 줄 확인 여부만(이름·금액 없음, 2026-11-13 P1 = A)', () => {
   const v = view('done_only');
   expect(v.lines).toHaveLength(1);
-  expect(v.lines[0]).toMatchObject({ name: '여행', amount: null, state: 'checked' });
+  expect(v.lines[0]).toMatchObject({ name: null, amount: null, state: 'checked' });
 });
 
 it('같이 계열은 모두, 해제 대기는 모두 가림', () => {

@@ -183,10 +183,13 @@ export async function mockV22(page: Page, db: MemDb, now: Date): Promise<V22Db> 
             id: l.id,
             kind: l.kind,
             goal_id: l.goal_id ?? null,
+            // 했어요만(각자)은 이름도 없이(서버 20261208090000 계약 1)
             name:
-              l.kind === 'saving'
-                ? ((db.goals.find((g) => g.id === l.goal_id)?.name as string | undefined) ?? null)
-                : ((l.name as string | null) ?? null),
+              !joint && share === 'done_only'
+                ? null
+                : l.kind === 'saving'
+                  ? ((db.goals.find((g) => g.id === l.goal_id)?.name as string | undefined) ?? null)
+                  : ((l.name as string | null) ?? null),
             user_id: l.user_id ?? null,
             amount: joint || share !== 'done_only' ? l.amount : null,
             in_checklist: l.in_checklist ?? l.kind !== 'living',
@@ -276,7 +279,8 @@ export async function mockV22(page: Page, db: MemDb, now: Date): Promise<V22Db> 
         const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
         const pd = db.me.payday_last ? last : Math.min(Number(db.me.payday ?? 1), last);
         const applyDay = `${from.slice(0, 7)}-${String(pd).padStart(2, '0')}`;
-        const nowApply = applyDay <= today;
+        // ‘이번 달부터’는 월급날 전이어도 바로(서버 20261208090000 계약 2)
+        const nowApply = from.slice(0, 7) === today.slice(0, 7) || applyDay <= today;
         const row: Record<string, unknown> = {
           id,
           user_id: db.me.id,

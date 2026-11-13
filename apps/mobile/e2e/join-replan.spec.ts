@@ -274,6 +274,10 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
     }),
   ]);
   expect(db.space?.salary_mode).toBe('separate');
+  // 요청이 열려 있거나 거절돼도 내 각자 월급 계획에 ‘보내기’(월급 − 용돈) + ‘용돈’(서버 20261208090000 계약 6)
+  expect(
+    db.splits.find((x) => x.owner_user_id === db.me.id)?.split_line.map((l) => l.kind),
+  ).toEqual(['allowance', 'send']);
   expect(ev.find((e) => e.name === 'mode_change_requested')?.props).toEqual({
     phrase: 'p04_send',
     to_mode: 'joint',

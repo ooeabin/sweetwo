@@ -8,6 +8,8 @@ export const copy = {
   partnerDoneOnly: (name: string) => `${name}님은 했어요만 보여 줘요`, // [확인 필요]
   doneThisMonth: '이번 달 했어요',
   notDoneYet: '아직이에요', // [확인 필요]
+  // 상대 ‘했어요만’ 저금 이름 대신(서버 space_goals와 같은 말, 2026-11-13 P1 = A)
+  privateSaving: '개인 저금', // [확인 필요]
   // W-01b·W-01c 분담 도우미(20 ‘월급 탭 v2.2’, 06 3-7, 2026-11-13) [확인 필요]
   splitShare: {
     nameQ: '어떤 통장을 나눌까요?',
@@ -383,7 +385,8 @@ export const copy = {
   bundleDone: '다 모았어요',
   bundleEdit: '같이 모으기 고치기', // [확인 필요] 묶음 카드 ⋯ 화면 읽기
   bundleMine: (name: string) => `내 저금 ${name}`, // [확인 필요] W-13 펼친 줄
-  bundlePartnerRow: (who: string, name: string) => `${who}님 ${name}`, // [확인 필요]
+  // 상대가 ‘했어요만’이면 서버가 이름을 주지 않음 → “{이름}님 저금”(2026-11-13 P1 = A)
+  bundlePartnerRow: (who: string, name: string | null) => `${who}님 ${name ?? '저금'}`, // [확인 필요]
   bundleOpen: (name: string) => `${name} 펼치기`, // [확인 필요] 화면 읽기
   bundleLabel: (name: string, amount: string, rest: string) =>
     [`같이 모으기`, name, amount, rest].filter(Boolean).join(', '), // 화면 읽기 한 문장

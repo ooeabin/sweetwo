@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   salaryChangeApplyDay,
+  salaryChangeAppliedDay,
   salaryChangeDay,
   salaryChangedTaskOpen,
   salaryChangeImmediate,
@@ -32,9 +33,26 @@ it('적용일 = 그 달 사이클 시작일, 되돌림 = until 다음 달 사이
   expect(salaryChangeDay('2027-02-01', null)).toBe('2027-02-01');
 });
 
-it('이번 사이클이면 바로(적용일 ≤ 오늘)', () => {
+it('이번 달부터는 월급날 전이어도 바로, 미래 달은 예약(2026-11-13 P2 = A)', () => {
   expect(salaryChangeImmediate({ effective_from: '2026-11-01' }, 10, '2026-11-13')).toBe(true);
-  expect(salaryChangeImmediate({ effective_from: '2026-11-01' }, 25, '2026-11-13')).toBe(false);
+  expect(salaryChangeImmediate({ effective_from: '2026-11-01' }, 25, '2026-11-13')).toBe(true);
+  expect(salaryChangeImmediate({ effective_from: '2026-12-01' }, 25, '2026-11-13')).toBe(false);
+  expect(salaryChangeImmediate({ effective_from: '2026-12-01' }, 1, '2026-12-01')).toBe(true);
+});
+
+it('실제로 적용된 날: 월급날 전에 바로 적용했으면 그날(띠 6번)', () => {
+  const now = { effective_from: '2026-11-01', applied_at: '2026-11-13T01:00:00Z' };
+  expect(salaryChangeAppliedDay(now, 25)).toBe('2026-11-13');
+  expect(salaryChangeAppliedDay({ ...now, applied_at: '2026-11-24T15:30:00Z' }, 25)).toBe(
+    '2026-11-25',
+  );
+  expect(
+    salaryChangeAppliedDay(
+      { effective_from: '2027-03-01', applied_at: '2027-03-24T15:01:00Z' },
+      25,
+    ),
+  ).toBe('2027-03-25');
+  expect(salaryChangeAppliedDay({ ...now, applied_at: null }, 25)).toBeNull();
 });
 
 it('상태', () => {

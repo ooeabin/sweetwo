@@ -214,7 +214,7 @@ test('분담 제안 받음(W-01c): 좋아요 → 내 월급 계획에 같이 쓰
   expect(v.shared[1]?.status).toBe('declined');
 });
 
-test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, 했어요만이어도 저금 목표 금액은 보임', async ({
+test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, 했어요만이면 “개인 저금” + 이번 달 확인 여부만', async ({
   page,
 }) => {
   const { db, v } = await connected(page);
@@ -254,12 +254,15 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await expect(page.getByText('청년 적금')).toHaveCount(0);
   await axe(page);
 
-  // 했어요만: 월급 계획은 금액 없이 “이번 달 했어요”, 저금 목표 금액은 그대로 보임(goal 읽기)
+  // 했어요만(2026-11-13 P1 = A): 서버가 저금 이름·목표 금액·모은 금액을 주지 않아 “개인 저금” + 이번 달 확인 여부만
   (db.me as Record<string, unknown>).plan_share = 'done_only';
   await page.reload();
   await expect(page.getByText('찬우님은 했어요만 보여 줘요')).toBeVisible();
-  await expect(page.getByText('이번 달 했어요')).toBeVisible();
-  await expect(page.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
+  await expect(page.getByText('이번 달 했어요').first()).toBeVisible();
+  await expect(page.getByText('개인 저금').first()).toBeVisible();
+  await expect(page.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
+  await expect(page.getByText('내 집 마련')).toHaveCount(0);
+  await axe(page);
 });
 
 test('내 월급(S-11c): 다음 달부터 + 언제까지 → 예약 표시(S-11) → 취소', async ({ page }) => {
@@ -280,6 +283,22 @@ test('내 월급(S-11c): 다음 달부터 + 언제까지 → 예약 표시(S-11)
   await page.getByRole('button', { name: '취소' }).click();
   await expect(page.getByText('월급 변경을 취소했어요')).toBeVisible();
   expect(v.salaryChanges[0]?.cancelled_at).toBeTruthy();
+});
+
+test('내 월급(S-11c): 이번 달부터면 월급날(25일) 전이어도 바로 적용 → “월급을 바꿨어요” + 되돌리기', async ({
+  page,
+}) => {
+  const { db, v } = await connected(page);
+  await page.goto('/settings/me/salary');
+  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '이번 달부터' }).click();
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
+  expect(v.salaryChanges[0]).toMatchObject({ effective_from: '2026-10-01', amount: 3_000_000 });
+  expect(v.salaryChanges[0]?.applied_at).toBeTruthy();
+  expect(db.me.monthly_income).toBe(3_000_000);
+  await expect(page.getByText(/2026년 10월부터/)).toHaveCount(0);
 });
 
 test('알림 종류(S-14): 한 사람 관리형 관리하지 않는 쪽은 ‘같이 쓰는 걸 바꿨을 때’ 기본 끔, ‘내 용돈’ 줄', async ({
@@ -317,7 +336,7 @@ test('보안(S-15): PIN을 건너뛰었으면 맨 위 권장 한 줄 + 켜기 �
   await expect(page).toHaveURL(/next=\/settings\/security/);
 });
 
-test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘했어요만’이면 이름 + 이번 달 확인 여부만', async ({
+test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘했어요만’이면 “개인 저금” + 이번 달 확인 여부만', async ({
   page,
 }) => {
   const { db, v } = await connected(page);
@@ -356,6 +375,22 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   v.partnerShare = 'done_only';
   await page.reload();
   await expect(page.getByText('예빈님은 했어요만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('개인 저금')).toBeVisible();
+  await expect(page.getByText('예빈 여행')).toHaveCount(0);
   await expect(page.getByText('아직이에요')).toBeVisible();
   await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
+  await axe(page);
+
+  // W-13 저금 목록: 서버(space_goals)가 “개인 저금”으로, 금액 없이 줌 → 이번 달 확인 여부만, 열지 않음
+  Object.assign(db.goals.find((g) => g.id === 'goal-y') ?? {}, {
+    name: '개인 저금',
+    target_amount: null,
+    start_saved: 0,
+  });
+  await page.goto('/salary/items');
+  const row = page.locator('.hg-goalrow', { hasText: '개인 저금' });
+  await expect(row).toContainText('아직이에요');
+  await expect(row.getByRole('button')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /개인 저금/ })).toHaveCount(0);
+  await axe(page);
 });

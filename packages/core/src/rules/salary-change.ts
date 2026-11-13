@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { daysBetween } from '../date';
+import { daysBetween, kstDateOf } from '../date';
 import { MAX_WON, type Won } from '../money';
 import { baseDateIn, type BaseDay } from '../onboarding/cycle';
 
@@ -44,12 +44,29 @@ export const salaryChangeRevertDay = (
   payday: BaseDay | null,
 ) => (c.until_month ? salaryChangeDay(nextMonth(c.until_month), payday) : null);
 
-/** 저장하면 바로 적용되나(이번 사이클이면 즉시, 07 5장): 적용일 ≤ 오늘 */
+/**
+ * 저장하면 바로 적용되나(07 5장, 2026-11-13 P2 = A, 서버 schedule_salary_change 계약 2):
+ * 시작 달이 이번 달이면 그 달 월급날 전이어도 바로(지금 사이클부터), 아니면 적용일 ≤ 오늘
+ */
 export const salaryChangeImmediate = (
   c: Pick<SalaryChangeRow, 'effective_from'>,
   payday: BaseDay | null,
   today: string,
-) => salaryChangeApplyDay(c, payday) <= today;
+) => c.effective_from.slice(0, 7) <= today.slice(0, 7) || salaryChangeApplyDay(c, payday) <= today;
+
+/**
+ * 실제로 적용된 날(띠 6번): 적용일과 적용한 날(applied_at, KST) 중 이른 날. ‘이번 달부터’를 월급날 전에 바로
+ * 적용했으면 그날. 적용 전이면 null
+ */
+export const salaryChangeAppliedDay = (
+  c: Pick<SalaryChangeRow, 'effective_from' | 'applied_at'>,
+  payday: BaseDay | null,
+): string | null => {
+  if (!c.applied_at) return null;
+  const at = kstDateOf(c.applied_at);
+  const day = salaryChangeApplyDay(c, payday);
+  return at < day ? at : day;
+};
 
 export type SalaryChangeState = 'scheduled' | 'applied' | 'reverted' | 'cancelled';
 export const salaryChangeState = (c: SalaryChangeRow): SalaryChangeState =>

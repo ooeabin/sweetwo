@@ -5,7 +5,11 @@ import { z } from 'zod';
 export const JoinContextSchema = z
   .object({
     space_id: z.string(),
-    member: z.boolean(),
+    // 서버는 20261208090000부터 늘 boolean. 옛 서버는 공간 없는 합류자에게 null을 줘서 false로(B1)
+    member: z
+      .boolean()
+      .nullable()
+      .transform((v) => v ?? false),
     reserved_until: z.string().nullable(),
     starter_id: z.string().nullable(),
     starter_nickname: z.string().nullable(),

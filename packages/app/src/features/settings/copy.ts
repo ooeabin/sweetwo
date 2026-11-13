@@ -650,6 +650,7 @@ export const copy = {
   previewIncome: (amount: string, day: string) => `월급 ${amount}, ${day}`,
   previewDone: '이번 달 했어요',
   previewNotYet: '아직이에요', // [확인 필요]
+  previewPrivate: '개인 저금', // [확인 필요] 했어요만이면 상대에게 저금 이름 대신(서버 space_goals와 같은 말)
   previewOf: (saved: string, target: string) => `${saved} / ${target}`,
   previewSum: (group: string, n: number) => `${group} ${n}개`, // [확인 필요] 총액만 보여 주기 묶음
   previewJoint: '공동', // [확인 필요]

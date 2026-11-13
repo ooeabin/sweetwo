@@ -5,6 +5,8 @@ import { savingPct } from './saving-item';
 // 서버 bundle_view·bundle_refresh·bundle_set_visibility(마이그레이션 20261203090000_v22_saving_together 계약 4)와 같은 결과.
 // 구성원 a = 만든 사람, b = 상대. 합계는 늘 둘 다, 각자 금액은 show_each_a and show_each_b일 때만,
 // percent_only_a or percent_only_b면 둘 모두에게 합계·목표 금액·각자 금액 없이 %만.
+// 2026-11-13(마이그레이션 20261208090000 계약 1): 구성원 중 한 사람이라도 공개 ‘했어요만’이면 각자 금액은 둘 다 꺼진 것처럼,
+// 그 사람의 묶인 저금 이름은 상대에게 null.
 
 export interface BundleRow {
   id: string;
@@ -45,7 +47,8 @@ export interface BundleView {
   target: Won | null;
   mine: Won | null;
   partner: Won | null;
-  goals: { id: string; mine: boolean; name: string }[];
+  /** 상대가 ‘했어요만’이면 상대 저금 이름은 null */
+  goals: { id: string; mine: boolean; name: string | null }[];
 }
 
 /** 묶음 진행률: 내림(합계 × 100 ÷ 목표 금액), 최대 100. 목표 금액이 없거나 0이면 null(06 5-1과 같음) */
@@ -58,6 +61,8 @@ export function bundleView(
   goals: readonly BundleGoal[],
   meId: string,
   paused = false,
+  /** 공개 ‘했어요만’인 구성원 id(각자 계열) */
+  doneOnly: readonly string[] = [],
 ): BundleView {
   const mine = goals.filter((g) => g.owner_user_id === meId).reduce((t, g) => t + g.saved, 0);
   const theirs = paused
@@ -65,7 +70,11 @@ export function bundleView(
     : goals.filter((g) => g.owner_user_id !== meId).reduce((t, g) => t + g.saved, 0);
   const total = mine + theirs;
   const pctOnly = b.percent_only_a || b.percent_only_b;
-  const each = b.show_each_a && b.show_each_b;
+  const each =
+    b.show_each_a && b.show_each_b && !doneOnly.some((u) => u === b.member_a || u === b.member_b);
+  // 상대 개인 저금을 가림(서버 saving_owner_hidden): 해제 대기이거나 주인이 ‘했어요만’
+  const hiddenOwner = (o: string | null) =>
+    o !== null && o !== meId && (paused || doneOnly.includes(o));
   const isA = meId === b.member_a;
   return {
     id: b.id,
@@ -82,7 +91,11 @@ export function bundleView(
     target: pctOnly ? null : b.target_amount,
     mine: pctOnly ? null : mine,
     partner: pctOnly || !each ? null : theirs,
-    goals: goals.map((g) => ({ id: g.id, mine: g.owner_user_id === meId, name: g.name })),
+    goals: goals.map((g) => ({
+      id: g.id,
+      mine: g.owner_user_id === meId,
+      name: hiddenOwner(g.owner_user_id) ? null : g.name,
+    })),
   };
 }
 

@@ -57,7 +57,7 @@
 
 - 공통 필드: id uuid, space\_id uuid(FK), created\_by·updated\_by uuid, created\_at·updated\_at timestamptz, version int(충돌 판정), deleted\_at timestamptz·deleted\_by uuid(휴지통, 30일 뒤 자동 영구 삭제)
 - 타입: 금액 bigint(원, 평문 컬럼. DB 전체 암호화 + RLS로 보호, 합계·배분은 DB가 계산), 날짜 date(한국 시간), 선택지 enum, 필드 암호화 값 bytea(메모·가족 정보만, 아래 표에서 ‘암호’), 명의 = owner\_user\_id(null이면 공동)
-- 공개 범위: RLS + 파트너용 뷰(금액만 보여 주기 = 합계 한 줄, 숨기기 = 제외). 2026-11-13: 각자 계열 월급 계획·저금은 `plan_share` 필터 `partner_plan_view` 하나(저금 공개 열 안 읽음), 자산 ‘금액만’ 값은 화면 이름 ‘총액만’, 바로잡기 사유는 `goal_move_public`에서 뺌(→ 09 7장)
+- 공개 범위: RLS + 파트너용 뷰(금액만 보여 주기 = 합계 한 줄, 숨기기 = 제외). 2026-11-13: 각자 계열 월급 계획·저금은 `plan_share` 필터 `partner_plan_view` 하나(저금 공개 열 안 읽음), 자산 ‘금액만’ 값은 화면 이름 ‘총액만’, 바로잡기 사유는 `goal_move_public`에서 뺌(→ 09 7장). ‘했어요만’ 저금은 goal 읽기·`space_goals`·`goal_saved_sums`·`goal_move`·묶음 응답 모두에서 이름·금액을 뺌(도우미 `saving_owner_hidden`, 2026-11-13)
 
 | 테이블 | 핵심 필드·타입 | 관계 |
 | --- | --- | --- |
