@@ -16,7 +16,7 @@ export const copy = {
   nicknamePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
 
-  // O-07 초대 코드 시트(첫 저금 직후, 2026-11-13). 코드 상자·보내기 버튼·공유 글·복사 토스트는 shared/invite-share(S-12와 같음)
+  // O-07 초대 코드 시트(첫 저금 직후, 2026-11-13). 코드 상자·보내기 버튼·공유 글·복사 Toast는 shared/invite-share(S-12와 같음)
   inviteAfterSaving: '같이 모을 사람을 초대할까요?', // [확인 필요] 16 O-07, 17 O-60 4번
   sendLater: '나중에 보낼게요', // [확인 필요] 보내기 전 ‘다음’ 대신
   inviteFailed: '지금은 코드를 만들 수 없어요',

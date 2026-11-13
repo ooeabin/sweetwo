@@ -616,7 +616,7 @@ test('이름: 보이는 글자로 셈(커플 이모지 = 1자, S2-19), 공백만
   expect(db.me.nickname).toBe(`${couple.repeat(6)}찬우`);
 });
 
-test('O-32 월급 계획 저장 실패 → 토스트 다시 시도 → 다시 만듦', async ({ page }) => {
+test('O-32 월급 계획 저장 실패 → Toast 다시 시도 → 다시 만듦', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   let fail = 1;
