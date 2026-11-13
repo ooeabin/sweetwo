@@ -16,6 +16,10 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
 $$;
+-- v2.2 D1 첫 사이클 소급 없음(20261201090000): 이 테스트는 이번 사이클 목록이 필요해 월급 계획 시작일 제한을 풂
+create function pg_temp.no_backdate() returns void language sql security definer as $$
+  update public.salary_split set checklist_from = null;
+$$;
 
 -- 찬우: 각자, 월급 계획과 체크리스트, 초대
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -30,6 +34,7 @@ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 select throws_ok($$ select public.complete_join() $$, '42501', 'not_joining', '합류 중이 아니면 못 함');
@@ -66,7 +71,8 @@ select is((select couple_state::text from public.couple_space where created_by =
   'connected', '커플 연결');
 select is((select body from public.notification where kind = 'partner_joined'), '이제 월급과 저금을 같이 봐요', '합류 알림');
 select is((select count(*) from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.owner_user_id is null and l.kind = 'allowance'), 2::bigint, '이번 체크리스트에 예빈 용돈 줄');
+  where c.owner_user_id is null and l.kind = 'allowance'), 0::bigint,
+  'v2.2(D2): 용돈 줄은 기본으로 확인 목록에 넣지 않음');
 
 -- 시작한 사람이 아직 온보딩 중: P-05 저장 = 대기, 시작한 사람이 끝내면 “월급 계획을 만들었어요”
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');

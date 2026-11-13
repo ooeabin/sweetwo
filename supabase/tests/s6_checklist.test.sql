@@ -54,6 +54,8 @@ end $$;
 select pg_temp.flush();
 delete from public.notification;
 delete from public.server_event;
+-- v2.2(D2): 생활비 줄은 기본으로 목록에 없음. 이 테스트는 줄 2개짜리 목록을 쓰므로 켜 둠
+update public.split_line set in_checklist = true;
 
 -- 1. checklist_generated: 예빈은 ‘분석 수집’을 끔 → 찬우 것만
 update public.app_user set analytics_off = true where id = '22222222-2222-2222-2222-222222222222';

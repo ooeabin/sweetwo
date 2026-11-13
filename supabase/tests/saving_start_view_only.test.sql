@@ -14,6 +14,10 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
 $$;
+-- v2.2 D1 첫 사이클 소급 없음(20261201090000): 이 테스트는 이번 사이클 목록이 필요해 월급 계획 시작일 제한을 풂
+create function pg_temp.no_backdate() returns void language sql security definer as $$
+  update public.salary_split set checklist_from = null;
+$$;
 create function pg_temp.item(n text) returns uuid language sql as $$
   select id from public.goal where name = n and deleted_at is null order by created_at desc limit 1;
 $$;
@@ -26,9 +30,10 @@ select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
-  jsonb_build_object('kind', 'living', 'amount', 880000),
+  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 
@@ -59,8 +64,9 @@ select public.join_space(current_setting('test.code'));
 select public.finish_join();
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'amount', 680000)
+  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 680000)
 ), auth.uid());
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select public.add_saving_item('카메라', 100000, 1000000);
 reset role;

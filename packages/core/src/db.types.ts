@@ -378,7 +378,9 @@ export type Database = {
           other_income: number
           payday: number | null
           payday_last: boolean
+          payday_none: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
           rank_month: string | null
@@ -422,7 +424,9 @@ export type Database = {
           other_income?: number
           payday?: number | null
           payday_last?: boolean
+          payday_none?: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          push_kinds?: NonNullable<Json>
           quiet_end?: number
           quiet_start?: number
           rank_month?: string | null
@@ -465,7 +469,9 @@ export type Database = {
           other_income?: number
           payday?: number | null
           payday_last?: boolean
+          payday_none?: boolean
           provider?: Database["public"]["Enums"]["auth_provider"]
+          push_kinds?: NonNullable<Json>
           quiet_end?: number
           quiet_start?: number
           rank_month?: string | null
@@ -1398,36 +1404,52 @@ export type Database = {
       goal_move: {
         Row: {
           amount: number
+          auto_line_id: string | null
+          auto_on: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
           goal_id: string
           id: string
           kind: string
+          reason_code: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id: string
         }
         ComputedFields: never
         Insert: {
           amount: number
+          auto_line_id?: string | null
+          auto_on?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           goal_id: string
           id?: string
           kind: string
+          reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id: string
         }
         Update: {
           amount?: number
+          auto_line_id?: string | null
+          auto_on?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
           goal_id?: string
           id?: string
           kind?: string
+          reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "goal_move_auto_line_id_fkey"
+            columns: ["auto_line_id"]
+            isOneToOne: false
+            referencedRelation: "split_line"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "goal_move_goal_id_fkey"
             columns: ["goal_id"]
@@ -2070,12 +2092,15 @@ export type Database = {
       pay_check_line: {
         Row: {
           actual: number | null
+          auto: boolean
+          auto_due: string | null
           checked_at: string | null
           checked_by: string | null
           checklist_id: string
           goal_id: string | null
           id: string
           kind: Database["public"]["Enums"]["split_line_kind"]
+          late: boolean
           name: string | null
           on_behalf: boolean
           planned: number
@@ -2088,12 +2113,15 @@ export type Database = {
         ComputedFields: never
         Insert: {
           actual?: number | null
+          auto?: boolean
+          auto_due?: string | null
           checked_at?: string | null
           checked_by?: string | null
           checklist_id: string
           goal_id?: string | null
           id?: string
           kind: Database["public"]["Enums"]["split_line_kind"]
+          late?: boolean
           name?: string | null
           on_behalf?: boolean
           planned: number
@@ -2105,12 +2133,15 @@ export type Database = {
         }
         Update: {
           actual?: number | null
+          auto?: boolean
+          auto_due?: string | null
           checked_at?: string | null
           checked_by?: string | null
           checklist_id?: string
           goal_id?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["split_line_kind"]
+          late?: boolean
           name?: string | null
           on_behalf?: boolean
           planned?: number
@@ -2153,6 +2184,8 @@ export type Database = {
       }
       pay_checklist: {
         Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
           cycle_end: string
           cycle_start: string
@@ -2165,6 +2198,8 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           cycle_end: string
           cycle_start: string
@@ -2176,6 +2211,8 @@ export type Database = {
           state?: string
         }
         Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           cycle_end?: string
           cycle_start?: string
@@ -2295,6 +2332,7 @@ export type Database = {
       }
       salary_split: {
         Row: {
+          checklist_from: string | null
           created_at: string
           id: string
           owner_user_id: string | null
@@ -2305,6 +2343,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          checklist_from?: string | null
           created_at?: string
           id?: string
           owner_user_id?: string | null
@@ -2314,6 +2353,7 @@ export type Database = {
           version?: number
         }
         Update: {
+          checklist_from?: string | null
           created_at?: string
           id?: string
           owner_user_id?: string | null
@@ -2366,8 +2406,11 @@ export type Database = {
       split_line: {
         Row: {
           amount: number
+          auto_day: number | null
+          auto_pay: boolean
           goal_id: string | null
           id: string
+          in_checklist: boolean
           kind: Database["public"]["Enums"]["split_line_kind"]
           name: string | null
           sort: number
@@ -2378,8 +2421,11 @@ export type Database = {
         ComputedFields: never
         Insert: {
           amount: number
+          auto_day?: number | null
+          auto_pay: boolean
           goal_id?: string | null
           id?: string
+          in_checklist: boolean
           kind: Database["public"]["Enums"]["split_line_kind"]
           name?: string | null
           sort: number
@@ -2389,8 +2435,11 @@ export type Database = {
         }
         Update: {
           amount?: number
+          auto_day?: number | null
+          auto_pay?: boolean
           goal_id?: string | null
           id?: string
+          in_checklist?: boolean
           kind?: Database["public"]["Enums"]["split_line_kind"]
           name?: string | null
           sort?: number
@@ -2920,6 +2969,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      auto_confirm_due_lines: { Args: { p_today?: string }; Returns: number }
+      auto_due_date: {
+        Args: { p_day: number; p_end: string; p_start: string }
+        Returns: string
+      }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
       can_read_photo: { Args: { p_name: string }; Returns: boolean }
@@ -2950,6 +3004,7 @@ export type Database = {
         Args: { p_actual?: number; p_line: string; p_state: string }
         Returns: undefined
       }
+      checklist_restate: { Args: { p_checklist: string }; Returns: string }
       claim_mail: {
         Args: { p_limit?: number }
         Returns: {
@@ -3046,7 +3101,9 @@ export type Database = {
           other_income: number
           payday: number | null
           payday_last: boolean
+          payday_none: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
           rank_month: string | null
@@ -3103,7 +3160,9 @@ export type Database = {
           other_income: number
           payday: number | null
           payday_last: boolean
+          payday_none: boolean
           provider: Database["public"]["Enums"]["auth_provider"]
+          push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
           rank_month: string | null
@@ -3122,6 +3181,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      confirm_auto_lines: {
+        Args: { p_checklist: string; p_today: string }
+        Returns: number
+      }
+      confirm_payday: { Args: { p_checklist: string }; Returns: number }
       create_inquiry: {
         Args: {
           p_attach?: Json
@@ -3178,6 +3242,7 @@ export type Database = {
           total: number
         }[]
       }
+      goal_auto_achieve: { Args: { p_goal: string }; Returns: boolean }
       goal_checked_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3186,6 +3251,10 @@ export type Database = {
         }[]
       }
       goal_lines_sync: { Args: { p_goal: string }; Returns: undefined }
+      goal_mark_achieved: {
+        Args: { p_actor: string; p_goal: string }
+        Returns: undefined
+      }
       goal_saved: { Args: { p_goal: string }; Returns: number }
       goal_saved_sums: {
         Args: Record<PropertyKey, never>
@@ -3260,6 +3329,7 @@ export type Database = {
       ko_obj: { Args: { w: string }; Returns: string }
       ko_subj: { Args: { w: string }; Returns: string }
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
+      late_check_until: { Args: { p_checklist: string }; Returns: string }
       lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
       log_partner_change: {
         Args: {
@@ -3467,6 +3537,14 @@ export type Database = {
           version: string
         }[]
       }
+      progress_hero: {
+        Args: { p_user: string }
+        Returns: {
+          goal_id: string
+          name: string
+          pct: number
+        }[]
+      }
       purge_abandoned_signups: { Args: { p_now?: string }; Returns: number }
       purge_app_devices: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_deleted_accounts: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3475,6 +3553,11 @@ export type Database = {
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
       purge_unlinked_spaces: { Args: Record<PropertyKey, never>; Returns: undefined }
+      push_kind_key: { Args: { p_kind: string }; Returns: string }
+      push_kind_on: {
+        Args: { p_kind: string; p_kinds: Json }
+        Returns: boolean
+      }
       push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
       read_won: { Args: { v: number }; Returns: string }
       recent_goal_changes: {
@@ -3538,6 +3621,7 @@ export type Database = {
       send_evening_notifications: { Args: { p_today?: string }; Returns: number }
       send_morning_notifications: { Args: { p_today?: string }; Returns: number }
       send_notice_mails: { Args: { p_now?: string }; Returns: number }
+      send_progress_news: { Args: { p_today?: string }; Returns: number }
       send_weekly_summary: { Args: { p_today?: string }; Returns: number }
       server_track: {
         Args: { p_name: string; p_props: Json; p_space: string; p_user: string }
@@ -3617,6 +3701,7 @@ export type Database = {
       split_editable: {
         Args: { p_split: string }
         Returns: {
+          checklist_from: string | null
           created_at: string
           id: string
           owner_user_id: string | null
@@ -3648,6 +3733,7 @@ export type Database = {
         Args: { p_amount?: number; p_line: string; p_name?: string }
         Returns: undefined
       }
+      split_lines_configure: { Args: { p_items: Json }; Returns: undefined }
       split_lines_json: {
         Args: { p_amount?: number; p_line?: string; p_split: string }
         Returns: Json

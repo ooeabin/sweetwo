@@ -14,6 +14,10 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
 $$;
+-- v2.2 D1 첫 사이클 소급 없음(20261201090000): 이 테스트는 이번 사이클 목록이 필요해 월급 계획 시작일 제한을 풂
+create function pg_temp.no_backdate() returns void language sql security definer as $$
+  update public.salary_split set checklist_from = null;
+$$;
 
 -- 찬우: 각자, 실수령 350만, 월급날 25일, 목표 비상금·내 집 마련
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -45,11 +49,13 @@ select throws_ok($$ select public.save_split('[{"kind":"fixed","amount":12345}]'
 select throws_ok($$ insert into public.split_line (split_id, space_id, kind, amount, sort)
   select id, space_id, 'fixed', 10000, 9 from public.salary_split $$, '42501', null, '직접 쓰기는 막음');
 
--- 첫 체크리스트: 오늘이 든 사이클, 0원 줄 빼고 5줄
+-- 첫 체크리스트: 오늘이 든 사이클, 0원 줄과 v2.2 기본 제외(생활비·용돈, D2) 빼고 3줄
+select pg_temp.no_backdate();
 select isnt(public.start_checklist(auth.uid()), null, '체크리스트 생김');
 select ok((select cycle_start <= public.kst_today() and cycle_end >= public.kst_today() from public.pay_checklist), '오늘이 사이클 안');
 select is((select extract(day from cycle_start)::int from public.pay_checklist), 25, '기준일 = 월급날 25일');
-select is((select count(*) from public.pay_check_line), 5::bigint, '0원 줄은 빠짐');
+select is((select count(*) from public.pay_check_line), 3::bigint, '0원 줄, 생활비·용돈은 빠짐');
+select pg_temp.no_backdate();
 select is(public.start_checklist(auth.uid()), (select id from public.pay_checklist), '두 번 불러도 하나');
 
 -- 저장하면 줄이 바뀜(통째로 교체)
