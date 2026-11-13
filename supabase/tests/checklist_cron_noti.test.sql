@@ -69,7 +69,7 @@ select results_eq(
   $$ select user_id, kind, title, body, target from public.notification order by kind $$,
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'maturity', '결혼자금 적금이 두 달 뒤 만기예요', null::text,
              '/assets/' || (select id from public.asset where name = '결혼자금 적금')),
-            ('11111111-1111-1111-1111-111111111111'::uuid, 'payday', '오늘은 월급날이에요', '월급 계획대로 보내고 체크해 주세요', '/salary') $$,
+            ('11111111-1111-1111-1111-111111111111'::uuid, 'payday', '오늘은 월급날이에요', '계획대로 됐는지 한 번만 확인해 주세요', '/salary') $$,
   '찬우에게만');
 select results_eq($$ select topic from public.notification order by kind $$, $$ values ('money'), ('plan') $$, '알림 묶음');
 
@@ -81,13 +81,11 @@ select throws_ok($$ select public.check_pay_line((select l.id from public.pay_ch
 reset role;
 select is((select count(*)::int from public.notification where kind = 'behalf_checked'), 0, '대신 체크 알림 없음');
 
--- 찬우가 남은 줄을 끝냄 → 예빈에게 인앱만
+-- 찬우가 남은 줄을 끝냄 → 예빈에게 인앱만(v2.2 D2: 생활비 줄은 기본으로 목록에 없어 저금 줄 하나)
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked');
-select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-03-25' and l.kind = 'living'), 'checked');
 reset role;
 select results_eq(
   $$ select user_id, title, target, topic from public.notification where kind = 'partner_done' $$,
@@ -97,7 +95,8 @@ select results_eq(
 
 -- 오후 8시 월말 확인: 다음 기준일 3일 전, 체크 안 한 줄이 있는 체크리스트만
 select is(public.send_evening_notifications('2027-04-07'), 1, '예빈만(찬우는 다 함)');
-select is((select title from public.notification where kind = 'review_due'), '3월 월급에서 체크 안 한 게 4개 있어요', '월말 확인 문구');
+select is((select title from public.notification where kind = 'review_due'), '3월 10일 월급에서 확인할 게 2개 남았어요',
+  'v2.2 월급 전 확인 문구(생활비·용돈 줄은 목록에 없음)');
 select is(public.send_evening_notifications('2027-04-22'), 0, '다 한 체크리스트는 없음');
 
 -- 초대 코드 만료 3일 전(합류 전 공간만)

@@ -14,6 +14,10 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
 $$;
+-- v2.2 D1 첫 사이클 소급 없음(20261201090000): 이 테스트는 이번 사이클 목록이 필요해 월급 계획 시작일 제한을 풂
+create function pg_temp.no_backdate() returns void language sql security definer as $$
+  update public.salary_split set checklist_from = null;
+$$;
 create function pg_temp.line(k text) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal g on g.id = l.goal_id
   where coalesce(g.template, l.kind::text) = k;
@@ -29,8 +33,9 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 150000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'living', 'amount', 880000)
+  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 880000)
 ), auth.uid());
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 
 select public.check_pay_line(pg_temp.line('home'), 'checked');
@@ -40,7 +45,7 @@ select is((select state from public.pay_checklist), 'open', '남은 줄이 있�
 -- 월급 계획을 고치면 체크 안 한 줄(생활비)만 새 금액, 체크한 줄은 그대로
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 500000),
-  jsonb_build_object('kind', 'living', 'amount', 700000)
+  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 700000)
 ), auth.uid());
 select is((select planned from public.pay_check_line where id = pg_temp.line('home')), 950000::bigint, '체크한 줄은 그대로');
 select is((select planned from public.pay_check_line where id = pg_temp.line('living')), 700000::bigint, '체크 안 한 줄은 새 금액');

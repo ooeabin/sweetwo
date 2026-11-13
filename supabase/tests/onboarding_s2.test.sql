@@ -2,7 +2,7 @@
 -- onboarding_reset_plan(S2-01), 결혼했어요가 아니면 자동 결혼기념일 지움(S2-09), 이름 한도 코드 포인트 40(S2-19)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com');
@@ -10,6 +10,9 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
   ('kakao-c', '11111111-1111-1111-1111-111111111111', '{}', 'kakao');
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
+$$;
+create function pg_temp.no_backdate() returns void language sql security definer as $$
+  update public.salary_split set checklist_from = null;
 $$;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -20,6 +23,9 @@ update public.app_user set monthly_income = 3500000, payday = 25 where id = auth
 
 -- 1) 온보딩 중 다시 만들기: 지우고 새로 저장 → 체크리스트도 새 월급날로
 select public.save_split('[{"kind":"fixed","amount":880000},{"kind":"living","amount":880000}]'::jsonb, auth.uid());
+select is(public.start_checklist(auth.uid()), null::uuid,
+  'v2.2(D1): 온보딩 중 이미 시작한 사이클 목록은 만들지 않음(첫 월급날부터)');
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select is((select count(*) from public.pay_checklist), 1::bigint, '첫 체크리스트');
 select public.onboarding_reset_plan();
@@ -27,6 +33,7 @@ select is((select count(*) from public.salary_split), 0::bigint, '온보딩 중�
 select is((select count(*) from public.pay_checklist), 0::bigint, '체크리스트도 지움');
 update public.app_user set payday = 10 where id = auth.uid();
 select public.save_split('[{"kind":"fixed","amount":1250000}]'::jsonb, auth.uid());
+select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select is((select count(*) from public.pay_checklist), 1::bigint, '다시 하나');
 select is((select extract(day from cycle_start)::int from public.pay_checklist), 10, '새 월급날 기준');
