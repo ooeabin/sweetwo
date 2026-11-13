@@ -287,8 +287,9 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await expect(page.getByText('예빈님이 ‘좋아요’를 누르면 바뀌어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('예빈님에게 물어봤어요')).toBeVisible();
   await expect(page).toHaveURL(/\/settings\/me$/);
+  // 앞 Toast(월급 변경)가 끝난 뒤에 보일 수 있어 넉넉히
+  await expect(page.getByText('예빈님에게 물어봤어요')).toBeVisible({ timeout: 15_000 });
   expect(v.modeRequests[0]).toMatchObject({
     status: 'open',
     to_mode: 'joint',
@@ -647,6 +648,7 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
   // 다시 요청이 오면 ‘연결할게요’ → 받은 초대 코드로 합류 흐름
   ask();
   await page.goto('/settings/couple/reconnect');
+  await expect(page.getByRole('heading', { name: '예빈님이 다시 연결하자고 해요' })).toBeVisible();
   await page.getByRole('button', { name: '연결할게요' }).click();
   await expect(page).toHaveURL(/\/(i\/K7M2QX|join\/)/);
   expect(v.reconnects[1]).toMatchObject({ status: 'accepted' });

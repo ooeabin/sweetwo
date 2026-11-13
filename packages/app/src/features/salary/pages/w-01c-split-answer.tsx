@@ -41,6 +41,8 @@ export function W01cSplitAnswer() {
   const a = (rows.data ?? []).find((r) => r.id === id);
   const open = !!a && a.status === 'proposed' && Date.parse(a.expires_at) > Date.now();
   const home = () => nav('/', { replace: true });
+  // 기기에 남은 예전 목록이면 새로 받을 때까지 기다림
+  if (!open && rows.isFetching) return <QuestionSkeleton />;
   if (!a || !open)
     return (
       <QuestionLayout
@@ -77,7 +79,7 @@ export function W01cSplitAnswer() {
       track('split_answered', { name_code: nameCodeOf(a.name), rule: a.rule, result });
       await Promise.all(splitAccountKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
       if (result === 'expired') {
-        toast(t.expired);
+        carryToast(t.expired);
         return home();
       }
       if (result === 'accepted') {

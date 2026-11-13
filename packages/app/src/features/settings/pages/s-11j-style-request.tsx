@@ -33,6 +33,7 @@ export function S11jStyleRequest() {
   const myName = c.myName;
   const open =
     !!r && r.status === 'open' && r.from_user !== me.id && Date.parse(r.expires_at) > Date.now();
+  if (!open && q.isFetching) return <QuestionSkeleton />;
   if (!r || !open)
     return (
       <QuestionLayout
@@ -67,7 +68,7 @@ export function S11jStyleRequest() {
       track('mode_change_answered', { phrase: r.phrase, to_mode: r.to_mode, result });
       await Promise.all(manageKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
       if (result === 'expired') {
-        toast(copy.styleExpired);
+        carryToast(copy.styleExpired);
         return nav('/', { replace: true });
       }
       if (result === 'accepted') {

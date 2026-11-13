@@ -105,7 +105,7 @@ export function S11fManageStyle() {
       const { result } = await send(L, S, M);
       await refresh();
       if (result === 'requested') {
-        toast(copy.styleAsked(partnerName));
+        carryToast(copy.styleAsked(partnerName));
         nav('/settings/me', { replace: true });
         return;
       }

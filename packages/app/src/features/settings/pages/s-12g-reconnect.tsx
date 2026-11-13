@@ -31,6 +31,8 @@ export function S12gReconnect() {
   if (d.loading || !d.me || !d.c || reqs.isLoading || name.isLoading) return <QuestionSkeleton />;
   const me = d.me;
   const open = (reqs.data ?? []).find((r) => r.to_user === me.id && r.status === 'open');
+  // 기기에 남은 예전 목록으로 바로 나가지 않게, 새로 받는 중이면 기다림
+  if (!open && reqs.isFetching) return <QuestionSkeleton />;
   if (!open) return <Navigate to="/settings/couple" replace />;
   const partner = name.data ?? '';
   const answer = async (kind: 'yes' | 'no' | 'block') => {

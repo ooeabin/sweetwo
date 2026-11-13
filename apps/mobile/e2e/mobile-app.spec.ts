@@ -287,7 +287,7 @@ test('S-14 휴대폰 알림이 꺼져 있으면 “휴대폰 설정에서 알림
   await page.goto('/settings/notifications');
   await expect(page.getByText('휴대폰 설정에서 알림을 켜 주세요')).toBeVisible();
   await expect(page.getByRole('switch', { name: /^푸시 알림/ }).first()).not.toBeChecked();
-  await expect(page.getByRole('switch', { name: /^월급 체크리스트/ })).not.toBeChecked();
+  await expect(page.getByRole('switch', { name: /^경조사 일주일 전/ })).not.toBeChecked();
   await axe(page);
   await page.locator('main').getByRole('button', { name: '설정 열기' }).click();
   await expect.poll(async () => (await fake(page)).opened).toContain('os-settings');
