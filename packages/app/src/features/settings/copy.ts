@@ -634,7 +634,6 @@ export const copy = {
   assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 적기 전
   rankTitle: '자산 순위 같이 보기',
   rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]
-  rankAsked: (name: string) => `${name}님에게 물어봤어요`, // [확인 필요]
   rankWaiting: (name: string) => `${name}님 답을 기다려요`, // [확인 필요]
   alwaysShared: '경조사, 공동 명의, 같이 관리하는 월급 계획과 저금은 늘 같이 봐요', // [확인 필요]
 

@@ -715,11 +715,14 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
     .click();
   await expect.poll(() => db.assets.find((a) => a.id === 'a-stock')?.visibility).toBe('all');
 
-  // ④ 자산 순위 같이 보기: 켜면 예빈에게 요청
-  await page.getByRole('switch', { name: '자산 순위 같이 보기' }).click();
-  await expect(page.getByText('예빈님에게 물어봤어요')).toBeVisible();
-  expect(v.calls.some((c) => c.fn === 'request_rank_consent')).toBe(true);
   await axe(page);
+  // ④ 자산 순위 같이 보기: 켜져 있으면 끄기는 바로, 켜기는 F-08c(동의 보내기)로
+  (db.me as Record<string, unknown>).rank_consent = true;
+  await page.reload();
+  await page.getByRole('switch', { name: '자산 순위 같이 보기' }).click();
+  await expect.poll(() => v.calls.some((c) => c.fn === 'set_rank_consent')).toBe(true);
+  await page.getByRole('switch', { name: '자산 순위 같이 보기' }).click();
+  await expect(page).toHaveURL(/\/assets\/rank\/consent$/);
 });
 
 test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로), 영구 삭제', async ({

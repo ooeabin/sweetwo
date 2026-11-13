@@ -6,7 +6,6 @@ import {
   fetchOpenRankRequest,
   qk,
   rankKeys,
-  requestRankConsent,
   setAssetShareDefault,
   setBundleVisibility,
   turnOffRankConsent,
@@ -34,7 +33,7 @@ const VIS: Vis[] = ['all', 'sum', 'private'];
 // ① 내 월급 계획: 모두 / 저금만(기본) / 했어요만(각자 계열만, 같이 계열은 “같이 관리해서 모두 보여요” 한 줄)
 // ② 같이 모으기: 묶음마다 “각자 모은 금액 보여 주기”(W-15a와 같은 값, 내 쪽만). 묶음 없으면 숨김
 // ③ 자산·부채: 새 항목 기본값(처음 자산을 적을 때 고른 값, 그 전엔 비어 있음) + 내 명의 항목마다(모두 / 총액만 / 숨기기)
-// ④ 자산 순위 같이 보기: 켜면 상대에게 요청(request_rank_consent), 끄면 set_rank_consent(false)
+// ④ 자산 순위 같이 보기: 켜면 F-08c(/assets/rank/consent, 동의 보내기), 끄면 set_rank_consent(false)
 // 저금마다 공개(옛 ‘금액만 보여 주기’ 저금)는 없앰. ?next=로 열면 맨 아래 ‘확인’(합류 뒤 한 번 확인).
 export function S13Sharing() {
   const nav = useNavigate();
@@ -247,10 +246,9 @@ export function S13Sharing() {
               help={myRankOpen ? copy.rankWaiting(c.partnerName) : copy.rankHelp}
               checked={me.rank_consent}
               onChange={(on) =>
+                // 켜기는 F-08c(순위 같이 보기 동의 보내기, PR 12)에서, 끄기는 바로
                 on
-                  ? run(requestRankConsent, rankKeys, copy.rankAsked(c.partnerName)).then(() =>
-                      track('rank_consent_requested', { screen_id: 'S-13' }),
-                    )
+                  ? nav('/assets/rank/consent')
                   : run(turnOffRankConsent, rankKeys).then(() =>
                       track('rank_consent_turned_off', { screen_id: 'S-13' }),
                     )
