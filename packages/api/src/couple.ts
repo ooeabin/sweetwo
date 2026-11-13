@@ -1,4 +1,16 @@
-import type { Tables } from '@sweetwo/core';
+import {
+  AnswerResult,
+  ModeChangeRequestRowSchema,
+  ModeChangeResult,
+  MyManageStyleSchema,
+  PartnerPlanViewSchema,
+  type ManagerAnswer,
+  type ModeChangeRequestRow,
+  type MyManageStyle,
+  type PartnerPlanViewResponse,
+  type PlanShare,
+  type Tables,
+} from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -127,4 +139,128 @@ export async function fetchUnlinkPartnerName(): Promise<string> {
   const { data, error } = await supabase().rpc('unlink_partner_name');
   fail(error);
   return typeof data === 'string' ? data : '';
+}
+
+// ─────────────────────────── v2.2 관리 형태(08 2장, 서버 20261202090000_v22_manage_share) ───────────────────────────
+
+/** 관리 형태를 바꿀 수 없음: 해제 대기, 생활비 ‘네’인데 관리 답 없음 */
+export class ModeChangeBlocked extends Error {
+  constructor(readonly reason: 'unlink_pending' | 'need_manager' | 'no_space') {
+    super(reason);
+  }
+}
+
+/** 지금 공간의 관리 형태(my_manage_style, 이름 코드 포함). 공간이 없으면 null */
+export async function fetchManageStyle(): Promise<MyManageStyle | null> {
+  const { data, error } = await supabase().rpc('my_manage_style');
+  fail(error);
+  const row = (data ?? [])[0];
+  return row ? MyManageStyleSchema.parse(row) : null;
+}
+
+/**
+ * 관리 형태 저장·바꾸기(request_mode_change, O-30·30b·30c, S-11f, P-04 ‘보내요’).
+ * 수락이 필요 없으면 바로 적용 'applied', 상대 ‘좋아요’가 필요하면 'requested'(7일, 공간마다 열린 요청 1개).
+ * phrase: P-04 ‘월급은 대부분 …보내요’ = p04_send, S-11f 합치기 = s11f_combine, 관리 넘기기 = s11f_manager
+ */
+export async function requestModeChange(o: {
+  sharedLiving: boolean;
+  sharedSaving: boolean;
+  manager: ManagerAnswer | null;
+  phrase?: 'p04_send' | 's11f_combine' | 's11f_manager';
+}): Promise<'applied' | 'requested'> {
+  const { data, error } = await supabase().rpc('request_mode_change', {
+    p_shared_living: o.sharedLiving,
+    p_shared_saving: o.sharedSaving,
+    // 생활비 ‘아니요’면 서버가 관리 답을 보지 않음
+    p_manager: o.manager ?? '',
+    p_phrase: o.phrase,
+  });
+  for (const r of ['unlink_pending', 'need_manager', 'no_space'] as const)
+    if (error?.message?.includes(r)) throw new ModeChangeBlocked(r);
+  fail(error);
+  return ModeChangeResult.parse(data);
+}
+
+/** S-11j 답(answer_mode_change): ‘좋아요’ / ‘지금처럼 할게요’. 만료면 'expired'(그대로) */
+export async function answerModeChange(id: string, accept: boolean): Promise<AnswerResult> {
+  const { data, error } = await supabase().rpc('answer_mode_change', {
+    p_request: id,
+    p_accept: accept,
+  });
+  if (error?.message?.includes('not_open')) return 'expired';
+  if (error?.message?.includes('unlink_pending')) throw new ModeChangeBlocked('unlink_pending');
+  fail(error);
+  return AnswerResult.parse(data);
+}
+
+/** 보낸 사람이 요청 취소(cancel_mode_change) */
+export async function cancelModeChange(id: string) {
+  const { error } = await supabase().rpc('cancel_mode_change', { p_request: id });
+  fail(error);
+}
+
+/** 우리 공간의 열린 관리 형태 요청(없으면 null). 만료 판단은 core pickTopTask(expires_at) */
+export async function fetchOpenModeRequest(): Promise<ModeChangeRequestRow | null> {
+  const { data, error } = await supabase()
+    .from('mode_change_request')
+    .select('*')
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(1);
+  fail(error);
+  const row = (data ?? [])[0];
+  return row ? ModeChangeRequestRowSchema.parse(row) : null;
+}
+
+/** 요청 하나(S-11j). 없거나 못 읽으면 null */
+export async function fetchModeRequest(id: string): Promise<ModeChangeRequestRow | null> {
+  const { data, error } = await supabase()
+    .from('mode_change_request')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  fail(error);
+  return data ? ModeChangeRequestRowSchema.parse(data) : null;
+}
+
+/** 관리 형태 요청 신호(Realtime mode_change_request). 받으면 manageKeys 무효화 */
+export function subscribeModeRequests(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`mode_change_request:${spaceId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'mode_change_request',
+        filter: `space_id=eq.${spaceId}`,
+      },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
+// ─────────────────────────── v2.2 공개 단계(S-13 ①, S-13p) ───────────────────────────
+
+/** 내 월급 계획 공개 단계(app_user.plan_share): 모두 / 저금만(기본) / 했어요만 */
+export async function setPlanShare(userId: string, share: PlanShare) {
+  const { error } = await supabase()
+    .from('app_user')
+    .update({ plan_share: share })
+    .eq('id', userId);
+  fail(error);
+}
+
+/**
+ * 상대에게 보이는 월급 계획(partner_plan_view, 서버 필터 하나). viewer 생략 = 내가 상대 것을 봄,
+ * viewer = 상대 id = S-13p ‘{파트너}님에게 보이는 모습’(내 것을 상대로서). 상대가 없으면 null
+ */
+export async function fetchPartnerPlanView(viewer?: string): Promise<PartnerPlanViewResponse> {
+  const { data, error } = await supabase().rpc('partner_plan_view', { p_viewer: viewer });
+  fail(error);
+  return PartnerPlanViewSchema.parse(data ?? null);
 }

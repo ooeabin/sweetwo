@@ -32,6 +32,14 @@ export type Me = Pick<
   | 'rank_month'
   | 'rank_pct'
   | 'rank_net'
+  // v2.2(ADR 0009): 날짜 없음, 알림 종류, 공개 단계, 자산 공개 첫 선택, 순위 동의·홈 배지, 마지막 잔액 맞추기
+  | 'payday_none'
+  | 'push_kinds'
+  | 'plan_share'
+  | 'asset_share_default'
+  | 'rank_consent'
+  | 'rank_badge_home'
+  | 'last_reconciled_at'
 >;
 export type Space = Tables<'couple_space'>;
 export type Goal = Tables<'goal'>;
@@ -45,7 +53,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off, rank_month, rank_pct, rank_net',
+      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off, rank_month, rank_pct, rank_net, payday_none, push_kinds, plan_share, asset_share_default, rank_consent, rank_badge_home, last_reconciled_at',
     )
     .maybeSingle();
   fail(error);
@@ -78,6 +86,11 @@ export async function updateMe(
     | 'rank_month'
     | 'rank_pct'
     | 'rank_net'
+    | 'payday_none'
+    | 'push_kinds'
+    | 'plan_share'
+    | 'asset_share_default'
+    | 'rank_badge_home'
   >,
 ) {
   const me = await fetchMe();
