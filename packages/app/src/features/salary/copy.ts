@@ -3,6 +3,11 @@
 import { formatMonthDay, object } from '@sweetwo/core';
 
 export const copy = {
+  // W-01 3b 파트너 탭(각자) 공개 단계(20 W-01 고친 점, 08 6장, PR 11)
+  partnerSavingOnly: (name: string) => `${name}님은 저금만 보여 줘요`, // [확인 필요]
+  partnerDoneOnly: (name: string) => `${name}님은 했어요만 보여 줘요`, // [확인 필요]
+  doneThisMonth: '이번 달 했어요',
+  notDoneYet: '아직이에요', // [확인 필요]
   // W-01b·W-01c 분담 도우미(20 ‘월급 탭 v2.2’, 06 3-7, 2026-11-13) [확인 필요]
   splitShare: {
     nameQ: '어떤 통장을 나눌까요?',

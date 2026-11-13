@@ -316,3 +316,46 @@ test('보안(S-15): PIN을 건너뛰었으면 맨 위 권장 한 줄 + 켜기 �
   await page.getByRole('button', { name: '켜기', exact: true }).click();
   await expect(page).toHaveURL(/next=\/settings\/security/);
 });
+
+test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘했어요만’이면 이름 + 이번 달 확인 여부만', async ({
+  page,
+}) => {
+  const { db, v } = await connected(page);
+  const base = db.goals.find((g) => g.id === 'goal-h') as Record<string, unknown>;
+  db.goals.push({
+    ...base,
+    id: 'goal-y',
+    name: '예빈 여행',
+    owner_user_id: YEBIN,
+    created_by: YEBIN,
+  });
+  db.splits.push({
+    id: 'split-y',
+    owner_user_id: YEBIN,
+    split_line: [
+      {
+        id: 'y-1',
+        split_id: 'split-y',
+        kind: 'saving',
+        goal_id: 'goal-y',
+        amount: 300_000,
+        sort: 0,
+      },
+      { id: 'y-2', split_id: 'split-y', kind: 'fixed', goal_id: null, amount: 700_000, sort: 1 },
+    ],
+  });
+  await page.goto(`/salary?view=plan&who=${YEBIN}`);
+  await expect(page.getByText('예빈님은 저금만 보여 줘요')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /예빈 여행/ }).or(page.getByText('예빈 여행')),
+  ).toBeVisible();
+  await expect(page.getByText('30만 원', { exact: true })).toBeVisible();
+  await expect(page.getByText('고정지출')).toHaveCount(0);
+  await axe(page);
+
+  v.partnerShare = 'done_only';
+  await page.reload();
+  await expect(page.getByText('예빈님은 했어요만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('아직이에요')).toBeVisible();
+  await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
+});

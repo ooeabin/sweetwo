@@ -60,7 +60,7 @@ import {
 } from '../data';
 import { baseDayOf, nextDayOf as nextDay, receiptAutoPill, salaryChangedDay } from '../cycle';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSalaryChanges } from '@sweetwo/api';
+import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { salaryPaths, savingPaths } from '../paths';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
 import { PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
@@ -104,6 +104,12 @@ export function W01Receipt() {
   const lineParam = params.get('line');
   const qc = useQueryClient();
   const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
+  // 3b 파트너 탭(각자): 파트너 공개 단계대로 서버가 자른 값(partner_plan_view). ‘모두’가 아니면 영수증 대신 저금만 목록
+  const partnerView = useQuery({
+    queryKey: qk.partnerPlanView(null),
+    queryFn: () => fetchPartnerPlanView(),
+    enabled: space.data?.salary_mode === 'separate' && !!partner.data,
+  });
 
   const m = me.data;
   const sp = space.data;
@@ -715,6 +721,8 @@ export function W01Receipt() {
   const noSplit = !split && !theirs;
   // 파트너 탭(각자)인데 파트너 월급 계획이 없음: 0원 영수증 대신 회색 빈 카드(2026-11-12 D3)
   const partnerNoSplit = !split && theirs;
+  const pv = partnerView.data ?? null;
+  const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
       {edit ? (
@@ -761,6 +769,13 @@ export function W01Receipt() {
               {copy.partnerSplitView(owner?.nickname ?? '')}
             </p>
           )}
+          {limited && pv && (
+            <p className="hg-q__help" style={{ margin: 0 }}>
+              {pv.share === 'saving_only'
+                ? copy.partnerSavingOnly(owner?.nickname ?? '')
+                : copy.partnerDoneOnly(owner?.nickname ?? '')}
+            </p>
+          )}
           {pending && !theirs && (
             <p className="hg-q__help" style={{ margin: 0 }}>
               {copy.splitPending}
@@ -771,6 +786,36 @@ export function W01Receipt() {
       {partnerNoSplit ? (
         <section className="hg-card hg-card--fill hg-stack">
           <p className="hg-card__meta">{copy.partnerNoPlan(owner?.nickname ?? '')}</p>
+        </section>
+      ) : limited && pv ? (
+        // 3b 저금만 / 했어요만: 머리 금액·지출·여유 자금 없이 서버가 준 줄만(보기만)
+        <section className="hg-card hg-stack" aria-label={copy.splitTitle}>
+          {pv.lines.length === 0 ? (
+            <p className="hg-card__meta">{copy.partnerNoPlan(owner?.nickname ?? '')}</p>
+          ) : (
+            <div className="hg-list hg-list--plain">
+              {pv.lines.map((l) => (
+                <ListRow
+                  key={l.id}
+                  label={
+                    l.kind === 'saving'
+                      ? (l.name ?? goalName(l.goal_id))
+                      : l.kind === 'shared_account'
+                        ? (l.name ?? copy.sharedAccountName)
+                        : (l.name ?? copy.lineNames[l.kind as keyof typeof copy.lineNames] ?? '')
+                  }
+                  value={
+                    l.amount !== null
+                      ? shown(won(l.amount))
+                      : l.state === 'checked'
+                        ? copy.doneThisMonth
+                        : copy.notDoneYet
+                  }
+                  chevron={false}
+                />
+              ))}
+            </div>
+          )}
         </section>
       ) : noSplit ? (
         // 월급 없음: W-02와 같은 빈 카드
