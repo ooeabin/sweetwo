@@ -18,7 +18,7 @@ import { Button, ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { track } from '../../../shared/analytics';
+import { salaryModeCode, track } from '../../../shared/analytics';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { myChecklist, useChecklists } from '../../salary';
 import { copy } from '../copy';
@@ -90,10 +90,10 @@ export function S11fManageStyle() {
         shared_living: lv,
         shared_saving: sv,
         manager: lv ? managerEventValue(mg) : null,
-        salary_mode: r.salaryMode,
+        salary_mode: salaryModeCode(r.salaryMode),
         screen_id: 'S-11f',
       });
-      track('mode_change_requested', { phrase, to_mode: r.salaryMode, result });
+      track('mode_change_requested', { phrase, to_mode: salaryModeCode(r.salaryMode), result });
     }
     return { result, toManagerId, r };
   };
@@ -143,7 +143,10 @@ export function S11fManageStyle() {
     setBusy(true);
     try {
       await cancelModeChange(mine.id);
-      track('mode_change_cancelled', { phrase: mine.phrase, to_mode: mine.to_mode });
+      track('mode_change_cancelled', {
+        phrase: mine.phrase,
+        to_mode: salaryModeCode(mine.to_mode),
+      });
       await refresh();
       toast(copy.styleCancelled);
     } catch {

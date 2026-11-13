@@ -7,6 +7,7 @@ import { restoreCache, startCacheSaver } from './shared/offline-cache';
 import { onSessionReset } from './shared/session-reset';
 import type { Platform } from './platform';
 import { routes } from './routes';
+import { trackWidgetTap } from './features/home';
 
 // 다크 모드는 토큰이 처리한다([data-theme="dark"]). 여기서 시스템 설정을 따라 붙이기만 한다(설정 S 탭의 화면 모드가 생기면 그 값 우선).
 function useSystemTheme() {
@@ -52,7 +53,15 @@ export function App({ platform }: { platform: Platform }) {
     });
   }, [router]);
   // 앱 링크(sweetwo://open…)가 고른 화면으로
-  useEffect(() => window.sweetwo?.onNavigate((path) => void router.navigate(path)), [router]);
+  // 위젯에서 왔으면 widget_tapped(32 4-7, 2026-11-13 PR 14)
+  useEffect(
+    () =>
+      window.sweetwo?.onNavigate((path, from) => {
+        if (from) trackWidgetTap(path, from);
+        void router.navigate(path);
+      }),
+    [router],
+  );
   if (!restored) return null;
   return (
     <QueryClientProvider client={queryClient}>

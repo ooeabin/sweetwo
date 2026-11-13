@@ -1,4 +1,5 @@
 import type { Page, Route } from '@playwright/test';
+import { json } from './http';
 
 // 가짜 Supabase(http://127.0.0.1:54399). 테스트마다 응답을 정한다.
 export const SB = 'http://127.0.0.1:54399';
@@ -8,14 +9,8 @@ export const fakeJwt = (sub: string) =>
   `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub, role: 'authenticated', aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })}.sig`;
 
 export const chanwoo = { id: '11111111-1111-1111-1111-111111111111', email: 'chanwoo@example.com' };
-
-const json = (route: Route, body: unknown, status = 200) =>
-  route.fulfill({
-    status,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
+/** 합류한 사람(예빈) 가짜 사용자 ID. 두 계정 흐름에서 예빈 화면의 me.id */
+export const YEBIN = 'yebin';
 
 export interface MockOptions {
   minVersionWeb?: string;

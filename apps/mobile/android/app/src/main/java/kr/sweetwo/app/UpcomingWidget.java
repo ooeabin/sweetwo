@@ -41,7 +41,7 @@ public class UpcomingWidget extends AppWidgetProvider {
                             R.string.widget_next_empty,
                             false,
                             false,
-                            WidgetStore.openPath(c, "/calendar", req)));
+                            WidgetStore.openPath(c, "/calendar", "wg04", req)));
             return;
         }
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_next);
@@ -50,7 +50,7 @@ public class UpcomingWidget extends AppWidgetProvider {
                 R.id.widget_big,
                 days == 0 ? c.getString(R.string.widget_dday) : c.getString(R.string.widget_dn, days));
         WidgetStore.setStamp(v, WidgetStore.stamp(c, d));
-        v.setOnClickPendingIntent(R.id.widget_root, WidgetStore.openPath(c, WidgetStore.str(n, "to"), req));
+        v.setOnClickPendingIntent(R.id.widget_root, WidgetStore.openPath(c, WidgetStore.str(n, "to"), "wg04", req));
         m.updateAppWidget(id, v);
     }
 }

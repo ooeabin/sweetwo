@@ -1,8 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { seed } from './seed-home';
-import { chanwoo } from './supabase-mock';
+import { chanwoo, type MemDb, mockOnboarding, seed } from './mocks';
 
 // W-01 ↔ W-02 잇기(20 W-02 1a·1c·W-01 3a·7번 Toast, 06 3-6, 2026-11-09, 2026-11-12 W-02 끝 대신 1c 한 줄).
 // 찬우 350만 원 25일, 9월 월급 체크리스트: 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·생활비 88만·용돈 35만(합 350만).

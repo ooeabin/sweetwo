@@ -1,8 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { setWheel } from './wheel';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { mockRealtime } from './realtime-mock';
+import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>

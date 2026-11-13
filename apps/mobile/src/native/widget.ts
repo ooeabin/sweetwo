@@ -1,5 +1,5 @@
 import { registerPlugin } from '@capacitor/core';
-import type { WidgetData } from '@sweetwo/app';
+import type { WidgetData, WidgetPlaced } from '@sweetwo/app';
 
 // 홈 화면 위젯(26 ‘위젯 v2.2’, DEV_GUIDE ‘위젯’). 앱 안 플러그인 HomeWidget(ios SceneDelegate.swift HomeWidgetPlugin,
 // android HomeWidgetPlugin.java)이 글을 기기 공유 저장소(iOS App Group, Android 앱 전용 SharedPreferences)에 두고 위젯을 다시 그림.
@@ -8,6 +8,7 @@ type Plugin = {
   write: (o: { json: string }) => Promise<void>;
   setLock: (o: { lockAt: number | null }) => Promise<void>;
   clear: () => Promise<void>;
+  installed: () => Promise<{ items: { widget: string; size: string }[] }>;
 };
 const HomeWidget = registerPlugin<Plugin>('HomeWidget');
 
@@ -41,4 +42,14 @@ export async function setWidgetLock(lockAt: number | null): Promise<void> {
 
 export async function clearWidget(): Promise<void> {
   await HomeWidget.clear().catch(() => undefined);
+}
+
+/** 놓인 위젯(종류·크기만). 플러그인이 없거나 실패하면 빈 목록 */
+export async function placedWidgets(): Promise<WidgetPlaced[]> {
+  const r = await HomeWidget.installed().catch(() => ({ items: [] }));
+  return (r.items ?? []).flatMap((x) =>
+    (x.widget === 'wg01' || x.widget === 'wg04') && (x.size === 'small' || x.size === 'medium')
+      ? [{ widget: x.widget, size: x.size }]
+      : [],
+  );
 }

@@ -77,6 +77,19 @@ describe('parseDeepLink 모바일 앱 링크', () => {
     expect(parseDeepLink('sweetwo://widget?to=/settings/delete')).toBeNull();
     expect(parseDeepLink('sweetwo://widget?to=//evil.example')).toBeNull();
     expect(parseDeepLink(`sweetwo://widget?to=/salary/items/${id}&x=1`)).toBeNull();
+    // 어느 위젯인지(w, widget_tapped 분석, 2026-11-13 PR 14)
+    expect(parseDeepLink(`sweetwo://widget?to=/salary/items/${id}&w=wg01`)).toEqual({
+      kind: 'open',
+      path: `/salary/items/${id}`,
+      widget: 'wg01',
+    });
+    expect(parseDeepLink('sweetwo://widget?to=/calendar&w=wg04')).toEqual({
+      kind: 'open',
+      path: '/calendar',
+      widget: 'wg04',
+    });
+    expect(parseDeepLink('sweetwo://widget?to=/&w=wg09')).toBeNull();
+    expect(parseDeepLink('sweetwo://widget?to=/&w=wg01&w=wg04')).toBeNull();
     expect(parseDeepLink(`https://sweetwo.kr/widget?to=/salary/items/${id}`)).toBeNull();
   });
 });

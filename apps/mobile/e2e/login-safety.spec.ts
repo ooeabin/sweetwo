@@ -1,9 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe } from './axe';
 import { emitAuth, emitInvite, fakeBridge, fb, pressHardwareBack } from './fake-bridge';
-import { mockOnboarding } from './onboarding-mock';
-import { seed } from './seed-home';
-import { asReturningFromProvider, chanwoo, fakeJwt, mockSupabase, SB } from './supabase-mock';
+import {
+  asReturningFromProvider,
+  chanwoo,
+  fakeJwt,
+  mockOnboarding,
+  mockSupabase,
+  SB,
+  seed,
+} from './mocks';
 
 // 1구간 검토(2026-11-10) 고친 흐름: 초대 링크, PIN 잊음, 로그아웃 뒤 데이터 비우기, 잠금 뒤 화면, 가입 취소,
 // A-07 막다른 화면, A-01 느린 연결, 보기만 모드, 약관 보기, 약한 PIN, 소셜 버튼, 태블릿 배치.

@@ -3,6 +3,7 @@ import {
   configureSplitLines,
   deleteSplitLine,
   dismissHomeTask,
+  fetchSharedAccounts,
   qk,
   reopenSavingItem,
   reorderSplit,
@@ -13,6 +14,7 @@ import {
 } from '@sweetwo/api';
 import {
   amountBand,
+  coupleOf,
   leftover,
   planChangeTouchesMonth,
   planRatio,
@@ -109,6 +111,12 @@ export function W01Receipt() {
     queryKey: qk.partnerPlanView(null),
     queryFn: () => fetchPartnerPlanView(),
     enabled: space.data?.salary_mode === 'separate' && !!partner.data,
+  });
+  // W-01b 열린 분담 제안(내가 연 것)이 있으면 그 통장 줄 아래 회색 “{이름}님 답을 기다려요”(20 W-01b, 2026-11-13 PR 14)
+  const accounts = useQuery({
+    queryKey: qk.sharedAccounts,
+    queryFn: fetchSharedAccounts,
+    enabled: !!partner.data,
   });
 
   const m = me.data;
@@ -580,6 +588,39 @@ export function W01Receipt() {
   };
 
   // ── 화면 ────────────────────────────────────────────────────────────
+  const proposal = theirs
+    ? undefined
+    : accounts.data?.find(
+        (a) =>
+          a.status === 'proposed' &&
+          a.proposed_by === m.id &&
+          Date.parse(a.expires_at) > Date.now(),
+      );
+  // 그 통장 줄(내 몫을 먼저 넣어 둔 줄 또는 같은 제안 줄). 없으면 제안한 통장을 잠긴 줄로 보여 줌(편집 중에는 뺌)
+  const waitLine = proposal
+    ? lines.find(
+        (l) => l.kind === 'shared_account' && (l.shared_account_id ?? proposal.id) === proposal.id,
+      )
+    : undefined;
+  const waitNote = proposal
+    ? copy.splitShare.waiting(coupleOf(m, sp, p).partnerName || copy.partnerFallback)
+    : undefined;
+  const proposalRow: ReceiptLine | null =
+    proposal && !waitLine && !edit
+      ? {
+          id: `proposal-${proposal.id}`,
+          name: proposal.name,
+          amount: won(proposal.member_a === m.id ? proposal.share_a : proposal.share_b),
+          label: spoken(
+            copy.rowLabel(
+              proposal.name,
+              won(proposal.member_a === m.id ? proposal.share_a : proposal.share_b),
+            ),
+          ),
+          locked: true,
+          note: waitNote,
+        }
+      : null;
   const rowsOf = (group: SplitLine[]): ReceiptLine[] =>
     group.map((l) => {
       const g = l.goal_id ? goals.data?.find((x) => x.id === l.goal_id) : undefined;
@@ -604,7 +645,7 @@ export function W01Receipt() {
         amount: won(l.amount),
         label: spoken(copy.rowLabel(nameOf(l), won(l.amount))),
         locked: lineLocked,
-        note: send ? copy.sendNote : undefined,
+        note: send ? copy.sendNote : waitLine && l.id === waitLine.id ? waitNote : undefined,
         auto: receiptAutoPill(l),
         onOpen:
           canEdit && !lineLocked
@@ -870,7 +911,7 @@ export function W01Receipt() {
             <ReceiptSection title={copy.spendGroup} subtotal={shown(won(spendSum))}>
               <ReceiptRows
                 label={copy.spendGroup}
-                lines={rowsOf(spendLines)}
+                lines={proposalRow ? [...rowsOf(spendLines), proposalRow] : rowsOf(spendLines)}
                 edit={edit}
                 onMove={edit ? moveIn(spendLines) : undefined}
                 labels={rowLabels}

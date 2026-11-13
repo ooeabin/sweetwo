@@ -18,7 +18,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 800 } },
     },
   ],
-  // Supabase는 가짜 주소(.env.e2e)로 띄우고 테스트가 응답을 흉내 낸다(e2e/supabase-mock.ts)
+  // Supabase는 가짜 주소(.env.e2e)로 띄우고 테스트가 응답을 흉내 낸다(e2e/mocks/)
   webServer: {
     command: `pnpm exec vite --mode e2e --host 127.0.0.1 --port ${port} --strictPort`,
     url: `http://127.0.0.1:${port}`,

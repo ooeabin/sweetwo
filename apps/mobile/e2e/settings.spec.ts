@@ -1,8 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
 import { setWheel } from './wheel';
-import { mockV22 } from './v22-settings-mock';
 
 // 설정(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 찬우(시작, 25일)와 합류한 예빈(10일), 웹
 
@@ -248,7 +247,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
-  const v = await mockV22(page, db, NOW);
+  const v = await mockV22Settings(page, db, NOW);
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /찬우와 예빈/ }).click();
 
@@ -503,7 +502,8 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
-  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  // 합쳐서 엔진: 해제하면 같이 쓰던 월급 계획·저금이 모두 지워져 S-12h ‘시작하기’ = O-30(각자 엔진은 main-loop.spec)
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending', salary_mode: 'joint' });
   db.unlinks.push({
     id: 'u1',
     space_id: 'space-1',
@@ -556,7 +556,7 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
   expect(db.unlinks[0]?.status).toBe('confirmed');
   expect(db.goals).toHaveLength(0);
   await axe(page);
-  // 내 월급 계획이 남지 않았으면(흉내 서버는 같이 쓰던 것을 모두 지움) 온보딩 O-30부터
+  // 내 월급 계획이 남지 않았으면(합쳐서 엔진은 같이 쓰던 것을 모두 지움) 온보딩 O-30부터
   await page.getByRole('button', { name: '시작하기' }).click();
   await expect(page).toHaveURL(/\/onboarding\/o-30$/);
 });
@@ -589,7 +589,7 @@ test('혼자 쓰기(S-12): 다시 연결하기(복구 없는 새 요청, 7일 1�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   soloAfterUnlink(db);
-  const v = await mockV22(page, db, NOW);
+  const v = await mockV22Settings(page, db, NOW);
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('혼자 쓰는 중')).toBeVisible();
@@ -619,7 +619,7 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   soloAfterUnlink(db);
-  const v = await mockV22(page, db, NOW);
+  const v = await mockV22Settings(page, db, NOW);
   const ask = () =>
     v.reconnects.push({
       id: `rc-${v.reconnects.length + 1}`,
@@ -686,7 +686,7 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   myStock(db);
-  const v = await mockV22(page, db, NOW);
+  const v = await mockV22Settings(page, db, NOW);
   (db.me as Record<string, unknown>).asset_share_default = 'sum';
   await open(page, info.project.name === 'narrow');
   const row = page.getByRole('button', { name: /공개 범위/ });

@@ -1,8 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
-import { mockOnboarding } from './onboarding-mock';
-import { seed } from './seed-home';
+import { chanwoo, mockOnboarding, seed } from './mocks';
 
 // 앱 기본 틀(19): ⌘K 검색 화면(바로 하기, 저금 항목 찾기), Ctrl+1~4 탭, Ctrl+N·‘추가’ 메뉴, 좁은 창 + 버튼,
 // 오프라인 띠, 연결 해제 대기 띠.

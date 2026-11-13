@@ -1,8 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe } from './axe';
-import { mockOnboarding } from './onboarding-mock';
-import { seed } from './seed-home';
-import { fakeJwt, chanwoo, mockSupabase } from './supabase-mock';
+import { chanwoo, fakeJwt, mockOnboarding, mockSupabase, seed } from './mocks';
 
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 

@@ -113,12 +113,13 @@ final class WidgetStore {
         }
     }
 
-    /** 앱 화면 열기(sweetwo://widget?to=…, core deep-link.ts 허용 목록) */
-    static PendingIntent openPath(Context c, String path, int request) {
+    /** 앱 화면 열기(sweetwo://widget?to=…&w=…, core deep-link.ts 허용 목록). w = wg01 / wg04(widget_tapped 분석만) */
+    static PendingIntent openPath(Context c, String path, String widget, int request) {
         Uri uri = new Uri.Builder()
                 .scheme("sweetwo")
                 .authority("widget")
                 .appendQueryParameter("to", path == null ? "/" : path)
+                .appendQueryParameter("w", widget)
                 .build();
         Intent i = new Intent(Intent.ACTION_VIEW, uri, c, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -67,6 +67,8 @@ reset role;
 select results_eq($$ select user_id, title, push_title, push_hidden from public.notification where kind = 'reconnect_requested' $$,
   $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '찬우님이 다시 연결하자고 했어요', 'sweeTwo', true) $$, '요청 알림');
 insert into public.push_device (user_id, platform, token) values ('22222222-2222-2222-2222-222222222222', 'ios', repeat('b', 64));
+-- 방해 금지 시간(기본 22~8시)에 돌려도 같은 결과(2026-11-13 PR 14: KST 밤에 돌리면 보내지 않아 실패하던 것)
+update public.app_user set quiet_start = 0, quiet_end = 0 where id = '22222222-2222-2222-2222-222222222222';
 select results_eq($$ select title, body from public.claim_push() $$, $$ values ('sweeTwo', '확인할 알림이 있어요') $$,
   '잠금 화면은 앱 이름과 한 줄만');
 

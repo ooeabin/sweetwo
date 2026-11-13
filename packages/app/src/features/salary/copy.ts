@@ -340,6 +340,8 @@ export const copy = {
   lineSettingChanged: (name: string) => `${name} 설정을 바꿨어요`,
   sendName: '보내기',
   sendNote: '월급 − 용돈',
+  // 애칭이 없을 때 상대 이름(CLAUDE.md 문구 ‘없으면 파트너’)
+  partnerFallback: '파트너',
   sharedAccountName: '같이 쓰는 통장',
   addSharedAccount: '+ 같이 쓰는 통장',
   allowanceNotify: (name: string) => `${name || '파트너'}님에게 알려 드려요`,

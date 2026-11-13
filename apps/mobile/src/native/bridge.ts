@@ -3,7 +3,7 @@ import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import type { AppBridge } from '@sweetwo/app';
+import type { AppBridge, NavigateFrom } from '@sweetwo/app';
 import { parseDeepLink } from '@sweetwo/core';
 import {
   authEvents,
@@ -43,15 +43,15 @@ import {
   unlockWithBiometric,
   verifyPin,
 } from './lock';
-import { writeWidget } from './widget';
+import { placedWidgets, writeWidget } from './widget';
 
 // 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
 // 웹뷰에는 access token만. refresh token, code_verifier, 로그인 콜백 code는 이 파일 밖(웹뷰 화면 코드)에서 못 봄.
 const invites = emitter<string>();
-const navigates = emitter<string>();
+const navigates = emitter<{ path: string; from?: NavigateFrom }>();
 // 앱이 화면을 그리기 전에 들어온 링크(처음 실행)는 받는 쪽이 생길 때 넘김
 let pendingInvite: string | null = null;
-let pendingPath: string | null = null;
+let pendingPath: { path: string; from?: NavigateFrom } | null = null;
 const backs = new Set<() => boolean>();
 let backBound = false;
 
@@ -64,8 +64,12 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       pendingInvite = link.code;
       invites.emit(link.code);
     } else if (link?.kind === 'open') {
-      pendingPath = link.path;
-      navigates.emit(link.path);
+      // 받는 쪽(앱)이 아직 없으면 처음 실행(위젯으로 켬) = 앱이 켜져 있지 않았음
+      const from = link.widget
+        ? { widget: link.widget, appWasRunning: navigates.size() > 0 }
+        : undefined;
+      pendingPath = { path: link.path, from };
+      navigates.emit({ path: link.path, from });
     }
   });
   watchBrowserClosed();
@@ -120,10 +124,10 @@ export async function installBridge(): Promise<'ios' | 'android'> {
     },
     onNavigate: (cb) => {
       if (pendingPath) {
-        cb(pendingPath);
+        cb(pendingPath.path, pendingPath.from);
         pendingPath = null;
       }
-      return navigates.on(cb);
+      return navigates.on((x) => cb(x.path, x.from));
     },
     push: {
       status: () => pushStatus(),
@@ -199,7 +203,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
     // 첫 실행 초대 코드(O-01, invite-code.ts): Android 설치 리퍼러, iOS 클립보드 1회
     inviteCode: { firstRun: () => firstRunInviteCode() },
     // 홈 화면 위젯(26 WG-01·WG-04, widget.ts): 금액 없는 글만
-    widget: { update: (d) => writeWidget(d) },
+    widget: { update: (d) => writeWidget(d), installed: () => placedWidgets() },
   };
   window.sweetwo = bridge;
   return platform;

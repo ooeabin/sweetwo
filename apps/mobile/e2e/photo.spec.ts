@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { type MemDb, mockOnboarding } from './mocks';
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);

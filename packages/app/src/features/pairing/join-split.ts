@@ -125,7 +125,7 @@ async function sendRequest(ctx: JoinContext) {
       manager: 'partner',
       phrase: 'p04_send',
     });
-    track('mode_change_requested', { phrase: 'p04_send', to_mode: 'joint', result });
+    track('mode_change_requested', { phrase: 'p04_send', to_mode: 'combined', result });
   } catch {
     /* 합류는 마쳤음 */
   }

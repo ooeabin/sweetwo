@@ -1,9 +1,7 @@
 import { setYearMonth } from './wheel';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
-import { mockOnboarding } from './onboarding-mock';
-import { seed } from './seed-home';
+import { chanwoo, mockOnboarding, seed } from './mocks';
 
 // 저금 항목(20 W-10~W-12, ADR 0007): 목표 탭 없이 월급 탭 저금 줄이 목표 금액(+ 기한)을 가짐.
 // 모은 금액 = 체크한 저금 합. 달성하면 축하 1회 → ‘계속 모을게요’ / ‘그만할게요’.

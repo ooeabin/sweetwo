@@ -1,9 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge } from './fake-bridge';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { seed } from './seed-home';
-import { mockV22, YEBIN } from './v22-settings-mock';
+import { type MemDb, mockOnboarding, mockV22Settings, seed, YEBIN } from './mocks';
 
 // v2.2 PR 11 공개·관계·설정(25 ‘설정 v2.2’, 20 W-01b·W-01c, 08 2·4·6장). 찬우(시작한 사람, 이 기기)와 합류한 예빈.
 // 예빈이 보낸 요청·제안은 흉내 서버에 넣어 두고 찬우가 답함.
@@ -42,7 +40,7 @@ async function connected(page: Page) {
     (l) => l.goal_id === 'goal-h',
   );
   if (line) Object.assign(line, { state: 'checked', checked_by: db.me.id });
-  const v = await mockV22(page, db, NOW);
+  const v = await mockV22Settings(page, db, NOW);
   return { db, v };
 }
 const modeRequest = (db: MemDb, o: Record<string, unknown>) => ({
@@ -153,6 +151,17 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
   await page.getByRole('button', { name: '예빈님에게 제안하기' }).click();
   await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
   expect(v.shared[0]).toMatchObject({ name: '생활비 통장', rule: 'half', share_a: 500_000 });
+  // W-01: 내가 연 제안이 열려 있으면 그 통장(내 몫, 잠김) 아래 회색 “예빈님 답을 기다려요”(20 W-01b, PR 14)
+  await page.goto('/salary?view=plan');
+  await expect(page.getByText('예빈님 답을 기다려요')).toBeVisible();
+  await expect(page.getByText('생활비 통장')).toBeVisible();
+  await axe(page);
+  // 예빈이 답하면 사라짐
+  Object.assign(v.shared[0] ?? {}, { status: 'declined' });
+  await page.reload();
+  await expect(page.getByText('내 집 마련').first()).toBeVisible();
+  await expect(page.getByText('생활비 통장')).toHaveCount(0);
+  await expect(page.getByText('예빈님 답을 기다려요')).toHaveCount(0);
 });
 
 test('분담 도우미(W-01b): 두 사람 모두 ‘모두 보여 주기’면 월급 비율, 결과 비율만', async ({

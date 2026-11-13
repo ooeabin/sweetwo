@@ -3,6 +3,7 @@ import {
   AdminDashboard,
   AdminInquiry,
   AdminMe,
+  AdminMetrics,
   AdminReveal,
   AdminUserDetail,
   NoticeAudience,
@@ -128,6 +129,12 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   const { data, error } = await supabase().rpc('admin_dashboard');
   fail(error);
   return AdminDashboard.parse(data);
+}
+/** AD-01 8번 지표 v2.2(32 0장): 북극성 달마다, 선행, 가드레일 */
+export async function fetchAdminMetrics(months = 6): Promise<AdminMetrics> {
+  const { data, error } = await supabase().rpc('admin_metrics', { p_months: months });
+  fail(error);
+  return AdminMetrics.parse(data);
 }
 export type AdminSearchRow = {
   user_id: string;

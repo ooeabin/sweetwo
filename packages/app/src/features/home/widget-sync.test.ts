@@ -1,6 +1,6 @@
 import type { BundleView, HeroItem } from '@sweetwo/core';
 import { describe, expect, it } from 'vitest';
-import { widgetNext, widgetSave } from './widget-sync';
+import { widgetLanding, widgetNext, widgetSave } from './widget-sync';
 
 // 홈 화면 위젯 글(26 ‘위젯 v2.2’): 금액 없이 %·이름·기한 달, 다가오는 날은 날짜만
 const G = '0b9c1d2e-3f40-4a5b-8c6d-7e8f90a1b2c3';
@@ -118,5 +118,18 @@ describe('WG-04 다가오는 날 글', () => {
   });
   it('없으면 null', () => {
     expect(widgetNext({ today: '2026-11-13', care: undefined, note: undefined })).toBeNull();
+  });
+});
+
+describe('widgetLanding(widget_tapped landing_screen, 32 4-7)', () => {
+  it('위젯이 여는 길을 화면 ID로', () => {
+    const id = '0e3c6a4e-1b7d-4c58-9a40-1f0d8b1c2d3e';
+    expect(widgetLanding('/')).toBe('H-01');
+    expect(widgetLanding(`/salary/items/${id}`)).toBe('W-10');
+    expect(widgetLanding(`/salary/items/${id}/notes`)).toBe('W-14');
+    expect(widgetLanding(`/salary/bundles/${id}/notes`)).toBe('W-14');
+    expect(widgetLanding('/calendar')).toBe('Y-01');
+    expect(widgetLanding(`/calendar/day/${id}`)).toBe('Y-05');
+    expect(widgetLanding('/settings')).toBe('other');
   });
 });

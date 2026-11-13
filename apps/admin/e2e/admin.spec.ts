@@ -193,6 +193,40 @@ async function mock(
           mfa: true,
           last_seen_at: '2026-10-18T00:00:00Z',
         });
+      case 'admin_metrics': {
+        // AD-01 8번(admin_metrics, 32 0장). 서버와 같은 모양(core AdminMetrics)
+        const r = (num: number, den: number) => ({
+          num,
+          den,
+          pct: den > 0 ? Math.round((100 * num) / den) : null,
+        });
+        return json(route, {
+          north_star: ['2026-09', '2026-10', '2026-11'].map((month, i) => ({
+            month,
+            couples: [80, 96, 120][i],
+            connected: [300, 350, 402][i],
+            solo: [40, 51, 63][i],
+            manual: r([60, 70, 84][i] ?? 0, [80, 96, 120][i] ?? 0),
+            bundle: r(30, [80, 96, 120][i] ?? 0),
+          })),
+          leading: {
+            first_saving: r(42, 70),
+            first_payday: r(30, 50),
+            auto_line: r(200, 400),
+            money_in: { dated: r(20, 300), none: r(15, 25) },
+            bundle: r(90, 220),
+            split_accept: r(12, 20),
+            rank_pair: r(40, 402),
+          },
+          guardrails: [
+            { kind: 'request_declined', ...r(9, 30), limit: 50, alert: false },
+            { kind: 'unlink', ...r(2, 402), limit: 1, alert: false },
+            { kind: 'auto_line_changed', ...r(31, 250), limit: 10, alert: true },
+            { kind: 'reconcile_minus', ...r(3, 40), limit: 20, alert: false },
+          ],
+          at: '2026-11-13T04:00:00Z',
+        });
+      }
       case 'admin_dashboard':
         return json(route, {
           inquiries: { received: 3, in_progress: 1 },
@@ -660,6 +694,16 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await expect(page.getByRole('region', { name: '최근 활동' })).toContainText('A-10001');
   await expect(page.getByRole('region', { name: '상시 경보' })).toContainText(
     '평균 금리 마지막 갱신95일 전 / 기준 90일',
+  );
+  // 8 지표 v2.2(2026-11-13 PR 14): 북극성 이번 달, 선행, 가드레일(기준 넘음)
+  await expect(page.getByRole('region', { name: '이번 달 같이 모은 커플' })).toContainText(
+    '이번 달 같이 모은 커플120연결 커플 402',
+  );
+  await expect(page.getByRole('region', { name: '선행 지표' })).toContainText(
+    '첫 저금률(최근 30일)60%42 / 70',
+  );
+  await expect(page.getByRole('region', { name: '가드레일' })).toContainText(
+    '자동 줄 바꿈(최근 30일)12%10%기준 넘음',
   );
   await axe(page);
 

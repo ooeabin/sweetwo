@@ -9,5 +9,9 @@ export function emitter<T>() {
     emit(v: T) {
       fns.forEach((f) => f(v));
     },
+    /** 받는 쪽 수(0이면 아직 아무도 안 들음) */
+    size() {
+      return fns.size;
+    },
   };
 }

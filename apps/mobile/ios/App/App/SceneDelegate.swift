@@ -124,7 +124,8 @@ public class HomeWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "write", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setLock", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "clear", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "clear", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "installed", returnType: CAPPluginReturnPromise)
     ]
     static let group = "group.kr.sweetwo.app"
     private var store: UserDefaults? { UserDefaults(suiteName: HomeWidgetPlugin.group) }
@@ -161,6 +162,25 @@ public class HomeWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
         store?.removeObject(forKey: "lockAt")
         reload()
         call.resolve()
+    }
+
+    /// 홈 화면에 놓인 위젯(종류, 크기). 앱이 처음 본 것만 widget_added로 보냄(32 4-7, 2026-11-13 PR 14). 개수·위치는 보내지 않음
+    @objc func installed(_ call: CAPPluginCall) {
+        guard #available(iOS 14.0, *) else {
+            call.resolve(["items": []])
+            return
+        }
+        WidgetCenter.shared.getCurrentConfigurations { result in
+            var items: [[String: String]] = []
+            if case .success(let infos) = result {
+                for info in infos {
+                    let w = info.kind == "kr.sweetwo.widget.save" ? "wg01" : info.kind == "kr.sweetwo.widget.next" ? "wg04" : ""
+                    if w.isEmpty { continue }
+                    items.append(["widget": w, "size": info.family == .systemMedium ? "medium" : "small"])
+                }
+            }
+            call.resolve(["items": items])
+        }
     }
 }
 

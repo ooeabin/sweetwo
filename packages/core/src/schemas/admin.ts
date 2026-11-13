@@ -262,3 +262,37 @@ export const ActiveNotice = z.object({
   platforms: z.array(z.string()),
 });
 export type ActiveNotice = z.infer<typeof ActiveNotice>;
+
+// AD-01 8번 지표 v2.2(admin_metrics, 32 0장, 2026-11-13 PR 14). 집계 숫자만(사람·커플 ID 없음)
+const MetricRatio = z.object({ num: z.number(), den: z.number(), pct: z.number().nullable() });
+export type MetricRatio = z.infer<typeof MetricRatio>;
+export const AdminMetrics = z.object({
+  north_star: z.array(
+    z.object({
+      month: z.string(),
+      couples: z.number(),
+      connected: z.number(),
+      solo: z.number(),
+      manual: MetricRatio,
+      bundle: MetricRatio,
+    }),
+  ),
+  leading: z.object({
+    first_saving: MetricRatio,
+    first_payday: MetricRatio,
+    auto_line: MetricRatio,
+    money_in: z.object({ dated: MetricRatio, none: MetricRatio }),
+    bundle: MetricRatio,
+    split_accept: MetricRatio,
+    rank_pair: MetricRatio,
+  }),
+  guardrails: z.array(
+    MetricRatio.extend({
+      kind: z.enum(['request_declined', 'unlink', 'auto_line_changed', 'reconcile_minus']),
+      limit: z.number(),
+      alert: z.boolean(),
+    }),
+  ),
+  at: z.string(),
+});
+export type AdminMetrics = z.infer<typeof AdminMetrics>;

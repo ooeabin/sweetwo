@@ -153,7 +153,7 @@ export function S13Sharing() {
                 onChange={(on) =>
                   run(() => setBundleVisibility(b.id, { showEach: on }), bundleKeys).then(() =>
                     track('bundle_show_each_toggled', {
-                      entry: 'S-13',
+                      entry: 's13',
                       has_target: b.target !== null,
                       on,
                     }),
@@ -250,7 +250,7 @@ export function S13Sharing() {
                 on
                   ? nav('/assets/rank/consent')
                   : run(turnOffRankConsent, rankKeys).then(() =>
-                      track('rank_consent_turned_off', { result: 'off' }),
+                      track('rank_consent_turned_off', {}),
                     )
               }
             />

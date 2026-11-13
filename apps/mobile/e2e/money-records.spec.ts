@@ -1,14 +1,20 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { mockSaving, newSavingDb, notiTitles, type SavingDb } from './saving-mock';
-import { seed } from './seed-home';
+import {
+  chanwoo,
+  type MemDb,
+  mockOnboarding,
+  mockSaving,
+  newSavingDb,
+  notiTitles,
+  type SavingDb,
+  seed,
+  YEBIN,
+} from './mocks';
 
 // v2.2 돈 기록(20 W-20·W-20a 돈 들어왔어요, W-10b 바로잡기, W-10c 잔액 맞추기, W-14·W-14a 쓸 곳 메모, ADR 0009 결정 4, F1·F3·G7·G11).
 // 찬우 ‘내 집 마련’(목표 1억 5,000만, 이미 모은 300만). 바로잡기 상대 문구는 찬우·예빈 두 계정(묶음)
 const NOW = new Date('2026-10-07T10:00:00+09:00');
-const YEBIN = 'yebin';
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(

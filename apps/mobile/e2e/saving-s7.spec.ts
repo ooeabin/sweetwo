@@ -1,16 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { mockRealtime } from './realtime-mock';
-import { seed } from './seed-home';
+import { chanwoo, type MemDb, mockOnboarding, mockRealtime, seed, YEBIN } from './mocks';
 import { setYearMonth } from './wheel';
 
 // QA 7구간 저금(2026-11-12): D1 합쳐서 모드 주인 있는 저금은 두 사람 모두(찬우·예빈 두 계정), Realtime(S7-02),
 // 저금 내역 다시 읽기(S7-03), 오류 다시 시도(S7-04), W-10a 기한(S7-07), 회색 한 줄(S7-08·S7-09), 모은 금액 → 저금 내역(S7-10),
 // 충돌 ‘내 값’ 문장(S7-11), 지우기 글자 버튼(S7-12), W-11 금액 가리기(S7-13), W-11 막힘 → W-02(S7-15)
 const NOW = new Date('2026-10-07T10:00:00+09:00');
-const YEBIN = 'yebin';
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(

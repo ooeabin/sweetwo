@@ -7,7 +7,8 @@ import {
   type SavingNoteRow,
 } from '@sweetwo/core';
 import { useEffect } from 'react';
-import type { WidgetData } from '../../platform';
+import type { NavigateFrom, WidgetData } from '../../platform';
+import { track } from '../../shared/analytics';
 import { onSessionReset } from '../../shared/session-reset';
 import { savingPaths, togetherPaths } from '../salary';
 import { copy } from './copy';
@@ -82,4 +83,60 @@ export function useWidgetSync(ready: boolean, data: WidgetData) {
       last = '';
     });
   }, [ready, text]);
+  // 앱을 열 때마다 한 번(실행마다), 새로 놓인 위젯이 있으면 widget_added
+  useEffect(() => {
+    if (ready) void trackPlacedWidgets();
+  }, [ready]);
+}
+
+/** 위젯이 연 화면의 화면 ID(26 ‘누르면’). 모르는 길은 other */
+export function widgetLanding(path: string): string {
+  if (path === '/') return 'H-01';
+  if (/^\/salary\/items\/[^/]+$/.test(path)) return 'W-10';
+  if (/^\/salary\/(items|bundles)\/[^/]+\/notes$/.test(path)) return 'W-14';
+  if (path === '/calendar') return 'Y-01';
+  if (/^\/calendar\/day\/[^/]+$/.test(path)) return 'Y-05';
+  return 'other';
+}
+
+/** widget_tapped(32 4-7): 위젯 전체가 누르는 곳 하나라 element = card */
+export function trackWidgetTap(path: string, from: NavigateFrom) {
+  track('widget_tapped', {
+    widget: from.widget,
+    element: 'card',
+    landing_screen: widgetLanding(path),
+    app_was_running: from.appWasRunning,
+  });
+}
+
+// widget_added(32 4-7): 홈 화면에 놓인 위젯 중 이 기기에서 처음 본 종류·크기만 한 번. 개수·위치는 보내지 않음.
+// 금액은 위젯에 넘기지 않아(S-22 화면 전) amounts_shown 늘 false
+const SEEN = 'sw.widgets.seen';
+const readSeen = (): string[] | null => {
+  try {
+    const v = localStorage.getItem(SEEN);
+    return v ? (JSON.parse(v) as string[]) : null;
+  } catch {
+    return null;
+  }
+};
+let checked = false;
+export async function trackPlacedWidgets(): Promise<void> {
+  const w = typeof window !== 'undefined' ? window.sweetwo?.widget : undefined;
+  if (checked || !w?.installed) return;
+  checked = true;
+  const placed = await w.installed().catch(() => null);
+  if (!placed) return;
+  const seen = new Set(readSeen() ?? []);
+  for (const p of placed) {
+    const key = `${p.widget}:${p.size}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    track('widget_added', { widget: p.widget, size: p.size, amounts_shown: false });
+  }
+  try {
+    localStorage.setItem(SEEN, JSON.stringify([...seen]));
+  } catch {
+    /* 저장 못 해도 화면은 그대로 */
+  }
 }
