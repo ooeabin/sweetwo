@@ -1,8 +1,8 @@
 -- pgTAP: 연결 해제 재기획(25 S-12, 08 7·8장). 요청 → 대기(월급 계획 고치기 멈춤) → 확인하면 같이 쓰던 데이터는 두 사람 모두 못 봄,
--- 빈 새 공간에서 처음부터. 30일 안 다시 연결하면 원래 공간으로 돌아오고 해제 뒤 데이터는 버림. 찬우, 예빈
+-- 새 공간에서 처음부터(v2.2 D5: 내 월급 계획·내 저금은 옮겨 남김). 다시 연결은 복구 없는 새 연결(D10). 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(17);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -58,7 +58,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.agree_unlink();
 select isnt((select space_id::text from public.app_user where id = auth.uid()), current_setting('test.space'), '예빈 새 공간');
-select is((select count(*) from public.goal) + (select count(*) from public.salary_split), 0::bigint, '같이 쓰던 데이터는 안 보임');
+select is((select count(*) from public.goal where owner_user_id is null), 0::bigint, '같이 쓰던 저금은 안 보임');
 select is((select onboarding_step from public.app_user where id = auth.uid()), 'S-12H', '해제 안내 먼저');
 select public.start_after_unlink();
 select is((select onboarding_step from public.app_user where id = auth.uid()), 'O-11', '시작하기 → O-11');
@@ -69,18 +69,18 @@ reset role;
 select is((select count(*) from public.notification where space_id = current_setting('test.space')::uuid), 0::bigint,
   '원래 공간 알림 기록 지움');
 
--- 다시 연결: 찬우 요청 → 예빈 수락 → 원래 공간으로, 해제 뒤 데이터는 버림
+-- 다시 연결(v2.2 D10): 찬우 요청 → 예빈 수락 → 복구 없이 찬우 공간 새 초대 코드
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.request_reconnect();
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.answer_reconnect(true);
-select is((select space_id::text from public.app_user where id = auth.uid()), current_setting('test.space'), '원래 공간으로');
-select is((select array_agg(name order by name) from public.goal), array['내 집 마련'], '같이 쓰던 목표가 돌아오고 해제 뒤 목표는 버림');
+select isnt(public.answer_reconnect(true), null, '수락하면 새 초대 코드');
+select isnt((select space_id::text from public.app_user where id = auth.uid()), current_setting('test.space'), '원래 공간으로 돌아가지 않음');
+select is((select array_agg(name order by name) from public.goal), array['혼자 여행'], '해제 뒤 내 저금은 그대로');
 reset role;
-select is((select couple_state::text from public.couple_space where id = current_setting('test.space')::uuid), 'connected', '다시 연결');
+select is((select couple_state::text from public.couple_space where id = current_setting('test.space')::uuid), 'solo', '원래 공간은 되살리지 않음');
 
 select * from finish();
 rollback;

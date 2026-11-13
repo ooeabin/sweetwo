@@ -60,7 +60,7 @@ select is(pg_temp.last('unlink_cancelled'), '파트너가 연결 해제 요청�
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.agree_unlink();
-select is(pg_temp.last('unlink_confirmed'), '연결이 해제됐어요 / 30일 안에 다시 연결할 수 있어요', '해제 완료(14)');
+select is(pg_temp.last('unlink_confirmed'), '연결이 해제됐어요 / 내 명의와 내 저금은 그대로 남았어요', 'v2.2 해제 완료(복구 없음, D5)');
 reset role;
 
 -- 다시 연결: 예빈 요청 → 찬우 수락
@@ -69,14 +69,18 @@ set local role authenticated;
 select is(public.my_reconnect_ok(), true, '30일 안이면 다시 연결 가능(S3-20)');
 select public.request_reconnect();
 reset role;
-select is(pg_temp.last('reconnect_requested'), '파트너가 다시 연결하자고 해요 / 연결하면 해제 전 같이 쓰던 데이터가 돌아와요', '다시 연결 요청(14)');
+select is(pg_temp.last('reconnect_requested'), '파트너가 다시 연결하자고 했어요 / 연결하면 새로 같이 시작해요', 'v2.2 다시 연결 요청(D10)');
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.answer_reconnect(true);
 reset role;
-select is(pg_temp.last('reconnected'), '찬우님과 다시 연결됐어요 / 해제 전 공동 데이터를 되살렸어요', '다시 연결됨(14)');
+select is(pg_temp.last('reconnected'), '찬우님이 다시 연결하기로 했어요 / ', 'v2.2 다시 연결 수락(‘되살렸어요’ 없음)');
 
 -- 2026-11-12 QA 10구간 S10-01: 파트너 변경 묶음·주간 요약·열람 알림도 호칭이 없으면 ‘파트너가’
+-- v2.2 다시 연결은 새 합류(D10)라 두 사람을 같은 공간에 둠(문구 검사만)
+update public.app_user set space_id = (select space_id from public.app_user where id = '22222222-2222-2222-2222-222222222222')
+  where id = '11111111-1111-1111-1111-111111111111';
+update public.couple_space set couple_state = 'connected' where id = (select space_id from public.app_user where id = '22222222-2222-2222-2222-222222222222');
 insert into public.partner_change (space_id, actor_id, receiver_id, topic, field, noun, before_v, after_v, urgent, target, created_at)
 select space_id, id, '11111111-1111-1111-1111-111111111111', 'split', f, '생활비', '880000', '1000000', true, '/salary?view=plan',
   now() - interval '11 minutes'
@@ -111,7 +115,7 @@ select is((select count(*)::int from pg_proc where proname = 'notify_first_goal'
 
 -- 상대 계정 삭제(호칭 없음 → ‘파트너가’), 복구 본문
 select public.account_deletion_for('22222222-2222-2222-2222-222222222222');
-select is(pg_temp.last('partner_deleted'), '파트너가 계정을 삭제했어요 / 같이 쓰던 데이터는 지웠어요', '상대 계정 삭제(14)');
+select is(pg_temp.last('partner_deleted'), '파트너가 계정을 삭제했어요 / 내 명의와 내 저금은 그대로 남았어요', '상대 계정 삭제(14)');
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.cancel_account_deletion();
