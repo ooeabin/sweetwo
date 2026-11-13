@@ -1,5 +1,7 @@
 # HomeHub
 
+2026-11-13 v2.2: 홈 주인공 H-10 같이 모으기(SaveTogether), H-11 이번 달 한 줄, H-12 결혼 준비, 띠 글자 버튼 둘 → 맨 아래 ‘v2.2’ 장. H-02 저금 상자·H-03 큰 상자는 없앰.
+
 홈 허브(2026-11-09, GCOO 앱 홈처럼, 사용자 승인한 그림 기준). 회색 바탕(`surface-alt`, AppFrame `tone="alt"`) 위에 크기가 다른 흰 상자를 쌓아 각 화면으로 잇는 홈(19 H-02~H-09).
 
 - 격자(`hg-hub`): 상자 사이 12px(`space-3`). 좁은 창·중간 창은 2열(`hg-hub__wide`·`hg-hub__full`은 두 칸), 넓은 창(1100px 이상)은 4열(`hg-hub__wide` = 두 칸, `hg-hub__full` = 한 줄, 할 일 띠는 맨 위로 `order`). 상자는 모두 흰색 `radius-xl`, 테두리·그림자 없음(마우스 올림만 `shadow-2`), 누름 98%, 키보드 포커스 ink 링 2px.
@@ -13,3 +15,16 @@
 - React 래퍼(packages/ui `HomeHub.tsx`): `Hub`(`label`), `HubHero`(`caption`, `title`, `people`, `percent`, `meterLabel`, `done`, `total`, `split`, `label`, `onClick`), `HubBand`(`text`, `go`, `onClick`. 2026-11-11 `close` 없앰), `HubTile`(`title`, `sub`, `value`, `art`, `small`, `point`, `badge`, `label`, `onClick`), `HubSaving`(`name`, `badge`, `percent`, `sub`, `bar`, `label`, `onClick`).
 
 - 좁은 화면 글자(2026-11-11): 허브 안 글자는 말 단위로 줄바꿈(`word-break: keep-all`, 아주 긴 말만 `overflow-wrap: anywhere`). 타일 값(`hg-hubtile__value`)은 타일 너비에 맞춰 17px에서 14px까지 줄어듦(`container-type: inline-size`, `clamp(14px, 13cqi, 17px)`), 320px 휴대폰 반 칸에서도 “2억 1,000만 원”이 한 줄. 그보다 큰 값(“987억 6,543만 2,100원”처럼 입력 상한에 가까운 값)은 말 단위로 두 줄까지 허용(2026-11-11 QA 4구간 S4-18, 글자를 더 줄이거나 자르지 않음).
+
+## v2.2 (2026-11-13, ADR 0009)
+
+홈 구성이 바뀜(→ 19 ‘홈 v2.2’). 이 장이 2026-11-13부터 정본이고, 위 큰 상자(`hg-hubhero`, H-03)와 저금 상자(`hg-hubsave`, H-02)는 홈에서 없앰(클래스는 새 코드에서 쓰지 않고 PR 9에서 지움). 아래 새 클래스는 PR 9(홈)에서 `bundle.css`에 더하고 `pnpm ds:sync`로 복사함. 그 전까지는 이름과 생김새만 정함.
+
+- 같이 모으기(H-10, SaveTogether 컴포넌트 `hg-together`, 두 칸, 두 줄 높이): 생김새 → [SaveTogether](SaveTogether.md). 허브 안에서는 `hg-hub__wide` 자리, 넓은 창 4열에서는 두 칸 × 두 줄
+- 이번 달 한 줄(H-11, `hg-hubline`, HubLine, 두 칸, 한 줄): 흰 얇은 상자(`radius-xl`, 안쪽 세로 14px 가로 18px), 왼쪽 문장 15px 600 `ink`(두 줄까지) + 그 아래 회색 보조 13px 500 `slate`(있을 때) + 오른쪽 이동 글자 13px 600 `ink-2`(“확인하기 ›”, “보기 ›”, “돈 들어왔어요 ›”). 오렌지 없음. 상자 전체가 버튼, 키보드 포커스 ink 링. 날짜 없는 사람의 막대 상태(H-13)는 문장 자리에 [PeriodBar](PeriodBar.md). 못 불러오면 13 공통 7번 카드
+- 결혼 준비 타일(H-12, `hg-hubtile` 그대로, 두 칸 `hg-hub__wide`): 제목 “결혼 준비 메모 4개” + 회색 보조 “다음 잔금 12월 3일”. 그림 자리 72px 그대로
+- 할 일 띠 글자 버튼 둘(`hg-hubband--two`, HubBand `secondary`): 띠 8번 “같이 쓰는 생활비를 나눠 볼까요?”에서만. 오른쪽에 글자 버튼 두 개: 둘째 버튼 “이미 정했어요”(13px 500, 같은 `on-band-cocoa` 글자, 새 토큰 없음, 밑줄 없음) + 첫째 이동 글자 “나누기 ›”. 띠 전체가 버튼이 아니라 두 버튼이 따로(각각 44px 이상 누름 자리). 좁은 창 320px에서 문장이 두 줄을 넘으면 버튼 줄이 문장 아래로 내려감
+- 타일 배지 “상위 38%”(H-04): 두 사람 모두 순위 동의 + “홈에 보여 주기”를 켰을 때만(2026-11-13 기본 끔)
+- H-07 월급 계획 포인트 상자 보조 줄 두 줄: “매달 25일” + “여유 자금 20만 원”(같은 `on-accent-app-sub`)
+- 넓은 창(1100px 이상 4열): 할 일 띠 한 줄 → H-10(두 칸, 두 줄) + 오른쪽 H-11과 H-07 → H-08, H-12(있으면), H-04, H-09
+- React 래퍼(packages/ui `HomeHub.tsx`)에 더함: `HubLine`(`text`, `sub`, `go`, `bar`(PeriodBar props), `label`, `onClick`), `HubBand`에 `secondary`(`{ text, onClick }`). `SaveTogether`는 따로 파일

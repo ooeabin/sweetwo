@@ -220,9 +220,9 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 권한 규칙
 
 - RLS 기본값은 막힘. 테이블마다 ‘같은 space의 구성원’만 읽고 씀
-- 공개 범위 3단계(전체 공개, 합계만, 비공개)는 RLS와 security\_invoker = true 뷰로 걸러냄(이 옵션 없는 뷰는 소유자 권한으로 RLS를 건너뜀). 클라이언트에서 숨기지 않음
+- 공개 범위 3단계(전체 공개, 합계만, 비공개. 화면 이름 2026-11-13 ‘모두 / 총액만 / 숨기기’, 미리 고른 값 없음)와 각자 계열 월급 계획 공개 3단계(`plan_share`, 2026-11-13)는 RLS와 security\_invoker = true 뷰로 걸러냄(이 옵션 없는 뷰는 소유자 권한으로 RLS를 건너뜀). 클라이언트에서 숨기지 않음
 - 목표(20261106090000, 2026-11-08부터 저금 항목 행): 읽기는 우리 목표·내 목표·파트너의 ‘모두 보여 주기’ 내 목표만(‘금액만 보여 주기’는 `space_goals()`가 이름을 가려서 줌), 추가·고치기는 우리 목표 둘 다·내 목표 주인만, 주인은 나 또는 없음(우리)으로만. 앱이 바로 고치는 열만 `grant update`(이름, 형태, 질문 답, 금액, 기한, 이미 모은 금액, 순서, 상태, 주인, 공개 범위, 휴지통). 2026-11-12(20261123090000) 합쳐서 공간은 ‘모두 보여 주기’ 주인 있는 항목도 둘 다 고침(D1), 주인은 나 ↔ 없음만(`goal_owner_guard`), 연결 해제 대기 중 바로 고치기 거절(`goal_unlink_guard`). 상태는 진행·지연·보류 사이만(`goal_client_guard`), 달성·사용 완료·사진·템플릿은 함수로만
-- 제안·승인 없음(ADR 0003). 누구나 바로 고치고 상대에게 알림(partner\_change 묶음) + 고친 사람에게 Toast ‘되돌리기’
+- 제안·승인 없음(ADR 0003). 누구나 바로 고치고 상대에게 알림(partner\_change 묶음) + 고친 사람에게 Toast ‘되돌리기’. 2026-11-13 예외 둘(관리 형태 합치기, 분담 제안, ADR 0009 8-1, 아래 ‘v2.2 데이터와 서버’). 각자 계열 파트너 것은 `plan_share` 공개 단계대로
 - 토스트와 화면 이동(2026-11-11): `shared/toast` `ToastHost`는 경로(pathname)가 바뀌면 떠 있는 토스트를 닫는다(그 화면의 동작 결과는 그 화면에서만). 결과를 알리고 바로 다른 화면으로 옮기는 동작(저장하고 돌아가기, 지우고 목록으로, 되돌리기 토스트 + 이동)은 `carryToast(문장, 행동?)`로 띄워 다음 화면 하나까지만 남긴다(그다음 이동에서 닫힘). 같은 화면 안 결과는 `toast()`. 쿼리(`?view=`)만 바뀌는 이동은 닫지 않음
 - 오프라인은 볼 수만(30 동기화 4장): api `trackedFetch`가 `navigator.onLine`이 거짓이면 서버로 가는 쓰기(POST·PATCH·PUT·DELETE, auth 토큰 갱신 빼고)를 바로 실패시키고 `lastOfflineBlock()`을 남김 → `shared/toast`가 3초 안의 실패 안내를 “인터넷에 연결되면 할 수 있어요”(`shared/copy`)로 바꿈. 입력 대기열은 두지 않음(2026-10-27 결정)
 - 오프라인 조회 캐시: `packages/app/src/shared/offline-cache.ts`가 TanStack Query 캐시를 `dehydrate`해 브리지 `cache.save`로(3초 모아서), 켤 때 `cache.load` → `hydrate` 뒤에 그림. 모바일 `native/offline-cache.ts`(보안 저장소의 AES-GCM 키 + Filesystem 데이터 폴더). 로그아웃은 네이티브 `signOut`이 지움, 앱은 `signed_out` 뒤 저장을 멈춤. `me.space_id`가 바뀌면(연결 해제 확정 등) `cache.clear()` + 그 전에 받은 쿼리를 메모리에서도 빼고 새로 받음. 사진 서명 주소·기기 목록은 빼고, 모양이 바뀌면 `VERSION`을 올림
@@ -262,6 +262,25 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 서버 분석 이벤트(20261122090000, 2026-11-12 QA 6구간 S6-02): `server_event`(이름, 가명 `user_id`·`space_id`, `props`, `sent_at`). 앱(anon·authenticated)은 읽지도 쓰지도 못함(RLS 켬 + 권한 회수, `mail_outbox`와 같은 서버 전용 표). 쓰기는 내부 `server_track(이름, 사람, 공간, props)`만: ‘분석 수집’을 끈 사람(`analytics_off`) 것은 남기지 않고, 공동(합쳐서) 것은 한 사람이라도 끄면 안 남김. 지금 남기는 것: `checklist_generated`(`pay_checklist` 미룬 제약 트리거, 트랜잭션 끝이라 줄 수가 들어감), `checklist_closed`(`state` → `closed` 트리거), `notification_sent`(20261126090000, QA 10구간 S10-03, `track_noti_sent`: `notify`가 행을 새로 넣으면 `inapp`, `claim_push`가 꺼내면 `os`(알림마다 1번), `mail_missed_notifications`가 메일을 쌓으면 `email`. props `type`(kind), `channel`, `cap_scope`(`noti_always_mail`이면 `out_of_cap`), pgTAP `s10_noti.test.sql`). 금액 구간은 `amount_band`(core `amountBand`와 같은 이름). PostHog로 보내고 `sent_at`을 채우는 일은 분석 단계에서. pgTAP `s6_checklist.test.sql`(트랜잭션 안에서는 `set constraints all immediate`로 미룬 트리거를 내보내 확인)
 - 만 18세 미만: 가입 때 A-05 ‘만 18세 이상이에요’ 체크로만 확인하고 가입 뒤 나이로 계정을 지우지 않음. 옛 `delete_minor_account`·`delete_underage_account`는 20261103210000에서 지움
 - v2.2 DB(ADR 0009, plan v2.2 9-2 PR 1~5). PR 1 enum 값(20261201080000, 추가만, 값을 쓰는 표·함수는 다음 마이그레이션부터): `split_line_kind` + `send`(한 사람 관리형 ‘보내기’, 서버가 계산), `shared_account`(같이 쓰는 통장 줄), `marriage_status` + `dating`, `living_together`(O-11 4지선다, 옛 `undecided`는 남김), 새 enum `plan_share`(all, saving\_only, done\_only), `money_in_kind`(salary, bonus, family, work, refund, etc), `goal_move_reason`(fix, used, interest, reconcile, note\_paid, custom, auto). 앱은 화면 PR 전까지 새 줄 종류를 저장된 이름으로만 보여 줌. pgTAP `v22_enum_values.test.sql`
+
+### v2.2 데이터와 서버 (2026-11-13, ADR 0009)
+
+기획 정본 → `docs/spec/09-data-items.md` 7장(테이블·열), 07(확인 루프·월급 변경·기간), 08(관리 형태·공개·예외 둘·해제), 06(계산). 구현 순서는 PR 1(enum 값) → 2(확인 루프) → 6(core) → 8·9 → 3·4 → 10·11 → 5 → 12 → 13 → 14. 아래는 구현할 때 지킬 규칙만.
+
+- enum은 값 추가만(`ALTER TYPE … ADD VALUE`는 같은 트랜잭션에서 못 써서 따로 먼저 마이그레이션): `split_line_kind` + `send`, `shared_account` / `marriage_state` + `dating`, `living_together` / 새 enum `plan_share`(all, saving_only, done_only), `money_in_kind`(salary, bonus, family, work, refund, etc), `goal_move_reason`(fix, used, interest, reconcile, note_paid, custom, auto). check 제약을 바꿔야 하면 새 열로 피한다
+- 새 표: `saving_bundle`, `saving_note`, `money_in`, `shared_account`, `mode_change_request`, `reconnect_request`, `partner_code`, `salary_change`, `rank_consent_request`, `home_task_state`. RLS는 09 7-1 표대로
+- 공개 필터는 서버 함수 하나(`partner_plan_view(p_viewer)`, security invoker 뷰·함수). S-13p 미리 보기도 같은 함수를 ‘상대로서’ 부른다. 저금마다 공개 열(`goal` 공개 범위)은 새 코드에서 읽지 않고 2단계로 지운다. 묶음 응답은 `show_each_a and show_each_b`일 때만 상대 금액, `percent_only_a or percent_only_b`면 합계·목표 금액 대신 %만(위젯 피드 포함)
+- 바로잡기 사유 `goal_move.reason`은 주인만. 상대는 `goal_move_public` 뷰(reason 뺌)로만 읽는다. 묶음·공동 저금 바로잡기의 상대 활동 기록·주간 요약은 사람·금액·사유 없는 한 줄, `hide_from_summary`면 주간 요약에서 뺀다
+- 권한 예외 둘(관리 형태 합치기 `request_mode_change`/`answer_mode_change`/`cancel_mode_change`, 분담 `propose_split`/`answer_split`)만 요청 → 답. 그 밖의 같이 쓰는 값은 지금처럼 바로 고침 + `partner_change` + Toast ‘되돌리기’. 순위 동의(`request_rank_consent`/`answer_rank_consent`)는 동의 기록으로 따로
+- 분담 월급 비율은 서버에서만 계산하고 결과 몫과 비율만 돌려준다(월급 원값을 응답·표에 넣지 않음). 두 사람 모두 `plan_share = all`이고 월급이 있을 때만
+- `save_split`: 각자 파트너 거절(지금) + 합쳐서 용돈 줄 주인만(한 사람 관리형이면 관리하는 사람도, 주인에게 `my_allowance` 알림) + ‘보내기’ 줄 직접 저장 거절 + `in_checklist`/`auto_pay`/`auto_day` 여러 줄 한 번에(W-01d). ‘보내기’ 금액은 트리거 `recalc_send_line`만
+- 확인 루프: `onboarding_reset_plan`은 첫 확인 목록을 만들지 않는다(소급 없음). 생성은 `in_checklist`만, 자동 줄은 `auto`/`auto_due`. `confirm_payday(p_checklist)`는 남은 손 줄만 체크 + confirmed. `check_pay_line`은 지난 사이클 줄을 다음 사이클 끝까지(`late`). `payday_none`이면 확인 목록 없음
+- 해제: `request_unlink`는 요청자 개인 데이터를 즉시 가리고 묶음을 멈춘다. `confirm_unlink`는 혼자 공간 둘을 만들고 주인 있는 행을 옮기고 같이 쓰는 행만 지운다(운영 보관 30일). 계정 삭제도 같은 규칙. 30일 재연결 복구(옛 `restore`)는 새 코드에서 부르지 않음, 다시 연결은 `request_reconnect`(7일 1회, 차단 조용히)
+- 자산 공개 첫 선택: `asset_share_default`가 null이면 자산 저장에 공개 단계를 명시해야 받음, 첫 저장 값을 기본값으로
+- 순위: `networth_rank_pair()`는 연결 + 두 사람 `rank_consent`일 때만 순위(둘의 합, 숨기기 제외, 연령대 = 먼저 태어난 사람), 아니면 `peer_median(birth_year)`. 첫 조회 무료(`rank_view.paid_by_ad`)
+- 앱 잠금: PIN 필수 검사 없음(로그인 뒤 PIN 없는 기기 허용)
+- core 한 곳: `resolveManageStyle`(2-5 표 6줄 = 서버 `resolve_manage_style`), `moneyInPeriod`(= `money_in_period`), `pickHero`·`pickMonthLine`·`pickTopTask`(16순서, `home.ts`), `autoDue`, `next-saving.ts`(칩 표). 06·07 예시를 Vitest와 pgTAP에 같은 값으로
+- 분석: 32 0-4 이벤트(금액은 `_band`), 서버 이벤트 `auto_line_confirmed`, `progress_news_sent`, `salary_change_applied`
 
 ### 마이그레이션과 RLS 규칙
 
@@ -412,6 +431,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 잠금
 
+- 2026-11-13(ADR 0009 결정 12): 앱 잠금은 선택. 신규 가입은 O-60 흐름 뒤, 재로그인·새 기기는 로그인 직후 A-06 “앱 잠금을 켤까요?” 한 번(‘나중에 할게요’ 가능). 앱·서버 어디에도 PIN 필수 검사를 두지 않는다. 꺼져 있으면 S-15 맨 위 권장 한 줄
+
 - MVP: PIN 6자리 + 생체 인증(iPhone Face ID·Touch ID, Android 지문). 5회 틀리면 PIN 지우고 로그아웃. 잠금 화면은 앱 전체를 덮어 금액이 보이지 않음. 잠긴 동안(상태를 읽는 동안 포함) 뒤 화면은 `visibility: hidden` + `inert` + `aria-hidden`(LockGate가 화면을 감쌈). 약한 PIN(core `isWeakPin`): 같은 숫자 6개, 오름·내림 연속(9→0 도는 것 포함), 두 개씩 3번(112233), 두 숫자 번갈아(121212). PIN 저장 실패면 처음부터. ‘PIN을 잊었어요’는 확인 Modal 뒤 `signOut({ forgetPin: true })`. 브리지 `lock.reset()`은 PIN 잊음·다른 계정 로그인 때만 앱이 부름(잠금 해제 대신 쓰지 않음). 데스크톱 잠금(Electron main, Touch ID, Windows Hello)은 ADR 0008로 없앰
 - 모바일(`apps/mobile/src/native/lock.ts`): PIN은 PBKDF2(SHA-256, 21만 번) 해시로 Keychain·Keystore에, 틀린 횟수도 같이(5회면 PIN 지우고 로그아웃). 생체 인증은 `@aparajita/capacitor-biometric-auth`(iPhone Face ID·Touch ID, Android BiometricPrompt, 문구는 `LockStatus.bioKind`로 “Face ID로 풀기”, “지문으로 풀기”). 자동 잠금은 앱이 뒤로 간 지 N분(S-15, 기본 5분). 최근 앱 화면에는 가림 화면(`@capacitor/privacy-screen`: iOS 흐림, Android 스플래시)
 
@@ -438,6 +459,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 | 메일 깨우기(`kick-mail`): 보낼 메일이 있으면 pg_net으로 `send-mail` | 매분 | `* * * * *` | `kick_mail()` |
 | 공휴일 받기(`kick-holidays`): pg_net으로 Edge Function `fetch-holidays` → 특일 정보 API 올해·다음 해 → `save_api_holidays`(어드민 날은 안 덮음, 빠진 API 날은 지움) | 월 03:00 | `0 18 * * 0` | `kick_holidays()` |
 
+- 2026-11-13 v2.2에서 더하는 작업(ADR 0009, 시각 초안): 월급 변경 적용 `apply_salary_changes()` 매일 00:01 KST(기준일 체크리스트보다 먼저, 순서 고정), 자동 확인 `auto_confirm_due_lines()` 매일 00:05 KST(`auto_due` = 오늘인 대기 자동 줄 → 체크, 날짜 없는 사람의 자동 저금은 `goal_move(in, reason_code auto)`), 진행 소식 `send_progress_news()` 09:00(월급날, 날짜 없음은 매달 1일, 손 줄 0개 + `push_kinds.progress_news`), 대신 입력 정리(초대 만료 + 30일, 7일 전 알림). 오전 알림의 월급날과 저녁 알림의 월급 전 확인은 손 줄이 1개 이상일 때만, `payday_none`은 없음. 기준일 체크리스트는 ‘못 함’으로 닫되 다음 사이클 끝까지 늦은 확인을 받음
 - (다음 단계) 재시도: 함수 안에서 space 단위로 3회 지수 백오프. 끝내 실패하면 job\_run에 남기고 알림(‘운영 절차’)
 - space마다 `pg_try_advisory_xact_lock`으로 중복 실행 막음. 작업은 멱등하게(두 번 돌아도 결과 같음)
 - (다음 단계) job\_run: 작업, 시작, 끝, 처리한 space 수, 실패 목록
@@ -639,6 +661,8 @@ supabase/
 
 ### 홈과 월급 체크리스트 구조
 
+> 2026-11-13(ADR 0009): 홈은 H-10 같이 모으기(`h-10-save-together.tsx`) + H-11 이번 달 한 줄(`h-11-month-line.tsx`, 날짜 없음 기간 막대 H-13 포함) + H-12(`h-12-wedding.tsx`) + 할 일 띠 16순서(core `pickTopTask`, 닫기·끝냄은 서버 `home_task_state`, 기기 저장 아님) + 타일. H-03 큰 상자·H-02 저금 상자는 없앰(아래는 그 전 구조 기록). W-02는 `w-02-payday-confirm.tsx`(자동 묶음 + “모두 계획대로 됐어요” = `confirm_payday`), 지난 달 늦은 확인 `w-02-last-month.tsx`, W-05는 손 줄만. 새 W 화면 파일 → 20 ‘월급 탭 v2.2’.
+
 재기획(ADR 0003) 홈과 W 화면. 기획 → 19 홈, 20 월급 체크리스트, 07 월 사이클.
 
 - `packages/app/src/features/home`: `pages/h-01-home.tsx`(2026-11-09 홈 허브, ui `Hub`·`HubHero`·`HubBand`·`HubTile`·`HubSaving`, `MainFrame tone="alt"`): 큰 상자 H-03(다음 월급날 = 체크리스트 `cycle_end` 다음 날, core `monthProgress`로 보낸 줄·보낸 금액, 모은 금액 = 내(합쳐서면 공동) 저금 합) → 할 일 띠 H-06(core `homeTodo` 맨 앞 하나: 연결 해제 요청 받음 → 다시 연결 요청 받음 → 월급 전 확인 → 월급날 체크(core `checkTodo`, 월급날부터 7일 안 + 체크 안 한 줄) → 첫 저금 추가(`firstSavingTodo`) → 만기·경조사 → 초대(같은 코코아 띠 “초대하기 ›” → S-12, 맨 끝). 2026-11-11 띠 닫기 ✕와 기기 저장(닫은 할 일·초대 닫은 날 키)을 없앰: 할 일은 끝내거나 기간이 지나야 사라짐. 예전 키는 `home-input`이 한 번 지움) → 타일 H-07 월급 계획·H-08 캘린더(가장 가까운 경조사, `homeUpcoming(i, 365)`) → 저금 상자 H-02(목표 금액에 가장 가까운 달성 전 저금) → 작은 타일 H-04 자산 관리(`useNetWorth`)·H-09 저금(W-13 범위) (H-04 제목 아래 순위 배지 `useRank`, 2026-11-11 홈 순위 줄 1a 없앰). 분석 `home_box_tapped`. 예전 `parts.tsx`(체크 목록·저금 줄·일정 카드)는 지움. 순자산은 month의 `useNetWorth`·`H06NetWorth`를 그대로 씀
@@ -685,7 +709,7 @@ supabase/
 
 ### 설정 구조
 
-> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 연결 해제는 ADR 0003 11장(나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)대로 다시 씀(마이그레이션 20261030180000). 계정 삭제(S-18b, 20261101210000 `request_account_deletion`): 탈퇴 = 데이터 모두 지움. 연결·해제 대기면 연결 해제 확정과 같게 두 사람 모두 빈 새 공간(`unlinked_from` = 원래 공간, `onboarding_step` S-12H), 원래 공간은 30일 보관, `couple_unlink` `how = 'deleted'` 확정 행. 취소하면(`cancel_account_deletion`) 그때부터 30일 안 다시 연결 가능(해제와 같은 `answer_reconnect`).
+> 재기획(2026-10-25, `docs/adr/0003-replan-goal-checklist.md`) 반영. 연결 해제는 ADR 0003 11장(나누지 않고 모두 지움, 30일 보관 뒤 영구 삭제)대로 다시 씀(마이그레이션 20261030180000). 계정 삭제(S-18b, 20261101210000 `request_account_deletion`): 탈퇴 = 데이터 모두 지움. 연결·해제 대기면 연결 해제 확정과 같게 두 사람 모두 빈 새 공간(`unlinked_from` = 원래 공간, `onboarding_step` S-12H), 원래 공간은 30일 보관, `couple_unlink` `how = 'deleted'` 확정 행. 취소하면(`cancel_account_deletion`) 그때부터 30일 안 다시 연결 가능(해제와 같은 `answer_reconnect`). 2026-11-13 ADR 0009로 바뀜: 같이 쓰던 것만 지우고 내 것은 혼자 공간으로 옮김, 30일 재연결 복구는 미룸(위 ‘v2.2 데이터와 서버’, 08 7·8장). 아래는 지금 코드 기록
 
 - features/settings: S-10 `/settings`(상단 아바타, 좁은 창 설정 버튼), S-11 `/settings/me`, S-11a `/settings/me/nickname`, S-11c·d·f·g·h·i `/settings/me/…`, S-12 `/settings/couple`, S-12a·c·d `/settings/couple/unlink`(`/confirm`, `/review`), S-12h `/settings/couple/unlinked`, S-12g `/settings/couple/reconnect`, S-14 `/settings/notifications`, S-14a `/settings/notifications/quiet`. 메뉴가 아니라 `MainFrame current={null}` (재기획으로 S-10a 통장 방식, S-11b 신랑·신부, S-17 내 답 다시 보기, 연결 해제 S-12b 자산 정리·S-12e 다르게 정리하기·S-12f 다른 안은 지움)
 - 공개 범위 줄은 합류한 두 사람만. 위젯 줄(S-22)은 없앰(2026-11-10, ADR 0008. 모바일 홈 화면 위젯이 나오면 다시)

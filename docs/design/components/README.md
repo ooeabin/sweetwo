@@ -8,7 +8,9 @@
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
 | [AddRow](AddRow.md) | Actions | 목록 끝·묶음 머리의 회색 ‘+ … 추가’ 줄(2026-11-09 + 버튼 대신) |
 | [Drawer](Drawer.md) | Navigation | 좁은 창 홈 머리 ☰ 메뉴 서랍(2026-11-09 하단 탭 막대 대신) |
-| [HomeHub](HomeHub.md) | Layout | 홈 허브: 회색 바탕 위 큰 상자, 할 일 띠, 타일, 저금 상자(2026-11-09) |
+| [HomeHub](HomeHub.md) | Layout | 홈 허브: 회색 바탕 위 상자, 할 일 띠, 타일(2026-11-09). 2026-11-13 H-10·H-11·H-12, 띠 글자 버튼 둘 |
+| [SaveTogether](SaveTogether.md) | Layout | 같이 모으기 상자(H-10, 묶음 카드, 퍼센트만 상태, 2026-11-13) |
+| [PeriodBar](PeriodBar.md) | Charts | 날짜 없는 사람의 들어온 돈 / 필요한 돈 막대(중립 색, 2026-11-13) |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
 | [GoalTile](GoalTile.md) | Cards | 없앰(2026-11-08 목표 탭 없음). 묶음 카드 `hg-goalbox`만 저금 항목 상세(W-10)에서 씀 |
 | [GoalRow](GoalRow.md) | Charts | 저금 줄(아이콘 + 금액 + 얇은 막대, W-13. 홈 H-02 줄 목록은 2026-11-09 없앰) |
