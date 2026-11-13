@@ -1,6 +1,95 @@
 # 성공 지표
 
-핵심 지표는 ‘월급 체크를 한 커플 수(월)’. 단계별 지표로 온보딩(8~9화면) → 첫 체크 → 파트너 초대·합류 → 매달 체크리스트 → 저금 항목 진행 → 리텐션 → 유료 전환을 보고, 이벤트는 금액 원값 없이 구간으로만 수집함. 2026-10-25 재기획(`docs/adr/0003-replan-goal-checklist.md`)으로 월말 정리, 제안, 월급 나누기, 첫 주 할 일, 재정 진단 지표는 없앰. 목표치는 모두 출시 전 가설 [확인 필요], 첫 3개 사이클 코호트 확인 후 재설정.
+2026-11-13부터 핵심 지표는 ‘이번 달 같이 모은 커플 수(월)’(0장). 예전 핵심 지표는 ‘월급 체크를 한 커플 수(월)’. 단계별 지표로 온보딩(8~9화면) → 첫 체크 → 파트너 초대·합류 → 매달 체크리스트 → 저금 항목 진행 → 리텐션 → 유료 전환을 보고, 이벤트는 금액 원값 없이 구간으로만 수집함. 2026-10-25 재기획(`docs/adr/0003-replan-goal-checklist.md`)으로 월말 정리, 제안, 월급 나누기, 첫 주 할 일, 재정 진단 지표는 없앰. 목표치는 모두 출시 전 가설 [확인 필요], 첫 3개 사이클 코호트 확인 후 재설정.
+
+## 0. 지표 v2.2 (2026-11-13, ADR 0009 결정 15)
+
+이 장이 2026-11-13부터 정본. 아래 1~3장의 ‘월급 체크를 한 커플 수’와 그에 기댄 지표는 바꾼 기록이고, 4장 이벤트는 0-4를 더함(이름 규칙, 공통 속성, 금액은 `_band`는 그대로). 대시보드는 북극성, 선행, 가드레일 세 판(PR 14).
+
+### 0-1. 북극성 (2026-11-13)
+
+**이번 달 같이 모은 커플 수(월)**
+
+- 셈 단위: 연결 커플, 달은 그 커플의 ‘대표 사이클’ 월. 대표 사이클 = 같이 계열은 공동 확인 목록, 각자 계열은 먼저 시작한 사람의 확인 목록, 둘 다 날짜 없으면 달력 월.
+- 조건 둘을 모두 만족하면 1.
+  1. **확인 끝**: 그 달 확인 목록이 있는 사람마다 손 줄이 모두 체크 또는 건너뜀(자동 줄은 나가는 날 자동 확인되므로 따로 요구하지 않음). 손 줄이 하나도 없는 사람은 자동으로 만족. 확인 목록이 없는 사람(날짜 없음, 월급 없음, 월급 없이 합류)은 조건에서 뺀다. 같이 계열은 공동 목록 하나만 본다.
+  2. **모음**: 그 달 두 사람 중 누구의 저금(묶음, 공동 포함)이든 모은 금액이 늘었다. 늘어난 것 = 저금 줄 체크(자동 확인 포함) + 날짜 없는 사람의 자동 저금(reason_code auto) + 돈 들어왔어요로 넣은 금액. 이미 모은 금액, 바로잡기 ±(잔액 맞추기 포함), 쓸 곳 메모 ‘냈어요’ −는 셈에서 뺀다.
+  - 날짜 없는 사람의 ‘확인 끝’ 대신: 그 달에 걸친 기간에 돈 들어왔어요 1건 이상(G8).
+- 따로 보는 숫자: 같은 정의의 혼자 쓰는 사람 수, 그중 ‘사람이 직접 확인한’ 비율(손 줄이 있고 사람이 끝낸 커플 ÷ 북극성 커플. 자동만으로 세어지는 비중을 감시), 묶음 있는 커플 비율.
+- 없앰: ‘월급 체크를 한 커플 수(1줄 이상)’.
+
+### 0-2. 선행 지표
+
+| 지표 | 정의 | 처음 목표(가설) |
+| --- | --- | --- |
+| 첫 저금률 | 온보딩 완료 24시간 안 저금 1개 이상 ÷ 온보딩 완료 | 60% |
+| 알림 허용률 | O-55·P-11 ‘알림 받기’ 후 OS 허용 ÷ 표시 | 60% |
+| 첫 월급날 확인률 | 손 줄이 있는 첫 확인 목록 중 7일 안 확인 끝 | 60% |
+| 자동 줄 설정률 | 첫 월급날 전 자동 줄 1개 이상 ÷ 월급 계획 있는 사람 | 비교만 |
+| 돈 들어왔어요 사용 | 월 1회 이상 쓴 사람 ÷ 월급 계획 있는 사람(날짜 있음 / 없음 따로) | 비교만 |
+| 자동 줄 질문 응답 | W-11e·W-01d에서 ‘네’ 비율, 첫 월급날 손 줄 수 | 비교만 |
+| 잔액 맞추기 | 띠를 본 사람 중 W-10c 완료, 맞춘 차이 금액 구간 | 50% |
+| 다음 저금 이어 가기 | W-12b를 본 사람 중 30일 안 새 저금 | 40% |
+| 순위 같이 보기 | 연결 커플 중 두 사람 모두 동의 | 비교만 |
+| 진행 소식 열람 | 진행 소식 푸시 열람률, 끈 비율 | 열람 15% |
+| 월급 변경 예약 | S-11c에서 미래 날짜로 바꾼 사람, 그 달 W-01을 연 비율 | 비교만 |
+| 초대율 / 합류율 | 진입점 속성 추가 | 60% / 50% |
+| 묶음률 | 각자 계열 연결 커플 중 14일 안 묶음 | 40% |
+| 분담 제안 수락률 | 수락 ÷ 제안 | 비교만 |
+| M1, M3 | 첫 사이클에 같이 모은 커플 중 다음, 세 번째에도 | 70% / 50% |
+| 온보딩 시간 | A-01부터 O-60 중앙값 | 3분 이하 |
+
+### 0-3. 가드레일
+
+| 신호 | 정의 | 경보 기준(가설) |
+| --- | --- | --- |
+| 공개 좁히기 | 연결 뒤 30일 안 `plan_share`를 좁힌 비율 | 15% 초과 |
+| 각자 금액 끄기 | 묶음에서 켰다가 끈 비율 | 비교만 |
+| 미리 보기 뒤 좁히기 | S-13p를 본 뒤 7일 안 좁힌 비율 | 비교만 |
+| 파트너 알림 끄기 | S-14·P-11에서 ‘같이 쓰는 걸 바꿨을 때’를 끈 비율 | 20% 초과 |
+| 되돌리기·이전 값 돌리기 | 같이 쓰는 값 변경 중 7일 안 | 15% 초과 |
+| 요청 거절 | 관리 형태·분담 요청 중 거절 + 만료 | 50% 초과 |
+| 연결 해제 | 월 요청 ÷ 연결 커플, ‘다시 받지 않기’ 비율 | 월 1% 초과 |
+| 자동 줄 바꿈 | 자동 확인 뒤 사람이 건너뜀·다른 금액으로 바꾼 비율 | 10% 초과 |
+| 잔액 차이 | 잔액 맞추기에서 −로 맞춘 저금 비율(자동 확인이 실제보다 많았다는 신호, G7) | 20% 초과 |
+| 퍼센트만 켜기 | 묶음 중 ‘퍼센트만 보여 주기’ 비율 | 비교만 |
+| 바로잡기 숨기기 | 묶음 바로잡기 중 ‘주간 요약에 넣지 않기’ 비율 | 비교만 |
+| 관리하는 사람의 용돈 수정 | 한 사람 관리형에서 관리하는 사람이 상대 용돈을 줄인 횟수와 그 뒤 30일 해제·공개 좁히기 | 비교만(관계 신호) |
+| 건너뜀 누적 | 연속 2사이클 손 줄 절반 넘게 건너뜀 | 30% 초과 |
+| 앱 잠금 꺼짐 | A-06 건너뛴 비율, 그 뒤 분실·새 기기 신고 | 비교만 |
+| 광고 | 광고 뒤 7일 안 삭제·알림 끄기, 광고 실패율 | 비교만 |
+
+### 0-4. 이벤트 추가·변경
+
+| 이벤트 | 속성 |
+| --- | --- |
+| `push_permission_asked` / `_answered` | screen_id(O-55, P-11, H-06), result, kinds_on |
+| `manage_answers_saved` | shared_living, shared_saving, manager(self/partner/both/each), salary_mode, screen_id |
+| `plan_share_changed` | from, to, screen_id |
+| `share_preview_viewed` | — |
+| `split_line_setting_changed` | kind, in_checklist, auto_pay, auto_day_band |
+| `auto_line_confirmed`(서버) | kind |
+| `payday_confirmed` | method(one_tap/line_by_line/w05), manual_lines, late |
+| `pay_line_late_checked` | kind, days_late |
+| `auto_line_changed` | to(skipped/other_amount) |
+| `saving_adjusted` | sign, amount_band, reason_code, from(w10b/note_paid) |
+| `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none |
+| `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry, has_target, on |
+| `saving_note_saved` / `saving_note_paid` | has_due, subtracted |
+| `split_proposed` / `split_answered` | name_code, rule, result |
+| `mode_change_requested` / `_answered` / `_cancelled` | phrase, to_mode, result |
+| `app_lock_answered` | result(on/later) |
+| `rank_viewed` | first_free, ad_result, mode(pair/peer_median) |
+| `rank_consent_requested` / `_answered` / `_turned_off` | result |
+| `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
+| `savings_reconciled` | count, diff_sign, diff_band |
+| `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code |
+| `bundle_percent_only_toggled`, `adjust_summary_hidden` | on |
+| `salary_change_scheduled` / `_applied` / `_cancelled` | months_ahead, has_until |
+| `progress_news_sent`(서버) / `_opened` | — |
+| `home_task_dismissed` | task_key |
+| `money_in_period_viewed` | state(early/bar/gap), filled_band |
+| `rank_badge_toggled`, `quick_assets_saved`, `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음 |
 
 ## 1. 핵심 지표 (North Star)
 
