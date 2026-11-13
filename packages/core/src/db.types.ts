@@ -352,6 +352,7 @@ export type Database = {
           allowance: number | null
           analytics_off: boolean
           app_seen_at: string | null
+          asset_share_default: Database["public"]["Enums"]["asset_visibility"] | null
           avatar_path: string | null
           avatar_social_checked_at: string | null
           avatar_updated_at: string | null
@@ -368,6 +369,7 @@ export type Database = {
           invest_answer: Database["public"]["Enums"]["invest_answer"] | null
           invest_answered_at: string | null
           is_internal_tester: boolean
+          last_reconciled_at: string | null
           monthly_income: number | null
           nickname: string | null
           noti_prefs: NonNullable<Json>
@@ -379,10 +381,13 @@ export type Database = {
           payday: number | null
           payday_last: boolean
           payday_none: boolean
+          plan_share: Database["public"]["Enums"]["plan_share"]
           provider: Database["public"]["Enums"]["auth_provider"]
           push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
+          rank_badge_home: boolean
+          rank_consent: boolean
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
@@ -398,6 +403,7 @@ export type Database = {
           allowance?: number | null
           analytics_off?: boolean
           app_seen_at?: string | null
+          asset_share_default?: Database["public"]["Enums"]["asset_visibility"] | null
           avatar_path?: string | null
           avatar_social_checked_at?: string | null
           avatar_updated_at?: string | null
@@ -414,6 +420,7 @@ export type Database = {
           invest_answer?: Database["public"]["Enums"]["invest_answer"] | null
           invest_answered_at?: string | null
           is_internal_tester?: boolean
+          last_reconciled_at?: string | null
           monthly_income?: number | null
           nickname?: string | null
           noti_prefs?: NonNullable<Json>
@@ -425,10 +432,13 @@ export type Database = {
           payday?: number | null
           payday_last?: boolean
           payday_none?: boolean
+          plan_share?: Database["public"]["Enums"]["plan_share"]
           provider: Database["public"]["Enums"]["auth_provider"]
           push_kinds?: NonNullable<Json>
           quiet_end?: number
           quiet_start?: number
+          rank_badge_home?: boolean
+          rank_consent?: boolean
           rank_month?: string | null
           rank_net?: number | null
           rank_pct?: number | null
@@ -443,6 +453,7 @@ export type Database = {
           allowance?: number | null
           analytics_off?: boolean
           app_seen_at?: string | null
+          asset_share_default?: Database["public"]["Enums"]["asset_visibility"] | null
           avatar_path?: string | null
           avatar_social_checked_at?: string | null
           avatar_updated_at?: string | null
@@ -459,6 +470,7 @@ export type Database = {
           invest_answer?: Database["public"]["Enums"]["invest_answer"] | null
           invest_answered_at?: string | null
           is_internal_tester?: boolean
+          last_reconciled_at?: string | null
           monthly_income?: number | null
           nickname?: string | null
           noti_prefs?: NonNullable<Json>
@@ -470,10 +482,13 @@ export type Database = {
           payday?: number | null
           payday_last?: boolean
           payday_none?: boolean
+          plan_share?: Database["public"]["Enums"]["plan_share"]
           provider?: Database["public"]["Enums"]["auth_provider"]
           push_kinds?: NonNullable<Json>
           quiet_end?: number
           quiet_start?: number
+          rank_badge_home?: boolean
+          rank_consent?: boolean
           rank_month?: string | null
           rank_net?: number | null
           rank_pct?: number | null
@@ -1003,6 +1018,7 @@ export type Database = {
           living_budget_estimated: boolean
           living_check: boolean
           loan_repayment: number | null
+          manager_user_id: string | null
           marriage_status: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month: string | null
@@ -1012,6 +1028,8 @@ export type Database = {
           partner_nickname: string | null
           prep_money_mode: Database["public"]["Enums"]["prep_money_mode"] | null
           salary_mode: Database["public"]["Enums"]["salary_mode"]
+          shared_living: boolean | null
+          shared_saving: boolean | null
           split_deferred: boolean
           split_mode: Database["public"]["Enums"]["split_mode"] | null
           split_ratio: number | null
@@ -1051,6 +1069,7 @@ export type Database = {
           living_budget_estimated?: boolean
           living_check?: boolean
           loan_repayment?: number | null
+          manager_user_id?: string | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month?: string | null
@@ -1060,6 +1079,8 @@ export type Database = {
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
           salary_mode?: Database["public"]["Enums"]["salary_mode"]
+          shared_living?: boolean | null
+          shared_saving?: boolean | null
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
@@ -1098,6 +1119,7 @@ export type Database = {
           living_budget_estimated?: boolean
           living_check?: boolean
           loan_repayment?: number | null
+          manager_user_id?: string | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
           newlywed_home_month?: string | null
@@ -1107,6 +1129,8 @@ export type Database = {
           partner_nickname?: string | null
           prep_money_mode?: Database["public"]["Enums"]["prep_money_mode"] | null
           salary_mode?: Database["public"]["Enums"]["salary_mode"]
+          shared_living?: boolean | null
+          shared_saving?: boolean | null
           split_deferred?: boolean
           split_mode?: Database["public"]["Enums"]["split_mode"] | null
           split_ratio?: number | null
@@ -1488,6 +1512,28 @@ export type Database = {
           kind?: Database["public"]["Enums"]["holiday_kind"]
           name?: string
           source?: Database["public"]["Enums"]["holiday_source"]
+        }
+        Relationships: []
+      }
+      home_task_state: {
+        Row: {
+          at: string
+          state: string
+          task_key: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          at?: string
+          state: string
+          task_key: string
+          user_id: string
+        }
+        Update: {
+          at?: string
+          state?: string
+          task_key?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1904,6 +1950,60 @@ export type Database = {
           last_at?: string
         }
         Relationships: []
+      }
+      mode_change_request: {
+        Row: {
+          answered_at: string | null
+          created_at: string
+          expires_at: string
+          from_user: string
+          id: string
+          phrase: string
+          space_id: string
+          status: string
+          to_manager: string | null
+          to_mode: Database["public"]["Enums"]["salary_mode"]
+          to_shared_living: boolean
+          to_shared_saving: boolean | null
+        }
+        ComputedFields: never
+        Insert: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          from_user: string
+          id?: string
+          phrase: string
+          space_id: string
+          status?: string
+          to_manager?: string | null
+          to_mode: Database["public"]["Enums"]["salary_mode"]
+          to_shared_living: boolean
+          to_shared_saving?: boolean | null
+        }
+        Update: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          from_user?: string
+          id?: string
+          phrase?: string
+          space_id?: string
+          status?: string
+          to_manager?: string | null
+          to_mode?: Database["public"]["Enums"]["salary_mode"]
+          to_shared_living?: boolean
+          to_shared_saving?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mode_change_request_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notice: {
         Row: {
@@ -2329,6 +2429,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      salary_change: {
+        Row: {
+          amount: number
+          applied_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          effective_from: string
+          id: string
+          revert_amount: number | null
+          reverted_at: string | null
+          space_id: string
+          until_month: string | null
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          applied_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          effective_from: string
+          id?: string
+          revert_amount?: number | null
+          reverted_at?: string | null
+          space_id: string
+          until_month?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          applied_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          effective_from?: string
+          id?: string
+          revert_amount?: number | null
+          reverted_at?: string | null
+          space_id?: string
+          until_month?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_change_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       salary_split: {
         Row: {
@@ -2939,9 +3090,31 @@ export type Database = {
       }
       agree_terms: { Args: { p_marketing?: boolean }; Returns: number }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
+      allowance_editable: {
+        Args: { p_owner: string; p_space: string }
+        Returns: boolean
+      }
       amount_band: { Args: { v: number }; Returns: string }
       answer_access_request: { Args: { p_accept: boolean; p_id: string }; Returns: undefined }
+      answer_mode_change: {
+        Args: { p_accept: boolean; p_request: string }
+        Returns: string
+      }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
+      apply_manage_style: {
+        Args: {
+          p_living: boolean
+          p_manager: string
+          p_mode: Database["public"]["Enums"]["salary_mode"]
+          p_saving: boolean
+          p_space: string
+        }
+        Returns: undefined
+      }
+      apply_salary_changes: {
+        Args: { p_today?: string; p_user?: string }
+        Returns: number
+      }
       asset_editable: {
         Args: {
           a: Omit<
@@ -2979,6 +3152,8 @@ export type Database = {
       can_read_photo: { Args: { p_name: string }; Returns: boolean }
       cancel_account_deletion: { Args: Record<PropertyKey, never>; Returns: undefined }
       cancel_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
+      cancel_mode_change: { Args: { p_request: string }; Returns: undefined }
+      cancel_salary_change: { Args: { p_id: string }; Returns: undefined }
       cancel_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       care_date_in_year: {
         Args: {
@@ -2999,6 +3174,14 @@ export type Database = {
           today: string
         }
         Returns: string
+      }
+      check_line_visible: {
+        Args: {
+          p_checklist: string
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_space: string
+        }
+        Returns: boolean
       }
       check_pay_line: {
         Args: { p_actual?: number; p_line: string; p_state: string }
@@ -3075,6 +3258,7 @@ export type Database = {
           allowance: number | null
           analytics_off: boolean
           app_seen_at: string | null
+          asset_share_default: Database["public"]["Enums"]["asset_visibility"] | null
           avatar_path: string | null
           avatar_social_checked_at: string | null
           avatar_updated_at: string | null
@@ -3091,6 +3275,7 @@ export type Database = {
           invest_answer: Database["public"]["Enums"]["invest_answer"] | null
           invest_answered_at: string | null
           is_internal_tester: boolean
+          last_reconciled_at: string | null
           monthly_income: number | null
           nickname: string | null
           noti_prefs: NonNullable<Json>
@@ -3102,10 +3287,13 @@ export type Database = {
           payday: number | null
           payday_last: boolean
           payday_none: boolean
+          plan_share: Database["public"]["Enums"]["plan_share"]
           provider: Database["public"]["Enums"]["auth_provider"]
           push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
+          rank_badge_home: boolean
+          rank_consent: boolean
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
@@ -3134,6 +3322,7 @@ export type Database = {
           allowance: number | null
           analytics_off: boolean
           app_seen_at: string | null
+          asset_share_default: Database["public"]["Enums"]["asset_visibility"] | null
           avatar_path: string | null
           avatar_social_checked_at: string | null
           avatar_updated_at: string | null
@@ -3150,6 +3339,7 @@ export type Database = {
           invest_answer: Database["public"]["Enums"]["invest_answer"] | null
           invest_answered_at: string | null
           is_internal_tester: boolean
+          last_reconciled_at: string | null
           monthly_income: number | null
           nickname: string | null
           noti_prefs: NonNullable<Json>
@@ -3161,10 +3351,13 @@ export type Database = {
           payday: number | null
           payday_last: boolean
           payday_none: boolean
+          plan_share: Database["public"]["Enums"]["plan_share"]
           provider: Database["public"]["Enums"]["auth_provider"]
           push_kinds: NonNullable<Json>
           quiet_end: number
           quiet_start: number
+          rank_badge_home: boolean
+          rank_consent: boolean
           rank_month: string | null
           rank_net: number | null
           rank_pct: number | null
@@ -3205,6 +3398,10 @@ export type Database = {
       cycle_date: { Args: { m: number; p_day: number; y: number }; Returns: string }
       cycle_day: { Args: { p_owner: string; p_space: string }; Returns: number }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
+      dismiss_home_task: {
+        Args: { p_key: string; p_state?: string }
+        Returns: undefined
+      }
       done_storage_move: { Args: { p_ids: number[] }; Returns: undefined }
       done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
@@ -3366,6 +3563,16 @@ export type Database = {
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       my_login_email: { Args: Record<PropertyKey, never>; Returns: string }
       my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
+      my_manage_style: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          manager_user_id: string
+          salary_mode: Database["public"]["Enums"]["salary_mode"]
+          shared_living: boolean
+          shared_saving: boolean
+          style: string
+        }[]
+      }
       my_notices: { Args: { p_platform: string; p_version?: string }; Returns: Json }
       my_reconnect_ok: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {
@@ -3426,6 +3633,7 @@ export type Database = {
       note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
       note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
+      noti_inapp_only: { Args: { p_kind: string }; Returns: boolean }
       noti_mail_body: {
         Args: { p_body: string; p_title: string }
         Returns: {
@@ -3433,6 +3641,7 @@ export type Database = {
           body_text: string
         }[]
       }
+      noti_push_body_hidden: { Args: { p_kind: string }; Returns: boolean }
       noti_send_window: { Args: { p_quiet_end: number; p_quiet_start: number }; Returns: string }
       notice_target_valid: { Args: { p: Json }; Returns: boolean }
       notice_user_match: {
@@ -3460,6 +3669,10 @@ export type Database = {
           p_title: string
           p_user: string
         }
+        Returns: undefined
+      }
+      notify_my_allowance: {
+        Args: { p_owner: string; p_space: string }
         Returns: undefined
       }
       onboarding_reset_plan: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3495,6 +3708,7 @@ export type Database = {
         Args: { p_noun: string; p_topic: string; who: string }
         Returns: string
       }
+      partner_plan_view: { Args: { p_viewer?: string }; Returns: Json }
       partner_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3537,6 +3751,14 @@ export type Database = {
           version: string
         }[]
       }
+      plan_row_visible: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_owner: string
+          p_space: string
+        }
+        Returns: boolean
+      }
       progress_hero: {
         Args: { p_user: string }
         Returns: {
@@ -3560,6 +3782,7 @@ export type Database = {
       }
       push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
       read_won: { Args: { v: number }; Returns: string }
+      recalc_send_line: { Args: { p_space: string }; Returns: undefined }
       recent_goal_changes: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3595,12 +3818,37 @@ export type Database = {
         }[]
       }
       request_account_deletion: { Args: Record<PropertyKey, never>; Returns: string }
+      request_mode_change: {
+        Args: {
+          p_manager: string
+          p_phrase?: string
+          p_shared_living: boolean
+          p_shared_saving: boolean
+        }
+        Returns: string
+      }
       request_reconnect: { Args: Record<PropertyKey, never>; Returns: undefined }
       request_unlink: { Args: { p_confirm: string }; Returns: string }
+      resolve_manage_style: {
+        Args: {
+          p_manager: string
+          p_shared_living: boolean
+          p_shared_saving: boolean
+        }
+        Returns: {
+          manager: string
+          salary_mode: Database["public"]["Enums"]["salary_mode"]
+          style: string
+        }[]
+      }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
       run_access_expiry: { Args: Record<PropertyKey, never>; Returns: undefined }
       run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
       run_unlink_deadlines: { Args: Record<PropertyKey, never>; Returns: undefined }
+      salary_change_day: {
+        Args: { p_month: string; p_user: string }
+        Returns: string
+      }
       save_api_holidays: { Args: { p_rows: Json; p_years: number[] }; Returns: number }
       save_split: { Args: { p_lines: Json; p_owner?: string }; Returns: string }
       saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
@@ -3613,6 +3861,10 @@ export type Database = {
         Returns: undefined
       }
       saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
+      schedule_salary_change: {
+        Args: { p_amount: number; p_from: string; p_until?: string }
+        Returns: string
+      }
       sell_asset: {
         Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
         Returns: number
@@ -3732,6 +3984,14 @@ export type Database = {
       split_line_set: {
         Args: { p_amount?: number; p_line: string; p_name?: string }
         Returns: undefined
+      }
+      split_line_visible: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_space: string
+          p_split: string
+        }
+        Returns: boolean
       }
       split_lines_configure: { Args: { p_items: Json }; Returns: undefined }
       split_lines_json: {

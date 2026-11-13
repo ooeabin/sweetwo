@@ -57,6 +57,9 @@ select throws_ok($$ update public.goal set start_saved = 0 where id = pg_temp.it
 reset role;
 
 -- 예빈 합류(각자) + 예빈 월급 계획·저금
+reset role;
+-- v2.2 공개 단계(20261202090000): 이 테스트는 상대 월급 계획 전체를 보므로 ‘모두 보여 주기’
+update public.app_user set plan_share = 'all';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -70,6 +73,8 @@ select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select public.add_saving_item('카메라', 100000, 1000000);
 reset role;
+
+update public.app_user set plan_share = 'all';
 
 -- 2) 찬우가 예빈 것을 고치려 함: 모두 보기만
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

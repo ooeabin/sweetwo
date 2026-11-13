@@ -65,16 +65,16 @@ update public.goal set target_amount = 200000000 where template = 'home';
 update public.goal set target_amount = 150000000 where template = 'home';
 select is(public.flush_partner_changes(now() + interval '11 minutes'), 0, '되돌린 변경은 안 알림');
 
--- 월급 계획 금액 + 월급 금액 → 묶어서 하나, 자산 금액은 활동 기록(인앱만)
+-- v2.2(B8): 각자 계열 월급 계획 금액·월급 금액은 알리지 않음, 자산 금액은 활동 기록(인앱만)
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 1070000),
   jsonb_build_object('kind', 'living', 'amount', 700000)
 ), '22222222-2222-2222-2222-222222222222');
 update public.app_user set monthly_income = 2800000 where id = '22222222-2222-2222-2222-222222222222';
 update public.asset set amount = 220000000 where name = '전세 보증금';
-select is(public.flush_partner_changes(now() + interval '11 minutes'), 2, '바로 알림 하나 + 활동 기록 하나');
-select is((select title || ' / ' || body from public.notification where kind = 'partner_change' and body like '생활비%'),
-  '예빈님이 2가지를 바꿨어요 / 생활비 68만 원 → 70만 원 외 1개', '여럿이면 묶음 문구');
+select is(public.flush_partner_changes(now() + interval '11 minutes'), 1, '활동 기록 하나(각자 계열 월급 계획·월급은 없음)');
+select is((select count(*)::int from public.notification where kind = 'partner_change' and body like '생활비%'), 0,
+  'v2.2 각자 계열 바로 알림 없음');
 select results_eq(
   $$ select title, body, topic from public.notification where kind = 'partner_activity' $$,
   $$ values ('예빈님이 자산을 바꿨어요', '전세 보증금 2억 원 → 2억 2,000만 원', 'silent') $$,
@@ -82,9 +82,9 @@ select results_eq(
 select is((select count(*)::int from public.notification where user_id = '22222222-2222-2222-2222-222222222222'), 0,
   '고친 사람에게는 알림 없음');
 
--- 월요일 주간 요약: 지난주 바꾼 것(같은 항목은 하나, 되돌린 것 빼고) = 목표 금액, 생활비, 월급, 자산 = 4
+-- 월요일 주간 요약: 지난주 바꾼 것(같은 항목은 하나, 되돌린 것 빼고) = 목표 금액, 자산 = 2(v2.2 각자 계열 월급 계획·월급 빼고)
 select is(public.send_weekly_summary(public.kst_today() + 1), 1, '찬우에게 요약 하나');
-select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 예빈님이 바꾼 게 4개 있어요', '요약 문구');
+select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 예빈님이 바꾼 게 2개 있어요', '요약 문구');
 
 -- 2026-11-09 쉬운 이름: 경조사 변경 제목
 select is(public.partner_change_title('care', null, '예빈'), '예빈님이 경조사를 바꿨어요', '경조사 변경 제목(챙길 날 대신)');

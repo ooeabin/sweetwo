@@ -139,6 +139,9 @@ select is(pg_temp.sl(auth.uid(), 'saving', '청약'), null, '월급 계획에서
 reset role;
 
 -- 예빈 합류(각자): 찬우 월급 계획은 보기만
+reset role;
+-- v2.2 공개 단계(20261202090000): 이 테스트는 상대 월급 계획 전체를 보므로 ‘모두 보여 주기’
+update public.app_user set plan_share = 'all';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -160,7 +163,7 @@ select throws_ok(format('select public.split_reorder(%L, %L::uuid[])', pg_temp.s
 select lives_ok(format('select public.split_line_set(%L, 700000)', pg_temp.sl(auth.uid(), 'living')), '내 줄은 고침');
 reset role;
 
--- 알림 묶음: 찬우가 여러 번 고쳐도 10분 묶음으로 예빈에게 바로 알림 하나(같은 줄은 처음 전 값 → 마지막 후 값)
+-- v2.2(B8): 각자 계열 월급 계획 변경(금액, 이름, 순서)은 상대에게 기록·알림하지 않음
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.split_line_set(pg_temp.sl(auth.uid(), 'living'), 900000);
@@ -170,17 +173,15 @@ select public.split_line_set(pg_temp.sl(auth.uid(), 'custom', '통신비'), null
 select public.split_reorder(pg_temp.split(auth.uid()), array(
   select l.id from public.split_line l where l.split_id = pg_temp.split(auth.uid()) order by l.kind <> 'saving', l.sort desc));
 reset role;
-select is((select count(*)::int from public.partner_change where actor_id = '11111111-1111-1111-1111-111111111111'
-  and target = '/salary?view=plan' and sent_at is null), 5, '변경은 기록에 쌓임(링크 /salary?view=plan)');
-select is(public.flush_partner_changes(now() + interval '11 minutes'), 3, '10분 뒤: 예빈에게 바로 알림 1개 + 활동 기록 1개, 찬우에게 예빈 변경 1개');
-select results_eq($$ select kind, title from public.notification where user_id = '22222222-2222-2222-2222-222222222222'
-  and kind in ('partner_change', 'partner_activity') order by kind $$,
-  $$ values ('partner_activity', '찬우님이 월급 계획을 바꿨어요'), ('partner_change', '찬우님이 3가지를 바꿨어요') $$,
-  '여러 번 고쳐도 알림은 하나(순서는 활동 기록만)');
-select is((select body from public.notification where user_id = '22222222-2222-2222-2222-222222222222' and kind = 'partner_activity'),
-  '월급 계획 순서를 바꿨어요', '순서 바꾸기 문구');
+select is((select count(*)::int from public.partner_change where target = '/salary?view=plan'), 0,
+  '각자 계열 월급 계획 변경은 기록하지 않음');
+select is(public.flush_partner_changes(now() + interval '11 minutes'), 0, '10분 뒤에도 보낼 것 없음');
+select is((select count(*)::int from public.notification where user_id = '22222222-2222-2222-2222-222222222222'
+  and kind in ('partner_change', 'partner_activity')), 0, '예빈에게 알림 없음');
+select is(public.partner_change_line('split', 'order', '', null, '1'), '월급 계획 순서를 바꿨어요', '순서 바꾸기 문구(합쳐서용)');
 select is(public.partner_change_line('split', 'name:x', '통신비', '통신비', '휴대폰'), '이름 통신비 → 휴대폰', '이름 바꾸기 문구');
 
+update public.app_user set plan_share = 'all'; -- v2.2 공개 단계: 예빈 월급 계획 줄도 봄
 -- 관리 방식 각자 → 합쳐서: 찬우는 고정지출이 없음(0원으로 셈) → 공동 고정지출 = 예빈 것만
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
