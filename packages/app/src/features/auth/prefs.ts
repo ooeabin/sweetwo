@@ -48,6 +48,9 @@ export const prefs = {
   /** O-01은 첫 실행에만 */
   started: () => get('sweetwo.started') === '1',
   setStarted: () => set('sweetwo.started', '1'),
+  /** 첫 실행 초대 코드 자동 입력(O-01 시트)은 이 기기에서 한 번만 물음(2026-11-13) */
+  inviteAutofillChecked: () => get('sweetwo.invite-autofill') === '1',
+  setInviteAutofillChecked: () => set('sweetwo.invite-autofill', '1'),
   /** A-06 PIN 정하기는 이 기기에서 첫 로그인 직후 1회 */
   pinAsked: () => get('sweetwo.pin-asked') === '1',
   setPinAsked: (on: boolean) => set('sweetwo.pin-asked', on ? '1' : null),

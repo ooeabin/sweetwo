@@ -8,6 +8,7 @@ import {
   splitLineDefaults,
   recommendSplit,
   round10k,
+  sharedAccountSeed,
   type SavingPlanItem,
 } from './salary-split';
 
@@ -254,5 +255,18 @@ describe('v2.2 용돈·보내기·줄 설정(06 3-1, 3-2)', () => {
       autoPay: false,
       autoDay: null,
     });
+  });
+});
+
+describe('sharedAccountSeed(06 3-1 Q9)', () => {
+  it('생활비 네 + 각자 관리면 같이 쓰는 통장 0원 자동 줄', () => {
+    expect(sharedAccountSeed('separate', true)).toEqual([
+      { kind: 'shared_account', amount: 0, inChecklist: true, autoPay: true },
+    ]);
+  });
+  it('합쳐서·생활비 아니요·안 고름이면 없음', () => {
+    expect(sharedAccountSeed('joint', true)).toEqual([]);
+    expect(sharedAccountSeed('separate', false)).toEqual([]);
+    expect(sharedAccountSeed('separate', null)).toEqual([]);
   });
 });

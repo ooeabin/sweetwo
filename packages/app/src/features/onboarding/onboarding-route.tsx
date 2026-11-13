@@ -4,25 +4,29 @@ import { track } from '../../shared/analytics';
 import { isJoinScreen } from '../pairing';
 import { useMe, useSpace } from './data';
 import { current, FIRST } from './flow';
+import { justFinishedTo } from './step';
 import { O03MyNickname } from './pages/o-03-my-nickname';
-import { O06InviteNow } from './pages/o-06-invite-now';
-import { O07InviteCode } from './pages/o-07-invite-code';
-import { O11Marriage } from './pages/o-11-marriage';
-import { O30SalaryMode } from './pages/o-30-salary-mode';
+import { O11Relation } from './pages/o-11-relation';
+import { O30SharedLiving } from './pages/o-30-shared-living';
+import { O30bSharedSaving } from './pages/o-30b-shared-saving';
+import { O30cManager } from './pages/o-30c-manager';
 import { O31Salary } from './pages/o-31-salary';
 import { O32Payday } from './pages/o-32-payday';
+import { O55Push } from './pages/o-55-push';
 import { O60Ready } from './pages/o-60-ready';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
-// 2026-11-10 QA 2구간: O-10·O-12·O-13을 뺌(옛 주소와 멈춘 기록은 flow.ts current로 옮김)
+// 2026-11-10 QA 2구간: O-10·O-12·O-13을 뺌, 2026-11-13 O-06 초대 화면을 뺌(옛 주소와 멈춘 기록은 flow.ts current로 옮김).
+// O-07 초대 시트는 첫 저금 직후 홈 위(/welcome, routes)
 const SCREENS: Record<string, () => ReactNode> = {
   'o-03': () => <O03MyNickname />,
-  'o-06': () => <O06InviteNow />,
-  'o-07': () => <O07InviteCode />,
-  'o-11': () => <O11Marriage />,
-  'o-30': () => <O30SalaryMode />,
+  'o-11': () => <O11Relation />,
+  'o-30': () => <O30SharedLiving />,
+  'o-30b': () => <O30bSharedSaving />,
+  'o-30c': () => <O30cManager />,
   'o-31': () => <O31Salary />,
   'o-32': () => <O32Payday />,
+  'o-55': () => <O55Push />,
   'o-60': () => <O60Ready />,
 };
 
@@ -51,7 +55,13 @@ export function OnboardingRoute() {
   const me = useMe();
   markSeen();
   // 온보딩을 마친 뒤 뒤로(하드웨어 뒤로, 웹뷰 기록)로 돌아오면 홈으로(2026-11-10 S2-01: 끝난 온보딩 화면을 다시 열지 않음)
-  if (me.data?.onboarding_done_at) return <Navigate to="/" replace />;
+  if (me.data?.onboarding_done_at) return <Navigate to={justFinishedTo() ?? '/'} replace />;
+  // /onboarding/resume(홈 띠 waiting_joiner, core pickTopTask): 가장 멀리 간 화면으로(2026-11-13)
+  if (screen === 'resume') {
+    if (me.isLoading) return null;
+    const at = current(me.data?.onboarding_step ?? FIRST);
+    return <Navigate to={`/onboarding/${isOnboardingScreen(at) ? at : FIRST}`} replace />;
+  }
   if (current(screen) !== screen) return <Navigate to={`/onboarding/${current(screen)}`} replace />;
   const render = SCREENS[screen];
   return render ? (
@@ -66,18 +76,16 @@ let resumed = false;
 
 /**
  * 온보딩을 마치지 않았으면 가장 멀리 간 화면으로 바로(이어하기, 2026-11-10 Q4: “이어서 할까요?” 질문 화면은 없앰).
- * 파트너가 이미 합류했으면 초대(O-06·O-07)는 건너뛰고 O-11로. 모르는 화면 ID면 그대로 둔다
+ * 예전 O-06·O-07에 멈춘 사람은 O-11로(flow current). 모르는 화면 ID면 그대로 둔다
  */
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
   const space = useSpace();
   // 모든 화면을 감싸는 문이라 뼈대 없이(어느 화면 모양인지 모름, 보통 A-01에서 이미 불러옴)
   if (me.isLoading) return null;
-  let step = current(me.data?.onboarding_step ?? FIRST);
+  const step = current(me.data?.onboarding_step ?? FIRST);
   const open = !!me.data && !me.data.onboarding_done_at;
   if (open && isOnboardingScreen(step) && space.isLoading) return null;
-  if ((step === 'o-06' || step === 'o-07') && space.data?.couple_state === 'connected')
-    step = 'o-11';
   const to =
     open && isOnboardingScreen(step)
       ? `/onboarding/${step}`

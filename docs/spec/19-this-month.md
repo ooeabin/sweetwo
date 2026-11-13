@@ -107,7 +107,7 @@
 | 13 | 파트너 저금에 같이 모으기 | “{이름}님 ‘결혼 비용’에 같이 모을까요?” | W-15 | 각자 계열만, 7일 동안 |
 | 14 | 만기·경조사·쓸 곳 메모 날짜 | “12월 3일 예식장 잔금이에요” 등(만기·경조사 문구는 예전 6번 그대로) | F-04a, Y-05, W-14 | 7일 안(만기는 예전 규칙 그대로) |
 | 15 | 초대 | “같이 모을 사람을 초대해 보세요” + “초대하기 ›” | S-12 초대(`/settings/couple?invite=1`) | 미합류 |
-| 16 | 기다리는 합류자 | “{이름}님이 기다리고 있어요. 월급 계획을 마쳐 주세요” | 온보딩 이어하기(`/onboarding/resume`) | 같이 계열 합류자가 대기 중. 2026-11-13 PR 9: 앱이 대기 여부를 읽을 재료가 아직 없어 띄우지 않음(PR 8 이어하기 화면과 같이) |
+| 16 | 기다리는 합류자 | “{이름}님이 기다리고 있어요. 월급 계획을 마쳐 주세요” | 온보딩 이어하기(`/onboarding/resume`) | 같이 계열 합류자가 대기 중: 같이 계열 + 연결 + 공동 월급 계획에 줄이 없음(PR 8, 2026-11-13). 상대가 ‘알려 주기’를 누르면 같은 문장 알림(`nudge_starter`) |
 
 - 앱(2026-11-13 PR 9): 띠 문장은 `features/home/copy.ts`, 고르기는 core `pickTopTask`, 재료는 `h-01-home.tsx`(분담 제안은 `shared_account` status proposed + 받은 사람, 순위 요청은 `rank_consent_request` open, 월급 변경 띠 날은 salary `salaryChangedDay`, 잔액 맞추기는 core `reconcileTask`(마지막 맞추기 = `last_reconciled_at`, 없으면 첫 저금 만든 날), 다음 저금·파트너 저금은 W-13 범위 저금). 띠 6번은 W-01을 열면 끝냄(`salary_changed:{날}` done). 분석 `home_box_tapped`(box band, todo = 띠 종류), 닫기 `home_task_dismissed`
 - 월급날 확인과 월급 전 확인은 띠가 아니라 H-11이 맡음(예전 3번 ‘월급 전 확인’, 3a ‘월급날 체크’, 4b ‘첫 저금 추가’는 없앰). 순서와 조건은 core `pickTopTask`가 정본. 띠 닫기·끝냄 기록은 `home_task_state`

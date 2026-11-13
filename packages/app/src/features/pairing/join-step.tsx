@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
 import { saveMe, useJoinData, type JoinData } from './data';
+import { afterSetupPath } from '../auth';
 import { finishJoin } from './join-split';
 
 export const joinPath = (id: string) => `/join/${id}`;
@@ -14,15 +15,20 @@ export const joinPath = (id: string) => `/join/${id}`;
 const BAR = ['p-03', 'p-04', 'p-05', 'p-05b'];
 
 /**
- * 합류 화면 순서(18 흐름 요약). 기본 P-03 → P-04 → P-05 → P-05b(마지막 저장 = 추천 월급 계획으로 합류 완료 → 홈).
- * 시작한 사람이 아직 온보딩 중이면 P-03 → P-05 → P-05b(저장 = 합류, 홈 대기), 대기 뒤 이어서 P-04(저장 = 월급 계획 만들기).
+ * 합류 화면 순서(18 ‘파트너 합류 v2.2’). 기본 P-03 → P-04 → P-05 → P-05b → (P-05c: 관리하지 않는 쪽) → 합류 완료 → P-10 → P-11.
+ * P-04(형태 이름 확인)는 시작한 사람이 형태를 골랐을 때만. 같이 계열이고 시작한 사람이 아직 온보딩 중이면
+ * P-03 → P-05 → P-05b(저장 = 합류, 홈 대기), 대기 뒤 이어서 P-04 → (P-05c)(저장 = 월급 계획 만들기).
  * 월급이 없으면 P-05b 없이 끝. 예전에 P-06에서 멈춘 사람만 P-06.
  */
-export function joinScreens(d: Pick<JoinData, 'waiting' | 'resumed' | 'me'>): string[] {
+export function joinScreens(
+  d: Pick<JoinData, 'waiting' | 'resumed' | 'me'> &
+    Partial<Pick<JoinData, 'styleChosen' | 'nonManager'>>,
+): string[] {
   if (d.me?.onboarding_step === 'P-06') return ['p-06'];
-  if (d.resumed) return ['p-04'];
+  const tail = d.nonManager ? ['p-05c'] : [];
+  if (d.resumed) return ['p-04', ...tail];
   if (d.waiting) return ['p-03', 'p-05', 'p-05b'];
-  return BAR;
+  return ['p-03', ...(d.styleChosen === false ? [] : ['p-04']), 'p-05', 'p-05b', ...tail];
 }
 /**
  * 합류 흐름에서 뺀 화면 → 그 화면 바로 앞 화면(이어하기). P-03a 출생연도(2026-11-11 뺌, 출생연도는 자산 순위 F-08 → S-11i에서)
@@ -58,7 +64,7 @@ export const joinChapter = (id: string, list: readonly string[] = BAR) => {
   };
 };
 
-/** 합류 화면 하나: 멈춘 화면 기록, 저장 뒤 다음(마지막이면 홈), 뒤로 */
+/** 합류 화면 하나: 멈춘 화면 기록, 저장 뒤 다음(마지막이면 합류를 마치고 P-10, 대기 뒤 이어서면 A-06 권장 → 홈), 뒤로 */
 export function useJoinStep(id: string) {
   const nav = useNavigate();
   const d = useJoinData();
@@ -75,16 +81,23 @@ export function useJoinStep(id: string) {
       void saveMe({ onboarding_step: id.toUpperCase() }).catch(() => undefined);
   }, [d.ready, d.me, id]);
 
-  /** next: 다음 화면(기본 순서대로). null이면 여기서 합류를 마침(월급 없음 → P-05b 건너뜀) */
-  const done = async (save?: () => Promise<unknown>, next?: string | null) => {
+  /**
+   * next: 다음 화면(기본 순서대로). null이면 여기서 합류를 마침(월급 없음 → P-05b 건너뜀).
+   * noPlan: 월급 계획 없이 합류(P-05 ‘월급 없이 합류할게요’, 각자 계열)
+   */
+  const done = async (
+    save?: () => Promise<unknown>,
+    next?: string | null,
+    o: { noPlan?: boolean } = {},
+  ) => {
     if (saving) return;
     setSaving(true);
     try {
       await save?.();
       const to = next === null ? undefined : (next ?? list[i + 1]);
-      // 마지막 화면: 추천 월급 계획으로 합류 완료(월급 계획 화면 없이, 홈 할 일 ‘월급 계획 확인’)
+      // 마지막 화면: 추천 월급 계획으로 합류 완료(월급 계획 화면 없이, 첫 확인 목록은 다음 월급날)
       if (!to && id !== 'p-06') {
-        const r = await finishJoin(d);
+        const r = await finishJoin(d, o);
         if (r === 'split_changed') throw new Error('split_changed');
         // 그 사이 시작한 사람이 초대를 취소했거나 잡아 둔 24시간이 지남: 합류가 끝난 초대 안내(JoinRoute)
         if (r === 'ended') {
@@ -94,13 +107,13 @@ export function useJoinStep(id: string) {
       }
       await d.refetch().catch(() => undefined);
       setSaving(false);
-      // 합류를 마치면 짧은 축하(P-10) → 푸시 허용을 아직 안 물었으면 P-11 → 홈(2026-11-11 D7)
+      // 합류를 마치면 짧은 축하(P-10) → 알림 종류(P-11) → A-06 권장 → 홈(2026-11-11 D7, 2026-11-13)
       // 대기 뒤 이어서(P-04)는 이미 합류를 마친 사람이라 축하 없이 홈
-      if (!to) nav(d.resumed ? '/' : joinPath('p-10'), { replace: true });
+      if (!to) nav(d.resumed ? await afterSetupPath() : joinPath('p-10'), { replace: true });
       else nav(joinPath(to));
     } catch {
       setSaving(false);
-      toast(copy.saveFailed, { label: copy.retry, onClick: () => void done(save, next) });
+      toast(copy.saveFailed, { label: copy.retry, onClick: () => void done(save, next, o) });
     }
   };
 

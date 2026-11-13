@@ -2,3 +2,4 @@
 export { P01JoinStart } from './pages/p-01-join-start';
 export { P01CodeEntry } from './pages/p-01-code-entry';
 export { JoinRoute, isJoinScreen } from './join-route';
+export { WaitNudge } from './wait-nudge';

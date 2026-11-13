@@ -145,6 +145,9 @@ test('모바일(iOS): 로그인 창 → 돌아오면 다음 화면, PIN 뒤 “F
     f.token = jwt;
     f.authCb?.({ type: 'signed_in', provider: 'kakao', waitSec: 3, reopened: false });
   }, fakeJwt(chanwoo.id));
+  // 2026-11-13 v2.2: 먼저 “앱 잠금을 켤까요?”(건너뛸 수 있음) → ‘켜기’
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '켜기' }).click();
   await expect(
     page.getByRole('heading', { name: '앱을 열 때 쓸 PIN 6자리를 정해 주세요' }),
   ).toBeVisible();

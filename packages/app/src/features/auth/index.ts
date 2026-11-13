@@ -11,7 +11,7 @@ export { A05rReconsent } from './pages/a-05r-reconsent';
 export { AuthCallback } from './pages/auth-callback';
 export { initSession, session } from './session';
 export { signOut, clearLocalSession, type SignOutOptions } from './sign-out';
-export { paths } from './flow';
+export { afterSetupPath, paths } from './flow';
 export { prefs } from './prefs';
 export { providerName, lockedOutState } from './copy';
 export { A02Restore } from './pages/a-02-restore';

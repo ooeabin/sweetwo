@@ -1,12 +1,15 @@
 import {
   JoinContextSchema,
+  NudgeResultSchema,
   TERMS_VERSION,
+  type NudgeResult,
   type JoinContext,
   type Json,
   type SplitLineDraft,
 } from '@sweetwo/core';
 export type { JoinContext } from '@sweetwo/core';
 import { AuthCallError } from './auth';
+import type { SplitLineSettings } from './salary';
 import { supabase } from './client';
 
 // 파트너 합류 서버 호출(docs/spec/18-partner-join.md, 15 A-07)
@@ -102,7 +105,7 @@ export async function joinMovingRecords(
  * version = P-06을 열 때 공동 월급 계획 버전(합쳐서). 그 사이 바뀌었으면 'split_changed'
  */
 export async function completeJoin(
-  lines?: SplitLineDraft[],
+  lines?: (SplitLineDraft & SplitLineSettings)[],
   version?: number,
 ): Promise<'ok' | 'split_changed'> {
   const p_lines = lines
@@ -112,6 +115,10 @@ export async function completeJoin(
         goal_id: l.goalId ?? null,
         user_id: l.userId ?? null,
         name: l.name ?? null,
+        // v2.2 줄 설정(P-05c 용돈 자동 줄). 안 넘기면 서버 기본값
+        ...(l.inChecklist !== undefined ? { in_checklist: l.inChecklist } : {}),
+        ...(l.autoPay !== undefined ? { auto_pay: l.autoPay } : {}),
+        ...(l.autoDay !== undefined ? { auto_day: l.autoDay } : {}),
       })) as unknown as Json)
     : undefined;
   const { error } = await supabase().rpc('complete_join', { p_lines, p_version: version });
@@ -120,7 +127,20 @@ export async function completeJoin(
   return 'ok';
 }
 
-/** P-04: 합류 중 관리 방식 바꾸기(바로 적용, 시작한 사람 알림) */
+/** P-05 ‘월급 없이 합류할게요’(각자 계열, v2.2): 월급 계획 없이 합류만 마침(finish_join) */
+export async function completeJoinWithoutPlan() {
+  const { error } = await supabase().rpc('finish_join');
+  fail(error);
+}
+
+/** 대기 화면 ‘알려 주기’(18 v2.2, nudge_starter): 시작한 사람에게 알림, 24시간에 1번 */
+export async function nudgeStarter(): Promise<NudgeResult> {
+  const { data, error } = await supabase().rpc('nudge_starter');
+  fail(error);
+  return NudgeResultSchema.parse(data);
+}
+
+/** P-04: 합류 중 관리 방식 바꾸기(바로 적용, 시작한 사람 알림). v2.2 P-04는 쓰지 않음(확인과 요청만) */
 export async function setJoinSalaryMode(mode: 'separate' | 'joint') {
   const { error } = await supabase().rpc('set_join_salary_mode', { p_mode: mode });
   fail(error);

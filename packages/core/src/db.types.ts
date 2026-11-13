@@ -1018,6 +1018,7 @@ export type Database = {
           living_budget_estimated: boolean
           living_check: boolean
           loan_repayment: number | null
+          manager_pending_partner: boolean
           manager_user_id: string | null
           marriage_status: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home: Database["public"]["Enums"]["newlywed_home"] | null
@@ -1069,6 +1070,7 @@ export type Database = {
           living_budget_estimated?: boolean
           living_check?: boolean
           loan_repayment?: number | null
+          manager_pending_partner?: boolean
           manager_user_id?: string | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
@@ -1119,6 +1121,7 @@ export type Database = {
           living_budget_estimated?: boolean
           living_check?: boolean
           loan_repayment?: number | null
+          manager_pending_partner?: boolean
           manager_user_id?: string | null
           marriage_status?: Database["public"]["Enums"]["marriage_status"] | null
           newlywed_home?: Database["public"]["Enums"]["newlywed_home"] | null
@@ -3770,6 +3773,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_pending_manager: { Args: { p_space: string; p_user: string }; Returns: undefined }
       claim_push: {
         Args: { p_limit?: number; p_now?: string }
         Returns: {
@@ -4278,6 +4282,7 @@ export type Database = {
         Args: { p_owner: string; p_space: string }
         Returns: undefined
       }
+      nudge_starter: { Args: Record<PropertyKey, never>; Returns: string }
       onboarding_reset_plan: { Args: Record<PropertyKey, never>; Returns: undefined }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>

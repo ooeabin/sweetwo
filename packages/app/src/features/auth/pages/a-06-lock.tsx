@@ -17,13 +17,16 @@ const Center = ({ children }: { children: ReactNode }) => (
   <main className="hg-auth">{children}</main>
 );
 
-// A-06 앱 잠금 설정(모바일 앱, 이 기기에 PIN이 없을 때 첫 로그인 직후 1회). S-15에서 열면 ?next=/settings/security
+// A-06 앱 잠금 설정(모바일 앱). 2026-11-13 v2.2(ADR 0009 결정 12, R1): 권장하되 건너뛸 수 있음.
+// 먼저 “앱 잠금을 켤까요?” + ‘켜기’ / ‘나중에 할게요’(분석 app_lock_answered) → ‘켜기’면 PIN 정하기(1~3번).
+// 신규 가입은 온보딩 O-60 흐름(첫 저금, 초대) 뒤·합류 P-10/P-11 뒤, 재로그인·새 기기는 로그인 직후 한 번.
+// S-15에서 켜려고 열면(?next=/settings/security) 묻지 않고 바로 PIN 정하기
 export function A06LockSetup() {
   const nav = useNavigate();
   const [params] = useSearchParams();
   const next = params.get('next');
   const bridge = session.bridge;
-  const [step, setStep] = useState<'enter' | 'confirm' | 'touch'>('enter');
+  const [step, setStep] = useState<'ask' | 'enter' | 'confirm' | 'touch'>(next ? 'enter' : 'ask');
   const [first, setFirst] = useState('');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string>();
@@ -38,6 +41,39 @@ export function A06LockSetup() {
     nav(back ?? paths.home, { replace: true });
   };
   if (!bridge) return null;
+
+  if (step === 'ask') {
+    return (
+      <AuthLayout
+        art="status-lock"
+        title={copy.lockAsk}
+        help={copy.lockAskHelp}
+        actionsRow
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                track('app_lock_answered', { result: 'later' });
+                finish();
+              }}
+            >
+              {copy.later}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                track('app_lock_answered', { result: 'on' });
+                setStep('enter');
+              }}
+            >
+              {copy.lockOn}
+            </Button>
+          </>
+        }
+      />
+    );
+  }
 
   if (step === 'touch') {
     return (

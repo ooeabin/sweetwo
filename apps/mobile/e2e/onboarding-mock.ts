@@ -95,6 +95,10 @@ export interface MemDb {
   checklists: Record<string, unknown>[];
   /** 목표 넣기·빼기·꺼내 쓰기(goal_move) */
   goalMoves: Record<string, unknown>[];
+  /** v2.2 관리 형태 요청(request_mode_change, P-04 ‘보내요’) */
+  modeRequests: Record<string, unknown>[];
+  /** 대기 ‘알려 주기’(nudge_starter) 횟수 */
+  nudges: number;
   rpc: string[];
   /**
    * 자산 순위 v2.2(F-08, F-08c): pair = 두 사람 모두 동의(서버 networth_rank_pair가 pair), pairNet·topPct는 그 결과
@@ -163,6 +167,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       payday: null,
       payday_last: false,
       allowance: null,
+      // v2.2(2026-11-13)
+      payday_none: false,
+      push_kinds: {},
+      plan_share: 'saving_only',
     },
     space: null,
     goals: [],
@@ -208,6 +216,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     splits: [],
     checklists: [],
     goalMoves: [],
+    modeRequests: [],
+    nudges: 0,
     notices: [],
     goalChanges: [],
     pendingTerms: [],
@@ -224,6 +234,35 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     rpc: [],
   };
   // 서버 goal_saved 흉내(ADR 0007, 2026-11-09): 모은 금액 = 시작할 때 모은 금액 + 그 저금 항목을 체크한 금액의 합
+  // 서버 recalc_send_line 흉내(v2.2 G9): 한 사람 관리형이면 관리하지 않는 사람마다 공동 월급 계획에 ‘보내기’ 자동 줄
+  // = 1만 원 내림(월급 − 그 사람 용돈 줄)
+  const recalcSend = () => {
+    const js = db.splits.find((x) => x.owner_user_id === null);
+    if (!js) return;
+    js.split_line = js.split_line.filter((l) => l.kind !== 'send');
+    const sp = db.space;
+    if (!sp || sp.salary_mode !== 'joint' || !sp.manager_user_id) return;
+    const people = [db.me, ...(db.partner && sp.couple_state === 'connected' ? [db.partner] : [])];
+    for (const u of people) {
+      if (u.id === sp.manager_user_id) continue;
+      const a = js.split_line
+        .filter((l) => l.kind === 'allowance' && l.user_id === u.id)
+        .reduce((n, l) => n + Number(l.amount), 0);
+      js.split_line.push({
+        id: `${js.id}-send-${String(u.id)}`,
+        split_id: js.id,
+        kind: 'send',
+        goal_id: null,
+        user_id: u.id,
+        name: null,
+        amount: Math.floor(Math.max(0, Number(u.monthly_income ?? 0) - a) / 10_000) * 10_000,
+        sort: js.split_line.length,
+        in_checklist: true,
+        auto_pay: true,
+        auto_day: u.payday_last ? 31 : (u.payday ?? null),
+      });
+    }
+  };
   const goalSaved = (id: string) => {
     let v = Number(db.goals.find((g) => g.id === id)?.start_saved ?? 0);
     for (const c of db.checklists)
@@ -489,6 +528,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             split_deferred: false,
             account_mode: null,
             salary_mode: 'separate',
+            // v2.2 관리 형태(O-30·O-30b·O-30c, request_mode_change)
+            shared_living: null,
+            shared_saving: null,
+            manager_user_id: null,
+            manager_pending_partner: false,
             joint_cycle_day: null,
             base_day: null,
             base_day_last: false,
@@ -519,7 +563,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           name: l.name ?? null,
           amount: l.amount,
           sort: i,
+          in_checklist: l.in_checklist ?? !['living', 'allowance'].includes(String(l.kind)),
+          auto_pay: l.auto_pay ?? ['send', 'shared_account'].includes(String(l.kind)),
+          auto_day: l.auto_day ?? null,
         }));
+        recalcSend();
         // 이번 사이클 체크 안 한 줄만 새 금액(sync_checklist 흉내)
         const cl = db.checklists.find((c) => c.owner_user_id === owner);
         if (cl) {
@@ -726,6 +774,79 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
         );
       }
+      // v2.2 관리 형태(서버 20261202090000·20261206090000 흉내): 2-5 표, 연결된 각자 → 합쳐서는 요청
+      if (fn === 'request_mode_change') {
+        const b = body();
+        const living = !!b.p_shared_living;
+        const saving = !!b.p_shared_saving;
+        const mgr = living ? String(b.p_manager ?? '') : '';
+        if (living && !['me', 'partner', 'together', 'each'].includes(mgr))
+          return json(route, { message: 'need_manager', code: '22023' }, 400);
+        const mode = living && mgr !== 'each' ? 'joint' : 'separate';
+        const other = (db.partner?.id as string | undefined) ?? null;
+        const connected = db.space?.couple_state === 'connected' && !!other;
+        // 온보딩 중 답은 바로(20261206090000 계약 4)
+        if (
+          connected &&
+          db.me.onboarding_done_at &&
+          db.space?.salary_mode === 'separate' &&
+          mode === 'joint'
+        ) {
+          db.modeRequests.push({ ...b, to_mode: mode, status: 'open' });
+          return json(route, 'requested');
+        }
+        if (db.space) {
+          db.space.shared_living = living;
+          db.space.shared_saving = saving;
+          db.space.salary_mode = mode;
+          db.space.manager_pending_partner = mgr === 'partner' && !connected;
+          db.space.manager_user_id =
+            mode !== 'joint'
+              ? null
+              : mgr === 'me'
+                ? db.me.id
+                : mgr === 'partner' && connected
+                  ? other
+                  : null;
+          // 서버 set_salary_mode가 합쳐서면 빈 공동 월급 계획을 만듦(합류 화면 has_plan은 줄이 있을 때만)
+          if (mode === 'joint' && !db.splits.some((x) => x.owner_user_id === null))
+            db.splits.push({
+              id: `split-${db.splits.length + 1}`,
+              owner_user_id: null,
+              split_line: [],
+            });
+        }
+        return json(route, 'applied');
+      }
+      if (fn === 'my_manage_style') {
+        const sp = db.space;
+        if (!sp) return json(route, []);
+        const joint = sp.salary_mode === 'joint';
+        const style = joint
+          ? sp.manager_user_id || sp.manager_pending_partner
+            ? 'one_manager'
+            : 'together'
+          : sp.shared_living && sp.shared_saving
+            ? 'living_saving'
+            : sp.shared_living
+              ? 'living_only'
+              : sp.shared_saving
+                ? 'saving_only'
+                : 'separate';
+        return json(route, [
+          {
+            salary_mode: sp.salary_mode,
+            manager_user_id: sp.manager_user_id ?? null,
+            shared_living: sp.shared_living ?? null,
+            shared_saving: sp.shared_saving ?? null,
+            style,
+          },
+        ]);
+      }
+      if (fn === 'nudge_starter') {
+        db.nudges += 1;
+        return json(route, db.nudges === 1 ? 'sent' : 'too_soon');
+      }
       if (fn === 'onboarding_reset_plan') {
         // 서버 흉내(2026-11-10 S2-01): 온보딩 중에만, 내 것과 공동 것을 지움. 체크한 줄이 있으면 그대로
         if (db.me.onboarding_done_at)
@@ -817,8 +938,31 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           starter_id: (db.partner?.id as string | undefined) ?? null,
           starter_nickname: (db.partner?.nickname as string | undefined) ?? '찬우',
           salary_mode: sp.salary_mode ?? 'separate',
-          // 흉내: 합류하는 사람의 월급 계획은 합류를 마칠 때 생기므로 그 전 월급 계획은 모두 시작한 사람 것
-          has_plan: db.splits.length > 0,
+          shared_living: sp.shared_living ?? null,
+          shared_saving: sp.shared_saving ?? null,
+          manager:
+            sp.salary_mode !== 'joint'
+              ? null
+              : sp.manager_user_id && sp.manager_user_id === db.partner?.id
+                ? 'starter'
+                : sp.manager_user_id === meId || sp.manager_pending_partner
+                  ? 'joiner'
+                  : null,
+          style:
+            sp.salary_mode === 'joint'
+              ? sp.manager_user_id || sp.manager_pending_partner
+                ? 'one_manager'
+                : 'together'
+              : sp.shared_living && sp.shared_saving
+                ? 'living_saving'
+                : sp.shared_living
+                  ? 'living_only'
+                  : sp.shared_saving
+                    ? 'saving_only'
+                    : 'separate',
+          // 흉내: 합류하는 사람의 월급 계획은 합류를 마칠 때 생기므로 그 전 월급 계획은 모두 시작한 사람 것.
+          // 줄이 있는 월급 계획만(관리 형태를 고를 때 생긴 빈 공동 월급 계획은 없는 것, 20261206090000)
+          has_plan: db.splits.some((x) => x.split_line.length > 0),
           prefill: db.assets
             .filter(
               (a) =>
@@ -837,13 +981,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             ? {
                 version:
                   ((jointSplit as Record<string, unknown>).version as number | undefined) ?? 1,
-                lines: lines.map((l) => ({
-                  kind: l.kind,
-                  amount: l.amount,
-                  goal_id: l.goal_id ?? null,
-                  user_id: l.user_id ?? null,
-                  name: l.name ?? null,
-                })),
+                lines: lines
+                  .filter((l) => l.kind !== 'send')
+                  .map((l) => ({
+                    kind: l.kind,
+                    amount: l.amount,
+                    goal_id: l.goal_id ?? null,
+                    user_id: l.user_id ?? null,
+                    name: l.name ?? null,
+                  })),
                 items: db.goals
                   .filter((g) => !g.deleted_at && !g.closed_at)
                   .map((g) => ({
@@ -991,6 +1137,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const b = body();
         db.joinCalls.push({ fn, ...b });
         const lines = b.p_lines as Record<string, unknown>[] | undefined;
+        // 합류 전 ‘파트너가 주로 해요’면 합류한 사람이 관리하는 사람(20261206090000 계약 1)
+        if (db.space?.manager_pending_partner && db.space.salary_mode === 'joint') {
+          db.space.manager_user_id = db.me.id;
+          db.space.manager_pending_partner = false;
+        }
         if (lines) {
           const owner = db.space?.salary_mode === 'joint' ? null : String(db.me.id);
           const found = db.splits.find((x) => x.owner_user_id === owner);
@@ -1009,9 +1160,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             name: l.name ?? null,
             amount: l.amount,
             sort: i,
+            in_checklist: l.in_checklist ?? !['living', 'allowance'].includes(String(l.kind)),
+            auto_pay: l.auto_pay ?? ['send', 'shared_account'].includes(String(l.kind)),
+            auto_day: l.auto_day ?? null,
           }));
         }
         if (db.space) db.space.couple_state = 'connected';
+        recalcSend();
         Object.assign(db.me, {
           onboarding_step: lines ? 'P-06' : 'P-WAIT',
           onboarding_done_at: new Date().toISOString(),
@@ -1025,6 +1180,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'finish_join') {
+        db.joinCalls.push({ fn });
+        if (db.space?.manager_pending_partner && db.space.salary_mode === 'joint') {
+          db.space.manager_user_id = db.me.id;
+          db.space.manager_pending_partner = false;
+        }
         if (db.space) db.space.couple_state = 'connected';
         Object.assign(db.me, {
           onboarding_step: 'P-11',

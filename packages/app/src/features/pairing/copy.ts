@@ -6,17 +6,28 @@ const who = (name: string) => (name ? `${name}님이` : '파트너가');
 export const copy = {
   // P-10 합류 축하(2026-11-11 D7) [확인 필요] 문구
   joinedTitle: (starter: string) => (starter ? `${starter}님과 연결됐어요` : '파트너와 연결됐어요'),
-  joinedHelp: '이제 월급과 저금을 같이 봐요', // [확인 필요] 합류 알림 본문(14)과 같음
+  joinedHelp: '이제 같이 모은 걸 같이 봐요', // [확인 필요] 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
   joinedWaitHelp: (starter: string) => `${who(starter)} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 홈 대기 카드와 같음
   toHomeAfter: '홈으로 가기',
   // 합류가 끝난 초대(취소, 잡아 둔 24시간 지남, 2026-11-11 D1) [확인 필요]
   endedTitle: '초대가 취소됐거나 기한이 지났어요',
   endedHelp: '받은 코드를 다시 넣거나 혼자 시작할 수 있어요',
   startSolo: '혼자 시작하기',
-  // P-11 합류 직후 푸시 허용(모바일, 1회) [확인 필요] 문구
-  pushTitle: '알림을 받을까요?',
-  pushHelp: '파트너가 체크하거나 바꾸면 바로 알려 드려요', // [확인 필요]
+  // P-11 알림 종류 골라 켜기(2026-11-13 v2.2, 18 P-11 표) [확인 필요]
+  kindsTitle: '이런 알림을 보내 드려요',
+  kinds: {
+    care: '경조사 일주일 전',
+    payday: '월급날 확인할 게 있을 때',
+    achieved: '같이 모으기를 다 모았을 때',
+    shared_change: (name: string) => `${name ? `${name}님이` : '파트너가'} 같이 쓰는 걸 바꿨을 때`,
+    my_allowance: '내 용돈이 바뀌었을 때',
+    progress_news: '진행 소식',
+  },
   pushAllow: '알림 받기',
+  // 대기 화면 ‘알려 주기’(18 v2.2, 24시간에 1번) [확인 필요]
+  nudge: '알려 주기',
+  nudgeSent: (starter: string) => `${starter ? `${starter}님` : '파트너'}에게 알렸어요`, // [확인 필요]
+  nudgeTooSoon: '내일 다시 알릴 수 있어요', // [확인 필요]
   later: '나중에 할게요',
   next: '다음',
   retry: '다시 시도',
@@ -83,38 +94,36 @@ export const copy = {
   namePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
 
-  // P-04 관리 방식 확인
-  modeTitle: (starter: string) => `${who(starter)} 고른 월급 관리 방식이에요`, // [확인 필요]
-  modeHelp: '바꾸면 두 분 모두에게 적용돼요', // [확인 필요]
-  modes: {
-    separate: {
-      label: '각자 월급을 따로 관리해요',
-      sub: '월급 계획과 체크리스트가 사람마다 있어요',
-    }, // [확인 필요]
-    joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
+  // P-04 형태 확인(2026-11-13 v2.2, 18 ‘P-04 형태 확인’, 형태 이름 08 2장) [확인 필요]
+  styleTitle: (starter: string) => `${who(starter)} 이렇게 골랐어요`,
+  styleNames: {
+    one_manager: '한 사람이 관리해요',
+    together: '합쳐서 관리해요',
+    living_saving: '생활비와 저금을 같이 해요',
+    living_only: '생활비만 같이 해요',
+    saving_only: '저금만 같이 해요',
+    separate: '각자 따로 해요',
   },
-  // P-04 다른 방식을 고르면 결과 한 줄 + 확인 Modal(2026-11-09 round 3) [확인 필요]
-  modeResult: {
-    joint: (starter: string) =>
-      `${starter ? `${starter}님` : '파트너'} 월급 계획이 두 분의 월급 계획 하나가 돼요`,
-    separate: () => '월급 계획과 체크리스트가 사람마다 따로 생겨요',
-  },
-  modeConfirmTitle: '월급 관리 방식을 바꿀까요?',
-  modeConfirmBody: (starter: string) =>
-    `${starter ? `${starter}님` : '파트너'}에게도 바로 적용되고 알림이 가요`,
-  modeConfirmOk: '바꿀게요',
-  modeConfirmCancel: '다시 고를게요',
-
+  styleOk: '좋아요',
+  styleSend: (starter: string) => `월급은 대부분 ${starter ? `${starter}님` : '파트너'}에게 보내요`,
+  // P-05c 용돈(관리하지 않는 쪽, 18 v2.2) [확인 필요]
+  allowanceTitle: '용돈은 얼마로 할까요?',
+  allowanceHelp: (manager: string) => `나머지는 ${manager ? `${manager}님` : '파트너'}에게 보내요`,
+  allowanceNote: (manager: string) =>
+    `${manager ? `${manager}님` : '파트너'}도 용돈을 고칠 수 있어요. 고치면 알려 드려요`,
+  allowanceOver: '월급보다 많이 정할 수 없어요', // [확인 필요] 0 ≤ 용돈 ≤ 월급
   // P-05 내 월급(O-31과 같음)
   salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
-  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
+  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어오면 그때 알려 주세요', // [확인 필요] O-31과 같음(2026-11-13)
   noSalary: '지금은 월급이 없어요',
+  noSalaryJoin: '월급 없이 합류할게요', // [확인 필요] 각자 계열만(2026-11-13)
   payday: '월급날',
   paydayTitle: '월급날은 며칠이에요?',
   paydayLast: '말일',
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
+  paydayNone: '날짜가 정해져 있지 않아요', // [확인 필요] O-32와 같음(2026-11-13)
   checkValue: '입력한 값이 맞나요?',
 
   // P-06 월급 계획

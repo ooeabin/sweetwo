@@ -63,7 +63,7 @@
 
 | 이벤트 | 속성 |
 | --- | --- |
-| `push_permission_asked` / `_answered` | screen_id(O-55, P-11, H-06), result, kinds_on |
+| `push_permission_asked` / `_answered` | screen_id(O-55, P-11, H-06), result(granted / denied / unavailable(브리지 없음) / later), kinds_on(켠 종류 키 목록) |
 | `manage_answers_saved` | shared_living, shared_saving, manager(self/partner/both/each), salary_mode, screen_id |
 | `plan_share_changed` | from, to, screen_id |
 | `share_preview_viewed` | — |
@@ -91,7 +91,9 @@
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
-| `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음. 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11) |
+| `invite_code_autofilled` | source(clipboard / referrer), result(join / decline) (2026-11-13 PR 8) |
+| `saving_item_created` | entry에 onboarding(O-60 ‘첫 저금 만들기’) 더함 |
+| `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음. 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11) |
 
 ## 1. 핵심 지표 (North Star)
 

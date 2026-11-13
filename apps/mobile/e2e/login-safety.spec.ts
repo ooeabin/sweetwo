@@ -89,6 +89,9 @@ test('PIN을 잊었어요(S1-02·S1-32): 확인 → PIN 지우고 로그아웃 �
   ).toBeVisible();
   expect(await fb(page)).toMatchObject({ resets: 1, pin: null, token: null });
   await login(page);
+  // 2026-11-13 v2.2: 먼저 “앱 잠금을 켤까요?”(건너뛸 수 있음) → ‘켜기’
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '켜기' }).click();
   await expect(
     page.getByRole('heading', { name: '앱을 열 때 쓸 PIN 6자리를 정해 주세요' }),
   ).toBeVisible();
@@ -123,6 +126,9 @@ test('만료·다른 계정(S1-03·S1-13·S1-14): 이 기기 데이터를 비우
     await r.fallback();
   });
   await login(page, '22222222-2222-2222-2222-222222222222');
+  // 2026-11-13 v2.2: 먼저 “앱 잠금을 켤까요?”(건너뛸 수 있음) → ‘켜기’
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '켜기' }).click();
   await expect(
     page.getByRole('heading', { name: '앱을 열 때 쓸 PIN 6자리를 정해 주세요' }),
   ).toBeVisible();
@@ -146,7 +152,7 @@ test('가입 취소(S1-11): A-04 뒤로, A-05 하드웨어 뒤로 = 로그아웃
     .locator('visible=true')
     .first()
     .click();
-  await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '같이 모으는 돈, 둘이 같이 봐요' })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('sb-session'))).toBeNull();
 });
 
@@ -287,6 +293,9 @@ test('약한 PIN(A-06): 9 다음 0으로 도는 연속, 두 개씩 3번, 두 숫
 }) => {
   await signedInHome(page, { pin: null });
   await page.goto('/lock/setup');
+  // 2026-11-13 v2.2: 먼저 “앱 잠금을 켤까요?”(건너뛸 수 있음) → ‘켜기’
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '켜기' }).click();
   await expect(
     page.getByRole('heading', { name: '앱을 열 때 쓸 PIN 6자리를 정해 주세요' }),
   ).toBeVisible();
