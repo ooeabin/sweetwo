@@ -19,6 +19,8 @@ export type FakeState = {
   shared: { text: string; url?: string }[];
   /** 보상형 광고를 부른 횟수(ads.rewarded) */
   ads: number;
+  /** 푸시 허용 창을 띄운 횟수(O-55·P-11) */
+  pushRequests: number;
 };
 export interface FakeOptions {
   signedIn?: boolean;
@@ -45,6 +47,10 @@ export interface FakeOptions {
    * 없으면 브리지에 ads가 없음(광고 SDK 없는 앱, 광고 없이 바로)
    */
   ad?: 'rewarded' | 'closed' | 'failed' | 'throw';
+  /** 푸시: 'prompt'면 아직 안 물음, 허용 창에서 grant대로(기본 거절된 기기) */
+  push?: { status: 'prompt' | 'denied' | 'granted'; grant?: boolean };
+  /** 첫 실행 초대 코드(설치 리퍼러·클립보드, 2026-11-13 O-01 시트) */
+  inviteCode?: { code: string; source: 'clipboard' | 'referrer' };
 }
 
 export async function fakeBridge(page: Page, o: FakeOptions = {}) {
@@ -64,6 +70,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       cacheCleared: 0,
       shared: [],
       ads: 0,
+      pushRequests: 0,
     };
     const cbs: {
       auth: Set<(e: unknown) => void>;
@@ -111,10 +118,14 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
           if (o.openFail) throw new Error('open');
           f.opened.push(u);
         },
+        ...(o.inviteCode ? { inviteCode: { firstRun: async () => o.inviteCode } } : {}),
         push: {
-          status: async () => 'denied',
-          request: async () => false,
-          token: async () => null,
+          status: async () => o.push?.status ?? 'denied',
+          request: async () => {
+            f.pushRequests++;
+            return !!o.push?.grant;
+          },
+          token: async () => (o.push?.grant ? 'e2e-push-token' : null),
           onOpen: off,
           onReceive: off,
         },

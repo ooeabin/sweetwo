@@ -40,6 +40,8 @@ export function recommendedDraft(
     saved?: Record<string, number>;
     current?: SplitLineDraft[];
     keep?: Record<string, number>;
+    /** 합쳐서 추천 용돈 같은 금액(합 × 10% ÷ 사람 수, 17 O-50 고친 점 2026-11-13) */
+    equalAllowance?: boolean;
   } = {},
 ): SplitLineDraft[] {
   const people = o.joint && o.partner ? [owner, o.partner] : [owner];
@@ -57,6 +59,7 @@ export function recommendedDraft(
     current,
     keep: o.keep,
     custom,
+    equalAllowance: o.equalAllowance,
   });
 }
 

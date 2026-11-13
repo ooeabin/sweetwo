@@ -77,7 +77,8 @@ export async function routeAfterLogin(
   const pf = session.platform;
   if (b && pf !== 'web' && /^\d+\.\d+\.\d+$/.test(b.appVersion))
     void noteDevice(prefs.installId(), pf, b.appVersion).catch(() => undefined);
-  if (session.bridge) {
+  // 앱 잠금 권장(A-06, 2026-11-13): 온보딩·합류를 마친 계정만 로그인 직후 한 번. 마치기 전이면 O-60 흐름·P-11 뒤에 물음
+  if (session.bridge && s.onboarding_done) {
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };
   }
@@ -98,4 +99,17 @@ async function forgetOtherAccountPin() {
     if (!prefs.returnTo()?.startsWith('/i/')) prefs.setReturnTo(null);
   }
   prefs.setLastUser(uid);
+}
+
+/**
+ * 온보딩·합류를 마친 뒤 갈 곳(15 A-06 v2.2, 2026-11-13 ADR 0009 결정 12): 모바일 앱이고 이 기기에 PIN이 없고 아직 안 물었으면
+ * A-06 “앱 잠금을 켤까요?”(건너뛸 수 있음), 아니면 then(기본 홈)
+ */
+export async function afterSetupPath(then: string = paths.home): Promise<string> {
+  const b = session.bridge;
+  if (!b || prefs.pinAsked()) return then;
+  const lock = await b.lock.status().catch(() => null);
+  if (!lock || lock.hasPin) return then;
+  if (then !== paths.home) prefs.setReturnTo(then);
+  return paths.pinSetup;
 }

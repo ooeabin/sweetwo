@@ -22,6 +22,8 @@ describe('로그아웃 때 기기 저장소(S11-08)', () => {
       'sweetwo.onboardingSeenAt',
       'sweetwo.onboardingStartedAt',
       'sweetwo.pushAsked',
+      'sweetwo.pushLater',
+      'sweetwo.joinSend',
       'sweetwo.split-notice.s1',
       'sweetwo.split-notice.s2',
       'sweetwo.made-notice.c1',

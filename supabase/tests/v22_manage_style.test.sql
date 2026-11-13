@@ -24,7 +24,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
-update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
+update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25, onboarding_done_at = now() where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority, target_amount)
   select space_id, 'home', '내 집 마련', 'once', 1, 100000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(

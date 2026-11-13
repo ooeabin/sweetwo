@@ -1,9 +1,11 @@
+import { qk } from '@sweetwo/api';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../shared/analytics';
 import { toast } from '../../shared/toast';
 import { copy } from './copy';
-import { saveMe, useMe, useOnboardingLocal, usePartner, useSpace } from './data';
+import { saveMe, useMe, usePartner, useSpace } from './data';
 import { FIRST, isAhead, nextOf, prevOf, progressOf, screens, type FlowState } from './flow';
 
 export const onboardingPath = (id: string) => `/onboarding/${id}`;
@@ -30,18 +32,23 @@ export const secondsSinceStart = () => {
   return t ? Math.max(0, Math.round((Date.now() - t) / 1000)) : 0;
 };
 
+/**
+ * 방금 온보딩을 마치고 가는 곳(O-60 ‘첫 저금 만들기’ → W-11, ‘나중에 할게요’ → A-06). 마친 사람이 온보딩 주소에 있으면
+ * OnboardingRoute가 홈으로 보내는데, 마친 직후 몇 초는 이 곳으로(홈으로 보내기가 이동을 덮지 않게)
+ */
+let finishedTo: { path: string; at: number } | null = null;
+export const justFinishedTo = () =>
+  finishedTo && performance.now() - finishedTo.at < 3000 ? finishedTo.path : null;
+
 // 이번 실행에서 ‘다음’을 누른 화면(changed_after_back: 뒤로 와서 다시 답함)
 const completedThisRun = new Set<string>();
-
-/** O-07 시트만 선택 화면(32 required) */
-const REQUIRED = (id: string) => id !== 'o-07';
 
 /** 화면 하나의 흐름: 진행 막대, 뒤로, 저장 뒤 다음, 분석 이벤트(32 4-3) */
 export function useStep(id: string) {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const me = useMe();
   const space = useSpace();
-  const inviteNow = useOnboardingLocal((s) => s.inviteNow);
   const [saving, setSaving] = useState(false);
   const shownAt = useRef(Date.now());
 
@@ -50,7 +57,6 @@ export function useStep(id: string) {
     me: me.data,
     space: space.data,
     partner: partner.data,
-    inviteNow,
   };
   const ready = !me.isLoading && !space.isLoading && !partner.isLoading;
   const list = screens(state);
@@ -69,7 +75,8 @@ export function useStep(id: string) {
     track('onboarding_step_viewed', {
       screen_id: id.toUpperCase(),
       flow: 'starter',
-      required: REQUIRED(id),
+      // 모두 필수(O-55는 ‘나중에 할게요’로 넘기지만 필수 화면, 16 화면 목록)
+      required: true,
       marriage_state: space.data?.marriage_status ?? null,
     });
     if (isAhead(id, step))
@@ -104,7 +111,6 @@ export function useStep(id: string) {
         me: m.data,
         space: s.data,
         partner: partner.data,
-        inviteNow: useOnboardingLocal.getState().inviteNow,
       };
       const to = next?.(fresh) ?? nextOf(id, screens(fresh));
       if (o.replan && m.data && !isAhead(to, m.data.onboarding_step))
@@ -118,23 +124,37 @@ export function useStep(id: string) {
     }
   };
 
-  /** 온보딩을 마치고 홈으로(O-60). before를 먼저. 완료 시각을 남기고 다시 읽는다 */
-  const finish = async (before?: () => Promise<unknown>, after?: () => void) => {
+  /**
+   * 온보딩을 마침(O-60). before를 먼저. 완료 시각을 남기고 to로(기본 홈).
+   * to가 함수면 다 마친 뒤 갈 곳을 고름(A-06 앱 잠금 권장 등)
+   */
+  const finish = async (
+    before?: () => Promise<unknown>,
+    after?: () => void,
+    to: string | (() => Promise<string>) = '/',
+  ) => {
     if (saving) return;
     setSaving(true);
     try {
       await before?.();
-      await saveMe({
-        onboarding_step: id.toUpperCase(),
-        onboarding_done_at: new Date().toISOString(),
-      });
-      await me.refetch();
+      const doneAt = new Date().toISOString();
+      await saveMe({ onboarding_step: id.toUpperCase(), onboarding_done_at: doneAt });
       after?.();
+      const dest = typeof to === 'string' ? to : await to();
+      // 다시 읽기 전에 캐시를 고치고 같은 틱에 이동(온보딩 화면이 먼저 홈으로 보내 갈 곳을 덮지 않게 justFinishedTo)
+      finishedTo = { path: dest, at: performance.now() };
+      if (me.data)
+        qc.setQueryData(qk.me, {
+          ...me.data,
+          onboarding_step: id.toUpperCase(),
+          onboarding_done_at: doneAt,
+        });
       setSaving(false);
-      nav('/', { replace: true });
+      nav(dest, { replace: true });
+      void qc.invalidateQueries({ queryKey: qk.me });
     } catch {
       setSaving(false);
-      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish(before, after) });
+      toast(copy.saveFailed, { label: copy.retry, onClick: () => void finish(before, after, to) });
     }
   };
 

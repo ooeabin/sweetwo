@@ -148,6 +148,19 @@ export const splitLineDefaults = (kind: SplitKind) => ({
   autoDay: null as number | null,
 });
 
+/**
+ * 생활비 ‘네’ + 각자 관리(각자 엔진, 06 3-1·17 O-50 고친 점, Q9): 처음 월급 계획에 ‘같이 쓰는 통장’ 0원 줄
+ * (체크리스트에 넣기 켬, 자동 줄 켬). 분담 도우미(W-01b)가 정하면 서버 apply_shared_account가 이 줄을 채움. 그 밖은 없음
+ */
+export function sharedAccountSeed(
+  salaryMode: 'separate' | 'joint',
+  sharedLiving: boolean | null | undefined,
+): (SplitLineDraft & { inChecklist: boolean; autoPay: boolean })[] {
+  return salaryMode === 'separate' && sharedLiving === true
+    ? [{ kind: 'shared_account', amount: 0, inChecklist: true, autoPay: true }]
+    : [];
+}
+
 export interface JoinerSplitInput {
   /** 합류한 사람 실수령과 id */
   income: Won;

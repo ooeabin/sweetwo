@@ -39,7 +39,7 @@ type Step = (typeof STEPS)[number];
 type Draft = SavingDraft;
 // 들어온 곳(32 saving_item_created entry, 2026-11-12 S7-16): home·salary = 첫 저금 빈 줄(홈·W-02), salary_row = W-02 저금 묶음
 // ‘+ 저금 추가’ 줄, salary_wide = W-02 넓은 창 제목 줄 버튼, split = W-01, list = W-13, add_menu = 홈 ‘추가’ 메뉴,
-// palette = 검색 ‘바로 하기’, shortcut = Ctrl(⌘)+N, 그 밖 direct
+// palette = 검색 ‘바로 하기’, shortcut = Ctrl(⌘)+N, onboarding = O-60 ‘첫 저금 만들기’(2026-11-13), 그 밖 direct
 const ENTRIES = [
   'home',
   'salary',
@@ -50,6 +50,7 @@ const ENTRIES = [
   'list',
   'add_menu',
   'shortcut',
+  'onboarding',
 ] as const;
 type Entry = (typeof ENTRIES)[number] | 'direct';
 
@@ -137,7 +138,8 @@ export function W11SavingAdd() {
         ),
       );
       carryToast(left - v.monthly < 0 ? copy.addShort : copy.added);
-      nav(savingPaths.item(id), { replace: true });
+      // O-60 ‘첫 저금 만들기’로 왔으면 끝에 미합류 초대 시트(O-07) → A-06 → 홈(16 v2.2, onboarding AFTER_FIRST_SAVING_PATH)
+      nav(entry === 'onboarding' ? '/welcome' : savingPaths.item(id), { replace: true });
     } catch (e) {
       toast(
         e instanceof SavingItemBlocked

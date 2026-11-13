@@ -88,6 +88,13 @@ export interface AppBridge {
     /** 앱이 화면에 떠 있을 때 온 푸시(OS 알림 대신 앱 안 토스트) */
     onReceive: (cb: (n: { title: string; body: string | null }) => void) => () => void;
   };
+  /**
+   * 첫 실행 초대 코드(15 O-01, 18 P-01 v2.2, 2026-11-13): Android 설치 리퍼러, iOS는 웹 초대 페이지(L-07)가 복사한 클립보드를
+   * 첫 실행 1회만 읽음(31 2장). 코드가 없으면 null. 네이티브는 PR 13, 옛 앱·브라우저는 없음(앱이 null로 봄)
+   */
+  inviteCode?: {
+    firstRun: () => Promise<{ code: string; source: 'clipboard' | 'referrer' } | null>;
+  };
   /** 웹사이트 열기(A-01 업데이트 → 스토어 안내). sweetwo.kr 주소만 */
   openUrl?: (url: string) => Promise<void>;
   /** 오프라인 조회 캐시(30 동기화 4장): 기기에 암호화해 둔 마지막 화면 데이터(JSON 글). 로그아웃하면 기기가 지움 */

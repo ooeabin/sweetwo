@@ -25,7 +25,9 @@ const ACCOUNT_KEYS = [
   'sweetwo.exportedAt', // S-18 내보낸 시각(분석 exported_data)
   'sweetwo.onboardingSeenAt', // 온보딩 마지막 본 시각(분석)
   'sweetwo.onboardingStartedAt', // 온보딩 시작 시각(분석)
-  'sweetwo.pushAsked', // P-11 푸시 물음 1회(다음 계정도 물어봄)
+  'sweetwo.pushAsked', // O-55·P-11 푸시 물음 1회(다음 계정도 물어봄)
+  'sweetwo.pushLater', // O-55 ‘나중에 할게요’(홈 띠 10번으로 1회 다시 물음, 2026-11-13)
+  'sweetwo.joinSend', // P-04 ‘월급은 대부분 …보내요’(합류를 마치면 요청, 2026-11-13)
 ];
 const ACCOUNT_PREFIXES = ['sweetwo.split-notice.', 'sweetwo.made-notice.']; // W-02 안내 본 표시(월급 계획·체크리스트 id)
 

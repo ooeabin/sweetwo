@@ -91,7 +91,12 @@ import {
   W01bSplitPropose,
   W01cSplitAnswer,
 } from './features/salary';
-import { OnboardingGate, OnboardingRoute } from './features/onboarding';
+import {
+  AFTER_FIRST_SAVING_PATH,
+  O07InviteSheet,
+  OnboardingGate,
+  OnboardingRoute,
+} from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
 import { CS19NotFound, RouteError } from './shared/cs-19-not-found';
 
@@ -118,6 +123,17 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // 홈 H-01~06
+      {
+        path: AFTER_FIRST_SAVING_PATH, // O-07 첫 저금 직후 초대 시트(홈 위) → A-06 → 홈(2026-11-13)
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <H01Home />
+              <O07InviteSheet />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      },
       ...(
         [
           ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary?view=plan(2026-11-09)

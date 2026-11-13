@@ -77,6 +77,45 @@ export type AnalyticsEvent =
         no_income: boolean;
       };
     }
+  // ── v2.2 온보딩·합류(32 0-4, 2026-11-13) ──
+  | { name: 'push_permission_asked'; props: { screen_id: 'O-55' | 'P-11' | 'H-06' } }
+  | {
+      // result: OS 허용 결과(granted/denied), 브리지 없음(unavailable), ‘나중에 할게요’(later). kinds_on = 켠 알림 종류
+      name: 'push_permission_answered';
+      props: {
+        screen_id: 'O-55' | 'P-11' | 'H-06';
+        result: 'granted' | 'denied' | 'unavailable' | 'later';
+        kinds_on: string[];
+      };
+    }
+  | {
+      name: 'manage_answers_saved';
+      props: {
+        shared_living: boolean;
+        shared_saving: boolean;
+        manager: 'self' | 'partner' | 'both' | 'each' | null;
+        salary_mode: 'separate' | 'joint';
+        screen_id: string;
+      };
+    }
+  | {
+      name: 'plan_share_changed';
+      props: { from: string; to: string; screen_id: string };
+    }
+  | {
+      name: 'mode_change_requested';
+      props: {
+        phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
+        to_mode: 'joint' | 'separate';
+        result: 'applied' | 'requested';
+      };
+    }
+  | { name: 'app_lock_answered'; props: { result: 'on' | 'later' } }
+  | {
+      // 첫 실행 초대 코드 자동 입력(15 O-01 시트): 클립보드(iOS)·설치 리퍼러(Android)
+      name: 'invite_code_autofilled';
+      props: { source: 'clipboard' | 'referrer'; result: 'join' | 'decline' };
+    }
   | {
       // O-07 초대 코드 보내기(32 4-3). share = 기기 공유 창(카카오톡 등)
       name: 'invite_sent';
@@ -217,6 +256,7 @@ export type AnalyticsEvent =
           | 'list'
           | 'add_menu'
           | 'shortcut'
+          | 'onboarding'
           | 'direct';
         monthly_band: AmountBand;
         has_target: boolean;

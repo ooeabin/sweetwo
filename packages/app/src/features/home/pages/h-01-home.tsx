@@ -28,6 +28,7 @@ import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { toast } from '../../../shared/toast';
 import { sharedCopy } from '../../../shared/copy';
+import { WaitNudge } from '../../pairing';
 import {
   AddMenu,
   lastAssetsTab,
@@ -194,7 +195,8 @@ export function H01Home() {
   // 합류했는데 시작한 사람이 아직 온보딩 중(18, 상태 변형 v2.2 ‘시작한 사람을 기다림’): 월급 계획이 생기면 P-04, 그 전엔 대기
   if (me.data.onboarding_step === 'P-WAIT') {
     if (splits.isLoading) return <LoadingFrame current="month" />;
-    if (splits.data?.length) return <Navigate to="/join/p-04" replace />;
+    // 줄이 있는 월급 계획만(관리 형태를 고를 때 생긴 빈 공동 월급 계획은 아직 없는 것, 2026-11-13 PR 8)
+    if (splits.data?.some((x) => x.split_line.length)) return <Navigate to="/join/p-04" replace />;
     const starter = partner.data?.nickname ?? sp.partner_nickname ?? '';
     return (
       <MainFrame
@@ -209,6 +211,8 @@ export function H01Home() {
             <Illustration name="status-waiting" className="hg-auth__art" />
             <b className="hg-hubwait__title">{copy.waitTitle(starter)}</b>
             <span className="hg-hubwait__sub">{copy.waitCard(starter)}</span>
+            {/* 2026-11-13 v2.2 ‘알려 주기’(시작한 사람에게 알림, 24시간에 1번) */}
+            <WaitNudge starter={starter} />
           </section>,
         ]}
       />

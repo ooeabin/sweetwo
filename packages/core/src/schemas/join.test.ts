@@ -24,6 +24,28 @@ describe('JoinContextSchema', () => {
     });
     expect(v?.starter_nickname).toBe('찬우');
     expect(v?.joint?.lines[0]?.amount).toBe(950000);
+    // 옛 응답(관리 형태 없음)은 기본값
+    expect(v?.style).toBeNull();
+    expect(v?.manager).toBeNull();
+  });
+  it('v2.2 관리 형태: 한 사람 관리형, 시작한 사람이 관리', () => {
+    const v = JoinContextSchema.parse({
+      space_id: 's1',
+      member: false,
+      reserved_until: null,
+      starter_id: 'u1',
+      starter_nickname: '찬우',
+      salary_mode: 'joint',
+      shared_living: true,
+      shared_saving: false,
+      manager: 'starter',
+      style: 'one_manager',
+      has_plan: true,
+      prefill: [],
+      joint: null,
+    });
+    expect(v?.manager).toBe('starter');
+    expect(v?.style).toBe('one_manager');
   });
   it('모르는 관리 방식은 거절', () => {
     expect(() =>
