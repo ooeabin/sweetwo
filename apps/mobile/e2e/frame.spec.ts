@@ -105,7 +105,7 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d), 맨 �
   await context.setOffline(false);
   await expect(page.getByText('연결이 끊겼어요')).toHaveCount(0);
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
-  await page.getByRole('button', { name: '확인하기' }).click();
+  await page.getByRole('button', { name: '확인하기', exact: true }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/unlink\/review$/);
 });
 

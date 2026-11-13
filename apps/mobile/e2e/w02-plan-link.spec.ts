@@ -178,7 +178,7 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   await page.goto('/salary');
   await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 확인을 마쳤어요');
   // ‘못 함’ 줄: 체크 안 된 빈 원, 취소선 없음, 화면 읽기 “청약 못 함”
-  const skipped = page.getByRole('checkbox', { name: '청약 못 함' });
+  const skipped = page.getByRole('checkbox', { name: '청약 건너뜀' });
   await expect(skipped).toHaveAttribute('aria-checked', 'false');
   const row = page.locator('.hg-transfer', { hasText: '청약' });
   await expect(row).not.toHaveClass(/is-done/);

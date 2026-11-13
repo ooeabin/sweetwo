@@ -57,7 +57,7 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
 
   // 2026-11-09 홈 허브: 저금 타일(H-09) → W-13
   await page.goto('/');
-  await page.getByRole('button', { name: /^저금/ }).click();
+  await page.getByRole('button', { name: /^저금 (\d|아직)/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=home$/);
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
 });

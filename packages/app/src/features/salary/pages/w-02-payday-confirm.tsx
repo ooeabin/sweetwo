@@ -80,6 +80,7 @@ export function W02PaydayConfirm() {
   const [who, setWho] = useState<string | null>(() => params.get('who'));
   const [ago, setAgo] = useState(0);
   const [hidden, setHidden] = useState<string | null>(null);
+  const [madeHidden, setMadeHidden] = useState<string | null>(null);
   const [autoOpen, setAutoOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const cycleParam = params.get('cycle');
@@ -305,6 +306,26 @@ export function W02PaydayConfirm() {
       /* 저장 못 해도 이번 화면에서는 숨김 */
     }
   };
+  // 새 사이클 첫 화면 한 줄 “11월 계획대로 체크리스트를 만들었어요”(2026-11-09): 지난 체크리스트가 있을 때(첫 달 아님),
+  // 이번 달 내(합쳐서면 공동) 탭, ×로 닫으면 그 체크리스트에서는 다시 안 보임(기기마다)
+  const madeKey = `sweetwo.made-notice.${list.id}`;
+  const madeSeen = (() => {
+    if (madeHidden === list.id) return true;
+    try {
+      return localStorage.getItem(madeKey) === '1';
+    } catch {
+      return false;
+    }
+  })();
+  const showMade = ago === 0 && !partnerTab && (past.data?.length ?? 0) > 0 && !madeSeen;
+  const dismissMade = () => {
+    setMadeHidden(list.id);
+    try {
+      localStorage.setItem(madeKey, '1');
+    } catch {
+      /* 저장 못 해도 이번 화면에서는 숨김 */
+    }
+  };
   const income = incomeOf(owner, me.data, partner.data);
   const ownerPeople = (
     owner === null ? [me.data, partner.data] : [owner === meId ? me.data : partner.data]
@@ -517,6 +538,21 @@ export function W02PaydayConfirm() {
         />
       </section>
       {late && !partnerTab && <LastMonthNote />}
+      {showMade && (
+        <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+          <p className="hg-q__help" style={{ flex: 1 }}>
+            {copy.madeFromPlan(Number(list.cycle_start.slice(5, 7)))}
+          </p>
+          <button
+            type="button"
+            className="hg-btn hg-btn--ghost hg-btn--sm"
+            aria-label={copy.close}
+            onClick={dismissMade}
+          >
+            ×
+          </button>
+        </div>
+      )}
       {changedBy && !dismissed && (
         <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
           <p className="hg-q__help" style={{ flex: 1 }}>

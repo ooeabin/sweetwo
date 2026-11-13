@@ -116,7 +116,6 @@ export async function handleV22(
     ['/rest/v1/mode_change_request', v.modeRequests],
     ['/rest/v1/shared_account', v.accounts],
     ['/rest/v1/salary_change', v.salaryChanges],
-    ['/rest/v1/rank_consent_request', v.rankRequests],
     ['/rest/v1/money_in', v.moneyIns],
   ];
   for (const [p, rows] of tables)
