@@ -19,7 +19,15 @@ export const JoinContextSchema = z
         version: z.number(),
         lines: z.array(
           z.object({
-            kind: z.enum(['saving', 'fixed', 'living', 'allowance', 'custom']),
+            kind: z.enum([
+              'saving',
+              'fixed',
+              'living',
+              'allowance',
+              'custom',
+              'send',
+              'shared_account',
+            ]),
             amount: z.number(),
             goal_id: z.string().nullable(),
             user_id: z.string().nullable(),

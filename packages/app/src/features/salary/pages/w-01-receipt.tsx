@@ -146,7 +146,9 @@ export function W01Receipt() {
         ? (l.name ?? '')
         : l.kind === 'allowance' && joint
           ? `${personName(l.user_id)} ${copy.lineNames.allowance}`
-          : copy.lineNames[l.kind];
+          : l.kind === 'send' || l.kind === 'shared_account'
+            ? (l.name ?? '') // v2.2 새 줄: 화면 PR 전까지 저장된 이름만
+            : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
   // 보이는 금액 글자(가리기면 화면 읽기는 “가려진 금액”, 11 9장)
   const shown = (text: string) => speakMasked(text);

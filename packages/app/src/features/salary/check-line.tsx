@@ -55,6 +55,8 @@ export function lineName(
   if (l.kind === 'custom') return l.name ?? '';
   if (l.kind === 'allowance' && joint)
     return `${personName(l.user_id) ?? ''} ${LINE_NAMES.allowance}`;
+  // v2.2 새 줄(보내기, 같이 쓰는 통장)은 화면 PR 전까지 저장된 이름만
+  if (l.kind === 'send' || l.kind === 'shared_account') return l.name ?? '';
   return LINE_NAMES[l.kind];
 }
 

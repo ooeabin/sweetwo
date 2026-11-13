@@ -16,7 +16,14 @@ export function O11Marriage() {
     <QuestionLayout chapter={s.chapter} title={copy.married} onBack={s.onBack}>
       <ChoiceCards<Status>
         label={copy.married}
-        value={sp?.marriage_status ?? null}
+        value={
+          // v2.2 새 값(dating, living_together)은 이 화면 선택지에 아직 없음(v2.2 온보딩 PR에서 4지선다)
+          sp?.marriage_status === 'married' ||
+          sp?.marriage_status === 'engaged' ||
+          sp?.marriage_status === 'undecided'
+            ? sp.marriage_status
+            : null
+        }
         onChange={() => undefined}
         onPick={(v) =>
           void s.done(() =>

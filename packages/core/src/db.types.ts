@@ -3729,6 +3729,7 @@ export type Database = {
       expense_burden: "shared" | "personal"
       family_relation: "parent" | "grandparent" | "sibling" | "sibling_spouse" | "nephew" | "other"
       goal_kind: "once" | "yearly" | "monthly"
+      goal_move_reason: "fix" | "used" | "interest" | "reconcile" | "note_paid" | "custom" | "auto"
       goal_owner: "together" | "me" | "partner"
       goal_status: "active" | "delayed" | "achieved" | "used" | "paused" | "wrapping_up"
       goal_use_source: "care" | "wedding" | "yearly" | "close" | "achieved" | "move"
@@ -3739,20 +3740,23 @@ export type Database = {
       inquiry_category: "account" | "couple" | "calc" | "sync" | "billing" | "privacy" | "etc"
       inquiry_status: "received" | "in_progress" | "waiting_user" | "done"
       invest_answer: "keep" | "some" | "active" | "unsure"
-      marriage_status: "married" | "engaged" | "undecided"
+      marriage_status: "married" | "engaged" | "undecided" | "dating" | "living_together"
+      money_in_kind: "salary" | "bonus" | "family" | "work" | "refund" | "etc"
       month_close_status: "draft" | "done"
       newlywed_home: "have" | "before" | "after" | "parents"
       paid_from: "goal_fund" | "living" | "personal" | "wedding_account" | "personal_support"
       plan_line_kind: "split" | "emergency_to_living" | "goal_to_living"
       plan_line_state: "pending" | "done"
       plan_line_target: "account" | "goal"
+      plan_share: "all" | "saving_only" | "done_only"
       plan_status: "created" | "splitting" | "closing" | "closed" | "skipped"
       prep_money_mode: "separate" | "together"
       proposal_response: "like" | "oppose" | "differently"
       proposal_status:
         "open" | "applied" | "held" | "withdrawn" | "expired" | "reverted" | "superseded"
       salary_mode: "separate" | "joint"
-      split_line_kind: "saving" | "fixed" | "living" | "allowance" | "custom"
+      split_line_kind:
+        "saving" | "fixed" | "living" | "allowance" | "custom" | "send" | "shared_account"
       split_mode: "half" | "income" | "custom"
       todo_status: "pending" | "snoozed" | "done"
       wedding_payer: "us" | "groom" | "bride" | "family"
@@ -3907,6 +3911,7 @@ export const Constants = {
       expense_burden: ["shared", "personal"],
       family_relation: ["parent", "grandparent", "sibling", "sibling_spouse", "nephew", "other"],
       goal_kind: ["once", "yearly", "monthly"],
+      goal_move_reason: ["fix", "used", "interest", "reconcile", "note_paid", "custom", "auto"],
       goal_owner: ["together", "me", "partner"],
       goal_status: ["active", "delayed", "achieved", "used", "paused", "wrapping_up"],
       goal_use_source: ["care", "wedding", "yearly", "close", "achieved", "move"],
@@ -3917,13 +3922,15 @@ export const Constants = {
       inquiry_category: ["account", "couple", "calc", "sync", "billing", "privacy", "etc"],
       inquiry_status: ["received", "in_progress", "waiting_user", "done"],
       invest_answer: ["keep", "some", "active", "unsure"],
-      marriage_status: ["married", "engaged", "undecided"],
+      marriage_status: ["married", "engaged", "undecided", "dating", "living_together"],
+      money_in_kind: ["salary", "bonus", "family", "work", "refund", "etc"],
       month_close_status: ["draft", "done"],
       newlywed_home: ["have", "before", "after", "parents"],
       paid_from: ["goal_fund", "living", "personal", "wedding_account", "personal_support"],
       plan_line_kind: ["split", "emergency_to_living", "goal_to_living"],
       plan_line_state: ["pending", "done"],
       plan_line_target: ["account", "goal"],
+      plan_share: ["all", "saving_only", "done_only"],
       plan_status: ["created", "splitting", "closing", "closed", "skipped"],
       prep_money_mode: ["separate", "together"],
       proposal_response: ["like", "oppose", "differently"],
@@ -3937,7 +3944,15 @@ export const Constants = {
         "superseded",
       ],
       salary_mode: ["separate", "joint"],
-      split_line_kind: ["saving", "fixed", "living", "allowance", "custom"],
+      split_line_kind: [
+        "saving",
+        "fixed",
+        "living",
+        "allowance",
+        "custom",
+        "send",
+        "shared_account",
+      ],
       split_mode: ["half", "income", "custom"],
       todo_status: ["pending", "snoozed", "done"],
       wedding_payer: ["us", "groom", "bride", "family"],

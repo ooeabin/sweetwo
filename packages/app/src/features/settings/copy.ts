@@ -49,6 +49,9 @@ export const copy = {
     married: '결혼했어요',
     engaged: '결혼 준비 중이에요',
     undecided: '아직 안 정했어요',
+    // v2.2 O-11 4지선다 새 값(ADR 0009). 고르는 화면은 v2.2 온보딩 PR에서
+    dating: '연애 중이에요',
+    living_together: '같이 살아요',
   },
   weddingDay: { married: '결혼한 날', engaged: '결혼 예정일' }, // [확인 필요]
   weddingPlannedMonth: (y: number, m: number) => `${y}년 ${m}월 예정`, // [확인 필요]
