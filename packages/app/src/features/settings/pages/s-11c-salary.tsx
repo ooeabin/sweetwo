@@ -10,14 +10,15 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { changeBand, track } from '../../../shared/analytics';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 type Day = number | 'last';
 
 // S-11c 내 월급(O-31과 같음): 금액 + 매달 달라요 + 월급날, ‘지금은 월급이 없어요’. 본인만.
-// 저장 = 바로 적용 + Toast ‘되돌리기’(상대 알림은 서버). 금액이 바뀌면 남는 돈만, 월급날은 다음 체크리스트부터(20 ‘다시 계산되는 때’).
+// 저장 = 바로 적용 + Toast ‘되돌리기’(상대 알림은 서버). 금액이 바뀌면 여유 자금만, 월급날은 다음 체크리스트부터(20 ‘다시 계산되는 때’).
 export function S11cSalary() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -52,9 +53,26 @@ export function S11cSalary() {
         payday_last: dd === 'last',
       });
       await qc.invalidateQueries({ queryKey: qk.me });
-      toast(copy.salarySaved, {
+      // 32 4-5 fact_value_changed(2026-11-12 QA 11구간 S11-06): 바뀐 값마다. 월급날은 날짜 숫자(말일 31)로 변동률
+      const dayNum = (n: number | null, last: boolean) => (last ? 31 : (n ?? 0));
+      if ((me.monthly_income ?? 0) !== income)
+        track('fact_value_changed', {
+          field: 'income',
+          change_band: changeBand(me.monthly_income ?? 0, income),
+          source_screen: 'S-11c',
+        });
+      const fromDay = dayNum(me.payday, !!me.payday_last);
+      const toDay = dayNum(typeof dd === 'number' ? dd : null, dd === 'last');
+      if (fromDay !== toDay)
+        track('fact_value_changed', {
+          field: 'payday',
+          change_band: changeBand(fromDay, toDay),
+          source_screen: 'S-11c',
+        });
+      carryToast(copy.salarySaved, {
         label: copy.undo,
-        onClick: () => void updateMe(before).then(() => qc.invalidateQueries({ queryKey: qk.me })),
+        onClick: () =>
+          quietly(updateMe(before).then(() => qc.invalidateQueries({ queryKey: qk.me }))),
       });
       nav('/settings/me', { replace: true });
     } catch {

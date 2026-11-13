@@ -1,48 +1,35 @@
-import {
-  dateToYm,
-  emergencyTarget,
-  recommendSplit,
-  type AllocGoal,
-  type SplitLineDraft,
-} from '@sweetwo/core';
+import { dateToYm, recommendSplit, type SavingPlanItem, type SplitLineDraft } from '@sweetwo/core';
 import type { Goal, Me } from '@sweetwo/api';
 
-// 월급 계획 초안(O-50, 17 온보딩 ②). W-01도 같은 규칙을 쓴다.
+// 월급 계획 초안(O-50 추천값, W-01 ‘추천값으로 다시 채우기’, 20·06 3-2). 2026-11-08 ADR 0007: 비상금 없음, 저금 줄 = 저금 항목.
 
-export const toAllocGoal = (g: Goal): AllocGoal => ({
+/** 저금 항목 → 추천값 재료(모은 금액은 서버 값) */
+export const toPlanItem = (g: Goal, saved: Record<string, number> | undefined): SavingPlanItem => ({
   id: g.id,
-  template: g.template,
-  name: g.name,
-  kind: g.kind,
-  priority: g.priority,
   target: g.target_amount,
-  held: g.other_held,
+  saved: saved?.[g.id] ?? 0,
   deadline: g.deadline ? dateToYm(g.deadline) : null,
-  paused: g.status === 'paused',
 });
 
 /**
- * 저금 줄 순서: 비상금 → 우리 목표 → 내 목표(묶음 안은 우선순위). 보류·달성 목표는 뺌.
- * owners = 내 목표를 넣을 사람(각자 = 월급 계획 주인 한 명, 합쳐서 = 두 사람)
+ * 이 월급 계획의 저금 항목(저금 묶음 순서 = 만든 순서). 그만 모음·휴지통은 뺌.
+ * owner = 월급 계획 주인(각자), 합쳐서면 null(우리 둘 항목 + 각자일 때 만든 항목 모두)
  */
-export function savingGoals(goals: Goal[], owners: string | string[] | undefined): Goal[] {
-  const ids = Array.isArray(owners) ? owners : owners ? [owners] : [];
-  const live = goals.filter(
-    (g) => g.status === 'active' || g.status === 'delayed' || g.template === 'emergency',
-  );
-  const rank = (g: Goal) => (g.template === 'emergency' ? 0 : g.owner_user_id === null ? 1 : 2);
-  return live
-    .filter((g) => g.owner_user_id === null || ids.includes(g.owner_user_id))
-    .sort((a, b) => rank(a) - rank(b) || a.priority - b.priority);
+export function savingGoals(goals: Goal[], owner: string | null): Goal[] {
+  return goals
+    .filter((g) => !g.deleted_at && !g.closed_at)
+    .filter((g) => owner === null || g.owner_user_id === owner)
+    .sort((a, b) => a.priority - b.priority || (a.created_at < b.created_at ? -1 : 1));
 }
 
 type Person = Pick<Me, 'id' | 'monthly_income'>;
 
 /**
  * 추천값(O-50 처음 채우기, W-01 ‘추천값으로 다시 채우기’, 20 W-01 6번).
- * - 각자: 월급 계획 주인 수입. 우리 목표 줄은 상대 월급 계획 같은 목표 줄만큼 빼고 채움(others)
- * - 합쳐서: 두 사람 수입 합, 용돈은 사람마다
- * - keep: 그대로 둘 줄(배우자 탭의 배우자 내 목표 줄)
+ * - 각자: 월급 계획 주인 수입, 그 사람 저금 항목만
+ * - 합쳐서: 두 사람 수입 합, 용돈은 사람마다, 공동 월급 계획의 저금 항목
+ * - current: 지금 줄. 저금 줄 금액(목표 금액·기한이 없는 항목은 그대로), 직접 추가한 지출 줄(금액 그대로, 2026-11-12 D1)
+ * - keep: 그대로 둘 줄(파트너 탭)
  */
 export function recommendedDraft(
   owner: Person,
@@ -50,41 +37,41 @@ export function recommendedDraft(
   o: {
     partner?: Person | null;
     joint?: boolean;
-    others?: Record<string, number>;
+    saved?: Record<string, number>;
+    current?: SplitLineDraft[];
     keep?: Record<string, number>;
   } = {},
 ): SplitLineDraft[] {
   const people = o.joint && o.partner ? [owner, o.partner] : [owner];
   const incomes = people.map((p) => ({ userId: p.id, income: p.monthly_income ?? 0 }));
+  const current: Record<string, number> = {};
+  for (const l of o.current ?? [])
+    if (l.kind === 'saving' && l.goalId) current[l.goalId] = (current[l.goalId] ?? 0) + l.amount;
+  const custom = (o.current ?? [])
+    .filter((l) => l.kind === 'custom')
+    .map((l) => ({ name: l.name ?? '', amount: l.amount }));
   return recommendSplit({
     income: incomes.reduce((s, p) => s + p.income, 0),
     people: incomes,
-    goals: savingGoals(
-      goals,
-      people.map((p) => p.id),
-    ).map(toAllocGoal),
-    others: o.others,
+    items: savingGoals(goals, o.joint ? null : owner.id).map((g) => toPlanItem(g, o.saved)),
+    current,
     keep: o.keep,
+    custom,
   });
 }
 
-/** 상대 월급 계획의 우리 목표(비상금 포함) 저금 줄 금액(각자 모드 추천값에서 뺌) */
-export function ourLinesOf(
-  split: { split_line: { kind: string; goal_id: string | null; amount: number }[] } | undefined,
-  goals: Goal[],
-): Record<string, number> {
-  const ours = new Set(goals.filter((g) => g.owner_user_id === null).map((g) => g.id));
-  const out: Record<string, number> = {};
-  for (const l of split?.split_line ?? [])
-    if (l.kind === 'saving' && l.goal_id && ours.has(l.goal_id))
-      out[l.goal_id] = (out[l.goal_id] ?? 0) + l.amount;
-  return out;
-}
-
-/** 비상금 목표 금액 = (고정지출 + 생활비) × 3(06 3장). 둘 다 0이면 null(금액 정하기) */
-export function emergencyGoalTarget(lines: SplitLineDraft[]) {
-  const sum = (k: SplitLineDraft['kind']) =>
-    lines.filter((l) => l.kind === k).reduce((s, l) => s + l.amount, 0);
-  const t = emergencyTarget(sum('fixed'), sum('living'));
-  return t > 0 ? t : null;
+/**
+ * 추천값을 지금 줄 순서대로(W-01 ‘추천값으로 다시 채우기’는 순서를 그대로, 2026-11-09).
+ * 저금 줄이 먼저, 각 묶음 안은 지금 순서, 지금 없던 줄은 그 묶음 맨 아래
+ */
+export function keepOrder(next: SplitLineDraft[], current: SplitLineDraft[]): SplitLineDraft[] {
+  const key = (l: SplitLineDraft) =>
+    `${l.kind}:${l.goalId ?? ''}:${l.userId ?? ''}:${l.name ?? ''}`;
+  const pos = new Map(current.map((l, i) => [key(l), i]));
+  const rank = (l: SplitLineDraft) => pos.get(key(l)) ?? Number.MAX_SAFE_INTEGER;
+  const group = (l: SplitLineDraft) => (l.kind === 'saving' ? 0 : 1);
+  return next
+    .map((l, i) => ({ l, i }))
+    .sort((a, b) => group(a.l) - group(b.l) || rank(a.l) - rank(b.l) || a.i - b.i)
+    .map(({ l }) => l);
 }

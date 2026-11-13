@@ -14,11 +14,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
-import { useCalendarData } from '../data';
+import { careUndo, trackCareShared, useCalendarData } from '../data';
+import { onSessionReset } from '../../../shared/session-reset';
 
-// Y-07 챙길 날 추가(24 Y-07, 화면별 정의, 재기획): 모든 챙길 날을 같은 3화면으로.
+// Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
 // → c “언제예요?” 날짜 + 양력/음력 + “매년 돌아와요”(설날·추석·어버이날은 날짜를 채우고 건너뜀)
 // → d “쓸 돈을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-01.
@@ -34,7 +35,7 @@ const FIXED: Partial<Record<ChipKey, { lunar: boolean; month: number; day: numbe
   parents_day: { lunar: false, month: 5, day: 8 },
 };
 interface Draft {
-  /** 고친다면 그 챙길 날 id */
+  /** 고친다면 그 경조사 id */
   editId: string | null;
   chip: ChipKey | null;
   name: string;
@@ -64,9 +65,11 @@ const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, ge
   d: start(),
   set: (p) => set({ d: { ...get().d, ...p } }),
 }));
-/** 챙길 날 추가 시작(‘+ 추가’, 달력 고른 날) */
+// 로그아웃하면 입력 중이던 경조사 이름·날짜를 비움(2026-11-12 QA 11구간 S11-08)
+onSessionReset(() => useDraft.setState({ d: start() }));
+/** 경조사 추가 시작(‘+ 추가’, 달력 고른 날) */
 export const startCareAdd = (date: string | null = null) => useDraft.getState().set(start(date));
-/** 챙길 날 수정 시작(Y-05 ‘수정’): 이름과 날짜(다음 회차 날짜, 음력이면 음력 원본) */
+/** 경조사 수정 시작(Y-05 ‘수정’): 이름과 날짜(다음 회차 날짜, 음력이면 음력 원본) */
 export const startCareEdit = (c: CareDay, today: string) => {
   const y = today.slice(0, 4);
   const pad = (n: number | null) => String(n ?? 1).padStart(2, '0');
@@ -168,9 +171,18 @@ export function Y07CareAdd() {
     setSaving(true);
     try {
       if (editing) {
+        // 2026-11-12 S9-04 Toast ‘되돌리기’: 고치기 전 이름·날짜로
+        const prev = {
+          name: editing.name,
+          date_rule: editing.date_rule,
+          month: editing.month,
+          day: editing.day,
+          leap: editing.leap,
+          once_on: editing.once_on,
+        };
         await updateCareDay(editing.id, { name, ...rule });
         await qc.invalidateQueries({ queryKey: qk.careDays });
-        toast(copy.edited);
+        carryToast(copy.edited, careUndo(qc, editing.id, prev));
         nav(`/calendar/day/${editing.id}`, { replace: true });
         return;
       }
@@ -178,11 +190,12 @@ export function Y07CareAdd() {
         { category: 'couple', kind: KIND[d.chip ?? 'custom'], name, budget: amount, ...rule },
       ]);
       await qc.invalidateQueries({ queryKey: qk.careDays });
+      trackCareShared(!!c.couple?.joined); // 상대 알림이 감(32 4-6, S9-05)
       // 초안은 다음 시작(startCareAdd)에서 비움(여기서 비우면 a로 되돌아감)
       if (record && id && rule.once_on)
         nav(`/calendar/day/${id}/record/a?on=${rule.once_on}`, { replace: true });
       else {
-        toast(copy.saved);
+        carryToast(copy.saved);
         nav('/calendar/list', { replace: true });
       }
     } catch {
@@ -315,7 +328,14 @@ export function Y07CareAdd() {
       title={copy.amountQ}
       help={name}
       onBack={back}
-      later={{ label: copy.skip, onClick: () => void save(0) }}
+      // 건너뛰기도 같은 날 확인을 한 번(2026-11-12 S9-09)
+      later={{
+        label: copy.skip,
+        onClick: () => {
+          if (dup && !asked) return setAsked(true);
+          void save(0);
+        },
+      }}
       primary={{ label: copy.addOk, loading: saving }}
       onSubmit={() => {
         if (dup && !asked) return setAsked(true);

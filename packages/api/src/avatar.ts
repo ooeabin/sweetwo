@@ -65,7 +65,7 @@ export async function removeAvatar(spaceId: string, userId: string) {
     .remove([`${spaceId}/${userId}.jpg`]);
 }
 
-/** 소셜 사진을 가져올 차례인지: 부부 공간이 있고, 사진이 없고, 아직 시도하지 않았을 때(25 S-11e) */
+/** 소셜 사진을 가져올 차례인지: 우리 둘 공간이 있고, 사진이 없고, 아직 시도하지 않았을 때(25 S-11e) */
 export async function needsSocialAvatar(): Promise<boolean> {
   const { data, error } = await supabase()
     .from('app_user')
@@ -73,4 +73,11 @@ export async function needsSocialAvatar(): Promise<boolean> {
     .maybeSingle();
   fail(error);
   return !!data?.space_id && !data.avatar_path && !data.avatar_social_checked_at;
+}
+
+/** S-11 ‘로그인’ 줄: 가입한 소셜 계정 이메일(없으면 null, 25 S-11 3번, 2026-11-12 QA 11구간 S11-11) */
+export async function fetchLoginEmail(): Promise<string | null> {
+  const { data, error } = await supabase().rpc('my_login_email');
+  fail(error);
+  return typeof data === 'string' && data ? data : null;
 }

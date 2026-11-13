@@ -3,11 +3,13 @@ import { todayKst } from '@sweetwo/core';
 import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useOnline } from '../../../shared/online';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { exportedRecently } from '../unlink';
 
 /** 함께 쓴 개월 수(공간 만든 달부터). 값이 없거나 깨졌으면 0 */
 function monthsSince(at: string | undefined): number {
@@ -25,17 +27,22 @@ export function S12cUnlinkConfirm() {
   const d = useSettingsData();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
+  // 오프라인이면 요청 비활성 + 이유 한 줄(25 예외, 2026-11-11 S3-08)
+  const online = useOnline();
   if (d.loading || !d.c) return <QuestionSkeleton />;
   const c = d.c;
   const ok = text.trim() === copy.confirmWord;
   const send = async () => {
-    if (!ok || busy) return;
+    if (!ok || busy || !online) return;
     setBusy(true);
     try {
       await requestUnlink(copy.confirmWord);
-      track('unlink_requested', { linked_months: monthsSince(d.space?.created_at) });
+      track('unlink_requested', {
+        linked_months: monthsSince(d.space?.created_at),
+        exported_data: exportedRecently(),
+      });
       await Promise.all([qk.space, qk.unlink].map((k) => qc.invalidateQueries({ queryKey: k })));
-      toast(copy.sent(c.partnerName));
+      carryToast(copy.sent(c.partnerName));
       nav('/settings/couple', { replace: true });
     } catch {
       toast(copy.failed);
@@ -48,7 +55,8 @@ export function S12cUnlinkConfirm() {
       steps={{ total: 2, now: 1 }}
       title={copy.confirmQ}
       onBack={() => nav('/settings/couple/unlink')}
-      primary={{ label: copy.send, disabled: !ok, loading: busy }}
+      primary={{ label: copy.send, disabled: !ok || !online, loading: busy }}
+      note={online ? undefined : copy.needOnline}
       onSubmit={() => void send()}
     >
       <Field

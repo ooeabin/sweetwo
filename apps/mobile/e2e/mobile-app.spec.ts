@@ -136,7 +136,7 @@ test('모바일(iOS): 로그인 창 → 돌아오면 다음 화면, PIN 뒤 “F
     },
   });
   await page.goto('/login');
-  await page.getByRole('button', { name: '카카오로 3초 만에 시작하기' }).click();
+  await page.getByRole('button', { name: '카카오로 3초 만에 로그인' }).click();
   await expect.poll(async () => (await fake(page)).started).toEqual(['kakao']);
   await expect(page).toHaveURL(/\/login\/wait$/);
   // 로그인 창이 닫히며 결과가 옴(네이티브 브리지 → 앱)
@@ -175,70 +175,26 @@ test('모바일 푸시(S-14): 켜면 OS 허용 → 기기 등록, 푸시를 누�
     .toBeGreaterThan(0);
   // 푸시를 눌러 들어옴 → 그 알림 화면
   await page.evaluate(() =>
-    (window as unknown as { __fake: Fake }).__fake.openCb?.({ id: 'nope', target: '/goals' }),
+    (window as unknown as { __fake: Fake }).__fake.openCb?.({ id: 'nope', target: '/salary' }),
   );
-  await expect(page).toHaveURL(/\/goals$/);
+  await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('모바일로 합류한 사람의 첫 홈: “PC에서도” 띠 1회 → 링크 메일 보내기', async ({ page }) => {
+test('앱 정보(S-19): 업데이트는 스토어가 해서 ‘업데이트 확인’ 줄이 없음, 합류한 사람 홈에 PC 안내 띠 없음(ADR 0008)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   if (db.space) db.space.created_by = 'starter-other';
   await fakeIosBridge(page, true);
   await page.goto('/');
-  const band = page.getByText('PC에서도 같은 계정으로 쓸 수 있어요');
-  await expect(band).toBeVisible();
-  await page.getByRole('button', { name: '데스크톱 앱 받기 링크 보내기' }).click();
-  await expect(page.getByText('알림 이메일로 링크를 보냈어요')).toBeVisible();
-  expect(db.rpc).toContain('send_desktop_link');
-  await expect(band).toHaveCount(0);
-  await page.reload();
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-  await expect(band).toHaveCount(0);
-});
-
-test('앱 정보(S-19): 업데이트 확인 → 받는 중 → 다 받으면 “다시 시작”(자동 업데이트가 있는 앱)', async ({
-  page,
-}) => {
-  await page.clock.setFixedTime(NOW);
-  const db = await mockOnboarding(page, { now: NOW });
-  seed(db);
-  await fakeIosBridge(page, true);
-  // 데스크톱 자동 업데이트 브리지 흉내(main updater.ts가 보내는 상태)
-  await page.addInitScript(() => {
-    const w = window as unknown as {
-      sweetwo: Record<string, unknown>;
-      __update: { cb: ((s: unknown) => void) | null; installed: number };
-    };
-    w.__update = { cb: null, installed: 0 };
-    w.sweetwo.update = {
-      state: async () => ({ status: 'latest' }),
-      check: async () => {
-        setTimeout(() => w.__update.cb?.({ status: 'ready', version: '1.2.0' }), 50);
-        return { status: 'downloading', version: '1.2.0', percent: 42 };
-      },
-      install: async () => void w.__update.installed++,
-      onState: (cb: (s: unknown) => void) => {
-        w.__update.cb = cb;
-        return () => undefined;
-      },
-    };
-  });
+  await expect(page.getByText('PC에서도 같은 계정으로 쓸 수 있어요')).toHaveCount(0);
   await page.goto('/settings/about');
-  const row = page.getByRole('button', { name: /업데이트 확인/ });
-  await expect(row).toContainText('최신 버전이에요');
-  await row.click();
-  await expect(page.getByText('1.2.0 버전을 받았어요. 다시 시작하면 바뀌어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '새 기능 보기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /업데이트 확인/ })).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '다시 시작' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => (window as unknown as { __update: { installed: number } }).__update.installed,
-      ),
-    )
-    .toBe(1);
 });
 
 test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기에 두고, 인터넷이 끊겨도 홈을 보여 줌 + “오프라인”', async ({
@@ -249,8 +205,8 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
   seed(db);
   await fakeIosBridge(page, true);
   await page.goto('/');
-  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
-  // 홈이 쓰는 데이터(목표, 체크리스트)가 모두 기기에 들어간 뒤
+  await expect(page.locator('.hg-hubsave')).toContainText('내 집 마련');
+  // 홈이 쓰는 데이터(저금 항목, 체크리스트)가 모두 기기에 들어간 뒤
   await expect
     .poll(
       () =>
@@ -272,13 +228,13 @@ test('오프라인 조회(30 동기화 4장): 받은 화면 데이터를 기기�
     Object.defineProperty(Navigator.prototype, 'onLine', { get: () => false }),
   );
   await page.reload();
-  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  await expect(page.locator('.hg-hubsave')).toContainText('내 집 마련');
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toContainText(
     /마지막 저장 10월 7일 \d{2}:\d{2}/,
   );
 });
 
-test('부부 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 공간 데이터를 지움(31 보안·개인정보 4장)', async ({
+test('우리 둘 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 공간 데이터를 지움(31 보안·개인정보 4장)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -286,7 +242,7 @@ test('부부 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 
   seed(db);
   await fakeIosBridge(page, true);
   await page.goto('/');
-  await expect(page.getByRole('region', { name: '목표' })).toContainText('내 집 마련');
+  await expect(page.locator('.hg-hubsave')).toContainText('내 집 마련');
   await expect
     .poll(
       () => page.evaluate(() => (localStorage.getItem('e2e-cache') ?? '').includes('내 집 마련')),
@@ -295,7 +251,7 @@ test('부부 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 
       },
     )
     .toBe(true);
-  // 서버에서 공간이 바뀜(예전 목표는 더 이상 안 보임)
+  // 서버에서 공간이 바뀜(예전 저금 항목은 더 이상 안 보임)
   db.me.space_id = 'space-2';
   if (db.space) db.space.id = 'space-2';
   db.goals.splice(0, db.goals.length);
@@ -308,4 +264,69 @@ test('부부 공간이 바뀌면(연결 해제 확정 등) 기기에 둔 예전 
       },
     )
     .toBe(false);
+});
+
+// QA 11구간(2026-11-12): 휴대폰 알림 권한, S-18 본인 확인
+test('S-14 휴대폰 알림이 꺼져 있으면 “휴대폰 설정에서 알림을 켜 주세요” + ‘설정 열기’, 푸시·묶음은 꺼짐으로(S11-04)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.noti_prefs = { push: true };
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    const w = window as unknown as {
+      __fake: Fake;
+      sweetwo: { push: Record<string, unknown> };
+    };
+    w.__fake.push = 'denied';
+    w.sweetwo.push.request = async () => false;
+    w.sweetwo.push.openSettings = async () => void w.__fake.opened.push('os-settings');
+  });
+  await page.goto('/settings/notifications');
+  await expect(page.getByText('휴대폰 설정에서 알림을 켜 주세요')).toBeVisible();
+  await expect(page.getByRole('switch', { name: /^푸시 알림/ }).first()).not.toBeChecked();
+  await expect(page.getByRole('switch', { name: /^월급 체크리스트/ })).not.toBeChecked();
+  await axe(page);
+  await page.locator('main').getByRole('button', { name: '설정 열기' }).click();
+  await expect.poll(async () => (await fake(page)).opened).toContain('os-settings');
+});
+
+test('S-18 앱 잠금이 꺼진 모바일 앱도 내보내기 전 가입 소셜로 다시 로그인(S11-02)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    (window as unknown as { __fake: Fake }).__fake.pinSet = null;
+    localStorage.setItem('sweetwo.last-provider', 'kakao');
+    localStorage.setItem('sweetwo.pin-asked', '1');
+  });
+  await page.goto('/settings/data');
+  await page.getByRole('button', { name: '내보내기', exact: true }).click();
+  await expect.poll(async () => (await fake(page)).started).toEqual(['kakao']);
+  // 다시 로그인하고 돌아오면 이어서 내보냄
+  expect(await page.evaluate(() => sessionStorage.getItem('sweetwo.return-to'))).toBe(
+    '/settings/data?export=joint&format=csv',
+  );
+});
+
+test('S-18 PIN을 5번 틀리면 A-02 + 안내(S-15와 같음, S11-07)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await fakeIosBridge(page, true);
+  await page.addInitScript(() => {
+    const w = window as unknown as { sweetwo: { lock: Record<string, unknown> } };
+    w.sweetwo.lock.verify = async () => ({ ok: false, failed: 5, signedOut: true });
+  });
+  await page.goto('/settings/data');
+  await page.getByRole('button', { name: '내보내기', exact: true }).click();
+  await page.getByLabel('PIN을 입력해 주세요').fill('111111');
+  await page.getByRole('button', { name: '확인' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText('PIN을 5번 틀려서 다시 로그인해 주세요')).toBeVisible();
 });

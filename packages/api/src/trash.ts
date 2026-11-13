@@ -30,11 +30,14 @@ export async function fetchTrash(): Promise<TrashRow[]> {
   }));
 }
 
-/** 되살리기(제안 없이 바로) */
-export async function restoreTrash(kind: TrashKind, id: string): Promise<'restored'> {
-  const { error } = await supabase().rpc('restore_trash', { p_kind: kind, p_id: id });
+/**
+ * 되살리기(바로). 연결 대상이 없어 연결 없이 되살렸으면 'unlinked'(저금 항목인데 넣을 월급 계획이 없을 때,
+ * 25 S-21 3번 “연결된 항목이 없어 따로 되살렸어요”, 서버 20261127090000). 옛 서버는 늘 'restored'
+ */
+export async function restoreTrash(kind: TrashKind, id: string): Promise<'restored' | 'unlinked'> {
+  const { data, error } = await supabase().rpc('restore_trash', { p_kind: kind, p_id: id });
   fail(error);
-  return 'restored';
+  return data === 'unlinked' ? 'unlinked' : 'restored';
 }
 
 /** 영구 삭제(kind, id) 또는 비우기(인자 없음). 지운 개수 */

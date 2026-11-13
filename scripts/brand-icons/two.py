@@ -1,12 +1,12 @@
 """앱 아이콘 ‘Two’(2026-11-06): 브랜드 오렌지 바탕 + 흰 워드마크 ‘Two’(logo-cherry.svg 뒤 세 글자). 파이 차트 앱 아이콘을 바꿈.
 
 python3 scripts/brand-icons/two.py   (pillow, node + playwright 필요)
-만드는 것: symbol.png(512, 둥근 사각 앱 아이콘, 모서리 투명)와 symbol.svg(같은 그림 벡터), og.png(공유 이미지), app-icon.png, apple-touch-icon.png, app-icon-macos.png, favicon-32/48.png(디자인 시스템 Brand),
-데스크톱 build/icon.png와 트레이, iOS AppIcon, Android 런처(적응형 전경 + 바탕 색, 예전 방식 정사각·원형), 사이트·모바일 파비콘.
+만드는 것: symbol.png(512, 둥근 사각 앱 아이콘, 모서리 투명)와 symbol.svg(같은 그림 벡터), og.png(공유 이미지), app-icon.png, apple-touch-icon.png, favicon-32/48.png(디자인 시스템 Brand),
+iOS AppIcon, Android 런처(적응형 전경 + 바탕 색, 예전 방식 정사각·원형), 사이트(32·48·apple-touch-icon)·어드민(32·48)·모바일 파비콘.
 글자 크기는 아래 FRAC(캔버스 폭 대비 Two 폭). 바꾸면 docs/spec/04-brand.md ‘앱 아이콘’도 같이 고침.
 """
 import os, subprocess, sys
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
@@ -42,24 +42,21 @@ def main():
         subprocess.run(['node', os.path.join(HERE, 'render-two.cjs'), MASTER, '--wordmark', WORDMARK], check=True, cwd=p('apps/mobile'))
     icon = tile(1024).convert('RGB')
     icon.save(os.path.join(B, 'app-icon.png'), optimize=True)
-    icon.save(p('apps/desktop/build/icon.png'), optimize=True)
     icon.save(p('apps/mobile/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png'), optimize=True)
     icon.resize((180, 180), Image.LANCZOS).save(os.path.join(B, 'apple-touch-icon.png'), optimize=True)
-    # macOS: 1024 캔버스에 824 둥근 사각(모서리 185) + 그림자
-    mac = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-    sh = Image.new('L', (1024, 1024), 0); ImageDraw.Draw(sh).rounded_rectangle((100, 112, 924, 936), radius=185, fill=90)
-    shadow = Image.new('RGBA', (1024, 1024), (0, 0, 0, 255)); shadow.putalpha(sh.filter(ImageFilter.GaussianBlur(16)))
-    mac.alpha_composite(shadow)
-    mac.alpha_composite(tile(824, radius=185), (100, 100))
-    mac.save(os.path.join(B, 'app-icon-macos.png'), optimize=True)
     # 파비콘: 둥근 사각, 글자 비율은 앱 아이콘과 같게(2026-11-06)
     for n in (32, 48):
         f = tile(n * 8, radius=n * 8 // 5).resize((n, n), Image.LANCZOS)
         f.save(os.path.join(B, f'favicon-{n}.png'), optimize=True)
-    for q in ('apps/site/public/favicon-32.png', 'apps/mobile/public/favicon-32.png'):
-        Image.open(os.path.join(B, 'favicon-32.png')).save(p(q), optimize=True)
-    # 데스크톱 트레이 32px(16으로 줄여 씀)
-    tile(256, radius=56).resize((32, 32), Image.LANCZOS).save(p('apps/desktop/resources/tray.png'), optimize=True)
+    # 사이트(32, 48, apple-touch-icon 180)·어드민(32, 48)·모바일(32) 파비콘은 위 원본을 그대로 복사(2026-11-12)
+    for name, dests in {
+        'favicon-32.png': ('apps/site/public', 'apps/admin/public', 'apps/mobile/public'),
+        'favicon-48.png': ('apps/site/public', 'apps/admin/public'),
+        'apple-touch-icon.png': ('apps/site/public',),
+    }.items():
+        for d in dests:
+            os.makedirs(p(d), exist_ok=True)
+            Image.open(os.path.join(B, name)).save(p(f'{d}/{name}'), optimize=True)
     # Android
     res = p('apps/mobile/android/app/src/main/res')
     for d, s in {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}.items():

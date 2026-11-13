@@ -9,6 +9,8 @@ export interface ConsentItem {
   label: string;
   required: boolean;
   onView?: () => void;
+  /** 이 줄만 다른 ‘보기’ 이름(A-05r 바뀐 항목 ‘바뀐 점 보기’, 2026-11-10) */
+  viewLabel?: string;
 }
 
 export function ConsentGroup({
@@ -54,7 +56,7 @@ export function ConsentGroup({
             type="button"
             className="hg-consent__view"
             onClick={i.onView}
-            aria-label={`${i.label} ${viewLabel}`}
+            aria-label={`${i.label} ${i.viewLabel ?? viewLabel}`}
           >
             <Icon name="chevron-right" />
           </button>

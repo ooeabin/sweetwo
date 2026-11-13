@@ -7,14 +7,15 @@ export function EmptyState({
   body,
   action,
 }: {
-  title: string;
+  /** 없으면 그림 자리 + 행동만(2026-11-11 Y-01 경조사 빈 상태) */
+  title?: string;
   body?: string;
   action?: ReactNode;
 }) {
   return (
     <div className="hg-empty">
       <Illustration name="empty-plate" className="hg-empty__art" />
-      <p className="hg-empty__title">{title}</p>
+      {title && <p className="hg-empty__title">{title}</p>}
       {body && <p className="hg-empty__body">{body}</p>}
       {action}
     </div>

@@ -9,63 +9,58 @@ import {
 } from '@sweetwo/api';
 import { todayKst, type HomeCare, type HomeInput } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { closeHomeTodo, readClosedTodos } from '../../shared/home-todo';
+import { useEffect } from 'react';
 import { useMe, useSpace } from './data';
 
-const INVITE_KEY = 'sweetwo:home:invite-closed'; // 초대 할 일 닫은 날(7일 동안 안 보임)
-
-const read = (k: string) => {
+// 2026-11-11 홈 띠 닫기(✕)를 없애며 쓰지 않게 된 기기 저장 키(닫은 할 일, 초대 닫은 날). 남은 값은 한 번 지움
+const OLD_KEYS = ['sweetwo:home:todo-closed', 'sweetwo:home:invite-closed'];
+const dropOldKeys = () => {
   try {
-    return localStorage.getItem(k);
+    for (const k of OLD_KEYS) localStorage.removeItem(k);
   } catch {
-    return null;
+    /* 저장소를 못 쓰면 그대로(읽지 않으니 상관없음) */
   }
 };
-const write = (k: string, v: string) => {
-  try {
-    localStorage.setItem(k, v);
-  } catch {
-    /* 저장소를 못 쓰면 이번 실행에서만 닫음 */
-  }
-};
-const readList = readClosedTodos; // 닫은 할 일(항목 + 날짜, 월급 계획 확인)
 
-// 홈(H-05·H-06)과 트레이 위젯이 같이 쓰는 core homeTodo·upcoming·salaryState 재료. 키는 다른 화면과 같은 qk.
-/** on = false면 읽지 않음(트레이 위젯이 없는 웹·모바일) */
-export function useHomeInput(on = true) {
+// 홈(H-06 할 일 띠, H-08 캘린더 타일)이 쓰는 core homeTodo·homeUpcoming 재료. 키는 다른 화면과 같은 qk.
+// 재료(체크리스트, 저금, 경조사, 자산, 해제 기록)가 다 온 뒤에만 input을 만듦(2026-11-11 QA 4구간 S4-13):
+// 일부만 온 채로 계산하면 할 일 띠가 초대 → 만기처럼 잠깐 바뀌어 보임. 실패한 재료는 빈 값으로 셈
+export function useHomeInput() {
   const today = todayKst();
   const me = useMe();
   const space = useSpace();
   const lists = useQuery({
     queryKey: qk.checklists(today),
     queryFn: () => fetchChecklistsEnsured(today),
-    enabled: on && !!me.data?.onboarding_done_at,
+    enabled: !!me.data?.onboarding_done_at,
   });
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals, enabled: on });
-  const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays, enabled: on });
-  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets, enabled: on });
+  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
+  const cares = useQuery({ queryKey: qk.careDays, queryFn: fetchCareDays });
+  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const state = space.data?.couple_state;
   const unlink = useQuery({
     queryKey: qk.unlink,
     queryFn: fetchUnlink,
-    enabled: on && state === 'unlink_pending',
+    enabled: state === 'unlink_pending',
   });
   const solo = state === 'solo';
-  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: on && solo });
-  const [inviteClosedOn, setInvite] = useState(() => read(INVITE_KEY));
-  const [closed, setClosed] = useState(readList);
+  const myUnlink = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink, enabled: solo });
+  useEffect(dropOldKeys, []);
 
+  // 켜진 쿼리가 아직 처음 받는 중이면 기다림(꺼진 쿼리·실패한 쿼리는 기다리지 않음)
+  const waiting = [lists, goals, cares, assets, unlink, myUnlink].some((q) => q.isLoading);
   const input: HomeInput | null =
-    on && me.data && space.data && goals.data && !lists.isLoading
+    me.data && space.data && goals.data && !waiting
       ? {
           today,
           meId: me.data.id,
           joint: space.data.salary_mode === 'joint',
           coupleState: space.data.couple_state,
           checklists: (lists.data ?? []).map((c) => ({
+            id: c.id,
             owner_user_id: c.owner_user_id,
             label: c.label,
+            cycle_start: c.cycle_start,
             cycle_end: c.cycle_end,
             lines: c.pay_check_line,
           })),
@@ -86,8 +81,10 @@ export function useHomeInput(on = true) {
             solo && myUnlink.data?.reconnect_by && !myUnlink.data.reconnect_answer
               ? myUnlink.data.reconnect_by
               : null,
-          inviteClosedOn,
-          closed,
+          // 첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b): 온보딩을 마친 날(KST)
+          onboardedOn: me.data.onboarding_done_at
+            ? todayKst(new Date(me.data.onboarding_done_at))
+            : null,
         }
       : null;
   return {
@@ -97,13 +94,6 @@ export function useHomeInput(on = true) {
       state === 'unlink_pending' && unlink.data
         ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
         : null,
-    /** 만기·챙길 날 할 일 닫기(그 항목·날짜만) */
-    closeTodo: (key: string) => setClosed(closeHomeTodo(key)),
-    /** 초대 할 일 닫기(7일) */
-    closeInvite: () => {
-      write(INVITE_KEY, today);
-      setInvite(today);
-    },
   };
 }
 export type HomeInputState = ReturnType<typeof useHomeInput>;

@@ -1,6 +1,7 @@
 import { quickChips } from '@sweetwo/core';
-import { AmountInput, QuestionLayout } from '@sweetwo/ui';
+import { AmountInput, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
+import { useCheckOnce } from '../check-once';
 import { copy } from '../copy';
 import { saveMe } from '../data';
 import { useJoinStep } from '../join-step';
@@ -14,8 +15,10 @@ export function P05Salary() {
   const me = d.me;
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
-  const [asked, setAsked] = useState(false);
-  if (!d.ready || !me) return null;
+  // 큰 값 한 번 확인은 O-31과 같은 확인 띠(2026-11-11 S3-25, 작은 회색 글 대신)
+  const once = useCheckOnce();
+  if (!d.ready || !me)
+    return <QuestionSkeleton title={copy.salary} chapter={s.chapter} onBack={s.onBack ?? null} />;
   const value = amount === undefined ? (me.monthly_income ?? null) : amount;
   const isVariable = variable ?? me.income_variable ?? false;
   const valid = value !== null && value > 0;
@@ -40,7 +43,7 @@ export function P05Salary() {
       primary={{ label: copy.next, disabled: !valid, loading: s.saving }}
       onSubmit={() => {
         if (!valid) return;
-        if (odd && !asked) return setAsked(true);
+        if (!once.check(odd)) return;
         void save(value);
       }}
     >
@@ -49,7 +52,7 @@ export function P05Salary() {
         value={value}
         onChange={(x) => {
           setAmount(x);
-          setAsked(false);
+          once.reset();
         }}
         quick={quickChips.small.slice(1)}
         monthly
@@ -68,11 +71,7 @@ export function P05Salary() {
           </button>
         }
       />
-      {asked && (
-        <p className="hg-help" role="status">
-          {copy.checkValue}
-        </p>
-      )}
+      {once.banner}
     </QuestionLayout>
   );
 }

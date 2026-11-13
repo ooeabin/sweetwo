@@ -1,26 +1,18 @@
 import { dday, isFestive, monthGrid, type MoneyKind } from '@sweetwo/core';
-import {
-  Band,
-  Button,
-  type CalDay,
-  Calendar,
-  icon3d,
-  type IconName,
-  Lead,
-  ListRow,
-} from '@sweetwo/ui';
+import { Band, Button, type CalDay, Calendar, Lead, leadOf, ListRow } from '@sweetwo/ui';
 import { Fragment, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOW, copy } from '../copy';
 import { moneyLine, reviewMonth, useCalendarData } from '../data';
 import { money as won, useMask } from '../../../shared/mask';
-import { CalendarFrame, useCalFilter } from '../frame';
+import { SkelBody } from '../../frame';
+import { CalendarFrame, CalendarLoadError, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
 
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
 const ymText = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}`;
 
-// 칸 안 짧은 이름과 고른 날 줄 아이콘(돈 일정 종류)
+// 칸 안 짧은 이름(금융 일정 종류). 고른 날 줄 아이콘은 ui lead-kinds.ts ‘money’·‘care’ 표(2026-11-09)
 const MONEY_SHORT: Record<MoneyKind, string> = {
   payday: copy.short.payday,
   review: copy.short.review,
@@ -28,30 +20,15 @@ const MONEY_SHORT: Record<MoneyKind, string> = {
   goal: copy.short.goal,
   maturity: copy.short.maturity,
 };
-// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
-const MONEY_ART: Record<MoneyKind, string> = {
-  payday: 'line-custom',
-  review: 'line-fixed',
-  deadline: 'goal-deadline',
-  goal: 'goal-deadline',
-  maturity: 'asset-deposit',
-};
-const MONEY_ICON: Record<MoneyKind, IconName> = {
-  payday: 'wallet',
-  review: 'calendar-check',
-  deadline: 'target',
-  goal: 'target',
-  maturity: 'piggy-bank',
-};
 let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
 
-/** 챙길 날 이름의 마지막 낱말(“어머니 생신” → “생신”) */
+/** 경조사 이름의 마지막 낱말(“어머니 생신” → “생신”) */
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
-// Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 토스 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
-// 칸마다 숫자 + 짧은 이름 한 줄, 월말 확인 기간은 칸 아래 이어진 한 줄 띠(“월말 확인”, 누르면 그 날 줄 → W-05).
+// Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
+// 칸마다 숫자 + 짧은 이름 한 줄, 월급 전 확인 기간은 칸 아래 이어진 한 줄 띠(“월급 전 확인”, 누르면 그 날 줄 → W-05).
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달을 보고 있으면 ‘오늘’.
-// 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 챙길 날 추가’ → Y-07.
+// 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 경조사 추가’ → Y-07.
 export function Y04Calendar() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -75,7 +52,8 @@ export function Y04Calendar() {
       {children}
     </CalendarFrame>
   );
-  if (d.loading) return frame(null);
+  if (d.failed) return frame(<CalendarLoadError onRetry={d.retry} />);
+  if (d.loading) return frame(<SkelBody shape="calendar" />);
 
   const [y, m] = ym;
   const moneyOf = (date: string) => {
@@ -108,7 +86,7 @@ export function Y04Calendar() {
   );
   const grid: CalDay[] = weeks.flat().map((c, i) => {
     const cs = caresOn(c.date);
-    // 월말 확인은 띠로 보여 주니 칸 이름에서 뺌
+    // 월급 전 확인은 띠로 보여 주니 칸 이름에서 뺌
     const ms = moneyOf(c.date).filter((x) => x.kind !== 'review');
     const [, cm, cd] = ymd(c.date);
     const hol = d.holidayOf(c.date);
@@ -139,7 +117,7 @@ export function Y04Calendar() {
     setSelected(ny === ty && nm === tm ? d.today : `${ymText(ny, nm)}-01`);
   };
 
-  /** 고른 날 일정 줄들(공휴일, 월말 확인, 챙길 날, 돈 일정) */
+  /** 고른 날 일정 줄들(공휴일, 월급 전 확인, 경조사, 금융 일정) */
   const items = (date: string) => {
     const hol = d.holidayOf(date);
     const band = bandOn(date);
@@ -150,7 +128,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key="hol"
-          lead={<Lead icon="flag-pennant" />}
+          lead={<Lead {...leadOf('money', 'holiday')} />}
           label={hol.name}
           sub={copy.holiday}
           chevron={false}
@@ -160,7 +138,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key="band"
-          lead={<Lead icon="calendar-check" art3d={icon3d('line-fixed')} />}
+          lead={<Lead {...leadOf('money', 'review')} />}
           label={copy.reviewBand(reviewMonth(band.end))}
           sub={copy.go.review}
           onClick={() => nav('/salary/review')}
@@ -172,7 +150,7 @@ export function Y04Calendar() {
       rows.push(
         <Fragment key={x.care.id}>
           <ListRow
-            lead={<Lead icon="gift" tone="together" art3d={icon3d('care-gift')} />}
+            lead={<Lead {...leadOf('care', x.care.kind)} />}
             label={x.care.name}
             sub={
               x.care.budget > 0
@@ -182,7 +160,7 @@ export function Y04Calendar() {
             onClick={() => nav(`/calendar/day/${x.care.id}`)}
             chevron
           />
-          {/* 그날이 된 챙길 날은 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
+          {/* 그날이 된 경조사는 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
           {x.date <= d.today && !(x.care.status === 'done' && x.care.status_on === x.date) && (
             <Button
               variant="ghost"
@@ -201,7 +179,7 @@ export function Y04Calendar() {
       rows.push(
         <ListRow
           key={`${x.kind}-${i}`}
-          lead={<Lead icon={MONEY_ICON[x.kind]} art3d={icon3d(MONEY_ART[x.kind])} />}
+          lead={<Lead {...leadOf('money', x.kind)} />}
           label={l.label}
           sub={copy.goSub[x.kind]}
           onClick={() => nav(l.to)}
@@ -238,6 +216,12 @@ export function Y04Calendar() {
         }}
         bandLabel={copy.short.band}
       />
+      {/* ‘금융 일정’ 필터에 이 달 금융 일정이 없음(13 공통 상태 18번, 2026-11-12 QA 9구간 D3 = A) */}
+      {filter === 'money' && !d.monthOf(y, m).dates.length && (
+        <p className="hg-help" role="status" style={{ margin: 0 }}>
+          {copy.noMoneyThisMonth}
+        </p>
+      )}
       <Band />
       <section
         className="hg-cal__agenda"
@@ -251,7 +235,7 @@ export function Y04Calendar() {
         {selected >= d.today && (
           <div className="hg-list hg-list--plain hg-cal__add">
             <ListRow
-              lead={<Lead icon="plus" />}
+              lead={<Lead icon="plus" uiIcon />}
               label={copy.addOnDay}
               chevron={false}
               onClick={() => {

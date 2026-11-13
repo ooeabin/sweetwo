@@ -1,5 +1,5 @@
 ---
-// L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 4개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 다운로드(#get).
+// L-01 랜딩(docs/spec/28-website.md). 첫 화면 → 기능 4개 → 둘이 쓰는 법 → 안심 4가지 → 자주 묻는 질문 5개 → 마지막 앱 받기(#get).
 import { parseFaq } from '@sweetwo/core';
 import symbol from '../../../../packages/ui/src/assets/brand/symbol.png';
 import Download from '../components/Download.astro';
@@ -19,14 +19,14 @@ const pick = [1, 2, 22, 4, 10].flatMap((n) => all.filter((f) => f.n === n));
       <p class="hg-site__lead">{t.heroLead}</p>
       <Download placement="hero" />
     </div>
-    <div class="hg-card" style="background: var(--surface); display: grid; place-items: center; gap: var(--space-4);">
+    <div class="hg-card hg-site__art" data-theme="light">
       <img src={symbol.src} alt="" width="320" height="320" loading="eager" />
     </div>
   </section>
 
   <section class="hg-site__sec" aria-labelledby="features">
     <h2 id="features" class="hg-site__h2">{t.featuresTitle}</h2>
-    <div class="hg-site__cols">
+    <div class="hg-site__cols hg-site__cols--2">
       {t.features.map((f) => (
         <div class="hg-site__feature">
           <b>{f.title}</b>
@@ -46,7 +46,8 @@ const pick = [1, 2, 22, 4, 10].flatMap((n) => all.filter((f) => f.n === n));
     <ul class="hg-site__safe">
       {t.safe.map((s) => (
         <li>
-          <span class={`hg-ico hg-ico--${s.icon}`} aria-hidden="true"></span>
+          {/* 2026-11-08 2D 플랫 아이콘을 만들 때까지 빈 자리(Illustrations ‘나중 과제’ 8번) */}
+          <span class="hg-artslot hg-artslot--sm" aria-hidden="true"></span>
           {s.text}
         </li>
       ))}

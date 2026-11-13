@@ -40,8 +40,11 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
+reset role; -- 합류 중인 사람은 공간 데이터를 못 읽음(D1), 줄 초안은 앱이 join_context로 만듦
+select set_config('test.home', (select id::text from public.goal where template = 'home'), true);
+set local role authenticated;
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 1070000),
+  jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
   jsonb_build_object('kind', 'fixed', 'amount', 680000),
   jsonb_build_object('kind', 'living', 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)

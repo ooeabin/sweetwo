@@ -1,28 +1,11 @@
-import { markNotificationsRead, qk } from '@sweetwo/api';
 import { maskMoney, notiGroup, notiTime } from '@sweetwo/core';
-import { NotificationPanel, type IconName } from '@sweetwo/ui';
+import { leadOf, NotificationPanel } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
 import { copy } from './copy';
-import { useNotiList, useNotiPeople, useOpenNotification } from './data';
-
-// 알림 아이콘(기획서 14 ‘센터 표시’ Phosphor 이름 → 앱 아이콘 모음). 없는 것은 종
-const ICON: Record<string, IconName> = {
-  gift: 'gift',
-  'calendar-check': 'calendar',
-  'clipboard-text': 'check',
-  wallet: 'wallet',
-  'piggy-bank': 'piggy-bank',
-  'shield-check': 'shield-check',
-  heart: 'gift',
-  house: 'house',
-  trophy: 'flag-pennant',
-  'user-plus': 'user',
-  'user-minus': 'user',
-  'envelope-simple': 'envelope',
-};
+import { markRead, useNotiList, useNotiPeople, useOpenNotification } from './data';
 
 /** N-01·N-02 공통 내용: 묶음(오늘·이번 주·이전), 줄, 모두 읽음, 더 불러오기, 실패·오프라인 */
 export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onClose: () => void }) {
@@ -59,8 +42,10 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
     msg: masked ? maskMoney(n.title) : n.title,
     time: notiTime(n.created_at, now),
     read: !!n.read_at,
-    person: person(n.actor_id),
-    icon: ICON[n.icon ?? ''] ?? ('bell' as const),
+    // 아이콘이 있는 알림(목표 금액 달성 등)은 사람이 있어도 아이콘 자리(14 ‘센터 표시’, 2026-11-12 S10-05)
+    person: n.icon ? undefined : person(n.actor_id),
+    // 알림 아이콘(기획서 14 ‘센터 표시’ Phosphor 이름 → lead-kinds.ts noti 표, 모르는 것은 종)
+    ...leadOf('noti', n.icon),
   });
   const groups = (['today', 'week', 'earlier'] as const).map((key) => ({
     key,
@@ -98,10 +83,7 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
         const n = rows.find((x) => x.id === id);
         if (n) void open(n);
       }}
-      onReadAll={async () => {
-        await markNotificationsRead().catch(() => undefined);
-        await qc.invalidateQueries({ queryKey: qk.notifications });
-      }}
+      onReadAll={() => void markRead(qc)}
       onSettings={() => {
         onClose();
         nav('/settings/notifications');

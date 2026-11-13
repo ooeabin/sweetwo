@@ -1,7 +1,9 @@
 // TanStack Query 키는 여기에만 모은다.
 export const qk = {
   me: ['me'] as const,
+  loginEmail: ['me', 'login-email'] as const,
   space: ['space'] as const,
+  /** 저금 항목(goal 행, space_goals) */
   goals: ['goals'] as const,
   partner: ['partner'] as const,
   partnerBirthYear: ['partner', 'birth-year'] as const,
@@ -13,25 +15,25 @@ export const qk = {
   todos: ['todo'] as const,
   spendCategories: ['spend_category'] as const,
   monthClose: (planId: string) => ['month_close', planId] as const,
-  goalRecords: ['goal_records'] as const,
-  emergencyMoves: ['emergency_move'] as const,
   recentCloses: ['recent_closes'] as const,
   assets: ['asset'] as const,
-  goalAssetSums: ['goal_asset_sums'] as const,
   partnerAssetSums: ['partner_asset_sums'] as const,
   netWorthHistory: ['net_worth_history'] as const,
-  investAnswers: ['invest_answers'] as const,
   incomeItems: ['income_item'] as const,
   incomeEvents: ['income_event'] as const,
   careDays: ['care_day'] as const,
   careRecords: ['care_record'] as const,
   notifications: ['notification'] as const,
   hasUnread: ['notification', 'unread'] as const,
-  /** 배우자 활동(H-08). 알림 키 아래라 새 알림이 오면 같이 새로 받음 */
+  /** 파트너 활동(H-08). 알림 키 아래라 새 알림이 오면 같이 새로 받음 */
   partnerActivity: ['notification', 'activity'] as const,
   holidays: ['holiday'] as const,
   assetKindNames: ['asset_kind_name'] as const,
   latestInvite: ['invite', 'latest'] as const,
+  /** 합류 흐름에 필요한 것(join_context, 2026-11-11 D1) */
+  joinContext: ['join_context'] as const,
+  /** 다시 연결할 수 있는지(my_reconnect_ok) */
+  reconnectOk: ['couple_unlink', 'reconnect_ok'] as const,
   unlink: ['couple_unlink'] as const,
   myUnlink: ['couple_unlink', 'mine'] as const,
   unlinkPartner: ['couple_unlink', 'partner'] as const,
@@ -52,17 +54,18 @@ export const qk = {
   weddingPayments: ['wedding_payment'] as const,
   pastPlans: (today: string) => ['monthly_plan', 'past', today] as const,
   recentClosesLong: ['recent_closes', 'long'] as const,
-  cycleGoalUses: (start: string, end: string) => ['goal_use', start, end] as const,
   assetHistory: (id: string) => ['asset_history', id] as const,
   splits: ['salary_split'] as const,
   checklists: (today: string) => ['pay_checklist', today] as const,
   pastChecklists: (owner: string | null, before: string) =>
     ['pay_checklist', 'past', owner ?? 'joint', before] as const,
-  goalCheckedSums: ['goal_checked_sums'] as const,
+  /** 저금 항목별 모은 금액 */
   goalSaved: ['goal_saved'] as const,
-  goalMoves: (id: string) => ['goal_move', id] as const,
-  goalChanges: ['goal_changes'] as const,
   pendingTerms: ['pending_terms'] as const,
   mailBounced: ['mail_bounced'] as const,
+  /** 저금 항목 하나의 체크 줄(W-10 저금 내역) */
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
 };
+
+/** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
+export const splitKeys = [qk.splits, ['pay_checklist'], qk.goals, qk.goalSaved] as const;

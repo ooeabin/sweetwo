@@ -1,18 +1,19 @@
 import {
+  addDays,
   dday,
   formatDateWeekday,
   formatMonthDay,
   withinDays,
   type MoneyDate,
-  type MoneyKind,
 } from '@sweetwo/core';
 import {
+  AddRow,
   Button,
   EmptyState,
   Icon,
-  icon3d,
-  type IconName,
   Lead,
+  leadOf,
+  type LeadSpec,
   ListRow,
   SectionHeader,
   StatBlock,
@@ -22,43 +23,44 @@ import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
 import { moneyLine, useCalendarData } from '../data';
-import { CalendarFrame, useCalFilter } from '../frame';
+import { SkelBody } from '../../frame';
+import { CalendarFrame, CalendarLoadError, useCalFilter } from '../frame';
 import { startCareAdd } from './y-07-care-add';
-import { reviewMonth } from '../data';
-
-// 2026-11-04 줄 앞 종류 아이콘(24 Y-01 6번): 챙길 날 선물(together 판), 돈 일정은 종류마다
-// 돈 일정 3D 아이콘(2026-11-05, Illustrations D). 파일이 없으면 MONEY_ICON
-const MONEY_ART: Record<MoneyKind, string> = {
-  payday: 'line-custom',
-  review: 'line-fixed',
-  deadline: 'goal-deadline',
-  goal: 'goal-deadline',
-  maturity: 'asset-deposit',
-};
-const MONEY_ICON: Record<MoneyKind, IconName> = {
-  payday: 'wallet',
-  review: 'calendar-check',
-  deadline: 'target',
-  goal: 'target',
-  maturity: 'piggy-bank',
-};
 
 // Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
-// 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 챙길 날 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
-// “다가오는 일정” 한 목록(60일 안 챙길 날 + 돈 일정, 날짜순, 오른쪽 D-day, 챙길 날은 영역 색 막대, 돈 일정은 검정 점),
-// 드린 기록(→ Y-09). 챙길 날이 없으면 빈 상태 + ‘챙길 날 추가’(돈 일정은 그대로 보임). “돈 일정”이면 4·6번 숨김.
+// 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 경조사 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
+// “일정” 한 목록(60일 안 경조사 + 금융 일정, 날짜순, 오른쪽 D-day, 경조사는 영역 색 막대, 금융 일정은 검정 점),
+// 선물 기록(→ Y-09). 경조사가 없으면 빈 상태 + ‘경조사 추가’(금융 일정은 그대로 보임). “금융 일정”이면 4·6번 숨김.
 export function Y01CareList() {
   const nav = useNavigate();
   const d = useCalendarData();
   const [filter, setFilter] = useCalFilter();
   const { masked } = useMask();
   const m = (x: number) => won(x, masked);
-  const frame = (children: ReactNode) => (
-    <CalendarFrame view="list" filter={filter} onFilter={setFilter}>
+  const frame = (
+    children: ReactNode,
+    week?: { today: string; marked: ReadonlySet<string>; holidays: ReadonlySet<string> },
+  ) => (
+    <CalendarFrame view="list" filter={filter} onFilter={setFilter} week={week}>
       {children}
     </CalendarFrame>
   );
-  if (d.loading) return frame(null);
+  // 못 불러오면 빈 상태 대신 오류 카드 + ‘다시 시도’(2026-11-12 S9-02)
+  if (d.failed) return frame(<CalendarLoadError onRetry={d.retry} />);
+  if (d.loading) return frame(<SkelBody shape="rows" />);
+
+  // 맨 위 이번 주 띠(2026-11-09): 일~토 중 일정(보기 필터대로)이 있는 날에 점
+  const [ty, tm, td] = d.today.split('-').map(Number) as [number, number, number];
+  const sunday = addDays(d.today, -new Date(Date.UTC(ty, tm - 1, td)).getUTCDay());
+  const marked = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    const day = addDays(sunday, i);
+    const [dy, dm] = day.split('-').map(Number) as [number, number];
+    const has =
+      (filter !== 'money' && d.caresOf(dy, dm).some((x) => x.date === day)) ||
+      (filter !== 'care' && d.monthOf(dy, dm).dates.some((x) => x.date === day));
+    if (has) marked.add(day);
+  }
 
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const months: [number, number][] = [0, 1, 2].map((n) => {
@@ -68,8 +70,7 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  // 8번 월말 확인 띠: 오늘이 다음 월급날 3일 전 ~ 전날이면 → W-05
-  const band = d.monthOf(y, mo).bands.find((b) => d.today >= b.start && d.today <= b.end);
+  // 맨 위 ‘월급 전 확인’ 띠는 없앰(2026-11-12 QA 9구간 D1 = A): 일정 목록의 ‘월급 전 확인’ 줄과 홈 할 일 띠가 같은 일을 함
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
   const add = () => {
@@ -77,16 +78,15 @@ export function Y01CareList() {
     nav('/calendar/add/a');
   };
 
-  // 다가오는 일정: 챙길 날과 돈 일정을 날짜순 한 목록으로
+  // 일정: 경조사와 금융 일정을 날짜순 한 목록으로
   type Row = {
     key: string;
     date: string;
     label: string;
     sub: string;
     care: boolean;
-    icon: IconName;
-    /** 3D 아이콘 이름(2026-11-05) */
-    art: string;
+    /** 줄 앞 칸(2026-11-09 lead-kinds.ts ‘care’·‘money’ 표) */
+    lead: LeadSpec;
     to: string;
   };
   const rows: Row[] = [
@@ -101,8 +101,7 @@ export function Y01CareList() {
               ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
               : formatDateWeekday(x.date),
           care: true,
-          icon: 'gift' as IconName,
-          art: 'care-gift',
+          lead: leadOf('care', x.care.kind),
           to: `/calendar/day/${x.care.id}`,
         }))),
     ...(filter === 'care'
@@ -115,8 +114,7 @@ export function Y01CareList() {
             label: l.label,
             sub: formatDateWeekday(x.date),
             care: false,
-            icon: MONEY_ICON[x.kind],
-            art: MONEY_ART[x.kind],
+            lead: leadOf('money', x.kind),
             to: l.to,
           };
         })),
@@ -125,15 +123,6 @@ export function Y01CareList() {
 
   return frame(
     <>
-      {band && filter !== 'care' && (
-        <button
-          type="button"
-          className="hg-banner hg-banner--info"
-          onClick={() => nav('/salary/review')}
-        >
-          <span>{copy.reviewBand(reviewMonth(band.end))}</span>
-        </button>
-      )}
       {filter !== 'money' && first && (
         <button
           type="button"
@@ -154,7 +143,6 @@ export function Y01CareList() {
       )}
       {filter !== 'money' && !d.cares.length && (
         <EmptyState
-          title={copy.empty}
           action={
             <Button variant="secondary" onClick={add}>
               {copy.emptyAdd}
@@ -183,27 +171,32 @@ export function Y01CareList() {
             >
               {copy.prepare}
             </Button>
-            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
-            {next.date <= d.today && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
-              >
-                {copy.statuses.done}
-              </Button>
-            )}
+            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번). 이번 회차를 기록했으면 숨김(Y-04·Y-05와 같은 조건, S9-12) */}
+            {next.date <= d.today &&
+              !(next.care.status === 'done' && next.care.status_on === next.date) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
+                >
+                  {copy.statuses.done}
+                </Button>
+              )}
           </div>
         </section>
       )}
       <section className="hg-stack" aria-label={copy.upcomingList}>
-        <SectionHeader title={copy.upcomingList} />
+        {/* 2026-11-09 + 버튼(FAB) 대신 머리 오른쪽 회색 ‘+ 경조사 추가’ → Y-07. 좁은 창만(넓은 창은 제목 줄 ‘+ 추가’, S9-11) */}
+        <SectionHeader
+          title={copy.upcomingList}
+          action={<AddRow className="hg-narrow-only" label={copy.addCareRow} onClick={add} />}
+        />
         {!rows.length ? (
           <p className="hg-card__meta" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
           </p>
         ) : (
-          // 2026-11-04 달 머리로 묶음(토스 소비 목록처럼, 월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
+          // 2026-11-04 달 머리로 묶음(월급 줄이 되풀이돼도 어디까지가 이번 달인지 보이게)
           Object.entries(
             rows.reduce<Record<string, Row[]>>((acc, r) => {
               (acc[r.date.slice(0, 7)] ??= []).push(r);
@@ -218,13 +211,7 @@ export function Y01CareList() {
                   return (
                     <ListRow
                       key={r.key}
-                      lead={
-                        <Lead
-                          icon={r.icon}
-                          tone={r.care ? 'together' : undefined}
-                          art3d={icon3d(r.art)}
-                        />
-                      }
+                      lead={<Lead icon={r.lead.icon} tone={r.lead.tone} />}
                       label={r.label}
                       sub={r.sub}
                       value={
@@ -247,5 +234,6 @@ export function Y01CareList() {
         </div>
       )}
     </>,
+    { today: d.today, marked, holidays: d.holidays },
   );
 }

@@ -1,4 +1,4 @@
--- pgTAP: 문의(S-19a)와 관리자 열람 동의(S-19b). 찬우(문의), 예빈(배우자), 다른 사용자 K
+-- pgTAP: 문의(S-19a)와 관리자 열람 동의(S-19b). 찬우(문의), 예빈(파트너), 다른 사용자 K
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(14);
@@ -33,7 +33,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈';
 select public.finish_join();
-select is((select count(*)::int from public.inquiry), 0, '배우자 문의는 안 보임');
+select is((select count(*)::int from public.inquiry), 0, '파트너 문의는 안 보임');
 reset role;
 
 -- 운영자 답변(어드민 단계 흉내): 답변 대기
@@ -52,7 +52,7 @@ reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select title from public.notification where kind = 'access_partner'), '운영자가 찬우님 문의를 확인하고 있어요', '배우자 열람 알림');
+select is((select title from public.notification where kind = 'access_partner'), '운영자가 찬우님 문의를 확인하고 있어요', '파트너 열람 알림');
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

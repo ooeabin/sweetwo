@@ -1,4 +1,4 @@
--- pgTAP: 알림. 내 알림만 보고 읽음 처리, 합류는 바로, 챙길 날(음력·서프라이즈)은 예약 작업으로,
+-- pgTAP: 알림. 내 알림만 보고 읽음 처리, 합류는 바로, 경조사(음력·서프라이즈)는 예약 작업으로,
 -- 같은 알림은 한 번만
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -50,19 +50,21 @@ reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
--- 챙길 날: 음력 8월 15일(2026 추석 = 9월 25일) D-7 같이, 서프라이즈는 만든 사람만
+-- 경조사: 음력 8월 15일(2026 추석 = 9월 25일) D-7 같이, 서프라이즈는 만든 사람만
 insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer)
   select space_id, 'family', 'chuseok', '추석', 'lunar_yearly', 8, 15, 500000, 'together' from public.app_user;
-insert into public.care_day (space_id, category, kind, name, date_rule, month, day, carer, secret, alerts)
-  select space_id, 'couple', 'partner_birthday', '찬우 생일', 'solar_yearly', 9, 18, 'bride', true, '{30,7,0}' from public.app_user;
 reset role;
+-- 서프라이즈는 2026-11-12 D2부터 앱이 못 만듦. 지금 있는 옛 행으로 확인(서버로 넣음)
+insert into public.care_day (space_id, category, kind, name, date_rule, month, day, carer, secret, alerts, created_by)
+  select space_id, 'couple', 'partner_birthday', '찬우 생일', 'solar_yearly', 9, 18, 'bride', true, '{30,7,0}', id
+  from public.app_user where id = '22222222-2222-2222-2222-222222222222';
 
 select is(public.send_morning_notifications('2026-09-18'), 3, '추석 D-7 둘 + 서프라이즈 당일 하나');
 select public.send_morning_notifications('2026-09-18');
 select results_eq(
   $$ select user_id, title, push_title, push_hidden from public.notification where kind = 'care_day' order by user_id, title $$,
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '추석이 일주일 남았어요', null::text, false),
-            ('22222222-2222-2222-2222-222222222222'::uuid, '오늘은 찬우 생일이에요', '챙길 날 알림이 있어요', true),
+            ('22222222-2222-2222-2222-222222222222'::uuid, '오늘은 찬우 생일이에요', '경조사 알림이 있어요', true),
             ('22222222-2222-2222-2222-222222222222'::uuid, '추석이 일주일 남았어요', null::text, false) $$,
   '음력 날짜, 서프라이즈는 만든 사람만 + OS 알림 숨김, 다시 돌려도 한 번');
 

@@ -7,7 +7,7 @@ import Site from '../layouts/Site.astro';
 import { URLS, t } from '../lib/site';
 const groups = parseFaq(faqMd);
 ---
-<Site title={t.title(t.helpPage)} description={t.faq}>
+<Site title={t.title(t.helpPage)} description={t.desc.help}>
   <section class="hg-site__sec" style="border-top: 0;">
     <h1 class="hg-site__h2">{t.helpPage}</h1>
     <input class="hg-input" type="search" aria-label={t.searchPlaceholder} placeholder={t.searchPlaceholder} data-faq-search />

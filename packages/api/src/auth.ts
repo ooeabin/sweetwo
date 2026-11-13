@@ -1,8 +1,8 @@
 import {
   LoginState,
   NotifyEmail,
+  CONSENT_VERSIONS,
   SignupError,
-  TERMS_VERSION,
   type AuthProvider,
 } from '@sweetwo/core';
 import { supabase } from './client';
@@ -46,23 +46,23 @@ export async function agreeTerms(marketing: boolean | null) {
   if (error) throw toError(error.message);
 }
 
-/** A-05: 계정 생성 + 동의 기록 */
+/** A-05: 계정 생성 + 동의 기록. 버전은 앱이 보여 준 문서 것(이용약관·개인정보는 서버가 시행 중 버전으로 고름) */
 export async function completeSignup(input: {
   provider: AuthProvider;
   notifyEmail: string | null;
   marketing: boolean;
 }) {
   const email = input.notifyEmail === null ? null : NotifyEmail.parse(input.notifyEmail);
-  const { error } = await supabase().rpc('complete_signup', {
+  const { error } = await supabase().rpc('complete_signup_v2', {
     p_provider: input.provider,
     p_notify_email: email ?? '', // 빈 값이면 소셜 이메일을 쓴다
     p_marketing: input.marketing,
-    p_terms_version: TERMS_VERSION,
+    p_versions: { ...CONSENT_VERSIONS },
   });
   if (error) throw toError(error.message);
 }
 
-// 웹 전용 세션 동작(데스크톱은 main 프로세스가 한다)
+// 웹 전용 세션 동작(개발·e2e. 모바일 앱은 네이티브 브리지가 한다)
 export const webAuth = {
   /** 제공자 로그인 페이지로 이동(리다이렉트) */
   async start(provider: AuthProvider, redirectTo: string) {
@@ -72,6 +72,10 @@ export const webAuth = {
   async exchange(code: string) {
     const { error } = await supabase().auth.exchangeCodeForSession(code);
     if (error) throw toError(error.message);
+  },
+  async userId(): Promise<string | null> {
+    const { data } = await supabase().auth.getSession();
+    return data.session?.user.id ?? null;
   },
   async hasSession() {
     const { data } = await supabase().auth.getSession();
@@ -94,27 +98,25 @@ export async function fetchSocialName(): Promise<string | null> {
 }
 
 /** A-01: 최소 지원 버전과 점검 시간(AD-16, 로그인 전에도 읽을 수 있음) */
-export async function fetchLaunchConfig(platform: 'desktop' | 'ios' | 'android' | 'web'): Promise<{
+export async function fetchLaunchConfig(platform: 'ios' | 'android' | 'web'): Promise<{
   min: string;
   maintenance: { starts: string; ends: string; message: string | null } | null;
 }> {
   const { data, error } = await supabase()
     .from('app_config')
     .select(
-      'min_version_desktop, min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
+      'min_version_web, min_version_ios, min_version_android, maintenance_starts_at, maintenance_ends_at, maintenance_message',
     )
     .eq('id', 1)
     .single();
   if (error) throw toError(error.message);
   return {
     min:
-      platform === 'desktop'
-        ? data.min_version_desktop
-        : platform === 'ios'
-          ? data.min_version_ios
-          : platform === 'android'
-            ? data.min_version_android
-            : data.min_version_web,
+      platform === 'ios'
+        ? data.min_version_ios
+        : platform === 'android'
+          ? data.min_version_android
+          : data.min_version_web,
     maintenance:
       data.maintenance_starts_at && data.maintenance_ends_at
         ? {

@@ -1,4 +1,4 @@
--- pgTAP: 배우자 월급 계획의 배우자 내 목표 줄 잠금(20 W-01 1번), 월급날 바꾸면 이번 사이클 끝 = 새 기준일 전날(07 3장).
+-- pgTAP: 각자 모드 파트너 월급 계획은 보기만(20 W-01 1번, 2026-11-09), 월급날 바꾸면 이번 사이클 끝 = 새 기준일 전날(07 3장).
 -- 찬우(시작), 예빈(합류), 각자
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -37,21 +37,21 @@ select public.save_split(jsonb_build_array(
 ), auth.uid());
 reset role;
 
--- 찬우가 예빈 월급 계획을 고침
+-- 찬우가 예빈 월급 계획을 고침: 각자 모드 파트너 월급 계획은 보기만(2026-11-09, 지출 줄도)
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok(format($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', %L, 'amount', 200000),
   jsonb_build_object('kind', 'living', 'amount', 680000)), '22222222-2222-2222-2222-222222222222') $$,
-  current_setting('test.g')), '42501', 'locked_line', '배우자 내 목표 줄 금액은 못 바꿈');
-select throws_ok($$ select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'amount', 680000)), '22222222-2222-2222-2222-222222222222') $$,
-  '42501', 'locked_line', '배우자 내 목표 줄을 빼지도 못 함');
-select lives_ok(format($$ select public.save_split(jsonb_build_array(
+  current_setting('test.g')), '42501', 'not_owner', '파트너 저금 줄 금액은 못 바꿈');
+select throws_ok(format($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', %L, 'amount', 100000),
   jsonb_build_object('kind', 'living', 'amount', 700000)), '22222222-2222-2222-2222-222222222222') $$,
-  current_setting('test.g')), '다른 줄은 고칠 수 있음');
+  current_setting('test.g')), '42501', 'not_owner', '파트너 지출 줄도 못 바꿈(보기만)');
 reset role;
+select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
+  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 680000::bigint,
+  '예빈 생활비는 그대로');
 
 -- 월급날 바꾸기: 찬우 이번 사이클 끝이 새 기준일 전날로
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

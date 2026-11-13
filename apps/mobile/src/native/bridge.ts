@@ -3,13 +3,14 @@ import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import type { DesktopBridge } from '@sweetwo/app';
+import type { AppBridge } from '@sweetwo/app';
 import { parseDeepLink } from '@sweetwo/core';
 import {
   authEvents,
   cancelLogin,
   getAccessToken,
   listenAppUrls,
+  loginPending,
   reopenLogin,
   signOut,
   startLogin,
@@ -22,11 +23,13 @@ import {
   pushReceives,
   pushStatus,
   pushToken,
+  openPushSettings,
   requestPush,
   startPush,
   takePendingOpen,
 } from './push';
 import {
+  clearPin,
   clearPinVerified,
   lockEvents,
   lockNow,
@@ -39,13 +42,15 @@ import {
   verifyPin,
 } from './lock';
 
-// 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts DesktopBridge와 같음(위젯·OS 알림 없음).
+// 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
 // 웹뷰에는 access token만. refresh token, code_verifier, 로그인 콜백 code는 이 파일 밖(웹뷰 화면 코드)에서 못 봄.
 const invites = emitter<string>();
 const navigates = emitter<string>();
 // 앱이 화면을 그리기 전에 들어온 링크(처음 실행)는 받는 쪽이 생길 때 넘김
 let pendingInvite: string | null = null;
 let pendingPath: string | null = null;
+const backs = new Set<() => boolean>();
+let backBound = false;
 
 export async function installBridge(): Promise<'ios' | 'android'> {
   const platform = Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
@@ -64,7 +69,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
   startPush();
   await startAutoLock();
 
-  const bridge: DesktopBridge = {
+  const bridge: AppBridge = {
     platform,
     version: Capacitor.getPlatform(),
     appVersion: info.version,
@@ -79,6 +84,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       start: (p) => startLogin(p),
       reopen: () => reopenLogin(),
       cancel: () => cancelLogin(),
+      pending: async () => loginPending(),
       getAccessToken: () => getAccessToken(),
       signOut: () => signOut('user'),
       onEvent: (cb) => authEvents.on(cb),
@@ -91,8 +97,23 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       setTouchId: (on) => setBiometric(on),
       unlockWithTouchId: () => unlockWithBiometric(),
       clear: () => clearPinVerified(),
+      // ‘PIN을 잊었어요’(곧 로그아웃), 다른 계정 로그인 때만 앱이 부름(platform.ts AppBridge.lock.reset)
+      reset: () => clearPin(),
       setAutoLock: (min) => setAutoLock(min),
       onLock: (cb) => lockEvents.on(() => cb()),
+    },
+    // 안드로이드 하드웨어 뒤로(2026-11-09): 앱(홈 밖 메뉴 → 홈, 열린 메뉴 서랍 닫기)이 먼저, 아니면 웹뷰 뒤로 / 앱 닫기
+    onBack: (cb) => {
+      backs.add(cb);
+      if (!backBound) {
+        backBound = true;
+        void CapApp.addListener('backButton', ({ canGoBack }) => {
+          if ([...backs].reverse().some((f) => f())) return;
+          if (canGoBack) window.history.back();
+          else void CapApp.exitApp();
+        });
+      }
+      return () => void backs.delete(cb);
     },
     onNavigate: (cb) => {
       if (pendingPath) {
@@ -105,6 +126,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       status: () => pushStatus(),
       request: () => requestPush(),
       token: () => pushToken(),
+      openSettings: () => openPushSettings(),
       onOpen: (cb) => {
         const p = takePendingOpen();
         if (p) cb(p);
@@ -139,6 +161,34 @@ export async function installBridge(): Promise<'ios' | 'android'> {
         await Filesystem.deleteFile({ path: name, directory: Directory.Cache }).catch(
           () => undefined,
         );
+      }
+    },
+    // 이미지 공유(W-01 영수증 ‘공유하기’, 2026-11-09): 앱 캐시에 PNG를 쓰고 OS 공유 창. 끝나면 캐시 파일은 지움
+    shareImage: async (f) => {
+      const name = f.name.replace(/[^\w.-]/g, '_');
+      const w = await Filesystem.writeFile({
+        path: name,
+        data: f.base64,
+        directory: Directory.Cache,
+      });
+      try {
+        await Share.share({ files: [w.uri] });
+        return 'shared';
+      } catch {
+        return 'cancelled';
+      } finally {
+        await Filesystem.deleteFile({ path: name, directory: Directory.Cache }).catch(
+          () => undefined,
+        );
+      }
+    },
+    // 글 공유(O-07 초대 코드, 2026-11-10): Android WebView에는 navigator.share가 없어 @capacitor/share로
+    shareText: async (t) => {
+      try {
+        await Share.share({ text: t.text, url: t.url, dialogTitle: t.text });
+        return 'shared';
+      } catch {
+        return 'cancelled';
       }
     },
   };

@@ -5,13 +5,13 @@ import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 const CATS: InquiryCategory[] = ['account', 'couple', 'calc', 'sync', 'billing', 'privacy', 'etc'];
 
-// S-19a 문의하기: 분류 + 내용 + “앱 정보 함께 보내기”(기본 켜짐). 자동 첨부는 앱 버전·OS·부부 상태·동기화 상태만
+// S-19a 문의하기: 분류 + 내용 + “앱 정보 함께 보내기”(기본 켜짐). 자동 첨부는 앱 버전·OS·우리 둘 상태·동기화 상태만
 // (금액·메모 없음, 서버도 키를 거름). 번호는 서버가 발급 → “문의 #A-10234를 받았어요” → 내 문의.
 // help@ 사본 메일은 메일 발송과 함께.
 export function S19aInquiry() {
@@ -47,7 +47,7 @@ export function S19aInquiry() {
         : null;
       const no = await createInquiry(cat, text.trim(), info);
       await qc.invalidateQueries({ queryKey: qk.inquiries });
-      toast(copy.inquirySent(no));
+      carryToast(copy.inquirySent(no));
       nav('/settings/help/inquiries', { replace: true });
     } catch {
       toast(copy.failed);
@@ -59,7 +59,7 @@ export function S19aInquiry() {
     <QuestionLayout
       title={copy.contact}
       onBack={() => nav('/settings/help')}
-      primary={{ label: copy.sendInquiry, disabled: !ok || busy, loading: busy }}
+      primary={{ label: copy.sendInquiry, disabled: !ok, loading: busy }}
       onSubmit={() => void send()}
     >
       <div className="hg-list">

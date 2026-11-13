@@ -9,7 +9,7 @@ insert into auth.users (id, email) values
   ('aaaaaaaa-0000-0000-0000-000000000004', 'ops01@sweetwo.kr'),
   ('aaaaaaaa-0000-0000-0000-000000000009', 'x@gmail.com');
 create function pg_temp.login_as(uid uuid) returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2')::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', 'aal2', 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 
 -- 첫 최고 관리자: 회사 도메인만, 한 번만
@@ -21,9 +21,9 @@ select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000002');
 set local role authenticated;
 select is(public.admin_bootstrap(), true, '첫 최고 관리자');
 select is(public.admin_bootstrap(), false, '두 번째는 없음');
--- 관리자 추가는 승인 요청(본인 승인 불가)
-select set_config('test.a1', public.admin_request_user('boss2@sweetwo.kr', '대표2', array['super']::public.admin_role[])::text, true);
-select throws_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.a1')), '42501', 'self_approval', '본인 승인 불가');
+-- 관리자 추가는 승인 요청. 2026-11-06부터 요청한 최고 관리자 본인도 승인할 수 있음
+select set_config('test.a1', public.admin_request_user('cs09@sweetwo.kr', 'cs09', array['cs']::public.admin_role[])::text, true);
+select lives_ok(format($$ select public.admin_decide(%L, 'approve') $$, current_setting('test.a1')), '본인 요청도 승인');
 reset role;
 -- boss2가 없으니 흉내로 직접 넣고 승인
 insert into public.admin_user (id, email, name, roles) values ('aaaaaaaa-0000-0000-0000-000000000003', 'boss2@sweetwo.kr', '대표2', array['super']::public.admin_role[]);
@@ -72,7 +72,7 @@ select throws_ok($$ select public.admin_add_terms_version('terms', 'v2', current
 select isnt(public.admin_add_terms_version('terms', 'v2', current_date + 30, true, true), null, '약관 버전 요청');
 -- 앱 버전·점검: 저장 = 승인 요청, 모르는 키 거절
 select throws_ok($$ select public.admin_request_app_config('{"flags":{}}') $$, '22023', 'bad_value', '정해진 값만');
-select set_config('test.cfg', public.admin_request_app_config(jsonb_build_object('min_version_desktop', '1.2.0',
+select set_config('test.cfg', public.admin_request_app_config(jsonb_build_object('min_version_ios', '1.2.0',
   'maintenance_starts_at', now() + interval '1 day', 'maintenance_ends_at', now() + interval '1 day 2 hours', 'maintenance_message', '저장 기능 점검'))::text, true);
 -- 기준 데이터
 select lives_ok($$ select public.admin_set_loan_rate('credit', 650, current_date) $$, '평균 금리 바꿈');
@@ -84,7 +84,7 @@ set local role authenticated;
 select public.admin_decide((select id from public.admin_approvals() where kind = 'app_version'), 'approve');
 select public.admin_decide((select id from public.admin_approvals() where kind = 'terms_version'), 'approve');
 reset role;
-select results_eq($$ select min_version_desktop, maintenance_message from public.app_config $$,
+select results_eq($$ select min_version_ios, maintenance_message from public.app_config $$,
   $$ values ('1.2.0', '저장 기능 점검') $$, '앱 버전·점검 적용');
 set local role anon;
 select results_eq($$ select version, reconsent from public.terms_version $$, $$ values ('v2', true) $$, '승인된 약관 버전');

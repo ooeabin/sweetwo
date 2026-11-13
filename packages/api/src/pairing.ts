@@ -1,18 +1,47 @@
-import { TERMS_VERSION, type Json, type SplitLineDraft } from '@sweetwo/core';
+import {
+  JoinContextSchema,
+  TERMS_VERSION,
+  type JoinContext,
+  type Json,
+  type SplitLineDraft,
+} from '@sweetwo/core';
+export type { JoinContext } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// 배우자 합류 서버 호출(docs/spec/18-partner-join.md, 15 A-07)
+// 파트너 합류 서버 호출(docs/spec/18-partner-join.md, 15 A-07)
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type InviteStatus = 'ok' | 'invalid' | 'expired' | 'used' | 'unavailable';
-/** 로그인 전에도: 초대한 사람 호칭과 상태 */
+export type InviteStatus = 'ok' | 'invalid' | 'expired' | 'used' | 'unavailable' | 'locked';
+
+// 이 기기를 가리키는 임의 값(로그인과 상관없음). 서버가 sha256으로 바꿔 미리보기 시도 수를 셈(31 보안 3장, D2)
+const DEVICE_KEY = 'sweetwo.inviteDevice';
+function inviteDevice(): string | null {
+  try {
+    let v = localStorage.getItem(DEVICE_KEY);
+    if (!v) {
+      v =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+      localStorage.setItem(DEVICE_KEY, v);
+    }
+    return v;
+  } catch {
+    return null;
+  }
+}
+
+/** 로그인 전에도: 초대한 사람 호칭과 상태. 같은 기기·접속 주소에서 10분에 너무 많이 물으면 'locked' */
 export async function invitePreview(
   code: string,
 ): Promise<{ inviter: string | null; status: InviteStatus }> {
-  const { data, error } = await supabase().rpc('invite_preview', { p_code: code });
+  const { data, error } = await supabase().rpc('invite_preview', {
+    p_code: code,
+    p_device: inviteDevice() ?? '',
+  });
   fail(error);
   const row = Array.isArray(data) ? data[0] : null;
   return {
@@ -32,13 +61,14 @@ export type JoinResult =
   | 'own_code'
   | 'already_connected'
   | 'has_records';
+/** ‘합류하기’: 코드를 내 몫으로 24시간 잡아 둠(공간에는 합류를 마칠 때 들어감, D1) */
 export async function joinSpace(code: string): Promise<JoinResult> {
   const { data, error } = await supabase().rpc('join_space', { p_code: code });
   fail(error);
   return data as JoinResult;
 }
 
-/** P-02a ‘안 옮겨요’ 개수: 목표(비상금 빼고), 월급 계획, 체크리스트 */
+/** P-02a ‘안 옮겨요’ 개수: 저금 항목, 월급 계획, 체크리스트 */
 export async function fetchRecordCounts(): Promise<{
   goals: number;
   splits: number;
@@ -46,11 +76,7 @@ export async function fetchRecordCounts(): Promise<{
 }> {
   const db = supabase();
   const [g, sp, l] = await Promise.all([
-    db
-      .from('goal')
-      .select('id', { count: 'exact', head: true })
-      .is('deleted_at', null)
-      .neq('template', 'emergency'),
+    db.from('goal').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     db.from('salary_split').select('id', { count: 'exact', head: true }),
     db.from('pay_checklist').select('id', { count: 'exact', head: true }),
   ]);
@@ -61,7 +87,7 @@ export async function fetchRecordCounts(): Promise<{
 /** P-02a 혼자 쓰던 기록 옮기기 + 합류. vis = 내 명의 자산 id → 공개 범위(기본 금액만) */
 export async function joinMovingRecords(
   code: string,
-  vis: Record<string, 'all' | 'sum'>,
+  vis: Record<string, 'all' | 'sum' | 'private'>,
 ): Promise<JoinResult> {
   const { data, error } = await supabase().rpc('join_moving_records', {
     p_code: code,
@@ -116,4 +142,15 @@ export async function recordPrefillConsent(userId: string) {
 export async function discardPrefill() {
   const { error } = await supabase().rpc('discard_prefill');
   fail(error);
+}
+
+/**
+ * 합류 흐름에 필요한 것만(18, D1): 합류를 마치기 전에는 공간 구성원이 아니라 공간 데이터를 직접 못 읽음.
+ * 시작한 사람 호칭, 관리 방식, 시작한 사람 월급 계획이 있는지, 대신 입력한 내 명의 항목, 합쳐서면 다시 채울 공동 월급 계획.
+ * 합류 중이 아니면(취소, 기한 지남) null
+ */
+export async function fetchJoinContext(): Promise<JoinContext | null> {
+  const { data, error } = await supabase().rpc('join_context');
+  fail(error);
+  return JoinContextSchema.parse(data ?? null);
 }

@@ -1290,6 +1290,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          closed_at: string | null
           created_at: string
           created_by: string | null
           deadline: string | null
@@ -1308,6 +1309,7 @@ export type Database = {
           photo_preset: string | null
           priority: number
           space_id: string
+          start_saved: number
           status: Database["public"]["Enums"]["goal_status"]
           target_amount: number | null
           template: string
@@ -1322,6 +1324,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline?: string | null
@@ -1340,6 +1343,7 @@ export type Database = {
           photo_preset?: string | null
           priority: number
           space_id: string
+          start_saved?: number
           status?: Database["public"]["Enums"]["goal_status"]
           target_amount?: number | null
           template: string
@@ -1353,6 +1357,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline?: string | null
@@ -1371,6 +1376,7 @@ export type Database = {
           photo_preset?: string | null
           priority?: number
           space_id?: string
+          start_saved?: number
           status?: Database["public"]["Enums"]["goal_status"]
           target_amount?: number | null
           template?: string
@@ -1471,6 +1477,8 @@ export type Database = {
           channel: string
           created_at: string
           done_at: string | null
+          email_from: string | null
+          email_subject: string | null
           id: string
           mail_copied_at: string | null
           no: string
@@ -1487,6 +1495,8 @@ export type Database = {
           channel?: string
           created_at?: string
           done_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
           id?: string
           mail_copied_at?: string | null
           no?: string
@@ -1502,6 +1512,8 @@ export type Database = {
           channel?: string
           created_at?: string
           done_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
           id?: string
           mail_copied_at?: string | null
           no?: string
@@ -1516,6 +1528,65 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiry_mail: {
+        Row: {
+          attachments: number
+          created_at: string
+          direction: string
+          id: string
+          inquiry_id: string
+          inquiry_message_id: string | null
+          message_id: string | null
+          outbox_id: string | null
+          refs: string[]
+        }
+        ComputedFields: never
+        Insert: {
+          attachments?: number
+          created_at?: string
+          direction: string
+          id?: string
+          inquiry_id: string
+          inquiry_message_id?: string | null
+          message_id?: string | null
+          outbox_id?: string | null
+          refs?: string[]
+        }
+        Update: {
+          attachments?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          inquiry_id?: string
+          inquiry_message_id?: string | null
+          message_id?: string | null
+          outbox_id?: string | null
+          refs?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_mail_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiry_mail_inquiry_message_id_fkey"
+            columns: ["inquiry_message_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry_message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiry_mail_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "mail_outbox"
             referencedColumns: ["id"]
           },
         ]
@@ -1563,6 +1634,9 @@ export type Database = {
           created_by: string | null
           expires_at: string
           id: string
+          reserved_by: string | null
+          reserved_until: string | null
+          reserved_vis: Json | null
           space_id: string
           used_at: string | null
           used_by: string | null
@@ -1574,6 +1648,9 @@ export type Database = {
           created_by?: string | null
           expires_at: string
           id?: string
+          reserved_by?: string | null
+          reserved_until?: string | null
+          reserved_vis?: Json | null
           space_id: string
           used_at?: string | null
           used_by?: string | null
@@ -1584,6 +1661,9 @@ export type Database = {
           created_by?: string | null
           expires_at?: string
           id?: string
+          reserved_by?: string | null
+          reserved_until?: string | null
+          reserved_vis?: Json | null
           space_id?: string
           used_at?: string | null
           used_by?: string | null
@@ -1614,6 +1694,28 @@ export type Database = {
           created_at?: string
           id?: never
           user_id?: string
+        }
+        Relationships: []
+      }
+      invite_guard_attempt: {
+        Row: {
+          created_at: string
+          id: number
+          key_hash: string
+          kind: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          id?: never
+          key_hash: string
+          kind: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          key_hash?: string
+          kind?: string
         }
         Relationships: []
       }
@@ -1707,6 +1809,8 @@ export type Database = {
           claimed_at: string | null
           created_at: string
           dedupe: string
+          from_email: string | null
+          headers: Json | null
           id: string
           kind: string
           last_error: string | null
@@ -1725,6 +1829,8 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           dedupe: string
+          from_email?: string | null
+          headers?: Json | null
           id?: string
           kind: string
           last_error?: string | null
@@ -1742,6 +1848,8 @@ export type Database = {
           claimed_at?: string | null
           created_at?: string
           dedupe?: string
+          from_email?: string | null
+          headers?: Json | null
           id?: string
           kind?: string
           last_error?: string | null
@@ -1790,6 +1898,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
+          target: NonNullable<Json>
           title: string
         }
         ComputedFields: never
@@ -1807,6 +1916,7 @@ export type Database = {
           published_at?: string | null
           starts_at: string
           status?: string
+          target?: NonNullable<Json>
           title: string
         }
         Update: {
@@ -1823,6 +1933,7 @@ export type Database = {
           published_at?: string | null
           starts_at?: string
           status?: string
+          target?: NonNullable<Json>
           title?: string
         }
         Relationships: []
@@ -2221,6 +2332,37 @@ export type Database = {
           },
         ]
       }
+      server_event: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          props: NonNullable<Json>
+          sent_at: string | null
+          space_id: string | null
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          id?: never
+          name: string
+          props?: NonNullable<Json>
+          sent_at?: string | null
+          space_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          name?: string
+          props?: NonNullable<Json>
+          sent_at?: string | null
+          space_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       split_line: {
         Row: {
           amount: number
@@ -2276,6 +2418,48 @@ export type Database = {
             columns: ["split_id"]
             isOneToOne: false
             referencedRelation: "salary_split"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storage_move: {
+        Row: {
+          attempts: number
+          bucket: string
+          created_at: string
+          done_at: string | null
+          from_path: string
+          id: number
+          to_path: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          done_at?: string | null
+          from_path: string
+          id?: never
+          to_path: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          created_at?: string
+          done_at?: string | null
+          from_path?: string
+          id?: never
+          to_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_move_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
             referencedColumns: ["id"]
           },
         ]
@@ -2353,6 +2537,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _accept_join: { Args: { p_space: string }; Returns: undefined }
+      _detach_pending_member: { Args: { p_space: string; p_user: string }; Returns: undefined }
+      _join_reserve: { Args: { p_code: string; p_moving: boolean; p_vis: Json }; Returns: string }
+      _release_expired: { Args: { p_space: string }; Returns: undefined }
+      _release_invite: { Args: { p_invite: string }; Returns: undefined }
       access_send: {
         Args: {
           p_admin: string
@@ -2372,18 +2561,20 @@ export type Database = {
         Args: { p_path: string; p_record: string; p_size: number }
         Returns: string
       }
-      add_inquiry_message: {
-        Args: { p_body: string; p_inquiry: string }
-        Returns: undefined
+      add_inquiry_message: { Args: { p_body: string; p_inquiry: string }; Returns: undefined }
+      add_saving_item: {
+        Args: {
+          p_deadline?: string
+          p_monthly: number
+          p_name: string
+          p_start?: number
+          p_target?: number
+        }
+        Returns: string
       }
       admin_access_data: { Args: { p_access: string }; Returns: Json }
       admin_account_action: {
-        Args: {
-          p_action: string
-          p_inquiry_no: string
-          p_note: string
-          p_user: string
-        }
+        Args: { p_action: string; p_inquiry_no: string; p_note: string; p_user: string }
         Returns: undefined
       }
       admin_add_content_version: {
@@ -2482,10 +2673,7 @@ export type Database = {
         }
       }
       admin_dashboard: { Args: Record<PropertyKey, never>; Returns: Json }
-      admin_decide: {
-        Args: { p_decision: string; p_id: string }
-        Returns: undefined
-      }
+      admin_decide: { Args: { p_decision: string; p_id: string }; Returns: undefined }
       admin_delete_kind_name: { Args: { p_id: string }; Returns: undefined }
       admin_end_notice: { Args: { p_id: string }; Returns: undefined }
       admin_inquiries: {
@@ -2523,6 +2711,10 @@ export type Database = {
         Args: { p_reason: string; p_rows: number; p_screen: string }
         Returns: string
       }
+      admin_notice_audience: {
+        Args: { p_email: boolean; p_kind: string; p_platforms: string[]; p_target: Json }
+        Returns: Json
+      }
       admin_notices: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2539,6 +2731,7 @@ export type Database = {
           published_at: string | null
           starts_at: string
           status: string
+          target: NonNullable<Json>
           title: string
         }[]
         SetofOptions: {
@@ -2549,12 +2742,7 @@ export type Database = {
         }
       }
       admin_request_access: {
-        Args: {
-          p_inquiry: string
-          p_raw: boolean
-          p_reason: string
-          p_scopes: string[]
-        }
+        Args: { p_inquiry: string; p_raw: boolean; p_reason: string; p_scopes: string[] }
         Returns: string
       }
       admin_request_app_config: { Args: { p: Json }; Returns: string }
@@ -2571,14 +2759,10 @@ export type Database = {
         Returns: string
       }
       admin_request_login_move: {
-        Args: {
-          p_inquiry_no: string
-          p_new: string
-          p_note: string
-          p_user: string
-        }
+        Args: { p_inquiry_no: string; p_new: string; p_note: string; p_user: string }
         Returns: string
       }
+      admin_request_notice: { Args: { p_id: string }; Returns: undefined }
       admin_request_user: {
         Args: {
           p_email: string
@@ -2606,13 +2790,9 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_require_fresh: { Args: { p_seconds?: number }; Returns: undefined }
       admin_reveal: {
-        Args: {
-          p_inquiry_no: string
-          p_reason: string
-          p_scopes: string[]
-          p_user: string
-        }
+        Args: { p_inquiry_no: string; p_reason: string; p_scopes: string[]; p_user: string }
         Returns: Json
       }
       admin_reviews: {
@@ -2668,24 +2848,16 @@ export type Database = {
         Returns: undefined
       }
       admin_set_inquiry_status: {
-        Args: {
-          p_id: string
-          p_status: Database["public"]["Enums"]["inquiry_status"]
-        }
+        Args: { p_id: string; p_status: Database["public"]["Enums"]["inquiry_status"] }
         Returns: undefined
       }
       admin_set_loan_rate: {
         Args: { p_applied: string; p_kind: string; p_rate_bp: number }
         Returns: undefined
       }
-      admin_set_lock: {
-        Args: { p_email: string; p_locked: boolean }
-        Returns: undefined
-      }
-      admin_set_notice_email: {
-        Args: { p_email: boolean; p_id: string }
-        Returns: undefined
-      }
+      admin_set_lock: { Args: { p_email: string; p_locked: boolean }; Returns: undefined }
+      admin_set_notice_email: { Args: { p_email: boolean; p_id: string }; Returns: undefined }
+      admin_set_notice_target: { Args: { p_id: string; p_target: Json }; Returns: undefined }
       admin_terms_versions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2698,6 +2870,10 @@ export type Database = {
           status: string
           version: string
         }[]
+      }
+      admin_test_notice_mail: {
+        Args: { p_body: string; p_kind: string; p_title: string }
+        Returns: undefined
       }
       admin_user_detail: { Args: { p_user: string }; Returns: Json }
       admin_users: {
@@ -2714,10 +2890,8 @@ export type Database = {
       }
       agree_terms: { Args: { p_marketing?: boolean }; Returns: number }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
-      answer_access_request: {
-        Args: { p_accept: boolean; p_id: string }
-        Returns: undefined
-      }
+      amount_band: { Args: { v: number }; Returns: string }
+      answer_access_request: { Args: { p_accept: boolean; p_id: string }; Returns: undefined }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
       asset_editable: {
         Args: {
@@ -2749,10 +2923,8 @@ export type Database = {
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
       can_read_photo: { Args: { p_name: string }; Returns: boolean }
-      cancel_account_deletion: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cancel_account_deletion: { Args: Record<PropertyKey, never>; Returns: undefined }
+      cancel_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
       cancel_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       care_date_in_year: {
         Args: {
@@ -2788,6 +2960,8 @@ export type Database = {
           claimed_at: string | null
           created_at: string
           dedupe: string
+          from_email: string | null
+          headers: Json | null
           id: string
           kind: string
           last_error: string | null
@@ -2815,6 +2989,15 @@ export type Database = {
           token: string
         }[]
       }
+      claim_storage_move: {
+        Args: { p_limit?: number }
+        Returns: {
+          bucket: string
+          from_path: string
+          id: number
+          to_path: string
+        }[]
+      }
       claim_storage_purge: {
         Args: { p_limit?: number }
         Returns: {
@@ -2823,16 +3006,71 @@ export type Database = {
           path: string
         }[]
       }
-      complete_join: {
-        Args: { p_lines?: Json; p_version?: number }
-        Returns: undefined
-      }
+      client_ip_key: { Args: Record<PropertyKey, never>; Returns: string }
+      complete_join: { Args: { p_lines?: Json; p_version?: number }; Returns: undefined }
       complete_signup: {
         Args: {
           p_marketing: boolean
           p_notify_email: string
           p_provider: Database["public"]["Enums"]["auth_provider"]
           p_terms_version: string
+        }
+        Returns: {
+          adult_confirmed_at: string | null
+          allowance: number | null
+          analytics_off: boolean
+          app_seen_at: string | null
+          avatar_path: string | null
+          avatar_social_checked_at: string | null
+          avatar_updated_at: string | null
+          birth_day: number | null
+          birth_month: number | null
+          birth_year: number | null
+          card_main: boolean | null
+          created_at: string
+          default_visibility: Database["public"]["Enums"]["asset_visibility"]
+          deletion_requested_at: string | null
+          employment: Database["public"]["Enums"]["employment"] | null
+          id: string
+          income_variable: boolean
+          invest_answer: Database["public"]["Enums"]["invest_answer"] | null
+          invest_answered_at: string | null
+          is_internal_tester: boolean
+          monthly_income: number | null
+          nickname: string | null
+          noti_prefs: NonNullable<Json>
+          notify_email: string
+          notify_email_source: Database["public"]["Enums"]["email_source"]
+          onboarding_done_at: string | null
+          onboarding_step: string | null
+          other_income: number
+          payday: number | null
+          payday_last: boolean
+          provider: Database["public"]["Enums"]["auth_provider"]
+          quiet_end: number
+          quiet_start: number
+          rank_month: string | null
+          rank_net: number | null
+          rank_pct: number | null
+          side: Database["public"]["Enums"]["couple_side"] | null
+          space_id: string | null
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "app_user"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_signup_v2: {
+        Args: {
+          p_marketing: boolean
+          p_notify_email: string
+          p_provider: Database["public"]["Enums"]["auth_provider"]
+          p_versions: Json
         }
         Returns: {
           adult_confirmed_at: string | null
@@ -2899,25 +3137,14 @@ export type Database = {
           expires_at: string
         }[]
       }
-      cut_cycle: {
-        Args: { p_day: number; p_owner: string; p_space: string }
-        Returns: undefined
-      }
-      cycle_date: {
-        Args: { m: number; p_day: number; y: number }
-        Returns: string
-      }
-      cycle_day: {
-        Args: { p_owner: string; p_space: string }
-        Returns: number
-      }
+      cut_cycle: { Args: { p_day: number; p_owner: string; p_space: string }; Returns: undefined }
+      cycle_date: { Args: { m: number; p_day: number; y: number }; Returns: string }
+      cycle_day: { Args: { p_owner: string; p_space: string }; Returns: number }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
+      done_storage_move: { Args: { p_ids: number[] }; Returns: undefined }
       done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
-      emergency_asset_add: {
-        Args: { d: number; p_space: string }
-        Returns: undefined
-      }
+      emergency_asset_add: { Args: { d: number; p_space: string }; Returns: undefined }
       end_access: { Args: { p_id: string }; Returns: undefined }
       end_sessions: { Args: { p_id?: string }; Returns: number }
       enqueue_mail: {
@@ -2975,6 +3202,22 @@ export type Database = {
         }[]
       }
       html_esc: { Args: { t: string }; Returns: string }
+      in_force_terms_version: { Args: { p_kind: string }; Returns: string }
+      ingest_inquiry_mail: {
+        Args: {
+          p_attachments?: number
+          p_body: string
+          p_from: string
+          p_message_id: string
+          p_refs: string[]
+          p_subject: string
+        }
+        Returns: Json
+      }
+      inquiry_is_about: {
+        Args: { p_inquiry_no: string; p_user: string }
+        Returns: boolean
+      }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2982,22 +3225,29 @@ export type Database = {
           partner: Database["public"]["Enums"]["invest_answer"]
         }[]
       }
-      invite_preview: {
-        Args: { p_code: string }
-        Returns: {
-          inviter_nickname: string
-          status: string
-        }[]
-      }
-      is_own_space_row: {
-        Args: { p_owner: string; p_space_id: string }
+      invite_guard_hit: {
+        Args: { p_key: string; p_kind: string; p_limit: number }
         Returns: boolean
       }
+      invite_preview:
+        | {
+            Args: { p_code: string }
+            Returns: {
+              inviter_nickname: string
+              status: string
+            }[]
+          }
+        | {
+            Args: { p_code: string; p_device: string }
+            Returns: {
+              inviter_nickname: string
+              status: string
+            }[]
+          }
+      is_own_space_row: { Args: { p_owner: string; p_space_id: string }; Returns: boolean }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
-      join_moving_records: {
-        Args: { p_code: string; p_vis?: Json }
-        Returns: string
-      }
+      join_context: { Args: Record<PropertyKey, never>; Returns: Json }
+      join_moving_records: { Args: { p_code: string; p_vis?: Json }; Returns: string }
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
@@ -3025,18 +3275,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      log_split_changes: {
-        Args: { p_old: Json; p_split: string }
-        Returns: undefined
-      }
-      login_move_apply: {
-        Args: { p: Json; p_approval: string }
-        Returns: undefined
-      }
-      login_move_check: {
-        Args: { p_new: string; p_user: string }
-        Returns: undefined
-      }
+      log_split_changes: { Args: { p_old: Json; p_split: string }; Returns: undefined }
+      login_move_apply: { Args: { p: Json; p_approval: string }; Returns: undefined }
+      login_move_check: { Args: { p_new: string; p_user: string }; Returns: undefined }
       login_state: {
         Args: { p_provider?: Database["public"]["Enums"]["auth_provider"] }
         Returns: Json
@@ -3051,12 +3292,12 @@ export type Database = {
       mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
-      move_goal: {
-        Args: { p_amount: number; p_goal: string; p_kind: string }
-        Returns: string
-      }
+      move_goal: { Args: { p_amount: number; p_goal: string; p_kind: string }; Returns: string }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
+      my_login_email: { Args: Record<PropertyKey, never>; Returns: string }
       my_mail_bounced: { Args: Record<PropertyKey, never>; Returns: boolean }
+      my_notices: { Args: { p_platform: string; p_version?: string }; Returns: Json }
+      my_reconnect_ok: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3107,10 +3348,7 @@ export type Database = {
           net: number
         }[]
       }
-      next_base_after: {
-        Args: { d: string; day: number; last: boolean }
-        Returns: string
-      }
+      next_base_after: { Args: { d: string; day: number; last: boolean }; Returns: string }
       note_device: {
         Args: { p_install: string; p_platform: string; p_version: string }
         Returns: undefined
@@ -3124,6 +3362,19 @@ export type Database = {
           body_html: string
           body_text: string
         }[]
+      }
+      noti_send_window: { Args: { p_quiet_end: number; p_quiet_start: number }; Returns: string }
+      notice_target_valid: { Args: { p: Json }; Returns: boolean }
+      notice_user_match: {
+        Args: {
+          p_now?: string
+          p_platform?: string
+          p_platforms: string[]
+          p_target: Json
+          p_user: string
+          p_version?: string
+        }
+        Returns: boolean
       }
       notify: {
         Args: {
@@ -3141,6 +3392,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      onboarding_reset_plan: { Args: Record<PropertyKey, never>; Returns: undefined }
       partner_asset_sums: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3215,19 +3467,14 @@ export type Database = {
           version: string
         }[]
       }
+      purge_abandoned_signups: { Args: { p_now?: string }; Returns: number }
       purge_app_devices: { Args: Record<PropertyKey, never>; Returns: undefined }
-      purge_deleted_accounts: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      purge_deleted_accounts: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_left_spaces: { Args: Record<PropertyKey, never>; Returns: number }
       purge_notifications: { Args: Record<PropertyKey, never>; Returns: number }
       purge_old_trash: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
-      purge_unlinked_spaces: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      purge_unlinked_spaces: { Args: Record<PropertyKey, never>; Returns: undefined }
       push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
       read_won: { Args: { v: number }; Returns: string }
       recent_goal_changes: {
@@ -3264,61 +3511,45 @@ export type Database = {
           expires_at: string
         }[]
       }
-      request_account_deletion: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      request_reconnect: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      request_account_deletion: { Args: Record<PropertyKey, never>; Returns: string }
+      request_reconnect: { Args: Record<PropertyKey, never>; Returns: undefined }
       request_unlink: { Args: { p_confirm: string }; Returns: string }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
-      run_access_expiry: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      run_access_expiry: { Args: Record<PropertyKey, never>; Returns: undefined }
       run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
-      run_unlink_deadlines: {
-        Args: Record<PropertyKey, never>
+      run_unlink_deadlines: { Args: Record<PropertyKey, never>; Returns: undefined }
+      save_api_holidays: { Args: { p_rows: Json; p_years: number[] }; Returns: number }
+      save_split: { Args: { p_lines: Json; p_owner?: string }; Returns: string }
+      saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_keep: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_reopen: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_retarget: { Args: { p_goal: string; p_target: number }; Returns: undefined }
+      saving_item_stop: { Args: { p_goal: string }; Returns: undefined }
+      saving_item_unkeep: {
+        Args: { p_deadline?: string; p_goal: string; p_target: number }
         Returns: undefined
       }
-      save_api_holidays: {
-        Args: { p_rows: Json; p_years: number[] }
-        Returns: number
-      }
-      save_split: {
-        Args: { p_lines: Json; p_owner?: string }
-        Returns: string
-      }
+      saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
       sell_asset: {
         Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
         Returns: number
       }
       send_desktop_link: { Args: Record<PropertyKey, never>; Returns: boolean }
-      send_evening_notifications: {
-        Args: { p_today?: string }
-        Returns: number
-      }
-      send_morning_notifications: {
-        Args: { p_today?: string }
-        Returns: number
-      }
+      send_evening_notifications: { Args: { p_today?: string }; Returns: number }
+      send_morning_notifications: { Args: { p_today?: string }; Returns: number }
       send_notice_mails: { Args: { p_now?: string }; Returns: number }
       send_weekly_summary: { Args: { p_today?: string }; Returns: number }
-      set_avatar: { Args: { p_path?: string }; Returns: undefined }
-      set_checklist_done: {
-        Args: { p_done: boolean; p_key: string }
+      server_track: {
+        Args: { p_name: string; p_props: Json; p_space: string; p_user: string }
         Returns: undefined
       }
+      set_avatar: { Args: { p_path?: string }; Returns: undefined }
+      set_checklist_done: { Args: { p_done: boolean; p_key: string }; Returns: undefined }
       set_goal_photo: {
         Args: { p_goal: string; p_path?: string; p_size?: number }
         Returns: undefined
       }
-      set_goal_preset: {
-        Args: { p_goal: string; p_preset: string }
-        Returns: undefined
-      }
+      set_goal_preset: { Args: { p_goal: string; p_preset: string }; Returns: undefined }
       set_join_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }
         Returns: undefined
@@ -3347,6 +3578,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          closed_at: string | null
           created_at: string
           created_by: string | null
           deadline: string | null
@@ -3365,6 +3597,7 @@ export type Database = {
           photo_preset: string | null
           priority: number
           space_id: string
+          start_saved: number
           status: Database["public"]["Enums"]["goal_status"]
           target_amount: number | null
           template: string
@@ -3380,6 +3613,47 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      split_amount_ok: { Args: { p: number }; Returns: boolean }
+      split_editable: {
+        Args: { p_split: string }
+        Returns: {
+          created_at: string
+          id: string
+          owner_user_id: string | null
+          space_id: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "salary_split"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      split_line_add: {
+        Args: {
+          p_amount: number
+          p_kind: Database["public"]["Enums"]["split_line_kind"]
+          p_name?: string
+          p_sort?: number
+          p_split: string
+          p_user?: string
+        }
+        Returns: string
+      }
+      split_line_delete: { Args: { p_line: string }; Returns: undefined }
+      split_line_set: {
+        Args: { p_amount?: number; p_line: string; p_name?: string }
+        Returns: undefined
+      }
+      split_lines_json: {
+        Args: { p_amount?: number; p_line?: string; p_split: string }
+        Returns: Json
+      }
+      split_reorder: { Args: { p_ids: string[]; p_split: string }; Returns: undefined }
+      split_touch: { Args: { p_split: string }; Returns: undefined }
       start_after_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
       start_checklist: { Args: { p_owner?: string }; Returns: string }
       start_new_invite: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3387,6 +3661,10 @@ export type Database = {
       sync_checklist: { Args: { p_split: string }; Returns: undefined }
       sync_wedding_care: { Args: { p_space: string }; Returns: undefined }
       touch_app: { Args: Record<PropertyKey, never>; Returns: undefined }
+      track_noti_sent: {
+        Args: { p_channel: string; p_kind: string; p_space: string; p_user: string }
+        Returns: undefined
+      }
       trash_rows: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3499,9 +3777,7 @@ export type Tables<
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
@@ -3524,9 +3800,7 @@ export type TablesInsert<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
@@ -3548,9 +3822,7 @@ export type TablesUpdate<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
@@ -3572,9 +3844,7 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
@@ -3588,9 +3858,7 @@ export type CompositeTypes<
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]

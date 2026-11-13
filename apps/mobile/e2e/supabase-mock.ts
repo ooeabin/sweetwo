@@ -71,11 +71,14 @@ export async function mockSupabase(page: Page, o: MockOptions = {}) {
     }
     if (url.pathname === '/rest/v1/rpc/login_state')
       return json(route, o.loginState ?? { state: 'new', needs_email: false });
-    if (url.pathname === '/rest/v1/rpc/complete_signup') {
+    if (
+      url.pathname === '/rest/v1/rpc/complete_signup' ||
+      url.pathname === '/rest/v1/rpc/complete_signup_v2'
+    ) {
       o.signup?.(req.postDataJSON() as Record<string, unknown>);
       return json(route, { id: chanwoo.id });
     }
-    // 가입 뒤 온보딩 첫 화면(O-10)까지
+    // 가입 뒤 온보딩 첫 화면(O-03, 2026-11-10 O-10 없앰)까지
     if (url.pathname === '/rest/v1/app_user') {
       return json(route, {
         id: chanwoo.id,

@@ -37,7 +37,7 @@ export function useRank(): { state: RankState; net: number; view: NetWorthView }
   };
 }
 
-/** 연령대 비교(계산·배분 7-7): 나와 배우자 출생연도 평균 나이. 아무도 안 적었으면 null */
+/** 연령대 비교(계산·배분 7-7): 나와 파트너 출생연도 평균 나이. 아무도 안 적었으면 null */
 export function useRankAge(): RankAgeBand | null {
   const me = useMe();
   const py = useQuery({ queryKey: qk.partnerBirthYear, queryFn: fetchPartnerBirthYear });
@@ -45,7 +45,7 @@ export function useRankAge(): RankAgeBand | null {
   return rankAgeBand([me.data.birth_year, py.data ?? null], Number(todayKst().slice(0, 4)));
 }
 
-// 모바일 앱이면 보상형 광고(ADR 0006). 데스크톱·브라우저(브리지 없음)와 못 불러오면 광고 없이 바로
+// 모바일 앱이면 보상형 광고(ADR 0006). 브라우저(브리지 없음)와 못 불러오면 광고 없이 바로
 async function watchAd(): Promise<'rewarded' | 'closed' | 'failed' | 'none'> {
   const ads = typeof window !== 'undefined' ? window.sweetwo?.ads : undefined;
   if (!ads) return 'none';
@@ -57,10 +57,10 @@ async function watchAd(): Promise<'rewarded' | 'closed' | 'failed' | 'none'> {
 }
 
 /**
- * 우리 자산 순위 줄(RankRow, 23 F-01 0번·19 H-01 1a): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
- * 이번 달에 봤으면 바로 F-08. 자산이 없으면 홈에서는 우리 자산(F-01)로, F-01에서는 누를 수 없음
+ * 자산 순위 줄(RankRow, 23 F-01 0번): 안 봄·지난번이면 ‘광고’ 표시 + 확인하기 → 광고 → 순위 저장 → F-08,
+ * 이번 달에 봤으면 바로 F-08. 자산이 없으면 누를 수 없음. 2026-11-11 홈 순위 줄(19 H-01 1a)은 없앰(홈은 H-04 타일 배지)
  */
-export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
+export function RankBanner() {
   const r = useRank();
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -69,13 +69,12 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
   const s = r.state;
   const open = async () => {
     if (busy) return;
-    track('rank_banner_tapped', { state: s.kind, entry });
-    if (s.kind === 'empty') return nav('/assets');
+    track('rank_banner_tapped', { state: s.kind, entry: 'assets' });
     if (s.kind === 'seen') return nav(RANK_PATH);
     setBusy(true);
     try {
       const ad = await watchAd();
-      track('rank_ad_result', { result: ad });
+      track('rank_ad_result', { result: ad, platform: window.sweetwo?.platform ?? 'web' });
       if (ad === 'closed') return toast(copy.rankAdClosed);
       const month = `${todayKst().slice(0, 7)}-01`;
       await updateMe({ rank_month: month, rank_pct: rankTopPct(r.net), rank_net: r.net });
@@ -87,15 +86,7 @@ export function RankBanner({ entry }: { entry: 'home' | 'assets' }) {
       setBusy(false);
     }
   };
-  if (s.kind === 'empty')
-    return (
-      <RankRow
-        badge="?%"
-        title={copy.rankEmpty}
-        action={entry === 'home' ? copy.rankEmptyGo : undefined}
-        onClick={entry === 'home' ? () => void open() : undefined}
-      />
-    );
+  if (s.kind === 'empty') return <RankRow badge="?%" title={copy.rankEmpty} />;
   if (s.kind === 'seen')
     return (
       <RankRow

@@ -1,4 +1,4 @@
-import { ChoiceCards, QuestionLayout } from '@sweetwo/ui';
+import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveSpace } from '../data';
@@ -11,7 +11,10 @@ type Mode = keyof typeof copy.salaryModes;
 export function O30SalaryMode() {
   const s = useStep('o-30');
   const [v, setV] = useState<Mode | null>(null);
-  if (!s.ready) return null;
+  if (!s.ready)
+    return (
+      <QuestionSkeleton title={copy.salaryMode} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   const value: Mode = v ?? s.state.space?.salary_mode ?? 'separate';
   return (
     <QuestionLayout
@@ -20,7 +23,12 @@ export function O30SalaryMode() {
       help={copy.salaryModeHelp}
       onBack={s.onBack}
       primary={{ label: copy.next, loading: s.saving }}
-      onSubmit={() => void s.done(() => saveSpace({ salary_mode: value }))}
+      onSubmit={() =>
+        // 바꾸면 O-32에서 월급 계획을 다시 만들게 이어하기 기록을 되돌림(2026-11-10 S2-01)
+        void s.done(() => saveSpace({ salary_mode: value }), undefined, {
+          replan: value !== s.state.space?.salary_mode,
+        })
+      }
     >
       <ChoiceCards<Mode>
         label={copy.salaryMode}

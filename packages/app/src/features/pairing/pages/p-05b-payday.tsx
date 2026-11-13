@@ -1,4 +1,4 @@
-import { DayWheel, QuestionLayout } from '@sweetwo/ui';
+import { DayWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
@@ -12,7 +12,10 @@ export function P05bPayday() {
   const s = useJoinStep('p-05b');
   const me = s.d.me;
   const [day, setDay] = useState<Day | null | undefined>(undefined);
-  if (!s.d.ready || !me) return null;
+  if (!s.d.ready || !me)
+    return (
+      <QuestionSkeleton title={copy.paydayTitle} chapter={s.chapter} onBack={s.onBack ?? null} />
+    );
   const saved: Day | null = me.payday_last ? 'last' : (me.payday ?? null);
   const payday = day === undefined ? saved : day;
   return (

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import type { AuthProvider } from '@sweetwo/core';
 import { Button, type ButtonProps } from './Button';
 import { ProviderMark } from './ProviderMark';
@@ -26,14 +26,30 @@ export function ProviderButton({
   ...rest
 }: ProviderButtonProps) {
   const v = variant ?? (provider === 'kakao' ? 'kakao' : 'secondary');
+  // 말풍선(‘최근 사용’, 이메일 충돌)은 버튼 이름에 붙지 않게 따로 설명으로(2026-11-10, 이름은 공식 문구 그대로)
+  const noteId = useId();
+  const note = bubble ?? (recent ? recentLabel : undefined);
   return (
-    <Button variant={v} block {...rest}>
+    <Button
+      variant={v}
+      block
+      aria-describedby={note ? noteId : undefined}
+      {...rest}
+      // 2026-11-10 애플은 채움 버튼(라이트 검정 바탕 흰 글자, 다크 흰 바탕 검정 글자: ink/on-ink 토큰), 이메일 충돌 강조 때는 덮지 않음
+      className={['hg-btn--provider', provider === 'apple' && !variant && 'hg-btn--apple', rest.className]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <ProviderMark provider={provider} />
-      {children}
-      {bubble ? (
-        <span className="hg-auth__bubble">{bubble}</span>
-      ) : (
-        recent && <span className="hg-auth__recent">{recentLabel}</span>
+      <span className="hg-btn__label">{children}</span>
+      {note && (
+        <span
+          id={noteId}
+          className={bubble ? 'hg-auth__bubble' : 'hg-auth__recent'}
+          aria-hidden="true"
+        >
+          {note}
+        </span>
       )}
     </Button>
   );

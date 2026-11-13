@@ -15,6 +15,7 @@ export function O01Start() {
   return (
     <AuthLayout
       className="hg-auth--hero hg-auth--start"
+      // 2026-11-10 워드마크 위 시작 그림 자리(scene-start) 없앰: A-02와 같은 워드마크 히어로
       media={<Wordmark height={40} />}
       title={copy.catchphrase}
       help={copy.startHelp}

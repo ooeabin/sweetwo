@@ -1,4 +1,5 @@
-// 생활비 체크(docs/spec/20-salary-plan.md W-03, 07 3-2장). 서버 living_check_day와 같은 결과.
+// 예전 생활비 체크(07 3-2장, 화면은 2026-11-09 W-01 영수증으로 없앰). 서버 living_check_day와 같은 결과.
+// 분석 금액 구간(amountBand)은 지금도 여러 화면이 씀.
 import { addDays, daysBetween } from '../date';
 import type { Won } from '../money';
 
@@ -13,7 +14,7 @@ export function inLivingCheckWindow(today: string, cycleStart: string, cycleEnd:
   return Math.abs(daysBetween(livingCheckDay(cycleStart, cycleEnd), today)) <= 2;
 }
 
-/** W-03c ‘내 용돈에서’: 내 용돈보다 많으면 고를 수 없음. 고를 수 있으면 바뀐 용돈 */
+/** 예전 생활비 체크 ‘내 용돈에서’: 내 용돈보다 많으면 고를 수 없음. 고를 수 있으면 바뀐 용돈 */
 export function allowanceAfterCut(allowance: Won | null, over: Won): Won | null {
   const a = allowance ?? 0;
   return over > a ? null : a - over;

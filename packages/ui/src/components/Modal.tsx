@@ -11,6 +11,7 @@ export function Modal({
   onConfirm,
   onCancel,
   busy = false,
+  tone = 'danger',
 }: {
   title: string;
   body?: string;
@@ -19,6 +20,8 @@ export function Modal({
   onConfirm: () => void;
   onCancel: () => void;
   busy?: boolean;
+  /** 실행 버튼 색. 되돌릴 수 있는 바꾸기 확인(P-04 관리 방식, 2026-11-09 round 3)은 primary, 그 밖에는 danger */
+  tone?: 'danger' | 'primary';
 }) {
   const id = useId();
   const box = useRef<HTMLDivElement>(null);
@@ -74,7 +77,7 @@ export function Modal({
           <Button variant="secondary" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button variant="danger" disabled={busy} onClick={onConfirm}>
+          <Button variant={tone} loading={busy} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>

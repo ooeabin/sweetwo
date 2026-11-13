@@ -39,7 +39,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select public.finish_join();
 select results_eq($$ select name from public.asset order by name $$,
-  $$ values ('생활비 통장'::text), ('예빈 적금'::text) $$, '배우자는 공동, 전체 공개만 행으로');
+  $$ values ('생활비 통장'::text), ('예빈 적금'::text) $$, '파트너는 공동, 전체 공개만 행으로');
 select results_eq($$ select grp, n, total from public.partner_asset_sums() $$,
   $$ values ('invest'::text, 1, 10000000::bigint) $$, '합계만은 묶음 합계로, 비공개는 없음');
 select is((select count(*)::int from public.asset_history), 2, '이력도 볼 수 있는 행만');

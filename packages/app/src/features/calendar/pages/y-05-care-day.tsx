@@ -16,10 +16,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
-import { useCalendarData } from '../data';
+import { careUndo, trackCareShared, useCalendarData } from '../data';
+import { CalendarLoadError } from '../frame';
 import { startCareEdit } from './y-07-care-add';
 
 const ALERTS = [30, 14, 7, 0];
@@ -28,7 +29,7 @@ const ALERTS = [30, 14, 7, 0];
 const statusOf = (c: CareDay, date: string | null) =>
   c.status_on && date && c.status_on === date ? c.status : 'todo';
 
-// Y-05 챙길 날 상세(24 Y-05, 재기획): 제목(이름, 날짜, 음력이면 “(음력 8월 3일)”, D-day) + ‘수정’(이름·날짜 → Y-07 화면),
+// Y-05 경조사 상세(24 Y-05, 재기획): 제목(이름, 날짜, 음력이면 “(음력 8월 3일)”, D-day) + ‘수정’(이름·날짜 → Y-07 화면),
 // 금액 메모(수정 = Q3, 계산에 안 들어감), 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요 → Y-08, 기록 없이 7일 지나면 ‘지남’ + ‘기록하기’),
 // 미리 알림 칩, 작년에는(지난 회차 기록), 메모(두 사람이 같이 봄), ⋯ → 지우기(휴지통 + ‘되돌리기’).
 export function Y05CareDay() {
@@ -39,6 +40,10 @@ export function Y05CareDay() {
   const { masked } = useMask();
   const m = (x: number) => money(x, masked);
   const [memo, setMemo] = useState<string | null>(null);
+  // 준비 상황 칩을 저장하는 동안 누른 칩을 바로 고른 것으로(2026-11-06)
+  const [picking, setPicking] = useState<'todo' | 'preparing' | null>(null);
+  // 못 불러오면 목록으로 튕기지 않고 오류 카드 + ‘다시 시도’(2026-11-12 S9-02)
+  if (c.failed) return <CareDayError onBack={() => nav(-1)} onRetry={c.retry} />;
   if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
@@ -59,10 +64,14 @@ export function Y05CareDay() {
     : null;
 
   const refresh = () => qc.invalidateQueries({ queryKey: qk.careDays });
-  const patch = async (p: Parameters<typeof updateCareDay>[1]) => {
+  type Patch = Parameters<typeof updateCareDay>[1];
+  // 고치면 Toast “고쳤어요” + ‘되돌리기’(고치기 전 값, 2026-11-12 S9-04). 메모는 상대 알림이 가는 동작이라 shared_item_changed
+  const patch = async (p: Patch, prev: Patch) => {
     try {
       await updateCareDay(care.id, p);
       await refresh();
+      toast(copy.edited, careUndo(qc, care.id, prev));
+      if ('memo' in p) trackCareShared(!!c.couple?.joined);
     } catch {
       toast(copy.loadFailed);
     }
@@ -71,9 +80,9 @@ export function Y05CareDay() {
     try {
       await trashCareDay(care.id);
       await refresh();
-      toast(copy.removed, {
+      carryToast(copy.removed, {
         label: copy.undo,
-        onClick: () => void restoreTrash('care_day', care.id).then(refresh),
+        onClick: () => quietly(restoreTrash('care_day', care.id).then(refresh)),
       });
       nav('/calendar/list', { replace: true });
     } catch {
@@ -151,8 +160,15 @@ export function Y05CareDay() {
               <Chip
                 key={s}
                 small
-                selected={st === s}
-                onClick={() => void patch({ status: s, status_on: date })}
+                selected={(picking ?? st) === s}
+                onClick={() => {
+                  if (picking) return;
+                  setPicking(s);
+                  void patch(
+                    { status: s, status_on: date },
+                    { status: care.status, status_on: care.status_on },
+                  ).finally(() => setPicking(null));
+                }}
               >
                 {copy.statuses[s]}
               </Chip>
@@ -179,11 +195,14 @@ export function Y05CareDay() {
                 aria-checked={on}
                 className="hg-listrow"
                 onClick={() =>
-                  void patch({
-                    alerts: on
-                      ? care.alerts.filter((x) => x !== n)
-                      : [...care.alerts, n].sort((a, b) => b - a),
-                  })
+                  void patch(
+                    {
+                      alerts: on
+                        ? care.alerts.filter((x) => x !== n)
+                        : [...care.alerts, n].sort((a, b) => b - a),
+                    },
+                    { alerts: care.alerts },
+                  )
                 }
               >
                 <span />
@@ -208,9 +227,10 @@ export function Y05CareDay() {
         value={memo ?? care.memo ?? ''}
         maxLength={200}
         onChange={(e) => setMemo(e.target.value)}
-        onBlur={() =>
-          memo !== null && memo !== (care.memo ?? '') && void patch({ memo: memo.trim() || null })
-        }
+        onBlur={() => {
+          if (memo === null || memo === (care.memo ?? '')) return;
+          void patch({ memo: memo.trim() || null }, { memo: care.memo }).then(() => setMemo(null));
+        }}
       />
     </div>
   );
@@ -225,6 +245,7 @@ export function Y05Budget() {
   const c = useCalendarData();
   const [value, setValue] = useState<number | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
+  if (c.failed) return <CareDayError onBack={() => nav(`/calendar/day/${id}`)} onRetry={c.retry} />;
   if (c.loading) return <QuestionSkeleton />;
   const care = c.cares.find((x) => x.id === id);
   if (!care) return <Navigate to="/calendar/list" replace />;
@@ -239,8 +260,11 @@ export function Y05Budget() {
         if (saving) return;
         setSaving(true);
         try {
+          const prev = care.budget;
           await updateCareDay(care.id, { budget: v ?? 0 });
           await qc.invalidateQueries({ queryKey: qk.careDays });
+          // 2026-11-12 S9-04 Toast “고쳤어요” + ‘되돌리기’(고치기 전 금액 메모)
+          if (prev !== (v ?? 0)) carryToast(copy.edited, careUndo(qc, care.id, { budget: prev }));
           nav(`/calendar/day/${care.id}`, { replace: true });
         } catch {
           toast(copy.loadFailed);
@@ -257,5 +281,21 @@ export function Y05Budget() {
         allowZero
       />
     </QuestionLayout>
+  );
+}
+
+/** Y-05·금액 메모를 못 불러옴(2026-11-12 S9-02): 머리 ‘‹’ + 오류 카드 */
+function CareDayError({ onBack, onRetry }: { onBack: () => void; onRetry: () => void }) {
+  return (
+    <MainFrame
+      sub="detail"
+      current="calendar"
+      columns={[
+        <div key="e" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+          <PageHeader title={copy.title} backLabel={copy.back} onBack={onBack} />
+          <CalendarLoadError onRetry={onRetry} />
+        </div>,
+      ]}
+    />
   );
 }

@@ -1,15 +1,15 @@
 import { formatYm, readWon } from '@sweetwo/core';
 import { assetGroupsOf } from '@sweetwo/core';
-import { Button, Lead, List, ListRow, MonthBars, SectionHeader } from '@sweetwo/ui';
+import { Button, Lead, leadOf, List, ListRow, MonthBars, SectionHeader } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
-import { RankBanner } from '../../frame';
+import { RankBanner, SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { useAssetsData } from '../data';
 import { AssetArt } from '../asset-art';
 
-// F-01 한눈에(23 F-01·F-02 2~4번, 2026-11-03 다시 짬): “우리 순자산” 큰 숫자 + 지난달 대비 문장,
+// F-01 요약(23 F-01·F-02 2~4번, 2026-11-03 다시 짬): “순자산” 큰 숫자 + 지난달 대비 문장,
 // 달마다 순자산 막대(MonthBars, 최근 6달), 목록(자산 → F-02, 부채 → F-02, 예상 순자산과 안 판 수익). 비상금 카드, 이번 달 카드·계획, 월 정산 요약, 재정 진단은 재기획으로 없앰(ADR 0003).
 export function F01Overview() {
   const nav = useNavigate();
@@ -28,7 +28,7 @@ export function F01Overview() {
       </div>
     );
   } else if (d.loading) {
-    body = null;
+    body = <SkelBody shape="cards" />;
   } else if (!d.items.length && !d.sums.length) {
     // 2026-11-04 항목별 등록 유도: 순위 줄 + 자산 묶음 타일 + 부채 묶음 타일(F-03a와 같은 타일, 누르면 그 묶음을 고른 F-03a)
     const tiles = (side: 'asset' | 'debt') => (
@@ -52,7 +52,7 @@ export function F01Overview() {
     );
     body = (
       <>
-        <RankBanner entry="assets" />
+        <RankBanner />
         <section
           className="hg-stack"
           style={{ gap: 'var(--space-3)' }}
@@ -77,8 +77,8 @@ export function F01Overview() {
     const short = (v: number) => m(v).replace(/ 원$/, '');
     body = (
       <>
-        {/* 2026-11-04 순위 줄(23 F-01 0번)은 한눈에 맨 위 */}
-        <RankBanner entry="assets" />
+        {/* 2026-11-04 순위 줄(23 F-01 0번)은 요약 맨 위 */}
+        <RankBanner />
         <section
           className="hg-stack"
           style={{ gap: 'var(--space-1)' }}
@@ -109,20 +109,20 @@ export function F01Overview() {
         </section>
         <List>
           <ListRow
-            lead={<Lead icon="wallet" />}
+            lead={<Lead {...leadOf('summary', 'assets')} />}
             label={copy.assetsLabel}
             value={m(nw.assets)}
             onClick={() => nav('/assets/items?side=asset')}
           />
           <ListRow
-            lead={<Lead icon="bank" />}
+            lead={<Lead {...leadOf('summary', 'debts')} />}
             label={copy.debtsLabel}
             value={nw.debts ? m(nw.debts) : readWon(0)}
             onClick={() => nav('/assets/items?side=debt')}
           />
           {nw.gain !== 0 && (
             <ListRow
-              lead={<Lead icon="trending-up" />}
+              lead={<Lead {...leadOf('summary', 'expected')} />}
               label={copy.expectedName}
               sub={copy.gainIncl(`${nw.gain > 0 ? '+' : '−'}${m(Math.abs(nw.gain))}`)}
               value={m(nw.expected)}

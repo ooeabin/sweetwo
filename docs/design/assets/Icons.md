@@ -1,23 +1,24 @@
 # Icons
 
-Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
+Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
 
-- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 좁은 창 하단 탭 막대의 네 칸 모두(2026-11-05 토스형, 고른 칸 `ink`, 나머지 `muted`)와, 그 밖에는 지금 선택된 자리에만: 사이드바 현재 메뉴, 하단 독 현재 칸, 켜진 상태를 보여 줄 때(`is-filled`).
-- 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴, 독 칸 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
-- 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바, 하단 독, 떠 있는 추가 버튼).
-- 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음.
+- 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 켜진 상태를 보여 줄 때(`is-filled`). 하단 독은 2026-11-09 없앰(좁은 창은 홈 머리 ☰ 메뉴 서랍).
+- 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
+- 크기 16(표 안, 배지 옆), 20(목록, 버튼 안), 24(사이드바), 22(좁은 창 머리와 메뉴 서랍 머리).
+- 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음. 예외: 줄 앞 칸(Lead)과 알림 아이콘 원은 영역 색 원 위 짝 글자색(`*-ink`, 2026-11-09, ListRow ‘Lead 종류 표’).
+- 줄 앞 종류 아이콘(2026-11-09): 줄 앞 칸은 2D 그림 대신 이 세트로 확정. 종류와 아이콘의 짝은 `packages/ui/src/components/lead-kinds.ts` 한 곳.
 - 아이콘만으로 뜻을 전하지 않음: 라벨 또는 `aria-label`을 같이 둠.
 - 필요한 아이콘이 여기 없으면 같은 Phosphor 세트에서 bold와 fill을 함께 추가. 새 아이콘은 클래스 이름을 Phosphor 이름 그대로 씀.
 - 클래스 이름은 지금 것을 그대로 씀(바꾸지 않음). 아래 표가 클래스와 Phosphor 원래 이름의 짝.
 - 뒤로는 모든 화면 `chevron-left`(꺾쇠 <). `arrow-left`는 뒤로에 쓰지 않음. 화면 모드는 `sun`, `moon`.
-- `apple-logo`, `windows-logo`는 웹사이트 다운로드 버튼과 OS 표시에만. 브랜드 로고라 모양을 바꾸지 않음.
+- `apple-logo`는 웹사이트 App Store 버튼에만. 브랜드 로고라 모양을 바꾸지 않음. `windows-logo`는 데스크톱 다운로드와 함께 없앰(2026-11-10, ADR 0008).
 - 빈 상태, 카테고리, 축하 같은 큰 자리 그림은 이 아이콘이 아니라 실사 제품 사진(README ‘그림’ 장).
 
 ## 클래스와 Phosphor 이름
 
 | 클래스 | Phosphor 이름 | 새로 쓰는 곳 |
 | --- | --- | --- |
-| `hg-ico--apple-logo` | `apple-logo` | 웹사이트 Mac용 다운로드 |
+| `hg-ico--apple-logo` | `apple-logo` | 웹사이트 App Store 버튼 |
 | `hg-ico--arrow-left` | `arrow-left` |  |
 | `hg-ico--arrow-right` | `arrow-right` |  |
 | `hg-ico--bell` | `bell` |  |
@@ -46,6 +47,7 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--image` | `image` |  |
 | `hg-ico--info` | `info` |  |
 | `hg-ico--link` | `link` | 초대 링크, 링크 복사 |
+| `hg-ico--list` | `list` | 2026-11-09 좁은 창 홈 머리 메뉴(☰) 버튼 → Drawer |
 | `hg-ico--list-filter` | `funnel-simple` |  |
 | `hg-ico--loader-circle` | `circle-notch` |  |
 | `hg-ico--lock` | `lock` |  |
@@ -65,9 +67,8 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--undo-2` | `arrow-u-up-left` |  |
 | `hg-ico--user` | `user` |  |
 | `hg-ico--wallet` | `wallet` |  |
-| `hg-ico--windows-logo` | `windows-logo` | 웹사이트 Windows용 다운로드 |
 | `hg-ico--x` | `x` |  |
-| `hg-ico--hand-coins` | `hand-coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
+| `hg-ico--hand-coins` | `hand-coins` | 월급 탭(사이드바, 하단 독. 2026-11-09 채운 모양 추가), 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--bank` | `bank` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--truck` | `truck` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--couch` | `couch` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
@@ -87,4 +88,22 @@ Phosphor 아이콘(MIT 라이선스) 49개. 굵은 둥근 선(bold)과 채운 �
 | `hg-ico--coins` | `coins` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--diamond` | `diamond` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
 | `hg-ico--first-aid-kit` | `first-aid-kit` | 목표 카드 아이콘(그림이 없을 때, GoalPick) |
-
+| `hg-ico--receipt` | `receipt` | 줄 앞 칸(Lead, 2026-11-09): 고정지출 줄, 연말정산 알림 |
+| `hg-ico--shopping-cart` | `shopping-cart` | 줄 앞 칸(Lead, 2026-11-09): 생활비 줄 |
+| `hg-ico--vault` | `vault` | 줄 앞 칸(Lead, 2026-11-09): 자산 예금·적금 |
+| `hg-ico--chart-line-up` | `chart-line-up` | 줄 앞 칸(Lead, 2026-11-09): 자산 투자, 예상 순자산 |
+| `hg-ico--umbrella` | `umbrella` | 줄 앞 칸(Lead, 2026-11-09): 자산 연금 |
+| `hg-ico--credit-card` | `credit-card` | 줄 앞 칸(Lead, 2026-11-09): 부채 신용 |
+| `hg-ico--handshake` | `handshake` | 줄 앞 칸(Lead, 2026-11-09): 부채 개인 간 |
+| `hg-ico--money` | `money` | 줄 앞 칸(Lead, 2026-11-09): 월급날(금융 일정, 알림) |
+| `hg-ico--hourglass` | `hourglass` | 줄 앞 칸(Lead, 2026-11-09): 만기(금융 일정) |
+| `hg-ico--cake` | `cake` | 줄 앞 칸(Lead, 2026-11-09): 경조사 생일 |
+| `hg-ico--moon-stars` | `moon-stars` | 줄 앞 칸(Lead, 2026-11-09): 경조사 명절 |
+| `hg-ico--flower-tulip` | `flower-tulip` | 줄 앞 칸(Lead, 2026-11-09): 경조사 어버이날 |
+| `hg-ico--confetti` | `confetti` | 줄 앞 칸(Lead, 2026-11-09): 경조사 양가 행사 |
+| `hg-ico--trophy` | `trophy` | 줄 앞 칸(Lead, 2026-11-09): 목표 금액 달성 알림 |
+| `hg-ico--user-plus` | `user-plus` | 줄 앞 칸(Lead, 2026-11-09): 초대 알림 |
+| `hg-ico--user-minus` | `user-minus` | 줄 앞 칸(Lead, 2026-11-09): 계정 삭제·연결 해제 알림 |
+| `hg-ico--chat-circle-text` | `chat-circle-text` | 줄 앞 칸(Lead, 2026-11-09): 문의 답변 알림 |
+| `hg-ico--megaphone` | `megaphone` | 줄 앞 칸(Lead, 2026-11-09): 공지·약관 알림 |
+| `hg-ico--shield-warning` | `shield-warning` | 줄 앞 칸(Lead, 2026-11-09): 새 기기 로그인 알림 |

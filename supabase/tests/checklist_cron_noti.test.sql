@@ -38,8 +38,11 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
+reset role; -- 합류 중인 사람은 공간 데이터를 못 읽음(D1), 줄 초안은 앱이 join_context로 만듦
+select set_config('test.home', (select id::text from public.goal where template = 'home'), true);
+set local role authenticated;
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 1070000),
+  jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
   jsonb_build_object('kind', 'fixed', 'amount', 680000),
   jsonb_build_object('kind', 'living', 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)
@@ -74,7 +77,7 @@ select results_eq($$ select topic from public.notification order by kind $$, $$ 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select throws_ok($$ select public.check_pay_line((select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked') $$, '42501', 'not_owner', '배우자 줄은 체크 못 함');
+  where c.cycle_start = '2027-03-25' and l.kind = 'saving'), 'checked') $$, '42501', 'not_owner', '파트너 줄은 체크 못 함');
 reset role;
 select is((select count(*)::int from public.notification where kind = 'behalf_checked'), 0, '대신 체크 알림 없음');
 

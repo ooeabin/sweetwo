@@ -1,4 +1,5 @@
 import {
+  AdminError,
   adminAnswerInquiry,
   adminRequestAccess,
   adminSetInquiryStatus,
@@ -6,18 +7,26 @@ import {
   type InquiryStatus,
 } from '@sweetwo/api';
 import { ACCESS_SCOPES, formatKstDateTime } from '@sweetwo/core';
-import { Badge, Button, Chip } from '@sweetwo/ui';
+import { Chip, Status } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '../act';
 import { copy } from '../copy';
+import { inquiryTone } from '../tones';
 import { Frame } from '../frame';
+import { PageSkel } from '../skel';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
+import { useReauth } from '../reauth';
 
 const STATUSES: InquiryStatus[] = ['received', 'in_progress', 'waiting_user', 'done'];
 
 // AD-06 문의 상세: 대화, 자동 첨부(사용자가 켠 경우만, 금액·메모 없음), 답변(해요체) + 상태, ‘답변 보내기’
-// (보내면 ‘사용자 답변 대기’ + 앱 ‘내 문의’ 알림). 화면 확인이 필요하면 AD-04 L2 동의 요청(CS만).
+// (보내면 ‘사용자 답변 대기’ + 앱 ‘내 문의’ 알림). 화면 확인이 필요하면 AD-04 L2 동의 요청(CS만, 앱 문의만).
+// 이메일 문의: 제목, 가린 보낸 주소, 회원(정확히 일치한 경우만) 또는 ‘회원 연결 없음’, 받지 않은 첨부 수.
+// 답변은 help@sweetwo.kr에서 같은 주소로 메일로 감(앱 알림 없음). 메일 발송(SES) 연결 전에는 실제로 나가지 않으므로
+// 이메일 문의에는 늘 안내 띠(‘네이버웍스 help@에서 직접 답장’)를 보여 줌. 서버는 발송 설정을 알려 주지 않음.
 export function AD06Inquiry() {
   const { id = '' } = useParams();
   const nav = useNavigate();
@@ -28,7 +37,7 @@ export function AD06Inquiry() {
   const [body, setBody] = useState('');
   const [status, setStatus] = useState<InquiryStatus>('waiting_user');
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const refresh = () =>
     Promise.all([
       q.refetch(),
@@ -39,7 +48,7 @@ export function AD06Inquiry() {
   if (!q.data)
     return (
       <Frame menu="inquiries" title={copy.menus.inquiries}>
-        {null}
+        <PageSkel />
       </Frame>
     );
   const d = q.data;
@@ -63,10 +72,17 @@ export function AD06Inquiry() {
     <Frame
       menu="inquiries"
       title={`${d.no} ${copy.categories[d.category] ?? d.category}`}
-      actions={<Badge kind="temp">{copy.statuses[d.status] ?? d.status}</Badge>}
+      actions={
+        <Status tone={inquiryTone[d.status] ?? 'off'}>{copy.statuses[d.status] ?? d.status}</Status>
+      }
     >
       <div className="hg-admin__grid">
         <div className="hg-admin__col">
+          {d.channel === 'email' && (
+            <div className="hg-banner hg-banner--info" role="note">
+              <span className="hg-banner__text">{copy.emailAnswerHelp}</span>
+            </div>
+          )}
           <ol className="hg-stack" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {d.messages.map((m, i) => (
               <li key={i} className="hg-card hg-stack" style={{ gap: 'var(--space-1)' }}>
@@ -103,52 +119,87 @@ export function AD06Inquiry() {
                     </option>
                   ))}
                 </select>
-                <Button
-                  variant="primary"
-                  aria-busy={busy}
-                  disabled={!body.trim()}
-                  onClick={() => void send()}
-                >
-                  {copy.sendAnswer}
-                </Button>
+                <span style={{ flex: 1 }} />
                 {d.status === 'received' && (
                   <Button
                     variant="secondary"
-                    onClick={() => void adminSetInquiryStatus(d.id, 'in_progress').then(refresh)}
+                    onAct={() => adminSetInquiryStatus(d.id, 'in_progress').then(refresh)}
                   >
                     {copy.statuses.in_progress}
                   </Button>
                 )}
+                <Button
+                  variant="primary"
+                  aria-busy={busy}
+                  disabled={!body.trim()}
+                  onAct={() => send()}
+                >
+                  {copy.sendAnswer}
+                </Button>
               </div>
-              {msg && (
-                <p className="hg-help" role="status">
-                  {msg}
-                </p>
-              )}
             </section>
           )}
         </div>
         <div className="hg-admin__col">
-          <section className="hg-card hg-stack" aria-label={copy.attach}>
-            <span className="hg-card__label">{copy.attach}</span>
-            {d.user_id && (
-              <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
-                {d.user_id}
-              </Button>
-            )}
-            {d.attach ? (
-              Object.entries(d.attach).map(([k, v]) => (
-                <div key={k} className="hg-row" style={{ justifyContent: 'space-between' }}>
-                  <span className="hg-card__meta">{k}</span>
-                  <span>
-                    {typeof v === 'string' || typeof v === 'number' ? v : JSON.stringify(v)}
-                  </span>
+          {d.email && (
+            <section className="hg-card hg-stack" aria-label={copy.emailInfo}>
+              <span className="hg-card__label">{copy.emailInfo}</span>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.subject}</span>
+                <span>{d.email.subject || copy.noSubject}</span>
+              </div>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.from}</span>
+                <span>{d.email.from_masked ?? '—'}</span>
+              </div>
+              <div className="hg-admin__kv">
+                <span>{copy.emailKeys.member}</span>
+                <span>
+                  {d.user_id ? (
+                    <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
+                      {d.user_id}
+                    </Button>
+                  ) : (
+                    copy.noMemberLink
+                  )}
+                </span>
+              </div>
+              {d.email.attachments > 0 && (
+                <div className="hg-admin__kv">
+                  <span>{copy.emailKeys.attachments}</span>
+                  <span>{copy.attachmentsDropped(d.email.attachments)}</span>
                 </div>
-              ))
-            ) : (
-              <span className="hg-help">—</span>
-            )}
-          </section>
+              )}
+            </section>
+          )}
+          {d.channel !== 'email' && (
+            <section className="hg-card hg-stack" aria-label={copy.attach}>
+              <span className="hg-card__label">{copy.attach}</span>
+              {d.user_id && (
+                <Button variant="link" size="sm" onClick={() => nav(`/members/${d.user_id}`)}>
+                  {d.user_id}
+                </Button>
+              )}
+              {d.attach ? (
+                Object.entries(d.attach).map(([k, v]) => (
+                  <div key={k} className="hg-admin__kv">
+                    <span>{copy.attachKeys[k] ?? k}</span>
+                    <span>
+                      {k === 'couple_state' && typeof v === 'string'
+                        ? (copy.coupleStates[v] ?? v)
+                        : typeof v === 'string'
+                          ? (copy.attachValues[v] ?? v) || '—'
+                          : typeof v === 'number'
+                            ? v
+                            : JSON.stringify(v)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <span className="hg-help">—</span>
+              )}
+            </section>
+          )}
           {d.access.map((a) => (
             <section key={a.id} className="hg-card hg-stack" aria-label={copy.l2}>
               <span className="hg-card__label">
@@ -158,7 +209,7 @@ export function AD06Inquiry() {
               {a.expires_at && <span className="hg-help">{formatKstDateTime(a.expires_at)}</span>}
             </section>
           ))}
-          {cs && d.user_id && d.status !== 'done' && (
+          {cs && d.user_id && d.channel !== 'email' && d.status !== 'done' && (
             <AccessForm inquiryId={d.id} onDone={() => void refresh()} />
           )}
         </div>
@@ -172,20 +223,21 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
   const [raw, setRaw] = useState(false);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
+  const reauth = useReauth();
   const toggle = (s: string) =>
     setScopes((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]));
   const go = async () => {
     setBusy(true);
     setMsg(null);
     try {
-      await adminRequestAccess(inquiryId, scopes, raw, reason);
+      await reauth(() => adminRequestAccess(inquiryId, scopes, raw, reason));
       setMsg(raw ? copy.rawRequested : copy.requested);
       setScopes([]);
       setRaw(false);
       onDone();
-    } catch {
-      setMsg(copy.failed);
+    } catch (e) {
+      setMsg(e instanceof AdminError && e.code === 'reauth_cancelled' ? null : copy.failed);
     } finally {
       setBusy(false);
     }
@@ -209,16 +261,11 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
         <span className="hg-field__label">{copy.l1Reason}</span>
         <input className="hg-input" value={reason} onChange={(e) => setReason(e.target.value)} />
       </label>
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <Button
         variant="primary"
         aria-busy={busy}
         disabled={!scopes.length || !reason.trim() || (raw && scopes.length !== 1)}
-        onClick={() => void go()}
+        onAct={() => go()}
       >
         {copy.sendRequest}
       </Button>

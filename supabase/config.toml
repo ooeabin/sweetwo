@@ -443,6 +443,10 @@ verify_jwt = false
 [functions.mail-events]
 verify_jwt = false
 
+# 이메일 문의 받기(네이버웍스 전달 → Cloudflare Email Routing → 메일 Worker apps/mail-worker). JWT 대신 x-inbound-secret(INBOUND_MAIL_SECRET)로 확인
+[functions.inbound-mail]
+verify_jwt = false
+
 # 모바일 푸시 보내기(DB kick_push가 pg_net으로 부름). JWT 대신 x-push-secret(PUSH_CRON_SECRET)로 확인
 [functions.send-push]
 verify_jwt = false
@@ -451,7 +455,7 @@ verify_jwt = false
 [functions.purge-storage]
 verify_jwt = false
 
-# 소셜 계정 프로필 사진 받기(앱이 부부 공간이 생긴 뒤 한 번 부름, 25 S-11e). 앱 사용자 JWT로 확인
+# 소셜 계정 프로필 사진 받기(앱이 우리 둘 공간이 생긴 뒤 한 번 부름, 25 S-11e). 앱 사용자 JWT로 확인
 [functions.social-avatar]
 verify_jwt = true
 

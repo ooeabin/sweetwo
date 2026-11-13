@@ -57,12 +57,12 @@ select public.save_split('[{"kind":"fixed","amount":1000000}]', auth.uid());
 select is((select count(*) from public.split_line), 1::bigint, '다시 저장하면 줄 교체');
 reset role;
 
--- 다른 부부는 볼 수 없음
+-- 다른 커플은 볼 수 없음
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
-select is((select count(*) from public.split_line) + (select count(*) from public.pay_check_line), 0::bigint, '다른 부부 월급 계획·체크리스트는 안 보임');
+select is((select count(*) from public.split_line) + (select count(*) from public.pay_check_line), 0::bigint, '다른 커플 월급 계획·체크리스트는 안 보임');
 reset role;
 
 select * from finish();

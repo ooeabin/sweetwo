@@ -1,4 +1,4 @@
--- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 돈 합, 월급 계획을 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
+-- pgTAP: 월급 체크(W-02, W-02a, W-05), 모은 금액 합, 월급 계획을 고치면 체크 안 한 줄만 새 금액. 찬우(시작한 사람), 예빈(합류한 사람)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(11);
@@ -63,18 +63,19 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
-select throws_ok($$ select public.check_pay_line(pg_temp.line('living'), 'checked') $$, '42501', 'not_owner', '배우자 체크리스트는 체크 못 함');
-select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'skipped', '배우자 줄은 그대로');
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
+select throws_ok($$ select public.check_pay_line(pg_temp.line('living'), 'checked') $$, '42501', 'not_owner', '파트너 체크리스트는 체크 못 함');
+select is((select state from public.pay_check_line where id = pg_temp.line('living')), 'skipped', '파트너 줄은 그대로');
 reset role;
 
--- 다른 부부는 체크할 수 없음
+-- 다른 커플은 체크할 수 없음
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 select throws_ok(
   format('select public.check_pay_line(%L, ''wait'')', (select id from public.pay_check_line limit 1)),
-  '42501', null, '다른 부부 줄은 못 고침');
+  '42501', null, '다른 커플 줄은 못 고침');
 reset role;
 
 select * from finish();

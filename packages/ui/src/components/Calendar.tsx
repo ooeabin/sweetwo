@@ -4,7 +4,7 @@ import { IconButton } from './IconButton';
 
 // 캘린더 달력(docs/design/components/Calendar.md, 2026-11-04 토스 소비 달력형):
 // 카드 없이 가운데 ‘‹ 10월 ›’(다른 달이면 오른쪽 ‘오늘’) → 요일 → 그 달 주만 → 아래 일정 목록(children).
-// 칸: 숫자 + 짧은 이름 한 줄(월급, 생신, 만기, 공휴일 이름) + 월말 확인 기간은 칸 아래 이어진 한 줄 띠.
+// 칸: 숫자 + 짧은 이름 한 줄(월급, 생신, 만기, 공휴일 이름) + 월급 전 확인 기간은 칸 아래 이어진 한 줄 띠.
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달 날짜는 비워 둠.
 export type CalTone = 'care' | 'holiday' | 'money';
 export interface CalDay {
@@ -14,7 +14,7 @@ export interface CalDay {
   /** 칸 안 짧은 이름(“월급”, “생신”, “만기”). 여러 개면 화면이 ‘+1’을 붙여 줌 */
   short?: string;
   tone?: CalTone;
-  /** 월말 확인 기간 띠의 자리. start 칸에 띠 이름 */
+  /** 월급 전 확인 기간 띠의 자리. start 칸에 띠 이름 */
   band?: 'start' | 'mid' | 'end' | 'single';
   /** 공휴일(숫자 빨간 글자) */
   holiday?: boolean;
@@ -63,7 +63,7 @@ export function Calendar({
   /** 오늘이 든 달이 아니면 ‘오늘’ */
   todayLabel?: string;
   onToday?: () => void;
-  /** 월말 확인 띠 이름(“월말 확인”) */
+  /** 월급 전 확인 띠 이름(“월급 전 확인”) */
   bandLabel?: string;
   /** 맨 위 보기 필터(칩) */
   filter?: ReactNode;

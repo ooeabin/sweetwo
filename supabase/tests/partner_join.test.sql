@@ -1,7 +1,7 @@
--- pgTAP: 초대 미리보기, 합류, 배우자 프로필, 합류 완료(P-01, P-11)
+-- pgTAP: 초대 미리보기, 합류, 파트너 프로필, 합류 완료(P-01, P-11)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(16);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -43,20 +43,22 @@ select results_eq(
   $$ values ('예빈'::text, 'bride'::text, 2500000::bigint, 'P-03'::text) $$,
   '찬우가 적은 호칭, 추정 수입이 초기값, 반대쪽');
 select is(public.join_space(current_setting('test.code')), 'resume', '같은 코드로 다시 열면 이어서');
-select is((select nickname from public.partner_profile()), '찬우', '배우자 프로필');
+select is((select count(*)::int from public.partner_profile()), 0, '합류를 마치기 전에는 파트너 프로필을 못 봄(D1)');
+select is(public.join_context()->>'starter_nickname', '찬우', '합류 흐름에 필요한 호칭은 join_context로');
 select lives_ok($$ select public.finish_join() $$, '합류 완료');
-select is((select couple_state::text from public.couple_space), 'connected', '부부 연결');
+select is((select nickname from public.partner_profile()), '찬우', '합류 뒤 파트너 프로필');
+select is((select couple_state::text from public.couple_space), 'connected', '커플 연결');
 select isnt((select used_at from public.invite), null, '코드 사용됨');
 reset role;
 
--- K: 이미 쓴 코드, 5회 오류 제한, 남의 배우자 못 봄
+-- K: 이미 쓴 코드, 시도 제한(맞든 틀리든 10분에 10번, D2), 남의 파트너 못 봄
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('google', null, false, 'v1');
 select is(public.join_space(current_setting('test.code')), 'used', '이미 합류가 끝난 초대');
-select public.join_space('ZZZZZZ') from generate_series(1, 5);
-select is(public.join_space('ZZZZZZ'), 'locked', '5회 오류면 10분 제한');
-select is((select count(*)::int from public.partner_profile()), 0, '다른 부부의 배우자는 안 보인다');
+select public.join_space('ZZZZZZ') from generate_series(1, 9);
+select is(public.join_space('ZZZZZZ'), 'locked', '모든 시도 10번이면 10분 제한');
+select is((select count(*)::int from public.partner_profile()), 0, '다른 커플의 파트너는 안 보인다');
 select throws_ok($$ select public.finish_join() $$, '42501', null, '합류 중이 아니면 완료 못 한다');
 reset role;
 

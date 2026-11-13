@@ -2,7 +2,7 @@ import type { Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// 가이드 체크리스트 완료(25 S-02). 부부 공유.
+// 가이드 체크리스트 완료(25 S-02). 두 사람 공유.
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };

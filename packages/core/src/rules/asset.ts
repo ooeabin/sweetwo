@@ -203,7 +203,7 @@ export interface NetWorthItem {
 
 /**
  * 순자산(06 9장): 자산 − 부채, 원금이 있으면 원금(없으면 평가금액). 예상 순자산 = 평가금액 기준.
- * 안 판 수익 = 예상 − 순자산. 비공개·판 항목·만기 완료 항목은 빼고, 배우자 ‘합계만’ 묶음 합계는 더한다.
+ * 안 판 수익 = 예상 − 순자산. 비공개·판 항목·만기 완료 항목은 빼고, 파트너 ‘합계만’ 묶음 합계는 더한다.
  */
 export function netWorth(
   items: NetWorthItem[],
@@ -275,7 +275,7 @@ export const periodSlice = <T>(rows: T[], p: NetWorthPeriod) =>
 /**
  * 투자 묶음 줄(23 F-02 12번, 06 8장). 투자 비중 = 투자 자산 합계 ÷ 총자산(부채 빼기 전, 평가금액, 반올림 %).
  * 손익 = 원금 있는 투자 항목의 평가금액 − 원금 합(원금 있는 항목이 없으면 null). 비공개·판 항목 제외,
- * 배우자 ‘합계만’은 비중에만 더함(원금을 따로 알 수 없음).
+ * 파트너 ‘합계만’은 비중에만 더함(원금을 따로 알 수 없음).
  */
 export function investSummary(
   items: (NetWorthItem & { grp: string })[],

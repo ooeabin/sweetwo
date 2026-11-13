@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from './toast';
 import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import '@sweetwo/ui/styles.css';
 import { canSee, NoPermission } from './frame';
 import { AdminGate, useAdmin } from './gate';
+import { ReauthProvider } from './reauth';
 import { AD01Dashboard } from './pages/ad-01-dashboard';
 import { AD02Members } from './pages/ad-02-members';
 import { AD03Member } from './pages/ad-03-member';
@@ -21,6 +23,13 @@ import { AD20Docs } from './pages/ad-20-docs';
 // 어드민(ops.sweetwo.kr, 27 어드민 화면). 데스크톱 웹만, 기준 폭 1440·최소 1280.
 // 매직 링크는 새 탭에서 열리므로 세션·PKCE 값은 localStorage(최대 8시간은 session.ts가 지킴)
 
+// 다크 모드는 토큰이 처리한다([data-theme="dark"]). 앱과 같이 시스템 설정만 따라 붙인다(2026-11-06, 전에는 늘 밝게만 보였음)
+const themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const applyTheme = () =>
+  (document.documentElement.dataset.theme = themeQuery.matches ? 'dark' : 'light');
+applyTheme();
+themeQuery.addEventListener('change', applyTheme);
+
 const qc = new QueryClient({
   defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
 });
@@ -32,95 +41,99 @@ function Allow({ menu, children }: { menu: string; children: ReactNode }) {
 
 function App() {
   return (
-    <AdminGate>
-      <Routes>
-        <Route path="/" element={<AD01Dashboard />} />
-        <Route
-          path="/members"
-          element={
-            <Allow menu="members">
-              <AD02Members />
-            </Allow>
-          }
-        />
-        <Route
-          path="/members/:id"
-          element={
-            <Allow menu="members">
-              <AD03Member />
-            </Allow>
-          }
-        />
-        <Route
-          path="/inquiries"
-          element={
-            <Allow menu="inquiries">
-              <AD06Inquiries />
-            </Allow>
-          }
-        />
-        <Route
-          path="/inquiries/:id"
-          element={
-            <Allow menu="inquiries">
-              <AD06Inquiry />
-            </Allow>
-          }
-        />
-        <Route
-          path="/notices"
-          element={
-            <Allow menu="send">
-              <AD10Notices />
-            </Allow>
-          }
-        />
-        <Route
-          path="/content"
-          element={
-            <Allow menu="content">
-              <AD14Content />
-            </Allow>
-          }
-        />
-        <Route path="/system" element={<Navigate to="/system/approvals" replace />} />
-        <Route
-          path="/system/approvals"
-          element={
-            <Allow menu="system">
-              <AD18Approvals />
-            </Allow>
-          }
-        />
-        <Route
-          path="/system/app"
-          element={
-            <Allow menu="system">
-              <AD16App />
-            </Allow>
-          }
-        />
-        <Route
-          path="/system/admins"
-          element={
-            <Allow menu="system">
-              <AD18Admins />
-            </Allow>
-          }
-        />
-        <Route
-          path="/system/audit"
-          element={
-            <Allow menu="system">
-              <AD17Audit />
-            </Allow>
-          }
-        />
-        <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
-        <Route path="/docs" element={<AD20Docs />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AdminGate>
+    <ToastProvider>
+      <AdminGate>
+        <ReauthProvider>
+          <Routes>
+            <Route path="/" element={<AD01Dashboard />} />
+            <Route
+              path="/members"
+              element={
+                <Allow menu="members">
+                  <AD02Members />
+                </Allow>
+              }
+            />
+            <Route
+              path="/members/:id"
+              element={
+                <Allow menu="members">
+                  <AD03Member />
+                </Allow>
+              }
+            />
+            <Route
+              path="/inquiries"
+              element={
+                <Allow menu="inquiries">
+                  <AD06Inquiries />
+                </Allow>
+              }
+            />
+            <Route
+              path="/inquiries/:id"
+              element={
+                <Allow menu="inquiries">
+                  <AD06Inquiry />
+                </Allow>
+              }
+            />
+            <Route
+              path="/notices"
+              element={
+                <Allow menu="send">
+                  <AD10Notices />
+                </Allow>
+              }
+            />
+            <Route
+              path="/content"
+              element={
+                <Allow menu="content">
+                  <AD14Content />
+                </Allow>
+              }
+            />
+            <Route path="/system" element={<Navigate to="/system/approvals" replace />} />
+            <Route
+              path="/system/approvals"
+              element={
+                <Allow menu="system">
+                  <AD18Approvals />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/app"
+              element={
+                <Allow menu="system">
+                  <AD16App />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/admins"
+              element={
+                <Allow menu="system">
+                  <AD18Admins />
+                </Allow>
+              }
+            />
+            <Route
+              path="/system/audit"
+              element={
+                <Allow menu="system">
+                  <AD17Audit />
+                </Allow>
+              }
+            />
+            <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
+            <Route path="/docs" element={<AD20Docs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ReauthProvider>
+      </AdminGate>
+    </ToastProvider>
   );
 }
 

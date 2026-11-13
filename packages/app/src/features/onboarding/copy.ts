@@ -1,58 +1,37 @@
-import { object } from '@sweetwo/core';
-
 // 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md, 질문 패턴 docs/spec/12-question-pattern.md). 기획서 “ ” 안 문장 그대로.
-// [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
+// [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것(기획서에도 [확인 필요]).
+// 2026-11-10 QA 2구간: O-10 첫 화면, O-12 결혼한 날·예정일, O-13 출생연도, 이어하기 질문 화면과 없앤 화면 문구를 지움
 export const copy = {
-  // 온보딩 이어하기(16 ‘답은 화면마다 저장’, 12 Q 이어하기)
-  resumeHelp: '멈춘 화면부터 이어서 할 수 있어요', // [확인 필요] 2026-11-02 짧게 다시 넣음
-  resumeQ: '이어서 할까요?',
-  resumeGo: '이어서 하기', // [확인 필요]
   next: '다음',
-  unsure: '잘 모르겠어요',
-  unsureLater: '잘 모르겠어요, 나중에 적을게요', // [확인 필요] 금액 칸 보조 링크(구간 골라 추정 + 할 일)
-  checkValue: '입력한 값이 맞나요?',
   saveFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
-  estimated: '추정',
 
-  // O-03, O-05 (Q5)
+  // O-03 (Q5)
   myNickname: '내 이름이나 애칭을 알려 주세요',
-  myNicknameHelp: '배우자에게도 이 이름으로 보여요',
+  myNicknameHelp: '파트너에게도 이 이름으로 보여요', // [확인 필요]
   nicknamePlaceholder: '이름이나 애칭',
   nameRequired: '이름을 넣어 주세요',
   // O-06, O-07
   inviteNow: '같이 쓸 사람을 초대할까요?',
-  inviteNowHelp: '목표와 월급을 둘이 같이 볼 수 있어요', // [확인 필요]
-  inviteChoices: { now: '초대하기', later: '나중에 할게요' },
+  inviteNowHelp: '월급과 저금을 둘이 같이 볼 수 있어요', // [확인 필요] 2026-11-08
+  // 2026-11-10 S2-17: 선택지는 대답이라 해요체(버튼 말투 규칙)
+  inviteChoices: { now: '지금 초대할게요', later: '나중에 할게요' }, // [확인 필요] now
+  haveCode: '받은 초대 코드가 있어요 ›', // [확인 필요] 2026-11-11 D4 O-06·S-12 → P-01 코드 입력
   inviteTitle: '이 코드를 보내 주세요',
-  copyLink: '링크 복사',
-  tapToCopy: '눌러서 복사', // [확인 필요] 코드 상자 아래
+  // 링크 복사, 눌러서 복사, 카톡으로 보내기, 공유 글, 복사 토스트는 shared/invite-share(S-12와 같이 씀, 2026-11-11)
   sendLater: '나중에 보낼게요', // [확인 필요] 보내기 전 ‘다음’ 대신
-  sendKakao: '카톡으로 보내기',
   inviteFailed: '지금은 코드를 만들 수 없어요',
-  copied: '복사했어요', // [확인 필요] 복사 토스트
+  inviteFailedTitle: '초대 코드를 만들지 못했어요', // [확인 필요] 2026-11-11 S3-27 발급 실패 시트 제목
 
-  // O-10 온보딩 첫 화면(챕터 4개 안내), O-20·O-30·O-50 챕터 시작(Q7)
-  overviewTitle: '2분이면 우리의 첫 목표가 생겨요', // [확인 필요]
-  // [확인 필요] O-10 3단계 안내(2026-11-02, 배민 커넥트·GCOO 시작 화면처럼)
-  overviewSteps: [
-    { icon: 'flag-pennant', text: '같이 이룰 목표를 골라요' },
-    { icon: 'wallet', text: '월급과 월급날을 알려 줘요' },
-    { icon: 'calendar-check', text: '월급날마다 보낸 돈을 체크해요' },
-  ] as const,
   // O-60 준비 끝(2026-11-02 다시 둠) [확인 필요]
   readyTitle: (name: string) => `${name}님, 준비가 끝났어요`,
-  readyHelp: '이제 홈에서 하나씩 해 볼게요',
   readyDone: {
     split: '월급을 추천값으로 나눠 뒀어요',
     checklist: (day: string) => `${day} 월급 체크리스트를 만들었어요`,
-    goal: '목표 금액은 홈에서 정해요',
+    goal: '첫 저금은 체크리스트에서 추가해요', // [확인 필요] 2026-11-10 S2-20
     salary: '월급이 생기면 홈에서 알려 주세요',
   },
   readyGo: '홈으로 가기',
-  overviewEditable: '언제든 고칠 수 있으니 편하게 적어 주세요',
-  chapterStart: '시작하기',
-  edit: '수정',
 
   // O-11
   married: '두 사람은 어떤 사이예요?',
@@ -62,59 +41,14 @@ export const copy = {
     engaged: '결혼 준비 중이에요',
     undecided: '아직 안 정했어요',
   },
-  cancel: '취소',
 
-  // O-12
-  weddingDone: '결혼한 날은 언제예요?',
-  weddingPlanned: '결혼 예정일은 언제예요?',
-  undecided: '아직 미정이에요',
-  skipDate: '건너뛸게요', // [확인 필요]
-  whenPlanned: '언제쯤 예정이에요?',
-  noDate: '없는 날짜예요',
-  pastOnly: '오늘까지의 날짜를 넣어 주세요', // [확인 필요]
-  futureOnly: '내일부터의 날짜를 넣어 주세요', // [확인 필요]
-
-  // O-13
-  birthYear: (me: string) => `${me}님은 몇 년생이에요?`, // [확인 필요]
-  // O-21
-  goalsTitle: '둘이 가장 먼저 이루고 싶은 건 뭐예요?',
-  goalsHelp: '모으고 싶은 순서대로 골라 주세요', // [확인 필요]
-  recommended: '추천',
-  makeOwn: '직접 만들기',
-  picked: (n: number) => `${n}개 골랐어요`,
-  goalsLater: '나중에 고를게요', // [확인 필요] O-21 하나도 안 골랐을 때
-  goalTabsLabel: '목표 분류',
-
-  // O-23, O-24
-  first: '1순위',
-  saveRatio: (manText: string) => `${manText}을 모아요`,
-  yearsLater: (n: number) => `${n}년 뒤`,
-  monthlyNeed: (manText: string) => `매달 ${manText}씩 모으면 돼요`,
-  needFormula: (left: string, months: number) => `${left} ÷ ${months}개월`,
-  goalDeadline: '언제까지 모을까요?', // [확인 필요] O-24 질문 문구
-  notBeforeThisYear: (y: number) => `${y}년부터 넣어 주세요`, // [확인 필요]
-  yearTotal: (manText: string) => `1년에 모두 ${manText} 원`,
-
-  // O-32, O-33
+  // O-32
   payday: '월급날은 며칠이에요?',
   paydayLast: '말일',
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] O-32 휠 아래
-  partnerIncome: (partner: string) => `${partner}님 수입은 한 달에 어느 정도예요?`,
-  // O-36
-  add: '추가', // [확인 필요]
-  // O-51, O-52 (파트 5)
-  later: '나중에 할게요',
-  splitHelp: (amount: string) => `한 달 ${amount}을 두 분이 나눠 넣어요`,
-  // 결과 카드 금액 아래 한 줄 [확인 필요]
-  whoMine: (me: string) => `${me}님`,
-  // O-64
-  expected: (ym: string) => `${ym} 달성 예상`,
-  // O-66
-  myPayday: (me: string) => `${me}님 월급날`,
-  // O-66 조건 요약 판 [확인 필요]
-  start: '시작하기',
+  paydayShortMonth: '짧은 달은 말일로 계산해요', // 2026-11-10 S2-24, 12 Q4 예외 문구. 29~31일을 고르면 휠 아래
 
-  // 재기획(ADR 0003) 온보딩 ②: O-30 월급 관리 방식, O-31 월급, O-50 월급 계획, O-60 결과(17-onboarding-2.md)
+  // 온보딩 ②: O-30 월급 관리 방식, O-31 월급(17-onboarding-2.md)
   salaryMode: '월급을 어떻게 관리해요?', // [확인 필요]
   salaryModeHelp: '나중에 바꿀 수 있어요', // [확인 필요]
   salaryModes: {
@@ -125,37 +59,15 @@ export const copy = {
     joint: { label: '합쳐서 같이 관리해요', sub: '둘의 월급을 한 월급 계획으로 나눠요' }, // [확인 필요]
   },
   salary: '한 달 실수령액은 얼마예요?',
-  salaryHelp: '세금 떼고 통장에 들어오는 돈이에요',
+  salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
   salaryVariableHelp: '가장 적게 들어온 달 기준으로 적어 주세요', // [확인 필요]
   noSalary: '지금은 월급이 없어요',
-  splitTitle: '월급을 이렇게 나눠 볼까요?',
-  splitTableHelp: '눌러서 금액을 바꿔요', // [확인 필요]
-  splitIncome: (man: string) => `월급 ${man}`,
-  savingGroup: '저금',
-  spendGroup: '쓰는 돈',
-  lineNames: { fixed: '고정지출', living: '생활비', allowance: '용돈' },
-  fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
-  livingSub: '식비·장보기처럼 쓰는 대로 나가는 돈', // [확인 필요]
-  needPerMonth: (man: string) => `매달 ${man}이 필요해요`,
-  addLine: '+ 줄 추가',
-  newLineName: '줄 이름', // [확인 필요] 직접 추가 줄 이름 칸
-  newLinePlaceholder: '예: 부모님 용돈',
-  removeLine: '줄 지우기', // [확인 필요]
-  lineAmount: (name: string) => `${name} 금액`,
-  tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
-  leftover: (man: string) => `남는 돈 ${man}`,
-  short: (man: string) => `${man}이 모자라요`,
-  shortHelp: '쓰는 돈이나 저금을 줄여 주세요',
-  splitDone: '이대로 저장하기',
-  resultTitle: (monthly: string, when: string, goal: string) =>
-    `매달 ${monthly}씩 모으면 ${when}에 ${object(goal)} 이뤄요`, // [확인 필요]
-  resultNoSaving: '월급 계획에서 저금을 정하면 언제 이룰지 알려 드려요',
-  resultLate: (n: string) => `목표 기한보다 ${n} 늦어요`,
-  resultOnTime: '목표 기한 안에 이뤄요',
-  resultLateHelp: '월급 계획에서 저금을 늘리면 앞당길 수 있어요',
-  resultTodo: (day: string) => `월급날(${day})에 월급 계획대로 보내고 체크해 주세요`, // [확인 필요]
-  resultStart: '시작하기',
-  years: (n: number) => `${n}년`,
-  months: (n: number) => `${n}개월`,
+  // 2026-11-10 S2-02: ‘지금은 월급이 없어요’ 확인(되돌릴 수 있는 확인 → Modal primary)
+  noSalaryQ: '월급 없이 시작할까요?', // [확인 필요]
+  noSalaryHelp: '월급이 생기면 설정에서 넣을 수 있어요', // [확인 필요]
+  noSalaryYes: '월급 없이 시작할게요', // [확인 필요]
+  noSalaryNo: '다시 적을게요', // [확인 필요]
+  // 2026-11-10 S2-07: 10만 원 미만이나 1억 원 초과면 한 번 확인(막지 않음)
+  checkSalary: (amount: string) => `한 달에 ${amount}이 맞나요?`, // [확인 필요]
 };

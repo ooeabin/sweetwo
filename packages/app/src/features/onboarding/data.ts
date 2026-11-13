@@ -2,7 +2,6 @@ import {
   ensureSpace,
   fetchAccounts,
   fetchFixedExpenses,
-  fetchGoals,
   fetchMe,
   fetchPartner,
   fetchSpace,
@@ -12,12 +11,12 @@ import {
   updateSpace,
   type Account,
   type FixedExpense,
-  type Goal,
   type Me,
   type Space,
 } from '@sweetwo/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
+import { onSessionReset } from '../../shared/session-reset';
 
 // 온보딩 데이터: 서버 값(react-query) + 이 탭에서만 쓰는 값(zustand).
 export function useMe() {
@@ -32,13 +31,10 @@ export function useSpace() {
     },
   });
 }
-/** 합류한 배우자(합류 전 null). 시작한 사람이 온보딩 중에 배우자가 먼저 합류할 수 있음 */
+/** 합류한 파트너(합류 전 null). 시작한 사람이 온보딩 중에 파트너가 먼저 합류할 수 있음 */
 export function usePartner(joined: boolean) {
-  // 합류 전에는 부르지 않음(배우자 없음)
+  // 합류 전에는 부르지 않음(파트너 없음)
   return useQuery({ queryKey: qk.partner, queryFn: fetchPartner, enabled: joined });
-}
-export function useGoals() {
-  return useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 }
 
 /** 월급 계획(O-50에서 다시 열면 저장한 값부터) */
@@ -59,14 +55,13 @@ export function useRefresh() {
   return {
     me: () => qc.invalidateQueries({ queryKey: qk.me }),
     space: () => qc.invalidateQueries({ queryKey: qk.space }),
-    goals: () => qc.invalidateQueries({ queryKey: qk.goals }),
   };
 }
 
 export const saveMe = updateMe;
 export const saveSpace = updateSpace;
 
-/** O-06 답(서버에 저장하지 않음, 결과 뒤 할 일 ‘배우자 초대하기’는 할 일 단계에서) */
+/** O-06 답(서버에 저장하지 않음, 결과 뒤 할 일 ‘파트너 초대하기’는 할 일 단계에서) */
 interface Local {
   inviteNow: 'now' | 'later' | null;
   setInviteNow: (v: 'now' | 'later') => void;
@@ -75,5 +70,6 @@ export const useOnboardingLocal = create<Local>((set) => ({
   inviteNow: null,
   setInviteNow: (v) => set({ inviteNow: v }),
 }));
+onSessionReset(() => useOnboardingLocal.setState({ inviteNow: null }));
 
-export type { Account, FixedExpense, Goal, Me, Space };
+export type { Account, FixedExpense, Me, Space };

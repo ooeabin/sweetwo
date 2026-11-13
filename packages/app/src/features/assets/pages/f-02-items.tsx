@@ -7,10 +7,21 @@ import {
   todayKst,
   type AssetSide,
 } from '@sweetwo/core';
-import { Badge, Button, Chip, EmptyState, Icon, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  AddRow,
+  Badge,
+  Button,
+  Chip,
+  EmptyState,
+  Icon,
+  ListRow,
+  SectionHeader,
+  Tabs,
+} from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
+import { SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
 import { ownerOf, useAssetsData } from '../data';
@@ -50,7 +61,7 @@ const saveSort = (s: Sort) => {
 };
 
 // F-02 자산·부채 목록(23 F-02 7~11·13·14번): 자산·부채 전환(탭마다 합계), 묶음(F-03a 그룹) 안 금액 큰 순,
-// 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 배우자 ‘합계만’은 묶음별 한 줄(누를 수 없음).
+// 줄 = 이름(+ 공개 범위, 대신 입력) / 명의, 수정일 / 금액. 파트너 ‘합계만’은 묶음별 한 줄(누를 수 없음).
 // 배지: 공개 범위(내 항목), 대신 입력. 통장 역할·목표 연결은 재기획으로 없앰. 정렬 칩(이름, 명의, 금액, 수정일)은 묶음 안에서, 기기에 기억.
 // 투자 묶음 줄 = “안 판 수익” + 손익(원금 있는 항목). 2026-11-04 투자 비중 줄은 뺌.
 export function F02Items() {
@@ -90,6 +101,7 @@ export function F02Items() {
       partner: sums.find((s) => s.grp === g.key),
     }))
     .filter((x) => x.rows.length || x.partner);
+  const ready = !d.loading && !d.failed;
   const total = (s: AssetSide) => (s === 'asset' ? d.nw.assets : d.nw.debts);
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 
@@ -132,12 +144,23 @@ export function F02Items() {
         value={side}
         onChange={(s) => setParams({ side: s }, { replace: true })}
         items={[
-          { value: 'asset', label: copy.assets(m(total('asset'))) },
-          { value: 'debt', label: copy.debts(m(total('debt'))) },
+          // 불러오는 동안은 이름만(0원이 먼저 보였다가 바뀌지 않게, 2026-11-06)
+          { value: 'asset', label: !ready ? copy.assetsLabel : copy.assets(m(total('asset'))) },
+          { value: 'debt', label: !ready ? copy.debtsLabel : copy.debts(m(total('debt'))) },
         ]}
       />
-      {!d.loading && !groups.length && (
-        // 2026-11-04 한눈에(F-01)와 같은 빈 상태 모양
+      {/* 못 불러오면 F-01과 같은 오류 카드 + ‘다시 시도’, 불러오는 동안은 뼈대만(2026-11-12 QA 8구간 S8-04) */}
+      {d.failed && (
+        <div className="hg-card hg-stack">
+          <p className="hg-card__meta">{copy.loadFailed}</p>
+          <Button variant="primary" onClick={d.retry}>
+            {copy.retry}
+          </Button>
+        </div>
+      )}
+      {!d.failed && d.loading && <SkelBody shape="rows" />}
+      {ready && !groups.length && (
+        // 2026-11-04 요약(F-01)과 같은 빈 상태 모양
         <EmptyState
           title={side === 'debt' ? copy.noDebt : copy.empty}
           action={
@@ -147,7 +170,7 @@ export function F02Items() {
           }
         />
       )}
-      {groups.length > 0 && (
+      {ready && groups.length > 0 && (
         <div
           className="hg-row"
           role="group"
@@ -171,11 +194,15 @@ export function F02Items() {
           })}
         </div>
       )}
-      {groups.map(({ g, rows, partner }) => (
+      {(ready ? groups : []).map(({ g, rows, partner }) => (
         <section key={g.key} className="hg-stack" aria-label={g.name}>
+          {/* 묶음 합계는 탭 합계와 같게 내 ‘숨기기’ 항목을 뺌(7번, 2026-11-12 S8-09) */}
           <SectionHeader
             title={g.name}
-            count={m(rows.reduce((t, a) => t + a.amount, 0) + (partner?.total ?? 0))}
+            count={m(
+              rows.filter((a) => a.visibility !== 'private').reduce((t, a) => t + a.amount, 0) +
+                (partner?.total ?? 0),
+            )}
           />
           <div className="hg-list">
             {g.key === 'invest' && inv.gain !== null && inv.gain !== 0 && (
@@ -203,6 +230,14 @@ export function F02Items() {
           </div>
         </section>
       ))}
+      {/* 2026-11-09 + 버튼(FAB) 대신 목록 끝 회색 ‘+ 자산 추가’ / ‘+ 부채 추가’(보던 쪽 그대로 F-03a) */}
+      {ready && groups.length > 0 && (
+        <AddRow
+          block
+          label={side === 'debt' ? copy.addDebtRow : copy.addAssetRow}
+          onClick={() => nav(`/assets/new?side=${side}`)}
+        />
+      )}
     </AssetsFrame>
   );
 }

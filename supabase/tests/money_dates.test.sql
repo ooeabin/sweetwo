@@ -62,11 +62,12 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 select throws_ok($$ select public.settle_matured((select id from public.asset where name = '정기 예금'), null, '2099-04-02') $$,
-  '42501', 'not_found', '배우자 개인 항목은 못 고침');
+  '42501', 'not_found', '파트너 개인 항목은 못 고침');
 reset role;
 
--- 연말정산: 1월 둘째 주 월요일(2027-01-11), 결혼한 부부 두 사람
+-- 연말정산: 1월 둘째 주 월요일(2027-01-11), 결혼한 커플 두 사람
 delete from public.notification;
 select is(public.send_morning_notifications('2027-01-11'), 2, '연말정산 준비 둘 다');
 

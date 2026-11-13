@@ -16,18 +16,21 @@ import {
   type AdminAccessData,
   type AdminReveal,
 } from '@sweetwo/core';
-import { Button, Chip, DataTable, Modal } from '@sweetwo/ui';
+import { Chip, DataTable, Modal } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { Frame } from '../frame';
+import { PageSkel } from '../skel';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 
 type L1Scope = 'email' | 'sign_ins' | 'payments';
 const REVEAL_MS = 30 * 60_000;
 
-// AD-03 회원·부부 상세(L0: 구조 정보만, 금액·항목명·메모 없음). 글자 선택·복사 막음(hg-admin__main).
+// AD-03 회원·커플 상세(L0: 구조 정보만, 금액·항목명·메모 없음). 글자 선택·복사 막음(hg-admin__main).
 // ‘개인정보 보기’ = AD-04 L1(사유 + 문의 번호 → 30분 표시 후 다시 가림), ‘계정 조치’ = AD-05.
 // L2 동의 요청은 문의(AD-06)에서. 동의가 있으면 위 띠 + ‘보기’(동의 범위만, 읽기 전용). 운영 역할은 버튼 없음.
 export function AD03Member() {
@@ -35,6 +38,8 @@ export function AD03Member() {
   const nav = useNavigate();
   const me = useAdmin();
   const cs = me.roles.includes('cs') || me.roles.includes('super');
+  // L2 동의 범위 보기는 CS만(최고 관리자는 승인만, 33 2장)
+  const csOnly = me.roles.includes('cs');
   const q = useQuery({ queryKey: ['admin', 'user', id], queryFn: () => fetchAdminUser(id) });
   const [panel, setPanel] = useState<'reveal' | 'action' | null>(null);
   const [shown, setShown] = useState<{ data: AdminReveal; until: number } | null>(null);
@@ -50,7 +55,7 @@ export function AD03Member() {
   if (q.isLoading)
     return (
       <Frame menu="members" title={copy.memberTitle}>
-        {null}
+        <PageSkel />
       </Frame>
     );
   if (q.isError || !q.data)
@@ -69,6 +74,7 @@ export function AD03Member() {
     <Frame
       menu="members"
       title={copy.memberTitle}
+      protect
       actions={
         cs && (
           <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
@@ -93,13 +99,15 @@ export function AD03Member() {
           <small>
             {copy.hoursLeft(hoursBetween(new Date().toISOString(), new Date(approved.expires_at)))}
           </small>{' '}
-          <Button
-            variant="link"
-            size="sm"
-            onClick={() => void fetchAdminAccessData(approved.id).then(setAccess)}
-          >
-            {copy.see}
-          </Button>
+          {csOnly && (
+            <Button
+              variant="link"
+              size="sm"
+              onAct={() => fetchAdminAccessData(approved.id).then(setAccess)}
+            >
+              {copy.see}
+            </Button>
+          )}
         </div>
       )}
       <div className="hg-admin__grid">
@@ -111,7 +119,10 @@ export function AD03Member() {
               k={copy.cols.email}
               v={shown?.data.email ?? <span className="hg-mask-text">{u.email_masked ?? '—'}</span>}
             />
-            <KV k={copy.provider} v={u.provider ?? '—'} />
+            <KV
+              k={copy.provider}
+              v={u.provider ? (copy.providers[u.provider] ?? u.provider) : '—'}
+            />
             <KV k={copy.cols.joined} v={u.created_at ? formatKstDateTime(u.created_at) : '—'} />
             <KV
               k={copy.lastSeen}
@@ -119,6 +130,20 @@ export function AD03Member() {
             />
             <KV k={copy.cols.sub} v={u.subscription} />
             <span className="hg-help">{copy.sessions(u.sessions)}</span>
+            {u.devices.length > 0 && (
+              <>
+                <span className="hg-card__meta">{copy.devices}</span>
+                {u.devices.map((d) => (
+                  <span key={`${d.platform}-${d.last_seen_at}`} className="hg-help">
+                    {copy.deviceLine(
+                      copy.platforms[d.platform] ?? d.platform,
+                      d.app_version,
+                      formatKstDateTime(d.last_seen_at),
+                    )}
+                  </span>
+                ))}
+              </>
+            )}
           </section>
           <section className="hg-card hg-stack" aria-label={copy.space}>
             <span className="hg-card__label">{copy.space}</span>
@@ -155,14 +180,34 @@ export function AD03Member() {
                 u.counts.closes,
               )}
             </span>
-            <KV k={copy.planStatus} v={u.plan_status ?? '—'} />
+            <KV k={copy.salaryMode} v={u.salary_mode ? copy.salaryModes[u.salary_mode] : '—'} />
+            <KV
+              k={copy.planStatus}
+              v={
+                u.checklist
+                  ? copy.checklistLine(
+                      u.checklist.label,
+                      copy.checklistStates[u.checklist.state] ?? u.checklist.state,
+                      u.checklist.checked,
+                      u.checklist.total,
+                    )
+                  : u.plan_status
+                    ? (copy.checklistStates[u.plan_status] ?? '—')
+                    : '—'
+              }
+            />
           </section>
           <DataTable
             label={copy.consents}
+            empty={copy.noRows}
             rows={u.consents}
             rowKey={(c) => `${c.kind}-${c.at}`}
             columns={[
-              { key: 'kind', label: copy.consents, render: (c) => c.kind },
+              {
+                key: 'kind',
+                label: copy.consents,
+                render: (c) => copy.consentKinds[c.kind] ?? c.kind,
+              },
               { key: 'version', label: copy.versionCol, render: (c) => c.version },
               {
                 key: 'agreed',
@@ -175,6 +220,7 @@ export function AD03Member() {
           {shown?.data.sign_ins && (
             <DataTable
               label={copy.l1Scopes.sign_ins}
+              empty={copy.noRows}
               rows={shown.data.sign_ins}
               rowKey={(s) => `${s.created_at}-${s.user_agent}`}
               columns={[
@@ -215,8 +261,8 @@ export function AD03Member() {
 
 function KV({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="hg-row" style={{ justifyContent: 'space-between', gap: 'var(--space-4)' }}>
-      <span className="hg-card__meta">{k}</span>
+    <div className="hg-admin__kv">
+      <span>{k}</span>
       <span>{v}</span>
     </div>
   );
@@ -275,7 +321,7 @@ function RevealForm({ userId, onShown }: { userId: string; onShown: (d: AdminRev
         variant="primary"
         aria-busy={busy}
         disabled={!/^A-\d+$/i.test(no.trim()) || !scopes.length}
-        onClick={() => void go()}
+        onAct={() => go()}
       >
         {copy.revealGo}
       </Button>
@@ -297,7 +343,7 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
   const [target, setTarget] = useState('');
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const move = action === 'login_move';
   const ask = CONFIRM[action];
   const run = async () => {
@@ -356,11 +402,6 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
         <span className="hg-field__label">{copy.note}</span>
         <input className="hg-input" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <Button
         variant={ask ? 'danger' : 'primary'}
         aria-busy={busy}
@@ -404,7 +445,17 @@ function AccessView({ d }: { d: AdminAccessData }) {
       {d.assets?.map((a) => (
         <KV key={`${a.name}-${a.grp}`} k={a.name} v={val(a.amount)} />
       ))}
-      {d.plan && <KV k={copy.planStatus} v={`${d.plan.status} ${d.plan.done}/${d.plan.lines}`} />}
+      {d.plan && (
+        <KV
+          k={copy.planStatus}
+          v={copy.checklistLine(
+            d.plan.label_month,
+            copy.checklistStates[d.plan.status] ?? d.plan.status,
+            d.plan.done,
+            d.plan.lines,
+          )}
+        />
+      )}
       {d.close && <KV k={copy.l2Labels.close} v={`${d.close.status} ${val(d.close.spent)}`} />}
       {d.calendar?.map((c) => (
         <KV key={c.name} k={c.name} v={c.kind} />

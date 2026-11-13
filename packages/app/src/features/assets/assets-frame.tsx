@@ -1,27 +1,17 @@
 import { Button, Tabs } from '@sweetwo/ui';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MainFrame } from '../frame';
+import { MainFrame, rememberAssetsTab, type AssetsTab } from '../frame';
 import { copy } from './copy';
 
-type Tab = 'overview' | 'items';
+type Tab = AssetsTab;
 const PATH: Record<Tab, string> = {
   overview: '/assets',
   items: '/assets/items',
 };
-const KEY = 'sweetwo.assets-tab';
 
-/** 마지막 본 하위 탭(F-01 1번). 기기에만 */
-export const lastAssetsTab = () => {
-  try {
-    const t = localStorage.getItem(KEY);
-    return t === 'items' ? '/assets/items' : '/assets';
-  } catch {
-    return '/assets';
-  }
-};
-
-// 우리 자산 첫 화면 틀: 화면 제목 줄(“우리 자산” + ‘+ 추가’) + 하위 탭 “한눈에” “자산·부채”(23 1번, 2개 고정)
+// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산·부채”(23 1번, 2개 고정).
+// 2026-11-09 회색 바탕(tone="alt") 위 흰 상자, 좁은 창 추가는 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄
 export function AssetsFrame({
   tab,
   addSide = 'asset',
@@ -32,20 +22,19 @@ export function AssetsFrame({
   children: ReactNode;
 }) {
   const nav = useNavigate();
-  try {
-    localStorage.setItem(KEY, tab);
-  } catch {
-    /* 기억 못 해도 됨 */
-  }
+  // 마지막 본 하위 탭(F-01 1번, 기기에만). 들어올 때 frame lastAssetsTab으로 이 탭을 엶(2026-11-12 S8-10)
+  useEffect(() => rememberAssetsTab(tab), [tab]);
   return (
     <MainFrame
       current="assets"
+      tone="alt"
       page={{
         title: copy.title,
         actions: (
-          // 좁은 창은 + 버튼이 같은 일(2026-11-03 추가 입구 하나로)
+          // 넓은 창만. 좁은 창은 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄(2026-11-09 + 버튼 대신).
+          // 메뉴 제목 줄 ‘추가’는 보조 버튼(DESIGN.md, 2026-11-12 QA 8구간 S8-11)
           <Button
-            variant="primary"
+            variant="secondary"
             className="hg-wide-only"
             onClick={() => nav(`/assets/new?side=${addSide}`)}
           >

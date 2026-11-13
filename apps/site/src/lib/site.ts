@@ -7,8 +7,6 @@ export const URLS = {
   playStore:
     (import.meta.env.PUBLIC_PLAY_STORE_URL as string | undefined) ??
     'https://play.google.com/store/apps/details?id=kr.sweetwo.app',
-  mac: 'https://download.sweetwo.kr/latest/mac',
-  win: 'https://download.sweetwo.kr/latest/win',
   status: 'https://status.sweetwo.kr',
   help: 'mailto:help@sweetwo.kr',
   privacyMail: 'mailto:privacy@sweetwo.kr',
@@ -19,28 +17,21 @@ export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크하는 부부 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 같이 체크하고, 모은 금액을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
   getApp: '앱 받기',
-  heroLead: '둘의 목표를 정하고, 월급날 정한 대로 나눴는지 같이 체크해요', // [확인 필요]
-  macDownload: 'Mac용 다운로드',
-  winDownload: 'Windows용 다운로드',
-  otherOs: '다른 OS용 받기',
-  supported: 'macOS 12 이상, Windows 10 64비트 이상에서 쓸 수 있어요',
-  unsupported: '이 컴퓨터에서는 앱을 쓸 수 없어요. 휴대폰 앱으로 시작할 수 있어요', // [확인 필요]
-  phoneAlso: 'Mac이나 Windows에서도 같은 계정으로 쓸 수 있어요', // [확인 필요]
-  mobileToo: '휴대폰 앱도 있어요',
+  heroLead: '월급날 정한 대로 나눴는지 같이 체크하고, 모은 금액을 같이 봐요', // [확인 필요]
   // 스토어 배지 자리(공식 배지 이미지를 넣기 전까지 글자 버튼)
   appStore: 'App Store에서 받기',
   googlePlay: 'Google Play에서 받기',
   // [확인 필요] 기능 4개(28 L-01 3번)
   features: [
-    { title: '우리 목표', body: '내 집 마련, 여행, 비상금까지 얼마나 모았는지 한눈에 봐요' },
+    { title: '저금', body: '목표 금액을 정하면 얼마나 모았는지 한눈에 봐요' }, // [확인 필요] 2026-11-09 ‘저금 항목’ 대신
     {
       title: '월급 계획과 체크리스트',
       body: '월급을 어디에 얼마씩 보낼지 한 번 정하고, 월급날 보냈는지 체크만 해요',
     },
-    { title: '한눈에 순자산', body: '통장, 투자, 집, 대출을 적으면 우리 순자산을 보여 드려요' },
+    { title: '한눈에 순자산', body: '통장, 투자, 집, 대출을 적으면 순자산을 보여 드려요' },
     { title: '둘이 같이', body: '초대 코드 하나로 같이 쓰고, 누가 고쳐도 서로 바로 알 수 있어요' },
   ],
   featuresTitle: '이렇게 써요', // [확인 필요] 구획 제목
@@ -61,37 +52,25 @@ export const t = {
     status: '상태 페이지',
     contact: '고객센터 help@sweetwo.kr',
     privacyOfficer: '개인정보 보호책임자 privacy@sweetwo.kr',
-    // 사업자 정보 값은 출시 준비(34 4장)에서 정함
+    // 사업자 정보 값은 출시 준비(34 4장)에서 정함 [확인 필요]. 빈 값인 줄은 하단에 보이지 않음(2026-11-12)
     business: [
-      ['상호', '[확인 필요]'],
-      ['대표', '[확인 필요]'],
-      ['사업자등록번호', '[확인 필요]'],
-      ['주소', '[확인 필요]'],
+      ['상호', ''],
+      ['대표', ''],
+      ['사업자등록번호', ''],
+      ['주소', ''],
     ] as [string, string][],
     notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
   },
 
-  // L-02
-  installPage: '설치 안내',
-  started: '다운로드를 시작했어요',
-  startedSub: '받기가 시작되지 않으면 다시 받기를 눌러 주세요',
-  again: '다시 받기',
-  steps: {
-    mac: [
-      'dmg 파일을 열어요',
-      'sweeTwo를 응용 프로그램 폴더로 끌어 놓아요',
-      '처음 열 때 ‘열기’를 눌러요',
-    ],
-    win: ['설치 파일을 실행해요', '설치를 눌러요', '시작 메뉴에서 sweeTwo를 열어요'],
+  // 페이지마다 메타 설명 1줄(28 공통 ‘주소’, 2026-11-12) [확인 필요]
+  desc: {
+    releases: 'sweeTwo 새 버전에서 달라진 점을 버전별로 모았어요',
+    terms: 'sweeTwo 이용약관 전문과 이전 버전을 볼 수 있어요',
+    privacy: 'sweeTwo 개인정보처리방침 전문과 이전 버전을 볼 수 있어요',
+    help: 'sweeTwo 자주 묻는 질문을 찾아보고, 답이 없으면 메일로 물어볼 수 있어요',
+    download: 'iPhone과 iPad는 App Store, Android는 Google Play에서 sweeTwo를 받아요',
+    invite: '앱을 설치한 뒤 초대 코드를 입력하면 같이 쓸 수 있어요',
   },
-  warnQ: '보안 경고가 뜨나요?',
-  warn: {
-    mac: '‘확인되지 않은 개발자’ 경고가 뜨면 시스템 설정의 개인정보 보호 및 보안에서 ‘그래도 열기’를 눌러 주세요',
-    win: 'SmartScreen 창이 뜨면 ‘추가 정보’를 누른 뒤 ‘실행’을 눌러 주세요',
-  },
-  signed: 'sweeTwo는 서명과 공증을 마친 앱이라 보통은 이 경고가 뜨지 않아요',
-  after: '휴대폰 앱과 같은 계정으로 로그인하면 기록이 그대로 있어요', // [확인 필요]
-  chooseOs: '받을 파일을 골라 주세요', // [확인 필요] OS를 모를 때
 
   // L-03
   releasesPage: '릴리스 노트',
@@ -114,11 +93,12 @@ export const t = {
   home: '처음으로', // [확인 필요]
 
   // 초대 링크
-  openInApp: 'sweeTwo 앱으로 열까요?',
   openApp: '앱으로 열기',
   // [확인 필요] 초대 페이지(28 공통 ‘초대 링크’)
   invited: 'sweeTwo에 초대받았어요',
   invitedSub: '앱을 설치한 뒤 이 코드를 입력해 주세요',
+  // [확인 필요] 코드 없이 /i/로 들어옴(2026-11-12)
+  invitedNoCode: '앱을 설치한 뒤 받은 초대 코드를 입력해 주세요',
   copyCode: '복사',
   copied: '복사했어요',
 

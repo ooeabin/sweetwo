@@ -18,8 +18,9 @@ test('첫 방문: O-01 → A-02', async ({ page }) => {
   await noA11yViolations(page);
   await page.getByRole('button', { name: '시작하기' }).click();
   await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
-  for (const name of ['카카오로 3초 만에 시작하기', 'Google로 시작하기', 'Apple로 시작하기']) {
-    await expect(page.getByRole('button', { name })).toBeEnabled();
+  // 제공자 공식 문구 그대로(2026-11-10). ‘최근 사용’ 말풍선은 이름에 붙지 않음
+  for (const name of ['카카오로 3초 만에 로그인', 'Google로 계속하기', 'Apple로 계속하기']) {
+    await expect(page.getByRole('button', { name, exact: true })).toBeEnabled();
   }
   await expect(page.getByRole('checkbox', { name: '이 기기에서 로그인 유지' })).toHaveCount(0);
   await noA11yViolations(page);
@@ -48,7 +49,9 @@ test('A-01: 점검 시간이면 점검 안내, 끝나는 시각', async ({ page 
   await noA11yViolations(page);
 });
 
-test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-10', async ({ page }) => {
+test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 O-03(2026-11-10 O-10 없앰)', async ({
+  page,
+}) => {
   let signup: Record<string, unknown> | undefined;
   await mockSupabase(page, {
     loginState: { state: 'new', needs_email: true },
@@ -57,7 +60,7 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await asReturningFromProvider(page, 'kakao');
   await page.goto('/auth/callback?code=e2e-code');
 
-  await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려주세요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '알림 받을 이메일을 알려 주세요' })).toBeVisible();
   const next = page.getByRole('button', { name: '다음' });
   const email = page.getByLabel('알림 이메일');
   await email.fill('chanwoo@mail');
@@ -67,25 +70,23 @@ test('신규 가입: 카카오 이메일 거부 → A-04 → A-05 → 온보딩 
   await email.fill(' ChanWoo@Mail.com ');
   await next.click();
 
-  await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: '모두 동의해요(선택 포함)' })).toBeVisible();
   const agree = page.getByRole('button', { name: '동의하고 계속하기' });
   await expect(agree).toBeDisabled();
   await page.getByRole('checkbox', { name: '[필수] 이용약관' }).click();
   await page.getByRole('checkbox', { name: '[필수] 개인정보 수집·이용' }).click();
   await expect(agree).toBeDisabled();
-  await page.getByRole('checkbox', { name: '[필수] 배우자와 부부 공간 공유' }).click();
+  await page.getByRole('checkbox', { name: '[필수] 파트너와 우리 둘 공간 공유' }).click();
   await expect(agree).toBeDisabled(); // 만 18세 확인도 필수(A-05 2a)
   await page.getByRole('checkbox', { name: '[필수] 만 18세 이상이에요' }).click();
-  await expect(page.getByRole('checkbox', { name: '모두 동의해요' })).toHaveAttribute(
+  await expect(page.getByRole('checkbox', { name: '모두 동의해요(선택 포함)' })).toHaveAttribute(
     'aria-checked',
     'false',
   );
   await noA11yViolations(page);
   await agree.click();
 
-  await expect(
-    page.getByRole('heading', { name: '2분이면 우리의 첫 목표가 생겨요' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
   expect(signup).toMatchObject({
     p_provider: 'kakao',
     p_notify_email: 'chanwoo@mail.com',
@@ -99,7 +100,8 @@ test('다른 소셜로 가입된 계정이면 막고 가입한 방법을 알려 
   await page.goto('/auth/callback?code=e2e-code');
   await expect(page.getByText('이미 카카오로 가입한 이메일이에요')).toBeVisible();
   // 카카오 버튼은 노란색 그대로, 안내는 그 버튼 위 말풍선
-  const kakao = page.getByRole('button', { name: /카카오로 3초 만에 시작하기/ });
+  const kakao = page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true });
+  await expect(kakao).toHaveAccessibleDescription('이미 카카오로 가입한 이메일이에요');
   await expect(kakao).toHaveClass(/hg-btn--kakao/);
   await expect(kakao.locator('.hg-auth__bubble')).toHaveText('이미 카카오로 가입한 이메일이에요');
 });
@@ -111,12 +113,27 @@ test('제공자 화면에서 취소하면 A-02에 안내', async ({ page }) => {
   await expect(page.getByText('로그인을 취소했어요')).toBeVisible();
 });
 
-test('데스크톱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다', async ({ page }) => {
+test('앱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다', async ({ page }) => {
   await mockSupabase(page);
-  await page.goto('/auth/callback?from=desktop&state=s1&code=c1');
+  await page.goto('/auth/callback?from=app&state=s1&code=c1');
   await expect(page.getByRole('heading', { name: '로그인을 마쳤어요' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'sweeTwo 열기' })).toHaveAttribute(
     'href',
     'sweetwo://auth/callback?state=s1&code=c1',
   );
+});
+
+// 2026-11-10 워드마크는 번들 안 data: URL이라 네트워크가 끊겨도 보임(전에는 깨진 이미지에 “sweeTwo” 글자)
+test('A-02 오프라인: 워드마크가 네트워크 없이 보임', async ({ page, context }) => {
+  await mockSupabase(page);
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: '시작하기' })).toBeVisible();
+  await context.setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await page.getByRole('button', { name: '시작하기' }).click();
+  await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
+  const mark = page.getByRole('img', { name: 'sweeTwo' }).first();
+  await expect(mark).toBeVisible();
+  expect(await mark.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+  expect(await mark.getAttribute('src')).toMatch(/^data:image\/svg/);
 });

@@ -1,8 +1,9 @@
 import { dehydrate, hydrate, type QueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
-import type { DesktopBridge } from '../platform';
+import type { AppBridge } from '../platform';
+import { onSessionReset } from './session-reset';
 
-// 오프라인 조회(30 동기화 1·4장): 데스크톱·모바일 앱은 마지막으로 받은 화면 데이터를 기기에 암호화해 두고(브리지 cache),
+// 오프라인 조회(30 동기화 1·4장): 모바일 앱은 마지막으로 받은 화면 데이터를 기기에 암호화해 두고(브리지 cache),
 // 켤 때 먼저 채워서 인터넷이 없어도 볼 수 있게 함. 서버가 원본이라 연결되면 늘 새로 받음.
 // - 저장: 받은 데이터가 바뀌면 3초 모아서 한 번. 성공한 조회만, 서명 주소(사진)처럼 곧 만료되는 것은 뺌
 // - 버전이 다르면(앱 업데이트로 모양이 바뀜) 버리고 서버에서 다시 받음
@@ -14,8 +15,9 @@ const SKIP = new Set(['photo_urls', 'avatars', 'sessions']);
 export const useCacheInfo = create<{ savedAt: string | null; set: (at: string | null) => void }>(
   (set) => ({ savedAt: null, set: (savedAt) => set({ savedAt }) }),
 );
+onSessionReset(() => useCacheInfo.getState().set(null));
 
-export async function restoreCache(qc: QueryClient, bridge: DesktopBridge | undefined) {
+export async function restoreCache(qc: QueryClient, bridge: AppBridge | undefined) {
   if (!bridge?.cache) return;
   try {
     const text = await bridge.cache.load();
@@ -29,7 +31,7 @@ export async function restoreCache(qc: QueryClient, bridge: DesktopBridge | unde
   }
 }
 
-export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefined) {
+export function startCacheSaver(qc: QueryClient, bridge: AppBridge | undefined) {
   const cache = bridge?.cache;
   if (!cache) return () => undefined;
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -43,7 +45,7 @@ export function startCacheSaver(qc: QueryClient, bridge: DesktopBridge | undefin
       useCacheInfo.getState().set(null);
     }
   });
-  // 부부 공간이 바뀌면(연결 해제 확정, 합류, 계정 삭제 뒤 새 공간) 예전 공간 데이터를 기기에서 지움(31 보안·개인정보 4장).
+  // 우리 둘 공간이 바뀌면(연결 해제 확정, 합류, 계정 삭제 뒤 새 공간) 예전 공간 데이터를 기기에서 지움(31 보안·개인정보 4장).
   // 그 뒤 저장에는 바뀐 다음에 받은 것만 넣음
   let spaceId: string | null | undefined = (
     qc.getQueryData<{ space_id?: string | null }>(['me']) ?? undefined

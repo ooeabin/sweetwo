@@ -16,12 +16,23 @@ import {
   type LoanRate,
   type TermsVersionRow,
 } from '@sweetwo/api';
-import { KIND_NAME_GROUPS, addDays, assetGroup, daysBetween, todayKst } from '@sweetwo/core';
-import { Badge, Button, DataTable, Tabs } from '@sweetwo/ui';
+import {
+  KIND_NAME_GROUPS,
+  addDays,
+  assetGroup,
+  daysBetween,
+  formatKstDateTime,
+  todayKst,
+} from '@sweetwo/core';
+import { Badge, DataTable, SectionHeader, Status, Tabs } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
+import { decisionTone } from '../tones';
 import { Frame } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
 
 type Tab = 'guides' | 'terms' | 'data';
@@ -31,8 +42,10 @@ type Tab = 'guides' | 'terms' | 'data';
 // 운영이 쓰고, 약관 버전은 최고 관리자 승인.
 export function AD14Content() {
   const me = useAdmin();
-  const canEdit = me.roles.includes('ops');
-  const [tab, setTab] = useState<Tab>('guides');
+  const canEdit = me.roles.includes('ops') || me.roles.includes('super');
+  // 대시보드 경보에서 오면 계산·기준 데이터 탭
+  const from = (useLocation().state as { tab?: Tab } | null)?.tab;
+  const [tab, setTab] = useState<Tab>(from ?? 'guides');
   return (
     <Frame menu="content" title={ops.contentTitle}>
       <Tabs<Tab>
@@ -58,7 +71,7 @@ function Guides({ canEdit }: { canEdit: boolean }) {
     effective: today,
     checked: today,
   });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const add = async () => {
     setMsg(null);
     try {
@@ -77,7 +90,9 @@ function Guides({ canEdit }: { canEdit: boolean }) {
     <div className="hg-admin__grid">
       <DataTable<ContentVersion>
         label={ops.tabs.guides}
+        empty={copy.noRows}
         rows={q.data ?? []}
+        loading={q.isLoading}
         rowKey={(r) => r.id}
         columns={[
           { key: 'kind', label: ops.versionCols.kind, render: (r) => ops.guideKinds[r.kind] },
@@ -135,8 +150,7 @@ function Guides({ canEdit }: { canEdit: boolean }) {
             value={f.checked}
             onChange={(v) => setF({ ...f, checked: v })}
           />
-          {msg && <p className="hg-help is-error">{msg}</p>}
-          <Button variant="primary" disabled={!f.key || !f.version} onClick={() => void add()}>
+          <Button variant="primary" disabled={!f.key || !f.version} onAct={() => add()}>
             {ops.addVersion}
           </Button>
         </section>
@@ -154,7 +168,7 @@ function Terms({ canEdit }: { canEdit: boolean }) {
     reconsent: false,
     legal: false,
   });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const add = async () => {
     setMsg(null);
     try {
@@ -179,7 +193,9 @@ function Terms({ canEdit }: { canEdit: boolean }) {
     <div className="hg-admin__grid">
       <DataTable<TermsVersionRow>
         label={ops.tabs.terms}
+        empty={copy.noRows}
         rows={q.data ?? []}
+        loading={q.isLoading}
         rowKey={(r) => r.id}
         columns={[
           { key: 'kind', label: ops.termsCols.kind, render: (r) => ops.termsKinds[r.kind] },
@@ -196,7 +212,13 @@ function Terms({ canEdit }: { canEdit: boolean }) {
             num: true,
             render: (r) => r.agreed.toLocaleString('ko-KR'),
           },
-          { key: 's', label: ops.termsCols.status, render: (r) => ops.termsStatus[r.status] },
+          {
+            key: 's',
+            label: ops.termsCols.status,
+            render: (r) => (
+              <Status tone={decisionTone[r.status] ?? 'off'}>{ops.termsStatus[r.status]}</Status>
+            ),
+          },
         ]}
       />
       {canEdit && (
@@ -243,12 +265,7 @@ function Terms({ canEdit }: { canEdit: boolean }) {
             />
             {ops.legalChecked}
           </label>
-          {msg && (
-            <p className="hg-help" role="status">
-              {msg}
-            </p>
-          )}
-          <Button variant="primary" disabled={!f.version || !f.legal} onClick={() => void add()}>
+          <Button variant="primary" disabled={!f.version || !f.legal} onAct={() => add()}>
             {ops.requestApproval}
           </Button>
         </section>
@@ -261,17 +278,19 @@ function RefData({ canEdit }: { canEdit: boolean }) {
   const rates = useQuery({ queryKey: ['admin', 'loan-rates'], queryFn: fetchLoanRates });
   const hol = useQuery({ queryKey: ['admin', 'holidays'], queryFn: fetchHolidays });
   const [edit, setEdit] = useState<Record<string, string>>({});
+  // 적용일(27 AD-19): 기본 오늘, 바꿀 수 있음
+  const [applied, setApplied] = useState(todayKst());
   const [h, setH] = useState({
     date: '',
     name: '',
     kind: 'temporary' as 'holiday' | 'substitute' | 'temporary',
   });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const saveRate = async (r: LoanRate) => {
     const v = Math.round(Number(edit[r.kind]) * 100);
     if (!Number.isFinite(v)) return;
     try {
-      await adminSetLoanRate(r.kind, v, todayKst());
+      await adminSetLoanRate(r.kind, v, applied);
       setEdit((x) => ({ ...x, [r.kind]: '' }));
       void rates.refetch();
     } catch {
@@ -283,7 +302,9 @@ function RefData({ canEdit }: { canEdit: boolean }) {
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <DataTable<LoanRate>
         label={ops.loanTitle}
+        empty={copy.noRows}
         rows={rates.data ?? []}
+        loading={rates.isLoading}
         rowKey={(r) => r.kind}
         columns={[
           { key: 'kind', label: ops.loanCols.kind, render: (r) => ops.loanKinds[r.kind] },
@@ -310,7 +331,7 @@ function RefData({ canEdit }: { canEdit: boolean }) {
                     variant="secondary"
                     size="sm"
                     disabled={!edit[r.kind]}
-                    onClick={() => void saveRate(r)}
+                    onAct={() => saveRate(r)}
                   >
                     {ops.save}
                   </Button>
@@ -320,12 +341,31 @@ function RefData({ canEdit }: { canEdit: boolean }) {
               ),
           },
           { key: 'applied', label: ops.loanCols.applied, render: (r) => r.applied_on },
+          {
+            key: 'updated',
+            label: ops.loanCols.updated,
+            render: (r) => formatKstDateTime(r.updated_at).slice(0, 10),
+          },
         ]}
       />
+      {canEdit && (
+        <label className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+          <span className="hg-card__meta">{ops.loanAppliedPick}</span>
+          <input
+            className="hg-input"
+            type="date"
+            style={{ width: 'auto' }}
+            value={applied}
+            onChange={(e) => setApplied(e.target.value)}
+          />
+        </label>
+      )}
       <div className="hg-admin__grid">
         <DataTable
           label={ops.holidayTitle}
-          rows={(hol.data ?? []).filter((x) => x.date >= todayKst())}
+          empty={copy.noRows}
+          loading={hol.isLoading}
+          rows={(hol.data ?? []).filter((x) => x.date >= `${todayKst().slice(0, 4)}-01-01`)}
           rowKey={(x) => x.date}
           columns={[
             { key: 'date', label: ops.date, render: (x) => x.date },
@@ -343,8 +383,8 @@ function RefData({ canEdit }: { canEdit: boolean }) {
                   <Button
                     variant="link"
                     size="sm"
-                    onClick={() =>
-                      void adminSetHoliday(x.date, x.name, x.kind as 'holiday', true).then(() =>
+                    onAct={() =>
+                      adminSetHoliday(x.date, x.name, x.kind as 'holiday', true).then(() =>
                         hol.refetch(),
                       )
                     }
@@ -378,12 +418,11 @@ function RefData({ canEdit }: { canEdit: boolean }) {
                 ))}
               </select>
             </label>
-            {msg && <p className="hg-help is-error">{msg}</p>}
             <Button
               variant="primary"
               disabled={!h.date || !h.name.trim()}
-              onClick={() =>
-                void adminSetHoliday(h.date, h.name, h.kind).then(
+              onAct={() =>
+                adminSetHoliday(h.date, h.name, h.kind).then(
                   () => hol.refetch(),
                   () => setMsg(copy.failed),
                 )
@@ -406,7 +445,7 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
   const q = useQuery({ queryKey: ['admin', 'kind-names'], queryFn: fetchAssetKindNames });
   const [edit, setEdit] = useState<Record<string, { name?: string; hidden?: boolean }>>({});
   const [add, setAdd] = useState({ grp: 'deposit', base: 'term_deposit', name: '' });
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
   const rows = q.data ?? [];
   const baseKinds = (grp: string) =>
     (assetGroup(grp)?.kinds ?? []).filter((k) => k.key !== 'other');
@@ -451,81 +490,82 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
   return (
     <section className="hg-stack" aria-label={ops.kindTitle}>
       <span className="hg-card__label">{ops.kindTitle}</span>
-      <p className="hg-help">{ops.kindHelp}</p>
-      {msg && <p className="hg-help is-error">{msg}</p>}
       {KIND_NAME_GROUPS.map((grp) => (
-        <DataTable<KindRow>
-          key={grp}
-          label={assetGroup(grp)?.name ?? grp}
-          rows={list(grp)}
-          rowKey={(x) => x.key}
-          columns={[
-            {
-              key: 'name',
-              label: ops.kindCols.name,
-              render: (x) =>
-                canEdit ? (
+        <div key={grp} className="hg-stack">
+          <SectionHeader title={assetGroup(grp)?.name ?? grp} count={list(grp).length} />
+          <DataTable<KindRow>
+            label={assetGroup(grp)?.name ?? grp}
+            empty={copy.noRows}
+            rows={list(grp)}
+            rowKey={(x) => x.key}
+            columns={[
+              {
+                key: 'name',
+                label: ops.kindCols.name,
+                render: (x) =>
+                  canEdit ? (
+                    <input
+                      className="hg-input"
+                      aria-label={`${assetGroup(grp)?.name ?? grp} ${nameOf(x) || ops.kindCols.name}`}
+                      value={nameOf(x)}
+                      maxLength={20}
+                      onChange={(e) =>
+                        setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], name: e.target.value } }))
+                      }
+                    />
+                  ) : (
+                    nameOf(x)
+                  ),
+              },
+              {
+                key: 'base',
+                label: ops.kindCols.base,
+                render: (x) => (x.added ? baseName(grp, x.base) : ops.kindDefault),
+              },
+              {
+                key: 'hidden',
+                label: ops.kindCols.hidden,
+                render: (x) => (
                   <input
-                    className="hg-input"
-                    aria-label={`${assetGroup(grp)?.name ?? grp} ${nameOf(x) || ops.kindCols.name}`}
-                    value={nameOf(x)}
-                    maxLength={20}
+                    type="checkbox"
+                    aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
+                    checked={hiddenOf(x)}
+                    disabled={!canEdit}
                     onChange={(e) =>
-                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], name: e.target.value } }))
+                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
                     }
                   />
-                ) : (
-                  nameOf(x)
                 ),
-            },
-            {
-              key: 'base',
-              label: ops.kindCols.base,
-              render: (x) => (x.added ? baseName(grp, x.base) : ops.kindDefault),
-            },
-            {
-              key: 'hidden',
-              label: ops.kindCols.hidden,
-              render: (x) => (
-                <input
-                  type="checkbox"
-                  aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
-                  checked={hiddenOf(x)}
-                  disabled={!canEdit}
-                  onChange={(e) =>
-                    setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
-                  }
-                />
-              ),
-            },
-            {
-              key: 'act',
-              label: '',
-              render: (x) =>
-                canEdit && (
-                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={!nameOf(x).trim() || edit[x.key] === undefined}
-                      onClick={() => void save(x)}
-                    >
-                      {ops.save}
-                    </Button>
-                    {x.row && (
+              },
+              {
+                key: 'act',
+                label: '',
+                render: (x) =>
+                  canEdit && (
+                    <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
                       <Button
-                        variant="link"
+                        variant="secondary"
                         size="sm"
-                        onClick={() => void run(adminDeleteKindName(x.row?.id ?? ''))}
+                        disabled={!nameOf(x).trim() || edit[x.key] === undefined}
+                        onAct={() => save(x)}
                       >
-                        {x.added ? ops.remove : ops.kindReset}
+                        {ops.save}
                       </Button>
-                    )}
-                  </span>
-                ),
-            },
-          ]}
-        />
+                      {x.row && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onAct={() => run(adminDeleteKindName(x.row?.id ?? ''))}
+                        >
+                          {x.added ? ops.remove : ops.kindReset}
+                        </Button>
+                      )}
+                    </span>
+                  ),
+              },
+            ]}
+          />
+        </div>
       ))}
       {canEdit && (
         <section className="hg-card hg-stack" aria-label={ops.kindAdd} style={{ maxWidth: 520 }}>
@@ -571,8 +611,8 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
           <Button
             variant="primary"
             disabled={!add.name.trim() || add.name.trim().length > 20}
-            onClick={() =>
-              void run(
+            onAct={() =>
+              run(
                 adminSaveKindName({ ...add, added: true, hidden: false }).then(() =>
                   setAdd({ ...add, name: '' }),
                 ),

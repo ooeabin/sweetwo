@@ -1,4 +1,4 @@
-import { fetchInquiries, qk } from '@sweetwo/api';
+import { fetchInquiries, fetchLatestInvite, qk } from '@sweetwo/api';
 import { notiPrefs } from '@sweetwo/core';
 import { Badge, ListRow, Toggle } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -9,20 +9,18 @@ import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
-import { useWidgetSettings } from '../widget-settings';
+import { inviteStateOf } from '../invite-state';
 import { PersonDot } from '../../../shared/person';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
-// 오른쪽 회색 요약 값(공개 범위, 알림 채널, 앱 잠금(데스크톱), 가이드 진행), 앱 정보 줄에 버전 + 확인 요청 배지(관리자 열람 요청이 있을 때만 → S-19a).
-// 공개 범위 줄은 배우자 미합류·혼자 쓰기면 숨김, 위젯 줄은 데스크톱만.
+// 오른쪽 회색 요약 값(공개 범위, 알림 채널, 앱 잠금(모바일 앱), 가이드 진행), 앱 정보 줄에 버전 + 확인 요청 배지(관리자 열람 요청이 있을 때만 → S-19a).
+// 공개 범위 줄은 파트너 미합류·혼자 쓰기면 숨김.
 export function S10Settings() {
   const nav = useNavigate();
   const d = useSettingsData();
   const ck = useChecklist(d.space);
-  const widget = useWidgetSettings();
   const mask = useMask();
   const platform = detectPlatform();
-  const desktop = platform === 'desktop';
   const app = isApp(platform);
   const lock = useQuery({
     queryKey: ['lock-status'],
@@ -30,12 +28,24 @@ export function S10Settings() {
     enabled: app,
   });
   const inquiries = useQuery({ queryKey: qk.inquiries, queryFn: fetchInquiries });
+  const invite = useQuery({
+    queryKey: qk.latestInvite,
+    queryFn: fetchLatestInvite,
+    enabled: d.space?.couple_state === 'not_joined',
+  });
   const asking = (inquiries.data ?? []).filter((q) =>
     q.access_request.some((a) => a.status === 'requested'),
   ).length;
   if (d.loading || !d.me || !d.c) return <LoadingFrame current={null} />;
   const c = d.c;
   const state = d.space?.couple_state ?? 'not_joined';
+  // 미합류는 초대 전 / 초대 중 / 합류하는 중 / 초대 만료로 나눔(2026-11-11 S3-18)
+  const stateValue =
+    state === 'connected'
+      ? copy.state.connected(c.partnerName)
+      : state === 'not_joined'
+        ? copy.inviteState(inviteStateOf(invite.data ?? null))
+        : copy.state[state];
   const prefs = notiPrefs(d.me.noti_prefs);
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
@@ -55,7 +65,7 @@ export function S10Settings() {
         />
         <ListRow
           label={copy.rows.couple}
-          value={state === 'connected' ? copy.state.connected(c.partnerName) : copy.state[state]}
+          value={stateValue}
           onClick={() => nav('/settings/couple')}
         />
       </div>
@@ -116,13 +126,6 @@ export function S10Settings() {
           value={app ? (window.sweetwo?.appVersion ?? '') : undefined}
           onClick={() => nav(asking ? '/settings/help/inquiries' : '/settings/about')}
         />
-        {desktop && (
-          <ListRow
-            label={copy.rows.widget}
-            sub={widget.settings?.tray === false ? copy.widgetTrayOff : copy.widgetTrayOn}
-            onClick={() => nav('/settings/widget')}
-          />
-        )}
       </div>
     </div>
   );

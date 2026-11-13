@@ -1,7 +1,7 @@
 -- pgTAP: 어드민 기본(AD-01~06·17). 찬우(사용자), 관리자 cs01(CS), 관리자 boss(최고), 사용자 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(27);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -12,7 +12,7 @@ insert into auth.identities (provider_id, user_id, identity_data, provider) valu
   ('kakao-c', '11111111-1111-1111-1111-111111111111', '{}', 'kakao'),
   ('google-k', '33333333-3333-3333-3333-333333333333', '{}', 'google');
 create function pg_temp.login_as(uid uuid, aal text default 'aal1') returns void language sql as $$
-  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal)::text, true);
+  select set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated', 'aal', aal, 'amr', json_build_array(json_build_object('method', 'totp', 'timestamp', extract(epoch from now())::bigint)))::text, true);
 $$;
 
 -- 찬우: 가입 + 문의
@@ -44,12 +44,18 @@ reset role;
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
 select is((public.admin_dashboard()->'inquiries'->>'received')::int, 1, '미처리 문의 집계');
+select is((public.admin_dashboard()->'members'->>'joined_today')::int, 1, '오늘 가입 집계');
+select is(jsonb_array_length(public.admin_dashboard()->'trend'), 7, '최근 7일 추이 7칸');
+select is(public.admin_dashboard()->'recent'->'inquiries'->0->>'no', current_setting('test.no'), '최근 문의(번호만, 본문 없음)');
+select ok(not (public.admin_dashboard()->'recent'->'inquiries'->0 ? 'body'), '최근 문의에 본문 없음');
 select results_eq($$ select email_masked, couple_state from public.admin_search('chanwoo@example.com') $$,
   $$ values ('cha***@example.com', 'not_joined') $$, '이메일 정확히 일치, 가림');
 select is((select count(*)::int from public.admin_search('chanwoo')), 0, '부분 일치 없음');
 select is((select count(*)::int from public.admin_search(current_setting('test.no'))), 1, '문의 번호로 찾기');
 select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'email_masked', 'cha***@example.com', '상세 L0');
 select ok(not (public.admin_user_detail('11111111-1111-1111-1111-111111111111') ? 'monthly_income'), '상세에 금액 없음');
+select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'salary_mode', 'separate', '상세에 월급 관리 방식');
+select is(jsonb_typeof(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->'devices'), 'array', '상세에 기기 목록');
 select throws_ok($$ select public.admin_reveal('11111111-1111-1111-1111-111111111111', '', 'A-1', array['email']) $$,
   '22023', 'reason_required', 'L1은 사유와 문의 번호');
 select is(public.admin_reveal('11111111-1111-1111-1111-111111111111', '본인 확인', current_setting('test.no'), array['email'])->>'email',
@@ -62,18 +68,19 @@ select is((select count(*)::int from public.notification where kind = 'inquiry_a
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
 -- L2 요청 → 사용자 알림, 동의 전에는 못 봄
-select set_config('test.access', public.admin_request_access(current_setting('test.qid')::uuid, array['income_spend'], false, '계산 확인')::text, true);
+select set_config('test.access', public.admin_request_access(current_setting('test.qid')::uuid, array['assets'], false, '계산 확인')::text, true);
 select throws_ok(format($$ select public.admin_access_data(%L) $$, current_setting('test.access')), '42501', 'not_allowed', '동의 전에는 못 봄');
 reset role;
 -- 찬우 동의 → cs01 구간으로 봄
-update public.app_user set monthly_income = 3500000 where id = '11111111-1111-1111-1111-111111111111';
+insert into public.asset (space_id, side, grp, kind, name, amount, owner)
+  select space_id, 'asset', 'cash', 'bank', '공동 적금', 3500000, 'joint' from public.app_user where id = '11111111-1111-1111-1111-111111111111';
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.answer_access_request(current_setting('test.access')::uuid, true);
 reset role;
 select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
 set local role authenticated;
-select is(public.admin_access_data(current_setting('test.access')::uuid)->'income_spend'->>'monthly_income', '300만~1,000만 원', '금액은 구간');
+select is(public.admin_access_data(current_setting('test.access')::uuid)->'assets'->0->>'amount', '300만~1,000만 원', '금액은 구간');
 select results_eq($$ select array_agg(distinct action order by action) from public.admin_audit_rows() $$,
   $$ values (array['execute', 'request', 'reveal', 'search', 'view']) $$, '본인 기록(검색, 조회, 열람, 요청, 실행)');
 reset role;
@@ -85,6 +92,14 @@ select public.admin_me();
 select throws_ok($$ select public.admin_request_access(current_setting('test.qid')::uuid, array['goals'], false, 'x') $$,
   '42501', 'no_permission', '최고 관리자는 L2 직접 요청 안 함');
 select is((select count(*)::int from public.admin_audit_rows()), (select count(*)::int from public.admin_audit_rows(p_admin => 'cs01@sweetwo.kr')), '최고 관리자는 다른 관리자 기록도');
+reset role;
+
+-- 분석 역할은 최근 활동(문의, 감사 로그) 없음
+reset role;
+update public.admin_user set roles = array['analyst']::public.admin_role[] where email = 'cs01@sweetwo.kr';
+select pg_temp.login_as('aaaaaaaa-0000-0000-0000-000000000001', 'aal2');
+set local role authenticated;
+select is(public.admin_dashboard()->'recent'->'inquiries', 'null'::jsonb, '분석 역할은 최근 문의 없음');
 reset role;
 
 select * from finish();

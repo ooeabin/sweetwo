@@ -9,8 +9,6 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    env:
-      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -51,8 +49,6 @@ jobs:
 
   e2e-web:
     runs-on: ubuntu-latest
-    env:
-      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -75,35 +71,19 @@ jobs:
 
   mobile-android:
     runs-on: ubuntu-latest
-    env:
-      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: 21 }
+        with: { distribution: temurin, java-version: 21, cache: gradle }
       - run: pnpm install --frozen-lockfile
       - name: 화면 묶음 → Android 프로젝트(cap sync)
         run: pnpm --filter @sweetwo/mobile build && pnpm --filter @sweetwo/mobile exec cap sync android
       - name: Android 디버그 빌드
         working-directory: apps/mobile/android
         run: ./gradlew assembleDebug --no-daemon
-
-  e2e-desktop:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      # 캐시에서 되살린 electron에 실행 파일이 빠져 있으면 다시 받음(‘Electron failed to install correctly’)
-      - name: Electron 실행 파일 확인
-        run: test -f apps/desktop/node_modules/electron/path.txt || node apps/desktop/node_modules/electron/install.js
-      - run: pnpm --filter @sweetwo/desktop build
-      - run: xvfb-run -a pnpm --filter @sweetwo/desktop e2e
 
   db:
     runs-on: ubuntu-latest
@@ -115,7 +95,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: '1' }
       - name: 로컬 Supabase 시작(마이그레이션 + seed)
         run: pnpm supabase start -x studio,imgproxy,vector,logflare,edge-runtime
       - name: pgTAP(RLS, DB 함수)

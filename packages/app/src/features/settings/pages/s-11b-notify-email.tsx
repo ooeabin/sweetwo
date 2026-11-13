@@ -1,10 +1,10 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { NotifyEmail } from '@sweetwo/core';
+import { EMAIL_MAX, NotifyEmail } from '@sweetwo/core';
 import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -32,7 +32,7 @@ export function S11bNotifyEmail() {
         try {
           await updateMe({ notify_email: parsed.data });
           await qc.invalidateQueries({ queryKey: qk.me });
-          toast(copy.saved);
+          carryToast(copy.saved);
           nav('/settings/me', { replace: true });
         } catch {
           toast(copy.failed);
@@ -45,6 +45,9 @@ export function S11bNotifyEmail() {
         label={copy.notifyEmail}
         type="email"
         autoComplete="email"
+        autoCapitalize="none"
+        spellCheck={false}
+        maxLength={EMAIL_MAX}
         value={v}
         onChange={(e) => setValue(e.target.value)}
         error={v.trim() && !parsed.success ? copy.emailError : undefined}

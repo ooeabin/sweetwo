@@ -1,4 +1,5 @@
 import {
+  AdminError,
   adminAddReview,
   adminRequestUser,
   adminSetLock,
@@ -7,18 +8,21 @@ import {
   type AdminUserRow,
 } from '@sweetwo/api';
 import { formatKstDateTime, type AdminRole } from '@sweetwo/core';
-import { Button, Chip, DataTable } from '@sweetwo/ui';
+import { Chip, DataTable, Status } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Button } from '../act';
 import { copy, ops } from '../copy';
 import { Frame, NoPermission } from '../frame';
+import { useToast } from '../toast';
 import { useAdmin } from '../gate';
+import { useReauth } from '../reauth';
 import { SysTabs } from '../sys-tabs';
 
 const ROLES: AdminRole[] = ['super', 'ops', 'cs', 'analyst'];
 
 // AD-18 관리자 계정(최고 관리자만): 표(ID, 역할, 마지막 접속, 2단계 인증, 잠금), 관리자 추가·역할 바꾸기(승인 요청),
-// 잠금·풀기(본인 불가, 90일 미접속은 자동 잠금), 분기 점검 기록. 최고 관리자는 2명 이상 유지.
+// 잠금·풀기(본인 불가, 90일 미접속은 자동 잠금), 분기 점검 기록. 최고 관리자는 1명 이상 유지.
 export function AD18Admins() {
   const me = useAdmin();
   const list = useQuery({
@@ -37,7 +41,8 @@ export function AD18Admins() {
     roles: ['cs'],
   });
   const [note, setNote] = useState('');
-  const [msg, setMsg] = useState<string | null>(null);
+  const setMsg = useToast();
+  const reauth = useReauth();
   if (!me.roles.includes('super')) return <NoPermission />;
   const run = async (p: Promise<unknown>, ok: string) => {
     setMsg(null);
@@ -46,8 +51,14 @@ export function AD18Admins() {
       setMsg(ok);
       void list.refetch();
       void reviews.refetch();
-    } catch {
-      setMsg(copy.failed);
+    } catch (e) {
+      setMsg(
+        e instanceof AdminError && e.code === 'reauth_cancelled'
+          ? null
+          : e instanceof AdminError && e.code === 'super_min'
+            ? ops.superMin
+            : copy.failed,
+      );
     }
   };
   const toggle = (r: AdminRole) =>
@@ -58,16 +69,13 @@ export function AD18Admins() {
   return (
     <Frame menu="system" title={ops.systemTitle}>
       <SysTabs current="admins" />
-      {msg && (
-        <p className="hg-help" role="status">
-          {msg}
-        </p>
-      )}
       <div className="hg-admin__grid">
         <div className="hg-admin__col">
           <DataTable<AdminUserRow>
             label={ops.sysTabs.admins}
+            empty={copy.noRows}
             rows={list.data ?? []}
+            loading={list.isLoading}
             rowKey={(u) => u.email}
             columns={[
               { key: 'email', label: ops.adminCols.email, render: (u) => u.email },
@@ -91,28 +99,38 @@ export function AD18Admins() {
               {
                 key: 'lock',
                 label: ops.adminCols.locked,
-                render: (u) =>
-                  u.email === me.email ? (
-                    u.locked ? (
-                      ops.yes
+                render: (u) => (
+                  <span className="hg-row" style={{ gap: 'var(--space-3)' }}>
+                    {u.locked ? (
+                      <Status tone="bad">{ops.adminCols.locked}</Status>
                     ) : (
-                      ops.no
-                    )
-                  ) : (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={() => void run(adminSetLock(u.email, !u.locked), ops.saved)}
-                    >
-                      {u.locked ? ops.unlock : ops.lock}
-                    </Button>
-                  ),
+                      <Status tone="off">{ops.no}</Status>
+                    )}
+                    {u.email !== me.email && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onAct={() =>
+                          run(
+                            reauth(() => adminSetLock(u.email, !u.locked)),
+                            ops.saved,
+                          )
+                        }
+                      >
+                        {u.locked ? ops.unlock : ops.lock}
+                      </Button>
+                    )}
+                  </span>
+                ),
               },
             ]}
           />
+          <span className="hg-card__label">{ops.review}</span>
           <DataTable
             label={ops.review}
+            empty={copy.noRows}
             rows={reviews.data ?? []}
+            loading={reviews.isLoading}
             rowKey={(r) => r.at}
             columns={[
               { key: 'at', label: copy.auditCols.at, render: (r) => formatKstDateTime(r.at) },
@@ -156,9 +174,7 @@ export function AD18Admins() {
             <Button
               variant="primary"
               disabled={!f.email.includes('@') || !f.name.trim() || !f.roles.length}
-              onClick={() =>
-                void run(adminRequestUser(f.email, f.name, f.roles), ops.requestedApproval)
-              }
+              onAct={() => run(adminRequestUser(f.email, f.name, f.roles), ops.requestedApproval)}
             >
               {ops.requestApproval}
             </Button>
@@ -176,7 +192,7 @@ export function AD18Admins() {
             <Button
               variant="secondary"
               disabled={!note.trim()}
-              onClick={() => void run(adminAddReview(note), ops.saved)}
+              onAct={() => run(adminAddReview(note), ops.saved)}
             >
               {ops.addReview}
             </Button>

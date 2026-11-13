@@ -1,16 +1,18 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { mockRealtime } from './realtime-mock';
+import { setWheel } from './wheel';
 
-/** 추가 입구(2026-11-03): 넓은 창은 제목 줄 버튼, 좁은 창은 + 버튼 */
+/** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
   page
     .getByRole('button', { name, exact: true })
-    .or(page.locator('.hg-fab'))
+    .or(page.locator('.hg-addrow'))
     .locator('visible=true')
     .first();
 
-// 우리 자산 F-01 한눈에, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
+// 자산 관리 F-01 요약, F-02 자산·부채, F-03 추가, F-04 상세(docs/spec/23-assets.md). 찬우, 예빈 합류.
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -176,7 +178,7 @@ function seed(db: MemDb, joined = true) {
   });
 }
 
-test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
+test('요약: 순자산(원금 기준)과 예상, 지난달 대비, 합계(재기획: 이번 달 카드·계획·정산 요약 없음)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -184,15 +186,23 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(�
   seed(db);
 
   await page.goto('/');
-  await page.getByRole('link', { name: '우리 자산' }).filter({ visible: true }).first().click();
+  // 넓은 창은 사이드바 탭, 좁은 창은 홈 자산 관리 타일(2026-11-09 하단 탭 막대 없앰)
+  await page
+    .getByRole('link', { name: '자산 관리' })
+    .or(page.getByRole('button', { name: /^자산 관리/ }))
+    .locator('visible=true')
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/assets$/);
-  // 자산(원금 기준) 3 + 8 + 2 + 배우자 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
-  const nw = page.getByRole('region', { name: '우리 순자산' });
+  // 자산(원금 기준) 3 + 8 + 2 + 파트너 합계만 400 = 1,700만, 부채 100만 → 순자산 1,600만
+  const nw = page.getByRole('region', { name: '순자산', exact: true });
   await expect(nw).toContainText('1,600만 원');
   await expect(nw).toContainText('지난달보다 180만 원 늘었어요');
   // 예상 순자산과 안 판 수익은 목록 한 줄(2026-11-03)
   await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText('1,840만 원');
-  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText('안 판 수익 +240만 원 포함');
+  await expect(page.locator('.hg-listrow', { hasText: '예상 순자산' })).toContainText(
+    '안 판 수익 +240만 원 포함',
+  );
   await expect(page.getByRole('button', { name: /^자산\s*1,940만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^부채\s*100만 원/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /이번 달 계획/ })).toHaveCount(0);
@@ -204,7 +214,7 @@ test('한눈에: 순자산(원금 기준)과 예상, 지난달 대비, 합계(�
   await expect(page.getByRole('button', { name: /신용대출/ })).toContainText('금액이 맞나요?');
 });
 
-test('한눈에: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 값)', async ({ page }) => {
+test('요약: 달마다 순자산 막대(최근 6달, 이번 달만 진하게 + 값)', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -255,7 +265,14 @@ test('한눈에: 달마다 순자산 막대(최근 6달, 이번 달만 진하게
   await page.goto('/assets');
   const bars = page.getByRole('img', { name: '달마다 순자산, 2026년 10월 1,600만 원' });
   await expect(bars).toBeVisible();
-  await expect(bars.locator('.hg-mbars__col small')).toHaveText(['5월', '6월', '7월', '8월', '9월', '10월']);
+  await expect(bars.locator('.hg-mbars__col small')).toHaveText([
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+  ]);
   await expect(bars.locator('.hg-mbars__col.is-now')).toContainText('1,600만');
   await axe(page);
 });
@@ -315,7 +332,7 @@ test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범위, 금액 수정, 삭제 되돌리기', async ({
+test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범위, 금액 수정, 삭제 되돌리기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -334,7 +351,7 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
   await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('공동');
   await axe(page);
 
-  // 배우자 명의는 볼 수만
+  // 파트너 명의는 볼 수만
   await page.getByRole('button', { name: /예빈 적금/ }).click();
   await expect(page.getByText('예빈님 항목이라 볼 수만 있어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '시세 바꾸기' })).toHaveCount(0);
@@ -342,18 +359,18 @@ test('자산·부채 목록 → 상세: 묶음, 배우자 합계만, 공개 범�
 
   await page.goto('/assets/a2');
   await heading(page, '내 주식');
-  await expect(page.getByRole('region', { name: '금액' })).toContainText(
-    '+200만 원, 원금 800만 원',
-  );
-  // 고친 기록은 직접 고친 것만(23 F-04 5번)
-  await expect(page.getByRole('region', { name: '고친 기록' })).not.toContainText('월말 정리');
+  // 7번 안 판 수익 “+200만 원(+25%)” / “원금 800만 원”(2026-11-12 S8-13)
+  await expect(page.getByRole('region', { name: '금액' })).toContainText('+200만 원(+25%)');
+  await expect(page.getByRole('region', { name: '금액' })).toContainText('원금 800만 원');
+  // 수정 내역은 직접 고친 것만(23 F-04 5번)
+  await expect(page.getByRole('region', { name: '수정 내역' })).not.toContainText('월말 정리');
   await axe(page);
   await page.getByRole('button', { name: '시세 바꾸기' }).click();
   await page.getByRole('textbox', { name: '금액' }).fill('12000000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('저장했어요')).toBeVisible();
   expect(db.assets.find((a) => a.id === 'a2')?.amount).toBe(12_000_000);
-  await expect(page.getByRole('region', { name: '고친 기록' })).toContainText('1,200만 원');
+  await expect(page.getByRole('region', { name: '수정 내역' })).toContainText('1,200만 원');
 
   await page.getByRole('button', { name: /공개 범위/ }).click();
   await page.getByRole('radio', { name: /숨기기/ }).click();
@@ -406,10 +423,10 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await page.getByLabel('현재 금액은 얼마예요?').fill('1200000');
   await page.getByRole('button', { name: '다음' }).click();
   await heading(page, '누구 명의예요?');
-  // 합류 뒤에는 배우자 명의 새로 만들기 없음
+  // 합류 뒤에는 파트너 명의 새로 만들기 없음
   await expect(page.getByRole('radio', { name: /예빈/ })).toHaveCount(0);
   await page.getByRole('radio', { name: /^나/ }).click();
-  await heading(page, '배우자에게 공개할까요?');
+  await heading(page, '파트너에게 공개할까요?');
   await expect(page.getByRole('radio', { name: /금액만 보여 주기/ })).toHaveAttribute(
     'aria-checked',
     'true',
@@ -482,7 +499,7 @@ test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기�
   await expect(page.getByLabel('이름을 정해주세요')).toHaveValue('청년도약계좌');
 });
 
-test('추가(합류 전): 배우자 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
+test('추가(합류 전): 파트너 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -603,7 +620,7 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   await expect(page.getByRole('region', { name: '금액' })).toContainText('350만 원');
 });
 
-test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈에도 같은 줄', async ({
+test('자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 → 순위 저장 → 이번 달 봄, 홈은 자산 관리 타일 “상위 n%”', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -625,7 +642,9 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await expect(page.getByText('전체 가구 중앙값')).toBeVisible();
   await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
   await expect(page.getByText('30대 가구 중앙값')).toBeVisible();
-  await expect(page.getByText(/30대 가구 (중간보다 .+ 많아요|가운데 중간보다 아래예요)/)).toBeVisible();
+  await expect(
+    page.getByText(/30대 가구 (중간보다 .+ 많아요|가운데 중간보다 아래예요)/),
+  ).toBeVisible();
   await expect(page.getByText(/^상위 \d+%까지$/)).toBeVisible();
   await expect(page.getByText(/남았어요$/)).toBeVisible();
   await expect(page.getByText(/\d+월(보다 .+(올랐어요|내려갔어요)|과 같아요)/)).toBeVisible(); // 지난달 기록이 있음
@@ -645,8 +664,15 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await expect(seen).not.toContainText('광고');
   await expect(seen).toContainText('10월 기준, 자세히 보기');
 
+  // 홈(2026-11-11): 순위 줄 대신 자산 관리 타일 오른쪽 위 “상위 n%”
   await page.goto('/');
-  await expect(page.getByRole('button', { name: new RegExp(`우리 자산 상위 ${pct}%예요`) })).toBeVisible();
+  await expect(page.getByRole('button', { name: /우리 자산 상위/ })).toHaveCount(0);
+  const tile = page.getByRole('button', {
+    name: new RegExp(`^자산 관리, 순자산 .+, 상위 ${pct}%$`),
+  });
+  await expect(tile.locator('.hg-hubtile__badge')).toHaveText(`상위 ${pct}%`);
+  await tile.click();
+  await expect(page).toHaveURL(/\/assets$/);
 
   // 순자산이 바뀌면 지난번 값 + 새로 확인하기(광고)
   db.me.rank_net = 1;
@@ -656,7 +682,7 @@ test('우리 자산 순위(F-01 0번, F-08, H-01 1a): 안 봄 → 확인하기 �
   await expect(stale).toContainText('광고');
 });
 
-test('우리 자산 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
+test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -669,8 +695,247 @@ test('우리 자산 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   await expect(page.getByRole('heading', { name: '무엇부터 적어 볼까요?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '갚을 돈도 있나요?' })).toBeVisible();
   await axe(page);
-  await page.getByRole('group', { name: '무엇부터 적어 볼까요?' }).getByRole('button', { name: '예금·적금' }).click();
+  await page
+    .getByRole('group', { name: '무엇부터 적어 볼까요?' })
+    .getByRole('button', { name: '예금·적금' })
+    .click();
   await heading(page, '무엇을 추가할까요?');
   await expect(page.getByRole('button', { name: '예금·적금', pressed: true })).toBeVisible();
   await expect(page.getByRole('button', { name: '적금', exact: true })).toBeVisible();
+});
+
+test('자산 순위(F-08): 출생연도가 없으면 ‘출생연도 알려 주기’ → S-11i(휠을 움직여야 저장) → F-08 연령대 비교(2026-11-10 온보딩 O-13 뺌)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.me.birth_year = null;
+  if (db.partner) Object.assign(db.partner, { birth_year: null });
+  await page.goto('/assets/rank');
+  await expect(page.getByText(/상위 \d+%예요/).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /가구와 비교/ })).toHaveCount(0);
+  const ask = page.getByRole('button', { name: /출생연도 알려 주기/ });
+  await expect(ask).toContainText('또래와 비교해 드려요');
+  await axe(page);
+  await ask.click();
+  await expect(page).toHaveURL(/\/settings\/me\/birth-year\?from=rank$/);
+  await expect(page.getByRole('heading', { name: '찬우님은 몇 년생이에요?' })).toBeVisible();
+  // 처음 위치(올해 − 30)가 그대로 답이 되지 않게: 움직이기 전에는 저장 못 함
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/assets\/rank$/);
+  expect(db.me.birth_year).toBe(1993);
+  await expect(page.getByRole('heading', { name: '30대 가구와 비교' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /출생연도 알려 주기/ })).toHaveCount(0);
+});
+
+// ── QA 8구간(2026-11-12) ────────────────────────────────────────────────
+
+test('F-04 저장 Toast ‘되돌리기’: 고치기 전 금액으로(S8-05), 처음 값은 수정 내역에 없음(D3)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.assetHistory.push({
+    id: 9,
+    asset_id: 'a1',
+    amount: 3_000_000,
+    source: 'created',
+    recorded_at: '2026-09-01T00:00:00Z',
+  });
+  await page.goto('/assets/a1');
+  await heading(page, '생활비 통장');
+  await expect(page.getByRole('region', { name: '수정 내역' })).toContainText(
+    '아직 수정 내역이 없어요',
+  );
+  await page.getByRole('button', { name: '금액 고치기' }).click();
+  await page.getByRole('textbox', { name: '금액' }).fill('3500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('저장했어요')).toBeVisible();
+  expect(db.assets.find((a) => a.id === 'a1')?.amount).toBe(3_500_000);
+  await page.getByRole('button', { name: '되돌리기' }).click();
+  await expect.poll(() => db.assets.find((a) => a.id === 'a1')?.amount).toBe(3_000_000);
+  await expect(page.getByRole('region', { name: '금액', exact: true })).toContainText('300만 원');
+});
+
+test('F-04 저장 실패: “저장하지 못했어요” + 원래 값, 권한 밖(0행)은 “볼 수만 있어요”(S8-16)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  let mode: 'fail' | 'none' = 'fail';
+  await page.route('**/rest/v1/asset?*', async (route) => {
+    if (route.request().method() !== 'PATCH') return route.fallback();
+    if (mode === 'fail') return route.fulfill({ status: 500, body: '{}' });
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '[]',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    });
+  });
+  await page.goto('/assets/a1');
+  await heading(page, '생활비 통장');
+  await page.getByRole('button', { name: '금액 고치기' }).click();
+  await page.getByRole('textbox', { name: '금액' }).fill('3500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('저장하지 못했어요')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: '금액' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: '금액', exact: true })).toContainText('300만 원');
+  mode = 'none';
+  await page.getByRole('button', { name: '금액 고치기' }).click();
+  await page.getByRole('textbox', { name: '금액' }).fill('3500000');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('예빈님 항목이라 볼 수만 있어요')).toBeVisible();
+  expect(db.assets.find((a) => a.id === 'a1')?.amount).toBe(3_000_000);
+});
+
+test('합계가 999억을 넘으면 “999억+”(S8-02): 요약, 목록, 홈 타일이 멈추지 않음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const me = String(db.me.id);
+  for (const id of ['big1', 'big2'])
+    db.assets.push(
+      asset({
+        id,
+        side: 'asset',
+        grp: 'real_estate',
+        kind: 'house',
+        name: id === 'big1' ? '빌딩' : '땅',
+        amount: 90_000_000_000,
+        owner_user_id: me,
+        created_by: me,
+      }),
+    );
+  await page.goto('/assets');
+  await expect(page.getByRole('region', { name: '순자산', exact: true })).toContainText('999억+');
+  await page.goto('/assets/items');
+  await expect(page.getByRole('tab', { name: '자산 999억+' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '부동산' })).toContainText('999억+');
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: /^자산 관리/ })).toContainText('999억+');
+});
+
+test('F-02 못 불러옴: 오류 카드 + 다시 시도(S8-04), 숨김 항목은 묶음 합계에서 빠짐(S8-09)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const me = String(db.me.id);
+  db.assets.push(
+    asset({
+      id: 'p1',
+      side: 'asset',
+      grp: 'cash',
+      kind: 'cash',
+      name: '비상금',
+      amount: 700_000,
+      owner_user_id: me,
+      visibility: 'private',
+      created_by: me,
+    }),
+  );
+  let fail = true;
+  await page.route('**/rest/v1/asset?*', (route) =>
+    fail && route.request().method() === 'GET'
+      ? route.fulfill({ status: 500, body: '{}' })
+      : route.fallback(),
+  );
+  await page.goto('/assets/items');
+  await expect(page.getByText('잠시 문제가 생겼어요. 다시 시도해 주세요')).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole('tab', { name: '자산', exact: true })).toBeVisible();
+  await expect(page.getByRole('group', { name: '정렬' })).toHaveCount(0);
+  fail = false;
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  const cash = page.getByRole('region', { name: '현금성' });
+  await expect(cash.getByRole('button', { name: /비상금/ })).toContainText('숨김');
+  // 묶음 머리 합계 = 생활비 통장 300만(숨김 70만 빼고)
+  await expect(cash.locator('.hg-sechead')).toContainText('300만 원');
+  await axe(page);
+});
+
+test('Realtime: 상대가 공동 자산을 고치면 목록이 바로 바뀜(S8-06)', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const rt = await mockRealtime(page);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/assets/items');
+  await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('300만 원');
+  await expect.poll(() => rt.subscribed('asset')).toBeGreaterThan(0);
+  const a1 = db.assets.find((a) => a.id === 'a1');
+  if (a1) a1.amount = 4_200_000;
+  rt.emit('asset', 'UPDATE', { id: 'a1', space_id: 'space-1' });
+  await expect(page.getByRole('button', { name: /생활비 통장/ })).toContainText('420만 원');
+});
+
+test('마지막 본 하위 탭으로 들어감(S8-10), 넓은 창 ‘+ 추가’는 보조 버튼(S8-11)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/assets/items');
+  await expect(page.getByRole('tab', { name: /^자산 / })).toBeVisible();
+  const add = page.locator('.hg-wide-only.hg-btn');
+  if (await add.isVisible()) await expect(add).toHaveClass(/hg-btn--secondary/);
+  await page.goto('/');
+  await page
+    .getByRole('link', { name: '자산 관리' })
+    .or(page.getByRole('button', { name: /^자산 관리/ }))
+    .locator('visible=true')
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/assets\/items/);
+});
+
+test('금리는 0~30% 소수 1자리(D5, F-03g와 F-04 같음), 보증금은 팔기 없음(S8-15)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db, false);
+  const me = String(db.me.id);
+  db.assets.push(
+    asset({
+      id: 'dep',
+      side: 'asset',
+      grp: 'real_estate',
+      kind: 'deposit_money',
+      name: '전세 보증금',
+      amount: 200_000_000,
+      principal: 200_000_000,
+      owner_user_id: me,
+      created_by: me,
+    }),
+  );
+  await page.goto('/assets/dep/sold');
+  await expect(page).toHaveURL(/\/assets$/);
+
+  await page.goto('/assets/new?side=debt');
+  await page.getByRole('button', { name: '신용' }).click();
+  await page.getByRole('button', { name: '신용대출' }).click();
+  await page.getByLabel('이름을 정해주세요').fill('카드 대출');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('남은 대출금은 얼마예요?').fill('5000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '나' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '금리는 몇 %예요?');
+  await page.getByLabel('금리는 몇 %예요?').fill('30.5');
+  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await page.getByLabel('금리는 몇 %예요?').fill('4.25');
+  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
+  await expect(page.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
 });

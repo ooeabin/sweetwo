@@ -5,7 +5,9 @@ import {
   AdminMe,
   AdminReveal,
   AdminUserDetail,
+  NoticeAudience,
   type AdminRole,
+  type NoticeTarget,
   type Json,
   type Tables,
 } from '@sweetwo/core';
@@ -41,6 +43,11 @@ const KNOWN = [
   'legal_check_required',
   'bad_value',
   'self_lock',
+  'reauth_required',
+  'super_min',
+  'no_audience',
+  'too_many',
+  'bad_target',
   // 로그인 링크(Supabase Auth 오류 코드)
   'over_email_send_rate_limit',
   'email_address_not_authorized',
@@ -189,11 +196,7 @@ export async function fetchAdminAccessData(accessId: string): Promise<AdminAcces
   return AdminAccessData.parse(data);
 }
 export type AdminAction =
-  | 'sign_out_all'
-  | 'delete_request'
-  | 'rights_access'
-  | 'rights_fix'
-  | 'rights_delete';
+  'sign_out_all' | 'delete_request' | 'rights_access' | 'rights_fix' | 'rights_delete';
 export async function adminAccountAction(
   id: string,
   action: AdminAction,
@@ -354,6 +357,44 @@ export async function adminSaveNotice(n: {
   fail(error);
   return data as string;
 }
+/** 대상 조건(커플 상태, 앱 버전, 가입 주차). 초안·승인 대기만, 약관 개정은 빈 조건만 */
+export async function adminSetNoticeTarget(id: string, target: NoticeTarget) {
+  const { error } = await supabase().rpc('admin_set_notice_target', {
+    p_id: id,
+    p_target: target as Json,
+  });
+  fail(error);
+}
+/** 대상 수(숫자만). 조건을 바꿀 때마다 다시 셈 */
+export async function fetchNoticeAudience(a: {
+  kind: string;
+  platforms: string[];
+  target: NoticeTarget;
+  email: boolean;
+}): Promise<NoticeAudience> {
+  const { data, error } = await supabase().rpc('admin_notice_audience', {
+    p_kind: a.kind,
+    p_platforms: a.platforms,
+    p_target: a.target as Json,
+    p_email: a.email,
+  });
+  fail(error);
+  return NoticeAudience.parse(data);
+}
+/** 초안 → 승인 요청(대상 0명이면 서버가 no_audience) */
+export async function adminRequestNotice(id: string) {
+  const { error } = await supabase().rpc('admin_request_notice', { p_id: id });
+  fail(error);
+}
+/** 테스트 발송: 메일 공지(약관 개정·장애 고지)를 내 관리자 메일로만 */
+export async function adminTestNoticeMail(n: { kind: string; title: string; body: string }) {
+  const { error } = await supabase().rpc('admin_test_notice_mail', {
+    p_kind: n.kind,
+    p_title: n.title,
+    p_body: n.body,
+  });
+  fail(error);
+}
 export async function adminEndNotice(id: string) {
   const { error } = await supabase().rpc('admin_end_notice', { p_id: id });
   fail(error);
@@ -417,17 +458,16 @@ export async function adminAddTermsVersion(v: {
 }
 
 // ── AD-16 앱 버전·점검 ───────────────────────────────────────────────
+// 데스크톱 열(min_version_desktop, latest_version_desktop)은 DB에 남았지만 쓰지 않음(ADR 0008)
 export type AppConfigRow = {
-  min_version_desktop: string;
   min_version_web: string;
   min_version_ios: string;
   min_version_android: string;
-  latest_version_desktop: string;
   maintenance_starts_at: string | null;
   maintenance_ends_at: string | null;
   maintenance_message: string | null;
   /** 지금 최소 지원 버전보다 낮은 기기 수(90일 안에 켠 기기). 읽기만 */
-  below_min?: { desktop: number; ios: number; android: number };
+  below_min?: { ios: number; android: number };
 };
 export async function fetchAdminAppConfig(): Promise<AppConfigRow> {
   const { data, error } = await supabase().rpc('admin_app_config');

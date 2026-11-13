@@ -6,9 +6,11 @@ import {
   fetchPartnerAssetSums,
   fetchSpace,
   qk,
+  subscribeAssets,
 } from '@sweetwo/api';
 import { financialPct, netWorth, netWorthSeries, todayKst } from '@sweetwo/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 // 앱 기본 틀 데이터(react-query). 키는 다른 기능과 같은 qk라 캐시를 같이 쓴다.
 export const useMe = () => useQuery({ queryKey: qk.me, queryFn: fetchMe });
@@ -46,3 +48,18 @@ export function useNetWorth(enabled: boolean) {
   };
 }
 export type NetWorthView = NonNullable<ReturnType<typeof useNetWorth>>;
+
+/**
+ * 상대가 자산을 고치면(Realtime asset, 2026-11-12 QA 8구간 S8-06) 자산, 파트너 ‘금액만’ 합계, 월말 순자산을 바로 다시 읽음.
+ * F-01·F-02(AssetsFrame), F-04, 홈에서 한 번
+ */
+export function useAssetRealtime(spaceId: string | null | undefined) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!spaceId) return;
+    return subscribeAssets(spaceId, () => {
+      for (const k of [qk.assets, qk.partnerAssetSums, qk.netWorthHistory])
+        void qc.invalidateQueries({ queryKey: k });
+    });
+  }, [spaceId, qc]);
+}

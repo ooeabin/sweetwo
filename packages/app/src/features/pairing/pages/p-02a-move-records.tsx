@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 
-type Vis = 'all' | 'sum';
+type Vis = 'all' | 'sum' | 'private';
 
 // P-02a 혼자 쓰던 기록 옮기기(18): 월급·월급날, 내 명의 자산·부채(공개 범위 한 번, 기본 금액만 보여 주기)만 옮김.
 // 목표·월급 계획·체크리스트는 안 옮김(원래 공간은 30일 보관 후 지움, 합류 전에 ‘사본 내려받기’ → S-18).
@@ -88,9 +88,11 @@ export function P02aMoveRecords({
             )}
             {/* 2026-11-03 휴대폰 기본 드롭다운 대신: 줄 오른쪽에 공개 범위, 누르면 시트에서 고름 */}
             {mine.map((a) => (
+              // 2026-11-11 S3-26: 금액은 이름 아래 줄(320px에서 금액이 꺾이지 않게)
               <ListRow
                 key={a.id}
-                label={`${a.name} ${readWon(a.amount)}`}
+                label={a.name}
+                sub={readWon(a.amount)}
                 value={copy.moveVis[vis[a.id] ?? 'sum']}
                 onClick={() => setOpen(a.id)}
               />
@@ -106,7 +108,14 @@ export function P02aMoveRecords({
       </List>
       <p className="hg-help" style={{ margin: 0 }}>
         {copy.moveKeep}{' '}
-        <button type="button" className="hg-btn hg-btn--link" onClick={() => nav('/settings/data')}>
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          // 사본을 받고 뒤로 = 이 초대(S3-07). 옮기기 화면은 ‘합류하기’를 다시 눌러 열림
+          onClick={() =>
+            nav('/settings/data', { state: { back: `/i/${code}`, backLabel: copy.join } })
+          }
+        >
           {copy.moveCopy}
         </button>
       </p>
@@ -120,7 +129,9 @@ export function P02aMoveRecords({
             value={vis[open] ?? 'sum'}
             onChange={(v) => setVis({ ...vis, [open]: v })}
             onPick={() => setOpen(null)}
-            options={(['all', 'sum'] as Vis[]).map((v) => ({
+            // 고르는 선택지라 › 대신 동그라미(라디오형, S3-26)
+            go={false}
+            options={(['all', 'sum', 'private'] as Vis[]).map((v) => ({
               value: v,
               label: copy.moveVis[v] ?? v,
             }))}

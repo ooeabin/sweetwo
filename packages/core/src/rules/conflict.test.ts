@@ -11,7 +11,7 @@ const row = (o: Record<string, unknown>) => ({
 });
 
 describe('conflictDecision(30 동기화 2장)', () => {
-  it('배우자가 1분 안에 같은 칸을 다르게 바꿨으면 고르기', () => {
+  it('파트너가 1분 안에 같은 칸을 다르게 바꿨으면 고르기', () => {
     expect(conflictDecision(row({}), { target_amount: 120_000_000 }, 'chanwoo', NOW)).toBe(
       'choose',
     );

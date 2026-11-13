@@ -1,4 +1,4 @@
-import type { Tables } from '@sweetwo/core';
+import { ActiveNotice, NotiRow, parseNotiRows, type NotiCursor } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -7,20 +7,24 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-export type Notification = Tables<'notification'>;
+/** 앱이 쓰는 알림 칸(Zod로 검사한 행, core NotiRow) */
+export type Notification = NotiRow;
 export const NOTI_PAGE = 30;
+const NOTI_COLS = 'id, kind, title, body, target, icon, actor_id, created_at, read_at';
 
-/** 최신순 30개. before = 그보다 오래된 것(더 불러오기) */
-export async function fetchNotifications(before?: string): Promise<Notification[]> {
+/** 최신순(같은 시각이면 id 내림차순) 30개. before = 그 커서보다 뒤(더 불러오기, 같은 시각 알림도 빠지지 않게 S10-13) */
+export async function fetchNotifications(before?: NotiCursor): Promise<Notification[]> {
   let q = supabase()
     .from('notification')
-    .select('*')
+    .select(NOTI_COLS)
     .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(NOTI_PAGE);
-  if (before) q = q.lt('created_at', before);
+  if (before)
+    q = q.or(`created_at.lt."${before.at}",and(created_at.eq."${before.at}",id.lt.${before.id})`);
   const { data, error } = await q;
   fail(error);
-  return data ?? [];
+  return parseNotiRows(data);
 }
 
 /** 읽지 않은 알림이 있는지(종 아이콘 점) */
@@ -51,8 +55,10 @@ export function subscribeNotifications(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'notification', filter: `user_id=eq.${userId}` },
       (p) => {
-        if (p.eventType === 'INSERT') on({ type: 'insert', row: p.new as Notification });
-        else if (p.eventType === 'UPDATE') on({ type: 'update', row: p.new as Notification });
+        const r = NotiRow.safeParse(p.new);
+        if (!r.success) return;
+        if (p.eventType === 'INSERT') on({ type: 'insert', row: r.data });
+        else if (p.eventType === 'UPDATE') on({ type: 'update', row: r.data });
       },
     )
     .subscribe();
@@ -65,35 +71,27 @@ export function subscribeNotifications(
 export async function fetchNotification(id: string): Promise<Notification | null> {
   const { data, error } = await supabase()
     .from('notification')
-    .select('*')
+    .select(NOTI_COLS)
     .eq('id', id)
     .maybeSingle();
   fail(error);
-  return data;
+  const r = NotiRow.safeParse(data);
+  return r.success ? r.data : null;
 }
 
-// ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것만(RLS) ─────────────────────
-export type ActiveNotice = {
-  id: string;
-  kind: string;
-  title: string;
-  body: string;
-  importance: 'normal' | 'must';
-  platforms: string[];
-};
+// ── 앱 안 공지(AD-10): 게시되고 노출 기간 안의 것 중 나에게 맞는 것만 ──────────────
+// 대상 조건(플랫폼, 우리 둘 상태, 앱 버전, 가입 주차)은 서버 my_notices가 봄. 앱 버전은 브리지 값(웹은 없음)
 export async function fetchActiveNotices(
-  platform: 'desktop' | 'ios' | 'android' | 'web',
+  platform: 'ios' | 'android' | 'web',
+  version?: string,
 ): Promise<ActiveNotice[]> {
-  // 공지 대상(AD-10): 데스크톱 앱 / 모바일 앱(iOS·Android) / 웹
-  const target = platform === 'ios' || platform === 'android' ? 'mobile' : platform;
-  const { data, error } = await supabase()
-    .from('notice')
-    .select('id, kind, title, body, importance, platforms')
-    .order('starts_at', { ascending: false });
+  const { data, error } = await supabase().rpc('my_notices', {
+    p_platform: platform,
+    ...(version ? { p_version: version } : {}),
+  });
   if (error) return [];
-  return (data ?? [])
-    .filter((n) => n.platforms.includes(target))
-    .map((n) => ({ ...n, importance: n.importance === 'must' ? 'must' : 'normal' }));
+  const r = ActiveNotice.array().safeParse(data ?? []);
+  return r.success ? r.data : [];
 }
 
 /** 새 기기 로그인 확인(로그인 뒤 한 번): 다른 세션이 있으면 서버가 본인에게 알림 + 메일 */
@@ -106,7 +104,7 @@ export async function noteLogin(): Promise<boolean> {
 /** 앱 기기 기록(AD-16 최소 지원 버전 미만 기기 수): 로그인된 채 켜질 때 설치 ID, 플랫폼, 앱 버전 */
 export async function noteDevice(
   installId: string,
-  platform: 'desktop' | 'ios' | 'android',
+  platform: 'ios' | 'android',
   version: string,
 ): Promise<void> {
   const { error } = await supabase().rpc('note_device', {
@@ -117,7 +115,7 @@ export async function noteDevice(
   if (error) throw new Error(error.message);
 }
 
-/** 데스크톱 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없으면 서버가 알림을 메일로 대신 보냄 */
+/** 앱 접속 신호(켜져 있는 동안 5분마다). 10분 넘게 없고 푸시 기기도 없으면 서버가 월급 전 확인 알림을 메일로 대신 보냄 */
 export async function touchApp(): Promise<void> {
   const { error } = await supabase().rpc('touch_app');
   if (error) throw new Error(error.message);
@@ -172,11 +170,4 @@ export async function registerPushDevice(
 export async function unregisterPushDevice(token: string) {
   const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
   if (error) throw new Error(error.message);
-}
-
-/** 18 ‘합류 뒤’: 데스크톱 앱 받기 링크를 알림 이메일로(하루 한 번) */
-export async function sendDesktopLink(): Promise<boolean> {
-  const { data, error } = await supabase().rpc('send_desktop_link');
-  if (error) throw new Error(error.message);
-  return data === true;
 }

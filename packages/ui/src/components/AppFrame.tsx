@@ -4,13 +4,15 @@ import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 import { Wordmark } from './Wordmark';
 
-// 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 회색 바탕 위 (홈만) 인사 카드 + 두 단 본문.
-// 좁은 창(768px 미만): 머리(홈은 워드마크, 다른 메뉴는 큰 제목 + 아이콘 4개) + 인사 카드 + 하단 탭 막대와 + 버튼.
+// 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 본문(홈·자산 관리는 회색 바탕, tone="alt").
+// 좁은 창(768px 미만, 2026-11-09 GCOO 홈처럼): 하단 탭 막대와 + 버튼 없음. 홈 머리 = 워드마크 + 알림 + ☰(메뉴 서랍),
+// 다른 메뉴 첫 화면 머리 = ‹(홈으로) + 굵은 제목. 서랍(Drawer)은 소비자가 onMenu로 엶.
 
-export type AppTab = 'month' | 'goals' | 'assets' | 'calendar';
+// 2026-11-08 ADR 0007: 목표 탭 자리에 월급 탭(손 위 동전 hand-coins)
+export type AppTab = 'month' | 'salary' | 'assets' | 'calendar';
 const TAB_ICON: Record<AppTab, IconName> = {
   month: 'house',
-  goals: 'target',
+  salary: 'hand-coins',
   assets: 'wallet',
   calendar: 'calendar',
 };
@@ -61,7 +63,7 @@ export interface AppFrameProps {
   };
   /** 다른 메뉴 첫 화면의 제목 줄(제목 24px + 오른쪽 동작). 좁은 창은 머리가 홈과 같아(메뉴 이름은 화면 읽기용) 동작만 */
   page?: { title: ReactNode; actions?: ReactNode };
-  /** 좁은 창 머리의 큰 제목(메뉴 이름) */
+  /** 좁은 창 머리 왼쪽 제목(메뉴 이름, 홈은 워드마크라 화면 읽기용). 탭 막대 이름표로도 씀 */
   narrowTitle: string;
   date: string;
   labels: {
@@ -69,21 +71,25 @@ export interface AppFrameProps {
     mask: string;
     noti: string;
     settings: string;
-    add: string;
+    /** ☰ 버튼 이름(“메뉴”) */
+    menu: string;
+    /** ‹ 버튼 이름(“홈으로”) */
+    home: string;
     me: string;
     /** 숫자 타일 묶음(좁은 창에서 가로로 넘김) */
     stats: string;
-    /** 홈 머리 두 사람을 눌러 초대할 때 이름 */
-    invite?: string;
   };
   masked: boolean;
   onMask: () => void;
   onSearch?: () => void;
   onNoti?: () => void;
   onSettings?: () => void;
-  onAdd?: () => void;
-  /** 홈 머리 두 사람: 배우자가 아직 없으면 눌러서 초대(S-12) */
-  onInvite?: () => void;
+  /** 좁은 창 홈 머리 ☰(메뉴 서랍 열기) */
+  onMenu?: () => void;
+  /** ☰가 연 서랍이 열려 있음(aria-expanded) */
+  menuOpen?: boolean;
+  /** 좁은 창 홈 밖 메뉴 첫 화면 머리 ‹ = 홈으로 */
+  onHome?: () => void;
   hasNewNoti?: boolean;
   people: AppFramePerson[];
   saveState?: string;
@@ -91,12 +97,14 @@ export interface AppFrameProps {
   columns: ReactNode[];
   /** 본문 맨 위 띠(해제 대기 등) */
   banner?: ReactNode;
-  /** 하위 화면(설정 안쪽 등): 좁은 창에서 앱 머리와 탭 막대를 숨기고 본문의 ‘‹ 제목’ 한 줄만(2026-11-03) */
+  /** 하위 화면(설정 안쪽 등): 좁은 창에서 앱 머리를 숨기고 본문의 ‘‹ 제목’ 한 줄만(2026-11-03) */
   sub?: boolean;
+  /** 바탕(2026-11-09): alt = 회색(surface-alt) 바탕 + 테두리·그림자 없는 흰 상자(홈, 자산 관리). 기본은 흰 바탕 */
+  tone?: 'alt';
 }
 
 function Person({ p }: { p: AppFramePerson }) {
-  // 배우자 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음(2026-11-05 그림 파일은 만들지 않음)
+  // 파트너 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음(2026-11-05 그림 파일은 만들지 않음)
   if (p.empty)
     return (
       <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
@@ -141,13 +149,14 @@ function TabLink({
       role="link" // href 없는(아직 없는) 메뉴도 링크로 읽히게
       aria-current={on ? 'page' : undefined}
       aria-disabled={t.disabled || undefined}
+      // 하단 탭 막대는 아이콘만(2026-11-09): 이름은 화면 읽기용(aria-label)
       aria-label={showLabel ? undefined : t.label}
       onClick={(e) => {
         e.preventDefault();
         if (!t.disabled) onTab?.(t.key);
       }}
     >
-      <Icon name={TAB_ICON[t.key]} size={className === 'hg-dock__item' ? 24 : 20} />
+      <Icon name={TAB_ICON[t.key]} size={showLabel ? 20 : 24} />
       {showLabel && t.label}
       {t.badge ? (
         <span className="hg-nav__count" aria-label={t.badgeLabel ?? `${t.badge}`}>
@@ -173,8 +182,9 @@ export function AppFrame(p: AppFrameProps) {
     </>
   );
   const focus = p.today?.focus;
+  const home = p.current === 'month';
   return (
-    <div className={cx('hg-frame', p.sub && 'hg-frame--sub')}>
+    <div className={cx('hg-frame', p.sub && 'hg-frame--sub', p.tone === 'alt' && 'hg-frame--alt')}>
       <aside className="hg-appside">
         <div className="hg-appside__in">
           <span className="hg-appside__logo">
@@ -226,62 +236,58 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리: 모든 화면이 홈과 같음(두 사람 아바타 + 이름, 2026-11-04 머리 공통화). 메뉴 이름은 화면 읽기용 제목으로만 */}
+        {/* 좁은 창 머리(2026-11-09 GCOO 홈처럼). 홈: 왼쪽 워드마크, 오른쪽 알림 + ☰(메뉴 서랍, 설정은 서랍 안).
+            홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹(홈으로) + 메뉴 이름 굵은 제목(h1), 오른쪽 버튼 없음 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
-          {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
-          {(() => {
-            const body = (
+          <div className="hg-mhead__place">
+            {home ? (
               <>
-                {/* 배우자 빈 자리는 기본 그림, 누르면 초대(연결을 계속 권함, 2026-11-03) */}
-                <span className="hg-avatars" aria-hidden="true">
-                  {p.people.map((x) => (
-                    <Person key={x.no} p={x} />
-                  ))}
+                <span className="hg-mhead__logo">
+                  <Wordmark height={24} />
                 </span>
-                <span className="hg-mhead__names">
-                  {p.people
-                    .filter((x) => !x.empty && x.name)
-                    .map((x) => x.name)
-                    .join(', ')}
-                </span>
+                {/* 홈 제목은 제목 줄(today)이 h1. 그것이 없는 홈(합류 대기, 불러오는 중)만 여기서 화면 읽기용 h1 */}
+                {!p.today && <h1 className="hg-sr">{p.narrowTitle}</h1>}
               </>
-            );
-            return p.onInvite && p.people.some((x) => x.empty) ? (
-              <button
-                type="button"
-                className="hg-mhead__people"
-                aria-label={p.labels.invite}
-                onClick={p.onInvite}
-              >
-                {body}
-              </button>
             ) : (
-              <span className="hg-mhead__people">{body}</span>
-            );
-          })()}
-          <IconButton
-            icon="search"
-            label={p.labels.search}
-            ghost
-            disabled={!p.onSearch}
-            onClick={p.onSearch}
-          />
-          {/* 금액 가리기 눈은 좁은 창 머리에서 뺌(설정 S-10, ⌘K, Ctrl+Shift+H, 2026-11-03) */}
-          <IconButton
-            icon="bell"
-            label={p.labels.noti}
-            ghost
-            dot={p.hasNewNoti}
-            disabled={!p.onNoti}
-            onClick={p.onNoti}
-          />
-          <IconButton
-            icon="settings"
-            label={p.labels.settings}
-            ghost
-            disabled={!p.onSettings}
-            onClick={p.onSettings}
-          />
+              <>
+                {p.onHome && (
+                  <IconButton
+                    icon="chevron-left"
+                    label={p.labels.home}
+                    ghost
+                    className="hg-mhead__back hg-back"
+                    onClick={p.onHome}
+                  />
+                )}
+                {p.today ? (
+                  <span className="hg-mhead__title">{p.narrowTitle}</span>
+                ) : (
+                  <h1 className="hg-mhead__title">{p.narrowTitle}</h1>
+                )}
+              </>
+            )}
+          </div>
+          {home && (
+            <>
+              <IconButton
+                icon="bell"
+                label={p.labels.noti}
+                ghost
+                dot={p.hasNewNoti}
+                disabled={!p.onNoti}
+                onClick={p.onNoti}
+              />
+              <IconButton
+                icon="list"
+                label={p.labels.menu}
+                ghost
+                aria-haspopup="dialog"
+                aria-expanded={!!p.menuOpen}
+                disabled={!p.onMenu}
+                onClick={p.onMenu}
+              />
+            </>
+          )}
         </div>
 
         {p.today?.plain ? (
@@ -353,26 +359,6 @@ export function AppFrame(p: AppFrameProps) {
           ))}
         </main>
       </div>
-
-      {/* 좁은 창 하단 탭 막대 + 추가 */}
-      <nav className="hg-dock" aria-label={p.narrowTitle}>
-        {p.tabs.map((t) => (
-          <TabLink
-            key={t.key}
-            t={t}
-            current={p.current}
-            onTab={p.onTab}
-            className="hg-dock__item"
-            activeClass="is-active"
-            showLabel
-          />
-        ))}
-      </nav>
-      {p.onAdd !== undefined && (
-        <button type="button" className="hg-fab" aria-label={p.labels.add} onClick={p.onAdd}>
-          <Icon name="plus" size={24} />
-        </button>
-      )}
     </div>
   );
 }

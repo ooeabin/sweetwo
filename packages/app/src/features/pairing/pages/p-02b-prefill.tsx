@@ -1,21 +1,19 @@
-import { discardPrefill, fetchAssets, qk, recordPrefillConsent } from '@sweetwo/api';
+import { discardPrefill, recordPrefillConsent } from '@sweetwo/api';
 import { readWon } from '@sweetwo/core';
 import { ListRow, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
-import { useQuery } from '@tanstack/react-query';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
 
 // P-02b 사전 입력 확인·동의(18): 시작한 사람이 합류 전에 대신 입력한 내 명의 자산·부채를 처음 보는 화면.
 // ‘확인하고 이어 쓸게요’ = 동의 기록(합류를 마치면 소유가 내게 넘어감) / ‘지우고 새로 입력할게요’ = 그 항목을 휴지통으로.
+// 좁은 창(320px)에서 글자 버튼이 잘리지 않게 줄바꿈(2026-11-11 S3-13, QuestionLayout 글자 버튼 공통)
 export function P02bPrefill() {
   const s = useJoinStep('p-02b');
   const d = s.d;
-  const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
-  if (!d.ready || !d.me || assets.isLoading) return <QuestionSkeleton />;
-  const starter = d.couple?.partnerName ?? '';
-  const items = (assets.data ?? []).filter(
-    (a) => a.owner === 'person' && a.owner_user_id === null && a.created_by !== d.me?.id,
-  );
+  // 합류를 마치기 전이라 자산을 직접 못 읽음: 대신 입력한 내 명의 항목은 join_context로(2026-11-11 D1)
+  if (!d.ready || !d.me || !d.ctx) return <QuestionSkeleton />;
+  const starter = d.starterName;
+  const items = d.ctx.prefill;
   return (
     <QuestionLayout
       title={copy.prefillTitle(starter)}

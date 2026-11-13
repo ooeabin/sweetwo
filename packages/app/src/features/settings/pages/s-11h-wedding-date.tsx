@@ -4,7 +4,7 @@ import { DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sw
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, quietly, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
@@ -81,10 +81,10 @@ export function S11hWeddingDate() {
     try {
       await updateSpace({ marriage_status: status, ...patch });
       await Promise.all([qk.space, qk.careDays].map((k) => qc.invalidateQueries({ queryKey: k })));
-      toast(copy.saved, {
+      carryToast(copy.saved, {
         label: copy.undo,
         onClick: () =>
-          void updateSpace(before).then(() => qc.invalidateQueries({ queryKey: qk.space })),
+          quietly(updateSpace(before).then(() => qc.invalidateQueries({ queryKey: qk.space }))),
       });
       nav('/settings/me', { replace: true });
     } catch {
@@ -130,6 +130,8 @@ export function S11hWeddingDate() {
         minYear={engaged ? Number(today.slice(0, 4)) : 1950}
         maxYear={Number(today.slice(0, 4)) + (engaged ? 5 : 0)}
         onChange={(v) => setDate(textOf(v))}
+        // 2026-11-10 QA 2구간: 처음 넣는 날짜면 처음 값(오늘·내일)이 그대로 답이 되지 않게 휠을 움직여야 저장
+        commitInitial={!!dv}
       />
       {rangeError && (
         <p className="hg-help is-error" role="alert">

@@ -1,4 +1,4 @@
-// 소셜 계정 프로필 사진 받기(2026-11-05, 25 S-11e ‘처음 사진’). 앱이 부부 공간이 생긴 뒤 한 번만 부름.
+// 소셜 계정 프로필 사진 받기(2026-11-05, 25 S-11e ‘처음 사진’). 앱이 우리 둘 공간이 생긴 뒤 한 번만 부름.
 // 1) 앱 사용자 JWT로 Auth에서 내 계정을 읽음(사진 주소는 요청 본문이 아니라 로그인 제공자가 준 identity_data에서만)
 // 2) 카카오·구글이고 사진이 있으면 허용한 주소(googleusercontent.com, kakaocdn.net)에서만 받음
 // 3) 그림이면 바이트를 그대로 돌려줌(supabase-js functions.invoke가 Blob으로 받게 application/octet-stream, 앱이 512px 정사각 JPEG로 다시 그려 EXIF를 없애고 내 저장소에 저장). 없거나 못 받으면 204
@@ -48,7 +48,7 @@ export function pictureUrl(identities: Identity[]): string | null {
   return null;
 }
 
-// 앱(데스크톱, 모바일 웹뷰, 개발 브라우저)에서 바로 부르므로 CORS
+// 앱(모바일 웹뷰, 개발 브라우저)에서 바로 부르므로 CORS
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',

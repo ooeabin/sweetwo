@@ -82,7 +82,15 @@ function Column({
                   : null;
     if (n === null) return;
     e.preventDefault();
+    kbd(true);
     step(n);
+  };
+  // 둘레 링은 키보드로 왔을 때만(2026-11-11): Tab으로 들어오거나 화살표를 누르면 켜고, 손가락·마우스·휠이면 끔
+  const kbd = (on: boolean) => {
+    const el = ref.current;
+    if (!el) return;
+    if (on) el.dataset.kbd = '';
+    else delete el.dataset.kbd;
   };
 
   return (
@@ -98,6 +106,10 @@ function Column({
       aria-valuetext={format ? format(value) : `${value}${unit}`}
       onScroll={onScroll}
       onKeyDown={onKey}
+      onKeyUp={(e) => e.key === 'Tab' && kbd(true)}
+      onPointerDown={() => kbd(false)}
+      onWheel={() => kbd(false)}
+      onBlur={() => kbd(false)}
     >
       {items.map((v) => (
         <div
@@ -132,6 +144,7 @@ export function DateWheel({
   yearOnly,
   yearMonth,
   lunar,
+  commitInitial = true,
 }: {
   label: string;
   value: YMD | null;
@@ -140,18 +153,23 @@ export function DateWheel({
   maxYear: number;
   initial?: YMD;
   className?: string;
-  /** 연도만 1열(O-13, P-03a 출생연도). 값의 월·일은 1 */
+  /** 연도만 1열(S-11i 출생연도). 값의 월·일은 1 */
   yearOnly?: boolean;
   /** 연·월 2열(예정 연·월, 여행 가는 달, 기한). 값의 일은 1 */
   yearMonth?: boolean;
   /** 음력(2026-11-04 Y-07c): 어느 달이든 1~30일(맞는 날인지는 화면이 따로 확인) */
   lunar?: boolean;
+  /**
+   * 처음 값을 바로 답으로 알려 줄지(기본 true). false면 사람이 휠을 움직일 때까지 value가 null로 남음
+   * (2026-11-10 QA 2구간 Q3: 출생연도·결혼한 날을 처음 묻는 자리에서 처음 값이 그대로 답이 되지 않게)
+   */
+  commitInitial?: boolean;
 }) {
   const dim = (y: number, m: number) => (lunar ? 30 : daysIn(y, m));
   const start = initial ?? { y: maxYear - 12, m: 1, d: 1 };
   const v = value ?? start;
   useEffect(() => {
-    if (!value) onChange(start);
+    if (!value && commitInitial) onChange(start);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i);

@@ -1,4 +1,4 @@
--- pgTAP: 체크리스트 완료(S-02). 부부 공유, 완료한 사람, 되돌리기, 직접 쓰기 막음. 찬우, 예빈
+-- pgTAP: 체크리스트 완료(S-02). 커플 공유, 완료한 사람, 되돌리기, 직접 쓰기 막음. 찬우, 예빈
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(5);
@@ -27,7 +27,8 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
-select is((select count(*) from public.checklist_done), 1::bigint, '배우자도 같은 완료를 봄');
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
+select is((select count(*) from public.checklist_done), 1::bigint, '파트너도 같은 완료를 봄');
 select public.set_checklist_done('insurance', false);
 select is((select count(*) from public.checklist_done), 0::bigint, '되돌리기');
 select throws_ok($$ select public.set_checklist_done('Bad Key', true) $$, '22023', 'bad_key', '키 형식');

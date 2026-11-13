@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, useParams, type RouteObject } from 'react-router-dom';
 import {
   A01Launch,
   A02Login,
@@ -24,23 +24,7 @@ import {
   F04aMatured,
   F04bSold,
 } from './features/assets';
-import { TrayWidget } from './features/widget';
 import { DevUiGallery } from './features/dev';
-import {
-  AchieveWatch,
-  G01GoalList,
-  G02GoalDetail,
-  G05Achieved,
-  G05Send,
-  G02GoalEdit,
-  G02pGoalPhoto,
-  G06GoalOrder,
-  G02aGoalMove,
-  G02bGoalUse,
-  GoalAddRoute,
-  GoalFillStart,
-  G03gGoalMonthly,
-} from './features/goals';
 import {
   CalendarHome,
   Y01CareList,
@@ -73,7 +57,6 @@ import {
   S11aNickname,
   S11bNotifyEmail,
   S11ePhoto,
-  S22Widget,
   S01Guides,
   S02ChecklistItem,
   S03Guide,
@@ -88,10 +71,28 @@ import {
 } from './features/settings';
 import { N02Notifications } from './features/notifications';
 import { H01Home } from './features/home';
-import { W01Split, W02Checklist, W02Done, W05Review } from './features/salary';
+import {
+  AchieveWatch,
+  DoneRedirect,
+  SalaryTab,
+  SplitRedirect,
+  W05Review,
+  W10SavingItem,
+  W10aSavingEdit,
+  W11SavingAdd,
+  W12SavingAchieved,
+  W12aSavingAfter,
+  W13SavingList,
+} from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
 import { CS19NotFound, RouteError } from './shared/cs-19-not-found';
+
+/** 옛 목표 상세 주소(/goals/:id…) → 저금 항목 상세(W-10) */
+function GoalRedirect() {
+  const { id = '' } = useParams();
+  return <Navigate to={/^[0-9a-f-]{36}$/.test(id) ? `/salary/items/${id}` : '/salary'} replace />;
+}
 
 // 경로 표. 화면 ID를 주석으로 남긴다. 모든 화면은 A-01(실행 판단) 아래에.
 export const routes: RouteObject[] = [
@@ -112,10 +113,16 @@ export const routes: RouteObject[] = [
       }, // 홈 H-01~06
       ...(
         [
-          ['/salary/split', <W01Split key="w01" />], // W-01 월급 계획
-          ['/salary', <W02Checklist key="w02" />], // W-02 이번 달 월급
-          ['/salary/done', <W02Done key="w02e" />], // W-02 끝
-          ['/salary/review', <W05Review key="w05" />], // W-05 월말 확인
+          ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary?view=plan(2026-11-09)
+          ['/salary', <SalaryTab key="w02" />], // 월급 탭: ‘이번 달’ W-02 / ‘계획’ W-01 영수증(?view=plan)
+          ['/salary/done', <DoneRedirect key="w02e" />], // 옛 W-02 끝(2026-11-12 없앰) → W-02
+          ['/salary/review', <W05Review key="w05" />], // W-05 월급 전 확인
+          ['/salary/items', <W13SavingList key="w13" />], // W-13 저금 목록(2026-11-09 round 3)
+          ['/salary/items/new/:step?', <W11SavingAdd key="w11" />], // W-11a~d 저금 항목 추가
+          ['/salary/items/:id', <W10SavingItem key="w10" />], // W-10 저금 항목 상세
+          ['/salary/items/:id/edit/:field', <W10aSavingEdit key="w10a" />], // W-10a 고치기
+          ['/salary/items/:id/achieved', <W12SavingAchieved key="w12" />], // W-12 달성 축하
+          ['/salary/items/:id/after', <W12aSavingAfter key="w12a" />], // W-12a 달성 뒤
         ] as const
       ).map(([path, el]) => ({
         path,
@@ -125,132 +132,9 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       })),
-      {
-        path: '/goals',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G01GoalList />
-              <AchieveWatch />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-01 목표 목록
-      {
-        path: '/goals/order',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G06GoalOrder />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-06 우선순위 바꾸기
-      {
-        path: '/goals/new/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <GoalAddRoute />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-03a~f 목표 추가
-      {
-        path: '/goals/:id/set-amount',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <GoalFillStart />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 금액 정하기: G-03b → G-03c
-      {
-        path: '/goals/:id/monthly',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G03gGoalMonthly />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-03g 매달 넣는 돈(금액 정하기 끝)
-      {
-        path: '/goals/:id',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02GoalDetail />
-              <AchieveWatch />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02 목표 상세
-      {
-        path: '/goals/:id/achieved',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G05Achieved />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-05 달성 축하
-      {
-        path: '/goals/:id/achieved/send',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G05Send />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-05 보낼 곳
-      {
-        path: '/goals/:id/use',
-        element: <Navigate to=".." relative="path" replace />,
-      }, // 2026-11-04 사용 기록 없앰: 옛 링크는 목표 상세로
-      {
-        path: '/goals/:id/move/:kind?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02aGoalMove />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02a 넣기·빼기, 이미 모은 돈 넣기
-      {
-        path: '/goals/:id/spend',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02bGoalUse />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // G-02b 꺼내 쓰기
-      {
-        path: '/goals/:id/edit/:field',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02GoalEdit />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 목표 수정(금액, 기한, 이름)
-      {
-        path: '/goals/:id/photo',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <G02pGoalPhoto />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 목표 사진 바꾸기(모든 목표, 지정 사진 고르기 + 올리기)
+      // 2026-11-08 목표 탭 없앰(ADR 0007): 옛 주소(알림 링크 등)는 월급 탭으로
+      { path: '/goals', element: <Navigate to="/salary" replace /> },
+      { path: '/goals/:id/*', element: <GoalRedirect /> },
       {
         path: '/assets',
         element: (
@@ -260,7 +144,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-01 우리 자산 한눈에
+      }, // F-01 자산 관리 요약
       {
         path: '/assets/items',
         element: (
@@ -290,7 +174,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-01 챙길 날 목록
+      }, // Y-01 경조사 목록
       {
         path: '/calendar/month',
         element: (
@@ -310,7 +194,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-05 챙길 날 상세
+      }, // Y-05 경조사 상세
       {
         path: '/calendar/day/:id/budget',
         element: (
@@ -340,7 +224,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-09 드린 기록
+      }, // Y-09 선물 기록
       {
         path: '/notifications',
         element: (
@@ -380,7 +264,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-12 부부 정보
+      }, // S-12 우리 둘 정보
       {
         path: '/settings/couple/unlink',
         element: (
@@ -678,16 +562,6 @@ export const routes: RouteObject[] = [
         ),
       }, // S-03 가이드 글
       {
-        path: '/settings/widget/:step?',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <S22Widget />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // S-22 위젯
-      {
         path: '/settings/notifications',
         element: (
           <RequireAccount>
@@ -716,7 +590,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-07 챙길 날 추가
+      }, // Y-07 경조사 추가
       {
         path: '/assets/new/:step?',
         element: (
@@ -736,7 +610,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-08 우리 자산 순위(2026-11-04)
+      }, // F-08 자산 순위(2026-11-04)
       {
         path: '/assets/:id',
         element: (
@@ -768,7 +642,7 @@ export const routes: RouteObject[] = [
         ),
       }, // F-04b~d 팔았어요
       {
-        path: '/onboarding/:screen', // O-10~O-67 온보딩
+        path: '/onboarding/:screen', // O-03~O-60 온보딩(2026-11-10 O-10·O-12·O-13 없앰)
         element: (
           <RequireAccount>
             <OnboardingRoute />
@@ -778,7 +652,7 @@ export const routes: RouteObject[] = [
       { path: '/i', element: <P01CodeEntry /> }, // P-01 코드 직접 입력(O-01 ‘코드 입력하기’)
       { path: '/i/:code', element: <P01JoinStart /> }, // A-07 초대 링크, P-01 합류 시작(로그인 전에도)
       {
-        path: '/join/:screen', // P-02b~P-11 배우자 합류
+        path: '/join/:screen', // P-02b~P-11 파트너 합류
         element: (
           <RequireAccount>
             <JoinRoute />
@@ -793,12 +667,10 @@ export const routes: RouteObject[] = [
       { path: paths.pinSetup, element: <A06LockSetup /> }, // A-06 PIN 정하기
       { path: paths.expired, element: <A08SessionExpired /> }, // A-08 세션 만료
       { path: paths.restore, element: <A02Restore /> }, // A-02 계정 삭제 취소
-      { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 데스크톱 복귀 페이지)
+      { path: paths.callback, element: <AuthCallback /> }, // 소셜 로그인 복귀(웹 콜백, 앱 복귀 페이지)
       { path: '*', element: <CS19NotFound /> }, // 13 공통 상태 19번 없는 주소
     ],
   },
-  // 트레이 위젯 창(데스크톱, 26). 앱 틀·로그인 확인 없이 브리지 값만 그림
-  { path: '/widget/tray', element: <TrayWidget /> },
   // 개발 전용: 컴포넌트 모음. 배포 빌드에서는 import.meta.env.DEV가 false라 빠진다.
   ...(import.meta.env.DEV ? [{ path: '/dev/ui', element: <DevUiGallery /> }] : []),
 ];

@@ -117,7 +117,7 @@ export async function updateSpace(patch: SpacePatch) {
   fail(error);
 }
 
-// 서버 space_goals(): 배우자 내 목표가 ‘금액만 보여 주기’면 이름 대신 “개인 목표”(22 공개, 25 S-13)
+// 서버 space_goals(): 파트너 저금 항목이 ‘금액만 보여 주기’면 이름 대신 “개인 저금”(20 저금 항목, 25 S-13)
 export async function fetchGoals(): Promise<Goal[]> {
   const { data, error } = await supabase()
     .rpc('space_goals')
@@ -127,45 +127,9 @@ export async function fetchGoals(): Promise<Goal[]> {
   return data ?? [];
 }
 
-export async function insertGoals(rows: Omit<GoalInsert, 'space_id'>[]) {
-  if (!rows.length) return;
-  const space_id = await ensureSpace();
-  const { error } = await supabase()
-    .from('goal')
-    .insert(rows.map((r) => ({ ...r, space_id })));
-  fail(error);
-}
-
-/** 목표 하나 추가하고 id(가진 자산 연결용) */
-export async function insertGoal(row: Omit<GoalInsert, 'space_id'>): Promise<string> {
-  const space_id = await ensureSpace();
-  const { data, error } = await supabase()
-    .from('goal')
-    .insert({ ...row, space_id })
-    .select('id')
-    .single();
-  fail(error);
-  return data?.id ?? '';
-}
-
 export async function updateGoal(id: string, patch: TablesUpdate<'goal'>) {
   const { error } = await supabase().from('goal').update(patch).eq('id', id);
   fail(error);
-}
-
-/** 우리 ↔ 내 목표 바꾸기(22 ‘목표 종류’). 상대가 체크한 저금 줄·직접 넣은 돈이 있으면 서버가 막음 */
-export async function setGoalOwner(
-  id: string,
-  owner: string | null,
-  priority: number,
-): Promise<'ok' | 'partner_saved'> {
-  const { error } = await supabase()
-    .from('goal')
-    .update({ owner_user_id: owner, priority })
-    .eq('id', id);
-  if (error?.message?.includes('partner_saved')) return 'partner_saved';
-  fail(error);
-  return 'ok';
 }
 
 /** 휴지통으로(영구 삭제는 30일 뒤 예약 작업) */
@@ -212,7 +176,7 @@ export async function fetchAccounts(): Promise<Account[]> {
   return data ?? [];
 }
 
-// 배우자 프로필(같은 공간 다른 사람). 없으면 null
+// 파트너 프로필(같은 공간 다른 사람). 없으면 null
 export type PartnerProfile = {
   id: string;
   nickname: string | null;
@@ -226,7 +190,7 @@ export type PartnerProfile = {
   /** 다른 수입 월 합계(O-35b) */
   other_income: number;
 };
-/** 배우자 출생연도(우리 자산 순위 연령대 비교, 계산·배분 7-7). 배우자가 없거나 안 적었으면 null */
+/** 파트너 출생연도(자산 순위 연령대 비교, 계산·배분 7-7). 파트너가 없거나 안 적었으면 null */
 export async function fetchPartnerBirthYear(): Promise<number | null> {
   const { data, error } = await supabase().rpc('partner_birth_year');
   fail(error);

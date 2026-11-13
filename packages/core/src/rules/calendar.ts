@@ -1,10 +1,11 @@
 import { addDays, daysBetween } from '../date';
 import { baseDateIn } from '../onboarding/cycle';
 import type { BaseDay } from '../onboarding/cycle';
+import { deadlineDay } from './saving-item';
 
-// 캘린더 돈 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
-// 월급날(주말·공휴일이면 직전 영업일, 부부가 끄면 그대로), 월말 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
-// 목표 기한(한 번 목표, 기한의 달 1일), 매년 목표 쓰는 달(그 달 1일), 자산·대출 만기.
+// 캘린더 금융 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
+// 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
+// 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
 export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity';
 export interface MoneyDate {
@@ -14,6 +15,8 @@ export interface MoneyDate {
   name: string;
   /** 누르면 갈 곳의 id(만기 자산, 목표) */
   ref?: string;
+  /** 월급날의 사람 id(각자 모드 파트너 월급날 → W-02 그 사람 탭, 2026-11-12 QA 9구간 S9-10) */
+  who?: string;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -49,21 +52,21 @@ export function monthGrid(y: number, m: number) {
 
 export interface MoneyInput {
   /** 각자 모드 = 사람마다(이름), 합쳐서 모드 = 체크리스트를 만드는 날 하나(이름 '') */
-  paydays: { name: string; day: BaseDay | null }[];
+  paydays: { name: string; day: BaseDay | null; who?: string }[];
   /** 공휴일 날짜. 월급날 앞당기기에 씀 */
   holidays?: ReadonlySet<string>;
   /** 월급날 주말·공휴일 앞당겨 표시(기본 켜짐) */
   shift?: boolean;
-  /** 월말 확인 기준 월급날(각자 = 내 월급날, 합쳐서 = 공동 사이클 날). 없으면 띠 없음 */
+  /** 월급 전 확인 기준 월급날(각자 = 내 월급날, 합쳐서 = 공동 사이클 날). 없으면 띠 없음 */
   reviewDay: BaseDay | null;
   maturities: { id: string; name: string; date: string }[];
-  /** 한 번 목표 기한(YYYY-MM-DD, 보통 그 달 1일). 진행 중 목표만 넘김 */
+  /** 저금 항목 기한(YYYY-MM-DD, 저장은 그 달 1일). 일정은 그 달 말일. 모으는 중인 것만 넘김 */
   goalDeadlines: { id: string; name: string; date: string }[];
   /** 매년 목표 쓰는 달(기한의 달) */
   yearlyGoals: { id: string; name: string; month: number }[];
 }
 
-/** 그 달(y, m)의 돈 일정과 월말 확인 띠 */
+/** 그 달(y, m)의 금융 일정과 월급 전 확인 띠 */
 export function moneyDates(y: number, m: number, o: MoneyInput) {
   const ym = ymOf(y, m);
   const first = `${ym}-01`;
@@ -77,9 +80,10 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
           : businessDayOnOrBefore(baseDateIn(y, m, p.day), o.holidays),
       kind: 'payday',
       name: p.name,
+      ...(p.who ? { who: p.who } : {}),
     });
   }
-  // 월말 확인: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만
+  // 월급 전 확인: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만
   const bands: { start: string; end: string }[] = [];
   if (o.reviewDay !== null) {
     for (const [yy, mm] of [
@@ -99,7 +103,7 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
       out.push({ date: a.date, kind: 'maturity', name: a.name, ref: a.id });
   for (const g of o.goalDeadlines)
     if (g.date.slice(0, 7) === ym)
-      out.push({ date: g.date, kind: 'deadline', name: g.name, ref: g.id });
+      out.push({ date: deadlineDay(g.date), kind: 'deadline', name: g.name, ref: g.id });
   for (const g of o.yearlyGoals)
     if (g.month === m) out.push({ date: first, kind: 'goal', name: g.name, ref: g.id });
   out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));

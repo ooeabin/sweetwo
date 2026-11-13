@@ -12,7 +12,7 @@ import { LoadFailed } from '../load-failed';
 import { CHECKLIST, guidesPath, useChecklist } from '../guides';
 
 // S-02 체크리스트 항목(25 S-02): 제목·설명(3줄 이내), 해야 할 일 단계, 출처(공식 사이트)·확인일, 완료자 표시, 관련 기능 링크.
-// 이번 달 할 일에서 열면(?from=todo) “완료했어요”. 완료는 부부 공유.
+// 이번 달 할 일에서 열면(?from=todo) “완료했어요”. 완료는 두 사람 공유.
 export function S02ChecklistItem() {
   const { key = '' } = useParams();
   const [params] = useSearchParams();
@@ -20,7 +20,7 @@ export function S02ChecklistItem() {
   const qc = useQueryClient();
   const d = useSettingsData();
   const ck = useChecklist(d.space);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState<boolean | null>(null);
   const item = CHECKLIST.flatMap((s) => s.items).find((i) => i.key === key);
   if (!item) return <Navigate to={guidesPath} replace />;
   if (d.failed || ck.failed)
@@ -38,8 +38,8 @@ export function S02ChecklistItem() {
   const who = done ? (done.done_by === d.me?.id ? d.c.myName : d.c.partnerName) : null;
   const back = () => nav(fromTodo ? '/' : guidesPath);
   const toggle = async (v: boolean) => {
-    if (saving) return;
-    setSaving(true);
+    if (saving !== null) return;
+    setSaving(v);
     try {
       await setChecklistDone(key, v);
       await qc.invalidateQueries({ queryKey: qk.checklistDone });
@@ -47,7 +47,7 @@ export function S02ChecklistItem() {
     } catch {
       toast(copy.failed);
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
   const body = (
@@ -98,11 +98,11 @@ export function S02ChecklistItem() {
       )}
       {fromTodo &&
         (done ? (
-          <Button variant="secondary" disabled={saving} onClick={() => void toggle(false)}>
+          <Button variant="secondary" loading={saving === false} onClick={() => void toggle(false)}>
             {copy.undo}
           </Button>
         ) : (
-          <Button variant="primary" disabled={saving} onClick={() => void toggle(true)}>
+          <Button variant="primary" loading={saving === true} onClick={() => void toggle(true)}>
             {copy.markDone}
           </Button>
         ))}

@@ -125,16 +125,26 @@ describe('기록할 회차, 7일 지남', () => {
     expect(prevCareDate(w, '2026-09-19')).toBeNull();
     expect(overdueDate(w, '2026-10-07', none)).toBe('2026-09-20');
   });
+  it('한 번인 날을 기록하면 더는 기록할 날도 지난 날도 아님(S9-01)', () => {
+    const w = { ...mom, date_rule: 'once' as const, once_on: '2026-09-20' };
+    const done = (d: string) => d === '2026-09-20';
+    expect(recordDate(w, '2026-10-07', done)).toBeNull();
+    expect(overdueDate(w, '2026-10-07', done)).toBeNull();
+    // 그날(오늘) 기록해도 다시 ‘다녀왔어요’ 회차가 아님
+    expect(recordDate(w, '2026-09-20', done)).toBeNull();
+    // 60일이 넘은 뒤에도 기록 없이 다시 지난 날로 돌아오지 않음
+    expect(recordDate(w, '2026-12-31', done)).toBeNull();
+  });
 });
 
 describe('작년에도 드렸어요', () => {
   const rec = [{ care_day_id: 'm', gift_name: '안마기', occurs_on: '2025-10-14' }];
-  it('같은 챙길 날, 같은 선물, 2년 안', () => {
+  it('같은 경조사, 같은 선물, 2년 안', () => {
     expect(
       giftRepeated(rec, { care_day_id: 'm', gift_name: ' 안마기 ', occurs_on: '2026-10-14' }),
     ).toBe(true);
   });
-  it('다른 챙길 날, 다른 선물, 2년 넘음, 같은 날은 아님', () => {
+  it('다른 경조사, 다른 선물, 2년 넘음, 같은 날은 아님', () => {
     expect(
       giftRepeated(rec, { care_day_id: 'x', gift_name: '안마기', occurs_on: '2026-10-14' }),
     ).toBe(false);

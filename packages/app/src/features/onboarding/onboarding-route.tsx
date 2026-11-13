@@ -1,42 +1,30 @@
-import { QuestionLayout } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { track } from '../../shared/analytics';
-import { copy } from './copy';
 import { isJoinScreen } from '../pairing';
-import { useMe } from './data';
+import { useMe, useSpace } from './data';
+import { current, FIRST } from './flow';
 import { O03MyNickname } from './pages/o-03-my-nickname';
 import { O06InviteNow } from './pages/o-06-invite-now';
 import { O07InviteCode } from './pages/o-07-invite-code';
-import { O10Overview } from './pages/o-10-overview';
 import { O11Marriage } from './pages/o-11-marriage';
-import { O12WeddingDate } from './pages/o-12-wedding-date';
-import { O13BirthYear } from './pages/o-13-birth-year';
-import { O21Goals } from './pages/o-21-goals';
 import { O30SalaryMode } from './pages/o-30-salary-mode';
 import { O31Salary } from './pages/o-31-salary';
 import { O32Payday } from './pages/o-32-payday';
 import { O60Ready } from './pages/o-60-ready';
 
 // /onboarding/:screen → 화면 파일. 화면 id = 기획서 화면 ID(소문자).
+// 2026-11-10 QA 2구간: O-10·O-12·O-13을 뺌(옛 주소와 멈춘 기록은 flow.ts current로 옮김)
 const SCREENS: Record<string, () => ReactNode> = {
-  'o-10': () => <O10Overview />,
   'o-03': () => <O03MyNickname />,
   'o-06': () => <O06InviteNow />,
   'o-07': () => <O07InviteCode />,
   'o-11': () => <O11Marriage />,
-  'o-12': () => <O12WeddingDate />,
-  'o-13': () => <O13BirthYear />,
-  'o-21': () => <O21Goals />,
   'o-30': () => <O30SalaryMode />,
   'o-31': () => <O31Salary />,
   'o-32': () => <O32Payday />,
   'o-60': () => <O60Ready />,
 };
-
-// 온보딩에서 뺀 화면(2026-11-02, ADR 0004·0005)에 멈춰 있던 사람: O-23·O-24 → O-30, O-50·O-60 → O-31
-const RETIRED = /^o-23-\d+$|^o-24$|^o-50$/;
-const current = (id: string) => (RETIRED.test(id) ? (id === 'o-50' ? 'o-31' : 'o-30') : id);
 
 export const isOnboardingScreen = (id: string) => current(id) in SCREENS;
 
@@ -59,27 +47,37 @@ const hoursSinceSeen = () => {
 };
 
 export function OnboardingRoute() {
-  const { screen = 'o-10' } = useParams();
+  const { screen = FIRST } = useParams();
+  const me = useMe();
   markSeen();
-  if (RETIRED.test(screen)) return <Navigate to={`/onboarding/${current(screen)}`} replace />;
+  // 온보딩을 마친 뒤 뒤로(하드웨어 뒤로, 웹뷰 기록)로 돌아오면 홈으로(2026-11-10 S2-01: 끝난 온보딩 화면을 다시 열지 않음)
+  if (me.data?.onboarding_done_at) return <Navigate to="/" replace />;
+  if (current(screen) !== screen) return <Navigate to={`/onboarding/${current(screen)}`} replace />;
   const render = SCREENS[screen];
-  return render ? <div key={screen}>{render()}</div> : <Navigate to="/onboarding/o-10" replace />;
+  return render ? (
+    <div key={screen}>{render()}</div>
+  ) : (
+    <Navigate to={`/onboarding/${FIRST}`} replace />
+  );
 }
 
-// 이번 실행에서 이미 물었는지(앱을 다시 열 때만 한 번)
-let asked = false;
+// 이번 실행에서 이어하기를 이미 기록했는지(앱을 다시 열 때만 한 번)
+let resumed = false;
 
 /**
- * 온보딩을 마치지 않았으면 멈춘 화면으로(이어하기). 모르는 화면 ID면 그대로 둔다.
- * 앱을 다시 열어 첫 화면(O-10)이 아닌 곳에 멈춰 있으면 먼저 “이어서 할까요?”(16·12) → 멈춘 화면부터
+ * 온보딩을 마치지 않았으면 가장 멀리 간 화면으로 바로(이어하기, 2026-11-10 Q4: “이어서 할까요?” 질문 화면은 없앰).
+ * 파트너가 이미 합류했으면 초대(O-06·O-07)는 건너뛰고 O-11로. 모르는 화면 ID면 그대로 둔다
  */
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
-  const nav = useNavigate();
+  const space = useSpace();
   // 모든 화면을 감싸는 문이라 뼈대 없이(어느 화면 모양인지 모름, 보통 A-01에서 이미 불러옴)
   if (me.isLoading) return null;
-  const step = current(me.data?.onboarding_step?.toLowerCase() ?? 'o-10');
+  let step = current(me.data?.onboarding_step ?? FIRST);
   const open = !!me.data && !me.data.onboarding_done_at;
+  if (open && isOnboardingScreen(step) && space.isLoading) return null;
+  if ((step === 'o-06' || step === 'o-07') && space.data?.couple_state === 'connected')
+    step = 'o-11';
   const to =
     open && isOnboardingScreen(step)
       ? `/onboarding/${step}`
@@ -87,21 +85,12 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
         ? `/join/${step}`
         : null;
   if (!to) return <>{children}</>;
-  // 합류 중(P-)은 묻지 않고 그 화면부터(18 ‘이어서’)
-  if (step === 'o-10' || asked || !isOnboardingScreen(step)) return <Navigate to={to} replace />;
-  return (
-    <QuestionLayout
-      title={copy.resumeQ}
-      help={copy.resumeHelp}
-      primary={{ label: copy.resumeGo }}
-      onSubmit={() => {
-        asked = true;
-        track('onboarding_resumed', {
-          screen_id: step.toUpperCase(),
-          hours_since_last: hoursSinceSeen(),
-        });
-        nav(to, { replace: true });
-      }}
-    />
-  );
+  if (!resumed && step !== FIRST && isOnboardingScreen(step)) {
+    resumed = true;
+    track('onboarding_resumed', {
+      screen_id: step.toUpperCase(),
+      hours_since_last: hoursSinceSeen(),
+    });
+  }
+  return <Navigate to={to} replace />;
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { copy } from '../copy';
-import { docs, DESIGN_PREVIEW_URL } from '../docs';
+import { DOC_GROUPS, docs, DESIGN_PREVIEW_URL } from '../docs';
 import { Frame } from '../frame';
 import { Markdown } from '../markdown';
 
@@ -45,28 +45,46 @@ export function AD20Docs() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-          <ul
-            className="hg-stack"
-            style={{ listStyle: 'none', padding: 0, margin: 0, gap: 'var(--space-1)' }}
-          >
-            {list.map((d) => (
-              <li key={d.path}>
-                <button
-                  type="button"
-                  className="hg-btn hg-btn--ghost hg-btn--sm"
-                  onClick={() => setSel(d.path)}
-                  aria-current={d.path === sel ? 'page' : undefined}
+          {DOC_GROUPS.map((g) => {
+            const items = list.filter((d) => d.group === g);
+            if (!items.length) return null;
+            return (
+              <section key={g} className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+                <h2 className="hg-card__label">{copy.docGroups[g]}</h2>
+                <ul
+                  className="hg-stack"
+                  style={{ listStyle: 'none', padding: 0, margin: 0, gap: 'var(--space-1)' }}
                 >
-                  {d.title}
-                </button>
-              </li>
-            ))}
-          </ul>
+                  {items.map((d) => (
+                    <li key={d.path}>
+                      <button
+                        type="button"
+                        className="hg-btn hg-btn--ghost hg-btn--sm"
+                        style={{
+                          width: '100%',
+                          justifyContent: 'flex-start',
+                          textAlign: 'left',
+                          whiteSpace: 'normal',
+                          height: 'auto',
+                        }}
+                        onClick={() => setSel(d.path)}
+                        aria-current={d.path === sel ? 'page' : undefined}
+                      >
+                        {d.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
         </nav>
-        <article aria-label={cur?.title}>
+        <article aria-label={cur?.title} style={{ minWidth: 0 }}>
           <p className="hg-help">
             {cur?.path}
-            {__DOCS_COMMIT__ ? ` ${__DOCS_COMMIT__}` : ''}
+            {cur && (__DOCS_DATES__[cur.path] ?? __DOCS_COMMIT__)
+              ? ` ${copy.docUpdated(__DOCS_DATES__[cur.path] ?? __DOCS_COMMIT__)}`
+              : ''}
           </p>
           {cur && <Markdown text={cur.body} />}
         </article>

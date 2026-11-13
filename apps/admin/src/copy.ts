@@ -1,4 +1,5 @@
-// 어드민 문구(docs/spec/27-admin-screens.md, 33-admin.md). 기획서 “ ” 안 문장을 그대로, 해요체.
+// 어드민 문구(docs/spec/27-admin-screens.md, 33-admin.md). 기획서 “ ” 안 문장 그대로.
+// 어드민은 해요체 대신 짧게(2026-11-06): 명사형, ‘~됨’, ‘~불가’. 사용자에게 가는 글(공지, 답변, 메일)과 앱 문구를 그대로 보여 주는 곳만 해요체.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   menus: {
@@ -10,45 +11,77 @@ export const copy = {
     system: '시스템',
     docs: '문서',
   },
+  menuGroups: { work: '운영', content: '발송과 콘텐츠', manage: '관리' }, // [확인 필요]
+  globalSearch: '전체에서 찾기', // [확인 필요] 상단 바 검색 이름(자리표시는 search)
   roles: { super: '최고 관리자', ops: '운영', cs: 'CS', analyst: '분석' } as Record<string, string>,
   signOut: '로그아웃',
   seenAt: (t: string) => `${t} 접속`,
 
   // 로그인
-  loginTitle: 'sweeTwo 어드민', // [확인 필요]
-  loginHelp: '회사 이메일로 로그인 링크를 보내요', // [확인 필요]
+  loginTitle: '어드민 로그인', // [확인 필요] 위에 흑백 워드마크 + ‘어드민’ 태그가 있음
   email: '회사 이메일', // [확인 필요]
   sendLink: '로그인 링크 받기', // [확인 필요]
-  linkSent: '메일함에서 링크를 눌러 주세요', // [확인 필요]
-  tooSoon: '조금 뒤에 다시 눌러 주세요', // [확인 필요]
-  notAllowedEmail: '이 이메일로는 로그인 링크를 보낼 수 없어요', // [확인 필요]
-  resendIn: (s: number) => `${s}초 뒤에 다시 받을 수 있어요`, // [확인 필요]
-  mfaEnrollTitle: '인증 앱을 등록해 주세요', // [확인 필요]
-  mfaEnrollHelp: '인증 앱으로 QR을 찍고 6자리 숫자를 넣어 주세요', // [확인 필요]
-  mfaTitle: '인증 앱의 6자리 숫자를 넣어 주세요', // [확인 필요]
+  linkSent: '메일함에서 링크 열기', // [확인 필요]
+  sentTo: (email: string) => `${email}로 링크 보냄`, // [확인 필요]
+  otherEmail: '다른 이메일로 받기', // [확인 필요]
+  tooSoon: '잠시 뒤 다시 시도', // [확인 필요]
+  notAllowedEmail: '로그인할 수 없는 이메일', // [확인 필요]
+  resendIn: (s: number) => `${s}초 뒤 다시 받기 가능`, // [확인 필요]
+  mfaEnrollTitle: '인증 앱 등록', // [확인 필요]
+  mfaEnrollHelp: 'Google Authenticator 같은 인증 앱으로 QR 스캔 후 6자리 입력', // [확인 필요]
+  mfaTitle: '인증 앱 6자리 입력', // [확인 필요]
   code: '6자리 숫자', // [확인 필요]
   verify: '확인', // [확인 필요]
-  wrongCode: '숫자가 맞지 않아요. 다시 넣어 주세요', // [확인 필요]
-  notAdmin: '권한이 없어요',
-  noPermission: '권한이 없어요',
+  reauthTitle: '인증 앱 6자리 다시 입력', // [확인 필요] 재인증(33 3장)
+  reauthGo: '확인',
+  wrongCode: '숫자 불일치', // [확인 필요]
+  notAdmin: '권한 없음',
+  noPermission: '권한 없음',
   toDashboard: '대시보드로',
-  expired: '30분 동안 쓰지 않아 로그아웃했어요', // [확인 필요]
-  failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
+  expired: '30분 미사용으로 로그아웃됨', // [확인 필요]
+  failed: '오류. 다시 시도',
+  noRows: '기록 없음', // [확인 필요] 빈 표(2026-11-06 검수)
   retry: '다시 시도',
 
   // AD-01
   alerts: '상시 경보', // [확인 필요]
+  alertKinds: { loan_rate_stale: '평균 금리 마지막 갱신' } as Record<string, string>, // [확인 필요]
+  alertValue: (kind: string, v: number, limit: number) =>
+    kind === 'loan_rate_stale' ? `${v}일 전 / 기준 ${limit}일` : `${v} / 기준 ${limit}`, // [확인 필요]
   failedJobs: '실패 건수', // [확인 필요]
-  failedPlans: '플랜 생성 실패',
+  failedPlans: '체크리스트 생성 실패',
   failedNotis: '알림 발송 실패',
   openInquiries: '미처리 문의', // [확인 필요]
   received: '접수',
   inProgress: '처리 중',
   aggregatedAt: (t: string) => `${t} 집계`, // [확인 필요]
+  // AD-01 4~7번(2026-11-06) [확인 필요]
+  membersTitle: '회원 현황', // [확인 필요]
+  memberTotal: '전체 회원', // [확인 필요]
+  joinedToday: '오늘 가입', // [확인 필요]
+  vsYesterday: (n: number) => `어제 ${n.toLocaleString('ko-KR')}명`, // [확인 필요]
+  connectedCouples: '연결된 커플', // [확인 필요]
+  deletionToday: '오늘 삭제 요청', // [확인 필요]
+  trendTitle: '최근 7일', // [확인 필요]
+  // [확인 필요] 커플 연결
+  trendKinds: { joined: '가입', connected: '커플 연결', checked: '체크한 줄' } as Record<
+    string,
+    string
+  >, // [확인 필요]
+  trendTable: '최근 7일 표', // [확인 필요] 표 보기 접기 제목
+  versionsTitle: '앱 버전', // [확인 필요]
+  belowMin: '최소 버전 미만 기기(최근 7일 실행)', // [확인 필요]
+  versionCols: { platform: '기기', version: '버전', devices: '기기 수' }, // [확인 필요]
+  recentTitle: '최근 활동', // [확인 필요]
+  approvalsWaiting: '승인 대기', // [확인 필요]
+  recentInquiries: '최근 문의', // [확인 필요]
+  recentAudit: '최근 감사 로그', // [확인 필요]
+  seeAll: '모두 보기', // [확인 필요]
+  none: '없음', // [확인 필요]
 
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',
-  noMember: '일치하는 회원이 없어요',
+  noMember: '일치하는 회원 없음',
   // AD-02 내려받기(L0 열만, 사유 입력 후, 파일에 관리자 ID)
   download: '내려받기',
   downloadReason: '내려받는 이유', // [확인 필요]
@@ -59,7 +92,7 @@ export const copy = {
     userId: '사용자 ID',
     email: '이메일',
     joined: '가입일',
-    couple: '부부 상태',
+    couple: '커플 상태', // [확인 필요]
     sub: '구독',
   },
   coupleStates: {
@@ -75,19 +108,45 @@ export const copy = {
   askConsent: '동의 요청',
   action: '계정 조치',
   account: '계정', // [확인 필요]
-  space: '부부 공간', // [확인 필요]
+  space: '커플 공간', // [확인 필요]
   consents: '동의 내역', // [확인 필요]
   data: '데이터', // [확인 필요]
   provider: '로그인 수단', // [확인 필요]
   lastSeen: '최근 접속', // [확인 필요]
   sessions: (n: number) => `로그인된 기기 ${n}대`, // [확인 필요]
   deleting: (days: number) => `삭제 유예 중, ${days}일 남음`,
-  partner: '배우자 ID', // [확인 필요]
+  partner: '파트너 ID', // [확인 필요]
   invite: (made: string, until: string, used: string | null) =>
     used ? `${made} 발급, ${used} 사용` : `${made} 발급, ${until} 만료`, // [확인 필요]
   counts: (a: number, est: number, g: number, c: number) =>
-    `자산 ${a}개, 그중 추정 ${est}개, 목표 ${g}개, 정리한 달 ${c}번`,
-  planStatus: '플랜 상태', // [확인 필요]
+    `자산 ${a}개, 그중 추정 ${est}개, 저금 항목 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
+  planStatus: '이번 달 체크리스트', // [확인 필요]
+  checklistStates: { open: '진행 중', done: '다 했어요', closed: '끝남' } as Record<string, string>,
+  checklistLine: (label: string, state: string, checked: number, total: number) =>
+    `${label} ${state}, ${checked}/${total}줄 체크`, // [확인 필요]
+  salaryMode: '월급 관리 방식', // [확인 필요]
+  salaryModes: { separate: '각자', joint: '합쳐서' } as Record<string, string>,
+  devices: '기기·앱 버전', // [확인 필요]
+  deviceLine: (platform: string, version: string, seen: string) =>
+    `${platform} ${version}, ${seen} 마지막 실행`, // [확인 필요]
+  platforms: { desktop: '데스크톱', ios: 'iOS', android: 'Android', web: '웹' } as Record<
+    string,
+    string
+  >,
+  providers: { kakao: '카카오', google: '구글', apple: '애플', email: '이메일' } as Record<
+    string,
+    string
+  >,
+  consentKinds: {
+    terms: '이용약관',
+    privacy: '개인정보처리방침',
+    space_sharing: '커플 공간 공유', // [확인 필요]
+    family_info: '양가 가족 정보',
+    photo: '사진',
+    marketing: '마케팅 수신',
+    analytics: '분석 수집',
+    peer_stats: '통계 참여',
+  } as Record<string, string>,
   hoursLeft: (h: number) => `${h}시간 남음`,
   see: '보기',
 
@@ -101,22 +160,22 @@ export const copy = {
     string
   >,
   revealGo: '보기',
-  revealUntil: (t: string) => `${t}까지 보여요`, // [확인 필요]
+  revealUntil: (t: string) => `${t}까지 표시`, // [확인 필요]
   l2: 'L2 사용자 동의',
   l2Scopes: {
     month: '이번 달 화면',
-    plan: '월급 플랜 화면',
-    close: '월말 정리 화면',
-    goals: '목표 화면',
-    assets: '우리 자산 화면',
-    income_spend: '월 수입·지출 화면',
+    plan: '이번 달 화면', // 예전 키(지금은 month)
+    close: '월급 전 확인 화면', // 예전 키, 새 요청에는 없음(2026-11-09 이름)
+    goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
+    assets: '자산 관리 화면',
+    income_spend: '월 수입·지출(없앤 화면)', // 예전 키, 새 요청에는 없음
     calendar: '캘린더 화면',
   } as Record<string, string>,
   raw: '금액 원값 요청',
-  rawHelp: '화면 1개만. 최고 관리자가 승인하면 사용자에게 요청해요. 거절되면 구간으로만 요청해요', // [확인 필요]
-  rawRequested: '최고 관리자에게 원값 승인을 요청했어요', // [확인 필요]
+  rawHelp: '화면 1개만. 최고 관리자 승인 후 요청, 거절 시 구간으로', // [확인 필요]
+  rawRequested: '원값 승인 요청됨', // [확인 필요]
   sendRequest: '동의 요청 보내기',
-  requested: '동의를 요청했어요', // [확인 필요]
+  requested: '동의 요청됨', // [확인 필요]
   accessStatus: {
     requested: '대기',
     approved: '동의',
@@ -130,7 +189,7 @@ export const copy = {
     fixed: '고정지출',
     living: '생활비 예산',
     loan: '대출 상환',
-    close: '월말 정리',
+    close: '월급 전 확인',
   }, // [확인 필요]
   agreedCol: '동의 여부', // [확인 필요]
   agreed: '동의',
@@ -149,21 +208,21 @@ export const copy = {
   } as Record<string, string>,
   note: '메모', // [확인 필요]
   run: '실행', // [확인 필요]
-  done: '처리했어요', // [확인 필요]
-  confirmSignOut: '이 회원의 모든 기기에서 로그아웃할까요?', // [확인 필요]
-  confirmDelete: '이 회원의 계정 삭제를 접수할까요?', // [확인 필요]
-  confirmDeleteHelp: '30일 뒤 지워져요. 그 전에 본인이 다시 로그인하면 취소돼요', // [확인 필요]
+  done: '처리됨', // [확인 필요]
+  confirmSignOut: '모든 기기에서 로그아웃?', // [확인 필요]
+  confirmDelete: '계정 삭제 접수?', // [확인 필요]
+  confirmDeleteHelp: '30일 뒤 삭제. 그 전 재로그인 시 취소', // [확인 필요]
   newAccount: '새 계정 이메일 또는 사용자 ID', // [확인 필요]
-  newAccountHelp: '본인 확인이 끝난 뒤 사용자가 새 소셜 계정으로 한 번 로그인해요. 최고 관리자가 승인하면 옮겨요', // [확인 필요]
-  moveRequested: '최고 관리자에게 승인을 요청했어요', // [확인 필요]
+  newAccountHelp: '본인 확인 → 새 소셜 계정으로 1회 로그인 → 최고 관리자 승인 시 이전', // [확인 필요]
+  moveRequested: '승인 요청됨', // [확인 필요]
   moveErrors: {
-    new_not_found: '새 계정을 찾지 못했어요',
-    new_no_login: '새 계정에 로그인 수단이 없어요',
-    new_has_partner: '새 계정이 다른 사람과 연결돼 있어요',
-    same_account: '같은 계정이에요',
-    already_requested: '이미 승인 대기 중이에요',
-    not_active: '사용 중인 계정이 아니에요',
-    reason_required: '문의 번호를 확인해 주세요',
+    new_not_found: '새 계정 없음',
+    new_no_login: '새 계정에 로그인 수단 없음',
+    new_has_partner: '새 계정이 다른 커플에 연결됨',
+    same_account: '같은 계정',
+    already_requested: '이미 승인 대기 중',
+    not_active: '사용 중인 계정 아님',
+    reason_required: '문의 번호 확인 필요',
   } as Record<string, string>, // [확인 필요]
   cancel: '취소',
 
@@ -176,27 +235,64 @@ export const copy = {
   } as Record<string, string>,
   categories: {
     account: '계정·로그인',
-    couple: '부부 연결',
-    calc: '계산·플랜',
+    couple: '커플 연결', // [확인 필요]
+    calc: '저금·월급 체크리스트', // 2026-11-09 사용자 앱 분류와 같게
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
     etc: '기타',
   } as Record<string, string>,
-  inqCols: { no: '문의 번호', category: '분류', elapsed: '경과 시간', channel: '채널' }, // [확인 필요] 채널
+  inqCols: {
+    no: '문의 번호',
+    category: '분류',
+    elapsed: '경과 시간',
+    channel: '채널',
+    created: '받은 시각',
+  }, // [확인 필요] 채널
   channels: { app: '앱', email: '이메일' } as Record<string, string>,
-  noInquiry: '문의가 없어요', // [확인 필요]
+  noInquiry: '문의 없음', // [확인 필요]
   attach: '자동 첨부',
+  attachKeys: {
+    app_version: '앱 버전',
+    platform: '플랫폼',
+    os: 'OS',
+    couple_state: '커플 상태', // [확인 필요]
+    sync: '동기화',
+    error: '최근 오류 코드',
+  } as Record<string, string>,
+  attachValues: {
+    online: '온라인',
+    offline: '오프라인',
+    mac: 'macOS',
+    windows: 'Windows',
+    ios: 'iOS',
+    android: 'Android',
+    desktop: '데스크톱',
+    web: '웹',
+    other: '기타',
+  } as Record<string, string>,
   statusLabel: '상태', // [확인 필요]
   answer: '답변',
   sendAnswer: '답변 보내기',
-  answered: '답변을 보냈어요', // [확인 필요]
+  answered: '답변 보냄', // [확인 필요]
   user: '사용자', // [확인 필요]
   admin: '운영자', // [확인 필요]
+  emailInfo: '이메일', // [확인 필요] 이메일 문의 상세 묶음 이름
+  emailKeys: {
+    subject: '제목',
+    from: '보낸 사람',
+    member: '회원',
+    attachments: '첨부 파일',
+  }, // [확인 필요]
+  noSubject: '제목 없음', // [확인 필요]
+  noMemberLink: '회원 연결 없음', // [확인 필요]
+  attachmentsDropped: (n: number) => `${n}개 미수신, 메일함에서 확인`, // [확인 필요]
+  emailAnswerHelp: '메일 발송 연결 전까지 답장은 네이버웍스 help@에서 직접', // [확인 필요]
   elapsed: (h: number) => (h < 24 ? `${h}시간` : `${Math.floor(h / 24)}일 ${h % 24}시간`),
 
   // AD-17
   auditTitle: '감사 로그',
+  change: '바뀐 값', // [확인 필요] 감사 로그 행 상세(전 → 후)
   auditCols: {
     at: '시각',
     admin: '관리자',
@@ -219,19 +315,25 @@ export const copy = {
   all: '전체', // [확인 필요]
   ip: '접속 IP',
   screen: '화면',
-  noAudit: '기록이 없어요', // [확인 필요]
+  noAudit: '기록 없음', // [확인 필요]
 
   // AD-20
   docSearch: '문서 검색',
+  docGroups: { spec: '기획서', design: '디자인', dev: '개발 가이드', adr: 'ADR' } as Record<
+    'spec' | 'design' | 'dev' | 'adr',
+    string
+  >, // [확인 필요]
+  docUpdated: (v: string) => `마지막 수정 ${v.split(' ').reverse().join(', 커밋 ')}`, // [확인 필요] ‘마지막 수정 2026-11-06, 커밋 af6ea4a’
   designPreview: '디자인 시스템 미리보기',
 };
 
 export type Copy = typeof copy;
 
-// 운영(AD-10·14·15·16·18·19, 2인 승인)
+// 운영(AD-10·14·15·16·18·19, 승인)
 export const ops = {
   // AD-10
   noticeTitle: '공지',
+  noticeEmpty: '공지 없음', // [확인 필요]
   newNotice: '새 공지', // [확인 필요]
   noticeCols: {
     title: '제목',
@@ -253,7 +355,6 @@ export const ops = {
     published: '게시',
     cancelled: '내림',
   } as Record<string, string>, // [확인 필요]
-  platforms: { desktop: '데스크톱 앱', mobile: '모바일 앱', web: '웹' } as Record<string, string>, // [확인 필요]
   field: {
     title: '제목',
     body: '내용',
@@ -261,17 +362,59 @@ export const ops = {
     ends: '끝',
     kind: '종류',
     importance: '중요도',
-    platforms: '대상 플랫폼',
     email: '이메일로도 보내기',
-    emailHelp: '노출 시작 때 사용 중인 모든 회원의 알림 이메일로 한 번 보내요. 메일 상한과 상관없어요',
+    emailHelp: '노출 시작 때 전체 회원에게 1회 발송(메일 상한 무관)',
+    // 장애 고지는 영향받은 회원(대상 조건)에게만(33 ‘1등급 장애 뒤 고지’)
+    emailHelpTarget: '노출 시작 때 대상 회원에게 1회 발송(메일 상한 무관)',
   }, // [확인 필요]
+  // 27 AD-10 2번 대상. 금액 조건 없음
+  target: {
+    title: '대상', // 27 AD-10 2번
+    all: '약관 개정은 전체 회원', // [확인 필요]
+    coupleStates: '커플 상태', // 27 AD-10 2번 [확인 필요]
+    coupleHelp: '미선택 시 전체', // [확인 필요]
+    versionBelow: '이 버전보다 낮은 앱만', // [확인 필요]
+    versionHelp: '예: 1.4.0, 비우면 전체', // [확인 필요]
+    weeksMin: '가입 주차(부터)', // [확인 필요]
+    weeksMax: '가입 주차(까지)', // [확인 필요]
+    weeksHelp: '가입 주 = 1주차, 비우면 전체', // [확인 필요]
+    badVersion: '버전 형식: 1.4.0', // [확인 필요]
+    badWeeks: '가입 주차: 1~520, 시작 ≤ 끝', // [확인 필요]
+  },
+  // 27 AD-10 4번 대상 수: 이름표 “대상” “제외” + “3,214명”
+  audience: {
+    title: '대상 수', // 27 AD-10 4번
+    target: '대상',
+    excluded: '제외',
+    people: (n: number) => `${n.toLocaleString('ko-KR')}명`,
+    blocked: '반송·수신 거부', // [확인 필요] 메일이 막힌 주소
+    zero: '대상 0명, 승인 요청 불가', // [확인 필요] 27 AD-10 예외 ‘대상 0명’
+    failed: '대상 수 계산 실패', // [확인 필요]
+  },
+  // 27 AD-10 6번 미리보기: 공지는 홈 상단 띠, 메일은 받은 메일 모양
+  preview: {
+    title: '미리보기', // 27 AD-10 6번
+    band: '홈 상단 띠', // [확인 필요]
+    mail: '이메일', // [확인 필요]
+    // 앱 공지 띠 버튼(packages/app frame copy와 같은 문구)
+    open: '보기',
+    fold: '접기',
+    close: '닫기',
+    from: '보내는 곳 sweeTwo', // [확인 필요]
+    sign: 'sweeTwo',
+    emptyTitle: '제목 미입력', // [확인 필요]
+  },
+  // 27 AD-10 7번 테스트 발송: 내부 계정(내 관리자 메일)만
+  testSend: '테스트 발송', // 27 AD-10 7번
+  testSent: '내 메일로 보냄', // [확인 필요]
+  testTooMany: '테스트 메일은 10분에 5회까지', // [확인 필요]
   saveDraft: '초안 저장', // [확인 필요]
-  belowMin: (n: number) => `지금 최소 버전보다 낮은 기기 ${n}대(90일 안에 켠 기기)`, // [확인 필요]
+  belowMin: (n: number) => `최소 버전 미만 기기 ${n}대(90일 내 실행)`, // [확인 필요]
   requestApproval: '승인 요청',
   endNotice: '내리기', // [확인 필요]
-  quietHours: '밤 10시~아침 8시에는 시작할 수 없어요', // [확인 필요]
-  saved: '저장했어요', // [확인 필요]
-  requestedApproval: '승인을 요청했어요', // [확인 필요]
+  quietHours: '밤 10시~아침 8시 시작 불가', // [확인 필요]
+  saved: '저장됨', // [확인 필요]
+  requestedApproval: '승인 요청됨', // [확인 필요]
 
   // 콘텐츠
   contentTitle: '콘텐츠',
@@ -314,11 +457,11 @@ export const ops = {
     student: '학자금',
     card_loan: '카드론·현금서비스',
   } as Record<string, string>,
-  loanCols: { kind: '유형', rate: '연 금리', applied: '적용일' },
+  loanCols: { kind: '유형', rate: '연 금리', applied: '적용일', updated: '마지막 갱신' }, // [확인 필요] 마지막 갱신
+  loanAppliedPick: '저장할 때 적용일', // [확인 필요],
   holidayTitle: '공휴일', // [확인 필요]
   // AD-19 항목 이름 목록 [확인 필요]
   kindTitle: '항목 이름 목록',
-  kindHelp: '자산 추가 화면의 세부 항목 칩이에요. 새 칩은 고른 항목과 같은 질문을 해요. 앱 배포 없이 바로 바뀌어요',
   kindCols: { name: '이름', base: '따르는 항목', hidden: '숨김' },
   kindDefault: '기본 항목',
   kindAdd: '칩 추가',
@@ -345,12 +488,9 @@ export const ops = {
   approve: '승인', // [확인 필요]
   reject: '거절', // [확인 필요]
   cancelRequest: '요청 취소', // [확인 필요]
-  noApproval: '승인할 요청이 없어요', // [확인 필요]
-  selfApproval: '내가 요청한 건 다른 최고 관리자가 승인해요', // [확인 필요]
+  noApproval: '승인할 요청 없음', // [확인 필요]
+  superMin: '최고 관리자 최소 1명 필요', // [확인 필요] 33 2장 최소 1명(2026-11-06)
   appCols: {
-    latest: '최신 버전(데스크톱)',
-    minDesktop: '최소 지원 버전(데스크톱)',
-    minWeb: '최소 지원 버전(웹)',
     minIos: '최소 지원 버전(iOS)',
     minAndroid: '최소 지원 버전(Android)',
   }, // [확인 필요]

@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { track } from './analytics';
 import { squarePhoto } from './photo';
+import { onSessionReset } from './session-reset';
 
 /** 같은 공간 사람 프로필 사진: 사람 id → 사진 주소(없으면 없음 → 첫 글자). 2026-11-05 지정 아바타 없앰 */
 export function usePeopleArt(): (userId: string | null | undefined) => string | undefined {
@@ -19,11 +20,15 @@ export function usePeopleArt(): (userId: string | null | undefined) => string | 
 
 /**
  * 소셜 계정 프로필 사진 한 번 가져오기(2026-11-05, 25 S-11e ‘처음 사진’). 앱 틀이 부름.
- * 부부 공간이 있고 사진이 없고 아직 시도하지 않았으면: 함수로 받아 → 가운데 정사각 512px JPEG → 내 사진으로 저장 → 시도 남김.
+ * 우리 둘 공간이 있고 사진이 없고 아직 시도하지 않았으면: 함수로 받아 → 가운데 정사각 512px JPEG → 내 사진으로 저장 → 시도 남김.
  * 사진이 없거나 그림을 못 읽어도 시도 남김(다시 안 함). 함수 호출이 실패하면 남기지 않음(다음에 다시). 알림, Toast 없음
  */
 // 앱을 켤 때마다 한 번만 확인(화면마다 앱 틀이 새로 그려져도)
 let socialChecked = false;
+// 같은 실행에서 다른 계정으로 로그인하면 그 계정도 한 번 확인(2026-11-12 QA 11구간 S11-08)
+onSessionReset(() => {
+  socialChecked = false;
+});
 export function useSocialAvatar(
   userId: string | null | undefined,
   spaceId: string | null | undefined,
@@ -57,7 +62,7 @@ export function useSocialAvatar(
   }, [userId, spaceId, qc]);
 }
 
-// 사람 원(Avatar). 사진이 있으면 사진, 없으면 첫 글자. 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
+// 사람 원(Avatar). 사진이 있으면 사진, 없으면 사람 색 원 + 빵모자 실루엣(첫 글자는 DOM에만, CSS로 숨김). 시작한 사람 1, 합류한 사람 2(누가 보든 같음)
 export function PersonDot({
   name,
   starter,

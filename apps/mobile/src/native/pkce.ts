@@ -1,4 +1,4 @@
-// PKCE(RFC 7636) 웹뷰용(WebCrypto). 데스크톱 apps/desktop/src/main/pkce.ts와 같은 값을 만든다.
+// PKCE(RFC 7636) 웹뷰용(WebCrypto).
 const b64url = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-')

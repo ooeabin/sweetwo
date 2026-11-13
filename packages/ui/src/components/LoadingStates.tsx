@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
-import { QuestionLayout } from './QuestionLayout';
+import { QuestionLayout, type ChapterProgress } from './QuestionLayout';
 
 // 로딩 상태(docs/design/components/Skeleton.md, 2026-11-04 우리나라 앱 참고: 당근 뼈대, 카카오페이·토스 처리 중).
 // 0.3초 안에 오면 뼈대를 보여 주지 않음(13 공통 상태 5번).
@@ -63,11 +63,15 @@ export function QuestionSkeleton({
   title,
   help,
   onBack,
+  chapter,
   fields = 1,
 }: {
   title?: ReactNode;
   help?: ReactNode;
-  onBack?: () => void;
+  /** 없으면 이전 화면으로, null이면 뒤로 버튼 없음(흐름의 첫 화면) */
+  onBack?: (() => void) | null;
+  /** 온보딩·합류 진행 막대(2026-11-06): 불러오는 동안에도 같은 자리에 */
+  chapter?: ChapterProgress;
   /** 입력 칸 뼈대 수 */
   fields?: number;
 }) {
@@ -76,8 +80,9 @@ export function QuestionSkeleton({
     <QuestionLayout
       title={title ?? (show ? <Skel w="70%" h={28} /> : <span aria-hidden="true">&nbsp;</span>)}
       help={help}
+      chapter={chapter}
       // 뒤로 갈 곳을 모르면 이전 화면으로
-      onBack={onBack ?? (() => window.history.back())}
+      onBack={onBack === null ? undefined : (onBack ?? (() => window.history.back()))}
     >
       <div className="hg-stack hg-skelq" aria-busy="true" style={{ gap: 'var(--space-3)' }}>
         {show &&

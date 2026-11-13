@@ -2,14 +2,14 @@ import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import type { AuthEvent } from '@sweetwo/app';
-import { DESKTOP_LOGIN_TIMEOUT_MS, parseDeepLink, type AuthProvider } from '@sweetwo/core';
+import { LOGIN_TIMEOUT_MS, parseDeepLink, type AuthProvider } from '@sweetwo/core';
 import { z } from 'zod';
 import { emitter } from './events';
 import { authorizeUrl, randomToken } from './pkce';
 import { offlineCache } from './offline-cache';
 import { secureStore } from './store';
 
-// 모바일 로그인(DEV_GUIDE ‘모바일 세션’, 기획서 A-02, A-03). 데스크톱 apps/desktop/src/main/auth.ts와 같은 흐름.
+// 모바일 로그인(DEV_GUIDE ‘모바일 세션’, 기획서 A-02, A-03).
 // 시스템 로그인 창(iOS ASWebAuthenticationSession = 앱 안 WebAuth 플러그인, Android Custom Tabs = @capacitor/browser)
 // → https 웹 콜백(from=app) → sweetwo://auth/callback → state 확인 → grant_type=pkce 교환.
 // code_verifier는 메모리에만, refresh token은 Keychain·Keystore에만. 웹뷰의 supabase-js는 access token만 받는다.
@@ -121,7 +121,7 @@ export async function startLogin(provider: AuthProvider) {
   const timer = setTimeout(() => {
     clearPending();
     authEvents.emit({ type: 'login_failed', reason: 'timeout' });
-  }, DESKTOP_LOGIN_TIMEOUT_MS);
+  }, LOGIN_TIMEOUT_MS);
   pending = {
     provider,
     verifier,
@@ -150,6 +150,9 @@ export async function reopenLogin() {
     return { ok: false };
   }
 }
+
+/** 이 기기가 시작한 로그인 요청이 아직 기다리는 중인지(A-03 새로 고침·다시 실행 때 끝없이 기다리지 않게) */
+export const loginPending = () => pending !== null;
 
 export async function cancelLogin() {
   clearPending();

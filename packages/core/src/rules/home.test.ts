@@ -1,5 +1,15 @@
 import { expect, it } from 'vitest';
-import { homeTodo, homeUpcoming, salaryState, type HomeInput } from './home';
+import {
+  checkTodo,
+  homeTodo,
+  homeUpcoming,
+  inReviewWindow,
+  reviewPath,
+  pickMyChecklist,
+  pickTopBanner,
+  salaryState,
+  type HomeInput,
+} from './home';
 
 // 찬우(혼자, 각자, 월급날 25일), 9월 월급 사이클 9월 25일 ~ 10월 24일
 const base = (over: Partial<HomeInput> = {}): HomeInput => ({
@@ -21,12 +31,10 @@ const base = (over: Partial<HomeInput> = {}): HomeInput => ({
   assets: [],
   unlinkRequestedBy: null,
   reconnectFrom: null,
-  inviteClosedOn: null,
-  closed: [],
   ...over,
 });
 
-it('이번 달 월급 상태: 진행 중 → 월말 확인 기간(다음 기준일 3일 전) → 다 했어요', () => {
+it('이번 달 월급 상태: 진행 중 → 월급 전 확인 기간(다음 기준일 3일 전) → 다 했어요', () => {
   expect(salaryState(base())).toEqual({
     state: 'progress',
     label: '9월 월급',
@@ -36,18 +44,52 @@ it('이번 달 월급 상태: 진행 중 → 월말 확인 기간(다음 기준�
     nextPayday: '2026-10-25',
   });
   expect(salaryState(base({ today: '2026-10-22' })).state).toBe('review');
-  expect(salaryState(base({ joint: true })).state).toBe('none');
+  // 합쳐서로 바꿔도 이번 달 체크리스트는 그대로(25 S-11f): 이번 사이클에 내 것이 있으면 내 것
+  expect(salaryState(base({ joint: true })).state).toBe('progress');
+  expect(salaryState(base({ meId: 'x' })).state).toBe('none');
 });
 
-it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 → 초대 → 목표 금액 → 만기 → 챙길 날(7일 안)', () => {
+it('내 체크리스트 고르기(2026-11-11 QA 4구간 S4-12): 내 것 → 공동, 홈과 월급 탭이 같은 함수', () => {
+  const mine = { owner_user_id: 'c', id: 'm' };
+  const hers = { owner_user_id: 'y', id: 'y' };
+  const ours = { owner_user_id: null, id: 'o' };
+  // 각자: 내 것
+  expect(pickMyChecklist([hers, mine], 'c')?.id).toBe('m');
+  // 합쳐서: 공동
+  expect(pickMyChecklist([ours], 'c')?.id).toBe('o');
+  // 이번 달에 둘 다 있으면(방식을 바꾼 사이클) 내 것이 먼저
+  expect(pickMyChecklist([ours, mine], 'c')?.id).toBe('m');
+  // 사람을 모르면 공동만, 없으면 undefined
+  expect(pickMyChecklist([mine, ours], undefined)?.id).toBe('o');
+  expect(pickMyChecklist([hers], 'c')).toBeUndefined();
+  expect(pickMyChecklist(undefined, 'c')).toBeUndefined();
+});
+
+it('맨 위 띠는 하나만(2026-11-11 QA 4구간 D3): 오프라인 > 해제 대기 > 필독 공지 > 메일 반송 > 일반 공지', () => {
+  const all = {
+    offline: true,
+    unlink: true,
+    must_notice: true,
+    mail_bounced: true,
+    notice: true,
+  };
+  expect(pickTopBanner(all)).toBe('offline');
+  expect(pickTopBanner({ ...all, offline: false })).toBe('unlink');
+  expect(pickTopBanner({ ...all, offline: false, unlink: false })).toBe('must_notice');
+  expect(pickTopBanner({ mail_bounced: true, notice: true })).toBe('mail_bounced');
+  expect(pickTopBanner({ notice: true })).toBe('notice');
+  expect(pickTopBanner({})).toBeNull();
+});
+
+it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월급 전 확인 → 만기 → 경조사(7일 안) → 초대(맨 끝, 2026-11-11). 닫기 없음, 목표 금액 정하기는 없음(ADR 0007)', () => {
   const goal = {
     id: 'g',
     name: '여행',
-    template: 'travel',
     status: 'active',
     target_amount: null,
     deadline: null,
     owner_user_id: null,
+    closed_at: null,
   };
   const asset = {
     id: 'a',
@@ -80,36 +122,31 @@ it('할 일 한 줄 순서: 해제 요청 → 다시 연결 → 월말 확인 �
   expect(homeTodo({ ...all, unlinkRequestedBy: 'c' })?.kind).toBe('reconnect');
   const review = homeTodo({ ...all, unlinkRequestedBy: null, reconnectFrom: null });
   expect(review).toMatchObject({ kind: 'review', left: 2 });
-  // 월말 확인은 닫으면 이번 달만 안 보임
-  const closedReview = homeTodo({
-    ...all,
-    unlinkRequestedBy: null,
-    reconnectFrom: null,
-    closed: [review?.kind === 'review' ? review.key : ''],
-  });
-  expect(closedReview?.kind).toBe('invite');
+  // 월급 전 확인은 다 체크(‘못 함’ 포함)해야 사라짐
+  const allDone = all.checklists.map((c) => ({
+    ...c,
+    lines: c.lines.map(() => ({ state: 'skipped' })),
+  }));
   const noReview = { ...all, unlinkRequestedBy: null, reconnectFrom: null, today: '2026-10-07' };
-  expect(homeTodo(noReview)?.kind).toBe('invite');
-  const amount = homeTodo({ ...noReview, inviteClosedOn: '2026-10-05' });
-  expect(amount).toMatchObject({ kind: 'amount', goal: '여행' });
-  // 목표 금액 정하기도 닫을 수 있음
   expect(
-    homeTodo({
-      ...noReview,
-      inviteClosedOn: '2026-10-05',
-      closed: [amount?.kind === 'amount' ? amount.key : ''],
-    })?.kind,
+    homeTodo({ ...all, unlinkRequestedBy: null, reconnectFrom: null, checklists: allDone })?.kind,
   ).toBe('matured');
-  const noGoal = { ...noReview, inviteClosedOn: '2026-10-05', goals: [] };
-  expect(homeTodo(noGoal)).toMatchObject({ kind: 'matured', to: '/assets/a/matured' });
-  expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07'] })).toMatchObject({
-    kind: 'care',
-    date: '2026-10-12',
-  });
-  expect(homeTodo({ ...noGoal, closed: ['matured:a:2026-10-07', 'care:m:2026-10-12'] })).toBeNull();
+  // 목표 금액이 없는 저금 항목이 있어도 할 일은 바로 만기로(초대보다 먼저)
+  expect(homeTodo(noReview)).toMatchObject({ kind: 'matured', to: '/assets/a/matured' });
+  // 만기 띠는 만기일부터 30일째까지, 31일째부터는 없음(2026-11-11)
+  expect(homeTodo({ ...noReview, checklists: allDone, today: '2026-11-06' })?.kind).toBe('matured');
+  expect(homeTodo({ ...noReview, checklists: allDone, today: '2026-11-07' })?.kind).not.toBe(
+    'matured',
+  );
+  // 만기는 정리하면(보관돼 목록에서 빠짐) 사라짐 → 경조사(7일 안)
+  const noMatured = { ...noReview, assets: [] };
+  expect(homeTodo(noMatured)).toMatchObject({ kind: 'care', date: '2026-10-12' });
+  // 경조사는 그날이 지나면 사라짐 → 다른 할 일이 없을 때만 초대
+  expect(homeTodo({ ...noMatured, today: '2026-10-13' })?.kind).toBe('invite');
+  expect(homeTodo({ ...noMatured, today: '2026-10-13', coupleState: 'connected' })).toBeNull();
 });
 
-it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, 만기를 날짜순(같은 날은 챙길 날 먼저)', () => {
+it('일정: 월급날, 월급 전 확인, 경조사, 목표 기한(목표 금액·기한이 있는 저금 항목만), 만기를 날짜순(같은 날은 경조사 먼저)', () => {
   const u = homeUpcoming(
     base({
       cares: [
@@ -127,11 +164,21 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, �
         {
           id: 'g',
           name: '여행',
-          template: 'travel',
+          status: 'active',
+          target_amount: 1,
+          // 기한 2026년 10월 = 10월 31일(그 달 말일, 2026-11-09)
+          deadline: '2026-10-01',
+          owner_user_id: null,
+          closed_at: null,
+        },
+        {
+          id: 'x',
+          name: '그만 모은 여행',
           status: 'active',
           target_amount: 1,
           deadline: '2026-11-01',
           owner_user_id: null,
+          closed_at: '2026-10-01',
         },
       ],
       assets: [
@@ -152,6 +199,104 @@ it('다가오는 일정: 월급날, 월말 확인, 챙길 날, 목표 기한, �
     ['care', '2026-10-25', 18],
     ['payday', '2026-10-25', 18],
     ['maturity', '2026-10-30', 23],
-    ['goal', '2026-11-01', 25],
+    ['goal', '2026-10-31', 24],
   ]);
+  expect(u.find((x) => x.kind === 'goal')?.to).toBe('/salary/items/g');
+});
+
+it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초대보다 먼저, 7일 안, 내 저금이 없을 때만', () => {
+  const goal = (over: Partial<HomeInput['goals'][number]> = {}) => ({
+    id: 'g1',
+    name: '여행',
+    status: 'active',
+    target_amount: null,
+    deadline: null,
+    owner_user_id: 'c',
+    closed_at: null,
+    ...over,
+  });
+  const first = base({ onboardedOn: '2026-10-01' });
+  expect(homeTodo(first)).toEqual({
+    kind: 'saving',
+    key: 'saving-first',
+    to: '/salary/items/new/a?from=home',
+  });
+  // 초대보다 먼저(2026-11-11 초대는 맨 끝), 첫 주가 끝나면 초대
+  expect(homeTodo({ ...first, coupleState: 'not_joined' })?.kind).toBe('saving');
+  expect(homeTodo({ ...first, coupleState: 'not_joined', today: '2026-10-08' })?.kind).toBe(
+    'invite',
+  );
+  // 7일째(온보딩 날 + 7)부터는 없음
+  expect(homeTodo({ ...first, today: '2026-10-08' })).toBeNull();
+  expect(homeTodo({ ...first, onboardedOn: null })).toBeNull();
+  // 내 저금이 있으면 없음, 파트너 저금·그만 모은 저금·휴지통은 셈하지 않음
+  expect(homeTodo({ ...first, goals: [goal()] })).toBeNull();
+  expect(homeTodo({ ...first, goals: [goal({ owner_user_id: 'y' })] })?.kind).toBe('saving');
+  expect(homeTodo({ ...first, goals: [goal({ closed_at: '2026-10-02' })] })?.kind).toBe('saving');
+  expect(homeTodo({ ...first, goals: [goal({ deleted_at: '2026-10-02' })] })?.kind).toBe('saving');
+  // 합쳐서: 공동 월급 계획 저금(누구 것이든)이 있으면 없음
+  expect(
+    homeTodo({
+      ...first,
+      joint: true,
+      checklists: [{ owner_user_id: null, label: '9월 월급', cycle_end: '2026-10-24', lines: [] }],
+      goals: [goal({ owner_user_id: 'y' })],
+    }),
+  ).toBeNull();
+  // 이번 달 체크리스트가 없으면 없음(내 것도 공동 것도 없음)
+  expect(homeTodo({ ...first, joint: true, meId: 'x' })).toBeNull();
+  // 연결 해제 대기면 없음
+  expect(homeTodo({ ...first, coupleState: 'unlink_pending' })).toBeNull();
+});
+
+it('월급날 체크 할 일(19 H-06 3a, 2026-11-09): 월급날부터 7일 안, 체크 안 한 줄이 있을 때, 월급 전 확인 다음·초대 앞', () => {
+  const mine = (over: Partial<HomeInput['checklists'][number]> = {}) => ({
+    owner_user_id: 'c',
+    label: '10월 월급',
+    cycle_start: '2026-10-05',
+    cycle_end: '2026-11-04',
+    lines: [{ state: 'checked' }, { state: 'wait' }],
+    ...over,
+  });
+  // 찬우 월급날 10월 5일, 오늘 7일: 체크할 차례
+  expect(homeTodo(base({ checklists: [mine()] }))).toEqual({
+    kind: 'check',
+    label: '10월 월급',
+    left: 1,
+    key: 'check:10월 월급:2026-10-05',
+    to: '/salary',
+  });
+  // 초대보다 먼저
+  expect(homeTodo(base({ checklists: [mine()], coupleState: 'not_joined' }))?.kind).toBe('check');
+  // 7일째(11일)까지, 8일째(12일)부터는 없음
+  expect(homeTodo(base({ today: '2026-10-11', checklists: [mine()] }))?.kind).toBe('check');
+  expect(homeTodo(base({ today: '2026-10-12', checklists: [mine()] }))).toBeNull();
+  // 다 체크했으면(‘못 함’ 포함) 없음(닫기 없음, 2026-11-11)
+  expect(
+    homeTodo(base({ checklists: [mine({ lines: [{ state: 'checked' }, { state: 'skipped' }] })] })),
+  ).toBeNull();
+  // 예빈 체크리스트만 남았으면(각자) 찬우에게는 없음
+  expect(checkTodo(base({ checklists: [{ ...mine(), owner_user_id: 'y' }] }))).toBeNull();
+  // 합쳐서: 공동 체크리스트
+  expect(
+    checkTodo(base({ joint: true, checklists: [{ ...mine(), owner_user_id: null }] }))?.kind,
+  ).toBe('check');
+});
+
+it('월급 전 확인 기간과 주소(2026-11-12 D3): 기간 끝 2일 전 ~ 기간 끝, 할 일 링크는 그 체크리스트', () => {
+  expect(inReviewWindow('2026-10-21', '2026-10-24')).toBe(false);
+  expect(inReviewWindow('2026-10-22', '2026-10-24')).toBe(true);
+  expect(inReviewWindow('2026-10-24', '2026-10-24')).toBe(true);
+  expect(inReviewWindow('2026-10-25', '2026-10-24')).toBe(false);
+  expect(reviewPath('cl 1')).toBe('/salary/review?checklist=cl%201');
+  expect(reviewPath(null)).toBe('/salary/review');
+  const b = base({ today: '2026-10-22' });
+  const i = {
+    ...b,
+    checklists: b.checklists.map((c, n) => (n === 0 ? { ...c, id: 'checklist-1' } : c)),
+  };
+  expect(homeTodo({ ...i, unlinkRequestedBy: null, reconnectFrom: null })).toMatchObject({
+    kind: 'review',
+    to: '/salary/review?checklist=checklist-1',
+  });
 });

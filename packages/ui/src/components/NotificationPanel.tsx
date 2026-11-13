@@ -1,8 +1,9 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { cx } from './cx';
 import { Button } from './Button';
-import { Icon, type IconName } from './Icon';
+import type { IconName } from './Icon';
 import { IconButton } from './IconButton';
+import type { LeadTone } from './lead-kinds';
 
 // 알림 패널(docs/design/components/NotificationPanel.md, 기획서 14 N-01~N-03). 넓은 창은 오른쪽 시트, 좁은 창은 전체 화면.
 // 묶음(오늘·이번 주·이전) → 줄(사람 Avatar 또는 아이콘, 문구, 시간, 새 알림 점). 열리면 첫 줄 포커스, ↑↓ 이동, Enter 열기.
@@ -15,6 +16,8 @@ export interface NotiItem {
   person?: { name: string; no: 1 | 2 };
   /** 앱 안내 아이콘(사람이 없을 때) */
   icon?: IconName;
+  /** 아이콘 원 영역 색(lead-kinds.ts noti) */
+  tone?: LeadTone;
 }
 
 export function NotificationPanel(p: {
@@ -131,7 +134,13 @@ export function NotificationPanel(p: {
     >
       <div className="hg-noti__head">
         {p.variant === 'page' && (
-          <IconButton icon="chevron-left" label={p.labels.back} ghost small onClick={p.onClose} />
+          <IconButton
+            icon="chevron-left"
+            label={p.labels.back}
+            ghost
+            className="hg-back"
+            onClick={p.onClose}
+          />
         )}
         <h2 className="hg-noti__title">{p.labels.title}</h2>
         <Button variant="ghost" size="sm" disabled={!unread} onClick={p.onReadAll}>
@@ -164,7 +173,8 @@ export function NotificationPanel(p: {
           </div>
         ) : !hasItems ? (
           <div className="hg-noti__empty">
-            <Icon name="bell" />
+            {/* 2026-11-12 D2: 빈 상태 그림 자리 120px(2D 그림이 들어올 때까지 회색 빈 자리) */}
+            <span className="hg-empty__art hg-artslot" aria-hidden="true" />
             <b>{p.labels.emptyTitle}</b>
             {p.labels.emptySub && <span>{p.labels.emptySub}</span>}
           </div>
@@ -194,9 +204,12 @@ export function NotificationPanel(p: {
                           {[...x.person.name][0] ?? ''}
                         </span>
                       ) : (
-                        <span className="hg-noti__icon" aria-hidden="true">
-                          <Icon name={x.icon ?? 'bell'} size={16} />
-                        </span>
+                        // 2026-11-10 알림 종류 자리: 2D 그림이 들어올 때까지 회색 빈 원(종류는 data-art, lead-kinds.ts noti)
+                        <span
+                          className="hg-noti__icon hg-lead--slot"
+                          data-art={x.icon}
+                          aria-hidden="true"
+                        />
                       )}
                       <span className="hg-noti__text">
                         <span className="hg-noti__msg">{x.msg}</span>

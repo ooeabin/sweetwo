@@ -1,4 +1,5 @@
 import {
+  AssetForbiddenError,
   fetchAssetHistory,
   qk,
   restoreAsset,
@@ -12,6 +13,8 @@ import {
   formatDot,
   formatYm,
   hasPrincipal,
+  parsePaidCount,
+  parseRate,
   todayKst,
 } from '@sweetwo/core';
 import {
@@ -30,22 +33,22 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { changeBand, track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
-import { toast } from '../../../shared/toast';
-import { LoadingFrame, MainFrame } from '../../frame';
-import { lastAssetsTab } from '../assets-frame';
+import { carryToast, quietly, toast } from '../../../shared/toast';
+import { lastAssetsTab, LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { canEdit, ownerOf, useAssetsData, useRefreshAssets } from '../data';
 
 type Vis = 'all' | 'sum' | 'private';
 
 // F-04 항목 상세·수정(23 F-04 1·2·3·5·6·7번): 금액(누르면 그 자리에서 수정, Esc 취소), 공개 범위(내 명의만),
-// 안 판 수익(원금 있는 투자·부동산), 월별 기록(월말 정리 / 직접 수정), 삭제(휴지통 + 되돌리기).
+// 안 판 수익(원금 있는 투자·부동산), 월별 기록, 삭제(휴지통 + 되돌리기).
 // 유형별 값(만기일, 납입 회차, 금리, 월 납입·상환액)도 누르면 그 자리에서 입력칸 + ‘저장’(3번, Esc 취소).
-// 배우자 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
-// 고친 기록은 직접 고친 것만, 날짜와 고친 사람.
+// 파트너 명의는 볼 수만. 금액 그래프(등록 이후 월별), 투자·부동산은 ‘팔았어요’(F-04b~d)·‘시세 바꾸기’.
+// 수정 내역은 직접 고친 것만, 날짜와 고친 사람.
 type ValueField = 'maturity_date' | 'paid_count' | 'interest_rate' | 'monthly_payment';
-const RATE = /^\d{1,2}(\.\d{1,2})?$/;
+type Patch = Parameters<typeof updateAsset>[1];
 
 export function F04Item() {
   const { id = '' } = useParams();
@@ -56,7 +59,7 @@ export function F04Item() {
   const m = (v: number) => money(v, masked);
   const history = useQuery({ queryKey: qk.assetHistory(id), queryFn: () => fetchAssetHistory(id) });
   const [editAmount, setEditAmountRaw] = useState<number | null | undefined>(undefined);
-  // 금액 고치기를 열 때의 값(30 동기화 2장 충돌 판정 기준)과 충돌(배우자가 1분 안에 바꿈)
+  // 금액 고치기를 열 때의 값(30 동기화 2장 충돌 판정 기준)과 충돌(파트너가 1분 안에 바꿈)
   const [openedAmount, setOpenedAmount] = useState<number | null>(null);
   const [conflict, setConflict] = useState<{ mine: number; theirs: number } | null>(null);
   const setEditAmount = (v: number | null | undefined) => {
@@ -80,27 +83,67 @@ export function F04Item() {
   if (!a) return <Navigate to={lastAssetsTab()} replace />;
   const o = ownerOf(a, d);
   const editable = canEdit(a, d.me?.id);
+  // 만기일이 지났는데 아직 정리 안 함(2026-11-11): 홈 띠는 30일 뒤 내려가니 상세에서도 F-04a로
+  const maturedOpen =
+    editable &&
+    a.side === 'asset' &&
+    a.kind !== 'deposit_money' &&
+    a.status === 'held' &&
+    !!a.maturity_date &&
+    a.maturity_date <= todayKst();
   const mine = a.owner_user_id === d.me?.id;
   const back = () => nav(`/assets/items?side=${a.side}`);
 
-  const run = async (act: () => Promise<unknown>, done?: string) => {
-    if (busy) return;
+  // 저장 실패(13 공통 상태 10번): “저장하지 못했어요” + 원래 값으로(입력칸을 닫아 서버 값을 보임).
+  // 서버가 권한 밖이라 거절(0행, 명의 잠금)하면 8번 “{파트너}님 항목이라 볼 수만 있어요”(2026-11-12 S8-16)
+  const run = async (act: () => Promise<unknown>, done?: string, undo?: Patch) => {
+    if (busy) return false;
     setBusy(true);
     try {
       await act();
       await refresh();
       await history.refetch();
-      if (done) toast(done);
-    } catch {
-      toast(copy.loadFailed);
+      if (done) toast(done, undo ? undoAction(undo) : undefined);
+      return true;
+    } catch (e) {
+      toast(
+        e instanceof AssetForbiddenError
+          ? copy.readOnly(d.couple?.partnerName ?? '')
+          : copy.saveFailed,
+      );
+      setEditAmount(undefined);
+      setField(null);
+      await refresh();
+      return false;
     } finally {
       setBusy(false);
     }
   };
-  // 금액 저장: 열 때 값이 서버에 그대로일 때만. 배우자가 1분 안에 바꿨으면 충돌 선택, 그 밖은 마지막 저장 우선
+  // 저장 Toast ‘되돌리기’(6초, 13 공통 상태 14번, 2026-11-12 S8-05): 고치기 전 값으로 다시 저장 + change_reverted
+  const undoAction = (prev: Patch) => {
+    const at = Date.now();
+    return {
+      label: copy.undo,
+      onClick: () => {
+        track('change_reverted', {
+          item_type: 'asset',
+          entry: 'toast',
+          reverted_whose: 'self',
+          hours_since_change: Math.floor((Date.now() - at) / 3_600_000),
+        });
+        quietly(
+          updateAsset(a.id, prev)
+            .then(refresh)
+            .then(() => history.refetch()),
+        );
+      },
+    };
+  };
+  // 금액 저장: 열 때 값이 서버에 그대로일 때만. 파트너가 1분 안에 바꿨으면 충돌 선택, 그 밖은 마지막 저장 우선
   const saveAmount = (force = false) => {
     if (editAmount === undefined || editAmount === null) return;
     const patch = { amount: editAmount, estimated: false };
+    const prev = { amount: a.amount, estimated: a.estimated };
     let saved = false;
     void run(async () => {
       if (!force) {
@@ -118,18 +161,33 @@ export function F04Item() {
       }
       await updateAsset(a.id, patch);
       saved = true;
-    }).then(() => {
-      if (!saved) return;
-      toast(copy.saved);
+    }).then((ok) => {
+      if (!ok || !saved) return;
+      toast(copy.saved, undoAction(prev));
+      // 32 4-5 fact_value_changed(자산·부채 금액)
+      track('fact_value_changed', {
+        field: a.side,
+        change_band: changeBand(prev.amount, patch.amount),
+        source_screen: 'F-04',
+      });
       setEditAmount(undefined);
     });
   };
   const remove = () =>
     void run(async () => {
       await trashAsset(a.id);
-      toast(copy.removed, {
+      carryToast(copy.removed, {
         label: copy.undo,
-        onClick: () => void restoreAsset(a.id).then(refresh),
+        onClick: () => {
+          // 32 4-7 trash_restored(Toast ‘되돌리기’, 2026-11-12 S8-07)
+          track('trash_restored', {
+            item_type: 'asset',
+            days_in_trash: 0,
+            relinked: false,
+            entry: 'toast',
+          });
+          quietly(restoreAsset(a.id).then(refresh));
+        },
       });
       back();
     });
@@ -152,16 +210,17 @@ export function F04Item() {
     setField(f);
     setDraft(v);
   };
+  // 금리 0~30% 소수 1자리, 회차 0~999: F-03과 같은 core 규칙 하나(2026-11-12 D5 = A, S8-12)
   const valueError =
-    field === 'interest_rate' && draft !== '' && !(RATE.test(draft) && Number(draft) <= 30)
+    field === 'interest_rate' && parseRate(draft) === 'bad'
       ? copy.rateInvalid
-      : field === 'paid_count' && draft !== '' && !/^\d{1,3}$/.test(draft)
+      : field === 'paid_count' && parsePaidCount(draft) === 'bad'
         ? copy.countInvalid
         : undefined;
   const valueOk = field === 'monthly_payment' ? draftAmount !== null : draft !== '' && !valueError;
   const saveValue = () => {
     if (!field || !valueOk || busy) return;
-    const patch =
+    const patch: Patch =
       field === 'maturity_date'
         ? { maturity_date: draft }
         : field === 'paid_count'
@@ -169,7 +228,15 @@ export function F04Item() {
           : field === 'interest_rate'
             ? { interest_rate: Number(draft), rate_estimated: false }
             : { monthly_payment: draftAmount };
-    void run(() => updateAsset(a.id, patch), copy.saved).then(() => setField(null));
+    const prev: Patch =
+      field === 'maturity_date'
+        ? { maturity_date: a.maturity_date }
+        : field === 'paid_count'
+          ? { paid_count: a.paid_count }
+          : field === 'interest_rate'
+            ? { interest_rate: a.interest_rate, rate_estimated: a.rate_estimated }
+            : { monthly_payment: a.monthly_payment };
+    void run(() => updateAsset(a.id, patch), copy.saved, prev).then(() => setField(null));
   };
   const fieldLabel =
     field === 'maturity_date'
@@ -212,7 +279,7 @@ export function F04Item() {
         />
       )}
       <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        <Button variant="primary" size="sm" disabled={busy || !valueOk} onClick={saveValue}>
+        <Button variant="primary" size="sm" disabled={!valueOk} loading={busy} onClick={saveValue}>
           {copy.saveEdit}
         </Button>
         <Button variant="secondary" size="sm" onClick={() => setField(null)}>
@@ -223,7 +290,7 @@ export function F04Item() {
   );
   const body = (
     <div className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
-      {/* 2026-11-04 목표 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
+      {/* 2026-11-04 저금 항목 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
       <PageHeader
         title={a.name}
         backLabel={copy.back}
@@ -241,6 +308,14 @@ export function F04Item() {
         <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
           <span>{copy.readOnly(o.name)}</span>
         </p>
+      )}
+      {maturedOpen && (
+        <div className="hg-banner hg-banner--info" role="status">
+          <span>{copy.maturedPast}</span>
+          <Button variant="link" size="sm" onClick={() => nav(`/assets/${a.id}/matured`)}>
+            {copy.maturedSettle}
+          </Button>
+        </div>
       )}
       <section className="hg-card hg-stack" aria-label={copy.amountLabel}>
         <span className="hg-card__label">
@@ -265,7 +340,8 @@ export function F04Item() {
               <Button
                 variant="primary"
                 size="sm"
-                disabled={busy || editAmount === null}
+                disabled={editAmount === null}
+                loading={busy}
                 onClick={() => saveAmount()}
               >
                 {copy.saveEdit}
@@ -292,15 +368,24 @@ export function F04Item() {
         ) : (
           <span className="hg-card__value">{m(a.amount)}</span>
         )}
+        {/* 7번 안 판 수익 “+120만 원(+12%)” / “원금 980만 원”(F-02 투자 묶음 줄과 같은 표기, 2026-11-12 S8-13) */}
         {gain !== null && a.principal !== null && (
-          <span className="hg-card__meta">
-            {`${gain >= 0 ? '+' : '−'}${m(Math.abs(gain))}`}, {copy.principal(m(a.principal))}
+          <span className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+            <span className="hg-card__meta">
+              <b>
+                {copy.investGain(
+                  `${gain >= 0 ? '+' : '−'}${m(Math.abs(gain))}`,
+                  a.principal > 0 ? Math.round((gain * 100) / a.principal) : null,
+                )}
+              </b>
+            </span>
+            <span className="hg-card__meta">{copy.principal(m(a.principal))}</span>
           </span>
         )}
-        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 보조 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일) */}
+        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일). 2026-11-11 주 버튼(오렌지 채움, 사용자 결정), ‘팔았어요’는 보조 그대로 */}
         {editable && editAmount === undefined && (
           <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <Button variant="secondary" size="sm" onClick={() => startEdit(a.amount)}>
+            <Button variant="primary" size="sm" onClick={() => startEdit(a.amount)}>
               {market ? copy.marketEdit : copy.amountEdit}
             </Button>
             {market && (
@@ -351,7 +436,7 @@ export function F04Item() {
           />
         )}
         {field === 'paid_count' && editor}
-        {/* 매달 나가는 돈이 금리보다 먼저(23 F-03g) */}
+        {/* 매달 내는 돈이 금리보다 먼저(23 F-03g) */}
         {a.monthly_payment !== null && (
           <ListRow
             label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
@@ -398,7 +483,9 @@ export function F04Item() {
           value={a.visibility}
           onChange={(v) => {
             setEditVis(false);
-            void run(() => updateAsset(a.id, { visibility: v }), copy.saved);
+            void run(() => updateAsset(a.id, { visibility: v }), copy.saved, {
+              visibility: a.visibility,
+            });
           }}
           autoAdvance={false}
           options={[

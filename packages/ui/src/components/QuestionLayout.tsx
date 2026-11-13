@@ -1,4 +1,5 @@
-import { Children, useEffect, type ReactNode } from 'react';
+import { Children, useEffect, useRef, type ReactNode } from 'react';
+import { useLoadingShown } from './Button';
 import { Icon } from './Icon';
 import { Wordmark } from './Wordmark';
 
@@ -13,6 +14,8 @@ export interface ChapterProgress {
   steps?: { total: number; done: number };
   /** 이름이 없을 때 화면 읽기 이름 앞말(기본 ‘온보딩’) */
   label?: string;
+  /** 채움 색. 온보딩 챕터만 brand, 다른 질문 흐름(steps로 그린 막대)은 ink(2026-11-09, DESIGN.md) */
+  tone?: 'brand' | 'ink';
 }
 
 /** 넓은 창 위 바 가운데: 챕터면 “목표” + 칸 막대(brand), 아니면 ProgressSteps */
@@ -30,7 +33,7 @@ function BarProgress({
         {chapter.name && <p className="hg-qbar__label">{chapter.name}</p>}
         {s && s.total > 0 && (
           <div
-            className="hg-segs"
+            className={`hg-segs${chapter.tone === 'ink' ? ' hg-segs--ink' : ''}`}
             role="progressbar"
             aria-label={`${chapter.name || chapter.label || '온보딩'} 진행`}
             aria-valuemin={0}
@@ -75,10 +78,10 @@ function StepsBar({ steps }: { steps: { total: number; now: number; fill?: numbe
 export function ChapterBar({ chapter, onBack }: { chapter: ChapterProgress; onBack?: () => void }) {
   const fill = chapter.fill === null ? null : Math.min(Math.max(Math.round(chapter.fill), 0), 100);
   return (
-    <div className="hg-chapterbar">
+    <div className={`hg-chapterbar${chapter.tone === 'ink' ? ' hg-chapterbar--ink' : ''}`}>
       <div className="hg-chapterbar__top">
         {onBack && (
-          <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
+          <button type="button" className="hg-q__back hg-back" aria-label="뒤로" onClick={onBack}>
             <Icon name="chevron-left" size={24} />
           </button>
         )}
@@ -160,6 +163,7 @@ export function QuestionLayout({
   summary,
   note,
   hero,
+  celebrate,
 }: {
   steps?: { total: number; now: number; fill?: number };
   /** 온보딩 챕터 진행(ChapterBar). 주면 steps 대신 “목표” + 챕터 안 막대 */
@@ -174,21 +178,24 @@ export function QuestionLayout({
     loading?: boolean;
     variant?: 'primary' | 'secondary' | 'danger';
   };
-  later?: { label: string; onClick: () => void };
+  /** loading: 이 글자 버튼이 서버 일을 기다리는 중(2026-11-06, 누르기 막고 0.3초 뒤 도는 원) */
+  later?: { label: string; onClick: () => void; loading?: boolean };
   /** 주 버튼 왼쪽 회색 보조 버튼(대답 성격의 ‘취소’ 등). 좁은 창에서 주 버튼과 반씩 */
-  secondary?: { label: string; onClick: () => void };
+  secondary?: { label: string; onClick: () => void; loading?: boolean };
   onBack?: () => void;
   onSubmit?: () => void;
   /** 결과 화면(O-61~67): 본문 2열(`hg-q__cols`)을 쓸 수 있게 넓은 틀 */
   wide?: boolean;
   /** 안내 화면: 제목 가운데 정렬 + 세로 가운데(O-01, A-02와 같은 배치). 입력 영역이 없으면 기본으로 켬 */
   center?: boolean;
-  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 남는 돈) */
+  /** 주 버튼 바로 위 요약(`hg-q__sum`). 좁은 창에서도 버튼과 같이 아래에 붙어 있음(O-50 여유 자금) */
   summary?: ReactNode;
   /** 버튼 바로 위 가운데 정렬 안내 한 줄(2026-11-03, S-11e·G-02p ‘올린 사진은 …’) */
   note?: ReactNode;
   /** 제목 위 주인공 자리(그림 또는 완료 표시). 결과 화면(O-60)처럼 가운데 배치와 같이 씀 */
   hero?: ReactNode;
+  /** 축하·보상 화면 배경(화면 위 40~50% brand-soft → surface, `hg-celebrate-bg`, DESIGN.md ‘색’ 예외). 움직이는 그림 자리가 있는 축하 화면만 */
+  celebrate?: boolean;
 }) {
   // 2026-11-03 칸 막대(StepsBar) 대신 모든 질문 흐름을 온보딩과 같은 얇은 막대(ChapterBar)로
   const chapter: ChapterProgress | undefined =
@@ -199,57 +206,95 @@ export function QuestionLayout({
           total: 1,
           name: '',
           label: '질문',
+          tone: 'ink',
           fill: ((steps.now + (steps.fill ?? 50) / 100) / steps.total) * 100,
           steps: { total: steps.total, done: steps.now + 1 },
         }
       : undefined);
   const centered = center ?? Children.toArray(children).length === 0;
+  // 처리 중(2026-11-06): 누르기와 Enter는 바로 막고, 도는 원은 0.3초 넘을 때만(Button.md)
+  const busy = !!(primary?.loading || later?.loading || secondary?.loading);
+  const primaryShown = useLoadingShown(primary?.loading);
+  const laterShown = useLoadingShown(later?.loading);
+  const secondShown = useLoadingShown(secondary?.loading);
   useEffect(() => {
     if (!onBack) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onBack();
+      // 시트·대화상자가 열려 있으면 Esc는 그것만 닫음(2026-11-10: 소비자가 onBack을 빼면 뒤로가 사라져 제목이 움직이던 것)
+      if (e.key === 'Escape' && !document.querySelector('[aria-modal="true"]')) onBack();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onBack]);
 
+  // Enter = 주 버튼(12 공통 ‘키보드’, 2026-11-10 QA 2구간 S2-08): 입력 칸이 없거나 휠·빈 곳에 포커스가 있어도.
+  // 입력 칸은 form 제출이 처리하고, 다른 버튼·링크·선택지에 포커스가 있으면 그것을 누름. 한글 조합 중, 시트·대화상자가 열려 있으면 무시
+  const submitRef = useRef<() => void>();
+  submitRef.current = primary && !primary.disabled && !busy ? onSubmit : undefined;
+  useEffect(() => {
+    if (!primary) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.isComposing || e.defaultPrevented) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      const a = document.activeElement;
+      if (
+        a &&
+        a !== document.body &&
+        a.closest(
+          'button, a, input, textarea, select, [role="checkbox"], [role="radio"], [role="switch"]',
+        )
+      )
+        return;
+      e.preventDefault();
+      submitRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [!!primary]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const backOnly = !primary && !later && !secondary;
   return (
-    <main style={{ padding: '0 var(--space-4)' }}>
+    <main className={celebrate ? 'hg-qmain hg-celebrate-bg' : 'hg-qmain'}>
       <div className="hg-qbar">
         <Wordmark height={24} />
         <BarProgress chapter={chapter} steps={steps} />
         <span />
       </div>
       <form
-        className={['hg-q', wide && 'hg-q--wide', centered && 'hg-q--center']
+        className={[
+          'hg-q',
+          wide && 'hg-q--wide',
+          centered && 'hg-q--center',
+          !chapter && !steps && !onBack && 'hg-q--top',
+        ]
           .filter(Boolean)
           .join(' ')}
         onSubmit={(e) => {
           e.preventDefault();
-          if (!primary?.disabled) onSubmit?.();
+          if (!primary?.disabled && !busy) onSubmit?.();
         }}
       >
         {chapter ? (
           <div className="hg-q__nav">
             <ChapterBar chapter={chapter} onBack={onBack} />
           </div>
-        ) : steps || onBack ? (
-          <div className="hg-q__nav">
-            {steps && <StepsBar steps={steps} />}
-            {onBack ? (
-              <button type="button" className="hg-q__back" aria-label="뒤로" onClick={onBack}>
-                <Icon name="chevron-left" size={24} />
-              </button>
-            ) : (
-              <span className="hg-q__back-space" aria-hidden="true" />
-            )}
-          </div>
         ) : (
-          // 뒤로가 없는 화면도 제목 자리를 같게(좁은 창에서 뒤로 버튼 높이만큼 비움)
-          <div className="hg-q__nav" aria-hidden="true">
-            <span className="hg-q__back-space" />
-          </div>
+          // 2026-11-10 뒤로가 없는 화면은 뒤로 자리를 비워 두지 않음: 제목이 위 여백(hg-q--top, 48px)에서 바로 시작
+          (steps || onBack) && (
+            <div className="hg-q__nav">
+              {steps && <StepsBar steps={steps} />}
+              {onBack && (
+                <button
+                  type="button"
+                  className="hg-q__back hg-back"
+                  aria-label="뒤로"
+                  onClick={onBack}
+                >
+                  <Icon name="chevron-left" size={24} />
+                </button>
+              )}
+            </div>
+          )
         )}
         {hero && <div className="hg-q__hero">{hero}</div>}
         <div className="hg-q__head">
@@ -276,8 +321,9 @@ export function QuestionLayout({
             {later && (
               <button
                 type="button"
-                className="hg-btn hg-btn--link hg-btn--quiet"
-                onClick={later.onClick}
+                className={`hg-btn hg-btn--link hg-btn--quiet${laterShown ? ' is-loading' : ''}`}
+                aria-busy={later.loading || undefined}
+                onClick={() => !busy && later.onClick()}
               >
                 {later.label}
               </button>
@@ -286,8 +332,9 @@ export function QuestionLayout({
             {secondary && (
               <button
                 type="button"
-                className="hg-btn hg-btn--secondary hg-q__second"
-                onClick={secondary.onClick}
+                className={`hg-btn hg-btn--secondary hg-q__second${secondShown ? ' is-loading' : ''}`}
+                aria-busy={secondary.loading || undefined}
+                onClick={() => !busy && secondary.onClick()}
               >
                 {secondary.label}
               </button>
@@ -295,7 +342,7 @@ export function QuestionLayout({
             {primary && (
               <button
                 type="submit"
-                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primary.loading ? ' is-loading' : ''}`}
+                className={`hg-btn hg-btn--${primary.variant ?? 'primary'}${primaryShown ? ' is-loading' : ''}`}
                 disabled={primary.disabled}
                 aria-busy={primary.loading || undefined}
               >

@@ -23,6 +23,8 @@ interface Row {
   subject: string;
   body_text: string;
   body_html: string;
+  from_email?: string | null; // 문의 답장은 help@
+  headers?: Record<string, string> | null; // In-Reply-To, References, X-Sweetwo-Copy
 }
 
 const same = (a: string, b: string) => {
@@ -87,7 +89,14 @@ export async function handle(
       const id = ses
         ? await sendSes(
             ses,
-            { to: r.to_email, subject: r.subject, text: r.body_text, html: r.body_html },
+            {
+              to: r.to_email,
+              subject: r.subject,
+              text: r.body_text,
+              html: r.body_html,
+              from: r.from_email,
+              headers: r.headers,
+            },
             fetchFn,
           )
         : `log-${r.id}`;

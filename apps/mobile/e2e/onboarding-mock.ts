@@ -15,24 +15,24 @@ export interface MemDb {
   spends: Record<string, unknown>[];
   bigs: Record<string, unknown>[];
   deposits: Record<string, unknown>[];
-  /** 합류 흐름: 배우자 프로필, 동의 기록, 다시 나눈 분담 */
+  /** 합류 흐름: 파트너 프로필, 동의 기록, 다시 나눈 분담 */
   partner: Record<string, unknown> | null;
   /** 합류 서버 함수 호출 기록 */
   joinCalls: Record<string, unknown>[];
   /** 비상금 넣기, 꺼내기(emergency_move) */
   emergencyMoves: Record<string, unknown>[];
-  /** 배우자 생일(partner_birthday) */
+  /** 파트너 생일(partner_birthday) */
   partnerBirthday?: { month: number; day: number } | null;
   consents: Record<string, unknown>[];
   shares: Record<string, unknown> | null;
   /** 제안(08 6장) */
   proposals: Record<string, unknown>[];
-  /** 우리 자산: 내가 볼 수 있는 행, 이력, 배우자 합계만, 월말 순자산 */
+  /** 자산 관리: 내가 볼 수 있는 행, 이력, 파트너 합계만, 월말 순자산 */
   assets: Record<string, unknown>[];
   assetHistory: Record<string, unknown>[];
   partnerSums: Record<string, unknown>[];
   netWorth: Record<string, unknown>[];
-  /** 배우자 활동(H-08) rpc 결과 */
+  /** 파트너 활동(H-08) rpc 결과 */
   activity: Record<string, unknown>[];
   /** 달성 축하 문장 재료(goal_story) */
   goalStory: { months: number; together: number };
@@ -54,7 +54,7 @@ export interface MemDb {
   /** 다른 수입(O-35b), 상여금(O-35) */
   incomeItems: Record<string, unknown>[];
   incomeEvents: Record<string, unknown>[];
-  /** 캘린더 가족·챙길 날 */
+  /** 캘린더 가족·경조사 */
   family: Record<string, unknown>[];
   cares: Record<string, unknown>[];
   /** 다녀온 뒤 기록(Y-08), 목표 사용 */
@@ -65,18 +65,29 @@ export interface MemDb {
   kindNames: Record<string, unknown>[];
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
-  invites: { code: string; expires_at: string; used_at: string | null }[];
+  invites: {
+    code: string;
+    expires_at: string;
+    used_at: string | null;
+    /** 누가 ‘합류하기’로 잡아 둠(2026-11-11 D1) */
+    reserved_until?: string | null;
+    reserved_by?: string | null;
+  }[];
+  /** 합류가 끝난 초대(시작한 사람이 취소, 24시간 지남): join_context가 null(2026-11-11 D1) */
+  joinEnded: boolean;
+  /** 다시 연결할 수 있는지(my_reconnect_ok). 기본은 확정 해제 기록의 reconnect_until로 */
+  reconnectOk?: boolean;
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
   goalChanges: Record<string, unknown>[];
   pendingTerms: { kind: string; version: string }[];
   mailBounced: boolean;
-  /** 생활비 체크 답(W-03) */
+  /** 생활비 체크 답(예전 화면, 서버 흉내만 남김) */
   livingChecks: Record<string, unknown>[];
   /** 앱 안 공지(AD-10, 게시된 것) */
   notices: Record<string, unknown>[];
-  /** 꼼꼼 모드 통장 잔액(W-04b) */
+  /** 꼼꼼 모드 통장 잔액(예전 월말 화면, 서버 흉내만 남김) */
   balances: Record<string, unknown>[];
   /** 월급 계획(save_split)와 이번 달 월급 체크리스트(start_checklist) */
   splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
@@ -172,6 +183,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     kindNames: [],
     notifications: [],
     invites: [],
+    joinEnded: false,
     unlinks: [],
     inquiries: [],
     livingChecks: [],
@@ -194,25 +206,25 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     ],
     rpc: [],
   };
-  // 서버 goal_saved 흉내: 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기
+  // 서버 goal_saved 흉내(ADR 0007, 2026-11-09): 모은 금액 = 시작할 때 모은 금액 + 그 저금 항목을 체크한 금액의 합
   const goalSaved = (id: string) => {
-    const g = db.goals.find((x) => x.id === id);
-    let v = Number(g?.other_held ?? 0);
+    let v = Number(db.goals.find((g) => g.id === id)?.start_saved ?? 0);
     for (const c of db.checklists)
       for (const l of c.pay_check_line as Record<string, unknown>[])
         if (l.goal_id === id && l.kind === 'saving' && l.state === 'checked')
           v += Number(l.actual ?? l.planned);
-    for (const mv of db.goalMoves)
-      if (mv.goal_id === id && !mv.deleted_at)
-        v += mv.kind === 'in' ? Number(mv.amount) : -Number(mv.amount);
-    return Math.max(v, 0);
+    return v;
   };
-  // 서버 goal_lines_sync 흉내: 모으는 목표만 월급 계획 저금 줄(각자: 우리 목표는 모든 월급 계획, 내 목표는 주인 것)
+  // 서버 goal_lines_sync 흉내(ADR 0007): 지우지 않고 그만 모으지 않은 저금 항목만 월급 계획 저금 줄.
+  // 합쳐서 = 공동 월급 계획, 각자 = 주인(없으면 만든 사람) 월급 계획 하나
   const goalLinesSync = (g: Record<string, unknown>) => {
+    const joint = db.space?.salary_mode === 'joint';
+    const owner = g.owner_user_id ?? g.created_by ?? null;
     const want = (sp: (typeof db.splits)[number]) =>
       !g.deleted_at &&
-      ['active', 'delayed'].includes(String(g.status ?? 'active')) &&
-      (g.owner_user_id == null || g.owner_user_id === sp.owner_user_id);
+      !g.closed_at &&
+      ['active', 'delayed', 'achieved'].includes(String(g.status ?? 'active')) &&
+      (joint ? sp.owner_user_id == null : sp.owner_user_id === owner);
     for (const sp of db.splits) {
       const has = sp.split_line.some((l) => l.goal_id === g.id);
       if (want(sp) && !has) {
@@ -220,7 +232,10 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           -1,
           ...sp.split_line.filter((l) => l.kind === 'saving').map((l) => Number(l.sort)),
         );
-        for (const l of sp.split_line) if (Number(l.sort) > last) l.sort = Number(l.sort) + 1;
+        // 그만 모음 되돌리기는 원래 자리(서버 freed_lines의 sort 키, 2026-11-12), 새 항목은 저금 묶음 맨 아래
+        const pos = Math.min(Number((g.freedSort as number | undefined) ?? last + 1), last + 1);
+        for (const l of sp.split_line) if (Number(l.sort) >= pos) l.sort = Number(l.sort) + 1;
+        delete g.freedSort;
         sp.split_line.push({
           id: `${sp.id}-g-${String(g.id)}`,
           split_id: sp.id,
@@ -228,11 +243,14 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           goal_id: g.id,
           user_id: null,
           name: null,
-          amount: 0,
-          sort: last + 1,
+          amount: Number((g.freed as number | undefined) ?? 0),
+          sort: pos,
         });
         sp.split_line.sort((a, b) => Number(a.sort) - Number(b.sort));
       } else if (!want(sp) && has) {
+        // 다시 모을 때 매달 금액을 되살리려고 기억(서버 freed_lines)
+        g.freed = sp.split_line.find((l) => l.goal_id === g.id)?.amount ?? 0;
+        g.freedSort = sp.split_line.find((l) => l.goal_id === g.id)?.sort ?? null;
         sp.split_line = sp.split_line.filter((l) => l.goal_id !== g.id);
         for (const c of db.checklists)
           c.pay_check_line = (c.pay_check_line as Record<string, unknown>[]).filter(
@@ -240,6 +258,59 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           );
       }
     }
+  };
+  /** 이번 사이클 체크리스트에 월급 계획 새 줄 넣기(sync_checklist 흉내, 체크 안 한 줄만 새 금액) */
+  const syncChecklist = (sp: (typeof db.splits)[number]) => {
+    const cl = db.checklists.find((c) => c.owner_user_id === sp.owner_user_id);
+    if (!cl) return;
+    const lines = cl.pay_check_line as Record<string, unknown>[];
+    for (const l of sp.split_line) {
+      if (l.kind !== 'saving' || Number(l.amount) <= 0) continue;
+      const cur = lines.find((x) => x.goal_id === l.goal_id);
+      if (cur && cur.state === 'wait') cur.planned = l.amount;
+      if (!cur)
+        lines.push({
+          ...l,
+          id: `${String(l.id)}-c`,
+          planned: l.amount,
+          actual: null,
+          state: 'wait',
+        });
+    }
+    lines.sort((a, b) => Number(a.sort) - Number(b.sort));
+  };
+  /** 서버 sync_checklist 흉내(2026-11-09): 체크 안 한 줄은 월급 계획대로 다시, 체크한 줄은 그대로(줄 id나 종류·이름으로 맞춤), 순서는 월급 계획 */
+  const resync = (sp: (typeof db.splits)[number]) => {
+    const cl = db.checklists.find((c) => c.owner_user_id === sp.owner_user_id);
+    if (!cl) return;
+    const kept = (cl.pay_check_line as Record<string, unknown>[]).filter((x) => x.state !== 'wait');
+    const lineOf = (x: Record<string, unknown>) =>
+      sp.split_line.find((l) => `${String(l.id)}-c` === x.id || l.id === x.split_line_id);
+    const same = (a: Record<string, unknown>, c: Record<string, unknown>) =>
+      lineOf(a) === c ||
+      (a.kind === c.kind &&
+        (a.goal_id ?? null) === (c.goal_id ?? null) &&
+        (a.name ?? null) === (c.name ?? null) &&
+        (a.kind !== 'allowance' || (a.user_id ?? null) === (c.user_id ?? null)));
+    for (const k of kept) {
+      const l = lineOf(k);
+      if (l) k.sort = l.sort;
+    }
+    cl.pay_check_line = [
+      ...kept,
+      ...sp.split_line
+        .filter((l) => Number(l.amount) > 0 && !kept.some((k) => same(k, l)))
+        .map((l): Record<string, unknown> => ({
+          ...l,
+          id: `${String(l.id)}-c`,
+          split_line_id: l.id,
+          planned: l.amount,
+          actual: null,
+          state: 'wait',
+          checked_by: null,
+          checked_at: null,
+        })),
+    ].sort((a, c) => Number(a.sort) - Number(c.sort));
   };
   // 로그인된 세션(localStorage)
   await page.addInitScript(
@@ -292,7 +363,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     if (method === 'HEAD') {
       const n =
         path === '/rest/v1/goal'
-          ? db.goals.filter((g) => !g.deleted_at && g.template !== 'emergency').length
+          ? db.goals.filter((g) => !g.deleted_at).length
           : path === '/rest/v1/salary_split'
             ? db.splits.length
             : path === '/rest/v1/pay_checklist'
@@ -412,6 +483,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         // 서버 흉내: 주인의 월급 계획 줄을 통째로 교체
         const b = body() as unknown as { p_lines: Record<string, unknown>[]; p_owner?: string };
         const owner = b.p_owner ?? null;
+        // 각자 모드 파트너 월급 계획은 보기만(2026-11-09 서버 not_owner)
+        if (db.space?.salary_mode !== 'joint' && owner && owner !== db.me.id)
+          return json(route, { message: 'not_owner', code: '42501' }, 403);
         let sp = db.splits.find((x) => x.owner_user_id === owner);
         if (!sp) {
           sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
@@ -452,6 +526,95 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return json(route, sp.id);
       }
+      // W-01 영수증 줄 RPC(2026-11-09, 서버 20261116090000_w01_receipt 흉내): 권한, 이번 달 체크 안 한 줄만 따름
+      if (
+        fn === 'split_line_set' ||
+        fn === 'split_line_add' ||
+        fn === 'split_line_delete' ||
+        fn === 'split_reorder'
+      ) {
+        const b = body() as unknown as {
+          p_line?: string;
+          p_split?: string;
+          p_amount?: number;
+          p_name?: string;
+          p_kind?: string;
+          p_user?: string;
+          p_sort?: number;
+          p_ids?: string[];
+        };
+        const sp = b.p_split
+          ? db.splits.find((x) => x.id === b.p_split)
+          : db.splits.find((x) => x.split_line.some((l) => l.id === b.p_line));
+        const line = sp?.split_line.find((l) => l.id === b.p_line);
+        const err = (message: string, code = '22023') =>
+          json(route, { message, code }, code === '42501' ? 403 : 400);
+        if (!sp || (b.p_line && !line)) return err('no_split', '42501');
+        if (db.space?.couple_state === 'unlink_pending') return err('unlink_pending', '42501');
+        const joint = db.space?.salary_mode === 'joint';
+        if ((!joint && sp.owner_user_id !== db.me.id) || (joint && sp.owner_user_id !== null))
+          return err('not_owner', '42501');
+        const touch = () =>
+          Object.assign(sp, { updated_by: db.me.id, updated_at: new Date().toISOString() });
+        const dupe = (name: string, except?: unknown) =>
+          sp.split_line.some((l) => l.kind === 'custom' && l.name === name && l.id !== except);
+        if (fn === 'split_line_set' && line) {
+          const name = b.p_name?.trim();
+          if (name && dupe(name, line.id)) return err('duplicate_line');
+          if (b.p_amount !== undefined && b.p_amount !== null) line.amount = b.p_amount;
+          if (name) line.name = name;
+        }
+        if (fn === 'split_line_add') {
+          const name = b.p_name?.trim() ?? null;
+          if (b.p_kind === 'custom' && name && dupe(name)) return err('duplicate_line');
+          if (
+            b.p_kind === 'custom' &&
+            sp.split_line.filter((l) => l.kind === 'custom').length >= 10
+          )
+            return err('too_many_custom');
+          const last = Math.max(-1, ...sp.split_line.map((l) => Number(l.sort)));
+          const pos =
+            b.p_sort === undefined || b.p_sort === null ? last + 1 : Math.min(b.p_sort, last + 1);
+          for (const l of sp.split_line) if (Number(l.sort) >= pos) l.sort = Number(l.sort) + 1;
+          const id = `${sp.id}-add-${db.rpc.length}`;
+          sp.split_line.push({
+            id,
+            split_id: sp.id,
+            kind: b.p_kind,
+            goal_id: null,
+            user_id: b.p_kind === 'allowance' ? (b.p_user ?? sp.owner_user_id ?? db.me.id) : null,
+            name: b.p_kind === 'custom' ? name : null,
+            amount: b.p_amount ?? 0,
+            sort: pos,
+          });
+          sp.split_line.sort((a, c) => Number(a.sort) - Number(c.sort));
+          touch();
+          resync(sp);
+          return json(route, id);
+        }
+        if (fn === 'split_line_delete' && line) {
+          if (line.kind === 'saving') {
+            const g = db.goals.find((x) => x.id === line.goal_id);
+            if (g) {
+              g.closed_at = new Date().toISOString();
+              goalLinesSync(g);
+            }
+          } else {
+            if (line.kind === 'allowance' && sp.owner_user_id === null)
+              return err('keep_allowance');
+            sp.split_line = sp.split_line.filter((l) => l !== line);
+          }
+        }
+        if (fn === 'split_reorder') {
+          const ids = b.p_ids ?? [];
+          if (ids.length !== sp.split_line.length) return err('bad_lines');
+          for (const l of sp.split_line) l.sort = ids.indexOf(String(l.id));
+          sp.split_line.sort((a, c) => Number(a.sort) - Number(c.sort));
+        }
+        touch();
+        resync(sp);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'check_pay_line') {
         // 서버 흉내: 줄 상태, 다른 금액(0이면 못 함), 체크리스트 상태
         const b = body() as unknown as { p_line: string; p_state: string; p_actual?: number };
@@ -467,6 +630,19 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           l.checked_by = b.p_state === 'wait' ? null : db.me.id;
           l.checked_at = b.p_state === 'wait' ? null : new Date().toISOString();
           c.state = lines.some((x) => x.state === 'wait') ? 'open' : 'done';
+          // 서버 saving_unachieve 흉내(2026-11-09): 고르기 전 달성 항목이 목표 금액 아래로 내려가면 모으는 중 + 달성 알림 지움
+          const g = l.kind === 'saving' ? db.goals.find((x) => x.id === l.goal_id) : undefined;
+          if (
+            g &&
+            g.status === 'achieved' &&
+            !g.closed_at &&
+            g.target_amount != null &&
+            goalSaved(String(g.id)) < Number(g.target_amount)
+          ) {
+            Object.assign(g, { status: 'active', achieved_seen: [] });
+            if (db.notifications)
+              db.notifications = db.notifications.filter((n) => n.id !== `n-ach-${String(g.id)}`);
+          }
         }
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
@@ -476,7 +652,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'note_device')
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       if (fn === 'space_goals') {
-        // 서버처럼 배우자 내 목표 ‘금액만 보여 주기’는 “개인 목표”
+        // 서버처럼 파트너 저금 항목 ‘금액만 보여 주기’는 “개인 저금”
         return json(
           route,
           db.goals
@@ -484,7 +660,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             .sort((a, b) => Number(a.priority) - Number(b.priority))
             .map((g) =>
               g.owner_user_id && g.owner_user_id !== db.me.id && g.visibility === 'amount'
-                ? { ...g, name: '개인 목표', template: 'custom', details: {} }
+                ? { ...g, name: '개인 저금', template: 'custom', details: {} }
                 : g,
             ),
         );
@@ -531,20 +707,50 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           Object.entries(sums).map(([goal_id, amount]) => ({ goal_id, amount })),
         );
       }
+      if (fn === 'onboarding_reset_plan') {
+        // 서버 흉내(2026-11-10 S2-01): 온보딩 중에만, 내 것과 공동 것을 지움. 체크한 줄이 있으면 그대로
+        if (db.me.onboarding_done_at)
+          return json(route, { message: 'onboarding_done', code: '42501' }, 403);
+        const mine = (o: unknown) => o === db.me.id || o === null;
+        const checked = db.checklists.some(
+          (c) =>
+            mine(c.owner_user_id) &&
+            (c.pay_check_line as Record<string, unknown>[]).some((l) => l.state !== 'wait'),
+        );
+        if (!checked) {
+          for (let i = db.checklists.length - 1; i >= 0; i--)
+            if (mine(db.checklists[i]?.owner_user_id)) db.checklists.splice(i, 1);
+          for (let i = db.splits.length - 1; i >= 0; i--)
+            if (mine(db.splits[i]?.owner_user_id)) db.splits.splice(i, 1);
+        }
+        return json(route, null);
+      }
       if (fn === 'start_checklist') {
         const b = body() as unknown as { p_owner?: string };
         const sp = db.splits.find((x) => x.owner_user_id === (b.p_owner ?? null));
         if (!sp) return json(route, { message: 'no_split' }, 400);
         if (!db.me.payday && !db.me.payday_last) return json(route, null);
         const id = `checklist-${db.checklists.length + 1}`;
+        // 사이클(서버 make_checklist 흉내): 이번 달 월급날, 아직 안 왔으면 지난달(KST 날짜, 짧은 달은 말일)
+        const kst = new Date((opts.now ?? new Date()).getTime() + 9 * 3_600_000);
+        const dayOf = (y: number, m: number) => {
+          const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+          return db.me.payday_last ? last : Math.min(Number(db.me.payday), last);
+        };
+        let y = kst.getUTCFullYear();
+        let m = kst.getUTCMonth();
+        if (dayOf(y, m) > kst.getUTCDate()) [y, m] = m === 0 ? [y - 1, 11] : [y, m - 1];
+        const start = new Date(Date.UTC(y, m, dayOf(y, m)));
+        const [ny, nm] = m === 11 ? [y + 1, 0] : [y, m + 1];
+        const end = new Date(Date.UTC(ny, nm, dayOf(ny, nm) - 1));
         if (!db.checklists.some((c) => c.owner_user_id === sp.owner_user_id))
           db.checklists.push({
             id,
             split_id: sp.id,
             owner_user_id: sp.owner_user_id,
-            label: '9월 월급',
-            cycle_start: '2026-09-25',
-            cycle_end: '2026-10-24',
+            label: `${m + 1}월 월급`,
+            cycle_start: start.toISOString().slice(0, 10),
+            cycle_end: end.toISOString().slice(0, 10),
             state: 'open',
             pay_check_line: sp.split_line
               .filter((l) => Number(l.amount) > 0)
@@ -577,6 +783,60 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'plan-1');
       }
       if (fn === 'invite_preview') return json(route, [{ inviter_nickname: '찬우', status: 'ok' }]);
+      // 합류 흐름에 필요한 것만(2026-11-11 D1): 합류를 마치기 전에는 공간을 직접 못 읽음
+      if (fn === 'join_context') {
+        if (db.joinEnded) return json(route, null);
+        const sp = db.space ?? {};
+        const meId = String(db.me.id);
+        const jointSplit =
+          sp.salary_mode === 'joint' ? db.splits.find((x) => x.owner_user_id === null) : undefined;
+        const lines = (jointSplit?.split_line ?? []) as Record<string, unknown>[];
+        return json(route, {
+          space_id: 'space-1',
+          member: !!db.me.onboarding_done_at && db.me.onboarding_step === 'P-WAIT',
+          reserved_until: '2026-10-09T00:00:00Z',
+          starter_id: (db.partner?.id as string | undefined) ?? null,
+          starter_nickname: (db.partner?.nickname as string | undefined) ?? '찬우',
+          salary_mode: sp.salary_mode ?? 'separate',
+          // 흉내: 합류하는 사람의 월급 계획은 합류를 마칠 때 생기므로 그 전 월급 계획은 모두 시작한 사람 것
+          has_plan: db.splits.length > 0,
+          prefill: db.assets
+            .filter(
+              (a) =>
+                a.owner === 'person' &&
+                a.owner_user_id === null &&
+                a.created_by !== meId &&
+                !a.deleted_at,
+            )
+            .map((a) => ({
+              id: a.id,
+              name: a.name,
+              amount: a.amount,
+              estimated: !!a.estimated,
+            })),
+          joint: jointSplit
+            ? {
+                version:
+                  ((jointSplit as Record<string, unknown>).version as number | undefined) ?? 1,
+                lines: lines.map((l) => ({
+                  kind: l.kind,
+                  amount: l.amount,
+                  goal_id: l.goal_id ?? null,
+                  user_id: l.user_id ?? null,
+                  name: l.name ?? null,
+                })),
+                items: db.goals
+                  .filter((g) => !g.deleted_at && !g.closed_at)
+                  .map((g) => ({
+                    id: g.id,
+                    target: g.target_amount ?? null,
+                    deadline: g.deadline ?? null,
+                    saved: 0,
+                  })),
+              }
+            : null,
+        });
+      }
       if (fn === 'join_space' && db.me.onboarding_done_at && db.me.space_id === 'space-solo')
         return json(route, 'has_records'); // 혼자 시작한 기록 있음(A-07 6번)
       if (fn === 'join_moving_records') {
@@ -684,7 +944,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, shares.length);
       }
       // 제안: 서버 함수와 같은 규칙만 간단히(항목당 열린 제안 하나, 용돈은 사람마다)
-      // 양가 비용 예산 바로 저장(혼자): 같은 종류 챙길 날 쓸 돈, 양가 비용 목표 금액
+      // 양가 비용 예산 바로 저장(혼자): 같은 종류 경조사 쓸 돈, 양가 비용 목표 금액
       if (fn === 'save_family_budget') {
         const a = body().p_after as Record<string, number>;
         const parent = (id: unknown) =>
@@ -705,7 +965,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           if (g.template === 'family_cost') g.target_amount = a.target_amount;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
-      // 신랑·신부(S-11b): 나와 배우자 쪽, 쪽으로 저장한 값을 같이 바꿈
+      // 신랑·신부(S-11b): 나와 파트너 쪽, 쪽으로 저장한 값을 같이 바꿈
       if (fn === 'set_my_side') {
         const side = String(body().p_side);
         const flip = (v: unknown) => (v === 'groom' ? 'bride' : v === 'bride' ? 'groom' : v);
@@ -882,10 +1142,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'achieve_goal') {
+        // 서버 흉내(ADR 0007): 목표 금액이 있고 모은 금액이 닿으면 달성 + 알림, 처음 본 사람이면 true
         const g = db.goals.find((x) => x.id === body().p_goal);
         const seen = (g?.achieved_seen as string[] | undefined) ?? [];
-        if (g && (g.status === 'active' || g.status === 'delayed')) {
+        if (
+          g &&
+          !g.closed_at &&
+          (g.status === 'active' || g.status === 'delayed') &&
+          g.target_amount != null &&
+          goalSaved(String(g.id)) >= Number(g.target_amount)
+        ) {
           Object.assign(g, { status: 'achieved', achieved_seen: [db.me.id] });
+          db.notifications?.unshift({
+            id: `n-ach-${String(g.id)}`,
+            kind: 'goal_achieved',
+            title: `${String(g.name)} 목표 금액을 다 모았어요!`,
+            body: null,
+            target: `/salary/items/${String(g.id)}`,
+            icon: 'trophy',
+            actor_id: db.me.id,
+            read_at: null,
+            created_at: new Date().toISOString(),
+          });
           return json(route, true);
         }
         if (g && g.status === 'achieved' && !seen.includes(String(db.me.id))) {
@@ -894,8 +1172,108 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         return json(route, false);
       }
+      if (fn === 'add_saving_item') {
+        // 서버 흉내(20 W-11, ADR 0007): 내 월급 계획(합쳐서면 공동) 저금 줄 + 이번 사이클 체크리스트
+        const b = body() as unknown as {
+          p_name: string;
+          p_monthly: number;
+          p_target?: number | null;
+          p_deadline?: string | null;
+          p_start?: number;
+        };
+        const joint = db.space?.salary_mode === 'joint';
+        const start = Number(b.p_start ?? 0);
+        if (start < 0 || (b.p_target != null && start >= b.p_target))
+          return json(route, { message: 'bad_start', code: '22023' }, 400);
+        if (db.space?.couple_state === 'unlink_pending')
+          return json(route, { message: 'unlink_pending', code: '55000' }, 400);
+        const sp = db.splits.find((x) => x.owner_user_id === (joint ? null : db.me.id));
+        if (!sp) return json(route, { message: 'no_split', code: '22023' }, 400);
+        // 앱이 uuid로 검사(savingItemId)해서 uuid 모양
+        const id = `00000000-0000-4000-8000-${String(db.goals.length + 1).padStart(12, '0')}`;
+        const g: Record<string, unknown> = {
+          id,
+          space_id: 'space-1',
+          template: 'custom',
+          name: String(b.p_name).trim(),
+          kind: 'once',
+          priority: Math.max(0, ...db.goals.map((x) => Number(x.priority))) + 1,
+          details: {},
+          other_held: 0,
+          start_saved: start,
+          target_amount: b.p_target ?? null,
+          deadline: b.p_deadline ? `${b.p_deadline.slice(0, 7)}-01` : null,
+          amount_estimated: false,
+          deadline_estimated: false,
+          after_marriage: false,
+          status: 'active',
+          owner: joint ? 'together' : 'me',
+          owner_user_id: joint ? null : db.me.id,
+          visibility: 'all',
+          created_at: new Date().toISOString(),
+          created_by: db.me.id,
+          closed_at: null,
+          deleted_at: null,
+          freed: b.p_monthly,
+        };
+        db.goals.push(g);
+        goalLinesSync(g);
+        syncChecklist(sp);
+        return json(route, id);
+      }
+      if (fn === 'saving_item_retarget') {
+        // 서버 흉내(2026-11-09 round 3): 달성(고르기 전)만, 모은 금액보다 큰 새 목표 금액 → 모으는 중 + 기한 지움
+        const b = body() as unknown as { p_goal: string; p_target: number };
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g || g.status !== 'achieved' || g.closed_at)
+          return json(route, { message: 'not_achieved', code: '22023' }, 400);
+        if (b.p_target <= goalSaved(String(g.id)))
+          return json(route, { message: 'not_above', code: '22023' }, 400);
+        Object.assign(g, {
+          target_amount: b.p_target,
+          deadline: null,
+          status: 'active',
+          achieved_seen: [],
+        });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'saving_item_editable')
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      if (
+        fn === 'saving_item_keep' ||
+        fn === 'saving_item_unkeep' ||
+        fn === 'saving_item_stop' ||
+        fn === 'saving_item_reopen'
+      ) {
+        const b = body() as unknown as {
+          p_goal: string;
+          p_target?: number;
+          p_deadline?: string | null;
+        };
+        const g = db.goals.find((x) => x.id === b.p_goal);
+        if (!g) return json(route, { message: 'not_found', code: 'P0002' }, 404);
+        if (fn === 'saving_item_keep')
+          Object.assign(g, {
+            target_amount: null,
+            deadline: null,
+            status: 'active',
+            achieved_seen: [],
+          });
+        if (fn === 'saving_item_unkeep')
+          Object.assign(g, {
+            target_amount: b.p_target,
+            deadline: b.p_deadline ?? null,
+            status: 'achieved',
+            achieved_seen: [db.me.id],
+          });
+        if (fn === 'saving_item_stop') g.closed_at = new Date().toISOString();
+        if (fn === 'saving_item_reopen') g.closed_at = null;
+        goalLinesSync(g);
+        for (const sp of db.splits) syncChecklist(sp);
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'goal_story') return json(route, [db.goalStory]);
-      // G-07 예산 바꾸기: 연결된 부부는 제안, 아니면 바로
+      // G-07 예산 바꾸기: 연결된 두 사람은 제안, 아니면 바로
       if (fn === 'change_wedding_budget') {
         const b = body();
         const it = db.weddingItems.find((x) => x.id === b.p_item);
@@ -946,7 +1324,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         });
         return json(route, null);
       }
-      // 함께 모드(W-04a): 같이 하기·나감·함께 정하기 확정
+      // 함께 모드(예전 월말 화면): 같이 하기·나감·함께 정하기 확정
       if (fn === 'join_close_together' || fn === 'leave_close_together') {
         const c = db.closes.find((x) => x.id === body().p_close);
         if (c && fn === 'join_close_together')
@@ -1316,10 +1694,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'my_sessions') return json(route, db.sessions);
+      // 공지(AD-10): 대상 조건은 서버가 봄. 흉내는 쌓인 공지를 그대로
+      if (fn === 'my_notices') return json(route, db.notices);
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
       if (fn === 'my_mail_bounced') return json(route, db.mailBounced);
-      if (fn === 'send_desktop_link') return json(route, true);
+      // S-11 로그인 줄 소셜 계정 이메일(2026-11-12 QA 11구간 S11-11)
+      if (fn === 'my_login_email') return json(route, 'chanwoo@kakao.example');
       if (fn === 'agree_terms') {
         const b = body();
         const n = db.pendingTerms.filter(
@@ -1499,7 +1880,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           body.p_kind === 'goal' ? db.goals : body.p_kind === 'care_day' ? db.cares : db.assets;
         const r = list.find((x) => x.id === body.p_id);
         if (r) r.deleted_at = null;
-        return json(route, 'restored');
+        // 넣을 월급 계획이 없는 저금 항목(테스트가 unlinked 표시)은 서버처럼 'unlinked'(S11-10)
+        return json(route, r && (r as { unlinked?: boolean }).unlinked ? 'unlinked' : 'restored');
       }
       if (fn === 'purge_trash') {
         const body = JSON.parse(route.request().postData() ?? '{}') as {
@@ -1548,6 +1930,28 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         if (db.space) db.space.couple_state = 'connected';
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      if (fn === 'cancel_invite') {
+        // 초대 취소(S-12 ‘합류하는 중’): 잡아 둔 것 풀고 코드도 못 쓰게
+        for (const i of db.invites)
+          if (!i.used_at)
+            Object.assign(i, {
+              reserved_until: null,
+              reserved_by: null,
+              expires_at: '2026-10-01T00:00:00Z',
+            });
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (fn === 'my_reconnect_ok')
+        return json(
+          route,
+          db.reconnectOk ??
+            db.unlinks.some(
+              (x) =>
+                x.status === 'confirmed' &&
+                typeof x.reconnect_until === 'string' &&
+                x.reconnect_until > (opts.now ?? new Date()).toISOString(),
+            ),
+        );
       if (fn === 'create_invite' || fn === 'renew_invite') {
         // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
         const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';
@@ -1623,7 +2027,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           id: db.assetHistory.length + 1,
           asset_id: r.id,
           amount: r.amount,
-          source: 'manual',
+          // 처음 적은 값은 created(2026-11-12 D3, 수정 내역에 안 보임)
+          source: 'created',
           recorded_at: now,
         });
         return json(route, { id: r.id }, 201);
@@ -1818,7 +2223,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
-    // 가족·챙길 날(Y-02, Y-05)
+    // 가족·경조사(Y-02, Y-05)
     for (const [tbl, rows, defaults] of [
       [
         'family_member',
@@ -2184,18 +2589,30 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.unlinks.filter((u) => u.status === 'pending'),
       );
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
-    // 알림: 최신순, lt(더 불러오기), id 하나, 읽지 않은 것 하나(점)
+    // 알림: 최신순(같은 시각이면 id 내림차순), (만든 때, id) 커서(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {
       const rows = [...db.notifications].sort((a, b) =>
-        String(a.created_at) < String(b.created_at) ? 1 : -1,
+        String(a.created_at) === String(b.created_at)
+          ? String(a.id) < String(b.id)
+            ? 1
+            : -1
+          : String(a.created_at) < String(b.created_at)
+            ? 1
+            : -1,
       );
       if (method === 'GET') {
         if (url.searchParams.get('read_at') === 'is.null')
           return json(route, rows.filter((r) => !r.read_at).slice(0, 1));
         if (url.searchParams.get('id')?.startsWith('eq.'))
           return json(route, rows.find((r) => r.id === eqId(url)) ?? null);
-        const lt = url.searchParams.get('created_at')?.replace(/^lt\./, '');
-        return json(route, rows.filter((r) => !lt || String(r.created_at) < lt).slice(0, 30));
+        // or=(created_at.lt."at",and(created_at.eq."at",id.lt.id))
+        const cur = /created_at\.lt\."([^"]+)",and\(created_at\.eq\."[^"]+",id\.lt\.([^)]+)\)/.exec(
+          url.searchParams.get('or') ?? '',
+        );
+        const [, at = '', id = ''] = cur ?? [];
+        const after = (r: Record<string, unknown>) =>
+          !cur || String(r.created_at) < at || (String(r.created_at) === at && String(r.id) < id);
+        return json(route, rows.filter(after).slice(0, 30));
       }
     }
     if (path === '/rest/v1/saving_deposit' && method === 'GET') {

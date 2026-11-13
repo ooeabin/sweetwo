@@ -1,11 +1,6 @@
-import { assetIcon, assetIcon3d, Icon } from '@sweetwo/ui';
+import { Lead, leadOf } from '@sweetwo/ui';
 
-/** 자산·부채 묶음 그림(F-01 빈 상태 항목별 등록, F-03a 묶음 타일): 3D 아이콘(2026-11-05), 파일이 없으면 Phosphor */
+/** 자산·부채 묶음 아이콘(F-01 빈 상태 항목별 등록, F-03a 묶음 타일). 2026-11-09 영역 색 원 + Phosphor(ui lead-kinds.ts ‘asset’ 표) */
 export function AssetArt({ group }: { group: string }) {
-  const src = assetIcon3d(group);
-  return src ? (
-    <img className="hg-pick__art" src={src} alt="" aria-hidden="true" />
-  ) : (
-    <Icon name={assetIcon(group)} />
-  );
+  return <Lead {...leadOf('asset', group)} />;
 }

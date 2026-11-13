@@ -1,6 +1,7 @@
 // 스타일은 앱 진입점에서 한 번: import '@sweetwo/ui/styles.css'
 // 컴포넌트 이름은 디자인 시스템(docs/design/components) 이름 그대로.
 export * from './components/cx';
+export * from './components/avatar-figure';
 export * from './components/Icon';
 export * from './components/Button';
 export * from './components/ProviderMark';
@@ -12,8 +13,10 @@ export * from './components/InfoPlate';
 export * from './components/Badge';
 export * from './components/Chip';
 export * from './components/Field';
+export * from './components/CodeCells';
 export * from './components/ListRow';
 export * from './components/SectionHeader';
+export * from './components/Status';
 export * from './components/Ring';
 export * from './components/WeekStrip';
 export * from './components/Tabs';
@@ -28,7 +31,14 @@ export * from './components/BarChart';
 export * from './components/MonthBars';
 export * from './components/GoalPick';
 export { goalIcon } from './components/goal-icons';
-export { assetIcon } from './components/asset-icons';
+export {
+  leadOf,
+  leadTable,
+  type LeadGroup,
+  type LeadKind,
+  type LeadSpec,
+  type LeadTone,
+} from './components/lead-kinds';
 export { Distribution } from './components/Distribution';
 export { RankRow } from './components/RankRow';
 export * from './components/FileAttach';
@@ -41,6 +51,7 @@ export * from './components/LoadingStates';
 export * from './components/LockScreen';
 export * from './components/ConsentCard';
 export * from './components/Wordmark';
+export * from './components/AdminAuth';
 export * from './components/AppFrame';
 export * from './components/Meter';
 export * from './components/Toggle';
@@ -49,15 +60,19 @@ export * from './components/PageHeader';
 export * from './components/Menu';
 export * from './components/Modal';
 export * from './components/BottomSheet';
+export * from './components/Drawer';
+export * from './components/HomeHub';
+export * from './components/AddRow';
 export * from './components/Accordion';
 export * from './components/Search';
 export * from './components/ReorderList';
+export * from './components/ReceiptCard';
 export * from './components/question';
 export * from './components/AdminFrame';
 export * from './components/DataTable';
 export * from './components/CommandPalette';
 export { ArtPick } from './components/ArtPick';
 export { goalPhotoArt } from './components/preset-art';
-export { assetIcon3d, icon3d } from './components/icons3d';
 export { Band } from './components/Band';
 export { StatBlock } from './components/StatBlock';
+export { trackInputModality } from './input-modality';

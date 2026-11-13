@@ -1,24 +1,27 @@
-import { fetchAvatars, qk, removeAvatar, updateSpace } from '@sweetwo/api';
+import { useState } from 'react';
+import { fetchAvatars, fetchLoginEmail, qk, removeAvatar, updateSpace } from '@sweetwo/api';
 import { coupleBaseDay, formatDateFull, formatManWon, type BaseDay } from '@sweetwo/core';
-import { Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import { Badge, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { toast } from '../../../shared/toast';
-import { session } from '../../auth';
+import { carryToast, toast } from '../../../shared/toast';
+import { signOut } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-11 내 정보와 월급(25, 재기획): 프로필 사진(→ S-11e), 이름(→ S-11a), 로그인, 알림 이메일(→ S-11b),
 // 결혼 상태(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
-// 월급: 내 월급(→ S-11c, 합류 뒤 배우자 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
-// 주말·공휴일 앞당기기(부부 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
+// 월급: 내 월급(→ S-11c, 합류 뒤 파트너 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
+// 주말·공휴일 앞당기기(두 사람 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
 export function S11Me() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
+  const loginEmail = useQuery({ queryKey: qk.loginEmail, queryFn: fetchLoginEmail });
+  const [clearing, setClearing] = useState(false);
   if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const { me, c, space: sp } = d;
   const later = coupleBaseDay(c);
@@ -42,7 +45,8 @@ export function S11Me() {
   const photo = avatars.data?.photos[me.id] ?? null;
   const shown = photo;
   const clearPhoto = async () => {
-    if (!me.space_id) return;
+    if (!me.space_id || clearing) return;
+    setClearing(true);
     try {
       await removeAvatar(me.space_id, me.id);
       await qc.invalidateQueries({ queryKey: qk.avatars });
@@ -50,6 +54,8 @@ export function S11Me() {
       toast(copy.photoRemoved);
     } catch {
       toast(copy.failed);
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -85,20 +91,28 @@ export function S11Me() {
               {c.myName.slice(0, 1)}
             </span>
           )}
+          {/* 사진 위 카메라는 누르기 쉬운 지름길. 같은 일은 옆 글자 버튼 “사진 바꾸기”가 하므로 보조 기술·Tab에서는 뺌 */}
           <button
             type="button"
             className="hg-avatar-edit__btn"
-            aria-label={copy.photoChange}
+            aria-hidden="true"
+            tabIndex={-1}
             onClick={() => nav('/settings/me/photo')}
           >
             <Icon name="camera" />
           </button>
         </span>
-        {photo && (
-          <Button variant="ghost" size="sm" onClick={() => void clearPhoto()}>
-            {copy.photoRemove}
+        {/* 1번 “사진 바꾸기” / 사진이 있으면 “사진 지우기”도(글자 버튼, 2026-11-12 QA 11구간 S11-11) */}
+        <span className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <Button variant="ghost" size="sm" onClick={() => nav('/settings/me/photo')}>
+            {copy.photoChange}
           </Button>
-        )}
+          {photo && (
+            <Button variant="ghost" size="sm" loading={clearing} onClick={() => void clearPhoto()}>
+              {copy.photoRemove}
+            </Button>
+          )}
+        </span>
       </div>
       <div className="hg-list">
         <ListRow
@@ -106,7 +120,18 @@ export function S11Me() {
           value={c.myName}
           onClick={() => nav('/settings/me/nickname')}
         />
-        <ListRow label={copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')} chevron={false} />
+        {/* 3번 로그인: 제공자 배지 + 소셜 계정 이메일, 보기만(이메일을 못 읽으면 “카카오로 로그인했어요”) */}
+        <ListRow
+          label={
+            <span className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
+              <Badge kind="temp">{copy.providers[me.provider ?? ''] ?? ''}</Badge>
+              <span>
+                {loginEmail.data ?? copy.loggedIn(copy.providers[me.provider ?? ''] ?? '')}
+              </span>
+            </span>
+          }
+          chevron={false}
+        />
         {/* 4번 알림 이메일: 2026-11-04 그 자리 입력칸 대신 줄 → S-11b */}
         <ListRow
           label={copy.notifyEmail}
@@ -161,7 +186,7 @@ export function S11Me() {
               onClick={locked ? undefined : () => nav('/settings/me/salary-mode')}
             />
           )}
-          {/* 합쳐서 + 배우자 합류일 때만(고를 날이 두 월급날) */}
+          {/* 합쳐서 + 파트너 합류일 때만(고를 날이 두 월급날) */}
           {sp.salary_mode === 'joint' && c.joined && (
             <ListRow
               label={copy.planDay}
@@ -193,7 +218,7 @@ export function S11Me() {
         />
         {/* 10번 월급 계획: 2026-11-04 다른 줄과 같은 목록 줄로 */}
         <div className="hg-list">
-          <ListRow label={copy.openSplit} onClick={() => nav('/salary/split')} />
+          <ListRow label={copy.openSplit} onClick={() => nav('/salary?view=plan')} />
         </div>
       </section>
       {/* 11번 로그아웃: 2026-11-04 맨 아래 목록 줄 */}
@@ -202,9 +227,9 @@ export function S11Me() {
           label={copy.logout}
           chevron={false}
           onClick={async () => {
-            await session.signOut();
-            qc.clear();
-            toast(copy.loggedOut);
+            // 로그아웃은 하나로(쿼리 캐시, 기기 캐시, 가입 중 값, 돌아갈 화면까지, DEV_GUIDE ‘로그아웃’)
+            await signOut();
+            carryToast(copy.loggedOut);
             nav('/login', { replace: true });
           }}
         />

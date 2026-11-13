@@ -109,3 +109,32 @@ Deno.test('서버 키: 새 비밀 키(JSON default) 먼저, 없으면 옛 키', 
   strictEqual(serverKey({ SUPABASE_URL: 'x', SUPABASE_SERVICE_ROLE_KEY: 'old' }), 'old');
   strictEqual(serverKey({ SUPABASE_URL: 'x' }), null);
 });
+
+Deno.test('ses 드라이버: 문의 답장은 help@에서, 머리글(In-Reply-To, References)도', async () => {
+  const sesEnv: Env = {
+    ...env,
+    MAIL_DRIVER: 'ses',
+    MAIL_FROM: 'sweeTwo <noti@sweetwo.kr>',
+    AWS_ACCESS_KEY_ID: 'AKID',
+    AWS_SECRET_ACCESS_KEY: 'secret',
+  };
+  const reply = {
+    ...row,
+    from_email: 'sweeTwo <help@sweetwo.kr>',
+    headers: { 'In-Reply-To': '<m1@x>', References: '<m0@x> <m1@x>', From: 'evil@x' },
+  };
+  let sent: Record<string, unknown> = {};
+  const f = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    if (url.endsWith('/rpc/claim_mail')) return Response.json([reply]);
+    if (url.endsWith('/rpc/finish_mail')) return new Response(null, { status: 204 });
+    sent = JSON.parse(String(init?.body));
+    return Response.json({ MessageId: 'ses-2' });
+  }) as typeof fetch;
+  await handle(new Request('http://f', { headers: { 'x-mail-secret': 's3cret' } }), sesEnv, f);
+  strictEqual(sent.FromEmailAddress, 'sweeTwo <help@sweetwo.kr>');
+  deepStrictEqual((sent.Content as { Simple: { Headers: unknown } }).Simple.Headers, [
+    { Name: 'In-Reply-To', Value: '<m1@x>' },
+    { Name: 'References', Value: '<m0@x> <m1@x>' },
+  ]);
+});

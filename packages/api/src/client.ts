@@ -2,11 +2,11 @@ import { createClient, type SupabaseClient, type SupportedStorage } from '@supab
 import type { Database } from '@sweetwo/core';
 
 // Supabase 클라이언트는 하나만. 앱에는 공개돼도 되는 값(VITE_)만 들어간다.
-// - 웹(개발·e2e)과 모바일: supabase-js가 세션을 localStorage에. 앱은 로그인을 유지하고 앱 잠금(A-06)으로 보호(15 A-02 6번)
-// - 데스크톱: 토큰은 main 프로세스만. 렌더러는 access token을 브리지에서 받아 쓴다(supabase.auth는 쓰지 않음).
+// - 웹(개발·e2e): supabase-js가 세션을 localStorage에(15 A-02 6번)
+// - 모바일 앱: 토큰은 네이티브 브리지만. 웹뷰는 access token을 브리지에서 받아 쓴다(supabase.auth는 쓰지 않음).
 export type Db = SupabaseClient<Database>;
 
-type Mode = { kind: 'web' } | { kind: 'desktop'; getAccessToken: () => Promise<string | null> };
+type Mode = { kind: 'web' } | { kind: 'bridge'; getAccessToken: () => Promise<string | null> };
 let mode: Mode = { kind: 'web' };
 let client: Db | null = null;
 
@@ -44,6 +44,57 @@ let blockedAt = 0;
 /** 인터넷이 없어 쓰기를 막은 마지막 시각(ms) */
 export const lastOfflineBlock = () => blockedAt;
 const offline = () => typeof navigator !== 'undefined' && navigator.onLine === false;
+
+// 보기만(15 A-01 5번 ‘업데이트 없이 보기만 할게요’, 13 공통 상태 12번): 최소 지원 버전 미만이면 서버로 가는 쓰기를 보내지 않음.
+// 화면은 그대로 두고 저장하려 하면 바로 실패 → 앱이 “지금 버전으로는 저장할 수 없어요” 토스트(toast.tsx).
+// 조회용 RPC(stable 함수)와 로그인·기기 기록처럼 보기에 필요한 것만 통과.
+let readOnly = false;
+let readOnlyAt = 0;
+/** 보기만 모드 켜기·끄기(A-01) */
+export const setReadOnly = (on: boolean) => {
+  readOnly = on;
+};
+export const isReadOnly = () => readOnly;
+/** 보기만이라 쓰기를 막은 마지막 시각(ms) */
+export const lastReadOnlyBlock = () => readOnlyAt;
+const READ_RPC = new Set([
+  'goal_saved_sums',
+  'goal_story',
+  'invest_answers',
+  'invite_preview',
+  'join_context',
+  'my_login_email',
+  'my_mail_bounced',
+  'my_notices',
+  'my_reconnect_ok',
+  'my_sessions',
+  'my_unlink',
+  'net_worth_history',
+  'partner_asset_sums',
+  'partner_birth_year',
+  'partner_profile',
+  'pending_terms',
+  'space_avatars',
+  'space_goals',
+  'trash_rows',
+  'unlink_partner_name',
+  'login_state',
+  // 보기에 필요한 기록·준비(사용자 데이터를 바꾸지 않음)
+  'ensure_my_space',
+  'start_checklist',
+  'note_login',
+  'note_device',
+  'touch_app',
+  'mark_notifications_read',
+  // 보안: 기기 로그아웃, 푸시 해제는 막지 않음
+  'end_sessions',
+  'unregister_push_device',
+]);
+const blockedByReadOnly = (url: string) => {
+  if (!readOnly || url.includes('/auth/v1/')) return false;
+  const m = /\/rest\/v1\/rpc\/([a-z0-9_]+)/.exec(url);
+  return !(m?.[1] && READ_RPC.has(m[1]));
+};
 const trackedFetch: typeof fetch = async (input, init) => {
   const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
   const write = method !== 'GET' && method !== 'HEAD';
@@ -53,6 +104,10 @@ const trackedFetch: typeof fetch = async (input, init) => {
   if (offline() && !url.includes('/auth/v1/')) {
     blockedAt = Date.now();
     throw new TypeError('Failed to fetch');
+  }
+  if (blockedByReadOnly(url)) {
+    readOnlyAt = Date.now();
+    throw new TypeError('read_only');
   }
   writing++;
   emitSaving();
@@ -72,7 +127,7 @@ export function supabase(): Db {
     throw new Error('VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY가 필요해요 (.env.development)');
   }
   client =
-    mode.kind === 'desktop'
+    mode.kind === 'bridge'
       ? createClient<Database>(url, anonKey, {
           accessToken: mode.getAccessToken,
           global: { fetch: trackedFetch },

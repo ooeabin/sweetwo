@@ -34,11 +34,11 @@ select ok(
   '이전 코드는 바로 만료');
 reset role;
 
--- 합류가 끝난 부부는 새 코드를 못 받는다
+-- 합류가 끝난 커플은 새 코드를 못 받는다
 update public.couple_space set couple_state = 'connected';
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select throws_ok($$ select * from public.renew_invite() $$, 'P0001', 'already_joined', '연결된 부부는 못 받는다');
+select throws_ok($$ select * from public.renew_invite() $$, 'P0001', 'already_joined', '연결된 커플은 못 받는다');
 reset role;
 
 select * from finish();

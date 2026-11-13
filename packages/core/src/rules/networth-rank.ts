@@ -1,7 +1,7 @@
 import type { Won } from '../money';
 import type { AssetSide, NetWorthItem } from './asset';
 
-// 우리 자산 순위 1단계(계산·배분 7-7, 23 F-08, ADR 0006, 2026-11-04).
+// 자산 순위 1단계(계산·배분 7-7, 23 F-08, ADR 0006, 2026-11-04).
 // 2025년 가계금융복지조사(통계청·한국은행·금융감독원, 자산·부채 2025년 3월 말) 부록 통계표 12의 순자산 분위 경계값(P10~P90),
 // 0원 아래는 2024년 보도자료 표 1-2의 순자산 구간별 가구 분포(−1억 미만 0.2%, −1억~0 2.8%).
 // 점 사이는 고르게 퍼져 있다고 보고 우리 아래 가구 비율(백분위)을 추정.
@@ -29,7 +29,7 @@ export const RANK_BASIS = {
   ] as { net: Won; below: number }[],
 };
 
-/** 우리 순자산이 들어가는 칸 번호: 0 = −1억 미만, 1~10 = 점 사이, 11 = P90(11억 20만 원) 이상 */
+/** 순자산이 들어가는 칸 번호: 0 = −1억 미만, 1~10 = 점 사이, 11 = P90(11억 20만 원) 이상 */
 export function rankBracket(net: Won): number {
   const p = RANK_BASIS.points;
   const i = p.findIndex((x) => net < x.net);
@@ -119,7 +119,7 @@ const isFinancial = (grp: string, kind?: string) =>
 
 /**
  * 우리 금융자산 비율(F-08 6a): 금융자산 ÷ 자산(평가금액), 반올림 %. 비공개·판 항목 제외.
- * 배우자 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
+ * 파트너 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
  */
 export function financialPct(
   items: (NetWorthItem & { grp: string; kind?: string })[],

@@ -1,4 +1,4 @@
-import type { Json, SplitLineDraft, Tables } from '@sweetwo/core';
+import { splitLineId, type Json, type SplitLineDraft, type Tables } from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -12,7 +12,7 @@ const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
 };
 
-/** 부부 공간의 월급 계획 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
+/** 우리 둘 공간의 월급 계획 전부(각자 = 사람마다, 합쳐서 = 하나). 줄은 순서대로 */
 export async function fetchSplits(): Promise<SalarySplit[]> {
   const { data, error } = await supabase()
     .from('salary_split')
@@ -50,6 +50,15 @@ export async function startChecklist(owner?: string): Promise<string | null> {
   const { data, error } = await supabase().rpc('start_checklist', { p_owner: owner });
   fail(error);
   return (data as string | null) ?? null;
+}
+
+/**
+ * 온보딩 중 추천 월급 계획 다시 만들기 전(17 O-32, 2026-11-10 S2-01): 내 월급 계획과 공동 월급 계획, 그 체크리스트를 지움.
+ * 온보딩을 마친 뒤에는 서버가 거부. 체크한 기록이 있으면 서버가 아무것도 지우지 않음
+ */
+export async function resetOnboardingPlan(): Promise<void> {
+  const { error } = await supabase().rpc('onboarding_reset_plan');
+  fail(error);
 }
 
 /** 지금 사이클 체크리스트들(오늘이 든 것). 줄은 순서대로 */
@@ -99,68 +108,14 @@ export async function checkPayLine(
   return 'ok';
 }
 
-/** 목표별 체크한 저금 합(모은 돈 계산용) */
-export async function fetchGoalCheckedSums(): Promise<Record<string, number>> {
-  const { data, error } = await supabase().rpc('goal_checked_sums');
-  fail(error);
-  return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.amount]));
-}
-
-/** 목표별 모은 돈 = 이미 모은 돈 + 체크한 저금 + 넣기 − 빼기 − 꺼내 쓰기(06 4장) */
+/** 저금 항목별 모은 금액 = 그 항목 저금 줄을 체크한 금액 합(06 4장, 서버 goal_saved) */
 export async function fetchGoalSaved(): Promise<Record<string, number>> {
   const { data, error } = await supabase().rpc('goal_saved_sums');
   fail(error);
   return Object.fromEntries((data ?? []).map((r) => [r.goal_id, r.saved]));
 }
 
-/** 배우자가 고친 목표(22 G-01 예외): 목표마다 마지막 변경 하나, 30일 안 */
-export type GoalChange = { goalId: string; field: string; actorId: string; at: string };
-export async function fetchRecentGoalChanges(): Promise<GoalChange[]> {
-  const { data, error } = await supabase().rpc('recent_goal_changes');
-  fail(error);
-  return (data ?? []).map((r) => ({
-    goalId: r.goal_id,
-    field: r.field,
-    actorId: r.actor_id,
-    at: r.created_at,
-  }));
-}
-
-export type GoalMove = Tables<'goal_move'>;
-/** 목표 넣기·빼기·꺼내 쓰기 기록(되돌린 것 빼고) */
-export async function fetchGoalMoves(goal: string): Promise<GoalMove[]> {
-  const { data, error } = await supabase()
-    .from('goal_move')
-    .select('*')
-    .eq('goal_id', goal)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false });
-  fail(error);
-  return data ?? [];
-}
-
-/** 넣기(in)·빼기(out)·꺼내 쓰기(use). 모은 돈보다 많이 빼면 'too_much' */
-export async function moveGoal(
-  goal: string,
-  kind: 'in' | 'out' | 'use',
-  amount: number,
-): Promise<{ id: string } | 'too_much'> {
-  const { data, error } = await supabase().rpc('move_goal', {
-    p_goal: goal,
-    p_kind: kind,
-    p_amount: amount,
-  });
-  if (error?.message?.includes('too_much')) return 'too_much';
-  fail(error);
-  return { id: data as string };
-}
-
-export async function undoGoalMove(id: string) {
-  const { error } = await supabase().rpc('undo_goal_move', { p_id: id });
-  fail(error);
-}
-
-/** 한 목표의 지난 체크 줄(월별 기록, G-02 10번) */
+/** 한 저금 항목의 체크 줄(W-10 6번 저금 내역) */
 export async function fetchGoalLines(
   goal: string,
 ): Promise<(PayCheckLine & { pay_checklist: { label: string; cycle_start: string } | null })[]> {
@@ -185,4 +140,126 @@ export async function setSalaryMode(mode: 'separate' | 'joint'): Promise<'ok' | 
 export async function setJointCycleDay(day: number) {
   const { error } = await supabase().rpc('set_joint_cycle_day', { p_day: day });
   fail(error);
+}
+
+// ── W-01 영수증: 줄마다 바로 저장(2026-11-09, docs/spec/20-salary-plan.md W-01) ─────────────
+// 서버 split_line_set / split_line_add / split_line_delete / split_reorder. 이번 달 체크 안 한 줄은 서버가 맞춤.
+
+/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개 */
+export type SplitBlockReason =
+  'duplicate_line' | 'not_owner' | 'unlink_pending' | 'keep_allowance' | 'too_many_custom';
+export class SplitBlocked extends Error {
+  constructor(readonly reason: SplitBlockReason) {
+    super(reason);
+  }
+}
+const REASONS: SplitBlockReason[] = [
+  'duplicate_line',
+  'not_owner',
+  'unlink_pending',
+  'keep_allowance',
+  'too_many_custom',
+];
+const failSplit = (e: { message?: string } | null) => {
+  const r = REASONS.find((x) => e?.message?.includes(x));
+  if (r) throw new SplitBlocked(r);
+  fail(e);
+};
+
+/** 줄 하나 금액·이름(이름은 직접 추가 줄만) */
+export async function setSplitLine(line: string, o: { amount?: number; name?: string }) {
+  const { error } = await supabase().rpc('split_line_set', {
+    p_line: line,
+    p_amount: o.amount,
+    p_name: o.name,
+  });
+  failSplit(error);
+}
+
+/** 지출 줄 추가(직접 추가 줄, 되돌리기면 지운 기본 줄도). sort = 넣을 자리(없으면 맨 아래). 새 줄 id */
+export async function addSplitLine(
+  split: string,
+  o: {
+    kind: Exclude<SplitLineDraft['kind'], 'saving'>;
+    amount: number;
+    name?: string;
+    userId?: string;
+    sort?: number;
+  },
+): Promise<string> {
+  const { data, error } = await supabase().rpc('split_line_add', {
+    p_split: split,
+    p_kind: o.kind,
+    p_amount: o.amount,
+    p_name: o.name,
+    p_user: o.userId,
+    p_sort: o.sort,
+  });
+  failSplit(error);
+  const id = splitLineId.safeParse(data);
+  if (!id.success) throw new AuthCallError('unknown');
+  return id.data;
+}
+
+/** 줄 지우기(저금 줄 = 그만 모음, 기록은 남음) */
+export async function deleteSplitLine(line: string) {
+  const { error } = await supabase().rpc('split_line_delete', { p_line: line });
+  failSplit(error);
+}
+
+/** 순서(그 월급 계획의 모든 줄 id, 저금 줄이 앞) */
+export async function reorderSplit(split: string, ids: string[]) {
+  const { error } = await supabase().rpc('split_reorder', { p_split: split, p_ids: ids });
+  failSplit(error);
+}
+
+/**
+ * 월급 계획 변경 신호(Realtime postgres_changes, salary_split 행: 서버 RPC마다 updated_at·version이 오름).
+ * 받으면 splitKeys를 무효화. 돌려준 함수로 끊음
+ */
+/**
+ * 체크리스트 줄이 바뀌면 신호(Realtime pay_check_line, 같은 공간만. RLS가 읽을 수 있는 줄만 보냄).
+ * 합쳐서 모드에서 상대가 공동 체크리스트를 체크하면 홈 큰 상자·W-02가 바로 바뀜(2026-11-11 QA 4구간 S4-02)
+ */
+export function subscribeCheckLines(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`pay_check_line:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'pay_check_line', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
+/** 저금 항목(goal) 변경 신호(2026-11-12 QA 7구간 S7-02, 20261123090000 발행). 읽기 권한은 goal_select 그대로 */
+export function subscribeGoals(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`goal:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'goal', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
+export function subscribeSplits(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`salary_split:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'salary_split', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
 }

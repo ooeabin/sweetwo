@@ -1,72 +1,104 @@
-import { completeJoin, type Goal } from '@sweetwo/api';
-import { jointRefill, joinerSplit, type SplitLineDraft } from '@sweetwo/core';
-import { savingGoals, toAllocGoal, toDraft } from '../salary';
+import { completeJoin, type JoinContext, type Me } from '@sweetwo/api';
+import {
+  dateToYm,
+  jointRefill,
+  joinerSplit,
+  type SavingPlanItem,
+  type SplitLineDraft,
+} from '@sweetwo/core';
+import { track } from '../../shared/analytics';
 import type { JoinData } from './data';
 
-type Snap = Pick<JoinData, 'me' | 'space' | 'partner' | 'splits' | 'resumed'> & { goals: Goal[] };
+type Joint = NonNullable<JoinContext['joint']>;
+type Snap = {
+  me: Pick<Me, 'id' | 'monthly_income'> | null;
+  salaryMode: 'separate' | 'joint';
+  /** 합쳐서면 지금 공동 월급 계획 줄, 버전, 저금 항목(join_context 또는 구성원이 직접 읽은 값) */
+  joint: Joint | null;
+  resumed: boolean;
+};
+
+const toDraftLines = (rows: Joint['lines']): SplitLineDraft[] =>
+  rows.map((l) => ({
+    kind: l.kind,
+    amount: l.amount,
+    goalId: l.goal_id ?? undefined,
+    userId: l.user_id ?? undefined,
+    name: l.name ?? undefined,
+  }));
+const toItems = (rows: Joint['items']): SavingPlanItem[] =>
+  rows.map((g) => ({
+    id: g.id,
+    target: g.target,
+    saved: g.saved,
+    deadline: g.deadline ? dateToYm(g.deadline) : null,
+  }));
 
 /**
  * 합류한 사람의 월급 계획 초안(18 P-06 규칙, O-50 추천과 같은 자리).
- * 각자: core joinerSplit(고정 25%, 생활 25%, 용돈 10%, 우리 목표에 아직 안 채운 월 필요액만큼).
- * 합쳐서: core jointRefill(있던 줄 그대로, 내 용돈 줄 + 늘어난 수입을 저금 줄 순서대로). 대기 뒤 이어서면 시작한 사람이 만든 그대로.
+ * 각자: core joinerSplit(고정 25%, 생활 25%, 용돈 10%. 저금 줄은 없음, 저금 항목은 각자 자기 월급 계획에만, ADR 0007).
+ * 합쳐서: core jointRefill(있던 줄 그대로, 내 용돈 줄 + 늘어난 수입을 저금 줄 순서대로 월 필요액까지). 대기 뒤 이어서면 시작한 사람이 만든 그대로.
  */
 export function joinDraft(x: Snap) {
   const me = x.me;
-  if (!me || !x.space) return null;
-  const joint = x.space.salary_mode === 'joint';
+  if (!me) return null;
+  const joint = x.salaryMode === 'joint';
   const income = me.monthly_income ?? 0;
-  const jointSplit = x.splits.find((s) => s.owner_user_id === null);
   if (joint) {
-    const current = jointSplit ? toDraft(jointSplit.split_line) : [];
+    const current = x.joint ? toDraftLines(x.joint.lines) : [];
     const lines: SplitLineDraft[] = x.resumed
       ? current
-      : jointRefill({ lines: current, income, userId: me.id, goals: x.goals.map(toAllocGoal) });
+      : jointRefill({
+          lines: current,
+          income,
+          userId: me.id,
+          items: x.joint ? toItems(x.joint.items) : [],
+        });
     return {
       joint,
       lines,
       current,
-      version: jointSplit?.version,
+      version: x.joint?.version,
       others: {} as Record<string, number>,
     };
   }
-  const theirs = x.splits.find((s) => s.owner_user_id === x.partner?.id);
-  const others: Record<string, number> = Object.fromEntries(
-    (theirs?.split_line ?? [])
-      .filter((l) => l.kind === 'saving' && l.goal_id)
-      .map((l) => [l.goal_id ?? '', l.amount]),
-  );
-  const lines = joinerSplit({
-    income,
-    userId: me.id,
-    // 우리 목표만(시작한 사람의 내 목표는 줄이 없음)
-    goals: savingGoals(x.goals, me.id)
-      .filter((g) => g.owner_user_id === null)
-      .map(toAllocGoal),
-    others,
-  });
+  const lines = joinerSplit({ income, userId: me.id });
+  const others: Record<string, number> = {};
   return { joint, lines, current: [] as SplitLineDraft[], version: undefined, others };
 }
 
 /**
- * 합류 마치기(2026-11-03, 온보딩 ADR 0005처럼 월급 계획 화면 없이 추천으로 저장 → 홈 할 일 ‘월급 계획 확인’).
+ * 합류 마치기(2026-11-03, 온보딩 ADR 0005처럼 월급 계획 화면 없이 추천으로 저장). 2026-11-11 D1: 이 순간 공간에 들어감.
  * 시작한 사람이 아직 온보딩 중이면(월급 계획 없음) 합류만. 그 사이 공동 월급 계획이 바뀌었으면 다시 계산해 한 번 더.
+ * 합류 중이 아니면(취소, 기한 지남) 'ended'
  */
 export async function finishJoin(d: JoinData) {
   for (let i = 0; i < 2; i++) {
-    const [me, space, partner, splits] = await d.refetch();
-    const list = splits.data ?? [];
-    if (!list.length) return completeJoin();
-    const draft = joinDraft({
-      me: me.data ?? null,
-      space: space.data ?? null,
-      partner: partner.data ?? null,
-      splits: list,
-      goals: d.goals,
-      resumed: me.data?.onboarding_step === 'P-WAIT',
-    });
-    if (!draft) return 'ok' as const;
-    const r = await completeJoin(draft.lines, draft.joint ? draft.version : undefined);
-    if (r !== 'split_changed') return r;
+    const { me, ctx } = await d.refetch();
+    if (!ctx || !me) return 'ended' as const;
+    const event = {
+      hours_since_invite: null,
+      mid_cycle: ctx.has_plan,
+      salary_mode: ctx.salary_mode === 'joint' ? ('combined' as const) : ('separate' as const),
+      // 혼자 쓰던 기록이 있던 사람(온보딩을 마친 적 있음)은 P-02a로 옮겨 옴
+      moved_records: !!me.onboarding_done_at && !ctx.member,
+    };
+    let r: 'ok' | 'split_changed';
+    if (!ctx.has_plan) r = await completeJoin();
+    else {
+      const draft = joinDraft({
+        me,
+        salaryMode: ctx.salary_mode,
+        joint: ctx.joint,
+        resumed: me.onboarding_step === 'P-WAIT',
+      });
+      if (!draft) return 'ok' as const;
+      r = await completeJoin(draft.lines, draft.joint ? draft.version : undefined);
+    }
+    if (r !== 'split_changed') {
+      if (me.onboarding_step !== 'P-WAIT') track('partner_joined', event);
+      return r;
+    }
   }
   return 'split_changed' as const;
 }

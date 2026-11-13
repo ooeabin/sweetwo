@@ -1,9 +1,10 @@
 ---
-// 초대 링크(sweetwo.kr/i/{코드}). 코드가 붙은 주소는 404 페이지가 같은 화면을 보여 줌.
+// 초대 링크(sweetwo.kr/i/{코드}). public/_redirects가 /i/{코드}를 이 페이지로 200 응답(주소는 그대로)해
+// 공유 미리보기 제목도 “sweeTwo에 초대받았어요”(2026-11-12, 28 공통 ‘초대 링크’). 코드 없이 /i/면 코드 줄 없이 안내.
 import Invite from '../../components/Invite.astro';
 import Site from '../../layouts/Site.astro';
 import { t } from '../../lib/site';
 ---
-<Site title={t.title(t.openInApp)} description={t.openInApp}>
-  <Invite />
+<Site title={t.invited} description={t.desc.invite} noindex>
+  <Invite always />
 </Site>

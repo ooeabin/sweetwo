@@ -1,12 +1,14 @@
 import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
 import { formatKstDateTime, toCsv } from '@sweetwo/core';
-import { Button, DataTable } from '@sweetwo/ui';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { DataTable, Status } from '@sweetwo/ui';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '../act';
 import { copy } from '../copy';
+import { coupleTone } from '../tones';
 import { Frame } from '../frame';
 
-// AD-02 회원·부부 검색: 이메일, 사용자 ID, 부부 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
+// AD-02 회원·커플 검색: 이메일, 사용자 ID, 커플 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
 // 결과 표는 L0(이메일 앞 3자 외 가림). 검색도 감사 로그(서버).
 // 내려받기: 결과 표 그대로(L0 열만), 사유를 남긴 뒤(감사 로그), 파일 첫 줄에 관리자 ID와 시각.
 export function AD02Members() {
@@ -55,12 +57,12 @@ export function AD02Members() {
       setBusy(false);
     }
   };
-  const search = async () => {
-    if (!q.trim() || busy) return;
+  const search = async (text = q) => {
+    if (!text.trim() || busy) return;
     setBusy(true);
     setErr(false);
     try {
-      const r = await adminSearch(q.trim());
+      const r = await adminSearch(text.trim());
       if (r.length === 1 && r[0]) return nav(`/members/${r[0].user_id}`);
       setRows(r);
     } catch {
@@ -69,6 +71,15 @@ export function AD02Members() {
       setBusy(false);
     }
   };
+  // 상단 바 통합 검색에서 넘어오면 바로 찾음
+  const loc = useLocation();
+  const from = (loc.state as { q?: string; at?: number } | null) ?? null;
+  useEffect(() => {
+    if (!from?.q) return;
+    setQ(from.q);
+    void search(from.q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from?.at]);
   return (
     <Frame menu="members" title={copy.menus.members}>
       <form
@@ -104,11 +115,7 @@ export function AD02Members() {
                 onChange={(e) => setReason(e.target.value)}
                 style={{ flex: 1 }}
               />
-              <Button
-                variant="primary"
-                disabled={!reason.trim() || busy}
-                onClick={() => void download()}
-              >
+              <Button variant="primary" disabled={!reason.trim() || busy} onAct={() => download()}>
                 {copy.downloadGo}
               </Button>
             </>
@@ -139,7 +146,14 @@ export function AD02Members() {
             {
               key: 'couple',
               label: copy.cols.couple,
-              render: (r) => copy.coupleStates[r.couple_state ?? ''] ?? '—',
+              render: (r) =>
+                r.couple_state ? (
+                  <Status tone={coupleTone[r.couple_state] ?? 'off'}>
+                    {copy.coupleStates[r.couple_state] ?? r.couple_state}
+                  </Status>
+                ) : (
+                  '—'
+                ),
             },
             { key: 'sub', label: copy.cols.sub, render: (r) => r.subscription },
           ]}

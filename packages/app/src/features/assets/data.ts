@@ -1,9 +1,6 @@
 import {
-  fetchAccounts,
   fetchAssetKindNames,
   fetchAssets,
-  fetchGoals,
-  fetchInvestAnswers,
   fetchMe,
   fetchNetWorthHistory,
   fetchPartner,
@@ -15,7 +12,6 @@ import {
 import {
   assetGroupsOf,
   coupleOf,
-  investPrinciple,
   netWorth,
   netWorthSeries,
   todayKst,
@@ -23,23 +19,23 @@ import {
   type AssetSide,
 } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAssetRealtime } from '../frame';
 import { copy } from './copy';
 
-// 우리 자산 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 배우자 합계만 = 묶음 합계)
+// 자산 관리 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 파트너 합계만 = 묶음 합계)
 export function useAssetsData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
   const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
   const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
   const assets = useQuery({ queryKey: qk.assets, queryFn: fetchAssets });
   const sums = useQuery({ queryKey: qk.partnerAssetSums, queryFn: fetchPartnerAssetSums });
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
-  const accounts = useQuery({ queryKey: qk.accounts, queryFn: fetchAccounts });
-  const answers = useQuery({ queryKey: qk.investAnswers, queryFn: fetchInvestAnswers });
   const history = useQuery({
     queryKey: qk.netWorthHistory,
     queryFn: () => fetchNetWorthHistory(120),
   });
-  const all = [me, space, partner, assets, sums, history, answers];
+  // 2026-11-12 S8-19 안 쓰던 저금 항목·통장·투자 원칙 쿼리를 뺌(불러오기 기다림에서도). S8-06 상대가 고치면 바로 다시 읽음
+  useAssetRealtime(space.data?.id);
+  const all = [me, space, partner, assets, sums, history];
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const items = assets.data ?? [];
   const nw = netWorth(items, sums.data ?? []);
@@ -49,7 +45,7 @@ export function useAssetsData() {
   const change = last && last.net !== 0 ? nw.net - last.net : null;
   return {
     loading: all.some((q) => q.isLoading),
-    failed: [me, space, assets].some((q) => q.isError),
+    failed: [me, space, assets, sums].some((q) => q.isError),
     retry: () => all.forEach((q) => void q.refetch()),
     me: me.data ?? null,
     space: space.data ?? null,
@@ -57,11 +53,6 @@ export function useAssetsData() {
     couple: c,
     items,
     sums: sums.data ?? [],
-    goals: goals.data ?? [],
-    accounts: accounts.data ?? [],
-    /** 투자 원칙(O-53): 내 답, 배우자 답, 합의 상태와 허용 비중(보수적인 쪽) */
-    answers: answers.data ?? { mine: null, partner: null },
-    invest: investPrinciple(answers.data?.mine ?? null, answers.data?.partner ?? null, !!c?.solo),
     nw,
     series,
     change,
@@ -83,13 +74,13 @@ export function useRefreshAssets() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory, qk.goalAssetSums].map((k) =>
+      [qk.assets, qk.partnerAssetSums, qk.netWorthHistory].map((k) =>
         qc.invalidateQueries({ queryKey: k }),
       ),
     );
 }
 
-/** 명의 이름: 공동 / 나 / 배우자. 합류 전 대신 입력은 배우자 + ‘대신 입력’ */
+/** 명의 이름: 공동 / 나 / 파트너. 합류 전 대신 입력은 파트너 + ‘대신 입력’ */
 export function ownerOf(a: Asset, d: Pick<AssetsData, 'me' | 'couple'>) {
   if (a.owner === 'joint') return { name: copy.joint, proxy: false };
   if (a.owner_user_id === d.me?.id) return { name: d.couple?.myName ?? '', proxy: false };

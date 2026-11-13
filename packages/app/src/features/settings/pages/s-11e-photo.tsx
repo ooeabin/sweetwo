@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { PhotoPick } from '../../../shared/photo-pick';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-11e 프로필 사진(25 S-11e, 디자인 ImageCrop): 올리기(고르기·끌어 놓기 + “올린 사진은 예빈님과 나만 볼 수 있어요”) → 자르기(정사각 틀, 확대,
 // 원형 미리보기) → “저장할게요”: 정사각 512px JPEG로 다시 그려(EXIF 위치 정보 없음) 저장 → S-11, “사진을 바꿨어요”.
-// 고르기·자르기는 목표 사진(22 G-02)과 같은 shared/photo-pick. 설정 하위 화면과 같은 QuestionLayout.
+// 고르기·자르기는 shared/photo-pick. 설정 하위 화면과 같은 QuestionLayout.
 // 2026-11-05 지정 아바타 고르기 격자 없앰(사진이 없으면 이름 첫 글자, 소셜 계정 사진은 처음 한 번 shared/person useSocialAvatar)
 export function S11ePhoto() {
   const nav = useNavigate();
@@ -30,7 +30,7 @@ export function S11ePhoto() {
       await uploadAvatar(me.space_id, me.id, jpeg);
       await qc.invalidateQueries({ queryKey: qk.avatars });
       track('profile_photo_changed', { action: 'set' });
-      toast(copy.photoSaved);
+      carryToast(copy.photoSaved);
       back();
     } catch {
       toast(copy.failed);

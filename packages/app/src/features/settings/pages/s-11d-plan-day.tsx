@@ -4,14 +4,14 @@ import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../../../shared/toast';
+import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 const key = (d: BaseDay) => (d === 'last' ? 'last' : String(d));
 const label = (d: BaseDay) => (d === 'last' ? copy.lastDay : copy.dayN(d));
 
-// S-11d 체크리스트 만드는 날(Q1, 합쳐서 + 배우자 합류만): 찬우 월급날 / 예빈 월급날, 기본 = 늦은 날.
+// S-11d 체크리스트 만드는 날(Q1, 합쳐서 + 파트너 합류만): 찬우 월급날 / 예빈 월급날, 기본 = 늦은 날.
 // 바로 적용 + 상대 알림(서버). 이번 사이클 끝 = 새 기준일 전날, 다음 체크리스트는 새 기준일에(07 3장). 해제 대기 중엔 못 바꿈.
 export function S11dPlanDay() {
   const nav = useNavigate();
@@ -51,7 +51,7 @@ export function S11dPlanDay() {
           await Promise.all(
             [qk.space, ['pay_checklist']].map((k) => qc.invalidateQueries({ queryKey: k })),
           );
-          toast(copy.planDaySaved);
+          carryToast(copy.planDaySaved);
           nav('/settings/me', { replace: true });
         } catch {
           toast(copy.failed);

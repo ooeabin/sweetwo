@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { inQuiet, notiPrefs, pushAllowed } from './noti-prefs';
 
 describe('알림 설정', () => {
-  it('기본값: 챙길 날 D-14·당일만 꺼짐', () => {
+  it('기본값: 경조사 D-14·당일만 꺼짐', () => {
     const p = notiPrefs({});
     expect(p.push && p.email).toBe(true);
     expect(p.topics.care_30.push).toBe(true);

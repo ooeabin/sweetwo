@@ -4,14 +4,24 @@ import { Button, Modal, QuestionLayout } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { track } from '../../../shared/analytics';
 import { toast } from '../../../shared/toast';
-import { paths, prefs, providerName, reauthenticate, session } from '../../auth';
+import { paths, providerName, reauthenticate, signOut } from '../../auth';
 import { LoadingFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
+import { exportedRecently } from '../unlink';
 
-// S-18b 계정 삭제 확인(docs/spec/25-settings.md, 31 3-2): 삭제 대상(부부 상태별), ‘먼저 내보내기’,
-// “카카오로 확인하고 삭제” → 확인 Modal → 가입 소셜로 다시 로그인(10분 안이면 생략) → 돌아오면(?go=1) 삭제 요청 →
+// 분석 couple_state 값(32 공통 속성)
+const COUPLE_STATE = {
+  not_joined: 'unjoined',
+  connected: 'linked',
+  unlink_pending: 'unlink_pending',
+  solo: 'solo',
+} as const;
+
+// S-18b 계정 삭제 확인(docs/spec/25-settings.md, 31 3-2): 삭제 대상(우리 둘 상태별), ‘먼저 내보내기’,
+// “카카오로 확인하고 삭제” → 확인 Modal(‘계정을 삭제할게요’, 13 15번) → 가입 소셜로 다시 로그인(10분 안이면 생략) → 돌아오면(?go=1) 삭제 요청 →
 // 바로 로그아웃, A-02에 “계정 삭제 요청을 받았어요. 11월 17일까지 다시 로그인하면 취소할 수 있어요”.
 // 구독 해지 안내는 구독과 함께.
 export function S18bDelete() {
@@ -32,8 +42,14 @@ export function S18bDelete() {
         if (w.wait) nav(w.wait);
         return;
       }
-      await session.signOut();
-      prefs.setReturnTo(null);
+      // 분석 account_delete_requested(32 4-7, 2026-11-12 QA 11구간 S11-06). 로그아웃(기기 값 지움) 전에
+      const st = d.space?.couple_state;
+      track('account_delete_requested', {
+        couple_state: st ? COUPLE_STATE[st] : 'unjoined',
+        exported_before: exportedRecently(),
+      });
+      // 기기 로컬 데이터는 요청 즉시 삭제(31 3-2): 캐시, 최근 사용 방법, 이 기기 PIN까지
+      await signOut({ accountChange: true });
       nav(paths.login, {
         replace: true,
         state: { notice: copy.deletedNotice(formatMonthDay(r.until)) },
@@ -71,13 +87,14 @@ export function S18bDelete() {
   return (
     <QuestionLayout
       title={copy.deleteAccount}
-      // 확인 대화상자가 열려 있으면 Esc는 대화상자만 닫음
-      onBack={ask ? undefined : () => nav('/settings/data')}
+      // 확인 대화상자가 열려 있으면 Esc는 대화상자만 닫음(QuestionLayout이 aria-modal을 보고 거름)
+      onBack={() => nav('/settings/data')}
       primary={{ label: copy.deleteWith(provider), variant: 'danger', disabled: busy }}
       onSubmit={() => setAsk(true)}
     >
       <div className="hg-row">
-        <Button variant="secondary" onClick={() => nav('/settings/data')}>
+        {/* 내보내고 나면 이 화면으로 돌아옴(25 S-18 5번, 2026-11-12 QA 11구간 D3). 다시 로그인을 거쳐도 남게 주소에 */}
+        <Button variant="secondary" onClick={() => nav('/settings/data?from=delete')}>
           {copy.exportFirst}
         </Button>
       </div>
@@ -90,7 +107,7 @@ export function S18bDelete() {
         <Modal
           title={copy.deleteQ}
           body={copy.deleteRestore}
-          confirmLabel={copy.deleteWith(provider)}
+          confirmLabel={copy.deleteConfirm}
           cancelLabel={copy.cancel}
           busy={busy}
           onConfirm={() => void go()}

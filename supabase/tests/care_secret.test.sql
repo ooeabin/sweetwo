@@ -1,4 +1,5 @@
--- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 배우자에게는 날도 기록도 안 감, 낸 곳은 각자 돈, 숨기기 끄면 둘 다 봄
+-- pgTAP: 서프라이즈 일정. 만든 사람만 보고 고치고 기록함, 파트너에게는 날도 기록도 안 감, 낸 곳은 개인 지출, 숨기기 끄면 둘 다 봄.
+-- 2026-11-12 QA 9구간 D2: 앱은 새 서프라이즈를 못 만듦(care_day_client_guard). 지금 있는 옛 행은 그대로라 옛 행을 서버로 넣고 확인
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(9);
@@ -23,32 +24,40 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
+select public.finish_join(); -- 2026-11-11 D1: 합류를 마쳐야 공간 구성원
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select lives_ok($$
+select throws_ok($$
   insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer, secret)
   select space_id, 'couple', 'partner_birthday', '예빈 생일', 'solar_yearly', 3, 9, 200000, 'groom', true from public.app_user $$,
-  '서프라이즈 추가');
+  '23514', 'care_secret_removed', '앱은 새 서프라이즈를 못 만듦(D2)');
+reset role;
+insert into public.care_day (space_id, category, kind, name, date_rule, month, day, budget, carer, secret, created_by)
+  select space_id, 'couple', 'partner_birthday', '예빈 생일', 'solar_yearly', 3, 9, 200000, 'groom', true, id
+  from public.app_user where id = '11111111-1111-1111-1111-111111111111';
 select throws_ok($$
   insert into public.care_day (space_id, category, kind, name, date_rule, month, day, secret)
-  select space_id, 'family', 'birthday', '어머니 생신', 'solar_yearly', 3, 9, true from public.app_user $$,
+  select space_id, 'family', 'birthday', '어머니 생신', 'solar_yearly', 3, 9, true from public.app_user
+  where id = '11111111-1111-1111-1111-111111111111' $$,
   '23514', null, '양가 날은 숨기지 못함');
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
 select set_config('test.c', (select id::text from public.care_day), true);
 select is(
   (public.record_care(current_setting('test.c')::uuid, '2026-03-09', 150000, 'living', '{gift}', '향수', null, 150000))->>'line',
-  '0', '낸 곳은 각자 돈, 줄 없음');
-select is((select paid_from::text from public.care_record), 'personal', '기록은 각자 돈');
+  '0', '낸 곳은 개인 지출, 줄 없음');
+select is((select paid_from::text from public.care_record), 'personal', '기록은 개인 지출');
 reset role;
 
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select count(*)::int from public.care_day) + (select count(*)::int from public.care_record), 0,
-  '배우자에게는 날도 기록도 안 감');
-select is_empty($$ update public.care_day set secret = false returning id $$, '배우자는 숨기기를 못 끔');
+  '파트너에게는 날도 기록도 안 감');
+select is_empty($$ update public.care_day set secret = false returning id $$, '파트너는 숨기기를 못 끔');
 select throws_ok(format($$ select public.record_care(%L, '2027-03-09', 1, 'personal', '{}', null, null, 0) $$,
-  current_setting('test.c')), '42501', null, '배우자는 기록 못 함');
+  current_setting('test.c')), '42501', null, '파트너는 기록 못 함');
 reset role;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -57,7 +66,7 @@ update public.care_day set secret = false;
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select count(*)::int from public.care_day), 1, '숨기기 끄면 배우자도 봄');
+select is((select count(*)::int from public.care_day), 1, '숨기기 끄면 파트너도 봄');
 select is((select count(*)::int from public.care_record), 1, '그동안 기록도 함께');
 reset role;
 
