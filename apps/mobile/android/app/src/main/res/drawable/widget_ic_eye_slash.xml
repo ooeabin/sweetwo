@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Phosphor eye-slash(bold), docs/design hg-ico--eye-off 그대로 -->
+<!-- Phosphor eye-slash(bold), docs/design 아이콘 eye-off 그대로 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="14dp" android:height="14dp"
     android:viewportWidth="256" android:viewportHeight="256">
