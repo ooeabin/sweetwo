@@ -35,6 +35,9 @@ select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 
 -- 예빈(270만, 10일) 합류: 각자 월급 계획
+reset role;
+-- v2.2 공개 단계(20261202090000): 이 테스트는 상대 월급 계획 전체를 보므로 ‘모두 보여 주기’
+update public.app_user set plan_share = 'all';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');

@@ -64,6 +64,9 @@ select public.check_pay_line(pg_temp.line('home'), 'checked');
 reset role;
 
 -- 예빈(합류): 찬우 체크리스트는 보기만(2026-11-03 대신 체크 없앰)
+reset role;
+-- v2.2 공개 단계(20261202090000): 이 테스트는 상대 월급 계획 전체를 보므로 ‘모두 보여 주기’
+update public.app_user set plan_share = 'all';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
