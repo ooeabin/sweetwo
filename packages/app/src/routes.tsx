@@ -17,10 +17,12 @@ import {
 } from './features/auth';
 import {
   AssetAddRoute,
-  F01Overview,
+  F01Summary,
   F02Items,
+  F03qQuick,
   F04Item,
   F08Rank,
+  F08cRankConsent,
   F04aMatured,
   F04bSold,
 } from './features/assets';
@@ -140,7 +142,7 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <F01Overview />
+              <F01Summary />
             </OnboardingGate>
           </RequireAccount>
         ),
@@ -610,7 +612,27 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-08 자산 순위(2026-11-04)
+      }, // F-08 자산 순위(2026-11-04, 2026-11-13 v2.2 두 상태)
+      {
+        path: '/assets/rank/consent/:id?',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F08cRankConsent />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-08c 순위 같이 보기 동의(보내기, 알림 링크 /assets/rank/consent/:id = 받기)
+      {
+        path: '/assets/quick',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F03qQuick />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-03q 빠르게 적기(2026-11-13)
       {
         path: '/assets/:id',
         element: (

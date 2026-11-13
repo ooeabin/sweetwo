@@ -37,9 +37,10 @@ export const copy = {
   addDebtRow: '부채 추가',
   joint: '공동',
   proxy: '대신 입력',
-  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
-  partnerPill: '금액만', // [확인 필요]
-  visShort: { all: '', sum: '금액만', private: '숨김' }, // 2026-11-04 목록 배지는 짧게(파트너 합계 줄 ‘금액만’과 같게) [확인 필요]
+  // 2026-11-13 ‘금액만 보여 주기’ → ‘총액만 보여 주기’(ADR 0009, 23 F-03e·F-04 2번·F-02 8번)
+  vis: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' },
+  partnerPill: '총액만', // [확인 필요]
+  visShort: { all: '', sum: '총액만', private: '숨김' }, // 목록 배지는 짧게(파트너 합계 줄 알약과 같게, 2026-11-13 ‘총액만’) [확인 필요]
   partnerSum: (name: string, side: string, n: number) => `${name}님 ${side} ${n}개`,
   checkAmount: '금액이 맞나요?',
   updated: (date: string) => `${date} 수정`, // [확인 필요]
@@ -59,8 +60,10 @@ export const copy = {
   amountDebt: '남은 대출금은 얼마예요?',
   ownerTitle: '누구 명의예요?',
   ownerMe: '나',
-  visTitle: '파트너에게 공개할까요?', // [확인 필요]
-  visOptions: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' },
+  // F-03e v2.2(2026-11-13): 미리 고른 값 없음, 처음 고른 값이 내 새 항목 기본값
+  visTitle: '파트너에게 어떻게 보여 줄까요?', // [확인 필요]
+  visOptions: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' }, // [확인 필요]
+  visSubs: { sum: '항목은 안 보이고 총액에만 더해요', private: '총액에도 안 더해요' }, // [확인 필요]
   next: '다음',
   save: '추가하기', // [확인 필요]
   sameName: '같은 이름이 있어요. 그래도 추가할까요?',
@@ -172,6 +175,52 @@ export const copy = {
   // 2026-11-10 QA 2구간: 출생연도를 온보딩에서 묻지 않고 F-08에서(23 F-08 7번)
   rankAskBirth: '출생연도 알려 주기', // [확인 필요]
   rankAskBirthSub: '또래와 비교해 드려요', // [확인 필요]
+  // F-01 v2.2(2026-11-13): 평가금액 기준 + 전환
+  principalView: '원금으로 보기', // [확인 필요]
+  principalViewHelp: '원금을 적은 투자·부동산은 원금으로 셈해요', // [확인 필요]
+  // F-03q 빠르게 적기(2026-11-13)
+  quickEntry: '큰 묶음만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
+  quickTitle: '큰 묶음만 빠르게 적어 볼까요?', // [확인 필요]
+  quickFields: {
+    cash: '현금·예적금',
+    invest: '투자',
+    home: '집·보증금',
+    pension: '연금·보험',
+    loan: '대출',
+  }, // [확인 필요]
+  quickHelp: '빈 칸은 저장하지 않아요', // [확인 필요]
+  quickSave: '저장하기',
+  quickSaved: (n: number) => `${n}개를 적었어요`, // [확인 필요]
+  quickPlaceholder: '0원',
+  // F-08 v2.2 (가) 순위(두 사람 모두 동의, 둘의 합)
+  rankPairHero1: (band: string | null) => (band ? `${band} 가구 가운데` : '전체 가구 가운데'), // [확인 필요]
+  rankPairNote: '둘의 자산을 합쳐 비교했어요', // [확인 필요]
+  rankPairBasis: (band: string | null) =>
+    band ? `${band} 가구 기준이에요` : '전체 가구 기준이에요', // [확인 필요] 06 7-8 연령대 분포가 없으면 전체 가구
+  rankPairOurs: (month: number) => `${month}월 둘의 순자산`, // [확인 필요]
+  rankHomeBadge: '홈에 보여 주기', // [확인 필요] 기본 끔
+  rankRefreshAd: '새로 확인하기', // [확인 필요] 앞에 ‘광고’ 표시
+  rankStaleNote: (month: number) => `${month}월에 본 결과예요`, // [확인 필요]
+  rankNotYet: '아직 확인하지 않았어요', // [확인 필요] 다시 동의한 뒤 저장 순위가 없을 때
+  rankAd: '광고',
+  // F-08 v2.2 (나) 순위 없음
+  rankPeerLine: (amount: string) => `또래 가구 중간값은 ${amount}이에요`, // [확인 필요]
+  rankPeerBand: (band: string) => `${band} 가구 기준`, // [확인 필요]
+  rankAskPair: (name: string) => `${name}님과 같이 순위 보기`, // [확인 필요]
+  rankAskWaiting: (name: string) => `${name}님 답을 기다리고 있어요`, // [확인 필요]
+  rankAskAnswer: (name: string) => `${name}님이 같이 보자고 해요`, // [확인 필요]
+  // F-08c 순위 같이 보기 동의
+  consentSendTitle: '둘의 자산을 합쳐 전체 가구와 비교해요', // [확인 필요] 06 7-8 연령대 분포가 들어오면 ‘또래 가구와’
+  consentSendHelp: (name: string) => `${name}님도 좋다고 하면 보여요`, // [확인 필요]
+  consentSend: '같이 보자고 하기', // [확인 필요]
+  consentSent: (name: string) => `${name}님에게 물어봤어요`, // [확인 필요]
+  consentAskTitle: (name: string) => `${name}님이 자산 순위를 같이 보자고 해요`, // [확인 필요]
+  consentAskHelp: '숨긴 자산은 빼고 합쳐요', // [확인 필요]
+  consentYes: '좋아요', // [확인 필요]
+  consentNo: '괜찮아요', // [확인 필요]
+  consentAccepted: '이제 자산 순위를 같이 봐요', // [확인 필요] 서버 알림 문구와 같음
+  consentGone: '이미 답했거나 기한이 지난 요청이에요', // [확인 필요]
+  consentFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   // F-01 빈 상태 항목별 등록(2026-11-04)
   emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
   emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]

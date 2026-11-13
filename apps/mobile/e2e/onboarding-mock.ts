@@ -95,6 +95,17 @@ export interface MemDb {
   /** 목표 넣기·빼기·꺼내 쓰기(goal_move) */
   goalMoves: Record<string, unknown>[];
   rpc: string[];
+  /**
+   * 자산 순위 v2.2(F-08, F-08c): pair = 두 사람 모두 동의(서버 networth_rank_pair가 pair), pairNet·topPct는 그 결과
+   * (없으면 보이는 행 합, 상위 50%). views = record_rank_view 기록(paid_by_ad), requests = rank_consent_request 행
+   */
+  rank?: {
+    pair: boolean;
+    pairNet?: number;
+    topPct?: number;
+    views: { paid_by_ad: boolean }[];
+    requests: Record<string, unknown>[];
+  };
 }
 
 const json = (route: Route, body: unknown, status = 200) =>
@@ -134,6 +145,9 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       quiet_start: 22,
       quiet_end: 8,
       default_visibility: 'sum',
+      asset_share_default: null,
+      rank_consent: false,
+      rank_badge_home: false,
       nickname: null,
       side: null,
       birth_year: null,
@@ -865,6 +879,87 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         return json(route, 'joined');
       }
       if (fn === 'partner_profile') return json(route, db.partner ? [db.partner] : []);
+      // 자산 순위 v2.2(20261204090000_v22_unlink_rank 계약 6·7, 23 F-08·F-08c·F-03e)
+      if (fn === 'networth_rank_pair' || fn === 'record_rank_view') {
+        const rk = (db.rank ??= { pair: false, views: [], requests: [] });
+        const by = db.me.birth_year as number | null;
+        const age = by ? 2026 - by : null;
+        const band =
+          age === null
+            ? null
+            : age < 30
+              ? '20s'
+              : age < 40
+                ? '30s'
+                : age < 50
+                  ? '40s'
+                  : age < 60
+                    ? '50s'
+                    : '60s';
+        const medians: Record<string, number> = {
+          '20s': 50_000_000,
+          '30s': 155_850_000,
+          '40s': 283_840_000,
+          '50s': 316_850_000,
+          '60s': 250_000_000,
+        };
+        const net =
+          rk.pairNet ??
+          db.assets
+            .filter(
+              (a) => !a.deleted_at && a.visibility !== 'private' && (a.status ?? 'held') === 'held',
+            )
+            .reduce((t, a) => t + (a.side === 'asset' ? 1 : -1) * Number(a.amount), 0);
+        const r = rk.pair
+          ? { mode: 'pair', net, top_pct: rk.topPct ?? 50, top_open: false, band, basis: 'all' }
+          : { mode: 'peer', band, median: band ? medians[band] : null };
+        if (fn === 'record_rank_view') {
+          const paid = !!body().p_paid_by_ad;
+          if (rk.views.length && !paid)
+            return json(route, { message: 'ad_required', code: '22023' }, 400);
+          rk.views.push({ paid_by_ad: paid });
+          if (rk.pair)
+            Object.assign(db.me, {
+              rank_month: '2026-10-01',
+              rank_pct: rk.topPct ?? 50,
+              rank_net: net,
+            });
+        }
+        return json(route, r);
+      }
+      if (fn === 'request_rank_consent') {
+        const rk = (db.rank ??= { pair: false, views: [], requests: [] });
+        for (const q of rk.requests) if (q.status === 'open') q.status = 'cancelled';
+        const id = `rank-req-${rk.requests.length + 1}`;
+        rk.requests.push({
+          id,
+          space_id: 'space-1',
+          from_user: db.me.id,
+          status: 'open',
+          created_at: '2026-10-07T01:00:00Z',
+          expires_at: '2026-10-14T01:00:00Z',
+          answered_at: null,
+        });
+        db.me.rank_consent = true;
+        return json(route, id);
+      }
+      if (fn === 'answer_rank_consent') {
+        const rk = (db.rank ??= { pair: false, views: [], requests: [] });
+        const b = body();
+        const q = rk.requests.find((x) => x.id === b.p_request);
+        if (!q || q.status !== 'open')
+          return json(route, { message: 'not_open', code: '22023' }, 400);
+        q.status = b.p_accept ? 'accepted' : 'declined';
+        if (b.p_accept) {
+          db.me.rank_consent = true;
+          rk.pair = true;
+        }
+        return json(route, b.p_accept ? 'accepted' : 'declined');
+      }
+      if (fn === 'set_asset_share_default') {
+        db.me.asset_share_default = body().p_vis;
+        return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
       if (fn === 'partner_birth_year')
         return json(route, (db.partner as { birth_year?: number } | null)?.birth_year ?? null);
       // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 월급 계획 또는 대기), 사전 입력 지우기
@@ -2074,6 +2169,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         [...db.proposals].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
       );
     }
+    if (path === '/rest/v1/rank_view' && method === 'GET')
+      return json(
+        route,
+        (db.rank?.views ?? []).map((_, i) => ({ id: `view-${i + 1}` })).slice(0, 1),
+      );
+    if (path === '/rest/v1/rank_consent_request' && method === 'GET')
+      return json(route, (db.rank?.requests ?? []).filter((q) => q.status === 'open').slice(-1));
     if (path === '/rest/v1/app_user') {
       if (method === 'GET') return json(route, db.me);
       if (method === 'PATCH') Object.assign(db.me, body());

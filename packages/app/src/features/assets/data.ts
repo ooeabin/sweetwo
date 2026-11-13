@@ -9,17 +9,9 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import {
-  assetGroupsOf,
-  coupleOf,
-  netWorth,
-  netWorthSeries,
-  todayKst,
-  withKindNames,
-  type AssetSide,
-} from '@sweetwo/core';
+import { assetGroupsOf, coupleOf, withKindNames, type AssetSide } from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAssetRealtime } from '../frame';
+import { netWorthOf, useAssetRealtime } from '../frame';
 import { copy } from './copy';
 
 // 자산 관리 데이터. 공개 범위는 서버가 거른 값만 온다(행 = 내가 볼 수 있는 것, 파트너 합계만 = 묶음 합계)
@@ -38,11 +30,8 @@ export function useAssetsData() {
   const all = [me, space, partner, assets, sums, history];
   const c = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
   const items = assets.data ?? [];
-  const nw = netWorth(items, sums.data ?? []);
-  // 그래프(F-01 6번): 월말 기록 + 이번 달은 지금 값. 지난달 대비는 지난달 말 기록이 있을 때만
-  const series = netWorthSeries(history.data ?? [], nw, `${todayKst().slice(0, 7)}-01`);
-  const last = series.length >= 2 ? series[series.length - 2] : undefined;
-  const change = last && last.net !== 0 ? nw.net - last.net : null;
+  // 2026-11-13 v2.2 평가금액 기준(net) + ‘원금으로 보기’(principalNet). 그래프·지난달 대비는 화면이 기준을 골라 netWorthTrend로
+  const nw = netWorthOf(items, sums.data ?? []);
   return {
     loading: all.some((q) => q.isLoading),
     failed: [me, space, assets, sums].some((q) => q.isError),
@@ -54,8 +43,7 @@ export function useAssetsData() {
     items,
     sums: sums.data ?? [],
     nw,
-    series,
-    change,
+    history: history.data ?? [],
   };
 }
 export type AssetsData = ReturnType<typeof useAssetsData>;

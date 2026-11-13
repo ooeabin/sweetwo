@@ -362,7 +362,7 @@ test('H-04 자산 관리 타일(2026-11-09): 순자산 값(보조 줄 없음, 20
     status: 'held',
     deleted_at: null,
   });
-  // 원금 기준 순자산 1,000 + 2,000 = 3,000만
+  // 평가금액 기준 순자산(2026-11-13) 1,000 + 2,120 = 3,120만
   db.assets.push(
     asset('a1', '공동 예금', 10_000_000, null),
     asset('a2', '공동 펀드', 21_200_000, 20_000_000),
@@ -378,7 +378,7 @@ test('H-04 자산 관리 타일(2026-11-09): 순자산 값(보조 줄 없음, 20
   await page.goto('/');
   const tile = page.getByRole('button', { name: /^자산 관리/ });
   await expect(tile).not.toContainText('순자산');
-  await expect(tile).toContainText('3,000만 원');
+  await expect(tile).toContainText('3,120만 원');
   // 예전 순자산 카드(지난달 대비, 6달 막대)는 없음
   await expect(page.getByRole('region', { name: '순자산', exact: true })).toHaveCount(0);
   const bands = page.locator('.hg-body__banner');

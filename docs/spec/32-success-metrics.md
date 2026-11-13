@@ -80,7 +80,9 @@
 | `mode_change_requested` / `_answered` / `_cancelled` | phrase, to_mode, result |
 | `app_lock_answered` | result(on/later) |
 | `rank_viewed` | first_free, ad_result, mode(pair/peer_median) |
-| `rank_consent_requested` / `_answered` / `_turned_off` | result |
+| `rank_consent_requested` / `_answered` / `_turned_off` | result(requested: `sent` / `failed`, answered: `accepted` / `declined` / `expired`) |
+| `rank_badge_toggled` | on(F-08 ‘홈에 보여 주기’) |
+| `quick_assets_saved` | count(채운 칸 수), has_debt, total_band, share(`all` / `sum` / `private`) |
 | `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
 | `savings_reconciled` | count, diff_sign, diff_band |
 | `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code |
@@ -89,7 +91,7 @@
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
-| `rank_badge_toggled`, `quick_assets_saved`, `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음 |
+| `widget_added` / `widget_tapped`, `invite_code_autofilled`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음 |
 
 ## 1. 핵심 지표 (North Star)
 
@@ -228,7 +230,7 @@
 | asset\_added | F-03 저장(2026-11-12 QA 8구간 S8-07 앱에 넣음) | kind(`account`: 현금성·예금·적금·청약 / `invest` / `pension` / `insurance` / `real_estate` / `other` / `debt`), entry(`home`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `assets`: 자산 관리 화면과 그 밖), is\_first(자산·부채가 하나도 없을 때 추가) |
 | rank\_banner\_tapped | F-01 0번 순위 줄 (2026-11-04. 2026-11-11 홈 순위 줄 1a 없앰, 홈은 H-04 타일 배지라 이벤트 없음) | state(`unseen` / `seen` / `stale` / `empty`), entry(`assets`) |
 | rank\_ad\_result | F-08 앞 보상형 광고 | result(`rewarded` / `closed` / `failed` / `none`), platform(`ios` / `android` / `web`: 브리지 없음, 2026-11-12 S8-07) |
-| rank\_viewed | F-08 순위 레포트 열림 | top\_band(10% 구간), basis(`public_2025`), age\_band(`20s`~`60s`, 출생연도가 없으면 null) |
+| rank\_viewed | F-08 순위 레포트 열림 | 2026-11-13 v2.2: first\_free, ad\_result(`rewarded` / `failed` / `none`), mode(`pair` / `peer_median`) → 0-4. 예전 top\_band·basis·age\_band는 없앰 |
 | fact\_value\_changed | 설정 S-11c 월급(2026-11-12: 저장된 값이 바뀌면 `income`·`payday`마다, 월급날은 날짜 숫자(말일 31)로 변동률, `source_screen` = `S-11c`), 자산·부채 화면(2026-11-12 S8-07: F-04 금액 고치기·시세 바꾸기 저장, `source_screen` = `F-04`) | field(`income` / `payday` / `asset` / `debt`), change\_band(변동률 `<5` / `5-20` / `20+`%), source\_screen |
 | event\_recorded | Y-08 경조사 기록(2026-11-12 S9-05: 기록을 저장한 순간) | event\_type(`birthday` / `holiday` / `anniversary` / `family_event` / `etc`) [확인 필요](이름 칩 kind: 생일 = birthday, 설날·추석·어버이날 = holiday, 결혼기념일 = anniversary, 행사 = family\_event, 그 밖 = etc), amount\_band, vs\_budget(`under` / `on` / `over`, 금액 메모가 없으면 null [확인 필요]), is\_secret(서프라이즈 옛 행이면 event\_type 미전송) |
 

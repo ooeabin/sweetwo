@@ -177,8 +177,30 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // 2026-11-13 v2.2(32 0-4): first_free = 광고 없는 첫 결과, ad_result = 그 앞 광고 결과, mode = pair / peer_median
       name: 'rank_viewed';
-      props: { top_band: number; basis: 'public_2025'; age_band: string | null };
+      props: {
+        first_free: boolean;
+        ad_result: 'rewarded' | 'closed' | 'failed' | 'none';
+        mode: 'pair' | 'peer_median';
+      };
+    }
+  | {
+      // F-08c(32 0-4, 2026-11-13). requested: sent / failed, answered: accepted / declined / expired
+      name: 'rank_consent_requested';
+      props: { result: 'sent' | 'failed' };
+    }
+  | { name: 'rank_consent_answered'; props: { result: 'accepted' | 'declined' | 'expired' } }
+  | { name: 'rank_badge_toggled'; props: { on: boolean } }
+  | {
+      // F-03q 빠르게 적기(32 0-4, 2026-11-13)
+      name: 'quick_assets_saved';
+      props: {
+        count: number;
+        has_debt: boolean;
+        total_band: AmountBand;
+        share: 'all' | 'sum' | 'private';
+      };
     }
   | {
       // 저금 항목(32 4-5, 2026-11-08 ADR 0007)
