@@ -116,16 +116,38 @@ export async function startAfterUnlink() {
   fail(error);
 }
 
-/** S-12 “다시 연결하기”(해제 확정 뒤 30일 안) */
+/** 다시 연결 요청을 못 보냄: 7일 안에 이미 보냄, 연결할 수 없는 상태(상대 탈퇴, 누가 이미 연결됨) */
+export class ReconnectBlocked extends Error {
+  constructor(readonly reason: 'too_soon' | 'reconnect_closed' | 'no_request') {
+    super(reason);
+  }
+}
+const failReconnect = (e: { message?: string } | null) => {
+  for (const r of ['too_soon', 'reconnect_closed', 'no_request'] as const)
+    if (e?.message?.includes(r)) throw new ReconnectBlocked(r);
+  fail(e);
+};
+
+/**
+ * S-12 “다시 연결하기”(v2.2 D10: 복구 없는 새 연결 요청, 마지막 해제 상대에게 7일에 1번).
+ * 상대가 ‘다시 받지 않기’를 골랐으면 서버가 조용히 거절(오류 없음)
+ */
 export async function requestReconnect() {
   const { error } = await supabase().rpc('request_reconnect');
-  fail(error);
+  failReconnect(error);
 }
 
-/** S-12g 답: true = 다시 연결할게요, false = 괜찮아요 */
-export async function answerReconnect(accept: boolean) {
-  const { error } = await supabase().rpc('answer_reconnect', { p_accept: accept });
-  fail(error);
+/**
+ * S-12g 답: true = 다시 연결할게요(요청한 사람 공간의 초대 코드를 돌려줌, 앱이 그 코드로 합류),
+ * false = 괜찮아요, block = ‘다시 받지 않기’. 거절이면 null
+ */
+export async function answerReconnect(accept: boolean, block = false): Promise<string | null> {
+  const { data, error } = await supabase().rpc('answer_reconnect', {
+    p_accept: accept,
+    p_block: block,
+  });
+  failReconnect(error);
+  return typeof data === 'string' && data ? data : null;
 }
 
 /** 혼자 쓰기 → 새로 초대하기(미합류로) */
