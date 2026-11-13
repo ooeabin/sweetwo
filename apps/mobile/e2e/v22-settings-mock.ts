@@ -270,7 +270,13 @@ export async function mockV22(page: Page, db: MemDb, now: Date): Promise<V22Db> 
         const from = String(b.p_from);
         if (from.slice(0, 7) < today.slice(0, 7)) return err(route, 'bad_month');
         const id = `00000000-0000-4000-8000-${String(v.salaryChanges.length + 1).padStart(12, '0')}`;
-        const nowApply = from.slice(0, 7) === today.slice(0, 7);
+        // 적용일 = 그 달의 사이클 시작일(월급날, 말일·짧은 달은 그 달 끝). 오늘 이전이면 바로(서버 salary_change_day)
+        const y = Number(from.slice(0, 4));
+        const m = Number(from.slice(5, 7));
+        const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+        const pd = db.me.payday_last ? last : Math.min(Number(db.me.payday ?? 1), last);
+        const applyDay = `${from.slice(0, 7)}-${String(pd).padStart(2, '0')}`;
+        const nowApply = applyDay <= today;
         const row: Record<string, unknown> = {
           id,
           user_id: db.me.id,

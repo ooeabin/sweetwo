@@ -130,7 +130,9 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   const salary = page.getByRole('button', { name: /내 월급/ });
   await expect(salary).toContainText('350만 원, 25일');
   await expect(salary).toContainText('예빈 250만 원, 10일');
-  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 관리해요');
+  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
+    '각자 따로 해요',
+  );
   await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toHaveCount(0);
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
   await page.getByRole('button', { name: /알림 이메일/ }).click();
@@ -255,17 +257,18 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
   await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3800000');
   await axe(page);
-  // 금액이 바뀌면 “언제부터 이 금액이에요?”(v2.2 S-11c) → 이번 달이면 바로 적용
+  // 금액이 바뀌면 “언제부터 이 금액이에요?”(v2.2 S-11c). 이번 달(10월) 사이클 시작일이 25일이라 그날 적용(예약)
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '언제부터 이 금액이에요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
-  expect(db.me.monthly_income).toBe(3_800_000);
+  await expect(page.getByText('2026년 10월부터 바꿀게요')).toBeVisible();
+  expect(db.me.monthly_income).toBe(3_500_000);
   expect(v.calls.find((c) => c.fn === 'schedule_salary_change')?.body).toMatchObject({
     p_amount: 3_800_000,
     p_from: '2026-10-01',
   });
+  await expect(page.getByText(/2026년 10월부터 380만 원/)).toBeVisible();
 
   // 관리 형태(S-11f): 세 질문, 각자 → 합쳐서는 예빈 ‘좋아요’가 필요(요청)
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
