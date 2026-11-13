@@ -59,6 +59,25 @@ it('합쳐서 모드: 월급날 하나(이름 없음), 월급 전 확인은 공�
   expect(r.bands).toEqual([{ start: '2026-11-07', end: '2026-11-09' }]);
 });
 
+it('쓸 곳 메모 날짜(W-14, v2.2): 그 달 것만, 저금 메모는 ref, 묶음 메모는 bundle', () => {
+  const r = moneyDates(2026, 12, {
+    paydays: [],
+    reviewDay: null,
+    maturities: [],
+    goalDeadlines: [],
+    yearlyGoals: [],
+    notes: [
+      { name: '예식장 잔금', date: '2026-12-03', goal: 'g1', bundle: null },
+      { name: '신혼여행 항공', date: '2026-12-20', goal: null, bundle: 'b1' },
+      { name: '다음 달', date: '2027-01-02', goal: 'g1', bundle: null },
+    ],
+  });
+  expect(r.dates).toEqual([
+    { date: '2026-12-03', kind: 'note', name: '예식장 잔금', ref: 'g1' },
+    { date: '2026-12-20', kind: 'note', name: '신혼여행 항공', bundle: 'b1' },
+  ]);
+});
+
 it('공휴일이면 직전 영업일(주말 넘어서까지)', () => {
   // 2026-10-05 대체공휴일(월) → 10-03 토, 10-04 일 지나 10-02 금
   expect(businessDayOnOrBefore('2026-10-05', new Set(['2026-10-03', '2026-10-05']))).toBe(

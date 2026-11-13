@@ -1,10 +1,19 @@
-import { addSavingItem, qk, SavingItemBlocked } from '@sweetwo/api';
+import {
+  addSavingItem,
+  configureSplitLines,
+  fetchSplits,
+  qk,
+  SavingItemBlocked,
+} from '@sweetwo/api';
 import {
   amountBand,
   defaultDeadline,
+  formatYm,
   leftover,
   quickChips,
+  savingChips,
   savingItemInput,
+  savingEta,
   savingLate,
   savingNeed,
   thisMonth,
@@ -13,6 +22,7 @@ import {
 } from '@sweetwo/core';
 import {
   AmountInput,
+  Chip,
   QuestionLayout,
   QuestionSkeleton,
   ShortText,
@@ -29,12 +39,15 @@ import { useMe, usePartner, useSpace, useSplits } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
 import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
+import { W11eAutoAsk } from './w-11e-auto-ask';
+import { AFTER_FIRST_SAVING_PATH } from '../../onboarding';
 
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
 // W-11c 아래 선택 칸 ‘이미 모은 금액이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
-const STEPS = ['a', 'b', 'c', 'd'] as const;
+// v2.2(2026-11-13): W-11b 다음, W-11c 앞에 W-11e “은행에서 자동으로 나가요?”(주소 /e)
+const STEPS = ['a', 'b', 'e', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
 type Draft = SavingDraft;
 // 들어온 곳(32 saving_item_created entry, 2026-11-12 S7-16): home·salary = 첫 저금 빈 줄(홈·W-02), salary_row = W-02 저금 묶음
@@ -51,6 +64,7 @@ const ENTRIES = [
   'add_menu',
   'shortcut',
   'onboarding',
+  'next',
 ] as const;
 type Entry = (typeof ENTRIES)[number] | 'direct';
 
@@ -77,9 +91,13 @@ export function W11SavingAdd() {
     : 'direct';
   const go = (to: Step) => nav(`${savingPaths.add}/${to}${params.size ? `?${params}` : ''}`);
   const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
-  const title = { a: copy.addNameQ, b: copy.addMonthlyQ, c: copy.addTargetQ, d: copy.addDeadlineQ }[
-    s
-  ];
+  const title = {
+    a: copy.addNameQ,
+    b: copy.addMonthlyQ,
+    e: copy.autoQ,
+    c: copy.addTargetQ,
+    d: copy.addDeadlineQ,
+  }[s];
   if (!me.data || !space.data || !splits.data) return <QuestionSkeleton title={title} />;
   const joint = space.data.salary_mode === 'joint';
   const mine = splits.data.find((x) =>
@@ -118,6 +136,16 @@ export function W11SavingAdd() {
         deadline: v.deadline ? ymToDate(v.deadline) : null,
         start: v.start,
       });
+      // W-11e ‘네, 자동이에요’: 새 저금 줄에 자동 줄 설정(나가는 날, null = 월급날)
+      if (d.auto) {
+        const line = (await fetchSplits())
+          .flatMap((x) => x.split_line)
+          .find((l) => l.kind === 'saving' && l.goal_id === id);
+        if (line)
+          await configureSplitLines([{ id: line.id, autoPay: true, autoDay: d.autoDay }]).catch(
+            () => undefined,
+          );
+      }
       track('saving_item_created', {
         entry,
         monthly_band: amountBand(v.monthly),
@@ -139,7 +167,15 @@ export function W11SavingAdd() {
       );
       carryToast(left - v.monthly < 0 ? copy.addShort : copy.added);
       // O-60 ‘첫 저금 만들기’로 왔으면 끝에 미합류 초대 시트(O-07) → A-06 → 홈(16 v2.2, onboarding AFTER_FIRST_SAVING_PATH)
-      nav(entry === 'onboarding' ? '/welcome' : savingPaths.item(id), { replace: true });
+      // 그 밖(20 W-11 고친 점): 미합류면 초대, 각자 계열 연결이면 “{이름}님과 같이 모을까요?”(→ W-15). W-10이 시트로 물음
+      const st = space.data?.couple_state;
+      const ask = st === 'not_joined' ? 'invite' : !joint && st === 'connected' ? 'bundle' : null;
+      nav(
+        entry === 'onboarding'
+          ? AFTER_FIRST_SAVING_PATH
+          : `${savingPaths.item(id)}${ask ? `?ask=${ask}` : ''}`,
+        { replace: true },
+      );
     } catch (e) {
       toast(
         e instanceof SavingItemBlocked
@@ -171,6 +207,23 @@ export function W11SavingAdd() {
           max={20}
           placeholder={copy.addNamePlaceholder}
         />
+        {/* 이름 칩(19 ‘이름 칩 표’, 2026-11-13): 두 사람 사이마다 3개, 결혼 준비 중이면 ‘결혼 비용’ 맨 앞. 누르면 이름을 채움 */}
+        <div
+          className="hg-row"
+          role="group"
+          aria-label={copy.addNameChips}
+          style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
+        >
+          {savingChips(space.data.marriage_status).map((c) => (
+            <Chip
+              key={c}
+              selected={draft.name === copy.chipNames[c]}
+              onClick={() => setDraft({ ...draft, name: copy.chipNames[c] })}
+            >
+              {copy.chipNames[c]}
+            </Chip>
+          ))}
+        </div>
       </QuestionLayout>
     );
   if (!draft.name.trim()) return <Navigate to={`${savingPaths.add}/a`} replace />;
@@ -184,7 +237,7 @@ export function W11SavingAdd() {
         help={copy.addMonthlyHelp(money(Math.max(left, 0), masked))}
         onBack={back}
         primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
-        onSubmit={() => go('c')}
+        onSubmit={() => go('e')}
       >
         <AmountInput
           label={copy.addMonthlyQ}
@@ -199,6 +252,19 @@ export function W11SavingAdd() {
       </QuestionLayout>
     );
   }
+  if (draft.monthly === null) return <Navigate to={`${savingPaths.add}/b`} replace />;
+  if (s === 'e')
+    return (
+      <W11eAutoAsk
+        steps={steps}
+        value={draft.auto}
+        day={draft.autoDay}
+        payday={me.data.payday}
+        onBack={back}
+        onChange={(auto, autoDay) => setDraft({ ...draft, auto, autoDay })}
+        onNext={() => go('c')}
+      />
+    );
   // 시작할 때 모은 금액(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
   const start = draft.hasStart ? (draft.start ?? 0) : 0;
   const startOver = draft.target !== null && start >= draft.target;
@@ -259,6 +325,8 @@ export function W11SavingAdd() {
   const need = savingNeed(plan);
   // 월 필요액 > 매달 금액이면 사실 한 줄(2026-11-09, 06 5-4)
   const late = savingLate(plan, draft.monthly ?? 0);
+  // v2.2(2026-11-13): 늦어지면 판정 대신 사실 “지금 속도면 …에 다 모아요”
+  const eta = savingEta({ target: draft.target, saved: start }, draft.monthly ?? 0);
   return (
     <QuestionLayout
       steps={steps}
@@ -267,10 +335,10 @@ export function W11SavingAdd() {
         need !== null ? (
           <>
             {copy.needPerMonth(money(need, masked))}
-            {late !== null && (
+            {late !== null && eta && (
               <>
                 <br />
-                {copy.lateBy(late)}
+                {copy.etaAt(formatYm(eta))}
               </>
             )}
           </>

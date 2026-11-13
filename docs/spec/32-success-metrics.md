@@ -72,9 +72,9 @@
 | `payday_confirmed` | method(one_tap/line_by_line/w05), manual_lines, late |
 | `pay_line_late_checked` | kind, days_late |
 | `auto_line_changed` | to(skipped/other_amount) |
-| `saving_adjusted` | sign, amount_band, reason_code, from(w10b/note_paid) |
+| `saving_adjusted` | sign(`plus`/`minus`), amount_band, reason_code, from(w10b/note_paid). 잔액 맞추기는 `savings_reconciled`로만 |
 | `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none |
-| `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry, has_target, on |
+| `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate`), has_target, on |
 | `saving_note_saved` / `saving_note_paid` | has_due, subtracted |
 | `split_proposed` / `split_answered` | name_code, rule, result |
 | `mode_change_requested` / `_answered` / `_cancelled` | phrase, to_mode, result |
@@ -84,8 +84,8 @@
 | `rank_badge_toggled` | on(F-08 ‘홈에 보여 주기’) |
 | `quick_assets_saved` | count(채운 칸 수), has_debt, total_band, share(`all` / `sum` / `private`) |
 | `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
-| `savings_reconciled` | count, diff_sign, diff_band |
-| `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code |
+| `savings_reconciled` | count, diff_sign(`plus`/`minus`/`zero`, 맞춘 차이 합), diff_band(차이 없으면 null) |
+| `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code(viewed는 null, chosen은 칩 코드·`redeadline`·`custom`·`later`) |
 | `bundle_percent_only_toggled`, `adjust_summary_hidden` | on |
 | `salary_change_scheduled` / `_applied` / `_cancelled` | months_ahead, has_until |
 | `progress_news_sent`(서버) / `_opened` | — |

@@ -50,6 +50,7 @@
 | | 월급 전 확인(`review`) | `calendar-check` | `safety` | 〃 |
 | | 저금 기한(`deadline`), 쓰는 달(`goal`) | `target` | `goal` | 〃 |
 | | 만기(`maturity`) | `hourglass` | `family` | 〃 |
+| | 쓸 곳 메모(`note`, 2026-11-13 W-14 날짜) | `piggy-bank` | `goal` | 〃 |
 | | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
 | 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-01, Y-04 |
 | | 기념일(`anniversary`) | `heart` | `together` | 〃 |

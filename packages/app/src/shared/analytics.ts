@@ -1,8 +1,10 @@
 import type { AmountBand, AuthProvider, SplitKind, TopTask } from '@sweetwo/core';
+import type { SavingTogetherEvent } from './analytics-saving';
 
 // 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
 export type AnalyticsEvent =
+  | SavingTogetherEvent
   | {
       name: 'app_first_launch';
       props: { download_id: string | null; os: string; app_version: string };
@@ -257,6 +259,7 @@ export type AnalyticsEvent =
           | 'add_menu'
           | 'shortcut'
           | 'onboarding'
+          | 'next'
           | 'direct';
         monthly_band: AmountBand;
         has_target: boolean;

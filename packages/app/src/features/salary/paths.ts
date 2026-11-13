@@ -23,3 +23,24 @@ export const savingPaths = {
   achieved: (id: string) => `/salary/items/${id}/achieved`, // W-12
   after: (id: string) => `/salary/items/${id}/after`, // W-12a
 };
+
+// v2.2 같이 모으기와 돈 기록(20 ‘월급 탭 v2.2’, PR 10). 서버 알림 링크와 core pickTopTask가 같은 주소를 씀
+export const togetherPaths = {
+  adjust: (id: string) => `/salary/items/${id}/adjust`, // W-10b
+  next: (id: string) => `/salary/items/${id}/next`, // W-12b
+  notes: (id: string) => `/salary/items/${id}/notes`, // W-14(저금)
+  note: (id: string, note: string) => `/salary/items/${id}/notes/${note}`, // W-14a(note = 'new' 또는 메모 id)
+  bundleNew: (goal?: string) =>
+    `/salary/bundles/new${goal ? `?goal=${encodeURIComponent(goal)}` : ''}`, // W-15
+  bundle: (id: string) => `/salary/bundles/${id}`, // 알림 링크: 들어가기(W-15 2~4단계) 또는 내 저금 W-10
+  bundleJoin: (id: string) => `/salary/bundles/${id}/join`, // W-15 들어가기
+  bundleEdit: (id: string) => `/salary/bundles/${id}/edit`, // W-15a
+  bundleField: (id: string, field: 'name' | 'target' | 'deadline') =>
+    `/salary/bundles/${id}/edit/${field}`,
+  bundleNotes: (id: string) => `/salary/bundles/${id}/notes`, // W-14(묶음)
+  bundleNote: (id: string, note: string) => `/salary/bundles/${id}/notes/${note}`,
+  bundleAchieved: (id: string) => `/salary/bundles/${id}/achieved`, // W-12(묶음, 합계 기준)
+  moneyIn: '/salary/money-in', // W-20
+  distribute: (id: string) => `/salary/money-in/${id}`, // W-20a
+  reconcile: '/salary/reconcile', // W-10c
+};

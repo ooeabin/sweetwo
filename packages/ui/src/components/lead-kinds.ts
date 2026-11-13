@@ -49,6 +49,8 @@ const LEADS = {
     deadline: { icon: 'target', tone: 'goal' },
     goal: { icon: 'target', tone: 'goal' },
     maturity: { icon: 'hourglass', tone: 'family' },
+    // 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2)
+    note: { icon: 'piggy-bank', tone: 'goal' },
     holiday: { icon: 'flag-pennant' },
   },
   /** 경조사(care_day.kind). 경조사는 한 종류라 영역 색은 모두 together, 아이콘만 이름 칩에 따라 */

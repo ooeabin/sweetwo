@@ -1,4 +1,4 @@
-import { Icon, ListRow, PageHeader } from '@sweetwo/ui';
+import { AddRow, Icon, ListRow, Menu, PageHeader } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -6,7 +6,10 @@ import { money, useMask } from '../../../shared/mask';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSavingRealtime, useSplits } from '../data';
-import { salaryPaths, savingPaths } from '../paths';
+import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { BundleRow } from '../bundle-parts';
+import { useBundles, useTogetherRealtime } from '../together';
+import { BundleAchieveWatch } from './w-12-bundle-achieved';
 import { useSavingItems } from '../saving';
 import { SavingGoalRow, SavingLoadError } from '../saving-parts';
 
@@ -23,6 +26,8 @@ export function W13SavingList() {
   const splits = useSplits();
   const { masked } = useMask();
   const [fold, setFold] = useState(false);
+  const bundles = useBundles();
+  const [openBundle, setOpenBundle] = useState<string | null>(null);
   const from = params.get('from');
   const entry: Entry = (ENTRIES as readonly string[]).includes(from ?? '')
     ? (from as Entry)
@@ -34,6 +39,7 @@ export function W13SavingList() {
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
   // 상대가 저금을 고치면 바로 다시 읽음(2026-11-12 S7-02)
   useSavingRealtime(d.ready ? d.space.id : null);
+  useTogetherRealtime(d.ready ? d.space.id : null);
   const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
   // 못 불러오면 오류 카드 + 다시 시도(2026-11-12 S7-04)
   if (!d.ready && d.failed) return <SavingLoadError onBack={back} onRetry={d.retry} />;
@@ -43,6 +49,13 @@ export function W13SavingList() {
     d.joint ? x.owner_user_id === null : x.owner_user_id === d.meId,
   );
   const canAdd = mine && !d.pending;
+  // 묶음(2026-11-13): 묶음 한 줄(합계) + 펼치면 각자 줄. 각자 금액은 둘 다 켰을 때만, 아니면 상대 줄은 이름만
+  const bundleList = (bundles.data ?? []).filter((b) =>
+    b.goals.some((g) => d.live.some((i) => i.goal.id === g.id)),
+  );
+  const inBundle = new Set(bundleList.flatMap((b) => b.goals.map((g) => g.id)));
+  const single = d.live.filter((i) => !inBundle.has(i.goal.id));
+  const canReconcile = d.live.some((i) => i.canEdit);
   const body = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader
@@ -50,10 +63,45 @@ export function W13SavingList() {
         backLabel={copy.back}
         backTo={copy.tabTitle}
         onBack={back}
+        action={
+          canReconcile ? (
+            <Menu
+              label={copy.menu}
+              actions={[
+                { label: copy.menuReconcile, onSelect: () => nav(togetherPaths.reconcile) },
+              ]}
+            />
+          ) : undefined
+        }
       />
       {d.live.length ? (
         <div className="hg-card hg-goallist">
-          {d.live.map((i) => (
+          {bundleList.map((b) => (
+            <div key={b.id}>
+              <BundleRow
+                bundle={b}
+                masked={masked}
+                open={openBundle === b.id}
+                onToggle={() => setOpenBundle((x) => (x === b.id ? null : b.id))}
+              />
+              {openBundle === b.id &&
+                b.goals.map((g) => {
+                  const i = d.byId(g.id);
+                  if (!i) return null;
+                  return g.mine || (b.show_each && !b.percent_only) ? (
+                    <SavingGoalRow
+                      key={g.id}
+                      item={i}
+                      masked={masked}
+                      onClick={() => nav(savingPaths.item(g.id))}
+                    />
+                  ) : (
+                    <ListRow key={g.id} label={copy.bundlePartnerRow(d.partnerName, g.name)} />
+                  );
+                })}
+            </div>
+          ))}
+          {single.map((i) => (
             <SavingGoalRow
               key={i.goal.id}
               item={i}
@@ -67,6 +115,12 @@ export function W13SavingList() {
           {copy.listEmpty}
         </p>
       )}
+      <AddRow
+        label={copy.moneyIn}
+        block
+        onClick={() => nav(`${togetherPaths.moneyIn}?back=${encodeURIComponent(savingPaths.list)}`)}
+      />
+      <BundleAchieveWatch />
       {canAdd && (
         <div className="hg-list">
           <ListRow

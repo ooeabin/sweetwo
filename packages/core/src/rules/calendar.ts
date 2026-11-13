@@ -7,14 +7,17 @@ import { deadlineDay } from './saving-item';
 // 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
 // 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
-export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity';
+/** note = 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2, 24 ‘캘린더 v2.2’) */
+export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity' | 'note';
 export interface MoneyDate {
   date: string;
   kind: MoneyKind;
   /** 라벨에 넣을 이름(사람, 항목, 목표). 합쳐서 모드 월급날은 ''. 문구는 화면이 만든다 */
   name: string;
-  /** 누르면 갈 곳의 id(만기 자산, 목표) */
+  /** 누르면 갈 곳의 id(만기 자산, 목표, 쓸 곳 메모의 저금) */
   ref?: string;
+  /** 쓸 곳 메모가 묶음 메모이면 묶음 id(누르면 묶음 W-14) */
+  bundle?: string;
   /** 월급날의 사람 id(각자 모드 파트너 월급날 → W-02 그 사람 탭, 2026-11-12 QA 9구간 S9-10) */
   who?: string;
 }
@@ -64,6 +67,8 @@ export interface MoneyInput {
   goalDeadlines: { id: string; name: string; date: string }[];
   /** 매년 목표 쓰는 달(기한의 달) */
   yearlyGoals: { id: string; name: string; month: number }[];
+  /** 안 낸 쓸 곳 메모 날짜(W-14, 2026-11-13). goal = 저금 id, bundle = 묶음 id(둘 중 하나) */
+  notes?: { name: string; date: string; goal: string | null; bundle: string | null }[];
 }
 
 /** 그 달(y, m)의 금융 일정과 월급 전 확인 띠 */
@@ -106,6 +111,15 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
       out.push({ date: deadlineDay(g.date), kind: 'deadline', name: g.name, ref: g.id });
   for (const g of o.yearlyGoals)
     if (g.month === m) out.push({ date: first, kind: 'goal', name: g.name, ref: g.id });
+  for (const n of o.notes ?? [])
+    if (n.date.slice(0, 7) === ym)
+      out.push({
+        date: n.date,
+        kind: 'note',
+        name: n.name,
+        ...(n.goal ? { ref: n.goal } : {}),
+        ...(n.bundle ? { bundle: n.bundle } : {}),
+      });
   out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   return { dates: out, bands };
 }

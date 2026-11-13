@@ -359,4 +359,181 @@ export const copy = {
   periodGap: (n: number) => `지난번 돈이 들어온 지 ${n}일 됐어요`,
   periodBarLabel: (inn: string, need: string, since: string) =>
     `이번 기간 들어온 돈 ${inn}, 필요한 돈 ${need}, ${since}`,
+  // ───────── v2.2 같이 모으기와 돈 기록(20 ‘월급 탭 v2.2’, ADR 0009, PR 10) ─────────
+  // W-10 고친 점
+  etaAt: (ym: string) => `지금 속도면 ${ym}에 다 모아요`, // [확인 필요] 3a(‘기한보다 n개월 늦어요’ 대신)
+  remainUntil: (ym: string, amount: string) => `${ym}까지 ${amount} 더 필요해요`, // [확인 필요] 3b G5
+  remainUntilPct: (ym: string) => `${ym}까지`, // [확인 필요] 퍼센트만(SaveTogether.md)
+  historyStartV22: (amount: string) => `이미 모은 금액 ${amount}`, // [확인 필요] 6a
+  historyMoneyIn: (amount: string) => `돈 들어왔어요 ${amount}`, // [확인 필요]
+  historyAuto: (amount: string) => `자동으로 넣었어요 ${amount}`, // [확인 필요] 날짜 없는 사람 자동 넣기
+  historyAdjust: (sign: '+' | '−', amount: string) => `바로잡기 ${sign}${amount}`, // [확인 필요]
+  historyReconcile: (sign: '+' | '−', amount: string) => `잔액 맞추기 ${sign}${amount}`, // [확인 필요]
+  historyNotePaid: (amount: string) => `쓸 곳 메모 −${amount}`, // [확인 필요]
+  moneyIn: '돈 들어왔어요', // AddRow 글자(+ 아이콘이 ‘+’를 대신) [확인 필요]
+  menuAdjust: '모은 금액 바로잡기', // [확인 필요]
+  menuNotes: '쓸 곳 메모', // [확인 필요]
+  menuBundle: '같이 모으기로 묶기', // [확인 필요]
+  menuReconcile: '실제 잔액과 맞추기', // [확인 필요] W-13 ⋯
+  // 묶음 카드(W-10 0번, W-13 묶음 줄, SaveTogether.md)
+  together: '같이 모으기',
+  bundleTotalOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`, // [확인 필요]
+  bundleEach: (a: string, av: string, b: string, bv: string) => `${a} ${av}, ${b} ${bv}`, // [확인 필요]
+  bundlePaused: '같이 모으기를 잠시 멈췄어요', // [확인 필요]
+  bundleDone: '다 모았어요',
+  bundleEdit: '같이 모으기 고치기', // [확인 필요] 묶음 카드 ⋯ 화면 읽기
+  bundleMine: (name: string) => `내 저금 ${name}`, // [확인 필요] W-13 펼친 줄
+  bundlePartnerRow: (who: string, name: string) => `${who}님 ${name}`, // [확인 필요]
+  bundleOpen: (name: string) => `${name} 펼치기`, // [확인 필요] 화면 읽기
+  bundleLabel: (name: string, amount: string, rest: string) =>
+    [`같이 모으기`, name, amount, rest].filter(Boolean).join(', '), // 화면 읽기 한 문장
+  partnerBundleItem: (name: string) => `${name}님 저금이에요. 같이 모으기 합계만 보여요`, // [확인 필요] 각자 금액을 안 켰을 때
+  // W-10b 모은 금액 바로잡기
+  adjustQ: '모은 금액 바로잡기', // [확인 필요]
+  adjustAdd: '더할게요', // [확인 필요]
+  adjustSub: '뺄게요', // [확인 필요]
+  adjustAmountQ: (sign: 'add' | 'sub') => (sign === 'add' ? '얼마를 더할까요?' : '얼마를 뺄까요?'), // [확인 필요]
+  adjustNow: (amount: string) => `지금 모은 금액 ${amount}`, // [확인 필요]
+  adjustOver: '모은 금액보다 많이 뺄 수 없어요', // [확인 필요]
+  adjustReasonQ: '왜 바꾸나요?', // [확인 필요]
+  adjustReasonHelp: '이 내용은 나만 봐요', // [확인 필요]
+  adjustReasons: {
+    used: '꺼내 썼어요',
+    interest: '이자가 붙었어요',
+    fix: '숫자를 맞춰요',
+    custom: '직접 쓰기',
+  }, // [확인 필요]
+  adjustReasonLabel: '바꾸는 까닭', // 화면 읽기
+  adjustCustomPlaceholder: '예: 여행 경비', // [확인 필요]
+  adjustHide: '주간 요약에 넣지 않기', // [확인 필요] G11
+  adjustSave: '바로잡기', // [확인 필요] 주 버튼
+  adjusted: '모은 금액을 바로잡았어요', // [확인 필요]
+  // W-10c 실제 잔액 맞추기
+  reconcileQ: '실제 잔액과 맞춰 볼까요?', // [확인 필요]
+  reconcileHelp: '통장에 실제로 모인 금액을 적어 주세요. 비우면 그대로 둬요', // [확인 필요]
+  reconcileNow: (amount: string) => `지금 모은 금액 ${amount}`, // [확인 필요]
+  reconcileActual: '실제로 모인 금액', // [확인 필요]
+  reconcileSave: '맞추기', // [확인 필요]
+  reconciled: (n: number) => (n ? `저금 ${n}개를 실제 잔액과 맞췄어요` : '실제 잔액과 같아요'), // [확인 필요]
+  reconcileEmpty: '맞출 저금이 없어요', // [확인 필요]
+  // W-11e 은행에서 자동으로 나가요?
+  autoQ: '은행에서 자동으로 나가요?', // [확인 필요]
+  autoYes: '네, 자동이에요', // [확인 필요]
+  autoNo: '아니요, 직접 보내요', // [확인 필요]
+  autoDayQ: '언제 나가요?', // [확인 필요]
+  autoDayPayday: '월급날', // [확인 필요] 칩
+  autoDayNext: '다음 날', // [확인 필요] 칩
+  autoDayLabel: '나가는 날', // [확인 필요]
+  autoDayOf: (d: number) => (d === 31 ? '말일' : `${d}일`),
+  // W-11 끝
+  bundleAskQ: (name: string) => `${name}님과 같이 모을까요?`, // [확인 필요]
+  bundleAskYes: '같이 모을게요', // [확인 필요]
+  inviteAskQ: '같이 모을 사람을 초대할까요?', // [확인 필요]
+  inviteAskYes: '초대할게요', // [확인 필요]
+  laterAnswer: '나중에 할게요',
+  // W-12b 다음엔 뭘 같이 모을까요
+  nextQ: '다음엔 뭘 같이 모을까요?', // [확인 필요]
+  nextRedeadline: (name: string) => `‘${name}’ 기한을 새로 정할게요`, // [확인 필요]
+  nextCustom: '직접 정할게요', // [확인 필요]
+  addNameChips: '이름 고르기', // [확인 필요] W-11a 칩 묶음 화면 읽기 이름
+  chipNames: {
+    wedding: '결혼 비용',
+    honeymoon: '신혼여행',
+    emergency: '비상금',
+    jeonse_loan: '전세 대출 갚기',
+    travel: '여행',
+    moving: '이사',
+    gift: '선물',
+  }, // 19 ‘이름 칩 표’ [확인 필요]
+  // W-14 쓸 곳 메모, W-14a
+  notesTitle: (name: string) => `쓸 곳 메모 ${name}`, // [확인 필요] 제목 “쓸 곳 메모” + 저금 이름
+  notesHelp: '모은 돈을 어디에 쓸지 적어 두면 캘린더에도 보여요', // [확인 필요]
+  notesEmpty: '아직 메모가 없어요', // [확인 필요]
+  noteAdd: '메모 추가', // [확인 필요] AddRow(+ 아이콘)
+  notePaid: '냈어요', // [확인 필요]
+  notePaidDone: '냈어요', // 줄 표시 [확인 필요]
+  notePaidLabel: (name: string) => `${name} 냈어요`, // 화면 읽기
+  notePayQ: (amount: string) => `모은 금액에서 ${amount} 뺄까요?`, // [확인 필요] F3
+  notePayAmountQ: '얼마를 냈어요?', // [확인 필요] 금액이 없는 메모
+  notePaySub: '뺄게요', // [확인 필요]
+  notePayKeep: '그대로 둘게요', // [확인 필요]
+  notePaidToast: (name: string) => `${name}, 냈어요`, // [확인 필요]
+  notePaidSubToast: (amount: string) => `모은 금액에서 ${amount} 뺐어요`, // [확인 필요]
+  noteNameQ: '어디에 쓸 돈이에요?', // [확인 필요] W-14a 이름
+  noteNamePlaceholder: '예: 예식장 잔금', // [확인 필요]
+  noteAmountQ: '얼마쯤 들어요?', // [확인 필요] 예상 금액(선택)
+  noteNoAmount: '금액 없이 적을게요', // [확인 필요]
+  noteDateQ: '언제 내요?', // [확인 필요]
+  noteNoDate: '날짜 없이 적을게요', // [확인 필요]
+  noteSave: '저장',
+  noteSaved: '메모를 저장했어요', // [확인 필요]
+  noteDeleted: '메모를 지웠어요', // [확인 필요]
+  noteDelete: '메모 지우기', // [확인 필요]
+  noteDue: (date: string) => date,
+  notBeforeToday: '오늘부터 고를 수 있어요', // [확인 필요]
+  // W-15 같이 모으기로 묶기
+  bundlePartnerQ: (name: string) => `${name}님 저금 중 같이 모을 걸 골라 주세요`, // [확인 필요]
+  bundleFromMine: '내 저금에서 시작할게요', // [확인 필요]
+  bundleMineQ: '어떤 저금으로 같이 모을까요?', // [확인 필요]
+  bundleNewSaving: '새 저금 만들기', // [확인 필요]
+  bundleTargetQ: '같이 모을 목표 금액이 있나요?', // [확인 필요]
+  bundleTargetHelp: '두 저금 목표 금액을 더한 금액이에요', // [확인 필요] Q11 처음 값이 있을 때
+  bundleNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
+  bundleDeadlineQ: '언제까지 모을까요?',
+  bundleNoDeadline: '기한 없이 모을게요', // [확인 필요]
+  bundleNoticeQ: '같이 모으기 전에 알려 드려요', // [확인 필요] 고지 화면 제목
+  bundleNotice:
+    '같이 모으면 합계가 둘 다에게 보여요. 합계로 서로 얼마 넣었는지 짐작할 수 있어요. 각자 금액은 둘 다 켰을 때만 나란히 보여요', // [확인 필요] G1
+  percentOnly: '퍼센트만 보여 주기', // [확인 필요]
+  percentOnlyHelp: '둘 다 금액 대신 %로 봐요', // [확인 필요]
+  percentOnlyNoTarget: '목표 금액이 있어야 고를 수 있어요', // [확인 필요]
+  bundleStart: '같이 모으기 시작하기', // [확인 필요]
+  bundleJoin: '같이 모으기 시작하기', // [확인 필요] 들어가기(2~4단계)
+  bundleStarted: '같이 모으기를 시작했어요', // [확인 필요]
+  bundleJoinQ: (who: string, name: string) => `${who}님 ‘${name}’에 같이 모을까요?`, // [확인 필요] 띠 13번과 같은 말
+  bundleNoMine: '같이 모을 내 저금이 없어요', // [확인 필요]
+  bundleBlocked: '지금은 같이 모으기를 만들 수 없어요', // [확인 필요] 합쳐서·연결 전 등
+  // W-15a 묶음 고치기
+  bundleEditTitle: '같이 모으기', // [확인 필요]
+  bundleName: '이름',
+  bundleTarget: '목표 금액',
+  bundleDeadline: '기한',
+  bundleNone: '없음', // [확인 필요]
+  showEach: '각자 모은 금액 보여 주기', // [확인 필요]
+  showEachHelp: (name: string) => `${name}님도 켜야 보여요`, // [확인 필요]
+  bundleLeave: '묶음 풀기', // [확인 필요]
+  bundleLeaveQ: '같이 모으기를 풀까요?', // [확인 필요]
+  bundleLeaveBody: '각자 저금은 그대로 남아요', // [확인 필요]
+  bundleLeaveOk: '풀게요', // [확인 필요]
+  bundleLeft: '같이 모으기를 풀었어요', // [확인 필요]
+  bundleChanged: (field: 'name' | 'target' | 'deadline') =>
+    field === 'name'
+      ? '이름을 바꿨어요'
+      : field === 'target'
+        ? '목표 금액을 바꿨어요'
+        : '기한을 바꿨어요', // [확인 필요]
+  bundleNameQ: '이름을 뭐라고 할까요?', // [확인 필요]
+  // W-20 돈 들어왔어요, W-20a
+  moneyInQ: '얼마 들어왔어요?', // [확인 필요]
+  moneyInDate: '받은 날', // [확인 필요]
+  moneyInDateToday: '받은 날 오늘', // [확인 필요]
+  moneyInFuture: '오늘까지 고를 수 있어요', // [확인 필요]
+  moneyInKinds: {
+    salary: '월급',
+    bonus: '상여',
+    family: '가족이 보태 줬어요',
+    work: '일한 돈',
+    refund: '환급',
+    etc: '그 밖',
+  }, // [확인 필요]
+  moneyInKindLabel: '어떤 돈이에요?', // [확인 필요] 칩 묶음 이름
+  moneyInDistributeQ: '저금에 얼마씩 넣을까요?', // [확인 필요]
+  moneyInLeft: (total: string, left: string) => `들어온 돈 ${total} 중 남은 ${left}`, // [확인 필요]
+  moneyInOver: '들어온 돈보다 많이 넣을 수 없어요', // [확인 필요]
+  moneyInPut: '넣기', // [확인 필요]
+  moneyInNoSaving: '넣을 저금이 없어요. 들어온 돈만 적어 둘게요', // [확인 필요]
+  moneyInLogged: '들어온 돈을 적었어요', // [확인 필요]
+  moneyInPutDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
+  amountOf: (name: string) => `${name} 금액`, // 화면 읽기
+  wonUnit: '원',
 };

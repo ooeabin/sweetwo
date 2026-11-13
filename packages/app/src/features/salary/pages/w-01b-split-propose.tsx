@@ -158,7 +158,7 @@ export function W01bSplitPropose() {
           <Chip
             small
             role="radio"
-              aria-pressed={undefined}
+            aria-pressed={undefined}
             aria-checked={chip === 'self'}
             selected={chip === 'self'}
             onClick={() => setChip('self')}
