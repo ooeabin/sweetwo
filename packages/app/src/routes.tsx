@@ -45,7 +45,8 @@ import {
   S12cUnlinkConfirm,
   S12dUnlinkReview,
   S12gReconnect,
-  S13Visibility,
+  S13Sharing,
+  S13pPreview,
   S15Security,
   S18Data,
   S18bDelete,
@@ -64,7 +65,8 @@ import {
   S03Guide,
   S11dPlanDay,
   S11cSalary,
-  S11fSalaryMode,
+  S11fManageStyle,
+  S11jStyleRequest,
   S11gMarriage,
   S11hWeddingDate,
   S11iBirthYear,
@@ -86,6 +88,8 @@ import {
   W12SavingAchieved,
   W12aSavingAfter,
   W13SavingList,
+  W01bSplitPropose,
+  W01cSplitAnswer,
 } from './features/salary';
 import { OnboardingGate, OnboardingRoute } from './features/onboarding';
 import { JoinRoute, P01CodeEntry, P01JoinStart } from './features/pairing';
@@ -117,6 +121,8 @@ export const routes: RouteObject[] = [
       ...(
         [
           ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary?view=plan(2026-11-09)
+          ['/salary/split/new', <W01bSplitPropose key="w01b" />], // W-01b 분담 도우미(제안하는 쪽, v2.2)
+          ['/salary/split/:id', <W01cSplitAnswer key="w01c" />], // W-01c 분담 제안 확인(받은 사람, 서버 알림 링크)
           ['/salary', <SalaryTab key="w02" />], // 월급 탭: ‘이번 달’ W-02 / ‘계획’ W-01 영수증(?view=plan)
           ['/salary/done', <DoneRedirect key="w02e" />], // 옛 W-02 끝(2026-11-12 없앰) → W-02
           ['/salary/review', <W05PrePayday key="w05" />], // W-05 월급 전 확인
@@ -324,11 +330,21 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S13Visibility />
+              <S13Sharing />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-13 공개 범위
+      }, // S-13 공개 범위(v2.2 한 목록)
+      {
+        path: '/settings/visibility/preview',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S13pPreview />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-13p 상대에게 보이는 모습
       {
         path: '/settings/trash',
         element: (
@@ -495,16 +511,31 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-11c 내 월급
+      // 옛 S-11f 주소 → 관리 형태(v2.2, 서버 알림 링크와 같은 /settings/couple/style)
       {
         path: '/settings/me/salary-mode',
+        element: <Navigate to="/settings/couple/style" replace />,
+      },
+      {
+        path: '/settings/couple/style',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <S11fSalaryMode />
+              <S11fManageStyle />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-11f 월급 관리 방식
+      }, // S-11f 관리 형태(세 질문)
+      {
+        path: '/settings/couple/style/request/:id',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S11jStyleRequest />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-11j 관리 형태 요청 확인(받은 사람)
       {
         path: '/settings/me/marriage',
         element: (

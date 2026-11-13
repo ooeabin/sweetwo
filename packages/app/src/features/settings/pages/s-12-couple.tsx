@@ -4,8 +4,9 @@ import {
   createInvite,
   fetchLatestInvite,
   fetchMyUnlink,
-  fetchReconnectOk,
+  fetchReconnectRequests,
   fetchUnlinkPartnerName,
+  ReconnectBlocked,
   requestReconnect,
   startNewInvite,
   fetchUnlink,
@@ -33,8 +34,8 @@ import { daysPending, exportedSince } from '../unlink';
 // 홈 초대 띠·서랍 ‘초대하기’는 ?invite=1로 와서 코드가 없으면 바로 만듦.
 // 결혼 예정일은 보기만(예식일 수정 H-P1, ‘결혼했어요’ H-T1은 아직 없음). 연결이면 ‘연결 해제’ → S-12a.
 // 해제 대기: 요청한 사람은 “예빈님 답을 기다리고 있어요” + ‘요청 취소’, 받은 사람은 ‘자산 정리 안 보기’ → S-12d.
-// 혼자 쓰기(해제 확정 뒤): 30일 동안 “30일 안에 다시 연결하면 되돌릴 수 있어요”.
-// 다르게 정리하기, 새로 초대하기, 다시 연결하기는 다음 단계.
+// 혼자 쓰기(해제 확정 뒤, v2.2 D10): ‘다시 연결하기’ = 복구 없는 새 연결 요청(7일에 1번, 기한 없음).
+// 받은 요청이 있으면 “{이름}님이 다시 연결하자고 해요” + ‘확인하기’(→ S-12g), 보낸 요청이 열려 있으면 “{이름}님 답을 기다리고 있어요”.
 export function S12Couple() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -61,10 +62,10 @@ export function S12Couple() {
     queryFn: fetchUnlinkPartnerName,
     enabled: !!myUnlink.data,
   });
-  // 다시 연결할 수 있는지는 서버 기준(S3-20: 서버가 거절할 때도 버튼이 보이던 것)
-  const reconnectOk = useQuery({
-    queryKey: qk.reconnectOk,
-    queryFn: fetchReconnectOk,
+  // 다시 연결 요청(보낸 것·받은 것, reconnect_request)
+  const reconnects = useQuery({
+    queryKey: qk.reconnectRequests,
+    queryFn: fetchReconnectRequests,
     enabled: !!myUnlink.data,
   });
   const [busy, setBusy] = useState(false);
@@ -255,11 +256,12 @@ export function S12Couple() {
     </div>
   ) : null;
 
-  // 혼자 쓰기(또는 해제 뒤 새로 초대 중): 30일 안 다시 연결, 새로 초대하기
+  // 혼자 쓰기(또는 해제 뒤 새로 초대 중): 다시 연결 요청(7일에 1번), 새로 초대하기
   const done = state === 'solo' || state === 'not_joined' ? (myUnlink.data ?? null) : null;
-  const until = done?.reconnect_until ? todayKst(new Date(done.reconnect_until)) : null;
   const ex = partnerName.data ?? '';
-  const openReq = done && done.reconnect_by && !done.reconnect_answer ? done.reconnect_by : null;
+  const rows = reconnects.data ?? [];
+  const received = rows.find((r) => r.to_user === d.me?.id && r.status === 'open');
+  const sent = rows.find((r) => r.from_user === d.me?.id && r.status === 'open');
   const reconnectAsk = async () => {
     if (busy) return;
     setBusy(true);
@@ -269,10 +271,13 @@ export function S12Couple() {
         track('rejoin_requested', {
           days_since_unlink: daysPending(done.confirmed_at),
         });
-      await qc.invalidateQueries({ queryKey: qk.myUnlink });
+      await qc.invalidateQueries({ queryKey: qk.reconnectRequests });
       toast(copy.reconnectSent(ex));
-    } catch {
-      toast(copy.failed);
+    } catch (e) {
+      if (e instanceof ReconnectBlocked && e.reason !== 'no_request') {
+        track('reconnect_blocked', { reason: e.reason });
+        toast(e.reason === 'too_soon' ? copy.reconnectTooSoon : copy.reconnectClosed);
+      } else toast(copy.failed);
     } finally {
       setBusy(false);
     }
@@ -289,41 +294,32 @@ export function S12Couple() {
       setBusy(false);
     }
   };
-  const soloBlock =
-    until && until >= today ? (
-      <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
-        {openReq === d.me.id ? (
-          <p>
-            <strong>{copy.pendingWait(ex)}</strong>
-          </p>
-        ) : openReq ? (
+  const soloBlock = done ? (
+    <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
+      {received ? (
+        <>
           <p>
             <strong>{copy.reconnectAsked(ex)}</strong>
           </p>
-        ) : (
-          <p>{copy.reconnectNote}</p>
-        )}
-        <p className="hg-q__help">{copy.reconnectUntil(formatMonthDay(until))}</p>
-        {openReq !== d.me.id && (openReq || reconnectOk.data) && (
           <div className="hg-row">
-            {openReq ? (
-              <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
-                {copy.seeRequest}
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={busy}
-                onClick={() => void reconnectAsk()}
-              >
-                {copy.reconnect}
-              </Button>
-            )}
+            <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
+              {copy.seeRequest}
+            </Button>
           </div>
-        )}
-      </div>
-    ) : null;
+        </>
+      ) : sent ? (
+        <p>
+          <strong>{copy.pendingWait(ex)}</strong>
+        </p>
+      ) : (
+        <div className="hg-row">
+          <Button variant="secondary" size="sm" loading={busy} onClick={() => void reconnectAsk()}>
+            {copy.reconnect}
+          </Button>
+        </div>
+      )}
+    </div>
+  ) : null;
   const newInviteBlock =
     state === 'solo' ? (
       <div className="hg-list">

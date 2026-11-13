@@ -175,7 +175,7 @@ test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초�
   await expect(page.locator('.hg-hubband')).toContainText('같이 모을 사람을 초대해 보세요');
 });
 
-test('S-11f 저장 전 미리보기 한 줄: 다른 방식을 고르면 “{다음 시작일}부터 체크리스트가 …”', async ({
+test('S-11f 저장 전 미리보기 한 줄: 각자 → 합쳐서는 상대 ‘좋아요’ 안내, 합쳐서 → 각자는 “{다음 시작일}부터 체크리스트가 …”', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -189,21 +189,26 @@ test('S-11f 저장 전 미리보기 한 줄: 다른 방식을 고르면 “{다�
     payday: 10,
     payday_last: false,
   };
+  // 옛 주소는 관리 형태(v2.2 세 질문)로
   await page.goto('/settings/me/salary-mode');
-  await expect(page.getByRole('heading', { name: '월급을 어떻게 관리해요?' })).toBeVisible();
+  await expect(page).toHaveURL(/\/settings\/couple\/style$/);
+  await expect(page.getByRole('heading', { name: '같이 쓰는 생활비가 있어요?' })).toBeVisible();
+  await page.getByRole('radio', { name: '네' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '둘이 같이 해요' }).click();
+  await expect(page.getByText('예빈님이 ‘좋아요’를 누르면 바뀌어요')).toBeVisible();
   await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
-  await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
-  // 9월 월급 기간 끝 10월 24일 → 10월 25일부터
-  await expect(page.getByText('10월 25일부터 체크리스트가 하나가 돼요')).toBeVisible();
   await axe(page);
-  await page.getByRole('radio', { name: '각자 월급을 따로 관리해요' }).click();
-  await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
-  await page.getByRole('radio', { name: '합쳐서 같이 관리해요' }).click();
-  await page.getByRole('button', { name: '저장' }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
-  expect(db.space?.salary_mode).toBe('joint');
-  // 합쳐서 → 각자 미리보기
-  await page.goto('/settings/me/salary-mode');
-  await page.getByRole('radio', { name: '각자 월급을 따로 관리해요' }).click();
+  // 합쳐서 → 각자는 바로: 9월 월급 기간 끝 10월 24일 → 10월 25일부터
+  Object.assign(db.space ?? {}, {
+    salary_mode: 'joint',
+    shared_living: true,
+    manager_user_id: null,
+  });
+  await page.goto('/settings/couple/style');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '각자 자기 월급으로 해요' }).click();
   await expect(page.getByText(/부터 체크리스트가 사람마다 생겨요$/)).toBeVisible();
 });

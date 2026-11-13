@@ -4,8 +4,8 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { UnlinkDeleted, type DataBack } from '../unlink';
 
-// S-12a 연결 해제 안내(25 ‘연결 해제 요청과 확인’): 같이 쓰던 데이터는 나누지 않고 모두 지움(목록), 확정 시점(상대 확인 또는 14일),
-// 혼자 쓰기로 처음부터, 30일 안 다시 연결(2026-11-11 D8), ‘먼저 내보내기’(→ S-18, 뒤로 = 이 화면). 다음 → S-12c.
+// S-12a 연결 해제 안내(25 ‘S-12 계열 문구’, 08 7장 v2.2): “남는 것” / “지워지는 것”, 확정 시점(상대 확인 또는 14일),
+// ‘먼저 내보내기’(→ S-18, 뒤로 = 이 화면). 다음 → S-12c. 30일 복구 안내는 없앰(2026-11-13 D10).
 export function S12aUnlinkIntro() {
   const nav = useNavigate();
   const d = useSettingsData();
@@ -27,11 +27,9 @@ export function S12aUnlinkIntro() {
       }}
     >
       <UnlinkDeleted />
-      <ul className="hg-stack" style={{ gap: 'var(--space-2)', paddingLeft: 'var(--space-5)' }}>
-        <li>{copy.unlinkWhen(d.c.partnerName)}</li>
-        <li>{copy.unlinkRestart}</li>
-        <li>{copy.unlinkReconnect}</li>
-      </ul>
+      <p className="hg-help" style={{ margin: 0 }}>
+        {copy.unlinkWhen(d.c.partnerName)}
+      </p>
     </QuestionLayout>
   );
 }

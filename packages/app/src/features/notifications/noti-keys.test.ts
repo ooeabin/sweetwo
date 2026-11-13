@@ -1,4 +1,4 @@
-import { qk, splitKeys } from '@sweetwo/api';
+import { manageKeys, qk, splitAccountKeys, splitKeys } from '@sweetwo/api';
 import { expect, it } from 'vitest';
 import { notiKeys } from './noti-keys';
 
@@ -30,7 +30,15 @@ it('해제 확정·다시 연결은 전부, 해제 요청은 우리 둘 상태, 
   expect(notiKeys('unlink_confirmed')).toBe('all');
   expect(notiKeys('reconnected')).toBe('all');
   expect(notiKeys('unlink_requested')).toEqual([qk.space, qk.unlink, qk.partner]);
-  expect(notiKeys('reconnect_requested')).toEqual([qk.myUnlink]);
+  expect(notiKeys('reconnect_requested')).toEqual([qk.myUnlink, qk.reconnectRequests]);
   expect(notiKeys('inquiry_answered')).toEqual([qk.inquiries]);
   expect(notiKeys('weekly_summary')).toEqual([]);
+});
+
+it('v2.2 관리 형태 요청·결과, 분담 제안·결과는 그 요청과 월급 계획을 다시 읽음', () => {
+  expect(notiKeys('mode_request')).toEqual(manageKeys);
+  expect(notiKeys('mode_result')).toEqual(manageKeys);
+  expect(notiKeys('split_request')).toEqual(splitAccountKeys);
+  expect(notiKeys('split_result')).toEqual(splitAccountKeys);
+  expect(notiKeys('my_allowance')).toEqual(splitKeys);
 });

@@ -4,6 +4,7 @@ import {
   ModeChangeResult,
   MyManageStyleSchema,
   PartnerPlanViewSchema,
+  ReconnectRequestRowSchema,
   type ManagerAnswer,
   type ModeChangeRequestRow,
   type MyManageStyle,
@@ -148,6 +149,22 @@ export async function answerReconnect(accept: boolean, block = false): Promise<s
   });
   failReconnect(error);
   return typeof data === 'string' && data ? data : null;
+}
+
+export type ReconnectRequest = ReturnType<typeof ReconnectRequestRowSchema.parse>;
+
+/**
+ * 다시 연결 요청(reconnect_request, v2.2 D10): 내가 보낸 것과 받은 것(RLS: 조용히 거절된 것은 안 보임). 최근 것부터.
+ * 받은 열린 요청이 있으면 S-12g, 보낸 열린 요청이 있으면 S-12 “{이름}님 답을 기다리고 있어요”
+ */
+export async function fetchReconnectRequests(): Promise<ReconnectRequest[]> {
+  const { data, error } = await supabase()
+    .from('reconnect_request')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
+  fail(error);
+  return (data ?? []).map((r) => ReconnectRequestRowSchema.parse(r));
 }
 
 /** 혼자 쓰기 → 새로 초대하기(미합류로) */

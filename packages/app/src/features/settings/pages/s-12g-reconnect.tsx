@@ -1,11 +1,11 @@
 import {
   answerReconnect,
-  fetchMyUnlink,
+  fetchReconnectRequests,
   fetchUnlinkPartnerName,
   qk,
-  startNewInvite,
+  ReconnectBlocked,
 } from '@sweetwo/api';
-import { Icon, Modal, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -15,62 +15,42 @@ import { toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
-// S-12g 다시 연결 수락(받은 사람, Q7): Avatar 2개 + “찬우님이 다시 연결하자고 해요”,
-// “연결을 끊기 전 같이 쓰던 월급 계획과 저금이 돌아와요” + 따로 경고 띠 “해제 뒤 새로 적은 내용은 지워져요”(2026-11-11 S3-19),
-// ‘다시 연결할게요’ → 확인 Modal → 연결 복구 → 공개 범위(S-13) 한 번 → 홈, ‘괜찮아요’ → 혼자 쓰기 유지.
-// 30일이 지났으면 “다시 연결할 수 있는 기간이 지났어요” + ‘새로 초대하기’(막다른 화면 없이). 오프라인이면 버튼 비활성 + 이유 한 줄.
+// S-12g 다시 연결 요청(받은 사람, Q7, 25 ‘S-12 계열 문구’ v2.2, 08 8장): 복구 없는 새 연결(D10).
+// Avatar 2개 + “찬우님이 다시 연결하자고 해요” / “연결하면 새로 같이 시작해요”.
+// ‘연결할게요’ → 서버가 요청한 사람 공간의 초대 코드를 돌려줌 → 합류 흐름(/i/{코드}, 공개 범위는 합류에서 한 번 확인).
+// ‘괜찮아요’ → 혼자 쓰기 유지. “다시 받지 않을게요” → 그 뒤 요청은 서버가 조용히 거절(요청한 사람에게 알리지 않음).
+// 받은 열린 요청이 없으면 S-12로. 오프라인이면 버튼 비활성 + 이유 한 줄.
 export function S12gReconnect() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const d = useSettingsData();
   const online = useOnline();
-  const u = useQuery({ queryKey: qk.myUnlink, queryFn: fetchMyUnlink });
+  const reqs = useQuery({ queryKey: qk.reconnectRequests, queryFn: fetchReconnectRequests });
   const name = useQuery({ queryKey: qk.unlinkPartner, queryFn: fetchUnlinkPartnerName });
-  const [busy, setBusy] = useState(false);
-  const [ask, setAsk] = useState(false);
-  if (d.loading || !d.me || !d.c || u.isLoading || name.isLoading) return <QuestionSkeleton />;
-  const done = u.data;
-  const open = done && done.reconnect_by && !done.reconnect_answer && done.reconnect_by !== d.me.id;
-  if (!done || (!open && done.reconnect_until && Date.parse(done.reconnect_until) > Date.now()))
-    return <Navigate to="/settings/couple" replace />;
+  const [busy, setBusy] = useState<'yes' | 'no' | 'block' | null>(null);
+  if (d.loading || !d.me || !d.c || reqs.isLoading || name.isLoading) return <QuestionSkeleton />;
+  const me = d.me;
+  const open = (reqs.data ?? []).find((r) => r.to_user === me.id && r.status === 'open');
+  if (!open) return <Navigate to="/settings/couple" replace />;
   const partner = name.data ?? '';
-  const expired = !done.reconnect_until || Date.parse(done.reconnect_until) <= Date.now();
-  const answer = async (accept: boolean) => {
+  const answer = async (kind: 'yes' | 'no' | 'block') => {
     if (busy || !online) return;
-    setBusy(true);
+    setBusy(kind);
     try {
-      await answerReconnect(accept);
-      const at = done.reconnect_at ? Date.parse(done.reconnect_at) : NaN;
+      const code = await answerReconnect(kind === 'yes', kind === 'block');
       track('rejoin_responded', {
-        response: accept ? 'accept' : 'decline',
-        hours_since_request: Number.isNaN(at)
-          ? 0
-          : Math.max(0, Math.floor((Date.now() - at) / 3_600_000)),
+        response: kind === 'yes' ? 'accept' : kind === 'block' ? 'block' : 'decline',
+        hours_since_request: Math.max(
+          0,
+          Math.floor((Date.now() - Date.parse(open.created_at)) / 3_600_000),
+        ),
       });
-      if (accept) {
-        // 다시 연결 뒤 공개 범위 한 번 확인(S-13) → 홈
-        nav('/settings/visibility?next=/', { replace: true });
-        void qc.invalidateQueries();
-      } else {
-        await qc.invalidateQueries({ queryKey: qk.myUnlink });
-        nav('/settings/couple', { replace: true });
-      }
-    } catch {
-      toast(copy.failed);
-      setBusy(false);
-      setAsk(false);
-    }
-  };
-  const newInvite = async () => {
-    if (busy || !online) return;
-    setBusy(true);
-    try {
-      if (d.space?.couple_state === 'solo') await startNewInvite();
-      await qc.invalidateQueries({ queryKey: qk.space });
-      nav('/settings/couple?invite=1', { replace: true });
-    } catch {
-      toast(copy.failed);
-      setBusy(false);
+      await qc.invalidateQueries({ queryKey: ['couple_unlink'] });
+      if (kind === 'yes' && code) nav(`/i/${code}`, { replace: true });
+      else nav('/settings/couple', { replace: true });
+    } catch (e) {
+      toast(e instanceof ReconnectBlocked ? copy.reconnectClosed : copy.failed);
+      setBusy(null);
     }
   };
   const avatars = (
@@ -79,48 +59,27 @@ export function S12gReconnect() {
       <span className="hg-avatar hg-avatar--p2">{[...d.c.myName][0] ?? ''}</span>
     </span>
   );
-  if (expired)
-    return (
-      <QuestionLayout
-        hero={avatars}
-        title={copy.reconnectExpired}
-        onBack={() => nav('/settings/couple')}
-        primary={{ label: copy.newInvite, loading: busy, disabled: !online }}
-        note={online ? undefined : copy.needOnline}
-        onSubmit={() => void newInvite()}
-        center
-      />
-    );
   return (
-    <>
-      <QuestionLayout
-        hero={avatars}
-        title={copy.reconnectAsked(partner)}
-        help={copy.reconnectBack}
-        onBack={() => nav('/settings/couple')}
-        primary={{ label: copy.reconnectYes, loading: busy, disabled: !online }}
-        note={online ? undefined : copy.needOnline}
-        onSubmit={() => setAsk(true)}
-        later={{ label: copy.reconnectNo, onClick: () => void answer(false) }}
-        center
-      >
-        <div className="hg-banner hg-banner--check" role="note">
-          <Icon name="circle-alert" />
-          <span>{copy.reconnectDiscard}</span>
-        </div>
-      </QuestionLayout>
-      {ask && (
-        <Modal
-          tone="primary"
-          title={copy.reconnectQ}
-          body={copy.reconnectQBody}
-          confirmLabel={copy.reconnectOk}
-          cancelLabel={copy.reconnectKeep}
-          busy={busy}
-          onCancel={() => setAsk(false)}
-          onConfirm={() => void answer(true)}
-        />
-      )}
-    </>
+    <QuestionLayout
+      hero={avatars}
+      title={copy.reconnectAsked(partner)}
+      help={copy.reconnectFresh}
+      onBack={() => nav('/settings/couple')}
+      primary={{ label: copy.reconnectYes, loading: busy === 'yes', disabled: !online }}
+      note={online ? undefined : copy.needOnline}
+      onSubmit={() => void answer('yes')}
+      secondary={{
+        label: copy.reconnectNo,
+        loading: busy === 'no',
+        disabled: !online,
+        onClick: () => void answer('no'),
+      }}
+      later={{
+        label: copy.reconnectBlock,
+        loading: busy === 'block',
+        onClick: () => void answer('block'),
+      }}
+      center
+    />
   );
 }

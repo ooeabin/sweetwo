@@ -3,6 +3,44 @@
 import { formatMonthDay, object } from '@sweetwo/core';
 
 export const copy = {
+  // W-01b·W-01c 분담 도우미(20 ‘월급 탭 v2.2’, 06 3-7, 2026-11-13) [확인 필요]
+  splitShare: {
+    nameQ: '어떤 통장을 나눌까요?',
+    nameChips: { living: '생활비 통장', date: '데이트 통장' } as Record<string, string>,
+    nameSelf: '직접 쓸게요',
+    nameLabel: '통장 이름',
+    totalQ: '한 달에 얼마 넣을까요?',
+    mineQ: '내 몫은 한 달에 얼마예요?',
+    ruleQ: '어떻게 나눌까요?',
+    rules: { half: '반반', income_ratio: '월급 비율', custom: '직접' } as Record<string, string>,
+    customQ: (me: string) => `${me}님 몫은 얼마예요?`,
+    result: (me: string, a: string, them: string, b: string, ra: number, rb: number) =>
+      `${me} ${a}, ${them} ${b} (${ra} : ${rb})`,
+    propose: (name: string) => `${name}님에게 제안하기`,
+    addMine: '내 월급 계획에 넣기',
+    proposed: (name: string) => `${name}님에게 제안했어요`,
+    added: '월급 계획에 넣었어요',
+    waiting: (name: string) => `${name}님 답을 기다려요`,
+    title: (name: string, account: string) => `${name}님이 ‘${account}’ 나누기를 제안했어요`,
+    body: (total: string, me: string, a: string, them: string, b: string) =>
+      `한 달 ${total}, ${me} ${a}, ${them} ${b}`,
+    ruleLine: {
+      half: '반반으로 나눠요',
+      income_ratio: (ra: number, rb: number) => `월급 비율로 나눠요 (${ra} : ${rb})`,
+      custom: '직접 정한 금액이에요',
+    },
+    yes: '좋아요',
+    no: '지금처럼 할게요',
+    accepted: '월급 계획에 같이 쓰는 통장을 넣었어요',
+    expired: '제안 기한이 지났어요',
+    gone: '지금은 받은 제안이 없어요',
+    notConnected: '파트너가 합류하면 제안할 수 있어요',
+    ok: '확인',
+    next: '다음',
+    tooLong: '20자까지 쓸 수 있어요',
+    unit: '1만 원 단위로 적어 주세요',
+    overTotal: '한 달 금액보다 작게 적어 주세요',
+  },
   // W-01 월급 계획
   splitTitle: '월급 계획',
   splitHelp: '눌러서 금액을 바꿔요', // [확인 필요]

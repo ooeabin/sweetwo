@@ -21,6 +21,12 @@ describe('알림 → 화면 ID(notification_opened landing_screen)', () => {
     ['/settings/help/access/r-1', 'S-19b'],
     ['/new-device/s-1', 'A-08'],
     ['/notifications', 'N-02'],
+    ['/salary/split/new', 'W-01b'],
+    ['/salary/split/s-1', 'W-01c'],
+    ['/settings/couple/style/request/r-1', 'S-11j'],
+    ['/settings/couple/style', 'S-11f'],
+    ['/settings/visibility/preview', 'S-13p'],
+    ['/settings/couple/reconnect', 'S-12g'],
     ['/somewhere', 'other'],
   ])('%s → %s', (t, id) => expect(landingScreen(t)).toBe(id));
 });
