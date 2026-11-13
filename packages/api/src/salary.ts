@@ -1,4 +1,12 @@
-import { splitLineId, type Json, type SplitLineDraft, type Tables } from '@sweetwo/core';
+import {
+  SalaryChangeRowSchema,
+  savingItemId,
+  splitLineId,
+  type Json,
+  type SalaryChangeRowResponse,
+  type SplitLineDraft,
+  type Tables,
+} from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -31,14 +39,33 @@ export async function fetchChecklistsEnsured(today: string): Promise<PayChecklis
   return fetchCurrentChecklists(today);
 }
 
-/** 월급 계획 저장(줄 통째로 교체). owner: 각자면 사람 id, 합쳐서면 생략 */
-export async function saveSplit(lines: SplitLineDraft[], owner?: string): Promise<string> {
+/** v2.2 줄 설정(06 3-1): 체크리스트에 넣기, 은행에서 자동으로 나가요, 나가는 날(null = 월급날, 31 = 말일) */
+export interface SplitLineSettings {
+  inChecklist?: boolean;
+  autoPay?: boolean;
+  autoDay?: number | null;
+}
+const settingsJson = (l: SplitLineSettings) => ({
+  ...(l.inChecklist !== undefined ? { in_checklist: l.inChecklist } : {}),
+  ...(l.autoPay !== undefined ? { auto_pay: l.autoPay } : {}),
+  ...(l.autoDay !== undefined ? { auto_day: l.autoDay } : {}),
+});
+
+/**
+ * 월급 계획 저장(줄 통째로 교체). owner: 각자면 사람 id, 합쳐서면 생략.
+ * v2.2: 줄 설정을 넘기면 그 값, 안 넘기면 서버가 같은 줄(kind, goal, user, name)의 설정을 이어받음. 보내기 줄은 서버가 거절(send_locked)
+ */
+export async function saveSplit(
+  lines: (SplitLineDraft & SplitLineSettings)[],
+  owner?: string,
+): Promise<string> {
   const p_lines = lines.map((l) => ({
     kind: l.kind,
     amount: l.amount,
     goal_id: l.goalId ?? null,
     user_id: l.userId ?? null,
     name: l.name ?? null,
+    ...settingsJson(l),
   })) as unknown as Json;
   const { data, error } = await supabase().rpc('save_split', { p_lines, p_owner: owner });
   fail(error);
@@ -145,9 +172,14 @@ export async function setJointCycleDay(day: number) {
 // ── W-01 영수증: 줄마다 바로 저장(2026-11-09, docs/spec/20-salary-plan.md W-01) ─────────────
 // 서버 split_line_set / split_line_add / split_line_delete / split_reorder. 이번 달 체크 안 한 줄은 서버가 맞춤.
 
-/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개 */
+/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개, 보내기 줄(v2.2 서버 계산) */
 export type SplitBlockReason =
-  'duplicate_line' | 'not_owner' | 'unlink_pending' | 'keep_allowance' | 'too_many_custom';
+  | 'duplicate_line'
+  | 'not_owner'
+  | 'unlink_pending'
+  | 'keep_allowance'
+  | 'too_many_custom'
+  | 'send_locked';
 export class SplitBlocked extends Error {
   constructor(readonly reason: SplitBlockReason) {
     super(reason);
@@ -159,6 +191,7 @@ const REASONS: SplitBlockReason[] = [
   'unlink_pending',
   'keep_allowance',
   'too_many_custom',
+  'send_locked',
 ];
 const failSplit = (e: { message?: string } | null) => {
   const r = REASONS.find((x) => e?.message?.includes(x));
@@ -262,4 +295,115 @@ export function subscribeSplits(spaceId: string, on: () => void) {
   return () => {
     void supabase().removeChannel(ch);
   };
+}
+
+// ─────────────────────────── v2.2 확인 루프(07, 서버 20261201090000_v22_check_loop) ───────────────────────────
+
+/** 확인 목록 한 번 확인을 못 함: 남의 각자 목록, 해제 대기 공동 목록, 늦은 확인 기간도 지남 */
+export class ConfirmBlocked extends Error {
+  constructor(readonly reason: 'not_owner' | 'unlink_pending' | 'closed') {
+    super(reason);
+  }
+}
+
+/**
+ * W-02 “모두 계획대로 됐어요”(confirm_payday): 남은 손 줄을 계획 금액으로 체크 + confirmed_at/by.
+ * 지난 사이클이면 늦은 확인(다음 사이클 끝까지). 합쳐서 남의 용돈 줄은 서버가 건너뜀. 체크한 줄 수
+ */
+export async function confirmPayday(checklist: string): Promise<number> {
+  const { data, error } = await supabase().rpc('confirm_payday', { p_checklist: checklist });
+  for (const r of ['not_owner', 'unlink_pending', 'closed'] as const)
+    if (error?.message?.includes(r)) throw new ConfirmBlocked(r);
+  fail(error);
+  return typeof data === 'number' ? data : 0;
+}
+
+/**
+ * 줄 설정 여러 줄 한 번에(split_lines_configure: W-01 줄 설정, W-01d 자동 줄 고르기, W-11e). 키가 없으면 그대로.
+ * 권한은 월급 계획 고치기와 같음(각자 = 주인, 합쳐서 = 둘 다)
+ */
+export async function configureSplitLines(items: ({ id: string } & SplitLineSettings)[]) {
+  const p_items = items.map((i) => ({ id: i.id, ...settingsJson(i) })) as unknown as Json;
+  const { error } = await supabase().rpc('split_lines_configure', { p_items });
+  failSplit(error);
+}
+
+/** 늦은 확인 마지막 날(late_check_until). 목록이 없으면 null */
+export async function fetchLateCheckUntil(checklist: string): Promise<string | null> {
+  const { data, error } = await supabase().rpc('late_check_until', { p_checklist: checklist });
+  fail(error);
+  return typeof data === 'string' ? data : null;
+}
+
+// ─────────────────────────── v2.2 날짜를 정한 월급 변경(07 5장, S-11c) ───────────────────────────
+
+/** S-11c 저장 못 함: 지난 달, 금액 범위, 공간 없음 */
+export class SalaryChangeBlocked extends Error {
+  constructor(readonly reason: 'bad_month' | 'bad_amount' | 'already_applied') {
+    super(reason);
+  }
+}
+const failChange = (e: { message?: string } | null) => {
+  for (const r of ['bad_month', 'bad_amount', 'already_applied'] as const)
+    if (e?.message?.includes(r)) throw new SalaryChangeBlocked(r);
+  fail(e);
+};
+
+/**
+ * 월급 변경 예약(schedule_salary_change). from·until = 'YYYY-MM'(그 달 1일로 보냄). 이번 사이클이면 서버가 바로 적용.
+ * 같은 사람의 아직 적용 안 한 변경 중 시작 달 이후 것은 취소됨. 새 변경 id
+ */
+export async function scheduleSalaryChange(o: {
+  amount: number;
+  from: string;
+  until: string | null;
+}): Promise<string> {
+  const { data, error } = await supabase().rpc('schedule_salary_change', {
+    p_amount: o.amount,
+    p_from: `${o.from.slice(0, 7)}-01`,
+    p_until: o.until ? `${o.until.slice(0, 7)}-01` : undefined,
+  });
+  failChange(error);
+  const id = savingItemId.safeParse(data); // uuid 검사
+  if (!id.success) throw new AuthCallError('unknown');
+  return id.data;
+}
+
+/** 아직 적용 안 한 월급 변경 취소(적용한 것은 already_applied) */
+export async function cancelSalaryChange(id: string) {
+  const { error } = await supabase().rpc('cancel_salary_change', { p_id: id });
+  failChange(error);
+}
+
+/** 월급 변경 목록(본인 + 같이 계열 상대, RLS). 최근 시작 달부터 */
+export async function fetchSalaryChanges(): Promise<SalaryChangeRowResponse[]> {
+  const { data, error } = await supabase()
+    .from('salary_change')
+    .select('*')
+    .order('effective_from', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(50);
+  fail(error);
+  return (data ?? []).map((r) => SalaryChangeRowSchema.parse(r));
+}
+
+/** 월급 변경 신호(Realtime salary_change). 받으면 salaryChangeKeys 무효화 */
+export function subscribeSalaryChanges(spaceId: string, on: () => void) {
+  const ch = supabase()
+    .channel(`salary_change:${spaceId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'salary_change', filter: `space_id=eq.${spaceId}` },
+      () => on(),
+    )
+    .subscribe();
+  return () => {
+    void supabase().removeChannel(ch);
+  };
+}
+
+/** O-32 ‘날짜가 정해져 있지 않아요’(app_user.payday_none): 확인 목록·월급날 알림 없음, 기간(07 6장)으로 봄 */
+export async function setPaydayNone(userId: string, on: boolean) {
+  const { error } = await supabase().from('app_user').update({ payday_none: on }).eq('id', userId);
+  fail(error);
 }

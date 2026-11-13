@@ -1,4 +1,10 @@
-import { ActiveNotice, NotiRow, parseNotiRows, type NotiCursor } from '@sweetwo/core';
+import {
+  ActiveNotice,
+  NotiRow,
+  parseNotiRows,
+  type NotiCursor,
+  type PushKind,
+} from '@sweetwo/core';
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
@@ -169,5 +175,21 @@ export async function registerPushDevice(
 /** 로그아웃 전에 이 기기 토큰을 지움(실패해도 로그아웃은 함) */
 export async function unregisterPushDevice(token: string) {
   const { error } = await supabase().rpc('unregister_push_device', { p_token: token });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * 알림 종류 켜기(P-11, S-14, app_user.push_kinds: care, payday, achieved, shared_change, my_allowance, progress_news).
+ * 없는 키 = 켬(core pushKindOn). 바꾼 키만 넘기면 지금 값에 덮어씀
+ */
+export async function setPushKinds(
+  userId: string,
+  current: Record<string, boolean>,
+  patch: Partial<Record<PushKind, boolean>>,
+): Promise<void> {
+  const { error } = await supabase()
+    .from('app_user')
+    .update({ push_kinds: { ...current, ...patch } })
+    .eq('id', userId);
   if (error) throw new Error(error.message);
 }

@@ -65,7 +65,23 @@ export const qk = {
   mailBounced: ['mail_bounced'] as const,
   /** 저금 항목 하나의 체크 줄(W-10 저금 내역) */
   goalLines: (id: string) => ['pay_check_line', 'goal', id] as const,
+  // ── v2.2(ADR 0009) ──
+  /** 관리 형태(my_manage_style). 공간 키 아래라 공간이 바뀌면 같이 새로 받음 */
+  manageStyle: ['space', 'manage_style'] as const,
+  /** 관리 형태 바꾸기 요청(mode_change_request) */
+  modeRequests: ['mode_change_request'] as const,
+  /** 상대에게 보이는 내(또는 상대) 월급 계획(partner_plan_view). viewer = 보는 사람(S-13p 미리 보기는 상대 id) */
+  partnerPlanView: (viewer: string | null) => ['partner_plan_view', viewer ?? 'me'] as const,
+  /** 날짜를 정한 월급 변경(salary_change) */
+  salaryChanges: ['salary_change'] as const,
+  /** 홈 띠 닫기·끝냄(home_task_state) */
+  homeTasks: ['home_task_state'] as const,
 };
 
 /** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */
 export const splitKeys = [qk.splits, ['pay_checklist'], qk.goals, qk.goalSaved] as const;
+
+/** 관리 형태가 바뀌면 다시 읽을 것(request/answer_mode_change 뒤, Realtime mode_change_request): 공간, 요청, 월급 계획 쪽, 상대 보기 */
+export const manageKeys = [qk.space, qk.modeRequests, ...splitKeys, ['partner_plan_view']] as const;
+/** 월급 변경이 바뀌면 다시 읽을 것(schedule/cancel_salary_change 뒤, Realtime salary_change): 변경 목록, 나, 상대, 월급 계획 쪽 */
+export const salaryChangeKeys = [qk.salaryChanges, qk.me, qk.partner, ...splitKeys] as const;
