@@ -47,9 +47,10 @@ export function S12gReconnect() {
           Math.floor((Date.now() - Date.parse(open.created_at)) / 3_600_000),
         ),
       });
-      await qc.invalidateQueries({ queryKey: ['couple_unlink'] });
+      // 먼저 옮기고 다시 읽음(다시 읽은 목록에 열린 요청이 없어 이 화면이 S-12로 먼저 나가지 않게)
       if (kind === 'yes' && code) nav(`/i/${code}`, { replace: true });
       else nav('/settings/couple', { replace: true });
+      void qc.invalidateQueries({ queryKey: ['couple_unlink'] });
     } catch (e) {
       toast(e instanceof ReconnectBlocked ? copy.reconnectClosed : copy.failed);
       setBusy(null);
