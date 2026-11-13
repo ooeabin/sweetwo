@@ -1320,6 +1320,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          bundle_id: string | null
           closed_at: string | null
           created_at: string
           created_by: string | null
@@ -1354,6 +1355,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          bundle_id?: string | null
           closed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -1387,6 +1389,7 @@ export type Database = {
           achieved_seen?: string[]
           after_marriage?: boolean
           amount_estimated?: boolean
+          bundle_id?: string | null
           closed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -1417,6 +1420,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "goal_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "saving_bundle"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "goal_space_id_fkey"
             columns: ["space_id"]
             isOneToOne: false
@@ -1434,8 +1444,12 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           goal_id: string
+          hide_from_summary: boolean
           id: string
           kind: string
+          money_in_id: string | null
+          note_id: string | null
+          reason: string | null
           reason_code: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id: string
         }
@@ -1448,8 +1462,12 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           goal_id: string
+          hide_from_summary?: boolean
           id?: string
           kind: string
+          money_in_id?: string | null
+          note_id?: string | null
+          reason?: string | null
           reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id: string
         }
@@ -1461,8 +1479,12 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           goal_id?: string
+          hide_from_summary?: boolean
           id?: string
           kind?: string
+          money_in_id?: string | null
+          note_id?: string | null
+          reason?: string | null
           reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
           space_id?: string
         }
@@ -1479,6 +1501,20 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_money_in_id_fkey"
+            columns: ["money_in_id"]
+            isOneToOne: false
+            referencedRelation: "money_in"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "saving_note"
             referencedColumns: ["id"]
           },
           {
@@ -2005,6 +2041,48 @@ export type Database = {
           },
         ]
       }
+      money_in: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["money_in_kind"]
+          owner_user_id: string
+          received_on: string
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["money_in_kind"]
+          owner_user_id: string
+          received_on: string
+          space_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["money_in_kind"]
+          owner_user_id?: string
+          received_on?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "money_in_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notice: {
         Row: {
           body: string
@@ -2523,6 +2601,163 @@ export type Database = {
           },
         ]
       }
+      saving_bundle: {
+        Row: {
+          achieved_at: string | null
+          achieved_seen: string[]
+          created_at: string
+          deadline: string | null
+          deleted_at: string | null
+          id: string
+          member_a: string
+          member_b: string | null
+          name: string
+          percent_only_a: boolean
+          percent_only_b: boolean
+          show_each_a: boolean
+          show_each_b: boolean
+          space_id: string
+          status: string
+          target_amount: number | null
+          updated_at: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          achieved_at?: string | null
+          achieved_seen?: string[]
+          created_at?: string
+          deadline?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_a: string
+          member_b?: string | null
+          name: string
+          percent_only_a?: boolean
+          percent_only_b?: boolean
+          show_each_a?: boolean
+          show_each_b?: boolean
+          space_id: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          achieved_at?: string | null
+          achieved_seen?: string[]
+          created_at?: string
+          deadline?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_a?: string
+          member_b?: string | null
+          name?: string
+          percent_only_a?: boolean
+          percent_only_b?: boolean
+          show_each_a?: boolean
+          show_each_b?: boolean
+          space_id?: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saving_bundle_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saving_note: {
+        Row: {
+          amount: number | null
+          bundle_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          due_on: string | null
+          goal_id: string | null
+          id: string
+          name: string
+          paid: boolean
+          paid_at: string | null
+          paid_move_id: string | null
+          space_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          amount?: number | null
+          bundle_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          due_on?: string | null
+          goal_id?: string | null
+          id?: string
+          name: string
+          paid?: boolean
+          paid_at?: string | null
+          paid_move_id?: string | null
+          space_id: string
+        }
+        Update: {
+          amount?: number | null
+          bundle_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          due_on?: string | null
+          goal_id?: string | null
+          id?: string
+          name?: string
+          paid?: boolean
+          paid_at?: string | null
+          paid_move_id?: string | null
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saving_note_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "saving_bundle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_note_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_note_paid_move_id_fkey"
+            columns: ["paid_move_id"]
+            isOneToOne: false
+            referencedRelation: "goal_move"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_note_paid_move_id_fkey"
+            columns: ["paid_move_id"]
+            isOneToOne: false
+            referencedRelation: "goal_move_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saving_note_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       server_event: {
         Row: {
           created_at: string
@@ -2554,6 +2789,69 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_account: {
+        Row: {
+          answered_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          member_a: string
+          member_b: string
+          monthly_total: number
+          name: string
+          proposed_by: string
+          ratio_a: number
+          rule: string
+          share_a: number
+          share_b: number
+          space_id: string
+          status: string
+        }
+        ComputedFields: never
+        Insert: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          member_a: string
+          member_b: string
+          monthly_total: number
+          name: string
+          proposed_by: string
+          ratio_a: number
+          rule: string
+          share_a: number
+          share_b: number
+          space_id: string
+          status?: string
+        }
+        Update: {
+          answered_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          member_a?: string
+          member_b?: string
+          monthly_total?: number
+          name?: string
+          proposed_by?: string
+          ratio_a?: number
+          rule?: string
+          share_a?: number
+          share_b?: number
+          space_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_account_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       split_line: {
         Row: {
           amount: number
@@ -2564,6 +2862,7 @@ export type Database = {
           in_checklist: boolean
           kind: Database["public"]["Enums"]["split_line_kind"]
           name: string | null
+          shared_account_id: string | null
           sort: number
           space_id: string
           split_id: string
@@ -2579,6 +2878,7 @@ export type Database = {
           in_checklist: boolean
           kind: Database["public"]["Enums"]["split_line_kind"]
           name?: string | null
+          shared_account_id?: string | null
           sort: number
           space_id: string
           split_id: string
@@ -2593,6 +2893,7 @@ export type Database = {
           in_checklist?: boolean
           kind?: Database["public"]["Enums"]["split_line_kind"]
           name?: string | null
+          shared_account_id?: string | null
           sort?: number
           space_id?: string
           split_id?: string
@@ -2604,6 +2905,13 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "split_line_shared_account_id_fkey"
+            columns: ["shared_account_id"]
+            isOneToOne: false
+            referencedRelation: "shared_account"
             referencedColumns: ["id"]
           },
           {
@@ -2734,7 +3042,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      goal_move_public: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          created_by: string | null
+          goal_id: string | null
+          hide_from_summary: boolean | null
+          id: string | null
+          kind: string | null
+          money_in_id: string | null
+          note_id: string | null
+          reason_code: Database["public"]["Enums"]["goal_move_reason"] | null
+          space_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          goal_id?: string | null
+          hide_from_summary?: boolean | null
+          id?: string | null
+          kind?: string | null
+          money_in_id?: string | null
+          note_id?: string | null
+          reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
+          space_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          goal_id?: string | null
+          hide_from_summary?: boolean | null
+          id?: string | null
+          kind?: string | null
+          money_in_id?: string | null
+          note_id?: string | null
+          reason_code?: Database["public"]["Enums"]["goal_move_reason"] | null
+          space_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_move_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_money_in_id_fkey"
+            columns: ["money_in_id"]
+            isOneToOne: false
+            referencedRelation: "money_in"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "saving_note"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_move_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       _accept_join: { Args: { p_space: string }; Returns: undefined }
@@ -2756,6 +3135,7 @@ export type Database = {
         Returns: string
       }
       account_deletion_for: { Args: { uid: string }; Returns: string }
+      achieve_bundle: { Args: { p_bundle: string }; Returns: boolean }
       achieve_goal: { Args: { p_goal: string }; Returns: boolean }
       add_care_photo: {
         Args: { p_path: string; p_record: string; p_size: number }
@@ -2769,6 +3149,18 @@ export type Database = {
           p_name: string
           p_start?: number
           p_target?: number
+        }
+        Returns: string
+      }
+      adjust_saving: {
+        Args: {
+          p_delta: number
+          p_goal: string
+          p_hide_from_summary?: boolean
+          p_money_in?: string
+          p_note?: string
+          p_reason?: string
+          p_reason_code?: Database["public"]["Enums"]["goal_move_reason"]
         }
         Returns: string
       }
@@ -3101,6 +3493,10 @@ export type Database = {
         Returns: string
       }
       answer_reconnect: { Args: { p_accept: boolean }; Returns: undefined }
+      answer_split: {
+        Args: { p_accept: boolean; p_id: string }
+        Returns: string
+      }
       apply_manage_style: {
         Args: {
           p_living: boolean
@@ -3115,6 +3511,7 @@ export type Database = {
         Args: { p_today?: string; p_user?: string }
         Returns: number
       }
+      apply_shared_account: { Args: { p_account: string }; Returns: undefined }
       asset_editable: {
         Args: {
           a: Omit<
@@ -3148,6 +3545,41 @@ export type Database = {
         Returns: string
       }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
+      bundle_create: {
+        Args: {
+          p_deadline?: string
+          p_goal: string
+          p_name?: string
+          p_target?: number
+        }
+        Returns: string
+      }
+      bundle_join: {
+        Args: { p_bundle: string; p_goal: string }
+        Returns: undefined
+      }
+      bundle_leave: { Args: { p_bundle: string }; Returns: undefined }
+      bundle_refresh: { Args: { p_bundle: string }; Returns: undefined }
+      bundle_set_visibility: {
+        Args: {
+          p_bundle: string
+          p_percent_only?: boolean
+          p_show_each?: boolean
+        }
+        Returns: undefined
+      }
+      bundle_total: { Args: { p_bundle: string }; Returns: number }
+      bundle_update: {
+        Args: {
+          p_bundle: string
+          p_clear_deadline?: boolean
+          p_deadline?: string
+          p_name?: string
+          p_target?: number
+        }
+        Returns: undefined
+      }
+      bundle_view: { Args: { p_bundle?: string }; Returns: Json }
       business_day_on_or_before: { Args: { d: string }; Returns: string }
       can_read_photo: { Args: { p_name: string }; Returns: boolean }
       cancel_account_deletion: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3402,6 +3834,10 @@ export type Database = {
         Args: { p_key: string; p_state?: string }
         Returns: undefined
       }
+      distribute_money_in: {
+        Args: { p_items: Json; p_money_in: string }
+        Returns: number
+      }
       done_storage_move: { Args: { p_ids: number[] }; Returns: undefined }
       done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
@@ -3447,10 +3883,19 @@ export type Database = {
           goal_id: string
         }[]
       }
+      goal_editable: { Args: { p_goal: string }; Returns: boolean }
+      goal_is_together: { Args: { p_goal: string }; Returns: boolean }
       goal_lines_sync: { Args: { p_goal: string }; Returns: undefined }
       goal_mark_achieved: {
         Args: { p_actor: string; p_goal: string }
         Returns: undefined
+      }
+      goal_move_reasons: {
+        Args: { p_goal: string }
+        Returns: {
+          id: string
+          reason: string
+        }[]
       }
       goal_saved: { Args: { p_goal: string }; Returns: number }
       goal_saved_sums: {
@@ -3467,6 +3912,7 @@ export type Database = {
           together: number
         }[]
       }
+      goal_visible: { Args: { p_goal: string }; Returns: boolean }
       html_esc: { Args: { t: string }; Returns: string }
       in_force_terms_version: { Args: { p_kind: string }; Returns: string }
       ingest_inquiry_mail: {
@@ -3528,6 +3974,14 @@ export type Database = {
       kst_today: { Args: Record<PropertyKey, never>; Returns: string }
       late_check_until: { Args: { p_checklist: string }; Returns: string }
       lock_idle_admins: { Args: Record<PropertyKey, never>; Returns: number }
+      log_money_in: {
+        Args: {
+          p_amount: number
+          p_kind?: Database["public"]["Enums"]["money_in_kind"]
+          p_received_on?: string
+        }
+        Returns: string
+      }
       log_partner_change: {
         Args: {
           p_after: string
@@ -3555,10 +4009,29 @@ export type Database = {
         Args: { p_owner: string; p_space: string; p_today?: string }
         Returns: string
       }
+      mark_note_paid: {
+        Args: { p_note: string; p_subtract: boolean }
+        Returns: string
+      }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
+      money_in_delete: { Args: { p_id: string }; Returns: undefined }
+      money_in_period: {
+        Args: { p_today?: string; p_user?: string }
+        Returns: Json
+      }
+      money_in_set: {
+        Args: {
+          p_amount?: number
+          p_id: string
+          p_kind?: Database["public"]["Enums"]["money_in_kind"]
+          p_received_on?: string
+        }
+        Returns: undefined
+      }
+      money_in_visible: { Args: { p_owner: string }; Returns: boolean }
       move_goal: { Args: { p_amount: number; p_goal: string; p_kind: string }; Returns: string }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       my_login_email: { Args: Record<PropertyKey, never>; Returns: string }
@@ -3767,6 +4240,15 @@ export type Database = {
           pct: number
         }[]
       }
+      propose_split: {
+        Args: {
+          p_monthly_total: number
+          p_name: string
+          p_rule: string
+          p_share_mine?: number
+        }
+        Returns: string
+      }
       purge_abandoned_signups: { Args: { p_now?: string }; Returns: number }
       purge_app_devices: { Args: Record<PropertyKey, never>; Returns: undefined }
       purge_deleted_accounts: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3792,6 +4274,7 @@ export type Database = {
           goal_id: string
         }[]
       }
+      reconcile_savings: { Args: { p_items: Json }; Returns: number }
       reconnect_ok: { Args: { p_id: string }; Returns: boolean }
       record_care: {
         Args: {
@@ -3842,6 +4325,7 @@ export type Database = {
         }[]
       }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
+      round10k: { Args: { v: number }; Returns: number }
       run_access_expiry: { Args: Record<PropertyKey, never>; Returns: undefined }
       run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
       run_unlink_deadlines: { Args: Record<PropertyKey, never>; Returns: undefined }
@@ -3851,6 +4335,7 @@ export type Database = {
       }
       save_api_holidays: { Args: { p_rows: Json; p_years: number[] }; Returns: number }
       save_split: { Args: { p_lines: Json; p_owner?: string }; Returns: string }
+      saving_after_change: { Args: { p_goal: string }; Returns: undefined }
       saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
       saving_item_keep: { Args: { p_goal: string }; Returns: undefined }
       saving_item_reopen: { Args: { p_goal: string }; Returns: undefined }
@@ -3859,6 +4344,14 @@ export type Database = {
       saving_item_unkeep: {
         Args: { p_deadline?: string; p_goal: string; p_target: number }
         Returns: undefined
+      }
+      saving_note_editable: {
+        Args: { p_bundle: string; p_goal: string }
+        Returns: boolean
+      }
+      saving_note_visible: {
+        Args: { p_bundle: string; p_goal: string }
+        Returns: boolean
       }
       saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
       schedule_salary_change: {
@@ -3914,6 +4407,7 @@ export type Database = {
           achieved_seen: string[]
           after_marriage: boolean
           amount_estimated: boolean
+          bundle_id: string | null
           closed_at: string | null
           created_at: string
           created_by: string | null
