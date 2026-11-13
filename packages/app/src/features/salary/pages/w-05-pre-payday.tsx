@@ -40,11 +40,11 @@ function pick(
   return { list };
 }
 
-// W-05 월급 전 확인(20). 다음 월급날 3일 전 ~ 전날, 처음 열 때 체크 안 한 줄만(2026-11-12 D6: 체크한 줄은 체크 모양으로 남고
+// W-05 월급 전 확인(20, 2026-11-13 v2.2: 남은 손 줄만, 자동 줄은 나가는 날 앱이 확인해 여기 없음). 다음 월급날 3일 전 ~ 전날, 처음 열 때 체크 안 한 손 줄만(2026-11-12 D6: 체크한 줄은 체크 모양으로 남고
 // 다시 누르면 풀림). 줄 시트는 W-02와 같고(‘보냈어요’, ‘다른 금액으로 보냈어요’, ‘저금 보기’) + ‘이번 달은 못 했어요’
 // = 그 줄을 ‘못 함’으로 닫고 목록에서 뺌(저금이면 모은 금액에 더하지 않음). 확인 = 남은 줄은 그대로 닫힘.
 // 기간 밖이거나 끝난 사이클이면 W-02(끝난 사이클은 그 지난 달, 읽기 전용). 상대 체크는 Realtime으로 바로 + 2초 강조(S6-06)
-export function W05Review() {
+export function W05PrePayday() {
   const nav = useNavigate();
   const me = useMe();
   const space = useSpace();
@@ -64,7 +64,9 @@ export function W05Review() {
   // 처음 열 때 체크 안 한 줄(이 줄들만 보임, 체크해도 남음). ‘못 함’으로 닫은 줄은 빠짐
   const first = useRef<string[] | null>(null);
   if (list && first.current === null)
-    first.current = list.pay_check_line.filter((l) => l.state === 'wait').map((l) => l.id);
+    first.current = list.pay_check_line
+      .filter((l) => l.state === 'wait' && !l.auto)
+      .map((l) => l.id);
   const shown = (list?.pay_check_line ?? [])
     .filter((l) => first.current?.includes(l.id) && l.state !== 'skipped')
     .sort((a, b) => a.sort - b.sort);
@@ -148,7 +150,7 @@ export function W05Review() {
   const itemOf = (gid: string | null) => (saving.ready && gid ? saving.byId(gid) : undefined);
   return (
     <QuestionLayout
-      title={copy.reviewTitle(list.label)}
+      title={copy.reviewTitle(list.cycle_start)}
       onBack={() => nav('/')}
       primary={{ label: copy.ok }}
       onSubmit={() => nav('/', { replace: true })}

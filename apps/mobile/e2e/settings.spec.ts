@@ -87,7 +87,7 @@ function seed(db: MemDb) {
 const open = async (page: Page, narrow: boolean) => {
   if (narrow) {
     await page.goto('/');
-    await expect(page.locator('.hg-hubhero, .hg-hub .hg-card--fill').first()).toBeVisible();
+    await expect(page.locator('.hg-together, .hg-hub .hg-card--fill').first()).toBeVisible();
     await page.getByRole('button', { name: '메뉴', exact: true }).click();
     await page
       .getByRole('dialog', { name: '메뉴' })
@@ -326,7 +326,7 @@ test('우리 둘 정보(S-12): 미합류 초대하기(코드 상자, 링크 복�
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
 
   // 초대 전: 기획 문장 그대로 + ‘초대하기’ = 바로 코드 상자(D6, D9)
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toBeVisible();
   await expect(page.getByRole('button', { name: '받은 초대 코드가 있어요' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '초대하기' }).click();
@@ -553,7 +553,7 @@ test('혼자 쓰기(S-12): 다시 연결하기, 새로 초대하기', async ({ p
   await expect(page.getByRole('button', { name: '다시 연결하기' })).toHaveCount(0);
 
   await page.getByRole('button', { name: '새로 초대하기' }).click();
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toBeVisible();
   expect(db.space?.couple_state).toBe('not_joined');
   await axe(page);
 });

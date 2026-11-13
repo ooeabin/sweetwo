@@ -6,6 +6,7 @@ export type IconName =
   | 'apple-logo'
   | 'arrow-left'
   | 'arrow-right'
+  | 'arrows-clockwise'
   | 'baby'
   | 'bank'
   | 'bell'

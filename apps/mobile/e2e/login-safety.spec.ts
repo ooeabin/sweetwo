@@ -52,7 +52,7 @@ test('잠금 뒤 화면(S1-05): 보이지 않고 Tab·화면 읽기가 닿지 �
   await signedInHome(page, { locked: true });
   await page.goto('/');
   await expect(lockHeading(page)).toBeVisible();
-  await expect(page.locator('.hg-hubsave')).toBeHidden();
+  await expect(page.locator('.hg-together')).toBeHidden();
   for (let i = 0; i < 16; i++) {
     await page.keyboard.press('Tab');
     const inside = await page.evaluate(
@@ -64,7 +64,7 @@ test('잠금 뒤 화면(S1-05): 보이지 않고 Tab·화면 읽기가 닿지 �
   }
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1); // 잠금 제목만
   await page.keyboard.type('258036');
-  await expect(page.locator('.hg-hubsave')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
 });
 
 test('PIN을 잊었어요(S1-02·S1-32): 확인 → PIN 지우고 로그아웃 → A-02 안내 → 로그인 → 새 PIN 정하기', async ({

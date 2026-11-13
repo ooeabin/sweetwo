@@ -1,6 +1,9 @@
 import {
   addSplitLine,
+  configureSplitLines,
   deleteSplitLine,
+  dismissHomeTask,
+  qk,
   reopenSavingItem,
   reorderSplit,
   saveSplit,
@@ -8,7 +11,14 @@ import {
   SplitBlocked,
   type SplitLine,
 } from '@sweetwo/api';
-import { amountBand, leftover, planChangeTouchesMonth, planRatio, todayKst } from '@sweetwo/core';
+import {
+  amountBand,
+  leftover,
+  planChangeTouchesMonth,
+  planRatio,
+  salaryChangedTaskOpen,
+  todayKst,
+} from '@sweetwo/core';
 import {
   Button,
   Icon,
@@ -26,6 +36,7 @@ import {
   Tabs,
   type ReceiptLine,
 } from '@sweetwo/ui';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -47,9 +58,12 @@ import {
   useSplits,
   useSplitWrite,
 } from '../data';
+import { baseDayOf, nextDayOf as nextDay, receiptAutoPill, salaryChangedDay } from '../cycle';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSalaryChanges } from '@sweetwo/api';
 import { salaryPaths, savingPaths } from '../paths';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
-import { PlanSheet, SpendChips } from '../receipt-parts';
+import { PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { keepOrder, recommendedDraft } from '../split-draft';
 import { toDraft } from '../split-editor';
@@ -88,6 +102,8 @@ export function W01Receipt() {
   const [sharing, setSharing] = useState(false);
   const who = params.get('who');
   const lineParam = params.get('line');
+  const qc = useQueryClient();
+  const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
 
   const m = me.data;
   const sp = space.data;
@@ -123,6 +139,19 @@ export function W01Receipt() {
     setParams(next, { replace: true });
   }, [lineParam, split, canEdit, params, setParams]);
 
+  // 월급이 바뀐 달 띠(H-06 6번, 07 5장): W-01을 열면 끝냄(home_task_state done)
+  const changedDay = m && sp ? salaryChangedDay(changes.data, m.id, baseDayOf(m, sp)) : null;
+  useEffect(() => {
+    if (
+      !changedDay ||
+      !salaryChangedTaskOpen({ appliedDay: changedDay, today: todayKst(), done: false })
+    )
+      return;
+    void dismissHomeTask(`salary_changed:${changedDay}`, 'done')
+      .then(() => qc.invalidateQueries({ queryKey: qk.homeTasks }))
+      .catch(() => undefined);
+  }, [changedDay, qc]);
+
   // 못 불러오면 오류 카드 + 다시 시도(13 공통 상태 7번, S5-02), 불러오는 중은 구간 탭 + 본문 뼈대(13-5, S5-11)
   const loads = [me, space, goals, splits];
   if (loads.some((q) => q.isError && !q.data))
@@ -146,10 +175,13 @@ export function W01Receipt() {
         ? (l.name ?? '')
         : l.kind === 'allowance' && joint
           ? `${personName(l.user_id)} ${copy.lineNames.allowance}`
-          : l.kind === 'send' || l.kind === 'shared_account'
-            ? (l.name ?? '') // v2.2 새 줄: 화면 PR 전까지 저장된 이름만
-            : copy.lineNames[l.kind];
+          : l.kind === 'send'
+            ? copy.sendName // 5e 한 사람 관리형 ‘보내기’
+            : l.kind === 'shared_account'
+              ? (l.name ?? copy.sharedAccountName) // 5d 같이 쓰는 통장(분담 이름)
+              : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
+  const baseDay = baseDayOf(owner ?? m, sp);
   // 보이는 금액 글자(가리기면 화면 읽기는 “가려진 금액”, 11 9장)
   const shown = (text: string) => speakMasked(text);
   const income = joint
@@ -175,9 +207,11 @@ export function W01Receipt() {
           parts.map(({ x, d }) => copy.personPayday(x.nickname ?? '', d ?? '')),
         );
       })()
-    : dayText(owner)
-      ? copy.everyMonth(dayText(owner) ?? '')
-      : undefined;
+    : ownerId === m.id && m.payday_none
+      ? copy.noPaydayHead // 날짜 없음(20 W-01 예외)
+      : dayText(owner)
+        ? copy.everyMonth(dayText(owner) ?? '')
+        : undefined;
   const people = (joint && p ? [m, p] : owner ? [owner] : []).map((x) => ({
     id: x.id,
     name: x.nickname ?? '',
@@ -240,11 +274,74 @@ export function W01Receipt() {
     };
   };
 
-  const change = (l: SplitLine, amount: number, rawName: string, from?: 'saving_detail') =>
+  const change = (
+    l: SplitLine,
+    amount: number,
+    rawName: string,
+    from?: 'saving_detail',
+    set?: LineSettings,
+  ) =>
     run(async () => {
       const renamed = l.kind === 'custom' && rawName !== '' && rawName !== l.name;
       const moved = amount !== l.amount;
-      if (!renamed && !moved) return setSheet(null);
+      const before: LineSettings = {
+        inChecklist: l.in_checklist,
+        autoPay: l.auto_pay,
+        autoDay: l.auto_day,
+      };
+      const reset =
+        !!set &&
+        (set.inChecklist !== before.inChecklist ||
+          set.autoPay !== before.autoPay ||
+          (set.autoPay && set.autoDay !== before.autoDay));
+      if (!renamed && !moved && !reset) return setSheet(null);
+      if (set && reset) {
+        // 줄 설정(20 W-01 7a): 바로 저장(split_lines_configure), 이번 사이클 체크 안 한 줄도 따라 바뀜
+        await write(() =>
+          configureSplitLines([
+            {
+              id: l.id,
+              inChecklist: set.inChecklist,
+              autoPay: set.autoPay,
+              autoDay: set.autoPay ? set.autoDay : null,
+            },
+          ]),
+        );
+        const next = nextDay(baseDay);
+        track('split_line_setting_changed', {
+          kind: l.kind,
+          in_checklist: set.inChecklist,
+          auto_pay: set.autoPay,
+          auto_day_band: !set.autoPay
+            ? 'none'
+            : set.autoDay === null
+              ? 'payday'
+              : set.autoDay === next
+                ? 'next'
+                : 'other',
+        });
+        if (set.autoPay !== before.autoPay)
+          track('auto_pay_asked', { screen_id: 'W-01', answer: set.autoPay ? 'yes' : 'no' });
+        if (!renamed && !moved) {
+          setSheet(null);
+          sharedChanged();
+          return toast(
+            copy.lineSettingChanged(nameOf(l)),
+            undo(() =>
+              write(() =>
+                configureSplitLines([
+                  {
+                    id: l.id,
+                    inChecklist: before.inChecklist,
+                    autoPay: before.autoPay,
+                    autoDay: before.autoDay,
+                  },
+                ]),
+              ),
+            ),
+          );
+        }
+      }
       // 이번 달 체크 안 한 줄도 바뀌는지(서버 sync_checklist와 같은 맞춤, 바꾸기 전 체크리스트로)
       const monthToo = moved && planChangeTouchesMonth(l, amount, month?.pay_check_line);
       await write(() =>
@@ -490,18 +587,26 @@ export function W01Receipt() {
           g.owner_user_id !== m.id &&
           !(joint && g.visibility === 'all')
         );
+      // 보내기 줄(5e)은 직접 못 고침(월급 − 용돈, 서버 send_locked). 합쳐서 남의 용돈 줄은 주인만,
+      // 한 사람 관리형이면 관리하는 사람도(5f)
+      const send = l.kind === 'send';
+      const othersAllowance = joint && l.kind === 'allowance' && !!l.user_id && l.user_id !== m.id;
+      const lineLocked = theirs || send || (othersAllowance && sp.manager_user_id !== m.id);
       return {
         id: l.id,
         name: nameOf(l),
         amount: won(l.amount),
         label: spoken(copy.rowLabel(nameOf(l), won(l.amount))),
-        locked: theirs,
-        onOpen: canEdit
-          ? () => {
-              if (!offline()) setSheet({ line: l });
-            }
-          : undefined,
-        onDelete: deletable ? () => remove(l, 'edit') : undefined,
+        locked: lineLocked,
+        note: send ? copy.sendNote : undefined,
+        auto: receiptAutoPill(l),
+        onOpen:
+          canEdit && !lineLocked
+            ? () => {
+                if (!offline()) setSheet({ line: l });
+              }
+            : undefined,
+        onDelete: deletable && !send ? () => remove(l, 'edit') : undefined,
       };
     });
   const rowLabels = {
@@ -549,8 +654,23 @@ export function W01Receipt() {
       confirmLabel={copy.ok}
       busy={busy}
       onClose={() => setSheet(null)}
-      onConfirm={(v, n) =>
-        void change(sheetLine, v, n, sheet && 'line' in sheet ? sheet.from : undefined)
+      onConfirm={(v, n, set) =>
+        void change(sheetLine, v, n, sheet && 'line' in sheet ? sheet.from : undefined, set)
+      }
+      settings={{
+        value: {
+          inChecklist: sheetLine.in_checklist,
+          autoPay: sheetLine.auto_pay,
+          autoDay: sheetLine.auto_day,
+        },
+        // 체크리스트에 넣기는 지출 줄만(저금 줄은 늘 켬)
+        showInChecklist: sheetLine.kind !== 'saving',
+        payday: baseDay,
+      }}
+      notify={
+        joint && sheetLine.kind === 'allowance' && sheetLine.user_id && sheetLine.user_id !== m.id
+          ? copy.allowanceNotify(personName(sheetLine.user_id))
+          : undefined
       }
       onDelete={rowsOf([sheetLine])[0]?.onDelete ? () => remove(sheetLine, 'sheet') : undefined}
       deleteLabel={copy.removeLabel(nameOf(sheetLine))}
@@ -717,6 +837,12 @@ export function W01Receipt() {
                   }}
                 >
                   {copy.addSpend}
+                </ReceiptAdd>
+              )}
+              {canEdit && (
+                // 5d 같이 쓰는 통장 → W-01b 분담 도우미(PR 11)
+                <ReceiptAdd onClick={() => nav('/salary/split/new')}>
+                  {copy.addSharedAccount}
                 </ReceiptAdd>
               )}
               {adding && canEdit && (

@@ -1,5 +1,6 @@
 import type { Page, Route } from '@playwright/test';
 import { chanwoo, fakeJwt, SB } from './supabase-mock';
+import { handleV22, type V22Db } from './v22-mock';
 
 // 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense, account, 첫 플랜). 테스트가 db를 들여다본다.
 export interface MemDb {
@@ -106,6 +107,8 @@ export interface MemDb {
     views: { paid_by_ad: boolean }[];
     requests: Record<string, unknown>[];
   };
+  /** v2.2 새 표·RPC(v22-mock.ts) */
+  v22?: V22Db;
 }
 
 const json = (route: Route, body: unknown, status = 200) =>
@@ -373,6 +376,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     const url = new URL(req.url());
     const path = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
+    // v2.2 새 표·RPC는 먼저(v22-mock.ts). 처리하지 않은 것만 아래 예전 흉내로
+    if (await handleV22(route, db, path, method, url, opts.now ?? new Date())) return;
     // 개수만 읽기(HEAD, count=exact): P-02a ‘안 옮겨요’
     if (method === 'HEAD') {
       const n =

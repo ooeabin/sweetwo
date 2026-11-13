@@ -148,7 +148,7 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
   await expect(
     page.getByRole('link', { name: '월급', exact: true }).locator('visible=true'),
   ).toHaveCount(0);
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toBeVisible();
   await axe(page);
 
   // 다른 메뉴 첫 화면: ‹(홈으로) + 머리 제목 h1, 워드마크·알림·메뉴 없음, ‹ → 홈
@@ -183,7 +183,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   seed(db);
   await page.goto('/');
   // 불러오는 중 틀이 홈 틀로 바뀐 뒤(☰ 버튼이 새로 그려짐)
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   const menuBtn = page.getByRole('button', { name: '메뉴', exact: true });
   await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
   await menuBtn.click();
@@ -238,14 +238,14 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     ['도움말', /\/settings\/help$/],
   ] as const) {
     await page.goto('/');
-    await expect(page.locator('.hg-hubhero')).toBeVisible();
+    await expect(page.locator('.hg-together')).toBeVisible();
     await menuBtn.click();
     await drawer.getByRole('button', { name, exact: true }).click();
     await expect(page).toHaveURL(url);
     await expect(drawer).toHaveCount(0);
   }
   await page.goto('/');
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   await menuBtn.click();
   await drawer.getByRole('button', { name: '월급', exact: true }).click();
   await expect(page).toHaveURL(/\/salary$/);
@@ -266,7 +266,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     payday_last: false,
   };
   await page.goto('/');
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   await menuBtn.click();
   await expect(drawer.getByRole('button', { name: '우리 둘', exact: true })).toBeVisible();
   await expect(drawer.getByRole('button', { name: '초대하기' })).toHaveCount(0);
@@ -282,7 +282,7 @@ test('메뉴 서랍 키보드만으로(2026-11-09): Enter로 열고, Tab은 서�
   seed(db);
   await page.goto('/');
   // 불러오는 중 틀이 홈 틀로 바뀐 뒤(☰ 버튼이 새로 그려짐)
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   const menuBtn = page.getByRole('button', { name: '메뉴', exact: true });
   await menuBtn.focus();
   await page.keyboard.press('Enter');
@@ -319,7 +319,7 @@ test('메뉴 서랍(2026-11-11 QA 4구간 S4-09·S4-15·S4-20): 열린 동안 �
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/');
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   await page.getByRole('button', { name: '메뉴', exact: true }).click();
   const drawer = page.getByRole('dialog', { name: '메뉴' });
   await expect(drawer).toBeVisible();
@@ -402,7 +402,7 @@ test('포커스 테두리(2026-11-11): 손가락·마우스로 서랍을 닫아 
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/');
-  await expect(page.locator('.hg-hubhero')).toBeVisible();
+  await expect(page.locator('.hg-together')).toBeVisible();
   const menuBtn = page.getByRole('button', { name: '메뉴', exact: true });
   const ring = () => menuBtn.evaluate((el) => getComputedStyle(el).outlineStyle);
   await menuBtn.click();

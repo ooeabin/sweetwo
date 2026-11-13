@@ -1,6 +1,6 @@
 # Icons
 
-Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
+Phosphor 아이콘(MIT 라이선스) 91개(2026-11-13 `arrows-clockwise`, 2026-11-09 `list` 더함, `Icon`의 `IconName`). 굵은 둥근 선(bold)과 채운 모양(fill)이 짝으로 있음. 256 격자, 둥근 끝. 파일 색은 `ink`(#1c1b19) 한 가지.
 
 - 기본은 굵은 선(`<이름>.svg`). 채운 모양(`<이름>-fill.svg`)은 지금 선택된 자리에만: 사이드바 현재 메뉴, 켜진 상태를 보여 줄 때(`is-filled`). 하단 독은 2026-11-09 없앰(좁은 창은 홈 머리 ☰ 메뉴 서랍).
 - 화면에서는 `hg-ico`(CSS mask, bundle.css에 SVG를 data URI로 넣어 둠)로 써서 글자 색을 따라가게 함. 현재 메뉴 안에서는 자동으로 채운 모양으로 바뀜. 파일은 원본 보관용.
@@ -21,6 +21,7 @@ Phosphor 아이콘(MIT 라이선스) 90개(2026-11-09 `list` 더함, `Icon`의 `
 | `hg-ico--apple-logo` | `apple-logo` | 웹사이트 App Store 버튼 |
 | `hg-ico--arrow-left` | `arrow-left` |  |
 | `hg-ico--arrow-right` | `arrow-right` |  |
+| `hg-ico--arrows-clockwise` | `arrows-clockwise` | 2026-11-13 자동 줄 알약(ListRow ‘자동 표시’ hg-autopill) |
 | `hg-ico--bell` | `bell` |  |
 | `hg-ico--calendar` | `calendar-blank` |  |
 | `hg-ico--camera` | `camera` |  |

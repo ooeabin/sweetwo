@@ -5,7 +5,7 @@ import { MainFrame, SkelBody } from '../frame';
 import { copy } from './copy';
 import { useCheckRealtime, useGoalRealtime, useSpace, useSplitRealtime } from './data';
 import { W01Receipt } from './pages/w-01-receipt';
-import { W02Checklist } from './pages/w-02-checklist';
+import { W02PaydayConfirm } from './pages/w-02-payday-confirm';
 
 // 월급 탭(20 W-01 1번, 2026-11-09): 맨 위 구간 탭 ‘이번 달’(W-02) / ‘계획’(W-01 영수증, ?view=plan).
 // 상대가 월급 계획을 바꾸면 Realtime으로 바로 다시 읽음.
@@ -15,7 +15,7 @@ export function SalaryTab() {
   useSplitRealtime(space.data?.id);
   useCheckRealtime(space.data?.id);
   useGoalRealtime(space.data?.id);
-  return params.get('view') === 'plan' ? <W01Receipt /> : <W02Checklist />;
+  return params.get('view') === 'plan' ? <W01Receipt /> : <W02PaydayConfirm />;
 }
 
 /** 구간 탭 ‘이번 달 / 계획’. 사람 탭(who)은 그대로 */

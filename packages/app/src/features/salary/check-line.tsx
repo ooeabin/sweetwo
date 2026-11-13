@@ -83,7 +83,7 @@ export function checkToast(
     return toast(copy.alreadyChecked(o.personName(o.line.checked_by) ?? ''));
   if (res.r === 'closed') return toast(copy.closed);
   const undo = { label: copy.undo, onClick: o.undo };
-  if (res.finish) return toast(copy.monthFinished(res.finish.month, res.finish.kind), undo);
+  if (res.finish) return toast(copy.monthFinished(res.finish.start, res.finish.kind), undo);
   if (o.to === 'skipped') return toast(copy.skippedDone(o.name), undo);
   toast(
     o.line.kind === 'saving' ? copy.addedToGoal(o.goalName ?? o.name, o.amount) : copy.checked,
@@ -114,6 +114,7 @@ export function CheckLine({
   lead,
   entry = 'w02',
   changed = false,
+  auto,
 }: {
   line: PayCheckLine;
   name: string;
@@ -139,6 +140,8 @@ export function CheckLine({
   entry?: CheckEntry;
   /** 상대가 방금 바꿈(2초 강조) */
   changed?: boolean;
+  /** 자동 줄 알약 글자(2026-11-13 W-02 2번 “26일 자동”, “자동 확인”) */
+  auto?: string;
 }) {
   const { masked } = useMask();
   const check = useCheck(entry);
@@ -190,7 +193,8 @@ export function CheckLine({
   ) : undefined;
   // ‘못 함’은 목표 금액 진행 글자보다 먼저(체크 안 한 줄처럼 보이므로 이유를 보여 줌)
   const meta = skipped ? checkMeta : (progress ?? checkMeta);
-  const open = !done && !readOnly && !viewOnly;
+  // 자동 줄은 자동 확인된 뒤에도 시트에서 건너뜀·다른 금액으로 바꿈(20 W-02 5번, 2026-11-13)
+  const open = (!done || !!line.auto) && !readOnly && !viewOnly;
   const canSheet = (open && (onOther || onSkip)) || !!onItem;
   const pick = (f: () => void) => () => {
     setSheet(false);
@@ -216,6 +220,7 @@ export function CheckLine({
         meta={meta}
         lead={lead}
         changed={changed}
+        auto={auto}
         onOpen={canSheet ? () => setSheet(true) : undefined}
       />
       {sheet && (
@@ -224,7 +229,7 @@ export function CheckLine({
           onClose={() => setSheet(false)}
           actions={
             <>
-              {open && (
+              {open && !done && (
                 <Button block variant="primary" onClick={pick(() => void toggle())}>
                   {copy.sent}
                 </Button>
@@ -236,7 +241,7 @@ export function CheckLine({
               )}
               {open && !skipped && onSkip && (
                 <Button block variant="secondary" onClick={pick(onSkip)}>
-                  {copy.skipped}
+                  {copy.skipThis}
                 </Button>
               )}
               {/* 저금 보기는 글자 버튼(2026-11-12 S6-15, 20 W-02 6번) */}
