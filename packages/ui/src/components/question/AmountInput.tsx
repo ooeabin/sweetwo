@@ -303,7 +303,7 @@ export function AmountInput({
           <button
             type="button"
             className="hg-key hg-key--fn"
-            aria-label="지우기"
+            aria-label="한 글자 지우기"
             onClick={() => {
               const s = String(target.value ?? '').slice(0, -1);
               target.set(s === '' ? null : Number(s));

@@ -16,12 +16,20 @@ export const copy = {
   // P-11 알림 종류 골라 켜기(2026-11-13 v2.2, 18 P-11 표) [확인 필요]
   kindsTitle: '이런 알림을 보내 드려요',
   kinds: {
-    care: '경조사 일주일 전',
+    care: '경조사가 다가올 때', // 2026-11-13 UX B(예전 ‘경조사 일주일 전’은 D-30 알림과 안 맞음)
     payday: '월급날 확인할 게 있을 때',
     achieved: '같이 모으기를 다 모았을 때',
     shared_change: (name: string) => `${name ? `${name}님이` : '파트너가'} 같이 쓰는 걸 바꿨을 때`,
     my_allowance: '내 용돈이 바뀌었을 때',
     progress_news: '진행 소식',
+  },
+  /** 알림 종류 보조 줄(2026-11-13 UX B, 18 P-11 표) [확인 필요] */
+  kindsHelp: {
+    care: '한 달 전, 일주일 전에 알려 드려요',
+    progress_news: (paydayNone: boolean) =>
+      paydayNone
+        ? '매달 1일, 저금이 얼마나 모였는지 알려 드려요'
+        : '확인할 게 없는 달 월급날, 저금이 얼마나 모였는지 알려 드려요',
   },
   pushAllow: '알림 받기',
   // 대기 화면 ‘알려 주기’(18 v2.2, 24시간에 1번) [확인 필요]
@@ -104,6 +112,9 @@ export const copy = {
     saving_only: '저금만 같이 해요',
     separate: '각자 따로 해요',
   },
+  /** P-04 한 사람 관리형: 누가 관리하는지 한 줄(2026-11-13 UX B) [확인 필요] */
+  managedBy: (starter: string, me: boolean) =>
+    me ? '관리는 내가 해요' : `관리는 ${starter ? `${starter}님이` : '파트너가'} 해요`,
   styleOk: '좋아요',
   styleSend: (starter: string) => `월급은 대부분 ${starter ? `${starter}님` : '파트너'}에게 보내요`,
   // P-05c 용돈(관리하지 않는 쪽, 18 v2.2) [확인 필요]

@@ -11,6 +11,7 @@ import {
   firstChecklistStart,
   isConfirmed,
   lateCheckUntil,
+  lineIsMine,
   nextAutoDue,
   reviewDue,
 } from './pay-confirm';
@@ -108,4 +109,37 @@ it('자동 줄 고르기 띠(H-06 9번): 첫 월급날 7일 전 ~ 전날', () =>
 it('날짜 없는 사람 자동 저금 나가는 날(기본 1일, 31 = 말일)', () => {
   expect(autoDayIn('2027-02', null)).toBe('2027-02-01');
   expect(autoDayIn('2027-02', 31)).toBe('2027-02-28');
+});
+
+describe('lineIsMine·confirmableLines 한 사람 관리형(2026-11-13 UX B H2, 서버 pay_line_mine)', () => {
+  const lines = [
+    { state: 'wait', kind: 'fixed', user_id: null },
+    { state: 'wait', kind: 'allowance', user_id: 'y' },
+    { state: 'wait', kind: 'send', user_id: 'y', auto: true },
+  ];
+  it('관리하는 사람은 상대 용돈 줄까지 모든 손 줄', () => {
+    expect(
+      confirmableLines(lines, { joint: true, ownerId: null, meId: 'c', managerId: 'c' }).map(
+        (l) => l.kind,
+      ),
+    ).toEqual(['fixed', 'allowance']);
+  });
+  it('관리하지 않는 쪽은 자기 줄만', () => {
+    expect(
+      confirmableLines(lines, { joint: true, ownerId: null, meId: 'y', managerId: 'c' }).map(
+        (l) => l.kind,
+      ),
+    ).toEqual(['allowance']);
+    expect(
+      lineIsMine(
+        { state: 'wait', kind: 'fixed', user_id: null },
+        { joint: true, ownerId: null, meId: 'y', managerId: 'c' },
+      ),
+    ).toBe(false);
+  });
+  it('둘이 같이(관리하는 사람 없음)는 남의 용돈 줄만 빼고', () => {
+    expect(
+      confirmableLines(lines, { joint: true, ownerId: null, meId: 'c' }).map((l) => l.kind),
+    ).toEqual(['fixed']);
+  });
 });

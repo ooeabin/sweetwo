@@ -2,7 +2,7 @@ import type { HomeMonthLine } from '@sweetwo/core';
 import { HubLine } from '@sweetwo/ui';
 import { spoken } from '../../../shared/masked-text';
 import { sharedCopy } from '../../../shared/copy';
-import { PeriodLine } from '../../salary';
+import { PeriodLine, useShownPayday } from '../../salary';
 import { copy } from '../copy';
 
 /**
@@ -18,6 +18,8 @@ export function H11MonthLine({
   go: (to: string) => void;
   onRetry: () => void;
 }) {
+  // 날짜는 W-02 제목과 같은 날(앞당기기 설정대로, 07 1장, 2026-11-13 UX B M2)
+  const shown = useShownPayday();
   if (line.kind === 'error')
     return (
       <section className="hg-card hg-card--fill hg-stack hg-hub__wide" role="status">
@@ -51,7 +53,12 @@ export function H11MonthLine({
       text = line.date ? copy.monthFirst(line.date) : copy.monthFirstNoDate;
       break;
     case 'review':
-      text = copy.monthReview(line.cycleStart, line.left);
+      text = copy.monthReview(shown(line.cycleStart), line.left);
+      sub = late;
+      goText = copy.goCheck;
+      break;
+    case 'left':
+      text = copy.monthReview(shown(line.cycleStart), line.left);
       sub = late;
       goText = copy.goCheck;
       break;
@@ -70,7 +77,7 @@ export function H11MonthLine({
       goText = late ? copy.goCheck : copy.goView;
       break;
     case 'done':
-      text = copy.monthDone(line.cycleStart, line.finish);
+      text = copy.monthDone(shown(line.cycleStart), line.finish);
       sub = late ?? copy.untilNext(line.daysLeft);
       goText = late ? copy.goCheck : copy.goView;
       break;

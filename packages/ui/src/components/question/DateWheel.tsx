@@ -238,6 +238,7 @@ export function DayWheel({
   lastLabel,
   hint,
   initial = 25,
+  disabled = false,
 }: {
   label: string;
   value: PayDay | null;
@@ -246,15 +247,27 @@ export function DayWheel({
   /** 휠 아래 한 줄(‘말일’ 안내) */
   hint?: ReactNode;
   initial?: PayDay;
+  /** 끔(O-32 ‘날짜가 정해져 있지 않아요’, 2026-11-13): 흐리게 + 누르기·키보드·화면 읽기에서 빠짐(inert) */
+  disabled?: boolean;
 }) {
   useEffect(() => {
     if (value === null) onChange(initial);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (box.current) box.current.inert = disabled;
+  }, [disabled]);
   const v = value ?? initial;
   const items = Array.from({ length: LAST }, (_, i) => i + 1);
   return (
     <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-      <div className="hg-wheel hg-wheel--day" role="group" aria-label={label}>
+      <div
+        ref={box}
+        className={cx('hg-wheel hg-wheel--day', disabled && 'is-disabled')}
+        role="group"
+        aria-label={label}
+        aria-disabled={disabled || undefined}
+      >
         <span className="hg-wheel__band" aria-hidden="true" />
         <Column
           label={label}
@@ -266,7 +279,7 @@ export function DayWheel({
           onChange={(d) => onChange(d === LAST ? 'last' : d)}
         />
       </div>
-      {hint && <p className="hg-wheel__age">{hint}</p>}
+      {hint && !disabled && <p className="hg-wheel__age">{hint}</p>}
     </div>
   );
 }

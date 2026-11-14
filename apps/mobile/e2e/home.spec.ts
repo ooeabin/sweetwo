@@ -28,7 +28,9 @@ const PARTNER = {
 
 const together = (page: Page) => page.locator('.hg-together');
 const monthLine = (page: Page) => page.locator('.hg-hubline');
-const band = (page: Page) => page.locator('.hg-hubband');
+// 할 일 띠는 두 칸까지(2026-11-13 UX B M5): 첫 칸
+const band = (page: Page) => page.locator('.hg-hubband').first();
+const bands = (page: Page) => page.locator('.hg-hubband');
 
 async function open(page: Page, prep?: (db: MemDb) => void, now = NOW, url = '/') {
   await page.clock.setFixedTime(now);
@@ -61,8 +63,8 @@ test('H-10 같이 모으기 + H-11 월급날 + H-07 여유 자금(19 v2.2): 대�
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
   await expect(h.getByRole('button', { name: '저금 모두 보기' })).toBeVisible();
   await expect(h.getByRole('button', { name: '돈 들어왔어요' })).toBeVisible();
-  // H-11: 손 줄 5개가 남음
-  await expect(monthLine(page)).toContainText('월급날이에요. 확인할 게 5개 있어요');
+  // H-11: 손 줄 5개가 남음. 월급날(9월 25일)이 지났으니 “월급날이에요” 대신 날짜 문장(2026-11-13 UX B M2)
+  await expect(monthLine(page)).toContainText('9월 25일 월급에서 확인할 게 5개 남았어요');
   await expect(monthLine(page)).toContainText('확인하기');
   // H-06: 저금이 있어 첫 저금 띠는 없고, 미합류라 초대(15번)
   await expect(band(page)).toContainText('같이 모을 사람을 초대해 보세요');
@@ -151,6 +153,9 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   await expect(h.locator('.hg-hubtile__badge')).toHaveText('결혼식 D-145');
   // 띠 7번: 저금 0개 + 첫 30일
   await expect(band(page)).toContainText('무엇을 같이 모을지 정해 볼까요?');
+  // 두 칸: 내 할 일(첫 저금) 아래 초대가 가려지지 않음(19 ‘띠 두 칸’)
+  await expect(bands(page)).toHaveCount(2);
+  await expect(bands(page).nth(1)).toContainText('같이 모을 사람을 초대해 보세요');
   // H-12: 메모가 없으면 “+ 쓸 곳 메모 적기”
   await expect(page.getByRole('button', { name: /결혼 준비 메모 0개/ })).toContainText(
     '+ 쓸 곳 메모 적기',
@@ -280,7 +285,8 @@ test('지난 달 늦은 확인: H-11 아래 “지난 달 2개 늦게 확인할 
     },
     LATE,
   );
-  await expect(monthLine(page)).toContainText('월급날이에요. 확인할 게 5개 있어요');
+  // 10월 25일(일요일)은 앞당겨 23일로 보임(W-02 제목과 같은 날, 2026-11-13 UX B M2)
+  await expect(monthLine(page)).toContainText('10월 23일 월급에서 확인할 게 5개 남았어요');
   await expect(monthLine(page)).toContainText('지난 달 2개 늦게 확인할 수 있어요');
   await page.goto('/salary?cycle=last');
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
@@ -626,7 +632,7 @@ test('H-11 오류(S4-01): 확인 목록을 못 불러오면 공통 7번 카드 +
   await axe(page);
   fail = false;
   await page.getByRole('button', { name: '다시 시도' }).click();
-  await expect(monthLine(page)).toContainText('확인할 게 5개 있어요');
+  await expect(monthLine(page)).toContainText('확인할 게 5개 남았어요');
   Object.assign(db.me, { monthly_income: 0, payday: null });
   db.splits.length = 0;
   db.checklists.length = 0;
@@ -726,7 +732,7 @@ test('두 계정(찬우·예빈, 합쳐서): 예빈이 “모두 계획대로 �
   });
   db.v22 = ydb.v22;
   await c.goto('/');
-  await expect(monthLine(c)).toContainText('확인할 게 5개 있어요');
+  await expect(monthLine(c)).toContainText('확인할 게 5개 남았어요');
   await expect.poll(() => rt.subscribed('pay_check_line')).toBeGreaterThan(0);
   await y.goto('/salary');
   await y.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
@@ -737,9 +743,41 @@ test('두 계정(찬우·예빈, 합쳐서): 예빈이 “모두 계획대로 �
   );
   expect(left.map((l) => l.kind)).toEqual(['allowance']);
   rt.emit('pay_check_line', 'UPDATE', { id: 'x', space_id: 'space-1', state: 'checked' });
-  await expect(monthLine(c)).toContainText('확인할 게 1개 있어요');
+  await expect(monthLine(c)).toContainText('9월 25일 월급에서 확인할 게 1개 남았어요');
   await cCtx.close();
   await yCtx.close();
+});
+
+test('한 사람 관리형(찬우 관리): 예빈 홈은 자동 문장, W-02는 찬우 줄을 “찬우님이 확인해요” 묶음으로 보기만, 주 버튼 없음(UX B H2)', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.clock.setFixedTime(NOW);
+  const cdb = await mockOnboarding(page, { now: NOW });
+  seed(cdb);
+  Object.assign(cdb.space ?? {}, {
+    couple_state: 'connected',
+    partner_nickname: '예빈',
+    salary_mode: 'joint',
+    joint_cycle_day: 25,
+    manager_user_id: chanwoo.id,
+  });
+  for (const sp of cdb.splits) sp.owner_user_id = null;
+  for (const ch of cdb.checklists) ch.owner_user_id = null;
+  for (const g of cdb.goals) g.owner_user_id = null;
+  Object.assign(cdb, {
+    me: { ...cdb.me, ...PARTNER, space_id: 'space-1', onboarding_done_at: '2026-10-02T00:00:00Z' },
+    partner: { id: chanwoo.id, nickname: '찬우', monthly_income: 3_500_000, payday: 25 },
+    v22: emptyV22(),
+  });
+  await page.goto('/');
+  await expect(monthLine(page)).toContainText('이번 달 보내기와 용돈은 자동이에요');
+  await page.goto('/salary');
+  const group = page.getByRole('region', { name: '찬우님이 확인해요' });
+  await expect(group).toBeVisible();
+  await expect(group.getByRole('checkbox')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
+  await axe(page);
 });
 
 test('홈 화면 위젯(26 v2.2): 홈 값으로 WG-01 대표 저금 %·기한 달, WG-04 다가오는 날을 금액 없이 브리지에 넘김', async ({

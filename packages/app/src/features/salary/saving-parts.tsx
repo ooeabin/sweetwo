@@ -82,7 +82,7 @@ export function SavingMeta({ item, masked }: { item: SavingItem | undefined; mas
 
 /**
  * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’): 내 저금이 없을 때 체크리스트 저금 묶음 자리에 “+ 저금 추가 (여유 자금 {n})” → W-11a.
- * 파트너가 저금이 있으면(각자) 제목 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?” + 보조 “여유 자금 {n}”.
+ * 파트너가 묶음에 안 든 저금이 있으면(각자) 제목 “{파트너}님 ‘결혼 비용’에 같이 모을까요?” + 보조 “여유 자금 {n}” → W-15.
  * 홈 H-03과 W-02에서 씀(H-02 회색 제안 문장 대신). 보여 줄 때가 아니면 null
  */
 export function FirstSavingRow({
@@ -100,10 +100,20 @@ export function FirstSavingRow({
     <div className="hg-list">
       <ListRow
         icon="plus"
-        label={f.partnerName ? copy.firstSavingLike(f.partnerName) : copy.firstSaving(left)}
-        sub={f.partnerName ? copy.firstSavingLeft(left) : undefined}
+        label={
+          f.partnerGoal
+            ? copy.firstSavingTogether(f.partnerName ?? '', f.partnerGoal.name)
+            : copy.firstSaving(left)
+        }
+        sub={f.partnerGoal ? copy.firstSavingLeft(left) : undefined}
         chevron={false}
-        onClick={() => go(`${savingPaths.add}/a?from=${from}`)}
+        onClick={() =>
+          go(
+            f.partnerGoal
+              ? `/salary/bundles/new?goal=${encodeURIComponent(f.partnerGoal.id)}`
+              : `${savingPaths.add}/a?from=${from}`,
+          )
+        }
       />
     </div>
   );

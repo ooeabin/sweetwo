@@ -2,7 +2,6 @@ import {
   checkPayLine,
   confirmPayday,
   ConfirmBlocked,
-  fetchHolidays,
   fetchMoneyInPeriod,
   fetchPastChecklists,
   qk,
@@ -10,11 +9,11 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import {
-  businessDayOnOrBefore,
   confirmableLines,
   confirmFinish,
   isManual,
   kstDateOf,
+  lineIsMine,
   todayKst,
 } from '@sweetwo/core';
 import { AddRow, Button, Icon, IconButton, SectionHeader, Tabs } from '@sweetwo/ui';
@@ -37,11 +36,12 @@ import {
   periodText,
 } from '../check-line';
 import { copy } from '../copy';
-import { autoDayText, baseDayOf, cycleName, firstPaydayOf } from '../cycle';
+import { autoDayText, baseDayOf, cycleName, firstPaydayOf, useShownPayday } from '../cycle';
 import {
   markLocalState,
   markLocalWrite,
   refreshChecks,
+  useAccountNames,
   useChangedLines,
   useCheck,
   useChecklists,
@@ -85,7 +85,8 @@ export function W02PaydayConfirm() {
   const [busy, setBusy] = useState(false);
   const cycleParam = params.get('cycle');
   const splits = useSplits();
-  const holidays = useQuery({ queryKey: qk.holidays, queryFn: fetchHolidays });
+  const accountNames = useAccountNames();
+  const shownPayday = useShownPayday();
   const saving = useSavingItems();
   const first = useFirstSaving();
   const { masked } = useMask();
@@ -152,7 +153,13 @@ export function W02PaydayConfirm() {
     return (
       <W02aOtherAmount
         line={other}
-        name={lineName(other, goalName, personName, joint)}
+        name={lineName(
+          other,
+          goalName,
+          personName,
+          joint,
+          accountNames.ofSplitLine(other.split_line_id),
+        )}
         goalName={other.kind === 'saving' ? goalName(other.goal_id) : undefined}
         personName={personName}
         entry="w02"
@@ -275,11 +282,8 @@ export function W02PaydayConfirm() {
   // 지난 달은 읽기 전용, 늦은 확인 기간이면 남은 손 줄만 체크(07 4장)
   const readOnly = (ago > 0 || isPast(shown.cycle_end)) && !late;
   const lateIds = late ? new Set(lateLines(shown).map((l) => l.id)) : null;
-  const holidaySet = new Set((holidays.data ?? []).map((h) => h.date));
-  const start =
-    sp.holiday_shift === false
-      ? shown.cycle_start
-      : businessDayOnOrBefore(shown.cycle_start, holidaySet);
+  // 제목과 기간 첫날은 같은 날(앞당기기 설정대로, 07 1장, 2026-11-13 UX B M2)
+  const start = shownPayday(shown.cycle_start);
   // 상대가 이번 사이클에 월급 계획을 바꿨으면 안내(20 ‘바뀐 직후 W-02 맨 위 안내 한 줄’)
   const split = (splits.data ?? []).find((x) => x.owner_user_id === owner);
   const changedBy =
@@ -333,7 +337,8 @@ export function W02PaydayConfirm() {
     .filter((x): x is NonNullable<typeof x> => !!x)
     .map((x) => ({ id: x.id, name: x.nickname ?? '', starter: x.id === sp.created_by }));
   const itemOf = (id: string | null) => (saving.ready && id ? saving.byId(id) : undefined);
-  const nameOf = (l: PayCheckLine) => lineName(l, goalName, personName, joint);
+  const nameOf = (l: PayCheckLine) =>
+    lineName(l, goalName, personName, joint, accountNames.ofSplitLine(l.split_line_id));
 
   // 줄 하나 건너뛰기(“이번 달은 건너뛸게요”) + Toast 되돌리기
   const skip = (l: PayCheckLine) => {
@@ -392,17 +397,23 @@ export function W02PaydayConfirm() {
     );
   };
   const autoLines = ordered.filter((l) => l.auto);
-  const manual = ordered.filter(isManual);
+  // 한 사람 관리형(2026-11-13 UX B H2): 관리하지 않는 쪽은 자기 줄만 확인, 관리하는 사람 줄은 따로 보기만
+  const managerId = joint ? (sp.manager_user_id ?? null) : null;
+  const mineOpt = { joint, ownerId: owner, meId: meId ?? '', managerId };
+  const othersManual =
+    managerId && managerId !== meId && !partnerTab
+      ? ordered.filter((l) => isManual(l) && !lineIsMine(l, mineOpt))
+      : [];
+  const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
   // “모두 계획대로 됐어요”(confirm_payday): 남은 손 줄(늦은 확인이면 건너뜀으로 닫힌 줄도) 중 내가 확인할 수 있는 것
+  const managerName = personName(managerId) ?? '';
   const confirmable = partnerTab
     ? []
     : late
-      ? lateLines(shown).filter(
-          (l) => !(joint && l.kind === 'allowance' && l.user_id && l.user_id !== meId),
-        )
+      ? lateLines(shown).filter((l) => lineIsMine(l, mineOpt))
       : readOnly
         ? []
-        : confirmableLines(shown.pay_check_line, { joint, ownerId: owner, meId: meId ?? '' });
+        : confirmableLines(shown.pay_check_line, mineOpt);
   const confirm = async () => {
     if (busy || !confirmable.length) return;
     if (typeof navigator !== 'undefined' && navigator.onLine === false)
@@ -423,7 +434,7 @@ export function W02PaydayConfirm() {
         ids.includes(l.id) ? { ...l, state: 'checked' } : l,
       );
       await refreshChecks(qc);
-      toast(copy.monthFinished(shown.cycle_start, confirmFinish(after) ?? 'all'), {
+      toast(copy.monthFinished(start, confirmFinish(after) ?? 'all'), {
         label: copy.undo,
         onClick: () =>
           quietly(
@@ -501,9 +512,9 @@ export function W02PaydayConfirm() {
   return frame(
     <>
       <AchieveWatch from="checklist" />
-      <section aria-label={cycleName(shown.cycle_start)}>
+      <section aria-label={cycleName(start)}>
         <SectionHeader
-          title={cycleName(shown.cycle_start)}
+          title={cycleName(start)}
           meta={periodText(start, shown.cycle_end)}
           action={
             <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
@@ -528,6 +539,8 @@ export function W02PaydayConfirm() {
           list={shown}
           income={income}
           masked={masked}
+          shownStart={start}
+          lateOpen={late ? confirmable.length : 0}
           share={{
             received: start,
             people: ownerPeople,
@@ -570,7 +583,7 @@ export function W02PaydayConfirm() {
       )}
       {people && (
         <Tabs
-          label={cycleName(shown.cycle_start)}
+          label={cycleName(start)}
           value={tab}
           onChange={(v) => {
             setWho(v);
@@ -613,6 +626,25 @@ export function W02PaydayConfirm() {
       <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
         {groups}
       </div>
+      {othersManual.length > 0 && (
+        <section className="hg-checkgroup" aria-label={copy.managerChecks(managerName)}>
+          <SectionHeader variant="group" title={copy.managerChecks(managerName)} />
+          <div className="hg-checklist__list">
+            {othersManual.map((l) => (
+              <CheckLine
+                key={l.id}
+                line={l}
+                name={nameOf(l)}
+                personName={personName}
+                meId={meId}
+                lead={<LineLead line={l} />}
+                readOnly
+                viewOnly
+              />
+            ))}
+          </div>
+        </section>
+      )}
       {confirmable.length > 0 && (
         <Button variant="primary" block loading={busy} onClick={() => void confirm()}>
           {copy.confirmAll}

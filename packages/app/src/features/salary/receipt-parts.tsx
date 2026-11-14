@@ -189,7 +189,7 @@ export function PlanSheet({
               aria-label={deleteLabel}
               onClick={onDelete}
             >
-              {copy.remove}
+              {copy.removeLine}
             </button>
           )}
         </>

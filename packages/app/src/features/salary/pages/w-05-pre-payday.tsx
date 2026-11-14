@@ -1,5 +1,5 @@
 import type { PayChecklist, PayCheckLine } from '@sweetwo/api';
-import { inReviewWindow, todayKst } from '@sweetwo/core';
+import { inReviewWindow, lineIsMine, todayKst } from '@sweetwo/core';
 import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useEffect, useRef } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { CheckLine, checkToast, goalLineName, LineLead, lineName } from '../chec
 import { copy } from '../copy';
 import {
   myChecklist,
+  useAccountNames,
   useChangedLines,
   useCheck,
   useCheckRealtime,
@@ -49,6 +50,7 @@ export function W05PrePayday() {
   const me = useMe();
   const space = useSpace();
   const goals = useGoals();
+  const accountNames = useAccountNames();
   const partner = usePartner();
   const lists = useChecklists();
   const saving = useSavingItems();
@@ -63,9 +65,21 @@ export function W05PrePayday() {
   const list = picked && 'list' in picked ? picked.list : undefined;
   // 처음 열 때 체크 안 한 줄(이 줄들만 보임, 체크해도 남음). ‘못 함’으로 닫은 줄은 빠짐
   const first = useRef<string[] | null>(null);
-  if (list && first.current === null)
+  // 내가 확인을 맡은 손 줄만(합쳐서 남의 용돈 줄, 한 사람 관리형 관리하지 않는 쪽의 관리하는 사람 줄 빼고, 2026-11-13 UX B H2)
+  const sp = space.data;
+  if (list && sp && me.data && first.current === null)
     first.current = list.pay_check_line
-      .filter((l) => l.state === 'wait' && !l.auto)
+      .filter(
+        (l) =>
+          l.state === 'wait' &&
+          !l.auto &&
+          lineIsMine(l, {
+            joint: sp.salary_mode === 'joint',
+            ownerId: list.owner_user_id,
+            meId: me.data?.id ?? '',
+            managerId: sp.manager_user_id,
+          }),
+      )
       .map((l) => l.id);
   const shown = (list?.pay_check_line ?? [])
     .filter((l) => first.current?.includes(l.id) && l.state !== 'skipped')
@@ -114,7 +128,8 @@ export function W05PrePayday() {
     x === meId ? (me.data?.nickname ?? '') : (partner.data?.nickname ?? null);
   const joint = space.data.salary_mode === 'joint';
   const goalName = goalLineName(goals.data, personName, joint);
-  const nameOf = (l: PayCheckLine) => lineName(l, goalName, personName, joint);
+  const nameOf = (l: PayCheckLine) =>
+    lineName(l, goalName, personName, joint, accountNames.ofSplitLine(l.split_line_id));
 
   // W-02a 다른 금액(W-02와 같은 화면, 기록 상태 other, 2026-11-12 D6)
   const otherId = (loc.state as { other?: string } | null)?.other;

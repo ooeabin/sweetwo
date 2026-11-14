@@ -4410,6 +4410,10 @@ export type Database = {
           side: Database["public"]["Enums"]["couple_side"]
         }[]
       }
+      pay_line_mine: {
+        Args: { p_kind: string; p_owner: string; p_space: string; p_uid: string; p_user: string }
+        Returns: boolean
+      }
       pay_line_noun: {
         Args: {
           p_goal: string

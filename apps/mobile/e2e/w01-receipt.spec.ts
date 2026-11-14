@@ -106,7 +106,7 @@ test('금액 바꾸기: 시트(여유 자금 미리보기) → 바로 저장 + �
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
   // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
-  await expect(page.getByText('이번 달 체크 안 한 줄도 바꿨어요')).toBeVisible();
+  await expect(page.getByText('이번 달 확인 안 한 줄도 바꿨어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '생활비 80만 원' })).toBeVisible();
   expect(lineOf(db, 'living')?.amount).toBe(800_000);
   expect(waitLine(db, 'living')?.planned).toBe(800_000);
@@ -153,7 +153,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await page.getByRole('button', { name: '고정지출 88만 원' }).click();
   await page
     .getByRole('dialog', { name: '고정지출 금액' })
-    .getByRole('button', { name: '고정지출 지우기' })
+    .getByRole('button', { name: '고정지출 줄 지우기' })
     .click();
   await expect(page.getByText('고정지출을 지웠어요')).toBeVisible();
   expect(await names(page, '지출')).toEqual(['생활비', '용돈']);
@@ -166,7 +166,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await page.getByRole('button', { name: '청약 44만 원' }).click();
   await page
     .getByRole('dialog', { name: '청약 금액' })
-    .getByRole('button', { name: '청약 지우기' })
+    .getByRole('button', { name: '청약 줄 지우기' })
     .click();
   const modal = page.getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' });
   await expect(modal.getByText('월급 계획에서 빠지고 저금 내역은 남아요')).toBeVisible();
@@ -224,7 +224,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.getByText('매달 10일')).toBeVisible();
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
   // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 체크했어요 ›’ 링크 하나(2026-11-09)
-  await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 체크했어요']);
+  await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 확인했어요']);
   for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저금 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
@@ -447,7 +447,7 @@ test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page 
   await page.getByRole('button', { name: '청약 44만 원' }).click();
   await page
     .getByRole('dialog', { name: '청약 금액' })
-    .getByRole('button', { name: '청약 지우기' })
+    .getByRole('button', { name: '청약 줄 지우기' })
     .click();
   await page
     .getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' })

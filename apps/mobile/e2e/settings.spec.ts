@@ -192,7 +192,7 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크
     )
     .toBe(true);
   // v2.2: P-11과 같은 종류 목록(push_kinds). 각자 계열이면 ‘같이 쓰는 걸 바꿨을 때’ 없음, 손 줄이 없으면 월급날 줄 없음
-  await expect(card.getByRole('switch', { name: '경조사 일주일 전' })).toBeVisible();
+  await expect(card.getByRole('switch', { name: '경조사가 다가올 때' })).toBeVisible();
   await expect(card.getByRole('switch', { name: '진행 소식' })).toBeVisible();
   await expect(card.getByRole('switch', { name: /같이 쓰는 걸 바꿨을 때/ })).toHaveCount(0);
   await expect(card.getByRole('switch', { name: '월급날 확인할 게 있을 때' })).toHaveCount(0);
@@ -634,7 +634,7 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
   ask();
   // 홈 띠 2번(19): 받은 열린 요청(reconnect_request)을 봄(옛 couple_unlink.reconnect_by는 비어 있음)
   await page.goto('/');
-  await expect(page.locator('.hg-hubband')).toContainText('예빈님이 다시 연결하자고 했어요');
+  await expect(page.locator('.hg-hubband').first()).toContainText('예빈님이 다시 연결하자고 했어요');
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('예빈님이 다시 연결하자고 해요')).toBeVisible();

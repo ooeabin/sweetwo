@@ -82,7 +82,7 @@ select public.check_pay_line(pg_temp.line('11111111-1111-1111-1111-111111111111'
 reset role;
 select results_eq(
   $$ select user_id, title, target from public.notification where kind = 'partner_done' $$,
-  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '찬우님이 3월 월급 체크를 마쳤어요',
+  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '찬우님이 3월 25일 월급 확인을 마쳤어요',
              '/salary?who=11111111-1111-1111-1111-111111111111') $$,
   '못 함이 섞이면 마쳤어요');
 select is((select state from public.pay_checklist where owner_user_id = '11111111-1111-1111-1111-111111111111'
@@ -104,7 +104,7 @@ select public.check_pay_line(pg_temp.line('22222222-2222-2222-2222-222222222222'
 select public.check_pay_line(pg_temp.line('22222222-2222-2222-2222-222222222222', 'living'), 'checked');
 reset role;
 select is((select title from public.notification where kind = 'partner_done' and user_id = '11111111-1111-1111-1111-111111111111'),
-  '파트너가 3월 월급 체크를 다 했어요', '모두 체크면 다 했어요, 호칭 없으면 파트너가');
+  '파트너가 3월 10일 월급 확인을 마쳤어요', '모두 확인해도 확인을 마쳤어요(14 v2.2), 호칭 없으면 파트너가');
 
 -- 6. 달성 알림 링크: 주인(찬우) = W-12, 파트너(예빈, 보기만) = W-10
 update public.goal set target_amount = 950000, owner_user_id = '11111111-1111-1111-1111-111111111111' where template = 'home';

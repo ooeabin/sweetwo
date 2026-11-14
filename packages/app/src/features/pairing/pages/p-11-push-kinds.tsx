@@ -62,6 +62,13 @@ export function P11PushKinds() {
             <Toggle
               key={r.kind}
               label={typeof c === 'function' ? c(d.starterName) : c}
+              help={
+                r.kind === 'care'
+                  ? copy.kindsHelp.care
+                  : r.kind === 'progress_news'
+                    ? copy.kindsHelp.progress_news(!!me.payday_none)
+                    : undefined
+              }
               checked={value(r.kind, r.on)}
               onChange={(on) => setPicked((p) => ({ ...p, [r.kind]: on }))}
             />

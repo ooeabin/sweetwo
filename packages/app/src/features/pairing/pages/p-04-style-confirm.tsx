@@ -16,7 +16,11 @@ export function P04StyleConfirm() {
   if (!d.ready || !d.ctx) return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} />;
   const starter = d.starterName;
   const title = copy.styleTitle(starter);
-  const help = copy.styleNames[d.style];
+  // 한 사람 관리형이면 누가 관리하는지 한 줄 더(2026-11-13 UX B)
+  const help =
+    d.style === 'one_manager' && d.ctx.manager
+      ? `${copy.styleNames.one_manager}. ${copy.managedBy(starter, d.ctx.manager === 'joiner')}`
+      : copy.styleNames[d.style];
   if (d.salaryMode === 'joint')
     return (
       <QuestionLayout

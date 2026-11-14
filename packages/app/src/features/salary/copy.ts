@@ -104,6 +104,8 @@ export const copy = {
   moveDown: (name: string) => `${name} 아래로`,
   moved: (name: string, pos: number) => `${name}, ${pos}번째`,
   removeLabel: (name: string) => `${name} 지우기`,
+  /** 금액 시트의 줄 지우기 화면 읽기 이름(키패드 ‘한 글자 지우기’와 구분, 2026-11-13 UX B M8) */
+  removeLineLabel: (name: string) => `${name} 줄 지우기`,
   locked: '보기만 할 수 있어요',
   lineChanged: (name: string, amount: string) => `${object(name)} ${amount}으로 바꿨어요`,
   lineAdded: (name: string) => `${object(name)} 추가했어요`,
@@ -122,13 +124,13 @@ export const copy = {
   prevMonth: '지난 달 보기', // [확인 필요]
   nextMonth: '다음 달 보기', // [확인 필요]
   partnerChangedSplit: (name: string) =>
-    `${name}님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요`,
+    `${name}님이 월급 계획을 바꿔서 확인 안 한 줄을 다시 계산했어요`, // 2026-11-13 UX B ‘체크’ → ‘확인’
   allDone: '다 보냈어요',
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
-  checkLabel: (name: string) => `${name} 체크`,
+  checkLabel: (name: string) => `${name} 확인`,
   viewLabel: (name: string, state: string) =>
-    `${name} ${state === 'checked' ? '체크했어요' : state === 'skipped' ? '건너뜀' : '아직 체크 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), 2026-11-13 ‘못 함’ → ‘건너뜀’
+    `${name} ${state === 'checked' ? '확인했어요' : state === 'skipped' ? '건너뜀' : '아직 확인 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), 2026-11-13 ‘못 함’ → ‘건너뜀’
   // ‘못 함’ 줄 체크 칸 화면 읽기(2026-11-12 D2: 빈 원 + “이번 달은 못 했어요”) [확인 필요]
   skippedLabel: (name: string) => `${name} 건너뜀`, // 2026-11-13 ‘못 함’ → ‘건너뜀’
   otherAmount: '다른 금액으로 했어요', // 2026-11-13 W-02 5번
@@ -136,17 +138,17 @@ export const copy = {
   lineSheet: (name: string, amount: string) => `${name} ${amount}`,
   sent: '계획대로 했어요', // 2026-11-13 W-02 5번(줄 시트 주 버튼)
   // 체크한 사람·때(2026-11-03): 파트너가 체크했으면 이름 칩 + “08.26 체크”, 내가 체크했으면 날짜만
-  checkedAt: (date: string) => `${date} 체크`, // [확인 필요]
+  checkedAt: (date: string) => `${date} 확인`, // [확인 필요] 2026-11-13 UX B ‘체크’ → ‘확인’
   // W-05 ‘이번 달은 못 했어요’ 뒤 Toast(2026-11-03)
   skippedDone: (name: string) => `${name}, 이번 달은 건너뛰었어요`, // [확인 필요] 2026-11-13
   skipped: '이번 달은 건너뛰었어요', // [확인 필요] 2026-11-13 W-02 6번 건너뛴 줄 보조 줄
   skipThis: '이번 달은 건너뛸게요', // [확인 필요] 2026-11-13 W-02 5번 줄 시트
   editSplit: '월급 계획 고치기',
   // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
-  sentOfPlan: (sent: string, planned: string) => `체크한 금액 ${sent} / ${planned}`,
-  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 체크했어요`,
-  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 체크했어요`,
-  monthLineToo: '이번 달 체크 안 한 줄도 바꿨어요',
+  sentOfPlan: (sent: string, planned: string) => `확인한 금액 ${sent} / ${planned}`, // [확인 필요] 2026-11-13 UX B ‘체크한 금액’ → ‘확인한 금액’
+  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 확인했어요`,
+  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 확인했어요`,
+  monthLineToo: '이번 달 확인 안 한 줄도 바꿨어요',
   madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
   // 다 끝난 달(2026-11-12 W-02 끝 화면 대신 W-02 막대 아래 한 줄 + Toast, D4: ‘못 함’이 섞이면 ‘마쳤어요’) [확인 필요]
   // 2026-11-13 W-02 7번: “11월 25일 월급, 계획대로 됐어요” / 건너뜀이 섞이면 “…확인을 마쳤어요” [확인 필요]
@@ -154,19 +156,19 @@ export const copy = {
     `${formatMonthDay(start)} 월급, ${kind === 'all' ? '계획대로 됐어요' : '확인을 마쳤어요'}`,
   // 공유 이미지(달 결과, W-01과 같은 canvas) [확인 필요]
   received: (date: string) => `${date} 받음`,
-  sentTotal: '체크한 금액',
+  sentTotal: '확인한 금액',
   skippedShort: '건너뜀',
   monthImageName: (ym: string) => `sweetwo-${ym}.png`,
   // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3) [확인 필요]
   groupAllSent: '모두 보냈어요',
   groupAllSentLabel: (group: string) => `${group} 모두 보냈어요`,
   groupSavingDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 더했어요`,
-  groupSpendDone: (n: number) => `지출 ${n}개를 체크했어요`,
+  groupSpendDone: (n: number) => `지출 ${n}개를 확인했어요`,
   // 토스트는 한 줄(Toast.md): 저금 항목 이름이 길면 8자 + … 로 줄여 금액이 잘리지 않게
   addedToGoal: (goal: string, amount: string) =>
     `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,
-  checked: '체크했어요', // [확인 필요] 지출 줄 체크 토스트
-  alreadyChecked: (who: string) => `${who}님이 먼저 체크했어요`,
+  checked: '확인했어요', // [확인 필요] 지출 줄 확인 토스트(2026-11-13 UX B)
+  alreadyChecked: (who: string) => `${who}님이 먼저 확인했어요`,
   closed: '지난 달 체크리스트는 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
@@ -212,7 +214,9 @@ export const copy = {
   addItem: '+ 저금 추가', // [확인 필요] 2026-11-09 사용자에게는 ‘저금’
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
   firstSaving: (left: string) => `저금 추가 (여유 자금 ${left})`,
-  firstSavingLike: (partner: string) => `${partner}님처럼 나도 모을 곳을 만들어 볼까요?`,
+  // 20 ‘첫 저금’ 3번(2026-11-13): 예전 비교 문구 “…님처럼 나도 모을 곳을…”은 없앰 [확인 필요]
+  firstSavingTogether: (partner: string, goal: string) =>
+    `${partner ? `${partner}님` : '파트너'} ‘${goal}’에 같이 모을까요?`,
   firstSavingLeft: (left: string) => `여유 자금 ${left}`,
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
@@ -343,6 +347,8 @@ export const copy = {
   // 애칭이 없을 때 상대 이름(CLAUDE.md 문구 ‘없으면 파트너’)
   partnerFallback: '파트너',
   sharedAccountName: '같이 쓰는 통장',
+  /** W-02 한 사람 관리형 관리하지 않는 쪽: 관리하는 사람이 확인하는 손 줄 묶음 머리(보기만) [확인 필요] 2026-11-13 UX B H2 */
+  managerChecks: (name: string) => (name ? `${name}님이 확인해요` : '파트너가 확인해요'),
   addSharedAccount: '+ 같이 쓰는 통장',
   allowanceNotify: (name: string) => `${name || '파트너'}님에게 알려 드려요`,
   noPaydayHead: '돈이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)
