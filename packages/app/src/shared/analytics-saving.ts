@@ -35,12 +35,30 @@ export type SavingTogetherEvent =
         | 'bundle_achieved'
         | 'bundle_show_each_toggled';
       props: {
-        /** 들어온 곳: band(홈 띠 13번) / saving(W-10 ⋯·W-11 끝) / direct / notification / w15a / celebrate / s13(설정 S-13 묶음 줄) */
-        entry: 'band' | 'saving' | 'direct' | 'notification' | 'w15a' | 'celebrate' | 's13';
+        /**
+         * 들어온 곳: band(홈 띠 13번) / saving(W-10 ⋯·W-11 끝) / direct / notification(알림·홈 H-10 들어가기) / w15a /
+         * celebrate / s13(설정 S-13 묶음 줄) / money_in(W-20a ‘같이 모으기에 들어가기’, 2026-11-14) / exist(W-15 ‘같이 모을게요’, 2026-11-14)
+         */
+        entry:
+          | 'band'
+          | 'saving'
+          | 'direct'
+          | 'notification'
+          | 'w15a'
+          | 'celebrate'
+          | 's13'
+          | 'money_in'
+          | 'exist';
         has_target: boolean;
         on: boolean;
+        /** 열린 묶음이 있는데 ‘따로 새로 모을게요’로 만듦(2026-11-14 H1) */
+        separate?: boolean;
       };
     }
+  /** W-15 열린 묶음 질문 답(2026-11-14 H1): 들어가기 / 따로 / 나중에 */
+  | { name: 'bundle_open_answered'; props: { choice: 'join' | 'separate' | 'later' } }
+  /** W-20 돈 들어온 기록 지우기·고치기(2026-11-14 M6) */
+  | { name: 'money_in_deleted' | 'money_in_edited'; props: { distributed: boolean } }
   | { name: 'bundle_percent_only_toggled'; props: { on: boolean } }
   | {
       name: 'saving_note_saved' | 'saving_note_paid';

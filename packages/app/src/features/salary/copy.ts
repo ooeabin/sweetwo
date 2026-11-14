@@ -241,7 +241,6 @@ export const copy = {
   achieved: '달성',
   monthlyOf: (amount: string) => `매달 ${amount}씩`,
   change: '바꾸기',
-  expected: (ym: string) => `예상 ${ym}`, // [확인 필요]
   history: '저금 내역', // [확인 필요]
   historyChecked: (label: string, amount: string) => `${label} ${amount}`,
   historyOther: (label: string, amount: string) => `${label} 다른 금액 ${amount}`,
@@ -547,4 +546,29 @@ export const copy = {
   moneyInPutDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
   amountOf: (name: string) => `${name} 금액`, // 화면 읽기
   wonUnit: '원',
+  // 2026-11-14 실구동 고침 A(20 v2.2 ‘고침 A’)
+  bundleJoinHelp: '같이 모으면 합계 하나로 같이 봐요', // [확인 필요] H1 들어갈 묶음이 있을 때
+  bundleSeparate: '따로 새로 모을게요', // [확인 필요]
+  bundleWaitingQ: (who: string, name: string) => `${who}님이 아직 ‘${name}’에 들어오지 않았어요`, // [확인 필요]
+  bundleWaitingHelp: '다른 저금으로 따로 하나 더 같이 모을 수도 있어요', // [확인 필요]
+  bundleOpenBlocked: '들어오길 기다리는 같이 모으기가 있어요', // [확인 필요] 서버 bundle_open
+  bundleJoinCta: '같이 모으기에 들어가기', // [확인 필요] W-10 0c, W-20a
+  moneyInNoSavingJoin: (name: string) =>
+    `넣을 저금이 없어요. ‘${name}’에 같이 모으면 넣을 수 있어요`, // [확인 필요]
+  moneyInAll: '남은 돈 전부 넣기', // [확인 필요] W-20a
+  moneyInAllLabel: (name: string) => `${name}에 남은 돈 전부 넣기`, // 화면 읽기
+  moneyInList: '들어온 돈 기록', // [확인 필요] W-20b
+  moneyInListEmpty: '아직 적은 돈이 없어요', // [확인 필요]
+  moneyInPutOf: (amount: string) => `저금에 ${amount} 넣었어요`, // [확인 필요] W-20b 줄 보조
+  moneyInRowMenu: (amount: string) => `${amount} 기록 메뉴`, // 화면 읽기
+  moneyInEdit: '고치기',
+  moneyInDelete: '지우기',
+  moneyInDeleted: '들어온 돈 기록을 지웠어요', // [확인 필요]
+  moneyInDeletedPut: '들어온 돈 기록과 저금에 넣은 금액을 지웠어요', // [확인 필요] 나눠 넣은 게 있을 때
+  moneyInEdited: '들어온 돈 기록을 고쳤어요', // [확인 필요]
+  moneyInEditBelow: '저금에 넣은 금액보다 적게 고칠 수 없어요', // [확인 필요]
+  moneyInEditSave: '저장',
+  noteOverdue: (date: string) => `${date} 지났어요`, // [확인 필요] W-14 안 낸 메모
+  monthlyOverLeft: (left: string) => `여유 자금 ${left}보다 많아요`, // [확인 필요] W-11b
+  needPerMonthTogether: (amount: string) => `둘이 같이 매달 ${amount}이 필요해요`, // [확인 필요] 같이 계열 W-11d·W-10
 };

@@ -141,8 +141,8 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await y.getByLabel('얼마 들어왔어요?').fill('1000000');
   await y.getByRole('button', { name: '가족이 보태 줬어요' }).click();
   await y.getByRole('button', { name: '다음' }).click();
-  await y.getByLabel('결혼 비용').fill('500000');
-  await y.getByRole('button', { name: '넣기' }).click();
+  await y.getByLabel('결혼 비용', { exact: true }).fill('500000');
+  await y.getByRole('button', { name: '넣기', exact: true }).click();
   await expect(y.getByText('저금 1개에 50만 원 넣었어요')).toBeVisible();
   expect(s.moves).toMatchObject([{ goal_id: 'goal-y', kind: 'in', amount: 500_000 }]);
   await c.goto('/salary/items/goal-h');

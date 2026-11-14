@@ -4,12 +4,20 @@ import {
   logMoneyIn,
   MoneyInBlocked,
   qk,
+  updateMoneyIn,
   type MoneyInKind,
 } from '@sweetwo/api';
-import { amountBand, todayKst } from '@sweetwo/core';
-import { AmountInput, Chip, DateInput, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { amountBand, joinableBundle, todayKst } from '@sweetwo/core';
+import {
+  AmountInput,
+  Button,
+  Chip,
+  DateInput,
+  QuestionLayout,
+  QuestionSkeleton,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
@@ -20,7 +28,7 @@ import { useMe } from '../data';
 import { salaryPaths, togetherPaths } from '../paths';
 import { useSavingItems } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
-import { refreshMoneyIn } from '../together';
+import { refreshMoneyIn, useBundles } from '../together';
 
 const KINDS: MoneyInKind[] = ['salary', 'bonus', 'family', 'work', 'refund', 'etc'];
 
@@ -32,7 +40,8 @@ const backOf = (p: URLSearchParams) => {
 
 /**
  * W-20 돈 들어왔어요(20 v2.2, 모든 사람, N8·F1): “얼마 들어왔어요?” 금액 + 받은 날(오늘, 미래 불가) + 칩(미리 고른 값 없음,
- * 날짜 없는 사람은 ‘일한 돈’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 돈 들어왔어요”에서 열림
+ * 날짜 없는 사람은 ‘일한 돈’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 돈 들어왔어요”에서 열림.
+ * `?edit={기록}`(W-20b ‘고치기’, 2026-11-14 M6)이면 그 기록 값으로 채우고 ‘저장’ = money_in_set → 들어온 화면으로
  */
 export function W20MoneyIn() {
   const nav = useNavigate();
@@ -45,8 +54,25 @@ export function W20MoneyIn() {
   const [busy, setBusy] = useState(false);
   // 받은 날은 처음엔 “오늘” 한 줄, ‘바꾸기’를 누르면 날짜 칸(날짜 칸이 처음부터 있으면 금액 칸 포커스를 가져감)
   const [pickDate, setPickDate] = useState(false);
-  const close = () => (window.history.length > 1 ? nav(-1) : nav(backOf(params)));
-  if (me.isLoading) return <QuestionSkeleton title={copy.moneyInQ} />;
+  const editId = params.get('edit');
+  const ins = useQuery({
+    queryKey: qk.moneyIns,
+    queryFn: () => fetchMoneyIns(),
+    enabled: !!editId,
+  });
+  const rec = editId ? ins.data?.find((r) => r.id === editId) : undefined;
+  // 고치기: 처음 한 번 기록 값으로 채움
+  useEffect(() => {
+    if (!rec) return;
+    setAmount(rec.amount);
+    setKind(rec.kind);
+    setDate(rec.received_on);
+    setPickDate(rec.received_on !== todayKst());
+  }, [rec?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const close = () =>
+    window.history.length > 1 ? nav(-1) : nav(editId ? togetherPaths.moneyInList : backOf(params));
+  if (me.isLoading || (editId && ins.isLoading)) return <QuestionSkeleton title={copy.moneyInQ} />;
+  if (editId && !rec) return <Navigate to={togetherPaths.moneyInList} replace />;
   const none = !!me.data?.payday_none;
   const kinds = none ? (['work', ...KINDS.filter((k) => k !== 'work')] as MoneyInKind[]) : KINDS;
   const future = date !== null && date > todayKst();
@@ -54,6 +80,14 @@ export function W20MoneyIn() {
     if (busy || !amount || !kind || !date || future) return;
     setBusy(true);
     try {
+      if (rec) {
+        await updateMoneyIn(rec.id, { amount, receivedOn: date, kind });
+        track('money_in_edited', { distributed: false });
+        await refreshMoneyIn(qc);
+        carryToast(copy.moneyInEdited);
+        close();
+        return;
+      }
       const id = await logMoneyIn({ amount, receivedOn: date, kind });
       track('money_in_logged', {
         kind,
@@ -74,7 +108,9 @@ export function W20MoneyIn() {
       toast(
         e instanceof MoneyInBlocked && e.reason === 'future_date'
           ? copy.moneyInFuture
-          : copy.failed,
+          : e instanceof MoneyInBlocked && e.reason === 'bad_amount' && rec
+            ? copy.moneyInEditBelow
+            : copy.failed,
       );
     } finally {
       setBusy(false);
@@ -85,7 +121,7 @@ export function W20MoneyIn() {
       title={copy.moneyInQ}
       onBack={close}
       primary={{
-        label: copy.next,
+        label: rec ? copy.moneyInEditSave : copy.next,
         disabled: !amount || !kind || !date || future,
         loading: busy,
       }}
@@ -119,6 +155,17 @@ export function W20MoneyIn() {
           </button>
         </div>
       )}
+      {/* 잘못 적은 기록 고치기·지우기(W-20b, 2026-11-14 M6) */}
+      {!rec && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav(togetherPaths.moneyInList)}
+        >
+          {copy.moneyInList}
+        </button>
+      )}
     </QuestionLayout>
   );
 }
@@ -134,6 +181,7 @@ export function W20aDistribute() {
   const qc = useQueryClient();
   const d = useSavingItems();
   const me = useMe();
+  const bundles = useBundles();
   const { masked } = useMask();
   const ins = useQuery({ queryKey: qk.moneyIns, queryFn: () => fetchMoneyIns() });
   const [put, setPut] = useState<Record<string, number | null>>({});
@@ -153,6 +201,9 @@ export function W20aDistribute() {
   const total = Object.values(put).reduce<number>((t, v) => t + (v ?? 0), 0);
   const left = rec.amount - total;
   const over = left < 0;
+  // 넣을 저금이 없는데 상대가 만든 같이 모으기가 있으면 들어가기(들어간 뒤 이 화면으로, 2026-11-14 H1)
+  const join =
+    !goals.length && !d.joint && !d.pending ? joinableBundle(bundles.data ?? []) : undefined;
   const finish = async () => {
     if (busy || over) return;
     setBusy(true);
@@ -180,22 +231,56 @@ export function W20aDistribute() {
     <QuestionLayout
       title={copy.moneyInDistributeQ}
       help={
-        goals.length ? copy.moneyInLeft(m(rec.amount), m(Math.max(left, 0))) : copy.moneyInNoSaving
+        goals.length
+          ? copy.moneyInLeft(m(rec.amount), m(Math.max(left, 0)))
+          : join
+            ? copy.moneyInNoSavingJoin(join.name)
+            : copy.moneyInNoSaving
       }
       onBack={leave}
       primary={{ label: copy.moneyInPut, disabled: over, loading: busy }}
       onSubmit={() => void finish()}
     >
       <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
-        {goals.map((i) => (
-          <MoneyField
-            key={i.goal.id}
-            label={i.goal.name}
-            value={put[i.goal.id] ?? null}
-            placeholder="0"
-            onChange={(v) => setPut((p) => ({ ...p, [i.goal.id]: v }))}
-          />
-        ))}
+        {goals.map((i) => {
+          const cur = put[i.goal.id] ?? 0;
+          return (
+            <div key={i.goal.id} className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+              <MoneyField
+                label={i.goal.name}
+                value={put[i.goal.id] ?? null}
+                placeholder="0"
+                onChange={(v) => setPut((p) => ({ ...p, [i.goal.id]: v }))}
+              />
+              {/* 남은 돈을 이 저금에 전부(2026-11-14) */}
+              {left > 0 && (
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link"
+                  style={{ alignSelf: 'flex-end' }}
+                  aria-label={copy.moneyInAllLabel(i.goal.name)}
+                  onClick={() => setPut((p) => ({ ...p, [i.goal.id]: cur + left }))}
+                >
+                  {copy.moneyInAll}
+                </button>
+              )}
+            </div>
+          );
+        })}
+        {join && (
+          <Button
+            variant="secondary"
+            block
+            onClick={() =>
+              nav(
+                `${togetherPaths.bundleJoin(join.id)}?then=${encodeURIComponent(togetherPaths.distribute(id))}`,
+                { replace: true },
+              )
+            }
+          >
+            {copy.bundleJoinCta}
+          </Button>
+        )}
         {over && (
           <p className="hg-help is-error" role="alert">
             {copy.moneyInOver}

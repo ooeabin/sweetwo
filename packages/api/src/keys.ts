@@ -82,6 +82,7 @@ export const qk = {
   bundles: ['saving_bundle'] as const,
   /** 돈 들어왔어요 기록(money_in) */
   moneyIns: ['money_in'] as const,
+  moneyInPuts: ['money_in', 'puts'] as const,
   /** 날짜 없는 사람의 기간(money_in_period). 돈 들어왔어요 키 아래 */
   moneyInPeriod: (today: string) => ['money_in', 'period', today] as const,
   /** 한 저금의 돈 움직임(goal_move_public)과 내 사유 글 */

@@ -1,5 +1,10 @@
 import { markNotePaid, SavingAdjustBlocked, unpaySavingNote, updateSavingNote } from '@sweetwo/api';
-import { amountBand as amountBandOf, formatMonthDay, type SavingNoteRow } from '@sweetwo/core';
+import {
+  amountBand as amountBandOf,
+  formatMonthDay,
+  todayKst,
+  type SavingNoteRow,
+} from '@sweetwo/core';
 import { AddRow, BottomSheet, Button, ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -105,6 +110,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
     }
   };
   const list = notes.data ?? [];
+  const today = todayKst();
   const body = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader
@@ -136,12 +142,22 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
       ) : list.length ? (
         <div className="hg-list">
           {list.map((n) => (
-            <div key={n.id} className="hg-row" style={{ gap: 'var(--space-2)' }}>
+            // 오른쪽 ‘냈어요’는 줄 안쪽 여백만큼 띄우고 줄지 않게(카드 밖으로 넘치지 않음, 2026-11-14)
+            <div
+              key={n.id}
+              className="hg-row"
+              style={{ gap: 'var(--space-2)', paddingRight: 'var(--space-4)' }}
+            >
               <div style={{ flex: 1, minWidth: 0 }}>
                 <ListRow
                   label={n.name}
                   sub={[
-                    n.due_on ? formatMonthDay(n.due_on) : null,
+                    // 날짜가 지났는데 안 낸 메모는 “12월 3일 지났어요”(사라지지 않음, 2026-11-14)
+                    n.due_on
+                      ? !n.paid && n.due_on < today
+                        ? copy.noteOverdue(formatMonthDay(n.due_on))
+                        : formatMonthDay(n.due_on)
+                      : null,
                     n.amount !== null ? m(n.amount) : null,
                   ]
                     .filter(Boolean)
@@ -151,17 +167,19 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
                 />
               </div>
               {!n.paid && t.canEdit && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  aria-label={copy.notePaidLabel(n.name)}
-                  onClick={() => {
-                    setPayAmount(n.amount);
-                    setPaying(n);
-                  }}
-                >
-                  {copy.notePaid}
-                </Button>
+                <span style={{ flex: 'none' }}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-label={copy.notePaidLabel(n.name)}
+                    onClick={() => {
+                      setPayAmount(n.amount);
+                      setPaying(n);
+                    }}
+                  >
+                    {copy.notePaid}
+                  </Button>
+                </span>
               )}
             </div>
           ))}

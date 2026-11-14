@@ -16,7 +16,7 @@ import { SaveTogether, SaveTogetherEmpty, type SaveTogetherSlideProps } from '@s
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { spoken } from '../../../shared/masked-text';
-import { EMPTY_DRAFT, savingPaths, writeDraft } from '../../salary';
+import { EMPTY_DRAFT, savingPaths, togetherPaths, writeDraft } from '../../salary';
 import { copy } from '../copy';
 
 /**
@@ -30,6 +30,8 @@ export function H10SaveTogether({
   heroes,
   savedOf,
   people,
+  peopleMine,
+  joint,
   names,
   marriage,
   weddingDate,
@@ -42,7 +44,11 @@ export function H10SaveTogether({
   heroes: HeroItem[];
   /** 저금 모은 금액(goal_saved) */
   savedOf: (id: string) => number;
+  /** 사람(연결이면 둘). 묶음·공동 저금·합쳐서 저금 칸 */
   people: ReactNode;
+  /** 나 하나. 각자 계열의 묶이지 않은 내 저금 칸(묶기 전엔 내 얼굴만, 2026-11-14) */
+  peopleMine?: ReactNode;
+  joint: boolean;
   names: { me: string; partner: string };
   marriage: MarriageStatus | null;
   weddingDate: string | null;
@@ -110,6 +116,12 @@ export function H10SaveTogether({
     const done = b.status === 'achieved' || (b.pct !== null && b.pct >= 100);
     const lines: string[] = [];
     const say: string[] = [b.name];
+    // 아직 안 들어간 묶음(상대가 만듦): 첫 줄에 권유, 누르면 들어가기(2026-11-14 H1, 홈 띠가 가려도 보이게)
+    const invited = !b.goals.some((x) => x.mine);
+    if (invited) {
+      lines.push(copy.togetherInvite(names.partner));
+      say.push(copy.togetherInvite(names.partner));
+    }
     if (b.percent_only) {
       // 퍼센트만(G1): 금액 대신 %, 목표 금액 문장·‘이번 달 +’·각자 금액 없음, 기한은 달만
       say.push(`${b.pct ?? 0}%`);
@@ -124,7 +136,8 @@ export function H10SaveTogether({
         lines.push(copy.targetOf(won(b.target), b.pct));
         say.push(copy.targetPctLabel(b.pct));
       }
-      const g = gain(b.goals.map((x) => x.id));
+      // 이번 달 +: 서버 묶음 값(상대 움직임을 못 봐도 합계와 같은 기준, 2026-11-14 M1). 옛 응답이면 앱 계산
+      const g = b.month_gain ?? gain(b.goals.map((x) => x.id));
       if (g > 0) lines.push(copy.thisMonthGain(won(g)));
       const r = done
         ? null
@@ -147,9 +160,8 @@ export function H10SaveTogether({
       paused: b.paused,
       percentOnly: b.percent_only,
       label: spoken(copy.togetherLabel(say)),
-      // W-10(내 줄 저금, 묶음 카드는 그 위, 20 W-10). 내 줄이 없으면 상대 줄
-      onClick: () =>
-        go('together', savingPaths.item((b.goals.find((x) => x.mine) ?? b.goals[0])?.id ?? '')),
+      // 묶음 입구(BundleEntry): 안 들어갔으면 들어가기(W-15), 처음 보는 달성이면 W-12, 아니면 내 저금 W-10(2026-11-14 H1)
+      onClick: () => go('together', togetherPaths.bundle(b.id)),
     };
   };
 
@@ -170,7 +182,7 @@ export function H10SaveTogether({
       say.push(copy.remain(r.deadline, won(r.remain)));
     }
     return {
-      people,
+      people: !joint && g.owner_user_id !== null ? (peopleMine ?? people) : people,
       name: g.name,
       amount: won(saved),
       bar: g.target_amount !== null ? savingBar(saved, g.target_amount) : null,

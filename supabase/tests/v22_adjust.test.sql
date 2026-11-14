@@ -66,9 +66,9 @@ select throws_ok(format('select public.adjust_saving(%L, 10000, %L)', current_se
   '자동 사유는 서버만');
 reset role;
 -- 2. 상대(예빈): 사람·금액·사유 없는 한 줄, 사유는 못 읽음
-select results_eq($$ select user_id, title, body, actor_id from public.notification where kind = 'saving_adjusted' $$,
-  $$ values ('22222222-2222-2222-2222-222222222222'::uuid, '같이 모으기에서 꺼내 썼어요', null::text, null::uuid) $$,
-  '상대 한 줄(사람·금액·사유 없음)');
+-- 2026-11-14(20261213090000 계약 3): ‘주간 요약에 넣지 않기’면 상대 한 줄도 없음(문구·사유 규칙은 ux_a_saving)
+select is((select count(*)::int from public.notification where kind = 'saving_adjusted'), 0,
+  '주간 요약에 넣지 않기면 상대 한 줄도 없음');
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select count(*)::int from public.goal_move_reasons(current_setting('test.trip')::uuid)), 0, '상대 사유는 못 읽음');
@@ -82,7 +82,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.adjust_saving(current_setting('test.cam')::uuid, 50000, 'interest');
 reset role;
-select is((select count(*)::int from public.notification where kind = 'saving_adjusted'), 1, '개인 저금 바로잡기는 알림 없음');
+select is((select count(*)::int from public.notification where kind = 'saving_adjusted'), 0, '개인 저금 바로잡기는 알림 없음');
 -- 4. 주간 요약: hide_from_summary면 뺌, 아니면 사람 없이 한 줄
 delete from public.partner_change; -- 준비 때 남은 저금 추가 기록은 이 검사와 상관없음
 select is(public.send_weekly_summary(public.kst_today() + 1), 0, '주간 요약에 넣지 않기를 고르면 없음');
@@ -92,7 +92,7 @@ select public.adjust_saving(current_setting('test.trip')::uuid, 200000, 'fix');
 reset role;
 select is(public.send_weekly_summary(public.kst_today() + 1), 1, '주간 요약 한 줄');
 select results_eq($$ select title, actor_id from public.notification where kind = 'weekly_saving' $$,
-  $$ values ('이번 주 같이 모으기에 더했어요', null::uuid) $$, '주간 요약 문구(사람 없음)');
+  $$ values ('이번 주 같이 모으기 금액을 맞췄어요', null::uuid) $$, '주간 요약 문구(사람 없음, 숫자를 맞춰요는 맞췄어요)');
 
 -- 5. 잔액 맞추기: 여러 건 한 번에, 차이만큼
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

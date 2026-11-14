@@ -64,14 +64,16 @@ export function W13SavingList() {
         backTo={copy.tabTitle}
         onBack={back}
         action={
-          canReconcile ? (
-            <Menu
-              label={copy.menu}
-              actions={[
-                { label: copy.menuReconcile, onSelect: () => nav(togetherPaths.reconcile) },
-              ]}
-            />
-          ) : undefined
+          <Menu
+            label={copy.menu}
+            actions={[
+              ...(canReconcile
+                ? [{ label: copy.menuReconcile, onSelect: () => nav(togetherPaths.reconcile) }]
+                : []),
+              // 들어온 돈 기록(W-20b, 2026-11-14 M6): 잘못 적은 기록 고치기·지우기
+              { label: copy.moneyInList, onSelect: () => nav(togetherPaths.moneyInList) },
+            ]}
+          />
         }
       />
       {d.live.length ? (

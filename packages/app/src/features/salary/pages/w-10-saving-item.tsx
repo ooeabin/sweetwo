@@ -82,6 +82,8 @@ export function W10SavingItem() {
     );
   const nameOf = (uid: string | null) => (uid === d.meId ? d.myName : uid ? d.partnerName : '');
   const closed = i.state === 'closed';
+  // 같이 계열(합쳐서 + 연결, 공동 저금): 월 필요액은 둘이 같이(2026-11-14)
+  const together = (d.joint && d.joined) || i.owner === 'ours';
   // 해제 대기 중: 고칠 수 있는 사람에게도 버튼은 보이되 비활성(20 W-10 예외, S7-09)
   const locked = i.mayEdit && d.pending;
   const showEdit = i.canEdit || locked;
@@ -157,6 +159,7 @@ export function W10SavingItem() {
       key: l.id,
       at: l.checked_at ?? `${l.pay_checklist?.cycle_start ?? ''}T00:00:00+09:00`,
       label: recordText(l),
+      to: undefined as string | undefined,
       sub:
         l.checked_at && d.joint && l.checked_by
           ? `${formatDateFull(l.checked_at.slice(0, 10))}, ${nameOf(l.checked_by)}`
@@ -173,6 +176,8 @@ export function W10SavingItem() {
         sub: [formatDateFull(kstDay(x.created_at)), reasons.data?.[x.id]]
           .filter(Boolean)
           .join(', '),
+        // 내가 적은 돈 들어왔어요 줄은 들어온 돈 기록(W-20b)에서 고치기·지우기(2026-11-14 M6)
+        to: x.money_in_id && x.created_by === d.meId ? togetherPaths.moneyInList : undefined,
       })),
   ].sort((a, b) => (a.at < b.at ? 1 : -1));
 
@@ -216,6 +221,12 @@ export function W10SavingItem() {
           }
         />
       )}
+      {/* 아직 안 들어간 묶음(상대가 만듦): 들어가기(20 W-10 0c, 2026-11-14 H1) */}
+      {bundle && !bundle.goals.some((x) => x.mine) && !d.pending && (
+        <Button variant="secondary" block onClick={() => nav(togetherPaths.bundleJoin(bundle.id))}>
+          {copy.bundleJoinCta}
+        </Button>
+      )}
       {!hideAmounts && (
         <section className="hg-goalbox" aria-label={copy.savedLabel}>
           {/* 누르면 아래 저금 내역으로(20 W-10 2번) */}
@@ -227,7 +238,8 @@ export function W10SavingItem() {
       )}
       {!closed &&
         !hideAmounts &&
-        (i.target !== null ? (
+        // 묶인 저금은 목표 금액이 묶음에 있어 ‘목표 금액 정하기’ 카드 없음(2026-11-14, W-15a에서 고침)
+        (i.target === null && g.bundle_id ? null : i.target !== null ? (
           <section className="hg-goalbox" aria-label={copy.setTarget}>
             <div className="hg-goalbox__head">
               <b>
@@ -282,11 +294,16 @@ export function W10SavingItem() {
                 ) : (
                   <span />
                 )}
-                {i.eta && <span>{copy.expected(formatYm(i.eta))}</span>}
               </div>
             )}
             {i.state !== 'achieved' && i.need !== null && (
-              <span className="hg-goalbox__sub">{copy.needPerMonth(m(i.need))}</span>
+              <span className="hg-goalbox__sub">
+                {together ? copy.needPerMonthTogether(m(i.need)) : copy.needPerMonth(m(i.need))}
+              </span>
+            )}
+            {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만(2026-11-14 예전 ‘예상 …’과 겹침 없앰) */}
+            {i.state !== 'achieved' && i.eta && (
+              <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
             )}
             {/* 기한까지 남은 금액(06 5-3b, G5) */}
             {i.state !== 'achieved' && remain && (
@@ -297,7 +314,6 @@ export function W10SavingItem() {
             {/* 월 필요액 > 매달 금액이면 사실 한 줄 + 할 일(2026-11-09, 배지 아님) */}
             {i.state !== 'achieved' && i.late !== null && (
               <>
-                {i.eta && <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>}
                 {showEdit && (
                   <span className="hg-row" style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}>
                     <button
@@ -336,7 +352,7 @@ export function W10SavingItem() {
             )}
           </section>
         ))}
-      {!closed && !hideAmounts && (
+      {!closed && !hideAmounts && (i.monthly > 0 || i.owner !== 'partner' || d.joint) && (
         <section className="hg-goalbox" aria-label={copy.monthlyOf(m(i.monthly))}>
           <div className="hg-goalbox__head">
             <b>{copy.monthlyOf(m(i.monthly))}</b>
@@ -400,7 +416,12 @@ export function W10SavingItem() {
           ) : history.length || g.start_saved > 0 ? (
             <div className="hg-list">
               {(all ? history : history.slice(0, 12)).map((h) => (
-                <ListRow key={h.key} label={h.label} sub={h.sub || undefined} />
+                <ListRow
+                  key={h.key}
+                  label={h.label}
+                  sub={h.sub || undefined}
+                  onClick={h.to ? () => nav(h.to ?? '') : undefined}
+                />
               ))}
               {/* 시작할 때 모은 금액(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
               {g.start_saved > 0 && (
@@ -434,14 +455,16 @@ export function W10SavingItem() {
           {d.joined && g.created_by && <ListRow label={copy.createdBy(nameOf(g.created_by))} />}
         </div>
       </section>
-      {/* 맨 아래 “+ 돈 들어왔어요”(20 W-10 8번, 모든 사람) → W-20 */}
-      <AddRow
-        label={copy.moneyIn}
-        block
-        onClick={() =>
-          nav(`${togetherPaths.moneyIn}?back=${encodeURIComponent(savingPaths.item(id))}`)
-        }
-      />
+      {/* 맨 아래 “+ 돈 들어왔어요”(20 W-10 8번) → W-20. 넣을 수 있는 저금만(보기만인 상대 저금은 없음, 2026-11-14) */}
+      {i.canEdit && !closed && (
+        <AddRow
+          label={copy.moneyIn}
+          block
+          onClick={() =>
+            nav(`${togetherPaths.moneyIn}?back=${encodeURIComponent(savingPaths.item(id))}`)
+          }
+        />
+      )}
       <BundleAchieveWatch />
       {/* W-11 끝(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”, 미합류면 초대 */}
       {(ask === 'bundle' || ask === 'invite') && (

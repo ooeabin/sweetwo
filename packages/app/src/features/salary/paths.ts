@@ -42,5 +42,7 @@ export const togetherPaths = {
   bundleAchieved: (id: string) => `/salary/bundles/${id}/achieved`, // W-12(묶음, 합계 기준)
   moneyIn: '/salary/money-in', // W-20
   distribute: (id: string) => `/salary/money-in/${id}`, // W-20a
+  moneyInList: '/salary/money-in/list', // W-20b 들어온 돈 기록(고치기·지우기, 2026-11-14)
+  moneyInEdit: (id: string) => `/salary/money-in?edit=${encodeURIComponent(id)}`, // W-20 고치기
   reconcile: '/salary/reconcile', // W-10c
 };

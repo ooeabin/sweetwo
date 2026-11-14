@@ -17,6 +17,7 @@ import {
   pushKindOn,
   pushReaskOpen,
   reconcileTask,
+  savingsTotal,
   todayKst,
   type BundleView,
   type HeroGoal,
@@ -577,6 +578,16 @@ export function H01Home() {
       })()}
     </span>
   );
+  const peopleMine = (
+    <span className="hg-avatars" aria-hidden="true">
+      <PersonDot name={myName} starter={sp.created_by === myId} userId={myId} />
+    </span>
+  );
+  // H-09·H-10 개수와 합: 묶인 저금은 묶음 하나로(core savingsTotal, 2026-11-14 M1)
+  const sums = savingsTotal(
+    live.map((i) => ({ id: i.goal.id, saved: i.saved, bundle_id: i.goal.bundle_id })),
+    bundles.data ?? [],
+  );
   const monthFrom = list?.cycle_start ?? `${today.slice(0, 7)}-01`;
   const monthTo = list?.cycle_end ?? today;
   const heroFailed = (saving.ready === false && saving.failed) || bundles.isError;
@@ -602,6 +613,8 @@ export function H01Home() {
       heroes={heroes}
       savedOf={(id) => (saving.ready ? (saving.byId(id)?.saved ?? 0) : 0)}
       people={people}
+      peopleMine={peopleMine}
+      joint={joint}
       names={{ me: myName, partner: partnerName }}
       marriage={marriage}
       weddingDate={sp.wedding_date}
@@ -612,7 +625,7 @@ export function H01Home() {
         lines: (lists.data ?? []).flatMap((c) => c.pay_check_line),
       }}
       moves={moves.moves}
-      savingCount={live.length + activeBundles.length}
+      savingCount={sums.count}
       go={(box, to) => go(box, to)}
     />
   );
@@ -649,7 +662,6 @@ export function H01Home() {
   // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔), H-09 저금 ──
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
   const rankPct = rank?.homeBadge ?? null;
-  const savedAll = live.reduce((s, i) => s + i.saved, 0);
 
   return (
     <MainFrame
@@ -730,8 +742,8 @@ export function H01Home() {
             <HubTile
               small
               title={copy.savingsTile}
-              sub={live.length ? copy.savingCount(live.length) : copy.noSavings}
-              value={live.length ? m(savedAll) : undefined}
+              sub={sums.count ? copy.savingCount(sums.count) : copy.noSavings}
+              value={sums.count ? m(sums.total) : undefined}
               onClick={() => go('savings', '/salary/items?from=home')}
             />
           </Hub>

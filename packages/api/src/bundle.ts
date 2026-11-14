@@ -17,7 +17,8 @@ export type BundleBlockReason =
   | 'already_bundled'
   | 'not_owner'
   | 'not_found'
-  | 'unlink_pending';
+  | 'unlink_pending'
+  | 'bundle_open';
 export class BundleBlocked extends Error {
   constructor(readonly reason: BundleBlockReason) {
     super(reason);
@@ -31,6 +32,7 @@ const REASONS: BundleBlockReason[] = [
   'not_owner',
   'not_found',
   'unlink_pending',
+  'bundle_open',
 ];
 const failBundle = (e: { message?: string } | null) => {
   const r = REASONS.find((x) => e?.message?.includes(x));
@@ -47,16 +49,19 @@ export async function fetchBundles(id?: string): Promise<BundleViewResponse[]> {
 
 /**
  * 묶음 만들기(W-15, 각자 엔진 + 연결만): 내 저금 하나로 시작. 이름 없으면 그 저금 이름, 목표 금액 처음 값은 서버(Q11).
- * deadline = 'YYYY-MM'(그 달 1일로). 새 묶음 id
+ * deadline = 'YYYY-MM'(그 달 1일로). 아직 한 사람만 든 묶음이 열려 있으면 서버가 'bundle_open'으로 거절,
+ * 사용자가 ‘따로 모을게요’를 골랐을 때만 separate = true(2026-11-14 H1). 새 묶음 id
  */
 export async function createBundle(o: {
   goalId: string;
   name?: string;
   target?: number | null;
   deadline?: string | null;
+  separate?: boolean;
 }): Promise<string> {
   const { data, error } = await supabase().rpc('bundle_create', {
     p_goal: o.goalId,
+    p_separate: o.separate ?? false,
     p_name: o.name,
     p_target: o.target ?? undefined,
     p_deadline: o.deadline ? `${o.deadline.slice(0, 7)}-01` : undefined,
