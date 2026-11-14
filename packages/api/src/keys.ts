@@ -25,6 +25,8 @@ export const qk = {
   careRecords: ['care_record'] as const,
   notifications: ['notification'] as const,
   hasUnread: ['notification', 'unread'] as const,
+  // 지금 ‘이전 값으로 돌리기’를 할 수 있는 알림 id(14 N-01·N-02, R-08)
+  revertibleNotis: ['notification', 'revertible'] as const,
   /** 파트너 활동(H-08). 알림 키 아래라 새 알림이 오면 같이 새로 받음 */
   partnerActivity: ['notification', 'activity'] as const,
   holidays: ['holiday'] as const,

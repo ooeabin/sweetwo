@@ -1,6 +1,9 @@
 import { maskMoney, notiGroup, notiTime } from '@sweetwo/core';
 import { leadOf, NotificationPanel } from '@sweetwo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchRevertibleNotifications, qk, revertPartnerChange, RevertGone } from '@sweetwo/api';
+import { track } from '../../shared/analytics';
+import { toast } from '../../shared/toast';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMask } from '../../shared/mask';
@@ -15,6 +18,33 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
   const person = useNotiPeople();
   const open = useOpenNotification();
   const { masked } = useMask();
+  // R-08: 같이 쓰는 것을 상대가 바꾼 알림 중 지금 돌릴 수 있는 것(서버가 고름: 그 뒤 안 바뀜, 같이 쓰는 항목만)
+  const revertible = useQuery({
+    queryKey: qk.revertibleNotis,
+    queryFn: fetchRevertibleNotifications,
+  });
+  const [reverting, setReverting] = useState<string | null>(null);
+  const revert = async (id: string, createdAt: string) => {
+    if (reverting) return;
+    setReverting(id);
+    try {
+      await revertPartnerChange(id);
+      track('partner_change_reverted', {
+        hours_since_change: Math.max(
+          0,
+          Math.floor((Date.now() - Date.parse(createdAt)) / 3_600_000),
+        ),
+      });
+      toast(copy.reverted);
+      // 돌린 값이 화면 여기저기(저금, 월급 계획, 캘린더)에 있어 모두 다시 읽음
+      await qc.invalidateQueries();
+    } catch (e) {
+      toast(e instanceof RevertGone ? copy.revertGone : copy.revertFailed);
+      void revertible.refetch();
+    } finally {
+      setReverting(null);
+    }
+  };
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   useEffect(() => {
     const on = () => setOnline(true);
@@ -46,6 +76,15 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
     person: n.icon ? undefined : person(n.actor_id),
     // 알림 아이콘(기획서 14 ‘센터 표시’ Phosphor 이름 → lead-kinds.ts noti 표, 모르는 것은 종)
     ...leadOf('noti', n.icon),
+    ...(revertible.data?.includes(n.id)
+      ? {
+          action: {
+            label: copy.revert,
+            busy: reverting === n.id,
+            onClick: () => void revert(n.id, n.created_at),
+          },
+        }
+      : {}),
   });
   const groups = (['today', 'week', 'earlier'] as const).map((key) => ({
     key,

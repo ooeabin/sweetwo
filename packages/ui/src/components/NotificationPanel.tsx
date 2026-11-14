@@ -18,6 +18,8 @@ export interface NotiItem {
   icon?: IconName;
   /** 아이콘 원 영역 색(lead-kinds.ts noti) */
   tone?: LeadTone;
+  /** 줄 아래 회색 글자 버튼 하나(2026-11-13 R-08 ‘이전 값으로 돌리기’). 줄 버튼 밖 형제라 겹친 버튼이 아님 */
+  action?: { label: string; onClick: () => void; busy?: boolean };
 }
 
 export function NotificationPanel(p: {
@@ -185,39 +187,58 @@ export function NotificationPanel(p: {
               .map((g) => (
                 <section key={g.key} aria-label={g.label}>
                   <h3 className="hg-noti__group">{g.label}</h3>
-                  {g.items.map((x) => (
-                    <button
-                      key={x.id}
-                      type="button"
-                      className={cx('hg-noti__item', x.read && 'is-read')}
-                      title={x.msg}
-                      onClick={() => p.onItem(x.id)}
-                    >
-                      {x.person ? (
-                        <span
-                          className={cx(
-                            'hg-avatar',
-                            x.person.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2',
-                          )}
-                          aria-hidden="true"
-                        >
-                          {[...x.person.name][0] ?? ''}
+                  {g.items.map((x) => {
+                    const row = (
+                      <button
+                        key={x.id}
+                        type="button"
+                        className={cx('hg-noti__item', x.read && 'is-read')}
+                        title={x.msg}
+                        onClick={() => p.onItem(x.id)}
+                      >
+                        {x.person ? (
+                          <span
+                            className={cx(
+                              'hg-avatar',
+                              x.person.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2',
+                            )}
+                            aria-hidden="true"
+                          >
+                            {[...x.person.name][0] ?? ''}
+                          </span>
+                        ) : (
+                          // 2026-11-10 알림 종류 자리: 2D 그림이 들어올 때까지 회색 빈 원(종류는 data-art, lead-kinds.ts noti)
+                          <span
+                            className="hg-noti__icon hg-lead--slot"
+                            data-art={x.icon}
+                            aria-hidden="true"
+                          />
+                        )}
+                        <span className="hg-noti__text">
+                          <span className="hg-noti__msg">{x.msg}</span>
+                          <span className="hg-noti__time">{x.time}</span>
                         </span>
-                      ) : (
-                        // 2026-11-10 알림 종류 자리: 2D 그림이 들어올 때까지 회색 빈 원(종류는 data-art, lead-kinds.ts noti)
-                        <span
-                          className="hg-noti__icon hg-lead--slot"
-                          data-art={x.icon}
-                          aria-hidden="true"
-                        />
-                      )}
-                      <span className="hg-noti__text">
-                        <span className="hg-noti__msg">{x.msg}</span>
-                        <span className="hg-noti__time">{x.time}</span>
-                      </span>
-                      {!x.read && <span className="hg-noti__dot" aria-label={p.labels.unread} />}
-                    </button>
-                  ))}
+                        {!x.read && <span className="hg-noti__dot" aria-label={p.labels.unread} />}
+                      </button>
+                    );
+                    return x.action ? (
+                      <div key={x.id}>
+                        {row}
+                        <div className="hg-noti__undo">
+                          <Button
+                            variant="link"
+                            size="sm"
+                            loading={x.action.busy}
+                            onClick={x.action.onClick}
+                          >
+                            {x.action.label}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      row
+                    );
+                  })}
                 </section>
               ))}
             {p.more && skeleton(2)}
