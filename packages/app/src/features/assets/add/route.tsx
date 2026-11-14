@@ -139,13 +139,11 @@ export function AssetAddRoute() {
         is_first: isFirst,
       });
       await refresh();
-      const counted = vis !== 'private';
+      // 숨기기도 내 합계에는 더함(2026-11-13 H3)
       carryToast(
-        !counted
-          ? copy.added
-          : x.side === 'asset'
-            ? copy.addedUp(money(x.amount, masked))
-            : copy.addedDown(money(x.amount, masked)),
+        x.side === 'asset'
+          ? copy.addedUp(money(x.amount, masked))
+          : copy.addedDown(money(x.amount, masked)),
       );
       nav(`/assets/items?side=${x.side}`, { replace: true });
     } catch {

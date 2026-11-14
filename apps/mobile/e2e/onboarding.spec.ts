@@ -145,6 +145,10 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await next(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
   await next(page);
+  // 여기서 앱을 닫았다 다시 열면(2026-11-13 실구동) 홈이 아니라 /onboarding/resume → 멈춘 단계(입력값 그대로)
+  await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
   // W-11e 은행에서 자동으로 나가요?(2026-11-13)
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
@@ -161,6 +165,10 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await sheet.getByRole('button', { name: '나중에 보낼게요' }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(sheet).toHaveCount(0);
+  // 이어서 연 뒤에도 앞 단계 입력값(이름, 매달 금액) 그대로 저장
+  expect(db.goals.map((g) => g.name)).toContain('내 집 마련');
+  // 저장했으니 다시 열어도 홈 그대로
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.firstSavingAt'))).toBeNull();
 
   // 분석 이벤트(32 0-4)
   await expect.poll(() => ev.some((e) => e.name === 'onboarding_completed')).toBe(true);
@@ -393,6 +401,9 @@ test('O-31 공개 고지 ‘바꾸기’ → 내 월급 계획 시트(모두 / �
   await page.getByRole('button', { name: '바꾸기' }).click();
   const sheet = page.getByRole('dialog', { name: '내 월급 계획' });
   await expect(sheet.getByRole('radio', { name: '저금만 보여 주기' })).toBeChecked();
+  // 단계마다 무엇이 보이는지 한 줄(2026-11-13 실구동)
+  await expect(sheet.getByText('이번 달 했는지만 보이고 금액은 안 보여요')).toBeVisible();
+  await expect(sheet.getByText('저금 이름과 금액만 보이고 월급은 안 보여요')).toBeVisible();
   await axe(page);
   await sheet.getByRole('radio', { name: '모두 보여 주기' }).click();
   await expect(sheet).toHaveCount(0);

@@ -9,6 +9,7 @@ export function SheetSelect<V extends string | number>({
   value,
   options,
   nameOf,
+  subOf,
   onChange,
   disabled,
 }: {
@@ -19,6 +20,8 @@ export function SheetSelect<V extends string | number>({
   value: V;
   options: readonly V[];
   nameOf: (v: V) => string;
+  /** 선택지 아래 한 줄 설명(없으면 없음) */
+  subOf?: (v: V) => string | undefined;
   onChange: (v: V) => void;
   disabled?: boolean;
 }) {
@@ -42,7 +45,7 @@ export function SheetSelect<V extends string | number>({
               if (v !== undefined && v !== value) onChange(v);
             }}
             onPick={() => setOpen(false)}
-            options={options.map((o) => ({ value: key(o), label: nameOf(o) }))}
+            options={options.map((o) => ({ value: key(o), label: nameOf(o), sub: subOf?.(o) }))}
           />
         </BottomSheet>
       )}

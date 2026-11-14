@@ -219,7 +219,8 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   await ask.click();
   await expect(page).toHaveURL(/\/settings\/me\/birth-year\?from=rank$/);
   await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  // 처음 보이는 값으로 바로 저장할 수 있음(2026-11-13 실구동)
+  await expect(page.getByRole('button', { name: '저장' })).toBeEnabled();
   await setWheel(page, '예빈님은 몇 년생이에요?', 1995);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);

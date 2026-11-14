@@ -63,13 +63,13 @@ export const copy = {
   // F-03e v2.2(2026-11-13): 미리 고른 값 없음, 처음 고른 값이 내 새 항목 기본값
   visTitle: '파트너에게 어떻게 보여 줄까요?', // [확인 필요]
   visOptions: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' }, // [확인 필요]
-  visSubs: { sum: '항목은 안 보이고 총액에만 더해요', private: '총액에도 안 더해요' }, // [확인 필요]
+  // 숨기기는 파트너에게만 안 보임, 내 순자산에는 더함(2026-11-13 H3) [확인 필요]
+  visSubs: { sum: '항목은 안 보이고 총액에만 더해요', private: '파트너에게는 총액에도 안 더해요' },
   next: '다음',
   save: '추가하기', // [확인 필요]
   sameName: '같은 이름이 있어요. 그래도 추가할까요?',
   addedUp: (amount: string) => `추가했어요. 순자산이 ${amount} 늘었어요`,
   addedDown: (amount: string) => `추가했어요. 순자산이 ${amount} 줄었어요`, // [확인 필요] 부채
-  added: '추가했어요', // [확인 필요] 숨기기는 합계에 없음
 
   estimatedTag: '추정', // F-03 6번 ‘잘 모르겠어요’ 알약
 
@@ -189,6 +189,9 @@ export const copy = {
     loan: '대출',
   }, // [확인 필요]
   quickHelp: '빈 칸은 저장하지 않아요', // [확인 필요]
+  // 적금을 어디에 넣는지, 저금과 두 번 세지 않음(2026-11-13 실구동, 06 6장) [확인 필요]
+  quickCashHelp: '적금 통장도 여기에 적어요',
+  quickNoDouble: '앱에서 모으는 저금은 순자산에 더하지 않아서 두 번 세지 않아요',
   quickSave: '저장하기',
   quickSaved: (n: number) => `${n}개를 적었어요`, // [확인 필요]
   quickPlaceholder: '0원',

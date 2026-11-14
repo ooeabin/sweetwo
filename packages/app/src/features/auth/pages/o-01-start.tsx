@@ -13,7 +13,7 @@ type Found = { code: string; source: 'clipboard' | 'referrer' };
 
 // O-01 시작 화면. 첫 실행에만(로그아웃 뒤 실행은 A-02). 2026-11-13 v2.2: 메인 문구 “같이 모으는 돈, 둘이 같이 봐요”, 서브 없음.
 // 첫 실행에 설치 리퍼러(Android)·클립보드(iOS, L-07이 복사)에 초대 코드가 있으면 시트 “받은 초대 코드로 합류할까요?”
-// ‘합류하기’ → P-01(코드 채움) / ‘아니요, 새로 시작할게요’. 브리지(window.sweetwo.inviteCode)가 없으면 묻지 않음
+// ‘합류하기’ → P-01을 거쳐 바로 로그인(A-02 초대 문구, 한 번만 누름) / ‘아니요, 새로 시작할게요’. 브리지(window.sweetwo.inviteCode)가 없으면 묻지 않음
 export function O01Start() {
   const nav = useNavigate();
   const [found, setFound] = useState<Found | null>(null);
@@ -43,7 +43,8 @@ export function O01Start() {
     setFound(null);
     if (!join) return;
     prefs.setStarted();
-    nav(`/i/${found.code}`);
+    // 시트에서 이미 ‘합류하기’를 눌렀으니 P-01에서 다시 누르지 않게 바로 이어서(?go=1, 2026-11-13 실구동)
+    nav(`/i/${found.code}?go=1`);
   };
   return (
     <>

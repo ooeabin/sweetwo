@@ -118,16 +118,14 @@ const isFinancial = (grp: string, kind?: string) =>
   FINANCIAL_GROUPS.has(grp) || (grp === 'real_estate' && kind === 'deposit_money');
 
 /**
- * 우리 금융자산 비율(F-08 6a): 금융자산 ÷ 자산(평가금액), 반올림 %. 비공개·판 항목 제외.
+ * 우리 금융자산 비율(F-08 6a): 금융자산 ÷ 자산(평가금액), 반올림 %. 판 항목 제외(앱이 받는 숨기기 행은 내 것이라 포함, H3).
  * 파트너 ‘합계만’ 묶음은 세부 항목을 몰라 부동산 묶음을 모두 실물로 셈. 자산 0원이면 null
  */
 export function financialPct(
   items: (NetWorthItem & { grp: string; kind?: string })[],
   partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
 ): number | null {
-  const live = items.filter(
-    (i) => i.side === 'asset' && i.visibility !== 'private' && (i.status ?? 'held') === 'held',
-  );
+  const live = items.filter((i) => i.side === 'asset' && (i.status ?? 'held') === 'held');
   const partner = partnerSums.filter((p) => p.side === 'asset');
   const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);
   if (total <= 0) return null;
@@ -242,10 +240,25 @@ export function rankPair(o: {
   };
 }
 
-/** 순위에 넣는 둘의 합(서버 networth_rank_pair): 보유 중, 숨기기(private) 빼고, 평가금액 자산 − 부채 */
+/**
+ * 순위에 넣는 둘의 합(서버 networth_rank_pair): 보유 중, 평가금액 자산 − 부채.
+ * ‘숨기기’(private)는 파트너에게만 안 보임(2026-11-13 H3): 보는 사람(viewer) 것이면 넣고, 상대 것은 뺀다.
+ * 그래서 두 사람이 보는 값이 다를 수 있다. viewer를 안 주면 숨기기는 모두 뺌
+ */
 export const rankPairNet = (
-  items: readonly { side: AssetSide; amount: Won; visibility?: string; status?: string }[],
+  items: readonly {
+    side: AssetSide;
+    amount: Won;
+    visibility?: string;
+    status?: string;
+    owner_user_id?: string | null;
+  }[],
+  viewer?: string,
 ): Won =>
   items
-    .filter((i) => i.visibility !== 'private' && (i.status ?? 'held') === 'held')
+    .filter(
+      (i) =>
+        (i.visibility !== 'private' || (viewer !== undefined && i.owner_user_id === viewer)) &&
+        (i.status ?? 'held') === 'held',
+    )
     .reduce((t, i) => t + (i.side === 'asset' ? i.amount : -i.amount), 0);

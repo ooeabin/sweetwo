@@ -1,8 +1,8 @@
--- pgTAP: v2.2 자산 순위 같이 보기(20261204090000 계약 6). 한쪽만 동의면 또래 중간값만, 둘 다 동의면 둘의 합(숨기기 제외),
+-- pgTAP: v2.2 자산 순위 같이 보기(20261204090000 계약 6). 한쪽만 동의면 또래 중간값만, 둘 다 동의면 둘의 합(상대 숨기기만 제외, 2026-11-13 H3),
 -- 연령대 = 먼저 태어난 사람, core rankTopPct와 같은 값, 첫 조회 무료, 한 사람 끄면 배지·저장 순위 지움
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(18);
+select plan(19);
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
   ('22222222-2222-2222-2222-222222222222', 'yebin@example.com'),
@@ -89,14 +89,19 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is(public.answer_rank_consent((select id from public.rank_consent_request), true), 'accepted', '좋아요');
 select results_eq($$ select r->>'mode', (r->>'net')::bigint, r->>'band', (r->>'top_pct')::int from public.networth_rank_pair() r $$,
-  $$ values ('pair', 150000000::bigint, '30s', 63) $$, '둘의 합 2억 − 5천(숨긴 예금 1억 제외), 30대');
+  $$ values ('pair', 250000000::bigint, '30s', 49) $$, '예빈이 보면 둘의 합 2억 + 내 숨긴 예금 1억 − 5천(H3), 30대');
 -- 첫 조회 무료, 그다음은 광고
 select is(public.record_rank_view(false)->>'mode', 'pair', '첫 결과 무료');
 select throws_ok($$ select public.record_rank_view(false) $$, '22023', 'ad_required', '새로 확인은 광고 뒤');
 select lives_ok($$ select public.record_rank_view(true) $$, '광고 본 뒤');
-select is((select rank_pct from public.app_user where id = auth.uid()), 63::smallint, '저장 순위');
+select is((select rank_pct from public.app_user where id = auth.uid()), 49::smallint, '저장 순위(보는 사람 값)');
 update public.app_user set rank_badge_home = true where id = auth.uid();
 select is((select rank_badge_home from public.app_user where id = auth.uid()), true, '둘 다 동의면 배지 켬');
+reset role;
+select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+select results_eq($$ select (r->>'net')::bigint, (r->>'top_pct')::int from public.networth_rank_pair() r $$,
+  $$ values (150000000::bigint, 63) $$, '찬우가 보면 예빈 숨긴 예금 1억은 빠짐(숨기기는 파트너에게만 안 보임)');
 reset role;
 -- 찬우가 동의를 끔 → 두 사람 배지·저장 순위 지움, 다시 또래 중간값
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

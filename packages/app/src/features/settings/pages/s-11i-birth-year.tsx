@@ -9,7 +9,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-11i 출생연도(Q4 연도 휠). 본인만, 상대 알림 없음. 2026-11-10 온보딩 O-13을 빼고 자산 순위 F-08에서도 엶(?from=rank → 저장·뒤로 F-08)
-// 아직 적은 적이 없으면 처음 위치가 답이 되지 않게 휠을 움직여야 저장(commitInitial false)
+// 처음 적을 때도 보이는 처음 위치(올해 − 30)로 바로 저장할 수 있음(2026-11-13 실구동, 예전 ‘휠을 움직여야 저장’을 바꿈)
 export function S11iBirthYear() {
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -50,7 +50,7 @@ export function S11iBirthYear() {
         maxYear={range.max}
         initial={{ y: d.me.birth_year ?? range.max - 12, m: 1, d: 1 }}
         yearOnly
-        commitInitial={!!d.me.birth_year}
+        commitInitial
       />
     </QuestionLayout>
   );

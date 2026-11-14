@@ -256,8 +256,34 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await expect(page.getByText('95만 원', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('고정지출')).toHaveCount(0);
   await expect(page.getByText(/월급 350만/)).toHaveCount(0);
-  // 같이 모으기: 목표 금액이 있는 저금은 모은 금액 / 목표 금액
-  await expect(page.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
+  // 상대 홈 H-10과 같게(2026-11-13 실구동): 묶이지 않은 내 개인 저금은 ‘같이 모으기’가 아니라 ‘저금’(상대 W-10·H-09)에
+  const together = page.getByRole('region', { name: '같이 모으기' });
+  await expect(together.getByText('보이는 게 없어요')).toBeVisible();
+  await expect(together.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
+  const mySaving = page.getByRole('region', { name: '저금', exact: true });
+  await expect(mySaving.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
+  // 같이 모으기 묶음: 합계 / 목표 금액, 둘 다 ‘각자 모은 금액 보여 주기’면 내 몫 한 줄(상대 H-10 카드와 같은 값)
+  v.bundles.push({
+    id: 'b-1',
+    name: '신혼여행',
+    status: 'active',
+    deadline: null,
+    paused: false,
+    percent_only: false,
+    show_each: true,
+    my_show_each: true,
+    my_percent_only: false,
+    pct: 30,
+    total: 1_500_000,
+    target: 5_000_000,
+    mine: 900_000,
+    partner: 600_000,
+    goals: [],
+  });
+  await page.reload();
+  await expect(together.getByText('신혼여행')).toBeVisible();
+  await expect(together.getByText('150만 원 / 500만 원')).toBeVisible();
+  await expect(together.getByText('찬우님 몫 90만 원')).toBeVisible();
   // 자산 총액만: 종류별 합계만
   await expect(page.getByText('예금·적금 1개')).toBeVisible();
   await expect(page.getByText('청년 적금')).toHaveCount(0);
@@ -269,6 +295,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await expect(page.getByText('찬우님은 했어요만 보여 줘요')).toBeVisible();
   await expect(page.getByText('이번 달 했어요').first()).toBeVisible();
   await expect(page.getByText('개인 저금').first()).toBeVisible();
+  await expect(mySaving.getByText('개인 저금').first()).toBeVisible();
   await expect(page.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
   await expect(page.getByText('내 집 마련')).toHaveCount(0);
   await axe(page);

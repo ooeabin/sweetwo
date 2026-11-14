@@ -3,7 +3,7 @@
 -- 달성 알림, 묶음), ‘저금만’은 그대로 보임. 자산 공개 첫 선택은 연결된 뒤에만, asset.quick, 순자산 = 앱 netWorthOf
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(35);
+select plan(37);
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
   ('22222222-2222-2222-2222-222222222222', 'yebin@example.com');
@@ -177,7 +177,7 @@ insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_
   select space_id, 'asset', 'cash', 'bank', '예빈 통장', 2000000, 'person', auth.uid(), 'all' from public.app_user where id = auth.uid();
 select is((select quick from public.asset where name = '비상금'), false, 'quick 기본 false');
 reset role;
--- 6. 순자산(찬우): 내 자산(숨기기 빼고) + 예빈 ‘모두’ + 예빈 ‘총액만’ 합계, 예빈 ‘숨기기’ 빼고
+-- 6. 순자산(찬우): 내 자산(내 숨기기 포함, 20261211130000 H3) + 예빈 ‘모두’ + 예빈 ‘총액만’ 합계, 예빈 ‘숨기기’ 빼고
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id, visibility)
@@ -188,10 +188,17 @@ insert into public.asset (space_id, side, grp, kind, name, amount, owner)
   select space_id, 'debt', 'loan', 'credit', '공동 대출', 3000000, 'joint' from public.app_user where id = auth.uid();
 select results_eq($$ select (r->>'assets')::bigint, (r->>'debts')::bigint, (r->>'net')::bigint, (r->>'principal_net')::bigint
     from public.networth_summary() r $$,
-  $$ values (15000000::bigint, 3000000::bigint, 12000000::bigint, 10000000::bigint) $$,
-  '순자산: 500만 + 예빈 모두 200만 + 예빈 총액만 800만(원금 600만) − 대출 300만');
+  $$ values (24000000::bigint, 3000000::bigint, 21000000::bigint, 19000000::bigint) $$,
+  '순자산: 500만 + 내 숨김 900만 + 예빈 모두 200만 + 예빈 총액만 800만(원금 600만) − 대출 300만');
+select is((select expected from public.net_worth_history(1)), 21000000::bigint, '월말 기록도 내 숨기기 포함, 예빈 숨기기 제외');
 select is((select sum(total)::bigint from public.partner_asset_sums() where side = 'asset'), 8000000::bigint,
   '총액만 합계와 같은 행');
+reset role;
+-- 예빈이 보면 예빈 숨김 100만은 넣고 찬우 숨김 900만은 뺌(숨기기는 파트너에게만 안 보임)
+select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
+set local role authenticated;
+select results_eq($$ select (r->>'assets')::bigint, (r->>'net')::bigint from public.networth_summary() r $$,
+  $$ values (16000000::bigint, 13000000::bigint) $$, '예빈 순자산: 내 숨김 포함, 찬우 숨김 제외');
 reset role;
 
 select * from finish();

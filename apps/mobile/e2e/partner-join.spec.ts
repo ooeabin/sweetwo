@@ -70,8 +70,8 @@ test('O-01 ‘코드 입력하기’ → P-01 코드 입력 → 초대 확인 �
 });
 
 // 2026-11-13 v2.2(15 O-01, 18 P-01): 첫 실행에 설치 리퍼러(Android)·클립보드(iOS)에 초대 코드가 있으면 시트로 먼저 물음.
-// 브리지(window.sweetwo.inviteCode)가 코드를 주면 “받은 초대 코드로 합류할까요?” → 합류하기 = P-01(코드 채움). 한 번만
-test('첫 실행 초대 코드 자동 입력: 시트 → 합류하기 = P-01, 다시 열면 묻지 않음, ‘아니요’면 O-01 그대로', async ({
+// 브리지(window.sweetwo.inviteCode)가 코드를 주면 “받은 초대 코드로 합류할까요?” → 합류하기 한 번으로 A-02. 한 번만
+test('첫 실행 초대 코드 자동 입력: 시트 → 합류하기 한 번으로 A-02, 뒤로는 P-01, 다시 열면 묻지 않음', async ({
   page,
 }) => {
   await mockSupabase(page);
@@ -88,6 +88,16 @@ test('첫 실행 초대 코드 자동 입력: 시트 → 합류하기 = P-01, �
   await expect(sheet.getByText('초대 코드 K 7 M 2 Q X')).toHaveCount(1);
   await axe(page);
   await sheet.getByRole('button', { name: '합류하기' }).click();
+  // 시트에서 한 번 눌렀으니 P-01 ‘합류하기’를 다시 누르지 않고 바로 A-02 초대 문구(2026-11-13 실구동)
+  await heading(page, '찬우님 공간에 합류할 계정을 골라요');
+  expect(
+    await page.evaluate(
+      () =>
+        localStorage.getItem('sweetwo.return-to') ?? sessionStorage.getItem('sweetwo.return-to'),
+    ),
+  ).toBe('/i/K7M2QX?go=1');
+  // 뒤로 오면 P-01(다시 넘어가지 않음)
+  await page.getByRole('button', { name: /^(뒤로|이전)/ }).click();
   await expect(page).toHaveURL(/\/i\/K7M2QX$/);
   await heading(page, '찬우님이 초대했어요');
   expect(ev).toContainEqual([

@@ -137,6 +137,37 @@ test('F-01: 순자산은 평가금액 기준, ‘원금으로 보기’를 켜�
   await expect(nw).toContainText('1,000만 원');
 });
 
+test('F-01·F-02·홈 H-04: 내 ‘숨기기’ 항목은 파트너에게만 안 보이고 내 합계에는 더함(H3)', async ({
+  page,
+}) => {
+  const db = await start(page);
+  const me = String(db.me.id);
+  db.assets.push(
+    row({
+      id: 'a5',
+      side: 'asset',
+      grp: 'cash',
+      kind: 'bank',
+      name: '비상금 통장',
+      amount: 5_000_000,
+      visibility: 'private',
+      owner_user_id: me,
+      created_by: me,
+    }),
+  );
+  await page.goto('/assets');
+  // 300 + 1,000 + 숨김 500 − 100 = 1,700만
+  const nw = page.getByRole('region', { name: '순자산', exact: true });
+  await expect(nw).toContainText('1,700만 원');
+  await expect(page.getByRole('button', { name: /자산 1,800만 원/ })).toBeVisible();
+  await page.goto('/assets/items?side=asset');
+  // 숨김 알약은 그대로, 묶음 머리 합계(현금·예적금)에 숨김 500만도 더함
+  await expect(page.getByText('숨김', { exact: true })).toBeVisible();
+  await expect(page.getByText('800만 원').first()).toBeVisible();
+  await page.goto('/');
+  await expect(page.getByText('1,700만 원').first()).toBeVisible();
+});
+
 test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없음, 빈 칸은 저장 안 함, 고른 값이 기본값', async ({
   page,
 }) => {
@@ -147,6 +178,11 @@ test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없
   await expect(page.getByRole('heading', { name: '큰 묶음만 빠르게 적어 볼까요?' })).toBeVisible();
   const next = page.getByRole('button', { name: '다음', exact: true });
   await expect(next).toBeDisabled();
+  // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)
+  await expect(page.getByText('적금 통장도 여기에 적어요')).toBeVisible();
+  await expect(
+    page.getByText('앱에서 모으는 저금은 순자산에 더하지 않아서 두 번 세지 않아요'),
+  ).toBeVisible();
   await page.getByLabel('현금·예적금').fill('5000000');
   await page.getByLabel('대출').fill('20000000');
   await axe(page);
@@ -154,7 +190,7 @@ test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없
   // F-03e: 질문 + 세 선택지, 아무것도 고르지 않은 채
   await expect(page.getByRole('heading', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
   await expect(page.getByText('항목은 안 보이고 총액에만 더해요')).toBeVisible();
-  await expect(page.getByText('총액에도 안 더해요')).toBeVisible();
+  await expect(page.getByText('파트너에게는 총액에도 안 더해요')).toBeVisible();
   const save = page.getByRole('button', { name: '저장하기', exact: true });
   await expect(save).toBeDisabled();
   await expect(page.getByRole('radio', { checked: true })).toHaveCount(0);

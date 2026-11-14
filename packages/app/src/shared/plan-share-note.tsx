@@ -56,7 +56,7 @@ export function usePlanShareNote({
           label={c.sheet}
           value={share}
           onChange={(v) => void pick(v)}
-          options={OPTIONS.map((v) => ({ value: v, label: c.options[v] }))}
+          options={OPTIONS.map((v) => ({ value: v, label: c.options[v], sub: c.subs[v] }))}
         />
       </BottomSheet>
     ),

@@ -119,7 +119,7 @@ export function F03qQuick() {
               inputMode="numeric"
               placeholder={copy.quickPlaceholder}
               value={v === undefined ? '' : v.toLocaleString('ko-KR')}
-              help={v ? readWon(v) : undefined}
+              help={v ? readWon(v) : q.key === 'cash' ? copy.quickCashHelp : undefined}
               onChange={(e) => {
                 const t = e.target.value.replace(/\D/g, '');
                 setVals((o) => ({
@@ -130,6 +130,9 @@ export function F03qQuick() {
             />
           );
         })}
+        <p className="hg-help" style={{ margin: 0 }}>
+          {copy.quickNoDouble}
+        </p>
       </div>
     </QuestionLayout>
   );

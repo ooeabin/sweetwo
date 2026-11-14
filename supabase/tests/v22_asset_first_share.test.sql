@@ -58,8 +58,8 @@ insert into public.asset (space_id, side, grp, kind, name, amount, owner)
   select space_id, 'debt', 'loan', 'credit', '공동 대출', 5000000, 'joint' from public.app_user where id = auth.uid();
 select results_eq($$ select (r->>'assets')::bigint, (r->>'debts')::bigint, (r->>'net')::bigint, (r->>'principal_net')::bigint
     from public.networth_summary() r $$,
-  $$ values (12000000::bigint, 5000000::bigint, 7000000::bigint, 5000000::bigint) $$,
-  '평가금액 기준(원금 보기는 원금으로), 숨기기는 빼고(앱 netWorthOf와 같음)');
+  $$ values (15000000::bigint, 5000000::bigint, 10000000::bigint, 8000000::bigint) $$,
+  '평가금액 기준(원금 보기는 원금으로), 내 숨기기도 넣음(H3, 앱 netWorthOf와 같음)');
 reset role;
 
 -- 3. 대신 입력 정리: 합류 전, 초대 만료 + 23일 알림, + 30일 지움
