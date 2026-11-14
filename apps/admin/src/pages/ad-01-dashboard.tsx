@@ -9,9 +9,10 @@ import { canSee, Frame } from '../frame';
 import { useAdmin } from '../gate';
 import { PageSkel } from '../skel';
 import { inquiryTone } from '../tones';
+import { MetricsCards } from './ad-01-metrics';
 
 // AD-01 대시보드. 1 상시 경보(없으면 숨김, 지금은 AD-19 평균 금리 90일 넘음만, 누르면 콘텐츠 › 계산·기준 데이터),
-// 2 실패 건수, 3 미처리 문의, 4 회원 현황, 5 최근 7일 추이, 6 앱 버전, 7 최근 활동(2026-11-06).
+// 2 실패 건수, 3 미처리 문의, 4 회원 현황, 5 최근 7일 추이, 6 앱 버전, 7 최근 활동(2026-11-06), 8 지표 v2.2(ad-01-metrics.tsx).
 // 집계 실패면 칸 “—” + 마지막 집계 시각. 최근 활동은 운영·CS·최고 관리자만(서버가 null로 줌).
 // 누르는 곳(경보, 미처리 문의, 승인 대기)은 그 메뉴를 볼 수 있는 역할만 누름. 분석 역할은 숫자만(2026-11-12).
 type Recent = NonNullable<AdminDashboard['recent']>;
@@ -108,6 +109,9 @@ export function AD01Dashboard() {
       </div>
 
       {d?.trend && <Trend trend={d.trend} />}
+
+      {/* 8 지표 v2.2(북극성, 선행, 가드레일, 2026-11-13 PR 14) */}
+      <MetricsCards />
 
       <div className="hg-admin__grid2">
         {d?.versions && (

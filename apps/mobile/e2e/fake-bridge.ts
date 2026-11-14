@@ -53,6 +53,8 @@ export interface FakeOptions {
   push?: { status: 'prompt' | 'denied' | 'granted'; grant?: boolean };
   /** 첫 실행 초대 코드(설치 리퍼러·클립보드, 2026-11-13 O-01 시트) */
   inviteCode?: { code: string; source: 'clipboard' | 'referrer' };
+  /** 홈 화면에 놓인 위젯(widget.installed, widget_added 분석, 2026-11-13 PR 14) */
+  widgets?: { widget: 'wg01' | 'wg04'; size: 'small' | 'medium' }[];
 }
 
 export async function fakeBridge(page: Page, o: FakeOptions = {}) {
@@ -80,7 +82,8 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       lock: Cb<void>;
       invite: Cb<string>;
       back: Set<() => boolean>;
-    } = { auth: new Set(), lock: null, invite: null, back: new Set() };
+      navigate: Cb<[string, unknown]>;
+    } = { auth: new Set(), lock: null, invite: null, back: new Set(), navigate: null };
     const off = () => () => undefined;
     Object.assign(window, {
       __fb: f,
@@ -97,7 +100,11 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
           }
           return () => (cbs.invite = null);
         },
-        onNavigate: off,
+        // 앱 링크·위젯으로 화면 열기: 테스트가 __fbcb.navigate([path, from])를 부름
+        onNavigate: (cb: (path: string, from?: unknown) => void) => {
+          cbs.navigate = ([p, from]) => cb(p, from);
+          return () => (cbs.navigate = null);
+        },
         onBack: (cb: () => boolean) => {
           cbs.back.add(cb);
           return () => void cbs.back.delete(cb);
@@ -123,6 +130,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
         },
         widget: {
           update: async (d: unknown) => void f.widget.push(d),
+          installed: async () => o.widgets ?? [],
         },
         ...(o.inviteCode ? { inviteCode: { firstRun: async () => o.inviteCode } } : {}),
         push: {

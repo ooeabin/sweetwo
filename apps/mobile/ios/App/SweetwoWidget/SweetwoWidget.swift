@@ -111,11 +111,12 @@ private func stamp(_ p: WidgetPayload, now: Date) -> String? {
     return T.stamp(f.string(from: saved))
 }
 
-private func link(_ path: String) -> URL? {
+/// w = 어느 위젯(wg01, wg04)인지. 앱이 widget_tapped 분석에만 씀(32 4-7, 2026-11-13 PR 14)
+private func link(_ path: String, _ w: String) -> URL? {
     var c = URLComponents()
     c.scheme = "sweetwo"
     c.host = "widget"
-    c.queryItems = [URLQueryItem(name: "to", value: path)]
+    c.queryItems = [URLQueryItem(name: "to", value: path), URLQueryItem(name: "w", value: w)]
     return c.url
 }
 
@@ -209,9 +210,9 @@ struct SaveTogetherView: View {
             MessageView(label: nil, text: T.locked, lock: true).card(C.surface)
         case .data(let p):
             if let s = p.save {
-                content(s, p).card(C.goal).widgetURL(link(s.to))
+                content(s, p).card(C.goal).widgetURL(link(s.to, "wg01"))
             } else {
-                MessageView(label: T.saveName, text: T.saveEmpty, lock: false).card(C.surface).widgetURL(link("/"))
+                MessageView(label: T.saveName, text: T.saveEmpty, lock: false).card(C.surface).widgetURL(link("/", "wg01"))
             }
         }
     }
@@ -273,9 +274,9 @@ struct UpcomingView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .card(C.surface)
-                .widgetURL(link(n.to))
+                .widgetURL(link(n.to, "wg04"))
             } else {
-                MessageView(label: T.nextName, text: T.nextEmpty, lock: false).card(C.surface).widgetURL(link("/calendar"))
+                MessageView(label: T.nextName, text: T.nextEmpty, lock: false).card(C.surface).widgetURL(link("/calendar", "wg04"))
             }
         }
     }

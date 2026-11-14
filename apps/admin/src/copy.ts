@@ -78,6 +78,44 @@ export const copy = {
   recentAudit: '최근 감사 로그', // [확인 필요]
   seeAll: '모두 보기', // [확인 필요]
   none: '없음', // [확인 필요]
+  // AD-01 8번 지표 v2.2(32 0장, 2026-11-13 PR 14). 집계만 [확인 필요]
+  metricsTitle: '지표', // [확인 필요]
+  northStar: '이번 달 같이 모은 커플', // [확인 필요]
+  northConnected: (n: number) => `연결 커플 ${n.toLocaleString('ko-KR')}`, // [확인 필요]
+  northManual: '사람이 직접 확인', // [확인 필요]
+  northBundle: '묶음 있는 커플', // [확인 필요]
+  northSolo: '혼자 쓰는 사람', // [확인 필요]
+  northCols: {
+    month: '월',
+    couples: '같이 모은 커플',
+    connected: '연결 커플',
+    solo: '혼자',
+    manual: '직접 확인',
+  }, // [확인 필요]
+  leadingTitle: '선행 지표', // [확인 필요]
+  guardTitle: '가드레일', // [확인 필요]
+  metricCols: { name: '지표', value: '값', base: '분자 / 분모', limit: '기준', state: '상태' }, // [확인 필요]
+  leadingNames: {
+    first_saving: '첫 저금률(최근 30일)',
+    first_payday: '첫 월급날 확인률(7일 안)',
+    auto_line: '자동 줄 설정률(지금)',
+    money_in_dated: '돈 들어왔어요 사용(이번 달, 날짜 있음)',
+    money_in_none: '돈 들어왔어요 사용(이번 달, 날짜 없음)',
+    bundle: '묶음률(각자 계열 연결 커플)',
+    split_accept: '분담 제안 수락률(최근 90일)',
+    rank_pair: '순위 같이 보기(두 사람 모두 동의)',
+  } as Record<string, string>, // [확인 필요]
+  guardNames: {
+    request_declined: '요청 거절(최근 30일)',
+    unlink: '연결 해제 요청(최근 30일)',
+    auto_line_changed: '자동 줄 바꿈(최근 30일)',
+    reconcile_minus: '잔액 차이 −(최근 90일)',
+  } as Record<string, string>, // [확인 필요]
+  guardOver: '기준 넘음', // [확인 필요]
+  guardOk: '정상', // [확인 필요]
+  pct: (n: number | null) => (n === null ? '—' : `${n}%`),
+  ratioBase: (num: number, den: number) =>
+    `${num.toLocaleString('ko-KR')} / ${den.toLocaleString('ko-KR')}`,
 
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',

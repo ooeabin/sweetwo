@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { axe } from './axe';
-import { asReturningFromProvider, mockSupabase } from './supabase-mock';
+import { asReturningFromProvider, mockSupabase } from './mocks';
 
 // 로그인, 가입 흐름(docs/spec/15-login-signup.md). Supabase 응답은 흉내 낸다.
 

@@ -14,7 +14,7 @@ import org.json.JSONObject;
  */
 public class SaveTogetherWidget extends AppWidgetProvider {
     /** 이 너비(dp) 이상이면 중 */
-    private static final int MEDIUM_DP = 200;
+    static final int MEDIUM_DP = 200;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
@@ -52,7 +52,7 @@ public class SaveTogetherWidget extends AppWidgetProvider {
                             R.string.widget_save_empty,
                             false,
                             false,
-                            WidgetStore.openPath(c, "/", req)));
+                            WidgetStore.openPath(c, "/", "wg01", req)));
             return;
         }
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_save);
@@ -82,7 +82,7 @@ public class SaveTogetherWidget extends AppWidgetProvider {
             v.setViewVisibility(R.id.widget_done, View.GONE);
         }
         WidgetStore.setStamp(v, WidgetStore.stamp(c, d));
-        v.setOnClickPendingIntent(R.id.widget_root, WidgetStore.openPath(c, WidgetStore.str(s, "to"), req));
+        v.setOnClickPendingIntent(R.id.widget_root, WidgetStore.openPath(c, WidgetStore.str(s, "to"), "wg01", req));
         m.updateAppWidget(id, v);
     }
 }

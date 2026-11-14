@@ -35,8 +35,8 @@ export type SavingTogetherEvent =
         | 'bundle_achieved'
         | 'bundle_show_each_toggled';
       props: {
-        /** 들어온 곳: band(홈 띠 13번) / saving(W-10 ⋯·W-11 끝) / direct / notification / w15a / celebrate */
-        entry: 'band' | 'saving' | 'direct' | 'notification' | 'w15a' | 'celebrate';
+        /** 들어온 곳: band(홈 띠 13번) / saving(W-10 ⋯·W-11 끝) / direct / notification / w15a / celebrate / s13(설정 S-13 묶음 줄) */
+        entry: 'band' | 'saving' | 'direct' | 'notification' | 'w15a' | 'celebrate' | 's13';
         has_target: boolean;
         on: boolean;
       };

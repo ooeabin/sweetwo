@@ -1,5 +1,5 @@
-import { chanwoo } from './supabase-mock';
-import type { MemDb } from './onboarding-mock';
+import { chanwoo } from './supabase';
+import type { MemDb } from './app-db';
 
 // 홈·월급 e2e 공통 준비: 온보딩을 마친 찬우(혼자, 각자, 실수령 350만, 월급날 25일), 저금 항목 청약(목표 금액 없음)·내 집 마련,
 // 월급 계획과 9월 월급 체크리스트(9월 25일 ~ 10월 24일).

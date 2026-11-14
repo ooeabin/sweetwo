@@ -1,14 +1,20 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo } from './supabase-mock';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { mockSaving, newSavingDb, notiTitles, type SavingDb } from './saving-mock';
-import { seed } from './seed-home';
+import {
+  chanwoo,
+  type MemDb,
+  mockOnboarding,
+  mockSaving,
+  newSavingDb,
+  notiTitles,
+  type SavingDb,
+  seed,
+  YEBIN,
+} from './mocks';
 
 // v2.2 같이 모으기(20 W-15·W-15a·W-10 0번·W-13·W-12(묶음)·W-12b, ADR 0009 결정 5, G1·G4). 찬우(시작한 사람)와 예빈(합류한 사람) 두 계정.
 // 각자 계열 연결, 찬우 ‘내 집 마련’(목표 1억 5,000만), 예빈 ‘결혼 비용’(목표 3,000만, 이미 모은 500만)
 const NOW = new Date('2026-10-07T10:00:00+09:00');
-const YEBIN = 'yebin';
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(

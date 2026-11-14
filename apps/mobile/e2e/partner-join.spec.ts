@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge } from './fake-bridge';
-import { mockSupabase, SB } from './supabase-mock';
+import { mockSupabase, SB } from './mocks';
 
 // 파트너 합류(docs/spec/18-partner-join.md). 예빈이 찬우의 초대 링크로 합류한다.
 

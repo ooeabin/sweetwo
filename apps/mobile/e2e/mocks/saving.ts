@@ -1,6 +1,7 @@
 import type { Page, Route } from '@playwright/test';
-import type { MemDb } from './onboarding-mock';
-import { SB } from './supabase-mock';
+import { json } from './http';
+import type { MemDb } from './app-db';
+import { SB } from './supabase';
 
 // v2.2 같이 모으기와 돈 기록 가짜 서버(20261203090000_v22_saving_together, 20261207090000_v22_saving_undo 흉내).
 // mockOnboarding 뒤에 붙여 그 메모리 DB(goals, checklists)를 같이 쓰고, 이 파일이 맡지 않은 요청은 그대로 넘김(route.fallback).
@@ -28,13 +29,6 @@ export const newSavingDb = (): SavingDb => ({
   reconciledAt: {},
 });
 
-const json = (route: Route, body: unknown, status = 200) =>
-  route.fulfill({
-    status,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
 const fail = (route: Route, message: string) =>
   json(route, { message, code: message === 'not_owner' ? '42501' : '22023' }, 400);
 
@@ -183,7 +177,10 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
       const p = body().p_bundle;
       return json(
         route,
-        s.bundles.filter((b) => b.status !== 'closed' && (!p || b.id === p)).map(view),
+        // 해제 확정 뒤(혼자 쓰기) 묶음은 원래 공간에 남아 보이지 않음(서버 finish_unlink, 20261204090000 계약 1)
+        db.space?.couple_state === 'solo'
+          ? []
+          : s.bundles.filter((b) => b.status !== 'closed' && (!p || b.id === p)).map(view),
       );
     }
     if (fn === 'bundle_create') {

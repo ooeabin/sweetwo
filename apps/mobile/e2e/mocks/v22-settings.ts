@@ -1,6 +1,7 @@
-import type { Page, Route } from '@playwright/test';
-import type { MemDb } from './onboarding-mock';
-import { SB } from './supabase-mock';
+import type { Page } from '@playwright/test';
+import { json, rpcError } from './http';
+import type { MemDb } from './app-db';
+import { SB, YEBIN } from './supabase';
 
 // v2.2 PR 11(공개·관계·설정) 서버 흉내: mockOnboarding 위에 얹음(나중에 건 route가 먼저 받음, 모르면 fallback).
 // 관리 형태 요청(request/answer/cancel_mode_change, mode_change_request), 공개 단계 필터(partner_plan_view),
@@ -8,9 +9,7 @@ import { SB } from './supabase-mock';
 // 다시 연결(request/answer_reconnect, reconnect_request), 묶음(bundle_view), 자산 공개·순위 동의.
 // 계약은 supabase/migrations/20261202090000~20261204090000 머리 주석.
 
-export const YEBIN = 'yebin';
-
-export interface V22Db {
+export interface V22SettingsDb {
   modeRequests: Record<string, unknown>[];
   shared: Record<string, unknown>[];
   salaryChanges: Record<string, unknown>[];
@@ -25,19 +24,11 @@ export interface V22Db {
   calls: { fn: string; body: Record<string, unknown> }[];
 }
 
-const json = (route: Route, body: unknown, status = 200) =>
-  route.fulfill({
-    status,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
-const err = (route: Route, message: string, code = '22023') =>
-  json(route, { message, code }, code === '42501' ? 403 : 400);
+const err = rpcError;
 const r10k = (v: number) => Math.round(v / 10_000) * 10_000;
 
-export async function mockV22(page: Page, db: MemDb, now: Date): Promise<V22Db> {
-  const v: V22Db = {
+export async function mockV22Settings(page: Page, db: MemDb, now: Date): Promise<V22SettingsDb> {
+  const v: V22SettingsDb = {
     modeRequests: [],
     shared: [],
     salaryChanges: [],

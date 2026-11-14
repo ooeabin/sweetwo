@@ -1,11 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { seed } from './seed-home';
-import { chanwoo } from './supabase-mock';
-import { mockRealtime } from './realtime-mock';
-import { emptyV22 } from './v22-mock';
+import { chanwoo, emptyV22, type MemDb, mockOnboarding, mockRealtime, seed } from './mocks';
 import { fakeBridge } from './fake-bridge';
+import { events } from './analytics';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
 // H-07 월급 계획 + 여유 자금, H-12 결혼 준비, H-04·H-09. 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
@@ -781,4 +778,39 @@ test('홈 화면 위젯(26 v2.2): 홈 값으로 WG-01 대표 저금 %·기한 �
   });
   expect(last.save?.to).toMatch(/^\/salary\/items\//);
   expect(JSON.stringify(last)).not.toMatch(/원/);
+});
+
+test('위젯 분석(32 4-7, PR 14): 이 기기에서 처음 본 위젯만 widget_added, 위젯을 누르면 widget_tapped + 그 화면', async ({
+  page,
+}) => {
+  await fakeBridge(page, {
+    signedIn: true,
+    pin: null,
+    widgets: [
+      { widget: 'wg01', size: 'medium' },
+      { widget: 'wg04', size: 'small' },
+    ],
+  });
+  await page.addInitScript(() => localStorage.setItem('sweetwo.pin-asked', '1'));
+  const ev = events(page);
+  const added = () => ev.filter((e) => e.name === 'widget_added').map((e) => e.props);
+  await open(page);
+  await expect.poll(added).toEqual([
+    { widget: 'wg01', size: 'medium', amounts_shown: false },
+    { widget: 'wg04', size: 'small', amounts_shown: false },
+  ]);
+  // 다시 열어도 같은 위젯은 다시 보내지 않음
+  await page.reload();
+  await expect(together(page).locator('.hg-together__slide').first()).toBeVisible();
+  // WG-04를 눌러 캘린더로(앱이 켜져 있음)
+  await page.evaluate(() =>
+    (window as unknown as { __fbcb: { navigate: (x: [string, unknown]) => void } }).__fbcb.navigate(
+      ['/calendar', { widget: 'wg04', appWasRunning: true }],
+    ),
+  );
+  await expect(page).toHaveURL(/\/calendar/);
+  await expect
+    .poll(() => ev.find((e) => e.name === 'widget_tapped')?.props)
+    .toEqual({ widget: 'wg04', element: 'card', landing_screen: 'Y-01', app_was_running: true });
+  expect(added()).toHaveLength(2);
 });

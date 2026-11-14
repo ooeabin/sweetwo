@@ -41,6 +41,8 @@
 
 ### 0-3. 가드레일
 
+어드민 AD-01 8번(서버 `admin_metrics`)은 아래 표 중 DB로 셀 수 있는 넷(요청 거절, 연결 해제, 자동 줄 바꿈, 잔액 차이)을 바로 보여 줌. 나머지는 화면 이벤트라 분석 도구에서(0-5).
+
 | 신호 | 정의 | 경보 기준(가설) |
 | --- | --- | --- |
 | 공개 좁히기 | 연결 뒤 30일 안 `plan_share`를 좁힌 비율 | 15% 초과 |
@@ -63,8 +65,8 @@
 
 | 이벤트 | 속성 |
 | --- | --- |
-| `push_permission_asked` / `_answered` | screen_id(O-55, P-11, H-06), result(granted / denied / unavailable(브리지 없음) / later), kinds_on(켠 종류 키 목록) |
-| `manage_answers_saved` | shared_living, shared_saving, manager(self/partner/both/each), salary_mode, screen_id |
+| `push_permission_asked` / `_answered` | screen_id(O-55, P-11, H-06), result(granted / denied / unavailable(브리지 없음) / later), kinds_on(켠 종류 키 목록, 허용하지 않았으면 빈 목록. H-06은 그 사람 알림 종류 설정에서 켠 것, 2026-11-13 PR 14) |
+| `manage_answers_saved` | shared_living, shared_saving, manager(self/partner/both/each), salary_mode(`separate` / `combined`, 4-2와 같은 코드. 엔진 값 joint는 combined로 보냄, 2026-11-13 PR 14), screen_id |
 | `plan_share_changed` | from, to, screen_id |
 | `share_preview_viewed` | — |
 | `split_line_setting_changed` | kind, in_checklist, auto_pay, auto_day_band |
@@ -74,13 +76,13 @@
 | `auto_line_changed` | to(skipped/other_amount) |
 | `saving_adjusted` | sign(`plus`/`minus`), amount_band, reason_code, from(w10b/note_paid). 잔액 맞추기는 `savings_reconciled`로만 |
 | `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none |
-| `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate`), has_target, on |
+| `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate` / `s13` 설정 S-13 묶음 줄, 2026-11-13 PR 14), has_target, on |
 | `saving_note_saved` / `saving_note_paid` | has_due, subtracted |
 | `split_proposed` / `split_answered` | name_code, rule, result |
-| `mode_change_requested` / `_answered` / `_cancelled` | phrase, to_mode, result |
+| `mode_change_requested` / `_answered` / `_cancelled` | phrase(`p04_send` / `s11f_combine` / `s11f_manager`), to_mode(`separate` / `combined`), result(requested: `applied` / `requested`, answered: `accepted` / `declined` / `expired`, cancelled는 없음) |
 | `app_lock_answered` | result(on/later) |
-| `rank_viewed` | first_free, ad_result, mode(pair/peer_median) |
-| `rank_consent_requested` / `_answered` / `_turned_off` | result(requested: `sent` / `failed`, answered: `accepted` / `declined` / `expired`) |
+| `rank_viewed` | first_free, ad_result(`rewarded` / `closed` / `failed` / `none`), mode(pair/peer_median) |
+| `rank_consent_requested` / `_answered` / `_turned_off` | result(requested: `sent` / `failed`, answered: `accepted` / `declined` / `expired`, turned_off는 속성 없음) |
 | `rank_badge_toggled` | on(F-08 ‘홈에 보여 주기’) |
 | `quick_assets_saved` | count(채운 칸 수), has_debt, total_band, share(`all` / `sum` / `private`) |
 | `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
@@ -93,7 +95,52 @@
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
 | `invite_code_autofilled` | source(clipboard / referrer), result(join / decline) (2026-11-13 PR 8) |
 | `saving_item_created` | entry에 onboarding(O-60 ‘첫 저금 만들기’) 더함 |
-| `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | v2와 같음. 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11) |
+| `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | 위젯은 4-7(v2.2 값은 2026-11-13 PR 14: widget `wg01` / `wg04`, size `small` / `medium`). 코드 입력은 `invite_accepted` channel `code`로 셈(`partner_code_entered`는 따로 보내지 않음, PR 14). 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11). `partner_change_reverted`는 N-01·N-02 ‘이전 값으로 돌리기’(14 R-08) |
+
+### 0-5. 구현 상태 (2026-11-13 PR 14)
+
+앱 이벤트는 `packages/app/src/shared/analytics.ts`(+ `analytics-saving.ts`)의 `AnalyticsEvent` 한 곳(이름 하나 = 정의 하나), 서버 이벤트는 표 `server_event`(DEV_GUIDE ‘지금 있는 테이블과 함수’). PostHog 전송기는 분석 단계에서 붙임(지금 앱은 개발 중에만 콘솔).
+
+| 이벤트(0-4) | 어디서 | 상태 |
+| --- | --- | --- |
+| `push_permission_asked` / `_answered` | O-55, P-11, H-06 띠 10번 | 됨. H-06 result unavailable·kinds_on 목록 맞춤(PR 14) |
+| `manage_answers_saved` | O-30c 끝(온보딩), S-11f | 됨. salary_mode `combined`로 맞춤(PR 14) |
+| `plan_share_changed`, `share_preview_viewed` | S-13, S-13p | 됨 |
+| `split_line_setting_changed`, `auto_pay_asked` | W-01 줄 설정, W-01d, W-11e | 됨 |
+| `auto_line_confirmed` | 서버: 자동 줄 나가는 날 자동 확인(`pay_check_line` 트리거), 날짜 없는 자동 저금(`goal_move` auto 트리거) | 됨(PR 14) |
+| `payday_confirmed`, `pay_line_late_checked`, `auto_line_changed` | W-02, W-05 | 됨 |
+| `saving_adjusted`, `adjust_summary_hidden`, `savings_reconciled` | W-10b, W-10c, W-14 냈어요 | 됨 |
+| `money_in_logged` / `_distributed`, `money_in_period_viewed` | W-20, H-13 | 됨 |
+| `bundle_*`, `bundle_percent_only_toggled` | W-15·W-15a, W-12, S-13 | 됨. S-13 entry `s13`로 맞춤(PR 14) |
+| `saving_note_saved` / `_paid` | W-14 | 됨 |
+| `split_proposed` / `_answered` | W-01b, W-01c | 됨(만료는 연 사람이 볼 때 expired) |
+| `mode_change_requested` / `_answered` / `_cancelled` | P-04, S-11f, S-11j | 됨. to_mode `combined`로 맞춤(PR 14) |
+| `app_lock_answered` | A-06 | 됨 |
+| `rank_viewed`, `rank_consent_*`, `rank_badge_toggled` | F-08, F-08c, S-13 | 됨. turned_off 속성 없앰(PR 14) |
+| `quick_assets_saved` | F-03q | 됨 |
+| `next_saving_prompt_viewed` / `_chosen` | W-12b | 됨 |
+| `salary_change_scheduled` / `_cancelled` | S-11c | 됨 |
+| `salary_change_applied` | 서버: 예약 적용(`salary_change.applied_at` 트리거) | 됨(PR 14) |
+| `progress_news_sent` / `_opened` | 서버: 진행 소식 알림이 생김(`notification` 트리거) / 알림 열기 | 됨(sent는 PR 14) |
+| `home_task_dismissed` | H-06 띠 | 됨 |
+| `invite_code_autofilled` | O-01 시트 | 됨 |
+| `saving_item_created` entry onboarding | O-60 | 됨 |
+| `widget_added` / `widget_tapped` | 앱 시작 때 놓인 위젯 확인(브리지 `widget.installed`, 이 기기에서 처음 본 종류·크기만) / 위젯 링크 `w` | 됨(PR 14) |
+| `unlink_resolved` path timeout | 서버: 14일 기한 확정(`couple_unlink` 트리거) | 됨(PR 14). acknowledged·canceled는 앱 |
+| `rejoin_requested` / `_responded`, `reconnect_blocked` | S-12, S-12g | 됨 |
+| `partner_change_reverted` | N-01·N-02 ‘이전 값으로 돌리기’ | PR 14 뒤 별도 PR(`revert_partner_change`) |
+| `partner_code_entered` | — | 보내지 않음(`invite_accepted` channel code로 셈) |
+
+지표 판(AD-01 8번, `admin_metrics`, 집계 숫자만):
+
+| 판 | 서버가 세는 것 | 분석 도구에서 볼 것 |
+| --- | --- | --- |
+| 북극성 | 0-1 정의 그대로 달마다(`metric_couple_month`): 같이 모은 커플 / 연결 커플(지금 연결·해제 대기 공간), 혼자 쓰는 사람, ‘사람이 직접 확인’ 비율, 묶음 커플 비율 | — |
+| 선행 | 첫 저금률(최근 30일), 첫 월급날 확인률(7일 안), 자동 줄 설정률(지금), 돈 들어왔어요 사용(이번 달, 날짜 있음·없음), 묶음률(지금), 분담 제안 수락률(최근 90일), 순위 같이 보기 | 알림 허용률, 자동 줄 질문 응답, 잔액 맞추기 완료, 다음 저금 이어 가기, 진행 소식 열람, 월급 변경 예약, 초대·합류율, M1·M3, 온보딩 시간 |
+| 가드레일 | 요청 거절(30일, 50%), 연결 해제 요청(30일, 1%), 자동 줄 바꿈(30일, 10%), 잔액 차이 −(90일, 20%) | 공개 좁히기, 각자 금액 끄기, 미리 보기 뒤 좁히기, 파트너 알림 끄기, 되돌리기, 퍼센트만, 바로잡기 숨기기, 관리하는 사람 용돈 수정, 건너뜀 누적, 앱 잠금, 광고 |
+
+- ‘연결 커플’은 지난 달 연결 여부 기록이 없어 지금 상태로 셈(해제된 커플은 지난 달 칸에서도 빠짐) [확인 필요]
+- 묶음률·자동 줄 설정률은 ‘14일 안’·‘첫 월급날 전’ 대신 지금 값(시점 기록이 없음) [확인 필요]
 
 ## 1. 핵심 지표 (North Star)
 
@@ -256,8 +303,8 @@
 | paywall\_viewed | 프리미엄 기능 진입. 진입점은 유료화 시점에 다시 정함 [확인 필요](예전 진입점 중 월말 정리 심화, 계획 다시 세우기 비교는 없앰). 유료화 시점부터 수집 | entry, cycles\_checked |
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
 | subscription\_canceled | 설정 › 구독 해지, 연결 해제로 상대 무료 전환 | reason\_path(`user` / `unlink`), months\_subscribed |
-| widget\_added | 위젯을 처음 놓음(트레이는 없앰 2026-11-10, ADR 0008) | widget(wg01\~wg05), size(small / medium / large / lock), amounts\_shown |
-| widget\_tapped | 위젯 누름 → 딥링크 진입 | widget, element, landing\_screen, app\_was\_running |
+| widget\_added | 위젯을 처음 놓음(트레이는 없앰 2026-11-10, ADR 0008). 2026-11-13 PR 14: 앱을 열 때 놓인 위젯을 보고 이 기기에서 처음 본 종류·크기만 | widget(v1 `wg01` / `wg04`, 예전 wg01\~wg05), size(v1 small / medium, 예전 large / lock), amounts\_shown(지금 늘 false) |
+| widget\_tapped | 위젯 누름 → 딥링크 진입(2026-11-13 PR 14: 링크 `sweetwo://widget?to=…&w=wg01`) | widget, element(위젯 전체가 누르는 곳 하나라 `card`), landing\_screen(H-01 / W-10 / W-14 / Y-01 / Y-05 / other), app\_was\_running |
 | peer\_stats\_viewed | F-08 지표 카드 표시 (출시 후) | metric(net\_worth / saving\_rate / saving\_amount / emergency\_months / debt\_ratio), group\_level [확인 필요], source(public / app) |
 | peer\_stats\_consent\_changed | F-08 참여 안내, 설정 S-18 통계 참여 토글 (출시 후) | state(on / off), entry(f08 / settings), couple\_both\_on |
 | profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’, 소셜 계정 사진을 처음 가져왔을 때(2026-11-05) | action(set / remove / imported) |

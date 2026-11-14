@@ -3,7 +3,7 @@ import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { track } from '../../../shared/analytics';
+import { salaryModeCode, track } from '../../../shared/analytics';
 import { useOnline } from '../../../shared/online';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
@@ -65,7 +65,11 @@ export function S11jStyleRequest() {
     setBusy(accept ? 'yes' : 'no');
     try {
       const result = await answerModeChange(r.id, accept);
-      track('mode_change_answered', { phrase: r.phrase, to_mode: r.to_mode, result });
+      track('mode_change_answered', {
+        phrase: r.phrase,
+        to_mode: salaryModeCode(r.to_mode),
+        result,
+      });
       await Promise.all(manageKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
       if (result === 'expired') {
         carryToast(copy.styleExpired);

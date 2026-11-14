@@ -34,6 +34,18 @@ export interface LockStatus {
  * 위젯에 둘 값(26 v2.2). 금액은 없음(26 ‘금액 표시’: 기본 가림, S-22 ‘위젯에 금액 보이기’는 아직 없음).
  * 글은 앱 copy가 만든 그대로, D-n은 위젯이 그날(KST) 다시 셈
  */
+/** 놓인 위젯 하나(26 위젯 v2.2): WG-01 소·중, WG-04 소 */
+export interface WidgetPlaced {
+  widget: 'wg01' | 'wg04';
+  size: 'small' | 'medium';
+}
+
+/** 앱 링크가 어디서 왔는지(지금은 위젯만) */
+export interface NavigateFrom {
+  widget: 'wg01' | 'wg04';
+  appWasRunning: boolean;
+}
+
 export interface WidgetData {
   /** WG-01 같이 모으기: 대표 저금(core pickHeroes 첫 칸). 저금이 없으면 null */
   save: {
@@ -149,14 +161,19 @@ export interface AppBridge {
    */
   widget?: {
     update: (d: WidgetData) => Promise<void>;
+    /** 홈 화면에 놓인 위젯 종류·크기(widget_added 분석, 2026-11-13 PR 14). 옛 앱은 없음 */
+    installed?: () => Promise<WidgetPlaced[]>;
   };
   /**
    * 안드로이드 하드웨어 뒤로(2026-11-09). 받는 쪽이 true를 돌려주면 처리한 것, false면 브리지가 기본 동작
    * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS는 없음
    */
   onBack?: (cb: () => boolean) => () => void;
-  /** 앱 링크(sweetwo://open…)로 이 화면으로 가라고 할 때 */
-  onNavigate: (cb: (path: string) => void) => () => void;
+  /**
+   * 앱 링크(sweetwo://open…)로 이 화면으로 가라고 할 때. from = 위젯을 눌러 왔으면 그 위젯(wg01·wg04)과
+   * 앱이 이미 켜져 있었는지(widget_tapped 분석, 2026-11-13 PR 14)
+   */
+  onNavigate: (cb: (path: string, from?: NavigateFrom) => void) => () => void;
 }
 
 declare global {

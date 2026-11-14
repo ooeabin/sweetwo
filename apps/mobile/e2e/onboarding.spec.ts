@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge, fb } from './fake-bridge';
-import { chanwoo, SB } from './supabase-mock';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { chanwoo, type MemDb, mockOnboarding, SB } from './mocks';
+import { events } from './analytics';
 
 // 온보딩 v2.2(docs/spec/16·17 ‘온보딩 ② v2.2’, ADR 0009, 2026-11-13):
 // O-03 → O-11(4지선다) → O-30 → O-30b → (O-30c) → O-31(공개 고지) → O-32(날짜 없음) → O-55 알림 → O-60 ‘첫 저금 만들기’
@@ -27,17 +27,6 @@ const back = (page: Page) =>
     .click();
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const lines = (db: MemDb) => db.splits.map((s) => s.split_line.map((l) => [l.kind, l.amount]));
-
-/** 분석 이벤트(개발 빌드 콘솔 ‘[analytics]’)를 모음 */
-function events(page: Page) {
-  const out: { name: string; props: Record<string, unknown> }[] = [];
-  page.on('console', async (m) => {
-    if (m.type() !== 'debug' || !m.text().startsWith('[analytics]')) return;
-    const [, name, props] = await Promise.all(m.args().map((a) => a.jsonValue()));
-    out.push({ name: String(name), props: (props ?? {}) as Record<string, unknown> });
-  });
-  return out;
-}
 
 /** O-03 → O-11(두 사람 사이) → O-30 */
 async function start(page: Page, relation = '결혼했어요') {

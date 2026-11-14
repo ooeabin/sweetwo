@@ -1,6 +1,7 @@
-import type { Page, Route } from '@playwright/test';
-import { chanwoo, fakeJwt, SB } from './supabase-mock';
-import { handleV22, type V22Db } from './v22-mock';
+import type { Page } from '@playwright/test';
+import { json } from './http';
+import { chanwoo, fakeJwt, SB } from './supabase';
+import { handleV22Pay, type V22PayDb } from './v22-pay';
 
 // 온보딩용 가짜 Supabase: 로그인된 찬우 + 메모리 DB(app_user, couple_space, goal, fixed_expense, account, 첫 플랜). 테스트가 db를 들여다본다.
 export interface MemDb {
@@ -111,17 +112,9 @@ export interface MemDb {
     views: { paid_by_ad: boolean }[];
     requests: Record<string, unknown>[];
   };
-  /** v2.2 새 표·RPC(v22-mock.ts) */
-  v22?: V22Db;
+  /** v2.2 새 표·RPC(v22-pay.ts) */
+  v22?: V22PayDb;
 }
-
-const json = (route: Route, body: unknown, status = 200) =>
-  route.fulfill({
-    status,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
 
 const eqId = (url: URL) => url.searchParams.get('id')?.replace(/^eq\./, '');
 
@@ -415,8 +408,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     const url = new URL(req.url());
     const path = url.pathname;
     const body = () => (req.postData() ? (req.postDataJSON() as Record<string, unknown>) : {});
-    // v2.2 새 표·RPC는 먼저(v22-mock.ts). 처리하지 않은 것만 아래 예전 흉내로
-    if (await handleV22(route, db, path, method, url, opts.now ?? new Date())) return;
+    // v2.2 새 표·RPC는 먼저(v22-pay.ts). 처리하지 않은 것만 아래 예전 흉내로
+    if (await handleV22Pay(route, db, path, method, url, opts.now ?? new Date())) return;
     // 개수만 읽기(HEAD, count=exact): P-02a ‘안 옮겨요’
     if (method === 'HEAD') {
       const n =
@@ -1936,12 +1929,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             confirmed_at: '2026-10-07T01:00:00Z',
             reconnect_until: '2026-11-06T01:00:00Z',
           });
+        // 서버 finish_unlink·move_owned_rows(v2.2, 20261204090000 계약 1)와 같게: 각자 엔진이면 내 월급 계획·확인 목록·
+        // 내 저금(주인 = 나, 묶음에서 뺌)은 남기고, 같이 쓰던 것(공동 월급 계획·저금, 상대 것)만 지움. 합쳐서 엔진이면 모두 지움
+        const mine = String(db.me.id);
+        const sep = db.space?.salary_mode !== 'joint';
+        const keep = <T extends Record<string, unknown>>(rows: T[], ok: (r: T) => boolean) => {
+          const kept = rows.filter((r) => sep && ok(r));
+          rows.length = 0;
+          rows.push(...kept);
+        };
+        keep(db.goals, (g) => g.owner_user_id === mine);
+        for (const g of db.goals) g.bundle_id = null;
+        keep(db.splits, (x) => x.owner_user_id === mine);
+        keep(db.checklists, (c) => c.owner_user_id === mine);
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
-        // 같이 쓰던 데이터는 모두 지움, 해제 안내(S-12h)부터
-        db.goals.length = 0;
-        db.splits.length = 0;
-        db.checklists.length = 0;
         db.me.onboarding_step = 'S-12H';
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
@@ -2881,7 +2883,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         route,
         db.unlinks.filter((u) => u.status === 'pending'),
       );
-    // 다시 연결 요청(홈 띠 2번, 혼자 쓰기). 요청을 넣는 테스트는 v22-settings-mock이 먼저 받음
+    // 다시 연결 요청(홈 띠 2번, 혼자 쓰기). 요청을 넣는 테스트는 v22-settings가 먼저 받음
     if (path === '/rest/v1/reconnect_request' && method === 'GET') return json(route, []);
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
     // 알림: 최신순(같은 시각이면 id 내림차순), (만든 때, id) 커서(더 불러오기), id 하나, 읽지 않은 것 하나(점)

@@ -1,7 +1,14 @@
 import type { AmountBand, AuthProvider, SplitKind, TopTask } from '@sweetwo/core';
 import type { SavingTogetherEvent } from './analytics-saving';
 
-// 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로.
+// 분석 이벤트(docs/spec/32-success-metrics.md 이벤트 표). 이름과 속성은 표 그대로. 이벤트 하나 = 정의 하나(2026-11-13 PR 14,
+// 같은 이름을 두 번 적지 않음). 구현 상태 표는 32 ‘0-5 구현 상태’.
+
+/** 월급 관리 방식 코드(32 4-1 선택지 값, 4-2 salary_mode). 엔진 값 joint는 combined로 보냄(salaryModeCode) */
+export type SalaryModeCode = 'separate' | 'combined';
+export const salaryModeCode = (m: 'separate' | 'joint'): SalaryModeCode =>
+  m === 'joint' ? 'combined' : 'separate';
+
 // PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
 export type AnalyticsEvent =
   | SavingTogetherEvent
@@ -88,28 +95,6 @@ export type AnalyticsEvent =
         screen_id: 'O-55' | 'P-11' | 'H-06';
         result: 'granted' | 'denied' | 'unavailable' | 'later';
         kinds_on: string[];
-      };
-    }
-  | {
-      name: 'manage_answers_saved';
-      props: {
-        shared_living: boolean;
-        shared_saving: boolean;
-        manager: 'self' | 'partner' | 'both' | 'each' | null;
-        salary_mode: 'separate' | 'joint';
-        screen_id: string;
-      };
-    }
-  | {
-      name: 'plan_share_changed';
-      props: { from: string; to: string; screen_id: string };
-    }
-  | {
-      name: 'mode_change_requested';
-      props: {
-        phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
-        to_mode: 'joint' | 'separate';
-        result: 'applied' | 'requested';
       };
     }
   | { name: 'app_lock_answered'; props: { result: 'on' | 'later' } }
@@ -484,7 +469,7 @@ export type AnalyticsEvent =
       name: 'mode_change_requested';
       props: {
         phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
-        to_mode: 'separate' | 'joint';
+        to_mode: SalaryModeCode;
         result: 'applied' | 'requested';
       };
     }
@@ -492,7 +477,7 @@ export type AnalyticsEvent =
       name: 'mode_change_answered';
       props: {
         phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
-        to_mode: 'separate' | 'joint';
+        to_mode: SalaryModeCode;
         result: 'accepted' | 'declined' | 'expired';
       };
     }
@@ -500,7 +485,7 @@ export type AnalyticsEvent =
       name: 'mode_change_cancelled';
       props: {
         phrase: 'p04_send' | 's11f_combine' | 's11f_manager';
-        to_mode: 'separate' | 'joint';
+        to_mode: SalaryModeCode;
       };
     }
   | {
@@ -509,7 +494,7 @@ export type AnalyticsEvent =
         shared_living: boolean;
         shared_saving: boolean | null;
         manager: 'self' | 'partner' | 'both' | 'each' | null;
-        salary_mode: 'separate' | 'joint';
+        salary_mode: SalaryModeCode;
         screen_id: string;
       };
     }
@@ -535,11 +520,7 @@ export type AnalyticsEvent =
       name: 'salary_change_scheduled' | 'salary_change_cancelled';
       props: { months_ahead: number; has_until: boolean };
     }
-  | { name: 'rank_consent_turned_off'; props: { result: 'off' } }
-  | {
-      name: 'bundle_show_each_toggled';
-      props: { entry: string; has_target: boolean; on: boolean };
-    }
+  | { name: 'rank_consent_turned_off'; props: Record<string, never> }
   | {
       name: 'unlink_resolved';
       // 상대 확인(S-12d) acknowledged, 요청자 취소 canceled(32 4-7, 2026-11-12 S11-06 ‘agreed’에서 맞춤).
@@ -551,19 +532,6 @@ export type AnalyticsEvent =
       };
     }
   // ── v2.2(32 0-4, 2026-11-13) 홈·월급날 확인 ──
-  | {
-      // 알림 허용 묻기(O-55, P-11, H-06 띠 10번). answered result: granted/denied/later
-      name: 'push_permission_asked';
-      props: { screen_id: 'O-55' | 'P-11' | 'H-06' };
-    }
-  | {
-      name: 'push_permission_answered';
-      props: {
-        screen_id: 'O-55' | 'P-11' | 'H-06';
-        result: 'granted' | 'denied' | 'later';
-        kinds_on: number | null;
-      };
-    }
   | {
       // W-01 줄 설정(7a), W-01d. auto_day_band: payday(월급날) / next(다음 날) / other / none(자동 아님)
       name: 'split_line_setting_changed';
@@ -590,7 +558,23 @@ export type AnalyticsEvent =
       name: 'money_in_period_viewed';
       props: { state: 'early' | 'bar' | 'gap'; filled_band: number | null };
     }
-  | { name: 'progress_news_opened'; props: Record<string, never> };
+  | { name: 'progress_news_opened'; props: Record<string, never> }
+  // ── v2.2 PR 14(32 4-7, 26 위젯 v2.2) 위젯 ──
+  | {
+      // 홈 화면에 처음 놓은 위젯(이 기기에서 처음 본 종류·크기). amounts_shown: 금액은 아직 늘 가림(S-22 전)
+      name: 'widget_added';
+      props: { widget: 'wg01' | 'wg04'; size: 'small' | 'medium'; amounts_shown: boolean };
+    }
+  | {
+      // 위젯을 눌러 들어옴. element: 위젯 전체가 누르는 곳 하나라 card. landing_screen = 간 화면 ID
+      name: 'widget_tapped';
+      props: {
+        widget: 'wg01' | 'wg04';
+        element: 'card';
+        landing_screen: string;
+        app_was_running: boolean;
+      };
+    };
 
 /** 값이 바뀐 정도(32 fact_value_changed change_band): 변동률 <5 / 5-20 / 20+ %. F-04 금액, S-11c 월급·월급날 */
 export const changeBand = (from: number, to: number): '<5' | '5-20' | '20+' => {

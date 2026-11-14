@@ -1,6 +1,6 @@
 import { requestModeChange } from '@sweetwo/api';
 import { managerEventValue, resolveManageStyle, type ManagerAnswer } from '@sweetwo/core';
-import { track } from '../../shared/analytics';
+import { salaryModeCode, track } from '../../shared/analytics';
 import type { Space } from './data';
 
 // O-30·O-30b·O-30c 관리 형태 세 질문(17 v2.2, 08 2장 표). 서버 request_mode_change 한 곳으로 저장(직접 salary_mode를 바꾸지 않음).
@@ -39,7 +39,7 @@ export async function saveManage(o: {
     shared_living: o.living,
     shared_saving: o.saving ?? false,
     manager: managerEventValue(manager),
-    salary_mode: resolveManageStyle(o.living, o.saving, manager).salaryMode,
+    salary_mode: salaryModeCode(resolveManageStyle(o.living, o.saving, manager).salaryMode),
     screen_id: o.screenId,
   });
 }

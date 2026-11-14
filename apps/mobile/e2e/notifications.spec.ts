@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { type MemDb, mockOnboarding } from './mocks';
 
 // 알림 센터(docs/spec/14-notifications.md N-01~N-03). 찬우(시작한 사람)의 센터, 예빈(합류)이 바꾼 저금 항목·경조사·월급 전 확인
 

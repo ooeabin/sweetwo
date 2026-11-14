@@ -3,14 +3,18 @@
 // - sweetwo://auth/callback?error=…&state=… : 브라우저에서 취소, 동의 거부(error는 영문 소문자와 _만)
 // - sweetwo://i/{code} : 초대
 // - sweetwo://n, sweetwo://n/settings : 알림 메일 링크(알림 센터, 알림 설정). 정한 화면만
-// - sweetwo://widget?to=… : 홈 화면 위젯(26 WG-01·WG-04, 2026-11-13). 정한 화면 모양(WIDGET_TO)만, sweetwo://로만
+// - sweetwo://widget?to=…&w=… : 홈 화면 위젯(26 WG-01·WG-04, 2026-11-13). 정한 화면 모양(WIDGET_TO)만, sweetwo://로만.
+//   w = wg01 / wg04(어느 위젯인지, widget_tapped 분석만, 2026-11-13 PR 14. 없어도 됨)
 // - 모바일 앱 링크: https://sweetwo.kr/i/{code}, /n, /n/settings(같은 규칙. 로그인 콜백은 sweetwo://로만)
 // 나머지는 모두 버린다(null).
 export type DeepLink =
   | { kind: 'auth'; code: string; state: string }
   | { kind: 'auth_error'; error: string; state: string }
   | { kind: 'invite'; code: string }
-  | { kind: 'open'; path: string };
+  | { kind: 'open'; path: string; widget?: WidgetId };
+
+/** 홈 화면 위젯 번호(26 위젯 v2.2) */
+export type WidgetId = 'wg01' | 'wg04';
 
 /** 알림 메일 링크(sweetwo.kr/n…) → 앱 화면. 여기 없는 것은 버림 */
 const OPEN: Record<string, string> = {
@@ -60,9 +64,11 @@ export function parseDeepLink(raw: string): DeepLink | null {
   }
   if (path === 'widget' && url.protocol === 'sweetwo:') {
     const to = url.searchParams.get('to') ?? '';
-    return WIDGET_TO.test(to) && [...url.searchParams.keys()].length === 1
-      ? { kind: 'open', path: to }
-      : null;
+    const w = url.searchParams.get('w');
+    const keys = [...url.searchParams.keys()];
+    const known = keys.every((k) => k === 'to' || k === 'w') && new Set(keys).size === keys.length;
+    if (!WIDGET_TO.test(to) || !known || (w !== null && w !== 'wg01' && w !== 'wg04')) return null;
+    return w ? { kind: 'open', path: to, widget: w } : { kind: 'open', path: to };
   }
   const open = OPEN[path];
   if (open && !url.search) return { kind: 'open', path: open };

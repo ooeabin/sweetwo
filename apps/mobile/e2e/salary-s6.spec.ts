@@ -1,9 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { mockRealtime } from './realtime-mock';
-import { seed } from './seed-home';
-import { chanwoo } from './supabase-mock';
+import { chanwoo, type MemDb, mockOnboarding, mockRealtime, seed } from './mocks';
 
 // QA 6구간(2026-11-12): W-02 다 끝난 달 한 줄(W-02 끝 없앰), 상대가 끝내도 이동 없음, 달성 되돌린 뒤 같은 화면 다시 축하,
 // W-02a Toast·되돌리기·뒤로, W-05 그 체크리스트만(옛 링크·기간 밖·끝난 사이클), W-05 Realtime 강조.

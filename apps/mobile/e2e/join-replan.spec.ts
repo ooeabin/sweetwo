@@ -1,8 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo, SB } from './supabase-mock';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { seed } from './seed-home';
+import { chanwoo, type MemDb, mockOnboarding, SB, seed } from './mocks';
+import { events } from './analytics';
 import { setWheel } from './wheel';
 
 // 파트너 합류 v2.2(18 ‘파트너 합류 v2.2’, 2026-11-13): P-03 이름 → P-04 형태 확인(좋아요 / 월급은 대부분 보내요) → P-05 월급
@@ -17,16 +16,6 @@ const axe = async (page: Page) => {
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-/** 분석 이벤트(개발 빌드 콘솔 ‘[analytics]’)를 모음 */
-function events(page: Page) {
-  const out: { name: string; props: Record<string, unknown> }[] = [];
-  page.on('console', async (m) => {
-    if (m.type() !== 'debug' || !m.text().startsWith('[analytics]')) return;
-    const [, name, props] = await Promise.all(m.args().map((a) => a.jsonValue()));
-    out.push({ name: String(name), props: (props ?? {}) as Record<string, unknown> });
-  });
-  return out;
-}
 const STARTER = 'starter-chanwoo';
 
 /** 시작한 사람이 고른 관리 형태(08 2장). 기본 ‘저금만 같이 해요’ */
@@ -280,7 +269,7 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
   ).toEqual(['allowance', 'send']);
   expect(ev.find((e) => e.name === 'mode_change_requested')?.props).toEqual({
     phrase: 'p04_send',
-    to_mode: 'joint',
+    to_mode: 'combined',
     result: 'requested',
   });
   // 관리하지 않는 쪽: 월급날 확인 없음(자동 줄뿐), 내 용돈이 바뀌었을 때

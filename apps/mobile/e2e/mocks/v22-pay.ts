@@ -1,10 +1,11 @@
 import type { Route } from '@playwright/test';
+import { json, ok } from './http';
 
 // v2.2(ADR 0009) 가짜 Supabase 응답: 홈 v2.2(H-10·H-11·H-06)와 월급날 확인(W-02·W-05·W-01·W-01d)이 부르는 새 표·RPC.
-// onboarding-mock의 route가 맨 먼저 handleV22를 부르고, 여기서 처리하지 않으면(false) 예전 흉내로 넘어간다.
+// app-db의 route가 맨 먼저 handleV22Pay를 부르고, 여기서 처리하지 않으면(false) 예전 흉내로 넘어간다.
 // 서버 계약은 supabase/migrations/20261201090000_v22_check_loop.sql ~ 20261203090000_v22_saving_together.sql.
 
-export interface V22Db {
+export interface V22PayDb {
   /** 닫거나 끝낸 띠 키(home_task_state) */
   tasks: string[];
   bundles: Record<string, unknown>[];
@@ -23,7 +24,7 @@ export interface V22Db {
   noRetro?: boolean;
 }
 
-export const emptyV22 = (): V22Db => ({
+export const emptyV22 = (): V22PayDb => ({
   tasks: [],
   bundles: [],
   period: null,
@@ -42,18 +43,8 @@ type Db = {
   space: Record<string, unknown> | null;
   splits: { id: string; owner_user_id: string | null; split_line: Record<string, unknown>[] }[];
   checklists: Record<string, unknown>[];
-  v22?: V22Db;
+  v22?: V22PayDb;
 };
-
-const json = (route: Route, body: unknown, status = 200) =>
-  route.fulfill({
-    status,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  });
-const ok = (route: Route) =>
-  route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
 
 /** 예전 시드에 v2.2 열 채우기(줄 설정 기본: 체크리스트에 넣기 켬, 자동 끔) */
 function normalize(db: Db) {
@@ -85,7 +76,7 @@ const lateUntil = (end: string) => {
 };
 
 /** v2.2 요청이면 응답하고 true */
-export async function handleV22(
+export async function handleV22Pay(
   route: Route,
   db: Db,
   path: string,

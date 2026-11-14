@@ -1,8 +1,6 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
-import { seed } from './seed-home';
-import { chanwoo } from './supabase-mock';
+import { chanwoo, type MemDb, mockOnboarding, seed } from './mocks';
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09): 월급 탭 구간 탭 ‘계획’(/salary?view=plan), 줄마다 바로 저장 + 되돌리기,
 // 지출 추가 칩, 기본 줄 지우기, 편집 모드 순서(키보드), 파트너 탭 보기만, 합쳐서(두 Avatar, 합), 모자람, 공유(브라우저 = 내려받기),

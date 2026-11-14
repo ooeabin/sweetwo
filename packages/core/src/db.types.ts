@@ -3430,6 +3430,7 @@ export type Database = {
         Returns: undefined
       }
       admin_me: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_metrics: { Args: { p_months?: number }; Returns: Json }
       admin_note_export: {
         Args: { p_reason: string; p_rows: number; p_screen: string }
         Returns: string
@@ -4162,6 +4163,15 @@ export type Database = {
       mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
       md_label: { Args: { d: string }; Returns: string }
+      metric_couple_month: {
+        Args: { p_month: string; p_space: string }
+        Returns: {
+          confirmed: boolean
+          manual: boolean
+          saved: boolean
+        }[]
+      }
+      metric_ratio: { Args: { p_den: number; p_num: number }; Returns: Json }
       money_in_delete: { Args: { p_id: string }; Returns: undefined }
       money_in_period: {
         Args: { p_today?: string; p_user?: string }

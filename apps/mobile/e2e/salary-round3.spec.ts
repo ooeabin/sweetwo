@@ -1,7 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { mockOnboarding } from './onboarding-mock';
-import { seed } from './seed-home';
+import { mockOnboarding, seed } from './mocks';
 
 // 월급 탭 다음 개선(20 ‘다음 개선’ 2026-11-09 검토 → round 3에서 만듦). 찬우(시작), 각자.
 const axe = async (page: Page) => {

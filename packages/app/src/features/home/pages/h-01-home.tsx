@@ -12,6 +12,8 @@ import {
   pickMonthLine,
   pickTopBanner,
   pickTopTask,
+  PUSH_KINDS,
+  pushKindOn,
   reconcileTask,
   todayKst,
   type BundleView,
@@ -431,11 +433,14 @@ export function H01Home() {
     if (x.kind !== 'push_reask') return nav(x.to);
     // 10번: OS 허용 창(1회). 답과 상관없이 띠는 끝냄
     track('push_permission_asked', { screen_id: 'H-06' });
-    const ok = await window.sweetwo?.push?.request().catch(() => false);
+    const push = window.sweetwo?.push;
+    const ok = push ? await push.request().catch(() => false) : false;
+    // 32 0-4: 브리지 없음 unavailable, kinds_on = 켠 알림 종류 키(허용했을 때만)
+    const kinds = (me.data?.push_kinds ?? {}) as Record<string, boolean>;
     track('push_permission_answered', {
       screen_id: 'H-06',
-      result: ok ? 'granted' : 'denied',
-      kinds_on: null,
+      result: !push ? 'unavailable' : ok ? 'granted' : 'denied',
+      kinds_on: ok ? PUSH_KINDS.filter((k) => pushKindOn(kinds, k)) : [],
     });
     setPushPrompt(false);
     await dismissHomeTask(x.key, 'done').catch(() => undefined);

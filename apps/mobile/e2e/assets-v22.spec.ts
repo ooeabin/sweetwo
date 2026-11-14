@@ -1,14 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge, fb } from './fake-bridge';
-import { mockOnboarding, type MemDb } from './onboarding-mock';
+import { type MemDb, mockOnboarding, YEBIN } from './mocks';
 
 // 자산 관리 v2.2(23 ‘자산 관리 v2.2’, 06 7-8, ADR 0009 결정 11·13): F-01 평가금액 + 원금으로 보기, F-03q 빠르게 적기,
 // F-03e 첫 공개 선택(미리 고른 값 없음, ‘총액만 보여 주기’), F-08 두 상태(pair / 또래 중간값), 첫 결과 광고 없음,
 // ‘새로 확인하기’ 보상형 광고(흉내 브리지: 끝까지 봄, 닫음, 못 불러옴, 브리지 없음), F-08c 동의 요청·답. 찬우, 예빈.
 
 const NOW = new Date('2026-10-07T10:00:00+09:00');
-const YEBIN = 'yebin';
 
 const axe = async (page: Page) => {
   const r = await runAxe(page);
