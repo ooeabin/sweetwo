@@ -140,7 +140,7 @@ export function H10SaveTogether({
       const total = b.total ?? 0;
       // 큰 숫자는 묶음 합계(둘이 모은 금액). 월급 탭 저금 줄은 ‘내 몫’(2026-11-14 R4: 화면마다 숫자가 달라 보였음)
       if (!invited) lines.push(copy.bothSaved);
-      say.push(copy.bothSaved, won(total));
+      say.push(won(total));
       if (b.target !== null && b.pct !== null) {
         lines.push(copy.targetOf(won(b.target), b.pct));
         say.push(copy.targetPctLabel(b.pct));

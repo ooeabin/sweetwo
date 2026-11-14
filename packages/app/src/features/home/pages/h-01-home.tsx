@@ -211,7 +211,7 @@ export function H01Home() {
   // 처음 받을 때만 기다림(다시 받는 동안은 홈을 그대로, S4-01)
   const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;
   // 모은 금액·묶음 합계도 처음 받을 때까지 기다림(2026-11-14 R7: 먼저 0원·옛 숫자를 2초쯤 보였다가 바뀌었음)
-  const sumsFirstLoad = saving.loading || bundles.isLoading;
+  const sumsFirstLoad = (saving.ready && saving.savedLoading) || bundles.isLoading;
   if (!me.data || !sp || !goals.data || listsFirstLoad || sumsFirstLoad)
     return <LoadingFrame current="month" />;
 

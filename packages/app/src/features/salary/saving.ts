@@ -157,6 +157,8 @@ export function useSavingItems() {
     );
   return {
     loading,
+    /** 모은 금액(goal_saved)을 처음 받는 중(홈이 0원을 먼저 보이지 않게, 2026-11-14 R7) */
+    savedLoading: saved.isLoading,
     failed,
     retry,
     fetching,

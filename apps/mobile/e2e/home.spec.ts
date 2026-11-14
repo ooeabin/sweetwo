@@ -454,6 +454,8 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 
     '같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, 2027년 5월까지 1,900만 원 더 필요해요',
   );
   await expect(first).toContainText('찬우 2,100만 원, 예빈 1,000만 원');
+  // 큰 숫자는 묶음 합계라는 이름(2026-11-14 R4)
+  await expect(first).toContainText('둘이 모은 금액');
   await axe(page);
   // 퍼센트만(G1)
   Object.assign(db.v22?.bundles[0] ?? {}, {
