@@ -410,6 +410,8 @@ export interface MonthLineInput {
   base: BaseDay | null;
   /** 아직 확인 목록이 없을 때 첫 월급날(firstChecklistStart) */
   firstPayday?: string | null;
+  /** 월급날 앞당기기(07 1장, 앱 useShownPayday). 늦은 확인 마지막 날 계산에 씀 */
+  shift?: (d: string) => string;
 }
 
 export type HomeMonthLine =
@@ -451,8 +453,9 @@ export function lateLeft(
   prev: MonthChecklist | null | undefined,
   today: string,
   base: BaseDay | null,
+  shift?: (d: string) => string,
 ) {
-  if (!prev || !canLateCheck(today, prev.cycle_end, base)) return 0;
+  if (!prev || !canLateCheck(today, prev.cycle_end, base, shift)) return 0;
   return prev.lines.filter((l) => isManual(l) && l.state === 'skipped').length;
 }
 
@@ -495,7 +498,7 @@ export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
   if (i.nonManager) return { kind: 'non_manager', to: SALARY_PATHS.checklist };
   const c = i.current;
   if (!c) return { kind: 'first', date: i.firstPayday ?? null, to: SALARY_PATHS.plan };
-  const late = lateLeft(i.previous, i.today, i.base);
+  const late = lateLeft(i.previous, i.today, i.base, i.shift);
   const left = manualLeft(c.lines);
   if (reviewDue(i.today, c.cycle_end, c.lines))
     return { kind: 'review', cycleStart: c.cycle_start, left, late, to: reviewPath(c.id) };
@@ -709,8 +712,29 @@ function datedTask(i: TopTaskInput): TopTask | null {
   return dated[0]?.t ?? null;
 }
 
+/**
+ * 파트너 저금에 같이 모으기 권유(띠 13, H-10): 각자 계열 + 연결, 상대가 만든 지 7일 안, 묶음에 안 든 상대 저금 중 가장 최근.
+ * 내 저금이 0개면 H-10 빈 상태가 이 권유를 대신 보여 주고 띠는 내지 않음(2026-11-14 재테스트 R4: 한 화면에 세 번 겹침)
+ */
+export function bundleInviteGoal(
+  i: Pick<TopTaskInput, 'joint' | 'coupleState' | 'partnerGoals' | 'today'>,
+): { id: string; name: string; to: string } | null {
+  if (i.joint || i.coupleState !== 'connected') return null;
+  const g = (i.partnerGoals ?? [])
+    .filter((x) => !x.bundle_id)
+    .filter((x) => {
+      const d = daysBetween(x.created_at.slice(0, 10), i.today);
+      return d >= 0 && d < REQUEST_TASK_DAYS;
+    })
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+  return g
+    ? { id: g.id, name: g.name, to: `/salary/bundles/new?goal=${encodeURIComponent(g.id)}` }
+    : null;
+}
+
 /** 열린 할 일 띠 모두(순서대로). 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름 */
 function openTopTasks(i: TopTaskInput): TopTask[] {
+  const invite = bundleInviteGoal(i);
   const closed = new Set(i.closedKeys ?? []);
   const ok = (t: TopTask | null): t is TopTask => !!t && !closed.has(t.key);
   const separate = !i.joint;
@@ -778,7 +802,11 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
         : null,
     // 7 첫 저금(저금 0개, 첫 30일, 해제 대기 아님)
     () =>
-      i.savingCount === 0 && inFirst(FIRST_TASK_DAYS) && i.coupleState !== 'unlink_pending'
+      // 상대 저금 권유가 있으면 첫 저금 띠는 내지 않음(H-10이 권유 하나만, R4)
+      i.savingCount === 0 &&
+      !invite &&
+      inFirst(FIRST_TASK_DAYS) &&
+      i.coupleState !== 'unlink_pending'
         ? { kind: 'first_saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' }
         : null,
     // 8 생활비 나누기(각자 계열 + 생활비 ‘네’ + 연결 + 분담 없음, 첫 30일, ‘이미 정했어요’로 영구히 닫음)
@@ -813,25 +841,17 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
     () =>
       i.reconcile ? { kind: 'reconcile', key: i.reconcile.key, to: '/salary/reconcile' } : null,
     // 13 파트너 저금에 같이 모으기(각자 계열, 상대가 만든 지 7일 안, 묶음에 안 듦)
-    () => {
-      if (!separate || !connected) return null;
-      const g = (i.partnerGoals ?? [])
-        .filter((x) => !x.bundle_id)
-        .filter((x) => {
-          const d = daysBetween(x.created_at.slice(0, 10), i.today);
-          return d >= 0 && d < REQUEST_TASK_DAYS;
-        })
-        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
-      return g
+    // 내 저금이 0개면 H-10 빈 상태가 대신 보여 줌(R4)
+    () =>
+      invite && i.savingCount > 0
         ? {
             kind: 'bundle_invite',
-            goalId: g.id,
-            name: g.name,
-            key: `bundle_invite:${g.id}`,
-            to: `/salary/bundles/new?goal=${encodeURIComponent(g.id)}`,
+            goalId: invite.id,
+            name: invite.name,
+            key: `bundle_invite:${invite.id}`,
+            to: invite.to,
           }
-        : null;
-    },
+        : null,
     // 14 만기·경조사·쓸 곳 메모 날짜
     () => datedTask(i),
     // 15 초대(미합류)

@@ -76,6 +76,8 @@ export function SavingGoalRow({
  * 진행은 줄 앞 진행 원(LineLead, 2026-11-09 줄 아래 얇은 막대 대신, 줄 높이가 다른 줄과 같게)
  */
 export function SavingMeta({ item, masked }: { item: SavingItem | undefined; masked: boolean }) {
+  // 같이 모으기에 든 저금: 진행·목표는 묶음(둘이 모은 금액)에서만, 줄에는 내 몫만(2026-11-14 R4)
+  if (item?.bundled) return <>{copy.myShare(money(item.saved, masked))}</>;
   if (!item || item.target === null) return null;
   return <>{copy.itemProgress(money(item.saved, masked), money(item.target, masked))}</>;
 }

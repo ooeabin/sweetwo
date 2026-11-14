@@ -59,9 +59,11 @@ export const copy = {
   birthYearValue: (y: number) => `${y}년생`, // [확인 필요]
   salaryGroup: '월급',
   mySalary: '내 월급',
-  salaryValue: (amount: string, day: string) => `${amount}, ${day}`,
+  // 빈 값(공개 단계로 못 보는 금액, 날짜 없는 사람의 월급날)은 빼고 쉼표로(2026-11-14 R5: “시우 ,”)
+  salaryValue: (amount: string, day: string) => [amount, day].filter(Boolean).join(', '),
   variable: '매달 달라요',
-  partnerSalary: (name: string, amount: string, day: string) => `${name} ${amount}, ${day}`, // [확인 필요]
+  partnerSalary: (name: string, amount: string, day: string) =>
+    [amount, day].some(Boolean) ? `${name} ${[amount, day].filter(Boolean).join(', ')}` : '', // [확인 필요]
   salaryMode: '월급 관리 방식',
   salaryModeValue: { separate: '각자 관리해요', joint: '합쳐서 관리해요' }, // [확인 필요]
   planDay: '체크리스트 만드는 날',

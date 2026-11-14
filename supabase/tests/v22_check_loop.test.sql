@@ -36,6 +36,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 1 where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority, target_amount)
   select space_id, 'home', '내 집 마련', 'once', 1, 3000000 from public.app_user where id = auth.uid();
@@ -181,6 +182,7 @@ select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set nickname = '프리', monthly_income = 3000000, payday = null, payday_none = true where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority, target_amount)
   select space_id, 'rainy', '비상금', 'once', 1, 10000000 from public.app_user where id = auth.uid();
@@ -207,6 +209,7 @@ select pg_temp.login_as('44444444-4444-4444-4444-444444444444');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set monthly_income = 3000000, payday = 1 where id = auth.uid();
 select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 500000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), auth.uid());

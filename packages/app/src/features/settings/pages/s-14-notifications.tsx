@@ -21,12 +21,13 @@ import {
 } from '@sweetwo/core';
 import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sharedCopy } from '../../../shared/copy';
 import { toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy, hourLabel } from '../copy';
+import { usePushPermission } from '../push-status';
 import { useSettingsData } from '../data';
 
 // S-14 알림(docs/spec/25-settings.md). 2026-11-04 이메일은 자동 예비로만이라 이메일 설정 없음.
@@ -52,21 +53,9 @@ export function S14Notifications() {
   const d = useSettingsData();
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
   const splits = useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
-  // 휴대폰 알림 권한(모바일 앱만). 설정 앱에서 바꾸고 돌아오면 다시 읽음
-  const [osDenied, setOsDenied] = useState(false);
-  useEffect(() => {
-    const push = window.sweetwo?.push;
-    if (!push) return;
-    const read = () =>
-      void push
-        .status()
-        .then((st) => setOsDenied(st === 'denied'))
-        .catch(() => undefined);
-    read();
-    const onShow = () => document.visibilityState === 'visible' && read();
-    document.addEventListener('visibilitychange', onShow);
-    return () => document.removeEventListener('visibilitychange', onShow);
-  }, []);
+  // 휴대폰 알림 권한(모바일 앱만, S-10 요약과 같은 값). 설정 앱에서 바꾸고 돌아오면 다시 읽음
+  const [perm, setPerm] = usePushPermission();
+  const osDenied = perm === 'denied';
   // 관리하지 않는 쪽은 ‘같이 쓰는 걸 바꿨을 때’ 기본 끔(18 P-11 표). 서버는 없는 키 = 켬이라 한 번 적어 둠
   const nonManagerMe = !!d.me && !!d.space && isNonManager(d.space, d.me.id);
   const kindsRaw = (d.me?.push_kinds ?? {}) as Record<string, boolean>;
@@ -79,7 +68,8 @@ export function S14Notifications() {
   if (d.loading || !d.me || !d.c || !d.space) return <LoadingFrame sub="settings" current={null} />;
   const prefs = notiPrefs(d.me.noti_prefs);
   // 보이는 푸시 상태: 내 설정이 켜져 있고 휴대폰도 허용
-  const pushOn = prefs.push && !osDenied;
+  // 아직 허용하지 않았으면(‘나중에 할게요’로 건너뜀) 꺼짐으로 보임. 켜면 OS 허용을 물음(R7)
+  const pushOn = prefs.push && !osDenied && perm !== 'prompt';
   const openOsSettings = window.sweetwo?.push?.openSettings;
   const me = d.me;
   const c = d.c;
@@ -139,8 +129,8 @@ export function S14Notifications() {
     // 모바일: 푸시를 켜면 OS 허용부터(거절했으면 휴대폰 설정에서)
     const push = window.sweetwo?.push;
     if (on && push && (await push.status()) !== 'granted') {
-      if (!(await push.request())) return setOsDenied(true);
-      setOsDenied(false);
+      if (!(await push.request())) return setPerm('denied');
+      setPerm('granted');
       const t = await push.token();
       const pf = window.sweetwo?.platform;
       if (t && (pf === 'ios' || pf === 'android'))

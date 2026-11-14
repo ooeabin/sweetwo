@@ -13,6 +13,7 @@ import {
   pickMonthLine,
   pickTopBanner,
   pickTopTasks,
+  bundleInviteGoal,
   PUSH_KINDS,
   pushKindOn,
   pushReaskOpen,
@@ -51,6 +52,7 @@ import {
   AchieveWatch,
   baseDayOf,
   firstPaydayOf,
+  useShownPayday,
   myChecklist,
   salaryChangedDay,
   useChecklists,
@@ -119,6 +121,8 @@ export function H01Home() {
   const rankReq = useRankRequest(joined);
   const accounts = useSharedAccounts(joined);
   const changes = useSalaryChanges();
+  // 월급날 앞당기기(07 1장): 첫 월급날·늦은 확인 마지막 날도 W-02와 같은 날(2026-11-14 R3)
+  const shownPayday = useShownPayday();
   const notes = useUpcomingNotes(today, addDays(today, 365));
   const exName = useQuery({
     queryKey: qk.unlinkPartner,
@@ -206,7 +210,10 @@ export function H01Home() {
 
   // 처음 받을 때만 기다림(다시 받는 동안은 홈을 그대로, S4-01)
   const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;
-  if (!me.data || !sp || !goals.data || listsFirstLoad) return <LoadingFrame current="month" />;
+  // 모은 금액·묶음 합계도 처음 받을 때까지 기다림(2026-11-14 R7: 먼저 0원·옛 숫자를 2초쯤 보였다가 바뀌었음)
+  const sumsFirstLoad = saving.loading || bundles.isLoading;
+  if (!me.data || !sp || !goals.data || listsFirstLoad || sumsFirstLoad)
+    return <LoadingFrame current="month" />;
 
   // 연결 해제 확정 뒤 처음 열면 해제 안내(25 S-12h)
   if (me.data.onboarding_step === 'S-12H')
@@ -257,7 +264,7 @@ export function H01Home() {
   const noSalary = joint
     ? !me.data.monthly_income && !partner.data?.monthly_income
     : !me.data.monthly_income;
-  const firstPayday = list ? null : firstPaydayOf(mySplit, base, today);
+  const firstPayday = list ? null : firstPaydayOf(mySplit, base, today, shownPayday);
   const nonManager = joint && !!sp.manager_user_id && sp.manager_user_id !== myId;
   // 내가 확인을 맡은 손 줄만 셈(한 사람 관리형·합쳐서 남의 용돈 줄 빼고, core lineIsMine = 서버 pay_line_mine)
   const mineOnly = <
@@ -277,6 +284,7 @@ export function H01Home() {
     );
   const monthLine = pickMonthLine({
     today,
+    shift: shownPayday,
     error: lists.isError && !lists.data,
     noSalary,
     paydayNone,
@@ -324,6 +332,23 @@ export function H01Home() {
       ? list.cycle_start
       : addDays(list.cycle_end, 1)
     : (firstPayday ?? null);
+  // 상대 저금 같이 모으기 권유(띠 13). 내 저금이 0개면 띠 대신 H-10 빈 상태가 한 번만 보여 줌(2026-11-14 R4)
+  const inviteGoal =
+    mine.length + activeBundles.length === 0
+      ? bundleInviteGoal({
+          joint,
+          coupleState: sp.couple_state,
+          today,
+          partnerGoals: live
+            .filter((i) => i.owner === 'partner')
+            .map((i) => ({
+              id: i.goal.id,
+              name: i.goal.name,
+              created_at: i.goal.created_at,
+              bundle_id: i.goal.bundle_id,
+            })),
+        })
+      : null;
   const tasks0: TopTask[] = h.input
     ? pickTopTasks({
         today,
@@ -398,7 +423,8 @@ export function H01Home() {
           })),
         reconcile: reconcileTask({
           today,
-          hasSaving: mine.some((i) => i.canEdit),
+          // 맞춰 볼 돈이 있는 저금만(모은 금액 0원뿐이면 띠 없음, 2026-11-14 R7)
+          hasSaving: mine.some((i) => i.canEdit && i.saved > 0),
           lastReconciledOn: me.data.last_reconciled_at
             ? kstDateOf(me.data.last_reconciled_at)
             : null,
@@ -626,6 +652,7 @@ export function H01Home() {
       }}
       moves={moves.moves}
       savingCount={sums.count}
+      invite={inviteGoal}
       go={(box, to) => go(box, to)}
     />
   );

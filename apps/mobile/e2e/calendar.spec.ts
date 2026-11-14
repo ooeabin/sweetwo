@@ -161,7 +161,7 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   ).toBeVisible();
   // 경조사와 금융 일정은 “일정” 한 목록, 오른쪽 D-day(2026-11-03)
   const money = page.getByRole('region', { name: '일정' });
-  // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 22일, 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
+  // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 20일(23일 앞 3일, 2026-11-14 R3), 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
   // 머리 오른쪽 ‘+ 경조사 추가’(2026-11-09)는 빼고 줄만
   const rows = await money.locator('.hg-list').getByRole('button').allTextContents();
   expect(rows[0]).toContain('예빈 월급날');
@@ -242,13 +242,18 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-05), 고른 �
   await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   await axe(page);
 
-  const d23 = page.getByRole('button', { name: '10월 23일, 일정 1개' });
-  // 월급 전 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름
-  await expect(d23.locator('.hg-cal__band')).toHaveCount(1);
+  // 월급 전 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름. 25일(일)이 23일(금)로 앞당겨지니 띠도 그 3일 전 20~22일
+  // (2026-11-14 R3, 서버 cycle_end − 2와 같음)
   await expect(
-    page.getByRole('button', { name: '10월 22일, 일정 1개' }).locator('.hg-cal__band'),
+    page.getByRole('button', { name: '10월 22일', exact: true }).locator('.hg-cal__band'),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole('button', { name: '10월 23일, 일정 1개' }).locator('.hg-cal__band'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: '10월 20일, 일정 1개' }).locator('.hg-cal__band'),
   ).toHaveText('월급 전 확인');
-  await page.getByRole('button', { name: '10월 22일, 일정 1개' }).click();
+  await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
   // 오늘(10월 7일)은 아직 월급 전 확인 기간 전이라 W-05가 W-02로 보냄(2026-11-12 D3)
   await expect(page).toHaveURL(/\/salary$/);
@@ -598,7 +603,7 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
 test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날 → 그 사람 체크리스트(S9-10), 맨 위 월급 전 확인 띠 없음(D1)', async ({
   page,
 }) => {
-  // 10월 22일 = 찬우 월급 전 확인 기간(22~24일)
+  // 10월 22일 = 찬우 월급 전 확인 기간(앞당긴 23일 앞 20~22일, 2026-11-14 R3)
   const DAY = new Date('2026-10-22T10:00:00+09:00');
   await page.clock.setFixedTime(DAY);
   const db = await mockOnboarding(page, { now: DAY });

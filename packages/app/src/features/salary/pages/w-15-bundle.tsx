@@ -82,6 +82,16 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
     ? undefined
     : (joinableBundle(bundles.data ?? []) ?? waitingBundle(bundles.data ?? []));
   const openJoin = !!open && !open.goals.some((g) => g.mine);
+  /**
+   * 새 저금 매달 금액 처음 값(2026-11-14 R4): 같이 모을 상대 저금(들어가는 묶음이면 그 묶음의 상대 저금)의 매달 금액.
+   * 공개 단계로 못 보면(0) 비워 둠. 목표 금액은 묶음 것을 쓰니 새 저금에는 묻지 않음
+   */
+  const partnerMonthly = (goalId: string | null | undefined) => {
+    const m = d.ready && goalId ? (d.byId(goalId)?.monthly ?? 0) : 0;
+    return m > 0 ? m : null;
+  };
+  const joinPartnerGoal = () =>
+    bundles.data?.find((b) => b.id === bundleId)?.goals.find((g) => !g.mine)?.id ?? null;
   /** 처음 단계(주소의 goal에 따라). skipOpen = ‘따로 새로 모을게요’를 고른 뒤 */
   const firstStep = (skipOpen = false) => {
     if (!skipOpen && open) return setStep('exist');
@@ -97,6 +107,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
       ) {
         setMineGoal(NEW);
         setNewName(bundles.data?.find((b) => b.id === bundleId)?.name ?? '');
+        setNewMonthly(partnerMonthly(joinPartnerGoal()));
         return setStep('newName');
       }
       return setStep('mine');
@@ -295,6 +306,8 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
             if (v !== NEW) return afterMine();
             // 새 저금 이름 처음 값: 고른 상대 저금(또는 들어가는 묶음) 이름
             setNewName(pg?.goal.name ?? bundle?.name ?? '');
+            if (newMonthly === null)
+              setNewMonthly(partnerMonthly(pg?.goal.id ?? joinPartnerGoal()));
             go('newName');
           }}
           options={[

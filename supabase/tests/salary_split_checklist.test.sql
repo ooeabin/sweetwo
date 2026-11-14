@@ -24,6 +24,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set monthly_income = 3500000, payday = 25 where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'emergency', '비상금', 'once', 0 from public.app_user where id = auth.uid();
@@ -68,6 +69,7 @@ select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 select is((select count(*) from public.split_line) + (select count(*) from public.pay_check_line), 0::bigint, '다른 커플 월급 계획·체크리스트는 안 보임');
 reset role;
 

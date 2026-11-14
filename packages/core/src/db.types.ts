@@ -4641,6 +4641,10 @@ export type Database = {
         Args: { p_asset: string; p_new_date?: string; p_to?: string }
         Returns: undefined
       }
+      shifted_cycle_date: {
+        Args: { m: number; p_day: number; p_space: string; y: number }
+        Returns: string
+      }
       space_avatars: {
         Args: Record<PropertyKey, never>
         Returns: {

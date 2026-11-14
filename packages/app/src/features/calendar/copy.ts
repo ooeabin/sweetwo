@@ -26,6 +26,9 @@ export const copy = {
     goal: (name: string) => `${name} 쓰는 달`,
     maturity: (name: string) => `${name} 만기`,
     note: (name: string) => name, // 쓸 곳 메모 날짜(W-14, 24 v2.2) [확인 필요]
+    // 날짜 없는 사람의 자동 줄(2026-11-14 R6). 지난 날은 자동 확인 [확인 필요]
+    auto: (name: string) => `${name} 자동으로 나가요`,
+    autoDone: (name: string) => `${name} 자동으로 나갔어요`,
   },
   go: {
     payday: '체크리스트', // [확인 필요]
@@ -34,6 +37,7 @@ export const copy = {
     goal: '저금',
     maturity: '자산',
     note: '쓸 곳 메모', // [확인 필요] 2026-11-13
+    auto: '월급 계획', // [확인 필요] 2026-11-14 R6
   },
   // 2026-11-04 칸 안 짧은 이름, 월급 전 확인 띠 이름, 오늘로 [확인 필요]
   short: {
@@ -43,6 +47,7 @@ export const copy = {
     goal: '쓰는 달',
     maturity: '만기',
     note: '쓸 곳', // [확인 필요] 2026-11-13 칸 안 짧은 이름
+    auto: '자동', // [확인 필요] 2026-11-14 R6
     band: '월급 전 확인',
   },
   today: '오늘',
@@ -54,6 +59,7 @@ export const copy = {
     goal: '저금 보기',
     maturity: '자산 보기',
     note: '쓸 곳 메모 보기', // [확인 필요] 2026-11-13
+    auto: '월급 계획 보기', // [확인 필요] 2026-11-14 R6
   },
   monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',

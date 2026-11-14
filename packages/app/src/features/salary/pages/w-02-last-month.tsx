@@ -7,8 +7,12 @@ import { copy } from '../copy';
 // 체크할 수 있음(check_pay_line·confirm_payday가 late = true로 허용). 그 뒤 읽기 전용. W-02 ‹ 지난 달과 `?cycle=last`가 여기로.
 
 /** 이 지난 사이클을 지금 늦게 확인할 수 있나(서버 late_check_until, core canLateCheck) */
-export const lateOpen = (list: PayChecklist, today: string, base: BaseDay | null) =>
-  list.cycle_end < today && canLateCheck(today, list.cycle_end, base);
+export const lateOpen = (
+  list: PayChecklist,
+  today: string,
+  base: BaseDay | null,
+  shift?: (d: string) => string,
+) => list.cycle_end < today && canLateCheck(today, list.cycle_end, base, shift);
 
 /** 늦게 확인할 수 있는 손 줄(닫을 때 건너뜀이 된 줄 + 아직 대기) */
 export const lateLines = (list: PayChecklist) =>

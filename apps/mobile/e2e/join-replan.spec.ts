@@ -3,6 +3,7 @@ import { axe as runAxe } from './axe';
 import { chanwoo, type MemDb, mockOnboarding, SB, seed } from './mocks';
 import { events } from './analytics';
 import { setWheel } from './wheel';
+import { fakeBridge } from './fake-bridge';
 
 // 파트너 합류 v2.2(18 ‘파트너 합류 v2.2’, 2026-11-13): P-03 이름 → P-04 형태 확인(좋아요 / 월급은 대부분 보내요) → P-05 월급
 // (공개 고지, 각자 계열 ‘월급 없이 합류할게요’) → P-05b 월급날 → (P-05c 용돈: 관리하지 않는 쪽) → P-10 축하 → P-11 알림 종류 → 홈.
@@ -299,7 +300,10 @@ test('한 사람이 관리해요(찬우가 관리): 형태 확인만 → P-05c �
   await salary(page);
   await allowance(page, '250000');
   await celebrate(page);
+  // R1(2026-11-14): 본 version(공간에 넣기 전 값)으로 비교. 넣는 순간 보내기 줄로 version이 올라도 멈추지 않음
+  expect(db.joinCalls.find((c) => c.fn === 'complete_join')?.p_version).toBe(1);
   const joint = db.splits.find((x) => x.owner_user_id === null);
+  expect((joint as { version?: number } | undefined)?.version).toBe(3);
   const mine = joint?.split_line.filter((l) => l.user_id === db.me.id);
   expect(mine?.map((l) => [l.kind, l.amount, l.auto_pay, l.auto_day])).toEqual([
     ['allowance', 250_000, true, 10],
@@ -564,4 +568,53 @@ test('로그인된 사람의 합류 불가(A-07 7번): 코드 다시 입력하�
     .first()
     .click();
   await expect(page).toHaveURL(/\/$/);
+});
+
+// 2026-11-14 재테스트 R2: 로그인 전에 P-01을 한 번 열어 ‘로그인 안 됨’을 기억한 채 가입(A-05)을 마치고 돌아오면(?go=1)
+// 옛 값으로 다시 A-02에 튀었음. 열 때마다 새로 확인해 바로 합류하고, 가입 도중 앱을 다시 열어도 초대로 이어 감
+const freshJoiner = (db: MemDb) => {
+  joining(db, true, 'one_manager');
+  Object.assign(db.me, { space_id: null, onboarding_step: null, nickname: null });
+};
+test('초대 코드로 가입: 로그인 전에 연 P-01 뒤 가입을 마치고 돌아오면 A-02로 튀지 않고 바로 합류(R2)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  freshJoiner(db);
+  await fakeBridge(page, { signedIn: false });
+  await page.goto('/i/K7M2QX');
+  await expect(page.getByRole('heading', { name: '찬우님이 초대했어요' })).toBeVisible();
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(
+    page.getByRole('heading', { name: '찬우님 공간에 합류할 계정을 골라요' }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.pending-invite'))).toBe('K7M2QX');
+  // 로그인·가입이 끝난 것처럼: 토큰을 주고 A-05가 하듯 앱 안에서 돌아갈 자리로
+  await page.evaluate(() => {
+    const w = window as unknown as {
+      __fb: { token: string | null };
+      __fbcb: { navigate: (x: [string, unknown]) => void };
+    };
+    w.__fb.token = 'e2e-access-token';
+    w.__fbcb.navigate(['/i/K7M2QX?go=1', undefined]);
+  });
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  expect(db.rpc).toContain('join_space');
+  // 합류를 시작하면 이 기기에 남긴 초대는 지움
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.pending-invite'))).toBeNull();
+});
+
+test('초대 코드로 가입 도중 앱을 다시 열면(돌아갈 자리 없음) 시작한 사람 질문이 아니라 합류로(R2)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  freshJoiner(db);
+  await fakeBridge(page, { signedIn: true, pin: null });
+  await page.addInitScript(() => localStorage.setItem('sweetwo.pending-invite', 'K7M2QX'));
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-03$/);
+  await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
+  expect(db.rpc).toContain('join_space');
 });

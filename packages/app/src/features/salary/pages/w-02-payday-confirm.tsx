@@ -232,7 +232,7 @@ export function W02PaydayConfirm() {
   }
   if (!list) {
     // 첫 확인 목록 전(소급 없음, 07 3-1): 월급 계획이 있으면 “11월 25일 첫 월급날에 확인해요” + 월급 계획 보기
-    const firstDay = mySplit ? firstPaydayOf(mySplit, base, today) : null;
+    const firstDay = mySplit ? firstPaydayOf(mySplit, base, today, shownPayday) : null;
     if (mySplit)
       return frame(
         <section className="hg-card hg-card--fill hg-stack">
@@ -278,7 +278,7 @@ export function W02PaydayConfirm() {
   const shown = shownList ?? list;
   const ordered = [...shown.pay_check_line].sort((a, b) => a.sort - b.sort);
   const partnerTab = !joint && tab !== meId;
-  const late = ago > 0 && lateOpen(shown, today, base);
+  const late = ago > 0 && lateOpen(shown, today, base, shownPayday);
   // 지난 달은 읽기 전용, 늦은 확인 기간이면 남은 손 줄만 체크(07 4장)
   const readOnly = (ago > 0 || isPast(shown.cycle_end)) && !late;
   const lateIds = late ? new Set(lateLines(shown).map((l) => l.id)) : null;

@@ -168,7 +168,7 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   await expect(page.getByRole('textbox').first()).toHaveValue('결혼 비용');
 });
 
-test('첫 월급날 전(소급 없음): H-11 “10월 25일 첫 월급날에 확인해요”, 7일 전 띠 9번 → W-01d 자동 줄 고르기 → 띠 사라짐', async ({
+test('첫 월급날 전(소급 없음): H-11 “10월 23일 첫 월급날에 확인해요”(25일 일요일 → 앞당김), 7일 전 띠 9번 → W-01d 자동 줄 고르기 → 띠 사라짐', async ({
   page,
 }) => {
   const PRE = new Date('2026-10-20T10:00:00+09:00');
@@ -182,12 +182,13 @@ test('첫 월급날 전(소급 없음): H-11 “10월 25일 첫 월급날에 확
     },
     PRE,
   );
-  await expect(monthLine(page)).toContainText('10월 25일 첫 월급날에 확인해요');
+  // 첫 월급날도 앞당긴 날(25일 일요일 → 23일 금요일, 서버 make_checklist와 같음, 2026-11-14 R3)
+  await expect(monthLine(page)).toContainText('10월 23일 첫 월급날에 확인해요');
   await expect(band(page)).toContainText('자동으로 나가는 걸 골라 주세요');
   await axe(page);
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');
-  await expect(page.getByText('10월 25일 첫 월급날에 확인해요')).toBeVisible();
+  await expect(page.getByText('10월 23일 첫 월급날에 확인해요')).toBeVisible();
   await page.goto('/');
   await band(page).click();
   await expect(page).toHaveURL(/\/salary\/auto-lines$/);

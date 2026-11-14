@@ -8,6 +8,7 @@ import {
   fetchMe,
   fetchPartner,
   fetchSpace,
+  fetchSplits,
   qk,
   subscribeCares,
   updateCareDay,
@@ -29,6 +30,7 @@ import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-quer
 import { useEffect } from 'react';
 import { track } from '../../shared/analytics';
 import { quietly } from '../../shared/toast';
+import { lineName } from '../salary';
 import { copy } from './copy';
 
 /**
@@ -70,6 +72,8 @@ export function useCalendarData() {
     queryFn: fetchHolidays,
     staleTime: 24 * 3_600_000,
   });
+  // 날짜 없는 사람의 자동 줄 나가는 날(07 6장, 2026-11-14 R6). 못 읽어도 캘린더는 그대로
+  const splits = useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
   const all = [me, space, partner, assets, goals, cares, records, holidays];
   const loading = all.some((q) => q.isLoading);
   // 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 9구간 S9-02): 빈 상태·목록으로 튕기기 대신 오류 카드 + ‘다시 시도’
@@ -98,6 +102,17 @@ export function useCalendarData() {
             : []),
         ];
   const reviewDay: BaseDay | null = !c ? null : joint ? (sp?.joint_cycle_day ?? null) : c.myPayday;
+  // 확인 목록이 없는 사람(날짜 없음): 각자 = 내 월급 계획, 합쳐서 = 기준일이 없을 때 공동 월급 계획(서버 cycle_day null)
+  const dateLess =
+    !!me.data?.payday_none &&
+    (!joint || (sp?.joint_cycle_day ?? c?.partnerPayday ?? null) === null);
+  const autoSplit = dateLess
+    ? (splits.data ?? []).find((x) => x.owner_user_id === (joint ? null : (me.data?.id ?? '')))
+    : undefined;
+  const goalName = (id: string | null) => (goals.data ?? []).find((g) => g.id === id)?.name ?? '';
+  const autoLines = (autoSplit?.split_line ?? [])
+    .filter((l) => l.auto_pay && l.amount > 0)
+    .map((l) => ({ name: lineName(l, goalName, () => null, joint), day: l.auto_day ?? 1 }));
 
   const holidayList = holidays.data ?? [];
   const holidaySet = new Set(holidayList.map((h) => h.date));
@@ -123,6 +138,7 @@ export function useCalendarData() {
         .map((a) => ({ id: a.id, name: a.name, date: a.maturity_date ?? '' })),
       goalDeadlines: openGoals.map((g) => ({ id: g.id, name: g.name, date: g.deadline ?? '' })),
       yearlyGoals: [],
+      autoLines,
       notes: (notes.data ?? [])
         .filter((n) => n.due_on)
         .map((n) => ({ name: n.name, date: n.due_on ?? '', goal: n.goal_id, bundle: n.bundle_id })),
@@ -183,7 +199,11 @@ export function moneyLine(d: MoneyDate) {
             ? copy.money.goal(d.name)
             : d.kind === 'note'
               ? copy.money.note(d.name)
-              : copy.money.maturity(d.name);
+              : d.kind === 'auto'
+                ? d.date <= todayKst()
+                  ? copy.money.autoDone(d.name)
+                  : copy.money.auto(d.name)
+                : copy.money.maturity(d.name);
   const to =
     d.kind === 'payday'
       ? d.who
@@ -193,11 +213,13 @@ export function moneyLine(d: MoneyDate) {
         ? '/salary/review'
         : d.kind === 'maturity'
           ? `/assets/${d.ref ?? ''}`
-          : d.kind === 'note'
-            ? d.bundle
-              ? `/salary/bundles/${d.bundle}/notes`
-              : `/salary/items/${d.ref ?? ''}/notes`
-            : `/salary/items/${d.ref ?? ''}`;
+          : d.kind === 'auto'
+            ? '/salary?view=plan'
+            : d.kind === 'note'
+              ? d.bundle
+                ? `/salary/bundles/${d.bundle}/notes`
+                : `/salary/items/${d.ref ?? ''}/notes`
+              : `/salary/items/${d.ref ?? ''}`;
   return { label, go: copy.go[d.kind], to };
 }
 

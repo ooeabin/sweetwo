@@ -30,7 +30,8 @@ export const firstPaydayOf = (
   split: SalarySplit | undefined,
   base: BaseDay | null,
   today: string,
-) => (split ? firstChecklistStart(split.checklist_from ?? today, base) : null);
+  shift?: (d: string) => string,
+) => (split ? firstChecklistStart(split.checklist_from ?? today, base, shift) : null);
 
 /**
  * 월급이 바뀐 날(띠 6번, 07 5장): 내 월급 변경 중 가장 최근에 적용되거나 되돌린 것의 그날(‘이번 달부터’를 월급날 전에
@@ -62,11 +63,12 @@ export const autoDayText = (autoDay: number | null) =>
  * ‘월급날’ 대신 “자동 1일”(06 3-1, 2026-11-13 UX B)
  */
 export const receiptAutoPill = (
-  l: Pick<SplitLine, 'auto_pay' | 'auto_day'>,
+  l: Pick<SplitLine, 'auto_pay' | 'auto_day' | 'amount'>,
   base: BaseDay | null = null,
   paydayNone = false,
 ) =>
-  l.auto_pay
+  // 0원 줄은 나가는 돈이 없어 알약을 달지 않음(2026-11-14 R6: 날짜 없는 사람의 0원 ‘같이 쓰는 통장’ 줄이 “자동 1일”)
+  l.auto_pay && l.amount > 0
     ? copy.autoPill(
         l.auto_day === null && (paydayNone || base === null)
           ? copy.payday(1)

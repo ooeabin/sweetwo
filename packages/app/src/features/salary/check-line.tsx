@@ -19,7 +19,8 @@ export function LineLead({ line }: { line: Pick<PayCheckLine, 'kind' | 'goal_id'
   const item =
     line.kind === 'saving' && line.goal_id && saving.ready ? saving.byId(line.goal_id) : undefined;
   const spec = leadOf('line', line.kind);
-  return item && item.target !== null ? (
+  // 같이 모으기에 든 저금은 묶음 합계만 진행으로 보임(줄은 아이콘, R4)
+  return item && item.target !== null && !item.bundled ? (
     <Lead progress={item.bar} />
   ) : (
     <Lead icon={spec.icon} tone={spec.tone} />

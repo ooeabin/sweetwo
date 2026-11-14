@@ -39,6 +39,7 @@ export function H10SaveTogether({
   month,
   moves,
   savingCount,
+  invite,
   go,
 }: {
   heroes: HeroItem[];
@@ -58,6 +59,8 @@ export function H10SaveTogether({
   moves: GoalMovePublic[];
   /** 모으는 중 저금 수(2개 이상이면 ‘저금 모두 보기’) */
   savingCount: number;
+  /** 상대 저금 같이 모으기 권유(core bundleInviteGoal). 빈 상태 질문 자리에 한 번만(띠 13 대신, 2026-11-14 R4) */
+  invite?: { name: string; to: string } | null;
   go: (box: 'together' | 'money_in' | 'more' | 'chip' | 'dday', to: string) => void;
 }) {
   const { masked } = useMask();
@@ -96,11 +99,15 @@ export function H10SaveTogether({
         className="hg-hub__wide"
         title={copy.together}
         head={head}
-        question={copy.emptyAsk}
-        chips={savingChips(marriage).map((c) => ({
-          label: copy.chips[c],
-          onClick: () => start(copy.chips[c]),
-        }))}
+        question={invite ? copy.taskBundle(names.partner, invite.name) : copy.emptyAsk}
+        chips={
+          invite
+            ? [{ label: copy.inviteJoin, onClick: () => go('together', invite.to) }]
+            : savingChips(marriage).map((c) => ({
+                label: copy.chips[c],
+                onClick: () => start(copy.chips[c]),
+              }))
+        }
         add={{
           label: copy.emptyAdd,
           onClick: () => {
@@ -131,7 +138,9 @@ export function H10SaveTogether({
       }
     } else {
       const total = b.total ?? 0;
-      say.push(won(total));
+      // 큰 숫자는 묶음 합계(둘이 모은 금액). 월급 탭 저금 줄은 ‘내 몫’(2026-11-14 R4: 화면마다 숫자가 달라 보였음)
+      if (!invited) lines.push(copy.bothSaved);
+      say.push(copy.bothSaved, won(total));
       if (b.target !== null && b.pct !== null) {
         lines.push(copy.targetOf(won(b.target), b.pct));
         say.push(copy.targetPctLabel(b.pct));

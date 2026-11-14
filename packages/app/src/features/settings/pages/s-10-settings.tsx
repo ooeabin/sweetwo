@@ -10,6 +10,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
 import { inviteStateOf } from '../invite-state';
+import { usePushPermission } from '../push-status';
 import { PersonDot } from '../../../shared/person';
 
 // S-10 설정 홈(docs/spec/25-settings.md). 메뉴가 아니라 상단 아바타(좁은 창은 설정 버튼)로 들어옴.
@@ -20,6 +21,7 @@ export function S10Settings() {
   const d = useSettingsData();
   const ck = useChecklist(d.space);
   const mask = useMask();
+  const [pushPerm] = usePushPermission();
   const platform = detectPlatform();
   const app = isApp(platform);
   const lock = useQuery({
@@ -47,6 +49,7 @@ export function S10Settings() {
         ? copy.inviteState(inviteStateOf(invite.data ?? null))
         : copy.state[state];
   const prefs = notiPrefs(d.me.noti_prefs);
+  // 휴대폰에서 알림을 허용했을 때만 ‘켜짐’(건너뛰었거나 거절했으면 꺼짐, R7)
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <div className="hg-list">
@@ -84,7 +87,7 @@ export function S10Settings() {
         )}
         <ListRow
           label={copy.rows.noti}
-          value={copy.pushState(prefs.push)}
+          value={copy.pushState(prefs.push && pushPerm === 'granted')}
           onClick={() => nav('/settings/notifications')}
         />
         <ListRow

@@ -7,8 +7,11 @@ import { deadlineDay } from './saving-item';
 // 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
 // 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
-/** note = 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2, 24 ‘캘린더 v2.2’) */
-export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity' | 'note';
+/**
+ * note = 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2, 24 ‘캘린더 v2.2’).
+ * auto = 날짜 없는 사람의 자동 줄 나가는 날(07 6장, 2026-11-14 R6: 확인 목록이 없어 그날 보이는 곳이 없었음)
+ */
+export type MoneyKind = 'payday' | 'review' | 'deadline' | 'goal' | 'maturity' | 'note' | 'auto';
 export interface MoneyDate {
   date: string;
   kind: MoneyKind;
@@ -69,6 +72,11 @@ export interface MoneyInput {
   yearlyGoals: { id: string; name: string; month: number }[];
   /** 안 낸 쓸 곳 메모 날짜(W-14, 2026-11-13). goal = 저금 id, bundle = 묶음 id(둘 중 하나) */
   notes?: { name: string; date: string; goal: string | null; bundle: string | null }[];
+  /**
+   * 날짜 없는 사람의 자동 줄(0원 넘는 것): 매달 나가는 날(1~31, 31 = 말일, 없는 날은 말일). 서버 auto_confirm_due_lines와 같은 날,
+   * 앞당기지 않음. 지난 날은 앱이 ‘자동 확인’으로 봄
+   */
+  autoLines?: { name: string; day: number }[];
 }
 
 /** 그 달(y, m)의 금융 일정과 월급 전 확인 띠 */
@@ -95,7 +103,9 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
       [y, m],
       [m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1],
     ] as const) {
-      const base = baseDateIn(yy, mm, o.reviewDay);
+      // 월급 전 확인은 앞당긴 다음 월급날 3일 전부터(서버 send_evening_notifications = cycle_end − 2, 2026-11-14 R3)
+      const raw = baseDateIn(yy, mm, o.reviewDay);
+      const base = o.shift === false ? raw : businessDayOnOrBefore(raw, o.holidays);
       const band = { start: addDays(base, -3), end: addDays(base, -1) };
       if (band.start.slice(0, 7) === ym || band.end.slice(0, 7) === ym) {
         bands.push(band);
@@ -103,6 +113,8 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
       }
     }
   }
+  for (const a of o.autoLines ?? [])
+    out.push({ date: baseDateIn(y, m, a.day >= 31 ? 'last' : a.day), kind: 'auto', name: a.name });
   for (const a of o.maturities)
     if (a.date.slice(0, 7) === ym)
       out.push({ date: a.date, kind: 'maturity', name: a.name, ref: a.id });

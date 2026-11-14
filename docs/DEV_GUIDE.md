@@ -354,6 +354,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 ### 오류 코드
 
 - DB: `RAISE EXCEPTION USING ERRCODE = 'P0001', MESSAGE = '<code>'` (예: `unlink_pending`)
+- `40001`(serialization_failure)·`40P01`(deadlock)은 쓰지 않는다(2026-11-14 재테스트 R1). PostgREST는 이 둘이 나면 같은 요청을 트랜잭션째 끝없이 다시 돌려, 앱은 답을 못 받고 멈추고 DB 연결을 붙잡는다. ‘다시 하세요’ 뜻(`split_changed`, `already_checked`)도 `P0001`(20261214090000에서 바꿈)
 - api가 `AppError{code, retryable}`로 바꿈 → 화면은 기능 copy.ts의 문구 표에서 찾음
 - 오류 코드, 사용자 문구, 재시도 여부는 표 하나(docs/errors.md)로 관리하고 기획서 ‘공통 상태’ 탭과 연결
 
