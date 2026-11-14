@@ -69,7 +69,7 @@ select is((select onboarding_step from public.app_user where id = auth.uid()), '
 reset role;
 select is((select couple_state::text from public.couple_space where created_by = '11111111-1111-1111-1111-111111111111'),
   'connected', '커플 연결');
-select is((select body from public.notification where kind = 'partner_joined'), '이제 월급과 저금을 같이 봐요', '합류 알림');
+select is((select body from public.notification where kind = 'partner_joined'), '이제 월급 계획과 저금을 같이 봐요', '합류 알림(같이 계열이거나 모두 공개)');
 select is((select count(*) from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.owner_user_id is null and l.kind = 'allowance'), 0::bigint,
   'v2.2(D2): 용돈 줄은 기본으로 확인 목록에 넣지 않음');

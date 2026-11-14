@@ -99,7 +99,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(
-    page.getByText('예빈님이 월급 계획을 바꿔서 체크 안 한 줄을 다시 계산했어요'),
+    page.getByText('예빈님이 월급 계획을 바꿔서 확인 안 한 줄을 다시 계산했어요'),
   ).toBeVisible();
   await axe(page);
   // 지난 달이 있어 새 사이클 한 줄도 있음(2026-11-09): 안내마다 ×

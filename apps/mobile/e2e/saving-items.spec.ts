@@ -221,7 +221,7 @@ test('W-11b 바꾸기 칩 고른 표시, W-11c 키패드는 하나로 맨 아래
   await expect(page.getByLabel('숫자 키패드')).toHaveCount(1);
   // 목표 금액 칸을 누르면 키패드가 다시 그 칸에
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').click();
-  await page.getByRole('button', { name: '지우기' }).click();
+  await page.getByRole('button', { name: '한 글자 지우기' }).click();
   await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('500,000');
   await axe(page);
 });

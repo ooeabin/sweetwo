@@ -427,6 +427,8 @@ export type HomeMonthLine =
   | { kind: 'first'; date: string | null; to: string }
   | { kind: 'review'; cycleStart: string; left: number; late: number; to: string }
   | { kind: 'payday'; cycleStart: string; left: number; late: number; to: string }
+  /** 월급날이 지났고 월급 전 확인 기간 전, 손 줄이 남음(“10월 25일 월급에서 확인할 게 n개 남았어요” → W-02) */
+  | { kind: 'left'; cycleStart: string; left: number; late: number; to: string }
   | {
       kind: 'auto_only';
       cycleStart: string;
@@ -464,7 +466,8 @@ const SALARY_PATHS = {
 
 /**
  * H-11 이번 달 한 줄(19 ‘H-11 상태’): 못 불러옴 → 월급 없음 → 날짜 없음(H-13 기간) → 관리하지 않는 쪽 →
- * 첫 월급날 전 → 월급 전 확인(손 줄 남음) → 월급날(손 줄 남음) → 자동 줄뿐 → 지난 달 끝(계획대로 됐어요).
+ * 첫 월급날 전 → 월급 전 확인(손 줄 남음) → 월급날 당일(손 줄 남음) → 월급날 뒤(손 줄 남음) → 자동 줄뿐 → 지난 달 끝.
+ * 손 줄 수(left)는 내가 확인을 맡은 줄만 셀 수 있게 앱이 lines를 걸러 넘김(한 사람 관리형, lineIsMine).
  * 늦은 확인 수(late)는 모든 확인 목록 상태에 붙고, 있으면 이동이 지난 달
  */
 export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
@@ -496,8 +499,15 @@ export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
   const left = manualLeft(c.lines);
   if (reviewDue(i.today, c.cycle_end, c.lines))
     return { kind: 'review', cycleStart: c.cycle_start, left, late, to: reviewPath(c.id) };
+  // “월급날이에요”는 월급날(사이클 첫날) 하루만. 다음 날부터는 날짜를 넣은 문장(2026-11-13 UX B M2)
   if (left > 0)
-    return { kind: 'payday', cycleStart: c.cycle_start, left, late, to: SALARY_PATHS.checklist };
+    return {
+      kind: i.today <= c.cycle_start ? 'payday' : 'left',
+      cycleStart: c.cycle_start,
+      left,
+      late,
+      to: SALARY_PATHS.checklist,
+    };
   const lateTo = late > 0 ? SALARY_PATHS.last : SALARY_PATHS.checklist;
   if (manualCount(c.lines) === 0)
     return {
@@ -699,12 +709,8 @@ function datedTask(i: TopTaskInput): TopTask | null {
   return dated[0]?.t ?? null;
 }
 
-/**
- * 할 일 띠 하나(19 ‘할 일 띠 순서 v2.2’ 1~16번, 정본). 월급날 확인·월급 전 확인은 띠가 아니라 H-11(pickMonthLine).
- * 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름. 없으면 null.
- * 이동 주소 중 v2.2 새 화면 주소는 화면 PR(8~12)에서 routes.tsx와 맞춤(서버 알림 링크와 같은 모양)
- */
-export function pickTopTask(i: TopTaskInput): TopTask | null {
+/** 열린 할 일 띠 모두(순서대로). 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름 */
+function openTopTasks(i: TopTaskInput): TopTask[] {
   const closed = new Set(i.closedKeys ?? []);
   const ok = (t: TopTask | null): t is TopTask => !!t && !closed.has(t.key);
   const separate = !i.joint;
@@ -844,9 +850,63 @@ export function pickTopTask(i: TopTaskInput): TopTask | null {
           }
         : null,
   ];
-  for (const step of steps) {
-    const t = step();
-    if (ok(t)) return t;
+  return steps.map((step) => step()).filter(ok);
+}
+
+/**
+ * 할 일 띠 하나(19 ‘할 일 띠 순서 v2.2’ 1~16번, 정본). 월급날 확인·월급 전 확인은 띠가 아니라 H-11(pickMonthLine).
+ * 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름. 없으면 null
+ */
+export function pickTopTask(i: TopTaskInput): TopTask | null {
+  return openTopTasks(i)[0] ?? null;
+}
+
+/** 사람이 보낸 요청·초대(19 ‘띠 두 칸’): 다른 할 일에 가려지면 안 되는 것 */
+const PERSON_TASKS: readonly TopTask['kind'][] = [
+  'reconnect',
+  'mode_request',
+  'split_request',
+  'rank_request',
+  'bundle_invite',
+  'invite',
+  'waiting_joiner',
+];
+/** 홈 할 일 띠 최대 칸 수(2026-11-13 UX B M5) */
+export const TOP_TASK_MAX = 2;
+
+/**
+ * 홈 할 일 띠 두 칸까지(19 ‘할 일 띠 순서 v2.2’, 2026-11-13 UX B M5) [확인 필요]:
+ * 첫 칸 = 순서상 첫 할 일. 둘째 칸 = 남은 것 중 사람이 보낸 요청·초대(2·3·4·5·13·15·16번) 중 첫째,
+ * 없으면 순서상 다음 할 일. 그래서 첫 저금·잔액 맞추기 같은 내 할 일이 상대 요청·같이 모으기 권유·초대를 가리지 않음
+ */
+export function pickTopTasks(i: TopTaskInput, max = TOP_TASK_MAX): TopTask[] {
+  const all = openTopTasks(i);
+  const out: TopTask[] = [];
+  const first = all[0];
+  if (!first) return out;
+  out.push(first);
+  const rest = all.slice(1);
+  while (out.length < max && rest.length) {
+    const k = rest.findIndex((t) => PERSON_TASKS.includes(t.kind));
+    const [t] = rest.splice(k >= 0 ? k : 0, 1);
+    if (t) out.push(t);
   }
-  return null;
+  return out;
+}
+
+/** 알림 다시 묻기 띠가 뜨는 기간(19 띠 10번, 2026-11-13 UX B M5): 다가오는 월급날 3일 전 ~ 당일. 날짜 없음은 온보딩 7일 뒤부터 */
+export const PUSH_REASK_DAYS_BEFORE = 3;
+export const PUSH_REASK_NO_DATE_AFTER = 7;
+export function pushReaskOpen(o: {
+  today: string;
+  /** 다가오는 월급날(첫 확인 목록 전이면 첫 월급날, 아니면 이번 사이클 첫날이나 다음 사이클 첫날) */
+  nextPayday: string | null;
+  paydayNone: boolean;
+  onboardedOn: string | null;
+}): boolean {
+  if (o.paydayNone)
+    return !!o.onboardedOn && daysBetween(o.onboardedOn, o.today) >= PUSH_REASK_NO_DATE_AFTER;
+  if (!o.nextPayday) return false;
+  const d = daysBetween(o.today, o.nextPayday);
+  return d >= 0 && d <= PUSH_REASK_DAYS_BEFORE;
 }

@@ -667,12 +667,20 @@ export const copy = {
 
   // S-14 알림 종류(18 P-11 표와 같은 목록) [확인 필요]
   kinds: {
-    care: '경조사 일주일 전',
+    care: '경조사가 다가올 때', // 2026-11-13 UX B
     payday: '월급날 확인할 게 있을 때',
     achieved: '같이 모으기를 다 모았을 때',
     shared_change: (name: string) => `${name}님이 같이 쓰는 걸 바꿨을 때`,
     my_allowance: '내 용돈이 바뀌었을 때',
     progress_news: '진행 소식',
+  },
+  /** 알림 종류 보조 줄(2026-11-13 UX B, 18 P-11 표) [확인 필요] */
+  kindsHelp: {
+    care: '한 달 전, 일주일 전에 알려 드려요',
+    progress_news: (paydayNone: boolean) =>
+      paydayNone
+        ? '매달 1일, 저금이 얼마나 모였는지 알려 드려요'
+        : '확인할 게 없는 달 월급날, 저금이 얼마나 모였는지 알려 드려요',
   },
   lockScreenNote: '잠금 화면에서는 금액을 늘 가려요', // [확인 필요]
   otherAlerts: '그 밖의 알림', // [확인 필요]

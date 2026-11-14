@@ -158,7 +158,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   // 월급 계획 화면 없이 합류 축하(P-10) → P-11. 첫 확인 목록은 다음 월급날(소급 없음)
   await celebrate(page);
   await pushKinds(page, [
-    ['경조사 일주일 전', true],
+    ['경조사가 다가올 때', true],
     ['월급날 확인할 게 있을 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['진행 소식', true],
@@ -275,7 +275,7 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
   });
   // 관리하지 않는 쪽: 월급날 확인 없음(자동 줄뿐), 내 용돈이 바뀌었을 때
   await pushKinds(page, [
-    ['경조사 일주일 전', true],
+    ['경조사가 다가올 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['내 용돈이 바뀌었을 때', true],
     ['진행 소식', true],
@@ -310,7 +310,7 @@ test('한 사람이 관리해요(찬우가 관리): 형태 확인만 → P-05c �
     5,
   );
   await pushKinds(page, [
-    ['경조사 일주일 전', true],
+    ['경조사가 다가올 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['찬우님이 같이 쓰는 걸 바꿨을 때', false],
     ['내 용돈이 바뀌었을 때', true],
@@ -334,7 +334,7 @@ test('합쳐서 관리해요(둘이 같이): 형태 확인만 → 공동 월급 
   expect(lines.some((l) => l.kind === 'allowance' && l.amount === 270_000)).toBe(true);
   expect(lines.some((l) => l.kind === 'send')).toBe(false);
   await pushKinds(page, [
-    ['경조사 일주일 전', true],
+    ['경조사가 다가올 때', true],
     ['월급날 확인할 게 있을 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['찬우님이 같이 쓰는 걸 바꿨을 때', true],
@@ -354,7 +354,7 @@ test('각자 계열 ‘월급 없이 합류할게요’: 월급날·용돈 없�
   expect(db.me).toMatchObject({ monthly_income: 0, payday: null });
   expect(db.splits.filter((s) => s.owner_user_id === db.me.id)).toHaveLength(0);
   await pushKinds(page, [
-    ['경조사 일주일 전', true],
+    ['경조사가 다가올 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['진행 소식', true],
   ]);

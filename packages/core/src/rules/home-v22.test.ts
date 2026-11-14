@@ -5,6 +5,8 @@ import {
   pickHeroes,
   pickMonthLine,
   pickTopTask,
+  pickTopTasks,
+  pushReaskOpen,
   reconcileTask,
   type HeroGoal,
   type MonthChecklist,
@@ -98,8 +100,15 @@ describe('pickMonthLine(H-11 상태)', () => {
       { state: 'checked' },
       { state: 'wait', auto: true, auto_due: '2026-10-26' },
     ]);
-    expect(pickMonthLine({ ...base, current: c })).toMatchObject({
+    expect(pickMonthLine({ ...base, today: '2026-10-25', current: c })).toMatchObject({
       kind: 'payday',
+      left: 1,
+      to: '/salary',
+    });
+    // 월급날이 지나면 “월급날이에요” 대신 날짜 문장(2026-11-13 UX B M2), 이동은 W-02 그대로
+    expect(pickMonthLine({ ...base, current: c })).toMatchObject({
+      kind: 'left',
+      cycleStart: '2026-10-25',
       left: 1,
       to: '/salary',
     });
@@ -319,5 +328,60 @@ describe('pickTopTask(H-06 16순서)', () => {
       date: '2026-11-20',
       to: '/salary/items/g/notes',
     });
+  });
+});
+
+describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
+  const base: TopTaskInput = {
+    today: '2026-11-13',
+    now: '2026-11-13T03:00:00Z',
+    meId: 'c',
+    coupleState: 'connected',
+    joint: false,
+    unlinkRequestedBy: null,
+    reconnectFrom: null,
+    onboardedOn: '2026-11-01',
+    savingCount: 0,
+  };
+  it('첫 칸은 순서대로, 둘째 칸은 사람이 보낸 요청·권유가 먼저(첫 저금이 같이 모으기 권유를 가리지 않음)', () => {
+    const t = pickTopTasks({
+      ...base,
+      reconcile: { key: 'reconcile:2026-11-10', due: '2026-11-10' },
+      partnerGoals: [
+        { id: 'g', name: '결혼 비용', created_at: '2026-11-12T00:00:00Z', bundle_id: null },
+      ],
+    });
+    expect(t.map((x) => x.kind)).toEqual(['first_saving', 'bundle_invite']);
+  });
+  it('요청이 없으면 다음 순서', () => {
+    const t = pickTopTasks({ ...base, reconcile: { key: 'r', due: '2026-11-10' } });
+    expect(t.map((x) => x.kind)).toEqual(['first_saving', 'reconcile']);
+  });
+  it('미합류 초대도 둘째 칸에', () => {
+    const t = pickTopTasks({
+      ...base,
+      coupleState: 'not_joined',
+      reconcile: { key: 'r', due: '2026-11-10' },
+    });
+    expect(t.map((x) => x.kind)).toEqual(['first_saving', 'invite']);
+  });
+  it('하나뿐이면 하나, 없으면 빈 배열', () => {
+    expect(pickTopTasks({ ...base, savingCount: 1 })).toEqual([]);
+    expect(pickTopTasks(base).map((x) => x.kind)).toEqual(['first_saving']);
+  });
+});
+
+describe('pushReaskOpen(띠 10번 기간)', () => {
+  const o = { paydayNone: false, onboardedOn: '2026-11-01' };
+  it('다가오는 월급날 3일 전 ~ 당일', () => {
+    expect(pushReaskOpen({ ...o, today: '2026-11-21', nextPayday: '2026-11-25' })).toBe(false);
+    expect(pushReaskOpen({ ...o, today: '2026-11-22', nextPayday: '2026-11-25' })).toBe(true);
+    expect(pushReaskOpen({ ...o, today: '2026-11-25', nextPayday: '2026-11-25' })).toBe(true);
+    expect(pushReaskOpen({ ...o, today: '2026-11-25', nextPayday: null })).toBe(false);
+  });
+  it('날짜 없음은 온보딩 7일 뒤부터', () => {
+    const n = { paydayNone: true, nextPayday: null, onboardedOn: '2026-11-01' };
+    expect(pushReaskOpen({ ...n, today: '2026-11-07' })).toBe(false);
+    expect(pushReaskOpen({ ...n, today: '2026-11-08' })).toBe(true);
   });
 });

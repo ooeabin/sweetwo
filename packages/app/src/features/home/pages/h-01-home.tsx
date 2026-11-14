@@ -8,12 +8,14 @@ import {
   homeUpcoming,
   kstDateOf,
   leftover,
+  lineIsMine,
   pickHeroes,
   pickMonthLine,
   pickTopBanner,
-  pickTopTask,
+  pickTopTasks,
   PUSH_KINDS,
   pushKindOn,
+  pushReaskOpen,
   reconcileTask,
   todayKst,
   type BundleView,
@@ -255,19 +257,36 @@ export function H01Home() {
     ? !me.data.monthly_income && !partner.data?.monthly_income
     : !me.data.monthly_income;
   const firstPayday = list ? null : firstPaydayOf(mySplit, base, today);
+  const nonManager = joint && !!sp.manager_user_id && sp.manager_user_id !== myId;
+  // 내가 확인을 맡은 손 줄만 셈(한 사람 관리형·합쳐서 남의 용돈 줄 빼고, core lineIsMine = 서버 pay_line_mine)
+  const mineOnly = <
+    T extends { state: string; auto: boolean; kind: string; user_id: string | null },
+  >(
+    ls: T[],
+  ) =>
+    ls.filter(
+      (l) =>
+        l.auto ||
+        lineIsMine(l, {
+          joint,
+          ownerId: list?.owner_user_id ?? null,
+          meId: myId,
+          managerId: sp.manager_user_id,
+        }),
+    );
   const monthLine = pickMonthLine({
     today,
     error: lists.isError && !lists.data,
     noSalary,
     paydayNone,
-    nonManager: joint && !!sp.manager_user_id && sp.manager_user_id !== myId,
+    nonManager,
     period: period.data ?? null,
     current: list
       ? {
           id: list.id,
           cycle_start: list.cycle_start,
           cycle_end: list.cycle_end,
-          lines: list.pay_check_line,
+          lines: mineOnly(list.pay_check_line),
         }
       : null,
     previous: prev.data
@@ -276,7 +295,9 @@ export function H01Home() {
           cycle_start: prev.data.cycle_start,
           cycle_end: prev.data.cycle_end,
           // 늦은 확인은 닫을 때 서버가 건너뜀으로 바꾼 줄만(checked_by 없음). 사람이 직접 건너뛴 줄은 빼고 셈(confirm_payday와 같음)
-          lines: prev.data.pay_check_line.filter((l) => !(l.state === 'skipped' && l.checked_by)),
+          lines: mineOnly(
+            prev.data.pay_check_line.filter((l) => !(l.state === 'skipped' && l.checked_by)),
+          ),
         }
       : null,
     base,
@@ -296,8 +317,14 @@ export function H01Home() {
       .map((i) => kstDateOf(i.goal.created_at))
       .sort()
       .find(Boolean) ?? null;
-  const t0: TopTask | null = h.input
-    ? pickTopTask({
+  // 띠 10번 기간: 다가오는 월급날 3일 전 ~ 당일(날짜 없음은 온보딩 7일 뒤부터, core pushReaskOpen)
+  const nextPayday = list
+    ? today === list.cycle_start
+      ? list.cycle_start
+      : addDays(list.cycle_end, 1)
+    : (firstPayday ?? null);
+  const tasks0: TopTask[] = h.input
+    ? pickTopTasks({
         today,
         now: new Date().toISOString(),
         meId: myId,
@@ -331,7 +358,10 @@ export function H01Home() {
               expires_at: rankReq.data.expires_at,
             }
           : null,
-        salaryChanged: { appliedDay: salaryChangedDay(changes.data, myId, base), done: false },
+        // 한 사람 관리형 관리하지 않는 쪽은 ‘보내기’가 서버에서 다시 계산돼 맞출 게 없음(2026-11-13 UX B M5)
+        salaryChanged: nonManager
+          ? null
+          : { appliedDay: salaryChangedDay(changes.data, myId, base), done: false },
         onboardedOn: h.input.onboardedOn,
         savingCount: mine.length + activeBundles.length,
         sharedLiving: sp.shared_living,
@@ -344,7 +374,15 @@ export function H01Home() {
           manualLines: splitLines.filter((l) => l.in_checklist && !l.auto_pay).length,
           done: closed.includes('auto_pick'),
         }),
-        pushReask: pushPrompt && !!me.data.onboarding_done_at,
+        pushReask:
+          pushPrompt &&
+          !!me.data.onboarding_done_at &&
+          pushReaskOpen({
+            today,
+            nextPayday,
+            paydayNone,
+            onboardedOn: h.input.onboardedOn ?? null,
+          }),
         paydayNone,
         deadlineGoals: mine
           .filter((i) => i.owner !== 'partner')
@@ -382,9 +420,9 @@ export function H01Home() {
             ? { name: partner.data?.nickname ?? null }
             : null,
       })
-    : null;
-  // 해제 대기 띠가 있으면 같은 할 일(1번)은 빼고 맨 위 띠만
-  const t = t0?.kind === 'unlink' && h.unlink ? null : t0;
+    : [];
+  // 해제 대기 띠가 있으면 같은 할 일(1번)은 빼고 맨 위 띠만. 띠는 두 칸까지(core pickTopTasks)
+  const shownTasks = tasks0.filter((x) => !(x.kind === 'unlink' && h.unlink));
   const taskText = (x: TopTask): string => {
     switch (x.kind) {
       case 'unlink':
@@ -455,8 +493,9 @@ export function H01Home() {
       toast(sharedCopy.errorTitle);
     }
   };
-  const todoBand = t ? (
+  const todoBands = shownTasks.map((t) => (
     <HubBand
+      key={t.key}
       text={taskText(t)}
       go={
         t.kind === 'invite'
@@ -472,7 +511,7 @@ export function H01Home() {
           : undefined
       }
     />
-  ) : null;
+  ));
 
   // ── 맨 위 띠(하나만, core pickTopBanner) ──
   const top = pickTopBanner({
@@ -641,7 +680,7 @@ export function H01Home() {
                 void qc.invalidateQueries({ queryKey: qk.splits });
               }}
             />
-            {todoBand}
+            {todoBands}
             <HubTile
               title={copy.planTile}
               sub={planDay}

@@ -50,13 +50,16 @@ export function lineName(
   goalName: (id: string | null) => string,
   personName: (id: string | null) => string | null,
   joint = false,
+  /** 같이 쓰는 통장 줄의 분담 이름(data useAccountNames) */
+  accountName?: string,
 ) {
   if (l.kind === 'saving') return goalName(l.goal_id);
   if (l.kind === 'custom') return l.name ?? '';
   if (l.kind === 'allowance' && joint)
     return `${personName(l.user_id) ?? ''} ${LINE_NAMES.allowance}`;
-  // v2.2 새 줄(보내기, 같이 쓰는 통장)은 화면 PR 전까지 저장된 이름만
-  if (l.kind === 'send' || l.kind === 'shared_account') return l.name ?? '';
+  // v2.2 새 줄: 보내기는 늘 ‘보내기’, 같이 쓰는 통장은 분담 이름(없으면 ‘같이 쓰는 통장’, W-01 5d와 같음, 2026-11-13 UX B M7)
+  if (l.kind === 'send') return copy.sendName;
+  if (l.kind === 'shared_account') return l.name || accountName || copy.sharedAccountName;
   return LINE_NAMES[l.kind];
 }
 

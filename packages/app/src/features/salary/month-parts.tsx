@@ -54,19 +54,27 @@ export function MonthBar({
   income,
   masked,
   share,
+  shownStart,
+  lateOpen = 0,
 }: {
   list: PayChecklist;
   income: number;
   masked: boolean;
   /** 다 끝난 달 한 줄의 ‘공유하기’ 재료 */
   share?: MonthShare;
+  /** 보여 줄 월급날(앞당기기, useShownPayday). 없으면 사이클 첫날 */
+  shownStart?: string;
+  /** 지금 늦게 확인할 수 있는 손 줄 수. 있으면 “확인을 마쳤어요”를 띄우지 않음(2026-11-13 UX B M2) */
+  lateOpen?: number;
 }) {
   const p = monthProgress({ income, lines: list.pay_check_line });
   // 확인 끝(07 7장, 2026-11-13): 손 줄이 있으면 손 줄만, 자동 줄뿐이면 모두 확인됐을 때
   const finish =
-    manualCount(list.pay_check_line) > 0
-      ? confirmFinish(list.pay_check_line)
-      : checklistFinish(list.pay_check_line);
+    lateOpen > 0
+      ? null
+      : manualCount(list.pay_check_line) > 0
+        ? confirmFinish(list.pay_check_line)
+        : checklistFinish(list.pay_check_line);
   const [sharing, setSharing] = useState(false);
   const caption = copy.sentOfPlan(money(p.sent, masked), money(p.planned, masked));
   const run = async () => {
@@ -93,7 +101,7 @@ export function MonthBar({
       progress
       label={p.complete ? copy.allDone : copy.progress(p.total, p.done)}
       parts={partsOf(p)}
-      title={finish ? copy.monthFinished(list.cycle_start, finish) : undefined}
+      title={finish ? copy.monthFinished(shownStart ?? list.cycle_start, finish) : undefined}
       caption={caption}
       action={
         finish && share ? (

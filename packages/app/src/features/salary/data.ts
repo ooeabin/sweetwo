@@ -6,6 +6,7 @@ import {
   fetchMe,
   fetchPartner,
   fetchPartnerPlanView,
+  fetchSharedAccounts,
   fetchSpace,
   fetchSplits,
   qk,
@@ -36,6 +37,25 @@ export const useSpace = () => useQuery({ queryKey: qk.space, queryFn: fetchSpace
 export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
 export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
 export const useSplits = () => useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
+/**
+ * 같이 쓰는 통장 줄 이름(20 W-01 5d, 2026-11-13 UX B M7): 줄에는 이름을 두지 않고(split_line.name은 직접 추가 줄만)
+ * shared_account_id로 분담 이름(‘데이트 통장’)을 찾음. 확인 목록 줄은 split_line_id → 월급 계획 줄 → 분담
+ */
+export function useAccountNames() {
+  const splits = useSplits();
+  const accounts = useQuery({ queryKey: qk.sharedAccounts, queryFn: fetchSharedAccounts });
+  const byAccount = new Map((accounts.data ?? []).map((a) => [a.id, a.name]));
+  const byLine = new Map<string, string>();
+  for (const sp of splits.data ?? [])
+    for (const l of sp.split_line) {
+      const n = l.shared_account_id ? byAccount.get(l.shared_account_id) : undefined;
+      if (n) byLine.set(l.id, n);
+    }
+  return {
+    ofAccount: (id: string | null | undefined) => (id ? byAccount.get(id) : undefined),
+    ofSplitLine: (id: string | null | undefined) => (id ? byLine.get(id) : undefined),
+  };
+}
 /**
  * 상대(각자 계열)의 공개 단계대로 서버가 자른 월급 계획(partner_plan_view). W-01 파트너 탭과 같은 캐시.
  * ‘했어요만’이면 상대 저금은 이름·금액 없이 이번 달 확인 여부만(08 6장, 2026-11-13 P1 = A)

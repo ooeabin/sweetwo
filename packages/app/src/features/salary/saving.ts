@@ -179,10 +179,18 @@ export function trackSharedGoal(m: { joint: boolean; joined: boolean } | null | 
 /**
  * 첫 저금 빈 줄(2026-11-09, 20 ‘첫 저금’, 19 H-03): 내 저금이 없으면 체크리스트 저금 묶음에
  * “+ 저금 추가 (여유 자금 {n})” → W-11. ‘내 저금’ = 각자면 내가 주인인 것, 합쳐서면 공동 월급 계획의 것(그만 모은 것 빼고).
- * 각자 모드에서 파트너는 저금이 있으면 “{파트너}님처럼 나도 모을 곳을 만들어 볼까요?”. 월급 계획이 없거나 해제 대기면 없음.
+ * 각자 모드에서 파트너가 묶음에 안 든 저금이 있으면 “{파트너}님 ‘결혼 비용’에 같이 모을까요?” → W-15(20 ‘첫 저금’ 3번, 2026-11-13.
+ * 예전 비교 문구 “…님처럼 나도 모을 곳을…”은 없앰, UX B). 월급 계획이 없거나 해제 대기면 없음.
  */
 export function useFirstSaving():
-  { show: false } | { show: true; left: number; partnerName: string | null } {
+  | { show: false }
+  | {
+      show: true;
+      left: number;
+      partnerName: string | null;
+      /** 같이 모으자고 권할 상대 저금(각자 계열, 묶음에 안 든 것, 이름이 보일 때만) */
+      partnerGoal: { id: string; name: string } | null;
+    } {
   const d = useSavingItems();
   const splits = useSplits();
   const me = useMe();
@@ -200,10 +208,18 @@ export function useFirstSaving():
   const left = Math.max(
     leftover(
       income,
-      mine.split_line.map((l) => ({ amount: l.amount })),
+      mine.split_line.map((l) => ({ amount: l.amount, kind: l.kind })),
     ),
     0,
   );
-  const partnerHas = !d.joint && d.joined && d.live.some((i) => i.owner === 'partner');
-  return { show: true, left, partnerName: partnerHas ? d.partnerName : null };
+  const theirs =
+    !d.joint && d.joined
+      ? d.live.find((i) => i.owner === 'partner' && !i.goal.bundle_id && !!i.goal.name)
+      : undefined;
+  return {
+    show: true,
+    left,
+    partnerName: theirs ? d.partnerName : null,
+    partnerGoal: theirs ? { id: theirs.goal.id, name: theirs.goal.name } : null,
+  };
 }

@@ -29,7 +29,7 @@ export { AchieveWatch, FirstSavingRow, SavingGoalRow, SavingMeta } from './savin
 export { planPath, salaryPaths, savingPaths } from './paths';
 export { EMPTY_DRAFT, writeDraft } from './saving-draft';
 export { PeriodLine } from './period-line';
-export { autoDayText, baseDayOf, firstPaydayOf, salaryChangedDay } from './cycle';
+export { autoDayText, baseDayOf, firstPaydayOf, salaryChangedDay, useShownPayday } from './cycle';
 export { W01dAutoLines } from './pages/w-01d-auto-lines';
 export { W01bSplitPropose } from './pages/w-01b-split-propose';
 export { W01cSplitAnswer } from './pages/w-01c-split-answer';

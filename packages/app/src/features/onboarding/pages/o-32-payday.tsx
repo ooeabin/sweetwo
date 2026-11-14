@@ -50,6 +50,8 @@ export function O32Payday() {
           setNone(false);
         }}
         lastLabel={copy.paydayLast}
+        // ‘날짜가 정해져 있지 않아요’를 고르면 휠은 끔(2026-11-13 UX B), 다시 풀면 켬
+        disabled={noDate}
         // 29~31일은 없는 달이 있어 ‘말일’과 같아질 수 있음(2026-11-10 S2-24, 12 Q4 예외)
         hint={
           typeof payday === 'number' && payday >= 29 ? copy.paydayShortMonth : copy.paydayLastHint

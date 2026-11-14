@@ -192,7 +192,7 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크
     )
     .toBe(true);
   // v2.2: P-11과 같은 종류 목록(push_kinds). 각자 계열이면 ‘같이 쓰는 걸 바꿨을 때’ 없음, 손 줄이 없으면 월급날 줄 없음
-  await expect(card.getByRole('switch', { name: '경조사 일주일 전' })).toBeVisible();
+  await expect(card.getByRole('switch', { name: '경조사가 다가올 때' })).toBeVisible();
   await expect(card.getByRole('switch', { name: '진행 소식' })).toBeVisible();
   await expect(card.getByRole('switch', { name: /같이 쓰는 걸 바꿨을 때/ })).toHaveCount(0);
   await expect(card.getByRole('switch', { name: '월급날 확인할 게 있을 때' })).toHaveCount(0);

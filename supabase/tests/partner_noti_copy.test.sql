@@ -43,7 +43,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select public.finish_join();
 reset role;
-select is(pg_temp.last('partner_joined'), '파트너가 합류했어요 / 이제 월급과 저금을 같이 봐요', '합류(14)');
+select is(pg_temp.last('partner_joined'), '파트너가 합류했어요 / 이제 저금을 같이 봐요', '합류(14, 저금만 공개)');
 
 -- 예빈 해제 요청 → 취소 → 다시 요청 → 찬우 확인
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');

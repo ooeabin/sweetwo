@@ -135,7 +135,7 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   const toast = page.locator('.hg-toast');
-  await expect(toast).toContainText('체크했어요');
+  await expect(toast).toContainText('확인했어요');
   await expect.poll(() => living()?.actual).toBe(700_000);
   await toast.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => living()?.state).toBe('wait');
@@ -200,7 +200,7 @@ test('W-05 기간 안: 옛 링크(/salary/review)와 id 링크, 끝난 사이클
   await expect(sheet.getByRole('button', { name: '이번 달은 건너뛸게요' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '저금 보기' })).toHaveClass(/hg-btn--link/);
   await sheet.getByRole('button', { name: '계획대로 했어요', exact: true }).click();
-  const box = page.getByRole('checkbox', { name: '내 집 마련 체크' });
+  const box = page.getByRole('checkbox', { name: '내 집 마련 확인' });
   await expect(page.locator('.hg-toast')).toContainText('내 집 마련에 95만 원 더했어요');
   await expect(box).toHaveAttribute('aria-checked', 'true');
   await expect(box).not.toHaveAttribute('aria-busy', 'true');
@@ -226,7 +226,7 @@ test('W-05 Realtime(합쳐서): 상대가 체크하면 바로 바뀌고 2초 강
   const fixed = linesOf(db).find((l) => l.kind === 'fixed');
   byYebin(fixed);
   rt.emit('pay_check_line', 'UPDATE', { id: fixed?.id, space_id: 'space-1', state: 'checked' });
-  await expect(page.getByRole('checkbox', { name: '고정지출 체크' })).toHaveAttribute(
+  await expect(page.getByRole('checkbox', { name: '고정지출 확인' })).toHaveAttribute(
     'aria-checked',
     'true',
   );

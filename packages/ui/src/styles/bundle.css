@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (c8936e68). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (1f1f1bd4). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1069,6 +1069,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
 .hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
 .hg-wheel--day .hg-wheel__col { border-radius: var(--radius-xl); }
+.hg-wheel.is-disabled { opacity: 0.4; pointer-events: none; }  /* 2026-11-13 O-32 ‘날짜가 정해져 있지 않아요’: 휠 끔(DayWheel disabled, inert) */
 .hg-wheel--ym { grid-template-columns: 1.2fr 1fr; }  /* 연·월(YearMonthInput) */
 .hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
 .hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
@@ -1808,6 +1809,8 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-appside__logo { display: flex; padding: 0 var(--space-3) var(--space-6); }
 .hg-appside__search { display: flex; align-items: center; gap: var(--space-2); height: 40px; margin: 0 0 var(--space-4); padding: 0 var(--space-2) 0 var(--space-3); border: 0; border-radius: var(--radius-btn-sm); background: var(--surface-alt); color: var(--stone); font: var(--text-body-sm); text-align: left; cursor: pointer; }
 .hg-appside__search > span:not(.hg-ico):not(.hg-kbd) { flex: 1; }
+/* 2026-11-13 UX B: 마우스·트랙패드가 없는 터치 태블릿은 단축키를 누를 수 없어 ⌘K 표시를 숨김(검색 칸은 그대로) */
+@media (hover: none) and (pointer: coarse) { .hg-appside__search .hg-kbd { display: none; } }
 .hg-appside__search:hover { background: var(--hairline-soft); color: var(--slate); }
 .hg-appside__search:focus-visible, .hg-appside__me:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-appside__nav { display: flex; flex-direction: column; gap: 2px; }
@@ -2335,7 +2338,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__plan { font: var(--text-body-sm); color: var(--stone); font-variant-numeric: tabular-nums; white-space: nowrap; }  /* 다른 금액 줄 아래 “계획 80만 원” */
 .hg-receipt__row--strong .hg-receipt__amt { font: var(--text-body-strong); font-weight: 700; }
 .hg-receipt__row.is-short .hg-receipt__name, .hg-receipt__row.is-short .hg-receipt__amt { color: var(--danger); }
-.hg-receipt__add { display: inline-flex; align-items: center; min-height: 36px; margin-top: var(--space-1); padding: 0; border: 0; background: none; color: var(--stone); font: var(--text-label); font-weight: 500; cursor: pointer; }
+.hg-receipt__add { display: flex; width: max-content; max-width: 100%; align-items: center; min-height: 36px; margin-top: var(--space-1); padding: 0; border: 0; background: none; color: var(--stone); font: var(--text-label); font-weight: 500; cursor: pointer; }
 .hg-receipt__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 .hg-receipt__chips .hg-input { flex: 1 1 160px; height: 40px; font-size: 14px; }  /* 칩 줄 높이(hg-chip 40px)에 맞춤 */
 :is(.hg-receipt__amount, .hg-receipt__main, .hg-receipt__add, .hg-receipt__handle, .hg-receipt__link):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }

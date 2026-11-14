@@ -51,6 +51,7 @@ import { MainFrame } from '../../frame';
 import { goalLineName } from '../check-line';
 import { copy } from '../copy';
 import {
+  useAccountNames,
   useChecklists,
   useGoalSaved,
   useGoals,
@@ -88,6 +89,7 @@ export function W01Receipt() {
   const space = useSpace();
   const goals = useGoals();
   const splits = useSplits();
+  const accountNames = useAccountNames();
   const partner = usePartner();
   const saved = useGoalSaved();
   const lists = useChecklists();
@@ -182,7 +184,10 @@ export function W01Receipt() {
   const personName = (id: string | null | undefined) =>
     id === m.id ? (m.nickname ?? '') : (p?.nickname ?? '');
   const goalName = goalLineName(goals.data, (id) => personName(id), joint);
-  const nameOf = (l: Pick<SplitLine, 'kind' | 'goal_id' | 'user_id' | 'name'>) =>
+  const nameOf = (
+    l: Pick<SplitLine, 'kind' | 'goal_id' | 'user_id' | 'name'> &
+      Partial<Pick<SplitLine, 'shared_account_id'>>,
+  ) =>
     l.kind === 'saving'
       ? goalName(l.goal_id)
       : l.kind === 'custom'
@@ -192,7 +197,7 @@ export function W01Receipt() {
           : l.kind === 'send'
             ? copy.sendName // 5e 한 사람 관리형 ‘보내기’
             : l.kind === 'shared_account'
-              ? (l.name ?? copy.sharedAccountName) // 5d 같이 쓰는 통장(분담 이름)
+              ? (l.name ?? accountNames.ofAccount(l.shared_account_id) ?? copy.sharedAccountName) // 5d 같이 쓰는 통장(분담 이름, M7)
               : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
   const baseDay = baseDayOf(owner ?? m, sp);
@@ -205,7 +210,9 @@ export function W01Receipt() {
   const spendLines = lines.filter((l) => l.kind !== 'saving');
   const sum = (ls: SplitLine[]) => ls.reduce((s, l) => s + l.amount, 0);
   const savingSum = sum(savingLines);
-  const spendSum = sum(spendLines);
+  // 보내기 줄(한 사람 관리형)은 공동 수입 안의 이동이라 지출 합·여유 자금에 넣지 않음(06 3-2, core leftover·홈 H-07과 같음,
+  // 2026-11-13 UX B M1: 수입과 보내기를 두 번 세던 것)
+  const spendSum = sum(spendLines.filter((l) => l.kind !== 'send'));
   const ratio = planRatio({ income, saving: savingSum, spend: spendSum });
   const left = ratio.left;
   const dayText = (u: { payday: number | null; payday_last: boolean } | null | undefined) =>
@@ -646,7 +653,7 @@ export function W01Receipt() {
         label: spoken(copy.rowLabel(nameOf(l), won(l.amount))),
         locked: lineLocked,
         note: send ? copy.sendNote : waitLine && l.id === waitLine.id ? waitNote : undefined,
-        auto: receiptAutoPill(l),
+        auto: receiptAutoPill(l, baseDay, !joint && owner === m && !!m?.payday_none),
         onOpen:
           canEdit && !lineLocked
             ? () => {
@@ -711,7 +718,8 @@ export function W01Receipt() {
           autoDay: sheetLine.auto_day,
         },
         // 체크리스트에 넣기는 지출 줄만(저금 줄은 늘 켬)
-        showInChecklist: sheetLine.kind !== 'saving',
+        // 날짜 없는 사람은 확인 목록이 없어 ‘체크리스트에 넣기’를 보이지 않음(07 6장, 2026-11-13 UX B)
+        showInChecklist: sheetLine.kind !== 'saving' && baseDay !== null,
         payday: baseDay,
       }}
       notify={
@@ -720,7 +728,7 @@ export function W01Receipt() {
           : undefined
       }
       onDelete={rowsOf([sheetLine])[0]?.onDelete ? () => remove(sheetLine, 'sheet') : undefined}
-      deleteLabel={copy.removeLabel(nameOf(sheetLine))}
+      deleteLabel={copy.removeLineLabel(nameOf(sheetLine))}
       onItem={
         sheetLine.kind === 'saving' && sheetLine.goal_id
           ? () => nav(savingPaths.item(sheetLine.goal_id ?? ''))

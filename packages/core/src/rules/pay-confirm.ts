@@ -114,20 +114,30 @@ export const reviewDue = (today: string, cycleEnd: string, lines: readonly Confi
   inReviewWindow(today, cycleEnd) && manualLeft(lines) > 0;
 
 /**
- * “모두 계획대로 됐어요”(confirm_payday)가 체크할 줄: 남은 손 줄 중 내가 확인할 수 있는 것.
- * 각자 목록은 주인만(남이면 빈 배열), 합쳐서 목록은 누구나, 단 남의 용돈 줄은 건너뜀(B7)
+ * 이 사람이 확인을 맡은 손 줄인가(서버 pay_line_mine과 같음, 07 4장, 08 2장):
+ * 각자 목록은 주인만. 합쳐서 목록은 누구나, 단 남의 용돈 줄은 빼고(B7).
+ * 한 사람 관리형(managerId 있음, 2026-11-13 UX B H2): 관리하는 사람은 모든 손 줄(상대 용돈 줄 포함),
+ * 관리하지 않는 쪽은 자기 줄(user_id = 나)만. 나머지는 W-02에서 보기만, 월급날·월급 전 확인 알림도 없음
+ */
+export function lineIsMine(
+  l: ConfirmLine,
+  o: { joint: boolean; ownerId: string | null; meId: string; managerId?: string | null },
+): boolean {
+  if (!o.joint) return o.ownerId === o.meId;
+  if (o.managerId) return o.managerId === o.meId || (!!l.user_id && l.user_id === o.meId);
+  return !(l.kind === 'allowance' && l.user_id && l.user_id !== o.meId);
+}
+
+/**
+ * “모두 계획대로 됐어요”(confirm_payday)가 체크할 줄: 남은 손 줄 중 내가 확인을 맡은 것(lineIsMine).
+ * 각자 목록은 주인만(남이면 빈 배열)
  */
 export function confirmableLines<T extends ConfirmLine>(
   lines: readonly T[],
-  o: { joint: boolean; ownerId: string | null; meId: string },
+  o: { joint: boolean; ownerId: string | null; meId: string; managerId?: string | null },
 ): T[] {
   if (!o.joint && o.ownerId !== o.meId) return [];
-  return lines.filter(
-    (l) =>
-      isManual(l) &&
-      l.state === 'wait' &&
-      !(o.joint && l.kind === 'allowance' && l.user_id && l.user_id !== o.meId),
-  );
+  return lines.filter((l) => isManual(l) && l.state === 'wait' && lineIsMine(l, o));
 }
 
 /**

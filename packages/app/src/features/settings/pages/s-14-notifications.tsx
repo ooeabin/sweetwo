@@ -123,10 +123,11 @@ export function S14Notifications() {
       await qc.invalidateQueries({ queryKey: qk.me });
     }
   };
-  const kindRow = (k: PushKind, label: string) => (
+  const kindRow = (k: PushKind, label: string, help?: string) => (
     <Toggle
       key={k}
       label={label}
+      help={help}
       checked={pushOn && pushKindOn(kinds, k)}
       disabled={!pushOn}
       onChange={(on) => setKind(k, on)}
@@ -191,12 +192,16 @@ export function S14Notifications() {
       </section>
       <section className="hg-card hg-stack" aria-label={copy.notiTopics} style={{ gap: 0 }}>
         <span className="hg-card__label">{copy.notiTopics}</span>
-        {kindRow('care', copy.kinds.care)}
+        {kindRow('care', copy.kinds.care, copy.kindsHelp.care)}
         {manual && kindRow('payday', copy.kinds.payday)}
         {kindRow('achieved', copy.kinds.achieved)}
         {joint && c.joined && kindRow('shared_change', copy.kinds.shared_change(c.partnerName))}
         {nonManagerMe && kindRow('my_allowance', copy.kinds.my_allowance)}
-        {kindRow('progress_news', copy.kinds.progress_news)}
+        {kindRow(
+          'progress_news',
+          copy.kinds.progress_news,
+          copy.kindsHelp.progress_news(!!me?.payday_none),
+        )}
         <p className="hg-help" style={{ margin: 0 }}>
           {copy.lockScreenNote}
         </p>
