@@ -154,7 +154,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await page.getByRole('button', { name: '추가하기' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();
   await page.getByRole('dialog').getByLabel('줄 이름').fill('헬스');
-  await page.getByRole('button', { name: '확인' }).click();
+  await page.getByRole('button', { name: '확인', exact: true }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
   await page.getByRole('button', { name: /월급 350만 원/ }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
