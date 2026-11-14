@@ -67,6 +67,11 @@ export interface SavingItem {
   private: boolean;
   /** private일 때 이번 달 확인 여부(partner_plan_view 줄 state) */
   doneThisMonth: boolean;
+  /**
+   * 같이 모으기(묶음)에 든 저금(2026-11-14 R4): 진행·목표는 묶음 합계 하나(둘이 모은 금액)로만 보이고, 저금 줄에는 ‘내 몫’
+   * 금액만(이 저금의 목표 금액은 묶음 목표를 옮겨 둔 값이라 따로 %를 내면 화면마다 숫자가 달라짐)
+   */
+  bundled: boolean;
 }
 
 /** 저금 항목 줄 순서(홈 H-02, W-01 접힌 목록): 내 것 → 파트너 것 → 우리 둘 것, 묶음 안은 만든 순서 */
@@ -137,6 +142,7 @@ export function useSavingItems() {
         owner === 'partner' &&
         partnerDoneOnly &&
         !!pv.data?.lines.some((l) => l.goal_id === g.id && l.state === 'checked'),
+      bundled: !!g.bundle_id,
     };
   };
 
@@ -151,6 +157,8 @@ export function useSavingItems() {
     );
   return {
     loading,
+    /** 모은 금액(goal_saved)을 처음 받는 중(홈이 0원을 먼저 보이지 않게, 2026-11-14 R7) */
+    savedLoading: saved.isLoading,
     failed,
     retry,
     fetching,

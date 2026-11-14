@@ -34,13 +34,14 @@ it('금융 일정: 월급날, 월급 전 확인 띠, 목표 기한, 매년 목�
   expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
     '2026-10-01 goal 자동차 유지비',
     '2026-10-09 payday 예빈',
-    '2026-10-22 review ',
+    // 25일(일)이 23일(금)로 앞당겨지니 월급 전 확인도 그 3일 전부터(2026-11-14 R3, 서버 cycle_end − 2)
+    '2026-10-20 review ',
     '2026-10-23 payday 찬우',
     '2026-10-30 maturity 청년 적금',
     // 기한은 그 달 말일(2026-11-09)
     '2026-10-31 deadline 내 집 마련',
   ]);
-  expect(r.bands).toEqual([{ start: '2026-10-22', end: '2026-10-24' }]);
+  expect(r.bands).toEqual([{ start: '2026-10-20', end: '2026-10-22' }]);
 });
 
 it('합쳐서 모드: 월급날 하나(이름 없음), 월급 전 확인은 공동 사이클 날 기준', () => {
@@ -126,5 +127,24 @@ it('각자 모드 파트너 월급날은 그 사람 id를 같이 줌(S9-10)', ()
   expect(r.dates.map((d) => [d.name, d.who])).toEqual([
     ['예빈', 'yebin-id'],
     ['찬우', undefined],
+  ]);
+});
+
+it('날짜 없는 사람의 자동 줄(2026-11-14 R6): 나가는 날마다, 앞당기지 않음, 31 = 말일', () => {
+  const r = moneyDates(2027, 2, {
+    paydays: [{ name: '찬우', day: null }],
+    reviewDay: null,
+    maturities: [],
+    goalDeadlines: [],
+    yearlyGoals: [],
+    holidays: new Set(['2027-02-15']),
+    autoLines: [
+      { name: '전세대출 원리금', day: 15 },
+      { name: '여행', day: 31 },
+    ],
+  });
+  expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
+    '2027-02-15 auto 전세대출 원리금',
+    '2027-02-28 auto 여행',
   ]);
 });

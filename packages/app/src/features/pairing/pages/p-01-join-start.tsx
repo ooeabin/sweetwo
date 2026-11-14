@@ -45,7 +45,13 @@ export function P01JoinStart() {
     enabled: wellFormed,
     retry: 1,
   });
-  const signedIn = useQuery({ queryKey: ['session-has'], queryFn: () => session.has() });
+  // 로그인 여부는 열 때마다 새로(2026-11-14 R2: 로그인 전에 담아 둔 false가 남아, 가입하고 돌아온 ?go=1이 A-02로 다시 튀었음)
+  const signedIn = useQuery({
+    queryKey: ['session-has'],
+    queryFn: () => session.has(),
+    staleTime: 0,
+    gcTime: 0,
+  });
   const me = useQuery({ queryKey: ['me'], queryFn: fetchMe, enabled: signedIn.data === true });
   const [result, setResult] = useState<JoinResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,18 +61,22 @@ export function P01JoinStart() {
     if (r === 'joined' || r === 'resume') {
       if (r === 'joined')
         track('invite_accepted', { hours_since_sent: null, channel: typed ? 'code' : 'link' });
+      prefs.setPendingInvite(null);
       await qc.invalidateQueries({ queryKey: qk.joinContext });
       const fresh = await me.refetch();
       nav(joinPath((fresh.data?.onboarding_step ?? 'P-03').toLowerCase()), { replace: true });
       return;
     }
     setMoving(false);
+    // 막힌 코드(만료, 잘못됨, 공간 가득 등)는 다시 열어도 이어 가지 않음
+    if (r !== 'has_records') prefs.setPendingInvite(null);
     setResult(r);
   };
   const join = async () => {
     if (busy) return;
     if (!signedIn.data || !me.data) {
       prefs.setReturnTo(`/i/${code}?go=1`); // 로그인, 가입이 끝나면 여기로 돌아와 바로 합류
+      prefs.setPendingInvite(code); // 가입 도중 앱을 닫았다 열어도 합류로(R2)
       nav(paths.login, {
         state: { fromStart: true, entry: 'invite', inviter: preview.data?.inviter },
       });
@@ -87,12 +97,19 @@ export function P01JoinStart() {
   // 주소에서 go를 빼 두어 A-02에서 뒤로 오면 P-01이 보임(다시 넘어가지 않음)
   const auto = useRef(false);
   useEffect(() => {
-    if (auto.current || params.get('go') !== '1' || signedIn.data === undefined) return;
+    // 이 화면을 연 뒤 새로 확인한 로그인 여부로만(옛 값으로 A-02에 보내지 않음, R2)
+    if (
+      auto.current ||
+      params.get('go') !== '1' ||
+      !signedIn.isFetchedAfterMount ||
+      signedIn.isFetching
+    )
+      return;
     if (signedIn.data ? !me.data : preview.data?.status !== 'ok') return;
     auto.current = true;
     if (!signedIn.data) nav(`/i/${code}`, { replace: true });
     void join();
-  }, [me.data, signedIn.data, preview.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [me.data, signedIn.data, signedIn.isFetchedAfterMount, signedIn.isFetching, preview.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if ((wellFormed && preview.isLoading) || signedIn.isLoading || (signedIn.data && me.isLoading))
     return <QuestionSkeleton />;

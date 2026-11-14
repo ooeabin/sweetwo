@@ -1,3 +1,4 @@
+import { businessDayOnOrBefore } from './calendar';
 import { describe, expect, it } from 'vitest';
 import {
   addMonthsToDate,
@@ -42,6 +43,20 @@ it('오늘이 든 사이클과 첫 사이클(소급 없음, 07 3-1)', () => {
   expect(firstChecklistStart('2026-11-25', 25)).toBe('2026-11-25');
   expect(firstChecklistStart('2026-11-26', 25)).toBe('2026-12-25');
   expect(firstChecklistStart('2026-11-13', null)).toBeNull();
+});
+
+it('월급날 앞당기기(07 1장, 서버 shifted_cycle_date·make_checklist와 같음, 2026-11-14 R3)', () => {
+  // 월급날 10일. 2027-01-10은 일요일 → 1월 8일(금). 2027-02-10은 공휴일로 두면 설 연휴(6~9일) 앞 2월 5일(금)
+  const holidays = new Set(['2027-02-06', '2027-02-07', '2027-02-08', '2027-02-09', '2027-02-10']);
+  const shift = (d: string) => businessDayOnOrBefore(d, holidays);
+  // 1월 9일에 만든 월급 계획: 앞당긴 1월 8일은 지났으니 첫 목록은 2월 5일
+  expect(firstChecklistStart('2027-01-09', 10, shift)).toBe('2027-02-05');
+  expect(firstChecklistStart('2027-01-08', 10, shift)).toBe('2027-01-08');
+  expect(firstChecklistStart('2027-01-09', 10)).toBe('2027-01-10');
+  // 12월 10일 사이클(끝 1월 7일) → 다음 사이클 1월 8일 ~ 2월 4일
+  expect(lateCheckUntil('2027-01-07', 10, shift)).toBe('2027-02-04');
+  expect(canLateCheck('2027-02-04', '2027-01-07', 10, shift)).toBe(true);
+  expect(canLateCheck('2027-02-05', '2027-01-07', 10, shift)).toBe(false);
 });
 
 it('늦은 확인(서버 late_check_until, 07 4장): 그다음 사이클 끝까지', () => {

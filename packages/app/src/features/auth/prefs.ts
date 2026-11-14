@@ -70,4 +70,13 @@ export const prefs = {
   },
   returnTo: () => sget('sweetwo.return-to'),
   setReturnTo: (path: string | null) => sset('sweetwo.return-to', path),
+  /**
+   * 로그인 전에 P-01 ‘합류하기’를 누른 초대 코드(이 기기, 앱을 다시 열어도 남음). 합류를 마치거나 코드가 막히면 지움.
+   * 가입 도중 앱을 닫았다 열어도 시작한 사람 질문(O-11)이 아니라 합류로 이어 감(2026-11-14 재테스트 R2)
+   */
+  pendingInvite: () => {
+    const v = get('sweetwo.pending-invite');
+    return v && /^[A-HJ-NP-Z2-9]{6}$/.test(v) ? v : null;
+  },
+  setPendingInvite: (code: string | null) => set('sweetwo.pending-invite', code),
 };

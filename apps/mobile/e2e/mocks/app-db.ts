@@ -686,7 +686,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           const l = lines.find((x) => x.id === b.p_line);
           if (!l) continue;
           if (b.p_state === 'checked' && l.state === 'checked' && l.checked_by !== db.me.id)
-            return json(route, { message: 'already_checked', code: '40001' }, 409);
+            return json(route, { message: 'already_checked', code: 'P0001' }, 409);
           const zero = b.p_state === 'checked' && b.p_actual === 0;
           l.state = zero ? 'skipped' : b.p_state;
           l.actual = b.p_state === 'checked' && b.p_actual ? b.p_actual : null;
@@ -1158,6 +1158,26 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const b = body();
         db.joinCalls.push({ fn, ...b });
         const lines = b.p_lines as Record<string, unknown>[] | undefined;
+        // 서버와 같은 순서(20261214090000 계약 1): 합류한 사람이 본 version(공간에 넣기 전)과 비교한 뒤 공간에 넣음.
+        // 한 사람 관리형(시작한 사람이 관리)은 넣는 순간 합류한 사람 보내기 줄이 생겨 version이 오름
+        const joint0 = db.splits.find((x) => x.owner_user_id === null) as
+          (Record<string, unknown> & { version?: number }) | undefined;
+        const seen = joint0 ? (joint0.version ?? 1) : null;
+        if (
+          lines &&
+          db.space?.salary_mode === 'joint' &&
+          b.p_version != null &&
+          seen !== null &&
+          b.p_version !== seen
+        )
+          return json(route, { message: 'split_changed', code: 'P0001' }, 400);
+        if (
+          joint0 &&
+          db.space?.salary_mode === 'joint' &&
+          db.space.manager_user_id &&
+          db.space.manager_user_id !== db.me.id
+        )
+          joint0.version = (seen ?? 1) + 1;
         // 합류 전 ‘파트너가 주로 해요’면 합류한 사람이 관리하는 사람(20261206090000 계약 1)
         if (db.space?.manager_pending_partner && db.space.salary_mode === 'joint') {
           db.space.manager_user_id = db.me.id;
@@ -1188,6 +1208,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         }
         if (db.space) db.space.couple_state = 'connected';
         recalcSend();
+        if (lines && joint0 && db.space?.salary_mode === 'joint')
+          joint0.version = Number(joint0.version ?? 1) + 1;
         Object.assign(db.me, {
           onboarding_step: lines ? 'P-06' : 'P-WAIT',
           onboarding_done_at: new Date().toISOString(),
@@ -1705,7 +1727,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const b = body();
         const g = db.goals.find((x) => x.id === b.p_goal);
         if (!g) return json(route, { message: 'no_goal' }, 400);
-        if (g.status === 'used') return json(route, { message: 'goal_used', code: '40001' }, 400);
+        if (g.status === 'used') return json(route, { message: 'goal_used', code: 'P0001' }, 400);
         const saved = goalSaved(String(g.id));
         const use = Math.min(Number(b.p_spent), saved);
         if (use > 0)

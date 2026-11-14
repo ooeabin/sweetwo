@@ -214,9 +214,13 @@ export function S11Me() {
               </span>
             }
             sub={
-              c.joined
-                ? copy.partnerSalary(c.partnerName, man(c.partnerIncome), dayText(c.partnerPayday))
-                : undefined
+              (c.joined &&
+                copy.partnerSalary(
+                  c.partnerName,
+                  man(c.partnerIncome),
+                  dayText(c.partnerPayday),
+                )) ||
+              undefined
             }
             value={copy.salaryValue(man(me.monthly_income ?? 0), dayText(c.myPayday))}
             onClick={() => nav('/settings/me/salary')}

@@ -20,6 +20,7 @@ const MONEY_SHORT: Record<MoneyKind, string> = {
   goal: copy.short.goal,
   maturity: copy.short.maturity,
   note: copy.short.note,
+  auto: copy.short.auto,
 };
 let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
 

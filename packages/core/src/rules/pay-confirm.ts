@@ -56,30 +56,51 @@ export function cycleOf(today: string, base: BaseDay): { start: string; end: str
  * 첫 확인 목록이 생기는 날(소급 없음, 07 3-1, 서버 계약 2): 월급 계획을 만든 날(checklist_from) 이후 처음 오는 기준일.
  * 만든 날이 기준일이면 그날. 날짜 없음(기준일 null)이면 없음
  */
-export function firstChecklistStart(checklistFrom: string, base: BaseDay | null): string | null {
+export function firstChecklistStart(
+  checklistFrom: string,
+  base: BaseDay | null,
+  shift: (d: string) => string = (d) => d,
+): string | null {
   if (base === null) return null;
   const day = baseDayNumber(base);
   const { y, m } = ymdOf(checklistFrom);
-  const d = cycleDate(day, y, m);
-  if (d >= checklistFrom) return d;
-  const n = shiftMonth(y, m, 1);
-  return cycleDate(day, n.y, n.m);
+  // shift = 월급날 앞당기기(07 1장, 서버 shifted_cycle_date와 같음, 2026-11-14 R3). 앞당긴 날로 비교
+  for (const k of [0, 1, 2]) {
+    const n = shiftMonth(y, m, k);
+    const d = shift(cycleDate(day, n.y, n.m));
+    if (d >= checklistFrom) return d;
+  }
+  return null;
 }
 
 /**
  * 늦은 확인 마지막 날(서버 late_check_until, 07 4장): 지난 사이클 목록은 그다음 사이클이 끝날 때까지.
  * 다음 사이클 시작 = 끝 + 1일, 그 끝 = 그다음 기준일 전날. 기준일이 없으면(날짜 없음으로 바꿈) 다음 시작 + 1달 − 1일
  */
-export function lateCheckUntil(cycleEnd: string, base: BaseDay | null): string {
+export function lateCheckUntil(
+  cycleEnd: string,
+  base: BaseDay | null,
+  shift: (d: string) => string = (d) => d,
+): string {
   const next = addDays(cycleEnd, 1);
   if (base === null) return addDays(addMonthsToDate(next, 1), -1);
-  const { y, m } = ymdOf(addMonthsToDate(next, 1));
-  return addDays(cycleDate(baseDayNumber(base), y, m), -1);
+  // 다음 사이클 시작(next)은 앞당겨 그 전 달일 수 있음: 그다음 사이클은 next + 1달의 달, 그 날이 next 이하면 한 달 더
+  let { y, m } = ymdOf(addMonthsToDate(next, 1));
+  let d = shift(cycleDate(baseDayNumber(base), y, m));
+  if (d <= next) {
+    ({ y, m } = shiftMonth(y, m, 1));
+    d = shift(cycleDate(baseDayNumber(base), y, m));
+  }
+  return addDays(d, -1);
 }
 
 /** 오늘 늦은 확인을 받을 수 있나: 사이클이 끝났고 늦은 확인 마지막 날 안 */
-export const canLateCheck = (today: string, cycleEnd: string, base: BaseDay | null) =>
-  today > cycleEnd && today <= lateCheckUntil(cycleEnd, base);
+export const canLateCheck = (
+  today: string,
+  cycleEnd: string,
+  base: BaseDay | null,
+  shift?: (d: string) => string,
+) => today > cycleEnd && today <= lateCheckUntil(cycleEnd, base, shift);
 
 export interface ConfirmLine {
   state: string;

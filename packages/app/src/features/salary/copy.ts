@@ -225,6 +225,8 @@ export const copy = {
   listTitle: '저금',
   listOpen: '저금 목록 보기', // 저금 묶음 머리(누르는 제목) 화면 읽기 이름
   listSaved: (amount: string) => `모은 금액 ${amount}`,
+  /** 같이 모으기에 든 저금 줄 보조 줄(W-02, 묶음 합계 ‘둘이 모은 금액’과 나눔, 2026-11-14 R4) */
+  myShare: (amount: string) => `내 몫 ${amount}`, // [확인 필요]
   listEmpty: '아직 저금이 없어요',
   listAdd: '저금 추가',
   // W-10 저금 항목 상세
@@ -457,7 +459,7 @@ export const copy = {
   }, // 19 ‘이름 칩 표’ [확인 필요]
   // W-14 쓸 곳 메모, W-14a
   notesTitle: (name: string) => `쓸 곳 메모 ${name}`, // [확인 필요] 제목 “쓸 곳 메모” + 저금 이름
-  notesHelp: '모은 돈을 어디에 쓸지 적어 두면 캘린더에도 보여요', // [확인 필요]
+  notesHelp: '모은 금액을 어디에 쓸지 적어 두면 캘린더에도 보여요', // [확인 필요]
   notesEmpty: '아직 메모가 없어요', // [확인 필요]
   noteAdd: '메모 추가', // [확인 필요] AddRow(+ 아이콘)
   notePaid: '냈어요', // [확인 필요]

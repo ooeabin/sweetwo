@@ -6,6 +6,7 @@ import {
   pickMonthLine,
   pickTopTask,
   pickTopTasks,
+  bundleInviteGoal,
   pushReaskOpen,
   reconcileTask,
   type HeroGoal,
@@ -344,14 +345,23 @@ describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
     savingCount: 0,
   };
   it('첫 칸은 순서대로, 둘째 칸은 사람이 보낸 요청·권유가 먼저(첫 저금이 같이 모으기 권유를 가리지 않음)', () => {
+    const partnerGoals = [
+      { id: 'g', name: '결혼 비용', created_at: '2026-11-12T00:00:00Z', bundle_id: null },
+    ];
     const t = pickTopTasks({
       ...base,
+      savingCount: 1,
       reconcile: { key: 'reconcile:2026-11-10', due: '2026-11-10' },
-      partnerGoals: [
-        { id: 'g', name: '결혼 비용', created_at: '2026-11-12T00:00:00Z', bundle_id: null },
-      ],
+      partnerGoals,
     });
-    expect(t.map((x) => x.kind)).toEqual(['first_saving', 'bundle_invite']);
+    expect(t.map((x) => x.kind)).toEqual(['reconcile', 'bundle_invite']);
+    // 내 저금이 0개면 권유는 H-10 빈 상태 하나로만: 첫 저금 띠도 같이 모으기 띠도 없음(2026-11-14 R4)
+    const none = pickTopTasks({ ...base, partnerGoals });
+    expect(none.map((x) => x.kind)).toEqual([]);
+    expect(bundleInviteGoal({ ...base, partnerGoals })).toMatchObject({
+      id: 'g',
+      name: '결혼 비용',
+    });
   });
   it('요청이 없으면 다음 순서', () => {
     const t = pickTopTasks({ ...base, reconcile: { key: 'r', due: '2026-11-10' } });

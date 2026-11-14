@@ -82,9 +82,15 @@ export async function routeAfterLogin(
     const lock = await session.bridge.lock.status();
     if (!lock.hasPin && !prefs.pinAsked()) return { to: paths.pinSetup };
   }
-  const back = prefs.returnTo();
+  const back = prefs.returnTo() ?? (s.onboarding_done ? null : pendingInvitePath());
   prefs.setReturnTo(null);
   return { to: back ?? paths.home };
+}
+
+/** 로그인 전에 누른 초대(P-01 ‘합류하기’)가 남아 있으면 그 P-01로 돌아가 바로 합류(?go=1). 없으면 null */
+export function pendingInvitePath(): string | null {
+  const code = prefs.pendingInvite();
+  return code ? `/i/${code}?go=1` : null;
 }
 
 /** 이 기기에 앞 계정이 정한 PIN이 있으면 지움(다른 계정으로 로그인, 2026-11-10). 새 계정은 로그인 뒤 PIN을 새로 정함 */

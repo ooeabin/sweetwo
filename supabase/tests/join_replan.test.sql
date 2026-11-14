@@ -58,7 +58,7 @@ set local role authenticated;
 select is((select count(*)::int from public.salary_split), 0, '합류를 마치기 전에는 공동 월급 계획을 직접 못 읽음(D1)');
 select set_config('test.v', public.join_context()->'joint'->>'version', true);
 select throws_ok(format($$ select public.complete_join('[]'::jsonb, %s) $$, current_setting('test.v')::int - 1),
-  '40001', 'split_changed', '월급 계획이 바뀌었으면 다시');
+  'P0001', 'split_changed', '월급 계획이 바뀌었으면 다시');
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (public.join_context()->'joint'->'items'->0->>'id')::uuid, 'amount', 2500000),
   jsonb_build_object('kind', 'fixed', 'amount', 880000),

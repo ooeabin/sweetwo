@@ -24,6 +24,7 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
+update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'home', '내 집 마련', 'once', 1 from public.app_user where id = auth.uid();

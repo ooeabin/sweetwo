@@ -205,8 +205,8 @@ export function S11cSalary() {
             {copy.fromNext}
           </Chip>
         </div>
+        {/* key를 두지 않음: 값이 바뀔 때마다 휠을 새로 만들어 키보드 포커스를 잃었음(2026-11-14 R7). 칩으로 바꾼 값은 휠이 그 칸으로 굴림 */}
         <YearMonthInput
-          key={from}
           label={copy.fromLabel}
           value={from}
           onChange={(v) => v && setFrom(v)}

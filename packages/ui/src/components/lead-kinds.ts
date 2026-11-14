@@ -51,6 +51,8 @@ const LEADS = {
     maturity: { icon: 'hourglass', tone: 'family' },
     // 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2)
     note: { icon: 'piggy-bank', tone: 'goal' },
+    // 날짜 없는 사람의 자동 줄 나가는 날(2026-11-14 R6)
+    auto: { icon: 'arrows-clockwise', tone: 'safety' },
     holiday: { icon: 'flag-pennant' },
   },
   /** 경조사(care_day.kind). 경조사는 한 종류라 영역 색은 모두 together, 아이콘만 이름 칩에 따라 */

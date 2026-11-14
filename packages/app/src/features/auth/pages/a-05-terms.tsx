@@ -9,7 +9,7 @@ import { carryToast, toast } from '../../../shared/toast';
 import { useHardwareBack } from '../back';
 import { ConsentDocSheet, openPolicy, type ConsentDocKey } from '../consent-doc';
 import { copy } from '../copy';
-import { paths } from '../flow';
+import { paths, pendingInvitePath } from '../flow';
 import { prefs } from '../prefs';
 import { signOut } from '../sign-out';
 import { useAuthStore } from '../store';
@@ -50,7 +50,8 @@ export function A05Terms() {
         carryToast(sharedCopy.marketingResult(true, formatDateFull(todayKst())));
       // 온보딩 O-03(2026-11-10 O-10 없앰). 앱 잠금(A-06)은 2026-11-13부터 가입 직후가 아니라 온보딩 O-60 흐름·합류 뒤에 권장.
       // 초대 링크(P-01)에서 왔으면 그리로 돌아가 합류를 이어 간다
-      const back = prefs.returnTo();
+      // 앱을 다시 열어 sessionStorage가 비었어도 이 기기에 남긴 초대로(2026-11-14 R2)
+      const back = prefs.returnTo() ?? pendingInvitePath();
       prefs.setReturnTo(null);
       nav(back ?? paths.home, { replace: true });
     } catch {

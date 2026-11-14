@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (1f1f1bd4). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (59521b63). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2349,7 +2349,6 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__moves { display: inline-flex; flex: none; gap: var(--space-1); }
 .hg-receipt__row:not(:focus-within) .hg-receipt__moves { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hg-receipt__del { flex: none; min-height: 36px; }
-@media (pointer: coarse) { .hg-receipt__row:not(.is-open):not(:focus-within) .hg-receipt__del { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 @media (prefers-reduced-motion: no-preference) { .hg-receipt__row { transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); } }
 .hg-receipt-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2) var(--space-6); }
 
