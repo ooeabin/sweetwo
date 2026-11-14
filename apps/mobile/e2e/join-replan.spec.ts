@@ -269,7 +269,7 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
   ).toEqual(['allowance', 'send']);
   expect(ev.find((e) => e.name === 'mode_change_requested')?.props).toEqual({
     phrase: 'p04_send',
-    to_mode: 'joint',
+    to_mode: 'combined',
     result: 'requested',
   });
   // 관리하지 않는 쪽: 월급날 확인 없음(자동 줄뿐), 내 용돈이 바뀌었을 때
