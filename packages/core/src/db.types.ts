@@ -3702,6 +3702,7 @@ export type Database = {
           p_deadline?: string
           p_goal: string
           p_name?: string
+          p_separate?: boolean
           p_target?: number
         }
         Returns: string
@@ -3712,6 +3713,7 @@ export type Database = {
         Returns: undefined
       }
       bundle_leave: { Args: { p_bundle: string }; Returns: undefined }
+      bundle_month_gain: { Args: { p_bundle: string; p_today?: string }; Returns: number }
       bundle_refresh: { Args: { p_bundle: string }; Returns: undefined }
       bundle_set_visibility: {
         Args: {
@@ -4206,6 +4208,7 @@ export type Database = {
         Args: { p_today?: string; p_user?: string }
         Returns: Json
       }
+      money_in_restore: { Args: { p_id: string }; Returns: undefined }
       money_in_set: {
         Args: {
           p_amount?: number
@@ -4568,6 +4571,13 @@ export type Database = {
       }
       save_api_holidays: { Args: { p_rows: Json; p_years: number[] }; Returns: number }
       save_split: { Args: { p_lines: Json; p_owner?: string }; Returns: string }
+      saving_adjust_title: {
+        Args: {
+          p_kind: string
+          p_reason: Database["public"]["Enums"]["goal_move_reason"]
+        }
+        Returns: string
+      }
       saving_after_change: { Args: { p_goal: string }; Returns: undefined }
       saving_item_editable: { Args: { p_goal: string }; Returns: undefined }
       saving_item_keep: { Args: { p_goal: string }; Returns: undefined }

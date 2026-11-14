@@ -137,12 +137,18 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
       note_id: o.note ?? null,
       deleted_at: null,
     });
-    // 같이 모으는 저금이면 상대에게 사람·금액·사유 없는 한 줄(계약 3)
-    if (together(g))
+    // 같이 모으는 저금이면 상대에게 사람·금액·사유 없는 한 줄(계약 3). ‘주간 요약에 넣지 않기’면 없음,
+    // 문구는 사유대로(20261213090000 계약 3 saving_adjust_title)
+    if (together(g) && !o.hide)
       s.noti.push({
         to: other(),
         kind: `saving_adjusted:${id}`,
-        title: o.delta < 0 ? '같이 모으기에서 꺼내 썼어요' : '같이 모으기에 더했어요',
+        title:
+          o.delta < 0 && ['used', 'note_paid'].includes(o.code)
+            ? '같이 모으기에서 꺼내 썼어요'
+            : o.delta > 0 && ['interest', 'custom'].includes(o.code)
+              ? '같이 모으기에 더했어요'
+              : '같이 모으기 금액을 맞췄어요',
         actor: null,
       });
     afterChange(o.goal);
@@ -189,6 +195,12 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
       if (!g || g.owner_user_id !== viewer) return fail(route, 'not_owner');
       if (db.space?.salary_mode !== 'separate') return fail(route, 'joint_engine');
       if (g.bundle_id) return fail(route, 'already_bundled');
+      // 아직 한 사람만 든 묶음이 열려 있으면 거절(20261213090000 계약 1), 따로 고르면 만듦
+      const half = s.bundles.some(
+        (b) =>
+          b.status !== 'closed' && new Set(bundleGoals(b).map((x) => x.owner_user_id)).size < 2,
+      );
+      if (half && !b0.p_separate) return fail(route, 'bundle_open');
       const id = `bundle-${s.bundles.length + 1}`;
       s.bundles.push({
         id,
@@ -382,6 +394,53 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
       s.lineSettings.push(...(body().p_items as Row[]));
       return json(route, null);
     }
+    if (fn === 'money_in_delete') {
+      const mi = s.moneyIns.find((x) => x.id === body().p_id && !x.deleted_at);
+      if (!mi) return fail(route, 'not_found');
+      const at = new Date().toISOString();
+      mi.deleted_at = at;
+      for (const m of s.moves.filter((x) => x.money_in_id === mi.id && !x.deleted_at)) {
+        m.deleted_at = at;
+        afterChange(m.goal_id);
+      }
+      return json(route, null);
+    }
+    if (fn === 'money_in_restore') {
+      const mi = s.moneyIns.find((x) => x.id === body().p_id && x.deleted_at);
+      if (!mi) return fail(route, 'not_found');
+      for (const m of s.moves.filter(
+        (x) => x.money_in_id === mi.id && x.deleted_at === mi.deleted_at,
+      )) {
+        m.deleted_at = null;
+        afterChange(m.goal_id);
+      }
+      mi.deleted_at = null;
+      return json(route, null);
+    }
+    if (fn === 'money_in_set') {
+      const b0 = body();
+      const mi = s.moneyIns.find((x) => x.id === b0.p_id && !x.deleted_at);
+      if (!mi) return fail(route, 'not_found');
+      const put = s.moves
+        .filter((m) => m.money_in_id === mi.id && !m.deleted_at)
+        .reduce((t, m) => t + Number(m.amount), 0);
+      if (b0.p_amount != null && Number(b0.p_amount) < put) return fail(route, 'bad_amount');
+      if (b0.p_amount != null) mi.amount = b0.p_amount;
+      if (b0.p_received_on) mi.received_on = b0.p_received_on;
+      if (b0.p_kind) mi.kind = b0.p_kind;
+      return json(route, null);
+    }
+    if (
+      path === '/rest/v1/goal_move_public' &&
+      method === 'GET' &&
+      url.searchParams.get('money_in_id') === 'not.is.null'
+    )
+      return json(
+        route,
+        s.moves
+          .filter((m) => m.money_in_id && !m.deleted_at)
+          .map((m) => ({ money_in_id: m.money_in_id, amount: m.amount })),
+      );
     if (path === '/rest/v1/goal_move_public' && method === 'GET') {
       const gid = url.searchParams.get('goal_id')?.replace(/^eq\./, '');
       return json(

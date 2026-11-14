@@ -641,7 +641,9 @@ test('H-11 오류(S4-01): 확인 목록을 못 불러오면 공통 7번 카드 +
   await expect(monthLine(page)).toContainText('월급 알려 주기');
 });
 
-test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라지고 H-10 Avatar 둘', async ({ page }) => {
+test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라지고 H-10 내 저금 칸은 내 Avatar 하나', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const rt = await mockRealtime(page);
   const db = await mockOnboarding(page, { now: NOW });
@@ -661,9 +663,10 @@ test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라지고 H-10
     created_at: '2026-10-07T01:00:00Z',
   });
   await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toHaveCount(0);
+  // 각자 계열의 묶이지 않은 내 저금 칸은 내 얼굴만(2026-11-14 ‘묶기 전 두 얼굴’), 묶음·공동 저금 칸이 둘
   await expect(
     together(page).locator('.hg-together__slide').first().locator('.hg-avatar'),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
 });
 
 test('Realtime(S4-02): P-WAIT 대기 중 시작한 사람이 월급 계획을 만들면 바로 다음 화면', async ({

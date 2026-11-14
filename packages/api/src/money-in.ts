@@ -1,5 +1,6 @@
 import {
   MoneyInPeriodSchema,
+  MoneyInPutSchema,
   MoneyInRowSchema,
   type MoneyInPeriod,
   type MoneyInRowResponse,
@@ -40,6 +41,19 @@ export async function fetchMoneyIns(limit = 100): Promise<MoneyInRowResponse[]> 
   return (data ?? []).map((r) => MoneyInRowSchema.parse(r));
 }
 
+/** 기록마다 저금에 나눠 넣은 금액 합(내가 볼 수 있는 goal_move_public, W-20b). money_in id → 합 */
+export async function fetchMoneyInPuts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase()
+    .from('goal_move_public')
+    .select('money_in_id, amount')
+    .not('money_in_id', 'is', null);
+  fail(error);
+  const out: Record<string, number> = {};
+  for (const r of (data ?? []).map((x) => MoneyInPutSchema.parse(x)))
+    if (r.money_in_id) out[r.money_in_id] = (out[r.money_in_id] ?? 0) + r.amount;
+  return out;
+}
+
 /** W-20 기록(log_money_in). receivedOn 생략 = 오늘(KST). 새 기록 id */
 export async function logMoneyIn(o: {
   amount: number;
@@ -73,6 +87,12 @@ export async function updateMoneyIn(
 /** 지우기(나눠 넣은 것도 지움) */
 export async function deleteMoneyIn(id: string) {
   const { error } = await supabase().rpc('money_in_delete', { p_id: id });
+  failMoney(error);
+}
+
+/** 지운 기록 되살리기(money_in_restore, 같이 지운 나눠 넣은 금액도, W-20b ‘되돌리기’) */
+export async function restoreMoneyIn(id: string) {
+  const { error } = await supabase().rpc('money_in_restore', { p_id: id });
   failMoney(error);
 }
 

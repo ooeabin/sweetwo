@@ -10,8 +10,10 @@ import {
   bundleTargetDefault,
   canPercentOnly,
   defaultDeadline,
+  joinableBundle,
   quickChips,
   thisMonth,
+  waitingBundle,
   type YearMonth,
 } from '@sweetwo/core';
 import {
@@ -34,9 +36,18 @@ import { useSavingItems, type SavingItem } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
 import { refreshBundles, refreshSaving, useBundles } from '../together';
 
-type Step = 'partner' | 'mine' | 'newName' | 'newMonthly' | 'target' | 'deadline' | 'notice';
+type Step =
+  'exist' | 'partner' | 'mine' | 'newName' | 'newMonthly' | 'target' | 'deadline' | 'notice';
 const NEW = '__new';
 const MINE_ONLY = '__mine';
+const JOIN = '__join';
+const SEPARATE = '__separate';
+
+/** 끝나고 갈 곳(`?then=`, 앱 안 주소만, W-20a에서 들어가기) */
+const thenOf = (p: URLSearchParams) => {
+  const t = p.get('then');
+  return t && t.startsWith('/') && !t.startsWith('//') ? t : null;
+};
 
 /**
  * W-15 같이 모으기로 묶기(20 v2.2, 각자 계열 + 연결만, ADR 0009 결정 5, G1).
@@ -61,14 +72,35 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
   const [target, setTarget] = useState<number | null | undefined>(undefined);
   const [deadline, setDeadline] = useState<YearMonth | null | undefined>(undefined);
   const [pctOnly, setPctOnly] = useState(false);
+  const [separate, setSeparate] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const ready = d.ready && !bundles.isLoading;
   const given = d.ready ? d.byId(params.get('goal') ?? '') : undefined;
-  // 처음 단계(주소의 goal에 따라)
-  useEffect(() => {
-    if (!ready || step) return;
-    if (join) return setStep('mine');
+  // 묶음은 한 쌍에 하나씩(2026-11-14 H1): 상대가 만든 들어갈 묶음이나 내가 만든 기다리는 묶음이 있으면 먼저 물음
+  const open = join
+    ? undefined
+    : (joinableBundle(bundles.data ?? []) ?? waitingBundle(bundles.data ?? []));
+  const openJoin = !!open && !open.goals.some((g) => g.mine);
+  /** 처음 단계(주소의 goal에 따라). skipOpen = ‘따로 새로 모을게요’를 고른 뒤 */
+  const firstStep = (skipOpen = false) => {
+    if (!skipOpen && open) return setStep('exist');
+    if (join) {
+      // 주소에 내 저금(`?goal=`)이 있으면 고른 채로 고지, 고를 저금이 없으면 바로 새 저금 이름(18 H1)
+      if (given?.owner === 'mine' && !given.goal.bundle_id) {
+        setMineGoal(given.goal.id);
+        return setStep('notice');
+      }
+      if (
+        !d.ready ||
+        !d.live.some((i) => i.owner === 'mine' && !i.goal.bundle_id && i.state === 'saving')
+      ) {
+        setMineGoal(NEW);
+        setNewName(bundles.data?.find((b) => b.id === bundleId)?.name ?? '');
+        return setStep('newName');
+      }
+      return setStep('mine');
+    }
     if (given?.owner === 'partner' && !given.goal.bundle_id) {
       setPartnerGoal(given.goal.id);
       return setStep('mine');
@@ -78,6 +110,10 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
       return setStep('target');
     }
     setStep('partner');
+  };
+  useEffect(() => {
+    if (!ready || step) return;
+    firstStep();
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
@@ -130,10 +166,11 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
         });
       if (!goalId) return;
       let bid = bundleId;
+      const then = thenOf(params);
       if (join) {
         await joinBundle(bundleId, goalId);
         track('bundle_joined', {
-          entry: 'notification',
+          entry: then ? 'money_in' : params.get('goal') ? 'exist' : 'notification',
           has_target: bundle?.pct !== null,
           on: true,
         });
@@ -143,11 +180,13 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
           name: pg?.goal.name ?? mg?.goal.name ?? newName.trim(),
           target: tv,
           deadline: tv !== null ? dv : null,
+          separate,
         });
         track('bundle_created', {
           entry: given?.owner === 'partner' ? 'band' : given ? 'saving' : 'direct',
           has_target: tv !== null,
           on: true,
+          separate,
         });
       }
       if (pctOnly) {
@@ -156,14 +195,73 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
       }
       await Promise.all([refreshBundles(qc), refreshSaving(qc)]);
       carryToast(copy.bundleStarted);
-      nav(savingPaths.item(goalId), { replace: true });
+      nav(then ?? savingPaths.item(goalId), { replace: true });
     } catch (e) {
-      toast(e instanceof BundleBlocked ? copy.bundleBlocked : copy.failed);
+      toast(
+        e instanceof BundleBlocked
+          ? e.reason === 'bundle_open'
+            ? copy.bundleOpenBlocked
+            : copy.bundleBlocked
+          : copy.failed,
+      );
     } finally {
       setBusy(false);
     }
   };
 
+  // 들어갈 묶음(상대가 만듦) → ‘같이 모을게요’ = 들어가기(이 저금을 고른 채로), 기다리는 묶음(내가 만듦) → 따로 하나 더 또는 나중에
+  if (step === 'exist' && open)
+    return (
+      <QuestionLayout
+        title={
+          openJoin
+            ? copy.bundleJoinQ(d.partnerName, open.name)
+            : copy.bundleWaitingQ(d.partnerName, open.name)
+        }
+        help={openJoin ? copy.bundleJoinHelp : copy.bundleWaitingHelp}
+        onBack={back}
+      >
+        <ChoiceCards<string>
+          label={
+            openJoin
+              ? copy.bundleJoinQ(d.partnerName, open.name)
+              : copy.bundleWaitingQ(d.partnerName, open.name)
+          }
+          value={null}
+          onChange={() => undefined}
+          onPick={(v) => {
+            track('bundle_open_answered', {
+              choice: v === JOIN ? 'join' : v === SEPARATE ? 'separate' : 'later',
+            });
+            if (v === JOIN) {
+              const q = new URLSearchParams();
+              if (given?.owner === 'mine' && !given.goal.bundle_id) q.set('goal', given.goal.id);
+              const s = q.toString();
+              return nav(`${togetherPaths.bundleJoin(open.id)}${s ? `?${s}` : ''}`, {
+                replace: true,
+              });
+            }
+            if (v === SEPARATE) {
+              setSeparate(true);
+              setTrail((t) => [...t, 'exist']);
+              return firstStep(true);
+            }
+            back();
+          }}
+          options={
+            openJoin
+              ? [
+                  { value: JOIN, label: copy.bundleAskYes },
+                  { value: SEPARATE, label: copy.bundleSeparate },
+                ]
+              : [
+                  { value: SEPARATE, label: copy.bundleSeparate },
+                  { value: '__later', label: copy.laterAnswer },
+                ]
+          }
+        />
+      </QuestionLayout>
+    );
   if (step === 'partner')
     return (
       <QuestionLayout title={copy.bundlePartnerQ(d.partnerName)} onBack={prev}>

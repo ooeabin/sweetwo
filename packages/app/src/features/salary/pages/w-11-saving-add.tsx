@@ -258,6 +258,12 @@ export function W11SavingAdd() {
           allowZero
         />
         {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
+        {/* 매달 금액이 여유 자금보다 크면 사실 한 줄(막지 않음, 2026-11-14) */}
+        {v !== null && v > 0 && v > Math.max(left, 0) && (
+          <p className="hg-help" role="status">
+            {copy.monthlyOverLeft(money(Math.max(left, 0), masked))}
+          </p>
+        )}
       </QuestionLayout>
     );
   }
@@ -343,7 +349,10 @@ export function W11SavingAdd() {
       help={
         need !== null ? (
           <>
-            {copy.needPerMonth(money(need, masked))}
+            {/* 같이 계열(합쳐서 + 연결)은 둘이 같이 모으는 금액(2026-11-14) */}
+            {joint && space.data.couple_state === 'connected'
+              ? copy.needPerMonthTogether(money(need, masked))
+              : copy.needPerMonth(money(need, masked))}
             {late !== null && eta && (
               <>
                 <br />

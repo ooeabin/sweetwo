@@ -106,9 +106,13 @@ export function useSavingItems() {
     const s = saved.data?.[g.id] ?? 0;
     const target = g.target_amount;
     const deadline = g.deadline ? dateToYm(g.deadline) : null;
-    const monthly = splitLines
-      .filter((l) => l.kind === 'saving' && l.goal_id === g.id)
-      .reduce((t, l) => t + l.amount, 0);
+    // 매달 금액: 월급 계획 줄. 상대 저금(각자)은 줄을 못 읽으면 partner_plan_view가 준 금액(공개 단계대로, 2026-11-14 M7)
+    const own = splitLines.filter((l) => l.kind === 'saving' && l.goal_id === g.id);
+    const monthly = own.length
+      ? own.reduce((t, l) => t + l.amount, 0)
+      : (pv.data?.lines ?? [])
+          .filter((l) => l.kind === 'saving' && l.goal_id === g.id)
+          .reduce((t, l) => t + (l.amount ?? 0), 0);
     const owner: SavingOwner =
       g.owner_user_id === null ? 'ours' : g.owner_user_id === meId ? 'mine' : 'partner';
     return {

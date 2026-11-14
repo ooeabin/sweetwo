@@ -47,6 +47,8 @@ export interface BundleView {
   target: Won | null;
   mine: Won | null;
   partner: Won | null;
+  /** 이번 달 +(서버 bundle_month_gain, 06 5-6). 퍼센트만·해제 대기면 null, 옛 응답은 없음 */
+  month_gain?: Won | null;
   /** 상대가 ‘했어요만’이면 상대 저금 이름은 null */
   goals: { id: string; mine: boolean; name: string | null }[];
 }
@@ -124,3 +126,42 @@ export function bundleNextStatus(
 /** 묶음 예상 달성일의 매달 금액(06 5-6): 묶인 저금 줄 금액 합 */
 export const bundleMonthly = (lines: readonly { amount: Won }[]) =>
   lines.reduce((t, l) => t + Math.max(l.amount, 0), 0);
+
+/**
+ * 묶음은 한 쌍에 하나씩(20 W-15 ‘묶음 하나씩’, 서버 bundle_create 'bundle_open', 2026-11-14 H1).
+ * 들어갈 묶음 = 상대 저금만 든 열린 묶음(내가 아직 안 들어감), 기다리는 묶음 = 내 저금만 든 열린 묶음.
+ * 이런 묶음이 있으면 새로 만들기 전에 들어가기(또는 사용자가 ‘따로 모을게요’를 고름)
+ */
+export const joinableBundle = <B extends Pick<BundleView, 'status' | 'goals'>>(
+  bundles: readonly B[],
+): B | undefined =>
+  bundles.find((b) => b.status !== 'closed' && b.goals.length > 0 && !b.goals.some((g) => g.mine));
+export const waitingBundle = <B extends Pick<BundleView, 'status' | 'goals'>>(
+  bundles: readonly B[],
+): B | undefined =>
+  bundles.find((b) => b.status !== 'closed' && b.goals.length > 0 && b.goals.every((g) => g.mine));
+
+/**
+ * 홈 H-09 ‘저금’ 합(19, 2026-11-14 M1): H-10 같이 모으기와 같은 숫자가 되게 묶인 저금은 묶음 합계로 한 번만 셈.
+ * 묶이지 않은 저금 모은 금액 합 + 묶음마다 합계(퍼센트만이라 합계가 없으면 내 저금 모은 금액만).
+ * 개수도 묶음을 하나로(묶이지 않은 저금 수 + 묶음 수)
+ */
+export function savingsTotal(
+  items: readonly { id: string; saved: Won; bundle_id: string | null }[],
+  bundles: readonly Pick<BundleView, 'id' | 'status' | 'total' | 'goals'>[],
+): { count: number; total: Won } {
+  const open = bundles.filter((b) => b.status !== 'closed');
+  const inOpen = new Set(open.map((b) => b.id));
+  const loose = items.filter((i) => !i.bundle_id || !inOpen.has(i.bundle_id));
+  const savedOf = new Map(items.map((i) => [i.id, i.saved]));
+  const bundleSum = open.reduce(
+    (t, b) =>
+      t +
+      (b.total ?? b.goals.filter((g) => g.mine).reduce((s, g) => s + (savedOf.get(g.id) ?? 0), 0)),
+    0,
+  );
+  return {
+    count: loose.length + open.length,
+    total: loose.reduce((t, i) => t + i.saved, 0) + bundleSum,
+  };
+}

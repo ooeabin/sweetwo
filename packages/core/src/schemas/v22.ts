@@ -127,10 +127,15 @@ export const BundleViewSchema = z.object({
   target: nullableWon,
   mine: nullableWon,
   partner: nullableWon,
+  /** 이번 달 +(서버 bundle_month_gain, 퍼센트만·해제 대기면 null, 옛 서버는 없음) */
+  month_gain: nullableWon.optional(),
   goals: z.array(z.object({ id: z.string(), mine: z.boolean(), name: nullableText })),
 });
 export const BundleViewListSchema = z.array(BundleViewSchema);
 export type BundleViewResponse = z.infer<typeof BundleViewSchema>;
+
+/** 나눠 넣은 움직임(goal_move_public의 money_in_id, amount, W-20b) */
+export const MoneyInPutSchema = z.object({ money_in_id: nullableText, amount: won });
 
 /** money_in 행 */
 export const MoneyInKindSchema = z.enum(['salary', 'bonus', 'family', 'work', 'refund', 'etc']);

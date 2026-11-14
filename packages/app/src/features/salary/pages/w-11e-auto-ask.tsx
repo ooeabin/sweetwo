@@ -62,6 +62,8 @@ export function W11eAutoAsk({
           }
         }}
         autoAdvance
+        // ‘네’는 같은 화면에 휠이 열려 넘어가지 않으므로 › 대신 고른 표시(2026-11-14)
+        go={false}
         options={[
           { value: 'yes', label: copy.autoYes },
           { value: 'no', label: copy.autoNo },

@@ -91,6 +91,7 @@ import {
   W15aBundleField,
   W20aDistribute,
   W20MoneyIn,
+  W20bMoneyInList,
   SplitRedirect,
   W01dAutoLines,
   W05PrePayday,
@@ -176,6 +177,7 @@ export const routes: RouteObject[] = [
           ['/salary/bundles/:id/notes/:note', <W14aNoteEdit key="w14ab" kind="bundle" />], // W-14a
           ['/salary/bundles/:id/achieved', <W12BundleAchieved key="w12m" />], // W-12 묶음 달성
           ['/salary/money-in', <W20MoneyIn key="w20" />], // W-20 돈 들어왔어요
+          ['/salary/money-in/list', <W20bMoneyInList key="w20b" />], // W-20b 들어온 돈 기록(고치기·지우기)
           ['/salary/money-in/:id', <W20aDistribute key="w20a" />], // W-20a 저금에 나눠 넣기
         ] as const
       ).map(([path, el]) => ({

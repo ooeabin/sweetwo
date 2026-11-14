@@ -262,3 +262,80 @@ test('W-15a 묶음 풀기: 각자 저금은 그대로', async ({ browser }) => {
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toHaveCount(0);
   await close();
 });
+
+test('묶음 하나씩(H1): 찬우가 묶은 뒤 예빈이 자기 저금에서 묶기 → “찬우님 ‘내 집 마련’에 같이 모을까요?” → 들어가기, 새 묶음 없음', async ({
+  browser,
+}) => {
+  test.setTimeout(150_000);
+  const { c, y, db, s, close } = await pair(browser, (_d, sv) => {
+    sv.bundles.push({
+      id: 'bundle-1',
+      name: '내 집 마련',
+      target_amount: 150_000_000,
+      deadline: null,
+      status: 'active',
+      member_a: chanwoo.id,
+      member_b: YEBIN,
+      show_each_a: false,
+      show_each_b: false,
+      percent_only_a: false,
+      percent_only_b: false,
+      achieved_seen: [],
+    });
+    for (const g of _d.goals) if (g.id === 'goal-h') g.bundle_id = 'bundle-1';
+  });
+  // 예빈이 찬우 저금을 열면 들어가기 버튼, ‘+ 돈 들어왔어요’는 없음(보기만)
+  await y.goto('/salary/items/goal-h');
+  await expect(y.getByRole('button', { name: '같이 모으기에 들어가기' })).toBeVisible();
+  await expect(y.getByRole('button', { name: '돈 들어왔어요' })).toHaveCount(0);
+  // 예빈 자기 저금 ⋯ 같이 모으기로 묶기 → 들어갈 묶음을 먼저 물음
+  await y.goto('/salary/items/goal-y');
+  await y.getByRole('button', { name: '더보기' }).click();
+  await y.getByRole('menuitem', { name: '같이 모으기로 묶기' }).click();
+  await expect(
+    y.getByRole('heading', { name: '찬우님 ‘내 집 마련’에 같이 모을까요?' }),
+  ).toBeVisible();
+  await axe(y);
+  await y.getByRole('radio', { name: '같이 모을게요' }).click();
+  await expect(y).toHaveURL(/\/salary\/bundles\/bundle-1\/join\?goal=goal-y$/);
+  await expect(y.getByRole('heading', { name: '같이 모으기 전에 알려 드려요' })).toBeVisible();
+  await y.getByRole('button', { name: '같이 모으기 시작하기' }).click();
+  await expect(y).toHaveURL(/\/salary\/items\/goal-y$/);
+  expect(s.bundles).toHaveLength(1);
+  expect(db.goals.find((g) => g.id === 'goal-y')?.bundle_id).toBe('bundle-1');
+
+  // 찬우가 다른 저금을 또 묶으면 둘 다 든 묶음만 있으니 그대로 만듦(질문 없음)
+  await c.goto('/salary/bundles/new?goal=goal-e');
+  await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
+  await close();
+});
+
+test('묶음 하나씩(H1): 기다리는 묶음이 있으면 ‘따로 새로 모을게요’로만 새로 만듦(separate)', async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const { c, s, close } = await pair(browser, (_d, sv) => {
+    sv.bundles.push({
+      id: 'bundle-1',
+      name: '내 집 마련',
+      target_amount: 150_000_000,
+      deadline: null,
+      status: 'active',
+      member_a: chanwoo.id,
+      member_b: YEBIN,
+      achieved_seen: [],
+    });
+    for (const g of _d.goals) if (g.id === 'goal-h') g.bundle_id = 'bundle-1';
+  });
+  await c.goto('/salary/bundles/new?goal=goal-e');
+  await expect(
+    c.getByRole('heading', { name: '예빈님이 아직 ‘내 집 마련’에 들어오지 않았어요' }),
+  ).toBeVisible();
+  await c.getByRole('radio', { name: '따로 새로 모을게요' }).click();
+  await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
+  await c.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await c.getByRole('button', { name: '같이 모으기 시작하기' }).click();
+  await expect(c).toHaveURL(/\/salary\/items\/goal-e$/);
+  expect(s.bundles).toHaveLength(2);
+  await close();
+});

@@ -21,6 +21,8 @@ export const copy = {
   weddingDateAsk: '결혼식 날짜 알려 주기',
   targetOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`,
   thisMonthGain: (amount: string) => `이번 달 +${amount}`,
+  /** 아직 안 들어간 묶음(상대가 만듦) 칸 첫 줄(2026-11-14 H1) */
+  togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 들어가요`, // [확인 필요]
   remain: (deadline: string, amount: string) => `${ym(deadline)}까지 ${amount} 더 필요해요`,
   remainPercent: (deadline: string) => `${ym(deadline)}까지`,
   each: (a: string, x: string, b: string, y: string) => `${a} ${x}, ${b} ${y}`,
@@ -104,6 +106,8 @@ export const copy = {
   weddingTile: (n: number) => `결혼 준비 메모 ${n}개`,
   weddingNext: (name: string, date: string) => `다음 ${name} ${formatMonthDay(date)}`,
   weddingAdd: '+ 쓸 곳 메모 적기',
+  /** 날짜가 지났는데 안 낸 메모가 있으면 그것 먼저(2026-11-14) */
+  weddingOverdue: (name: string, date: string) => `${name} ${formatMonthDay(date)} 지났어요`, // [확인 필요]
 
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
