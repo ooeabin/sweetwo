@@ -196,13 +196,10 @@ export function F02Items() {
       )}
       {(ready ? groups : []).map(({ g, rows, partner }) => (
         <section key={g.key} className="hg-stack" aria-label={g.name}>
-          {/* 묶음 합계는 탭 합계와 같게 내 ‘숨기기’ 항목을 뺌(7번, 2026-11-12 S8-09) */}
+          {/* 묶음 합계는 탭 합계와 같게 내 ‘숨기기’ 항목도 더함(7번, 숨기기는 파트너에게만 안 보임, 2026-11-13 H3) */}
           <SectionHeader
             title={g.name}
-            count={m(
-              rows.filter((a) => a.visibility !== 'private').reduce((t, a) => t + a.amount, 0) +
-                (partner?.total ?? 0),
-            )}
+            count={m(rows.reduce((t, a) => t + a.amount, 0) + (partner?.total ?? 0))}
           />
           <div className="hg-list">
             {g.key === 'invest' && inv.gain !== null && inv.gain !== 0 && (

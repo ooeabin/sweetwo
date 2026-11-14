@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useEffect, type ReactNode } from 'react';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { track } from '../../shared/analytics';
 import { isJoinScreen } from '../pairing';
 import { useMe, useSpace } from './data';
+import { firstSavingPath } from './first-saving-resume';
 import { current, FIRST } from './flow';
 import { justFinishedTo } from './step';
 import { O03MyNickname } from './pages/o-03-my-nickname';
@@ -54,6 +55,14 @@ export function OnboardingRoute() {
   const { screen = FIRST } = useParams();
   const me = useMe();
   markSeen();
+  // 첫 저금 흐름(O-60 뒤 W-11)을 마치지 않고 앱을 닫았으면 멈춘 단계로(2026-11-13 실구동)
+  if (screen === 'resume' && me.data?.onboarding_done_at) {
+    const saving = firstSavingPath();
+    if (saving) {
+      track('onboarding_resumed', { screen_id: 'W-11', hours_since_last: hoursSinceSeen() });
+      return <Navigate to={saving} replace />;
+    }
+  }
   // 온보딩을 마친 뒤 뒤로(하드웨어 뒤로, 웹뷰 기록)로 돌아오면 홈으로(2026-11-10 S2-01: 끝난 온보딩 화면을 다시 열지 않음)
   if (me.data?.onboarding_done_at) return <Navigate to={justFinishedTo() ?? '/'} replace />;
   // /onboarding/resume(홈 띠 waiting_joiner, core pickTopTask): 가장 멀리 간 화면으로(2026-11-13)
@@ -73,6 +82,8 @@ export function OnboardingRoute() {
 
 // 이번 실행에서 이어하기를 이미 기록했는지(앱을 다시 열 때만 한 번)
 let resumed = false;
+// 이번 실행에서 첫 저금 흐름 이어하기를 이미 했는지(홈으로 들어올 때 한 번만)
+let savingResumeChecked = false;
 
 /**
  * 온보딩을 마치지 않았으면 가장 멀리 간 화면으로 바로(이어하기, 2026-11-10 Q4: “이어서 할까요?” 질문 화면은 없앰).
@@ -81,6 +92,16 @@ let resumed = false;
 export function OnboardingGate({ children }: { children: ReactNode }) {
   const me = useMe();
   const space = useSpace();
+  const loc = useLocation();
+  // 첫 저금 흐름 이어하기는 실행마다 한 번: 그린 뒤(커밋) 표시해 두 번 그리기(StrictMode)에도 Navigate가 남게
+  const savingResume =
+    !savingResumeChecked &&
+    !!me.data?.onboarding_done_at &&
+    loc.pathname === '/' &&
+    firstSavingPath() !== null;
+  useEffect(() => {
+    if (me.data) savingResumeChecked = true;
+  }, [me.data]);
   // 모든 화면을 감싸는 문이라 뼈대 없이(어느 화면 모양인지 모름, 보통 A-01에서 이미 불러옴)
   if (me.isLoading) return null;
   const step = current(me.data?.onboarding_step ?? FIRST);
@@ -92,7 +113,11 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
       : open && isJoinScreen(step)
         ? `/join/${step}`
         : null;
-  if (!to) return <>{children}</>;
+  if (!to) {
+    // 온보딩은 마쳤지만 첫 저금 흐름(W-11)을 마치지 않고 앱을 닫았으면 실행 뒤 홈에서 한 번 /onboarding/resume으로
+    if (savingResume) return <Navigate to="/onboarding/resume" replace />;
+    return <>{children}</>;
+  }
   if (!resumed && step !== FIRST && isOnboardingScreen(step)) {
     resumed = true;
     track('onboarding_resumed', {

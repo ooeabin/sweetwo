@@ -59,15 +59,16 @@ describe('다음 칸, 지난달 대비, 부채·금융자산 비율(F-08)', () =
         { side: 'asset', grp: 'real_estate', kind: 'house', amount: 200_000_000 },
         { side: 'asset', grp: 'etc', kind: 'car', amount: 20_000_000 },
         { side: 'debt', grp: 'credit', kind: 'credit_loan', amount: 5_000_000 },
-        {
-          side: 'asset',
-          grp: 'deposit',
-          kind: 'savings',
-          amount: 9_000_000,
-          visibility: 'private',
-        },
+        { side: 'asset', grp: 'etc', kind: 'car', amount: 9_000_000, status: 'sold' },
       ]),
     ).toBe(39));
+  it('금융자산 비율: 앱이 받은 내 숨기기 항목은 넣음(H3, 숨기기는 파트너에게만 안 보임)', () =>
+    expect(
+      financialPct([
+        { side: 'asset', grp: 'deposit', kind: 'savings', amount: 50_000_000 },
+        { side: 'asset', grp: 'etc', kind: 'car', amount: 40_000_000, visibility: 'private' },
+      ]),
+    ).toBe(56));
 });
 
 describe('연령대(7-1처럼 두 사람 평균 나이)', () => {
@@ -114,13 +115,31 @@ describe('순위 v2.2(06 7-8, 서버 networth_rank_pair)', () => {
     expect(pairRankBand([], 2026)).toBeNull();
     expect(rankBandOf(1966, 2026)).toBe('60s');
   });
-  it('두 사람 모두 동의면 둘의 합 순위(숨기기 빼고), 아니면 또래 중간값', () => {
-    const net = rankPairNet([
-      { side: 'asset', amount: 300_000_000 },
-      { side: 'asset', amount: 50_000_000, visibility: 'private' },
-      { side: 'asset', amount: 10_000_000, status: 'sold' },
-      { side: 'debt', amount: 61_400_000 },
-    ]);
+  it('숨기기는 보는 사람 것만 넣음(H3): 찬우가 보면 찬우 숨기기 포함, 예빈 숨기기 제외', () => {
+    const rows = [
+      { side: 'asset' as const, amount: 300_000_000 },
+      {
+        side: 'asset' as const,
+        amount: 50_000_000,
+        visibility: 'private',
+        owner_user_id: 'chanwoo',
+      },
+      { side: 'asset' as const, amount: 7_000_000, visibility: 'private', owner_user_id: 'yebin' },
+    ];
+    expect(rankPairNet(rows, 'chanwoo')).toBe(350_000_000);
+    expect(rankPairNet(rows, 'yebin')).toBe(307_000_000);
+    expect(rankPairNet(rows)).toBe(300_000_000);
+  });
+  it('두 사람 모두 동의면 둘의 합 순위(상대 숨기기 빼고), 아니면 또래 중간값', () => {
+    const net = rankPairNet(
+      [
+        { side: 'asset', amount: 300_000_000 },
+        { side: 'asset', amount: 50_000_000, visibility: 'private', owner_user_id: 'yebin' },
+        { side: 'asset', amount: 10_000_000, status: 'sold' },
+        { side: 'debt', amount: 61_400_000 },
+      ],
+      'chanwoo',
+    );
     expect(net).toBe(238_600_000);
     expect(
       rankPair({ consented: true, net, birthYears: [1993, 1995], myBirthYear: 1995, year: 2026 }),

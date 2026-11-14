@@ -203,13 +203,14 @@ export interface NetWorthItem {
 
 /**
  * 순자산(06 9장): 자산 − 부채, 원금이 있으면 원금(없으면 평가금액). 예상 순자산 = 평가금액 기준.
- * 안 판 수익 = 예상 − 순자산. 비공개·판 항목·만기 완료 항목은 빼고, 파트너 ‘합계만’ 묶음 합계는 더한다.
+ * 안 판 수익 = 예상 − 순자산. 판 항목·만기 완료 항목은 빼고, 파트너 ‘합계만’ 묶음 합계는 더한다.
+ * ‘숨기기’는 파트너에게만 안 보임(2026-11-13 H3): 앱이 받는 행(RLS) 중 숨기기는 늘 내 것이라 내 합계에는 더한다.
  */
 export function netWorth(
   items: NetWorthItem[],
   partnerSums: { side: AssetSide; total: Won; principal_total: Won }[] = [],
 ) {
-  const live = items.filter((i) => i.visibility !== 'private' && (i.status ?? 'held') === 'held');
+  const live = items.filter((i) => (i.status ?? 'held') === 'held');
   const sum = (side: AssetSide, f: (i: NetWorthItem) => Won) =>
     live.filter((i) => i.side === side).reduce((t, i) => t + f(i), 0) +
     partnerSums
@@ -274,16 +275,14 @@ export const periodSlice = <T>(rows: T[], p: NetWorthPeriod) =>
 
 /**
  * 투자 묶음 줄(23 F-02 12번, 06 8장). 투자 비중 = 투자 자산 합계 ÷ 총자산(부채 빼기 전, 평가금액, 반올림 %).
- * 손익 = 원금 있는 투자 항목의 평가금액 − 원금 합(원금 있는 항목이 없으면 null). 비공개·판 항목 제외,
+ * 손익 = 원금 있는 투자 항목의 평가금액 − 원금 합(원금 있는 항목이 없으면 null). 판 항목 제외(내 숨기기는 포함, H3),
  * 파트너 ‘합계만’은 비중에만 더함(원금을 따로 알 수 없음).
  */
 export function investSummary(
   items: (NetWorthItem & { grp: string })[],
   partnerSums: { side: AssetSide; grp: string; total: Won }[] = [],
 ) {
-  const live = items.filter(
-    (i) => i.side === 'asset' && i.visibility !== 'private' && (i.status ?? 'held') === 'held',
-  );
+  const live = items.filter((i) => i.side === 'asset' && (i.status ?? 'held') === 'held');
   const partner = partnerSums.filter((p) => p.side === 'asset');
   const total = live.reduce((t, i) => t + i.amount, 0) + partner.reduce((t, p) => t + p.total, 0);
   const inv = live.filter((i) => i.grp === 'invest');

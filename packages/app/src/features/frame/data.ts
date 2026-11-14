@@ -26,14 +26,15 @@ export const usePartner = () => useQuery({ queryKey: qk.partner, queryFn: fetchP
 
 /**
  * 순자산 요약 v2.2(06 6장, 23 F-01, 2026-11-13 N11): 평가금액 기준이 기본(net), principalNet은 ‘원금으로 보기’.
- * core netWorthSummary에 보이는 행 중 ‘숨기기’를 빼고 파트너 ‘총액만’ 묶음 합계를 행처럼 더함(23 F-01 2번, 홈 H-04와 같은 값)
+ * core netWorthSummary에 내가 볼 수 있는 행 모두 + 파트너 ‘총액만’ 묶음 합계를 행처럼 더함(23 F-01 2번, 홈 H-04와 같은 값).
+ * ‘숨기기’는 파트너에게만 안 보임(2026-11-13 H3): RLS로 받는 숨기기 행은 늘 내 것이라 내 합계에는 넣음
  */
 export function netWorthOf(
   items: readonly (NetWorthItem & { visibility?: string })[],
   sums: readonly PartnerAssetSumRow[],
 ) {
   return netWorthSummary([
-    ...items.filter((i) => i.visibility !== 'private'),
+    ...items,
     ...sums.map((p) => ({ side: p.side, amount: p.total, principal: p.principal_total })),
   ]);
 }

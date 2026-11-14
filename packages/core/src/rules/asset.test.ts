@@ -23,7 +23,7 @@ it('분류: 자산 8묶음, 부채 6묶음, 모두 기타(직접 입력)', () =>
     expect(g.kinds.at(-1)?.key).toBe('other');
 });
 
-it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항목·만기 완료 항목 빼고 파트너 합계만 더함', () => {
+it('순자산 = 원금 기준, 예상 = 평가금액 기준, 판 항목·만기 완료 항목 빼고 내 숨기기(H3)와 파트너 합계만 더함', () => {
   const n = netWorth(
     [
       { side: 'asset', amount: 3_000_000 },
@@ -36,10 +36,10 @@ it('순자산 = 원금 기준, 예상 = 평가금액 기준, 비공개·판 항�
     [{ side: 'asset', total: 4_400_000, principal_total: 4_000_000 }],
   );
   expect(n).toEqual({
-    assets: 17_400_000,
+    assets: 17_900_000,
     debts: 1_000_000,
-    net: 14_000_000,
-    expected: 16_400_000,
+    net: 14_500_000,
+    expected: 16_900_000,
     gain: 2_400_000,
   });
 });
@@ -82,8 +82,8 @@ it('투자 묶음 줄: 비중은 총자산(평가금액) 대비, 손익은 원�
     ],
     [{ side: 'asset', grp: 'invest', total: 2_000_000 }],
   );
-  // (1,120 + 80 + 200) ÷ (600 + 1,120 + 80 + 200) = 70%
-  expect(r).toEqual({ sharePct: 70, gain: 1_200_000, gainPct: 12 });
+  // 내 숨기기 500만도 넣음(H3): (1,120 + 80 + 500 + 200) ÷ (600 + 1,120 + 80 + 500 + 200) = 76%
+  expect(r).toEqual({ sharePct: 76, gain: 1_200_000, gainPct: 12 });
   expect(investSummary([{ side: 'asset', grp: 'invest', amount: 1 }]).gain).toBeNull();
 });
 

@@ -82,13 +82,17 @@ export function P01JoinStart() {
     }
   };
 
-  // 로그인하고 돌아온 길(?go=1)이면 한 번 바로 합류
+  // ?go=1이면 한 번 바로 합류: 로그인하고 돌아온 길, 또는 O-01 첫 실행 시트에서 이미 ‘합류하기’를 누른 길
+  // (2026-11-13 실구동: 시트 뒤 P-01에서 합류를 한 번 더 눌러야 했음). 로그인 전이면 초대가 유효할 때만 바로 A-02로,
+  // 주소에서 go를 빼 두어 A-02에서 뒤로 오면 P-01이 보임(다시 넘어가지 않음)
   const auto = useRef(false);
   useEffect(() => {
-    if (auto.current || params.get('go') !== '1' || !me.data) return;
+    if (auto.current || params.get('go') !== '1' || signedIn.data === undefined) return;
+    if (signedIn.data ? !me.data : preview.data?.status !== 'ok') return;
     auto.current = true;
+    if (!signedIn.data) nav(`/i/${code}`, { replace: true });
     void join();
-  }, [me.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [me.data, signedIn.data, preview.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if ((wellFormed && preview.isLoading) || signedIn.isLoading || (signedIn.data && me.isLoading))
     return <QuestionSkeleton />;

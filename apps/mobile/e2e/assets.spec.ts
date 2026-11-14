@@ -659,8 +659,8 @@ test('자산 순위(F-08 (나)): 출생연도가 없으면 ‘출생연도 알�
   await ask.click();
   await expect(page).toHaveURL(/\/settings\/me\/birth-year\?from=rank$/);
   await expect(page.getByRole('heading', { name: '찬우님은 몇 년생이에요?' })).toBeVisible();
-  // 처음 위치(올해 − 30)가 그대로 답이 되지 않게: 움직이기 전에는 저장 못 함
-  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  // 처음 보이는 값(올해 − 30)으로 바로 저장할 수 있음(2026-11-13 실구동)
+  await expect(page.getByRole('button', { name: '저장' })).toBeEnabled();
   await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
@@ -761,7 +761,7 @@ test('합계가 999억을 넘으면 “999억+”(S8-02): 요약, 목록, 홈 �
   await expect(page.getByRole('button', { name: /^자산 관리/ })).toContainText('999억+');
 });
 
-test('F-02 못 불러옴: 오류 카드 + 다시 시도(S8-04), 숨김 항목은 묶음 합계에서 빠짐(S8-09)', async ({
+test('F-02 못 불러옴: 오류 카드 + 다시 시도(S8-04), 내 숨김 항목도 묶음 합계에 더함(H3)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -797,8 +797,8 @@ test('F-02 못 불러옴: 오류 카드 + 다시 시도(S8-04), 숨김 항목은
   await page.getByRole('button', { name: '다시 시도' }).click();
   const cash = page.getByRole('region', { name: '현금성' });
   await expect(cash.getByRole('button', { name: /비상금/ })).toContainText('숨김');
-  // 묶음 머리 합계 = 생활비 통장 300만(숨김 70만 빼고)
-  await expect(cash.locator('.hg-sechead')).toContainText('300만 원');
+  // 묶음 머리 합계 = 생활비 통장 300만 + 내 숨김 70만(숨기기는 파트너에게만 안 보임, 2026-11-13 H3)
+  await expect(cash.locator('.hg-sechead')).toContainText('370만 원');
   await axe(page);
 });
 

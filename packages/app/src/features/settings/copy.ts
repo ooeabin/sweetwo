@@ -629,7 +629,7 @@ export const copy = {
   >,
   assetVisHelp: {
     sum: '항목은 안 보이고 총액에만 더해요',
-    private: '총액에도 안 더해요',
+    private: '파트너에게는 총액에도 안 더해요', // 2026-11-13 H3 [확인 필요]
   } as Record<string, string>,
   assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 적기 전
   rankTitle: '자산 순위 같이 보기',
@@ -641,6 +641,8 @@ export const copy = {
   previewTitle: (name: string) => `${name}님에게 보이는 모습`,
   previewTop: (name: string) => `${name}님 화면에서는 이렇게 보여요`,
   previewSaving: '같이 모으기',
+  previewMySaving: '저금', // [확인 필요] 각자 계열 내 개인 저금(상대 W-10 파트너 저금과 같게, 2026-11-13)
+  previewBundleMine: (me: string, amount: string) => `${me}님 몫 ${amount}`, // [확인 필요] 묶음 각자 금액
   previewPlan: '월급 계획',
   previewAssets: '자산 관리',
   previewNothing: '보이는 게 없어요', // [확인 필요]

@@ -40,7 +40,7 @@ import { salaryPaths, savingPaths } from '../paths';
 import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
 import { W11eAutoAsk } from './w-11e-auto-ask';
-import { AFTER_FIRST_SAVING_PATH } from '../../onboarding';
+import { AFTER_FIRST_SAVING_PATH, clearFirstSaving, markFirstSaving } from '../../onboarding';
 
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
@@ -90,7 +90,15 @@ export function W11SavingAdd() {
     ? (params.get('from') as Entry)
     : 'direct';
   const go = (to: Step) => nav(`${savingPaths.add}/${to}${params.size ? `?${params}` : ''}`);
-  const back = () => (window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist));
+  // 첫 저금 흐름(O-60 뒤)이면 지금 단계를 남겨 둠: 앱을 닫았다 열면 /onboarding/resume → 여기로(2026-11-13 실구동)
+  useEffect(() => {
+    if (entry === 'onboarding') markFirstSaving(`${savingPaths.add}/${s}?${params}`);
+  }, [entry, s, params]);
+  const back = () => {
+    // 첫 저금 흐름의 첫 화면에서 뒤로 나가면 이어하기를 지움(그만둔 것)
+    if (entry === 'onboarding' && s === 'a') clearFirstSaving();
+    return window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist);
+  };
   const title = {
     a: copy.addNameQ,
     b: copy.addMonthlyQ,
@@ -160,6 +168,7 @@ export function W11SavingAdd() {
         joined: space.data?.couple_state === 'connected',
       });
       writeDraft(null);
+      if (entry === 'onboarding') clearFirstSaving();
       await Promise.all(
         [qk.goals, qk.splits, ['pay_checklist'], qk.goalSaved].map((k) =>
           qc.invalidateQueries({ queryKey: k }),

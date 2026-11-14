@@ -1,7 +1,7 @@
 -- pgTAP: 자산·부채 명의, 공개 범위(서버에서 거름), 대신 입력과 합류 뒤 넘김, 이력, 순자산(23 F-01~F-04, 08 2·4장)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -56,8 +56,12 @@ select throws_ok(
      select space_id, 'asset', 'cash', 'bank', 'x', 1, 'person' from public.app_user $$,
   '42501', null, '합류 뒤 상대 명의 새로 만들기 불가');
 select is((select count(*)::int from public.asset_history where asset_id = (select id from public.asset where name = '생활비 통장')), 2, '금액이 바뀌면 이력');
-select is((select net from public.net_worth_history(1)), 13500000::bigint, '순자산 = 원금 기준(생활비 350 + 주식 원금 800 + 적금 200), 비공개 제외');
+select is((select net from public.net_worth_history(1)), 14000000::bigint, '순자산 = 원금 기준(생활비 350 + 주식 원금 800 + 적금 200 + 내 숨기기 50, H3)');
 select throws_ok($$ delete from public.asset $$, '42501', null, '지우기는 휴지통만');
+reset role;
+select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
+set local role authenticated;
+select is((select net from public.net_worth_history(1)), 13500000::bigint, '예빈이 보면 찬우 숨기기는 빠짐');
 reset role;
 
 select * from finish();

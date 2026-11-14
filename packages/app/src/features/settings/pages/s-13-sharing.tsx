@@ -18,6 +18,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
+import { sharedCopy } from '../../../shared/copy';
 import { SheetSelect } from '../../../shared/sheet-select';
 import { toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
@@ -124,6 +125,7 @@ export function S13Sharing() {
               value={share}
               options={PLAN_SHARES}
               nameOf={(v) => copy.planShares[v] ?? v}
+              subOf={(v) => sharedCopy.shareNote.subs[v]}
               onChange={(v) =>
                 v !== share &&
                 void run(
@@ -175,6 +177,7 @@ export function S13Sharing() {
               value={me.asset_share_default}
               options={VIS}
               nameOf={visName}
+              subOf={(v) => copy.assetVisHelp[v]}
               onChange={(v) => {
                 if (differ(v) > 0) setAsk(v);
                 else void setDefault(v, false);
@@ -230,6 +233,7 @@ export function S13Sharing() {
                 value={a.visibility}
                 options={VIS}
                 nameOf={visName}
+                subOf={(v) => copy.assetVisHelp[v]}
                 onChange={(v) => void run(() => updateAsset(a.id, { visibility: v }), [qk.assets])}
               />
             ))}
