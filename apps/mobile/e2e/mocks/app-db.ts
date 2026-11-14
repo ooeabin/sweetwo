@@ -67,6 +67,9 @@ export interface MemDb {
   kindNames: Record<string, unknown>[];
   /** 알림 센터(내 알림) */
   notifications: Record<string, unknown>[];
+  /** 돌릴 수 있는 알림 id(revertible_notifications, R-08)와 돌린 기록 */
+  revertible?: string[];
+  reverted?: string[];
   invites: {
     code: string;
     expires_at: string;
@@ -1867,6 +1870,16 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           } else line = 0;
         }
         return json(route, { record: rid, line });
+      }
+      // R-08 ‘이전 값으로 돌리기’(서버 20261210090000): 돌릴 수 있는 알림 id, 돌리면 1(항목 수), 이미 돌렸으면 not_revertible
+      if (fn === 'revertible_notifications') return json(route, db.revertible ?? []);
+      if (fn === 'revert_partner_change') {
+        const id = String(body().p_notification);
+        if (!(db.revertible ?? []).includes(id))
+          return json(route, { message: 'not_revertible', code: '22023' }, 400);
+        db.revertible = (db.revertible ?? []).filter((x) => x !== id);
+        db.reverted = [...(db.reverted ?? []), id];
+        return json(route, 1);
       }
       if (fn === 'mark_notifications_read') {
         const ids = (body().p_ids as string[] | undefined) ?? null;

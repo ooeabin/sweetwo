@@ -297,3 +297,26 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
     .poll(() => db.notifications.find((n) => n.kind === 'goal_achieved')?.read_at ?? null)
     .not.toBeNull();
 });
+
+test('이전 값으로 돌리기(14 N-01·N-02, R-08): 돌릴 수 있는 변경 알림만 글자 버튼 → 돌림 + Toast, 그 뒤엔 없음', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedNotis(db);
+  db.revertible = ['00000000-0000-4000-8000-000000000001'];
+  const narrow = info.project.name === 'narrow';
+  await page.goto(narrow ? '/notifications' : '/calendar/list');
+  if (!narrow) await page.locator('.hg-appside').getByRole('button', { name: /^알림/ }).click();
+  const undo = page.getByRole('button', { name: '이전 값으로 돌리기' });
+  // 같이 쓰는 저금을 바꾼 알림 하나에만
+  await expect(undo).toHaveCount(1);
+  await axe(page);
+  await undo.click();
+  await expect(page.getByText('이전 값으로 돌렸어요')).toBeVisible();
+  expect(db.reverted).toEqual(['00000000-0000-4000-8000-000000000001']);
+  await expect(undo).toHaveCount(0);
+  // 줄 자체는 그대로(누르면 그 화면)
+  await expect(page.getByText('예빈님이 내 집 마련 저금을 바꿨어요')).toBeVisible();
+});

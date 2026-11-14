@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ab57187b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (c8936e68). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1469,6 +1469,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-noti__msg { overflow: hidden; font: var(--text-body-sm); color: var(--ink); white-space: nowrap; text-overflow: ellipsis; }  /* 2026-11-12 D4 문구 1줄 + 말줄임, 전체 문구는 줄 title 툴팁 */
 .hg-noti__item.is-read .hg-noti__msg { color: var(--slate); }
 .hg-noti__time { font: var(--text-micro); font-weight: 400; color: var(--stone); }
+.hg-noti__undo { padding: 0 var(--space-3) var(--space-2) calc(var(--space-3) + 32px + var(--space-3)); margin-top: calc(-1 * var(--space-2)); }  /* 2026-11-13 R-08 같이 쓰는 것 변경 줄 아래 글자 버튼 ‘이전 값으로 돌리기’(줄 글자와 같은 왼쪽) */
 .hg-noti__icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); }
 .hg-noti__icon .hg-ico { width: 16px; height: 16px; }
 .hg-noti__dot { position: absolute; top: 19px; right: 12px; width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--brand); }

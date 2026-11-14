@@ -287,3 +287,7 @@ export const PushKindsSchema = z.record(z.string(), z.boolean()).default({});
 /** 그 종류가 켜져 있나(없는 키 = 켬, 서버 push_kind_on) */
 export const pushKindOn = (kinds: Record<string, boolean> | null | undefined, k: PushKind) =>
   kinds?.[k] !== false;
+
+/** ‘이전 값으로 돌리기’(14 N-01·N-02, R-08): 돌릴 수 있는 알림 id, 돌린 항목 수 */
+export const RevertibleNotisSchema = z.array(z.string());
+export const RevertCountSchema = z.number().int().min(1);

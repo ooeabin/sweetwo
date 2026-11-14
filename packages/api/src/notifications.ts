@@ -2,6 +2,8 @@ import {
   ActiveNotice,
   NotiRow,
   parseNotiRows,
+  RevertCountSchema,
+  RevertibleNotisSchema,
   type NotiCursor,
   type PushKind,
 } from '@sweetwo/core';
@@ -192,4 +194,23 @@ export async function setPushKinds(
     .update({ push_kinds: { ...current, ...patch } })
     .eq('id', userId);
   if (error) throw new Error(error.message);
+}
+
+/** ‘이전 값으로 돌리기’를 할 수 있는 내 알림 id(같이 쓰는 항목, 그 뒤 안 바뀐 것만, 14 N-02 R-08) */
+export async function fetchRevertibleNotifications(): Promise<string[]> {
+  const { data, error } = await supabase().rpc('revertible_notifications');
+  fail(error);
+  return RevertibleNotisSchema.parse(data ?? []);
+}
+
+/** 이미 바뀌었거나 돌린 알림 */
+export class RevertGone extends Error {}
+
+/** 알림의 변경을 원래 값으로. 돌린 항목 수 */
+export async function revertPartnerChange(id: string): Promise<number> {
+  const { data, error } = await supabase().rpc('revert_partner_change', { p_notification: id });
+  if (error?.message?.includes('not_revertible') || error?.message?.includes('no_notification'))
+    throw new RevertGone();
+  fail(error);
+  return RevertCountSchema.parse(data);
 }

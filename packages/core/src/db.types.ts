@@ -2226,7 +2226,9 @@ export type Database = {
       partner_change: {
         Row: {
           actor_id: string
+          after_raw: Json | null
           after_v: string | null
+          before_raw: Json | null
           before_v: string | null
           created_at: string
           field: string
@@ -2234,6 +2236,8 @@ export type Database = {
           noun: string
           receiver_id: string
           ref_id: string | null
+          reverted_at: string | null
+          reverted_by: string | null
           sent_at: string | null
           space_id: string
           target: string
@@ -2243,7 +2247,9 @@ export type Database = {
         ComputedFields: never
         Insert: {
           actor_id: string
+          after_raw?: Json | null
           after_v?: string | null
+          before_raw?: Json | null
           before_v?: string | null
           created_at?: string
           field: string
@@ -2251,6 +2257,8 @@ export type Database = {
           noun: string
           receiver_id: string
           ref_id?: string | null
+          reverted_at?: string | null
+          reverted_by?: string | null
           sent_at?: string | null
           space_id: string
           target: string
@@ -2259,7 +2267,9 @@ export type Database = {
         }
         Update: {
           actor_id?: string
+          after_raw?: Json | null
           after_v?: string | null
+          before_raw?: Json | null
           before_v?: string | null
           created_at?: string
           field?: string
@@ -2267,6 +2277,8 @@ export type Database = {
           noun?: string
           receiver_id?: string
           ref_id?: string | null
+          reverted_at?: string | null
+          reverted_by?: string | null
           sent_at?: string | null
           space_id?: string
           target?: string
@@ -4128,20 +4140,37 @@ export type Database = {
         }
         Returns: string
       }
-      log_partner_change: {
-        Args: {
-          p_after: string
-          p_before: string
-          p_field: string
-          p_noun: string
-          p_ref: string
-          p_space: string
-          p_target: string
-          p_topic: string
-          p_urgent: boolean
-        }
-        Returns: undefined
-      }
+      log_partner_change:
+        | {
+            Args: {
+              p_after: string
+              p_before: string
+              p_field: string
+              p_noun: string
+              p_ref: string
+              p_space: string
+              p_target: string
+              p_topic: string
+              p_urgent: boolean
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_after: string
+              p_after_raw: Json
+              p_before: string
+              p_before_raw: Json
+              p_field: string
+              p_noun: string
+              p_ref: string
+              p_space: string
+              p_target: string
+              p_topic: string
+              p_urgent: boolean
+            }
+            Returns: undefined
+          }
       log_split_changes: { Args: { p_old: Json; p_split: string }; Returns: undefined }
       login_move_apply: { Args: { p: Json; p_approval: string }; Returns: undefined }
       login_move_check: { Args: { p_new: string; p_user: string }; Returns: undefined }
@@ -4330,6 +4359,23 @@ export type Database = {
           month: number
         }[]
       }
+      partner_change_group: {
+        Args: { p_notification: string }
+        Returns: {
+          actor_id: string
+          after_raw: Json
+          before_raw: Json
+          created_at: string
+          field: string
+          ids: number[]
+          noun: string
+          ok: boolean
+          ref_id: string
+          space_id: string
+          target: string
+          topic: string
+        }[]
+      }
       partner_change_line: {
         Args: {
           p_after: string
@@ -4339,6 +4385,10 @@ export type Database = {
           p_topic: string
         }
         Returns: string
+      }
+      partner_change_now: {
+        Args: { p_field: string; p_ref: string; p_space: string; p_topic: string }
+        Returns: Json
       }
       partner_change_title: {
         Args: { p_noun: string; p_topic: string; who: string }
@@ -4434,6 +4484,7 @@ export type Database = {
       }
       rank_pair_consented: { Args: { p_space: string }; Returns: boolean }
       rank_top_pct: { Args: { p_net: number }; Returns: number }
+      raw_of: { Args: { v: unknown }; Returns: Json }
       read_won: { Args: { v: number }; Returns: string }
       recalc_send_line: { Args: { p_space: string }; Returns: undefined }
       recent_goal_changes: {
@@ -4501,6 +4552,8 @@ export type Database = {
         }[]
       }
       restore_trash: { Args: { p_id: string; p_kind: string }; Returns: string }
+      revert_partner_change: { Args: { p_notification: string }; Returns: number }
+      revertible_notifications: { Args: Record<PropertyKey, never>; Returns: string[] }
       round10k: { Args: { v: number }; Returns: number }
       run_access_expiry: { Args: Record<PropertyKey, never>; Returns: undefined }
       run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
