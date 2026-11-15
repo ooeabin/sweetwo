@@ -23,6 +23,8 @@ vi.mock('./prefs', () => ({
     setPinAsked: (v: boolean) => (store.pinAsked = v ? '1' : null),
     setLastProvider: (v: string | null) => (store.lastProvider = v),
     setLastUser: (v: string | null) => (store.lastUser = v),
+    setJoinAfter: (u: string | null, v: string | null) =>
+      (store.joinAfter = u && v ? `${u}|${v}` : null),
   },
 }));
 
@@ -37,6 +39,7 @@ const fill = () =>
     pinAsked: '1',
     lastProvider: 'kakao',
     lastUser: 'u1',
+    joinAfter: 'u1|p-10',
   });
 
 describe('로그아웃 하나(S1-03)', () => {
@@ -58,6 +61,7 @@ describe('로그아웃 하나(S1-03)', () => {
     expect(store).toMatchObject({
       pending: null,
       returnTo: null,
+      joinAfter: null,
       pinAsked: '1',
       lastProvider: 'kakao',
     });
@@ -81,6 +85,7 @@ describe('로그아웃 하나(S1-03)', () => {
     expect(calls).toEqual(['cache.clear']);
     expect(cleared).toBe(1);
     expect(store.returnTo).toBe('/assets');
+    expect(store.joinAfter).toBe('u1|p-10');
   });
 
   it('서버 로그아웃이 실패해도 이 기기 데이터는 지움(웹)', async () => {

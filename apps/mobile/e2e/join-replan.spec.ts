@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo, emptyV22, type MemDb, mockOnboarding, SB, seed } from './mocks';
+import { chanwoo, emptyV22, fakeJwt, type MemDb, mockOnboarding, SB, seed } from './mocks';
 import { events } from './analytics';
 import { setWheel } from './wheel';
 import { fakeBridge } from './fake-bridge';
@@ -167,6 +167,14 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
     page.getByText('찬우님의 ‘내 집 마련’과 묶어서 둘이 모은 금액을 바로 보여 드려요'),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: '같이 모으기' })).toBeDisabled();
+  // 새 저금 매달 금액은 0원이라 월급 계획에서 정한다고 알림(r5 A2, 예전 ‘월급날 확인하면 더해져요’)
+  await expect(
+    page.getByText('이 금액은 처음 한 번만 넣어요. 매달 모을 금액은 월급 계획에서 정해요'),
+  ).toBeVisible();
+  // 다시 열면 여기부터(r5 A1): 이 기기에 계정과 화면을 기억
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('sweetwo.join-after')))
+    .toBe(`${db.me.id}|p-09`);
   await axe(page);
   await page.getByLabel('지금까지 모은 금액').fill('4000000');
   await page.getByRole('button', { name: '같이 모으기' }).click();
@@ -189,6 +197,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
     ['진행 소식', true],
     ['매달 우리 둘 소식', true],
   ]);
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.join-after'))).toBeNull();
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
   expect(
@@ -642,4 +651,47 @@ test('초대 코드로 가입 도중 앱을 다시 열면(돌아갈 자리 없�
   await expect(page).toHaveURL(/\/join\/p-03$/);
   await expect(page.getByRole('heading', { name: '내 이름이나 애칭을 알려 주세요' })).toBeVisible();
   expect(db.rpc).toContain('join_space');
+});
+
+test('합류를 마치고 P-09에서 앱을 닫았다 열면 A-06 권장보다 P-09부터, A-06은 P-11 뒤(r5 A1)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.v22 = { ...emptyV22(), joinOffer: { bundle_id: null, goal_id: 'g-home', name: '내 집 마련' } };
+  // 합류를 마친 각자 계열 예빈(월급 없이 합류)
+  Object.assign(db.me, { onboarding_done_at: '2026-10-07T00:50:00Z', onboarding_step: 'P-06' });
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  await fakeBridge(page, { signedIn: true, pin: null });
+  const id = db.me.id as string;
+  await page.addInitScript(
+    ([jwt, mark]) => {
+      (window as unknown as { __fb: { token: string } }).__fb.token = jwt;
+      if (!sessionStorage.getItem('e2e-marked')) {
+        sessionStorage.setItem('e2e-marked', '1');
+        localStorage.setItem('sweetwo.join-after', mark);
+      }
+    },
+    [fakeJwt(id), `${id}|p-09`] as const,
+  );
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/join\/p-09$/);
+  await expect(
+    page.getByRole('heading', { name: '지금까지 모은 금액을 알려 주세요' }),
+  ).toBeVisible();
+  // 월급 계획이 없으면 안내는 앞 문장만(r5 A2)
+  await expect(page.getByText('이 금액은 처음 한 번만 넣어요', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/join\/p-10$/);
+  // 축하에서 다시 열어도 축하부터
+  await page.reload();
+  await expect(page).toHaveURL(/\/join\/p-10$/);
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '이런 알림을 보내 드려요' })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/lock\/setup$/);
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.join-after'))).toBeNull();
 });

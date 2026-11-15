@@ -79,4 +79,15 @@ export const prefs = {
     return v && /^[A-HJ-NP-Z2-9]{6}$/.test(v) ? v : null;
   },
   setPendingInvite: (code: string | null) => set('sweetwo.pending-invite', code),
+  /**
+   * 합류를 마친 뒤 아직 끝내지 않은 합류 화면(P-09·P-10·P-11)과 그 계정(2026-11-16 r5 A1). 그 사이 앱을 다시 열면
+   * A-06 권장보다 먼저 그 화면으로(A-06은 P-11 뒤 한 번). 다른 계정 값이면 없는 것
+   */
+  joinAfter: (uid: string | null) => {
+    const v = get('sweetwo.join-after');
+    const m = v ? /^([^|]+)\|(p-09|p-10|p-11)$/.exec(v) : null;
+    return m && uid && m[1] === uid ? m[2] : null;
+  },
+  setJoinAfter: (uid: string | null, screen: string | null) =>
+    set('sweetwo.join-after', uid && screen ? `${uid}|${screen}` : null),
 };

@@ -9,6 +9,7 @@ import { afterSetupPath } from '../../auth';
 import { copy } from '../copy';
 import { useJoinData, useJoinSend } from '../data';
 import { pushKindRows } from '../push-kinds';
+import { clearJoinAfter } from '../join-after';
 
 // P-11 알림 종류 골라 켜기(18 ‘P-10, P-11 고친 점’, 2026-11-13 v2.2, 1회, P-10 다음). 제목 “이런 알림을 보내 드려요”
 // + 실제 오는 종류만 스위치(18 P-11 표, push-kinds.ts). ‘알림 받기’ = OS 허용 창(브리지) + 종류 저장,
@@ -46,6 +47,7 @@ export function P11PushKinds() {
     });
     // P-04 ‘보내요’ 흐름은 여기까지(요청은 이미 보냄)
     setSend(null);
+    clearJoinAfter();
     nav(await afterSetupPath(), { replace: true });
   };
   return (

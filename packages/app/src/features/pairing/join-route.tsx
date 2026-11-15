@@ -1,9 +1,10 @@
 import { Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { paths } from '../auth';
 import { copy } from './copy';
 import { saveMe, useJoinData } from './data';
+import { markJoinAfter } from './join-after';
 import { JOIN_REMOVED, joinChapter, joinPath, movedJoinScreen } from './join-step';
 import { P02bPrefill } from './pages/p-02b-prefill';
 import { P03Name } from './pages/p-03-name';
@@ -73,6 +74,11 @@ function JoinEnded() {
 /** 합류 중인지 먼저 확인(합류를 마치기 전 화면만). 끝난 초대면 안내 */
 function Guard({ id, children }: { id: string; children: ReactNode }) {
   const d = useJoinData();
+  const uid = d.me?.onboarding_done_at ? d.me.id : null;
+  // 합류를 마친 뒤 화면이면 기억(다시 열면 여기부터, join-after.ts)
+  useEffect(() => {
+    if (uid) markJoinAfter(uid, id);
+  }, [uid, id]);
   if (AFTER.has(id) || d.resumed) return <>{children}</>;
   if (!d.ready) return <QuestionSkeleton onBack={null} />;
   if (d.ended) return <JoinEnded />;

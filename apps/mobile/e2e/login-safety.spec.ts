@@ -359,3 +359,18 @@ test('태블릿(터치) 질문 화면(S1-24): Enter 안내와 넓은 창 바 없
   expect(box?.width).toBeGreaterThan(400); // 휴대폰처럼 열 너비 주 버튼(넓은 창 120px 버튼 아님)
   await ctx.close();
 });
+
+test('다시 실행·새로 고침에 A-06 권장이 끼면 ‘나중에 할게요’ 뒤 보던 화면으로, 다시 묻지 않음(r5 A4)', async ({
+  page,
+}) => {
+  await signedInHome(page, { pin: null });
+  await page.goto('/settings/me');
+  await expect(page).toHaveURL(/\/lock\/setup$/);
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toBeVisible();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  // 예전에는 늘 홈
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  await page.reload();
+  await expect(page).toHaveURL(/\/settings\/me$/);
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
+});
