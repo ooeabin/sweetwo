@@ -73,10 +73,10 @@ export const copy = {
   taskReconnect: (name: string) => `${whoDid(name)} 다시 연결하자고 했어요`,
   taskModeSend: (name: string, me: string) =>
     `${whoDid(name)} 월급은 대부분 ${nim(me)}에게 보낸다고 했어요`,
-  taskModeCombine: (name: string) => `${whoDid(name)} 월급을 합쳐서 관리하자고 해요`,
+  taskModeCombine: (name: string) => `${whoDid(name)} 월급을 합쳐서 쓰자고 해요`,
   taskModeManager: (name: string, me: string) =>
     `${whoDid(name)} 생활비 관리를 ${nim(me)}에게 맡기자고 해요`,
-  taskSplit: (name: string, account: string) => `${whoDid(name)} ‘${account}’ 나누기를 제안했어요`,
+  taskSplit: (name: string, account: string) => `${whoDid(name)} ‘${account}’ 나누기를 알렸어요`,
   taskRank: (name: string) => `${whoDid(name)} 자산 순위를 같이 보자고 해요`,
   taskSalaryChanged: '월급이 바뀌었어요. 월급 계획을 다시 맞춰 볼까요?',
   taskFirstSaving: '무엇을 같이 모을지 정해 볼까요?',
@@ -100,7 +100,7 @@ export const copy = {
   payday: (d: number) => `${d}일`,
   paydayLast: '말일',
   noPaydayTile: '돈이 들어올 때', // [확인 필요] 2026-11-13 날짜 없음
-  leftover: (amount: string) => `여유 자금 ${amount}`, // [확인 필요] 2026-11-13 H-07
+  leftover: (amount: string) => `아직 안 정한 돈 ${amount}`, // [확인 필요] 2026-11-13 H-07
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
   noCare: '다가오는 일정 없어요',

@@ -86,7 +86,7 @@ test('관리 형태 요청 받음(S-11j): 지금처럼 할게요 → 각자 그�
   v.modeRequests.push(modeRequest(db, {}));
   await page.goto('/settings/couple/style/request/mr-1');
   await expect(
-    page.getByRole('heading', { name: '예빈님이 월급을 합쳐서 관리하자고 해요' }),
+    page.getByRole('heading', { name: '예빈님이 월급을 합쳐서 쓰자고 해요' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '지금처럼 할게요' }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -130,12 +130,12 @@ test('관리 형태(S-11f): 진행 중인 내 요청 표시와 요청 취소, �
   expect(db.space?.salary_mode).toBe('separate');
 });
 
-test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → 예빈님에게 제안하기, 월급 비율은 흐린 선택지', async ({
+test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → 예빈님께 알리기, 월급 비율은 흐린 선택지', async ({
   page,
 }) => {
   const { v } = await connected(page);
   await page.goto('/salary/split/new');
-  await expect(page.getByRole('heading', { name: '어떤 통장을 나눌까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '낼 몫 정하기' })).toBeVisible();
   await page.getByRole('radio', { name: '생활비 통장' }).click();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
@@ -148,8 +148,8 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
   await page.getByRole('radio', { name: '반반' }).click();
   await expect(page.getByText('찬우 50만 원, 예빈 50만 원 (5 : 5)')).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '예빈님에게 제안하기' }).click();
-  await expect(page.getByText('예빈님에게 제안했어요')).toBeVisible();
+  await page.getByRole('button', { name: '예빈님께 알리기' }).click();
+  await expect(page.getByText('예빈님께 알렸어요')).toBeVisible();
   expect(v.shared[0]).toMatchObject({ name: '생활비 통장', rule: 'half', share_a: 500_000 });
   // W-01: 내가 연 제안이 열려 있으면 그 통장(내 몫, 잠김) 아래 회색 “예빈님 답을 기다려요”(20 W-01b, PR 14)
   await page.goto('/salary?view=plan');
@@ -179,7 +179,7 @@ test('분담 도우미(W-01b): 두 사람 모두 ‘모두 보여 주기’면 �
   // 350만 : 250만 → 60만 × 350/600 = 35만
   await expect(page.getByText('찬우 35만 원, 예빈 25만 원 (6 : 4)')).toBeVisible();
   await expect(page.getByText(/250만|350만/)).toHaveCount(0);
-  await page.getByRole('button', { name: '예빈님에게 제안하기' }).click();
+  await page.getByRole('button', { name: '예빈님께 알리기' }).click();
   await expect.poll(() => v.shared[0]?.share_a).toBe(350_000);
 });
 
@@ -207,7 +207,7 @@ test('분담 제안 받음(W-01c): 좋아요 → 내 월급 계획에 같이 쓰
   v.shared.push(proposal('sa-1'));
   await page.goto('/salary/split/sa-1');
   await expect(
-    page.getByRole('heading', { name: '예빈님이 ‘생활비 통장’ 나누기를 제안했어요' }),
+    page.getByRole('heading', { name: '예빈님이 ‘생활비 통장’ 나누기를 알렸어요' }),
   ).toBeVisible();
   await expect(page.getByText('한 달 100만 원, 찬우 40만 원, 예빈 60만 원')).toBeVisible();
   await axe(page);

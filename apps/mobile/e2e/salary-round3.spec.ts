@@ -61,7 +61,7 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
   await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
 });
 
-test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 여유 자금 미리보기', async ({
+test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 아직 안 정한 돈 미리보기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -75,14 +75,14 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
     .click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/edit\/monthly$/);
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 지금 여유 자금 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
-  await expect(page.getByText('여유 자금 0원')).toBeVisible();
+  // 지금 아직 안 정한 돈 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
+  await expect(page.getByText('아직 안 정한 돈 0원')).toBeVisible();
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('950,000');
   await axe(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('1000000');
   await expect(page.getByText('5만 원이 모자라요')).toBeVisible();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('800000');
-  await expect(page.getByText('여유 자금 15만 원')).toBeVisible();
+  await expect(page.getByText('아직 안 정한 돈 15만 원')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
@@ -197,7 +197,7 @@ test('S-11f 저장 전 미리보기 한 줄: 각자 → 합쳐서는 상대 ‘�
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '둘이 같이 해요' }).click();
   await expect(page.getByText('예빈님이 ‘좋아요’를 누르면 바뀌어요')).toBeVisible();
-  await expect(page.getByText(/부터 체크리스트가/)).toHaveCount(0);
+  await expect(page.getByText(/부터 월급날 확인 목록이/)).toHaveCount(0);
   await axe(page);
   // 합쳐서 → 각자는 바로: 9월 월급 기간 끝 10월 24일 → 10월 25일부터
   Object.assign(db.space ?? {}, {
@@ -209,5 +209,5 @@ test('S-11f 저장 전 미리보기 한 줄: 각자 → 합쳐서는 상대 ‘�
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '각자 자기 월급으로 해요' }).click();
-  await expect(page.getByText(/부터 체크리스트가 사람마다 생겨요$/)).toBeVisible();
+  await expect(page.getByText(/부터 월급날 확인 목록이 사람마다 생겨요$/)).toBeVisible();
 });

@@ -240,6 +240,8 @@ export function F08Rank() {
         />
       </section>
       <p className="hg-help" style={{ textAlign: 'center', margin: 0 }}>
+        {copy.rankAxisHelp}
+        <br />
         {copy.rankPairNote}
         <br />
         {copy.rankPairBasis(band)}

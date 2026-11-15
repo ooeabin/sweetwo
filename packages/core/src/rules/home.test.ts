@@ -4,7 +4,6 @@ import {
   homeTodo,
   homeUpcoming,
   inReviewWindow,
-  reviewPath,
   pickMyChecklist,
   pickTopBanner,
   salaryState,
@@ -283,13 +282,11 @@ it('월급날 체크 할 일(19 H-06 3a, 2026-11-09): 월급날부터 7일 안, 
   ).toBe('check');
 });
 
-it('월급 전 확인 기간과 주소(2026-11-12 D3): 기간 끝 2일 전 ~ 기간 끝, 할 일 링크는 그 체크리스트', () => {
+it('월급 전 확인 기간: 기간 끝 2일 전 ~ 기간 끝, 할 일 링크는 W-02(2026-11-15 W-05 없앰)', () => {
   expect(inReviewWindow('2026-10-21', '2026-10-24')).toBe(false);
   expect(inReviewWindow('2026-10-22', '2026-10-24')).toBe(true);
   expect(inReviewWindow('2026-10-24', '2026-10-24')).toBe(true);
   expect(inReviewWindow('2026-10-25', '2026-10-24')).toBe(false);
-  expect(reviewPath('cl 1')).toBe('/salary/review?checklist=cl%201');
-  expect(reviewPath(null)).toBe('/salary/review');
   const b = base({ today: '2026-10-22' });
   const i = {
     ...b,
@@ -297,6 +294,6 @@ it('월급 전 확인 기간과 주소(2026-11-12 D3): 기간 끝 2일 전 ~ 기
   };
   expect(homeTodo({ ...i, unlinkRequestedBy: null, reconnectFrom: null })).toMatchObject({
     kind: 'review',
-    to: '/salary/review?checklist=checklist-1',
+    to: '/salary',
   });
 });

@@ -7,7 +7,7 @@ describe('알림 → 화면 ID(notification_opened landing_screen)', () => {
     ['/salary', 'W-02'],
     ['/salary?who=u-1', 'W-02'],
     ['/salary?view=plan', 'W-01'],
-    ['/salary/review?checklist=c-1', 'W-05'],
+    ['/salary/review?checklist=c-1', 'W-02'],
     ['/salary/items/g-1', 'W-10'],
     ['/salary/items/g-1/achieved', 'W-12'],
     ['/assets/a-1', 'F-04'],

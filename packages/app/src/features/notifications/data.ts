@@ -153,7 +153,7 @@ export function useOpenNotification() {
     // 대상 항목이 지워졌거나 볼 수 없으면 이동 없이 Toast(14 N-01 예외)
     const gone = await targetGone(n.target, qc).catch(() => null);
     if (gone) toast(gone === 'deleted' ? copy.targetDeleted : copy.targetHidden);
-    // 알림에서 왔음(분석 entry, 예: W-05 month_check_viewed)
+    // 알림에서 왔음(분석 entry, 예: W-02 checklist_line_checked)
     else nav(n.target, { state: { from: 'notification' } });
     const made = n.created_at ? Date.parse(n.created_at) : NaN;
     track('notification_opened', {

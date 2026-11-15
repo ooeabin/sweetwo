@@ -116,7 +116,7 @@ describe('pickMonthLine(H-11 상태)', () => {
     expect(pickMonthLine({ ...base, today: '2026-11-22', current: c })).toMatchObject({
       kind: 'review',
       left: 1,
-      to: '/salary/review?checklist=cl',
+      to: '/salary',
     });
   });
   it('자동 줄뿐 → “26일에 3개”', () => {

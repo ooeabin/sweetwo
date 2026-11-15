@@ -168,11 +168,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   expect(call?.p_version).toBeUndefined();
   expect(
     (call?.p_lines as { kind: string; amount: number }[]).map((l) => [l.kind, l.amount]),
-  ).toEqual([
-    ['fixed', 680_000],
-    ['living', 680_000],
-    ['allowance', 270_000],
-  ]);
+  ).toEqual([['allowance', 270_000]]);
   expect(db.modeRequests).toHaveLength(0);
   expect(db.me).toMatchObject({ birth_year: null, monthly_income: 2_700_000, payday: 10 });
   expect(db.me.push_kinds).toEqual({
@@ -323,14 +319,14 @@ test('한 사람이 관리해요(찬우가 관리): 형태 확인만 → P-05c �
   expect(db.me.push_kinds).toMatchObject({ shared_change: false, my_allowance: true });
 });
 
-test('합쳐서 관리해요(둘이 같이): 형태 확인만 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)', async ({
+test('월급을 합쳐서 써요(둘이 같이): 형태 확인만 → 공동 월급 계획 다시 채우기(있던 줄 그대로, 예빈 용돈)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   joining(db, true, 'together');
   await answerBasics(page);
-  await expect(page.getByText('합쳐서 관리해요')).toBeVisible();
+  await expect(page.getByText('월급을 합쳐서 써요')).toBeVisible();
   await page.getByRole('button', { name: '좋아요' }).click();
   await salary(page);
   await celebrate(page);

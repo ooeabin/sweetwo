@@ -52,7 +52,7 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
-import { salaryPaths, savingPaths } from '../paths';
+import { salaryPaths, savingPaths, togetherPaths } from '../paths';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
@@ -203,7 +203,7 @@ export function W02PaydayConfirm() {
     const mine = saving.ready ? saving.live.filter((i) => i.owner !== 'partner') : [];
     return frame(
       <>
-        {period.data && <PeriodLine period={period.data} onGo={() => nav('/salary/money-in')} />}
+        {period.data && <PeriodLine period={period.data} onGo={() => nav(togetherPaths.moneyIn)} />}
         <section className="hg-checkgroup" aria-label={copy.savingGroup}>
           <SectionHeader
             variant="group"
@@ -247,6 +247,9 @@ export function W02PaydayConfirm() {
           >
             {copy.editSplit}
           </button>
+          {!pending && (
+            <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
+          )}
         </section>,
       );
     // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’
@@ -649,6 +652,10 @@ export function W02PaydayConfirm() {
         <Button variant="primary" block loading={busy} onClick={() => void confirm()}>
           {copy.confirmAll}
         </Button>
+      )}
+      {/* “+ 받은 돈 적기”(20 W-02 ‘받은 돈 적기’, 2026-11-15: 저금 카드·저금 상세에서 옮김) → W-20 */}
+      {!partnerTab && !pending && ago === 0 && (
+        <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
       )}
       {!partnerTab && (
         <button

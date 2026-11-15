@@ -108,12 +108,11 @@ export type SalaryState =
     };
 
 const PATHS = {
-  review: '/salary/review',
   checklist: '/salary',
 };
 
 /**
- * 내 이번 달 체크리스트(홈 H-03·H-06, 월급 탭 W-02·W-05, 설정 S-11f가 모두 이것 하나로, 2026-11-11 QA 4구간 S4-12):
+ * 내 이번 달 체크리스트(홈 H-03·H-06, 월급 탭 W-02, 설정 S-11f가 모두 이것 하나로, 2026-11-11 QA 4구간 S4-12):
  * 내가 주인인 것(각자) → 없으면 공동(합쳐서). 월급 관리 방식을 바꿔도 이번 달 체크리스트는 그대로라(25 S-11f)
  * 지금 방식이 아니라 이번 사이클에 실제로 있는 체크리스트로 고름. meId가 없으면 공동만
  */
@@ -154,10 +153,6 @@ export function pickTopBanner(on: Partial<Record<TopBanner, boolean>>): TopBanne
 
 export { inReviewWindow };
 
-/** 월급 전 확인(W-05) 주소: 그 체크리스트만(2026-11-12 D3) */
-export const reviewPath = (checklistId?: string | null) =>
-  checklistId ? `${PATHS.review}?checklist=${encodeURIComponent(checklistId)}` : PATHS.review;
-
 /** 이번 달 월급 상태(WG-01, 홈 H-03): 진행 중 / 월급 전 확인 기간(다음 기준일 3일 전 ~, 체크 안 한 줄 있음) / 다 했어요 */
 export function salaryState(i: Pick<HomeInput, 'checklists' | 'meId' | 'today'>): SalaryState {
   const c = myList(i);
@@ -177,7 +172,7 @@ export const CHECK_TODO_DAYS = 7;
 /**
  * 월급날 체크 할 일(19 H-06 3a, 2026-11-09 홈 허브): 내(합쳐서면 공동) 이번 달 체크리스트에 체크 안 한 줄이 있고
  * 오늘이 월급날(기간 첫날)부터 7일 안. 닫기 없음(2026-11-11): 다 체크하거나 7일이 지나면 사라짐.
- * 그 뒤 체크는 홈 큰 상자 → W-02, 월급 전 확인(W-05)
+ * 그 뒤 체크는 홈 큰 상자 → W-02, W-02(월급 전 확인 화면 W-05는 2026-11-15 없앰)
  */
 export function checkTodo(i: HomeInput): Extract<HomeTodo, { kind: 'check' }> | null {
   const c = myList(i);
@@ -219,7 +214,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
       label: s.label,
       left: s.left,
       key: `review:${s.label}:${s.nextPayday}`,
-      to: reviewPath(myList(i)?.id),
+      to: PATHS.checklist,
     };
   // 월급날 체크(2026-11-09, 월급 전 확인 다음): 월급날부터 7일 안, 체크 안 한 줄이 있을 때
   const check = checkTodo(i);
@@ -280,7 +275,7 @@ export function homeUpcoming(i: HomeInput, days = 30): HomeUpcoming[] {
       add({ key: 'payday', kind: 'payday', date: s.nextPayday, name: '', to: PATHS.checklist });
     const review = addDays(s.nextPayday, -3);
     if (s.left > 0 && within(review))
-      add({ key: 'review', kind: 'review', date: review, name: '', to: PATHS.review });
+      add({ key: 'review', kind: 'review', date: review, name: '', to: PATHS.checklist });
   }
   for (const c of i.cares) {
     const d = nextCareDate(c, i.today);
@@ -501,7 +496,7 @@ export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
   const late = lateLeft(i.previous, i.today, i.base, i.shift);
   const left = manualLeft(c.lines);
   if (reviewDue(i.today, c.cycle_end, c.lines))
-    return { kind: 'review', cycleStart: c.cycle_start, left, late, to: reviewPath(c.id) };
+    return { kind: 'review', cycleStart: c.cycle_start, left, late, to: PATHS.checklist };
   // “월급날이에요”는 월급날(사이클 첫날) 하루만. 다음 날부터는 날짜를 넣은 문장(2026-11-13 UX B M2)
   if (left > 0)
     return {

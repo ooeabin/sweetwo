@@ -210,7 +210,7 @@ export function moneyLine(d: MoneyDate) {
         ? `/salary?who=${encodeURIComponent(d.who)}`
         : '/salary'
       : d.kind === 'review'
-        ? '/salary/review'
+        ? '/salary'
         : d.kind === 'maturity'
           ? `/assets/${d.ref ?? ''}`
           : d.kind === 'auto'

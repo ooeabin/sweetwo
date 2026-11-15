@@ -1,7 +1,6 @@
 import { fetchGoalLines, qk, restoreTrash, trashGoals } from '@sweetwo/api';
 import { formatDateFull, formatYm, kstDateOf as kstDay, savingRemain } from '@sweetwo/core';
 import {
-  AddRow,
   Badge,
   BottomSheet,
   Button,
@@ -455,16 +454,6 @@ export function W10SavingItem() {
           {d.joined && g.created_by && <ListRow label={copy.createdBy(nameOf(g.created_by))} />}
         </div>
       </section>
-      {/* 맨 아래 “+ 돈 들어왔어요”(20 W-10 8번) → W-20. 넣을 수 있는 저금만(보기만인 상대 저금은 없음, 2026-11-14) */}
-      {i.canEdit && !closed && (
-        <AddRow
-          label={copy.moneyIn}
-          block
-          onClick={() =>
-            nav(`${togetherPaths.moneyIn}?back=${encodeURIComponent(savingPaths.item(id))}`)
-          }
-        />
-      )}
       <BundleAchieveWatch />
       {/* W-11 끝(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”, 미합류면 초대 */}
       {(ask === 'bundle' || ask === 'invite') && (

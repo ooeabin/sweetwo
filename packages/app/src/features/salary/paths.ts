@@ -2,7 +2,6 @@
 export const salaryPaths = {
   plan: '/salary?view=plan', // W-01 월급 계획 영수증(옛 /salary/split은 여기로 넘김)
   checklist: '/salary', // W-02
-  review: '/salary/review', // W-05
 };
 
 /** W-01 주소: 사람 탭(각자, who), 처음에 열 저금 줄 금액 시트(line = 저금 항목 id) */
@@ -42,7 +41,7 @@ export const togetherPaths = {
   bundleAchieved: (id: string) => `/salary/bundles/${id}/achieved`, // W-12(묶음, 합계 기준)
   moneyIn: '/salary/money-in', // W-20
   distribute: (id: string) => `/salary/money-in/${id}`, // W-20a
-  moneyInList: '/salary/money-in/list', // W-20b 들어온 돈 기록(고치기·지우기, 2026-11-14)
+  moneyInList: '/salary/money-in/list', // W-20b 받은 돈 기록(고치기·지우기, 2026-11-14)
   moneyInEdit: (id: string) => `/salary/money-in?edit=${encodeURIComponent(id)}`, // W-20 고치기
   reconcile: '/salary/reconcile', // W-10c
 };

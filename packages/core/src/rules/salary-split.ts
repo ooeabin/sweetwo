@@ -27,8 +27,7 @@ export interface SplitLineDraft {
 export const round10k = (v: number): Won => Math.round(v / 10_000) * 10_000;
 const floor10k = (v: number): Won => Math.floor(v / 10_000) * 10_000;
 
-export const FIXED_RATE = 0.25;
-export const LIVING_RATE = 0.25;
+// 2026-11-15 3차 검토 D1: 추천 고정지출·생활비 줄은 새로 만들지 않음(가짜 숫자를 확인하게 하는 숙제가 됨). 용돈만 추천 비율.
 export const ALLOWANCE_RATE = 0.1;
 
 /** 저금 항목(추천값 재료). 목표 금액·기한이 있으면 월 필요액까지 채움 */
@@ -52,9 +51,13 @@ export interface RecommendInput {
   keep?: Record<string, Won>;
   /**
    * 직접 추가한 지출 줄(W-01 ‘추천값으로 다시 채우기’, 2026-11-12 QA 5구간 D1). 금액 그대로 두고 지출 줄 맨 뒤에 그대로 돌려줌.
-   * 고정지출·생활비는 수입에서 이 줄들을 뺀 금액의 25%, 저금은 그 뒤 남은 금액에서(06 3-2)
+   * 저금은 수입에서 이 줄들과 이미 있는 고정지출·생활비·용돈을 뺀 남은 금액에서(06 3-2)
    */
   custom?: { name: string; amount: Won }[];
+  /**
+   * 이미 있는 고정지출·생활비 줄(2026-11-15: 추천값은 새로 만들지 않고, 있던 줄은 지우지 않고 금액 그대로 돌려줌, 종류마다 합쳐 1줄)
+   */
+  existing?: { kind: 'fixed' | 'living'; amount: Won }[];
   /**
    * 합쳐서(2026-11-13, 06 3-2): 용돈을 사람마다 같은 금액 = 두 사람 실수령 합 × 10% ÷ 사람 수(1만 원 반올림).
    * 없거나 false면 사람마다 그 사람 실수령 × 10%(각자, 예전)
@@ -65,7 +68,7 @@ export interface RecommendInput {
 
 /**
  * 처음 채우는 값(O-50, W-01 ‘추천값으로 다시 채우기’).
- * 직접 추가한 지출 줄(custom)은 금액 그대로 두고 먼저 뗌. 고정지출·생활비 = (수입 − 직접 추가 줄 합) × 25%,
+ * 직접 추가한 지출 줄(custom)과 이미 있는 고정지출·생활비 줄(existing)은 금액 그대로 두고 먼저 뗌(새로 만들지 않음, 2026-11-15).
  * 용돈 = 사람마다 실수령 × 10%. 그대로 두는 저금 줄(keep, 월 필요액이 없는 항목의 지금 금액)을
  * 먼저 떼고, 남은 금액을 저금 묶음 순서대로 월 필요액만큼(모자라면 남은 만큼, 그다음은 0원). 저금 항목이 없으면 여유 자금.
  */
@@ -77,9 +80,13 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     amount: Math.max(c.amount, 0),
   }));
   const customSum = custom.reduce((t, c) => t + c.amount, 0);
-  const base = Math.max(income - customSum, 0);
-  const fixed = round10k(base * FIXED_RATE);
-  const living = round10k(base * LIVING_RATE);
+  const spendOf = (kind: 'fixed' | 'living') =>
+    (o.existing ?? [])
+      .filter((e) => e.kind === kind)
+      .reduce((t, e) => t + Math.max(e.amount, 0), 0);
+  const fixed = spendOf('fixed');
+  const living = spendOf('living');
+  const hasKind = (kind: 'fixed' | 'living') => (o.existing ?? []).some((e) => e.kind === kind);
   const same = o.equalAllowance ? equalAllowance(o.people.map((p) => p.income)) : null;
   const allowances = o.people.map((p) => ({
     kind: 'allowance' as const,
@@ -103,8 +110,8 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   });
   return [
     ...savings,
-    { kind: 'fixed', amount: fixed },
-    { kind: 'living', amount: living },
+    ...(hasKind('fixed') ? [{ kind: 'fixed' as const, amount: fixed }] : []),
+    ...(hasKind('living') ? [{ kind: 'living' as const, amount: living }] : []),
     ...allowances,
     ...custom,
   ];
@@ -168,16 +175,12 @@ export interface JoinerSplitInput {
 }
 
 /**
- * 각자: 합류한 사람 월급 계획 추천값(18 P-06 각자). 고정지출·생활비 = 실수령 × 25%, 용돈 = × 10%.
- * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 여유 자금
+ * 각자: 합류한 사람 월급 계획 추천값(18 P-06 각자). 용돈 = 실수령 × 10%만(고정지출·생활비 추천 줄은 2026-11-15에 없앰).
+ * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 아직 안 정한 돈
  */
 export function joinerSplit(o: JoinerSplitInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);
-  return [
-    { kind: 'fixed', amount: round10k(income * FIXED_RATE) },
-    { kind: 'living', amount: round10k(income * LIVING_RATE) },
-    { kind: 'allowance', userId: o.userId, amount: round10k(income * ALLOWANCE_RATE) },
-  ];
+  return [{ kind: 'allowance', userId: o.userId, amount: round10k(income * ALLOWANCE_RATE) }];
 }
 
 export interface JointRefillInput {
