@@ -220,6 +220,9 @@ export const copy = {
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
   closedFold: (n: number) => `그만 모은 저금 ${n}개`, // [확인 필요]
+  // W-10 저금 카드 접기 줄(2026-11-15 3차 검토) [확인 필요]
+  foldOpen: '자세히 보기',
+  foldClose: '접기',
   // W-13 저금 목록(2026-11-09 round 3) [확인 필요]
   listTitle: '저금',
   listOpen: '저금 목록 보기', // 저금 묶음 머리(누르는 제목) 화면 읽기 이름
@@ -333,6 +336,9 @@ export const copy = {
   lateTitle: (start: string) => `${formatMonthDay(start)} 월급`,
   firstWait: (start: string) => `${formatMonthDay(start)} 첫 월급날에 확인해요`, // W-02 첫 확인 목록 전
   firstWaitNoDate: '첫 월급날에 확인해요',
+  // W-02 0a 첫 월급날 전 미리 보기(2026-11-15 3차 검토) [확인 필요]
+  previewTitle: '월급날에 확인할 것',
+  previewAuto: '자동으로 나가요',
   moneyInGo: '받은 돈 적기',
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',

@@ -25,6 +25,7 @@ import {
   todayKst,
   type BaseDay,
   type MoneyDate,
+  withinDays,
 } from '@sweetwo/core';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -267,3 +268,25 @@ export function careUndo(qc: QueryClient, id: string, prev: Parameters<typeof up
 export const trackCareShared = (linked: boolean) => {
   if (linked) track('shared_item_changed', { item_type: 'care_day', linked: true });
 };
+
+/**
+ * 가장 가까운 일정 하나(홈 H-08 캘린더 타일, 2026-11-15 3차 검토: 캘린더 목록과 같은 재료라 월급날도 같음).
+ * 경조사(다음 날짜) + 금융 일정(Y-01 목록과 같은 60일 안, 월급날·쓸 곳 메모·만기 등) 중 이른 것. 같은 날이면 경조사 먼저
+ */
+export function nextSchedule(
+  d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'upcoming' | 'monthOf'>,
+): { label: string; date: string } | null {
+  const [y, mo] = d.today.split('-').map(Number) as [number, number];
+  const money = [0, 1, 2]
+    .map((n) => {
+      const t = y * 12 + (mo - 1) + n;
+      return [Math.floor(t / 12), (t % 12) + 1] as const;
+    })
+    .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
+    .filter((x) => x.date >= d.today && withinDays(d.today, x.date, 60))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const care = d.upcoming[0];
+  const m = money[0];
+  if (care && (!m || care.date <= m.date)) return { label: care.care.name, date: care.date };
+  return m ? { label: moneyLine(m).label, date: m.date } : null;
+}

@@ -553,7 +553,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지킬 것
 
-- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색(당근처럼): 주 버튼, 홈 ‘월급 계획’ 포인트 상자 채움(`hg-hubtile--point`, 2026-11-11 사용자 결정, 글자는 `on-accent-app-text`. 홈 할 일·초대 띠는 2026-11-11부터 코코아 `band-cocoa`. + 버튼 FAB는 없앰), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + `brand-ink`, 2026-11-04)
+- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색(당근처럼): 주 버튼(글자는 `on-accent-app-text` 진한 글자, 2026-11-15), 홈 ‘월급 계획’ 포인트 상자 채움(`hg-hubtile--point`, 2026-11-11 사용자 결정, 글자는 `on-accent-app-text`. 홈 할 일·초대 띠는 2026-11-11부터 코코아 `band-cocoa`. + 버튼 FAB는 없앰), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + `brand-ink`, 2026-11-04)
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -569,7 +569,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - 파일 이름: `<종류>-<이름>.webp` (예: `goal-04-home.webp`)
 - 크기 상한: 그림 150KB. `pnpm check:assets`(scripts/check-assets.mjs), CI가 넘으면 멈춤
 - 그림은 `<Illustration name>`, 빈 상태는 `<EmptyState>`로만 씀. 파일을 직접 import하지 않음
-- 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 그림이 없는 화면은 영역만 잡아 비워 둠. 그림이 있는 P-01·P-11은 `Illustration`(`scene-invite`, `scene-clap`)을 QuestionLayout `hero`에(2026-11-05). 그림 파일: `packages/ui/src/assets/illustrations`(3D 이모지), `goal-photos`(목표 사진)(작은 3D 아이콘 `icons3d`·`icon3d`는 2026-11-09 지움). 줄 앞 칸(Lead)은 그림이 아니라 `packages/ui/src/components/lead-kinds.ts`의 종류 표(`leadOf(묶음, 종류)`, 2026-11-10부터 회색 빈 원 `hg-lead--slot` + `data-art` 그림 이름, 그림이 들어오면 `art`로 채움)로만 그리고, 목표 금액이 있는 저금 줄은 `Lead progress`(core `savingBar`)
+- 장면 자리는 `<SceneMedia>` 컴포넌트 하나로만: 그림이 없는 화면은 영역만 잡아 비워 둠. 그림이 있는 P-01·P-11은 `Illustration`(`scene-invite`, `scene-clap`)을 QuestionLayout `hero`에(2026-11-05). 그림 파일: `packages/ui/src/assets/illustrations`(3D 이모지), `goal-photos`(목표 사진)(작은 3D 아이콘 `icons3d`·`icon3d`는 2026-11-09 지움). 줄 앞 칸(Lead)은 그림이 아니라 `packages/ui/src/components/lead-kinds.ts`의 종류 표(`leadOf(묶음, 종류)`, 2026-11-10부터 회색 빈 원 `hg-lead--slot` + `data-art` 그림 이름, 그림이 들어오면 `art`로 채움)로만 그리고, 목표 금액이 있는 저금 줄은 `Lead progress`(core `savingBar`) (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)
 
 ### 디자인 시스템 갱신 절차
 
@@ -896,7 +896,7 @@ supabase/
 - 모바일 네이티브 부분(로그인 창, 보안 저장소, 잠금, 푸시)은 e2e가 흉내 브리지(`mobile-app.spec.ts`)로, 실제 동작은 기기 빌드로
 - 테스트마다 DB 초기화(seed 다시 넣기). 테스트끼리 데이터를 나눠 쓰지 않음
 - 음력: fixture를 천문연구원 표와 대조
-- 접근성: 화면마다 axe 검사(`e2e/axe.ts`(mobile, admin, site)의 `axe(page)`로. 브랜드 오렌지 위 흰 글자의 color-contrast만 예외), ‘동작 줄이기’ 켜고 한 번
+- 접근성: 화면마다 axe 검사(`e2e/axe.ts`(mobile, admin, site)의 `axe(page)`로. 달성 배지와 짧은 오렌지 글자의 color-contrast만 예외. 주 버튼은 2026-11-15부터 진한 글자라 예외 아님), ‘동작 줄이기’ 켜고 한 번
 - 디자인 시스템 컴포넌트: `/dev/ui` 컴포넌트 모음을 라이트, 다크, 좁은 창(375px)에서 열어 오류 없음, axe 위반 없음, 스크린샷(apps/mobile/e2e). 기준 이미지 비교는 화면이 안정되면 추가
 - 링크 허용 목록은 Vitest(`packages/core/src/deep-link.test.ts`), 모바일 PKCE는 Vitest(`apps/mobile/src/native/pkce.test.ts`)
 

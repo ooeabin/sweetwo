@@ -214,6 +214,7 @@ test('A-07 합류 불가(S1-06·S1-27·S1-35): 막다른 화면 없이 코드 �
   const before = asked;
   await page.goto('/i/abc%3Cb%3E');
   await expect(page.getByRole('heading', { name: '코드를 다시 확인해 주세요' })).toBeVisible();
+  await expect(page.getByText('초대 코드는 영문 대문자와 숫자 6자예요')).toBeVisible();
   await expect(page.locator('.hg-invite-code')).toHaveCount(0);
   expect(asked).toBe(before);
 });

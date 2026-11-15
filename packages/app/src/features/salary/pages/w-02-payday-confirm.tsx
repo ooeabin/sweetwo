@@ -16,25 +16,17 @@ import {
   lineIsMine,
   todayKst,
 } from '@sweetwo/core';
-import { AddRow, Button, Icon, IconButton, SectionHeader, Tabs } from '@sweetwo/ui';
+import { AddRow, Button, Icon, IconButton, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { sharedCopy } from '../../../shared/copy';
-import { useMask } from '../../../shared/mask';
+import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { quietly, toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
-import {
-  CheckLine,
-  checkToast,
-  goalLineName,
-  isPast,
-  LineLead,
-  lineName,
-  periodText,
-} from '../check-line';
+import { CheckLine, checkToast, goalLineName, isPast, lineName, periodText } from '../check-line';
 import { copy } from '../copy';
 import { autoDayText, baseDayOf, cycleName, firstPaydayOf, useShownPayday } from '../cycle';
 import {
@@ -233,24 +225,55 @@ export function W02PaydayConfirm() {
   if (!list) {
     // 첫 확인 목록 전(소급 없음, 07 3-1): 월급 계획이 있으면 “11월 25일 첫 월급날에 확인해요” + 월급 계획 보기
     const firstDay = mySplit ? firstPaydayOf(mySplit, base, today, shownPayday) : null;
+    // 월급날에 볼 줄 미리 보기(20 W-02 0a, 2026-11-15 3차 검토): 확인 목록에 들어갈 줄을 회색으로, 누를 수 없음
+    const preview = (mySplit?.split_line ?? []).filter((l) => l.in_checklist && l.amount > 0);
+    const previewName = (l: (typeof preview)[number]) =>
+      lineName(
+        { kind: l.kind, goal_id: l.goal_id, user_id: l.user_id, name: l.name },
+        goalName,
+        personName,
+        joint,
+        accountNames.ofSplitLine(l.id),
+      );
     if (mySplit)
       return frame(
-        <section className="hg-card hg-card--fill hg-stack">
-          <p className="hg-card__meta">
-            {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
-          </p>
-          <button
-            type="button"
-            className="hg-btn hg-btn--link"
-            style={{ alignSelf: 'flex-start' }}
-            onClick={() => nav(salaryPaths.plan)}
-          >
-            {copy.editSplit}
-          </button>
-          {!pending && (
-            <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
+        <>
+          <section className="hg-card hg-card--fill hg-stack">
+            <p className="hg-card__meta">
+              {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
+            </p>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => nav(salaryPaths.plan)}
+            >
+              {copy.editSplit}
+            </button>
+            {!pending && (
+              <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
+            )}
+          </section>
+          {preview.length > 0 && (
+            <section
+              className="hg-stack"
+              aria-label={copy.previewTitle}
+              style={{ gap: 'var(--space-2)' }}
+            >
+              <SectionHeader variant="group" title={copy.previewTitle} />
+              <div className="hg-list hg-list--preview">
+                {preview.map((l) => (
+                  <ListRow
+                    key={l.id}
+                    label={previewName(l)}
+                    sub={l.auto_pay ? copy.previewAuto : undefined}
+                    value={money(l.amount, masked)}
+                  />
+                ))}
+              </div>
+            </section>
           )}
-        </section>,
+        </>,
       );
     // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’
     return frame(
@@ -375,7 +398,6 @@ export function W02PaydayConfirm() {
         name={nameOf(l)}
         personName={personName}
         meId={meId}
-        lead={<LineLead line={l} />}
         readOnly={!lineOpen}
         viewOnly={partnerTab}
         auto={l.auto ? autoText(l) : undefined}
@@ -640,7 +662,6 @@ export function W02PaydayConfirm() {
                 name={nameOf(l)}
                 personName={personName}
                 meId={meId}
-                lead={<LineLead line={l} />}
                 readOnly
                 viewOnly
               />

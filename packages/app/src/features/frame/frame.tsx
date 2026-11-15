@@ -14,6 +14,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { track } from '../../shared/analytics';
+import { sharedCopy } from '../../shared/copy';
+import { toast } from '../../shared/toast';
 import { useMask } from '../../shared/mask';
 import { usePeopleArt, useSocialAvatar } from '../../shared/person';
 import { useCacheInfo } from '../../shared/offline-cache';
@@ -46,7 +48,8 @@ const HREF: Record<AppTab, string | undefined> = {
 const openSite = (path: string) => {
   const url = `${SITE}${path}`;
   const b = window.sweetwo;
-  if (b?.openUrl) void b.openUrl(url);
+  // 앱 안 브라우저가 못 열면 조용히 서랍만 닫히지 않게 알림(2026-11-15 3차 검토: ‘공지’ 눌러도 안 열림)
+  if (b?.openUrl) void b.openUrl(url).catch(() => toast(sharedCopy.errorTitle));
   else window.open(url, '_blank', 'noopener');
 };
 const SITE = 'https://sweetwo.kr';

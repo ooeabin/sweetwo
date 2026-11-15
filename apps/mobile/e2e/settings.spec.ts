@@ -125,10 +125,13 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page).toHaveURL(/\/settings\/me$/);
   await expect(page.getByRole('button', { name: /이름/ })).toContainText('찬우');
   await expect(page.getByRole('button', { name: /결혼 상태/ })).toContainText('했어요');
-  // 내 월급 + 예빈 값 보기만, 관리 방식(각자면 체크리스트 만드는 날 없음)
+  // 내 월급이 먼저, 아래 예빈 월급 줄은 보기만(2026-11-15 3차 검토), 관리 방식(각자면 체크리스트 만드는 날 없음)
   const salary = page.getByRole('button', { name: /내 월급/ });
   await expect(salary).toContainText('350만 원, 25일');
-  await expect(salary).toContainText('예빈 250만 원, 10일');
+  await expect(salary).not.toContainText('예빈');
+  const partnerRow = page.locator('.hg-listrow', { hasText: '예빈님 월급' });
+  await expect(partnerRow).toContainText('250만 원, 10일');
+  await expect(partnerRow.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
     '월급은 각자 써요',
   );
@@ -148,7 +151,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page.getByRole('button', { name: /알림 이메일/ })).toContainText('new@example.com');
   await expect(page.getByRole('button', { name: '월급 계획 열기' })).toBeVisible();
   // 앞당기기 끄기(두 사람 공통)
-  const shift = page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여줘요' });
+  const shift = page.getByRole('switch', { name: '월급날이 쉬는 날이면 앞당겨 보여 줘요' });
   await expect(shift).toHaveAttribute('aria-checked', 'true');
   await shift.click();
   await expect.poll(() => db.space?.holiday_shift).toBe(false);

@@ -16,7 +16,7 @@ import { copy } from './copy';
 import { shareReceipt, type ReceiptImageModel } from './receipt-image';
 
 // W-01 ↔ W-02 잇기(docs/spec/20-salary-plan.md W-02 1번, 2026-11-09).
-// MonthBar: W-02 머리 진행 막대(W-01과 같은 PlanBar, 보낸 만큼 채움) + “체크한 금액 142만 원 / 342만 원”.
+// MonthBar: W-02 머리 진행 막대 하나(확인한 줄 수 ÷ 줄 수, 2026-11-15 3차 검토: 범례 없는 3색 막대 대신) + “확인한 금액 142만 원 / 342만 원”.
 // 다 끝난 달은 그 아래 굵은 한 줄 + ‘공유하기’(2026-11-12 W-02 끝 화면과 달 결과 카드 1b 대신, 사용자 결정 A)
 
 type Person = { id: string; nickname: string | null; monthly_income: number | null };
@@ -100,7 +100,9 @@ export function MonthBar({
       flat
       progress
       label={p.complete ? copy.allDone : copy.progress(p.total, p.done)}
-      parts={partsOf(p)}
+      parts={[
+        { kind: 'check', percent: 100, fill: p.total ? Math.floor((p.done * 100) / p.total) : 0 },
+      ]}
       title={finish ? copy.monthFinished(shownStart ?? list.cycle_start, finish) : undefined}
       caption={caption}
       action={

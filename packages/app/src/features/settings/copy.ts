@@ -62,8 +62,8 @@ export const copy = {
   // 빈 값(공개 단계로 못 보는 금액, 날짜 없는 사람의 월급날)은 빼고 쉼표로(2026-11-14 R5: “시우 ,”)
   salaryValue: (amount: string, day: string) => [amount, day].filter(Boolean).join(', '),
   variable: '매달 달라요',
-  partnerSalary: (name: string, amount: string, day: string) =>
-    [amount, day].some(Boolean) ? `${name} ${[amount, day].filter(Boolean).join(', ')}` : '', // [확인 필요]
+  // 파트너 월급 줄(내 월급 줄 아래 보기만, 2026-11-15 3차 검토: 내 것 먼저) [확인 필요]
+  partnerSalaryRow: (name: string) => `${name}님 월급`,
   salaryMode: '월급 관리 방식',
   salaryModeValue: { separate: '월급은 각자 써요', joint: '월급을 합쳐서 써요' }, // [확인 필요]
   planDay: '월급날 확인 목록 만드는 날',
@@ -71,7 +71,7 @@ export const copy = {
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
-  holidayShift: '월급날이 쉬는 날이면 앞당겨 보여줘요',
+  holidayShift: '월급날이 쉬는 날이면 앞당겨 보여 줘요',
   holidayShiftLabel: '주말·공휴일 앞당기기', // [확인 필요] 줄 이름
   openSplit: '월급 계획 열기',
   logout: '로그아웃',
@@ -90,7 +90,7 @@ export const copy = {
   payday: '월급날',
   salarySaved: '월급을 바꿨어요', // [확인 필요]
 
-  // S-11d 체크리스트 만드는 날
+  // S-11d 월급날 확인 목록 만드는 날
   planDayQ: '월급날 확인 목록을 언제 만들까요?', // [확인 필요]
   paydayOf: (name: string, d: string) => `${name} 월급날 ${d}`,
   planDaySaved: '월급날 확인 목록 만드는 날을 바꿨어요', // [확인 필요]

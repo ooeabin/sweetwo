@@ -21,7 +21,7 @@ type ErrorKey = keyof typeof copy.errors;
 
 // 초대 코드 형식(P-01 코드 입력과 같음, DB 검사와 같은 규칙). 형식이 아니면 서버에 묻지 않고 바로 ‘잘못된 코드’(2026-11-10)
 const CODE = /^[A-HJ-NP-Z2-9]{6}$/;
-// 상태 그림 자리(96px, 그림이 들어올 때까지 회색 빈 자리 hg-artslot, 2026-11-10 아이콘 원에서 되돌림. Illustrations ‘나중 과제’)
+// 상태 그림(96px, Illustrations ‘나중 과제’). 그림 파일이 들어올 때까지 아무것도 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김)
 const StatusArt = ({ name }: { name: string }) => (
   <Illustration name={name} className="hg-auth__art" />
 );
@@ -172,6 +172,14 @@ export function P01JoinStart() {
       <QuestionLayout
         hero={<StatusArt name="status-invite-blocked" />}
         title={copy.errors[blocked]}
+        // 잘못된 코드면 이유 한 줄(2026-11-15 3차 검토): 헷갈리는 글자가 있으면 그것, 아니면 코드 모양
+        help={
+          blocked === 'invalid'
+            ? /[01IO]/i.test(code)
+              ? copy.codeConfusable
+              : copy.codeRule
+            : undefined
+        }
         center
         primary={{ label: copy.reenterCode }}
         secondary={

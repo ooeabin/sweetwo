@@ -16,7 +16,9 @@ export function P01CodeEntry() {
   const from = (useLocation().state as { from?: string } | null)?.from ?? paths.start;
   const [code, setCode] = useState('');
   const valid = CODE.test(code);
-  const bad = code.length === 6 && !valid;
+  // 헷갈리는 글자(0, 1, I, O)는 넣는 즉시 이유를 알려 줌(2026-11-15 3차 검토), 6자인데 틀리면 다시 확인
+  const confusable = /[01IO]/.test(code);
+  const bad = confusable || (code.length === 6 && !valid);
 
   return (
     <QuestionLayout
@@ -50,7 +52,7 @@ export function P01CodeEntry() {
         />
         {bad && (
           <p id="p-01-code-error" className="hg-help is-error" role="alert">
-            {copy.errors.invalid}
+            {confusable ? copy.codeConfusable : copy.errors.invalid}
           </p>
         )}
       </div>

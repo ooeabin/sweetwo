@@ -9,6 +9,9 @@ import {
   kstDateOf,
   leftover,
   lineIsMine,
+  heroZero,
+  homeOrder,
+  monthLineUrgent,
   pickHeroes,
   pickMonthLine,
   pickTopBanner,
@@ -22,18 +25,20 @@ import {
   todayKst,
   type BundleView,
   type HeroGoal,
+  type HomeBlock,
   type MarriageStatus,
   type TopTask,
 } from '@sweetwo/core';
 import { Hub, HubBand, HubTile, Illustration } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track, type AnalyticsEvent } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { toast } from '../../../shared/toast';
 import { sharedCopy } from '../../../shared/copy';
+import { nextSchedule, useCalendarData } from '../../calendar';
 import { WaitNudge } from '../../pairing';
 import {
   AddMenu,
@@ -89,8 +94,8 @@ import { H12Wedding } from './h-12-wedding';
 import { H14MonthUs } from './h-14-month-us';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009 결정 1): 회색 바탕 위 흰 상자.
-// 좁은 창: H-10 같이 모으기(주인공) → H-11 이번 달 한 줄(날짜 없는 사람 H-13) → H-06 할 일 띠(16순서, core pickTopTask)
-// → H-07 월급 계획(포인트 상자, + 여유 자금)·H-08 캘린더 → H-12 결혼 준비(결혼 준비 중만) → H-04 자산 관리·H-09 저금.
+// 좁은 창(2026-11-15 3차 검토 순서, core homeOrder): (H-11이 확인할 것을 말하면 H-11) → H-06 할 일 띠 → H-14 이번 달 우리 둘
+// → H-10 같이 모으기(0원이면 반 칸 타일 아래) → H-11 → H-07 월급 계획·H-08 캘린더 → H-12 결혼 준비 → H-04 자산 관리·H-09 저금.
 // 넓은 창(1100px 이상 4열)은 CSS 격자가 띠를 맨 위, H-10을 두 칸 두 줄로(HomeHub v2.2). H-02·H-03은 없앰.
 // 본문 맨 위 띠(해제 대기, 공지, 메일 반송)는 하나만(core pickTopBanner). 상대가 바꾸면 Realtime으로 바로 다시 읽음.
 
@@ -128,6 +133,7 @@ export function H01Home() {
   // 월급날 앞당기기(07 1장): 첫 월급날·늦은 확인 마지막 날도 W-02와 같은 날(2026-11-14 R3)
   const shownPayday = useShownPayday();
   const notes = useUpcomingNotes(today, addDays(today, 365));
+  const cal = useCalendarData();
   const exName = useQuery({
     queryKey: qk.unlinkPartner,
     queryFn: fetchUnlinkPartnerName,
@@ -679,20 +685,99 @@ export function H01Home() {
   const leftText =
     left === null ? undefined : left >= 0 ? copy.leftover(m(left)) : copy.short(m(-left));
 
-  // ── H-08 캘린더 타일: 가장 가까운 경조사 또는 쓸 곳 메모 날짜 ──
-  const care = (h.input ? homeUpcoming(h.input, 365) : []).find((u) => u.kind === 'care');
-  const note = (notes.data ?? []).find((n) => !n.paid && n.due_on);
-  const careDate = care ? addDays(today, care.dday) : null;
-  const near =
-    note?.due_on && (!careDate || note.due_on < careDate)
-      ? { name: note.name, dday: daysBetween(today, note.due_on) }
-      : care
-        ? { name: care.name, dday: care.dday }
-        : null;
+  // ── H-08 캘린더 타일: 가장 가까운 일정(캘린더 목록과 같은 재료, 월급날 포함, 2026-11-15 3차 검토) ──
+  const nx = cal.loading || cal.failed ? null : nextSchedule(cal);
+  const near = nx ? { name: nx.label, dday: daysBetween(today, nx.date) } : null;
 
   // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔), H-09 저금 ──
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
   const rankPct = rank?.homeBadge ?? null;
+
+  // 홈 순서(19 ‘홈 순서’, 2026-11-15 3차 검토, core homeOrder): 할 일 띠는 H-10 위, H-11이 확인할 것을 말하면 맨 위,
+  // 0원 같이 모으기는 반 칸 타일 아래. H-14 이번 달 우리 둘은 띠 바로 아래
+  const order = homeOrder({
+    urgent: monthLineUrgent(monthLine),
+    heroZero: !heroFailed && heroZero(heroes, !!inviteGoal),
+  });
+  const blocks: Record<HomeBlock, ReactNode> = {
+    tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
+    month: (
+      <H11MonthLine
+        key="month"
+        line={monthLine}
+        go={(to) => go('month_line', to)}
+        onRetry={() => {
+          track('home_box_tapped', { box: 'retry' });
+          void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
+          void qc.invalidateQueries({ queryKey: qk.splits });
+        }}
+      />
+    ),
+    month_us: monthUs.data ? (
+      <H14MonthUs key="month_us" card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
+    ) : null,
+    hero: <Fragment key="hero">{hero}</Fragment>,
+    tiles: (
+      <Fragment key="tiles">
+        <HubTile
+          title={copy.planTile}
+          sub={planDay}
+          sub2={leftText}
+          point
+          onClick={() => go('plan', '/salary?view=plan')}
+        />
+        <HubTile
+          title={copy.calendarTile}
+          sub={near ? `${near.name} ${copy.ddayShort(near.dday)}` : copy.noCare}
+          onClick={() => go('calendar', '/calendar')}
+        />
+      </Fragment>
+    ),
+    wedding: engaged ? (
+      <H12Wedding
+        key="wedding"
+        notes={heroNotes.data ?? []}
+        today={today}
+        onClick={() =>
+          go(
+            'wedding',
+            first?.kind === 'bundle'
+              ? `/salary/bundles/${first.bundle.id}/notes`
+              : first
+                ? `/salary/items/${first.goal.id}/notes`
+                : '/salary/items/new/a?from=home',
+          )
+        }
+      />
+    ) : null,
+    small: (
+      <Fragment key="small">
+        <HubTile
+          small
+          title={copy.assetsTile}
+          sub={nw?.empty ? copy.noAssets : undefined}
+          value={nw && !nw.empty ? m(nw.nw.net) : undefined}
+          badge={rankPct === null || nw?.empty ? undefined : copy.rankBadge(rankPct)}
+          label={
+            nw && !nw.empty
+              ? copy.assetsTileLabel(
+                  m(nw.nw.net),
+                  rankPct === null ? null : copy.rankBadge(rankPct),
+                )
+              : undefined
+          }
+          onClick={() => go('assets', lastAssetsTab())}
+        />
+        <HubTile
+          small
+          title={copy.savingsTile}
+          sub={sums.count ? copy.savingCount(sums.count) : copy.noSavings}
+          value={sums.count ? m(sums.total) : undefined}
+          onClick={() => go('savings', '/salary/items?from=home')}
+        />
+      </Fragment>
+    ),
+  };
 
   return (
     <MainFrame
@@ -712,75 +797,7 @@ export function H01Home() {
       columns={[
         <div key="hub" className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <AchieveWatch />
-          <Hub label={copy.hubLabel}>
-            {hero}
-            <H11MonthLine
-              line={monthLine}
-              go={(to) => go('month_line', to)}
-              onRetry={() => {
-                track('home_box_tapped', { box: 'retry' });
-                void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
-                void qc.invalidateQueries({ queryKey: qk.splits });
-              }}
-            />
-            {monthUs.data && (
-              <H14MonthUs card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
-            )}
-            {todoBands}
-            <HubTile
-              title={copy.planTile}
-              sub={planDay}
-              sub2={leftText}
-              art
-              point
-              onClick={() => go('plan', '/salary?view=plan')}
-            />
-            <HubTile
-              title={copy.calendarTile}
-              sub={near ? `${near.name} ${copy.ddayShort(near.dday)}` : copy.noCare}
-              art
-              onClick={() => go('calendar', '/calendar')}
-            />
-            {engaged && (
-              <H12Wedding
-                notes={heroNotes.data ?? []}
-                today={today}
-                onClick={() =>
-                  go(
-                    'wedding',
-                    first?.kind === 'bundle'
-                      ? `/salary/bundles/${first.bundle.id}/notes`
-                      : first
-                        ? `/salary/items/${first.goal.id}/notes`
-                        : '/salary/items/new/a?from=home',
-                  )
-                }
-              />
-            )}
-            <HubTile
-              small
-              title={copy.assetsTile}
-              sub={nw?.empty ? copy.noAssets : undefined}
-              value={nw && !nw.empty ? m(nw.nw.net) : undefined}
-              badge={rankPct === null || nw?.empty ? undefined : copy.rankBadge(rankPct)}
-              label={
-                nw && !nw.empty
-                  ? copy.assetsTileLabel(
-                      m(nw.nw.net),
-                      rankPct === null ? null : copy.rankBadge(rankPct),
-                    )
-                  : undefined
-              }
-              onClick={() => go('assets', lastAssetsTab())}
-            />
-            <HubTile
-              small
-              title={copy.savingsTile}
-              sub={sums.count ? copy.savingCount(sums.count) : copy.noSavings}
-              value={sums.count ? m(sums.total) : undefined}
-              onClick={() => go('savings', '/salary/items?from=home')}
-            />
-          </Hub>
+          <Hub label={copy.hubLabel}>{order.map((b) => blocks[b])}</Hub>
         </div>,
       ]}
     />

@@ -73,7 +73,7 @@ export function SavingGoalRow({
 
 /**
  * 저금 줄 보조 줄(20 W-02 4번): “2,700만 / 1억 5,000만 원”. 목표 금액이 없으면 없음.
- * 진행은 줄 앞 진행 원(LineLead, 2026-11-09 줄 아래 얇은 막대 대신, 줄 높이가 다른 줄과 같게)
+ * 진행은 이 글자로만(2026-11-15 줄 앞 진행 원 없앰, 한 줄에 원 하나)
  */
 export function SavingMeta({ item, masked }: { item: SavingItem | undefined; masked: boolean }) {
   // 같이 모으기에 든 저금: 진행·목표는 묶음(둘이 모은 금액)에서만, 줄에는 내 몫만(2026-11-14 R4)

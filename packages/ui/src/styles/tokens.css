@@ -1,4 +1,4 @@
-/* docs/design/tokens.css에서 복사 (17891bf). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/tokens.css에서 복사 (e1ec062d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo — generated from tokens.json */
 :root, [data-theme="light"] {
   --surface: #ffffff; /* 앱 바탕과 기본 카드 바탕. 모든 본문 글자는 이 위에서 읽혀야 함. */
@@ -22,7 +22,7 @@
   --brand-soft: #fff2e8; /* 브랜드 색의 옅은 판(accent-app-soft): 달력의 오늘 날짜 칸, 카드 안 보조 버튼, 공지 띠 바탕, 고른 작은 칩, 결과 카드 체크 동그라미(2026-11-09), 축하 화면 배경 그라데이션 위쪽(hg-celebrate-bg, 2026-11-09). */
   --brand-ink: #b33f00; /* brand-soft 위 작은 글자(14px 미만: 오늘 날짜, 배지, 작은 칩. 카드 안 보조 버튼은 2026-11-11부터 accent-app-text), 축하 화면 머리글 글자. brand-soft 위 4.5:1 이상. */
   --brand-pressed: #ec6a08; /* 주 버튼 누름 상태 바탕. */
-  --on-brand: #ffffff; /* brand 바탕 위 글자(주 버튼). 라이트는 흰 글자, 다크는 어두운 글자. */
+  --on-brand: #ffffff; /* brand 바탕 위 아이콘·체크(on-accent-app)와 어드민 주 버튼 글자(어드민은 brand = ink). 사용자 앱 주 버튼 글자는 2026-11-15부터 on-accent-app-text(라이트 흰 글자 2.7:1 대신 ink 6.5:1). 라이트는 흰색, 다크는 어두운 색. */
   --focus: #3d5afe; /* 어드민 전용(2026-11-09): 어드민 키보드 포커스 링과 글자 버튼. 사용자 앱은 focus-ring(ink)과 글자 버튼 ink-2를 씀. */
   --together: #ffe3e6; /* ‘우리 둘’ 영역 틴트: 공동 생활비, 함께 정한 것. */
   --together-ink: #9b1c33; /* together 위 라벨·배지 글자. */
@@ -48,9 +48,10 @@
   --accent-app-soft: var(--brand-soft); /* 2026-11-09 사용자 앱 포인트 옅은 판: 공지 띠, 고른 작은 칩, 달성·완료 배지 바탕. 위 글자는 ink(긴 글자) 또는 accent-app-ink(작은 글자). */
   --accent-app-ink: var(--brand-ink); /* 2026-11-09 accent-app-soft 위 14px 미만 글자(작은 칩, 배지). */
   --on-accent-app: var(--on-brand); /* 2026-11-09 accent-app 채움 위 체크·아이콘(주 버튼과 같은 on-brand). */
-  --on-accent-app-text: var(--ink); /* 2026-11-09 accent-app 채움 위 글자(홈 ‘월급 계획’ 포인트 상자 hg-hubtile--point 제목 17px 700, 2026-11-11. 예전 홈 할 일 띠). 라이트는 ink(오렌지 위 6.5:1, 흰 글자는 2.7:1이라 쓰지 않음), 다크는 on-brand 어두운 글자(7.6:1). */
+  --on-accent-app-text: var(--ink); /* 2026-11-09 accent-app 채움 위 글자: 주 버튼(hg-btn--primary, 2026-11-15 3차 검토 사용자 결정, 흰 글자 2.7:1 대신)과 홈 ‘월급 계획’ 포인트 상자 hg-hubtile--point 제목(17px 700, 2026-11-11). 라이트는 ink(오렌지 위 6.5:1, 흰 글자는 2.7:1이라 쓰지 않음), 다크는 on-brand 어두운 글자(7.6:1). */
   --on-accent-app-sub: #482d1b; /* 2026-11-11 accent-app 채움 위 보조 글자(홈 ‘월급 계획’ 포인트 상자 hg-hubtile--point의 13px “매달 25일”). on-accent-app-text 80% + accent-app 20%를 섞은 색(라이트 4.7:1, 다크 #493222 5.3:1, 75%는 라이트 4.3:1이라 80%). */
   --accent-app-slot: rgba(255,255,255,0.35); /* 2026-11-11 accent-app 채움 위 그림 빈 자리(홈 ‘월급 계획’ 포인트 상자의 72px hg-artslot): 오렌지 위 반투명 밝은 네모, 선 없음. 다크도 같은 흰색 28%. */
+  --bar-track: #f3f4f6; /* 2026-11-15 3차 검토: 진행 막대·진행 원의 빈 바탕(W-02 확인 막대, W-10 저금 막대, 홈 같이 모으기 막대, 기간 막대, 저금 진행 원). 라이트는 surface-alt와 같은 값, 다크는 surface-alt가 바탕과 거의 같아 안 보여 한 단계 밝게. */
   --band-cocoa: #3b2a22; /* 2026-11-11 사용자 결정: 홈 허브 띠(할 일 띠 + 초대 띠, hg-hubband) 바탕 코코아 갈색. 오렌지·brand-soft가 아님. 다른 띠(공지, 해제 대기, 메일 반송, 다른 화면 띠)는 그대로. 사용자 앱 전용(어드민·웹사이트는 쓰지 않음). 다크 #4a352b(다크 바탕보다 조금 밝은 코코아). */
   --on-band-cocoa: #fff3ea; /* 2026-11-11 band-cocoa 위 글자·꺾쇠·✕(15px 600). 라이트 12.5:1, 다크 #ffeee2 10.1:1. */
   --accent-app-text: var(--brand); /* 2026-11-09 오렌지 글자: 띠 안 흰 작은 버튼(‘초대하기’, ‘펼치기’), 고른 바꾸기 칩. 14px 이상 600 이상만. 글자 버튼(hg-btn--link, 금액 정하기, RankRow)은 모두 회색 ink-2(2026-11-09). 어드민·웹사이트는 focus. */
@@ -124,6 +125,7 @@
   --on-accent-app-text: var(--on-brand);
   --on-accent-app-sub: #493222;
   --accent-app-slot: rgba(255,255,255,0.28);
+  --bar-track: #3a3b3e;
   --band-cocoa: #4a352b;
   --on-band-cocoa: #ffeee2;
   --accent-app-text: var(--brand);
