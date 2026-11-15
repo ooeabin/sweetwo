@@ -14,7 +14,7 @@ export const homeText = {
   todoMatured: (name: string) => `${subject(name)} 만기됐어요`, // [확인 필요] 알림 문구와 같게
   todoCare: (date: string, name: string) => `${date} ${isWord(name)}`,
   payday: (who: string) => `${who}님 월급날`, // [확인 필요]
-  review: '월급 전 확인', // 2026-11-09 ‘월급 전 확인’ 대신
+  review: '월급날 확인 목록', // 2026-11-15 ‘월급 전 확인’ 대신(W-05 없앰) [확인 필요]
   deadline: (goal: string) => `${goal} 기한`, // [확인 필요]
   maturity: (name: string) => `${name} 만기`, // 캘린더 금융 일정과 같음
 };

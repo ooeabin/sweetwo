@@ -69,7 +69,7 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  // 맨 위 ‘월급 전 확인’ 띠는 없앰(2026-11-12 QA 9구간 D1 = A): 일정 목록의 ‘월급 전 확인’ 줄과 홈 할 일 띠가 같은 일을 함
+  // 맨 위 ‘월급날 확인 목록’ 띠는 없앰(2026-11-12 QA 9구간 D1 = A): 일정 목록의 ‘월급날 확인 목록’ 줄과 홈 할 일 띠가 같은 일을 함
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
   const add = () => {

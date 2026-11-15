@@ -20,7 +20,7 @@ export const copy = {
     more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
   money: {
     payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
-    review: '월급 전 확인', // [확인 필요] 2026-11-09 한 이름으로
+    review: '월급날 확인 목록', // [확인 필요] 2026-11-15 ‘월급 전 확인’ 대신(W-05 없앰)
     deadline: (name: string) => `${name} 기한`,
     goal: (name: string) => `${name} 쓰는 달`,
     maturity: (name: string) => `${name} 만기`,
@@ -31,29 +31,29 @@ export const copy = {
   },
   go: {
     payday: '월급날 확인 목록', // [확인 필요]
-    review: '월급 전 확인', // [확인 필요]
+    review: '월급날 확인 목록', // [확인 필요] 2026-11-15
     deadline: '저금', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금',
     maturity: '자산',
     note: '쓸 곳 메모', // [확인 필요] 2026-11-13
     auto: '월급 계획', // [확인 필요] 2026-11-14 R6
   },
-  // 2026-11-04 칸 안 짧은 이름, 월급 전 확인 띠 이름, 오늘로 [확인 필요]
+  // 2026-11-04 칸 안 짧은 이름, 확인 목록 안내 띠 이름, 오늘로 [확인 필요]
   short: {
     payday: '월급',
-    review: '월급 전 확인',
+    review: '확인 목록',
     deadline: '기한',
     goal: '쓰는 달',
     maturity: '만기',
     note: '쓸 곳', // [확인 필요] 2026-11-13 칸 안 짧은 이름
     auto: '자동', // [확인 필요] 2026-11-14 R6
-    band: '월급 전 확인',
+    band: '확인 목록',
   },
   today: '오늘',
   // 달력 고른 날 금융 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
   goSub: {
     payday: '월급날 확인 목록 보기',
-    review: '월급 전 확인하기',
+    review: '월급날 확인 목록 보기',
     deadline: '저금 보기', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금 보기',
     maturity: '자산 보기',
@@ -64,7 +64,7 @@ export const copy = {
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   // Y-04 고른 날 줄(Y-01 맨 위 띠는 2026-11-12 D1로 없앰) [확인 필요]
-  reviewBand: (month: number) => `${month}월 월급, 빠진 게 있는지 확인할 때예요`,
+  reviewBand: (month: number) => `${month}월 월급, 확인 목록에 남은 게 있어요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',

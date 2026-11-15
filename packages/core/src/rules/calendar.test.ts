@@ -14,7 +14,7 @@ it('주말 월급날은 직전 금요일', () => {
   expect(businessDayOnOrBefore('2026-10-23')).toBe('2026-10-23');
 });
 
-it('금융 일정: 월급날, 월급 전 확인 띠, 목표 기한, 매년 목표 쓰는 달, 만기', () => {
+it('금융 일정: 월급날, 월급날 확인 목록 띠, 목표 기한, 매년 목표 쓰는 달, 만기', () => {
   const r = moneyDates(2026, 10, {
     paydays: [
       { name: '찬우', day: 25 },
@@ -34,7 +34,7 @@ it('금융 일정: 월급날, 월급 전 확인 띠, 목표 기한, 매년 목�
   expect(r.dates.map((d) => `${d.date} ${d.kind} ${d.name}`)).toEqual([
     '2026-10-01 goal 자동차 유지비',
     '2026-10-09 payday 예빈',
-    // 25일(일)이 23일(금)로 앞당겨지니 월급 전 확인도 그 3일 전부터(2026-11-14 R3, 서버 cycle_end − 2)
+    // 25일(일)이 23일(금)로 앞당겨지니 확인 목록 안내도 그 3일 전부터(2026-11-14 R3, 서버 cycle_end − 2)
     '2026-10-20 review ',
     '2026-10-23 payday 찬우',
     '2026-10-30 maturity 청년 적금',
@@ -44,7 +44,7 @@ it('금융 일정: 월급날, 월급 전 확인 띠, 목표 기한, 매년 목�
   expect(r.bands).toEqual([{ start: '2026-10-20', end: '2026-10-22' }]);
 });
 
-it('합쳐서 모드: 월급날 하나(이름 없음), 월급 전 확인은 공동 사이클 날 기준', () => {
+it('합쳐서 모드: 월급날 하나(이름 없음), 확인 목록 안내는 공동 사이클 날 기준', () => {
   const r = moneyDates(2026, 11, {
     paydays: [{ name: '', day: 10 }],
     reviewDay: 10,
@@ -58,6 +58,23 @@ it('합쳐서 모드: 월급날 하나(이름 없음), 월급 전 확인은 공�
   ]);
   // 12월 10일 앞 띠(12-07~09)는 11월에 걸치지 않음
   expect(r.bands).toEqual([{ start: '2026-11-07', end: '2026-11-09' }]);
+});
+
+it('월급날 확인 목록 안내: reviewFor가 있으면 그 월급날 앞만, null이면 없음(손 줄이 없을 때)', () => {
+  const base = {
+    paydays: [{ name: '', day: 10 as const }],
+    reviewDay: 10 as const,
+    maturities: [],
+    goalDeadlines: [],
+    yearlyGoals: [],
+  };
+  // 12월 10일(목) 월급날: 12월 7~9일만. 11월 10일 앞 띠는 거름
+  const on = moneyDates(2026, 11, { ...base, reviewFor: '2026-11-10' });
+  expect(on.bands).toEqual([{ start: '2026-11-07', end: '2026-11-09' }]);
+  expect(moneyDates(2026, 11, { ...base, reviewFor: '2026-12-10' }).bands).toEqual([]);
+  const off = moneyDates(2026, 11, { ...base, reviewFor: null });
+  expect(off.bands).toEqual([]);
+  expect(off.dates.map((d) => d.kind)).toEqual(['payday']);
 });
 
 it('쓸 곳 메모 날짜(W-14, v2.2): 그 달 것만, 저금 메모는 ref, 묶음 메모는 bundle', () => {

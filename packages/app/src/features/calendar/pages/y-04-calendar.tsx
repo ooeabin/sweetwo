@@ -28,7 +28,7 @@ let lastView: { today: string; ym: [number, number]; selected: string } | null =
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
 // Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
-// 칸마다 숫자 + 짧은 이름 한 줄, 월급 전 확인 기간은 칸 아래 이어진 한 줄 띠(“월급 전 확인”, 누르면 월급 탭 W-02).
+// 칸마다 숫자 + 짧은 이름 한 줄, 확인 목록 안내 기간은 칸 아래 이어진 한 줄 띠(“확인 목록”, 누르면 월급 탭 W-02).
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달을 보고 있으면 ‘오늘’.
 // 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 경조사 추가’ → Y-07.
 export function Y04Calendar() {
@@ -88,7 +88,7 @@ export function Y04Calendar() {
   );
   const grid: CalDay[] = weeks.flat().map((c, i) => {
     const cs = caresOn(c.date);
-    // 월급 전 확인은 띠로 보여 주니 칸 이름에서 뺌
+    // 확인 목록 안내는 띠로 보여 주니 칸 이름에서 뺌
     const ms = moneyOf(c.date).filter((x) => x.kind !== 'review');
     const [, cm, cd] = ymd(c.date);
     const hol = d.holidayOf(c.date);
@@ -119,7 +119,7 @@ export function Y04Calendar() {
     setSelected(ny === ty && nm === tm ? d.today : `${ymText(ny, nm)}-01`);
   };
 
-  /** 고른 날 일정 줄들(공휴일, 월급 전 확인, 경조사, 금융 일정) */
+  /** 고른 날 일정 줄들(공휴일, 월급날 확인 목록, 경조사, 금융 일정) */
   const items = (date: string) => {
     const hol = d.holidayOf(date);
     const band = bandOn(date);
