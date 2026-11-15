@@ -124,9 +124,9 @@ reset role; select public.set_salary_mode('joint'); set local role authenticated
 reset role;
 select is((select title || ' / ' || body || ' | ' || target from public.notification where kind = 'salary_mode'
   and user_id = '22222222-2222-2222-2222-222222222222'),
-  '찬우님이 월급 관리 방식을 바꿨어요 / 다음 월급날부터 합쳐서 관리해요 | /salary?view=plan', '관리 방식 변경(D3)');
+  '찬우님이 월급 관리 방식을 바꿨어요 / 다음 월급날부터 월급을 합쳐서 써요 | /salary?view=plan', '관리 방식 변경(D3)');
 select is((select count(*)::int from pg_proc where proname = 'set_join_salary_mode'
-  and pg_get_functiondef(oid) like '%다음 월급날부터 각자 관리해요%'
+  and pg_get_functiondef(oid) like '%다음 월급날부터 월급은 각자 써요%'
   and pg_get_functiondef(oid) like '%/salary?view=plan%'
   and pg_get_functiondef(oid) not like '%/salary/split%'), 1, '합류 중 관리 방식: 본문(D3), 링크 W-01');
 

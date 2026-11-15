@@ -2,7 +2,7 @@
 -- 찬우(시작한 사람), 예빈(합류한 사람). 고친 사람은 request.jwt.claims로만 정함(권한 검사는 다른 테스트)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(14);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -87,7 +87,10 @@ select is(public.send_weekly_summary(public.kst_today() + 1), 1, '찬우에게 �
 select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 예빈님이 바꾼 게 2개 있어요', '요약 문구');
 
 -- 2026-11-09 쉬운 이름: 경조사 변경 제목
-select is(public.partner_change_title('care', null, '예빈'), '예빈님이 경조사를 바꿨어요', '경조사 변경 제목(챙길 날 대신)');
+select is(public.partner_change_title('care', null, '예빈'), '예빈님이 경조사·기념일을 바꿨어요', '경조사 변경 제목(2026-11-15 경조사·기념일)');
+-- 2026-11-15 3차 검토: 체크리스트 → 월급날 확인 목록
+select is(public.partner_change_title('cycle_day', null, '예빈'), '예빈님이 월급날 확인 목록 만드는 날을 바꿨어요', '확인 목록 만드는 날 변경 제목');
+select is(public.partner_change_line('cycle_day', 'day', null, '25', '10'), '월급날 확인 목록 만드는 날 25 → 10', '확인 목록 만드는 날 변경 줄');
 
 select * from finish();
 rollback;
