@@ -2,6 +2,7 @@ import { Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { track } from '../../../shared/analytics';
 import { askPush, markPushAsked, markPushLater } from '../../../shared/push-ask';
+import { useShownPayday } from '../../salary';
 import { copy } from '../copy';
 import { firstPaydayLabel } from '../first-payday';
 import { useStep } from '../step';
@@ -14,10 +15,12 @@ const STARTER_KINDS = ['care', 'payday', 'achieved', 'shared_change', 'progress_
 // ‘알림 받기’ = OS 허용 창(브리지), 결과와 상관없이 → O-60. ‘나중에 할게요’ → O-60, 홈 띠 10번으로 1회 다시 물음
 export function O55Push() {
   const s = useStep('o-55');
+  // 첫 월급날도 앞당긴 날(07 1장, 확인 목록이 생기는 날과 같게)
+  const shownPayday = useShownPayday();
   const [busy, setBusy] = useState(false);
   if (!s.ready)
     return <QuestionSkeleton chapter={s.chapter} onBack={s.onBack ?? null} fields={0} />;
-  const date = firstPaydayLabel(s.state.me);
+  const date = firstPaydayLabel(s.state.me, new Date(), shownPayday);
   const title = date ? copy.pushPayday(date) : copy.pushNoDate;
   const allow = () =>
     void s.done(async () => {

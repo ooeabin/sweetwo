@@ -557,6 +557,9 @@ export function reconcileTask(o: {
 export const FIRST_TASK_DAYS = 30;
 /** 요청 띠(3·4·5번)와 파트너 저금 띠(13번)가 뜨는 날 수 */
 export const REQUEST_TASK_DAYS = 7;
+/** 연결할 때 자산 공개 고르기(띠 5a, 23 F-03e ‘연결할 때’) */
+export const ASSET_SHARE_PATH = '/assets/share';
+
 /** 홈 할 일 띠 키(home_task_state.task_key) */
 export const TASK_KEYS = { splitSuggest: 'split_suggest', autoPick: 'auto_pick' } as const;
 
@@ -623,6 +626,8 @@ export interface TopTaskInput {
   }[];
   /** 기다리는 합류자(같이 계열 합류자가 시작한 사람을 기다림, 시작한 사람 쪽) */
   waitingJoiner?: { name: string | null } | null;
+  /** 연결할 때 숨겨 둔 내 명의 자산이 있음(asset.share_pending, 서버 20261218090000 계약 4) */
+  assetSharePending?: boolean;
 }
 
 export type TopTask =
@@ -631,6 +636,7 @@ export type TopTask =
   | { kind: 'mode_request'; id: string; phrase: string; key: string; to: string }
   | { kind: 'split_request'; id: string; name: string; key: string; to: string }
   | { kind: 'rank_request'; id: string; key: string; to: string }
+  | { kind: 'asset_share'; key: string; to: string }
   | { kind: 'salary_changed'; key: string; to: string }
   | { kind: 'first_saving'; key: string; to: string }
   | { kind: 'split_suggest'; key: string; to: string }
@@ -791,6 +797,11 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
             key: `rank_request:${i.rankRequest.id}`,
             to: `/assets/rank/consent/${i.rankRequest.id}`,
           }
+        : null,
+    // 5a 연결할 때 자산 공개 한 번 고르기(2026-11-16 5차 검토 B5, 고를 때까지)
+    () =>
+      connected && i.assetSharePending
+        ? { kind: 'asset_share', key: 'asset_share', to: ASSET_SHARE_PATH }
         : null,
     // 6 월급이 바뀐 달(적용된 사이클 첫 7일, W-01을 열 때까지)
     () =>

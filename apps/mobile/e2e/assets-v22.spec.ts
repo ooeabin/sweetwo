@@ -224,6 +224,30 @@ test('F-03e: 기본값을 이미 골랐으면 그 값이 골라진 채로, 이�
   await expect(page.getByRole('radio', { name: /총액만 보여 주기/ })).toBeVisible();
 });
 
+test('F-03e 연결할 때(2026-11-16 B5): 숨겨 둔 내 자산이 있으면 홈 띠 → 한 번 고르기 → 고른 값으로', async ({
+  page,
+}) => {
+  const db = await start(page);
+  db.me.asset_share_default = null;
+  const a2 = db.assets.find((a) => a.id === 'a2');
+  Object.assign(a2 ?? {}, { visibility: 'private', share_pending: true });
+  await page.goto('/');
+  await page.getByText('혼자 쓸 때 적은 자산을 예빈님에게 어떻게 보여 줄까요?').click();
+  await expect(page).toHaveURL(/\/assets\/share$/);
+  await expect(page.getByRole('heading', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
+  await expect(page.getByText('혼자 쓸 때 적은 자산은 고르기 전까지 숨겨 뒀어요')).toBeVisible();
+  // 미리 고른 값 없음
+  const save = page.getByRole('button', { name: '저장하기' });
+  await expect(save).toBeDisabled();
+  await axe(page);
+  await page.getByRole('radio', { name: /총액만 보여 주기/ }).click();
+  await save.click();
+  await expect(page.getByText('자산 공개를 정했어요')).toBeVisible();
+  expect(a2).toMatchObject({ visibility: 'sum', share_pending: false });
+  expect(db.me.asset_share_default).toBe('sum');
+  await expect(page.getByText('혼자 쓸 때 적은 자산을')).toHaveCount(0);
+});
+
 test('F-08 (나) 순위 없음: 또래 가구 중간값 한 줄(광고 없음) → F-08c 같이 보자고 하기', async ({
   page,
 }) => {

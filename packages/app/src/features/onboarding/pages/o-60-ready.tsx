@@ -2,6 +2,7 @@ import { amountBand, leftover } from '@sweetwo/core';
 import { DoneMark, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { track } from '../../../shared/analytics';
 import { afterSetupPath } from '../../auth';
+import { useShownPayday } from '../../salary';
 import { copy } from '../copy';
 import { useSplits } from '../data';
 import { firstPaydayLabel } from '../first-payday';
@@ -16,11 +17,13 @@ export const FIRST_SAVING_PATH = '/salary/items/new/a?from=onboarding';
 // 첫 확인 목록은 만들지 않음(소급 없음, 07 3-1). 진행 막대, 뒤로 없음
 export function O60Ready() {
   const s = useStep('o-60');
+  // 첫 월급날도 앞당긴 날(07 1장, 확인 목록이 생기는 날과 같게)
+  const shownPayday = useShownPayday();
   const splits = useSplits();
   if (!s.ready) return <QuestionSkeleton onBack={null} fields={0} />;
   const me = s.state.me;
   const joint = s.state.space?.salary_mode === 'joint';
-  const date = firstPaydayLabel(me);
+  const date = firstPaydayLabel(me, new Date(), shownPayday);
   const items = me?.monthly_income
     ? [copy.readyDone.split, date ? copy.readyDone.firstCheck(date) : copy.readyDone.noDate]
     : [copy.readyDone.salary];

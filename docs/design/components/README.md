@@ -20,7 +20,7 @@
 | [Distribution](Distribution.md) | Charts | F-08 분포 그림 |
 | [RankRow](RankRow.md) | Content | 자산 순위 줄(F-01 0번, 2026-11-04) |
 | [Band](Band.md) | Layout | 구역을 나누는 굵은 회색 띠(F-08, 2026-11-04) |
-| [StatBlock](StatBlock.md) | Content | 토스형 구역 머리: 라벨 + 큰 숫자 문장 + 보조 줄(F-08, 2026-11-04) |
+| [StatBlock](StatBlock.md) | Content | 대형 금융 앱형 구역 머리: 라벨 + 큰 숫자 문장 + 보조 줄(F-08, 2026-11-04) |
 | [LineChart](LineChart.md) | Charts | 시간에 따른 금액 변화(순자산 추이) |
 | [Meter](Meter.md) | Charts | 칸 진행 막대(지금 쓰는 화면 없음) |
 | [Accordion](Accordion.md) | Containers | 가이드·자주 묻는 질문을 접었다 폈다 |

@@ -195,6 +195,10 @@ export const copy = {
   quickNoDouble: '앱에서 모으는 저금은 순자산에 더하지 않아서 두 번 세지 않아요',
   quickSave: '저장하기',
   quickSaved: (n: number) => `${n}개를 적었어요`, // [확인 필요]
+  // F-03e 연결할 때(23 ‘F-03e 연결할 때’, 2026-11-16 5차 검토 B5)
+  shareConnectHelp: '혼자 쓸 때 적은 자산은 고르기 전까지 숨겨 뒀어요', // [확인 필요]
+  shareConnectSave: '저장하기',
+  shareConnectDone: '자산 공개를 정했어요', // [확인 필요]
   quickPlaceholder: '0원',
   // F-08 v2.2 (가) 순위(두 사람 모두 동의, 둘의 합)
   rankPairHero1: (band: string | null) => (band ? `${band} 가구 가운데` : '전체 가구 가운데'), // [확인 필요]

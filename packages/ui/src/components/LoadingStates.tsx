@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
 import { QuestionLayout, type ChapterProgress } from './QuestionLayout';
 
-// 로딩 상태(docs/design/components/Skeleton.md, 2026-11-04 우리나라 앱 참고: 당근 뼈대, 카카오페이·토스 처리 중).
+// 로딩 상태(docs/design/components/Skeleton.md, 2026-11-04 우리나라 앱 참고: 당근 뼈대, 카카오페이·대형 금융 앱 처리 중).
 // 0.3초 안에 오면 뼈대를 보여 주지 않음(13 공통 상태 5번).
 
 /** ms가 지나면 true(그 전엔 뼈대를 그리지 않아 깜빡임이 없음) */
@@ -96,7 +96,7 @@ export function QuestionSkeleton({
 }
 
 /**
- * 처리 중(E): 가운데 그림 자리 + 한 문장 + 보조(카카오페이·토스). 오래 걸리는 일(파일 만들기, 연결 처리)에만.
+ * 처리 중(E): 가운데 그림 자리 + 한 문장 + 보조(카카오페이·대형 금융 앱). 오래 걸리는 일(파일 만들기, 연결 처리)에만.
  * 그림이 생기기 전에는 회색 원 안 아이콘.
  */
 export function ProcessingState({

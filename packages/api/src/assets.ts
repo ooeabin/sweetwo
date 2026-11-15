@@ -2,6 +2,7 @@ import {
   AssetHistorySchema,
   AnswerResult,
   AssetRowSchema,
+  AssetShareAnswerSchema,
   NetWorthMonthSchema,
   NetworthSummarySchema,
   RankConsentRequestRowSchema,
@@ -156,6 +157,16 @@ export function subscribeAssets(spaceId: string, on: () => void) {
 export async function setAssetShareDefault(vis: 'all' | 'sum' | 'private') {
   const { error } = await supabase().rpc('set_asset_share_default', { p_vis: vis });
   if (error) throw new AuthCallError(error.message.includes('fetch') ? 'network' : 'unknown');
+}
+
+/**
+ * 연결할 때 숨겨 둔 내 자산 공개 한 번 고르기(answer_asset_share, 서버 20261218090000 계약 4, 23 F-03e ‘연결할 때’).
+ * 혼자 쓸 때 ‘모두’로 적은 내 명의 자산(share_pending)을 고른 값으로, 기본값이 없으면 기본값도. 바꾼 개수
+ */
+export async function answerAssetShare(vis: 'all' | 'sum' | 'private'): Promise<number> {
+  const { data, error } = await supabase().rpc('answer_asset_share', { p_vis: vis });
+  if (error) throw new AuthCallError(error.message.includes('fetch') ? 'network' : 'unknown');
+  return AssetShareAnswerSchema.parse(data);
 }
 
 /** 순자산 요약(networth_summary, 평가금액 기본 + principalNet ‘원금으로 보기’) */

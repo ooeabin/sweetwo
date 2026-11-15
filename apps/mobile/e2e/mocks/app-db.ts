@@ -1132,6 +1132,21 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.me.asset_share_default = body().p_vis;
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
+      // F-03e 연결할 때(20261218090000 계약 4): 숨겨 둔 내 자산을 고른 값으로, 기본값이 없으면 기본값도
+      if (fn === 'answer_asset_share') {
+        const vis = body().p_vis;
+        let n = 0;
+        for (const a of db.assets)
+          if (a.owner_user_id === db.me.id && a.share_pending) {
+            if (a.visibility === 'private' && !a.deleted_at) {
+              a.visibility = vis;
+              n++;
+            }
+            a.share_pending = false;
+          }
+        db.me.asset_share_default ??= vis;
+        return json(route, n);
+      }
       if (fn === 'partner_birth_year')
         return json(route, (db.partner as { birth_year?: number } | null)?.birth_year ?? null);
       // 합류 재기획(18): P-04 관리 방식 바꾸기, 합류 완료(P-06 월급 계획 또는 대기), 사전 입력 지우기

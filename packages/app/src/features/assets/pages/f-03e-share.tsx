@@ -23,6 +23,7 @@ export function F03eShare({
   steps,
   primaryLabel,
   loading,
+  help,
 }: {
   value: ShareVis | null;
   onChange: (v: ShareVis) => void;
@@ -31,11 +32,14 @@ export function F03eShare({
   steps?: { total: number; now: number; fill?: number };
   primaryLabel: string;
   loading?: boolean;
+  /** 제목 아래 회색 한 줄(연결할 때 F03eShareConnect) */
+  help?: string;
 }) {
   return (
     <QuestionLayout
       steps={steps}
       title={copy.visTitle}
+      help={help}
       onBack={onBack}
       primary={{ label: primaryLabel, disabled: value === null, loading }}
       onSubmit={() => value !== null && onSubmit()}

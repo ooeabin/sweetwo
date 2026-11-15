@@ -272,7 +272,7 @@ export function S18Data() {
       </div>
     </div>
   );
-  // 2026-11-04 파일을 만드는 동안은 처리 중 화면(그림 자리 + 한 문장, 카카오페이·토스처럼)
+  // 2026-11-04 파일을 만드는 동안은 처리 중 화면(그림 자리 + 한 문장, 카카오페이·대형 금융 앱처럼)
   const busy = (
     <ProcessingState
       icon="download"

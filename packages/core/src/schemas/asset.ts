@@ -31,6 +31,8 @@ export const AssetRowSchema = z.object({
   status: z.enum(['held', 'sold', 'matured']).default('held'),
   sold_at: nullableText,
   realized_gain: nullableWon,
+  /** 연결할 때 숨겨 둔 내 자산(공개를 한 번 묻기 전, 서버 20261218090000 계약 4) */
+  share_pending: z.boolean().default(false),
   created_by: nullableText,
   updated_by: nullableText,
   created_at: z.string().default('1970-01-01T00:00:00Z'),
@@ -40,6 +42,9 @@ export const AssetRowSchema = z.object({
   deleted_by: nullableText,
 });
 export type AssetRow = z.output<typeof AssetRowSchema>;
+
+/** answer_asset_share 응답: 고른 값으로 바꾼 자산 개수 */
+export const AssetShareAnswerSchema = z.number().int().nonnegative();
 
 /** asset_history 행. source: created(처음 값) / manual(직접 고침) / sell / matured / close(옛 월말 정리) */
 export const AssetHistorySchema = z.object({

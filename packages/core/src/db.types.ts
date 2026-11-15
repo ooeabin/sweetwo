@@ -542,6 +542,7 @@ export type Database = {
           quick: boolean
           rate_estimated: boolean
           realized_gain: number | null
+          share_pending: boolean
           side: Database["public"]["Enums"]["asset_side"]
           sold_at: string | null
           space_id: string
@@ -578,6 +579,7 @@ export type Database = {
           quick?: boolean
           rate_estimated?: boolean
           realized_gain?: number | null
+          share_pending?: boolean
           side: Database["public"]["Enums"]["asset_side"]
           sold_at?: string | null
           space_id: string
@@ -610,6 +612,7 @@ export type Database = {
           quick?: boolean
           rate_estimated?: boolean
           realized_gain?: number | null
+          share_pending?: boolean
           side?: Database["public"]["Enums"]["asset_side"]
           sold_at?: string | null
           space_id?: string
@@ -3692,6 +3695,10 @@ export type Database = {
       }
       amount_band: { Args: { v: number }; Returns: string }
       answer_access_request: { Args: { p_accept: boolean; p_id: string }; Returns: undefined }
+      answer_asset_share: {
+        Args: { p_vis: Database["public"]["Enums"]["asset_visibility"] }
+        Returns: number
+      }
       answer_mode_change: {
         Args: { p_accept: boolean; p_request: string }
         Returns: string
@@ -4291,6 +4298,10 @@ export type Database = {
       }
       money_in_visible: { Args: { p_owner: string }; Returns: boolean }
       month_us_build: { Args: { p_today: string; p_user: string }; Returns: string }
+      month_us_build_key: {
+        Args: { p_key: string; p_today: string; p_user: string }
+        Returns: string
+      }
       month_us_card: { Args: { p_today?: string }; Returns: Json }
       month_us_for: { Args: { p_user: string }; Returns: boolean }
       month_us_saved: {
@@ -4691,6 +4702,7 @@ export type Database = {
       send_evening_notifications: { Args: { p_today?: string }; Returns: number }
       send_month_us: { Args: { p_today?: string }; Returns: number }
       send_morning_notifications: { Args: { p_today?: string }; Returns: number }
+      send_note_reminders: { Args: { p_today?: string }; Returns: number }
       send_notice_mails: { Args: { p_now?: string }; Returns: number }
       send_progress_news: { Args: { p_today?: string }; Returns: number }
       send_weekly_summary: { Args: { p_today?: string }; Returns: number }
