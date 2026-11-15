@@ -365,7 +365,7 @@ test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 
 
 // ── QA 5구간(2026-11-12) ────────────────────────────────────────────
 
-test('추천값으로 다시 채우기(D1): 직접 추가 줄은 금액 그대로, 고정지출·생활비는 남은 금액에서, 확인 창은 바뀌는 것을', async ({
+test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 고정지출·생활비는 금액 그대로, 확인 창은 바뀌는 것을', async ({
   page,
 }) => {
   const { db, go } = await open(page);
@@ -384,16 +384,14 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄은 금액 그대�
   await page.getByRole('button', { name: '추천값으로 다시 채우기' }).click();
   const modal = page.getByRole('alertdialog', { name: '추천값으로 다시 채울까요?' });
   await expect(
-    modal.getByText(
-      '고정지출, 생활비, 용돈과 기한을 정한 저금 금액이 바뀌어요. 직접 추가한 지출은 그대로예요',
-    ),
+    modal.getByText('용돈과 기한을 정한 저금 금액이 바뀌어요. 이미 적은 지출은 그대로예요'),
   ).toBeVisible();
   await modal.getByRole('button', { name: '다시 채우기' }).click();
   await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
-  // 06 3-2: 기준 350만 − 15만 = 335만 → 고정지출·생활비 84만
+  // 06 3-2(2026-11-15): 추천 고정지출·생활비 줄은 새로 만들지 않고, 이미 있던 줄은 금액 그대로
   await expect.poll(() => lineOf(db, 'custom', '관리비')?.amount).toBe(150_000);
-  expect(lineOf(db, 'fixed')?.amount).toBe(840_000);
-  expect(lineOf(db, 'living')?.amount).toBe(840_000);
+  expect(lineOf(db, 'fixed')?.amount).toBe(880_000);
+  expect(lineOf(db, 'living')?.amount).toBe(880_000);
   expect(await names(page, '지출')).toEqual(['고정지출', '생활비', '용돈', '관리비']);
 });
 
