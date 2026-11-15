@@ -7,6 +7,7 @@ import { InviteButtons, InviteCodeBox, inviteActions } from '../../../shared/inv
 import { afterSetupPath } from '../../auth';
 import { copy } from '../copy';
 import { useMe, useSpace } from '../data';
+import { clearFirstSaving, markFirstSaving } from '../first-saving-resume';
 
 /** 첫 저금(W-11, from=onboarding) 끝에 오는 주소. 홈 위에 이 시트(routes) */
 export const AFTER_FIRST_SAVING_PATH = '/welcome';
@@ -31,8 +32,13 @@ export function O07InviteSheet() {
   const leave = () => {
     if (leaving) return;
     setLeaving(true);
+    clearFirstSaving(); // 시트를 끝냄: 다시 열어도 여기로 오지 않음. 다음은 A-06
     void afterSetupPath().then((to) => nav(to, { replace: true }));
   };
+  // 시트가 떠 있는 동안 기억: 앱을 닫았다 열면 A-06보다 이 시트부터(2026-11-16 r5)
+  useEffect(() => {
+    if (space.data && !joined) markFirstSaving(AFTER_FIRST_SAVING_PATH);
+  }, [space.data, joined]);
   useEffect(() => {
     if (joined) leave();
     // 합류 여부가 정해지면 한 번

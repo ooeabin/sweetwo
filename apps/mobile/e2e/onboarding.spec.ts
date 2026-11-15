@@ -675,3 +675,52 @@ test('O-32 휠 둘레 링은 키보드로 왔을 때만(손가락·마우스로 
   await col.getByText('25일').click();
   expect(await ring()).toBe('none');
 });
+
+test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열면 A-06 권장보다 그 단계부터, A-06은 끝난 뒤 한 번(r5)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  await fakeBridge(page, { signedIn: true, pin: null });
+  const key = () => page.evaluate(() => localStorage.getItem('sweetwo.firstSavingAt'));
+  await start(page);
+  await manage(page, '아니요', '네');
+  await salary(page);
+  await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-55
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
+  await next(page);
+  await expect(page).toHaveURL(/\/salary\/items\/new\/b\?from=onboarding$/);
+  expect(db.me.onboarding_done_at).toBeTruthy();
+  await page.waitForTimeout(3500); // 기기에 화면 데이터를 저장하는 3초 모으기(offline-cache)가 끝난 뒤 닫는 것처럼
+  // 앱을 닫았다 열기: A-06 대신 멈춘 단계(입력값 그대로)
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/salary\/items\/new\/b\?from=onboarding$/);
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
+  await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
+  await next(page);
+  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
+  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
+  await next(page);
+  await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
+  await expect(sheet).toBeVisible();
+  expect(db.goals.map((g) => g.name)).toContain('내 집 마련');
+  await expect.poll(key).toBe('/welcome');
+  // 초대 시트에서 닫았다 열기: 저금은 이미 저장됐으니 시트부터
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/welcome$/);
+  await expect(sheet).toBeVisible();
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
+  // 시트를 끝내면 그때 A-06을 한 번, 답하면 홈. 기억은 지움
+  await sheet.getByRole('button', { name: '나중에 보낼게요' }).click();
+  await heading(page, '앱 잠금을 켤까요?');
+  expect(await key()).toBeNull();
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
+});

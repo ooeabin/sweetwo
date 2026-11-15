@@ -82,6 +82,11 @@ export async function routeAfterLogin(
     const after = prefs.joinAfter(await session.userId().catch(() => null));
     if (after) return { to: `/join/${after}` };
   }
+  // 시작한 사람이 O-60 뒤 첫 저금(W-11a~e)이나 초대 시트(O-07)를 끝내지 않고 앱을 닫음: 그 화면부터. A-06은 흐름이 끝난 뒤(2026-11-16 r5)
+  if (s.onboarding_done) {
+    const saving = prefs.firstSavingAt();
+    if (saving) return { to: saving };
+  }
   // 앱 잠금 권장(A-06, 2026-11-13): 온보딩·합류를 마친 계정만 로그인 직후 한 번. 마치기 전이면 O-60 흐름·P-11 뒤에 물음
   if (session.bridge && s.onboarding_done) {
     const lock = await session.bridge.lock.status();
