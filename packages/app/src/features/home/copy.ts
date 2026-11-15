@@ -82,6 +82,9 @@ export const copy = {
   taskFirstSaving: '무엇을 같이 모을지 정해 볼까요?',
   taskSplitSuggest: '같이 쓰는 생활비를 나눠 볼까요?',
   taskSplitDone: '이미 정했어요',
+  // 띠 둘 → 한 띠(2026-11-16 4차 검토) [확인 필요]
+  tasksCount: (n: number) => `할 일 ${n}개`, // [확인 필요]
+  tasksTitle: '할 일', // [확인 필요] 목록 시트 제목
   taskSplitGo: '나누기',
   taskAutoPick: '자동으로 나가는 걸 골라 주세요',
   taskPush: '월급날 아침에 알려 드릴까요?',
@@ -136,11 +139,14 @@ export const copy = {
   // H-14 이번 달 우리 둘(3차 검토 D3, 2026-11-15) [확인 필요]
   monthUsTitle: '이번 달 우리 둘',
   monthUsClose: '닫기',
-  monthUsSaving: '모은 금액',
-  monthUsFirst: (total: string) => `지금까지 ${total}`,
-  monthUsUp: (amount: string) => `지난달보다 +${amount}`,
-  monthUsDown: (amount: string) => `지난달보다 −${amount}`,
-  monthUsSame: '지난달과 같아요',
+  monthUsSaving: '모은 금액', // 했어요만 공개(개수만)일 때 줄 이름
+  // 2026-11-16 4차 검토: 줄 이름을 첫 카드와 그 뒤 카드로 나눔 [확인 필요]
+  monthUsSavingFirst: '지금까지 모은 금액', // [확인 필요]
+  monthUsSavingDelta: '지난달보다', // [확인 필요]
+  monthUsFirst: (total: string) => total,
+  monthUsUp: (amount: string) => `+${amount}`,
+  monthUsDown: (amount: string) => `−${amount}`,
+  monthUsSame: '그대로예요', // [확인 필요] 2026-11-16 줄 이름 ‘지난달보다’ 옆
   monthUsHidden: (n: number) => `저금 ${n}개 모으는 중`,
   monthUsCare: '다가올 경조사·기념일',
   monthUsCareOne: (name: string, date: string) => `${name} ${date}`,

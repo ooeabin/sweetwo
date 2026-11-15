@@ -137,6 +137,9 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await expect(card).toContainText('500만 원');
   await expect(card).toContainText('목표 금액 1억 8,000만 원의 2%');
   await expect(card).not.toContainText('찬우');
+  // 진행 표시는 이 카드 하나, 내 몫 = 합계(찬우 0원)면 ‘내 몫’ 줄 없음(2026-11-16 4차 검토)
+  await expect(card).not.toContainText('내 몫');
+  await expect(y.getByRole('region', { name: '모은 금액' })).toHaveCount(0);
   await axe(y);
 
   // 찬우 W-13: 묶음 한 줄, 펼치면 예빈 줄은 이름만(금액 없음)
@@ -160,6 +163,11 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).not.toContainText(
     '예빈 500만 원',
   );
+  // 찬우 W-10: 합계 카드 아래 ‘내 몫’ 한 줄, 따로 모은 금액 카드 없음(2026-11-16 4차 검토)
+  await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toContainText(
+    '내 몫 0원',
+  );
+  await expect(c.getByRole('region', { name: '모은 금액' })).toHaveCount(0);
   await c.goto('/salary/bundles/bundle-1/edit');
   await c.getByRole('switch', { name: /각자 모은 금액 보여 주기/ }).click();
   await expect(c.getByRole('switch', { name: /각자 모은 금액 보여 주기/ })).toHaveAttribute(
@@ -169,6 +177,10 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await c.goto('/salary/items/goal-h');
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toContainText(
     '찬우 0원, 예빈 500만 원',
+  );
+  // 각자 금액 줄이 있으면 ‘내 몫’ 줄은 겹쳐서 뺌
+  await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).not.toContainText(
+    '내 몫',
   );
 
   // 퍼센트만: 찬우만 켜도 예빈 화면도 금액 대신 %

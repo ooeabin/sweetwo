@@ -218,6 +218,7 @@ export function W10SavingItem() {
           masked={masked}
           myName={d.myName}
           partnerName={d.partnerName}
+          share={i.owner === 'mine' ? i.saved : null}
           onClick={
             bundle.goals.some((x) => x.mine)
               ? () => nav(togetherPaths.bundleEdit(bundle.id))
@@ -231,9 +232,10 @@ export function W10SavingItem() {
           {copy.bundleJoinCta}
         </Button>
       )}
-      {/* 저금 한 카드(20 W-10 3차 검토, 2026-11-15): 모은 금액 큰 숫자 + 막대 + 한 줄(목표 금액의 %), 나머지(기한, 월 필요액, 예상,
-          남은 금액, 바꾸기)는 ‘자세히 보기’ 아래로 접음. 목표 금액이 없으면 같은 카드 안에 ‘목표 금액 정하기’ */}
-      {!hideAmounts && (
+      {/* 저금 한 카드(20 W-10, 2026-11-16 4차 검토): 모은 금액 큰 숫자 + 막대 + 한 줄(목표 금액의 %) + 기한 줄(늘 보임, 기한까지 남은
+          금액과 한 줄). 월 필요액·예상·‘매달 금액 바꾸기’만 가벼운 글자 버튼 ‘자세히 보기’ 아래. 목표 금액이 없으면 같은 카드 안에
+          ‘목표 금액 정하기’. 묶인 저금은 이 카드 없이 묶음 카드 한 장(합계 + ‘내 몫’ 한 줄, 2026-11-16) */}
+      {!hideAmounts && !g.bundle_id && (
         <section className="hg-goalbox" aria-label={copy.savedLabel}>
           {/* 누르면 아래 저금 내역으로(20 W-10 2번) */}
           <button type="button" className="hg-goalbox__jump" onClick={toHistory}>
@@ -268,96 +270,74 @@ export function W10SavingItem() {
                   )
                 )}
               </div>
-              {i.state !== 'achieved' && (
-                <>
-                  <button
-                    type="button"
-                    className="hg-foldrow"
-                    aria-expanded={more}
-                    aria-controls="w-10-more"
-                    onClick={() => setMore((x) => !x)}
-                  >
-                    <span>{more ? copy.foldClose : copy.foldOpen}</span>
-                    <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
-                  </button>
-                  {more && (
-                    <div id="w-10-more" className="hg-goalbox__fold">
-                      <div className="hg-goalbox__meta">
-                        {i.deadline ? (
-                          showEdit ? (
-                            <button
-                              type="button"
-                              className="hg-goalbox__metabtn"
-                              disabled={locked}
-                              onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                            >
-                              {copy.until(formatYm(i.deadline))}
-                            </button>
-                          ) : (
-                            <span>{copy.until(formatYm(i.deadline))}</span>
-                          )
-                        ) : showEdit ? (
-                          <button
-                            type="button"
-                            className="hg-btn hg-btn--link"
-                            disabled={locked}
-                            onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                          >
-                            {copy.setDeadline}
-                          </button>
-                        ) : (
-                          <span />
+              {i.state !== 'achieved' && (i.deadline || showEdit) && (
+                // 기한 줄(늘 보임): “2027년 11월까지 300만 원 더 필요해요”(남은 금액이 없으면 “2027년 11월까지”) + ‘기한 바꾸기’.
+                // 기한이 없으면 ‘기한 정하기’ 하나. 같은 날짜를 두 번 쓰지 않음
+                <div className="hg-goalbox__due">
+                  {i.deadline ? (
+                    <span>
+                      {remain
+                        ? copy.remainUntil(formatYm(remain.deadline), m(remain.remain))
+                        : copy.until(formatYm(i.deadline))}
+                    </span>
+                  ) : null}
+                  {showEdit && (
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      disabled={locked}
+                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                    >
+                      {i.deadline ? copy.changeDeadline : copy.setDeadline}
+                    </button>
+                  )}
+                </div>
+              )}
+              {i.state !== 'achieved' &&
+                (i.need !== null || i.eta || (i.late !== null && showEdit)) && (
+                  <>
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link hg-goalbox__more"
+                      aria-expanded={more}
+                      aria-controls="w-10-more"
+                      onClick={() => setMore((x) => !x)}
+                    >
+                      {more ? copy.foldClose : copy.foldOpen}
+                      <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
+                    </button>
+                    {more && (
+                      <div id="w-10-more" className="hg-goalbox__fold">
+                        {i.need !== null && (
+                          <span className="hg-goalbox__sub">
+                            {together
+                              ? copy.needPerMonthTogether(m(i.need))
+                              : copy.needPerMonth(m(i.need))}
+                          </span>
                         )}
-                      </div>
-                      {i.need !== null && (
-                        <span className="hg-goalbox__sub">
-                          {together
-                            ? copy.needPerMonthTogether(m(i.need))
-                            : copy.needPerMonth(m(i.need))}
-                        </span>
-                      )}
-                      {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
-                      {i.eta && (
-                        <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
-                      )}
-                      {/* 기한까지 남은 금액(06 5-3b, G5) */}
-                      {remain && (
-                        <span className="hg-goalbox__sub">
-                          {copy.remainUntil(formatYm(remain.deadline), m(remain.remain))}
-                        </span>
-                      )}
-                      {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님) */}
-                      {i.late !== null && showEdit && (
-                        <span
-                          className="hg-row"
-                          style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}
-                        >
+                        {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
+                        {i.eta && (
+                          <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
+                        )}
+                        {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
+                        {i.late !== null && showEdit && (
                           <button
                             type="button"
                             className="hg-btn hg-btn--link"
+                            style={{ alignSelf: 'flex-start' }}
                             disabled={locked}
                             onClick={() => nav(splitTo)}
                           >
                             {copy.changeMonthly}
                           </button>
-                          <button
-                            type="button"
-                            className="hg-btn hg-btn--link"
-                            disabled={locked}
-                            onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                          >
-                            {copy.changeDeadline}
-                          </button>
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
             </>
           )}
-          {/* 묶인 저금은 목표 금액이 묶음에 있어 ‘목표 금액 정하기’ 없음(2026-11-14, W-15a에서 고침) */}
-          {showTarget && i.target === null && !g.bundle_id && (
+          {showTarget && i.target === null && (
             <>
               <span className="hg-card__meta">{copy.noTarget}</span>
               {showEdit && (

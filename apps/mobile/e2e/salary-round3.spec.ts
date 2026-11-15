@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, seed } from './mocks';
+import { homeTask, homeTaskTexts } from './home-tasks';
 
 // 월급 탭 다음 개선(20 ‘다음 개선’ 2026-11-09 검토 → round 3에서 만듦). 찬우(시작), 각자.
 const axe = async (page: Page) => {
@@ -155,17 +156,15 @@ test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초�
   // 홈에는 순위 줄이 없음(2026-11-11), 순위를 본 적이 없으면 자산 관리 타일 배지도 없음
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await expect(page.locator('.hg-hubtile__badge')).toHaveCount(0);
-  const todo = page
-    .locator('.hg-hubband')
-    .getByRole('button', { name: '무엇을 같이 모을지 정해 볼까요?' });
-  await expect(todo).toBeVisible();
+  // 띠가 하나면 그 띠, 둘이면 “할 일 2개” 시트 줄(19 ‘띠 하나로 묶기’, 2026-11-16)
+  expect(await homeTaskTexts(page)).toContain('무엇을 같이 모을지 정해 볼까요?');
   await axe(page);
   // 체크해도 홈에 순위 줄은 없음
   await page.goto('/salary');
   await page.locator('.hg-transfer').first().getByRole('checkbox').click();
   await page.goto('/');
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
-  await todo.click();
+  await (await homeTask(page, '무엇을 같이 모을지 정해 볼까요?')).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
   // 첫 30일이 끝나면(2026-11-13 v2.2 띠 7번) 사라지고 초대 띠(맨 끝)
   db.me.onboarding_done_at = '2026-09-01T01:00:00Z';

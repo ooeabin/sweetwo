@@ -18,4 +18,4 @@
 - 다크: 토큰 그대로
 - React(packages/ui `SaveTogether.tsx`, 2026-11-13 PR 9): `SaveTogether`(`title`, `head`(D-day 알약·글자 버튼), `slides`, `more`, `moneyIn`, `label`) > 칸 `SaveTogetherSlide`(`people`, `name`, `amount`, `bar`(null = 막대 없음), `lines`(보조 줄 글자 배열, 위 순서), `done`, `paused`, `percentOnly`, `label`, `onClick`), `SaveTogetherEmpty`(`title`, `head`, `question`, `chips`, `add`). 문장 만들기(목표 금액의 %, 이번 달 +, 기한까지, 각자 금액)는 앱(`h-10-save-together.tsx`)이 core로
 
-쓰는 곳: 홈 H-10, W-10 묶음 카드(머리 없이, 2026-11-13 PR 10은 W-10 목표 금액 카드와 같은 `hg-goalbox` 틀에 같은 규칙: 이름표 ‘같이 모으기’ + ⋯, 이름, 큰 숫자, 막대, “목표 금액 …의 n%”, 보조 줄 순서, 퍼센트만·다 모음. 앱 `BundleCard`), W-13 묶음 줄(막대와 합계만, GoalRow 꼴 `BundleRow`), 위젯 WG-01은 네이티브라 같은 규칙만 따름.
+쓰는 곳: 홈 H-10, W-10 묶음 카드(머리 없이, 2026-11-13 PR 10은 W-10 목표 금액 카드와 같은 `hg-goalbox` 틀에 같은 규칙: 이름표 ‘같이 모으기’ + ⋯, 이름, 큰 숫자, 막대, “목표 금액 …의 n%”, 보조 줄 순서, 퍼센트만·다 모음. 앱 `BundleCard`. 2026-11-16 4차 검토: W-10의 진행 표시는 이 카드 하나, 내 저금 화면이면 보조 줄 끝에 “내 몫 50만 원” 한 줄(`share`), 각자 금액 줄이 있거나 내 몫 = 합계면 그 줄 없음. 묶인 저금은 따로 모은 금액 카드를 그리지 않음), W-13 묶음 줄(막대와 합계만, GoalRow 꼴 `BundleRow`), 위젯 WG-01은 네이티브라 같은 규칙만 따름.

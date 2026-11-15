@@ -12,6 +12,7 @@ import {
   heroZero,
   homeOrder,
   monthLineUrgent,
+  monthUsShown,
   pickHeroes,
   pickMonthLine,
   pickTopBanner,
@@ -29,7 +30,7 @@ import {
   type MarriageStatus,
   type TopTask,
 } from '@sweetwo/core';
-import { Hub, HubBand, HubTile, Illustration } from '@sweetwo/ui';
+import { BottomSheet, Hub, HubBand, HubTile, Illustration, ListRow } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -145,6 +146,8 @@ export function H01Home() {
   const rank = useRank();
   // 띠 10번 알림 다시 묻기: 이 기기 알림이 아직 묻기 전(‘나중에 할게요’)일 때만(브라우저는 브리지가 없어 없음)
   const [pushPrompt, setPushPrompt] = useState(false);
+  // 할 일 띠가 둘이면 한 띠 “할 일 2개 ›” → 이 목록 시트(2026-11-16 4차 검토)
+  const [taskSheet, setTaskSheet] = useState(false);
   useEffect(() => {
     let on = true;
     void window.sweetwo?.push
@@ -530,7 +533,7 @@ export function H01Home() {
       toast(sharedCopy.errorTitle);
     }
   };
-  const todoBands = shownTasks.map((t) => (
+  const bandOf = (t: TopTask) => (
     <HubBand
       key={t.key}
       text={taskText(t)}
@@ -548,7 +551,52 @@ export function H01Home() {
           : undefined
       }
     />
-  ));
+  );
+  // 코코아 띠는 하나만(2026-11-16 4차 검토): 할 일이 둘이면 “할 일 2개 ›” 한 띠 → 목록 시트(줄마다 같은 이동, 8번은 ‘이미 정했어요’도)
+  const grouped = shownTasks.length > 1;
+  const todoBands = grouped
+    ? [
+        <HubBand
+          key="tasks"
+          text={copy.tasksCount(shownTasks.length)}
+          onClick={() => {
+            track('home_box_tapped', { box: 'band_group' });
+            setTaskSheet(true);
+          }}
+        />,
+      ]
+    : shownTasks.map(bandOf);
+  const taskList =
+    grouped && taskSheet ? (
+      <BottomSheet title={copy.tasksTitle} onClose={() => setTaskSheet(false)}>
+        <div className="hg-list hg-list--plain hg-tasksheet">
+          {shownTasks.map((t) => (
+            <Fragment key={t.key}>
+              <ListRow
+                label={taskText(t)}
+                onClick={() => {
+                  setTaskSheet(false);
+                  void tapTask(t);
+                }}
+              />
+              {t.kind === 'split_suggest' && (
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link hg-btn--quiet"
+                  style={{ alignSelf: 'flex-start' }}
+                  onClick={() => {
+                    setTaskSheet(false);
+                    void closeTask(t);
+                  }}
+                >
+                  {copy.taskSplitDone}
+                </button>
+              )}
+            </Fragment>
+          ))}
+        </div>
+      </BottomSheet>
+    ) : null;
 
   // ── 맨 위 띠(하나만, core pickTopBanner) ──
   const top = pickTopBanner({
@@ -713,9 +761,11 @@ export function H01Home() {
         }}
       />
     ),
-    month_us: monthUs.data ? (
-      <H14MonthUs key="month_us" card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
-    ) : null,
+    // 보여 줄 만한 줄이 2개 이상일 때만(2026-11-16 4차 검토, core monthUsShown)
+    month_us:
+      monthUs.data && monthUsShown(monthUs.data) ? (
+        <H14MonthUs key="month_us" card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
+      ) : null,
     hero: <Fragment key="hero">{hero}</Fragment>,
     tiles: (
       <Fragment key="tiles">
@@ -798,6 +848,7 @@ export function H01Home() {
         <div key="hub" className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <AchieveWatch />
           <Hub label={copy.hubLabel}>{order.map((b) => blocks[b])}</Hub>
+          {taskList}
         </div>,
       ]}
     />

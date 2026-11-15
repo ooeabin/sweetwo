@@ -68,6 +68,8 @@ export interface AppFrameProps {
   date: string;
   labels: {
     search: string;
+    /** 검색 칸 키 안내(Apple “⌘K”, 그 밖 “Ctrl K”, 터치 기기는 CSS로 숨김). 없으면 “⌘K” */
+    searchKey?: string;
     mask: string;
     noti: string;
     settings: string;
@@ -199,7 +201,9 @@ export function AppFrame(p: AppFrameProps) {
           >
             <Icon name="search" size={16} />
             <span>{p.labels.search}</span>
-            <span className="hg-kbd">⌘K</span>
+            <span className="hg-kbd" aria-hidden="true">
+              {p.labels.searchKey ?? '⌘K'}
+            </span>
           </button>
           <nav className="hg-appside__nav" aria-label={p.narrowTitle}>
             {p.tabs.map((t) => (
