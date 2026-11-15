@@ -713,11 +713,17 @@ function datedTask(i: TopTaskInput): TopTask | null {
  */
 export function bundleInviteGoal(
   i: Pick<TopTaskInput, 'joint' | 'coupleState' | 'partnerGoals' | 'today'>,
+  /**
+   * anyAge: 7일 제한 없이(H-10 빈 상태, 2026-11-16 4차 검토 R4-8: 상대가 저금을 만든 지 7일이 지나면 내 홈은
+   * “무엇을 같이 모을까요?”, 상대 홈은 ‘같이 모으기’로 서로 다르게 말했음). 띠 13은 그대로 7일
+   */
+  o: { anyAge?: boolean } = {},
 ): { id: string; name: string; to: string } | null {
   if (i.joint || i.coupleState !== 'connected') return null;
   const g = (i.partnerGoals ?? [])
     .filter((x) => !x.bundle_id)
     .filter((x) => {
+      if (o.anyAge) return true;
       const d = daysBetween(x.created_at.slice(0, 10), i.today);
       return d >= 0 && d < REQUEST_TASK_DAYS;
     })

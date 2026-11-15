@@ -351,8 +351,14 @@ export function W11SavingAdd() {
           <>
             {/* 같이 계열(합쳐서 + 연결)은 둘이 같이 모으는 금액(2026-11-14) */}
             {joint && space.data.couple_state === 'connected'
-              ? copy.needPerMonthTogether(money(need, masked))
-              : copy.needPerMonth(money(need, masked))}
+              ? copy.needPerMonthTogether(
+                  money(need, masked),
+                  draft.monthly ? money(draft.monthly, masked) : undefined,
+                )
+              : copy.needPerMonth(
+                  money(need, masked),
+                  draft.monthly ? money(draft.monthly, masked) : undefined,
+                )}
             {late !== null && eta && (
               <>
                 <br />

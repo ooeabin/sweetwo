@@ -71,6 +71,28 @@ test('W-20 받은 돈 적기 → W-20a 저금에 나눠 넣기: 남은 금액, �
   await expect(page.getByText('400만 원', { exact: true }).first()).toBeVisible();
 });
 
+test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 ‘받은 돈’ 묶음에 줄로 보임', async ({
+  page,
+}) => {
+  const { s } = await open(page, '/salary');
+  await page.getByRole('button', { name: '받은 돈 적기' }).click();
+  await page.getByLabel('얼마 들어왔어요?').fill('1000000');
+  await page.getByRole('button', { name: '상여' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('heading', { name: '저금에 얼마씩 넣을까요?' })).toBeVisible();
+  await page.getByLabel('내 집 마련', { exact: true }).fill('300000');
+  await page.getByRole('button', { name: '저금에 안 넣을게요' }).click();
+  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page.getByText('들어온 돈을 적었어요')).toBeVisible();
+  expect(s.moneyIns[0]).toMatchObject({ amount: 1_000_000, kind: 'bonus' });
+  expect(s.moves).toEqual([]);
+  const got = page.getByRole('region', { name: '받은 돈' });
+  await expect(got.getByRole('button', { name: /상여/ })).toContainText('100만 원');
+  await axe(page);
+  await got.getByRole('button', { name: /상여/ }).click();
+  await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
+});
+
 test('W-10b 바로잡기(묶음): 사유는 나만, 예빈에게는 사람·금액·사유 없는 한 줄, 되돌리기로 한 줄도 지움(두 계정)', async ({
   browser,
 }) => {

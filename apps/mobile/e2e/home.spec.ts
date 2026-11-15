@@ -862,7 +862,7 @@ test('위젯 분석(32 4-7, PR 14): 이 기기에서 처음 본 위젯만 widget
   expect(added()).toHaveLength(2);
 });
 
-test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경조사·기념일, 내 용돈 → 닫기', async ({
+test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경조사·기념일, 용돈 계획 → 닫기', async ({
   page,
 }) => {
   const ev = events(page);
@@ -893,7 +893,7 @@ test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경�
   await expect(card.getByRole('button', { name: /다가올 경조사·기념일/ })).toContainText(
     '어머니 생신 10월 20일 외 1개',
   );
-  await expect(card.getByRole('button', { name: /내 용돈/ })).toContainText('30만 원');
+  await expect(card.getByRole('button', { name: /용돈 계획/ })).toContainText('30만 원');
   expect(ev.find((e) => e.name === 'month_us_viewed')?.props).toEqual({
     saving: 'up',
     care_count: 2,

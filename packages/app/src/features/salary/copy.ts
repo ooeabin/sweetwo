@@ -92,6 +92,24 @@ export const copy = {
     { name: '부모님 용돈', code: 'parents' },
   ] as const,
   spendChipsLabel: '지출 이름',
+  allowanceRows: '용돈', // 화면 읽기: W-01 지출 묶음 맨 위 용돈 줄 목록(2026-11-16 R4-3)
+  /** W-01 첫 달 묻기(2026-11-16 4차 검토 사용자 결정, 20 W-01 ‘첫 달 묻기’) [모두 확인 필요] */
+  firstSpend: {
+    title: '매달 나가는 돈이 있어요?',
+    help: '고르고 금액을 적으면 지출에 한 줄씩 들어가요',
+    chips: [
+      { name: '월세', code: 'rent' },
+      { name: '관리비', code: 'maintenance' },
+      { name: '통신비', code: 'phone' },
+      { name: '보험료', code: 'insurance' },
+      { name: '대출 상환', code: 'loan' },
+      { name: '생활비', code: 'living' },
+    ] as const,
+    other: '그 밖에',
+    done: '다 넣었어요',
+    skip: '건너뛸게요',
+  },
+  sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
   ownName: '직접 입력',
   editPlan: '편집하기',
   share: '공유하기',
@@ -193,7 +211,12 @@ export const copy = {
   lineNames: { fixed: '고정지출', living: '생활비', allowance: '용돈' },
   fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
   livingSub: '식비·장보기처럼 그때그때 쓰는 지출', // [확인 필요]
-  needPerMonth: (amount: string) => `매달 ${amount}이 필요해요`,
+  /**
+   * 기한까지 월 필요액(06 5-3). now = 지금 매달 넣는 금액(다르면 덧붙임). 2026-11-16 4차 검토 R4-2: “매달 24만 원이 필요해요”가
+   * 내가 정한 30만 원과 달라 틀린 줄 알았음 → 기한 기준임을 말하고 지금 금액을 나란히 [확인 필요]
+   */
+  needPerMonth: (amount: string, now?: string) =>
+    `기한까지 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`,
   // 월 필요액 > 매달 금액(2026-11-09, W-10 3번, W-11d 보조) [확인 필요]
   lateBy: (n: number) => `지금대로면 기한보다 ${n}개월 늦어요`,
   changeMonthly: '매달 금액 바꾸기', // [확인 필요]
@@ -286,7 +309,7 @@ export const copy = {
   conflictTheirs: (partner: string) => `${partner}님 값`,
   // W-11 저금 항목 추가
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
-  addNameHelp: '월급 계획 저금 묶음에 한 줄로 생겨요', // [확인 필요]
+  addNameHelp: '매달 월급에서 이만큼 모으기로 적어 둬요', // [확인 필요] 2026-11-16 R4-2(예전 “월급 계획 저금 묶음에 한 줄로 생겨요”)
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string) => `아직 안 정한 돈 ${left}`, // [확인 필요]
@@ -548,6 +571,11 @@ export const copy = {
   moneyInLeft: (total: string, left: string) => `들어온 돈 ${total} 중 남은 ${left}`, // [확인 필요]
   moneyInOver: '들어온 돈보다 많이 넣을 수 없어요', // [확인 필요]
   moneyInPut: '넣기', // [확인 필요]
+  /** W-20a 적기만(2026-11-16 R4-7: 받은 돈 적기가 저금 나누기로만 끝났음) [확인 필요] */
+  moneyInSkip: '저금에 안 넣을게요',
+  /** W-02 ‘받은 돈’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) [확인 필요] */
+  moneyInGroup: '받은 돈',
+  moneyInRow: (date: string, kind: string) => `${date}, ${kind}`,
   moneyInNoSaving: '넣을 저금이 없어요. 들어온 돈만 적어 둘게요', // [확인 필요]
   moneyInLogged: '들어온 돈을 적었어요', // [확인 필요]
   moneyInPutDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
@@ -577,5 +605,6 @@ export const copy = {
   moneyInEditSave: '저장',
   noteOverdue: (date: string) => `${date} 지났어요`, // [확인 필요] W-14 안 낸 메모
   monthlyOverLeft: (left: string) => `아직 안 정한 돈 ${left}보다 많아요`, // [확인 필요] W-11b
-  needPerMonthTogether: (amount: string) => `둘이 같이 매달 ${amount}이 필요해요`, // [확인 필요] 같이 계열 W-11d·W-10
+  needPerMonthTogether: (amount: string, now?: string) =>
+    `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
 };

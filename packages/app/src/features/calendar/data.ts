@@ -235,7 +235,11 @@ export function moneyLine(d: MoneyDate) {
                 ? `/salary/bundles/${d.bundle}/notes`
                 : `/salary/items/${d.ref ?? ''}/notes`
               : `/salary/items/${d.ref ?? ''}`;
-  return { label, go: copy.go[d.kind], to };
+  // 주말·공휴일이라 앞당긴 월급날은 까닭 한마디(“25일이 토요일이라 24일”, 2026-11-16 R4-9)
+  const why = d.moved
+    ? copy.money.moved(Number(d.moved.from.slice(8, 10)), d.moved.why, Number(d.date.slice(8, 10)))
+    : undefined;
+  return { label, go: copy.go[d.kind], to, why };
 }
 
 /**

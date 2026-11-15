@@ -276,7 +276,7 @@ export function W10aSavingEdit() {
         : f === 'deadline'
           ? copy.addDeadlineQ
           : copy.addNameQ;
-  // 기한: W-11d와 같은 보조 줄 “매달 n이 필요해요” + 늦어지면 “지금대로면 기한보다 n개월 늦어요”(2026-11-12 S7-07)
+  // 기한: W-11d와 같은 보조 줄 “기한까지 매달 n이면 돼요. 지금은 m씩 모아요” + 늦어지면 “지금대로면 기한보다 n개월 늦어요”(2026-11-12 S7-07)
   const plan = { target: g.target_amount, saved: item.saved, deadline: curYm };
   const need = f === 'deadline' && curYm ? savingNeed(plan) : null;
   const late = f === 'deadline' && curYm ? savingLate(plan, item.monthly) : null;
@@ -291,7 +291,10 @@ export function W10aSavingEdit() {
     )
   ) : need !== null ? (
     <>
-      {copy.needPerMonth(money(need, masked))}
+      {copy.needPerMonth(
+        money(need, masked),
+        item.monthly ? money(item.monthly, masked) : undefined,
+      )}
       {late !== null && eta && (
         <>
           <br />

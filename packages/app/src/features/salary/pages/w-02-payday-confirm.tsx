@@ -45,6 +45,7 @@ import {
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
 import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
@@ -196,6 +197,15 @@ export function W02PaydayConfirm() {
     return frame(
       <>
         {period.data && <PeriodLine period={period.data} onGo={() => nav(togetherPaths.moneyIn)} />}
+        {meId && (
+          <MoneyInRows
+            meId={meId}
+            from={period.data?.start ?? `${today.slice(0, 8)}01`}
+            to={today}
+            masked={masked}
+            onOpen={() => nav(togetherPaths.moneyInList)}
+          />
+        )}
         <section className="hg-checkgroup" aria-label={copy.savingGroup}>
           <SectionHeader
             variant="group"
@@ -254,6 +264,15 @@ export function W02PaydayConfirm() {
               <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
             )}
           </section>
+          {meId && (
+            <MoneyInRows
+              meId={meId}
+              from={`${today.slice(0, 8)}01`}
+              to={today}
+              masked={masked}
+              onOpen={() => nav(togetherPaths.moneyInList)}
+            />
+          )}
           {preview.length > 0 && (
             <section
               className="hg-stack"
@@ -675,6 +694,16 @@ export function W02PaydayConfirm() {
         </Button>
       )}
       {/* “+ 받은 돈 적기”(20 W-02 ‘받은 돈 적기’, 2026-11-15: 저금 카드·저금 상세에서 옮김) → W-20 */}
+      {/* 이번 달에 적은 받은 돈(2026-11-16 R4-7: 적은 기록이 어디에도 안 보였음) */}
+      {!partnerTab && ago === 0 && meId && (
+        <MoneyInRows
+          meId={meId}
+          from={shown.cycle_start}
+          to={shown.cycle_end}
+          masked={masked}
+          onOpen={() => nav(togetherPaths.moneyInList)}
+        />
+      )}
       {!partnerTab && !pending && ago === 0 && (
         <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
       )}

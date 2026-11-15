@@ -22,6 +22,8 @@ export const copy = {
   targetOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`,
   thisMonthGain: (amount: string) => `이번 달 +${amount}`,
   /** 아직 안 들어간 묶음(상대가 만듦) 칸 첫 줄(2026-11-14 H1) */
+  /** 각자 계열 내 저금 칸(상대가 아직 같이 모으기에 없음, 2026-11-16 R4-8: 상대 홈 “…에 같이 모을까요?”와 맞춤) */
+  partnerNotIn: (name: string) => `${nim(name)}은 아직 같이 모으기에 없어요`, // [확인 필요]
   togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 들어가요`, // [확인 필요]
   remain: (deadline: string, amount: string) => `${ym(deadline)}까지 ${amount} 더 필요해요`,
   remainPercent: (deadline: string) => `${ym(deadline)}까지`,
@@ -91,7 +93,7 @@ export const copy = {
   taskPushNoDate: '경조사 일주일 전에 알려 드릴까요?',
   taskNextSaving: (name: string) => `‘${name}’ 기한이 지났어요. 다음엔 뭘 같이 모을까요?`,
   taskReconcile: '실제 잔액과 맞춰 볼까요?',
-  taskBundle: (partner: string, goal: string) => `${nim(partner)} ‘${goal}’에 같이 모을까요?`,
+  taskBundle: (partner: string, goal: string) => `${nim(partner)}의 ‘${goal}’에 같이 모을까요?`, // [확인 필요] 2026-11-16 R4-8
   taskInvite: '같이 모을 사람을 초대해 보세요',
   taskWaiting: (name: string | null) =>
     `${name ? `${name}님이` : '파트너가'} 기다리고 있어요. 월급 계획을 마쳐 주세요`,
@@ -152,5 +154,6 @@ export const copy = {
   monthUsCareOne: (name: string, date: string) => `${name} ${date}`,
   monthUsCareMore: (first: string, more: number) => `${first} 외 ${more}개`,
   monthUsCareNone: '한 달 안에는 없어요',
-  monthUsAllowance: '내 용돈',
+  /** 2026-11-16 4차 검토 R4-3: ‘내 용돈’이 남은 돈처럼 읽혀 계획 줄임을 드러냄 [확인 필요] */
+  monthUsAllowance: '용돈 계획',
 };

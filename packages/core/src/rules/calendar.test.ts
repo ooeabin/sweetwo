@@ -42,6 +42,29 @@ it('금융 일정: 월급날, 월급날 확인 목록 띠, 목표 기한, 매년
     '2026-10-31 deadline 내 집 마련',
   ]);
   expect(r.bands).toEqual([{ start: '2026-10-20', end: '2026-10-22' }]);
+  // 앞당긴 까닭(2026-11-16 R4-9: “25일이 일요일이라 23일”)
+  const pays = r.dates.filter((d) => d.kind === 'payday');
+  expect(pays.map((d) => d.moved)).toEqual([
+    { from: '2026-10-10', why: 'sat' },
+    { from: '2026-10-25', why: 'sun' },
+  ]);
+});
+
+it('금융 일정: 공휴일 월급날은 까닭 holiday, 앞당기지 않으면 moved 없음', () => {
+  const base = { reviewDay: null, maturities: [], goalDeadlines: [], yearlyGoals: [] };
+  const r = moneyDates(2026, 12, {
+    ...base,
+    paydays: [{ name: '', day: 25 }],
+    holidays: new Set(['2026-12-25']),
+  });
+  expect(r.dates[0]).toMatchObject({
+    date: '2026-12-24',
+    moved: { from: '2026-12-25', why: 'holiday' },
+  });
+  const off = moneyDates(2026, 12, { ...base, paydays: [{ name: '', day: 25 }], shift: false });
+  expect(off.dates[0]?.moved).toBeUndefined();
+  const plain = moneyDates(2026, 11, { ...base, paydays: [{ name: '', day: 25 }] });
+  expect(plain.dates[0]?.moved).toBeUndefined();
 });
 
 it('합쳐서 모드: 월급날 하나(이름 없음), 확인 목록 안내는 공동 사이클 날 기준', () => {

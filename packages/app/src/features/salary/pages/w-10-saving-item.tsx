@@ -311,8 +311,11 @@ export function W10SavingItem() {
                         {i.need !== null && (
                           <span className="hg-goalbox__sub">
                             {together
-                              ? copy.needPerMonthTogether(m(i.need))
-                              : copy.needPerMonth(m(i.need))}
+                              ? copy.needPerMonthTogether(
+                                  m(i.need),
+                                  i.monthly ? m(i.monthly) : undefined,
+                                )
+                              : copy.needPerMonth(m(i.need), i.monthly ? m(i.monthly) : undefined)}
                           </span>
                         )}
                         {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
