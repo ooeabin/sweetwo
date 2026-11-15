@@ -65,7 +65,8 @@ export function ReceiptHead({
   );
 }
 
-export type ReceiptPartKind = 'saving' | 'spend' | 'free';
+/** check: W-02 확인 막대 하나(확인한 줄 수 ÷ 줄 수, 바탕 bar-track, 2026-11-15 3차 검토) */
+export type ReceiptPartKind = 'saving' | 'spend' | 'free' | 'check';
 
 /**
  * 비율 막대 PlanBar(12px, 칸 사이 3px) + 가운데 범례(W-01 영수증, W-02 진행, 달 결과 카드 같은 마크업).

@@ -1,5 +1,5 @@
 import { cx } from './cx';
-import type { CSSProperties, ReactNode } from 'react';
+import { isValidElement, type CSSProperties, type ReactNode } from 'react';
 import { Icon, type IconName } from './Icon';
 import type { LeadTone } from './lead-kinds';
 
@@ -28,7 +28,7 @@ export function ListRow({
 }) {
   const inner = (
     <>
-      {icon ? <Icon name={icon} /> : (lead ?? <span />)}
+      {icon ? <Icon name={icon} /> : (shownLead(lead) ?? <span />)}
       <span className="hg-listrow__text">
         <span className="hg-listrow__label">{label}</span>
         {sub && <span className="hg-listrow__sub">{sub}</span>}
@@ -59,10 +59,30 @@ export function ListRow({
   );
 }
 
+type LeadProps = {
+  tone?: LeadTone;
+  icon?: IconName;
+  uiIcon?: boolean;
+  progress?: number;
+  art?: ReactNode;
+  photo?: string;
+};
+/** 그림이 아직 없는 종류 자리(예전 회색 빈 원 hg-lead--slot): 진행 원·사진·그림·UI 아이콘이 아님 */
+const isSlot = (p: LeadProps) => p.progress === undefined && !p.photo && !p.art && !p.uiIcon;
+
 /**
- * 행 앞 칸(hg-lead, docs/design/components/ListRow.md ‘Lead’). 2026-11-10: 종류 아이콘 자리는 2D 그림이 들어올 때까지
- * 회색 빈 원(hg-lead--slot). 종류는 lead-kinds.ts 표 그대로(data-art = 나중 그림 이름). UI 아이콘(+ 등)은 uiIcon으로 그대로.
- * 목표 금액이 있는 저금 줄은 진행 원(progress). 장식이라 aria-hidden(금액·진행은 줄 글자가 말함).
+ * 줄 앞 칸을 그릴지: 그림이 없는 종류 자리 Lead면 null(2026-11-15 3차 검토, 칸도 비우지 않음).
+ * ListRow·TransferRow가 칸 모양(hg-transfer--lead 등)을 정할 때 씀
+ */
+export function shownLead(lead: ReactNode): ReactNode {
+  if (isValidElement<LeadProps>(lead) && lead.type === Lead && isSlot(lead.props)) return null;
+  return lead;
+}
+
+/**
+ * 행 앞 칸(hg-lead, docs/design/components/ListRow.md ‘Lead’). 종류 그림 자리는 2D 그림이 들어올 때까지
+ * 그리지 않음(2026-11-15 3차 검토: 예전 회색 빈 원 hg-lead--slot 숨김, 자리도 비우지 않음). 종류는 lead-kinds.ts 표 그대로.
+ * UI 아이콘(+ 등)은 uiIcon으로 그대로. 목표 금액이 있는 저금 줄은 진행 원(progress). 장식이라 aria-hidden(금액·진행은 줄 글자가 말함).
  */
 export function Lead({
   tone,
@@ -85,16 +105,15 @@ export function Lead({
 }) {
   const ring = progress !== undefined && !photo && !art;
   const p = ring ? Math.min(Math.max(Math.trunc(progress), 0), 100) : 0;
-  const slot = !ring && !photo && !art && !uiIcon;
+  if (isSlot({ progress, photo, art, uiIcon })) return null;
   return (
     <span
       className={cx(
         'hg-lead',
-        ring ? 'hg-lead--ring' : slot ? 'hg-lead--slot' : tone && `hg-lead--${tone}`,
+        ring ? 'hg-lead--ring' : tone && `hg-lead--${tone}`,
         photo && 'hg-lead--photo',
       )}
       style={ring ? ({ '--p': p } as CSSProperties) : undefined}
-      data-art={slot && icon ? icon : undefined}
       aria-hidden="true"
     >
       {photo ? <img src={photo} alt="" /> : (art ?? (uiIcon && icon ? <Icon name={icon} /> : null))}

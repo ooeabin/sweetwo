@@ -213,18 +213,16 @@ export function S11Me() {
                 {me.income_variable && <span className="hg-tag">{copy.variable}</span>}
               </span>
             }
-            sub={
-              (c.joined &&
-                copy.partnerSalary(
-                  c.partnerName,
-                  man(c.partnerIncome),
-                  dayText(c.partnerPayday),
-                )) ||
-              undefined
-            }
             value={copy.salaryValue(man(me.monthly_income ?? 0), dayText(c.myPayday))}
             onClick={() => nav('/settings/me/salary')}
           />
+          {/* 파트너 월급은 내 월급 아래 보기만 줄(2026-11-15 3차 검토: 예전 내 월급 줄 회색 보조 줄이 먼저 읽혔음) */}
+          {c.joined && copy.salaryValue(man(c.partnerIncome), dayText(c.partnerPayday)) && (
+            <ListRow
+              label={copy.partnerSalaryRow(c.partnerName)}
+              value={copy.salaryValue(man(c.partnerIncome), dayText(c.partnerPayday))}
+            />
+          )}
           {scheduled && (
             <div
               className="hg-row"

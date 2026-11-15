@@ -56,7 +56,10 @@ test('O-01 ‘코드 입력하기’ → P-01 코드 입력 → 초대 확인 �
   await expect(next).toBeDisabled();
   await input.fill('k7m2q1'); // 1은 코드에 안 쓰는 글자
   await expect(input).toHaveValue('K7M2Q1');
-  await expect(page.getByText('코드를 다시 확인해 주세요')).toBeVisible();
+  // 이유를 알려 줌(2026-11-15 3차 검토)
+  await expect(
+    page.getByText('초대 코드에는 0, 1, I, O가 없어요. 비슷한 글자로 넣어 주세요'),
+  ).toBeVisible();
   await expect(next).toBeDisabled();
   await axe(page);
   await input.fill('k7m2qx');

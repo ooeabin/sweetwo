@@ -155,10 +155,8 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   seed(db);
   await page.goto('/calendar');
   await expect(page).toHaveURL(/\/calendar\/list$/);
-  await expect(page.locator('.hg-empty')).toBeVisible();
-  await expect(
-    page.locator('.hg-empty').getByRole('button', { name: '경조사 추가' }),
-  ).toBeVisible();
+  // 경조사가 없어도 빈 상태 카드와 둘째 추가 버튼은 없음(2026-11-15 3차 검토): 추가는 ‘일정’ 머리 하나
+  await expect(page.locator('.hg-empty')).toHaveCount(0);
   // 경조사와 금융 일정은 “일정” 한 목록, 오른쪽 D-day(2026-11-03)
   const money = page.getByRole('region', { name: '일정' });
   // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 20일(23일 앞 3일, 2026-11-14 R3), 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
@@ -717,7 +715,7 @@ test('Realtime: 상대가 경조사를 넣거나 기록하면 목록이 바로 �
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/calendar/list');
-  await expect(page.locator('.hg-empty')).toBeVisible();
+  await expect(page.getByRole('region', { name: '일정' })).toBeVisible();
   await expect.poll(() => rt.subscribed('care_day')).toBeGreaterThan(0);
   await expect.poll(() => rt.subscribed('care_record')).toBeGreaterThan(0);
   db.cares.push(care({ id: 'c-y', name: '할머니 생신', month: 10, day: 30, created_by: 'yebin' }));

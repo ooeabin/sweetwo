@@ -64,6 +64,8 @@ export function H14MonthUs({
           icon="x"
           label={copy.monthUsClose}
           ghost
+          // 누르는 칸 44px(2026-11-15 3차 검토, hg-card__close)
+          className="hg-card__close"
           onClick={() => {
             track('month_us_dismissed', {});
             void dismissMonthUs(card.id)

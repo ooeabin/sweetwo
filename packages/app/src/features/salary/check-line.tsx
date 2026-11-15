@@ -1,31 +1,15 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatDot2, todayKst } from '@sweetwo/core';
-import { BottomSheet, Button, Lead, leadOf, TransferRow } from '@sweetwo/ui';
+import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { quietly, toast } from '../../shared/toast';
 import { copy } from './copy';
 import { useCheck, type CheckEntry, type CheckResult } from './data';
-import { useSavingItems } from './saving';
 
 const LINE_NAMES = { fixed: '고정지출', living: '생활비', allowance: '용돈' } as const;
 
-/**
- * 줄 앞 칸(홈 H-03, W-02, W-05 같음, 2026-11-09): 종류 아이콘 + 영역 색 원(ui lead-kinds.ts ‘line’ 표).
- * 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(모은 금액 ÷ 목표 금액, 줄 아래 막대 대신). 장식이라 화면 읽기에서 숨김
- */
-export function LineLead({ line }: { line: Pick<PayCheckLine, 'kind' | 'goal_id'> }) {
-  const saving = useSavingItems();
-  const item =
-    line.kind === 'saving' && line.goal_id && saving.ready ? saving.byId(line.goal_id) : undefined;
-  const spec = leadOf('line', line.kind);
-  // 같이 모으기에 든 저금은 묶음 합계만 진행으로 보임(줄은 아이콘, R4)
-  return item && item.target !== null && !item.bundled ? (
-    <Lead progress={item.bar} />
-  ) : (
-    <Lead icon={spec.icon} tone={spec.tone} />
-  );
-}
+// 줄 앞 칸(LineLead: 종류 그림·저금 진행 원)은 2026-11-15 3차 검토에서 없앰: W-02 한 줄에 원은 체크 원 하나(진행은 보조 줄 글자)
 
 /**
  * 저금 줄 이름 = 저금 항목 이름. 합쳐서 모드에서 각자일 때 만든 항목 줄은 앞에 주인 이름(“찬우 적금”, 20 W-01 3번).
@@ -101,7 +85,7 @@ export function checkToast(
  * ‘못 함’ 줄(2026-11-12 D2)은 빈 원·취소선 없음 + 보조 줄 “이번 달은 못 했어요”, 화면 읽기 “{이름} 못 함”. 체크 칸을 누르면 체크.
  * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 보냈어요’(W-02a) + W-05는 ‘이번 달은 못 했어요’
  * + 저금 줄은 글자 버튼 ‘저금 보기’(W-10, 체크한 줄도). 줄마다 링크를 반복하지 않음(2026-11-03).
- * 목표 금액이 있는 저금 줄은 보조 줄에 “2,700만 / 1억 5,000만 원”(progress), 진행은 줄 앞 진행 원(LineLead).
+ * 목표 금액이 있는 저금 줄은 보조 줄에 “2,700만 / 1억 5,000만 원”(progress). 줄 앞 칸 없음(한 줄에 원 하나, 2026-11-15)
  */
 export function CheckLine({
   line,

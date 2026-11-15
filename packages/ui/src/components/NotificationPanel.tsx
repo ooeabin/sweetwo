@@ -175,8 +175,7 @@ export function NotificationPanel(p: {
           </div>
         ) : !hasItems ? (
           <div className="hg-noti__empty">
-            {/* 2026-11-12 D2: 빈 상태 그림 자리 120px(2D 그림이 들어올 때까지 회색 빈 자리) */}
-            <span className="hg-empty__art hg-artslot" aria-hidden="true" />
+            {/* 빈 상태 그림 자리(120px)는 2D 그림이 들어올 때까지 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김) */}
             <b>{p.labels.emptyTitle}</b>
             {p.labels.emptySub && <span>{p.labels.emptySub}</span>}
           </div>
@@ -192,28 +191,28 @@ export function NotificationPanel(p: {
                       <button
                         key={x.id}
                         type="button"
-                        className={cx('hg-noti__item', x.read && 'is-read')}
+                        className={cx(
+                          'hg-noti__item',
+                          !x.person && 'hg-noti__item--plain',
+                          x.read && 'is-read',
+                        )}
                         title={x.msg}
                         onClick={() => p.onItem(x.id)}
                       >
-                        {x.person ? (
-                          <span
-                            className={cx(
-                              'hg-avatar',
-                              x.person.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2',
-                            )}
-                            aria-hidden="true"
-                          >
-                            {[...x.person.name][0] ?? ''}
-                          </span>
-                        ) : (
-                          // 2026-11-10 알림 종류 자리: 2D 그림이 들어올 때까지 회색 빈 원(종류는 data-art, lead-kinds.ts noti)
-                          <span
-                            className="hg-noti__icon hg-lead--slot"
-                            data-art={x.icon}
-                            aria-hidden="true"
-                          />
-                        )}
+                        {
+                          x.person ? (
+                            <span
+                              className={cx(
+                                'hg-avatar',
+                                x.person.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2',
+                              )}
+                              aria-hidden="true"
+                            >
+                              {[...x.person.name][0] ?? ''}
+                            </span>
+                          ) : null
+                          /* 알림 종류 그림(lead-kinds.ts noti, x.icon)은 2D 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */
+                        }
                         <span className="hg-noti__text">
                           <span className="hg-noti__msg">{x.msg}</span>
                           <span className="hg-noti__time">{x.time}</span>

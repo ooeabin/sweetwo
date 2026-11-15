@@ -11,7 +11,7 @@ import { useSettingsData } from '../data';
 
 // S-11j 관리 형태 요청 확인(받은 사람, 25 ‘S-11j’, 08 4-1 (가)): 요청한 사람이 고른 말 그대로
 // (P-04 “{이름}님이 월급은 대부분 {나}님에게 보낸다고 했어요” / “{나}님이 관리하는 걸로 바꿀까요?”,
-// S-11f “{이름}님이 월급을 합쳐서 관리하자고 해요”) + 바뀌는 것 3줄 + ‘좋아요’ / ‘지금처럼 할게요’(answer_mode_change).
+// S-11f “{이름}님이 월급을 합쳐서 쓰자고 해요”, 서버 알림과 같음) + 바뀌는 것 3줄 + ‘좋아요’ / ‘지금처럼 할게요’(answer_mode_change).
 // 거절·7일 만료면 원래 형태 그대로, 요청한 사람 인앱은 서버. 진입: 홈 띠 3번, 알림(/settings/couple/style/request/:id).
 export function S11jStyleRequest() {
   const nav = useNavigate();

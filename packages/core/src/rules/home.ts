@@ -925,3 +925,47 @@ export function pushReaskOpen(o: {
   const d = daysBetween(o.today, o.nextPayday);
   return d >= 0 && d <= PUSH_REASK_DAYS_BEFORE;
 }
+
+// ─────────────────────────── 홈 순서 (2026-11-15 3차 검토, 19 ‘홈 순서’) ───────────────────────────
+
+/** H-11이 할 일을 말함: 확인할 손 줄이 남았거나 지난 달 늦은 확인이 있음(이동 글자 “확인하기 ›”) */
+export function monthLineUrgent(l: HomeMonthLine): boolean {
+  if (l.kind === 'review' || l.kind === 'payday' || l.kind === 'left')
+    return l.left > 0 || l.late > 0;
+  if (l.kind === 'auto_only' || l.kind === 'done') return l.late > 0;
+  return false;
+}
+
+/**
+ * H-10 첫 칸이 0원(맨 위를 차지하지 않게): 저금이 없음(빈 상태, 상대 저금 같이 모으기 권유는 빼고),
+ * 대표 저금 모은 금액 0원, 묶음 합계 0원(퍼센트만이면 0%). 아직 안 들어간 묶음(상대가 만듦, 권유)은 0원이 아님
+ */
+export function heroZero(heroes: readonly HeroItem[], invited = false): boolean {
+  const first = heroes[0];
+  if (!first) return !invited;
+  if (first.kind === 'goal') return first.goal.saved <= 0;
+  const b = first.bundle;
+  if (!b.goals.some((g) => g.mine)) return false;
+  return b.percent_only ? (b.pct ?? 0) <= 0 : (b.total ?? 0) <= 0;
+}
+
+/** 홈 상자 묶음 순서(좁은 창 위에서 아래). month = H-11, tasks = H-06 띠, month_us = H-14 이번 달 우리 둘 카드 자리 */
+export type HomeBlock = 'tasks' | 'month' | 'month_us' | 'hero' | 'tiles' | 'wedding' | 'small';
+
+/**
+ * 홈 순서(19 ‘홈 순서’, 2026-11-15 3차 검토 디자이너 TOP 1): 확인할 것이 맨 위.
+ * H-11이 확인할 것을 말하면 H-11 → 할 일 띠(H-06), 아니면 할 일 띠가 맨 위. H-14 이번 달 우리 둘은 늘 띠 바로 아래.
+ * 그다음 H-10(0원이면 반 칸 타일 H-07·H-08 아래로), 할 일이 아닌 H-11은 H-10 아래(예전처럼)
+ */
+export function homeOrder(o: { urgent: boolean; heroZero: boolean }): HomeBlock[] {
+  return [
+    ...(o.urgent ? (['month', 'tasks'] as const) : (['tasks'] as const)),
+    'month_us',
+    ...(o.heroZero ? [] : (['hero'] as const)),
+    ...(o.urgent ? [] : (['month'] as const)),
+    'tiles',
+    ...(o.heroZero ? (['hero'] as const) : []),
+    'wedding',
+    'small',
+  ];
+}

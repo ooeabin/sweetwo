@@ -54,8 +54,7 @@ export function O60Ready() {
       <ul className="hg-intro-steps">
         {items.map((text) => (
           <li key={text}>
-            {/* 2D 안내 그림(Illustrations ‘나중 과제’ 5번)이 들어올 때까지 40px 회색 빈 원(hg-artslot, 2026-11-09 다시 붙임) */}
-            <span className="hg-intro-steps__icon hg-artslot" aria-hidden="true" />
+            {/* 2D 안내 그림(Illustrations ‘나중 과제’ 5번, 40px 원)은 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */}
             <span>{text}</span>
           </li>
         ))}

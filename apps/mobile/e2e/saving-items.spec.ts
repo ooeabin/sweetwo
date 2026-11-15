@@ -26,8 +26,15 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
 
   await page.goto('/salary/items/goal-h');
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
-  const target = page.getByRole('region', { name: '목표 금액 정하기' });
+  // 저금 한 카드(2026-11-15 3차 검토): 큰 숫자 + 막대 + 한 줄, 기한·월 필요액은 ‘자세히 보기’ 아래
+  const target = page.getByRole('region', { name: '모은 금액' });
   await expect(target).toContainText('목표 1억 5,000만 원의 0%');
+  await expect(target).not.toContainText('2031년 10월까지');
+  await target.getByRole('button', { name: '자세히 보기' }).click();
+  await expect(target.getByRole('button', { name: '접기' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
   await expect(target).toContainText('2031년 10월까지');
   await expect(target).toContainText('매달');
   await expect(page.getByText('매달 95만 원씩')).toBeVisible();
@@ -96,7 +103,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page.getByRole('heading', { name: '제주 여행' })).toBeVisible();
   // W-10: 늦어지는 사실 한 줄 + 할 일(2026-11-09)
-  const target = page.getByRole('region', { name: '목표 금액 정하기' });
+  const target = page.getByRole('region', { name: '모은 금액' });
+  await target.getByRole('button', { name: '자세히 보기' }).click();
   await expect(target).toContainText('지금 속도면 2027년 7월에 다 모아요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
@@ -350,9 +358,7 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
   await page.goto('/salary/items/goal-h');
   await expect(page.getByText('목표 95만 원의 0%')).toBeVisible();
-  await expect(
-    page.getByRole('region', { name: '목표 금액 정하기' }).getByText('달성'),
-  ).toHaveCount(0);
+  await expect(page.getByRole('region', { name: '모은 금액' }).getByText('달성')).toHaveCount(0);
   // 다시 체크하면 다시 축하
   await page.goto('/salary');
   await page.getByRole('checkbox', { name: /내 집 마련/ }).click();

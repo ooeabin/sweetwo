@@ -72,7 +72,7 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('진행 막대: 체크할수록 칸 안이 차고 “체크한 금액”이 늘어남, 개수는 화면 읽기 이름', async ({
+test('진행 막대 하나(2026-11-15): 확인할수록 차고 “확인한 금액”이 늘어남, 개수는 화면 읽기 이름', async ({
   page,
 }) => {
   await open(page);
@@ -83,22 +83,16 @@ test('진행 막대: 체크할수록 칸 안이 차고 “체크한 금액”이
   await expect(page.getByRole('img', { name: '5개 중 0개 완료' })).toBeVisible();
   // 개수 글자는 머리에서 빠짐
   await expect(page.getByText(/5개 중 0개 완료/)).toHaveCount(0);
-  // 06 3-5: 139만 / 211만 / 0 → 40 / 60, 아직 안 정한 돈 0이라 칸 없음
-  expect(await bar(page)).toEqual([
-    ['saving', 40, '0%'],
-    ['spend', 60, '0%'],
-  ]);
+  // 2026-11-15 3차 검토: 3색 비율 막대 대신 확인한 줄 수 ÷ 줄 수 막대 하나
+  expect(await bar(page)).toEqual([['check', 100, '0%']]);
   await axe(page);
   await page.getByRole('checkbox', { name: /청약/ }).click();
   await expect(page.getByText('확인한 금액 44만 원 / 350만 원')).toBeVisible();
   await page.getByRole('checkbox', { name: /고정지출/ }).click();
   await expect(page.getByText('확인한 금액 132만 원 / 350만 원')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 2개 완료' })).toBeVisible();
-  // 44 ÷ 139 = 31, 88 ÷ 211 = 41
-  expect(await bar(page)).toEqual([
-    ['saving', 40, '31%'],
-    ['spend', 60, '41%'],
-  ]);
+  // 5개 중 2개 = 40%
+  expect(await bar(page)).toEqual([['check', 100, '40%']]);
   // 체크 풀면 다시 줄어듦
   await page.getByRole('checkbox', { name: /청약/ }).click();
   await expect(page.getByText('확인한 금액 88만 원 / 350만 원')).toBeVisible();
@@ -125,9 +119,7 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   linesOf(db)
     .slice(0, 4)
     .forEach((l) => mark(l, 'checked'));
-  await page.goto('/salary?view=plan');
-  const plan = await bar(page);
-  await page.getByRole('tab', { name: '이번 달' }).click();
+  await page.goto('/salary');
   await expect(page.locator('.hg-planbar__title')).toHaveCount(0);
   await page.getByRole('checkbox', { name: /용돈/ }).click();
   await expect(page).toHaveURL(/\/salary$/);
@@ -141,10 +133,8 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   await expect(
     page.locator('.hg-planbar__foot').getByRole('button', { name: '공유하기' }),
   ).toBeVisible();
-  // 다 채운 막대 = W-01 막대(같은 칸, 같은 너비, 같은 색)
-  const full = await bar(page);
-  expect(full.map(([k, g]) => [k, g])).toEqual(plan.map(([k, g]) => [k, g]));
-  expect(full.map(([, , f]) => f)).toEqual(['100%', '100%']);
+  // 다 채운 확인 막대 하나(2026-11-15)
+  expect(await bar(page)).toEqual([['check', 100, '100%']]);
   // 결과 카드·‘체크 고치기’ 없음, 묶음 카드는 그대로(체크 모양)
   await expect(page.locator('.hg-receipt')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '체크 고치기' })).toHaveCount(0);
@@ -181,8 +171,8 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   const row = page.locator('.hg-transfer', { hasText: '청약' });
   await expect(row).not.toHaveClass(/is-done/);
   await expect(row).toContainText('이번 달은 건너뛰었어요');
-  // 못 함이 있으면 저금 칸은 다 차지 않음(95 ÷ 139 = 68)
-  expect((await bar(page)).map(([, , f]) => f)).toEqual(['68%', '100%']);
+  // 건너뛴 줄도 끝난 줄이라 확인 막대는 다 참(2026-11-15 막대 하나)
+  expect(await bar(page)).toEqual([['check', 100, '100%']]);
   await expect(page.locator('.hg-planbar__foot')).toContainText('확인한 금액 288만 원 / 350만 원');
   await axe(page);
   const dl = page.waitForEvent('download');
@@ -299,11 +289,8 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같�
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
   await expect(page.getByText('확인한 금액 0원 / 95만 원')).toBeVisible();
-  // 95 ÷ 270 → 지출 35%, 아직 안 정한 돈 65%
-  expect(await bar(page)).toEqual([
-    ['spend', 35, '0%'],
-    ['free', 65, null],
-  ]);
+  // 확인 막대 하나(0/2)
+  expect(await bar(page)).toEqual([['check', 100, '0%']]);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await axe(page);
   // 예빈이 다 체크하면 같은 한 줄(보기만, 공유는 있음, 2026-11-12)

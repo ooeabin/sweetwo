@@ -4,6 +4,7 @@ import {
   Badge,
   BottomSheet,
   Button,
+  Icon,
   ListRow,
   Menu,
   PageHeader,
@@ -34,7 +35,7 @@ import { trackSharedGoal, useSavingItems } from '../saving';
 import { AchieveWatch, SavingLoadError } from '../saving-parts';
 import { AfterChoice } from './w-12a-saving-after';
 
-// W-10 저금 항목 상세(20, ADR 0007). 머리(‹ 이름 ⋯) → 모은 금액 → 목표 금액 카드(진행, 기한, 월 필요액)
+// W-10 저금 항목 상세(20, ADR 0007). 머리(‹ 이름 ⋯) → 저금 한 카드(모은 금액 + 막대 + 목표 금액 한 줄, 나머지 ‘자세히 보기’, 2026-11-15)
 // → 매달 카드(매달 금액 + 이번 달 줄) → (달성했는데 아직 고르지 않았으면) 달성 뒤 질문 → 저금 내역 → 정보.
 // ⋯ = 이름 바꾸기, 지우기(묻지 않고 휴지통 + 되돌리기). 파트너 저금 항목(각자)은 보기만. 그만 모은 항목은 기록만.
 // 합쳐서 모드는 주인이 있는 저금도 두 사람 모두 고침(2026-11-12 D1). 보기만·그만 모음·해제 대기 안내는 머리 아래 회색 한 줄(S7-08·S7-09),
@@ -47,6 +48,8 @@ export function W10SavingItem() {
   const { masked } = useMask();
   const lines = useQuery({ queryKey: qk.goalLines(id), queryFn: () => fetchGoalLines(id) });
   const [all, setAll] = useState(false);
+  // 저금 카드 ‘자세히 보기’(기한, 월 필요액, 예상, 남은 금액). 처음엔 접힘(2026-11-15 3차 검토)
+  const [more, setMore] = useState(false);
   const historyRef = useRef<HTMLElement>(null);
   const [params, setParams] = useSearchParams();
   const bundles = useBundles();
@@ -126,6 +129,8 @@ export function W10SavingItem() {
           .catch(() => toast(copy.loadFailed)),
     },
   ];
+  // 목표 금액 줄은 그만 모은 저금이 아닐 때만
+  const showTarget = !closed;
   const remain = savingRemain({ target: i.target, saved: i.saved, deadline: g.deadline });
   // ‘매달 금액 바꾸기’ → W-01 영수증에서 이 저금 줄 금액 시트를 연 채(2026-11-09, 여유 자금을 같이 봄)
   const splitTo = planPath({ line: id });
@@ -226,6 +231,8 @@ export function W10SavingItem() {
           {copy.bundleJoinCta}
         </Button>
       )}
+      {/* 저금 한 카드(20 W-10 3차 검토, 2026-11-15): 모은 금액 큰 숫자 + 막대 + 한 줄(목표 금액의 %), 나머지(기한, 월 필요액, 예상,
+          남은 금액, 바꾸기)는 ‘자세히 보기’ 아래로 접음. 목표 금액이 없으면 같은 카드 안에 ‘목표 금액 정하기’ */}
       {!hideAmounts && (
         <section className="hg-goalbox" aria-label={copy.savedLabel}>
           {/* 누르면 아래 저금 내역으로(20 W-10 2번) */}
@@ -233,124 +240,140 @@ export function W10SavingItem() {
             <span className="hg-card__label">{copy.savedLabel}</span>
             <span className="hg-goalhero__amount">{m(i.saved)}</span>
           </button>
+          {showTarget && i.target !== null && (
+            <>
+              {i.state !== 'achieved' && (
+                <div className="hg-goalbox__bar" role="img" aria-label={`${g.name} ${i.pct ?? 0}%`}>
+                  <i style={{ width: `${i.bar}%` }} />
+                </div>
+              )}
+              <div className="hg-goalbox__head">
+                <span>
+                  {i.state === 'achieved'
+                    ? copy.reachedAll(m(i.target))
+                    : copy.targetOf(m(i.target), i.pct ?? 0)}
+                </span>
+                {i.state === 'achieved' ? (
+                  <Badge kind="achieved">{copy.achieved}</Badge>
+                ) : (
+                  showEdit && (
+                    <button
+                      type="button"
+                      className="hg-btn hg-btn--link"
+                      disabled={locked}
+                      onClick={() => nav(savingPaths.edit(id, 'amount'))}
+                    >
+                      {copy.edit}
+                    </button>
+                  )
+                )}
+              </div>
+              {i.state !== 'achieved' && (
+                <>
+                  <button
+                    type="button"
+                    className="hg-foldrow"
+                    aria-expanded={more}
+                    aria-controls="w-10-more"
+                    onClick={() => setMore((x) => !x)}
+                  >
+                    <span>{more ? copy.foldClose : copy.foldOpen}</span>
+                    <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
+                  </button>
+                  {more && (
+                    <div id="w-10-more" className="hg-goalbox__fold">
+                      <div className="hg-goalbox__meta">
+                        {i.deadline ? (
+                          showEdit ? (
+                            <button
+                              type="button"
+                              className="hg-goalbox__metabtn"
+                              disabled={locked}
+                              onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                            >
+                              {copy.until(formatYm(i.deadline))}
+                            </button>
+                          ) : (
+                            <span>{copy.until(formatYm(i.deadline))}</span>
+                          )
+                        ) : showEdit ? (
+                          <button
+                            type="button"
+                            className="hg-btn hg-btn--link"
+                            disabled={locked}
+                            onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                          >
+                            {copy.setDeadline}
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+                      </div>
+                      {i.need !== null && (
+                        <span className="hg-goalbox__sub">
+                          {together
+                            ? copy.needPerMonthTogether(m(i.need))
+                            : copy.needPerMonth(m(i.need))}
+                        </span>
+                      )}
+                      {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
+                      {i.eta && (
+                        <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
+                      )}
+                      {/* 기한까지 남은 금액(06 5-3b, G5) */}
+                      {remain && (
+                        <span className="hg-goalbox__sub">
+                          {copy.remainUntil(formatYm(remain.deadline), m(remain.remain))}
+                        </span>
+                      )}
+                      {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님) */}
+                      {i.late !== null && showEdit && (
+                        <span
+                          className="hg-row"
+                          style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}
+                        >
+                          <button
+                            type="button"
+                            className="hg-btn hg-btn--link"
+                            disabled={locked}
+                            onClick={() => nav(splitTo)}
+                          >
+                            {copy.changeMonthly}
+                          </button>
+                          <button
+                            type="button"
+                            className="hg-btn hg-btn--link"
+                            disabled={locked}
+                            onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                          >
+                            {copy.changeDeadline}
+                          </button>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {/* 묶인 저금은 목표 금액이 묶음에 있어 ‘목표 금액 정하기’ 없음(2026-11-14, W-15a에서 고침) */}
+          {showTarget && i.target === null && !g.bundle_id && (
+            <>
+              <span className="hg-card__meta">{copy.noTarget}</span>
+              {showEdit && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={locked}
+                  onClick={() => nav(`${savingPaths.edit(id, 'amount')}?first=1`)}
+                >
+                  {copy.setTarget}
+                </Button>
+              )}
+            </>
+          )}
         </section>
       )}
-      {!closed &&
-        !hideAmounts &&
-        // 묶인 저금은 목표 금액이 묶음에 있어 ‘목표 금액 정하기’ 카드 없음(2026-11-14, W-15a에서 고침)
-        (i.target === null && g.bundle_id ? null : i.target !== null ? (
-          <section className="hg-goalbox" aria-label={copy.setTarget}>
-            <div className="hg-goalbox__head">
-              <b>
-                {i.state === 'achieved'
-                  ? copy.reachedAll(m(i.target))
-                  : copy.targetOf(m(i.target), i.pct ?? 0)}
-              </b>
-              {i.state === 'achieved' ? (
-                <Badge kind="achieved">{copy.achieved}</Badge>
-              ) : (
-                showEdit && (
-                  <button
-                    type="button"
-                    className="hg-btn hg-btn--link"
-                    disabled={locked}
-                    onClick={() => nav(savingPaths.edit(id, 'amount'))}
-                  >
-                    {copy.edit}
-                  </button>
-                )
-              )}
-            </div>
-            {i.state !== 'achieved' && (
-              <div className="hg-goalbox__bar" role="img" aria-label={`${g.name} ${i.pct ?? 0}%`}>
-                <i style={{ width: `${i.bar}%` }} />
-              </div>
-            )}
-            {i.state !== 'achieved' && (
-              <div className="hg-goalbox__meta">
-                {i.deadline ? (
-                  showEdit ? (
-                    <button
-                      type="button"
-                      className="hg-goalbox__metabtn"
-                      disabled={locked}
-                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                    >
-                      {copy.until(formatYm(i.deadline))}
-                    </button>
-                  ) : (
-                    <span>{copy.until(formatYm(i.deadline))}</span>
-                  )
-                ) : showEdit ? (
-                  <button
-                    type="button"
-                    className="hg-btn hg-btn--link"
-                    disabled={locked}
-                    onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                  >
-                    {copy.setDeadline}
-                  </button>
-                ) : (
-                  <span />
-                )}
-              </div>
-            )}
-            {i.state !== 'achieved' && i.need !== null && (
-              <span className="hg-goalbox__sub">
-                {together ? copy.needPerMonthTogether(m(i.need)) : copy.needPerMonth(m(i.need))}
-              </span>
-            )}
-            {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만(2026-11-14 예전 ‘예상 …’과 겹침 없앰) */}
-            {i.state !== 'achieved' && i.eta && (
-              <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
-            )}
-            {/* 기한까지 남은 금액(06 5-3b, G5) */}
-            {i.state !== 'achieved' && remain && (
-              <span className="hg-goalbox__sub">
-                {copy.remainUntil(formatYm(remain.deadline), m(remain.remain))}
-              </span>
-            )}
-            {/* 월 필요액 > 매달 금액이면 사실 한 줄 + 할 일(2026-11-09, 배지 아님) */}
-            {i.state !== 'achieved' && i.late !== null && (
-              <>
-                {showEdit && (
-                  <span className="hg-row" style={{ gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="hg-btn hg-btn--link"
-                      disabled={locked}
-                      onClick={() => nav(splitTo)}
-                    >
-                      {copy.changeMonthly}
-                    </button>
-                    <button
-                      type="button"
-                      className="hg-btn hg-btn--link"
-                      disabled={locked}
-                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
-                    >
-                      {copy.changeDeadline}
-                    </button>
-                  </span>
-                )}
-              </>
-            )}
-          </section>
-        ) : (
-          <section className="hg-card hg-card--fill hg-stack" aria-label={copy.setTarget}>
-            <span className="hg-card__meta">{copy.noTarget}</span>
-            {showEdit && (
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={locked}
-                onClick={() => nav(`${savingPaths.edit(id, 'amount')}?first=1`)}
-              >
-                {copy.setTarget}
-              </Button>
-            )}
-          </section>
-        ))}
       {!closed && !hideAmounts && (i.monthly > 0 || i.owner !== 'partner' || d.joint) && (
         <section className="hg-goalbox" aria-label={copy.monthlyOf(m(i.monthly))}>
           <div className="hg-goalbox__head">

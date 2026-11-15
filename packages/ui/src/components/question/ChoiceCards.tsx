@@ -115,10 +115,7 @@ export function ChoiceCards<T extends string>({
             aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
-            {o.icon && (
-              // 2D 선택지 그림이 들어올 때까지 같은 크기의 회색 빈 자리(Illustrations ‘나중 과제’ 5번, 2026-11-09 다시 붙임)
-              <span className="hg-option__icon hg-artslot" aria-hidden="true" />
-            )}
+            {/* 선택지 그림(o.icon, Illustrations ‘나중 과제’ 5번)은 2D 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */}
             <span className="hg-option__body">
               <span className="hg-option__label">
                 {o.label}

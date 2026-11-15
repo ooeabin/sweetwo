@@ -104,7 +104,6 @@ export function HubTile({
   sub,
   sub2,
   value,
-  art,
   small,
   point,
   badge,
@@ -117,7 +116,7 @@ export function HubTile({
   /** 보조 둘째 줄(2026-11-13 H-07 “여유 자금 20만 원”) */
   sub2?: ReactNode;
   value?: ReactNode;
-  /** 72px 그림 자리(큰 타일만, 2D 그림이 들어올 때까지 hg-artslot) */
+  /** 72px 그림 자리(큰 타일만). 2026-11-15부터 2D 그림이 들어올 때까지 그리지 않음(회색 빈 자리 숨김) */
   art?: boolean;
   small?: boolean;
   /** 홈 포인트 상자(오렌지 채움, 홈 ‘월급 계획’ 하나만, 2026-11-11) */
@@ -153,7 +152,7 @@ export function HubTile({
       )}
       {sub2 && <span className="hg-hubtile__sub">{sub2}</span>}
       {value !== undefined && <span className="hg-hubtile__value">{value}</span>}
-      {art && <span className="hg-artslot" aria-hidden="true" />}
+      {/* art: 72px 그림 자리. 2D 그림이 들어올 때까지 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김) */}
     </button>
   );
 }

@@ -9,7 +9,6 @@ import {
 import {
   AddRow,
   Button,
-  EmptyState,
   Icon,
   Lead,
   leadOf,
@@ -30,7 +29,7 @@ import { startCareAdd } from './y-07-care-add';
 // Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
 // 맨 위 회색 띠 “기록할 날이 1개 있어요”(→ Y-08), 다음 경조사 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
 // “일정” 한 목록(60일 안 경조사 + 금융 일정, 날짜순, 오른쪽 D-day, 경조사는 영역 색 막대, 금융 일정은 검정 점),
-// 선물 기록(→ Y-09). 경조사가 없으면 빈 상태 + ‘경조사 추가’(금융 일정은 그대로 보임). “금융 일정”이면 4·6번 숨김.
+// 선물 기록(→ Y-09). 빈 상태 카드 없음: 추가는 ‘일정’ 머리 ‘+ 경조사 추가’ 하나(2026-11-15 3차 검토). “금융 일정”이면 4·6번 숨김.
 export function Y01CareList() {
   const nav = useNavigate();
   const d = useCalendarData();
@@ -141,15 +140,8 @@ export function Y01CareList() {
           <span className="hg-chevron" aria-hidden="true" />
         </button>
       )}
-      {filter !== 'money' && !d.cares.length && (
-        <EmptyState
-          action={
-            <Button variant="secondary" onClick={add}>
-              {copy.emptyAdd}
-            </Button>
-          }
-        />
-      )}
+      {/* 경조사 빈 상태(그림 자리 + ‘경조사 추가’)는 없앰(2026-11-15 3차 검토: 월급날이 있는데 빈 상태와 추가 버튼 둘이 겹쳤음).
+          추가는 ‘일정’ 머리의 ‘+ 경조사 추가’ 하나, 일정이 없으면 그 아래 한 줄 */}
       {filter !== 'money' && next && (
         <section className="hg-card hg-stack" aria-label={copy.nextCare}>
           {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}

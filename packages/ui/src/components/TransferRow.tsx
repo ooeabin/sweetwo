@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
+import { shownLead } from './ListRow';
 
 /** 자동 줄 알약(hg-autopill, ListRow ‘자동 표시’, 2026-11-13): 회색 판 + arrows-clockwise 12px + 글자 */
 export function AutoPill({ text }: { text: string }) {
@@ -58,6 +59,8 @@ export function TransferRow({
   /** 자동 줄 알약(2026-11-13 ListRow ‘자동 표시’, hg-autopill): “26일 자동”, “자동 확인”. 이름 아래 보조 줄 자리 */
   auto?: string;
 }) {
+  // 그림이 없는 종류 자리는 그리지 않고 칸도 비우지 않음(2026-11-15 3차 검토)
+  const shown = shownLead(lead);
   const body = (
     <>
       <span className="hg-stack" style={{ gap: 0 }}>
@@ -87,10 +90,10 @@ export function TransferRow({
         done && 'is-done',
         viewOnly && 'is-view',
         changed && 'is-changed',
-        !!lead && 'hg-transfer--lead',
+        !!shown && 'hg-transfer--lead',
       )}
     >
-      {lead}
+      {shown}
       {viewOnly ? (
         <span className="hg-transfer__state" role="img" aria-label={checkLabel}>
           {done && <Icon name="check" size={20} />}

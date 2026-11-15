@@ -545,7 +545,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-11d 체크리스트 만드는 날
+      }, // S-11d 월급날 확인 목록 만드는 날
       {
         path: '/settings/me/salary',
         element: (
