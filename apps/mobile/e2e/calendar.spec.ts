@@ -63,6 +63,28 @@ function seed(db: MemDb) {
     payday_last: false,
     allowance: 500_000,
   };
+  // 확인할 손 줄이 남은 이번 사이클(9월 25일 ~ 10월 24일): 월급날 확인 목록 안내는 손 줄이 남았을 때만 보임(2026-11-15)
+  db.checklists.push({
+    id: 'cl-1',
+    split_id: 'split-1',
+    owner_user_id: db.me.id,
+    label: '9월 월급',
+    cycle_start: '2026-09-25',
+    cycle_end: '2026-10-24',
+    state: 'open',
+    pay_check_line: [
+      {
+        id: 'cl-1-l1',
+        kind: 'saving',
+        name: '여행',
+        planned: 100_000,
+        actual: null,
+        state: 'wait',
+        checked_by: null,
+        checked_at: null,
+      },
+    ],
+  });
   db.assets.push({
     id: 'a-sav',
     side: 'asset',
@@ -147,7 +169,7 @@ const care = (o: Record<string, unknown>) => ({
   ...o,
 });
 
-test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금 항목 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
+test('목록(Y-01): 60일 안 금융 일정(월급날, 월급날 확인 목록, 저금 항목 기한, 만기), 누르면 해당 화면, 빈 상태, 필터', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -159,14 +181,15 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   await expect(page.locator('.hg-empty')).toHaveCount(0);
   // 경조사와 금융 일정은 “일정” 한 목록, 오른쪽 D-day(2026-11-03)
   const money = page.getByRole('region', { name: '일정' });
-  // 예빈 월급날 10일(토) → 9일(금), 월급 전 확인 20일(23일 앞 3일, 2026-11-14 R3), 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
+  // 예빈 월급날 10일(토) → 9일(금), 월급날 확인 목록 20일(23일 앞 3일, 2026-11-14 R3), 찬우 월급날 25일(일) → 23일(금), 만기 30일, 여행 기한 11월 30일(그 달 말일, 2026-11-09)
   // 머리 오른쪽 ‘+ 경조사 추가’(2026-11-09)는 빼고 줄만
+  await expect(money.locator('.hg-list').getByRole('button').first()).toBeVisible();
   const rows = await money.locator('.hg-list').getByRole('button').allTextContents();
   expect(rows[0]).toContain('예빈 월급날');
   expect(rows[0]).toContain('10월 9일');
   expect(rows[0]).toContain('D-2');
   const all = rows.join('|');
-  expect(all).toContain('월급 전 확인');
+  expect(all).toContain('월급날 확인 목록');
   expect(all).toContain('청년 적금 만기');
   expect(all).toContain('여행 기한');
   // 달성한 저금 항목 기한은 없음
@@ -219,7 +242,7 @@ test('Y-01 맨 위 이번 주 띠(2026-11-09): 일~토, 오늘 ink 원, 일정 �
   await expect(page).toHaveURL(/\/calendar\/list$/);
 });
 
-test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-02, W-05 화면은 2026-11-15 없앰), 고른 날 일정 → 화면, 달 넘기기, 캘린더 탭은 늘 목록', async ({
+test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 화면은 2026-11-15 없앰), 고른 날 일정 → 화면, 달 넘기기, 캘린더 탭은 늘 목록', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -240,7 +263,7 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-02, W-05 화�
   await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   await axe(page);
 
-  // 월급 전 확인 기간은 칸 아래 이어진 띠, 시작 칸에 이름. 25일(일)이 23일(금)로 앞당겨지니 띠도 그 3일 전 20~22일
+  // 월급날 확인 목록 안내 기간은 칸 아래 이어진 띠, 시작 칸에 이름. 25일(일)이 23일(금)로 앞당겨지니 띠도 그 3일 전 20~22일
   // (2026-11-14 R3, 서버 cycle_end − 2와 같음)
   await expect(
     page.getByRole('button', { name: '10월 22일', exact: true }).locator('.hg-cal__band'),
@@ -250,9 +273,9 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-02, W-05 화�
   ).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: '10월 20일, 일정 1개' }).locator('.hg-cal__band'),
-  ).toHaveText('월급 전 확인');
+  ).toHaveText('확인 목록');
   await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
-  await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
+  await page.getByRole('button', { name: /9월 월급, 확인 목록에 남은 게 있어요/ }).click();
   // 오늘(10월 7일)은 월급 탭 W-02로 감(W-05 화면은 2026-11-15 없앰)
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/calendar/month');
@@ -598,10 +621,10 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
   await axe(page);
 });
 
-test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날 → 그 사람 체크리스트(S9-10), 맨 위 월급 전 확인 띠 없음(D1)', async ({
+test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날 → 그 사람 체크리스트(S9-10), 맨 위 확인 목록 띠 없음(D1)', async ({
   page,
 }) => {
-  // 10월 22일 = 찬우 월급 전 확인 기간(앞당긴 23일 앞 20~22일, 2026-11-14 R3)
+  // 10월 22일 = 찬우 월급날 확인 목록 안내 기간(앞당긴 23일 앞 20~22일, 2026-11-14 R3)
   const DAY = new Date('2026-10-22T10:00:00+09:00');
   await page.clock.setFixedTime(DAY);
   const db = await mockOnboarding(page, { now: DAY });
@@ -610,8 +633,10 @@ test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날
 
   await page.goto('/calendar/list');
   const list = page.getByRole('region', { name: '일정' });
-  await expect(list.getByRole('button', { name: /월급 전 확인/ }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /빠진 게 있는지 확인할 때예요/ })).toHaveCount(0);
+  // 이번 안내는 20일에 시작했고(지난 일정), 다음 달 것은 그 월급의 손 줄이 생긴 뒤에만 보임(2026-11-15)
+  await expect(list.getByRole('button', { name: /월급날 확인 목록/ })).toHaveCount(0);
+  await expect(list.getByRole('button', { name: /찬우 월급날/ }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /확인 목록에 남은 게 있어요/ })).toHaveCount(0);
   await expect(page.locator('.hg-banner')).toHaveCount(0);
   // 넓은 창은 제목 줄 ‘+ 추가’만, 좁은 창은 ‘+ 경조사 추가’만(S9-11)
   await expect(page.locator('.hg-addrow').locator('visible=true')).toHaveCount(

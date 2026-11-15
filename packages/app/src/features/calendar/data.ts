@@ -1,5 +1,6 @@
 import {
   fetchAssets,
+  fetchChecklistsEnsured,
   fetchCareDays,
   fetchCareRecords,
   fetchGoals,
@@ -21,6 +22,7 @@ import {
   moneyDates,
   nextCareDate,
   overdueDate,
+  pickMyChecklist,
   recordDate,
   todayKst,
   type BaseDay,
@@ -53,7 +55,7 @@ export function useCareRealtime(spaceId: string | null | undefined) {
 const NOTE_FROM = '2000-01-01';
 const NOTE_TO = '2099-12-31';
 
-// 캘린더 재료(24, 재기획): 경조사와 기록, 공휴일, 금융 일정(월급날, 월급 전 확인 띠, 저금 항목 기한, 자산·대출 만기).
+// 캘린더 재료(24, 재기획): 경조사와 기록, 공휴일, 금융 일정(월급날, 월급날 확인 목록 안내 띠, 저금 항목 기한, 자산·대출 만기).
 // 금융 일정 계산은 core rules/calendar `moneyDates`.
 export function useCalendarData() {
   const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
@@ -75,8 +77,16 @@ export function useCalendarData() {
   });
   // 날짜 없는 사람의 자동 줄 나가는 날(07 6장, 2026-11-14 R6). 못 읽어도 캘린더는 그대로
   const splits = useQuery({ queryKey: qk.splits, queryFn: fetchSplits });
+  // 월급날 확인 목록 안내(2026-11-15 W-05 없앰)는 손 줄이 남았을 때만. 못 읽으면 안내 없음(홈 H-11과 같은 재료)
+  const today = todayKst();
+  const lists = useQuery({
+    queryKey: qk.checklists(today),
+    queryFn: () => fetchChecklistsEnsured(today),
+    enabled: !!me.data?.onboarding_done_at,
+  });
   const all = [me, space, partner, assets, goals, cares, records, holidays];
-  const loading = all.some((q) => q.isLoading);
+  const loading =
+    all.some((q) => q.isLoading) || (!!me.data?.onboarding_done_at && lists.isPending);
   // 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 9구간 S9-02): 빈 상태·목록으로 튕기기 대신 오류 카드 + ‘다시 시도’
   const failed = all.some((q) => q.isError);
   const retry = () => all.forEach((q) => void q.refetch());
@@ -115,6 +125,10 @@ export function useCalendarData() {
     .filter((l) => l.auto_pay && l.amount > 0)
     .map((l) => ({ name: lineName(l, goalName, () => null, joint), day: l.auto_day ?? 1 }));
 
+  const mine = pickMyChecklist(lists.data ?? [], me.data?.id ?? '');
+  const reviewFor =
+    mine && mine.pay_check_line.some((l) => l.state === 'wait') ? addDays(mine.cycle_end, 1) : null;
+
   const holidayList = holidays.data ?? [];
   const holidaySet = new Set(holidayList.map((h) => h.date));
   /** 그 날 공휴일 */
@@ -134,6 +148,7 @@ export function useCalendarData() {
       shift: sp?.holiday_shift ?? true,
       paydays,
       reviewDay,
+      reviewFor,
       maturities: (assets.data ?? [])
         .filter((a) => a.maturity_date)
         .map((a) => ({ id: a.id, name: a.name, date: a.maturity_date ?? '' })),
@@ -144,7 +159,6 @@ export function useCalendarData() {
         .filter((n) => n.due_on)
         .map((n) => ({ name: n.name, date: n.due_on ?? '', goal: n.goal_id, bundle: n.bundle_id })),
     });
-  const today = todayKst();
   const careList = cares.data ?? [];
   /** 그 달 경조사(날짜, 경조사) */
   const caresOf = (y: number, m: number) =>
@@ -238,7 +252,7 @@ export function careEventType(kind: string) {
 export const vsBudget = (amount: number, budget: number) =>
   budget <= 0 ? null : amount < budget ? 'under' : amount === budget ? 'on' : 'over';
 
-/** 월급 전 확인 띠가 보는 월급(띠 끝 다음 날 = 다음 월급날, 보는 체크리스트는 그 전 달 월급) */
+/** 확인 목록 안내 띠가 보는 월급(띠 끝 다음 날 = 다음 월급날, 보는 체크리스트는 그 전 달 월급) */
 export const reviewMonth = (bandEnd: string) => {
   const m = Number(addDays(bandEnd, 1).slice(5, 7));
   return m === 1 ? 12 : m - 1;

@@ -4,7 +4,7 @@ import type { BaseDay } from '../onboarding/cycle';
 import { deadlineDay } from './saving-item';
 
 // 캘린더 금융 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
-// 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급 전 확인 띠(다음 월급날 3일 전 ~ 전날, W-05),
+// 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급날 확인 목록 안내 띠(다음 월급날 3일 전 ~ 전날, 손 줄이 남았을 때만, W-02),
 // 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
 /**
@@ -65,6 +65,11 @@ export interface MoneyInput {
   shift?: boolean;
   /** 월급 전 확인 기준 월급날(각자 = 내 월급날, 합쳐서 = 공동 사이클 날). 없으면 띠 없음 */
   reviewDay: BaseDay | null;
+  /**
+   * 월급날 확인 목록 안내를 보일 월급날(= 이번 사이클 끝 다음 날, 2026-11-15 W-05 없앰). 손 줄이 남았을 때만 넘김.
+   * null = 안내 없음(손 줄 없음), 생략 = 거르지 않음. 넘기면 그 월급날(앞당기기 전 날이어도 같은 월급날로 봄) 3일 전~전날만
+   */
+  reviewFor?: string | null;
   maturities: { id: string; name: string; date: string }[];
   /** 저금 항목 기한(YYYY-MM-DD, 저장은 그 달 1일). 일정은 그 달 말일. 모으는 중인 것만 넘김 */
   goalDeadlines: { id: string; name: string; date: string }[];
@@ -79,7 +84,7 @@ export interface MoneyInput {
   autoLines?: { name: string; day: number }[];
 }
 
-/** 그 달(y, m)의 금융 일정과 월급 전 확인 띠 */
+/** 그 달(y, m)의 금융 일정과 월급날 확인 목록 안내 띠 */
 export function moneyDates(y: number, m: number, o: MoneyInput) {
   const ym = ymOf(y, m);
   const first = `${ym}-01`;
@@ -96,16 +101,22 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
       ...(p.who ? { who: p.who } : {}),
     });
   }
-  // 월급 전 확인: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만
+  // 월급날 확인 목록 안내: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만
   const bands: { start: string; end: string }[] = [];
   if (o.reviewDay !== null) {
     for (const [yy, mm] of [
       [y, m],
       [m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1],
     ] as const) {
-      // 월급 전 확인은 앞당긴 다음 월급날 3일 전부터(서버 send_evening_notifications = cycle_end − 2, 2026-11-14 R3)
+      // 안내는 앞당긴 다음 월급날 3일 전부터(서버 send_evening_notifications = cycle_end − 2, 2026-11-14 R3)
       const raw = baseDateIn(yy, mm, o.reviewDay);
       const base = o.shift === false ? raw : businessDayOnOrBefore(raw, o.holidays);
+      // 사이클 끝 다음 날은 앞당기기 전 월급날이라 앞당긴 날 ~ 그 뒤 7일 안이면 같은 월급날로 봄
+      if (
+        o.reviewFor !== undefined &&
+        !(o.reviewFor !== null && o.reviewFor >= base && o.reviewFor <= addDays(base, 7))
+      )
+        continue;
       const band = { start: addDays(base, -3), end: addDays(base, -1) };
       if (band.start.slice(0, 7) === ym || band.end.slice(0, 7) === ym) {
         bands.push(band);
