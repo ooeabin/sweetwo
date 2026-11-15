@@ -2,7 +2,7 @@
 -- 관리하는 사람을 상대로), 거절·만료·취소 뒤 그대로, 바로 적용 경로(합쳐서 → 각자)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(27);
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
   ('22222222-2222-2222-2222-222222222222', 'yebin@example.com'),
@@ -94,7 +94,7 @@ select is(public.answer_mode_change((select id from public.mode_change_request),
 reset role;
 select is((select salary_mode::text from public.couple_space where created_by = '11111111-1111-1111-1111-111111111111'),
   'separate', '거절이면 각자 그대로');
-select is((select title from public.notification where kind = 'mode_result'), '지금처럼 각자 관리해요', '거절 결과 알림');
+select is((select title from public.notification where kind = 'mode_result'), '지금처럼 월급은 각자 써요', '거절 결과 알림');
 
 -- 4. 만료: 답하면 expired, 그대로
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
@@ -142,6 +142,12 @@ reset role;
 select results_eq($$ select salary_mode::text, manager_user_id from public.couple_space
     where created_by = '11111111-1111-1111-1111-111111111111' $$,
   $$ values ('separate', null::uuid) $$, '각자 따로, 관리하는 사람 없음');
+
+-- 2026-11-15 3차 검토: 서버 문구(월급을 합쳐서 써요, 월급날 확인 목록)
+select is((select count(*)::int from pg_proc where proname = 'request_mode_change'
+  and pg_get_functiondef(oid) like '%월급을 합쳐서 쓰자고 해요%' and pg_get_functiondef(oid) not like '%합쳐서 관리하자고%'), 1, '합치자는 요청 문구');
+select is((select count(*)::int from pg_proc where proname = 'inquiry_copy_mail'
+  and pg_get_functiondef(oid) like '%월급날 확인 목록%' and pg_get_functiondef(oid) not like '%체크리스트%'), 1, '문의 메일 분류 이름');
 
 select * from finish();
 rollback;

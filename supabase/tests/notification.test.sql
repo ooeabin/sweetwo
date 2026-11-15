@@ -64,7 +64,7 @@ select public.send_morning_notifications('2026-09-18');
 select results_eq(
   $$ select user_id, title, push_title, push_hidden from public.notification where kind = 'care_day' order by user_id, title $$,
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '추석이 일주일 남았어요', null::text, false),
-            ('22222222-2222-2222-2222-222222222222'::uuid, '오늘은 찬우 생일이에요', '경조사 알림이 있어요', true),
+            ('22222222-2222-2222-2222-222222222222'::uuid, '오늘은 찬우 생일이에요', '경조사·기념일 알림이 있어요', true),
             ('22222222-2222-2222-2222-222222222222'::uuid, '추석이 일주일 남았어요', null::text, false) $$,
   '음력 날짜, 서프라이즈는 만든 사람만 + OS 알림 숨김, 다시 돌려도 한 번');
 
