@@ -241,6 +241,29 @@ describe('pickTopTask(H-06 16순서)', () => {
       to: '/assets/rank/consent/r',
     });
   });
+  it('연결할 때 자산 공개(5a, 2026-11-16 B5): 순위 요청 다음, 월급 바뀜 앞, 연결됐을 때만', () => {
+    expect(pickTopTask({ ...base, assetSharePending: true })).toEqual({
+      kind: 'asset_share',
+      key: 'asset_share',
+      to: '/assets/share',
+    });
+    expect(pickTopTask({ ...base, assetSharePending: true, coupleState: 'solo' })).toBeNull();
+    expect(
+      pickTopTask({
+        ...base,
+        assetSharePending: true,
+        rankRequest: req,
+        salaryChanged: { appliedDay: '2026-11-10', done: false },
+      })?.kind,
+    ).toBe('rank_request');
+    expect(
+      pickTopTask({
+        ...base,
+        assetSharePending: true,
+        salaryChanged: { appliedDay: '2026-11-10', done: false },
+      })?.kind,
+    ).toBe('asset_share');
+  });
   it('생활비 나누기: 각자 + 생활비 네 + 분담 없음 + 첫 30일, ‘이미 정했어요’면 영구히 없음', () => {
     const o = { ...base, sharedLiving: true };
     expect(pickTopTask(o)?.kind).toBe('split_suggest');

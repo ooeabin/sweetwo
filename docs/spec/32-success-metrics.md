@@ -88,6 +88,7 @@
 | `rank_consent_requested` / `_answered` / `_turned_off` | result(requested: `sent` / `failed`, answered: `accepted` / `declined` / `expired`, turned_off는 속성 없음) |
 | `rank_badge_toggled` | on(F-08 ‘홈에 보여 주기’) |
 | `quick_assets_saved` | count(채운 칸 수), has_debt, total_band, share(`all` / `sum` / `private`) |
+| `asset_share_answered` | share(`all` / `sum` / `private`), count(바꾼 자산 수). F-03e 연결할 때(2026-11-16 5차 검토 B5) |
 | `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
 | `savings_reconciled` | count, diff_sign(`plus`/`minus`/`zero`, 맞춘 차이 합), diff_band(차이 없으면 null) |
 | `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code(viewed는 null, chosen은 칩 코드·`redeadline`·`custom`·`later`) |
@@ -122,6 +123,7 @@
 | `app_lock_answered` | A-06 | 됨 |
 | `rank_viewed`, `rank_consent_*`, `rank_badge_toggled` | F-08, F-08c, S-13 | 됨. turned_off 속성 없앰(PR 14) |
 | `quick_assets_saved` | F-03q | 됨 |
+| `asset_share_answered` | F-03e 연결할 때 | 됨 |
 | `next_saving_prompt_viewed` / `_chosen` | W-12b | 됨 |
 | `salary_change_scheduled` / `_cancelled` | S-11c | 됨 |
 | `salary_change_applied` | 서버: 예약 적용(`salary_change.applied_at` 트리거) | 됨(PR 14) |

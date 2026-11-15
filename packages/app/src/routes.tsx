@@ -20,6 +20,7 @@ import {
   F01Summary,
   F02Items,
   F03qQuick,
+  F03eShareConnect,
   F04Item,
   F08Rank,
   F08cRankConsent,
@@ -711,6 +712,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // F-03q 빠르게 적기(2026-11-13)
+      {
+        path: '/assets/share',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <F03eShareConnect />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // F-03e 연결할 때 자산 공개 한 번 고르기(홈 띠 5a, 2026-11-16 5차 검토 B5)
       {
         path: '/assets/:id',
         element: (

@@ -229,6 +229,11 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // F-03e 연결할 때 자산 공개 고르기(32 0-4, 2026-11-16 5차 검토 B5)
+      name: 'asset_share_answered';
+      props: { share: 'all' | 'sum' | 'private'; count: number };
+    }
+  | {
       // 저금 항목(32 4-5, 2026-11-08 ADR 0007)
       name: 'saving_item_created';
       props: {

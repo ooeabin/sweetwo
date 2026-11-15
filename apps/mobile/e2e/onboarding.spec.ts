@@ -107,14 +107,14 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   // 매달 금액이 같으면 날짜 없음 선택지 없음
   await expect(page.getByText('날짜가 정해져 있지 않아요')).toHaveCount(0);
   await next(page);
-  // O-55: 날짜 있음(오늘 10/7, 첫 월급날 10/25)
-  await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
+  // O-55: 날짜 있음(오늘 10/7, 첫 월급날 10/25 일요일 → 23일 금요일로 앞당김, 2026-11-16 B2)
+  await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   await expect(page.getByText('경조사 일주일 전에도 알려 드려요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급 계획을 만들어 뒀어요')).toBeVisible();
-  await expect(page.getByText('10월 25일 월급날에 처음 확인해요')).toBeVisible();
+  await expect(page.getByText('10월 23일 월급날에 처음 확인해요')).toBeVisible();
   await expect(page.getByText('앱은 돈을 옮기지 않아요. 보낸 걸 확인만 해요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
@@ -474,7 +474,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   await next(page);
   await heading(page, '월급날은 며칠이에요?');
   await next(page);
-  await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
+  await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   expect(lines(db).filter((l) => l.length)).toEqual([[['allowance', 350_000]]]);
 });
 
@@ -502,7 +502,7 @@ test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월
   await expect.poll(() => db.me.onboarding_step).toBe('O-31');
   await next(page);
   await next(page);
-  await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
+  await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   expect(db.space).toMatchObject({ salary_mode: 'joint', shared_living: true });
   expect(db.splits.filter((s) => s.split_line.length).map((s) => s.owner_user_id)).toEqual([null]);
 });
@@ -586,7 +586,7 @@ test('Enter 키 = 주 버튼(S2-08): 선택 화면은 숫자 키, 휠·O-55·O-6
   await page.keyboard.press('Enter');
   await heading(page, '월급날은 며칠이에요?');
   await page.keyboard.press('Enter');
-  await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
+  await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press('Enter');
   await heading(page, '찬우님, 준비가 끝났어요');
@@ -633,7 +633,7 @@ test('O-32 월급 계획 저장 실패 → Toast 다시 시도 → 다시 만듦
   await next(page);
   await expect(page.getByText('잠시 문제가 생겼어요. 다시 시도해 주세요')).toBeVisible();
   await page.getByRole('button', { name: '다시 시도' }).click();
-  await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
+  await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   expect(db.splits).toHaveLength(1);
 });
 

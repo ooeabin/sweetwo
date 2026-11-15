@@ -99,6 +99,10 @@ export function useHomeInput() {
       state === 'unlink_pending' && unlink.data
         ? { deadline: unlink.data.deadline, mine: unlink.data.requested_by === me.data?.id }
         : null,
+    /** 띠 5a(2026-11-16 5차 검토 B5): 연결할 때 숨겨 둔 내 명의 자산(share_pending)이 있어 공개를 한 번 고를 때 */
+    assetSharePending: (assets.data ?? []).some(
+      (a) => a.share_pending && a.owner_user_id === me.data?.id && !a.deleted_at,
+    ),
   };
 }
 export type HomeInputState = ReturnType<typeof useHomeInput>;

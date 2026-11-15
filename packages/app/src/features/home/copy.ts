@@ -80,6 +80,8 @@ export const copy = {
     `${whoDid(name)} 생활비 관리를 ${nim(me)}에게 맡기자고 해요`,
   taskSplit: (name: string, account: string) => `${whoDid(name)} ‘${account}’ 나누기를 알렸어요`,
   taskRank: (name: string) => `${whoDid(name)} 자산 순위를 같이 보자고 해요`,
+  // [확인 필요] 19 띠 5a(2026-11-16 5차 검토 B5): 혼자 쓸 때 적은 자산을 연결할 때 숨겨 두고 한 번 물음
+  taskAssetShare: (name: string) => `혼자 쓸 때 적은 자산을 ${nim(name)}에게 어떻게 보여 줄까요?`,
   taskSalaryChanged: '월급이 바뀌었어요. 월급 계획을 다시 맞춰 볼까요?',
   taskFirstSaving: '무엇을 같이 모을지 정해 볼까요?',
   taskSplitSuggest: '같이 쓰는 생활비를 나눠 볼까요?',

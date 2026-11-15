@@ -7,4 +7,5 @@ export { F04bSold } from './pages/f-04b-sold';
 export { F08Rank } from './pages/f-08-rank';
 export { F08cRankConsent } from './pages/f-08c-rank-consent';
 export { F03qQuick } from './pages/f-03q-quick';
+export { F03eShareConnect } from './pages/f-03e-share-connect';
 export { AssetAddRoute } from './add/route';

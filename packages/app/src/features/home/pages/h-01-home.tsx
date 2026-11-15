@@ -457,6 +457,7 @@ export function H01Home() {
         assets: h.input.assets,
         cares: h.input.cares,
         notes: notes.data ?? [],
+        assetSharePending: h.assetSharePending,
         // 16 기다리는 합류자(18 v2.2, PR 8): 같이 계열에 상대가 합류했는데 공동 월급 계획에 줄이 없음(상대는 대기 화면)
         waitingJoiner:
           joint && sp.couple_state === 'connected' && splitLines.length === 0
@@ -482,6 +483,8 @@ export function H01Home() {
         return copy.taskSplit(partnerName, x.name);
       case 'rank_request':
         return copy.taskRank(partnerName);
+      case 'asset_share':
+        return copy.taskAssetShare(partnerName);
       case 'salary_changed':
         return copy.taskSalaryChanged;
       case 'first_saving':
