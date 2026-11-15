@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { monthUsSaving } from './month-us';
+import { monthUsRowCount, monthUsSaving, monthUsShown } from './month-us';
 
 // 19 H-14 이번 달 우리 둘: 예빈(합류한 사람) 카드
 const base = {
@@ -40,5 +40,25 @@ describe('monthUsSaving', () => {
   });
   it('저금이 없으면 줄 없음', () => {
     expect(monthUsSaving({ ...base, saving_count: 0, saved_total: 0 })).toEqual({ kind: 'none' });
+  });
+});
+
+describe('monthUsShown(2026-11-16 4차 검토: 줄이 2개보다 적으면 숨김)', () => {
+  it('저금 + 용돈 = 2줄이면 보임(경조사 없음 줄은 세지 않음)', () => {
+    expect(monthUsRowCount(base)).toBe(2);
+    expect(monthUsShown(base)).toBe(true);
+  });
+  it('경조사 없음 + 용돈뿐이면 숨김', () => {
+    const c = { ...base, saving_count: 0, saved_total: null };
+    expect(monthUsRowCount(c)).toBe(1);
+    expect(monthUsShown(c)).toBe(false);
+  });
+  it('저금 + 경조사 + 용돈 = 3줄', () => {
+    const c = {
+      ...base,
+      care: [{ name: '어머니 생신', on: '2026-12-03' }],
+      care_count: 1,
+    };
+    expect(monthUsRowCount(c)).toBe(3);
   });
 });

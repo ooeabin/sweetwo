@@ -26,17 +26,21 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
 
   await page.goto('/salary/items/goal-h');
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
-  // 저금 한 카드(2026-11-15 3차 검토): 큰 숫자 + 막대 + 한 줄, 기한·월 필요액은 ‘자세히 보기’ 아래
+  // 저금 한 카드(2026-11-15 3차 검토): 큰 숫자 + 막대 + 한 줄
   const target = page.getByRole('region', { name: '모은 금액' });
   await expect(target).toContainText('목표 1억 5,000만 원의 0%');
-  await expect(target).not.toContainText('2031년 10월까지');
+  // 2026-11-16 4차 검토: 기한 줄은 늘 보임(남은 금액과 한 줄, 같은 날짜 한 번), 월 필요액은 ‘자세히 보기’ 아래
+  await expect(target).toContainText('2031년 10월까지 1억 5,000만 원 더 필요해요');
+  await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
+  expect((await target.innerText()).match(/2031년 10월/g)).toHaveLength(1);
+  await expect(target).not.toContainText('매달');
   await target.getByRole('button', { name: '자세히 보기' }).click();
   await expect(target.getByRole('button', { name: '접기' })).toHaveAttribute(
     'aria-expanded',
     'true',
   );
-  await expect(target).toContainText('2031년 10월까지');
   await expect(target).toContainText('매달');
+  expect((await target.innerText()).match(/2031년 10월/g)).toHaveLength(1);
   await expect(page.getByText('매달 95만 원씩')).toBeVisible();
   await axe(page);
 

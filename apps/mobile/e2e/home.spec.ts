@@ -3,6 +3,7 @@ import { axe as runAxe } from './axe';
 import { chanwoo, emptyV22, type MemDb, mockOnboarding, mockRealtime, seed } from './mocks';
 import { fakeBridge } from './fake-bridge';
 import { events } from './analytics';
+import { homeTask, homeTaskTexts } from './home-tasks';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
 // H-07 월급 계획 + 아직 안 정한 돈, H-12 결혼 준비, H-04·H-09. 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
@@ -152,10 +153,15 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   // 결혼식 D-145(10월 7일 → 3월 1일)
   await expect(h.locator('.hg-hubtile__badge')).toHaveText('결혼식 D-145');
   // 띠 7번: 저금 0개 + 첫 30일
-  await expect(band(page)).toContainText('무엇을 같이 모을지 정해 볼까요?');
-  // 두 칸: 내 할 일(첫 저금) 아래 초대가 가려지지 않음(19 ‘띠 두 칸’)
-  await expect(bands(page)).toHaveCount(2);
-  await expect(bands(page).nth(1)).toContainText('같이 모을 사람을 초대해 보세요');
+  // 두 칸: 내 할 일(첫 저금) 아래 초대가 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 2개” → 시트
+  await expect(bands(page)).toHaveCount(1);
+  await expect(band(page)).toContainText('할 일 2개');
+  await band(page).click();
+  const tl = page.getByRole('dialog', { name: '할 일' });
+  await expect(tl.locator('.hg-listrow').nth(0)).toContainText('무엇을 같이 모을지 정해 볼까요?');
+  await expect(tl.locator('.hg-listrow').nth(1)).toContainText('같이 모을 사람을 초대해 보세요');
+  await axe(page);
+  await page.keyboard.press('Escape');
   // H-12: 메모가 없으면 “+ 쓸 곳 메모 적기”
   await expect(page.getByRole('button', { name: /결혼 준비 메모 0개/ })).toContainText(
     '+ 쓸 곳 메모 적기',
@@ -184,13 +190,13 @@ test('첫 월급날 전(소급 없음): H-11 “10월 23일 첫 월급날에 확
   );
   // 첫 월급날도 앞당긴 날(25일 일요일 → 23일 금요일, 서버 make_checklist와 같음, 2026-11-14 R3)
   await expect(monthLine(page)).toContainText('10월 23일 첫 월급날에 확인해요');
-  await expect(band(page)).toContainText('자동으로 나가는 걸 골라 주세요');
+  expect(await homeTaskTexts(page)).toContain('자동으로 나가는 걸 골라 주세요');
   await axe(page);
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');
   await expect(page.getByText('10월 23일 첫 월급날에 확인해요')).toBeVisible();
   await page.goto('/');
-  await band(page).click();
+  await (await homeTask(page, '자동으로 나가는 걸 골라 주세요')).click();
   await expect(page).toHaveURL(/\/salary\/auto-lines$/);
   const sheet = page.getByRole('dialog', { name: '자동으로 나가는 걸 골라 주세요' });
   await expect(sheet).toBeVisible();
@@ -882,9 +888,8 @@ test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경�
   });
   const card = page.getByRole('region', { name: '이번 달 우리 둘' });
   await expect(card.getByRole('heading', { name: '이번 달 우리 둘' })).toBeVisible();
-  await expect(card.getByRole('button', { name: /모은 금액/ })).toContainText(
-    '지난달보다 +100만 원',
-  );
+  // 줄 이름: 첫 카드 “지금까지 모은 금액”, 그 뒤 “지난달보다”(2026-11-16 4차 검토)
+  await expect(card.getByRole('button', { name: /^지난달보다/ })).toContainText('+100만 원');
   await expect(card.getByRole('button', { name: /다가올 경조사·기념일/ })).toContainText(
     '어머니 생신 10월 20일 외 1개',
   );
@@ -897,4 +902,43 @@ test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경�
   await card.getByRole('button', { name: '닫기' }).click();
   await expect(card).toHaveCount(0);
   await expect.poll(() => db.v22?.calls.some((c) => c.fn === 'dismiss_month_us')).toBe(true);
+});
+
+const monthUsOf = (allowance: number | null) => (d: MemDb) => {
+  Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+  d.partner = { id: 'p-yebin', nickname: '예빈', monthly_income: 2_700_000, payday: 10 };
+  if (d.v22)
+    d.v22.monthUs = {
+      id: '00000000-0000-4000-8000-0000000000c2',
+      sent_on: '2026-10-06',
+      month_key: '2026-10',
+      saved_total: 14_000_000,
+      saved_delta: null,
+      saving_count: 1,
+      hidden: false,
+      care: [],
+      care_count: 0,
+      allowance,
+    };
+};
+
+test('H-14 보여 줄 줄이 2개보다 적으면 숨김(2026-11-16 4차 검토): 저금 줄 하나뿐', async ({
+  page,
+}) => {
+  await open(page, monthUsOf(null));
+  await expect(page.locator('.hg-hubtile').first()).toBeVisible();
+  await expect(page.getByRole('region', { name: '이번 달 우리 둘' })).toHaveCount(0);
+});
+
+test('H-14 첫 카드 줄 이름 “지금까지 모은 금액”, 줄 이름은 한 줄(2026-11-16 4차 검토)', async ({
+  page,
+}) => {
+  await open(page, monthUsOf(300_000));
+  const card = page.getByRole('region', { name: '이번 달 우리 둘' });
+  await expect(card.getByRole('button', { name: /^지금까지 모은 금액/ })).toContainText(
+    '1,400만 원',
+  );
+  const label = card.locator('.hg-listrow__label', { hasText: '다가올 경조사·기념일' });
+  const box = await label.boundingBox();
+  expect(box?.height ?? 0).toBeLessThan(30);
 });

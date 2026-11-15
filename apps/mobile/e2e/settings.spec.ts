@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
 import { setWheel } from './wheel';
+import { homeTaskTexts } from './home-tasks';
 
 // 설정(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 찬우(시작, 25일)와 합류한 예빈(10일), 웹
 
@@ -640,9 +641,10 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
   ask();
   // 홈 띠 2번(19): 받은 열린 요청(reconnect_request)을 봄(옛 couple_unlink.reconnect_by는 비어 있음)
   await page.goto('/');
-  await expect(page.locator('.hg-hubband').first()).toContainText(
-    '예빈님이 다시 연결하자고 했어요',
-  );
+  // 띠가 하나면 그 띠, 둘이면 “할 일 2개” 시트(19 ‘띠 하나로 묶기’, 2026-11-16)
+  expect(
+    (await homeTaskTexts(page)).some((t) => t.includes('예빈님이 다시 연결하자고 했어요')),
+  ).toBe(true);
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('예빈님이 다시 연결하자고 해요')).toBeVisible();

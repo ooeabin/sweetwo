@@ -34,7 +34,9 @@ export const bundleBar = (b: BundleViewResponse): number | null =>
 /**
  * W-10 맨 위 묶음 카드(20 W-10 0번, SaveTogether.md ‘W-10 묶음 카드(머리 없이)’): ui SaveTogetherSlide(홈 H-10과 같은 칸) 하나.
  * 사람 + 묶음 이름 → 합계(퍼센트만이면 %) → 막대 → “목표 금액 5,000만 원의 62%” → 기한 → 각자 금액(둘 다 켰을 때) → 멈춤.
- * 누르면 W-15a(묶음에 든 사람만, onClick이 없으면 누를 곳 없음). 화면 읽기는 한 문장. W-10 다른 카드처럼 hg-goalbox 테두리
+ * 누르면 W-15a(묶음에 든 사람만, onClick이 없으면 누를 곳 없음). 화면 읽기는 한 문장. W-10 다른 카드처럼 hg-goalbox 테두리.
+ * share(2026-11-16 4차 검토): 내 저금 W-10이면 이 카드 하나에 ‘내 몫 n원’ 한 줄(따로 모은 금액 카드 없음). 각자 금액 줄이 이미 있거나
+ * 내 몫이 합계와 같으면(상대가 아직 0원·안 들어옴) 같은 금액이 두 번 보이지 않게 뺌
  */
 export function BundleCard({
   bundle: b,
@@ -42,6 +44,7 @@ export function BundleCard({
   myName,
   partnerName,
   people,
+  share,
   onClick,
 }: {
   bundle: BundleViewResponse;
@@ -49,6 +52,8 @@ export function BundleCard({
   myName: string;
   partnerName: string;
   people?: ReactNode;
+  /** 내 몫(내 저금 모은 금액). 상대 저금 화면이면 null */
+  share?: number | null;
   onClick?: () => void;
 }) {
   const m = (v: number) => money(v, masked);
@@ -60,7 +65,12 @@ export function BundleCard({
     !b.percent_only && b.target !== null && b.pct !== null && !done
       ? copy.bundleTotalOf(m(b.target), b.pct)
       : null;
-  const all = [ofTarget, ...lines].filter((x): x is string => !!x);
+  const each = b.show_each && !b.percent_only && b.mine !== null && b.partner !== null;
+  const shareLine =
+    share !== null && share !== undefined && !b.percent_only && !each && share !== b.total
+      ? copy.myShare(m(share))
+      : null;
+  const all = [ofTarget, ...lines, shareLine].filter((x): x is string => !!x);
   return (
     <section className="hg-goalbox hg-together" aria-label={copy.together}>
       <SaveTogetherSlide

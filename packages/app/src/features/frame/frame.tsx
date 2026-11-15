@@ -27,7 +27,7 @@ import {
   useNotiRealtime,
   usePushRegistration,
 } from '../notifications';
-import { FrameCommands } from './command';
+import { FrameCommands, searchKey } from './command';
 import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
 import { LineBand } from './notice-band';
@@ -272,6 +272,7 @@ export function MainFrame(
         narrowTitle={p.narrowTitle ?? (p.current ? label[p.current] : copy.settings)}
         labels={{
           search: copy.search,
+          searchKey: searchKey(),
           mask: copy.mask,
           noti: notiLabel,
           settings: copy.settings,

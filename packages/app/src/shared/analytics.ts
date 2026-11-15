@@ -419,6 +419,8 @@ export type AnalyticsEvent =
           | 'chip'
           | 'dday'
           | 'band'
+          // 띠 둘을 묶은 “할 일 2개” 띠(시트를 엶, 2026-11-16 4차 검토). 시트 안 줄은 band + todo
+          | 'band_group'
           | 'plan'
           | 'calendar'
           | 'assets'

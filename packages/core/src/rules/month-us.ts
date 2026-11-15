@@ -19,3 +19,17 @@ export function monthUsSaving(card: NonNullable<MonthUsCard>): MonthUsSaving {
   if (card.saved_delta < 0) return { kind: 'down', amount: -card.saved_delta };
   return { kind: 'same' };
 }
+
+/** H-14를 보여 줄 만한 줄 수(2026-11-16 4차 검토): 저금 줄(저금이 있을 때), 일정 줄(30일 안 경조사가 있을 때), 용돈 줄(있을 때) */
+export function monthUsRowCount(card: NonNullable<MonthUsCard>): number {
+  return (
+    (monthUsSaving(card).kind === 'none' ? 0 : 1) +
+    (card.care_count > 0 ? 1 : 0) +
+    (card.allowance !== null ? 1 : 0)
+  );
+}
+
+/** H-14는 보여 줄 만한 줄이 2개 이상일 때만(MONTH_US_MIN_ROWS). 적으면 홈에서 카드를 숨김(‘한 달 안에는 없어요’만 남는 카드 없음) */
+export const MONTH_US_MIN_ROWS = 2;
+export const monthUsShown = (card: NonNullable<MonthUsCard>): boolean =>
+  monthUsRowCount(card) >= MONTH_US_MIN_ROWS;
