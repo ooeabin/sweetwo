@@ -250,7 +250,7 @@ test('S7-07·S7-12: 목표 금액을 처음 정한 뒤 기한은 1년 뒤 + 필�
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline\?first=1$/);
   // 처음 값 1년 뒤(2027년 10월): 1,200만 원 ÷ 13개월 = 93만 원
-  await expect(page.getByText('매달 93만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText('기한까지 매달 93만 원이면 돼요')).toBeVisible();
   // 2026-11-13: 늦어지면 판정 대신 “지금 속도면 …에 다 모아요”
   await expect(page.getByText(/지금 속도면 \d+년 \d+월에 다 모아요/)).toBeVisible();
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();

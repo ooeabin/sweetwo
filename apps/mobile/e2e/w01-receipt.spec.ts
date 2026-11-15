@@ -18,8 +18,13 @@ const waitLine = (db: MemDb, kind: string) =>
   (db.checklists[0]?.pay_check_line as Record<string, unknown>[]).find(
     (l) => l.kind === kind && l.state === 'wait',
   );
-const names = (page: Page, group: string) =>
+const listNames = (page: Page, group: string) =>
   page.getByRole('list', { name: group }).locator('.hg-receipt__name').allTextContents();
+// 지출 묶음은 맨 위 용돈 줄 목록(‘용돈’) + 나머지 지출(‘지출’)(2026-11-16 R4-3)
+const names = async (page: Page, group: string) =>
+  group === '지출'
+    ? [...(await listNames(page, '용돈')), ...(await listNames(page, '지출'))]
+    : listNames(page, group);
 
 async function open(page: Page, url = '/salary?view=plan') {
   await page.clock.setFixedTime(NOW);
@@ -73,7 +78,7 @@ test('보기: 구간 탭 ‘계획’, 머리·비율·묶음·합계, + 버튼 
   ).toBeVisible();
   await expect(card.locator('.hg-receipt__seg--free')).toHaveCount(1); // 범례 네모만(막대 칸 없음)
   expect(await names(page, '저금')).toEqual(['청약', '내 집 마련']);
-  expect(await names(page, '지출')).toEqual(['고정지출', '생활비', '용돈']);
+  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
   await expect(card.getByText('139만 원', { exact: true })).toBeVisible();
   await expect(card.getByText('211만 원', { exact: true })).toBeVisible();
   await expect(card.locator('.hg-receipt__row--strong')).toContainText('아직 안 정한 돈0원');
@@ -129,7 +134,7 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await sheet.getByRole('textbox', { name: '관리비 금액' }).fill('100000');
   await sheet.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('관리비를 추가했어요')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['고정지출', '생활비', '용돈', '관리비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비', '관리비']);
   expect(lineOf(db, 'custom', '관리비')?.amount).toBe(100_000);
   expect(waitLine(db, 'custom')?.planned).toBe(100_000);
   // 이미 있는 이름은 칩에서 숨김, 글자로 넣으면 막음
@@ -158,14 +163,14 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
     .getByRole('button', { name: '고정지출 줄 지우기' })
     .click();
   await expect(page.getByText('고정지출을 지웠어요')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['생활비', '용돈']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비']);
   expect(lineOf(db, 'fixed')).toBeUndefined();
   expect(waitLine(db, 'fixed')).toBeUndefined();
   await expect(
     page.getByRole('img', { name: '저금 40%, 지출 35%, 아직 안 정한 돈 25%' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect.poll(() => names(page, '지출')).toEqual(['고정지출', '생활비', '용돈']);
+  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
   // 저금 줄: 확인 Modal → 그만 모음
   await page.getByRole('button', { name: '청약 44만 원' }).click();
   await page
@@ -192,13 +197,14 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
   // 기본 줄도 지우기(마우스 기기는 늘 보임)
   await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
   await axe(page);
-  const up = page.getByRole('button', { name: '용돈 위로' });
+  // 용돈 줄은 지출 맨 위에 고정(2026-11-16 R4-3), 나머지 지출끼리 순서를 바꿈
+  await expect(page.getByRole('button', { name: '용돈 위로' })).toHaveCount(0);
+  const up = page.getByRole('button', { name: '생활비 위로' });
   await up.focus();
   await expect(up).toBeVisible();
   await page.keyboard.press('Enter');
-  await expect(page.getByText('용돈, 2번째')).toBeAttached();
-  await page.keyboard.press('Enter');
-  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
+  await expect(page.getByText('생활비, 1번째')).toBeAttached();
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '고정지출']);
   // 아직 저장 전
   expect(db.rpc.includes('split_reorder')).toBe(false);
   await page.getByRole('button', { name: '완료' }).click();
@@ -208,7 +214,7 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
     [...(db.splits[0]?.split_line ?? [])]
       .sort((a, b) => Number(a.sort) - Number(b.sort))
       .map((l) => l.kind),
-  ).toEqual(['saving', 'saving', 'allowance', 'fixed', 'living']);
+  ).toEqual(['saving', 'saving', 'allowance', 'living', 'fixed']);
   // 이번 달 체크리스트도 같은 순서
   await page.getByRole('tab', { name: '이번 달' }).click();
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
@@ -270,7 +276,7 @@ test('합쳐서: 두 사람 Avatar 겹침, 수입 합, 월급날 둘, 용돈 줄
   await expect(page.locator('.hg-receipt__head .hg-avatars .hg-avatar')).toHaveCount(2);
   await expect(page.locator('.hg-receipt__amount')).toHaveText('620만 원');
   await expect(page.getByText('찬우 25일, 예빈 10일')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['고정지출', '찬우 용돈', '예빈 용돈']);
+  expect(await names(page, '지출')).toEqual(['찬우 용돈', '예빈 용돈', '고정지출']);
   await page.getByRole('button', { name: '편집하기' }).click();
   await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
   await expect(page.getByRole('button', { name: '찬우 용돈 지우기' })).toHaveCount(0);
@@ -392,7 +398,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   await expect.poll(() => lineOf(db, 'custom', '관리비')?.amount).toBe(150_000);
   expect(lineOf(db, 'fixed')?.amount).toBe(880_000);
   expect(lineOf(db, 'living')?.amount).toBe(880_000);
-  expect(await names(page, '지출')).toEqual(['고정지출', '생활비', '용돈', '관리비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비', '관리비']);
 });
 
 test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async ({ page }) => {
@@ -484,4 +490,73 @@ test('W-02 ‘이번 달’도 못 불러오면 오류 카드(‘월급 없음�
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
   await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await expect(page.getByRole('tab', { name: '이번 달' })).toBeVisible();
+});
+
+/** 첫 달: 지출 줄(고정지출·생활비·직접 추가)이 없는 월급 계획 */
+function noSpend(db: MemDb) {
+  const sp = db.splits[0];
+  if (sp)
+    sp.split_line = sp.split_line.filter(
+      (l) => !['fixed', 'living', 'custom'].includes(String(l.kind)),
+    );
+}
+
+test('첫 달 묻기(R4): 칩 → 금액 직접 → 지출 줄, ‘다 넣었어요’면 다시 묻지 않음', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  noSpend(db);
+  await go();
+  const card = page.getByRole('region', { name: '매달 나가는 돈이 있어요?' });
+  await expect(card).toBeVisible();
+  // 가짜 추천 금액 없음: 칩만, 금액은 시트에서 직접
+  await expect(card.getByRole('button', { name: '다 넣었어요' })).toHaveCount(0);
+  await card.getByRole('button', { name: '월세' }).click();
+  const sheet = page.getByRole('dialog', { name: '월세 금액' });
+  await sheet.getByRole('textbox', { name: '월세 금액' }).fill('500000');
+  await sheet.getByRole('button', { name: '추가하기' }).click();
+  await expect(page.getByText('월세를 추가했어요')).toBeVisible();
+  expect(lineOf(db, 'custom', '월세')?.amount).toBe(500_000);
+  // 생활비 칩은 기본 생활비 줄(kind living)
+  await card.getByRole('button', { name: '생활비' }).click();
+  const s2 = page.getByRole('dialog', { name: '생활비 금액' });
+  await s2.getByRole('textbox', { name: '생활비 금액' }).fill('600000');
+  await s2.getByRole('button', { name: '추가하기' }).click();
+  await expect.poll(() => lineOf(db, 'living')?.amount).toBe(600_000);
+  await expect(card.getByRole('button', { name: '월세' })).toHaveCount(0);
+  expect(await names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
+  await axe(page);
+  await card.getByRole('button', { name: '다 넣었어요' }).click();
+  await expect(card).toHaveCount(0);
+  expect(db.v22?.tasks).toContain('first_spend_ask');
+  await page.reload();
+  await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '매달 나가는 돈이 있어요?' })).toHaveCount(0);
+});
+
+test('첫 달 묻기(R4): ‘건너뛸게요’, 이미 지출 줄이 있으면 묻지 않음', async ({ page }) => {
+  const { db, go } = await open(page);
+  noSpend(db);
+  await go();
+  const card = page.getByRole('region', { name: '매달 나가는 돈이 있어요?' });
+  await card.getByRole('button', { name: '건너뛸게요' }).click();
+  await expect(card).toHaveCount(0);
+  expect(db.v22?.tasks).toContain('first_spend_ask');
+});
+
+test('지출 줄이 있으면 첫 달 묻기 없음, 같이 쓰는 생활비 ‘아니요’면 “+ 같이 쓰는 통장” 대신 칩(R4)', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  Object.assign(db.space ?? {}, { shared_living: false });
+  await go();
+  await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '매달 나가는 돈이 있어요?' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장' })).toHaveCount(0);
+  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await page
+    .getByRole('group', { name: '지출 이름' })
+    .getByRole('button', { name: '같이 쓰는 통장' })
+    .click();
+  await expect(page).toHaveURL(/\/salary\/split\/new/);
 });

@@ -111,7 +111,7 @@ export function Y01CareList() {
             key: `m-${x.date}-${x.kind}-${i}`,
             date: x.date,
             label: l.label,
-            sub: formatDateWeekday(x.date),
+            sub: l.why ? `${formatDateWeekday(x.date)}, ${l.why}` : formatDateWeekday(x.date),
             care: false,
             lead: leadOf('money', x.kind),
             to: l.to,

@@ -75,7 +75,8 @@
 | `pay_line_late_checked` | kind, days_late |
 | `auto_line_changed` | to(skipped/other_amount) |
 | `saving_adjusted` | sign(`plus`/`minus`), amount_band, reason_code, from(w10b/note_paid). 잔액 맞추기는 `savings_reconciled`로만 |
-| `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none |
+| `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none(`_distributed`는 ‘저금에 안 넣을게요’면 skipped, 2026-11-16) |
+| `first_spend_asked`(2026-11-16, W-01 첫 달 묻기) | answer(done/skipped), lines_count, joint. 칩으로 넣은 줄은 `plan_line_added`에 first_ask |
 | `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate` / `s13` 설정 S-13 묶음 줄, 2026-11-13 PR 14 / `exist` W-15 ‘같이 모을게요’ / `money_in` W-20a, 2026-11-14), has_target, on, separate(열린 묶음이 있는데 따로 만듦, 2026-11-14) |
 | `bundle_open_answered` | choice(`join` / `separate` / `later`), W-15 열린 묶음 질문(2026-11-14 H1) |
 | `money_in_deleted` / `money_in_edited` | distributed(나눠 넣은 게 있었나), W-20b(2026-11-14 M6) |

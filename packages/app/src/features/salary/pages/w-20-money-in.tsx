@@ -193,8 +193,10 @@ export function W20aDistribute() {
     hasBack || window.history.length <= 1 ? nav(back, { replace: true }) : nav(-1);
   if (!d.ready && d.failed)
     return <SavingQuestionError onBack={() => nav(back)} onRetry={d.retry} />;
-  if (!d.ready || ins.isLoading) return <QuestionSkeleton title={copy.moneyInDistributeQ} />;
   const rec = ins.data?.find((r) => r.id === id);
+  // 방금 적은 기록이 예전 목록(W-02 ‘받은 돈’ 묶음이 받아 둔 것)에 아직 없으면 다시 받는 동안 기다림
+  if (!d.ready || ins.isLoading || (!rec && ins.isFetching))
+    return <QuestionSkeleton title={copy.moneyInDistributeQ} />;
   if (!rec) return <Navigate to={back} replace />;
   const m = (v: number) => money(v, masked);
   const goals = d.live.filter((i) => i.canEdit);
@@ -204,11 +206,13 @@ export function W20aDistribute() {
   // 넣을 저금이 없는데 상대가 만든 같이 모으기가 있으면 들어가기(들어간 뒤 이 화면으로, 2026-11-14 H1)
   const join =
     !goals.length && !d.joint && !d.pending ? joinableBundle(bundles.data ?? []) : undefined;
-  const finish = async () => {
-    if (busy || over) return;
+  /** skip: ‘저금에 안 넣을게요’ = 기록만(2026-11-16 R4-7, 0원 ‘넣기’와 같음) */
+  const finish = async (skip = false) => {
+    if (busy || (over && !skip)) return;
     setBusy(true);
     try {
       const items = goals
+        .filter(() => !skip)
         .filter((i) => (put[i.goal.id] ?? 0) > 0)
         .map((i) => ({ goalId: i.goal.id, amount: put[i.goal.id] ?? 0 }));
       const n = items.length ? await distributeMoneyIn(id, items) : 0;
@@ -217,9 +221,10 @@ export function W20aDistribute() {
         amount_band: amountBand(rec.amount),
         saving_count: n,
         payday_none: !!me.data?.payday_none,
+        ...(skip ? { skipped: true } : {}),
       });
       await refreshMoneyIn(qc);
-      carryToast(n ? copy.moneyInPutDone(n, m(total)) : copy.moneyInLogged);
+      carryToast(n && !skip ? copy.moneyInPutDone(n, m(total)) : copy.moneyInLogged);
       leave();
     } catch (e) {
       toast(e instanceof MoneyInBlocked && e.reason === 'over' ? copy.moneyInOver : copy.failed);
@@ -240,6 +245,10 @@ export function W20aDistribute() {
       onBack={leave}
       primary={{ label: copy.moneyInPut, disabled: over, loading: busy }}
       onSubmit={() => void finish()}
+      // 적기만 하고 저금에 넣지 않기(2026-11-16 R4-7). 넣을 저금이 없으면 ‘넣기’가 이미 기록만
+      later={
+        goals.length ? { label: copy.moneyInSkip, onClick: () => void finish(true) } : undefined
+      }
     >
       <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
         {goals.map((i) => {

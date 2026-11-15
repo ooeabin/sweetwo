@@ -40,6 +40,7 @@ export function H10SaveTogether({
   moves,
   savingCount,
   invite,
+  partnerOut,
   go,
 }: {
   heroes: HeroItem[];
@@ -61,6 +62,8 @@ export function H10SaveTogether({
   savingCount: number;
   /** 상대 저금 같이 모으기 권유(core bundleInviteGoal). 빈 상태 질문 자리에 한 번만(띠 13 대신, 2026-11-14 R4) */
   invite?: { name: string; to: string } | null;
+  /** 각자 계열 + 연결: 묶이지 않은 내 저금 칸 첫 줄 “{이름}님은 아직 같이 모으기에 없어요”(2026-11-16 R4-8) */
+  partnerOut?: boolean;
   go: (box: 'together' | 'money_in' | 'more' | 'chip' | 'dday', to: string) => void;
 }) {
   const { masked } = useMask();
@@ -179,6 +182,11 @@ export function H10SaveTogether({
     const pct = savingPct(saved, g.target_amount);
     const lines: string[] = [];
     const say: string[] = [g.name, won(saved)];
+    const solo = !joint && g.owner_user_id !== null;
+    if (solo && partnerOut) {
+      lines.push(copy.partnerNotIn(names.partner));
+      say.push(copy.partnerNotIn(names.partner));
+    }
     if (g.target_amount !== null && pct !== null) {
       lines.push(copy.targetOf(won(g.target_amount), pct));
       say.push(copy.targetPctLabel(pct));
@@ -191,7 +199,7 @@ export function H10SaveTogether({
       say.push(copy.remain(r.deadline, won(r.remain)));
     }
     return {
-      people: !joint && g.owner_user_id !== null ? (peopleMine ?? people) : people,
+      people: solo ? (peopleMine ?? people) : people,
       name: g.name,
       amount: won(saved),
       bar: g.target_amount !== null ? savingBar(saved, g.target_amount) : null,

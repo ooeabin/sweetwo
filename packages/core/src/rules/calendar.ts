@@ -23,6 +23,11 @@ export interface MoneyDate {
   bundle?: string;
   /** 월급날의 사람 id(각자 모드 파트너 월급날 → W-02 그 사람 탭, 2026-11-12 QA 9구간 S9-10) */
   who?: string;
+  /**
+   * 월급날을 주말·공휴일이라 앞당겼으면 원래 날과 까닭(24 ‘금융 일정’, 2026-11-16 4차 검토 R4-9:
+   * “25일이 토요일이라 24일”). 앞당기지 않았으면 없음
+   */
+  moved?: { from: string; why: 'sat' | 'sun' | 'holiday' };
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -91,14 +96,17 @@ export function moneyDates(y: number, m: number, o: MoneyInput) {
   const out: MoneyDate[] = [];
   for (const p of o.paydays) {
     if (p.day === null) continue;
+    const raw = baseDateIn(y, m, p.day);
+    const date = o.shift === false ? raw : businessDayOnOrBefore(raw, o.holidays);
+    const w = weekday(raw);
     out.push({
-      date:
-        o.shift === false
-          ? baseDateIn(y, m, p.day)
-          : businessDayOnOrBefore(baseDateIn(y, m, p.day), o.holidays),
+      date,
       kind: 'payday',
       name: p.name,
       ...(p.who ? { who: p.who } : {}),
+      ...(date !== raw
+        ? { moved: { from: raw, why: w === 6 ? 'sat' : w === 0 ? 'sun' : 'holiday' } as const }
+        : {}),
     });
   }
   // 월급날 확인 목록 안내: 다음 월급날 3일 전 ~ 전날. 이번 달·다음 달 월급날 앞을 모두 보고 이 달에 걸친 것만

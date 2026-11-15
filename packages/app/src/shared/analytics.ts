@@ -342,7 +342,14 @@ export type AnalyticsEvent =
         chip: string | null;
         amount_band: AmountBand;
         joint: boolean;
+        /** W-01 첫 달 묻기 카드에서 넣음(2026-11-16 R4 첫 달) */
+        first_ask?: boolean;
       };
+    }
+  /** W-01 첫 달 ‘매달 나가는 돈’ 묻기 끝(2026-11-16 R4): 넣은 줄 수, 건너뜀 여부 */
+  | {
+      name: 'first_spend_asked';
+      props: { answer: 'done' | 'skipped'; lines_count: number; joint: boolean };
     }
   | {
       name: 'plan_line_deleted';

@@ -362,6 +362,14 @@ describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
       id: 'g',
       name: '결혼 비용',
     });
+    // 만든 지 7일이 지난 상대 저금: 띠 13은 없고, H-10 빈 상태(anyAge)는 그대로 권유(2026-11-16 R4-8)
+    const old = [
+      { id: 'g', name: '결혼 비용', created_at: '2026-10-01T00:00:00Z', bundle_id: null },
+    ];
+    expect(bundleInviteGoal({ ...base, partnerGoals: old })).toBeNull();
+    expect(bundleInviteGoal({ ...base, partnerGoals: old }, { anyAge: true })).toMatchObject({
+      id: 'g',
+    });
   });
   it('요청이 없으면 다음 순서', () => {
     const t = pickTopTasks({ ...base, reconcile: { key: 'r', due: '2026-11-10' } });

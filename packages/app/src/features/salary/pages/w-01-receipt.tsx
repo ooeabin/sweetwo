@@ -3,6 +3,7 @@ import {
   configureSplitLines,
   deleteSplitLine,
   dismissHomeTask,
+  fetchHomeTasks,
   fetchSharedAccounts,
   qk,
   reopenSavingItem,
@@ -66,17 +67,21 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { salaryPaths, savingPaths } from '../paths';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
-import { PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
+import { FirstSpendAsk, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
 import { keepOrder, recommendedDraft } from '../split-draft';
 import { toDraft } from '../split-editor';
 
 // from: W-10 ‘매달 금액 바꾸기’(?line=)로 연 시트(분석 entry saving_detail, 주소의 line은 열자마자 지움)
 type Sheet =
-  { line: SplitLine; from?: 'saving_detail' } | { add: string; chip: string | null } | null;
+  | { line: SplitLine; from?: 'saving_detail' }
+  | { add: string; chip: string | null; first?: boolean }
+  | null;
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
 const MAX_CUSTOM = 10;
+/** 첫 달 ‘매달 나가는 돈’ 묻기를 끝낸 표시(home_task_state, 사람마다, 2026-11-16 R4) */
+const FIRST_SPEND_KEY = 'first_spend_ask';
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 월급 탭 구간 탭 ‘계획’(/salary?view=plan).
 // 고칠 때마다 바로 저장(줄 RPC) + Toast ‘되돌리기’. 편집 모드: 손잡이·위아래로 순서(‘완료’에서 한 번에), 지우기.
@@ -104,10 +109,13 @@ export function W01Receipt() {
   const [fold, setFold] = useState(false);
   const [busy, setBusy] = useState(false);
   const [sharing, setSharing] = useState(false);
+  // 첫 달 묻기 카드: 처음 판단한 값을 끝날 때까지 유지(줄을 넣어도 카드가 사라지지 않게). null = 아직 판단 전
+  const [ask, setAsk] = useState<boolean | null>(null);
   const who = params.get('who');
   const lineParam = params.get('line');
   const qc = useQueryClient();
   const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
+  const homeTasks = useQuery({ queryKey: qk.homeTasks, queryFn: fetchHomeTasks });
   // 3b 파트너 탭(각자): 파트너 공개 단계대로 서버가 자른 값(partner_plan_view). ‘모두’가 아니면 영수증 대신 저금만 목록
   const partnerView = useQuery({
     queryKey: qk.partnerPlanView(null),
@@ -154,6 +162,20 @@ export function W01Receipt() {
     next.delete('line');
     setParams(next, { replace: true });
   }, [lineParam, split, canEdit, params, setParams]);
+
+  // 첫 달 묻기(20 W-01 ‘첫 달 묻기’): 내가 고칠 수 있는 내 월급 계획(합쳐서면 공동)이고, 아직 지출 줄(고정지출·생활비·직접 추가)이
+  // 없고, 끝낸 표시가 없을 때 한 번. 한 사람 관리형의 관리하지 않는 쪽(보내기·용돈만)에게는 묻지 않음
+  const notManager =
+    space.data?.salary_mode === 'joint' &&
+    !!space.data.manager_user_id &&
+    space.data.manager_user_id !== me.data?.id;
+  useEffect(() => {
+    if (ask !== null || !split || !homeTasks.data) return;
+    const hasSpend = split.split_line.some(
+      (l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom',
+    );
+    setAsk(canEdit && !notManager && !hasSpend && !homeTasks.data.includes(FIRST_SPEND_KEY));
+  }, [ask, split, homeTasks.data, canEdit, notManager]);
 
   // 월급이 바뀐 달 띠(H-06 6번, 07 5장): W-01을 열면 끝냄(home_task_state done)
   const changedDay = m && sp ? salaryChangedDay(changes.data, m.id, baseDayOf(m, sp)) : null;
@@ -207,7 +229,12 @@ export function W01Receipt() {
     ? (m.monthly_income ?? 0) + (p?.monthly_income ?? 0)
     : (owner?.monthly_income ?? 0);
   const savingLines = lines.filter((l) => l.kind === 'saving');
-  const spendLines = lines.filter((l) => l.kind !== 'saving');
+  // 용돈 줄을 지출 묶음 맨 위에(2026-11-16 4차 검토 R4-3: 용돈도 ‘아직 안 정한 돈’에서 빠지는 계획 줄임이 보이게).
+  // 나머지 줄은 월급 계획 순서 그대로, 편집 모드 순서 바꾸기도 이 순서 안에서
+  const spendLines = [
+    ...lines.filter((l) => l.kind === 'allowance'),
+    ...lines.filter((l) => l.kind !== 'saving' && l.kind !== 'allowance'),
+  ];
   const sum = (ls: SplitLine[]) => ls.reduce((s, l) => s + l.amount, 0);
   const savingSum = sum(savingLines);
   // 보내기 줄(한 사람 관리형)은 공동 수입 안의 이동이라 지출 합·여유 자금에 넣지 않음(06 3-2, core leftover·홈 H-07과 같음,
@@ -399,10 +426,17 @@ export function W01Receipt() {
       );
     });
 
-  const add = (name: string, chip: string | null, amount: number) =>
+  const add = (name: string, chip: string | null, amount: number, first = false) =>
     run(async () => {
       if (!split) return;
-      const id = await write(() => addSplitLine(split.id, { kind: 'custom', name, amount }));
+      // 첫 달 묻기 ‘생활비’ 칩은 기본 생활비 줄(kind living, 이름 없음). 그 밖은 직접 추가 줄
+      const living = first && chip === 'living';
+      const id = await write(() =>
+        addSplitLine(
+          split.id,
+          living ? { kind: 'living', amount } : { kind: 'custom', name, amount },
+        ),
+      );
       setSheet(null);
       setAdding(false);
       track('plan_line_added', {
@@ -410,6 +444,7 @@ export function W01Receipt() {
         chip,
         amount_band: amountBand(amount),
         joint,
+        ...(first ? { first_ask: true } : {}),
       });
       sharedChanged();
       toast(
@@ -469,15 +504,16 @@ export function W01Receipt() {
       });
     });
 
-  // 편집 모드 순서: 같은 묶음 안에서만
+  // 편집 모드 순서: 같은 묶음 안에서만. 지출 묶음은 용돈 줄(맨 위 고정)과 나머지를 따로 옮김(2026-11-16 R4-3)
+  const allowanceLines = spendLines.filter((l) => l.kind === 'allowance');
+  const otherSpend = spendLines.filter((l) => l.kind !== 'allowance');
   const moveIn = (group: SplitLine[]) => (from: number, to: number) => {
     const ids = group.map((l) => l.id);
     const [id] = ids.splice(from, 1);
     if (!id) return;
     ids.splice(to, 0, id);
-    const saving = group[0]?.kind === 'saving' ? ids : savingLines.map((l) => l.id);
-    const spend = group[0]?.kind === 'saving' ? spendLines.map((l) => l.id) : ids;
-    setOrder([...saving, ...spend]);
+    const pick = (g: SplitLine[]) => (g[0] && g[0].id === group[0]?.id ? ids : g.map((l) => l.id));
+    setOrder([...pick(savingLines), ...pick(allowanceLines), ...pick(otherSpend)]);
   };
   const finish = () =>
     void run(async () => {
@@ -537,6 +573,23 @@ export function W01Receipt() {
         copy.saved,
         undo(() => write(() => saveSplit(current, ownerId ?? undefined))),
       );
+    });
+
+  // 첫 달 묻기 끝(‘다 넣었어요’ / ‘건너뛸게요’): 다시 묻지 않게 서버에 표시. 넣은 줄 = 지금 지출 줄(카드는 지출 줄이 없을 때만 뜸)
+  const asked = spendLines.filter(
+    (l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom',
+  ).length;
+  const firstDone = (skipped: boolean) =>
+    void run(async () => {
+      await dismissHomeTask(FIRST_SPEND_KEY, skipped ? 'dismissed' : 'done');
+      setAsk(false);
+      setAdding(false);
+      track('first_spend_asked', {
+        answer: skipped ? 'skipped' : 'done',
+        lines_count: asked,
+        joint,
+      });
+      void qc.invalidateQueries({ queryKey: qk.homeTasks });
     });
 
   // ── 공유(이미지) ─────────────────────────────────────────────────────
@@ -673,6 +726,9 @@ export function W01Receipt() {
     locked: copy.locked,
   };
   const customs = serverLines.filter((l) => l.kind === 'custom').length;
+  // 5d “+ 같이 쓰는 통장”: 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 숨김. 나중에는 ‘+ 지출 추가’ 칩 끝
+  // ‘같이 쓰는 통장’으로 엶(2026-11-16 4차 검토 R4-4)
+  const sharedOn = sp.shared_living !== false || lines.some((l) => l.kind === 'shared_account');
   const lead =
     people.length > 1 ? (
       <span className="hg-avatars">
@@ -744,7 +800,7 @@ export function W01Receipt() {
       confirmLabel={copy.addDone}
       busy={busy}
       onClose={() => setSheet(null)}
-      onConfirm={(v) => void add(sheetAdd.add, sheetAdd.chip, v)}
+      onConfirm={(v) => void add(sheetAdd.add, sheetAdd.chip, v, !!sheetAdd.first)}
     />
   ) : null;
 
@@ -832,6 +888,20 @@ export function W01Receipt() {
           )}
         </>
       )}
+      {ask && canEdit && !edit && (
+        <FirstSpendAsk
+          taken={spendLines.map((l) => nameOf(l))}
+          added={asked}
+          busy={busy}
+          onPick={(name, chip) => {
+            if (!offline()) setSheet({ add: name, chip, first: true });
+          }}
+          onOther={() => {
+            if (!offline()) setAdding(true);
+          }}
+          onDone={firstDone}
+        />
+      )}
       {partnerNoSplit ? (
         <section className="hg-card hg-card--fill hg-stack">
           <p className="hg-card__meta">{copy.partnerNoPlan(owner?.nickname ?? '')}</p>
@@ -917,11 +987,21 @@ export function W01Receipt() {
               )}
             </ReceiptSection>
             <ReceiptSection title={copy.spendGroup} subtotal={shown(won(spendSum))}>
+              {/* 용돈 줄 먼저(맨 위 고정, 2026-11-16 R4-3), 그 아래 나머지 지출 */}
+              {allowanceLines.length > 0 && (
+                <ReceiptRows
+                  label={copy.allowanceRows}
+                  lines={rowsOf(allowanceLines)}
+                  edit={edit}
+                  onMove={edit ? moveIn(allowanceLines) : undefined}
+                  labels={rowLabels}
+                />
+              )}
               <ReceiptRows
                 label={copy.spendGroup}
-                lines={proposalRow ? [...rowsOf(spendLines), proposalRow] : rowsOf(spendLines)}
+                lines={proposalRow ? [...rowsOf(otherSpend), proposalRow] : rowsOf(otherSpend)}
                 edit={edit}
-                onMove={edit ? moveIn(spendLines) : undefined}
+                onMove={edit ? moveIn(otherSpend) : undefined}
                 labels={rowLabels}
               />
               {canEdit && customs < MAX_CUSTOM && (
@@ -934,7 +1014,7 @@ export function W01Receipt() {
                   {copy.addSpend}
                 </ReceiptAdd>
               )}
-              {canEdit && (
+              {canEdit && sharedOn && (
                 // 5d 같이 쓰는 통장 → W-01b 분담 도우미(PR 11)
                 <ReceiptAdd onClick={() => nav('/salary/split/new')}>
                   {copy.addSharedAccount}
@@ -942,6 +1022,11 @@ export function W01Receipt() {
               )}
               {adding && canEdit && (
                 <SpendChips
+                  more={
+                    sharedOn
+                      ? undefined
+                      : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
+                  }
                   taken={spendLines.map((l) => nameOf(l))}
                   onPick={(name, chip) => {
                     if (spendLines.some((l) => nameOf(l) === name))

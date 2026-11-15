@@ -183,7 +183,7 @@ export function Y04Calendar() {
           key={`${x.kind}-${i}`}
           lead={<Lead {...leadOf('money', x.kind)} />}
           label={l.label}
-          sub={copy.goSub[x.kind]}
+          sub={l.why ? `${l.why}, ${copy.goSub[x.kind]}` : copy.goSub[x.kind]}
           onClick={() => nav(l.to)}
           chevron
         />,

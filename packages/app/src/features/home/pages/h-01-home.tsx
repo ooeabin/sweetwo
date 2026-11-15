@@ -348,19 +348,22 @@ export function H01Home() {
   // 상대 저금 같이 모으기 권유(띠 13). 내 저금이 0개면 띠 대신 H-10 빈 상태가 한 번만 보여 줌(2026-11-14 R4)
   const inviteGoal =
     mine.length + activeBundles.length === 0
-      ? bundleInviteGoal({
-          joint,
-          coupleState: sp.couple_state,
-          today,
-          partnerGoals: live
-            .filter((i) => i.owner === 'partner')
-            .map((i) => ({
-              id: i.goal.id,
-              name: i.goal.name,
-              created_at: i.goal.created_at,
-              bundle_id: i.goal.bundle_id,
-            })),
-        })
+      ? bundleInviteGoal(
+          {
+            joint,
+            coupleState: sp.couple_state,
+            today,
+            partnerGoals: live
+              .filter((i) => i.owner === 'partner')
+              .map((i) => ({
+                id: i.goal.id,
+                name: i.goal.name,
+                created_at: i.goal.created_at,
+                bundle_id: i.goal.bundle_id,
+              })),
+          },
+          { anyAge: true },
+        )
       : null;
   const tasks0: TopTask[] = h.input
     ? pickTopTasks({
@@ -711,6 +714,7 @@ export function H01Home() {
       moves={moves.moves}
       savingCount={sums.count}
       invite={inviteGoal}
+      partnerOut={!joint && sp.couple_state === 'connected' && !!partner.data}
       go={(box, to) => go(box, to)}
     />
   );

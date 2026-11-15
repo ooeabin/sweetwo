@@ -20,7 +20,10 @@ export function P04StyleConfirm() {
   const help =
     d.style === 'one_manager' && d.ctx.manager
       ? `${copy.styleNames.one_manager}. ${copy.managedBy(starter, d.ctx.manager === 'joiner')}`
-      : copy.styleNames[d.style];
+      : d.salaryMode === 'joint'
+        ? copy.styleNames[d.style]
+        : // 각자 엔진은 월급이 따로임을 같이 말함(2026-11-16 R4-9)
+          `${copy.styleNames[d.style]}. ${copy.styleEach(d.style === 'separate')}`;
   if (d.salaryMode === 'joint')
     return (
       <QuestionLayout

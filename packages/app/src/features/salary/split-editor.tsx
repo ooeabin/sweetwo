@@ -110,7 +110,7 @@ export function SplitEditor({
           : l.kind === 'send' || l.kind === 'shared_account'
             ? (l.name ?? '') // v2.2 새 줄: 화면 PR 전까지 저장된 이름만
             : copy.lineNames[l.kind];
-  /** 저금 줄 보조 글: 목표 금액이 있으면 “120만 / 500만 원”, 기한도 있으면 + “매달 246만 원이 필요해요”(06 5-2) */
+  /** 저금 줄 보조 글: 목표 금액이 있으면 “120만 / 500만 원”, 기한도 있으면 + “기한까지 매달 246만 원이면 돼요”(06 5-2) */
   const savingSub = (l: SplitLineDraft) => {
     const g = goalOf(l.goalId);
     if (!g || g.target_amount === null) return undefined;

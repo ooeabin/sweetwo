@@ -25,6 +25,8 @@ export type SavingTogetherEvent =
         amount_band: AmountBand;
         saving_count: number;
         payday_none: boolean;
+        /** W-20a ‘저금에 안 넣을게요’(2026-11-16 R4-7) */
+        skipped?: boolean;
       };
     }
   | {

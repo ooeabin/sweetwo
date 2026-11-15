@@ -95,11 +95,11 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
   // 처음 값 = 1년 뒤(2027년 10월, 13개월) → 200만 ÷ 13 = 16만(올림), 매달 20만이면 늦지 않음
-  await expect(page.getByText('매달 16만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText('기한까지 매달 16만 원이면 돼요')).toBeVisible();
   await expect(page.getByText(/지금 속도면/)).toHaveCount(0);
   // 2027년 6월(9개월) → 23만 > 20만 → 10개월째 2027년 7월, 1개월 늦어요
   await setYearMonth(page, 2027, 6);
-  await expect(page.getByText('매달 23만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText('기한까지 매달 23만 원이면 돼요')).toBeVisible();
   await expect(page.getByText('지금 속도면 2027년 7월에 다 모아요')).toBeVisible();
   await page.getByRole('button', { name: '추가하기' }).click();
   // 끝나면 미합류는 초대 시트(20 W-11 고친 점)
@@ -182,7 +182,7 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   // 월 필요액은 남은 1,000만 기준: 1년 뒤(13개월) → 77만(올림)
-  await expect(page.getByText('매달 77만 원이 필요해요')).toBeVisible();
+  await expect(page.getByText('기한까지 매달 77만 원이면 돼요')).toBeVisible();
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
   await expect(page.getByRole('heading', { name: '결혼 비용' })).toBeVisible();
   await page.getByRole('button', { name: '나중에 할게요' }).click();
