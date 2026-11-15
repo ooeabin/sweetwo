@@ -144,6 +144,7 @@ export const copy = {
   rankHero1: '우리 자산은 전체 가구 중', // [확인 필요]
   rankHero2: (pct: number, open = false) => (open ? `상위 ${pct}% 안이에요` : `상위 ${pct}%예요`), // [확인 필요] open = P90 이상
   rankAxis: { low: '하위', mid: '중간', high: '상위' },
+  rankAxisHelp: '‘중간’은 전체 가구를 줄 세웠을 때 한가운데예요', // [확인 필요] 2026-11-15
   rankYou: '우리',
   rankAria: (pct: number) => `우리나라 전체 가구 중 상위 ${pct}%`,
   rankBasis: (label: string, ym: string) => `${label}, ${ym} 말 기준`,
@@ -177,7 +178,7 @@ export const copy = {
   rankAskBirthSub: '또래와 비교해 드려요', // [확인 필요]
   // F-01 v2.2(2026-11-13): 평가금액 기준 + 전환
   principalView: '원금으로 보기', // [확인 필요]
-  principalViewHelp: '원금을 적은 투자·부동산은 원금으로 셈해요', // [확인 필요]
+  principalViewHelp: '원금은 처음 넣은 돈이에요. 적어 둔 투자·부동산은 그 금액으로 셈해요', // [확인 필요]
   // F-03q 빠르게 적기(2026-11-13)
   quickEntry: '큰 묶음만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
   quickTitle: '큰 묶음만 빠르게 적어 볼까요?', // [확인 필요]

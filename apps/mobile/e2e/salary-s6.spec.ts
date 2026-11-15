@@ -152,96 +152,15 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   );
 });
 
-test('W-05 그 체크리스트만: 옛 링크는 지금 것, 기간 밖은 W-02, 끝난 사이클은 W-02 그 달', async ({
+test('W-05는 없앰(2026-11-15): 옛 알림 링크(/salary/review)는 기간 안이든 밖이든 월급 탭 W-02로', async ({
   page,
 }) => {
-  // 기간 밖(10월 7일): 옛 링크도 id 링크도 W-02
-  await open(page);
+  await open(page, REVIEW);
   await page.goto('/salary/review');
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/salary/review?checklist=checklist-1');
   await expect(page).toHaveURL(/\/salary$/);
-});
-
-test('W-05 기간 안: 옛 링크(/salary/review)와 id 링크, 끝난 사이클 알림은 W-02 지난 달, 시트에 다른 금액·저금 보기, 체크한 줄은 남음', async ({
-  page,
-}) => {
-  const { db } = await open(page, REVIEW, (d) => {
-    const cur = d.checklists[0] as Line;
-    d.checklists.push({
-      ...cur,
-      id: 'checklist-past',
-      label: '8월 월급',
-      cycle_start: '2026-08-25',
-      cycle_end: '2026-09-24',
-      state: 'closed',
-      pay_check_line: (cur.pay_check_line as Line[]).map((l) => ({
-        ...l,
-        id: `${String(l.id)}-p`,
-        state: 'checked',
-        checked_by: chanwoo.id,
-        checked_at: '2026-08-26T01:00:00Z',
-      })),
-    });
-  });
-  await page.goto('/salary/review');
-  await expect(
-    page.getByRole('heading', { name: '9월 25일 월급, 확인할 게 남았어요' }),
-  ).toBeVisible();
-  await page.goto('/salary/review?checklist=checklist-1');
-  await expect(
-    page.getByRole('heading', { name: '9월 25일 월급, 확인할 게 남았어요' }),
-  ).toBeVisible();
-  // 시트: W-02와 같음(2026-11-12 D6)
-  await page.getByRole('button', { name: /^내 집 마련/ }).click();
-  const sheet = page.getByRole('dialog');
-  await expect(sheet.getByRole('button', { name: '계획대로 했어요', exact: true })).toBeVisible();
-  await expect(sheet.getByRole('button', { name: '다른 금액으로 했어요' })).toBeVisible();
-  await expect(sheet.getByRole('button', { name: '이번 달은 건너뛸게요' })).toBeVisible();
-  await expect(sheet.getByRole('button', { name: '저금 보기' })).toHaveClass(/hg-btn--link/);
-  await sheet.getByRole('button', { name: '계획대로 했어요', exact: true }).click();
-  const box = page.getByRole('checkbox', { name: '내 집 마련 확인' });
-  await expect(page.locator('.hg-toast')).toContainText('내 집 마련에 95만 원 더했어요');
-  await expect(box).toHaveAttribute('aria-checked', 'true');
-  await expect(box).not.toHaveAttribute('aria-busy', 'true');
-  await expect(page.locator('.hg-transfer')).toHaveCount(5);
-  // 다시 누르면 풀림
-  await box.click();
-  await expect.poll(() => linesOf(db)[1]?.state).toBe('wait');
-  // 지난 사이클을 가리키는 링크 → W-02 그 달(읽기 전용)
-  await page.goto('/salary/review?checklist=checklist-past');
-  await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('heading', { name: '8월 25일 월급' })).toBeVisible();
-});
-
-test('W-05 Realtime(합쳐서): 상대가 체크하면 바로 바뀌고 2초 강조, 못 불러오면 다시 시도', async ({
-  page,
-}) => {
-  const { db, rt } = await open(page, REVIEW, joint);
-  await page.goto('/salary/review');
-  await expect(
-    page.getByRole('heading', { name: '9월 25일 월급, 확인할 게 남았어요' }),
-  ).toBeVisible();
-  await expect.poll(() => rt.subscribed('pay_check_line')).toBeGreaterThan(0);
-  const fixed = linesOf(db).find((l) => l.kind === 'fixed');
-  byYebin(fixed);
-  rt.emit('pay_check_line', 'UPDATE', { id: fixed?.id, space_id: 'space-1', state: 'checked' });
-  await expect(page.getByRole('checkbox', { name: '고정지출 확인' })).toHaveAttribute(
-    'aria-checked',
-    'true',
-  );
-  await expect(page.locator('.hg-transfer.is-changed')).toContainText('고정지출');
-  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText('예빈');
-
-  // 못 불러오면 오류 + 다시 시도(S6-08)
-  await page.route('**/rest/v1/pay_checklist*', (r) =>
-    r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"x"}' }),
-  );
-  await page.reload();
-  await expect(page.getByRole('heading', { name: '잠시 문제가 생겼어요' })).toBeVisible({
-    timeout: 20_000,
-  });
-  await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^내 집 마련/ })).toBeVisible();
 });
 
 test('저금 묶음 끝 ‘+ 저금 추가’는 좁은 창만(넓은 창은 제목 줄 버튼, S6-16)', async ({

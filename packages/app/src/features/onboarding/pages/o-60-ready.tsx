@@ -60,6 +60,10 @@ export function O60Ready() {
           </li>
         ))}
       </ul>
+      {/* 2026-11-15 3차 검토 U9: 앱이 돈을 옮기지 않는다는 한 줄 */}
+      <p className="hg-help" style={{ textAlign: 'center' }}>
+        {copy.readyNoMove}
+      </p>
     </QuestionLayout>
   );
 }

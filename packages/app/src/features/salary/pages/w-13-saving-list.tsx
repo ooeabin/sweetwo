@@ -1,4 +1,4 @@
-import { AddRow, Icon, ListRow, Menu, PageHeader } from '@sweetwo/ui';
+import { Icon, ListRow, Menu, PageHeader } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -117,11 +117,6 @@ export function W13SavingList() {
           {copy.listEmpty}
         </p>
       )}
-      <AddRow
-        label={copy.moneyIn}
-        block
-        onClick={() => nav(`${togetherPaths.moneyIn}?back=${encodeURIComponent(savingPaths.list)}`)}
-      />
       <BundleAchieveWatch />
       {canAdd && (
         <div className="hg-list">

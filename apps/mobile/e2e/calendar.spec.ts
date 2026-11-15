@@ -175,7 +175,7 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급 전 확인, 저금
   expect(all).not.toContain('자동차 기한');
   await axe(page);
 
-  await page.getByRole('button', { name: '경조사', exact: true }).click();
+  await page.getByRole('button', { name: '경조사·기념일', exact: true }).click();
   await expect(money.locator('.hg-list').getByRole('button')).toHaveCount(0);
   await page.getByRole('button', { name: '금융 일정', exact: true }).click();
   await expect(page.locator('.hg-empty')).toHaveCount(0);
@@ -208,7 +208,7 @@ test('Y-01 맨 위 이번 주 띠(2026-11-09): 일~토, 오늘 ink 원, 일정 �
   await expect(dot(9)).toHaveCount(1);
   await expect(dot(8)).toHaveCount(0);
   // 경조사만 보면 금융 일정 점 없음
-  await page.getByRole('button', { name: '경조사', exact: true }).click();
+  await page.getByRole('button', { name: '경조사·기념일', exact: true }).click();
   await expect(dot(9)).toHaveCount(0);
   await page.getByRole('button', { name: '전체', exact: true }).click();
   // ‘목록 / 달력’ 탭은 없고 오른쪽 ‘달력 ›’
@@ -221,7 +221,7 @@ test('Y-01 맨 위 이번 주 띠(2026-11-09): 일~토, 오늘 ink 원, 일정 �
   await expect(page).toHaveURL(/\/calendar\/list$/);
 });
 
-test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-05), 고른 날 일정 → 화면, 달 넘기기, 캘린더 탭은 늘 목록', async ({
+test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-02, W-05 화면은 2026-11-15 없앰), 고른 날 일정 → 화면, 달 넘기기, 캘린더 탭은 늘 목록', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -255,7 +255,7 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-05), 고른 �
   ).toHaveText('월급 전 확인');
   await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급, 빠진 게 있는지 확인할 때예요/ }).click();
-  // 오늘(10월 7일)은 아직 월급 전 확인 기간 전이라 W-05가 W-02로 보냄(2026-11-12 D3)
+  // 오늘(10월 7일)은 월급 탭 W-02로 감(W-05 화면은 2026-11-15 없앰)
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/calendar/month');
   await page.getByRole('button', { name: '10월 23일, 일정 1개' }).click();
@@ -276,7 +276,7 @@ test('달력(Y-04): 금융 일정 점, 월급 전 확인 띠(→ W-05), 고른 �
   await page.getByRole('button', { name: '11월 30일, 일정 1개' }).click();
   await expect(page.getByRole('button', { name: /여행 기한/ })).toBeVisible();
   // 경조사만 보면 금융 일정 점·띠 없음
-  await page.getByRole('button', { name: '경조사', exact: true }).click();
+  await page.getByRole('button', { name: '경조사·기념일', exact: true }).click();
   await expect(page.getByRole('button', { name: '11월 30일' })).toBeVisible();
 });
 

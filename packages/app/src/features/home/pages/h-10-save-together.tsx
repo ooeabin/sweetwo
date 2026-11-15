@@ -216,7 +216,6 @@ export function H10SaveTogether({
             }
           : undefined
       }
-      moneyIn={{ label: copy.moneyIn, onClick: () => go('money_in', '/salary/money-in') }}
     />
   );
 }

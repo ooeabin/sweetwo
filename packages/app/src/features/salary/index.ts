@@ -17,7 +17,6 @@ export { copy as salaryCopy } from './copy';
 export { W01Receipt } from './pages/w-01-receipt';
 export { DoneRedirect, SalaryTab, SalarySeg, SplitRedirect } from './salary-tab';
 export { W02PaydayConfirm } from './pages/w-02-payday-confirm';
-export { W05PrePayday } from './pages/w-05-pre-payday';
 export { W10SavingItem } from './pages/w-10-saving-item';
 export { W10aSavingEdit } from './pages/w-10a-saving-edit';
 export { W11SavingAdd } from './pages/w-11-saving-add';

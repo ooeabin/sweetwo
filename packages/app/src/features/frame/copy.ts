@@ -40,7 +40,7 @@ export const copy = {
   noticeClose: '닫기', // [확인 필요]
   addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
-  addCare: '경조사',
+  addCare: '경조사·기념일',
   cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
   cmdEmpty: '찾는 게 없어요',
   // 검색 아래 키 안내(넓은 창, 2026-11-03)
@@ -56,7 +56,7 @@ export const copy = {
   cmdLock: '잠그기',
   cmdSavings: '저금',
   cmdAssets: '자산·부채',
-  cmdCares: '경조사',
+  cmdCares: '경조사·기념일',
   offlineTitle: '연결이 끊겼어요',
   offlineBody: '다시 연결되면 이어서 볼 수 있어요',
   offlineCached: '오프라인',

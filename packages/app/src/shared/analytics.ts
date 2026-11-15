@@ -384,7 +384,7 @@ export type AnalyticsEvent =
         result: 'as_planned' | 'different';
         diff_band: AmountBand | null;
         checked_by: 'self' | 'joint';
-        entry: 'w02' | 'w05' | 'w10';
+        entry: 'w02' | 'w10';
         days_from_payday: number | null;
       };
     }
@@ -434,11 +434,6 @@ export type AnalyticsEvent =
         banner: 'unlink' | 'must_notice' | 'mail_bounced' | 'notice';
         action: 'open' | 'close';
       };
-    }
-  | {
-      // W-05 월급 전 확인 열림(32 4-4). entry: home = 홈 할 일 띠, notification = 알림, other = 그 밖(월급 탭 등)
-      name: 'month_check_viewed';
-      props: { entry: 'notification' | 'home' | 'other'; open_lines_count: number };
     }
   | {
       // 알림을 눌러 들어옴(32 4-7, 2026-11-12 QA 10구간 S10-03). type = 알림 종류(kind), channel inapp = 알림 센터, os = 푸시.

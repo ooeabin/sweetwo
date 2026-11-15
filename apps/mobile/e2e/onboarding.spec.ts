@@ -113,8 +113,9 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await axe(page);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('월급을 추천값으로 나눠 뒀어요')).toBeVisible();
+  await expect(page.getByText('월급 계획을 만들어 뒀어요')).toBeVisible();
   await expect(page.getByText('10월 25일 월급날에 처음 확인해요')).toBeVisible();
+  await expect(page.getByText('앱은 돈을 옮기지 않아요. 보낸 걸 확인만 해요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
 
@@ -128,11 +129,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   });
   expect(db.splits).toHaveLength(1);
   expect(db.splits[0]?.owner_user_id).toBe(chanwoo.id);
-  expect(lines(db)[0]).toEqual([
-    ['fixed', 880_000],
-    ['living', 880_000],
-    ['allowance', 350_000],
-  ]);
+  expect(lines(db)[0]).toEqual([['allowance', 350_000]]);
   // 소급 없음: 첫 확인 목록은 만들지 않음
   expect(db.checklists).toHaveLength(0);
   expect(db.rpc).not.toContain('start_checklist');
@@ -149,7 +146,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
   await page.goto('/');
   await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
-  // W-11e 은행에서 자동으로 나가요?(2026-11-13)
+  // W-11e 은행에서 자동으로 보내요?(2026-11-13)
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
   await next(page);
@@ -226,7 +223,7 @@ const ROWS: {
     note: '같이 관리하면 파트너도 이 금액을 봐요',
   },
   {
-    name: '합쳐서 관리해요(둘이 같이)',
+    name: '월급을 합쳐서 써요(둘이 같이)',
     living: '네',
     saving: '네',
     who: '둘이 같이 해요',
@@ -465,7 +462,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급이 생기면 홈에서 알려 주세요')).toBeVisible();
-  await expect(page.getByText('월급을 추천값으로 나눠 뒀어요')).toHaveCount(0);
+  await expect(page.getByText('월급 계획을 만들어 뒀어요')).toHaveCount(0);
   expect(db.splits.find((s) => s.split_line.length)?.owner_user_id).toBeNull();
   // 뒤로(O-55 → O-31, O-32는 건너뜀)
   await page.goBack();
@@ -478,13 +475,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   await heading(page, '월급날은 며칠이에요?');
   await next(page);
   await heading(page, '10월 25일 월급날 아침에 알려 드릴까요?');
-  expect(lines(db).filter((l) => l.length)).toEqual([
-    [
-      ['fixed', 880_000],
-      ['living', 880_000],
-      ['allowance', 350_000],
-    ],
-  ]);
+  expect(lines(db).filter((l) => l.length)).toEqual([[['allowance', 350_000]]]);
 });
 
 test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월급 계획을 다시 만듦(S2-01)', async ({
@@ -542,8 +533,6 @@ test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈이 주로 해
       .find((s) => s.owner_user_id === null)
       ?.split_line.map((l) => [l.kind, l.user_id ?? null, l.amount]),
   ).toEqual([
-    ['fixed', null, 1_550_000],
-    ['living', null, 1_550_000],
     ['allowance', chanwoo.id, 310_000],
     ['allowance', 'yebin', 310_000],
   ]);

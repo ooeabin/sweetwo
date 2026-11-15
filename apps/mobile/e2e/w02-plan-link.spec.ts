@@ -83,7 +83,7 @@ test('진행 막대: 체크할수록 칸 안이 차고 “체크한 금액”이
   await expect(page.getByRole('img', { name: '5개 중 0개 완료' })).toBeVisible();
   // 개수 글자는 머리에서 빠짐
   await expect(page.getByText(/5개 중 0개 완료/)).toHaveCount(0);
-  // 06 3-5: 139만 / 211만 / 0 → 40 / 60, 여유 자금 0이라 칸 없음
+  // 06 3-5: 139만 / 211만 / 0 → 40 / 60, 아직 안 정한 돈 0이라 칸 없음
   expect(await bar(page)).toEqual([
     ['saving', 40, '0%'],
     ['spend', 60, '0%'],
@@ -253,7 +253,7 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   // 첫 체크리스트(지난 달 없음)에는 없음
-  await expect(page.getByText('계획대로 체크리스트를 만들었어요')).toHaveCount(0);
+  await expect(page.getByText('계획대로 월급날 확인 목록을 만들었어요')).toHaveCount(0);
   const cur = db.checklists[0] as Line;
   db.checklists.push({
     ...cur,
@@ -271,7 +271,7 @@ test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어
     })),
   });
   await page.reload();
-  const note = page.getByText('9월 계획대로 체크리스트를 만들었어요');
+  const note = page.getByText('9월 계획대로 월급날 확인 목록을 만들었어요');
   await expect(note).toBeVisible();
   await axe(page);
   // 지난 달 보기에서는 없음, 지난 달은 같은 한 줄(읽기 전용, 2026-11-12)
@@ -297,9 +297,9 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같�
   await expect(link).toHaveText('이번 달 0/2 확인했어요');
   await link.click();
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);
-  await expect(page.getByText('예빈님 체크리스트예요. 보기만 할 수 있어요')).toBeVisible();
+  await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
   await expect(page.getByText('확인한 금액 0원 / 95만 원')).toBeVisible();
-  // 95 ÷ 270 → 지출 35%, 여유 자금 65%
+  // 95 ÷ 270 → 지출 35%, 아직 안 정한 돈 65%
   expect(await bar(page)).toEqual([
     ['spend', 35, '0%'],
     ['free', 65, null],

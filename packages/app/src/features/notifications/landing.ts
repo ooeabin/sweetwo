@@ -2,7 +2,7 @@
 const RULES: [RegExp, string][] = [
   [/^\/$/, 'H-01'],
   [/^\/notifications$/, 'N-02'],
-  [/^\/salary\/review(?:\?|$)/, 'W-05'],
+  [/^\/salary\/review(?:\?|$)/, 'W-02'], // 옛 W-05 링크(2026-11-15 없앰)
   [/^\/salary\/items\/[^/?]+\/achieved/, 'W-12'],
   [/^\/(?:salary\/items|goals)\/[^/?]+/, 'W-10'],
   [/^\/salary\/split\/new/, 'W-01b'],

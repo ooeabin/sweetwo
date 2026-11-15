@@ -130,9 +130,9 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(salary).toContainText('350만 원, 25일');
   await expect(salary).toContainText('예빈 250만 원, 10일');
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '각자 따로 해요',
+    '월급은 각자 써요',
   );
-  await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toHaveCount(0);
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
   await page.getByRole('button', { name: /알림 이메일/ }).click();
   await expect(page).toHaveURL(/\/settings\/me\/email$/);
@@ -272,7 +272,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
 
   // 관리 형태(S-11f): 세 질문, 각자 → 합쳐서는 예빈 ‘좋아요’가 필요(요청)
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '각자 따로 해요',
+    '월급은 각자 써요',
   );
   await page.getByRole('button', { name: /월급 관리 방식/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/style$/);
@@ -306,11 +306,13 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
 
   // 체크리스트 만드는 날(합쳐서 + 합류): 늦은 월급날이 기본
   await page.goto('/settings/me');
-  await expect(page.getByRole('button', { name: /체크리스트 만드는 날/ })).toContainText(
+  await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toContainText(
     '늦은 월급날',
   );
-  await page.getByRole('button', { name: /체크리스트 만드는 날/ }).click();
-  await expect(page.getByRole('heading', { name: '체크리스트를 언제 만들까요?' })).toBeVisible();
+  await page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ }).click();
+  await expect(
+    page.getByRole('heading', { name: '월급날 확인 목록을 언제 만들까요?' }),
+  ).toBeVisible();
   await expect(page.getByRole('radio', { name: '찬우 월급날 25일' })).toHaveAttribute(
     'aria-checked',
     'true',
@@ -368,11 +370,8 @@ test('우리 둘 정보(S-12): 미합류 초대하기(코드 상자, 링크 복�
   await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('초대 전');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
 
-  // 초대 전: 기획 문장 그대로 + ‘초대하기’ = 바로 코드 상자(D6, D9)
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  // 합류 전에 열면 코드를 바로 만들어 코드 상자가 처음부터 보임(2026-11-15 3차 검토 U10)
   await expect(page.getByRole('button', { name: '받은 초대 코드가 있어요' })).toBeVisible();
-  await axe(page);
-  await page.getByRole('button', { name: '초대하기' }).click();
   const box = page.getByRole('button', { name: /초대 코드 K 7 M 2 Q X/ });
   await expect(box).toContainText('K7M2QX');
   await expect(page.getByText('10월 22일까지')).toBeVisible();
@@ -450,6 +449,8 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   seed(db);
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  // 2026-11-15 3차 검토 U10: 연결 상태 S-12에 활동 기록 줄(→ 알림 화면)
+  await expect(page.getByRole('button', { name: '활동 기록' })).toBeVisible();
   await page.getByRole('button', { name: '연결 해제' }).click();
 
   // S-12a 안내(v2.2): 남는 것 / 지워지는 것, 30일 복구 안내 없음
@@ -607,7 +608,7 @@ test('혼자 쓰기(S-12): 다시 연결하기(복구 없는 새 요청, 7일 1�
   await expect(page.getByText('다시 연결 요청은 7일에 한 번 보낼 수 있어요')).toBeVisible();
 
   await page.getByRole('button', { name: '새로 초대하기' }).click();
-  await expect(page.getByText('함께할 사람을 초대해 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: /초대 코드 K 7 M 2 Q X/ })).toBeVisible();
   expect(db.space?.couple_state).toBe('not_joined');
   await axe(page);
 });
@@ -634,7 +635,9 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
   ask();
   // 홈 띠 2번(19): 받은 열린 요청(reconnect_request)을 봄(옛 couple_unlink.reconnect_by는 비어 있음)
   await page.goto('/');
-  await expect(page.locator('.hg-hubband').first()).toContainText('예빈님이 다시 연결하자고 했어요');
+  await expect(page.locator('.hg-hubband').first()).toContainText(
+    '예빈님이 다시 연결하자고 했어요',
+  );
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /우리 둘 정보/ }).click();
   await expect(page.getByText('예빈님이 다시 연결하자고 해요')).toBeVisible();

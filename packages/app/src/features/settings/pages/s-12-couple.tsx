@@ -74,11 +74,13 @@ export function S12Couple() {
   const reserved = inv && !inv.usedAt && inv.reservedUntil ? inv : null;
   const live =
     inv && !inv.usedAt && !reserved && new Date(inv.expiresAt).getTime() > Date.now() ? inv : null;
-  // 홈 초대 띠·서랍에서 왔으면(?invite=1) 코드가 없을 때 바로 만듦(한 번)
+  // 합류 전에 들어오면 코드가 바로 보이게(2026-11-15 3차 검토 U10): 코드를 한 번도 안 만들었으면 바로 만들고,
+  // 홈 초대 띠·서랍 ‘초대하기’(?invite=1)는 만료된 코드도 새로 만듦(한 번)
   const auto = useRef(false);
   const wantInvite = params.get('invite') === '1';
   useEffect(() => {
-    if (auto.current || !wantInvite || state !== 'not_joined' || invite.isLoading) return;
+    if (auto.current || state !== 'not_joined' || invite.isLoading) return;
+    if (!wantInvite && inv) return;
     if (live || reserved) return;
     auto.current = true;
     void make(!!inv);
@@ -378,6 +380,7 @@ export function S12Couple() {
       {(state === 'not_joined' && !reserved) || state === 'solo' ? haveCode : null}
       {state === 'connected' && (
         <div className="hg-list">
+          <ListRow label={copy.activityLog} onClick={() => nav('/notifications')} />
           <ListRow label={copy.unlink} onClick={() => nav('/settings/couple/unlink')} />
         </div>
       )}

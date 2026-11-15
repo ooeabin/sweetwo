@@ -5,7 +5,7 @@ import { fakeBridge } from './fake-bridge';
 import { events } from './analytics';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
-// H-07 월급 계획 + 여유 자금, H-12 결혼 준비, H-04·H-09. 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
+// H-07 월급 계획 + 아직 안 정한 돈, H-12 결혼 준비, H-04·H-09. 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 25일 월급 사이클 = 9월 25일 ~ 10월 24일, 월급 전 확인은 10월 22일부터.
 
 const axe = async (page: Page) => {
@@ -44,7 +44,7 @@ async function open(page: Page, prep?: (db: MemDb) => void, now = NOW, url = '/'
 const lines = (db: MemDb, i = 0) =>
   (db.checklists[i]?.pay_check_line ?? []) as Record<string, unknown>[];
 
-test('H-10 같이 모으기 + H-11 월급날 + H-07 여유 자금(19 v2.2): 대표 저금은 목표 금액에 가까운 것, 저금 2개면 가로 넘김 + ‘저금 모두 보기’', async ({
+test('H-10 같이 모으기 + H-11 월급날 + H-07 아직 안 정한 돈(19 v2.2): 대표 저금은 목표 금액에 가까운 것, 저금 2개면 가로 넘김 + ‘저금 모두 보기’', async ({
   page,
 }) => {
   const db = await open(page);
@@ -62,17 +62,18 @@ test('H-10 같이 모으기 + H-11 월급날 + H-07 여유 자금(19 v2.2): 대�
   await expect(first).toContainText('목표 금액 1억 5,000만 원의 0%');
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
   await expect(h.getByRole('button', { name: '저금 모두 보기' })).toBeVisible();
-  await expect(h.getByRole('button', { name: '돈 들어왔어요' })).toBeVisible();
+  // 2026-11-15: ‘돈 들어왔어요’는 저금 카드에서 빼고 월급 ‘이번 달’(W-02) ‘받은 돈 적기’로 옮김
+  await expect(h.getByRole('button', { name: '받은 돈 적기' })).toHaveCount(0);
   // H-11: 손 줄 5개가 남음. 월급날(9월 25일)이 지났으니 “월급날이에요” 대신 날짜 문장(2026-11-13 UX B M2)
   await expect(monthLine(page)).toContainText('9월 25일 월급에서 확인할 게 5개 남았어요');
   await expect(monthLine(page)).toContainText('확인하기');
   // H-06: 저금이 있어 첫 저금 띠는 없고, 미합류라 초대(15번)
   await expect(band(page)).toContainText('같이 모을 사람을 초대해 보세요');
   await expect(band(page)).toContainText('초대하기');
-  // H-07 포인트 상자: 매달 25일 + 여유 자금(350만 − 350만)
+  // H-07 포인트 상자: 매달 25일 + 아직 안 정한 돈(350만 − 350만)
   const plan = page.getByRole('button', { name: /^월급 계획/ });
   await expect(plan).toContainText('매달 25일');
-  await expect(plan).toContainText('여유 자금 0원');
+  await expect(plan).toContainText('아직 안 정한 돈 0원');
   // 결혼했어요라 H-12 없음
   await expect(page.getByText(/결혼 준비 메모/)).toHaveCount(0);
   await axe(page);
@@ -95,7 +96,7 @@ test('H-10 같이 모으기 + H-11 월급날 + H-07 여유 자금(19 v2.2): 대�
   await expect(first).toContainText('이번 달 +95만 원');
 });
 
-test('홈 상자 → 화면: 같이 모으기 W-10, 돈 들어왔어요 W-20, 저금 모두 보기 W-13, 월급 계획 W-01, 캘린더, 자산 관리, 저금', async ({
+test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-13, 월급 계획 W-01, 캘린더, 자산 관리, 저금', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -105,7 +106,6 @@ test('홈 상자 → 화면: 같이 모으기 W-10, 돈 들어왔어요 W-20, �
       () => together(page).locator('.hg-together__slide').first().click(),
       /\/salary\/items\/goal-h$/,
     ],
-    [() => page.getByRole('button', { name: '돈 들어왔어요' }).click(), /\/salary\/money-in$/],
     [
       () => page.getByRole('button', { name: '저금 모두 보기' }).click(),
       /\/salary\/items\?from=home$/,
@@ -354,7 +354,7 @@ test('날짜 없는 사람: 첫 돈 전 “돈이 들어오면 알려 주세요�
     d.checklists.length = 0;
   });
   await expect(monthLine(page)).toContainText('돈이 들어오면 알려 주세요');
-  await expect(monthLine(page)).toContainText('돈 들어왔어요');
+  await expect(monthLine(page)).toContainText('받은 돈 적기');
   if (db.v22)
     db.v22.period = {
       status: 'gap',
@@ -369,7 +369,7 @@ test('날짜 없는 사람: 첫 돈 전 “돈이 들어오면 알려 주세요�
   await expect(monthLine(page)).toContainText('지난번 돈이 들어온 지 41일 됐어요');
 });
 
-test('W-05 월급 전 확인(v2.2): 남은 손 줄만(자동 줄 없음), 제목 “9월 25일 월급, 확인할 게 남았어요”, ‘이번 달은 건너뛸게요’', async ({
+test('H-11 월급 전 확인 한 줄(v2.2, W-05 화면은 2026-11-15 없앰): 누르면 월급 탭 W-02, 남은 손 줄만(자동 줄 없음), ‘이번 달은 건너뛸게요’', async ({
   page,
 }) => {
   const REVIEW = new Date('2026-10-22T10:00:00+09:00');
@@ -383,10 +383,7 @@ test('W-05 월급 전 확인(v2.2): 남은 손 줄만(자동 줄 없음), 제목
   );
   await expect(monthLine(page)).toContainText('9월 25일 월급에서 확인할 게 4개 남았어요');
   await monthLine(page).click();
-  await expect(page).toHaveURL(/\/salary\/review\?checklist=checklist-1$/);
-  await expect(
-    page.getByRole('heading', { name: '9월 25일 월급, 확인할 게 남았어요' }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/salary$/);
   await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: /^청약/ }).click();
@@ -512,17 +509,17 @@ test('한 사람 관리형 관리하지 않는 쪽: H-11 “이번 달 보내기
   await axe(page);
 });
 
-test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 나가요 + 나가는 날 → 바로 저장 + 되돌리기, 알약 “자동 26일”', async ({
+test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 알약 “자동 26일”', async ({
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary?view=plan');
   await page.getByRole('button', { name: '고정지출 88만 원' }).click();
   const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
-  await expect(sheet.getByRole('switch', { name: '체크리스트에 넣기' })).toHaveAttribute(
+  await expect(sheet.getByRole('switch', { name: '월급날 확인 목록에 넣기' })).toHaveAttribute(
     'aria-checked',
     'true',
   );
-  await sheet.getByRole('switch', { name: '은행에서 자동으로 나가요' }).click();
+  await sheet.getByRole('switch', { name: '은행에서 자동으로 보내요' }).click();
   await sheet.getByRole('button', { name: '다음 날' }).click();
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
@@ -535,7 +532,7 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   );
   // 저금 줄 시트에는 ‘체크리스트에 넣기’가 없음(늘 켬)
   await page.getByRole('button', { name: /^청약/ }).click();
-  await expect(page.getByRole('switch', { name: '체크리스트에 넣기' })).toHaveCount(0);
+  await expect(page.getByRole('switch', { name: '월급날 확인 목록에 넣기' })).toHaveCount(0);
 });
 
 // ---- 맨 위 띠, 오류, 자산, Realtime(2026-11-11 QA 4구간, v2.2에 맞춤) ----

@@ -76,10 +76,11 @@ export const copy = {
   // O-60 준비 끝(2026-11-13 고친 점) [확인 필요]
   readyTitle: (name: string) => `${name}님, 준비가 끝났어요`,
   readyDone: {
-    split: '월급을 추천값으로 나눠 뒀어요',
+    split: '월급 계획을 만들어 뒀어요',
     firstCheck: (date: string) => `${date} 월급날에 처음 확인해요`,
     noDate: '돈이 들어오면 홈에서 알려 주세요',
     salary: '월급이 생기면 홈에서 알려 주세요',
   },
   readyGo: '첫 저금 만들기',
+  readyNoMove: '앱은 돈을 옮기지 않아요. 보낸 걸 확인만 해요', // [확인 필요] 2026-11-15 3차 검토 U9
 };

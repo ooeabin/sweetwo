@@ -142,7 +142,7 @@ export function trackCompleted(
   });
 }
 
-export type CheckEntry = 'w02' | 'w05' | 'w10';
+export type CheckEntry = 'w02' | 'w10';
 export type CheckResult = {
   r: 'ok' | 'already_checked' | 'closed';
   /** 이번 체크로 확인이 끝났으면(마지막 손 줄, 2026-11-13 자동 줄은 셈하지 않음) 그 끝남과 사이클 시작일 */
@@ -204,7 +204,7 @@ export function useCheck(entry: CheckEntry = 'w02') {
         if (kind) {
           finish = { kind, start: list.cycle_start };
           track('payday_confirmed', {
-            method: entry === 'w05' ? 'w05' : 'line_by_line',
+            method: 'line_by_line',
             manual_lines: before.length,
             late: list.cycle_end < today,
           });

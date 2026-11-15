@@ -14,7 +14,7 @@
 | 저장소 구조 | pnpm + Turborepo | 모바일 앱, 어드민, 웹사이트, 공용 패키지를 한 저장소에서 관리·빌드 |
 | 테스트 | Vitest, Playwright, pgTAP | 계산 함수 단위 테스트, 화면 흐름 E2E, DB 함수·RLS 테스트 |
 | CI/CD | GitHub Actions | 테스트·빌드·배포 자동 실행 |
-| 서버(DB·인증·실시간) | Supabase: Postgres + Auth + Realtime + Edge Functions, 서울 리전(ap-northeast-2) | 커플 공간·항목·월급 계획·체크리스트·이력 저장. 행 단위 보안(RLS)으로 공개 범위 필터를 서버에서 적용, Realtime으로 상대 변경 1\~2초 수신. DB 전체 암호화(저장·백업), 금액 합계·여유 자금·목표 모은 금액은 DB 함수가 계산 |
+| 서버(DB·인증·실시간) | Supabase: Postgres + Auth + Realtime + Edge Functions, 서울 리전(ap-northeast-2) | 커플 공간·항목·월급 계획·체크리스트·이력 저장. 행 단위 보안(RLS)으로 공개 범위 필터를 서버에서 적용, Realtime으로 상대 변경 1\~2초 수신. DB 전체 암호화(저장·백업), 금액 합계·아직 안 정한 돈·목표 모은 금액은 DB 함수가 계산 |
 | 서버 작업 | Postgres 함수(버전 판정·충돌 규칙) + pg\_cron + Edge Functions | 월급날(기준일) 0시 체크리스트 생성과 지난 체크리스트 닫기(체크 안 한 줄 ‘못 함’), 알림 예약(월급날 오전 9시, 다음 월급날 3일 전 오후 8시)(→ 동기화 5장, 핵심 규칙 › 월 사이클), 비교 통계 월 1회 계산(출시 후, 기준 다시 정함 [확인 필요]), 공휴일 받기(매년 12월 다음 해, 매주 1회 다시), 연결 해제(요청 + 14일 지나면 확정하고 커플 공간 데이터를 보관본으로 옮김, 확정 + 30일 지나면 보관본 영구 삭제 → 보안·개인정보 4장) |
 | 로그인 | Supabase Auth. 카카오·구글·애플 모두 기본 제공 공급자 사용 | 기준 → 보안·개인정보 2장 ‘로그인’ |
 | 필드 암호화 | Edge Functions에서 AES-256-GCM, 키 = AWS KMS 서울. 메모·가족 정보만 | 범위 → 보안·개인정보 2장 |
@@ -69,12 +69,12 @@
 | debt 부채 | kind enum, name, balance bigint, rate numeric(5,3), monthly\_payment bigint, maturity\_date, owner\_user\_id, entered\_by uuid, visibility enum | 1 : N 금액 이력 |
 | annual\_event 연간 이벤트 | name, amount bigint, month smallint, repeat bool | N : 1 커플 공간 |
 | goal 저금 항목(예전 목표, 2026-11-08 ADR 0007) | 테이블 이름은 그대로(스키마 추가만). 쓰는 필드: name, target\_amount(null = 목표 금액 없음), deadline(null 가능), owner\_user\_id(null = 합쳐서 우리 둘, 사용자 id = 각자 모드 주인), visibility(주인 있는 항목만), status(active / achieved), closed\_at(그만 모음, 2026-11-08 추가), achieved\_at·achieved\_seen(축하 1회). 모은 금액 = 체크한 저금 줄 합(DB 함수 goal\_saved). 안 쓰는 필드(template, kind, priority, other\_held, photo, freed\_lines 등)는 남겨 두고 2단계로 지움 | 0\~1 월급 계획 저금 줄(주인 월급 계획 또는 공동) |
-| salary\_split 월급 계획 (W-01, O-50) | owner\_user\_id(각자 = 그 사람, 합쳐서 = null 공동), income bigint(합쳐서면 두 사람 실수령 합, 서버 계산), updated\_by. 여유 자금 = income − 줄 합계(저장 안 함, 계산) [확인 필요] | 각자 = 사람마다 1, 합쳐서 = 커플 공간에 1. 1 : N 월급 계획 줄 |
+| salary\_split 월급 계획 (W-01, O-50) | owner\_user\_id(각자 = 그 사람, 합쳐서 = null 공동), income bigint(합쳐서면 두 사람 실수령 합, 서버 계산), updated\_by. 아직 안 정한 돈 = income − 줄 합계(저장 안 함, 계산) [확인 필요] | 각자 = 사람마다 1, 합쳐서 = 커플 공간에 1. 1 : N 월급 계획 줄 |
 | split\_line 월급 계획 줄 | split\_id, kind enum(저금/고정지출/생활비/용돈/직접 추가), goal\_id(저금 줄만), user\_id(용돈 줄만, 합쳐서면 사람마다 1줄), name text(직접 추가 줄, 최대 10줄), amount bigint(1만 원 단위, 0 가능), sort smallint [확인 필요] | N : 1 월급 계획, N : 0\~1 목표 |
 | pay\_checklist 이번 달 월급 체크리스트 (W-02) | split\_id, owner\_user\_id(null이면 합쳐서 공동), cycle\_start·cycle\_end date, label text(‘10월 월급’), state enum(진행 중/다 했어요/끝남). 기준일 0시 서버 작업이 월급 계획을 복사해 만듦, 첫 사이클은 O-60 직후 [확인 필요] | 1 : N 체크 줄 |
 | pay\_check\_line 체크 줄 | checklist\_id, split\_line\_id(null 가능, 줄을 지워도 기록 유지), kind enum, goal\_id(저금 줄), planned bigint, actual bigint(W-02a 다른 금액), state enum(대기/체크/못 함), checked\_by, checked\_at, on\_behalf bool(옛 대신 체크. 2026-11-03 대신 체크 없앰, 새 체크에는 쓰지 않음, 스키마는 추가만이라 열은 둠) [확인 필요]. 저금 줄 체크·풀기 = 목표 모은 금액 더하기·빼기 | N : 1 체크리스트, N : 0\~1 목표 |
 | item\_catalog 항목 이름 목록 | kind enum(저축·투자), group text, key, name, sort, hidden bool. 어드민 AD-19에서 수정, 앱 배포 없이 반영. 고정·변동·큰 지출 종류는 지출 입력이 없어져 없앰 [확인 필요] | 전체 공통(커플 공간 없음) |
-| goal\_move 넣기·빼기·꺼내 쓰기 | 2026-11-08 새 코드에서 쓰지 않음(ADR 0007). 2026-11-13 다시 씀(ADR 0009): 돈 들어왔어요·바로잡기·잔액 맞추기·쓸 곳 메모·날짜 없는 자동 저금 기록. `reason`, `reason_code`, `hide_from_summary`, `money_in_id`, `note_id` 추가, kind는 in/out만. 2026-11-08 전 옛 행은 계속 세지 않음 [확인 필요] | — |
+| goal\_move 넣기·빼기·꺼내 쓰기 | 2026-11-08 새 코드에서 쓰지 않음(ADR 0007). 2026-11-13 다시 씀(ADR 0009): 받은 돈 적기·바로잡기·잔액 맞추기·쓸 곳 메모·날짜 없는 자동 저금 기록. `reason`, `reason_code`, `hide_from_summary`, `money_in_id`, `note_id` 추가, kind는 in/out만. 2026-11-08 전 옛 행은 계속 세지 않음 [확인 필요] | — |
 | family 가족 | side enum, relation enum, nickname 암호, birthday\_md 암호, lunar bool, leap bool, birth\_year 암호, age\_rule enum(세는 나이/만 나이, 환갑·칠순 계산), memo 암호 | 1 : N 경조사. 경조사를 한 종류로 합치면서 가족 등록을 남길지 [확인 필요] |
 | care\_day 경조사 | 종류 구분 없음(생일·기념일·사귄 날·명절·가족 행사(화면 이름, 2026-11-13) 모두 같은 경조사, ADR 0003), name, family\_id(null), date\_rule enum, budget bigint, owner enum, notify\_rule jsonb(기본 D-30·D-7), private bool, auto\_wedding bool(S-11h 결혼한 날로 자동으로 만든 결혼기념일, 기본 false. 날짜를 직접 고치면 false) [확인 필요]. 없앤 필드: kind(우리 둘/양가/결혼 준비), wedding\_item\_id | 1 : N 회차 |
 | care\_round 경조사 회차 | care\_day\_id, year smallint, solar\_date date, prep\_state enum, actual bigint, paid\_from enum, gift text, memo 암호 | N : 1 경조사(예전 목표 사용 연결은 2026-11-08 꺼내 쓰기와 함께 없앰) |

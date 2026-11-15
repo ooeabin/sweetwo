@@ -94,7 +94,6 @@ import {
   W20bMoneyInList,
   SplitRedirect,
   W01dAutoLines,
-  W05PrePayday,
   W10SavingItem,
   W10aSavingEdit,
   W11SavingAdd,
@@ -154,7 +153,7 @@ export const routes: RouteObject[] = [
           ['/salary/split/:id', <W01cSplitAnswer key="w01c" />], // W-01c 분담 제안 확인(받은 사람, 서버 알림 링크)
           ['/salary', <SalaryTab key="w02" />], // 월급 탭: ‘이번 달’ W-02 / ‘계획’ W-01 영수증(?view=plan)
           ['/salary/done', <DoneRedirect key="w02e" />], // 옛 W-02 끝(2026-11-12 없앰) → W-02
-          ['/salary/review', <W05PrePayday key="w05" />], // W-05 월급 전 확인
+          ['/salary/review', <Navigate key="w05" to="/salary" replace />], // 옛 W-05 월급 전 확인(2026-11-15 없앰, 알림 옛 링크) → W-02
           ['/salary/auto-lines', <W01dAutoLines key="w01d" />], // W-01d 자동으로 나가는 것 고르기(2026-11-13)
           ['/salary/items', <W13SavingList key="w13" />], // W-13 저금 목록(2026-11-09 round 3)
           ['/salary/items/new/:step?', <W11SavingAdd key="w11" />], // W-11a~d 저금 항목 추가

@@ -8,7 +8,7 @@ export const copy = {
   views: { month: '달력' },
   monthLink: '달력', // 2026-11-09 Y-01 ‘목록/달력’ 탭 대신 오른쪽 ‘달력 ›’ 링크 [확인 필요]
   addCareRow: '경조사 추가', // 2026-11-09 ‘일정’ 머리 오른쪽 + 줄(+ 아이콘이 글자 앞 ‘+’) [확인 필요]
-  filters: { all: '전체', care: '경조사', money: '금융 일정' }, // [확인 필요]
+  filters: { all: '전체', care: '경조사·기념일', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
   emptyAdd: '경조사 추가',
   noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // 13 공통 상태 18번, Y-04(2026-11-12 D3)
@@ -31,7 +31,7 @@ export const copy = {
     autoDone: (name: string) => `${name} 자동으로 나갔어요`,
   },
   go: {
-    payday: '체크리스트', // [확인 필요]
+    payday: '월급날 확인 목록', // [확인 필요]
     review: '월급 전 확인', // [확인 필요]
     deadline: '저금', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금',
@@ -53,7 +53,7 @@ export const copy = {
   today: '오늘',
   // 달력 고른 날 금융 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
   goSub: {
-    payday: '체크리스트 보기',
+    payday: '월급날 확인 목록 보기',
     review: '월급 전 확인하기',
     deadline: '저금 보기', // [확인 필요] ADR 0007, 2026-11-09
     goal: '저금 보기',

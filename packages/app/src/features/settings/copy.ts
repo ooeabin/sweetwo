@@ -65,8 +65,8 @@ export const copy = {
   partnerSalary: (name: string, amount: string, day: string) =>
     [amount, day].some(Boolean) ? `${name} ${[amount, day].filter(Boolean).join(', ')}` : '', // [확인 필요]
   salaryMode: '월급 관리 방식',
-  salaryModeValue: { separate: '각자 관리해요', joint: '합쳐서 관리해요' }, // [확인 필요]
-  planDay: '체크리스트 만드는 날',
+  salaryModeValue: { separate: '월급은 각자 써요', joint: '월급을 합쳐서 써요' }, // [확인 필요]
+  planDay: '월급날 확인 목록 만드는 날',
   lastDay: '말일',
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   dayN: (n: number) => `${n}일`,
@@ -91,22 +91,22 @@ export const copy = {
   salarySaved: '월급을 바꿨어요', // [확인 필요]
 
   // S-11d 체크리스트 만드는 날
-  planDayQ: '체크리스트를 언제 만들까요?', // [확인 필요]
+  planDayQ: '월급날 확인 목록을 언제 만들까요?', // [확인 필요]
   paydayOf: (name: string, d: string) => `${name} 월급날 ${d}`,
-  planDaySaved: '체크리스트 만드는 날을 바꿨어요', // [확인 필요]
+  planDaySaved: '월급날 확인 목록 만드는 날을 바꿨어요', // [확인 필요]
 
   // S-11f 월급 관리 방식
   salaryModeQ: '월급을 어떻게 관리해요?',
-  salaryModeHelp: '바꾸면 두 분 모두에게 적용되고, 체크리스트는 다음 월급날부터 바뀌어요', // [확인 필요]
+  salaryModeHelp: '바꾸면 두 분 모두에게 적용되고, 월급날 확인 목록은 다음 월급날부터 바뀌어요', // [확인 필요]
   salaryModes: {
-    separate: '각자 월급을 따로 관리해요',
-    joint: '합쳐서 같이 관리해요',
+    separate: '월급은 각자 써요',
+    joint: '월급을 합쳐서 써요',
   },
   salaryModeSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
   // S-11f 저장 전 미리보기 한 줄(2026-11-09 round 3) [확인 필요]. when = “11월 25일” 또는 “다음 월급날”
   salaryModePreview: {
-    joint: (when: string) => `${when}부터 체크리스트가 하나가 돼요`,
-    separate: (when: string) => `${when}부터 체크리스트가 사람마다 생겨요`,
+    joint: (when: string) => `${when}부터 월급날 확인 목록이 하나가 돼요`,
+    separate: (when: string) => `${when}부터 월급날 확인 목록이 사람마다 생겨요`,
   },
   nextPayday: '다음 월급날',
 
@@ -136,6 +136,7 @@ export const copy = {
   newCodeDone: '새 코드를 받았어요. 이전 코드는 이제 못 써요', // [확인 필요]
   // 2026-11-11 D4: 받은 코드로 합류(→ P-01 코드 입력)
   haveCode: '받은 초대 코드가 있어요', // [확인 필요]
+  activityLog: '활동 기록', // [확인 필요] 2026-11-15 S-12 → 알림 화면(파트너가 바꾼 것)
   // 2026-11-11 D1 합류하는 중(누가 ‘합류하기’를 눌러 코드를 24시간 잡아 둠) [확인 필요]
   joiningTitle: '파트너가 합류하는 중이에요',
   joiningHelp: '합류를 마치면 알려 드릴게요. 24시간 안에 마치지 않으면 다시 초대할 수 있어요',
@@ -305,7 +306,7 @@ export const copy = {
       debts: '부채.csv',
       goals: '저금.csv',
       splits: '월급 계획.csv',
-      checklists: '월급 체크리스트.csv',
+      checklists: '월급 월급날 확인 목록.csv',
       care: '경조사.csv',
     },
     heads: {
@@ -365,7 +366,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '우리 둘 연결', // [확인 필요]
-    calc: '저금·월급 체크리스트', // [확인 필요] 27 AD-06, 2026-11-09
+    calc: '저금·월급 월급날 확인 목록', // [확인 필요] 27 AD-06, 2026-11-09
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
@@ -450,9 +451,9 @@ export const copy = {
   mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
-    plan: '월급 체크리스트',
+    plan: '월급 월급날 확인 목록',
     partner_change: (name: string) => `${name}님이 바꾼 값`,
-    care: '경조사',
+    care: '경조사·기념일',
     money: '금융 일정',
     goal: '저금', // [확인 필요]
     invite: '파트너 초대', // [확인 필요]
@@ -471,9 +472,9 @@ export const copy = {
   quietEnd: '끝', // [확인 필요]
   // S-01~S-03 가이드
   guidesTitle: '가이드 모아보기',
-  checklistProgress: (done: number, total: number) => `체크리스트 ${done}/${total}`,
+  checklistProgress: (done: number, total: number) => `월급날 확인 목록 ${done}/${total}`,
   checklistCount: (done: number, total: number) => `${done}/${total}`, // 2026-11-04 S-01은 제목에 ‘체크리스트’가 있어 숫자만
-  checklistStage: (stage: string) => `${stage} 체크리스트`, // [확인 필요] 요소 이름
+  checklistStage: (stage: string) => `${stage} 월급날 확인 목록`, // [확인 필요] 요소 이름
   forUs: '맞춤 정보', // [확인 필요] 요소 이름
   topics: '주제별 가이드', // [확인 필요] 요소 이름
   steps: '해야 할 일', // [확인 필요] 요소 이름
@@ -483,7 +484,7 @@ export const copy = {
   markDone: '완료했어요',
   applyToUs: '우리에게 적용하기',
   notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요', // 31 5-3
-  noStage: '지금 단계의 체크리스트가 없어요', // [확인 필요]
+  noStage: '지금 단계의 월급날 확인 목록이 없어요', // [확인 필요]
 
   goalsCount: (n: number) => `${n}개`,
   marriageState: {
@@ -543,11 +544,11 @@ export const copy = {
   // S-11·S-11f 관리 형태 이름(08 2장 표) [확인 필요]
   styleNames: {
     one_manager: '한 사람이 관리해요',
-    together: '합쳐서 관리해요',
+    together: '월급을 합쳐서 써요',
     living_saving: '생활비와 저금을 같이 해요',
     living_only: '생활비만 같이 해요',
     saving_only: '저금만 같이 해요',
-    separate: '각자 따로 해요',
+    separate: '월급은 각자 써요',
   } as Record<string, string>,
   // S-11c 예약 표시(S-11 월급 줄 아래 회색) [확인 필요]
   salaryScheduled: (y: number, m: number, amount: string) => `${y}년 ${m}월부터 ${amount}`,
@@ -599,7 +600,7 @@ export const copy = {
   styleReqSend: (name: string, me: string) =>
     `${name}님이 월급은 대부분 ${me}님에게 보낸다고 했어요`,
   styleReqSendSub: (me: string) => `${me}님이 관리하는 걸로 바꿀까요?`,
-  styleReqCombine: (name: string) => `${name}님이 월급을 합쳐서 관리하자고 해요`,
+  styleReqCombine: (name: string) => `${name}님이 월급을 합쳐서 쓰자고 해요`,
   styleReqManager: (name: string, me: string) =>
     `${name}님이 월급 관리를 ${me}님에게 맡기고 싶어 해요`, // [확인 필요] 기획서에 없는 경우
   styleChangesTitle: '이렇게 바뀌어요',

@@ -25,7 +25,7 @@ const YEBIN_PROFILE = {
   payday_last: false,
 };
 
-test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 확인 → 같이 모으기 → 돈 들어왔어요 → 해제 뒤 내 것은 남음', async ({
+test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 확인 → 같이 모으기 → 받은 돈 적기 → 해제 뒤 내 것은 남음', async ({
   browser,
 }) => {
   test.setTimeout(240_000);
@@ -136,8 +136,9 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await expect(yCard).toContainText('595만 원');
   await axe(y);
 
-  // 5. 예빈 돈 들어왔어요 → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
-  await y.getByRole('button', { name: '돈 들어왔어요' }).click();
+  // 5. 예빈 받은 돈 적기(월급 탭 W-02) → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
+  await y.goto('/salary');
+  await y.getByRole('button', { name: '받은 돈 적기' }).click();
   await y.getByLabel('얼마 들어왔어요?').fill('1000000');
   await y.getByRole('button', { name: '가족이 보태 줬어요' }).click();
   await y.getByRole('button', { name: '다음' }).click();

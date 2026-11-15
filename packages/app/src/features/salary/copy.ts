@@ -12,7 +12,7 @@ export const copy = {
   privateSaving: '개인 저금', // [확인 필요]
   // W-01b·W-01c 분담 도우미(20 ‘월급 탭 v2.2’, 06 3-7, 2026-11-13) [확인 필요]
   splitShare: {
-    nameQ: '어떤 통장을 나눌까요?',
+    nameQ: '낼 몫 정하기',
     nameChips: { living: '생활비 통장', date: '데이트 통장' } as Record<string, string>,
     nameSelf: '직접 쓸게요',
     nameLabel: '통장 이름',
@@ -23,12 +23,12 @@ export const copy = {
     customQ: (me: string) => `${me}님 몫은 얼마예요?`,
     result: (me: string, a: string, them: string, b: string, ra: number, rb: number) =>
       `${me} ${a}, ${them} ${b} (${ra} : ${rb})`,
-    propose: (name: string) => `${name}님에게 제안하기`,
+    propose: (name: string) => `${name}님께 알리기`,
     addMine: '내 월급 계획에 넣기',
-    proposed: (name: string) => `${name}님에게 제안했어요`,
+    proposed: (name: string) => `${name}님께 알렸어요`,
     added: '월급 계획에 넣었어요',
     waiting: (name: string) => `${name}님 답을 기다려요`,
-    title: (name: string, account: string) => `${name}님이 ‘${account}’ 나누기를 제안했어요`,
+    title: (name: string, account: string) => `${name}님이 ‘${account}’ 나누기를 알렸어요`,
     body: (total: string, me: string, a: string, them: string, b: string) =>
       `한 달 ${total}, ${me} ${a}, ${them} ${b}`,
     ruleLine: {
@@ -39,9 +39,9 @@ export const copy = {
     yes: '좋아요',
     no: '지금처럼 할게요',
     accepted: '월급 계획에 같이 쓰는 통장을 넣었어요',
-    expired: '제안 기한이 지났어요',
-    gone: '지금은 받은 제안이 없어요',
-    notConnected: '파트너가 합류하면 제안할 수 있어요',
+    expired: '답할 수 있는 기간이 지났어요',
+    gone: '지금은 받은 알림이 없어요',
+    notConnected: '파트너가 합류하면 알릴 수 있어요',
     ok: '확인',
     next: '다음',
     tooLong: '20자까지 쓸 수 있어요',
@@ -57,14 +57,13 @@ export const copy = {
   splitPending: '연결 해제 대기 중에는 월급 계획을 고칠 수 없어요', // [확인 필요]
   // 각자 모드 파트너 것은 보기만(2026-11-09) [확인 필요]
   partnerSplitView: (name: string) => `${name}님 월급 계획이에요. 보기만 할 수 있어요`,
-  partnerChecklistView: (name: string) => `${name}님 체크리스트예요. 보기만 할 수 있어요`,
+  partnerChecklistView: (name: string) => `${name}님 월급날 확인 목록이에요. 보기만 할 수 있어요`,
   // 파트너 탭(각자)인데 파트너 월급 계획이 없음(2026-11-12 QA 5구간 D3, 0원 영수증 대신 빈 카드) [확인 필요]
   partnerNoPlan: (name: string) => `${name}님은 아직 월급 계획이 없어요`,
   refill: '추천값으로 다시 채우기',
   refillTitle: '추천값으로 다시 채울까요?', // [확인 필요]
   // 2026-11-12 QA 5구간 D1: 직접 추가한 지출은 그대로라 무엇이 바뀌는지 적음 [확인 필요]
-  refillBody:
-    '고정지출, 생활비, 용돈과 기한을 정한 저금 금액이 바뀌어요. 직접 추가한 지출은 그대로예요',
+  refillBody: '용돈과 기한을 정한 저금 금액이 바뀌어요. 이미 적은 지출은 그대로예요', // [확인 필요] 2026-11-15 추천 고정지출·생활비 줄 없앰
   refillOk: '다시 채우기', // [확인 필요]
   cancel: '취소',
   // W-01 영수증(2026-11-09) [확인 필요]
@@ -79,10 +78,10 @@ export const copy = {
     `저금 ${saving}%, 지출 ${spend}%, ${free}`,
   legendSaving: (n: number) => `저금 ${n}%`,
   legendSpend: (n: number) => `지출 ${n}%`,
-  legendFree: (n: number) => `여유 자금 ${n}%`,
-  legendShort: (amount: string) => `여유 자금 ${amount}`,
-  allocated: '배분',
-  leftoverLabel: '여유 자금',
+  legendFree: (n: number) => `아직 안 정한 돈 ${n}%`,
+  legendShort: (amount: string) => `아직 안 정한 돈 ${amount}`,
+  allocated: '계획한 돈',
+  leftoverLabel: '아직 안 정한 돈',
   addSpend: '+ 지출 추가',
   spendChips: [
     { name: '관리비', code: 'maintenance' },
@@ -149,7 +148,7 @@ export const copy = {
   monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 확인했어요`,
   monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 확인했어요`,
   monthLineToo: '이번 달 확인 안 한 줄도 바꿨어요',
-  madeFromPlan: (month: number) => `${month}월 계획대로 체크리스트를 만들었어요`,
+  madeFromPlan: (month: number) => `${month}월 계획대로 월급날 확인 목록을 만들었어요`,
   // 다 끝난 달(2026-11-12 W-02 끝 화면 대신 W-02 막대 아래 한 줄 + Toast, D4: ‘못 함’이 섞이면 ‘마쳤어요’) [확인 필요]
   // 2026-11-13 W-02 7번: “11월 25일 월급, 계획대로 됐어요” / 건너뜀이 섞이면 “…확인을 마쳤어요” [확인 필요]
   monthFinished: (start: string, kind: 'all' | 'mixed') =>
@@ -169,7 +168,7 @@ export const copy = {
     `${[...goal].length > 8 ? `${[...goal].slice(0, 8).join('')}…` : goal}에 ${amount} 더했어요`,
   checked: '확인했어요', // [확인 필요] 지출 줄 확인 토스트(2026-11-13 UX B)
   alreadyChecked: (who: string) => `${who}님이 먼저 확인했어요`,
-  closed: '지난 달 체크리스트는 고칠 수 없어요', // [확인 필요]
+  closed: '지난 달 월급날 확인 목록은 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
   noChecklist: '월급이 생기면 월급 계획을 만들어 드려요',
@@ -206,18 +205,18 @@ export const copy = {
   removeLine: '줄 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
-  leftover: (amount: string) => `여유 자금 ${amount}`,
+  leftover: (amount: string) => `아직 안 정한 돈 ${amount}`,
   short: (amount: string) => `${amount}이 모자라요`,
   shortHelp: '지출이나 저금을 줄여 주세요',
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
   addItem: '+ 저금 추가', // [확인 필요] 2026-11-09 사용자에게는 ‘저금’
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
-  firstSaving: (left: string) => `저금 추가 (여유 자금 ${left})`,
+  firstSaving: (left: string) => `저금 추가 (아직 안 정한 돈 ${left})`,
   // 20 ‘첫 저금’ 3번(2026-11-13): 예전 비교 문구 “…님처럼 나도 모을 곳을…”은 없앰 [확인 필요]
   firstSavingTogether: (partner: string, goal: string) =>
     `${partner ? `${partner}님` : '파트너'} ‘${goal}’에 같이 모을까요?`,
-  firstSavingLeft: (left: string) => `여유 자금 ${left}`,
+  firstSavingLeft: (left: string) => `아직 안 정한 돈 ${left}`,
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
   closedFold: (n: number) => `그만 모은 저금 ${n}개`, // [확인 필요]
@@ -287,7 +286,7 @@ export const copy = {
   addNameHelp: '월급 계획 저금 묶음에 한 줄로 생겨요', // [확인 필요]
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
-  addMonthlyHelp: (left: string) => `지금 여유 자금 ${left}`, // [확인 필요]
+  addMonthlyHelp: (left: string) => `아직 안 정한 돈 ${left}`, // [확인 필요]
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
@@ -299,7 +298,7 @@ export const copy = {
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
   added: '저금을 추가했어요', // [확인 필요]
-  addShort: '여유 자금이 모자라요. 지출이나 저금을 줄여 주세요', // [확인 필요]
+  addShort: '아직 안 정한 돈이 모자라요. 지출이나 저금을 줄여 주세요', // [확인 필요]
   addBlocked: '연결 해제 대기 중에는 저금을 추가할 수 없어요', // [확인 필요]
   addNoSplit: '월급이 생기면 저금을 추가할 수 있어요', // [확인 필요]
   // W-12 달성 축하, W-12a
@@ -334,10 +333,10 @@ export const copy = {
   lateTitle: (start: string) => `${formatMonthDay(start)} 월급`,
   firstWait: (start: string) => `${formatMonthDay(start)} 첫 월급날에 확인해요`, // W-02 첫 확인 목록 전
   firstWaitNoDate: '첫 월급날에 확인해요',
-  moneyInGo: '돈 들어왔어요',
+  moneyInGo: '받은 돈 적기',
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
-  inChecklist: '체크리스트에 넣기',
-  autoPay: '은행에서 자동으로 나가요',
+  inChecklist: '월급날 확인 목록에 넣기',
+  autoPay: '은행에서 자동으로 보내요',
   autoDay: '나가는 날',
   chipPayday: '월급날',
   chipNextDay: '다음 날',
@@ -376,12 +375,12 @@ export const copy = {
   remainUntil: (ym: string, amount: string) => `${ym}까지 ${amount} 더 필요해요`, // [확인 필요] 3b G5
   remainUntilPct: (ym: string) => `${ym}까지`, // [확인 필요] 퍼센트만(SaveTogether.md)
   historyStartV22: (amount: string) => `이미 모은 금액 ${amount}`, // [확인 필요] 6a
-  historyMoneyIn: (amount: string) => `돈 들어왔어요 ${amount}`, // [확인 필요]
+  historyMoneyIn: (amount: string) => `받은 돈 ${amount}`, // [확인 필요]
   historyAuto: (amount: string) => `자동으로 넣었어요 ${amount}`, // [확인 필요] 날짜 없는 사람 자동 넣기
   historyAdjust: (sign: '+' | '−', amount: string) => `바로잡기 ${sign}${amount}`, // [확인 필요]
   historyReconcile: (sign: '+' | '−', amount: string) => `잔액 맞추기 ${sign}${amount}`, // [확인 필요]
   historyNotePaid: (amount: string) => `쓸 곳 메모 −${amount}`, // [확인 필요]
-  moneyIn: '돈 들어왔어요', // AddRow 글자(+ 아이콘이 ‘+’를 대신) [확인 필요]
+  moneyIn: '받은 돈 적기', // AddRow 글자(+ 아이콘이 ‘+’를 대신) [확인 필요]
   menuAdjust: '모은 금액 바로잡기', // [확인 필요]
   menuNotes: '쓸 곳 메모', // [확인 필요]
   menuBundle: '같이 모으기로 묶기', // [확인 필요]
@@ -429,7 +428,7 @@ export const copy = {
   reconciled: (n: number) => (n ? `저금 ${n}개를 실제 잔액과 맞췄어요` : '실제 잔액과 같아요'), // [확인 필요]
   reconcileEmpty: '맞출 저금이 없어요', // [확인 필요]
   // W-11e 은행에서 자동으로 나가요?
-  autoQ: '은행에서 자동으로 나가요?', // [확인 필요]
+  autoQ: '은행에서 자동으로 보내요?', // [확인 필요]
   autoYes: '네, 자동이에요', // [확인 필요]
   autoNo: '아니요, 직접 보내요', // [확인 필요]
   autoDayQ: '언제 나가요?', // [확인 필요]
@@ -559,18 +558,18 @@ export const copy = {
     `넣을 저금이 없어요. ‘${name}’에 같이 모으면 넣을 수 있어요`, // [확인 필요]
   moneyInAll: '남은 돈 전부 넣기', // [확인 필요] W-20a
   moneyInAllLabel: (name: string) => `${name}에 남은 돈 전부 넣기`, // 화면 읽기
-  moneyInList: '들어온 돈 기록', // [확인 필요] W-20b
+  moneyInList: '받은 돈 기록', // [확인 필요] W-20b
   moneyInListEmpty: '아직 적은 돈이 없어요', // [확인 필요]
   moneyInPutOf: (amount: string) => `저금에 ${amount} 넣었어요`, // [확인 필요] W-20b 줄 보조
   moneyInRowMenu: (amount: string) => `${amount} 기록 메뉴`, // 화면 읽기
   moneyInEdit: '고치기',
   moneyInDelete: '지우기',
-  moneyInDeleted: '들어온 돈 기록을 지웠어요', // [확인 필요]
-  moneyInDeletedPut: '들어온 돈 기록과 저금에 넣은 금액을 지웠어요', // [확인 필요] 나눠 넣은 게 있을 때
-  moneyInEdited: '들어온 돈 기록을 고쳤어요', // [확인 필요]
+  moneyInDeleted: '받은 돈 기록을 지웠어요', // [확인 필요]
+  moneyInDeletedPut: '받은 돈 기록과 저금에 넣은 금액을 지웠어요', // [확인 필요] 나눠 넣은 게 있을 때
+  moneyInEdited: '받은 돈 기록을 고쳤어요', // [확인 필요]
   moneyInEditBelow: '저금에 넣은 금액보다 적게 고칠 수 없어요', // [확인 필요]
   moneyInEditSave: '저장',
   noteOverdue: (date: string) => `${date} 지났어요`, // [확인 필요] W-14 안 낸 메모
-  monthlyOverLeft: (left: string) => `여유 자금 ${left}보다 많아요`, // [확인 필요] W-11b
+  monthlyOverLeft: (left: string) => `아직 안 정한 돈 ${left}보다 많아요`, // [확인 필요] W-11b
   needPerMonthTogether: (amount: string) => `둘이 같이 매달 ${amount}이 필요해요`, // [확인 필요] 같이 계열 W-11d·W-10
 };

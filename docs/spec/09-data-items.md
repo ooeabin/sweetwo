@@ -56,7 +56,7 @@
 
 | 항목 | 설명 |
 | --- | --- |
-| 종류 | 저금 / 지출 / 같이 쓰는 통장(`shared_account`, + `shared_account_id`) / 보내기(`send`) (2026-11-13). 여유 자금은 저장하지 않고 계산 |
+| 종류 | 저금 / 지출 / 같이 쓰는 통장(`shared_account`, + `shared_account_id`) / 보내기(`send`) (2026-11-13). 아직 안 정한 돈은 저장하지 않고 계산 |
 | 체크리스트에 넣기 | `in_checklist` bool(2026-11-13, 기본값 → 06 3-1) |
 | 자동 줄 | `auto_pay` bool, `auto_day` 1~31(31 = 말일, null = 월급날) (2026-11-13) |
 | 지출 구분 | 고정지출 / 생활비 / 용돈 / 직접 추가. 고정지출·생활비·용돈은 지우지 못함(0원) |
@@ -91,7 +91,7 @@
 | 체크한 사람 | 각자면 늘 주인, 합쳐서면 체크한 사람(2026-11-03 대신 체크 없앰) |
 | 체크한 시각 | KST |
 
-- 이미 모은 금액 + 저금 줄 확인 상태와 실제 금액 + 저금 움직임(`goal_move`: 돈 들어왔어요, 바로잡기, 잔액 맞추기, 쓸 곳 메모, 날짜 없는 사람의 자동 저금)이 저금 모은 금액의 기록(2026-11-13, → 06 4장)
+- 이미 모은 금액 + 저금 줄 확인 상태와 실제 금액 + 저금 움직임(`goal_move`: 받은 돈 적기, 바로잡기, 잔액 맞추기, 쓸 곳 메모, 날짜 없는 사람의 자동 저금)이 저금 모은 금액의 기록(2026-11-13, → 06 4장)
 - 지난 사이클 확인 목록은 다음 사이클 끝까지 늦은 확인만 되고 그 뒤 읽기 전용
 
 ## 4. 공통 규칙
@@ -118,7 +118,7 @@
 | 부채 | 휴지통 | 과거 순자산 기록 유지 |
 | 경조사 | 휴지통 | — |
 
-- 연결 해제 확정(2026-11-13 고침, → 08 7장): 주인 있는 행(내 명의 자산·부채, 각자 계열 내 월급 계획·확인 목록·저금·내역, 내 돈 들어왔어요)은 각자 새 혼자 공간으로 옮기고, 같이 쓰던 행만 지움. 아래는 2026-10-26 기록: 우리 둘 공간의 모든 항목(저금 항목, 월급 계획·줄, 체크리스트·줄, 자산·부채와 금액 이력, 경조사, 활동 기록, 알림, 닫은 할 일, 휴지통)을 한 번에 지움. 휴지통을 거치지 않고 복구용 보관본으로 옮겨 30일 뒤 영구 삭제. 사용자·로그인 기기·동의 기록은 남음(→ 커플·권한 7장, 보안·개인정보 4장)
+- 연결 해제 확정(2026-11-13 고침, → 08 7장): 주인 있는 행(내 명의 자산·부채, 각자 계열 내 월급 계획·확인 목록·저금·내역, 내 받은 돈 적기)은 각자 새 혼자 공간으로 옮기고, 같이 쓰던 행만 지움. 아래는 2026-10-26 기록: 우리 둘 공간의 모든 항목(저금 항목, 월급 계획·줄, 체크리스트·줄, 자산·부채와 금액 이력, 경조사, 활동 기록, 알림, 닫은 할 일, 휴지통)을 한 번에 지움. 휴지통을 거치지 않고 복구용 보관본으로 옮겨 30일 뒤 영구 삭제. 사용자·로그인 기기·동의 기록은 남음(→ 커플·권한 7장, 보안·개인정보 4장)
 - ‘같이 휴지통’은 부모 항목을 되살리면 함께 되살아남. 저금 항목을 되살리면 월급 계획에 0원 저금 줄이 다시 생김 [확인 필요]
 - 되살릴 때 연결 대상이 없으면(이미 영구 삭제) 연결 없이 되살리고 Toast “연결된 항목이 없어 따로 되살렸어요”
 
@@ -186,7 +186,7 @@
 | --- | --- | --- | --- |
 | 같이 모으기 묶음 `saving_bundle` | id, space_id, name, target_amount, deadline, status, achieved_at, show_each_a·show_each_b(구성원별), percent_only_a·percent_only_b, version, deleted_at | 구성원 둘 다 읽기·고치기(show_each·percent_only는 자기 쪽만). 공간이 각자 엔진일 때만 만들 수 있음 | W-15, W-15a, H-10 |
 | 쓸 곳 메모 `saving_note` | id, space_id, goal_id 또는 bundle_id, name, amount, due_on, paid, paid_move_id(→ goal_move) | 그 저금을 볼 수 있는 사람 읽기, 고칠 수 있는 사람 쓰기 | W-14, W-14a, Y-01 |
-| 돈 들어왔어요 `money_in` | id, space_id, owner_user_id, amount, received_on, kind(enum `money_in_kind`: salary/bonus/family/work/refund/etc) | 주인만(공개 ‘모두’면 상대 읽기) | W-20, W-20a, H-13 |
+| 받은 돈 적기 `money_in` | id, space_id, owner_user_id, amount, received_on, kind(enum `money_in_kind`: salary/bonus/family/work/refund/etc) | 주인만(공개 ‘모두’면 상대 읽기) | W-20, W-20a, H-13 |
 | 같이 쓰는 통장 분담 `shared_account` | id, space_id, name, monthly_total, rule(half/income_ratio/custom), share_a, share_b, status(proposed/accepted/declined/expired), proposed_by, expires_at | 구성원 둘 다 읽기, 답은 받은 사람만. income_ratio여도 월급 원값은 저장하지 않고 결과만 | W-01b, W-01c |
 | 관리 형태 요청 `mode_change_request` | id, space_id, from_user, to_mode, to_manager, phrase(p04_send/s11f_combine), status, expires_at | 구성원 읽기, 받은 사람만 답, 보낸 사람만 취소 | P-04, S-11f, S-11j |
 | 다시 연결 요청 `reconnect_request` | id, from_user, to_user, created_at, status, blocked | 두 사람만 | S-12, S-12g |

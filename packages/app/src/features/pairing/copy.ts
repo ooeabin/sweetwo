@@ -84,7 +84,7 @@ export const copy = {
   moveDo: '옮겨요', // [확인 필요] 옮길 항목 묶음 이름(2026-11-03)
   moveSalaryLabel: '월급',
   moveDay: (day: string) => `월급날 ${day}`,
-  moveSkipItems: { goals: '저금', splits: '월급 계획', lists: '체크리스트' }, // 2026-11-08 [확인 필요]
+  moveSkipItems: { goals: '저금', splits: '월급 계획', lists: '월급날 확인 목록' }, // 2026-11-08 [확인 필요]
   moveCount: (n: number) => `${n}개`,
   moveSkip: '안 옮겨요',
   moveKeep: '30일 보관 후 지워져요',
@@ -106,11 +106,11 @@ export const copy = {
   styleTitle: (starter: string) => `${who(starter)} 이렇게 골랐어요`,
   styleNames: {
     one_manager: '한 사람이 관리해요',
-    together: '합쳐서 관리해요',
+    together: '월급을 합쳐서 써요',
     living_saving: '생활비와 저금을 같이 해요',
     living_only: '생활비만 같이 해요',
     saving_only: '저금만 같이 해요',
-    separate: '각자 따로 해요',
+    separate: '월급은 각자 써요',
   },
   /** P-04 한 사람 관리형: 누가 관리하는지 한 줄(2026-11-13 UX B) [확인 필요] */
   managedBy: (starter: string, me: boolean) =>
