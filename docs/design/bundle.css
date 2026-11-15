@@ -2509,6 +2509,8 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__handle { width: 32px; height: 44px; }
 .hg-receipt__del { min-height: 44px; }
 .hg-iconbtn.hg-card__close { width: 44px; height: 44px; margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0; }  /* 카드 머리 닫기 ✕(H-14 이번 달 우리 둘): 누르는 칸 44px, 카드 높이는 그대로 */
+/* 주 버튼 글자색은 바로 바꿈(비활성 muted → 진한 글자 사이 흐린 중간색이 오렌지 위에 잠깐 보이지 않게). 바탕만 부드럽게 */
+.hg-btn.hg-btn--primary { transition-property: background-color, border-color, box-shadow, transform; }
 /* 그림 빈 자리 숨김(사용자 결정): hg-artslot·hg-lead--slot은 컴포넌트가 그리지 않음(Illustration·Lead가 그림 파일이 없으면 null).
    그림을 감싸는 틀이 비면 자리도 비우지 않음 */
 :is(.hg-q__hero, .hg-busy__art, .hg-celebrate__hero):empty { display: none; }
