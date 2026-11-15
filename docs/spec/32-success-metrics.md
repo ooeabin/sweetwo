@@ -126,6 +126,8 @@
 | `salary_change_applied` | 서버: 예약 적용(`salary_change.applied_at` 트리거) | 됨(PR 14) |
 | `progress_news_sent` / `_opened` | 서버: 진행 소식 알림이 생김(`notification` 트리거) / 알림 열기 | 됨(sent는 PR 14) |
 | `home_task_dismissed` | H-06 띠 | 됨 |
+| `join_saved_answered` | P-09 합류 때 모은 금액(entered, amount_band, new_bundle, 2026-11-15 3차 검토 D2) | 됨 |
+| `month_us_viewed` / `month_us_dismissed` | H-14 이번 달 우리 둘(saving 종류, care_count / 닫기, 2026-11-15 D3) | 됨 |
 | `invite_code_autofilled` | O-01 시트 | 됨 |
 | `saving_item_created` entry onboarding | O-60 | 됨 |
 | `widget_added` / `widget_tapped` | 앱 시작 때 놓인 위젯 확인(브리지 `widget.installed`, 이 기기에서 처음 본 종류·크기만) / 위젯 링크 `w` | 됨(PR 14) |

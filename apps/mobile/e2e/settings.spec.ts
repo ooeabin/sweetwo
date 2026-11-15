@@ -196,6 +196,8 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크
   await expect(card.getByRole('switch', { name: '진행 소식' })).toBeVisible();
   await expect(card.getByRole('switch', { name: /같이 쓰는 걸 바꿨을 때/ })).toHaveCount(0);
   await expect(card.getByRole('switch', { name: '월급날 확인할 게 있을 때' })).toHaveCount(0);
+  // 이번 달 우리 둘(3차 검토 D3): 연결된 각자 계열이면 보임
+  await expect(card.getByRole('switch', { name: '매달 우리 둘 소식' })).toBeVisible();
   await expect(card).toContainText('잠금 화면에서는 금액을 늘 가려요');
   await card.getByRole('switch', { name: '진행 소식' }).click();
   await expect

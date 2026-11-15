@@ -423,7 +423,9 @@ export type AnalyticsEvent =
           | 'calendar'
           | 'assets'
           | 'savings'
-          | 'retry';
+          | 'retry'
+          // H-14 이번 달 우리 둘 줄(3차 검토 D3)
+          | 'month_us';
         todo?: TopTask['kind'];
       };
     }
@@ -554,6 +556,16 @@ export type AnalyticsEvent =
       props: { state: 'early' | 'bar' | 'gap'; filled_band: number | null };
     }
   | { name: 'progress_news_opened'; props: Record<string, never> }
+  // 3차 검토 PR-C 아하 순간(32 0-4): P-09 합류 때 모은 금액(넣음·건너뜀, 묶음을 새로 만들었나), H-14 이번 달 우리 둘
+  | {
+      name: 'join_saved_answered';
+      props: { entered: boolean; amount_band: AmountBand | null; new_bundle: boolean };
+    }
+  | {
+      name: 'month_us_viewed';
+      props: { saving: 'none' | 'hidden' | 'first' | 'up' | 'down' | 'same'; care_count: number };
+    }
+  | { name: 'month_us_dismissed'; props: Record<string, never> }
   // R-08 N-01·N-02 ‘이전 값으로 돌리기’(32 0-4). hours_since_change = 알림이 온 뒤 시간
   | { name: 'partner_change_reverted'; props: { hours_since_change: number } }
   // ── v2.2 PR 14(32 4-7, 26 위젯 v2.2) 위젯 ──

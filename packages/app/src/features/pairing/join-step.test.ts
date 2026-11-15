@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { joinChapter, joinScreens, movedJoinScreen } from './join-step';
+import { afterJoinScreen, joinChapter, joinScreens, movedJoinScreen } from './join-step';
 
 // 합류 화면 순서(18). 2026-11-11 P-03a 출생연도를 뺌(출생연도는 자산 순위 F-08 → S-11i에서)
 type D = Parameters<typeof joinScreens>[0];
@@ -37,5 +37,13 @@ describe('movedJoinScreen', () => {
   });
   it('뺀 화면이 아니면 null', () => {
     expect(movedJoinScreen('p-04', st())).toBeNull();
+  });
+});
+
+// 3차 검토 D2: 합류를 마친 뒤 각자 계열은 P-09(모은 금액), 같이 계열은 P-10 축하
+describe('afterJoinScreen', () => {
+  it('각자 계열 → P-09, 같이 계열 → P-10', () => {
+    expect(afterJoinScreen('separate')).toBe('p-09');
+    expect(afterJoinScreen('joint')).toBe('p-10');
   });
 });

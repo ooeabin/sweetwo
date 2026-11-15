@@ -102,6 +102,10 @@ export const qk = {
   rankViewed: ['rank_view'] as const,
   /** 다시 연결 요청(reconnect_request, 보낸 것·받은 것). 해제 기록 키 아래라 해제가 바뀌면 같이 */
   reconnectRequests: ['couple_unlink', 'reconnect_request'] as const,
+  /** 합류 때 묶을 같이 모으기(join_saving_offer, 18 P-09). 묶음 키 아래 */
+  joinSavingOffer: ['saving_bundle', 'join_offer'] as const,
+  /** 이번 달 우리 둘 카드(month_us_card, 19 H-14) */
+  monthUs: ['month_us'] as const,
 };
 
 /** 월급 계획이 바뀌면 다시 읽을 것(W-01 줄 RPC 뒤, Realtime salary_split 신호): 월급 계획, 체크리스트, 저금 항목, 모은 금액 */

@@ -74,6 +74,7 @@ import {
   useModeRequest,
   useRankRequest,
   useMoneyInPeriod,
+  useMonthUs,
   usePartner,
   usePreviousChecklist,
   useSalaryChanges,
@@ -85,6 +86,7 @@ import { H10SaveTogether } from './h-10-save-together';
 import { useWidgetSync, widgetNext, widgetSave } from '../widget-sync';
 import { H11MonthLine } from './h-11-month-line';
 import { H12Wedding } from './h-12-wedding';
+import { H14MonthUs } from './h-14-month-us';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009 결정 1): 회색 바탕 위 흰 상자.
 // 좁은 창: H-10 같이 모으기(주인공) → H-11 이번 달 한 줄(날짜 없는 사람 H-13) → H-06 할 일 띠(16순서, core pickTopTask)
@@ -117,6 +119,8 @@ export function H01Home() {
   const bundles = useBundles(!!sp && !joint);
   const tasks = useHomeTasks();
   const period = useMoneyInPeriod(today, paydayNone);
+  // H-14 이번 달 우리 둘(3차 검토 D3): 연결된 공간에서만 서버 카드
+  const monthUs = useMonthUs(sp?.couple_state === 'connected');
   const modeReq = useModeRequest(joined);
   const rankReq = useRankRequest(joined);
   const accounts = useSharedAccounts(joined);
@@ -719,6 +723,9 @@ export function H01Home() {
                 void qc.invalidateQueries({ queryKey: qk.splits });
               }}
             />
+            {monthUs.data && (
+              <H14MonthUs card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
+            )}
             {todoBands}
             <HubTile
               title={copy.planTile}

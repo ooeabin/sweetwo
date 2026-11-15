@@ -9,6 +9,7 @@ describe('pushKindRows', () => {
       { kind: 'payday', on: true },
       { kind: 'achieved', on: true },
       { kind: 'progress_news', on: true },
+      { kind: 'month_us', on: true },
     ]);
   });
   it('합쳐서(둘이 같이): 같이 쓰는 걸 바꿨을 때 켬', () => {
@@ -23,6 +24,7 @@ describe('pushKindRows', () => {
       { kind: 'shared_change', on: false },
       { kind: 'my_allowance', on: true },
       { kind: 'progress_news', on: true },
+      { kind: 'month_us', on: true },
     ]);
   });
   it('월급 없이 합류: 월급날 없음', () => {

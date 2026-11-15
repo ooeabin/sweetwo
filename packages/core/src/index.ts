@@ -42,5 +42,6 @@ export * from './rules/site-os';
 export * from './rules/guides';
 export * from './rules/year-summary';
 export * from './rules/conflict';
+export * from './rules/month-us';
 export * from './deep-link';
 export * from './schemas/v22';

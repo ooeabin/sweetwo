@@ -12,10 +12,11 @@ import { P05Salary } from './pages/p-05-salary';
 import { P05bPayday } from './pages/p-05b-payday';
 import { P05cAllowance } from './pages/p-05c-allowance';
 import { P06Split } from './pages/p-06-split';
+import { P09SavedSoFar } from './pages/p-09-saved-so-far';
 import { P10Joined } from './pages/p-10-joined';
 import { P11PushKinds } from './pages/p-11-push-kinds';
 
-// /join/:screen → 합류 화면(18 P-02b~P-06, P-05c 용돈, P-10 축하, P-11 알림 종류). 화면 id = 기획서 화면 ID(소문자).
+// /join/:screen → 합류 화면(18 P-02b~P-06, P-05c 용돈, P-09 모은 금액, P-10 축하, P-11 알림 종류). 화면 id = 기획서 화면 ID(소문자).
 const SCREENS: Record<string, () => ReactNode> = {
   'p-02b': () => <P02bPrefill />,
   'p-03': () => <P03Name />,
@@ -24,11 +25,12 @@ const SCREENS: Record<string, () => ReactNode> = {
   'p-05b': () => <P05bPayday />,
   'p-05c': () => <P05cAllowance />,
   'p-06': () => <P06Split />,
+  'p-09': () => <P09SavedSoFar />,
   'p-10': () => <P10Joined />,
   'p-11': () => <P11PushKinds />,
 };
 /** 합류를 마친 뒤 화면(합류 중인지 따지지 않음) */
-const AFTER = new Set(['p-06', 'p-10', 'p-11']);
+const AFTER = new Set(['p-06', 'p-09', 'p-10', 'p-11']);
 
 /** 뺀 화면에 멈춘 사람(이어하기): 지금 흐름에서 그 앞 화면의 다음 화면으로 */
 function Moved({ id }: { id: string }) {

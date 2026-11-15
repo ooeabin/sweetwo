@@ -37,7 +37,7 @@ import { useSettingsData } from '../data';
 // 모바일 앱에서 휴대폰 알림 권한이 꺼져 있으면(브리지 push.status) “휴대폰 설정에서 알림을 켜 주세요” + ‘설정 열기’, 푸시 토글은 꺼짐으로.
 // 푸시가 꺼져 있으면 묶음 줄·경조사 체크도 꺼짐으로 보임(저장된 묶음 값은 그대로, 2026-11-12 QA 11구간 S11-04).
 // v2.2(2026-11-13): ‘알림 종류’ = P-11과 같은 목록(app_user.push_kinds: care, payday(손 줄이 있을 때만), achieved,
-// shared_change(같이 계열만, 관리하지 않는 쪽 기본 끔), my_allowance(관리하지 않는 쪽만), progress_news) + 잠금 화면 한 줄.
+// shared_change(같이 계열만, 관리하지 않는 쪽 기본 끔), my_allowance(관리하지 않는 쪽만), progress_news, month_us(이번 달 우리 둘: 연결됐고 같이 계열 관리하는 사람이 아닐 때, 3차 검토 D3)) + 잠금 화면 한 줄.
 // 같은 일을 하는 옛 묶음(plan, partner_change, goal)도 같은 값으로 맞춤(서버 claim_push가 둘 다 봄).
 // 금융 일정·파트너 초대와 경조사 시점은 ‘그 밖의 알림’으로 그대로.
 const KIND_TOPIC: Partial<Record<PushKind, NotiTopic>> = {
@@ -192,6 +192,9 @@ export function S14Notifications() {
           copy.kinds.progress_news,
           copy.kindsHelp.progress_news(!!me?.payday_none),
         )}
+        {c.joined &&
+          (!joint || nonManagerMe) &&
+          kindRow('month_us', copy.kinds.month_us, copy.kindsHelp.month_us(!!me?.payday_none))}
         <p className="hg-help" style={{ margin: 0 }}>
           {copy.lockScreenNote}
         </p>

@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { chanwoo, type MemDb, mockOnboarding, SB, seed } from './mocks';
+import { chanwoo, emptyV22, type MemDb, mockOnboarding, SB, seed } from './mocks';
 import { events } from './analytics';
 import { setWheel } from './wheel';
 import { fakeBridge } from './fake-bridge';
@@ -146,6 +146,8 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   joining(db);
+  // 찬우 첫 저금 ‘내 집 마련’에 같이 모으기로 바로 묶을 수 있음(P-09, 3차 검토 D2)
+  db.v22 = { ...emptyV22(), joinOffer: { bundle_id: null, goal_id: 'g-home', name: '내 집 마련' } };
   const ev = events(page);
   await answerBasics(page);
   await expect(page.getByText('저금만 같이 해요')).toBeVisible();
@@ -156,6 +158,28 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   await expect(page.getByText('파트너에게는 저금만 보여요')).toBeVisible();
   await salary(page);
 
+  // 합류를 마치면 P-09 지금까지 모은 금액(각자 계열, 묶을 곳이 있을 때만) → 같이 모으기에 바로 묶음
+  await expect(page).toHaveURL(/\/join\/p-09$/);
+  await expect(
+    page.getByRole('heading', { name: '지금까지 모은 금액을 알려 주세요' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('찬우님의 ‘내 집 마련’과 묶어서 둘이 모은 금액을 바로 보여 드려요'),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: '같이 모으기' })).toBeDisabled();
+  await axe(page);
+  await page.getByLabel('지금까지 모은 금액').fill('4000000');
+  await page.getByRole('button', { name: '같이 모으기' }).click();
+  await expect(page).toHaveURL(/\/join\/p-10$/);
+  expect(db.v22?.calls.find((c) => c.fn === 'join_saving_start')?.body).toEqual({
+    p_amount: 4_000_000,
+  });
+  expect(ev.find((e) => e.name === 'join_saved_answered')?.props).toEqual({
+    entered: true,
+    amount_band: '300-1000만',
+    new_bundle: true,
+  });
+
   // 월급 계획 화면 없이 합류 축하(P-10) → P-11. 첫 확인 목록은 다음 월급날(소급 없음)
   await celebrate(page);
   await pushKinds(page, [
@@ -163,6 +187,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
     ['월급날 확인할 게 있을 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['진행 소식', true],
+    ['매달 우리 둘 소식', true],
   ]);
   const call = db.joinCalls.find((c) => c.fn === 'complete_join');
   expect(call?.p_version).toBeUndefined();
@@ -176,6 +201,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
     payday: true,
     achieved: true,
     progress_news: true,
+    month_us: true,
   });
   expect(db.space?.couple_state).toBe('connected');
   expect(ev.find((e) => e.name === 'push_permission_answered')?.props).toMatchObject({
@@ -276,6 +302,7 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
     ['같이 모으기를 다 모았을 때', true],
     ['내 용돈이 바뀌었을 때', true],
     ['진행 소식', true],
+    ['매달 우리 둘 소식', true],
   ]);
 });
 
@@ -315,6 +342,7 @@ test('한 사람이 관리해요(찬우가 관리): 형태 확인만 → P-05c �
     ['찬우님이 같이 쓰는 걸 바꿨을 때', false],
     ['내 용돈이 바뀌었을 때', true],
     ['진행 소식', true],
+    ['매달 우리 둘 소식', true],
   ]);
   expect(db.me.push_kinds).toMatchObject({ shared_change: false, my_allowance: true });
 });
@@ -357,6 +385,7 @@ test('각자 계열 ‘월급 없이 합류할게요’: 월급날·용돈 없�
     ['경조사가 다가올 때', true],
     ['같이 모으기를 다 모았을 때', true],
     ['진행 소식', true],
+    ['매달 우리 둘 소식', true],
   ]);
 });
 

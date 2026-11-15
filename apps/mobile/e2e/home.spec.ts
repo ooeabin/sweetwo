@@ -855,3 +855,46 @@ test('위젯 분석(32 4-7, PR 14): 이 기기에서 처음 본 위젯만 widget
     .toEqual({ widget: 'wg04', element: 'card', landing_screen: 'Y-01', app_was_running: true });
   expect(added()).toHaveLength(2);
 });
+
+test('H-14 이번 달 우리 둘(3차 검토 D3): 모은 금액, 다가올 경조사·기념일, 내 용돈 → 닫기', async ({
+  page,
+}) => {
+  const ev = events(page);
+  const db = await open(page, (d) => {
+    Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+    d.partner = { id: 'p-yebin', nickname: '예빈', monthly_income: 2_700_000, payday: 10 };
+    if (d.v22)
+      d.v22.monthUs = {
+        id: '00000000-0000-4000-8000-0000000000c1',
+        sent_on: '2026-10-06',
+        month_key: '2026-10',
+        saved_total: 15_000_000,
+        saved_delta: 1_000_000,
+        saving_count: 2,
+        hidden: false,
+        care: [
+          { name: '어머니 생신', on: '2026-10-20' },
+          { name: '추석', on: '2026-10-25' },
+        ],
+        care_count: 2,
+        allowance: 300_000,
+      };
+  });
+  const card = page.getByRole('region', { name: '이번 달 우리 둘' });
+  await expect(card.getByRole('heading', { name: '이번 달 우리 둘' })).toBeVisible();
+  await expect(card.getByRole('button', { name: /모은 금액/ })).toContainText(
+    '지난달보다 +100만 원',
+  );
+  await expect(card.getByRole('button', { name: /다가올 경조사·기념일/ })).toContainText(
+    '어머니 생신 10월 20일 외 1개',
+  );
+  await expect(card.getByRole('button', { name: /내 용돈/ })).toContainText('30만 원');
+  expect(ev.find((e) => e.name === 'month_us_viewed')?.props).toEqual({
+    saving: 'up',
+    care_count: 2,
+  });
+  await axe(page);
+  await card.getByRole('button', { name: '닫기' }).click();
+  await expect(card).toHaveCount(0);
+  await expect.poll(() => db.v22?.calls.some((c) => c.fn === 'dismiss_month_us')).toBe(true);
+});

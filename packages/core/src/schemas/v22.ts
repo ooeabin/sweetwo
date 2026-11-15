@@ -286,6 +286,7 @@ export const PUSH_KINDS = [
   'shared_change',
   'my_allowance',
   'progress_news',
+  'month_us',
 ] as const;
 export type PushKind = (typeof PUSH_KINDS)[number];
 export const PushKindsSchema = z.record(z.string(), z.boolean()).default({});
@@ -296,3 +297,35 @@ export const pushKindOn = (kinds: Record<string, boolean> | null | undefined, k:
 /** ‘이전 값으로 돌리기’(14 N-01·N-02, R-08): 돌릴 수 있는 알림 id, 돌린 항목 수 */
 export const RevertibleNotisSchema = z.array(z.string());
 export const RevertCountSchema = z.number().int().min(1);
+
+/**
+ * 합류 때 모은 금액(18 P-09, 서버 join_saving_offer): 상대 같이 모으기(bundle_id) 또는 묶음을 만들 상대 저금(goal_id).
+ * 없으면 null(합쳐서 엔진, 상대 저금 없음, 이미 묶임)
+ */
+export const JoinSavingOfferSchema = z
+  .object({
+    bundle_id: z.string().nullable().default(null),
+    goal_id: z.string().nullable().default(null),
+    name: z.string(),
+  })
+  .nullable();
+export type JoinSavingOffer = z.infer<typeof JoinSavingOfferSchema>;
+/** join_saving_start 응답 */
+export const JoinSavingStartSchema = z.object({ bundle_id: z.string(), goal_id: z.string() });
+
+/** 이번 달 우리 둘 카드(19 H-14, 서버 month_us_card). hidden이면 금액 null(했어요만 공개) */
+export const MonthUsCardSchema = z
+  .object({
+    id: z.string(),
+    sent_on: z.string(),
+    month_key: z.string(),
+    saved_total: z.number().int().nullable(),
+    saved_delta: z.number().int().nullable(),
+    saving_count: z.number().int(),
+    hidden: z.boolean(),
+    care: z.array(z.object({ name: z.string(), on: z.string() })),
+    care_count: z.number().int(),
+    allowance: z.number().int().nullable(),
+  })
+  .nullable();
+export type MonthUsCard = z.infer<typeof MonthUsCardSchema>;

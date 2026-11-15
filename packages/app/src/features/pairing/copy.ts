@@ -9,6 +9,13 @@ export const copy = {
   joinedHelp: '이제 같이 모은 걸 같이 봐요', // [확인 필요] 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
   joinedWaitHelp: (starter: string) => `${who(starter)} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 홈 대기 카드와 같음
   toHomeAfter: '홈으로 가기',
+  // P-09 합류 때 모은 금액(3차 검토 D2, 2026-11-15) [확인 필요]
+  savedTitle: '지금까지 모은 금액을 알려 주세요',
+  savedHelp: (starter: string, name: string) =>
+    `${starter ? `${starter}님` : '파트너'}의 ‘${name}’과 묶어서 둘이 모은 금액을 바로 보여 드려요`,
+  savedLabel: '지금까지 모은 금액',
+  savedNote: '이 금액은 처음 한 번만 넣어요. 그 뒤로는 월급날 확인하면 더해져요',
+  savedStart: '같이 모으기',
   // 합류가 끝난 초대(취소, 잡아 둔 24시간 지남, 2026-11-11 D1) [확인 필요]
   endedTitle: '초대가 취소됐거나 기한이 지났어요',
   endedHelp: '받은 코드를 다시 넣거나 혼자 시작할 수 있어요',
@@ -22,6 +29,7 @@ export const copy = {
     shared_change: (name: string) => `${name ? `${name}님이` : '파트너가'} 같이 쓰는 걸 바꿨을 때`,
     my_allowance: '내 용돈이 바뀌었을 때',
     progress_news: '진행 소식',
+    month_us: '매달 우리 둘 소식', // [확인 필요] 3차 검토 D3
   },
   /** 알림 종류 보조 줄(2026-11-13 UX B, 18 P-11 표) [확인 필요] */
   kindsHelp: {
@@ -30,6 +38,11 @@ export const copy = {
       paydayNone
         ? '매달 1일, 저금이 얼마나 모였는지 알려 드려요'
         : '확인할 게 없는 달 월급날, 저금이 얼마나 모였는지 알려 드려요',
+    // [확인 필요] 3차 검토 D3
+    month_us: (paydayNone: boolean) =>
+      paydayNone
+        ? '매달 1일, 모은 금액과 다가올 일정을 알려 드려요'
+        : '월급날 다음 날, 모은 금액과 다가올 일정을 알려 드려요',
   },
   pushAllow: '알림 받기',
   // 대기 화면 ‘알려 주기’(18 v2.2, 24시간에 1번) [확인 필요]

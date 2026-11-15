@@ -8,6 +8,10 @@ import { finishJoin } from './join-split';
 
 export const joinPath = (id: string) => `/join/${id}`;
 
+/** 합류를 마친 다음 화면: 각자 계열은 P-09 모은 금액(같이 모으기에 바로 묶기), 같이 계열은 P-10 축하(3차 검토 D2) */
+export const afterJoinScreen = (salaryMode: 'separate' | 'joint') =>
+  salaryMode === 'joint' ? 'p-10' : 'p-09';
+
 /**
  * 진행 막대(18): P-03, P-04, P-05, P-05b. 월급 계획(P-06)는 안 보여 줌(2026-11-03, 온보딩 ADR 0005처럼).
  * 2026-11-11 P-03a 출생연도를 뺌(시작한 사람처럼 자산 순위 F-08 ‘출생연도 알려 주기’ → S-11i에서 물음)
@@ -107,9 +111,12 @@ export function useJoinStep(id: string) {
       }
       await d.refetch().catch(() => undefined);
       setSaving(false);
-      // 합류를 마치면 짧은 축하(P-10) → 알림 종류(P-11) → A-06 권장 → 홈(2026-11-11 D7, 2026-11-13)
-      // 대기 뒤 이어서(P-04)는 이미 합류를 마친 사람이라 축하 없이 홈
-      if (!to) nav(d.resumed ? await afterSetupPath() : joinPath('p-10'), { replace: true });
+      // 합류를 마치면 (각자 계열) 모은 금액(P-09, 묶을 곳이 없으면 그 화면이 바로 넘김) → 짧은 축하(P-10) → 알림 종류(P-11)
+      // → A-06 권장 → 홈(2026-11-11 D7, 2026-11-13, 3차 검토 D2). 대기 뒤 이어서(P-04)는 이미 합류를 마친 사람이라 축하 없이 홈
+      if (!to)
+        nav(d.resumed ? await afterSetupPath() : joinPath(afterJoinScreen(d.salaryMode)), {
+          replace: true,
+        });
       else nav(joinPath(to));
     } catch {
       setSaving(false);
