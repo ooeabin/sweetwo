@@ -2102,7 +2102,7 @@ export type Database = {
       month_us: {
         Row: {
           allowance: number | null
-          care: Json
+          care: NonNullable<Json>
           care_count: number
           created_at: string
           dismissed_at: string | null
@@ -2119,7 +2119,7 @@ export type Database = {
         ComputedFields: never
         Insert: {
           allowance?: number | null
-          care?: Json
+          care?: NonNullable<Json>
           care_count?: number
           created_at?: string
           dismissed_at?: string | null
@@ -2135,7 +2135,7 @@ export type Database = {
         }
         Update: {
           allowance?: number | null
-          care?: Json
+          care?: NonNullable<Json>
           care_count?: number
           created_at?: string
           dismissed_at?: string | null
