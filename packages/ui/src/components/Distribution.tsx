@@ -70,7 +70,7 @@ export function Distribution({
   note?: ReactNode;
   /** 내려간 쪽이면 강조 숫자를 goal-ink로 */
   noteDown?: boolean;
-  /** 카드 없이 가운데(2026-11-04 F-08 토스형) */
+  /** 카드 없이 가운데(2026-11-04 F-08 대형 금융 앱형) */
   hero?: boolean;
   sub?: ReactNode;
   /** 아래에서부터 백분위 0~100(상위 n%면 100 − n) */

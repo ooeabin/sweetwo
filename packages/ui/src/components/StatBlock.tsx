@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// 토스형 구역 머리(docs/design/components/StatBlock.md, 2026-11-04 F-08).
+// 대형 금융 앱형 구역 머리(docs/design/components/StatBlock.md, 2026-11-04 F-08).
 // 숫자형: 작은 라벨 + 큰 숫자 문장 + 보조 한 줄. 제목형: 20px 제목 + 보조 한 줄(<b>로 숫자 강조)
 export function StatBlock({
   label,

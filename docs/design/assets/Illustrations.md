@@ -217,10 +217,10 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 
 | 묶음 | 확정 | 레퍼런스 | 지킬 것 |
 | --- | --- | --- | --- |
-| A 3D 이모지(상태, 빈 상태, 축하, 처리 중, 완료, 장면) | 토스 행운 복권형 | [Toss 행운 복권](https://mobbin.com/screens/565bb38d-ffbf-4291-b5c6-3a9bf4de645b?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp), [Toss 증권 빈 상태](https://mobbin.com/screens/5d378b66-9281-4f81-b50b-a6aa39d5709c?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 반광택, 사물 고유색, 뭉툭한 형태, 왼쪽 위 빛, 투명 바탕, 물건 하나 |
+| A 3D 이모지(상태, 빈 상태, 축하, 처리 중, 완료, 장면) | 대형 금융 앱 행운 복권형 | [대형 금융 앱 행운 복권](https://mobbin.com/screens/565bb38d-ffbf-4291-b5c6-3a9bf4de645b?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp), [대형 금융 앱 증권 빈 상태](https://mobbin.com/screens/5d378b66-9281-4f81-b50b-a6aa39d5709c?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 반광택, 사물 고유색, 뭉툭한 형태, 왼쪽 위 빛, 투명 바탕, 물건 하나 |
 | B 목표 실사 사진 | 블라인드 채널 썸네일형 | 사용자 첨부(블라인드 채널 목록: 피크닉 바구니, 접시, 리모컨, 헤드폰, 서류 가방, 안전모, 헤드셋, 팔레트) | 실사, 주제 물건 하나가 가운데에 크게, 얕은 심도로 배경은 흐린 실제 공간, 밝고 부드러운 자연광. 원으로 잘라도(홈 줄 앞 40px) 무엇인지 보이게 |
 | C 지정 아바타 | 없앰(2026-11-05). 3D 동물 캐릭터를 시험했지만 쓰지 않기로 함 | — | — |
-| D 작은 3D 아이콘 | 토스 카드 추천형 | [Toss 카드 추천](https://mobbin.com/screens/fee5ef80-0773-4dae-ae42-90f52ebd2fce?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 원 판 없이 3D 사물만(A와 같은 그림체), 줄 앞 32~40px, 사물 고유색 |
+| D 작은 3D 아이콘 | 대형 금융 앱 카드 추천형 | [대형 금융 앱 카드 추천](https://mobbin.com/screens/fee5ef80-0773-4dae-ae42-90f52ebd2fce?utm_source=claude&utm_medium=ai-assistant&utm_source_platform=mcp) | 원 판 없이 3D 사물만(A와 같은 그림체), 줄 앞 32~40px, 사물 고유색 |
 
 ### 3. 코드에 붙이기
 

@@ -249,7 +249,7 @@ test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 �
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/calendar/month');
-  // 2026-11-04 토스 소비 달력형: 처음부터 한 달(그 달 주만, 10월은 5주), 처음 고른 날은 오늘
+  // 2026-11-04 대형 금융 앱 소비 달력형: 처음부터 한 달(그 달 주만, 10월은 5주), 처음 고른 날은 오늘
   await expect(page.locator('.hg-cal__day')).toHaveCount(35);
   await expect(page.getByRole('button', { name: '10월 7일' })).toHaveAttribute(
     'aria-current',

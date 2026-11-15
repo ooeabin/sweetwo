@@ -14,7 +14,7 @@
 - 값 + 화살표: 오른쪽에 현재 값(`hg-listrow__value is-soft`, `slate` 400) + `hg-chevron`. 누르면 고르는 화면·BottomSheet.
 - 스위치 줄: 오른쪽 Toggle(`button role="switch"` + `aria-checked`, 라벨을 `aria-labelledby`로). 줄 자체는 누르는 대상 아님, 바로 적용.
 - 앞 아이콘은 20px `ink`, 보조 1줄은 지금 설정을 사실로(“월요일 오전 9시”).
-- 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 줄 높이 56px 이상(2026-11-09 64px에서), 값 17px, 보조 13px `slate`. 토스형 구역(StatBlock 아래)에서만.
+- 줄만 목록(2026-11-04 F-08): `hg-list hg-list--plain`은 테두리·바탕·그림자 없이 줄만. 좌우 여백 0, 줄 높이 56px 이상(2026-11-09 64px에서), 값 17px, 보조 13px `slate`. 대형 금융 앱형 구역(StatBlock 아래)에서만.
 
 - 잠긴 줄(`locked`, 2026-11-09): 고칠 수 없는 줄(각자 모드 파트너 월급 계획 W-01)은 꺾쇠 자리에 Phosphor `lock` 16px(`hg-listrow__lock`, `stone`). 누를 수 없음(div). 왜 잠겼는지는 목록 위 회색 한 줄로 알림(“{파트너}님 월급 계획이에요. 보기만 할 수 있어요”).
 

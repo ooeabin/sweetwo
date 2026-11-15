@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { cx } from './cx';
 import { IconButton } from './IconButton';
 
-// 캘린더 달력(docs/design/components/Calendar.md, 2026-11-04 토스 소비 달력형):
+// 캘린더 달력(docs/design/components/Calendar.md, 2026-11-04 대형 금융 앱 소비 달력형):
 // 카드 없이 가운데 ‘‹ 10월 ›’(다른 달이면 오른쪽 ‘오늘’) → 요일 → 그 달 주만 → 아래 일정 목록(children).
 // 칸: 숫자 + 짧은 이름 한 줄(월급, 생신, 만기, 공휴일 이름) + 월급 전 확인 기간은 칸 아래 이어진 한 줄 띠.
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달 날짜는 비워 둠.
@@ -93,7 +93,7 @@ export function Calendar({
           </span>
         ))}
         {days.map((d) =>
-          // 2026-11-04 다른 달 날짜는 비워 둠(토스처럼, 흐린 숫자는 대비가 모자람)
+          // 2026-11-04 다른 달 날짜는 비워 둠(대형 금융 앱처럼, 흐린 숫자는 대비가 모자람)
           d.muted ? (
             <span key={d.date} className="hg-cal__day is-muted" aria-hidden="true" />
           ) : (

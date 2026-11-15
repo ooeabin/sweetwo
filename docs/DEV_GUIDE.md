@@ -65,7 +65,7 @@ MVP는 모바일 앱(iOS, Android, 태블릿 포함)을 React + TypeScript 화�
 
 ### 결정된 것
 
-- [x] PG사: MVP 밖, 유료화 때 토스페이먼츠 우선 검토
+- [x] PG사: MVP 밖, 유료화 때 대형 금융 앱 결제 서비스 우선 검토
 
 ## 구조
 
@@ -1268,7 +1268,7 @@ supabase/
 
 ### 확정된 결정(10월 14일)
 
-- 결제 회사: MVP 밖, 유료화 때 토스페이먼츠 우선 검토
+- 결제 회사: MVP 밖, 유료화 때 대형 금융 앱 결제 서비스 우선 검토
 - 로그인: 시스템 브라우저(모바일은 시스템 로그인 창) → https://sweetwo.kr/auth/callback → sweetwo://로 앱에 복귀(2026-11-10 데스크톱은 ADR 0008로 없앰). 루프백은 쓰지 않음(Apple 로그인이 https 리다이렉트만 허용)
 - 어드민 권한: 같은 Supabase 프로젝트, 관리자 role claim + RLS, 2단계 인증과 WAF IP 허용 필수
 - 어드민 도메인: ops.sweetwo.kr
