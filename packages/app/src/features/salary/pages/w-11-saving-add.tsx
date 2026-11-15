@@ -168,7 +168,8 @@ export function W11SavingAdd() {
         joined: space.data?.couple_state === 'connected',
       });
       writeDraft(null);
-      if (entry === 'onboarding') clearFirstSaving();
+      // 저장했으면 첫 저금 흐름은 끝, 남은 건 초대 시트(O-07)라 거기부터 이어 가게(2026-11-16 r5)
+      if (entry === 'onboarding') markFirstSaving(AFTER_FIRST_SAVING_PATH);
       await Promise.all(
         [qk.goals, qk.splits, ['pay_checklist'], qk.goalSaved].map((k) =>
           qc.invalidateQueries({ queryKey: k }),

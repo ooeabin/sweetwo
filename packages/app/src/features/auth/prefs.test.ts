@@ -31,3 +31,25 @@ describe('prefs.joinAfter', () => {
     expect(prefs.joinAfter('u1')).toBeNull();
   });
 });
+
+// 시작한 사람의 첫 저금·초대 시트 기억(2026-11-16 r5): W-11 from=onboarding과 /welcome만
+describe('prefs.firstSavingAt', () => {
+  beforeEach(() => mem.clear());
+
+  it('첫 저금 흐름과 초대 시트 주소만 기억', () => {
+    prefs.setFirstSavingAt('/salary/items/new/c?from=onboarding');
+    expect(prefs.firstSavingAt()).toBe('/salary/items/new/c?from=onboarding');
+    prefs.setFirstSavingAt('/welcome');
+    expect(prefs.firstSavingAt()).toBe('/welcome');
+  });
+
+  it('다른 주소·온보딩 밖 W-11은 없음, 지우면 없음', () => {
+    mem.set('sweetwo.firstSavingAt', '/salary/items/new/a?from=salary');
+    expect(prefs.firstSavingAt()).toBeNull();
+    mem.set('sweetwo.firstSavingAt', '/assets');
+    expect(prefs.firstSavingAt()).toBeNull();
+    prefs.setFirstSavingAt('/welcome');
+    prefs.setFirstSavingAt(null);
+    expect(prefs.firstSavingAt()).toBeNull();
+  });
+});

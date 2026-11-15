@@ -90,4 +90,15 @@ export const prefs = {
   },
   setJoinAfter: (uid: string | null, screen: string | null) =>
     set('sweetwo.join-after', uid && screen ? `${uid}|${screen}` : null),
+  /**
+   * 시작한 사람이 O-60 뒤에 아직 끝내지 않은 첫 저금 흐름(W-11a~e, from=onboarding)이나 초대 시트(O-07 /welcome)의 주소
+   * (2026-11-16 r5, 키는 예전 그대로). 다시 열면 A-06 권장보다 먼저 그 화면으로(routeAfterLogin). 끝내거나 로그아웃하면 지움
+   */
+  firstSavingAt: () => {
+    const p = get('sweetwo.firstSavingAt');
+    if (!p) return null;
+    if (p === '/welcome') return p;
+    return p.startsWith('/salary/items/new/') && p.includes('from=onboarding') ? p : null;
+  },
+  setFirstSavingAt: (path: string | null) => set('sweetwo.firstSavingAt', path),
 };
