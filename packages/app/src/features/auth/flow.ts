@@ -77,6 +77,11 @@ export async function routeAfterLogin(
   const pf = session.platform;
   if (b && pf !== 'web' && /^\d+\.\d+\.\d+$/.test(b.appVersion))
     void noteDevice(prefs.installId(), pf, b.appVersion).catch(() => undefined);
+  // 합류를 마쳤지만 P-09·P-10·P-11을 아직 끝내지 않음(그 사이 앱을 닫음): 그 화면부터. A-06은 P-11 뒤(2026-11-16 r5 A1)
+  if (s.onboarding_done) {
+    const after = prefs.joinAfter(await session.userId().catch(() => null));
+    if (after) return { to: `/join/${after}` };
+  }
   // 앱 잠금 권장(A-06, 2026-11-13): 온보딩·합류를 마친 계정만 로그인 직후 한 번. 마치기 전이면 O-60 흐름·P-11 뒤에 물음
   if (session.bridge && s.onboarding_done) {
     const lock = await session.bridge.lock.status();

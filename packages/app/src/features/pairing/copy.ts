@@ -14,7 +14,11 @@ export const copy = {
   savedHelp: (starter: string, name: string) =>
     `${starter ? `${starter}님` : '파트너'}의 ‘${name}’과 묶어서 둘이 모은 금액을 바로 보여 드려요`,
   savedLabel: '지금까지 모은 금액',
-  savedNote: '이 금액은 처음 한 번만 넣어요. 그 뒤로는 월급날 확인하면 더해져요',
+  // 2026-11-16 r5 A2: 새 저금 매달 금액은 0원이라 ‘월급날 확인하면 더해져요’가 사실이 아니었음. 월급 계획이 있으면 거기서 정함
+  savedNote: (hasPlan: boolean) =>
+    hasPlan
+      ? '이 금액은 처음 한 번만 넣어요. 매달 모을 금액은 월급 계획에서 정해요'
+      : '이 금액은 처음 한 번만 넣어요',
   savedStart: '같이 모으기',
   // 합류가 끝난 초대(취소, 잡아 둔 24시간 지남, 2026-11-11 D1) [확인 필요]
   endedTitle: '초대가 취소됐거나 기한이 지났어요',

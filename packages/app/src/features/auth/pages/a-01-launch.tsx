@@ -106,6 +106,16 @@ export function A01Launch() {
         const r = await routeAfterLogin();
         if (stale()) return;
         setPhase('ready');
+        // 다시 실행·새로 고침에 A-06 권장이 끼면 묻고 난 뒤 보던 화면으로(2026-11-16 r5 A4, 예전에는 늘 홈)
+        if (
+          r.to === paths.pinSetup &&
+          here !== paths.home &&
+          here !== paths.pinSetup &&
+          !PUBLIC.has(here) &&
+          !SIGNUP.has(here) &&
+          !prefs.returnTo()
+        )
+          prefs.setReturnTo(here + loc.search);
         if (PUBLIC.has(here) || r.to !== paths.home || SIGNUP.has(here))
           nav(r.to, { replace: true, state: r.state });
       } catch {

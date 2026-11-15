@@ -6,6 +6,7 @@ import { afterSetupPath } from '../../auth';
 import { copy } from '../copy';
 import { useJoinData } from '../data';
 import { joinPath } from '../join-step';
+import { clearJoinAfter } from '../join-after';
 
 // P-10 합류 축하(18, 2026-11-11 D7): 합류를 마친 순간 한 번. 화면 위 축하 배경(hg-celebrate-bg) + 96px 움직이는 그림 자리
 // (그림이 들어올 때까지 회색 빈 자리) + “{시작한 사람}님과 연결됐어요” / “이제 같이 모은 걸 같이 봐요”(2026-11-13).
@@ -26,7 +27,7 @@ export function P10Joined() {
       onSubmit={() =>
         ask
           ? nav(joinPath('p-11'), { replace: true })
-          : void afterSetupPath().then((to) => nav(to, { replace: true }))
+          : (clearJoinAfter(), void afterSetupPath().then((to) => nav(to, { replace: true })))
       }
     />
   );

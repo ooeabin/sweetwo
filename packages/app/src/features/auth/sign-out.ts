@@ -21,7 +21,11 @@ export interface SignOutOptions {
 export function clearLocalSession(o: SignOutOptions = {}) {
   resetSessionState();
   prefs.setPendingProvider(null);
-  if (!o.keepReturnTo) prefs.setReturnTo(null);
+  // 돌아갈 화면과 합류 뒤 화면(P-09~P-11, 계정마다)은 만료 뒤 같은 계정이 돌아오면 이어서
+  if (!o.keepReturnTo) {
+    prefs.setReturnTo(null);
+    prefs.setJoinAfter(null, null);
+  }
   if (o.forgetPin || o.accountChange) prefs.setPinAsked(false);
   if (o.accountChange) {
     prefs.setLastProvider(null);

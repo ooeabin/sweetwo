@@ -51,7 +51,7 @@ export function P09SavedSoFar() {
     <QuestionLayout
       title={copy.savedTitle}
       help={copy.savedHelp(d.starterName, o.name)}
-      note={copy.savedNote}
+      note={copy.savedNote((d.me?.monthly_income ?? 0) > 0)}
       primary={{ label: copy.savedStart, disabled: !valid, loading: saving }}
       onSubmit={() => void submit()}
       later={{
