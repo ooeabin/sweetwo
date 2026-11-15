@@ -6,6 +6,7 @@ import {
   fetchHomeTasks,
   fetchMe,
   fetchMoneyInPeriod,
+  fetchMonthUsCard,
   fetchOpenRankRequest,
   fetchOpenModeRequest,
   fetchPartner,
@@ -42,6 +43,10 @@ export const useGoals = () => useQuery({ queryKey: qk.goals, queryFn: fetchGoals
 /** 같이 모으기 묶음(bundle_view: 합계만·각자 금액·퍼센트만을 서버가 잘라 보냄). 합쳐서 엔진이면 없음 */
 export const useBundles = (on: boolean) =>
   useQuery({ queryKey: qk.bundles, queryFn: () => fetchBundles(), enabled: on });
+
+/** 이번 달 우리 둘 카드(H-14, month_us_card). 연결된 공간에서만 */
+export const useMonthUs = (on: boolean) =>
+  useQuery({ queryKey: qk.monthUs, queryFn: fetchMonthUsCard, enabled: on });
 
 /** 닫거나 끝낸 띠 키(home_task_state) */
 export const useHomeTasks = () => useQuery({ queryKey: qk.homeTasks, queryFn: fetchHomeTasks });

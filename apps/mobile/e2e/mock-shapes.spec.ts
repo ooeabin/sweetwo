@@ -3,6 +3,9 @@ import {
   AnswerResult,
   BundleViewListSchema,
   HomeTaskStateSchema,
+  JoinSavingOfferSchema,
+  JoinSavingStartSchema,
+  MonthUsCardSchema,
   ModeChangeRequestRowSchema,
   ModeChangeResult,
   MoneyInPeriodSchema,
@@ -217,4 +220,41 @@ test('홈·자산(mocks/app-db, v22-pay): 홈 띠 상태, 순위, 답 결과 = �
     const ans = await page.rpc('answer_mode_change', { p_request: id, p_accept: false });
     expectShape(AnswerResult, ans.body, 'answer_mode_change');
   }
+});
+
+test('아하 순간(mocks/v22-pay): 이번 달 우리 둘 카드, 합류 때 묶을 곳 = 서버 모양', async () => {
+  onlyOnce();
+  const { page, db } = await pair('settings');
+  expectShape(
+    MonthUsCardSchema,
+    (await page.rpc('month_us_card')).body ?? null,
+    'month_us_card(없음)',
+  );
+  // 첫 v2.2 요청 뒤에 생기는 흉내 상태(v22-pay emptyV22)
+  const v = (db as unknown as { v22: { monthUs?: unknown; joinOffer?: unknown } }).v22;
+  v.monthUs = {
+    id: '00000000-0000-4000-8000-0000000000c1',
+    sent_on: '2026-11-11',
+    month_key: '2026-11',
+    saved_total: 14_000_000,
+    saved_delta: null,
+    saving_count: 1,
+    hidden: false,
+    care: [{ name: '생일', on: '2026-12-03' }],
+    care_count: 1,
+    allowance: 300_000,
+  };
+  expectShape(MonthUsCardSchema, (await page.rpc('month_us_card')).body, 'month_us_card');
+  v.joinOffer = {
+    bundle_id: null,
+    goal_id: '00000000-0000-4000-8000-0000000000c2',
+    name: '결혼 비용',
+  };
+  expectShape(
+    JoinSavingOfferSchema,
+    (await page.rpc('join_saving_offer')).body,
+    'join_saving_offer',
+  );
+  const start = await page.rpc('join_saving_start', { p_amount: 4_000_000 });
+  expectShape(JoinSavingStartSchema, start.body, 'join_saving_start');
 });

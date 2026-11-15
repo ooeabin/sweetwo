@@ -2099,6 +2099,66 @@ export type Database = {
           },
         ]
       }
+      month_us: {
+        Row: {
+          allowance: number | null
+          care: Json
+          care_count: number
+          created_at: string
+          dismissed_at: string | null
+          hidden: boolean
+          id: string
+          month_key: string
+          saved_delta: number | null
+          saved_total: number | null
+          saving_count: number
+          sent_on: string
+          space_id: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          allowance?: number | null
+          care?: Json
+          care_count?: number
+          created_at?: string
+          dismissed_at?: string | null
+          hidden?: boolean
+          id?: string
+          month_key: string
+          saved_delta?: number | null
+          saved_total?: number | null
+          saving_count?: number
+          sent_on: string
+          space_id: string
+          user_id: string
+        }
+        Update: {
+          allowance?: number | null
+          care?: Json
+          care_count?: number
+          created_at?: string
+          dismissed_at?: string | null
+          hidden?: boolean
+          id?: string
+          month_key?: string
+          saved_delta?: number | null
+          saved_total?: number | null
+          saving_count?: number
+          sent_on?: string
+          space_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "month_us_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notice: {
         Row: {
           body: string
@@ -3992,6 +4052,7 @@ export type Database = {
         Args: { p_key: string; p_state?: string }
         Returns: undefined
       }
+      dismiss_month_us: { Args: { p_id: string }; Returns: undefined }
       distribute_money_in: {
         Args: { p_items: Json; p_money_in: string }
         Returns: number
@@ -4119,6 +4180,16 @@ export type Database = {
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_context: { Args: Record<PropertyKey, never>; Returns: Json }
       join_moving_records: { Args: { p_code: string; p_vis?: Json }; Returns: string }
+      join_saving_offer: { Args: Record<PropertyKey, never>; Returns: Json }
+      join_saving_start: { Args: { p_amount: number }; Returns: Json }
+      join_saving_target: {
+        Args: { p_user: string }
+        Returns: {
+          bundle_id: string
+          goal_id: string
+          name: string
+        }[]
+      }
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
@@ -4219,6 +4290,16 @@ export type Database = {
         Returns: undefined
       }
       money_in_visible: { Args: { p_owner: string }; Returns: boolean }
+      month_us_build: { Args: { p_today: string; p_user: string }; Returns: string }
+      month_us_card: { Args: { p_today?: string }; Returns: Json }
+      month_us_for: { Args: { p_user: string }; Returns: boolean }
+      month_us_saved: {
+        Args: { p_user: string }
+        Returns: {
+          cnt: number
+          total: number
+        }[]
+      }
       move_goal: { Args: { p_amount: number; p_goal: string; p_kind: string }; Returns: string }
       move_goal_saved: { Args: { p_goal: string; p_to: string }; Returns: number }
       move_owned_rows: {
@@ -4608,6 +4689,7 @@ export type Database = {
       }
       send_desktop_link: { Args: Record<PropertyKey, never>; Returns: boolean }
       send_evening_notifications: { Args: { p_today?: string }; Returns: number }
+      send_month_us: { Args: { p_today?: string }; Returns: number }
       send_morning_notifications: { Args: { p_today?: string }; Returns: number }
       send_notice_mails: { Args: { p_now?: string }; Returns: number }
       send_progress_news: { Args: { p_today?: string }; Returns: number }

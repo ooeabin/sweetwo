@@ -1,5 +1,8 @@
 import {
   JoinContextSchema,
+  JoinSavingOfferSchema,
+  JoinSavingStartSchema,
+  type JoinSavingOffer,
   NudgeResultSchema,
   TERMS_VERSION,
   type NudgeResult,
@@ -173,4 +176,20 @@ export async function fetchJoinContext(): Promise<JoinContext | null> {
   const { data, error } = await supabase().rpc('join_context');
   fail(error);
   return JoinContextSchema.parse(data ?? null);
+}
+
+/** P-09 합류 때 모은 금액: 묶을 상대 같이 모으기(없으면 null, 서버 join_saving_offer) */
+export async function fetchJoinSavingOffer(): Promise<JoinSavingOffer> {
+  const { data, error } = await supabase().rpc('join_saving_offer');
+  fail(error);
+  return JoinSavingOfferSchema.parse(data ?? null);
+}
+
+/** P-09 ‘같이 모으기’: 내 새 저금(시작할 때 모은 금액 = amount)을 상대 같이 모으기에 바로 묶음. 묶음 id */
+export async function startJoinSaving(amount: number): Promise<string> {
+  const { data, error } = await supabase().rpc('join_saving_start', { p_amount: amount });
+  fail(error);
+  const r = JoinSavingStartSchema.safeParse(data);
+  if (!r.success) throw new AuthCallError('unknown');
+  return r.data.bundle_id;
 }

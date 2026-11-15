@@ -132,4 +132,19 @@ export const copy = {
   mailBounced: '알림 메일이 전달되지 않았어요',
   mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
   mailCheck: '확인하기', // [확인 필요]
+
+  // H-14 이번 달 우리 둘(3차 검토 D3, 2026-11-15) [확인 필요]
+  monthUsTitle: '이번 달 우리 둘',
+  monthUsClose: '닫기',
+  monthUsSaving: '모은 금액',
+  monthUsFirst: (total: string) => `지금까지 ${total}`,
+  monthUsUp: (amount: string) => `지난달보다 +${amount}`,
+  monthUsDown: (amount: string) => `지난달보다 −${amount}`,
+  monthUsSame: '지난달과 같아요',
+  monthUsHidden: (n: number) => `저금 ${n}개 모으는 중`,
+  monthUsCare: '다가올 경조사·기념일',
+  monthUsCareOne: (name: string, date: string) => `${name} ${date}`,
+  monthUsCareMore: (first: string, more: number) => `${first} 외 ${more}개`,
+  monthUsCareNone: '한 달 안에는 없어요',
+  monthUsAllowance: '내 용돈',
 };

@@ -67,7 +67,9 @@ export function P11PushKinds() {
                   ? copy.kindsHelp.care
                   : r.kind === 'progress_news'
                     ? copy.kindsHelp.progress_news(!!me.payday_none)
-                    : undefined
+                    : r.kind === 'month_us'
+                      ? copy.kindsHelp.month_us(!!me.payday_none)
+                      : undefined
               }
               checked={value(r.kind, r.on)}
               onChange={(on) => setPicked((p) => ({ ...p, [r.kind]: on }))}

@@ -22,6 +22,10 @@ export interface V22PayDb {
   calls: { fn: string; body: Record<string, unknown> }[];
   /** v2.2 서버처럼 확인 목록을 소급해 만들지 않음(start_checklist가 지금 목록만 돌려줌) */
   noRetro?: boolean;
+  /** 이번 달 우리 둘 카드(month_us_card, H-14). 없으면 null. dismiss_month_us면 null로 */
+  monthUs?: Record<string, unknown> | null;
+  /** 합류 때 묶을 곳(join_saving_offer, P-09). 없으면 null. join_saving_start면 null로 */
+  joinOffer?: Record<string, unknown> | null;
 }
 
 export const emptyV22 = (): V22PayDb => ({
@@ -142,6 +146,28 @@ export async function handleV22Pay(
   const fn = path.slice('/rest/v1/rpc/'.length);
   if (fn === 'bundle_view') {
     await json(route, v.bundles);
+    return true;
+  }
+  // 3차 검토 아하 순간(20261216090000): H-14 카드, P-09 합류 때 모은 금액
+  if (fn === 'month_us_card') {
+    await json(route, v.monthUs ?? null);
+    return true;
+  }
+  if (fn === 'dismiss_month_us') {
+    v.calls.push({ fn, body: body() });
+    v.monthUs = null;
+    await json(route, null);
+    return true;
+  }
+  if (fn === 'join_saving_offer') {
+    await json(route, v.joinOffer ?? null);
+    return true;
+  }
+  if (fn === 'join_saving_start') {
+    v.calls.push({ fn, body: body() });
+    const bundleId = String(v.joinOffer?.bundle_id ?? 'b-join');
+    v.joinOffer = null;
+    await json(route, { bundle_id: bundleId, goal_id: '00000000-0000-4000-8000-0000000000a9' });
     return true;
   }
   if (fn === 'money_in_period') {
