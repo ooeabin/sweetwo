@@ -162,6 +162,18 @@ export async function adminSearch(q: string): Promise<AdminSearchRow[]> {
   fail(error);
   return data ?? [];
 }
+/** AD-02 회원 목록: 가입 최신순 한 쪽. 다음 쪽은 마지막 줄의 가입 시각·사용자 ID를 넘김(커서) */
+export const ADMIN_LIST_PAGE = 50;
+export async function adminListUsers(
+  before?: Pick<AdminSearchRow, 'created_at' | 'user_id'>,
+): Promise<AdminSearchRow[]> {
+  const { data, error } = await supabase().rpc('admin_list_users', {
+    p_limit: ADMIN_LIST_PAGE,
+    ...(before ? { p_before_at: before.created_at, p_before_id: before.user_id } : {}),
+  });
+  fail(error);
+  return data ?? [];
+}
 export async function fetchAdminUser(id: string): Promise<AdminUserDetail> {
   const { data, error } = await supabase().rpc('admin_user_detail', { p_user: id });
   fail(error);

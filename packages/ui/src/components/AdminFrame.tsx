@@ -26,11 +26,14 @@ export function AdminFrame({
   title,
   actions,
   protect,
+  onHome,
   children,
 }: {
   menus: AdminMenu[];
   current: string | null;
   onMenu: (m: AdminMenu) => void;
+  /** 로고(워드마크) 누르면 대시보드로 가는 길(2026-11-16). 없으면 로고는 글자만 */
+  onHome?: () => void;
   /** 보는 관리자: 이름 + 역할 이름표 + 작은 글(접속 시각) + 로그아웃 */
   who: { name: string; role?: string; sub?: string; action?: ReactNode };
   /** 상단 바 전역 검색(hg-search) */
@@ -44,10 +47,25 @@ export function AdminFrame({
   return (
     <div className="hg-admin">
       <nav className="hg-admin__side" aria-label="어드민 메뉴">
-        <div className="hg-admin__brand">
-          <Wordmark height={24} ink />
-          <span className="hg-tag">어드민</span>
-        </div>
+        {onHome ? (
+          <a
+            className="hg-admin__brand"
+            href="/"
+            style={{ color: 'inherit', textDecoration: 'none' }}
+            onClick={(e) => {
+              e.preventDefault();
+              onHome();
+            }}
+          >
+            <Wordmark height={24} ink />
+            <span className="hg-tag">어드민</span>
+          </a>
+        ) : (
+          <div className="hg-admin__brand">
+            <Wordmark height={24} ink />
+            <span className="hg-tag">어드민</span>
+          </div>
+        )}
         {menus.map((m, i) => {
           const on = m.key === current;
           const head = m.group && m.group !== menus[i - 1]?.group;

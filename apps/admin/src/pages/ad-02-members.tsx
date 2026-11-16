@@ -1,4 +1,10 @@
-import { adminNoteExport, adminSearch, type AdminSearchRow } from '@sweetwo/api';
+import {
+  adminListUsers,
+  adminNoteExport,
+  adminSearch,
+  ADMIN_LIST_PAGE,
+  type AdminSearchRow,
+} from '@sweetwo/api';
 import { formatKstDateTime, toCsv } from '@sweetwo/core';
 import { DataTable, Status } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
@@ -8,17 +14,69 @@ import { copy } from '../copy';
 import { coupleTone } from '../tones';
 import { Frame } from '../frame';
 
-// AD-02 회원·커플 검색: 이메일, 사용자 ID, 커플 공간 ID, 문의 번호 정확히 일치만. 1건이면 AD-03으로 바로.
-// 결과 표는 L0(이메일 앞 3자 외 가림). 검색도 감사 로그(서버).
-// 내려받기: 결과 표 그대로(L0 열만), 사유를 남긴 뒤(감사 로그), 파일 첫 줄에 관리자 ID와 시각.
+// AD-02 회원·커플: 들어오면 가입 최신순 목록(한 쪽 50명, 더 보기로 다음 쪽).
+// 검색은 이메일, 사용자 ID, 커플 공간 ID, 문의 번호 정확히 일치만(2026-11-16 목록 추가). 1건이면 AD-03으로 바로.
+// 결과 표는 L0(이메일 앞 3자 외 가림). 목록·검색 모두 감사 로그(서버).
+// 내려받기: 지금 표에 떠 있는 줄만(L0 열), 사유를 남긴 뒤(감사 로그), 파일 첫 줄에 관리자 ID와 시각.
 export function AD02Members() {
   const nav = useNavigate();
   const [q, setQ] = useState('');
   const [rows, setRows] = useState<AdminSearchRow[] | null>(null);
+  const [mode, setMode] = useState<'list' | 'search'>('list');
+  const [more, setMore] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
+
+  const loadFirst = async () => {
+    if (busy) return;
+    setBusy(true);
+    setErr(false);
+    try {
+      const r = await adminListUsers();
+      setRows(r);
+      setMore(r.length === ADMIN_LIST_PAGE);
+      setMode('list');
+    } catch {
+      setErr(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const loadMore = async () => {
+    const last = rows?.at(-1);
+    if (!last || busy) return;
+    setBusy(true);
+    setErr(false);
+    try {
+      const r = await adminListUsers(last);
+      setRows((prev) => [...(prev ?? []), ...r]);
+      setMore(r.length === ADMIN_LIST_PAGE);
+    } catch {
+      setErr(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const search = async (text = q) => {
+    if (busy) return;
+    if (!text.trim()) return loadFirst();
+    setBusy(true);
+    setErr(false);
+    try {
+      const r = await adminSearch(text.trim());
+      if (r.length === 1 && r[0]) return nav(`/members/${r[0].user_id}`);
+      setRows(r);
+      setMore(false);
+      setMode('search');
+    } catch {
+      setErr(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const download = async () => {
     if (!rows?.length || !reason.trim() || busy) return;
     setBusy(true);
@@ -57,29 +115,20 @@ export function AD02Members() {
       setBusy(false);
     }
   };
-  const search = async (text = q) => {
-    if (!text.trim() || busy) return;
-    setBusy(true);
-    setErr(false);
-    try {
-      const r = await adminSearch(text.trim());
-      if (r.length === 1 && r[0]) return nav(`/members/${r[0].user_id}`);
-      setRows(r);
-    } catch {
-      setErr(true);
-    } finally {
-      setBusy(false);
-    }
-  };
-  // 상단 바 통합 검색에서 넘어오면 바로 찾음
+
+  // 상단 바 통합 검색에서 넘어오면 바로 찾음, 아니면 목록을 먼저 보여 줌
   const loc = useLocation();
   const from = (loc.state as { q?: string; at?: number } | null) ?? null;
   useEffect(() => {
-    if (!from?.q) return;
-    setQ(from.q);
-    void search(from.q);
+    if (from?.q) {
+      setQ(from.q);
+      void search(from.q);
+    } else {
+      void loadFirst();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from?.at]);
+
   return (
     <Frame menu="members" title={copy.menus.members}>
       <form
@@ -130,7 +179,7 @@ export function AD02Members() {
           rows={rows}
           rowKey={(r) => r.user_id}
           onRow={(r) => nav(`/members/${r.user_id}`)}
-          empty={copy.noMember}
+          empty={mode === 'list' ? copy.noMemberAtAll : copy.noMember}
           columns={[
             { key: 'id', label: copy.cols.userId, render: (r) => r.user_id },
             {
@@ -158,6 +207,11 @@ export function AD02Members() {
             { key: 'sub', label: copy.cols.sub, render: (r) => r.subscription },
           ]}
         />
+      )}
+      {mode === 'list' && more && (
+        <div className="hg-row" style={{ justifyContent: 'center', marginTop: 'var(--space-3)' }}>
+          <Button onAct={() => loadMore()}>{copy.moreMembers}</Button>
+        </div>
       )}
     </Frame>
   );

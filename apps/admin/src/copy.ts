@@ -120,6 +120,8 @@ export const copy = {
   // AD-02
   search: '이메일, 사용자 ID, 문의 번호로 찾기',
   noMember: '일치하는 회원 없음',
+  noMemberAtAll: '가입한 회원 없음',
+  moreMembers: '회원 더 보기',
   // AD-02 내려받기(L0 열만, 사유 입력 후, 파일에 관리자 ID)
   download: '내려받기',
   downloadReason: '내려받는 이유', // [확인 필요]

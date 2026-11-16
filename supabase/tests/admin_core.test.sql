@@ -1,7 +1,7 @@
 -- pgTAP: 어드민 기본(AD-01~06·17). 찬우(사용자), 관리자 cs01(CS), 관리자 boss(최고), 사용자 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(27);
+select plan(30);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -52,6 +52,9 @@ select results_eq($$ select email_masked, couple_state from public.admin_search(
   $$ values ('cha***@example.com', 'not_joined') $$, '이메일 정확히 일치, 가림');
 select is((select count(*)::int from public.admin_search('chanwoo')), 0, '부분 일치 없음');
 select is((select count(*)::int from public.admin_search(current_setting('test.no'))), 1, '문의 번호로 찾기');
+select ok(exists (select 1 from public.admin_list_users() where email_masked = 'cha***@example.com'), '목록에 가린 이메일로 나옴');
+select is((select count(*)::int from public.admin_list_users(1)), 1, '목록 한 쪽 크기 지킴');
+select is((select count(*)::int from public.admin_list_users(1, (select created_at from public.admin_list_users(1)), (select user_id from public.admin_list_users(1)))), 0, '커서 다음 쪽(한 명뿐이라 비어 있음)');
 select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'email_masked', 'cha***@example.com', '상세 L0');
 select ok(not (public.admin_user_detail('11111111-1111-1111-1111-111111111111') ? 'monthly_income'), '상세에 금액 없음');
 select is(public.admin_user_detail('11111111-1111-1111-1111-111111111111')->>'salary_mode', 'separate', '상세에 월급 관리 방식');

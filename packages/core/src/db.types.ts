@@ -3534,6 +3534,16 @@ export type Database = {
         Args: { p_email: boolean; p_kind: string; p_platforms: string[]; p_target: Json }
         Returns: Json
       }
+      admin_list_users: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number }
+        Returns: {
+          couple_state: string
+          created_at: string
+          email_masked: string
+          subscription: string
+          user_id: string
+        }[]
+      }
       admin_notices: {
         Args: Record<PropertyKey, never>
         Returns: {

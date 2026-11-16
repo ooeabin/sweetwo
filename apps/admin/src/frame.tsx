@@ -101,6 +101,7 @@ export function Frame({
       menus={menus}
       current={menu}
       onMenu={(m) => nav(m.href)}
+      onHome={() => nav('/')}
       search={<GlobalSearch />}
       who={{
         name: me.name,
