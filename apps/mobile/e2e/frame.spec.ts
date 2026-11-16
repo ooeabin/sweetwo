@@ -24,7 +24,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: '검색' });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole('option', { name: /월급 체크하기/ })).toBeVisible();
+  await expect(dialog.getByRole('option', { name: /월급날 확인하기/ })).toBeVisible();
   await expect(dialog.getByRole('option', { name: /금액 가리기/ })).toBeVisible();
   await expect(dialog.getByRole('option', { name: /저금 추가/ })).toBeVisible();
   await axe(page);

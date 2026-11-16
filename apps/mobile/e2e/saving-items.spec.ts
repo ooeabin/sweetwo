@@ -28,7 +28,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   // 저금 한 카드(2026-11-15 3차 검토): 큰 숫자 + 막대 + 한 줄
   const target = page.getByRole('region', { name: '모은 금액' });
-  await expect(target).toContainText('목표 1억 5,000만 원의 0%');
+  await expect(target).toContainText('목표 금액 1억 5,000만 원의 0%');
   // 2026-11-16 4차 검토: 기한 줄은 늘 보임(남은 금액과 한 줄, 같은 날짜 한 번), 월 필요액은 ‘자세히 보기’ 아래
   await expect(target).toContainText('2031년 10월까지 1억 5,000만 원 더 필요해요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
@@ -48,7 +48,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await page.goto('/salary/items/goal-e');
   await expect(page.getByRole('heading', { name: '청약' })).toBeVisible();
   await expect(page.getByText('목표 금액을 정하면 얼마나 모았는지 보여 드려요')).toBeVisible();
-  await page.getByRole('button', { name: '목표 금액 정하기' }).click();
+  await page.getByRole('button', { name: '금액 정하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?first=1$/);
   await page.getByRole('textbox').first().fill('5000000');
   await page.getByRole('button', { name: '저장' }).click();
@@ -189,7 +189,7 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   const g = db.goals.find((x) => x.name === '결혼 비용');
   expect(g).toMatchObject({ start_saved: 20_000_000, target_amount: 30_000_000 });
   await expect(page.getByText('2,000만 원', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('목표 3,000만 원의 66%')).toBeVisible();
+  await expect(page.getByText('목표 금액 3,000만 원의 66%')).toBeVisible();
   await expect(page.getByText('이미 모은 금액 2,000만 원')).toBeVisible();
   // 체크하면 시작값에 더해짐
   await page.getByRole('checkbox', { name: /이번 달/ }).click();
@@ -361,7 +361,7 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   await expect.poll(() => home.status).toBe('active');
   expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('목표 95만 원의 0%')).toBeVisible();
+  await expect(page.getByText('목표 금액 95만 원의 0%')).toBeVisible();
   await expect(page.getByRole('region', { name: '모은 금액' }).getByText('달성')).toHaveCount(0);
   // 다시 체크하면 다시 축하
   await page.goto('/salary');

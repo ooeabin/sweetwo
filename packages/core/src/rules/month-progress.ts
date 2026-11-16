@@ -120,7 +120,7 @@ export function planChangeTouchesMonth(
 
 /**
  * 체크리스트 다 끝남(07 5장, 2026-11-12 D4): 여유 자금 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이면 끝남.
- * 모두 체크면 'all'(“{월}월 월급 체크를 다 했어요”), ‘못 함’이 섞이면 'mixed'(“…체크를 마쳤어요”).
+ * 모두 체크면 'all'(“{월}월 {일}일 월급, 계획대로 됐어요”), ‘못 함’이 섞이면 'mixed'(“…확인을 마쳤어요”).
  * 체크 안 한 줄이 있거나 줄이 없으면 null. 서버 check_pay_line의 체크리스트 상태·파트너 알림과 같은 판단
  */
 export type ChecklistFinish = 'all' | 'mixed';

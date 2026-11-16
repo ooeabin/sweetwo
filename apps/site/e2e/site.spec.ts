@@ -59,12 +59,12 @@ test.describe('PC', () => {
     await expect(page.getByRole('button', { name: '다른 OS용 받기' })).toHaveCount(0);
     // 상단 ‘앱 받기’는 맨 아래 앱 받기로
     await expect(page.getByRole('link', { name: '앱 받기' })).toHaveAttribute('href', '/#get');
-    await expect(page.getByText('월급 계획과 체크리스트')).toBeVisible();
-    await expect(page.getByText('직접 입력해요, 계좌를 연결하지 않아요')).toBeVisible();
-    const q = page.getByRole('button', { name: '계좌를 연결하지 않나요?' });
+    await expect(page.getByText('월급 계획과 월급날 확인 목록')).toBeVisible();
+    await expect(page.getByText('직접 입력해요, 통장을 연결하지 않아요')).toBeVisible();
+    const q = page.getByRole('button', { name: '통장을 연결하지 않나요?' });
     await q.click();
     await expect(q).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByText(/계좌·카드 연동 없이 직접 입력해요/)).toBeVisible();
+    await expect(page.getByText(/통장·카드 연동 없이 직접 입력해요/)).toBeVisible();
     await expect(page.getByRole('link', { name: '개인정보처리방침' })).toHaveClass(/is-strong/);
     await expect(
       page.getByText(

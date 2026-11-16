@@ -158,7 +158,7 @@ export function AssetAddRoute() {
     const g = draft.grp ? groups.find((x) => x.key === draft.grp) : undefined;
     return (
       <QuestionLayout steps={progress} title={copy.addTitle} onBack={back}>
-        {/* 2026-11-13 F-03q 입구: 맨 위 “큰 묶음만 빠르게 적기 ›” */}
+        {/* 2026-11-13 F-03q 입구: 맨 위 “큰 항목만 빠르게 적기 ›” */}
         <List>
           <ListRow label={copy.quickEntry} onClick={() => nav('/assets/quick')} />
         </List>

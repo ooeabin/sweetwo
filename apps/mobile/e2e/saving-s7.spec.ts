@@ -98,7 +98,7 @@ test('D1 합쳐서: 찬우가 주인인 저금을 예빈도 고치고, 찬우 �
   // 보기만 안내 없음, ⋯ 메뉴와 고치기(목표 금액 정하기)가 있음
   await expect(y.getByText('보기만 할 수 있어요')).toHaveCount(0);
   await expect(y.getByRole('button', { name: '더보기' }).first()).toBeVisible();
-  await expect(y.getByRole('button', { name: '목표 금액 정하기' })).toBeEnabled();
+  await expect(y.getByRole('button', { name: '금액 정하기' })).toBeEnabled();
   // 이번 달 줄도 체크할 수 있음(공동 체크리스트)
   await expect(y.getByRole('checkbox', { name: '이번 달 확인' })).toBeEnabled();
   await axe(y);
@@ -245,7 +245,7 @@ test('S7-07·S7-12: 목표 금액을 처음 정한 뒤 기한은 1년 뒤 + 필�
 }) => {
   test.setTimeout(90_000);
   const db = await open(page, undefined, '/salary/items/goal-e');
-  await page.getByRole('button', { name: '목표 금액 정하기' }).click();
+  await page.getByRole('button', { name: '금액 정하기' }).click();
   await page.getByRole('textbox').first().fill('12000000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/deadline\?first=1$/);
