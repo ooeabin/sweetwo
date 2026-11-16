@@ -98,6 +98,8 @@ export function FirstSavingRow({
   const { masked } = useMask();
   if (!f.show) return null;
   const left = money(f.left, masked);
+  // 아직 안 정한 돈에서 용돈은 이미 빠져 있음을 한 줄로(2026-11-16 r6)
+  const excl = f.allowance > 0 ? copy.firstSavingExcl(money(f.allowance, masked)) : undefined;
   return (
     <div className="hg-list">
       <ListRow
@@ -107,7 +109,7 @@ export function FirstSavingRow({
             ? copy.firstSavingTogether(f.partnerName ?? '', f.partnerGoal.name)
             : copy.firstSaving(left)
         }
-        sub={f.partnerGoal ? copy.firstSavingLeft(left) : undefined}
+        sub={f.partnerGoal ? [copy.firstSavingLeft(left), excl].filter(Boolean).join(', ') : excl}
         chevron={false}
         onClick={() =>
           go(

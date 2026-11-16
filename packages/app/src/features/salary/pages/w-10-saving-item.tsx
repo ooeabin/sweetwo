@@ -166,9 +166,9 @@ export function W10SavingItem() {
       to: undefined as string | undefined,
       sub:
         l.checked_at && d.joint && l.checked_by
-          ? `${formatDateFull(l.checked_at.slice(0, 10))}, ${nameOf(l.checked_by)}`
+          ? `${formatDateFull(kstDay(l.checked_at))}, ${nameOf(l.checked_by)}`
           : l.checked_at
-            ? formatDateFull(l.checked_at.slice(0, 10))
+            ? formatDateFull(kstDay(l.checked_at))
             : undefined,
     })),
     ...(moves.data ?? [])
@@ -357,6 +357,17 @@ export function W10SavingItem() {
           )}
         </section>
       )}
+      {/* 매달 모을 금액이 0원인 내 저금(합류해서 같이 모으기에 든 저금 등): 안내 줄 → 그 저금 줄 금액 시트(2026-11-16 r6) */}
+      {!closed && !hideAmounts && i.monthly === 0 && i.canEdit && !locked && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav(splitTo)}
+        >
+          {copy.setMonthly}
+        </button>
+      )}
       {!closed && !hideAmounts && (i.monthly > 0 || i.owner !== 'partner' || d.joint) && (
         <section className="hg-goalbox" aria-label={copy.monthlyOf(m(i.monthly))}>
           <div className="hg-goalbox__head">
@@ -432,7 +443,7 @@ export function W10SavingItem() {
               {g.start_saved > 0 && (
                 <ListRow
                   label={copy.historyStartV22(m(g.start_saved))}
-                  sub={formatDateFull(g.created_at.slice(0, 10))}
+                  sub={formatDateFull(kstDay(g.created_at))}
                 />
               )}
             </div>
@@ -456,7 +467,7 @@ export function W10SavingItem() {
       <section className="hg-stack" aria-label={copy.info}>
         <SectionHeader title={copy.info} />
         <div className="hg-list">
-          <ListRow label={copy.createdOn(formatDateFull(g.created_at.slice(0, 10)))} />
+          <ListRow label={copy.createdOn(formatDateFull(kstDay(g.created_at)))} />
           {d.joined && g.created_by && <ListRow label={copy.createdBy(nameOf(g.created_by))} />}
         </div>
       </section>

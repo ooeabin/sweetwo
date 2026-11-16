@@ -172,7 +172,7 @@ export function W20MoneyIn() {
 
 /**
  * W-20a 저금에 나눠 넣기(20 v2.2): 내가 넣을 수 있는 저금(내 저금, 묶음의 내 줄, 같이 계열은 공동 저금) + 금액 칸(빈 칸),
- * 맨 위 “들어온 돈 300만 원 중 남은 100만 원”. ‘넣기’ = distribute_money_in, 합이 들어온 돈보다 크면 막음. 0원이면 기록만
+ * 맨 위 “들어온 돈 300만 원 중 아직 저금에 안 넣은 돈 100만 원”. ‘넣기’ = distribute_money_in, 합이 들어온 돈보다 크면 막음. 0원이면 기록만
  */
 export function W20aDistribute() {
   const { id = '' } = useParams();

@@ -1,5 +1,5 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { formatDot2, todayKst } from '@sweetwo/core';
+import { formatDot2, kstDateOf, todayKst } from '@sweetwo/core';
 import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
@@ -166,7 +166,7 @@ export function CheckLine({
   };
   const shownDone = pending ? pending === 'checked' : done;
 
-  const when = line.checked_at ? formatDot2(line.checked_at.slice(0, 10)) : null;
+  const when = line.checked_at ? formatDot2(kstDateOf(line.checked_at)) : null;
   const checkMeta = skipped ? (
     copy.skipped
   ) : done && when ? (

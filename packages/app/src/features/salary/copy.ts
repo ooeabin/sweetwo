@@ -114,6 +114,7 @@ export const copy = {
     done: '다 넣었어요',
     skip: '건너뛸게요',
   },
+  addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 돈’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
   sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
   ownName: '직접 입력',
   editPlan: '편집하기',
@@ -225,6 +226,7 @@ export const copy = {
   // 월 필요액 > 매달 금액(2026-11-09, W-10 3번, W-11d 보조) [확인 필요]
   lateBy: (n: number) => `지금대로면 기한보다 ${n}개월 늦어요`,
   changeMonthly: '매달 금액 바꾸기', // [확인 필요]
+  setMonthly: '매달 모을 금액 정하기', // [확인 필요] 2026-11-16 r6 W-10 매달 0원이면 안내 줄 → W-01 금액 시트
   changeDeadline: '기한 바꾸기', // [확인 필요]
   addLine: '+ 줄 추가',
   addLineTitle: '줄 추가',
@@ -245,6 +247,8 @@ export const copy = {
   firstSavingTogether: (partner: string, goal: string) =>
     `${partner ? `${partner}님` : '파트너'} ‘${goal}’에 같이 모을까요?`,
   firstSavingLeft: (left: string) => `아직 안 정한 돈 ${left}`,
+  // 2026-11-16 r6: 용돈이 이미 빠진 돈이라는 걸 보임 [확인 필요]
+  firstSavingExcl: (allowance: string) => `용돈 ${allowance} 빼고`,
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
   itemProgress: (saved: string, target: string) => `${saved} / ${target}`,
   closedFold: (n: number) => `그만 모은 저금 ${n}개`, // [확인 필요]
@@ -317,7 +321,8 @@ export const copy = {
   addNameHelp: '매달 월급에서 이만큼 모으기로 적어 둬요', // [확인 필요] 2026-11-16 R4-2(예전 “월급 계획 저금 묶음에 한 줄로 생겨요”)
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
-  addMonthlyHelp: (left: string) => `아직 안 정한 돈 ${left}`, // [확인 필요]
+  addMonthlyHelp: (left: string, allowance?: string) =>
+    `아직 안 정한 돈 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // [확인 필요] 2026-11-16 r6 용돈 빼고
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
@@ -573,7 +578,8 @@ export const copy = {
   }, // [확인 필요]
   moneyInKindLabel: '어떤 돈이에요?', // [확인 필요] 칩 묶음 이름
   moneyInDistributeQ: '저금에 얼마씩 넣을까요?', // [확인 필요]
-  moneyInLeft: (total: string, left: string) => `들어온 돈 ${total} 중 남은 ${left}`, // [확인 필요]
+  moneyInLeft: (total: string, left: string) =>
+    `들어온 돈 ${total} 중 아직 저금에 안 넣은 돈 ${left}`, // [확인 필요] 2026-11-16 r6 (예전 “…중 남은 …”)
   moneyInOver: '들어온 돈보다 많이 넣을 수 없어요', // [확인 필요]
   moneyInPut: '넣기', // [확인 필요]
   /** W-20a 적기만(2026-11-16 R4-7: 받은 돈 적기가 저금 나누기로만 끝났음) [확인 필요] */
