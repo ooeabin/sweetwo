@@ -3509,6 +3509,16 @@ export type Database = {
       }
       admin_inquiry: { Args: { p_id: string }; Returns: Json }
       admin_inquiry_counts: { Args: Record<PropertyKey, never>; Returns: Json }
+      admin_list_users: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number }
+        Returns: {
+          couple_state: string
+          created_at: string
+          email_masked: string
+          subscription: string
+          user_id: string
+        }[]
+      }
       admin_log: {
         Args: {
           a: Omit<
@@ -3533,16 +3543,6 @@ export type Database = {
       admin_notice_audience: {
         Args: { p_email: boolean; p_kind: string; p_platforms: string[]; p_target: Json }
         Returns: Json
-      }
-      admin_list_users: {
-        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number }
-        Returns: {
-          couple_state: string
-          created_at: string
-          email_masked: string
-          subscription: string
-          user_id: string
-        }[]
       }
       admin_notices: {
         Args: Record<PropertyKey, never>
@@ -3719,32 +3719,17 @@ export type Database = {
       }
       agree_terms: { Args: { p_marketing?: boolean }; Returns: number }
       agree_unlink: { Args: Record<PropertyKey, never>; Returns: undefined }
-      allowance_editable: {
-        Args: { p_owner: string; p_space: string }
-        Returns: boolean
-      }
+      allowance_editable: { Args: { p_owner: string; p_space: string }; Returns: boolean }
       amount_band: { Args: { v: number }; Returns: string }
       answer_access_request: { Args: { p_accept: boolean; p_id: string }; Returns: undefined }
       answer_asset_share: {
         Args: { p_vis: Database["public"]["Enums"]["asset_visibility"] }
         Returns: number
       }
-      answer_mode_change: {
-        Args: { p_accept: boolean; p_request: string }
-        Returns: string
-      }
-      answer_rank_consent: {
-        Args: { p_accept: boolean; p_request: string }
-        Returns: string
-      }
-      answer_reconnect: {
-        Args: { p_accept: boolean; p_block?: boolean }
-        Returns: string
-      }
-      answer_split: {
-        Args: { p_accept: boolean; p_id: string }
-        Returns: string
-      }
+      answer_mode_change: { Args: { p_accept: boolean; p_request: string }; Returns: string }
+      answer_rank_consent: { Args: { p_accept: boolean; p_request: string }; Returns: string }
+      answer_reconnect: { Args: { p_accept: boolean; p_block?: boolean }; Returns: string }
+      answer_split: { Args: { p_accept: boolean; p_id: string }; Returns: string }
       apply_manage_style: {
         Args: {
           p_living: boolean
@@ -3756,10 +3741,7 @@ export type Database = {
         Returns: undefined
       }
       apply_salary_change_row: { Args: { p_id: string }; Returns: boolean }
-      apply_salary_changes: {
-        Args: { p_today?: string; p_user?: string }
-        Returns: number
-      }
+      apply_salary_changes: { Args: { p_today?: string; p_user?: string }; Returns: number }
       apply_shared_account: { Args: { p_account: string }; Returns: undefined }
       asset_editable: {
         Args: {
@@ -3789,10 +3771,7 @@ export type Database = {
         Returns: boolean
       }
       auto_confirm_due_lines: { Args: { p_today?: string }; Returns: number }
-      auto_due_date: {
-        Args: { p_day: number; p_end: string; p_start: string }
-        Returns: string
-      }
+      auto_due_date: { Args: { p_day: number; p_end: string; p_start: string }; Returns: string }
       base_day_ok: { Args: { p: Json; sid: string }; Returns: boolean }
       bundle_create: {
         Args: {
@@ -3805,19 +3784,12 @@ export type Database = {
         Returns: string
       }
       bundle_each_open: { Args: { p_bundle: string }; Returns: boolean }
-      bundle_join: {
-        Args: { p_bundle: string; p_goal: string }
-        Returns: undefined
-      }
+      bundle_join: { Args: { p_bundle: string; p_goal: string }; Returns: undefined }
       bundle_leave: { Args: { p_bundle: string }; Returns: undefined }
       bundle_month_gain: { Args: { p_bundle: string; p_today?: string }; Returns: number }
       bundle_refresh: { Args: { p_bundle: string }; Returns: undefined }
       bundle_set_visibility: {
-        Args: {
-          p_bundle: string
-          p_percent_only?: boolean
-          p_show_each?: boolean
-        }
+        Args: { p_bundle: string; p_percent_only?: boolean; p_show_each?: boolean }
         Returns: undefined
       }
       bundle_total: { Args: { p_bundle: string }; Returns: number }
@@ -4061,10 +4033,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      confirm_auto_lines: {
-        Args: { p_checklist: string; p_today: string }
-        Returns: number
-      }
+      confirm_auto_lines: { Args: { p_checklist: string; p_today: string }; Returns: number }
       confirm_payday: { Args: { p_checklist: string }; Returns: number }
       create_inquiry: {
         Args: {
@@ -4085,15 +4054,9 @@ export type Database = {
       cycle_date: { Args: { m: number; p_day: number; y: number }; Returns: string }
       cycle_day: { Args: { p_owner: string; p_space: string }; Returns: number }
       discard_prefill: { Args: Record<PropertyKey, never>; Returns: undefined }
-      dismiss_home_task: {
-        Args: { p_key: string; p_state?: string }
-        Returns: undefined
-      }
+      dismiss_home_task: { Args: { p_key: string; p_state?: string }; Returns: undefined }
       dismiss_month_us: { Args: { p_id: string }; Returns: undefined }
-      distribute_money_in: {
-        Args: { p_items: Json; p_money_in: string }
-        Returns: number
-      }
+      distribute_money_in: { Args: { p_items: Json; p_money_in: string }; Returns: number }
       done_storage_move: { Args: { p_ids: number[] }; Returns: undefined }
       done_storage_purge: { Args: { p_ids: number[] }; Returns: undefined }
       drop_push_tokens: { Args: { p_tokens: string[] }; Returns: number }
@@ -4143,10 +4106,7 @@ export type Database = {
       goal_editable: { Args: { p_goal: string }; Returns: boolean }
       goal_is_together: { Args: { p_goal: string }; Returns: boolean }
       goal_lines_sync: { Args: { p_goal: string }; Returns: undefined }
-      goal_mark_achieved: {
-        Args: { p_actor: string; p_goal: string }
-        Returns: undefined
-      }
+      goal_mark_achieved: { Args: { p_actor: string; p_goal: string }; Returns: undefined }
       goal_move_reasons: {
         Args: { p_goal: string }
         Returns: {
@@ -4183,10 +4143,7 @@ export type Database = {
         }
         Returns: Json
       }
-      inquiry_is_about: {
-        Args: { p_inquiry_no: string; p_user: string }
-        Returns: boolean
-      }
+      inquiry_is_about: { Args: { p_inquiry_no: string; p_user: string }; Returns: boolean }
       invest_answers: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4296,10 +4253,7 @@ export type Database = {
         Args: { p_owner: string; p_space: string; p_today?: string }
         Returns: string
       }
-      mark_note_paid: {
-        Args: { p_note: string; p_subtract: boolean }
-        Returns: string
-      }
+      mark_note_paid: { Args: { p_note: string; p_subtract: boolean }; Returns: string }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       mark_social_avatar_checked: { Args: Record<PropertyKey, never>; Returns: undefined }
       mask_email: { Args: { e: string }; Returns: string }
@@ -4314,10 +4268,7 @@ export type Database = {
       }
       metric_ratio: { Args: { p_den: number; p_num: number }; Returns: Json }
       money_in_delete: { Args: { p_id: string }; Returns: undefined }
-      money_in_period: {
-        Args: { p_today?: string; p_user?: string }
-        Returns: Json
-      }
+      money_in_period: { Args: { p_today?: string; p_user?: string }; Returns: Json }
       money_in_restore: { Args: { p_id: string }; Returns: undefined }
       money_in_set: {
         Args: {
@@ -4462,10 +4413,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      notify_my_allowance: {
-        Args: { p_owner: string; p_space: string }
-        Returns: undefined
-      }
+      notify_my_allowance: { Args: { p_owner: string; p_space: string }; Returns: undefined }
       nudge_starter: { Args: Record<PropertyKey, never>; Returns: string }
       onboarding_reset_plan: { Args: Record<PropertyKey, never>; Returns: undefined }
       partner_asset_sums: {
@@ -4586,12 +4534,7 @@ export type Database = {
         }[]
       }
       propose_split: {
-        Args: {
-          p_monthly_total: number
-          p_name: string
-          p_rule: string
-          p_share_mine?: number
-        }
+        Args: { p_monthly_total: number; p_name: string; p_rule: string; p_share_mine?: number }
         Returns: string
       }
       purge_abandoned_signups: { Args: { p_now?: string }; Returns: number }
@@ -4604,15 +4547,9 @@ export type Database = {
       purge_trash: { Args: { p_id?: string; p_kind?: string }; Returns: number }
       purge_unlinked_spaces: { Args: Record<PropertyKey, never>; Returns: undefined }
       push_kind_key: { Args: { p_kind: string }; Returns: string }
-      push_kind_on: {
-        Args: { p_kind: string; p_kinds: Json }
-        Returns: boolean
-      }
+      push_kind_on: { Args: { p_kind: string; p_kinds: Json }; Returns: boolean }
       push_wanted: { Args: { p_prefs: Json; p_topic: string }; Returns: boolean }
-      rank_age_band: {
-        Args: { p_birth_year: number; p_year: number }
-        Returns: string
-      }
+      rank_age_band: { Args: { p_birth_year: number; p_year: number }; Returns: string }
       rank_pair_consented: { Args: { p_space: string }; Returns: boolean }
       rank_top_pct: { Args: { p_net: number }; Returns: number }
       raw_of: { Args: { v: unknown }; Returns: Json }
@@ -4664,18 +4601,11 @@ export type Database = {
         }
         Returns: string
       }
-      request_rank_consent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      request_rank_consent: { Args: Record<PropertyKey, never>; Returns: string }
       request_reconnect: { Args: Record<PropertyKey, never>; Returns: undefined }
       request_unlink: { Args: { p_confirm: string }; Returns: string }
       resolve_manage_style: {
-        Args: {
-          p_manager: string
-          p_shared_living: boolean
-          p_shared_saving: boolean
-        }
+        Args: { p_manager: string; p_shared_living: boolean; p_shared_saving: boolean }
         Returns: {
           manager: string
           salary_mode: Database["public"]["Enums"]["salary_mode"]
@@ -4689,17 +4619,11 @@ export type Database = {
       run_access_expiry: { Args: Record<PropertyKey, never>; Returns: undefined }
       run_cycle_checklists: { Args: { p_today?: string }; Returns: number }
       run_unlink_deadlines: { Args: Record<PropertyKey, never>; Returns: undefined }
-      salary_change_day: {
-        Args: { p_month: string; p_user: string }
-        Returns: string
-      }
+      salary_change_day: { Args: { p_month: string; p_user: string }; Returns: string }
       save_api_holidays: { Args: { p_rows: Json; p_years: number[] }; Returns: number }
       save_split: { Args: { p_lines: Json; p_owner?: string }; Returns: string }
       saving_adjust_title: {
-        Args: {
-          p_kind: string
-          p_reason: Database["public"]["Enums"]["goal_move_reason"]
-        }
+        Args: { p_kind: string; p_reason: Database["public"]["Enums"]["goal_move_reason"] }
         Returns: string
       }
       saving_after_change: { Args: { p_goal: string }; Returns: undefined }
@@ -4712,14 +4636,8 @@ export type Database = {
         Args: { p_deadline?: string; p_goal: string; p_target: number }
         Returns: undefined
       }
-      saving_note_editable: {
-        Args: { p_bundle: string; p_goal: string }
-        Returns: boolean
-      }
-      saving_note_visible: {
-        Args: { p_bundle: string; p_goal: string }
-        Returns: boolean
-      }
+      saving_note_editable: { Args: { p_bundle: string; p_goal: string }; Returns: boolean }
+      saving_note_visible: { Args: { p_bundle: string; p_goal: string }; Returns: boolean }
       saving_owner_hidden: { Args: { p_owner: string; p_space: string }; Returns: boolean }
       saving_unachieve: { Args: { p_goal: string }; Returns: undefined }
       schedule_salary_change: {
