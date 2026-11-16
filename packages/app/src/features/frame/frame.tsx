@@ -150,7 +150,7 @@ export function MainFrame(
     const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
     return () => clearInterval(t);
   }, [signedIn]);
-  // 서랍 줄(19 앱 기본 틀 11번): 메뉴 4개 / 내 정보, 설정 / 우리 둘(+ 초대하기, 파트너 합류 전만) / 공지, 문의, 도움말
+  // 서랍 줄(19 앱 기본 틀 11번, 2026-11-16 내 정보·설정은 머리 톱니로): 메뉴 4개 / 우리 둘(+ 초대하기, 파트너 합류 전만) / 공지, 문의, 도움말
   const go = (to: string, replace = false, key?: string) => {
     setMenu(false);
     if (key) track('menu_item_tapped', { item: key });
@@ -178,10 +178,6 @@ export function MainFrame(
       item('salary', d.salary, '/salary', path === '/salary'),
       item('assets', d.assets, lastAssetsTab(), path === '/assets' || path === '/assets/items'),
       item('calendar', d.calendar, '/calendar', path === '/calendar/list'),
-    ],
-    [
-      item('me', d.me, '/settings/me', path === '/settings/me'),
-      item('settings', d.settings, '/settings', path === '/settings'),
     ],
     [
       item('couple', d.couple, '/settings/couple', path === '/settings/couple'),

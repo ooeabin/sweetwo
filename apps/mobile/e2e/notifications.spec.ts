@@ -139,6 +139,21 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   await expect(bell).toHaveClass(/hg-iconbtn--dot/);
   // 점은 그림이라 화면 읽기 이름에도(2026-11-11 QA 4구간 S4-06)
   await expect(bell).toHaveAccessibleName('알림, 새 알림이 있어요');
+  // 점은 버튼 상자 모서리가 아니라 종 아이콘 오른쪽 위 어깨에 붙음(2026-11-16, 누르는 칸을 44px로 키워도), 테두리는 놓인 바탕색
+  const geo = () =>
+    bell.evaluate((b) => {
+      const r = b.getBoundingClientRect();
+      const i = (b.querySelector('.hg-ico') ?? b).getBoundingClientRect();
+      const cs = getComputedStyle(b, '::after');
+      return {
+        dx: i.right - (r.left + parseFloat(cs.left) + 4),
+        dy: r.top + parseFloat(cs.top) + 4 - i.top,
+      };
+    });
+  await expect.poll(async () => (await geo()).dx).toBeGreaterThanOrEqual(1);
+  await expect.poll(async () => (await geo()).dx).toBeLessThanOrEqual(5);
+  await expect.poll(async () => (await geo()).dy).toBeGreaterThanOrEqual(1);
+  await expect.poll(async () => (await geo()).dy).toBeLessThanOrEqual(5);
   await bell.click();
   if (narrow) await expect(page).toHaveURL(/\/notifications$/);
   const panel = page.getByRole('complementary', { name: '알림' });

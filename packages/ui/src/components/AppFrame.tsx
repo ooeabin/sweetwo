@@ -5,7 +5,7 @@ import { IconButton } from './IconButton';
 import { Wordmark } from './Wordmark';
 
 // 앱 화면 틀(docs/design/components/AppFrame.md). 넓은 창: 왼쪽 사이드바 + 본문(홈·자산 관리는 회색 바탕, tone="alt").
-// 좁은 창(768px 미만, 2026-11-09 GCOO 홈처럼): 하단 탭 막대와 + 버튼 없음. 홈 머리 = 워드마크 + 알림 + ☰(메뉴 서랍),
+// 좁은 창(768px 미만, 2026-11-09 GCOO 홈처럼): 하단 탭 막대와 + 버튼 없음. 홈 머리 = 워드마크 + 알림 + 설정(톱니) + ☰(메뉴 서랍),
 // 다른 메뉴 첫 화면 머리 = ‹(홈으로) + 굵은 제목. 서랍(Drawer)은 소비자가 onMenu로 엶.
 
 // 2026-11-08 ADR 0007: 목표 탭 자리에 월급 탭(손 위 동전 hand-coins)
@@ -240,7 +240,7 @@ export function AppFrame(p: AppFrameProps) {
       </aside>
 
       <div className="hg-frame__main">
-        {/* 좁은 창 머리(2026-11-09 GCOO 홈처럼). 홈: 왼쪽 워드마크, 오른쪽 알림 + ☰(메뉴 서랍, 설정은 서랍 안).
+        {/* 좁은 창 머리(2026-11-09 GCOO 홈처럼). 홈: 왼쪽 워드마크, 오른쪽 알림 + 설정(톱니) + ☰(메뉴 서랍, 2026-11-16 설정을 서랍에서 머리로).
             홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹(홈으로) + 메뉴 이름 굵은 제목(h1), 오른쪽 버튼 없음 */}
         <div className={cx('hg-frame__mhead', p.today && 'is-today')}>
           <div className="hg-mhead__place">
@@ -280,6 +280,13 @@ export function AppFrame(p: AppFrameProps) {
                 dot={p.hasNewNoti}
                 disabled={!p.onNoti}
                 onClick={p.onNoti}
+              />
+              <IconButton
+                icon="settings"
+                label={p.labels.settings}
+                ghost
+                disabled={!p.onSettings}
+                onClick={p.onSettings}
               />
               <IconButton
                 icon="list"
