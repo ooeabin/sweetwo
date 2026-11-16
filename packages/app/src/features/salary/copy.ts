@@ -56,7 +56,6 @@ export const copy = {
   },
   // W-01 월급 계획
   splitTitle: '월급 계획',
-  splitHelp: '눌러서 금액을 바꿔요', // [확인 필요]
   save: '저장',
   saved: '월급 계획을 바꿨어요',
   undo: '되돌리기',

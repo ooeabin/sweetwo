@@ -163,14 +163,12 @@ export const copy = {
   payday: '월급날',
   paydayTitle: '월급날은 며칠이에요?',
   paydayLast: '말일',
-  paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] 월급날 휠 아래
   paydayNone: '날짜가 정해져 있지 않아요', // [확인 필요] O-32와 같음(2026-11-13)
   checkValue: '입력한 값이 맞나요?',
 
   // P-06 월급 계획
   splitTitle: '내 월급을 이렇게 나눠 볼까요?', // [확인 필요]
   splitJointTitle: '같이 쓰는 월급 계획이에요', // [확인 필요]
-  splitHelp: '눌러서 금액을 바꿔요',
   splitJointHelp: '내 월급을 더해 금액을 다시 채웠어요',
   splitDone: '이대로 저장하기',
   partnerPuts: (starter: string, amount: string) => `${starter}님이 매달 ${amount} 넣어요`, // [확인 필요]
