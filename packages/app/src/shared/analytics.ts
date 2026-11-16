@@ -452,6 +452,22 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // 앱 안 공지 화면 N-04에서 공지를 펼침(14 N-04, 2026-11-16). 띠 ‘보기’로 들어와 펼쳐진 채 열린 것은 home_banner_tapped
+      name: 'notice_opened';
+      props: {
+        kind: string;
+        importance: 'normal' | 'must';
+        /** 지금 노출 중인 공지인지(false = 끝난 지난 공지) */
+        active: boolean;
+        from: 'list';
+      };
+    }
+  | {
+      // 공지 화면 N-04를 봄(공지 개수 0도 셈)
+      name: 'notice_list_viewed';
+      props: { count: number };
+    }
+  | {
       // 알림을 눌러 들어옴(32 4-7, 2026-11-12 QA 10구간 S10-03). type = 알림 종류(kind), channel inapp = 알림 센터, os = 푸시.
       // minutes_to_open = 알림이 생긴 뒤 분(모르면 null), landing_screen = 간 화면 ID(대상이 없어 Toast면 none)
       name: 'notification_opened';

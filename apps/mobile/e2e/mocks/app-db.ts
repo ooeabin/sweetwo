@@ -2034,6 +2034,17 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'my_sessions') return json(route, db.sessions);
       // 공지(AD-10): 대상 조건은 서버가 봄. 흉내는 쌓인 공지를 그대로
       if (fn === 'my_notices') return json(route, db.notices);
+      // N-04 공지 목록(my_notice_history): 노출 기간·active를 안 준 공지는 지금 노출 중으로 봄
+      if (fn === 'my_notice_history')
+        return json(
+          route,
+          db.notices.map((n) => ({
+            starts_at: '2026-11-01T00:00:00Z',
+            ends_at: '2099-12-31T00:00:00Z',
+            active: true,
+            ...n,
+          })),
+        );
       if (fn === 'recent_goal_changes') return json(route, db.goalChanges);
       if (fn === 'pending_terms') return json(route, db.pendingTerms);
       if (fn === 'my_mail_bounced') return json(route, db.mailBounced);

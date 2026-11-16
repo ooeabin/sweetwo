@@ -1,7 +1,8 @@
-import { fetchActiveNotices, qk } from '@sweetwo/api';
+import { fetchActiveNotices, fetchNoticeHistory, qk } from '@sweetwo/api';
 import { Button, Icon, type IconName } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { track } from '../../shared/analytics';
 import { detectPlatform } from '../../platform';
 import { copy } from './copy';
@@ -22,7 +23,7 @@ export interface NoticeBand {
 }
 
 // 홈 맨 위 공지 띠(AD-10, 14 ‘공지·캠페인’, 13 점검 예고). 필독이 먼저, 한 번에 하나.
-// ‘보기’로 내용을 펼치고, 일반 공지는 닫으면 이 기기에서 다시 안 보임(필독은 노출 기간 동안 늘 보임).
+// ‘보기’는 앱 안 공지 화면 N-04(그 공지가 펼쳐진 채)로 가고, 일반 공지는 닫으면 이 기기에서 다시 안 보임(필독은 노출 기간 동안 늘 보임).
 // 제목은 두 줄까지, 넘치면 말줄임(2026-11-11 QA 4구간 D2, hg-banner__one). 맨 위 띠는 하나만이라 홈이 순서대로 고름(D3)
 const noticesQuery = {
   queryKey: qk.notices,
@@ -31,16 +32,80 @@ const noticesQuery = {
   staleTime: 10 * 60_000,
 };
 
-/** 지금 볼 공지(노출 기간 안, 닫은 것 포함)가 있는지. 서랍 ‘공지’ 줄은 있을 때만(2026-11-16) */
-export function useHasNotices(enabled: boolean): boolean {
-  const q = useQuery({ ...noticesQuery, enabled });
-  return (q.data?.length ?? 0) > 0;
+// 앱 안 공지 화면 N-04(2026-11-16): 노출 중인 공지 + 끝난 지 90일 안 지난 공지(20개까지). 대상 조건은 서버가 봄
+const historyQuery = {
+  queryKey: qk.noticeHistory,
+  queryFn: () => fetchNoticeHistory(detectPlatform(), window.sweetwo?.appVersion),
+  staleTime: 10 * 60_000,
+};
+
+/** N-04 공지 목록(들어올 때마다 다시 받음) */
+export function useNoticeHistory(fresh = false) {
+  return useQuery({ ...historyQuery, ...(fresh ? { staleTime: 0 } : {}) });
+}
+
+// 읽은 공지(이 기기, 닫은 공지와 같이 기기 설정. 공지 id는 모두에게 같아서 로그아웃해도 남김)
+const READ_KEY = 'sweetwo.notice-read';
+const readListeners = new Set<() => void>();
+let readCache: { raw: string; ids: string[] } = { raw: '', ids: [] };
+const readSnapshot = (): string[] => {
+  let raw = '';
+  try {
+    raw = localStorage.getItem(READ_KEY) ?? '';
+  } catch {
+    /* 저장소를 못 쓰면 이번 실행에서만 */
+  }
+  if (raw !== readCache.raw) {
+    let ids: string[] = [];
+    try {
+      ids = raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      ids = [];
+    }
+    readCache = { raw, ids };
+  }
+  return readCache.ids;
+};
+/** 공지를 읽음으로(펼침). 서랍 ‘공지’ 줄의 새 알림 점이 꺼짐 */
+export function markNoticeRead(id: string) {
+  const ids = readSnapshot();
+  if (ids.includes(id)) return;
+  try {
+    localStorage.setItem(READ_KEY, JSON.stringify([...ids, id].slice(-100)));
+  } catch {
+    readCache = { raw: '\0', ids: [...ids, id] };
+  }
+  readListeners.forEach((f) => f());
+}
+export function useReadNotices(): string[] {
+  return useSyncExternalStore(
+    (f) => {
+      readListeners.add(f);
+      return () => readListeners.delete(f);
+    },
+    readSnapshot,
+    () => [],
+  );
+}
+
+/**
+ * 서랍 ‘공지’ 줄(2026-11-16): 보여 줄 공지(노출 중이거나 끝난 지 90일 안)가 하나라도 있으면 줄이 보이고,
+ * 노출 중인데 안 읽은 공지가 있으면 새 알림 점. 서랍을 열었을 때만 불러옴
+ */
+export function useNoticeMenu(enabled: boolean): { show: boolean; unread: boolean } {
+  const q = useQuery({ ...historyQuery, enabled });
+  const read = useReadNotices();
+  const list = q.data ?? [];
+  return {
+    show: list.length > 0,
+    unread: list.some((n) => n.active && !read.includes(n.id)),
+  };
 }
 
 export function useNoticeBand(): NoticeBand | null {
   const q = useQuery(noticesQuery);
   const [closed, setClosed] = useState(closedIds);
-  const [open, setOpen] = useState(false);
+  const nav = useNavigate();
   const list = (q.data ?? [])
     .filter((n) => n.importance === 'must' || !closed.includes(n.id))
     .sort((a, b) => (a.importance === b.importance ? 0 : a.importance === 'must' ? -1 : 1));
@@ -61,24 +126,22 @@ export function useNoticeBand(): NoticeBand | null {
     <div className="hg-banner hg-banner--line hg-body__banner" role="status">
       <Icon name="info" size={16} />
       <span className="hg-stack" style={{ gap: 'var(--space-1)' }}>
-        <strong className={open ? undefined : 'hg-banner__one'}>{n.title}</strong>
-        {open && n.body && <span style={{ whiteSpace: 'pre-wrap' }}>{n.body}</span>}
+        <strong className="hg-banner__one">{n.title}</strong>
       </span>
       {n.body && (
         <Button
           variant="secondary"
           size="sm"
           onClick={() => {
-            if (!open)
-              track('home_banner_tapped', {
-                banner: must ? 'must_notice' : 'notice',
-                action: 'open',
-              });
-            setOpen(!open);
+            track('home_banner_tapped', {
+              banner: must ? 'must_notice' : 'notice',
+              action: 'open',
+            });
+            // 공지 화면 N-04에서 그 공지가 펼쳐진 채로 열림(2026-11-16)
+            nav(`/notices?open=${encodeURIComponent(n.id)}`);
           }}
-          aria-expanded={open}
         >
-          {open ? copy.noticeFold : copy.noticeOpen}
+          {copy.noticeOpen}
         </Button>
       )}
       {!must && (

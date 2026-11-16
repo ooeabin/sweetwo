@@ -46,6 +46,7 @@ export const qk = {
   livingCheck: (planId: string) => ['living_check', planId] as const,
   closeBalances: ['close_balance'] as const,
   notices: ['notice'] as const,
+  noticeHistory: ['notice', 'history'] as const,
   weddingItems: ['wedding_item'] as const,
   incomePeriods: ['income_period'] as const,
   checklistDone: ['checklist_done'] as const,

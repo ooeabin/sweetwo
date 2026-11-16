@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ActiveNotice, NoticeTarget } from './admin';
+import { ActiveNotice, NoticeEntry, NoticeTarget } from './admin';
 
 // 공지 대상 조건(27 AD-10 2번): 서버 notice_target_valid와 같은 모양
 describe('NoticeTarget', () => {
@@ -38,5 +38,27 @@ describe('ActiveNotice', () => {
       platforms: ['desktop'],
     });
     expect(n.importance).toBe('normal');
+  });
+});
+
+// N-04 공지 화면이 읽는 모양(my_notice_history)
+describe('NoticeEntry', () => {
+  const base = { id: 'n1', kind: 'info', title: '안내', body: '', platforms: ['mobile'] };
+  it('노출 기간과 active를 같이 읽음', () => {
+    const n = NoticeEntry.parse({
+      ...base,
+      importance: 'must',
+      starts_at: '2026-11-01T00:00:00Z',
+      ends_at: '2026-11-10T00:00:00Z',
+      active: false,
+    });
+    expect(n.active).toBe(false);
+    expect(n.importance).toBe('must');
+  });
+  it('active가 없으면 모양이 틀림', () => {
+    expect(
+      NoticeEntry.safeParse({ ...base, starts_at: 'a', ends_at: 'b', importance: 'normal' })
+        .success,
+    ).toBe(false);
   });
 });

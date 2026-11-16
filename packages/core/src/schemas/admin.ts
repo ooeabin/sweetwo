@@ -263,6 +263,15 @@ export const ActiveNotice = z.object({
 });
 export type ActiveNotice = z.infer<typeof ActiveNotice>;
 
+/** 앱 안 공지 화면 N-04가 읽는 공지(my_notice_history): 노출 중 + 끝난 지 90일 안, 20개까지 */
+export const NoticeEntry = ActiveNotice.extend({
+  starts_at: z.string(),
+  ends_at: z.string(),
+  /** 지금 노출 중(끝나는 시각이 아직 안 지남) */
+  active: z.boolean(),
+});
+export type NoticeEntry = z.infer<typeof NoticeEntry>;
+
 // AD-01 8번 지표 v2.2(admin_metrics, 32 0장, 2026-11-13 PR 14). 집계 숫자만(사람·커플 ID 없음)
 const MetricRatio = z.object({ num: z.number(), den: z.number(), pct: z.number().nullable() });
 export type MetricRatio = z.infer<typeof MetricRatio>;

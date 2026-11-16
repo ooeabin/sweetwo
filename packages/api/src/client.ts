@@ -65,6 +65,7 @@ const READ_RPC = new Set([
   'join_context',
   'my_login_email',
   'my_mail_bounced',
+  'my_notice_history',
   'my_notices',
   'my_reconnect_ok',
   'my_sessions',

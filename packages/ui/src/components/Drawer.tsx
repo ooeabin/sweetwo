@@ -16,6 +16,8 @@ export interface DrawerItem {
   /** 지금 화면(굵은 ink, aria-current="page") */
   current?: boolean;
   onSelect: () => void;
+  /** 새 알림 점(2026-11-16 ‘공지’ 안 읽음) + 화면 읽기 글자(“새 공지”). 없으면 점 없음 */
+  dot?: string;
   /** 하위 줄(2026-11-16, 늘 펼침). 있으면 이 줄은 머리 줄 */
   children?: DrawerItem[];
 }
@@ -34,6 +36,12 @@ function Row({ it, sub }: { it: DrawerItem; sub?: boolean }) {
       onClick={it.onSelect}
     >
       {it.label}
+      {it.dot && (
+        <>
+          <span className="hg-drawer__dot" aria-hidden="true" />
+          <span className="hg-sr"> {it.dot}</span>
+        </>
+      )}
     </button>
   );
 }
