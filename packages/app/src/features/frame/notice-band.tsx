@@ -24,13 +24,21 @@ export interface NoticeBand {
 // 홈 맨 위 공지 띠(AD-10, 14 ‘공지·캠페인’, 13 점검 예고). 필독이 먼저, 한 번에 하나.
 // ‘보기’로 내용을 펼치고, 일반 공지는 닫으면 이 기기에서 다시 안 보임(필독은 노출 기간 동안 늘 보임).
 // 제목은 두 줄까지, 넘치면 말줄임(2026-11-11 QA 4구간 D2, hg-banner__one). 맨 위 띠는 하나만이라 홈이 순서대로 고름(D3)
+const noticesQuery = {
+  queryKey: qk.notices,
+  // 대상 조건(우리 둘 상태, 앱 버전, 가입 주차)은 서버가 봄. 앱 버전은 브리지 값(웹은 없음)
+  queryFn: () => fetchActiveNotices(detectPlatform(), window.sweetwo?.appVersion),
+  staleTime: 10 * 60_000,
+};
+
+/** 지금 볼 공지(노출 기간 안, 닫은 것 포함)가 있는지. 서랍 ‘공지’ 줄은 있을 때만(2026-11-16) */
+export function useHasNotices(enabled: boolean): boolean {
+  const q = useQuery({ ...noticesQuery, enabled });
+  return (q.data?.length ?? 0) > 0;
+}
+
 export function useNoticeBand(): NoticeBand | null {
-  const q = useQuery({
-    queryKey: qk.notices,
-    // 대상 조건(우리 둘 상태, 앱 버전, 가입 주차)은 서버가 봄. 앱 버전은 브리지 값(웹은 없음)
-    queryFn: () => fetchActiveNotices(detectPlatform(), window.sweetwo?.appVersion),
-    staleTime: 10 * 60_000,
-  });
+  const q = useQuery(noticesQuery);
   const [closed, setClosed] = useState(closedIds);
   const [open, setOpen] = useState(false);
   const list = (q.data ?? [])

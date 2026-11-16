@@ -4,7 +4,9 @@ import { cx } from './cx';
 import { IconButton } from './IconButton';
 
 // 메뉴 서랍(docs/design/components/Drawer.md, 2026-11-09 GCOO 홈처럼): 오른쪽에서 들어오는 흰 판 + 뒤 막.
-// 머리 오른쪽에 도구(알림 종) + 닫기 ✕, 본문은 글자만 있는 줄 묶음, 맨 아래 작은 버전 글자.
+// 머리 오른쪽에 닫기 ✕(도구를 주면 그 앞), 본문은 글자만 있는 줄 묶음, 맨 아래 작은 글자(주면).
+// 2026-11-16 2단: 줄에 하위 줄(children)을 주면 그 줄은 굵은 머리 줄(`hg-drawer__item--head`)이 되고,
+// 아래에 들여쓴 하위 줄(`hg-drawer__sub`, 44px)이 늘 펼쳐져 있음(아코디언 아님).
 // 포커스는 판 안에서 돌고, Esc·막 누르기·✕로 닫힘. 닫으면 연 버튼으로 포커스가 돌아감. ‘동작 줄이기’면 미끄러짐 없음(CSS).
 // 2026-11-11 QA 4구간 S4-09: body 끝에 그리고(portal), 열린 동안 뒤 화면은 inert(화면 읽기·Tab·누르기 막음) + 스크롤 잠금(hg-scroll-lock).
 
@@ -14,6 +16,26 @@ export interface DrawerItem {
   /** 지금 화면(굵은 ink, aria-current="page") */
   current?: boolean;
   onSelect: () => void;
+  /** 하위 줄(2026-11-16, 늘 펼침). 있으면 이 줄은 머리 줄 */
+  children?: DrawerItem[];
+}
+
+function Row({ it, sub }: { it: DrawerItem; sub?: boolean }) {
+  return (
+    <button
+      type="button"
+      className={cx(
+        'hg-drawer__item',
+        sub && 'hg-drawer__sub',
+        !sub && !!it.children?.length && 'hg-drawer__item--head',
+        it.current && 'is-current',
+      )}
+      aria-current={it.current ? 'page' : undefined}
+      onClick={it.onSelect}
+    >
+      {it.label}
+    </button>
+  );
 }
 
 export function Drawer({
@@ -32,9 +54,9 @@ export function Drawer({
   closeLabel: string;
   /** 줄 묶음(묶음 사이 hairline-soft 선) */
   groups: DrawerItem[][];
-  /** 머리 오른쪽 ✕ 앞 도구(알림 종) */
+  /** 머리 오른쪽 ✕ 앞 도구(사용자 앱은 2026-11-16부터 안 씀: 알림 종은 홈 머리에 있음) */
   tools?: ReactNode;
-  /** 맨 아래 작은 글자(버전) */
+  /** 맨 아래 작은 글자(사용자 앱은 2026-11-16부터 안 씀: 버전은 설정 › 도움말 › 앱 정보) */
   foot?: ReactNode;
   onClose: () => void;
 }) {
@@ -121,15 +143,20 @@ export function Drawer({
             .map((g) => (
               <ul key={g[0]?.key} className="hg-drawer__group">
                 {g.map((it) => (
-                  <li key={it.key}>
-                    <button
-                      type="button"
-                      className={cx('hg-drawer__item', it.current && 'is-current')}
-                      aria-current={it.current ? 'page' : undefined}
-                      onClick={it.onSelect}
-                    >
-                      {it.label}
-                    </button>
+                  <li
+                    key={it.key}
+                    className={it.children?.length ? 'hg-drawer__branch' : undefined}
+                  >
+                    <Row it={it} />
+                    {!!it.children?.length && (
+                      <ul className="hg-drawer__subs">
+                        {it.children.map((c) => (
+                          <li key={c.key}>
+                            <Row it={c} sub />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
