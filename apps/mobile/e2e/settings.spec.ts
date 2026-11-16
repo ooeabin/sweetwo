@@ -118,7 +118,9 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page.locator('main').getByRole('button', { name: /^알림/ })).toContainText(
     '푸시 알림 켜짐',
   );
-  await expect(page.getByText('예빈님과 연결돼 있어요')).toBeVisible();
+  // 우리 둘(S-12) 줄은 두 사람 카드 바로 아래, 보조 글 “연결됨”(2026-11-16 서랍에서 옮김)
+  await expect(page.locator('main .hg-listrow').nth(1)).toContainText('우리 둘');
+  await expect(page.getByRole('button', { name: /^우리 둘/ })).toContainText('연결됨');
   await axe(page);
   await me.click();
 
@@ -351,7 +353,7 @@ test('우리 둘 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', a
   seed(db);
   Object.assign(db.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-01-09' });
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple$/);
   await expect(page.getByText('찬우 예빈')).toBeVisible();
   await expect(page.getByText('연결됨', { exact: true })).toBeVisible();
@@ -360,6 +362,9 @@ test('우리 둘 정보(S-12): 연결됨 예비부부 결혼 예정일 D-day', a
   await expect(page.getByText('D-94')).toBeVisible();
   await expect(page.getByText('초대 코드')).toHaveCount(0);
   await axe(page);
+  // 뒤로 = ‹ 설정(S-10)
+  await page.getByRole('button', { name: /뒤로/ }).first().click();
+  await expect(page).toHaveURL(/\/settings$/);
 });
 
 test('우리 둘 정보(S-12): 미합류 초대하기(코드 상자, 링크 복사, 카톡), 새 코드 받기, 만료', async ({
@@ -372,8 +377,8 @@ test('우리 둘 정보(S-12): 미합류 초대하기(코드 상자, 링크 복�
   db.partner = null;
   await open(page, info.project.name === 'narrow');
   // 미합류 상태 나눔(S3-18): 코드가 없으면 ‘초대 전’
-  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('초대 전');
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await expect(page.getByRole('button', { name: /^우리 둘/ })).toContainText('초대 전');
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
 
   // 합류 전에 열면 코드를 바로 만들어 코드 상자가 처음부터 보임(2026-11-15 3차 검토 U10)
   await expect(page.getByRole('button', { name: '받은 초대 코드가 있어요' })).toBeVisible();
@@ -419,7 +424,7 @@ test('우리 둘 정보(S-12): 합류하는 중 → 초대 취소(확인 Modal),
     reserved_until: '2026-10-09T00:00:00Z',
   });
   await page.goto('/settings');
-  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText('합류하는 중');
+  await expect(page.getByRole('button', { name: /^우리 둘/ })).toContainText('합류하는 중');
   await page.goto('/settings/couple');
   await expect(page.getByText('파트너가 합류하는 중이에요')).toBeVisible();
   // 합류하는 중에는 코드 상자도, 받은 코드 입구도 없음
@@ -453,7 +458,7 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
   // 2026-11-15 3차 검토 U10: 연결 상태 S-12에 활동 기록 줄(→ 알림 화면)
   await expect(page.getByRole('button', { name: '활동 기록' })).toBeVisible();
   await page.getByRole('button', { name: '연결 해제' }).click();
@@ -523,10 +528,8 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
     confirmed_at: null,
   });
   await open(page, info.project.name === 'narrow');
-  await expect(page.getByRole('button', { name: /우리 둘 정보/ })).toContainText(
-    '연결 해제 대기 중',
-  );
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await expect(page.getByRole('button', { name: /^우리 둘/ })).toContainText('연결 해제 대기 중');
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
   await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
   // 받은 사람에게는 날짜만(S3-03: “예빈님이 확인하거나 …”이던 것)
   await expect(page.getByText('10월 19일에 해제돼요')).toBeVisible();
@@ -597,7 +600,7 @@ test('혼자 쓰기(S-12): 다시 연결하기(복구 없는 새 요청, 7일 1�
   soloAfterUnlink(db);
   const v = await mockV22Settings(page, db, NOW);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
   await expect(page.getByText('혼자 쓰는 중')).toBeVisible();
   await expect(page.getByText(/까지 다시 연결할 수 있어요/)).toHaveCount(0);
   await axe(page);
@@ -645,7 +648,7 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
     (await homeTaskTexts(page)).some((t) => t.includes('예빈님이 다시 연결하자고 했어요')),
   ).toBe(true);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /우리 둘 정보/ }).click();
+  await page.getByRole('button', { name: /^우리 둘/ }).click();
   await expect(page.getByText('예빈님이 다시 연결하자고 해요')).toBeVisible();
   await page.getByRole('button', { name: '확인하기' }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/reconnect$/);

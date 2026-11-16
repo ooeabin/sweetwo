@@ -208,19 +208,19 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   const drawer = page.getByRole('dialog', { name: '메뉴' });
   await expect(drawer).toBeVisible();
   await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
-  // 파트너 합류 전이라 ‘초대하기’ 있음. 묶음 3개
+  // 파트너 합류 전이라 ‘초대하기’ 한 줄 있음(2026-11-16 ‘우리 둘’은 설정 홈으로). 묶음 3개
   expect(await drawer.locator('.hg-drawer__item').allTextContents()).toEqual([
     '홈',
     '월급',
     '자산 관리',
     '캘린더',
-    '우리 둘',
     '초대하기',
     '공지',
     '문의',
     '도움말',
   ]);
   await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
+  await expect(drawer.getByRole('button', { name: '우리 둘', exact: true })).toHaveCount(0);
   // 내 정보·설정은 서랍에 없음(홈 머리 톱니 → 설정 홈 맨 위 줄, 2026-11-16)
   await expect(drawer.getByRole('button', { name: '내 정보', exact: true })).toHaveCount(0);
   await expect(drawer.getByRole('button', { name: '설정', exact: true })).toHaveCount(0);
@@ -249,7 +249,6 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     ['월급', /\/salary$/],
     ['자산 관리', /\/assets$/],
     ['캘린더', /\/calendar\/list$/],
-    ['우리 둘', /\/settings\/couple$/],
     ['초대하기', /\/settings\/couple\?invite=1$/],
     ['문의', /\/settings\/help\/inquiries$/],
     ['도움말', /\/settings\/help$/],
@@ -285,8 +284,10 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   await page.goto('/');
   await expect(page.locator('.hg-together')).toBeVisible();
   await menuBtn.click();
-  await expect(drawer.getByRole('button', { name: '우리 둘', exact: true })).toBeVisible();
+  // 서랍에는 ‘우리 둘’도 ‘초대하기’도 없음: 묶음 2개(메뉴 4개 / 공지, 문의, 도움말)
+  await expect(drawer.getByRole('button', { name: '우리 둘', exact: true })).toHaveCount(0);
   await expect(drawer.getByRole('button', { name: '초대하기' })).toHaveCount(0);
+  await expect(drawer.locator('.hg-drawer__group')).toHaveCount(2);
 });
 
 test('메뉴 서랍 키보드만으로(2026-11-09): Enter로 열고, Tab은 서랍 안에서 돌고, Esc로 닫으면 ☰로 포커스, ‘동작 줄이기’면 미끄러짐 없음', async ({

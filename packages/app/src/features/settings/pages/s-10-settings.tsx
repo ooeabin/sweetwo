@@ -44,7 +44,7 @@ export function S10Settings() {
   // 미합류는 초대 전 / 초대 중 / 합류하는 중 / 초대 만료로 나눔(2026-11-11 S3-18)
   const stateValue =
     state === 'connected'
-      ? copy.state.connected(c.partnerName)
+      ? copy.state.connected
       : state === 'not_joined'
         ? copy.inviteState(inviteStateOf(invite.data ?? null))
         : copy.state[state];

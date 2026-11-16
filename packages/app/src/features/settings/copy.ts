@@ -9,13 +9,13 @@ export const copy = {
   providers: { kakao: '카카오', google: '구글', apple: 'Apple' } as Record<string, string>,
   loggedIn: (p: string) => `${p}로 로그인했어요`,
   state: {
-    connected: (name: string) => `${name}님과 연결돼 있어요`,
+    connected: '연결됨', // [확인 필요] 2026-11-16 (예전 “{이름}님과 연결돼 있어요”, 이름은 위 두 사람 카드에 있음)
     not_joined: '초대 중',
     unlink_pending: '연결 해제 대기 중',
     solo: '혼자 쓰는 중',
   },
   rows: {
-    couple: '우리 둘 정보', // [확인 필요]
+    couple: '우리 둘', // [확인 필요] 2026-11-16 서랍 ‘우리 둘’을 설정 홈으로
     visibility: '공개 범위',
     noti: '알림',
     security: '보안',
