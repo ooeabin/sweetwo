@@ -21,7 +21,6 @@ export const copy = {
     salary: '월급',
     assets: '자산 관리',
     calendar: '캘린더',
-    couple: '우리 둘',
     invite: '초대하기',
     notice: '공지',
     inquiry: '문의',
