@@ -24,7 +24,7 @@ export const copy = {
   /** 아직 안 들어간 묶음(상대가 만듦) 칸 첫 줄(2026-11-14 H1) */
   /** 각자 계열 내 저금 칸(상대가 아직 같이 모으기에 없음, 2026-11-16 R4-8: 상대 홈 “…에 같이 모을까요?”와 맞춤) */
   partnerNotIn: (name: string) => `${nim(name)}은 아직 같이 모으기에 없어요`, // [확인 필요]
-  togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 들어가요`, // [확인 필요]
+  togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 볼 수 있어요`,
   remain: (deadline: string, amount: string) => `${ym(deadline)}까지 ${amount} 더 필요해요`,
   remainPercent: (deadline: string) => `${ym(deadline)}까지`,
   each: (a: string, x: string, b: string, y: string) => `${a} ${x}, ${b} ${y}`,
@@ -37,7 +37,7 @@ export const copy = {
   inviteJoin: '같이 모을게요', // [확인 필요]
   /** 같이 모으기 큰 숫자 아래 이름(묶음 합계, W-02 저금 줄 ‘내 몫’과 나눔, R4) */
   bothSaved: '둘이 모은 금액', // [확인 필요]
-  emptyAdd: '저금 만들기', // AddRow(+ 아이콘이 ‘+’)
+  emptyAdd: '저금 추가', // AddRow(+ 아이콘이 ‘+’)
   widgetSaving: '모으는 중', // [확인 필요] 26 WG-01 목표 금액이 없고 금액 가림
   /** 화면 읽기 문장 하나(“같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, …”) */
   togetherLabel: (parts: string[]) => ['같이 모으기', ...parts].filter(Boolean).join(', '),
@@ -60,12 +60,12 @@ export const copy = {
   untilNext: (n: number) => `다음 월급날까지 ${n}일`,
   monthPayday: (n: number) => `월급날이에요. 확인할 게 ${n}개 있어요`,
   monthAutoOnly: '이번 달은 자동으로 나가는 것뿐이에요',
-  autoNext: (day: number, n: number) => `${day}일에 ${n}개`,
+  autoNext: (day: number, n: number) => `${day}일에 ${n}개 나가요`,
   monthReview: (start: string, n: number) =>
     `${formatMonthDay(start)} 월급에서 확인할 게 ${n}개 남았어요`,
-  lateLeft: (n: number) => `지난 달 ${n}개 늦게 확인할 수 있어요`,
-  noSalary: '월급이 생기면 월급 계획을 만들어 드려요',
-  nonManager: '이번 달 보내기와 용돈은 자동이에요',
+  lateLeft: (n: number) => `지난달 확인할 게 ${n}개 남았어요`,
+  noSalary: '월급을 넣으면 월급 계획을 만들어 드려요',
+  nonManager: '이번 달 보낼 돈과 용돈은 자동으로 정해져요',
   goView: '보기',
   goCheck: '확인하기',
   goMoneyIn: '돈 들어왔어요',
@@ -94,11 +94,11 @@ export const copy = {
   taskPush: '월급날 아침에 알려 드릴까요?',
   taskPushNoDate: '경조사 일주일 전에 알려 드릴까요?',
   taskNextSaving: (name: string) => `‘${name}’ 기한이 지났어요. 다음엔 뭘 같이 모을까요?`,
-  taskReconcile: '실제 잔액과 맞춰 볼까요?',
+  taskReconcile: '통장 잔액과 모은 금액을 맞춰 볼까요?',
   taskBundle: (partner: string, goal: string) => `${nim(partner)}의 ‘${goal}’에 같이 모을까요?`, // [확인 필요] 2026-11-16 R4-8
   taskInvite: '같이 모을 사람을 초대해 보세요',
   taskWaiting: (name: string | null) =>
-    `${name ? `${name}님이` : '파트너가'} 기다리고 있어요. 월급 계획을 마쳐 주세요`,
+    `${name ? `${name}님이` : '파트너가'} 기다리고 있어요. 월급 계획을 마저 만들어 볼까요?`,
   inviteNow: '초대하기',
 
   // H-07 월급 계획 타일, H-08 캘린더 타일
@@ -110,15 +110,15 @@ export const copy = {
   leftover: (amount: string) => `아직 안 정한 돈 ${amount}`, // [확인 필요] 2026-11-13 H-07
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
-  noCare: '다가오는 일정 없어요',
+  noCare: '다가오는 일정이 없어요',
   ddayShort: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
 
   // H-12 결혼 준비 타일 [모두 확인 필요]
   weddingTile: (n: number) => `결혼 준비 메모 ${n}개`,
   weddingNext: (name: string, date: string) => `다음 ${name} ${formatMonthDay(date)}`,
-  weddingAdd: '+ 쓸 곳 메모 적기',
+  weddingAdd: '+ 쓸 곳 메모 추가',
   /** 날짜가 지났는데 안 낸 메모가 있으면 그것 먼저(2026-11-14) */
-  weddingOverdue: (name: string, date: string) => `${name} ${formatMonthDay(date)} 지났어요`, // [확인 필요]
+  weddingOverdue: (name: string, date: string) => `${name}, ${formatMonthDay(date)}이 지났어요`,
 
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',

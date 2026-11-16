@@ -150,7 +150,9 @@ test('모바일(iOS): 로그인 창 → 돌아오면 다음 화면, PIN 뒤 “F
     page.getByRole('heading', { name: '앱을 열 때 쓸 PIN 6자리를 정해 주세요' }),
   ).toBeVisible();
   await page.keyboard.type('258036');
-  await expect(page.getByRole('heading', { name: '한 번 더 입력해 주세요' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '같은 PIN을 한 번 더 입력해 주세요' }),
+  ).toBeVisible();
   await page.keyboard.type('258036');
   await expect(page.getByRole('heading', { name: 'Face ID로도 풀까요?' })).toBeVisible();
   await axe(page);

@@ -86,7 +86,7 @@ select space_id, id, '11111111-1111-1111-1111-111111111111', 'split', f, '생활
   now() - interval '11 minutes'
 from public.app_user, unnest(array['amount', 'name']) f where id = '22222222-2222-2222-2222-222222222222';
 select public.flush_partner_changes();
-select alike(pg_temp.last('partner_change'), '파트너가 2가지를 바꿨어요 / % 외 1개', '변경 묶음(여럿): ‘파트너가’');
+select alike(pg_temp.last('partner_change'), '파트너가 2가지를 바꿨어요 / %, 1개 더', '변경 묶음(여럿): ‘파트너가’');
 insert into public.partner_change (space_id, actor_id, receiver_id, topic, field, noun, before_v, after_v, urgent, target, created_at)
 select space_id, id, '11111111-1111-1111-1111-111111111111', 'asset', 'amount', '전세 보증금', '200000000', '220000000', false, '/assets',
   now() - interval '11 minutes'
@@ -94,7 +94,7 @@ from public.app_user where id = '22222222-2222-2222-2222-222222222222';
 select public.flush_partner_changes();
 select alike(pg_temp.last('partner_activity'), '파트너가 자산을 바꿨어요 / %', '활동 기록(하나): ‘파트너가’');
 select public.send_weekly_summary(public.kst_today() + 1);
-select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 파트너가 바꾼 게 3개 있어요', '주간 요약: ‘파트너가’');
+select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 파트너가 3가지를 바꿨어요', '주간 요약: ‘파트너가’');
 select alike((select body_text from public.weekly_mail_body('11111111-1111-1111-1111-111111111111',
   '22222222-2222-2222-2222-222222222222', public.kst_today() + 1)), '파트너가 바꾼 것%', '주간 메일 본문: ‘파트너가’');
 -- 예빈 문의 → 운영자 열람 동의 → 찬우에게 파트너 열람 알림

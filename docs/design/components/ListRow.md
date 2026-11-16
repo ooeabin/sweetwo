@@ -48,7 +48,7 @@
 | | 예상 순자산(`expected`) | `chart-line-up` | `invest` | 〃 |
 | 금융 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-01 일정, Y-04 고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
 | | 월급 전 확인(`review`) | `calendar-check` | `safety` | 〃 |
-| | 저금 기한(`deadline`), 쓰는 달(`goal`) | `target` | `goal` | 〃 |
+| | 저금 기한(`deadline`), 쓸 곳(`goal`) | `target` | `goal` | 〃 |
 | | 만기(`maturity`) | `hourglass` | `family` | 〃 |
 | | 쓸 곳 메모(`note`, 2026-11-13 W-14 날짜) | `piggy-bank` | `goal` | 〃 |
 | | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
@@ -86,4 +86,4 @@
 - 문구 상태: 나가는 날 전 “자동 26일” / 월급날이면 “자동 월급날” / 나가는 날 뒤 체크됨 “자동 확인” / 사람이 바꿈 “건너뜀” 또는 다른 금액(알약 대신 보조 줄) [모두 확인 필요]
 - 오렌지·파랑 쓰지 않음(상태 표시라 회색). 체크 칸(`hg-check`)은 자동 확인된 뒤에도 같은 체크 모양(오렌지 원, 그래픽 예외 그대로)
 - 화면 읽기: 줄 이름 뒤에 “자동, 26일에 나가요” / “자동으로 확인했어요” [확인 필요]
-- React(2026-11-13 PR 9): `AutoPill`(`text`), `TransferRow` `auto`(알약 글자, 이름 아래 보조 줄 자리), 영수증 `ReceiptLine` `auto`(금액 왼쪽, `hg-receipt__autocol`)·`note`(이름 아래 회색 한 줄 `hg-receipt__note`, 보내기 줄 “월급 − 용돈”). 글자는 앱이 정함(W-02 “26일 자동”·“월급날 자동”·“자동 확인”, W-01 “자동 26일”·“자동 월급날”·“자동 말일”)
+- React(2026-11-13 PR 9): `AutoPill`(`text`), `TransferRow` `auto`(알약 글자, 이름 아래 보조 줄 자리), 영수증 `ReceiptLine` `auto`(금액 왼쪽, `hg-receipt__autocol`)·`note`(이름 아래 회색 한 줄 `hg-receipt__note`, 보내기 줄 “월급 − 용돈”). 글자는 앱이 정함(W-02 “자동 26일”·“자동 월급날”·“자동 확인”, W-01 “자동 26일”·“자동 월급날”·“자동 말일”)

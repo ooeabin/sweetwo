@@ -125,7 +125,7 @@ delete from public.notification;
 select is(public.send_morning_notifications('2027-04-01'), 0, '⑥ 손 줄 0 → 월급날 알림 없음');
 select is(public.send_progress_news('2027-04-01'), 1, '⑥ 진행 소식 1건');
 select results_eq($$ select title, body from public.notification where kind = 'progress_news' $$,
-  $$ values ('월급날이에요', '내 집 마련 31%까지 왔어요') $$, '⑥ 진행 소식 문구(대표 저금 이름 + %, 금액 없음)');
+  $$ values ('월급날이에요', '내 집 마련, 목표 금액의 31%까지 모았어요') $$, '⑥ 진행 소식 문구(대표 저금 이름 + %, 금액 없음)');
 select is(public.send_progress_news('2027-04-01'), 1, '⑥ 다시 돌려도 알림은 한 번(dedupe)');
 select is((select count(*)::int from public.notification where kind = 'progress_news'), 1, '⑥ 한 건');
 select is(public.send_evening_notifications('2027-04-28'), 0, '⑥ 손 줄 0 → 월급 전 확인 없음');

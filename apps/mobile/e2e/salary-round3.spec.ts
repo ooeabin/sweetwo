@@ -13,7 +13,7 @@ const axe = async (page: Page) => {
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 type Line = { kind: string; state: string; goal_id: string | null };
 
-// 2026-11-13 묶음 ‘모두 보냈어요’(3a)는 없앰: 주 버튼 “모두 계획대로 됐어요”가 대신(home.spec.ts)
+// 2026-11-13 묶음 ‘모두 계획대로 했어요’(3a)는 없앰: 주 버튼 “모두 계획대로 됐어요”가 대신(home.spec.ts)
 
 test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
   page,
@@ -113,7 +113,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await expect(page.getByText('목표 금액만 지우고 지금처럼 모아요')).toBeVisible();
-  await expect(page.getByText('월급 계획에서 빠지고 저금 내역은 남아요')).toBeVisible();
+  await expect(page.getByText('월급 계획에서는 빠지지만 저금 내역은 남아요')).toBeVisible();
   await expect(page.getByText('모은 금액은 그대로 두고 더 큰 금액으로 이어서 모아요')).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: /목표 금액을 새로 정할게요/ }).click();

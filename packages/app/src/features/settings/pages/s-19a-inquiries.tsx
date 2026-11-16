@@ -15,7 +15,7 @@ const hoursLeft = (until: string | null) =>
 const scopeText = (s: string[]) => s.map((x) => copy.accessScopes[x] ?? x).join(', ');
 
 // S-19a 내 문의: 목록(번호, 분류, 상태, 날짜) → 상세(대화, 덧붙이기). 열람 요청이 오면 상세 위 “문의를 확인하려면
-// 동의가 필요해요” → S-19b, 동의한 동안 “상담원이 확인 중이에요 / 월 수입·지출 화면 / 23시간 남았어요” + ‘지금 그만 보게 하기’.
+// 동의가 필요해요” → S-19b, 동의한 동안 “운영자가 확인하고 있어요 / 월 수입·지출 화면 / 23시간 남았어요” + ‘지금 그만 보게 하기’.
 export function S19aInquiries() {
   const nav = useNavigate();
   const { id } = useParams();

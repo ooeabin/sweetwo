@@ -12,7 +12,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { daysPending, exportedSince, UnlinkDeleted, type DataBack } from '../unlink';
 
-// S-12d 연결 해제 요청 확인(받은 사람): Avatar 2개 + “찬우님이 연결 해제를 요청했어요”, 남는 것·지워지는 것, 기한 “11월 7일에 해제돼요”.
+// S-12d 연결 해제 요청 확인(받은 사람): Avatar 2개 + “{이름}님이 연결 해제를 요청했어요”, 남는 것·지워지는 것, 기한 “11월 7일에 해제돼요”.
 // 2026-11-13 v2.2(R-09): 주 버튼 ‘먼저 내보내기’(→ S-18, 뒤로 = 이 화면), 보조 ‘해제할게요’ → 확인 Modal → 바로 확정 → S-12h.
 // 거절 없음, 닫으면 대기 유지. 오프라인이면 주 버튼 비활성 + 이유 한 줄(S3-08). 요청한 사람은 S-12로.
 export function S12dUnlinkReview() {

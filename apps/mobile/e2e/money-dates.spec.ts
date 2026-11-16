@@ -130,7 +130,7 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: /입출금 통장/ }).click();
   await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
-  await expect(page.getByText('실현 손익 +100만 원')).toBeVisible();
+  await expect(page.getByText('판 수익 +100만 원')).toBeVisible();
   await axe(page);
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(8_000_000);
   expect(db.assets.find((a) => a.id === 'a-stock')).toMatchObject({
@@ -164,7 +164,7 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
   await page.getByRole('radio', { name: /입출금 통장/ }).click();
   await expect(page.getByRole('heading', { name: '팔았어요' })).toBeVisible();
   await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
-  await expect(page.getByText('실현 손익 +300만 원')).toBeVisible();
+  await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
   await axe(page);
   expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
   await page.getByRole('button', { name: '목록으로 가기' }).click();

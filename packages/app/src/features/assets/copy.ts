@@ -77,10 +77,10 @@ export const copy = {
   later: '나중에 할게요',
   maturity: '만기일은 언제예요?',
   contractEnd: '계약 만기일은요?',
-  paidCount: '납입 회차는요?',
+  paidCount: '지금까지 몇 번 넣었어요?',
   paidCountUnit: '회', // [확인 필요]
-  payment: '월 납입액은요?',
-  repayment: '월 상환액은요?',
+  payment: '매달 얼마씩 넣어요?',
+  repayment: '매달 얼마씩 갚아요?',
   rate: '금리는 몇 %예요?',
 
   // F-04a 만기된 돈 정리
@@ -106,7 +106,7 @@ export const copy = {
   soldDone: '팔았어요', // [확인 필요] 결과 제목
   toList: '목록으로 가기', // [확인 필요] F-04d 주 버튼(2026-11-03)
   soldTo: (name: string, amount: string) => `${name} +${amount}`,
-  soldGain: (v: string) => `실현 손익 ${v}`,
+  soldGain: (v: string) => `판 수익 ${v}`,
   graph: '금액 그래프', // [확인 필요] 요소 이름
   editedBy: (date: string, name: string) => `${date} ${name}`,
   maturedDone: '정리했어요', // [확인 필요]
@@ -141,6 +141,7 @@ export const copy = {
 
   // F-08 자산 순위(23 F-08, 2026-11-04 카드 없이 문장 + 곡선 + 굵은 띠 + 이름·값 줄)
   rankTitle: '자산 순위', // [확인 필요]
+  rankOpen: '자산 순위 보기', // F-08c 지난 요청 화면 주 버튼(2026-11-16 문구 리뷰)
   rankHero1: '우리 자산은 전체 가구 중', // [확인 필요]
   rankHero2: (pct: number, open = false) => (open ? `상위 ${pct}% 안이에요` : `상위 ${pct}%예요`), // [확인 필요] open = P90 이상
   rankAxis: { low: '하위', mid: '중간', high: '상위' },
@@ -164,10 +165,10 @@ export const copy = {
   // 연령대 비교(계산·배분 7-7): 연령대별 중앙값만 공공 통계에 있어 순위 없이 중간보다 많은지만
   rankAge: { '20s': '20대', '30s': '30대', '40s': '40대', '50s': '50대', '60s': '60대 이상' },
   rankAgeTitle: (band: string) => `${band} 가구와 비교`, // [확인 필요]
-  rankAgeMore: (band: string) => `${band} 가구 중간보다 `, // [확인 필요] + 금액 + rankAgeMoreTail
+  rankAgeMore: (band: string) => `${band} 가구 중간값보다 `, // [확인 필요] + 금액 + rankAgeMoreTail
   rankAgeMoreTail: ' 많아요',
   rankAgeBelow: (band: string) => `${band} 가구 가운데 중간보다 아래예요`, // [확인 필요] 계산·배분 7-3 말투(사실만)
-  rankAgeMedian: (band: string) => `${band} 가구 중앙값`, // [확인 필요]
+  rankAgeMedian: (band: string) => `${band} 가구 중간값`,
   rankDebt: '부채 비율', // [확인 필요] 부채 ÷ 자산
   rankFinancial: '자산 중 금융자산', // [확인 필요] 예금·투자·보험·보증금
   rankAgeAvg: (band: string, pct: number) => `${band} 가구 평균 ${pct}%`,
@@ -178,7 +179,7 @@ export const copy = {
   rankAskBirthSub: '또래와 비교해 드려요', // [확인 필요]
   // F-01 v2.2(2026-11-13): 평가금액 기준 + 전환
   principalView: '원금으로 보기', // [확인 필요]
-  principalViewHelp: '원금은 처음 넣은 돈이에요. 적어 둔 투자·부동산은 그 금액으로 셈해요', // [확인 필요]
+  principalViewHelp: '원금은 처음 넣은 돈이에요. 투자와 부동산도 넣은 돈으로 셈해요',
   // F-03q 빠르게 적기(2026-11-13)
   quickEntry: '큰 항목만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
   quickTitle: '큰 항목만 빠르게 적어 볼까요?', // [확인 필요]
@@ -192,7 +193,7 @@ export const copy = {
   quickHelp: '빈 칸은 저장하지 않아요', // [확인 필요]
   // 적금을 어디에 넣는지, 저금과 두 번 세지 않음(2026-11-13 실구동, 06 6장) [확인 필요]
   quickCashHelp: '적금 통장도 여기에 적어요',
-  quickNoDouble: '앱에서 모으는 저금은 순자산에 더하지 않아서 두 번 세지 않아요',
+  quickNoDouble: '저금은 통장 잔액에 이미 들어 있어서 순자산에 따로 더하지 않아요',
   quickSave: '저장하기',
   quickSaved: (n: number) => `${n}개를 적었어요`, // [확인 필요]
   // F-03e 연결할 때(23 ‘F-03e 연결할 때’, 2026-11-16 5차 검토 B5)
@@ -213,7 +214,8 @@ export const copy = {
   rankAd: '광고',
   // F-08 v2.2 (나) 순위 없음
   rankPeerLine: (amount: string) => `또래 가구 중간값은 ${amount}이에요`, // [확인 필요]
-  rankPeerBand: (band: string) => `${band} 가구 기준`, // [확인 필요]
+  /** (나) 보조 “2025년 가계금융복지조사(2025년 3월 말), 30대 가구 기준”(23 F-08 v2.2) */
+  rankPeerSub: (label: string, ym: string, band: string) => `${label}(${ym} 말), ${band} 가구 기준`,
   rankAskPair: (name: string) => `${name}님과 같이 순위 보기`, // [확인 필요]
   rankAskWaiting: (name: string) => `${name}님 답을 기다리고 있어요`, // [확인 필요]
   rankAskAnswer: (name: string) => `${name}님이 같이 보자고 해요`, // [확인 필요]

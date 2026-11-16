@@ -124,10 +124,11 @@ export function F08Rank() {
           <StatBlock
             ariaLabel={copy.rankTitle}
             title={copy.rankPeerLine(money(p.median, masked))}
-            sub={`${copy.rankPeerBand(copy.rankAge[p.band])}, ${copy.rankBasis(
+            sub={copy.rankPeerSub(
               RANK_BASIS.label,
               formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'),
-            )}`}
+              copy.rankAge[p.band],
+            )}
           />
         ) : (
           <div className="hg-list hg-list--plain">

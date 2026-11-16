@@ -125,7 +125,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
 
   await expect(page).toHaveURL(/\/settings\/me$/);
   await expect(page.getByRole('button', { name: /이름/ })).toContainText('찬우');
-  await expect(page.getByRole('button', { name: /결혼 상태/ })).toContainText('했어요');
+  await expect(page.getByRole('button', { name: /두 사람 사이/ })).toContainText('했어요');
   // 내 월급이 먼저, 아래 예빈 월급 줄은 보기만(2026-11-15 3차 검토), 관리 방식(각자면 체크리스트 만드는 날 없음)
   const salary = page.getByRole('button', { name: /내 월급/ });
   await expect(salary).toContainText('350만 원, 25일');
@@ -185,7 +185,7 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크
   await expect(page.getByRole('switch', { name: '이메일' })).toHaveCount(0);
   const card = page.getByRole('region', { name: '알림 종류' });
   const d14 = card
-    .getByRole('group', { name: '경조사 미리 알림' })
+    .getByRole('group', { name: '경조사·기념일 미리 알림' })
     .getByRole('checkbox', { name: '14일 전' });
   await expect(d14).toHaveAttribute('aria-checked', 'false');
   await d14.click();
@@ -329,7 +329,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   expect(db.space?.joint_cycle_day).toBe(10);
 
   // 결혼 상태 준비 중 → 예정일
-  await page.getByRole('button', { name: /결혼 상태/ }).click();
+  await page.getByRole('button', { name: /두 사람 사이/ }).click();
   await page.getByRole('radio', { name: '결혼 준비 중이에요' }).click();
   await expect(page.getByRole('heading', { name: '결혼 예정일은 언제예요?' })).toBeVisible();
   await setWheel(page, '결혼 예정일은 언제예요?', 2027, 5, 15);
@@ -429,7 +429,7 @@ test('우리 둘 정보(S-12): 합류하는 중 → 초대 취소(확인 Modal),
   await axe(page);
   await page.getByRole('button', { name: '초대 취소' }).click();
   const dialog = page.getByRole('alertdialog', { name: '초대를 취소할까요?' });
-  await expect(dialog).toContainText('지금 코드는 더 못 써요');
+  await expect(dialog).toContainText('지금 코드는 더 쓸 수 없어요');
   await axe(page);
   await dialog.getByRole('button', { name: '취소할게요' }).click();
   await expect(page.getByText('초대를 취소했어요')).toBeVisible();
@@ -796,7 +796,7 @@ test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로
   await rowOf('여행').getByRole('button', { name: '되살리기' }).click();
   await expect.poll(() => db.goals.find((g) => g.id === 'g-trip')?.deleted_at).toBeNull();
   // 넣을 월급 계획이 없으면 연결 없이 되살리고 안내(25 S-21 3번, S11-10)
-  await expect(page.getByText('연결된 항목이 없어 따로 되살렸어요')).toBeVisible();
+  await expect(page.getByText('원래 함께 있던 항목이 없어 이것만 되살렸어요')).toBeVisible();
 
   // 오프라인: 영구 삭제·비우기 비활성(S11-10)
   await page.context().setOffline(true);
@@ -964,7 +964,7 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await expect(page.getByText('용돈 내역')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '동의해요' }).click();
-  await expect(page.getByText('상담원이 확인 중이에요')).toBeVisible();
+  await expect(page.getByText('운영자가 확인하고 있어요')).toBeVisible();
   await page.getByRole('button', { name: '지금 그만 보게 하기' }).click();
   await expect(page.getByText('이제 운영자는 볼 수 없어요')).toBeVisible();
 });
@@ -1103,9 +1103,7 @@ test('가이드(S-01·S-03): 대화 카드 줄 없음, 돈 합치기 적용은 �
   await axe(page);
   await topic.click();
   await expect(
-    page.getByText(
-      'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
-    ),
+    page.getByText('입력한 숫자로 계산한 참고 정보예요. 투자·금융 자문이 아니에요'),
   ).toBeVisible();
   await page.getByRole('button', { name: /우리에게 적용하기/ }).click();
   await expect(page).toHaveURL(/\/salary\?view=plan$/);

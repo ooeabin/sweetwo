@@ -165,7 +165,7 @@
 
 | 지표 | 정의(계산식) | 초기 목표치(가설) | 보는 이유 |
 | --- | --- | --- | --- |
-| 온보딩 완료율 | O-60 ‘홈으로 가기’ 사용자 ÷ O-03 첫 표시 사용자 (초대받은 파트너 제외, 2026-11-10 O-10 없앰) | 80% [확인 필요] | 질문 6~7화면 안에 월급 계획까지 가야 가치 체험 시작 |
+| 온보딩 완료율 | O-60 ‘첫 저금 만들기’ 또는 ‘나중에 할게요’ 사용자 ÷ O-03 첫 표시 사용자 (초대받은 파트너 제외, 2026-11-10 O-10 없앰) | 80% [확인 필요] | 질문 6~7화면 안에 월급 계획까지 가야 가치 체험 시작 |
 | 온보딩 소요 시간 | O-03 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 2분 이하 [확인 필요] | 약 1분·질문 6~7화면 설계 검증(2026-11-10) |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 월급 계획이 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 월급 계획 전체를 따라가는지 |
@@ -245,7 +245,7 @@
 | onboarding\_step\_completed | 각 화면 ‘다음’(선택지, 시트 닫기 포함) | screen\_id, answer(`input` / `none`: O-06 나중에, O-07 보내지 않고 닫음, O-31 월급 없음. 2026-11-10 ‘잘 모르겠어요’ 추정이 없어 `estimate` 뺌), duration\_sec, changed\_after\_back(이번 실행에서 그 화면을 이미 한 번 넘겼는지) |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | 앱을 다시 열어 멈춘 화면으로 바로 감(실행마다 한 번, 2026-11-10 질문 화면 없앰) | screen\_id, hours\_since\_last |
-| onboarding\_completed | O-60 ‘홈으로 가기’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(아직 안 정한 돈 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
+| onboarding\_completed | O-60 ‘첫 저금 만들기’ 또는 ‘나중에 할게요’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(아직 안 정한 돈 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
 | invite\_sent | O-07 코드 복사·링크 복사·공유, 설정 S-12 ‘우리 둘 정보’(홈 초대 띠·서랍 ‘초대하기’로 왔으면 entry home, 2026-11-11 D6) | channel(`code` / `link` / `share`: 기기 공유 창, 카카오톡 등), entry(`onboarding` / `home` / `settings`). issue\_seq(재발급 회차)는 서버만 알아 서버 이벤트로 [확인 필요] |
 | invite\_accepted | P-01 ‘합류하기’로 코드를 잡음(2026-11-11 D1, 처음 잡을 때만) | hours\_since\_sent(앱은 모름: null, 서버 이벤트로 [확인 필요]), channel(`link` 링크로 연 경우 / `code` 코드 직접 입력) |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
@@ -257,7 +257,7 @@
 | --- | --- | --- |
 | checklist\_generated | 기준일 0시, 첫 사이클은 O-60 직후, 파트너 합류 직후 (서버, 2026-11-12 `server_event`: 체크리스트가 생긴 트랜잭션 끝, 분석 수집을 끈 사람 것은 안 남김) | cycle\_type(`first` / `regular` / `extended`(해제 대기 중)), owner(`self` / `joint`), lines\_count, saving\_lines\_count |
 | checklist\_line\_checked | W-02, W-10 이번 달 줄 체크(체크 칸, 시트 ‘보냈어요’, W-02a 다른 금액. 홈 H-03 줄 체크는 2026-11-09 없앰, 2026-11-12 앱 연결) | line\_kind(`saving` / `fixed` / `living` / `allowance` / `custom`), result(`as_planned` / `different`), diff\_band, checked\_by(`self` / `joint`, `on_behalf`는 2026-11-03 대신 체크 없앰), entry(`w02` / `w05` / `w10` / `home` / `widget`), days\_from\_payday(기간 시작부터 날 수) |
-| checklist\_group\_checked | W-02 묶음 ‘모두 보냈어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
+| checklist\_group\_checked | W-02 묶음 ‘모두 계획대로 했어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
 | checklist\_line\_unchecked | 체크한 줄의 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-02 ‘이번 달은 건너뛸게요’, W-02a 0원, ‘못 함’으로 되돌리기 | line\_kind |
 | checklist\_completed | 이 기기에서 마지막 줄을 끝내 아직 안 정한 돈 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이 됨(W-02 “…계획대로 됐어요/확인을 마쳤어요” Toast, 2026-11-12 D4. 예전 W-02 끝 화면은 없앰) | hours\_since\_generated(체크리스트가 생긴 뒤), checked\_by\_partner\_count(상대가 체크한 줄 수) |

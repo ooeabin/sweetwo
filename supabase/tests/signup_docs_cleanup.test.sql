@@ -51,7 +51,7 @@ insert into public.consent (user_id, kind, terms_version, agreed, source)
 reset role;
 select is((select distinct target from public.notification where kind = 'marketing_result'), '/settings/notifications',
   '누르면 S-14 알림 설정');
-select is((select count(*)::int from public.notification where title = '마케팅 정보 받기를 거부했어요'), 1, '끄면 거부 결과 알림');
+select is((select count(*)::int from public.notification where title = '마케팅 정보를 받지 않기로 했어요'), 1, '끄면 거부 결과 알림');
 -- 다른 동의 종류는 알리지 않음
 insert into public.consent (user_id, kind, terms_version, agreed, source)
   values ('11111111-1111-1111-1111-111111111111', 'photo', 'v1', true, 'care_day_first');

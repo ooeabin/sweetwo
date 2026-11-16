@@ -1474,7 +1474,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           db.notifications?.unshift({
             id: `n-ach-${String(g.id)}`,
             kind: 'goal_achieved',
-            title: `${String(g.name)} 목표 금액을 다 모았어요!`,
+            title: `${String(g.name)} 목표 금액을 다 모았어요`,
             body: null,
             target: `/salary/items/${String(g.id)}`,
             icon: 'trophy',

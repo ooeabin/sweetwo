@@ -110,7 +110,7 @@ export function P06Split() {
       personName={nameOf}
       joint={joint}
       title={joint ? copy.splitJointTitle : copy.splitTitle}
-      help={joint && !resumed ? copy.splitJointHelp(me.nickname ?? '') : copy.splitHelp}
+      help={joint && !resumed ? copy.splitJointHelp : copy.splitHelp}
       primaryLabel={copy.splitDone}
       saving={busy}
       progress={s.chapter}

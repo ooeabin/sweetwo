@@ -64,13 +64,13 @@ select is(public.achieve_goal(current_setting('test.secret')::uuid), true, '금�
 select is(public.achieve_goal(current_setting('test.trip')::uuid), true, '모두 보여 주기 저금 달성');
 reset role;
 select is(pg_temp.noti('22222222-2222-2222-2222-222222222222', 'goal_achieved', current_setting('test.secret')),
-  '개인 저금 목표 금액을 다 모았어요! | /salary?who=11111111-1111-1111-1111-111111111111',
+  '개인 저금 목표 금액을 다 모았어요 | /salary?who=11111111-1111-1111-1111-111111111111',
   '금액만: 파트너에게는 이름 없이 “개인 저금 …” + W-02 그 사람 탭(D1)');
 select is(pg_temp.noti('11111111-1111-1111-1111-111111111111', 'goal_achieved', current_setting('test.secret')),
-  '비밀 목표 금액을 다 모았어요! | /salary/items/' || current_setting('test.secret') || '/achieved',
+  '비밀 목표 금액을 다 모았어요 | /salary/items/' || current_setting('test.secret') || '/achieved',
   '금액만: 주인 알림은 그대로(W-12)');
 select is(pg_temp.noti('22222222-2222-2222-2222-222222222222', 'goal_achieved', current_setting('test.trip')),
-  '여행 목표 금액을 다 모았어요! | /salary/items/' || current_setting('test.trip'),
+  '여행 목표 금액을 다 모았어요 | /salary/items/' || current_setting('test.trip'),
   '모두 보여 주기: 파트너는 이름 + W-10 그대로');
 
 -- S10-03 notification_sent(inapp): 알림 행마다 하나, type = kind

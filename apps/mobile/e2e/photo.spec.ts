@@ -73,7 +73,9 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   });
   await expect(page.getByRole('alert')).toHaveText('10MB 이하 사진만 올릴 수 있어요');
   await input.setInputFiles({ name: 'a.gif', mimeType: 'image/gif', buffer: PNG });
-  await expect(page.getByRole('alert')).toHaveText('이 형식은 올릴 수 없어요');
+  await expect(page.getByRole('alert')).toHaveText(
+    '이 파일은 올릴 수 없어요. 사진 파일을 골라 주세요',
+  );
 
   await input.setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: PNG });
   const stage = page.getByRole('group', { name: '사진 위치, 화살표로 옮겨요' });

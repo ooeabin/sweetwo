@@ -15,22 +15,22 @@ export const copy = {
   // Y-01 ‘금융 일정’ 필터 빈 목록(2026-11-12 D3) [확인 필요]
   noMoney60: '60일 안에는 금융 일정이 없어요',
   upcomingList: '일정',
-  recordCount: (n: number) => `기록할 날이 ${n}개 있어요`,
+  recordCount: (n: number) => `선물을 기록할 날이 ${n}개 있어요`,
   recordWhich: (name: string, date: string, more: number) =>
     more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
   money: {
     payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
     review: '월급날 확인 목록', // [확인 필요] 2026-11-15 ‘월급 전 확인’ 대신(W-05 없앰)
     deadline: (name: string) => `${name} 기한`,
-    goal: (name: string) => `${name} 쓰는 달`,
+    goal: (name: string) => `${name} 쓸 곳`,
     maturity: (name: string) => `${name} 만기`,
     note: (name: string) => name, // 쓸 곳 메모 날짜(W-14, 24 v2.2) [확인 필요]
     // 날짜 없는 사람의 자동 줄(2026-11-14 R6). 지난 날은 자동 확인 [확인 필요]
     auto: (name: string) => `${name} 자동으로 나가요`,
     autoDone: (name: string) => `${name} 자동으로 나갔어요`,
-    /** 앞당긴 월급날 까닭(2026-11-16 4차 검토 R4-9) [확인 필요] */
-    moved: (from: number, why: 'sat' | 'sun' | 'holiday', to: number) =>
-      `${from}일이 ${why === 'sat' ? '토요일' : why === 'sun' ? '일요일' : '공휴일'}이라 ${to}일`,
+    /** 앞당긴 월급날 까닭(2026-11-16 4차 검토 R4-9, 문구 리뷰). to = “24일” 또는 Y-01 “24일 목요일” */
+    moved: (from: number, why: 'sat' | 'sun' | 'holiday', to: string) =>
+      `${from}일이 ${why === 'sat' ? '토요일' : why === 'sun' ? '일요일' : '공휴일'}이라 ${to}로 앞당겼어요`,
   },
   go: {
     payday: '월급날 확인 목록', // [확인 필요]
@@ -46,11 +46,11 @@ export const copy = {
     payday: '월급',
     review: '확인 목록',
     deadline: '기한',
-    goal: '쓰는 달',
+    goal: '쓸 곳',
     maturity: '만기',
     note: '쓸 곳', // [확인 필요] 2026-11-13 칸 안 짧은 이름
     auto: '자동', // [확인 필요] 2026-11-14 R6
-    band: '확인 목록',
+    band: '월급날 확인 목록',
   },
   today: '오늘',
   // 달력 고른 날 금융 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
@@ -67,7 +67,7 @@ export const copy = {
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   // Y-04 고른 날 줄(Y-01 맨 위 띠는 2026-11-12 D1로 없앰) [확인 필요]
-  reviewBand: (month: number) => `${month}월 월급, 확인 목록에 남은 게 있어요`,
+  reviewBand: (month: number) => `${month}월 월급날 확인 목록에 남은 게 있어요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
   prev: '이전 달',
@@ -153,9 +153,9 @@ export const copy = {
   photoAdd: '사진 추가', // [확인 필요] 2026-11-04 사진 칸 첫 칸
   photoHelp: '사진 10장까지, 한 장에 10MB 이하', // [확인 필요]
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
-  photoBadType: '이 형식은 올릴 수 없어요',
+  photoBadType: '이 파일은 올릴 수 없어요. 사진 파일을 골라 주세요',
   photoTooMany: '사진은 10장까지 올릴 수 있어요',
-  photoFailed: '사진을 올리지 못했어요',
+  photoFailed: '사진을 올리지 못했어요. 다시 올려 주세요',
   photoRetry: '다시 시도',
   photoUploading: '올리는 중',
   photoRemove: (name: string) => `${name} 빼기`,

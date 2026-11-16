@@ -24,7 +24,7 @@ import { useSettingsData } from '../data';
 // 되살리기는 묻지 않고 바로 + Toast “되살렸어요”(같이 지워진 것도 함께, 서버). 파트너의 저금 항목은 안 보임.
 // 영구 삭제(⋯)와 비우기만 Modal. 30일 지나면 서버가 매일 자동 영구 삭제.
 // 2026-11-12 QA 11구간: 오프라인이면 영구 삭제·비우기 비활성(S11-10), 연결 대상이 없어 따로 되살렸으면
-// “연결된 항목이 없어 따로 되살렸어요”, 분석 trash_restored(entry trash, S11-06).
+// “원래 함께 있던 항목이 없어 이것만 되살렸어요”, 분석 trash_restored(entry trash, S11-06).
 export function S21Trash() {
   const nav = useNavigate();
   const qc = useQueryClient();

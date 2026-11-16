@@ -79,9 +79,9 @@ reset role;
 -- 달성 알림: 상대에게는 이름 없이
 select public.goal_mark_achieved(current_setting('test.yt')::uuid, null);
 select results_eq($$ select user_id, title, target from public.notification where kind = 'goal_achieved' order by user_id $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '개인 저금 목표 금액을 다 모았어요!',
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '개인 저금 목표 금액을 다 모았어요',
              '/salary?who=22222222-2222-2222-2222-222222222222'),
-            ('22222222-2222-2222-2222-222222222222'::uuid, '여행 목표 금액을 다 모았어요!',
+            ('22222222-2222-2222-2222-222222222222'::uuid, '여행 목표 금액을 다 모았어요',
              '/salary/items/' || current_setting('test.yt') || '/achieved') $$,
   '달성 알림: 상대는 “개인 저금” + W-01 파트너 탭');
 delete from public.notification;

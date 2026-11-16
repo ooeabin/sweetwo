@@ -8,7 +8,7 @@ const who = (name: string) => (name ? `${name}님이` : '파트너가');
 export const copy = {
   // P-10 합류 축하(2026-11-11 D7) [확인 필요] 문구
   joinedTitle: (starter: string) => (starter ? `${starter}님과 연결됐어요` : '파트너와 연결됐어요'),
-  joinedHelp: '이제 같이 모은 걸 같이 봐요', // [확인 필요] 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
+  joinedHelp: '이제 같이 모으는 저금을 둘이 봐요', // 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
   joinedWaitHelp: (starter: string) => `${who(starter)} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 홈 대기 카드와 같음
   toHomeAfter: '홈으로 가기',
   // P-09 합류 때 모은 금액(3차 검토 D2, 2026-11-15) [확인 필요]
@@ -53,7 +53,7 @@ export const copy = {
   pushAllow: '알림 받기',
   // 대기 화면 ‘알려 주기’(18 v2.2, 24시간에 1번) [확인 필요]
   nudge: '알려 주기',
-  nudgeSent: (starter: string) => `${starter ? `${starter}님` : '파트너'}에게 알렸어요`, // [확인 필요]
+  nudgeSent: (starter: string) => `${starter ? `${starter}님` : '파트너'}께 알렸어요`,
   nudgeTooSoon: '내일 다시 알릴 수 있어요', // [확인 필요]
   later: '나중에 할게요',
   next: '다음',
@@ -90,15 +90,15 @@ export const copy = {
     unavailable: '사용할 수 없는 초대예요',
   },
   // 코드 오류 이유(2026-11-15 3차 검토: ‘1’을 넣으면 이유 없이 거절됐음) [확인 필요]
-  codeConfusable: '초대 코드에는 0, 1, I, O가 없어요. 비슷한 글자로 넣어 주세요',
+  codeConfusable: '초대 코드에는 0, 1, I, O가 없어요. 받은 코드를 다시 확인해 주세요',
   codeRule: '초대 코드는 영문 대문자와 숫자 6자예요',
   hasRecords: '이미 시작한 기록이 있어요',
-  hasRecordsHelp: '수입·자산 같은 내 정보만 옮겨요',
+  hasRecordsHelp: '월급과 내 명의 자산·부채만 옮겨요',
   // P-02a 혼자 쓰던 기록 옮기기
   moveTitle: '내 정보만 옮겨요',
   paydayDay: (d: number) => `${d}일`,
   moveVisLabel: (name: string) => `${name} 공개 범위`,
-  moveVis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<
+  moveVis: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' } as Record<
     string,
     string
   >, // 2026-11-09 3단계
@@ -109,7 +109,7 @@ export const copy = {
   moveSkipItems: { goals: '저금', splits: '월급 계획', lists: '월급날 확인 목록' }, // 2026-11-08 [확인 필요]
   moveCount: (n: number) => `${n}개`,
   moveSkip: '안 옮겨요',
-  moveKeep: '30일 보관 후 지워져요',
+  moveKeep: '30일 동안 보관한 뒤 지워요',
   moveCopy: '사본 내려받기',
 
   // P-02b
@@ -152,12 +152,12 @@ export const copy = {
   allowanceHelp: (manager: string) => `나머지는 ${manager ? `${manager}님` : '파트너'}에게 보내요`,
   allowanceNote: (manager: string) =>
     `${manager ? `${manager}님` : '파트너'}도 용돈을 고칠 수 있어요. 고치면 알려 드려요`,
-  allowanceOver: '월급보다 많이 정할 수 없어요', // [확인 필요] 0 ≤ 용돈 ≤ 월급
+  allowanceOver: '용돈은 월급보다 많이 정할 수 없어요', // 0 ≤ 용돈 ≤ 월급
   // P-05 내 월급(O-31과 같음)
   salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
-  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어오면 그때 알려 주세요', // [확인 필요] O-31과 같음(2026-11-13)
+  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어온 달은 그때 적으면 돼요', // O-31과 같음(2026-11-13)
   noSalary: '지금은 월급이 없어요',
   noSalaryJoin: '월급 없이 합류할게요', // [확인 필요] 각자 계열만(2026-11-13)
   payday: '월급날',
@@ -171,11 +171,11 @@ export const copy = {
   splitTitle: '내 월급을 이렇게 나눠 볼까요?', // [확인 필요]
   splitJointTitle: '같이 쓰는 월급 계획이에요', // [확인 필요]
   splitHelp: '눌러서 금액을 바꿔요',
-  splitJointHelp: (me: string) => `${me}님 월급을 더해 다시 채웠어요`, // [확인 필요]
+  splitJointHelp: '내 월급을 더해 금액을 다시 채웠어요',
   splitDone: '이대로 저장하기',
   partnerPuts: (starter: string, amount: string) => `${starter}님이 매달 ${amount} 넣어요`, // [확인 필요]
-  incomes: (a: string, b: string) => `${a}, ${b}`, // [확인 필요] 합쳐서 수입 줄 아래
-  personIncome: (name: string, amount: string) => `${name} ${amount}`,
+  incomes: (a: string, b: string) => `${a}, ${b}`, // 합쳐서 수입 줄 아래 “{시작한 사람}님 350만 원, {나}님 270만 원”
+  personIncome: (name: string, amount: string) => `${name ? `${name}님` : '파트너'} ${amount}`,
   changed: (before: string, after: string) => `${before} → ${after}`,
-  splitChanged: (starter: string) => `${who(starter)} 방금 월급 계획을 바꿨어요`, // [확인 필요]
+  splitChanged: (starter: string) => `${who(starter)} 방금 월급 계획을 바꿨어요`,
 };

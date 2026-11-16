@@ -25,6 +25,12 @@ export function formatDateWeekday(s: string): string {
   return `${m}월 ${d}일 ${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}`;
 }
 
+/** '2026-12-24' → "24일 목요일"(같은 달 안 짧은 날짜, 캘린더 앞당긴 월급날 까닭) */
+export function formatDayWeekday(s: string): string {
+  const { y, m, d } = ymd(s);
+  return `${d}일 ${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}`;
+}
+
 /** '2026-10-25' → "10월 25일" */
 export function formatMonthDay(s: string): string {
   const { m, d } = ymd(s);

@@ -162,7 +162,7 @@ export function confirmableLines<T extends ConfirmLine>(
 }
 
 /**
- * 다음 자동 확인(H-11 “26일에 3개”): 아직 대기 중인 자동 줄 중 가장 이른 나가는 날과 그날 줄 수. 없으면 null
+ * 다음 자동 확인(H-11 “26일에 3개 나가요”): 아직 대기 중인 자동 줄 중 가장 이른 나가는 날과 그날 줄 수. 없으면 null
  */
 export function nextAutoDue(lines: readonly ConfirmLine[]): { date: string; count: number } | null {
   const due = lines

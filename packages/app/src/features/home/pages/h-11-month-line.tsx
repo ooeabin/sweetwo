@@ -7,7 +7,7 @@ import { copy } from '../copy';
 
 /**
  * H-11 이번 달 한 줄(19 ‘H-11 상태’, core pickMonthLine). 날짜 없는 사람은 H-13 기간 한 줄(salary PeriodLine).
- * 늦은 확인이 있으면 문장 아래 회색 “지난 달 n개 늦게 확인할 수 있어요” + “확인하기 ›”. 못 불러오면 13 공통 7번 카드
+ * 늦은 확인이 있으면 문장 아래 회색 “지난달 확인할 게 n개 남았어요” + “확인하기 ›”. 못 불러오면 13 공통 7번 카드
  */
 export function H11MonthLine({
   line,

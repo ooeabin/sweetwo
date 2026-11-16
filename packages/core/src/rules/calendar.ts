@@ -5,7 +5,7 @@ import { deadlineDay } from './saving-item';
 
 // 캘린더 금융 일정(docs/spec/24-calendar.md ‘캘린더 범위’, 재기획 2026-10-25). 읽기 전용이고 누르면 해당 화면.
 // 월급날(주말·공휴일이면 직전 영업일, 두 사람이 끄면 그대로), 월급날 확인 목록 안내 띠(다음 월급날 3일 전 ~ 전날, 손 줄이 남았을 때만, W-02),
-// 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓰는 달(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
+// 저금 항목 목표 기한(기한의 달 말일, 2026-11-09), 매년 목표 쓸 곳(그 달 1일, 지금 쓰는 곳 없음), 자산·대출 만기.
 
 /**
  * note = 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2, 24 ‘캘린더 v2.2’).
@@ -25,7 +25,7 @@ export interface MoneyDate {
   who?: string;
   /**
    * 월급날을 주말·공휴일이라 앞당겼으면 원래 날과 까닭(24 ‘금융 일정’, 2026-11-16 4차 검토 R4-9:
-   * “25일이 토요일이라 24일”). 앞당기지 않았으면 없음
+   * “25일이 토요일이라 24일로 앞당겼어요”). 앞당기지 않았으면 없음
    */
   moved?: { from: string; why: 'sat' | 'sun' | 'holiday' };
 }
@@ -78,7 +78,7 @@ export interface MoneyInput {
   maturities: { id: string; name: string; date: string }[];
   /** 저금 항목 기한(YYYY-MM-DD, 저장은 그 달 1일). 일정은 그 달 말일. 모으는 중인 것만 넘김 */
   goalDeadlines: { id: string; name: string; date: string }[];
-  /** 매년 목표 쓰는 달(기한의 달) */
+  /** 매년 목표 쓸 곳(기한의 달) */
   yearlyGoals: { id: string; name: string; month: number }[];
   /** 안 낸 쓸 곳 메모 날짜(W-14, 2026-11-13). goal = 저금 id, bundle = 묶음 id(둘 중 하나) */
   notes?: { name: string; date: string; goal: string | null; bundle: string | null }[];

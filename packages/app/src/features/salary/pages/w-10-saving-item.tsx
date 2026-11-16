@@ -93,7 +93,7 @@ export function W10SavingItem() {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     historyRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   };
-  // v2.2 ⋯: 모은 금액 바로잡기, 쓸 곳 메모, 같이 모으기로 묶기(각자 계열 + 연결 + 내 저금 + 아직 안 묶음)
+  // v2.2 ⋯: 모은 금액 바로잡기, 쓸 곳 메모, 같이 모으기 시작하기(각자 계열 + 연결 + 내 저금 + 아직 안 묶음)
   const canBundle =
     !d.joint && d.space.couple_state === 'connected' && i.owner === 'mine' && !g.bundle_id;
   const actions: MenuAction[] = [

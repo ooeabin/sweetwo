@@ -13,7 +13,7 @@ const OPTIONS: readonly PlanShare[] = ['all', 'saving_only', 'done_only'];
  * 월급 입력의 공개 고지 한 줄(17 O-31 5번, 18 P-05, 08 6장). note는 QuestionLayout `note`(주 버튼 위 가운데 회색 한 줄)에,
  * sheet는 화면 안 아무 곳(note가 p 안이라 시트는 따로)에 넣는다.
  * 각자 계열: 내 공개 단계(app_user.plan_share) 문장 + 글자 버튼 ‘바꾸기’ → S-13 ① ‘내 월급 계획’ 시트(모두 / 저금만 / 했어요만).
- * 같이 계열: “같이 관리하면 파트너도 이 금액을 봐요” 한 줄(같이 계열은 모두 보임).
+ * 같이 계열: “월급을 합쳐서 쓰면 파트너도 이 금액을 봐요” 한 줄(같이 계열은 모두 보임).
  */
 export function usePlanShareNote({
   joint,

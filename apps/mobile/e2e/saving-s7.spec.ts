@@ -178,7 +178,7 @@ test('S7-08·S7-09: 보기만·그만 모음·해제 대기는 머리 아래 회
   });
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   const line = page.locator('.hg-goaldetail > .hg-q__help');
-  await expect(line).toHaveText('연결 해제 대기 중에는 저금을 고칠 수 없어요');
+  await expect(line).toHaveText('연결 해제를 기다리는 동안에는 저금을 고칠 수 없어요');
   await expect(page.getByRole('button', { name: '더보기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '고치기' })).toBeDisabled();
   await expect(page.getByRole('button', { name: '바꾸기', exact: true })).toBeDisabled();
@@ -301,7 +301,7 @@ test('S7-13·S7-15: W-11b 아직 안 정한 돈은 금액 가리기를 따름, �
   );
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.locator('.hg-toast')).toContainText(
-    '연결 해제 대기 중에는 저금을 추가할 수 없어요',
+    '연결 해제를 기다리는 동안에는 저금을 추가할 수 없어요',
   );
 
   await open(

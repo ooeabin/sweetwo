@@ -536,7 +536,7 @@ export function H01Home() {
       track('home_task_dismissed', { task_key: x.key });
       await qc.invalidateQueries({ queryKey: qk.homeTasks });
     } catch {
-      toast(sharedCopy.errorTitle);
+      toast(sharedCopy.errorToast);
     }
   };
   const bandOf = (t: TopTask) => (

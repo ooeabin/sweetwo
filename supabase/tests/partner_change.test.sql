@@ -84,7 +84,7 @@ select is((select count(*)::int from public.notification where user_id = '222222
 
 -- 월요일 주간 요약: 지난주 바꾼 것(같은 항목은 하나, 되돌린 것 빼고) = 목표 금액, 자산 = 2(v2.2 각자 계열 월급 계획·월급 빼고)
 select is(public.send_weekly_summary(public.kst_today() + 1), 1, '찬우에게 요약 하나');
-select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 예빈님이 바꾼 게 2개 있어요', '요약 문구');
+select is((select title from public.notification where kind = 'weekly_summary'), '이번 주 예빈님이 2가지를 바꿨어요', '요약 문구');
 
 -- 2026-11-09 쉬운 이름: 경조사 변경 제목
 select is(public.partner_change_title('care', null, '예빈'), '예빈님이 경조사·기념일을 바꿨어요', '경조사 변경 제목(2026-11-15 경조사·기념일)');

@@ -20,7 +20,7 @@ export const lateLines = (list: PayChecklist) =>
     (l) => isManual(l) && (l.state === 'wait' || (l.state === 'skipped' && !l.checked_by)),
   );
 
-/** 머리 아래 회색 한 줄 “다음 월급날 전까지 늦게 확인할 수 있어요” */
+/** 머리 아래 회색 한 줄 “다음 월급날 전까지 언제든 확인할 수 있어요” */
 export function LastMonthNote() {
   return (
     <p className="hg-q__help" style={{ margin: 0 }}>

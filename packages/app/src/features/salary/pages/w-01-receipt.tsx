@@ -726,7 +726,7 @@ export function W01Receipt() {
     locked: copy.locked,
   };
   const customs = serverLines.filter((l) => l.kind === 'custom').length;
-  // 5d “+ 같이 쓰는 통장”: 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 숨김. 나중에는 ‘+ 지출 추가’ 칩 끝
+  // 5d “+ 같이 쓰는 통장 추가”: 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 숨김. 나중에는 ‘+ 지출 추가’ 칩 끝
   // ‘같이 쓰는 통장’으로 엶(2026-11-16 4차 검토 R4-4)
   const sharedOn = sp.shared_living !== false || lines.some((l) => l.kind === 'shared_account');
   const lead =

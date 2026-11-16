@@ -41,8 +41,8 @@ export const copy = {
   addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
   addCare: '경조사·기념일',
-  cmdPlaceholder: '찾거나 바로 할 일을 입력해요',
-  cmdEmpty: '찾는 게 없어요',
+  cmdPlaceholder: '찾을 화면이나 할 일을 입력해요',
+  cmdEmpty: '맞는 결과가 없어요',
   // 검색 아래 키 안내(넓은 창, 2026-11-03)
   cmdKeyMove: '이동', // [확인 필요]
   cmdKeyOpen: '열기', // [확인 필요]
@@ -71,7 +71,7 @@ export const copy = {
   rankStale: (pct: number) => `지난번엔 상위 ${pct}%였어요`, // [확인 필요]
   rankRefresh: '새로 확인하기', // [확인 필요]
   rankEmpty: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요]
-  rankAdClosed: '광고를 끝까지 보면 볼 수 있어요', // [확인 필요]
+  rankAdClosed: '광고를 끝까지 보면 새 순위를 보여 드려요',
   // v2.2(23 F-01 고친 점, 2026-11-13): 첫 결과는 광고 없이, (나) 순위 없음은 또래 중간값 줄(광고 없음)
   rankPeer: '또래 가구 중간값 보기', // [확인 필요]
   rankPeerBadge: '중간', // [확인 필요] 40px 원 안(순위가 없어 % 대신)

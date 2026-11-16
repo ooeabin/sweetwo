@@ -77,7 +77,7 @@ select is(public.achieve_goal(pg_temp.item('여행')), true, '달성, 처음 봄
 select is(public.achieve_goal(pg_temp.item('여행')), false, '축하는 한 번');
 select is((select count(*)::int from public.split_line where goal_id = pg_temp.item('여행')), 1, '달성해도 줄은 그대로');
 reset role;
-select is((select title from public.notification where kind = 'goal_achieved'), '여행 목표 금액을 다 모았어요!', '달성 알림');
+select is((select title from public.notification where kind = 'goal_achieved'), '여행 목표 금액을 다 모았어요', '달성 알림');
 select is((select target from public.notification where kind = 'goal_achieved'), '/salary/items/' || pg_temp.item('여행') || '/achieved',
   '주인에게 알림은 달성 축하(W-12)로(2026-11-12 S6-18, 20261122090000)');
 

@@ -38,7 +38,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   // 찾는 게 없으면 빈 상태
   await page.keyboard.press('ControlOrMeta+k');
   await page.getByRole('combobox', { name: '검색' }).fill('없는 이름');
-  await expect(page.getByText('찾는 게 없어요')).toBeVisible();
+  await expect(page.getByText('맞는 결과가 없어요')).toBeVisible();
 });
 
 test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 추가', async ({ page }, info) => {

@@ -6,7 +6,7 @@ import { Icon } from './Icon';
 // 같이 모으기 상자(docs/design/components/SaveTogether.md, 2026-11-13 ADR 0009). 홈 주인공 H-10.
 // SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 돈 들어왔어요’),
 // 칸 하나 = SaveTogetherSlide(사람 + 이름 → 큰 숫자 → 막대 + 보조 줄들, 칸 전체가 버튼, 화면 읽기는 문장 하나).
-// 빈 상태(미합류·저금 0) = SaveTogetherEmpty(질문 + 이름 칩 + ‘+ 저금 만들기’).
+// 빈 상태(미합류·저금 0) = SaveTogetherEmpty(질문 + 이름 칩 + ‘+ 저금 추가’).
 
 export interface SaveTogetherSlideProps {
   /** 이름 왼쪽 겹친 Avatar(hg-avatars) */
@@ -131,7 +131,7 @@ export function SaveTogether({
   );
 }
 
-/** 빈 상태(미합류·저금 0): “무엇을 같이 모을까요?” + 이름 칩(고르면 W-11a) + ‘+ 저금 만들기’ */
+/** 빈 상태(미합류·저금 0): “무엇을 같이 모을까요?” + 이름 칩(고르면 W-11a) + ‘+ 저금 추가’ */
 export function SaveTogetherEmpty({
   title,
   question,

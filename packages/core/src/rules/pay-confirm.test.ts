@@ -86,7 +86,7 @@ describe('손 줄과 확인 끝(07 7장)', () => {
     expect(confirmFinish([{ state: 'checked' }, { state: 'skipped' }])).toBe('mixed');
     expect(confirmFinish(lines)).toBeNull();
   });
-  it('다음 자동 확인 “26일에 2개”', () => {
+  it('다음 자동 확인 “26일에 2개 나가요”', () => {
     expect(nextAutoDue(lines)).toEqual({ date: '2026-10-26', count: 2 });
     expect(nextAutoDue([{ state: 'checked', auto: true, auto_due: '2026-10-26' }])).toBeNull();
   });

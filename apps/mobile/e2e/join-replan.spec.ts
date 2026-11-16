@@ -89,7 +89,7 @@ async function answerBasics(page: Page, waiting = false) {
 }
 
 /** 합류 축하(P-10, 2026-11-11 D7): 축하 배경 + 그림 자리 + “찬우님과 연결됐어요” → P-11 알림 종류 */
-async function celebrate(page: Page, help = '이제 같이 모은 걸 같이 봐요') {
+async function celebrate(page: Page, help = '이제 같이 모으는 저금을 둘이 봐요') {
   await expect(page).toHaveURL(/\/join\/p-10$/);
   await expect(page.getByRole('heading', { name: '찬우님과 연결됐어요' })).toBeVisible();
   await expect(page.getByText(help)).toBeVisible();
@@ -119,7 +119,9 @@ async function allowance(page: Page, amount: string) {
   const f = page.getByLabel('용돈은 얼마로 할까요?');
   await expect(f).toHaveValue('270,000');
   await f.fill('3000000');
-  await expect(page.locator('.hg-banner--check')).toContainText('월급보다 많이 정할 수 없어요');
+  await expect(page.locator('.hg-banner--check')).toContainText(
+    '용돈은 월급보다 많이 정할 수 없어요',
+  );
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await axe(page);
   await f.fill(amount);
@@ -326,7 +328,7 @@ test('한 사람이 관리해요(찬우가 관리): 형태 확인만 → P-05c �
   await expect(page.getByRole('radio')).toHaveCount(0);
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();
-  await expect(page.getByText('같이 관리하면 파트너도 이 금액을 봐요')).toBeVisible();
+  await expect(page.getByText('월급을 합쳐서 쓰면 파트너도 이 금액을 봐요')).toBeVisible();
   // 같이 계열은 월급 없이 합류가 아니라 ‘지금은 월급이 없어요’
   await expect(page.getByRole('button', { name: '월급 없이 합류할게요' })).toHaveCount(0);
   await salary(page);
@@ -444,7 +446,7 @@ test('시작한 사람이 아직 온보딩 중 + 같이 계열: 합류만 하고
   expect(db.joinCalls.at(-1)).toMatchObject({ fn: 'complete_join' });
   expect(db.me.onboarding_step).toBe('P-WAIT');
   await page.getByRole('button', { name: '알려 주기' }).click();
-  await expect(page.locator('.hg-toast', { hasText: '찬우님에게 알렸어요' })).toBeVisible();
+  await expect(page.locator('.hg-toast', { hasText: '찬우님께 알렸어요' })).toBeVisible();
   await page.getByRole('button', { name: '알려 주기' }).click();
   await expect(page.locator('.hg-toast', { hasText: '내일 다시 알릴 수 있어요' })).toBeVisible();
   await axe(page);
@@ -519,10 +521,10 @@ test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류�
   await expect(page.getByRole('heading', { name: '내 정보만 옮겨요' })).toBeVisible();
   await expect(page.getByText('월급날 10일')).toBeVisible();
   await expect(page.getByText('270만 원', { exact: true })).toBeVisible();
-  // 공개 범위: 줄 오른쪽 ‘금액만 보여 주기’ → 시트에서 고름(2026-11-03)
+  // 공개 범위: 줄 오른쪽 ‘총액만 보여 주기’ → 시트에서 고름(2026-11-03)
   const row = page.getByRole('button', { name: /예빈 적금 500만 원/ });
-  await expect(row).toContainText('금액만 보여 주기');
-  await expect(page.getByText(/30일 보관 후 지워져요/)).toBeVisible();
+  await expect(row).toContainText('총액만 보여 주기');
+  await expect(page.getByText(/30일 동안 보관한 뒤 지워요/)).toBeVisible();
   await axe(page);
   await row.click();
   const sheet = page.getByRole('dialog', { name: '예빈 적금 공개 범위' });

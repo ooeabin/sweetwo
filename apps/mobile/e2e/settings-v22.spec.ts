@@ -135,11 +135,11 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
 }) => {
   const { v } = await connected(page);
   await page.goto('/salary/split/new');
-  await expect(page.getByRole('heading', { name: '낼 몫 정하기' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '같이 쓰는 통장 이름이 뭐예요?' })).toBeVisible();
   await page.getByRole('radio', { name: '생활비 통장' }).click();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('한 달에 얼마 넣을까요?').fill('1000000');
+  await page.getByLabel('둘이 한 달에 얼마 넣을까요?').fill('1000000');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '어떻게 나눌까요?' })).toBeVisible();
   // 두 사람 모두 ‘모두 보여 주기’가 아니라 월급 비율은 이유 문구 없이 흐림
@@ -173,7 +173,7 @@ test('분담 도우미(W-01b): 두 사람 모두 ‘모두 보여 주기’면 �
   await page.goto('/salary/split/new');
   await page.getByRole('radio', { name: '데이트 통장' }).click();
   await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('한 달에 얼마 넣을까요?').fill('600000');
+  await page.getByLabel('둘이 한 달에 얼마 넣을까요?').fill('600000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '월급 비율' }).click();
   // 350만 : 250만 → 60만 × 350/600 = 35만
@@ -292,7 +292,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   // 했어요만(2026-11-13 P1 = A): 서버가 저금 이름·목표 금액·모은 금액을 주지 않아 “개인 저금” + 이번 달 확인 여부만
   (db.me as Record<string, unknown>).plan_share = 'done_only';
   await page.reload();
-  await expect(page.getByText('찬우님은 했어요만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('찬우님은 이번 달 했는지만 보여 줘요')).toBeVisible();
   await expect(page.getByText('이번 달 했어요').first()).toBeVisible();
   await expect(page.getByText('개인 저금').first()).toBeVisible();
   await expect(mySaving.getByText('개인 저금').first()).toBeVisible();
@@ -366,7 +366,7 @@ test('보안(S-15): PIN을 건너뛰었으면 맨 위 권장 한 줄 + 켜기 �
   await fakeBridge(page, { signedIn: true, pin: null });
   await page.addInitScript(() => localStorage.setItem('sweetwo.pin-asked', '1'));
   await page.goto('/settings/security');
-  await expect(page.getByText('앱 잠금을 켜면 한 번 더 지켜 줘요')).toBeVisible();
+  await expect(page.getByText('앱 잠금을 켜면 열 때 PIN을 한 번 더 물어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '켜기', exact: true }).click();
   await expect(page).toHaveURL(/next=\/settings\/security/);
@@ -400,7 +400,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
     ],
   });
   await page.goto(`/salary?view=plan&who=${YEBIN}`);
-  await expect(page.getByText('예빈님은 저금만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('예빈님은 저금만 보여 주기로 정했어요')).toBeVisible();
   await expect(
     page.getByRole('button', { name: /예빈 여행/ }).or(page.getByText('예빈 여행')),
   ).toBeVisible();
@@ -410,7 +410,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
 
   v.partnerShare = 'done_only';
   await page.reload();
-  await expect(page.getByText('예빈님은 했어요만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('예빈님은 ‘했어요’만 보여 주기로 정했어요')).toBeVisible();
   await expect(page.getByText('개인 저금')).toBeVisible();
   await expect(page.getByText('예빈 여행')).toHaveCount(0);
   await expect(page.getByText('아직이에요')).toBeVisible();

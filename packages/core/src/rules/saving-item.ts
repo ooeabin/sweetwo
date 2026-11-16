@@ -223,8 +223,8 @@ export type SavingItemInput = z.infer<ReturnType<typeof savingItemInput>>;
 export const savingItemId = z.string().uuid();
 
 /**
- * 달성 축하 문장(20 W-12 4번): 모든 달 함께 → 'all'(“16개월 동안 매달 둘이 함께 모았어요”),
- * 일부 → 'some'(“16개월 중 14번은 둘이 함께 모았어요”), 한 사람만 또는 각자 항목 → 'solo'(“16개월 만에 모았어요”).
+ * 달성 축하 문장(20 W-12 4번): 모든 달 함께 → 'all'(“16개월 동안 매달 둘이 같이 모았어요”),
+ * 일부 → 'some'(“16개월 중 14번은 둘이 같이 모았어요”), 한 사람만 또는 각자 항목 → 'solo'(“16개월 만에 모았어요”).
  * 모은 달이 없으면 문장 없음(null).
  */
 export function celebrationStory(

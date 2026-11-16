@@ -1,4 +1,4 @@
-import { subject, withAnd } from '@sweetwo/core';
+import { withAnd } from '@sweetwo/core';
 
 // 설정 문구(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
@@ -27,7 +27,7 @@ export const copy = {
     screen: '화면',
     screenValue: '기기 설정을 따라요',
     mask: '금액 가리기',
-    maskHelp: '모든 금액을 •••로 가려요. 이 기기에서만', // [확인 필요]
+    maskHelp: '이 기기에서만 모든 금액을 •••로 가려요',
     help: '도움말',
     data: '데이터',
     dataSub: '내보내기, 휴지통, 계정 삭제',
@@ -43,12 +43,11 @@ export const copy = {
   emailError: '이메일 주소를 다시 확인해 주세요',
   save: '저장',
   saved: '저장했어요', // [확인 필요]
-  marriage: '결혼 상태',
+  marriage: '두 사람 사이',
   marriageValue: {
     married: '결혼했어요',
     engaged: '결혼 준비 중이에요',
-    undecided: '아직 안 정했어요',
-    // v2.2 O-11 4지선다 새 값(ADR 0009). 고르는 화면은 v2.2 온보딩 PR에서
+    // v2.2 O-11 4지선다(ADR 0009). 예전 값 undecided는 보이지 않음(2026-11-16 문구 리뷰)
     dating: '연애 중이에요',
     living_together: '같이 살아요',
   },
@@ -96,8 +95,8 @@ export const copy = {
   planDaySaved: '월급날 확인 목록 만드는 날을 바꿨어요', // [확인 필요]
 
   // S-11f 월급 관리 방식
-  salaryModeQ: '월급을 어떻게 관리해요?',
-  salaryModeHelp: '바꾸면 두 분 모두에게 적용되고, 월급날 확인 목록은 다음 월급날부터 바뀌어요', // [확인 필요]
+  salaryModeQ: '월급을 어떻게 써요?',
+  salaryModeHelp: '바꾸면 두 분 모두에게 적용돼요. 월급날 확인 목록은 다음 월급날부터 바뀌어요',
   salaryModes: {
     separate: '월급은 각자 써요',
     joint: '월급을 합쳐서 써요',
@@ -139,10 +138,10 @@ export const copy = {
   activityLog: '활동 기록', // [확인 필요] 2026-11-15 S-12 → 알림 화면(파트너가 바꾼 것)
   // 2026-11-11 D1 합류하는 중(누가 ‘합류하기’를 눌러 코드를 24시간 잡아 둠) [확인 필요]
   joiningTitle: '파트너가 합류하는 중이에요',
-  joiningHelp: '합류를 마치면 알려 드릴게요. 24시간 안에 마치지 않으면 다시 초대할 수 있어요',
+  joiningHelp: '합류를 마치면 알려 드릴게요. 24시간이 지나면 다시 초대할 수 있어요',
   inviteCancel: '초대 취소',
   inviteCancelQ: '초대를 취소할까요?',
-  inviteCancelBody: '합류하던 사람은 처음부터 다시 해야 하고, 지금 코드는 더 못 써요',
+  inviteCancelBody: '합류하던 사람은 처음부터 다시 해야 해요. 지금 코드는 더 쓸 수 없어요',
   inviteCancelOk: '취소할게요',
   inviteCancelKeep: '그대로 둘게요',
   inviteCancelled: '초대를 취소했어요',
@@ -203,7 +202,7 @@ export const copy = {
 
   // S-13 공개 범위
   visTitle: '공개 범위',
-  vis: { all: '모두 보여 주기', sum: '금액만 보여 주기', private: '숨기기' } as Record<
+  vis: { all: '모두 보여 주기', sum: '총액만 보여 주기', private: '숨기기' } as Record<
     string,
     string
   >,
@@ -213,8 +212,8 @@ export const copy = {
   visAll: '모두 바꾸기',
   visNewOnly: '새 항목만',
   visFixed: [
-    // [확인 필요] 기획서 25 S-13 2번 “월급과 월급 계획은 늘 같이 봐요” 등
-    '월급과 월급 계획은 늘 같이 봐요',
+    // 기획서 25 S-13 2번 “월급을 합쳐서 쓰면 월급 계획은 늘 같이 봐요” 등
+    '월급을 합쳐서 쓰면 월급 계획은 늘 같이 봐요',
     '우리 둘 저금과 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
     '경조사는 늘 같이 봐요',
   ],
@@ -222,7 +221,7 @@ export const copy = {
   visMine: '내 항목', // [확인 필요]
   visNone: '내 명의 항목이 없어요',
   visGoals: '내 저금', // [확인 필요]
-  goalVis: { all: '모두 보여 주기', amount: '금액만 보여 주기' } as Record<string, string>,
+  goalVis: { all: '모두 보여 주기', amount: '총액만 보여 주기' } as Record<string, string>,
   visDebt: '부채', // [확인 필요] 항목 이름표
   visLabel: (name: string) => `${name} 공개 범위`,
 
@@ -239,7 +238,7 @@ export const copy = {
   trashLeft: (n: number) => `${n}일 남음`,
   restore: '되살리기',
   restored: '되살렸어요',
-  restoredUnlinked: '연결된 항목이 없어 따로 되살렸어요', // 25 S-21 3번, 09 ‘삭제 연결 처리’
+  restoredUnlinked: '원래 함께 있던 항목이 없어 이것만 되살렸어요', // 25 S-21 3번, 09 ‘삭제 연결 처리’
   undo: '되돌리기',
   marketing: '마케팅 정보 받기',
   marketingAt: (date: string) => `${date} 동의`,
@@ -265,7 +264,7 @@ export const copy = {
   doExport: '내보내기',
   exporting: '파일을 만들고 있어요',
   exportingSub: '잠시만 기다려 주세요', // [확인 필요] 2026-11-04 처리 중 화면
-  exportFailed: '파일을 만들지 못했어요',
+  exportFailed: '파일을 만들지 못했어요. 잠시 뒤 다시 해 주세요',
   retry: '다시 시도',
   exported: '파일을 저장했어요', // [확인 필요]
   pinQ: 'PIN을 입력해 주세요', // [확인 필요] 내보내기 본인 확인
@@ -394,7 +393,7 @@ export const copy = {
   closedNote: '완료된 지 7일이 지나 새 문의로 보내 주세요', // [확인 필요]
   accessAsk: '문의를 확인하려면 동의가 필요해요',
   accessSee: '확인하기', // [확인 필요]
-  accessOn: '상담원이 확인 중이에요',
+  accessOn: '운영자가 확인하고 있어요',
   accessLeft: (h: number) => `${h}시간 남았어요`,
   accessStop: '지금 그만 보게 하기',
   accessStopped: '이제 운영자는 볼 수 없어요',
@@ -460,7 +459,7 @@ export const copy = {
   },
   partnerChangeSub: '월급 계획·관리 방식·저금 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
-  careAlerts: '경조사 미리 알림', // [확인 필요]
+  careAlerts: '경조사·기념일 미리 알림',
   cancel: '취소',
   quiet: '방해 금지 시간',
   quietValue: (a: string, b: string) => `${a} ~ ${b}`,
@@ -483,14 +482,15 @@ export const copy = {
   doneBy: (name: string) => `${name}님이 완료했어요`,
   markDone: '완료했어요',
   applyToUs: '우리에게 적용하기',
-  notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요', // 31 5-3
+  notAdvice: '입력한 숫자로 계산한 참고 정보예요. 투자·금융 자문이 아니에요', // 31 5-3
   noStage: '지금 단계의 월급날 확인 목록이 없어요', // [확인 필요]
 
   goalsCount: (n: number) => `${n}개`,
   marriageState: {
     married: '결혼했어요',
     engaged: '결혼 준비 중이에요',
-    undecided: '아직 안 정했어요',
+    dating: '연애 중이에요',
+    living_together: '같이 살아요',
   } as Record<string, string>,
   housingOptions: {
     jeonse: '전세',
@@ -532,7 +532,7 @@ export const copy = {
       : '올린 사진은 파트너와 나만 볼 수 있어요', // [확인 필요]
   photoNoticeSolo: '올린 사진은 나만 볼 수 있어요', // [확인 필요] 혼자 쓰기
   photoTooBig: '10MB 이하 사진만 올릴 수 있어요',
-  photoBadType: '이 형식은 올릴 수 없어요',
+  photoBadType: '이 파일은 올릴 수 없어요. 사진 파일을 골라 주세요',
   photoStage: '사진 위치, 화살표로 옮겨요',
   photoZoom: '확대', // [확인 필요] 화면 읽기용
   photoPreview: '미리보기', // [확인 필요] 화면 읽기용
@@ -559,8 +559,8 @@ export const copy = {
   shareNote: {
     saving_only: '파트너에게는 저금만 보여요',
     all: '파트너에게는 월급 계획이 모두 보여요', // [확인 필요]
-    done_only: '파트너에게는 했어요만 보여요', // [확인 필요]
-    joint: '같이 관리하면 파트너도 이 금액을 봐요', // [확인 필요]
+    done_only: '파트너에게는 이번 달 했는지만 보여요',
+    joint: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
   },
   change: '바꾸기',
   // S-11c 2·3·5 [확인 필요]
@@ -584,7 +584,7 @@ export const copy = {
   no: '아니요',
   notYet: '아직 없어요',
   managerMe: '제가 주로 해요',
-  managerPartner: (name: string) => (name ? `${subject(name)} 주로 해요` : '파트너가 주로 해요'),
+  managerPartner: (name: string) => (name ? `${name}님이 주로 해요` : '파트너가 주로 해요'),
   managerTogether: '둘이 같이 해요',
   managerEach: '각자 자기 월급으로 해요',
   styleWaiting: (name: string) => `${name}님 답을 기다려요`,
@@ -622,7 +622,7 @@ export const copy = {
     saving_only: '저금만 보여 주기',
     done_only: '했어요만 보여 주기',
   } as Record<string, string>,
-  planShareJoint: '같이 관리해서 모두 보여요',
+  planShareJoint: '월급을 합쳐서 쓰고 있어 모두 보여요',
   bundlesTitle: '같이 모으기',
   bundleShowEach: '각자 모은 금액 보여 주기',
   assetsTitle: '자산·부채',
@@ -638,7 +638,7 @@ export const copy = {
   rankTitle: '자산 순위 같이 보기',
   rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]
   rankWaiting: (name: string) => `${name}님 답을 기다려요`, // [확인 필요]
-  alwaysShared: '경조사, 공동 명의, 같이 관리하는 월급 계획과 저금은 늘 같이 봐요', // [확인 필요]
+  alwaysShared: '경조사, 공동 명의, 합쳐서 쓰는 월급 계획과 저금은 늘 같이 봐요',
 
   // S-13p 상대에게 보이는 모습 [확인 필요]
   previewTitle: (name: string) => `${name}님에게 보이는 모습`,
@@ -651,7 +651,7 @@ export const copy = {
   previewNothing: '보이는 게 없어요', // [확인 필요]
   previewHidden: '연결 해제 대기 중이라 지금은 아무것도 보이지 않아요', // [확인 필요]
   previewSavingOnly: (me: string) => `${me}님은 저금만 보여 줘요`, // 20 W-01 3b
-  previewDoneOnly: (me: string) => `${me}님은 했어요만 보여 줘요`, // [확인 필요]
+  previewDoneOnly: (me: string) => `${me}님은 이번 달 했는지만 보여 줘요`,
   previewIncome: (amount: string, day: string) => `월급 ${amount}, ${day}`,
   previewDone: '이번 달 했어요',
   previewNotYet: '아직이에요', // [확인 필요]
@@ -694,7 +694,7 @@ export const copy = {
   otherAlerts: '그 밖의 알림', // [확인 필요]
 
   // S-15 앱 잠금 권장 줄 [확인 필요]
-  lockRecommend: '앱 잠금을 켜면 한 번 더 지켜 줘요',
+  lockRecommend: '앱 잠금을 켜면 열 때 PIN을 한 번 더 물어요',
   lockTurnOn: '켜기',
 
   // S-20 1366 항목(기관 검토 전에는 플래그로 숨김, Q4)

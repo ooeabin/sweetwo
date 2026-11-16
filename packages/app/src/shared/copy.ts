@@ -7,8 +7,8 @@ export const sharedCopy = {
   shareNote: {
     saving_only: '파트너에게는 저금만 보여요',
     all: '파트너에게 모두 보여요', // [확인 필요]
-    done_only: '파트너에게는 했어요만 보여요', // [확인 필요]
-    joint: '같이 관리하면 파트너도 이 금액을 봐요', // [확인 필요]
+    done_only: '파트너에게는 이번 달 했는지만 보여요',
+    joint: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
     change: '바꾸기',
     sheet: '내 월급 계획', // [확인 필요] S-13 ① 이름을 시트 제목으로
     options: {
@@ -32,6 +32,8 @@ export const sharedCopy = {
   /** 13 공통 상태 7번: 화면을 그리다 문제가 생겼을 때 */
   errorTitle: '잠시 문제가 생겼어요',
   errorBody: '다시 시도해 주세요',
+  /** 7번을 Toast 한 줄로(두 줄 카드가 없는 자리, 2026-11-16 문구 리뷰) */
+  errorToast: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
   /** 13 공통 상태 10번: 저장 실패(되돌리기 등 결과 알림이 없던 동작, 2026-11-06) */
   saveFailed: '저장하지 못했어요',
@@ -47,5 +49,5 @@ export const sharedCopy = {
   marketingResult: (agreed: boolean, date: string) =>
     agreed
       ? `${date} sweeTwo 마케팅 정보 받기에 동의했어요`
-      : `${date} sweeTwo 마케팅 정보 받기를 거부했어요`,
+      : `${date} sweeTwo 마케팅 정보를 받지 않기로 했어요`,
 };

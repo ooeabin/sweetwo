@@ -127,7 +127,7 @@ export const copy = {
   lockOn: '켜기',
   pinSetTitle: '앱을 열 때 쓸\nPIN 6자리를 정해 주세요',
   pinSetSub: '자리를 비우면 5분 뒤 잠겨요',
-  pinConfirm: '한 번 더\n입력해 주세요',
+  pinConfirm: '같은 PIN을 한 번 더\n입력해 주세요',
   pinMismatch: 'PIN이 서로 달라요',
   pinWeak: '같은 숫자나 이어지는 숫자는 쓸 수 없어요', // [확인 필요] 기획서는 규칙만 있음
   pinSaveFailed: 'PIN을 저장하지 못했어요. 처음부터 다시 정해 주세요', // [확인 필요] 2026-11-10

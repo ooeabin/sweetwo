@@ -8,7 +8,7 @@ import { copy } from './copy';
 
 /**
  * H-13 기간 한 줄(07 6장, 19 ‘H-11 상태’ 날짜 없음): 홈 H-11 자리와 월급 탭 ‘이번 달’ 자리(날짜 없는 사람)가 같이 씀.
- * 기간 없음 “돈이 들어오면 알려 주세요” / 1~15일째 “이번 기간 들어온 돈 …” / 16일째부터 PeriodBar(중립 색, 판정 문장 없음)
+ * 기간 없음 “돈이 들어오면 ‘받은 돈 적기’로 알려 주세요” / 1~15일째 “이번 기간 들어온 돈 …” / 16일째부터 PeriodBar(중립 색, 판정 문장 없음)
  * / 빈 날 “지난번 돈이 들어온 지 n일 됐어요”. 상자 전체 → W-20(“돈 들어왔어요 ›”). 분석 money_in_period_viewed(상태마다 한 번)
  */
 export function PeriodLine({ period, onGo }: { period: MoneyInPeriod; onGo: () => void }) {

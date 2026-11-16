@@ -591,7 +591,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // S-11g 결혼 상태
+      }, // S-11g 두 사람 사이
       {
         path: '/settings/me/wedding',
         element: (

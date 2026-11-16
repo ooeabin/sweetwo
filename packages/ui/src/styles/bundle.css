@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ff7e29b5). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (a6fdb04d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1022,7 +1022,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sechead__count { font: var(--text-title-3); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: var(--text-label); font-weight: 500; color: var(--slate); text-decoration: none; }  /* 2026-11-09 머리 이동 링크(‘전체 보기 ›’ ‘캘린더 ›’ ‘5개 중 0개 완료 ›’)는 당근 ‘더보기’처럼 회색. 오렌지는 동작 글자 버튼만 */
 .hg-sechead__more:hover { background: var(--surface-alt); }
-.hg-sechead__action { margin-left: auto; display: inline-flex; align-items: center; flex: none; }  /* 2026-11-09 round 3 묶음 머리 오른쪽 글자 버튼(W-02 ‘모두 보냈어요’) */
+.hg-sechead__action { margin-left: auto; display: inline-flex; align-items: center; flex: none; }  /* 2026-11-09 round 3 묶음 머리 오른쪽 글자 버튼(W-02 ‘모두 계획대로 했어요’) */
 .hg-sechead__link { display: inline-flex; align-items: center; gap: 2px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }  /* 2026-11-09 round 3 누르는 제목(저금 묶음 → W-13) */
 .hg-sechead__link > svg { color: var(--slate); }
 .hg-sechead__link:hover > svg { color: var(--ink); }
@@ -2443,7 +2443,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__dots > i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--hairline); }
 .hg-together__dots > i.is-on { background: var(--ink-2); }
 .hg-together > .hg-addrow { align-self: flex-start; }
-/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 3개 + ‘+ 저금 만들기’. 그림 자리 없음 */
+/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 3개 + ‘+ 저금 추가’. 그림 자리 없음 */
 .hg-together__ask { margin: var(--space-2) 0 0; font: var(--text-title-3); font-weight: 700; }
 .hg-together__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 @media (prefers-reduced-motion: no-preference) { .hg-together__track { scroll-behavior: smooth; } }
