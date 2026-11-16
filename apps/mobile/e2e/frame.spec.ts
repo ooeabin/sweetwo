@@ -142,11 +142,19 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
       .getByRole('button')
       .evaluateAll((els) => els.map((e) => e.getAttribute('aria-label'))),
   ).toEqual(['알림', '설정', '메뉴']);
-  for (const b of await head.getByRole('button').all()) {
-    const box = await b.boundingBox();
-    expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
-    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
-  }
+  await expect
+    .poll(() =>
+      head
+        .getByRole('button')
+        .evaluateAll((els) =>
+          Math.min(
+            ...els.map((e) =>
+              Math.min(e.getBoundingClientRect().width, e.getBoundingClientRect().height),
+            ),
+          ),
+        ),
+    )
+    .toBeGreaterThanOrEqual(44);
   // 설정 톱니 → 설정 홈, ‹ → 홈
   await head.getByRole('button', { name: '설정', exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
