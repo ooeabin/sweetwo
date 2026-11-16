@@ -144,7 +144,12 @@ export function NotificationPanel(p: {
             onClick={p.onClose}
           />
         )}
-        <h2 className="hg-noti__title">{p.labels.title}</h2>
+        {/* 알림 화면(page)은 제목이 그 화면의 h1, 넓은 창 시트는 화면 위에 뜨는 패널이라 h2(2026-11-16) */}
+        {p.variant === 'page' ? (
+          <h1 className="hg-noti__title">{p.labels.title}</h1>
+        ) : (
+          <h2 className="hg-noti__title">{p.labels.title}</h2>
+        )}
         <Button variant="ghost" size="sm" disabled={!unread} onClick={p.onReadAll}>
           {p.labels.readAll}
         </Button>
@@ -185,7 +190,11 @@ export function NotificationPanel(p: {
               .filter((g) => g.items.length)
               .map((g) => (
                 <section key={g.key} aria-label={g.label}>
-                  <h3 className="hg-noti__group">{g.label}</h3>
+                  {p.variant === 'page' ? (
+                    <h2 className="hg-noti__group">{g.label}</h2>
+                  ) : (
+                    <h3 className="hg-noti__group">{g.label}</h3>
+                  )}
                   {g.items.map((x) => {
                     const row = (
                       <button

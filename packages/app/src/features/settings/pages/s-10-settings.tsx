@@ -57,13 +57,10 @@ export function S10Settings() {
           lead={
             <span className="hg-avatars" aria-hidden="true">
               <PersonDot name={c.myName} starter={c.starter} userId={d.me.id} />
-              {c.partnerName && !c.solo && (
-                <PersonDot name={c.partnerName} starter={!c.starter} userId={d.partner?.id} />
-              )}
             </span>
           }
-          label={copy.couple(c.myName, c.solo ? '' : c.partnerName)}
-          sub={copy.loggedIn(copy.providers[d.me.provider ?? ''] ?? '')}
+          label={copy.myInfo}
+          sub={c.myName}
           onClick={() => nav('/settings/me')}
         />
         <ListRow
@@ -79,7 +76,7 @@ export function S10Settings() {
             value={
               // v2.2: 요약 값은 내 월급 계획 공개 단계(같이 계열은 늘 모두)
               d.space?.salary_mode === 'joint'
-                ? copy.planShareJoint
+                ? copy.planShareJointRow
                 : (copy.planShares[d.me.plan_share] ?? '')
             }
             onClick={() => nav('/settings/visibility')}

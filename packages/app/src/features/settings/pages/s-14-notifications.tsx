@@ -23,6 +23,7 @@ import { Button, ListRow, PageHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useBackOr } from '../../../shared/back-or';
 import { sharedCopy } from '../../../shared/copy';
 import { toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
@@ -49,6 +50,7 @@ const CARE: NotiTopic[] = ['care_30', 'care_14', 'care_7', 'care_0'];
 
 export function S14Notifications() {
   const nav = useNavigate();
+  const goBack = useBackOr('/settings');
   const qc = useQueryClient();
   const d = useSettingsData();
   const marketing = useQuery({ queryKey: ['consent', 'marketing'], queryFn: fetchMarketing });
@@ -155,7 +157,7 @@ export function S14Notifications() {
         title={copy.rows.noti}
         backLabel={copy.back}
         backTo={copy.title}
-        onBack={() => nav('/settings')}
+        onBack={goBack}
       />
       <section className="hg-card hg-stack" aria-label={copy.push} style={{ gap: 0 }}>
         <Toggle

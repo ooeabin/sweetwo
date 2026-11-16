@@ -294,7 +294,7 @@ export const trackCareShared = (linked: boolean) => {
 };
 
 /**
- * 가장 가까운 일정 하나(홈 H-08 캘린더 타일, 2026-11-15 3차 검토: 캘린더 목록과 같은 재료라 월급날도 같음).
+ * 가장 가까운 일정 하나(홈 H-08 캘린더 타일, 2026-11-15 3차 검토: 캘린더 목록과 같은 재료. 2026-11-16 월급날·확인 목록은 뺌, 홈 H-11이 말함).
  * 경조사(다음 날짜) + 금융 일정(Y-01 목록과 같은 60일 안, 월급날·쓸 곳 메모·만기 등) 중 이른 것. 같은 날이면 경조사 먼저
  */
 export function nextSchedule(
@@ -307,6 +307,8 @@ export function nextSchedule(
       return [Math.floor(t / 12), (t % 12) + 1] as const;
     })
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
+    // 월급날·월급날 확인 목록은 홈 H-11이 이미 말해서 뺌(같은 날짜가 홈에 두 번 나오던 것, 2026-11-16)
+    .filter((x) => x.kind !== 'payday' && x.kind !== 'review')
     .filter((x) => x.date >= d.today && withinDays(d.today, x.date, 60))
     .sort((a, b) => a.date.localeCompare(b.date));
   const care = d.upcoming[0];

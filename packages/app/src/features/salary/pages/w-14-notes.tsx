@@ -115,11 +115,13 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader
         title={copy.notesTitle(t.name)}
-        sub={copy.notesHelp}
         backLabel={copy.back}
         backTo={t.name}
         onBack={back}
       />
+      <p className="hg-help" style={{ margin: 0 }}>
+        {copy.notesHelp}
+      </p>
       {notes.isLoading ? (
         <SkelRows
           rows={[

@@ -44,7 +44,7 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
-import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { savingPaths, togetherPaths } from '../paths';
 import { MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
@@ -252,14 +252,6 @@ export function W02PaydayConfirm() {
             <p className="hg-card__meta">
               {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
             </p>
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => nav(salaryPaths.plan)}
-            >
-              {copy.editSplit}
-            </button>
             {!pending && (
               <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
             )}
@@ -706,16 +698,6 @@ export function W02PaydayConfirm() {
       )}
       {!partnerTab && !pending && ago === 0 && (
         <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
-      )}
-      {!partnerTab && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav(salaryPaths.plan)}
-        >
-          {copy.editSplit}
-        </button>
       )}
     </>,
   );

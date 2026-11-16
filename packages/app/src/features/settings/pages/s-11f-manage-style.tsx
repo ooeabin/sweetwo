@@ -19,6 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { salaryModeCode, track } from '../../../shared/analytics';
+import { useBackOr } from '../../../shared/back-or';
 import { carryToast, quietly, toast } from '../../../shared/toast';
 import { myChecklist, useChecklists } from '../../salary';
 import { copy } from '../copy';
@@ -35,6 +36,7 @@ type YesNo = 'yes' | 'no';
 // 해제 대기 중에는 못 바꿈.
 export function S11fManageStyle() {
   const nav = useNavigate();
+  const goBack = useBackOr('/settings/me');
   const qc = useQueryClient();
   const d = useSettingsData();
   const open = useQuery({ queryKey: qk.modeRequests, queryFn: fetchOpenModeRequest });
@@ -232,7 +234,7 @@ export function S11fManageStyle() {
         steps={{ total: 3, now: 0 }}
         title={copy.livingQ}
         help={locked ? copy.unlinkPendingLocked : copy.livingHelp}
-        onBack={() => nav('/settings/me')}
+        onBack={goBack}
         primary={{ label: copy.next, disabled: locked }}
         onSubmit={() => !locked && setStep('saving')}
       >

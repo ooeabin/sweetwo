@@ -124,7 +124,9 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
       }}
       onReadAll={() => void markRead(qc)}
       onSettings={() => {
-        onClose();
+        // 알림 화면(page)은 닫지(뒤로 가지) 않고 그대로 두고 앞으로: 닫으면 뒤로 가기가 설정 이동을 이겨 홈에 남았고,
+        // 알림 설정 ‹가 알림으로 돌아오게 하려면 알림 화면이 기록에 남아 있어야 함(2026-11-16)
+        if (variant !== 'page') onClose();
         nav('/settings/notifications');
       }}
       onClose={onClose}
