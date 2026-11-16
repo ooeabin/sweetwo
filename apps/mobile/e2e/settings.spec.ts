@@ -84,14 +84,13 @@ function seed(db: MemDb) {
   });
 }
 
-// 좁은 창은 홈 머리 ☰ 메뉴 서랍 ‘설정’(2026-11-09 머리 톱니 없앰), 넓은 창은 사이드바 아바타 줄
+// 좁은 창은 홈 머리 설정 톱니(2026-11-16 서랍에서 머리로), 넓은 창은 사이드바 아바타 줄
 const open = async (page: Page, narrow: boolean) => {
   if (narrow) {
     await page.goto('/');
     await expect(page.locator('.hg-together, .hg-hub .hg-card--fill').first()).toBeVisible();
-    await page.getByRole('button', { name: '메뉴', exact: true }).click();
     await page
-      .getByRole('dialog', { name: '메뉴' })
+      .locator('.hg-frame__mhead')
       .getByRole('button', { name: '설정', exact: true })
       .click();
   } else {

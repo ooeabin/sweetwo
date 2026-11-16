@@ -135,11 +135,23 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   await expect(page.getByRole('heading', { level: 1, name: '홈' })).toBeAttached();
   await expect(page.locator('.hg-frame')).toHaveClass(/hg-frame--alt/);
-  // 오른쪽은 알림, 메뉴만. 설정 톱니·검색·두 사람 아바타 없음
-  await expect(head.getByRole('button')).toHaveCount(2);
-  await expect(head.getByRole('button', { name: '알림', exact: true })).toBeVisible();
-  await expect(head.getByRole('button', { name: '메뉴', exact: true })).toBeVisible();
-  await expect(head.getByRole('button', { name: '설정' })).toHaveCount(0);
+  // 오른쪽은 알림, 설정(톱니), 메뉴 차례(2026-11-16). 검색·두 사람 아바타 없음. 누르는 칸 44px 이상
+  await expect(head.getByRole('button')).toHaveCount(3);
+  expect(
+    await head
+      .getByRole('button')
+      .evaluateAll((els) => els.map((e) => e.getAttribute('aria-label'))),
+  ).toEqual(['알림', '설정', '메뉴']);
+  for (const b of await head.getByRole('button').all()) {
+    const box = await b.boundingBox();
+    expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  }
+  // 설정 톱니 → 설정 홈, ‹ → 홈
+  await head.getByRole('button', { name: '설정', exact: true }).click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await head.getByRole('button', { name: '홈으로' }).click();
+  await expect(page).toHaveURL(/\/$/);
   await expect(head.locator('.hg-avatar')).toHaveCount(0);
   // 하단 탭 막대와 + 버튼은 없음
   await expect(page.locator('.hg-dock, .hg-fab')).toHaveCount(0);
@@ -188,21 +200,22 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   const drawer = page.getByRole('dialog', { name: '메뉴' });
   await expect(drawer).toBeVisible();
   await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
-  // 파트너 합류 전이라 ‘초대하기’ 있음. 묶음 4개
+  // 파트너 합류 전이라 ‘초대하기’ 있음. 묶음 3개
   expect(await drawer.locator('.hg-drawer__item').allTextContents()).toEqual([
     '홈',
     '월급',
     '자산 관리',
     '캘린더',
-    '내 정보',
-    '설정',
     '우리 둘',
     '초대하기',
     '공지',
     '문의',
     '도움말',
   ]);
-  await expect(drawer.locator('.hg-drawer__group')).toHaveCount(4);
+  await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
+  // 내 정보·설정은 서랍에 없음(홈 머리 톱니 → 설정 홈 맨 위 줄, 2026-11-16)
+  await expect(drawer.getByRole('button', { name: '내 정보', exact: true })).toHaveCount(0);
+  await expect(drawer.getByRole('button', { name: '설정', exact: true })).toHaveCount(0);
   await expect(drawer.getByRole('button', { name: '홈', exact: true })).toHaveAttribute(
     'aria-current',
     'page',
@@ -228,8 +241,6 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     ['월급', /\/salary$/],
     ['자산 관리', /\/assets$/],
     ['캘린더', /\/calendar\/list$/],
-    ['내 정보', /\/settings\/me$/],
-    ['설정', /\/settings$/],
     ['우리 둘', /\/settings\/couple$/],
     ['초대하기', /\/settings\/couple\?invite=1$/],
     ['문의', /\/settings\/help\/inquiries$/],
