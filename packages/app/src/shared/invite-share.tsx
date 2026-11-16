@@ -1,4 +1,4 @@
-import { Button, CodeCells, Icon } from '@sweetwo/ui';
+import { Button, CodeCells, IconButton } from '@sweetwo/ui';
 import { track } from './analytics';
 import { toast } from './toast';
 
@@ -9,7 +9,7 @@ import { toast } from './toast';
 export const inviteCopy = {
   codeLabel: '초대 코드',
   copyLink: '링크 복사',
-  tapToCopy: '눌러서 복사', // [확인 필요] 코드 상자 아래
+  copyCode: '코드 복사', // 코드 상자 옆 복사 아이콘 버튼의 접근성 이름(2026-11-16, 예전 글 “눌러서 복사”)
   sendKakao: '카톡으로 보내기',
   copied: '복사했어요', // [확인 필요] 복사 토스트
   copyFailed: '복사하지 못했어요. 코드를 직접 적어 보내 주세요', // [확인 필요] 2026-11-11 S3-12
@@ -74,25 +74,31 @@ export function inviteActions(o: {
   };
 }
 
-/** 6자 코드 상자(O-07과 같은 모양, D9). 2026-11-11 한 글자씩 칸(CodeCells, 넣는 칸과 같은 모양). 누르면 복사 */
+/** 6자 코드 상자(O-07과 같은 모양, D9). 2026-11-11 한 글자씩 칸(CodeCells, 넣는 칸과 같은 모양). 누르면 복사.
+ * 2026-11-16: 아래 “눌러서 복사” 글 대신 상자 옆 복사 아이콘 버튼(접근성 이름 ‘코드 복사’) */
 export function InviteCodeBox({ code, onCopy }: { code: string | undefined; onCopy: () => void }) {
   return (
-    <button
-      type="button"
-      className="hg-invite-code"
-      aria-label={
-        code
-          ? `${inviteCopy.codeLabel} ${code.split('').join(' ')}, 누르면 복사`
-          : inviteCopy.making
-      }
-      onClick={() => code && onCopy()}
-    >
-      <CodeCells value={code ?? ''} />
-      <span className="hg-invite-code__tap" aria-hidden="true">
-        <Icon name="copy" size={16} />
-        {inviteCopy.tapToCopy}
-      </span>
-    </button>
+    <div className="hg-row" style={{ alignItems: 'center', gap: 'var(--space-2)' }}>
+      <button
+        type="button"
+        className="hg-invite-code"
+        aria-label={
+          code
+            ? `${inviteCopy.codeLabel} ${code.split('').join(' ')}, 누르면 복사`
+            : inviteCopy.making
+        }
+        onClick={() => code && onCopy()}
+      >
+        <CodeCells value={code ?? ''} />
+      </button>
+      <IconButton
+        icon="copy"
+        label={inviteCopy.copyCode}
+        ghost
+        disabled={!code}
+        onClick={() => code && onCopy()}
+      />
+    </div>
   );
 }
 

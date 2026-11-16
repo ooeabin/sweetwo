@@ -120,13 +120,13 @@ export const copy = {
 
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
-  noAssets: '아직 없어요', // 2026-11-11 D5 자산·부채가 없을 때(저금 타일과 같음)
+  noAssets: '+ 자산 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”): 자산·부채가 없으면 다음 할 일. 타일은 자산 관리로 감
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
   savingsTile: '저금', // 2026-11-09 사용자에게는 ‘저금’
   savingCount: (n: number) => `${n}개 모으는 중`,
-  noSavings: '아직 없어요',
+  noSavings: '+ 저금 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”). 타일은 저금 목록으로 감(빈 상태에 ‘저금 추가’)
 
   // 맨 위 띠
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요] 요청한 사람

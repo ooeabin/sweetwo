@@ -209,7 +209,6 @@ export function W11SavingAdd() {
       <QuestionLayout
         steps={steps}
         title={copy.addNameQ}
-        help={copy.addNameHelp}
         onBack={back}
         primary={{ label: copy.next, disabled: !draft.name.trim() }}
         onSubmit={() => go('b')}
