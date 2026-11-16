@@ -87,7 +87,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await axe(page);
   await radio(page, '결혼했어요');
   await heading(page, '같이 쓰는 생활비가 있어요?');
-  await expect(page.getByText('월세, 장보기, 데이트비처럼 둘이 같이 내는 돈이에요')).toBeVisible();
+  await expect(page.getByText('월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요')).toBeVisible();
   await expect(page.getByRole('radio', { name: '네' })).not.toBeChecked();
   await expect(page.getByRole('radio', { name: '아니요' })).not.toBeChecked();
   await axe(page);
@@ -303,11 +303,11 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
   await axe(page);
   await next(page);
-  await heading(page, '경조사와 큰돈 나갈 날 일주일 전에 알려 드릴까요?');
+  await heading(page, '경조사와 금융 일정 일주일 전에 알려 드릴까요?');
   await expect(page.getByText('경조사 일주일 전에도 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('돈이 들어오면 월급 ‘이번 달’에서 적어 주세요')).toBeVisible();
+  await expect(page.getByText('수입이 들어오면 월급 ‘이번 달’에서 적어 주세요')).toBeVisible();
   expect(db.me).toMatchObject({ payday: null, payday_last: false, payday_none: true });
   expect(db.space?.marriage_status).toBe('dating');
   expect(db.splits).toHaveLength(1);
@@ -457,7 +457,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   await expect(dialog).toBeVisible();
   await axe(page);
   await dialog.getByRole('button', { name: '월급 없이 시작할게요' }).click();
-  await heading(page, '경조사와 큰돈 나갈 날 일주일 전에 알려 드릴까요?');
+  await heading(page, '경조사와 금융 일정 일주일 전에 알려 드릴까요?');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급이 생기면 설정에서 넣어 주세요')).toBeVisible();
@@ -465,7 +465,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   expect(db.splits.find((s) => s.split_line.length)?.owner_user_id).toBeNull();
   // 뒤로(O-55 → O-31, O-32는 건너뜀)
   await page.goBack();
-  await heading(page, '경조사와 큰돈 나갈 날 일주일 전에 알려 드릴까요?');
+  await heading(page, '경조사와 금융 일정 일주일 전에 알려 드릴까요?');
   await back(page);
   await heading(page, '한 달 실수령액은 얼마예요?');
   await expect(amount(page)).toHaveValue('');

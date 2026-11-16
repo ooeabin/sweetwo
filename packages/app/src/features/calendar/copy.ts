@@ -22,7 +22,7 @@ export const copy = {
     payday: (name: string) => (name ? `${name} 월급날` : '월급날'),
     review: '월급날 확인 목록', // [확인 필요] 2026-11-15 ‘월급 전 확인’ 대신(W-05 없앰)
     deadline: (name: string) => `${name} 기한`,
-    goal: (name: string) => `${name} 쓸 곳`,
+    goal: (name: string) => `${name} 기한`, // 저금 기한의 달(2026-11-16: 쓸 곳 메모와 같은 ‘쓸 곳’으로 보여 ‘기한’으로)
     maturity: (name: string) => `${name} 만기`,
     note: (name: string) => name, // 쓸 곳 메모 날짜(W-14, 24 v2.2) [확인 필요]
     // 날짜 없는 사람의 자동 줄(2026-11-14 R6). 지난 날은 자동 확인 [확인 필요]
@@ -46,9 +46,9 @@ export const copy = {
     payday: '월급',
     review: '확인 목록',
     deadline: '기한',
-    goal: '쓸 곳',
+    goal: '기한', // 2026-11-16 쓸 곳 메모(note ‘쓸 곳’)와 나눔
     maturity: '만기',
-    note: '쓸 곳', // [확인 필요] 2026-11-13 칸 안 짧은 이름
+    note: '쓸 곳', // 2026-11-13 칸 안 짧은 이름(쓸 곳 메모만, 저금 기한은 ‘기한’)
     auto: '자동', // [확인 필요] 2026-11-14 R6
     band: '월급날 확인 목록',
   },
@@ -106,7 +106,7 @@ export const copy = {
   dateError: '날짜를 다시 확인해 주세요', // [확인 필요]
   pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
   recordPast: '기록으로 남기기', // [확인 필요] 지난 날짜 → Y-08
-  amountQ: '쓸 돈을 메모해 둘까요?', // [확인 필요]
+  amountQ: '쓸 금액을 메모해 둘까요?',
   skip: '건너뛰기',
   sameDay: '같은 날이 있어요. 그래도 추가할까요?', // [확인 필요]
   addOk: '추가하기',

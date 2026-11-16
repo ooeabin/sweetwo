@@ -10,8 +10,8 @@ import { canEdit, useAssetsData, useRefreshAssets } from '../data';
 
 const path = (id: string, step?: 'to' | 'date') => `/assets/${id}/matured${step ? `/${step}` : ''}`;
 
-// F-04a 만기된 돈 정리(23 F-04 아래 ‘만기일 당일’): 만기일 당일 알림·홈 할 일에서 들어옴.
-// a “만기된 돈은 어디로 옮겼어요?” 다른 통장으로 → 통장 고르기(그 통장 + 만기 금액, 이 항목은 ‘만기 완료’로 보관)
+// F-04a 만기 금액 정리(23 F-04 아래 ‘만기일 당일’): 만기일 당일 알림·홈 할 일에서 들어옴.
+// a “만기 금액은 어디로 옮겼어요?” 다른 통장으로 → 통장 고르기(그 통장 + 만기 금액, 이 항목은 ‘만기 완료’로 보관)
 //   / 다시 가입했어요 → 새 만기일(F-03f와 같은 질문). 고칠 수 있는 사람만, 만기 전이면 F-04로(옛 주소로 들어온 경우)
 const pad = (n: number) => String(n).padStart(2, '0');
 const ymdOf = (s: string) => ({

@@ -43,7 +43,7 @@ export function P05Salary() {
             : { monthly_income: 0, income_variable: false, payday: null, payday_last: false },
         ),
       income > 0 ? undefined : null,
-      // 각자 계열 ‘월급 없이 합류할게요’: 월급 계획 없음, 확인 목록 없음(저금·묶음·돈 들어왔어요는 씀)
+      // 각자 계열 ‘월급 없이 합류할게요’: 월급 계획 없음, 확인 목록 없음(저금·묶음·수입 적기는 씀)
       { noPlan: income === 0 && !joint },
     );
   return (

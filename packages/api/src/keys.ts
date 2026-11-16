@@ -80,10 +80,10 @@ export const qk = {
   homeTasks: ['home_task_state'] as const,
   /** 같이 모으기 묶음(bundle_view) */
   bundles: ['saving_bundle'] as const,
-  /** 돈 들어왔어요 기록(money_in) */
+  /** 수입 적기 기록(money_in) */
   moneyIns: ['money_in'] as const,
   moneyInPuts: ['money_in', 'puts'] as const,
-  /** 날짜 없는 사람의 기간(money_in_period). 돈 들어왔어요 키 아래 */
+  /** 날짜 없는 사람의 기간(money_in_period). 수입 적기 키 아래 */
   moneyInPeriod: (today: string) => ['money_in', 'period', today] as const,
   /** 한 저금의 돈 움직임(goal_move_public)과 내 사유 글 */
   goalMoves: (id: string) => ['goal_move', id] as const,
@@ -125,7 +125,7 @@ export const savingKeys = [
 ] as const;
 /** 묶음이 바뀌면(묶음 RPC 뒤, Realtime saving_bundle) */
 export const bundleKeys = [qk.bundles, qk.goals, qk.goalSaved] as const;
-/** 돈 들어왔어요가 바뀌면(기록·고치기·지우기·나눠 넣기 뒤, Realtime money_in) */
+/** 수입 적기가 바뀌면(기록·고치기·지우기·나눠 넣기 뒤, Realtime money_in) */
 export const moneyInKeys = [qk.moneyIns, ...savingKeys] as const;
 /** 분담이 바뀌면(propose/answer_split 뒤, Realtime shared_account): 분담, 월급 계획 쪽 */
 export const splitAccountKeys = [qk.sharedAccounts, ...splitKeys] as const;

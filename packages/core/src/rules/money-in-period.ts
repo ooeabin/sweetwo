@@ -26,16 +26,16 @@ export interface MoneyInPeriod {
   end: string | null;
   /** 오늘이 기간 몇째 날(1~30). 기간 밖이면 null */
   day: number | null;
-  /** 그 기간 [S, min(E, 오늘)]에 들어온 돈 합(종류 상관없음). 기간 없으면 0 */
+  /** 그 기간 [S, min(E, 오늘)]에 수입 합(종류 상관없음). 기간 없으면 0 */
   received: Won;
-  /** 필요한 돈(월급 계획 모든 줄 합). 기간이 없으면 null */
+  /** 월급 계획 합(월급 계획 모든 줄 합). 기간이 없으면 null */
   needed: Won | null;
   /** 빈 날 일수 = 오늘 − 마지막 돈 들어온 날(gap일 때만) */
   gapDays: number | null;
 }
 
 /**
- * 필요한 돈(06 2-2): 월급 계획 모든 줄 합(저금 + 고정지출 + 생활비 + 용돈 + 직접 추가 + 같이 쓰는 통장 + 보내기,
+ * 월급 계획 합(06 2-2): 월급 계획 모든 줄 합(저금 + 고정지출 + 생활비 + 용돈 + 직접 추가 + 같이 쓰는 통장 + 보내기,
  * ‘체크리스트에 넣기’와 상관없음). 여유 자금은 줄이 아니라 빠짐.
  * (설계는 ‘기간 시작 때’ 월급 계획이지만 계획 기록이 없어 서버·core 모두 지금 계획으로 셈)
  */
@@ -100,19 +100,19 @@ export function moneyInPeriod(
   };
 }
 
-/** 막대 채움 %(06 2-2): 들어온 돈 ÷ 필요한 돈 × 100 내림, 0~100. 필요한 돈이 0이거나 없으면 null */
+/** 막대 채움 %(06 2-2): 수입 ÷ 월급 계획 합 × 100 내림, 0~100. 월급 계획 합이 0이거나 없으면 null */
 export function periodFillPct(received: Won, needed: Won | null): number | null {
   if (needed === null || needed <= 0) return null;
   return Math.min(Math.max(Math.floor((Math.max(received, 0) * 100) / needed), 0), 100);
 }
 
-/** 보여 줄 모양(H-13): bar인데 필요한 돈이 0이면 막대 없이 early 문장(06 2-2) */
+/** 보여 줄 모양(H-13): bar인데 월급 계획 합이 0이면 막대 없이 early 문장(06 2-2) */
 export function periodDisplay(p: MoneyInPeriod): MoneyInPeriodStatus {
   if (p.status === 'bar' && periodFillPct(p.received, p.needed) === null) return 'early';
   return p.status;
 }
 
-/** 다 찼나(보조 “더 들어온 돈은 저금에 넣을 수 있어요”): bar이고 들어온 돈 ≥ 필요한 돈(> 0) */
+/** 다 찼나(보조 “더 들어온 수입은 저금에 넣을 수 있어요”): bar이고 수입 ≥ 월급 계획 합(> 0) */
 export const periodFull = (p: MoneyInPeriod) =>
   p.status === 'bar' && p.needed !== null && p.needed > 0 && p.received >= p.needed;
 

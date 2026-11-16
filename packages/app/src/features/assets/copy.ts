@@ -30,7 +30,7 @@ export const copy = {
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02
-  noDebt: '갚을 돈이 없어요',
+  noDebt: '부채가 없어요',
   addDebt: '+ 부채 추가',
   // 2026-11-09 F-02 목록 끝 추가 줄(+ 아이콘이 글자 앞 ‘+’를 대신) [확인 필요]
   addAssetRow: '자산 추가',
@@ -83,8 +83,8 @@ export const copy = {
   repayment: '매달 얼마씩 갚아요?',
   rate: '금리는 몇 %예요?',
 
-  // F-04a 만기된 돈 정리
-  maturedTitle: '만기된 돈은 어디로 옮겼어요?',
+  // F-04a 만기 금액 정리
+  maturedTitle: '만기 금액은 어디로 옮겼어요?',
   maturedPast: '만기일이 지났어요', // [확인 필요] 2026-11-11 F-04 상세 띠(정리 전)
   maturedSettle: '정리하기', // [확인 필요]
   maturedMoved: '다른 통장으로', // [확인 필요]
@@ -102,7 +102,7 @@ export const copy = {
   soldPart: '일부만 팔았어요',
   soldPartSub: '남은 평가금액도 물어볼게요', // [확인 필요]
   soldRemain: '남은 평가금액은 얼마예요?',
-  soldTo_q: '받은 돈은 어느 통장에 들어왔어요?', // [확인 필요]
+  soldTo_q: '받은 금액은 어느 통장에 들어왔어요?',
   soldDone: '팔았어요', // [확인 필요] 결과 제목
   toList: '목록으로 가기', // [확인 필요] F-04d 주 버튼(2026-11-03)
   soldTo: (name: string, amount: string) => `${name} +${amount}`,
@@ -179,7 +179,7 @@ export const copy = {
   rankAskBirthSub: '또래와 비교해 드려요', // [확인 필요]
   // F-01 v2.2(2026-11-13): 평가금액 기준 + 전환
   principalView: '원금으로 보기', // [확인 필요]
-  principalViewHelp: '원금은 처음 넣은 돈이에요. 투자와 부동산도 넣은 돈으로 셈해요',
+  principalViewHelp: '원금은 처음 넣은 금액이에요. 투자와 부동산도 넣은 금액으로 셈해요',
   // F-03q 빠르게 적기(2026-11-13)
   quickEntry: '큰 항목만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
   quickTitle: '큰 항목만 빠르게 적어 볼까요?', // [확인 필요]
@@ -233,5 +233,5 @@ export const copy = {
   consentFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   // F-01 빈 상태 항목별 등록(2026-11-04)
   emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
-  emptyDebtsQ: '갚을 돈도 있나요?', // [확인 필요]
+  emptyDebtsQ: '부채도 있나요?',
 };

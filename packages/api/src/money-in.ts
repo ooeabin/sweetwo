@@ -8,7 +8,7 @@ import {
 import { AuthCallError } from './auth';
 import { supabase } from './client';
 
-// 돈 들어왔어요(W-20·W-20a, H-13, 07 6장, 서버 20261203090000_v22_saving_together 계약 5·6).
+// 수입 적기(W-20·W-20a, H-13, 07 6장, 서버 20261203090000_v22_saving_together 계약 5·6).
 
 const fail = (e: { message?: string } | null) => {
   if (e) throw new AuthCallError(e.message?.includes('fetch') ? 'network' : 'unknown');
@@ -116,7 +116,7 @@ export async function fetchMoneyInPeriod(today?: string): Promise<MoneyInPeriod>
   return MoneyInPeriodSchema.parse(data);
 }
 
-/** 돈 들어왔어요 신호(Realtime money_in) */
+/** 수입 적기 신호(Realtime money_in) */
 export function subscribeMoneyIns(spaceId: string, on: () => void) {
   const ch = supabase()
     .channel(`money_in:${spaceId}`)

@@ -1429,7 +1429,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       if (fn === 'net_worth_history') return json(route, db.netWorth);
       if (fn === 'partner_activity') return json(route, db.activity);
       // G-05 달성: 축하는 사람마다 한 번
-      // F-04a 만기된 돈 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
+      // F-04a 만기 금액 정리: 다른 통장으로(통장 + 만기 금액, 이 항목은 만기 완료) / 다시 가입(새 만기일)
       if (fn === 'sell_asset') {
         // F-04b~d: 받은 금액을 통장에, 일부만이면 남은 평가금액, 다 팔면 매도 완료. 실현 손익 = 받은 금액 − 원금
         const b = body();

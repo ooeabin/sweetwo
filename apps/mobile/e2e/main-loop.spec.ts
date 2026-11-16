@@ -4,7 +4,7 @@ import { chanwoo, mockOnboarding, mockSaving, newSavingDb, seed, YEBIN } from '.
 
 // v2.2 큰 흐름 한 번(ADR 0009, 2026-11-13 PR 14): 찬우·예빈 두 계정이 같은 흉내 표를 나눠 씀.
 // 첫 저금이 있는 찬우(온보딩 끝) → 초대 코드 → 예빈 합류(‘저금만 같이 해요’, 합류 화면 자체는 join-replan.spec) →
-// 찬우 월급날 확인 한 번 → 같이 모으기 묶음(찬우 제안, 예빈 들어가기) → 예빈 돈 들어왔어요 → 연결 해제(각자 엔진)
+// 찬우 월급날 확인 한 번 → 같이 모으기 묶음(찬우 제안, 예빈 들어가기) → 예빈 수입 적기 → 연결 해제(각자 엔진)
 // → 찬우에게 내 월급 계획·내 저금이 남음.
 // 관리 형태 2-5 여섯 줄: 시작 쪽 onboarding.spec(각자 따로, 생활비만, 저금만, 생활비와 저금, 한 사람, 합쳐서),
 // 합류 쪽 join-replan.spec(저금만, 생활비와 저금 + 보내요, 한 사람, 합쳐서), 설정 쪽 settings.spec·settings-v22.spec.
@@ -25,7 +25,7 @@ const YEBIN_PROFILE = {
   payday_last: false,
 };
 
-test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 확인 → 같이 모으기 → 받은 돈 적기 → 해제 뒤 내 것은 남음', async ({
+test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 확인 → 같이 모으기 → 수입 적기 → 해제 뒤 내 것은 남음', async ({
   browser,
 }) => {
   test.setTimeout(240_000);
@@ -136,9 +136,9 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await expect(yCard).toContainText('595만 원');
   await axe(y);
 
-  // 5. 예빈 받은 돈 적기(월급 탭 W-02) → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
+  // 5. 예빈 수입 적기(월급 탭 W-02) → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
   await y.goto('/salary');
-  await y.getByRole('button', { name: '받은 돈 적기' }).click();
+  await y.getByRole('button', { name: '수입 적기' }).click();
   await y.getByLabel('얼마를 받았어요?').fill('1000000');
   await y.getByRole('button', { name: '가족이 보태 줬어요' }).click();
   await y.getByRole('button', { name: '다음' }).click();

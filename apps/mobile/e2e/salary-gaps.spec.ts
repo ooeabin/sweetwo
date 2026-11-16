@@ -195,7 +195,7 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   await expect(done.locator('.hg-transfer__state .hg-ico--check')).toHaveCount(1);
   await axe(page);
   // 첫 저금 빈 줄은 파트너 탭에 없음
-  await expect(page.getByRole('button', { name: /저금 추가 \(아직 안 정한 돈/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /저금 추가 \(아직 안 정한 월급/ })).toHaveCount(0);
   // 고치는 것 없음(2026-11-09 round 3): ‘월급 계획 고치기’, 2026-11-13 “모두 계획대로 됐어요”
   await expect(page.getByRole('button', { name: '월급 계획 고치기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);

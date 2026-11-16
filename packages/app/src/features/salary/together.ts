@@ -61,12 +61,12 @@ export const refreshSaving = (qc: QueryClient) =>
 export const refreshBundles = (qc: QueryClient) =>
   Promise.all([...bundleKeys, qk.splits].map((k) => qc.invalidateQueries({ queryKey: [...k] })));
 
-/** 돈 들어왔어요 뒤 */
+/** 수입 적기 뒤 */
 export const refreshMoneyIn = (qc: QueryClient) =>
   Promise.all(moneyInKeys.map((k) => qc.invalidateQueries({ queryKey: [...k] })));
 
 /**
- * 상대가 묶음·쓸 곳 메모를 바꾸면(Realtime saving_bundle, saving_note) 바로 다시 읽음. 돈 들어왔어요(money_in)도.
+ * 상대가 묶음·쓸 곳 메모를 바꾸면(Realtime saving_bundle, saving_note) 바로 다시 읽음. 수입 적기(money_in)도.
  * W-10, W-13, W-14, W-15a에서 한 번
  */
 export function useTogetherRealtime(spaceId: string | null | undefined) {

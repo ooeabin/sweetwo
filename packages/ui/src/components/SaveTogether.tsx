@@ -4,7 +4,7 @@ import { cx } from './cx';
 import { Icon } from './Icon';
 
 // 같이 모으기 상자(docs/design/components/SaveTogether.md, 2026-11-13 ADR 0009). 홈 주인공 H-10.
-// SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 돈 들어왔어요’),
+// SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 수입 적기’),
 // 칸 하나 = SaveTogetherSlide(사람 + 이름 → 큰 숫자 → 막대 + 보조 줄들, 칸 전체가 버튼, 화면 읽기는 문장 하나).
 // 빈 상태(미합류·저금 0) = SaveTogetherEmpty(질문 + 이름 칩 + ‘+ 저금 추가’).
 
@@ -86,7 +86,7 @@ export function SaveTogether({
   slides: SaveTogetherSlideProps[];
   /** 마지막 칸 “저금 모두 보기 ›”(저금 2개 이상일 때) */
   more?: { label: string; onClick: () => void };
-  /** 맨 아래 회색 글자 버튼 “+ 돈 들어왔어요” */
+  /** 맨 아래 회색 글자 버튼 “+ 수입 적기” */
   moneyIn?: { label: string; onClick: () => void };
   /** 묶음 이름(화면 읽기) */
   label: string;

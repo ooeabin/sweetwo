@@ -323,8 +323,8 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).toBeChecked();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '쓸 돈을 메모해 둘까요?' })).toBeVisible();
-  await page.getByLabel('쓸 돈을 메모해 둘까요?').fill('300000');
+  await expect(page.getByRole('heading', { name: '쓸 금액을 메모해 둘까요?' })).toBeVisible();
+  await page.getByLabel('쓸 금액을 메모해 둘까요?').fill('300000');
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar\/list$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -341,7 +341,7 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await addEntry(page, '+ 추가').click();
   await page.getByRole('button', { name: '추석', exact: true }).click();
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '쓸 돈을 메모해 둘까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '쓸 금액을 메모해 둘까요?' })).toBeVisible();
   await page.getByRole('button', { name: '건너뛰기' }).click();
   await expect(page).toHaveURL(/\/calendar\/list$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -676,7 +676,7 @@ test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날
 
   // 금액 메모 → 상세로 돌아와 Toast + 되돌리기
   await page.getByRole('button', { name: /금액 메모/ }).click();
-  await page.getByLabel('쓸 돈을 메모해 둘까요?').fill('500000');
+  await page.getByLabel('쓸 금액을 메모해 둘까요?').fill('500000');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('고쳤어요')).toBeVisible();
   await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.budget).toBe(500_000);
