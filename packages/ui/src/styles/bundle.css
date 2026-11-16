@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a96ff515). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (0785b722). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2377,8 +2377,13 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-drawer__group { margin: 0; padding: var(--space-2) 0; list-style: none; }
 .hg-drawer__group + .hg-drawer__group { border-top: 1px solid var(--hairline-soft); }
 .hg-drawer__item { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 var(--space-6); box-sizing: border-box; font: 500 17px/24px var(--font-sans); color: var(--ink-2); }
-.hg-drawer__item.is-current { font-weight: 700; color: var(--ink); }
 .hg-drawer__item:focus-visible { outline-offset: -2px; }
+/* 2026-11-16 2단 서랍: 메뉴 머리 줄(굵게 ink) + 늘 펼친 들여쓴 하위 줄(44px). 지금 화면 줄은 옅은 회색 판도 */
+.hg-drawer__branch + .hg-drawer__branch { margin-top: var(--space-2); }
+.hg-drawer__item--head { font: var(--text-title-3); color: var(--ink); }
+.hg-drawer__subs { margin: 0; padding: 0; list-style: none; }
+.hg-drawer__sub { min-height: 44px; padding-left: calc(var(--space-6) + var(--space-4)); font: var(--text-body); font-weight: 500; color: var(--ink-2); }
+.hg-drawer__item.is-current { background: var(--surface-alt); font-weight: 700; color: var(--ink); }
 .hg-drawer__foot { margin: 0; padding: var(--space-4) var(--space-6) 0; font: var(--text-caption); color: var(--stone); }
 @media (prefers-reduced-motion: no-preference) {
   .hg-drawer-scrim { animation: hg-scrim-in var(--dur-slow) var(--ease-out); }
