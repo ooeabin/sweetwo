@@ -113,8 +113,9 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   db.me.notify_email = 'chanwoo@example.com';
   await open(page, info.project.name === 'narrow');
 
-  const me = page.getByRole('button', { name: /찬우와 예빈/ });
-  await expect(me).toContainText('카카오로 로그인했어요');
+  // 첫 줄은 ‘내 정보’ + 내 이름(2026-11-16, 두 사람 이름 카드가 아님)
+  const me = page.getByRole('button', { name: /^내 정보/ });
+  await expect(me).toContainText('찬우');
   await expect(page.locator('main').getByRole('button', { name: /^알림/ })).toContainText(
     '푸시 알림 켜짐',
   );
@@ -256,7 +257,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   seed(db);
   const v = await mockV22Settings(page, db, NOW);
   await open(page, info.project.name === 'narrow');
-  await page.getByRole('button', { name: /찬우와 예빈/ }).click();
+  await page.getByRole('button', { name: /^내 정보/ }).click();
 
   // 내 월급
   await page.getByRole('button', { name: /내 월급/ }).click();

@@ -1,11 +1,9 @@
-import { withAnd } from '@sweetwo/core';
-
 // 설정 문구(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 export const copy = {
   title: '설정',
   back: '뒤로',
-  couple: (a: string, b: string) => (b ? `${withAnd(a)} ${b}` : a),
+  myInfo: '내 정보', // 설정 홈 첫 줄 이름(예전 두 사람 이름 “찬우와 예빈”, 목적지와 어긋남, 2026-11-16)
   providers: { kakao: '카카오', google: '구글', apple: 'Apple' } as Record<string, string>,
   loggedIn: (p: string) => `${p}로 로그인했어요`,
   state: {
@@ -621,6 +619,7 @@ export const copy = {
     done_only: '했어요만 보여 주기',
   } as Record<string, string>,
   planShareJoint: '월급을 합쳐서 쓰고 있어 모두 보여요',
+  planShareJointRow: '모두', // 설정 홈 줄 값(이름표와 붙던 긴 글을 줄임, 2026-11-16)
   bundlesTitle: '같이 모으기',
   bundleShowEach: '각자 모은 금액 보여 주기',
   assetsTitle: '자산·부채',
@@ -639,7 +638,7 @@ export const copy = {
   alwaysShared: '경조사, 공동 명의, 합쳐서 쓰는 월급 계획과 저금은 늘 같이 봐요',
 
   // S-13p 상대에게 보이는 모습 [확인 필요]
-  previewTitle: (name: string) => `${name}님에게 보이는 모습`,
+  previewTitle: (name: string) => `${name ? `${name}님` : '파트너'}에게 보이는 모습`, // 합류 전은 ‘파트너’(2026-11-16)
   previewSaving: '같이 모으기',
   previewMySaving: '저금', // [확인 필요] 각자 계열 내 개인 저금(상대 W-10 파트너 저금과 같게, 2026-11-13)
   previewBundleMine: (me: string, amount: string) => `${me}님 몫 ${amount}`, // [확인 필요] 묶음 각자 금액

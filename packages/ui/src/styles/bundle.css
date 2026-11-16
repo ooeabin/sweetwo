@@ -2301,7 +2301,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 button.hg-receipt__amount { cursor: pointer; }
 .hg-receipt__sub { margin: 0; font: var(--text-caption); color: var(--stone); }
 .hg-receipt__headtitle { margin: 0; font: var(--text-body-strong); color: var(--ink); }  /* 달 결과 카드 제목(“11월 월급”) */
-.hg-receipt__link { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; margin-top: var(--space-2); padding: 0 var(--space-1) 0 var(--space-2); border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 500 14px/20px var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }  /* W-01 ‘이번 달 3/5 보냈어요 ›’(머리 이동 링크처럼 slate) */
+.hg-receipt__link { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; margin-top: var(--space-2); padding: 0 var(--space-1) 0 var(--space-2); border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); font: 500 14px/20px var(--font-sans); cursor: pointer; }  /* W-01 ‘이번 달 3/5 보냈어요 ›’(머리 이동 링크처럼 slate) */
 .hg-receipt__bar { display: flex; gap: 3px; height: 12px; margin-top: var(--space-6); }  /* 막대 12px, 칸 사이 3px(W-01 확정 모양) */
 .hg-receipt__bar:empty { border-radius: var(--radius-full); background: var(--hairline-soft); }
 .hg-receipt__seg { min-width: 12px; border-radius: var(--radius-full); }
@@ -2445,7 +2445,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__bar { height: 10px; margin-top: var(--space-1); border-radius: var(--radius-full); background: var(--bar-track); overflow: hidden; }
 .hg-together__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 저금 진행이라 오렌지(CLAUDE.md 색 규칙) */
 .hg-together--paused .hg-together__bar > i { background: var(--slate); }  /* 해제 대기: 멈춤 */
-.hg-together__line { margin: 0; font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.hg-together__line { margin: 0; font: 500 13px/18px var(--font-sans); color: var(--slate); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 .hg-together__dots { display: flex; justify-content: center; gap: 6px; margin-top: var(--space-2); }
 .hg-together__dots > i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--hairline); }
 .hg-together__dots > i.is-on { background: var(--ink-2); }
@@ -2555,3 +2555,9 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-monthus .hg-listrow { padding-top: var(--space-2); padding-bottom: var(--space-2); min-height: 48px; }
 .hg-monthus .hg-listrow__label { white-space: nowrap; }
 .hg-monthus .hg-listrow__value { font-size: inherit; text-align: right; }
+
+/* 2026-11-16 메뉴·화면 점검 PR-1 ─────────────────────────────────────────────
+   작은 누르는 칸(구간 알약, 작은 글자 알약 버튼 ‘모두 읽음’ ‘사진 바꾸기’ ‘켜기’, ‘달력 ›’, 36px 이하 아이콘 버튼(달력 이전·다음 달, 지우기),
+   눌러서 고치는 큰 금액 ‘내 월급 고치기’)은 보이는 크기는 그대로 두고 보이지 않는 44px 칸을 덧댐. 어드민은 제 규칙 그대로 */
+:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *) { position: relative; }
+:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *)::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }

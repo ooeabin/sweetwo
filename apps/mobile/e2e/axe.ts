@@ -17,6 +17,10 @@ const ORANGE_TEXT = [
 ].join(', ');
 
 export async function axe(page: Page) {
+  // 주 버튼이 켜지며 바탕색이 바뀌는 중에 재면 중간 색으로 대비가 모자라 보임(느린 CI에서만): 전환이 끝난 뒤에 잼
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))),
+  );
   const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   const violations = await Promise.all(
     r.violations.map(async (v) => {

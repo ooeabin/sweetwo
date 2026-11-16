@@ -3,6 +3,7 @@ import { Accordion, Button, ListRow, PageHeader, Search, SectionHeader } from '@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import faqMd from '../../../content/faq.md?raw';
+import { useBackOr } from '../../../shared/back-or';
 import { MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { openSite } from './s-19-about';
@@ -16,6 +17,7 @@ const HELP_ABUSE_ENABLED = false as boolean;
 
 export function S20Help() {
   const nav = useNavigate();
+  const goBack = useBackOr('/settings');
   const groups = useMemo(() => parseFaq(faqMd), []);
   const [q, setQ] = useState('');
   const found = q.trim() ? searchFaq(groups, q) : null;
@@ -23,12 +25,7 @@ export function S20Help() {
     xs.map((i) => ({ id: String(i.n), q: i.q, a: i.a }));
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-      <PageHeader
-        title={copy.help}
-        backLabel={copy.back}
-        backTo={copy.title}
-        onBack={() => nav('/settings')}
-      />
+      <PageHeader title={copy.help} backLabel={copy.back} backTo={copy.title} onBack={goBack} />
       <Search label={copy.faqSearch} placeholder={copy.faqSearch} value={q} onChange={setQ} />
       {found ? (
         found.length ? (

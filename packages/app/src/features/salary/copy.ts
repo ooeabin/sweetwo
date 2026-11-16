@@ -165,7 +165,6 @@ export const copy = {
   skippedDone: (name: string) => `${name}, 이번 달은 건너뛰었어요`, // [확인 필요] 2026-11-13
   skipped: '이번 달은 건너뛰었어요', // [확인 필요] 2026-11-13 W-02 6번 건너뛴 줄 보조 줄
   skipThis: '이번 달은 건너뛸게요', // [확인 필요] 2026-11-13 W-02 5번 줄 시트
-  editSplit: '월급 계획 고치기',
   // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
   sentOfPlan: (sent: string, planned: string) => `계획한 ${planned} 중 ${sent} 확인했어요`, // 2026-11-16 문구 리뷰(예전 “확인한 금액 … / …”)
   monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 확인했어요`,
