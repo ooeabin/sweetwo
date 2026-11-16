@@ -199,6 +199,8 @@ export function useFirstSaving():
   | {
       show: true;
       left: number;
+      /** 아직 안 정한 돈에서 이미 빠진 용돈 합(0이면 안 알림, 2026-11-16 r6) */
+      allowance: number;
       partnerName: string | null;
       /** 같이 모으자고 권할 상대 저금(각자 계열, 묶음에 안 든 것, 이름이 보일 때만) */
       partnerGoal: { id: string; name: string } | null;
@@ -224,6 +226,9 @@ export function useFirstSaving():
     ),
     0,
   );
+  const allowance = mine.split_line
+    .filter((l) => l.kind === 'allowance')
+    .reduce((t, l) => t + l.amount, 0);
   const theirs =
     !d.joint && d.joined
       ? d.live.find((i) => i.owner === 'partner' && !i.goal.bundle_id && !!i.goal.name)
@@ -231,6 +236,7 @@ export function useFirstSaving():
   return {
     show: true,
     left,
+    allowance,
     partnerName: theirs ? d.partnerName : null,
     partnerGoal: theirs ? { id: theirs.goal.id, name: theirs.goal.name } : null,
   };

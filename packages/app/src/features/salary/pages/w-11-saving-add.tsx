@@ -123,6 +123,10 @@ export function W11SavingAdd() {
     income,
     mine.split_line.map((l) => ({ amount: l.amount })),
   );
+  // 용돈은 이미 빠진 돈(2026-11-16 r6)
+  const allowance = mine.split_line
+    .filter((l) => l.kind === 'allowance')
+    .reduce((t, l) => t + l.amount, 0);
 
   const save = async (d: Draft) => {
     if (saving) return;
@@ -244,7 +248,10 @@ export function W11SavingAdd() {
       <QuestionLayout
         steps={steps}
         title={copy.addMonthlyQ}
-        help={copy.addMonthlyHelp(money(Math.max(left, 0), masked))}
+        help={copy.addMonthlyHelp(
+          money(Math.max(left, 0), masked),
+          allowance > 0 ? money(allowance, masked) : undefined,
+        )}
         onBack={back}
         primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
         onSubmit={() => go('e')}

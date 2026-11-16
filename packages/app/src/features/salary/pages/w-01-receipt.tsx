@@ -799,6 +799,7 @@ export function W01Receipt() {
       masked={masked}
       confirmLabel={copy.addDone}
       busy={busy}
+      notify={copy.addMyShareHint}
       onClose={() => setSheet(null)}
       onConfirm={(v) => void add(sheetAdd.add, sheetAdd.chip, v, !!sheetAdd.first)}
     />

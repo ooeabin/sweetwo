@@ -50,9 +50,13 @@ test('W-20 받은 돈 적기 → W-20a 저금에 나눠 넣기: 남은 금액, �
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '저금에 얼마씩 넣을까요?' })).toBeVisible();
-  await expect(page.getByText('들어온 돈 300만 원 중 남은 300만 원')).toBeVisible();
+  await expect(
+    page.getByText('들어온 돈 300만 원 중 아직 저금에 안 넣은 돈 300만 원'),
+  ).toBeVisible();
   await page.getByLabel('내 집 마련', { exact: true }).fill('1000000');
-  await expect(page.getByText('들어온 돈 300만 원 중 남은 200만 원')).toBeVisible();
+  await expect(
+    page.getByText('들어온 돈 300만 원 중 아직 저금에 안 넣은 돈 200만 원'),
+  ).toBeVisible();
   await page.getByLabel('청약', { exact: true }).fill('5000000');
   await expect(page.getByText('들어온 돈보다 많이 넣을 수 없어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '넣기', exact: true })).toBeDisabled();
@@ -242,7 +246,7 @@ test('W-20a ‘남은 돈 전부 넣기’, W-20b 받은 돈 기록: 고치기, 
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '청약에 남은 돈 전부 넣기' }).click();
   await expect(page.getByLabel('청약', { exact: true })).toHaveValue('500,000');
-  await expect(page.getByText('들어온 돈 50만 원 중 남은 0원')).toBeVisible();
+  await expect(page.getByText('들어온 돈 50만 원 중 아직 저금에 안 넣은 돈 0원')).toBeVisible();
   await page.getByRole('button', { name: '넣기', exact: true }).click();
   await expect(page.getByText('저금 1개에 50만 원 넣었어요')).toBeVisible();
 

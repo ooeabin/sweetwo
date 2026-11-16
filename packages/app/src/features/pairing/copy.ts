@@ -1,3 +1,5 @@
+import { withAnd } from '@sweetwo/core';
+
 // 파트너 합류 문구(docs/spec/18-partner-join.md, 15 A-07). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
 /** 호칭이 있으면 “찬우님이”, 없으면 “파트너가”(2026-11-11 S3-29) */
@@ -12,7 +14,7 @@ export const copy = {
   // P-09 합류 때 모은 금액(3차 검토 D2, 2026-11-15) [확인 필요]
   savedTitle: '지금까지 모은 금액을 알려 주세요',
   savedHelp: (starter: string, name: string) =>
-    `${starter ? `${starter}님` : '파트너'}의 ‘${name}’과 묶어서 둘이 모은 금액을 바로 보여 드려요`,
+    `${starter ? `${starter}님` : '파트너'}의 ‘${name}’${withAnd(name).slice(name.length)} 묶어서 둘이 모은 금액을 바로 보여 드려요`,
   savedLabel: '지금까지 모은 금액',
   // 2026-11-16 r5 A2: 새 저금 매달 금액은 0원이라 ‘월급날 확인하면 더해져요’가 사실이 아니었음. 월급 계획이 있으면 거기서 정함
   savedNote: (hasPlan: boolean) =>

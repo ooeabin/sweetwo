@@ -1,4 +1,4 @@
-import { withAnd } from '@sweetwo/core';
+import { subject, withAnd } from '@sweetwo/core';
 
 // 설정 문구(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 기획서 “ ” 안 문장을 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
@@ -584,7 +584,7 @@ export const copy = {
   no: '아니요',
   notYet: '아직 없어요',
   managerMe: '제가 주로 해요',
-  managerPartner: (name: string) => (name ? `${name}가 주로 해요` : '파트너가 주로 해요'),
+  managerPartner: (name: string) => (name ? `${subject(name)} 주로 해요` : '파트너가 주로 해요'),
   managerTogether: '둘이 같이 해요',
   managerEach: '각자 자기 월급으로 해요',
   styleWaiting: (name: string) => `${name}님 답을 기다려요`,
