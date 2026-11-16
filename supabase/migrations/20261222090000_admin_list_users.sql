@@ -18,8 +18,9 @@ declare
   a public.admin_user := public.admin_require(array['super', 'ops', 'cs']::public.admin_role[]);
   lim integer := least(greatest(coalesce(p_limit, 50), 1), 100);
 begin
-  perform public.admin_log(a, 'list', 'AD-02', null, null, jsonb_build_object('limit', lim,
-    'paged', p_before_at is not null));
+  -- admin_audit.action은 기존 값만 허용(search 등). 목록 열람은 search + q_kind=list로 남김
+  perform public.admin_log(a, 'search', 'AD-02', null, null, jsonb_build_object('q_kind', 'list',
+    'limit', lim, 'paged', p_before_at is not null));
   return query
     select u.id, public.mask_email(au.email::text), u.created_at, s.couple_state::text, '무료'::text
     from public.app_user u
