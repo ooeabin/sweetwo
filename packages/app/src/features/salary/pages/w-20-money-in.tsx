@@ -39,8 +39,8 @@ const backOf = (p: URLSearchParams) => {
 };
 
 /**
- * W-20 돈 들어왔어요(20 v2.2, 모든 사람, N8·F1): “얼마를 받았어요?” 금액 + 받은 날(오늘, 미래 불가) + 칩(미리 고른 값 없음,
- * 날짜 없는 사람은 ‘일한 돈’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 돈 들어왔어요”에서 열림.
+ * W-20 수입 적기(20 v2.2, 모든 사람, N8·F1): “얼마를 받았어요?” 금액 + 받은 날(오늘, 미래 불가) + 칩(미리 고른 값 없음,
+ * 날짜 없는 사람은 ‘프리랜스·부업’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 수입 적기”에서 열림.
  * `?edit={기록}`(W-20b ‘고치기’, 2026-11-14 M6)이면 그 기록 값으로 채우고 ‘저장’ = money_in_set → 들어온 화면으로
  */
 export function W20MoneyIn() {
@@ -172,7 +172,7 @@ export function W20MoneyIn() {
 
 /**
  * W-20a 저금에 나눠 넣기(20 v2.2): 내가 넣을 수 있는 저금(내 저금, 묶음의 내 줄, 같이 계열은 공동 저금) + 금액 칸(빈 칸),
- * 맨 위 “받은 돈 300만 원 중 아직 안 넣은 100만 원”. ‘넣기’ = distribute_money_in, 합이 들어온 돈보다 크면 막음. 0원이면 기록만
+ * 맨 위 “수입 300만 원 중 아직 안 넣은 100만 원”. ‘넣기’ = distribute_money_in, 합이 수입보다 크면 막음. 0원이면 기록만
  */
 export function W20aDistribute() {
   const { id = '' } = useParams();
@@ -194,7 +194,7 @@ export function W20aDistribute() {
   if (!d.ready && d.failed)
     return <SavingQuestionError onBack={() => nav(back)} onRetry={d.retry} />;
   const rec = ins.data?.find((r) => r.id === id);
-  // 방금 적은 기록이 예전 목록(W-02 ‘받은 돈’ 묶음이 받아 둔 것)에 아직 없으면 다시 받는 동안 기다림
+  // 방금 적은 기록이 예전 목록(W-02 ‘수입’ 묶음이 받아 둔 것)에 아직 없으면 다시 받는 동안 기다림
   if (!d.ready || ins.isLoading || (!rec && ins.isFetching))
     return <QuestionSkeleton title={copy.moneyInDistributeQ} />;
   if (!rec) return <Navigate to={back} replace />;

@@ -70,7 +70,7 @@ export function W13SavingList() {
               ...(canReconcile
                 ? [{ label: copy.menuReconcile, onSelect: () => nav(togetherPaths.reconcile) }]
                 : []),
-              // 들어온 돈 기록(W-20b, 2026-11-14 M6): 잘못 적은 기록 고치기·지우기
+              // 수입 기록(W-20b, 2026-11-14 M6): 잘못 적은 기록 고치기·지우기
               { label: copy.moneyInList, onSelect: () => nav(togetherPaths.moneyInList) },
             ]}
           />

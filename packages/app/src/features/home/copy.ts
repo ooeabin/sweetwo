@@ -31,7 +31,6 @@ export const copy = {
   paused: '같이 모으기를 잠시 멈췄어요',
   doneBadge: '다 모았어요',
   seeAll: '저금 모두 보기',
-  moneyIn: '돈 들어왔어요', // AddRow(+ 아이콘이 ‘+’)
   emptyAsk: '무엇을 같이 모을까요?',
   /** 빈 상태에 상대 저금 권유가 있을 때 칩(2026-11-14 R4) */
   inviteJoin: '같이 모을게요', // [확인 필요]
@@ -65,10 +64,9 @@ export const copy = {
     `${formatMonthDay(start)} 월급에서 확인할 게 ${n}개 남았어요`,
   lateLeft: (n: number) => `지난달 확인할 게 ${n}개 남았어요`,
   noSalary: '월급을 넣으면 월급 계획을 만들어 드려요',
-  nonManager: '이번 달 보낼 돈과 용돈은 자동으로 정해져요',
+  nonManager: '이번 달 보낼 금액과 용돈은 자동으로 정해져요',
   goView: '보기',
   goCheck: '확인하기',
-  goMoneyIn: '돈 들어왔어요',
   goSalary: '월급 알려 주기',
 
   // H-06 할 일 띠 v2.2 [모두 확인 필요]
@@ -106,8 +104,8 @@ export const copy = {
   everyMonth: (day: string) => `매달 ${day}`,
   payday: (d: number) => `${d}일`,
   paydayLast: '말일',
-  noPaydayTile: '돈이 들어올 때', // [확인 필요] 2026-11-13 날짜 없음
-  leftover: (amount: string) => `아직 안 정한 돈 ${amount}`, // [확인 필요] 2026-11-13 H-07
+  noPaydayTile: '수입이 들어올 때', // 2026-11-13 날짜 없음
+  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`, // 2026-11-13 H-07
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
   noCare: '다가오는 일정이 없어요',

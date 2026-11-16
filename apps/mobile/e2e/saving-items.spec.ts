@@ -72,10 +72,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 처음 값은 빈 칸(아직 안 정한 돈 전부를 채우지 않음, 2026-11-09), 보조는 지금 아직 안 정한 돈
+  // 처음 값은 빈 칸(아직 안 정한 월급 전부를 채우지 않음, 2026-11-09), 보조는 지금 아직 안 정한 월급
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await expect(page.getByText(/^아직 안 정한 돈/)).toBeVisible();
+  await expect(page.getByText(/^아직 안 정한 월급/)).toBeVisible();
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
@@ -112,7 +112,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target).toContainText('지금 속도면 2027년 7월에 다 모아요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
-  // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(아직 안 정한 돈을 같이 봄)
+  // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(아직 안 정한 월급을 같이 봄)
   await expect(page).toHaveURL(/\/salary\?view=plan$/);
   await expect(page.getByRole('dialog', { name: '제주 여행 금액' })).toBeVisible();
   await page.goBack();

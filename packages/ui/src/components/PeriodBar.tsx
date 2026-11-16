@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 // 날짜 없는 사람의 기간 막대(docs/design/components/PeriodBar.md, 2026-11-13 ADR 0009 G8). HubLine 문장 자리 안.
-// 위 “들어온 돈 340만 원 / 필요한 돈 380만 원” → 8px 막대(채움 ink-2, 중립, 오렌지 아님) → 회색 “10월 3일부터”.
+// 위 “수입 340만 원 / 월급 계획 380만 원” → 8px 막대(채움 ink-2, 중립, 오렌지 아님) → 회색 “10월 3일부터”.
 // 판정 문장 없음. 다 차면 보조 한 줄(full). 막대는 장식(aria-hidden), 화면 읽기는 부르는 쪽 label
 export function PeriodBar({
   inLabel,
@@ -15,7 +15,7 @@ export function PeriodBar({
   /** 채움 0~100 */
   percent: number;
   since: ReactNode;
-  /** 다 참: 보조 줄(“더 들어온 돈은 저금에 넣을 수 있어요”) */
+  /** 다 참: 보조 줄(“더 들어온 수입은 저금에 넣을 수 있어요”) */
   full?: ReactNode;
 }) {
   return (

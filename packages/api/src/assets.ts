@@ -106,7 +106,7 @@ export async function updateAsset(id: string, patch: TablesUpdate<'asset'>) {
 export const trashAsset = (id: string) => updateAsset(id, { deleted_at: new Date().toISOString() });
 export const restoreAsset = (id: string) => updateAsset(id, { deleted_at: null });
 
-/** F-04a 만기된 돈 정리: 다른 통장으로(그 통장 + 만기 금액, 이 항목은 만기 완료) 또는 다시 가입(새 만기일) */
+/** F-04a 만기 금액 정리: 다른 통장으로(그 통장 + 만기 금액, 이 항목은 만기 완료) 또는 다시 가입(새 만기일) */
 /** F-04b~d 팔았어요: 받은 금액을 고른 통장에(일부만이면 남은 평가금액). 판 수익(실현 손익, 원금 없으면 null) */
 export async function sellAsset(
   id: string,

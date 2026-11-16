@@ -73,6 +73,7 @@ export function A02Login() {
         )
       }
       title={st.inviter ? copy.joinTitle(st.inviter) : copy.catchphrase}
+      help={st.inviter ? undefined : copy.heroSub}
       onBack={st.fromStart ? () => nav(-1) : undefined}
       backLabel={st.inviter ? undefined : copy.toStart}
       actions={

@@ -2419,7 +2419,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hub :is(.hg-hubtile, .hg-hubline):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (hover: hover) { :is(.hg-hubtile, .hg-hubline):hover, .hg-together:has(:is(.hg-together__slide, .hg-together__more):hover) { box-shadow: var(--shadow-2); } }
 /* 2026-11-13 v2.2(ADR 0009, HomeHub v2.2): H-02 저금 상자(hg-hubsave)·H-03 큰 상자(hg-hubhero)는 없앰. 아래 H-10 같이 모으기, H-11 이번 달 한 줄, 띠 글자 버튼 둘 */
-/* 같이 모으기(SaveTogether, H-10): 흰 상자 두 칸(넓은 창 두 줄 높이). 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸(최대 3 + ‘저금 모두 보기’) + 점 → ‘+ 돈 들어왔어요’ */
+/* 같이 모으기(SaveTogether, H-10): 흰 상자 두 칸(넓은 창 두 줄 높이). 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸(최대 3 + ‘저금 모두 보기’) + 점 (‘+ 수입 적기’는 2026-11-15 월급 W-02로 옮김) */
 .hg-together { display: flex; flex-direction: column; min-width: 0; padding: var(--space-5) var(--space-5) var(--space-2); box-sizing: border-box; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
 .hg-hub > .hg-together { grid-column: span 2; }
 @media (min-width: 1100px) { .hg-hub > .hg-together { grid-row: span 2; } }
@@ -2456,7 +2456,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-hubline__main { font: 600 15px/22px var(--font-sans); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 .hg-hubline__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
 .hg-hubline__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 600 13px/18px var(--font-sans); color: var(--ink-2); white-space: nowrap; }
-/* 기간 막대(PeriodBar, H-13 날짜 없는 사람 16일째부터): “들어온 돈 / 필요한 돈” + 8px 막대(채움 ink-2 중립, 오렌지 아님) + “10월 3일부터”. 판정 문장 없음 */
+/* 기간 막대(PeriodBar, H-13 날짜 없는 사람 16일째부터): “수입 / 월급 계획” + 8px 막대(채움 ink-2 중립, 오렌지 아님) + “10월 3일부터”. 판정 문장 없음 */
 .hg-periodbar { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .hg-periodbar__text { font: 600 15px/22px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; }
 .hg-periodbar__bar { height: 8px; border-radius: var(--radius-full); background: var(--bar-track); overflow: hidden; }

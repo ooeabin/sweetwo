@@ -31,7 +31,7 @@ export const copy = {
 
   // O-30·O-30b·O-30c 관리 형태 세 질문(17 v2.2, 08 2장) [확인 필요]
   sharedLiving: '같이 쓰는 생활비가 있어요?',
-  sharedLivingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 돈이에요',
+  sharedLivingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요',
   sharedLivingChoices: { yes: '네', no: '아니요' },
   sharedSaving: '같이 모으는 저금이 있어요?',
   sharedSavingChoices: { yes: '네', no: '아직 없어요' },
@@ -67,7 +67,7 @@ export const copy = {
   // O-55 알림 허용(2026-11-13) [확인 필요]
   pushPayday: (date: string) => `${date} 월급날 아침에 알려 드릴까요?`,
   pushPaydayHelp: '경조사 일주일 전에도 알려 드려요',
-  pushNoDate: '경조사와 큰돈 나갈 날 일주일 전에 알려 드릴까요?',
+  pushNoDate: '경조사와 금융 일정 일주일 전에 알려 드릴까요?',
   pushAllow: '알림 받기',
 
   // O-60 준비 끝(2026-11-13 고친 점) [확인 필요]
@@ -75,7 +75,7 @@ export const copy = {
   readyDone: {
     split: '월급 계획을 만들어 뒀어요',
     firstCheck: (date: string) => `${date} 월급날에 처음 확인해요`,
-    noDate: '돈이 들어오면 월급 ‘이번 달’에서 적어 주세요',
+    noDate: '수입이 들어오면 월급 ‘이번 달’에서 적어 주세요',
     salary: '월급이 생기면 설정에서 넣어 주세요',
   },
   readyGo: '첫 저금 만들기',

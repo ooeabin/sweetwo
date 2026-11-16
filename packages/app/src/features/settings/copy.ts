@@ -285,8 +285,8 @@ export const copy = {
     debts: '부채 합계', // [확인 필요]
     trend: '최근 12개월 순자산', // [확인 필요]
     yearTitle: (y: number) => `${y}년 연간 요약`, // [확인 필요]
-    yearSaved: '올해 저금한 돈', // [확인 필요] 2026-11-08 ADR 0007
-    monthly: '월별 저금한 돈', // [확인 필요]
+    yearSaved: '올해 저금한 금액', // 2026-11-08 ADR 0007
+    monthly: '월별 저금한 금액',
     month: (m: number) => `${m}월`,
     goals: '저금별 진행', // [확인 필요]
     noGoals: '저금이 없어요', // [확인 필요]
@@ -576,7 +576,7 @@ export const copy = {
 
   // S-11f 관리 형태(O-30·30b·30c와 같은 세 질문, 17·08 2장) [확인 필요]
   livingQ: '같이 쓰는 생활비가 있어요?',
-  livingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 돈이에요',
+  livingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요',
   savingQ: '같이 모으는 저금이 있어요?',
   managerQ: '누가 주로 관리해요?',
   yes: '네',

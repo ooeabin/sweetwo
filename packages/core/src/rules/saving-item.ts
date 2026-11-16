@@ -133,7 +133,7 @@ export const savedFromMoves = (id: string, moves: readonly SavingMove[]): Won =>
     .reduce((t, m) => t + (m.kind === 'in' ? m.amount : -m.amount), 0);
 
 /**
- * 모은 금액(06 4-1, 서버 goal_saved): 이미 모은 금액 + 확인한 저금 줄(자동 확인 포함) + 돈 움직임(돈 들어왔어요,
+ * 모은 금액(06 4-1, 서버 goal_saved): 이미 모은 금액 + 확인한 저금 줄(자동 확인 포함) + 돈 움직임(수입 적기,
  * 자동 넣기, 바로잡기, 잔액 맞추기, 냈어요 −)
  */
 export const savedTotal = (
@@ -143,7 +143,7 @@ export const savedTotal = (
 
 /**
  * 이번 달 +(06 5-6, H-10 “이번 달 +190만 원”, 북극성 ‘모음’ 8-1): 그 달 늘어난 것 중 저금 줄 확인(자동 포함) +
- * 날짜 없는 사람 자동 넣기(auto) + 돈 들어왔어요로 넣은 금액. 바로잡기·잔액 맞추기·냈어요·이미 모은 금액은 뺌.
+ * 날짜 없는 사람 자동 넣기(auto) + 수입 적기로 넣은 금액. 바로잡기·잔액 맞추기·냈어요·이미 모은 금액은 뺌.
  * lines는 이번 달(대표 사이클) 확인 목록 줄, moves는 그 기간(from~to, KST 날짜) 안의 움직임
  */
 export function savingMonthGain(

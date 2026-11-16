@@ -80,7 +80,7 @@ type Sheet =
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
 const MAX_CUSTOM = 10;
-/** 첫 달 ‘매달 나가는 돈’ 묻기를 끝낸 표시(home_task_state, 사람마다, 2026-11-16 R4) */
+/** 첫 달 ‘매달 나가는 지출’ 묻기를 끝낸 표시(home_task_state, 사람마다, 2026-11-16 R4) */
 const FIRST_SPEND_KEY = 'first_spend_ask';
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 월급 탭 구간 탭 ‘계획’(/salary?view=plan).
@@ -229,7 +229,7 @@ export function W01Receipt() {
     ? (m.monthly_income ?? 0) + (p?.monthly_income ?? 0)
     : (owner?.monthly_income ?? 0);
   const savingLines = lines.filter((l) => l.kind === 'saving');
-  // 용돈 줄을 지출 묶음 맨 위에(2026-11-16 4차 검토 R4-3: 용돈도 ‘아직 안 정한 돈’에서 빠지는 계획 줄임이 보이게).
+  // 용돈 줄을 지출 묶음 맨 위에(2026-11-16 4차 검토 R4-3: 용돈도 ‘아직 안 정한 월급’에서 빠지는 계획 줄임이 보이게).
   // 나머지 줄은 월급 계획 순서 그대로, 편집 모드 순서 바꾸기도 이 순서 안에서
   const spendLines = [
     ...lines.filter((l) => l.kind === 'allowance'),

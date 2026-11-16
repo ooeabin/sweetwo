@@ -83,10 +83,10 @@ export const copy = {
     `저금 ${saving}%, 지출 ${spend}%, ${free}`,
   legendSaving: (n: number) => `저금 ${n}%`,
   legendSpend: (n: number) => `지출 ${n}%`,
-  legendFree: (n: number) => `아직 안 정한 돈 ${n}%`,
-  legendShort: (amount: string) => `아직 안 정한 돈 ${amount}`,
-  allocated: '계획한 돈',
-  leftoverLabel: '아직 안 정한 돈',
+  legendFree: (n: number) => `아직 안 정한 월급 ${n}%`,
+  legendShort: (amount: string) => `아직 안 정한 월급 ${amount}`,
+  allocated: '계획한 월급',
+  leftoverLabel: '아직 안 정한 월급',
   addSpend: '+ 지출 추가',
   spendChips: [
     { name: '관리비', code: 'maintenance' },
@@ -100,7 +100,7 @@ export const copy = {
   allowanceRows: '용돈', // 화면 읽기: W-01 지출 묶음 맨 위 용돈 줄 목록(2026-11-16 R4-3)
   /** W-01 첫 달 묻기(2026-11-16 4차 검토 사용자 결정, 20 W-01 ‘첫 달 묻기’) [모두 확인 필요] */
   firstSpend: {
-    title: '매달 나가는 돈이 있어요?',
+    title: '매달 나가는 지출이 있어요?',
     help: '고르고 금액을 적으면 지출에 한 줄씩 들어가요',
     chips: [
       { name: '월세', code: 'rent' },
@@ -114,7 +114,7 @@ export const copy = {
     done: '다 넣었어요',
     skip: '건너뛸게요',
   },
-  addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 돈’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
+  addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
   sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
   ownName: '직접 입력',
   editPlan: '편집하기',
@@ -216,7 +216,7 @@ export const copy = {
   savingGroup: '저금',
   spendGroup: '지출',
   lineNames: { fixed: '고정지출', living: '생활비', allowance: '용돈' },
-  fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 돈', // [확인 필요]
+  fixedSub: '월세·관리비·보험·통신·대출 상환처럼 매달 정해진 지출',
   livingSub: '식비·장보기처럼 그때그때 쓰는 지출', // [확인 필요]
   /**
    * 기한까지 월 필요액(06 5-3). now = 지금 매달 넣는 금액(다르면 덧붙임). 2026-11-16 4차 검토 R4-2: “매달 24만 원이 필요해요”가
@@ -236,18 +236,18 @@ export const copy = {
   removeLine: '줄 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
-  leftover: (amount: string) => `아직 안 정한 돈 ${amount}`,
+  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`,
   short: (amount: string) => `${amount}이 모자라요`,
   shortHelp: '지출이나 저금을 줄여 주세요',
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
   addItem: '+ 저금 추가', // [확인 필요] 2026-11-09 사용자에게는 ‘저금’
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
-  firstSaving: (left: string) => `저금 추가 (아직 안 정한 돈 ${left})`,
+  firstSaving: (left: string) => `저금 추가 (아직 안 정한 월급 ${left})`,
   // 20 ‘첫 저금’ 3번(2026-11-13): 예전 비교 문구 “…님처럼 나도 모을 곳을…”은 없앰 [확인 필요]
   firstSavingTogether: (partner: string, goal: string) =>
     `${partner ? `${partner}님` : '파트너'} ‘${goal}’에 같이 모을까요?`,
-  firstSavingLeft: (left: string) => `아직 안 정한 돈 ${left}`,
+  firstSavingLeft: (left: string) => `아직 안 정한 월급 ${left}`,
   // 2026-11-16 r6: 용돈이 이미 빠진 돈이라는 걸 보임 [확인 필요]
   firstSavingExcl: (allowance: string) => `용돈 ${allowance} 빼고`,
   seeItem: '저금 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
@@ -323,7 +323,7 @@ export const copy = {
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string, allowance?: string) =>
-    `아직 안 정한 돈 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // [확인 필요] 2026-11-16 r6 용돈 빼고
+    `아직 안 정한 월급 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // 2026-11-16 r6 용돈 빼고
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
@@ -335,7 +335,7 @@ export const copy = {
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
   added: '저금을 추가했어요', // [확인 필요]
-  addShort: '아직 안 정한 돈이 모자라요. 지출이나 저금을 줄여 주세요', // [확인 필요]
+  addShort: '아직 안 정한 월급이 모자라요. 지출이나 저금을 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저금을 추가할 수 없어요',
   addNoSplit: '월급이 생기면 저금을 추가할 수 있어요', // [확인 필요]
   // W-12 달성 축하, W-12a
@@ -373,7 +373,7 @@ export const copy = {
   // W-02 0a 첫 월급날 전 미리 보기(2026-11-15 3차 검토) [확인 필요]
   previewTitle: '월급날에 확인할 것',
   previewAuto: '자동으로 나가요',
-  moneyInGo: '받은 돈 적기',
+  moneyInGo: '수입 적기',
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',
   autoPay: '은행에서 자동으로 보내요',
@@ -391,7 +391,7 @@ export const copy = {
   managerChecks: (name: string) => (name ? `${name}님이 확인해요` : '파트너가 확인해요'),
   addSharedAccount: '+ 같이 쓰는 통장 추가',
   allowanceNotify: (name: string) => (name ? `${name}님께 알려 드려요` : '파트너에게 알려 드려요'),
-  noPaydayHead: '돈이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)
+  noPaydayHead: '수입이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)
   // W-01d 자동으로 나가는 것 고르기
   autoPickTitle: '자동으로 나가는 걸 골라 주세요',
   autoPickSave: '저장하기',
@@ -400,27 +400,27 @@ export const copy = {
   autoPickEmpty: '고를 지출이나 저금이 없어요',
   autoPickLine: (name: string) => `${name} 자동으로 나가요`,
   // H-13 기간 한 줄(07 6장, 홈 H-11 자리와 월급 탭 ‘이번 달’ 자리가 같이 씀) [모두 확인 필요]
-  periodNone: '돈이 들어오면 ‘받은 돈 적기’로 알려 주세요',
-  periodEarly: (amount: string) => `이번 기간 들어온 돈 ${amount}`,
-  periodIn: (amount: string) => `들어온 돈 ${amount}`,
-  periodNeed: (amount: string) => `필요한 돈 ${amount}`,
+  periodNone: '수입이 들어오면 ‘수입 적기’로 알려 주세요',
+  periodEarly: (amount: string) => `이번 기간 수입 ${amount}`,
+  periodIn: (amount: string) => `수입 ${amount}`,
+  periodNeed: (amount: string) => `월급 계획 ${amount}`,
   periodSince: (date: string) => `${formatMonthDay(date)}부터`,
-  periodFull: '더 들어온 돈은 저금에 넣을 수 있어요',
-  periodGap: (n: number) => `마지막으로 돈이 들어온 지 ${n}일 됐어요`,
+  periodFull: '더 들어온 수입은 저금에 넣을 수 있어요',
+  periodGap: (n: number) => `마지막으로 수입이 들어온 지 ${n}일 됐어요`,
   periodBarLabel: (inn: string, need: string, since: string) =>
-    `이번 기간 들어온 돈 ${inn}, 필요한 돈 ${need}, ${since}`,
-  // ───────── v2.2 같이 모으기와 돈 기록(20 ‘월급 탭 v2.2’, ADR 0009, PR 10) ─────────
+    `이번 기간 수입 ${inn}, 월급 계획 ${need}, ${since}`,
+  // ───────── v2.2 같이 모으기와 수입 기록(20 ‘월급 탭 v2.2’, ADR 0009, PR 10) ─────────
   // W-10 고친 점
   etaAt: (ym: string) => `지금 속도면 ${ym}에 다 모아요`, // [확인 필요] 3a(‘기한보다 n개월 늦어요’ 대신)
   remainUntil: (ym: string, amount: string) => `${ym}까지 ${amount} 더 필요해요`, // [확인 필요] 3b G5
   remainUntilPct: (ym: string) => `${ym}까지`, // [확인 필요] 퍼센트만(SaveTogether.md)
   historyStartV22: (amount: string) => `이미 모은 금액 ${amount}`, // [확인 필요] 6a
-  historyMoneyIn: (amount: string) => `받은 돈 ${amount}`, // [확인 필요]
+  historyMoneyIn: (amount: string) => `수입에서 넣었어요 ${amount}`,
   historyAuto: (amount: string) => `자동으로 넣었어요 ${amount}`, // [확인 필요] 날짜 없는 사람 자동 넣기
   historyAdjust: (sign: '+' | '−', amount: string) => `바로잡기 ${sign}${amount}`, // [확인 필요]
   historyReconcile: (sign: '+' | '−', amount: string) => `잔액 맞추기 ${sign}${amount}`, // [확인 필요]
   historyNotePaid: (amount: string) => `쓸 곳 메모 −${amount}`, // [확인 필요]
-  moneyIn: '받은 돈 적기', // AddRow 글자(+ 아이콘이 ‘+’를 대신) [확인 필요]
+  moneyIn: '수입 적기', // AddRow 글자(+ 아이콘이 ‘+’를 대신)
   menuAdjust: '모은 금액 바로잡기', // [확인 필요]
   menuNotes: '쓸 곳 메모', // [확인 필요]
   menuBundle: '같이 모으기 시작하기',
@@ -510,7 +510,7 @@ export const copy = {
   notePayKeep: '그대로 둘게요', // [확인 필요]
   notePaidToast: (name: string) => `${name}, 냈어요`, // [확인 필요]
   notePaidSubToast: (amount: string) => `모은 금액에서 ${amount} 뺐어요`, // [확인 필요]
-  noteNameQ: '어디에 쓸 돈이에요?', // [확인 필요] W-14a 이름
+  noteNameQ: '모은 금액을 어디에 쓸 거예요?', // W-14a 이름
   noteNamePlaceholder: '예: 예식장 잔금', // [확인 필요]
   noteAmountQ: '얼마쯤 들어요?', // [확인 필요] 예상 금액(선택)
   noteNoAmount: '금액 없이 적을게요', // [확인 필요]
@@ -564,7 +564,7 @@ export const copy = {
         ? '목표 금액을 바꿨어요'
         : '기한을 바꿨어요', // [확인 필요]
   bundleNameQ: '이름을 뭐라고 할까요?', // [확인 필요]
-  // W-20 돈 들어왔어요, W-20a
+  // W-20 수입 적기, W-20a
   moneyInQ: '얼마를 받았어요?',
   moneyInDate: '받은 날', // [확인 필요]
   moneyInDateToday: '받은 날 오늘', // [확인 필요]
@@ -573,22 +573,22 @@ export const copy = {
     salary: '월급',
     bonus: '상여',
     family: '가족이 보태 줬어요',
-    work: '일한 돈',
+    work: '프리랜스·부업',
     refund: '환급',
     etc: '그 밖',
   }, // [확인 필요]
-  moneyInKindLabel: '어떤 돈이에요?', // [확인 필요] 칩 묶음 이름
+  moneyInKindLabel: '어떤 수입이에요?', // 칩 묶음 이름
   moneyInDistributeQ: '저금에 얼마씩 넣을까요?', // [확인 필요]
-  moneyInLeft: (total: string, left: string) => `받은 돈 ${total} 중 아직 안 넣은 ${left}`, // 2026-11-16 r6 (예전 “…중 남은 …”)
-  moneyInOver: '받은 돈보다 많이 넣을 수 없어요',
+  moneyInLeft: (total: string, left: string) => `수입 ${total} 중 아직 안 넣은 ${left}`, // 2026-11-16 r6 (예전 “…중 남은 …”)
+  moneyInOver: '수입보다 많이 넣을 수 없어요',
   moneyInPut: '넣기', // [확인 필요]
-  /** W-20a 적기만(2026-11-16 R4-7: 받은 돈 적기가 저금 나누기로만 끝났음) [확인 필요] */
+  /** W-20a 적기만(2026-11-16 R4-7: 수입 적기가 저금 나누기로만 끝났음) [확인 필요] */
   moneyInSkip: '저금에 안 넣을게요',
-  /** W-02 ‘받은 돈’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) [확인 필요] */
-  moneyInGroup: '받은 돈',
+  /** W-02 ‘수입’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) */
+  moneyInGroup: '수입',
   moneyInRow: (date: string, kind: string) => `${date}, ${kind}`,
-  moneyInNoSaving: '넣을 저금이 없어요. 받은 돈만 적어 둘게요',
-  moneyInLogged: '받은 돈을 적었어요',
+  moneyInNoSaving: '넣을 저금이 없어요. 수입만 적어 둘게요',
+  moneyInLogged: '수입을 적었어요',
   moneyInPutDone: (n: number, amount: string) => `저금 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
   amountOf: (name: string) => `${name} 금액`, // 화면 읽기
   wonUnit: '원',
@@ -603,19 +603,19 @@ export const copy = {
     `넣을 저금이 없어요. ‘${name}’에 같이 모으면 넣을 수 있어요`, // [확인 필요]
   moneyInAll: '나머지 모두 넣기', // W-20a
   moneyInAllLabel: (name: string) => `${name}에 나머지 모두 넣기`, // 화면 읽기
-  moneyInList: '받은 돈 기록', // [확인 필요] W-20b
-  moneyInListEmpty: '아직 적은 돈이 없어요', // [확인 필요]
+  moneyInList: '수입 기록', // W-20b
+  moneyInListEmpty: '아직 적은 수입이 없어요',
   moneyInPutOf: (amount: string) => `저금에 ${amount} 넣었어요`, // [확인 필요] W-20b 줄 보조
   moneyInRowMenu: (amount: string) => `${amount} 기록 메뉴`, // 화면 읽기
   moneyInEdit: '고치기',
   moneyInDelete: '지우기',
-  moneyInDeleted: '받은 돈 기록을 지웠어요', // [확인 필요]
-  moneyInDeletedPut: '받은 돈 기록과 저금에 넣은 금액을 지웠어요', // [확인 필요] 나눠 넣은 게 있을 때
-  moneyInEdited: '받은 돈 기록을 고쳤어요', // [확인 필요]
+  moneyInDeleted: '수입 기록을 지웠어요',
+  moneyInDeletedPut: '수입 기록과 저금에 넣은 금액을 지웠어요', // 나눠 넣은 게 있을 때
+  moneyInEdited: '수입 기록을 고쳤어요',
   moneyInEditBelow: '저금에 넣은 금액보다 적게 고칠 수 없어요', // [확인 필요]
   moneyInEditSave: '저장',
   noteOverdue: (date: string) => `${date}이 지났어요`, // W-14 안 낸 메모(날짜는 ‘…일’로 끝남)
-  monthlyOverLeft: (left: string) => `아직 안 정한 돈 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
+  monthlyOverLeft: (left: string) => `아직 안 정한 월급 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
   needPerMonthTogether: (amount: string, now?: string) =>
     `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
 };

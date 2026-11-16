@@ -13,10 +13,10 @@ import { savingPaths, togetherPaths } from '../paths';
 import { refreshMoneyIn } from '../together';
 
 /**
- * W-20b 들어온 돈 기록(20 v2.2 ‘고침 A’, 2026-11-14 M6): 내가 적은 돈 들어왔어요 기록(최근 받은 날부터).
+ * W-20b 수입 기록(20 v2.2 ‘고침 A’, 2026-11-14 M6): 내가 적은 수입 적기 기록(최근 받은 날부터).
  * 줄 = 금액 + “11월 14일, 상여, 저금 2개에 넣었어요”. 줄 ⋯ = ‘고치기’(W-20 같은 화면, 금액·종류·받은 날) / ‘지우기’
  * (묻지 않고 지움 + Toast ‘되돌리기’ = money_in_restore). 지우면 그 기록으로 저금에 넣은 금액도 빠짐(money_in_delete).
- * 입구: W-13 ⋯ ‘들어온 돈 기록’, W-20 아래 글자 버튼
+ * 입구: W-13 ⋯ ‘수입 기록’, W-20 아래 글자 버튼
  */
 export function W20bMoneyInList() {
   const nav = useNavigate();

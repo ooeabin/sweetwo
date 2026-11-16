@@ -351,7 +351,7 @@ export type AnalyticsEvent =
         first_ask?: boolean;
       };
     }
-  /** W-01 첫 달 ‘매달 나가는 돈’ 묻기 끝(2026-11-16 R4): 넣은 줄 수, 건너뜀 여부 */
+  /** W-01 첫 달 ‘매달 나가는 지출’ 묻기 끝(2026-11-16 R4): 넣은 줄 수, 건너뜀 여부 */
   | {
       name: 'first_spend_asked';
       props: { answer: 'done' | 'skipped'; lines_count: number; joint: boolean };
@@ -420,7 +420,7 @@ export type AnalyticsEvent =
       // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
       name: 'home_box_tapped';
       props: {
-        // 2026-11-13 v2.2: together = H-10 칸, month_line = H-11, wedding = H-12, money_in = ‘+ 돈 들어왔어요’,
+        // 2026-11-13 v2.2: together = H-10 칸, month_line = H-11, wedding = H-12, money_in = ‘+ 수입 적기’,
         // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 추가’, dday = ‘결혼식 날짜 알려 주기’
         box:
           | 'together'

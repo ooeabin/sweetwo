@@ -22,11 +22,11 @@ const oct = [
   { amount: 140 * MAN, received_on: '2026-10-20' },
 ];
 
-it('필요한 돈 = 모든 줄 합(체크리스트에 넣기 상관없이), 여유 자금은 줄이 아님', () => {
+it('월급 계획 합 = 모든 줄 합(체크리스트에 넣기 상관없이), 여유 자금은 줄이 아님', () => {
   expect(needed).toBe(380 * MAN);
 });
 
-it('첫 돈 전: none', () => {
+it('첫 수입 전: none', () => {
   expect(moneyInPeriod([], '2026-11-01', needed)).toEqual({
     status: 'none',
     start: null,
@@ -80,7 +80,7 @@ it('새 기간(11월 14일 400만): early 새 S, 다 참(11월 29일 16일째) 1
   expect(periodFull(b)).toBe(true);
 });
 
-it('경계: E 다음 날 받은 돈은 새 기간, 지운 기록은 빠짐, 필요한 돈 0이면 막대 없이 early 문장', () => {
+it('경계: E 다음 날 받은 돈은 새 기간, 지운 기록은 빠짐, 월급 계획 0이면 막대 없이 early 문장', () => {
   const rows = [
     { amount: 100 * MAN, received_on: '2026-10-03' },
     { amount: 50 * MAN, received_on: '2026-11-02' },

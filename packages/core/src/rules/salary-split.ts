@@ -176,7 +176,7 @@ export interface JoinerSplitInput {
 
 /**
  * 각자: 합류한 사람 월급 계획 추천값(18 P-06 각자). 용돈 = 실수령 × 10%만(고정지출·생활비 추천 줄은 2026-11-15에 없앰).
- * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 아직 안 정한 돈
+ * 저금 줄은 없음(저금 항목은 각자 자기 월급 계획에만, 합류한 사람이 직접 추가, ADR 0007). 나머지는 아직 안 정한 월급
  */
 export function joinerSplit(o: JoinerSplitInput): SplitLineDraft[] {
   const income = Math.max(o.income, 0);

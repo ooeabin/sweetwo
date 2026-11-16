@@ -12,7 +12,7 @@ import {
   YEBIN,
 } from './mocks';
 
-// v2.2 돈 기록(20 W-20·W-20a 돈 들어왔어요, W-10b 바로잡기, W-10c 잔액 맞추기, W-14·W-14a 쓸 곳 메모, ADR 0009 결정 4, F1·F3·G7·G11).
+// v2.2 돈 기록(20 W-20·W-20a 수입 적기, W-10b 바로잡기, W-10c 잔액 맞추기, W-14·W-14a 쓸 곳 메모, ADR 0009 결정 4, F1·F3·G7·G11).
 // 찬우 ‘내 집 마련’(목표 1억 5,000만, 이미 모은 300만). 바로잡기 상대 문구는 찬우·예빈 두 계정(묶음)
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const axe = async (page: Page) => {
@@ -35,11 +35,11 @@ async function open(page: Page, url: string, prep?: (db: MemDb, s: SavingDb) => 
   return { db, s };
 }
 
-test('W-20 받은 돈 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘치면 막음, 저금 내역에 기록', async ({
+test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘치면 막음, 저금 내역에 기록', async ({
   page,
 }) => {
   const { s } = await open(page, '/salary');
-  await page.getByRole('button', { name: '받은 돈 적기' }).click();
+  await page.getByRole('button', { name: '수입 적기' }).click();
   await expect(page.getByRole('heading', { name: '얼마를 받았어요?' })).toBeVisible();
   // 칩은 미리 고른 값 없음, 받은 날은 오늘
   await expect(page.getByRole('button', { name: '상여' })).toHaveAttribute('aria-pressed', 'false');
@@ -50,11 +50,11 @@ test('W-20 받은 돈 적기 → W-20a 저금에 나눠 넣기: 남은 금액, �
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '저금에 얼마씩 넣을까요?' })).toBeVisible();
-  await expect(page.getByText('받은 돈 300만 원 중 아직 안 넣은 300만 원')).toBeVisible();
+  await expect(page.getByText('수입 300만 원 중 아직 안 넣은 300만 원')).toBeVisible();
   await page.getByLabel('내 집 마련', { exact: true }).fill('1000000');
-  await expect(page.getByText('받은 돈 300만 원 중 아직 안 넣은 200만 원')).toBeVisible();
+  await expect(page.getByText('수입 300만 원 중 아직 안 넣은 200만 원')).toBeVisible();
   await page.getByLabel('청약', { exact: true }).fill('5000000');
-  await expect(page.getByText('받은 돈보다 많이 넣을 수 없어요')).toBeVisible();
+  await expect(page.getByText('수입보다 많이 넣을 수 없어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '넣기', exact: true })).toBeDisabled();
   await page.getByLabel('청약', { exact: true }).fill('');
   await axe(page);
@@ -67,15 +67,15 @@ test('W-20 받은 돈 적기 → W-20a 저금에 나눠 넣기: 남은 금액, �
     { goal_id: 'goal-h', kind: 'in', amount: 1_000_000, money_in_id: 'in-1' },
   ]);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('받은 돈 100만 원')).toBeVisible();
+  await expect(page.getByText('수입에서 넣었어요 100만 원')).toBeVisible();
   await expect(page.getByText('400만 원', { exact: true }).first()).toBeVisible();
 });
 
-test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 ‘받은 돈’ 묶음에 줄로 보임', async ({
+test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 ‘수입’ 묶음에 줄로 보임', async ({
   page,
 }) => {
   const { s } = await open(page, '/salary');
-  await page.getByRole('button', { name: '받은 돈 적기' }).click();
+  await page.getByRole('button', { name: '수입 적기' }).click();
   await page.getByLabel('얼마를 받았어요?').fill('1000000');
   await page.getByRole('button', { name: '상여' }).click();
   await page.getByRole('button', { name: '다음' }).click();
@@ -83,10 +83,10 @@ test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 ‘받은 �
   await page.getByLabel('내 집 마련', { exact: true }).fill('300000');
   await page.getByRole('button', { name: '저금에 안 넣을게요' }).click();
   await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByText('받은 돈을 적었어요')).toBeVisible();
+  await expect(page.getByText('수입을 적었어요')).toBeVisible();
   expect(s.moneyIns[0]).toMatchObject({ amount: 1_000_000, kind: 'bonus' });
   expect(s.moves).toEqual([]);
-  const got = page.getByRole('region', { name: '받은 돈' });
+  const got = page.getByRole('region', { name: '수입' });
   await expect(got.getByRole('button', { name: /상여/ })).toContainText('100만 원');
   await axe(page);
   await got.getByRole('button', { name: /상여/ }).click();
@@ -210,7 +210,7 @@ test('W-14 쓸 곳 메모: 추가 → ‘냈어요’ “모은 금액에서 250
   await expect(page.getByRole('heading', { name: '쓸 곳 메모 내 집 마련' })).toBeVisible();
   await expect(page.getByText('아직 메모가 없어요')).toBeVisible();
   await page.getByRole('button', { name: '메모 추가' }).click();
-  await page.getByLabel('어디에 쓸 돈이에요?').fill('예식장 잔금');
+  await page.getByLabel('모은 금액을 어디에 쓸 거예요?').fill('예식장 잔금');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByLabel('얼마쯤 들어요?').fill('2500000');
   await page.getByRole('button', { name: '다음' }).click();
@@ -234,7 +234,7 @@ test('W-14 쓸 곳 메모: 추가 → ‘냈어요’ “모은 금액에서 250
   expect(s.moves[0]?.deleted_at).toBeTruthy();
 });
 
-test('W-20a ‘나머지 모두 넣기’, W-20b 받은 돈 기록: 고치기, 지우기(넣은 금액도) → 되돌리기', async ({
+test('W-20a ‘나머지 모두 넣기’, W-20b 수입 기록: 고치기, 지우기(넣은 금액도) → 되돌리기', async ({
   page,
 }) => {
   test.setTimeout(90_000);
@@ -244,15 +244,15 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 받은 돈 기록: 고치기, �
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '청약에 나머지 모두 넣기' }).click();
   await expect(page.getByLabel('청약', { exact: true })).toHaveValue('500,000');
-  await expect(page.getByText('받은 돈 50만 원 중 아직 안 넣은 0원')).toBeVisible();
+  await expect(page.getByText('수입 50만 원 중 아직 안 넣은 0원')).toBeVisible();
   await page.getByRole('button', { name: '넣기', exact: true }).click();
   await expect(page.getByText('저금 1개에 50만 원 넣었어요')).toBeVisible();
 
-  // W-20b: W-13 ⋯ → 받은 돈 기록
+  // W-20b: W-13 ⋯ → 수입 기록
   await page.goto('/salary/items');
   await page.getByRole('button', { name: '더보기' }).click();
-  await page.getByRole('menuitem', { name: '받은 돈 기록' }).click();
-  await expect(page.getByRole('heading', { name: '받은 돈 기록' })).toBeVisible();
+  await page.getByRole('menuitem', { name: '수입 기록' }).click();
+  await expect(page.getByRole('heading', { name: '수입 기록' })).toBeVisible();
   await expect(page.getByText(/상여, 저금에 50만 원 넣었어요/)).toBeVisible();
   await axe(page);
   // 고치기: 넣은 금액보다 적게는 못 고침
@@ -265,15 +265,15 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 받은 돈 기록: 고치기, �
   await page.getByLabel('얼마를 받았어요?').fill('700000');
   await page.getByRole('button', { name: '환급' }).click();
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page.getByText('받은 돈 기록을 고쳤어요')).toBeVisible();
+  await expect(page.getByText('수입 기록을 고쳤어요')).toBeVisible();
   expect(s.moneyIns[0]).toMatchObject({ amount: 700_000, kind: 'refund' });
   // 지우기: 넣은 금액도 빠짐 → 되돌리기
   await page.goto('/salary/money-in/list');
   await page.getByRole('button', { name: '70만 원 기록 메뉴' }).click();
   await page.getByRole('menuitem', { name: '지우기' }).click();
-  await expect(page.getByText('받은 돈 기록과 저금에 넣은 금액을 지웠어요')).toBeVisible();
+  await expect(page.getByText('수입 기록과 저금에 넣은 금액을 지웠어요')).toBeVisible();
   expect(s.moves.every((m) => m.deleted_at)).toBe(true);
-  await expect(page.getByText('아직 적은 돈이 없어요')).toBeVisible();
+  await expect(page.getByText('아직 적은 수입이 없어요')).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('button', { name: '70만 원 기록 메뉴' })).toBeVisible();
   expect(s.moneyIns[0]?.deleted_at).toBeNull();
