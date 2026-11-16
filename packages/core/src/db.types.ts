@@ -213,6 +213,25 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_email_exception: {
+        Row: {
+          created_at: string
+          email: string
+          note: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          email: string
+          note?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          note?: string
+        }
+        Relationships: []
+      }
       admin_review: {
         Row: {
           at: string
@@ -3450,6 +3469,7 @@ export type Database = {
         }
       }
       admin_bootstrap: { Args: Record<PropertyKey, never>; Returns: boolean }
+      admin_claim_exception: { Args: Record<PropertyKey, never>; Returns: boolean }
       admin_content_versions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4183,6 +4203,7 @@ export type Database = {
               status: string
             }[]
           }
+      is_admin_email_allowed: { Args: { p_email: string }; Returns: boolean }
       is_own_space_row: { Args: { p_owner: string; p_space_id: string }; Returns: boolean }
       is_space_member: { Args: { p_space_id: string }; Returns: boolean }
       join_context: { Args: Record<PropertyKey, never>; Returns: Json }
@@ -4200,6 +4221,7 @@ export type Database = {
       join_space: { Args: { p_code: string }; Returns: string }
       joining_space: { Args: Record<PropertyKey, never>; Returns: string }
       jwt_aal: { Args: Record<PropertyKey, never>; Returns: string }
+      jwt_email_link_login: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_holidays: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_mail: { Args: Record<PropertyKey, never>; Returns: boolean }
       kick_purge: { Args: Record<PropertyKey, never>; Returns: boolean }
