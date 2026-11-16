@@ -99,7 +99,7 @@ const addYearsDay = (d: string, n: number) => `${Number(d.slice(0, 4)) + n}${d.s
 
 /**
  * 내 상황 맞춤 글 3개(S-01): 목표·거주 형태·자녀 계획 기준.
- * 전세 → 전세 만기 전 점검, 내 집 마련 목표 → 내 집 마련, 자녀 계획 3년 안 → 출산·육아, 그다음 비상금, 돈 합치기 순으로 채움.
+ * 전세 → 전세 만기 전 점검, 내 집 마련 목표 → 내 집 마련, 자녀 계획 3년 안 → 출산·육아, 그다음 비상금, 월급 합치기 순으로 채움.
  */
 export function pickGuides(o: {
   housing: string | null;

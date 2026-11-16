@@ -9,7 +9,7 @@ import { money, useMask } from '../../../shared/mask';
 import { carryToast, toast } from '../../../shared/toast';
 import { MoneyField } from '../bundle-parts';
 import { copy } from '../copy';
-import { salaryPaths } from '../paths';
+import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
 import { refreshSaving } from '../together';
@@ -59,8 +59,10 @@ export function W10cReconcile() {
       title={copy.reconcileQ}
       help={items.length ? copy.reconcileHelp : copy.reconcileEmpty}
       onBack={back}
-      primary={{ label: copy.reconcileSave, loading: busy, disabled: !items.length }}
-      onSubmit={() => void save()}
+      primary={
+        items.length ? { label: copy.reconcileSave, loading: busy } : { label: copy.listAdd }
+      }
+      onSubmit={() => (items.length ? void save() : nav(savingPaths.add))}
     >
       <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
         {items.map((i) => (

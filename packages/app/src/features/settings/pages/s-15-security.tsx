@@ -112,7 +112,6 @@ export function S15Security() {
         <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <Toggle
             label={copy.appLock}
-            help={copy.appLockSub}
             checked={lock.hasPin}
             onChange={(on) => {
               if (on) nav(`${paths.pinSetup}?next=/settings/security`);

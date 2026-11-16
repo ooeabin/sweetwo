@@ -299,7 +299,6 @@ export function FirstSpendAsk({
   return (
     <section className="hg-card hg-stack" aria-label={copy.firstSpend.title}>
       <h2 className="hg-card__title">{copy.firstSpend.title}</h2>
-      <p className="hg-card__meta">{copy.firstSpend.help}</p>
       <div className="hg-receipt__chips" role="group" aria-label={copy.firstSpend.title}>
         {copy.firstSpend.chips
           .filter((c) => !taken.includes(c.name))

@@ -263,9 +263,6 @@ export function S13pPreview() {
 
   return frame(
     <>
-      <p className="hg-help" style={{ margin: 0 }}>
-        {copy.previewTop(c.partnerName)}
-      </p>
       {savingSection}
       {mySavingSection}
       {planSection}

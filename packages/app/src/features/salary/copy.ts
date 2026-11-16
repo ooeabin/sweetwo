@@ -101,7 +101,6 @@ export const copy = {
   /** W-01 첫 달 묻기(2026-11-16 4차 검토 사용자 결정, 20 W-01 ‘첫 달 묻기’) [모두 확인 필요] */
   firstSpend: {
     title: '매달 나가는 지출이 있어요?',
-    help: '고르고 금액을 적으면 지출에 한 줄씩 들어가요',
     chips: [
       { name: '월세', code: 'rent' },
       { name: '관리비', code: 'maintenance' },
@@ -319,7 +318,6 @@ export const copy = {
   conflictTheirs: (partner: string) => `${partner}님 값`,
   // W-11 저금 항목 추가
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
-  addNameHelp: '매달 월급에서 이만큼 모으기로 적어 둬요', // [확인 필요] 2026-11-16 R4-2(예전 “월급 계획 저금 묶음에 한 줄로 생겨요”)
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string, allowance?: string) =>
@@ -461,7 +459,7 @@ export const copy = {
   adjusted: '모은 금액을 바로잡았어요', // [확인 필요]
   // W-10c 실제 잔액 맞추기
   reconcileQ: '통장 잔액과 모은 금액을 맞춰 볼까요?',
-  reconcileHelp: '통장에 실제로 모인 금액을 적어 주세요. 비우면 그대로 둬요', // [확인 필요]
+  reconcileHelp: '통장에 실제로 모인 금액을 적어 주세요', // [확인 필요] 2026-11-16 “비우면 그대로 둬요” 뺌
   reconcileNow: (amount: string) => `지금 모은 금액 ${amount}`, // [확인 필요]
   reconcileActual: '실제로 모인 금액', // [확인 필요]
   reconcileSave: '맞추기', // [확인 필요]

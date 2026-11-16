@@ -166,8 +166,8 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   await expect(page.getByRole('button', { name: /결혼 준비 메모 0개/ })).toContainText(
     '+ 쓸 곳 메모 추가',
   );
-  // 저금 타일 “아직 없어요”
-  await expect(page.getByRole('button', { name: /^저금 (\d|아직)/ })).toContainText('아직 없어요');
+  // 저금 타일 “+ 저금 추가”
+  await expect(page.getByRole('button', { name: /^저금 (\d|\+)/ })).toContainText('+ 저금 추가');
   await axe(page);
   await h.getByRole('button', { name: '결혼 비용' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);

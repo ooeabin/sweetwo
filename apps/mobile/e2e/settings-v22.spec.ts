@@ -246,7 +246,6 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await page.getByRole('button', { name: '예빈님에게 보이는 모습 보기 ›' }).click();
   await expect(page).toHaveURL(/\/settings\/visibility\/preview$/);
   await expect(page.getByRole('heading', { name: '예빈님에게 보이는 모습' })).toBeVisible();
-  await expect(page.getByText('예빈님 화면에서는 이렇게 보여요')).toBeVisible();
   // 서버 필터를 ‘상대로서’ 부름
   expect(v.calls.find((c) => c.fn === 'partner_plan_view')?.body).toMatchObject({
     p_viewer: YEBIN,
@@ -366,7 +365,7 @@ test('보안(S-15): PIN을 건너뛰었으면 맨 위 권장 한 줄 + 켜기 �
   await fakeBridge(page, { signedIn: true, pin: null });
   await page.addInitScript(() => localStorage.setItem('sweetwo.pin-asked', '1'));
   await page.goto('/settings/security');
-  await expect(page.getByText('앱 잠금을 켜면 열 때 PIN을 한 번 더 물어요')).toBeVisible();
+  await expect(page.getByText('열 때 PIN 6자리를 물어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '켜기', exact: true }).click();
   await expect(page).toHaveURL(/next=\/settings\/security/);

@@ -87,7 +87,9 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await axe(page);
   await radio(page, '결혼했어요');
   await heading(page, '같이 쓰는 생활비가 있어요?');
-  await expect(page.getByText('월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요')).toBeVisible();
+  await expect(
+    page.getByText('월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요'),
+  ).toBeVisible();
   await expect(page.getByRole('radio', { name: '네' })).not.toBeChecked();
   await expect(page.getByRole('radio', { name: '아니요' })).not.toBeChecked();
   await axe(page);
@@ -154,7 +156,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/\/welcome$/);
   // 코드를 받아 버튼이 켜지고 시트가 다 올라온 뒤 접근성 검사(올라오는 중에는 글자가 흐림)
-  await expect(sheet.getByText('눌러서 복사')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: '코드 복사' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '링크 복사' })).toBeEnabled();
   await page.waitForTimeout(400);
   await axe(page);

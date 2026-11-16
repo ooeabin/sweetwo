@@ -96,7 +96,6 @@ export function F03qQuick() {
   return (
     <QuestionLayout
       title={copy.quickTitle}
-      help={copy.quickHelp}
       onBack={() => nav(-1)}
       primary={{
         label: needShare ? copy.next : copy.quickSave,
