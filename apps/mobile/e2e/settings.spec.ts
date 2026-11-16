@@ -119,7 +119,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page.locator('main').getByRole('button', { name: /^알림/ })).toContainText(
     '푸시 알림 켜짐',
   );
-  await expect(page.getByText('예빈님과 연결됨')).toBeVisible();
+  await expect(page.getByText('예빈님과 연결돼 있어요')).toBeVisible();
   await axe(page);
   await me.click();
 
@@ -908,8 +908,8 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await page.getByRole('button', { name: /도움말/ }).click();
   await expect(page).toHaveURL(/\/settings\/help$/);
   await expect(page.getByRole('heading', { name: '시작하기' })).toBeVisible();
-  await page.getByRole('button', { name: '계좌를 연결하지 않나요?' }).click();
-  await expect(page.getByText(/계좌·카드 연동 없이 직접 입력해요/)).toBeVisible();
+  await page.getByRole('button', { name: '통장을 연결하지 않나요?' }).click();
+  await expect(page.getByText(/통장·카드 연동 없이 직접 입력해요/)).toBeVisible();
   await axe(page);
   const search = page.getByRole('searchbox', { name: '자주 묻는 질문에서 찾기' });
   await search.fill('초대 코드');

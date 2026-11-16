@@ -248,7 +248,7 @@ test('묶음 달성(합계 기준): 두 사람 모두 W-12 한 번 → 다음엔
   await close();
 });
 
-test('W-15a 묶음 풀기: 각자 저금은 그대로', async ({ browser }) => {
+test('W-15a 같이 모으기 풀기: 각자 저금은 그대로', async ({ browser }) => {
   test.setTimeout(120_000);
   const { c, db, s, close } = await pair(browser, (d, sv) => {
     sv.bundles.push({
@@ -264,7 +264,7 @@ test('W-15a 묶음 풀기: 각자 저금은 그대로', async ({ browser }) => {
     for (const g of d.goals) if (g.id === 'goal-h' || g.id === 'goal-y') g.bundle_id = 'bundle-1';
   });
   await c.goto('/salary/bundles/bundle-1/edit');
-  await c.getByRole('button', { name: '묶음 풀기' }).click();
+  await c.getByRole('button', { name: '같이 모으기 풀기' }).click();
   await expect(c.getByRole('alertdialog', { name: '같이 모으기를 풀까요?' })).toBeVisible();
   await c.getByRole('button', { name: '풀게요' }).click();
   await expect(c).toHaveURL(/\/salary\/items\/goal-h$/);

@@ -93,7 +93,7 @@ export function PlanBar({
   caption?: ReactNode;
   /** 카드 밖(W-02 머리 아래): 막대 위 여백을 좁게 */
   flat?: boolean;
-  /** 막대 아래 굵은 한 줄(W-02 다 끝난 달 “10월 월급 체크를 다 했어요”, 2026-11-12). caption 위 */
+  /** 막대 아래 굵은 한 줄(W-02 다 끝난 달 “10월 25일 월급, 계획대로 됐어요”, 2026-11-12). caption 위 */
   title?: ReactNode;
   /** 막대 아래 오른쪽 글자 버튼(W-02 ‘공유하기’, 2026-11-12) */
   action?: ReactNode;
@@ -440,7 +440,7 @@ export function ReceiptRows({
   );
 }
 
-/** 합계 줄(“배분 342만 원”, “여유 자금 8만 원” 굵게, 모자라면 danger) */
+/** 합계 줄(“계획한 돈 342만 원”, “아직 안 정한 돈 8만 원” 굵게, 모자라면 danger) */
 export function ReceiptTotal({
   rows,
 }: {

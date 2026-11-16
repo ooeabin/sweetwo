@@ -15,7 +15,7 @@ export function PeriodBar({
   /** 채움 0~100 */
   percent: number;
   since: ReactNode;
-  /** 다 참: 보조 줄(“남는 돈은 저금에 넣을 수 있어요”) */
+  /** 다 참: 보조 줄(“더 들어온 돈은 저금에 넣을 수 있어요”) */
   full?: ReactNode;
 }) {
   return (

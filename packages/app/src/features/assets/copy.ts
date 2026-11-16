@@ -180,8 +180,8 @@ export const copy = {
   principalView: '원금으로 보기', // [확인 필요]
   principalViewHelp: '원금은 처음 넣은 돈이에요. 적어 둔 투자·부동산은 그 금액으로 셈해요', // [확인 필요]
   // F-03q 빠르게 적기(2026-11-13)
-  quickEntry: '큰 묶음만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
-  quickTitle: '큰 묶음만 빠르게 적어 볼까요?', // [확인 필요]
+  quickEntry: '큰 항목만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
+  quickTitle: '큰 항목만 빠르게 적어 볼까요?', // [확인 필요]
   quickFields: {
     cash: '현금·예적금',
     invest: '투자',

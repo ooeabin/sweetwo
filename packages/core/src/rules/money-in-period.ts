@@ -112,7 +112,7 @@ export function periodDisplay(p: MoneyInPeriod): MoneyInPeriodStatus {
   return p.status;
 }
 
-/** 다 찼나(보조 “남는 돈은 저금에 넣을 수 있어요”): bar이고 들어온 돈 ≥ 필요한 돈(> 0) */
+/** 다 찼나(보조 “더 들어온 돈은 저금에 넣을 수 있어요”): bar이고 들어온 돈 ≥ 필요한 돈(> 0) */
 export const periodFull = (p: MoneyInPeriod) =>
   p.status === 'bar' && p.needed !== null && p.needed > 0 && p.received >= p.needed;
 

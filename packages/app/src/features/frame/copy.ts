@@ -8,7 +8,7 @@ export const copy = {
   search: '검색',
   mask: '금액 가리기',
   noti: '알림',
-  notiNew: '알림, 새 알림 있음', // [확인 필요] 2026-11-11 새 알림 점이 있을 때 종 이름(화면 읽기용)
+  notiNew: '알림, 새 알림이 있어요', // [확인 필요] 2026-11-11 새 알림 점이 있을 때 종 이름(화면 읽기용)
   settings: '설정',
   add: '추가',
   // 2026-11-09 좁은 창 홈 머리 ☰와 메뉴 서랍(19 앱 기본 틀 11번) [확인 필요]
@@ -48,7 +48,7 @@ export const copy = {
   cmdKeyOpen: '열기', // [확인 필요]
   cmdKeyClose: '닫기', // [확인 필요]
   cmdQuick: '바로 하기',
-  cmdCheck: '월급 체크하기',
+  cmdCheck: '월급날 확인하기',
   cmdSaving: '저금 추가', // [확인 필요] 2026-11-09
   cmdAsset: '자산 추가',
   cmdMask: '금액 가리기',

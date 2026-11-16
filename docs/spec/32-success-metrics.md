@@ -260,7 +260,7 @@
 | checklist\_group\_checked | W-02 묶음 ‘모두 보냈어요’ (2026-11-09 round 3) | group(`saving` / `spend`), lines\_count(이번에 체크한 줄 수), all(남은 줄을 모두 체크했는지) |
 | checklist\_line\_unchecked | 체크한 줄의 체크 칸을 다시 누름, Toast ‘되돌리기’ | line\_kind, minutes\_since\_checked, entry(`checkbox` / `toast`) |
 | checklist\_line\_skipped | W-02 ‘이번 달은 건너뛸게요’, W-02a 0원, ‘못 함’으로 되돌리기 | line\_kind |
-| checklist\_completed | 이 기기에서 마지막 줄을 끝내 아직 안 정한 돈 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이 됨(W-02 “…체크를 다 했어요/마쳤어요” Toast, 2026-11-12 D4. 예전 W-02 끝 화면은 없앰) | hours\_since\_generated(체크리스트가 생긴 뒤), checked\_by\_partner\_count(상대가 체크한 줄 수) |
+| checklist\_completed | 이 기기에서 마지막 줄을 끝내 아직 안 정한 돈 줄을 뺀 모든 줄이 체크 또는 ‘못 함’이 됨(W-02 “…계획대로 됐어요/확인을 마쳤어요” Toast, 2026-11-12 D4. 예전 W-02 끝 화면은 없앰) | hours\_since\_generated(체크리스트가 생긴 뒤), checked\_by\_partner\_count(상대가 체크한 줄 수) |
 | month\_check\_viewed | 없앰(2026-11-15 W-05 화면 없앰, 앱은 더 이상 보내지 않음) | 예전 속성:  entry(`notification` / `home` / `other`: 월급 탭·캘린더 등, 2026-11-11), open\_lines\_count(체크 안 한 줄 수) |
 | checklist\_closed | 다음 기준일 0시 (서버, 2026-11-12 `server_event`) | done(닫히기 전에 모든 줄이 체크 또는 ‘못 함’으로 끝났는지, 2026-11-12 D4), checked\_ratio\_band(체크한 줄 비율 `<50` / `50-99` / `100`%), missed\_saving\_lines(체크하지 않은 저금 줄 수), missed\_saving\_band(그 줄 계획 금액 합 구간, 없으면 null) |
 | split\_saved | W-01 ‘추천값으로 다시 채우기’ 저장(2026-11-09 영수증부터 ‘저장’ 버튼이 없어 추천값으로 채울 때만, O-50은 onboarding\_completed로) | changed\_lines\_count, editor(`self`), left\_band, reset\_to\_recommended(늘 true), entry(`split`) |

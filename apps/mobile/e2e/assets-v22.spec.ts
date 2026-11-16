@@ -173,9 +173,9 @@ test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없
 }) => {
   const db = await start(page, { withAssets: false });
   await page.goto('/assets');
-  await page.getByRole('button', { name: /큰 묶음만 빠르게 적기/ }).click();
+  await page.getByRole('button', { name: /큰 항목만 빠르게 적기/ }).click();
   await expect(page).toHaveURL(/\/assets\/quick$/);
-  await expect(page.getByRole('heading', { name: '큰 묶음만 빠르게 적어 볼까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '큰 항목만 빠르게 적어 볼까요?' })).toBeVisible();
   const next = page.getByRole('button', { name: '다음', exact: true });
   await expect(next).toBeDisabled();
   // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)

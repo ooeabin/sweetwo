@@ -117,7 +117,7 @@ export function MainFrame(
   // 소셜 계정 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-05)
   useSocialAvatar(me.data?.id, me.data?.space_id);
   const unread = useHasUnread();
-  // 종 화면 읽기 이름: 새 알림 점이 있으면 “알림, 새 알림 있음”(2026-11-11 QA 4구간 S4-06)
+  // 종 화면 읽기 이름: 새 알림 점이 있으면 “알림, 새 알림이 있어요”(2026-11-11 QA 4구간 S4-06)
   const notiLabel = unread.data ? copy.notiNew : copy.noti;
   const panel = useNotiPanel();
   const narrow = useNarrow();

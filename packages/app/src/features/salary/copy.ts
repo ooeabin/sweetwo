@@ -267,12 +267,12 @@ export const copy = {
   back: '뒤로',
   thisMonth: '이번 달', // [확인 필요] 매달 카드의 이번 달 줄
   savedLabel: '모은 금액',
-  targetOf: (target: string, pct: number) => `목표 ${target}의 ${pct}%`, // [확인 필요]
+  targetOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`, // [확인 필요]
   edit: '고치기',
   until: (ym: string) => `${ym}까지`,
   setDeadline: '기한 정하기', // [확인 필요]
   noTarget: '목표 금액을 정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
-  setTarget: '목표 금액 정하기', // [확인 필요]
+  setTarget: '금액 정하기', // [확인 필요]
   reachedAll: (target: string) => `${target}을 다 모았어요`, // [확인 필요]
   achieved: '달성',
   monthlyOf: (amount: string) => `매달 ${amount}씩`,
@@ -349,7 +349,7 @@ export const copy = {
   afterKeepSub: '목표 금액만 지우고 지금처럼 모아요',
   afterStopSub: '월급 계획에서 빠지고 저금 내역은 남아요',
   afterRetarget: '목표 금액을 새로 정할게요',
-  afterRetargetSub: '모은 금액은 그대로 두고 더 큰 목표로 이어서 모아요',
+  afterRetargetSub: '모은 금액은 그대로 두고 더 큰 금액으로 이어서 모아요',
   keptToast: '목표 금액을 지우고 계속 모아요', // [확인 필요]
   stoppedToast: '그만 모으기로 했어요', // [확인 필요]
 
@@ -404,7 +404,7 @@ export const copy = {
   periodIn: (amount: string) => `들어온 돈 ${amount}`,
   periodNeed: (amount: string) => `필요한 돈 ${amount}`,
   periodSince: (date: string) => `${formatMonthDay(date)}부터`,
-  periodFull: '남는 돈은 저금에 넣을 수 있어요',
+  periodFull: '더 들어온 돈은 저금에 넣을 수 있어요',
   periodGap: (n: number) => `지난번 돈이 들어온 지 ${n}일 됐어요`,
   periodBarLabel: (inn: string, need: string, since: string) =>
     `이번 기간 들어온 돈 ${inn}, 필요한 돈 ${need}, ${since}`,
@@ -551,7 +551,7 @@ export const copy = {
   bundleNone: '없음', // [확인 필요]
   showEach: '각자 모은 금액 보여 주기', // [확인 필요]
   showEachHelp: (name: string) => `${name}님도 켜야 보여요`, // [확인 필요]
-  bundleLeave: '묶음 풀기', // [확인 필요]
+  bundleLeave: '같이 모으기 풀기', // [확인 필요]
   bundleLeaveQ: '같이 모으기를 풀까요?', // [확인 필요]
   bundleLeaveBody: '각자 저금은 그대로 남아요', // [확인 필요]
   bundleLeaveOk: '풀게요', // [확인 필요]

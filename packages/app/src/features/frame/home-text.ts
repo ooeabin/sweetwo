@@ -7,8 +7,8 @@ export const whoDid = (name: string) => (name ? `${name}님이` : '파트너가'
 export const homeText = {
   todoUnlink: (name: string) => `${whoDid(name)} 연결 해제를 요청했어요`,
   todoReconnect: (name: string) => `${whoDid(name)} 다시 연결하자고 했어요`,
-  todoReview: (label: string, n: number) => `${label}에서 체크 안 한 게 ${n}개 있어요`,
-  todoCheck: '월급날 체크할 차례예요', // [확인 필요] 2026-11-09 홈 할 일 띠(19 H-06 3a)
+  todoReview: (label: string, n: number) => `${label}에서 확인 안 한 게 ${n}개 있어요`,
+  todoCheck: '월급날 확인할 차례예요', // [확인 필요] 2026-11-09 홈 할 일 띠(19 H-06 3a)
   todoInvite: '함께할 사람을 초대해 주세요',
   todoSaving: '첫 저금을 만들어 볼까요?', // [확인 필요] 2026-11-09 round 3 첫 주 할 일(19 H-06 4b)
   todoMatured: (name: string) => `${subject(name)} 만기됐어요`, // [확인 필요] 알림 문구와 같게

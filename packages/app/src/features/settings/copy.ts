@@ -9,7 +9,7 @@ export const copy = {
   providers: { kakao: '카카오', google: '구글', apple: 'Apple' } as Record<string, string>,
   loggedIn: (p: string) => `${p}로 로그인했어요`,
   state: {
-    connected: (name: string) => `${name}님과 연결됨`,
+    connected: (name: string) => `${name}님과 연결돼 있어요`,
     not_joined: '초대 중',
     unlink_pending: '연결 해제 대기 중',
     solo: '혼자 쓰는 중',
@@ -591,7 +591,7 @@ export const copy = {
   styleCancel: '요청 취소',
   styleCancelled: '요청을 취소했어요', // [확인 필요]
   styleAsked: (name: string) => `${name}님에게 물어봤어요`, // [확인 필요]
-  styleSaved: '관리 형태를 바꿨어요', // [확인 필요]
+  styleSaved: '월급 관리 방식을 바꿨어요', // [확인 필요]
   styleReceived: (name: string) => `${name}님이 보낸 요청이 있어요`, // [확인 필요]
   styleSame: '지금과 같아요', // [확인 필요] 저장 버튼 위(바뀐 게 없을 때)
   styleAskNote: (name: string) => `${name}님이 ‘좋아요’를 누르면 바뀌어요`, // [확인 필요]
@@ -608,7 +608,7 @@ export const copy = {
   styleChangeSend: (name: string) => `${name}님 줄은 보내기와 용돈이 돼요`,
   styleChangeMine: (me: string) => `${me}님이 월급 계획을 관리해요`, // [확인 필요]
   styleChangeAllowance: '용돈은 사람마다 한 줄씩 남아요', // [확인 필요]
-  styleChangeBundle: '같이 모으기 묶음은 공동 저금이 돼요',
+  styleChangeBundle: '같이 모으기는 공동 저금이 돼요',
   styleYes: '좋아요',
   styleNo: '지금처럼 할게요',
   styleExpired: '요청 기한이 지났어요', // [확인 필요]

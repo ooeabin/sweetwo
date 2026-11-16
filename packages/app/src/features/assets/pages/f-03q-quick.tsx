@@ -22,7 +22,7 @@ const QUICK: { key: QuickKey; side: AssetSide; grp: string; kind: string }[] = [
 ];
 
 /**
- * F-03q 빠르게 적기(2026-11-13): “큰 묶음만 빠르게 적어 볼까요?” + 5칸 금액. 빈 칸은 저장하지 않음, 명의 ‘나’.
+ * F-03q 빠르게 적기(2026-11-13): “큰 항목만 빠르게 적어 볼까요?” + 5칸 금액. 빈 칸은 저장하지 않음, 명의 ‘나’.
  * 처음 자산을 적는 사람(asset_share_default null, 혼자 쓰기 아님)은 저장 전에 F-03e를 한 번, 아니면 내 기본값.
  * 주 버튼 “저장하기” → F-01. 분석 quick_assets_saved.
  * 빠르게 적기 표시 asset.quick = true(서버 20261208090000)

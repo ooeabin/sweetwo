@@ -25,7 +25,7 @@ import { refreshBundles, refreshSaving, useBundles, useTogetherRealtime } from '
 
 /**
  * W-15a 묶음 고치기(20 v2.2, R2·G1): 이름·목표 금액·기한(누구나 바로 고침 + 상대 알림, 서버), 토글 “각자 모은 금액 보여 주기”
- * (내 쪽만, 상대도 켜야 보임), “퍼센트만 보여 주기”(내 쪽만, 하나라도 켜면 둘 다 %, 목표 금액이 있을 때만), “묶음 풀기”(Modal,
+ * (내 쪽만, 상대도 켜야 보임), “퍼센트만 보여 주기”(내 쪽만, 하나라도 켜면 둘 다 %, 목표 금액이 있을 때만), “같이 모으기 풀기”(Modal,
  * 각자 저금은 그대로). W-10 묶음 카드 ⋯에서 열림
  */
 export function W15aBundleEdit() {
