@@ -113,7 +113,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await c.getByRole('button', { name: '기한 없이 모을게요' }).click();
   await expect(c.getByRole('heading', { name: '같이 모으기 전에 알려 드려요' })).toBeVisible();
   // 고지(G1): 합계로 짐작할 수 있음을 숨기지 않음
-  await expect(c.getByText(/합계로 서로 얼마 넣었는지 짐작할 수 있어요/)).toBeVisible();
+  await expect(c.getByText(/서로 얼마 넣었는지 짐작할 수 있어요/)).toBeVisible();
   await expect(c.getByRole('checkbox', { name: '퍼센트만 보여 주기' })).toHaveAttribute(
     'aria-checked',
     'false',
@@ -300,10 +300,10 @@ test('묶음 하나씩(H1): 찬우가 묶은 뒤 예빈이 자기 저금에서 �
   await y.goto('/salary/items/goal-h');
   await expect(y.getByRole('button', { name: '같이 모으기에 들어가기' })).toBeVisible();
   await expect(y.getByRole('button', { name: '받은 돈 적기' })).toHaveCount(0);
-  // 예빈 자기 저금 ⋯ 같이 모으기로 묶기 → 들어갈 묶음을 먼저 물음
+  // 예빈 자기 저금 ⋯ 같이 모으기 시작하기 → 들어갈 묶음을 먼저 물음
   await y.goto('/salary/items/goal-y');
   await y.getByRole('button', { name: '더보기' }).click();
-  await y.getByRole('menuitem', { name: '같이 모으기로 묶기' }).click();
+  await y.getByRole('menuitem', { name: '같이 모으기 시작하기' }).click();
   await expect(
     y.getByRole('heading', { name: '찬우님 ‘내 집 마련’에 같이 모을까요?' }),
   ).toBeVisible();

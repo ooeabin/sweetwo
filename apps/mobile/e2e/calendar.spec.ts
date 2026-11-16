@@ -186,7 +186,7 @@ test('목록(Y-01): 60일 안 금융 일정(월급날, 월급날 확인 목록, 
   await expect(money.locator('.hg-list').getByRole('button').first()).toBeVisible();
   const rows = await money.locator('.hg-list').getByRole('button').allTextContents();
   expect(rows[0]).toContain('예빈 월급날');
-  expect(rows[0]).toContain('10월 9일');
+  expect(rows[0]).toContain('10일이 토요일이라 9일 금요일로 앞당겼어요');
   expect(rows[0]).toContain('D-2');
   const all = rows.join('|');
   expect(all).toContain('월급날 확인 목록');
@@ -273,9 +273,9 @@ test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 �
   ).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: '10월 20일, 일정 1개' }).locator('.hg-cal__band'),
-  ).toHaveText('확인 목록');
+  ).toHaveText('월급날 확인 목록');
   await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
-  await page.getByRole('button', { name: /9월 월급, 확인 목록에 남은 게 있어요/ }).click();
+  await page.getByRole('button', { name: /9월 월급날 확인 목록에 남은 게 있어요/ }).click();
   // 오늘(10월 7일)은 월급 탭 W-02로 감(W-05 화면은 2026-11-15 없앰)
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/calendar/month');
@@ -407,7 +407,7 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
 
   await page.goto('/calendar/list');
   // 기록할 날은 맨 위 회색 띠(2026-11-03)
-  const overdue = page.getByRole('button', { name: /기록할 날이 1개 있어요/ });
+  const overdue = page.getByRole('button', { name: /선물을 기록할 날이 1개 있어요/ });
   await expect(overdue).toContainText('민지 결혼식, 10월 5일');
   const next = page.getByRole('region', { name: '다음 경조사' });
   await expect(next).toContainText('D-6');
@@ -503,7 +503,9 @@ test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 �
   });
   await expect(page.getByRole('alert')).toHaveText('10MB 이하 사진만 올릴 수 있어요');
   await input.setInputFiles({ name: 'a.gif', mimeType: 'image/gif', buffer: PNG });
-  await expect(page.getByRole('alert')).toHaveText('이 형식은 올릴 수 없어요');
+  await expect(page.getByRole('alert')).toHaveText(
+    '이 파일은 올릴 수 없어요. 사진 파일을 골라 주세요',
+  );
   await input.setInputFiles(
     Array.from({ length: 10 }, (_, i) => ({
       name: `p${i}.png`,
@@ -636,7 +638,9 @@ test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날
   // 이번 안내는 20일에 시작했고(지난 일정), 다음 달 것은 그 월급의 손 줄이 생긴 뒤에만 보임(2026-11-15)
   await expect(list.getByRole('button', { name: /월급날 확인 목록/ })).toHaveCount(0);
   await expect(list.getByRole('button', { name: /찬우 월급날/ }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /확인 목록에 남은 게 있어요/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /월급날 확인 목록에 남은 게 있어요/ })).toHaveCount(
+    0,
+  );
   await expect(page.locator('.hg-banner')).toHaveCount(0);
   // 넓은 창은 제목 줄 ‘+ 추가’만, 좁은 창은 ‘+ 경조사 추가’만(S9-11)
   await expect(page.locator('.hg-addrow').locator('visible=true')).toHaveCount(

@@ -113,7 +113,7 @@ test('금액 바꾸기: 시트(아직 안 정한 돈 미리보기) → 바로 �
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
   // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
-  await expect(page.getByText('이번 달 확인 안 한 줄도 바꿨어요')).toBeVisible();
+  await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '생활비 80만 원' })).toBeVisible();
   expect(lineOf(db, 'living')?.amount).toBe(800_000);
   expect(waitLine(db, 'living')?.planned).toBe(800_000);
@@ -178,7 +178,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
     .getByRole('button', { name: '청약 줄 지우기' })
     .click();
   const modal = page.getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' });
-  await expect(modal.getByText('월급 계획에서 빠지고 저금 내역은 남아요')).toBeVisible();
+  await expect(modal.getByText('월급 계획에서는 빠지지만 저금 내역은 남아요')).toBeVisible();
   await modal.getByRole('button', { name: '그만할게요' }).click();
   await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
   expect(await names(page, '저금')).toEqual(['내 집 마련']);
@@ -390,7 +390,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   await page.getByRole('button', { name: '추천값으로 다시 채우기' }).click();
   const modal = page.getByRole('alertdialog', { name: '추천값으로 다시 채울까요?' });
   await expect(
-    modal.getByText('용돈과 기한을 정한 저금 금액이 바뀌어요. 이미 적은 지출은 그대로예요'),
+    modal.getByText('용돈과 기한 있는 저금이 추천값으로 바뀌어요. 이미 적은 지출은 그대로예요'),
   ).toBeVisible();
   await modal.getByRole('button', { name: '다시 채우기' }).click();
   await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
@@ -488,7 +488,7 @@ test('W-02 ‘이번 달’도 못 불러오면 오류 카드(‘월급 없음�
   await go();
   await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
-  await expect(page.getByText('월급이 생기면 월급 계획을 만들어 드려요')).toHaveCount(0);
+  await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await expect(page.getByRole('tab', { name: '이번 달' })).toBeVisible();
 });
 
@@ -552,7 +552,7 @@ test('지출 줄이 있으면 첫 달 묻기 없음, 같이 쓰는 생활비 ‘
   await go();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
   await expect(page.getByRole('region', { name: '매달 나가는 돈이 있어요?' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장 추가' })).toHaveCount(0);
   await page.getByRole('button', { name: '+ 지출 추가' }).click();
   await page
     .getByRole('group', { name: '지출 이름' })

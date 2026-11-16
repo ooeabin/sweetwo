@@ -43,7 +43,7 @@ export function S11hWeddingDate() {
       ? param
       : sp.marriage_status === 'engaged'
         ? 'engaged'
-        : 'married'; // 아직 안 정했어요면 날짜 화면이 없어 기본 ‘결혼했어요’
+        : 'married'; // 날짜 없는 사이(연애 중·같이 살아요·예전 값)면 기본 ‘결혼했어요’
   const changedStatus = status !== sp.marriage_status;
   const engaged = status === 'engaged';
   const today = todayKst();

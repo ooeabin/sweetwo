@@ -222,7 +222,7 @@ export function useCheck(entry: CheckEntry = 'w02') {
   };
 }
 
-/** 묶음 ‘모두 보냈어요’처럼 여러 줄을 체크한 뒤 체크리스트가 이번에 끝났는지 */
+/** 묶음 ‘모두 계획대로 했어요’처럼 여러 줄을 체크한 뒤 체크리스트가 이번에 끝났는지 */
 export function finishOfMany(list: PayChecklist | undefined, ids: string[]) {
   if (!list) return null;
   // 이번에 체크한 줄은 ‘전’에는 체크 안 한 줄, 다른 줄은 이 기기가 방금 저장한 상태를 덧씌움

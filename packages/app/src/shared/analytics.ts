@@ -273,7 +273,7 @@ export type AnalyticsEvent =
       };
     }
   | {
-      // W-02 묶음 ‘모두 보냈어요’(2026-11-09 round 3). all = 남은 줄을 모두 체크했는지(상대가 먼저 체크한 줄은 빠짐)
+      // W-02 묶음 ‘모두 계획대로 했어요’(2026-11-09 round 3). all = 남은 줄을 모두 체크했는지(상대가 먼저 체크한 줄은 빠짐)
       name: 'checklist_group_checked';
       props: { group: 'saving' | 'spend'; lines_count: number; all: boolean };
     }
@@ -421,7 +421,7 @@ export type AnalyticsEvent =
       name: 'home_box_tapped';
       props: {
         // 2026-11-13 v2.2: together = H-10 칸, month_line = H-11, wedding = H-12, money_in = ‘+ 돈 들어왔어요’,
-        // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 만들기’, dday = ‘결혼식 날짜 알려 주기’
+        // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 추가’, dday = ‘결혼식 날짜 알려 주기’
         box:
           | 'together'
           | 'month_line'

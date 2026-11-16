@@ -181,7 +181,7 @@ test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없
   // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)
   await expect(page.getByText('적금 통장도 여기에 적어요')).toBeVisible();
   await expect(
-    page.getByText('앱에서 모으는 저금은 순자산에 더하지 않아서 두 번 세지 않아요'),
+    page.getByText('저금은 통장 잔액에 이미 들어 있어서 순자산에 따로 더하지 않아요'),
   ).toBeVisible();
   await page.getByLabel('현금·예적금').fill('5000000');
   await page.getByLabel('대출').fill('20000000');
@@ -354,7 +354,7 @@ test('새로 확인하기: 광고를 닫으면 Toast, 순위를 열지 않음', 
   pairSeen(db);
   await page.goto('/assets');
   await page.getByRole('button', { name: /지난번엔 상위 41%였어요/ }).click();
-  await expect(page.getByText('광고를 끝까지 보면 볼 수 있어요')).toBeVisible();
+  await expect(page.getByText('광고를 끝까지 보면 새 순위를 보여 드려요')).toBeVisible();
   await expect(page).toHaveURL(/\/assets$/);
   expect(db.rank?.views).toHaveLength(1);
 });

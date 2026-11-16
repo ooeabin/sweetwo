@@ -41,7 +41,7 @@ const NAME_CHIPS = ['living', 'date'] as const;
 // → ‘{이름}님에게 제안하기’(propose_split, 상대 푸시·인앱 + 홈 띠 4번). 어느 관리 형태에서든.
 // ‘월급 비율’은 두 사람 모두 월급이 있고 둘 다 공개 ‘모두 보여 주기’일 때만 고를 수 있고, 아니면 이유 문구 없이 흐린 선택지.
 // 월급 비율 몫은 서버가 계산(미리 보기는 core splitShares로 같은 값, 월급 원값은 보이지 않음).
-// 미합류면 제안 없이 내 몫만 내 월급 계획 ‘같이 쓰는 통장’ 줄로(‘내 월급 계획에 넣기’). 진입: 홈 띠 8번, W-01 “+ 같이 쓰는 통장”.
+// 미합류면 제안 없이 내 몫만 내 월급 계획 ‘같이 쓰는 통장’ 줄로(‘내 월급 계획에 넣기’). 진입: 홈 띠 8번, W-01 “+ 같이 쓰는 통장 추가”.
 export function W01bSplitPropose() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -205,7 +205,7 @@ export function W01bSplitPropose() {
     const ok = mine !== null && mine >= 0 && mine % 10_000 === 0 && total !== null && mine <= total;
     return (
       <QuestionLayout
-        title={t.customQ(c.myName)}
+        title={t.customQ}
         help={
           mine !== null && total !== null && mine > total
             ? t.overTotal
@@ -229,14 +229,7 @@ export function W01bSplitPropose() {
         }
         onSubmit={() => void propose()}
       >
-        <AmountInput
-          label={t.customQ(c.myName)}
-          value={mine}
-          onChange={setMine}
-          monthly
-          embedded
-          allowZero
-        />
+        <AmountInput label={t.customQ} value={mine} onChange={setMine} monthly embedded allowZero />
       </QuestionLayout>
     );
   }

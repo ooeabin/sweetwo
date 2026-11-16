@@ -245,7 +245,7 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
     noti({
       id: '00000000-0000-4000-8000-000000000050',
       kind: 'goal_achieved',
-      title: '우리 할머니 팔순 잔치와 가족 여행 겸 기념 행사 저금 목표 금액을 다 모았어요!',
+      title: '우리 할머니 팔순 잔치와 가족 여행 겸 기념 행사 저금 목표 금액을 다 모았어요',
       target: '/calendar/list',
       icon: 'trophy',
       actor_id: 'yebin',
@@ -265,7 +265,7 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
   }
   const panel = page.getByRole('complementary', { name: '알림' });
   const first = panel.locator('.hg-noti__item').first();
-  await expect(first).toContainText('목표 금액을 다 모았어요!');
+  await expect(first).toContainText('목표 금액을 다 모았어요');
   await expect(first.locator('.hg-avatar')).toHaveCount(0);
   // 종류 그림 자리(trophy)는 그림이 들어올 때까지 없음: 글자가 왼쪽 끝부터(2026-11-15 3차 검토)
   await expect(first.locator('.hg-noti__icon, .hg-lead--slot')).toHaveCount(0);
@@ -273,7 +273,7 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
   const msg = first.locator('.hg-noti__msg');
   await expect(msg).toHaveCSS('white-space', 'nowrap');
   await expect(msg).toHaveCSS('text-overflow', 'ellipsis');
-  await expect(first).toHaveAttribute('title', /행사 저금 목표 금액을 다 모았어요!$/);
+  await expect(first).toHaveAttribute('title', /행사 저금 목표 금액을 다 모았어요$/);
   expect(await first.evaluate((e) => Math.round(e.getBoundingClientRect().height))).toBe(64);
 
   // 끝까지 내리면 31개 모두(같은 시각이 빠지지 않음)

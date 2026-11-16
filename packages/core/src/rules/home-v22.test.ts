@@ -119,7 +119,7 @@ describe('pickMonthLine(H-11 상태)', () => {
       to: '/salary',
     });
   });
-  it('자동 줄뿐 → “26일에 3개”', () => {
+  it('자동 줄뿐 → “26일에 3개 나가요”', () => {
     const c = cur([
       { state: 'wait', auto: true, auto_due: '2026-10-26' },
       { state: 'wait', auto: true, auto_due: '2026-10-26' },

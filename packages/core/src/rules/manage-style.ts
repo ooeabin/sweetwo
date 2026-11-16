@@ -4,7 +4,7 @@
 // 화면 규칙은 salary_mode와 관리하는 사람만 본다. shared_living·shared_saving은 권유와 이름 표시에만.
 
 export type SalaryMode = 'separate' | 'joint';
-/** O-30c 답. ‘제가 주로 해요’ / ‘{파트너}가 주로 해요’ / ‘둘이 같이 해요’ / ‘각자 자기 월급으로 해요’ */
+/** O-30c 답. ‘제가 주로 해요’ / ‘{파트너}님이 주로 해요’ / ‘둘이 같이 해요’ / ‘각자 자기 월급으로 해요’ */
 export type ManagerAnswer = 'me' | 'partner' | 'together' | 'each';
 /** 이름 코드(앱 copy가 “한 사람이 관리해요” 등으로 바꿈) */
 export type ManageStyle =

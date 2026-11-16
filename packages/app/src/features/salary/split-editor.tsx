@@ -77,7 +77,7 @@ export function SplitEditor({
   steps?: { total: number; now: number; fill?: number };
   /** 줄 오른쪽 회색 글(있으면 기본 보조 글 대신, 합류 P-06 “찬우님이 매달 95만 원 넣어요”, “95만 원 → 246만 원”) */
   noteOf?: (l: SplitLineDraft) => string | undefined;
-  /** 수입 줄 아래 회색 글(합쳐서 “찬우 350만 원, 예빈 270만 원”) */
+  /** 수입 줄 아래 회색 글(합쳐서 “찬우님 350만 원, 예빈님 270만 원”) */
   incomeSub?: string;
   /** 수입 줄을 누르면(W-01 2번 → 설정 내 월급 S-11) */
   onIncome?: () => void;
@@ -240,7 +240,7 @@ export function SplitEditor({
       {notice}
       <List>
         <ListRow
-          label={copy.splitIncome(readWon(income))}
+          label={(joint ? copy.splitIncomeJoint : copy.splitIncome)(readWon(income))}
           sub={incomeSub}
           value={paydayText}
           chevron={!!onIncome}

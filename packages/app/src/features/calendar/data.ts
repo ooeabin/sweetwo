@@ -19,6 +19,7 @@ import {
   addDays,
   careDatesInMonth,
   coupleOf,
+  formatDayWeekday,
   moneyDates,
   nextCareDate,
   overdueDate,
@@ -202,7 +203,8 @@ export function useCalendarData() {
 }
 
 /** 금융 일정 한 줄: 라벨, 갈 곳 이름, 경로(24 ‘캘린더 범위’ 표) */
-export function moneyLine(d: MoneyDate) {
+/** withWeekday: Y-01 목록은 날짜 자리를 까닭이 대신해 요일까지(“25일이 공휴일이라 24일 목요일로 앞당겼어요”) */
+export function moneyLine(d: MoneyDate, withWeekday = false) {
   const label =
     d.kind === 'payday'
       ? copy.money.payday(d.name)
@@ -235,9 +237,13 @@ export function moneyLine(d: MoneyDate) {
                 ? `/salary/bundles/${d.bundle}/notes`
                 : `/salary/items/${d.ref ?? ''}/notes`
               : `/salary/items/${d.ref ?? ''}`;
-  // 주말·공휴일이라 앞당긴 월급날은 까닭 한마디(“25일이 토요일이라 24일”, 2026-11-16 R4-9)
+  // 주말·공휴일이라 앞당긴 월급날은 까닭 한마디(“25일이 토요일이라 24일로 앞당겼어요”, 2026-11-16 R4-9)
   const why = d.moved
-    ? copy.money.moved(Number(d.moved.from.slice(8, 10)), d.moved.why, Number(d.date.slice(8, 10)))
+    ? copy.money.moved(
+        Number(d.moved.from.slice(8, 10)),
+        d.moved.why,
+        withWeekday ? formatDayWeekday(d.date) : `${Number(d.date.slice(8, 10))}일`,
+      )
     : undefined;
   return { label, go: copy.go[d.kind], to, why };
 }

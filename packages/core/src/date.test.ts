@@ -27,3 +27,8 @@ test('서버 시각의 KST 날짜(S6-10): UTC 전날 15시 이후는 KST 다음 
   expect(kstDateOf('2026-10-24T15:00:00Z')).toBe('2026-10-25');
   expect(kstDateOf('2026-10-25T00:30:00+09:00')).toBe('2026-10-25');
 });
+
+test('formatDayWeekday: 일 + 요일', () => {
+  expect(dt.formatDayWeekday('2026-12-24')).toBe('24일 목요일');
+  expect(dt.formatDayWeekday('2026-10-11')).toBe('11일 일요일');
+});

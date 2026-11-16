@@ -79,7 +79,7 @@ test('진행 막대 하나(2026-11-15): 확인할수록 차고 “확인한 금�
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(page.getByText('09.25 ~ 10.24', { exact: true })).toBeVisible();
-  await expect(page.getByText('확인한 금액 0원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('계획한 350만 원 중 0원 확인했어요')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 0개 완료' })).toBeVisible();
   // 개수 글자는 머리에서 빠짐
   await expect(page.getByText(/5개 중 0개 완료/)).toHaveCount(0);
@@ -87,15 +87,15 @@ test('진행 막대 하나(2026-11-15): 확인할수록 차고 “확인한 금�
   expect(await bar(page)).toEqual([['check', 100, '0%']]);
   await axe(page);
   await page.getByRole('checkbox', { name: /청약/ }).click();
-  await expect(page.getByText('확인한 금액 44만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('계획한 350만 원 중 44만 원 확인했어요')).toBeVisible();
   await page.getByRole('checkbox', { name: /고정지출/ }).click();
-  await expect(page.getByText('확인한 금액 132만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('계획한 350만 원 중 132만 원 확인했어요')).toBeVisible();
   await expect(page.getByRole('img', { name: '5개 중 2개 완료' })).toBeVisible();
   // 5개 중 2개 = 40%
   expect(await bar(page)).toEqual([['check', 100, '40%']]);
   // 체크 풀면 다시 줄어듦
   await page.getByRole('checkbox', { name: /청약/ }).click();
-  await expect(page.getByText('확인한 금액 88만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('계획한 350만 원 중 88만 원 확인했어요')).toBeVisible();
 });
 
 test('묶음은 월급 계획 순서(sort)대로', async ({ page }) => {
@@ -129,7 +129,9 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   await expect(toast).not.toContainText('확인했어요 ');
   const title = page.locator('.hg-planbar__title');
   await expect(title).toHaveText('9월 25일 월급, 계획대로 됐어요');
-  await expect(page.locator('.hg-planbar__foot')).toContainText('확인한 금액 350만 원 / 350만 원');
+  await expect(page.locator('.hg-planbar__foot')).toContainText(
+    '계획한 350만 원 중 350만 원 확인했어요',
+  );
   await expect(
     page.locator('.hg-planbar__foot').getByRole('button', { name: '공유하기' }),
   ).toBeVisible();
@@ -144,7 +146,7 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   // 되돌리기 = 마지막 줄을 풂 → 한 줄 사라짐
   await toast.getByRole('button', { name: '되돌리기' }).click();
   await expect(title).toHaveCount(0);
-  await expect(page.getByText('확인한 금액 315만 원 / 350만 원')).toBeVisible();
+  await expect(page.getByText('계획한 350만 원 중 315만 원 확인했어요')).toBeVisible();
   // 다시 체크 → 한 줄, 체크 칸으로 풀어도 같음
   await page.getByRole('checkbox', { name: /용돈/ }).click();
   await expect(title).toBeVisible();
@@ -173,7 +175,9 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   await expect(row).toContainText('이번 달은 건너뛰었어요');
   // 건너뛴 줄도 끝난 줄이라 확인 막대는 다 참(2026-11-15 막대 하나)
   expect(await bar(page)).toEqual([['check', 100, '100%']]);
-  await expect(page.locator('.hg-planbar__foot')).toContainText('확인한 금액 288만 원 / 350만 원');
+  await expect(page.locator('.hg-planbar__foot')).toContainText(
+    '계획한 350만 원 중 288만 원 확인했어요',
+  );
   await axe(page);
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();
@@ -223,7 +227,7 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
   let sheet = page.getByRole('dialog', { name: '생활비 금액' });
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('이번 달 확인 안 한 줄도 바꿨어요')).toBeVisible();
+  await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toBeVisible();
   expect(linesOf(db).find((l) => l.kind === 'living' && l.state === 'wait')?.planned).toBe(800_000);
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('button', { name: '생활비 88만 원' })).toBeVisible();
@@ -233,7 +237,7 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
   await sheet.getByRole('textbox', { name: '고정지출 금액' }).fill('900000');
   await sheet.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('고정지출을 90만 원으로 바꿨어요')).toBeVisible();
-  await expect(page.getByText('이번 달 확인 안 한 줄도 바꿨어요')).toHaveCount(0);
+  await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toHaveCount(0);
 });
 
 test('새 사이클 한 줄 “9월 계획대로 체크리스트를 만들었어요”: 지난 달이 있을 때만, ×로 닫으면 다시 안 보임', async ({
@@ -288,7 +292,7 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같�
   await link.click();
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
-  await expect(page.getByText('확인한 금액 0원 / 95만 원')).toBeVisible();
+  await expect(page.getByText('계획한 95만 원 중 0원 확인했어요')).toBeVisible();
   // 확인 막대 하나(0/2)
   expect(await bar(page)).toEqual([['check', 100, '0%']]);
   await expect(page.getByRole('checkbox')).toHaveCount(0);

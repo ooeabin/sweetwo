@@ -145,7 +145,7 @@ export function PlanSheet({
   masked?: boolean;
   /** 줄 설정(W-01 7a). 없으면 설정 칸 없음(줄 추가) */
   settings?: { value: LineSettings; showInChecklist: boolean; payday: BaseDay | null };
-  /** 시트 아래 회색 한 줄(5f 관리하는 사람의 상대 용돈 “{이름}님에게 알려 드려요”) */
+  /** 시트 아래 회색 한 줄(5f 관리하는 사람의 상대 용돈 “{이름}님께 알려 드려요”) */
   notify?: string;
 }) {
   const [v, setV] = useState<number | null>(initial);
@@ -240,7 +240,7 @@ export function SpendChips({
 }: {
   taken: string[];
   onPick: (name: string, chip: string | null) => void;
-  /** 칩 끝 하나 더(“+ 같이 쓰는 통장”을 숨겼을 때 나중에 켤 길, 2026-11-16 R4-4) */
+  /** 칩 끝 하나 더(“+ 같이 쓰는 통장 추가”를 숨겼을 때 나중에 켤 길, 2026-11-16 R4-4) */
   more?: { label: string; onClick: () => void };
 }) {
   const [text, setText] = useState('');

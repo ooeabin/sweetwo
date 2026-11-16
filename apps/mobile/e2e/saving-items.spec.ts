@@ -335,7 +335,7 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '계속 모을게요' }).click();
-  await expect(page.getByText('목표 금액을 지우고 계속 모아요')).toBeVisible();
+  await expect(page.getByText('목표 금액을 지우고 계속 모을게요')).toBeVisible();
   const tv = db.goals.find((g) => g.id === 'goal-tv');
   expect(tv?.target_amount).toBeNull();
   expect(tv?.closed_at ?? null).toBeNull();

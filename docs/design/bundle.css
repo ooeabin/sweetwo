@@ -1021,7 +1021,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sechead__count { font: var(--text-title-3); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: var(--text-label); font-weight: 500; color: var(--slate); text-decoration: none; }  /* 2026-11-09 머리 이동 링크(‘전체 보기 ›’ ‘캘린더 ›’ ‘5개 중 0개 완료 ›’)는 당근 ‘더보기’처럼 회색. 오렌지는 동작 글자 버튼만 */
 .hg-sechead__more:hover { background: var(--surface-alt); }
-.hg-sechead__action { margin-left: auto; display: inline-flex; align-items: center; flex: none; }  /* 2026-11-09 round 3 묶음 머리 오른쪽 글자 버튼(W-02 ‘모두 보냈어요’) */
+.hg-sechead__action { margin-left: auto; display: inline-flex; align-items: center; flex: none; }  /* 2026-11-09 round 3 묶음 머리 오른쪽 글자 버튼(W-02 ‘모두 계획대로 했어요’) */
 .hg-sechead__link { display: inline-flex; align-items: center; gap: 2px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; }  /* 2026-11-09 round 3 누르는 제목(저금 묶음 → W-13) */
 .hg-sechead__link > svg { color: var(--slate); }
 .hg-sechead__link:hover > svg { color: var(--ink); }
@@ -2442,7 +2442,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__dots > i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--hairline); }
 .hg-together__dots > i.is-on { background: var(--ink-2); }
 .hg-together > .hg-addrow { align-self: flex-start; }
-/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 3개 + ‘+ 저금 만들기’. 그림 자리 없음 */
+/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 3개 + ‘+ 저금 추가’. 그림 자리 없음 */
 .hg-together__ask { margin: var(--space-2) 0 0; font: var(--text-title-3); font-weight: 700; }
 .hg-together__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 @media (prefers-reduced-motion: no-preference) { .hg-together__track { scroll-behavior: smooth; } }

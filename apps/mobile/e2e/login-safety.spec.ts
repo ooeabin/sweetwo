@@ -314,7 +314,9 @@ test('약한 PIN(A-06): 9 다음 0으로 도는 연속, 두 개씩 3번, 두 숫
     ).toBeVisible();
   }
   await page.keyboard.type('258036');
-  await expect(page.getByRole('heading', { name: '한 번 더 입력해 주세요' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '같은 PIN을 한 번 더 입력해 주세요' }),
+  ).toBeVisible();
 });
 
 test('A-02 소셜 버튼(S1-30): 공식 문구, ‘최근 사용’은 이름이 아닌 설명, 비활성 카카오도 노랑', async ({

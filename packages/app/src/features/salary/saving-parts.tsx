@@ -134,7 +134,7 @@ export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
   const nav = useNavigate();
   const qc = useQueryClient();
   const tried = useRef(new Set<string>());
-  // 한 번에 하나만(2026-11-09 round 3 ‘모두 보냈어요’로 여러 항목이 한 번에 닿을 때): 축하로 넘어가는 동안 다른 항목을
+  // 한 번에 하나만(2026-11-09 round 3 ‘모두 계획대로 했어요’로 여러 항목이 한 번에 닿을 때): 축하로 넘어가는 동안 다른 항목을
   // 서버에 ‘봄’으로 남기지 않음. 남은 항목은 다음에 홈·월급 탭을 열 때 한 번씩
   const inflight = useRef(false);
   const [tick, setTick] = useState(0);

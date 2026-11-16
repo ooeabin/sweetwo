@@ -1,5 +1,3 @@
-import { subject } from '@sweetwo/core';
-
 // 온보딩 문구(① docs/spec/16-onboarding-1.md, ② 17-onboarding-2.md ‘온보딩 ② v2.2’, 질문 패턴 12). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에도 [확인 필요]인 것.
 // 2026-11-13 v2.2(ADR 0009): O-06 초대 화면 없앰(초대는 첫 저금 직후 O-07 시트), O-11 4지선다, O-30 세 질문, O-55 알림 허용,
@@ -40,8 +38,8 @@ export const copy = {
   manager: '누가 주로 관리해요?',
   managerChoices: {
     me: '제가 주로 해요',
-    /** 합류 전 ‘파트너가 주로 해요’, 합류 뒤 “{파트너}가 주로 해요” */
-    partner: (partner: string) => `${partner ? subject(partner) : '파트너가'} 주로 해요`,
+    /** 합류 전 ‘파트너가 주로 해요’, 합류 뒤 “{파트너}님이 주로 해요” */
+    partner: (partner: string) => `${partner ? `${partner}님이` : '파트너가'} 주로 해요`,
     together: '둘이 같이 해요',
     each: '각자 자기 월급으로 해요',
   },
@@ -50,7 +48,7 @@ export const copy = {
   salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
-  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어오면 그때 알려 주세요', // [확인 필요] 2026-11-13
+  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어온 달은 그때 적으면 돼요', // 2026-11-13
   noSalary: '지금은 월급이 없어요',
   // 2026-11-10 S2-02: ‘지금은 월급이 없어요’ 확인(되돌릴 수 있는 확인 → Modal primary)
   noSalaryQ: '월급 없이 시작할까요?', // [확인 필요]
@@ -64,7 +62,7 @@ export const copy = {
   payday: '월급날은 며칠이에요?',
   paydayLast: '말일',
   paydayLastHint: '맨 아래에 ‘말일’도 있어요', // [확인 필요] O-32 휠 아래
-  paydayShortMonth: '짧은 달은 말일로 계산해요', // 2026-11-10 S2-24, 12 Q4 예외 문구. 29~31일을 고르면 휠 아래
+  paydayShortMonth: '그날이 없는 달은 말일로 계산해요', // 2026-11-10 S2-24, 12 Q4 예외 문구. 29~31일을 고르면 휠 아래
   paydayNone: '날짜가 정해져 있지 않아요', // [확인 필요] 2026-11-13 ‘매달 금액이 달라요’일 때만
 
   // O-55 알림 허용(2026-11-13) [확인 필요]
@@ -78,8 +76,8 @@ export const copy = {
   readyDone: {
     split: '월급 계획을 만들어 뒀어요',
     firstCheck: (date: string) => `${date} 월급날에 처음 확인해요`,
-    noDate: '돈이 들어오면 홈에서 알려 주세요',
-    salary: '월급이 생기면 홈에서 알려 주세요',
+    noDate: '돈이 들어오면 월급 ‘이번 달’에서 적어 주세요',
+    salary: '월급이 생기면 설정에서 넣어 주세요',
   },
   readyGo: '첫 저금 만들기',
   readyNoMove: '앱은 돈을 옮기지 않아요. 보낸 걸 확인만 해요', // [확인 필요] 2026-11-15 3차 검토 U9

@@ -46,7 +46,7 @@ select is(public.nudge_starter(), 'sent', '대기 중 알려 주기');
 select is(public.nudge_starter(), 'too_soon', '24시간에 1번');
 reset role;
 select is((select title from public.notification where kind = 'join_nudge'),
-  '예빈님이 기다리고 있어요. 월급 계획을 마쳐 주세요', '시작한 사람에게 알림');
+  '예빈님이 기다리고 있어요. 월급 계획을 마저 만들어 볼까요?', '시작한 사람에게 알림');
 update public.notification set created_at = now() - interval '25 hours' where kind = 'join_nudge';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;

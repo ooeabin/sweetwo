@@ -67,7 +67,7 @@ export function F08cRankConsent() {
       <QuestionLayout
         title={copy.consentGone}
         onBack={back}
-        primary={{ label: copy.rankTitle }}
+        primary={{ label: copy.rankOpen }}
         onSubmit={back}
       />
     );

@@ -441,8 +441,8 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await page.getByRole('spinbutton', { name: '월' }).press('ArrowUp');
   await page.getByRole('spinbutton', { name: '일' }).press('End');
   await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '월 납입액은요?');
-  await page.getByLabel('월 납입액은요?').fill('300000');
+  await heading(page, '매달 얼마씩 넣어요?');
+  await page.getByLabel('매달 얼마씩 넣어요?').fill('300000');
   await page.getByRole('button', { name: '추가하기' }).click();
 
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
@@ -520,7 +520,7 @@ test('추가(합류 전): 파트너 명의는 대신 입력(모두 보여 주기
   await heading(page, '금리는 몇 %예요?');
   await page.getByLabel('금리는 몇 %예요?').fill('4.5');
   await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '월 상환액은요?');
+  await heading(page, '매달 얼마씩 갚아요?');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
 
   await expect(page.getByText('추가했어요. 순자산이 800만 원 줄었어요')).toBeVisible();
@@ -563,7 +563,7 @@ test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 
   await heading(page, '만기일은 언제예요?');
   // 유형별 질문은 나중에(F-03f)
   await page.getByRole('button', { name: '나중에 할게요' }).click();
-  await heading(page, '월 납입액은요?');
+  await heading(page, '매달 얼마씩 넣어요?');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
   expect(db.assets.at(-1)).toMatchObject({ amount: 20_000_000, estimated: true });
@@ -584,8 +584,8 @@ test('주택 대출(F-03g): 월 상환액을 먼저 묻고 금리는 다음, 목
   await page.getByLabel('남은 대출금은 얼마예요?').fill('200000000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: /예빈/ }).click();
-  await heading(page, '월 상환액은요?');
-  await page.getByLabel('월 상환액은요?').fill('1200000');
+  await heading(page, '매달 얼마씩 갚아요?');
+  await page.getByLabel('매달 얼마씩 갚아요?').fill('1200000');
   await page.getByRole('button', { name: '다음' }).click();
   await heading(page, '금리는 몇 %예요?');
   await page.getByRole('button', { name: '나중에 할게요' }).click();

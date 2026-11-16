@@ -67,9 +67,7 @@ test.describe('PC', () => {
     await expect(page.getByText(/통장·카드 연동 없이 직접 입력해요/)).toBeVisible();
     await expect(page.getByRole('link', { name: '개인정보처리방침' })).toHaveClass(/is-strong/);
     await expect(
-      page.getByText(
-        'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
-      ),
+      page.getByText('입력한 숫자로 계산한 참고 정보예요. 투자·금융 자문이 아니에요'),
     ).toBeVisible();
     await axe(page);
   });

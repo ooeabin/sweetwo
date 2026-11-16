@@ -152,7 +152,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
                 <ListRow
                   label={n.name}
                   sub={[
-                    // 날짜가 지났는데 안 낸 메모는 “12월 3일 지났어요”(사라지지 않음, 2026-11-14)
+                    // 날짜가 지났는데 안 낸 메모는 “12월 3일이 지났어요”(사라지지 않음, 2026-11-14)
                     n.due_on
                       ? !n.paid && n.due_on < today
                         ? copy.noteOverdue(formatMonthDay(n.due_on))

@@ -30,7 +30,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-11 내 정보와 월급(25, 재기획): 프로필 사진(→ S-11e), 이름(→ S-11a), 로그인, 알림 이메일(→ S-11b),
-// 결혼 상태(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
+// 두 사람 사이(→ S-11g), 결혼한 날·예정일(→ S-11h), 출생연도(→ S-11i).
 // 월급: 내 월급(→ S-11c, 합류 뒤 파트너 값 보기만), 관리 방식(→ S-11f, 혼자 쓰기면 숨김), 체크리스트 만드는 날(→ S-11d, 합쳐서 + 합류),
 // 주말·공휴일 앞당기기(두 사람 공통, 바로), 월급 계획 열기(→ W-01, 목록 줄), 로그아웃(맨 아래 목록 줄). 해제 대기 중엔 관리 방식·만드는 날 비활성.
 // v2.2: 관리 방식 값은 관리 형태 이름(08 2장), 예약한 월급 변경은 월급 줄 아래 회색 “2027년 3월부터 160만 원” + ‘취소’(S-11c 4번).
@@ -186,11 +186,12 @@ export function S11Me() {
         {sp.marriage_status && (
           <ListRow
             label={copy.marriage}
-            value={copy.marriageValue[sp.marriage_status]}
+            // 예전 값 ‘아직 안 정했어요’는 옮기지 않고 비워 보여 S-11g에서 다시 고르게 함(2026-11-16 문구 리뷰)
+            value={sp.marriage_status === 'undecided' ? '' : copy.marriageValue[sp.marriage_status]}
             onClick={() => nav('/settings/me/marriage')}
           />
         )}
-        {sp.marriage_status && sp.marriage_status !== 'undecided' && (
+        {(sp.marriage_status === 'married' || sp.marriage_status === 'engaged') && (
           <ListRow
             label={copy.weddingDay[married ? 'married' : 'engaged']}
             value={weddingText}

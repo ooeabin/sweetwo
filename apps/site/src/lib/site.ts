@@ -17,10 +17,10 @@ export const CATCH = '둘이 구워서 더 달콤한 자산파이';
 export const t = {
   title: (page: string) => `${page} - sweeTwo`,
   landingTitle: `sweeTwo | ${CATCH}`,
-  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 같이 확인하고, 모은 금액을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
+  landingDesc: `${CATCH}. 월급날 정한 대로 나눴는지 확인하고, 모은 금액을 같이 보는 두 사람의 돈 관리 앱이에요.`, // [확인 필요] 기능 설명 1문장
   faq: '자주 묻는 질문',
   getApp: '앱 받기',
-  heroLead: '월급날 정한 대로 나눴는지 같이 확인하고, 모은 금액을 같이 봐요', // [확인 필요]
+  heroLead: '월급날 정한 대로 나눴는지 확인하고, 모은 금액을 같이 봐요',
   // 스토어 배지 자리(공식 배지 이미지를 넣기 전까지 글자 버튼)
   appStore: 'App Store에서 받기',
   googlePlay: 'Google Play에서 받기',
@@ -59,7 +59,7 @@ export const t = {
       ['사업자등록번호', ''],
       ['주소', ''],
     ] as [string, string][],
-    notAdvice: 'sweeTwo는 입력한 숫자로 계산한 참고 정보를 보여드려요. 투자·금융 자문이 아니에요',
+    notAdvice: '입력한 숫자로 계산한 참고 정보예요. 투자·금융 자문이 아니에요',
   },
 
   // 페이지마다 메타 설명 1줄(28 공통 ‘주소’, 2026-11-12) [확인 필요]

@@ -211,7 +211,7 @@ const ROWS: {
     who: '제가 주로 해요',
     space: { salary_mode: 'joint', manager_user_id: chanwoo.id, manager_pending_partner: false },
     manager: 'self',
-    note: '같이 관리하면 파트너도 이 금액을 봐요',
+    note: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
   },
   {
     name: '한 사람이 관리해요(파트너가, 합류 전)',
@@ -220,7 +220,7 @@ const ROWS: {
     who: '파트너가 주로 해요',
     space: { salary_mode: 'joint', manager_user_id: null, manager_pending_partner: true },
     manager: 'partner',
-    note: '같이 관리하면 파트너도 이 금액을 봐요',
+    note: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
   },
   {
     name: '월급을 합쳐서 써요(둘이 같이)',
@@ -229,7 +229,7 @@ const ROWS: {
     who: '둘이 같이 해요',
     space: { salary_mode: 'joint', manager_user_id: null, manager_pending_partner: false },
     manager: 'both',
-    note: '같이 관리하면 파트너도 이 금액을 봐요',
+    note: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
   },
   {
     name: '생활비와 저금을 같이 해요',
@@ -296,7 +296,7 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await manage(page, '아니요', '아직 없어요');
   await page.getByRole('checkbox', { name: '매달 금액이 달라요' }).click();
   await expect(
-    page.getByText('보통 들어오는 금액을 적어 주세요. 더 들어오면 그때 알려 주세요'),
+    page.getByText('보통 들어오는 금액을 적어 주세요. 더 들어온 달은 그때 적으면 돼요'),
   ).toBeVisible();
   await amount(page).fill('2800000');
   await next(page);
@@ -308,7 +308,7 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await expect(page.getByText('경조사 일주일 전에도 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('돈이 들어오면 홈에서 알려 주세요')).toBeVisible();
+  await expect(page.getByText('돈이 들어오면 월급 ‘이번 달’에서 적어 주세요')).toBeVisible();
   expect(db.me).toMatchObject({ payday: null, payday_last: false, payday_none: true });
   expect(db.space?.marriage_status).toBe('dating');
   expect(db.splits).toHaveLength(1);
@@ -461,7 +461,7 @@ test('‘지금은 월급이 없어요’: 확인 대화상자, O-32 없이 O-55
   await heading(page, '경조사와 큰돈 나갈 날 일주일 전에 알려 드릴까요?');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('월급이 생기면 홈에서 알려 주세요')).toBeVisible();
+  await expect(page.getByText('월급이 생기면 설정에서 넣어 주세요')).toBeVisible();
   await expect(page.getByText('월급 계획을 만들어 뒀어요')).toHaveCount(0);
   expect(db.splits.find((s) => s.split_line.length)?.owner_user_id).toBeNull();
   // 뒤로(O-55 → O-31, O-32는 건너뜀)
@@ -507,7 +507,7 @@ test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월
   expect(db.splits.filter((s) => s.split_line.length).map((s) => s.owner_user_id)).toEqual([null]);
 });
 
-test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈이 주로 해요”, 둘이 같이면 두 사람 합으로 추천값', async ({
+test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈님이 주로 해요”, 둘이 같이면 두 사람 합으로 추천값', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -525,7 +525,7 @@ test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈이 주로 해
   await heading(page, '같이 모으는 저금이 있어요?');
   await radio(page, '네');
   await heading(page, '누가 주로 관리해요?');
-  await expect(page.getByRole('radio', { name: '예빈이 주로 해요' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: '예빈님이 주로 해요' })).toBeVisible();
   await radio(page, '둘이 같이 해요');
   await salary(page);
   expect(
