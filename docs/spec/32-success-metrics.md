@@ -324,7 +324,7 @@
 | rejoin\_responded | S-12g “연결할게요” / “괜찮아요” / “다시 받지 않을게요”(2026-11-13) | response(accept / decline / block), hours\_since\_request |
 | home\_box\_tapped | 홈 허브 상자를 누름 (19, 2026-11-09) | box(`hero` / `band` / `plan` / `calendar` / `saving` / `assets` / `savings` / `retry`: 큰 상자 오류 카드 ‘다시 시도’, 2026-11-11), todo(할 일 띠 종류, band일 때만: `unlink` / `reconnect` / `review` / `check` / `saving` / `matured` / `care` / `invite`, 2026-11-11 초대 띠도 같은 띠) |
 | home\_banner\_tapped | 홈 맨 위 띠의 버튼을 누름 (19 ‘맨 위 띠’, 2026-11-11) | banner(`unlink` / `must_notice` / `mail_bounced` / `notice`), action(`open`: ‘확인하기’·공지 ‘보기’ / `close`: 일반 공지 ‘닫기’) |
-| menu\_item\_tapped | 좁은 창 메뉴 서랍 줄을 누름 (19 앱 기본 틀 11번, 2026-11-09) | item(`home` / `salary` / `assets` / `calendar` / `me` / `settings` / `couple` / `invite` / `notice` / `inquiry` / `help`) |
+| menu\_item\_tapped | 좁은 창 메뉴 서랍 줄을 누름 (19 앱 기본 틀 11번, 2026-11-09, 2026-11-16 2단) | item(`salary` / `salary_month` / `salary_plan` / `savings` / `money_in` / `assets` / `asset_items` / `asset_rank` / `calendar` / `calendar_month` / `calendar_list` / `gifts` / `invite` / `notice` / `help`. 2026-11-16 없앤 줄의 옛 값 `home` / `me` / `settings` / `couple` / `inquiry`는 더 오지 않음) |
 | amounts\_hidden\_toggled | 눈 아이콘, 단축키, ⌘K 바로 하기 | state(on / off), entry(icon / shortcut / palette) |
 | search\_used | 검색 화면(⌘K, 좁은 창 검색) 닫을 때 | result\_count\_band, picked(goal / asset / debt / care\_day / quick\_action / none), quick\_action(salary\_check / add\_goal / add\_asset / hide\_amounts / lock). 검색어는 보내지 않음 |
 

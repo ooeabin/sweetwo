@@ -2,7 +2,6 @@ import { coupleOf, formatDateWeekday, formatKstMonthDayTime, todayKst } from '@s
 import {
   AppFrame,
   Drawer,
-  IconButton,
   useNarrow,
   type AppFrameProps,
   type AppTab,
@@ -30,7 +29,7 @@ import {
 import { FrameCommands, searchKey } from './command';
 import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
-import { LineBand } from './notice-band';
+import { LineBand, useHasNotices } from './notice-band';
 import { onSessionReset } from '../../shared/session-reset';
 import { lastAssetsTab } from './assets-tab';
 
@@ -150,7 +149,8 @@ export function MainFrame(
     const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
     return () => clearInterval(t);
   }, [signedIn]);
-  // 서랍 줄(19 앱 기본 틀 11번, 2026-11-16 내 정보·설정은 머리 톱니로): 메뉴 4개 / 초대하기(합류 전, 혼자 쓰기) / 공지, 문의, 도움말
+  // 서랍 줄(19 앱 기본 틀 11번, 2026-11-16 2단): 월급·자산 관리·캘린더 + 늘 펼친 하위 줄 / 초대하기(합류 전, 혼자 쓰기) / 공지(볼 공지가 있을 때만), 도움말.
+  // ‘홈’ 줄은 없음(서랍은 홈 머리에서만 엶). 문의·버전은 설정 › 도움말(S-20) 안, 알림 종은 홈 머리에 있어 서랍에 두지 않음
   const go = (to: string, replace = false, key?: string) => {
     setMenu(false);
     if (key) track('menu_item_tapped', { item: key });
@@ -166,18 +166,53 @@ export function MainFrame(
     else nav('/', { replace: true });
   };
   const d = copy.drawer;
-  const item = (key: string, label: string, to: string, on: boolean): DrawerItem => ({
+  const item = (
+    key: string,
+    label: string,
+    to: string,
+    on: boolean,
+    children?: DrawerItem[],
+  ): DrawerItem => ({
     key,
     label,
     current: on,
     onSelect: () => go(to, to !== '/', key),
+    children,
   });
+  const view = new URLSearchParams(loc.search).get('view');
+  // 날짜 없는 사람(각자)은 W-02 확인 목록이 없어 ‘이번 달 확인’ 줄을 숨김(20 W-02 ‘날짜 없는 사람은 W-02 없음’). ‘월급’ 줄이 그 자리(기간 한 줄)로 감
+  const noCheck = !!me.data?.payday_none && space.data?.salary_mode !== 'joint';
+  const salarySubs = [
+    ...(noCheck
+      ? []
+      : [item('salary_month', d.salaryMonth, '/salary', path === '/salary' && view !== 'plan')]),
+    item('salary_plan', d.salaryPlan, '/salary?view=plan', path === '/salary' && view === 'plan'),
+    item('savings', d.savings, '/salary/items', path === '/salary/items'),
+    item('money_in', d.moneyIn, '/salary/money-in/list', path === '/salary/money-in/list'),
+  ];
+  const assetSubs = [
+    item('asset_items', d.assetItems, '/assets/items', path === '/assets/items'),
+    // F-08은 동의 전에도 화면이 있음((나) 또래 가구 중간값, 2026-11-13)이라 늘 보임
+    item('asset_rank', d.rank, '/assets/rank', path === '/assets/rank'),
+  ];
+  const calendarSubs = [
+    item('calendar_month', d.calMonth, '/calendar/month', path === '/calendar/month'),
+    item('calendar_list', d.calList, '/calendar/list', path === '/calendar/list'),
+    item('gifts', d.gifts, '/calendar/gifts', path === '/calendar/gifts'),
+  ];
+  const hasNotice = useHasNotices(menu);
   const groups: DrawerItem[][] = [
     [
-      item('home', d.home, '/', path === '/'),
-      item('salary', d.salary, '/salary', path === '/salary'),
-      item('assets', d.assets, lastAssetsTab(), path === '/assets' || path === '/assets/items'),
-      item('calendar', d.calendar, '/calendar', path === '/calendar/list'),
+      // 머리 줄은 그 탭 첫 화면(자산 관리는 마지막 본 하위 탭). 하위 줄이 지금 화면이면 머리 줄은 표시 안 함
+      item(
+        'salary',
+        d.salary,
+        '/salary',
+        path === '/salary' && !salarySubs.some((x) => x.current),
+        salarySubs,
+      ),
+      item('assets', d.assets, lastAssetsTab(), path === '/assets', assetSubs),
+      item('calendar', d.calendar, '/calendar', path === '/calendar', calendarSubs),
     ],
     // 2026-11-16: ‘우리 둘’은 설정 홈(S-10) 안으로. 서랍에는 합류 전·혼자 쓰기일 때만 ‘초대하기’ 한 줄
     // (2026-11-16 혼자 쓰기도). 합류 전은 코드를 바로 만들고, 혼자 쓰기는 S-12의 새로 초대하기·다시 연결
@@ -187,21 +222,22 @@ export function MainFrame(
         ? [[item('invite', d.invite, '/settings/couple', false)]]
         : []),
     [
-      {
-        key: 'notice',
-        label: d.notice,
-        onSelect: () => {
-          setMenu(false);
-          track('menu_item_tapped', { item: 'notice' });
-          openSite('/releases');
-        },
-      },
-      item('inquiry', d.inquiry, '/settings/help/inquiries', path === '/settings/help/inquiries'),
+      ...(hasNotice
+        ? [
+            {
+              key: 'notice',
+              label: d.notice,
+              onSelect: () => {
+                setMenu(false);
+                track('menu_item_tapped', { item: 'notice' });
+                openSite('/releases');
+              },
+            },
+          ]
+        : []),
       item('help', d.help, '/settings/help', path === '/settings/help'),
     ],
   ];
-  const version =
-    window.sweetwo?.appVersion ?? (import.meta.env.VITE_APP_VERSION as string | undefined);
   // 좁은 창 홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈): ‹ = 홈으로, 안드로이드 뒤로도 홈으로(2026-11-09)
   const hubSub = !p.sub && p.current !== 'month';
   const online = useOnline();
@@ -301,16 +337,6 @@ export function MainFrame(
           navLabel={copy.menuList}
           closeLabel={copy.close}
           groups={groups}
-          tools={
-            <IconButton
-              icon="bell"
-              label={notiLabel}
-              ghost
-              dot={!!unread.data}
-              onClick={() => go('/notifications')}
-            />
-          }
-          foot={version ? copy.version(version) : undefined}
           onClose={() => setMenu(false)}
         />
       )}

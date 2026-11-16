@@ -16,17 +16,24 @@ export const copy = {
   menuList: '메뉴 목록', // [확인 필요] 2026-11-11 서랍 안 줄 묶음 nav 이름(화면 읽기용, 대화상자 ‘메뉴’와 다르게)
   home: '홈으로',
   close: '닫기',
+  // 2026-11-16 2단 서랍(사용자 결정): 메뉴 3개 + 늘 펼친 하위 줄 [하위 줄 이름 확인 필요]
   drawer: {
-    home: '홈',
     salary: '월급',
+    salaryMonth: '이번 달 확인',
+    salaryPlan: '월급 계획',
+    savings: '저금',
+    moneyIn: '수입 기록',
     assets: '자산 관리',
+    assetItems: '자산·부채',
+    rank: '자산 순위',
     calendar: '캘린더',
+    calMonth: '달력',
+    calList: '일정 목록',
+    gifts: '선물 기록',
     invite: '초대하기',
     notice: '공지',
-    inquiry: '문의',
     help: '도움말',
   },
-  version: (v: string) => `버전 ${v}`, // [확인 필요] 서랍 맨 아래
   me: '설정 열기', // [확인 필요] 아바타 버튼 이름(화면 읽기용)
   saved: '모두 저장됨',
   saving: '저장 중',

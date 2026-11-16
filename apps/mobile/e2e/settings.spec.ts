@@ -1091,7 +1091,7 @@ test('연결 해제 요청 받음(S-12d) 오프라인: ‘해제할게요’ 비
 });
 
 // QA 11구간(2026-11-12)
-test('가이드(S-01·S-03): 대화 카드 줄 없음, 돈 합치기 적용은 월급 계획, 끝 고지(S11-01, S11-12)', async ({
+test('가이드(S-01·S-03): 대화 카드 줄 없음, 월급 합치기 적용은 월급 계획, 끝 고지(S11-01, S11-12)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -1099,7 +1099,7 @@ test('가이드(S-01·S-03): 대화 카드 줄 없음, 돈 합치기 적용은 �
   seed(db);
   db.checklistDone = [];
   await page.goto('/settings/guides');
-  const topic = page.getByRole('button', { name: '돈 합치기 돈 합치기, 어디까지 할까요' });
+  const topic = page.getByRole('button', { name: '월급 합치기 월급 합치기, 어디까지 할까요' });
   await expect(topic).toBeVisible();
   await expect(page.getByText('우리 둘 대화 카드 다시 보기')).toHaveCount(0);
   await axe(page);

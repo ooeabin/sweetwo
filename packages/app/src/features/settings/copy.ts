@@ -426,7 +426,6 @@ export const copy = {
   // S-15 보안
   security: '보안',
   appLock: '앱 잠금',
-  appLockSub: 'PIN 6자리로 잠가요', // [확인 필요]
   changePin: 'PIN 바꾸기',
   pushDenied: '휴대폰 설정에서 알림을 켜 주세요', // [확인 필요] 25 S-14 1번
   openOsSettings: '설정 열기', // [확인 필요] 25 S-14 1번
@@ -641,7 +640,6 @@ export const copy = {
 
   // S-13p 상대에게 보이는 모습 [확인 필요]
   previewTitle: (name: string) => `${name}님에게 보이는 모습`,
-  previewTop: (name: string) => `${name}님 화면에서는 이렇게 보여요`,
   previewSaving: '같이 모으기',
   previewMySaving: '저금', // [확인 필요] 각자 계열 내 개인 저금(상대 W-10 파트너 저금과 같게, 2026-11-13)
   previewBundleMine: (me: string, amount: string) => `${me}님 몫 ${amount}`, // [확인 필요] 묶음 각자 금액
@@ -693,7 +691,7 @@ export const copy = {
   otherAlerts: '그 밖의 알림', // [확인 필요]
 
   // S-15 앱 잠금 권장 줄 [확인 필요]
-  lockRecommend: '앱 잠금을 켜면 열 때 PIN을 한 번 더 물어요',
+  lockRecommend: '열 때 PIN 6자리를 물어요',
   lockTurnOn: '켜기',
 
   // S-20 1366 항목(기관 검토 전에는 플래그로 숨김, Q4)
