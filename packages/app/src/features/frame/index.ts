@@ -9,7 +9,14 @@ export {
   type NetWorthView,
 } from './data';
 export { lastAssetsTab, rememberAssetsTab, type AssetsTab } from './assets-tab';
-export { LineBand, useNoticeBand, type NoticeBand } from './notice-band';
+export {
+  LineBand,
+  markNoticeRead,
+  useNoticeBand,
+  useNoticeHistory,
+  useReadNotices,
+  type NoticeBand,
+} from './notice-band';
 export { useHomeInput, type HomeInputState } from './home-input';
 export { homeText, todoText, upcomingName, whoDid } from './home-text';
 export { AddMenu, searchKey } from './command';

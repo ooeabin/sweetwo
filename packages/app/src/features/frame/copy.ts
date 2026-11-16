@@ -32,6 +32,7 @@ export const copy = {
     gifts: '선물 기록',
     invite: '초대하기',
     notice: '공지',
+    noticeNew: '새 공지', // [확인 필요] 서랍 ‘공지’ 줄 새 알림 점의 화면 읽기 글자
     help: '도움말',
   },
   me: '설정 열기', // [확인 필요] 아바타 버튼 이름(화면 읽기용)
@@ -40,7 +41,6 @@ export const copy = {
   stats: '이번 달 숫자', // [확인 필요] 숫자 타일 묶음 이름(화면 읽기용)
   // 공지 띠(AD-10)
   noticeOpen: '보기', // [확인 필요]
-  noticeFold: '접기', // [확인 필요]
   noticeClose: '닫기', // [확인 필요]
   addSaving: '저금', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',

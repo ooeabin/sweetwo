@@ -19,4 +19,11 @@ export const copy = {
   retry: '다시 시도',
   offline: '연결되면 새 알림을 받아요',
   unread: '새 알림', // [확인 필요] 화면 읽기용
+  // N-04 공지 화면(2026-11-16, 기획서 14 N-04). 모두 [확인 필요]
+  noticesTitle: '공지', // [확인 필요]
+  noticesEmpty: '지금은 공지가 없어요', // [확인 필요]
+  noticesLoadFailed: '공지를 불러오지 못했어요', // [확인 필요]
+  noticesNew: '새 공지', // [확인 필요] 화면 읽기용
+  noticesNoBody: '자세한 내용은 없어요', // [확인 필요]
+  noticesEnded: '끝난 공지', // [확인 필요] 지난 공지 줄 보조 글자 앞
 };

@@ -4312,6 +4312,7 @@ export type Database = {
           style: string
         }[]
       }
+      my_notice_history: { Args: { p_platform: string; p_version?: string }; Returns: Json }
       my_notices: { Args: { p_platform: string; p_version?: string }; Returns: Json }
       my_reconnect_ok: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_sessions: {

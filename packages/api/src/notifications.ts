@@ -1,5 +1,6 @@
 import {
   ActiveNotice,
+  NoticeEntry,
   NotiRow,
   parseNotiRows,
   RevertCountSchema,
@@ -100,6 +101,22 @@ export async function fetchActiveNotices(
   if (error) return [];
   const r = ActiveNotice.array().safeParse(data ?? []);
   return r.success ? r.data : [];
+}
+
+// 앱 안 공지 화면 N-04(2026-11-16): 지금 노출 중인 공지 + 끝난 지 90일 안 지난 공지, 20개까지(서버 my_notice_history).
+// 대상 조건은 my_notices와 같게 서버가 봄
+export async function fetchNoticeHistory(
+  platform: 'ios' | 'android' | 'web',
+  version?: string,
+): Promise<NoticeEntry[]> {
+  const { data, error } = await supabase().rpc('my_notice_history', {
+    p_platform: platform,
+    ...(version ? { p_version: version } : {}),
+  });
+  if (error) fail(error);
+  const r = NoticeEntry.array().safeParse(data ?? []);
+  if (!r.success) throw new Error('bad_notice_history');
+  return r.data;
 }
 
 /** 새 기기 로그인 확인(로그인 뒤 한 번): 다른 세션이 있으면 서버가 본인에게 알림 + 메일 */

@@ -13,8 +13,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { track } from '../../shared/analytics';
-import { sharedCopy } from '../../shared/copy';
-import { toast } from '../../shared/toast';
 import { useMask } from '../../shared/mask';
 import { usePeopleArt, useSocialAvatar } from '../../shared/person';
 import { useCacheInfo } from '../../shared/offline-cache';
@@ -29,7 +27,7 @@ import {
 import { FrameCommands, searchKey } from './command';
 import { copy } from './copy';
 import { useMe, usePartner, useSpace } from './data';
-import { LineBand, useHasNotices } from './notice-band';
+import { LineBand, useNoticeMenu } from './notice-band';
 import { onSessionReset } from '../../shared/session-reset';
 import { lastAssetsTab } from './assets-tab';
 
@@ -42,16 +40,6 @@ const HREF: Record<AppTab, string | undefined> = {
   assets: '/assets',
   calendar: '/calendar',
 };
-
-/** 웹사이트 페이지 열기(앱은 앱 안 브라우저, 웹은 새 창). 서랍 ‘공지’ → L-03 */
-const openSite = (path: string) => {
-  const url = `${SITE}${path}`;
-  const b = window.sweetwo;
-  // 앱 안 브라우저가 못 열면 조용히 서랍만 닫히지 않게 알림(2026-11-15 3차 검토: ‘공지’ 눌러도 안 열림)
-  if (b?.openUrl) void b.openUrl(url).catch(() => toast(sharedCopy.errorToast));
-  else window.open(url, '_blank', 'noopener');
-};
-const SITE = 'https://sweetwo.kr';
 
 const useMenuStore = create<{ open: boolean; set: (v: boolean) => void }>((set) => ({
   open: false,
@@ -200,7 +188,7 @@ export function MainFrame(
     item('calendar_list', d.calList, '/calendar/list', path === '/calendar/list'),
     item('gifts', d.gifts, '/calendar/gifts', path === '/calendar/gifts'),
   ];
-  const hasNotice = useHasNotices(menu);
+  const notices = useNoticeMenu(menu);
   const groups: DrawerItem[][] = [
     [
       // 머리 줄은 그 탭 첫 화면(자산 관리는 마지막 본 하위 탭). 하위 줄이 지금 화면이면 머리 줄은 표시 안 함
@@ -222,15 +210,18 @@ export function MainFrame(
         ? [[item('invite', d.invite, '/settings/couple', false)]]
         : []),
     [
-      ...(hasNotice
+      // 앱 안 공지 화면 N-04(2026-11-16). 보여 줄 공지가 하나라도 있을 때만, 안 읽은 노출 중 공지가 있으면 새 알림 점
+      ...(notices.show
         ? [
             {
               key: 'notice',
               label: d.notice,
+              current: path === '/notices',
+              dot: notices.unread ? d.noticeNew : undefined,
               onSelect: () => {
                 setMenu(false);
                 track('menu_item_tapped', { item: 'notice' });
-                openSite('/releases');
+                nav('/notices');
               },
             },
           ]

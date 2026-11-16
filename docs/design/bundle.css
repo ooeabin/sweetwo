@@ -853,6 +853,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-acc__q { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; font: var(--text-body-strong); }
 .hg-acc__q .hg-ico { transition: transform var(--dur-base) var(--ease-out); transform: rotate(90deg); color: var(--stone); }
 .hg-acc__item.is-open .hg-acc__q .hg-ico { transform: rotate(-90deg); }
+.hg-acc__text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-2) 0; }  /* 2026-11-16 N-04 공지: 제목 + 날짜 줄 */
+.hg-acc__sub { font: var(--text-caption); font-weight: 400; color: var(--stone); }
+.hg-acc__dot, .hg-drawer__dot { display: inline-block; width: 8px; height: 8px; margin-left: var(--space-2); border-radius: var(--radius-full); background: var(--brand); vertical-align: middle; }  /* 새 알림 점(안 읽음, 뜻은 화면 읽기 글자로도) */
 .hg-acc__a { margin: 0; padding-bottom: var(--space-4); font: var(--text-body); color: var(--slate); }
 :where(.hg-admin, .hg-adminauth, .hg-site) .hg-acc__a { font: 400 15px/24px var(--font-sans); }  /* 어드민·웹사이트는 예전 글자 그대로(2026-11-09) */
 

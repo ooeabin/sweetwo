@@ -74,7 +74,7 @@ import {
   S14Notifications,
   S14aQuiet,
 } from './features/settings';
-import { N02Notifications } from './features/notifications';
+import { N02Notifications, N04Notices } from './features/notifications';
 import { H01Home } from './features/home';
 import {
   AchieveWatch,
@@ -291,6 +291,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // N-02 알림 화면(좁은 창)
+      {
+        path: '/notices',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <N04Notices />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // N-04 공지(서랍 ‘공지’, 홈 공지 띠 ‘보기’)
       {
         path: '/settings',
         element: (

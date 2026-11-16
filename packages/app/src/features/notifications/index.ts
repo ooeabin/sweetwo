@@ -2,3 +2,4 @@
 export { useHasUnread, useNotiPanel, useNotiRealtime, usePushRegistration } from './data';
 export { N01Panel } from './pages/n-01-panel';
 export { N02Notifications } from './pages/n-02-notifications';
+export { N04Notices } from './pages/n-04-notices';

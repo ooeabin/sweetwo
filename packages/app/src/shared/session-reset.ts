@@ -20,7 +20,7 @@ export function resetSessionState() {
 }
 
 // 계정 값을 담은 기기 저장소 키(2026-11-12 QA 11구간 S11-08). 화면 파일이 아직 안 불렸어도 지워지게 여기 한 곳에 둠.
-// 기기 설정(‘최근 사용’ 방법, 금액 가리기, 보기 선택, 닫은 공지 등)은 남김(DEV_GUIDE ‘로그아웃’).
+// 기기 설정(‘최근 사용’ 방법, 금액 가리기, 보기 선택, 닫은 공지, 읽은 공지 등)은 남김(DEV_GUIDE ‘로그아웃’).
 const ACCOUNT_KEYS = [
   'sweetwo.exportedAt', // S-18 내보낸 시각(분석 exported_data)
   'sweetwo.onboardingSeenAt', // 온보딩 마지막 본 시각(분석)
