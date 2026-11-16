@@ -109,7 +109,8 @@ function Login({ note }: { note?: string }) {
     setErr(null);
     try {
       clearSessionClock();
-      await adminSendLink(email.trim().toLowerCase(), window.location.origin);
+      // 끝 슬래시 필수: Supabase Redirect URLs의 `https://dev-ops.sweetwo.kr/**`는 경로가 있어야 맞음(없으면 Site URL dev-app으로 감, 2026-11-16)
+      await adminSendLink(email.trim().toLowerCase(), `${window.location.origin}/`);
       setSent(true);
       setWait(RESEND_S);
     } catch (e) {
