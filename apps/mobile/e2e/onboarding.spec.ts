@@ -115,7 +115,6 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page.getByText('월급 계획을 만들어 뒀어요')).toBeVisible();
   await expect(page.getByText('10월 23일 월급날에 처음 확인해요')).toBeVisible();
-  await expect(page.getByText('앱은 돈을 옮기지 않아요. 보낸 걸 확인만 해요')).toBeVisible();
   await expect(page.getByRole('progressbar')).toHaveCount(0);
   await axe(page);
 

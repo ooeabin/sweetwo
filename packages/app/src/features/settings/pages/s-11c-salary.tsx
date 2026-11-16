@@ -274,7 +274,6 @@ export function S11cSalary() {
           value={payday}
           onChange={setDay}
           lastLabel={copy.lastDay}
-          hint={copy.paydayLastHint}
         />
         {/* 1번 공개 고지(O-31과 같음). 합류 전이면 볼 사람이 없어 숨김 */}
         {joined && (

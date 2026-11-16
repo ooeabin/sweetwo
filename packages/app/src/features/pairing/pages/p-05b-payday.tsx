@@ -51,7 +51,6 @@ export function P05bPayday() {
           setNone(false);
         }}
         lastLabel={copy.paydayLast}
-        hint={copy.paydayLastHint}
       />
       {variable && <Checkbox label={copy.paydayNone} checked={noDate} onChange={setNone} />}
     </QuestionLayout>
