@@ -284,10 +284,25 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   await page.goto('/');
   await expect(page.locator('.hg-together')).toBeVisible();
   await menuBtn.click();
-  // 서랍에는 ‘우리 둘’도 ‘초대하기’도 없음: 묶음 2개(메뉴 4개 / 공지, 문의, 도움말)
+  // 연결 중: 서랍에는 ‘우리 둘’도 ‘초대하기’도 없음: 묶음 2개(메뉴 4개 / 공지, 문의, 도움말)
   await expect(drawer.getByRole('button', { name: '우리 둘', exact: true })).toHaveCount(0);
   await expect(drawer.getByRole('button', { name: '초대하기' })).toHaveCount(0);
   await expect(drawer.locator('.hg-drawer__group')).toHaveCount(2);
+  // 해제 대기: 없음
+  Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
+  await page.reload();
+  await expect(page.locator('.hg-together')).toBeVisible();
+  await menuBtn.click();
+  await expect(drawer.getByRole('button', { name: '초대하기' })).toHaveCount(0);
+  await expect(drawer.locator('.hg-drawer__group')).toHaveCount(2);
+  // 혼자 쓰기(2026-11-16): ‘초대하기’ 한 줄, 누르면 S-12(코드 자동 만들기 없이)
+  Object.assign(db.space ?? {}, { couple_state: 'solo', partner_nickname: null });
+  await page.reload();
+  await expect(page.locator('.hg-together')).toBeVisible();
+  await menuBtn.click();
+  await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
+  await drawer.getByRole('button', { name: '초대하기' }).click();
+  await expect(page).toHaveURL(/\/settings\/couple$/);
 });
 
 test('메뉴 서랍 키보드만으로(2026-11-09): Enter로 열고, Tab은 서랍 안에서 돌고, Esc로 닫으면 ☰로 포커스, ‘동작 줄이기’면 미끄러짐 없음', async ({

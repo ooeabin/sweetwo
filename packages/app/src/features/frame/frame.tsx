@@ -150,7 +150,7 @@ export function MainFrame(
     const t = setInterval(() => void touchApp().catch(() => undefined), 5 * 60_000);
     return () => clearInterval(t);
   }, [signedIn]);
-  // 서랍 줄(19 앱 기본 틀 11번, 2026-11-16 내 정보·설정은 머리 톱니로): 메뉴 4개 / 초대하기(파트너 합류 전만) / 공지, 문의, 도움말
+  // 서랍 줄(19 앱 기본 틀 11번, 2026-11-16 내 정보·설정은 머리 톱니로): 메뉴 4개 / 초대하기(합류 전, 혼자 쓰기) / 공지, 문의, 도움말
   const go = (to: string, replace = false, key?: string) => {
     setMenu(false);
     if (key) track('menu_item_tapped', { item: key });
@@ -179,10 +179,13 @@ export function MainFrame(
       item('assets', d.assets, lastAssetsTab(), path === '/assets' || path === '/assets/items'),
       item('calendar', d.calendar, '/calendar', path === '/calendar/list'),
     ],
-    // 2026-11-16: ‘우리 둘’은 설정 홈(S-10) 안으로. 서랍에는 합류 전일 때만 ‘초대하기’ 한 줄
+    // 2026-11-16: ‘우리 둘’은 설정 홈(S-10) 안으로. 서랍에는 합류 전·혼자 쓰기일 때만 ‘초대하기’ 한 줄
+    // (2026-11-16 혼자 쓰기도). 합류 전은 코드를 바로 만들고, 혼자 쓰기는 S-12의 새로 초대하기·다시 연결
     ...(space.data?.couple_state === 'not_joined'
       ? [[item('invite', d.invite, '/settings/couple?invite=1', false)]]
-      : []),
+      : space.data?.couple_state === 'solo'
+        ? [[item('invite', d.invite, '/settings/couple', false)]]
+        : []),
     [
       {
         key: 'notice',
