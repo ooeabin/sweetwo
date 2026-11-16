@@ -114,7 +114,7 @@ export async function adminMfaVerify(factorId: string, code: string) {
 }
 
 // ── 관리자, 대시보드, 회원 ────────────────────────────────────────────
-/** 관리자가 아무도 없을 때 회사 도메인 이메일이면 첫 최고 관리자(서버가 확인) */
+/** 관리자가 아무도 없을 때 회사 도메인 이메일이면 첫 최고 관리자. 예외 이메일(admin_email_exception)은 관리자가 있어도(서버가 aal2·이메일 링크 확인) */
 export async function adminBootstrap(): Promise<boolean> {
   const { data, error } = await supabase().rpc('admin_bootstrap');
   fail(error);

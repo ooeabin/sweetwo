@@ -16,7 +16,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { copy } from './copy';
 import { clearSessionClock, useSessionGuard } from './session';
 
-// 어드민 들어가기: 회사 이메일 매직 링크 → 인증 앱(OTP) 등록·확인(aal2) → admin_me(관리자 연결·역할).
+// 어드민 들어가기: 이메일(회사 도메인 또는 서버 예외 목록) 매직 링크 → 인증 앱(OTP) 등록·확인(aal2) → admin_me(관리자 연결·역할).
 // IP 허용 목록은 WAF가 로그인 화면 전에 막음.
 type Step = 'login' | 'enroll' | 'verify' | 'denied' | 'ready';
 const MeContext = createContext<AdminMe | null>(null);
@@ -36,7 +36,8 @@ async function resolve(): Promise<{ step: Step; me: AdminMe | null }> {
     return { step: 'ready', me: await fetchAdminMe() };
   } catch (e) {
     if (!(e instanceof AdminError && e.code === 'not_admin')) throw e;
-    // 관리자가 아무도 없으면 회사 도메인 첫 로그인이 최고 관리자(서버가 확인)
+    // 관리자가 아무도 없으면 회사 도메인 첫 로그인이 최고 관리자, 예외 이메일은 관리자가 있어도 최고 관리자(서버가 확인).
+    // 아니면 “권한 없음”
     if (await adminBootstrap().catch(() => false))
       return { step: 'ready', me: await fetchAdminMe() };
     return { step: 'denied', me: null };

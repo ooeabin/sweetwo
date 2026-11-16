@@ -86,7 +86,14 @@ const json = (route: Route, body: unknown, status = 200) =>
 
 async function mock(
   page: Page,
-  o: { aal?: 'aal1' | 'aal2' | null; roles?: string[]; otpError?: string; stale?: boolean } = {},
+  o: {
+    aal?: 'aal1' | 'aal2' | null;
+    roles?: string[];
+    otpError?: string;
+    stale?: boolean;
+    /** 관리자 아님(admin_me not_admin, admin_bootstrap false): 회사 도메인도 예외 이메일도 아님 */
+    notAdmin?: boolean;
+  } = {},
 ) {
   const db: Db = {
     rpc: [],
@@ -185,7 +192,15 @@ async function mock(
     const fn = p.slice('/rest/v1/rpc/'.length);
     db.rpc.push({ fn, body: body() });
     switch (fn) {
+      case 'admin_bootstrap':
+        return json(route, false);
       case 'admin_me':
+        if (o.notAdmin)
+          return json(
+            route,
+            { code: '42501', message: 'not_admin', details: null, hint: null },
+            403,
+          );
         return json(route, {
           email: ADMIN.email,
           name: 'cs01',
@@ -643,11 +658,11 @@ async function mock(
   return db;
 }
 
-test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
+test('로그인: 이메일로 링크 받기', async ({ page }) => {
   const db = await mock(page, { aal: null });
   await page.goto('/');
   await heading(page, '어드민 로그인');
-  await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
+  await page.getByLabel('이메일', { exact: true }).fill('cs01@sweetwo.kr');
   await axe(page);
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
   await expect(page.getByText('메일함에서 링크 열기')).toBeVisible();
@@ -656,10 +671,18 @@ test('로그인: 회사 이메일로 링크 받기', async ({ page }) => {
   expect(db.rpc).toEqual([]);
 });
 
+test('로그인: 회사 도메인도 예외 이메일도 아니면 권한 없음', async ({ page }) => {
+  const db = await mock(page, { notAdmin: true });
+  await page.goto('/');
+  await heading(page, '권한 없음');
+  expect(db.rpc.map((r) => r.fn)).toEqual(['admin_me', 'admin_bootstrap']);
+  await axe(page);
+});
+
 test('로그인: 너무 자주 누르면 조금 뒤에 다시', async ({ page }) => {
   await mock(page, { aal: null, otpError: 'over_email_send_rate_limit' });
   await page.goto('/');
-  await page.getByLabel('회사 이메일').fill('cs01@sweetwo.kr');
+  await page.getByLabel('이메일', { exact: true }).fill('cs01@sweetwo.kr');
   await page.getByRole('button', { name: '로그인 링크 받기' }).click();
   await expect(page.getByText('잠시 뒤 다시 시도')).toBeVisible();
   await expect(page.getByRole('button', { name: '로그인 링크 받기' })).toBeDisabled();
