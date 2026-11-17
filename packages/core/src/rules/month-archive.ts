@@ -5,7 +5,8 @@ import { confirmFinish, manualCount } from './pay-confirm';
 import { checklistFinish, monthProgress } from './month-progress';
 
 // W-21 지난 달 모아보기(docs/spec/20-salary-plan.md W-21, 2026-11-17).
-// 줄 하나 = 지난 사이클 하나: 결과, 수입, 그 달 모은 금액. 계산은 W-02 머리(MonthBar)와 같은 규칙을 한 곳에 모음.
+// 줄 하나 = 지난 사이클 하나: 결과, 그 달 모은 금액, 계획한 월급(그 달 체크리스트 줄 계획 합).
+// 사이클 수입·월급 스냅샷이 저장돼 있지 않아(pay_checklist에 없음) 지금 실수령액을 쓰면 달마다 같은 값이 되므로 쓰지 않는다. 계산은 W-02 머리(MonthBar)와 같은 규칙을 한 곳에 모음.
 
 export interface ArchiveLine {
   kind: string;
@@ -22,8 +23,8 @@ export interface ArchiveRow {
   result: ArchiveResult;
   /** result가 late일 때 늦게 확인할 수 있는 줄 수 */
   lateCount: number;
-  /** 그 달 수입(W-02 1c 공유 이미지와 같은 기준: 체크리스트 주인의 실수령, 합쳐서면 두 사람 합). 없으면(0 이하) 계획 금액 합 */
-  income: Won;
+  /** 계획한 월급 = 그 달 체크리스트 줄 계획 금액 합(달마다 다름) */
+  planned: Won;
   /** 그 달 모은 금액 = 확인한 저축·투자 줄 합(다른 금액이면 그 금액, 건너뜀은 0) */
   saved: Won;
 }
@@ -31,20 +32,16 @@ export interface ArchiveRow {
 /**
  * 한 달 줄. lateCount = 지금 늦게 확인할 수 있는 손 줄 수(W-02 lateLines, 있으면 “확인을 마쳤어요”를 띄우지 않음)
  */
-export function archiveRow(o: {
-  lines: readonly ArchiveLine[];
-  income: Won;
-  lateCount: number;
-}): ArchiveRow {
+export function archiveRow(o: { lines: readonly ArchiveLine[]; lateCount: number }): ArchiveRow {
   const lines = o.lines.map((l) => ({ ...l, auto: l.auto ?? false }));
-  const p = monthProgress({ income: o.income, lines: [...lines] });
+  const p = monthProgress({ income: 0, lines: [...lines] });
   const finish =
     o.lateCount > 0 ? null : manualCount(lines) > 0 ? confirmFinish(lines) : checklistFinish(lines);
   return {
     // 끝난 사이클에 남은 대기 줄이 없으면 건너뜀이 섞인 것으로 봄
     result: o.lateCount > 0 ? 'late' : (finish ?? 'mixed'),
     lateCount: o.lateCount,
-    income: o.income > 0 ? o.income : p.planned,
+    planned: p.planned,
     saved: p.savingSent,
   };
 }

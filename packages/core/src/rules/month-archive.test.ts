@@ -18,10 +18,9 @@ it('모두 체크: 계획대로, 모은 금액 = 체크한 저금 줄 합, 수�
       line('living', 'checked', 150),
       line('fixed', 'checked', 60, null, true),
     ],
-    income: 350 * MAN,
     lateCount: 0,
   });
-  expect(r).toEqual({ result: 'all', lateCount: 0, income: 350 * MAN, saved: 100 * MAN });
+  expect(r).toEqual({ result: 'all', lateCount: 0, planned: 310 * MAN, saved: 100 * MAN });
 });
 
 it('건너뜀이 섞이면 확인을 마쳤어요, 건너뛴 저금은 모은 금액에 안 들어감, 다른 금액은 그 금액', () => {
@@ -31,7 +30,6 @@ it('건너뜀이 섞이면 확인을 마쳤어요, 건너뛴 저금은 모은 �
       line('saving', 'checked', 30, 20),
       line('living', 'checked', 150),
     ],
-    income: 350 * MAN,
     lateCount: 0,
   });
   expect(r.result).toBe('mixed');
@@ -41,25 +39,24 @@ it('건너뜀이 섞이면 확인을 마쳤어요, 건너뛴 저금은 모은 �
 it('늦게 확인할 줄이 남았으면 late(확인할 것 n개)', () => {
   const r = archiveRow({
     lines: [line('saving', 'skipped', 100), line('living', 'checked', 150)],
-    income: 350 * MAN,
     lateCount: 1,
   });
   expect(r).toMatchObject({ result: 'late', lateCount: 1, saved: 0 });
 });
 
-it('수입이 없으면(0) 계획 금액 합', () => {
+it('계획한 월급 = 그 달 줄 계획 합(달마다 다름)', () => {
   const r = archiveRow({
     lines: [line('saving', 'checked', 100), line('living', 'checked', 150)],
-    income: 0,
     lateCount: 0,
   });
-  expect(r.income).toBe(250 * MAN);
+  expect(r.planned).toBe(250 * MAN);
+  const r2 = archiveRow({ lines: [line('saving', 'checked', 80)], lateCount: 0 });
+  expect(r2.planned).toBe(80 * MAN);
 });
 
 it('자동 줄뿐이면 모두 체크일 때 계획대로', () => {
   const r = archiveRow({
     lines: [line('fixed', 'checked', 60, null, true)],
-    income: 350 * MAN,
     lateCount: 0,
   });
   expect(r.result).toBe('all');
