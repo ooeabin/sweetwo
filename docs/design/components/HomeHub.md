@@ -21,11 +21,22 @@
 홈 구성이 바뀜(→ 19 ‘홈 v2.2’). 이 장이 2026-11-13부터 정본이고, 위 큰 상자(`hg-hubhero`, H-03)와 저금 상자(`hg-hubsave`, H-02)는 홈에서 없앰(클래스와 React 래퍼는 PR 9에서 지움). 아래 새 클래스는 PR 9(홈)에서 `bundle.css`에 더하고 `pnpm ds:sync`로 복사함.
 
 - 같이 모으기(H-10, SaveTogether 컴포넌트 `hg-together`, 두 칸, 두 줄 높이): 생김새 → [SaveTogether](SaveTogether.md). 허브 안에서는 `hg-hub__wide` 자리, 넓은 창 4열에서는 두 칸 × 두 줄
-- 이번 달 한 줄(H-11, `hg-hubline`, HubLine, 두 칸, 한 줄): 흰 얇은 상자(`radius-xl`, 안쪽 세로 14px 가로 18px), 왼쪽 문장 15px 600 `ink`(두 줄까지) + 그 아래 회색 보조 13px 500 `slate`(있을 때) + 오른쪽 이동 글자 13px 600 `ink-2`(“확인하기 ›”, “보기 ›”, “수입 적기 ›”). 오렌지 없음. 상자 전체가 버튼, 키보드 포커스 ink 링. 날짜 없는 사람의 막대 상태(H-13)는 문장 자리에 [PeriodBar](PeriodBar.md). 못 불러오면 13 공통 7번 카드
+- (2026-11-17 홈에서는 없앰, 월급 상자 H-15로. HubLine은 월급 탭 W-02의 날짜 없는 사람 기간 한 줄(PeriodLine)이 계속 씀) 이번 달 한 줄(H-11, `hg-hubline`, HubLine, 두 칸, 한 줄): 흰 얇은 상자(`radius-xl`, 안쪽 세로 14px 가로 18px), 왼쪽 문장 15px 600 `ink`(두 줄까지) + 그 아래 회색 보조 13px 500 `slate`(있을 때) + 오른쪽 이동 글자 13px 600 `ink-2`(“확인하기 ›”, “보기 ›”, “수입 적기 ›”). 오렌지 없음. 상자 전체가 버튼, 키보드 포커스 ink 링. 날짜 없는 사람의 막대 상태(H-13)는 문장 자리에 [PeriodBar](PeriodBar.md). 못 불러오면 13 공통 7번 카드
 - 결혼 준비 타일(H-12, `hg-hubtile` 그대로, 두 칸 `hg-hub__wide`, HubTile `className`): 제목 “결혼 준비 메모 4개” + 회색 보조 “다음 잔금 12월 3일”. 그림 자리 72px 그대로
 - 할 일 띠 글자 버튼 둘(`hg-hubband--two`, HubBand `secondary`): 띠 8번 “같이 쓰는 생활비를 나눠 볼까요?”에서만. 오른쪽에 글자 버튼 두 개(`hg-hubband__btns` > `hg-hubband__btn`): 둘째 버튼 “이미 정했어요”(`hg-hubband__btn--quiet` 13px 500, 같은 `on-band-cocoa` 글자, 새 토큰 없음, 밑줄 없음) + 첫째 이동 글자 “나누기 ›”(15px 500). 띠 전체가 버튼이 아니라 두 버튼이 따로(각각 44px 이상 누름 자리, 묶음 `role=group` 이름 = 띠 문장). 좁은 창에서 문장 칸이 160px보다 좁아지면 버튼 줄이 문장 아래로 내려감(flex-wrap)
 - 타일 배지 “상위 38%”(H-04): 두 사람 모두 순위 동의 + “홈에 보여 주기”를 켰을 때만(2026-11-13 기본 끔)
-- H-07 월급 계획 포인트 상자 보조 줄 두 줄: “매달 25일” + “아직 안 정한 월급 20만 원”(같은 `on-accent-app-sub`)
-- 넓은 창(1100px 이상 4열): 할 일 띠 한 줄 → H-10(두 칸, 두 줄) + 오른쪽 H-11과 H-07 → H-08, H-12(있으면), H-04, H-09
+- (2026-11-17 H-07 타일은 없앰. 포인트 상자는 H-04 자산 관리 타일로 옮김: 제목 “자산 관리”, 값 순자산, 보조 `on-accent-app-sub`, 배지 “상위 38%”는 `plate` 알약 그대로. 둘째 보조 줄 `sub2`는 홈에서 안 씀)
+- 넓은 창(1100px 이상 4열, 2026-11-17): 할 일 띠 한 줄 → H-10(두 칸, 두 줄) + 오른쪽 H-12(있으면), 월급 상자 H-15(두 칸) → 그 아래 오른쪽에 반 칸 타일 H-04·H-08 한 칸씩. 0원이면 월급 상자가 왼쪽, H-10이 오른쪽
 - React 래퍼(packages/ui `HomeHub.tsx`)에 더함: `HubLine`(`text`, `sub`, `go`, `bar`(PeriodBar 요소), `label`, `onClick`), `HubBand`에 `secondary`(`{ text, onClick }`), `HubTile`에 `sub2`(H-07 아직 안 정한 월급 둘째 줄)·`className`. `SaveTogether`·`PeriodBar`는 따로 파일
-- 좁은 창 순서(DOM, 2026-11-15 3차 검토, 기획 19 ‘홈 순서’, core `homeOrder`): 확인할 것이 맨 위. H-11이 확인할 것을 말하면 H-11 → 할 일 띠 → H-14 → H-10, 아니면 할 일 띠 → H-14 → H-10 → H-11. 0원 H-10은 H-07·H-08 아래. 그다음 H-12 → H-04·H-09. 타일 72px 그림 자리는 그림이 들어올 때까지 그리지 않음(HubTile `art`는 남기되 그리지 않음). 예전(2026-11-13): H-10 → H-11 → 할 일 띠 → H-07·H-08 → H-12 → H-04·H-09. H-14 이번 달 우리 둘(`hg-card` + `hg-monthus`): 줄은 `hg-list--plain`(앞 칸 없이 카드 왼쪽 끝), 줄 높이 48px, 줄 이름 한 줄(`nowrap`), 값은 본문 글자 크기로 오른쪽(길면 값이 줄바꿈). 보여 줄 줄이 2개보다 적으면 그리지 않음(2026-11-16). 넓은 창은 띠 `order: -1`, `hg-together` 두 칸 두 줄(`grid-row: span 2`), `hg-hubline` 두 칸이라 격자 자동 배치가 ‘H-10 + 오른쪽 H-11, H-07·H-08’이 됨
+- 좁은 창 순서(DOM, 2026-11-17 새 순서: 할 일 띠 → H-10 → H-12 → 월급 상자 H-15 → 타일 H-04·H-08, 0원 H-10은 월급 상자 아래, core `homeOrder`. 아래는 2026-11-15 기록, 3차 검토, 기획 19 ‘홈 순서’, core `homeOrder`): 확인할 것이 맨 위. H-11이 확인할 것을 말하면 H-11 → 할 일 띠 → H-14 → H-10, 아니면 할 일 띠 → H-14 → H-10 → H-11. 0원 H-10은 H-07·H-08 아래. 그다음 H-12 → H-04·H-09. 타일 72px 그림 자리는 그림이 들어올 때까지 그리지 않음(HubTile `art`는 남기되 그리지 않음). 예전(2026-11-13): H-10 → H-11 → 할 일 띠 → H-07·H-08 → H-12 → H-04·H-09. H-14 이번 달 우리 둘(`hg-card` + `hg-monthus`): 줄은 `hg-list--plain`(앞 칸 없이 카드 왼쪽 끝), 줄 높이 48px, 줄 이름 한 줄(`nowrap`), 값은 본문 글자 크기로 오른쪽(길면 값이 줄바꿈). 보여 줄 줄이 2개보다 적으면 그리지 않음(2026-11-16). 넓은 창은 띠 `order: -1`, `hg-together` 두 칸 두 줄(`grid-row: span 2`), `hg-hubline` 두 칸이라 격자 자동 배치가 ‘H-10 + 오른쪽 H-11, H-07·H-08’이 됨
+
+## 월급 상자 (H-15, HubBox, 2026-11-17)
+
+메뉴 서랍과 같은 이름·순서로 정리하며 H-07 월급 계획 타일·H-09 저금 타일·H-11 이번 달 한 줄·H-13 기간 한 줄을 이 상자의 줄로 옮김(기획 19 ‘H-15 월급 상자’).
+
+- 상자(`hg-hubbox` + `hg-hub__wide`, 두 칸): 흰 `radius-xl`, 테두리·그림자 없음(마우스 올림만 `shadow-2`), 안쪽 위아래 `space-2`. 오렌지 없음.
+- 머리(`hg-hubbox__head`, 버튼): “월급” 17px 700 `ink`(`title-3`) + 오른쪽 꺾쇠(`slate`, 16px), 높이 44px 이상, 안쪽 가로 18px. 누르면 월급 첫 화면.
+- 줄(`hg-hubbox__list` > li > `hg-hubbox__row`, 버튼): 높이 56px 이상, 안쪽 가로 18px. 왼쪽 이름(`hg-hubbox__name` 15px 500 `ink`, 줄 이름은 메뉴 서랍과 같음) + 오른쪽 값 칸(`hg-hubbox__val`, 오른쪽 맞춤): 값(`hg-hubbox__main` 15px 600 `ink-2`, 확인할 게 있으면 `--alert` 700 `ink`) + 그 아래 회색 보조(`hg-hubbox__sub` 13px 500 `slate`) + 꺾쇠. 줄 사이 `hairline-soft` 선. 키보드 포커스는 ink 링(줄은 안쪽 `outline-offset: -2px`).
+- React 래퍼 `HubBox`(`title`, `onHead`, `rows[{ key, name, value, sub, alert, label, onClick }]`). 앱 `h-15-salary-box.tsx`가 값을 만듦.
+- 반 칸 타일 둘: H-04 자산 관리가 포인트 상자(`hg-hubtile--point`), H-08 캘린더는 흰색. 둘 다 그림 자리 없음, 높이는 내용에 맞춤(같은 줄은 격자가 같은 높이로).
+- H-14 이번 달 우리 둘 카드(`hg-card` + `hg-monthus`)는 홈에서 없앰(2026-11-17). `.hg-monthus` 규칙도 지움.

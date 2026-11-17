@@ -241,6 +241,36 @@ describe('pickTopTask(H-06 16순서)', () => {
       to: '/assets/rank/consent/r',
     });
   });
+  it('월급날 확인(5b, 2026-11-17): 요청·자산 공개 다음, 월급 바뀜 앞. 월급날 확인할 게 없으면 없음', () => {
+    const monthCheck = {
+      kind: 'payday' as const,
+      left: 1,
+      late: 0,
+      cycleStart: '2026-11-13',
+      to: '/salary',
+    };
+    expect(pickTopTask({ ...base, monthCheck })).toEqual({
+      kind: 'month_check',
+      check: monthCheck,
+      key: 'month_check',
+      to: '/salary',
+    });
+    expect(pickTopTask({ ...base, monthCheck: null })).toBeNull();
+    expect(
+      pickTopTask({
+        ...base,
+        monthCheck,
+        salaryChanged: { appliedDay: '2026-11-10', done: false },
+      })?.kind,
+    ).toBe('month_check');
+    expect(pickTopTask({ ...base, monthCheck, rankRequest: req })?.kind).toBe('rank_request');
+    // 두 칸에 세지 않음: 월급날 확인 + 첫 저금 + 초대(2026-11-17)
+    expect(
+      pickTopTasks({ ...base, monthCheck, savingCount: 0, coupleState: 'not_joined' }).map(
+        (t) => t.kind,
+      ),
+    ).toEqual(['month_check', 'first_saving', 'invite']);
+  });
   it('연결할 때 자산 공개(5a, 2026-11-16 B5): 순위 요청 다음, 월급 바뀜 앞, 연결됐을 때만', () => {
     expect(pickTopTask({ ...base, assetSharePending: true })).toEqual({
       kind: 'asset_share',

@@ -421,11 +421,10 @@ export type AnalyticsEvent =
       // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
       name: 'home_box_tapped';
       props: {
-        // 2026-11-13 v2.2: together = H-10 칸, month_line = H-11, wedding = H-12, money_in = ‘+ 수입 적기’,
+        // 2026-11-13 v2.2: together = H-10 칸, wedding = H-12, money_in = ‘+ 수입 적기’,
         // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 추가’, dday = ‘결혼식 날짜 알려 주기’
         box:
           | 'together'
-          | 'month_line'
           | 'wedding'
           | 'money_in'
           | 'more'
@@ -434,13 +433,14 @@ export type AnalyticsEvent =
           | 'band'
           // 띠 둘을 묶은 “할 일 2개” 띠(시트를 엶, 2026-11-16 4차 검토). 시트 안 줄은 band + todo
           | 'band_group'
-          | 'plan'
+          // H-15 월급 상자(2026-11-17): 머리 “월급 ›”, 줄 이번 달 월급 체크·월급 계획 템플릿(저축·투자는 savings)
+          | 'salary'
+          | 'salary_month'
+          | 'salary_plan'
           | 'calendar'
           | 'assets'
           | 'savings'
-          | 'retry'
-          // H-14 이번 달 우리 둘 줄(3차 검토 D3)
-          | 'month_us';
+          | 'retry';
         todo?: TopTask['kind'];
       };
     }
@@ -592,16 +592,11 @@ export type AnalyticsEvent =
       props: { kind: 'cycle' | 'period'; rows: number; entry: 'drawer' | 'w02' };
     }
   | { name: 'progress_news_opened'; props: Record<string, never> }
-  // 3차 검토 PR-C 아하 순간(32 0-4): P-09 합류 때 모은 금액(넣음·건너뜀, 묶음을 새로 만들었나), H-14 이번 달 우리 둘
+  // 3차 검토 PR-C 아하 순간(32 0-4): P-09 합류 때 모은 금액(넣음·건너뜀, 묶음을 새로 만들었나). H-14 이번 달 우리 둘 카드와 분석은 2026-11-17 홈에서 없앰
   | {
       name: 'join_saved_answered';
       props: { entered: boolean; amount_band: AmountBand | null; new_bundle: boolean };
     }
-  | {
-      name: 'month_us_viewed';
-      props: { saving: 'none' | 'hidden' | 'first' | 'up' | 'down' | 'same'; care_count: number };
-    }
-  | { name: 'month_us_dismissed'; props: Record<string, never> }
   // R-08 N-01·N-02 ‘이전 값으로 돌리기’(32 0-4). hours_since_change = 알림이 온 뒤 시간
   | { name: 'partner_change_reverted'; props: { hours_since_change: number } }
   // ── v2.2 PR 14(32 4-7, 26 위젯 v2.2) 위젯 ──
