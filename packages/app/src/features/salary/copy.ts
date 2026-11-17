@@ -623,7 +623,7 @@ export const copy = {
     mixed: '확인을 마쳤어요',
     late: (n: number) => `확인할 것 ${n}개`,
   },
-  archiveSaved: (amount: string) => `모은 금액 ${amount}`,
+  archivePlanned: (amount: string) => `계획한 월급 ${amount}`, // 오른쪽 큰 숫자가 모은 금액이라 보조 줄에 계획 합
   archiveEmpty: '아직 지난 달 기록이 없어요',
   /** 날짜 없는 사람: 줄 이름 “10월 3일 ~ 11월 1일”, 보조 “수입 2번” */
   archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,

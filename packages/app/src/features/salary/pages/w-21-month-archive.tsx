@@ -10,14 +10,13 @@ import { speakMasked } from '../../../shared/masked-text';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { baseDayOf, cycleName, useShownPayday } from '../cycle';
-import { useChecklists, useMe, usePartner, useSpace } from '../data';
-import { incomeOf } from '../month-parts';
+import { useChecklists, useMe, useSpace } from '../data';
 import { salaryPaths, togetherPaths } from '../paths';
 import { lateLines, lateOpen } from './w-02-last-month';
 
 // W-21 지난 달 모아보기(20 W-21, 2026-11-17 사용자 결정). 입구: 메뉴 서랍 ‘월급 › 지난 달 모아보기’, W-02 머리 링크(?from=w02).
 // 지난 사이클(월급날 기준 달)을 최근 것부터: 제목 “10월 25일 월급”, 보조 결과(“계획대로 됐어요” / “확인을 마쳤어요” / “확인할 것 n개”)와
-// “모은 금액 …”, 오른쪽 그 달 수입(W-02 1c 공유 이미지와 같은 기준). 줄 → W-02 지난 달 보기(`?cycle=`, 읽기 전용, 늦은 확인 규칙 그대로).
+// 오른쪽 큰 숫자 = 그 달 모은 금액, 보조 둘째 줄 “계획한 월급 …”(그 달 줄 계획 합, 사이클 수입 스냅샷이 없어서). 줄 → W-02 지난 달 보기(`?cycle=`, 읽기 전용, 늦은 확인 규칙 그대로).
 // 각자 엔진은 내 것만, 합쳐서는 공동 것. 날짜 없는 사람(확인 목록 없음)은 끝난 30일 기간별 수입 합(줄 → W-20b).
 // 계산은 core `archiveRow`·`pastPeriods`(W-02 MonthBar와 같은 규칙).
 export function W21MonthArchive() {
@@ -25,7 +24,6 @@ export function W21MonthArchive() {
   const [params] = useSearchParams();
   const me = useMe();
   const space = useSpace();
-  const partner = usePartner();
   const lists = useChecklists();
   const shownPayday = useShownPayday();
   const { masked } = useMask();
@@ -71,7 +69,6 @@ export function W21MonthArchive() {
   const base = baseDayOf(me.data, sp);
   const failed = periodMode ? ins.isError && !ins.data : past.isError && !past.data;
   const retry = () => void (periodMode ? ins.refetch() : past.refetch());
-  const income = incomeOf(owner, me.data, partner.data);
 
   const row = (
     key: string,
@@ -130,7 +127,7 @@ export function W21MonthArchive() {
         <div className="hg-list">
           {(past.data ?? []).map((l) => {
             const late = lateOpen(l, today, base, shownPayday) ? lateLines(l).length : 0;
-            const r = archiveRow({ lines: l.pay_check_line, income, lateCount: late });
+            const r = archiveRow({ lines: l.pay_check_line, lateCount: late });
             return row(
               l.id,
               cycleName(shownPayday(l.cycle_start)),
@@ -141,10 +138,10 @@ export function W21MonthArchive() {
                     : copy.archiveResult[r.result]}
                 </span>
                 <span style={{ display: 'block' }}>
-                  {speakMasked(copy.archiveSaved(m(r.saved)))}
+                  {speakMasked(copy.archivePlanned(m(r.planned)))}
                 </span>
               </>,
-              r.income,
+              r.saved,
               () => nav(`${salaryPaths.checklist}?cycle=${l.id}`, { state: { from: 'archive' } }),
             );
           })}
