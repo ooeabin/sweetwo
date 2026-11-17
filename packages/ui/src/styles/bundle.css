@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (6520e962). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e1b5bbf9). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -320,6 +320,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-chapterbar { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
 .hg-chapterbar__top { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; min-height: 36px; }
 .hg-chapterbar__label { grid-column: 2; margin: 0; text-align: center; font: var(--text-body-strong); color: var(--ink); }
+@media (max-width: 767px) { .hg-chapterbar__label { font: var(--text-title-3); font-size: 17px; line-height: 24px; } }  /* 2026-11-17 머리 작은 제목은 ‹ 머리 하나와 같은 크기 */
 .hg-chapterbar__track { position: relative; height: 4px; border-radius: var(--radius-full); background: var(--hairline); overflow: hidden; }
 .hg-chapterbar__fill { position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: var(--radius-full); background: var(--brand); transition: width var(--dur-base) var(--ease-out); }
 /* 온보딩 밖 질문 흐름(W-11, F-03, Y-07, S-12a 등)은 ink 채움(2026-11-09) */
@@ -1962,6 +1963,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   /* 2026-11-09 홈 밖 메뉴 첫 화면(월급, 자산 관리, 캘린더, 설정 홈) 머리: ‹(홈으로) + 굵은 제목. 알림·메뉴 버튼은 홈 머리에만 */
   .hg-mhead__back { margin-left: calc(var(--space-2) * -1); margin-right: var(--space-1); }
   .hg-frame__mhead .hg-mhead__back.hg-iconbtn { color: var(--ink); }
+  /* 2026-11-17 사용자 결정: ‹가 있는 머리는 모든 화면이 W-21 ‘지난 달 모아보기’ 머리 하나(‹ 왼쪽 + 17px 굵은 제목 가운데, PageHeader와 같은 크기·높이). 홈 밖 메뉴 첫 화면도 같음(‹ = 홈으로) */
+  .hg-frame__mhead--back { display: grid; grid-template-columns: minmax(44px, 1fr) minmax(0, auto) minmax(44px, 1fr); min-height: 64px; padding: var(--space-2) var(--space-4) 0; gap: var(--space-2); }
+  .hg-frame__mhead--back .hg-mhead__place { display: contents; }
+  .hg-frame__mhead--back .hg-mhead__back { grid-column: 1; justify-self: start; margin: 0 0 0 -8px; }
+  .hg-frame__mhead--back .hg-mhead__title { grid-column: 2; text-align: center; font: var(--text-title-3); font-size: 17px; line-height: 24px; letter-spacing: 0; }
 }
 
 /* 로그인, 가입 화면 틀(AuthLayout: A-01~A-08, O-01). 가운데 한 열, 좁은 창은 버튼 묶음을 아래로 */
