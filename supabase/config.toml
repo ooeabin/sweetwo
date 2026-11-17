@@ -455,6 +455,10 @@ verify_jwt = false
 [functions.purge-storage]
 verify_jwt = false
 
+# 어드민 AD-21 분석(GA4 Data API 집계, ADR 0010). 어드민 JWT로 확인(admin_me: 2단계 인증 + 역할). 비밀 GA_PROPERTY_ID, GA_SA_KEY
+[functions.ga-report]
+verify_jwt = true
+
 # 소셜 계정 프로필 사진 받기(앱이 우리 둘 공간이 생긴 뒤 한 번 부름, 25 S-11e). 앱 사용자 JWT로 확인
 [functions.social-avatar]
 verify_jwt = true

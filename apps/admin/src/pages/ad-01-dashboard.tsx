@@ -112,6 +112,14 @@ export function AD01Dashboard() {
 
       {/* 8 지표 v2.2(북극성, 선행, 가드레일, 2026-11-13 PR 14) */}
       <MetricsCards />
+      {/* AD-21 분석(GA4)으로 가는 링크만(서버 지표는 위 그대로, 2026-11-17 ADR 0010) */}
+      {canSee(me.roles, 'analytics') && (
+        <div>
+          <Button variant="link" size="sm" onClick={() => nav('/analytics')}>
+            {copy.toAnalytics}
+          </Button>
+        </div>
+      )}
 
       <div className="hg-admin__grid2">
         {d?.versions && (
@@ -259,7 +267,7 @@ function Trend({ trend }: { trend: TrendRow[] }) {
   );
 }
 
-function Stat({
+export function Stat({
   label,
   value,
   bad,
@@ -280,7 +288,7 @@ function Stat({
 }
 
 // 작은 막대 7개(한 계열, 한 색). 오늘 막대만 진하게, 나머지는 옅게. 값은 막대 위 title과 아래 표 보기.
-function Bars({ label, days }: { label: string; days: { day: string; n: number }[] }) {
+export function Bars({ label, days }: { label: string; days: { day: string; n: number }[] }) {
   const max = Math.max(1, ...days.map((x) => x.n));
   const last = days[days.length - 1];
   return (

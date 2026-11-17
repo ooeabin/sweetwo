@@ -305,3 +305,26 @@ export const AdminMetrics = z.object({
   at: z.string(),
 });
 export type AdminMetrics = z.infer<typeof AdminMetrics>;
+
+// ── AD-21 분석(Edge Function ga-report, GA4 Data API 집계, ADR 0010) ──
+export const GA_REPORT_DAYS = [7, 28, 90] as const;
+export type GaReportDays = (typeof GA_REPORT_DAYS)[number];
+const n = z.number().int().nonnegative();
+export const GaReport = z.discriminatedUnion('state', [
+  z.object({ state: z.literal('not_connected') }),
+  z.object({ state: z.literal('failed') }),
+  z.object({
+    state: z.literal('ok'),
+    days: z.union([z.literal(7), z.literal(28), z.literal(90)]),
+    at: z.string(),
+    active: z.object({ dau: n, wau: n, mau: n }),
+    daily: z.array(z.object({ date: z.string(), users: n })),
+    users: z.object({ new: n, active: n }),
+    platforms: z.array(z.object({ platform: z.string(), users: n, new: n })),
+    funnel: z.array(z.object({ event: z.string(), users: n })),
+    events: z.array(z.object({ event: z.string(), count: n, users: n })),
+    sources: z.array(z.object({ source: z.string(), sessions: n, store_clicks: n })),
+    cohorts: z.array(z.object({ week: z.string(), users: n, w1: n, w2: n, w4: n, w8: n })),
+  }),
+]);
+export type GaReport = z.infer<typeof GaReport>;

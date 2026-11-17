@@ -19,6 +19,7 @@ import { AD17Audit } from './pages/ad-17-audit';
 import { AD18Admins } from './pages/ad-18-admins';
 import { AD18Approvals } from './pages/ad-18-approvals';
 import { AD20Docs } from './pages/ad-20-docs';
+import { AD21Analytics } from './pages/ad-21-analytics';
 
 // 어드민(ops.sweetwo.kr, 27 어드민 화면). 데스크톱 웹만, 기준 폭 1440·최소 1280.
 // 매직 링크는 새 탭에서 열리므로 세션·PKCE 값은 localStorage(최대 8시간은 session.ts가 지킴)
@@ -129,6 +130,14 @@ function App() {
             />
             <Route path="/audit" element={<Navigate to="/system/audit" replace />} />
             <Route path="/docs" element={<AD20Docs />} />
+            <Route
+              path="/analytics"
+              element={
+                <Allow menu="analytics">
+                  <AD21Analytics />
+                </Allow>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ReauthProvider>
