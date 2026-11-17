@@ -50,6 +50,7 @@ Capacitor(iOS, Android, 태블릿 포함) + React 18 + TypeScript + Vite, TanSta
 - 비밀 값(service role, KMS, SES)은 앱 코드에 넣지 않는다. 앱에는 공개돼도 되는 값만 `VITE_`로.
 - 로그아웃은 `features/auth` `signOut()` 하나로만(2026-11-10). 계정 데이터를 쥔 상점·캐시는 `shared/session-reset.ts` `onSessionReset`에 지우는 함수를 등록한다. 브리지가 스스로 로그아웃하면(만료, PIN 5번 틀림) `clearLocalSession()`.
 - 앱 화면 CSP는 빌드 때 `apps/mobile/vite.config.ts`가 meta로 넣는다. 새 외부 출처(이미지, API)를 쓰면 거기에 더한다.
+- 분석은 GA4 하나(2026-11-17 ADR 0010). 화면 코드는 `track()`만 부르고 전송은 `shared/analytics-ga.ts` → 브리지 `window.sweetwo.analytics`(Firebase는 `apps/mobile`만). 금액 원값·이름·이메일·메모를 보내지 않고 사람은 해시만. 새 화면 경로를 더하면 `shared/screen-id.ts`에도 화면 ID를 더한다. 웹사이트 CSP는 `apps/site/public/_headers`.
 
 ## 화면과 디자인
 

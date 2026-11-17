@@ -8,6 +8,8 @@ import { onSessionReset } from './shared/session-reset';
 import type { Platform } from './platform';
 import { routes } from './routes';
 import { trackWidgetTap } from './features/home';
+import { qk } from '@sweetwo/api';
+import { startAnalytics, type AnalyticsPerson } from './shared/analytics-ga';
 
 // 다크 모드는 토큰이 처리한다([data-theme="dark"]). 여기서 시스템 설정을 따라 붙이기만 한다(설정 S 탭의 화면 모드가 생기면 그 값 우선).
 function useSystemTheme() {
@@ -52,6 +54,22 @@ export function App({ platform }: { platform: Platform }) {
       last = st.location.pathname;
     });
   }, [router]);
+  // 분석(ADR 0010): 모바일 브리지가 있으면 GA4로(이벤트, 화면 ID screen_view, 가명 사용자). 없으면(브라우저) 개발 중 콘솔만
+  useEffect(() => {
+    const a = window.sweetwo?.analytics;
+    if (!a) return;
+    const cache = queryClient.getQueryCache();
+    const person = (): AnalyticsPerson | null => {
+      const me = queryClient.getQueryData<AnalyticsPerson | null>(qk.me);
+      return me ? { id: me.id, space_id: me.space_id, analytics_off: me.analytics_off } : null;
+    };
+    return startAnalytics(a, router, (cb) => {
+      cb(person());
+      return cache.subscribe((ev) => {
+        if (ev.query.queryKey.length === 1 && ev.query.queryKey[0] === qk.me[0]) cb(person());
+      });
+    });
+  }, [queryClient, router]);
   // 앱 링크(sweetwo://open…)가 고른 화면으로
   // 위젯에서 왔으면 widget_tapped(32 4-7, 2026-11-13 PR 14)
   useEffect(

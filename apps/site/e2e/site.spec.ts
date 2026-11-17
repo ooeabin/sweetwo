@@ -343,3 +343,16 @@ test('검색 정보: robots.txt, sitemap.xml, JSON-LD, noindex 페이지는 사�
     ),
   ).toHaveCount(0);
 });
+
+// 측정 GA4(ADR 0010): 측정 ID가 없는 빌드(e2e·개발)는 Google로 아무것도 보내지 않음
+test('측정 ID 없으면 GA 요청 없음', async ({ page }) => {
+  const ga: string[] = [];
+  page.on('request', (r) => {
+    if (/googletagmanager|google-analytics/.test(r.url())) ga.push(r.url());
+  });
+  await page.goto('/');
+  await page.goto('/help');
+  await page.waitForLoadState('networkidle');
+  expect(ga).toEqual([]);
+  expect(await page.evaluate(() => 'gtag' in window)).toBe(false);
+});

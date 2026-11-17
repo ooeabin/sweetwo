@@ -61,7 +61,9 @@
 - 이벤트: site\_landing\_viewed, site\_store\_clicked(store, placement: top/hero/bottom/invite/install), site\_faq\_opened. site\_download\_clicked·site\_install\_guide\_viewed는 없앰 2026-11-10, ADR 0008. 정의 → 성공 지표 4-8
 - UTM 값은 웹사이트 이벤트에만 남김(→ 성공 지표 4-2)
 - (없앰 2026-11-10, ADR 0008) 설치 출처: L-02가 download\_id를 발급해 이 브라우저에 저장, 설치 후 첫 실행의 브라우저 로그인(A-03)이 딥링크에 실어 앱으로 넘김 → app\_first\_launch(download\_id). 설치 파일 이름·웹 세션 매칭은 쓰지 않음(→ 성공 지표)
-- 쿠키 없는 측정(PostHog)이라 동의 배너 없음. 법무 확인 필요
+- 측정은 GA4(gtag.js, 2026-11-17 ADR 0010, 예전 ‘쿠키 없는 PostHog’). 운영 빌드에 측정 ID(`PUBLIC_GA_MEASUREMENT_ID`)가 있을 때만 붙임. Google 신호·광고 맞춤 신호 끔. 초대(/i/), 로그인 복귀(/auth/), 앱 열기 안내(/n/)는 측정하지 않고, 페이지 주소는 쿼리 중 `utm_*`만 보냄. UTM은 GA가 바로 받음
+- GA 쿠키(`_ga`)가 생기지만 이번에는 동의 배너 없이 개인정보 처리방침 고지로 감 [확인 필요](법무)
+- CSP는 `_headers`에 둠: GA 출처(googletagmanager, google-analytics)만 외부로 허용
 
 **구현**
 

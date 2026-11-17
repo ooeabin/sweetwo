@@ -1,3 +1,8 @@
 # Cloudflare 정적 자산 헤더. iOS 앱 링크 확인 파일은 확장자가 없어 JSON으로 알려 줌
 /.well-known/apple-app-site-association
   Content-Type: application/json
+
+# 모든 페이지 CSP(ADR 0010, 2026-11-17). 측정 GA4(gtag.js)만 외부 출처로 허용. 인라인은 테마 스크립트 때문에 허용.
+# 새 외부 출처(이미지, API)를 쓰면 여기에 더함
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; img-src 'self' data: https://*.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'

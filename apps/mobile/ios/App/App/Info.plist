@@ -45,6 +45,11 @@
 			<string>cstr6suwn9.skadnetwork</string>
 		</dict>
 	</array>
+	<!-- 분석 GA4(Firebase Analytics, ADR 0010): 광고 맞춤 신호 끔, 자동 화면 기록 끔. IDFA는 SPM 트레잇 AnalyticsWithoutAdIdSupport로 빼고 ATT 없음 -->
+	<key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS</key>
+	<false/>
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>앱 잠금을 Face ID로 풀어요</string>
 	<key>LSRequiresIPhoneOS</key>

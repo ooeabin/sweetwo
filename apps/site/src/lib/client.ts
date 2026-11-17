@@ -1,13 +1,49 @@
 // 웹사이트 브라우저 쪽 동작: 기기별 스토어 버튼, 상단 ‘앱 받기’, 접기, UTM 저장, 측정 이벤트.
-// 측정은 PostHog(쿠키 없음) 연결 전까지 보내지 않고 개발 중에만 콘솔에 남김(28 ‘측정과 쿠키’).
+// 측정은 GA4(gtag.js, ADR 0010, 28 ‘측정과 쿠키’): 운영 빌드에 PUBLIC_GA_MEASUREMENT_ID가 있을 때만. 없으면(개발·e2e) 개발 중 콘솔만.
 import { detectSiteOs, type SiteOs } from '@sweetwo/core';
 import { URLS } from './site';
 
 type Props = Record<string, string | number | boolean>;
+type Gtag = (...args: unknown[]) => void;
+type GaWindow = { dataLayer?: unknown[]; gtag?: Gtag };
+
 export function track(name: string, props: Props = {}) {
-  const w = window as unknown as { posthog?: { capture: (n: string, p: Props) => void } };
-  if (w.posthog) w.posthog.capture(name, props);
+  const w = window as unknown as GaWindow;
+  if (w.gtag) w.gtag('event', name, props);
   else if (import.meta.env.DEV) console.debug('[site]', name, props);
+}
+
+/** 측정하지 않는 주소: 초대(/i/ 코드), 로그인 복귀(/auth/ code), 앱 열기 안내(/n/) */
+export const NO_GA_PATH = /^\/(i|auth|n)(\/|$)/;
+
+/** GA에 보낼 페이지 주소: 쿼리는 utm_*만 남기고 해시는 뺌(코드·토큰이 주소에 실려 나가지 않게) */
+export function gaPageLocation(href: string): string {
+  const u = new URL(href);
+  const keep = [...u.searchParams.entries()].filter(([k]) => k.startsWith('utm_'));
+  const q = new URLSearchParams(keep).toString();
+  return `${u.origin}${u.pathname}${q ? `?${q}` : ''}`;
+}
+
+/** gtag.js를 붙인다(인라인 스크립트 없이). 광고 맞춤 신호·Google 신호 끔 */
+function startGa(id: string) {
+  if (!/^G-[A-Z0-9]+$/.test(id) || NO_GA_PATH.test(location.pathname)) return;
+  const w = window as unknown as GaWindow;
+  w.dataLayer = w.dataLayer ?? [];
+  // gtag.js는 arguments 객체를 dataLayer에서 읽음(공식 스니펫과 같은 모양)
+  w.gtag = function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    w.dataLayer?.push(arguments);
+  };
+  w.gtag('js', new Date());
+  w.gtag('config', id, {
+    page_location: gaPageLocation(location.href),
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
+  document.head.append(s);
 }
 
 const safe = <T>(f: () => T, fallback: T): T => {
@@ -80,6 +116,8 @@ export function accordions(root: ParentNode = document) {
 }
 
 export function boot() {
+  const ga = import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined;
+  if (import.meta.env.PROD && ga) startGa(ga);
   const os = detectSiteOs(navigator.userAgent);
   document.documentElement.dataset.os = os;
   downloads(os);

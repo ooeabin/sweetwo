@@ -11,3 +11,6 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# cap sync가 만드는 SwiftPM 심볼릭 링크(기기마다 절대 경로, @capacitor-firebase/analytics symlink 옵션)
+App/CapApp-SPM/symlinks

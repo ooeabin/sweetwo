@@ -108,6 +108,9 @@ importers:
       '@capacitor-community/admob':
         specifier: 8.2.1
         version: 8.2.1
+      '@capacitor-firebase/analytics':
+        specifier: 8.6.0
+        version: 8.6.0(@capacitor/core@8.5.3)
       '@capacitor/android':
         specifier: ^8.5.3
         version: 8.5.3(@capacitor/core@8.5.3)
@@ -420,6 +423,15 @@ packages:
   '@capacitor-community/admob@8.2.1':
     resolution: {integrity: sha512-kJRy6EMNrutDZL0ETChg5pAJ9pQFxkcsinrTRD4wkYp7NGkLZmG0m/YBMyXvUhMkbMIqlCGkNRSjgXi25F9/ww==}
     engines: {node: '>=22.0.0'}
+
+  '@capacitor-firebase/analytics@8.6.0':
+    resolution: {integrity: sha512-SiEgcC75secpgSVZncSoSB8mrx9mPVyDgO0PrFsknK9OYs8xZcoh7PIEfNENjvBrmfX0QDFA+bX7UDNSbhCPgg==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+      firebase: ^12.6.0
+    peerDependenciesMeta:
+      firebase:
+        optional: true
 
   '@capacitor/android@8.5.3':
     resolution: {integrity: sha512-ilH4gSSz3DrketMkzDVAvY9JsWJ//rCQnECLTdcFRO7xXDogwAbUvQAnIAbiqefwV/D1xfjEL4Gw1MJXEcaA9g==}
@@ -3760,6 +3772,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.3
       '@rdlabo/capacitor-docgen': 0.4.1
+
+  '@capacitor-firebase/analytics@8.6.0(@capacitor/core@8.5.3)':
+    dependencies:
+      '@capacitor/core': 8.5.3
 
   '@capacitor/android@8.5.3(@capacitor/core@8.5.3)':
     dependencies:
