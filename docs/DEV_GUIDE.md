@@ -28,7 +28,7 @@ MVP는 모바일 앱(iOS, Android, 태블릿 포함)을 React + TypeScript 화�
 | 암호화와 파일 | AWS KMS, S3(서울, 백업) |
 | 정적 배포·개발 서버 | Cloudflare Workers 정적 자산 + Access(웹사이트, 어드민, 개발 확인용 앱 화면, ADR 0002) |
 | 메일 | 보내기 Amazon SES(서울), 받기 네이버웍스 |
-| 분석, 오류, 모니터링 | PostHog(직접 운영), Sentry(직접 운영), Better Stack |
+| 분석, 오류, 모니터링 | GA4(앱 Firebase Analytics, 웹사이트 gtag.js, ADR 0010), Sentry(직접 운영), Better Stack |
 | 업데이트 | 스토어(App Store, Google Play) 단계적 출시 |
 | 저장소 | pnpm 워크스페이스 + Turborepo 모노레포 |
 | 테스트 | Vitest, Playwright, pgTAP(RLS 검사) |
@@ -259,7 +259,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 - `stamp_actor()` 트리거: created_by, updated_by, 휴지통에 넣을 때 deleted_by를 auth.uid()로. 목표, 고정지출 삭제는 `deleted_at`만(영구 삭제 정책 없음)
 - 초대 코드: `create_invite()`(6자리, 0 O 1 I L 제외, 7일). 링크는 `https://sweetwo.kr/i/{코드}`(모바일은 앱 링크로 앱이 바로 엶, (전환 전) app.sweetwo.kr), 앱 스킴 링크는 `sweetwo://i/{코드}`
 - 기준일(체크리스트 만드는 날)은 각자면 그 사람 월급날, 합쳐서면 `couple_space.joint_cycle_day`(기본 = 두 월급날 중 늦은 날, → 아래 S-11d). 옛 `base_day`·`base_day_last`·`account_mode` 열은 남겨 두고 새로 쓰지 않음
-- 서버 분석 이벤트(20261122090000, 2026-11-12 QA 6구간 S6-02): `server_event`(이름, 가명 `user_id`·`space_id`, `props`, `sent_at`). 앱(anon·authenticated)은 읽지도 쓰지도 못함(RLS 켬 + 권한 회수, `mail_outbox`와 같은 서버 전용 표). 쓰기는 내부 `server_track(이름, 사람, 공간, props)`만: ‘분석 수집’을 끈 사람(`analytics_off`) 것은 남기지 않고, 공동(합쳐서) 것은 한 사람이라도 끄면 안 남김. 지금 남기는 것: `checklist_generated`(`pay_checklist` 미룬 제약 트리거, 트랜잭션 끝이라 줄 수가 들어감), `checklist_closed`(`state` → `closed` 트리거), `notification_sent`(20261126090000, QA 10구간 S10-03, `track_noti_sent`: `notify`가 행을 새로 넣으면 `inapp`, `claim_push`가 꺼내면 `os`(알림마다 1번), `mail_missed_notifications`가 메일을 쌓으면 `email`. props `type`(kind), `channel`, `cap_scope`(`noti_always_mail`이면 `out_of_cap`), pgTAP `s10_noti.test.sql`). 금액 구간은 `amount_band`(core `amountBand`와 같은 이름). PostHog로 보내고 `sent_at`을 채우는 일은 분석 단계에서. pgTAP `s6_checklist.test.sql`(트랜잭션 안에서는 `set constraints all immediate`로 미룬 트리거를 내보내 확인)
+- 서버 분석 이벤트(20261122090000, 2026-11-12 QA 6구간 S6-02): `server_event`(이름, 가명 `user_id`·`space_id`, `props`, `sent_at`). 앱(anon·authenticated)은 읽지도 쓰지도 못함(RLS 켬 + 권한 회수, `mail_outbox`와 같은 서버 전용 표). 쓰기는 내부 `server_track(이름, 사람, 공간, props)`만: ‘분석 수집’을 끈 사람(`analytics_off`) 것은 남기지 않고, 공동(합쳐서) 것은 한 사람이라도 끄면 안 남김. 지금 남기는 것: `checklist_generated`(`pay_checklist` 미룬 제약 트리거, 트랜잭션 끝이라 줄 수가 들어감), `checklist_closed`(`state` → `closed` 트리거), `notification_sent`(20261126090000, QA 10구간 S10-03, `track_noti_sent`: `notify`가 행을 새로 넣으면 `inapp`, `claim_push`가 꺼내면 `os`(알림마다 1번), `mail_missed_notifications`가 메일을 쌓으면 `email`. props `type`(kind), `channel`, `cap_scope`(`noti_always_mail`이면 `out_of_cap`), pgTAP `s10_noti.test.sql`). 금액 구간은 `amount_band`(core `amountBand`와 같은 이름). GA로 보내고 `sent_at`을 채우는 일(Measurement Protocol)은 나중 과제(ADR 0010). pgTAP `s6_checklist.test.sql`(트랜잭션 안에서는 `set constraints all immediate`로 미룬 트리거를 내보내 확인)
 - v2.2 지표(20261209090000, 2026-11-13 PR 14, 32 0장): 서버 이벤트 넷을 표 트리거로 더함(함수를 다시 쓰지 않음): `auto_line_confirmed {kind}`(`pay_check_line` 자동 줄 wait → checked이고 `checked_by` 없음, 날짜 없는 자동 저금 `goal_move` reason_code auto), `progress_news_sent`(`notification` kind progress_news), `salary_change_applied {months_ahead, has_until}`(`salary_change.applied_at` 처음 채움), `unlink_resolved {path: timeout}`(`couple_unlink` how deadline 확정). 어드민 지표 `admin_metrics(p_months)`(AD-01 8번, `admin_require` 모든 역할 + aal2, 집계 jsonb만): 북극성 판정은 내부 `metric_couple_month(space, month)` 하나(32 0-1과 같은 말, 바꾸면 둘을 같이), 비율 칸은 `metric_ratio(num, den)` → `{num, den, pct}`. 앱 응답 Zod `AdminMetrics`(core), 훅 없이 `fetchAdminMetrics`(api). `save_split` 새 버전: 보내기 줄은 늘 맨 뒤 + 옛 설정 이어받기(각자 계열에서 트리거가 sort 0으로 넣어 맨 위로 가던 것). pgTAP `v22_metrics.test.sql`
 - ‘이전 값으로 돌리기’(20261210090000, 14 N-01·N-02 7a, R-08): `partner_change`에 `before_raw`·`after_raw`(jsonb, 값 없음 = JSON null, 열이 SQL null이면 예전 기록이라 못 돌림)·`reverted_at`·`reverted_by`. 원래 값은 11인자 `log_partner_change(…, p_before_raw, p_after_raw)`로 남김(9인자는 그대로): 공동 저금 목표 금액·기한·이름(`goal_partner_change`), 공동 월급 계획 줄 금액(`log_split_changes`, 같은 열쇠 줄이 하나일 때만 돌림), 경조사 메모(`care_partner_change`). 알림 하나 = flush 한 번의 묶음(dedupe `pc:{첫 id}:now|week` + 같은 `sent_at`), 판정은 내부 `partner_change_group(알림)` 하나(그 뒤 같은 topic·ref·field 기록 없음, 지금 값 = after, 연결, 같이 쓰는 항목). 앱은 `revertible_notifications()` id 목록 → N-01·N-02 줄 아래 글자 버튼, `revert_partner_change(알림)` → 원래 값 + 바꾼 사람에게 알림 한 건(돌리며 남긴 기록은 보낸 것으로). 열을 더해 `flush_partner_changes`도 새 버전(행 모양만). 자산 금액은 돌리지 않음. pgTAP `v22_revert_change.test.sql`
 - 분석 이벤트 타입은 `packages/app/src/shared/analytics.ts`(+ `analytics-saving.ts`) `AnalyticsEvent` 한 곳, 이벤트 이름 하나에 정의 하나(같은 이름을 두 번 적으면 속성이 어긋남, PR 14에서 합침). 월급 관리 방식 값은 4-2 코드(`separate` / `combined`)로 보내고 엔진 값 joint는 `salaryModeCode()`로 바꿈. 구현 상태 표는 32 0-5
@@ -425,7 +425,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
   - iOS 앱 링크: `ios/App/App/App.entitlements` `com.apple.developer.associated-domains` = `applinks:sweetwo.kr`(빌드 설정 `CODE_SIGN_ENTITLEMENTS`). Android: `AndroidManifest.xml` `autoVerify` intent-filter(/i/, /n, /n/settings)
 - refresh token은 Keychain(iOS)·Keystore(Android)에(`@aparajita/capacitor-secure-storage`, 이 기기에만), 30일 슬라이딩. 렌더러(웹뷰)의 supabase-js는 `accessToken` 옵션(api `configureSupabase({ kind: 'bridge' })`)으로 브리지에서 access token만 받음
 - 로그인된 기기 이름: 웹뷰 User-Agent에 `sweeTwo`(capacitor.config `appendUserAgent`) → S-15 “휴대폰 앱(iOS)”
-- 웹뷰 안 CSP(2026-11-10, `apps/mobile/vite.config.ts` 플러그인 `sweetwo-csp`가 빌드 때 `index.html`에 meta로 넣음. 개발 서버는 Vite HMR 인라인 스크립트 때문에 넣지 않음): `default-src 'self'`, `script-src 'self'`(인라인·eval 금지), `style-src 'self' 'unsafe-inline'`(React style 속성), `img-src 'self' data: blob: {Supabase}`(Storage 서명 주소), `connect-src 'self' {Supabase} {Supabase wss}`(REST, Auth, Realtime), `font-src 'self' data:`, `frame-src 'none'`, `object-src 'none'`, `base-uri 'none'`. Supabase 주소는 빌드 때 `VITE_SUPABASE_URL`에서. Capacitor 브리지는 네이티브가 넣는 스크립트라 막히지 않음. 분석(PostHog)·오류(Sentry)를 붙이면 그 주소를 `connect-src`에 더함. 원격 화면 코드를 내려받지 않음(코드 바꿔 넣기 업데이트 안 씀)
+- 웹뷰 안 CSP(2026-11-10, `apps/mobile/vite.config.ts` 플러그인 `sweetwo-csp`가 빌드 때 `index.html`에 meta로 넣음. 개발 서버는 Vite HMR 인라인 스크립트 때문에 넣지 않음): `default-src 'self'`, `script-src 'self'`(인라인·eval 금지), `style-src 'self' 'unsafe-inline'`(React style 속성), `img-src 'self' data: blob: {Supabase}`(Storage 서명 주소), `connect-src 'self' {Supabase} {Supabase wss}`(REST, Auth, Realtime), `font-src 'self' data:`, `frame-src 'none'`, `object-src 'none'`, `base-uri 'none'`. Supabase 주소는 빌드 때 `VITE_SUPABASE_URL`에서. Capacitor 브리지는 네이티브가 넣는 스크립트라 막히지 않음. 분석 GA4는 네이티브 Firebase SDK가 보내 웹뷰 CSP와 상관없음(ADR 0010). 오류(Sentry)를 붙이면 그 주소를 `connect-src`에 더함. 원격 화면 코드를 내려받지 않음(코드 바꿔 넣기 업데이트 안 씀)
 - 안전 영역(2026-11-10): `index.html` viewport `viewport-fit=cover`. 앱 틀(`hg-frame`), AuthLayout, QuestionLayout(`hg-qmain`, 아래 주 버튼 바), LockScreen, BottomSheet, Toast, Drawer가 `env(safe-area-inset-*)`를 더함(디자인 DESIGN.md ‘안전 영역’)
 - 앱 링크 확인 파일: sweetwo.kr/.well-known/apple-app-site-association, assetlinks.json(`apps/site/src/pages/.well-known/`, 값은 사이트 빌드 환경 변수 `PUBLIC_APPLE_TEAM_ID`, `PUBLIC_ANDROID_CERT_SHA256`(쉼표로 여러 개), 없으면 빈 목록 = 링크는 웹사이트로 열림). 이 값들은 비밀이 아니라 공개 값(누구나 확인 파일에서 봄). 아직 애플 개발자 계정·플레이 콘솔 앱이 없어 비어 있음 → 넣는 절차는 기획서 출시 준비(`docs/spec/34-launch-prep.md`) ‘앱 링크 값 넣기’ 할 일. 확장자 없는 AASA는 `apps/site/public/_headers`가 `Content-Type: application/json`으로(Cloudflare Workers 정적 자산). 경로는 /i/*와 알림 메일 링크(/n, /n/settings)만. 로그인 복귀는 sweetwo://로만
 - 최소 지원 버전: `app_config.min_version_ios`·`min_version_android`(AD-16 승인 시 반영). 미만이면 A-01 ‘지금 업데이트’ → 웹사이트 /download(스토어 안내). 공지는 플랫폼을 고르지 않음(AD-10, ADR 0008)
@@ -864,7 +864,7 @@ supabase/
 ### 환경 변수
 
 - 저장소에는 `.env.example`(형식), `.env.development`(스테이징 공개 값), `.env.e2e`(가짜 값)만. 그 밖의 값은 `.env.local`, `.env.development.local`(커밋 금지). 비밀 값은 어떤 .env에도 넣지 않음
-- 앱에 들어가는 값은 공개돼도 되는 것만(Supabase URL, anon key, PostHog 주소)
+- 앱에 들어가는 값은 공개돼도 되는 것만(Supabase URL, anon key, 웹사이트 GA 측정 ID `PUBLIC_GA_MEASUREMENT_ID`). Firebase 설정 파일(`google-services.json`, `GoogleService-Info.plist`)은 공개 값이지만 저장소에 넣지 않고 운영자가 빌드 기기에 둠(ADR 0010)
 - service role, KMS, SES 키는 Supabase 비밀 값에만. 앱 코드에 들어가면 빌드가 멈춤(CI 검사)
 
 ### 코드
@@ -944,7 +944,7 @@ supabase/
 
 새 개발자 첫날
 
-- [ ] GitHub, Supabase(스테이징만), Sentry, PostHog 접근 받기
+- [ ] GitHub, Supabase(스테이징만), Sentry, GA4(뷰어) 접근 받기
 - [ ] ‘로컬 개발 환경’대로 앱 띄우고 찬우, 예빈으로 로그인
 - [ ] 이 문서, 기획서 ‘기술·운영’, 디자인 시스템 README 읽기
 - [ ] 작은 PR 하나로 리뷰와 배포 흐름 경험
@@ -954,11 +954,11 @@ supabase/
 금융 정보를 다루므로 ‘모으지 않기, 국내에 두기, 두 번 잠그기’가 기본. 기준은 기획서 ‘보안·개인정보’ 탭.
 
 - 모으지 않음: 계좌번호, 카드번호, 주민등록번호. 입력 칸에 들어오면 저장 전에 막음
-- 국내 보관: Supabase, Storage, SES, S3 모두 서울. PostHog와 Sentry는 직접 운영
+- 국내 보관: Supabase, Storage, SES, S3 모두 서울. Sentry는 직접 운영. 분석 GA4는 국외(Google) 보관, 보관 기간 14개월(ADR 0010, 처리방침 반영 [확인 필요])
 - 암호화: DB 전체 암호화 + 메모와 가족 정보는 Edge Function에서 AES-256-GCM, 키는 AWS KMS
 - 토큰: access token은 짧게, refresh token은 기기별. 모바일은 Keychain·Keystore. 웹뷰는 엄격한 CSP(‘인증과 세션’)
 - 잠금: PIN 6자리 + 생체 인증(iPhone Face ID·Touch ID, Android 지문), 5분 뒤 자동 잠금
-- 로그: 금액, 메모, 이름을 남기지 않음. Sentry는 보내기 전에 걸러내기(beforeSend), PostHog는 금액을 구간으로만
+- 로그: 금액, 메모, 이름을 남기지 않음. Sentry는 보내기 전에 걸러내기(beforeSend), GA4는 금액을 구간으로만(앱 `toGaParams`가 금액처럼 보이는 숫자·이메일을 한 번 더 거름)
 - 비밀 값: 코드와 저장소에 두지 않음. Supabase 비밀 값과 GitHub Actions secrets만. service role 키는 서버 밖으로 나가지 않음
 - 보관 기간: 휴지통 30일, 알림 90일, 변경 이력 13개월, 결제 기록 5년, 접속 기록 3개월. pg\_cron이 정리
 - 탈퇴: 30일 유예 후 삭제. 우리 둘 상태에 따른 처리는 기획서 규칙 그대로
@@ -973,8 +973,8 @@ supabase/
 
 - Sentry: `beforeSend`, `beforeBreadcrumb`에서 키 이름으로 지움(amount, memo, name, email, token 들어간 키 전부), URL 쿼리도 지움
 - Edge Functions 로그: 함수 이름, space\_id, 오류 코드, 걸린 시간만. 요청 본문과 복호화 값은 남기지 않음
-- PostHog 공통 속성: platform(ios, android), app\_version, os, couple\_state. 사람은 익명 id로만
-- 서버 이벤트(32 4-1 `source=server`)는 DB 표 `server_event`에 쌓아 두고(위 ‘지금 있는 테이블과 함수’), 분석 단계에서 PostHog로 보냄. ‘분석 수집’을 끈 사람 것은 처음부터 남기지 않음
+- GA4 전송(ADR 0010): 앱 `packages/app/src/shared/analytics-ga.ts` `startAnalytics`(App에서 한 번) → 브리지 `window.sweetwo.analytics`(`apps/mobile/src/native/analytics.ts`, `@capacitor-firebase/analytics` 8.6.0 네이티브만 `registerPlugin`으로 부름, firebase JS SDK는 묶지 않음). 이벤트 속성은 `toGaParams`(참·거짓 → 'true'/'false', 배열 → 쉼표, null 뺌, GA 한도 이름 40자·글자 100자·25개). 화면 이동은 `screen_view` 화면 ID(`shared/screen-id.ts`, 경로 표에 화면을 더하면 여기도, `screen-id.test.ts`가 모든 경로 확인). 사람은 가명만: `user_id` = SHA-256(`sweetwo-ga-v1:` + 사용자 id) 앞 32자, 사용자 속성 `couple_hash`(커플 공간 id 같은 방식). platform·app\_version·os는 Firebase가 자동으로. ‘분석 수집’(`analytics_off`)을 끈 사람은 setEnabled(false) + 이벤트 버림, 로그아웃(`onSessionReset`)하면 사용자 지움. 브리지가 없으면(브라우저 개발·e2e) 개발 중 콘솔만, e2e는 GA로 보내지 않음. 광고 ID·자동 화면 기록 끔(AndroidManifest meta-data, iOS Info.plist + SwiftPM 트레잇 `AnalyticsWithoutAdIdSupport`, `capacitor.config.ts` `experimental.ios.spm`). Firebase 설정 파일이 없으면 빌드는 그대로, 보내지 않음
+- 서버 이벤트(32 4-1 `source=server`)는 DB 표 `server_event`에 쌓아 두고(위 ‘지금 있는 테이블과 함수’), GA로 보내는 일은 나중 과제(ADR 0010). ‘분석 수집’을 끈 사람 것은 처음부터 남기지 않음
 - 금액은 구간으로만: 월 수입·생활비·고정지출·결혼 총예산·목표 금액·여행 경비는 기획서 데이터 항목 구간, 그 밖의 금액은 10만 미만 / 10\~50만 / 50\~100만 / 100\~300만 / 300\~1000만 / 1000만 이상(기획서 성공 지표 5장)
 - ‘분석 수집’ 동의를 끄면 `analytics_off`: 기기에서 이벤트를 만들지도 보내지도 않음
 
@@ -1073,7 +1073,7 @@ supabase/
 
 - 오류: Sentry (모바일, Edge Functions)
 - 가용성과 상태 페이지: Better Stack. 목표 99.5%
-- 제품 지표: PostHog. North Star는 월급 체크를 한 커플 수(→ 기획서 성공 지표)
+- 제품 지표: GA4(어드민 AD-21 ‘분석’에서도 봄, ADR 0010). North Star는 월급 체크를 한 커플 수(→ 기획서 성공 지표)
 - 백업: 매일, 30일 보관, 분기마다 복구 훈련. RPO 24시간, RTO 4시간
 - 성능 목표: 앱 시작 2초, 화면 전환 0.3초, 동기화 p95 3초
 
@@ -1118,7 +1118,7 @@ supabase/
 
 ### 웹사이트(apps/site)
 
-- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보, 페이지 머리의 canonical·og·파비콘), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(기기별 스토어 버튼, 접기, 측정 이벤트 `site_*`는 PostHog 연결 전까지 개발 중 콘솔만). 기기 판정은 core `detectSiteOs`(Vitest)
+- Astro 정적 사이트(L-01·02·03·05·06, 28). 틀 `src/layouts/Site.astro`(SiteLayout: 상단 바, 하단, 사업자 정보, 페이지 머리의 canonical·og·파비콘), 문구·주소 `src/lib/site.ts`, 브라우저 동작 `src/lib/client.ts`(기기별 스토어 버튼, 접기, 측정 이벤트 `site_*`는 운영 빌드에 `PUBLIC_GA_MEASUREMENT_ID`가 있을 때만 gtag.js로, 없으면 개발 중 콘솔만. /i/·/auth/·/n/은 측정 안 함, 페이지 주소는 `utm_*` 쿼리만 남김, ADR 0010). CSP는 `public/_headers`(GA 출처만 외부 허용, 새 외부 출처를 쓰면 더함). 기기 판정은 core `detectSiteOs`(Vitest)
 - 다크 모드(2026-11-12): `Site.astro` 머리의 인라인 스크립트가 그리기 전에 기기 설정(`prefers-color-scheme`)으로 `<html data-theme>`을 붙이고 바뀌면 따라감(어드민 `main.tsx`와 같은 방식, 토큰이 `[data-theme]`로 바꿈). 첫 화면 그림 카드는 `data-theme="light"`로 다크에서도 흰 카드
 - L-02 `/download`: 제목 + 기기별 스토어 버튼(예전 `?os=` 주소도 같은 화면, 데스크톱 다운로드는 ADR 0008로 없앰)
 - 원본 마크다운: FAQ `src/content/faq.md`(앱 S-20은 `pnpm content:sync`로 복사), 릴리스 노트 `src/content/releases.md`, 약관·처리방침 `src/content/{terms,privacy}/{시행일}.md`(frontmatter version·effective `YYYY-MM-DD`, `?v=YYYY-MM-DD`로 이전 버전). 약관·처리방침은 법률 검토 전 초안
@@ -1185,7 +1185,7 @@ supabase/
 - [ ] 어드민 도메인 ops.sweetwo.kr
 - [ ] 카카오 디벨로퍼스 앱, 구글 OAuth 클라이언트, Apple 로그인 설정
 - [ ] Apple Developer 계정(iOS 서명, 애플 로그인), Google Play 개발자 계정
-- [ ] Sentry, PostHog 자체 운영 서버, Better Stack
+- [ ] Sentry, GA4 속성·Firebase 앱 등록(ADR 0010), Better Stack
 - [ ] 네이버웍스 help@sweetwo.kr과 privacy@sweetwo.kr 그룹 메일 만들기 (도메인 등록과 메일 DNS 연결은 10월 12일 완료: MX, SPF(TXT 한 줄에 include:worksmobile, SES는 나중에 같은 줄에), DKIM(선택자 naverworks), DMARC p=none)
 
 ## 개발 착수 체크리스트
@@ -1219,7 +1219,7 @@ supabase/
 - [ ] AWS: KMS 키(staging, prod), SES 발송 도메인 인증과 발송 제한 해제, S3 + CloudFront, 최소 권한 IAM 사용자
 - [ ] OAuth 앱 3종 × 3환경(카카오, 구글, 애플), Supabase Auth 리다이렉트 허용 목록
 - [ ] 서명: Apple Developer(iOS 서명, 애플 로그인), Google Play 업로드 키
-- [ ] 관측: Sentry, PostHog 자체 운영 서버, Better Stack(상태 페이지)
+- [ ] 관측: Sentry, GA4(Firebase 설정 파일 2개, 웹 측정 ID, 데이터 보관 14개월, ADR 0010), Better Stack(상태 페이지)
 - [ ] 메일: 네이버웍스 help@, privacy@ 그룹 메일, SPF는 TXT 한 줄에 네이버웍스와 SES
 - [ ] DB 마이그레이션 순서(테이블마다 공통 컬럼 + RLS 정책 4개 + pgTAP): ① 공통 틀(is\_space\_member, updated\_at·version·change\_log 트리거) ② couple\_space, app\_user, invite, device\_session, consent ③ change\_log(seq, mutation\_id), amount\_history ④ account, asset, debt, fixed\_expense, annual\_event ⑤ goal, goal\_move, salary\_split, split\_line, pay\_checklist, pay\_check\_line, checklist\_done ⑥ couple\_unlink, partner\_change ⑦ care\_day, care\_record, photo ⑧ notification, widget\_setting ⑨ inquiry, admin\_view\_request, holiday, notice, maintenance, app\_config, admin\_setting, item\_catalog, admin\_user, audit\_log, job\_run
 - [ ] seed.sql: 찬우, 예빈, 연결된 우리 둘 공간, 월급 계획과 이번 달 체크리스트

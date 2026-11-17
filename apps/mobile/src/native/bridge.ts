@@ -44,6 +44,7 @@ import {
   verifyPin,
 } from './lock';
 import { placedWidgets, writeWidget } from './widget';
+import { analytics } from './analytics';
 
 // 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
 // 웹뷰에는 access token만. refresh token, code_verifier, 로그인 콜백 code는 이 파일 밖(웹뷰 화면 코드)에서 못 봄.
@@ -204,6 +205,8 @@ export async function installBridge(): Promise<'ios' | 'android'> {
     inviteCode: { firstRun: () => firstRunInviteCode() },
     // 홈 화면 위젯(26 WG-01·WG-04, widget.ts): 금액 없는 글만
     widget: { update: (d) => writeWidget(d), installed: () => placedWidgets() },
+    // 분석(ADR 0010, analytics.ts): Firebase Analytics(GA4). 값은 앱이 거른 것만
+    analytics,
   };
   window.sweetwo = bridge;
   return platform;

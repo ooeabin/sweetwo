@@ -165,6 +165,19 @@ export interface AppBridge {
     installed?: () => Promise<WidgetPlaced[]>;
   };
   /**
+   * 분석 전송(ADR 0010, 2026-11-17): 네이티브 Firebase Analytics(GA4). 값은 analytics-ga.ts toGaParams가 거른 것만
+   * (금액 원값·이름·이메일·메모 없음). user_id·couple_hash는 내부 id의 SHA-256 가명. 옛 앱·브라우저는 없음(콘솔만)
+   */
+  analytics?: {
+    log: (name: string, params: Record<string, string | number>) => Promise<void>;
+    /** 화면 이동(screen_view). 화면 ID(‘W-02’)만 */
+    screen: (screenId: string) => Promise<void>;
+    /** id null = 사용자 지움. props 값 null = 그 속성 지움 */
+    setUser: (u: { id: string | null; props: Record<string, string | null> }) => Promise<void>;
+    /** ‘분석 수집’(S-18)을 끄면 false */
+    setEnabled: (on: boolean) => Promise<void>;
+  };
+  /**
    * 안드로이드 하드웨어 뒤로(2026-11-09). 받는 쪽이 true를 돌려주면 처리한 것, false면 브리지가 기본 동작
    * (웹뷰 뒤로, 더 갈 곳이 없으면 앱 닫기). 돌려준 함수로 해제. iOS는 없음
    */

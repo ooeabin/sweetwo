@@ -103,7 +103,7 @@
 
 ### 0-5. 구현 상태 (2026-11-13 PR 14)
 
-앱 이벤트는 `packages/app/src/shared/analytics.ts`(+ `analytics-saving.ts`)의 `AnalyticsEvent` 한 곳(이름 하나 = 정의 하나), 서버 이벤트는 표 `server_event`(DEV_GUIDE ‘지금 있는 테이블과 함수’). PostHog 전송기는 분석 단계에서 붙임(지금 앱은 개발 중에만 콘솔).
+앱 이벤트는 `packages/app/src/shared/analytics.ts`(+ `analytics-saving.ts`)의 `AnalyticsEvent` 한 곳(이름 하나 = 정의 하나), 서버 이벤트는 표 `server_event`(DEV_GUIDE ‘지금 있는 테이블과 함수’). 전송 경로(2026-11-17 ADR 0010): 앱 이벤트 → `analytics-ga.ts` `toGaParams`(참·거짓 글자, 배열 쉼표, 금액처럼 보이는 숫자·이메일 버림) → 모바일 브리지 `window.sweetwo.analytics` → Firebase Analytics(GA4). 화면 이동은 GA `screen_view`(화면 ID만). 웹사이트 `site_*` → gtag.js(같은 GA4 속성, 웹 스트림). 브리지·측정 ID가 없으면(브라우저 개발·e2e) 개발 중 콘솔만. 서버 이벤트 `server_event`를 GA로 보내는 일은 나중 과제. 결과는 GA4 화면과 어드민 AD-21.
 
 | 이벤트(0-4) | 어디서 | 상태 |
 | --- | --- | --- |
@@ -212,8 +212,8 @@
 
 | 속성 | 값 | 비고 |
 | --- | --- | --- |
-| user\_id | 가명 내부 ID | 로그인 계정·이메일과 분리 |
-| couple\_id | 커플 공간 가명 ID | 해제 후 혼자 쓰기도 기존 couple\_id 유지, 새로 초대하면 새 ID |
+| user\_id | 가명 내부 ID | 로그인 계정·이메일과 분리. GA4 `user_id` = SHA-256(공개 salt + 사용자 id) 앞 32자(ADR 0010) |
+| couple\_id | 커플 공간 가명 ID | 해제 후 혼자 쓰기도 기존 couple\_id 유지, 새로 초대하면 새 ID. GA4 사용자 속성 `couple_hash`(같은 방식) |
 | role | `starter`(먼저 시작) / `partner`(초대받아 합류) |  |
 | couple\_state | `unjoined` 미합류 / `linked` 연결 / `unlink_pending` 해제 대기 / `solo` 혼자 쓰기 | → 핵심 규칙 › 커플·권한 |
 | marriage\_state | `married` 했어요 / `preparing` 준비 중이에요 | O-11 답 [확인 필요] |

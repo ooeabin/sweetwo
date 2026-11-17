@@ -9,7 +9,8 @@ export type SalaryModeCode = 'separate' | 'combined';
 export const salaryModeCode = (m: 'separate' | 'joint'): SalaryModeCode =>
   m === 'joint' ? 'combined' : 'separate';
 
-// PostHog 연결 전까지는 보내지 않고 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 보낸다.
+// 모바일 앱은 브리지로 GA4(Firebase Analytics)에 보낸다(ADR 0010, analytics-ga.ts startAnalytics). 브리지가 없으면(브라우저 개발·e2e)
+// 개발 중에만 콘솔에 남긴다. (서버) 표시 이벤트는 서버가 server_event에 쌓는다.
 export type AnalyticsEvent =
   | SavingTogetherEvent
   | {
@@ -625,8 +626,8 @@ export const changeBand = (from: number, to: number): '<5' | '5-20' | '20+' => {
 type Sink = (e: AnalyticsEvent) => void;
 let sink: Sink | null = null;
 
-/** PostHog 등 실제 전송기를 붙인다(분석 단계에서). */
-export const setAnalyticsSink = (s: Sink) => {
+/** 실제 전송기를 붙인다(analytics-ga.ts startAnalytics, ADR 0010). null이면 뗌 */
+export const setAnalyticsSink = (s: Sink | null) => {
   sink = s;
 };
 
