@@ -4,17 +4,15 @@ import { object } from '@sweetwo/core';
 // [확인 필요] 표시는 기획서에 문구가 없거나 [확인 필요]로 둔 것.
 export const copy = {
   title: '캘린더',
-  add: '+ 추가',
-  views: { month: '달력' },
-  monthLink: '달력', // 2026-11-09 Y-01 ‘목록/달력’ 탭 대신 오른쪽 ‘달력 ›’ 링크 [확인 필요]
-  addCareRow: '경조사 추가', // 2026-11-09 ‘일정’ 머리 오른쪽 + 줄(+ 아이콘이 글자 앞 ‘+’) [확인 필요]
+  add: '+ 일정 추가', // [확인 필요] 2026-11-17 넓은 창 제목 줄(예전 ‘+ 추가’)
+  addSchedule: '일정 추가', // [확인 필요] 2026-11-17 좁은 창 보기 필터 줄 오른쪽(+ 아이콘이 글자 앞 ‘+’, 예전 ‘경조사 추가’)
   filters: { all: '전체', care: '경조사·기념일', money: '금융 일정' }, // [확인 필요]
   filterLabel: '보기 필터', // [확인 필요] 화면 읽기용
   noMoneyThisMonth: '이번 달은 금융 일정이 없어요', // 13 공통 상태 18번, Y-04(2026-11-12 D3)
   none60: '60일 안에는 경조사가 없어요',
-  // Y-01 ‘금융 일정’ 필터 빈 목록(2026-11-12 D3) [확인 필요]
+  // Y-04 ‘다가오는 일정’ ‘금융 일정’ 필터 빈 목록(2026-11-12 D3, 예전 Y-01) [확인 필요]
   noMoney60: '60일 안에는 금융 일정이 없어요',
-  upcomingList: '일정',
+  upcomingList: '다가오는 일정', // [확인 필요] 2026-11-17 예전 ‘일정’(Y-01)
   recordCount: (n: number) => `선물을 기록할 날이 ${n}개 있어요`,
   recordWhich: (name: string, date: string, more: number) =>
     more > 0 ? `${name}, ${date} 외 ${more}개` : `${name}, ${date}`,
@@ -28,7 +26,7 @@ export const copy = {
     // 날짜 없는 사람의 자동 줄(2026-11-14 R6). 지난 날은 자동 확인 [확인 필요]
     auto: (name: string) => `${name} 자동으로 나가요`,
     autoDone: (name: string) => `${name} 자동으로 나갔어요`,
-    /** 앞당긴 월급날 까닭(2026-11-16 4차 검토 R4-9, 문구 리뷰). to = “24일” 또는 Y-01 “24일 목요일” */
+    /** 앞당긴 월급날 까닭(2026-11-16 4차 검토 R4-9, 문구 리뷰). to = “24일” 또는 Y-04 “24일 목요일” */
     moved: (from: number, why: 'sat' | 'sun' | 'holiday', to: string) =>
       `${from}일이 ${why === 'sat' ? '토요일' : why === 'sun' ? '일요일' : '공휴일'}이라 ${to}로 앞당겼어요`,
   },
@@ -66,7 +64,7 @@ export const copy = {
   monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
-  // Y-04 고른 날 줄(Y-01 맨 위 띠는 2026-11-12 D1로 없앰) [확인 필요]
+  // Y-04 고른 날 줄(맨 위 ‘월급날 확인 목록’ 띠는 2026-11-12 D1로 없앰) [확인 필요]
   reviewBand: (month: number) => `${month}월 월급날 확인 목록에 남은 게 있어요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
@@ -77,7 +75,7 @@ export const copy = {
   agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
   dday: (n: number) => (n === 0 ? '오늘' : n < 0 ? `D+${-n}` : `D-${n}`), // 지난 날 D+[확인 필요]
 
-  // Y-01
+  // Y-04 ‘다가오는 일정’(예전 Y-01 본문)
   memoAmount: (amount: string) => `${amount} 생각해 뒀어요`, // [확인 필요]
   prepare: '준비하기',
   nextCare: '다음 경조사', // [확인 필요] 화면 읽기용

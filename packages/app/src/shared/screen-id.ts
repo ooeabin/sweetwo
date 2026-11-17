@@ -29,6 +29,7 @@ const TABLE: [RegExp, string][] = [
   [new RegExp(`^/salary/bundles/${ID}/achieved$`), 'W-12'],
   [/^\/salary\/money-in$/, 'W-20'],
   [/^\/salary\/money-in\/list$/, 'W-20b'],
+  [/^\/salary\/archive$/, 'W-21'],
   [new RegExp(`^/salary/money-in/${ID}$`), 'W-20a'],
   [/^\/assets$/, 'F-01'],
   [/^\/assets\/items$/, 'F-02'],
@@ -40,8 +41,7 @@ const TABLE: [RegExp, string][] = [
   [new RegExp(`^/assets/${ID}/matured(/${ID})?$`), 'F-04a'],
   [new RegExp(`^/assets/${ID}/sold$`), 'F-04b'],
   [new RegExp(`^/assets/${ID}$`), 'F-04'],
-  [/^\/calendar(\/list)?$/, 'Y-01'],
-  [/^\/calendar\/month$/, 'Y-04'],
+  [/^\/calendar(\/list|\/month)?$/, 'Y-04'], // 2026-11-17 Y-01 없앰: 옛 주소도 Y-04
   [/^\/calendar\/add(\/[^/]+)?$/, 'Y-07'],
   [/^\/calendar\/gifts$/, 'Y-09'],
   [new RegExp(`^/calendar/day/${ID}/budget$`), 'Y-05'],

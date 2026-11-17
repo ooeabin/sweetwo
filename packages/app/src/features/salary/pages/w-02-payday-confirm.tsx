@@ -16,7 +16,16 @@ import {
   lineIsMine,
   todayKst,
 } from '@sweetwo/core';
-import { AddRow, Button, Icon, IconButton, ListRow, SectionHeader, Tabs } from '@sweetwo/ui';
+import {
+  AddRow,
+  Button,
+  Icon,
+  IconButton,
+  ListRow,
+  PageHeader,
+  SectionHeader,
+  Tabs,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -44,7 +53,7 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
-import { savingPaths, togetherPaths } from '../paths';
+import { salaryPaths, savingPaths, togetherPaths } from '../paths';
 import { MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
@@ -77,6 +86,8 @@ export function W02PaydayConfirm() {
   const [autoOpen, setAutoOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const cycleParam = params.get('cycle');
+  // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
+  const fromArchive = (loc.state as { from?: string } | null)?.from === 'archive';
   const splits = useSplits();
   const accountNames = useAccountNames();
   const shownPayday = useShownPayday();
@@ -115,8 +126,8 @@ export function W02PaydayConfirm() {
     if (i >= 0 && past.data.length > i) setAgo(i + 1);
     const next = new URLSearchParams(params);
     next.delete('cycle');
-    setParams(next, { replace: true });
-  }, [cycleParam, past.data, params, setParams]);
+    setParams(next, { replace: true, state: loc.state });
+  }, [cycleParam, past.data, params, setParams, loc.state]);
   const changed = useChangedLines(ago === 0 ? list?.pay_check_line : undefined);
 
   const loads = [me, space, goals, lists];
@@ -177,14 +188,40 @@ export function W02PaydayConfirm() {
   const frame = (body: ReactNode) => (
     <MainFrame
       current="salary"
-      page={page}
+      sub={fromArchive ? 'detail' : undefined}
+      page={fromArchive ? undefined : page}
       columns={[
         <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-          <SalarySeg value="month" />
+          {fromArchive ? (
+            <PageHeader
+              title={copy.tabTitle}
+              backLabel={copy.back}
+              backTo={copy.archiveTitle}
+              onBack={() => nav(-1)}
+            />
+          ) : (
+            <SalarySeg value="month" />
+          )}
           {body}
         </div>,
       ]}
     />
+  );
+  // W-21 지난 달 모아보기 링크(머리 링크 규칙: slate 500, hg-sechead__more)
+  const archiveLink = !fromArchive && (
+    <div className="hg-sechead">
+      <a
+        className="hg-sechead__more"
+        href={`${salaryPaths.archive}?from=w02`}
+        onClick={(e) => {
+          e.preventDefault();
+          nav(`${salaryPaths.archive}?from=w02`);
+        }}
+      >
+        {copy.archiveLink}
+        <Icon name="chevron-right" size={16} />
+      </a>
+    </div>
   );
 
   const base = baseDayOf(me.data, sp);
@@ -196,6 +233,7 @@ export function W02PaydayConfirm() {
     const mine = saving.ready ? saving.live.filter((i) => i.owner !== 'partner') : [];
     return frame(
       <>
+        {archiveLink}
         {period.data && <PeriodLine period={period.data} onGo={() => nav(togetherPaths.moneyIn)} />}
         {meId && (
           <MoneyInRows
@@ -571,6 +609,7 @@ export function W02PaydayConfirm() {
             </span>
           }
         />
+        {archiveLink}
         <MonthBar
           list={shown}
           income={income}

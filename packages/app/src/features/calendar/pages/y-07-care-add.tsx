@@ -22,7 +22,7 @@ import { onSessionReset } from '../../../shared/session-reset';
 // Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
 // → c “언제예요?” 날짜 + 양력/음력 + “매년 돌아와요”(설날·추석·어버이날은 날짜를 채우고 건너뜀)
-// → d “쓸 금액을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-01.
+// → d “쓸 금액을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-04.
 // 한 번인 지난 날짜는 “이미 지난 날이에요. 기록으로 남길까요?” → Y-08. 같은 이름·같은 날짜가 있으면 한 번 확인.
 // 수정(Y-05 ‘수정’)은 같은 a → c 화면에서 이름·날짜만 고치고 ‘저장’.
 
@@ -196,7 +196,7 @@ export function Y07CareAdd() {
         nav(`/calendar/day/${id}/record/a?on=${rule.once_on}`, { replace: true });
       else {
         carryToast(copy.saved);
-        nav('/calendar/list', { replace: true });
+        nav('/calendar', { replace: true });
       }
     } catch {
       toast(copy.loadFailed);

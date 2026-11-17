@@ -43,6 +43,7 @@ export { BundleEntry, W15Bundle } from './pages/w-15-bundle';
 export { W15aBundleEdit, W15aBundleField } from './pages/w-15a-bundle-edit';
 export { W20aDistribute, W20MoneyIn } from './pages/w-20-money-in';
 export { W20bMoneyInList } from './pages/w-20b-money-in-list';
+export { W21MonthArchive } from './pages/w-21-month-archive';
 export { BundleCard, BundleRow, bundleLines } from './bundle-parts';
 export { togetherPaths } from './paths';
 export { bundleOfGoal, useBundles, useTogetherRealtime } from './together';

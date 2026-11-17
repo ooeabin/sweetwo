@@ -22,7 +22,7 @@ const OPEN: Record<string, string> = {
   'n/settings': '/settings/notifications',
 };
 
-/** 위젯이 여는 화면: 홈, W-10 저금, W-14 쓸 곳 메모(저금·묶음), Y-01 캘린더, Y-05 경조사 */
+/** 위젯이 여는 화면: 홈, W-10 저금, W-14 쓸 곳 메모(저금·묶음), Y-04 캘린더(달력), Y-05 경조사 */
 const ID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const WIDGET_TO = new RegExp(
   `^/(|salary/items/${ID}(/notes)?|salary/bundles/${ID}/notes|calendar|calendar/day/${ID})$`,

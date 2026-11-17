@@ -17,4 +17,4 @@
 - 보기 필터 칩(“전체” “경조사” “금융 일정”)은 회색 알약(`surface-alt` + `slate`), 고르면 검정. 그 위에 자산 관리와 같은 탭 “목록” / “달력”.
 - 날짜 칸 `aria-label`에 날짜, 공휴일 이름, 일정 수. 고른 날 `aria-pressed`, 오늘 `aria-current="date"`.
 - React 래퍼 `Calendar`(packages/ui): `days`(`short`, `tone`, `band`, `holiday`, `festive`), `today`, `selected`, 이전·다음, `todayLabel`·`onToday`, `bandLabel`, `showYear`.
-- 목록(Y-01)의 줄은 같은 종류 아이콘(Lead)과 오른쪽 D-day `hg-cal__dday`(7일 안 `is-near`). 기록할 날 띠 `hg-recband`.
+- 달력 아래 ‘다가오는 일정’(Y-04, 예전 Y-01 목록)의 줄은 같은 종류 아이콘(Lead)과 오른쪽 D-day `hg-cal__dday`(7일 안 `is-near`). 기록할 날 띠 `hg-recband`.

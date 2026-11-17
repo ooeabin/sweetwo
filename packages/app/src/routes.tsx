@@ -29,8 +29,6 @@ import {
 } from './features/assets';
 import { DevUiGallery } from './features/dev';
 import {
-  CalendarHome,
-  Y01CareList,
   Y04Calendar,
   Y05Budget,
   Y05CareDay,
@@ -93,6 +91,7 @@ import {
   W20aDistribute,
   W20MoneyIn,
   W20bMoneyInList,
+  W21MonthArchive,
   SplitRedirect,
   W01dAutoLines,
   W10SavingItem,
@@ -178,6 +177,7 @@ export const routes: RouteObject[] = [
           ['/salary/bundles/:id/achieved', <W12BundleAchieved key="w12m" />], // W-12 묶음 달성
           ['/salary/money-in', <W20MoneyIn key="w20" />], // W-20 수입 적기
           ['/salary/money-in/list', <W20bMoneyInList key="w20b" />], // W-20b 수입 기록(고치기·지우기)
+          ['/salary/archive', <W21MonthArchive key="w21" />], // W-21 지난 달 모아보기
           ['/salary/money-in/:id', <W20aDistribute key="w20a" />], // W-20a 저금에 나눠 넣기
         ] as const
       ).map(([path, el]) => ({
@@ -216,31 +216,14 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <CalendarHome />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // 캘린더: 마지막 보기
-      {
-        path: '/calendar/list',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
-              <Y01CareList />
-            </OnboardingGate>
-          </RequireAccount>
-        ),
-      }, // Y-01 경조사 목록
-      {
-        path: '/calendar/month',
-        element: (
-          <RequireAccount>
-            <OnboardingGate>
               <Y04Calendar />
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // Y-04 달력
+      }, // Y-04 달력(캘린더 첫 화면, 2026-11-17)
+      // 옛 주소(예전 Y-01 일정 목록 /calendar/list, 예전 달력 /calendar/month, 알림에 이미 저장된 링크)는 Y-04로
+      { path: '/calendar/list', element: <Navigate to="/calendar" replace /> },
+      { path: '/calendar/month', element: <Navigate to="/calendar" replace /> },
       {
         path: '/calendar/day/:id',
         element: (

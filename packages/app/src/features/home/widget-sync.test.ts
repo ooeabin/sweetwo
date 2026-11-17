@@ -128,7 +128,7 @@ describe('widgetLanding(widget_tapped landing_screen, 32 4-7)', () => {
     expect(widgetLanding(`/salary/items/${id}`)).toBe('W-10');
     expect(widgetLanding(`/salary/items/${id}/notes`)).toBe('W-14');
     expect(widgetLanding(`/salary/bundles/${id}/notes`)).toBe('W-14');
-    expect(widgetLanding('/calendar')).toBe('Y-01');
+    expect(widgetLanding('/calendar')).toBe('Y-04');
     expect(widgetLanding(`/calendar/day/${id}`)).toBe('Y-05');
     expect(widgetLanding('/settings')).toBe('other');
   });

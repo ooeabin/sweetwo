@@ -168,7 +168,7 @@ export function MainFrame(
     children,
   });
   const view = new URLSearchParams(loc.search).get('view');
-  // 날짜 없는 사람(각자)은 W-02 확인 목록이 없어 ‘이번 달 확인’ 줄을 숨김(20 W-02 ‘날짜 없는 사람은 W-02 없음’). ‘월급’ 줄이 그 자리(기간 한 줄)로 감
+  // 날짜 없는 사람(각자)은 W-02 확인 목록이 없어 ‘이번 달 월급 체크’ 줄을 숨김(20 W-02 ‘날짜 없는 사람은 W-02 없음’). ‘월급’ 줄이 그 자리(기간 한 줄)로 감
   const noCheck = !!me.data?.payday_none && space.data?.salary_mode !== 'joint';
   const salarySubs = [
     ...(noCheck
@@ -176,7 +176,8 @@ export function MainFrame(
       : [item('salary_month', d.salaryMonth, '/salary', path === '/salary' && view !== 'plan')]),
     item('salary_plan', d.salaryPlan, '/salary?view=plan', path === '/salary' && view === 'plan'),
     item('savings', d.savings, '/salary/items', path === '/salary/items'),
-    item('money_in', d.moneyIn, '/salary/money-in/list', path === '/salary/money-in/list'),
+    // W-21 지난 달 모아보기(2026-11-17). ‘수입 기록’ 줄은 없앰(W-20b는 W-02 ‘수입’ 묶음에서)
+    item('month_archive', d.monthArchive, '/salary/archive', path === '/salary/archive'),
   ];
   const assetSubs = [
     item('asset_items', d.assetItems, '/assets/items', path === '/assets/items'),
@@ -184,8 +185,8 @@ export function MainFrame(
     item('asset_rank', d.rank, '/assets/rank', path === '/assets/rank'),
   ];
   const calendarSubs = [
-    item('calendar_month', d.calMonth, '/calendar/month', path === '/calendar/month'),
-    item('calendar_list', d.calList, '/calendar/list', path === '/calendar/list'),
+    // 캘린더 첫 화면 = 달력 Y-04(2026-11-17, ‘일정 목록’ Y-01 줄은 없앰)
+    item('calendar_month', d.calMonth, '/calendar', path === '/calendar'),
     item('gifts', d.gifts, '/calendar/gifts', path === '/calendar/gifts'),
   ];
   const notices = useNoticeMenu(menu);
@@ -200,7 +201,13 @@ export function MainFrame(
         salarySubs,
       ),
       item('assets', d.assets, lastAssetsTab(), path === '/assets', assetSubs),
-      item('calendar', d.calendar, '/calendar', path === '/calendar', calendarSubs),
+      item(
+        'calendar',
+        d.calendar,
+        '/calendar',
+        path === '/calendar' && !calendarSubs.some((x) => x.current),
+        calendarSubs,
+      ),
     ],
     // 2026-11-16: ‘우리 둘’은 설정 홈(S-10) 안으로. 서랍에는 합류 전·혼자 쓰기일 때만 ‘초대하기’ 한 줄
     // (2026-11-16 혼자 쓰기도). 합류 전은 코드를 바로 만들고, 혼자 쓰기는 S-12의 새로 초대하기·다시 연결

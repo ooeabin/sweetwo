@@ -464,7 +464,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
   - 저장소: iOS App Group `group.kr.sweetwo.app` UserDefaults(키 `data`, `lockAt`), Android 앱 전용 SharedPreferences `sweetwo_widget`(백업 제외 `xml/backup_rules.xml`, `data_extraction_rules.xml`). 로그아웃(브리지 `signOut`)이면 지움 → “sweeTwo를 열어 로그인해 주세요”
   - 잠금: `lock.ts`가 잠글 때 `lockAt` = 지금, 앱이 뒤로 가면 `lockAt` = 지금 + 자동 잠금 분(PIN이 있을 때만), 풀리면 지움. 위젯은 그 시각부터 값 없이 “잠겨 있어요” + “앱 열기”(iOS는 그 시각에 타임라인 항목, Android는 `WidgetLockReceiver` 알람)
   - 갱신: 앱이 값을 쓰면 바로(iOS `WidgetCenter.reloadAllTimelines`, Android `WidgetStore.refreshAll`), 그 밖에 30분마다와 KST 자정(D-n). 마지막 저장이 30분보다 오래면 오른쪽 아래 “오전 10:30 기준”
-  - 누르면 `sweetwo://widget?to={경로}&w={wg01|wg04}` → core `deep-link.ts`가 정한 화면 모양(홈, W-10, W-14 저금·묶음, Y-01, Y-05)만 `open`으로 → 브리지 `onNavigate(path, from)`(from = 위젯과 앱이 켜져 있었는지, 앱이 `widget_tapped`를 보냄. `w` 없는 옛 링크도 받음, 2026-11-13 PR 14)
+  - 누르면 `sweetwo://widget?to={경로}&w={wg01|wg04}` → core `deep-link.ts`가 정한 화면 모양(홈, W-10, W-14 저금·묶음, Y-04, Y-05)만 `open`으로 → 브리지 `onNavigate(path, from)`(from = 위젯과 앱이 켜져 있었는지, 앱이 `widget_tapped`를 보냄. `w` 없는 옛 링크도 받음, 2026-11-13 PR 14)
   - 분석 `widget_added`(2026-11-13 PR 14): 홈이 준비되면 실행마다 한 번 브리지 `widget.installed()`(플러그인 `HomeWidget.installed`: iOS `WidgetCenter.getCurrentConfigurations`, Android `AppWidgetManager.getAppWidgetIds` + 최소 너비 200dp 이상이면 medium) → 종류·크기만, 이 기기에서 처음 본 것만(localStorage `sw.widgets.seen`)
   - Android: `SaveTogetherWidget.java`·`UpcomingWidget.java`(RemoteViews, Java. Glance(Kotlin·Compose)는 빌드 설정이 커서 쓰지 않음), `res/layout/widget_*.xml`, `res/xml/widget_*_info.xml`, 문구 `res/values/widget_strings.xml`, 색 `res/values(-night)/widget_colors.xml`(tokens.css 값 그대로 옮김, 바꾸면 같이)
   - iOS: 위젯 확장 `ios/App/SweetwoWidget/`(`SweetwoWidget.swift` SwiftUI WidgetKit, `Info.plist`, `SweetwoWidget.entitlements`, Phosphor lock·eye-slash `Assets.xcassets`). 이 저장소에서 Xcode 타깃은 만들지 않음 → 아래 순서로 사람이 한 번 만듦
@@ -738,11 +738,12 @@ supabase/
 
 ### 캘린더 구조
 
-- 기획: 24(재기획 2026-10-25). features/calendar: `/calendar`(마지막 보기로, 기기에 기억), Y-01 `/calendar/list`, Y-04 `/calendar/month`. 보기 필터 “전체” “경조사” “금융 일정”은 목록·달력 공통, 기기에 기억
+- 기획: 24(재기획 2026-10-25). features/calendar: `/calendar` = Y-04 달력(캘린더 첫 화면, 2026-11-17부터. 예전 Y-01 일정 목록은 없애 `/calendar/list`·`/calendar/month`는 `/calendar`로 넘김, 본문은 `upcoming.tsx` ‘다가오는 일정’). 보기 필터 “전체” “경조사” “금융 일정”은 달력·다가오는 일정 공통, 기기에 기억
+- W-21 지난 달 모아보기(2026-11-17, features/salary `pages/w-21-month-archive.tsx`, `/salary/archive`): 새 DB 함수 없이 `fetchPastChecklists`(W-02 지난 달과 같은 쿼리 키)·`fetchMoneyIns`를 읽고, 계산은 core `rules/month-archive.ts`(`archiveRow` 결과·수입·모은 금액, `pastPeriods` 날짜 없는 사람 끝난 30일 기간). W-02는 `?cycle={id}` + 라우터 state `from: 'archive'`면 머리를 ‹ 지난 달 모아보기로(구간 탭 없음). 분석 `month_archive_viewed`, 화면 ID `screen-id.ts` W-21
 - 금융 일정(읽기 전용, 누르면 해당 화면)은 core `rules/calendar.ts` `moneyDates(연, 월, 재료)`: 월급날(각자 = 사람마다 “찬우 월급날”, 합쳐서 = `joint_cycle_day` 하나 “월급날”, 주말·공휴일이면 직전 영업일) → W-02, 월급날 확인 목록 안내 띠(다음 월급날 3일 전 ~ 전날, 손 줄이 남았을 때만 = `reviewFor`, 각자 = 내 월급날 기준, 첫날 “월급날 확인 목록”, 2026-11-15) → W-02(W-05 없앰), 저금 항목 기한(목표 금액과 기한이 있고 모으는 중만) → W-10, 자산·대출 만기(서버가 공개 범위로 거른 행) → F-04
 - 달력 칸은 ui `Calendar`(일요일 시작 6주, `monthGrid`). 금융 일정 = 검정 점, 확인 목록 안내 = `is-band`, 경조사 = `together` 점 한 가지. 고른 날이 띠 안이면 “{n}월 월급, 확인 목록에 남은 게 있어요” 줄(→ W-02). 목록 맨 위 띠는 2026-11-12 D1로 없앰(일정 줄 하나)
 - 목록: 기록 없이 7일 지난 날(맨 위 ‘기록하기’) → 다음 경조사 카드(D-day, 날짜, 금액 메모 “30만 원 생각해 뒀어요”, ‘준비하기’) → 60일 안 경조사 → 금융 일정 작은 줄 → 선물 기록. 경조사가 없으면 빈 상태 + ‘경조사 추가’(금융 일정은 그대로)
-- QA 9구간(2026-11-12): `useCalendarData`가 `failed`·`retry`를 주고 Y-01·Y-04·Y-05(+ 금액 메모)는 frame `CalendarLoadError`(13-7 카드 + ‘다시 시도’, S9-02). Realtime은 api `subscribeCares`(care_day + care_record) → `useCareRealtime`(경조사·기록·사진 키 다시 읽음, S9-03). 고치기 Toast ‘되돌리기’는 `careUndo`(고치기 전 값으로 `updateCareDay` + `change_reverted` care_day, S9-04), 상대 알림이 가는 동작(추가, 메모)은 `trackCareShared`(S9-05). 경조사 응답은 core `CareDaySchema`·`CareRecordSchema`·`RecordCareResultSchema`(S9-15). 금융 일정 월급날은 `who`(파트너 id)를 실어 `/salary?who=`(S9-10). 이번 주 띠 `WeekStrip holidays`(S9-07)
+- QA 9구간(2026-11-12): `useCalendarData`가 `failed`·`retry`를 주고 Y-04·Y-05(+ 금액 메모)는 frame `CalendarLoadError`(13-7 카드 + ‘다시 시도’, S9-02). Realtime은 api `subscribeCares`(care_day + care_record) → `useCareRealtime`(경조사·기록·사진 키 다시 읽음, S9-03). 고치기 Toast ‘되돌리기’는 `careUndo`(고치기 전 값으로 `updateCareDay` + `change_reverted` care_day, S9-04), 상대 알림이 가는 동작(추가, 메모)은 `trackCareShared`(S9-05). 경조사 응답은 core `CareDaySchema`·`CareRecordSchema`·`RecordCareResultSchema`(S9-15). 금융 일정 월급날은 `who`(파트너 id)를 실어 `/salary?who=`(S9-10). 이번 주 띠 `WeekStrip holidays`(S9-07)
 - 경조사는 한 종류(`care_day`, 새로 만드는 것은 category `couple`). 금액(`budget`)은 메모일 뿐 계산에 안 들어감. 가족 목록, 양가·우리 둘 구분, 챙길 사람, 서프라이즈(`secret`), 양가 비용(Y-06)·낸 곳은 재기획으로 없앰(열은 남기고 새로 안 씀)
 - 날짜 계산은 core `rules/care.ts`(`careDateInYear`, `nextCareDate`, `careDatesInMonth`, `dday`). 음력은 `rules/lunar.ts`(`lunarToSolar`: 윤달이 없으면 평달, 30일이 없으면 29일)
 - Y-07 `/calendar/add/:step`: a 이름(최대 20자) + 이름 칩(생일, 결혼기념일, 설날, 추석, 어버이날, 행사, 직접 쓰기 = 이름·날짜·반복 기본값만, `kind`로 저장) → c 날짜 + 양력/음력(+ 윤달) + “매년 돌아와요”(행사만 기본 꺼짐, 설날·추석·어버이날은 건너뜀) → d 금액 메모(건너뛰기) → ‘추가하기’(알림 D-30 + D-7). 한 번인 지난 날은 ‘기록으로 남기기’ → Y-08. 같은 이름·날짜면 한 번 확인. ‘+ 추가’, 달력 고른 날(날짜 채움)에서 시작. 수정(Y-05 ⋯ ‘수정’, `startCareEdit`)은 같은 a → c에서 이름·날짜만 ‘저장’
@@ -1242,7 +1243,7 @@ supabase/
 | W-02 체크리스트 줄 | TransferRow(hg-transfer) |
 | 홈 H-02·H-03·H-04·H-06~H-09 (2026-11-09) | HomeHub(hg-hub, hg-hubhero, hg-hubband, hg-hubtile, hg-hubsave) |
 | 좁은 창 홈 머리 ☰ 메뉴 (2026-11-09) | Drawer(hg-drawer) |
-| W-02·F-02·Y-01 ‘+ … 추가’ 줄 (2026-11-09) | AddRow(hg-addrow) |
+| W-02·F-02·Y-04 ‘+ … 추가’ 줄 (2026-11-09) | AddRow(hg-addrow) |
 | F-01 16번, W-01 6번 | ListRow |
 | 검색(⌘K, 좁은 창 검색) | CommandPalette |
 | 알림 센터 N-01·N-02 항목 | Avatar |

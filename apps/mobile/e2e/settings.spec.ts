@@ -1057,7 +1057,7 @@ test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려�
   await page.goto('/calendar/list');
   await expect(page.getByRole('heading', { name: '마케팅 정보를 계속 받을까요?' })).toBeVisible();
   await page.getByRole('button', { name: '그만 받을게요' }).click();
-  await expect(page).toHaveURL(/\/calendar\/list$/);
+  await expect(page).toHaveURL(/\/calendar$/);
 });
 
 test('연결 해제 요청 받음(S-12d) 오프라인: ‘해제할게요’ 비활성 + 이유 한 줄(S3-08)', async ({

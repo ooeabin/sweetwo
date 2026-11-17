@@ -4,6 +4,7 @@
 
 - 소비자가 주는 것: 앞 요소(아이콘·Avatar·Toggle, 선택), 라벨, 보조 1줄(선택), 값(선택), 이동 표시(선택).
 - 높이 56px 이상(위아래 `space-3` 12px, 2026-11-09 밀도: 한 줄 56px, 두 줄 64~68px), 세로 가운데 정렬. 값은 오른쪽 정렬(2026-11-16 비례 숫자, 값에 날짜·문장이 섞여 고정폭이면 ‘1 1월’처럼 벌어짐). 이름 15px 500(2026-11-09 글자 단계: 16px 400에서. 캘린더 고른 날 줄도 15px 500, 700에서), 값 15px 600, 보조 줄 13px `stone`(`body-sm`).
+- 보조 줄 둘(2026-11-17 W-21 지난 달 모아보기): 결과와 “모은 금액 …”을 `hg-listrow__sub` 안에 줄바꿈 두 줄(각 `display: block`)로, 오른쪽 값은 그 달 수입 하나. 줄 높이는 두 줄 규칙(64~68px) 그대로.
 - 누르면 이동하는 줄만 화살표(`hg-chevron`)이고 줄 전체가 `button`(또는 `a`). 토글 줄은 화살표 없음.
 - 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 56px 이상(2026-11-09 60px에서). 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
 - 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 2D 그림이 들어올 때까지 회색 빈 원(`hg-lead--slot`, `surface-alt` + 안쪽 1px `hairline-soft`, 2026-11-10. 그 전 2026-11-09는 영역 색 원 + Phosphor 아이콘). 종류는 아래 ‘Lead 종류 표’, 나중 그림 이름은 `data-art`(표의 아이콘 이름). UI 아이콘(캘린더 ‘+’ 추가 칸)은 `uiIcon`으로 아이콘 그대로. 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음. (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)
@@ -46,13 +47,13 @@
 | 자산 요약 `summary` | 자산(`assets`) | `wallet` | `invest` | F-01 요약 아래 줄 |
 | | 부채(`debts`) | `bank` | 회색 | 〃 |
 | | 예상 순자산(`expected`) | `chart-line-up` | `invest` | 〃 |
-| 금융 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-01 일정, Y-04 고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
+| 금융 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-04 다가오는 일정·고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
 | | 월급 전 확인(`review`) | `calendar-check` | `safety` | 〃 |
 | | 저금 기한(`deadline`), 쓸 곳(`goal`) | `target` | `goal` | 〃 |
 | | 만기(`maturity`) | `hourglass` | `family` | 〃 |
 | | 쓸 곳 메모(`note`, 2026-11-13 W-14 날짜) | `piggy-bank` | `goal` | 〃 |
 | | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
-| 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-01, Y-04 |
+| 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-04 |
 | | 기념일(`anniversary`) | `heart` | `together` | 〃 |
 | | 명절(`seollal`, `chuseok`) | `moon-stars` | `together` | 〃 |
 | | 어버이날(`parents_day`) | `flower-tulip` | `together` | 〃 |

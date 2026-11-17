@@ -2544,10 +2544,11 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-addrow--block { display: flex; width: 100%; padding: 0 var(--space-4); }
 .hg-sechead .hg-addrow { margin-left: auto; min-height: 32px; }
 .hg-checkgroup > .hg-addrow--block { padding-inline: 0; }  /* W-02 저금 묶음 끝: + 아이콘을 줄 앞 칸과 같은 선에 */
-/* 캘린더 목록 도구 줄(2026-11-09): 왼쪽 보기 필터 칩, 오른쪽 ‘달력 ›’ 링크(hg-sechead__more, slate 500). 예전 ‘목록/달력’ 탭 대신 */
+/* 캘린더 도구 줄(2026-11-09): 왼쪽 보기 필터 칩, 오른쪽 글자 줄(2026-11-17부터 좁은 창 ‘+ 일정 추가’ AddRow, 예전 ‘달력 ›’ 링크) */
 .hg-cal__tools { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .hg-cal__tools > .hg-cal__filter { flex: 1; min-width: 0; flex-wrap: wrap; }
 .hg-cal__tools > .hg-sechead__more { flex: none; }
+.hg-cal__tools > .hg-addrow { flex: none; }  /* 2026-11-17 캘린더 첫 화면 Y-04: 필터 칩 오른쪽 ‘+ 일정 추가’(좁은 창) */
 
 /* 2026-11-10 뒤로 버튼 하나로(hg-back): 로그인(A-02), 앱 틀 ‹ 홈으로, PageHeader, 질문 화면, 알림 화면이 같은 모양.
    40px 누르는 자리, Phosphor chevron-left 24px ink, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px(앱 틀 ‹ 홈으로와 같은 자리). */

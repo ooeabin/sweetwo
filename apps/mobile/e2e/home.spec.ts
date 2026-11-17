@@ -112,7 +112,7 @@ test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-13, �
       /\/salary\/items\?from=home$/,
     ],
     [() => page.getByRole('button', { name: /^월급 계획/ }).click(), /\/salary\?view=plan$/],
-    [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar\/list$/],
+    [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar$/],
     [() => page.getByRole('button', { name: /^자산 관리/ }).click(), /\/assets$/],
     [
       () => page.getByRole('button', { name: /^저금 (\d|아직)/ }).click(),
@@ -858,7 +858,7 @@ test('위젯 분석(32 4-7, PR 14): 이 기기에서 처음 본 위젯만 widget
   await expect(page).toHaveURL(/\/calendar/);
   await expect
     .poll(() => ev.find((e) => e.name === 'widget_tapped')?.props)
-    .toEqual({ widget: 'wg04', element: 'card', landing_screen: 'Y-01', app_was_running: true });
+    .toEqual({ widget: 'wg04', element: 'card', landing_screen: 'Y-04', app_was_running: true });
   expect(added()).toHaveLength(2);
 });
 
