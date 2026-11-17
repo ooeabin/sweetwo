@@ -53,6 +53,7 @@ const hoursSinceSeen = () => {
 
 export function OnboardingRoute() {
   const { screen = FIRST } = useParams();
+  const loc = useLocation();
   const me = useMe();
   markSeen();
   // 첫 저금 흐름(O-60 뒤 W-11)을 마치지 않고 앱을 닫았으면 멈춘 단계로(2026-11-13 실구동)
@@ -64,7 +65,12 @@ export function OnboardingRoute() {
     }
   }
   // 온보딩을 마친 뒤 뒤로(하드웨어 뒤로, 웹뷰 기록)로 돌아오면 홈으로(2026-11-10 S2-01: 끝난 온보딩 화면을 다시 열지 않음)
-  if (me.data?.onboarding_done_at) return <Navigate to={justFinishedTo() ?? '/'} replace />;
+  // 예외(2026-11-17): 첫 저금 W-11a에서 뒤로 오면 O-60 ‘준비 끝’은 다시 보임(거기서 ‘나중에 할게요’ → A-06 → 홈)
+  if (me.data?.onboarding_done_at) {
+    if (screen === 'o-60' && (loc.state as { backToReady?: boolean } | null)?.backToReady)
+      return <div key={screen}>{SCREENS['o-60']?.()}</div>;
+    return <Navigate to={justFinishedTo() ?? '/'} replace />;
+  }
   // /onboarding/resume(홈 띠 waiting_joiner, core pickTopTask): 가장 멀리 간 화면으로(2026-11-13)
   if (screen === 'resume') {
     if (me.isLoading) return null;

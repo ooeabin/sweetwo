@@ -40,7 +40,13 @@ import { salaryPaths, savingPaths } from '../paths';
 import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
 import { W11eAutoAsk } from './w-11e-auto-ask';
-import { AFTER_FIRST_SAVING_PATH, clearFirstSaving, markFirstSaving } from '../../onboarding';
+import { useHardwareBack } from '../../auth';
+import {
+  AFTER_FIRST_SAVING_PATH,
+  clearFirstSaving,
+  markFirstSaving,
+  ONBOARDING_READY_PATH,
+} from '../../onboarding';
 
 // W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
 // 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
@@ -95,10 +101,17 @@ export function W11SavingAdd() {
     if (entry === 'onboarding') markFirstSaving(`${savingPaths.add}/${s}?${params}`);
   }, [entry, s, params]);
   const back = () => {
-    // 첫 저금 흐름의 첫 화면에서 뒤로 나가면 이어하기를 지움(그만둔 것)
-    if (entry === 'onboarding' && s === 'a') clearFirstSaving();
+    if (entry === 'onboarding') {
+      // 첫 저금 흐름(2026-11-17): W-11a 뒤로 = O-60 ‘준비 끝’(이어하기는 지움), 그다음 단계 뒤로 = 앞 단계. 기록이 없어도(이어하기로 열었을 때) 같게
+      if (s === 'a') {
+        clearFirstSaving();
+        return nav(ONBOARDING_READY_PATH, { replace: true, state: { backToReady: true } });
+      }
+      return nav(`${savingPaths.add}/${STEPS[Math.max(now - 1, 0)]}?${params}`, { replace: true });
+    }
     return window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist);
   };
+  useHardwareBack(back, entry === 'onboarding'); // 안드로이드 뒤로도 ‹와 같게
   const title = {
     a: copy.addNameQ,
     b: copy.addMonthlyQ,

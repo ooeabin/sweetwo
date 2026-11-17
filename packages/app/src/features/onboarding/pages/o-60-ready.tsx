@@ -11,6 +11,9 @@ import { secondsSinceStart, useStep } from '../step';
 /** O-60 ‘첫 저금 만들기’가 여는 W-11a(entry onboarding). 끝나면 미합류 초대 시트(O-07) → A-06 → 홈(/welcome) */
 export const FIRST_SAVING_PATH = '/salary/items/new/a?from=onboarding';
 
+/** W-11a 뒤로가 돌아오는 O-60(2026-11-17) */
+export const ONBOARDING_READY_PATH = '/onboarding/o-60';
+
 // O-60 준비 끝(17 ‘O-60 준비 끝 (고친 점)’, 2026-11-13). 해 둔 것: “월급 계획을 만들어 뒀어요” /
 // “11월 25일 월급날에 처음 확인해요”(날짜 없음 “수입이 들어오면 월급 ‘이번 달’에서 적어 주세요”), 월급이 없으면 한 줄만.
 // 주 버튼 ‘첫 저금 만들기’ → 온보딩을 마치고 W-11a. ‘나중에 할게요’ → 온보딩을 마치고 A-06(권장, 건너뛸 수 있음) → 홈.
@@ -28,6 +31,7 @@ export function O60Ready() {
     ? [copy.readyDone.split, date ? copy.readyDone.firstCheck(date) : copy.readyDone.noDate]
     : [copy.readyDone.salary];
   const completed = () => {
+    if (me?.onboarding_done_at) return; // W-11a 뒤로 다시 온 O-60(2026-11-17): 완료 이벤트는 처음 한 번
     const income = me?.monthly_income ?? 0;
     const mine = splits.data?.find((x) =>
       joint ? x.owner_user_id === null : x.owner_user_id === me?.id,

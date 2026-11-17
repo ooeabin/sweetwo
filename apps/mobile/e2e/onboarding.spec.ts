@@ -139,7 +139,19 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await page.getByRole('button', { name: '첫 저금 만들기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
   expect(db.me.onboarding_done_at).toBeTruthy();
+  // W-11a 뒤로 → O-60 ‘준비 끝’(홈이 아님, 2026-11-17), 다시 ‘첫 저금 만들기’
+  await back(page);
+  await expect(page).toHaveURL(/\/onboarding\/o-60$/);
+  await heading(page, '찬우님, 준비가 끝났어요');
+  expect(await page.evaluate(() => localStorage.getItem('sweetwo.firstSavingAt'))).toBeNull();
+  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
   await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
+  await next(page);
+  // W-11b 뒤로 → W-11a(이름 그대로)
+  await back(page);
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
+  await expect(page.getByLabel('무엇을 위해 모을까요?')).toHaveValue('내 집 마련');
   await next(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
   await next(page);
@@ -724,4 +736,29 @@ test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열�
   await page.goto('/');
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
+});
+
+test('O-60 → 첫 저금 만들기 → W-11a 뒤로 → O-60, ‘나중에 할게요’ → A-06 → 홈(2026-11-17)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  await fakeBridge(page, { signedIn: true, pin: null, push: { status: 'prompt', grant: true } });
+  await start(page);
+  await manage(page, '아니요', '네');
+  await salary(page);
+  await page.getByRole('button', { name: '알림 받기' }).click();
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
+  await back(page);
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await expect(page).toHaveURL(/\/onboarding\/o-60$/);
+  const done = db.me.onboarding_done_at;
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await heading(page, '앱 잠금을 켤까요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.me.onboarding_done_at).toBe(done);
 });
