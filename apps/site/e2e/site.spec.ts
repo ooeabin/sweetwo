@@ -313,3 +313,33 @@ test('L-03(S12-11): 버전 h2, 묶음 h3(제목 단계를 건너뛰지 않음)',
   await expect(page.getByRole('heading', { level: 3, name: '새 기능' }).first()).toBeVisible();
   expect(await page.locator('h4').count()).toBe(0);
 });
+
+test('검색 정보: robots.txt, sitemap.xml, JSON-LD, noindex 페이지는 사이트맵 밖', async ({
+  page,
+  request,
+}) => {
+  const robots = await (await request.get('/robots.txt')).text();
+  expect(robots).toContain('Sitemap: https://sweetwo.kr/sitemap.xml');
+  expect(robots).toContain('Disallow: /i/');
+  expect(robots).toContain('Disallow: /auth/');
+  const map = await (await request.get('/sitemap.xml')).text();
+  for (const p of ['/', '/help', '/download', '/releases', '/terms', '/privacy'])
+    expect(map).toContain(`<loc>https://sweetwo.kr${p}</loc>`);
+  for (const p of ['/i', '/auth', '/n', '/404']) expect(map).not.toContain(`sweetwo.kr${p}`);
+
+  const types = async (path: string) => {
+    await page.goto(path);
+    const raw = await page.locator('script[type="application/ld+json"]').allTextContents();
+    return raw.map((r) => (JSON.parse(r) as { '@type': string })['@type']);
+  };
+  expect(await types('/')).toEqual(['Organization', 'MobileApplication']);
+  expect(await types('/help')).toEqual(['FAQPage']);
+  expect(await types('/terms')).toEqual([]);
+  // 확인 메타·앱 배너는 빌드 변수가 없으면 안 나옴
+  await page.goto('/');
+  await expect(
+    page.locator(
+      'meta[name="google-site-verification"], meta[name="naver-site-verification"], meta[name="apple-itunes-app"]',
+    ),
+  ).toHaveCount(0);
+});
