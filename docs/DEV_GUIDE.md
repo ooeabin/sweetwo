@@ -954,7 +954,7 @@ supabase/
 금융 정보를 다루므로 ‘모으지 않기, 국내에 두기, 두 번 잠그기’가 기본. 기준은 기획서 ‘보안·개인정보’ 탭.
 
 - 모으지 않음: 계좌번호, 카드번호, 주민등록번호. 입력 칸에 들어오면 저장 전에 막음
-- 국내 보관: Supabase, Storage, SES, S3 모두 서울. Sentry는 직접 운영. 분석 GA4는 국외(Google) 보관, 보관 기간 14개월(ADR 0010, 처리방침 반영 [확인 필요])
+- 국내 보관: Supabase, Storage, SES, S3 모두 서울. Sentry는 직접 운영. 분석 GA4는 국외(Google) 보관, 보관 기간 14개월(ADR 0010, 처리방침 v3 `apps/site/src/content/privacy/2026-11-18.md`에 반영, 2026-11-17 사용자 결정: 별도 법무 검토 없이 처리방침 고지로 진행, 쿠키 배너 없음)
 - 암호화: DB 전체 암호화 + 메모와 가족 정보는 Edge Function에서 AES-256-GCM, 키는 AWS KMS
 - 토큰: access token은 짧게, refresh token은 기기별. 모바일은 Keychain·Keystore. 웹뷰는 엄격한 CSP(‘인증과 세션’)
 - 잠금: PIN 6자리 + 생체 인증(iPhone Face ID·Touch ID, Android 지문), 5분 뒤 자동 잠금

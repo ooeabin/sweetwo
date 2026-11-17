@@ -287,19 +287,26 @@ test('초대 링크(S12-05): /i/는 코드 없이 안내 + 초대 제목, /i/{�
   await expect(page.getByText('앱을 설치한 뒤 이 코드를 입력해 주세요')).toBeVisible();
 });
 
-test('L-05(S12-04·07): 시행일 YYYY-MM-DD, ?v= 이전 판, 개인정보처리방침 v2 시행', async ({
+test('L-05(S12-04·07): 시행일 YYYY-MM-DD, ?v= 이전 판, 개인정보처리방침 v2·v3 시행', async ({
   page,
 }) => {
   await outside(page);
   await page.goto('/privacy');
-  await expect(page.getByText('시행일 2026년 11월 12일')).toBeVisible();
+  // 2026-11-18 v3 시행 전(KST)에는 11-12판, 시행일부터 11-18판이 지금 판(날짜에 따라 달라서 둘 중 하나)
+  await expect(
+    page.locator('article[data-version]:not([hidden])').getByText(/^시행일 2026년 11월 (12|18)일$/),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: /2026년 11월 1일/ })).toHaveAttribute(
     'href',
     '/privacy?v=2026-11-01',
   );
+  await page.goto('/privacy?v=2026-11-18');
+  await expect(page.getByText('시행일 2026년 11월 18일')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /처리 위탁과 국외 이전/ })).toBeVisible();
+  await expect(page.getByText('Google LLC').first()).toBeVisible();
   await page.goto('/privacy?v=2026-11-01');
   await expect(page.getByText('시행일 2026년 11월 1일')).toBeVisible();
-  await expect(page.getByText('시행일 2026년 11월 12일')).toBeHidden();
+  await expect(page.getByText('시행일 2026년 11월 18일')).toBeHidden();
   await expect(page.getByRole('link', { name: '지금 버전 보기' })).toBeVisible();
   // 예전 링크 형식(ISO 시각)도 그 날짜 판
   await page.goto('/terms?v=2026-11-01T00:00:00.000Z');
