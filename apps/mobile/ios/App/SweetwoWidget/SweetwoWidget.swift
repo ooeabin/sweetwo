@@ -14,7 +14,7 @@ private let kst = TimeZone(identifier: "Asia/Seoul")!
 // MARK: 문구(26)
 private enum T {
     static let saveName = "같이 모으기"
-    static let saveDesc = "같이 모으는 저금이 얼마나 모였는지 봐요" // [확인 필요]
+    static let saveDesc = "같이 모으는 저축·투자가 얼마나 모였는지 봐요" // [확인 필요]
     static let nextName = "다가오는 날"
     static let nextDesc = "가장 가까운 경조사나 쓸 곳 메모 날짜를 봐요" // [확인 필요]
     static let login = "sweeTwo를 열어 로그인해 주세요"

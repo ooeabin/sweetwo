@@ -1,5 +1,5 @@
 -- pgTAP: v2.2 해제·탈퇴 때 남는 것(20261204090000 계약 1·2·3). 각 행 종류가 어디로 가는지, 같이 쓰던 것은 원래 공간째 보관,
--- 묶음 해체, 해제 대기 중 상대 개인 저금 가림, 상대 계정 삭제 때 내 것은 남음
+-- 묶음 해체, 해제 대기 중 상대 개인 저축·투자 가림, 상대 계정 삭제 때 내 것은 남음
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(16);
@@ -79,14 +79,14 @@ set local role authenticated;
 select public.bundle_join(current_setting('test.b')::uuid, current_setting('test.yg')::uuid);
 reset role;
 
--- 1. 해제 요청 → 대기: 예빈은 찬우 개인 저금을 못 봄, 묶음은 멈춤
+-- 1. 해제 요청 → 대기: 예빈은 찬우 개인 저축·투자을 못 봄, 묶음은 멈춤
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.request_unlink('연결 해제');
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select count(*)::int from public.goal where id = current_setting('test.cg')::uuid), 0, '해제 대기: 상대 개인 저금 가림');
+select is((select count(*)::int from public.goal where id = current_setting('test.cg')::uuid), 0, '해제 대기: 상대 개인 저축·투자 가림');
 select is((select (v->>'paused')::boolean from jsonb_array_elements(public.bundle_view()) v), true, '해제 대기: 묶음 멈춤');
 -- 2. 확정
 select public.agree_unlink();

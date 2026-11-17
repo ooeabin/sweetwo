@@ -181,7 +181,9 @@ test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없
   // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)
   await expect(page.getByText('적금 통장도 여기에 적어요')).toBeVisible();
   await expect(
-    page.getByText('저금은 통장 잔액에 이미 들어 있어서 순자산에 따로 더하지 않아요'),
+    page.getByText(
+      '모은 금액은 자산에 적은 통장이나 투자에 이미 들어 있어서 순자산에 따로 더하지 않아요',
+    ),
   ).toBeVisible();
   await page.getByLabel('현금·예적금').fill('5000000');
   await page.getByLabel('대출').fill('20000000');

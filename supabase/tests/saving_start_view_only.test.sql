@@ -98,8 +98,8 @@ select is((select amount from public.split_line l join public.salary_split s on 
   where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 680000::bigint,
   '예빈 생활비 그대로');
 
--- 파트너 변경 알림 문구: ‘저금’
-select is(public.partner_change_title('goal', '카메라', '예빈'), '예빈님이 카메라 저금을 바꿨어요', '알림 제목은 ‘저금’');
+-- 파트너 변경 알림 문구: ‘저축·투자’
+select is(public.partner_change_title('goal', '카메라', '예빈'), '예빈님이 카메라 저축·투자를 바꿨어요', '알림 제목은 ‘저축·투자’');
 
 select * from finish();
 rollback;

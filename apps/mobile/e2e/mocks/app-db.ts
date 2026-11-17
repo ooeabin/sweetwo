@@ -723,7 +723,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             .sort((a, b) => Number(a.priority) - Number(b.priority))
             .map((g) =>
               g.owner_user_id && g.owner_user_id !== db.me.id && g.visibility === 'amount'
-                ? { ...g, name: '개인 저금', template: 'custom', details: {} }
+                ? { ...g, name: '개인 저축·투자', template: 'custom', details: {} }
                 : g,
             ),
         );

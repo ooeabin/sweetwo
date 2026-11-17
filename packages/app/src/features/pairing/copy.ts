@@ -8,7 +8,7 @@ const who = (name: string) => (name ? `${name}님이` : '파트너가');
 export const copy = {
   // P-10 합류 축하(2026-11-11 D7) [확인 필요] 문구
   joinedTitle: (starter: string) => (starter ? `${starter}님과 연결됐어요` : '파트너와 연결됐어요'),
-  joinedHelp: '이제 같이 모으는 저금을 둘이 봐요', // 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
+  joinedHelp: '이제 같이 모으는 저축·투자를 둘이 봐요', // 2026-11-13 v2.2(예전 “이제 월급과 저금을 같이 봐요”)
   joinedWaitHelp: (starter: string) => `${who(starter)} 월급 계획을 만들면 알려 드릴게요`, // [확인 필요] 홈 대기 카드와 같음
   toHomeAfter: '홈으로 가기',
   // P-09 합류 때 모은 금액(3차 검토 D2, 2026-11-15) [확인 필요]
@@ -42,8 +42,8 @@ export const copy = {
     care: '한 달 전, 일주일 전에 알려 드려요',
     progress_news: (paydayNone: boolean) =>
       paydayNone
-        ? '매달 1일, 저금이 얼마나 모였는지 알려 드려요'
-        : '확인할 게 없는 달 월급날, 저금이 얼마나 모였는지 알려 드려요',
+        ? '매달 1일, 저축·투자가 얼마나 모였는지 알려 드려요'
+        : '확인할 게 없는 달 월급날, 저축·투자가 얼마나 모였는지 알려 드려요',
     // [확인 필요] 3차 검토 D3
     month_us: (paydayNone: boolean) =>
       paydayNone
@@ -106,7 +106,7 @@ export const copy = {
   moveDo: '옮겨요', // [확인 필요] 옮길 항목 묶음 이름(2026-11-03)
   moveSalaryLabel: '월급',
   moveDay: (day: string) => `월급날 ${day}`,
-  moveSkipItems: { goals: '저금', splits: '월급 계획', lists: '월급날 확인 목록' }, // 2026-11-08 [확인 필요]
+  moveSkipItems: { goals: '저축·투자', splits: '월급 계획', lists: '월급날 확인 목록' }, // 2026-11-08 [확인 필요]
   moveCount: (n: number) => `${n}개`,
   moveSkip: '안 옮겨요',
   moveKeep: '30일 동안 보관한 뒤 지워요',
@@ -129,9 +129,9 @@ export const copy = {
   styleNames: {
     one_manager: '한 사람이 관리해요',
     together: '월급을 합쳐서 써요',
-    living_saving: '생활비와 저금을 같이 해요',
+    living_saving: '생활비와 저축·투자를 같이 해요',
     living_only: '생활비만 같이 해요',
-    saving_only: '저금만 같이 해요',
+    saving_only: '저축·투자만 같이 해요',
     separate: '월급은 각자 써요',
   },
   /**

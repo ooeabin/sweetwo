@@ -75,7 +75,7 @@
 | `pay_line_late_checked` | kind, days_late |
 | `auto_line_changed` | to(skipped/other_amount) |
 | `saving_adjusted` | sign(`plus`/`minus`), amount_band, reason_code, from(w10b/note_paid). 잔액 맞추기는 `savings_reconciled`로만 |
-| `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none(`_distributed`는 ‘저금에 안 넣을게요’면 skipped, 2026-11-16) |
+| `money_in_logged` / `_distributed` | kind, amount_band, saving_count, payday_none(`_distributed`는 ‘저축·투자에 안 넣을게요’면 skipped, 2026-11-16) |
 | `first_spend_asked`(2026-11-16, W-01 첫 달 묻기) | answer(done/skipped), lines_count, joint. 칩으로 넣은 줄은 `plan_line_added`에 first_ask |
 | `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate` / `s13` 설정 S-13 묶음 줄, 2026-11-13 PR 14 / `exist` W-15 ‘같이 모을게요’ / `money_in` W-20a, 2026-11-14), has_target, on, separate(열린 묶음이 있는데 따로 만듦, 2026-11-14) |
 | `bundle_open_answered` | choice(`join` / `separate` / `later`), W-15 열린 묶음 질문(2026-11-14 H1) |
@@ -99,7 +99,7 @@
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
 | `month_archive_viewed` | kind(`cycle` / `period`), rows(줄 수), entry(`drawer` / `w02`). W-21 지난 달 모아보기, 금액·이름 없음(2026-11-17) |
 | `invite_code_autofilled` | source(clipboard / referrer), result(join / decline) (2026-11-13 PR 8) |
-| `saving_item_created` | entry에 onboarding(O-60 ‘첫 저금 만들기’) 더함 |
+| `saving_item_created` | entry에 onboarding(O-60 ‘모으기 시작하기’) 더함 |
 | `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | 위젯은 4-7(v2.2 값은 2026-11-13 PR 14: widget `wg01` / `wg04`, size `small` / `medium`). 코드 입력은 `invite_accepted` channel `code`로 셈(`partner_code_entered`는 따로 보내지 않음, PR 14). 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11). `partner_change_reverted`는 N-01·N-02 ‘이전 값으로 돌리기’(14 R-08) |
 
 ### 0-5. 구현 상태 (2026-11-13 PR 14)
@@ -166,7 +166,7 @@
 
 | 지표 | 정의(계산식) | 초기 목표치(가설) | 보는 이유 |
 | --- | --- | --- | --- |
-| 온보딩 완료율 | O-60 ‘첫 저금 만들기’ 또는 ‘나중에 할게요’ 사용자 ÷ O-03 첫 표시 사용자 (초대받은 파트너 제외, 2026-11-10 O-10 없앰) | 80% [확인 필요] | 질문 6~7화면 안에 월급 계획까지 가야 가치 체험 시작 |
+| 온보딩 완료율 | O-60 ‘모으기 시작하기’ 또는 ‘나중에 할게요’ 사용자 ÷ O-03 첫 표시 사용자 (초대받은 파트너 제외, 2026-11-10 O-10 없앰) | 80% [확인 필요] | 질문 6~7화면 안에 월급 계획까지 가야 가치 체험 시작 |
 | 온보딩 소요 시간 | O-03 → O-60 중앙값 (이어하기 포함, 비활성 30분 초과 구간 제외) | 2분 이하 [확인 필요] | 약 1분·질문 6~7화면 설계 검증(2026-11-10) |
 | 첫 체크 완료율 | 첫 체크리스트 생성(O-60 직후) 후 7일 안에 1줄 이상 체크한 사용자 ÷ 첫 체크리스트가 생긴 사용자 | 70% [확인 필요] | 월급 계획이 실제로 보내고 체크하는 행동으로 이어지는지 |
 | 첫 체크리스트 다 함 | 첫 사이클이 끝날 때 ‘다 했어요’인 체크리스트 ÷ 첫 체크리스트 | 50% [확인 필요] | 첫 달에 월급 계획 전체를 따라가는지 |
@@ -246,7 +246,7 @@
 | onboarding\_step\_completed | 각 화면 ‘다음’(선택지, 시트 닫기 포함) | screen\_id, answer(`input` / `none`: O-06 나중에, O-07 보내지 않고 닫음, O-31 월급 없음. 2026-11-10 ‘잘 모르겠어요’ 추정이 없어 `estimate` 뺌), duration\_sec, changed\_after\_back(이번 실행에서 그 화면을 이미 한 번 넘겼는지) |
 | onboarding\_step\_skipped | O-06 ‘나중에 할게요’ | screen\_id |
 | onboarding\_resumed | 앱을 다시 열어 멈춘 화면으로 바로 감(실행마다 한 번, 2026-11-10 질문 화면 없앰) | screen\_id, hours\_since\_last |
-| onboarding\_completed | O-60 ‘첫 저금 만들기’ 또는 ‘나중에 할게요’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(아직 안 정한 월급 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
+| onboarding\_completed | O-60 ‘모으기 시작하기’ 또는 ‘나중에 할게요’ | duration\_sec(O-03 처음 표시부터, 이 기기 기준), salary\_mode(`separate` / `combined`), income\_band(금액 구간, 월급 없으면 `none`), split\_left\_band(아직 안 정한 월급 구간, 모자라면 `short`), no\_income(‘지금은 월급이 없어요’). 2026-11-10 has\_estimate·goals\_count·first\_goal\_template·split\_edited는 없앤 개념(추정, 목표 고르기, O-50 화면)이라 뺌 |
 | invite\_sent | O-07 코드 복사·링크 복사·공유, 설정 S-12 ‘우리 둘 정보’(홈 초대 띠·서랍 ‘초대하기’로 왔으면 entry home, 2026-11-11 D6) | channel(`code` / `link` / `share`: 기기 공유 창, 카카오톡 등), entry(`onboarding` / `home` / `settings`). issue\_seq(재발급 회차)는 서버만 알아 서버 이벤트로 [확인 필요] |
 | invite\_accepted | P-01 ‘합류하기’로 코드를 잡음(2026-11-11 D1, 처음 잡을 때만) | hours\_since\_sent(앱은 모름: null, 서버 이벤트로 [확인 필요]), channel(`link` 링크로 연 경우 / `code` 코드 직접 입력) |
 | invite\_link\_opened | sweetwo.kr/i/{코드}가 앱이 아닌 웹사이트 초대 페이지로 열림(앱이 없는 기기) | choice(open\_app / store / download), os |
@@ -279,7 +279,7 @@
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | saving\_list\_viewed | W-13 저금 목록 열림 (2026-11-09 round 3) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
-| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary`: W-02 첫 저금 빈 줄 / `salary_row`: W-02 저금 묶음 ‘+ 저금 추가’ 줄 / `salary_wide`: W-02 넓은 창 제목 줄 버튼 / `split`: W-01 / `list`: W-13 / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
+| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary`: W-02 첫 저금 빈 줄 / `salary_row`: W-02 저금 묶음 ‘+ 추가’ 줄 / `salary_wide`: W-02 넓은 창 제목 줄 버튼 / `split`: W-01 / `list`: W-13 / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
 | saving\_item\_target\_set | W-10a 목표 금액 저장이 된 뒤(2026-11-12 S7-16, 저장 전에 보내던 것 고침. 충돌 선택에서 ‘내 값’으로 저장해도) | had\_target(고치기인지), has\_deadline, target\_band |
 | saving\_item\_achieved | W-12 | months\_taken |
 | saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |

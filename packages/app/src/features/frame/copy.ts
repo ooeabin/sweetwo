@@ -41,7 +41,7 @@ export const copy = {
   // 공지 띠(AD-10)
   noticeOpen: '보기', // [확인 필요]
   noticeClose: '닫기', // [확인 필요]
-  addSaving: '저금', // [확인 필요] 2026-11-09
+  addSaving: '저축·투자', // [확인 필요] 2026-11-09
   addAsset: '자산·부채',
   addCare: '경조사·기념일',
   cmdPlaceholder: '찾을 화면이나 할 일을 입력해요',
@@ -52,12 +52,12 @@ export const copy = {
   cmdKeyClose: '닫기', // [확인 필요]
   cmdQuick: '바로 하기',
   cmdCheck: '월급날 확인하기',
-  cmdSaving: '저금 추가', // [확인 필요] 2026-11-09
+  cmdSaving: '저축·투자 추가', // [확인 필요] 2026-11-09
   cmdAsset: '자산 추가',
   cmdMask: '금액 가리기',
   cmdUnmask: '금액 보이기',
   cmdLock: '잠그기',
-  cmdSavings: '저금',
+  cmdSavings: '저축·투자',
   cmdAssets: '자산·부채',
   cmdCares: '경조사·기념일',
   offlineTitle: '연결이 끊겼어요',

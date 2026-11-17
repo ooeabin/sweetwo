@@ -31,9 +31,9 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
     closed_at: '2026-10-02T00:00:00Z',
   });
   await page.goto('/salary');
-  await page.getByRole('button', { name: '저금 목록 보기' }).click();
+  await page.getByRole('button', { name: '저축·투자 목록 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=checklist$/);
-  await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '저축·투자' })).toBeVisible();
   // 목표 금액이 없는 청약도 모은 금액과 함께
   await expect(page.getByRole('button', { name: /청약.*모은 금액 0원/ })).toBeVisible();
   await expect(
@@ -41,25 +41,27 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
   ).toBeVisible();
   // 그만 모은 저금은 접힌 줄
   await expect(page.getByRole('button', { name: '노트북' })).toHaveCount(0);
-  await page.getByRole('button', { name: '그만 모은 저금 1개' }).click();
+  await page.getByRole('button', { name: '그만 모은 것 1개' }).click();
   await expect(page.getByRole('button', { name: /노트북/ })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: /청약/ }).click();
   await expect(page.getByRole('heading', { name: '청약' })).toBeVisible();
   await page.goBack();
-  await page.getByRole('button', { name: '저금 추가' }).click();
+  await page.getByRole('button', { name: '추가', exact: true }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=list$/);
 
   // W-01 영수증 저금 머리는 소계만(2026-11-09), 저금 목록은 W-02 저금 묶음 머리에서
   await page.goto('/salary?view=plan');
-  await expect(page.locator('.hg-receipt').getByRole('heading', { name: '저금' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '저금 목록 보기' })).toHaveCount(0);
+  await expect(
+    page.locator('.hg-receipt').getByRole('heading', { name: '저축·투자' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: '저축·투자 목록 보기' })).toHaveCount(0);
 
   // 2026-11-09 홈 허브: 저금 타일(H-09) → W-13
   await page.goto('/');
-  await page.getByRole('button', { name: /^저금 (\d|아직)/ }).click();
+  await page.getByRole('button', { name: /^저축·투자 (\d|아직)/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=home$/);
-  await expect(page.getByRole('heading', { name: '저금' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '저축·투자' })).toBeVisible();
 });
 
 test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 아직 안 정한 월급 미리보기', async ({
@@ -111,9 +113,9 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await page.getByRole('checkbox', { name: /청약/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/achieved(\?from=checklist)?$/);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '청약을 어떻게 할까요?' })).toBeVisible();
   await expect(page.getByText('목표 금액만 지우고 지금처럼 모아요')).toBeVisible();
-  await expect(page.getByText('월급 계획에서는 빠지지만 저금 내역은 남아요')).toBeVisible();
+  await expect(page.getByText('월급 계획에서는 빠지지만 모은 내역은 남아요')).toBeVisible();
   await expect(
     page.getByText('모은 금액은 그대로 두고 더 큰 금액으로 이어서 모아요'),
   ).toBeVisible();

@@ -89,7 +89,7 @@ async function answerBasics(page: Page, waiting = false) {
 }
 
 /** 합류 축하(P-10, 2026-11-11 D7): 축하 배경 + 그림 자리 + “찬우님과 연결됐어요” → P-11 알림 종류 */
-async function celebrate(page: Page, help = '이제 같이 모으는 저금을 둘이 봐요') {
+async function celebrate(page: Page, help = '이제 같이 모으는 저축·투자를 둘이 봐요') {
   await expect(page).toHaveURL(/\/join\/p-10$/);
   await expect(page.getByRole('heading', { name: '찬우님과 연결됐어요' })).toBeVisible();
   await expect(page.getByText(help)).toBeVisible();
@@ -152,12 +152,12 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   db.v22 = { ...emptyV22(), joinOffer: { bundle_id: null, goal_id: 'g-home', name: '내 집 마련' } };
   const ev = events(page);
   await answerBasics(page);
-  await expect(page.getByText('저금만 같이 해요')).toBeVisible();
+  await expect(page.getByText('저축·투자만 같이 해요')).toBeVisible();
   await expect(page.getByRole('radio', { name: '좋아요' })).not.toBeChecked();
   await expect(page.getByRole('radio', { name: '월급은 대부분 찬우님에게 보내요' })).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: '좋아요' }).click();
-  await expect(page.getByText('파트너에게는 저금만 보여요')).toBeVisible();
+  await expect(page.getByText('파트너에게는 저축·투자만 보여요')).toBeVisible();
   await salary(page);
 
   // 합류를 마치면 P-09 지금까지 모은 금액(각자 계열, 묶을 곳이 있을 때만) → 같이 모으기에 바로 묶음
@@ -269,7 +269,7 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
   joining(db, true, 'living_saving');
   const ev = events(page);
   await answerBasics(page);
-  await expect(page.getByText('생활비와 저금을 같이 해요')).toBeVisible();
+  await expect(page.getByText('생활비와 저축·투자를 같이 해요')).toBeVisible();
   await page.getByRole('radio', { name: '월급은 대부분 찬우님에게 보내요' }).click();
   await expect(page).toHaveURL(/\/join\/p-05$/);
   // 진행 막대: P-03, P-04, P-05, P-05b, P-05c 다섯 칸

@@ -60,7 +60,7 @@ export function W10cReconcile() {
       help={items.length ? copy.reconcileHelp : copy.reconcileEmpty}
       onBack={back}
       primary={
-        items.length ? { label: copy.reconcileSave, loading: busy } : { label: copy.listAdd }
+        items.length ? { label: copy.reconcileSave, loading: busy } : { label: copy.listAddOut }
       }
       onSubmit={() => (items.length ? void save() : nav(savingPaths.add))}
     >

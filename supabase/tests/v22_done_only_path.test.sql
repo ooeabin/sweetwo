@@ -2,7 +2,7 @@
 -- 예빈(각자) 공개 ‘했어요만’ → 저금 만들기(add_saving_item) → 돈 들어왔어요(log_money_in + distribute_money_in)
 -- → 모은 금액 바로잡기(adjust_saving, 사유 글) → 찬우가 W-13·W-10(space_goals, goal 읽기, goal_saved_sums,
 -- goal_move_public, goal_story)·홈 H-09(goal_saved_sums)·W-01 파트너 탭(partner_plan_view)·알림에서 이름·금액을 못 받음.
--- 찬우에게 보이는 것은 “개인 저금”과 확인 여부 자리뿐. 예빈 자신은 그대로.
+-- 찬우에게 보이는 것은 “개인 저축·투자”과 확인 여부 자리뿐. 예빈 자신은 그대로.
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(14);
@@ -48,7 +48,7 @@ set local role authenticated;
 select is((select count(*)::int from public.goal where id = current_setting('test.g')::uuid), 0, 'goal 읽기: 행 없음');
 select results_eq(format($$ select name, target_amount, start_saved, deadline from public.space_goals() where id = %L $$,
     current_setting('test.g')),
-  $$ values ('개인 저금'::text, null::bigint, 0::bigint, null::date) $$, 'W-13·W-10 space_goals: “개인 저금”만');
+  $$ values ('개인 저축·투자'::text, null::bigint, 0::bigint, null::date) $$, 'W-13·W-10 space_goals: “개인 저축·투자”만');
 select is((select count(*)::int from public.goal_saved_sums() where goal_id = current_setting('test.g')::uuid), 0,
   'H-09·W-10 goal_saved_sums: 모은 금액 없음');
 select is((select count(*)::int from public.goal_move_public where goal_id = current_setting('test.g')::uuid), 0,

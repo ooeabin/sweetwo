@@ -33,7 +33,7 @@ export const copy = {
   sharedLiving: '같이 쓰는 생활비가 있어요?',
   sharedLivingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요',
   sharedLivingChoices: { yes: '네', no: '아니요' },
-  sharedSaving: '같이 모으는 저금이 있어요?',
+  sharedSaving: '같이 모으는 저축·투자가 있어요?',
   sharedSavingChoices: { yes: '네', no: '아직 없어요' },
   manager: '누가 주로 관리해요?',
   managerChoices: {
@@ -78,5 +78,5 @@ export const copy = {
     noDate: '수입이 들어오면 월급 ‘이번 달’에서 적어 주세요',
     salary: '월급이 생기면 설정에서 넣어 주세요',
   },
-  readyGo: '첫 저금 만들기',
+  readyGo: '모으기 시작하기',
 };

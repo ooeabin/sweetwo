@@ -47,7 +47,7 @@ async function manage(
   who?: string,
 ) {
   await radio(page, living);
-  await heading(page, '같이 모으는 저금이 있어요?');
+  await heading(page, '같이 모으는 저축·투자가 있어요?');
   await radio(page, saving);
   if (who) {
     await heading(page, '누가 주로 관리해요?');
@@ -94,14 +94,14 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await expect(page.getByRole('radio', { name: '아니요' })).not.toBeChecked();
   await axe(page);
   await radio(page, '아니요');
-  await heading(page, '같이 모으는 저금이 있어요?');
+  await heading(page, '같이 모으는 저축·투자가 있어요?');
   await axe(page);
   await radio(page, '아직 없어요');
   // 생활비 ‘아니요’면 O-30c 없이 O-31
   await heading(page, '한 달 실수령액은 얼마예요?');
   await expect(amount(page)).toBeFocused();
   // 공개 고지 한 줄(각자 계열): 저금만 + 바꾸기
-  await expect(page.getByText('파트너에게는 저금만 보여요')).toBeVisible();
+  await expect(page.getByText('파트너에게는 저축·투자만 보여요')).toBeVisible();
   await amount(page).fill('3500000');
   await axe(page);
   await next(page);
@@ -136,7 +136,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   expect(db.rpc).not.toContain('start_checklist');
 
   // 주 버튼 ‘첫 저금 만들기’ → W-11a(from=onboarding) → 저장 → 초대 시트(미합류) → 홈
-  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await page.getByRole('button', { name: '모으기 시작하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
   expect(db.me.onboarding_done_at).toBeTruthy();
   // W-11a 뒤로 → O-60 ‘준비 끝’(홈이 아님, 2026-11-17), 다시 ‘첫 저금 만들기’
@@ -144,7 +144,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await expect(page).toHaveURL(/\/onboarding\/o-60$/);
   await heading(page, '찬우님, 준비가 끝났어요');
   expect(await page.evaluate(() => localStorage.getItem('sweetwo.firstSavingAt'))).toBeNull();
-  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await page.getByRole('button', { name: '모으기 시작하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
   await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
   await next(page);
@@ -245,14 +245,14 @@ const ROWS: {
     note: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
   },
   {
-    name: '생활비와 저금을 같이 해요',
+    name: '생활비와 저축·투자를 같이 해요',
     living: '네',
     saving: '네',
     who: '각자 자기 월급으로 해요',
     space: { salary_mode: 'separate', shared_living: true, shared_saving: true },
     manager: 'each',
     shared: true,
-    note: '파트너에게는 저금만 보여요',
+    note: '파트너에게는 저축·투자만 보여요',
   },
   {
     name: '생활비만 같이 해요',
@@ -262,15 +262,15 @@ const ROWS: {
     space: { salary_mode: 'separate', shared_living: true, shared_saving: false },
     manager: 'each',
     shared: true,
-    note: '파트너에게는 저금만 보여요',
+    note: '파트너에게는 저축·투자만 보여요',
   },
   {
-    name: '저금만 같이 해요',
+    name: '저축·투자만 같이 해요',
     living: '아니요',
     saving: '네',
     space: { salary_mode: 'separate', shared_living: false, shared_saving: true },
     manager: null,
-    note: '파트너에게는 저금만 보여요',
+    note: '파트너에게는 저축·투자만 보여요',
   },
 ];
 for (const row of ROWS)
@@ -410,10 +410,10 @@ test('O-31 공개 고지 ‘바꾸기’ → 내 월급 계획 시트(모두 / �
   await manage(page, '아니요', '아직 없어요');
   await page.getByRole('button', { name: '바꾸기' }).click();
   const sheet = page.getByRole('dialog', { name: '내 월급 계획' });
-  await expect(sheet.getByRole('radio', { name: '저금만 보여 주기' })).toBeChecked();
+  await expect(sheet.getByRole('radio', { name: '저축·투자만 보여 주기' })).toBeChecked();
   // 단계마다 무엇이 보이는지 한 줄(2026-11-13 실구동)
   await expect(sheet.getByText('이번 달 했는지만 보이고 금액은 안 보여요')).toBeVisible();
-  await expect(sheet.getByText('저금 이름과 금액만 보이고 월급은 안 보여요')).toBeVisible();
+  await expect(sheet.getByText('저축·투자 이름과 금액만 보이고 월급은 안 보여요')).toBeVisible();
   await axe(page);
   await sheet.getByRole('radio', { name: '모두 보여 주기' }).click();
   await expect(sheet).toHaveCount(0);
@@ -506,7 +506,7 @@ test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월
   await heading(page, '같이 쓰는 생활비가 있어요?');
   await expect(page.getByRole('radio', { name: '아니요' })).toBeChecked();
   await radio(page, '네');
-  await heading(page, '같이 모으는 저금이 있어요?');
+  await heading(page, '같이 모으는 저축·투자가 있어요?');
   await radio(page, '아직 없어요');
   await heading(page, '누가 주로 관리해요?');
   await expect(page.getByRole('radio', { name: '둘이 같이 해요' })).not.toBeChecked();
@@ -535,7 +535,7 @@ test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈님이 주로 
     payday_last: false,
   };
   await radio(page, '네');
-  await heading(page, '같이 모으는 저금이 있어요?');
+  await heading(page, '같이 모으는 저축·투자가 있어요?');
   await radio(page, '네');
   await heading(page, '누가 주로 관리해요?');
   await expect(page.getByRole('radio', { name: '예빈님이 주로 해요' })).toBeVisible();
@@ -592,7 +592,7 @@ test('Enter 키 = 주 버튼(S2-08): 선택 화면은 숫자 키, 휠·O-55·O-6
   await page.keyboard.press('3');
   await heading(page, '같이 쓰는 생활비가 있어요?');
   await page.keyboard.press('2');
-  await heading(page, '같이 모으는 저금이 있어요?');
+  await heading(page, '같이 모으는 저축·투자가 있어요?');
   await page.keyboard.press('2');
   await heading(page, '한 달 실수령액은 얼마예요?');
   await page.keyboard.type('3500000');
@@ -702,7 +702,7 @@ test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열�
   await salary(page);
   await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-55
   await heading(page, '찬우님, 준비가 끝났어요');
-  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await page.getByRole('button', { name: '모으기 시작하기' }).click();
   await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
   await next(page);
   await expect(page).toHaveURL(/\/salary\/items\/new\/b\?from=onboarding$/);
@@ -750,7 +750,7 @@ test('O-60 → 첫 저금 만들기 → W-11a 뒤로 → O-60, ‘나중에 할�
   await salary(page);
   await page.getByRole('button', { name: '알림 받기' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await page.getByRole('button', { name: '첫 저금 만들기' }).click();
+  await page.getByRole('button', { name: '모으기 시작하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
   await back(page);
   await heading(page, '찬우님, 준비가 끝났어요');

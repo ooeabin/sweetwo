@@ -54,7 +54,7 @@ set local role authenticated;
 select is((select count(*)::int from public.goal where id = current_setting('test.yt')::uuid), 0, 'goal 읽기(Realtime 포함): 행 없음');
 select results_eq(format($$ select name, target_amount, start_saved, deadline from public.space_goals() where id = %L $$,
     current_setting('test.yt')),
-  $$ values ('개인 저금'::text, null::bigint, 0::bigint, null::date) $$, 'space_goals: “개인 저금”, 금액·기한 없음');
+  $$ values ('개인 저축·투자'::text, null::bigint, 0::bigint, null::date) $$, 'space_goals: “개인 저축·투자”, 금액·기한 없음');
 select is((select count(*)::int from public.goal_saved_sums() where goal_id = current_setting('test.yt')::uuid), 0,
   'goal_saved_sums: 모은 금액 없음');
 select is((select count(*)::int from public.goal_move_public where goal_id = current_setting('test.yt')::uuid), 0,
@@ -79,11 +79,11 @@ reset role;
 -- 달성 알림: 상대에게는 이름 없이
 select public.goal_mark_achieved(current_setting('test.yt')::uuid, null);
 select results_eq($$ select user_id, title, target from public.notification where kind = 'goal_achieved' order by user_id $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '개인 저금 목표 금액을 다 모았어요',
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '개인 저축·투자 목표 금액을 다 모았어요',
              '/salary?who=22222222-2222-2222-2222-222222222222'),
             ('22222222-2222-2222-2222-222222222222'::uuid, '여행 목표 금액을 다 모았어요',
              '/salary/items/' || current_setting('test.yt') || '/achieved') $$,
-  '달성 알림: 상대는 “개인 저금” + W-01 파트너 탭');
+  '달성 알림: 상대는 “개인 저축·투자” + W-01 파트너 탭');
 delete from public.notification;
 update public.goal set status = 'active', achieved_at = null where id = current_setting('test.yt')::uuid;
 
@@ -149,7 +149,7 @@ select is((select count(*)::int from public.goal_move_public where goal_id = cur
 select public.bundle_set_visibility(current_setting('test.b')::uuid, null, false);
 reset role;
 
--- 4. 해제 대기: 상대 개인 저금은 행 없음(space_goals도)
+-- 4. 해제 대기: 상대 개인 저축·투자은 행 없음(space_goals도)
 update public.couple_space set couple_state = 'unlink_pending'
   where id = (select space_id from public.app_user where id = '11111111-1111-1111-1111-111111111111');
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

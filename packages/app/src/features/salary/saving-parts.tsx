@@ -107,7 +107,9 @@ export function FirstSavingRow({
         label={
           f.partnerGoal
             ? copy.firstSavingTogether(f.partnerName ?? '', f.partnerGoal.name)
-            : copy.firstSaving(left)
+            : from === 'home'
+              ? copy.firstSaving(left)
+              : copy.firstSavingIn(left)
         }
         sub={f.partnerGoal ? [copy.firstSavingLeft(left), excl].filter(Boolean).join(', ') : excl}
         chevron={false}

@@ -74,10 +74,10 @@ test('보기: 구간 탭 ‘계획’, 머리·비율·묶음·합계, + 버튼 
   await expect(card.getByText('매달 25일')).toBeVisible();
   // 06 3-5: 139만 / 211만 / 0 → 40% / 60% / 0%
   await expect(
-    page.getByRole('img', { name: '저금 40%, 지출 60%, 아직 안 정한 월급 0%' }),
+    page.getByRole('img', { name: '저축·투자 40%, 지출 60%, 아직 안 정한 월급 0%' }),
   ).toBeVisible();
   await expect(card.locator('.hg-receipt__seg--free')).toHaveCount(1); // 범례 네모만(막대 칸 없음)
-  expect(await names(page, '저금')).toEqual(['청약', '내 집 마련']);
+  expect(await names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
   expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
   await expect(card.getByText('139만 원', { exact: true })).toBeVisible();
   await expect(card.getByText('211만 원', { exact: true })).toBeVisible();
@@ -167,7 +167,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   expect(lineOf(db, 'fixed')).toBeUndefined();
   expect(waitLine(db, 'fixed')).toBeUndefined();
   await expect(
-    page.getByRole('img', { name: '저금 40%, 지출 35%, 아직 안 정한 월급 25%' }),
+    page.getByRole('img', { name: '저축·투자 40%, 지출 35%, 아직 안 정한 월급 25%' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
@@ -177,13 +177,13 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
     .getByRole('dialog', { name: '청약 금액' })
     .getByRole('button', { name: '청약 줄 지우기' })
     .click();
-  const modal = page.getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' });
-  await expect(modal.getByText('월급 계획에서는 빠지지만 저금 내역은 남아요')).toBeVisible();
+  const modal = page.getByRole('alertdialog', { name: '청약을 그만 모을까요?' });
+  await expect(modal.getByText('월급 계획에서는 빠지지만 모은 내역은 남아요')).toBeVisible();
   await modal.getByRole('button', { name: '그만할게요' }).click();
   await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
-  expect(await names(page, '저금')).toEqual(['내 집 마련']);
+  expect(await names(page, '저축·투자')).toEqual(['내 집 마련']);
   expect(db.goals.find((g) => g.id === 'goal-e')?.closed_at).toBeTruthy();
-  await expect(page.getByRole('button', { name: '그만 모은 저금 1개' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '그만 모은 것 1개' })).toBeVisible();
 });
 
 test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 번에 저장 + 되돌리기, 줄마다 지우기', async ({
@@ -235,7 +235,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
   // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 체크했어요 ›’ 링크 하나(2026-11-09)
   await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 확인했어요']);
-  for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저금 추가'])
+  for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
   await axe(page);
@@ -292,7 +292,7 @@ test('모자람: 막대는 저금·지출만, 범례 “아직 안 정한 월급
   await go();
   // 139만 / 243만(기준 382만) → 36.39 / 63.61 → 36 / 64
   await expect(
-    page.getByRole('img', { name: '저금 36%, 지출 64%, 아직 안 정한 월급 −32만 원' }),
+    page.getByRole('img', { name: '저축·투자 36%, 지출 64%, 아직 안 정한 월급 −32만 원' }),
   ).toBeVisible();
   await expect(page.locator('.hg-receipt__legend li.is-short')).toHaveText(
     '아직 안 정한 월급 −32만 원',
@@ -351,7 +351,7 @@ test('W-10 ‘매달 금액 바꾸기’ 주소(?line=): 그 저금 줄 시트�
   const sheet = page.getByRole('dialog', { name: '내 집 마련 금액' });
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/\/salary\?view=plan$/);
-  await sheet.getByRole('button', { name: '저금 보기' }).click();
+  await sheet.getByRole('button', { name: '저축·투자 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
 
@@ -390,7 +390,9 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   await page.getByRole('button', { name: '추천값으로 다시 채우기' }).click();
   const modal = page.getByRole('alertdialog', { name: '추천값으로 다시 채울까요?' });
   await expect(
-    modal.getByText('용돈과 기한 있는 저금이 추천값으로 바뀌어요. 이미 적은 지출은 그대로예요'),
+    modal.getByText(
+      '용돈과 기한 있는 저축·투자가 추천값으로 바뀌어요. 이미 적은 지출은 그대로예요',
+    ),
   ).toBeVisible();
   await modal.getByRole('button', { name: '다시 채우기' }).click();
   await expect(page.getByText('월급 계획을 바꿨어요')).toBeVisible();
@@ -445,7 +447,7 @@ test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', asyn
   await go();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
   await context.setOffline(true);
-  await page.getByRole('button', { name: '+ 저금 추가' }).click();
+  await page.getByRole('button', { name: '+ 추가' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\?view=plan$/);
   await context.setOffline(false);
@@ -460,12 +462,12 @@ test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page 
     .getByRole('button', { name: '청약 줄 지우기' })
     .click();
   await page
-    .getByRole('alertdialog', { name: '청약 저금을 그만 모을까요?' })
+    .getByRole('alertdialog', { name: '청약을 그만 모을까요?' })
     .getByRole('button', { name: '그만할게요' })
     .click();
-  await expect.poll(() => names(page, '저금')).toEqual(['내 집 마련']);
+  await expect.poll(() => names(page, '저축·투자')).toEqual(['내 집 마련']);
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect.poll(() => names(page, '저금')).toEqual(['청약', '내 집 마련']);
+  await expect.poll(() => names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
 });
 
 test('금액 가리기: 화면 읽기는 “가려진 금액”, 시트 미리보기도 가림(S5-12)', async ({ page }) => {

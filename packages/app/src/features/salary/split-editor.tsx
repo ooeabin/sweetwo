@@ -257,7 +257,7 @@ export function SplitEditor({
         {!readOnly && onAddItem && (
           <ListRow
             icon="plus"
-            label={copy.addItem.replace(/^\+\s*/, '')}
+            label={copy.addItemIn.replace(/^\+\s*/, '')}
             chevron={false}
             onClick={onAddItem}
           />

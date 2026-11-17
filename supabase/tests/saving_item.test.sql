@@ -132,12 +132,12 @@ select is((select owner_user_id from public.goal where id = pg_temp.item('이사
   '22222222-2222-2222-2222-222222222222'::uuid, '만든 사람이 주인');
 reset role;
 
--- ‘금액만 보여 주기’ 저금 항목은 파트너에게 “개인 저금”
+-- ‘금액만 보여 주기’ 저금 항목은 파트너에게 “개인 저축·투자”
 update public.goal set visibility = 'amount' where id = pg_temp.item('이사');
 select set_config('test.move', pg_temp.item('이사')::text, true);
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select is((select name from public.space_goals() where id = current_setting('test.move')::uuid), '개인 저금',
+select is((select name from public.space_goals() where id = current_setting('test.move')::uuid), '개인 저축·투자',
   '파트너에게는 이름 가림');
 reset role;
 

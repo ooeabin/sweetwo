@@ -983,7 +983,7 @@ export function W01Receipt() {
                     if (!offline()) nav(`${savingPaths.add}/a?from=split`);
                   }}
                 >
-                  {copy.addItem}
+                  {copy.addItemIn}
                 </ReceiptAdd>
               )}
             </ReceiptSection>

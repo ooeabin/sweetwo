@@ -25,7 +25,7 @@ select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 select set_config('test.space', (select space_id::text from public.app_user where id = '11111111-1111-1111-1111-111111111111'), true);
 
--- 합류 알림: 예빈이 ‘저금만 보여 주기’(기본)로 합류 → “이제 저금을 같이 봐요”
+-- 합류 알림: 예빈이 ‘저금만 보여 주기’(기본)로 합류 → “이제 저축·투자를 같이 봐요”
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
@@ -33,8 +33,8 @@ select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2800000, payday = 25 where id = auth.uid();
 select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 500000)));
 reset role;
-select is((select body from public.notification where kind = 'partner_joined'), '이제 저금을 같이 봐요',
-  '합류 알림은 합류한 사람 공개 단계대로(저금만)');
+select is((select body from public.notification where kind = 'partner_joined'), '이제 저축·투자를 같이 봐요',
+  '합류 알림은 합류한 사람 공개 단계대로(저축·투자만)');
 
 -- 한 사람 관리형: 합쳐서 + 관리하는 사람 = 찬우. 공동 월급 계획(찬우 고정지출·생활비 손 줄, 예빈 보내기·용돈 자동 줄)
 update public.couple_space set salary_mode = 'joint', manager_user_id = '11111111-1111-1111-1111-111111111111',
