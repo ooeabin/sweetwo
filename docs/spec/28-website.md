@@ -27,6 +27,14 @@
 - 페이지 제목은 “{페이지 이름} - sweeTwo”, 랜딩만 “sweeTwo | 둘이 구워서 더 달콤한 자산파이”, 초대 페이지만 “sweeTwo에 초대받았어요”(2026-11-12, 공유 미리보기 제목). 페이지마다 메타 설명 1줄, 랜딩 메타 설명은 “둘이 구워서 더 달콤한 자산파이” 다음에 기능 설명 1문장
 - 메타 설명(2026-11-12) [확인 필요]: L-03 “sweeTwo 새 버전에서 달라진 점을 버전별로 모았어요”, 이용약관 “sweeTwo 이용약관 전문과 이전 버전을 볼 수 있어요”, 개인정보처리방침 “sweeTwo 개인정보처리방침 전문과 이전 버전을 볼 수 있어요”, L-06 “sweeTwo 자주 묻는 질문을 찾아보고, 답이 없으면 메일로 물어볼 수 있어요”, L-02 “iPhone과 iPad는 App Store, Android는 Google Play에서 sweeTwo를 받아요”, 초대 “앱을 설치한 뒤 초대 코드를 입력하면 같이 쓸 수 있어요”
 - 검색·공유 정보(2026-11-12): 페이지마다 canonical과 og:url = `https://sweetwo.kr` + 경로(쿼리 없음), og:type website, og:site_name sweeTwo, og:locale ko_KR, 공유 이미지 og.png. 초대, 없는 주소, 로그인 복귀(/auth/callback), 알림 메일 링크(/n)는 검색에 안 내보냄(noindex, canonical 없음) [확인 필요]
+- 검색 노출(2026-11-17, 출시 전 SEO) [확인 필요]:
+  - `/sitemap.xml`(`pages/sitemap.xml.ts`): 검색에 내보내는 주소만(`/`, `/download`, `/help`, `/releases`, `/terms`, `/privacy`). 약관·처리방침은 현행 판 주소 하나(이전 판은 같은 페이지 안 `?v=`). 초대, `/auth`, `/n`, 404는 뺌
+  - `/robots.txt`(`pages/robots.txt.ts`): 모두 허용, `/i/`·`/auth/`·`/n/` 막음, 사이트맵 주소
+  - 검색 등록 확인 메타: 구글 `google-site-verification`(빌드 변수 `PUBLIC_GOOGLE_SITE_VERIFICATION`), 네이버 `naver-site-verification`(`PUBLIC_NAVER_SITE_VERIFICATION`). 값이 있을 때만, 랜딩(`/`)에만
+  - 구조화 데이터(JSON-LD, `lib/seo.ts`): 랜딩에 Organization + MobileApplication(운영체제 iOS, Android, 가격 0원, 앱 주소는 정해진 스토어만), L-06에 FAQPage(자주 묻는 질문 전부). 별점·후기·가짜 값은 넣지 않음
+  - 앱 배너: 빌드 변수 `PUBLIC_APP_STORE_ID`가 있을 때만 `apple-itunes-app`(검색에 내보내는 페이지). 앱 등록 전에는 빈 값
+  - 공유 미리보기 보강: `og:image:alt`, `twitter:title`·`twitter:description`·`twitter:image`
+  - 성능: 스타일을 페이지에 바로 넣음(`build.inlineStylesheets: 'always'`), 상단 로고에 가로 크기 지정. 로컬 빌드 Lighthouse 랜딩 SEO 100, 성능 98~100(모바일 100, 데스크톱 98), 접근성 100, 권장사항 100
 - 파비콘(2026-11-12): 32px, 48px, apple-touch-icon 180px(앱 아이콘과 같은 오렌지 바탕 흰 ‘Two’, 원본 `packages/ui/src/assets/brand`, → 브랜드)
 
 **초대 링크 (sweetwo.kr/i/{코드}) = L-07**

@@ -4,10 +4,12 @@ import { parseFaq } from '@sweetwo/core';
 import Faq from '../components/Faq.astro';
 import faqMd from '../content/faq.md?raw';
 import Site from '../layouts/Site.astro';
+import { faqLd } from '../lib/seo';
 import { URLS, t } from '../lib/site';
 const groups = parseFaq(faqMd);
+const ld = faqLd(groups.flatMap((g) => g.items));
 ---
-<Site title={t.title(t.helpPage)} description={t.desc.help}>
+<Site title={t.title(t.helpPage)} description={t.desc.help} jsonLd={[ld]}>
   <section class="hg-site__sec" style="border-top: 0;">
     <h1 class="hg-site__h2">{t.helpPage}</h1>
     <input class="hg-input" type="search" aria-label={t.searchPlaceholder} placeholder={t.searchPlaceholder} data-faq-search />

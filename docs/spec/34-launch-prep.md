@@ -115,6 +115,7 @@
 | FAQ | FAQ 탭 내용 링크 |
 | 하단 | 이용약관·개인정보처리방침 링크, 사업자 정보 |
 | 측정 | 스토어 클릭 이벤트(스토어, 위치) |
+| 검색 노출(2026-11-17) [확인 필요] | 사이트맵·robots·JSON-LD는 코드에 들어 있음(→ 웹사이트 ‘검색 노출’). 출시 전: 운영 도메인에서 구글 Search Console 소유 확인 + 사이트맵 제출, 네이버 서치어드바이저 등록 + 사이트맵 제출(확인 값은 빌드 변수 `PUBLIC_GOOGLE_SITE_VERIFICATION`·`PUBLIC_NAVER_SITE_VERIFICATION`), 스토어 등록 뒤 `PUBLIC_APP_STORE_ID`(앱 배너). 운영 도메인이 바뀌면 다시 제출 |
 
 ## 6. 출시 당일 체크리스트
 

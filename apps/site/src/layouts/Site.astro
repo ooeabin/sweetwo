@@ -11,12 +11,21 @@ interface Props {
   bare?: boolean;
   /** 검색에 안 내보내는 페이지(초대, 없는 주소, 로그인 복귀, 알림 메일 링크): noindex, canonical·og:url 없음 */
   noindex?: boolean;
+  /** 구조화 데이터(JSON-LD) 객체들. 28 ‘검색·공유 정보’ */
+  jsonLd?: Record<string, unknown>[];
 }
-const { title, description, noindex = false } = Astro.props;
+const { title, description, noindex = false, jsonLd = [] } = Astro.props;
 const og = new URL('/og.png', Astro.site).toString();
 // 28 공통(2026-11-12): 페이지마다 canonical·og:url = sweetwo.kr + 경로(쿼리 없음). 미리보기·개발 주소도 운영 주소로
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 // 사업자 정보는 값이 정해진 줄만(출시 준비 34 4장, 정하기 전에는 하단에 안 보임, 2026-11-12)
+// 검색 등록 확인 메타(구글 Search Console, 네이버 서치어드바이저): 값이 있을 때만, 첫 화면에만. 값은 Cloudflare 빌드 변수
+const googleVerify = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as string | undefined;
+const naverVerify = import.meta.env.PUBLIC_NAVER_SITE_VERIFICATION as string | undefined;
+const isHome = Astro.url.pathname === '/';
+// iOS 스마트 앱 배너: App Store 앱 ID가 정해진 뒤에만(빈 값이면 안 넣음)
+const appleAppId = (import.meta.env.PUBLIC_APP_STORE_ID as string | undefined)?.trim();
+const ld = jsonLd.map((o) => JSON.stringify(o).replace(/</g, '\\u003c'));
 const business = t.foot.business.filter(([, v]) => v.trim() !== '');
 ---
 <html lang="ko">
@@ -45,7 +54,15 @@ const business = t.foot.business.filter(([, v]) => v.trim() !== '');
     <meta property="og:image" content={og} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="sweeTwo, 둘이 구워서 더 달콤한 자산파이" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
+    {isHome && googleVerify && <meta name="google-site-verification" content={googleVerify} />}
+    {isHome && naverVerify && <meta name="naver-site-verification" content={naverVerify} />}
+    {!noindex && appleAppId && <meta name="apple-itunes-app" content={`app-id=${appleAppId}`} />}
+    {ld.map((j) => <script type="application/ld+json" set:html={j} />)}
     <link rel="icon" href="/favicon-32.png" sizes="32x32" />
     <link rel="icon" href="/favicon-48.png" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
@@ -53,7 +70,7 @@ const business = t.foot.business.filter(([, v]) => v.trim() !== '');
   <body class="hg-root hg-site">
     <header class="hg-site__wrap">
       <nav class="hg-site__bar" aria-label="sweeTwo">
-        <a href="/" class="hg-wordmark" aria-label="sweeTwo 처음으로"><img src={logo.src} alt="sweeTwo" height="32" /></a>
+        <a href="/" class="hg-wordmark" aria-label="sweeTwo 처음으로"><img src={logo.src} alt="sweeTwo" width="119" height="32" /></a>
         <a class="hg-btn hg-btn--ghost hg-site__faq" href="/help">{t.faq}</a>
         <!-- 앱 받기(L-01 1번): PC는 맨 아래 다운로드로, 휴대폰은 그 기기 스토어(lib/client.ts가 주소를 바꿈) -->
         <a class="hg-btn hg-btn--secondary hg-btn--sm" href="/#get" data-get-app data-placement="top">{t.getApp}</a>

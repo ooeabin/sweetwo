@@ -1266,6 +1266,7 @@ supabase/
 - [ ] 공휴일 받기: 공공데이터포털(data.go.kr)에서 ‘한국천문연구원_특일 정보’ 활용신청 → 마이페이지의 일반 인증키(Decoding) → Edge Function Secrets `HOLIDAY_API_KEY`. `openssl rand -hex 32` → `HOLIDAY_CRON_SECRET`, Vault `holiday_function_url`(…/functions/v1/fetch-holidays)·`holiday_cron_secret`(같은 값). 넣기 전에는 마이그레이션으로 넣은 2026·2027년과 어드민 AD-19 입력만 씀. 응답 모양(item 하나면 객체)은 키를 받은 뒤 실제 응답으로 한 번 확인
 - [ ] 사진 지우기: `openssl rand -hex 32` → Edge Function Secrets `PURGE_CRON_SECRET`, Vault `purge_function_url`(…/functions/v1/purge-storage)·`purge_cron_secret`(같은 값). 넣기 전에는 지울 목록에 쌓이기만 함
 - [ ] 웹사이트 스토어: 앱 등록 뒤 App Store 주소 → 웹사이트 빌드 환경 변수 `PUBLIC_APP_STORE_URL`(Google Play는 `kr.sweetwo.app`으로 정해져 있음, 바꾸면 `PUBLIC_PLAY_STORE_URL`). 공식 배지 이미지(Apple 마케팅 리소스, Google Play 배지)를 받아 `docs/design/assets`에 넣으면 `StoreBadges.astro`를 이미지로 바꿈
+- [ ] 웹사이트 검색 노출(2026-11-17): 웹사이트 빌드 환경 변수 `PUBLIC_GOOGLE_SITE_VERIFICATION`, `PUBLIC_NAVER_SITE_VERIFICATION`(검색 등록 확인 메타, 없으면 안 넣음), `PUBLIC_APP_STORE_ID`(iOS 앱 배너, 없으면 안 넣음). 사이트맵·robots·JSON-LD는 `apps/site`(28 ‘검색 노출’)
 - [ ] 운영 준비 때: Supabase 토큰 `github-actions-sweetwo-prod`(sweetwo-prod만) → GitHub Environments production(승인자 1명), `deploy-prod.yml`
 
 ### 확정된 결정(10월 14일)
