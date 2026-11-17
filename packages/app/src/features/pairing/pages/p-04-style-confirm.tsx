@@ -48,8 +48,8 @@ export function P04StyleConfirm() {
           void s.done(undefined, 'p-05');
         }}
         options={[
-          { value: 'ok', label: copy.styleOk, icon: 'check' },
-          { value: 'send', label: copy.styleSend(starter), icon: 'hand-coins' },
+          { value: 'ok', label: copy.styleOk, icon: 'choice-style-ok' },
+          { value: 'send', label: copy.styleSend(starter), icon: 'choice-style-send' },
         ]}
       />
     </QuestionLayout>

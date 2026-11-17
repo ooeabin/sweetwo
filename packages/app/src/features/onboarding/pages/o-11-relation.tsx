@@ -5,6 +5,12 @@ import { passed } from '../flow';
 import { useStep } from '../step';
 
 type Relation = keyof typeof copy.relationChoices;
+const ART = {
+  married: 'choice-married',
+  engaged: 'choice-engaged',
+  dating: 'choice-dating',
+  living_together: 'choice-living-together',
+} as const;
 const RELATIONS = ['married', 'engaged', 'dating', 'living_together'] as const;
 
 // O-11 두 사람 사이(Q1, 16, 2026-11-13 4지선다) → O-30. 미리 고른 값 없음.
@@ -39,14 +45,7 @@ export function O11Relation() {
         options={RELATIONS.map((k) => ({
           value: k,
           label: copy.relationChoices[k],
-          icon:
-            k === 'married'
-              ? 'heart'
-              : k === 'engaged'
-                ? 'diamond'
-                : k === 'dating'
-                  ? 'chat-circle-text'
-                  : 'house',
+          icon: ART[k],
         }))}
       />
     </QuestionLayout>

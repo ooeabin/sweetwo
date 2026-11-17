@@ -14,7 +14,7 @@ import {
   resolveManageStyle,
   type ManagerAnswer,
 } from '@sweetwo/core';
-import { Button, ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { Button, ChoiceCards, QuestionLayout, QuestionSkeleton, type ChoiceArt } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -223,9 +223,17 @@ export function S11fManageStyle() {
       )}
     </>
   );
-  const yesNo = (k: 'living' | 'saving'): { value: YesNo; label: string }[] => [
-    { value: 'yes', label: copy.yes },
-    { value: 'no', label: k === 'living' ? copy.no : copy.notYet },
+  const yesNo = (k: 'living' | 'saving'): { value: YesNo; label: string; icon: ChoiceArt }[] => [
+    {
+      value: 'yes',
+      label: copy.yes,
+      icon: k === 'living' ? 'choice-living-shared' : 'choice-saving-shared',
+    },
+    {
+      value: 'no',
+      label: k === 'living' ? copy.no : copy.notYet,
+      icon: k === 'living' ? 'choice-living-own' : 'choice-saving-own',
+    },
   ];
 
   if (step === 'living')
@@ -271,11 +279,15 @@ export function S11fManageStyle() {
         />
       </QuestionLayout>
     );
-  const options: { value: ManagerAnswer; label: string }[] = [
-    { value: 'me', label: copy.managerMe },
-    { value: 'partner', label: copy.managerPartner(c.joined ? partnerName : '') },
-    { value: 'together', label: copy.managerTogether },
-    { value: 'each', label: copy.managerEach },
+  const options: { value: ManagerAnswer; label: string; icon: ChoiceArt }[] = [
+    { value: 'me', label: copy.managerMe, icon: 'choice-manager-me' },
+    {
+      value: 'partner',
+      label: copy.managerPartner(c.joined ? partnerName : ''),
+      icon: 'choice-manager-partner',
+    },
+    { value: 'together', label: copy.managerTogether, icon: 'choice-manager-together' },
+    { value: 'each', label: copy.managerEach, icon: 'choice-manager-each' },
   ];
   return (
     <QuestionLayout

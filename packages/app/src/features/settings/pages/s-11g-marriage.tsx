@@ -70,13 +70,13 @@ export function S11gMarriage() {
         options={RELATIONS.map((k) => ({
           value: k,
           label: copy.marriageValue[k],
-          // O-11과 같은 선택지 아이콘(지금은 빈 자리, Illustrations ‘나중 과제’ 5번)
+          // O-11과 같은 선택지 그림(Illustrations ‘선택지 그림’)
           icon: (
             {
-              married: 'heart',
-              engaged: 'diamond',
-              dating: 'chat-circle-text',
-              living_together: 'house',
+              married: 'choice-married',
+              engaged: 'choice-engaged',
+              dating: 'choice-dating',
+              living_together: 'choice-living-together',
             } as const
           )[k],
         }))}

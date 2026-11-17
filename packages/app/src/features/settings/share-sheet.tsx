@@ -8,6 +8,12 @@ import { copy } from './copy';
 
 // S-13 ① ‘내 월급 계획’ 공개 단계 시트(08 6장): 모두 / 저금만(기본) / 했어요만.
 // S-11c(O-31·P-05와 같은 공개 고지 ‘바꾸기’)와 S-13이 같이 씀. 고르면 바로 저장 + 분석 plan_share_changed.
+const SHARE_ART = {
+  all: 'choice-share-all',
+  saving_only: 'choice-share-saving',
+  done_only: 'choice-share-done',
+} as const;
+
 export function PlanShareSheet({
   me,
   screenId,
@@ -25,7 +31,11 @@ export function PlanShareSheet({
         label={copy.planShareTitle}
         value={from}
         autoAdvance={false}
-        options={PLAN_SHARES.map((v) => ({ value: v, label: copy.planShares[v] ?? v }))}
+        options={PLAN_SHARES.map((v) => ({
+          value: v,
+          label: copy.planShares[v] ?? v,
+          icon: SHARE_ART[v],
+        }))}
         onChange={(to) => {
           onClose();
           if (to === from) return;

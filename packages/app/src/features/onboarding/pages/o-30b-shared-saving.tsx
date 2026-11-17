@@ -44,7 +44,7 @@ export function O30bSharedSaving() {
         options={(['yes', 'no'] as const).map((k) => ({
           value: k,
           label: copy.sharedSavingChoices[k],
-          icon: k === 'yes' ? 'piggy-bank' : 'ellipsis',
+          icon: k === 'yes' ? 'choice-saving-shared' : 'choice-saving-own',
         }))}
       />
     </QuestionLayout>

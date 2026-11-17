@@ -182,8 +182,8 @@ export function S18Data() {
           onChange={setScope}
           autoAdvance={false}
           options={[
-            { value: 'mine', label: copy.scope.mine ?? '' },
-            { value: 'joint', label: copy.scope.joint ?? '' },
+            { value: 'mine', label: copy.scope.mine ?? '', icon: 'choice-export-mine' },
+            { value: 'joint', label: copy.scope.joint ?? '', icon: 'choice-export-joint' },
           ]}
         />
         <p className="hg-field__label">{copy.formatLabel}</p>
@@ -195,8 +195,8 @@ export function S18Data() {
           onChange={setFormat}
           autoAdvance={false}
           options={[
-            { value: 'csv', label: copy.formatCsv },
-            { value: 'pdf', label: copy.formatPdf },
+            { value: 'csv', label: copy.formatCsv, icon: 'choice-export-csv' },
+            { value: 'pdf', label: copy.formatPdf, icon: 'choice-export-pdf' },
           ]}
         />
         <p className="hg-q__help">{copy.noPhotos}</p>

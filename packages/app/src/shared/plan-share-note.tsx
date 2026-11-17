@@ -7,6 +7,11 @@ import { track } from './analytics';
 import { sharedCopy } from './copy';
 import { toast } from './toast';
 
+const SHARE_ART = {
+  all: 'choice-share-all',
+  saving_only: 'choice-share-saving',
+  done_only: 'choice-share-done',
+} as const;
 const OPTIONS: readonly PlanShare[] = ['all', 'saving_only', 'done_only'];
 
 /**
@@ -56,7 +61,12 @@ export function usePlanShareNote({
           label={c.sheet}
           value={share}
           onChange={(v) => void pick(v)}
-          options={OPTIONS.map((v) => ({ value: v, label: c.options[v], sub: c.subs[v] }))}
+          options={OPTIONS.map((v) => ({
+            value: v,
+            label: c.options[v],
+            sub: c.subs[v],
+            icon: SHARE_ART[v],
+          }))}
         />
       </BottomSheet>
     ),
