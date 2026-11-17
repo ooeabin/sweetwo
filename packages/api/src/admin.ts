@@ -1,4 +1,6 @@
 import {
+  GaReport,
+  type GaReportDays,
   AdminAccessData,
   AdminDashboard,
   AdminInquiry,
@@ -131,6 +133,13 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   return AdminDashboard.parse(data);
 }
 /** AD-01 8번 지표 v2.2(32 0장): 북극성 달마다, 선행, 가드레일 */
+/** AD-21 분석(ADR 0010): Edge Function ga-report(어드민 2단계 인증 + 최고 관리자·운영·분석). 비밀이 없으면 not_connected */
+export async function fetchGaReport(days: GaReportDays): Promise<GaReport> {
+  const { data, error } = await supabase().functions.invoke('ga-report', { body: { days } });
+  if (error) throw error;
+  return GaReport.parse(data);
+}
+
 export async function fetchAdminMetrics(months = 6): Promise<AdminMetrics> {
   const { data, error } = await supabase().rpc('admin_metrics', { p_months: months });
   fail(error);

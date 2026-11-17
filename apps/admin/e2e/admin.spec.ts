@@ -93,6 +93,8 @@ async function mock(
     stale?: boolean;
     /** 관리자 아님(admin_me not_admin, admin_bootstrap false): 회사 도메인도 예외 이메일도 아님 */
     notAdmin?: boolean;
+    /** AD-21 Edge Function ga-report 흉내 응답(ADR 0010). 'error' = 500 */
+    ga?: Record<string, unknown> | 'error';
   } = {},
 ) {
   const db: Db = {
@@ -188,6 +190,12 @@ async function mock(
       ]);
     if (p === '/rest/v1/holiday')
       return json(route, [{ date: '2026-12-25', name: '성탄절', kind: 'holiday' }]);
+    if (p === '/functions/v1/ga-report') {
+      db.rpc.push({ fn: 'ga-report', body: body() });
+      if (o.ga === 'error') return json(route, { error: 'x' }, 500);
+      const g = o.ga ?? { state: 'not_connected' };
+      return json(route, g.state === 'ok' ? { ...g, days: body().days } : g);
+    }
     if (!p.startsWith('/rest/v1/rpc/')) return json(route, { message: `e2e: ${p}` }, 404);
     const fn = p.slice('/rest/v1/rpc/'.length);
     db.rpc.push({ fn, body: body() });
@@ -1202,4 +1210,82 @@ test('감사 로그: 행을 누르면 그 아래에 IP, 화면, 바뀐 값', asy
   await expect(more).toBeVisible();
   await expect(more).toContainText('화면');
   await axe(page);
+});
+
+// AD-21 분석(27 AD-21, ADR 0010): Edge Function 응답은 흉내(실제 GA 호출 없음)
+const GA_OK = {
+  state: 'ok',
+  days: 28,
+  at: '2026-11-17T03:00:00Z',
+  active: { dau: 12, wau: 31, mau: 82 },
+  daily: [
+    { date: '2026-11-16', users: 10 },
+    { date: '2026-11-17', users: 12 },
+  ],
+  users: { new: 74, active: 130 },
+  platforms: [
+    { platform: 'iOS', users: 40, new: 9 },
+    { platform: 'Android', users: 20, new: 5 },
+  ],
+  funnel: [
+    { event: 'signup_completed', users: 0 },
+    { event: 'onboarding_completed', users: 40 },
+    { event: 'saving_item_created', users: 30 },
+    { event: 'invite_sent', users: 20 },
+    { event: 'partner_joined', users: 10 },
+    { event: 'payday_confirmed', users: 8 },
+  ],
+  events: [{ event: 'screen_view', count: 900, users: 50 }],
+  sources: [{ source: 'google / organic', sessions: 40, store_clicks: 6 }],
+  cohorts: [{ week: '2026-11-02', users: 50, w1: 20, w2: 15, w4: 0, w8: 0 }],
+};
+
+test('AD-21 분석(분석 역할): 대시보드 링크, 활성·퍼널·이벤트·유입·코호트, 기간 바꾸면 다시 부름', async ({
+  page,
+}) => {
+  const db = await mock(page, { roles: ['analyst'], ga: GA_OK });
+  await page.goto('/');
+  await heading(page, '대시보드');
+  await page.getByRole('button', { name: '분석(GA) 보기' }).click();
+  await heading(page, '분석');
+  const active = page.getByRole('region', { name: '활성 사용자', exact: true });
+  await expect(active).toContainText('DAU(하루)12');
+  await expect(active).toContainText('MAU(28일)82');
+  await expect(active).toContainText('신규 사용자74');
+  const funnel = page.getByRole('region', { name: '핵심 퍼널' });
+  await expect(funnel.getByRole('row', { name: /온보딩 완료/ })).toContainText('100%');
+  await expect(funnel.getByRole('row', { name: /첫 월급날 확인/ })).toContainText('20%');
+  await expect(page.getByRole('region', { name: '웹사이트 유입' })).toContainText(
+    'google / organic',
+  );
+  await expect(page.getByRole('region', { name: '첫 방문 주 코호트 재방문' })).toContainText('40%');
+  expect(db.rpc.filter((r) => r.fn === 'ga-report').at(-1)?.body).toEqual({ days: 28 });
+  await axe(page);
+  await page.getByRole('tab', { name: '7일' }).click();
+  await expect
+    .poll(() => db.rpc.filter((r) => r.fn === 'ga-report').at(-1)?.body)
+    .toEqual({ days: 7 });
+});
+
+test('AD-21 분석(운영): 비밀이 없으면 “GA 연결 안 됨”', async ({ page }) => {
+  await mock(page, { roles: ['ops'] });
+  await page.goto('/analytics');
+  await expect(page.getByRole('status')).toContainText('GA 연결 안 됨');
+  await axe(page);
+});
+
+test('AD-21 분석(최고 관리자): Edge Function 오류면 “불러오기 실패”', async ({ page }) => {
+  await mock(page, { roles: ['super'], ga: 'error' });
+  await page.goto('/analytics');
+  await expect(page.getByRole('status')).toContainText('불러오기 실패');
+});
+
+test('AD-21 분석: CS는 메뉴 없음, 주소로 가도 권한 없음', async ({ page }) => {
+  await mock(page, { roles: ['cs'] });
+  await page.goto('/');
+  await heading(page, '대시보드');
+  await expect(page.getByRole('button', { name: '분석(GA) 보기' })).toHaveCount(0);
+  await expect(page.getByRole('navigation').getByText('분석', { exact: true })).toHaveCount(0);
+  await page.goto('/analytics');
+  await heading(page, '권한 없음');
 });

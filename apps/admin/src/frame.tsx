@@ -35,6 +35,15 @@ const MENUS: (AdminMenu & { roles: AdminRole[] })[] = [
     roles: ['super', 'ops', 'cs'],
   },
   {
+    // AD-21 분석(GA4, ADR 0010): 최고 관리자·운영·분석(33 2장)
+    key: 'analytics',
+    label: copy.menus.analytics,
+    group: copy.menuGroups.work,
+    icon: 'chart-line-up',
+    href: '/analytics',
+    roles: ['super', 'ops', 'analyst'],
+  },
+  {
     key: 'send',
     label: copy.menus.send,
     group: copy.menuGroups.content,

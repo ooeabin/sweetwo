@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ActiveNotice, NoticeEntry, NoticeTarget } from './admin';
+import { ActiveNotice, GaReport, NoticeEntry, NoticeTarget } from './admin';
 
 // 공지 대상 조건(27 AD-10 2번): 서버 notice_target_valid와 같은 모양
 describe('NoticeTarget', () => {
@@ -60,5 +60,28 @@ describe('NoticeEntry', () => {
       NoticeEntry.safeParse({ ...base, starts_at: 'a', ends_at: 'b', importance: 'normal' })
         .success,
     ).toBe(false);
+  });
+});
+
+describe('GaReport(AD-21, ADR 0010)', () => {
+  it('연결 안 됨·실패·결과를 가리고, 음수·소수는 막음', () => {
+    expect(GaReport.parse({ state: 'not_connected' }).state).toBe('not_connected');
+    expect(GaReport.parse({ state: 'failed' }).state).toBe('failed');
+    const ok = {
+      state: 'ok',
+      days: 7,
+      at: '2026-11-17T03:00:00Z',
+      active: { dau: 1, wau: 2, mau: 3 },
+      daily: [],
+      users: { new: 0, active: 3 },
+      platforms: [],
+      funnel: [],
+      events: [],
+      sources: [],
+      cohorts: [],
+    };
+    expect(GaReport.parse(ok).state).toBe('ok');
+    expect(() => GaReport.parse({ ...ok, days: 30 })).toThrow();
+    expect(() => GaReport.parse({ ...ok, active: { dau: -1, wau: 2, mau: 3 } })).toThrow();
   });
 });
