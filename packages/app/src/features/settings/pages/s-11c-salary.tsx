@@ -269,12 +269,7 @@ export function S11cSalary() {
           <span className="hg-consent__label">{copy.variable}</span>
         </button>
         <SectionHeader title={copy.payday} />
-        <DayWheel
-          label={copy.payday}
-          value={payday}
-          onChange={setDay}
-          lastLabel={copy.lastDay}
-        />
+        <DayWheel label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.lastDay} />
         {/* 1번 공개 고지(O-31과 같음). 합류 전이면 볼 사람이 없어 숨김 */}
         {joined && (
           <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>

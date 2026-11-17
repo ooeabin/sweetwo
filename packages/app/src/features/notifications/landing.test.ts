@@ -14,6 +14,8 @@ describe('알림 → 화면 ID(notification_opened landing_screen)', () => {
     ['/assets/a-1/matured', 'F-04a'],
     ['/assets', 'F-02'],
     ['/calendar/day/c-1', 'Y-05'],
+    ['/calendar/list', 'Y-04'],
+    ['/calendar', 'Y-04'],
     ['/settings/me/email', 'S-11b'],
     ['/settings/couple/unlink/review', 'S-12d'],
     ['/settings/couple', 'S-12'],

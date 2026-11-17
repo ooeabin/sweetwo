@@ -114,7 +114,9 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
   await expect(page.getByText('목표 금액만 지우고 지금처럼 모아요')).toBeVisible();
   await expect(page.getByText('월급 계획에서는 빠지지만 저금 내역은 남아요')).toBeVisible();
-  await expect(page.getByText('모은 금액은 그대로 두고 더 큰 금액으로 이어서 모아요')).toBeVisible();
+  await expect(
+    page.getByText('모은 금액은 그대로 두고 더 큰 금액으로 이어서 모아요'),
+  ).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: /목표 금액을 새로 정할게요/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?retarget=1$/);

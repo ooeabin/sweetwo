@@ -97,6 +97,7 @@
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
+| `month_archive_viewed` | kind(`cycle` / `period`), rows(줄 수), entry(`drawer` / `w02`). W-21 지난 달 모아보기, 금액·이름 없음(2026-11-17) |
 | `invite_code_autofilled` | source(clipboard / referrer), result(join / decline) (2026-11-13 PR 8) |
 | `saving_item_created` | entry에 onboarding(O-60 ‘첫 저금 만들기’) 더함 |
 | `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | 위젯은 4-7(v2.2 값은 2026-11-13 PR 14: widget `wg01` / `wg04`, size `small` / `medium`). 코드 입력은 `invite_accepted` channel `code`로 셈(`partner_code_entered`는 따로 보내지 않음, PR 14). 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11). `partner_change_reverted`는 N-01·N-02 ‘이전 값으로 돌리기’(14 R-08) |
@@ -312,7 +313,7 @@
 | subscription\_started | 설정 › 구독 결제 완료 | entry, cycles\_checked, days\_since\_signup |
 | subscription\_canceled | 설정 › 구독 해지, 연결 해제로 상대 무료 전환 | reason\_path(`user` / `unlink`), months\_subscribed |
 | widget\_added | 위젯을 처음 놓음(트레이는 없앰 2026-11-10, ADR 0008). 2026-11-13 PR 14: 앱을 열 때 놓인 위젯을 보고 이 기기에서 처음 본 종류·크기만 | widget(v1 `wg01` / `wg04`, 예전 wg01\~wg05), size(v1 small / medium, 예전 large / lock), amounts\_shown(지금 늘 false) |
-| widget\_tapped | 위젯 누름 → 딥링크 진입(2026-11-13 PR 14: 링크 `sweetwo://widget?to=…&w=wg01`) | widget, element(위젯 전체가 누르는 곳 하나라 `card`), landing\_screen(H-01 / W-10 / W-14 / Y-01 / Y-05 / other), app\_was\_running |
+| widget\_tapped | 위젯 누름 → 딥링크 진입(2026-11-13 PR 14: 링크 `sweetwo://widget?to=…&w=wg01`) | widget, element(위젯 전체가 누르는 곳 하나라 `card`), landing\_screen(H-01 / W-10 / W-14 / Y-04 / Y-05 / other), app\_was\_running |
 | peer\_stats\_viewed | F-08 지표 카드 표시 (출시 후) | metric(net\_worth / saving\_rate / saving\_amount / emergency\_months / debt\_ratio), group\_level [확인 필요], source(public / app) |
 | peer\_stats\_consent\_changed | F-08 참여 안내, 설정 S-18 통계 참여 토글 (출시 후) | state(on / off), entry(f08 / settings), couple\_both\_on |
 | profile\_photo\_changed | S-11e 저장, S-11 ‘사진 지우기’, 소셜 계정 사진을 처음 가져왔을 때(2026-11-05) | action(set / remove / imported) |

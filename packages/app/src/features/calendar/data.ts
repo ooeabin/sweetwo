@@ -176,7 +176,7 @@ export function useCalendarData() {
     recordList.some((r) => r.care_day_id === careId && r.occurs_on === date);
   /** 기록할 회차(‘다녀왔어요’ → Y-08) */
   const recordOn = (x: CareDay) => recordDate(x, today, recordedOf(x.id));
-  /** 기록 없이 7일 지난 날(Y-01 맨 위, Y-05 ‘지남’) */
+  /** 기록 없이 7일 지난 날(Y-04 맨 위, Y-05 ‘지남’) */
   const overdue = careList
     .map((x) => ({ care: x, date: overdueDate(x, today, recordedOf(x.id)) }))
     .filter((x): x is { care: CareDay; date: string } => x.date !== null)
@@ -203,7 +203,7 @@ export function useCalendarData() {
 }
 
 /** 금융 일정 한 줄: 라벨, 갈 곳 이름, 경로(24 ‘캘린더 범위’ 표) */
-/** withWeekday: Y-01 목록은 날짜 자리를 까닭이 대신해 요일까지(“25일이 공휴일이라 24일 목요일로 앞당겼어요”) */
+/** withWeekday: 다가오는 일정 목록은 날짜 자리를 까닭이 대신해 요일까지(“25일이 공휴일이라 24일 목요일로 앞당겼어요”) */
 export function moneyLine(d: MoneyDate, withWeekday = false) {
   const label =
     d.kind === 'payday'
@@ -295,7 +295,7 @@ export const trackCareShared = (linked: boolean) => {
 
 /**
  * 가장 가까운 일정 하나(홈 H-08 캘린더 타일, 2026-11-15 3차 검토: 캘린더 목록과 같은 재료. 2026-11-16 월급날·확인 목록은 뺌, 홈 H-11이 말함).
- * 경조사(다음 날짜) + 금융 일정(Y-01 목록과 같은 60일 안, 월급날·쓸 곳 메모·만기 등) 중 이른 것. 같은 날이면 경조사 먼저
+ * 경조사(다음 날짜) + 금융 일정(Y-04 다가오는 일정과 같은 60일 안, 월급날·쓸 곳 메모·만기 등) 중 이른 것. 같은 날이면 경조사 먼저
  */
 export function nextSchedule(
   d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'upcoming' | 'monthOf'>,

@@ -7,6 +7,7 @@ import { moneyLine, reviewMonth, useCalendarData } from '../data';
 import { money as won, useMask } from '../../../shared/mask';
 import { SkelBody } from '../../frame';
 import { CalendarFrame, CalendarLoadError, useCalFilter } from '../frame';
+import { RecordBand, UpcomingSection } from '../upcoming';
 import { startCareAdd } from './y-07-care-add';
 
 const ymd = (s: string) => s.split('-').map(Number) as [number, number, number];
@@ -27,7 +28,7 @@ let lastView: { today: string; ym: [number, number]; selected: string } | null =
 /** 경조사 이름의 마지막 낱말(“어머니 생신” → “생신”) */
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
-// Y-04 달력(24 Y-01·Y-04 7~10번). 2026-11-04 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
+// Y-04 달력(24 Y-04, 2026-11-17부터 캘린더 첫 화면. 예전 Y-01 일정 목록 본문은 달력 아래 ‘다가오는 일정’(upcoming.tsx)으로). 2026-11-04 소비 달력형: 카드 없이 한 달 전체(접기 없앰),
 // 칸마다 숫자 + 짧은 이름 한 줄, 확인 목록 안내 기간은 칸 아래 이어진 한 줄 띠(“확인 목록”, 누르면 월급 탭 W-02).
 // 오늘은 굵은 숫자, 고른 날은 떠 있는 흰 칸. 다른 달을 보고 있으면 ‘오늘’.
 // 아래는 굵은 회색 띠 + 고른 날 일정(종류 아이콘 + 굵은 이름 + 회색 보조 줄), 그 아래 ‘이 날에 경조사 추가’ → Y-07.
@@ -50,7 +51,7 @@ export function Y04Calendar() {
   };
   const { masked } = useMask();
   const frame = (children: ReactNode) => (
-    <CalendarFrame view="month" filter={filter} onFilter={setFilter}>
+    <CalendarFrame filter={filter} onFilter={setFilter}>
       {children}
     </CalendarFrame>
   );
@@ -197,6 +198,7 @@ export function Y04Calendar() {
 
   return frame(
     <>
+      <RecordBand d={d} filter={filter} />
       <Calendar
         year={y}
         month={m}
@@ -248,6 +250,7 @@ export function Y04Calendar() {
           </div>
         )}
       </section>
+      <UpcomingSection d={d} filter={filter} />
     </>,
   );
 }

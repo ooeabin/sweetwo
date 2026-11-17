@@ -94,7 +94,7 @@ export function widgetLanding(path: string): string {
   if (path === '/') return 'H-01';
   if (/^\/salary\/items\/[^/]+$/.test(path)) return 'W-10';
   if (/^\/salary\/(items|bundles)\/[^/]+\/notes$/.test(path)) return 'W-14';
-  if (path === '/calendar') return 'Y-01';
+  if (path === '/calendar') return 'Y-04';
   if (/^\/calendar\/day\/[^/]+$/.test(path)) return 'Y-05';
   return 'other';
 }

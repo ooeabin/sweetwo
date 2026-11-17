@@ -13,6 +13,7 @@ const RULES: [RegExp, string][] = [
   [/^\/assets\/[^/?]+/, 'F-04'],
   [/^\/assets(?:\?|$)/, 'F-02'],
   [/^\/calendar\/day\//, 'Y-05'],
+  [/^\/calendar(?:\/list|\/month)?(?:\?|$)/, 'Y-04'], // 옛 Y-01 주소(2026-11-17 없앰)도 Y-04
   [/^\/settings\/notifications/, 'S-14'],
   [/^\/settings\/me\/email/, 'S-11b'],
   [/^\/settings\/me\/salary/, 'S-11c'],

@@ -185,7 +185,7 @@
 | 엔티티 | 주요 필드 | 권한(RLS) | 화면 |
 | --- | --- | --- | --- |
 | 같이 모으기 묶음 `saving_bundle` | id, space_id, name, target_amount, deadline, status, achieved_at, show_each_a·show_each_b(구성원별), percent_only_a·percent_only_b, version, deleted_at | 구성원 둘 다 읽기·고치기(show_each·percent_only는 자기 쪽만). 공간이 각자 엔진일 때만 만들 수 있음 | W-15, W-15a, H-10 |
-| 쓸 곳 메모 `saving_note` | id, space_id, goal_id 또는 bundle_id, name, amount, due_on, paid, paid_move_id(→ goal_move) | 그 저금을 볼 수 있는 사람 읽기, 고칠 수 있는 사람 쓰기 | W-14, W-14a, Y-01 |
+| 쓸 곳 메모 `saving_note` | id, space_id, goal_id 또는 bundle_id, name, amount, due_on, paid, paid_move_id(→ goal_move) | 그 저금을 볼 수 있는 사람 읽기, 고칠 수 있는 사람 쓰기 | W-14, W-14a, Y-04 |
 | 수입 적기 `money_in` | id, space_id, owner_user_id, amount, received_on, kind(enum `money_in_kind`: salary/bonus/family/work/refund/etc) | 주인만(공개 ‘모두’면 상대 읽기) | W-20, W-20a, H-13 |
 | 같이 쓰는 통장 분담 `shared_account` | id, space_id, name, monthly_total, rule(half/income_ratio/custom), share_a, share_b, status(proposed/accepted/declined/expired), proposed_by, expires_at | 구성원 둘 다 읽기, 답은 받은 사람만. income_ratio여도 월급 원값은 저장하지 않고 결과만 | W-01b, W-01c |
 | 관리 형태 요청 `mode_change_request` | id, space_id, from_user, to_mode, to_manager, phrase(p04_send/s11f_combine), status, expires_at | 구성원 읽기, 받은 사람만 답, 보낸 사람만 취소 | P-04, S-11f, S-11j |

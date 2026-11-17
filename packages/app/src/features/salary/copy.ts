@@ -615,4 +615,17 @@ export const copy = {
   monthlyOverLeft: (left: string) => `아직 안 정한 월급 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
   needPerMonthTogether: (amount: string, now?: string) =>
     `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
+  // ── W-21 지난 달 모아보기(20 W-21, 2026-11-17) [모두 확인 필요] ──
+  archiveTitle: '지난 달 모아보기',
+  archiveLink: '지난 달 모아보기', // W-02 머리 링크(‘›’는 아이콘)
+  archiveResult: {
+    all: '계획대로 됐어요',
+    mixed: '확인을 마쳤어요',
+    late: (n: number) => `확인할 것 ${n}개`,
+  },
+  archiveSaved: (amount: string) => `모은 금액 ${amount}`,
+  archiveEmpty: '아직 지난 달 기록이 없어요',
+  /** 날짜 없는 사람: 줄 이름 “10월 3일 ~ 11월 1일”, 보조 “수입 2번” */
+  archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,
+  archivePeriodCount: (n: number) => `수입 ${n}번`,
 };

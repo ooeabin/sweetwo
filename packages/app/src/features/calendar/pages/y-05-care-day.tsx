@@ -46,7 +46,7 @@ export function Y05CareDay() {
   if (c.failed) return <CareDayError onBack={() => nav(-1)} onRetry={c.retry} />;
   if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
   const care = c.cares.find((x) => x.id === id);
-  if (!care) return <Navigate to="/calendar/list" replace />;
+  if (!care) return <Navigate to="/calendar" replace />;
   const date = nextCareDate(care, c.today);
   const lunar = care.date_rule === 'lunar_yearly' && date ? solarToLunar(date) : null;
   const st = statusOf(care, date);
@@ -84,7 +84,7 @@ export function Y05CareDay() {
         label: copy.undo,
         onClick: () => quietly(restoreTrash('care_day', care.id).then(refresh)),
       });
-      nav('/calendar/list', { replace: true });
+      nav('/calendar', { replace: true });
     } catch {
       toast(copy.loadFailed);
     }
@@ -248,7 +248,7 @@ export function Y05Budget() {
   if (c.failed) return <CareDayError onBack={() => nav(`/calendar/day/${id}`)} onRetry={c.retry} />;
   if (c.loading) return <QuestionSkeleton />;
   const care = c.cares.find((x) => x.id === id);
-  if (!care) return <Navigate to="/calendar/list" replace />;
+  if (!care) return <Navigate to="/calendar" replace />;
   const v = value === undefined ? care.budget || null : value;
   return (
     <QuestionLayout

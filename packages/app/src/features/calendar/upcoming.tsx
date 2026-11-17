@@ -1,13 +1,5 @@
+import { dday, formatDateWeekday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
 import {
-  addDays,
-  dday,
-  formatDateWeekday,
-  formatMonthDay,
-  withinDays,
-  type MoneyDate,
-} from '@sweetwo/core';
-import {
-  AddRow,
   Button,
   Icon,
   Lead,
@@ -17,49 +9,46 @@ import {
   SectionHeader,
   StatBlock,
 } from '@sweetwo/ui';
-import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { money as won, useMask } from '../../../shared/mask';
-import { copy } from '../copy';
-import { moneyLine, useCalendarData } from '../data';
-import { SkelBody } from '../../frame';
-import { CalendarFrame, CalendarLoadError, useCalFilter } from '../frame';
-import { startCareAdd } from './y-07-care-add';
+import { money as won, useMask } from '../../shared/mask';
+import { copy } from './copy';
+import { moneyLine, type useCalendarData } from './data';
+import type { CalFilter } from './frame';
 
-// Y-01 일정 목록(24 Y-01 4~10번, 2026-11-03 다시 짬): 보기 필터와 목록/달력은 한 줄(frame), 기록 없이 7일 지난 날은
-// 맨 위 회색 띠 “선물을 기록할 날이 1개 있어요”(→ Y-08), 다음 경조사 카드(D-day, 이름, 날짜, 금액 메모, 준비하기 → Y-05),
-// “일정” 한 목록(60일 안 경조사 + 금융 일정, 날짜순, 오른쪽 D-day, 경조사는 영역 색 막대, 금융 일정은 검정 점),
-// 선물 기록(→ Y-09). 빈 상태 카드 없음: 추가는 ‘일정’ 머리 ‘+ 경조사 추가’ 하나(2026-11-15 3차 검토). “금융 일정”이면 4·6번 숨김.
-export function Y01CareList() {
+// Y-04 달력 아래 ‘다가오는 일정’ 묶음(24 Y-04 11~14번, 2026-11-17): 예전 Y-01 일정 목록 본문을 달력으로 옮김.
+// 기록할 날 띠(→ Y-08), 다음 경조사 카드(D-day, 준비하기 → Y-05), “다가오는 일정” 한 목록(60일 안 경조사 + 금융 일정, 날짜순,
+// 오른쪽 D-day, 경조사는 영역 색, 금융 일정은 종류 아이콘), 선물 기록(→ Y-09). 보기 필터가 “금융 일정”이면 경조사 쪽은 숨김.
+type CalData = ReturnType<typeof useCalendarData>;
+
+/** 기록 없이 7일 지난 날이 있으면 맨 위 회색 띠 “선물을 기록할 날이 1개 있어요”(→ Y-08) */
+export function RecordBand({ d, filter }: { d: CalData; filter: CalFilter }) {
   const nav = useNavigate();
-  const d = useCalendarData();
-  const [filter, setFilter] = useCalFilter();
+  const first = d.overdue[0];
+  if (filter === 'money' || !first) return null;
+  return (
+    <button
+      type="button"
+      className="hg-recband"
+      onClick={() => nav(`/calendar/day/${first.care.id}/record/a?on=${first.date}`)}
+    >
+      <span className="hg-recband__icon" aria-hidden="true">
+        <Icon name="pencil" />
+      </span>
+      <span className="hg-recband__text">
+        <b>{copy.recordCount(d.overdue.length)}</b>
+        <span>
+          {copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}
+        </span>
+      </span>
+      <span className="hg-chevron" aria-hidden="true" />
+    </button>
+  );
+}
+
+export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }) {
+  const nav = useNavigate();
   const { masked } = useMask();
   const m = (x: number) => won(x, masked);
-  const frame = (
-    children: ReactNode,
-    week?: { today: string; marked: ReadonlySet<string>; holidays: ReadonlySet<string> },
-  ) => (
-    <CalendarFrame view="list" filter={filter} onFilter={setFilter} week={week}>
-      {children}
-    </CalendarFrame>
-  );
-  // 못 불러오면 빈 상태 대신 오류 카드 + ‘다시 시도’(2026-11-12 S9-02)
-  if (d.failed) return frame(<CalendarLoadError onRetry={d.retry} />);
-  if (d.loading) return frame(<SkelBody shape="rows" />);
-
-  // 맨 위 이번 주 띠(2026-11-09): 일~토 중 일정(보기 필터대로)이 있는 날에 점
-  const [ty, tm, td] = d.today.split('-').map(Number) as [number, number, number];
-  const sunday = addDays(d.today, -new Date(Date.UTC(ty, tm - 1, td)).getUTCDay());
-  const marked = new Set<string>();
-  for (let i = 0; i < 7; i++) {
-    const day = addDays(sunday, i);
-    const [dy, dm] = day.split('-').map(Number) as [number, number];
-    const has =
-      (filter !== 'money' && d.caresOf(dy, dm).some((x) => x.date === day)) ||
-      (filter !== 'care' && d.monthOf(dy, dm).dates.some((x) => x.date === day));
-    if (has) marked.add(day);
-  }
 
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const months: [number, number][] = [0, 1, 2].map((n) => {
@@ -69,21 +58,15 @@ export function Y01CareList() {
   const money: MoneyDate[] = months
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => withinDays(d.today, x.date, 60));
-  // 맨 위 ‘월급날 확인 목록’ 띠는 없앰(2026-11-12 QA 9구간 D1 = A): 일정 목록의 ‘월급날 확인 목록’ 줄과 홈 할 일 띠가 같은 일을 함
   const soon = d.upcoming.filter((x) => withinDays(d.today, x.date, 60));
   const next = d.upcoming[0];
-  const add = () => {
-    startCareAdd();
-    nav('/calendar/add/a');
-  };
 
-  // 일정: 경조사와 금융 일정을 날짜순 한 목록으로
+  // 경조사와 금융 일정을 날짜순 한 목록으로
   type Row = {
     key: string;
     date: string;
     label: string;
     sub: string;
-    care: boolean;
     /** 줄 앞 칸(2026-11-09 lead-kinds.ts ‘care’·‘money’ 표) */
     lead: LeadSpec;
     to: string;
@@ -99,7 +82,6 @@ export function Y01CareList() {
             x.care.budget > 0
               ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
               : formatDateWeekday(x.date),
-          care: true,
           lead: leadOf('care', x.care.kind),
           to: `/calendar/day/${x.care.id}`,
         }))),
@@ -112,36 +94,14 @@ export function Y01CareList() {
             date: x.date,
             label: l.label,
             sub: l.why ?? formatDateWeekday(x.date),
-            care: false,
             lead: leadOf('money', x.kind),
             to: l.to,
           };
         })),
   ].sort((a, b) => a.date.localeCompare(b.date));
-  const first = d.overdue[0];
 
-  return frame(
+  return (
     <>
-      {filter !== 'money' && first && (
-        <button
-          type="button"
-          className="hg-recband"
-          onClick={() => nav(`/calendar/day/${first.care.id}/record/a?on=${first.date}`)}
-        >
-          <span className="hg-recband__icon" aria-hidden="true">
-            <Icon name="pencil" />
-          </span>
-          <span className="hg-recband__text">
-            <b>{copy.recordCount(d.overdue.length)}</b>
-            <span>
-              {copy.recordWhich(first.care.name, formatMonthDay(first.date), d.overdue.length - 1)}
-            </span>
-          </span>
-          <span className="hg-chevron" aria-hidden="true" />
-        </button>
-      )}
-      {/* 경조사 빈 상태(그림 자리 + ‘경조사 추가’)는 없앰(2026-11-15 3차 검토: 월급날이 있는데 빈 상태와 추가 버튼 둘이 겹쳤음).
-          추가는 ‘일정’ 머리의 ‘+ 경조사 추가’ 하나, 일정이 없으면 그 아래 한 줄 */}
       {filter !== 'money' && next && (
         <section className="hg-card hg-stack" aria-label={copy.nextCare}>
           {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}
@@ -163,7 +123,7 @@ export function Y01CareList() {
             >
               {copy.prepare}
             </Button>
-            {/* 그날이 되면 목록에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번). 이번 회차를 기록했으면 숨김(Y-04·Y-05와 같은 조건, S9-12) */}
+            {/* 그날이 되면 여기서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번). 이번 회차를 기록했으면 숨김(Y-04·Y-05와 같은 조건, S9-12) */}
             {next.date <= d.today &&
               !(next.care.status === 'done' && next.care.status_on === next.date) && (
                 <Button
@@ -178,11 +138,7 @@ export function Y01CareList() {
         </section>
       )}
       <section className="hg-stack" aria-label={copy.upcomingList}>
-        {/* 2026-11-09 + 버튼(FAB) 대신 머리 오른쪽 회색 ‘+ 경조사 추가’ → Y-07. 좁은 창만(넓은 창은 제목 줄 ‘+ 추가’, S9-11) */}
-        <SectionHeader
-          title={copy.upcomingList}
-          action={<AddRow className="hg-narrow-only" label={copy.addCareRow} onClick={add} />}
-        />
+        <SectionHeader title={copy.upcomingList} />
         {!rows.length ? (
           <p className="hg-card__meta" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
@@ -225,7 +181,6 @@ export function Y01CareList() {
           <ListRow label={copy.gifted} onClick={() => nav('/calendar/gifts')} />
         </div>
       )}
-    </>,
-    { today: d.today, marked, holidays: d.holidays },
+    </>
   );
 }

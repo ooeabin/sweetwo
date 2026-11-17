@@ -1,7 +1,5 @@
 // calendar 기능(캘린더 메뉴). 밖으로 내보낼 것만 여기서 export.
-export { Y01CareList } from './pages/y-01-care-list';
 export { Y04Calendar } from './pages/y-04-calendar';
-export { CalendarHome } from './frame';
 export { Y05Budget, Y05CareDay } from './pages/y-05-care-day';
 export { Y07CareAdd } from './pages/y-07-care-add';
 export { Y08Record } from './pages/y-08-record';

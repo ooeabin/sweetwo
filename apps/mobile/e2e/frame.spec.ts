@@ -212,21 +212,20 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   // ‘홈’·‘문의’·버전·알림 종은 없음. 묶음 3개
   expect(await drawer.locator('.hg-drawer__item').allTextContents()).toEqual([
     '월급',
-    '이번 달 확인',
-    '월급 계획',
-    '저금',
-    '수입 기록',
+    '이번 달 월급 체크',
+    '월급 계획 템플릿',
+    '저축·투자',
+    '지난 달 모아보기',
     '자산 관리',
     '자산·부채',
     '자산 순위',
     '캘린더',
     '달력',
-    '일정 목록',
     '선물 기록',
     '초대하기',
     '도움말',
   ]);
-  await expect(drawer.locator('.hg-drawer__sub')).toHaveCount(9);
+  await expect(drawer.locator('.hg-drawer__sub')).toHaveCount(8);
   await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
   for (const name of ['홈', '문의', '공지', '우리 둘', '내 정보', '설정', '알림'])
     await expect(drawer.getByRole('button', { name, exact: true })).toHaveCount(0);
@@ -234,7 +233,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   // 홈에서 열어 지금 화면 줄 없음
   await expect(drawer.locator('[aria-current="page"]')).toHaveCount(0);
   // 하위 줄 누르는 칸 44px 이상, 머리 줄보다 들여씀
-  const sub = drawer.getByRole('button', { name: '저금', exact: true });
+  const sub = drawer.getByRole('button', { name: '저축·투자', exact: true });
   const head = drawer.getByRole('button', { name: '월급', exact: true });
   expect((await sub.boundingBox())?.height).toBeGreaterThanOrEqual(44);
   const padLeft = (el: Element) => parseFloat(getComputedStyle(el).paddingLeft);
@@ -253,16 +252,15 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   // 줄 → 화면, 뒤로 가면 홈
   for (const [name, url] of [
     ['월급', /\/salary$/],
-    ['이번 달 확인', /\/salary$/],
-    ['월급 계획', /\/salary\?view=plan$/],
-    ['저금', /\/salary\/items$/],
-    ['수입 기록', /\/salary\/money-in\/list$/],
+    ['이번 달 월급 체크', /\/salary$/],
+    ['월급 계획 템플릿', /\/salary\?view=plan$/],
+    ['저축·투자', /\/salary\/items$/],
+    ['지난 달 모아보기', /\/salary\/archive$/],
     ['자산 관리', /\/assets$/],
     ['자산·부채', /\/assets\/items$/],
     ['자산 순위', /\/assets\/rank$/],
-    ['캘린더', /\/calendar\/list$/],
-    ['달력', /\/calendar\/month$/],
-    ['일정 목록', /\/calendar\/list$/],
+    ['캘린더', /\/calendar$/],
+    ['달력', /\/calendar$/],
     ['선물 기록', /\/calendar\/gifts$/],
     ['초대하기', /\/settings\/couple\?invite=1$/],
     ['도움말', /\/settings\/help$/],
@@ -281,13 +279,16 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   await expect(page.getByRole('button', { name: /문의하기/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: /내 문의/ })).toBeVisible();
 
-  // 날짜 없는 사람(각자): ‘이번 달 확인’ 줄 없음
+  // 날짜 없는 사람(각자): ‘이번 달 월급 체크’ 줄 없음
   Object.assign(db.me, { payday_none: true, payday: null });
   await page.goto('/');
   await expect(page.locator('.hg-hubtile, .hg-together').first()).toBeVisible();
   await menuBtn.click();
-  await expect(drawer.getByRole('button', { name: '이번 달 확인', exact: true })).toHaveCount(0);
-  await expect(drawer.getByRole('button', { name: '월급 계획', exact: true })).toBeVisible();
+  await expect(drawer.getByRole('button', { name: '이번 달 월급 체크', exact: true })).toHaveCount(
+    0,
+  );
+  await expect(drawer.getByRole('button', { name: '월급 계획 템플릿', exact: true })).toBeVisible();
+  await expect(drawer.getByRole('button', { name: '지난 달 모아보기', exact: true })).toBeVisible();
   Object.assign(db.me, { payday_none: false, payday: 25 });
 
   // 볼 공지가 있으면 ‘공지’ 줄(도움말 위)
@@ -366,14 +367,14 @@ test('메뉴 서랍 키보드만으로(2026-11-09): Enter로 열고, Tab은 서�
   expect(
     await page.locator('.hg-drawer').evaluate((el) => getComputedStyle(el).animationName),
   ).toBe('none');
-  // 앞으로 Tab: 닫기 → 월급 → 이번 달 확인 … 도움말 → 다시 닫기(서랍 밖으로 나가지 않음, 머리 줄 다음에 그 하위 줄)
+  // 앞으로 Tab: 닫기 → 월급 → 이번 달 월급 체크 … 도움말 → 다시 닫기(서랍 밖으로 나가지 않음, 머리 줄 다음에 그 하위 줄)
   const inside = () => page.evaluate(() => !!document.activeElement?.closest('.hg-drawer'));
   const focused = () => page.evaluate(() => document.activeElement?.textContent ?? '');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   expect(await focused()).toBe('월급');
   await page.keyboard.press('Tab');
-  expect(await focused()).toBe('이번 달 확인');
+  expect(await focused()).toBe('이번 달 월급 체크');
   for (let i = 0; i < 16; i++) {
     await page.keyboard.press('Tab');
     expect(await inside()).toBe(true);
@@ -461,15 +462,15 @@ test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월�
   await page.goto('/assets/items');
   await page.getByRole('button', { name: '자산 추가', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/new\?side=asset/);
-  // 캘린더 Y-01: ‘일정’ 머리 오른쪽(좁은 창만, 넓은 창은 제목 줄 ‘+ 추가’, 2026-11-12 S9-11)
-  await page.goto('/calendar/list');
+  // 캘린더 Y-04: 보기 필터 줄 오른쪽(좁은 창만, 넓은 창은 제목 줄 ‘+ 일정 추가’, 2026-11-17)
+  await page.goto('/calendar');
   const careAdd = page
-    .getByRole('region', { name: '일정' })
-    .getByRole('button', { name: '경조사 추가', exact: true });
+    .locator('.hg-cal__tools')
+    .getByRole('button', { name: '일정 추가', exact: true });
   if ((info.project.use.viewport?.width ?? 1280) < 768) await careAdd.click();
   else {
     await expect(careAdd).toBeHidden();
-    await page.getByRole('button', { name: '+ 추가', exact: true }).click();
+    await page.getByRole('button', { name: '+ 일정 추가', exact: true }).click();
   }
   await expect(page).toHaveURL(/\/calendar\/add/);
 });

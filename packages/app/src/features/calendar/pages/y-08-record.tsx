@@ -89,7 +89,7 @@ export function Y08Record() {
   }, [care, d.key, key, set]);
 
   if (c.loading) return <QuestionSkeleton />;
-  if (!care || !on) return <Navigate to="/calendar/list" replace />;
+  if (!care || !on) return <Navigate to="/calendar" replace />;
   if (d.key !== key) return null;
 
   const i = Math.max(STEPS.indexOf(step), 0);

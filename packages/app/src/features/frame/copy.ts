@@ -19,16 +19,15 @@ export const copy = {
   // 2026-11-16 2단 서랍(사용자 결정): 메뉴 3개 + 늘 펼친 하위 줄 [하위 줄 이름 확인 필요]
   drawer: {
     salary: '월급',
-    salaryMonth: '이번 달 확인',
-    salaryPlan: '월급 계획',
-    savings: '저금',
-    moneyIn: '수입 기록',
+    salaryMonth: '이번 달 월급 체크', // [확인 필요] 2026-11-17 예전 ‘이번 달 확인’
+    salaryPlan: '월급 계획 템플릿', // [확인 필요] 2026-11-17 예전 ‘월급 계획’(서랍 줄 이름만, 화면 제목은 그대로)
+    savings: '저축·투자', // [확인 필요] 2026-11-17 예전 ‘저금’
+    monthArchive: '지난 달 모아보기', // [확인 필요] 2026-11-17 새 줄(W-21), ‘수입 기록’ 줄은 없앰
     assets: '자산 관리',
     assetItems: '자산·부채',
     rank: '자산 순위',
     calendar: '캘린더',
     calMonth: '달력',
-    calList: '일정 목록',
     gifts: '선물 기록',
     invite: '초대하기',
     notice: '공지',

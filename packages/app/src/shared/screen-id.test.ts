@@ -32,6 +32,12 @@ describe('screenIdOf', () => {
     expect(screenIdOf('/salary')).toBe('W-02');
     expect(screenIdOf('/salary', '?view=plan')).toBe('W-01');
   });
+  it('캘린더 첫 화면은 달력 Y-04(옛 Y-01 주소도), 지난 달 모아보기는 W-21', () => {
+    expect(screenIdOf('/calendar')).toBe('Y-04');
+    expect(screenIdOf('/calendar/list')).toBe('Y-04');
+    expect(screenIdOf('/calendar/month')).toBe('Y-04');
+    expect(screenIdOf('/salary/archive')).toBe('W-21');
+  });
   it('온보딩·합류는 주소 끝 화면 ID', () => {
     expect(screenIdOf('/onboarding/o-30b')).toBe('O-30b');
     expect(screenIdOf('/join/p-05c')).toBe('P-05c');
