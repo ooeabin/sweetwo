@@ -15,5 +15,6 @@
 - 닫힌 칸: `button.hg-select` + `role="combobox"` + `aria-haspopup="listbox"` + `aria-expanded`, 이름은 라벨(`aria-labelledby`), 값은 칸 글자. 열리면 칸 테두리 `ink`(입력 칸 포커스와 같음). 꺼지면 `surface-sunk` 바탕 + `muted` 글자.
 - 펼친 목록: `hg-menu hg-select__list`(`role="listbox"`, 칸 바로 아래, 칸보다 좁지 않게, 최대 280px 뒤로 스크롤). 항목 `hg-menu__item hg-select__opt`(`role="option"`): 고른 항목은 굵게 + 오른쪽 `check`(색만으로 말하지 않음, `aria-selected`), 마우스·키보드로 가리킨 항목은 `surface-alt`(`is-active`).
 - 키보드: ↓/↑ 열기와 옮기기, Home/End 처음·끝, Enter·Space 고르기, Esc 닫기(값 그대로), Tab 닫기, 글자를 치면 그 글자로 시작하는 항목. 포커스는 칸에 두고 가리킨 항목은 `aria-activedescendant`. 바깥을 누르면 닫힘.
+- 화살표는 다른 머리 아이콘과 같은 Phosphor `caret-down`(`chevron-down`, 열리면 `chevron-up`) 16px `slate`, 굵기는 아이콘 기본(2026-11-17 확인, 브라우저 기본 화살표 아님).
 - 어드민 밀도: 칸 36px, 항목 32px 14px(`hg-admin` 안).
 - 좁은 창 BottomSheet는 아직 없음(어드민은 넓은 창만). 사용자 앱에서 쓸 때 더함.

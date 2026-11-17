@@ -1,7 +1,7 @@
 import { createInquiry, qk, type InquiryCategory } from '@sweetwo/api';
-import { QuestionLayout, Toggle } from '@sweetwo/ui';
+import { QuestionLayout, Textarea, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectPlatform } from '../../../platform';
 import { SheetSelect } from '../../../shared/sheet-select';
@@ -83,7 +83,7 @@ export function S19aInquiry() {
   );
 }
 
-/** 여러 줄 내용 칸(입력 칸 모양 그대로, 높이만 늘림) */
+/** 여러 줄 내용 칸(디자인 시스템 Textarea: 손잡이 없이 글에 따라 높이가 늘어남) */
 export function InquiryText({
   value,
   onChange,
@@ -93,28 +93,13 @@ export function InquiryText({
   onChange: (v: string) => void;
   label?: string;
 }) {
-  const id = useId();
   return (
-    <div className="hg-field">
-      <label className="hg-field__label" htmlFor={id}>
-        {label}
-      </label>
-      <textarea
-        id={id}
-        className="hg-input"
-        style={{
-          height: 'auto',
-          minHeight: 'calc(var(--space-22) * 2)',
-          paddingBlock: 'var(--space-3)',
-        }}
-        maxLength={2000}
-        value={value}
-        aria-describedby={`${id}-h`}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <span id={`${id}-h`} className="hg-help">
-        {copy.bodyHelp}
-      </span>
-    </div>
+    <Textarea
+      label={label}
+      help={copy.bodyHelp}
+      maxLength={2000}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
