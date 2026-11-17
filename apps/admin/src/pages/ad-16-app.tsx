@@ -1,5 +1,6 @@
 import { adminRequestAppConfig, fetchAdminAppConfig } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
+import { DatePicker, Field } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Button } from '../act';
@@ -57,28 +58,35 @@ export function AD16App() {
     }
   };
   const below = q.data?.below_min;
-  const field = (label: string, k: keyof typeof f, type = 'text', help?: number) => (
-    <label className="hg-field">
-      <span className="hg-field__label">{label}</span>
-      <input
-        className="hg-input"
-        type={type}
-        value={f[k]}
-        disabled={!canEdit}
-        onChange={(e) => setF({ ...f, [k]: e.target.value })}
-      />
-      {help !== undefined && <span className="hg-help">{ops.belowMin(help)}</span>}
-    </label>
+  const field = (label: string, k: keyof typeof f, help?: number) => (
+    <Field
+      label={label}
+      value={f[k]}
+      disabled={!canEdit}
+      help={help !== undefined ? ops.belowMin(help) : undefined}
+      onChange={(e) => setF({ ...f, [k]: e.target.value })}
+    />
+  );
+  // 점검 시작·끝: 날짜 + 시각(KST), 브라우저 기본 datetime-local 대신(2026-11-17)
+  const when = (label: string, k: 'starts' | 'ends') => (
+    <DatePicker
+      label={label}
+      time
+      value={f[k]}
+      disabled={!canEdit}
+      labels={copy.datePicker}
+      onChange={(v) => setF((x) => ({ ...x, [k]: v }))}
+    />
   );
   return (
     <Frame menu="system" title={ops.systemTitle}>
       <SysTabs current="app" />
       <section className="hg-card hg-stack" aria-label={ops.sysTabs.app} style={{ maxWidth: 520 }}>
-        {field(ops.appCols.minIos, 'minI', 'text', below?.ios)}
-        {field(ops.appCols.minAndroid, 'minA', 'text', below?.android)}
+        {field(ops.appCols.minIos, 'minI', below?.ios)}
+        {field(ops.appCols.minAndroid, 'minA', below?.android)}
         <span className="hg-card__label">{ops.maintenance}</span>
-        {field(ops.field.starts, 'starts', 'datetime-local')}
-        {field(ops.field.ends, 'ends', 'datetime-local')}
+        {when(ops.field.starts, 'starts')}
+        {when(ops.field.ends, 'ends')}
         {field(ops.maintenanceMsg, 'message')}
         {canEdit && (
           <Button variant="primary" disabled={!ready} onAct={() => save()}>

@@ -1,6 +1,6 @@
 import { fetchAdminAudit, type AdminAuditRow } from '@sweetwo/api';
 import { formatKstDateTime } from '@sweetwo/core';
-import { Button, DataTable } from '@sweetwo/ui';
+import { Button, DataTable, DateRange, Select } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { copy } from '../copy';
@@ -37,9 +37,10 @@ export function AD17Audit() {
       <SysTabs current="audit" />
       <form
         className="hg-row"
-        style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
+        style={{ gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'flex-start' }}
         onSubmit={(e) => {
           e.preventDefault();
+          if (draft.from && draft.to && draft.to < draft.from) return;
           setF(draft);
         }}
       >
@@ -61,35 +62,26 @@ export function AD17Audit() {
           value={draft.target}
           onChange={set('target')}
         />
-        <select
-          className="hg-input"
-          style={{ width: 140 }}
-          aria-label={copy.filter.action}
+        <Select
+          label={copy.filter.action}
+          hideLabel
+          width={140}
           value={draft.action}
-          onChange={set('action')}
-        >
-          <option value="">{copy.all}</option>
-          {ACTIONS.map((a) => (
-            <option key={a} value={a}>
-              {copy.auditActions[a]}
-            </option>
-          ))}
-        </select>
-        <input
-          className="hg-input"
-          style={{ width: 160 }}
-          type="date"
-          aria-label={copy.filter.from}
-          value={draft.from}
-          onChange={set('from')}
+          options={[
+            { value: '', label: copy.all },
+            ...ACTIONS.map((a) => ({ value: a, label: copy.auditActions[a] ?? a })),
+          ]}
+          onChange={(v) => setDraft((x) => ({ ...x, action: v }))}
         />
-        <input
-          className="hg-input"
-          style={{ width: 160 }}
-          type="date"
-          aria-label={copy.filter.to}
-          value={draft.to}
-          onChange={set('to')}
+        <DateRange
+          label={copy.period}
+          fromLabel={copy.filter.from}
+          toLabel={copy.filter.to}
+          from={draft.from}
+          to={draft.to}
+          error={copy.badPeriod}
+          labels={copy.datePicker}
+          onChange={(from, to) => setDraft((x) => ({ ...x, from, to }))}
         />
         <Button variant="secondary" type="submit">
           {copy.see}

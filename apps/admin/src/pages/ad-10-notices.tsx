@@ -16,7 +16,17 @@ import {
   NOTICE_VERSION,
   NoticeTarget,
 } from '@sweetwo/core';
-import { Chip, DataTable, Icon, Status, Toggle } from '@sweetwo/ui';
+import {
+  Chip,
+  DataTable,
+  DatePicker,
+  Field,
+  Icon,
+  Select,
+  Status,
+  Textarea,
+  Toggle,
+} from '@sweetwo/ui';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Button } from '../act';
@@ -32,7 +42,7 @@ import { useAdmin } from '../gate';
 const PLATFORMS: ('desktop' | 'mobile')[] = ['desktop', 'mobile'];
 type CoupleState = (typeof NOTICE_COUPLE_STATES)[number];
 const KINDS = ['info', 'maintenance', 'incident', 'terms'];
-// datetime-local(KST로 넣음) ↔ ISO
+// 날짜 칸 값 'YYYY-MM-DDTHH:MM'(KST로 넣음) ↔ ISO
 const toIso = (local: string) => (local ? new Date(`${local}:00+09:00`).toISOString() : '');
 
 // AD-10 공지(MVP: 앱 안 공지 + 약관 개정·1등급 장애 고지 메일). 노출 기간·중요도(일반/필독)·대상 플랫폼 + 대상 조건
@@ -212,42 +222,28 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
   return (
     <>
       <section className="hg-card hg-stack" aria-label={n ? n.title : ops.newNotice}>
-        <label className="hg-field">
-          <span className="hg-field__label">{ops.field.kind}</span>
-          <select
-            className="hg-input"
-            value={kind}
-            disabled={!draft}
-            onChange={(e) => setKind(e.target.value)}
-          >
-            {KINDS.map((k) => (
-              <option key={k} value={k}>
-                {ops.noticeKinds[k]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="hg-field">
-          <span className="hg-field__label">{ops.field.title}</span>
-          <input
-            className="hg-input"
-            value={title}
-            maxLength={60}
-            disabled={!draft}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </label>
-        <label className="hg-field">
-          <span className="hg-field__label">{ops.field.body}</span>
-          <textarea
-            className="hg-input"
-            rows={4}
-            value={body}
-            maxLength={2000}
-            disabled={!draft}
-            onChange={(e) => setBody(e.target.value)}
-          />
-        </label>
+        <Select
+          label={ops.field.kind}
+          value={kind}
+          disabled={!draft}
+          options={KINDS.map((k) => ({ value: k, label: ops.noticeKinds[k] ?? k }))}
+          onChange={setKind}
+        />
+        <Field
+          label={ops.field.title}
+          value={title}
+          maxLength={60}
+          disabled={!draft}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <Textarea
+          label={ops.field.body}
+          rows={4}
+          value={body}
+          maxLength={2000}
+          disabled={!draft}
+          onChange={(e) => setBody(e.target.value)}
+        />
         {mailable && (
           <Toggle
             label={ops.field.email}
@@ -275,26 +271,22 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
             </Chip>
           ))}
         </div>
-        <label className="hg-field">
-          <span className="hg-field__label">{ops.field.starts}</span>
-          <input
-            className="hg-input"
-            type="datetime-local"
-            value={starts}
-            disabled={!draft}
-            onChange={(e) => setStarts(e.target.value)}
-          />
-        </label>
-        <label className="hg-field">
-          <span className="hg-field__label">{ops.field.ends}</span>
-          <input
-            className="hg-input"
-            type="datetime-local"
-            value={ends}
-            disabled={!draft}
-            onChange={(e) => setEnds(e.target.value)}
-          />
-        </label>
+        <DatePicker
+          label={ops.field.starts}
+          time
+          value={starts}
+          disabled={!draft}
+          labels={copy.datePicker}
+          onChange={setStarts}
+        />
+        <DatePicker
+          label={ops.field.ends}
+          time
+          value={ends}
+          disabled={!draft}
+          labels={copy.datePicker}
+          onChange={setEnds}
+        />
         {draft ? (
           <div className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             <Button variant="secondary" disabled={!ready || busy} onAct={() => save(false)}>
@@ -356,48 +348,35 @@ function NoticeForm({ n, onDone }: { n: Notice | null; onDone: () => void }) {
               </div>
               <span className="hg-help">{ops.target.coupleHelp}</span>
             </div>
-            <label className="hg-field">
-              <span className="hg-field__label">{ops.target.versionBelow}</span>
-              <input
-                className="hg-input"
-                value={version}
-                inputMode="decimal"
-                maxLength={14}
-                disabled={!draft}
-                aria-invalid={!versionOk}
-                onChange={(e) => setVersion(e.target.value)}
-              />
-              <span className={versionOk ? 'hg-help' : 'hg-help is-error'}>
-                {versionOk ? ops.target.versionHelp : ops.target.badVersion}
-              </span>
-            </label>
+            <Field
+              label={ops.target.versionBelow}
+              value={version}
+              inputMode="decimal"
+              maxLength={14}
+              disabled={!draft}
+              help={ops.target.versionHelp}
+              error={versionOk ? undefined : ops.target.badVersion}
+              onChange={(e) => setVersion(e.target.value)}
+            />
             <div className="hg-admin__grid2">
-              <label className="hg-field">
-                <span className="hg-field__label">{ops.target.weeksMin}</span>
-                <input
-                  className="hg-input"
-                  type="number"
-                  min={1}
-                  max={520}
-                  value={weeksMin}
-                  disabled={!draft}
-                  aria-invalid={!weeksOk}
-                  onChange={(e) => setWeeksMin(e.target.value)}
-                />
-              </label>
-              <label className="hg-field">
-                <span className="hg-field__label">{ops.target.weeksMax}</span>
-                <input
-                  className="hg-input"
-                  type="number"
-                  min={1}
-                  max={520}
-                  value={weeksMax}
-                  disabled={!draft}
-                  aria-invalid={!weeksOk}
-                  onChange={(e) => setWeeksMax(e.target.value)}
-                />
-              </label>
+              <Field
+                label={ops.target.weeksMin}
+                inputMode="numeric"
+                maxLength={3}
+                value={weeksMin}
+                disabled={!draft}
+                aria-invalid={!weeksOk || undefined}
+                onChange={(e) => setWeeksMin(e.target.value.replace(/\D/g, ''))}
+              />
+              <Field
+                label={ops.target.weeksMax}
+                inputMode="numeric"
+                maxLength={3}
+                value={weeksMax}
+                disabled={!draft}
+                aria-invalid={!weeksOk || undefined}
+                onChange={(e) => setWeeksMax(e.target.value.replace(/\D/g, ''))}
+              />
             </div>
             <span className={weeksOk ? 'hg-help' : 'hg-help is-error'}>
               {weeksOk ? ops.target.weeksHelp : ops.target.badWeeks}

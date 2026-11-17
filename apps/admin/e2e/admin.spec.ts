@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Locator, type Page, type Route } from '@playwright/test';
 import { axe as runAxe } from './axe';
 
 // 어드민(27 어드민 화면): 매직 링크 + 인증 앱, 대시보드, 회원 검색·상세(L0·L1), 문의 답변·동의 요청, 감사 로그, 문서.
@@ -51,6 +51,16 @@ const axe = async (page: Page) => {
 };
 const heading = (page: Page, name: string | RegExp) =>
   expect(page.getByRole('heading', { name }).first()).toBeVisible();
+// 고르기 칸(Select, 2026-11-17 브라우저 기본 select 대신): 칸을 눌러 열고 항목을 누름
+const choose = async (scope: Locator, label: string, option: string) => {
+  await scope.getByRole('combobox', { name: label }).click();
+  await scope.getByRole('option', { name: option, exact: true }).click();
+};
+// 날짜 칸(DatePicker): “2026-10-20T14:00” → 날짜 “2026.10.20” + 시각 “14:00”을 직접 침
+const typeDate = async (scope: Locator, label: string, v: string) => {
+  await scope.getByLabel(label, { exact: true }).fill(v.slice(0, 10).replace(/-/g, '.'));
+  if (v.length > 10) await scope.getByLabel(`${label} 시각`, { exact: true }).fill(v.slice(11, 16));
+};
 
 interface Db {
   rpc: { fn: string; body: Record<string, unknown> }[];
@@ -827,7 +837,7 @@ test('문의 처리: 탭, 오래된 문의 강조, 답변 보내면 사용자 �
 
   // 금액 원값: 화면 1개만, 최고 관리자 승인 요청
   await ask.getByRole('button', { name: '월급 화면' }).click();
-  await ask.getByLabel('금액 원값 요청').check();
+  await ask.getByRole('checkbox', { name: '금액 원값 요청' }).check();
   await expect(ask.getByText('최고 관리자 승인 후 요청', { exact: false })).toBeVisible();
   await ask.getByLabel('사유').fill('목표 금액 확인');
   await ask.getByRole('button', { name: '동의 요청 보내기' }).click();
@@ -893,7 +903,7 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
   await heading(page, '회원 상세');
   await page.getByRole('button', { name: '계정 조치' }).click();
   const form = page.getByRole('region', { name: '계정 조치' });
-  await form.getByLabel('계정 조치').selectOption('delete_request');
+  await choose(form, '계정 조치', '삭제 대리 접수');
   await form.getByLabel('문의 번호').fill('A-10001');
   await form.getByRole('button', { name: '실행' }).click();
   const dialog = page.getByRole('alertdialog');
@@ -906,7 +916,7 @@ test('계정 조치(AD-05): 삭제 대리 접수는 확인 뒤 바로, 로그인
     p_inquiry_no: 'A-10001',
   });
 
-  await form.getByLabel('계정 조치').selectOption('login_move');
+  await choose(form, '계정 조치', '로그인 수단 이전');
   const go = form.getByRole('button', { name: '승인 요청' });
   await expect(go).toBeDisabled();
   await form.getByLabel('새 계정 이메일 또는 사용자 ID').fill('nobody@example.com');
@@ -969,10 +979,10 @@ test('공지(운영): 초안 저장, 승인 요청, 밤 시간 안내 없이 저
   await heading(page, '공지');
   await page.getByRole('button', { name: '새 공지' }).click();
   const form = page.getByRole('region', { name: '새 공지' });
-  await form.getByLabel('종류').selectOption('maintenance');
+  await choose(form, '종류', '점검');
   await form.getByLabel('제목').fill('저장 기능 점검');
-  await form.getByLabel('시작').fill('2026-10-20T14:00');
-  await form.getByLabel('끝').fill('2026-10-20T16:00');
+  await typeDate(form, '시작', '2026-10-20T14:00');
+  await typeDate(form, '끝', '2026-10-20T16:00');
   await expect(form.getByRole('button', { name: '필독' })).toBeVisible();
   await axe(page);
   await form.getByRole('button', { name: '승인 요청' }).click();
@@ -1000,11 +1010,11 @@ test('공지 대상(AD-10 2·4·6번): 조건 바꾸면 대상 수 다시 셈, 0
   await page.getByRole('button', { name: '새 공지' }).click();
   const form = page.getByRole('region', { name: '새 공지' });
   const target = page.getByRole('region', { name: '대상', exact: true });
-  await form.getByLabel('종류').selectOption('maintenance');
+  await choose(form, '종류', '점검');
   await form.getByLabel('제목').fill('새 버전으로 업데이트해 주세요');
   await form.getByLabel('내용').fill('1.4.0부터 저장이 빨라져요');
-  await form.getByLabel('시작').fill('2026-10-20T14:00');
-  await form.getByLabel('끝').fill('2026-10-20T16:00');
+  await typeDate(form, '시작', '2026-10-20T14:00');
+  await typeDate(form, '끝', '2026-10-20T16:00');
   const counts = target.getByRole('group', { name: '대상 수' });
   await expect(counts).toContainText('3,214명');
   await target.getByLabel('이 버전보다 낮은 앱만').fill('1.4');
@@ -1050,10 +1060,10 @@ test('공지 메일(AD-10): 약관 개정·장애 고지만 ‘이메일로도 �
   await page.getByRole('button', { name: '새 공지' }).click();
   const form = page.getByRole('region', { name: '새 공지' });
   await expect(form.getByRole('switch', { name: '이메일로도 보내기' })).toHaveCount(0);
-  await form.getByLabel('종류').selectOption('terms');
+  await choose(form, '종류', '약관 개정');
   await form.getByLabel('제목').fill('이용약관이 바뀌어요');
-  await form.getByLabel('시작', { exact: true }).fill('2026-10-20T10:00');
-  await form.getByLabel('끝', { exact: true }).fill('2026-11-20T10:00');
+  await typeDate(form, '시작', '2026-10-20T10:00');
+  await typeDate(form, '끝', '2026-11-20T10:00');
   const mail = form.getByRole('switch', { name: '이메일로도 보내기' });
   await mail.click();
   await expect(mail).toBeChecked();
@@ -1090,7 +1100,7 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
   const add = page.getByRole('region', { name: '버전 추가' });
   await add.getByLabel('버전').fill('v2');
   await expect(add.getByRole('button', { name: '승인 요청' })).toBeDisabled();
-  await add.getByLabel('법률 검토 확인').check();
+  await add.getByRole('checkbox', { name: '법률 검토 확인' }).check();
   await add.getByRole('button', { name: '승인 요청' }).click();
   await expect(page.getByText('승인 요청됨')).toBeVisible();
   await page.getByRole('tab', { name: '계산·기준 데이터' }).click();
@@ -1103,8 +1113,8 @@ test('콘텐츠: 가이드 버전, 약관 버전(법률 검토 체크해야 요�
 
   // AD-19 항목 이름 목록: 새 칩은 기본 항목을 따름, 기본 항목은 숨김
   const kinds = page.getByRole('region', { name: '칩 추가' });
-  await kinds.getByLabel('종류').selectOption({ label: '예금·적금' });
-  await kinds.getByLabel('따르는 항목').selectOption({ label: '정책형 적금' });
+  await choose(kinds, '종류', '예금·적금');
+  await choose(kinds, '따르는 항목', '정책형 적금');
   await kinds.getByLabel('이름').fill('청년도약계좌');
   await kinds.getByRole('button', { name: '칩 추가' }).click();
   await expect(page.getByRole('row', { name: /청년도약계좌/ })).toContainText('정책형 적금');
@@ -1288,4 +1298,65 @@ test('AD-21 분석: CS는 메뉴 없음, 주소로 가도 권한 없음', async 
   await expect(page.getByRole('navigation').getByText('분석', { exact: true })).toHaveCount(0);
   await page.goto('/analytics');
   await heading(page, '권한 없음');
+});
+
+test('어드민 컨트롤(2026-11-17): 고르기와 날짜를 키보드만으로, 열린 목록·달력도 axe', async ({
+  page,
+}) => {
+  const db = await mock(page, { roles: ['super'] });
+  await page.goto('/system/audit');
+  await heading(page, '감사 로그');
+  // 고르기: ↓로 열고 옮기고 Enter, Esc는 값 그대로 닫음
+  const action = page.getByRole('combobox', { name: '동작' });
+  await expect(action).toHaveText('전체');
+  await action.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(action).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByRole('listbox', { name: '동작' })).toBeVisible();
+  await axe(page);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(action).toHaveText('검색');
+  await expect(action).toHaveAttribute('aria-expanded', 'false');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Escape');
+  await expect(action).toHaveText('검색');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+
+  // 날짜: 직접 입력(숫자만 쳐도 됨), 칸을 떠나면 “2026.10.01”로
+  const from = page.getByLabel('시작일', { exact: true });
+  await from.fill('20261001');
+  await from.press('Tab');
+  await expect(from).toHaveValue('2026.10.01');
+  // 없는 날짜는 오류 표시
+  const to = page.getByLabel('끝일', { exact: true });
+  await to.fill('2026.02.30');
+  await to.press('Tab');
+  await expect(to).toHaveAttribute('aria-invalid', 'true');
+  await to.fill('');
+  // 달력: 열면 오늘(KST)에 포커스, →로 하루 뒤, Enter로 고름
+  await page.getByRole('button', { name: '끝일 달력 열기' }).click();
+  await expect(page.getByRole('dialog', { name: '끝일' })).toBeVisible();
+  const kst = (n: number) =>
+    new Date(Date.now() + 9 * 3_600_000 + n * 86_400_000).toISOString().slice(0, 10);
+  await expect(page.locator(`[data-day="${kst(0)}"]`)).toBeFocused();
+  await axe(page);
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(to).toHaveValue(kst(1).replace(/-/g, '.'));
+  // Esc로 닫으면 달력 버튼으로 포커스가 돌아옴
+  await page.getByRole('button', { name: '끝일 달력 열기' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: '끝일 달력 열기' })).toBeFocused();
+
+  await page.getByRole('button', { name: '보기' }).click();
+  await expect
+    .poll(() => db.rpc.filter((r) => r.fn === 'admin_audit_rows').at(-1)?.body)
+    .toEqual({
+      p_action: 'search',
+      p_from: '2026-10-01T00:00:00+09:00',
+      p_to: `${kst(1)}T24:00:00+09:00`,
+    });
 });

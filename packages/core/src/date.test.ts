@@ -1,5 +1,13 @@
 import { expect, test } from 'vitest';
-import { formatDot2, formatKstDateTime, formatKstMonthDayTime, hoursBetween } from './date';
+import {
+  formatDateDot,
+  parseDateDot,
+  parseTimeText,
+  formatDot2,
+  formatKstDateTime,
+  formatKstMonthDayTime,
+  hoursBetween,
+} from './date';
 import * as dt from './date';
 
 test('어드민 시각은 KST', () => {
@@ -31,4 +39,16 @@ test('서버 시각의 KST 날짜(S6-10): UTC 전날 15시 이후는 KST 다음 
 test('formatDayWeekday: 일 + 요일', () => {
   expect(dt.formatDayWeekday('2026-12-24')).toBe('24일 목요일');
   expect(dt.formatDayWeekday('2026-10-11')).toBe('11일 일요일');
+});
+
+test('formatDateDot·parseDateDot·parseTimeText: 어드민 날짜 칸', () => {
+  expect(formatDateDot('2026-11-25')).toBe('2026.11.25');
+  expect(parseDateDot('2026.11.25')).toBe('2026-11-25');
+  expect(parseDateDot('20261125')).toBe('2026-11-25');
+  expect(parseDateDot('2026-1-5')).toBe('2026-01-05');
+  expect(parseDateDot('2026.02.30')).toBeNull();
+  expect(parseDateDot('11.25')).toBeNull();
+  expect(parseTimeText('1400')).toBe('14:00');
+  expect(parseTimeText('9:05')).toBe('09:05');
+  expect(parseTimeText('24:00')).toBeNull();
 });

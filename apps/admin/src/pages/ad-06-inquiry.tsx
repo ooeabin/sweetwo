@@ -7,7 +7,7 @@ import {
   type InquiryStatus,
 } from '@sweetwo/api';
 import { ACCESS_SCOPES, formatKstDateTime } from '@sweetwo/core';
-import { Chip, Status } from '@sweetwo/ui';
+import { Checkbox, Chip, Field, Select, Status, Textarea } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -95,30 +95,22 @@ export function AD06Inquiry() {
           </ol>
           {cs && (
             <section className="hg-card hg-stack" aria-label={copy.answer}>
-              <label className="hg-field">
-                <span className="hg-field__label">{copy.answer}</span>
-                <textarea
-                  className="hg-input"
-                  rows={6}
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  maxLength={4000}
-                />
-              </label>
+              <Textarea
+                label={copy.answer}
+                rows={6}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={4000}
+              />
               <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                <select
-                  className="hg-input"
-                  aria-label={copy.statusLabel}
+                <Select<InquiryStatus>
+                  label={copy.statusLabel}
+                  hideLabel
+                  width={160}
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as InquiryStatus)}
-                  style={{ width: 'auto' }}
-                >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {copy.statuses[s]}
-                    </option>
-                  ))}
-                </select>
+                  options={STATUSES.map((s) => ({ value: s, label: copy.statuses[s] ?? s }))}
+                  onChange={setStatus}
+                />
                 <span style={{ flex: 1 }} />
                 {d.status === 'received' && (
                   <Button
@@ -252,15 +244,9 @@ function AccessForm({ inquiryId, onDone }: { inquiryId: string; onDone: () => vo
           </Chip>
         ))}
       </div>
-      <label className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        <input type="checkbox" checked={raw} onChange={(e) => setRaw(e.target.checked)} />
-        {copy.raw}
-      </label>
+      <Checkbox label={copy.raw} checked={raw} onChange={setRaw} />
       {raw && <p className="hg-help">{copy.rawHelp}</p>}
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.l1Reason}</span>
-        <input className="hg-input" value={reason} onChange={(e) => setReason(e.target.value)} />
-      </label>
+      <Field label={copy.l1Reason} value={reason} onChange={(e) => setReason(e.target.value)} />
       <Button
         variant="primary"
         aria-busy={busy}

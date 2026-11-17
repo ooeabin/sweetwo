@@ -8,7 +8,7 @@ import {
   type AdminUserRow,
 } from '@sweetwo/api';
 import { formatKstDateTime, type AdminRole } from '@sweetwo/core';
-import { Chip, DataTable, Status } from '@sweetwo/ui';
+import { Chip, DataTable, Field, Status, Textarea } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Button } from '../act';
@@ -142,23 +142,17 @@ export function AD18Admins() {
         <div className="hg-admin__col">
           <section className="hg-card hg-stack" aria-label={ops.addAdmin}>
             <span className="hg-card__label">{ops.addAdmin}</span>
-            <label className="hg-field">
-              <span className="hg-field__label">{ops.adminCols.email}</span>
-              <input
-                className="hg-input"
-                type="email"
-                value={f.email}
-                onChange={(e) => setF({ ...f, email: e.target.value })}
-              />
-            </label>
-            <label className="hg-field">
-              <span className="hg-field__label">{ops.adminCols.name}</span>
-              <input
-                className="hg-input"
-                value={f.name}
-                onChange={(e) => setF({ ...f, name: e.target.value })}
-              />
-            </label>
+            <Field
+              label={ops.adminCols.email}
+              type="email"
+              value={f.email}
+              onChange={(e) => setF({ ...f, email: e.target.value })}
+            />
+            <Field
+              label={ops.adminCols.name}
+              value={f.name}
+              onChange={(e) => setF({ ...f, name: e.target.value })}
+            />
             <div
               className="hg-row"
               style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
@@ -180,15 +174,12 @@ export function AD18Admins() {
             </Button>
           </section>
           <section className="hg-card hg-stack" aria-label={ops.review}>
-            <label className="hg-field">
-              <span className="hg-field__label">{ops.reviewNote}</span>
-              <textarea
-                className="hg-input"
-                rows={3}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-            </label>
+            <Textarea
+              label={ops.reviewNote}
+              rows={3}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
             <Button
               variant="secondary"
               disabled={!note.trim()}

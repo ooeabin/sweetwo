@@ -72,6 +72,8 @@ export * from './components/ReceiptCard';
 export * from './components/question';
 export * from './components/AdminFrame';
 export * from './components/DataTable';
+export * from './components/Select';
+export * from './components/DatePicker';
 export * from './components/CommandPalette';
 export { ArtPick } from './components/ArtPick';
 export { goalPhotoArt } from './components/preset-art';
