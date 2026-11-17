@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
+import { homeTaskTexts } from './home-tasks';
 import { chanwoo, mockOnboarding, seed } from './mocks';
 
 // 앱 기본 틀(19): ⌘K 검색 화면(바로 하기, 저금 항목 찾기), Ctrl+1~4 탭, Ctrl+N·‘추가’ 메뉴, 좁은 창 + 버튼,
@@ -166,7 +167,7 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
   await expect(
     page.getByRole('link', { name: '월급', exact: true }).locator('visible=true'),
   ).toHaveCount(0);
-  await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toBeVisible();
+  expect(await homeTaskTexts(page)).toContain('같이 모을 사람을 초대해 보세요');
   await axe(page);
 
   // 다른 메뉴 첫 화면: ‹(홈으로) + 머리 제목 h1, 워드마크·알림·메뉴 없음, ‹ → 홈

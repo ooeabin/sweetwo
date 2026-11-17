@@ -15,7 +15,7 @@ type Line = { kind: string; state: string; goal_id: string | null };
 
 // 2026-11-13 묶음 ‘모두 계획대로 했어요’(3a)는 없앰: 주 버튼 “모두 계획대로 됐어요”가 대신(home.spec.ts)
 
-test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
+test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 월급 상자 ‘저축·투자’ 줄(H-15)에서 열림, 목표 금액 없는 저금, 그만 모은 저금', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -57,9 +57,9 @@ test('W-13 저금 목록: W-02 저금 묶음 머리, 홈 저금 타일(H-09)에�
   ).toBeVisible();
   await expect(page.getByRole('button', { name: '저축·투자 목록 보기' })).toHaveCount(0);
 
-  // 2026-11-09 홈 허브: 저금 타일(H-09) → W-13
+  // 2026-11-17 홈 월급 상자 ‘저축·투자’ 줄(H-15, 예전 저금 타일 H-09) → W-13
   await page.goto('/');
-  await page.getByRole('button', { name: /^저축·투자 (\d|아직)/ }).click();
+  await page.getByRole('button', { name: /^저축·투자, \d+개 모으는 중/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\?from=home$/);
   await expect(page.getByRole('heading', { name: '저축·투자' })).toBeVisible();
 });
@@ -174,7 +174,7 @@ test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초�
   db.me.onboarding_done_at = '2026-09-01T01:00:00Z';
   await page.goto('/');
   await expect(page.getByText('무엇을 같이 모을지 정해 볼까요?')).toHaveCount(0);
-  await expect(page.locator('.hg-hubband')).toContainText('같이 모을 사람을 초대해 보세요');
+  expect(await homeTaskTexts(page)).toContain('같이 모을 사람을 초대해 보세요');
 });
 
 test('S-11f 저장 전 미리보기 한 줄: 각자 → 합쳐서는 상대 ‘좋아요’ 안내, 합쳐서 → 각자는 “{다음 시작일}부터 체크리스트가 …”', async ({

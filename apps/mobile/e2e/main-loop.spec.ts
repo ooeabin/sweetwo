@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, mockOnboarding, mockSaving, newSavingDb, seed, YEBIN } from './mocks';
+import { homeTask, homeTaskTexts } from './home-tasks';
 
 // v2.2 큰 흐름 한 번(ADR 0009, 2026-11-13 PR 14): 찬우·예빈 두 계정이 같은 흉내 표를 나눠 씀.
 // 첫 저금이 있는 찬우(온보딩 끝) → 초대 코드 → 예빈 합류(‘저금만 같이 해요’, 합류 화면 자체는 join-replan.spec) →
@@ -42,8 +43,8 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   // 1. 찬우 홈: 첫 저금(H-10) + 초대 띠 → 초대 코드
   await c.goto('/');
   await expect(c.locator('.hg-together').getByText('내 집 마련').first()).toBeVisible();
-  await expect(c.locator('.hg-hubband')).toContainText('같이 모을 사람을 초대해 보세요');
-  await c.locator('.hg-hubband').getByText('초대하기').click();
+  expect(await homeTaskTexts(c)).toContain('같이 모을 사람을 초대해 보세요');
+  await (await homeTask(c, '같이 모을 사람을 초대해 보세요')).click();
   await expect(c).toHaveURL(/\/settings\/couple/);
   // 띠 ‘초대하기’ = S-12 코드 상자를 바로 엶(?invite=1)
   await expect(c.getByRole('button', { name: /초대 코드 K 7 M 2 Q X/ })).toContainText('K7M2QX');

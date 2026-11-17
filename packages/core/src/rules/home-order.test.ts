@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { heroZero, homeOrder, monthLineUrgent, type HeroGoal, type HeroItem } from './home';
+import {
+  heroZero,
+  homeOrder,
+  monthCheck,
+  monthLineUrgent,
+  type HeroGoal,
+  type HeroItem,
+} from './home';
 import type { BundleView } from './saving-bundle';
 
-// 19 ‘홈 순서’(2026-11-15 3차 검토). 찬우(시작한 사람) 홈
+// 19 ‘홈 순서’(2026-11-17 메뉴 서랍과 같은 이름·순서). 찬우(시작한 사람) 홈
 const goal = (saved: number): HeroItem => ({
   kind: 'goal',
   goal: {
@@ -109,47 +116,61 @@ describe('heroZero: H-10 첫 칸이 0원', () => {
   });
 });
 
-describe('homeOrder', () => {
-  it('할 일이 없고 돈이 있으면 띠·H-14 → H-10 → H-11', () => {
-    expect(homeOrder({ urgent: false, heroZero: false })).toEqual([
-      'tasks',
-      'month_us',
-      'hero',
-      'month',
-      'tiles',
-      'wedding',
-      'small',
-    ]);
+describe('monthCheck: 할 일 띠 5b 재료', () => {
+  it('월급날 당일·월급날 뒤·확인 목록 기간에 손 줄이 남으면 그 종류와 수', () => {
+    expect(
+      monthCheck({ kind: 'payday', cycleStart: '2026-11-25', left: 1, late: 0, to: '/salary' }),
+    ).toEqual({ kind: 'payday', left: 1, late: 0, cycleStart: '2026-11-25', to: '/salary' });
+    expect(
+      monthCheck({ kind: 'left', cycleStart: '2026-11-25', left: 2, late: 1, to: '/salary' }),
+    ).toEqual({ kind: 'left', left: 2, late: 1, cycleStart: '2026-11-25', to: '/salary' });
+    expect(
+      monthCheck({ kind: 'review', cycleStart: '2026-11-25', left: 1, late: 0, to: '/salary' })
+        ?.kind,
+    ).toBe('review');
   });
-  it('월급날 확인이 남으면 H-11이 맨 위, 띠, H-14, 그다음 H-10', () => {
-    expect(homeOrder({ urgent: true, heroZero: false })).toEqual([
-      'month',
-      'tasks',
-      'month_us',
-      'hero',
-      'tiles',
-      'wedding',
-      'small',
-    ]);
+  it('손 줄은 없고 지난 달 늦은 확인만 남으면 late, 이동은 지난 달', () => {
+    expect(
+      monthCheck({
+        kind: 'done',
+        cycleStart: '2026-10-25',
+        finish: 'all',
+        nextPayday: '2026-11-25',
+        daysLeft: 3,
+        late: 2,
+        to: '/salary?cycle=last',
+      }),
+    ).toEqual({
+      kind: 'late',
+      left: 0,
+      late: 2,
+      cycleStart: '2026-10-25',
+      to: '/salary?cycle=last',
+    });
   });
-  it('0원 같이 모으기는 반 칸 타일 아래로', () => {
-    expect(homeOrder({ urgent: true, heroZero: true })).toEqual([
-      'month',
-      'tasks',
-      'month_us',
-      'tiles',
-      'hero',
-      'wedding',
-      'small',
-    ]);
-    expect(homeOrder({ urgent: false, heroZero: true })).toEqual([
-      'tasks',
-      'month_us',
-      'month',
-      'tiles',
-      'hero',
-      'wedding',
-      'small',
-    ]);
+  it('확인할 것이 없으면 null', () => {
+    expect(
+      monthCheck({
+        kind: 'auto_only',
+        cycleStart: '2026-11-25',
+        next: null,
+        late: 0,
+        to: '/salary',
+      }),
+    ).toBeNull();
+    expect(monthCheck({ kind: 'first', date: '2026-11-25', to: '/salary?view=plan' })).toBeNull();
+  });
+});
+
+describe('homeOrder(2026-11-17)', () => {
+  it('띠 → 같이 모으기 → 결혼 준비 → 월급 상자 → 반 칸 타일 둘', () => {
+    expect(homeOrder({ heroZero: false })).toEqual(['tasks', 'hero', 'wedding', 'salary', 'tiles']);
+  });
+  it('0원 같이 모으기는 월급 상자 아래, 결혼 준비는 그래도 같이 모으기 바로 아래', () => {
+    expect(homeOrder({ heroZero: true })).toEqual(['tasks', 'salary', 'hero', 'wedding', 'tiles']);
+  });
+  it('H-11·H-14·큰 반 칸 타일(월급 계획)·저금 타일은 홈 블록에 없음', () => {
+    const all = [...homeOrder({ heroZero: false }), ...homeOrder({ heroZero: true })] as string[];
+    for (const gone of ['month', 'month_us', 'small']) expect(all).not.toContain(gone);
   });
 });

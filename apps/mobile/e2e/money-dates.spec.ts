@@ -54,6 +54,9 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   seed(db);
   // 월급 전 확인·초대 할 일이 앞에 오지 않게
   Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  // 월급날 확인 띠(5b)가 앞에 오지 않게 확인 목록은 다 끝낸 상태
+  for (const l of (db.checklists[0]?.pay_check_line ?? []) as Record<string, unknown>[])
+    l.state = 'checked';
   seedAssets(db);
   await page.goto('/');
   const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
@@ -74,6 +77,9 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  // 월급날 확인 띠(5b)가 앞에 오지 않게 확인 목록은 다 끝낸 상태
+  for (const l of (db.checklists[0]?.pay_check_line ?? []) as Record<string, unknown>[])
+    l.state = 'checked';
   seedAssets(db);
   await page.goto('/assets/a-sav/matured');
   await page.getByRole('radio', { name: /다시 가입했어요/ }).click();
@@ -179,6 +185,9 @@ test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지�
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  // 월급날 확인 띠(5b)가 앞에 오지 않게 확인 목록은 다 끝낸 상태
+  for (const l of (db.checklists[0]?.pay_check_line ?? []) as Record<string, unknown>[])
+    l.state = 'checked';
   seedAssets(db);
   const sav = db.assets.find((a) => a.id === 'a-sav');
   // 오늘(10월 7일)은 만기일 다음 31일째. 상세 화면은 만든 날·고친 날도 씀

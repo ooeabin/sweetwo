@@ -98,14 +98,14 @@ export const copy = {
   taskWaiting: (name: string | null) =>
     `${name ? `${name}님이` : '파트너가'} 기다리고 있어요. 월급 계획을 마저 만들어 볼까요?`,
   inviteNow: '초대하기',
+  // 띠 5b 월급날 확인(2026-11-17): 문장은 위 monthPayday·monthReview·lateLeft, 이동 글자는 goCheck
 
-  // H-07 월급 계획 타일, H-08 캘린더 타일
-  planTile: '월급 계획',
+  // H-15 월급 상자 ‘월급 계획 템플릿’ 줄 값(예전 H-07 타일 내용), H-08 캘린더 타일
   everyMonth: (day: string) => `매달 ${day}`,
   payday: (d: number) => `${d}일`,
   paydayLast: '말일',
   noPaydayTile: '수입이 들어올 때', // 2026-11-13 날짜 없음
-  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`, // 2026-11-13 H-07
+  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
   noCare: '다가오는 일정이 없어요',
@@ -138,22 +138,22 @@ export const copy = {
   mailBouncedSub: '알림 이메일 주소를 확인해 주세요',
   mailCheck: '확인하기', // [확인 필요]
 
-  // H-14 이번 달 우리 둘(3차 검토 D3, 2026-11-15) [확인 필요]
-  monthUsTitle: '이번 달 우리 둘',
-  monthUsClose: '닫기',
-  monthUsSaving: '모은 금액', // 했어요만 공개(개수만)일 때 줄 이름
-  // 2026-11-16 4차 검토: 줄 이름을 첫 카드와 그 뒤 카드로 나눔 [확인 필요]
-  monthUsSavingFirst: '지금까지 모은 금액', // [확인 필요]
-  monthUsSavingDelta: '지난달보다', // [확인 필요]
-  monthUsFirst: (total: string) => total,
-  monthUsUp: (amount: string) => `+${amount}`,
-  monthUsDown: (amount: string) => `−${amount}`,
-  monthUsSame: '그대로예요', // [확인 필요] 2026-11-16 줄 이름 ‘지난달보다’ 옆
-  monthUsHidden: (n: number) => `저축·투자 ${n}개 모으는 중`,
-  monthUsCare: '다가올 경조사·기념일',
-  monthUsCareOne: (name: string, date: string) => `${name} ${date}`,
-  monthUsCareMore: (first: string, more: number) => `${first} 외 ${more}개`,
-  monthUsCareNone: '한 달 안에는 없어요',
-  /** 2026-11-16 4차 검토 R4-3: ‘내 용돈’이 남은 돈처럼 읽혀 계획 줄임을 드러냄 [확인 필요] */
-  monthUsAllowance: '용돈 계획',
+  // H-15 월급 상자(2026-11-17, 메뉴 서랍과 같은 이름·순서) [모두 확인 필요]. 줄 이름은 서랍 하위 줄과 똑같이
+  salaryBox: '월급',
+  rowMonth: '이번 달 월급 체크',
+  rowPlan: '월급 계획 템플릿',
+  // 이번 달 월급 체크 값(H-11 상태를 짧게 줄인 것)
+  leftShort: (n: number) => `${n}개 남음`,
+  lateShort: (n: number) => `지난달 ${n}개 남음`,
+  doneShort: (kind: 'all' | 'mixed') => (kind === 'all' ? '계획대로 됐어요' : '확인을 마쳤어요'),
+  autoShort: '자동으로 나가요',
+  firstShort: (date: string | null) => (date ? `${formatMonthDay(date)}부터` : '첫 월급날부터'),
+  noSalaryShort: '월급 알려 주기',
+  nonManagerShort: '자동으로 정해져요',
+  // 날짜 없는 사람(H-13 기간)을 이 줄에 담음
+  periodNoneShort: '수입 적기',
+  periodEarlyShort: (won: string) => `수입 ${won}`,
+  periodBarShort: (inn: string, need: string) => `${inn} / ${need}`,
+  periodBarSub: '수입 / 월급 계획',
+  periodGapShort: (n: number) => `마지막 수입 ${n}일 전`,
 };

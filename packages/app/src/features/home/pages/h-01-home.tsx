@@ -11,8 +11,7 @@ import {
   lineIsMine,
   heroZero,
   homeOrder,
-  monthLineUrgent,
-  monthUsShown,
+  monthCheck,
   pickHeroes,
   pickMonthLine,
   pickTopBanner,
@@ -80,7 +79,6 @@ import {
   useModeRequest,
   useRankRequest,
   useMoneyInPeriod,
-  useMonthUs,
   usePartner,
   usePreviousChecklist,
   useSalaryChanges,
@@ -90,14 +88,14 @@ import {
 } from '../data';
 import { H10SaveTogether } from './h-10-save-together';
 import { useWidgetSync, widgetNext, widgetSave } from '../widget-sync';
-import { H11MonthLine } from './h-11-month-line';
 import { H12Wedding } from './h-12-wedding';
-import { H14MonthUs } from './h-14-month-us';
+import { H15SalaryBox } from './h-15-salary-box';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009 결정 1): 회색 바탕 위 흰 상자.
-// 좁은 창(2026-11-15 3차 검토 순서, core homeOrder): (H-11이 확인할 것을 말하면 H-11) → H-06 할 일 띠 → H-14 이번 달 우리 둘
-// → H-10 같이 모으기(0원이면 반 칸 타일 아래) → H-11 → H-07 월급 계획·H-08 캘린더 → H-12 결혼 준비 → H-04 자산 관리·H-09 저금.
-// 넓은 창(1100px 이상 4열)은 CSS 격자가 띠를 맨 위, H-10을 두 칸 두 줄로(HomeHub v2.2). H-02·H-03은 없앰.
+// 좁은 창(2026-11-17, 메뉴 서랍과 같은 이름·순서, core homeOrder): H-06 할 일 띠(월급날 확인할 게 있으면 5b 띠) → H-10 같이 모으기
+// (결혼 준비 중이면 바로 아래 H-12) → H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿·저축·투자, H-10이 0원이면 H-10 위)
+// → 반 칸 타일 둘 H-04 자산 관리(오렌지 포인트 상자)·H-08 캘린더. H-02·H-03·H-07·H-09·H-11·H-13·H-14는 홈에서 없앰.
+// 넓은 창(1100px 이상 4열)은 CSS 격자가 띠를 맨 위, H-10을 두 칸 두 줄로, 월급 상자 두 칸(HomeHub v2.2).
 // 본문 맨 위 띠(해제 대기, 공지, 메일 반송)는 하나만(core pickTopBanner). 상대가 바꾸면 Realtime으로 바로 다시 읽음.
 
 type Box = Extract<AnalyticsEvent, { name: 'home_box_tapped' }>['props']['box'];
@@ -125,8 +123,6 @@ export function H01Home() {
   const bundles = useBundles(!!sp && !joint);
   const tasks = useHomeTasks();
   const period = useMoneyInPeriod(today, paydayNone);
-  // H-14 이번 달 우리 둘(3차 검토 D3): 연결된 공간에서만 서버 카드
-  const monthUs = useMonthUs(sp?.couple_state === 'connected');
   const modeReq = useModeRequest(joined);
   const rankReq = useRankRequest(joined);
   const accounts = useSharedAccounts(joined);
@@ -273,7 +269,7 @@ export function H01Home() {
   );
   const closed = tasks.data ?? [];
 
-  // ── H-11 이번 달 한 줄(core pickMonthLine) ──
+  // ── 이번 달 월급 체크 값(core pickMonthLine, H-15 첫 줄과 할 일 띠 5b가 같이 씀) ──
   const noSalary = joint
     ? !me.data.monthly_income && !partner.data?.monthly_income
     : !me.data.monthly_income;
@@ -374,6 +370,7 @@ export function H01Home() {
         joint,
         unlinkRequestedBy: h.input.unlinkRequestedBy,
         reconnectFrom: h.input.reconnectFrom,
+        monthCheck: monthCheck(monthLine),
         modeRequest: modeReq.data
           ? {
               id: modeReq.data.id,
@@ -485,6 +482,12 @@ export function H01Home() {
         return copy.taskRank(partnerName);
       case 'asset_share':
         return copy.taskAssetShare(partnerName);
+      case 'month_check':
+        return x.check.kind === 'payday'
+          ? copy.monthPayday(x.check.left)
+          : x.check.kind === 'late'
+            ? copy.lateLeft(x.check.late)
+            : copy.monthReview(shownPayday(x.check.cycleStart), x.check.left);
       case 'salary_changed':
         return copy.taskSalaryChanged;
       case 'first_saving':
@@ -548,7 +551,9 @@ export function H01Home() {
           ? copy.inviteNow
           : t.kind === 'split_suggest'
             ? copy.taskSplitGo
-            : undefined
+            : t.kind === 'month_check'
+              ? copy.goCheck
+              : undefined
       }
       onClick={() => void tapTask(t)}
       secondary={
@@ -722,7 +727,7 @@ export function H01Home() {
     />
   );
 
-  // ── H-07 월급 계획 타일: 매달 며칠 + 여유 자금 ──
+  // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 매달 며칠 + 아직 안 정한 월급, 모자라면 “30만 원이 모자라요” ──
   const dayOf = (u: { payday: number | null; payday_last: boolean }) =>
     u.payday_last ? copy.paydayLast : u.payday ? copy.payday(u.payday) : null;
   const jointDay = sp.joint_cycle_day;
@@ -737,59 +742,24 @@ export function H01Home() {
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
   const left = mySplit ? leftover(income, mySplit.split_line) : null;
-  const leftText =
-    left === null ? undefined : left >= 0 ? copy.leftover(m(left)) : copy.short(m(-left));
+  const plan =
+    left !== null && left < 0
+      ? { value: copy.short(m(-left)), sub: planDay }
+      : { value: planDay, sub: left === null ? undefined : copy.leftover(m(left)) };
 
   // ── H-08 캘린더 타일: 가장 가까운 일정(캘린더 목록과 같은 재료, 월급날 포함, 2026-11-15 3차 검토) ──
   const nx = cal.loading || cal.failed ? null : nextSchedule(cal);
   const near = nx ? { name: nx.label, dday: daysBetween(today, nx.date) } : null;
 
-  // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔), H-09 저금 ──
+  // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔) ──
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
   const rankPct = rank?.homeBadge ?? null;
 
-  // 홈 순서(19 ‘홈 순서’, 2026-11-15 3차 검토, core homeOrder): 할 일 띠는 H-10 위, H-11이 확인할 것을 말하면 맨 위,
-  // 0원 같이 모으기는 반 칸 타일 아래. H-14 이번 달 우리 둘은 띠 바로 아래
-  const order = homeOrder({
-    urgent: monthLineUrgent(monthLine),
-    heroZero: !heroFailed && heroZero(heroes, !!inviteGoal),
-  });
+  // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10(0원이면 월급 상자 아래) → H-12 → H-15 월급 상자 → 반 칸 타일 둘
+  const order = homeOrder({ heroZero: !heroFailed && heroZero(heroes, !!inviteGoal) });
   const blocks: Record<HomeBlock, ReactNode> = {
     tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
-    month: (
-      <H11MonthLine
-        key="month"
-        line={monthLine}
-        go={(to) => go('month_line', to)}
-        onRetry={() => {
-          track('home_box_tapped', { box: 'retry' });
-          void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
-          void qc.invalidateQueries({ queryKey: qk.splits });
-        }}
-      />
-    ),
-    // 보여 줄 만한 줄이 2개 이상일 때만(2026-11-16 4차 검토, core monthUsShown)
-    month_us:
-      monthUs.data && monthUsShown(monthUs.data) ? (
-        <H14MonthUs key="month_us" card={monthUs.data} money={m} go={(to) => go('month_us', to)} />
-      ) : null,
     hero: <Fragment key="hero">{hero}</Fragment>,
-    tiles: (
-      <Fragment key="tiles">
-        <HubTile
-          title={copy.planTile}
-          sub={planDay}
-          sub2={leftText}
-          point
-          onClick={() => go('plan', '/salary?view=plan')}
-        />
-        <HubTile
-          title={copy.calendarTile}
-          sub={near ? `${near.name} ${copy.ddayShort(near.dday)}` : copy.noCare}
-          onClick={() => go('calendar', '/calendar')}
-        />
-      </Fragment>
-    ),
     wedding: engaged ? (
       <H12Wedding
         key="wedding"
@@ -807,10 +777,25 @@ export function H01Home() {
         }
       />
     ) : null,
-    small: (
-      <Fragment key="small">
+    salary: (
+      <H15SalaryBox
+        key="salary"
+        line={monthLine}
+        won={m}
+        plan={plan}
+        savings={{ count: sums.count, total: m(sums.total) }}
+        go={(box, to) => go(box, to)}
+        onRetry={() => {
+          track('home_box_tapped', { box: 'retry' });
+          void qc.invalidateQueries({ queryKey: ['pay_checklist'] });
+          void qc.invalidateQueries({ queryKey: qk.splits });
+        }}
+      />
+    ),
+    tiles: (
+      <Fragment key="tiles">
         <HubTile
-          small
+          point
           title={copy.assetsTile}
           sub={nw?.empty ? copy.noAssets : undefined}
           value={nw && !nw.empty ? m(nw.nw.net) : undefined}
@@ -826,11 +811,9 @@ export function H01Home() {
           onClick={() => go('assets', lastAssetsTab())}
         />
         <HubTile
-          small
-          title={copy.savingsTile}
-          sub={sums.count ? copy.savingCount(sums.count) : copy.noSavings}
-          value={sums.count ? m(sums.total) : undefined}
-          onClick={() => go('savings', '/salary/items?from=home')}
+          title={copy.calendarTile}
+          sub={near ? `${near.name} ${copy.ddayShort(near.dday)}` : copy.noCare}
+          onClick={() => go('calendar', '/calendar')}
         />
       </Fragment>
     ),

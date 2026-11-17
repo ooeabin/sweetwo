@@ -585,6 +585,8 @@ export interface TopTaskInput {
   splitProposal?: (OpenRequest & { name: string }) | null;
   /** 순위 같이 보기 요청(rank_consent_request) */
   rankRequest?: OpenRequest | null;
+  /** 월급날 확인할 것(monthCheck, 2026-11-17 H-11을 맨 위로 올리던 규칙을 띠 5b로 바꿈) */
+  monthCheck?: MonthCheck | null;
   /** 월급이 바뀐 사이클 시작일(내 salary_change 마지막 적용·되돌림의 적용일)과 W-01을 열었나 */
   salaryChanged?: { appliedDay: string | null; done: boolean } | null;
   /** 온보딩을 마친 날(KST) */
@@ -637,6 +639,7 @@ export type TopTask =
   | { kind: 'split_request'; id: string; name: string; key: string; to: string }
   | { kind: 'rank_request'; id: string; key: string; to: string }
   | { kind: 'asset_share'; key: string; to: string }
+  | { kind: 'month_check'; check: MonthCheck; key: string; to: string }
   | { kind: 'salary_changed'; key: string; to: string }
   | { kind: 'first_saving'; key: string; to: string }
   | { kind: 'split_suggest'; key: string; to: string }
@@ -803,6 +806,11 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
       connected && i.assetSharePending
         ? { kind: 'asset_share', key: 'asset_share', to: ASSET_SHARE_PATH }
         : null,
+    // 5b 월급날 확인할 게 있음(2026-11-17, 예전 H-11이 맨 위로 올라가던 규칙. 끝낼 때까지, 닫기 없음)
+    () =>
+      i.monthCheck
+        ? { kind: 'month_check', check: i.monthCheck, key: 'month_check', to: i.monthCheck.to }
+        : null,
     // 6 월급이 바뀐 달(적용된 사이클 첫 7일, W-01을 열 때까지)
     () =>
       i.salaryChanged && salaryChangedTaskOpen({ ...i.salaryChanged, today: i.today })
@@ -908,22 +916,27 @@ export const TOP_TASK_MAX = 2;
 
 /**
  * 홈 할 일 띠 두 칸까지(19 ‘할 일 띠 순서 v2.2’, 2026-11-13 UX B M5) [확인 필요]:
- * 첫 칸 = 순서상 첫 할 일. 둘째 칸 = 남은 것 중 사람이 보낸 요청·초대(2·3·4·5·13·15·16번) 중 첫째,
+ * (2026-11-17 월급날 확인 5b는 두 칸에 세지 않고 더해짐) 첫 칸 = 순서상 첫 할 일. 둘째 칸 = 남은 것 중 사람이 보낸 요청·초대(2·3·4·5·13·15·16번) 중 첫째,
  * 없으면 순서상 다음 할 일. 그래서 첫 저금·잔액 맞추기 같은 내 할 일이 상대 요청·같이 모으기 권유·초대를 가리지 않음
  */
 export function pickTopTasks(i: TopTaskInput, max = TOP_TASK_MAX): TopTask[] {
   const all = openTopTasks(i);
+  // 월급날 확인(5b, 2026-11-17)은 두 칸에 세지 않음: 확인을 끝낼 때까지 달 내내 떠 있어 첫 저금·월급 바뀜 같은 내 할 일을 가리면 안 됨
+  const check = all.find((t) => t.kind === 'month_check');
+  const rest = all.filter((t) => t !== check);
   const out: TopTask[] = [];
-  const first = all[0];
-  if (!first) return out;
-  out.push(first);
-  const rest = all.slice(1);
-  while (out.length < max && rest.length) {
-    const k = rest.findIndex((t) => PERSON_TASKS.includes(t.kind));
-    const [t] = rest.splice(k >= 0 ? k : 0, 1);
-    if (t) out.push(t);
+  const first = rest[0];
+  if (first) {
+    out.push(first);
+    const left = rest.slice(1);
+    while (out.length < max && left.length) {
+      const k = left.findIndex((t) => PERSON_TASKS.includes(t.kind));
+      const [t] = left.splice(k >= 0 ? k : 0, 1);
+      if (t) out.push(t);
+    }
   }
-  return out;
+  if (check) out.push(check);
+  return out.sort((a, b) => all.indexOf(a) - all.indexOf(b));
 }
 
 /** 알림 다시 묻기 띠가 뜨는 기간(19 띠 10번, 2026-11-13 UX B M5): 다가오는 월급날 3일 전 ~ 당일. 날짜 없음은 온보딩 7일 뒤부터 */
@@ -945,12 +958,42 @@ export function pushReaskOpen(o: {
 
 // ─────────────────────────── 홈 순서 (2026-11-15 3차 검토, 19 ‘홈 순서’) ───────────────────────────
 
-/** H-11이 할 일을 말함: 확인할 손 줄이 남았거나 지난 달 늦은 확인이 있음(이동 글자 “확인하기 ›”) */
+/** 월급날 확인할 것이 있음: 확인할 손 줄이 남았거나 지난 달 늦은 확인이 있음(월급 상자 첫 줄이 굵게, 할 일 띠 5b) */
 export function monthLineUrgent(l: HomeMonthLine): boolean {
   if (l.kind === 'review' || l.kind === 'payday' || l.kind === 'left')
     return l.left > 0 || l.late > 0;
   if (l.kind === 'auto_only' || l.kind === 'done') return l.late > 0;
   return false;
+}
+
+/**
+ * 할 일 띠 5b “월급날이에요. 확인할 게 1개 있어요”(2026-11-17 홈 월급 상자): 월급날 확인할 것의 종류와 수.
+ * payday = 월급날 당일, review = 월급날 확인 목록 기간, left = 월급날 뒤, late = 손 줄은 없고 지난 달 늦은 확인만.
+ * 이동은 pickMonthLine이 정한 곳(W-02, 늦은 확인만이면 지난 달)
+ */
+export interface MonthCheck {
+  kind: 'payday' | 'review' | 'left' | 'late';
+  left: number;
+  late: number;
+  /** 사이클 첫날(문장의 “10월 25일”) */
+  cycleStart: string;
+  to: string;
+}
+
+/** 월급날 확인할 것이 없으면 null(monthLineUrgent가 거짓) */
+export function monthCheck(l: HomeMonthLine): MonthCheck | null {
+  if (!monthLineUrgent(l)) return null;
+  if (l.kind === 'review' || l.kind === 'payday' || l.kind === 'left')
+    return {
+      kind: l.left > 0 ? l.kind : 'late',
+      left: l.left,
+      late: l.late,
+      cycleStart: l.cycleStart,
+      to: l.to,
+    };
+  if (l.kind === 'auto_only' || l.kind === 'done')
+    return { kind: 'late', left: 0, late: l.late, cycleStart: l.cycleStart, to: l.to };
+  return null;
 }
 
 /**
@@ -966,23 +1009,23 @@ export function heroZero(heroes: readonly HeroItem[], invited = false): boolean 
   return b.percent_only ? (b.pct ?? 0) <= 0 : (b.total ?? 0) <= 0;
 }
 
-/** 홈 상자 묶음 순서(좁은 창 위에서 아래). month = H-11, tasks = H-06 띠, month_us = H-14 이번 달 우리 둘 카드 자리 */
-export type HomeBlock = 'tasks' | 'month' | 'month_us' | 'hero' | 'tiles' | 'wedding' | 'small';
+/**
+ * 홈 상자 묶음 순서(좁은 창 위에서 아래, 2026-11-17 메뉴 서랍과 같은 이름·순서).
+ * tasks = H-06 띠, hero = H-10, wedding = H-12, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더)
+ */
+export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles';
 
 /**
- * 홈 순서(19 ‘홈 순서’, 2026-11-15 3차 검토 디자이너 TOP 1): 확인할 것이 맨 위.
- * H-11이 확인할 것을 말하면 H-11 → 할 일 띠(H-06), 아니면 할 일 띠가 맨 위. H-14 이번 달 우리 둘은 늘 띠 바로 아래.
- * 그다음 H-10(0원이면 반 칸 타일 H-07·H-08 아래로), 할 일이 아닌 H-11은 H-10 아래(예전처럼)
+ * 홈 순서(19 ‘홈 순서’, 2026-11-17): 할 일 띠(H-06) → 같이 모으기 H-10 → (결혼 준비 중이면 바로 아래 H-12) → 월급 상자 H-15 → 반 칸 타일 둘.
+ * H-10이 0원이면(heroZero) 월급 상자가 H-10 위(맨 위를 0원이 차지하지 않게). H-12는 늘 H-10 바로 아래.
+ * 확인할 게 있으면 H-11을 맨 위로 올리던 예전 규칙(2026-11-15)은 없앰: 할 일 띠 5b가 대신함
  */
-export function homeOrder(o: { urgent: boolean; heroZero: boolean }): HomeBlock[] {
+export function homeOrder(o: { heroZero: boolean }): HomeBlock[] {
   return [
-    ...(o.urgent ? (['month', 'tasks'] as const) : (['tasks'] as const)),
-    'month_us',
-    ...(o.heroZero ? [] : (['hero'] as const)),
-    ...(o.urgent ? [] : (['month'] as const)),
+    'tasks',
+    ...(o.heroZero
+      ? (['salary', 'hero', 'wedding'] as const)
+      : (['hero', 'wedding', 'salary'] as const)),
     'tiles',
-    ...(o.heroZero ? (['hero'] as const) : []),
-    'wedding',
-    'small',
   ];
 }
