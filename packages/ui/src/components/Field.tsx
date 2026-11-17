@@ -1,6 +1,10 @@
 import {
   forwardRef,
+  useCallback,
+  useEffect,
   useId,
+  useLayoutEffect,
+  useRef,
   type InputHTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
@@ -43,24 +47,45 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   );
 });
 
-// 여러 줄 글자 칸(Input.md ‘여러 줄’, 2026-11-17): hg-input + hg-textarea, 위아래로만 늘림
+// 여러 줄 글자 칸(Input.md ‘여러 줄’, 2026-11-17): hg-input + hg-textarea.
+// 크기 조절 손잡이는 없고(resize: none), 글이 늘면 높이가 따라 커진다. 최소·최대 높이는 CSS(.hg-textarea), 넘으면 안에서 스크롤.
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: ReactNode;
   help?: ReactNode;
 }
 
-export function Textarea({ label, help, className, id, ...rest }: TextareaProps) {
+export function Textarea({ label, help, className, id, onInput, value, ...rest }: TextareaProps) {
   const autoId = useId();
   const tid = id ?? autoId;
+  const el = useRef<HTMLTextAreaElement>(null);
+  const fit = useCallback(() => {
+    const t = el.current;
+    if (!t) return;
+    t.style.height = 'auto';
+    // border-box: 테두리 두께를 더함
+    t.style.height = `${t.scrollHeight + (t.offsetHeight - t.clientHeight)}px`;
+  }, []);
+  useLayoutEffect(fit, [fit, value]);
+  // 너비가 바뀌어 줄바꿈이 달라질 때
+  useEffect(() => {
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [fit]);
   return (
     <div className="hg-field">
       <label className="hg-field__label" htmlFor={tid}>
         {label}
       </label>
       <textarea
+        ref={el}
         id={tid}
         className={cx('hg-input hg-textarea', className)}
         aria-describedby={help ? `${tid}-help` : undefined}
+        value={value}
+        onInput={(e) => {
+          fit();
+          onInput?.(e);
+        }}
         {...rest}
       />
       {help && (
