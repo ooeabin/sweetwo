@@ -137,8 +137,10 @@ export function useStep(id: string) {
     setSaving(true);
     try {
       await before?.();
-      const doneAt = new Date().toISOString();
-      await saveMe({ onboarding_step: id.toUpperCase(), onboarding_done_at: doneAt });
+      // 이미 마친 사람이 O-60에 다시 오면(W-11a 뒤로, 2026-11-17) 완료 시각을 다시 쓰지 않음
+      const doneAt = me.data?.onboarding_done_at ?? new Date().toISOString();
+      if (!me.data?.onboarding_done_at)
+        await saveMe({ onboarding_step: id.toUpperCase(), onboarding_done_at: doneAt });
       after?.();
       const dest = typeof to === 'string' ? to : await to();
       // 다시 읽기 전에 캐시를 고치고 같은 틱에 이동(온보딩 화면이 먼저 홈으로 보내 갈 곳을 덮지 않게 justFinishedTo)
