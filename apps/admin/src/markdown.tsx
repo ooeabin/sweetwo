@@ -1,3 +1,4 @@
+import { DataTable } from '@sweetwo/ui';
 import { Fragment, type ReactNode } from 'react';
 
 // AD-20 문서 보기용 작은 마크다운 렌더러(읽기 전용, HTML 문자열을 쓰지 않음).
@@ -84,29 +85,26 @@ export function Markdown({ text }: { text: string }) {
       while (i < lines.length && (lines[i] ?? '').trim().startsWith('|'))
         rows.push(lines[i++] ?? '');
       const [head, , ...body] = rows;
+      // 표는 DataTable(2026-11-17): 머리 고정, 숫자만 있는 열은 오른쪽 정렬
+      const heads = cells(head ?? '');
+      const grid = body.map((r) => cells(r));
+      const plain = (c: string) => c.replace(/\*\*|`/g, '').trim();
+      const isNum = (j: number) =>
+        grid.length > 0 &&
+        grid.every((r) => /^[-+]?[\d,.]+\s*(%|원|만 원|명|개|일|px)?$/.test(plain(r[j] ?? '')));
       blocks.push(
-        <table key={k++} className="hg-table">
-          <thead>
-            <tr>
-              {cells(head ?? '').map((c, j) => (
-                <th key={j} scope="col">
-                  {inline(c)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {body.map((r, j) => (
-              <tr key={j}>
-                {cells(r).map((c, n) => (
-                  <td key={n} style={{ whiteSpace: 'normal' }}>
-                    {inline(c)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>,
+        <DataTable<{ i: number; c: string[] }>
+          key={k++}
+          label={plain(heads[0] ?? '')}
+          rows={grid.map((c, i) => ({ i, c }))}
+          rowKey={(r) => String(r.i)}
+          columns={heads.map((h, j) => ({
+            key: String(j),
+            label: plain(h),
+            num: isNum(j),
+            render: (r) => inline(r.c[j] ?? ''),
+          }))}
+        />,
       );
       continue;
     }

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3b215462). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (b8349e6d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -574,6 +574,48 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* Select, Menu */
 .hg-select { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--border-control); border-radius: var(--radius-md); background: var(--surface); font: var(--text-body); }
 .hg-select .hg-ico { color: var(--slate); }
+/* Select React 래퍼(2026-11-17): 닫힌 칸(button role=combobox) + 펼친 목록(hg-menu, role=listbox). 고른 항목은 굵게 + 오른쪽 check, 키보드로 가리킨 항목은 surface-alt */
+.hg-selectbox { position: relative; width: 100%; }
+.hg-select { color: var(--ink); text-align: left; }
+.hg-select.is-open { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.hg-select:disabled { background: var(--surface-sunk); color: var(--muted); cursor: not-allowed; }
+.hg-select__value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-select__list { position: absolute; top: 100%; left: 0; z-index: var(--z-dropdown); min-width: 100%; max-height: 280px; margin: var(--space-1) 0 0; overflow-y: auto; list-style: none; }
+.hg-select__opt { gap: var(--space-3); white-space: nowrap; cursor: pointer; }
+.hg-select__opt.is-active { font-weight: 400; }
+.hg-select__opt[aria-selected="true"] { font-weight: 600; }
+.hg-select__opt > .hg-ico { flex: none; color: var(--ink); }
+/* 여러 줄 글자 칸(Input.md, 2026-11-17): 위아래로만 늘림 */
+.hg-textarea { height: auto; min-height: 120px; padding-top: var(--space-3); padding-bottom: var(--space-3); resize: vertical; }
+/* DatePicker React 래퍼(2026-11-17): 글자 칸 하나(직접 입력 “2026.11.25” + 시각 칸 선택) + 오른쪽 달력 버튼 → 아래 달력 판 */
+.hg-datepick { position: relative; width: 100%; }
+.hg-datepick__box { display: flex; align-items: center; gap: var(--space-2); padding-right: var(--space-1); }
+.hg-datepick__box:focus-within { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.hg-datepick__box.is-error:focus-within { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+.hg-datepick__box.is-disabled { background: var(--surface-sunk); color: var(--muted); }
+.hg-datepick__text, .hg-datepick__time { box-sizing: border-box; min-width: 0; padding: 0; border: 0; outline: 0; background: none; color: inherit; font: inherit; font-variant-numeric: tabular-nums; }
+.hg-datepick__text { flex: 1; width: 6.5em; }
+.hg-datepick__time { flex: none; width: 3.6em; padding-left: var(--space-2); border-left: 1px solid var(--hairline-soft); }
+.hg-datepick__text::placeholder, .hg-datepick__time::placeholder { color: var(--stone); }
+.hg-datepick__btn { display: grid; place-items: center; flex: none; width: 28px; height: 28px; margin-left: auto; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--slate); cursor: pointer; }
+.hg-datepick__btn:hover:not(:disabled) { background: var(--surface-sunk); color: var(--ink); }
+.hg-datepick__btn:disabled { cursor: not-allowed; }
+.hg-datepick__btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; }
+.hg-datepick__pop { position: absolute; top: 100%; left: 0; z-index: var(--z-dropdown); margin-top: var(--space-1); padding: var(--space-3); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); }
+.hg-datepick__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2); }
+.hg-datepick__head b { font: 600 14px/20px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-datepick__grid { border-collapse: collapse; }
+.hg-datepick__grid th { width: 36px; height: 28px; padding: 0; font: 400 12px/16px var(--font-sans); color: var(--stone); text-align: center; }
+.hg-datepick__grid td { padding: 1px; text-align: center; }
+.hg-datepick__day { width: 34px; height: 34px; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: 400 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
+.hg-datepick__day:hover { background: var(--surface-alt); }
+.hg-datepick__day.is-today { font-weight: 700; box-shadow: inset 0 0 0 1px var(--hairline); }
+.hg-datepick__day.is-selected { background: var(--ink); color: var(--on-ink); font-weight: 600; box-shadow: none; }
+.hg-datepick__day:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.hg-daterange { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.hg-daterange__sep { color: var(--stone); }
+.hg-daterange > .hg-help { flex-basis: 100%; }
+@media (prefers-reduced-motion: no-preference) { .hg-select, .hg-datepick__day, .hg-datepick__btn { transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); } }
 .hg-menu { box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: var(--space-2); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); }
 .hg-menu__item { width: 100%; display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-md); font: var(--text-body); }
 .hg-menu__item.is-active { background: var(--surface-alt); font-weight: 600; }
@@ -1045,6 +1087,8 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-amountin > .hg-btn--link { align-self: flex-start; }
 /* Checkbox 줄(Selection.md, 2026-11-10): 체크 상자 + 글자, 줄 전체가 누르는 곳(44px). O-31 ‘매달 금액이 달라요’ */
 .hg-checkrow { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; font: var(--text-body); color: var(--ink); }
+.hg-checkrow:disabled { color: var(--muted); cursor: not-allowed; }  /* 2026-11-17 어드민 볼 권한만 있을 때 */
+.hg-checkrow:disabled .hg-checkbox { border-color: var(--hairline); }
 /* 날짜 한 칸(DateInput): 글자 칸 하나 안에 연·월·일 조각 */
 .hg-datefield { display: flex; align-items: center; gap: var(--space-1); max-width: 280px; }
 .hg-datefield:focus-within { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
@@ -1670,6 +1714,19 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-admin .hg-card .hg-field { max-width: none; }
 .hg-admin .hg-input, .hg-admin select.hg-input, .hg-admin .hg-select { height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-md); font: 400 14px/20px var(--font-sans); }
 .hg-admin textarea.hg-input { height: auto; min-height: 96px; padding: var(--space-2) var(--space-3); }
+/* 2026-11-17 어드민 컨트롤(사용자 지적 ‘기본 컴포넌트 그대로’): 고르기·날짜·체크 상자·꺼진 칸을 디자인 시스템 모양으로, 어드민 밀도 */
+.hg-admin .hg-input:disabled { background: var(--surface-sunk); color: var(--muted); cursor: not-allowed; }
+.hg-admin .hg-select { gap: var(--space-2); padding-right: var(--space-2); }
+.hg-admin .hg-select__list { padding: var(--space-1); }
+.hg-admin .hg-select__opt { height: 32px; padding: 0 var(--space-2); font: 400 14px/20px var(--font-sans); }
+.hg-admin .hg-select__opt[aria-selected="true"] { font-weight: 600; }
+.hg-admin .hg-datepick__box { padding-right: var(--space-1); }
+.hg-admin .hg-checkrow { min-height: 32px; gap: var(--space-2); font: 400 14px/20px var(--font-sans); }
+.hg-admin .hg-checkbox { width: 18px; height: 18px; }
+.hg-admin .hg-checkbox.is-on { background: var(--ink); border-color: var(--ink); }  /* 어드민은 고른 표시도 잉크(오렌지·파랑 아님) */
+.hg-admin .hg-checkbox.is-on::after { border-color: var(--on-ink); }
+.hg-admin .hg-table { overflow: clip; }  /* 머리 고정: hidden이면 표가 스크롤 틀이 되어 sticky가 안 먹음. clip은 둥근 모서리 자르기 그대로 */
+.hg-admin .hg-table thead th { position: sticky; top: 56px; z-index: 1; }  /* 상단 바(56px) 아래에 머리 고정 */
 .hg-admin .hg-field { gap: var(--space-1); }
 .hg-admin .hg-field__label, .hg-admin label > .hg-label { font: 600 13px/18px var(--font-sans); }
 .hg-admin .hg-chip { height: 30px; padding: 0 var(--space-3); font-size: 13px; }

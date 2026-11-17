@@ -1,3 +1,4 @@
+import { Search } from '@sweetwo/ui';
 import { useMemo, useState } from 'react';
 import { copy } from '../copy';
 import { DOC_GROUPS, docs, DESIGN_PREVIEW_URL } from '../docs';
@@ -38,13 +39,7 @@ export function AD20Docs() {
         }}
       >
         <nav aria-label={copy.menus.docs} className="hg-stack">
-          <input
-            className="hg-input"
-            aria-label={copy.docSearch}
-            placeholder={copy.docSearch}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+          <Search label={copy.docSearch} placeholder={copy.docSearch} value={q} onChange={setQ} />
           {DOC_GROUPS.map((g) => {
             const items = list.filter((d) => d.group === g);
             if (!items.length) return null;

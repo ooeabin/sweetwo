@@ -24,7 +24,17 @@ import {
   formatKstDateTime,
   todayKst,
 } from '@sweetwo/core';
-import { Badge, DataTable, SectionHeader, Status, Tabs } from '@sweetwo/ui';
+import {
+  Badge,
+  Checkbox,
+  DataTable,
+  DatePicker,
+  Field,
+  SectionHeader,
+  Select,
+  Status,
+  Tabs,
+} from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
@@ -114,20 +124,12 @@ function Guides({ canEdit }: { canEdit: boolean }) {
       {canEdit && (
         <section className="hg-card hg-stack" aria-label={ops.addVersion}>
           <span className="hg-card__label">{ops.addVersion}</span>
-          <label className="hg-field">
-            <span className="hg-field__label">{ops.versionCols.kind}</span>
-            <select
-              className="hg-input"
-              value={f.kind}
-              onChange={(e) => setF({ ...f, kind: e.target.value })}
-            >
-              {Object.entries(ops.guideKinds).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label={ops.versionCols.kind}
+            value={f.kind}
+            options={Object.entries(ops.guideKinds).map(([value, label]) => ({ value, label }))}
+            onChange={(v) => setF({ ...f, kind: v })}
+          />
           <Input
             label={ops.versionCols.key}
             value={f.key}
@@ -224,20 +226,12 @@ function Terms({ canEdit }: { canEdit: boolean }) {
       {canEdit && (
         <section className="hg-card hg-stack" aria-label={ops.addVersion}>
           <span className="hg-card__label">{ops.addVersion}</span>
-          <label className="hg-field">
-            <span className="hg-field__label">{ops.termsCols.kind}</span>
-            <select
-              className="hg-input"
-              value={f.kind}
-              onChange={(e) => setF({ ...f, kind: e.target.value })}
-            >
-              {Object.entries(ops.termsKinds).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label={ops.termsCols.kind}
+            value={f.kind}
+            options={Object.entries(ops.termsKinds).map(([value, label]) => ({ value, label }))}
+            onChange={(v) => setF({ ...f, kind: v })}
+          />
           <Input
             label={ops.termsCols.version}
             value={f.version}
@@ -249,22 +243,16 @@ function Terms({ canEdit }: { canEdit: boolean }) {
             value={f.effective}
             onChange={(v) => setF({ ...f, effective: v })}
           />
-          <label className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <input
-              type="checkbox"
-              checked={f.reconsent}
-              onChange={(e) => setF({ ...f, reconsent: e.target.checked })}
-            />
-            {ops.reconsent}
-          </label>
-          <label className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <input
-              type="checkbox"
-              checked={f.legal}
-              onChange={(e) => setF({ ...f, legal: e.target.checked })}
-            />
-            {ops.legalChecked}
-          </label>
+          <Checkbox
+            label={ops.reconsent}
+            checked={f.reconsent}
+            onChange={(v) => setF({ ...f, reconsent: v })}
+          />
+          <Checkbox
+            label={ops.legalChecked}
+            checked={f.legal}
+            onChange={(v) => setF({ ...f, legal: v })}
+          />
           <Button variant="primary" disabled={!f.version || !f.legal} onAct={() => add()}>
             {ops.requestApproval}
           </Button>
@@ -349,16 +337,13 @@ function RefData({ canEdit }: { canEdit: boolean }) {
         ]}
       />
       {canEdit && (
-        <label className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
-          <span className="hg-card__meta">{ops.loanAppliedPick}</span>
-          <input
-            className="hg-input"
-            type="date"
-            style={{ width: 'auto' }}
-            value={applied}
-            onChange={(e) => setApplied(e.target.value)}
-          />
-        </label>
+        <DatePicker
+          label={ops.loanAppliedPick}
+          width={220}
+          value={applied}
+          labels={copy.datePicker}
+          onChange={setApplied}
+        />
       )}
       <div className="hg-admin__grid">
         <DataTable
@@ -404,20 +389,15 @@ function RefData({ canEdit }: { canEdit: boolean }) {
               onChange={(v) => setH({ ...h, date: v })}
             />
             <Input label={ops.name} value={h.name} onChange={(v) => setH({ ...h, name: v })} />
-            <label className="hg-field">
-              <span className="hg-field__label">{ops.versionCols.kind}</span>
-              <select
-                className="hg-input"
-                value={h.kind}
-                onChange={(e) => setH({ ...h, kind: e.target.value as typeof h.kind })}
-              >
-                {Object.entries(ops.holidayKinds).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              label={ops.versionCols.kind}
+              value={h.kind}
+              options={(Object.keys(ops.holidayKinds) as (typeof h.kind)[]).map((value) => ({
+                value,
+                label: ops.holidayKinds[value] ?? value,
+              }))}
+              onChange={(v) => setH({ ...h, kind: v })}
+            />
             <Button
               variant="primary"
               disabled={!h.date || !h.name.trim()}
@@ -526,13 +506,13 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
                 key: 'hidden',
                 label: ops.kindCols.hidden,
                 render: (x) => (
-                  <input
-                    type="checkbox"
-                    aria-label={`${nameOf(x)} ${ops.kindCols.hidden}`}
+                  <Checkbox
+                    label={`${nameOf(x)} ${ops.kindCols.hidden}`}
+                    hideLabel
                     checked={hiddenOf(x)}
                     disabled={!canEdit}
-                    onChange={(e) =>
-                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: e.target.checked } }))
+                    onChange={(on) =>
+                      setEdit((v) => ({ ...v, [x.key]: { ...v[x.key], hidden: on } }))
                     }
                   />
                 ),
@@ -569,40 +549,18 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
       ))}
       {canEdit && (
         <section className="hg-card hg-stack" aria-label={ops.kindAdd} style={{ maxWidth: 520 }}>
-          <label className="hg-field">
-            <span className="hg-field__label">{ops.versionCols.kind}</span>
-            <select
-              className="hg-input"
-              value={add.grp}
-              onChange={(e) =>
-                setAdd({
-                  ...add,
-                  grp: e.target.value,
-                  base: baseKinds(e.target.value)[0]?.key ?? '',
-                })
-              }
-            >
-              {KIND_NAME_GROUPS.map((g) => (
-                <option key={g} value={g}>
-                  {assetGroup(g)?.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="hg-field">
-            <span className="hg-field__label">{ops.kindCols.base}</span>
-            <select
-              className="hg-input"
-              value={add.base}
-              onChange={(e) => setAdd({ ...add, base: e.target.value })}
-            >
-              {baseKinds(add.grp).map((k) => (
-                <option key={k.key} value={k.key}>
-                  {k.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label={ops.versionCols.kind}
+            value={add.grp}
+            options={KIND_NAME_GROUPS.map((g) => ({ value: g, label: assetGroup(g)?.name ?? g }))}
+            onChange={(g) => setAdd({ ...add, grp: g, base: baseKinds(g)[0]?.key ?? '' })}
+          />
+          <Select
+            label={ops.kindCols.base}
+            value={add.base}
+            options={baseKinds(add.grp).map((k) => ({ value: k.key, label: k.name }))}
+            onChange={(b) => setAdd({ ...add, base: b })}
+          />
           <Input
             label={ops.kindCols.name}
             value={add.name}
@@ -627,6 +585,7 @@ function KindNames({ canEdit }: { canEdit: boolean }) {
   );
 }
 
+// 칸 하나: 날짜(type="date")면 DatePicker, 아니면 Field(2026-11-17 브라우저 기본 날짜 칸 대신)
 function Input({
   label,
   value,
@@ -636,17 +595,11 @@ function Input({
   label: string;
   value: string;
   onChange: (v: string) => void;
-  type?: string;
+  type?: 'text' | 'date';
 }) {
-  return (
-    <label className="hg-field">
-      <span className="hg-field__label">{label}</span>
-      <input
-        className="hg-input"
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </label>
+  return type === 'date' ? (
+    <DatePicker label={label} value={value} labels={copy.datePicker} onChange={onChange} />
+  ) : (
+    <Field label={label} value={value} onChange={(e) => onChange(e.target.value)} />
   );
 }

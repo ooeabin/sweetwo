@@ -16,7 +16,7 @@ import {
   type AdminAccessData,
   type AdminReveal,
 } from '@sweetwo/core';
-import { Chip, DataTable, Modal } from '@sweetwo/ui';
+import { Chip, DataTable, Field, Modal, Select } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -292,23 +292,18 @@ function RevealForm({ userId, onShown }: { userId: string; onShown: (d: AdminRev
   return (
     <section className="hg-card hg-stack" aria-label={copy.l1}>
       <span className="hg-card__label">{copy.l1}</span>
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.l1Reason}</span>
-        <select className="hg-input" value={reason} onChange={(e) => setReason(e.target.value)}>
-          {copy.l1Reasons.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </select>
-      </label>
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.inquiryNo}</span>
-        <input
-          className="hg-input"
-          value={no}
-          onChange={(e) => setNo(e.target.value)}
-          placeholder="A-10001"
-        />
-      </label>
+      <Select
+        label={copy.l1Reason}
+        value={reason}
+        options={copy.l1Reasons.map((r) => ({ value: r, label: r }))}
+        onChange={setReason}
+      />
+      <Field
+        label={copy.inquiryNo}
+        value={no}
+        onChange={(e) => setNo(e.target.value)}
+        placeholder="A-10001"
+      />
       <div className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
         {(Object.keys(copy.l1Scopes) as L1Scope[]).map((s) => (
           <Chip key={s} small selected={scopes.includes(s)} onClick={() => toggle(s)}>
@@ -368,40 +363,30 @@ function ActionForm({ userId, onDone }: { userId: string; onDone: () => void }) 
   return (
     <section className="hg-card hg-stack" aria-label={copy.action}>
       <span className="hg-card__label">{copy.action}</span>
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.action}</span>
-        <select
-          className="hg-input"
-          value={action}
-          onChange={(e) => setAction(e.target.value as ActionKind)}
-        >
-          {Object.entries(copy.actions).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.inquiryNo}</span>
-        <input
-          className="hg-input"
-          value={no}
-          onChange={(e) => setNo(e.target.value)}
-          placeholder="A-10001"
-        />
-      </label>
+      <Select<ActionKind>
+        label={copy.action}
+        value={action}
+        options={(Object.keys(copy.actions) as ActionKind[]).map((k) => ({
+          value: k,
+          label: copy.actions[k] ?? k,
+        }))}
+        onChange={setAction}
+      />
+      <Field
+        label={copy.inquiryNo}
+        value={no}
+        onChange={(e) => setNo(e.target.value)}
+        placeholder="A-10001"
+      />
       {move && (
-        <label className="hg-field">
-          <span className="hg-field__label">{copy.newAccount}</span>
-          <input className="hg-input" value={target} onChange={(e) => setTarget(e.target.value)} />
-          <span className="hg-help">{copy.newAccountHelp}</span>
-        </label>
+        <Field
+          label={copy.newAccount}
+          value={target}
+          help={copy.newAccountHelp}
+          onChange={(e) => setTarget(e.target.value)}
+        />
       )}
-      <label className="hg-field">
-        <span className="hg-field__label">{copy.note}</span>
-        <input className="hg-input" value={note} onChange={(e) => setNote(e.target.value)} />
-      </label>
+      <Field label={copy.note} value={note} onChange={(e) => setNote(e.target.value)} />
       <Button
         variant={ask ? 'danger' : 'primary'}
         aria-busy={busy}

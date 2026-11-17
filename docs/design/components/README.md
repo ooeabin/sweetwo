@@ -48,14 +48,14 @@
 | [InfoPlate](InfoPlate.md) | Data | 조건 요약 판(이름–값 두 열), 완료 표시 DoneMark |
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
 | [CopyField](CopyField.md) | Inputs | 초대 코드·링크를 보여 주고 복사 |
-| [DatePicker](DatePicker.md) | Inputs | 날짜 입력(결혼식 날짜 묻기 등) |
+| [DatePicker](DatePicker.md) | Inputs | 날짜 입력(결혼식 날짜 묻기 등), 어드민 날짜·시각·기간 칸(`DatePicker`, `DateRange`, 2026-11-17) |
 | [DateWheel](DateWheel.md) | Inputs | 날짜·연도 휠(연도만 S-11i / 연·월·일 S-11h. `commitInitial`) |
 | [DayChips](DayChips.md) | Inputs | 월급날 숫자 판(1~31 + 말일). 지금은 안 씀, 월급날은 DayWheel |
 | [FileAttach](FileAttach.md) | Inputs | 파일 첨부 칸 |
 | [ImageCrop](ImageCrop.md) | Inputs | 프로필 사진 올리기와 자르기(S-11e) |
 | [Input](Input.md) | Inputs | 글자 입력 칸과 금액 입력 |
 | [Search](Search.md) | Inputs | 찾기 칸 + 결과 목록 + 결과 없음 |
-| [Select](Select.md) | Inputs | 목록에서 하나 고르기 |
+| [Select](Select.md) | Inputs | 목록에서 하나 고르기(React `Select`: 버튼 + listbox, 2026-11-17) |
 | [Selection](Selection.md) | Inputs | 켜기·끄기(Toggle), 여러 개 고르기(Checkbox), 하나 고르기(Radio) |
 | [Slider](Slider.md) | Inputs | 둘 사이 비율 나누기(분담, 자동차 현금 비율) |
 | [AdminFrame](AdminFrame.md) | Layout | 어드민 틀 |

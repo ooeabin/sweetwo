@@ -48,6 +48,31 @@ export function formatDot(s: string): string {
   return `${m}.${d}`;
 }
 
+/** '2026-11-25' → "2026.11.25"(어드민 날짜 칸 DatePicker, 2026-11-17) */
+export function formatDateDot(s: string): string {
+  return s.slice(0, 10).replace(/-/g, '.');
+}
+
+/** "2026.11.25", "2026-11-25", "20261125", "2026 11 25" → '2026-11-25'(없는 날짜면 null). 어드민 날짜 칸 직접 입력 */
+export function parseDateDot(t: string): string | null {
+  const m = /^(\d{4})[-./\s]?(\d{1,2})[-./\s]?(\d{1,2})\.?$/.exec(t.trim());
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d)
+    return null;
+  return dt.toISOString().slice(0, 10);
+}
+
+/** "14:00", "1400", "9:05" → '14:00'(없는 시각이면 null) */
+export function parseTimeText(t: string): string | null {
+  const m = /^(\d{1,2}):?(\d{2})$/.exec(t.trim());
+  if (!m) return null;
+  const [h, mi] = [Number(m[1]), Number(m[2])];
+  if (h > 23 || mi > 59) return null;
+  return `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`;
+}
+
 /** '2027-01-09' → "2027년 1월 9일" */
 export function formatDateFull(s: string): string {
   const { y, m, d } = ymd(s);

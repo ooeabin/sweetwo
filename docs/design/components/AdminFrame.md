@@ -26,6 +26,8 @@
 - 브랜드 오렌지는 쓰지 않음(워드마크, 주 버튼 모두 잉크). 로그인·인증은 AdminAuth.
 - 공지 편집(AD-10, 2026-11-06): 오른쪽 칸(340px)에 카드 세 장. 입력 카드 → ‘대상’ 카드(조건 칩·입력 + 대상 수 `hg-admin__grid2` 안 `hg-admin__stat` 두 개 “대상” “제외”, 메일이면 아래 `hg-admin__kv` “반송·수신 거부”) → ‘미리보기’ 카드(앱 공지 띠 `hg-banner hg-banner--line`을 앱과 같은 마크업으로, 접힌 모양 + 펼친 모양, 메일을 켜면 안쪽 카드로 메일 모양). 미리보기 띠는 화면 읽기에서 숨기고 버튼은 탭으로 가지 않음. 새 클래스 없음.
 
+- 입력 컨트롤(2026-11-17 사용자 지적 “기본 컴포넌트 그대로라 불편”): 브라우저 기본 `select`, `type="date"`·`datetime-local`, `type="number"`, `type="checkbox"`, 맨 `textarea`·`table`을 쓰지 않는다. 고르기는 [Select](Select.md) `Select`, 날짜·시각과 기간은 [DatePicker](DatePicker.md) `DatePicker`·`DateRange`, 체크는 [Selection](Selection.md) `Checkbox`(잉크), 글자는 [Input](Input.md) `Field`·`Textarea`, 목록 안 거르기는 [Search](Search.md) `Search`(AD-20), 표는 `DataTable`. 필터 줄처럼 칸이 나란하면 라벨을 화면 읽기에만(`hideLabel`).
+
 React 래퍼: `AdminFrame`(packages/ui, 메뉴·지금 메뉴·보는 관리자·제목·오른쪽 버튼). 표는 `DataTable`.
 
 쓰는 곳: 어드민 AD-01~AD-17 모든 화면.

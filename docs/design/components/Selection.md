@@ -7,6 +7,7 @@
 - Toggle 이름(2026-11-15 3차 검토): 스위치(`role="switch"`)는 `aria-labelledby`로 라벨 글자만 이름, 보조 글은 `aria-describedby`(감싼 label만으로는 이름이 안 잡히는 화면 읽기가 있었음).
 - Toggle: 설정 알림처럼 바로 적용되는 것. Checkbox: 약관 동의(ConsentCard), 질문 화면의 켜고 끄는 한 줄. Radio: 한 화면 안 하나 고르기.
 - Checkbox 줄(`Checkbox`, `hg-checkrow`, 2026-11-10): 체크 상자 20px(`hg-checkbox`) + 12px + 글자 15px(`text-body`, `ink`), 줄 전체가 누르는 곳(높이 44px 이상), 포커스 링은 `focus-ring`. O-31 ‘매달 금액이 달라요’. 동의 묶음 안 줄은 그대로 `hg-consent__check`.
+  - 2026-11-17 어드민: 브라우저 기본 체크 상자 대신 이 줄(AD-06 동의 요청 ‘금액 원값 요청’, AD-14 ‘재동의 요구’·‘법률 검토 확인’, 항목 이름 표의 ‘숨김’). 어드민 안에서는 상자 18px, 줄 32px, 글자 14px, 체크한 상자는 `ink` 채움 + `on-ink` 체크(오렌지·파랑 아님). 꺼지면(`disabled`) 글자 `muted` + 상자 테두리 `hairline`. 표 칸 안처럼 글자가 따로 보일 필요가 없으면 `hideLabel`(글자는 화면 읽기에만).
 - 질문 화면의 하나 고르기(결혼 여부 묻기)는 카드형 `hg-option--card`(2026-11-03 지그재그 선택 카드처럼 바꿈).
   - 안 고른 카드: `surface` 바탕 + 1px `hairline` 테두리, `radius-lg`, 안쪽 16px, 높이 64px 이상. 올리면 테두리 `border-control`.
   - 왼쪽 그림 칸(`hg-option__icon`): 2D 선택지 그림(Illustrations ‘나중 과제’ 5번)이 들어올 때까지 36px 회색 빈 자리(`hg-option__icon hg-artslot`, `surface-alt` + 안쪽 1px `hairline-soft`, `radius-md` 둥근 네모, 화면 읽기에서 숨김). `ChoiceCards` 선택지에 `icon`(그림 주제)이 있을 때만 그림(O-30, O-06, O-07, O-11, P-04, S-11f, S-11g). 2026-11-09 오전에 없앴다가 같은 날 사용자 요청으로 되돌림. (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)

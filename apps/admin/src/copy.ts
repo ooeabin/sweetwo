@@ -354,6 +354,10 @@ export const copy = {
   } as Record<string, string>,
   filter: { admin: '관리자', target: '대상 ID', action: '동작', from: '시작일', to: '끝일' }, // [확인 필요]
   all: '전체', // [확인 필요]
+  period: '기간', // [확인 필요] 2026-11-17 감사 로그 기간 묶음 이름(화면 읽기)
+  badPeriod: '끝일이 시작일보다 앞', // [확인 필요]
+  // 날짜 칸(DatePicker, 2026-11-17). 칸 이름 뒤에 붙음: “시작 달력 열기”, “시작 시각”
+  datePicker: { open: '달력 열기', prev: '이전 달', next: '다음 달', time: '시각' }, // [확인 필요]
   ip: '접속 IP',
   screen: '화면',
   noAudit: '기록 없음', // [확인 필요]
