@@ -10,7 +10,7 @@ export const homeText = {
   todoReview: (label: string, n: number) => `${label}에서 확인할 게 ${n}개 남았어요`,
   todoCheck: '월급날 확인할 차례예요', // [확인 필요] 2026-11-09 홈 할 일 띠(19 H-06 3a)
   todoInvite: '함께할 사람을 초대해 주세요',
-  todoSaving: '첫 저금을 만들어 볼까요?', // [확인 필요] 2026-11-09 round 3 첫 주 할 일(19 H-06 4b)
+  todoSaving: '모으기를 시작해 볼까요?', // [확인 필요] 2026-11-09 round 3 첫 주 할 일(19 H-06 4b)
   todoMatured: (name: string) => `${subject(name)} 만기됐어요`, // [확인 필요] 알림 문구와 같게
   todoCare: (date: string, name: string) => `${date} ${isWord(name)}`,
   payday: (who: string) => `${who}님 월급날`, // [확인 필요]

@@ -71,7 +71,7 @@ test('관리 형태 요청 받음(S-11j): P-04 ‘보내요’ 문구 그대로 
   await expect(page.getByText('찬우님이 관리하는 걸로 바꿀까요?')).toBeVisible();
   await expect(page.getByText('월급 계획이 하나로 합쳐져요')).toBeVisible();
   await expect(page.getByText('예빈님 줄은 보내기와 용돈이 돼요')).toBeVisible();
-  await expect(page.getByText('같이 모으기는 공동 저금이 돼요')).toBeVisible();
+  await expect(page.getByText('같이 모으기는 공동 저축·투자가 돼요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();
   await expect(page).toHaveURL(/\/salary\?view=plan$/);
@@ -250,7 +250,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   expect(v.calls.find((c) => c.fn === 'partner_plan_view')?.body).toMatchObject({
     p_viewer: YEBIN,
   });
-  await expect(page.getByText('찬우님은 저금만 보여 줘요')).toBeVisible();
+  await expect(page.getByText('찬우님은 저축·투자만 보여 줘요')).toBeVisible();
   // 저금만: 저금 줄 금액은 보이고, 월급·고정지출은 안 보임
   await expect(page.getByText('95만 원', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('고정지출')).toHaveCount(0);
@@ -259,7 +259,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   const together = page.getByRole('region', { name: '같이 모으기' });
   await expect(together.getByText('보이는 게 없어요')).toBeVisible();
   await expect(together.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
-  const mySaving = page.getByRole('region', { name: '저금', exact: true });
+  const mySaving = page.getByRole('region', { name: '저축·투자', exact: true });
   await expect(mySaving.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
   // 같이 모으기 묶음: 합계 / 목표 금액, 둘 다 ‘각자 모은 금액 보여 주기’면 내 몫 한 줄(상대 H-10 카드와 같은 값)
   v.bundles.push({
@@ -293,8 +293,8 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await page.reload();
   await expect(page.getByText('찬우님은 이번 달 했는지만 보여 줘요')).toBeVisible();
   await expect(page.getByText('이번 달 했어요').first()).toBeVisible();
-  await expect(page.getByText('개인 저금').first()).toBeVisible();
-  await expect(mySaving.getByText('개인 저금').first()).toBeVisible();
+  await expect(page.getByText('개인 저축·투자').first()).toBeVisible();
+  await expect(mySaving.getByText('개인 저축·투자').first()).toBeVisible();
   await expect(page.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
   await expect(page.getByText('내 집 마련')).toHaveCount(0);
   await axe(page);
@@ -304,7 +304,7 @@ test('내 월급(S-11c): 다음 달부터 + 언제까지 → 예약 표시(S-11)
   const { db, v } = await connected(page);
   await page.goto('/settings/me/salary');
   // 공개 고지 한 줄(O-31과 같음)
-  await expect(page.getByText('파트너에게는 저금만 보여요')).toBeVisible();
+  await expect(page.getByText('파트너에게는 저축·투자만 보여요')).toBeVisible();
   await page.getByLabel('한 달 실수령액은 얼마예요?').fill('1600000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '다음 달부터' }).click();
@@ -399,7 +399,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
     ],
   });
   await page.goto(`/salary?view=plan&who=${YEBIN}`);
-  await expect(page.getByText('예빈님은 저금만 보여 주기로 정했어요')).toBeVisible();
+  await expect(page.getByText('예빈님은 저축·투자만 보여 주기로 정했어요')).toBeVisible();
   await expect(
     page.getByRole('button', { name: /예빈 여행/ }).or(page.getByText('예빈 여행')),
   ).toBeVisible();
@@ -410,7 +410,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   v.partnerShare = 'done_only';
   await page.reload();
   await expect(page.getByText('예빈님은 ‘했어요’만 보여 주기로 정했어요')).toBeVisible();
-  await expect(page.getByText('개인 저금')).toBeVisible();
+  await expect(page.getByText('개인 저축·투자')).toBeVisible();
   await expect(page.getByText('예빈 여행')).toHaveCount(0);
   await expect(page.getByText('아직이에요')).toBeVisible();
   await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
@@ -418,14 +418,14 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
 
   // W-13 저금 목록: 서버(space_goals)가 “개인 저금”으로, 금액 없이 줌 → 이번 달 확인 여부만, 열지 않음
   Object.assign(db.goals.find((g) => g.id === 'goal-y') ?? {}, {
-    name: '개인 저금',
+    name: '개인 저축·투자',
     target_amount: null,
     start_saved: 0,
   });
   await page.goto('/salary/items');
-  const row = page.locator('.hg-goalrow', { hasText: '개인 저금' });
+  const row = page.locator('.hg-goalrow', { hasText: '개인 저축·투자' });
   await expect(row).toContainText('아직이에요');
   await expect(row.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /개인 저금/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /개인 저축·투자/ })).toHaveCount(0);
   await axe(page);
 });

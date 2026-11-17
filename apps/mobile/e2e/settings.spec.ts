@@ -288,7 +288,9 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await page.getByRole('radio', { name: '네' }).click();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '같이 모으는 저금이 있어요?' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '같이 모으는 저축·투자가 있어요?' }),
+  ).toBeVisible();
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '누가 주로 관리해요?' })).toBeVisible();
   await page.getByRole('radio', { name: '둘이 같이 해요' }).click();
@@ -466,8 +468,8 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
 
   // S-12a 안내(v2.2): 남는 것 / 지워지는 것, 30일 복구 안내 없음
   await expect(page.getByRole('heading', { name: '연결을 해제할까요?' })).toBeVisible();
-  await expect(page.getByText('내 명의 자산과 대출, 내 저금과 저금 내역')).toBeVisible();
-  await expect(page.getByText('같이 쓰던 월급 계획과 저금, 공동 명의, 경조사')).toBeVisible();
+  await expect(page.getByText('내 명의 자산과 대출, 내 저축·투자와 모은 내역')).toBeVisible();
+  await expect(page.getByText('같이 쓰던 월급 계획과 저축·투자, 공동 명의, 경조사')).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 14일이 지나면 해제돼요')).toBeVisible();
   await expect(page.getByText(/30일 안에는 다시 연결/)).toHaveCount(0);
   await expect(page.getByRole('button', { name: '먼저 내보내기' })).toBeVisible();
@@ -542,7 +544,7 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
     page.getByRole('heading', { name: '예빈님이 연결 해제를 요청했어요' }),
   ).toBeVisible();
   await expect(page.getByText('10월 19일에 해제돼요')).toBeVisible();
-  await expect(page.getByText('내 명의 자산과 대출, 내 저금과 저금 내역')).toBeVisible();
+  await expect(page.getByText('내 명의 자산과 대출, 내 저축·투자와 모은 내역')).toBeVisible();
   await expect(page.getByRole('button', { name: '다르게 정리하기' })).toHaveCount(0);
   // v2.2(R-09): 주 버튼 ‘먼저 내보내기’, 보조 ‘해제할게요’
   await expect(page.getByRole('button', { name: '먼저 내보내기' })).toBeVisible();
@@ -559,7 +561,7 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
   await expect(page).toHaveURL(/\/settings\/couple\/unlinked$/);
   await expect(page.getByRole('heading', { name: '연결이 해제됐어요' })).toBeVisible();
   await expect(
-    page.getByText('같이 쓰던 것만 지웠어요. 내 저금과 자산은 그대로예요'),
+    page.getByText('같이 쓰던 것만 지웠어요. 내 저축·투자와 자산은 그대로예요'),
   ).toBeVisible();
   await expect(page.getByText(/30일 안에/)).toHaveCount(0);
   await expect(page.getByText('설정 › 우리 둘 정보에서 다시 연결할 수 있어요')).toBeVisible();
@@ -703,12 +705,12 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
   (db.me as Record<string, unknown>).asset_share_default = 'sum';
   await open(page, info.project.name === 'narrow');
   const row = page.getByRole('button', { name: /공개 범위/ });
-  await expect(row).toContainText('저금만 보여 주기');
+  await expect(row).toContainText('저축·투자만 보여 주기');
   await row.click();
   await expect(page).toHaveURL(/\/settings\/visibility$/);
   await expect(page.getByRole('button', { name: '예빈님에게 보이는 모습 보기 ›' })).toBeVisible();
   // 저금마다 공개는 없앰
-  await expect(page.getByText('개인 저금')).toHaveCount(0);
+  await expect(page.getByText('개인 저축·투자')).toHaveCount(0);
   await axe(page);
 
   // ① 내 월급 계획: 했어요만으로 좁힘

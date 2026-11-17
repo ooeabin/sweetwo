@@ -159,9 +159,9 @@ export const copy = {
   unlinkQ: '연결을 해제할까요?', // [확인 필요]
   // 2026-11-13 v2.2(08 7장): 내 것은 남기고 같이 쓰던 것만 지움 [확인 필요]
   unlinkKeepTitle: '남는 것',
-  unlinkKeep: '내 명의 자산과 대출, 내 저금과 저금 내역',
+  unlinkKeep: '내 명의 자산과 대출, 내 저축·투자와 모은 내역',
   unlinkGoneTitle: '지워지는 것',
-  unlinkGone: '같이 쓰던 월급 계획과 저금, 공동 명의, 경조사',
+  unlinkGone: '같이 쓰던 월급 계획과 저축·투자, 공동 명의, 경조사',
   unlinkWhen: (name: string) => `${name}님이 확인하거나 14일이 지나면 해제돼요`, // [확인 필요]
   exportFirst: '먼저 내보내기',
   next: '다음',
@@ -176,7 +176,7 @@ export const copy = {
   /** 13 공통 상태 9번(오프라인에서 막힌 동작, 버튼 위 한 줄) */
   needOnline: '인터넷에 연결되면 할 수 있어요',
   unlinkedTitle: '연결이 해제됐어요', // [확인 필요]
-  unlinkedHelp: '같이 쓰던 것만 지웠어요. 내 저금과 자산은 그대로예요', // [확인 필요] 2026-11-13 v2.2
+  unlinkedHelp: '같이 쓰던 것만 지웠어요. 내 저축·투자와 자산은 그대로예요', // [확인 필요] 2026-11-13 v2.2
   startSolo: '시작하기', // [확인 필요]
   reconnectWhere: '설정 › 우리 둘 정보에서 다시 연결할 수 있어요', // [확인 필요] 2026-11-11 S3-16 S-12h
   ok: '확인', // [확인 필요]
@@ -211,13 +211,13 @@ export const copy = {
   visFixed: [
     // 기획서 25 S-13 2번 “월급을 합쳐서 쓰면 월급 계획은 늘 같이 봐요” 등
     '월급을 합쳐서 쓰면 월급 계획은 늘 같이 봐요',
-    '우리 둘 저금과 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
+    '우리 둘 저축·투자와 공동 명의 항목은 늘 같이 봐요', // [확인 필요] 2026-11-08 ADR 0007
     '경조사는 늘 같이 봐요',
   ],
   visFixedTitle: '항상 함께 보는 것', // [확인 필요]
   visMine: '내 항목', // [확인 필요]
   visNone: '내 명의 항목이 없어요',
-  visGoals: '내 저금', // [확인 필요]
+  visGoals: '내 저축·투자', // [확인 필요]
   goalVis: { all: '모두 보여 주기', amount: '총액만 보여 주기' } as Record<string, string>,
   visDebt: '부채', // [확인 필요] 항목 이름표
   visLabel: (name: string) => `${name} 공개 범위`,
@@ -228,7 +228,7 @@ export const copy = {
   trashKinds: {
     asset: '자산',
     debt: '부채',
-    goal: '저금',
+    goal: '저축·투자',
     care_day: '경조사',
   } as Record<string, string>,
   trashWhen: (md: string) => `${md}에 지웠어요`,
@@ -283,11 +283,11 @@ export const copy = {
     debts: '부채 합계', // [확인 필요]
     trend: '최근 12개월 순자산', // [확인 필요]
     yearTitle: (y: number) => `${y}년 연간 요약`, // [확인 필요]
-    yearSaved: '올해 저금한 금액', // 2026-11-08 ADR 0007
-    monthly: '월별 저금한 금액',
+    yearSaved: '올해 모은 금액', // 2026-11-08 ADR 0007
+    monthly: '월별 모은 금액',
     month: (m: number) => `${m}월`,
-    goals: '저금별 진행', // [확인 필요]
-    noGoals: '저금이 없어요', // [확인 필요]
+    goals: '저축·투자별 진행', // [확인 필요]
+    noGoals: '저축·투자가 없어요', // [확인 필요]
     savedOf: (saved: string, target: string) => `${saved} / ${target}`,
     eta: (ym: string) => `${ym} 달성 예정`,
     achieved: '달성', // [확인 필요]
@@ -300,7 +300,7 @@ export const copy = {
     files: {
       assets: '자산.csv',
       debts: '부채.csv',
-      goals: '저금.csv',
+      goals: '저축·투자.csv',
       splits: '월급 계획.csv',
       checklists: '월급 월급날 확인 목록.csv',
       care: '경조사.csv',
@@ -308,7 +308,7 @@ export const copy = {
     heads: {
       assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
       debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
-      goals: ['이름', '목표 금액', '모은 금액', '기한', '상태', '월급 계획 저금 금액'],
+      goals: ['이름', '목표 금액', '모은 금액', '기한', '상태', '월급 계획 저축·투자 금액'],
       splits: ['사람', '줄 종류', '줄 이름', '금액'],
       checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
       care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
@@ -316,7 +316,7 @@ export const copy = {
     // 저금 항목 상태(ADR 0007) [확인 필요]
     goalStatus: { saving: '모으는 중', achieved: '달성', closed: '그만 모음' },
     lineKinds: {
-      saving: '저금',
+      saving: '저축·투자',
       fixed: '고정지출',
       living: '생활비',
       allowance: '용돈',
@@ -328,7 +328,7 @@ export const copy = {
     >,
     careCats: { family: '양가', couple: '우리 둘', wedding: '결혼' } as Record<string, string>, // [확인 필요]
     paidFrom: {
-      goal_fund: '저금', // [확인 필요] 옛 값(2026-11-12 QA 11구간 S11-14, ‘목표자금’ 대신)
+      goal_fund: '저축·투자', // [확인 필요] 옛 값(2026-11-12 QA 11구간 S11-14, ‘목표자금’ 대신)
       living: '생활비',
       personal: '개인 지출',
       wedding_account: '결혼 준비 통장',
@@ -362,7 +362,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '우리 둘 연결', // [확인 필요]
-    calc: '저금·월급 월급날 확인 목록', // [확인 필요] 27 AD-06, 2026-11-09
+    calc: '저축·투자와 월급, 월급날 확인 목록', // [확인 필요] 27 AD-06, 2026-11-09
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
@@ -450,10 +450,10 @@ export const copy = {
     partner_change: (name: string) => `${name}님이 바꾼 값`,
     care: '경조사·기념일',
     money: '금융 일정',
-    goal: '저금', // [확인 필요]
+    goal: '저축·투자', // [확인 필요]
     invite: '파트너 초대', // [확인 필요]
   },
-  partnerChangeSub: '월급 계획·관리 방식·저금 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
+  partnerChangeSub: '월급 계획, 관리 방식, 저축·투자 변경은 바로, 나머지는 월요일에 모아서 알려요', // [확인 필요]
   carePoints: { care_30: '30일 전', care_14: '14일 전', care_7: '7일 전', care_0: '당일' },
   careAlerts: '경조사·기념일 미리 알림',
   cancel: '취소',
@@ -541,9 +541,9 @@ export const copy = {
   styleNames: {
     one_manager: '한 사람이 관리해요',
     together: '월급을 합쳐서 써요',
-    living_saving: '생활비와 저금을 같이 해요',
+    living_saving: '생활비와 저축·투자를 같이 해요',
     living_only: '생활비만 같이 해요',
-    saving_only: '저금만 같이 해요',
+    saving_only: '저축·투자만 같이 해요',
     separate: '월급은 각자 써요',
   } as Record<string, string>,
   // S-11c 예약 표시(S-11 월급 줄 아래 회색) [확인 필요]
@@ -553,7 +553,7 @@ export const copy = {
   salaryChangeCancelled: '월급 변경을 취소했어요', // [확인 필요]
   // S-11c 1 공개 고지(O-31과 같음, 17 O-31 5번) + ‘바꾸기’. 저금만 말고 두 단계 문구는 [확인 필요]
   shareNote: {
-    saving_only: '파트너에게는 저금만 보여요',
+    saving_only: '파트너에게는 저축·투자만 보여요',
     all: '파트너에게는 월급 계획이 모두 보여요', // [확인 필요]
     done_only: '파트너에게는 이번 달 했는지만 보여요',
     joint: '월급을 합쳐서 쓰면 파트너도 이 금액을 봐요',
@@ -574,7 +574,7 @@ export const copy = {
   // S-11f 관리 형태(O-30·30b·30c와 같은 세 질문, 17·08 2장) [확인 필요]
   livingQ: '같이 쓰는 생활비가 있어요?',
   livingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요',
-  savingQ: '같이 모으는 저금이 있어요?',
+  savingQ: '같이 모으는 저축·투자가 있어요?',
   managerQ: '누가 주로 관리해요?',
   yes: '네',
   no: '아니요',
@@ -604,7 +604,7 @@ export const copy = {
   styleChangeSend: (name: string) => `${name}님 줄은 보내기와 용돈이 돼요`,
   styleChangeMine: (me: string) => `${me}님이 월급 계획을 관리해요`, // [확인 필요]
   styleChangeAllowance: '용돈은 사람마다 한 줄씩 남아요', // [확인 필요]
-  styleChangeBundle: '같이 모으기는 공동 저금이 돼요',
+  styleChangeBundle: '같이 모으기는 공동 저축·투자가 돼요',
   styleYes: '좋아요',
   styleNo: '지금처럼 할게요',
   styleExpired: '요청 기한이 지났어요', // [확인 필요]
@@ -615,7 +615,7 @@ export const copy = {
   planShareTitle: '내 월급 계획',
   planShares: {
     all: '모두 보여 주기',
-    saving_only: '저금만 보여 주기',
+    saving_only: '저축·투자만 보여 주기',
     done_only: '했어요만 보여 주기',
   } as Record<string, string>,
   planShareJoint: '월급을 합쳐서 쓰고 있어 모두 보여요',
@@ -635,23 +635,23 @@ export const copy = {
   rankTitle: '자산 순위 같이 보기',
   rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]
   rankWaiting: (name: string) => `${name}님 답을 기다려요`, // [확인 필요]
-  alwaysShared: '경조사, 공동 명의, 합쳐서 쓰는 월급 계획과 저금은 늘 같이 봐요',
+  alwaysShared: '경조사, 공동 명의, 합쳐서 쓰는 월급 계획과 저축·투자는 늘 같이 봐요',
 
   // S-13p 상대에게 보이는 모습 [확인 필요]
   previewTitle: (name: string) => `${name ? `${name}님` : '파트너'}에게 보이는 모습`, // 합류 전은 ‘파트너’(2026-11-16)
   previewSaving: '같이 모으기',
-  previewMySaving: '저금', // [확인 필요] 각자 계열 내 개인 저금(상대 W-10 파트너 저금과 같게, 2026-11-13)
+  previewMySaving: '저축·투자', // [확인 필요] 각자 계열 내 개인 저금(상대 W-10 파트너 저금과 같게, 2026-11-13)
   previewBundleMine: (me: string, amount: string) => `${me}님 몫 ${amount}`, // [확인 필요] 묶음 각자 금액
   previewPlan: '월급 계획',
   previewAssets: '자산 관리',
   previewNothing: '보이는 게 없어요', // [확인 필요]
   previewHidden: '연결 해제 대기 중이라 지금은 아무것도 보이지 않아요', // [확인 필요]
-  previewSavingOnly: (me: string) => `${me}님은 저금만 보여 줘요`, // 20 W-01 3b
+  previewSavingOnly: (me: string) => `${me}님은 저축·투자만 보여 줘요`, // 20 W-01 3b
   previewDoneOnly: (me: string) => `${me}님은 이번 달 했는지만 보여 줘요`,
   previewIncome: (amount: string, day: string) => `월급 ${amount}, ${day}`,
   previewDone: '이번 달 했어요',
   previewNotYet: '아직이에요', // [확인 필요]
-  previewPrivate: '개인 저금', // [확인 필요] 했어요만이면 상대에게 저금 이름 대신(서버 space_goals와 같은 말)
+  previewPrivate: '개인 저축·투자', // [확인 필요] 했어요만이면 상대에게 저금 이름 대신(서버 space_goals와 같은 말)
   previewOf: (saved: string, target: string) => `${saved} / ${target}`,
   previewSum: (group: string, n: number) => `${group} ${n}개`, // [확인 필요] 총액만 보여 주기 묶음
   previewJoint: '공동', // [확인 필요]
@@ -679,8 +679,8 @@ export const copy = {
     care: '한 달 전, 일주일 전에 알려 드려요',
     progress_news: (paydayNone: boolean) =>
       paydayNone
-        ? '매달 1일, 저금이 얼마나 모였는지 알려 드려요'
-        : '확인할 게 없는 달 월급날, 저금이 얼마나 모였는지 알려 드려요',
+        ? '매달 1일, 저축·투자가 얼마나 모였는지 알려 드려요'
+        : '확인할 게 없는 달 월급날, 저축·투자가 얼마나 모였는지 알려 드려요',
     month_us: (paydayNone: boolean) =>
       paydayNone
         ? '매달 1일, 모은 금액과 다가올 일정을 알려 드려요'

@@ -26,7 +26,7 @@ test('검색 화면(⌘K): 바로 하기, 저금 항목 찾기 → 저금 항목
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('option', { name: /월급날 확인하기/ })).toBeVisible();
   await expect(dialog.getByRole('option', { name: /금액 가리기/ })).toBeVisible();
-  await expect(dialog.getByRole('option', { name: /저금 추가/ })).toBeVisible();
+  await expect(dialog.getByRole('option', { name: /저축·투자 추가/ })).toBeVisible();
   await axe(page);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
@@ -450,12 +450,12 @@ test('+ 버튼(FAB) 없음, 화면 안 ‘+ … 추가’ 줄(2026-11-09): 월�
   // 월급 W-02: 저금 묶음 끝(좁은 창만, 넓은 창은 제목 줄 ‘+ 저금 추가’, 2026-11-12 S6-16)
   await page.goto('/salary');
   await expect(page.locator('.hg-fab, .hg-dock')).toHaveCount(0);
-  const saving = page.getByRole('region', { name: '저금', exact: true });
+  const saving = page.getByRole('region', { name: '저축·투자', exact: true });
   if ((info.project.use.viewport?.width ?? 1280) < 768)
-    await saving.getByRole('button', { name: '저금 추가', exact: true }).click();
+    await saving.getByRole('button', { name: '추가', exact: true }).click();
   else {
-    await expect(saving.getByRole('button', { name: '저금 추가', exact: true })).toBeHidden();
-    await page.getByRole('button', { name: '+ 저금 추가' }).click();
+    await expect(saving.getByRole('button', { name: '추가', exact: true })).toBeHidden();
+    await page.getByRole('button', { name: '+ 저축·투자 추가' }).click();
   }
   await expect(page).toHaveURL(/\/salary\/items\/new/);
   // 자산 관리 F-02: 보던 쪽 목록 끝

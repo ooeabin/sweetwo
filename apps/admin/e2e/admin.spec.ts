@@ -741,7 +741,7 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
     '이번 달 같이 모은 커플120연결 커플 402',
   );
   await expect(page.getByRole('region', { name: '선행 지표' })).toContainText(
-    '첫 저금률(최근 30일)60%42 / 70',
+    '첫 저축·투자 생성률(최근 30일)60%42 / 70',
   );
   await expect(page.getByRole('region', { name: '가드레일' })).toContainText(
     '자동 줄 바꿈(최근 30일)12%10%기준 넘음',
@@ -758,7 +758,7 @@ test('대시보드 → 회원 검색(정확히 일치, 1건이면 상세) → L1
   await heading(page, '회원 상세');
   await expect(page.getByText('cha***@example.com')).toBeVisible();
   await expect(
-    page.getByText('자산 6개, 그중 추정 2개, 저금 항목 3개, 끝난 체크리스트 1번'),
+    page.getByText('자산 6개, 그중 추정 2개, 저축·투자 3개, 끝난 체크리스트 1번'),
   ).toBeVisible();
   await expect(page.getByText('10월 월급 진행 중, 3/5줄 체크')).toBeVisible();
   await expect(page.getByText(/데스크톱 1\.0\.0/)).toBeVisible();

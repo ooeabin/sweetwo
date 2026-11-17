@@ -87,12 +87,12 @@ export function AfterChoice({ item }: { item: SavingItem }) {
   const a = useAfter(item);
   const nav = useNavigate();
   return (
-    <section className="hg-goalbox" aria-label={copy.afterQ}>
+    <section className="hg-goalbox" aria-label={copy.afterQ(item.goal.name)}>
       <div className="hg-goalbox__head">
-        <b>{copy.afterQ}</b>
+        <b>{copy.afterQ(item.goal.name)}</b>
       </div>
       <ChoiceCards<After>
-        label={copy.afterQ}
+        label={copy.afterQ(item.goal.name)}
         value={null}
         onChange={(v) =>
           void a.choose(v).then((ok) => {
@@ -125,7 +125,7 @@ export function W12aSavingAfter() {
   // 못 불러오면 오류 + 다시 시도(2026-11-12 S7-04)
   if (!d.ready && d.failed)
     return <SavingQuestionError onBack={() => nav(back, { replace: true })} onRetry={d.retry} />;
-  if (!d.ready) return <QuestionSkeleton title={copy.afterQ} />;
+  if (!d.ready) return <QuestionSkeleton title={copy.afterQLoading} />;
   if (!i) return <Navigate to={salaryPaths.checklist} replace />;
   // 이미 골랐거나 고칠 수 없으면 상세로
   if (!leaving.current && (i.state !== 'achieved' || !i.canEdit))
@@ -154,9 +154,9 @@ function AfterPage({
   const a = useAfter(item);
   const [v, setV] = useState<After | null>(null);
   return (
-    <QuestionLayout title={copy.afterQ} onBack={onClose}>
+    <QuestionLayout title={copy.afterQ(item.goal.name)} onBack={onClose}>
       <ChoiceCards<After>
-        label={copy.afterQ}
+        label={copy.afterQ(item.goal.name)}
         value={v}
         onChange={setV}
         onPick={(x) => {

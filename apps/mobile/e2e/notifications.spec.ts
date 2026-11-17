@@ -96,7 +96,7 @@ function seedNotis(db: MemDb) {
     noti({
       id: '00000000-0000-4000-8000-000000000001',
       kind: 'partner_change',
-      title: '예빈님이 내 집 마련 저금을 바꿨어요',
+      title: '예빈님이 내 집 마련 저축·투자를 바꿨어요',
       target: '/salary/split',
       actor_id: 'yebin',
       created_at: '2026-10-07T00:48:00Z', // 오늘 09:48 → 12분 전
@@ -159,7 +159,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   const panel = page.getByRole('complementary', { name: '알림' });
   await expect(panel).toBeVisible();
   const today = panel.getByRole('region', { name: '오늘' });
-  await expect(today).toContainText('예빈님이 내 집 마련 저금을 바꿨어요');
+  await expect(today).toContainText('예빈님이 내 집 마련 저축·투자를 바꿨어요');
   await expect(today).toContainText('12분 전');
   await expect(today.locator('.hg-avatar--p2')).toHaveText('예');
   await expect(panel.getByRole('region', { name: '이번 주' })).toContainText(
@@ -260,7 +260,7 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
     noti({
       id: '00000000-0000-4000-8000-000000000050',
       kind: 'goal_achieved',
-      title: '우리 할머니 팔순 잔치와 가족 여행 겸 기념 행사 저금 목표 금액을 다 모았어요',
+      title: '우리 할머니 팔순 잔치와 가족 여행 겸 기념 행사 저축·투자 목표 금액을 다 모았어요',
       target: '/calendar/list',
       icon: 'trophy',
       actor_id: 'yebin',
@@ -288,7 +288,7 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
   const msg = first.locator('.hg-noti__msg');
   await expect(msg).toHaveCSS('white-space', 'nowrap');
   await expect(msg).toHaveCSS('text-overflow', 'ellipsis');
-  await expect(first).toHaveAttribute('title', /행사 저금 목표 금액을 다 모았어요$/);
+  await expect(first).toHaveAttribute('title', /행사 저축·투자 목표 금액을 다 모았어요$/);
   expect(await first.evaluate((e) => Math.round(e.getBoundingClientRect().height))).toBe(64);
 
   // 끝까지 내리면 31개 모두(같은 시각이 빠지지 않음)
@@ -334,5 +334,5 @@ test('이전 값으로 돌리기(14 N-01·N-02, R-08): 돌릴 수 있는 변경 
   expect(db.reverted).toEqual(['00000000-0000-4000-8000-000000000001']);
   await expect(undo).toHaveCount(0);
   // 줄 자체는 그대로(누르면 그 화면)
-  await expect(page.getByText('예빈님이 내 집 마련 저금을 바꿨어요')).toBeVisible();
+  await expect(page.getByText('예빈님이 내 집 마련 저축·투자를 바꿨어요')).toBeVisible();
 });

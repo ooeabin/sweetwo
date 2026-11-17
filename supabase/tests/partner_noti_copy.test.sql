@@ -43,7 +43,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 select public.finish_join();
 reset role;
-select is(pg_temp.last('partner_joined'), '파트너가 합류했어요 / 이제 저금을 같이 봐요', '합류(14, 저금만 공개)');
+select is(pg_temp.last('partner_joined'), '파트너가 합류했어요 / 이제 저축·투자를 같이 봐요', '합류(14, 저축·투자만 공개)');
 
 -- 예빈 해제 요청 → 취소 → 다시 요청 → 찬우 확인
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
@@ -60,7 +60,7 @@ select is(pg_temp.last('unlink_cancelled'), '파트너가 연결 해제 요청�
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.agree_unlink();
-select is(pg_temp.last('unlink_confirmed'), '연결이 해제됐어요 / 내 명의와 내 저금은 그대로 남았어요', 'v2.2 해제 완료(복구 없음, D5)');
+select is(pg_temp.last('unlink_confirmed'), '연결이 해제됐어요 / 내 명의와 내 저축·투자는 그대로 남았어요', 'v2.2 해제 완료(복구 없음, D5)');
 reset role;
 
 -- 다시 연결: 예빈 요청 → 찬우 수락
@@ -115,7 +115,7 @@ select is((select count(*)::int from pg_proc where proname = 'notify_first_goal'
 
 -- 상대 계정 삭제(호칭 없음 → ‘파트너가’), 복구 본문
 select public.account_deletion_for('22222222-2222-2222-2222-222222222222');
-select is(pg_temp.last('partner_deleted'), '파트너가 계정을 삭제했어요 / 내 명의와 내 저금은 그대로 남았어요', '상대 계정 삭제(14)');
+select is(pg_temp.last('partner_deleted'), '파트너가 계정을 삭제했어요 / 내 명의와 내 저축·투자는 그대로 남았어요', '상대 계정 삭제(14)');
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.cancel_account_deletion();

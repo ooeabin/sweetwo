@@ -333,7 +333,7 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   expect(db.goals.find((g) => g.id === 'goal-tv')?.status).toBe('achieved');
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '가전 바꾸기를 어떻게 할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '계속 모을게요' }).click();
   await expect(page.getByText('목표 금액을 지우고 계속 모을게요')).toBeVisible();
   const tv = db.goals.find((g) => g.id === 'goal-tv');
@@ -379,15 +379,15 @@ test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 �
   if (!home) throw new Error('seed');
   Object.assign(home, { status: 'achieved', achieved_seen: [chanwoo.id] });
   await page.goto('/salary/items/goal-h/after');
-  await expect(page.getByRole('heading', { name: '이 저금을 어떻게 할까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '내 집 마련을 어떻게 할까요?' })).toBeVisible();
   await page.getByRole('radio', { name: '그만할게요' }).click();
   await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
   expect(home.closed_at).toBeTruthy();
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('그만 모은 저금이에요')).toBeVisible();
+  await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
   await page.goto('/salary?view=plan');
-  await expect(page.getByText('그만 모은 저금 1개')).toBeVisible();
+  await expect(page.getByText('그만 모은 것 1개')).toBeVisible();
 });
 
 test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주기’면 “개인 저금”, S-13에는 저금마다 공개 없음', async ({
@@ -430,8 +430,8 @@ test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주�
     },
   );
   await page.goto('/salary/items/goal-y');
-  await expect(page.getByRole('heading', { name: '개인 저금' })).toBeVisible();
-  await expect(page.getByText('예빈님 저금이에요. 보기만 할 수 있어요')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '개인 저축·투자' })).toBeVisible();
+  await expect(page.getByText('예빈님이 모으고 있어요. 보기만 할 수 있어요')).toBeVisible();
   // 보기만: ⋯ 메뉴, 고치기 버튼 없음
   await expect(page.getByRole('button', { name: '더보기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '고치기' })).toHaveCount(0);

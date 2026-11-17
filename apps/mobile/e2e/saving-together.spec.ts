@@ -103,7 +103,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   const { c, y, db, s, close } = await pair(browser);
   // 홈 띠 13번과 같은 주소: 상대 저금을 고른 채로
   await c.goto('/salary/bundles/new?goal=goal-y');
-  await expect(c.getByRole('heading', { name: '어떤 저금으로 같이 모을까요?' })).toBeVisible();
+  await expect(c.getByRole('heading', { name: '어떤 저축·투자로 같이 모을까요?' })).toBeVisible();
   await axe(c);
   await c.getByRole('radio', { name: '내 집 마련' }).click();
   await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
@@ -148,7 +148,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await expect(c.getByText('예빈님 결혼 비용')).toBeVisible();
   // 찬우 W-10의 예빈 저금: 합계만 보인다는 한 줄, 금액 칸 없음
   await c.goto('/salary/items/goal-y');
-  await expect(c.getByText('예빈님 저금이에요. 같이 모으기 합계만 보여요')).toBeVisible();
+  await expect(c.getByText('예빈님이 모으고 있어요. 같이 모으기 합계만 보여요')).toBeVisible();
   await expect(c.getByRole('region', { name: '모은 금액' })).toHaveCount(0);
 
   // 각자 금액: 한 사람만 켜면 아직 안 보임, 둘 다 켜야 보임

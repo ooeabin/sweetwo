@@ -30,13 +30,13 @@ export const copy = {
   each: (a: string, x: string, b: string, y: string) => `${a} ${x}, ${b} ${y}`,
   paused: '같이 모으기를 잠시 멈췄어요',
   doneBadge: '다 모았어요',
-  seeAll: '저금 모두 보기',
+  seeAll: '저축·투자 모두 보기',
   emptyAsk: '무엇을 같이 모을까요?',
   /** 빈 상태에 상대 저금 권유가 있을 때 칩(2026-11-14 R4) */
   inviteJoin: '같이 모을게요', // [확인 필요]
   /** 같이 모으기 큰 숫자 아래 이름(묶음 합계, W-02 저금 줄 ‘내 몫’과 나눔, R4) */
   bothSaved: '둘이 모은 금액', // [확인 필요]
-  emptyAdd: '저금 추가', // AddRow(+ 아이콘이 ‘+’)
+  emptyAdd: '저축·투자 추가', // AddRow(+ 아이콘이 ‘+’)
   widgetSaving: '모으는 중', // [확인 필요] 26 WG-01 목표 금액이 없고 금액 가림
   /** 화면 읽기 문장 하나(“같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, …”) */
   togetherLabel: (parts: string[]) => ['같이 모으기', ...parts].filter(Boolean).join(', '),
@@ -124,9 +124,9 @@ export const copy = {
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
-  savingsTile: '저금', // 2026-11-09 사용자에게는 ‘저금’
+  savingsTile: '저축·투자', // 2026-11-17 예전 ‘저금’
   savingCount: (n: number) => `${n}개 모으는 중`,
-  noSavings: '+ 저금 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”). 타일은 저금 목록으로 감(빈 상태에 ‘저금 추가’)
+  noSavings: '+ 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”). 타일은 저금 목록으로 감(빈 상태에 ‘저금 추가’)
 
   // 맨 위 띠
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요] 요청한 사람
@@ -149,7 +149,7 @@ export const copy = {
   monthUsUp: (amount: string) => `+${amount}`,
   monthUsDown: (amount: string) => `−${amount}`,
   monthUsSame: '그대로예요', // [확인 필요] 2026-11-16 줄 이름 ‘지난달보다’ 옆
-  monthUsHidden: (n: number) => `저금 ${n}개 모으는 중`,
+  monthUsHidden: (n: number) => `저축·투자 ${n}개 모으는 중`,
   monthUsCare: '다가올 경조사·기념일',
   monthUsCareOne: (name: string, date: string) => `${name} ${date}`,
   monthUsCareMore: (first: string, more: number) => `${first} 외 ${more}개`,

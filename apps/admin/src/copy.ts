@@ -97,7 +97,7 @@ export const copy = {
   guardTitle: '가드레일', // [확인 필요]
   metricCols: { name: '지표', value: '값', base: '분자 / 분모', limit: '기준', state: '상태' }, // [확인 필요]
   leadingNames: {
-    first_saving: '첫 저금률(최근 30일)',
+    first_saving: '첫 저축·투자 생성률(최근 30일)',
     first_payday: '첫 월급날 확인률(7일 안)',
     auto_line: '자동 줄 설정률(지금)',
     money_in_dated: '수입 적기 사용(이번 달, 날짜 있음)',
@@ -160,7 +160,7 @@ export const copy = {
   invite: (made: string, until: string, used: string | null) =>
     used ? `${made} 발급, ${used} 사용` : `${made} 발급, ${until} 만료`, // [확인 필요]
   counts: (a: number, est: number, g: number, c: number) =>
-    `자산 ${a}개, 그중 추정 ${est}개, 저금 항목 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
+    `자산 ${a}개, 그중 추정 ${est}개, 저축·투자 ${g}개, 끝난 체크리스트 ${c}번`, // [확인 필요]
   planStatus: '이번 달 체크리스트', // [확인 필요]
   checklistStates: { open: '진행 중', done: '다 했어요', closed: '끝남' } as Record<string, string>,
   checklistLine: (label: string, state: string, checked: number, total: number) =>
@@ -277,7 +277,7 @@ export const copy = {
   categories: {
     account: '계정·로그인',
     couple: '커플 연결', // [확인 필요]
-    calc: '저금·월급 체크리스트', // 2026-11-09 사용자 앱 분류와 같게
+    calc: '저축·투자와 월급 체크리스트', // 2026-11-09 사용자 앱 분류와 같게
     sync: '동기화',
     billing: '결제·환불',
     privacy: '개인정보',
@@ -411,7 +411,7 @@ export const copy = {
   gaSteps: {
     signup_completed: '가입',
     onboarding_completed: '온보딩 완료',
-    saving_item_created: '첫 저금',
+    saving_item_created: '첫 저축·투자',
     invite_sent: '초대',
     partner_joined: '합류',
     payday_confirmed: '첫 월급날 확인',
