@@ -46,14 +46,14 @@ export function O30cManager() {
         options={ANSWERS.map((k) => ({
           value: k,
           label: label(k),
-          icon:
-            k === 'me'
-              ? 'user'
-              : k === 'partner'
-                ? 'user-plus'
-                : k === 'together'
-                  ? 'users-three'
-                  : 'wallet',
+          icon: (
+            {
+              me: 'choice-manager-me',
+              partner: 'choice-manager-partner',
+              together: 'choice-manager-together',
+              each: 'choice-manager-each',
+            } as const
+          )[k],
         }))}
       />
     </QuestionLayout>

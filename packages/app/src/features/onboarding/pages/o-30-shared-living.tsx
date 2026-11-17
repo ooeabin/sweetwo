@@ -49,7 +49,7 @@ export function O30SharedLiving() {
         options={(['yes', 'no'] as const).map((k) => ({
           value: k,
           label: copy.sharedLivingChoices[k],
-          icon: k === 'yes' ? 'users-three' : 'user',
+          icon: k === 'yes' ? 'choice-living-shared' : 'choice-living-own',
         }))}
       />
     </QuestionLayout>

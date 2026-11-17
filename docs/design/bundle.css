@@ -378,7 +378,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
    surface-alt를 연하게 해서 흰 바탕 위에서도 보이게 안쪽 1px hairline-soft 테두리. 어드민·웹사이트는 예전 그대로(테두리 없음) */
 .hg-artslot { box-shadow: inset 0 0 0 1px var(--hairline-soft); }
 :where(.hg-admin, .hg-adminauth, .hg-site) .hg-artslot { box-shadow: none; }
-.hg-option__icon.hg-artslot { display: inline-block; width: 36px; height: 36px; border-radius: var(--radius-md); }  /* 선택지 카드 왼쪽 그림 자리(36px 둥근 네모) */
 .hg-intro-steps__icon.hg-artslot { display: inline-block; border-radius: var(--radius-full); background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--hairline); }  /* O-10·O-60 목록 앞 그림 자리(40px 원). 회색 판(plate) 위라 hairline 테두리 */
 /* 2026-11-09 축하 화면 배경(사용자 승인, DESIGN.md ‘색’ 예외): 움직이는 그림 자리가 있는 축하·보상 화면(W-12, O-60, P-10 합류 축하. W-02 끝은 2026-11-12 없앰)의
    화면 위 40~50%만 brand-soft → surface 세로 그라데이션(경계 없음). 카드·띠·다른 화면에는 쓰지 않음.
@@ -472,8 +471,8 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-option[data-autofocus]:focus-visible, .hg-noti__item[data-autofocus]:focus-visible { outline: none; }  /* 2026-11-04 화면에 들어올 때 준 처음 포커스는 테두리 없이(키를 누르면 보임) */
 .hg-option--card.is-on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .hg-option__body { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
-.hg-option__icon { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--surface-alt); color: var(--ink); }
-.hg-option__go { flex: none; color: var(--stone); }  /* 누르면 바로 넘어가는 선택(자동 다음) */
+.hg-option__icon { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); overflow: hidden; }  /* 2026-11-17 선택지 그림은 문구 앞 36px(그림 파일이 있을 때만 그림). 오른쪽 › 는 없앰 */
+.hg-option__icon > img { width: 100%; height: 100%; object-fit: contain; }
 .hg-option__label { font-weight: 600; }
 .hg-option__mark { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; box-sizing: border-box; border-radius: var(--radius-full); border: 2px solid var(--border-control); color: transparent; }
 .hg-option--card.is-on .hg-option__mark { border-color: var(--accent-app); background: var(--accent-app); color: var(--on-accent-app); }  /* 2026-11-09 고른 동그라미는 체크(hg-check)와 같은 오렌지 원 + 체크 */

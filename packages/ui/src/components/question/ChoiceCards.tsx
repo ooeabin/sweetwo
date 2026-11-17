@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { cx } from '../cx';
-import { Icon, type IconName } from '../Icon';
+import { Icon } from '../Icon';
+import { Illustration, hasIllustration } from '../Illustration';
 
 // Q1 단일 선택(docs/spec/12-question-pattern.md Q1, 디자인 Selection ‘hg-option--card’).
 // 고르면 0.3초 뒤 onPick(그 사이 바꾸면 다시 셈). 1~9 키로 n번째 선택.
@@ -14,9 +15,36 @@ export interface Choice<T extends string> {
   tag?: string;
   /** 고를 수 없음(is-disabled) */
   disabled?: boolean;
-  /** 선택지 그림 주제(2D 플랫 그림 자리, Illustrations ‘나중 과제’ 5번). 그림이 들어올 때까지 36px 회색 빈 자리(hg-artslot, 2026-11-09) */
-  icon?: IconName;
+  /** 선택지 그림 주제(2D 플랫 그림 파일 이름, Illustrations ‘선택지 그림’ 표). 문구 앞 36px. 파일이 없으면 자리도 없음(2026-11-15) */
+  icon?: ChoiceArt;
 }
+
+/** 선택지 그림 주제 = 그림 파일 이름(`packages/ui/src/assets/illustrations/{이름}.webp`). 표는 docs/design/assets/Illustrations.md ‘선택지 그림’ */
+export type ChoiceArt =
+  | 'choice-married'
+  | 'choice-engaged'
+  | 'choice-dating'
+  | 'choice-living-together'
+  | 'choice-living-shared'
+  | 'choice-living-own'
+  | 'choice-saving-shared'
+  | 'choice-saving-own'
+  | 'choice-manager-me'
+  | 'choice-manager-partner'
+  | 'choice-manager-together'
+  | 'choice-manager-each'
+  | 'choice-style-ok'
+  | 'choice-style-send'
+  | 'choice-share-all'
+  | 'choice-share-saving'
+  | 'choice-share-done'
+  | 'choice-vis-all'
+  | 'choice-vis-sum'
+  | 'choice-vis-private'
+  | 'choice-export-mine'
+  | 'choice-export-joint'
+  | 'choice-export-csv'
+  | 'choice-export-pdf';
 
 export function ChoiceCards<T extends string>({
   label,
@@ -27,7 +55,6 @@ export function ChoiceCards<T extends string>({
   autoAdvance = true,
   autoFocus = true,
   shortcuts = true,
-  go,
 }: {
   label: string;
   options: Choice<T>[];
@@ -40,10 +67,9 @@ export function ChoiceCards<T extends string>({
   autoFocus?: boolean;
   /** 1~9 키로 고르기(한 화면에 묶음이 여럿이면 하나만) */
   shortcuts?: boolean;
-  /** 오른쪽 표시: 누르면 바로 넘어가면 ›, 고른 뒤 ‘다음’이면 동그라미. 기본은 자동 다음이면 › */
-  go?: boolean;
 }) {
-  const chevron = go ?? (autoAdvance && !!onPick);
+  // 오른쪽 끝: 고른 뒤 ‘다음’을 누르는 카드만 동그라미. 누르면 바로 넘어가는 카드는 › 없음(2026-11-17 사용자 결정)
+  const showMark = !(autoAdvance && !!onPick);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const first = useRef<HTMLButtonElement>(null);
 
@@ -115,7 +141,12 @@ export function ChoiceCards<T extends string>({
             aria-disabled={o.disabled || undefined}
             onClick={() => pick(o.value)}
           >
-            {/* 선택지 그림(o.icon, Illustrations ‘나중 과제’ 5번)은 2D 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */}
+            {/* 선택지 그림(o.icon): 파일이 있을 때만 문구 앞 36px. 없으면 자리도 비우지 않음(2026-11-15 3차 검토) */}
+            {hasIllustration(o.icon) && (
+              <span className="hg-option__icon" aria-hidden="true">
+                <Illustration name={o.icon} />
+              </span>
+            )}
             <span className="hg-option__body">
               <span className="hg-option__label">
                 {o.label}
@@ -128,11 +159,7 @@ export function ChoiceCards<T extends string>({
               {o.sub && <span className="hg-help">{o.sub}</span>}
               {o.detail}
             </span>
-            {chevron ? (
-              <span className="hg-option__go" aria-hidden="true">
-                <Icon name="chevron-right" />
-              </span>
-            ) : (
+            {showMark && (
               <span className="hg-option__mark" aria-hidden="true">
                 <Icon name="check" size={16} />
               </span>

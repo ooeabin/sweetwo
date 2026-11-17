@@ -129,11 +129,16 @@ export function P02aMoveRecords({
             value={vis[open] ?? 'sum'}
             onChange={(v) => setVis({ ...vis, [open]: v })}
             onPick={() => setOpen(null)}
-            // 고르는 선택지라 › 대신 동그라미(라디오형, S3-26)
-            go={false}
             options={(['all', 'sum', 'private'] as Vis[]).map((v) => ({
               value: v,
               label: copy.moveVis[v] ?? v,
+              icon: (
+                {
+                  all: 'choice-vis-all',
+                  sum: 'choice-vis-sum',
+                  private: 'choice-vis-private',
+                } as const
+              )[v],
             }))}
           />
         </BottomSheet>

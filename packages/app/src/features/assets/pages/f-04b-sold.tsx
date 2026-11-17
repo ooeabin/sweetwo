@@ -129,7 +129,6 @@ export function F04bSold() {
           label={copy.soldHow}
           value={null}
           onChange={() => undefined}
-          go
           onPick={(v) => {
             setPart(v === 'part');
             setStep('amount');
