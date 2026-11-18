@@ -7,7 +7,9 @@ const RULES: [RegExp, string][] = [
   [/^\/(?:salary\/items|goals)\/[^/?]+/, 'W-10'],
   [/^\/salary\/split\/new/, 'W-01b'],
   [/^\/salary\/split\/[^/?]+/, 'W-01c'],
-  [/^\/salary\?(?:.*&)?view=plan/, 'W-01'],
+  [/^\/salary\/plan(?:[?#]|$)/, 'W-01'], // 2026-11-18 별도 화면
+  [/^\/salary\/items(?:[?#]|$)/, 'W-01'], // 옛 W-13(2026-11-18 없앰) → W-01 저축·투자 묶음
+  [/^\/salary\?(?:.*&)?view=plan/, 'W-01'], // 옛 구간 탭 주소(서버가 보낸 지난 알림)
   [/^\/salary(?:\/split)?(?:\?|$)/, 'W-02'],
   [/^\/assets\/[^/?]+\/matured/, 'F-04a'],
   [/^\/assets\/[^/?]+/, 'F-04'],

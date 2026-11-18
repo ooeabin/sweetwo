@@ -154,18 +154,25 @@ export function ReceiptSection({
   subtotal,
   children,
   label,
+  id,
+  action,
 }: {
   title?: string;
   subtotal?: ReactNode;
+  /** 묶음 머리 오른쪽 ⋯ 메뉴 같은 것(2026-11-18 저축·투자 묶음) */
+  action?: ReactNode;
   children: ReactNode;
   label?: string;
+  /** 주소 `#saving`으로 스크롤할 자리(2026-11-18) */
+  id?: string;
 }) {
   return (
-    <section className="hg-receipt__sec" aria-label={label ?? title}>
+    <section id={id} className="hg-receipt__sec" aria-label={label ?? title}>
       {title && (
         <div className="hg-receipt__sechead">
           <h3 className="hg-receipt__title">{title}</h3>
           {subtotal && <span className="hg-receipt__subtotal">{subtotal}</span>}
+          {action}
         </div>
       )}
       {children}
@@ -208,8 +215,12 @@ export interface ReceiptLine {
   muted?: boolean;
   /** 자동 줄 알약(2026-11-13 hg-autopill “자동 26일”), 금액 왼쪽 */
   auto?: string;
-  /** 이름 아래 회색 한 줄(2026-11-13 보내기 줄 “월급 − 용돈”) */
+  /** 이름 아래 회색 한 줄(2026-11-13 보내기 줄 “월급 − 용돈”, 2026-11-18 저축·투자 줄 “모은 금액 1,240만 원”) */
   note?: string;
+  /** 이름 아래 진행 막대 + 글자 “목표 금액의 62%”(2026-11-18 W-01 저축·투자 줄, 막대는 그래픽이라 뜻은 글자로도) */
+  progress?: { percent: number; label: string };
+  /** 새로 만든 줄 잠깐 강조(2026-11-18, ‘동작 줄이기’면 없음) */
+  fresh?: boolean;
 }
 
 export interface ReceiptEditLabels {
@@ -307,6 +318,14 @@ export function ReceiptRows({
               <span className="hg-receipt__name">
                 {l.name}
                 {l.note && <span className="hg-receipt__note">{l.note}</span>}
+                {l.progress && (
+                  <span className="hg-receipt__prog">
+                    <span className="hg-receipt__progbar" aria-hidden="true">
+                      <i style={{ width: `${l.progress.percent}%` }} />
+                    </span>
+                    <span className="hg-receipt__proglabel">{l.progress.label}</span>
+                  </span>
+                )}
               </span>
               {l.auto ? (
                 <span className="hg-receipt__autocol">
@@ -325,6 +344,7 @@ export function ReceiptRows({
                 'hg-receipt__row',
                 dragging && 'is-dragging',
                 open === l.id && 'is-open',
+                l.fresh && 'is-new',
               )}
               style={
                 dragging

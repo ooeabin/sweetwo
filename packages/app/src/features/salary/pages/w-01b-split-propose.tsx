@@ -74,7 +74,7 @@ export function W01bSplitPropose() {
   const c = coupleOf(me.data, space.data, partner.data ?? null);
   const name = chip === 'self' ? own.trim() : chip ? (t.nameChips[chip] ?? '') : '';
   const nameCode = chip === 'living' || chip === 'date' ? chip : 'custom';
-  const back = () => nav('/salary?view=plan');
+  const back = () => nav('/salary/plan');
   const unitOk = (v: number | null) => v !== null && v > 0 && v % 10_000 === 0;
   // 월급 비율: 두 사람 모두 ‘모두 보여 주기’ + 월급. 상대 값은 partner_plan_view가 ‘모두’일 때만 줌
   const ratioOk =
@@ -107,7 +107,7 @@ export function W01bSplitPropose() {
       else await addSplitLine(sp.id, { kind: 'shared_account', amount: total });
       await Promise.all(splitAccountKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
       carryToast(t.added);
-      nav('/salary?view=plan', { replace: true });
+      nav('/salary/plan', { replace: true });
     } catch {
       toast(copy.failed);
       setBusy(false);
@@ -121,7 +121,7 @@ export function W01bSplitPropose() {
       track('split_proposed', { name_code: nameCode, rule });
       await Promise.all(splitAccountKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
       carryToast(t.proposed(c.partnerName));
-      nav('/salary?view=plan', { replace: true });
+      nav('/salary/plan', { replace: true });
     } catch (e) {
       toast(
         e instanceof SplitProposeBlocked && e.reason === 'not_connected'

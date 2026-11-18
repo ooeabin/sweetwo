@@ -103,8 +103,17 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(page.getByText('지금 속도면 2027년 7월에 다 모아요')).toBeVisible();
   await page.getByRole('button', { name: '추가하기' }).click();
   // 끝나면 미합류는 초대 시트(20 W-11 고친 점)
-  await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}\?ask=invite$/);
+  // 2026-11-18: 만들면 W-01 월급 계획 템플릿 ‘저축·투자’ 묶음으로: 새 줄 강조 + Toast, 초대 물음은 거기서
+  await expect(page).toHaveURL(/\/salary\/plan/);
+  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
+  // 이 시드는 아직 안 정한 월급이 모자라 “모자라요” Toast(addShort)가 뜸
+  await expect(page.locator('.hg-toasts')).toBeVisible();
+  await expect(page.locator('.hg-receipt__row.is-new')).toContainText('제주 여행');
+  await expect(page.locator('.hg-receipt__row.is-new')).toContainText('매달 20만 원');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
+  // 줄을 누르면 W-10 상세
+  await page.getByRole('button', { name: /^제주 여행/ }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { name: '제주 여행' })).toBeVisible();
   // W-10: 늦어지는 사실 한 줄 + 할 일(2026-11-09)
   const target = page.getByRole('region', { name: '모은 금액' });
@@ -113,7 +122,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
   // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(아직 안 정한 월급을 같이 봄)
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await expect(page.getByRole('dialog', { name: '제주 여행 금액' })).toBeVisible();
   await page.goBack();
   const g = db.goals.find((x) => x.name === '제주 여행');
@@ -136,7 +145,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
-  await expect(page.getByRole('heading', { name: '적금' })).toBeVisible();
+  await expect(page).toHaveURL(/\/salary\/plan/);
+  await expect(page.getByRole('button', { name: /^적금/ })).toBeVisible();
   expect(db.goals.find((x) => x.name === '적금')?.target_amount).toBeNull();
 
   // 휠을 건드리지 않고 추가하면 기한 = 1년 뒤(20 W-11d, 다음 달로 잡히던 것 고침)
@@ -149,7 +159,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('1500000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추가하기' }).click();
-  await expect(page.getByRole('heading', { name: '노트북' })).toBeVisible();
+  await expect(page).toHaveURL(/\/salary\/plan/);
+  await expect(page.getByRole('button', { name: /^노트북/ })).toBeVisible();
   expect(db.goals.find((x) => x.name === '노트북')).toMatchObject({ deadline: '2027-10-01' });
   expect(
     db.splits[0]?.split_line.find(
@@ -184,8 +195,12 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   // 월 필요액은 남은 1,000만 기준: 1년 뒤(13개월) → 77만(올림)
   await expect(page.getByText('기한까지 매달 77만 원이면 돼요')).toBeVisible();
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
-  await expect(page.getByRole('heading', { name: '결혼 비용' })).toBeVisible();
+  await expect(page).toHaveURL(/\/salary\/plan/);
+  await expect(page.getByRole('button', { name: /^결혼 비용/ })).toBeVisible();
   await page.getByRole('button', { name: '나중에 할게요' }).click();
+  // 묶음 줄에도 모은 금액·진행이 보이고, 줄을 누르면 W-10
+  await expect(page.getByText('목표 금액의 66%')).toBeVisible();
+  await page.getByRole('button', { name: /^결혼 비용/ }).click();
   const g = db.goals.find((x) => x.name === '결혼 비용');
   expect(g).toMatchObject({ start_saved: 20_000_000, target_amount: 30_000_000 });
   await expect(page.getByText('2,000만 원', { exact: true }).first()).toBeVisible();
@@ -386,7 +401,7 @@ test('W-12a ‘그만할게요’: 월급 계획 줄이 빠지고 W-01 접힌 �
   expect(db.splits[0]?.split_line.some((l) => l.goal_id === 'goal-h')).toBe(false);
   await page.goto('/salary/items/goal-h');
   await expect(page.getByText('그만 모으기로 했어요')).toBeVisible();
-  await page.goto('/salary?view=plan');
+  await page.goto('/salary/plan');
   await expect(page.getByText('그만 모은 것 1개')).toBeVisible();
 });
 

@@ -129,8 +129,8 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   seed(db);
   joinYebin(db);
   await page.goto('/salary');
-  await page.getByRole('tab', { name: '계획' }).click();
-  await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await page.getByRole('tab', { name: '예빈' }).click();
   await expect(page.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
@@ -210,7 +210,7 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
   joinYebin(db);
   Object.assign(db.space ?? {}, { couple_state: 'unlink_pending' });
   await page.goto('/salary/split');
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await expect(
     page.getByText('연결 해제를 기다리는 동안에는 월급 계획을 고칠 수 없어요'),
   ).toBeVisible();

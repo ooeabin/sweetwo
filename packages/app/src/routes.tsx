@@ -99,7 +99,8 @@ import {
   W11SavingAdd,
   W12SavingAchieved,
   W12aSavingAfter,
-  W13SavingList,
+  SalaryPlanTab,
+  SavingListRedirect,
   W01bSplitPropose,
   W01cSplitAnswer,
 } from './features/salary';
@@ -148,14 +149,15 @@ export const routes: RouteObject[] = [
       },
       ...(
         [
-          ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary?view=plan(2026-11-09)
+          ['/salary/split', <SplitRedirect key="w01r" />], // 옛 W-01 주소 → /salary/plan(2026-11-18)
           ['/salary/split/new', <W01bSplitPropose key="w01b" />], // W-01b 분담 도우미(제안하는 쪽, v2.2)
           ['/salary/split/:id', <W01cSplitAnswer key="w01c" />], // W-01c 분담 제안 확인(받은 사람, 서버 알림 링크)
-          ['/salary', <SalaryTab key="w02" />], // 월급 탭: ‘이번 달’ W-02 / ‘계획’ W-01 영수증(?view=plan)
+          ['/salary', <SalaryTab key="w02" />], // W-02 이번 달 월급 체크(옛 ?view=plan은 /salary/plan으로 넘김)
+          ['/salary/plan', <SalaryPlanTab key="w01" />], // W-01 월급 계획 템플릿(2026-11-18 구간 탭 없앰)
           ['/salary/done', <DoneRedirect key="w02e" />], // 옛 W-02 끝(2026-11-12 없앰) → W-02
           ['/salary/review', <Navigate key="w05" to="/salary" replace />], // 옛 W-05 월급 전 확인(2026-11-15 없앰, 알림 옛 링크) → W-02
           ['/salary/auto-lines', <W01dAutoLines key="w01d" />], // W-01d 자동으로 나가는 것 고르기(2026-11-13)
-          ['/salary/items', <W13SavingList key="w13" />], // W-13 저금 목록(2026-11-09 round 3)
+          ['/salary/items', <SavingListRedirect key="w13r" />], // 옛 W-13(2026-11-18 없앰) → W-01 저축·투자 묶음
           ['/salary/items/new/:step?', <W11SavingAdd key="w11" />], // W-11a~d 저금 항목 추가
           ['/salary/items/:id', <W10SavingItem key="w10" />], // W-10 저금 항목 상세
           ['/salary/items/:id/edit/:field', <W10aSavingEdit key="w10a" />], // W-10a 고치기

@@ -53,10 +53,10 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
-import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { planPath, salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
 import { MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
-import { SalaryLoadError, SalaryLoading, SalarySeg } from '../salary-tab';
+import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
 import { useFirstSaving, useSavingItems } from '../saving';
 import { AchieveWatch, FirstSavingRow, SavingGoalRow, SavingMeta } from '../saving-parts';
 import { LastMonthNote, lateLines, lateOpen } from './w-02-last-month';
@@ -88,6 +88,9 @@ export function W02PaydayConfirm() {
   const cycleParam = params.get('cycle');
   // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
   const fromArchive = (loc.state as { from?: string } | null)?.from === 'archive';
+  // W-01 ‘이번 달 월급 체크 ›’ 링크로 열었으면 ‹ = W-01(2026-11-18), 아니면 홈
+  const fromPlan = (loc.state as { from?: string } | null)?.from === 'plan';
+  const title = useSalaryTitle('month');
   const splits = useSplits();
   const accountNames = useAccountNames();
   const shownPayday = useShownPayday();
@@ -173,7 +176,7 @@ export function W02PaydayConfirm() {
 
   const pending = sp.couple_state === 'unlink_pending';
   const page = {
-    title: copy.tabTitle,
+    title,
     actions:
       list && !pending ? (
         <Button
@@ -190,6 +193,7 @@ export function W02PaydayConfirm() {
       current="salary"
       sub={fromArchive ? 'detail' : undefined}
       page={fromArchive ? undefined : page}
+      onBack={fromPlan ? () => nav(-1) : undefined}
       columns={[
         <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
           {fromArchive ? (
@@ -199,17 +203,27 @@ export function W02PaydayConfirm() {
               backTo={copy.archiveTitle}
               onBack={() => nav(-1)}
             />
-          ) : (
-            <SalarySeg value="month" />
-          )}
+          ) : null}
           {body}
         </div>,
       ]}
     />
   );
-  // W-21 지난 달 모아보기 링크(머리 링크 규칙: slate 500, hg-sechead__more)
-  const archiveLink = !fromArchive && (
+  // 머리 이동 링크(slate 500, hg-sechead__more): 왼쪽 ‘월급 계획 템플릿 ›’(W-01, 2026-11-18 구간 탭 대신), 오른쪽 ‘지난 달 모아보기 ›’(W-21, 2026-11-17)
+  const headLinks = !fromArchive && (
     <div className="hg-sechead">
+      <a
+        className="hg-sechead__more"
+        style={{ marginLeft: 0 }}
+        href={planPath({ who })}
+        onClick={(e) => {
+          e.preventDefault();
+          nav(planPath({ who }), { state: { from: 'month' } });
+        }}
+      >
+        {copy.planLink}
+        <Icon name="chevron-right" size={16} />
+      </a>
       <a
         className="hg-sechead__more"
         href={`${salaryPaths.archive}?from=w02`}
@@ -223,6 +237,7 @@ export function W02PaydayConfirm() {
       </a>
     </div>
   );
+  const archiveLink = headLinks;
 
   const base = baseDayOf(me.data, sp);
   const mySplit = (splits.data ?? []).find((x) =>
@@ -248,7 +263,7 @@ export function W02PaydayConfirm() {
           <SectionHeader
             variant="group"
             title={copy.savingGroup}
-            onTitle={() => nav(`${savingPaths.list}?from=checklist`)}
+            onTitle={() => nav(savingListPath('checklist'), { state: { from: 'month' } })}
             titleLabel={copy.listOpen}
           />
           {mine.map((i) => (
@@ -286,6 +301,7 @@ export function W02PaydayConfirm() {
     if (mySplit)
       return frame(
         <>
+          {headLinks}
           <section className="hg-card hg-card--fill hg-stack">
             <p className="hg-card__meta">
               {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
@@ -528,7 +544,7 @@ export function W02PaydayConfirm() {
     }
   };
   const more = (past.data?.length ?? 0) > ago;
-  const openList = () => nav(`${savingPaths.list}?from=checklist`);
+  const openList = () => nav(savingListPath('checklist'), { state: { from: 'month' } });
   const groups = (
     [
       [copy.savingGroup, manual.filter((l) => l.kind === 'saving')],

@@ -221,7 +221,6 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     '월급',
     '이번 달 월급 체크',
     '월급 계획 템플릿',
-    '저축·투자',
     '지난 달 모아보기',
     '자산 관리',
     '자산·부채',
@@ -232,15 +231,16 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     '초대하기',
     '도움말',
   ]);
-  await expect(drawer.locator('.hg-drawer__sub')).toHaveCount(8);
+  await expect(drawer.locator('.hg-drawer__sub')).toHaveCount(7);
   await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
-  for (const name of ['홈', '문의', '공지', '우리 둘', '내 정보', '설정', '알림'])
+  // 2026-11-18: ‘저축·투자’ 줄은 W-01 월급 계획 템플릿 안 묶음으로 합쳐 없앰
+  for (const name of ['홈', '문의', '공지', '우리 둘', '내 정보', '설정', '알림', '저축·투자'])
     await expect(drawer.getByRole('button', { name, exact: true })).toHaveCount(0);
   await expect(drawer.locator('.hg-drawer__foot')).toHaveCount(0);
   // 홈에서 열어 지금 화면 줄 없음
   await expect(drawer.locator('[aria-current="page"]')).toHaveCount(0);
   // 하위 줄 누르는 칸 44px 이상, 머리 줄보다 들여씀
-  const sub = drawer.getByRole('button', { name: '저축·투자', exact: true });
+  const sub = drawer.getByRole('button', { name: '월급 계획 템플릿', exact: true });
   const head = drawer.getByRole('button', { name: '월급', exact: true });
   expect((await sub.boundingBox())?.height).toBeGreaterThanOrEqual(44);
   const padLeft = (el: Element) => parseFloat(getComputedStyle(el).paddingLeft);
@@ -260,8 +260,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   for (const [name, url] of [
     ['월급', /\/salary$/],
     ['이번 달 월급 체크', /\/salary$/],
-    ['월급 계획 템플릿', /\/salary\?view=plan$/],
-    ['저축·투자', /\/salary\/items$/],
+    ['월급 계획 템플릿', /\/salary\/plan$/],
     ['지난 달 모아보기', /\/salary\/archive$/],
     ['자산 관리', /\/assets$/],
     ['자산·부채', /\/assets\/items$/],
@@ -276,6 +275,19 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     await drawer.getByRole('button', { name, exact: true }).click();
     await expect(page).toHaveURL(url);
     await expect(drawer).toHaveCount(0);
+    // 화면 이름 = 서랍 줄 이름(2026-11-18): 서랍 하위 줄로 간 화면의 머리 제목이 줄 이름과 같음(탭 머리 줄은 탭 첫 화면 이름)
+    const same = [
+      '이번 달 월급 체크',
+      '월급 계획 템플릿',
+      '지난 달 모아보기',
+      '자산·부채',
+      '자산 순위',
+      '달력',
+      '선물 기록',
+      '도움말',
+    ];
+    if (same.includes(name))
+      await expect(page.getByRole('heading', { name, exact: true, level: 1 })).toBeVisible();
     // 서랍은 홈에서 쌓으므로 뒤로 = 홈
     await page.goBack();
     await expect(page).toHaveURL(/\/$/);

@@ -76,7 +76,7 @@ export function CalendarFrame({
     <MainFrame
       current="calendar"
       page={{
-        title: copy.title,
+        title: copy.monthTitle, // 제목 = 서랍 줄 이름 ‘달력’(2026-11-18)
         actions: (
           // 넓은 창만. 좁은 창은 보기 필터 줄 오른쪽 ‘+ 일정 추가’(2026-11-09 + 버튼 대신).
           // 메뉴 제목 줄 ‘추가’는 보조 버튼(DESIGN.md 브랜드 색 ‘바꾸지 않는 것’, 2026-11-12 QA 8구간 S8-11)

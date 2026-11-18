@@ -16,3 +16,10 @@
 - 카드 아래(`hg-receipt-actions`): 꽉 찬 `hg-btn--outline`(흰 테두리 보조 버튼, ‘편집하기’) 한 줄 + 가운데 글자 버튼 줄(‘공유하기’ `hg-btn--link`, ‘추천값으로 다시 채우기’ `hg-btn--quiet`).
 - 다크 모드는 토큰 그대로(바탕 `surface-alt`가 카드보다 밝음). ‘동작 줄이기’면 줄 배경 전환 없음.
 - 이미지 공유(W-01 ‘공유하기’, W-02 다 끝난 달 ‘공유하기’)는 앱이 같은 숫자와 같은 토큰 색(그때 테마)으로 canvas에 다시 그림(`features/salary/receipt-image.ts`). 이 카드 모양(톱니, 막대, 범례, 묶음 선)을 그대로 따름. 달 결과 이미지는 제목(`title`), 진행 막대(`progress`, 범례 없음), 줄 `sub`·`muted`도 같게.
+
+## 저축·투자 줄과 새 줄 강조 (2026-11-18, W-01 ‘저축·투자’ 묶음, 옛 W-13 합침)
+
+- `ReceiptLine`에 `note`(이름 아래 `stone` 한 줄 “모은 금액 1,240만 원”), `progress`(`{ percent, label }`: 이름 아래 진행 막대 `hg-receipt__progbar`(6px, `bar-track` 바탕 위 `accent-app` 오렌지 — 저금 목록 줄 `hg-goalrow__bar`와 같은 규칙) + 글자 `hg-receipt__proglabel`(`text-caption` `stone`, “목표 금액의 62%”)), `fresh`(새로 만든 줄 강조)를 씀. 막대는 그래픽이라 뜻은 늘 글자로도 전함. 큰 금액은 “매달 30만 원”.
+- `fresh`: 줄에 `is-new`. 배경 `brand-soft` → 투명, `dur-slow` × 6(약 1.5초) 한 번, ‘동작 줄이기’면 움직임 없음.
+- `ReceiptSection`은 `id`(주소 `#saving` 스크롤 자리)와 `action`(머리 오른쪽 ⋯ 메뉴)을 받음.
+- 머리 `extra`(예전 “이번 달 3/5 확인했어요 ›” `hg-receipt__link`)는 2026-11-18부터 W-01이 쓰지 않음(맨 위 머리 이동 링크로 옮김).

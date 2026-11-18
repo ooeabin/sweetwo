@@ -124,9 +124,6 @@ export const copy = {
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
-  savingsTile: '저축·투자', // 2026-11-17 예전 ‘저금’
-  savingCount: (n: number) => `${n}개 모으는 중`,
-  noSavings: '+ 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”). 타일은 저금 목록으로 감(빈 상태에 ‘저금 추가’)
 
   // 맨 위 띠
   unlinkWait: '연결 해제를 기다리고 있어요', // [확인 필요] 요청한 사람

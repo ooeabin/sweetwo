@@ -143,7 +143,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await axe(y);
 
   // 찬우 W-13: 묶음 한 줄, 펼치면 예빈 줄은 이름만(금액 없음)
-  await c.goto('/salary/items');
+  await c.goto('/salary/plan#saving');
   await c.getByRole('button', { name: '결혼 비용 펼치기' }).click();
   await expect(c.getByText('예빈님 결혼 비용')).toBeVisible();
   // 찬우 W-10의 예빈 저금: 합계만 보인다는 한 줄, 금액 칸 없음

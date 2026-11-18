@@ -2,7 +2,7 @@ import { test, expect, type Page, type Route } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, type MemDb, mockOnboarding, seed } from './mocks';
 
-// W-01 월급 계획 영수증(20 W-01, 2026-11-09): 월급 탭 구간 탭 ‘계획’(/salary?view=plan), 줄마다 바로 저장 + 되돌리기,
+// W-01 월급 계획 영수증(20 W-01, 2026-11-09): 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰), 줄마다 바로 저장 + 되돌리기,
 // 지출 추가 칩, 기본 줄 지우기, 편집 모드 순서(키보드), 파트너 탭 보기만, 합쳐서(두 Avatar, 합), 모자람, 공유(브라우저 = 내려받기),
 // 금액 가리기. 찬우(시작) 350만 원 25일, 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·생활비 88만·용돈 35만.
 const NOW = new Date('2026-10-07T10:00:00+09:00');
@@ -19,14 +19,17 @@ const waitLine = (db: MemDb, kind: string) =>
     (l) => l.kind === kind && l.state === 'wait',
   );
 const listNames = (page: Page, group: string) =>
-  page.getByRole('list', { name: group }).locator('.hg-receipt__name').allTextContents();
+  page
+    .getByRole('list', { name: group })
+    .locator('.hg-receipt__name')
+    .evaluateAll((els) => els.map((e) => e.firstChild?.textContent ?? ''));
 // 지출 묶음은 맨 위 용돈 줄 목록(‘용돈’) + 나머지 지출(‘지출’)(2026-11-16 R4-3)
 const names = async (page: Page, group: string) =>
   group === '지출'
     ? [...(await listNames(page, '용돈')), ...(await listNames(page, '지출'))]
     : listNames(page, group);
 
-async function open(page: Page, url = '/salary?view=plan') {
+async function open(page: Page, url = '/salary/plan') {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -63,12 +66,13 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('보기: 구간 탭 ‘계획’, 머리·비율·묶음·합계, + 버튼 없음, ‘이번 달’로 돌아감', async ({
+test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶음·합계, + 버튼 없음, ‘이번 달 월급 체크 ›’로 갔다 옴', async ({
   page,
 }) => {
   const { go } = await open(page);
   await go();
-  await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
+  await expect(page.getByRole('tab', { name: '계획' })).toHaveCount(0); // 구간 탭 없음(2026-11-18)
   const card = page.locator('.hg-receipt');
   await expect(card.locator('.hg-receipt__amount')).toHaveText('350만 원');
   await expect(card.getByText('매달 25일')).toBeVisible();
@@ -91,11 +95,13 @@ test('보기: 구간 탭 ‘계획’, 머리·비율·묶음·합계, + 버튼 
   await expect(page).toHaveURL(/\/settings\/me$/);
   // 옛 주소 /salary/split → 계획, ‘이번 달’ → W-02
   await page.goto('/salary/split');
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
-  await page.getByRole('tab', { name: '이번 달' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan$/);
+  await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
+  await expect(page).toHaveURL(/\/salary$/);
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
-  await page.getByRole('tab', { name: '계획' }).click();
-  await expect(page.getByRole('tab', { name: '계획' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan$/);
+  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
 });
 
 test('금액 바꾸기: 시트(아직 안 정한 월급 미리보기) → 바로 저장 + 되돌리기, 이번 달 체크 안 한 줄도', async ({
@@ -172,7 +178,8 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
   // 저금 줄: 확인 Modal → 그만 모음
-  await page.getByRole('button', { name: '청약 44만 원' }).click();
+  // 저축·투자 줄을 누르면 W-10 상세로 가고(2026-11-18), 줄 시트는 W-10 ‘매달 금액 바꾸기’(?line=)나 편집하기에서
+  await page.goto('/salary/plan?line=goal-e');
   await page
     .getByRole('dialog', { name: '청약 금액' })
     .getByRole('button', { name: '청약 줄 지우기' })
@@ -193,7 +200,7 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
   await go();
   await page.getByRole('button', { name: '편집하기' }).click();
   await expect(page.getByRole('heading', { name: '월급 계획 편집' })).toBeVisible();
-  await expect(page.getByRole('tab', { name: '계획' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
   // 기본 줄도 지우기(마우스 기기는 늘 보임)
   await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
   await axe(page);
@@ -216,16 +223,16 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
       .map((l) => l.kind),
   ).toEqual(['saving', 'saving', 'allowance', 'living', 'fixed']);
   // 이번 달 체크리스트도 같은 순서
-  await page.getByRole('tab', { name: '이번 달' }).click();
+  await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
-  await page.getByRole('tab', { name: '계획' }).click();
+  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
   await page.getByRole('button', { name: '편집하기' }).click();
   await page.getByRole('button', { name: '완료' }).click();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
 });
 
 test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없음, 공유는 있음', async ({ page }) => {
-  const { db, go } = await open(page, '/salary?view=plan&who=yebin');
+  const { db, go } = await open(page, '/salary/plan?who=yebin');
   joinYebin(db);
   await go();
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
@@ -233,8 +240,9 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(card.getByText('매달 10일')).toBeVisible();
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
-  // 누를 수 있는 건 머리 아래 ‘이번 달 0/2 체크했어요 ›’ 링크 하나(2026-11-09)
-  await expect(card.getByRole('button')).toHaveText(['이번 달 0/2 확인했어요']);
+  // 영수증 안에는 누를 수 있는 것이 없음(머리 이동 링크 ‘이번 달 월급 체크 ›’는 맨 위, 2026-11-18)
+  await expect(card.getByRole('button')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toBeVisible();
   for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
@@ -333,7 +341,7 @@ test('금액 가리기: 영수증 금액은 •••, 공유 이미지도 가�
   await go();
   const card = page.locator('.hg-receipt');
   await expect(card.locator('.hg-receipt__amount')).toHaveText('•••');
-  await expect(card.locator('.hg-receipt__amt').first()).toHaveText('•••');
+  await expect(card.locator('.hg-receipt__amt').first()).toHaveText('매달 •••');
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();
   await dl;
@@ -346,11 +354,11 @@ test('금액 가리기: 영수증 금액은 •••, 공유 이미지도 가�
 test('W-10 ‘매달 금액 바꾸기’ 주소(?line=): 그 저금 줄 시트를 열고 시작, ‘저금 보기’', async ({
   page,
 }) => {
-  const { go } = await open(page, '/salary?view=plan&line=goal-h');
+  const { go } = await open(page, '/salary/plan?line=goal-h');
   await go();
   const sheet = page.getByRole('dialog', { name: '내 집 마련 금액' });
   await expect(sheet).toBeVisible();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await sheet.getByRole('button', { name: '저축·투자 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
@@ -417,7 +425,7 @@ test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async (
 });
 
 test('파트너 탭(각자)인데 파트너 월급 계획이 없으면 빈 카드(D3)', async ({ page }) => {
-  const { db, go } = await open(page, '/salary?view=plan&who=yebin');
+  const { db, go } = await open(page, '/salary/plan?who=yebin');
   joinYebin(db);
   db.splits = db.splits.filter((s) => s.owner_user_id !== 'yebin');
   await go();
@@ -436,7 +444,7 @@ test('못 불러오면 오류 카드 + 다시 시도, 구간 탭은 그대로(S5
   );
   await go();
   await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByRole('tab', { name: '계획' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
   fail = false;
   await page.getByRole('button', { name: '다시 시도' }).click();
   await expect(page.locator('.hg-receipt')).toBeVisible();
@@ -449,14 +457,15 @@ test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', asyn
   await context.setOffline(true);
   await page.getByRole('button', { name: '+ 추가' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await context.setOffline(false);
 });
 
 test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page }) => {
   const { go } = await open(page);
   await go();
-  await page.getByRole('button', { name: '청약 44만 원' }).click();
+  // 저축·투자 줄을 누르면 W-10 상세로 가고(2026-11-18), 줄 시트는 W-10 ‘매달 금액 바꾸기’(?line=)나 편집하기에서
+  await page.goto('/salary/plan?line=goal-e');
   await page
     .getByRole('dialog', { name: '청약 금액' })
     .getByRole('button', { name: '청약 줄 지우기' })
@@ -491,7 +500,7 @@ test('W-02 ‘이번 달’도 못 불러오면 오류 카드(‘월급 없음�
   await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
-  await expect(page.getByRole('tab', { name: '이번 달' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '이번 달 월급 체크', level: 1 })).toBeVisible();
 });
 
 /** 첫 달: 지출 줄(고정지출·생활비·직접 추가)이 없는 월급 계획 */

@@ -279,7 +279,7 @@ export type AnalyticsEvent =
       props: { group: 'saving' | 'spend'; lines_count: number; all: boolean };
     }
   | {
-      // W-13 저금 목록 열림(2026-11-09 round 3)
+      // W-01 저축·투자 묶음으로 열림(주소 #saving, 2026-11-18 W-13을 합침. 이름은 그대로)
       name: 'saving_list_viewed';
       props: { entry: 'checklist' | 'split' | 'home' | 'direct'; items_count: number };
     }
@@ -433,13 +433,12 @@ export type AnalyticsEvent =
           | 'band'
           // 띠 둘을 묶은 “할 일 2개” 띠(시트를 엶, 2026-11-16 4차 검토). 시트 안 줄은 band + todo
           | 'band_group'
-          // H-15 월급 상자(2026-11-17): 머리 “월급 ›”, 줄 이번 달 월급 체크·월급 계획 템플릿(저축·투자는 savings)
+          // H-15 월급 상자(2026-11-17): 머리 “월급 ›”, 줄 이번 달 월급 체크·월급 계획 템플릿(2026-11-18 저축·투자 줄 없앰)
           | 'salary'
           | 'salary_month'
           | 'salary_plan'
           | 'calendar'
           | 'assets'
-          | 'savings'
           | 'retry';
         todo?: TopTask['kind'];
       };

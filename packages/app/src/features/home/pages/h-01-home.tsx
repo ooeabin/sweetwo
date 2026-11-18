@@ -783,7 +783,6 @@ export function H01Home() {
         line={monthLine}
         won={m}
         plan={plan}
-        savings={{ count: sums.count, total: m(sums.total) }}
         go={(box, to) => go(box, to)}
         onRetry={() => {
           track('home_box_tapped', { box: 'retry' });

@@ -1,21 +1,26 @@
-// 월급 탭 경로(20). 월급 탭 = 구간 탭 ‘이번 달’(W-02, 첫 화면) / ‘계획’(W-01, ?view=plan, 2026-11-09)
+// 월급 탭 경로(20). 월급 탭 첫 화면 = W-02 ‘이번 달 월급 체크’(/salary), W-01 ‘월급 계획 템플릿’은 따로 화면(/salary/plan, 2026-11-18 구간 탭 없앰)
 export const salaryPaths = {
-  plan: '/salary?view=plan', // W-01 월급 계획 영수증(옛 /salary/split은 여기로 넘김)
+  plan: '/salary/plan', // W-01 월급 계획 템플릿(옛 /salary/plan, /salary/split은 여기로 넘김)
   checklist: '/salary', // W-02
   archive: '/salary/archive', // W-21 지난 달 모아보기(2026-11-17)
 };
 
 /** W-01 주소: 사람 탭(각자, who), 처음에 열 저금 줄 금액 시트(line = 저금 항목 id) */
 export const planPath = (o: { who?: string | null; line?: string | null } = {}) => {
-  const q = new URLSearchParams({ view: 'plan' });
+  const q = new URLSearchParams();
   if (o.who) q.set('who', o.who);
   if (o.line) q.set('line', o.line);
-  return `/salary?${q.toString()}`;
+  const s = q.toString();
+  return `/salary/plan${s ? `?${s}` : ''}`;
 };
+
+/** W-01 ‘저축·투자’ 묶음으로 스크롤(옛 W-13 저금 목록 주소 /salary/items의 새 자리, 2026-11-18). from = 분석 entry */
+export const savingListPath = (from?: 'checklist' | 'home' | 'split' | 'direct') =>
+  `/salary/plan${from ? `?from=${from}` : ''}#saving`;
 
 // 저금 항목(20 W-10~W-12, ADR 0007)
 export const savingPaths = {
-  list: '/salary/items', // W-13 저금 목록(2026-11-09 round 3)
+  list: '/salary/plan#saving', // W-13 저금 목록은 없앰(2026-11-18) → W-01 저축·투자 묶음. 옛 /salary/items는 넘김
   add: '/salary/items/new', // W-11a~d
   item: (id: string) => `/salary/items/${id}`, // W-10
   edit: (id: string, field: 'name' | 'amount' | 'deadline' | 'monthly') =>

@@ -2551,6 +2551,13 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-autopill > .hg-ico { width: 12px; height: 12px; }
 .hg-receipt__autocol { display: inline-flex; flex: none; align-items: center; gap: var(--space-2); }
 .hg-receipt__note { display: block; font: var(--text-body-sm); color: var(--stone); }  /* 보내기 줄 아래 “월급 − 용돈” */
+.hg-receipt__prog { display: block; margin-top: var(--space-2); }  /* 2026-11-18 W-01 저축·투자 줄: 이름 아래 모은 금액 + 진행 막대 + “목표 금액의 62%”(저금 목록 줄 hg-goalrow__bar와 같은 규칙: 조용한 바탕 위 오렌지) */
+.hg-receipt__progbar { display: block; height: 6px; border-radius: var(--radius-full); background: var(--bar-track); overflow: hidden; }
+.hg-receipt__progbar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }
+.hg-receipt__proglabel { display: block; margin-top: var(--space-1); font: var(--text-caption); color: var(--stone); font-variant-numeric: tabular-nums; }
+@keyframes hg-receipt-flash { from { background: var(--brand-soft); } to { background: transparent; } }
+.hg-receipt__row.is-new { border-radius: var(--radius-md); animation: hg-receipt-flash calc(var(--dur-slow) * 6) var(--ease-out) 1; }  /* 2026-11-18 W-11로 만든 새 줄 잠깐 강조(‘동작 줄이기’면 없음, 아래 reduced-motion) */
+@media (prefers-reduced-motion: reduce) { .hg-receipt__row.is-new { animation: none; } }
 
 /* AddRow(+ 추가 줄): 2026-11-09 + 버튼(FAB) 대신 목록 끝이나 묶음 머리 오른쪽의 회색 글자 줄. hg-btn--link와 같은 ink-2 600 + Phosphor plus */
 .hg-addrow { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-1); box-sizing: border-box; border: 0; border-radius: var(--radius-btn-sm); background: none; color: var(--ink-2); font: var(--text-label); cursor: pointer; }

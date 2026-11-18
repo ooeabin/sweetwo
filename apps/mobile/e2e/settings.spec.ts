@@ -1111,7 +1111,7 @@ test('가이드(S-01·S-03): 대화 카드 줄 없음, 월급 합치기 적용�
     page.getByText('입력한 숫자로 계산한 참고 정보예요. 투자·금융 자문이 아니에요'),
   ).toBeVisible();
   await page.getByRole('button', { name: /우리에게 적용하기/ }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
 });
 
 test('계정 삭제(S-18b) ‘먼저 내보내기’ → 내보내면 S-18b로 돌아옴(S11-13)', async ({ page }) => {

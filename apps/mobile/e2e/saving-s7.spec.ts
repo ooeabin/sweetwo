@@ -229,7 +229,7 @@ test('S7-04: 저금을 못 불러오면 오류 카드 + 다시 시도(W-10, W-13
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
 
   fail = true;
-  await page.goto('/salary/items');
+  await page.goto('/salary/plan#saving');
   await expect(page.getByText('잠시 문제가 생겼어요')).toBeVisible({ timeout: 20_000 });
   await page.goto('/salary/items/goal-h/edit/name');
   await expect(page.getByRole('heading', { name: '잠시 문제가 생겼어요' })).toBeVisible({
@@ -317,17 +317,19 @@ test('S7-13·S7-15: W-11b 아직 안 정한 월급은 금액 가리기를 따름
   );
 });
 
-test('S7-02: W-13 저금 목록도 상대 변경을 Realtime으로 바로 받음', async ({ page }) => {
+test('S7-02: W-01 저축·투자 묶음(옛 W-13)도 상대 변경을 Realtime으로 바로 받음', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const rt = await mockRealtime(page);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   joint(db);
-  await page.goto('/salary/items');
-  await expect(page.locator('.hg-goallist')).toBeVisible();
+  await page.goto('/salary/plan#saving');
+  await expect(page.getByRole('region', { name: '저축·투자', exact: true })).toBeVisible();
   await expect.poll(() => rt.subscribed('goal')).toBeGreaterThan(0);
   const h = db.goals.find((g) => g.id === 'goal-h');
   if (h) h.name = '우리 집';
   rt.emit('goal', 'UPDATE', { id: 'goal-h', space_id: 'space-1' });
-  await expect(page.locator('.hg-goalrow__name').filter({ hasText: '우리 집' })).toBeVisible();
+  await expect(page.locator('.hg-receipt__name').filter({ hasText: '우리 집' })).toBeVisible();
 });

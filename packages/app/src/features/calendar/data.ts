@@ -231,7 +231,7 @@ export function moneyLine(d: MoneyDate, withWeekday = false) {
         : d.kind === 'maturity'
           ? `/assets/${d.ref ?? ''}`
           : d.kind === 'auto'
-            ? '/salary?view=plan'
+            ? '/salary/plan'
             : d.kind === 'note'
               ? d.bundle
                 ? `/salary/bundles/${d.bundle}/notes`

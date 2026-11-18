@@ -99,7 +99,7 @@ describe('startAnalytics', () => {
       return () => undefined;
     });
     expect(a.screen).toHaveBeenCalledWith('W-10');
-    route({ location: { pathname: '/salary', search: '?view=plan' } });
+    route({ location: { pathname: '/salary/plan', search: '' } });
     expect(a.screen).toHaveBeenLastCalledWith('W-01');
     track('menu_item_tapped', { item: 'salary' });
     expect(a.log).toHaveBeenCalledWith('menu_item_tapped', { item: 'salary' });
