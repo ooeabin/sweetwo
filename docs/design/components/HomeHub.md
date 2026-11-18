@@ -30,15 +30,14 @@
 - React 래퍼(packages/ui `HomeHub.tsx`)에 더함: `HubLine`(`text`, `sub`, `go`, `bar`(PeriodBar 요소), `label`, `onClick`), `HubBand`에 `secondary`(`{ text, onClick }`), `HubTile`에 `sub2`(H-07 미계획 금액 둘째 줄)·`className`. `SaveTogether`·`PeriodBar`는 따로 파일
 - 좁은 창 순서(DOM, 2026-11-17 새 순서: 할 일 띠 → H-10 → H-12 → 월급 상자 H-15 → 타일 H-04·H-08, 0원 H-10은 월급 상자 아래, core `homeOrder`. 아래는 2026-11-15 기록, 3차 검토, 기획 19 ‘홈 순서’, core `homeOrder`): 확인할 것이 맨 위. H-11이 확인할 것을 말하면 H-11 → 할 일 띠 → H-14 → H-10, 아니면 할 일 띠 → H-14 → H-10 → H-11. 0원 H-10은 H-07·H-08 아래. 그다음 H-12 → H-04·H-09. 타일 72px 그림 자리는 그림이 들어올 때까지 그리지 않음(HubTile `art`는 남기되 그리지 않음). 예전(2026-11-13): H-10 → H-11 → 할 일 띠 → H-07·H-08 → H-12 → H-04·H-09. H-14 이번 달 우리 둘(`hg-card` + `hg-monthus`): 줄은 `hg-list--plain`(앞 칸 없이 카드 왼쪽 끝), 줄 높이 48px, 줄 이름 한 줄(`nowrap`), 값은 본문 글자 크기로 오른쪽(길면 값이 줄바꿈). 보여 줄 줄이 2개보다 적으면 그리지 않음(2026-11-16). 넓은 창은 띠 `order: -1`, `hg-together` 두 칸 두 줄(`grid-row: span 2`), `hg-hubline` 두 칸이라 격자 자동 배치가 ‘H-10 + 오른쪽 H-11, H-07·H-08’이 됨
 
-## 월급 상자 (H-15, HubBox, 2026-11-17, 2026-11-18 상자 전체가 버튼 하나)
+## 월급 상자 (H-15, HubBox, 2026-11-17, 2026-11-18 줄마다 따로 이동)
 
 메뉴 서랍과 같은 이름·순서로 정리하며 H-07 월급 계획 타일·H-09 저금 타일·H-11 이번 달 한 줄·H-13 기간 한 줄을 이 상자의 줄로 옮김(기획 19 ‘H-15 월급 상자’).
 
 - 상자(`hg-hubbox` + `hg-hub__wide`, 두 칸): 흰 `radius-xl`, 테두리·그림자 없음(마우스 올림만 `shadow-2`), 안쪽 위아래 `space-2`. 오렌지 없음.
-- 상자 전체가 버튼 하나(`button.hg-hubbox`, 2026-11-18 사용자 결정). 머리·줄의 꺾쇠를 없애고 눌리는 줄도 없앰. 안은 모두 span(버튼 안에 버튼·링크 없음). 누르는 칸 = 상자 전체(44px 이상), 키보드 포커스는 상자 둘레 ink 링, 마우스 올림 `shadow-2`, 누름 `scale(.98)`(동작 줄이기면 없음).
-- 머리(`hg-hubbox__title`): “월급” 17px 700 `ink`(`title-3`), 높이 44px 이상, 안쪽 가로 18px. 글자만(꺾쇠 없음).
-- 줄(`hg-hubbox__list` > `hg-hubbox__row`, 정보 줄): 높이 56px 이상, 안쪽 가로 18px. 왼쪽 이름(`hg-hubbox__name` 15px 500 `ink`, 줄 이름은 메뉴 서랍과 같음) + 오른쪽 값 칸(`hg-hubbox__val`, 오른쪽 맞춤): 값(`hg-hubbox__main` 15px 600 `ink-2`, 확인할 게 있으면 `--alert` 700 `ink`) + 그 아래 회색 보조(`hg-hubbox__sub` 13px 500 `slate`). 줄 사이 `hairline-soft` 선.
-- 맨 아래 오른쪽 이동 글자(`hg-hubbox__more`): “자세히 보기” + 꺾쇠 16px, `text-label` 500 `slate`(머리 이동 링크 `hg-sechead__more`와 같은 규칙). 눌리는 칸이 아니라 표시.
-- React 래퍼 `HubBox`(`title`, `more`, `rows[{ key, name, value, sub, alert }]`, `label`, `onClick`). `label`은 상자 내용을 읽는 화면 읽기 이름. 앱 `h-15-salary-box.tsx`가 값을 만듦.
+- 줄마다 버튼(`button.hg-hubbox__row`, 2026-11-18 사용자 결정, 앞의 ‘상자 전체가 버튼 하나’를 바꿈). 상자(`div role=group`)와 머리는 누를 수 없고 줄 전체가 눌림(높이 56px, 44px 이상). Tab은 줄마다 한 번, 포커스는 줄 둘레 안쪽 ink 링(`outline-offset: -2px`), 누름 `scale(.98)`(동작 줄이기면 없음). 줄 안은 모두 span.
+- 머리(`hg-hubbox__title`): “월급” 17px 700 `ink`(`title-3`), 높이 44px 이상, 안쪽 가로 18px. 글자만(꺾쇠 없음, 누를 수 없음).
+- 줄(`hg-hubbox__list` > `button.hg-hubbox__row`): 높이 56px 이상, 안쪽 가로 18px. 왼쪽 이름(`hg-hubbox__name` 15px 500 `ink`, 줄 이름은 메뉴 서랍과 같음) + 오른쪽 값 칸(`hg-hubbox__val`, 오른쪽 맞춤): 값(`hg-hubbox__main` 15px 600 `ink-2`, 확인할 게 있으면 `--alert` 700 `ink`) + 그 아래 회색 보조(`hg-hubbox__sub` 13px 500 `slate`). 줄 사이 `hairline-soft` 선. 값 칸 뒤에 꺾쇠 하나(`hg-hubbox__go`, 16px `slate`, 그래픽이라 화면 읽기에서 숨김).
+- React 래퍼 `HubBox`(`title`, `rows[{ key, name, value, sub, alert, label, onClick }]`). 줄의 `label`은 “이름, 값 보조” 화면 읽기 이름. 앱 `h-15-salary-box.tsx`가 값과 이동을 만듦. 맨 아래 “자세히 보기 ›”는 없앰.
 - 반 칸 타일 둘: H-04 자산 관리가 포인트 상자(`hg-hubtile--point`), H-08 캘린더는 흰색. 둘 다 그림 자리 없음, 높이는 내용에 맞춤(같은 줄은 격자가 같은 높이로).
 - H-14 이번 달 우리 둘 카드(`hg-card` + `hg-monthus`)는 홈에서 없앰(2026-11-17). `.hg-monthus` 규칙도 지움.

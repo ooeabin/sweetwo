@@ -5,12 +5,12 @@ import { spoken } from '../../../shared/masked-text';
 import { copy } from '../copy';
 
 /**
- * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로, 2026-11-18 상자 전체가 버튼 하나):
- * 머리 “월급”(글자만) + 정보 줄 둘(꺾쇠 없음) + 맨 아래 오른쪽 “자세히 보기 ›”. 누르면 이번 달 월급 체크(W-02, 날짜 없는 사람은
- * 예전 그 줄이 가던 곳). 월급 계획 템플릿은 W-02 안 링크로 감. 못 불러왔으면 누르면 다시 읽음.
- * 줄 이름은 서랍과 똑같이 “이번 달 월급 체크” “월급 계획 템플릿”. 값은 예전 홈 상자를 짧게 줄인 것:
+ * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로, 2026-11-18 줄마다 따로 이동):
+ * 머리 “월급”(글자만, 누를 수 없음) + 줄 둘, 줄마다 오른쪽 값 뒤 ›. “이번 달 월급 체크” 줄 → W-02(날짜 없는 사람은 그 줄이
+ * 예전 가던 곳, core line.to), “월급 계획 템플릿” 줄 → W-01(/salary/plan). 못 불러왔으면 첫 줄은 다시 읽음.
+ * 줄 이름은 서랍과 똑같이. 값은 예전 홈 상자를 짧게 줄인 것:
  * 이번 달 월급 체크 = H-11 이번 달 한 줄(core pickMonthLine, 날짜 없는 사람은 H-13 기간) / 월급 계획 템플릿 = H-07.
- * 확인할 게 있으면(core monthLineUrgent) 첫 줄 값이 굵게
+ * 확인할 게 있으면(core monthLineUrgent) 첫 줄 값이 굵게. 화면 읽기 이름은 줄마다 “이름, 값 보조”
  */
 export function H15SalaryBox({
   line,
@@ -23,28 +23,30 @@ export function H15SalaryBox({
   won: (v: number) => string;
   /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“미계획 금액 20만 원”) */
   plan: { value?: string; sub?: string };
-  go: (box: 'salary', to: string) => void;
+  go: (box: 'salary_month' | 'salary_plan', to: string) => void;
   onRetry: () => void;
 }) {
   const month = monthValue(line, won);
+  const label = (name: string, v: { value?: string; sub?: string }) =>
+    spoken(`${name}, ${[v.value, v.sub].filter(Boolean).join(' ')}`);
   const rows: HubBoxRow[] = [
-    { key: 'month', name: copy.rowMonth, ...month, alert: monthLineUrgent(line) },
-    { key: 'plan', name: copy.rowPlan, ...plan },
+    {
+      key: 'month',
+      name: copy.rowMonth,
+      ...month,
+      alert: monthLineUrgent(line),
+      label: label(copy.rowMonth, month),
+      onClick: line.kind === 'error' ? onRetry : () => go('salary_month', line.to),
+    },
+    {
+      key: 'plan',
+      name: copy.rowPlan,
+      ...plan,
+      label: label(copy.rowPlan, plan),
+      onClick: () => go('salary_plan', '/salary/plan'),
+    },
   ];
-  const label = spoken(
-    [copy.salaryBox, ...rows.map((r) => [r.name, r.value, r.sub].filter(Boolean).join(' '))].join(
-      ', ',
-    ),
-  );
-  return (
-    <HubBox
-      title={copy.salaryBox}
-      more={copy.salaryBoxMore}
-      rows={rows}
-      label={label}
-      onClick={line.kind === 'error' ? onRetry : () => go('salary', line.to)}
-    />
-  );
+  return <HubBox title={copy.salaryBox} rows={rows} />;
 }
 
 /** 이번 달 월급 체크 줄의 짧은 값(H-11 상태 → 한 마디). 늦은 확인이 있으면 보조로 “지난달 n개 남음” */
