@@ -180,7 +180,7 @@ export type AnalyticsEvent =
       name: 'asset_added';
       props: {
         kind: 'account' | 'invest' | 'pension' | 'insurance' | 'real_estate' | 'other' | 'debt';
-        entry: 'home' | 'assets' | 'palette';
+        entry: 'home' | 'assets' | 'palette' | 'chip'; // chip = F-02 빈 상태 종류 칩(2026-11-18)
         is_first: boolean;
       };
     }

@@ -14,6 +14,7 @@ import {
   monthCheck,
   pickHeroes,
   pickMonthLine,
+  assetTileHint,
   pickTopBanner,
   pickTopTasks,
   PUSH_KINDS,
@@ -730,6 +731,17 @@ export function H01Home() {
 
   // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10(0원이면 월급 상자 아래) → H-12 → H-15 월급 상자 → 반 칸 타일 둘
   const order = homeOrder({ heroZero: !heroFailed && heroZero(heroes), heroNone });
+  // 2026-11-18 H-04 빈 타일 문구(core assetTileHint): 내 자산 있음 = 순자산 값, 없으면 파트너 소식 > 궁금함
+  const tileHint = nw ? assetTileHint({ together: joined, ...nw.own }) : 'value';
+  const showNet = !!nw && tileHint === 'value' && !nw.empty;
+  const tileSub =
+    !nw || tileHint === 'value'
+      ? undefined
+      : tileHint === 'partner'
+        ? copy.assetsPartner(partnerName)
+        : tileHint === 'ask-two'
+          ? copy.assetsAskTwo
+          : copy.assetsAskMe;
   const blocks: Record<HomeBlock, ReactNode> = {
     tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
     hero: <Fragment key="hero">{hero}</Fragment>,
@@ -769,18 +781,19 @@ export function H01Home() {
         <HubTile
           point
           title={copy.assetsTile}
-          sub={nw?.empty ? copy.noAssets : undefined}
-          value={nw && !nw.empty ? m(nw.nw.net) : undefined}
-          badge={rankPct === null || nw?.empty ? undefined : copy.rankBadge(rankPct)}
+          sub={tileSub}
+          value={showNet && nw ? m(nw.nw.net) : undefined}
+          badge={rankPct === null || !showNet ? undefined : copy.rankBadge(rankPct)}
           label={
-            nw && !nw.empty
+            nw && showNet
               ? copy.assetsTileLabel(
                   m(nw.nw.net),
                   rankPct === null ? null : copy.rankBadge(rankPct),
                 )
               : undefined
           }
-          onClick={() => go('assets', lastAssetsTab())}
+          // 내 자산이 없으면 바로 F-02 빈 상태(종류 칩), 있으면 마지막 본 하위 탭(2026-11-18)
+          onClick={() => go('assets', showNet ? lastAssetsTab() : '/assets/items')}
         />
         <HubTile
           title={copy.calendarTile}

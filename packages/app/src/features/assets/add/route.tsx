@@ -1,6 +1,7 @@
 import { insertAsset, qk, setAssetShareDefault } from '@sweetwo/api';
 import {
   assetGroup,
+  assetOwnership,
   bands,
   parsePaidCount,
   parseRate,
@@ -81,15 +82,16 @@ export function AssetAddRoute() {
   if (d.loading || !d.couple || !d.space) return <QuestionSkeleton />;
   const solo = d.space.couple_state === 'solo';
   const joined = d.couple.joined;
-  const steps = assetSteps(draft, solo);
+  const steps = assetSteps(draft, solo, !d.me?.asset_share_default);
   const i = Math.max(steps.indexOf(step), 0);
   if (step !== 'kind' && !draft.kind) return <Navigate to={path('kind')} replace />;
-  const progress = { total: steps.length, now: i, fill: 50 };
+  // 칩으로 연 쉬운 첫 입력은 한두 단계라 진행 막대 없음
+  const progress = draft.quick ? undefined : { total: steps.length, now: i, fill: 50 };
   const back = () => (i > 0 ? nav(`${path(steps[i - 1] ?? 'kind')}?keep=1`) : nav(-1));
   const go = (next: Partial<typeof draft>) => {
     const nd = { ...draft, ...next };
     set(next);
-    const l = assetSteps(nd, solo);
+    const l = assetSteps(nd, solo, !d.me?.asset_share_default);
     const to = l[l.indexOf(step) + 1];
     if (to) nav(path(to));
     else void save(nd);
@@ -101,6 +103,8 @@ export function AssetAddRoute() {
     try {
       const owner = solo ? 'me' : (x.owner ?? 'me');
       const isFirst = d.items.length === 0 && d.sums.length === 0;
+      // 내 첫 자산(파트너만 적은 상태 포함): F-02 맨 위 순자산 + 순위 이동 줄을 한 번
+      const ownFirst = assetOwnership(d.items, d.sums, d.me?.id).mine === 0;
       const vis = owner === 'me' && !solo ? (x.visibility ?? 'sum') : 'all';
       // F-03e 처음 고른 값 = 내 새 항목 기본값(서버도 첫 저장 행으로 정하지만 명시)
       if (owner === 'me' && !solo && !d.me?.asset_share_default && x.visibility) {
@@ -135,7 +139,7 @@ export function AssetAddRoute() {
                   x.grp === 'real_estate'
                 ? x.grp
                 : 'other',
-        entry,
+        entry: x.quick ? 'chip' : entry,
         is_first: isFirst,
       });
       await refresh();
@@ -145,7 +149,11 @@ export function AssetAddRoute() {
           ? copy.addedUp(money(x.amount, masked))
           : copy.addedDown(money(x.amount, masked)),
       );
-      nav(`/assets/items?side=${x.side}`, { replace: true });
+      // 첫 자산이면 F-02 맨 위에 순자산 + 순위 이동 줄을 한 번(state는 이번 이동에만, 2026-11-18)
+      nav(`/assets/items?side=${x.side}`, {
+        replace: true,
+        state: ownFirst && x.side === 'asset' ? { firstAsset: true } : null,
+      });
     } catch {
       // 13 공통 상태 10번 저장 실패(2026-11-12 S8-16). 입력값은 그대로라 다시 누르면 됨
       toast(copy.saveFailed);
@@ -253,7 +261,12 @@ export function AssetAddRoute() {
         steps={progress}
         title={title}
         onBack={back}
-        primary={{ label: copy.next, disabled: draft.amount === null, loading: saving }}
+        primary={{
+          // 칩으로 연 쉬운 첫 입력은 금액이 마지막이면 바로 저장(2026-11-18)
+          label: draft.quick && !steps[i + 1] ? copy.save : copy.next,
+          disabled: draft.amount === null,
+          loading: saving,
+        }}
         onSubmit={() => draft.amount !== null && go({})}
       >
         <AmountInput

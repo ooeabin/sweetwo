@@ -1,7 +1,9 @@
 import type { Asset } from '@sweetwo/api';
 import {
   assetGroupsOf,
+  assetOwnership,
   daysBetween,
+  firstAssetChips,
   formatDot,
   investSummary,
   todayKst,
@@ -14,16 +16,18 @@ import {
   Chip,
   EmptyState,
   Icon,
+  List,
   ListRow,
   SectionHeader,
   Tabs,
 } from '@sweetwo/ui';
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
+import { useAssetDraft } from '../add/draft';
 import { ownerOf, useAssetsData } from '../data';
 
 const STALE_DAYS = 92; // 3개월 넘게 안 고친 줄 → “금액이 맞나요?”
@@ -69,6 +73,8 @@ export function F02Items() {
   const [params, setParams] = useSearchParams();
   const side: AssetSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   const d = useAssetsData();
+  const { reset: resetDraft, set: setDraft } = useAssetDraft();
+  const loc = useLocation();
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
   const today = todayKst();
@@ -102,6 +108,30 @@ export function F02Items() {
     }))
     .filter((x) => x.rows.length || x.partner);
   const ready = !d.loading && !d.failed;
+  // 2026-11-18 쉬운 첫 입력: 내 것(자산·부채)이 하나도 없으면 종류 칩, 파트너가 적었으면 맨 위 회색 한 줄.
+  // 첫 자산을 막 저장했으면(첫 저장 직후 한 번) 맨 위에 순자산 + 순위 이동 줄
+  const own = assetOwnership(d.items, d.sums, d.me?.id);
+  const joined = !!d.couple?.joined;
+  const noneMine = ready && own.mine === 0;
+  // 첫 저장 직후 이동에 실린 표시(한 번만: 읽고 바로 지워서 새로 고침·다시 들어옴에는 안 보임)
+  const [afterFirst] = useState(
+    () => (loc.state as { firstAsset?: boolean } | null)?.firstAsset === true,
+  );
+  useEffect(() => {
+    if (afterFirst) nav(`${loc.pathname}${loc.search}`, { replace: true, state: null });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const justFirst = ready && own.mine > 0 && afterFirst;
+  const startChip = (c: (typeof firstAssetChips)[number]) => {
+    resetDraft(c.side, d.me?.asset_share_default ?? null);
+    setDraft({
+      grp: c.grp,
+      kind: c.kind,
+      name: copy.firstChips[c.key as keyof typeof copy.firstChips],
+      owner: 'me',
+      quick: true,
+    });
+    nav('/assets/new/amount');
+  };
   const total = (s: AssetSide) => (s === 'asset' ? d.nw.assets : d.nw.debts);
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 
@@ -138,6 +168,26 @@ export function F02Items() {
 
   return (
     <AssetsFrame tab="items" addSide={side}>
+      {justFirst && (
+        <>
+          <section
+            className="hg-stack"
+            style={{ gap: 'var(--space-1)' }}
+            aria-label={copy.firstNetLabel}
+          >
+            <span className="hg-networth__label">{copy.firstNetLabel}</span>
+            <span className="hg-networth__value">{m(d.nw.net)}</span>
+          </section>
+          <List>
+            <ListRow label={copy.firstRankLink} onClick={() => nav('/assets/rank')} />
+          </List>
+        </>
+      )}
+      {noneMine && joined && own.partner > 0 && (
+        <p className="hg-q__help" style={{ margin: 0 }}>
+          {copy.partnerWrote(d.couple?.partnerName ?? '')}
+        </p>
+      )}
       <Tabs<AssetSide>
         variant="seg"
         label={copy.sideLabel}
@@ -159,6 +209,25 @@ export function F02Items() {
         </div>
       )}
       {!d.failed && d.loading && <SkelBody shape="rows" />}
+      {noneMine && (
+        <div
+          role="group"
+          className="hg-stack"
+          style={{ gap: 'var(--space-3)' }}
+          aria-label={copy.firstChipsLabel}
+        >
+          <p className="hg-q__help" style={{ margin: 0 }}>
+            {copy.firstChipsLabel}
+          </p>
+          <div className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+            {firstAssetChips.map((c) => (
+              <Chip key={c.key} onClick={() => startChip(c)}>
+                {copy.firstChips[c.key as keyof typeof copy.firstChips]}
+              </Chip>
+            ))}
+          </div>
+        </div>
+      )}
       {ready && !groups.length && (
         // 2026-11-04 요약(F-01)과 같은 빈 상태 모양
         <EmptyState

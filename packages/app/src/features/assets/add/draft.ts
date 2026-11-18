@@ -19,6 +19,8 @@ export interface AssetDraft {
   payment: number | null;
   paidCount: number | null;
   rate: number | null;
+  /** F-02 빈 상태 종류 칩으로 연 쉬운 첫 입력(2026-11-18): 금액만 묻고 저장 */
+  quick: boolean;
 }
 const empty: AssetDraft = {
   side: 'asset',
@@ -33,6 +35,7 @@ const empty: AssetDraft = {
   payment: null,
   paidCount: null,
   rate: null,
+  quick: false,
 };
 
 export const useAssetDraft = create<{
@@ -53,7 +56,9 @@ const SAVINGS = ['saving', 'policy_saving'];
  * 적금 = 만기일 → 월 납입액, 청약 = 납입 회차 → 월 납입액, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액.
  * 월 납입액·상환액은 기록만(월급 계획과 연결하지 않음). 통장 역할, 목표 연결은 재기획으로 없앰
  */
-export function assetSteps(d: AssetDraft, solo: boolean) {
+export function assetSteps(d: AssetDraft, solo: boolean, firstShare = false) {
+  // 칩으로 연 쉬운 첫 입력: 금액만. 처음 적는 사람(asset_share_default 없음)만 F-03e를 한 번(미리 고른 값 없음, 2026-11-13)
+  if (d.quick) return ['amount', ...(!solo && firstShare ? ['visibility'] : [])];
   const k = d.kind ?? '';
   const saving = SAVINGS.includes(k);
   const sub = k === 'housing_subscription';

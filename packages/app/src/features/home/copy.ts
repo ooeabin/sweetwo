@@ -129,7 +129,10 @@ export const copy = {
 
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
-  noAssets: '+ 자산 추가', // 2026-11-16 IA 점검(예전 “아직 없어요”): 자산·부채가 없으면 다음 할 일. 타일은 자산 관리로 감
+  // 2026-11-18 빈 타일에서 자산을 적고 싶게(궁금함, 파트너 소식) [확인 필요]
+  assetsAskTwo: '우리 둘 순자산, 또래 중 어디쯤일까요?',
+  assetsAskMe: '내 순자산, 또래 중 어디쯤일까요?',
+  assetsPartner: (name: string) => `${name}님이 자산을 적었어요`,
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
