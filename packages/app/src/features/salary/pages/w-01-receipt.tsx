@@ -20,10 +20,12 @@ import {
   planChangeTouchesMonth,
   planRatio,
   salaryChangedTaskOpen,
+  savingStartChips,
   todayKst,
 } from '@sweetwo/core';
 import {
   Button,
+  Chip,
   Icon,
   ListRow,
   Menu,
@@ -68,6 +70,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { BundleRow } from '../bundle-parts';
 import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
 import { FirstSpendAsk, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
 import { SalaryLoadError, SalaryLoading } from '../salary-tab';
@@ -1128,6 +1131,38 @@ export function W01Receipt() {
                   ))}
                 </div>
               )}
+              {!edit &&
+                !theirs &&
+                canEdit &&
+                savingLines.length === 0 &&
+                bundleList.length === 0 && (
+                  <>
+                    <p className="hg-receipt__empty">{copy.savingEmptyAsk}</p>
+                    <div
+                      className="hg-receipt__chips"
+                      role="group"
+                      aria-label={copy.savingEmptyAsk}
+                    >
+                      {savingStartChips(sp.marriage_status).map((c) => {
+                        const name = c === 'custom' ? '' : copy.chipNames[c];
+                        return (
+                          <Chip
+                            key={c}
+                            small
+                            onClick={() => {
+                              // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
+                              if (offline()) return;
+                              writeDraft({ ...EMPTY_DRAFT, name });
+                              nav(`${savingPaths.add}/a?from=split`);
+                            }}
+                          >
+                            {c === 'custom' ? copy.savingEmptyCustom : name}
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               {canEdit && (
                 <ReceiptAdd
                   onClick={() => {

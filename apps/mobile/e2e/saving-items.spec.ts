@@ -65,9 +65,9 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   seed(db);
   await page.goto('/salary/items/new');
   await expect(page.getByRole('heading', { name: '무엇을 위해 모을까요?' })).toBeVisible();
-  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → 전세 대출 갚기, 여행, 비상금. 누르면 이름을 채움
-  await page.getByRole('button', { name: '전세 대출 갚기' }).click();
-  await expect(page.getByLabel('무엇을 위해 모을까요?')).toHaveValue('전세 대출 갚기');
+  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → 내 집 마련, 여행, 비상금, 차, 출산·육아, 노후. 누르면 이름을 채움
+  await page.getByRole('button', { name: '내 집 마련' }).click();
+  await expect(page.getByLabel('무엇을 위해 모을까요?')).toHaveValue('내 집 마련');
   await axe(page);
   await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
@@ -101,6 +101,23 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await setYearMonth(page, 2027, 6);
   await expect(page.getByText('기한까지 매달 23만 원이면 돼요')).toBeVisible();
   await expect(page.getByText('지금 속도면 2027년 7월에 다 모아요')).toBeVisible();
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(
+    page.getByRole('heading', { name: '월급 계획 템플릿에 이렇게 들어가요' }),
+  ).toBeVisible();
+  // W-11f 미리 보기(2026-11-18): 작은 영수증에 새 줄 “새로” + 미계획 금액이 줄어드는 모습
+  const pv = page.getByRole('region', { name: '월급 계획 템플릿 미리 보기' });
+  await expect(pv).toContainText('월급 계획 템플릿');
+  await expect(pv.locator('.hg-receipt__row').filter({ hasText: '새로' })).toContainText(
+    '제주 여행',
+  );
+  await expect(pv.locator('.hg-receipt__row').filter({ hasText: '새로' })).toContainText(
+    '매달 20만 원',
+  );
+  await expect(pv).toContainText('미계획 금액');
+  await expect(pv).toContainText('→');
+  await expect(pv).toContainText('이 모자라요'); // 이 시드는 20만 원을 넣으면 미계획 금액이 모자람(기존 모자람 문구)
+  await axe(page);
   await page.getByRole('button', { name: '추가하기' }).click();
   // 끝나면 미합류는 초대 시트(20 W-11 고친 점)
   // 2026-11-18: 만들면 W-01 월급 계획 템플릿 ‘저축·투자’ 묶음으로: 새 줄 강조 + Toast, 초대 물음은 거기서
@@ -145,6 +162,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^적금/ })).toBeVisible();
   expect(db.goals.find((x) => x.name === '적금')?.target_amount).toBeNull();
@@ -158,6 +176,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('1500000');
   await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^노트북/ })).toBeVisible();
@@ -167,6 +186,32 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
       (l) => l.goal_id === db.goals.find((x) => x.name === '노트북')?.id,
     )?.amount,
   ).toBe(500_000);
+});
+
+test('W-11f: 매달 0원이면 “매달 금액 없음”, 미계획 금액은 그대로, 뒤로 가면 입력값 이어짐', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/salary/items/new');
+  await page.getByLabel('무엇을 위해 모을까요?').fill('비상금');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('매달 얼마씩 모을까요?').fill('0');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
+  await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  const pv = page.getByRole('region', { name: '월급 계획 템플릿 미리 보기' });
+  await expect(pv.locator('.hg-receipt__row').filter({ hasText: '새로' })).toContainText(
+    '매달 금액 없음',
+  );
+  await expect(pv).not.toContainText('→');
+  expect(db.goals.find((g) => g.name === '비상금')).toBeUndefined(); // 아직 저장 전
+  await axe(page);
+  await page.goBack();
+  await expect(
+    page.getByRole('heading', { name: '모으고 싶은 목표 금액이 있나요?' }),
+  ).toBeVisible();
 });
 
 test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다 적게, 모은 금액 = 시작값 + 체크, 저금 내역 맨 아래', async ({
@@ -195,6 +240,7 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   // 월 필요액은 남은 1,000만 기준: 1년 뒤(13개월) → 77만(올림)
   await expect(page.getByText('기한까지 매달 77만 원이면 돼요')).toBeVisible();
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^결혼 비용/ })).toBeVisible();
   await page.getByRole('button', { name: '나중에 할게요' }).click();

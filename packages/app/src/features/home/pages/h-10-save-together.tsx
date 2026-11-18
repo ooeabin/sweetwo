@@ -2,7 +2,6 @@ import type { PayCheckLine } from '@sweetwo/api';
 import {
   daysBetween,
   kstDateOf,
-  savingChips,
   savingMonthGain,
   savingPct,
   savingRemain,
@@ -12,19 +11,19 @@ import {
   type HeroItem,
   type MarriageStatus,
 } from '@sweetwo/core';
-import { SaveTogether, SaveTogetherEmpty, type SaveTogetherSlideProps } from '@sweetwo/ui';
+import { SaveTogether, type SaveTogetherSlideProps } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { spoken } from '../../../shared/masked-text';
-import { EMPTY_DRAFT, savingListPath, savingPaths, togetherPaths, writeDraft } from '../../salary';
 import { copy } from '../copy';
 
 /**
  * H-10 같이 모으기(19 ‘홈 v2.2’ 2번, 디자인 SaveTogether): 대표 저금(core pickHeroes, 최대 3칸 + ‘저금 모두 보기 ›’).
  * 칸: 사람(연결이면 둘, 미합류면 나) + 이름 → 큰 숫자 모은 금액(퍼센트만이면 %) → 오렌지 막대(목표 금액이 있을 때만)
  * → “목표 금액 …의 62%” → “이번 달 +…” → 기한 “…까지 n원 더 필요해요” → 각자 금액(둘 다 켰을 때만) → 해제 대기 멈춤.
- * 맨 아래 “+ 수입 적기” → W-20. 결혼 준비 중이면 머리 D-day 알약(예정일 없으면 “결혼식 날짜 알려 주기” → S-11h).
- * 저금이 하나도 없으면 빈 상태(질문 + 이름 칩 3개 → W-11a 이름 채움, ‘+ 저금 추가’)
+ * 결혼 준비 중이면 머리 D-day 알약(예정일 없으면 “결혼식 날짜 알려 주기” → S-11h).
+ * 2026-11-18: 누를 수 없는 정보 상자(칸·‘모두 보기’ 이동 없음). 같이 모으기 항목이 하나도 없으면 홈이 이 상자를 그리지 않음
+ * (빈 상태 질문·칩·버튼은 W-01 저축·투자 묶음 빈 상태로 옮김, 상대 권유는 띠 13번)
  */
 export function H10SaveTogether({
   heroes,
@@ -38,8 +37,6 @@ export function H10SaveTogether({
   today,
   month,
   moves,
-  savingCount,
-  invite,
   partnerOut,
   go,
 }: {
@@ -58,13 +55,9 @@ export function H10SaveTogether({
   /** 이번 달(대표 사이클) 범위와 확인 목록 줄(‘이번 달 +’) */
   month: { from: string; to: string; lines: PayCheckLine[] };
   moves: GoalMovePublic[];
-  /** 모으는 중 저금 수(2개 이상이면 ‘저금 모두 보기’) */
-  savingCount: number;
-  /** 상대 저금 같이 모으기 권유(core bundleInviteGoal). 빈 상태 질문 자리에 한 번만(띠 13 대신, 2026-11-14 R4) */
-  invite?: { name: string; to: string } | null;
   /** 각자 계열 + 연결: 묶이지 않은 내 저금 칸 첫 줄 “{이름}님은 아직 같이 모으기에 없어요”(2026-11-16 R4-8) */
   partnerOut?: boolean;
-  go: (box: 'together' | 'money_in' | 'more' | 'chip' | 'dday', to: string) => void;
+  go: (box: 'dday', to: string) => void;
 }) {
   const { masked } = useMask();
   const won = (v: number) => money(v, masked);
@@ -91,42 +84,11 @@ export function H10SaveTogether({
     </button>
   ) : undefined;
 
-  if (!heroes.length) {
-    // 빈 상태: 이름 칩(19 ‘이름 칩 표’, core savingChips) → W-11a에 이름을 채워 시작
-    const start = (name: string) => {
-      writeDraft({ ...EMPTY_DRAFT, name });
-      go('chip', `${savingPaths.add}/a?from=home`);
-    };
-    return (
-      <SaveTogetherEmpty
-        className="hg-hub__wide"
-        title={copy.together}
-        head={head}
-        question={invite ? copy.taskBundle(names.partner, invite.name) : copy.emptyAsk}
-        chips={
-          invite
-            ? [{ label: copy.inviteJoin, onClick: () => go('together', invite.to) }]
-            : savingChips(marriage).map((c) => ({
-                label: copy.chips[c],
-                onClick: () => start(copy.chips[c]),
-              }))
-        }
-        add={{
-          label: copy.emptyAdd,
-          onClick: () => {
-            writeDraft(null);
-            go('chip', `${savingPaths.add}/a?from=home`);
-          },
-        }}
-      />
-    );
-  }
-
   const bundleSlide = (b: BundleViewResponse): SaveTogetherSlideProps => {
     const done = b.status === 'achieved' || (b.pct !== null && b.pct >= 100);
     const lines: string[] = [];
     const say: string[] = [b.name];
-    // 아직 안 들어간 묶음(상대가 만듦): 첫 줄에 권유, 누르면 들어가기(2026-11-14 H1, 홈 띠가 가려도 보이게)
+    // 아직 안 들어간 묶음(상대가 만듦): 첫 줄에 권유, (2026-11-14 H1, 2026-11-18부터 상자는 누를 수 없어 들어가는 길은 묶음 알림·띠)
     const invited = !b.goals.some((x) => x.mine);
     if (invited) {
       lines.push(copy.togetherInvite(names.partner));
@@ -172,8 +134,6 @@ export function H10SaveTogether({
       paused: b.paused,
       percentOnly: b.percent_only,
       label: spoken(copy.togetherLabel(say)),
-      // 묶음 입구(BundleEntry): 안 들어갔으면 들어가기(W-15), 처음 보는 달성이면 W-12, 아니면 내 저금 W-10(2026-11-14 H1)
-      onClick: () => go('together', togetherPaths.bundle(b.id)),
     };
   };
 
@@ -205,7 +165,6 @@ export function H10SaveTogether({
       bar: g.target_amount !== null ? savingBar(saved, g.target_amount) : null,
       lines,
       label: spoken(copy.togetherLabel(say)),
-      onClick: () => go('together', savingPaths.item(g.id)),
     };
   };
 
@@ -216,14 +175,6 @@ export function H10SaveTogether({
       label={copy.together}
       head={head}
       slides={heroes.map((h) => (h.kind === 'bundle' ? bundleSlide(h.bundle) : goalSlide(h.goal)))}
-      more={
-        savingCount >= 2
-          ? {
-              label: copy.seeAll,
-              onClick: () => go('more', savingListPath('home')),
-            }
-          : undefined
-      }
     />
   );
 }

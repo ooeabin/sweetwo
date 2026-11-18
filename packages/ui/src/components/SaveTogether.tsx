@@ -1,12 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { AddRow } from './AddRow';
 import { cx } from './cx';
-import { Icon } from './Icon';
 
 // 같이 모으기 상자(docs/design/components/SaveTogether.md, 2026-11-13 ADR 0009). 홈 주인공 H-10.
 // SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 수입 적기’),
 // 칸 하나 = SaveTogetherSlide(사람 + 이름 → 큰 숫자 → 막대 + 보조 줄들, 칸 전체가 버튼, 화면 읽기는 문장 하나).
-// 빈 상태(미합류·저금 0) = SaveTogetherEmpty(질문 + 이름 칩 + ‘+ 저금 추가’).
+// 2026-11-18: 누를 수 없는 정보 상자(칸은 div, onClick 없음, ‘모두 보기’ 칸 없음). 같이 모으기가 0개면 홈이 상자를 그리지 않음.
 
 export interface SaveTogetherSlideProps {
   /** 이름 왼쪽 겹친 Avatar(hg-avatars) */
@@ -25,7 +24,8 @@ export interface SaveTogetherSlideProps {
   percentOnly?: boolean;
   /** 화면 읽기 문장 하나 */
   label: string;
-  onClick: () => void;
+  /** 없으면 누를 수 없는 칸(2026-11-18 H-10은 정보 상자) */
+  onClick?: () => void;
 }
 
 export function SaveTogetherSlide({
@@ -40,17 +40,14 @@ export function SaveTogetherSlide({
   label,
   onClick,
 }: SaveTogetherSlideProps) {
-  return (
-    <button
-      type="button"
-      className={cx(
-        'hg-together__slide',
-        paused && 'hg-together--paused',
-        percentOnly && 'hg-together--percent',
-      )}
-      aria-label={label}
-      onClick={onClick}
-    >
+  const cls = cx(
+    'hg-together__slide',
+    !onClick && 'hg-together__slide--info',
+    paused && 'hg-together--paused',
+    percentOnly && 'hg-together--percent',
+  );
+  const inner = (
+    <>
       <span className="hg-together__people">
         {people}
         <span className="hg-together__name">{name}</span>
@@ -67,7 +64,16 @@ export function SaveTogetherSlide({
           {l}
         </span>
       ))}
+    </>
+  );
+  return onClick ? (
+    <button type="button" className={cls} aria-label={label} onClick={onClick}>
+      {inner}
     </button>
+  ) : (
+    <div className={cls} role="group" aria-label={label}>
+      {inner}
+    </div>
   );
 }
 
@@ -75,7 +81,6 @@ export function SaveTogether({
   title,
   head,
   slides,
-  more,
   moneyIn,
   label,
   className,
@@ -84,8 +89,6 @@ export function SaveTogether({
   /** 머리 오른쪽(D-day 알약 또는 글자 버튼 “결혼식 날짜 알려 주기”) */
   head?: ReactNode;
   slides: SaveTogetherSlideProps[];
-  /** 마지막 칸 “저금 모두 보기 ›”(저금 2개 이상일 때) */
-  more?: { label: string; onClick: () => void };
   /** 맨 아래 회색 글자 버튼 “+ 수입 적기” */
   moneyIn?: { label: string; onClick: () => void };
   /** 묶음 이름(화면 읽기) */
@@ -94,7 +97,7 @@ export function SaveTogether({
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState(0);
-  const count = slides.length + (more ? 1 : 0);
+  const count = slides.length;
   return (
     <section className={cx('hg-together', className)} aria-label={label}>
       <div className="hg-together__head">
@@ -104,6 +107,8 @@ export function SaveTogether({
       <div
         ref={track}
         className="hg-together__track"
+        // 칸이 눌리지 않아도 가로로 넘기는 칸은 키보드로 닿게(2026-11-18)
+        {...(count > 1 ? { tabIndex: 0, role: 'group', 'aria-label': label } : {})}
         onScroll={(e) => {
           const el = e.currentTarget;
           if (el.clientWidth > 0) setAt(Math.round(el.scrollLeft / el.clientWidth));
@@ -112,12 +117,6 @@ export function SaveTogether({
         {slides.map((s, i) => (
           <SaveTogetherSlide key={i} {...s} />
         ))}
-        {more && (
-          <button type="button" className="hg-together__more" onClick={more.onClick}>
-            {more.label}
-            <Icon name="chevron-right" size={16} />
-          </button>
-        )}
       </div>
       {count > 1 && (
         <div className="hg-together__dots" aria-hidden="true">
@@ -127,42 +126,6 @@ export function SaveTogether({
         </div>
       )}
       {moneyIn && <AddRow label={moneyIn.label} onClick={moneyIn.onClick} />}
-    </section>
-  );
-}
-
-/** 빈 상태(미합류·저금 0): “무엇을 같이 모을까요?” + 이름 칩(고르면 W-11a) + ‘+ 저금 추가’ */
-export function SaveTogetherEmpty({
-  title,
-  question,
-  chips,
-  add,
-  head,
-  className,
-}: {
-  title: string;
-  /** 머리 오른쪽(D-day 알약 등, SaveTogether와 같음) */
-  head?: ReactNode;
-  question: string;
-  chips: { label: string; onClick: () => void }[];
-  add: { label: string; onClick: () => void };
-  className?: string;
-}) {
-  return (
-    <section className={cx('hg-together', className)} aria-label={title}>
-      <div className="hg-together__head">
-        <h2 className="hg-together__title">{title}</h2>
-        {head}
-      </div>
-      <p className="hg-together__ask">{question}</p>
-      <div className="hg-together__chips" role="group" aria-label={question}>
-        {chips.map((c) => (
-          <button key={c.label} type="button" className="hg-chip" onClick={c.onClick}>
-            {c.label}
-          </button>
-        ))}
-      </div>
-      <AddRow label={add.label} onClick={add.onClick} />
     </section>
   );
 }
