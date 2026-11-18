@@ -20,7 +20,6 @@ import {
   pushKindOn,
   pushReaskOpen,
   reconcileTask,
-  savingsTotal,
   todayKst,
   type BundleView,
   type HeroGoal,
@@ -656,11 +655,6 @@ export function H01Home() {
     <span className="hg-avatars" aria-hidden="true">
       <PersonDot name={myName} starter={sp.created_by === myId} userId={myId} />
     </span>
-  );
-  // H-09·H-10 개수와 합: 묶인 저금은 묶음 하나로(core savingsTotal, 2026-11-14 M1)
-  const sums = savingsTotal(
-    live.map((i) => ({ id: i.goal.id, saved: i.saved, bundle_id: i.goal.bundle_id })),
-    bundles.data ?? [],
   );
   const monthFrom = list?.cycle_start ?? `${today.slice(0, 7)}-01`;
   const monthTo = list?.cycle_end ?? today;
