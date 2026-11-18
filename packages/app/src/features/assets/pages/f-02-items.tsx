@@ -3,7 +3,7 @@ import {
   assetGroupsOf,
   assetOwnership,
   daysBetween,
-  firstAssetChips,
+  firstAssetChipsOf,
   formatDot,
   investSummary,
   todayKst,
@@ -121,7 +121,7 @@ export function F02Items() {
     if (afterFirst) nav(`${loc.pathname}${loc.search}`, { replace: true, state: null });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const justFirst = ready && own.mine > 0 && afterFirst;
-  const startChip = (c: (typeof firstAssetChips)[number]) => {
+  const startChip = (c: ReturnType<typeof firstAssetChipsOf>[number]) => {
     resetDraft(c.side, d.me?.asset_share_default ?? null);
     setDraft({
       grp: c.grp,
@@ -214,21 +214,22 @@ export function F02Items() {
           role="group"
           className="hg-stack"
           style={{ gap: 'var(--space-3)' }}
-          aria-label={copy.firstChipsLabel}
+          aria-label={side === 'debt' ? copy.firstChipsDebtLabel : copy.firstChipsLabel}
         >
           <p className="hg-q__help" style={{ margin: 0 }}>
-            {copy.firstChipsLabel}
+            {side === 'debt' ? copy.firstChipsDebtLabel : copy.firstChipsLabel}
           </p>
           <div className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-            {firstAssetChips.map((c) => (
+            {firstAssetChipsOf(side).map((c) => (
               <Chip key={c.key} onClick={() => startChip(c)}>
                 {copy.firstChips[c.key as keyof typeof copy.firstChips]}
               </Chip>
             ))}
+            <Chip onClick={() => nav(`/assets/new?side=${side}`)}>{copy.firstChipPick}</Chip>
           </div>
         </div>
       )}
-      {ready && !groups.length && (
+      {ready && !groups.length && !noneMine && (
         // 2026-11-04 요약(F-01)과 같은 빈 상태 모양
         <EmptyState
           title={side === 'debt' ? copy.noDebt : copy.empty}

@@ -25,20 +25,26 @@ export const copy = {
   debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음)
+  empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음, 칩이 안 보일 때만)
   expectedName: '예상 순자산',
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02 빈 상태 쉬운 첫 입력(2026-11-18, 23 F-02 빈 상태) [확인 필요]
-  firstChipsLabel: '금액만 적어도 돼요',
+  firstChipsLabel: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요',
+  firstChipsDebtLabel: '부채도 적으면 순자산이 정확해져요. 금액만 적어도 돼요',
   firstChips: {
     bank: '통장',
     savings: '적금·예금',
     stock: '주식·펀드',
     jeonse: '전세 보증금',
     car: '자동차',
-    loan: '대출',
+    creditLoan: '신용대출',
+    mortgage: '주택담보대출',
+    jeonseLoan: '전세 대출',
+    studentLoan: '학자금 대출',
+    cardInstallment: '카드 할부',
   },
+  firstChipPick: '직접 고르기',
   partnerWrote: (name: string) =>
     `${name}님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요`,
   firstNetLabel: '순자산',

@@ -63,5 +63,13 @@ export const firstAssetChips: readonly FirstAssetChip[] = [
   { key: 'stock', side: 'asset', grp: 'invest', kind: 'other' },
   { key: 'jeonse', side: 'asset', grp: 'real_estate', kind: 'deposit_money' },
   { key: 'car', side: 'asset', grp: 'etc', kind: 'car' },
-  { key: 'loan', side: 'debt', grp: 'other_loan', kind: 'other' },
+  { key: 'creditLoan', side: 'debt', grp: 'credit', kind: 'credit_loan' },
+  { key: 'mortgage', side: 'debt', grp: 'housing_loan', kind: 'mortgage' },
+  { key: 'jeonseLoan', side: 'debt', grp: 'housing_loan', kind: 'jeonse_loan' },
+  { key: 'studentLoan', side: 'debt', grp: 'student', kind: 'student_loan' },
+  { key: 'cardInstallment', side: 'debt', grp: 'installment', kind: 'card_installment' },
 ];
+
+/** 탭(자산·부채)별 칩. 끝에 ‘직접 고르기’ 칩은 화면이 더함(전체 추가 흐름을 종류 고르기부터 엶) */
+export const firstAssetChipsOf = (side: 'asset' | 'debt'): FirstAssetChip[] =>
+  firstAssetChips.filter((c) => c.side === side);
