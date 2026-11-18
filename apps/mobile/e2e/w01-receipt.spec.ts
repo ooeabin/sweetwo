@@ -243,7 +243,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   // 영수증 안에는 누를 수 있는 것이 없음(머리 이동 링크 ‘이번 달 월급 체크 ›’는 맨 위, 2026-11-18)
   await expect(card.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toBeVisible();
-  for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 추가'])
+  for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저축·투자 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();
   await axe(page);
@@ -455,7 +455,7 @@ test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', asyn
   await go();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
   await context.setOffline(true);
-  await page.getByRole('button', { name: '+ 추가' }).click();
+  await page.getByRole('button', { name: '+ 저축·투자 추가' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/plan$/);
   await context.setOffline(false);

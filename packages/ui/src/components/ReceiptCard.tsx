@@ -159,7 +159,7 @@ export function ReceiptSection({
 }: {
   title?: string;
   subtotal?: ReactNode;
-  /** 묶음 머리 오른쪽 ⋯ 메뉴 같은 것(2026-11-18 저축·투자 묶음) */
+  /** 묶음 머리 제목 오른쪽 ⋯ 메뉴 같은 것(2026-11-18 저축·투자 묶음, 소계는 늘 줄 금액 열 오른쪽 끝) */
   action?: ReactNode;
   children: ReactNode;
   label?: string;
@@ -170,9 +170,11 @@ export function ReceiptSection({
     <section id={id} className="hg-receipt__sec" aria-label={label ?? title}>
       {title && (
         <div className="hg-receipt__sechead">
-          <h3 className="hg-receipt__title">{title}</h3>
+          <div className="hg-receipt__headl">
+            <h3 className="hg-receipt__title">{title}</h3>
+            {action}
+          </div>
           {subtotal && <span className="hg-receipt__subtotal">{subtotal}</span>}
-          {action}
         </div>
       )}
       {children}
