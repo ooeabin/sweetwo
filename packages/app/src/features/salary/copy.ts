@@ -244,7 +244,8 @@ export const copy = {
   targetPct: (pct: number) => `목표 금액의 ${pct}%`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 진행 글자
   savingRowLabel: (name: string, monthly: string, saved: string, pct: number | null) =>
     `${name} 매달 ${monthly}, 모은 금액 ${saved}${pct === null ? '' : `, 목표 금액의 ${pct}%`}`, // 화면 읽기 이름
-  addItemIn: '+ 추가', // [확인 필요] 2026-11-17 ‘저축·투자’ 구획·묶음 안(W-01 영수증, 분할 편집기)
+  addItemInReceipt: '+ 저축·투자 추가', // [확인 필요] 2026-11-18 W-01 영수증 구획 끝(묶음이 여럿이라 무엇을 더하는지 보이게, ‘+ 지출 추가’와 같은 꼴)
+  addItemIn: '+ 추가', // [확인 필요] 2026-11-17 ‘저축·투자’ 구획·묶음 안(분할 편집기)
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
   firstSaving: (left: string) => `저축·투자 추가 (아직 안 정한 월급 ${left})`, // 묶음 밖(홈 H-01)
   firstSavingIn: (left: string) => `추가 (아직 안 정한 월급 ${left})`, // [확인 필요] 2026-11-17 묶음 안(W-02)

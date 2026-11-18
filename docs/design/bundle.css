@@ -2387,10 +2387,12 @@ button.hg-receipt__amount { cursor: pointer; }
 .hg-planbar__foot > .hg-btn { flex: none; }
 .hg-receipt__sec { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--hairline-soft); }
 .hg-receipt__sechead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin: 0 0 var(--space-1); }
+.hg-receipt__headl { display: flex; align-items: center; gap: var(--space-1); min-width: 0; }  /* 묶음 머리 왼쪽: 제목 + ⋯ 메뉴. 소계는 늘 오른쪽 끝(줄 금액 열) */
 .hg-receipt__title { margin: 0; font: var(--text-body-strong); color: var(--ink); }
 .hg-receipt__subtotal { font: var(--text-caption); font-weight: 500; color: var(--stone); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hg-receipt__rows { margin: 0; padding: 0; list-style: none; }
 .hg-receipt__row { position: relative; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; }
+.hg-receipt__main:has(.hg-receipt__prog) { align-items: flex-start; }  /* 2026-11-18 저축·투자 줄: 오른쪽 금액을 이름 줄 높이(위쪽 맞춤)로 */
 .hg-receipt__main { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 40px; padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: inherit; font: inherit; text-align: left; }
 button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__name { min-width: 0; font: var(--text-body); font-weight: 500; color: var(--slate); overflow-wrap: anywhere; }

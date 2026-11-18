@@ -1082,9 +1082,7 @@ export function W01Receipt() {
               subtotal={shown(won(savingSum))}
               action={
                 !edit && !theirs && savingMenu.length > 0 ? (
-                  <span style={{ alignSelf: 'center' }}>
-                    <Menu label={copy.menu} actions={savingMenu} />
-                  </span>
+                  <Menu label={copy.menu} actions={savingMenu} />
                 ) : undefined
               }
             >
@@ -1137,7 +1135,7 @@ export function W01Receipt() {
                     if (!offline()) nav(`${savingPaths.add}/a?from=split`);
                   }}
                 >
-                  {copy.addItemIn}
+                  {copy.addItemInReceipt}
                 </ReceiptAdd>
               )}
               {/* 그만 모은 저축·투자(옛 W-13 맨 아래와 같음): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
