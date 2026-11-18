@@ -278,8 +278,8 @@
 
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
-| saving\_list\_viewed | W-13 저금 목록 열림 (2026-11-09 round 3) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
-| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary`: W-02 첫 저금 빈 줄 / `salary_row`: W-02 저금 묶음 ‘+ 추가’ 줄 / `salary_wide`: W-02 넓은 창 제목 줄 버튼 / `split`: W-01 / `list`: W-13 / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
+| saving\_list\_viewed | W-01 저축·투자 묶음으로 열림(주소 `#saving`, 2026-11-18 W-13을 합침, 이름은 그대로) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
+| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary`: W-02 첫 저금 빈 줄 / `salary_row`: W-02 저금 묶음 ‘+ 추가’ 줄 / `salary_wide`: W-02 넓은 창 제목 줄 버튼 / `split`: W-01 / `list`: 옛 W-13(2026-11-18 합침, 지금은 쓰지 않음) / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
 | saving\_item\_target\_set | W-10a 목표 금액 저장이 된 뒤(2026-11-12 S7-16, 저장 전에 보내던 것 고침. 충돌 선택에서 ‘내 값’으로 저장해도) | had\_target(고치기인지), has\_deadline, target\_band |
 | saving\_item\_achieved | W-12 | months\_taken |
 | saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |

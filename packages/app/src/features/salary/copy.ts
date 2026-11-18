@@ -72,9 +72,11 @@ export const copy = {
   refillOk: '다시 채우기', // [확인 필요]
   cancel: '취소',
   // W-01 영수증(2026-11-09) [확인 필요]
-  segMonth: '이번 달',
-  segPlan: '계획',
-  segLabel: '월급 보기',
+  // 2026-11-18 화면 이름 = 서랍 줄 이름(구간 탭 ‘이번 달 / 계획’ 없앰) [확인 필요]
+  monthTitle: '이번 달 월급 체크',
+  planTitle: '월급 계획 템플릿',
+  planLink: '월급 계획 템플릿', // W-02 머리 이동 링크(‘›’는 아이콘)
+  monthLinkTo: '이번 달 월급 체크', // W-01 머리 이동 링크(‘›’는 아이콘)
   everyMonth: (day: string) => `매달 ${day}`,
   jointPaydays: (parts: string[]) => parts.join(', '),
   personPayday: (name: string, day: string) => `${name} ${day}`,
@@ -167,8 +169,6 @@ export const copy = {
   skipThis: '이번 달은 건너뛸게요', // [확인 필요] 2026-11-13 W-02 5번 줄 시트
   // W-01 ↔ W-02 잇기(2026-11-09) [확인 필요]
   sentOfPlan: (sent: string, planned: string) => `계획한 ${planned} 중 ${sent} 확인했어요`, // 2026-11-16 문구 리뷰(예전 “확인한 금액 … / …”)
-  monthLink: (n: number, total: number) => `이번 달 ${n}/${total} 확인했어요`,
-  monthLinkLabel: (n: number, total: number) => `이번 달 ${total}개 중 ${n}개 확인했어요`,
   monthLineToo: '이번 달 아직 확인하지 않은 것도 바꿨어요',
   madeFromPlan: (month: number) => `${month}월 계획대로 월급날 확인 목록을 만들었어요`,
   // 다 끝난 달(2026-11-12 W-02 끝 화면 대신 W-02 막대 아래 한 줄 + Toast, D4: ‘못 함’이 섞이면 ‘마쳤어요’) [확인 필요]
@@ -240,6 +240,10 @@ export const copy = {
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
   addItem: '+ 저축·투자 추가', // [확인 필요] 묶음 밖(W-02 월급 탭 머리 오른쪽 버튼). 2026-11-17 ‘저금’ → ‘저축·투자’
+  monthlyShort: (amount: string) => `매달 ${amount}`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 큰 금액
+  targetPct: (pct: number) => `목표 금액의 ${pct}%`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 진행 글자
+  savingRowLabel: (name: string, monthly: string, saved: string, pct: number | null) =>
+    `${name} 매달 ${monthly}, 모은 금액 ${saved}${pct === null ? '' : `, 목표 금액의 ${pct}%`}`, // 화면 읽기 이름
   addItemIn: '+ 추가', // [확인 필요] 2026-11-17 ‘저축·투자’ 구획·묶음 안(W-01 영수증, 분할 편집기)
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
   firstSaving: (left: string) => `저축·투자 추가 (아직 안 정한 월급 ${left})`, // 묶음 밖(홈 H-01)
@@ -320,6 +324,7 @@ export const copy = {
   conflictTheirs: (partner: string) => `${partner}님 값`,
   // W-11 저금 항목 추가
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
+  addNameHelp: '매달 월급에서 이만큼 떼어 둬요. 월급 계획 템플릿에 들어가요', // [확인 필요] 2026-11-18 첫 질문 회색 한 줄
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string, allowance?: string) =>
@@ -334,7 +339,7 @@ export const copy = {
   addDeadlineQ: '언제까지 모을까요?',
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
-  added: '저축·투자를 추가했어요', // [확인 필요]
+  added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
   addShort: '아직 안 정한 월급이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   addNoSplit: '월급이 생기면 저축·투자를 추가할 수 있어요', // [확인 필요]

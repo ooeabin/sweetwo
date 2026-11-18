@@ -1,6 +1,15 @@
 import { achieveGoal, qk } from '@sweetwo/api';
 import { reachedTarget } from '@sweetwo/core';
-import { Badge, Lead, leadOf, ListRow, PageHeader, QuestionLayout } from '@sweetwo/ui';
+import {
+  Badge,
+  BottomSheet,
+  Button,
+  Lead,
+  leadOf,
+  ListRow,
+  PageHeader,
+  QuestionLayout,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +18,7 @@ import { money, useMask } from '../../shared/mask';
 import { hideToast } from '../../shared/toast';
 import { MainFrame } from '../frame';
 import { copy } from './copy';
-import { savingPaths } from './paths';
+import { savingPaths, togetherPaths } from './paths';
 import { useFirstSaving, useSavingItems, type SavingItem } from './saving';
 
 /**
@@ -237,6 +246,51 @@ export function SavingQuestionError({
       onBack={onBack}
       primary={{ label: sharedCopy.retry }}
       onSubmit={onRetry}
+    />
+  );
+}
+
+/**
+ * W-11 끝 물음(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”(→ W-15), 미합류면 초대(S-12).
+ * 2026-11-18 W-11 끝이 W-01로 바뀌어 W-01과 W-10 어느 쪽에서든 엶
+ */
+export function SavingAskSheet({
+  ask,
+  goalId,
+  partnerName,
+  onClose,
+}: {
+  ask: 'bundle' | 'invite';
+  goalId: string;
+  partnerName: string;
+  onClose: () => void;
+}) {
+  const nav = useNavigate();
+  return (
+    <BottomSheet
+      title={ask === 'bundle' ? copy.bundleAskQ(partnerName) : copy.inviteAskQ}
+      onClose={onClose}
+      actions={
+        <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <Button
+            block
+            variant="primary"
+            onClick={() =>
+              nav(
+                ask === 'bundle' ? togetherPaths.bundleNew(goalId) : '/settings/couple?invite=1',
+                {
+                  replace: true,
+                },
+              )
+            }
+          >
+            {ask === 'bundle' ? copy.bundleAskYes : copy.inviteAskYes}
+          </Button>
+          <Button block variant="ghost" onClick={onClose}>
+            {copy.laterAnswer}
+          </Button>
+        </div>
+      }
     />
   );
 }

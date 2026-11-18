@@ -89,6 +89,11 @@ export function MainFrame(
     sub?: 'detail' | 'settings';
     /** 좁은 창 앱 머리 제목(메뉴 밖 화면, 예: N-02 “알림”). 없으면 메뉴 이름, 메뉴가 없으면 “설정” */
     narrowTitle?: string;
+    /**
+     * 좁은 창 머리 ‹와 안드로이드 뒤로를 ‘홈으로’ 대신 이 동작으로(2026-11-18 W-02 ↔ W-01 링크로 열었을 때).
+     * 없으면 홈으로
+     */
+    onBack?: () => void;
   },
 ) {
   const nav = useNavigate();
@@ -167,15 +172,12 @@ export function MainFrame(
     onSelect: () => go(to, to !== '/', key),
     children,
   });
-  const view = new URLSearchParams(loc.search).get('view');
   // 날짜 없는 사람(각자)은 W-02 확인 목록이 없어 ‘이번 달 월급 체크’ 줄을 숨김(20 W-02 ‘날짜 없는 사람은 W-02 없음’). ‘월급’ 줄이 그 자리(기간 한 줄)로 감
   const noCheck = !!me.data?.payday_none && space.data?.salary_mode !== 'joint';
   const salarySubs = [
-    ...(noCheck
-      ? []
-      : [item('salary_month', d.salaryMonth, '/salary', path === '/salary' && view !== 'plan')]),
-    item('salary_plan', d.salaryPlan, '/salary?view=plan', path === '/salary' && view === 'plan'),
-    item('savings', d.savings, '/salary/items', path === '/salary/items'),
+    ...(noCheck ? [] : [item('salary_month', d.salaryMonth, '/salary', path === '/salary')]),
+    // 저축·투자 줄은 없앰(2026-11-18): W-01 월급 계획 템플릿 안 ‘저축·투자’ 묶음이 정식 자리
+    item('salary_plan', d.salaryPlan, '/salary/plan', path === '/salary/plan'),
     // W-21 지난 달 모아보기(2026-11-17). ‘수입 기록’ 줄은 없앰(W-20b는 W-02 ‘수입’ 묶음에서)
     item('month_archive', d.monthArchive, '/salary/archive', path === '/salary/archive'),
   ];
@@ -247,7 +249,8 @@ export function MainFrame(
         }
       : narrow && hubSub
         ? () => {
-            goHome();
+            if (p.onBack) p.onBack();
+            else goHome();
             return true;
           }
         : null,
@@ -285,7 +288,7 @@ export function MainFrame(
         // 2026-11-09 좁은 창 + 버튼(FAB)과 하단 탭 막대 없앰: 추가는 화면 안 ‘+ … 추가’ 줄, 메뉴는 홈 머리 ☰ 서랍
         onMenu={() => setMenu(true)}
         menuOpen={menu}
-        onHome={goHome}
+        onHome={p.onBack ?? goHome}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}
@@ -300,7 +303,15 @@ export function MainFrame(
           if (to) nav(to);
         }}
         date={formatDateWeekday(todayKst())}
-        narrowTitle={p.narrowTitle ?? (p.current ? label[p.current] : copy.settings)}
+        // 머리 제목 = 화면 이름(2026-11-18, 서랍 줄 이름과 같게). 제목 줄(page.title)이 글자면 그것, 없으면 메뉴 이름
+        narrowTitle={
+          p.narrowTitle ??
+          (typeof p.page?.title === 'string'
+            ? p.page.title
+            : p.current
+              ? label[p.current]
+              : copy.settings)
+        }
         labels={{
           search: copy.search,
           searchKey: searchKey(),

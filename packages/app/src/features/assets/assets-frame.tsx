@@ -29,7 +29,8 @@ export function AssetsFrame({
       current="assets"
       tone="alt"
       page={{
-        title: copy.title,
+        // 제목 = 서랍 줄 이름(2026-11-18): F-02는 ‘자산·부채’, 서랍에 없는 F-01은 탭 이름 ‘자산 관리’
+        title: tab === 'items' ? copy.tabs.items : copy.title,
         actions: (
           // 넓은 창만. 좁은 창은 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄(2026-11-09 + 버튼 대신).
           // 메뉴 제목 줄 ‘추가’는 보조 버튼(DESIGN.md, 2026-11-12 QA 8구간 S8-11)

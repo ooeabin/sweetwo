@@ -188,7 +188,7 @@ export function AppFrame(p: AppFrameProps) {
               {p.labels.searchKey ?? '⌘K'}
             </span>
           </button>
-          <nav className="hg-appside__nav" aria-label={p.narrowTitle}>
+          <nav className="hg-appside__nav" aria-label={p.labels.menu}>
             {p.tabs.map((t) => (
               <TabLink
                 key={t.key}

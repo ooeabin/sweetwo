@@ -2,7 +2,6 @@ import { fetchGoalLines, qk, restoreTrash, trashGoals } from '@sweetwo/api';
 import { formatDateFull, formatYm, kstDateOf as kstDay, savingRemain } from '@sweetwo/core';
 import {
   Badge,
-  BottomSheet,
   Button,
   Icon,
   ListRow,
@@ -32,7 +31,7 @@ import {
 import { BundleAchieveWatch } from './w-12-bundle-achieved';
 import { useSavingRealtime } from '../data';
 import { trackSharedGoal, useSavingItems } from '../saving';
-import { AchieveWatch, SavingLoadError } from '../saving-parts';
+import { AchieveWatch, SavingAskSheet, SavingLoadError } from '../saving-parts';
 import { AfterChoice } from './w-12a-saving-after';
 
 // W-10 저금 항목 상세(20, ADR 0007). 머리(‹ 이름 ⋯) → 저금 한 카드(모은 금액 + 막대 + 목표 금액 한 줄, 나머지 ‘자세히 보기’, 2026-11-15)
@@ -474,31 +473,7 @@ export function W10SavingItem() {
       <BundleAchieveWatch />
       {/* W-11 끝(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”, 미합류면 초대 */}
       {(ask === 'bundle' || ask === 'invite') && (
-        <BottomSheet
-          title={ask === 'bundle' ? copy.bundleAskQ(d.partnerName) : copy.inviteAskQ}
-          onClose={closeAsk}
-          actions={
-            <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-              <Button
-                block
-                variant="primary"
-                onClick={() =>
-                  nav(
-                    ask === 'bundle' ? togetherPaths.bundleNew(id) : '/settings/couple?invite=1',
-                    {
-                      replace: true,
-                    },
-                  )
-                }
-              >
-                {ask === 'bundle' ? copy.bundleAskYes : copy.inviteAskYes}
-              </Button>
-              <Button block variant="ghost" onClick={closeAsk}>
-                {copy.laterAnswer}
-              </Button>
-            </div>
-          }
-        />
+        <SavingAskSheet ask={ask} goalId={id} partnerName={d.partnerName} onClose={closeAsk} />
       )}
     </div>
   );

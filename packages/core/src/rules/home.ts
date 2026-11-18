@@ -457,7 +457,7 @@ export function lateLeft(
 const SALARY_PATHS = {
   checklist: '/salary',
   last: '/salary?cycle=last',
-  plan: '/salary?view=plan',
+  plan: '/salary/plan',
   moneyIn: '/salary/money-in',
   salary: '/settings/me/salary',
 };

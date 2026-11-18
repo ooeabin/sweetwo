@@ -158,7 +158,7 @@ describe('monthCheck: 할 일 띠 5b 재료', () => {
         to: '/salary',
       }),
     ).toBeNull();
-    expect(monthCheck({ kind: 'first', date: '2026-11-25', to: '/salary?view=plan' })).toBeNull();
+    expect(monthCheck({ kind: 'first', date: '2026-11-25', to: '/salary/plan' })).toBeNull();
   });
 });
 

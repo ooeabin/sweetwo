@@ -6,11 +6,11 @@ const ID = '[^/]+';
 const TABLE: [RegExp, string][] = [
   [/^\/$/, 'H-01'],
   [/^\/welcome$/, 'O-07'],
-  // 월급 탭: ‘계획’(?view=plan)은 W-01, 아니면 W-02(아래 screenIdOf에서)
+  // 월급 탭: W-02(/salary), W-01(/salary/plan)
   [/^\/salary\/split\/new$/, 'W-01b'],
   [new RegExp(`^/salary/split/${ID}$`), 'W-01c'],
   [/^\/salary\/auto-lines$/, 'W-01d'],
-  [/^\/salary\/items$/, 'W-13'],
+  [/^\/salary\/plan$/, 'W-01'], // 2026-11-18 W-01은 별도 화면(옛 W-13 저금 목록 /salary/items는 W-01 저축·투자 묶음으로 넘김)
   [/^\/salary\/items\/new(\/[^/]+)?$/, 'W-11'],
   [new RegExp(`^/salary/items/${ID}/edit/${ID}$`), 'W-10a'],
   [new RegExp(`^/salary/items/${ID}/achieved$`), 'W-12'],
@@ -100,8 +100,10 @@ const TABLE: [RegExp, string][] = [
 /** 주소(pathname, search) → 화면 ID. 표에 없으면 null */
 export function screenIdOf(pathname: string, search = ''): string | null {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  // 옛 구간 탭 주소 /salary?view=plan은 곧바로 /salary/plan으로 넘어가므로 W-01로 셈(W-02 이벤트가 새지 않게)
   if (path === '/salary')
     return new URLSearchParams(search).get('view') === 'plan' ? 'W-01' : 'W-02';
+  if (path === '/salary/items') return 'W-01';
   // 온보딩(O-)·합류(P-) 화면은 주소 끝이 화면 ID 소문자(o-31, p-05b)
   const step = /^\/(onboarding|join)\/([op]-\d{2}[a-z]?)$/.exec(path);
   if (step?.[2]) return step[2].charAt(0).toUpperCase() + step[2].slice(1);

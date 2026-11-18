@@ -189,32 +189,28 @@ test('다 끝난 달 공유(2026-11-12): ‘못 함’이 섞이면 “마쳤어
   await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 계획대로 됐어요');
 });
 
-test('W-01 링크 줄 “이번 달 2/5 체크했어요 ›” → 이번 달, 체크리스트가 없으면 없음', async ({
+test('W-01 머리 링크 “이번 달 월급 체크 ›” → W-02, ‹ = W-01, 편집 중·날짜 없는 사람은 없음', async ({
   page,
 }) => {
   const db = await open(page);
   mark(linesOf(db)[0], 'checked');
-  mark(linesOf(db)[2], 'checked');
-  mark(linesOf(db)[1], 'skipped'); // 못 함은 보낸 것으로 세지 않음
-  await page.goto('/salary?view=plan');
-  const link = page.getByRole('button', { name: '이번 달 5개 중 2개 확인했어요' });
-  await expect(link).toHaveText('이번 달 2/5 확인했어요');
-  await axe(page);
+  await page.goto('/salary/plan');
+  const link = page.getByRole('link', { name: '이번 달 월급 체크' });
+  await link.click();
+  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  // W-02의 ‘월급 계획 템플릿 ›’로 다시 W-01, 편집하기 중에는 링크가 없음
+  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   await page.getByRole('button', { name: '편집하기' }).click();
   await expect(link).toHaveCount(0);
   await page.getByRole('button', { name: '완료' }).click();
-  await link.click();
-  await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('tab', { name: '이번 달' })).toHaveAttribute('aria-selected', 'true');
-});
-
-test('W-01 링크 줄: 월급날이 없어 체크리스트가 없으면 없음', async ({ page }) => {
-  const db = await open(page);
+  // 날짜 없는 사람(각자)은 W-02에 확인 목록이 없어 링크 없음(서랍 줄도 없음)
   db.checklists.length = 0;
-  Object.assign(db.me, { payday: null, payday_last: false });
-  await page.goto('/salary?view=plan');
+  Object.assign(db.me, { payday: null, payday_last: false, payday_none: true });
+  await page.goto('/salary/plan');
   await expect(page.locator('.hg-receipt__amount')).toBeVisible();
-  await expect(page.locator('.hg-receipt__link')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
 });
 
 test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 “이번 달 체크 안 한 줄도 바꿨어요”, 체크한 줄이면 그대로', async ({
@@ -222,7 +218,7 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
 }) => {
   const db = await open(page);
   mark(linesOf(db)[2], 'checked'); // 고정지출은 이미 체크
-  await page.goto('/salary?view=plan');
+  await page.goto('/salary/plan');
   await page.getByRole('button', { name: '생활비 88만 원' }).click();
   let sheet = page.getByRole('dialog', { name: '생활비 금액' });
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
@@ -286,9 +282,8 @@ test('파트너 탭(각자): 같은 진행 막대 보기만, 다 끝나면 같�
 }) => {
   const db = await open(page);
   joinYebin(db);
-  await page.goto('/salary?view=plan&who=yebin');
-  const link = page.locator('.hg-receipt__link');
-  await expect(link).toHaveText('이번 달 0/2 확인했어요');
+  await page.goto('/salary/plan?who=yebin');
+  const link = page.getByRole('link', { name: '이번 달 월급 체크' });
   await link.click();
   await expect(page).toHaveURL(/\/salary\?who=yebin$/);
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();

@@ -6,7 +6,7 @@ import { events } from './analytics';
 import { homeTask, homeTaskTexts } from './home-tasks';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
-// H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿·저축·투자, 2026-11-17), H-12 결혼 준비, H-04 자산 관리·H-08 캘린더 타일.
+// H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿, 2026-11-17, 2026-11-18 저축·투자 줄 없앰), H-12 결혼 준비, H-04 자산 관리·H-08 캘린더 타일.
 // 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 25일 월급 사이클 = 9월 25일 ~ 10월 24일, 월급 전 확인은 10월 22일부터.
 
@@ -82,8 +82,8 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(planRow(page)).toContainText('월급 계획 템플릿');
   await expect(planRow(page)).toContainText('매달 25일');
   await expect(planRow(page)).toContainText('아직 안 정한 월급 0원');
-  // 셋째 줄 저축·투자: 개수 + 합
-  await expect(page.locator('.hg-hubbox__row').nth(2)).toContainText('2개 모으는 중');
+  // 2026-11-18: 월급 상자는 줄 둘(저축·투자 줄 없앰)
+  await expect(page.locator('.hg-hubbox__row')).toHaveCount(2);
   // 결혼했어요라 H-12 없음
   await expect(page.getByText(/결혼 준비 메모/)).toHaveCount(0);
   await axe(page);
@@ -105,7 +105,7 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(first).toContainText('이번 달 +95만 원');
 });
 
-test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-13, 월급 계획 W-01, 캘린더, 자산 관리, 저금', async ({
+test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-01 저축·투자 묶음, 월급 계획 W-01, 캘린더, 자산 관리, 저금', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -117,13 +117,12 @@ test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-13, �
     ],
     [
       () => page.getByRole('button', { name: '저축·투자 모두 보기' }).click(),
-      /\/salary\/items\?from=home$/,
+      /\/salary\/plan\?from=home#saving$/,
     ],
     [() => page.getByRole('button', { name: '월급', exact: true }).click(), /\/salary$/],
-    [() => planRow(page).click(), /\/salary\?view=plan$/],
+    [() => planRow(page).click(), /\/salary\/plan$/],
     [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar$/],
     [() => page.getByRole('button', { name: /^자산 관리/ }).click(), /\/assets$/],
-    [() => page.locator('.hg-hubbox__row').nth(2).click(), /\/salary\/items\?from=home$/],
   ] as const) {
     await page.goto('/');
     await expect(together(page)).toBeVisible();
@@ -172,8 +171,6 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   await expect(page.getByRole('button', { name: /결혼 준비 메모 0개/ })).toContainText(
     '+ 쓸 곳 메모 추가',
   );
-  // 월급 상자 저축·투자 줄 “+ 추가”
-  await expect(page.locator('.hg-hubbox__row').nth(2)).toContainText('+ 추가');
   await axe(page);
   await h.getByRole('button', { name: '결혼 비용' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
@@ -201,6 +198,7 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');
   await expect(page.getByText('10월 23일 첫 월급날에 확인해요')).toBeVisible();
+  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toBeVisible();
   await page.goto('/');
   await (await homeTask(page, '자동으로 나가는 걸 골라 주세요')).click();
   await expect(page).toHaveURL(/\/salary\/auto-lines$/);
@@ -212,7 +210,7 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   await sheet.getByRole('button', { name: '다음 날' }).click();
   await axe(page);
   await sheet.getByRole('button', { name: '저장하기' }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   expect(db.v22?.calls.find((c) => c.fn === 'split_lines_configure')?.body).toEqual({
     p_items: [{ id: 'split-1-line-1', auto_pay: true, auto_day: 26 }],
   });
@@ -513,7 +511,7 @@ test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자
     for (const g of d.goals) g.owner_user_id = null;
   });
   await expect(monthLine(page)).toContainText('자동으로 정해져요');
-  await page.goto('/salary?view=plan');
+  await page.goto('/salary/plan');
   const send = page.locator('.hg-receipt__row', { hasText: '보내기' });
   await expect(send).toContainText('월급 − 용돈');
   await expect(send).toContainText('자동 월급날');
@@ -525,7 +523,7 @@ test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자
 test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 알약 “자동 26일”', async ({
   page,
 }) => {
-  const db = await open(page, undefined, NOW, '/salary?view=plan');
+  const db = await open(page, undefined, NOW, '/salary/plan');
   await page.getByRole('button', { name: '고정지출 88만 원' }).click();
   const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
   await expect(sheet.getByRole('switch', { name: '월급날 확인 목록에 넣기' })).toHaveAttribute(
@@ -921,7 +919,6 @@ test('홈 순서(2026-11-17): 같이 모으기가 0원이면 월급 상자가 �
   await expect(page.locator('.hg-hubbox__name')).toHaveText([
     '이번 달 월급 체크',
     '월급 계획 템플릿',
-    '저축·투자',
   ]);
   await expect(page.locator('.hg-hubtile')).toHaveText([/^자산 관리/, /^캘린더/]);
   await expect(page.locator('.hg-hubline')).toHaveCount(0);

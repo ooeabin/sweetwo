@@ -30,7 +30,7 @@ describe('screenIdOf', () => {
   });
   it('월급 탭은 보기로 나눔', () => {
     expect(screenIdOf('/salary')).toBe('W-02');
-    expect(screenIdOf('/salary', '?view=plan')).toBe('W-01');
+    expect(screenIdOf('/salary/plan')).toBe('W-01');
   });
   it('캘린더 첫 화면은 달력 Y-04(옛 Y-01 주소도), 지난 달 모아보기는 W-21', () => {
     expect(screenIdOf('/calendar')).toBe('Y-04');

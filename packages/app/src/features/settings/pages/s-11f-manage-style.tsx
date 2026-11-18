@@ -129,7 +129,7 @@ export function S11fManageStyle() {
               onClick: () => quietly(send(before.lv, before.sv, before.mg, true).then(refresh)),
             },
       );
-      nav('/salary?view=plan', { replace: true });
+      nav('/salary/plan', { replace: true });
     } catch (e) {
       toast(
         e instanceof ModeChangeBlocked && e.reason === 'unlink_pending'

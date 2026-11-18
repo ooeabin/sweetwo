@@ -5,18 +5,17 @@ import { spoken } from '../../../shared/masked-text';
 import { copy } from '../copy';
 
 /**
- * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로): 머리 “월급 ›”(→ 월급 첫 화면)와 줄 셋.
- * 줄 이름은 서랍과 똑같이 “이번 달 월급 체크” “월급 계획 템플릿” “저축·투자”. 값은 예전 홈 상자를 짧게 줄인 것:
- * 이번 달 월급 체크 = H-11 이번 달 한 줄(core pickMonthLine, 날짜 없는 사람은 H-13 기간) / 월급 계획 템플릿 = H-07 / 저축·투자 = H-09.
+ * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로): 머리 “월급 ›”(→ 월급 첫 화면)와 줄 둘(2026-11-18 ‘저축·투자’ 줄은 없앰: 저축·투자는 W-01 월급 계획 템플릿 안 묶음, 홈의 모은 금액은 H-10 같이 모으기).
+ * 줄 이름은 서랍과 똑같이 “이번 달 월급 체크” “월급 계획 템플릿”. 값은 예전 홈 상자를 짧게 줄인 것:
+ * 이번 달 월급 체크 = H-11 이번 달 한 줄(core pickMonthLine, 날짜 없는 사람은 H-13 기간) / 월급 계획 템플릿 = H-07.
  * 확인할 게 있으면(core monthLineUrgent) 첫 줄 값이 굵게
  */
-export type SalaryBoxTo = 'salary' | 'salary_month' | 'salary_plan' | 'savings';
+export type SalaryBoxTo = 'salary' | 'salary_month' | 'salary_plan';
 
 export function H15SalaryBox({
   line,
   won,
   plan,
-  savings,
   go,
   onRetry,
 }: {
@@ -24,8 +23,6 @@ export function H15SalaryBox({
   won: (v: number) => string;
   /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“아직 안 정한 월급 20만 원”) */
   plan: { value?: string; sub?: string };
-  /** H-09 내용: 개수와 모은 금액 합 */
-  savings: { count: number; total: string };
   go: (box: SalaryBoxTo, to: string) => void;
   onRetry: () => void;
 }) {
@@ -55,15 +52,7 @@ export function H15SalaryBox({
           { ...month, alert: monthLineUrgent(line) },
           line.kind === 'error' ? onRetry : () => go('salary_month', line.to),
         ),
-        row('plan', copy.rowPlan, plan, () => go('salary_plan', '/salary?view=plan')),
-        row(
-          'saving',
-          copy.savingsTile,
-          savings.count
-            ? { value: copy.savingCount(savings.count), sub: savings.total }
-            : { value: copy.noSavings },
-          () => go('savings', '/salary/items?from=home'),
-        ),
+        row('plan', copy.rowPlan, plan, () => go('salary_plan', '/salary/plan')),
       ]}
     />
   );

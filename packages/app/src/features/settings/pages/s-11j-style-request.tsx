@@ -77,7 +77,7 @@ export function S11jStyleRequest() {
       }
       if (result === 'accepted') {
         carryToast(copy.styleSaved);
-        return nav('/salary?view=plan', { replace: true });
+        return nav('/salary/plan', { replace: true });
       }
       nav('/', { replace: true });
     } catch (e) {

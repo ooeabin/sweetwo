@@ -73,9 +73,9 @@ export function W01cSplitAnswer() {
     return (
       <QuestionLayout
         title={t.waiting(c.partnerName)}
-        onBack={() => nav('/salary?view=plan')}
+        onBack={() => nav('/salary/plan')}
         primary={{ label: t.ok }}
-        onSubmit={() => nav('/salary?view=plan', { replace: true })}
+        onSubmit={() => nav('/salary/plan', { replace: true })}
         center
       />
     );
@@ -112,7 +112,7 @@ export function W01cSplitAnswer() {
             ? t.acceptedCut(living && fixed ? 'both' : living ? 'living' : 'fixed')
             : t.accepted,
         );
-        return nav('/salary?view=plan', { replace: true });
+        return nav('/salary/plan', { replace: true });
       }
       home();
     } catch {

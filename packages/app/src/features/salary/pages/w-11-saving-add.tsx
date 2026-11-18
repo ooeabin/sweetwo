@@ -197,12 +197,12 @@ export function W11SavingAdd() {
       // 그 밖(20 W-11 고친 점): 미합류면 초대, 각자 계열 연결이면 “{이름}님과 같이 모을까요?”(→ W-15). W-10이 시트로 물음
       const st = space.data?.couple_state;
       const ask = st === 'not_joined' ? 'invite' : !joint && st === 'connected' ? 'bundle' : null;
-      nav(
-        entry === 'onboarding'
-          ? AFTER_FIRST_SAVING_PATH
-          : `${savingPaths.item(id)}${ask ? `?ask=${ask}` : ''}`,
-        { replace: true },
-      );
+      // 2026-11-18: 만든 뒤 W-01 월급 계획 템플릿의 저축·투자 묶음으로(새 줄 잠깐 강조 + Toast), 물음은 거기서
+      const to = new URLSearchParams({ new: id });
+      if (ask) to.set('ask', ask);
+      nav(entry === 'onboarding' ? AFTER_FIRST_SAVING_PATH : `${salaryPaths.plan}?${to}#saving`, {
+        replace: true,
+      });
     } catch (e) {
       toast(
         e instanceof SavingItemBlocked
@@ -222,6 +222,7 @@ export function W11SavingAdd() {
       <QuestionLayout
         steps={steps}
         title={copy.addNameQ}
+        help={copy.addNameHelp}
         onBack={back}
         primary={{ label: copy.next, disabled: !draft.name.trim() }}
         onSubmit={() => go('b')}

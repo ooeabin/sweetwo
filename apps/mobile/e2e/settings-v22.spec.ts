@@ -74,7 +74,7 @@ test('관리 형태 요청 받음(S-11j): P-04 ‘보내요’ 문구 그대로 
   await expect(page.getByText('같이 모으기는 공동 저축·투자가 돼요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   expect(v.modeRequests[0]?.status).toBe('accepted');
   expect(db.space).toMatchObject({ salary_mode: 'joint', manager_user_id: db.me.id });
 });
@@ -126,7 +126,7 @@ test('관리 형태(S-11f): 진행 중인 내 요청 표시와 요청 취소, �
   await page.getByRole('radio', { name: '각자 자기 월급으로 해요' }).click();
   await expect(page.getByText(/‘좋아요’를 누르면/)).toHaveCount(0);
   await page.getByRole('button', { name: '저장' }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   expect(db.space?.salary_mode).toBe('separate');
 });
 
@@ -152,7 +152,7 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
   await expect(page.getByText('예빈님께 알렸어요')).toBeVisible();
   expect(v.shared[0]).toMatchObject({ name: '생활비 통장', rule: 'half', share_a: 500_000 });
   // W-01: 내가 연 제안이 열려 있으면 그 통장(내 몫, 잠김) 아래 회색 “예빈님 답을 기다려요”(20 W-01b, PR 14)
-  await page.goto('/salary?view=plan');
+  await page.goto('/salary/plan');
   await expect(page.getByText('예빈님 답을 기다려요')).toBeVisible();
   await expect(page.getByText('생활비 통장')).toBeVisible();
   await axe(page);
@@ -212,7 +212,7 @@ test('분담 제안 받음(W-01c): 좋아요 → 내 월급 계획에 같이 쓰
   await expect(page.getByText('한 달 100만 원, 찬우 40만 원, 예빈 60만 원')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();
-  await expect(page).toHaveURL(/\/salary\?view=plan$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
   expect(v.shared[0]?.status).toBe('accepted');
   expect(db.splits[0]?.split_line.find((l) => l.kind === 'shared_account')?.amount).toBe(400_000);
 
@@ -398,7 +398,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
       { id: 'y-2', split_id: 'split-y', kind: 'fixed', goal_id: null, amount: 700_000, sort: 1 },
     ],
   });
-  await page.goto(`/salary?view=plan&who=${YEBIN}`);
+  await page.goto(`/salary/plan?who=${YEBIN}`);
   await expect(page.getByText('예빈님은 저축·투자만 보여 주기로 정했어요')).toBeVisible();
   await expect(
     page.getByRole('button', { name: /예빈 여행/ }).or(page.getByText('예빈 여행')),
@@ -414,18 +414,5 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   await expect(page.getByText('예빈 여행')).toHaveCount(0);
   await expect(page.getByText('아직이에요')).toBeVisible();
   await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
-  await axe(page);
-
-  // W-13 저금 목록: 서버(space_goals)가 “개인 저금”으로, 금액 없이 줌 → 이번 달 확인 여부만, 열지 않음
-  Object.assign(db.goals.find((g) => g.id === 'goal-y') ?? {}, {
-    name: '개인 저축·투자',
-    target_amount: null,
-    start_saved: 0,
-  });
-  await page.goto('/salary/items');
-  const row = page.locator('.hg-goalrow', { hasText: '개인 저축·투자' });
-  await expect(row).toContainText('아직이에요');
-  await expect(row.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /개인 저축·투자/ })).toHaveCount(0);
   await axe(page);
 });

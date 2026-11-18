@@ -16,7 +16,7 @@ import { SaveTogether, SaveTogetherEmpty, type SaveTogetherSlideProps } from '@s
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { spoken } from '../../../shared/masked-text';
-import { EMPTY_DRAFT, savingPaths, togetherPaths, writeDraft } from '../../salary';
+import { EMPTY_DRAFT, savingListPath, savingPaths, togetherPaths, writeDraft } from '../../salary';
 import { copy } from '../copy';
 
 /**
@@ -220,7 +220,7 @@ export function H10SaveTogether({
         savingCount >= 2
           ? {
               label: copy.seeAll,
-              onClick: () => go('more', `${savingPaths.list}?from=home`),
+              onClick: () => go('more', savingListPath('home')),
             }
           : undefined
       }
