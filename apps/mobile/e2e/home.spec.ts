@@ -145,7 +145,7 @@ test('홈 상자 → 화면: 월급 W-02, 월급 계획 W-01, 캘린더, 자산 
   await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11a 이름 → 미리 보기 → 저장 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
+test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11a 이름 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
   page,
 }) => {
   await open(page, (db) => {
@@ -162,6 +162,15 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   // H-10은 그리지 않음(빈 상태 질문·칩·버튼도 홈에서 없어짐)
   await expect(together(page)).toHaveCount(0);
   await expect(page.getByText('무엇을 같이 모을까요?')).toHaveCount(0);
+  // 머리 아래가 비지 않음(2026-11-18): 띠, 월급 상자, 반 칸 타일 둘이 그대로 나옴
+  await expect(band(page)).toBeVisible();
+  await expect(page.locator('.hg-hubbox__name')).toHaveText([
+    '이번 달 월급 체크',
+    '월급 계획 템플릿',
+  ]);
+  // H-12(결혼 준비 중)도 hubtile이라 세 칸: 결혼 준비 → 자산 관리 → 캘린더
+  await expect(page.locator('.hg-hubtile').filter({ hasText: /^자산 관리/ })).toBeVisible();
+  await expect(page.locator('.hg-hubtile').filter({ hasText: /^캘린더/ })).toBeVisible();
   // 띠 5b(월급날 확인할 게 있음)는 두 칸에 세지 않음(2026-11-17): 확인 + 첫 저금(7번) + 초대. 초대는 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 3개” → 시트
   await expect(bands(page)).toHaveCount(1);
   await expect(band(page)).toContainText('할 일 3개');
@@ -206,11 +215,9 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
-  await expect(page.getByRole('region', { name: '월급 계획 템플릿 미리 보기' })).toContainText(
-    '새로',
-  );
-  await page.getByRole('button', { name: '추가하기' }).click();
+  // 저장 → W-01로 돌아와 새 줄 강조(미리 보기 단계 W-11f는 없앰)
   await expect(page).toHaveURL(/\/salary\/plan/);
+  await expect(page.locator('.hg-receipt__row.is-new')).toContainText('신혼집');
   // 저장하면 홈에 H-10이 생기고 누를 수 없음
   await page.goto('/');
   const h = together(page);
