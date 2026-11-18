@@ -125,7 +125,7 @@ test('홈 상자 → 화면: 월급 W-02, 월급 계획 W-01, 캘린더, 자산 
     [() => salaryBox(page).click(), /\/salary$/],
     [() => page.locator('.hg-hubbox__more').click(), /\/salary$/],
     [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar$/],
-    [() => page.getByRole('button', { name: /^자산 관리/ }).click(), /\/assets$/],
+    [() => page.getByRole('button', { name: /^자산 관리/ }).click(), /\/assets\/items$/],
   ] as const) {
     await page.goto('/');
     await expect(together(page)).toBeVisible();

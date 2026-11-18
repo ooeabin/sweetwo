@@ -21,7 +21,7 @@ import {
   SectionHeader,
   Tabs,
 } from '@sweetwo/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
 import { SkelBody } from '../../frame';
@@ -113,8 +113,14 @@ export function F02Items() {
   const own = assetOwnership(d.items, d.sums, d.me?.id);
   const joined = !!d.couple?.joined;
   const noneMine = ready && own.mine === 0;
-  const justFirst =
-    ready && own.mine > 0 && (loc.state as { firstAsset?: boolean } | null)?.firstAsset === true;
+  // 첫 저장 직후 이동에 실린 표시(한 번만: 읽고 바로 지워서 새로 고침·다시 들어옴에는 안 보임)
+  const [afterFirst] = useState(
+    () => (loc.state as { firstAsset?: boolean } | null)?.firstAsset === true,
+  );
+  useEffect(() => {
+    if (afterFirst) nav(`${loc.pathname}${loc.search}`, { replace: true, state: null });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const justFirst = ready && own.mine > 0 && afterFirst;
   const startChip = (c: (typeof firstAssetChips)[number]) => {
     resetDraft(c.side, d.me?.asset_share_default ?? null);
     setDraft({
@@ -204,7 +210,8 @@ export function F02Items() {
       )}
       {!d.failed && d.loading && <SkelBody shape="rows" />}
       {noneMine && (
-        <section
+        <div
+          role="group"
           className="hg-stack"
           style={{ gap: 'var(--space-3)' }}
           aria-label={copy.firstChipsLabel}
@@ -219,7 +226,7 @@ export function F02Items() {
               </Chip>
             ))}
           </div>
-        </section>
+        </div>
       )}
       {ready && !groups.length && (
         // 2026-11-04 요약(F-01)과 같은 빈 상태 모양

@@ -792,7 +792,8 @@ export function H01Home() {
                 )
               : undefined
           }
-          onClick={() => go('assets', lastAssetsTab())}
+          // 내 자산이 없으면 바로 F-02 빈 상태(종류 칩), 있으면 마지막 본 하위 탭(2026-11-18)
+          onClick={() => go('assets', showNet ? lastAssetsTab() : '/assets/items')}
         />
         <HubTile
           title={copy.calendarTile}

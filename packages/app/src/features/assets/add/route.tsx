@@ -261,7 +261,12 @@ export function AssetAddRoute() {
         steps={progress}
         title={title}
         onBack={back}
-        primary={{ label: copy.next, disabled: draft.amount === null, loading: saving }}
+        primary={{
+          // 칩으로 연 쉬운 첫 입력은 금액이 마지막이면 바로 저장(2026-11-18)
+          label: draft.quick && !steps[i + 1] ? copy.save : copy.next,
+          disabled: draft.amount === null,
+          loading: saving,
+        }}
         onSubmit={() => draft.amount !== null && go({})}
       >
         <AmountInput
