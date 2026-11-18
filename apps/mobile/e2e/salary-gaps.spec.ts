@@ -108,7 +108,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
     .getByRole('button', { name: '닫기' })
     .click();
   await expect(page.getByText('예빈님이 월급 계획을 바꿔서')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '다음 달 보기' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '다음 달 보기' })).toHaveCount(0); // 이번 달이면 › 숨김(2026-11-18)
   await page.getByRole('button', { name: '지난 달 보기' }).click();
   await expect(page.getByRole('heading', { name: '8월 25일 월급' })).toBeVisible();
   // 지난 달은 막대 아래 끝남 한 줄 + 줄은 읽기 전용(2026-11-12 결과 카드 대신: 체크 칸은 누를 수 없고 시트 없음)
@@ -128,9 +128,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   joinYebin(db);
-  await page.goto('/salary');
-  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan$/);
+  await page.goto('/salary/plan');
   await page.getByRole('tab', { name: '예빈' }).click();
   await expect(page.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
@@ -194,8 +192,8 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   await expect(done.locator('.hg-transfer__label')).toHaveCSS('text-decoration-line', 'none');
   await expect(done.locator('.hg-transfer__state .hg-ico--check')).toHaveCount(1);
   await axe(page);
-  // 첫 저금 빈 줄은 파트너 탭에 없음
-  await expect(page.getByRole('button', { name: /^추가 \(미계획 금액/ })).toHaveCount(0);
+  // 파트너 탭에는 추가 줄이 없음(W-02에는 내 탭에도 없음, 2026-11-18)
+  await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
   // 고치는 것 없음(2026-11-13): “모두 계획대로 됐어요”
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   // 내 탭으로 돌아가면 있음

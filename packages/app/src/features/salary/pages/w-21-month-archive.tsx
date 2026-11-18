@@ -3,7 +3,7 @@ import { archiveRow, formatMonthDay, pastPeriods, todayKst } from '@sweetwo/core
 import { ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
 import { speakMasked } from '../../../shared/masked-text';
@@ -14,14 +14,13 @@ import { useChecklists, useMe, useSpace } from '../data';
 import { salaryPaths, togetherPaths } from '../paths';
 import { lateLines, lateOpen } from './w-02-last-month';
 
-// W-21 지난 달 모아보기(20 W-21, 2026-11-17 사용자 결정). 입구: 메뉴 서랍 ‘월급 › 지난 달 모아보기’, W-02 머리 링크(?from=w02).
+// W-21 지난 달 모아보기(20 W-21, 2026-11-17 사용자 결정). 입구: 메뉴 서랍 ‘월급 › 지난 달 모아보기’ 하나(2026-11-18 W-02 머리 링크 없앰).
 // 지난 사이클(월급날 기준 달)을 최근 것부터: 제목 “10월 25일 월급”, 보조 결과(“계획대로 됐어요” / “확인을 마쳤어요” / “확인할 것 n개”)와
 // 오른쪽 큰 숫자 = 그 달 모은 금액, 보조 둘째 줄 “계획한 월급 …”(그 달 줄 계획 합, 사이클 수입 스냅샷이 없어서). 줄 → W-02 지난 달 보기(`?cycle=`, 읽기 전용, 늦은 확인 규칙 그대로).
 // 각자 엔진은 내 것만, 합쳐서는 공동 것. 날짜 없는 사람(확인 목록 없음)은 끝난 30일 기간별 수입 합(줄 → W-20b).
 // 계산은 core `archiveRow`·`pastPeriods`(W-02 MonthBar와 같은 규칙).
 export function W21MonthArchive() {
   const nav = useNavigate();
-  const [params] = useSearchParams();
   const me = useMe();
   const space = useSpace();
   const lists = useChecklists();
@@ -45,7 +44,6 @@ export function W21MonthArchive() {
     queryFn: () => fetchMoneyIns(),
     enabled: ready && periodMode,
   });
-  const entry = params.get('from') === 'w02' ? 'w02' : 'drawer';
   const periods = pastPeriods(
     (ins.data ?? []).filter((r) => r.owner_user_id === meId),
     today,
@@ -59,9 +57,8 @@ export function W21MonthArchive() {
     track('month_archive_viewed', {
       kind: periodMode ? 'period' : 'cycle',
       rows: rowCount,
-      entry,
     });
-  }, [loaded, periodMode, rowCount, entry]);
+  }, [loaded, periodMode, rowCount]);
 
   if (!me.data || !space.data) return <LoadingFrame current="salary" sub="detail" />;
   const m = (v: number) => money(v, masked);

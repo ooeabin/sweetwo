@@ -582,9 +582,9 @@ export type AnalyticsEvent =
       props: { state: 'early' | 'bar' | 'gap'; filled_band: number | null };
     }
   | {
-      // W-21 지난 달 모아보기를 엶(20 W-21, 2026-11-17). kind = 월급날 있는 사람 cycle / 날짜 없는 사람 period, rows = 줄 수, entry = 입구
+      // W-21 지난 달 모아보기를 엶(20 W-21, 2026-11-17). kind = 월급날 있는 사람 cycle / 날짜 없는 사람 period, rows = 줄 수
       name: 'month_archive_viewed';
-      props: { kind: 'cycle' | 'period'; rows: number; entry: 'drawer' | 'w02' };
+      props: { kind: 'cycle' | 'period'; rows: number };
     }
   | { name: 'progress_news_opened'; props: Record<string, never> }
   // 3차 검토 PR-C 아하 순간(32 0-4): P-09 합류 때 모은 금액(넣음·건너뜀, 묶음을 새로 만들었나). H-14 이번 달 우리 둘 카드와 분석은 2026-11-17 홈에서 없앰

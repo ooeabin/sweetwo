@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, seed } from './mocks';
 
-// W-21 지난 달 모아보기(20 W-21, 2026-11-17): 서랍 ‘월급 > 지난 달 모아보기’, W-02 머리 링크, 줄 → W-02 지난 달 보기, 빈 상태, 날짜 없는 사람 기간.
+// W-21 지난 달 모아보기(20 W-21, 2026-11-17): 서랍 ‘월급 > 지난 달 모아보기’, 줄 → W-02 지난 달 보기, 빈 상태, 날짜 없는 사람 기간.
 const axe = async (page: Page) => {
   const r = await runAxe(page);
   expect(
@@ -61,8 +61,8 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
       .getByRole('button', { name: '지난 달 모아보기', exact: true })
       .click();
   } else {
-    await page.goto('/salary');
-    await page.getByRole('link', { name: '지난 달 모아보기' }).click();
+    // 넓은 창: 사이드바 월급 탭에는 서랍이 없어 주소로 연다(W-02 머리 링크는 2026-11-18 없앰)
+    await page.goto('/salary/archive');
   }
   await expect(page).toHaveURL(/\/salary\/archive/);
   await expect(page.getByRole('heading', { name: '지난 달 모아보기', level: 1 })).toBeVisible();
@@ -93,13 +93,11 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
   await expect(page.locator('.hg-list .hg-listrow')).toHaveCount(3);
 });
 
-test('지난 달 모아보기: 지난 달이 없으면 빈 상태, W-02 머리 링크로 들어옴', async ({ page }) => {
+test('지난 달 모아보기: 지난 달이 없으면 빈 상태', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
-  await page.goto('/salary');
-  await page.getByRole('link', { name: '지난 달 모아보기' }).click();
-  await expect(page).toHaveURL(/\/salary\/archive\?from=w02$/);
+  await page.goto('/salary/archive');
   await expect(page.getByText('아직 지난 달 기록이 없어요')).toBeVisible();
   await axe(page);
 });

@@ -75,7 +75,6 @@ export const copy = {
   // 2026-11-18 화면 이름 = 서랍 줄 이름(구간 탭 ‘이번 달 / 계획’ 없앰) [확인 필요]
   monthTitle: '이번 달 월급 체크',
   planTitle: '월급 계획 템플릿',
-  planLink: '월급 계획 템플릿', // W-02 머리 이동 링크(‘›’는 아이콘)
   monthLinkTo: '이번 달 월급 체크', // W-01 머리 이동 링크(‘›’는 아이콘)
   everyMonth: (day: string) => `매달 ${day}`,
   jointPaydays: (parts: string[]) => parts.join(', '),
@@ -239,7 +238,6 @@ export const copy = {
   shortHelp: '지출이나 저축·투자를 줄여 주세요',
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
-  addItem: '+ 저축·투자 추가', // [확인 필요] 묶음 밖(W-02 월급 탭 머리 오른쪽 버튼). 2026-11-17 ‘저금’ → ‘저축·투자’
   monthlyShort: (amount: string) => `매달 ${amount}`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 큰 금액
   targetPct: (pct: number) => `목표 금액의 ${pct}%`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 진행 글자
   savingRowLabel: (name: string, monthly: string, saved: string, pct: number | null) =>
@@ -268,7 +266,6 @@ export const copy = {
   /** 같이 모으기에 든 저금 줄 보조 줄(W-02, 묶음 합계 ‘둘이 모은 금액’과 나눔, 2026-11-14 R4) */
   myShare: (amount: string) => `내 몫 ${amount}`, // [확인 필요]
   listEmpty: '아직 저축·투자가 없어요',
-  listAdd: '추가', // [확인 필요] 2026-11-17 묶음·목록 안 끝 줄(+ 아이콘이 ‘+’)
   listAddOut: '저축·투자 추가', // [확인 필요] 2026-11-17 묶음 밖(W-10c 맞출 게 없을 때 버튼)
   // W-10 저금 항목 상세
   back: '뒤로',
@@ -637,7 +634,6 @@ export const copy = {
     `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
   // ── W-21 지난 달 모아보기(20 W-21, 2026-11-17) [모두 확인 필요] ──
   archiveTitle: '지난 달 모아보기',
-  archiveLink: '지난 달 모아보기', // W-02 머리 링크(‘›’는 아이콘)
   archiveResult: {
     all: '계획대로 됐어요',
     mixed: '확인을 마쳤어요',
