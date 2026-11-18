@@ -140,7 +140,8 @@ test('모두 체크(2026-11-12 W-02 끝 없앰): 이동 없이 막대 아래 “
   // 결과 카드·‘체크 고치기’ 없음, 묶음 카드는 그대로(체크 모양)
   await expect(page.locator('.hg-receipt')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '체크 고치기' })).toHaveCount(0);
-  await expect(page.locator('.hg-checkgroup')).toHaveCount(2);
+  // 저축·투자 + 지출 묶음 + ‘수입’ 묶음(+ 수입 적기, 2026-11-18)
+  await expect(page.locator('.hg-checkgroup')).toHaveCount(3);
   await expect(page.getByText('영수증')).toHaveCount(0);
   await axe(page);
   // 되돌리기 = 마지막 줄을 풂 → 한 줄 사라짐

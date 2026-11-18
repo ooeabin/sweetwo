@@ -379,6 +379,7 @@ export const copy = {
   // W-02 0a 첫 월급날 전 미리 보기(2026-11-15 3차 검토) [확인 필요]
   previewTitle: '월급날에 확인할 것',
   previewAuto: '자동으로 나가요',
+  previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
   moneyInGo: '수입 적기',
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',

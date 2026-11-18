@@ -167,7 +167,7 @@ test('저금 묶음 끝 ‘추가’는 좁은 창만(넓은 창은 제목 줄 �
   await open(page);
   await page.goto('/salary');
   await expect(page.locator('.hg-checkgroup').first()).toBeVisible();
-  const row = page.locator('.hg-checkgroup .hg-addrow');
+  const row = page.locator('.hg-checkgroup .hg-addrow.hg-narrow-only');
   const narrow = (info.project.use.viewport?.width ?? 1280) < 768;
   if (narrow) await expect(row).toBeVisible();
   else {

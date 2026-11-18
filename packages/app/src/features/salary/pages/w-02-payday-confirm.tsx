@@ -21,10 +21,10 @@ import {
   Button,
   Icon,
   IconButton,
-  ListRow,
   PageHeader,
   SectionHeader,
   Tabs,
+  TransferRow,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -211,7 +211,7 @@ export function W02PaydayConfirm() {
   );
   // 머리 이동 링크(slate 500, hg-sechead__more): 왼쪽 ‘월급 계획 템플릿 ›’(W-01, 2026-11-18 구간 탭 대신), 오른쪽 ‘지난 달 모아보기 ›’(W-21, 2026-11-17)
   const headLinks = !fromArchive && (
-    <div className="hg-sechead">
+    <div className="hg-sechead" style={{ marginBottom: 'calc(-1 * var(--space-3))' }}>
       <a
         className="hg-sechead__more"
         style={{ marginLeft: 0 }}
@@ -298,27 +298,28 @@ export function W02PaydayConfirm() {
         joint,
         accountNames.ofSplitLine(l.id),
       );
-    if (mySplit)
+    if (mySplit) {
+      // 체크리스트가 맨 위(2026-11-18): 링크 → 제목 → 회색 한 줄 → 미리 보기 줄 → 수입 묶음(+ 수입 적기)
+      const ordered = [...preview].sort((x, y) => Number(x.auto_pay) - Number(y.auto_pay));
       return frame(
         <>
           {headLinks}
-          <section className="hg-card hg-card--fill hg-stack">
+          <section aria-label={firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}>
+            {firstDay && (
+              <SectionHeader
+                title={cycleName(firstDay)}
+                action={
+                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                    <IconButton icon="chevron-left" label={copy.prevMonth} small disabled />
+                    <IconButton icon="chevron-right" label={copy.nextMonth} small disabled />
+                  </span>
+                }
+              />
+            )}
             <p className="hg-card__meta">
               {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
             </p>
-            {!pending && (
-              <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
-            )}
           </section>
-          {meId && (
-            <MoneyInRows
-              meId={meId}
-              from={`${today.slice(0, 8)}01`}
-              to={today}
-              masked={masked}
-              onOpen={() => nav(togetherPaths.moneyInList)}
-            />
-          )}
           {preview.length > 0 && (
             <section
               className="hg-stack"
@@ -326,20 +327,34 @@ export function W02PaydayConfirm() {
               style={{ gap: 'var(--space-2)' }}
             >
               <SectionHeader variant="group" title={copy.previewTitle} />
-              <div className="hg-list hg-list--preview">
-                {preview.map((l) => (
-                  <ListRow
+              <div className="hg-checklist__list hg-list--preview">
+                {ordered.map((l) => (
+                  <TransferRow
                     key={l.id}
                     label={previewName(l)}
-                    sub={l.auto_pay ? copy.previewAuto : undefined}
-                    value={money(l.amount, masked)}
+                    meta={l.auto_pay ? copy.previewAuto : undefined}
+                    amount={money(l.amount, masked)}
+                    done={false}
+                    disabled
+                    checkLabel={copy.previewCheck(previewName(l))}
                   />
                 ))}
               </div>
             </section>
           )}
+          {meId && (
+            <MoneyInRows
+              meId={meId}
+              from={`${today.slice(0, 8)}01`}
+              to={today}
+              masked={masked}
+              onOpen={() => nav(togetherPaths.moneyInList)}
+              onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
+            />
+          )}
         </>,
       );
+    }
     // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’
     return frame(
       <section className="hg-card hg-card--fill hg-stack">
@@ -602,6 +617,7 @@ export function W02PaydayConfirm() {
   return frame(
     <>
       <AchieveWatch from="checklist" />
+      {archiveLink}
       <section aria-label={cycleName(start)}>
         <SectionHeader
           title={cycleName(start)}
@@ -625,7 +641,6 @@ export function W02PaydayConfirm() {
             </span>
           }
         />
-        {archiveLink}
         <MonthBar
           list={shown}
           income={income}
@@ -688,30 +703,6 @@ export function W02PaydayConfirm() {
           {copy.partnerChecklistView(partner.data?.nickname ?? '')}
         </p>
       )}
-      {/* 자동으로 나가는 것(접힌 묶음, 20 W-02 2번) */}
-      {autoLines.length > 0 && (
-        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-          <button
-            type="button"
-            className="hg-foldrow"
-            aria-expanded={autoOpen}
-            onClick={() => setAutoOpen((x) => !x)}
-          >
-            <span>{copy.autoGroup(autoLines.length)}</span>
-            <Icon name={autoOpen ? 'chevron-up' : 'chevron-down'} size={16} />
-          </button>
-          {autoOpen && (
-            <>
-              {autoLines.some((l) => l.state === 'checked') && !partnerTab && (
-                <p className="hg-q__help" style={{ margin: 0 }}>
-                  {copy.autoGroupHelp}
-                </p>
-              )}
-              <div className="hg-checklist__list">{autoLines.map(row)}</div>
-            </>
-          )}
-        </section>
-      )}
       {/* 확인할 것(손 줄, 20 W-02 3번): 저금·지출 묶음 카드 */}
       {manual.length > 0 && <SectionHeader title={copy.manualGroup(manual.length)} />}
       <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
@@ -740,8 +731,31 @@ export function W02PaydayConfirm() {
           {copy.confirmAll}
         </Button>
       )}
-      {/* “+ 수입 적기”(20 W-02 ‘수입 적기’, 2026-11-15: 저금 카드·저금 상세에서 옮김) → W-20 */}
-      {/* 이번 달에 적은 받은 돈(2026-11-16 R4-7: 적은 기록이 어디에도 안 보였음) */}
+      {/* 자동으로 나가는 것(접힌 묶음, 20 W-02 2번) */}
+      {autoLines.length > 0 && (
+        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <button
+            type="button"
+            className="hg-foldrow"
+            aria-expanded={autoOpen}
+            onClick={() => setAutoOpen((x) => !x)}
+          >
+            <span>{copy.autoGroup(autoLines.length)}</span>
+            <Icon name={autoOpen ? 'chevron-up' : 'chevron-down'} size={16} />
+          </button>
+          {autoOpen && (
+            <>
+              {autoLines.some((l) => l.state === 'checked') && !partnerTab && (
+                <p className="hg-q__help" style={{ margin: 0 }}>
+                  {copy.autoGroupHelp}
+                </p>
+              )}
+              <div className="hg-checklist__list">{autoLines.map(row)}</div>
+            </>
+          )}
+        </section>
+      )}
+      {/* 수입 묶음(2026-11-18: 체크리스트 아래) + 묶음 안 “+ 수입 적기”(20 W-02, 2026-11-15 저금 카드·저금 상세에서 옮김) → W-20 */}
       {!partnerTab && ago === 0 && meId && (
         <MoneyInRows
           meId={meId}
@@ -749,10 +763,8 @@ export function W02PaydayConfirm() {
           to={shown.cycle_end}
           masked={masked}
           onOpen={() => nav(togetherPaths.moneyInList)}
+          onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
         />
-      )}
-      {!partnerTab && !pending && ago === 0 && (
-        <AddRow block label={copy.moneyIn} onClick={() => nav(togetherPaths.moneyIn)} />
       )}
     </>,
   );

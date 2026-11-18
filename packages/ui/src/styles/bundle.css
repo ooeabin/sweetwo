@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (95d3921d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (03badc78). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2614,7 +2614,8 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-receipt__seg--check { background: var(--bar-track); }
 .hg-receipt__seg--check .hg-receipt__fill { background: var(--accent-app); }
 /* 월급 ‘이번 달’ 첫 월급날 전 미리 보기(W-02 0a): 월급날에 볼 줄을 회색으로(누를 수 없음) */
-.hg-list--preview :is(.hg-listrow__label, .hg-listrow__value) { color: var(--slate); font-weight: 500; }
+.hg-list--preview :is(.hg-listrow__label, .hg-listrow__value, .hg-transfer__label, .hg-transfer__amount) { color: var(--slate); font-weight: 500; }
+.hg-list--preview .hg-check:disabled { cursor: default; }  /* 2026-11-18 W-02 미리 보기는 TransferRow(체크 불가, 회색 원) */
 /* W-10 저금 상세 한 카드: 큰 숫자 + 막대 + 한 줄, 나머지는 접기 줄(hg-foldrow) 아래 */
 .hg-goalbox__fold { display: flex; flex-direction: column; gap: var(--space-3); }
 
