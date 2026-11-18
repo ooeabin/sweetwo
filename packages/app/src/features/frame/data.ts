@@ -12,6 +12,7 @@ import {
   netWorthSeries,
   netWorthSummary,
   todayKst,
+  assetOwnership,
   type NetWorthItem,
   type NetWorthPoint,
   type PartnerAssetSumRow,
@@ -78,13 +79,16 @@ export function useNetWorth(enabled: boolean) {
     queryFn: () => fetchNetWorthHistory(120),
     enabled,
   });
-  const ready = assets.isSuccess && sums.isSuccess && history.isSuccess;
+  const me = useMe();
+  const ready = assets.isSuccess && sums.isSuccess && history.isSuccess && me.isSuccess;
   if (!ready) return null;
   const items = assets.data;
   const nw = netWorthOf(items, sums.data);
   const t = netWorthTrend(history.data, nw);
   return {
     empty: items.length === 0 && sums.data.length === 0,
+    /** 내 것·파트너가 적은 자산 개수(공개 단계를 거친 것만, 2026-11-18 H-04 문구 고르기) */
+    own: assetOwnership(items, sums.data, me.data?.id),
     nw,
     series: t.series.slice(-6),
     change: t.change,

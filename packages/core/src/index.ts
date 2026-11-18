@@ -31,6 +31,7 @@ export * from './rules/notification';
 export * from './rules/noti-prefs';
 export * from './rules/couple';
 export * from './rules/asset';
+export * from './rules/asset-first';
 export * from './rules/admin-inquiry';
 export * from './rules/networth-rank';
 export * from './zip';

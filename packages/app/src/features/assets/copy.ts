@@ -29,6 +29,21 @@ export const copy = {
   expectedName: '예상 순자산',
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
+  // F-02 빈 상태 쉬운 첫 입력(2026-11-18, 23 F-02 빈 상태) [확인 필요]
+  firstChipsLabel: '금액만 적어도 돼요',
+  firstChips: {
+    bank: '통장',
+    savings: '적금·예금',
+    stock: '주식·펀드',
+    jeonse: '전세 보증금',
+    car: '자동차',
+    loan: '대출',
+  },
+  partnerWrote: (name: string) =>
+    `${name}님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요`,
+  firstNetLabel: '순자산',
+  firstRankLink: '또래 중 어디쯤인지 보기',
+
   // F-02
   noDebt: '부채가 없어요',
   addDebt: '+ 부채 추가',
