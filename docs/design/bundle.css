@@ -542,24 +542,18 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 @keyframes hg-breathe { 50% { transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .hg-busy__art .hg-ico { animation: none; } }
 
-/* Avatar */
-.hg-avatar { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); font: 600 13px/1 var(--font-sans); flex: none; box-sizing: border-box; }
+/* Avatar: 사진이 없으면 사람 색 원 + 닉네임 앞 최대 3자(2026-11-18, 예전 빵모자 실루엣 없앰). 글자가 없으면 사람 아이콘 */
+.hg-avatar { --avatar: 32px; display: inline-grid; place-items: center; width: var(--avatar); height: var(--avatar); border-radius: var(--radius-full); font: 600 calc(var(--avatar) * 0.4)/1 var(--font-sans); letter-spacing: 0; white-space: nowrap; overflow: hidden; flex: none; box-sizing: border-box; user-select: none; }
 .hg-avatar--p1 { background: var(--person-1); color: var(--person-1-ink); }
 .hg-avatar--p2 { background: var(--person-2); color: var(--person-2-ink); }
-/* 2026-11-09 사진이 없으면 사람 색 원 + 빵모자 실루엣(머리, 어깨, 하나로 이은 모자, 모자와 머리 사이 가는 틈). 글자는 DOM에만 남기고 숨김.
-   모양은 packages/ui/src/components/avatar-figure.ts의 AVATAR_FIGURE_PATH와 같은 path(64 칸). 바꾸면 둘 다 고친다. 색은 person-*-figure(라이트 흰색, 다크 person-*-ink) */
-.hg-avatar--p1, .hg-avatar--p2 { position: relative; overflow: hidden; font-size: 0 !important; }
-.hg-avatar--p1::after, .hg-avatar--p2::after, .hg-avatar--empty::after { content: ""; position: absolute; inset: 0; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M22.63%2028.13Q32%2025.57%2041.37%2028.13A10.7%2010.7%200%201%201%2022.63%2028.13ZM10.7%2066.1A21.3%2022.1%200%201%201%2053.3%2066.1A21.3%2022.1%200%201%201%2010.7%2066.1ZM23.33%2027.07V22.08A4.76%204.76%200%201%201%2026.57%2014A5.52%205.52%200%201%201%2037.43%2014A4.76%204.76%200%201%201%2040.67%2022.08V27.07Q32%2024.49%2023.33%2027.07Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M22.63%2028.13Q32%2025.57%2041.37%2028.13A10.7%2010.7%200%201%201%2022.63%2028.13ZM10.7%2066.1A21.3%2022.1%200%201%201%2053.3%2066.1A21.3%2022.1%200%201%201%2010.7%2066.1ZM23.33%2027.07V22.08A4.76%204.76%200%201%201%2026.57%2014A5.52%205.52%200%201%201%2037.43%2014A4.76%204.76%200%201%201%2040.67%2022.08V27.07Q32%2024.49%2023.33%2027.07Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
-.hg-avatar--p1::after { background: var(--person-1-figure); }
-.hg-avatar--p2::after { background: var(--person-2-figure); }
-.hg-avatar--sm { width: 24px; height: 24px; font-size: 12px; }
-.hg-avatar--lg { width: 40px; height: 40px; font-size: 15px; }
+/* 글자 수에 따라 원 안에 맞게 줄임(1자 40%, 2자 38%, 3자 28%) */
+.hg-avatar--n2 { font-size: calc(var(--avatar) * 0.38); }
+.hg-avatar--n3 { font-size: calc(var(--avatar) * 0.28); letter-spacing: -0.02em; }
+.hg-avatar .hg-ico { width: 56%; height: 56%; }
+.hg-avatar--sm { --avatar: 24px; }
+.hg-avatar--lg { --avatar: 40px; }
 .hg-avatars { display: inline-flex; }
-.hg-avatar--empty { background: var(--surface-alt); color: var(--stone); }  /* 2026-11-03 파트너 빈 자리 기본 그림 */
-/* 2026-11-05 빈 자리도 같은 실루엣(surface-alt 원 + muted), 2026-11-09 빵모자 실루엣 */
-.hg-avatar--empty { position: relative; overflow: hidden; }
-.hg-avatar--empty .hg-ico { display: none; }
-.hg-avatar--empty::after { background: var(--muted); }
+.hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
 
 /* Slider */
@@ -915,7 +909,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 /* Avatar: 프로필 사진 */
 .hg-avatar--photo { overflow: hidden; background: var(--surface-alt); padding: 0; }
 .hg-avatar--photo img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
-.hg-avatar--xl { width: 72px; height: 72px; font-size: 26px; }
+.hg-avatar--xl { --avatar: 72px; }
 .hg-avatar-edit { position: relative; display: inline-block; }
 .hg-avatar-edit__btn { position: absolute; right: -2px; bottom: -2px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--hairline), var(--shadow-1); border: 0; cursor: pointer; }
 .hg-avatar-edit.is-drop .hg-avatar { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
@@ -1061,7 +1055,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-week__day i { width: 5px; height: 5px; border-radius: var(--radius-full); }
 .hg-week__day i.is-on { background: var(--accent-app); }  /* 2026-11-09 캘린더 맨 위 주 띠: 일정 있는 날은 작은 오렌지 점(그래픽, 뜻은 아래 목록이 글자로) */
 /* 사람 탭(W-01·W-02 찬우·예빈): 이름 앞 작은 Avatar */
-.hg-tab .hg-avatar { width: 22px; height: 22px; margin-right: 6px; font-size: 12px; }
+.hg-tab .hg-avatar { --avatar: 22px; margin-right: 6px; }
 .hg-sechead__title { margin: 0; font: var(--text-title-3); letter-spacing: -0.2px; }
 .hg-sechead__count { font: var(--text-title-3); color: var(--stone); font-variant-numeric: tabular-nums; }
 .hg-sechead__more { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-full); font: var(--text-label); font-weight: 500; color: var(--slate); text-decoration: none; }  /* 2026-11-09 머리 이동 링크(‘전체 보기 ›’ ‘캘린더 ›’ ‘5개 중 0개 완료 ›’)는 당근 ‘더보기’처럼 회색. 오렌지는 동작 글자 버튼만 */
@@ -1529,7 +1523,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 /* 놓이는 곳: 넓은 창은 오른쪽 끝에 붙는 시트(막 없음), 좁은 창은 전체 화면 페이지 */
 .hg-noti--sheet { position: fixed; top: 0; right: 0; bottom: 0; height: auto; z-index: var(--z-sheet); }
 .hg-noti--page { width: 100%; height: auto; min-height: 0; border-left: 0; background: transparent; box-shadow: none; }  /* 2026-11-04 앱 틀(MainFrame) 안에 들어감 */
-.hg-noti__item .hg-avatar { width: 32px; height: 32px; }
+.hg-noti__item .hg-avatar { --avatar: 32px; }
 .hg-noti__more { padding: var(--space-3); text-align: center; }
 .hg-noti__head > .hg-btn--ghost:disabled { background: transparent; }  /* 2026-11-12 S10-12 ‘모두 읽음’ 꺼짐은 판 없이 글자만 muted */
 .hg-noti__foot { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--hairline-soft); }
@@ -1649,7 +1643,7 @@ a.hg-btn { text-decoration: none; }
 .hg-admin__bar .hg-search input { font: 400 14px/20px var(--font-sans); }
 .hg-admin__account { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-1) var(--space-2); margin-top: auto; padding: var(--space-3) var(--space-2) var(--space-2); border-top: 1px solid var(--hairline-soft); }
 .hg-admin__account > .hg-btn { flex-basis: 100%; justify-content: flex-start; height: auto; padding: 0 0 0 calc(28px + var(--space-2)); color: var(--slate); font: 500 12px/16px var(--font-sans); }  /* 2026-11-06 로그아웃은 글 아래 줄로(역할 글이 좁아 여러 줄로 깨지던 것) */
-.hg-admin__account .hg-avatar { width: 28px; height: 28px; background: var(--ink); color: var(--on-ink); font-size: 12px; }
+.hg-admin__account .hg-avatar { --avatar: 28px; background: var(--ink); color: var(--on-ink); }
 .hg-admin__account-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .hg-admin__account-text b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 13px/18px var(--font-sans); }
 .hg-admin__account-text span { overflow-wrap: anywhere; font: 400 12px/16px var(--font-sans); color: var(--stone); }  /* 2026-11-06 잘리지 않게 줄바꿈 */
@@ -1882,7 +1876,7 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-appside__foot { margin-top: auto; display: flex; align-items: center; gap: var(--space-1); padding-top: var(--space-3); border-top: 1px solid var(--hairline-soft); }
 .hg-appside__me { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-btn); background: none; color: var(--ink); font: var(--text-label); text-align: left; cursor: pointer; }
 .hg-appside__me:hover { background: var(--surface-alt); }
-.hg-appside__me .hg-avatar { width: 28px; height: 28px; font-size: 12px; }
+.hg-appside__me .hg-avatar { --avatar: 28px; }
 .hg-appside .hg-iconbtn { width: 40px; height: 40px; border-color: transparent; background: transparent; }
 .hg-appside .hg-iconbtn:hover { background: var(--surface-alt); }
 /* 홈 인사 카드(hg-today): 날짜 + 인사(작게) + 큰 숫자 하나 + 진행 막대 + 버튼 */
@@ -2502,7 +2496,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__more { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 120px; background: var(--surface-alt); color: var(--ink-2); font: var(--text-label); }
 :is(.hg-together__slide, .hg-together__more):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .hg-together__people { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.hg-together__people .hg-avatar { width: 28px; height: 28px; font-size: 12px; }
+.hg-together__people .hg-avatar { --avatar: 28px; }
 .hg-together__name { flex: 1; min-width: 0; font: 600 15px/22px var(--font-sans); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hg-together__people > .hg-badge { flex: none; }
 .hg-together__amount { font: var(--text-number-lg); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }

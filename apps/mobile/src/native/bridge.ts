@@ -14,6 +14,7 @@ import {
   reopenLogin,
   signOut,
   startLogin,
+  takeProviderToken,
   watchBrowserClosed,
 } from './auth';
 import { emitter } from './events';
@@ -95,6 +96,7 @@ export async function installBridge(): Promise<'ios' | 'android'> {
       pending: async () => loginPending(),
       getAccessToken: () => getAccessToken(),
       signOut: () => signOut('user'),
+      takeProviderToken: async () => takeProviderToken(),
       onEvent: (cb) => authEvents.on(cb),
     },
     lock: {

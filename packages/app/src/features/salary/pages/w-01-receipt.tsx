@@ -616,7 +616,7 @@ export function W01Receipt() {
     if (sharing) return;
     setSharing(true);
     const model: ReceiptImageModel = {
-      people: people.map((x) => (x.starter ? 1 : 2)),
+      people: people.map((x) => ({ no: x.starter ? 1 : 2, name: x.name })),
       amount: won(income),
       sub,
       bar,

@@ -19,7 +19,16 @@ import {
   todayKst,
   type BaseDay,
 } from '@sweetwo/core';
-import { Badge, Button, Icon, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Icon,
+  ListRow,
+  PageHeader,
+  SectionHeader,
+  Toggle,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -122,18 +131,13 @@ export function S11Me() {
             if (file) nav('/settings/me/photo', { state: { file } });
           }}
         >
-          {shown ? (
-            <span className="hg-avatar hg-avatar--xl hg-avatar--photo">
-              <img src={shown} alt={c.myName} />
-            </span>
-          ) : (
-            <span
-              className={`hg-avatar hg-avatar--xl ${c.starter ? 'hg-avatar--p1' : 'hg-avatar--p2'}`}
-              aria-hidden="true"
-            >
-              {c.myName.slice(0, 1)}
-            </span>
-          )}
+          <Avatar
+            name={c.myName}
+            no={c.starter ? 1 : 2}
+            size="xl"
+            src={shown ?? undefined}
+            alt={shown ? c.myName : undefined}
+          />
           {/* 사진 위 카메라는 누르기 쉬운 지름길. 같은 일은 옆 글자 버튼 “사진 바꾸기”가 하므로 보조 기술·Tab에서는 뺌 */}
           <button
             type="button"

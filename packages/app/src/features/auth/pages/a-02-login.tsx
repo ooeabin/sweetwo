@@ -1,6 +1,6 @@
 import { webAuth } from '@sweetwo/api';
 import { authProviders, type AuthProvider } from '@sweetwo/core';
-import { AuthLayout, ProviderButton, Wordmark } from '@sweetwo/ui';
+import { AuthLayout, Avatar, ProviderButton, Wordmark } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -64,10 +64,8 @@ export function A02Login() {
       className={st.inviter ? 'hg-auth--login' : 'hg-auth--hero hg-auth--login'}
       media={
         st.inviter ? (
-          // 초대한 사람 아바타(사진 없음: 찬우 = person-1). 글자는 제목이 읽어 주니 화면 읽기에서 숨김
-          <span className="hg-avatar hg-avatar--p1 hg-avatar--xl" aria-hidden="true">
-            {st.inviter.slice(0, 1)}
-          </span>
+          // 초대한 사람 아바타(사진 없음: 닉네임 글자, 시작한 사람 = person-1). 글자는 제목이 읽어 주니 화면 읽기에서 숨김
+          <Avatar name={st.inviter} no={1} size="xl" />
         ) : (
           <Wordmark height={40} />
         )

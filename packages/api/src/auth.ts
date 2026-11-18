@@ -77,6 +77,14 @@ export const webAuth = {
     const { data } = await supabase().auth.getSession();
     return data.session?.user.id ?? null;
   },
+  /** 로그인 직후 제공자가 준 토큰(구글, 카카오만). 소셜 프로필 사진 확인에만 씀. 없으면 null */
+  async providerToken(): Promise<{ provider: 'google' | 'kakao'; token: string } | null> {
+    const { data } = await supabase().auth.getSession();
+    const s = data.session;
+    const provider = s?.user.app_metadata?.provider;
+    if (!s?.provider_token || (provider !== 'google' && provider !== 'kakao')) return null;
+    return { provider, token: s.provider_token };
+  },
   async hasSession() {
     const { data } = await supabase().auth.getSession();
     return data.session !== null;

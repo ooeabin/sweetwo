@@ -88,6 +88,11 @@ export interface AppBridge {
     /** 세션이 없으면 null */
     getAccessToken: () => Promise<string | null>;
     signOut: () => Promise<void>;
+    /**
+     * 로그인 직후 제공자가 준 토큰(구글, 카카오만, 메모리에만, 한 번 주고 지움, 2026-11-18). 소셜 프로필 사진이 직접 지정한 것인지
+     * 확인하는 데만 씀(Edge Function social-avatar). 없으면(다시 실행, 다른 제공자) null
+     */
+    takeProviderToken?: () => Promise<{ provider: 'google' | 'kakao'; token: string } | null>;
     onEvent: (cb: (ev: AuthEvent) => void) => () => void;
   };
   lock: {

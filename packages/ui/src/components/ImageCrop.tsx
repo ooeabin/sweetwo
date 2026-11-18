@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react';
+import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { Icon } from './Icon';
 
@@ -180,12 +181,8 @@ export function ImageCrop({
       <div className="hg-crop__preview">
         {preview && (
           <>
-            <span className="hg-avatar hg-avatar--xl hg-avatar--photo">
-              <img src={preview} alt={labels.preview} />
-            </span>
-            <span className="hg-avatar hg-avatar--photo">
-              <img src={preview} alt="" />
-            </span>
+            <Avatar size="xl" src={preview} alt={labels.preview} />
+            <Avatar src={preview} />
           </>
         )}
       </div>

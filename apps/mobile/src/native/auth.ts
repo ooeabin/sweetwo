@@ -31,8 +31,15 @@ const TokenResponse = z.object({
   refresh_token: z.string(),
   expires_at: z.number().optional(),
   expires_in: z.number(),
+  // 구글·카카오 로그인 직후만(소셜 프로필 사진 확인용, 메모리에만)
+  provider_token: z.string().optional(),
 });
-type Session = { accessToken: string; refreshToken: string; expiresAt: number };
+type Session = {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  providerToken?: string;
+};
 export type SignOutReason = Extract<AuthEvent, { type: 'signed_out' }>['reason'];
 
 export const authEvents = emitter<AuthEvent>();
@@ -47,6 +54,14 @@ let pending: {
   timer: ReturnType<typeof setTimeout>;
 } | null = null;
 let refreshing: Promise<Session | null> | null = null;
+let providerLogin: { provider: 'google' | 'kakao'; token: string } | null = null;
+
+/** 로그인 직후 제공자 토큰 한 번(없으면 null). platform.ts AppBridge.auth.takeProviderToken */
+export function takeProviderToken() {
+  const t = providerLogin;
+  providerLogin = null;
+  return t;
+}
 
 function requireEnv() {
   if (!env.url || !env.key) throw new Error('VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY가 필요해요');
@@ -74,6 +89,7 @@ async function tokenRequest(
     accessToken: t.access_token,
     refreshToken: t.refresh_token,
     expiresAt: t.expires_at ? t.expires_at * 1000 : Date.now() + t.expires_in * 1000,
+    providerToken: t.provider_token,
   };
   await secureStore.set('refresh-token', s.refreshToken);
   return s;
@@ -186,6 +202,11 @@ export async function handleUrl(raw: string): Promise<boolean> {
       return true;
     }
     session = s;
+    // 제공자 토큰은 메모리에만(소셜 프로필 사진 확인에 한 번 쓰고 지움). 세션 갱신 때는 오지 않음
+    providerLogin =
+      s.providerToken && (p.provider === 'google' || p.provider === 'kakao')
+        ? { provider: p.provider, token: s.providerToken }
+        : null;
     authEvents.emit({
       type: 'signed_in',
       provider: p.provider,
@@ -238,6 +259,7 @@ export async function getAccessToken(): Promise<string | null> {
 export async function signOut(reason: SignOutReason, o: { remote: boolean } = { remote: true }) {
   const s = session;
   session = null;
+  providerLogin = null;
   await secureStore.remove('refresh-token');
   // 로그아웃(직접, 만료, 다른 기기, PIN 실패)이면 기기 캐시도 지움
   await offlineCache.clear();

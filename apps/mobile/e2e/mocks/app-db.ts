@@ -51,6 +51,8 @@ export interface MemDb {
   socialPhoto?: Buffer;
   /** 함수 social-avatar를 부른 횟수 */
   socialCalls?: number;
+  /** 함수 social-avatar에 보낸 본문(제공자, 토큰) */
+  socialBody?: unknown;
   /** 붙인 사진(목표·기록) */
   photos?: { goal_id?: string; care_record_id?: string; path: string; sort: number }[];
   /** 다른 수입(O-35b), 상여금(O-35) */
@@ -376,6 +378,8 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           expires_in: 3600,
           expires_at: now + 3600,
           refresh_token: 'rt',
+          // 로그인 직후 제공자 토큰(소셜 프로필 사진 확인용)
+          provider_token: 'e2e-provider-token',
           user,
         }),
       );
@@ -389,7 +393,11 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         role: 'authenticated',
         email: chanwoo.email,
         app_metadata: { provider: 'kakao' },
-        user_metadata: {},
+        // 소셜 계정이 준 사진 주소(기본 이미지일 수 있음). 앱은 화면에 쓰지 않아야 함
+        user_metadata: {
+          avatar_url: 'https://k.kakaocdn.net/dn/e2e/social-default.jpg',
+          picture: 'https://lh3.googleusercontent.com/a/e2e=s96-c',
+        },
         created_at: '2026-10-15T00:00:00Z',
       },
     },
@@ -435,6 +443,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     // 소셜 계정 프로필 사진 받기(함수 social-avatar, 25 S-11e ‘처음 사진’)
     if (path === '/functions/v1/social-avatar') {
       db.socialCalls = (db.socialCalls ?? 0) + 1;
+      db.socialBody = body();
       const cors = { 'Access-Control-Allow-Origin': '*' };
       return db.socialPhoto
         ? route.fulfill({
