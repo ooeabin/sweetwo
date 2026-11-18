@@ -3,7 +3,11 @@ import { emptyV22, type MemDb, mockOnboarding, seed } from './mocks';
 
 // W-02 이번 달 월급 체크: 체크리스트가 화면 맨 위(20 W-02 0번, 2026-11-18).
 // 순서: 머리 링크 한 줄 → 제목 줄 → (회색 한 줄) → 체크리스트 → ‘수입’ 묶음(+ 수입 적기).
-const y = async (loc: ReturnType<Page['locator']>) => (await loc.first().boundingBox())!.y;
+const y = async (loc: ReturnType<Page['locator']>) => {
+  const box = await loc.first().boundingBox();
+  expect(box).not.toBeNull();
+  return box?.y ?? 0;
+};
 
 async function open(page: Page, now: Date, prep?: (db: MemDb) => void) {
   await page.clock.setFixedTime(now);
