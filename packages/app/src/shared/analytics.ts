@@ -433,10 +433,8 @@ export type AnalyticsEvent =
           | 'band'
           // 띠 둘을 묶은 “할 일 2개” 띠(시트를 엶, 2026-11-16 4차 검토). 시트 안 줄은 band + todo
           | 'band_group'
-          // H-15 월급 상자(2026-11-17): 머리 “월급 ›”, 줄 이번 달 월급 체크·월급 계획 템플릿(2026-11-18 저축·투자 줄 없앰)
+          // H-15 월급 상자(2026-11-17): 2026-11-18부터 상자 전체가 하나(salary). 못 불러옴 다시 읽기는 retry
           | 'salary'
-          | 'salary_month'
-          | 'salary_plan'
           | 'calendar'
           | 'assets'
           | 'retry';
