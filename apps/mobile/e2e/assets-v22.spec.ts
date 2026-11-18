@@ -424,15 +424,40 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await tile(page).click();
   await expect(page).toHaveURL(/\/assets\/items$/);
   await expect(page.getByText('예빈님이 자산을 적었어요')).toHaveCount(0);
-  const chips = page.getByRole('group', { name: '금액만 적어도 돼요' });
+  const chips = page.getByRole('group', {
+    name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요',
+  });
   await expect(chips.getByRole('button')).toHaveText([
     '통장',
     '적금·예금',
     '주식·펀드',
     '전세 보증금',
     '자동차',
-    '대출',
+    '직접 고르기',
   ]);
+  // 칩 위 안내는 한 줄, 예전 빈 상태(문구 + 자산 추가하기)는 칩과 같은 일이라 안 그림
+  await expect(page.getByText('자산을 적으면 순자산을 보여 드려요', { exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByRole('button', { name: '자산 추가하기' })).toHaveCount(0);
+  await expect(page.getByText('부채가 없어요')).toHaveCount(0);
+  await shot(page, '5-f02-asset-tab');
+  await page.getByRole('tab', { name: /^부채/ }).click();
+  const debtChips = page.getByRole('group', {
+    name: '부채도 적으면 순자산이 정확해져요. 금액만 적어도 돼요',
+  });
+  await expect(debtChips.getByRole('button')).toHaveText([
+    '신용대출',
+    '주택담보대출',
+    '전세 대출',
+    '학자금 대출',
+    '카드 할부',
+    '직접 고르기',
+  ]);
+  await expect(page.getByRole('button', { name: '+ 부채 추가' })).toHaveCount(0);
+  await shot(page, '6-f02-debt-tab');
+  await page.getByRole('tab', { name: '자산 0원' }).click();
+  await expect(chips).toBeVisible();
   await shot(page, '2-f02-empty-chips');
   await axe(page);
   await chips.getByRole('button', { name: '통장' }).click();
@@ -446,7 +471,9 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await expect(nw).toContainText('2,300만 원');
   const rank = page.getByRole('button', { name: '또래 중 어디쯤인지 보기' });
   await expect(rank).toBeVisible();
-  await expect(page.getByRole('group', { name: '금액만 적어도 돼요' })).toHaveCount(0);
+  await expect(
+    page.getByRole('group', { name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요' }),
+  ).toHaveCount(0);
   await shot(page, '3-f02-after-first');
   await axe(page);
   const saved = db.assets.filter((a) => !a.deleted_at);
@@ -476,8 +503,8 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   page,
 }) => {
   const db = await start(page, { withAssets: false });
-  await page.goto('/assets/items');
-  await page.getByRole('button', { name: '대출' }).click();
+  await page.goto('/assets/items?side=debt');
+  await page.getByRole('button', { name: '신용대출' }).click();
   await heading(page, '남은 대출금은 얼마예요?');
   await page.getByLabel('남은 대출금은 얼마예요?').fill('5000000');
   await page.getByRole('button', { name: '다음', exact: true }).click();
@@ -490,8 +517,16 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   await expect(page.getByText('순자산', { exact: true })).toHaveCount(0);
   expect(db.me.asset_share_default).toBe('sum');
   expect(db.assets.map((a) => [a.name, a.side, a.grp, a.amount, a.visibility])).toEqual([
-    ['대출', 'debt', 'other_loan', 5_000_000, 'sum'],
+    ['신용대출', 'debt', 'credit', 5_000_000, 'sum'],
   ]);
+});
+
+test('직접 고르기 칩은 전체 추가 흐름(종류 고르기부터)을 연다', async ({ page }) => {
+  await start(page, { withAssets: false });
+  await page.goto('/assets/items');
+  await page.getByRole('button', { name: '직접 고르기' }).click();
+  await expect(page).toHaveURL(/\/assets\/new/);
+  await expect(page).not.toHaveURL(/\/amount$/);
 });
 
 test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총액만) → 이름만 알림(금액 없음), F-02 맨 위 한 줄, 우선순위는 궁금함보다 위', async ({
@@ -520,7 +555,9 @@ test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총�
   await expect(
     page.getByText('예빈님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요'),
   ).toBeVisible();
-  await expect(page.getByRole('group', { name: '금액만 적어도 돼요' })).toBeVisible();
+  await expect(
+    page.getByRole('group', { name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요' }),
+  ).toBeVisible();
   await axe(page);
   // ‘총액만’: 묶음 개수만 서버가 줌
   db.assets.length = 0;

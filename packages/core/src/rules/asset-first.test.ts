@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { assetGroup } from './asset';
-import { assetOwnership, assetTileHint, firstAssetChips, type AssetCountItem } from './asset-first';
+import {
+  assetOwnership,
+  assetTileHint,
+  firstAssetChips,
+  firstAssetChipsOf,
+  type AssetCountItem,
+} from './asset-first';
 
 const row = (o: Partial<AssetCountItem>): AssetCountItem => ({
   side: 'asset',
@@ -53,15 +59,23 @@ describe('내 것·파트너 개수', () => {
 });
 
 describe('F-02 종류 칩', () => {
-  it('여섯 개, 묶음·종류 키가 자산 종류 표에 있음', () => {
-    expect(firstAssetChips.map((c) => c.key)).toEqual([
+  it('자산 탭 다섯, 부채 탭 다섯(탭별로 나뉨)', () => {
+    expect(firstAssetChipsOf('asset').map((c) => c.key)).toEqual([
       'bank',
       'savings',
       'stock',
       'jeonse',
       'car',
-      'loan',
     ]);
+    expect(firstAssetChipsOf('debt').map((c) => c.key)).toEqual([
+      'creditLoan',
+      'mortgage',
+      'jeonseLoan',
+      'studentLoan',
+      'cardInstallment',
+    ]);
+  });
+  it('묶음·종류 키가 자산 종류 표에 있고 쪽이 맞음', () => {
     for (const c of firstAssetChips) {
       const g = assetGroup(c.grp);
       expect(g?.side).toBe(c.side);
