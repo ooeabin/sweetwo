@@ -35,9 +35,7 @@ import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
-import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
-import { goalLineName } from '../check-line';
-import { SavingPreview } from '../saving-preview';
+import { useMe, usePartner, useSpace, useSplits } from '../data';
 import { salaryPaths, savingPaths } from '../paths';
 import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
@@ -55,8 +53,7 @@ import {
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
 // W-11c 아래 선택 칸 ‘이미 모은 금액이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
 // v2.2(2026-11-13): W-11b 다음, W-11c 앞에 W-11e “은행에서 자동으로 나가요?”(주소 /e)
-// 2026-11-18: 끝에 W-11f ‘월급 계획 템플릿에 이렇게 들어가요’ 미리 보기(주소 /f). 저장은 여기서만(W-11c ‘목표 금액 없이’, W-11d ‘기한 없이’도 여기로)
-const STEPS = ['a', 'b', 'e', 'c', 'd', 'f'] as const;
+const STEPS = ['a', 'b', 'e', 'c', 'd'] as const;
 type Step = (typeof STEPS)[number];
 type Draft = SavingDraft;
 // 들어온 곳(32 saving_item_created entry, 2026-11-12 S7-16): home·salary = 첫 저금 빈 줄(홈·W-02), salary_row = W-02 저금 묶음
@@ -86,7 +83,6 @@ export function W11SavingAdd() {
   const space = useSpace();
   const partner = usePartner();
   const splits = useSplits();
-  const goals = useGoals();
   const [draft, setDraftState] = useState<Draft>(readDraft);
   const [saving, setSaving] = useState(false);
   const { masked } = useMask();
@@ -122,7 +118,6 @@ export function W11SavingAdd() {
     e: copy.autoQ,
     c: copy.addTargetQ,
     d: copy.addDeadlineQ,
-    f: copy.addPreviewQ,
   }[s];
   if (!me.data || !space.data || !splits.data) return <QuestionSkeleton title={title} />;
   const joint = space.data.salary_mode === 'joint';
@@ -319,10 +314,8 @@ export function W11SavingAdd() {
         onSubmit={() => go('d')}
         later={{
           label: copy.addNoTarget,
-          onClick: () => {
-            setDraft({ ...draft, target: null, deadline: null });
-            go('f');
-          },
+          loading: saving,
+          onClick: () => void save({ ...draft, target: null, deadline: null }),
         }}
       >
         <AmountInput
@@ -359,34 +352,6 @@ export function W11SavingAdd() {
         />
       </QuestionLayout>
     );
-  if (s === 'f') {
-    // 미리 보기(2026-11-18): 저장하면 W-01 ‘저축·투자’ 묶음 맨 아래에 이 줄이 생기고 미계획 금액이 줄어듦
-    const goalName = goalLineName(
-      goals.data ?? [],
-      (id) => (id === me.data?.id ? (me.data.nickname ?? '') : (partner.data?.nickname ?? '')),
-      joint,
-    );
-    const existing = mine.split_line
-      .filter((l) => l.kind === 'saving')
-      .map((l) => ({ id: l.id, name: goalName(l.goal_id), amount: l.amount }));
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.addPreviewQ}
-        onBack={back}
-        primary={{ label: copy.addDone, loading: saving }}
-        onSubmit={() => void save(draft)}
-      >
-        <SavingPreview
-          existing={existing}
-          name={draft.name.trim()}
-          monthly={draft.monthly}
-          left={left}
-          won={(v) => money(v, masked)}
-        />
-      </QuestionLayout>
-    );
-  }
   if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;
   // 처음 값 = 1년 뒤(20 W-11d). 휠이 처음 값을 다시 올려도 같은 값
   const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
@@ -424,17 +389,12 @@ export function W11SavingAdd() {
         ) : undefined
       }
       onBack={back}
-      primary={{ label: copy.addNext, disabled: !!err }}
-      onSubmit={() => {
-        setDraft({ ...draft, deadline: ym });
-        go('f');
-      }}
+      primary={{ label: copy.addDone, disabled: !!err, loading: saving }}
+      onSubmit={() => void save({ ...draft, deadline: ym })}
       later={{
         label: copy.addNoDeadline,
-        onClick: () => {
-          setDraft({ ...draft, deadline: null });
-          go('f');
-        },
+        loading: saving,
+        onClick: () => void save({ ...draft, deadline: null }),
       }}
     >
       <YearMonthInput

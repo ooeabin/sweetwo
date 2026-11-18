@@ -338,14 +338,6 @@ export const copy = {
   addStartOver: '목표 금액보다 적게 넣어 주세요',
   addDeadlineQ: '언제까지 모을까요?',
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
-  addNext: '다음', // W-11d 주 버튼(저장은 W-11f에서, 2026-11-18)
-  addPreviewQ: '월급 계획 템플릿에 이렇게 들어가요', // [확인 필요] 2026-11-18 W-11f 제목
-  addPreviewHead: '월급 계획 템플릿', // [확인 필요] 미리 보기 카드 머리
-  addPreviewNew: '새로', // [확인 필요] 새 줄 알약
-  addPreviewMore: (n: number) => `외 ${n}개`, // [확인 필요] 기존 저축·투자 줄이 셋 넘을 때
-  addPreviewNoAmount: '매달 금액 없음', // [확인 필요] 매달 0원인 새 줄
-  addPreviewArrow: (from: string, to: string) => `${from} → ${to}`, // 미계획 금액 변화
-  addPreviewLabel: '월급 계획 템플릿 미리 보기', // [확인 필요] 화면 읽기 이름
   addDone: '추가하기', // [확인 필요]
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
   addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
