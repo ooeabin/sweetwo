@@ -172,9 +172,9 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
 
   // 다른 메뉴 첫 화면: ‹(홈으로) + 머리 제목 h1, 워드마크·알림·메뉴 없음, ‹ → 홈
   for (const [name, url] of [
-    ['월급', '/salary'],
+    ['이번 달 월급 체크', '/salary'],
     ['자산 관리', '/assets'],
-    ['캘린더', '/calendar'],
+    ['달력', '/calendar'],
     ['설정', '/settings'],
   ] as const) {
     await page.goto(url);
