@@ -5,13 +5,13 @@ import { spoken } from '../../../shared/masked-text';
 import { copy } from '../copy';
 
 /**
- * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로): 머리 “월급 ›”(→ 월급 첫 화면)와 줄 둘(2026-11-18 ‘저축·투자’ 줄은 없앰: 저축·투자는 W-01 월급 계획 템플릿 안 묶음, 홈의 모은 금액은 H-10 같이 모으기).
+ * H-15 월급 상자(19 ‘H-15 월급 상자’, 2026-11-17 홈을 메뉴 서랍과 같은 이름·순서로, 2026-11-18 상자 전체가 버튼 하나):
+ * 머리 “월급”(글자만) + 정보 줄 둘(꺾쇠 없음) + 맨 아래 오른쪽 “자세히 보기 ›”. 누르면 이번 달 월급 체크(W-02, 날짜 없는 사람은
+ * 예전 그 줄이 가던 곳). 월급 계획 템플릿은 W-02 안 링크로 감. 못 불러왔으면 누르면 다시 읽음.
  * 줄 이름은 서랍과 똑같이 “이번 달 월급 체크” “월급 계획 템플릿”. 값은 예전 홈 상자를 짧게 줄인 것:
  * 이번 달 월급 체크 = H-11 이번 달 한 줄(core pickMonthLine, 날짜 없는 사람은 H-13 기간) / 월급 계획 템플릿 = H-07.
  * 확인할 게 있으면(core monthLineUrgent) 첫 줄 값이 굵게
  */
-export type SalaryBoxTo = 'salary' | 'salary_month' | 'salary_plan';
-
 export function H15SalaryBox({
   line,
   won,
@@ -23,37 +23,26 @@ export function H15SalaryBox({
   won: (v: number) => string;
   /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“미계획 금액 20만 원”) */
   plan: { value?: string; sub?: string };
-  go: (box: SalaryBoxTo, to: string) => void;
+  go: (box: 'salary', to: string) => void;
   onRetry: () => void;
 }) {
   const month = monthValue(line, won);
-  const row = (
-    key: string,
-    name: string,
-    v: { value?: string; sub?: string; alert?: boolean },
-    onClick: () => void,
-  ): HubBoxRow => ({
-    key,
-    name,
-    value: v.value,
-    sub: v.sub,
-    alert: v.alert,
-    label: spoken([name, v.value, v.sub].filter(Boolean).join(', ')),
-    onClick,
-  });
+  const rows: HubBoxRow[] = [
+    { key: 'month', name: copy.rowMonth, ...month, alert: monthLineUrgent(line) },
+    { key: 'plan', name: copy.rowPlan, ...plan },
+  ];
+  const label = spoken(
+    [copy.salaryBox, ...rows.map((r) => [r.name, r.value, r.sub].filter(Boolean).join(' '))].join(
+      ', ',
+    ),
+  );
   return (
     <HubBox
       title={copy.salaryBox}
-      onHead={() => go('salary', '/salary')}
-      rows={[
-        row(
-          'month',
-          copy.rowMonth,
-          { ...month, alert: monthLineUrgent(line) },
-          line.kind === 'error' ? onRetry : () => go('salary_month', line.to),
-        ),
-        row('plan', copy.rowPlan, plan, () => go('salary_plan', '/salary/plan')),
-      ]}
+      more={copy.salaryBoxMore}
+      rows={rows}
+      label={label}
+      onClick={line.kind === 'error' ? onRetry : () => go('salary', line.to)}
     />
   );
 }
