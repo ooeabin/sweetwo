@@ -1,12 +1,12 @@
 // W-01 영수증 이미지(‘공유하기’, docs/spec/20-salary-plan.md W-01 ‘영수증 이미지 공유’, 2026-11-09).
 // 화면과 같은 숫자·문구(금액 가리기, 공개 범위는 부르는 쪽에서 이미 적용)를 같은 디자인 토큰 색으로 canvas에 그림.
-// 사진 Avatar는 다른 출처라 canvas가 막히므로(tainted) 사람 색 원 + 빵모자 실루엣(화면 Avatar와 같은 path, 2026-11-09)으로 그림.
+// 사진 Avatar는 다른 출처라 canvas가 막히므로(tainted) 사람 색 원 + 닉네임 앞 최대 3자(화면 Avatar와 같은 글자·크기 단계, 2026-11-18)로 그림.
 
-import { AVATAR_FIGURE_PATH, AVATAR_FIGURE_VIEWBOX } from '@sweetwo/ui';
+import { avatarInitialCount, avatarInitials } from '@sweetwo/core';
 
 export interface ReceiptImageModel {
-  /** 사람 색 번호(시작한 사람 1, 합류한 사람 2). 합쳐서면 둘 */
-  people: (1 | 2)[];
+  /** 사람 색 번호(시작한 사람 1, 합류한 사람 2)와 닉네임. 합쳐서면 둘 */
+  people: { no: 1 | 2; name: string }[];
   /** 금액 위 제목(달 결과 카드 “11월 월급”, 2026-11-09) */
   title?: string;
   amount: string;
@@ -44,9 +44,9 @@ type Tokens = Record<
   | 'accentSoft'
   | 'danger'
   | 'person1'
-  | 'person1Figure'
+  | 'person1Ink'
   | 'person2'
-  | 'person2Figure',
+  | 'person2Ink',
   string
 > & { font: string };
 
@@ -68,9 +68,9 @@ function readTokens(): Tokens {
     accentSoft: v('--accent-app-soft'),
     danger: v('--danger'),
     person1: v('--person-1'),
-    person1Figure: v('--person-1-figure'),
+    person1Ink: v('--person-1-ink'),
     person2: v('--person-2'),
-    person2Figure: v('--person-2-figure'),
+    person2Ink: v('--person-2-ink'),
     font: v('--font-sans') || 'sans-serif',
   };
 }
@@ -111,20 +111,20 @@ function layout(ctx: CanvasRenderingContext2D, m: ReceiptImageModel, t: Tokens, 
     ctx.beginPath();
     ctx.arc(cx, y + r, r + (i > 0 ? 2 : 0), 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = p === 1 ? t.person1 : t.person2;
+    ctx.fillStyle = p.no === 1 ? t.person1 : t.person2;
     ctx.beginPath();
     ctx.arc(cx, y + r, r, 0, Math.PI * 2);
     ctx.fill();
-    // 빵모자 실루엣(person-*-figure, 2026-11-11 원과 같은 색의 다른 톤), 원 밖은 잘라 냄
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, y + r, r, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.translate(cx - r, y);
-    ctx.scale((r * 2) / AVATAR_FIGURE_VIEWBOX, (r * 2) / AVATAR_FIGURE_VIEWBOX);
-    ctx.fillStyle = p === 1 ? t.person1Figure : t.person2Figure;
-    ctx.fill(new Path2D(AVATAR_FIGURE_PATH));
-    ctx.restore();
+    // 닉네임 앞 최대 3자(화면 Avatar와 같은 크기 단계: 1자 40%, 2자 38%, 3자 28%). 글자가 없으면 그리지 않음
+    const initials = avatarInitials(p.name);
+    if (initials) {
+      const k = [0, 0.4, 0.38, 0.28][avatarInitialCount(p.name)] ?? 0.28;
+      ctx.font = font(600, Math.round(r * 2 * k));
+      ctx.fillStyle = p.no === 1 ? t.person1Ink : t.person2Ink;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(initials, cx, y + r + 1);
+    }
   });
   y += 40 + 12;
   if (m.title) {

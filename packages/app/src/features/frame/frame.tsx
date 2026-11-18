@@ -101,7 +101,7 @@ export function MainFrame(
   // 알림(14): 종 점, 넓은 창 패널 / 좁은 창 화면, Realtime, 푸시
   useNotiRealtime(me.data?.id);
   usePushRegistration(me.data?.id);
-  // 소셜 계정 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-05)
+  // 소셜 계정에서 직접 지정한 프로필 사진 한 번 가져오기(25 S-11e ‘처음 사진’, 2026-11-18)
   useSocialAvatar(me.data?.id, me.data?.space_id);
   const unread = useHasUnread();
   // 종 화면 읽기 이름: 새 알림 점이 있으면 “알림, 새 알림이 있어요”(2026-11-11 QA 4구간 S4-06)

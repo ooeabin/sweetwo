@@ -9,7 +9,16 @@ import {
   type TrashRow,
 } from '@sweetwo/api';
 import { daysBetween, formatMonthDay, todayKst } from '@sweetwo/core';
-import { Badge, Button, EmptyState, IconButton, Menu, Modal, PageHeader } from '@sweetwo/ui';
+import {
+  Avatar,
+  Badge,
+  Button,
+  EmptyState,
+  IconButton,
+  Menu,
+  Modal,
+  PageHeader,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -119,15 +128,7 @@ export function S21Trash() {
                 <div key={r.kind + r.id} className="hg-listrow" style={{ cursor: 'default' }}>
                   <span className="hg-avatars" aria-hidden="true">
                     {name && (
-                      <span
-                        className={
-                          (r.deletedBy === d.me?.id) === c.starter
-                            ? 'hg-avatar hg-avatar--p1'
-                            : 'hg-avatar hg-avatar--p2'
-                        }
-                      >
-                        {[...name][0] ?? ''}
-                      </span>
+                      <Avatar name={name} no={(r.deletedBy === d.me?.id) === c.starter ? 1 : 2} />
                     )}
                   </span>
                   <span className="hg-listrow__text">

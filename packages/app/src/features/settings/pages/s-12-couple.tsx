@@ -14,7 +14,7 @@ import {
   renewInvite,
 } from '@sweetwo/api';
 import { daysBetween, formatDateFull, formatMonthDay, todayKst } from '@sweetwo/core';
-import { Badge, Button, ListRow, Modal, PageHeader } from '@sweetwo/ui';
+import { Avatar, Badge, Button, ListRow, Modal, PageHeader } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -342,12 +342,7 @@ export function S12Couple() {
           lead={
             <span className="hg-avatars" aria-hidden="true">
               {people.map((p, i) => (
-                <span
-                  key={p.name + i}
-                  className={p.starter ? 'hg-avatar hg-avatar--p1' : 'hg-avatar hg-avatar--p2'}
-                >
-                  {[...p.name][0] ?? ''}
-                </span>
+                <Avatar key={p.name + i} name={p.name} no={p.starter ? 1 : 2} />
               ))}
             </span>
           }

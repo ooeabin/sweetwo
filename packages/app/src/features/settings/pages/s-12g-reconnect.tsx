@@ -5,7 +5,7 @@ import {
   qk,
   ReconnectBlocked,
 } from '@sweetwo/api';
-import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { Avatar, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -58,8 +58,8 @@ export function S12gReconnect() {
   };
   const avatars = (
     <span className="hg-avatars" aria-hidden="true">
-      <span className="hg-avatar hg-avatar--p1">{[...partner][0] ?? ''}</span>
-      <span className="hg-avatar hg-avatar--p2">{[...d.c.myName][0] ?? ''}</span>
+      <Avatar name={partner} no={1} />
+      <Avatar name={d.c.myName} no={2} />
     </span>
   );
   return (

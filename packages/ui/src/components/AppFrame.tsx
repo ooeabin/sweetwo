@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Avatar } from './Avatar';
 import { cx } from './cx';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
@@ -35,7 +36,7 @@ export interface AppFramePerson {
   no: 1 | 2;
   /** 미합류면 빈 원 */
   empty?: boolean;
-  /** 올린 사진이나 지정 아바타 그림 주소(없으면 첫 글자) */
+  /** 직접 올린 사진 주소(없으면 닉네임 글자) */
   src?: string;
 }
 
@@ -106,26 +107,8 @@ export interface AppFrameProps {
 }
 
 function Person({ p }: { p: AppFramePerson }) {
-  // 파트너 빈 자리: 기본 그림(사람 아이콘, 2026-11-03). 연결을 계속 권하려고 비워 두지 않음(2026-11-05 그림 파일은 만들지 않음)
-  if (p.empty)
-    return (
-      <span className="hg-avatar hg-avatar--empty" aria-hidden="true">
-        <Icon name="user" size={16} />
-      </span>
-    );
-  // 프로필 사진, 없으면 이름 첫 글자
-  return p.src ? (
-    <span className="hg-avatar hg-avatar--photo" aria-hidden="true">
-      <img src={p.src} alt="" />
-    </span>
-  ) : (
-    <span
-      className={cx('hg-avatar', p.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2')}
-      aria-hidden="true"
-    >
-      {[...p.name][0] ?? ''}
-    </span>
-  );
+  // 파트너 빈 자리: 사람 아이콘. 사진(직접 올린 것)이 있으면 사진, 없으면 닉네임 앞 최대 3자(2026-11-18)
+  return <Avatar name={p.name} no={p.no} src={p.src} empty={p.empty} />;
 }
 
 function TabLink({

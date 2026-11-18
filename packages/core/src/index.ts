@@ -9,6 +9,7 @@ export * from './schemas/care';
 export * from './version';
 export * from './onboarding';
 export * from './josa';
+export * from './avatar';
 export * from './rules/salary-split';
 export * from './rules/saving-item';
 export * from './rules/plan-ratio';

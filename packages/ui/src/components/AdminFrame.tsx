@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
+import { Avatar } from './Avatar';
 import { cx } from './cx';
 import { Icon, type IconName } from './Icon';
 import { Wordmark } from './Wordmark';
@@ -89,9 +90,7 @@ export function AdminFrame({
           );
         })}
         <div className="hg-admin__account">
-          <span className="hg-avatar" aria-hidden="true">
-            {who.name.slice(0, 1).toUpperCase()}
-          </span>
+          <Avatar name={who.name} />
           <span className="hg-admin__account-text">
             <b>{who.name}</b>
             {who.role && <span>{who.role}</span>}

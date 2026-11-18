@@ -156,7 +156,7 @@ function monthImage(
     },
   ].filter((x) => x.ls.length > 0);
   return {
-    people: share.people.map((x) => (x.starter ? 1 : 2)),
+    people: share.people.map((x) => ({ no: x.starter ? 1 : 2, name: x.name })),
     title: copy.cycleOf(list.cycle_start),
     amount: won(income),
     sub: copy.received(formatMonthDay(share.received)),

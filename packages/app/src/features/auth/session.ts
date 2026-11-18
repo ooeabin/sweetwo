@@ -44,6 +44,11 @@ export const session = {
     if (bridge) return (await bridge.auth.getAccessToken()) !== null;
     return webAuth.hasSession();
   },
+  /** 로그인 직후 제공자 토큰(구글, 카카오만). 소셜 프로필 사진 확인에만. 앱은 한 번 주고 지움 */
+  async providerToken() {
+    if (bridge) return (await bridge.auth.takeProviderToken?.()) ?? null;
+    return webAuth.providerToken();
+  },
   async signOut() {
     // 모바일: 이 기기로 푸시가 더 가지 않게 토큰부터 지움(실패해도 로그아웃)
     const t = await bridge?.push?.token().catch(() => null);

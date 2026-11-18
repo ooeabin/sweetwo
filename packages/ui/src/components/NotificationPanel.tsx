@@ -1,4 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { Avatar } from './Avatar';
 import { cx } from './cx';
 import { Button } from './Button';
 import type { IconName } from './Icon';
@@ -210,15 +211,7 @@ export function NotificationPanel(p: {
                       >
                         {
                           x.person ? (
-                            <span
-                              className={cx(
-                                'hg-avatar',
-                                x.person.no === 1 ? 'hg-avatar--p1' : 'hg-avatar--p2',
-                              )}
-                              aria-hidden="true"
-                            >
-                              {[...x.person.name][0] ?? ''}
-                            </span>
+                            <Avatar name={x.person.name} no={x.person.no === 1 ? 1 : 2} />
                           ) : null
                           /* 알림 종류 그림(lead-kinds.ts noti, x.icon)은 2D 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */
                         }

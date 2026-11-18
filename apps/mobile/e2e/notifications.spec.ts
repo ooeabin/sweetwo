@@ -161,7 +161,7 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
   const today = panel.getByRole('region', { name: '오늘' });
   await expect(today).toContainText('예빈님이 내 집 마련 저축·투자를 바꿨어요');
   await expect(today).toContainText('12분 전');
-  await expect(today.locator('.hg-avatar--p2')).toHaveText('예');
+  await expect(today.locator('.hg-avatar--p2')).toHaveText('예빈');
   await expect(panel.getByRole('region', { name: '이번 주' })).toContainText(
     '어머니 생신이 한 달 남았어요',
   );

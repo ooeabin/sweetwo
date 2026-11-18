@@ -59,7 +59,7 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/settings/me');
-  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await heading(page, '프로필 사진');
   await expect(page.getByText('올린 사진은 예빈님과 나만 볼 수 있어요')).toBeVisible();
@@ -96,10 +96,10 @@ test('프로필 사진(S-11e): 너무 큰 사진은 막음 → 고르기 → 자
   await page.getByRole('button', { name: '사진 지우기' }).click();
   await expect(page.getByText('사진을 지웠어요')).toBeVisible();
   expect(db.me.avatar_path).toBeNull();
-  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
 });
 
-test('소셜 계정 사진(S-11e 처음 사진, 2026-11-05): 처음 한 번 가져와 저장, 지우면 다시 안 가져옴', async ({
+test('소셜 계정에서 직접 지정한 사진(S-11e 처음 사진, 2026-11-18): 처음 한 번 가져와 저장, 지우면 다시 안 가져옴', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -112,6 +112,7 @@ test('소셜 계정 사진(S-11e 처음 사진, 2026-11-05): 처음 한 번 가�
   expect(db.storage).toEqual([`/storage/v1/object/avatars/space-1/${db.me.id}.jpg`]);
   expect(db.me.avatar_social_checked_at).toBeTruthy();
   expect(db.socialCalls).toBe(1);
+  expect(db.socialBody).toEqual({ provider: 'kakao', token: 'e2e-provider-token' });
   // 지정 아바타 고르기 격자 없음, 올리기만
   await page.getByRole('button', { name: '사진 바꾸기' }).click();
   await heading(page, '프로필 사진');
@@ -123,22 +124,54 @@ test('소셜 계정 사진(S-11e 처음 사진, 2026-11-05): 처음 한 번 가�
   await page.getByRole('button', { name: '사진 지우기' }).click();
   await expect(page.getByText('사진을 지웠어요')).toBeVisible();
   await page.reload();
-  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
   expect(db.me.avatar_path).toBeNull();
   expect(db.socialCalls).toBe(1);
 });
 
-test('소셜 계정 사진이 없으면(애플, 기본 사진) 시도만 남기고 이름 첫 글자', async ({ page }) => {
+test('소셜 기본 이미지면(함수가 204) 소셜 사진 주소가 있어도 닉네임 글자 아바타만(S-11 설정 홈, 우리 둘, 다크, 좁은 창, axe)', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/settings/me');
   await expect.poll(() => db.me.avatar_social_checked_at).toBeTruthy();
-  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
   expect(db.me.avatar_path ?? null).toBeNull();
+  // 소셜 계정 사진 주소(user_metadata)는 어느 화면에서도 이미지로 쓰지 않음
+  await page.goto('/settings');
+  await expect(page.locator('.hg-avatar')).not.toHaveCount(0);
+  await expect(page.locator('img[src*="kakaocdn"], img[src*="googleusercontent"]')).toHaveCount(0);
+  await expect(page.locator('.hg-avatar img')).toHaveCount(0);
+  await axe(page);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await axe(page);
+  await page.setViewportSize({ width: 360, height: 700 });
+  await expect(page.locator('.hg-avatar:visible').first()).toBeVisible();
+  await axe(page);
   await page.reload();
-  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬');
+  await page.goto('/settings/me');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
   expect(db.socialCalls).toBe(1);
+});
+
+test('토큰이 없으면(다시 실행) 소셜 사진을 부르지 않고 글자 아바타(시도도 남기지 않음)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.addInitScript(() => {
+    const s = JSON.parse(localStorage.getItem('sb-session') ?? '{}') as Record<string, unknown>;
+    delete s.provider_token;
+    localStorage.setItem('sb-session', JSON.stringify(s));
+  });
+  db.socialPhoto = PNG;
+  await page.goto('/settings/me');
+  await expect(page.locator('.hg-avatar--xl')).toHaveText('찬우');
+  expect(db.socialCalls ?? 0).toBe(0);
+  expect(db.me.avatar_path ?? null).toBeNull();
 });
 
 test('사진 고지: 파트너 합류 전이고 이름도 없으면 ‘파트너와 나만’', async ({ page }) => {
