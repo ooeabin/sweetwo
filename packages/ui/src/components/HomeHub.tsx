@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 
 // 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 GCOO 홈처럼): 회색 바탕 위 크기가 다른 흰 상자.
 // Hub(격자) > SaveTogether(H-10 같이 모으기, 따로 파일), HubLine(H-11 이번 달 한 줄, 날짜 없는 사람은 PeriodBar),
-// HubBand(할 일·초대 띠, 코코아 채움, 8번만 글자 버튼 둘 secondary), HubBox(월급 상자 H-15, 2026-11-17, 2026-11-18부터 상자 전체가 버튼 하나),
+// HubBand(할 일·초대 띠, 코코아 채움, 8번만 글자 버튼 둘 secondary), HubBox(월급 상자 H-15, 2026-11-17, 2026-11-18부터 줄마다 따로 이동),
 // HubTile(반 칸 타일, point = 오렌지 채운 포인트 상자 하나, 2026-11-17부터 자산 관리 타일).
 // 2026-11-13 v2.2(ADR 0009): HubHero(H-03)·HubSaving(H-02)은 없앰.
 
@@ -110,33 +110,30 @@ export interface HubBoxRow {
   sub?: ReactNode;
   /** 확인할 게 있음: 값을 굵은 ink로 */
   alert?: boolean;
+  /** 화면 읽기 이름(“이번 달 월급 체크, 2개 남음”) */
+  label?: string;
+  /** 이 줄을 누르면 */
+  onClick: () => void;
 }
 
 /**
- * 월급 상자(H-15, 2026-11-17 홈 순서를 메뉴 서랍과 같게, 2026-11-18 상자 전체가 버튼 하나):
- * 흰 넓은 상자. 머리 “월급”(글자만) + 줄 둘(이름 + 짧은 값, 정보만, 꺾쇠 없음) + 맨 아래 오른쪽 이동 글자 “자세히 보기 ›”.
- * 버튼 안에 버튼을 넣지 않으므로 줄과 이동 글자는 모두 span(눌리는 건 상자 하나). 화면 읽기는 label(상자 내용을 읽음)
+ * 월급 상자(H-15, 2026-11-17 홈 순서를 메뉴 서랍과 같게, 2026-11-18 줄마다 따로 이동):
+ * 흰 넓은 상자. 머리 “월급”(글자만, 누를 수 없음) + 줄 둘(button.hg-hubbox__row: 이름 + 짧은 값 + 꺾쇠 하나).
+ * 줄 전체가 눌리고(44px 이상), Tab은 줄마다 한 번. 상자 전체 버튼과 “자세히 보기 ›”는 없음
  */
-export function HubBox({
-  title,
-  more,
-  rows,
-  label,
-  onClick,
-}: {
-  title: string;
-  /** 맨 아래 오른쪽 이동 글자(“자세히 보기”, 꺾쇠는 따로 그림) */
-  more: string;
-  rows: HubBoxRow[];
-  label?: string;
-  onClick: () => void;
-}) {
+export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
   return (
-    <button type="button" className="hg-hubbox hg-hub__wide" aria-label={label} onClick={onClick}>
+    <div className="hg-hubbox hg-hub__wide" role="group" aria-label={title}>
       <span className="hg-hubbox__title">{title}</span>
-      <span className="hg-hubbox__list">
+      <div className="hg-hubbox__list">
         {rows.map((r) => (
-          <span key={r.key} className="hg-hubbox__row">
+          <button
+            key={r.key}
+            type="button"
+            className="hg-hubbox__row"
+            aria-label={r.label}
+            onClick={r.onClick}
+          >
             <span className="hg-hubbox__name">{r.name}</span>
             <span className="hg-hubbox__val">
               {r.value !== undefined && (
@@ -146,14 +143,13 @@ export function HubBox({
               )}
               {r.sub && <span className="hg-hubbox__sub">{r.sub}</span>}
             </span>
-          </span>
+            <span className="hg-hubbox__go" aria-hidden="true">
+              <Icon name="chevron-right" size={16} />
+            </span>
+          </button>
         ))}
-      </span>
-      <span className="hg-hubbox__more">
-        {more}
-        <Icon name="chevron-right" size={16} />
-      </span>
-    </button>
+      </div>
+    </div>
   );
 }
 

@@ -91,16 +91,17 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.getByText(/결혼 준비 메모/)).toHaveCount(0);
   await axe(page);
 
-  // 2026-11-18 상자 하나가 버튼: 안에 버튼·링크 없음, 줄에 꺾쇠 없음, 맨 아래 오른쪽 “자세히 보기”
-  await expect(page.locator('button.hg-hubbox')).toHaveCount(1);
-  await expect(page.locator('.hg-hubbox button, .hg-hubbox a')).toHaveCount(0);
-  await expect(page.locator('.hg-hubbox__row svg, .hg-hubbox__title svg')).toHaveCount(0);
-  await expect(page.locator('.hg-hubbox__more')).toHaveText('자세히 보기');
-  await expect(salaryBox(page)).toHaveAccessibleName(
-    /^월급, 이번 달 월급 체크 5개 남음, 월급 계획 템플릿 매달 25일 미계획 금액 0원$/,
-  );
+  // 2026-11-18 줄마다 버튼: 상자·머리는 누를 수 없고, 줄마다 › 하나, “자세히 보기” 없음
+  await expect(page.locator('button.hg-hubbox')).toHaveCount(0);
+  await expect(page.locator('button.hg-hubbox__row')).toHaveCount(2);
+  await expect(page.locator('.hg-hubbox__title .hg-ico')).toHaveCount(0);
+  await expect(page.locator('.hg-hubbox__row .hg-hubbox__go .hg-ico')).toHaveCount(2);
+  await expect(page.getByText('자세히 보기')).toHaveCount(0);
+  expect((await planRow(page).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  await expect(monthLine(page)).toHaveAccessibleName('이번 달 월급 체크, 5개 남음');
+  await expect(planRow(page)).toHaveAccessibleName('월급 계획 템플릿, 매달 25일 미계획 금액 0원');
   // 이번 달 월급 체크 → W-02 “모두 계획대로 됐어요” 한 번(confirm_payday)
-  await salaryBox(page).click();
+  await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '확인할 것 5개' })).toBeVisible();
@@ -116,14 +117,14 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(first).toContainText('이번 달 +95만 원');
 });
 
-test('홈 상자 → 화면: 월급 W-02, 월급 계획 W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
+test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
   page,
 }) => {
   test.setTimeout(60_000);
   await open(page);
   for (const [click, url] of [
-    [() => salaryBox(page).click(), /\/salary$/],
-    [() => page.locator('.hg-hubbox__more').click(), /\/salary$/],
+    [() => monthLine(page).click(), /\/salary$/],
+    [() => planRow(page).click(), /\/salary\/plan$/],
     [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar$/],
     [() => page.getByRole('button', { name: /^자산 관리/ }).click(), /\/assets\/items$/],
   ] as const) {
@@ -132,17 +133,18 @@ test('홈 상자 → 화면: 월급 W-02, 월급 계획 W-01, 캘린더, 자산 
     await click();
     await expect(page).toHaveURL(url);
   }
-  // 키보드만으로(2026-11-18): Tab 한 번에 상자 하나(안에 다른 Tab 자리 없음), ink 링 → Enter
+  // 키보드만으로(2026-11-18): Tab은 줄마다 한 번(머리·상자는 Tab 자리 없음), ink 링 → Enter
   await page.goto('/');
   await expect(together(page)).toBeVisible();
-  await salaryBox(page).focus();
-  expect(await salaryBox(page).evaluate((el) => getComputedStyle(el).outlineStyle)).toBe('solid');
+  await monthLine(page).focus();
+  expect(await monthLine(page).evaluate((el) => getComputedStyle(el).outlineStyle)).toBe('solid');
   await page.keyboard.press('Tab');
-  expect(await salaryBox(page).evaluate((el) => el.contains(document.activeElement))).toBe(false);
+  expect(await planRow(page).evaluate((el) => el === document.activeElement)).toBe(true);
   await page.keyboard.press('Shift+Tab');
-  expect(await salaryBox(page).evaluate((el) => el === document.activeElement)).toBe(true);
+  expect(await monthLine(page).evaluate((el) => el === document.activeElement)).toBe(true);
+  await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page).toHaveURL(/\/salary\/plan$/);
 });
 
 test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11a 이름 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
@@ -383,17 +385,16 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340
       };
   });
   const line = monthLine(page);
-  const box = salaryBox(page);
   await expect(line).toContainText('340만 원 / 350만 원');
   await expect(line).toContainText('수입 / 월급 계획');
   await expect(line).not.toContainText('모자라');
-  await expect(box).toHaveAccessibleName(
-    /^월급, 이번 달 월급 체크 340만 원 \/ 350만 원 수입 \/ 월급 계획, 월급 계획 템플릿 /,
+  await expect(line).toHaveAccessibleName(
+    '이번 달 월급 체크, 340만 원 / 350만 원 수입 / 월급 계획',
   );
   await expect(page.locator('.hg-hubline, .hg-periodbar')).toHaveCount(0);
   await expect(planRow(page)).toContainText('수입이 들어올 때');
   await axe(page);
-  await box.click();
+  await line.click();
   await expect(page).toHaveURL(/\/salary\/money-in$/);
   await page.goto('/salary');
   await expect(page.locator('.hg-periodbar')).toBeVisible();
