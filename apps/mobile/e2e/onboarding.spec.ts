@@ -164,6 +164,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
   await next(page);
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/\/welcome$/);
@@ -718,6 +719,7 @@ test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열�
   await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
   await next(page);
   await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
   await expect(sheet).toBeVisible();
   expect(db.goals.map((g) => g.name)).toContain('내 집 마련');

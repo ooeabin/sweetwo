@@ -92,10 +92,7 @@ it('W-12b 선택지: 기한 지남이면 맨 위 기한 새로 정하기', () =>
     ...savingChips('dating'),
     'custom',
   ]);
-  expect(nextSavingOptions('achieved', 'engaged')).toEqual([
-    ...savingChips('engaged'),
-    'custom',
-  ]);
+  expect(nextSavingOptions('achieved', 'engaged')).toEqual([...savingChips('engaged'), 'custom']);
 });
 
 it('다음 저금 띠(H-06 11번): 기한 다음 달 1일부터 14일', () => {

@@ -23,3 +23,10 @@
 - `fresh`: 줄에 `is-new`. 배경 `brand-soft` → 투명, `dur-slow` × 6(약 1.5초) 한 번, ‘동작 줄이기’면 움직임 없음.
 - `ReceiptSection`은 `id`(주소 `#saving` 스크롤 자리)와 `action`(머리 제목 바로 오른쪽 ⋯ 메뉴)을 받음.
 - 머리 `extra`(예전 “이번 달 3/5 확인했어요 ›” `hg-receipt__link`)는 2026-11-18부터 W-01이 쓰지 않음(맨 위 머리 이동 링크로 옮김).
+
+## 미리 보기 변형 (2026-11-18, W-11f ‘월급 계획 템플릿에 이렇게 들어가요’)
+
+- 저장 전에 새 줄이 W-01 ‘저축·투자’ 묶음에 어떻게 들어가는지 보이는 작은 영수증. `ReceiptStage` > `ReceiptCard` 하나, 머리는 아바타·금액 없이 제목 한 줄(`hg-receipt__head hg-receipt__head--plain` + `hg-receipt__headtitle`, “월급 계획 템플릿”), 묶음 `ReceiptSection` “저축·투자” 하나, 합계 `ReceiptTotal` 한 줄. 비율 막대·범례·공유·편집 없음. 앱 `SavingPreview`(`features/salary/saving-preview.tsx`)가 그림.
+- `ReceiptLine.badge`(2026-11-18): 이름 뒤 `Badge` `brand`(`hg-badge--brand`, 옅은 오렌지 판 + `brand-ink`, 예 “새로”). 이름과 `space-2` 띄움(`.hg-receipt__name .hg-badge`). 새 줄은 `fresh`도 같이 줘서 `is-new` 강조(한 번, ‘동작 줄이기’면 없음).
+- 기존 줄은 최대 2개 + 회색 “외 n개”(금액 없음, `muted`). 새 줄은 맨 아래. 매달 0원이면 금액 자리 “매달 금액 없음”(`muted`).
+- 합계 “미계획 금액 555만 원 → 525만 원”(`strong`), 모자라면 `short`(`danger`) “… → 30만 원이 모자라요”. 화살표는 글자(‘→’)라 뜻을 글자로 전함.

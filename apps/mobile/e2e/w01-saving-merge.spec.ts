@@ -102,6 +102,7 @@ test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   await expect(page).toHaveURL(/\/salary\/plan/);
   // 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort), 넉넉하면 ‘월급 계획 템플릿에 넣었어요’
   await expect(page.locator('.hg-toasts')).toBeVisible();

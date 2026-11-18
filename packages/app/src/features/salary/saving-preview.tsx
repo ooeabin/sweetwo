@@ -65,7 +65,8 @@ export function SavingPreview({
   const after = left - monthly;
   const lines = previewSavingLines(existing, { name, monthly }, won);
   const to = after >= 0 ? won(after) : copy.short(won(-after));
-  const amount = monthly > 0 ? copy.addPreviewArrow(won(Math.max(left, 0)), to) : won(Math.max(left, 0));
+  const amount =
+    monthly > 0 ? copy.addPreviewArrow(won(Math.max(left, 0)), to) : won(Math.max(left, 0));
   return (
     <ReceiptStage label={copy.addPreviewLabel}>
       <ReceiptCard>

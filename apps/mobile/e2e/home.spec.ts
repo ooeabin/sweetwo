@@ -167,8 +167,19 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   });
   const h = together(page);
   await expect(h).toContainText('무엇을 같이 모을까요?');
-  for (const c of ['결혼 비용', '신혼여행', '비상금'])
-    await expect(h.getByRole('button', { name: c })).toBeVisible();
+  // 칩 6개 + 직접 정하기(2026-11-18), 결혼 준비 중 칩
+  for (const c of [
+    '결혼 비용',
+    '신혼집',
+    '신혼여행',
+    '혼수',
+    '비상금',
+    '내 집 마련',
+    '직접 정하기',
+  ])
+    await expect(h.getByRole('button', { name: c, exact: true })).toBeVisible();
+  await expect(h.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
+  await expect(h.getByRole('button', { name: '모으기 시작하기' })).toBeVisible();
   // 결혼식 D-145(10월 7일 → 3월 1일)
   await expect(h.locator('.hg-hubtile__badge')).toHaveText('결혼식 D-145');
   // 띠 5b(월급날 확인할 게 있음)는 두 칸에 세지 않음(2026-11-17): 확인 + 첫 저금(7번) + 초대. 초대는 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 3개” → 시트
@@ -189,6 +200,13 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
   await h.getByRole('button', { name: '결혼 비용' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
   await expect(page.getByRole('textbox').first()).toHaveValue('결혼 비용');
+  // 직접 정하기·모으기 시작하기는 이름 칸이 빈 채로 엶(앞서 채운 이름이 남지 않음)
+  await page.goBack();
+  await together(page).getByRole('button', { name: '직접 정하기' }).click();
+  await expect(page.getByRole('textbox').first()).toHaveValue('');
+  await page.goBack();
+  await together(page).getByRole('button', { name: '모으기 시작하기' }).click();
+  await expect(page.getByRole('textbox').first()).toHaveValue('');
 });
 
 test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부터”(25일 일요일 → 앞당김), 7일 전 띠 9번 → W-01d 자동 줄 고르기 → 띠 사라짐', async ({
