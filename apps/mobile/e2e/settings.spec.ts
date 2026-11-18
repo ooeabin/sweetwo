@@ -88,7 +88,7 @@ function seed(db: MemDb) {
 const open = async (page: Page, narrow: boolean) => {
   if (narrow) {
     await page.goto('/');
-    await expect(page.locator('.hg-together, .hg-hub .hg-card--fill').first()).toBeVisible();
+    await expect(page.locator('.hg-together, .hg-hubtile, .hg-hub .hg-card--fill').first()).toBeVisible();
     await page
       .locator('.hg-frame__mhead')
       .getByRole('button', { name: '설정', exact: true })
