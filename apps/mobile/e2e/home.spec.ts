@@ -95,7 +95,7 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.locator('.hg-hubbox__row svg, .hg-hubbox__title svg')).toHaveCount(0);
   await expect(page.locator('.hg-hubbox__more')).toHaveText('자세히 보기');
   await expect(salaryBox(page)).toHaveAccessibleName(
-    /^월급, 이번 달 월급 체크 5개 남음, 월급 계획 템플릿 매달 25일 아직 안 정한 월급 0원$/,
+    /^월급, 이번 달 월급 체크 5개 남음, 월급 계획 템플릿 매달 25일 미계획 금액 0원$/,
   );
   // 이번 달 월급 체크 → W-02 “모두 계획대로 됐어요” 한 번(confirm_payday)
   await salaryBox(page).click();
