@@ -17,7 +17,6 @@ import {
   todayKst,
 } from '@sweetwo/core';
 import {
-  AddRow,
   Button,
   Icon,
   IconButton,
@@ -53,12 +52,12 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthBar } from '../month-parts';
-import { planPath, salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
+import { savingListPath, savingPaths, togetherPaths } from '../paths';
 import { MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
-import { useFirstSaving, useSavingItems } from '../saving';
-import { AchieveWatch, FirstSavingRow, SavingGoalRow, SavingMeta } from '../saving-parts';
+import { useSavingItems } from '../saving';
+import { AchieveWatch, SavingGoalRow, SavingMeta } from '../saving-parts';
 import { LastMonthNote, lateLines, lateOpen } from './w-02-last-month';
 import { W02aOtherAmount } from './w-02a-other-amount';
 
@@ -95,7 +94,6 @@ export function W02PaydayConfirm() {
   const accountNames = useAccountNames();
   const shownPayday = useShownPayday();
   const saving = useSavingItems();
-  const first = useFirstSaving();
   const { masked } = useMask();
   const check = useCheck('w02');
   const today = todayKst();
@@ -175,19 +173,7 @@ export function W02PaydayConfirm() {
     );
 
   const pending = sp.couple_state === 'unlink_pending';
-  const page = {
-    title,
-    actions:
-      list && !pending ? (
-        <Button
-          variant="secondary"
-          className="hg-wide-only"
-          onClick={() => nav(`${savingPaths.add}/a?from=salary_wide`)}
-        >
-          {copy.addItem}
-        </Button>
-      ) : undefined,
-  };
+  const page = { title };
   const frame = (body: ReactNode) => (
     <MainFrame
       current="salary"
@@ -209,36 +195,6 @@ export function W02PaydayConfirm() {
       ]}
     />
   );
-  // 머리 이동 링크(slate 500, hg-sechead__more): 왼쪽 ‘월급 계획 템플릿 ›’(W-01, 2026-11-18 구간 탭 대신), 오른쪽 ‘지난 달 모아보기 ›’(W-21, 2026-11-17)
-  const headLinks = !fromArchive && (
-    <div className="hg-sechead" style={{ marginBottom: 'calc(-1 * var(--space-3))' }}>
-      <a
-        className="hg-sechead__more"
-        style={{ marginLeft: 0 }}
-        href={planPath({ who })}
-        onClick={(e) => {
-          e.preventDefault();
-          nav(planPath({ who }), { state: { from: 'month' } });
-        }}
-      >
-        {copy.planLink}
-        <Icon name="chevron-right" size={16} />
-      </a>
-      <a
-        className="hg-sechead__more"
-        href={`${salaryPaths.archive}?from=w02`}
-        onClick={(e) => {
-          e.preventDefault();
-          nav(`${salaryPaths.archive}?from=w02`);
-        }}
-      >
-        {copy.archiveLink}
-        <Icon name="chevron-right" size={16} />
-      </a>
-    </div>
-  );
-  const archiveLink = headLinks;
-
   const base = baseDayOf(me.data, sp);
   const mySplit = (splits.data ?? []).find((x) =>
     joint ? x.owner_user_id === null : x.owner_user_id === meId,
@@ -248,7 +204,6 @@ export function W02PaydayConfirm() {
     const mine = saving.ready ? saving.live.filter((i) => i.owner !== 'partner') : [];
     return frame(
       <>
-        {archiveLink}
         {period.data && <PeriodLine period={period.data} onGo={() => nav(togetherPaths.moneyIn)} />}
         {meId && (
           <MoneyInRows
@@ -274,13 +229,6 @@ export function W02PaydayConfirm() {
               onClick={() => nav(savingPaths.item(i.goal.id))}
             />
           ))}
-          {!pending && (
-            <AddRow
-              block
-              label={copy.listAdd}
-              onClick={() => nav(`${savingPaths.add}/a?from=salary_row`)}
-            />
-          )}
         </section>
       </>,
     );
@@ -303,19 +251,8 @@ export function W02PaydayConfirm() {
       const ordered = [...preview].sort((x, y) => Number(x.auto_pay) - Number(y.auto_pay));
       return frame(
         <>
-          {headLinks}
           <section aria-label={firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}>
-            {firstDay && (
-              <SectionHeader
-                title={cycleName(firstDay)}
-                action={
-                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                    <IconButton icon="chevron-left" label={copy.prevMonth} small disabled />
-                    <IconButton icon="chevron-right" label={copy.nextMonth} small disabled />
-                  </span>
-                }
-              />
-            )}
+            {firstDay && <SectionHeader title={cycleName(firstDay)} />}
             <p className="hg-card__meta">
               {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
             </p>
@@ -568,21 +505,7 @@ export function W02PaydayConfirm() {
   ).map(([title, ls]) => {
     const n = ls.filter((l) => l.state !== 'wait').length;
     const kind = title === copy.savingGroup ? 'saving' : 'spend';
-    if (!ls.length) {
-      // 내 저금이 없으면 저금 묶음에 빈 줄 ‘+ 저금 추가’(이번 달 내 탭·합쳐서만)
-      if (kind !== 'saving' || !first.show || partnerTab || readOnly) return null;
-      return (
-        <section key={title} className="hg-checkgroup" aria-label={title}>
-          <SectionHeader
-            variant="group"
-            title={title}
-            onTitle={openList}
-            titleLabel={copy.listOpen}
-          />
-          <FirstSavingRow from="salary" go={nav} />
-        </section>
-      );
-    }
+    if (!ls.length) return null;
     return (
       <section key={title} className="hg-checkgroup" aria-label={title}>
         <SectionHeader
@@ -602,14 +525,6 @@ export function W02PaydayConfirm() {
           titleLabel={kind === 'saving' ? copy.listOpen : undefined}
         />
         <div className="hg-checklist__list">{ls.map(row)}</div>
-        {kind === 'saving' && !readOnly && !partnerTab && !pending && ago === 0 && (
-          <AddRow
-            block
-            className="hg-narrow-only"
-            label={copy.listAdd}
-            onClick={() => nav(`${savingPaths.add}/a?from=salary_row`)}
-          />
-        )}
       </section>
     );
   });
@@ -617,28 +532,30 @@ export function W02PaydayConfirm() {
   return frame(
     <>
       <AchieveWatch from="checklist" />
-      {archiveLink}
       <section aria-label={cycleName(start)}>
         <SectionHeader
           title={cycleName(start)}
           meta={periodText(start, shown.cycle_end)}
           action={
-            <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-              <IconButton
-                icon="chevron-left"
-                label={copy.prevMonth}
-                small
-                disabled={!more}
-                onClick={() => setAgo(ago + 1)}
-              />
-              <IconButton
-                icon="chevron-right"
-                label={copy.nextMonth}
-                small
-                disabled={ago === 0}
-                onClick={() => setAgo(ago - 1)}
-              />
-            </span>
+            more || ago > 0 ? (
+              <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                <IconButton
+                  icon="chevron-left"
+                  label={copy.prevMonth}
+                  small
+                  disabled={!more}
+                  onClick={() => setAgo(ago + 1)}
+                />
+                {ago > 0 && (
+                  <IconButton
+                    icon="chevron-right"
+                    label={copy.nextMonth}
+                    small
+                    onClick={() => setAgo(ago - 1)}
+                  />
+                )}
+              </span>
+            ) : undefined
           }
         />
         <MonthBar

@@ -163,15 +163,11 @@ test('W-05는 없앰(2026-11-15): 옛 알림 링크(/salary/review)는 기간 �
   await expect(page.getByRole('button', { name: /^내 집 마련/ })).toBeVisible();
 });
 
-test('저금 묶음 끝 ‘추가’는 좁은 창만(넓은 창은 제목 줄 버튼, S6-16)', async ({ page }, info) => {
+test('W-02 체크리스트에는 ‘추가’가 없음(2026-11-18, 추가는 W-01에서만, 예전 S6-16)', async ({
+  page,
+}) => {
   await open(page);
   await page.goto('/salary');
   await expect(page.locator('.hg-checkgroup').first()).toBeVisible();
-  const row = page.locator('.hg-checkgroup .hg-addrow.hg-narrow-only');
-  const narrow = (info.project.use.viewport?.width ?? 1280) < 768;
-  if (narrow) await expect(row).toBeVisible();
-  else {
-    await expect(row).toBeHidden();
-    await expect(page.getByRole('button', { name: '+ 저축·투자 추가' })).toBeVisible();
-  }
+  await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
 });

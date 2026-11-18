@@ -251,7 +251,7 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');
   await expect(page.getByText('10월 23일 첫 월급날에 확인해요')).toBeVisible();
-  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0); // 2026-11-18 머리 링크 없앰
   await page.goto('/');
   await (await homeTask(page, '자동으로 나가는 걸 골라 주세요')).click();
   await expect(page).toHaveURL(/\/salary\/auto-lines$/);

@@ -200,9 +200,11 @@ test('W-01 머리 링크 “이번 달 월급 체크 ›” → W-02, ‹ = W-01
   await link.click();
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
-  // W-02의 ‘월급 계획 템플릿 ›’로 다시 W-01, 편집하기 중에는 링크가 없음
-  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan$/);
+  // W-02에는 머리 링크가 없음(2026-11-18), W-01로는 직접 열어 편집하기 중에는 링크가 없음
+  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '지난 달 모아보기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
+  await page.goto('/salary/plan');
   await page.getByRole('button', { name: '편집하기' }).click();
   await expect(link).toHaveCount(0);
   await page.getByRole('button', { name: '완료' }).click();

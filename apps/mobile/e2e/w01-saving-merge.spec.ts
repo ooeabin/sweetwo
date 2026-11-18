@@ -58,20 +58,16 @@ test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목�
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
 
-test('W-02 ↔ W-01: 머리 링크, 구간 탭 없음, 저금 묶음 머리 → 저축·투자 묶음, ‹ = 건너온 화면', async ({
+test('W-02 ↔ W-01: W-02 머리 링크 없음, 구간 탭 없음, 저금 묶음 머리 → 저축·투자 묶음, ‹ = 건너온 화면', async ({
   page,
 }, info) => {
   await open(page);
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크', level: 1 })).toBeVisible();
   await expect(page.getByRole('tab', { name: '계획' })).toHaveCount(0);
-  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan$/);
-  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '지난 달 모아보기' })).toHaveCount(0);
   if (info.project.name === 'narrow') {
-    // ‹ = W-02(링크로 열었으니)
-    await page.getByRole('button', { name: '홈으로' }).click();
-    await expect(page).toHaveURL(/\/salary$/);
     // 홈에서 W-01을 열면 ‹ = 홈
     await page.goto('/');
     await page.getByRole('button', { name: '메뉴' }).click();

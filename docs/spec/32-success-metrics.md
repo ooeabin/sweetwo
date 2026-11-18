@@ -97,7 +97,7 @@
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
-| `month_archive_viewed` | kind(`cycle` / `period`), rows(줄 수), entry(`drawer` / `w02`). W-21 지난 달 모아보기, 금액·이름 없음(2026-11-17) |
+| `month_archive_viewed` | kind(`cycle` / `period`), rows(줄 수), W-21 지난 달 모아보기, 금액·이름 없음(2026-11-17, 2026-11-18 entry 없앰) |
 | `invite_code_autofilled` | source(clipboard / referrer), result(join / decline) (2026-11-13 PR 8) |
 | `saving_item_created` | entry에 onboarding(O-60 ‘모으기 시작하기’) 더함 |
 | `widget_added` / `widget_tapped`, `partner_code_entered`, `reconnect_requested` / `reconnect_blocked`, `partner_change_reverted` | 위젯은 4-7(v2.2 값은 2026-11-13 PR 14: widget `wg01` / `wg04`, size `small` / `medium`). 코드 입력은 `invite_accepted` channel `code`로 셈(`partner_code_entered`는 따로 보내지 않음, PR 14). 앱의 다시 연결 요청은 `rejoin_requested`, 막힘은 `reconnect_blocked`(reason too\_soon / reconnect\_closed, PR 11). `partner_change_reverted`는 N-01·N-02 ‘이전 값으로 돌리기’(14 R-08) |
@@ -279,7 +279,7 @@
 | 이벤트 | 발생 시점(화면 ID) | 주요 속성 |
 | --- | --- | --- |
 | saving\_list\_viewed | W-01 저축·투자 묶음으로 열림(주소 `#saving`, 2026-11-18 W-13을 합침, 이름은 그대로) | entry(`checklist` / `split` / `home` / `direct`), items\_count |
-| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary`: W-02 첫 저금 빈 줄 / `salary_row`: W-02 저금 묶음 ‘+ 추가’ 줄 / `salary_wide`: W-02 넓은 창 제목 줄 버튼 / `split`: W-01 / `list`: 옛 W-13(2026-11-18 합침, 지금은 쓰지 않음) / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
+| saving\_item\_created | W-11 저장 (2026-11-08, 예전 goal\_created) | entry(`home`: 홈 첫 저금 빈 줄 / `salary` / `salary_row` / `salary_wide`: 옛 W-02 입구(2026-11-18 없앰, 지금은 쓰지 않음) / `split`: W-01 / `list`: 옛 W-13(2026-11-18 합침, 지금은 쓰지 않음) / `add_menu`: 홈 ‘추가’ 메뉴 / `palette`: 검색 ‘바로 하기’ / `shortcut`: Ctrl(⌘)+N / `direct`: 그 밖, 2026-11-12 S7-16 셋이 `salary`로 섞이던 것 나눔), monthly\_band, has\_target, has\_deadline, has\_start, target\_band(목표 금액이 있을 때) |
 | saving\_item\_target\_set | W-10a 목표 금액 저장이 된 뒤(2026-11-12 S7-16, 저장 전에 보내던 것 고침. 충돌 선택에서 ‘내 값’으로 저장해도) | had\_target(고치기인지), has\_deadline, target\_band |
 | saving\_item\_achieved | W-12 | months\_taken |
 | saving\_item\_after\_achieve | W-12a 고름(‘목표 금액을 새로 정할게요’는 새 목표 금액 저장 때) | choice(`keep` / `stop` / `retarget`) |
