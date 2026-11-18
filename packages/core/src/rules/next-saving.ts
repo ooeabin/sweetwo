@@ -7,20 +7,43 @@ import { deadlineDay } from './saving-item';
 
 export type MarriageStatus = 'married' | 'engaged' | 'undecided' | 'dating' | 'living_together';
 export type SavingChip =
-  'wedding' | 'honeymoon' | 'emergency' | 'jeonse_loan' | 'travel' | 'moving' | 'gift';
+  | 'wedding'
+  | 'newlywed_home'
+  | 'honeymoon'
+  | 'dowry'
+  | 'emergency'
+  | 'home'
+  | 'travel'
+  | 'car'
+  | 'childcare'
+  | 'retire'
+  | 'moving'
+  | 'appliance'
+  | 'anniv_gift'
+  | 'date'
+  | 'lump';
 
-/** 19 ‘이름 칩 표’(H-10 빈 상태, W-11a, W-12b가 같이 씀). ‘같이 살 집’은 칩에 없음 */
+/**
+ * 19 ‘이름 칩 표’(H-10 빈 상태, W-11a, W-12b가 같이 씀). 두 사람 사이마다 6개(2026-11-18).
+ * ‘같이 살 집’은 칩에 없음. 결혼 말(‘신혼집’ ‘신혼여행’ ‘혼수’)은 결혼 준비 중에만.
+ * 연애 중의 ‘결혼 비용’은 사용자 결정(2026-11-18)이라 결혼 말 규칙의 예외로 둠
+ */
 export const SAVING_CHIPS: Record<MarriageStatus, readonly SavingChip[]> = {
-  engaged: ['wedding', 'honeymoon', 'emergency'],
-  married: ['jeonse_loan', 'travel', 'emergency'],
-  living_together: ['travel', 'moving', 'emergency'],
-  dating: ['travel', 'emergency', 'gift'],
-  // 옛 값 ‘아직 안 정했어요’(O-11 4지선다 전)와 안 고름: 결혼 말이 없는 연애 중 칩 [확인 필요]
-  undecided: ['travel', 'emergency', 'gift'],
+  engaged: ['wedding', 'newlywed_home', 'honeymoon', 'dowry', 'emergency', 'home'],
+  married: ['home', 'travel', 'emergency', 'car', 'childcare', 'retire'],
+  living_together: ['travel', 'moving', 'emergency', 'home', 'car', 'appliance'],
+  dating: ['travel', 'emergency', 'anniv_gift', 'wedding', 'date', 'lump'],
+  // 옛 값 ‘아직 안 정했어요’(O-11 4지선다 전)와 안 고름: 연애 중과 같은 칩 [확인 필요]
+  undecided: ['travel', 'emergency', 'anniv_gift', 'wedding', 'date', 'lump'],
 };
 
 export const savingChips = (m: MarriageStatus | null | undefined): readonly SavingChip[] =>
   SAVING_CHIPS[m ?? 'undecided'];
+
+/** H-10 빈 상태 칩(2026-11-18): 이름 칩 6개 + 맨 끝 ‘직접 정하기’(W-11a를 이름 칸 빈 채로 엶) */
+export const savingStartChips = (
+  m: MarriageStatus | null | undefined,
+): (SavingChip | 'custom')[] => [...savingChips(m), 'custom'];
 
 export interface NextSavingGoal {
   status: string;
@@ -44,7 +67,7 @@ export function nextSavingReason(g: NextSavingGoal, today: string): 'achieved' |
   return deadlinePassed(g, today) ? 'deadline' : null;
 }
 
-/** W-12b 선택지(20): 기한 지남이면 맨 위 ‘기한 새로 정하기’, 그다음 이름 칩 3개 + ‘직접 정할게요’ */
+/** W-12b 선택지(20): 기한 지남이면 맨 위 ‘기한 새로 정하기’, 그다음 이름 칩 6개 + ‘직접 정할게요’ */
 export function nextSavingOptions(
   reason: 'achieved' | 'deadline',
   m: MarriageStatus | null | undefined,

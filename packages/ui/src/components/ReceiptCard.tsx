@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { Badge } from './Badge';
 import { cx } from './cx';
 import { Icon } from './Icon';
 import { IconButton } from './IconButton';
@@ -223,6 +224,8 @@ export interface ReceiptLine {
   progress?: { percent: number; label: string };
   /** 새로 만든 줄 잠깐 강조(2026-11-18, ‘동작 줄이기’면 없음) */
   fresh?: boolean;
+  /** 이름 뒤 작은 알약 `hg-badge--brand`(2026-11-18 W-11 미리 보기 “새로”) */
+  badge?: string;
 }
 
 export interface ReceiptEditLabels {
@@ -319,6 +322,7 @@ export function ReceiptRows({
             <>
               <span className="hg-receipt__name">
                 {l.name}
+                {l.badge && <Badge kind="brand">{l.badge}</Badge>}
                 {l.note && <span className="hg-receipt__note">{l.note}</span>}
                 {l.progress && (
                   <span className="hg-receipt__prog">

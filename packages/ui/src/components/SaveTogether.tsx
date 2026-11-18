@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { AddRow } from './AddRow';
+import { Button } from './Button';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
@@ -131,7 +132,7 @@ export function SaveTogether({
   );
 }
 
-/** 빈 상태(미합류·저금 0): “무엇을 같이 모을까요?” + 이름 칩(고르면 W-11a) + ‘+ 저금 추가’ */
+/** 빈 상태(미합류·저금 0): “무엇을 같이 모을까요?” + 이름 칩 6개 + ‘직접 정하기’(고르면 W-11a) + 버튼 ‘모으기 시작하기’ */
 export function SaveTogetherEmpty({
   title,
   question,
@@ -162,7 +163,9 @@ export function SaveTogetherEmpty({
           </button>
         ))}
       </div>
-      <AddRow label={add.label} onClick={add.onClick} />
+      <Button variant="secondary" block className="hg-together__start" onClick={add.onClick}>
+        {add.label}
+      </Button>
     </section>
   );
 }

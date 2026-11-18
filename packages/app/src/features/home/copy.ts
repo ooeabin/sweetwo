@@ -36,19 +36,28 @@ export const copy = {
   inviteJoin: '같이 모을게요', // [확인 필요]
   /** 같이 모으기 큰 숫자 아래 이름(묶음 합계, W-02 저금 줄 ‘내 몫’과 나눔, R4) */
   bothSaved: '둘이 모은 금액', // [확인 필요]
-  emptyAdd: '저축·투자 추가', // AddRow(+ 아이콘이 ‘+’)
+  emptyAdd: '모으기 시작하기', // [확인 필요] 2026-11-18 H-10 빈 상태 버튼(예전 ‘+ 저축·투자 추가’, O-60과 같은 말)
+  emptyCustom: '직접 정하기', // [확인 필요] 2026-11-18 H-10 빈 상태 맨 끝 칩(W-11a를 이름 칸 빈 채로 엶)
   widgetSaving: '모으는 중', // [확인 필요] 26 WG-01 목표 금액이 없고 금액 가림
   /** 화면 읽기 문장 하나(“같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, …”) */
   togetherLabel: (parts: string[]) => ['같이 모으기', ...parts].filter(Boolean).join(', '),
   targetPctLabel: (pct: number) => `목표 금액의 ${pct}%`,
   chips: {
     wedding: '결혼 비용',
+    newlywed_home: '신혼집',
     honeymoon: '신혼여행',
+    dowry: '혼수',
     emergency: '비상금',
-    jeonse_loan: '전세 대출 갚기',
+    home: '내 집 마련',
     travel: '여행',
+    car: '차',
+    childcare: '출산·육아',
+    retire: '노후',
     moving: '이사',
-    gift: '선물',
+    appliance: '가전·가구',
+    anniv_gift: '기념일 선물',
+    date: '데이트 비용',
+    lump: '목돈',
   } satisfies Record<SavingChip, string>,
 
   // H-11 이번 달 한 줄 [모두 확인 필요]

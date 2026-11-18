@@ -2,7 +2,7 @@ import type { PayCheckLine } from '@sweetwo/api';
 import {
   daysBetween,
   kstDateOf,
-  savingChips,
+  savingStartChips,
   savingMonthGain,
   savingPct,
   savingRemain,
@@ -106,10 +106,11 @@ export function H10SaveTogether({
         chips={
           invite
             ? [{ label: copy.inviteJoin, onClick: () => go('together', invite.to) }]
-            : savingChips(marriage).map((c) => ({
-                label: copy.chips[c],
-                onClick: () => start(copy.chips[c]),
-              }))
+            : savingStartChips(marriage).map((c) =>
+                c === 'custom'
+                  ? { label: copy.emptyCustom, onClick: () => start('') }
+                  : { label: copy.chips[c], onClick: () => start(copy.chips[c]) },
+              )
         }
         add={{
           label: copy.emptyAdd,

@@ -325,7 +325,6 @@ export const copy = {
   conflictTheirs: (partner: string) => `${partner}님 값`,
   // W-11 저금 항목 추가
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
-  addNameHelp: '매달 월급에서 이만큼 떼어 둬요. 월급 계획 템플릿에 들어가요', // [확인 필요] 2026-11-18 첫 질문 회색 한 줄
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string, allowance?: string) =>
@@ -339,6 +338,14 @@ export const copy = {
   addStartOver: '목표 금액보다 적게 넣어 주세요',
   addDeadlineQ: '언제까지 모을까요?',
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
+  addNext: '다음', // W-11d 주 버튼(저장은 W-11f에서, 2026-11-18)
+  addPreviewQ: '월급 계획 템플릿에 이렇게 들어가요', // [확인 필요] 2026-11-18 W-11f 제목
+  addPreviewHead: '월급 계획 템플릿', // [확인 필요] 미리 보기 카드 머리
+  addPreviewNew: '새로', // [확인 필요] 새 줄 알약
+  addPreviewMore: (n: number) => `외 ${n}개`, // [확인 필요] 기존 저축·투자 줄이 셋 넘을 때
+  addPreviewNoAmount: '매달 금액 없음', // [확인 필요] 매달 0원인 새 줄
+  addPreviewArrow: (from: string, to: string) => `${from} → ${to}`, // 미계획 금액 변화
+  addPreviewLabel: '월급 계획 템플릿 미리 보기', // [확인 필요] 화면 읽기 이름
   addDone: '추가하기', // [확인 필요]
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
   addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
@@ -496,12 +503,20 @@ export const copy = {
   addNameChips: '이름 고르기', // [확인 필요] W-11a 칩 묶음 화면 읽기 이름
   chipNames: {
     wedding: '결혼 비용',
+    newlywed_home: '신혼집',
     honeymoon: '신혼여행',
+    dowry: '혼수',
     emergency: '비상금',
-    jeonse_loan: '전세 대출 갚기',
+    home: '내 집 마련',
     travel: '여행',
+    car: '차',
+    childcare: '출산·육아',
+    retire: '노후',
     moving: '이사',
-    gift: '선물',
+    appliance: '가전·가구',
+    anniv_gift: '기념일 선물',
+    date: '데이트 비용',
+    lump: '목돈',
   }, // 19 ‘이름 칩 표’ [확인 필요]
   // W-14 쓸 곳 메모, W-14a
   notesTitle: (name: string) => `쓸 곳 메모 ${name}`, // [확인 필요] 제목 “쓸 곳 메모” + 저금 이름
