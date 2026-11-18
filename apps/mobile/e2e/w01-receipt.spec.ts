@@ -77,9 +77,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶�
   await expect(card.locator('.hg-receipt__amount')).toHaveText('350만 원');
   await expect(card.getByText('매달 25일')).toBeVisible();
   // 06 3-5: 139만 / 211만 / 0 → 40% / 60% / 0%
-  await expect(
-    page.getByRole('img', { name: '저축·투자 40%, 지출 60%, 미계획 0%' }),
-  ).toBeVisible();
+  await expect(page.getByRole('img', { name: '저축·투자 40%, 지출 60%, 미계획 0%' })).toBeVisible();
   await expect(card.locator('.hg-receipt__seg--free')).toHaveCount(1); // 범례 네모만(막대 칸 없음)
   expect(await names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
   expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
@@ -99,8 +97,10 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶�
   await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
-  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan$/);
+  // W-02에는 월급 계획 템플릿 머리 링크가 없음(2026-11-18), 저축·투자 묶음 머리로 W-01에 감
+  await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0);
+  await page.getByRole('button', { name: '저축·투자 목록 보기' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
 });
 
@@ -225,7 +225,7 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
   // 이번 달 체크리스트도 같은 순서
   await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
-  await page.getByRole('link', { name: '월급 계획 템플릿' }).click();
+  await page.goto('/salary/plan');
   await page.getByRole('button', { name: '편집하기' }).click();
   await page.getByRole('button', { name: '완료' }).click();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
@@ -302,9 +302,7 @@ test('모자람: 막대는 저금·지출만, 범례 “미계획 −32만 원�
   await expect(
     page.getByRole('img', { name: '저축·투자 36%, 지출 64%, 미계획 −32만 원' }),
   ).toBeVisible();
-  await expect(page.locator('.hg-receipt__legend li.is-short')).toHaveText(
-    '미계획 −32만 원',
-  );
+  await expect(page.locator('.hg-receipt__legend li.is-short')).toHaveText('미계획 −32만 원');
   const short = page.locator('.hg-receipt__row.is-short');
   await expect(short).toContainText('32만 원이 모자라요');
   const red = await page.evaluate(() =>
