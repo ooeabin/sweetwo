@@ -57,7 +57,7 @@ test('W-01 저축·투자 묶음(2026-11-18 옛 W-13 합침): W-02 저금 묶음
   await expect(page.getByRole('button', { name: /^저축·투자, / })).toHaveCount(0);
 });
 
-test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 아직 안 정한 월급 미리보기', async ({
+test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 미계획 금액 미리보기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -71,14 +71,14 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
     .click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/edit\/monthly$/);
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 지금 아직 안 정한 월급 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
-  await expect(page.getByText('아직 안 정한 월급 0원')).toBeVisible();
+  // 지금 미계획 금액 = 350만 − (44 + 95 + 88 + 88 + 35)만 = 0원
+  await expect(page.getByText('미계획 금액 0원')).toBeVisible();
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('950,000');
   await axe(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('1000000');
   await expect(page.getByText('5만 원이 모자라요')).toBeVisible();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('800000');
-  await expect(page.getByText('아직 안 정한 월급 15만 원')).toBeVisible();
+  await expect(page.getByText('미계획 금액 15만 원')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);

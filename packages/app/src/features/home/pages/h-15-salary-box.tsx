@@ -21,7 +21,7 @@ export function H15SalaryBox({
 }: {
   line: HomeMonthLine;
   won: (v: number) => string;
-  /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“아직 안 정한 월급 20만 원”) */
+  /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“미계획 금액 20만 원”) */
   plan: { value?: string; sub?: string };
   go: (box: SalaryBoxTo, to: string) => void;
   onRetry: () => void;

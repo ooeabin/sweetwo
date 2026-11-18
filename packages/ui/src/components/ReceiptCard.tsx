@@ -462,7 +462,7 @@ export function ReceiptRows({
   );
 }
 
-/** 합계 줄(“계획한 월급 342만 원”, “아직 안 정한 월급 8만 원” 굵게, 모자라면 danger) */
+/** 합계 줄(“계획 금액 342만 원”, “미계획 금액 8만 원” 굵게, 모자라면 danger) */
 export function ReceiptTotal({
   rows,
 }: {

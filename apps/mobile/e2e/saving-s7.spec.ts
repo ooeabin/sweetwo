@@ -283,14 +283,14 @@ test('S7-11: 충돌에서 ‘내 값’을 고르면 그 칸의 문장(기한을
   await expect(page.locator('.hg-toast')).toContainText('기한을 바꿨어요');
 });
 
-test('S7-13·S7-15: W-11b 아직 안 정한 월급은 금액 가리기를 따름, 월급 계획이 없거나 해제 대기면 W-02 + 이유 Toast', async ({
+test('S7-13·S7-15: W-11b 미계획 금액은 금액 가리기를 따름, 월급 계획이 없거나 해제 대기면 W-02 + 이유 Toast', async ({
   page,
 }) => {
   await page.addInitScript(() => localStorage.setItem('sweetwo.masked', '1'));
   await open(page, undefined, '/salary/items/new/a');
   await page.getByRole('textbox').first().fill('여행');
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByText('아직 안 정한 월급 •••')).toBeVisible();
+  await expect(page.getByText('미계획 금액 •••')).toBeVisible();
 
   await open(
     page,

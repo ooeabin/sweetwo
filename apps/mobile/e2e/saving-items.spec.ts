@@ -72,10 +72,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 처음 값은 빈 칸(아직 안 정한 월급 전부를 채우지 않음, 2026-11-09), 보조는 지금 아직 안 정한 월급
+  // 처음 값은 빈 칸(미계획 금액 전부를 채우지 않음, 2026-11-09), 보조는 지금 미계획 금액
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await expect(page.getByText(/^아직 안 정한 월급/)).toBeVisible();
+  await expect(page.getByText(/^미계획 금액/)).toBeVisible();
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
@@ -106,7 +106,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 2026-11-18: 만들면 W-01 월급 계획 템플릿 ‘저축·투자’ 묶음으로: 새 줄 강조 + Toast, 초대 물음은 거기서
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
-  // 이 시드는 아직 안 정한 월급이 모자라 “모자라요” Toast(addShort)가 뜸
+  // 이 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort)가 뜸
   await expect(page.locator('.hg-toasts')).toBeVisible();
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('제주 여행');
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('매달 20만 원');
@@ -121,7 +121,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(target).toContainText('지금 속도면 2027년 7월에 다 모아요');
   await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
   await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
-  // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(아직 안 정한 월급을 같이 봄)
+  // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(미계획 금액을 같이 봄)
   await expect(page).toHaveURL(/\/salary\/plan$/);
   await expect(page.getByRole('dialog', { name: '제주 여행 금액' })).toBeVisible();
   await page.goBack();

@@ -78,10 +78,10 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
     '9월 25일 월급에서 확인할 게 5개 남았어요',
     '같이 모을 사람을 초대해 보세요',
   ]);
-  // H-15 둘째 줄: 매달 25일 + 아직 안 정한 월급(350만 − 350만)
+  // H-15 둘째 줄: 매달 25일 + 미계획 금액(350만 − 350만)
   await expect(planRow(page)).toContainText('월급 계획 템플릿');
   await expect(planRow(page)).toContainText('매달 25일');
-  await expect(planRow(page)).toContainText('아직 안 정한 월급 0원');
+  await expect(planRow(page)).toContainText('미계획 금액 0원');
   // 2026-11-18: 월급 상자는 줄 둘(저축·투자 줄 없앰)
   await expect(page.locator('.hg-hubbox__row')).toHaveCount(2);
   // 결혼했어요라 H-12 없음

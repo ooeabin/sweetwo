@@ -288,7 +288,7 @@ export function W01Receipt() {
     ? (m.monthly_income ?? 0) + (p?.monthly_income ?? 0)
     : (owner?.monthly_income ?? 0);
   const savingLines = lines.filter((l) => l.kind === 'saving');
-  // 용돈 줄을 지출 묶음 맨 위에(2026-11-16 4차 검토 R4-3: 용돈도 ‘아직 안 정한 월급’에서 빠지는 계획 줄임이 보이게).
+  // 용돈 줄을 지출 묶음 맨 위에(2026-11-16 4차 검토 R4-3: 용돈도 ‘미계획 금액’에서 빠지는 계획 줄임이 보이게).
   // 나머지 줄은 월급 계획 순서 그대로, 편집 모드 순서 바꾸기도 이 순서 안에서
   const spendLines = [
     ...lines.filter((l) => l.kind === 'allowance'),
