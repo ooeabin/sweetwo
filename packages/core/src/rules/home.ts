@@ -221,7 +221,7 @@ export function homeTodo(i: HomeInput): HomeTodo | null {
   if (check) return check;
   // 첫 주 ‘첫 저금 추가’(2026-11-09 round 3): 온보딩 뒤 7일 안, 내 저금이 없을 때(월급 탭 ‘첫 저금’과 같은 조건)
   if (firstSavingTodo(i))
-    return { kind: 'saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' };
+    return { kind: 'saving', key: SAVING_TODO_KEY, to: `${SALARY_PATHS.plan}?from=home#saving` };
   // 2026-11-08 ‘목표 금액 정하기’ 할 일은 없앰(ADR 0007, 첫 저금은 위 ‘첫 저금 추가’와 W-02 첫 저금 빈 줄)
   // 만기 띠는 만기일부터 30일 안만(2026-11-11 사용자 결정). 그 뒤에도 자산 관리 그 항목에는 ‘만기됨’이 남음
   const matured = i.assets.find(
@@ -744,7 +744,8 @@ export function bundleInviteGoal(
 
 /** 열린 할 일 띠 모두(순서대로). 닫거나 끝낸 띠는 closedKeys(home_task_state)로 거름 */
 function openTopTasks(i: TopTaskInput): TopTask[] {
-  const invite = bundleInviteGoal(i);
+  // 내 저축·투자가 0개면 7일 제한 없이(2026-11-18: 홈에 H-10 빈 상태가 없어져 이 띠가 권유를 맡음)
+  const invite = bundleInviteGoal(i, { anyAge: i.savingCount === 0 });
   const closed = new Set(i.closedKeys ?? []);
   const ok = (t: TopTask | null): t is TopTask => !!t && !closed.has(t.key);
   const separate = !i.joint;
@@ -820,14 +821,18 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
             to: SALARY_PATHS.plan,
           }
         : null,
-    // 7 첫 저금(저금 0개, 첫 30일, 해제 대기 아님)
+    // 7 첫 저금(저금 0개, 첫 30일, 해제 대기 아님). 2026-11-18: 누르면 W-01 저축·투자 묶음(빈 상태 칩)
     () =>
-      // 상대 저금 권유가 있으면 첫 저금 띠는 내지 않음(H-10이 권유 하나만, R4)
+      // 상대 저금 권유가 있으면 첫 저금 띠는 내지 않음(띠 13번이 권유 하나만, R4)
       i.savingCount === 0 &&
       !invite &&
       inFirst(FIRST_TASK_DAYS) &&
       i.coupleState !== 'unlink_pending'
-        ? { kind: 'first_saving', key: SAVING_TODO_KEY, to: '/salary/items/new/a?from=home' }
+        ? {
+            kind: 'first_saving',
+            key: SAVING_TODO_KEY,
+            to: `${SALARY_PATHS.plan}?from=home#saving`,
+          }
         : null,
     // 8 생활비 나누기(각자 계열 + 생활비 ‘네’ + 연결 + 분담 없음, 첫 30일, ‘이미 정했어요’로 영구히 닫음)
     () =>
@@ -861,9 +866,9 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
     () =>
       i.reconcile ? { kind: 'reconcile', key: i.reconcile.key, to: '/salary/reconcile' } : null,
     // 13 파트너 저금에 같이 모으기(각자 계열, 상대가 만든 지 7일 안, 묶음에 안 듦)
-    // 내 저금이 0개면 H-10 빈 상태가 대신 보여 줌(R4)
+    // 내 저금이 0개여도 이 띠가 보여 줌(2026-11-18, 예전엔 H-10 빈 상태가 대신, 7일 제한도 그때는 없음)
     () =>
-      invite && i.savingCount > 0
+      invite
         ? {
             kind: 'bundle_invite',
             goalId: invite.id,
@@ -997,12 +1002,12 @@ export function monthCheck(l: HomeMonthLine): MonthCheck | null {
 }
 
 /**
- * H-10 첫 칸이 0원(맨 위를 차지하지 않게): 저금이 없음(빈 상태, 상대 저금 같이 모으기 권유는 빼고),
- * 대표 저금 모은 금액 0원, 묶음 합계 0원(퍼센트만이면 0%). 아직 안 들어간 묶음(상대가 만듦, 권유)은 0원이 아님
+ * H-10 첫 칸이 0원(맨 위를 차지하지 않게): 대표 저금 모은 금액 0원, 묶음 합계 0원(퍼센트만이면 0%).
+ * 아직 안 들어간 묶음(상대가 만듦, 권유)은 0원이 아님. 항목이 없으면 상자를 안 그리니(2026-11-18, homeOrder heroNone) false
  */
-export function heroZero(heroes: readonly HeroItem[], invited = false): boolean {
+export function heroZero(heroes: readonly HeroItem[]): boolean {
   const first = heroes[0];
-  if (!first) return !invited;
+  if (!first) return false;
   if (first.kind === 'goal') return first.goal.saved <= 0;
   const b = first.bundle;
   if (!b.goals.some((g) => g.mine)) return false;
@@ -1020,12 +1025,15 @@ export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles';
  * H-10이 0원이면(heroZero) 월급 상자가 H-10 위(맨 위를 0원이 차지하지 않게). H-12는 늘 H-10 바로 아래.
  * 확인할 게 있으면 H-11을 맨 위로 올리던 예전 규칙(2026-11-15)은 없앰: 할 일 띠 5b가 대신함
  */
-export function homeOrder(o: { heroZero: boolean }): HomeBlock[] {
+export function homeOrder(o: { heroZero: boolean; heroNone?: boolean }): HomeBlock[] {
+  // 같이 모으기 항목이 하나도 없으면 H-10을 안 그림(2026-11-18). H-12는 그대로 월급 상자 위
   return [
     'tasks',
-    ...(o.heroZero
-      ? (['salary', 'hero', 'wedding'] as const)
-      : (['hero', 'wedding', 'salary'] as const)),
+    ...(o.heroNone
+      ? (['wedding', 'salary'] as const)
+      : o.heroZero
+        ? (['salary', 'hero', 'wedding'] as const)
+        : (['hero', 'wedding', 'salary'] as const)),
     'tiles',
   ];
 }

@@ -408,14 +408,14 @@ describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
       partnerGoals,
     });
     expect(t.map((x) => x.kind)).toEqual(['reconcile', 'bundle_invite']);
-    // 내 저금이 0개면 권유는 H-10 빈 상태 하나로만: 첫 저금 띠도 같이 모으기 띠도 없음(2026-11-14 R4)
+    // 내 저금이 0개면 권유는 띠 13번 하나로만: 첫 저금 띠는 없음(2026-11-18, 예전 H-10 빈 상태 대신)
     const none = pickTopTasks({ ...base, partnerGoals });
-    expect(none.map((x) => x.kind)).toEqual([]);
+    expect(none.map((x) => x.kind)).toEqual(['bundle_invite']);
     expect(bundleInviteGoal({ ...base, partnerGoals })).toMatchObject({
       id: 'g',
       name: '결혼 비용',
     });
-    // 만든 지 7일이 지난 상대 저금: 띠 13은 없고, H-10 빈 상태(anyAge)는 그대로 권유(2026-11-16 R4-8)
+    // 만든 지 7일이 지난 상대 저금: 내 저금이 있으면 띠 13은 없고, 0개면(빈 상태) 7일 제한 없이 띠가 권유(2026-11-18)
     const old = [
       { id: 'g', name: '결혼 비용', created_at: '2026-10-01T00:00:00Z', bundle_id: null },
     ];
@@ -423,6 +423,12 @@ describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
     expect(bundleInviteGoal({ ...base, partnerGoals: old }, { anyAge: true })).toMatchObject({
       id: 'g',
     });
+    expect(pickTopTasks({ ...base, savingCount: 1, partnerGoals: old }).map((x) => x.kind)).toEqual(
+      [],
+    );
+    expect(pickTopTasks({ ...base, partnerGoals: old }).map((x) => x.kind)).toEqual([
+      'bundle_invite',
+    ]);
   });
   it('요청이 없으면 다음 순서', () => {
     const t = pickTopTasks({ ...base, reconcile: { key: 'r', due: '2026-11-10' } });

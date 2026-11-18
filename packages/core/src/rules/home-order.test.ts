@@ -98,9 +98,8 @@ describe('monthLineUrgent: H-11이 확인할 것을 말할 때', () => {
 });
 
 describe('heroZero: H-10 첫 칸이 0원', () => {
-  it('저금이 없으면 0원(상대 같이 모으기 권유는 아님)', () => {
-    expect(heroZero([])).toBe(true);
-    expect(heroZero([], true)).toBe(false);
+  it('항목이 없으면 상자를 안 그리니 0원이 아님(2026-11-18)', () => {
+    expect(heroZero([])).toBe(false);
   });
   it('대표 저금 모은 금액 0원이면 0원, 30만 원이면 아님', () => {
     expect(heroZero([goal(0)])).toBe(true);
@@ -168,6 +167,14 @@ describe('homeOrder(2026-11-17)', () => {
   });
   it('0원 같이 모으기는 월급 상자 아래, 결혼 준비는 그래도 같이 모으기 바로 아래', () => {
     expect(homeOrder({ heroZero: true })).toEqual(['tasks', 'salary', 'hero', 'wedding', 'tiles']);
+  });
+  it('같이 모으기 항목이 없으면 H-10을 안 그림(결혼 준비·월급 상자·타일은 그대로)', () => {
+    expect(homeOrder({ heroZero: false, heroNone: true })).toEqual([
+      'tasks',
+      'wedding',
+      'salary',
+      'tiles',
+    ]);
   });
   it('H-11·H-14·큰 반 칸 타일(월급 계획)·저금 타일은 홈 블록에 없음', () => {
     const all = [...homeOrder({ heroZero: false }), ...homeOrder({ heroZero: true })] as string[];

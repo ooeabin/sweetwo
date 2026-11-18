@@ -88,20 +88,22 @@ test('W-02 ↔ W-01: 머리 링크, 구간 탭 없음, 저금 묶음 머리 → 
   await expect(page).toHaveURL(/\/salary\/plan\?from=checklist#saving$/);
 });
 
-test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫 질문 안내 한 줄', async ({
+test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫 질문 안내 줄은 없고 끝에 미리 보기', async ({
   page,
 }) => {
   await open(page);
   await page.goto('/salary/items/new/a?from=split');
+  // 2026-11-18: 첫 질문 안내 줄은 W-11f 미리 보기와 겹쳐 뺌
   await expect(
     page.getByText('매달 월급에서 이만큼 떼어 둬요. 월급 계획 템플릿에 들어가요'),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page.getByRole('textbox').first().fill('제주 여행');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('10000');
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await expect(page.getByRole('region', { name: '월급 계획 템플릿 미리 보기' })).toBeVisible();
   await page.getByRole('button', { name: '추가하기' }).click(); // W-11f 미리 보기에서 만들기
   await expect(page).toHaveURL(/\/salary\/plan/);
   // 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort), 넉넉하면 ‘월급 계획 템플릿에 넣었어요’

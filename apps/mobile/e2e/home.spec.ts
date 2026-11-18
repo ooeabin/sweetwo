@@ -67,7 +67,9 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   );
   await expect(first).toContainText('목표 금액 1억 5,000만 원의 0%');
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
-  await expect(h.getByRole('button', { name: '저축·투자 모두 보기' })).toBeVisible();
+  // 2026-11-18 누를 수 없는 정보 상자: 칸은 버튼이 아니고 ‘모두 보기’ 칸도 없음
+  await expect(h.getByRole('button')).toHaveCount(0);
+  await expect(first).toHaveCSS('cursor', 'default');
   // 2026-11-15: ‘수입 적기’는 저금 카드에서 빼고 월급 ‘이번 달’(W-02) ‘수입 적기’로 옮김
   await expect(h.getByRole('button', { name: '수입 적기' })).toHaveCount(0);
   // H-11: 손 줄 5개가 남음. 월급날(9월 25일)이 지났으니 “월급날이에요” 대신 날짜 문장(2026-11-13 UX B M2)
@@ -114,20 +116,12 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(first).toContainText('이번 달 +95만 원');
 });
 
-test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-01 저축·투자 묶음, 월급 계획 W-01, 캘린더, 자산 관리, 저금', async ({
+test('홈 상자 → 화면: 월급 W-02, 월급 계획 W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
   page,
 }) => {
   test.setTimeout(60_000);
   await open(page);
   for (const [click, url] of [
-    [
-      () => together(page).locator('.hg-together__slide').first().click(),
-      /\/salary\/items\/goal-h$/,
-    ],
-    [
-      () => page.getByRole('button', { name: '저축·투자 모두 보기' }).click(),
-      /\/salary\/plan\?from=home#saving$/,
-    ],
     [() => salaryBox(page).click(), /\/salary$/],
     [() => page.locator('.hg-hubbox__more').click(), /\/salary$/],
     [() => page.getByRole('button', { name: /^캘린더/ }).click(), /\/calendar$/],
@@ -151,7 +145,7 @@ test('홈 상자 → 화면: 같이 모으기 W-10, 저금 모두 보기 W-01 �
   await expect(page).toHaveURL(/\/salary$/);
 });
 
-test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 모을까요?” + 이름 칩 → W-11a 이름 채움, D-day 알약, 첫 저금 띠, H-12 결혼 준비', async ({
+test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11a 이름 → 미리 보기 → 저장 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
   page,
 }) => {
   await open(page, (db) => {
@@ -165,23 +159,9 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
       );
     Object.assign(db.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
   });
-  const h = together(page);
-  await expect(h).toContainText('무엇을 같이 모을까요?');
-  // 칩 6개 + 직접 정하기(2026-11-18), 결혼 준비 중 칩
-  for (const c of [
-    '결혼 비용',
-    '신혼집',
-    '신혼여행',
-    '혼수',
-    '비상금',
-    '내 집 마련',
-    '직접 정하기',
-  ])
-    await expect(h.getByRole('button', { name: c, exact: true })).toBeVisible();
-  await expect(h.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
-  await expect(h.getByRole('button', { name: '모으기 시작하기' })).toBeVisible();
-  // 결혼식 D-145(10월 7일 → 3월 1일)
-  await expect(h.locator('.hg-hubtile__badge')).toHaveText('결혼식 D-145');
+  // H-10은 그리지 않음(빈 상태 질문·칩·버튼도 홈에서 없어짐)
+  await expect(together(page)).toHaveCount(0);
+  await expect(page.getByText('무엇을 같이 모을까요?')).toHaveCount(0);
   // 띠 5b(월급날 확인할 게 있음)는 두 칸에 세지 않음(2026-11-17): 확인 + 첫 저금(7번) + 초대. 초대는 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 3개” → 시트
   await expect(bands(page)).toHaveCount(1);
   await expect(band(page)).toContainText('할 일 3개');
@@ -197,16 +177,48 @@ test('빈 상태(미합류·저금 0, 결혼 준비 중): “무엇을 같이 �
     '+ 쓸 곳 메모 추가',
   );
   await axe(page);
-  await h.getByRole('button', { name: '결혼 비용' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=home$/);
-  await expect(page.getByRole('textbox').first()).toHaveValue('결혼 비용');
-  // 직접 정하기·모으기 시작하기는 이름 칸이 빈 채로 엶(앞서 채운 이름이 남지 않음)
-  await page.goBack();
-  await together(page).getByRole('button', { name: '직접 정하기' }).click();
+  // 띠 → W-01 저축·투자 묶음 빈 상태
+  await band(page).click();
+  await page.getByRole('dialog', { name: '할 일' }).locator('.hg-listrow').nth(1).click();
+  await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
+  const sec = page.getByRole('region', { name: '저축·투자', exact: true });
+  await expect(sec).toContainText('아직 저축·투자가 없어요. 무엇을 모을지 골라 보세요');
+  for (const c of [
+    '결혼 비용',
+    '신혼집',
+    '신혼여행',
+    '혼수',
+    '비상금',
+    '내 집 마련',
+    '직접 정하기',
+  ])
+    await expect(sec.getByRole('button', { name: c, exact: true })).toBeVisible();
+  await expect(sec.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
+  await axe(page);
+  await sec.getByRole('button', { name: '직접 정하기' }).click();
   await expect(page.getByRole('textbox').first()).toHaveValue('');
   await page.goBack();
-  await together(page).getByRole('button', { name: '모으기 시작하기' }).click();
-  await expect(page.getByRole('textbox').first()).toHaveValue('');
+  await sec.getByRole('button', { name: '신혼집' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=split$/);
+  await expect(page.getByRole('textbox').first()).toHaveValue('신혼집');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByLabel('매달 얼마씩 모을까요?').fill('300000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
+  await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await expect(page.getByRole('region', { name: '월급 계획 템플릿 미리 보기' })).toContainText(
+    '새로',
+  );
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page).toHaveURL(/\/salary\/plan/);
+  // 저장하면 홈에 H-10이 생기고 누를 수 없음
+  await page.goto('/');
+  const h = together(page);
+  await expect(h).toBeVisible();
+  await expect(h).toContainText('신혼집');
+  await expect(h.getByRole('button')).toHaveCount(0); // 결혼식 날짜가 있어 머리는 D-day 알약(버튼 아님)
+  await h.locator('.hg-together__slide').first().click();
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부터”(25일 일요일 → 앞당김), 7일 전 띠 9번 → W-01d 자동 줄 고르기 → 띠 사라짐', async ({

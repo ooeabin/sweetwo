@@ -421,14 +421,11 @@ export type AnalyticsEvent =
       // 홈 허브 상자를 누름(19, 2026-11-09). todo = 할 일 띠 종류(band일 때만, core HomeTodo kind)
       name: 'home_box_tapped';
       props: {
-        // 2026-11-13 v2.2: together = H-10 칸, wedding = H-12, money_in = ‘+ 수입 적기’,
-        // more = ‘저금 모두 보기’, chip = H-10 빈 상태 이름 칩·‘+ 저금 추가’, dday = ‘결혼식 날짜 알려 주기’
+        // 2026-11-18: H-10은 누를 수 없는 정보 상자라 together·more·chip(빈 상태)을 없앰.
+        // wedding = H-12, money_in = ‘+ 수입 적기’, dday = H-10 머리 ‘결혼식 날짜 알려 주기’
         box:
-          | 'together'
           | 'wedding'
           | 'money_in'
-          | 'more'
-          | 'chip'
           | 'dday'
           | 'band'
           // 띠 둘을 묶은 “할 일 2개” 띠(시트를 엶, 2026-11-16 4차 검토). 시트 안 줄은 band + todo

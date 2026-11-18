@@ -218,7 +218,7 @@ it('첫 주 할 일 ‘첫 저금 추가’(19 H-06 4b, 2026-11-09 round 3): 초
   expect(homeTodo(first)).toEqual({
     kind: 'saving',
     key: 'saving-first',
-    to: '/salary/items/new/a?from=home',
+    to: '/salary/plan?from=home#saving',
   });
   // 초대보다 먼저(2026-11-11 초대는 맨 끝), 첫 주가 끝나면 초대
   expect(homeTodo({ ...first, coupleState: 'not_joined' })?.kind).toBe('saving');

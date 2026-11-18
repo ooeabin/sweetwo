@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (13293edc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (a9c3329a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2392,6 +2392,7 @@ button.hg-receipt__amount { cursor: pointer; }
 .hg-receipt__title { margin: 0; font: var(--text-body-strong); color: var(--ink); }
 .hg-receipt__subtotal { font: var(--text-caption); font-weight: 500; color: var(--stone); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hg-receipt__name .hg-badge { margin-inline-start: var(--space-2); vertical-align: middle; }  /* 2026-11-18 W-11 미리 보기 새 줄 “새로” 알약 */
+.hg-receipt__empty { margin: var(--space-1) 0 0; font: var(--text-body-sm); color: var(--stone); }  /* 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄 */
 .hg-receipt__head--plain { padding-bottom: var(--space-2); }  /* 2026-11-18 W-11 미리 보기 카드 제목 줄(아바타 없음) */
 .hg-receipt__rows { margin: 0; padding: 0; list-style: none; }
 .hg-receipt__row { position: relative; display: flex; align-items: center; gap: var(--space-2); min-height: 40px; }
@@ -2497,6 +2498,7 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__track { display: flex; gap: var(--space-4); margin-top: var(--space-1); overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
 .hg-together__track::-webkit-scrollbar { display: none; }
 .hg-together__slide, .hg-together__more { flex: 0 0 100%; min-width: 0; box-sizing: border-box; scroll-snap-align: start; border: 0; border-radius: var(--radius-lg); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-together__slide--info { cursor: default; }  /* 2026-11-18 H-10은 누를 수 없는 정보 상자 */
 .hg-together__slide { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) 0; }
 .hg-together__more { display: flex; align-items: center; justify-content: center; gap: 2px; min-height: 120px; background: var(--surface-alt); color: var(--ink-2); font: var(--text-label); }
 :is(.hg-together__slide, .hg-together__more):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
@@ -2513,10 +2515,6 @@ button.hg-receipt__main { cursor: pointer; }
 .hg-together__dots > i { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--hairline); }
 .hg-together__dots > i.is-on { background: var(--ink-2); }
 .hg-together > .hg-addrow { align-self: flex-start; }
-/* 빈 상태(미합류·저금 0): 질문 + 이름 칩 6개 + ‘직접 정하기’ + ‘모으기 시작하기’ 버튼. 그림 자리 없음 */
-.hg-together__ask { margin: var(--space-2) 0 0; font: var(--text-title-3); font-weight: 700; }
-.hg-together__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }  /* 2026-11-18 H-10 빈 상태 칩 7개(이름 6 + 직접 정하기)는 두 줄쯤으로 줄바꿈 */
-.hg-together__start { margin-top: var(--space-4); }  /* 2026-11-18 H-10 빈 상태 ‘모으기 시작하기’ 버튼 */
 @media (prefers-reduced-motion: no-preference) { .hg-together__track { scroll-behavior: smooth; } }
 /* 이번 달 한 줄(HubLine, H-11·H-13): 흰 얇은 상자 두 칸. 왼쪽 문장(15px 600, 두 줄까지) + 회색 보조 + 오른쪽 이동 글자(13px 600 ink-2). 오렌지 없음 */
 .hg-hubline { display: flex; align-items: center; gap: var(--space-3); min-width: 0; min-height: 56px; padding: 14px 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }

@@ -16,7 +16,6 @@ import {
   pickMonthLine,
   pickTopBanner,
   pickTopTasks,
-  bundleInviteGoal,
   PUSH_KINDS,
   pushKindOn,
   pushReaskOpen,
@@ -341,26 +340,6 @@ export function H01Home() {
       ? list.cycle_start
       : addDays(list.cycle_end, 1)
     : (firstPayday ?? null);
-  // 상대 저금 같이 모으기 권유(띠 13). 내 저금이 0개면 띠 대신 H-10 빈 상태가 한 번만 보여 줌(2026-11-14 R4)
-  const inviteGoal =
-    mine.length + activeBundles.length === 0
-      ? bundleInviteGoal(
-          {
-            joint,
-            coupleState: sp.couple_state,
-            today,
-            partnerGoals: live
-              .filter((i) => i.owner === 'partner')
-              .map((i) => ({
-                id: i.goal.id,
-                name: i.goal.name,
-                created_at: i.goal.created_at,
-                bundle_id: i.goal.bundle_id,
-              })),
-          },
-          { anyAge: true },
-        )
-      : null;
   const tasks0: TopTask[] = h.input
     ? pickTopTasks({
         today,
@@ -686,7 +665,9 @@ export function H01Home() {
   const monthFrom = list?.cycle_start ?? `${today.slice(0, 7)}-01`;
   const monthTo = list?.cycle_end ?? today;
   const heroFailed = (saving.ready === false && saving.failed) || bundles.isError;
-  const hero = heroFailed ? (
+  // 같이 모으기 항목이 하나도 없으면 H-10을 안 그림(2026-11-18, 첫 저축·투자는 띠 7번 → W-01 빈 묶음, 상대 권유는 띠 13번)
+  const heroNone = !heroFailed && heroes.length === 0;
+  const hero = heroNone ? null : heroFailed ? (
     <section className="hg-card hg-card--fill hg-stack hg-hub__wide" role="status">
       <p className="hg-card__title">{sharedCopy.errorTitle}</p>
       <p className="hg-card__meta">{sharedCopy.errorBody}</p>
@@ -720,8 +701,6 @@ export function H01Home() {
         lines: (lists.data ?? []).flatMap((c) => c.pay_check_line),
       }}
       moves={moves.moves}
-      savingCount={sums.count}
-      invite={inviteGoal}
       partnerOut={!joint && sp.couple_state === 'connected' && !!partner.data}
       go={(box, to) => go(box, to)}
     />
@@ -756,7 +735,7 @@ export function H01Home() {
   const rankPct = rank?.homeBadge ?? null;
 
   // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10(0원이면 월급 상자 아래) → H-12 → H-15 월급 상자 → 반 칸 타일 둘
-  const order = homeOrder({ heroZero: !heroFailed && heroZero(heroes, !!inviteGoal) });
+  const order = homeOrder({ heroZero: !heroFailed && heroZero(heroes), heroNone });
   const blocks: Record<HomeBlock, ReactNode> = {
     tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
     hero: <Fragment key="hero">{hero}</Fragment>,

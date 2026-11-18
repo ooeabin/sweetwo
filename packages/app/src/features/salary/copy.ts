@@ -500,6 +500,8 @@ export const copy = {
   nextQ: '다음엔 뭘 같이 모을까요?', // [확인 필요]
   nextRedeadline: (name: string) => `‘${name}’ 기한을 새로 정할게요`, // [확인 필요]
   nextCustom: '직접 정할게요', // [확인 필요]
+  savingEmptyAsk: '아직 저축·투자가 없어요. 무엇을 모을지 골라 보세요', // [확인 필요] 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄(홈 H-10 빈 상태가 옮겨 옴)
+  savingEmptyCustom: '직접 정하기', // [확인 필요] 같은 칩 끝(W-11a를 이름 칸 빈 채로 엶)
   addNameChips: '이름 고르기', // [확인 필요] W-11a 칩 묶음 화면 읽기 이름
   chipNames: {
     wedding: '결혼 비용',
