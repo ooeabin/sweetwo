@@ -59,6 +59,8 @@ export function ShortText({
           style={{ paddingRight: 'var(--space-14)' }}
           placeholder={placeholder}
           value={value}
+          /* 이전에 쓴 글이 자동 완성 목록으로 떠서 화면 아래를 가리는 일을 막음(2026-11-18). AmountInput과 같은 설정 */
+          autoComplete="off"
           aria-invalid={!!error || undefined}
           aria-describedby={`${id}-count`}
           onChange={(e) => {
