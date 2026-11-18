@@ -85,10 +85,10 @@ export const copy = {
     `저축·투자 ${saving}%, 지출 ${spend}%, ${free}`,
   legendSaving: (n: number) => `저축·투자 ${n}%`,
   legendSpend: (n: number) => `지출 ${n}%`,
-  legendFree: (n: number) => `아직 안 정한 월급 ${n}%`,
-  legendShort: (amount: string) => `아직 안 정한 월급 ${amount}`,
-  allocated: '계획한 월급',
-  leftoverLabel: '아직 안 정한 월급',
+  legendFree: (n: number) => `미계획 ${n}%`,
+  legendShort: (amount: string) => `미계획 ${amount}`,
+  allocated: '계획 금액',
+  leftoverLabel: '미계획 금액',
   addSpend: '+ 지출 추가',
   spendChips: [
     { name: '관리비', code: 'maintenance' },
@@ -234,7 +234,7 @@ export const copy = {
   removeLine: '줄 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
-  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`,
+  leftover: (amount: string) => `미계획 금액 ${amount}`,
   short: (amount: string) => `${amount}이 모자라요`,
   shortHelp: '지출이나 저축·투자를 줄여 주세요',
   // 월급 탭(2026-11-08 ADR 0007)
@@ -247,12 +247,12 @@ export const copy = {
   addItemInReceipt: '+ 저축·투자 추가', // [확인 필요] 2026-11-18 W-01 영수증 구획 끝(묶음이 여럿이라 무엇을 더하는지 보이게, ‘+ 지출 추가’와 같은 꼴)
   addItemIn: '+ 추가', // [확인 필요] 2026-11-17 ‘저축·투자’ 구획·묶음 안(분할 편집기)
   // 첫 저금 빈 줄(2026-11-09, 내 저금이 없을 때) [확인 필요]. ListRow + 아이콘이 글자 앞 ‘+’를 대신
-  firstSaving: (left: string) => `저축·투자 추가 (아직 안 정한 월급 ${left})`, // 묶음 밖(홈 H-01)
-  firstSavingIn: (left: string) => `추가 (아직 안 정한 월급 ${left})`, // [확인 필요] 2026-11-17 묶음 안(W-02)
+  firstSaving: (left: string) => `저축·투자 추가 (미계획 금액 ${left})`, // 묶음 밖(홈 H-01)
+  firstSavingIn: (left: string) => `추가 (미계획 금액 ${left})`, // [확인 필요] 2026-11-17 묶음 안(W-02)
   // 20 ‘첫 저금’ 3번(2026-11-13): 예전 비교 문구 “…님처럼 나도 모을 곳을…”은 없앰 [확인 필요]
   firstSavingTogether: (partner: string, goal: string) =>
     `${partner ? `${partner}님` : '파트너'} ‘${goal}’에 같이 모을까요?`,
-  firstSavingLeft: (left: string) => `아직 안 정한 월급 ${left}`,
+  firstSavingLeft: (left: string) => `미계획 금액 ${left}`,
   // 2026-11-16 r6: 용돈이 이미 빠진 돈이라는 걸 보임 [확인 필요]
   firstSavingExcl: (allowance: string) => `용돈 ${allowance} 빼고`,
   seeItem: '저축·투자 보기', // [확인 필요] 저금 줄 시트·금액 입력 아래(2026-11-09 ‘저금 항목’ 대신)
@@ -329,7 +329,7 @@ export const copy = {
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
   addMonthlyHelp: (left: string, allowance?: string) =>
-    `아직 안 정한 월급 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // 2026-11-16 r6 용돈 빼고
+    `미계획 금액 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // 2026-11-16 r6 용돈 빼고
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
@@ -341,7 +341,7 @@ export const copy = {
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
-  addShort: '아직 안 정한 월급이 모자라요. 지출이나 저축·투자를 줄여 주세요',
+  addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   addNoSplit: '월급이 생기면 저축·투자를 추가할 수 있어요', // [확인 필요]
   // W-12 달성 축하, W-12a
@@ -622,7 +622,7 @@ export const copy = {
   moneyInEditBelow: '저축·투자에 넣은 금액보다 적게 고칠 수 없어요', // [확인 필요]
   moneyInEditSave: '저장',
   noteOverdue: (date: string) => `${date}이 지났어요`, // W-14 안 낸 메모(날짜는 ‘…일’로 끝남)
-  monthlyOverLeft: (left: string) => `아직 안 정한 월급 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
+  monthlyOverLeft: (left: string) => `미계획 금액 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
   needPerMonthTogether: (amount: string, now?: string) =>
     `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
   // ── W-21 지난 달 모아보기(20 W-21, 2026-11-17) [모두 확인 필요] ──

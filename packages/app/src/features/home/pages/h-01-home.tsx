@@ -727,7 +727,7 @@ export function H01Home() {
     />
   );
 
-  // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 매달 며칠 + 아직 안 정한 월급, 모자라면 “30만 원이 모자라요” ──
+  // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 매달 며칠 + 미계획 금액, 모자라면 “30만 원이 모자라요” ──
   const dayOf = (u: { payday: number | null; payday_last: boolean }) =>
     u.payday_last ? copy.paydayLast : u.payday ? copy.payday(u.payday) : null;
   const jointDay = sp.joint_cycle_day;

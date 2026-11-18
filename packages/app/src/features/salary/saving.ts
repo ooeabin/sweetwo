@@ -199,7 +199,7 @@ export function useFirstSaving():
   | {
       show: true;
       left: number;
-      /** 아직 안 정한 월급에서 이미 빠진 용돈 합(0이면 안 알림, 2026-11-16 r6) */
+      /** 미계획 금액에서 이미 빠진 용돈 합(0이면 안 알림, 2026-11-16 r6) */
       allowance: number;
       partnerName: string | null;
       /** 같이 모으자고 권할 상대 저금(각자 계열, 묶음에 안 든 것, 이름이 보일 때만) */

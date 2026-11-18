@@ -27,7 +27,7 @@
 - 타일 배지 “상위 38%”(H-04): 두 사람 모두 순위 동의 + “홈에 보여 주기”를 켰을 때만(2026-11-13 기본 끔)
 - (2026-11-17 H-07 타일은 없앰. 포인트 상자는 H-04 자산 관리 타일로 옮김: 제목 “자산 관리”, 값 순자산, 보조 `on-accent-app-sub`, 배지 “상위 38%”는 `plate` 알약 그대로. 둘째 보조 줄 `sub2`는 홈에서 안 씀)
 - 넓은 창(1100px 이상 4열, 2026-11-17): 할 일 띠 한 줄 → H-10(두 칸, 두 줄) + 오른쪽 H-12(있으면), 월급 상자 H-15(두 칸) → 그 아래 오른쪽에 반 칸 타일 H-04·H-08 한 칸씩. 0원이면 월급 상자가 왼쪽, H-10이 오른쪽
-- React 래퍼(packages/ui `HomeHub.tsx`)에 더함: `HubLine`(`text`, `sub`, `go`, `bar`(PeriodBar 요소), `label`, `onClick`), `HubBand`에 `secondary`(`{ text, onClick }`), `HubTile`에 `sub2`(H-07 아직 안 정한 월급 둘째 줄)·`className`. `SaveTogether`·`PeriodBar`는 따로 파일
+- React 래퍼(packages/ui `HomeHub.tsx`)에 더함: `HubLine`(`text`, `sub`, `go`, `bar`(PeriodBar 요소), `label`, `onClick`), `HubBand`에 `secondary`(`{ text, onClick }`), `HubTile`에 `sub2`(H-07 미계획 금액 둘째 줄)·`className`. `SaveTogether`·`PeriodBar`는 따로 파일
 - 좁은 창 순서(DOM, 2026-11-17 새 순서: 할 일 띠 → H-10 → H-12 → 월급 상자 H-15 → 타일 H-04·H-08, 0원 H-10은 월급 상자 아래, core `homeOrder`. 아래는 2026-11-15 기록, 3차 검토, 기획 19 ‘홈 순서’, core `homeOrder`): 확인할 것이 맨 위. H-11이 확인할 것을 말하면 H-11 → 할 일 띠 → H-14 → H-10, 아니면 할 일 띠 → H-14 → H-10 → H-11. 0원 H-10은 H-07·H-08 아래. 그다음 H-12 → H-04·H-09. 타일 72px 그림 자리는 그림이 들어올 때까지 그리지 않음(HubTile `art`는 남기되 그리지 않음). 예전(2026-11-13): H-10 → H-11 → 할 일 띠 → H-07·H-08 → H-12 → H-04·H-09. H-14 이번 달 우리 둘(`hg-card` + `hg-monthus`): 줄은 `hg-list--plain`(앞 칸 없이 카드 왼쪽 끝), 줄 높이 48px, 줄 이름 한 줄(`nowrap`), 값은 본문 글자 크기로 오른쪽(길면 값이 줄바꿈). 보여 줄 줄이 2개보다 적으면 그리지 않음(2026-11-16). 넓은 창은 띠 `order: -1`, `hg-together` 두 칸 두 줄(`grid-row: span 2`), `hg-hubline` 두 칸이라 격자 자동 배치가 ‘H-10 + 오른쪽 H-11, H-07·H-08’이 됨
 
 ## 월급 상자 (H-15, HubBox, 2026-11-17)

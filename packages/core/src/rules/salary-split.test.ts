@@ -30,7 +30,7 @@ describe('recommendSplit: 온보딩 직후(저금 항목 없음)', () => {
     expect(lines.map((l) => l.kind)).toEqual(['allowance']);
     expect(amount('allowance')).toBe(350_000);
   });
-  it('저금 줄 없이 아직 안 정한 월급 315만(비상금 기본 항목 없음)', () => {
+  it('저금 줄 없이 미계획 금액 315만(비상금 기본 항목 없음)', () => {
     expect(lines.some((l) => l.kind === 'saving')).toBe(false);
     expect(leftover(3_500_000, lines)).toBe(3_150_000);
   });
@@ -83,7 +83,7 @@ describe('recommendSplit: 추천값으로 다시 채우기(06 3-2 두 번째 예
     expect(leftover(3_500_000, kept)).toBe(0);
     expect(kept.map((l) => l.kind)).toEqual(['saving', 'saving', 'fixed', 'living', 'allowance']);
   });
-  it('추천 줄이 없으면 남은 285만 → 내 집 마련 월 필요액 246만, 아직 안 정한 월급 39만, 저금 줄이 먼저', () => {
+  it('추천 줄이 없으면 남은 285만 → 내 집 마련 월 필요액 246만, 미계획 금액 39만, 저금 줄이 먼저', () => {
     expect(lines.find((l) => l.goalId === 'h')?.amount).toBe(2_460_000);
     expect(leftover(3_500_000, lines)).toBe(390_000);
     expect(lines.map((l) => l.kind)).toEqual(['saving', 'saving', 'allowance']);
@@ -103,7 +103,7 @@ describe('recommendSplit: 추천값으로 다시 채우기(06 3-2 두 번째 예
 
 describe('recommendSplit: 직접 추가한 지출 줄은 금액 그대로(06 3-2, 2026-11-12 D1)', () => {
   const custom = [{ name: '관리비', amount: 150_000 }];
-  it('찬우 350만 + 관리비 15만: 용돈 35, 관리비 15, 아직 안 정한 월급 300', () => {
+  it('찬우 350만 + 관리비 15만: 용돈 35, 관리비 15, 미계획 금액 300', () => {
     const lines = recommendSplit({
       income: 3_500_000,
       people: [{ userId: 'chanwoo', income: 3_500_000 }],
@@ -117,7 +117,7 @@ describe('recommendSplit: 직접 추가한 지출 줄은 금액 그대로(06 3-2
     ]);
     expect(leftover(3_500_000, lines)).toBe(3_000_000);
   });
-  it('저금은 직접 추가 줄을 뺀 남은 금액에서: 적금 30 그대로, 내 집 마련 246, 아직 안 정한 월급 24', () => {
+  it('저금은 직접 추가 줄을 뺀 남은 금액에서: 적금 30 그대로, 내 집 마련 246, 미계획 금액 24', () => {
     const lines = recommendSplit({
       income: 3_500_000,
       people: [{ userId: 'chanwoo', income: 3_500_000 }],
@@ -180,7 +180,7 @@ describe('recommendSplit: 직접 추가한 지출 줄은 금액 그대로(06 3-2
 });
 
 describe('합류 P-06 각자: joinerSplit', () => {
-  it('예빈 270만: 용돈 27만만, 저금 줄 없음, 아직 안 정한 월급 243만(2026-11-15 추천 고정·생활 줄 없음)', () => {
+  it('예빈 270만: 용돈 27만만, 저금 줄 없음, 미계획 금액 243만(2026-11-15 추천 고정·생활 줄 없음)', () => {
     const r = joinerSplit({ income: 2_700_000, userId: 'yebin' });
     expect(r.map((l) => [l.kind, l.userId ?? '', l.amount])).toEqual([
       ['allowance', 'yebin', 270_000],
@@ -190,7 +190,7 @@ describe('합류 P-06 각자: joinerSplit', () => {
 });
 
 describe('합류 P-06 합쳐서: jointRefill', () => {
-  it('620만: 있던 줄(이미 있던 고정지출·생활비 포함)은 그대로, 예빈 용돈 27, 내 집 95 → 246, 적금 30 그대로, 아직 안 정한 월급 106', () => {
+  it('620만: 있던 줄(이미 있던 고정지출·생활비 포함)은 그대로, 예빈 용돈 27, 내 집 95 → 246, 적금 30 그대로, 미계획 금액 106', () => {
     const lines = [
       { kind: 'saving' as const, goalId: 'h', amount: 950_000 },
       { kind: 'saving' as const, goalId: 's', amount: 300_000 },

@@ -105,7 +105,7 @@ export const copy = {
   payday: (d: number) => `${d}일`,
   paydayLast: '말일',
   noPaydayTile: '수입이 들어올 때', // 2026-11-13 날짜 없음
-  leftover: (amount: string) => `아직 안 정한 월급 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조
+  leftover: (amount: string) => `미계획 금액 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
   noCare: '다가오는 일정이 없어요',
