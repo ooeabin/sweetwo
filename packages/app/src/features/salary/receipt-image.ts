@@ -1,8 +1,11 @@
-// W-01 영수증 이미지(‘공유하기’, docs/spec/20-salary-plan.md W-01 ‘영수증 이미지 공유’, 2026-11-09).
+// W-01 공유 이미지(‘공유하기’, docs/spec/20-salary-plan.md W-01 ‘공유 이미지’, 2026-11-19 요약 카드 모양으로 다시 그림)와
+// W-02 달 결과 이미지(예전 영수증 모양, `ReceiptImageModel`).
 // 화면과 같은 숫자·문구(금액 가리기, 공개 범위는 부르는 쪽에서 이미 적용)를 같은 디자인 토큰 색으로 canvas에 그림.
+// 라이트 고정(2026-11-19): 앱이 다크여도 이미지는 라이트 토큰(`data-theme="light"` 자리에서 읽음)으로 그림. 보내는 그림이라 받는 사람 화면 테마와 무관해야 함.
 // 사진 Avatar는 다른 출처라 canvas가 막히므로(tainted) 사람 색 원 + 닉네임 앞 최대 3자(화면 Avatar와 같은 글자·크기 단계, 2026-11-18)로 그림.
 
 import { avatarInitialCount, avatarInitials } from '@sweetwo/core';
+import { wordmarkUrl } from '@sweetwo/ui';
 
 export interface ReceiptImageModel {
   /** 사람 색 번호(시작한 사람 1, 합류한 사람 2)와 닉네임. 합쳐서면 둘 */
@@ -42,6 +45,9 @@ type Tokens = Record<
   | 'spend'
   | 'accent'
   | 'accentSoft'
+  | 'brandInk'
+  | 'ink2'
+  | 'barTrack'
   | 'danger'
   | 'person1'
   | 'person1Ink'
@@ -50,11 +56,16 @@ type Tokens = Record<
   string
 > & { font: string };
 
-/** 지금 테마 토큰(라이트·다크 그대로) */
+/** 라이트 토큰(앱 테마와 상관없이. 보이지 않는 `data-theme="light"` 요소에서 읽음) */
 function readTokens(): Tokens {
-  const cs = getComputedStyle(document.documentElement);
+  const probe = document.createElement('div');
+  probe.setAttribute('data-theme', 'light');
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.display = 'none';
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe);
   const v = (name: string) => cs.getPropertyValue(name).trim();
-  return {
+  const t = {
     surface: v('--surface'),
     surfaceAlt: v('--surface-alt'),
     ink: v('--ink'),
@@ -66,6 +77,9 @@ function readTokens(): Tokens {
     spend: v('--spend'),
     accent: v('--accent-app'),
     accentSoft: v('--accent-app-soft'),
+    brandInk: v('--brand-ink'),
+    ink2: v('--ink-2'),
+    barTrack: v('--bar-track'),
     danger: v('--danger'),
     person1: v('--person-1'),
     person1Ink: v('--person-1-ink'),
@@ -73,6 +87,8 @@ function readTokens(): Tokens {
     person2Ink: v('--person-2-ink'),
     font: v('--font-sans') || 'sans-serif',
   };
+  probe.remove();
+  return t;
 }
 
 /** 그리기(draw = false면 높이만 잼). 끝난 y(카드 아래 톱니 포함)를 돌려줌 */
@@ -316,6 +332,220 @@ export async function renderReceiptPng(m: ReceiptImageModel): Promise<Blob> {
   );
 }
 
+/** 요약 카드 모양 공유 이미지(W-01, 2026-11-19) */
+export interface PlanImageModel {
+  /** 카드 위 이름표 “월급” */
+  label: string;
+  amount: string;
+  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 brand-ink로 */
+  sentence: { before: string; pct?: string; after: string };
+  /** 막대·범례를 그림(월급 0원이면 false) */
+  chart: boolean;
+  bar: { kind: 'saving' | 'spend' | 'free'; percent: number }[];
+  legend: { kind: 'saving' | 'spend' | 'free'; name: string; amount: string; short?: boolean }[];
+  /** 저축·투자, 지출 줄 목록(줄이 없는 묶음은 부르는 쪽에서 뺌). sub = 목표 금액이 있으면 “목표 금액의 62%” */
+  sections: {
+    title: string;
+    subtotal: string;
+    rows: { name: string; amount: string; sub?: string }[];
+  }[];
+}
+
+const CARD_R = 24;
+const GAP = 12;
+
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+/** 요약 카드 모양 그리기(draw = false면 높이만 잼). 끝난 y를 돌려줌 */
+function layoutPlan(
+  ctx: CanvasRenderingContext2D,
+  m: PlanImageModel,
+  t: Tokens,
+  logo: HTMLImageElement | null,
+  draw: boolean,
+) {
+  const x0 = PAD;
+  const x1 = W - PAD;
+  const left = x0 + CARD_PAD;
+  const right = x1 - CARD_PAD;
+  const font = (weight: number, size: number) => `${weight} ${size}px ${t.font}`;
+  const text = (
+    s: string,
+    x: number,
+    y: number,
+    o: { weight: number; size: number; color: string; align?: CanvasTextAlign; max?: number },
+  ) => {
+    if (!draw) return;
+    ctx.font = font(o.weight, o.size);
+    ctx.fillStyle = o.color;
+    ctx.textAlign = o.align ?? 'left';
+    ctx.textBaseline = 'middle';
+    let out = s;
+    if (o.max && ctx.measureText(out).width > o.max) {
+      while (out.length > 1 && ctx.measureText(`${out}…`).width > o.max) out = out.slice(0, -1);
+      out = `${out}…`;
+    }
+    ctx.fillText(out, x, y);
+  };
+  const card = (top: number, bottom: number) => {
+    if (!draw) return;
+    ctx.fillStyle = t.surface;
+    ctx.beginPath();
+    ctx.roundRect(x0, top, x1 - x0, bottom - top, CARD_R);
+    ctx.fill();
+  };
+  const color = (k: 'saving' | 'spend' | 'free') =>
+    k === 'saving' ? t.accent : k === 'spend' ? t.ink2 : t.barTrack;
+
+  // ── 요약 카드 ──
+  let y = PAD;
+  const top = y;
+  // 카드 높이는 안을 다 잰 뒤에 알 수 있어 draw 때는 먼저 같은 식으로 잰 높이로 칠함
+  const inner = (d: boolean) => {
+    let yy = top + CARD_PAD;
+    const put = (s: string, x: number, cy: number, o: Parameters<typeof text>[3]) => {
+      if (d) text(s, x, cy, o);
+    };
+    put(m.label, left, yy + 10, { weight: 500, size: 14, color: t.slate });
+    yy += 20 + 4;
+    put(m.amount, left, yy + 19, { weight: 700, size: 30, color: t.ink });
+    yy += 38 + 12;
+    // 굵은 한 문장(숫자만 brand-ink). 너무 길면 글자 크기를 줄임
+    const full = `${m.sentence.before}${m.sentence.pct ?? ''}${m.sentence.after}`;
+    let size = 20;
+    ctx.font = font(700, size);
+    while (size > 15 && ctx.measureText(full).width > right - left) {
+      size -= 1;
+      ctx.font = font(700, size);
+    }
+    if (d) {
+      let x = left;
+      const parts: [string, string][] = [
+        [m.sentence.before, t.ink],
+        ...(m.sentence.pct ? ([[m.sentence.pct, t.brandInk]] as [string, string][]) : []),
+        [m.sentence.after, t.ink],
+      ];
+      for (const [str, c] of parts) {
+        text(str, x, yy + 15, { weight: 700, size, color: c });
+        ctx.font = font(700, size);
+        x += ctx.measureText(str).width;
+      }
+    }
+    yy += 30;
+    if (m.chart) {
+      yy += 20;
+      if (d) {
+        const shown = m.bar.filter((b) => b.percent > 0);
+        const width = right - left - 3 * Math.max(shown.length - 1, 0);
+        let x = left;
+        for (const b of shown) {
+          const w = Math.max((width * b.percent) / 100, 16);
+          ctx.fillStyle = color(b.kind);
+          ctx.beginPath();
+          ctx.roundRect(x, yy, w, 16, 8);
+          ctx.fill();
+          x += w + 3;
+        }
+      }
+      yy += 16 + 16;
+      for (const l of m.legend) {
+        if (d) {
+          ctx.fillStyle = color(l.kind);
+          ctx.beginPath();
+          ctx.arc(left + 4, yy + 11, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        put(l.name, left + 20, yy + 11, { weight: 500, size: 15, color: t.ink2 });
+        put(l.amount, right, yy + 11, {
+          weight: 600,
+          size: 15,
+          color: l.short ? t.danger : t.ink,
+          align: 'right',
+        });
+        yy += 22 + 12;
+      }
+      yy -= 12;
+    }
+    return yy + CARD_PAD;
+  };
+  const summaryBottom = inner(false);
+  card(top, summaryBottom);
+  inner(draw);
+  y = summaryBottom;
+
+  // ── 저축·투자, 지출 카드 ──
+  for (const s of m.sections) {
+    y += GAP;
+    const cardTop = y;
+    const rowsH = s.rows.reduce((h, r) => h + (r.sub ? 60 : 48), 0);
+    const bottom = cardTop + CARD_PAD + 28 + 4 + rowsH + CARD_PAD - 8;
+    card(cardTop, bottom);
+    y = cardTop + CARD_PAD;
+    text(s.title, left, y + 14, { weight: 700, size: 18, color: t.ink });
+    text(s.subtotal, right, y + 14, { weight: 600, size: 15, color: t.slate, align: 'right' });
+    y += 28 + 4;
+    for (const r of s.rows) {
+      ctx.font = font(700, 16);
+      const aw = ctx.measureText(r.amount).width;
+      const h = r.sub ? 60 : 48;
+      text(r.name, left, y + (r.sub ? 20 : 24), {
+        weight: 600,
+        size: 16,
+        color: t.ink,
+        max: right - left - aw - 12,
+      });
+      if (r.sub) text(r.sub, left, y + 42, { weight: 400, size: 13, color: t.slate });
+      text(r.amount, right, y + (r.sub ? 20 : 24), {
+        weight: 700,
+        size: 16,
+        color: t.ink,
+        align: 'right',
+      });
+      y += h;
+    }
+    y = bottom;
+  }
+
+  // ── 맨 아래 작은 워드마크 ──
+  y += 24;
+  const lh = 18;
+  if (logo && draw) {
+    const lw = Math.round((lh * 6074) / 1633);
+    ctx.drawImage(logo, W / 2 - lw / 2, y, lw, lh);
+  }
+  y += lh + 20;
+  return y;
+}
+
+/** 요약 카드 모양 PNG(Blob). 라이트 고정 */
+export async function renderPlanPng(m: PlanImageModel): Promise<Blob> {
+  await document.fonts?.ready;
+  const t = readTokens();
+  const logo = await loadImage(wordmarkUrl);
+  const probe = document.createElement('canvas').getContext('2d');
+  if (!probe) throw new Error('canvas');
+  const H = Math.ceil(layoutPlan(probe, m, t, logo, false));
+  const canvas = document.createElement('canvas');
+  canvas.width = W * SCALE;
+  canvas.height = H * SCALE;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas');
+  ctx.scale(SCALE, SCALE);
+  ctx.fillStyle = t.surfaceAlt;
+  ctx.fillRect(0, 0, W, H);
+  layoutPlan(ctx, m, t, logo, true);
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('png'))), 'image/png'),
+  );
+}
+
 const toBase64 = (b: Blob) =>
   new Promise<string>((resolve, reject) => {
     const r = new FileReader();
@@ -332,7 +562,18 @@ export async function shareReceipt(
   m: ReceiptImageModel,
   name: string,
 ): Promise<'shared' | 'downloaded' | 'cancelled'> {
-  const png = await renderReceiptPng(m);
+  return sharePng(await renderReceiptPng(m), name);
+}
+
+/** W-01 공유(요약 카드 모양) */
+export async function sharePlan(
+  m: PlanImageModel,
+  name: string,
+): Promise<'shared' | 'downloaded' | 'cancelled'> {
+  return sharePng(await renderPlanPng(m), name);
+}
+
+async function sharePng(png: Blob, name: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
   if (bridge?.shareImage) return bridge.shareImage({ name, base64: await toBase64(png) });
   const url = URL.createObjectURL(png);

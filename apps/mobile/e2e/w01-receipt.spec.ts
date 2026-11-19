@@ -29,6 +29,15 @@ const names = async (page: Page, group: string) =>
     ? [...(await listNames(page, '용돈')), ...(await listNames(page, '지출'))]
     : listNames(page, group);
 
+/** ‘+ 지출 추가’ → 작은 선택 시트에서 “지출”(같이 쓰는 통장을 쓸 수 있을 때, 2026-11-19) */
+async function addSpend(page: Page) {
+  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await page
+    .getByRole('dialog', { name: '무엇을 추가할까요?' })
+    .getByRole('button', { name: '지출' })
+    .click();
+}
+
 async function open(page: Page, url = '/salary/plan') {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -170,7 +179,7 @@ test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 
 test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄은 이름 바꾸기', async ({ page }) => {
   const { db, go } = await open(page);
   await go();
-  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });
   for (const n of ['관리비', '통신비', '보험료', '구독료', '교통비', '부모님 용돈'])
     await expect(chips.getByRole('button', { name: n })).toBeVisible();
@@ -183,7 +192,7 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   expect(lineOf(db, 'custom', '관리비')?.amount).toBe(100_000);
   expect(waitLine(db, 'custom')?.planned).toBe(100_000);
   // 이미 있는 이름은 칩에서 숨김, 글자로 넣으면 막음
-  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await addSpend(page);
   await expect(chips.getByRole('button', { name: '관리비' })).toHaveCount(0);
   await chips.getByRole('textbox', { name: '줄 이름' }).fill('관리비');
   await chips.getByRole('textbox', { name: '줄 이름' }).press('Enter');
@@ -614,9 +623,61 @@ test('지출 줄이 있으면 빈 지출 카드 없음, 같이 쓰는 생활비 
   await expect(page.getByText('매달 나가는 지출을 골라 보세요')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장 추가' })).toHaveCount(0);
   await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  // 같이 쓰는 통장을 쓸 수 없으면 시트 없이 바로 지출 추가(칩 끝에 ‘같이 쓰는 통장’)
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page
     .getByRole('group', { name: '지출 이름' })
     .getByRole('button', { name: '같이 쓰는 통장' })
     .click();
   await expect(page).toHaveURL(/\/salary\/split\/new/);
+});
+
+test('‘+ 지출 추가’: 같이 쓰는 통장을 쓸 수 있으면 작은 선택 시트(지출 / 같이 쓰는 통장), 블록 버튼 하나', async ({
+  page,
+}) => {
+  const { go } = await open(page);
+  await go();
+  await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장 추가' })).toHaveCount(0);
+  await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  const sheet = page.getByRole('dialog', { name: '무엇을 추가할까요?' });
+  await expect(sheet.getByRole('button', { name: '지출' })).toBeVisible();
+  await expect(sheet.getByRole('button', { name: '같이 쓰는 통장' })).toBeVisible();
+  await axe(page);
+  await sheet.getByRole('button', { name: '같이 쓰는 통장' }).click();
+  await expect(page).toHaveURL(/\/salary\/split\/new/);
+});
+
+test('빈 상태(저축·투자도 지출도 0줄): 아래 편집하기·공유하기·추천값 숨김, 줄이 생기면 다시 보임', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  const sp = db.splits[0];
+  if (sp) sp.split_line = [];
+  await go();
+  await expect(page.getByText('무엇을 모을지 골라 보세요')).toBeVisible();
+  await expect(page.getByText('매달 나가는 지출을 골라 보세요')).toBeVisible();
+  for (const n of ['편집하기', '공유하기', '추천값으로 다시 채우기'])
+    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
+  await axe(page);
+  // 줄 하나(칩 → 금액)가 생기면 셋 다 보임
+  await page
+    .getByRole('region', { name: '지출', exact: true })
+    .getByRole('button', { name: '월세', exact: true })
+    .click();
+  const s = page.getByRole('dialog', { name: '월세 금액' });
+  await s.getByRole('textbox', { name: '월세 금액' }).fill('500000');
+  await s.getByRole('button', { name: '추가하기' }).click();
+  for (const n of ['편집하기', '공유하기', '추천값으로 다시 채우기'])
+    await expect(page.getByRole('button', { name: n })).toBeVisible();
+});
+
+test('월급 0원이어도 줄이 0개면 아래 버튼 숨김', async ({ page }) => {
+  const { db, go } = await open(page);
+  Object.assign(db.me, { monthly_income: 0 });
+  const sp = db.splits[0];
+  if (sp) sp.split_line = [];
+  await go();
+  await expect(page.getByRole('button', { name: '월급 적기' })).toBeVisible();
+  for (const n of ['편집하기', '공유하기', '추천값으로 다시 채우기'])
+    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
 });

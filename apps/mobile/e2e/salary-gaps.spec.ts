@@ -147,6 +147,10 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   // 내 탭: 직접 추가 줄 → 이름 바꾸기, 큰 금액 → S-11
   await page.getByRole('tab', { name: '찬우' }).click();
   await page.getByRole('button', { name: '+ 지출 추가' }).click();
+  await page
+    .getByRole('dialog', { name: '무엇을 추가할까요?' })
+    .getByRole('button', { name: '지출' })
+    .click();
   await page.getByRole('textbox', { name: '줄 이름' }).fill('운동');
   await page.getByRole('textbox', { name: '줄 이름' }).press('Enter');
   await page.getByRole('button', { name: '추가하기' }).click();
