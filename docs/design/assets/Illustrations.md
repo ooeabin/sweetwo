@@ -35,12 +35,13 @@
 | 11 | busy-file | 서류와 폴더 | S-18 내보내기 중 | ProcessingState `hg-busy__art` 112px 원 전체(2026-11-09 전에는 0px라 원 판만 보였음) |
 | 12 | scene-clap | 박수 치는 두 손 | P-10 합류 축하(2026-11-11 D7, 예전 P-11 자리) | 제목 위 96px 둥근 네모(`hg-auth__art hg-artslot`, 움직이는 그림 자리), 화면은 축하 배경 `hg-celebrate-bg` |
 | 13 | scene-invite | 초대장 봉투와 편지(3:4) | P-01 초대받은 첫 화면 | 제목 위 `hg-sceneart--tall` 120×160px 둥근 네모 |
-| 14 | celebrate | 폭죽 | W-02 월급 체크 끝, W-12 목표 금액 달성(2026-11-08) | DoneMark `hg-doneart` 96px 둥근 네모 |
+| 14 | celebrate | 폭죽 | ~~W-02 월급 체크 끝~~(W-02는 20번 `w02-done`), W-12 목표 금액 달성(2026-11-08) | DoneMark `hg-doneart` 96px 둥근 네모 |
 | 15 | status-newdevice(새) | 새 기기(폰과 노트북) | A-08 새 기기 로그인 확인(빈 자리 넣어 둠) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 16 | status-restore(새) | 되돌리는 화살표 | A-02 계정 삭제 취소(빈 자리 넣어 둠) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 17 | ~~scene-start~~ | ~~함께 시작~~ | 2026-11-10 없앰(O-01은 그림 없이 워드마크만) | 없음 |
 | 18 | status-wait(새) | 브라우저 창과 돌아오는 화살표 | A-03 브라우저 로그인 대기(2026-11-10, 도는 아이콘 대신) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 19 | status-invite-blocked(새) | 닫힌 초대장 봉투 | A-07 합류 불가(만료, 잘못된 코드, 10분 제한, 이미 연결, 내가 만든 코드, 이미 합류 끝남, 사용할 수 없음), 한 장(2026-11-10). 2026-11-11 합류가 끝난 초대(취소, 잡아 둔 24시간 지남)도 같은 그림 | QuestionLayout `hero` 안 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
+| 20 | w02-done(새) | 이번 달 월급 계획을 모두 지킨 두 사람의 작은 축하 | W-02 ‘다 확인 상태’(2026-11-19 사용자 결정) 날짜 알약 아래 주인공 자리, 움직이는 그림 후보(96px 이상) | **그림이 들어올 때까지 자리 없이 숨김**(`Illustration` 이름 `w02-done`, 파일이 없으면 null). 화면은 위 420px 축하 배경 |
 | 20 | status-push(새, 2026-11-11) | 종과 알림 점 | P-11 푸시 알림 허용(합류 축하 P-10 다음) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 21 | status-has-records(새, 2026-11-11) | 상자 두 개가 하나로 | A-07 6번 이미 시작한 기록이 있어요(S3-15) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |
 | 22 | status-unlinked(새, 2026-11-11) | 풀린 고리 두 개 | S-12h 연결이 해제됐어요(S3-16) | 96px 둥근 네모(`hg-auth__art hg-artslot`, `radius-lg`) |

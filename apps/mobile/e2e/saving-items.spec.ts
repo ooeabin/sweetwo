@@ -20,9 +20,13 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/salary');
-  // 목표 금액이 있는 저금 줄만 진행 “0원 / 1억 5,000만 원”
-  await expect(page.getByText('0원 / 1억 5,000만 원')).toBeVisible();
+  // 2026-11-19: W-02 줄에는 목표 금액 진행 보조 줄이 없음(종류 한 줄만). 시트 ‘저축·투자 보기’ → W-10
+  await expect(page.getByText('0원 / 1억 5,000만 원')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText('저축·투자');
   await axe(page);
+  await page.locator('.hg-transfer__open', { hasText: '내 집 마련' }).click();
+  await page.getByRole('button', { name: '저축·투자 보기' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 
   await page.goto('/salary/items/goal-h');
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
@@ -339,7 +343,7 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   });
   db.goalStory = { months: 4, together: 0 };
   await page.goto('/salary');
-  await page.getByRole('checkbox', { name: /가전 바꾸기/ }).click();
+  await page.getByRole('button', { name: '가전 바꾸기 확인', exact: true }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-tv\/achieved(\?from=checklist)?$/);
   await expect(page.getByText('4개월 만에 모았어요')).toBeVisible();
   // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않음(2026-11-09)
@@ -368,11 +372,12 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   // 목표 금액 95만: 이번 달 줄을 체크하면 달성
   Object.assign(home, { target_amount: 950_000, deadline: null });
   await page.goto('/salary');
-  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await page.getByRole('button', { name: '내 집 마련 확인', exact: true }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved(\?from=checklist)?$/);
   expect(home.status).toBe('achieved');
   await page.goto('/salary');
-  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await page.getByRole('button', { name: '내 집 마련 완료, 고치기', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '체크 풀기' }).click();
   await expect.poll(() => home.status).toBe('active');
   expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
   await page.goto('/salary/items/goal-h');
@@ -380,7 +385,7 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   await expect(page.getByRole('region', { name: '모은 금액' }).getByText('달성')).toHaveCount(0);
   // 다시 체크하면 다시 축하
   await page.goto('/salary');
-  await page.getByRole('checkbox', { name: /내 집 마련/ }).click();
+  await page.getByRole('button', { name: '내 집 마련 확인', exact: true }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved(\?from=checklist)?$/);
 });
 

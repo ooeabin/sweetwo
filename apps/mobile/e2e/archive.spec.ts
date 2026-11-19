@@ -86,8 +86,8 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
 
   // 줄 → W-02 지난 달 보기(읽기 전용), ‹ → 모아보기
   await page.locator('.hg-list .hg-listrow').nth(1).click();
-  await expect(page.getByRole('heading', { name: '7월 24일 월급' })).toBeVisible();
-  for (const c of await page.getByRole('checkbox').all()) await expect(c).toBeDisabled();
+  await expect(page.locator('.hg-datepill')).toHaveText('7월 24일 월급');
+  for (const c of await page.locator('.hg-transfer__action').all()) await expect(c).toBeDisabled();
   await page.getByRole('button', { name: '뒤로' }).locator('visible=true').first().click();
   await expect(page).toHaveURL(/\/salary\/archive/);
   await expect(page.locator('.hg-list .hg-listrow')).toHaveCount(3);

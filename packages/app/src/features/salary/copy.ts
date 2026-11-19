@@ -364,9 +364,7 @@ export const copy = {
   autoDone: '자동 확인',
   autoLabel: (name: string, day: string) => `${name}, 자동, ${day}에 나가요`, // 화면 읽기
   autoDoneLabel: (name: string) => `${name}, 자동으로 확인했어요`,
-  autoGroup: (n: number) => `자동으로 나가는 것 ${n}개`,
   autoGroupHelp: '안 나간 게 있으면 눌러서 바꿔 주세요',
-  manualGroup: (n: number) => `확인할 것 ${n}개`,
   confirmAll: '모두 계획대로 됐어요', // W-02 4번(버튼 말투 예외 Q2)
   lateHelp: '다음 월급날 전까지 언제든 확인할 수 있어요', // W-02 8번
   lateTitle: (start: string) => `${formatMonthDay(start)} 월급`,
@@ -401,9 +399,6 @@ export const copy = {
   chipAll: '전체',
   chipLeft: '남음',
   chipDone: '완료',
-  topLabel: (name: string, period: string, sent: string, planned: string) =>
-    `${name}, ${period}, 계획한 ${planned} 중 ${sent} 확인했어요`, // 화면 읽기 전용(보이는 문장은 없앰)
-  stepLabel: (total: number, done: number) => `${total}개 중 ${done}개 확인`,
   dayLabel: (n: string) => `월급날까지 ${n}`,
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',
@@ -418,8 +413,6 @@ export const copy = {
   // 애칭이 없을 때 상대 이름(CLAUDE.md 문구 ‘없으면 파트너’)
   partnerFallback: '파트너',
   sharedAccountName: '같이 쓰는 통장',
-  /** W-02 한 사람 관리형 관리하지 않는 쪽: 관리하는 사람이 확인하는 손 줄 묶음 머리(보기만) [확인 필요] 2026-11-13 UX B H2 */
-  managerChecks: (name: string) => (name ? `${name}님이 확인해요` : '파트너가 확인해요'),
   addSharedAccount: '+ 같이 쓰는 통장 추가',
   allowanceNotify: (name: string) => (name ? `${name}님께 알려 드려요` : '파트너에게 알려 드려요'),
   noPaydayHead: '수입이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)

@@ -55,7 +55,7 @@ async function open(page: Page, now = NOW, prep?: (db: MemDb) => void) {
   return { db, rt };
 }
 
-test('합쳐서: 상대가 마지막 줄을 끝내도 이동 없음, 막대 아래 한 줄만 바뀜(Toast 없음), 바뀐 줄은 2초 강조', async ({
+test('합쳐서: 상대가 줄을 끝내면 바로 바뀌고 2초 강조, 마지막 줄을 끝내도 이동 없이 다 확인 상태만 바뀜(Toast 없음)', async ({
   page,
 }) => {
   const { db, rt } = await open(page, NOW, joint);
@@ -63,15 +63,17 @@ test('합쳐서: 상대가 마지막 줄을 끝내도 이동 없음, 막대 아�
     .slice(0, 4)
     .forEach((l) => Object.assign(l, { state: 'checked', checked_by: chanwoo.id }));
   await page.goto('/salary');
-  await expect(page.locator('.hg-checkgroup').first()).toBeVisible();
+  await expect(page.locator('.hg-transfer').first()).toBeVisible();
   await expect.poll(() => rt.subscribed('pay_check_line')).toBeGreaterThan(0);
   const last = linesOf(db)[4];
   byYebin(last);
   rt.emit('pay_check_line', 'UPDATE', { id: last?.id, space_id: 'space-1', state: 'checked' });
-  await expect(page.locator('.hg-planbar__title')).toHaveText('9월 25일 월급, 계획대로 됐어요');
-  await expect(page.locator('.hg-transfer.is-changed')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toBeVisible();
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.locator('.hg-toast')).toHaveCount(0);
+  // 다 확인 상태에서는 줄이 접혀 있고, 펼치면 바뀐 줄이 잠깐 강조됨
+  await page.getByRole('button', { name: '5개 모두 확인했어요' }).click();
+  await expect(page.locator('.hg-transfer.is-changed')).toHaveCount(1);
   await expect(page.locator('.hg-transfer.is-changed')).toHaveCount(0, { timeout: 4000 });
 });
 
@@ -83,7 +85,7 @@ test('달성 되돌린 뒤 같은 화면에서 다시 체크하면 다시 W-12(�
   if (!home) throw new Error('seed');
   Object.assign(home, { target_amount: 950_000, deadline: null });
   await page.goto('/salary');
-  const box = page.getByRole('checkbox', { name: /내 집 마련/ });
+  const box = page.getByRole('button', { name: '내 집 마련 확인', exact: true });
   await box.click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved\?from=checklist$/);
   // 축하 배경(2026-11-12 D5)
@@ -91,9 +93,10 @@ test('달성 되돌린 뒤 같은 화면에서 다시 체크하면 다시 W-12(�
   await page.goBack();
   await expect(page).toHaveURL(/\/salary$/);
   // 체크를 풀어 목표 금액 아래로 → 모으는 중(배지도 바로 사라짐)
-  await box.click();
+  await page.getByRole('button', { name: '내 집 마련 완료, 고치기', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '체크 풀기' }).click();
   await expect.poll(() => home.status).toBe('active');
-  await expect(box).toHaveAttribute('aria-checked', 'false');
+  await expect(box).toBeVisible();
   // 새로 고치지 않고 다시 체크 → 다시 축하
   await box.click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved\?from=checklist$/);
@@ -117,14 +120,14 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   const { db } = await open(page);
   await page.goto('/salary');
   const living = () => linesOf(db).find((l) => l.kind === 'living');
-  await page.getByRole('button', { name: /^생활비/ }).click();
+  await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   await expect(page.getByRole('heading', { name: '생활비, 이번 달은 얼마였어요?' })).toBeVisible();
   // 하드웨어(브라우저) 뒤로 = W-02
   await page.goBack();
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(page).toHaveURL(/\/salary$/);
-  await page.getByRole('button', { name: /^생활비/ }).click();
+  await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   const input = page.getByRole('textbox', { name: '얼마를 보냈어요?' });
   await input.fill('');
@@ -133,23 +136,20 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   await expect(page.getByText('계획보다 18만 원 적어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   const toast = page.locator('.hg-toast');
   await expect(toast).toContainText('확인했어요');
   await expect.poll(() => living()?.actual).toBe(700_000);
   await toast.getByRole('button', { name: '되돌리기' }).click();
   await expect.poll(() => living()?.state).toBe('wait');
   // 0원 = 못 함 + Toast
-  await page.getByRole('button', { name: /^청약/ }).click();
+  await page.locator('.hg-transfer__open', { hasText: '청약' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   await page.getByRole('textbox', { name: '얼마를 보냈어요?' }).fill('0');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.locator('.hg-toast')).toContainText('청약, 이번 달은 건너뛰었어요');
   await expect.poll(() => linesOf(db)[0]?.state).toBe('skipped');
-  await expect(page.getByRole('checkbox', { name: '청약 건너뜀' })).toHaveAttribute(
-    'aria-checked',
-    'false',
-  );
+  await expect(page.getByRole('button', { name: '청약 건너뜀', exact: true })).toHaveText('건너뜀');
 });
 
 test('W-05는 없앰(2026-11-15): 옛 알림 링크(/salary/review)는 기간 안이든 밖이든 월급 탭 W-02로', async ({
@@ -160,7 +160,7 @@ test('W-05는 없앰(2026-11-15): 옛 알림 링크(/salary/review)는 기간 �
   await expect(page).toHaveURL(/\/salary$/);
   await page.goto('/salary/review?checklist=checklist-1');
   await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('button', { name: /^내 집 마련/ })).toBeVisible();
+  await expect(page.locator('.hg-transfer__open', { hasText: '내 집 마련' })).toBeVisible();
 });
 
 test('W-02 체크리스트에는 ‘추가’가 없음(2026-11-18, 추가는 W-01에서만, 예전 S6-16)', async ({
@@ -168,6 +168,6 @@ test('W-02 체크리스트에는 ‘추가’가 없음(2026-11-18, 추가는 W-
 }) => {
   await open(page);
   await page.goto('/salary');
-  await expect(page.locator('.hg-checkgroup').first()).toBeVisible();
+  await expect(page.locator('.hg-transfer').first()).toBeVisible();
   await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
 });

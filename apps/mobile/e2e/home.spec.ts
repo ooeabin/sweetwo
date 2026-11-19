@@ -103,8 +103,8 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   // 이번 달 월급 체크 → W-02 “모두 계획대로 됐어요” 한 번(confirm_payday)
   await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '확인할 것 5개' })).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
+  await expect(page.getByText('5개 중 0개 확인')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
   await expect(page.locator('.hg-toast')).toContainText('9월 25일 월급, 계획대로 됐어요');
@@ -250,7 +250,7 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   await axe(page);
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');
-  await expect(page.getByText('10월 23일 첫 월급날에 확인해요')).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('10월 23일 월급'); // 2026-11-19 회색 한 줄 문장은 날짜 알약으로
   await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0); // 2026-11-18 머리 링크 없앰
   await page.goto('/');
   await (await homeTask(page, '자동으로 나가는 걸 골라 주세요')).click();
@@ -295,15 +295,19 @@ test('자동 줄뿐인 사람: 월급 상자 첫 줄 “자동으로 나가요�
   await axe(page);
   await monthLine(page).click();
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
-  const fold = page.getByRole('button', { name: '자동으로 나가는 것 5개' });
-  await expect(fold).toHaveAttribute('aria-expanded', 'false');
-  await fold.click();
-  await expect(page.getByText('안 나간 게 있으면 눌러서 바꿔 주세요')).toBeVisible();
-  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText('자동 10일');
-  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText('자동 확인');
+  // 자동 줄뿐이면 다 확인 상태를 만들지 않고 일반 목록(칩 + 줄), 자동 줄은 보조 줄 “자동으로 나가요”
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText(
+    '자동으로 나가요',
+  );
+  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText(
+    '자동으로 나가요',
+  );
+  await expect(
+    page.getByRole('button', { name: '고정지출 완료, 고치기', exact: true }),
+  ).toBeVisible();
   await axe(page);
   // 자동 확인된 줄도 시트에서 건너뜀
-  await page.getByRole('button', { name: /^고정지출/ }).click();
+  await page.locator('.hg-transfer__open', { hasText: '고정지출' }).click();
   await page.getByRole('button', { name: '이번 달은 건너뛸게요' }).click();
   await expect(page.locator('.hg-toast')).toContainText('고정지출, 이번 달은 건너뛰었어요');
   expect(lines(db).find((l) => l.kind === 'fixed')?.state).toBe('skipped');
@@ -353,7 +357,7 @@ test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음�
   await expect(monthLine(page)).toContainText('지난달 2개 남음');
   expect(await homeTaskTexts(page)).toContain('10월 23일 월급에서 확인할 게 5개 남았어요');
   await page.goto('/salary?cycle=last');
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(page.getByText('다음 월급날 전까지 언제든 확인할 수 있어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
@@ -446,9 +450,12 @@ test('월급날 확인 목록 기간(v2.2, W-05 화면은 2026-11-15 없앰): �
   expect(await homeTaskTexts(page)).toContain('9월 25일 월급에서 확인할 게 4개 남았어요');
   await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toHaveCount(0);
+  // 2026-11-19 한 목록: 자동 줄도 같은 목록에(보조 줄 “자동으로 나가요”), 큰 숫자·보조 줄은 남은 손 줄과 별개로 전체 줄 수
+  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText(
+    '자동으로 나가요',
+  );
   await axe(page);
-  await page.getByRole('button', { name: /^청약/ }).click();
+  await page.locator('.hg-transfer__open', { hasText: '청약' }).click();
   await page.getByRole('button', { name: '이번 달은 건너뛸게요' }).click();
   await expect(page.locator('.hg-toast')).toContainText('청약, 이번 달은 건너뛰었어요');
   await expect.poll(() => lines(db).find((l) => l.goal_id === 'goal-e')?.state).toBe('skipped');
@@ -844,9 +851,11 @@ test('한 사람 관리형(찬우 관리): 예빈 홈은 자동 문장, W-02는 
   await page.goto('/');
   await expect(monthLine(page)).toContainText('자동으로 정해져요');
   await page.goto('/salary');
-  const group = page.getByRole('region', { name: '찬우님이 확인해요' });
-  await expect(group).toBeVisible();
-  await expect(group.getByRole('checkbox')).toHaveCount(0);
+  // 2026-11-19 한 목록: 관리하는 사람(찬우)의 줄은 같은 목록에 보기만(버튼 비활성)
+  await expect(page.getByRole('region', { name: '찬우님이 확인해요' })).toHaveCount(0);
+  await expect(
+    page.locator('.hg-transfer', { hasText: '고정지출' }).locator('.hg-transfer__action'),
+  ).toBeDisabled();
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await axe(page);
 });

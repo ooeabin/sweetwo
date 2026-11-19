@@ -74,7 +74,7 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안내', async ({ page }) => {
+test('W-02 지난 달 보기(날짜 알약 시트)와 상대가 월급 계획을 바꾼 안내', async ({ page }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -97,7 +97,7 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
   });
   Object.assign(db.splits[0] ?? {}, { updated_by: 'yebin', updated_at: '2026-10-01T03:00:00Z' });
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(
     page.getByText('예빈님이 월급 계획을 바꿔서 확인 안 한 줄을 다시 계산했어요'),
   ).toBeVisible();
@@ -108,17 +108,17 @@ test('W-02 지난 달 보기(‹ ›)와 상대가 월급 계획을 바꾼 안�
     .getByRole('button', { name: '닫기' })
     .click();
   await expect(page.getByText('예빈님이 월급 계획을 바꿔서')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '다음 달 보기' })).toHaveCount(0); // 이번 달이면 › 숨김(2026-11-18)
-  await page.getByRole('button', { name: '지난 달 보기' }).click();
-  await expect(page.getByRole('heading', { name: '8월 25일 월급' })).toBeVisible();
-  // 지난 달은 막대 아래 끝남 한 줄 + 줄은 읽기 전용(2026-11-12 결과 카드 대신: 체크 칸은 누를 수 없고 시트 없음)
-  await expect(page.getByText('08.25 ~ 09.24', { exact: true })).toBeVisible();
-  await expect(page.locator('.hg-planbar__title')).toContainText('8월 25일 월급,');
+  // 알약 시트로 지난 달(2026-11-19 ‹ › 대신): 읽기 전용, 줄 시트 없음
+  await page.getByRole('button', { name: '월급날 고르기' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '8월 25일 월급' }).click();
+  await expect(page.locator('.hg-datepill')).toHaveText('8월 25일 월급');
+  await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toHaveCount(0);
   await expect(page.locator('.hg-transfer').first()).toBeVisible();
   await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
-  for (const c of await page.getByRole('checkbox').all()) await expect(c).toBeDisabled();
-  await page.getByRole('button', { name: '다음 달 보기' }).click();
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  for (const c of await page.locator('.hg-transfer__action').all()) await expect(c).toBeDisabled();
+  await page.getByRole('button', { name: '월급날 고르기' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '9월 25일 월급' }).click();
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
 });
 
 test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 편집·추천값·추가 없음 / 내 탭은 고침, 큰 금액 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
@@ -187,10 +187,12 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   await page.goto('/salary?who=yebin');
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
   await expect(page.getByRole('checkbox')).toHaveCount(0);
-  const done = page.locator('.hg-transfer.is-view.is-done').first();
+  const done = page.locator('.hg-transfer.is-done').first();
   await expect(done).toBeVisible();
   await expect(done.locator('.hg-transfer__label')).toHaveCSS('text-decoration-line', 'none');
-  await expect(done.locator('.hg-transfer__state .hg-ico--check')).toHaveCount(1);
+  // 보기만: 상태 버튼은 비활성(완료 줄은 “완료”)
+  await expect(done.locator('.hg-transfer__action')).toBeDisabled();
+  await expect(done.locator('.hg-transfer__action')).toHaveText('완료');
   await axe(page);
   // 파트너 탭에는 추가 줄이 없음(W-02에는 내 탭에도 없음, 2026-11-18)
   await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
