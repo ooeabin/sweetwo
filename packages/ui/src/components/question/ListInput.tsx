@@ -1,7 +1,7 @@
 import { formatManWon, MAX_WON } from '@sweetwo/core';
 import { cx } from '../cx';
 import { IconButton } from '../IconButton';
-import { Icon } from '../Icon';
+import { AddText } from '../AddText';
 
 // Q6 목록 입력(docs/spec/12-question-pattern.md Q6): 이름 + 금액 + 월. 항목 한도 10개, 완성 행만 합계.
 export interface ListRowValue {
@@ -102,8 +102,7 @@ export function ListInput({
           if (!rows.some(isBlank)) onChange([...rows, emptyRow()]);
         }}
       >
-        <Icon name="plus" size={16} />
-        항목 추가
+        <AddText>항목 추가</AddText>
       </button>
       {rows.length >= limit && <span className="hg-help">{limit}개까지 넣을 수 있어요</span>}
       <p className="hg-listin__total" aria-live="polite">

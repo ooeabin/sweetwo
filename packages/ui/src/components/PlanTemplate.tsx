@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { AddText } from './AddText';
 import { Icon } from './Icon';
 
 // W-01 월급 계획 템플릿 틀(docs/design/components/PlanSummary.md, 2026-11-19 사용자 확정 시안).
@@ -223,8 +224,7 @@ export function PlanAdd({
       aria-expanded={expanded}
       onClick={onClick}
     >
-      <Icon name="plus" size={20} />
-      {children.replace(/^\+\s*/, '')}
+      <AddText>{children}</AddText>
     </button>
   );
 }

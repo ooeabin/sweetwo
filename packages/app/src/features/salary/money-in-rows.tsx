@@ -1,6 +1,6 @@
 import { fetchMoneyIns, qk } from '@sweetwo/api';
 import { formatDot2, formatMonthDay } from '@sweetwo/core';
-import { AddRow, Button, Icon, ListRow, SectionHeader } from '@sweetwo/ui';
+import { AddRow, AddText, Button, ListRow, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { money } from '../../shared/mask';
 import { speakMasked } from '../../shared/masked-text';
@@ -124,8 +124,7 @@ export function IncomeCard({
       )}
       {onAdd && (
         <Button variant="secondary" block className="hg-incomecard__add" onClick={onAdd}>
-          <Icon name="plus" size={20} />
-          {copy.incomeAddButton}
+          <AddText>{copy.incomeAddButton}</AddText>
         </Button>
       )}
     </section>

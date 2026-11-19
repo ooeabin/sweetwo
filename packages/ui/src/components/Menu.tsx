@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { AddText } from './AddText';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
 
@@ -97,11 +98,12 @@ export function Menu({
         <button
           type="button"
           className="hg-btn hg-btn--secondary"
+          aria-label={/^\+\s/.test(button) ? button : undefined}
           aria-haspopup="menu"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
         >
-          {button}
+          {/^\+\s/.test(button) ? <AddText>{button}</AddText> : button}
         </button>
       ) : (
         <IconButton

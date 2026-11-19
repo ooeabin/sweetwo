@@ -11,6 +11,7 @@ import {
 } from '@sweetwo/core';
 import {
   AddRow,
+  AddText,
   Badge,
   Button,
   Chip,
@@ -234,8 +235,12 @@ export function F02Items() {
         <EmptyState
           title={side === 'debt' ? copy.noDebt : copy.empty}
           action={
-            <Button variant="secondary" onClick={() => nav(`/assets/new?side=${side}`)}>
-              {side === 'debt' ? copy.addDebt : copy.emptyAdd}
+            <Button
+              variant="secondary"
+              aria-label={side === 'debt' ? copy.addDebt : copy.emptyAdd}
+              onClick={() => nav(`/assets/new?side=${side}`)}
+            >
+              <AddText>{side === 'debt' ? copy.addDebt : copy.emptyAdd}</AddText>
             </Button>
           }
         />
