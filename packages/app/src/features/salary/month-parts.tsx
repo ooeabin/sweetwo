@@ -1,5 +1,7 @@
 import type { PayChecklist, PayCheckLine } from '@sweetwo/api';
 import {
+  checkCells,
+  checkHeadline,
   checklistFinish,
   confirmFinish,
   formatMonthDay,
@@ -7,8 +9,8 @@ import {
   monthProgress,
   type MonthProgress,
 } from '@sweetwo/core';
-import { PlanBar } from '@sweetwo/ui';
-import { useState } from 'react';
+import { SectionHeader, StepBar } from '@sweetwo/ui';
+import { useState, type ReactNode } from 'react';
 import { track } from '../../shared/analytics';
 import { money } from '../../shared/mask';
 import { toast } from '../../shared/toast';
@@ -45,9 +47,10 @@ export type MonthShare = {
 };
 
 /**
- * W-02 머리 진행 막대. 화면 읽기는 막대 이름 “5개 중 2개 완료”(다 하면 “모두 확인했어요”) + 아래 한 줄 “계획한 … 중 … 확인했어요”.
- * 다 끝난 달(모든 줄이 체크 또는 ‘못 함’, 지난 달 포함, 2026-11-12 W-02 끝 화면 대신): 막대 아래 굵은 한 줄
- * “10월 25일 월급, 계획대로 됐어요”(‘못 함’이 섞이면 “…마쳤어요”) + 체크한 금액, 오른쪽 ‘공유하기’(달 결과 이미지)
+ * W-02 상단 묶음(2026-11-19, 카드 없이 바탕 위): 작은 회색 줄 “11월 25일 월급” + 오른쪽 ‹ ›(`nav`), 큰 숫자 한 줄
+ * (월급날 전 “D-6”, 확인 중 “3개 남음”, 다 확인 “확인 끝”, core `checkHeadline`), 칸 나눔 진행 막대(`StepBar`, core `checkCells`).
+ * 월급날 전(미리 보기, `preview`)은 막대 없음. 없앤 문장(“계획한 … 중 … 확인했어요”, 기간, 날짜 제목)은 화면 읽기 이름에만 남김.
+ * 다 끝났으면(`확인 끝`) 큰 숫자 줄 오른쪽에 ‘공유하기’(달 결과 이미지) 글자 버튼
  */
 export function MonthBar({
   list,
@@ -55,20 +58,30 @@ export function MonthBar({
   masked,
   share,
   shownStart,
+  headlineLines,
+  nav,
   lateOpen = 0,
+  period,
 }: {
   list: PayChecklist;
   income: number;
   masked: boolean;
-  /** 다 끝난 달 한 줄의 ‘공유하기’ 재료 */
+  /** ‘공유하기’ 재료 */
   share?: MonthShare;
   /** 보여 줄 월급날(앞당기기, useShownPayday). 없으면 사이클 첫날 */
   shownStart?: string;
-  /** 지금 늦게 확인할 수 있는 손 줄 수. 있으면 “확인을 마쳤어요”를 띄우지 않음(2026-11-13 UX B M2) */
+  /** 큰 숫자를 셀 줄(한 사람 관리형이면 내가 맡은 줄만). 없으면 모든 줄 */
+  headlineLines?: PayCheckLine[];
+  /** 오른쪽 ‹ › */
+  nav?: ReactNode;
+  /** 지금 늦게 확인할 수 있는 손 줄 수. 있으면 공유를 띄우지 않음(2026-11-13 UX B M2) */
   lateOpen?: number;
+  /** 화면 읽기용 기간 “09.25 ~ 10.24” */
+  period: string;
 }) {
   const p = monthProgress({ income, lines: list.pay_check_line });
-  // 확인 끝(07 7장, 2026-11-13): 손 줄이 있으면 손 줄만, 자동 줄뿐이면 모두 확인됐을 때
+  const head = checkHeadline({ lines: headlineLines ?? list.pay_check_line });
+  const cells = checkCells(list.pay_check_line);
   const finish =
     lateOpen > 0
       ? null
@@ -76,7 +89,6 @@ export function MonthBar({
         ? confirmFinish(list.pay_check_line)
         : checklistFinish(list.pay_check_line);
   const [sharing, setSharing] = useState(false);
-  const caption = copy.sentOfPlan(money(p.sent, masked), money(p.planned, masked));
   const run = async () => {
     if (sharing || !share) return;
     setSharing(true);
@@ -95,29 +107,57 @@ export function MonthBar({
       setSharing(false);
     }
   };
+  const name = copy.cycleOf(shownStart ?? list.cycle_start);
   return (
-    <PlanBar
-      flat
-      progress
-      label={p.complete ? copy.allDone : copy.progress(p.total, p.done)}
-      parts={[
-        { kind: 'check', percent: 100, fill: p.total ? Math.floor((p.done * 100) / p.total) : 0 },
-      ]}
-      title={finish ? copy.monthFinished(shownStart ?? list.cycle_start, finish) : undefined}
-      caption={caption}
-      action={
-        finish && share ? (
-          <button
-            type="button"
-            className="hg-btn hg-btn--link"
-            aria-busy={sharing || undefined}
-            onClick={() => void run()}
-          >
-            {copy.share}
-          </button>
-        ) : undefined
-      }
-    />
+    <section
+      className="hg-stack"
+      style={{ gap: 'var(--space-2)' }}
+      aria-label={copy.topLabel(name, period, money(p.sent, masked), money(p.planned, masked))}
+    >
+      <div className="hg-row" style={{ flexWrap: 'nowrap', justifyContent: 'space-between' }}>
+        <p className="hg-card__meta" style={{ margin: 0 }}>
+          {name}
+        </p>
+        {nav}
+      </div>
+      <SectionHeader
+        title={head.text}
+        action={
+          head.kind === 'done' && finish && share ? (
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              aria-busy={sharing || undefined}
+              onClick={() => void run()}
+            >
+              {copy.share}
+            </button>
+          ) : undefined
+        }
+      />
+      <StepBar
+        total={cells.total}
+        filled={cells.filled}
+        segmented={cells.segmented}
+        label={copy.stepLabel(cells.total, cells.filled)}
+      />
+    </section>
+  );
+}
+
+/** 월급날 전(미리 보기) 상단: 회색 줄 + “D-6”. 막대 없음 */
+export function PreviewTop({ name, headline }: { name: string; headline: string }) {
+  return (
+    <section
+      className="hg-stack"
+      style={{ gap: 'var(--space-2)' }}
+      aria-label={`${name}, ${copy.dayLabel(headline)}`}
+    >
+      <p className="hg-card__meta" style={{ margin: 0 }}>
+        {name}
+      </p>
+      <SectionHeader title={headline} />
+    </section>
   );
 }
 

@@ -75,7 +75,6 @@ export const copy = {
   // 2026-11-18 화면 이름 = 서랍 줄 이름(구간 탭 ‘이번 달 / 계획’ 없앰) [확인 필요]
   monthTitle: '이번 달 월급 체크',
   planTitle: '월급 계획 템플릿',
-  monthLinkTo: '이번 달 월급 체크', // W-01 머리 이동 링크(‘›’는 아이콘)
   everyMonth: (day: string) => `매달 ${day}`,
   jointPaydays: (parts: string[]) => parts.join(', '),
   personPayday: (name: string, day: string) => `${name} ${day}`,
@@ -378,6 +377,17 @@ export const copy = {
   previewAuto: '자동으로 나가요',
   previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
   moneyInGo: '수입 적기',
+  // W-02 새 구조(2026-11-19) [모두 확인 필요]
+  incomeLine: '수입',
+  incomeAdd: '적기', // 줄 끝 “+ 적기”
+  incomeAddLabel: '수입 적기', // 화면 읽기
+  incomeSumLabel: (sum: string) => `수입 ${sum}, 수입 기록 보기`,
+  autoTag: '자동',
+  skippedPill: '건너뜀',
+  topLabel: (name: string, period: string, sent: string, planned: string) =>
+    `${name}, ${period}, 계획한 ${planned} 중 ${sent} 확인했어요`, // 화면 읽기 전용(보이는 문장은 없앰)
+  stepLabel: (total: number, done: number) => `${total}개 중 ${done}개 확인`,
+  dayLabel: (n: string) => `월급날까지 ${n}`,
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',
   autoPay: '은행에서 자동으로 보내요',

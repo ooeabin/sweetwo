@@ -32,6 +32,8 @@ export function TransferRow({
   busy = false,
   changed = false,
   auto,
+  flow = false,
+  amountNote,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -58,6 +60,10 @@ export function TransferRow({
   changed?: boolean;
   /** 자동 줄 알약(2026-11-13 ListRow ‘자동 표시’, hg-autopill): “자동 26일”, “자동 확인”. 이름 아래 보조 줄 자리 */
   auto?: string;
+  /** W-02 한 목록(2026-11-19): 취소선 없이 확인한 줄만 흐리게(`hg-transfer--flow`) */
+  flow?: boolean;
+  /** 금액 왼쪽 작은 표시(W-02 다른 금액의 원래 금액 취소선, “건너뜀” 알약) */
+  amountNote?: ReactNode;
 }) {
   // 그림이 없는 종류 자리는 그리지 않고 칸도 비우지 않음(2026-11-15 3차 검토)
   const shown = shownLead(lead);
@@ -80,7 +86,10 @@ export function TransferRow({
           </span>
         )}
       </span>
-      <span className="hg-transfer__amount">{amount}</span>
+      <span className="hg-transfer__amount">
+        {amountNote}
+        {amount}
+      </span>
     </>
   );
   return (
@@ -90,6 +99,7 @@ export function TransferRow({
         done && 'is-done',
         viewOnly && 'is-view',
         changed && 'is-changed',
+        flow && 'hg-transfer--flow',
         !!shown && 'hg-transfer--lead',
       )}
     >

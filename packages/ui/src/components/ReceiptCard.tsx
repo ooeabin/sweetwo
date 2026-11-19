@@ -148,6 +148,43 @@ export function PlanBar({
   );
 }
 
+/**
+ * 칸 나눔 진행 막대 StepBar(W-02 이번 달 월급 체크, 2026-11-19): 줄 수만큼 칸(`hg-receipt__seg--check`, 칸 사이 3px, 바탕 bar-track),
+ * 확인한 칸(`is-on`)은 accent-app. `segmented`가 아니면(줄 12개 초과) 이어진 막대 하나(filled ÷ total). 그래픽이라 뜻은 label로 전함
+ */
+export function StepBar({
+  total,
+  filled,
+  segmented,
+  label,
+}: {
+  total: number;
+  filled: number;
+  segmented: boolean;
+  label: string;
+}) {
+  if (total <= 0) return null;
+  return (
+    <div className="hg-receipt__bar hg-stepbar" role="img" aria-label={label}>
+      {segmented ? (
+        Array.from({ length: total }, (_, i) => (
+          <i
+            key={i}
+            className={cx('hg-receipt__seg hg-receipt__seg--check', i < filled && 'is-on')}
+          />
+        ))
+      ) : (
+        <i className="hg-receipt__seg hg-receipt__seg--check" style={{ flexGrow: 1 }}>
+          <b
+            className="hg-receipt__fill"
+            style={{ width: `${Math.floor((filled * 100) / total)}%` }}
+          />
+        </i>
+      )}
+    </div>
+  );
+}
+
 /** 묶음: 제목(15px 600) + 오른쪽 stone 소계, 아래 줄들과 끝 글자 버튼 */
 export function ReceiptSection({
   title,

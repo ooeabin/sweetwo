@@ -1,6 +1,6 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatDot2, kstDateOf, todayKst } from '@sweetwo/core';
-import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
+import { AutoPill, BottomSheet, Button, TransferRow } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { quietly, toast } from '../../shared/toast';
@@ -103,6 +103,7 @@ export function CheckLine({
   entry = 'w02',
   changed = false,
   auto,
+  flow = false,
 }: {
   line: PayCheckLine;
   name: string;
@@ -130,6 +131,8 @@ export function CheckLine({
   changed?: boolean;
   /** 자동 줄 알약 글자(2026-11-13 W-02 2번 “자동 26일”, “자동 확인”) */
   auto?: string;
+  /** W-02 새 한 목록(2026-11-19): 보조 줄 없이 이름(+ 자동 알약) + 금액 + 체크 원. 건너뜀·다른 금액은 금액 왼쪽에 작게 */
+  flow?: boolean;
 }) {
   const { masked } = useMask();
   const check = useCheck(entry);
@@ -180,7 +183,13 @@ export function CheckLine({
     )
   ) : undefined;
   // ‘못 함’은 목표 금액 진행 글자보다 먼저(체크 안 한 줄처럼 보이므로 이유를 보여 줌)
-  const meta = skipped ? checkMeta : (progress ?? checkMeta);
+  const meta = flow ? undefined : skipped ? checkMeta : (progress ?? checkMeta);
+  const changedAmount = done && line.actual != null && line.actual !== line.planned;
+  const amountNote = !flow ? undefined : skipped ? (
+    <span className="hg-autopill">{copy.skippedPill}</span>
+  ) : changedAmount ? (
+    <span className="hg-transfer__was">{money(line.planned, masked)}</span>
+  ) : undefined;
   // 자동 줄은 자동 확인된 뒤에도 시트에서 건너뜀·다른 금액으로 바꿈(20 W-02 5번, 2026-11-13)
   const open = (!done || !!line.auto) && !readOnly && !viewOnly;
   const canSheet = (open && (onOther || onSkip)) || !!onItem;
@@ -208,7 +217,10 @@ export function CheckLine({
         meta={meta}
         lead={lead}
         changed={changed}
-        auto={auto}
+        auto={flow ? undefined : auto}
+        badge={flow && line.auto ? <AutoPill text={copy.autoTag} /> : undefined}
+        flow={flow}
+        amountNote={amountNote}
         onOpen={canSheet ? () => setSheet(true) : undefined}
       />
       {sheet && (

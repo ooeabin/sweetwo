@@ -2640,3 +2640,12 @@ button.hg-receipt__main { cursor: pointer; }
    눌러서 고치는 큰 금액 ‘내 월급 고치기’)은 보이는 크기는 그대로 두고 보이지 않는 44px 칸을 덧댐. 어드민은 제 규칙 그대로 */
 :where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *) { position: relative; }
 :where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *)::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+/* W-02 이번 달 월급 체크 새 구조(2026-11-19): 칸 막대 StepBar(확인한 칸 = accent-app), 한 목록(TransferRow flow, 끝낸 줄 흐리게·취소선 없음), 아래 고정 주 버튼 */
+.hg-stepbar .hg-receipt__seg--check { min-width: 0; flex: 1 1 0; }
+.hg-receipt__seg--check.is-on { background: var(--accent-app); }
+.hg-transfer--flow.is-done .hg-transfer__label { text-decoration: none; }
+.hg-transfer--flow.is-done { opacity: 0.6; }
+.hg-transfer__amount .hg-autopill, .hg-transfer__amount .hg-transfer__was { margin-right: var(--space-2); }
+.hg-transfer__was { color: var(--stone); font-weight: 500; text-decoration: line-through; }
+.hg-flowdiv { height: 0; margin: var(--space-2) 0; border-top: 1px solid var(--hairline-soft); }
+.hg-stickybar { position: sticky; bottom: 0; z-index: 1; padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
