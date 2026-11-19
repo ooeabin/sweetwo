@@ -14,10 +14,17 @@ export interface CheckLineLike extends ConfirmLine {
 export const plannedSum = (lines: readonly CheckLineLike[]) =>
   lines.reduce((s, l) => s + (l.planned ?? 0), 0);
 
-/** 칩 숫자: 전체 / 남음(대기) / 완료(체크 + 건너뜀) */
+/** 칩 숫자: 전체 / 남음(대기) / 완료(체크 + 건너뜀). checked·skipped는 글자용(건너뜀은 ‘확인’ 개수에 안 넣음, 2026-11-19) */
 export function chipCounts(lines: readonly ConfirmLine[]) {
   const left = lines.filter((l) => l.state === 'wait').length;
-  return { all: lines.length, left, done: lines.length - left };
+  const skipped = lines.filter((l) => l.state === 'skipped').length;
+  return {
+    all: lines.length,
+    left,
+    done: lines.length - left,
+    skipped,
+    checked: lines.length - left - skipped,
+  };
 }
 
 export type CheckChip = 'all' | 'left' | 'done';
@@ -42,7 +49,7 @@ export function splitCheckLines<T extends CheckLineLike>(
 
 /**
  * 보조 한 줄(큰 금액 아래): 월급날 전은 “D-6, 5개”(당일 이하는 “D-day, 5개”), 그 뒤는 “5개 중 2개 확인”(지난 달 읽기 전용도 같음).
- * 건너뛴 줄도 확인 쪽(대기가 아님)으로 셈
+ * 확인 개수에는 건너뛴 줄을 넣지 않고, 건너뜀이 있으면 “, 1개 건너뜀”을 붙임(2026-11-19)
  */
 export function heroMeta(
   o:
@@ -54,7 +61,17 @@ export function heroMeta(
     return `${days > 0 ? `D-${days}` : 'D-day'}, ${o.preview.count}개`;
   }
   const c = chipCounts(o.lines);
-  return `${c.all}개 중 ${c.done}개 확인`;
+  return `${c.all}개 중 ${c.checked}개 확인${c.skipped > 0 ? `, ${c.skipped}개 건너뜀` : ''}`;
+}
+
+/**
+ * 다 확인 상태에서 접힌 줄 글자(2026-11-19): 건너뜀이 없으면 “5개 모두 확인했어요”(자동 줄이 남았으면 “5개 확인했어요”),
+ * 있으면 “5개 확인, 1개 건너뜀”
+ */
+export function foldText(lines: readonly ConfirmLine[]): string {
+  const c = chipCounts(lines);
+  if (c.skipped > 0) return `${c.checked}개 확인, ${c.skipped}개 건너뜀`;
+  return c.left === 0 ? `${c.all}개 모두 확인했어요` : `${c.checked}개 확인했어요`;
 }
 
 /**

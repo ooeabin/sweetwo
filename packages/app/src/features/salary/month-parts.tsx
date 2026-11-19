@@ -91,11 +91,14 @@ export function MonthHero({
   pill,
   amount,
   meta,
+  bar,
   done,
 }: {
   pill: ReactNode;
   amount?: string;
   meta?: string;
+  /** 보조 줄 아래 중립 막대(날짜 없는 사람 “수입 / 월급 계획”, 0~100, ink-2 채움 + bar-track 바탕) */
+  bar?: number;
   done?: { title: string; saved?: ReactNode; art: ReactNode; extra?: ReactNode; burst?: boolean };
 }) {
   return (
@@ -118,6 +121,11 @@ export function MonthHero({
         <>
           {amount && <p className="hg-w02hero__amt">{amount}</p>}
           {meta && <p className="hg-w02hero__meta">{meta}</p>}
+          {bar !== undefined && (
+            <span className="hg-w02hero__bar" aria-hidden="true">
+              <i style={{ width: `${Math.max(0, Math.min(100, bar))}%` }} />
+            </span>
+          )}
         </>
       )}
     </section>

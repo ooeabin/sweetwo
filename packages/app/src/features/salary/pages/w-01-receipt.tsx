@@ -21,7 +21,10 @@ import {
   leftover,
   planChangeTouchesMonth,
   planRatio,
+  joinLineNote,
+  planOverText,
   planSummary,
+  savingLineNote,
   salaryChangedTaskOpen,
   savingStartChips,
   todayKst,
@@ -637,14 +640,16 @@ export function W01Receipt() {
       amount: won(income),
       sentence: summary.empty
         ? { before: `${copy.summaryEmpty[0]} ${copy.summaryEmpty[1]}`, after: '' }
-        : summary.noSaving
-          ? { before: copy.summaryNoSaving, after: '' }
-          : {
-              before: copy.summarySaving[0],
-              pct: copy.summaryPct(summary.share),
-              after: copy.summarySaving[1],
-            },
-      chart: !summary.empty,
+        : summary.over
+          ? { before: planOverText(summary.left), after: '' }
+          : summary.noSaving
+            ? { before: copy.summaryNoSaving, after: '' }
+            : {
+                before: copy.summarySaving[0],
+                pct: copy.summaryPct(summary.share),
+                after: copy.summarySaving[1],
+              },
+      chart: summary.chart,
       bar: [
         { kind: 'saving', percent: summary.bar.saving },
         { kind: 'spend', percent: summary.bar.spend },
@@ -740,26 +745,23 @@ export function W01Receipt() {
           : undefined;
       const othersAllowance = joint && l.kind === 'allowance' && !!l.user_id && l.user_id !== m.id;
       const lineLocked = theirs || send || (othersAllowance && sp.manager_user_id !== m.id);
-      const pct =
-        si && si.target !== null && !si.bundled
-          ? si.state === 'achieved'
-            ? copy.achieved
-            : copy.targetPct(si.pct ?? 0)
-          : null;
+      // 보조 줄(2026-11-19 짧게): 자동 정보가 맨 앞, 모은 금액 0원은 뺌(core savingLineNote)
       const savedNote = si
-        ? si.bundled
-          ? copy.myShare(won(si.saved))
-          : copy.listSaved(won(si.saved))
+        ? savingLineNote(
+            {
+              saved: si.saved,
+              target: si.target,
+              pct: si.pct,
+              achieved: si.state === 'achieved',
+              bundled: si.bundled,
+            },
+            won,
+          )
         : undefined;
       const autoNote = receiptAutoNote(l, baseDay, !joint && owner === m && !!m?.payday_none);
-      const note =
-        [
-          send ? copy.sendNote : waitLine && l.id === waitLine.id ? waitNote : savedNote,
-          pct,
-          autoNote,
-        ]
-          .filter((x): x is string => !!x)
-          .join(copy.noteJoin) || undefined;
+      const note = joinLineNote(autoNote, [
+        send ? copy.sendNote : waitLine && l.id === waitLine.id ? waitNote : savedNote,
+      ]);
       return {
         id: l.id,
         name: nameOf(l),
@@ -945,7 +947,12 @@ export function W01Receipt() {
   ];
   // 파트너 탭(각자)인데 파트너 월급 계획이 없음: 0원 영수증 대신 회색 빈 카드(2026-11-12 D3)
   const partnerNoSplit = !split && theirs;
-  const summary = planSummary({ income, saving: savingSum, spend: spendSum });
+  const summary = planSummary({
+    income,
+    saving: savingSum,
+    spend: spendSum,
+    lines: savingLines.length + spendLines.length,
+  });
   // 빈 저축·투자 카드: 저축·투자 줄도 같이 모으기 묶음도 없고 내 것으로 고칠 수 있을 때(파트너 탭 보기만·편집 모드는 없음)
   const savingEmpty =
     !edit && !theirs && canEdit && savingLines.length === 0 && bundleList.length === 0;
@@ -1079,8 +1086,12 @@ export function W01Receipt() {
                   }
                 : undefined
             }
+            // 계획이 월급보다 많으면 “계획이 월급보다 25만 원 많아요”(오류 빨강), 줄이 하나도 없으면 막대·범례 없이 문장만
+            titleError={summary.over}
             title={
-              summary.noSaving ? (
+              summary.over ? (
+                planOverText(summary.left)
+              ) : summary.noSaving ? (
                 copy.summaryNoSaving
               ) : (
                 <>
@@ -1090,22 +1101,30 @@ export function W01Receipt() {
                 </>
               )
             }
-            bar={[
-              { kind: 'saving', percent: summary.bar.saving },
-              { kind: 'spend', percent: summary.bar.spend },
-              { kind: 'free', percent: summary.bar.free },
-            ]}
+            bar={
+              summary.chart
+                ? [
+                    { kind: 'saving', percent: summary.bar.saving },
+                    { kind: 'spend', percent: summary.bar.spend },
+                    { kind: 'free', percent: summary.bar.free },
+                  ]
+                : undefined
+            }
             barLabel={spoken(copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? ''))}
-            legend={[
-              { kind: 'saving', name: copy.savingGroup, amount: shown(won(savingSum)) },
-              { kind: 'spend', name: copy.spendGroup, amount: shown(won(spendSum)) },
-              {
-                kind: 'free',
-                name: copy.legendFreeName,
-                amount: shown(won(left)),
-                short: summary.over,
-              },
-            ]}
+            legend={
+              summary.chart
+                ? [
+                    { kind: 'saving', name: copy.savingGroup, amount: shown(won(savingSum)) },
+                    { kind: 'spend', name: copy.spendGroup, amount: shown(won(spendSum)) },
+                    {
+                      kind: 'free',
+                      name: copy.legendFreeName,
+                      amount: shown(won(left)),
+                      short: summary.over,
+                    },
+                  ]
+                : undefined
+            }
           />
           <PlanCard
             id="saving"

@@ -14,7 +14,8 @@ export interface AmountBand {
 const digitsOnly = (s: string) => s.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
 /** 직접 친 값: 소수점 뒤는 버림(“3500000.5” → 3,500,000, 2026-11-10 S2-18). 쉼표 등 숫자 아닌 것은 지움 */
 const typedDigits = (s: string) => digitsOnly(s.split('.')[0] ?? '');
-/** 입력 자리 수 한도: 999억(11자리) 넘는 값은 한 자리까지만 받아 오류를 보여 주고 그 뒤는 멈춤(12자리) */
+/** 입력 자리 수 한도: 직접 친(물리 키보드) 999억(11자리) 넘는 값은 한 자리까지만 받아 오류를 보여 주고 그 뒤는 멈춤(12자리).
+ * 앱 키패드는 999억(MAX_WON)을 넘는 숫자를 아예 받지 않고 짧게 흔들림(2026-11-19) */
 const MAX_DIGITS = 12;
 
 /** 붙여넣기 “320만”, “1억 2천만” 단위 환산. 해석 못 하면 null */
@@ -56,6 +57,7 @@ function AmountBox({
   narrow,
   placeholder,
   idle,
+  shake,
   error: outerError,
   inputRef,
   onFocus,
@@ -71,6 +73,8 @@ function AmountBox({
   placeholder: string;
   /** 키패드가 이 칸에 쓰지 않음(두 칸일 때 다른 칸이 활성): 밑줄을 옅게 */
   idle?: boolean;
+  /** 키패드가 상한을 넘는 숫자를 막았을 때 짧게 흔들림(‘동작 줄이기’면 CSS가 없앰) */
+  shake?: boolean;
   error?: string;
   inputRef?: Ref<HTMLInputElement>;
   onFocus?: () => void;
@@ -93,7 +97,9 @@ function AmountBox({
         {label}
       </label>
       <div
-        className={['hg-amount', idle && 'is-idle', error && 'is-error'].filter(Boolean).join(' ')}
+        className={['hg-amount', idle && 'is-idle', error && 'is-error', shake && 'is-shake']
+          .filter(Boolean)
+          .join(' ')}
       >
         <input
           ref={inputRef}
@@ -203,14 +209,42 @@ export function AmountInput({
     prevSecond.current = hasSecond;
   }, [hasSecond, narrow]);
 
-  const set = (v: number | null) => onChange(v);
+  // 처음 연 상태에 미리 채워진 값(W-02a 계획 금액 등): 키패드 첫 숫자는 바꿔 쓰고, 지우기가 먼저면 끝자리를 지움(2026-11-19).
+  // 한 번이라도 손대면(키패드, 직접 입력, 칩) 그 뒤로는 끝에 붙음
+  const fresh = useRef<[boolean, boolean]>([value !== null, second?.value != null]);
+  const [shaking, setShaking] = useState(false);
+  const shakeTimer = useRef<number>();
+  useEffect(() => () => window.clearTimeout(shakeTimer.current), []);
+  const shake = () => {
+    setShaking(false);
+    window.requestAnimationFrame(() => setShaking(true));
+    window.clearTimeout(shakeTimer.current);
+    shakeTimer.current = window.setTimeout(() => setShaking(false), 400);
+  };
+  const touch = (i: 0 | 1) => {
+    fresh.current[i] = false;
+  };
+  const set = (v: number | null) => {
+    touch(0);
+    onChange(v);
+  };
   const target =
-    active === 1 && second ? { value: second.value, set: second.onChange } : { value, set };
-  // 키패드: 누른 숫자는 끝에 붙음. 빈 값에서 0, 00은 무시(맨 앞 0 지움)
+    active === 1 && second
+      ? {
+          value: second.value,
+          set: (v: number | null) => {
+            touch(1);
+            second.onChange(v);
+          },
+        }
+      : { value, set };
+  // 키패드: 누른 숫자는 끝에 붙음(미리 채운 값의 첫 숫자는 바꿔 씀). 빈 값에서 0, 00은 무시(맨 앞 0 지움).
+  // 999억을 넘는 숫자는 받지 않고 흔들림
   const append = (d: string) => {
-    const str = digitsOnly(`${target.value ?? ''}${d}`);
-    if (str.length > MAX_DIGITS) return;
+    const base = fresh.current[active] ? '' : `${target.value ?? ''}`;
+    const str = digitsOnly(`${base}${d}`);
     const n = Number(str);
+    if (str.length > MAX_DIGITS || n > MAX_WON) return shake();
     if (target.value === null && n === 0) return;
     target.set(n);
   };
@@ -226,6 +260,7 @@ export function AmountInput({
         narrow={narrow}
         placeholder={placeholder}
         idle={hasSecond && active !== 0}
+        shake={shaking && active === 0}
         inputRef={ref}
         onFocus={() => setActive(0)}
       />
@@ -283,11 +318,15 @@ export function AmountInput({
           label={second.label}
           showLabel
           value={second.value}
-          set={second.onChange}
+          set={(v) => {
+            touch(1);
+            second.onChange(v);
+          }}
           allowZero={!!second.allowZero}
           narrow={narrow}
           placeholder={placeholder}
           idle={active !== 1}
+          shake={shaking && active === 1}
           error={second.error}
           inputRef={secondRef}
           onFocus={() => setActive(1)}
