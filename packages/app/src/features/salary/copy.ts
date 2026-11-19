@@ -426,7 +426,8 @@ export const copy = {
   // 애칭이 없을 때 상대 이름(CLAUDE.md 문구 ‘없으면 파트너’)
   partnerFallback: '파트너',
   sharedAccountName: '같이 쓰는 통장',
-  addSharedAccount: '+ 같이 쓰는 통장 추가',
+  /** ‘+ 지출 추가’를 누르면 뜨는 작은 선택 시트(2026-11-19 사용자 결정: 예전 ‘+ 같이 쓰는 통장 추가’ 블록 버튼을 하나로) [확인 필요] */
+  addPick: { title: '무엇을 추가할까요?', spend: '지출', account: '같이 쓰는 통장' },
   allowanceNotify: (name: string) => (name ? `${name}님께 알려 드려요` : '파트너에게 알려 드려요'),
   noPaydayHead: '수입이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)
   // W-01d 자동으로 나가는 것 고르기

@@ -27,6 +27,7 @@ import {
   todayKst,
 } from '@sweetwo/core';
 import {
+  BottomSheet,
   Button,
   Chip,
   Icon,
@@ -71,7 +72,7 @@ import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { BundleRow } from '../bundle-parts';
 import { savingPaths, togetherPaths } from '../paths';
 import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
-import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
+import { sharePlan, type PlanImageModel } from '../receipt-image';
 import { IncomeSheet, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
 import { useEnsureSplit } from '../ensure-split';
 import { SalaryLoadError, SalaryLoading } from '../salary-tab';
@@ -113,6 +114,7 @@ export function W01Receipt() {
   const [order, setOrder] = useState<string[] | null>(null);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [adding, setAdding] = useState(false);
+  const [pick, setPick] = useState(false); // ‘+ 지출 추가’ 선택 시트(지출 / 같이 쓰는 통장)
   const [stop, setStop] = useState<SplitLine | null>(null);
   const [refill, setRefill] = useState(false);
   const [fold, setFold] = useState(false);
@@ -305,29 +307,6 @@ export function W01Receipt() {
   const spendSum = sum(spendLines.filter((l) => l.kind !== 'send'));
   const ratio = planRatio({ income, saving: savingSum, spend: spendSum });
   const left = ratio.left;
-  const dayText = (u: { payday: number | null; payday_last: boolean } | null | undefined) =>
-    !u ? null : u.payday_last ? copy.paydayLast : u.payday ? copy.payday(u.payday) : null;
-  const sub = joint
-    ? (() => {
-        const parts = [m, p]
-          .filter((x): x is NonNullable<typeof x> => !!x)
-          .map((x) => ({ x, d: dayText(x) }))
-          .filter((x) => x.d);
-        if (parts.length === 1 && parts[0]) return copy.everyMonth(parts[0].d ?? '');
-        return copy.jointPaydays(
-          parts.map(({ x, d }) => copy.personPayday(x.nickname ?? '', d ?? '')),
-        );
-      })()
-    : ownerId === m.id && m.payday_none
-      ? copy.noPaydayHead // 날짜 없음(20 W-01 예외)
-      : dayText(owner)
-        ? copy.everyMonth(dayText(owner) ?? '')
-        : undefined;
-  const people = (joint && p ? [m, p] : owner ? [owner] : []).map((x) => ({
-    id: x.id,
-    name: x.nickname ?? '',
-    starter: x.id === sp.created_by,
-  }));
   const closed = goals.data.filter(
     (g) => !g.deleted_at && !!g.closed_at && (joint || g.owner_user_id === ownerId),
   );
@@ -646,42 +625,55 @@ export function W01Receipt() {
       ? { kind: 'free' as const, text: copy.legendShort(won(left)), short: true }
       : { kind: 'free' as const, text: copy.legendFree(ratio.free) },
   ];
-  const bar = [
-    { kind: 'saving' as const, percent: ratio.saving },
-    { kind: 'spend' as const, percent: ratio.spend },
-    { kind: 'free' as const, percent: ratio.free ?? 0 },
-  ];
-  const totals = [
-    { label: copy.allocated, amount: won(savingSum + spendSum) },
-    left >= 0
-      ? { label: copy.leftoverLabel, amount: won(left), strong: true }
-      : { label: copy.leftoverLabel, amount: copy.short(won(-left)), strong: true, short: true },
-  ];
+  // 공유 이미지(2026-11-19): W-01 요약 카드 모양(월급, 한 문장, 알약 막대, ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
+  // 금액 가리기·공개 범위는 화면과 같은 값(won, nameOf)을 그대로 씀
+  const imageSub = (l: SplitLine) => {
+    const si =
+      l.kind === 'saving' && l.goal_id && saving.ready ? saving.byId(l.goal_id) : undefined;
+    return si && si.target !== null && !si.bundled
+      ? si.state === 'achieved'
+        ? copy.achieved
+        : copy.targetPct(si.pct ?? 0)
+      : undefined;
+  };
   const share = async () => {
     if (sharing) return;
     setSharing(true);
-    const model: ReceiptImageModel = {
-      people: people.map((x) => ({ no: x.starter ? 1 : 2, name: x.name })),
+    const model: PlanImageModel = {
+      label: copy.incomeRow,
       amount: won(income),
-      sub,
-      bar,
-      legend,
-      sections: [
-        {
-          title: copy.savingGroup,
-          subtotal: won(savingSum),
-          rows: savingLines.map((l) => ({ name: nameOf(l), amount: won(l.amount) })),
-        },
-        {
-          title: copy.spendGroup,
-          subtotal: won(spendSum),
-          rows: spendLines.map((l) => ({ name: nameOf(l), amount: won(l.amount) })),
-        },
+      sentence: summary.empty
+        ? { before: `${copy.summaryEmpty[0]} ${copy.summaryEmpty[1]}`, after: '' }
+        : summary.noSaving
+          ? { before: copy.summaryNoSaving, after: '' }
+          : {
+              before: copy.summarySaving[0],
+              pct: copy.summaryPct(summary.share),
+              after: copy.summarySaving[1],
+            },
+      chart: !summary.empty,
+      bar: [
+        { kind: 'saving', percent: summary.bar.saving },
+        { kind: 'spend', percent: summary.bar.spend },
+        { kind: 'free', percent: summary.bar.free },
       ],
-      totals,
+      legend: [
+        { kind: 'saving', name: copy.savingGroup, amount: won(savingSum) },
+        { kind: 'spend', name: copy.spendGroup, amount: won(spendSum) },
+        { kind: 'free', name: copy.legendFreeName, amount: won(left), short: summary.over },
+      ],
+      sections: [
+        { title: copy.savingGroup, subtotal: won(savingSum), ls: savingLines },
+        { title: copy.spendGroup, subtotal: won(spendSum), ls: spendLines },
+      ]
+        .filter((x) => x.ls.length > 0)
+        .map(({ ls, ...x }) => ({
+          ...x,
+          rows: ls.map((l) => ({ name: nameOf(l), amount: won(l.amount), sub: imageSub(l) })),
+        })),
     };
     try {
-      const r = await shareReceipt(model, copy.imageName(todayKst()));
+      const r = await sharePlan(model, copy.imageName(todayKst()));
       track('plan_shared', { result: r, masked, whose });
       if (r === 'downloaded') toast(copy.imageSaved);
     } catch {
@@ -813,7 +805,7 @@ export function W01Receipt() {
     locked: copy.locked,
   };
   const customs = serverLines.filter((l) => l.kind === 'custom').length;
-  // 5d “+ 같이 쓰는 통장 추가”: 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 숨김. 나중에는 ‘+ 지출 추가’ 칩 끝
+  // 5d 같이 쓰는 통장 입구(‘+ 지출 추가’ 선택 시트): 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 시트 없이 바로 이름 칩. 나중에는 ‘+ 지출 추가’ 칩 끝
   // ‘같이 쓰는 통장’으로 엶(2026-11-16 4차 검토 R4-4)
   const sharedOn = sp.shared_living !== false || lines.some((l) => l.kind === 'shared_account');
   // ── 요약 카드 월급(20 W-01 3·3b, 2026-11-19 사용자 결정): 큰 금액 + 연필을 누르면 월급 금액 시트(내 월급만, S-11과 같은 저장 길
@@ -968,6 +960,8 @@ export function W01Receipt() {
     !spendLines.some((l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom');
   if (spendEmpty && !spendAsk) setSpendAsk(true);
   const spendChipsShown = spendAsk && !edit && canEdit && !notManager;
+  // 줄이 하나도 없으면(저축·투자도 지출도 0개, 월급 금액과 상관없이) 맨 아래 ‘편집하기’·‘공유하기’·‘추천값으로 다시 채우기’를 숨김(2026-11-19 사용자 결정)
+  const planEmpty = savingLines.length === 0 && spendLines.length === 0 && !proposalRow;
   const pv = partnerView.data ?? null;
   const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
@@ -1276,15 +1270,14 @@ export function W01Receipt() {
               <PlanAdd
                 expanded={adding}
                 onClick={() => {
-                  if (!offline()) setAdding((x) => !x);
+                  if (offline()) return;
+                  // 같이 쓰는 통장을 쓸 수 있으면 먼저 작은 선택 시트(지출 / 같이 쓰는 통장), 아니면 바로 지출 추가
+                  if (sharedOn && !adding) setPick(true);
+                  else setAdding((x) => !x);
                 }}
               >
                 {copy.addSpend}
               </PlanAdd>
-            )}
-            {canEdit && sharedOn && !spendEmpty && (
-              // 5d 같이 쓰는 통장 → W-01b 분담 도우미(PR 11)
-              <PlanAdd onClick={() => nav('/salary/split/new')}>{copy.addSharedAccount}</PlanAdd>
             )}
             {adding && canEdit && (
               <SpendChips
@@ -1301,7 +1294,7 @@ export function W01Receipt() {
               />
             )}
           </PlanCard>
-          {!edit && (
+          {!edit && !planEmpty && (
             <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
               {canEdit && (
                 <Button
@@ -1355,6 +1348,26 @@ export function W01Receipt() {
         columns={[column]}
       />
       {sheetEl}
+      {pick && (
+        <BottomSheet title={copy.addPick.title} onClose={() => setPick(false)}>
+          <div className="hg-list hg-list--plain">
+            <ListRow
+              label={copy.addPick.spend}
+              onClick={() => {
+                setPick(false);
+                setAdding(true);
+              }}
+            />
+            <ListRow
+              label={copy.addPick.account}
+              onClick={() => {
+                setPick(false);
+                nav('/salary/split/new');
+              }}
+            />
+          </div>
+        </BottomSheet>
+      )}
       {askFor && (
         <SavingAskSheet
           ask={askFor.ask}
