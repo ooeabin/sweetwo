@@ -390,10 +390,13 @@ export const copy = {
   previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
   moneyInGo: '수입 적기',
   // W-02 새 구조(2026-11-19) [모두 확인 필요]
-  incomeLine: '수입',
-  incomeAdd: '적기', // 줄 끝 “+ 적기”
-  incomeAddLabel: '수입 적기', // 화면 읽기
-  incomeSumLabel: (sum: string) => `수입 ${sum}, 수입 기록 보기`,
+  // W-02 수입 카드(2026-11-19 사용자 결정, 20 W-02 6번) [확인 필요]
+  incomeCardLabel: '이번 달 수입',
+  incomePeriodLabel: '이번 기간 수입', // 날짜 없는 사람
+  incomeAll: '전체 ›', // 수입 기록(W-20b)
+  incomeAllLabel: '수입 기록 전체 보기',
+  incomeNone: '아직 적은 수입이 없어요',
+  incomeAddButton: '수입 적기',
   periodRange: (start: string, end: string) => `${formatMonthDay(start)} ~ ${formatMonthDay(end)}`, // [확인 필요] 날짜 없는 사람 W-02 날짜 알약(30일 기간)
   planOf: (amount: string) => `월급 계획 ${amount} 중`, // [확인 필요] 날짜 없는 사람 W-02 보조 줄
   goTag: '확인', // 남은 줄 상태 버튼(누르면 바로 계획대로 했어요)

@@ -10,7 +10,7 @@ import {
 } from './mocks';
 
 // W-02 이번 달 월급 체크 화면 순서(20 W-02 0번, 2026-11-19 확정 시안).
-// 날짜 알약 → 큰 금액 → 보조 한 줄 → 칩 → 줄 목록 → 수입 상자(+ 적기) → 아래 고정 주 버튼. 월급날 전은 “D-n, 5개” + 비활성 버튼.
+// 날짜 알약 → 큰 금액 → 보조 한 줄 → 칩 → 줄 목록 → 수입 카드(+ 수입 적기) → 아래 고정 주 버튼. 월급날 전은 “D-n, 5개” + 비활성 버튼.
 const y = async (loc: ReturnType<Page['locator']>) => {
   const box = await loc.first().boundingBox();
   expect(box).not.toBeNull();
@@ -29,7 +29,7 @@ async function open(page: Page, now: Date, prep?: (db: MemDb, sv: SavingDb) => v
   return db;
 }
 
-test('월급날 확인이 남은 달: 날짜 알약 → 큰 금액 → 칩 → 목록 → 수입 상자, 주 버튼은 화면 아래 고정, 머리 링크·‘+ 추가’ 없음', async ({
+test('월급날 확인이 남은 달: 날짜 알약 → 큰 금액 → 칩 → 목록 → 수입 카드, 주 버튼은 화면 아래 고정, 머리 링크·‘+ 추가’ 없음', async ({
   page,
 }) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'));
@@ -43,7 +43,7 @@ test('월급날 확인이 남은 달: 날짜 알약 → 큰 금액 → 칩 → �
   await expect(first).toBeVisible();
   const income = page.getByRole('region', { name: '수입' });
   await expect(income).toBeVisible();
-  await expect(income.getByRole('button', { name: '수입 적기' })).toHaveText('적기');
+  await expect(income.getByRole('button', { name: '수입 적기' })).toHaveText('수입 적기');
   await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: '지난 달 모아보기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);
@@ -67,7 +67,7 @@ test('월급날 확인이 남은 달: 날짜 알약 → 큰 금액 → 칩 → �
   expect((await confirm.boundingBox())?.y ?? 0).toBeGreaterThan(vh / 2);
 });
 
-test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → 비활성 버튼 줄 → 수입 상자(칩·주 버튼 없음)', async ({
+test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → 비활성 버튼 줄 → 수입 카드(칩·주 버튼 없음)', async ({
   page,
 }) => {
   await open(page, new Date('2026-10-20T10:00:00+09:00'), (d) => {
@@ -102,34 +102,43 @@ test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → �
   await expect(page).toHaveURL(/\/salary\/money-in/);
 });
 
-test('수입 상자: “+ 적기” → W-20, 기록이 있으면 오른쪽에 합 → W-20b(수입 기록)', async ({
-  page,
-}) => {
+test('수입 카드 없음 상태: “아직 적은 수입이 없어요” + “수입 적기” 버튼 → W-20', async ({ page }) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'));
-  await page.getByRole('button', { name: '수입 적기' }).click();
+  const income = page.getByRole('region', { name: '이번 달 수입' });
+  await expect(income).toContainText('아직 적은 수입이 없어요');
+  await expect(income.getByRole('button', { name: '수입 기록 전체 보기' })).toHaveCount(0);
+  await income.getByRole('button', { name: '수입 적기' }).click();
   await expect(page).toHaveURL(/\/salary\/money-in/);
 });
 
-test('수입 상자: 기록이 있으면(이번 사이클 100만 원 + 20만 원) 오른쪽에 합 → W-20b', async ({
-  page,
-}) => {
+test('수입 카드 있음 상태: 합계, 최근 2건(3건이어도 2건만), “전체 ›” → W-20b', async ({ page }) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'), (d, sv) => {
-    const row = (id: string, amount: number, on: string) => ({
+    const row = (id: string, amount: number, on: string, kind: string) => ({
       id,
       space_id: 'space-1',
       deleted_at: null,
       owner_user_id: d.me.id,
       received_on: on,
       amount,
-      kind: 'bonus',
+      kind,
       created_at: `${on}T01:00:00Z`,
     });
-    sv.moneyIns.push(row('in-1', 1_000_000, '2026-09-30'), row('in-2', 200_000, '2026-10-02'));
+    sv.moneyIns.push(
+      row('in-0', 100_000, '2026-09-28', 'refund'),
+      row('in-1', 1_000_000, '2026-09-30', 'bonus'),
+      row('in-2', 200_000, '2026-10-02', 'work'),
+    );
   });
-  const income = page.getByRole('region', { name: '수입' });
-  const sum = income.getByRole('button', { name: /수입 기록 보기/ });
-  await expect(sum).toHaveText('120만 원');
+  const income = page.getByRole('region', { name: '이번 달 수입' });
+  await expect(income.locator('.hg-incomecard__sum')).toHaveText('130만 원');
+  const rows = income.locator('.hg-incomecard__row');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0)).toContainText('10.02');
+  await expect(rows.nth(0)).toContainText('프리랜스·부업');
+  await expect(rows.nth(0)).toContainText('+20만 원');
+  await expect(rows.nth(1)).toContainText('09.30');
+  await expect(rows.nth(1)).toContainText('+100만 원');
   await expect(income.getByRole('button', { name: '수입 적기' })).toBeVisible();
-  await sum.click();
+  await income.getByRole('button', { name: '수입 기록 전체 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
 });

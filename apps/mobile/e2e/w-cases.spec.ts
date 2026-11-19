@@ -117,7 +117,7 @@ test('W-02 보조 줄: “n개 중 m개 확인”의 m에 건너뜀을 넣지 �
   await expect(page.locator('.hg-w02hero__meta')).toHaveText('5개 중 1개 확인, 1개 건너뜀');
 });
 
-test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, 기간 수입 큰 금액, 월급 계획 중, 수입 상자, 저축·투자 목록)', async ({
+test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, 기간 수입 큰 금액, 월급 계획 중, 수입 카드, 저축·투자 목록)', async ({
   page,
 }) => {
   const db = await open(page);
@@ -138,7 +138,10 @@ test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, �
   await expect(page.locator('.hg-datepill')).toHaveText('9월 20일 ~ 10월 19일');
   await expect(page.locator('.hg-w02hero__amt')).toHaveText('340만 원');
   await expect(page.locator('.hg-w02hero__meta')).toHaveText('월급 계획 350만 원 중');
-  await expect(page.getByRole('region', { name: '수입' })).toContainText('적기');
+  // 큰 금액은 위 기간 수입이라 카드는 이름표 + 기록 없음 안내 + 버튼만
+  const card = page.getByRole('region', { name: '이번 기간 수입' });
+  await expect(card).toContainText('수입 적기');
+  await expect(card.locator('.hg-incomecard__sum')).not.toHaveText(/\d+만 원/);
   await expect(page.getByText('수입이 들어오면')).toHaveCount(0);
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   await expect(group.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(
