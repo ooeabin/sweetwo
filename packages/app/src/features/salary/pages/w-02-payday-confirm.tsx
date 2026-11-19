@@ -9,8 +9,13 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import {
-  checkHeadline,
+  chipCounts,
   confirmableLines,
+  doneState,
+  heroMeta,
+  plannedSum,
+  savedSum,
+  type CheckChip,
   confirmFinish,
   isManual,
   splitCheckLines,
@@ -19,9 +24,11 @@ import {
   todayKst,
 } from '@sweetwo/core';
 import {
-  AutoPill,
+  BottomSheet,
   Button,
-  IconButton,
+  Chip,
+  Icon,
+  Illustration,
   PageHeader,
   SectionHeader,
   Tabs,
@@ -37,7 +44,7 @@ import { useFlip } from '../../../shared/flip';
 import { PersonDot } from '../../../shared/person';
 import { quietly, toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
-import { CheckLine, checkToast, goalLineName, isPast, lineName, periodText } from '../check-line';
+import { CheckLine, checkToast, goalLineName, isPast, lineName } from '../check-line';
 import { copy } from '../copy';
 import { baseDayOf, cycleName, firstPaydayOf, useShownPayday } from '../cycle';
 import {
@@ -54,7 +61,7 @@ import {
   useSpace,
   useSplits,
 } from '../data';
-import { incomeOf, MonthBar, PreviewTop } from '../month-parts';
+import { incomeOf, MonthHero, ShareLink } from '../month-parts';
 import { savingListPath, savingPaths, togetherPaths } from '../paths';
 import { MoneyInLine, MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
@@ -86,6 +93,9 @@ export function W02PaydayConfirm() {
   const [hidden, setHidden] = useState<string | null>(null);
   const [madeHidden, setMadeHidden] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [chip, setChip] = useState<CheckChip>('all');
+  const [foldOpen, setFoldOpen] = useState(false);
+  const [pickDate, setPickDate] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const cycleParam = params.get('cycle');
   // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
@@ -177,6 +187,7 @@ export function W02PaydayConfirm() {
     );
 
   const pending = sp.couple_state === 'unlink_pending';
+  const kindText = (kind: string) => (kind === 'saving' ? copy.kindSaving : copy.kindSpend);
   const page = { title };
   const frame = (body: ReactNode) => (
     <MainFrame
@@ -250,30 +261,43 @@ export function W02PaydayConfirm() {
         accountNames.ofSplitLine(l.id),
       );
     if (mySplit) {
-      // 2026-11-19 새 구조: 회색 줄 + “D-6” → 한 목록(체크 원은 비활성, 템플릿 순서) → 수입 한 줄
+      // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
       const ordered = [...preview].sort((x, y) => x.sort - y.sort);
+      const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
       return frame(
         <>
-          {firstDay ? (
-            <PreviewTop
-              name={cycleName(firstDay)}
-              headline={checkHeadline({ preview: { today, payday: firstDay } }).text}
-            />
-          ) : (
-            <p className="hg-card__meta">{copy.firstWaitNoDate}</p>
-          )}
+          <MonthHero
+            pill={
+              <span className="hg-datepill">
+                {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
+              </span>
+            }
+            amount={money(
+              ordered.reduce((sum, l) => sum + l.amount, 0),
+              masked,
+            )}
+            meta={
+              firstDay
+                ? heroMeta({ preview: { today, payday: firstDay, count: ordered.length } })
+                : undefined
+            }
+          />
           {preview.length > 0 && (
             <div className="hg-checklist__list hg-list--preview">
               {ordered.map((l) => (
                 <TransferRow
                   key={l.id}
-                  flow
                   label={previewName(l)}
-                  badge={l.auto_pay ? <AutoPill text={copy.autoTag} /> : undefined}
+                  meta={l.auto_pay ? copy.previewAuto : kindText(l.kind)}
                   amount={money(l.amount, masked)}
                   done={false}
-                  disabled
                   checkLabel={copy.previewCheck(previewName(l))}
+                  action={{
+                    label: dayTag,
+                    tone: 'wait',
+                    ariaLabel: copy.previewCheck(previewName(l)),
+                    disabled: true,
+                  }}
                 />
               ))}
             </div>
@@ -409,7 +433,7 @@ export function W02PaydayConfirm() {
         meId={meId}
         readOnly={!lineOpen}
         viewOnly={partnerTab || othersManual.includes(l)}
-        flow
+        sub={l.auto ? copy.previewAuto : kindText(l.kind)}
         onOther={
           partnerTab || !lineOpen
             ? undefined
@@ -480,37 +504,73 @@ export function W02PaydayConfirm() {
       setBusy(false);
     }
   };
-  const more = (past.data?.length ?? 0) > ago;
-  const { open: openLines, done: doneLines } = splitCheckLines(shown.pay_check_line);
-  // 큰 숫자는 내가 맡은 줄만 셈(한 사람 관리형에서 관리하는 사람 줄은 보기만)
-  const headlineLines = shown.pay_check_line.filter((l) => !othersManual.includes(l));
-  const navButtons =
-    more || ago > 0 ? (
-      <span className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'nowrap' }}>
-        <IconButton
-          icon="chevron-left"
-          label={copy.prevMonth}
-          small
-          disabled={!more}
-          onClick={() => setAgo(ago + 1)}
-        />
-        {ago > 0 && (
-          <IconButton
-            icon="chevron-right"
-            label={copy.nextMonth}
-            small
-            onClick={() => setAgo(ago - 1)}
-          />
-        )}
-      </span>
-    ) : undefined;
+  // 한 목록(2026-11-19 확정 시안): 칩 필터, 남은 줄 먼저 → 확인한 줄 아래. 줄이 자리를 옮기면 짧은 이동 애니메이션
+  const counts = chipCounts(shown.pay_check_line);
+  const finished = late ? null : doneState(shown.pay_check_line);
+  const { open: openLines, done: doneLines } = splitCheckLines(shown.pay_check_line, chip);
+  const cycles = [list, ...(past.data ?? [])];
+  const pick = (i: number) => {
+    setAgo(i);
+    setChip('all');
+    setPickDate(false);
+  };
+  const dateName = cycleName(start);
+  const datePill =
+    cycles.length > 1 ? (
+      <button
+        type="button"
+        className="hg-datepill"
+        aria-haspopup="dialog"
+        aria-label={copy.cyclePick}
+        onClick={() => setPickDate(true)}
+      >
+        {dateName}
+        <Icon name="chevron-down" size={16} />
+      </button>
+    ) : (
+      <span className="hg-datepill">{dateName}</span>
+    );
+  const planned = money(plannedSum(shown.pay_check_line), masked);
+  const share = {
+    received: start,
+    people: ownerPeople,
+    nameOf,
+    whose: (joint ? 'joint' : partnerTab ? 'partner' : 'self') as 'joint' | 'partner' | 'self',
+    screen: (readOnly || ago > 0 ? 'past' : 'checklist') as 'past' | 'checklist',
+  };
+  const saved = savedSum(shown.pay_check_line);
+  const filters = (
+    <div className="hg-row" role="group" aria-label={copy.manualGroupLabel}>
+      {(
+        [
+          ['all', copy.chipAll, counts.all],
+          ['left', copy.chipLeft, counts.left],
+          ['done', copy.chipDone, counts.done],
+        ] as const
+      ).map(([v, label, n]) => (
+        <Chip key={v} className="hg-chip--fill" selected={chip === v} onClick={() => setChip(v)}>
+          {label} <b>{n}</b>
+        </Chip>
+      ))}
+    </div>
+  );
+  const rowsList = (
+    <div className="hg-checklist__list" ref={listRef}>
+      {[...openLines, ...doneLines].map((l) => (
+        <div key={l.id} data-flip={l.id}>
+          {row(l)}
+        </div>
+      ))}
+    </div>
+  );
+  const finishedAll = finished === 'all';
 
   return frame(
     <>
       <AchieveWatch from="checklist" />
       {people && (
         <Tabs
-          label={cycleName(start)}
+          label={dateName}
           value={tab}
           onChange={(v) => {
             setWho(v);
@@ -524,22 +584,34 @@ export function W02PaydayConfirm() {
           {copy.partnerChecklistView(partner.data?.nickname ?? '')}
         </p>
       )}
-      <MonthBar
-        list={shown}
-        income={income}
-        masked={masked}
-        shownStart={start}
-        headlineLines={headlineLines}
-        nav={navButtons}
-        period={periodText(start, shown.cycle_end)}
-        lateOpen={late ? confirmable.length : 0}
-        share={{
-          received: start,
-          people: ownerPeople,
-          nameOf,
-          whose: joint ? 'joint' : partnerTab ? 'partner' : 'self',
-          screen: readOnly || ago > 0 ? 'past' : 'checklist',
-        }}
+      <HeroWithBurst
+        listId={list.id + ago}
+        finished={!!finished}
+        render={(burst) => (
+          <MonthHero
+            pill={datePill}
+            amount={planned}
+            meta={heroMeta({ lines: shown.pay_check_line })}
+            done={
+              finished
+                ? {
+                    title: finishedAll ? copy.heroTitleAll : copy.heroTitleMixed,
+                    saved:
+                      saved > 0 ? (
+                        <>
+                          {copy.savedBefore} <b>{money(saved, masked)}</b> {copy.savedAfter}
+                        </>
+                      ) : undefined,
+                    art: <Illustration name="w02-done" className="hg-sceneart" motion />,
+                    extra: share ? (
+                      <ShareLink list={shown} income={income} masked={masked} share={share} />
+                    ) : undefined,
+                    burst,
+                  }
+                : undefined
+            }
+          />
+        )}
       />
       {late && !partnerTab && <LastMonthNote />}
       {showMade && (
@@ -572,22 +644,25 @@ export function W02PaydayConfirm() {
           </button>
         </div>
       )}
-      {/* 목록 하나(2026-11-19): 남은 줄 → 얇은 구분선 → 확인한 줄(흐리게). 줄이 자리를 옮기면 짧은 이동 애니메이션 */}
-      <div className="hg-checklist__list" ref={listRef}>
-        {openLines.map((l) => (
-          <div key={l.id} data-flip={l.id}>
-            {row(l)}
-          </div>
-        ))}
-        {openLines.length > 0 && doneLines.length > 0 && (
-          <div className="hg-flowdiv" role="separator" key="div" />
-        )}
-        {doneLines.map((l) => (
-          <div key={l.id} data-flip={l.id}>
-            {row(l)}
-          </div>
-        ))}
-      </div>
+      {finished ? (
+        <>
+          <button
+            type="button"
+            className="hg-foldrow"
+            aria-expanded={foldOpen}
+            onClick={() => setFoldOpen((x) => !x)}
+          >
+            <span>{counts.left === 0 ? copy.foldAll(counts.all) : copy.foldSome(counts.done)}</span>
+            <Icon name={foldOpen ? 'chevron-up' : 'chevron-down'} size={16} />
+          </button>
+          {foldOpen && rowsList}
+        </>
+      ) : (
+        <>
+          {filters}
+          {rowsList}
+        </>
+      )}
       {!partnerTab && ago === 0 && meId && (
         <MoneyInLine
           meId={meId}
@@ -605,6 +680,49 @@ export function W02PaydayConfirm() {
           </Button>
         </div>
       )}
+      {pickDate && (
+        <BottomSheet title={copy.cyclePick} onClose={() => setPickDate(false)}>
+          <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+            {cycles.map((c, i) => (
+              <Button
+                key={c.id}
+                block
+                variant={i === ago ? 'primary' : 'secondary'}
+                aria-pressed={i === ago}
+                onClick={() => pick(i)}
+              >
+                {cycleName(shownPayday(c.cycle_start))}
+              </Button>
+            ))}
+          </div>
+        </BottomSheet>
+      )}
     </>,
   );
+}
+
+/**
+ * 마지막 줄을 확인해 다 확인 상태가 된 순간에만 한 번 축하 조각(같은 달에서 안 끝남 → 끝남으로 바뀔 때. 다시 들어오면 정적)
+ */
+function HeroWithBurst({
+  listId,
+  finished,
+  render,
+}: {
+  listId: string;
+  finished: boolean;
+  render: (burst: boolean) => ReactNode;
+}) {
+  const prev = useRef<{ id: string; finished: boolean } | null>(null);
+  const [burst, setBurst] = useState(false);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = { id: listId, finished };
+    if (was && was.id === listId && !was.finished && finished) {
+      setBurst(true);
+      const t = window.setTimeout(() => setBurst(false), 1300);
+      return () => window.clearTimeout(t);
+    }
+  }, [listId, finished]);
+  return <>{render(burst)}</>;
 }

@@ -75,9 +75,9 @@ export function MoneyInLine({
   );
   const sum = rows.reduce((s, r) => s + r.amount, 0);
   return (
-    <section className="hg-sechead hg-sechead--group" aria-label={copy.incomeLine}>
-      <h2 className="hg-sechead__title">{copy.incomeLine}</h2>
-      <span className="hg-sechead__action" style={{ gap: 'var(--space-2)' }}>
+    <section className="hg-moneybox" aria-label={copy.incomeLine}>
+      <h2 className="hg-moneybox__title">{copy.incomeLine}</h2>
+      <span className="hg-moneybox__right">
         {rows.length > 0 && (
           <button
             type="button"
@@ -88,14 +88,7 @@ export function MoneyInLine({
             {money(sum, masked)}
           </button>
         )}
-        {onAdd && (
-          <AddRow
-            label={copy.incomeAdd}
-            ariaLabel={copy.incomeAddLabel}
-            className="hg-addrow--inline"
-            onClick={onAdd}
-          />
-        )}
+        {onAdd && <AddRow label={copy.incomeAdd} ariaLabel={copy.incomeAddLabel} onClick={onAdd} />}
       </span>
     </section>
   );

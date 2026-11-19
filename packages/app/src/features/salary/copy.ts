@@ -382,8 +382,25 @@ export const copy = {
   incomeAdd: '적기', // 줄 끝 “+ 적기”
   incomeAddLabel: '수입 적기', // 화면 읽기
   incomeSumLabel: (sum: string) => `수입 ${sum}, 수입 기록 보기`,
-  autoTag: '자동',
+  goTag: '확인', // 남은 줄 상태 버튼(누르면 바로 계획대로 했어요)
+  doneTag: '완료', // 확인한 줄 상태 버튼(누르면 시트)
   skippedPill: '건너뜀',
+  doneLabel: (name: string) => `${name} 완료, 고치기`, // 화면 읽기
+  uncheck: '체크 풀기',
+  kindSaving: '저축·투자',
+  kindSpend: '지출',
+  dayTag: (day: number) => `${day}일`, // 월급날 전 비활성 버튼
+  cyclePick: '월급날 고르기',
+  heroTitleAll: '이번 달도 계획대로!',
+  heroTitleMixed: '이번 달 확인 끝',
+  savedBefore: '저축·투자', // 흰 알약 “저축·투자 139만 원 모았어요”(금액만 brand-ink)
+  savedAfter: '모았어요',
+  foldAll: (n: number) => `${n}개 모두 확인했어요`,
+  foldSome: (n: number) => `${n}개 확인했어요`,
+  manualGroupLabel: '보기 고르기', // 칩 묶음 화면 읽기 이름
+  chipAll: '전체',
+  chipLeft: '남음',
+  chipDone: '완료',
   topLabel: (name: string, period: string, sent: string, planned: string) =>
     `${name}, ${period}, 계획한 ${planned} 중 ${sent} 확인했어요`, // 화면 읽기 전용(보이는 문장은 없앰)
   stepLabel: (total: number, done: number) => `${total}개 중 ${done}개 확인`,

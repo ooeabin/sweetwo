@@ -1,56 +1,78 @@
 import { daysBetween } from '../date';
-import { isManual, type ConfirmLine } from './pay-confirm';
+import { confirmFinish, type ConfirmLine } from './pay-confirm';
 
-// W-02 이번 달 월급 체크 새 구조(docs/spec/20-salary-plan.md W-02, 2026-11-19 사용자 결정): 큰 숫자 문구, 칸 막대, 한 목록 정렬.
+// W-02 이번 달 월급 체크 새 구조(docs/spec/20-salary-plan.md W-02, 2026-11-19 사용자 결정): 계획 합 큰 금액, 보조 한 줄,
+// 필터 칩 개수, 한 목록 정렬, 다 확인 상태(제목, 저축·투자 합).
 
-/** 칸 막대 칸 수의 한계: 줄이 이보다 많으면 칸 대신 이어진 막대(2026-11-19) */
-export const MAX_CELLS = 12;
-
-/** 칸 막대: 칸 수 = 손 줄 + 자동 줄 수, 채운 칸 = 확인했거나 건너뛴 줄(대기가 아닌 줄). 12개를 넘으면 이어진 막대 */
-export function checkCells(lines: readonly ConfirmLine[]): {
-  total: number;
-  filled: number;
-  segmented: boolean;
-} {
-  const total = lines.length;
-  return {
-    total,
-    filled: lines.filter((l) => l.state !== 'wait').length,
-    segmented: total > 0 && total <= MAX_CELLS,
-  };
+export interface CheckLineLike extends ConfirmLine {
+  sort?: number;
+  planned?: number;
+  actual?: number | null;
 }
 
+/** 큰 금액 = 이번 사이클 계획 합(손 줄 + 자동 줄, 건너뛴 줄도 계획 금액 그대로) */
+export const plannedSum = (lines: readonly CheckLineLike[]) =>
+  lines.reduce((s, l) => s + (l.planned ?? 0), 0);
+
+/** 칩 숫자: 전체 / 남음(대기) / 완료(체크 + 건너뜀) */
+export function chipCounts(lines: readonly ConfirmLine[]) {
+  const left = lines.filter((l) => l.state === 'wait').length;
+  return { all: lines.length, left, done: lines.length - left };
+}
+
+export type CheckChip = 'all' | 'left' | 'done';
+
 /**
- * 한 목록 정렬: 남은 줄(대기, 손 줄·자동 줄) 먼저, 확인한 줄(체크, 건너뜀) 아래. 각 안에서는 템플릿 순서(sort) 그대로.
- * sort가 없으면 들어온 순서
+ * 한 목록 정렬: 남은 줄(대기, 손 줄·자동 줄) 먼저, 확인한 줄(체크, 건너뜀) 아래. 각 안에서는 템플릿 순서(sort) 그대로
+ * (sort가 없으면 들어온 순서). 칩이 ‘남음’이면 남은 줄만, ‘완료’면 확인한 줄만, ‘전체’면 둘 다(남은 줄 먼저)
  */
-export function splitCheckLines<T extends ConfirmLine & { sort?: number }>(
+export function splitCheckLines<T extends CheckLineLike>(
   lines: readonly T[],
+  chip: CheckChip = 'all',
 ): { open: T[]; done: T[] } {
   const ordered = lines
     .map((l, i) => ({ l, i }))
     .sort((a, b) => (a.l.sort ?? 0) - (b.l.sort ?? 0) || a.i - b.i)
     .map((x) => x.l);
   return {
-    open: ordered.filter((l) => l.state === 'wait'),
-    done: ordered.filter((l) => l.state !== 'wait'),
+    open: chip === 'done' ? [] : ordered.filter((l) => l.state === 'wait'),
+    done: chip === 'left' ? [] : ordered.filter((l) => l.state !== 'wait'),
   };
 }
 
-/** 큰 숫자 문구 한 줄(W-02, 홈 월급 상자 “n개 남음”과 같은 말) */
-export type CheckHeadline = { kind: 'dday' | 'left' | 'done'; text: string };
-
 /**
- * 큰 숫자 고르기: 월급날 전(미리 보기)은 “D-6”, 확인 중은 “3개 남음”(남은 손 줄 수), 손 줄을 다 끝냈으면 “확인 끝”(07 7장과 같은 기준).
- * 월급날 당일(0일 이하)은 목록이 생기므로 미리 보기에서는 “D-day”
+ * 보조 한 줄(큰 금액 아래): 월급날 전은 “D-6, 5개”(당일 이하는 “D-day, 5개”), 그 뒤는 “5개 중 2개 확인”(지난 달 읽기 전용도 같음).
+ * 건너뛴 줄도 확인 쪽(대기가 아님)으로 셈
  */
-export function checkHeadline(
-  o: { preview: { today: string; payday: string } } | { lines: readonly ConfirmLine[] },
-): CheckHeadline {
+export function heroMeta(
+  o:
+    | { preview: { today: string; payday: string; count: number } }
+    | { lines: readonly ConfirmLine[] },
+): string {
   if ('preview' in o) {
     const days = daysBetween(o.preview.today, o.preview.payday);
-    return { kind: 'dday', text: days > 0 ? `D-${days}` : 'D-day' };
+    return `${days > 0 ? `D-${days}` : 'D-day'}, ${o.preview.count}개`;
   }
-  const left = o.lines.filter((l) => isManual(l) && l.state === 'wait').length;
-  return left > 0 ? { kind: 'left', text: `${left}개 남음` } : { kind: 'done', text: '확인 끝' };
+  const c = chipCounts(o.lines);
+  return `${c.all}개 중 ${c.done}개 확인`;
 }
+
+/**
+ * 다 확인 상태(손 줄을 모두 체크 또는 건너뜀, 07 7장): 손 줄을 모두 계획대로 했으면 'all'(“이번 달도 계획대로!”),
+ * 건너뜀이나 다른 금액이 섞였으면 'mixed'(“이번 달 확인 끝”). 아직이면 null. 손 줄이 없으면(자동 줄뿐) 상태를 만들지 않음
+ */
+export function doneState(lines: readonly CheckLineLike[]): 'all' | 'mixed' | null {
+  if (!lines.some((l) => !l.auto)) return null;
+  const f = confirmFinish(lines);
+  if (!f) return null;
+  const changed = lines.some(
+    (l) => !l.auto && l.state === 'checked' && l.actual != null && l.actual !== l.planned,
+  );
+  return f === 'all' && !changed ? 'all' : 'mixed';
+}
+
+/** 이번 사이클에 확인한 저축·투자 합(다른 금액이면 그 금액, 건너뜀은 0). 0이면 알약을 숨김 */
+export const savedSum = (lines: readonly (CheckLineLike & { kind?: string })[]) =>
+  lines
+    .filter((l) => l.kind === 'saving' && l.state === 'checked')
+    .reduce((s, l) => s + (l.actual ?? l.planned ?? 0), 0);

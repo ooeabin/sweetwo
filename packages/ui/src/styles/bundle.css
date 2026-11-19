@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (03badc78). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (53819143). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2640,12 +2640,35 @@ button.hg-receipt__main { cursor: pointer; }
    눌러서 고치는 큰 금액 ‘내 월급 고치기’)은 보이는 크기는 그대로 두고 보이지 않는 44px 칸을 덧댐. 어드민은 제 규칙 그대로 */
 :where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *) { position: relative; }
 :where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-receipt__amount):not(.hg-admin *)::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
-/* W-02 이번 달 월급 체크 새 구조(2026-11-19): 칸 막대 StepBar(확인한 칸 = accent-app), 한 목록(TransferRow flow, 끝낸 줄 흐리게·취소선 없음), 아래 고정 주 버튼 */
-.hg-stepbar .hg-receipt__seg--check { min-width: 0; flex: 1 1 0; }
-.hg-receipt__seg--check.is-on { background: var(--accent-app); }
-.hg-transfer--flow.is-done .hg-transfer__label { text-decoration: none; }
-.hg-transfer--flow.is-done { opacity: 0.6; }
-.hg-transfer__amount .hg-autopill, .hg-transfer__amount .hg-transfer__was { margin-right: var(--space-2); }
-.hg-transfer__was { color: var(--stone); font-weight: 500; text-decoration: line-through; }
-.hg-flowdiv { height: 0; margin: var(--space-2) 0; border-top: 1px solid var(--hairline-soft); }
-.hg-stickybar { position: sticky; bottom: 0; z-index: 1; padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }
+/* W-02 이번 달 월급 체크 새 구조(2026-11-19 사용자 확정 시안): 가운데 날짜 알약 + 큰 금액 + 보조 한 줄, 필터 칩, 줄(이름 + 종류 한 줄 / 금액 + 상태 버튼), 수입 상자, 아래 고정 주 버튼, 다 확인 상태 */
+.hg-w02hero { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-3) 0 var(--space-4); text-align: center; }
+.hg-datepill { display: inline-flex; align-items: center; gap: var(--space-1); height: 32px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: 600 14px/20px var(--font-sans); }
+button.hg-datepill { cursor: pointer; }
+.hg-w02hero__amt { margin: var(--space-3) 0 0; font: var(--text-display); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+.hg-w02hero__meta { margin: 0; font: var(--text-body-sm); color: var(--slate); }
+.hg-w02hero__title { margin: var(--space-3) 0 0; font: 700 24px/32px var(--font-sans); letter-spacing: -0.3px; }
+.hg-w02hero__saved { display: inline-flex; gap: var(--space-1); margin-top: var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-1); font: var(--text-body-strong); }
+.hg-w02hero__saved b { color: var(--brand-ink); font-weight: 600; }
+.hg-chip--fill.is-selected { border-color: var(--ink); box-shadow: none; background: var(--ink); color: var(--on-ink); }
+.hg-chip--fill b { font-weight: 600; opacity: 0.6; }
+.hg-transfer--act { grid-template-columns: minmax(0, 1fr) auto; min-height: 68px; padding-block: 0; }
+.hg-transfer--act > .hg-transfer__open, .hg-transfer--act > .hg-transfer__body { grid-column: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; margin: 0; padding-block: var(--space-3); }
+.hg-transfer--act .hg-transfer__label { font: 600 16px/22px var(--font-sans); }
+.hg-transfer--act .hg-transfer__amount { font: 700 16px/22px var(--font-sans); }
+.hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount { color: var(--slate); text-decoration: none; }
+.hg-transfer__action { position: relative; grid-column: 2; order: 2; min-width: 56px; height: 34px; padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); font: 600 14px/20px var(--font-sans); cursor: pointer; }
+.hg-transfer__action::before { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+.hg-transfer__action--go { background: var(--brand-soft); color: var(--brand-ink); }
+.hg-transfer__action--done, .hg-transfer__action--skipped { background: var(--surface-alt); color: var(--slate); }
+.hg-transfer__action--wait { background: transparent; border-color: var(--surface-alt); color: var(--slate); cursor: default; }
+.hg-transfer__action:disabled { cursor: default; }
+.hg-moneybox { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-2) var(--space-4); min-height: 56px; border-radius: var(--radius-xl); background: var(--surface-alt); }
+.hg-moneybox__title { margin: 0; font: var(--text-body-strong); }
+.hg-moneybox__right { display: inline-flex; align-items: center; gap: var(--space-2); }
+.hg-stickybar { position: sticky; bottom: 0; z-index: 1; margin-top: var(--space-4); padding: var(--space-6) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, transparent, var(--surface) var(--space-6)); }
+.hg-w02done__bg { display: none; }
+.hg-frame:has(.hg-w02done__bg) { background: linear-gradient(180deg, var(--brand-soft) 0, var(--canvas) 420px) no-repeat, var(--canvas); }  /* 다 확인 상태 축하 배경: 화면 위 420px, hg-celebrate-bg와 같은 brand-soft → 바탕 (2026-11-19 사용자 결정, 축하 배경 예외에 W-02 다 확인 상태) */
+.hg-confetti { position: absolute; top: 120px; width: 8px; height: 14px; border-radius: 2px; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .hg-confetti { animation: hg-confetti 1.1s var(--ease-out) both; } }
+@media (prefers-reduced-motion: reduce) { .hg-confetti { display: none; } }
+@keyframes hg-confetti { from { opacity: 1; transform: translate(0, 0) rotate(0); } to { opacity: 0; transform: translate(var(--cx, 0px), var(--cy, 80px)) rotate(var(--cr, 120deg)); } }

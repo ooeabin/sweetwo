@@ -1,6 +1,6 @@
 import type { PayCheckLine } from '@sweetwo/api';
 import { formatDot2, kstDateOf, todayKst } from '@sweetwo/core';
-import { AutoPill, BottomSheet, Button, TransferRow } from '@sweetwo/ui';
+import { BottomSheet, Button, TransferRow } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { money, useMask } from '../../shared/mask';
 import { quietly, toast } from '../../shared/toast';
@@ -103,7 +103,7 @@ export function CheckLine({
   entry = 'w02',
   changed = false,
   auto,
-  flow = false,
+  sub,
 }: {
   line: PayCheckLine;
   name: string;
@@ -131,8 +131,11 @@ export function CheckLine({
   changed?: boolean;
   /** 자동 줄 알약 글자(2026-11-13 W-02 2번 “자동 26일”, “자동 확인”) */
   auto?: string;
-  /** W-02 새 한 목록(2026-11-19): 보조 줄 없이 이름(+ 자동 알약) + 금액 + 체크 원. 건너뜀·다른 금액은 금액 왼쪽에 작게 */
-  flow?: boolean;
+  /**
+   * W-02 새 줄(2026-11-19): 주면 체크 원 대신 상태 버튼(남음 “확인” / 완료 “완료” / “건너뜀”)이고, 보조 줄은 이 글자 하나(종류)만.
+   * 남음 버튼 = 바로 ‘계획대로 했어요’, 완료·건너뜀 버튼 = 줄 시트(체크 풀기 포함)
+   */
+  sub?: string;
 }) {
   const { masked } = useMask();
   const check = useCheck(entry);
@@ -183,16 +186,13 @@ export function CheckLine({
     )
   ) : undefined;
   // ‘못 함’은 목표 금액 진행 글자보다 먼저(체크 안 한 줄처럼 보이므로 이유를 보여 줌)
-  const meta = flow ? undefined : skipped ? checkMeta : (progress ?? checkMeta);
-  const changedAmount = done && line.actual != null && line.actual !== line.planned;
-  const amountNote = !flow ? undefined : skipped ? (
-    <span className="hg-autopill">{copy.skippedPill}</span>
-  ) : changedAmount ? (
-    <span className="hg-transfer__was">{money(line.planned, masked)}</span>
-  ) : undefined;
+  const button = sub !== undefined;
+  const meta = button ? sub : skipped ? checkMeta : (progress ?? checkMeta);
   // 자동 줄은 자동 확인된 뒤에도 시트에서 건너뜀·다른 금액으로 바꿈(20 W-02 5번, 2026-11-13)
   const open = (!done || !!line.auto) && !readOnly && !viewOnly;
-  const canSheet = (open && (onOther || onSkip)) || !!onItem;
+  // 상태 버튼 줄은 체크한 줄도 시트로 ‘체크 풀기’(2026-11-19)
+  const unlockable = button && done && !readOnly && !viewOnly;
+  const canSheet = (open && (onOther || onSkip)) || !!onItem || unlockable;
   const pick = (f: () => void) => () => {
     setSheet(false);
     f();
@@ -212,15 +212,30 @@ export function CheckLine({
               : copy.checkLabel(name)
         }
         onToggle={readOnly || viewOnly ? undefined : () => void toggle()}
+        action={
+          button
+            ? {
+                label: skipped ? copy.skippedPill : shownDone ? copy.doneTag : copy.goTag,
+                tone: skipped ? 'skipped' : shownDone ? 'done' : 'go',
+                ariaLabel: viewOnly
+                  ? copy.viewLabel(name, line.state)
+                  : skipped
+                    ? copy.skippedLabel(name)
+                    : shownDone
+                      ? copy.doneLabel(name)
+                      : copy.checkLabel(name),
+                disabled: readOnly || viewOnly,
+                busy: !!pending,
+                onClick: shownDone || skipped ? () => setSheet(true) : () => void toggle(),
+              }
+            : undefined
+        }
         disabled={readOnly}
         viewOnly={viewOnly}
         meta={meta}
         lead={lead}
         changed={changed}
-        auto={flow ? undefined : auto}
-        badge={flow && line.auto ? <AutoPill text={copy.autoTag} /> : undefined}
-        flow={flow}
-        amountNote={amountNote}
+        auto={auto}
         onOpen={canSheet ? () => setSheet(true) : undefined}
       />
       {sheet && (
@@ -232,6 +247,11 @@ export function CheckLine({
               {open && !done && (
                 <Button block variant="primary" onClick={pick(() => void toggle())}>
                   {copy.sent}
+                </Button>
+              )}
+              {unlockable && (
+                <Button block variant="secondary" onClick={pick(() => void toggle())}>
+                  {copy.uncheck}
                 </Button>
               )}
               {open && onOther && (
