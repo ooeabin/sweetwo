@@ -71,7 +71,7 @@ test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘�
   await expect(page.getByText('400만 원', { exact: true }).first()).toBeVisible();
 });
 
-test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 수입 상자에 합으로 보임', async ({ page }) => {
+test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 수입 카드에 합으로 보임', async ({ page }) => {
   const { s } = await open(page, '/salary');
   await page.getByRole('button', { name: '수입 적기' }).click();
   await page.getByLabel('얼마를 받았어요?').fill('1000000');
@@ -84,11 +84,11 @@ test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 수입 상�
   await expect(page.getByText('수입을 적었어요')).toBeVisible();
   expect(s.moneyIns[0]).toMatchObject({ amount: 1_000_000, kind: 'bonus' });
   expect(s.moves).toEqual([]);
-  const got = page.getByRole('region', { name: '수입' });
-  // 2026-11-19 W-02 수입 상자는 합만(기록 줄은 W-20b)
-  await expect(got.getByRole('button', { name: /수입 기록 보기/ })).toHaveText('100만 원');
+  const got = page.getByRole('region', { name: '이번 달 수입' });
+  // 2026-11-19 W-02 수입 카드: 합 + 최근 기록, “전체 ›”가 W-20b
+  await expect(got.locator('.hg-incomecard__sum')).toHaveText('100만 원');
   await axe(page);
-  await got.getByRole('button', { name: /수입 기록 보기/ }).click();
+  await got.getByRole('button', { name: '수입 기록 전체 보기' }).click();
   await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
 });
 

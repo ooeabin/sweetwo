@@ -280,6 +280,8 @@ test('파트너 탭(각자): 같은 구조 보기만(버튼 비활성), 다 끝�
   for (const b of await page.locator('.hg-transfer__action').all()) await expect(b).toBeDisabled();
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
+  // 수입 카드: 파트너 탭에는 “수입 적기” 버튼이 없음(2026-11-19)
+  await expect(page.getByRole('button', { name: '수입 적기' })).toHaveCount(0);
   await axe(page);
   const yl = db.checklists.find((c) => c.owner_user_id === 'yebin')?.pay_check_line as Line[];
   yl.forEach((l) => mark(l, 'checked', null, 'yebin'));

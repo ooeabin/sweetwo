@@ -77,7 +77,7 @@ import {
 } from '../data';
 import { incomeOf, MonthHero, ShareLink } from '../month-parts';
 import { salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
-import { MoneyInLine } from '../money-in-rows';
+import { IncomeCard } from '../money-in-rows';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
 import { useSavingItems } from '../saving';
 import { AchieveWatch } from '../saving-parts';
@@ -296,11 +296,13 @@ export function W02PaydayConfirm() {
           bar={needed > 0 ? (pct ?? 0) : undefined}
         />
         {meId && (
-          <MoneyInLine
-            meId={meId}
+          <IncomeCard
+            ownerId={meId}
             from={from}
             to={to}
             masked={masked}
+            label={copy.incomePeriodLabel}
+            hideSum
             onOpen={() => nav(togetherPaths.moneyInList)}
             onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
           />
@@ -403,8 +405,8 @@ export function W02PaydayConfirm() {
           </div>
         )}
         {meId && (
-          <MoneyInLine
-            meId={meId}
+          <IncomeCard
+            ownerId={meId}
             from={`${today.slice(0, 8)}01`}
             to={today}
             masked={masked}
@@ -760,14 +762,17 @@ export function W02PaydayConfirm() {
           {rowsList}
         </>
       )}
-      {!partnerTab && ago === 0 && meId && (
-        <MoneyInLine
-          meId={meId}
+      {meId && (
+        <IncomeCard
+          ownerId={partnerTab ? tab : meId}
           from={shown.cycle_start}
           to={shown.cycle_end}
           masked={masked}
-          onOpen={() => nav(togetherPaths.moneyInList)}
-          onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
+          hideEmpty={partnerTab}
+          onOpen={partnerTab ? undefined : () => nav(togetherPaths.moneyInList)}
+          onAdd={
+            pending || partnerTab || ago > 0 ? undefined : () => nav(togetherPaths.moneyIn)
+          }
         />
       )}
       {confirmable.length > 0 && (
