@@ -44,6 +44,7 @@ export function PlanSummary({
   onAmount,
   people,
   title,
+  titleError,
   bar,
   barLabel,
   legend,
@@ -60,6 +61,8 @@ export function PlanSummary({
   people?: PlanSummaryPerson[];
   /** 굵은 한 문장(숫자는 <em>) */
   title?: ReactNode;
+  /** 굵은 문장을 오류 빨강으로(“계획이 월급보다 25만 원 많아요”) */
+  titleError?: boolean;
   /** 막대 칸 퍼센트(0은 그리지 않음). 합 100 */
   bar?: { kind: PlanPartKind; percent: number }[];
   /** 막대 화면 읽기 이름(“저축·투자 40%, 지출 52%, 미계획 8%”) */
@@ -136,7 +139,11 @@ export function PlanSummary({
         </>
       ) : (
         <>
-          {title && <p className="hg-plansum__title">{title}</p>}
+          {title && (
+            <p className={cx('hg-plansum__title', titleError && 'hg-plansum__title--error')}>
+              {title}
+            </p>
+          )}
           {bar && (
             <div className="hg-plansum__bar" role="img" aria-label={barLabel}>
               {bar

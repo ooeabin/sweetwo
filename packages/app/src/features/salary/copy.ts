@@ -90,6 +90,7 @@ export const copy = {
   summarySaving: ['월급의 ', '를 모으고 있어요'] as const,
   summaryPct: (n: number) => `${n}%`,
   summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요',
+  // 계획이 월급보다 큼(미계획 < 0)이면 굵은 문장은 core planOverText “계획이 월급보다 25만 원 많아요”(오류 빨강) [확인 필요]
   summaryEmpty: ['월급을 적으면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
   summaryEmptyAction: '월급 적기',
   allocated: '계획 금액',
@@ -370,8 +371,8 @@ export const copy = {
   // ── v2.2 확인 루프(20 ‘월급 탭 v2.2’, 2026-11-13) [모두 확인 필요] ──
   cycleOf: (start: string) => `${formatMonthDay(start)} 월급`, // 07 1장 확인 목록 이름
   autoPayday: '월급날',
-  autoNote: '자동으로 나가요', // [확인 필요] 2026-11-19 W-01 줄 보조 줄(예전 알약 “자동 월급날”)
-  autoNoteOn: (day: string) => `${day}에 자동으로 나가요`, // [확인 필요] 2026-11-19 W-01 줄 보조 줄(예전 알약 “자동 26일”)
+  autoNote: '월급날 자동', // [확인 필요] 2026-11-19 W-01 줄 보조 줄(2026-11-19 짧게: 예전 “자동으로 나가요”)
+  autoNoteOn: (day: string) => `${day} 자동`, // [확인 필요] 2026-11-19 W-01 줄 보조 줄(“25일 자동”, 예전 “25일에 자동으로 나가요”)
   noteJoin: ', ', // 줄 보조 줄 조각 이음(“모은 금액 220만 원, 목표 금액의 23%, 자동으로 나가요”)
   autoWait: (day: string) => `자동 ${day}`, // W-02 2번 “자동 26일”(W-01과 같은 순서, 2026-11-16)
   autoDone: '자동 확인',
@@ -393,6 +394,8 @@ export const copy = {
   incomeAdd: '적기', // 줄 끝 “+ 적기”
   incomeAddLabel: '수입 적기', // 화면 읽기
   incomeSumLabel: (sum: string) => `수입 ${sum}, 수입 기록 보기`,
+  periodRange: (start: string, end: string) => `${formatMonthDay(start)} ~ ${formatMonthDay(end)}`, // [확인 필요] 날짜 없는 사람 W-02 날짜 알약(30일 기간)
+  planOf: (amount: string) => `월급 계획 ${amount} 중`, // [확인 필요] 날짜 없는 사람 W-02 보조 줄
   goTag: '확인', // 남은 줄 상태 버튼(누르면 바로 계획대로 했어요)
   doneTag: '완료', // 확인한 줄 상태 버튼(누르면 시트)
   skippedPill: '건너뜀',
@@ -406,8 +409,6 @@ export const copy = {
   heroTitleMixed: '이번 달 확인 끝',
   savedBefore: '저축·투자', // 흰 알약 “저축·투자 139만 원 모았어요”(금액만 brand-ink)
   savedAfter: '모았어요',
-  foldAll: (n: number) => `${n}개 모두 확인했어요`,
-  foldSome: (n: number) => `${n}개 확인했어요`,
   manualGroupLabel: '보기 고르기', // 칩 묶음 화면 읽기 이름
   chipAll: '전체',
   chipLeft: '남음',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { largestRemainder, planRatio, planSummary, splitShares } from './plan-ratio';
+import { largestRemainder, planOverText, planRatio, planSummary, splitShares } from './plan-ratio';
 
 // 기획서 06 3-5 예시 표 그대로
 const man = (n: number) => n * 10_000;
@@ -118,6 +118,8 @@ describe('W-01 요약 카드(20 W-01 3번, 2026-11-19)', () => {
       bar: { saving: 40, spend: 52, free: 8 },
       left: man(28),
       over: false,
+      noLines: false,
+      chart: true,
     });
   });
   it('문장 퍼센트는 정수 반올림(0.5는 올림): 1 ÷ 8 = 12.5% → 13, 3 ÷ 8 = 37.5% → 38', () => {
@@ -153,5 +155,25 @@ describe('W-01 요약 카드(20 W-01 3번, 2026-11-19)', () => {
     expect(planSummary({ income: 99_999_999_999, saving: 49_999_999_999, spend: 0 }).share).toBe(
       50,
     );
+  });
+});
+
+describe('W-01 요약 카드: 줄 없음·계획 초과(2026-11-19)', () => {
+  it('줄이 하나도 없으면 막대·범례 없이 문장만(월급이 있어도)', () => {
+    const r = planSummary({ income: 3_500_000, saving: 0, spend: 0, lines: 0 });
+    expect(r.noLines).toBe(true);
+    expect(r.chart).toBe(false);
+    expect(r.noSaving).toBe(true);
+  });
+  it('줄이 있으면(0원 줄 포함) 막대를 그림, 월급 0원이면 그리지 않음', () => {
+    expect(planSummary({ income: 3_500_000, saving: 0, spend: 0, lines: 2 }).chart).toBe(true);
+    expect(planSummary({ income: 0, saving: 100, spend: 0, lines: 1 }).chart).toBe(false);
+    expect(planSummary({ income: 3_500_000, saving: 1, spend: 1 }).chart).toBe(true);
+  });
+  it('계획이 월급을 넘으면 “계획이 월급보다 25만 원 많아요”', () => {
+    const r = planSummary({ income: 3_500_000, saving: 500_000, spend: 3_250_000, lines: 4 });
+    expect(r.over).toBe(true);
+    expect(r.left).toBe(-250_000);
+    expect(planOverText(r.left)).toBe('계획이 월급보다 25만 원 많아요');
   });
 });

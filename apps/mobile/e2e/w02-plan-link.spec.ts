@@ -182,7 +182,8 @@ test('다 확인 + 건너뜀이 섞이면 “이번 달 확인 끝”, 공유하
   await expect(page.getByRole('heading', { name: '이번 달 확인 끝' })).toBeVisible();
   await expect(page.locator('.hg-w02hero__saved')).toHaveCount(0);
   // 건너뜀 줄: 회색 “건너뜀” 버튼, 완료한 줄과 함께 아래
-  await page.getByRole('button', { name: /5개 모두 확인했어요/ }).click();
+  // 건너뜀이 섞이면 접힌 줄은 “3개 확인, 2개 건너뜀”(2026-11-19)
+  await page.getByRole('button', { name: '3개 확인, 2개 건너뜀' }).click();
   await expect(page.getByRole('button', { name: '청약 건너뜀', exact: true })).toHaveText('건너뜀');
   // 건너뜀 버튼 → 시트 → ‘계획대로 했어요’로 체크
   await page.getByRole('button', { name: '청약 건너뜀', exact: true }).click();
@@ -273,7 +274,8 @@ test('파트너 탭(각자): 같은 구조 보기만(버튼 비활성), 다 끝�
   joinYebin(db);
   await page.goto('/salary?who=yebin');
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('95만 원');
+  // 큰 금액 = 그 사이클 월급(2026-11-19, 예전 줄 계획 합 95만 원)
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('270만 원');
   await expect(page.getByText('2개 중 0개 확인')).toBeVisible();
   for (const b of await page.locator('.hg-transfer__action').all()) await expect(b).toBeDisabled();
   await expect(page.getByRole('checkbox')).toHaveCount(0);

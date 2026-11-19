@@ -2,7 +2,7 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { sharedCopy } from '../../shared/copy';
 import { MainFrame, SkelBody } from '../frame';
 import { copy } from './copy';
-import { useCheckRealtime, useGoalRealtime, useMe, useSpace, useSplitRealtime } from './data';
+import { useCheckRealtime, useGoalRealtime, useSpace, useSplitRealtime } from './data';
 import { useTogetherRealtime } from './together';
 import { W01Receipt } from './pages/w-01-receipt';
 import { W02PaydayConfirm } from './pages/w-02-payday-confirm';
@@ -38,14 +38,10 @@ export function SalaryPlanTab() {
 
 /**
  * 머리 제목(2026-11-18): 서랍 줄 이름과 같게. W-02 = ‘이번 달 월급 체크’, W-01 = ‘월급 계획 템플릿’.
- * 날짜 없는 사람(각자)은 서랍에 ‘이번 달 월급 체크’ 줄이 없어 W-02 제목은 탭 이름 ‘월급’
  */
 export function useSalaryTitle(view: 'month' | 'plan') {
-  const me = useMe();
-  const space = useSpace();
-  if (view === 'plan') return copy.planTitle;
-  const noCheck = !!me.data?.payday_none && space.data?.salary_mode !== 'joint';
-  return noCheck ? copy.tabTitle : copy.monthTitle;
+  // 화면 이름 = 서랍 줄 이름(2026-11-18), 날짜 없는 사람 W-02도 같은 개편 모양이라 같은 제목(2026-11-19)
+  return view === 'plan' ? copy.planTitle : copy.monthTitle;
 }
 
 /**

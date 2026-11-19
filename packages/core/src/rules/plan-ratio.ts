@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Won } from '../money';
+import { readWon, type Won } from '../money';
 
 // W-01 영수증 비율 막대(docs/spec/06-calc-allocation.md 3-5, 20 W-01 4번).
 // 퍼센트는 정수이고 합이 100: 모두 버림 → 모자란 만큼 나머지가 큰 순서로 1씩(같으면 저금 → 지출 → 여유 자금).
@@ -120,15 +120,31 @@ export interface PlanSummaryValue {
   bar: { saving: number; spend: number; free: number };
   /** 미계획 금액(원, 음수 = 모자람). 범례 셋째 줄 금액 */
   left: Won;
-  /** 계획이 월급을 넘음(미계획 < 0): 범례 미계획 금액을 −와 빨강으로 */
+  /** 계획이 월급을 넘음(미계획 < 0): 범례 미계획 금액을 −와 빨강으로, 굵은 문장은 `planOverText` */
   over: boolean;
+  /** 저축·투자 줄도 지출 줄도 0개(2026-11-19 사용자 결정): 알약 막대와 ● 범례를 숨기고 문장만 */
+  noLines: boolean;
+  /** 알약 막대와 ● 범례를 그림(월급이 있고 줄이 하나라도 있을 때) */
+  chart: boolean;
 }
 
-/** 월급, 저축·투자 줄 합, 지출 줄 합 → W-01 요약 카드 값(막대는 `planRatio`, 문장 퍼센트는 월급 기준 반올림) */
-export function planSummary(o: { income: Won; saving: Won; spend: Won }): PlanSummaryValue {
+/** 계획이 월급을 넘을 때 굵은 문장(2026-11-19): “계획이 월급보다 25만 원 많아요”. left = 미계획(음수) */
+export const planOverText = (left: Won) => `계획이 월급보다 ${readWon(Math.abs(left))} 많아요`;
+
+/**
+ * 월급, 저축·투자 줄 합, 지출 줄 합 → W-01 요약 카드 값(막대는 `planRatio`, 문장 퍼센트는 월급 기준 반올림).
+ * lines = 저축·투자 줄 수 + 지출 줄 수(주지 않으면 줄이 있다고 봄)
+ */
+export function planSummary(o: {
+  income: Won;
+  saving: Won;
+  spend: Won;
+  lines?: number;
+}): PlanSummaryValue {
   const saving = Math.max(o.saving, 0);
   const income = Math.max(o.income, 0);
   const r = planRatio({ income, saving, spend: o.spend });
+  const noLines = o.lines !== undefined && o.lines <= 0;
   const share =
     income > 0 ? Number((BigInt(saving) * 200n + BigInt(income)) / (2n * BigInt(income))) : 0;
   return {
@@ -139,5 +155,7 @@ export function planSummary(o: { income: Won; saving: Won; spend: Won }): PlanSu
     bar: { saving: r.saving, spend: r.spend, free: r.free ?? 0 },
     left: r.left,
     over: r.left < 0,
+    noLines,
+    chart: income > 0 && !noLines,
   };
 }
