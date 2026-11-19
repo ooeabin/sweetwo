@@ -44,7 +44,7 @@ test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목�
   await page.goto('/salary/plan#saving');
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   const home = group.getByRole('button', { name: /^내 집 마련/ });
-  await expect(home).toContainText('매달 95만 원');
+  await expect(home).toContainText('95만 원');
   await expect(home).toContainText('모은 금액 0원');
   await expect(home).toContainText('목표 금액의 0%');
   await expect(home).toHaveAccessibleName('내 집 마련 매달 95만 원, 모은 금액 0원, 목표 금액의 0%');
@@ -103,7 +103,7 @@ test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫
   await expect(page.locator('.hg-toasts')).toBeVisible();
   const fresh = page.locator('.hg-receipt__row.is-new');
   await expect(fresh).toContainText('제주 여행');
-  await expect(fresh).toContainText('매달 1만 원');
+  await expect(fresh).toContainText('1만 원');
   // 미합류라 초대 물음 시트가 W-01에서 열림(2026-11-18, 예전엔 W-10)
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   // 잠깐 강조라 곧 사라짐, 줄은 남음

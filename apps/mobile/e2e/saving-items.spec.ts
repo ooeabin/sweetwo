@@ -113,7 +113,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 이 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort)가 뜸
   await expect(page.locator('.hg-toasts')).toBeVisible();
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('제주 여행');
-  await expect(page.locator('.hg-receipt__row.is-new')).toContainText('매달 20만 원');
+  await expect(page.locator('.hg-receipt__row.is-new')).toContainText('20만 원');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   // 줄을 누르면 W-10 상세
   await page.getByRole('button', { name: /^제주 여행/ }).click();

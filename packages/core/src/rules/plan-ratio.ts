@@ -104,3 +104,40 @@ export function splitShares(
     ratioTen: [ten, 10 - ten],
   };
 }
+
+// ───────── W-01 요약 카드(20 W-01 3번, 2026-11-19) ─────────
+
+export interface PlanSummaryValue {
+  /** 월급(합쳐서면 두 사람 합). 0 이하면 요약은 ‘월급 적기’ 상태(막대·범례 없음) */
+  income: Won;
+  /** 월급 0원이라 막대와 범례를 그리지 않음 */
+  empty: boolean;
+  /** 월급 중 저축·투자 비율 %(정수, 0.5는 올림). 월급이 없으면 0 */
+  share: number;
+  /** 저축·투자 줄 합이 0원(굵은 문장이 “월급을 어떻게 나눌지 정해 보세요”) */
+  noSaving: boolean;
+  /** 막대 칸 퍼센트(합 100, 0인 칸은 그리지 않음). 미계획이 음수면 free = 0이고 저축·투자·지출이 막대를 꽉 채움 */
+  bar: { saving: number; spend: number; free: number };
+  /** 미계획 금액(원, 음수 = 모자람). 범례 셋째 줄 금액 */
+  left: Won;
+  /** 계획이 월급을 넘음(미계획 < 0): 범례 미계획 금액을 −와 빨강으로 */
+  over: boolean;
+}
+
+/** 월급, 저축·투자 줄 합, 지출 줄 합 → W-01 요약 카드 값(막대는 `planRatio`, 문장 퍼센트는 월급 기준 반올림) */
+export function planSummary(o: { income: Won; saving: Won; spend: Won }): PlanSummaryValue {
+  const saving = Math.max(o.saving, 0);
+  const income = Math.max(o.income, 0);
+  const r = planRatio({ income, saving, spend: o.spend });
+  const share =
+    income > 0 ? Number((BigInt(saving) * 200n + BigInt(income)) / (2n * BigInt(income))) : 0;
+  return {
+    income,
+    empty: income <= 0,
+    share,
+    noSaving: saving <= 0,
+    bar: { saving: r.saving, spend: r.spend, free: r.free ?? 0 },
+    left: r.left,
+    over: r.left < 0,
+  };
+}
