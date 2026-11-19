@@ -164,6 +164,32 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
     const body = () => (req.postDataJSON() ?? {}) as Row;
     const fn = path.startsWith('/rest/v1/rpc/') ? path.slice('/rest/v1/rpc/'.length) : null;
 
+    // 월급날 확인 → 월급 자동 수입 기록(20261224090000 pay_auto_income 흉내): 사람이 처음 확인(풀기 아님)할 때 사이클에 한 번.
+    // 지워도 auto_income_at이 남아 다시 안 넣음. 날짜 = 그 사이클 월급날, 금액 = 내 월급(0원이면 안 넣음), 모은 금액에는 안 들어감
+    if (fn === 'check_pay_line' || fn === 'confirm_payday') {
+      const b0 = body();
+      const c =
+        fn === 'confirm_payday'
+          ? db.checklists.find((x) => x.id === b0.p_checklist)
+          : db.checklists.find((x) => (x.pay_check_line as Row[]).some((l) => l.id === b0.p_line));
+      const human = fn === 'confirm_payday' || b0.p_state !== 'wait';
+      const pay = Number(db.me.monthly_income ?? 0);
+      if (c && human && !c.auto_income_at && pay > 0) {
+        c.auto_income_at = new Date().toISOString();
+        s.moneyIns.push({
+          id: `in-auto-${s.moneyIns.length + 1}`,
+          space_id: 'space-1',
+          owner_user_id: viewer,
+          amount: pay,
+          received_on: c.cycle_start,
+          kind: 'salary',
+          source: 'payday_auto',
+          created_at: new Date().toISOString(),
+          deleted_at: null,
+        });
+      }
+      return route.fallback();
+    }
     if (fn === 'goal_saved_sums')
       return json(
         route,
@@ -364,6 +390,7 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
         amount: b0.p_amount,
         received_on: b0.p_received_on ?? new Date().toISOString().slice(0, 10),
         kind: b0.p_kind ?? 'etc',
+        source: 'manual',
         created_at: new Date().toISOString(),
         deleted_at: null,
       });

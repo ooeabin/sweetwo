@@ -116,8 +116,15 @@ export function IncomeCard({
           {recent.map((r) => (
             <li key={r.id} className="hg-incomecard__row">
               <span className="hg-incomecard__date">{formatDot2(r.received_on)}</span>
-              <span className="hg-incomecard__name">{copy.moneyInKinds[r.kind]}</span>
-              <span className="hg-incomecard__amt">{speakMasked(`+${money(r.amount, masked)}`)}</span>
+              <span className="hg-incomecard__name">
+                {copy.moneyInKinds[r.kind]}
+                {r.source === 'payday_auto' && (
+                  <span className="hg-incomecard__auto">{copy.incomeAuto}</span>
+                )}
+              </span>
+              <span className="hg-incomecard__amt">
+                {speakMasked(`+${money(r.amount, masked)}`)}
+              </span>
             </li>
           ))}
         </ul>

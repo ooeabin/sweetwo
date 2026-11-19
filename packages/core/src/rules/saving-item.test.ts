@@ -216,6 +216,28 @@ describe('v2.2 모은 금액·남은 금액(06 4-1, 5-3b)', () => {
     ).toBe(2_030 * MAN);
   });
 
+  it('월급 자동 수입 기록(07 4장, 2026-11-20)은 모은 금액·이번 달 +에 안 들어감: 입력이 goal_move뿐이고 배정 없는 수입(money_in)은 움직임이 없음', () => {
+    const lines = [
+      { goal_id: 'h', kind: 'saving', state: 'checked', planned: 95 * MAN, actual: null },
+    ];
+    // 월급 350만 원이 payday_auto 수입으로 들어가도(저축·투자 배정 goal_move 없음) 모은 금액은 저금 줄 합 그대로
+    const autoIncome = { id: 'in-1', amount: 350 * MAN, kind: 'salary', source: 'payday_auto' };
+    expect(autoIncome.amount).toBeGreaterThan(0);
+    expect(savedTotal('h', { start: 2_000 * MAN, lines, moves: [] })).toBe(2_095 * MAN);
+    expect(savingMonthGain(['h'], { lines, moves: [], from: '2026-11-01', to: '2026-11-30' })).toBe(
+      95 * MAN,
+    );
+    // 나눠 넣어야(money_in_id가 있는 움직임) 모은 금액이 늘어남
+    const put = {
+      goal_id: 'h',
+      kind: 'in' as const,
+      amount: 50 * MAN,
+      reason_code: 'custom',
+      money_in_id: 'in-1',
+    };
+    expect(savedTotal('h', { start: 2_000 * MAN, lines, moves: [put] })).toBe(2_145 * MAN);
+  });
+
   it('이번 달 +(06 5-6): 확인·자동·수입 적기만, 바로잡기 빼고', () => {
     const lines = [
       { goal_id: 'h', kind: 'saving', state: 'checked', planned: 95 * MAN, actual: 90 * MAN },

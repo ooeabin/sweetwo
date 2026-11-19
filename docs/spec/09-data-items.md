@@ -76,6 +76,7 @@
 | 상태 | 진행 중 / 다 했어요 / 끝남(→ 핵심 규칙 › 월 사이클 5장) |
 | 첫 사이클 여부 | 2026-11-13 소급 없앰: 새로 만들지 않음(지난 데이터 읽기용) |
 | 확인 | `confirmed_at`, `confirmed_by`(“모두 계획대로 됐어요”, 2026-11-13) |
+| 자동 수입 | `auto_income_at`(그 사이클에 월급 자동 수입 기록을 넣은 때, 사이클에 한 번, 2026-11-20) |
 
 **체크리스트 줄**
 
@@ -186,7 +187,7 @@
 | --- | --- | --- | --- |
 | 같이 모으기 묶음 `saving_bundle` | id, space_id, name, target_amount, deadline, status, achieved_at, show_each_a·show_each_b(구성원별), percent_only_a·percent_only_b, version, deleted_at | 구성원 둘 다 읽기·고치기(show_each·percent_only는 자기 쪽만). 공간이 각자 엔진일 때만 만들 수 있음 | W-15, W-15a, H-10 |
 | 쓸 곳 메모 `saving_note` | id, space_id, goal_id 또는 bundle_id, name, amount, due_on, paid, paid_move_id(→ goal_move) | 그 저금을 볼 수 있는 사람 읽기, 고칠 수 있는 사람 쓰기 | W-14, W-14a, Y-04 |
-| 수입 적기 `money_in` | id, space_id, owner_user_id, amount, received_on, kind(enum `money_in_kind`: salary/bonus/family/work/refund/etc) | 주인만(공개 ‘모두’면 상대 읽기) | W-20, W-20a, H-13 |
+| 수입 적기 `money_in` | id, space_id, owner_user_id, amount, received_on, kind(enum `money_in_kind`: salary/bonus/family/work/refund/etc), `source`(text, `manual` 기본 / `payday_auto` = 월급날 확인으로 자동 기록, 2026-11-20, → 07 4장) | 주인만(공개 ‘모두’면 상대 읽기) | W-20, W-20a, H-13 |
 | 같이 쓰는 통장 분담 `shared_account` | id, space_id, name, monthly_total, rule(half/income_ratio/custom), share_a, share_b, status(proposed/accepted/declined/expired), proposed_by, expires_at | 구성원 둘 다 읽기, 답은 받은 사람만. income_ratio여도 월급 원값은 저장하지 않고 결과만 | W-01b, W-01c |
 | 관리 형태 요청 `mode_change_request` | id, space_id, from_user, to_mode, to_manager, phrase(p04_send/s11f_combine), status, expires_at | 구성원 읽기, 받은 사람만 답, 보낸 사람만 취소 | P-04, S-11f, S-11j |
 | 다시 연결 요청 `reconnect_request` | id, from_user, to_user, created_at, status, blocked | 두 사람만 | S-12, S-12g |
@@ -203,7 +204,7 @@
 | 사용자 `app_user` | `plan_share`(enum all/saving_only/done_only, 기본 saving_only), `rank_badge_home`(기본 false), `rank_consent`(기본 false), `asset_share_default`(null = 아직 안 고름, 첫 자산으로 정하는 것은 연결된 뒤만), `send_intent_space`(18 P-04 ‘보내요’를 보낸 공간, 각자 계열 내 월급 계획 ‘보내기’ 줄, 2026-11-13), `last_reconciled_at`, `push_asked_at`, `push_kinds` jsonb(키 care, payday, achieved, shared_change, my_allowance, progress_news), `payday_none` bool, `marriage_state` 값 `dating`·`living_together` |
 | 월급 계획 줄 `split_line` | `in_checklist`, `auto_pay`, `auto_day`, kind 값 `send`·`shared_account`(+ `shared_account_id`) |
 | 체크리스트 줄 `pay_check_line` | `auto`, `auto_due`, `late` |
-| 월급 체크리스트 `pay_checklist` | `confirmed_at`, `confirmed_by` |
+| 월급 체크리스트 `pay_checklist` | `confirmed_at`, `confirmed_by`, `auto_income_at`(2026-11-20) |
 | 저금 항목 `goal` | `bundle_id`. 저금 공개 열은 새 코드에서 읽지 않음(2단계로 지움) |
 | 저금 움직임 `goal_move` | `reason` text(40자, 주인만 읽는 뷰. 상대용은 `goal_move_public`), `reason_code`(enum `goal_move_reason`: fix/used/interest/reconcile/note_paid/custom/auto), `hide_from_summary` bool, `money_in_id`, `note_id`. kind는 기존 in / out만 |
 | 자산 `asset` | `quick` bool(빠르게 적기, 기본 false, 2026-11-13 열 추가). 공개 enum 값은 그대로(화면 이름만 ‘총액만’) |

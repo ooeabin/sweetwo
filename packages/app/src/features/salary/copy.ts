@@ -393,6 +393,7 @@ export const copy = {
   // W-02 수입 카드(2026-11-19 사용자 결정, 20 W-02 6번) [확인 필요]
   incomeCardLabel: '이번 달 수입',
   incomePeriodLabel: '이번 기간 수입', // 날짜 없는 사람
+  incomeAuto: '자동', // 월급날 확인으로 자동 기록한 수입 줄(W-02 수입 카드, W-20b) [확인 필요] 2026-11-20
   incomeAll: '전체 ›', // 수입 기록(W-20b)
   incomeAllLabel: '수입 기록 전체 보기',
   incomeNone: '아직 적은 수입이 없어요',
