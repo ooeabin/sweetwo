@@ -58,7 +58,7 @@ test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목�
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
 
-test('W-02 ↔ W-01: W-02 머리 링크 없음, 구간 탭 없음, 저금 묶음 머리 → 저축·투자 묶음, ‹ = 건너온 화면', async ({
+test('W-02 ↔ W-01: W-02 머리 링크 없음, 구간 탭 없음, 저금 묶음 머리 없음(2026-11-19), ‹ = 건너온 화면', async ({
   page,
 }, info) => {
   await open(page);
@@ -78,10 +78,9 @@ test('W-02 ↔ W-01: W-02 머리 링크 없음, 구간 탭 없음, 저금 묶음
     await page.getByRole('button', { name: '홈으로' }).click();
     await expect(page).toHaveURL(/\/$/);
   }
-  // W-02 저금 묶음 머리 ‘저축·투자 ›’ → W-01 묶음(주소 #saving)
+  // 2026-11-19: W-02에는 저금 묶음 머리가 없음(저축·투자 묶음은 W-01에서만)
   await page.goto('/salary');
-  await page.getByRole('button', { name: '저축·투자 목록 보기' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan\?from=checklist#saving$/);
+  await expect(page.getByRole('button', { name: '저축·투자 목록 보기' })).toHaveCount(0);
 });
 
 test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫 질문 안내 줄은 없음', async ({

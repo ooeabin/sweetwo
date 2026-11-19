@@ -75,7 +75,6 @@ export const copy = {
   // 2026-11-18 화면 이름 = 서랍 줄 이름(구간 탭 ‘이번 달 / 계획’ 없앰) [확인 필요]
   monthTitle: '이번 달 월급 체크',
   planTitle: '월급 계획 템플릿',
-  monthLinkTo: '이번 달 월급 체크', // W-01 머리 이동 링크(‘›’는 아이콘)
   everyMonth: (day: string) => `매달 ${day}`,
   jointPaydays: (parts: string[]) => parts.join(', '),
   personPayday: (name: string, day: string) => `${name} ${day}`,
@@ -365,9 +364,7 @@ export const copy = {
   autoDone: '자동 확인',
   autoLabel: (name: string, day: string) => `${name}, 자동, ${day}에 나가요`, // 화면 읽기
   autoDoneLabel: (name: string) => `${name}, 자동으로 확인했어요`,
-  autoGroup: (n: number) => `자동으로 나가는 것 ${n}개`,
   autoGroupHelp: '안 나간 게 있으면 눌러서 바꿔 주세요',
-  manualGroup: (n: number) => `확인할 것 ${n}개`,
   confirmAll: '모두 계획대로 됐어요', // W-02 4번(버튼 말투 예외 Q2)
   lateHelp: '다음 월급날 전까지 언제든 확인할 수 있어요', // W-02 8번
   lateTitle: (start: string) => `${formatMonthDay(start)} 월급`,
@@ -378,6 +375,31 @@ export const copy = {
   previewAuto: '자동으로 나가요',
   previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
   moneyInGo: '수입 적기',
+  // W-02 새 구조(2026-11-19) [모두 확인 필요]
+  incomeLine: '수입',
+  incomeAdd: '적기', // 줄 끝 “+ 적기”
+  incomeAddLabel: '수입 적기', // 화면 읽기
+  incomeSumLabel: (sum: string) => `수입 ${sum}, 수입 기록 보기`,
+  goTag: '확인', // 남은 줄 상태 버튼(누르면 바로 계획대로 했어요)
+  doneTag: '완료', // 확인한 줄 상태 버튼(누르면 시트)
+  skippedPill: '건너뜀',
+  doneLabel: (name: string) => `${name} 완료, 고치기`, // 화면 읽기
+  uncheck: '체크 풀기',
+  kindSaving: '저축·투자',
+  kindSpend: '지출',
+  dayTag: (day: number) => `${day}일`, // 월급날 전 비활성 버튼
+  cyclePick: '월급날 고르기',
+  heroTitleAll: '이번 달도 계획대로!',
+  heroTitleMixed: '이번 달 확인 끝',
+  savedBefore: '저축·투자', // 흰 알약 “저축·투자 139만 원 모았어요”(금액만 brand-ink)
+  savedAfter: '모았어요',
+  foldAll: (n: number) => `${n}개 모두 확인했어요`,
+  foldSome: (n: number) => `${n}개 확인했어요`,
+  manualGroupLabel: '보기 고르기', // 칩 묶음 화면 읽기 이름
+  chipAll: '전체',
+  chipLeft: '남음',
+  chipDone: '완료',
+  dayLabel: (n: string) => `월급날까지 ${n}`,
   // W-01 줄 설정(7a), 보내기(5e), 관리하는 사람의 상대 용돈(5f), 같이 쓰는 통장(5d)
   inChecklist: '월급날 확인 목록에 넣기',
   autoPay: '은행에서 자동으로 보내요',
@@ -391,8 +413,6 @@ export const copy = {
   // 애칭이 없을 때 상대 이름(CLAUDE.md 문구 ‘없으면 파트너’)
   partnerFallback: '파트너',
   sharedAccountName: '같이 쓰는 통장',
-  /** W-02 한 사람 관리형 관리하지 않는 쪽: 관리하는 사람이 확인하는 손 줄 묶음 머리(보기만) [확인 필요] 2026-11-13 UX B H2 */
-  managerChecks: (name: string) => (name ? `${name}님이 확인해요` : '파트너가 확인해요'),
   addSharedAccount: '+ 같이 쓰는 통장 추가',
   allowanceNotify: (name: string) => (name ? `${name}님께 알려 드려요` : '파트너에게 알려 드려요'),
   noPaydayHead: '수입이 들어올 때', // W-01 머리 ‘매달 25일’ 자리(날짜 없음)

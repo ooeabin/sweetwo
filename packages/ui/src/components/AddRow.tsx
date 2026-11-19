@@ -8,17 +8,21 @@ export function AddRow({
   onClick,
   block,
   className,
+  ariaLabel,
 }: {
   /** “저금 추가”처럼 + 없이(아이콘이 +) */
   label: string;
   onClick: () => void;
   block?: boolean;
   className?: string;
+  /** 보이는 글자보다 긴 화면 읽기 이름(W-02 수입 줄 “+ 적기” → “수입 적기”) */
+  ariaLabel?: string;
 }) {
   return (
     <button
       type="button"
       className={cx('hg-addrow', block && 'hg-addrow--block', className)}
+      aria-label={ariaLabel}
       onClick={onClick}
     >
       <Icon name="plus" size={16} />

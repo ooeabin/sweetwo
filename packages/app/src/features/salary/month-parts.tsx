@@ -1,14 +1,6 @@
 import type { PayChecklist, PayCheckLine } from '@sweetwo/api';
-import {
-  checklistFinish,
-  confirmFinish,
-  formatMonthDay,
-  manualCount,
-  monthProgress,
-  type MonthProgress,
-} from '@sweetwo/core';
-import { PlanBar } from '@sweetwo/ui';
-import { useState } from 'react';
+import { formatMonthDay, monthProgress, type MonthProgress } from '@sweetwo/core';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { track } from '../../shared/analytics';
 import { money } from '../../shared/mask';
 import { toast } from '../../shared/toast';
@@ -45,40 +37,23 @@ export type MonthShare = {
 };
 
 /**
- * W-02 머리 진행 막대. 화면 읽기는 막대 이름 “5개 중 2개 완료”(다 하면 “모두 확인했어요”) + 아래 한 줄 “계획한 … 중 … 확인했어요”.
- * 다 끝난 달(모든 줄이 체크 또는 ‘못 함’, 지난 달 포함, 2026-11-12 W-02 끝 화면 대신): 막대 아래 굵은 한 줄
- * “10월 25일 월급, 계획대로 됐어요”(‘못 함’이 섞이면 “…마쳤어요”) + 체크한 금액, 오른쪽 ‘공유하기’(달 결과 이미지)
+ * W-02 ‘공유하기’ 글자 버튼(다 확인 상태, 달 결과 이미지, W-01 영수증 공유와 같은 canvas). 분석 `month_result_shared`
  */
-export function MonthBar({
+export function ShareLink({
   list,
   income,
   masked,
   share,
-  shownStart,
-  lateOpen = 0,
 }: {
   list: PayChecklist;
   income: number;
   masked: boolean;
-  /** 다 끝난 달 한 줄의 ‘공유하기’ 재료 */
-  share?: MonthShare;
-  /** 보여 줄 월급날(앞당기기, useShownPayday). 없으면 사이클 첫날 */
-  shownStart?: string;
-  /** 지금 늦게 확인할 수 있는 손 줄 수. 있으면 “확인을 마쳤어요”를 띄우지 않음(2026-11-13 UX B M2) */
-  lateOpen?: number;
+  share: MonthShare;
 }) {
   const p = monthProgress({ income, lines: list.pay_check_line });
-  // 확인 끝(07 7장, 2026-11-13): 손 줄이 있으면 손 줄만, 자동 줄뿐이면 모두 확인됐을 때
-  const finish =
-    lateOpen > 0
-      ? null
-      : manualCount(list.pay_check_line) > 0
-        ? confirmFinish(list.pay_check_line)
-        : checklistFinish(list.pay_check_line);
   const [sharing, setSharing] = useState(false);
-  const caption = copy.sentOfPlan(money(p.sent, masked), money(p.planned, masked));
   const run = async () => {
-    if (sharing || !share) return;
+    if (sharing) return;
     setSharing(true);
     const props = { masked, whose: share.whose, screen: share.screen, skipped: p.done - p.checked };
     try {
@@ -96,28 +71,89 @@ export function MonthBar({
     }
   };
   return (
-    <PlanBar
-      flat
-      progress
-      label={p.complete ? copy.allDone : copy.progress(p.total, p.done)}
-      parts={[
-        { kind: 'check', percent: 100, fill: p.total ? Math.floor((p.done * 100) / p.total) : 0 },
-      ]}
-      title={finish ? copy.monthFinished(shownStart ?? list.cycle_start, finish) : undefined}
-      caption={caption}
-      action={
-        finish && share ? (
-          <button
-            type="button"
-            className="hg-btn hg-btn--link"
-            aria-busy={sharing || undefined}
-            onClick={() => void run()}
-          >
-            {copy.share}
-          </button>
-        ) : undefined
-      }
-    />
+    <button
+      type="button"
+      className="hg-btn hg-btn--link"
+      aria-busy={sharing || undefined}
+      onClick={() => void run()}
+    >
+      {copy.share}
+    </button>
+  );
+}
+
+/**
+ * W-02 상단(2026-11-19 확정 시안, 카드 없이 바탕 위 가운데): 날짜 알약(`pill`) → 큰 금액(이번 사이클 계획 합, text-display) → 보조 한 줄
+ * (월급날 전 “D-6, 5개”, 확인 중 “5개 중 2개 확인”). 다 확인 상태(`done`)는 알약 아래 그림 자리(`art`, 파일이 없으면 null = 숨김)
+ * → 제목 → 흰 알약 “저축·투자 139만 원 모았어요”(`saved`, 없으면 숨김) → 공유하기, 화면 위 420px 축하 배경(`hg-w02done__bg`)
+ */
+export function MonthHero({
+  pill,
+  amount,
+  meta,
+  done,
+}: {
+  pill: ReactNode;
+  amount?: string;
+  meta?: string;
+  done?: { title: string; saved?: ReactNode; art: ReactNode; extra?: ReactNode; burst?: boolean };
+}) {
+  return (
+    <section className="hg-w02hero">
+      {done && <div className="hg-w02done__bg hg-celebrate-bg" aria-hidden="true" />}
+      {pill}
+      {done ? (
+        <>
+          {done.art}
+          <h2 className="hg-w02hero__title">{done.title}</h2>
+          {done.saved && (
+            <p className="hg-w02hero__saved">
+              <span>{done.saved}</span>
+            </p>
+          )}
+          {done.extra}
+          {done.burst && <Confetti />}
+        </>
+      ) : (
+        <>
+          {amount && <p className="hg-w02hero__amt">{amount}</p>}
+          {meta && <p className="hg-w02hero__meta">{meta}</p>}
+        </>
+      )}
+    </section>
+  );
+}
+
+const PIECES = [
+  { l: '16%', x: '-60px', y: '90px', r: '-140deg', c: 'var(--accent-app)' },
+  { l: '84%', x: '60px', y: '100px', r: '160deg', c: 'var(--brand-soft)' },
+  { l: '28%', x: '-30px', y: '140px', r: '200deg', c: 'var(--ink)' },
+  { l: '72%', x: '40px', y: '130px', r: '-190deg', c: 'var(--brand)' },
+  { l: '40%', x: '-20px', y: '70px', r: '120deg', c: 'var(--brand-soft)' },
+  { l: '60%', x: '30px', y: '80px', r: '-120deg', c: 'var(--accent-app)' },
+];
+
+/** 마지막 줄을 확인해 다 확인 상태가 된 순간 한 번 흩어지는 조각(‘동작 줄이기’면 CSS가 숨김) */
+function Confetti() {
+  return (
+    <>
+      {PIECES.map((p, i) => (
+        <i
+          key={i}
+          className="hg-confetti"
+          aria-hidden="true"
+          style={
+            {
+              left: p.l,
+              background: p.c,
+              '--cx': p.x,
+              '--cy': p.y,
+              '--cr': p.r,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </>
   );
 }
 

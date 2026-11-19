@@ -114,7 +114,7 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
 
   // 3. 찬우 월급날 확인 한 번(W-02 “모두 계획대로 됐어요”) → 저금 줄 95만이 모은 금액에
   await c.goto('/salary');
-  await expect(c.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
+  await expect(c.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await c.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
   await expect(c.locator('.hg-toast')).toContainText('9월 25일 월급, 계획대로 됐어요');
   const lines = (db.checklists[0]?.pay_check_line ?? []) as Record<string, unknown>[];

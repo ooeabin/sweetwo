@@ -479,10 +479,6 @@ export type AnalyticsEvent =
       name: 'menu_item_tapped';
       props: { item: string };
     }
-  | {
-      name: 'plan_link_tapped';
-      props: { whose: 'self' | 'partner' | 'joint'; checked: number; total: number };
-    }
   // ── v2.2 PR 11 공개·관계·설정(32 0-4) ──
   | {
       name: 'reconnect_blocked';

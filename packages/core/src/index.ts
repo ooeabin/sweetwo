@@ -13,6 +13,7 @@ export * from './avatar';
 export * from './rules/salary-split';
 export * from './rules/saving-item';
 export * from './rules/plan-ratio';
+export * from './rules/month-check';
 export * from './rules/month-progress';
 export * from './rules/month-archive';
 export * from './rules/home';

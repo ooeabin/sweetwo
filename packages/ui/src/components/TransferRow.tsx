@@ -32,6 +32,7 @@ export function TransferRow({
   busy = false,
   changed = false,
   auto,
+  action,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -58,6 +59,19 @@ export function TransferRow({
   changed?: boolean;
   /** 자동 줄 알약(2026-11-13 ListRow ‘자동 표시’, hg-autopill): “자동 26일”, “자동 확인”. 이름 아래 보조 줄 자리 */
   auto?: string;
+  /**
+   * 체크 원 대신 상태 버튼(W-02, 2026-11-19): 남음 “확인”(go, 누르면 바로 확인), 완료 “완료”(done, 누르면 시트로 고치기),
+   * “건너뜀”(skipped), 월급날 전 “25일”(wait, 비활성). 보이는 크기 34px, 누르는 칸 44px
+   */
+  action?: {
+    label: string;
+    tone: 'go' | 'done' | 'skipped' | 'wait';
+    /** 화면 읽기 이름(“생활비 확인”) */
+    ariaLabel: string;
+    onClick?: () => void;
+    disabled?: boolean;
+    busy?: boolean;
+  };
 }) {
   // 그림이 없는 종류 자리는 그리지 않고 칸도 비우지 않음(2026-11-15 3차 검토)
   const shown = shownLead(lead);
@@ -91,10 +105,11 @@ export function TransferRow({
         viewOnly && 'is-view',
         changed && 'is-changed',
         !!shown && 'hg-transfer--lead',
+        action && 'hg-transfer--act',
       )}
     >
       {shown}
-      {viewOnly ? (
+      {action ? null : viewOnly ? (
         <span className="hg-transfer__state" role="img" aria-label={checkLabel}>
           {done && <Icon name="check" size={20} />}
         </span>
@@ -114,8 +129,22 @@ export function TransferRow({
         <button type="button" className="hg-transfer__open" aria-haspopup="dialog" onClick={onOpen}>
           {body}
         </button>
+      ) : action ? (
+        <span className="hg-transfer__body">{body}</span>
       ) : (
         body
+      )}
+      {action && (
+        <button
+          type="button"
+          className={cx('hg-transfer__action', `hg-transfer__action--${action.tone}`)}
+          aria-label={action.ariaLabel}
+          aria-busy={action.busy || undefined}
+          disabled={action.disabled}
+          onClick={action.busy ? undefined : action.onClick}
+        >
+          {action.label}
+        </button>
       )}
     </div>
   );

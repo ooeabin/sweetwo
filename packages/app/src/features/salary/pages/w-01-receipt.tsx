@@ -69,7 +69,7 @@ import { baseDayOf, nextDayOf as nextDay, receiptAutoPill, salaryChangedDay } fr
 import { useQuery } from '@tanstack/react-query';
 import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { BundleRow } from '../bundle-parts';
-import { salaryPaths, savingPaths, togetherPaths } from '../paths';
+import { savingPaths, togetherPaths } from '../paths';
 import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
 import { FirstSpendAsk, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
@@ -900,31 +900,7 @@ export function W01Receipt() {
     />
   ) : null;
 
-  // 머리 아래 한 줄 ‘이번 달 3/5 체크했어요 ›’(2026-11-09) → 그 사람 이번 달(W-02). 이번 체크리스트가 없거나 편집 중이면 없음
-  const monthChecked = month?.pay_check_line.filter((l) => l.state === 'checked').length ?? 0;
-  const monthTotal = month?.pay_check_line.length ?? 0;
-  // 2026-11-18 구간 탭을 없애고 맨 위 머리 이동 링크 ‘이번 달 월급 체크 ›’(slate, W-02로). 편집 중에는 없음.
-  // 날짜 없는 사람(각자)은 W-02에 확인 목록이 없어(서랍 줄도 없음) 링크 없음
-  const noCheck = !!m.payday_none && !joint;
-  const monthLinkTo = theirs && p ? `${salaryPaths.checklist}?who=${p.id}` : salaryPaths.checklist;
-  const monthLink =
-    !edit && !noCheck ? (
-      <div className="hg-sechead">
-        <a
-          className="hg-sechead__more"
-          style={{ marginLeft: 0 }}
-          href={monthLinkTo}
-          onClick={(e) => {
-            e.preventDefault();
-            track('plan_link_tapped', { whose, checked: monthChecked, total: monthTotal });
-            nav(monthLinkTo, { state: { from: 'plan' } });
-          }}
-        >
-          {copy.monthLinkTo}
-          <Icon name="chevron-right" size={16} />
-        </a>
-      </div>
-    ) : undefined;
+  // 머리 이동 링크 ‘이번 달 월급 체크 ›’는 2026-11-19 사용자 결정으로 없앰(W-02로는 홈 월급 상자·서랍)
 
   // 같이 모으기 묶음(각자 계열 내 탭, 옛 W-13 묶음 줄)과 ⋯ 메뉴(옛 W-13 ⋯: 통장 잔액과 맞추기 W-10c, 수입 기록 W-20b)
   const bundleList = (bundles.data ?? []).filter((b) =>
@@ -959,7 +935,6 @@ export function W01Receipt() {
         />
       ) : (
         <>
-          {monthLink}
           {tabs && p && (
             <Tabs
               label={copy.splitTitle}

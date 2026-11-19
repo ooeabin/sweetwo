@@ -66,7 +66,7 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶음·합계, + 버튼 없음, ‘이번 달 월급 체크 ›’로 갔다 옴', async ({
+test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶음·합계, + 버튼 없음', async ({
   page,
 }) => {
   const { go } = await open(page);
@@ -94,14 +94,13 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶�
   // 옛 주소 /salary/split → 계획, ‘이번 달’ → W-02
   await page.goto('/salary/split');
   await expect(page).toHaveURL(/\/salary\/plan$/);
-  await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
-  await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.getByRole('heading', { name: '9월 25일 월급' })).toBeVisible();
-  // W-02에는 월급 계획 템플릿 머리 링크가 없음(2026-11-18), 저축·투자 묶음 머리로 W-01에 감
+  // 2026-11-19: W-01에는 ‘이번 달 월급 체크 ›’ 링크가 없음. W-02는 주소로
+  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
+  await page.goto('/salary');
+  await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
+  // W-02에는 머리 링크도 저축·투자 묶음 머리도 없음
   await expect(page.getByRole('link', { name: '월급 계획 템플릿' })).toHaveCount(0);
-  await page.getByRole('button', { name: '저축·투자 목록 보기' }).click();
-  await expect(page).toHaveURL(/\/salary\/plan/);
-  await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
+  await expect(page.getByRole('button', { name: '저축·투자 목록 보기' })).toHaveCount(0);
 });
 
 test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 + 되돌리기, 이번 달 체크 안 한 줄도', async ({
@@ -223,7 +222,7 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
       .map((l) => l.kind),
   ).toEqual(['saving', 'saving', 'allowance', 'living', 'fixed']);
   // 이번 달 체크리스트도 같은 순서
-  await page.getByRole('link', { name: '이번 달 월급 체크' }).click();
+  await page.goto('/salary'); // 2026-11-19 W-01 머리 링크 없앰
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
   await page.goto('/salary/plan');
   await page.getByRole('button', { name: '편집하기' }).click();
@@ -240,9 +239,9 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(card.getByText('매달 10일')).toBeVisible();
   await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
-  // 영수증 안에는 누를 수 있는 것이 없음(머리 이동 링크 ‘이번 달 월급 체크 ›’는 맨 위, 2026-11-18)
+  // 영수증 안에는 누를 수 있는 것이 없음(머리 이동 링크 ‘이번 달 월급 체크 ›’는 2026-11-19 없앰)
   await expect(card.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
   for (const n of ['편집하기', '추천값으로 다시 채우기', '+ 지출 추가', '+ 저축·투자 추가'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '공유하기' })).toBeVisible();

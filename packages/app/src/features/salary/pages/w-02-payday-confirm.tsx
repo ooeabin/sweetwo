@@ -9,17 +9,26 @@ import {
   type PayCheckLine,
 } from '@sweetwo/api';
 import {
+  chipCounts,
   confirmableLines,
+  doneState,
+  heroMeta,
+  plannedSum,
+  savedSum,
+  type CheckChip,
   confirmFinish,
   isManual,
+  splitCheckLines,
   kstDateOf,
   lineIsMine,
   todayKst,
 } from '@sweetwo/core';
 import {
+  BottomSheet,
   Button,
+  Chip,
   Icon,
-  IconButton,
+  Illustration,
   PageHeader,
   SectionHeader,
   Tabs,
@@ -31,12 +40,13 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { sharedCopy } from '../../../shared/copy';
 import { money, useMask } from '../../../shared/mask';
+import { useFlip } from '../../../shared/flip';
 import { PersonDot } from '../../../shared/person';
 import { quietly, toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
-import { CheckLine, checkToast, goalLineName, isPast, lineName, periodText } from '../check-line';
+import { CheckLine, checkToast, goalLineName, isPast, lineName } from '../check-line';
 import { copy } from '../copy';
-import { autoDayText, baseDayOf, cycleName, firstPaydayOf, useShownPayday } from '../cycle';
+import { baseDayOf, cycleName, firstPaydayOf, useShownPayday } from '../cycle';
 import {
   markLocalState,
   markLocalWrite,
@@ -51,13 +61,13 @@ import {
   useSpace,
   useSplits,
 } from '../data';
-import { incomeOf, MonthBar } from '../month-parts';
+import { incomeOf, MonthHero, ShareLink } from '../month-parts';
 import { savingListPath, savingPaths, togetherPaths } from '../paths';
-import { MoneyInRows } from '../money-in-rows';
+import { MoneyInLine, MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
 import { useSavingItems } from '../saving';
-import { AchieveWatch, SavingGoalRow, SavingMeta } from '../saving-parts';
+import { AchieveWatch, SavingGoalRow } from '../saving-parts';
 import { LastMonthNote, lateLines, lateOpen } from './w-02-last-month';
 import { W02aOtherAmount } from './w-02a-other-amount';
 
@@ -82,13 +92,14 @@ export function W02PaydayConfirm() {
   const [ago, setAgo] = useState(0);
   const [hidden, setHidden] = useState<string | null>(null);
   const [madeHidden, setMadeHidden] = useState<string | null>(null);
-  const [autoOpen, setAutoOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [chip, setChip] = useState<CheckChip>('all');
+  const [foldOpen, setFoldOpen] = useState(false);
+  const [pickDate, setPickDate] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const cycleParam = params.get('cycle');
   // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
   const fromArchive = (loc.state as { from?: string } | null)?.from === 'archive';
-  // W-01 ‘이번 달 월급 체크 ›’ 링크로 열었으면 ‹ = W-01(2026-11-18), 아니면 홈
-  const fromPlan = (loc.state as { from?: string } | null)?.from === 'plan';
   const title = useSalaryTitle('month');
   const splits = useSplits();
   const accountNames = useAccountNames();
@@ -131,6 +142,9 @@ export function W02PaydayConfirm() {
   }, [cycleParam, past.data, params, setParams, loc.state]);
   const changed = useChangedLines(ago === 0 ? list?.pay_check_line : undefined);
 
+  useFlip(listRef, [
+    (lists.data ?? []).flatMap((c) => c.pay_check_line.map((l) => l.id + l.state)).join(),
+  ]);
   const loads = [me, space, goals, lists];
   if (loads.some((q) => q.isError && !q.data))
     return (
@@ -173,13 +187,13 @@ export function W02PaydayConfirm() {
     );
 
   const pending = sp.couple_state === 'unlink_pending';
+  const kindText = (kind: string) => (kind === 'saving' ? copy.kindSaving : copy.kindSpend);
   const page = { title };
   const frame = (body: ReactNode) => (
     <MainFrame
       current="salary"
       sub={fromArchive ? 'detail' : undefined}
       page={fromArchive ? undefined : page}
-      onBack={fromPlan ? () => nav(-1) : undefined}
       columns={[
         <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
           {fromArchive ? (
@@ -247,40 +261,49 @@ export function W02PaydayConfirm() {
         accountNames.ofSplitLine(l.id),
       );
     if (mySplit) {
-      // 체크리스트가 맨 위(2026-11-18): 링크 → 제목 → 회색 한 줄 → 미리 보기 줄 → 수입 묶음(+ 수입 적기)
-      const ordered = [...preview].sort((x, y) => Number(x.auto_pay) - Number(y.auto_pay));
+      // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
+      const ordered = [...preview].sort((x, y) => x.sort - y.sort);
+      const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
       return frame(
         <>
-          <section aria-label={firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}>
-            {firstDay && <SectionHeader title={cycleName(firstDay)} />}
-            <p className="hg-card__meta">
-              {firstDay ? copy.firstWait(firstDay) : copy.firstWaitNoDate}
-            </p>
-          </section>
+          <MonthHero
+            pill={
+              <span className="hg-datepill">
+                {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
+              </span>
+            }
+            amount={money(
+              ordered.reduce((sum, l) => sum + l.amount, 0),
+              masked,
+            )}
+            meta={
+              firstDay
+                ? heroMeta({ preview: { today, payday: firstDay, count: ordered.length } })
+                : undefined
+            }
+          />
           {preview.length > 0 && (
-            <section
-              className="hg-stack"
-              aria-label={copy.previewTitle}
-              style={{ gap: 'var(--space-2)' }}
-            >
-              <SectionHeader variant="group" title={copy.previewTitle} />
-              <div className="hg-checklist__list hg-list--preview">
-                {ordered.map((l) => (
-                  <TransferRow
-                    key={l.id}
-                    label={previewName(l)}
-                    meta={l.auto_pay ? copy.previewAuto : undefined}
-                    amount={money(l.amount, masked)}
-                    done={false}
-                    disabled
-                    checkLabel={copy.previewCheck(previewName(l))}
-                  />
-                ))}
-              </div>
-            </section>
+            <div className="hg-checklist__list hg-list--preview">
+              {ordered.map((l) => (
+                <TransferRow
+                  key={l.id}
+                  label={previewName(l)}
+                  meta={l.auto_pay ? copy.previewAuto : kindText(l.kind)}
+                  amount={money(l.amount, masked)}
+                  done={false}
+                  checkLabel={copy.previewCheck(previewName(l))}
+                  action={{
+                    label: dayTag,
+                    tone: 'wait',
+                    ariaLabel: copy.previewCheck(previewName(l)),
+                    disabled: true,
+                  }}
+                />
+              ))}
+            </div>
           )}
           {meId && (
-            <MoneyInRows
+            <MoneyInLine
               meId={meId}
               from={`${today.slice(0, 8)}01`}
               to={today}
@@ -399,13 +422,6 @@ export function W02PaydayConfirm() {
       )
       .catch(() => toast(copy.failed));
   };
-  const autoText = (l: PayCheckLine) => {
-    if (l.state === 'checked') return copy.autoDone;
-    const due = l.auto_due ?? shown.cycle_start;
-    return copy.autoWait(
-      due === shown.cycle_start ? autoDayText(null) : autoDayText(Number(due.slice(8, 10))),
-    );
-  };
   const row = (l: PayCheckLine) => {
     const lineOpen = !readOnly && (!lateIds || lateIds.has(l.id));
     return (
@@ -416,8 +432,8 @@ export function W02PaydayConfirm() {
         personName={personName}
         meId={meId}
         readOnly={!lineOpen}
-        viewOnly={partnerTab}
-        auto={l.auto ? autoText(l) : undefined}
+        viewOnly={partnerTab || othersManual.includes(l)}
+        sub={l.auto ? copy.previewAuto : kindText(l.kind)}
         onOther={
           partnerTab || !lineOpen
             ? undefined
@@ -430,15 +446,9 @@ export function W02PaydayConfirm() {
             ? () => nav(savingPaths.item(l.goal_id ?? ''))
             : undefined
         }
-        progress={
-          l.kind === 'saving' && itemOf(l.goal_id)?.target != null ? (
-            <SavingMeta item={itemOf(l.goal_id)} masked={masked} />
-          ) : undefined
-        }
       />
     );
   };
-  const autoLines = ordered.filter((l) => l.auto);
   // 한 사람 관리형(2026-11-13 UX B H2): 관리하지 않는 쪽은 자기 줄만 확인, 관리하는 사람 줄은 따로 보기만
   const managerId = joint ? (sp.manager_user_id ?? null) : null;
   const mineOpt = { joint, ownerId: owner, meId: meId ?? '', managerId };
@@ -448,7 +458,6 @@ export function W02PaydayConfirm() {
       : [];
   const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
   // “모두 계획대로 됐어요”(confirm_payday): 남은 손 줄(늦은 확인이면 건너뜀으로 닫힌 줄도) 중 내가 확인할 수 있는 것
-  const managerName = personName(managerId) ?? '';
   const confirmable = partnerTab
     ? []
     : late
@@ -495,84 +504,115 @@ export function W02PaydayConfirm() {
       setBusy(false);
     }
   };
-  const more = (past.data?.length ?? 0) > ago;
-  const openList = () => nav(savingListPath('checklist'), { state: { from: 'month' } });
-  const groups = (
-    [
-      [copy.savingGroup, manual.filter((l) => l.kind === 'saving')],
-      [copy.spendGroup, manual.filter((l) => l.kind !== 'saving')],
-    ] as const
-  ).map(([title, ls]) => {
-    const n = ls.filter((l) => l.state !== 'wait').length;
-    const kind = title === copy.savingGroup ? 'saving' : 'spend';
-    if (!ls.length) return null;
-    return (
-      <section key={title} className="hg-checkgroup" aria-label={title}>
-        <SectionHeader
-          variant="group"
-          title={title}
-          count={
-            n > 0 ? (
-              <>
-                <b>{n}</b>/{ls.length}
-              </>
-            ) : (
-              `${n}/${ls.length}`
-            )
-          }
-          countLabel={copy.progress(ls.length, n)}
-          onTitle={kind === 'saving' ? openList : undefined}
-          titleLabel={kind === 'saving' ? copy.listOpen : undefined}
-        />
-        <div className="hg-checklist__list">{ls.map(row)}</div>
-      </section>
+  // 한 목록(2026-11-19 확정 시안): 칩 필터, 남은 줄 먼저 → 확인한 줄 아래. 줄이 자리를 옮기면 짧은 이동 애니메이션
+  const counts = chipCounts(shown.pay_check_line);
+  const finished = late ? null : doneState(shown.pay_check_line);
+  const { open: openLines, done: doneLines } = splitCheckLines(shown.pay_check_line, chip);
+  const cycles = [list, ...(past.data ?? [])];
+  const pick = (i: number) => {
+    setAgo(i);
+    setChip('all');
+    setPickDate(false);
+  };
+  const dateName = cycleName(start);
+  const datePill =
+    cycles.length > 1 ? (
+      <button
+        type="button"
+        className="hg-datepill"
+        aria-haspopup="dialog"
+        aria-label={copy.cyclePick}
+        onClick={() => setPickDate(true)}
+      >
+        {dateName}
+        <Icon name="chevron-down" size={16} />
+      </button>
+    ) : (
+      <span className="hg-datepill">{dateName}</span>
     );
-  });
+  const planned = money(plannedSum(shown.pay_check_line), masked);
+  const share = {
+    received: start,
+    people: ownerPeople,
+    nameOf,
+    whose: (joint ? 'joint' : partnerTab ? 'partner' : 'self') as 'joint' | 'partner' | 'self',
+    screen: (readOnly || ago > 0 ? 'past' : 'checklist') as 'past' | 'checklist',
+  };
+  const saved = savedSum(shown.pay_check_line);
+  const filters = (
+    <div className="hg-row" role="group" aria-label={copy.manualGroupLabel}>
+      {(
+        [
+          ['all', copy.chipAll, counts.all],
+          ['left', copy.chipLeft, counts.left],
+          ['done', copy.chipDone, counts.done],
+        ] as const
+      ).map(([v, label, n]) => (
+        <Chip key={v} className="hg-chip--fill" selected={chip === v} onClick={() => setChip(v)}>
+          {label} <b>{n}</b>
+        </Chip>
+      ))}
+    </div>
+  );
+  const rowsList = (
+    <div className="hg-checklist__list" ref={listRef}>
+      {[...openLines, ...doneLines].map((l) => (
+        <div key={l.id} data-flip={l.id}>
+          {row(l)}
+        </div>
+      ))}
+    </div>
+  );
+  const finishedAll = finished === 'all';
 
   return frame(
     <>
       <AchieveWatch from="checklist" />
-      <section aria-label={cycleName(start)}>
-        <SectionHeader
-          title={cycleName(start)}
-          meta={periodText(start, shown.cycle_end)}
-          action={
-            more || ago > 0 ? (
-              <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                <IconButton
-                  icon="chevron-left"
-                  label={copy.prevMonth}
-                  small
-                  disabled={!more}
-                  onClick={() => setAgo(ago + 1)}
-                />
-                {ago > 0 && (
-                  <IconButton
-                    icon="chevron-right"
-                    label={copy.nextMonth}
-                    small
-                    onClick={() => setAgo(ago - 1)}
-                  />
-                )}
-              </span>
-            ) : undefined
-          }
-        />
-        <MonthBar
-          list={shown}
-          income={income}
-          masked={masked}
-          shownStart={start}
-          lateOpen={late ? confirmable.length : 0}
-          share={{
-            received: start,
-            people: ownerPeople,
-            nameOf,
-            whose: joint ? 'joint' : partnerTab ? 'partner' : 'self',
-            screen: readOnly || ago > 0 ? 'past' : 'checklist',
+      {people && (
+        <Tabs
+          label={dateName}
+          value={tab}
+          onChange={(v) => {
+            setWho(v);
+            setAgo(0);
           }}
+          items={people}
         />
-      </section>
+      )}
+      {partnerTab && (
+        <p className="hg-q__help" style={{ margin: 0 }}>
+          {copy.partnerChecklistView(partner.data?.nickname ?? '')}
+        </p>
+      )}
+      <HeroWithBurst
+        listId={list.id + ago}
+        finished={!!finished}
+        render={(burst) => (
+          <MonthHero
+            pill={datePill}
+            amount={planned}
+            meta={heroMeta({ lines: shown.pay_check_line })}
+            done={
+              finished
+                ? {
+                    title: finishedAll ? copy.heroTitleAll : copy.heroTitleMixed,
+                    saved:
+                      saved > 0 ? (
+                        <>
+                          {copy.savedBefore} <b>{money(saved, masked)}</b> {copy.savedAfter}
+                        </>
+                      ) : undefined,
+                    art: <Illustration name="w02-done" className="hg-sceneart" motion />,
+                    extra: share ? (
+                      <ShareLink list={shown} income={income} masked={masked} share={share} />
+                    ) : undefined,
+                    burst,
+                  }
+                : undefined
+            }
+          />
+        )}
+      />
       {late && !partnerTab && <LastMonthNote />}
       {showMade && (
         <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
@@ -604,77 +644,27 @@ export function W02PaydayConfirm() {
           </button>
         </div>
       )}
-      {people && (
-        <Tabs
-          label={cycleName(start)}
-          value={tab}
-          onChange={(v) => {
-            setWho(v);
-            setAgo(0);
-          }}
-          items={people}
-        />
-      )}
-      {partnerTab && (
-        <p className="hg-q__help" style={{ margin: 0 }}>
-          {copy.partnerChecklistView(partner.data?.nickname ?? '')}
-        </p>
-      )}
-      {/* 확인할 것(손 줄, 20 W-02 3번): 저금·지출 묶음 카드 */}
-      {manual.length > 0 && <SectionHeader title={copy.manualGroup(manual.length)} />}
-      <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-        {groups}
-      </div>
-      {othersManual.length > 0 && (
-        <section className="hg-checkgroup" aria-label={copy.managerChecks(managerName)}>
-          <SectionHeader variant="group" title={copy.managerChecks(managerName)} />
-          <div className="hg-checklist__list">
-            {othersManual.map((l) => (
-              <CheckLine
-                key={l.id}
-                line={l}
-                name={nameOf(l)}
-                personName={personName}
-                meId={meId}
-                readOnly
-                viewOnly
-              />
-            ))}
-          </div>
-        </section>
-      )}
-      {confirmable.length > 0 && (
-        <Button variant="primary" block loading={busy} onClick={() => void confirm()}>
-          {copy.confirmAll}
-        </Button>
-      )}
-      {/* 자동으로 나가는 것(접힌 묶음, 20 W-02 2번) */}
-      {autoLines.length > 0 && (
-        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+      {finished ? (
+        <>
           <button
             type="button"
             className="hg-foldrow"
-            aria-expanded={autoOpen}
-            onClick={() => setAutoOpen((x) => !x)}
+            aria-expanded={foldOpen}
+            onClick={() => setFoldOpen((x) => !x)}
           >
-            <span>{copy.autoGroup(autoLines.length)}</span>
-            <Icon name={autoOpen ? 'chevron-up' : 'chevron-down'} size={16} />
+            <span>{counts.left === 0 ? copy.foldAll(counts.all) : copy.foldSome(counts.done)}</span>
+            <Icon name={foldOpen ? 'chevron-up' : 'chevron-down'} size={16} />
           </button>
-          {autoOpen && (
-            <>
-              {autoLines.some((l) => l.state === 'checked') && !partnerTab && (
-                <p className="hg-q__help" style={{ margin: 0 }}>
-                  {copy.autoGroupHelp}
-                </p>
-              )}
-              <div className="hg-checklist__list">{autoLines.map(row)}</div>
-            </>
-          )}
-        </section>
+          {foldOpen && rowsList}
+        </>
+      ) : (
+        <>
+          {filters}
+          {rowsList}
+        </>
       )}
-      {/* 수입 묶음(2026-11-18: 체크리스트 아래) + 묶음 안 “+ 수입 적기”(20 W-02, 2026-11-15 저금 카드·저금 상세에서 옮김) → W-20 */}
       {!partnerTab && ago === 0 && meId && (
-        <MoneyInRows
+        <MoneyInLine
           meId={meId}
           from={shown.cycle_start}
           to={shown.cycle_end}
@@ -683,6 +673,56 @@ export function W02PaydayConfirm() {
           onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
         />
       )}
+      {confirmable.length > 0 && (
+        <div className="hg-stickybar">
+          <Button variant="primary" block loading={busy} onClick={() => void confirm()}>
+            {copy.confirmAll}
+          </Button>
+        </div>
+      )}
+      {pickDate && (
+        <BottomSheet title={copy.cyclePick} onClose={() => setPickDate(false)}>
+          <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+            {cycles.map((c, i) => (
+              <Button
+                key={c.id}
+                block
+                variant={i === ago ? 'primary' : 'secondary'}
+                aria-pressed={i === ago}
+                onClick={() => pick(i)}
+              >
+                {cycleName(shownPayday(c.cycle_start))}
+              </Button>
+            ))}
+          </div>
+        </BottomSheet>
+      )}
     </>,
   );
+}
+
+/**
+ * 마지막 줄을 확인해 다 확인 상태가 된 순간에만 한 번 축하 조각(같은 달에서 안 끝남 → 끝남으로 바뀔 때. 다시 들어오면 정적)
+ */
+function HeroWithBurst({
+  listId,
+  finished,
+  render,
+}: {
+  listId: string;
+  finished: boolean;
+  render: (burst: boolean) => ReactNode;
+}) {
+  const prev = useRef<{ id: string; finished: boolean } | null>(null);
+  const [burst, setBurst] = useState(false);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = { id: listId, finished };
+    if (was && was.id === listId && !was.finished && finished) {
+      setBurst(true);
+      const t = window.setTimeout(() => setBurst(false), 1300);
+      return () => window.clearTimeout(t);
+    }
+  }, [listId, finished]);
+  return <>{render(burst)}</>;
 }
