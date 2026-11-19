@@ -347,8 +347,21 @@ test('모자람: 막대는 저축·투자·지출로 꽉, 범례 “미계획 �
   await expect(page.locator('.hg-plansum__bar > i')).toHaveCount(2);
   const short = page.locator('.hg-plansum__legend li.is-short');
   await expect(short).toHaveText('미계획−32만 원');
-  await expect(short.locator('.hg-plansum__lamt')).toHaveCSS('color', 'rgb(220, 38, 38)');
-  await expect(short.locator('.hg-plansum__lname')).not.toHaveCSS('color', 'rgb(220, 38, 38)');
+  // 금액만 danger 토큰(라이트·다크 값이 달라 토큰으로 비교), 이름은 ink-2
+  const colors = await short.evaluate((li) => {
+    const probe = document.createElement('i');
+    probe.style.color = 'var(--danger)';
+    document.body.append(probe);
+    const danger = getComputedStyle(probe).color;
+    probe.remove();
+    return {
+      danger,
+      amt: getComputedStyle(li.querySelector('.hg-plansum__lamt') as Element).color,
+      name: getComputedStyle(li.querySelector('.hg-plansum__lname') as Element).color,
+    };
+  });
+  expect(colors.amt).toBe(colors.danger);
+  expect(colors.name).not.toBe(colors.danger);
   await expect(page.locator('.hg-plansum__title')).toHaveText('월급의 40%를 모으고 있어요');
   await axe(page);
 });
