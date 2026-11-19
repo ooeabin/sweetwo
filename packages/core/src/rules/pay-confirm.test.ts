@@ -111,6 +111,14 @@ it('“모두 계획대로 됐어요” 권한(confirm_payday): 각자 주인만
   ).toEqual([null, 'c']);
 });
 
+it('주 버튼 기준(2026-11-19): 남은(wait) 손 줄이 있을 때만, 건너뜀(서버가 닫은 줄 포함)만 남으면 없음', () => {
+  const o = { joint: false, ownerId: 'c', meId: 'c' };
+  expect(
+    confirmableLines([{ state: 'skipped' }, { state: 'skipped' }, { state: 'checked' }], o),
+  ).toEqual([]);
+  expect(confirmableLines([{ state: 'skipped' }, { state: 'wait' }], o)).toHaveLength(1);
+});
+
 it('자동 줄 고르기 띠(H-06 9번): 첫 월급날 7일 전 ~ 전날', () => {
   const o = { firstPayday: '2026-11-25', autoLines: 0, manualLines: 3, done: false };
   expect(autoPickTaskOpen({ ...o, today: '2026-11-17' })).toBe(false);

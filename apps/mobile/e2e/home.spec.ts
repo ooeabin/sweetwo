@@ -313,7 +313,7 @@ test('자동 줄뿐인 사람: 월급 상자 첫 줄 “자동으로 나가요�
   expect(lines(db).find((l) => l.kind === 'fixed')?.state).toBe('skipped');
 });
 
-test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음”, W-02 지난 달에서 “모두 계획대로 됐어요”(직접 건너뛴 줄은 빼고)', async ({
+test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음”, W-02 지난 달은 건너뜀만 남아 주 버튼 없음, 건너뜀 줄 시트로 다시 확인', async ({
   page,
 }) => {
   const LATE = new Date('2026-10-28T10:00:00+09:00');
@@ -360,15 +360,18 @@ test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음�
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(page.getByText('다음 월급날 전까지 언제든 확인할 수 있어요')).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
-  await expect(page.locator('.hg-toast')).toContainText('9월 25일 월급, 확인을 마쳤어요');
-  expect(db.v22?.calls.find((c) => c.fn === 'confirm_payday')?.body).toEqual({
-    p_checklist: 'checklist-1',
-  });
+  // 남은(미확인) 손 줄이 없고 서버가 닫은 건너뜀 줄만 남았으면 주 버튼 없음(2026-11-19)
+  await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
+  const skippedBtns = page.getByRole('button', { name: /건너뜀$/ });
+  await expect(skippedBtns).toHaveCount(3);
+  // 서버가 닫은 건너뜀 줄: 상태 버튼 → 줄 시트(계획대로 했어요 / 다른 금액으로 했어요) → 완료로 바뀜
+  await skippedBtns.nth(1).click();
+  await expect(page.getByRole('button', { name: '다른 금액으로 했어요' })).toBeVisible();
+  await page.getByRole('button', { name: '계획대로 했어요', exact: true }).click();
+  await expect(skippedBtns).toHaveCount(2);
   const prev = lines(db, 0);
-  expect(prev.slice(3).every((l) => l.state === 'checked' && l.late)).toBe(true);
-  // 직접 건너뛴 줄은 그대로
-  expect(prev[2]?.state).toBe('skipped');
+  expect(prev.filter((l) => l.state === 'checked' && l.late)).toHaveLength(1);
+  expect(db.v22?.calls.some((c) => c.fn === 'confirm_payday')).toBe(false);
 });
 
 test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340만 원 / 350만 원”(판정 문장 없음), 월급 계획 템플릿 “수입이 들어올 때”, W-02 자리는 기간 막대', async ({
