@@ -2414,6 +2414,7 @@ button.hg-receipt__main { cursor: pointer; }
 /* ── 2026-11-09 홈 허브와 메뉴 서랍(GCOO 홈처럼): 좁은 창 하단 탭 막대·+ 버튼 대신 ☰ 서랍, 회색 바탕 위 크기가 다른 흰 상자 ── */
 /* 회색 바탕 틀(AppFrame tone="alt"): 홈, 자산 관리. 흰 카드는 테두리·그림자 없이 바탕색으로만 구분. 넓은 창 사이드바는 흰색 그대로 */
 .hg-frame--alt { background: var(--surface-alt); }
+html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-alt); }  /* 2026-11-19 회색 바탕 화면(W-01 등) 아래 흰 띠 방지: 틀 아래로 넘치거나 당겨도 바탕까지 회색 */
 .hg-frame--alt :is(.hg-card, .hg-list, .hg-checklist, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(.hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: transparent; box-shadow: none; }
 .hg-frame--alt .hg-card--fill { background: var(--surface); }  /* 회색 판 카드도 회색 바탕 위에서는 흰 상자 */
 .hg-frame--alt .hg-pagetitle .hg-btn--secondary { background: var(--surface); }  /* 넓은 창 제목 줄 보조 버튼(‘추가’)은 회색 바탕 위라 흰 판 */
