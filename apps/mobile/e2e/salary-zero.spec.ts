@@ -159,3 +159,39 @@ test('월급 계획 템플릿이 아직 없는 사람(월급 0원)이 W-01·W-11
   await heading(page, '무엇을 위해 모을까요?');
   await expect.poll(() => db.splits.length).toBe(1);
 });
+
+test('합쳐서: 사람마다 월급 줄, 내 줄만 고치고 상대 줄은 보기만(월급 0원이면 “{이름}님이 입력해요”)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, {
+    couple_state: 'connected',
+    partner_nickname: '예빈',
+    salary_mode: 'joint',
+    joint_cycle_day: 25,
+  });
+  db.partner = {
+    id: 'yebin',
+    nickname: '예빈',
+    side: 'bride',
+    employment: 'regular',
+    monthly_income: 0,
+    payday: 10,
+    payday_last: false,
+    allowance: 0,
+  };
+  for (const sp of db.splits) sp.owner_user_id = null;
+  for (const c of db.checklists) c.owner_user_id = null;
+  await page.goto('/salary/plan');
+  await heading(page, '월급 계획 템플릿');
+  const mine = page.getByRole('button', { name: '찬우 월급 350만 원, 금액 고치기' });
+  await expect(mine).toBeVisible();
+  // 예빈 줄: 누를 수 없고 자물쇠 + 회색 보조
+  await expect(page.getByRole('button', { name: /^예빈 월급/ })).toHaveCount(0);
+  await expect(page.getByText('예빈님이 입력해요')).toBeVisible();
+  await mine.click();
+  await expect(page.getByRole('dialog', { name: '찬우 월급 금액' })).toBeVisible();
+});
