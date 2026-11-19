@@ -242,10 +242,15 @@ export function W02PaydayConfirm() {
     const monthTo = `${today.slice(0, 8)}${String(new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)), 0)).getUTCDate()).padStart(2, '0')}`;
     const from = inPeriod && pd?.start ? pd.start : monthFrom;
     const to = inPeriod && pd?.end ? pd.end : monthTo;
-    const got = (ins.data ?? [])
-      .filter((r) => r.owner_user_id === meId && r.received_on >= from && r.received_on <= to)
-      .reduce((sum, r) => sum + r.amount, 0);
-    const needed = periodNeeded(mySplit?.split_line ?? []);
+    // 기간이 있으면 홈 H-13과 같은 서버 값(수입 합, 월급 계획 합), 없으면 이달 기록과 지금 월급 계획 합
+    const got =
+      inPeriod && pd
+        ? pd.received
+        : (ins.data ?? [])
+            .filter((r) => r.owner_user_id === meId && r.received_on >= from && r.received_on <= to)
+            .reduce((sum, r) => sum + r.amount, 0);
+    const needed =
+      inPeriod && pd?.needed != null ? pd.needed : periodNeeded(mySplit?.split_line ?? []);
     const pct = periodFillPct(got, needed);
     const mine = (mySplit?.split_line ?? [])
       .filter((l) => l.kind === 'saving' && l.goal_id)

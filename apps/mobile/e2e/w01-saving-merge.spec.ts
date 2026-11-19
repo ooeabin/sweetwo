@@ -45,13 +45,14 @@ test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목�
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   const home = group.getByRole('button', { name: /^내 집 마련/ });
   await expect(home).toContainText('95만 원');
-  await expect(home).toContainText('모은 금액 0원');
-  await expect(home).toContainText('목표 금액의 0%');
+  // 2026-11-19: 모은 금액이 0원이면 “모은 금액 0원”을 빼고 “목표 금액 …”만
+  await expect(home).not.toContainText('모은 금액');
+  await expect(home).toContainText('목표 금액');
   await expect(home).toHaveAccessibleName('내 집 마련 매달 95만 원, 모은 금액 0원, 목표 금액의 0%');
   // 목표 금액이 없는 저금은 모은 금액만(막대·% 없음)
   const sub = group.getByRole('button', { name: /^청약/ });
-  await expect(sub).toContainText('모은 금액 0원');
-  await expect(sub).not.toContainText('목표 금액의');
+  await expect(sub).not.toContainText('모은 금액');
+  await expect(sub).not.toContainText('목표 금액');
   await expect(group.locator('.hg-receipt__progbar')).toHaveCount(1);
   await axe(page);
   await home.click();

@@ -268,9 +268,9 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
     p_items: [{ id: 'split-1-line-1', auto_pay: true, auto_day: 26 }],
   });
   expect(db.v22?.tasks).toContain('auto_pick');
-  // 줄 보조 줄 “26일에 자동으로 나가요”(2026-11-19, 예전 알약 “자동 26일”)
+  // 줄 보조 줄 “26일 자동”(2026-11-19 짧게, 예전 알약 “자동 26일”)
   await expect(page.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(
-    '26일에 자동으로 나가요',
+    '26일 자동',
   );
   await page.goto('/');
   await expect(band(page)).not.toContainText('자동으로 나가는 걸 골라 주세요');
@@ -401,10 +401,12 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340
   await line.click();
   await expect(page).toHaveURL(/\/salary\/money-in$/);
   await page.goto('/salary');
-  await expect(page.locator('.hg-periodbar')).toBeVisible();
+  // 2026-11-19: 같은 개편 모양(기간 알약, 큰 금액, “월급 계획 350만 원 중”) + 중립 막대
+  await expect(page.locator('.hg-w02hero__bar')).toBeVisible();
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('340만 원');
   // 막대는 오렌지가 아닌 ink-2
   const fill = await page
-    .locator('.hg-periodbar__bar > i')
+    .locator('.hg-w02hero__bar > i')
     .evaluate((el) => getComputedStyle(el).backgroundColor);
   const ink2 = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--ink-2').trim(),
@@ -574,13 +576,13 @@ test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자
   await page.goto('/salary/plan');
   const send = page.locator('.hg-receipt__row', { hasText: '보내기' });
   await expect(send).toContainText('월급 − 용돈');
-  await expect(send).toContainText('자동으로 나가요');
+  await expect(send).toContainText('자동');
   await expect(send.locator('.hg-receipt__lock')).toHaveCount(1);
   await expect(send.getByRole('button')).toHaveCount(0);
   await axe(page);
 });
 
-test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 보조 줄 “26일에 자동으로 나가요”', async ({
+test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 보조 줄 “26일 자동”', async ({
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary/plan');
@@ -599,7 +601,7 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
     p_items: [{ id: 'split-1-line-2', in_checklist: true, auto_pay: true, auto_day: 26 }],
   });
   await expect(page.locator('.hg-receipt__row', { hasText: '고정지출' })).toContainText(
-    '26일에 자동으로 나가요',
+    '26일 자동',
   );
   // 저금 줄 시트에는 ‘체크리스트에 넣기’가 없음(늘 켬)
   await page.getByRole('button', { name: /^청약/ }).click();
