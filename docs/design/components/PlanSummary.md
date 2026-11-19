@@ -7,7 +7,7 @@ W-01 월급 계획 템플릿 틀(2026-11-19 사용자 확정 시안으로 예전
   - 알약 막대(`hg-plansum__bar`): 높이 16px, 칸 사이 3px, 칸마다 `radius-full`, 칸 최소 16px, 0%는 그리지 않음. 저축·투자 `brand`, 지출 `ink-2`, 미계획 `bar-track`. `role="img"` + 문장 이름. 퍼센트는 core `planRatio`(합 100), 문장 퍼센트와 상태는 core `planSummary`.
   - ● 범례(`hg-plansum__legend`): 세 줄, 점 8px(미계획 점만 `bar-track` 채움 + `slate` 1px 테두리, 흰 카드 위에서 안 보여서, 2026-11-19. 막대 칸 색은 그대로) + 이름(`ink-2` 15px 500) + 오른쪽 금액(600, 숫자 너비 같게). 모자람이면 `short`: 금액을 `danger`(“−30만 원”), 막대는 저축·투자·지출로 꽉 채움.
   - `people`(합쳐서 + 파트너 합류): 큰 금액은 합계(버튼 아님), 아래 사람마다 한 줄(이름 + 금액 + 내 줄만 연필, 상대 줄 자물쇠 + 선택 `note`).
-  - `empty`(월급 0원): 막대·범례 없이 굵은 문장(두 줄) + `hg-plan__block hg-plan__block--soft` 블록 버튼(`brand-soft` 바탕 + `brand-ink` 글자, 카드 안 보조 버튼 규칙의 연장).
+  - `empty`(월급 0원): 막대·범례 없이 굵은 문장(두 줄) + `hg-plan__block hg-plan__block--soft` 블록 버튼(`brand-soft` 바탕 + 오렌지 `accent-app-text` 700 글자, 카드 안 보조 버튼과 같은 규칙, 2026-11-19).
 - `PlanCard`(묶음 카드, 저축·투자 / 지출): 머리 = 제목(18/26 700) + 제목 바로 오른쪽 `action`(작은 ⋯ `Menu`) + 오른쪽 합계(15px 600 `slate`). `id`는 주소 `#saving` 스크롤 자리. 안에 `ReceiptRows`, 같이 모으기 묶음 줄, 그만 모은 접힌 줄, 끝 `PlanAdd`.
 - `PlanAdd`: 카드 끝 블록 버튼(`hg-plan__block`, 52px, `surface-alt` 바탕, `radius-btn`, 15px 600 `ink-2`). 글자 앞 “+”는 Phosphor `plus` 아이콘으로 그리고 화면 읽기 이름(`aria-label`)은 글자 그대로(“+ 저축·투자 추가”).
 - 빈 카드(저축·투자, 지출): 합계 “0원” 아래 회색 한 줄(`hg-plancard__hint`, 14px `slate`) + 이름 칩 줄(`hg-receipt__chips`, Chip `sm`, 맨 끝 “직접 정하기”). 이때 `PlanAdd`는 두지 않음.
