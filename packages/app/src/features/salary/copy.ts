@@ -191,8 +191,8 @@ export const copy = {
   closed: '지난 달 월급날 확인 목록은 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
-  noChecklist: '월급을 넣으면 월급 계획을 만들어 드려요',
-  tellSalary: '월급 알려 주기',
+  emptyPlan: '월급 계획 템플릿에서 줄을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
+  goPlan: '월급 계획 템플릿 ›', // [확인 필요]
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
   howMuchFor: (line: string) => `${line}, 이번 달은 얼마였어요?`, // [확인 필요] 2026-11-13 W-02a
@@ -231,6 +231,13 @@ export const copy = {
   newLinePlaceholder: '예: 부모님 용돈',
   removeLine: '줄 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
+  // W-01 월급 줄(2026-11-19 사용자 결정, 영수증 맨 위): 각자 “월급”, 합쳐서 “찬우 월급” / “예빈 월급”
+  incomeRow: '월급',
+  incomeRowOf: (name: string) => `${name} 월급`,
+  incomeRowLabel: (name: string, amount: string) => `${name} ${amount}, 금액 고치기`, // 머리 금액 “내 월급 고치기”(S-11)와 구분
+  incomeByPartner: (name: string) => `${name}님이 입력해요`, // [확인 필요] 상대 월급이 0원일 때 보기만 줄 아래
+  incomeDay: '월급날은 며칠이에요?',
+  incomeSaved: '월급을 바꿨어요', // 설정 S-11c와 같은 말
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
   leftover: (amount: string) => `미계획 금액 ${amount}`,
   short: (amount: string) => `${amount}이 모자라요`,
@@ -338,7 +345,6 @@ export const copy = {
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
   addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
-  addNoSplit: '월급이 생기면 저축·투자를 추가할 수 있어요', // [확인 필요]
   // W-12 달성 축하, W-12a
   achievedEyebrow: '다 모았어요', // [확인 필요] 2026-11-09 ‘목표 달성’ 대신
   storyAll: (n: number) => `${n}개월 동안 매달 둘이 같이 모았어요`,

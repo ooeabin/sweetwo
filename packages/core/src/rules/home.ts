@@ -389,8 +389,6 @@ export interface MonthLineInput {
   today: string;
   /** 확인 목록을 못 불러옴(공통 상태 7번) */
   error?: boolean;
-  /** 월급 없음(‘지금은 월급이 없어요’) */
-  noSalary: boolean;
   /** 날짜 없음(O-32, payday_none): H-13 기간 */
   paydayNone: boolean;
   /** 한 사람 관리형의 관리하지 않는 쪽 */
@@ -411,7 +409,6 @@ export interface MonthLineInput {
 
 export type HomeMonthLine =
   | { kind: 'error' }
-  | { kind: 'no_salary'; to: string }
   | {
       kind: 'period';
       display: MoneyInPeriod['status'];
@@ -459,18 +456,16 @@ const SALARY_PATHS = {
   last: '/salary?cycle=last',
   plan: '/salary/plan',
   moneyIn: '/salary/money-in',
-  salary: '/settings/me/salary',
 };
 
 /**
- * H-11 이번 달 한 줄(19 ‘H-11 상태’): 못 불러옴 → 월급 없음 → 날짜 없음(H-13 기간) → 관리하지 않는 쪽 →
+ * H-11 이번 달 한 줄(19 ‘H-11 상태’): 못 불러옴 → 날짜 없음(H-13 기간) → 관리하지 않는 쪽 →
  * 첫 월급날 전 → 월급 전 확인(손 줄 남음) → 월급날 당일(손 줄 남음) → 월급날 뒤(손 줄 남음) → 자동 줄뿐 → 지난 달 끝.
  * 손 줄 수(left)는 내가 확인을 맡은 줄만 셀 수 있게 앱이 lines를 걸러 넘김(한 사람 관리형, lineIsMine).
  * 늦은 확인 수(late)는 모든 확인 목록 상태에 붙고, 있으면 이동이 지난 달
  */
 export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
   if (i.error) return { kind: 'error' };
-  if (i.noSalary) return { kind: 'no_salary', to: SALARY_PATHS.salary };
   if (i.paydayNone) {
     const period: MoneyInPeriod = i.period ?? {
       status: 'none',

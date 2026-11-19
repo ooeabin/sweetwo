@@ -78,7 +78,6 @@ describe('pickHero(H-10 대표 저금)', () => {
 describe('pickMonthLine(H-11 상태)', () => {
   const base: MonthLineInput = {
     today: '2026-11-13',
-    noSalary: false,
     paydayNone: false,
     nonManager: false,
     base: 25,
@@ -169,8 +168,9 @@ describe('pickMonthLine(H-11 상태)', () => {
       display: 'none',
     });
     expect(pickMonthLine({ ...base, nonManager: true }).kind).toBe('non_manager');
-    expect(pickMonthLine({ ...base, noSalary: true }).kind).toBe('no_salary');
-    expect(pickMonthLine({ ...base, error: true, noSalary: true }).kind).toBe('error');
+    // 월급 0원도 평소 줄(2026-11-19): 막는 ‘월급 알려 주기’ 줄 없음, 확인 목록이 아직 없으면 첫 월급날 줄
+    expect(pickMonthLine({ ...base })).toMatchObject({ kind: 'first', date: null });
+    expect(pickMonthLine({ ...base, error: true }).kind).toBe('error');
   });
 });
 

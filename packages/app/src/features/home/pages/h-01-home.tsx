@@ -269,9 +269,6 @@ export function H01Home() {
   const closed = tasks.data ?? [];
 
   // ── 이번 달 월급 체크 값(core pickMonthLine, H-15 첫 줄과 할 일 띠 5b가 같이 씀) ──
-  const noSalary = joint
-    ? !me.data.monthly_income && !partner.data?.monthly_income
-    : !me.data.monthly_income;
   const firstPayday = list ? null : firstPaydayOf(mySplit, base, today, shownPayday);
   const nonManager = joint && !!sp.manager_user_id && sp.manager_user_id !== myId;
   // 내가 확인을 맡은 손 줄만 셈(한 사람 관리형·합쳐서 남의 용돈 줄 빼고, core lineIsMine = 서버 pay_line_mine)
@@ -294,7 +291,6 @@ export function H01Home() {
     today,
     shift: shownPayday,
     error: lists.isError && !lists.data,
-    noSalary,
     paydayNone,
     nonManager,
     period: period.data ?? null,
@@ -719,7 +715,11 @@ export function H01Home() {
   const plan =
     left !== null && left < 0
       ? { value: copy.short(m(-left)), sub: planDay }
-      : { value: planDay, sub: left === null ? undefined : copy.leftover(m(left)) };
+      : {
+          // 월급 0원이고 월급날도 없으면 값 자리에 “월급 0원”(2026-11-19, 막는 ‘월급 알려 주기’ 줄 대신)
+          value: planDay ?? (income === 0 ? copy.zeroSalaryShort : undefined),
+          sub: left === null ? undefined : copy.leftover(m(left)),
+        };
 
   // ── H-08 캘린더 타일: 가장 가까운 일정(캘린더 목록과 같은 재료, 월급날 포함, 2026-11-15 3차 검토) ──
   const nx = cal.loading || cal.failed ? null : nextSchedule(cal);

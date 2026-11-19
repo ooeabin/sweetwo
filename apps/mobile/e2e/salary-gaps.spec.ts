@@ -135,7 +135,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   // 줄은 누를 수 없고 자물쇠
   await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
-  await expect(page.locator('.hg-receipt__lock')).toHaveCount(3);
+  await expect(page.locator('.hg-receipt__lock')).toHaveCount(4);
   for (const n of ['추천값으로 다시 채우기', '+ 지출 추가', '편집하기'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await axe(page);
@@ -154,7 +154,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await page.getByRole('dialog').getByLabel('줄 이름').fill('헬스');
   await page.getByRole('button', { name: '확인', exact: true }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
-  await page.getByRole('button', { name: /월급 350만 원/ }).click();
+  await page.getByRole('button', { name: '월급 350만 원, 내 월급 고치기' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
 });
 

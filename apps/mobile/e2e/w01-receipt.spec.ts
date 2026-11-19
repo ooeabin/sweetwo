@@ -66,9 +66,7 @@ function joinYebin(db: MemDb) {
   });
 }
 
-test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶음·합계, + 버튼 없음', async ({
-  page,
-}) => {
+test('보기: 머리 제목 ‘월급 계획 템플릿’, 머리·비율·묶음·합계, + 버튼 없음', async ({ page }) => {
   const { go } = await open(page);
   await go();
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
@@ -238,7 +236,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   const card = page.locator('.hg-receipt');
   await expect(card.locator('.hg-receipt__amount')).toHaveText('270만 원');
   await expect(card.getByText('매달 10일')).toBeVisible();
-  await expect(card.locator('.hg-receipt__lock')).toHaveCount(2);
+  await expect(card.locator('.hg-receipt__lock')).toHaveCount(3);
   // 영수증 안에는 누를 수 있는 것이 없음(머리 이동 링크 ‘이번 달 월급 체크 ›’는 2026-11-19 없앰)
   await expect(card.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
@@ -338,7 +336,9 @@ test('금액 가리기: 영수증 금액은 •••, 공유 이미지도 가�
   await go();
   const card = page.locator('.hg-receipt');
   await expect(card.locator('.hg-receipt__amount')).toHaveText('•••');
-  await expect(card.locator('.hg-receipt__amt').first()).toHaveText('매달 •••');
+  await expect(card.locator('.hg-receipt__amt', { hasText: '매달' }).first()).toHaveText(
+    '매달 •••',
+  );
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();
   await dl;

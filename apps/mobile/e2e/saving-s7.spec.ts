@@ -283,7 +283,7 @@ test('S7-11: 충돌에서 ‘내 값’을 고르면 그 칸의 문장(기한을
   await expect(page.locator('.hg-toast')).toContainText('기한을 바꿨어요');
 });
 
-test('S7-13·S7-15: W-11b 미계획 금액은 금액 가리기를 따름, 월급 계획이 없거나 해제 대기면 W-02 + 이유 Toast', async ({
+test('S7-13·S7-15: W-11b 미계획 금액은 금액 가리기를 따름, 해제 대기면 W-02 + 이유 Toast(월급 0원은 막지 않음)', async ({
   page,
 }) => {
   await page.addInitScript(() => localStorage.setItem('sweetwo.masked', '1'));
@@ -304,17 +304,16 @@ test('S7-13·S7-15: W-11b 미계획 금액은 금액 가리기를 따름, 월급
     '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   );
 
-  await open(
+  // 월급 계획 템플릿이 없어도(월급 0원) 막지 않음(2026-11-19): 템플릿을 만들고 W-11a를 엶
+  const zero = await open(
     page,
     (db) => {
       db.splits.length = 0;
     },
     '/salary/items/new/a',
   );
-  await expect(page).toHaveURL(/\/salary$/);
-  await expect(page.locator('.hg-toast')).toContainText(
-    '월급이 생기면 저축·투자를 추가할 수 있어요',
-  );
+  await expect(page.getByRole('heading', { name: '무엇을 위해 모을까요?' })).toBeVisible();
+  await expect.poll(() => zero.splits.length).toBe(1);
 });
 
 test('S7-02: W-01 저축·투자 묶음(옛 W-13)도 상대 변경을 Realtime으로 바로 받음', async ({

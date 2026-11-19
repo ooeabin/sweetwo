@@ -68,7 +68,7 @@ export function SalaryLoading({ value }: { value: 'month' | 'plan' }) {
 
 /**
  * 월급 탭을 못 불러옴(13 공통 상태 7번, 2026-11-12 QA 5구간 S5-02): 구간 탭 + 오류 카드 “잠시 문제가 생겼어요” + ‘다시 시도’.
- * 홈 큰 상자 오류 카드(H-03)와 같은 모양. 월급이 없을 때의 ‘월급 알려 주기’ 카드와 다름
+ * 홈 큰 상자 오류 카드(H-03)와 같은 모양.
  */
 export function SalaryLoadError({
   value,

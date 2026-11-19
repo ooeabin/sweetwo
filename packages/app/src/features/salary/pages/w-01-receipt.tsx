@@ -8,10 +8,13 @@ import {
   qk,
   reopenSavingItem,
   reorderSplit,
+  salaryChangeKeys,
   saveSplit,
+  scheduleSalaryChange,
   setSplitLine,
   SplitBlocked,
   type SplitLine,
+  updateMe,
 } from '@sweetwo/api';
 import {
   amountBand,
@@ -45,7 +48,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { track } from '../../../shared/analytics';
+import { changeBand, track } from '../../../shared/analytics';
 import { sharedCopy } from '../../../shared/copy';
 import { money, useMask } from '../../../shared/mask';
 import { speakMasked, spoken } from '../../../shared/masked-text';
@@ -72,7 +75,14 @@ import { BundleRow } from '../bundle-parts';
 import { savingPaths, togetherPaths } from '../paths';
 import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
-import { FirstSpendAsk, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
+import {
+  FirstSpendAsk,
+  IncomeSheet,
+  PlanSheet,
+  SpendChips,
+  type LineSettings,
+} from '../receipt-parts';
+import { useEnsureSplit } from '../ensure-split';
 import { SalaryLoadError, SalaryLoading } from '../salary-tab';
 import { SavingAskSheet, SavingGoalRow } from '../saving-parts';
 import { useSavingItems } from '../saving';
@@ -85,6 +95,7 @@ import { toDraft } from '../split-editor';
 type Sheet =
   | { line: SplitLine; from?: 'saving_detail' }
   | { add: string; chip: string | null; first?: boolean }
+  | { income: true }
   | null;
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
@@ -201,6 +212,15 @@ export function W01Receipt() {
     return () => clearTimeout(t);
   }, [fresh]);
   const planReady = !!(me.data && space.data && goals.data && splits.data);
+  // 월급 계획 템플릿이 아직 없으면(월급 0원 포함) 막는 카드 없이 그 자리에서 만듦(2026-11-19 사용자 결정)
+  useEnsureSplit({
+    enabled: planReady && !split && !theirs && !pending,
+    me: m,
+    partner: p,
+    goals: goals.data,
+    salaryMode: sp?.salary_mode,
+    sharedLiving: sp?.shared_living,
+  });
   // 주소 `#saving`이나 방금 만든 줄이면 저축·투자 묶음으로 스크롤(한 번)
   useEffect(() => {
     if (!planReady || scrolled.current) return;
@@ -846,8 +866,65 @@ export function W01Receipt() {
       />
     ) : null;
 
+  // ── 월급 줄(20 W-01 3b, 2026-11-19 사용자 결정): 영수증 맨 위. 각자 “월급”, 합쳐서 사람마다 한 줄.
+  // 내 줄만 눌러 금액 시트로 고침(월급은 본인만, S-11과 같은 저장 길 schedule_salary_change 이번 달부터).
+  // 상대 줄은 보기만(자물쇠), 0원이면 “{이름}님이 입력해요”
+  const twoPeople = joint && !!p;
+  const myIncomeName = twoPeople ? copy.incomeRowOf(m.nickname ?? '') : copy.incomeRow;
+  const incomeRows: ReceiptLine[] = (twoPeople && p ? [m, p] : owner ? [owner] : []).map((x) => {
+    const mineRow = x.id === m.id;
+    const name = twoPeople ? copy.incomeRowOf(x.nickname ?? '') : copy.incomeRow;
+    const value = x.monthly_income ?? 0;
+    return {
+      id: `income-${x.id}`,
+      name,
+      amount: won(value),
+      label: spoken(
+        mineRow ? copy.incomeRowLabel(name, won(value)) : copy.rowLabel(name, won(value)),
+      ),
+      locked: !mineRow,
+      note: !mineRow && value === 0 ? copy.incomeByPartner(x.nickname ?? '') : undefined,
+      onOpen: mineRow
+        ? () => {
+            if (offline()) return;
+            track('salary_line_edit_opened', { joint, was_zero: value === 0 });
+            setSheet({ income: true });
+          }
+        : undefined,
+    };
+  });
+  const saveIncome = (v: number, day: number | 'last' | null) =>
+    run(async () => {
+      const old = m.monthly_income ?? 0;
+      const thisMonth = todayKst().slice(0, 7);
+      const refresh = () =>
+        Promise.all(salaryChangeKeys.map((k) => qc.invalidateQueries({ queryKey: k })));
+      if (day !== null)
+        await updateMe({ payday: day === 'last' ? null : day, payday_last: day === 'last' });
+      if (v === old) {
+        await refresh();
+        return setSheet(null);
+      }
+      await scheduleSalaryChange({ amount: v, from: thisMonth, until: null });
+      track('fact_value_changed', {
+        field: 'income',
+        change_band: changeBand(old, v),
+        source_screen: 'W-01',
+      });
+      await refresh();
+      setSheet(null);
+      toast(copy.incomeSaved, {
+        label: copy.undo,
+        onClick: () =>
+          quietly(
+            scheduleSalaryChange({ amount: old, from: thisMonth, until: null }).then(refresh),
+          ),
+      });
+    });
+
   const sheetLine = sheet && 'line' in sheet ? sheet.line : null;
   const sheetAdd = sheet && 'add' in sheet ? sheet : null;
+  const sheetIncome = !!sheet && 'income' in sheet;
   const sheetEl = sheetLine ? (
     <PlanSheet
       title={copy.lineAmount(nameOf(sheetLine))}
@@ -898,6 +975,18 @@ export function W01Receipt() {
       onClose={() => setSheet(null)}
       onConfirm={(v) => void add(sheetAdd.add, sheetAdd.chip, v, !!sheetAdd.first)}
     />
+  ) : sheetIncome ? (
+    <IncomeSheet
+      title={copy.lineAmount(myIncomeName)}
+      amount={m.monthly_income ?? 0}
+      planned={savingSum + spendSum}
+      others={joint ? (p?.monthly_income ?? 0) : 0}
+      askDay={!m.payday && !m.payday_last && !m.payday_none}
+      masked={masked}
+      busy={busy}
+      onClose={() => setSheet(null)}
+      onConfirm={(v, day) => void saveIncome(v, day)}
+    />
   ) : null;
 
   // 머리 이동 링크 ‘이번 달 월급 체크 ›’는 2026-11-19 사용자 결정으로 없앰(W-02로는 홈 월급 상자·서랍)
@@ -912,7 +1001,6 @@ export function W01Receipt() {
       : []),
     { label: copy.moneyInList, onSelect: () => nav(togetherPaths.moneyInList) },
   ];
-  const noSplit = !split && !theirs;
   // 파트너 탭(각자)인데 파트너 월급 계획이 없음: 0원 영수증 대신 회색 빈 카드(2026-11-12 D3)
   const partnerNoSplit = !split && theirs;
   const pv = partnerView.data ?? null;
@@ -1025,19 +1113,6 @@ export function W01Receipt() {
             </div>
           )}
         </section>
-      ) : noSplit ? (
-        // 월급 없음: W-02와 같은 빈 카드
-        <section className="hg-card hg-card--fill hg-stack">
-          <p className="hg-card__meta">{copy.noChecklist}</p>
-          <button
-            type="button"
-            className="hg-btn hg-btn--link"
-            style={{ alignSelf: 'flex-start' }}
-            onClick={() => nav('/settings/me')}
-          >
-            {copy.tellSalary}
-          </button>
-        </section>
       ) : (
         <ReceiptStage label={copy.splitTitle}>
           <ReceiptCard className={edit ? 'is-edit' : undefined}>
@@ -1054,6 +1129,9 @@ export function W01Receipt() {
               parts={bar}
               legend={legend}
             />
+            <ReceiptSection label={copy.incomeRow}>
+              <ReceiptRows label={copy.incomeRow} lines={incomeRows} labels={rowLabels} />
+            </ReceiptSection>
             <ReceiptSection
               id="saving"
               title={copy.savingGroup}
