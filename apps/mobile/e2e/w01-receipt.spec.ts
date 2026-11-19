@@ -371,7 +371,8 @@ test('모자람: 막대는 저축·투자·지출로 꽉, 범례 “미계획 �
   });
   expect(colors.amt).toBe(colors.danger);
   expect(colors.name).not.toBe(colors.danger);
-  await expect(page.locator('.hg-plansum__title')).toHaveText('월급의 40%를 모으고 있어요');
+  // 계획이 월급보다 많으면 굵은 문장이 바뀜(2026-11-19)
+  await expect(page.locator('.hg-plansum__title')).toHaveText('계획이 월급보다 32만 원 많아요');
   await axe(page);
 });
 
