@@ -10,3 +10,4 @@
 - 오렌지 쓰지 않음(글자 버튼은 모두 회색, 2026-11-09).
 - React 래퍼 `AddRow`(packages/ui): `label`, `onClick`, `block`.
 - 좁은 창만(2026-11-12 `hg-narrow-only`): W-02 저금 묶음 끝 ‘+ 추가’는 넓은 창 제목 줄 버튼과 겹치지 않게 768px 미만에서만 보임
+- + 아이콘 규칙(2026-11-19): ‘+ … 추가’류 글자 앞 +는 문자가 아니라 `AddText`/`PlusIcon` 아이콘 하나(`hg-addtext`): 16px, Phosphor bold(글자 600~700), `currentColor`, 글자와 4px(`--space-1`), inline-flex 세로 가운데. 금액 앞 +50만 원 같은 숫자 부호는 글자 그대로.

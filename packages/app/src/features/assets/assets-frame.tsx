@@ -1,4 +1,4 @@
-import { Button, Tabs } from '@sweetwo/ui';
+import { AddText, Button, Tabs } from '@sweetwo/ui';
 import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainFrame, rememberAssetsTab, type AssetsTab } from '../frame';
@@ -37,9 +37,10 @@ export function AssetsFrame({
           <Button
             variant="secondary"
             className="hg-wide-only"
+            aria-label={copy.add}
             onClick={() => nav(`/assets/new?side=${addSide}`)}
           >
-            {copy.add}
+            <AddText>{copy.add}</AddText>
           </Button>
         ),
       }}

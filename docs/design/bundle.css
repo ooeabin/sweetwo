@@ -2674,3 +2674,7 @@ button.hg-datepill { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) { .hg-confetti { animation: hg-confetti 1.1s var(--ease-out) both; } }
 @media (prefers-reduced-motion: reduce) { .hg-confetti { display: none; } }
 @keyframes hg-confetti { from { opacity: 1; transform: translate(0, 0) rotate(0); } to { opacity: 0; transform: translate(var(--cx, 0px), var(--cy, 80px)) rotate(var(--cr, 120deg)); } }
+
+/* + 아이콘 규칙(2026-11-19): ‘+ … 추가’ 글자 앞 +는 아이콘 하나(AddText). 16px, bold, currentColor, 글자와 4px, 세로 가운데 */
+.hg-addtext { display: inline-flex; align-items: center; gap: var(--space-1); }
+.hg-addtext > .hg-plusic { width: 16px; height: 16px; flex: none; color: currentColor; }
