@@ -536,6 +536,11 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // W-01 월급 줄을 눌러 금액 시트를 엶(2026-11-19, 금액·이름 없음). was_zero = 지금 월급이 0원
+      name: 'salary_line_edit_opened';
+      props: { joint: boolean; was_zero: boolean };
+    }
+  | {
       name: 'salary_change_scheduled' | 'salary_change_cancelled';
       props: { months_ahead: number; has_until: boolean };
     }

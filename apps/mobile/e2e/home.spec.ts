@@ -688,7 +688,7 @@ test('맨 위 띠는 하나만(D3): 해제 대기 > 필독 공지 > 메일 반�
   await axe(page);
 });
 
-test('월급 상자 오류(S4-01): 확인 목록을 못 불러오면 첫 줄 “잠시 문제가 생겼어요” + 누르면 다시 시도, 월급이 없을 때만 ‘월급 알려 주기’', async ({
+test('월급 상자 오류(S4-01): 확인 목록을 못 불러오면 첫 줄 “잠시 문제가 생겼어요” + 누르면 다시 시도, 월급이 0원이어도 ‘월급 알려 주기’ 없이 평소 줄', async ({
   page,
 }) => {
   test.setTimeout(90_000);
@@ -713,7 +713,9 @@ test('월급 상자 오류(S4-01): 확인 목록을 못 불러오면 첫 줄 “
   db.splits.length = 0;
   db.checklists.length = 0;
   await page.reload();
-  await expect(monthLine(page)).toContainText('월급 알려 주기');
+  await expect(monthLine(page)).toContainText('첫 월급날부터');
+  await expect(page.getByText('월급 알려 주기')).toHaveCount(0);
+  await expect(page.getByText('월급 0원')).toBeVisible();
 });
 
 test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라지고 H-10 내 저금 칸은 내 Avatar 하나', async ({

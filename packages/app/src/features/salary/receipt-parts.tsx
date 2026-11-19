@@ -230,6 +230,81 @@ export function PlanSheet({
 }
 
 /**
+ * W-01 월급 줄 금액 시트(20 W-01 3b, 2026-11-19 사용자 결정): 월급 금액(좁은 창 숫자 키패드, 0원 가능) + 바뀐 뒤 미계획 금액.
+ * 월급날이 아직 없고 금액이 0보다 크면 월급날 휠도 같이(S-11c와 같은 규칙, 월급날 없이는 확인 목록을 못 만듦).
+ * planned = 월급 계획 줄 합(보내기 줄 뺌), others = 합쳐서에서 상대 월급(각자는 0)
+ */
+export function IncomeSheet({
+  title,
+  amount: initial,
+  planned,
+  others,
+  askDay,
+  masked,
+  busy,
+  onConfirm,
+  onClose,
+}: {
+  title: string;
+  amount: number;
+  planned: number;
+  others: number;
+  /** 월급날이 없을 때(금액이 0보다 크면 휠을 보임) */
+  askDay: boolean;
+  masked?: boolean;
+  busy?: boolean;
+  onConfirm: (amount: number, day: number | 'last' | null) => void;
+  onClose: () => void;
+}) {
+  const [v, setV] = useState<number | null>(initial);
+  const [day, setDay] = useState<number | 'last'>(25);
+  const left = others + (v ?? 0) - planned;
+  const needDay = askDay && (v ?? 0) > 0;
+  const won = (x: number) => (masked ? MASKED : readWon(x));
+  return (
+    <BottomSheet
+      title={title}
+      onClose={onClose}
+      closeLabel={copy.close}
+      actions={
+        <Button
+          block
+          variant="primary"
+          disabled={v === null}
+          loading={busy}
+          onClick={() => v !== null && onConfirm(v, needDay ? day : null)}
+        >
+          {copy.ok}
+        </Button>
+      }
+    >
+      <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+        <AmountInput
+          label={title}
+          value={v}
+          onChange={setV}
+          monthly
+          allowZero
+          extra={
+            <p className={left < 0 ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
+              {speakMasked(left >= 0 ? copy.leftover(won(left)) : copy.short(won(-left)))}
+            </p>
+          }
+        />
+        {needDay && (
+          <DayWheel
+            label={copy.incomeDay}
+            value={day}
+            onChange={setDay}
+            lastLabel={copy.paydayLast}
+          />
+        )}
+      </div>
+    </BottomSheet>
+  );
+}
+
+/**
  * ‘+ 지출 추가’ 뒤 이름 칩 + 글자 칸(20 W-01 5b). 칩을 누르거나 글자를 넣고 Enter → onPick
  * taken = 이미 있는 이름(숨김)
  */

@@ -93,7 +93,6 @@ describe('monthLineUrgent: H-11이 확인할 것을 말할 때', () => {
       }),
     ).toBe(false);
     expect(monthLineUrgent({ kind: 'first', date: '2026-11-25', to: '/salary' })).toBe(false);
-    expect(monthLineUrgent({ kind: 'no_salary', to: '/settings/me' })).toBe(false);
   });
 });
 

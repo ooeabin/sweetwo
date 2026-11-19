@@ -62,7 +62,7 @@ import {
   useSplits,
 } from '../data';
 import { incomeOf, MonthHero, ShareLink } from '../month-parts';
-import { savingListPath, savingPaths, togetherPaths } from '../paths';
+import { salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
 import { MoneyInLine, MoneyInRows } from '../money-in-rows';
 import { PeriodLine } from '../period-line';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
@@ -260,74 +260,76 @@ export function W02PaydayConfirm() {
         joint,
         accountNames.ofSplitLine(l.id),
       );
-    if (mySplit) {
-      // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
-      const ordered = [...preview].sort((x, y) => x.sort - y.sort);
-      const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
-      return frame(
-        <>
-          <MonthHero
-            pill={
-              <span className="hg-datepill">
-                {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
-              </span>
-            }
-            amount={money(
-              ordered.reduce((sum, l) => sum + l.amount, 0),
-              masked,
-            )}
-            meta={
-              firstDay
-                ? heroMeta({ preview: { today, payday: firstDay, count: ordered.length } })
-                : undefined
-            }
-          />
-          {preview.length > 0 && (
-            <div className="hg-checklist__list hg-list--preview">
-              {ordered.map((l) => (
-                <TransferRow
-                  key={l.id}
-                  label={previewName(l)}
-                  meta={l.auto_pay ? copy.previewAuto : kindText(l.kind)}
-                  amount={money(l.amount, masked)}
-                  done={false}
-                  checkLabel={copy.previewCheck(previewName(l))}
-                  action={{
-                    label: dayTag,
-                    tone: 'wait',
-                    ariaLabel: copy.previewCheck(previewName(l)),
-                    disabled: true,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {meId && (
-            <MoneyInLine
-              meId={meId}
-              from={`${today.slice(0, 8)}01`}
-              to={today}
-              masked={masked}
-              onOpen={() => nav(togetherPaths.moneyInList)}
-              onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
-            />
-          )}
-        </>,
-      );
-    }
-    // 월급 없음: 홈과 같은 빈 카드 + ‘월급 알려 주기’
+    // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
+    const ordered = [...preview].sort((x, y) => x.sort - y.sort);
+    const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
     return frame(
-      <section className="hg-card hg-card--fill hg-stack">
-        <p className="hg-card__meta">{copy.noChecklist}</p>
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav('/settings/me')}
-        >
-          {copy.tellSalary}
-        </button>
-      </section>,
+      <>
+        <MonthHero
+          pill={
+            <span className="hg-datepill">
+              {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
+            </span>
+          }
+          // 줄이 하나도 없으면(월급 0원 포함) 큰 금액 “0원”과 보조 줄 없이 아래 한 줄(2026-11-19 사용자 결정)
+          amount={
+            ordered.length > 0
+              ? money(
+                  ordered.reduce((sum, l) => sum + l.amount, 0),
+                  masked,
+                )
+              : undefined
+          }
+          meta={
+            firstDay && ordered.length > 0
+              ? heroMeta({ preview: { today, payday: firstDay, count: ordered.length } })
+              : undefined
+          }
+        />
+        {ordered.length === 0 && (
+          <section className="hg-card hg-card--fill hg-stack">
+            <p className="hg-card__meta">{copy.emptyPlan}</p>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
+            >
+              {copy.goPlan}
+            </button>
+          </section>
+        )}
+        {preview.length > 0 && (
+          <div className="hg-checklist__list hg-list--preview">
+            {ordered.map((l) => (
+              <TransferRow
+                key={l.id}
+                label={previewName(l)}
+                meta={l.auto_pay ? copy.previewAuto : kindText(l.kind)}
+                amount={money(l.amount, masked)}
+                done={false}
+                checkLabel={copy.previewCheck(previewName(l))}
+                action={{
+                  label: dayTag,
+                  tone: 'wait',
+                  ariaLabel: copy.previewCheck(previewName(l)),
+                  disabled: true,
+                }}
+              />
+            ))}
+          </div>
+        )}
+        {meId && (
+          <MoneyInLine
+            meId={meId}
+            from={`${today.slice(0, 8)}01`}
+            to={today}
+            masked={masked}
+            onOpen={() => nav(togetherPaths.moneyInList)}
+            onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
+          />
+        )}
+      </>,
     );
   }
 

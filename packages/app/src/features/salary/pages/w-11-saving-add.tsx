@@ -35,7 +35,8 @@ import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
 import { money, useMask } from '../../../shared/mask';
 import { copy } from '../copy';
-import { useMe, usePartner, useSpace, useSplits } from '../data';
+import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
+import { useEnsureSplit } from '../ensure-split';
 import { salaryPaths, savingPaths } from '../paths';
 import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
@@ -83,6 +84,24 @@ export function W11SavingAdd() {
   const space = useSpace();
   const partner = usePartner();
   const splits = useSplits();
+  const goals = useGoals();
+  // 월급 계획 템플릿이 아직 없으면(월급 0원 포함) 막지 않고 그 자리에서 만듦(2026-11-19 사용자 결정)
+  const pendingLink = space.data?.couple_state === 'unlink_pending';
+  useEnsureSplit({
+    enabled:
+      !!splits.data &&
+      !pendingLink &&
+      !splits.data.some((x) =>
+        space.data?.salary_mode === 'joint'
+          ? x.owner_user_id === null
+          : x.owner_user_id === me.data?.id,
+      ),
+    me: me.data,
+    partner: partner.data,
+    goals: goals.data,
+    salaryMode: space.data?.salary_mode,
+    sharedLiving: space.data?.shared_living,
+  });
   const [draft, setDraftState] = useState<Draft>(readDraft);
   const [saving, setSaving] = useState(false);
   const { masked } = useMask();
@@ -124,10 +143,10 @@ export function W11SavingAdd() {
   const mine = splits.data.find((x) =>
     joint ? x.owner_user_id === null : x.owner_user_id === me.data?.id,
   );
-  // 월급 계획이 없거나(월급 없음) 해제 대기 중이면 추가할 수 없음(20 W-11 예외): W-02로 + Toast(2026-11-12 S7-15).
-  // W-02가 그 상태 카드(‘월급 알려 주기’)·회색 한 줄을 보여 줌
-  if (!mine || space.data.couple_state === 'unlink_pending')
-    return <Blocked text={mine ? copy.addBlocked : copy.addNoSplit} />;
+  // 해제 대기 중이면 추가할 수 없음(20 W-11 예외): W-02로 + Toast(2026-11-12 S7-15). W-02가 회색 한 줄을 보여 줌.
+  // 월급 0원·템플릿 없음은 막지 않음(2026-11-19): 템플릿을 만드는 동안 뼈대
+  if (space.data.couple_state === 'unlink_pending') return <Blocked text={copy.addBlocked} />;
+  if (!mine) return <QuestionSkeleton title={title} />;
   // 지금 여유 자금(W-11b 보조, 0원 아래면 0원)
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
@@ -205,10 +224,8 @@ export function W11SavingAdd() {
       });
     } catch (e) {
       toast(
-        e instanceof SavingItemBlocked
-          ? e.reason === 'unlink_pending'
-            ? copy.addBlocked
-            : copy.addNoSplit
+        e instanceof SavingItemBlocked && e.reason === 'unlink_pending'
+          ? copy.addBlocked
           : copy.failed,
       );
     } finally {

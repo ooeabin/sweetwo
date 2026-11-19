@@ -94,6 +94,7 @@
 | `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code(viewed는 null, chosen은 칩 코드·`redeadline`·`custom`·`later`) |
 | `bundle_percent_only_toggled`, `adjust_summary_hidden` | on |
 | `salary_change_scheduled` / `_applied` / `_cancelled` | months_ahead, has_until |
+| `salary_line_edit_opened` | joint, was_zero. W-01 ‘월급’ 줄을 눌러 금액 시트를 엶, 금액·이름 없음(2026-11-19). 저장은 `fact_value_changed`(field income, source_screen W-01) |
 | `progress_news_sent`(서버) / `_opened` | — |
 | `home_task_dismissed` | task_key |
 | `money_in_period_viewed` | state(early/bar/gap), filled_band |
@@ -127,6 +128,7 @@
 | `asset_share_answered` | F-03e 연결할 때 | 됨 |
 | `next_saving_prompt_viewed` / `_chosen` | W-12b | 됨 |
 | `salary_change_scheduled` / `_cancelled` | S-11c | 됨 |
+| `salary_line_edit_opened` | W-01 | 됨(2026-11-19) |
 | `salary_change_applied` | 서버: 예약 적용(`salary_change.applied_at` 트리거) | 됨(PR 14) |
 | `progress_news_sent` / `_opened` | 서버: 진행 소식 알림이 생김(`notification` 트리거) / 알림 열기 | 됨(sent는 PR 14) |
 | `home_task_dismissed` | H-06 띠 | 됨 |

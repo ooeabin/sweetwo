@@ -58,8 +58,6 @@ export function monthValue(
   switch (line.kind) {
     case 'error':
       return { value: sharedCopy.errorTitle, sub: sharedCopy.retry };
-    case 'no_salary':
-      return { value: copy.noSalaryShort };
     case 'non_manager':
       return { value: copy.nonManagerShort };
     case 'first':

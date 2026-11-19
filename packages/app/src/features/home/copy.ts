@@ -72,11 +72,9 @@ export const copy = {
   monthReview: (start: string, n: number) =>
     `${formatMonthDay(start)} 월급에서 확인할 게 ${n}개 남았어요`,
   lateLeft: (n: number) => `지난달 확인할 게 ${n}개 남았어요`,
-  noSalary: '월급을 넣으면 월급 계획을 만들어 드려요',
   nonManager: '이번 달 보낼 금액과 용돈은 자동으로 정해져요',
   goView: '보기',
   goCheck: '확인하기',
-  goSalary: '월급 알려 주기',
 
   // H-06 할 일 띠 v2.2 [모두 확인 필요]
   taskReconnect: (name: string) => `${whoDid(name)} 다시 연결하자고 했어요`,
@@ -157,7 +155,7 @@ export const copy = {
   doneShort: (kind: 'all' | 'mixed') => (kind === 'all' ? '계획대로 됐어요' : '확인을 마쳤어요'),
   autoShort: '자동으로 나가요',
   firstShort: (date: string | null) => (date ? `${formatMonthDay(date)}부터` : '첫 월급날부터'),
-  noSalaryShort: '월급 알려 주기',
+  zeroSalaryShort: '월급 0원', // [확인 필요] 2026-11-19 H-15 ‘월급 계획 템플릿’ 줄 값(월급 0원이고 월급날도 없을 때)
   nonManagerShort: '자동으로 정해져요',
   // 날짜 없는 사람(H-13 기간)을 이 줄에 담음
   periodNoneShort: '수입 적기',
