@@ -21,6 +21,9 @@
 .hg-btn--secondary { background: var(--surface-alt); color: var(--ink); border-color: transparent; }
 /* 카드 안 보조 버튼은 옅은 오렌지 바탕 + 진한 오렌지 글자 */
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }  /* 2026-11-11 사용자 결정: 갈색(brand-ink) 글자가 어두워 보여 브랜드 오렌지 글자(당근 보조 버튼처럼). 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
+/* 2026-11-19 사용자 결정: 옅은 오렌지 판(brand-soft) 위의 버튼은 모두 오렌지 글자(accent-app-text) 700. 위 카드 안 보조 버튼과 같은 규칙. 배지·작은 칩(14px 미만)·축하 머리글·강조 숫자는 brand-ink 그대로. 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
+.hg-plan__block.hg-plan__block--soft, .hg-transfer__action.hg-transfer__action--go {  /* 두 클래스로 뒤쪽 기본 버튼 규칙(.hg-plan__block, .hg-transfer__action)보다 앞섬 */
+  background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
 .hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--link-sub, var(--ink-2)); font: var(--text-label); }  /* 2026-11-09 글자 버튼 기본은 진한 회색(ink-2 600): 고치기, 바꾸기, 월급 계획 고치기, 더 보기 */
 /* hg-btn--accent(오렌지 글자 버튼)는 2026-11-09 없앰: 사용자 앱 글자 버튼은 모두 hg-btn--link 기본 진한 회색. 어드민·웹사이트는 --link-sub(focus) 그대로 */
@@ -2353,7 +2356,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 .hg-planstage > * { width: 100%; max-width: 480px; margin-inline: auto; box-sizing: border-box; }
 .hg-plancard { padding: var(--space-6) var(--space-5); border-radius: 24px; background: var(--surface); color: var(--ink); }  /* 24px = 확정 시안 카드 모서리(radius 토큰 20·28 사이, 사용자 지정) */
 .hg-plan__block { display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; height: 52px; margin-top: var(--space-2); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-btn); background: var(--surface-alt); color: var(--ink-2); font: 600 15px/22px var(--font-sans); cursor: pointer; }
-.hg-plan__block--soft { margin-top: var(--space-4); background: var(--brand-soft); color: var(--brand-ink); }  /* 월급 0원 ‘월급 적기’: 카드 안 보조 버튼 규칙(옅은 오렌지 판) */
+.hg-plan__block--soft { margin-top: var(--space-4); }  /* 월급 0원 ‘월급 적기’: 카드 안 보조 버튼 규칙(옅은 오렌지 판) */
 .hg-plan__block:focus-visible, .hg-plansum__amt:focus-visible, .hg-plansum__person:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 요약 카드 */
 .hg-plansum__label { margin: 0; font: 500 14px/20px var(--font-sans); color: var(--slate); }
@@ -2648,7 +2651,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount { color: var(--slate); text-decoration: none; }
 .hg-transfer__action { position: relative; grid-column: 2; order: 2; min-width: 68px; height: 34px; padding: 0 var(--space-3); text-align: center; border: 1px solid transparent; border-radius: var(--radius-md); font: 600 14px/20px var(--font-sans); cursor: pointer; }
 .hg-transfer__action::before { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
-.hg-transfer__action--go { background: var(--brand-soft); color: var(--brand-ink); }
 .hg-transfer__action--done, .hg-transfer__action--skipped { background: var(--surface-alt); color: var(--slate); }
 .hg-transfer__action--wait { background: transparent; border-color: var(--surface-alt); color: var(--slate); cursor: default; }
 .hg-transfer__action:disabled { cursor: default; }
