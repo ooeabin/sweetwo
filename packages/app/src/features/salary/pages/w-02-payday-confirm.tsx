@@ -542,14 +542,10 @@ export function W02PaydayConfirm() {
       ? ordered.filter((l) => isManual(l) && !lineIsMine(l, mineOpt))
       : [];
   const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
-  // “모두 계획대로 됐어요”(confirm_payday): 남은 손 줄(늦은 확인이면 건너뜀으로 닫힌 줄도) 중 내가 확인할 수 있는 것
-  const confirmable = partnerTab
-    ? []
-    : late
-      ? lateLines(shown).filter((l) => lineIsMine(l, mineOpt))
-      : readOnly
-        ? []
-        : confirmableLines(shown.pay_check_line, mineOpt);
+  // “모두 계획대로 됐어요”(confirm_payday): 남은(미확인) 손 줄 중 내가 확인할 수 있는 것. 이번 달·지난 달(늦은 확인) 같은 기준,
+  // 서버가 닫을 때 건너뜀으로 바꾼 줄만 남았으면 버튼 없음(2026-11-19). 건너뜀 줄은 줄 시트로 다시 확인
+  const confirmable =
+    partnerTab || (readOnly && !late) ? [] : confirmableLines(shown.pay_check_line, mineOpt);
   const confirm = async () => {
     if (busy || !confirmable.length) return;
     if (typeof navigator !== 'undefined' && navigator.onLine === false)
