@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { largestRemainder, planRatio, splitShares } from './plan-ratio';
+import { largestRemainder, planRatio, planSummary, splitShares } from './plan-ratio';
 
 // 기획서 06 3-5 예시 표 그대로
 const man = (n: number) => n * 10_000;
@@ -105,5 +105,53 @@ describe('분담 도우미(06 3-7, 서버 propose_split)', () => {
     });
     expect(big?.mine).toBe(50_000_000_000);
     expect(big && big.mine + big.partner).toBe(99_999_990_000);
+  });
+});
+
+describe('W-01 요약 카드(20 W-01 3번, 2026-11-19)', () => {
+  it('시안: 월급 350만, 저축·투자 139만, 지출 183만 → “월급의 40%”, 막대 40 / 52 / 8, 미계획 28만', () => {
+    expect(planSummary({ income: man(350), saving: man(139), spend: man(183) })).toEqual({
+      income: man(350),
+      empty: false,
+      share: 40, // 139 ÷ 350 = 39.7% → 반올림 40
+      noSaving: false,
+      bar: { saving: 40, spend: 52, free: 8 },
+      left: man(28),
+      over: false,
+    });
+  });
+  it('문장 퍼센트는 정수 반올림(0.5는 올림): 1 ÷ 8 = 12.5% → 13, 3 ÷ 8 = 37.5% → 38', () => {
+    expect(planSummary({ income: man(8), saving: man(1), spend: 0 }).share).toBe(13);
+    expect(planSummary({ income: man(8), saving: man(3), spend: 0 }).share).toBe(38);
+    expect(planSummary({ income: man(300), saving: man(100), spend: man(200) }).share).toBe(33);
+  });
+  it('저축·투자가 0원이면 퍼센트 0, noSaving(굵은 문장이 “월급을 어떻게 나눌지 정해 보세요”)', () => {
+    const s = planSummary({ income: man(350), saving: 0, spend: man(35) });
+    expect(s).toMatchObject({ share: 0, noSaving: true, over: false });
+    expect(s.bar).toEqual({ saving: 0, spend: 10, free: 90 });
+  });
+  it('모자람: 막대는 저축·투자·지출만으로 꽉 채우고(합 100, 미계획 칸 0), 미계획은 음수', () => {
+    const s = planSummary({ income: man(350), saving: man(139), spend: man(241) });
+    expect(s).toMatchObject({ over: true, left: -man(30), share: 40 });
+    expect(s.bar).toEqual({ saving: 37, spend: 63, free: 0 });
+    expect(s.bar.saving + s.bar.spend + s.bar.free).toBe(100);
+  });
+  it('월급 0원이면 empty(막대·범례 없음), 줄이 있어도 퍼센트 0', () => {
+    expect(planSummary({ income: 0, saving: 0, spend: 0 })).toMatchObject({
+      empty: true,
+      share: 0,
+      left: 0,
+      over: false,
+    });
+    expect(planSummary({ income: 0, saving: man(10), spend: 0 })).toMatchObject({
+      empty: true,
+      share: 0,
+      over: true,
+    });
+  });
+  it('999억 상한도 정수로(BigInt)', () => {
+    expect(planSummary({ income: 99_999_999_999, saving: 49_999_999_999, spend: 0 }).share).toBe(
+      50,
+    );
   });
 });

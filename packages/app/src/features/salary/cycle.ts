@@ -59,22 +59,19 @@ export const autoDayText = (autoDay: number | null) =>
   autoDay === null ? copy.autoPayday : autoDay >= 31 ? copy.paydayLast : copy.payday(autoDay);
 
 /**
- * W-01 영수증 자동 알약 “자동 26일” / “자동 월급날”(20 W-01 5c). 월급날이 없는 사람(날짜 없음)은 나가는 날 기본이 1일이라
- * ‘월급날’ 대신 “자동 1일”(06 3-1, 2026-11-13 UX B)
+ * W-01 줄 보조 줄의 자동 안내(20 W-01 5c, 2026-11-19 시안: 예전 알약 “자동 26일”을 이 글자로): 월급날에 나가면 “자동으로 나가요”,
+ * 다른 날이면 “26일에 자동으로 나가요”. 월급날이 없는 사람(날짜 없음)은 나가는 날 기본이 1일이라 “1일에 자동으로 나가요”(06 3-1, 2026-11-13 UX B)
  */
-export const receiptAutoPill = (
+export const receiptAutoNote = (
   l: Pick<SplitLine, 'auto_pay' | 'auto_day' | 'amount'>,
   base: BaseDay | null = null,
   paydayNone = false,
-) =>
-  // 0원 줄은 나가는 돈이 없어 알약을 달지 않음(2026-11-14 R6: 날짜 없는 사람의 0원 ‘같이 쓰는 통장’ 줄이 “자동 1일”)
-  l.auto_pay && l.amount > 0
-    ? copy.autoPill(
-        l.auto_day === null && (paydayNone || base === null)
-          ? copy.payday(1)
-          : autoDayText(l.auto_day),
-      )
-    : undefined;
+) => {
+  // 0원 줄은 나가는 돈이 없어 안내를 달지 않음(2026-11-14 R6: 날짜 없는 사람의 0원 ‘같이 쓰는 통장’ 줄)
+  if (!l.auto_pay || l.amount <= 0) return undefined;
+  if (l.auto_day === null && !(paydayNone || base === null)) return copy.autoNote;
+  return copy.autoNoteOn(l.auto_day === null ? copy.payday(1) : autoDayText(l.auto_day));
+};
 
 /** ‘다음 날’ 칩(20 W-01 7a): 월급날 다음 날(말일이면 1일). 월급날이 없으면 null */
 export const nextDayOf = (base: BaseDay | null): number | null =>

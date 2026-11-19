@@ -100,8 +100,10 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await heading(page, '월급 계획 템플릿');
   const row = page.getByRole('button', { name: '월급 0원, 금액 고치기' });
   await expect(row).toBeVisible();
-  await expect(page.getByRole('button', { name: /저축·투자 추가/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /지출 추가/ })).toBeVisible();
+  // 2026-11-19: 요약 카드 “월급 적기”, 빈 카드는 칩 + 직접 정하기(블록 추가 버튼은 줄이 생기면)
+  await expect(page.getByRole('button', { name: '월급 적기' })).toBeVisible();
+  await expect(page.getByText('무엇을 모을지 골라 보세요')).toBeVisible();
+  await expect(page.getByText('매달 나가는 지출을 골라 보세요')).toBeVisible();
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await axe(page);
 
@@ -151,7 +153,7 @@ test('월급 계획 템플릿이 아직 없는 사람(월급 0원)이 W-01·W-11
   await expect(page.getByRole('button', { name: '월급 0원, 금액 고치기' })).toBeVisible();
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await expect.poll(() => db.splits.length).toBe(1);
-  await expect(page.getByRole('button', { name: /지출 추가/ })).toBeVisible();
+  await expect(page.getByText('매달 나가는 지출을 골라 보세요')).toBeVisible();
 
   // W-11도 월급 0원이라고 돌려보내지 않음
   db.splits.length = 0;

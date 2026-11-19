@@ -72,7 +72,8 @@
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |
 | [ListRow](ListRow.md) | Lists | 목록 한 줄 |
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |
-| [ReceiptCard](ReceiptCard.md) | Cards | 영수증 카드(W-01 월급 계획, 달 결과 공유 이미지, W-02 다 끝난 달 한 줄 `title`·`action`, 톱니 아래 가장자리, 비율 막대 PlanBar(진행 모드), 편집 모드) |
+| [PlanSummary](PlanSummary.md) | Cards | W-01 월급 계획 템플릿 틀(2026-11-19): 회색 바탕 위 둥근 흰 카드 셋, 요약 카드(큰 금액 + 연필, 굵은 문장, 알약 막대, ● 범례, 월급 0원 상태), 묶음 카드 PlanCard, 회색 블록 버튼 PlanAdd |
+| [ReceiptCard](ReceiptCard.md) | Cards | W-01 카드 안 줄 ReceiptRows(이름 + 회색 보조 줄 + 굵은 금액, 진행 막대, 편집 모드) |
 | [TransferRow](TransferRow.md) | Lists | 월급 체크리스트 줄 한 행 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |
 | [ChapterBar](ChapterBar.md) | Navigation | 온보딩 챕터 진행(챕터 이름 + 챕터 안 막대), 첫 화면 챕터 목록(ChapterList) |

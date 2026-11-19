@@ -3,7 +3,6 @@ import {
   configureSplitLines,
   deleteSplitLine,
   dismissHomeTask,
-  fetchHomeTasks,
   fetchSharedAccounts,
   qk,
   reopenSavingItem,
@@ -22,6 +21,7 @@ import {
   leftover,
   planChangeTouchesMonth,
   planRatio,
+  planSummary,
   salaryChangedTaskOpen,
   savingStartChips,
   todayKst,
@@ -33,14 +33,11 @@ import {
   ListRow,
   Menu,
   Modal,
-  PlanBar,
-  ReceiptAdd,
-  ReceiptCard,
-  ReceiptHead,
+  PlanAdd,
+  PlanCard,
+  PlanStage,
+  PlanSummary,
   ReceiptRows,
-  ReceiptSection,
-  ReceiptStage,
-  ReceiptTotal,
   SectionHeader,
   Tabs,
   type ReceiptLine,
@@ -68,20 +65,14 @@ import {
   useSplits,
   useSplitWrite,
 } from '../data';
-import { baseDayOf, nextDayOf as nextDay, receiptAutoPill, salaryChangedDay } from '../cycle';
+import { baseDayOf, nextDayOf as nextDay, receiptAutoNote, salaryChangedDay } from '../cycle';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { BundleRow } from '../bundle-parts';
 import { savingPaths, togetherPaths } from '../paths';
 import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { shareReceipt, type ReceiptImageModel } from '../receipt-image';
-import {
-  FirstSpendAsk,
-  IncomeSheet,
-  PlanSheet,
-  SpendChips,
-  type LineSettings,
-} from '../receipt-parts';
+import { IncomeSheet, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
 import { useEnsureSplit } from '../ensure-split';
 import { SalaryLoadError, SalaryLoading } from '../salary-tab';
 import { SavingAskSheet, SavingGoalRow } from '../saving-parts';
@@ -100,8 +91,6 @@ type Sheet =
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
 const MAX_CUSTOM = 10;
-/** 첫 달 ‘매달 나가는 지출’ 묻기를 끝낸 표시(home_task_state, 사람마다, 2026-11-16 R4) */
-const FIRST_SPEND_KEY = 'first_spend_ask';
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰).
 // 고칠 때마다 바로 저장(줄 RPC) + Toast ‘되돌리기’. 편집 모드: 손잡이·위아래로 순서(‘완료’에서 한 번에), 지우기.
@@ -128,9 +117,9 @@ export function W01Receipt() {
   const [refill, setRefill] = useState(false);
   const [fold, setFold] = useState(false);
   const [busy, setBusy] = useState(false);
+  // 빈 지출 카드 칩: 처음 비었다고 본 뒤에는 줄을 넣어도(생활비 칩 등 이어서 넣게) 화면을 나갈 때까지 둠
+  const [spendAsk, setSpendAsk] = useState(false);
   const [sharing, setSharing] = useState(false);
-  // 첫 달 묻기 카드: 처음 판단한 값을 끝날 때까지 유지(줄을 넣어도 카드가 사라지지 않게). null = 아직 판단 전
-  const [ask, setAsk] = useState<boolean | null>(null);
   const who = params.get('who');
   const lineParam = params.get('line');
   const loc = useLocation();
@@ -146,7 +135,6 @@ export function W01Receipt() {
   const scrolled = useRef(false);
   const qc = useQueryClient();
   const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
-  const homeTasks = useQuery({ queryKey: qk.homeTasks, queryFn: fetchHomeTasks });
   // 3b 파트너 탭(각자): 파트너 공개 단계대로 서버가 자른 값(partner_plan_view). ‘모두’가 아니면 영수증 대신 저금만 목록
   const partnerView = useQuery({
     queryKey: qk.partnerPlanView(null),
@@ -245,19 +233,12 @@ export function W01Receipt() {
     });
   }, [loc.hash, saving, viewedEntry]);
 
-  // 첫 달 묻기(20 W-01 ‘첫 달 묻기’): 내가 고칠 수 있는 내 월급 계획(합쳐서면 공동)이고, 아직 지출 줄(고정지출·생활비·직접 추가)이
-  // 없고, 끝낸 표시가 없을 때 한 번. 한 사람 관리형의 관리하지 않는 쪽(보내기·용돈만)에게는 묻지 않음
+  // 빈 지출 카드의 이름 칩(20 W-01 ‘빈 지출 카드’, 2026-11-19: 예전 맨 위 ‘매달 나가는 지출이 있어요?’ 카드가 옮겨 옴):
+  // 내가 고칠 수 있는 월급 계획(합쳐서면 공동)에 고정지출·생활비·직접 추가 줄이 하나도 없을 때. 한 사람 관리형의 관리하지 않는 쪽(보내기·용돈만)에게는 없음
   const notManager =
     space.data?.salary_mode === 'joint' &&
     !!space.data.manager_user_id &&
     space.data.manager_user_id !== me.data?.id;
-  useEffect(() => {
-    if (ask !== null || !split || !homeTasks.data) return;
-    const hasSpend = split.split_line.some(
-      (l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom',
-    );
-    setAsk(canEdit && !notManager && !hasSpend && !homeTasks.data.includes(FIRST_SPEND_KEY));
-  }, [ask, split, homeTasks.data, canEdit, notManager]);
 
   // 월급이 바뀐 달 띠(H-06 6번, 07 5장): W-01을 열면 끝냄(home_task_state done)
   const changedDay = m && sp ? salaryChangedDay(changes.data, m.id, baseDayOf(m, sp)) : null;
@@ -657,23 +638,6 @@ export function W01Receipt() {
       );
     });
 
-  // 첫 달 묻기 끝(‘다 넣었어요’ / ‘건너뛸게요’): 다시 묻지 않게 서버에 표시. 넣은 줄 = 지금 지출 줄(카드는 지출 줄이 없을 때만 뜸)
-  const asked = spendLines.filter(
-    (l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom',
-  ).length;
-  const firstDone = (skipped: boolean) =>
-    void run(async () => {
-      await dismissHomeTask(FIRST_SPEND_KEY, skipped ? 'dismissed' : 'done');
-      setAsk(false);
-      setAdding(false);
-      track('first_spend_asked', {
-        answer: skipped ? 'skipped' : 'done',
-        lines_count: asked,
-        joint,
-      });
-      void qc.invalidateQueries({ queryKey: qk.homeTasks });
-    });
-
   // ── 공유(이미지) ─────────────────────────────────────────────────────
   const legend = [
     { kind: 'saving' as const, text: copy.legendSaving(ratio.saving) },
@@ -693,7 +657,6 @@ export function W01Receipt() {
       ? { label: copy.leftoverLabel, amount: won(left), strong: true }
       : { label: copy.leftoverLabel, amount: copy.short(won(-left)), strong: true, short: true },
   ];
-  const totalRows = totals.map((r) => ({ ...r, amount: shown(r.amount) }));
   const share = async () => {
     if (sharing) return;
     setSharing(true);
@@ -779,7 +742,8 @@ export function W01Receipt() {
       // 보내기 줄(5e)은 직접 못 고침(월급 − 용돈, 서버 send_locked). 합쳐서 남의 용돈 줄은 주인만,
       // 한 사람 관리형이면 관리하는 사람도(5f)
       const send = l.kind === 'send';
-      // 저축·투자 줄(2026-11-18): 큰 금액 “매달 30만 원” + 보조 “모은 금액 1,240만 원” + 목표 금액이 있으면 진행 막대와 “목표 금액의 62%”.
+      // 저축·투자 줄(2026-11-19 시안): 오른쪽 굵은 금액 + 이름 아래 보조 한 줄 “모은 금액 1,240만 원, 목표 금액의 62%”
+      // + 목표 금액이 있으면 4px 진행 막대. 자동 줄은 보조 줄 끝 “자동으로 나가요”.
       // 눌러서 W-10 상세로(편집하기 중에는 금액 시트). 같이 모으기에 든 저금은 내 몫만
       const si =
         l.kind === 'saving' && l.goal_id && !edit && saving.ready
@@ -787,10 +751,30 @@ export function W01Receipt() {
           : undefined;
       const othersAllowance = joint && l.kind === 'allowance' && !!l.user_id && l.user_id !== m.id;
       const lineLocked = theirs || send || (othersAllowance && sp.manager_user_id !== m.id);
+      const pct =
+        si && si.target !== null && !si.bundled
+          ? si.state === 'achieved'
+            ? copy.achieved
+            : copy.targetPct(si.pct ?? 0)
+          : null;
+      const savedNote = si
+        ? si.bundled
+          ? copy.myShare(won(si.saved))
+          : copy.listSaved(won(si.saved))
+        : undefined;
+      const autoNote = receiptAutoNote(l, baseDay, !joint && owner === m && !!m?.payday_none);
+      const note =
+        [
+          send ? copy.sendNote : waitLine && l.id === waitLine.id ? waitNote : savedNote,
+          pct,
+          autoNote,
+        ]
+          .filter((x): x is string => !!x)
+          .join(copy.noteJoin) || undefined;
       return {
         id: l.id,
         name: nameOf(l),
-        amount: si ? copy.monthlyShort(won(l.amount)) : won(l.amount),
+        amount: won(l.amount),
         label: si
           ? spoken(
               copy.savingRowLabel(
@@ -803,23 +787,11 @@ export function W01Receipt() {
           : spoken(copy.rowLabel(nameOf(l), won(l.amount))),
         locked: lineLocked,
         fresh: l.id === fresh,
-        note: send
-          ? copy.sendNote
-          : waitLine && l.id === waitLine.id
-            ? waitNote
-            : si
-              ? si.bundled
-                ? copy.myShare(won(si.saved))
-                : copy.listSaved(won(si.saved))
-              : undefined,
+        note,
         progress:
           si && si.target !== null && !si.bundled
-            ? {
-                percent: si.state === 'achieved' ? 100 : si.bar,
-                label: si.state === 'achieved' ? copy.achieved : copy.targetPct(si.pct ?? 0),
-              }
+            ? { percent: si.state === 'achieved' ? 100 : si.bar }
             : undefined,
-        auto: receiptAutoPill(l, baseDay, !joint && owner === m && !!m?.payday_none),
         onOpen:
           si && !si.private && l.goal_id && !lineLocked
             ? () => nav(savingPaths.item(l.goal_id as string))
@@ -844,55 +816,36 @@ export function W01Receipt() {
   // 5d “+ 같이 쓰는 통장 추가”: 같이 쓰는 생활비 ‘아니요’(O-30)이고 통장 줄이 없으면 숨김. 나중에는 ‘+ 지출 추가’ 칩 끝
   // ‘같이 쓰는 통장’으로 엶(2026-11-16 4차 검토 R4-4)
   const sharedOn = sp.shared_living !== false || lines.some((l) => l.kind === 'shared_account');
-  const lead =
-    people.length > 1 ? (
-      <span className="hg-avatars">
-        {people.map((x) => (
-          <PersonDot
-            key={x.id}
-            name={x.name}
-            starter={x.starter}
-            userId={x.id}
-            className="hg-avatar--lg"
-          />
-        ))}
-      </span>
-    ) : people[0] ? (
-      <PersonDot
-        name={people[0].name}
-        starter={people[0].starter}
-        userId={people[0].id}
-        className="hg-avatar--lg"
-      />
-    ) : null;
-
-  // ── 월급 줄(20 W-01 3b, 2026-11-19 사용자 결정): 영수증 맨 위. 각자 “월급”, 합쳐서 사람마다 한 줄.
-  // 내 줄만 눌러 금액 시트로 고침(월급은 본인만, S-11과 같은 저장 길 schedule_salary_change 이번 달부터).
-  // 상대 줄은 보기만(자물쇠), 0원이면 “{이름}님이 입력해요”
+  // ── 요약 카드 월급(20 W-01 3·3b, 2026-11-19 사용자 결정): 큰 금액 + 연필을 누르면 월급 금액 시트(내 월급만, S-11과 같은 저장 길
+  // schedule_salary_change 이번 달부터). 합쳐서 + 파트너 합류면 큰 금액은 합계(누르지 않음)이고 사람마다 한 줄(내 것만 연필).
+  // 상대 줄·파트너 탭은 보기만, 상대 월급이 0원이면 “{이름}님이 입력해요”
   const twoPeople = joint && !!p;
   const myIncomeName = twoPeople ? copy.incomeRowOf(m.nickname ?? '') : copy.incomeRow;
-  const incomeRows: ReceiptLine[] = (twoPeople && p ? [m, p] : owner ? [owner] : []).map((x) => {
-    const mineRow = x.id === m.id;
-    const name = twoPeople ? copy.incomeRowOf(x.nickname ?? '') : copy.incomeRow;
-    const value = x.monthly_income ?? 0;
-    return {
-      id: `income-${x.id}`,
-      name,
-      amount: won(value),
-      label: spoken(
-        mineRow ? copy.incomeRowLabel(name, won(value)) : copy.rowLabel(name, won(value)),
-      ),
-      locked: !mineRow,
-      note: !mineRow && value === 0 ? copy.incomeByPartner(x.nickname ?? '') : undefined,
-      onOpen: mineRow
-        ? () => {
-            if (offline()) return;
-            track('salary_line_edit_opened', { joint, was_zero: value === 0 });
-            setSheet({ income: true });
-          }
-        : undefined,
-    };
-  });
+  const openIncome = () => {
+    if (offline()) return;
+    track('salary_line_edit_opened', { joint, was_zero: (m.monthly_income ?? 0) === 0 });
+    setSheet({ income: true });
+  };
+  const canEditIncome = !theirs && !edit;
+  const incomePeople =
+    twoPeople && p
+      ? [m, p].map((x) => {
+          const mineRow = x.id === m.id;
+          const name = copy.incomeRowOf(x.nickname ?? '');
+          const value = x.monthly_income ?? 0;
+          return {
+            id: `income-${x.id}`,
+            name,
+            amount: shown(won(value)),
+            label: spoken(
+              mineRow ? copy.incomeRowLabel(name, won(value)) : copy.rowLabel(name, won(value)),
+            ),
+            locked: !mineRow,
+            note: !mineRow && value === 0 ? copy.incomeByPartner(x.nickname ?? '') : undefined,
+            onOpen: mineRow && canEditIncome ? openIncome : undefined,
+          };
+        })
+      : undefined;
   const saveIncome = (v: number, day: number | 'last' | null) =>
     run(async () => {
       const old = m.monthly_income ?? 0;
@@ -1003,6 +956,18 @@ export function W01Receipt() {
   ];
   // 파트너 탭(각자)인데 파트너 월급 계획이 없음: 0원 영수증 대신 회색 빈 카드(2026-11-12 D3)
   const partnerNoSplit = !split && theirs;
+  const summary = planSummary({ income, saving: savingSum, spend: spendSum });
+  // 빈 저축·투자 카드: 저축·투자 줄도 같이 모으기 묶음도 없고 내 것으로 고칠 수 있을 때(파트너 탭 보기만·편집 모드는 없음)
+  const savingEmpty =
+    !edit && !theirs && canEdit && savingLines.length === 0 && bundleList.length === 0;
+  // 빈 지출 카드: 고정지출·생활비·직접 추가 줄이 하나도 없을 때(용돈·보내기 줄은 셈하지 않음). 처음 보인 뒤에는 spendAsk로 칩을 계속 둠
+  const spendEmpty =
+    !edit &&
+    canEdit &&
+    !notManager &&
+    !spendLines.some((l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom');
+  if (spendEmpty && !spendAsk) setSpendAsk(true);
+  const spendChipsShown = spendAsk && !edit && canEdit && !notManager;
   const pv = partnerView.data ?? null;
   const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
@@ -1064,20 +1029,6 @@ export function W01Receipt() {
           )}
         </>
       )}
-      {ask && canEdit && !edit && (
-        <FirstSpendAsk
-          taken={spendLines.map((l) => nameOf(l))}
-          added={asked}
-          busy={busy}
-          onPick={(name, chip) => {
-            if (!offline()) setSheet({ add: name, chip, first: true });
-          }}
-          onOther={() => {
-            if (!offline()) setAdding(true);
-          }}
-          onDone={firstDone}
-        />
-      )}
       {partnerNoSplit ? (
         <section className="hg-card hg-card--fill hg-stack">
           <p className="hg-card__meta">{copy.partnerNoPlan(owner?.nickname ?? '')}</p>
@@ -1114,193 +1065,242 @@ export function W01Receipt() {
           )}
         </section>
       ) : (
-        <ReceiptStage label={copy.splitTitle}>
-          <ReceiptCard className={edit ? 'is-edit' : undefined}>
-            <ReceiptHead
-              lead={lead}
-              // 누를 수 있으면 버튼 이름(amountLabel)이 읽히고, 아니면 글자(가리기면 “가려진 금액”)
-              amount={!theirs && !edit ? won(income) : shown(won(income))}
-              sub={sub}
-              onAmount={!theirs && !edit ? () => nav('/settings/me') : undefined}
-              amountLabel={spoken(copy.incomeLabel(won(income)))}
+        <PlanStage label={copy.splitTitle}>
+          <PlanSummary
+            label={copy.incomeRow}
+            amount={shown(won(income))}
+            amountLabel={spoken(copy.incomeRowLabel(copy.incomeRow, won(income)))}
+            onAmount={!twoPeople && canEditIncome ? openIncome : undefined}
+            people={incomePeople}
+            empty={
+              summary.empty
+                ? {
+                    title: (
+                      <>
+                        {copy.summaryEmpty[0]}
+                        <br />
+                        {copy.summaryEmpty[1]}
+                      </>
+                    ),
+                    action: canEditIncome
+                      ? { label: copy.summaryEmptyAction, onClick: openIncome }
+                      : undefined,
+                  }
+                : undefined
+            }
+            title={
+              summary.noSaving ? (
+                copy.summaryNoSaving
+              ) : (
+                <>
+                  {copy.summarySaving[0]}
+                  <em>{copy.summaryPct(summary.share)}</em>
+                  {copy.summarySaving[1]}
+                </>
+              )
+            }
+            bar={[
+              { kind: 'saving', percent: summary.bar.saving },
+              { kind: 'spend', percent: summary.bar.spend },
+              { kind: 'free', percent: summary.bar.free },
+            ]}
+            barLabel={spoken(copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? ''))}
+            legend={[
+              { kind: 'saving', name: copy.savingGroup, amount: shown(won(savingSum)) },
+              { kind: 'spend', name: copy.spendGroup, amount: shown(won(spendSum)) },
+              {
+                kind: 'free',
+                name: copy.legendFreeName,
+                amount: shown(won(left)),
+                short: summary.over,
+              },
+            ]}
+          />
+          <PlanCard
+            id="saving"
+            title={copy.savingGroup}
+            sum={shown(won(savingSum))}
+            action={
+              !edit && !theirs && savingMenu.length > 0 ? (
+                <Menu label={copy.menu} actions={savingMenu} />
+              ) : undefined
+            }
+          >
+            <ReceiptRows
+              label={copy.savingGroup}
+              lines={rowsOf(savingLines)}
+              edit={edit}
+              onMove={edit ? moveIn(savingLines) : undefined}
+              labels={rowLabels}
             />
-            <PlanBar
-              label={spoken(copy.ratioLabel(ratio.saving, ratio.spend, legend[2]?.text ?? ''))}
-              parts={bar}
-              legend={legend}
-            />
-            <ReceiptSection label={copy.incomeRow}>
-              <ReceiptRows label={copy.incomeRow} lines={incomeRows} labels={rowLabels} />
-            </ReceiptSection>
-            <ReceiptSection
-              id="saving"
-              title={copy.savingGroup}
-              subtotal={shown(won(savingSum))}
-              action={
-                !edit && !theirs && savingMenu.length > 0 ? (
-                  <Menu label={copy.menu} actions={savingMenu} />
-                ) : undefined
-              }
-            >
-              <ReceiptRows
-                label={copy.savingGroup}
-                lines={rowsOf(savingLines)}
-                edit={edit}
-                onMove={edit ? moveIn(savingLines) : undefined}
-                labels={rowLabels}
-              />
-              {!edit && !theirs && bundleList.length > 0 && (
-                <div className="hg-goallist" aria-label={copy.together}>
-                  {bundleList.map((b) => (
-                    <div key={b.id}>
-                      <BundleRow
-                        bundle={b}
-                        masked={masked}
-                        open={openBundle === b.id}
-                        onToggle={() => setOpenBundle((x) => (x === b.id ? null : b.id))}
-                      />
-                      {openBundle === b.id &&
-                        b.goals.map((g) => {
-                          const i = saving.ready ? saving.byId(g.id) : undefined;
-                          if (!i) return null;
-                          return g.mine || (b.show_each && !b.percent_only) ? (
-                            <SavingGoalRow
-                              key={g.id}
-                              item={i}
-                              masked={masked}
-                              onClick={() => nav(savingPaths.item(g.id))}
-                            />
-                          ) : (
-                            <ListRow
-                              key={g.id}
-                              label={copy.bundlePartnerRow(
-                                saving.ready ? saving.partnerName : '',
-                                g.name,
-                              )}
-                            />
-                          );
-                        })}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {!edit &&
-                !theirs &&
-                canEdit &&
-                savingLines.length === 0 &&
-                bundleList.length === 0 && (
-                  <>
-                    <p className="hg-receipt__empty">{copy.savingEmptyAsk}</p>
-                    <div
-                      className="hg-receipt__chips"
-                      role="group"
-                      aria-label={copy.savingEmptyAsk}
-                    >
-                      {savingStartChips(sp.marriage_status).map((c) => {
-                        const name = c === 'custom' ? '' : copy.chipNames[c];
-                        return (
-                          <Chip
-                            key={c}
-                            small
-                            onClick={() => {
-                              // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
-                              if (offline()) return;
-                              writeDraft({ ...EMPTY_DRAFT, name });
-                              nav(`${savingPaths.add}/a?from=split`);
-                            }}
-                          >
-                            {c === 'custom' ? copy.savingEmptyCustom : name}
-                          </Chip>
+            {!edit && !theirs && bundleList.length > 0 && (
+              <div className="hg-goallist" aria-label={copy.together}>
+                {bundleList.map((b) => (
+                  <div key={b.id}>
+                    <BundleRow
+                      bundle={b}
+                      masked={masked}
+                      open={openBundle === b.id}
+                      onToggle={() => setOpenBundle((x) => (x === b.id ? null : b.id))}
+                    />
+                    {openBundle === b.id &&
+                      b.goals.map((g) => {
+                        const i = saving.ready ? saving.byId(g.id) : undefined;
+                        if (!i) return null;
+                        return g.mine || (b.show_each && !b.percent_only) ? (
+                          <SavingGoalRow
+                            key={g.id}
+                            item={i}
+                            masked={masked}
+                            onClick={() => nav(savingPaths.item(g.id))}
+                          />
+                        ) : (
+                          <ListRow
+                            key={g.id}
+                            label={copy.bundlePartnerRow(
+                              saving.ready ? saving.partnerName : '',
+                              g.name,
+                            )}
+                          />
                         );
                       })}
-                    </div>
-                  </>
-                )}
-              {canEdit && (
-                <ReceiptAdd
+                  </div>
+                ))}
+              </div>
+            )}
+            {savingEmpty ? (
+              <>
+                <p className="hg-plancard__hint">{copy.savingEmptyAsk}</p>
+                <div className="hg-receipt__chips" role="group" aria-label={copy.savingEmptyAsk}>
+                  {savingStartChips(sp.marriage_status).map((c) => {
+                    const name = c === 'custom' ? '' : copy.chipNames[c];
+                    return (
+                      <Chip
+                        key={c}
+                        small
+                        onClick={() => {
+                          // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
+                          if (offline()) return;
+                          writeDraft({ ...EMPTY_DRAFT, name });
+                          nav(`${savingPaths.add}/a?from=split`);
+                        }}
+                      >
+                        {c === 'custom' ? copy.savingEmptyCustom : name}
+                      </Chip>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              canEdit && (
+                <PlanAdd
                   onClick={() => {
                     // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
                     if (!offline()) nav(`${savingPaths.add}/a?from=split`);
                   }}
                 >
                   {copy.addItemInReceipt}
-                </ReceiptAdd>
-              )}
-              {/* 그만 모은 저축·투자(옛 W-13 맨 아래와 같음): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
-              {!edit && closed.length > 0 && (
-                <button
-                  type="button"
-                  className="hg-foldrow"
-                  aria-expanded={fold}
-                  onClick={() => setFold((x) => !x)}
-                >
-                  <span>{copy.closedFold(closed.length)}</span>
-                  <Icon name={fold ? 'chevron-up' : 'chevron-down'} size={16} />
-                </button>
-              )}
-              {!edit &&
-                fold &&
-                closed.map((g) => (
-                  <ListRow
-                    key={g.id}
-                    label={g.name}
-                    value={won(saved.data?.[g.id] ?? 0)}
-                    onClick={() => nav(savingPaths.item(g.id))}
-                  />
-                ))}
-            </ReceiptSection>
-            <ReceiptSection title={copy.spendGroup} subtotal={shown(won(spendSum))}>
-              {/* 용돈 줄 먼저(맨 위 고정, 2026-11-16 R4-3), 그 아래 나머지 지출 */}
-              {allowanceLines.length > 0 && (
-                <ReceiptRows
-                  label={copy.allowanceRows}
-                  lines={rowsOf(allowanceLines)}
-                  edit={edit}
-                  onMove={edit ? moveIn(allowanceLines) : undefined}
-                  labels={rowLabels}
+                </PlanAdd>
+              )
+            )}
+            {/* 그만 모은 저축·투자(옛 W-13 맨 아래와 같음): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
+            {!edit && closed.length > 0 && (
+              <button
+                type="button"
+                className="hg-foldrow"
+                aria-expanded={fold}
+                onClick={() => setFold((x) => !x)}
+              >
+                <span>{copy.closedFold(closed.length)}</span>
+                <Icon name={fold ? 'chevron-up' : 'chevron-down'} size={16} />
+              </button>
+            )}
+            {!edit &&
+              fold &&
+              closed.map((g) => (
+                <ListRow
+                  key={g.id}
+                  label={g.name}
+                  value={won(saved.data?.[g.id] ?? 0)}
+                  onClick={() => nav(savingPaths.item(g.id))}
                 />
-              )}
+              ))}
+          </PlanCard>
+          <PlanCard title={copy.spendGroup} sum={shown(won(spendSum))}>
+            {/* 용돈 줄 먼저(맨 위 고정, 2026-11-16 R4-3), 그 아래 나머지 지출 */}
+            {allowanceLines.length > 0 && (
               <ReceiptRows
-                label={copy.spendGroup}
-                lines={proposalRow ? [...rowsOf(otherSpend), proposalRow] : rowsOf(otherSpend)}
+                label={copy.allowanceRows}
+                lines={rowsOf(allowanceLines)}
                 edit={edit}
-                onMove={edit ? moveIn(otherSpend) : undefined}
+                onMove={edit ? moveIn(allowanceLines) : undefined}
                 labels={rowLabels}
               />
-              {canEdit && customs < MAX_CUSTOM && (
-                <ReceiptAdd
-                  expanded={adding}
-                  onClick={() => {
-                    if (!offline()) setAdding((x) => !x);
-                  }}
-                >
-                  {copy.addSpend}
-                </ReceiptAdd>
-              )}
-              {canEdit && sharedOn && (
-                // 5d 같이 쓰는 통장 → W-01b 분담 도우미(PR 11)
-                <ReceiptAdd onClick={() => nav('/salary/split/new')}>
-                  {copy.addSharedAccount}
-                </ReceiptAdd>
-              )}
-              {adding && canEdit && (
-                <SpendChips
-                  more={
-                    sharedOn
-                      ? undefined
-                      : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
-                  }
-                  taken={spendLines.map((l) => nameOf(l))}
-                  onPick={(name, chip) => {
-                    if (spendLines.some((l) => nameOf(l) === name))
-                      return toast(copy.duplicateName);
-                    setSheet({ add: name, chip });
-                  }}
-                />
-              )}
-            </ReceiptSection>
-            <ReceiptTotal rows={totalRows} />
-          </ReceiptCard>
+            )}
+            <ReceiptRows
+              label={copy.spendGroup}
+              lines={proposalRow ? [...rowsOf(otherSpend), proposalRow] : rowsOf(otherSpend)}
+              edit={edit}
+              onMove={edit ? moveIn(otherSpend) : undefined}
+              labels={rowLabels}
+            />
+            {spendChipsShown && (
+              <>
+                <p className="hg-plancard__hint">{copy.spendEmpty.ask}</p>
+                <div className="hg-receipt__chips" role="group" aria-label={copy.spendEmpty.ask}>
+                  {copy.spendEmpty.chips
+                    .filter((c) => !spendLines.some((l) => nameOf(l) === c.name))
+                    .map((c) => (
+                      <Chip
+                        key={c.code}
+                        small
+                        onClick={() => {
+                          if (!offline()) setSheet({ add: c.name, chip: c.code, first: true });
+                        }}
+                      >
+                        {c.name}
+                      </Chip>
+                    ))}
+                  <Chip
+                    small
+                    onClick={() => {
+                      if (!offline()) setAdding(true);
+                    }}
+                  >
+                    {copy.spendEmpty.other}
+                  </Chip>
+                </div>
+              </>
+            )}
+            {!spendEmpty && canEdit && customs < MAX_CUSTOM && (
+              <PlanAdd
+                expanded={adding}
+                onClick={() => {
+                  if (!offline()) setAdding((x) => !x);
+                }}
+              >
+                {copy.addSpend}
+              </PlanAdd>
+            )}
+            {canEdit && sharedOn && !spendEmpty && (
+              // 5d 같이 쓰는 통장 → W-01b 분담 도우미(PR 11)
+              <PlanAdd onClick={() => nav('/salary/split/new')}>{copy.addSharedAccount}</PlanAdd>
+            )}
+            {adding && canEdit && (
+              <SpendChips
+                more={
+                  sharedOn
+                    ? undefined
+                    : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
+                }
+                taken={spendLines.map((l) => nameOf(l))}
+                onPick={(name, chip) => {
+                  if (spendLines.some((l) => nameOf(l) === name)) return toast(copy.duplicateName);
+                  setSheet({ add: name, chip });
+                }}
+              />
+            )}
+          </PlanCard>
           {!edit && (
             <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
               {canEdit && (
@@ -1339,7 +1339,7 @@ export function W01Receipt() {
               </div>
             </div>
           )}
-        </ReceiptStage>
+        </PlanStage>
       )}
       <BundleAchieveWatch />
     </div>
@@ -1349,6 +1349,7 @@ export function W01Receipt() {
       <MainFrame
         current="salary"
         page={{ title: copy.planTitle }}
+        tone="alt" // 2026-11-19 W-01은 회색 바탕 + 둥근 흰 카드(월급 탭 나머지 화면은 흰색)
         // W-02 링크로 열었으면 ‹ = W-02(2026-11-18), 서랍·홈에서 열었으면 홈
         onBack={fromMonth ? () => nav(-1) : undefined}
         columns={[column]}

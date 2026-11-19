@@ -69,6 +69,7 @@ export * from './components/Accordion';
 export * from './components/Search';
 export * from './components/ReorderList';
 export * from './components/ReceiptCard';
+export * from './components/PlanTemplate';
 export * from './components/question';
 export * from './components/AdminFrame';
 export * from './components/DataTable';

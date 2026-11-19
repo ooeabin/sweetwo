@@ -85,6 +85,13 @@ export const copy = {
   legendSpend: (n: number) => `지출 ${n}%`,
   legendFree: (n: number) => `미계획 ${n}%`,
   legendShort: (amount: string) => `미계획 ${amount}`,
+  legendFreeName: '미계획', // 2026-11-19 요약 카드 ● 범례 셋째 줄 이름(막대 막대 범례 줄 이름은 짧게, 금액은 오른쪽)
+  /** W-01 요약 카드(2026-11-19 사용자 결정) [모두 확인 필요]: 굵은 한 문장 “월급의 40%를 모으고 있어요”(숫자만 brand-ink) */
+  summarySaving: ['월급의 ', '를 모으고 있어요'] as const,
+  summaryPct: (n: number) => `${n}%`,
+  summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요',
+  summaryEmpty: ['월급을 적으면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
+  summaryEmptyAction: '월급 적기',
   allocated: '계획 금액',
   leftoverLabel: '미계획 금액',
   addSpend: '+ 지출 추가',
@@ -98,9 +105,9 @@ export const copy = {
   ] as const,
   spendChipsLabel: '지출 이름',
   allowanceRows: '용돈', // 화면 읽기: W-01 지출 묶음 맨 위 용돈 줄 목록(2026-11-16 R4-3)
-  /** W-01 첫 달 묻기(2026-11-16 4차 검토 사용자 결정, 20 W-01 ‘첫 달 묻기’) [모두 확인 필요] */
-  firstSpend: {
-    title: '매달 나가는 지출이 있어요?',
+  /** W-01 빈 지출 카드(2026-11-19 사용자 결정: 예전 맨 위 ‘매달 나가는 지출이 있어요?’ 칩 카드가 지출 카드 안으로, 칩은 그대로) [확인 필요] */
+  spendEmpty: {
+    ask: '매달 나가는 지출을 골라 보세요',
     chips: [
       { name: '월세', code: 'rent' },
       { name: '관리비', code: 'maintenance' },
@@ -109,9 +116,7 @@ export const copy = {
       { name: '대출 상환', code: 'loan' },
       { name: '생활비', code: 'living' },
     ] as const,
-    other: '그 밖에',
-    done: '다 넣었어요',
-    skip: '건너뛸게요',
+    other: '직접 정하기',
   },
   addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
   sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
@@ -365,7 +370,9 @@ export const copy = {
   // ── v2.2 확인 루프(20 ‘월급 탭 v2.2’, 2026-11-13) [모두 확인 필요] ──
   cycleOf: (start: string) => `${formatMonthDay(start)} 월급`, // 07 1장 확인 목록 이름
   autoPayday: '월급날',
-  autoPill: (day: string) => `자동 ${day}`, // W-01 5c “자동 26일”, “자동 월급날”
+  autoNote: '자동으로 나가요', // [확인 필요] 2026-11-19 W-01 줄 보조 줄(예전 알약 “자동 월급날”)
+  autoNoteOn: (day: string) => `${day}에 자동으로 나가요`, // [확인 필요] 2026-11-19 W-01 줄 보조 줄(예전 알약 “자동 26일”)
+  noteJoin: ', ', // 줄 보조 줄 조각 이음(“모은 금액 220만 원, 목표 금액의 23%, 자동으로 나가요”)
   autoWait: (day: string) => `자동 ${day}`, // W-02 2번 “자동 26일”(W-01과 같은 순서, 2026-11-16)
   autoDone: '자동 확인',
   autoLabel: (name: string, day: string) => `${name}, 자동, ${day}에 나가요`, // 화면 읽기
@@ -516,7 +523,7 @@ export const copy = {
   nextQ: '다음엔 뭘 같이 모을까요?', // [확인 필요]
   nextRedeadline: (name: string) => `‘${name}’ 기한을 새로 정할게요`, // [확인 필요]
   nextCustom: '직접 정할게요', // [확인 필요]
-  savingEmptyAsk: '아직 저축·투자가 없어요. 무엇을 모을지 골라 보세요', // [확인 필요] 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄(홈 H-10 빈 상태가 옮겨 옴)
+  savingEmptyAsk: '무엇을 모을지 골라 보세요', // [확인 필요] 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄(홈 H-10 빈 상태가 옮겨 옴)
   savingEmptyCustom: '직접 정하기', // [확인 필요] 같은 칩 끝(W-11a를 이름 칸 빈 채로 엶)
   addNameChips: '이름 고르기', // [확인 필요] W-11a 칩 묶음 화면 읽기 이름
   chipNames: {

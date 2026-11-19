@@ -193,7 +193,7 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await page.getByRole('dialog', { name: '할 일' }).locator('.hg-listrow').nth(1).click();
   await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
   const sec = page.getByRole('region', { name: '저축·투자', exact: true });
-  await expect(sec).toContainText('아직 저축·투자가 없어요. 무엇을 모을지 골라 보세요');
+  await expect(sec).toContainText('무엇을 모을지 골라 보세요');
   for (const c of [
     '결혼 비용',
     '신혼집',
@@ -268,9 +268,9 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
     p_items: [{ id: 'split-1-line-1', auto_pay: true, auto_day: 26 }],
   });
   expect(db.v22?.tasks).toContain('auto_pick');
-  // 영수증 줄 알약 “자동 26일”
+  // 줄 보조 줄 “26일에 자동으로 나가요”(2026-11-19, 예전 알약 “자동 26일”)
   await expect(page.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(
-    '자동 26일',
+    '26일에 자동으로 나가요',
   );
   await page.goto('/');
   await expect(band(page)).not.toContainText('자동으로 나가는 걸 골라 주세요');
@@ -574,13 +574,13 @@ test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자
   await page.goto('/salary/plan');
   const send = page.locator('.hg-receipt__row', { hasText: '보내기' });
   await expect(send).toContainText('월급 − 용돈');
-  await expect(send).toContainText('자동 월급날');
+  await expect(send).toContainText('자동으로 나가요');
   await expect(send.locator('.hg-receipt__lock')).toHaveCount(1);
   await expect(send.getByRole('button')).toHaveCount(0);
   await axe(page);
 });
 
-test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 알약 “자동 26일”', async ({
+test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 보조 줄 “26일에 자동으로 나가요”', async ({
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary/plan');
@@ -599,7 +599,7 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
     p_items: [{ id: 'split-1-line-2', in_checklist: true, auto_pay: true, auto_day: 26 }],
   });
   await expect(page.locator('.hg-receipt__row', { hasText: '고정지출' })).toContainText(
-    '자동 26일',
+    '26일에 자동으로 나가요',
   );
   // 저금 줄 시트에는 ‘체크리스트에 넣기’가 없음(늘 켬)
   await page.getByRole('button', { name: /^청약/ }).click();

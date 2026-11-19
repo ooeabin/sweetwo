@@ -1,203 +1,11 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useRef, useState } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
 import { IconButton } from './IconButton';
-import { AutoPill } from './TransferRow';
 
-// 영수증 카드(docs/design/components/ReceiptCard.md, 2026-11-09 W-01 월급 계획).
-// 바탕(ReceiptStage, surface-alt) 위 카드(ReceiptCard, 위 xl 모서리 + 아래 톱니) 안에 머리, 비율 막대, 묶음, 합계.
-// 숫자·문구·퍼센트는 쓰는 쪽이 줌(금액 가리기, 공개 범위도 쓰는 쪽에서).
-
-/** 카드 뒤 바탕(surface-alt) + 카드 아래 버튼 줄까지 같은 너비로 */
-export function ReceiptStage({ children, label }: { children: ReactNode; label?: string }) {
-  return (
-    <section className="hg-receipt-stage" aria-label={label}>
-      {children}
-    </section>
-  );
-}
-
-export function ReceiptCard({ children, className }: { children: ReactNode; className?: string }) {
-  return <article className={cx('hg-receipt', className)}>{children}</article>;
-}
-
-/** 머리: Avatar(40px, 둘이면 겹쳐서) + 큰 금액 + 아래 stone 한 줄. onAmount가 있으면 금액이 버튼 */
-export function ReceiptHead({
-  lead,
-  title,
-  amount,
-  sub,
-  onAmount,
-  amountLabel,
-  extra,
-}: {
-  lead?: ReactNode;
-  /** 금액 위 제목(달 결과 카드 “11월 월급”, 2026-11-09) */
-  title?: string;
-  /** 금액 글자(금액 가리기면 앱이 화면 읽기 글자를 붙인 노드로, 2026-11-12) */
-  amount: ReactNode;
-  sub?: string;
-  onAmount?: () => void;
-  /** 금액 버튼 화면 읽기 이름(“월급 350만 원, 내 월급 고치기”) */
-  amountLabel?: string;
-  /** 아래 한 줄 다음(W-01 ‘이번 달 3/5 체크했어요 ›’ 링크) */
-  extra?: ReactNode;
-}) {
-  return (
-    <header className="hg-receipt__head">
-      {lead}
-      {title && <p className="hg-receipt__headtitle">{title}</p>}
-      {onAmount ? (
-        <button
-          type="button"
-          className="hg-receipt__amount"
-          aria-label={amountLabel}
-          onClick={onAmount}
-        >
-          {amount}
-        </button>
-      ) : (
-        <p className="hg-receipt__amount">{amount}</p>
-      )}
-      {sub && <p className="hg-receipt__sub">{sub}</p>}
-      {extra}
-    </header>
-  );
-}
-
-/** check: W-02 확인 막대 하나(확인한 줄 수 ÷ 줄 수, 바탕 bar-track, 2026-11-15 3차 검토) */
-export type ReceiptPartKind = 'saving' | 'spend' | 'free' | 'check';
-
-/**
- * 비율 막대 PlanBar(12px, 칸 사이 3px) + 가운데 범례(W-01 영수증, W-02 진행, 달 결과 카드 같은 마크업).
- * 칸 너비는 percent, 0이면 칸 없음. progress 모드(2026-11-09 W-02): 칸마다 fill(0~100)만큼 채우고
- * 나머지는 조용한 칸(저금 accent-app-soft, 지출 hairline 테두리). fill이 모두 100이면 계획 막대와 똑같음.
- * legend가 비면 범례 없음, caption은 막대 아래 한 줄(“체크한 금액 142만 원 / 342만 원”).
- * title·action(2026-11-12 W-02 다 끝난 달): 막대 아래 왼쪽 굵은 한 줄 + caption, 오른쪽 글자 버튼(‘공유하기’)
- */
-export function PlanBar({
-  label,
-  parts,
-  legend = [],
-  progress,
-  caption,
-  flat,
-  title,
-  action,
-}: {
-  label: string;
-  parts: { kind: ReceiptPartKind; percent: number; fill?: number }[];
-  legend?: { kind: ReceiptPartKind; text: string; short?: boolean }[];
-  /** 진행 모드: 저금·지출 칸 안을 fill만큼 채움(여유 자금은 늘 stone) */
-  progress?: boolean;
-  caption?: ReactNode;
-  /** 카드 밖(W-02 머리 아래): 막대 위 여백을 좁게 */
-  flat?: boolean;
-  /** 막대 아래 굵은 한 줄(W-02 다 끝난 달 “10월 25일 월급, 계획대로 됐어요”, 2026-11-12). caption 위 */
-  title?: ReactNode;
-  /** 막대 아래 오른쪽 글자 버튼(W-02 ‘공유하기’, 2026-11-12) */
-  action?: ReactNode;
-}) {
-  return (
-    <div className={cx('hg-planbar', flat && 'hg-planbar--flat')}>
-      <div className="hg-receipt__bar" role="img" aria-label={label}>
-        {parts
-          .filter((p) => p.percent > 0)
-          .map((p) => {
-            const partial = progress && p.kind !== 'free';
-            const fill = Math.max(0, Math.min(100, p.fill ?? 0));
-            return (
-              <i
-                key={p.kind}
-                className={cx(
-                  'hg-receipt__seg',
-                  `hg-receipt__seg--${p.kind}`,
-                  partial && 'is-progress',
-                )}
-                style={{ flexGrow: p.percent, flexBasis: 0 }}
-              >
-                {partial && fill > 0 && (
-                  <b className="hg-receipt__fill" style={{ width: `${fill}%` }} />
-                )}
-              </i>
-            );
-          })}
-      </div>
-      {legend.length > 0 && (
-        <ul className="hg-receipt__legend" aria-hidden="true">
-          {legend.map((l) => (
-            <li key={l.kind} className={cx(l.short && 'is-short')}>
-              <i className={`hg-receipt__sw hg-receipt__seg--${l.kind}`} />
-              {l.text}
-            </li>
-          ))}
-        </ul>
-      )}
-      {title || action ? (
-        <div className="hg-planbar__foot">
-          <div className="hg-planbar__text">
-            {title && <p className="hg-planbar__title">{title}</p>}
-            {caption && <p className="hg-receipt__caption">{caption}</p>}
-          </div>
-          {action}
-        </div>
-      ) : (
-        caption && <p className="hg-receipt__caption">{caption}</p>
-      )}
-    </div>
-  );
-}
-
-/** 묶음: 제목(15px 600) + 오른쪽 stone 소계, 아래 줄들과 끝 글자 버튼 */
-export function ReceiptSection({
-  title,
-  subtotal,
-  children,
-  label,
-  id,
-  action,
-}: {
-  title?: string;
-  subtotal?: ReactNode;
-  /** 묶음 머리 제목 오른쪽 ⋯ 메뉴 같은 것(2026-11-18 저축·투자 묶음, 소계는 늘 줄 금액 열 오른쪽 끝) */
-  action?: ReactNode;
-  children: ReactNode;
-  label?: string;
-  /** 주소 `#saving`으로 스크롤할 자리(2026-11-18) */
-  id?: string;
-}) {
-  return (
-    <section id={id} className="hg-receipt__sec" aria-label={label ?? title}>
-      {title && (
-        <div className="hg-receipt__sechead">
-          <div className="hg-receipt__headl">
-            <h3 className="hg-receipt__title">{title}</h3>
-            {action}
-          </div>
-          {subtotal && <span className="hg-receipt__subtotal">{subtotal}</span>}
-        </div>
-      )}
-      {children}
-    </section>
-  );
-}
-
-/** 묶음 끝 stone 글자 버튼(“+ 저금 추가”) */
-export function ReceiptAdd({
-  children,
-  onClick,
-  expanded,
-}: {
-  children: ReactNode;
-  onClick: () => void;
-  expanded?: boolean;
-}) {
-  return (
-    <button type="button" className="hg-receipt__add" aria-expanded={expanded} onClick={onClick}>
-      {children}
-    </button>
-  );
-}
+// 월급 계획 템플릿 줄 목록(docs/design/components/ReceiptCard.md, 2026-11-09 영수증 줄, 2026-11-19 카드 틀은 PlanTemplate.tsx로).
+// 이 파일은 줄(ReceiptRows)과 줄 모양(ReceiptLine)만: 카드·요약·블록 버튼은 PlanTemplate.tsx(PlanStage, PlanSummary, PlanCard, PlanAdd).
+// 숫자·문구·금액 가리기·공개 범위는 쓰는 쪽이 줌.
 
 export interface ReceiptLine {
   id: string;
@@ -211,16 +19,10 @@ export interface ReceiptLine {
   onDelete?: () => void;
   /** 화면 읽기 이름(없으면 “이름 금액”) */
   label?: string;
-  /** 금액 아래 조용한 한 줄(달 결과 카드 “계획 80만 원”) */
-  sub?: string;
-  /** 금액 자리를 stone으로(달 결과 카드 ‘못 함’) */
-  muted?: boolean;
-  /** 자동 줄 알약(2026-11-13 hg-autopill “자동 26일”), 금액 왼쪽 */
-  auto?: string;
-  /** 이름 아래 회색 한 줄(2026-11-13 보내기 줄 “월급 − 용돈”, 2026-11-18 저축·투자 줄 “모은 금액 1,240만 원”) */
+  /** 이름 아래 회색 한 줄(“모은 금액 1,140만 원, 목표 금액의 23%”, 2026-11-19 시안: 자동이면 “자동으로 나가요”도 이 줄) */
   note?: string;
-  /** 이름 아래 진행 막대 + 글자 “목표 금액의 62%”(2026-11-18 W-01 저축·투자 줄, 막대는 그래픽이라 뜻은 글자로도) */
-  progress?: { percent: number; label: string };
+  /** note 아래 진행 막대(4px, 140px, 그래픽이라 뜻은 note 글자로도. 2026-11-19 시안에서 글자는 note로 합침) */
+  progress?: { percent: number };
   /** 새로 만든 줄 잠깐 강조(2026-11-18, ‘동작 줄이기’면 없음) */
   fresh?: boolean;
 }
@@ -236,7 +38,7 @@ export interface ReceiptEditLabels {
 }
 
 /**
- * 줄 목록. 두 칸(왼쪽 이름 slate, 오른쪽 금액 ink). 줄 앞 아이콘·줄 사이 선 없음.
+ * 줄 목록(카드 안). 두 칸(왼쪽 이름 16px 600 + 회색 보조 줄, 오른쪽 금액 16px 700). 줄 앞 아이콘·줄 사이 선 없음.
  * edit: 손잡이(끌기, 같은 목록 안), 포커스가 오면 보이는 위·아래 버튼, 지우기(마우스 = 늘, 터치 = 왼쪽으로 밀면)
  */
 export function ReceiptRows({
@@ -307,36 +109,20 @@ export function ReceiptRows({
                   ? 1
                   : 0
               : 0;
-          const amt = l.sub ? (
-            <span className="hg-receipt__amtcol">
-              <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
-              <span className="hg-receipt__plan">{l.sub}</span>
-            </span>
-          ) : (
-            <span className={cx('hg-receipt__amt', l.muted && 'is-muted')}>{l.amount}</span>
-          );
           const main = (
             <>
               <span className="hg-receipt__name">
                 {l.name}
                 {l.note && <span className="hg-receipt__note">{l.note}</span>}
                 {l.progress && (
-                  <span className="hg-receipt__prog">
-                    <span className="hg-receipt__progbar" aria-hidden="true">
+                  <span className="hg-receipt__prog" aria-hidden="true">
+                    <span className="hg-receipt__progbar">
                       <i style={{ width: `${l.progress.percent}%` }} />
                     </span>
-                    <span className="hg-receipt__proglabel">{l.progress.label}</span>
                   </span>
                 )}
               </span>
-              {l.auto ? (
-                <span className="hg-receipt__autocol">
-                  <AutoPill text={l.auto} />
-                  {amt}
-                </span>
-              ) : (
-                amt
-              )}
+              <span className="hg-receipt__amt">{l.amount}</span>
             </>
           );
           return (
@@ -459,35 +245,5 @@ export function ReceiptRows({
         {said}
       </span>
     </>
-  );
-}
-
-/** 합계 줄(“계획 금액 342만 원”, “미계획 금액 8만 원” 굵게, 모자라면 danger) */
-export function ReceiptTotal({
-  rows,
-}: {
-  rows: { label: string; amount: ReactNode; strong?: boolean; short?: boolean }[];
-}) {
-  return (
-    <section className="hg-receipt__sec">
-      <dl className="hg-receipt__rows" style={{ margin: 0 }}>
-        {rows.map((r) => (
-          <div
-            key={r.label}
-            className={cx(
-              'hg-receipt__row',
-              'hg-receipt__main',
-              r.strong && 'hg-receipt__row--strong',
-              r.short && 'is-short',
-            )}
-          >
-            <dt className="hg-receipt__name">{r.label}</dt>
-            <dd className="hg-receipt__amt" style={{ margin: 0 }}>
-              {r.amount}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </section>
   );
 }

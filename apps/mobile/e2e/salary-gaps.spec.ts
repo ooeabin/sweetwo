@@ -121,7 +121,7 @@ test('W-02 지난 달 보기(날짜 알약 시트)와 상대가 월급 계획을
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
 });
 
-test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 편집·추천값·추가 없음 / 내 탭은 고침, 큰 금액 → 내 월급, 직접 추가 줄 이름 바꾸기', async ({
+test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자물쇠, 편집·추천값·추가 없음 / 내 탭은 고침, 큰 금액 → 월급 금액 시트, 직접 추가 줄 이름 바꾸기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -130,12 +130,12 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   joinYebin(db);
   await page.goto('/salary/plan');
   await page.getByRole('tab', { name: '예빈' }).click();
-  await expect(page.locator('.hg-receipt__amount')).toHaveText('270만 원');
+  await expect(page.locator('.hg-plansum__amt')).toHaveText('270만 원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
   // 줄은 누를 수 없고 자물쇠
   await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
-  await expect(page.locator('.hg-receipt__lock')).toHaveCount(4);
+  await expect(page.locator('.hg-receipt__lock')).toHaveCount(3);
   for (const n of ['추천값으로 다시 채우기', '+ 지출 추가', '편집하기'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
   await axe(page);
@@ -154,8 +154,8 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await page.getByRole('dialog').getByLabel('줄 이름').fill('헬스');
   await page.getByRole('button', { name: '확인', exact: true }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
-  await page.getByRole('button', { name: '월급 350만 원, 내 월급 고치기' }).click();
-  await expect(page).toHaveURL(/\/settings\/me$/);
+  await page.getByRole('button', { name: '월급 350만 원, 금액 고치기' }).click();
+  await expect(page.getByRole('dialog', { name: '월급 금액' })).toBeVisible();
 });
 
 test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄은 취소선 없이 흐린 글자 + 체크 표시', async ({
