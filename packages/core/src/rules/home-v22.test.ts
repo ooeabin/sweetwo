@@ -93,6 +93,7 @@ describe('pickMonthLine(H-11 상태)', () => {
     expect(pickMonthLine({ ...base, firstPayday: '2026-11-25' })).toMatchObject({
       kind: 'first',
       date: '2026-11-25',
+      to: '/salary',
     });
   });
   it('월급날 손 줄 남음 → 월급 전 확인 기간이면 W-05', () => {

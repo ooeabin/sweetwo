@@ -492,7 +492,7 @@ export function pickMonthLine(i: MonthLineInput): HomeMonthLine {
   }
   if (i.nonManager) return { kind: 'non_manager', to: SALARY_PATHS.checklist };
   const c = i.current;
-  if (!c) return { kind: 'first', date: i.firstPayday ?? null, to: SALARY_PATHS.plan };
+  if (!c) return { kind: 'first', date: i.firstPayday ?? null, to: SALARY_PATHS.checklist };
   const late = lateLeft(i.previous, i.today, i.base, i.shift);
   const left = manualLeft(c.lines);
   if (reviewDue(i.today, c.cycle_end, c.lines))
