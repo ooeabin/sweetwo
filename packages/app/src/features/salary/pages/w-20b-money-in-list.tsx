@@ -75,6 +75,7 @@ export function W20bMoneyInList() {
           {mine.map((r) => {
             const put = puts.data?.[r.id] ?? 0;
             const sub = [formatDateFull(r.received_on), copy.moneyInKinds[r.kind]];
+            if (r.source === 'payday_auto') sub.push(copy.incomeAuto);
             if (put > 0) sub.push(copy.moneyInPutOf(m(put)));
             return (
               <div

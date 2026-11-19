@@ -2665,6 +2665,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-incomecard__row { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; }
 .hg-incomecard__date { flex: none; min-width: calc(var(--space-10)); font: var(--text-body-sm); color: var(--slate); }
 .hg-incomecard__name { flex: 1; min-width: 0; font: var(--text-body-strong); color: var(--ink); }
+.hg-incomecard__auto { margin-left: var(--space-2); font: var(--text-caption); font-weight: 500; color: var(--slate); white-space: nowrap; }  /* 자동 월급 기록 줄의 작은 회색 “자동”(2026-11-20) */
 .hg-incomecard__amt { font: var(--text-body-strong); font-weight: 700; color: var(--ink); }
 .hg-incomecard .hg-incomecard__add { margin-top: var(--space-3); font: var(--text-body-strong); color: var(--ink-2); }
 .hg-stickybar { position: sticky; bottom: 0; z-index: 1; margin-top: var(--space-4); padding: var(--space-6) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, transparent, var(--surface) var(--space-6)); }

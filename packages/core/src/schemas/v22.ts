@@ -146,6 +146,8 @@ export const MoneyInRowSchema = z.object({
   amount: won,
   received_on: z.string(),
   kind: MoneyInKindSchema,
+  /** 직접 적음(manual) / 월급날 확인으로 자동 기록(payday_auto, 2026-11-20). 없으면 직접 적음 */
+  source: z.enum(['manual', 'payday_auto']).default('manual'),
   created_at: ts,
   deleted_at: nullableText,
 });

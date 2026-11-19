@@ -2088,6 +2088,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["money_in_kind"]
           owner_user_id: string
           received_on: string
+          source: string
           space_id: string
         }
         ComputedFields: never
@@ -2099,6 +2100,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["money_in_kind"]
           owner_user_id: string
           received_on: string
+          source?: string
           space_id: string
         }
         Update: {
@@ -2109,6 +2111,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["money_in_kind"]
           owner_user_id?: string
           received_on?: string
+          source?: string
           space_id?: string
         }
         Relationships: [
@@ -2472,6 +2475,7 @@ export type Database = {
       }
       pay_checklist: {
         Row: {
+          auto_income_at: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
@@ -2486,6 +2490,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          auto_income_at?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -2499,6 +2504,7 @@ export type Database = {
           state?: string
         }
         Update: {
+          auto_income_at?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -4486,6 +4492,7 @@ export type Database = {
           side: Database["public"]["Enums"]["couple_side"]
         }[]
       }
+      pay_auto_income: { Args: { p_checklist: string }; Returns: number }
       pay_line_mine: {
         Args: { p_kind: string; p_owner: string; p_space: string; p_uid: string; p_user: string }
         Returns: boolean

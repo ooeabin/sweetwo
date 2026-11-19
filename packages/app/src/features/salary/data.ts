@@ -96,6 +96,8 @@ export const refreshChecks = (qc: QueryClient) =>
     qc.invalidateQueries({ queryKey: ['pay_check_line'] }),
     qc.invalidateQueries({ queryKey: qk.goalSaved }),
     qc.invalidateQueries({ queryKey: qk.goals }),
+    // 월급날 확인이 그 사이클 월급을 수입 기록으로 자동 기록함(2026-11-20): W-02 수입 카드
+    qc.invalidateQueries({ queryKey: qk.moneyIns }),
   ]);
 
 /** 지금 캐시에 있는 이번 사이클 체크리스트 중 이 줄이 든 것 */
