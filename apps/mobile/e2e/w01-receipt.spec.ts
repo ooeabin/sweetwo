@@ -681,3 +681,28 @@ test('월급 0원이어도 줄이 0개면 아래 버튼 숨김', async ({ page }
   for (const n of ['편집하기', '공유하기', '추천값으로 다시 채우기'])
     await expect(page.getByRole('button', { name: n })).toHaveCount(0);
 });
+
+test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(모은 금액 + 목표 금액의 %), 가리기면 금액만 •••', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  const g = db.goals.find((x) => x.id === 'goal-h');
+  if (g) g.start_saved = 33_000_000;
+  await page.addInitScript(() => {
+    const w = window as unknown as { __drawn: string[] };
+    w.__drawn = [];
+    const fill = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (t: string, x: number, y: number) {
+      w.__drawn.push(t);
+      return fill.call(this, t, x, y);
+    };
+  });
+  await go();
+  const note = '모은 금액 3,300만 원, 목표 금액의 22%';
+  await expect(page.getByText(note)).toBeVisible();
+  const dl = page.waitForEvent('download');
+  await page.getByRole('button', { name: '공유하기' }).click();
+  await dl;
+  const drawn = await page.evaluate(() => (window as unknown as { __drawn: string[] }).__drawn);
+  expect(drawn).toContain(note);
+});

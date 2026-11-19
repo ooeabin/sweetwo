@@ -461,6 +461,14 @@ function layoutPlan(
           ctx.beginPath();
           ctx.arc(left + 4, yy + 11, 4, 0, Math.PI * 2);
           ctx.fill();
+          if (l.kind === 'free') {
+            // 미계획 점: 흰 카드 위에서 보이게 slate 1px 테두리(화면 hg-plansum__dot과 같음)
+            ctx.strokeStyle = t.slate;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(left + 4, yy + 11, 3.5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
         }
         put(l.name, left + 20, yy + 11, { weight: 500, size: 15, color: t.ink2 });
         put(l.amount, right, yy + 11, {

@@ -627,18 +627,11 @@ export function W01Receipt() {
   ];
   // 공유 이미지(2026-11-19): W-01 요약 카드 모양(월급, 한 문장, 알약 막대, ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
   // 금액 가리기·공개 범위는 화면과 같은 값(won, nameOf)을 그대로 씀
-  const imageSub = (l: SplitLine) => {
-    const si =
-      l.kind === 'saving' && l.goal_id && saving.ready ? saving.byId(l.goal_id) : undefined;
-    return si && si.target !== null && !si.bundled
-      ? si.state === 'achieved'
-        ? copy.achieved
-        : copy.targetPct(si.pct ?? 0)
-      : undefined;
-  };
+  // 저축·투자 줄 보조 줄은 화면과 같은 글(“모은 금액 1,140만 원, 목표 금액의 22%”, 금액 가리기 포함): rowsOf의 note
   const share = async () => {
     if (sharing) return;
     setSharing(true);
+    const savingNotes = new Map(rowsOf(savingLines).map((r) => [r.id, r.note]));
     const model: PlanImageModel = {
       label: copy.incomeRow,
       amount: won(income),
@@ -669,7 +662,11 @@ export function W01Receipt() {
         .filter((x) => x.ls.length > 0)
         .map(({ ls, ...x }) => ({
           ...x,
-          rows: ls.map((l) => ({ name: nameOf(l), amount: won(l.amount), sub: imageSub(l) })),
+          rows: ls.map((l) => ({
+            name: nameOf(l),
+            amount: won(l.amount),
+            sub: savingNotes.get(l.id),
+          })),
         })),
     };
     try {

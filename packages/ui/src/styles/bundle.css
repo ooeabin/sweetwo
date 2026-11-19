@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (cac42546). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (704b0278). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2375,6 +2375,7 @@ button.hg-plansum__person { cursor: pointer; }
 .hg-plansum__legend { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .hg-plansum__legend li { display: flex; align-items: center; font: 500 15px/22px var(--font-sans); }
 .hg-plansum__dot { flex: none; width: 8px; height: 8px; margin-right: var(--space-3); border-radius: var(--radius-full); }
+.hg-plansum__dot.hg-plansum__seg--free { box-shadow: inset 0 0 0 1px var(--slate); }  /* 미계획 점: bar-track 채움이 흰 카드 위에서 안 보여 slate 1px 테두리(막대 칸 색은 그대로, 2026-11-19) */
 .hg-plansum__lname { flex: 1; color: var(--ink-2); }
 .hg-plansum__lamt { font-weight: 600; font-variant-numeric: tabular-nums; }
 .hg-plansum__legend li.is-short .hg-plansum__lamt { color: var(--danger); }  /* 모자람: 미계획 금액을 −와 빨강으로 */
