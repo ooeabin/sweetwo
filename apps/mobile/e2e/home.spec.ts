@@ -979,15 +979,15 @@ const top = (page: Page, sel: string) =>
     .first()
     .evaluate((el) => el.getBoundingClientRect().top);
 
-test('홈 순서(2026-11-17): 같이 모으기가 0원이면 월급 상자가 위, 월급 상자 줄 이름은 메뉴 서랍과 같고 반 칸 타일은 자산 관리·캘린더', async ({
+test('홈 순서(2026-11-17, 2026-11-20 고정): 같이 모으기가 0원이어도 같이 모으기가 월급 상자 위, 월급 상자 줄 이름은 메뉴 서랍과 같고 반 칸 타일은 자산 관리·캘린더', async ({
   page,
 }) => {
   await open(page);
   await expect(together(page)).toBeVisible();
   const narrow = (page.viewportSize()?.width ?? 1280) < 1100;
   if (narrow) {
-    expect(await top(page, '.hg-hubbox')).toBeLessThan(await top(page, '.hg-together'));
-    expect(await top(page, '.hg-together')).toBeLessThan(await top(page, '.hg-hubtile'));
+    expect(await top(page, '.hg-together')).toBeLessThan(await top(page, '.hg-hubbox'));
+    expect(await top(page, '.hg-hubbox')).toBeLessThan(await top(page, '.hg-hubtile'));
   }
   await expect(page.locator('.hg-hubbox__name')).toHaveText([
     '이번 달 월급 체크',
