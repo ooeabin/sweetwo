@@ -25,6 +25,13 @@ async function open(page: Page) {
   return db;
 }
 
+// 휴대폰 폭(390)에서 고정 주 버튼 폭이 본문 좌우 여백(space-4 = 16px)을 뺀 viewport - 32px(±2)
+async function expectDockWidth(page: Page, name: string) {
+  const vw = page.viewportSize()?.width ?? 0;
+  const box = await page.getByRole('button', { name, exact: true }).boundingBox();
+  expect(Math.abs((box?.width ?? 0) - (vw - 32))).toBeLessThanOrEqual(2);
+}
+
 test('W-01 b: 줄이 하나도 없으면 막대·범례 없이 문장만(월급이 있어도)', async ({ page }) => {
   const db = await open(page);
   for (const s of db.splits) s.split_line = [];
@@ -99,8 +106,20 @@ test('W-02 a: 템플릿 줄이 0개면 날짜 알약 + 한 덩어리 안내 + �
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: '월급 계획 템플릿 채우기' })).toBeVisible();
   expect(await noScroll()).toBe(true);
+  // 고정 주 버튼은 본문 좌우 여백만 뺀 꽉 찬 폭(390 - 32). 세로 flex 안의 margin auto 본문이 줄어들던 것(2026-11-20)
+  await expectDockWidth(page, '월급 계획 템플릿 채우기');
   await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿' })).toBeVisible();
+});
+
+test('W-02 확인 중: 고정 주 버튼 “모두 계획대로 됐어요”가 휴대폰 폭에서 본문 좌우 여백만 뺀 꽉 찬 폭', async ({
+  page,
+}) => {
+  await open(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/salary');
+  await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toBeVisible();
+  await expectDockWidth(page, '모두 계획대로 됐어요');
 });
 
 test('W-02 f: 건너뜀이 섞여 다 확인하면 접힌 줄 “4개 확인, 1개 건너뜀”, 건너뜀이 없으면 “5개 모두 확인했어요”', async ({

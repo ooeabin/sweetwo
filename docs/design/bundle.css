@@ -2675,7 +2675,7 @@ button.hg-datepill { cursor: pointer; }
 /* 2026-11-20 빈 계획 화면 스크롤 수정: 예전 min-height(100dvh - 320px)는 머리·여백·주 버튼 위에 더해져 한 화면에 들어가는 내용도 스크롤이 생겼다. 틀부터 본문 칸까지 세로 flex로 이어 남는 높이만 채움(내용이 더 길면 그때만 스크롤) */
 .hg-frame:has(.hg-empty--plan) { align-items: stretch; }
 .hg-frame__main:has(.hg-empty--plan) { display: flex; flex-direction: column; }
-.hg-frame__main:has(.hg-empty--plan) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; }
+.hg-frame__main:has(.hg-empty--plan) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; width: 100%; }  /* 2026-11-20 주 버튼 폭 수정: 본문(`hg-body`)의 grid용 align-items: start가 flex 열로 바뀌면 가로 줄이기가 돼 주 버튼이 내용 폭(260px)으로 좁아졌다. 가로는 stretch, 세로 flex 안 margin: 0 auto 칸은 width: 100%. 가운데 정렬은 문장 묶음(hg-empty)에만 */
 .hg-frame__main:has(.hg-empty--plan) > .hg-body > .hg-body__col { flex: 1 1 auto; }
 .hg-frame__main:has(.hg-empty--plan) .hg-body__col > .hg-stack { flex: 1 1 auto; }
 @media (max-width: 767px) { .hg-frame:has(.hg-empty--plan) { display: flex; flex-direction: column; } .hg-frame:has(.hg-empty--plan) > .hg-frame__main { flex: 1 1 auto; } }
