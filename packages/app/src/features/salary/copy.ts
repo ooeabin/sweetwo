@@ -198,7 +198,11 @@ export const copy = {
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
   emptyPlan: '월급 계획 템플릿에서 줄을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
-  goPlan: '월급 계획 템플릿 ›', // [확인 필요]
+  // W-02 템플릿 줄이 0개일 때 한 덩어리 안내(2026-11-20 사용자 결정, 20 W-02 0b) [모두 확인 필요]
+  emptyLeadPay: (amount: string) => `${object(amount)} 나눠서`,
+  emptyLeadNone: '월급을 적고',
+  emptyTail: '월급 계획 템플릿을 완성해 주세요',
+  fillPlan: '월급 계획 템플릿 채우기',
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
   howMuchFor: (line: string) => `${line}, 이번 달은 얼마였어요?`, // [확인 필요] 2026-11-13 W-02a
@@ -393,6 +397,10 @@ export const copy = {
   // W-02 수입 카드(2026-11-19 사용자 결정, 20 W-02 6번) [확인 필요]
   incomeCardLabel: '이번 달 수입',
   incomePeriodLabel: '이번 기간 수입', // 날짜 없는 사람
+  incomeDefaultOf: (name: string) => `${name}님 월급`, // 합쳐서에서 상대의 기본값 줄 이름(2026-11-20) [확인 필요]
+  incomeEditLabel: '월급 금액 고치기', // 큰 금액·연필 버튼 이름(2026-11-20) [확인 필요]
+  incomeEditTitle: '월급 금액', // 금액 시트 제목(2026-11-20) [확인 필요]
+  incomeRowEditLabel: (amount: string) => `월급 ${amount} 고치기`, // 자동 월급 줄 버튼 이름 [확인 필요]
   incomeAuto: '자동', // 월급날 확인으로 자동 기록한 수입 줄(W-02 수입 카드, W-20b) [확인 필요] 2026-11-20
   incomeAll: '전체 ›', // 수입 기록(W-20b)
   incomeAllLabel: '수입 기록 전체 보기',

@@ -79,19 +79,20 @@ test('W-01 저축·투자 줄 보조 줄: 모은 금액 0원은 빼고 “목표
   expect(wrap).toBe('nowrap');
 });
 
-test('W-02 a: 템플릿 줄이 0개면 큰 금액·보조 줄·칩 없이 안내 + ‘월급 계획 템플릿 ›’', async ({
+test('W-02 a: 템플릿 줄이 0개면 날짜 알약 + 한 덩어리 안내 + ‘월급 계획 템플릿 채우기’(큰 금액·칩·수입 카드 없음)', async ({
   page,
 }) => {
   const db = await open(page);
   const list = db.checklists[0];
   if (list) list.pay_check_line = [];
   await page.goto('/salary');
-  await expect(page.getByText('월급 계획 템플릿에서 줄을 추가해 주세요')).toBeVisible();
+  await expect(page.getByText('월급 계획 템플릿을 완성해 주세요')).toBeVisible();
+  await expect(page.getByRole('region', { name: '이번 달 수입' })).toHaveCount(0);
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);
   await expect(page.locator('.hg-w02hero__meta')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^전체/ })).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '월급 계획 템플릿 ›' }).click();
+  await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿' })).toBeVisible();
 });
 

@@ -6,10 +6,12 @@ import {
   fetchMoneyIns,
   fetchPastChecklists,
   qk,
+  setPaydayIncome,
   type PayChecklist,
   type PayCheckLine,
 } from '@sweetwo/api';
 import {
+  amountBand,
   chipCounts,
   confirmableLines,
   doneState,
@@ -77,7 +79,7 @@ import {
 } from '../data';
 import { incomeOf, MonthHero, ShareLink } from '../month-parts';
 import { salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
-import { IncomeCard } from '../money-in-rows';
+import { IncomeCard, PaydayIncomeSheet, type IncomeDefaults } from '../money-in-rows';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
 import { useSavingItems } from '../saving';
 import { AchieveWatch } from '../saving-parts';
@@ -109,6 +111,8 @@ export function W02PaydayConfirm() {
   const [chip, setChip] = useState<CheckChip>('all');
   const [foldOpen, setFoldOpen] = useState(false);
   const [pickDate, setPickDate] = useState(false);
+  const [incomeSheet, setIncomeSheet] = useState(false);
+  const [incomeBusy, setIncomeBusy] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const cycleParam = params.get('cycle');
   // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
@@ -206,6 +210,45 @@ export function W02PaydayConfirm() {
     );
 
   const pending = sp.couple_state === 'unlink_pending';
+  // 수입 카드 기본값(2026-11-20): 기록 0건 + 자동 기록 전이면 프로필 월급을 보이고 바로 고침(set_payday_income, 07 4장)
+  const meIncome = me.data.monthly_income ?? 0;
+  const defaultLines = (date: string): IncomeDefaults['lines'] => [
+    ...(meIncome > 0
+      ? [{ key: 'me', date, name: copy.moneyInKinds.salary, amount: meIncome }]
+      : []),
+    ...(joint && partner.data && (partner.data.monthly_income ?? 0) > 0
+      ? [
+          {
+            key: 'partner',
+            date,
+            name: copy.incomeDefaultOf(partner.data.nickname ?? ''),
+            amount: partner.data.monthly_income ?? 0,
+          },
+        ]
+      : []),
+  ];
+  const saveIncome = async (checklist: string, amount: number) => {
+    if (incomeBusy) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false)
+      return toast(sharedCopy.needOnline);
+    setIncomeBusy(true);
+    try {
+      await setPaydayIncome(checklist, amount);
+      track('payday_income_set', { amount_band: amountBand(amount), zero: amount === 0 });
+      await refreshChecks(qc);
+      setIncomeSheet(false);
+    } catch {
+      toast(copy.failed);
+    } finally {
+      setIncomeBusy(false);
+    }
+  };
+  const emptyPlan = (amount: number) => (
+    <EmptyPlan
+      lead={amount > 0 ? copy.emptyLeadPay(money(amount, masked)) : copy.emptyLeadNone}
+      onFill={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
+    />
+  );
   const kindText = (kind: string) => (kind === 'saving' ? copy.kindSaving : copy.kindSpend);
   const page = { title };
   const frame = (body: ReactNode) => (
@@ -349,6 +392,20 @@ export function W02PaydayConfirm() {
     // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
     const ordered = [...preview].sort((x, y) => x.sort - y.sort);
     const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
+    // 템플릿 줄이 하나도 없으면(월급 0원 포함) 날짜 알약 + 한 덩어리 안내 + 주 버튼만(2026-11-20 사용자 결정)
+    if (ordered.length === 0)
+      return frame(
+        <>
+          <MonthHero
+            pill={
+              <span className="hg-datepill">
+                {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
+              </span>
+            }
+          />
+          {emptyPlan(incomeOf(owner, me.data, partner.data))}
+        </>,
+      );
     // 버튼 날짜 = 그 줄이 실제로 나가는 날(자동 줄은 나가는 날, 손 줄은 월급날, 2026-11-19)
     const tagOf = (l: (typeof preview)[number]) =>
       l.auto_pay && l.auto_day !== null ? autoDayText(l.auto_day) : dayTag;
@@ -371,19 +428,6 @@ export function W02PaydayConfirm() {
               : undefined
           }
         />
-        {ordered.length === 0 && (
-          <section className="hg-card hg-card--fill hg-stack">
-            <p className="hg-card__meta">{copy.emptyPlan}</p>
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
-            >
-              {copy.goPlan}
-            </button>
-          </section>
-        )}
         {preview.length > 0 && (
           <div className="hg-checklist__list hg-list--preview">
             {ordered.map((l) => (
@@ -410,6 +454,11 @@ export function W02PaydayConfirm() {
             from={`${today.slice(0, 8)}01`}
             to={today}
             masked={masked}
+            // 첫 월급날 전: 아직 사이클이 서버에 없어 저장할 곳이 없으므로 보기만(연필 없음)
+            defaults={{
+              amount: meIncome,
+              lines: defaultLines(firstDay ?? today),
+            }}
             onOpen={() => nav(togetherPaths.moneyInList)}
             onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
           />
@@ -615,6 +664,10 @@ export function W02PaydayConfirm() {
     );
   const planned = money(income, masked);
   const noLines = shown.pay_check_line.length === 0;
+  // 내 이번 달 확인 목록에 줄이 하나도 없음(파트너 탭·지난 달은 예전 안내 한 줄 그대로)
+  const ownEmpty = noLines && ago === 0 && !partnerTab && !finished;
+  // 수입 카드 기본값: 내 이번 달, 아직 자동 기록 전(지금 확인하면 이 월급이 자동 기록됨)
+  const incomeDefault = ago === 0 && !partnerTab && !readOnly && !list.auto_income_at;
   const share = {
     received: start,
     people: ownerPeople,
@@ -742,27 +795,21 @@ export function W02PaydayConfirm() {
           {foldOpen && rowsList}
         </>
       ) : noLines ? (
-        // 템플릿 줄이 하나도 없으면 칩·목록 없이 안내 한 줄(2026-11-19 회귀 수정)
-        <section className="hg-card hg-card--fill hg-stack">
-          <p className="hg-card__meta">{copy.emptyPlan}</p>
-          {ago === 0 && !partnerTab && (
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
-            >
-              {copy.goPlan}
-            </button>
-          )}
-        </section>
+        // 템플릿 줄이 하나도 없으면 칩·목록 없이 안내(2026-11-19 회귀 수정). 내 이번 달은 한 덩어리 안내 + 주 버튼(2026-11-20)
+        ownEmpty ? (
+          emptyPlan(income)
+        ) : (
+          <section className="hg-card hg-card--fill hg-stack">
+            <p className="hg-card__meta">{copy.emptyPlan}</p>
+          </section>
+        )
       ) : (
         <>
           {filters}
           {rowsList}
         </>
       )}
-      {meId && (
+      {meId && !ownEmpty && (
         <IncomeCard
           ownerId={partnerTab ? tab : meId}
           from={shown.cycle_start}
@@ -770,9 +817,29 @@ export function W02PaydayConfirm() {
           masked={masked}
           hideEmpty={partnerTab}
           onOpen={partnerTab ? undefined : () => nav(togetherPaths.moneyInList)}
-          onAdd={
-            pending || partnerTab || ago > 0 ? undefined : () => nav(togetherPaths.moneyIn)
+          onAdd={pending || partnerTab || ago > 0 ? undefined : () => nav(togetherPaths.moneyIn)}
+          defaults={
+            incomeDefault
+              ? {
+                  amount: meIncome,
+                  lines: defaultLines(list.cycle_start < today ? list.cycle_start : today),
+                  onEdit: pending ? undefined : () => setIncomeSheet(true),
+                }
+              : undefined
           }
+          onEditAuto={
+            pending || partnerTab || ago > 0
+              ? undefined
+              : (id) => nav(`${togetherPaths.moneyIn}?edit=${id}`)
+          }
+        />
+      )}
+      {incomeSheet && incomeDefault && (
+        <PaydayIncomeSheet
+          initial={meIncome}
+          busy={incomeBusy}
+          onSave={(v) => void saveIncome(list.id, v)}
+          onClose={() => setIncomeSheet(false)}
         />
       )}
       {confirmable.length > 0 && (
@@ -827,4 +894,27 @@ function HeroWithBurst({
     }
   }, [listId, finished]);
   return <>{render(burst)}</>;
+}
+
+/**
+ * 템플릿 줄이 하나도 없을 때(20 W-02 0b, 2026-11-20 사용자 결정): 한 덩어리 안내 “350만 원을 나눠서 / 월급 계획 템플릿을 완성해 주세요”
+ * (월급 0원이면 “월급을 적고 / …”) + 아래 고정 주 버튼 ‘월급 계획 템플릿 채우기’ → W-01. 그림 `w02-empty`는 파일이 올 때까지 숨김
+ */
+function EmptyPlan({ lead, onFill }: { lead: string; onFill: () => void }) {
+  return (
+    <>
+      <section className="hg-empty hg-empty--plan">
+        <Illustration name="w02-empty" className="hg-empty__art" />
+        <h2 className="hg-empty__title">
+          <span>{lead}</span>
+          <span>{copy.emptyTail}</span>
+        </h2>
+      </section>
+      <div className="hg-stickybar">
+        <Button variant="primary" block onClick={onFill}>
+          {copy.fillPlan}
+        </Button>
+      </div>
+    </>
+  );
 }
