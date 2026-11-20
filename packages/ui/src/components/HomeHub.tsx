@@ -158,6 +158,7 @@ export function HubTile({
   sub,
   sub2,
   value,
+  foot,
   small,
   point,
   badge,
@@ -170,6 +171,8 @@ export function HubTile({
   /** 보조 둘째 줄 */
   sub2?: ReactNode;
   value?: ReactNode;
+  /** 값 아래 작은 줄(자산 관리 타일 “자산 4,200만 원, 부채 7,330만 원”, 2026-11-20). 두 줄까지 */
+  foot?: ReactNode;
   /** 72px 그림 자리(큰 타일만). 2026-11-15부터 2D 그림이 들어올 때까지 그리지 않음(회색 빈 자리 숨김) */
   art?: boolean;
   small?: boolean;
@@ -206,7 +209,44 @@ export function HubTile({
       )}
       {sub2 && <span className="hg-hubtile__sub">{sub2}</span>}
       {value !== undefined && <span className="hg-hubtile__value">{value}</span>}
+      {foot && <span className="hg-hubtile__foot">{foot}</span>}
       {/* art: 72px 그림 자리. 2D 그림이 들어올 때까지 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김) */}
+    </button>
+  );
+}
+
+export interface HubUpcomingRow {
+  key: string;
+  /** “어머니 생신” */
+  name: string;
+  /** “D-8” */
+  dday: string;
+}
+
+/**
+ * 다가오는 날 상자(H-16, 2026-11-20): 흰 넓은 상자 전체가 버튼(→ 달력 Y-04). 머리 + 줄 최대 2개(이름 + D-n).
+ * 일정이 없으면 홈이 그리지 않음. 꺾쇠는 없음(H-04·H-08 타일과 같은 원칙)
+ */
+export function HubUpcoming({
+  title,
+  rows,
+  label,
+  onClick,
+}: {
+  title: string;
+  rows: HubUpcomingRow[];
+  label?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className="hg-hubup hg-hub__wide" aria-label={label} onClick={onClick}>
+      <span className="hg-hubup__title">{title}</span>
+      {rows.map((r) => (
+        <span key={r.key} className="hg-hubup__row">
+          <span className="hg-hubup__name">{r.name}</span>
+          <span className="hg-hubup__dday">{r.dday}</span>
+        </span>
+      ))}
     </button>
   );
 }

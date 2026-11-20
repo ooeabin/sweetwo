@@ -294,25 +294,43 @@ export const trackCareShared = (linked: boolean) => {
 };
 
 /**
- * 가장 가까운 일정 하나(홈 H-08 캘린더 타일, 2026-11-15 3차 검토: 캘린더 목록과 같은 재료. 2026-11-16 월급날·확인 목록은 뺌, 홈 H-11이 말함).
- * 경조사(다음 날짜) + 금융 일정(Y-04 다가오는 일정과 같은 60일 안, 월급날·쓸 곳 메모·만기 등) 중 이른 것. 같은 날이면 경조사 먼저
+ * 다가오는 일정 n개(홈 H-16 ‘다가오는 날’ 상자, 2026-11-20): 경조사(다음 날짜) + 금융 일정(월급날·확인 목록은 뺌) 중
+ * 오늘부터 60일 안, 이른 순, 같은 날이면 경조사 먼저. 날짜 계산은 홈 H-08과 같은 재료(`monthOf`·`upcoming`)
  */
-export function nextSchedule(
+export function upcomingSchedules(
   d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'upcoming' | 'monthOf'>,
-): { label: string; date: string } | null {
+  n: number,
+): { label: string; date: string; care: boolean }[] {
   const [y, mo] = d.today.split('-').map(Number) as [number, number];
   const money = [0, 1, 2]
-    .map((n) => {
-      const t = y * 12 + (mo - 1) + n;
+    .map((k) => {
+      const t = y * 12 + (mo - 1) + k;
       return [Math.floor(t / 12), (t % 12) + 1] as const;
     })
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
-    // 월급날·월급날 확인 목록은 홈 H-11이 이미 말해서 뺌(같은 날짜가 홈에 두 번 나오던 것, 2026-11-16)
     .filter((x) => x.kind !== 'payday' && x.kind !== 'review')
     .filter((x) => x.date >= d.today && withinDays(d.today, x.date, 60))
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const care = d.upcoming[0];
-  const m = money[0];
-  if (care && (!m || care.date <= m.date)) return { label: care.care.name, date: care.date };
-  return m ? { label: moneyLine(m).label, date: m.date } : null;
+    .map((x) => ({
+      label: x.kind === 'auto' ? copy.money.autoShort(x.name, Number(x.date.slice(8, 10))) : moneyLine(x).label,
+      date: x.date,
+      care: false,
+    }));
+  const care = d.upcoming
+    .filter((x) => withinDays(d.today, x.date, 60))
+    .map((x) => ({ label: x.care.name, date: x.date, care: true }));
+  return [...care, ...money]
+    .sort((a, b) => a.date.localeCompare(b.date) || Number(b.care) - Number(a.care))
+    .slice(0, n);
 }
+
+/** 이번 달 일정 개수(홈 H-08 캘린더 타일 보조 줄 “이번 달 일정 3개”, 월급날·확인 목록은 홈이 따로 말해서 뺌) */
+export function monthScheduleCount(
+  d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'monthOf' | 'caresOf'>,
+): number {
+  const [y, mo] = d.today.split('-').map(Number) as [number, number];
+  return (
+    d.caresOf(y, mo).length +
+    d.monthOf(y, mo).dates.filter((x) => x.kind !== 'payday' && x.kind !== 'review').length
+  );
+}
+

@@ -28,7 +28,7 @@ import {
   type MarriageStatus,
   type TopTask,
 } from '@sweetwo/core';
-import { BottomSheet, Hub, HubBand, HubTile, Illustration, ListRow } from '@sweetwo/ui';
+import { BottomSheet, Hub, HubBand, HubTile, HubUpcoming, Icon, Illustration, ListRow } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -37,7 +37,7 @@ import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { toast } from '../../../shared/toast';
 import { sharedCopy } from '../../../shared/copy';
-import { nextSchedule, useCalendarData } from '../../calendar';
+import { monthScheduleCount, upcomingSchedules, useCalendarData } from '../../calendar';
 import { WaitNudge } from '../../pairing';
 import {
   AddMenu,
@@ -558,25 +558,38 @@ export function H01Home() {
         <div className="hg-list hg-list--plain hg-tasksheet">
           {shownTasks.map((t) => (
             <Fragment key={t.key}>
-              <ListRow
-                label={taskText(t)}
-                onClick={() => {
-                  setTaskSheet(false);
-                  void tapTask(t);
-                }}
-              />
-              {t.kind === 'split_suggest' && (
-                <button
-                  type="button"
-                  className="hg-btn hg-btn--link hg-btn--quiet"
-                  style={{ alignSelf: 'flex-start' }}
+              {t.kind === 'split_suggest' ? (
+                // 2026-11-20: 줄 사이 회색 글자 “이미 정했어요” 대신 줄 오른쪽 알약 “정했어요”(체크 아이콘). 줄은 그대로 이동
+                <div className="hg-tasksheet__row">
+                  <ListRow
+                    label={taskText(t)}
+                    chevron={false}
+                    onClick={() => {
+                      setTaskSheet(false);
+                      void tapTask(t);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="hg-tasksheet__done"
+                    aria-label={`${taskText(t)}, ${copy.taskDecided}`}
+                    onClick={() => {
+                      setTaskSheet(false);
+                      void closeTask(t);
+                    }}
+                  >
+                    <Icon name="check" size={16} />
+                    {copy.taskDecided}
+                  </button>
+                </div>
+              ) : (
+                <ListRow
+                  label={taskText(t)}
                   onClick={() => {
                     setTaskSheet(false);
-                    void closeTask(t);
+                    void tapTask(t);
                   }}
-                >
-                  {copy.taskSplitDone}
-                </button>
+                />
               )}
             </Fragment>
           ))}
@@ -692,7 +705,6 @@ export function H01Home() {
         lines: (lists.data ?? []).flatMap((c) => c.pay_check_line),
       }}
       moves={moves.moves}
-      partnerOut={!joint && sp.couple_state === 'connected' && !!partner.data}
       go={(box, to) => go(box, to)}
     />
   );
@@ -721,9 +733,16 @@ export function H01Home() {
           sub: left === null ? undefined : copy.leftover(m(left)),
         };
 
-  // ── H-08 캘린더 타일: 가장 가까운 일정(캘린더 목록과 같은 재료, 월급날 포함, 2026-11-15 3차 검토) ──
-  const nx = cal.loading || cal.failed ? null : nextSchedule(cal);
-  const near = nx ? { name: nx.label, dday: daysBetween(today, nx.date) } : null;
+  // ── H-08 캘린더 타일 보조 줄 “이번 달 일정 n개”(2026-11-20) + H-16 다가오는 날 상자(최대 2개, 없으면 안 그림) ──
+  const calReady = !cal.loading && !cal.failed;
+  const monthCount = calReady ? monthScheduleCount(cal) : null;
+  const upRows = calReady
+    ? upcomingSchedules(cal, 2).map((x, i) => ({
+        key: `${i}:${x.date}`,
+        name: x.label,
+        dday: copy.ddayShort(daysBetween(today, x.date)),
+      }))
+    : [];
 
   // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔) ──
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
@@ -781,8 +800,9 @@ export function H01Home() {
         <HubTile
           point
           title={copy.assetsTile}
-          sub={tileSub}
+          sub={showNet ? copy.netLabel : tileSub}
           value={showNet && nw ? m(nw.nw.net) : undefined}
+          foot={showNet && nw ? copy.assetsDebts(m(nw.nw.assets), m(nw.nw.debts)) : undefined}
           badge={rankPct === null || !showNet ? undefined : copy.rankBadge(rankPct)}
           label={
             nw && showNet
@@ -797,11 +817,19 @@ export function H01Home() {
         />
         <HubTile
           title={copy.calendarTile}
-          sub={near ? `${near.name} ${copy.ddayShort(near.dday)}` : copy.noCare}
+          sub={monthCount === null ? undefined : copy.monthSchedules(monthCount)}
           onClick={() => go('calendar', '/calendar')}
         />
       </Fragment>
     ),
+    upcoming: upRows.length ? (
+      <HubUpcoming
+        key="upcoming"
+        title={copy.upcomingTitle}
+        rows={upRows}
+        onClick={() => go('upcoming', '/calendar')}
+      />
+    ) : null,
   };
 
   return (

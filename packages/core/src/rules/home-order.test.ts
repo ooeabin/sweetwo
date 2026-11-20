@@ -161,11 +161,25 @@ describe('monthCheck: 할 일 띠 5b 재료', () => {
 });
 
 describe('homeOrder(2026-11-17)', () => {
-  it('띠 → 같이 모으기 → 결혼 준비 → 월급 상자 → 반 칸 타일 둘', () => {
-    expect(homeOrder({ heroZero: false })).toEqual(['tasks', 'hero', 'wedding', 'salary', 'tiles']);
+  it('띠 → 같이 모으기 → 결혼 준비 → 월급 상자 → 반 칸 타일 둘 → 다가오는 날(2026-11-20)', () => {
+    expect(homeOrder({ heroZero: false })).toEqual([
+      'tasks',
+      'hero',
+      'wedding',
+      'salary',
+      'tiles',
+      'upcoming',
+    ]);
   });
   it('0원 같이 모으기는 월급 상자 아래, 결혼 준비는 그래도 같이 모으기 바로 아래', () => {
-    expect(homeOrder({ heroZero: true })).toEqual(['tasks', 'salary', 'hero', 'wedding', 'tiles']);
+    expect(homeOrder({ heroZero: true })).toEqual([
+      'tasks',
+      'salary',
+      'hero',
+      'wedding',
+      'tiles',
+      'upcoming',
+    ]);
   });
   it('같이 모으기 항목이 없으면 H-10을 안 그림(결혼 준비·월급 상자·타일은 그대로)', () => {
     expect(homeOrder({ heroZero: false, heroNone: true })).toEqual([
@@ -173,6 +187,7 @@ describe('homeOrder(2026-11-17)', () => {
       'wedding',
       'salary',
       'tiles',
+      'upcoming',
     ]);
   });
   it('H-11·H-14·큰 반 칸 타일(월급 계획)·저금 타일은 홈 블록에 없음', () => {

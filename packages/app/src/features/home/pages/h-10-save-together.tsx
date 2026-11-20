@@ -20,7 +20,8 @@ import { copy } from '../copy';
 /**
  * H-10 같이 모으기(19 ‘홈 v2.2’ 2번, 디자인 SaveTogether): 대표 저금(core pickHeroes, 최대 3칸 + ‘저금 모두 보기 ›’).
  * 칸: 사람(연결이면 둘, 미합류면 나) + 이름 → 큰 숫자 모은 금액(퍼센트만이면 %) → 오렌지 막대(목표 금액이 있을 때만)
- * → “목표 금액 …의 62%” → “이번 달 +…” → 기한 “…까지 n원 더 필요해요” → 각자 금액(둘 다 켰을 때만) → 해제 대기 멈춤.
+ * → 보조 한 줄(목표 금액이 있으면 “62%, 5,000만 원 중”, 없으면 “이번 달 +190만 원”, 2026-11-20) → 각자 금액(둘 다 켰을 때만) → 해제 대기 멈춤.
+ * 기한 “…까지 n원 더 필요해요”는 카드에서 빼고 화면 읽기에만 남김.
  * 결혼 준비 중이면 머리 D-day 알약(예정일 없으면 “결혼식 날짜 알려 주기” → S-11h).
  * 2026-11-18: 누를 수 없는 정보 상자(칸·‘모두 보기’ 이동 없음). 같이 모으기 항목이 하나도 없으면 홈이 이 상자를 그리지 않음
  * (빈 상태 질문·칩·버튼은 W-01 저축·투자 묶음 빈 상태로 옮김, 상대 권유는 띠 13번)
@@ -37,7 +38,6 @@ export function H10SaveTogether({
   today,
   month,
   moves,
-  partnerOut,
   go,
 }: {
   heroes: HeroItem[];
@@ -55,8 +55,6 @@ export function H10SaveTogether({
   /** 이번 달(대표 사이클) 범위와 확인 목록 줄(‘이번 달 +’) */
   month: { from: string; to: string; lines: PayCheckLine[] };
   moves: GoalMovePublic[];
-  /** 각자 계열 + 연결: 묶이지 않은 내 저금 칸 첫 줄 “{이름}님은 아직 같이 모으기에 없어요”(2026-11-16 R4-8) */
-  partnerOut?: boolean;
   go: (box: 'dday', to: string) => void;
 }) {
   const { masked } = useMask();
@@ -106,20 +104,16 @@ export function H10SaveTogether({
       // 큰 숫자는 묶음 합계(둘이 모은 금액). 월급 탭 저금 줄은 ‘내 몫’(2026-11-14 R4: 화면마다 숫자가 달라 보였음)
       if (!invited) lines.push(copy.bothSaved);
       say.push(won(total));
-      if (b.target !== null && b.pct !== null) {
-        lines.push(copy.targetOf(won(b.target), b.pct));
-        say.push(copy.targetPctLabel(b.pct));
-      }
-      // 이번 달 +: 서버 묶음 값(상대 움직임을 못 봐도 합계와 같은 기준, 2026-11-14 M1). 옛 응답이면 앱 계산
+      // 보조 줄은 한 줄(2026-11-20): 목표 금액이 있으면 “10%, 300만 원 중”, 없으면 “이번 달 +30만 원”
       const g = b.month_gain ?? gain(b.goals.map((x) => x.id));
-      if (g > 0) lines.push(copy.thisMonthGain(won(g)));
+      if (b.target !== null && b.pct !== null) {
+        lines.push(copy.pctOfTarget(b.pct, won(b.target)));
+        say.push(copy.targetPctLabel(b.pct));
+      } else if (g > 0) lines.push(copy.thisMonthGain(won(g)));
       const r = done
         ? null
         : savingRemain({ target: b.target, saved: total, deadline: b.deadline });
-      if (r) {
-        lines.push(copy.remain(r.deadline, won(r.remain)));
-        say.push(copy.remain(r.deadline, won(r.remain)));
-      }
+      if (r) say.push(copy.remain(r.deadline, won(r.remain)));
       if (b.show_each && b.mine !== null && b.partner !== null)
         lines.push(copy.each(names.me, won(b.mine), names.partner, won(b.partner)));
     }
@@ -143,21 +137,17 @@ export function H10SaveTogether({
     const lines: string[] = [];
     const say: string[] = [g.name, won(saved)];
     const solo = !joint && g.owner_user_id !== null;
-    if (solo && partnerOut) {
-      lines.push(copy.partnerNotIn(names.partner));
-      say.push(copy.partnerNotIn(names.partner));
-    }
+    // 보조 줄은 한 줄(2026-11-20): 목표 금액이 있으면 “10%, 300만 원 중”, 없으면 “이번 달 +30만 원”.
+    // “{이름}님은 아직 같이 모으기에 없어요”는 카드에서 없앰(띠 13번이 같은 권유를 함)
     if (g.target_amount !== null && pct !== null) {
-      lines.push(copy.targetOf(won(g.target_amount), pct));
+      lines.push(copy.pctOfTarget(pct, won(g.target_amount)));
       say.push(copy.targetPctLabel(pct));
+    } else {
+      const m = gain([g.id]);
+      if (m > 0) lines.push(copy.thisMonthGain(won(m)));
     }
-    const m = gain([g.id]);
-    if (m > 0) lines.push(copy.thisMonthGain(won(m)));
     const r = savingRemain({ target: g.target_amount, saved, deadline: g.deadline });
-    if (r) {
-      lines.push(copy.remain(r.deadline, won(r.remain)));
-      say.push(copy.remain(r.deadline, won(r.remain)));
-    }
+    if (r) say.push(copy.remain(r.deadline, won(r.remain)));
     return {
       people: solo ? (peopleMine ?? people) : people,
       name: g.name,

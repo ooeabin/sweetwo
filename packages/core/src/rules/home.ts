@@ -1011,9 +1011,10 @@ export function heroZero(heroes: readonly HeroItem[]): boolean {
 
 /**
  * 홈 상자 묶음 순서(좁은 창 위에서 아래, 2026-11-17 메뉴 서랍과 같은 이름·순서).
- * tasks = H-06 띠, hero = H-10, wedding = H-12, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더)
+ * tasks = H-06 띠, hero = H-10, wedding = H-12, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더),
+ * upcoming = H-16 다가오는 날 상자(2026-11-20, 타일 아래. 일정이 없으면 홈이 안 그림)
  */
-export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles';
+export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles' | 'upcoming';
 
 /**
  * 홈 순서(19 ‘홈 순서’, 2026-11-17): 할 일 띠(H-06) → 같이 모으기 H-10 → (결혼 준비 중이면 바로 아래 H-12) → 월급 상자 H-15 → 반 칸 타일 둘.
@@ -1030,5 +1031,6 @@ export function homeOrder(o: { heroZero: boolean; heroNone?: boolean }): HomeBlo
         ? (['salary', 'hero', 'wedding'] as const)
         : (['hero', 'wedding', 'salary'] as const)),
     'tiles',
+    'upcoming',
   ];
 }

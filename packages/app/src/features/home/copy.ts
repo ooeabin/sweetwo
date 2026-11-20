@@ -20,10 +20,10 @@ export const copy = {
   ddayToday: '결혼식 D-day',
   weddingDateAsk: '결혼식 날짜 알려 주기',
   targetOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`,
+  /** 목표 금액이 있을 때 보조 한 줄(2026-11-20) */
+  pctOfTarget: (pct: number, target: string) => `${pct}%, ${target} 중`, // [확인 필요]
   thisMonthGain: (amount: string) => `이번 달 +${amount}`,
   /** 아직 안 들어간 묶음(상대가 만듦) 칸 첫 줄(2026-11-14 H1) */
-  /** 각자 계열 내 저금 칸(상대가 아직 같이 모으기에 없음, 2026-11-16 R4-8: 상대 홈 “…에 같이 모을까요?”와 맞춤) */
-  partnerNotIn: (name: string) => `${nim(name)}은 아직 같이 모으기에 없어요`, // [확인 필요]
   togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 볼 수 있어요`,
   remain: (deadline: string, amount: string) => `${ym(deadline)}까지 ${amount} 더 필요해요`,
   remainPercent: (deadline: string) => `${ym(deadline)}까지`,
@@ -91,6 +91,8 @@ export const copy = {
   taskFirstSaving: '무엇을 같이 모을지 정해 볼까요?',
   taskSplitSuggest: '같이 쓰는 생활비를 나눠 볼까요?',
   taskSplitDone: '이미 정했어요',
+  /** 목록 시트 8번 줄 오른쪽 알약(2026-11-20, 같은 동작: 띠를 영구히 닫음) [확인 필요] */
+  taskDecided: '정했어요',
   // 띠 둘 → 한 띠(2026-11-16 4차 검토) [확인 필요]
   tasksCount: (n: number) => `할 일 ${n}개`, // [확인 필요]
   tasksTitle: '할 일', // [확인 필요] 목록 시트 제목
@@ -115,7 +117,10 @@ export const copy = {
   leftover: (amount: string) => `미계획 금액 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
-  noCare: '다가오는 일정이 없어요',
+  /** H-08 보조 줄(2026-11-20, 예전 가장 가까운 일정 하나 “어머니 생신 D-8”) [확인 필요] */
+  monthSchedules: (n: number) => (n > 0 ? `이번 달 일정 ${n}개` : '이번 달 일정이 없어요'),
+  /** H-16 다가오는 날 상자 머리(2026-11-20) [확인 필요] */
+  upcomingTitle: '다가오는 날',
   ddayShort: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
 
   // H-12 결혼 준비 타일 [모두 확인 필요]
@@ -127,6 +132,9 @@ export const copy = {
 
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
+  /** H-04 값 이름표와 값 아래 작은 줄(2026-11-20) [확인 필요] */
+  netLabel: '순자산',
+  assetsDebts: (assets: string, debts: string) => `자산 ${assets}, 부채 ${debts}`,
   // 2026-11-18 빈 타일에서 자산을 적고 싶게(궁금함, 파트너 소식) [확인 필요]
   assetsAskTwo: '우리 둘 순자산, 또래 중 어디쯤일까요?',
   assetsAskMe: '내 순자산, 또래 중 어디쯤일까요?',
