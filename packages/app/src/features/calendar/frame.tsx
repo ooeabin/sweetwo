@@ -80,12 +80,7 @@ export function CalendarFrame({
         actions: (
           // 넓은 창만. 좁은 창은 보기 필터 줄 오른쪽 ‘+ 일정 추가’(2026-11-09 + 버튼 대신).
           // 메뉴 제목 줄 ‘추가’는 보조 버튼(DESIGN.md 브랜드 색 ‘바꾸지 않는 것’, 2026-11-12 QA 8구간 S8-11)
-          <Button
-            className="hg-wide-only"
-            variant="secondary"
-            aria-label={copy.add}
-            onClick={add}
-          >
+          <Button className="hg-wide-only" variant="secondary" aria-label={copy.add} onClick={add}>
             <AddText>{copy.add}</AddText>
           </Button>
         ),

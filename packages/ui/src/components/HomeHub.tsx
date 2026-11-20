@@ -23,12 +23,18 @@ export function Hub({ label, children }: { label: string; children: ReactNode })
 export function HubBand({
   text,
   go,
+  more,
+  label,
   onClick,
   secondary,
 }: {
   text: string;
   /** 오른쪽 이동 글자(“체크하기”). 없으면 꺾쇠만 */
   go?: string;
+  /** 묶음 띠(2026-11-20): 가장 앞선 할 일 문장 + 나머지 개수 “+1”. 있으면 문장은 한 줄 말줄임, 이동 글자는 없음 */
+  more?: number;
+  /** 화면 읽기 이름(묶음 띠 “할 일 2개”). 없으면 보이는 글자 */
+  label?: string;
   onClick: () => void;
   /** 둘째 글자 버튼(띠 8번 “이미 정했어요”) */
   secondary?: { text: string; onClick: () => void };
@@ -53,11 +59,11 @@ export function HubBand({
       </div>
     );
   return (
-    <div className="hg-hubband hg-hub__full">
-      <button type="button" className="hg-hubband__main" onClick={onClick}>
+    <div className={cx('hg-hubband hg-hub__full', more !== undefined && 'hg-hubband--group')}>
+      <button type="button" className="hg-hubband__main" aria-label={label} onClick={onClick}>
         <span className="hg-hubband__text">{text}</span>
-        <span className="hg-hubband__go" aria-hidden={go ? undefined : true}>
-          {go}
+        <span className="hg-hubband__go" aria-hidden={go && more === undefined ? undefined : true}>
+          {more !== undefined ? <span className="hg-hubband__more">+{more}</span> : go}
           <Icon name="chevron-right" size={16} />
         </span>
       </button>

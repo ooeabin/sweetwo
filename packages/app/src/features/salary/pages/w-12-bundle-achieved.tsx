@@ -34,12 +34,7 @@ export function W12BundleAchieved() {
       center
       celebrate
       hero={<DoneMark art="celebrate" />}
-      title={
-        <>
-          <span className="hg-celebrate__eyebrow">{copy.bundleDone}</span>
-          <span className="hg-celebrate__title">{b.name}</span>
-        </>
-      }
+      title={<span className="hg-celebrate__title">{b.name}</span>}
       primary={{ label: copy.next }}
       onSubmit={() => {
         hideToast();

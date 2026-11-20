@@ -225,7 +225,9 @@ test('묶음 달성(합계 기준): 두 사람 모두 W-12 한 번 → 다음엔
   await expect(c.getByText('목표 금액을 바꿨어요')).toBeVisible();
   await c.goto('/salary/items/goal-h');
   await expect(c).toHaveURL(/\/salary\/bundles\/bundle-1\/achieved$/);
-  await expect(c.getByText('다 모았어요').first()).toBeVisible();
+  // 2026-11-20 작은 머리글 “다 모았어요”는 없앰: 이름 + 합계만
+  await expect(c.getByText('다 모았어요')).toHaveCount(0);
+  await expect(c.locator('.hg-celebrate__title')).toBeVisible();
   await axe(c);
   await c.getByRole('button', { name: '다음' }).click();
   await expect(c.getByRole('heading', { name: '다음엔 뭘 같이 모을까요?' })).toBeVisible();

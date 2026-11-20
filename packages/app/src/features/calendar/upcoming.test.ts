@@ -40,6 +40,24 @@ describe('upcomingSchedules', () => {
     expect(r.map((x) => x.label)).toEqual(['월세 1일', '어머니 생신', '적금 만기']);
     expect(r.some((x) => x.label === '설 명절')).toBe(false);
   });
+  it('같은 반복 일정(월세 매달 1일)은 가장 가까운 회차 하나만(2026-11-20)', () => {
+    const r = upcomingSchedules(
+      mk(
+        '2026-11-20',
+        [],
+        [
+          { date: '2026-12-01', kind: 'auto', name: '월세' },
+          { date: '2027-01-01', kind: 'auto', name: '월세' },
+          { date: '2026-12-25', kind: 'auto', name: '통신비' },
+        ],
+      ),
+      5,
+    );
+    expect(r.map((x) => `${x.label} ${x.date}`)).toEqual([
+      '월세 1일 2026-12-01',
+      '통신비 25일 2026-12-25',
+    ]);
+  });
   it('일정이 없으면 빈 배열(홈이 상자를 안 그림)', () => {
     expect(upcomingSchedules(mk('2026-11-25', [], []), 2)).toEqual([]);
   });

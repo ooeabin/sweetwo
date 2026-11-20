@@ -137,10 +137,10 @@ export function FirstSavingRow({
 /**
  * 달성 지켜보기(20 W-12): 고칠 수 있는 저금 항목의 모은 금액(서버 goal_saved_sums) ≥ 목표 금액이 되면 서버에 달성 표시(achieve_goal)하고,
  * 이 사람이 처음이면 축하 화면으로. 합쳐서 모드 다른 사람은 다음에 앱을 열 때 한 번. 파트너 저금 항목(각자)은 알림만.
- * 홈, 월급 탭(W-02), 월급 전 확인(W-05, 2026-11-12 S6-09), 저금 상세에 붙음. 축하로 넘어갈 때 떠 있는 Toast(체크 ‘되돌리기’)를 닫음. 그 전에 되돌리거나
+ * 홈(2026-11-20부터 quiet: 달성만 남기고 넘어가지 않음, 띠 5c가 대신), 월급 탭(W-02), 월급 전 확인(W-05, 2026-11-12 S6-09), 저금 상세에 붙음. 축하로 넘어갈 때 떠 있는 Toast(체크 ‘되돌리기’)를 닫음. 그 전에 되돌리거나
  * 다른 곳에서 체크를 풀어 모은 금액이 목표 금액 아래로 내려가면 서버(check_pay_line)가 달성을 되돌림.
  */
-export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
+export function AchieveWatch({ from, quiet }: { from?: 'checklist'; quiet?: boolean } = {}) {
   const d = useSavingItems();
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -169,7 +169,7 @@ export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
         i.canEdit &&
         !tried.current.has(i.goal.id) &&
         (reachedTarget(i.goal, i.saved) ||
-          (i.state === 'achieved' && !(i.goal.achieved_seen ?? []).includes(meId))),
+          (!quiet && i.state === 'achieved' && !(i.goal.achieved_seen ?? []).includes(meId))),
     );
     if (!next) return;
     tried.current.add(next.goal.id);
@@ -182,6 +182,12 @@ export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
           setTick((x) => x + 1);
           return;
         }
+        // 홈(quiet, 2026-11-20): 달성만 서버에 남기고 W-12로 넘어가지 않음. 홈 할 일 띠 5c “{이름} 다 모았어요”가 W-12로 이어 줌
+        if (quiet) {
+          inflight.current = false;
+          await qc.invalidateQueries({ queryKey: qk.goals });
+          return;
+        }
         // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않게 닫고 넘어감(2026-11-09)
         hideToast(1500);
         // 체크리스트(W-02·W-05)에서 닿았으면 W-12a 뒤 W-02로 돌아옴(2026-11-12 S6-09)
@@ -192,7 +198,7 @@ export function AchieveWatch({ from }: { from?: 'checklist' } = {}) {
         inflight.current = false;
         setTick((x) => x + 1);
       });
-  }, [meId, key, tick, nav, qc, from]);
+  }, [meId, key, tick, nav, qc, from, quiet]);
   return null;
 }
 

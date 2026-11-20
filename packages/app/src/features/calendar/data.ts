@@ -295,7 +295,7 @@ export const trackCareShared = (linked: boolean) => {
 
 /**
  * 다가오는 일정 n개(홈 H-16 ‘다가오는 날’ 상자, 2026-11-20): 경조사(다음 날짜) + 금융 일정(월급날·확인 목록은 뺌) 중
- * 오늘부터 60일 안, 이른 순, 같은 날이면 경조사 먼저. 날짜 계산은 홈 H-08과 같은 재료(`monthOf`·`upcoming`)
+ * 오늘부터 60일 안, 이른 순, 같은 날이면 경조사 먼저, 같은 반복 일정(월세 매달 1일)은 가장 가까운 회차 하나만. 날짜 계산은 홈 H-08과 같은 재료(`monthOf`·`upcoming`)
  */
 export function upcomingSchedules(
   d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'upcoming' | 'monthOf'>,
@@ -310,8 +310,17 @@ export function upcomingSchedules(
     .flatMap(([yy, mm]) => d.monthOf(yy, mm).dates)
     .filter((x) => x.kind !== 'payday' && x.kind !== 'review')
     .filter((x) => x.date >= d.today && withinDays(d.today, x.date, 60))
+    // 같은 반복 일정(자동으로 나가는 줄은 매달 있음)은 가장 가까운 회차 하나만(2026-11-20: 월세 1일이 D-11, D-42로 두 번 나왔음).
+    // 달 순서로 모았으니 앞에 온 것이 가장 가까운 회차
+    .filter(
+      (x, i, all) =>
+        x.kind !== 'auto' || all.findIndex((y) => y.kind === 'auto' && y.name === x.name) === i,
+    )
     .map((x) => ({
-      label: x.kind === 'auto' ? copy.money.autoShort(x.name, Number(x.date.slice(8, 10))) : moneyLine(x).label,
+      label:
+        x.kind === 'auto'
+          ? copy.money.autoShort(x.name, Number(x.date.slice(8, 10)))
+          : moneyLine(x).label,
       date: x.date,
       care: false,
     }));
@@ -322,4 +331,3 @@ export function upcomingSchedules(
     .sort((a, b) => a.date.localeCompare(b.date) || Number(b.care) - Number(a.care))
     .slice(0, n);
 }
-

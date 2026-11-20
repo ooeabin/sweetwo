@@ -582,6 +582,10 @@ export interface TopTaskInput {
   rankRequest?: OpenRequest | null;
   /** 월급날 확인할 것(monthCheck, 2026-11-17 H-11을 맨 위로 올리던 규칙을 띠 5b로 바꿈) */
   monthCheck?: MonthCheck | null;
+  /** 다 모았는데 아직 W-12a에서 고르지 않은 저금(상태 achieved, 고칠 수 있는 것, 먼저 닿은 것) — 띠 5c */
+  achievedGoal?: { id: string; name: string } | null;
+  /** 그만 모은 저금이 있음(‘그만할게요’를 고른 적 있음) — 띠 11a 재료 */
+  hasClosedSaving?: boolean;
   /** 월급이 바뀐 사이클 시작일(내 salary_change 마지막 적용·되돌림의 적용일)과 W-01을 열었나 */
   salaryChanged?: { appliedDay: string | null; done: boolean } | null;
   /** 온보딩을 마친 날(KST) */
@@ -635,12 +639,14 @@ export type TopTask =
   | { kind: 'rank_request'; id: string; key: string; to: string }
   | { kind: 'asset_share'; key: string; to: string }
   | { kind: 'month_check'; check: MonthCheck; key: string; to: string }
+  | { kind: 'goal_achieved'; goalId: string; name: string; key: string; to: string }
   | { kind: 'salary_changed'; key: string; to: string }
   | { kind: 'first_saving'; key: string; to: string }
   | { kind: 'split_suggest'; key: string; to: string }
   | { kind: 'auto_pick'; key: string; to: string }
   | { kind: 'push_reask'; paydayNone: boolean; key: string; to: null }
   | { kind: 'next_saving'; goalId: string; name: string; key: string; to: string }
+  | { kind: 'next_goal'; key: string; to: string }
   | { kind: 'reconcile'; key: string; to: string }
   | { kind: 'bundle_invite'; goalId: string; name: string; key: string; to: string }
   | { kind: 'matured'; asset: string; key: string; to: string }
@@ -807,6 +813,17 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
       i.monthCheck
         ? { kind: 'month_check', check: i.monthCheck, key: 'month_check', to: i.monthCheck.to }
         : null,
+    // 5c 목표 금액을 다 모았어요(2026-11-20, 홈을 열면 W-12로 넘어가던 것을 대신함). 누르면 W-12, W-12a에서 고르면 사라짐
+    () =>
+      i.achievedGoal
+        ? {
+            kind: 'goal_achieved',
+            goalId: i.achievedGoal.id,
+            name: i.achievedGoal.name,
+            key: `goal_achieved:${i.achievedGoal.id}`,
+            to: `/salary/items/${i.achievedGoal.id}/achieved`,
+          }
+        : null,
     // 6 월급이 바뀐 달(적용된 사이클 첫 7일, W-01을 열 때까지)
     () =>
       i.salaryChanged && salaryChangedTaskOpen({ ...i.salaryChanged, today: i.today })
@@ -856,6 +873,15 @@ function openTopTasks(i: TopTaskInput): TopTask[] {
             to: `/salary/items/${g.id}/next`,
           }
         : null;
+    },
+    // 11a 다음엔 뭘 모을까요(2026-11-20): 모으는 저금이 하나도 없는데 그만 모은 것이 있을 때. 11번(기한 지남)·7번(첫 저금)·13번(상대 저금 권유)이
+    // 같은 말을 하니 그것들이 열려 있으면 내지 않고, 다 모았는데 아직 안 고른 저금(5c)이 있으면 W-12a·W-12b가 이어 물으니 내지 않음
+    () => {
+      if (i.savingCount > 0 || !i.hasClosedSaving || i.achievedGoal || invite) return null;
+      if (inFirst(FIRST_TASK_DAYS)) return null; // 7번이 같은 말을 함
+      if (i.coupleState === 'unlink_pending') return null;
+      if ((i.deadlineGoals ?? []).some((x) => nextSavingTaskOpen(x, i.today))) return null;
+      return { kind: 'next_goal', key: 'next_goal', to: `${SALARY_PATHS.plan}?from=home#saving` };
     },
     // 12 실제 잔액 맞추기(90일마다 14일 동안)
     () =>
@@ -997,19 +1023,6 @@ export function monthCheck(l: HomeMonthLine): MonthCheck | null {
 }
 
 /**
- * H-10 첫 칸이 0원(맨 위를 차지하지 않게): 대표 저금 모은 금액 0원, 묶음 합계 0원(퍼센트만이면 0%).
- * 아직 안 들어간 묶음(상대가 만듦, 권유)은 0원이 아님. 항목이 없으면 상자를 안 그리니(2026-11-18, homeOrder heroNone) false
- */
-export function heroZero(heroes: readonly HeroItem[]): boolean {
-  const first = heroes[0];
-  if (!first) return false;
-  if (first.kind === 'goal') return first.goal.saved <= 0;
-  const b = first.bundle;
-  if (!b.goals.some((g) => g.mine)) return false;
-  return b.percent_only ? (b.pct ?? 0) <= 0 : (b.total ?? 0) <= 0;
-}
-
-/**
  * 홈 상자 묶음 순서(좁은 창 위에서 아래, 2026-11-17 메뉴 서랍과 같은 이름·순서).
  * tasks = H-06 띠, hero = H-10, wedding = H-12, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더),
  * upcoming = H-16 다가오는 날 상자(2026-11-20, 타일 아래. 일정이 없으면 홈이 안 그림)
@@ -1017,19 +1030,15 @@ export function heroZero(heroes: readonly HeroItem[]): boolean {
 export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles' | 'upcoming';
 
 /**
- * 홈 순서(19 ‘홈 순서’, 2026-11-17): 할 일 띠(H-06) → 같이 모으기 H-10 → (결혼 준비 중이면 바로 아래 H-12) → 월급 상자 H-15 → 반 칸 타일 둘.
- * H-10이 0원이면(heroZero) 월급 상자가 H-10 위(맨 위를 0원이 차지하지 않게). H-12는 늘 H-10 바로 아래.
- * 확인할 게 있으면 H-11을 맨 위로 올리던 예전 규칙(2026-11-15)은 없앰: 할 일 띠 5b가 대신함
+ * 홈 순서(19 ‘홈 순서’, 2026-11-20 고정): 할 일 띠(H-06) → 같이 모으기 H-10 → (결혼 준비 중이면 바로 아래 H-12) → 월급 상자 H-15 → 반 칸 타일 둘 → H-16.
+ * 예전엔 H-10 모은 금액이 0원이면 월급 상자가 H-10 위로 올라갔으나(2026-11-17) 없앰: 같은 홈이 상태마다 다른 순서로 보이던 것을 고정.
+ * 확인할 게 있으면 H-11을 맨 위로 올리던 예전 규칙(2026-11-15)도 없앰: 할 일 띠 5b가 대신함
  */
-export function homeOrder(o: { heroZero: boolean; heroNone?: boolean }): HomeBlock[] {
+export function homeOrder(o: { heroNone?: boolean } = {}): HomeBlock[] {
   // 같이 모으기 항목이 하나도 없으면 H-10을 안 그림(2026-11-18). H-12는 그대로 월급 상자 위
   return [
     'tasks',
-    ...(o.heroNone
-      ? (['wedding', 'salary'] as const)
-      : o.heroZero
-        ? (['salary', 'hero', 'wedding'] as const)
-        : (['hero', 'wedding', 'salary'] as const)),
+    ...(o.heroNone ? (['wedding', 'salary'] as const) : (['hero', 'wedding', 'salary'] as const)),
     'tiles',
     'upcoming',
   ];
