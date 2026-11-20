@@ -559,7 +559,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar--lg { --avatar: 40px; }
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
-.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
+.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; }
+.hg-avatars:has(> .hg-avatar + .hg-avatar) > .hg-avatar { position: relative; }
+.hg-avatars > .hg-avatar:first-child:has(+ .hg-avatar) { z-index: 1; box-shadow: 0 0 0 2px var(--surface); }  /* 2026-11-20 쌓는 순서: 앞(첫째) 원이 뒤 원 위에(앞 원 글자가 가려져 ‘현’만 보였음). 겹치는 폭은 그대로, 고리는 위에 오는 앞 원에 */
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }
@@ -2469,6 +2471,9 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-hubband__text { flex: 1; min-width: 0; font: 600 15px/22px var(--font-sans); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }  /* 두 줄까지, 그 뒤 말줄임(2026-11-11 D2) */
 .hg-hubband__go { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 500 15px/22px var(--font-sans); white-space: nowrap; }
 .hg-hubband__main:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* 2026-11-20 묶음 띠(할 일 둘 이상, `hg-hubband--group`): 가장 앞선 할 일 문장(한 줄 말줄임) + 오른쪽 작은 개수 “+1” + 꺾쇠. 개수는 장식이라 화면 읽기는 띠 button의 aria-label “할 일 n개”로 */
+.hg-hubband--group .hg-hubband__text { -webkit-line-clamp: 1; line-clamp: 1; }
+.hg-hubband__more { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px; padding: 0 var(--space-2); box-sizing: border-box; border-radius: var(--radius-full); background: color-mix(in srgb, var(--on-band-cocoa) 18%, transparent); font: 600 13px/1 var(--font-sans); }
 /* 타일(HubTile): 반 칸 상자. 큰 타일 164px(오른쪽 아래 72px 그림 자리), 작은 타일(--sm) 104px(값 한 줄) */
 .hg-hubtile { position: relative; container-type: inline-size; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; min-height: 164px; padding: 18px; box-sizing: border-box; border: 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; overflow: hidden; }
 .hg-hubtile--sm { min-height: 104px; }

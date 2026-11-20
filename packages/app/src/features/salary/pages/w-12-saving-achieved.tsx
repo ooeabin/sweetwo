@@ -12,7 +12,7 @@ import { salaryPaths, savingPaths } from '../paths';
 import { useSavingItems } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
 
-// W-12 달성 축하(20): 축하 그림(DoneMark celebrate, 그림 파일이 생기기 전까지 빈 자리) → “다 모았어요” → 이름 → 모은 금액
+// W-12 달성 축하(20): 축하 그림(DoneMark celebrate, 그림 파일이 생기기 전까지 빈 자리) → 이름(2026-11-20 작은 오렌지 머리글 “다 모았어요”는 없앰) → 모은 금액
 // → 함께 모은 달 문장 → “다음”(→ W-12a). 사람마다 한 번(AchieveWatch가 엶, 달성 알림도 고칠 수 있는 사람은 여기로).
 // 화면 위 축하 배경(hg-celebrate-bg, 2026-11-12 D5). 이제 달성이 아니면(골랐거나 체크를 풀어 되돌아감) 저금 상세로.
 // `?from=checklist`(W-02·W-05에서 닿음)면 W-12a 뒤 W-02로 돌아감(2026-11-12 S6-09)
@@ -64,12 +64,7 @@ export function W12SavingAchieved() {
       center
       celebrate
       hero={<DoneMark art="celebrate" />}
-      title={
-        <>
-          <span className="hg-celebrate__eyebrow">{copy.achievedEyebrow}</span>
-          <span className="hg-celebrate__title">{i.goal.name}</span>
-        </>
-      }
+      title={<span className="hg-celebrate__title">{i.goal.name}</span>}
       primary={{ label: copy.next }}
       onSubmit={() => {
         // 축하로 넘어올 때 건 1.5초 토스트 막기(AchieveWatch hideToast)를 풂: 곧바로 고른 W-12a Toast가 보이게

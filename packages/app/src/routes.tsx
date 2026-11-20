@@ -131,7 +131,7 @@ export const routes: RouteObject[] = [
           <RequireAccount>
             <OnboardingGate>
               <H01Home />
-              <AchieveWatch />
+              <AchieveWatch quiet />
             </OnboardingGate>
           </RequireAccount>
         ),

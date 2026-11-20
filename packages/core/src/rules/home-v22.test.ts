@@ -449,6 +449,82 @@ describe('pickTopTasks(띠 두 칸, 2026-11-13 UX B M5)', () => {
   });
 });
 
+describe('띠 5c 다 모았어요, 11a 다음엔 뭘 모을까요(2026-11-20)', () => {
+  const base: TopTaskInput = {
+    today: '2026-11-25',
+    now: '2026-11-25T03:00:00Z',
+    meId: 'c',
+    coupleState: 'connected',
+    joint: false,
+    unlinkRequestedBy: null,
+    reconnectFrom: null,
+    onboardedOn: '2026-09-01',
+    savingCount: 1,
+  };
+  const ach = { id: 'g1', name: '여행' };
+  it('5c: 다 모았는데 아직 안 고른 저금이 있으면 그 띠, 누르면 W-12', () => {
+    const t = pickTopTask({ ...base, achievedGoal: ach });
+    expect(t).toMatchObject({
+      kind: 'goal_achieved',
+      name: '여행',
+      to: '/salary/items/g1/achieved',
+    });
+  });
+  it('5c 순서: 월급날 확인(5b) 다음, 월급 바뀜(6)·첫 저금 앞', () => {
+    const mc = {
+      kind: 'payday' as const,
+      left: 1,
+      late: 0,
+      cycleStart: '2026-11-25',
+      to: '/salary',
+    };
+    const t = pickTopTasks(
+      {
+        ...base,
+        achievedGoal: ach,
+        monthCheck: mc,
+        salaryChanged: { appliedDay: '2026-11-24', done: false },
+      },
+      5,
+    );
+    expect(t.map((x) => x.kind)).toEqual(['month_check', 'goal_achieved', 'salary_changed']);
+  });
+  it('5c는 고르면(achievedGoal 없음) 사라짐', () => {
+    expect(pickTopTask(base)).toBeNull();
+  });
+  it('11a: 모으는 저금이 없고 그만 모은 것이 있으면 “다음엔 뭘 모을까요?” → W-01 저축·투자 묶음', () => {
+    const t = pickTopTask({ ...base, savingCount: 0, hasClosedSaving: true });
+    expect(t).toMatchObject({ kind: 'next_goal', to: '/salary/plan?from=home#saving' });
+  });
+  it('11a: 그만 모은 것이 없으면(저금을 만든 적 없음) 없음, 모으는 저금이 있어도 없음', () => {
+    expect(pickTopTask({ ...base, savingCount: 0 })).toBeNull();
+    expect(pickTopTask({ ...base, savingCount: 1, hasClosedSaving: true })).toBeNull();
+  });
+  it('11a: 안 고른 달성(5c)·첫 저금(7)·상대 저금 권유(13)와는 같이 안 뜸(하나로 합침)', () => {
+    expect(
+      pickTopTasks({ ...base, savingCount: 0, hasClosedSaving: true, achievedGoal: ach }).map(
+        (x) => x.kind,
+      ),
+    ).toEqual(['goal_achieved']);
+    expect(
+      pickTopTasks({
+        ...base,
+        savingCount: 0,
+        hasClosedSaving: true,
+        onboardedOn: '2026-11-20',
+      }).map((x) => x.kind),
+    ).toEqual(['first_saving']);
+    const partnerGoals = [
+      { id: 'p', name: '결혼 비용', created_at: '2026-11-24T00:00:00Z', bundle_id: null },
+    ];
+    expect(
+      pickTopTasks({ ...base, savingCount: 0, hasClosedSaving: true, partnerGoals }).map(
+        (x) => x.kind,
+      ),
+    ).toEqual(['bundle_invite']);
+  });
+});
+
 describe('pushReaskOpen(띠 10번 기간)', () => {
   const o = { paydayNone: false, onboardedOn: '2026-11-01' };
   it('다가오는 월급날 3일 전 ~ 당일', () => {

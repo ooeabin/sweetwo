@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
+import { homeTask, homeTaskTexts } from './home-tasks';
 import { chanwoo, emptyV22, type MemDb, mockOnboarding, seed } from './mocks';
 
 // 구역 1 홈 점검(2026-11-20, 19 H-04·H-10·H-16·H-06·H-08, 25 S-20): 사용자 결정 7건 중 홈·도움말 5건
@@ -261,4 +262,95 @@ test('S-20 도움말: 기본 “자주 묻는 질문” 대표 5개 + 묶음 칩
   // 문의·약관·버전 상자는 그대로
   await expect(page.getByRole('button', { name: '문의하기' })).toBeVisible();
   await expect(page.getByRole('button', { name: '버전' })).toBeVisible();
+});
+
+// 구역 1 홈 케이스 점검(2026-11-20, 19 H-06 5c·11a, H-10, H-12, H-16, W-12)
+test('H-06 묶음 띠: 가장 앞선 할 일 문장 + 오른쪽 “+n” + ›, 읽기 이름 “할 일 n개”, 누르면 시트', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.space ?? {}, { couple_state: 'not_joined' });
+  });
+  const band = page.locator('.hg-hubband').first();
+  await expect(band).toBeVisible();
+  const texts = await homeTaskTexts(page);
+  expect(texts.length).toBeGreaterThan(1);
+  await expect(band.locator('.hg-hubband__text')).toHaveText(texts[0] ?? '');
+  await expect(band.locator('.hg-hubband__more')).toHaveText(`+${texts.length - 1}`);
+  await expect(band.getByRole('button', { name: `할 일 ${texts.length}개` })).toBeVisible();
+  // 이동 글자(“초대하기”, “확인하기”)는 묶음 띠에 없음
+  await expect(band).not.toContainText('초대하기');
+  await axe(page);
+  await band.click();
+  await expect(page.getByRole('dialog', { name: '할 일' })).toBeVisible();
+});
+
+test('같이 모으기 모은 금액이 0원이어도 홈 순서는 고정: 띠 → H-10 → 월급 상자 → 타일 → 다가오는 날', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page, (d) => {
+    d.cares.push(care({ id: 'c-mom' }));
+  });
+  await expect(page.locator('.hg-together__slide').first()).toContainText('0%');
+  const top = (sel: string) =>
+    page
+      .locator(sel)
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().top);
+  const hero = await top('.hg-together');
+  expect(await top('.hg-hubband')).toBeLessThan(hero);
+  expect(hero).toBeLessThan(await top('.hg-hubbox'));
+  expect(await top('.hg-hubbox')).toBeLessThan(await top('.hg-hubtile'));
+  expect(await top('.hg-hubtile')).toBeLessThan(await top('.hg-hubup'));
+});
+
+test('H-12 결혼 준비 메모가 0개면 제목은 “결혼 준비 메모”(개수 없음) + “+ 쓸 곳 메모 추가”', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
+  });
+  const tile = page.getByRole('button', { name: /^결혼 준비 메모/ });
+  await expect(tile.locator('.hg-hubtile__title')).toHaveText('결혼 준비 메모');
+  await expect(tile.locator('.hg-hubtile__sub')).toHaveText('+ 쓸 곳 메모 추가');
+  await expect(page.getByText('결혼 준비 메모 0개')).toHaveCount(0);
+});
+
+test('목표 달성: 홈을 열어도 W-12로 넘어가지 않고 띠 “{이름} 다 모았어요”가 뜸 → W-12(머리글 없음) → 고르면 띠가 사라짐', async ({
+  page,
+}) => {
+  const db = await open(page, (d) => {
+    const g = d.goals.find((x) => x.id === 'goal-h');
+    Object.assign(g ?? {}, { status: 'achieved', achieved_seen: [] });
+    d.goalStory = { months: 3, together: 0 };
+  });
+  await expect(page.locator('.hg-hub')).toBeVisible();
+  await page.waitForTimeout(800);
+  await expect(page).toHaveURL(/\/$/);
+  expect(await homeTaskTexts(page)).toContain('내 집 마련 다 모았어요');
+  await (await homeTask(page, '내 집 마련 다 모았어요')).click();
+  await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved$/);
+  await expect(page.locator('.hg-celebrate__title')).toHaveText('내 집 마련');
+  await expect(page.locator('.hg-celebrate__eyebrow')).toHaveCount(0);
+  await expect(page.getByText('다 모았어요')).toHaveCount(0);
+  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('radio', { name: '계속 모을게요' }).click();
+  await expect.poll(() => db.goals.find((g) => g.id === 'goal-h')?.target_amount).toBeNull();
+  await page.goto('/');
+  expect(await homeTaskTexts(page)).not.toContain('내 집 마련 다 모았어요');
+});
+
+test('모으는 저금이 하나도 없고 그만 모은 것이 있으면 H-10이 없고 띠 “다음엔 뭘 모을까요?” → W-01 저축·투자 묶음', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.me, { onboarding_done_at: '2026-08-01T00:00:00Z' });
+    for (const g of d.goals) Object.assign(g, { closed_at: '2026-10-01T00:00:00Z' });
+  });
+  await expect(page.locator('.hg-hub')).toBeVisible();
+  await expect(page.locator('.hg-together')).toHaveCount(0);
+  expect(await homeTaskTexts(page)).toContain('다음엔 뭘 모을까요?');
+  await (await homeTask(page, '다음엔 뭘 모을까요?')).click();
+  await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
 });

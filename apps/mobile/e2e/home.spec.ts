@@ -176,7 +176,10 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await expect(page.locator('.hg-hubtile').filter({ hasText: /^캘린더/ })).toBeVisible();
   // 띠 5b(월급날 확인할 게 있음)는 두 칸에 세지 않음(2026-11-17): 확인 + 첫 저금(7번) + 초대. 초대는 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 3개” → 시트
   await expect(bands(page)).toHaveCount(1);
-  await expect(band(page)).toContainText('할 일 3개');
+  await expect(band(page).getByRole('button', { name: '할 일 3개' })).toBeVisible();
+  // 2026-11-20: 가장 앞선 할 일 문장 + 오른쪽 “+2”
+  await expect(band(page)).toContainText(/월급에서 확인할 게 \d개 남았어요/);
+  await expect(band(page).locator('.hg-hubband__more')).toHaveText('+2');
   await band(page).click();
   const tl = page.getByRole('dialog', { name: '할 일' });
   await expect(tl.locator('.hg-listrow').nth(0)).toContainText(/월급에서 확인할 게 \d개 남았어요/);
@@ -185,7 +188,7 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await axe(page);
   await page.keyboard.press('Escape');
   // H-12: 메모가 없으면 “+ 쓸 곳 메모 추가”
-  await expect(page.getByRole('button', { name: /결혼 준비 메모 0개/ })).toContainText(
+  await expect(page.getByRole('button', { name: /^결혼 준비 메모,/ })).toContainText(
     '+ 쓸 곳 메모 추가',
   );
   await axe(page);
@@ -976,15 +979,15 @@ const top = (page: Page, sel: string) =>
     .first()
     .evaluate((el) => el.getBoundingClientRect().top);
 
-test('홈 순서(2026-11-17): 같이 모으기가 0원이면 월급 상자가 위, 월급 상자 줄 이름은 메뉴 서랍과 같고 반 칸 타일은 자산 관리·캘린더', async ({
+test('홈 순서(2026-11-17, 2026-11-20 고정): 같이 모으기가 0원이어도 같이 모으기가 월급 상자 위, 월급 상자 줄 이름은 메뉴 서랍과 같고 반 칸 타일은 자산 관리·캘린더', async ({
   page,
 }) => {
   await open(page);
   await expect(together(page)).toBeVisible();
   const narrow = (page.viewportSize()?.width ?? 1280) < 1100;
   if (narrow) {
-    expect(await top(page, '.hg-hubbox')).toBeLessThan(await top(page, '.hg-together'));
-    expect(await top(page, '.hg-together')).toBeLessThan(await top(page, '.hg-hubtile'));
+    expect(await top(page, '.hg-together')).toBeLessThan(await top(page, '.hg-hubbox'));
+    expect(await top(page, '.hg-hubbox')).toBeLessThan(await top(page, '.hg-hubtile'));
   }
   await expect(page.locator('.hg-hubbox__name')).toHaveText([
     '이번 달 월급 체크',

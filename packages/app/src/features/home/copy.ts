@@ -96,6 +96,10 @@ export const copy = {
   // 띠 둘 → 한 띠(2026-11-16 4차 검토) [확인 필요]
   tasksCount: (n: number) => `할 일 ${n}개`, // [확인 필요]
   tasksTitle: '할 일', // [확인 필요] 목록 시트 제목
+  // 띠 5c(2026-11-20): 홈을 열면 W-12로 넘어가던 것을 대신함 [확인 필요]
+  taskGoalAchieved: (name: string) => `${name} 다 모았어요`, // [확인 필요]
+  // 띠 11a(2026-11-20): 모으는 저금이 하나도 없는데 그만 모은 것이 있을 때 [확인 필요]
+  taskNextGoal: '다음엔 뭘 모을까요?', // [확인 필요]
   taskSplitGo: '나누기',
   taskAutoPick: '자동으로 나가는 걸 골라 주세요',
   taskPush: '월급날 아침에 알려 드릴까요?',
@@ -119,13 +123,18 @@ export const copy = {
   calendarTile: '캘린더',
   /** H-08 보조 줄(2026-11-20 오후, 다음 일정 기준: H-16과 같은 첫 항목, 당일 0 / 없음 null) [확인 필요] */
   nextSchedule: (days: number | null) =>
-    days === null ? '다가오는 일정이 없어요' : days === 0 ? '오늘 일정 있어요' : `다음 일정 D-${days}`,
+    days === null
+      ? '다가오는 일정이 없어요'
+      : days === 0
+        ? '오늘 일정 있어요'
+        : `다음 일정 D-${days}`,
   /** H-16 다가오는 날 상자 머리(2026-11-20) [확인 필요] */
   upcomingTitle: '다가오는 날',
   ddayShort: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
 
   // H-12 결혼 준비 타일 [모두 확인 필요]
-  weddingTile: (n: number) => `결혼 준비 메모 ${n}개`,
+  // 0개일 때는 개수 없이 “결혼 준비 메모”(2026-11-20) [확인 필요]
+  weddingTile: (n: number) => (n === 0 ? '결혼 준비 메모' : `결혼 준비 메모 ${n}개`),
   weddingNext: (name: string, date: string) => `다음 ${name} ${formatMonthDay(date)}`,
   weddingAdd: '+ 쓸 곳 메모 추가',
   /** 날짜가 지났는데 안 낸 메모가 있으면 그것 먼저(2026-11-14) */

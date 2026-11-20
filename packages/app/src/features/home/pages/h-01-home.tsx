@@ -9,7 +9,6 @@ import {
   kstDateOf,
   leftover,
   lineIsMine,
-  heroZero,
   homeOrder,
   monthCheck,
   pickHeroes,
@@ -28,7 +27,16 @@ import {
   type MarriageStatus,
   type TopTask,
 } from '@sweetwo/core';
-import { BottomSheet, Hub, HubBand, HubTile, HubUpcoming, Icon, Illustration, ListRow } from '@sweetwo/ui';
+import {
+  BottomSheet,
+  Hub,
+  HubBand,
+  HubTile,
+  HubUpcoming,
+  Icon,
+  Illustration,
+  ListRow,
+} from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -92,7 +100,7 @@ import { H15SalaryBox } from './h-15-salary-box';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009 결정 1): 회색 바탕 위 흰 상자.
 // 좁은 창(2026-11-17, 메뉴 서랍과 같은 이름·순서, core homeOrder): H-06 할 일 띠(월급날 확인할 게 있으면 5b 띠) → H-10 같이 모으기
-// (결혼 준비 중이면 바로 아래 H-12) → H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿·저축·투자, H-10이 0원이면 H-10 위)
+// (결혼 준비 중이면 바로 아래 H-12) → H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿)
 // → 반 칸 타일 둘 H-04 자산 관리(오렌지 포인트 상자)·H-08 캘린더. H-02·H-03·H-07·H-09·H-11·H-13·H-14는 홈에서 없앰.
 // 넓은 창(1100px 이상 4열)은 CSS 격자가 띠를 맨 위, H-10을 두 칸 두 줄로, 월급 상자 두 칸(HomeHub v2.2).
 // 본문 맨 위 띠(해제 대기, 공지, 메일 반송)는 하나만(core pickTopBanner). 상대가 바꾸면 Realtime으로 바로 다시 읽음.
@@ -336,6 +344,10 @@ export function H01Home() {
       ? list.cycle_start
       : addDays(list.cycle_end, 1)
     : (firstPayday ?? null);
+  // 띠 5c: 다 모았는데 아직 W-12a에서 고르지 않은 저금(고칠 수 있는 것, 먼저 닿은 것부터 하나씩). 고르면 상태가 바뀌어 사라짐
+  const achieved = mine
+    .filter((i) => i.state === 'achieved' && i.canEdit && !i.goal.bundle_id)
+    .sort((a, b) => (a.goal.achieved_at ?? '').localeCompare(b.goal.achieved_at ?? ''))[0];
   const tasks0: TopTask[] = h.input
     ? pickTopTasks({
         today,
@@ -346,6 +358,8 @@ export function H01Home() {
         unlinkRequestedBy: h.input.unlinkRequestedBy,
         reconnectFrom: h.input.reconnectFrom,
         monthCheck: monthCheck(monthLine),
+        achievedGoal: achieved ? { id: achieved.goal.id, name: achieved.goal.name } : null,
+        hasClosedSaving: saving.ready && saving.closed.some((i) => i.canEdit),
         modeRequest: modeReq.data
           ? {
               id: modeReq.data.id,
@@ -463,6 +477,10 @@ export function H01Home() {
           : x.check.kind === 'late'
             ? copy.lateLeft(x.check.late)
             : copy.monthReview(shownPayday(x.check.cycleStart), x.check.left);
+      case 'goal_achieved':
+        return copy.taskGoalAchieved(x.name);
+      case 'next_goal':
+        return copy.taskNextGoal;
       case 'salary_changed':
         return copy.taskSalaryChanged;
       case 'first_saving':
@@ -538,20 +556,25 @@ export function H01Home() {
       }
     />
   );
-  // 코코아 띠는 하나만(2026-11-16 4차 검토): 할 일이 둘이면 “할 일 2개 ›” 한 띠 → 목록 시트(줄마다 같은 이동, 8번은 ‘이미 정했어요’도)
+  // 코코아 띠는 하나만(2026-11-16 4차 검토): 할 일이 둘 이상이면 가장 앞선 할 일 문장(한 줄 말줄임) + 오른쪽 작은 “+n”(나머지 개수) + ›
+  // (2026-11-20, 예전 “할 일 2개 ›”만). 누르면 목록 시트(줄마다 같은 이동, 8번은 ‘이미 정했어요’도). 화면 읽기는 “할 일 n개” 전체
   const grouped = shownTasks.length > 1;
-  const todoBands = grouped
-    ? [
-        <HubBand
-          key="tasks"
-          text={copy.tasksCount(shownTasks.length)}
-          onClick={() => {
-            track('home_box_tapped', { box: 'band_group' });
-            setTaskSheet(true);
-          }}
-        />,
-      ]
-    : shownTasks.map(bandOf);
+  const lead = shownTasks[0];
+  const todoBands =
+    grouped && lead
+      ? [
+          <HubBand
+            key="tasks"
+            text={taskText(lead)}
+            more={shownTasks.length - 1}
+            label={copy.tasksCount(shownTasks.length)}
+            onClick={() => {
+              track('home_box_tapped', { box: 'band_group' });
+              setTaskSheet(true);
+            }}
+          />,
+        ]
+      : shownTasks.map(bandOf);
   const taskList =
     grouped && taskSheet ? (
       <BottomSheet title={copy.tasksTitle} onClose={() => setTaskSheet(false)}>
@@ -747,8 +770,8 @@ export function H01Home() {
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
   const rankPct = rank?.homeBadge ?? null;
 
-  // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10(0원이면 월급 상자 아래) → H-12 → H-15 월급 상자 → 반 칸 타일 둘
-  const order = homeOrder({ heroZero: !heroFailed && heroZero(heroes), heroNone });
+  // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10 → H-12 → H-15 월급 상자 → 반 칸 타일 둘
+  const order = homeOrder({ heroNone });
   // 2026-11-18 H-04 빈 타일 문구(core assetTileHint): 내 자산 있음 = 순자산 값, 없으면 파트너 소식 > 궁금함
   const tileHint = nw ? assetTileHint({ together: joined, ...nw.own }) : 'value';
   const showNet = !!nw && tileHint === 'value' && !nw.empty;
@@ -848,7 +871,7 @@ export function H01Home() {
       banner={banner}
       columns={[
         <div key="hub" className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-          <AchieveWatch />
+          <AchieveWatch quiet />
           <Hub label={copy.hubLabel}>{order.map((b) => blocks[b])}</Hub>
           {taskList}
         </div>,

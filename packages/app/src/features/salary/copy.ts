@@ -356,7 +356,6 @@ export const copy = {
   addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   // W-12 달성 축하, W-12a
-  achievedEyebrow: '다 모았어요', // [확인 필요] 2026-11-09 ‘목표 달성’ 대신
   storyAll: (n: number) => `${n}개월 동안 매달 둘이 같이 모았어요`,
   storySome: (n: number, m: number) => `${n}개월 중 ${m}번은 둘이 같이 모았어요`,
   storySolo: (n: number) => `${n}개월 만에 모았어요`,
