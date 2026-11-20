@@ -27,6 +27,8 @@ export const copy = {
     // 날짜 없는 사람의 자동 줄(2026-11-14 R6). 지난 날은 자동 확인 [확인 필요]
     auto: (name: string) => `${name} 자동으로 나가요`,
     autoDone: (name: string) => `${name} 자동으로 나갔어요`,
+    /** 홈 ‘다가오는 날’ 상자 짧은 줄(“월세 1일”, 2026-11-20) [확인 필요] */
+    autoShort: (name: string, day: number) => `${name} ${day}일`,
     /** 앞당긴 월급날 까닭(2026-11-16 4차 검토 R4-9, 문구 리뷰). to = “24일” 또는 Y-04 “24일 목요일” */
     moved: (from: number, why: 'sat' | 'sun' | 'holiday', to: string) =>
       `${from}일이 ${why === 'sat' ? '토요일' : why === 'sun' ? '일요일' : '공휴일'}이라 ${to}로 앞당겼어요`,

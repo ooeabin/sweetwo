@@ -4,9 +4,9 @@
 .hg-row--fill > * { flex: 1; }  /* 버튼 두 개를 반씩 */
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
 /* 버튼·링크로 쓰는 요소의 기본 모양 지우기(특이도 0이라 각 컴포넌트 값이 이김) */
-:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-together__slide, .hg-together__more, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+:where(button, a):where(.hg-tab, .hg-seg__item, .hg-menu__item, .hg-cmd__item, .hg-cal__day, .hg-nav, .hg-sechead__more, .hg-acc__q, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-toggle, .hg-option, .hg-select, .hg-listrow, .hg-task, .hg-task__text, .hg-check, .hg-result, .hg-cal__event) { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 /* 키보드 포커스: 2px focus 링, 바깥 2px */
-:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-together__slide, .hg-together__more, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event, .hg-foldrow, .hg-goalbox__metabtn, .hg-goalbox__jump):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }  /* 2026-11-12 S7-14 hg-foldrow·hg-goalbox__metabtn·__jump 더함 */
+:is(.hg-tab, .hg-seg__item, .hg-cal__day, .hg-nav, .hg-drawer__item, .hg-addrow, .hg-hubband__main, .hg-hubband__btn, .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-key, .hg-sechead__more, .hg-sechead__link, .hg-acc__q, .hg-toggle, .hg-option, .hg-select, .hg-chip, .hg-check, .hg-task, .hg-task__text, .hg-cal__event, .hg-foldrow, .hg-goalbox__metabtn, .hg-goalbox__jump):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }  /* 2026-11-12 S7-14 hg-foldrow·hg-goalbox__metabtn·__jump 더함 */
 /* 잘리는 묶음 안의 줄은 안쪽 링 */
 :is(.hg-menu__item, .hg-cmd__item, .hg-listrow, .hg-result):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 /* 터치 화면 좁은 창: 누르는 대상 44px */
@@ -1183,7 +1183,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item):active:not(:disabled) { transform: scale(0.98); }
 .hg-goaltile:has(> .hg-goaltile__main:active) { transform: scale(0.98); }
 :is(.hg-iconbtn, .hg-check):active:not(:disabled) { transform: scale(0.92); }
-:is(.hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-together__slide, .hg-together__more, .hg-hubband__main):active { transform: scale(0.98); }
+:is(.hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-hubband__main):active { transform: scale(0.98); }
 :is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-daygrid__day):active { background: var(--hairline-soft); }
 :is(.hg-transfer__open, .hg-banner__main):active { transform: scale(0.99); }
 /* 들어옴: 화면 본문(앱 틀의 단, 질문 화면의 제목과 내용)은 6px 아래에서, 펼친 내용과 메뉴는 4px 위에서, 새로 넣은 입력 줄은 98%에서. dur-base, ease-out */
@@ -1197,7 +1197,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 @keyframes hg-grow { from { transform: scale(0.98); } }
 @media (prefers-reduced-motion: reduce) {
   :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
-  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main,  .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-together__slide, .hg-together__more, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
+  :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main,  .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
 }
 
 /* 금액 가리기 */
@@ -1517,7 +1517,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-noti__msg { overflow: hidden; font: var(--text-body-sm); color: var(--ink); white-space: nowrap; text-overflow: ellipsis; }  /* 2026-11-12 D4 문구 1줄 + 말줄임, 전체 문구는 줄 title 툴팁 */
 .hg-noti__item.is-read .hg-noti__msg { color: var(--slate); }
 .hg-noti__time { font: var(--text-micro); font-weight: 400; color: var(--stone); }
-.hg-noti__undo { padding: 0 var(--space-3) var(--space-2) calc(var(--space-3) + 32px + var(--space-3)); margin-top: calc(-1 * var(--space-2)); }  /* 2026-11-13 R-08 같이 쓰는 것 변경 줄 아래 글자 버튼 ‘이전 값으로 돌리기’(줄 글자와 같은 왼쪽) */
+.hg-noti__undo { padding: 0 var(--space-3) var(--space-2) var(--space-3); margin-top: calc(-1 * var(--space-2)); }  /* 2026-11-13 R-08 같이 쓰는 것 변경 줄 아래 글자 버튼 ‘이전 값으로 돌리기’(줄 글자와 같은 왼쪽, 2026-11-20 줄 앞 칸을 비워 왼쪽 여백 그대로) */
 .hg-noti__icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); }
 .hg-noti__icon .hg-ico { width: 16px; height: 16px; }
 .hg-noti__dot { position: absolute; top: 19px; right: 12px; width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--brand); }
@@ -2469,6 +2469,8 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-hubtile__title { font: var(--text-title-3); font-weight: 700; }  /* 2026-11-10 목업처럼 700 */
 .hg-hubtile__sub { margin-top: 2px; font: 500 13px/18px var(--font-sans); color: var(--slate); }
 .hg-hubtile__value { margin-top: var(--space-2); font: 700 17px/24px var(--font-sans); font-size: clamp(14px, 13cqi, 17px); }  /* 2026-11-11 좁은 칸(320px 휴대폰 반 칸)에서는 14px까지 줄여 금액이 한 줄에 */
+.hg-hubtile__foot { margin-top: 2px; font: 500 12px/16px var(--font-sans); color: var(--slate); overflow-wrap: anywhere; }  /* 2026-11-20 값 아래 작은 줄(자산 관리 타일 “자산 …, 부채 …”), 반 칸이라 두 줄까지 */
+.hg-hubtile--point .hg-hubtile__foot { color: var(--on-accent-app-sub); }
 .hg-hubtile__subrow { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-2); margin-top: 2px; min-width: 0; }
 .hg-hubtile__subrow > .hg-hubtile__sub { margin-top: 0; white-space: nowrap; }  /* 좁으면 알약이 다음 줄로 */
 .hg-hubtile__badge { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--plate); color: var(--ink-2); font: 600 12px/18px var(--font-sans); white-space: nowrap; }  /* 2026-11-11 자산 관리 타일 ‘순자산 [상위 38%]’(HubTile badge), 보조 줄 바로 옆(좁은 반 칸에서도 제목과 겹치지 않게) */
@@ -2479,9 +2481,9 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-hubtile--point .hg-hubtile__sub { color: var(--on-accent-app-sub); }
 .hg-hubtile--point > .hg-artslot { background: var(--accent-app-slot); box-shadow: none; border: 0; }
 .hg-hubtile--point:active { background: var(--brand-pressed); }
-.hg-hub :is(.hg-hubtile, .hg-hubline):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-hub :is(.hg-hubtile, .hg-hubline, .hg-hubup):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-hub .hg-hubbox__row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; border-radius: var(--radius-lg); }
-@media (hover: hover) { :is(.hg-hubtile, .hg-hubline):hover, .hg-together:has(:is(.hg-together__slide, .hg-together__more):hover) { box-shadow: var(--shadow-2); } }
+@media (hover: hover) { :is(.hg-hubtile, .hg-hubline, .hg-hubup):hover, .hg-together:has(:is(.hg-together__slide, .hg-together__more):hover) { box-shadow: var(--shadow-2); } }
 /* 2026-11-13 v2.2(ADR 0009, HomeHub v2.2): H-02 저금 상자(hg-hubsave)·H-03 큰 상자(hg-hubhero)는 없앰. 아래 H-10 같이 모으기, H-11 이번 달 한 줄, 띠 글자 버튼 둘 */
 /* 같이 모으기(SaveTogether, H-10): 흰 상자 두 칸(넓은 창 두 줄 높이). 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸(최대 3 + ‘저금 모두 보기’) + 점 (‘+ 수입 적기’는 2026-11-15 월급 W-02로 옮김) */
 .hg-together { display: flex; flex-direction: column; min-width: 0; padding: var(--space-5) var(--space-5) var(--space-2); box-sizing: border-box; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); }
@@ -2530,6 +2532,18 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-hubbox__main { font: 600 15px/22px var(--font-sans); color: var(--ink-2); }
 .hg-hubbox__main--alert { font-weight: 700; color: var(--ink); }
 .hg-hubbox__sub { font: 500 13px/18px var(--font-sans); color: var(--slate); }
+/* 다가오는 날 상자(HubUpcoming, H-16, 2026-11-20): 흰 넓은 상자(두 칸) 전체가 버튼. 머리 17px 700 + 줄 최대 2개(이름 15px 500 + 오른쪽 D-n 15px 600, 누르면 Y-04 달력) */
+.hg-tasksheet__row { display: flex; align-items: center; gap: var(--space-2); }  /* 2026-11-20 할 일 시트 8번 줄: 줄 + 오른쪽 알약 “정했어요” */
+.hg-tasksheet__row > .hg-listrow { flex: 1; min-width: 0; }
+.hg-tasksheet__done { position: relative; flex: none; display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 0 var(--space-3); min-height: 32px; border: 0; border-radius: var(--radius-full); background: var(--plate); color: var(--ink-2); font: 600 13px/18px var(--font-sans); cursor: pointer; }
+.hg-tasksheet__done::after { content: ''; position: absolute; inset: -6px -4px; }  /* 누르는 칸 44px 이상 */
+.hg-tasksheet__done:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-hubup { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-width: 0; padding: var(--space-2) 0; border-radius: var(--radius-xl); background: var(--surface); color: var(--ink); text-align: left; }
+.hg-hubup__title { display: flex; align-items: center; min-height: 44px; padding: var(--space-2) 18px; box-sizing: border-box; font: var(--text-title-3); font-weight: 700; }
+.hg-hubup__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 44px; padding: var(--space-2) 18px; box-sizing: border-box; }
+.hg-hubup__row + .hg-hubup__row { border-top: 1px solid var(--hairline-soft); }
+.hg-hubup__name { min-width: 0; font: 500 15px/22px var(--font-sans); overflow-wrap: anywhere; }
+.hg-hubup__dday { flex: none; font: 600 15px/22px var(--font-sans); color: var(--ink-2); }
 /* 기간 막대(PeriodBar, H-13 날짜 없는 사람 16일째부터): “수입 / 월급 계획” + 8px 막대(채움 ink-2 중립, 오렌지 아님) + “10월 3일부터”. 판정 문장 없음 */
 .hg-periodbar { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .hg-periodbar__text { font: 600 15px/22px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; }

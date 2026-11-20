@@ -1,5 +1,4 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { Avatar } from './Avatar';
 import { cx } from './cx';
 import { Button } from './Button';
 import type { IconName } from './Icon';
@@ -13,9 +12,7 @@ export interface NotiItem {
   msg: string;
   time: string;
   read: boolean;
-  /** 사람이 한 일: 이름 첫 글자 + 사람 색(1 = 시작한 사람, 2 = 합류한 사람) */
-  person?: { name: string; no: 1 | 2 };
-  /** 앱 안내 아이콘(사람이 없을 때) */
+  /** 앱 안내 아이콘. 2026-11-20부터 줄 앞 칸은 모든 줄에서 비움(사람 원 포함, 종류별 2D 그림이 생기면 그때 다시 채움) */
   icon?: IconName;
   /** 아이콘 원 영역 색(lead-kinds.ts noti) */
   tone?: LeadTone;
@@ -201,20 +198,11 @@ export function NotificationPanel(p: {
                       <button
                         key={x.id}
                         type="button"
-                        className={cx(
-                          'hg-noti__item',
-                          !x.person && 'hg-noti__item--plain',
-                          x.read && 'is-read',
-                        )}
+                        className={cx('hg-noti__item', 'hg-noti__item--plain', x.read && 'is-read')}
                         title={x.msg}
                         onClick={() => p.onItem(x.id)}
                       >
-                        {
-                          x.person ? (
-                            <Avatar name={x.person.name} no={x.person.no === 1 ? 1 : 2} />
-                          ) : null
-                          /* 알림 종류 그림(lead-kinds.ts noti, x.icon)은 2D 그림이 들어올 때까지 자리 없이(2026-11-15 3차 검토) */
-                        }
+                        {/* 줄 앞 칸 없음(2026-11-20): 사람 원도 그리지 않아 글자 시작 위치를 통일. 알림 종류 그림(lead-kinds.ts noti)은 2D 그림이 들어올 때 */}
                         <span className="hg-noti__text">
                           <span className="hg-noti__msg">{x.msg}</span>
                           <span className="hg-noti__time">{x.time}</span>

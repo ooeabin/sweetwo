@@ -5,4 +5,4 @@ export { Y07CareAdd } from './pages/y-07-care-add';
 export { Y08Record } from './pages/y-08-record';
 export { Y09GiftLog } from './pages/y-09-gift-log';
 // 홈 H-08 캘린더 타일(가장 가까운 일정, 캘린더 목록과 같은 재료, 2026-11-15)
-export { nextSchedule, useCalendarData } from './data';
+export { monthScheduleCount, upcomingSchedules, useCalendarData } from './data';

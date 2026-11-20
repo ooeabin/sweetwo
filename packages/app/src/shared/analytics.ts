@@ -429,6 +429,8 @@ export type AnalyticsEvent =
           | 'salary_month'
           | 'salary_plan'
           | 'calendar'
+          // H-16 다가오는 날 상자(2026-11-20)
+          | 'upcoming'
           | 'assets'
           | 'retry';
         todo?: TopTask['kind'];

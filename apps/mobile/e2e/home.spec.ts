@@ -65,7 +65,8 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(first).toHaveAccessibleName(
     '같이 모으기, 내 집 마련, 0원, 목표 금액의 0%, 2031년 10월까지 1억 5,000만 원 더 필요해요',
   );
-  await expect(first).toContainText('목표 금액 1억 5,000만 원의 0%');
+  // 보조 줄은 한 줄(2026-11-20): 목표 금액이 있으면 “0%, 1억 5,000만 원 중”
+  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 1억 5,000만 원 중']);
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
   // 2026-11-18 누를 수 없는 정보 상자: 칸은 버튼이 아니고 ‘모두 보기’ 칸도 없음
   await expect(h.getByRole('button')).toHaveCount(0);
@@ -112,9 +113,9 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await page.goto('/');
   await expect(monthLine(page)).toContainText('계획대로 됐어요');
-  // 체크한 저금 줄이 모은 금액과 ‘이번 달 +’에
+  // 체크한 저금 줄이 모은 금액에. 보조 줄은 한 줄이라 목표 금액이 있으면 ‘이번 달 +’ 대신 “0%, … 중”(2026-11-20)
   await expect(first).toContainText('95만 원');
-  await expect(first).toContainText('이번 달 +95만 원');
+  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 1억 5,000만 원 중']);
 });
 
 test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
