@@ -323,14 +323,3 @@ export function upcomingSchedules(
     .slice(0, n);
 }
 
-/** 이번 달 일정 개수(홈 H-08 캘린더 타일 보조 줄 “이번 달 일정 3개”, 월급날·확인 목록은 홈이 따로 말해서 뺌) */
-export function monthScheduleCount(
-  d: Pick<ReturnType<typeof useCalendarData>, 'today' | 'monthOf' | 'caresOf'>,
-): number {
-  const [y, mo] = d.today.split('-').map(Number) as [number, number];
-  return (
-    d.caresOf(y, mo).length +
-    d.monthOf(y, mo).dates.filter((x) => x.kind !== 'payday' && x.kind !== 'review').length
-  );
-}
-

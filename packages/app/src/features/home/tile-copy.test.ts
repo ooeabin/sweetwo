@@ -8,9 +8,10 @@ describe('홈 보조 줄', () => {
     expect(copy.assetsDebts('4,200만 원', '7,330만 원')).toBe('자산 4,200만 원, 부채 7,330만 원');
     expect(copy.assetsDebts('•••', '•••')).toBe('자산 •••, 부채 •••');
   });
-  it('H-08 “이번 달 일정 n개”, 없으면 없다고', () => {
-    expect(copy.monthSchedules(3)).toBe('이번 달 일정 3개');
-    expect(copy.monthSchedules(0)).toBe('이번 달 일정이 없어요');
+  it('H-08 다음 일정 기준: “다음 일정 D-8”, 당일, 없음', () => {
+    expect(copy.nextSchedule(8)).toBe('다음 일정 D-8');
+    expect(copy.nextSchedule(0)).toBe('오늘 일정 있어요');
+    expect(copy.nextSchedule(null)).toBe('다가오는 일정이 없어요');
   });
   it('H-10 보조 한 줄: 목표 금액이 있으면 “10%, 300만 원 중”', () => {
     expect(copy.pctOfTarget(10, '300만 원')).toBe('10%, 300만 원 중');
