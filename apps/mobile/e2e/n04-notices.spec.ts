@@ -89,6 +89,37 @@ test('홈 공지 띠 ‘보기’ → N-04에서 그 공지가 펼쳐진 채 열
   await expect(page).toHaveURL(/\/$/);
 });
 
+test('홈 공지 띠 높이: 제목 한 줄이면 52px 이하(할 일 띠와 같거나 낮게), 버튼 누르는 칸은 44px 이상', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'light');
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page);
+  await page.goto('/');
+  const band = page.locator('.hg-banner--line');
+  await expect(band).toContainText('10월 20일 새벽 점검');
+  const box = await band.boundingBox();
+  expect(box?.height ?? 99).toBeLessThanOrEqual(52);
+  const todo = page.locator('.hg-hubband');
+  if (await todo.count())
+    expect(box?.height ?? 99).toBeLessThanOrEqual((await todo.boundingBox())?.height ?? 0);
+  // 보이는 버튼은 작아도 누르는 칸(::after)은 44px 이상
+  for (const name of ['보기', '닫기']) {
+    const hit = await band.getByRole('button', { name }).evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const a = getComputedStyle(el, '::after');
+      return {
+        h: Math.max(r.height, parseFloat(a.height) || 0),
+        w: Math.max(r.width, parseFloat(a.width) || 0),
+      };
+    });
+    expect(hit.h).toBeGreaterThanOrEqual(44);
+    expect(hit.w).toBeGreaterThanOrEqual(44);
+  }
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/band.png` });
+});
+
 test('공지가 없으면 “지금은 공지가 없어요”만(할 일 버튼 없음)', async ({ page }, info) => {
   test.setTimeout(120_000);
   await open(page, []);
