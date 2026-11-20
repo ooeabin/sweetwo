@@ -37,7 +37,7 @@ import { money, useMask } from '../../../shared/mask';
 import { PersonDot } from '../../../shared/person';
 import { toast } from '../../../shared/toast';
 import { sharedCopy } from '../../../shared/copy';
-import { monthScheduleCount, upcomingSchedules, useCalendarData } from '../../calendar';
+import { upcomingSchedules, useCalendarData } from '../../calendar';
 import { WaitNudge } from '../../pairing';
 import {
   AddMenu,
@@ -733,16 +733,15 @@ export function H01Home() {
           sub: left === null ? undefined : copy.leftover(m(left)),
         };
 
-  // ── H-08 캘린더 타일 보조 줄 “이번 달 일정 n개”(2026-11-20) + H-16 다가오는 날 상자(최대 2개, 없으면 안 그림) ──
+  // ── H-16 다가오는 날 상자(최대 2개, 없으면 안 그림) + H-08 캘린더 타일 보조 줄(같은 결과의 첫 항목, 2026-11-20) ──
   const calReady = !cal.loading && !cal.failed;
-  const monthCount = calReady ? monthScheduleCount(cal) : null;
-  const upRows = calReady
-    ? upcomingSchedules(cal, 2).map((x, i) => ({
-        key: `${i}:${x.date}`,
-        name: x.label,
-        dday: copy.ddayShort(daysBetween(today, x.date)),
-      }))
-    : [];
+  const upList = calReady ? upcomingSchedules(cal, 2) : [];
+  const nextDays = upList[0] ? daysBetween(today, upList[0].date) : null;
+  const upRows = upList.map((x, i) => ({
+    key: `${i}:${x.date}`,
+    name: x.label,
+    dday: copy.ddayShort(daysBetween(today, x.date)),
+  }));
 
   // ── H-04 자산 관리(순위 배지는 ‘홈에 보여 주기’를 켰을 때만, 2026-11-13 기본 끔) ──
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
@@ -817,7 +816,7 @@ export function H01Home() {
         />
         <HubTile
           title={copy.calendarTile}
-          sub={monthCount === null ? undefined : copy.monthSchedules(monthCount)}
+          sub={calReady ? copy.nextSchedule(nextDays) : undefined}
           onClick={() => go('calendar', '/calendar')}
         />
       </Fragment>

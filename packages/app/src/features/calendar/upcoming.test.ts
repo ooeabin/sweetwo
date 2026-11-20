@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { monthScheduleCount, upcomingSchedules } from './data';
+import { upcomingSchedules } from './data';
 
-// 홈 H-16 ‘다가오는 날’ 고르기, H-08 캘린더 타일 “이번 달 일정 n개”(19 ‘H-16’, 2026-11-20)
+// 홈 H-16 ‘다가오는 날’ 고르기, H-08 캘린더 타일은 첫 항목(19 ‘H-16’, 2026-11-20)
 type Money = { date: string; kind: string; name: string };
 const mk = (today: string, care: { name: string; date: string }[], money: Money[]) => ({
   today,
@@ -42,22 +42,5 @@ describe('upcomingSchedules', () => {
   });
   it('일정이 없으면 빈 배열(홈이 상자를 안 그림)', () => {
     expect(upcomingSchedules(mk('2026-11-25', [], []), 2)).toEqual([]);
-  });
-});
-
-describe('monthScheduleCount', () => {
-  it('이번 달 경조사 + 금융 일정 수(월급날 제외)', () => {
-    const d = mk(
-      '2026-12-02',
-      [{ name: '어머니 생신', date: '2026-12-03' }],
-      [
-        { date: '2026-12-01', kind: 'auto', name: '월세' },
-        { date: '2026-12-25', kind: 'payday', name: '' },
-        { date: '2026-12-26', kind: 'review', name: '' },
-        { date: '2026-12-10', kind: 'maturity', name: '적금' },
-        { date: '2027-01-01', kind: 'auto', name: '다음 달' },
-      ],
-    );
-    expect(monthScheduleCount(d)).toBe(3);
   });
 });
