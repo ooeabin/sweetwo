@@ -559,9 +559,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar--lg { --avatar: 40px; }
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
-.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; }
-.hg-avatars:has(> .hg-avatar + .hg-avatar) > .hg-avatar { position: relative; }
-.hg-avatars > .hg-avatar:first-child:has(+ .hg-avatar) { z-index: 1; box-shadow: 0 0 0 2px var(--surface); }  /* 2026-11-20 쌓는 순서: 앞(첫째) 원이 뒤 원 위에(앞 원 글자가 가려져 ‘현’만 보였음). 겹치는 폭은 그대로, 고리는 위에 오는 앞 원에 */
+.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }

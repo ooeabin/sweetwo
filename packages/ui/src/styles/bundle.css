@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (58297136). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (3406b890). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -560,9 +560,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatar--lg { --avatar: 40px; }
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
-.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; }
-.hg-avatars:has(> .hg-avatar + .hg-avatar) > .hg-avatar { position: relative; }
-.hg-avatars > .hg-avatar:first-child:has(+ .hg-avatar) { z-index: 1; box-shadow: 0 0 0 2px var(--surface); }  /* 2026-11-20 쌓는 순서: 앞(첫째) 원이 뒤 원 위에(앞 원 글자가 가려져 ‘현’만 보였음). 겹치는 폭은 그대로, 고리는 위에 오는 앞 원에 */
+.hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }
