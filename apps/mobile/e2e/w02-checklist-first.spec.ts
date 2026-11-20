@@ -102,10 +102,13 @@ test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → �
   await expect(page).toHaveURL(/\/salary\/money-in/);
 });
 
-test('수입 카드 없음 상태: “아직 적은 수입이 없어요” + “수입 적기” 버튼 → W-20', async ({ page }) => {
+test('수입 카드 기록 없음 상태: 월급 기본값(350만 원 + 연필) + “수입 적기” 버튼 → W-20', async ({
+  page,
+}) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'));
   const income = page.getByRole('region', { name: '이번 달 수입' });
-  await expect(income).toContainText('아직 적은 수입이 없어요');
+  await expect(income).not.toContainText('아직 적은 수입이 없어요');
+  await expect(income.locator('.hg-incomecard__sum')).toHaveText('350만 원');
   await expect(income.getByRole('button', { name: '수입 기록 전체 보기' })).toHaveCount(0);
   await income.getByRole('button', { name: '수입 적기' }).click();
   await expect(page).toHaveURL(/\/salary\/money-in/);

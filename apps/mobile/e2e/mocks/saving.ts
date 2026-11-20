@@ -190,6 +190,29 @@ export async function mockSaving(page: Page, db: MemDb, s: SavingDb, viewer: str
       }
       return route.fallback();
     }
+    // 수입 카드 기본값 저장(20261225090000 set_payday_income 흉내): 사이클에 한 번(찍혀 있으면 아무것도 안 함), 0원이면 기록 없이 찍기만
+    if (fn === 'set_payday_income') {
+      const b0 = body();
+      const c = db.checklists.find((x) => x.id === b0.p_checklist);
+      if (!c) return fail(route, 'no_checklist');
+      if (c.auto_income_at) return json(route, null);
+      c.auto_income_at = new Date().toISOString();
+      const amt = Number(b0.p_amount ?? 0);
+      if (amt <= 0) return json(route, null);
+      const id = `in-auto-${s.moneyIns.length + 1}`;
+      s.moneyIns.push({
+        id,
+        space_id: 'space-1',
+        owner_user_id: viewer,
+        amount: amt,
+        received_on: c.cycle_start,
+        kind: 'salary',
+        source: 'payday_auto',
+        created_at: new Date().toISOString(),
+        deleted_at: null,
+      });
+      return json(route, id);
+    }
     if (fn === 'goal_saved_sums')
       return json(
         route,

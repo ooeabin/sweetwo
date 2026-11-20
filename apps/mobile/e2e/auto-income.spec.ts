@@ -20,7 +20,7 @@ test('첫 확인 → 수입 카드에 “월급 +350만 원 자동”, 지우면
 }) => {
   const { sv } = await open(page);
   const income = page.getByRole('region', { name: '이번 달 수입' });
-  await expect(income).toContainText('아직 적은 수입이 없어요');
+  await expect(income.locator('.hg-incomecard__sum')).toHaveText('350만 원'); // 기본값(저장 전)
   // 줄 하나를 확인하면 월급이 수입으로 들어옴
   await page.getByRole('button', { name: '청약 확인' }).click();
   const row = income.locator('.hg-incomecard__row');

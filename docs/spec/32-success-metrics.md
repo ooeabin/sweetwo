@@ -80,6 +80,7 @@
 | `bundle_created` / `_joined` / `_left` / `_achieved` / `bundle_show_each_toggled` | entry(`band` 홈 띠 13번 / `saving` W-10 ⋯·W-11 끝 / `direct` / `notification` 들어가기 / `w15a` / `celebrate` / `s13` 설정 S-13 묶음 줄, 2026-11-13 PR 14 / `exist` W-15 ‘같이 모을게요’ / `money_in` W-20a, 2026-11-14), has_target, on, separate(열린 묶음이 있는데 따로 만듦, 2026-11-14) |
 | `bundle_open_answered` | choice(`join` / `separate` / `later`), W-15 열린 묶음 질문(2026-11-14 H1) |
 | `money_in_deleted` / `money_in_edited` | distributed(나눠 넣은 게 있었나), W-20b(2026-11-14 M6) |
+| `payday_income_set` | amount_band, zero(0원으로 닫음), W-02 수입 카드 기본값 저장(2026-11-20) |
 | `saving_note_saved` / `saving_note_paid` | has_due, subtracted |
 | `split_proposed` / `split_answered` | name_code, rule, result |
 | `mode_change_requested` / `_answered` / `_cancelled` | phrase(`p04_send` / `s11f_combine` / `s11f_manager`), to_mode(`separate` / `combined`), result(requested: `applied` / `requested`, answered: `accepted` / `declined` / `expired`, cancelled는 없음) |

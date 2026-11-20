@@ -4684,6 +4684,7 @@ export type Database = {
         Returns: undefined
       }
       set_joint_cycle_day: { Args: { p_day: number }; Returns: undefined }
+      set_payday_income: { Args: { p_amount: number; p_checklist: string }; Returns: string }
       set_rank_consent: { Args: { p_on: boolean }; Returns: undefined }
       set_salary_mode: {
         Args: { p_mode: Database["public"]["Enums"]["salary_mode"] }

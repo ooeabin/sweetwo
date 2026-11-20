@@ -112,9 +112,10 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await heading(page, '이번 달 월급 체크');
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await expect(page.getByText('월급 알려 주기')).toHaveCount(0);
-  await expect(page.getByText('월급 계획 템플릿에서 줄을 추가해 주세요')).toBeVisible();
+  await expect(page.getByText('월급을 적고')).toBeVisible();
+  await expect(page.getByText('월급 계획 템플릿을 완성해 주세요')).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '월급 계획 템플릿 ›' }).click();
+  await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
   await heading(page, '월급 계획 템플릿');
 
   // 홈: ‘월급 알려 주기’ 없이 평소 줄 두 개

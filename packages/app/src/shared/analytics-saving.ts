@@ -61,6 +61,8 @@ export type SavingTogetherEvent =
   | { name: 'bundle_open_answered'; props: { choice: 'join' | 'separate' | 'later' } }
   /** W-20 돈 들어온 기록 지우기·고치기(2026-11-14 M6) */
   | { name: 'money_in_deleted' | 'money_in_edited'; props: { distributed: boolean } }
+  /** W-02 수입 카드 기본값(월급)을 고쳐 저장(2026-11-20) */
+  | { name: 'payday_income_set'; props: { amount_band: AmountBand; zero: boolean } }
   | { name: 'bundle_percent_only_toggled'; props: { on: boolean } }
   | {
       name: 'saving_note_saved' | 'saving_note_paid';

@@ -84,6 +84,19 @@ export async function updateMoneyIn(
   failMoney(error);
 }
 
+/**
+ * W-02 수입 카드 기본값(월급)을 고쳐 저장(set_payday_income, 20261225090000, 2026-11-20): 그 사이클 자동 월급 기록을 내 금액으로 즉시 넣고
+ * auto_income_at을 찍음(0원이면 기록 없이 찍기만). 이미 찍혀 있으면(확인했거나 한 번 저장) 아무것도 안 하고 null. 새 기록 id
+ */
+export async function setPaydayIncome(checklist: string, amount: number): Promise<string | null> {
+  const { data, error } = await supabase().rpc('set_payday_income', {
+    p_checklist: checklist,
+    p_amount: amount,
+  });
+  failMoney(error);
+  return typeof data === 'string' ? data : null;
+}
+
 /** 지우기(나눠 넣은 것도 지움) */
 export async function deleteMoneyIn(id: string) {
   const { error } = await supabase().rpc('money_in_delete', { p_id: id });
