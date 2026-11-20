@@ -130,7 +130,7 @@ export function W01dAutoLines() {
           }
         >
           <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-            {lines.length === 0 && <p className="hg-help">{copy.autoPickEmpty}</p>}
+            {lines.length === 0 && <p className="hg-help hg-empty__line">{copy.autoPickEmpty}</p>}
             {lines.map((l) => {
               const p = pickOf(l);
               return (

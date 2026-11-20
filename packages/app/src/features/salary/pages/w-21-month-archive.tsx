@@ -105,7 +105,7 @@ export function W21MonthArchive() {
           ]}
         />
       ) : rowCount === 0 ? (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
           {copy.archiveEmpty}
         </p>
       ) : periodMode ? (

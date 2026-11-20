@@ -222,7 +222,7 @@ export function Y04Calendar() {
       />
       {/* ‘금융 일정’ 필터에 이 달 금융 일정이 없음(13 공통 상태 18번, 2026-11-12 QA 9구간 D3 = A) */}
       {filter === 'money' && !d.monthOf(y, m).dates.length && (
-        <p className="hg-help" role="status" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" role="status" style={{ margin: 0 }}>
           {copy.noMoneyThisMonth}
         </p>
       )}
@@ -234,7 +234,7 @@ export function Y04Calendar() {
       >
         <h2 className="hg-cal__date">{copy.agendaDay(sm, sd, dow)}</h2>
         <div className="hg-list hg-list--plain">
-          {rows.length ? rows : <p className="hg-help">{copy.agendaEmpty}</p>}
+          {rows.length ? rows : <p className="hg-help hg-empty__line">{copy.agendaEmpty}</p>}
         </div>
         {selected >= d.today && (
           <div className="hg-list hg-list--plain hg-cal__add">

@@ -494,7 +494,7 @@ export function F04Item() {
       )}
       <section className="hg-stack" aria-label={copy.history}>
         <SectionHeader title={copy.history} />
-        {manual.length === 0 && <p className="hg-help">{copy.historyEmpty}</p>}
+        {manual.length === 0 && <p className="hg-help hg-empty__line">{copy.historyEmpty}</p>}
         {manual.length > 0 && (
           <div className="hg-list">
             {manual.map((h) => (

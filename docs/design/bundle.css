@@ -54,7 +54,7 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-chip__order { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: 600 12px/1 var(--font-sans); }
 .hg-chip.is-selected .hg-chip__order { background: var(--ink); color: var(--on-ink); }
 .hg-chip.hg-chip--sm { border-color: transparent; background: var(--surface-alt); color: var(--slate); font-weight: 600; }  /* 2026-11-04 작은 칩: 회색 알약. 2026-11-09 고르면 옅은 오렌지 판 + brand-ink 글자(13px라 오렌지 글자 대신) */
-.hg-chip.hg-chip--sm.is-selected { border-color: transparent; box-shadow: none; background: var(--accent-app-soft); color: var(--accent-app-ink); }
+.hg-chip.hg-chip--sm.is-selected { border-color: transparent; box-shadow: none; background: var(--accent-app-soft); color: var(--accent-app-text); }  /* 2026-11-20 사용자 결정: 누르는 칩은 고르면 갈색(brand-ink)이 아니라 오렌지 글자(accent-app-text, 옅은 오렌지 판 위 버튼과 같은 규칙). 13px 600이라 대비 예외(axe 선택자 예외). 누르지 않는 배지·작은 표시는 brand-ink 그대로 */
 
 /* Card */
 .hg-card { display: flex; flex-direction: column; gap: var(--space-2); box-sizing: border-box; min-width: 0; background: var(--surface); border: 1px solid var(--hairline-soft); border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6); }  /* 2026-11-09 밀도: 위아래 20px(좁은 창 옆 20px은 앱 틀 규칙) */
@@ -118,6 +118,7 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-amount__unit { font: 600 18px/26px var(--font-sans); }
 .hg-help { font: var(--text-caption); color: var(--stone); }
 .hg-help.is-error { color: var(--danger); }
+.hg-empty__line { color: var(--slate); }  /* 2026-11-20 사용자 결정: 목록이 비었을 때 한 줄 안내는 진한 ink가 아니라 slate(‘아직 …이 없어요’). 큰 그림이 있는 빈 상태 제목(EmptyPlan 등)은 대상 아님. `hg-help`와 같이 씀(글자 크기는 hg-help, 색은 이 클래스) */
 
 /* ProgressSteps: 막대만, 글자 없음 */
 .hg-steps { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; max-width: 480px; padding: 4px 0; }
@@ -524,6 +525,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-empty__title { font: var(--text-title-3); word-break: keep-all; }
 .hg-empty__art { display: block; width: 120px; height: 120px; object-fit: contain; }
 .hg-empty__body { font: var(--text-body-sm); color: var(--slate); max-width: 280px; }
+.hg-empty--list .hg-empty__title { color: var(--slate); }  /* 2026-11-20 목록 자리의 빈 안내(공지 N-04, 휴지통, 문의, 선물 기록, 자산·부채 목록): 제목 글자를 slate로 */
 
 /* Skeleton */
 .hg-skel { display: block; border-radius: var(--radius-md); background: var(--hairline-soft); position: relative; overflow: hidden; }
@@ -875,7 +877,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cmd__item em { font-style: normal; font: var(--text-caption); color: var(--stone); }
 .hg-cmd__item.is-active { background: var(--surface-alt); }
 .hg-cmd__input input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; color: inherit; }
-.hg-cmd__empty { padding: var(--space-8) var(--space-3); font: var(--text-body); color: var(--stone); text-align: center; }
+.hg-cmd__empty { padding: var(--space-8) var(--space-3); font: var(--text-body); color: var(--slate); text-align: center; }
 .hg-cmd__foot { display: flex; align-items: center; gap: var(--space-5); height: 44px; padding: 0 var(--space-6); border-top: 1px solid var(--hairline-soft); font: var(--text-micro); font-weight: 400; color: var(--stone); }
 .hg-cmd__foot > span { display: inline-flex; align-items: center; gap: var(--space-1); }
 .hg-cmd { max-width: 560px; }
@@ -1528,7 +1530,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-noti__empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-16) var(--space-6); text-align: center; }
 .hg-noti__empty > * { margin: 0; }
 .hg-noti__empty > .hg-empty__art { margin-bottom: var(--space-2); }  /* 2026-11-12 D2 N-03 그림 자리 120px(hg-artslot) */
-.hg-noti__empty b { font: var(--text-body-strong); }
+.hg-noti__empty b { font: var(--text-body-strong); color: var(--slate); }  /* 2026-11-20 ‘새 알림이 없어요’ slate */
 .hg-noti__empty span { font: var(--text-caption); color: var(--stone); }
 /* 놓이는 곳: 넓은 창은 오른쪽 끝에 붙는 시트(막 없음), 좁은 창은 전체 화면 페이지 */
 .hg-noti--sheet { position: fixed; top: 0; right: 0; bottom: 0; height: auto; z-index: var(--z-sheet); }

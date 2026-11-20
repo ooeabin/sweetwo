@@ -205,6 +205,9 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
   seed(db);
   await page.goto('/notifications');
   await expect(page.getByText('새 알림이 없어요')).toBeVisible();
+  // 2026-11-20 빈 목록 안내 글자는 slate(라이트 rgb(84, 85, 87))
+  if (info.project.name === 'light')
+    await expect(page.getByText('새 알림이 없어요')).toHaveCSS('color', 'rgb(84, 85, 87)');
   // N-03 그림 자리는 2D 그림이 들어올 때까지 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김)
   await expect(page.locator('.hg-noti__empty .hg-artslot')).toHaveCount(0);
   await axe(page);

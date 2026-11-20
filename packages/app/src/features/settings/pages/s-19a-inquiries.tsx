@@ -57,6 +57,7 @@ export function S19aInquiries() {
       {rows.length === 0 ? (
         // 2026-11-04 비었으면 ‘문의하기’를 빈 화면 가운데에
         <EmptyState
+          list
           title={copy.noInquiries}
           action={
             <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>

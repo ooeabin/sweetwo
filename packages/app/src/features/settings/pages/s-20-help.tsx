@@ -1,5 +1,5 @@
 import { parseFaq, searchFaq } from '@sweetwo/core';
-import { Accordion, Button, Chip, ListRow, PageHeader, Search, SectionHeader } from '@sweetwo/ui';
+import { Accordion, Chip, ListRow, PageHeader, Search, SectionHeader } from '@sweetwo/ui';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import faqMd from '../../../content/faq.md?raw';
@@ -10,7 +10,7 @@ import { openSite } from './s-19-about';
 
 // S-20 도움말(docs/spec/25-settings.md): 자주 묻는 질문(웹사이트 L-06과 같은 원본 apps/site/src/content/faq.md,
 // pnpm content:sync로 복사) + 위에 검색, 문의하기(S-19a), 내 문의, 약관·처리방침, 버전(S-19).
-// 검색 결과가 없으면 “찾는 답이 없어요” + 문의하기.
+// 검색 결과가 없으면 “찾는 답이 없어요” 한 줄(문의하기는 아래 상자 줄 하나, 2026-11-20).
 // 2026-11-20: 검색 칸 아래 묶음 칩 5개(faq.md의 ## 묶음). 기본 = ‘자주 묻는 질문’(묶음마다 첫 질문, 5개), 칩을 고르면 그 묶음만,
 // 같은 칩을 다시 누르면 기본으로. 검색하면 칩을 무시하고 전체에서 찾음
 // v2.2(Q4): 항목 “상대가 돈을 통제하거나 위협할 때”(1366 등)는 기관 검토 뒤 게시. 검토 전엔 이 플래그로 숨기고 출시
@@ -37,14 +37,10 @@ export function S20Help() {
         found.length ? (
           <Accordion items={toItems(found)} />
         ) : (
-          <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-            <p>{copy.faqNone}</p>
-            <div className="hg-row">
-              <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
-                {copy.contact}
-              </Button>
-            </div>
-          </div>
+          // 2026-11-20 결과 없음: 안내 한 줄만(slate). ‘문의하기’는 아래 상자 줄 하나(오렌지 채움 버튼이 줄과 겹쳐 두 번 나왔음)
+          <p className="hg-help hg-empty__line" role="status">
+            {copy.faqNone}
+          </p>
         )
       ) : (
         <>

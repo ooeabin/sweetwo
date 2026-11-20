@@ -125,7 +125,7 @@ export function S13pPreview() {
     <section className="hg-stack" style={{ gap: 'var(--space-3)' }} aria-label={copy.previewSaving}>
       <SectionHeader title={copy.previewSaving} />
       {bundleRows.length + sharedGoals.length === 0 ? (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
           {copy.previewNothing}
         </p>
       ) : (
@@ -162,7 +162,7 @@ export function S13pPreview() {
     >
       <SectionHeader title={copy.previewMySaving} />
       {myGoals.length === 0 ? (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
           {copy.previewNothing}
         </p>
       ) : (
@@ -235,7 +235,7 @@ export function S13pPreview() {
     <section className="hg-stack" style={{ gap: 'var(--space-3)' }} aria-label={copy.previewAssets}>
       <SectionHeader title={copy.previewAssets} />
       {items.length + sums.size === 0 ? (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
           {copy.previewNothing}
         </p>
       ) : (

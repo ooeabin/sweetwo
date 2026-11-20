@@ -447,7 +447,7 @@ export function W10SavingItem() {
               )}
             </div>
           ) : (
-            <p className="hg-help" style={{ margin: 0 }}>
+            <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
               {copy.noHistory}
             </p>
           )}

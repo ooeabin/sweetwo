@@ -187,7 +187,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
           ))}
         </div>
       ) : (
-        <p className="hg-help" style={{ margin: 0 }}>
+        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
           {copy.notesEmpty}
         </p>
       )}
