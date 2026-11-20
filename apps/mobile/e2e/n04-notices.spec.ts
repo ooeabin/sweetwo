@@ -145,3 +145,37 @@ test('서랍 ‘공지’: 지난 공지만 있어도 줄은 보이고 점은 �
   await menuBtn.click();
   await expect(drawer.getByRole('button', { name: '공지' })).toHaveCount(0);
 });
+
+test('서랍 ‘공지’ 점 회귀(2026-11-20): 읽은 공지가 있어도 안 읽은 공지가 있으면 점, 모두 읽으면 점 없음, 홈 공지 띠와 같이 있어도 점', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'narrow');
+  test.setTimeout(120_000);
+  await open(page, [
+    NOTICES[0] ?? {},
+    { ...(NOTICES[0] ?? {}), id: 'n-new', title: '새 기능 안내 2' },
+  ]);
+  await page.goto('/');
+  await expect(page.locator('.hg-banner--line')).toBeVisible();
+  const menuBtn = page.getByRole('button', { name: '메뉴', exact: true });
+  const drawer = page.getByRole('dialog', { name: '메뉴' });
+  await menuBtn.click();
+  await expect(drawer.getByRole('button', { name: /^공지/ })).toContainText('새 공지');
+  await expect(drawer.locator('.hg-drawer__dot')).toHaveCount(1);
+  // 하나만 읽음(홈 띠 ‘보기’ → N-04에서 펼쳐짐) → 다른 새 공지가 있어 점은 그대로
+  await page.keyboard.press('Escape');
+  await page.goto('/notices?open=n-now');
+  await expect(page.locator('.hg-acc__q').first()).toHaveAttribute('aria-expanded', 'true');
+  await page.goto('/');
+  await expect(page.locator('.hg-together, .hg-hubtile').first()).toBeVisible();
+  await menuBtn.click();
+  await expect(drawer.locator('.hg-drawer__dot')).toHaveCount(1);
+  // 나머지도 읽으면 점 없음
+  await drawer.getByRole('button', { name: /^공지/ }).click();
+  await page.locator('.hg-acc__q', { hasText: '새 기능 안내 2' }).click();
+  await page.goto('/');
+  await expect(page.locator('.hg-together, .hg-hubtile').first()).toBeVisible();
+  await menuBtn.click();
+  await expect(drawer.getByRole('button', { name: '공지', exact: true })).toBeVisible();
+  await expect(drawer.locator('.hg-drawer__dot')).toHaveCount(0);
+});

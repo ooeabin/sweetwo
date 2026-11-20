@@ -88,7 +88,9 @@ function seed(db: MemDb) {
 const open = async (page: Page, narrow: boolean) => {
   if (narrow) {
     await page.goto('/');
-    await expect(page.locator('.hg-together, .hg-hubtile, .hg-hub .hg-card--fill').first()).toBeVisible();
+    await expect(
+      page.locator('.hg-together, .hg-hubtile, .hg-hub .hg-card--fill').first(),
+    ).toBeVisible();
     await page
       .locator('.hg-frame__mhead')
       .getByRole('button', { name: '설정', exact: true })
@@ -912,7 +914,8 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /도움말/ }).click();
   await expect(page).toHaveURL(/\/settings\/help$/);
-  await expect(page.getByRole('heading', { name: '시작하기' })).toBeVisible();
+  // 기본은 ‘자주 묻는 질문’ 대표 5개 + 묶음 칩 5개(2026-11-20)
+  await expect(page.getByRole('heading', { name: '자주 묻는 질문' })).toBeVisible();
   await page.getByRole('button', { name: '통장을 연결하지 않나요?' }).click();
   await expect(page.getByText(/통장·카드 연동 없이 직접 입력해요/)).toBeVisible();
   await axe(page);

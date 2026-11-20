@@ -59,7 +59,7 @@
 | | 어버이날(`parents_day`) | `flower-tulip` | `together` | 〃 |
 | | 양가 행사(`event`) | `confetti` | `together` | 〃 |
 | | 그 밖의 날(`custom`, 모를 때) | `gift` | `together` | 〃 |
-| 알림 `noti`(기획서 14 ‘아이콘’ 이름) | `gift`, `heart` | `gift`, `heart` | `together` | N-01, N-02(32px 원 `hg-noti__icon`, 16px 아이콘) |
+| 알림 `noti`(기획서 14 ‘아이콘’ 이름) | `gift`, `heart` | `gift`, `heart` | `together` | N-01, N-02(32px 원 `hg-noti__icon`, 16px 아이콘. 2026-11-20 알림 줄 앞 칸은 사람 원 포함 모두 비움, 종류별 그림이 생기면 이 표로 다시 채움) |
 | | `calendar-check`, `clipboard-text` | `calendar-check` | `safety` | 〃 |
 | | `receipt` | `receipt` | `safety` | 〃 |
 | | `wallet` | `money` | `invest` | 〃 |
