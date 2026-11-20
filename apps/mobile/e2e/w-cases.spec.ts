@@ -92,6 +92,13 @@ test('W-02 a: 템플릿 줄이 0개면 날짜 알약 + 한 덩어리 안내 + �
   await expect(page.locator('.hg-w02hero__meta')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^전체/ })).toHaveCount(0);
   await axe(page);
+  // 내용이 한 화면에 들어가면 세로 스크롤이 없다(2026-11-20): 지금 창과 휴대폰 크기(390x844) 모두
+  const noScroll = () =>
+    page.evaluate(() => (document.scrollingElement?.scrollHeight ?? 0) <= window.innerHeight);
+  expect(await noScroll()).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('button', { name: '월급 계획 템플릿 채우기' })).toBeVisible();
+  expect(await noScroll()).toBe(true);
   await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿' })).toBeVisible();
 });

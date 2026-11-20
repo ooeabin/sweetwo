@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (a62aff0d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (91849e11). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2672,7 +2672,14 @@ button.hg-datepill { cursor: pointer; }
 .hg-incomecard__edit { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin: 0; padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; color: inherit; text-align: left; cursor: pointer; }  /* 기본값 큰 금액 + 연필(2026-11-20) */
 .hg-incomecard__edit > svg { flex: none; color: var(--slate); }
 .hg-incomecard__rowbtn { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0; min-height: 48px; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }  /* 자동 월급 줄을 눌러 고치기(2026-11-20) */
-.hg-empty--plan { min-height: calc(100dvh - 320px); justify-content: center; padding-left: 0; padding-right: 0; }  /* 주 버튼(`hg-stickybar`)이 화면 아래에 오도록 문장 자리를 키움 */
+.hg-empty--plan { flex: 1 1 auto; justify-content: center; padding-left: 0; padding-right: 0; }  /* 문장 자리가 앱 틀 본문 영역의 남는 높이를 채워 주 버튼(`hg-stickybar`)이 화면 아래에 오게 함 */
+/* 2026-11-20 빈 계획 화면 스크롤 수정: 예전 min-height(100dvh - 320px)는 머리·여백·주 버튼 위에 더해져 한 화면에 들어가는 내용도 스크롤이 생겼다. 틀부터 본문 칸까지 세로 flex로 이어 남는 높이만 채움(내용이 더 길면 그때만 스크롤) */
+.hg-frame:has(.hg-empty--plan) { align-items: stretch; }
+.hg-frame__main:has(.hg-empty--plan) { display: flex; flex-direction: column; }
+.hg-frame__main:has(.hg-empty--plan) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; }
+.hg-frame__main:has(.hg-empty--plan) > .hg-body > .hg-body__col { flex: 1 1 auto; }
+.hg-frame__main:has(.hg-empty--plan) .hg-body__col > .hg-stack { flex: 1 1 auto; }
+@media (max-width: 767px) { .hg-frame:has(.hg-empty--plan) { display: flex; flex-direction: column; } .hg-frame:has(.hg-empty--plan) > .hg-frame__main { flex: 1 1 auto; } }
 .hg-empty--plan .hg-empty__title { font: var(--text-title-2); letter-spacing: -0.3px; }
 .hg-empty--plan .hg-empty__title > span { display: block; }
 .hg-stickybar { position: sticky; bottom: 0; z-index: 1; margin-top: var(--space-4); padding: var(--space-6) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, transparent, var(--surface) var(--space-6)); }
