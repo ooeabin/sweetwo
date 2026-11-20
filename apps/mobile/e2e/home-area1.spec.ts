@@ -221,7 +221,7 @@ test('H-06 할 일 시트 8번 줄: 줄 사이 회색 “이미 정했어요” 
 
 test('S-20 도움말: 기본 “자주 묻는 질문” 대표 5개 + 묶음 칩 5개, 칩을 고르면 그 묶음만, 검색하면 칩을 무시', async ({
   page,
-}) => {
+}, info) => {
   await open(page, undefined, '/settings/help');
   const chips = page.getByRole('group', { name: '묶음' }).getByRole('button');
   await expect(chips).toHaveText([
@@ -239,8 +239,10 @@ test('S-20 도움말: 기본 “자주 묻는 질문” 대표 5개 + 묶음 칩
   await chips.nth(1).click();
   await expect(chips.nth(1)).toHaveAttribute('aria-pressed', 'true');
   // 2026-11-20 고른 칩 글자는 갈색(brand-ink)이 아니라 오렌지 accent-app-text(라이트 #ff7716), 안 고른 칩은 slate
-  await expect(chips.nth(1)).toHaveCSS('color', 'rgb(255, 119, 22)');
-  await expect(chips.nth(0)).toHaveCSS('color', 'rgb(84, 85, 87)');
+  if (info.project.name === 'light')
+    await expect(chips.nth(1)).toHaveCSS('color', 'rgb(255, 119, 22)');
+  if (info.project.name === 'light')
+    await expect(chips.nth(0)).toHaveCSS('color', 'rgb(84, 85, 87)');
   await axe(page);
   await expect(page.getByRole('heading', { name: '둘이 쓰기' })).toBeVisible();
   await expect(qs.first()).toContainText('파트너는 어떻게 초대하나요?');
