@@ -58,7 +58,7 @@ export function N04Notices() {
           }
         />
       ) : list.length === 0 ? (
-        <EmptyState title={copy.noticesEmpty} />
+        <EmptyState list title={copy.noticesEmpty} />
       ) : (
         <Accordion
           // 공지 띠에서 들어온 공지가 바뀌면 다시 그려 펼침

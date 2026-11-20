@@ -238,6 +238,10 @@ test('S-20 도움말: 기본 “자주 묻는 질문” 대표 5개 + 묶음 칩
   await axe(page);
   await chips.nth(1).click();
   await expect(chips.nth(1)).toHaveAttribute('aria-pressed', 'true');
+  // 2026-11-20 고른 칩 글자는 갈색(brand-ink)이 아니라 오렌지 accent-app-text(라이트 #ff7716), 안 고른 칩은 slate
+  await expect(chips.nth(1)).toHaveCSS('color', 'rgb(255, 119, 22)');
+  await expect(chips.nth(0)).toHaveCSS('color', 'rgb(84, 85, 87)');
+  await axe(page);
   await expect(page.getByRole('heading', { name: '둘이 쓰기' })).toBeVisible();
   await expect(qs.first()).toContainText('파트너는 어떻게 초대하나요?');
   expect(await qs.count()).toBeGreaterThan(1);

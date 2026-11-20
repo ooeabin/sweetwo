@@ -115,7 +115,7 @@ export function S21Trash() {
         onBack={() => nav('/settings/data')}
       />
       {rows.length === 0 ? (
-        <EmptyState title={copy.trashEmpty} />
+        <EmptyState list title={copy.trashEmpty} />
       ) : (
         <>
           <p className="hg-q__help">{copy.trashNote}</p>

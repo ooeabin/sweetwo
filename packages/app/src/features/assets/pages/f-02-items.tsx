@@ -233,6 +233,7 @@ export function F02Items() {
       {ready && !groups.length && !noneMine && (
         // 2026-11-04 요약(F-01)과 같은 빈 상태 모양
         <EmptyState
+          list
           title={side === 'debt' ? copy.noDebt : copy.empty}
           action={
             <Button

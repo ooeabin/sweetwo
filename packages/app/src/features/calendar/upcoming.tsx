@@ -140,7 +140,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
       <section className="hg-stack" aria-label={copy.upcomingList}>
         <SectionHeader title={copy.upcomingList} />
         {!rows.length ? (
-          <p className="hg-card__meta" style={{ margin: 0 }}>
+          <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
           </p>
         ) : (

@@ -924,7 +924,12 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await expect(page.getByRole('button', { name: '파트너는 어떻게 초대하나요?' })).toBeVisible();
   await search.fill('우주선');
   await expect(page.getByText('찾는 답이 없어요')).toBeVisible();
-  await page.getByRole('button', { name: '문의하기' }).first().click();
+  // 2026-11-20 안내는 slate 한 줄, ‘문의하기’는 아래 상자 줄 하나(오렌지 채움 버튼 없음)
+  await expect(page.getByText('찾는 답이 없어요')).toHaveCSS('color', 'rgb(84, 85, 87)');
+  await expect(page.getByRole('button', { name: '문의하기' })).toHaveCount(1);
+  await expect(page.locator('.hg-btn--primary')).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '문의하기' }).click();
 
   // 문의하기
   await expect(page).toHaveURL(/\/settings\/help\/inquiry$/);

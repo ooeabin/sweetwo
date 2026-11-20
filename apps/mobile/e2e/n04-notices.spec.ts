@@ -126,6 +126,8 @@ test('공지가 없으면 “지금은 공지가 없어요”만(할 일 버튼 
   await page.goto('/notices');
   await expect(page.getByText('지금은 공지가 없어요')).toBeVisible();
   await expect(page.locator('.hg-empty button')).toHaveCount(0);
+  // 2026-11-20 빈 목록 안내 글자는 slate(라이트 rgb(84, 85, 87))
+  await expect(page.getByText('지금은 공지가 없어요')).toHaveCSS('color', 'rgb(84, 85, 87)');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/empty-${info.project.name}.png` });
   await axe(page);
   // 바로 열렸을 때 ‹은 홈으로
