@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ee7d9845). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (feb2402e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1041,6 +1041,10 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
   .hg-frame--alt :is(.hg-banner--todo, .hg-banner--line, .hg-banner--strip) { margin-left: 0; margin-right: 0; border-radius: var(--radius-xl); min-height: 52px; }
   .hg-frame--alt .hg-body__banners { gap: var(--space-2); }
 }
+/* 2026-11-20 홈 공지 띠(`hg-banner--notice`, NoticeBand만): 생김새는 그대로, 제목 한 줄이면 높이 48px. 원인은 min-height 52px가 content-box라 위아래 안쪽 여백 16px이 더해져 68px였던 것. border-box로 바로잡고 작은 버튼 32px + 위아래 8px = 48px(할 일 띠 hg-hubband 52px보다 낮음). ‘보기’·‘닫기’ 누르는 칸 44px은 ::after 덧댐(‘3차 검토’ 묶음)이 그대로 유지. 제목이 두 줄이면 늘어남 */
+.hg-banner--notice { box-sizing: border-box; min-height: 48px; }
+.hg-banner--notice .hg-btn--sm { height: 32px; }
+.hg-frame--alt .hg-banner--notice { min-height: 48px; }
 
 /* 사람 줄(카카오뱅크 모임통장 멤버 줄처럼): Avatar + 문장 + 진행 원 + › (홈 H-03 파트너 체크 현황) */
 .hg-person { display: flex; align-items: center; gap: var(--space-3); width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-4); border: 0; border-radius: var(--radius-lg); background: var(--plate); color: var(--ink); font: var(--text-label); text-align: left; cursor: pointer; }

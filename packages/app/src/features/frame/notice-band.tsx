@@ -123,7 +123,7 @@ export function useNoticeBand(): NoticeBand | null {
   };
   const must = n.importance === 'must';
   const node = (
-    <div className="hg-banner hg-banner--line hg-body__banner" role="status">
+    <div className="hg-banner hg-banner--line hg-banner--notice hg-body__banner" role="status">
       <Icon name="info" size={16} />
       <span className="hg-stack" style={{ gap: 'var(--space-1)' }}>
         <strong className="hg-banner__one">{n.title}</strong>
