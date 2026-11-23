@@ -13,7 +13,6 @@ import {
   coupleBaseDay,
   formatDateFull,
   formatManWon,
-  manageStyleOf,
   salaryChangeMonthsAhead,
   salaryChangeState,
   todayKst,
@@ -264,7 +263,14 @@ export function S11Me() {
             <ListRow
               label={copy.salaryMode}
               sub={locked ? copy.unlinkPendingLocked : undefined}
-              value={copy.styleNames[manageStyleOf(sp)]}
+              value={copy.styleRowValue(
+                sp.salary_mode,
+                sp.salary_mode === 'joint' && sp.manager_user_id
+                  ? sp.manager_user_id === me.id
+                    ? c.myName
+                    : c.partnerName
+                  : undefined,
+              )}
               onClick={locked ? undefined : () => nav('/settings/couple/style')}
             />
           )}

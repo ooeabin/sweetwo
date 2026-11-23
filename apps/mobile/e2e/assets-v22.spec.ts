@@ -442,7 +442,7 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await expect(page.getByRole('button', { name: '자산 추가하기' })).toHaveCount(0);
   await expect(page.getByText('부채가 없어요')).toHaveCount(0);
   await shot(page, '5-f02-asset-tab');
-  await page.getByRole('tab', { name: /^부채/ }).click();
+  await page.getByRole('tab', { name: '부채', exact: true }).click();
   const debtChips = page.getByRole('group', {
     name: '부채도 적으면 순자산이 정확해져요. 금액만 적어도 돼요',
   });
@@ -456,7 +456,7 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   ]);
   await expect(page.getByRole('button', { name: '+ 부채 추가' })).toHaveCount(0);
   await shot(page, '6-f02-debt-tab');
-  await page.getByRole('tab', { name: '자산 0원' }).click();
+  await page.getByRole('tab', { name: '자산', exact: true }).click();
   await expect(chips).toBeVisible();
   await shot(page, '2-f02-empty-chips');
   await axe(page);

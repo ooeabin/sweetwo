@@ -834,7 +834,7 @@ supabase/
 
 ### 자산 관리 구조
 
-- 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`, F-04a `/assets/:id/matured/:step?`. 하위 탭은 “요약” “자산·부채” 2개, 기기에 기억
+- 기획: 23 F-01~F-04, 09 6-5·6-6(분류, core `assetGroups`), 08 2·4장(명의, 공개 범위). 화면 features/assets: F-01 `/assets`, F-02 `/assets/items?side=asset|debt`, F-03 `/assets/new/:step?`, F-04 `/assets/:id`, F-04a `/assets/:id/matured/:step?`. 하위 탭은 “요약” “자산” “부채” 3개(2026-11-23, 한 줄), 마지막 본 하위 탭(요약/자산·부채)은 기기에 기억
 - `asset`: 자산과 부채를 한 표(`side`). 명의 = `owner` 공동(joint) / 사람(person + `owner_user_id`). 합류 전 파트너 명의 대신 입력 = person + `owner_user_id` null(모두 보여 주기만), `finish_join()`이 합류한 사람에게 넘김. 합류 뒤 상대 명의 새로 만들기는 RLS가 거절
 - 공개 범위(`visibility` all / sum / private = “모두 보여 주기” / “금액만 보여 주기” / “숨기기”, 새 내 항목 기본 = 금액만)는 서버에서 거름(31 보안): 행은 `asset_visible()`(공동, 모두 보여 주기, 내 명의, 내가 대신 입력한 것)만. 파트너 ‘금액만’은 `partner_asset_sums()`가 묶음별 개수와 합계만, ‘숨기기’는 아무것도 안 줌. 고치기는 `asset_editable()`
 - 금액 이력 `asset_history`: 금액·원금이 바뀔 때 트리거가 기록(앱은 못 씀). `source`(2026-11-12 QA 8구간 D3, 20261124090000): 처음 적은 값 `created`, 직접 고친 것 `manual`, 팔았어요 `sell`(`sell_asset`), 만기 정리 `matured`(`settle_matured`), 옛 월말 정리 `close`. 함수는 `sweetwo.asset_source` 설정으로 정하고 끝나면 비움. 수정 내역(F-04 5번)은 `manual`만

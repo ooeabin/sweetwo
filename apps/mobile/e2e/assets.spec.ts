@@ -341,7 +341,10 @@ test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범�
   seed(db);
 
   await page.goto('/assets/items');
-  await expect(page.getByRole('tab', { name: '자산 1,940만 원' })).toHaveAttribute(
+  // 2026-11-23: 하위 탭 한 줄 세 탭(요약 / 자산 / 부채)
+  await expect(page.getByRole('tablist')).toHaveCount(1);
+  await expect(page.getByRole('tab')).toHaveText(['요약', '자산', '부채']);
+  await expect(page.getByRole('tab', { name: '자산', exact: true })).toHaveAttribute(
     'aria-selected',
     'true',
   );
@@ -755,7 +758,7 @@ test('합계가 999억을 넘으면 “999억+”(S8-02): 요약, 목록, 홈 �
   await page.goto('/assets');
   await expect(page.getByRole('region', { name: '순자산', exact: true })).toContainText('999억+');
   await page.goto('/assets/items');
-  await expect(page.getByRole('tab', { name: '자산 999억+' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: '자산', exact: true })).toBeVisible();
   await expect(page.getByRole('region', { name: '부동산' })).toContainText('999억+');
   await page.goto('/');
   await expect(page.getByRole('button', { name: /^자산 관리/ })).toContainText('999억+');
@@ -823,7 +826,7 @@ test('마지막 본 하위 탭으로 들어감(S8-10), 넓은 창 ‘+ 추가’
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/assets/items');
-  await expect(page.getByRole('tab', { name: /^자산 / })).toBeVisible();
+  await expect(page.getByRole('tab', { name: '자산', exact: true })).toBeVisible();
   const add = page.locator('.hg-wide-only.hg-btn');
   if (await add.isVisible()) await expect(add).toHaveClass(/hg-btn--secondary/);
   await page.goto('/');

@@ -213,11 +213,20 @@ export function S15Security() {
               chevron={false}
             />
           ))}
-        </div>
-        <div className="hg-row">
-          <Button variant="secondary" loading={busy === 'all'} onClick={() => void logoutAll()}>
-            {copy.logoutAll}
-          </Button>
+          {/* 2026-11-23: 목록 흰 상자 맨 끝 줄에(회색 바탕 위에서는 빨강 글자 대비가 모자람) */}
+          <div
+            className="hg-row"
+            style={{ minHeight: 56, alignItems: 'center', paddingInline: 'var(--space-4)' }}
+          >
+            <Button
+              variant="link"
+              className="hg-btn--danger-plain"
+              loading={busy === 'all'}
+              onClick={() => void logoutAll()}
+            >
+              {copy.logoutAll}
+            </Button>
+          </div>
         </div>
       </section>
     </div>

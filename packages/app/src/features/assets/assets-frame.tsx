@@ -5,12 +5,15 @@ import { MainFrame, rememberAssetsTab, type AssetsTab } from '../frame';
 import { copy } from './copy';
 
 type Tab = AssetsTab;
-const PATH: Record<Tab, string> = {
+// 하위 탭 셋(2026-11-23): 요약 / 자산 / 부채. 자산·부채는 F-02(`/assets/items`, 부채는 ?side=debt)
+type ViewTab = 'overview' | 'asset' | 'debt';
+const PATH: Record<ViewTab, string> = {
   overview: '/assets',
-  items: '/assets/items',
+  asset: '/assets/items',
+  debt: '/assets/items?side=debt',
 };
 
-// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산·부채”(23 1번, 2개 고정).
+// 자산 관리 첫 화면 틀: 화면 제목 줄(“자산 관리” + ‘+ 추가’) + 하위 탭 “요약” “자산” “부채”(23 1번, 3개 고정, 2026-11-23).
 // 2026-11-09 회색 바탕(tone="alt") 위 흰 상자, 좁은 창 추가는 F-02 목록 끝 ‘+ 자산 추가’·‘+ 부채 추가’ 줄
 export function AssetsFrame({
   tab,
@@ -46,13 +49,14 @@ export function AssetsFrame({
       }}
       columns={[
         <div key="c" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-          <LineTabs<Tab>
+          <LineTabs<ViewTab>
             label={copy.tabsLabel}
-            value={tab}
-            onChange={(t) => PATH[t] && nav(PATH[t])}
+            value={tab === 'overview' ? 'overview' : addSide}
+            onChange={(t) => nav(PATH[t], { replace: tab === 'items' && t !== 'overview' })}
             items={[
               { value: 'overview', label: copy.tabs.overview },
-              { value: 'items', label: copy.tabs.items },
+              { value: 'asset', label: copy.tabs.asset },
+              { value: 'debt', label: copy.tabs.debt },
             ]}
           />
           {children}
