@@ -87,7 +87,7 @@ test('파트너 보기만: 대기 줄은 회색 “대기” 글자(주황 ‘�
   await expect(page.getByRole('button', { name: /확인할 것$/ })).toHaveCount(0);
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);
   await expect(page.getByText('0원', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('2개 중 1개 확인')).toBeVisible();
+  await expect(page.getByText('2개 중 1개 확인')).toHaveCount(0);
   await axe(page);
 });
 
@@ -143,7 +143,7 @@ test('자동 줄만 있는 달: 아직 나가는 날 전인 줄이 있으면 다
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toHaveCount(0);
   await expect(page.locator('.hg-datepill')).toBeVisible();
-  await expect(page.getByRole('group', { name: '보기 고르기' })).toBeVisible();
+  await expect(page.getByRole('tablist', { name: '보기 고르기' })).toBeVisible();
 });
 
 test('한 사람 관리형 관리하지 않는 쪽: 관리하는 사람 손 줄은 “{이름}님이 확인해요” 묶음(대기 글자), 주 버튼은 내 손 줄이 없으면 숨김', async ({

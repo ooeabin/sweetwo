@@ -25,11 +25,11 @@ async function open(page: Page) {
   return db;
 }
 
-// 휴대폰 폭(390)에서 고정 주 버튼 폭이 본문 좌우 여백(space-4 = 16px)을 뺀 viewport - 32px(±2)
+// 휴대폰 폭(390)에서 고정 주 버튼 폭이 본문 좌우 여백(2026-11-23 흰 화면 24px)을 뺀 viewport - 48px(±2)
 async function expectDockWidth(page: Page, name: string) {
   const vw = page.viewportSize()?.width ?? 0;
   const box = await page.getByRole('button', { name, exact: true }).boundingBox();
-  expect(Math.abs((box?.width ?? 0) - (vw - 32))).toBeLessThanOrEqual(2);
+  expect(Math.abs((box?.width ?? 0) - (vw - 48))).toBeLessThanOrEqual(2);
 }
 
 test('W-01 b: 줄이 하나도 없으면 막대·범례 없이 문장만(월급이 있어도)', async ({ page }) => {
@@ -134,14 +134,16 @@ test('W-02 f: 건너뜀이 섞여 다 확인하면 접힌 줄 “4개 확인, 1�
   await expect(page.getByRole('button', { name: '5개 모두 확인했어요' })).toBeVisible();
 });
 
-test('W-02 보조 줄: “n개 중 m개 확인”의 m에 건너뜀을 넣지 않고 “, k개 건너뜀”을 붙임', async ({
+test('W-02 탭 숫자(2026-11-23): 건너뜀도 완료 쪽(남음 3, 완료 2), “n개 중 m개 확인” 보조 줄은 없음', async ({
   page,
 }) => {
   const db = await open(page);
   mark(linesOf(db)[0], 'checked');
   mark(linesOf(db)[1], 'skipped');
   await page.goto('/salary');
-  await expect(page.locator('.hg-w02hero__meta')).toHaveText('5개 중 1개 확인, 1개 건너뜀');
+  await expect(page.locator('.hg-w02hero__meta')).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: /^완료 2$/ })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^남음 3$/ })).toBeVisible();
 });
 
 test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, 기간 수입 큰 금액, 월급 계획 중, 수입 카드, 저축·투자 목록)', async ({
@@ -166,9 +168,9 @@ test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, �
   await expect(page.locator('.hg-w02hero__amt')).toHaveText('340만 원');
   await expect(page.locator('.hg-w02hero__meta')).toHaveText('월급 계획 350만 원 중');
   // 큰 금액은 위 기간 수입이라 카드는 이름표 + 기록 없음 안내 + 버튼만
-  const card = page.getByRole('region', { name: '이번 기간 수입' });
-  await expect(card).toContainText('수입 적기');
-  await expect(card.locator('.hg-incomecard__sum')).not.toHaveText(/\d+만 원/);
+  const card = page.getByRole('group', { name: '이번 기간 수입' });
+  await expect(card).toBeVisible();
+  await expect(card.getByRole('button')).toBeVisible();
   await expect(page.getByText('수입이 들어오면')).toHaveCount(0);
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   await expect(group.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(

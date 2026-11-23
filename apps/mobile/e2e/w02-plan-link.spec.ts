@@ -64,26 +64,22 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   await page.goto('/salary');
   await expect(page.getByText('9월 25일 월급')).toBeVisible();
   await expect(page.locator('.hg-w02hero__amt')).toHaveText('350만 원');
-  await expect(page.getByText('5개 중 0개 확인')).toBeVisible();
-  // 칩 숫자
-  await expect(page.getByRole('button', { name: /^전체 5$/ })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await expect(page.getByRole('button', { name: /^남음 5$/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^완료 0$/ })).toBeVisible();
+  await expect(page.getByText('5개 중 0개 확인')).toHaveCount(0); // 2026-11-23 없앰
+  // 밑줄 탭 숫자
+  await expect(page.getByRole('tab', { name: /^전체 5$/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: /^남음 5$/ })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^완료 0$/ })).toBeVisible();
   // 체크 원은 이 화면에서 쓰지 않음
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(5);
   await expect(page.locator('.hg-transfer--act.is-go')).toHaveCount(5);
   await expect(goRow(page, '청약')).toBeVisible();
-  // 줄 = 이름 + 종류 한 줄(보조 줄 하나), 목표 금액 진행·묶음 머리 없음
-  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText('저축·투자');
+  // 줄 = 이름 + 금액, 종류 보조 줄 없음(2026-11-23), 목표 금액 진행·묶음 머리 없음
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('저축·투자');
   await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('1억');
   await expect(page.locator('.hg-checkgroup')).toHaveCount(0);
   // 청약을 확인하면 완료 쪽으로
   await checkRow(page, '청약');
-  await expect(page.getByText('5개 중 1개 확인')).toBeVisible();
   await expect(names(page)).toHaveText(['내 집 마련', '고정지출', '생활비', '용돈', '청약']);
   await expect(doneRow(page, '청약')).toBeVisible();
   await expect(page.locator('.hg-transfer--act.is-done .hg-transfer__dot.is-on')).toHaveCount(0);
@@ -91,13 +87,12 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   // 되돌리기 Toast
   await page.locator('.hg-toast').getByRole('button', { name: '되돌리기' }).click();
   await expect(names(page)).toHaveText(['청약', '내 집 마련', '고정지출', '생활비', '용돈']);
-  await expect(page.getByText('5개 중 0개 확인')).toBeVisible();
-  // 칩: 남음 / 완료
+  // 탭: 남음 / 완료
   await checkRow(page, '청약');
   await checkRow(page, '고정지출');
-  await page.getByRole('button', { name: /^완료 2$/ }).click();
+  await page.getByRole('tab', { name: /^완료 2$/ }).click();
   await expect(names(page)).toHaveText(['청약', '고정지출']);
-  await page.getByRole('button', { name: /^남음 3$/ }).click();
+  await page.getByRole('tab', { name: /^남음 3$/ }).click();
   await expect(names(page)).toHaveText(['내 집 마련', '생활비', '용돈']);
   await axe(page);
 });
@@ -147,7 +142,7 @@ test('다 확인(2026-11-19): 이동 없이 이 화면이 축하 상태로, 제�
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   // 칩·큰 금액 없음, 그림 자리는 파일이 없어 비어 있음(회색 자리 없음)
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /^전체/ })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: /^전체/ })).toHaveCount(0);
   await expect(page.locator('.hg-artslot')).toHaveCount(0);
   // 접힌 한 줄 → 펼치면 줄 목록
   const fold = page.getByRole('button', { name: '5개 모두 확인했어요' });
@@ -160,7 +155,7 @@ test('다 확인(2026-11-19): 이동 없이 이 화면이 축하 상태로, 제�
   // 되돌리기 → 일반 상태
   await toast.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toHaveCount(0);
-  await expect(page.getByText('5개 중 4개 확인')).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^남음 1$/ })).toBeVisible();
   // 옛 W-02 끝 주소는 W-02로
   await page.goto('/salary/done');
   await expect(page).toHaveURL(/\/salary$/);
@@ -280,7 +275,7 @@ test('파트너 탭(각자): 같은 구조 보기만(버튼 비활성), 다 끝�
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
   // 큰 금액 = 그 사이클 월급(2026-11-19, 예전 줄 계획 합 95만 원)
   await expect(page.locator('.hg-w02hero__amt')).toHaveText('270만 원');
-  await expect(page.getByText('2개 중 0개 확인')).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^남음 2$/ })).toBeVisible();
   await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);

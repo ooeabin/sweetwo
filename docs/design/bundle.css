@@ -2924,7 +2924,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-planstage .hg-receipt-actions .hg-btn--link { font: var(--text-value); }
 /* 주 버튼을 화면 아래에 고정(W-02, 내용이 짧아도 아래): 앱 틀 → 본문 → 열 → 스택 → hg-fd가 남는 높이를 채우고 주 버튼은 맨 아래 */
 @media (max-width: 767px) {
-  .hg-frame:has(.hg-fd > .hg-stickybar) { display: flex; flex-direction: column; }
+  .hg-frame:has(.hg-fd > .hg-stickybar) { display: flex; flex-direction: column; align-items: stretch; }
   .hg-frame:has(.hg-fd > .hg-stickybar) > .hg-frame__main { flex: 1 1 auto; display: flex; flex-direction: column; }
   .hg-frame__main:has(.hg-fd > .hg-stickybar) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; width: 100%; }
   .hg-body:has(.hg-fd > .hg-stickybar) > .hg-body__col, .hg-body__col:has(.hg-fd > .hg-stickybar) > .hg-stack { flex: 1 1 auto; }

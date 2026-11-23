@@ -107,7 +107,7 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
-  await expect(page.getByText('5개 중 0개 확인')).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^남음 5$/ })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
   await expect(page.locator('.hg-toast')).toContainText('9월 25일 월급, 계획대로 됐어요');
