@@ -194,9 +194,11 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   const done = page.locator('.hg-transfer.is-done').first();
   await expect(done).toBeVisible();
   await expect(done.locator('.hg-transfer__label')).toHaveCSS('text-decoration-line', 'none');
-  // 보기만: 상태 버튼은 비활성(완료 줄은 “완료”)
-  await expect(done.locator('.hg-transfer__action')).toBeDisabled();
-  await expect(done.locator('.hg-transfer__action')).toHaveText('완료');
+  // 보기만(2026-11-23): 버튼 모양 없이 회색 상태 글자(완료 줄은 “완료”, 대기 줄은 “대기”), 누를 것처럼 보이는 ‘확인’ 버튼 없음
+  await expect(page.locator('.hg-transfer__action')).toHaveCount(0);
+  await expect(done.locator('.hg-transfer__status')).toHaveText('완료');
+  await expect(page.locator('.hg-transfer__status', { hasText: '대기' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /확인$/ })).toHaveCount(0);
   await axe(page);
   // 파트너 탭에는 추가 줄이 없음(W-02에는 내 탭에도 없음, 2026-11-18)
   await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);

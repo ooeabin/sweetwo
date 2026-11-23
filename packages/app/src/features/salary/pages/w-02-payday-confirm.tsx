@@ -495,7 +495,9 @@ export function W02PaydayConfirm() {
   const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
   // 관리하지 않는 쪽은 관리하는 사람 줄을 뺀 내 줄로 칩·개수·다 확인 상태를 셈(그 줄은 아래 “{이름}님이 확인해요” 묶음, 2026-11-23)
   const mineLines = shown.pay_check_line.filter((l) => !othersManual.includes(l));
-  const finished = late ? null : doneState(mineLines);
+  // 관리하는 사람 줄이 아직 대기면 축하하지 않음(그 사람이 끝내야 이번 달이 끝남)
+  const finished =
+    late || othersManual.some((l) => l.state === 'wait') ? null : doneState(mineLines);
   // 제목과 기간 첫날은 같은 날(앞당기기 설정대로, 07 1장, 2026-11-13 UX B M2)
   const start = shownPayday(shown.cycle_start);
   // 상대가 이번 사이클에 월급 계획을 바꿨으면 안내(20 ‘바뀐 직후 W-02 맨 위 안내 한 줄’)
