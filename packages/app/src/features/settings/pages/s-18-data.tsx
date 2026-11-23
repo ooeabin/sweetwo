@@ -281,5 +281,7 @@ export function S18Data() {
       sub={copy.exportingSub}
     />
   );
-  return <MainFrame sub="settings" current={null} columns={[step === 'busy' ? busy : body]} />;
+  return (
+    <MainFrame sub="settings" current={null} tone="alt" columns={[step === 'busy' ? busy : body]} />
+  );
 }

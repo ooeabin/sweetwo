@@ -273,5 +273,5 @@ export function S13Sharing() {
       )}
     </div>
   );
-  return <MainFrame sub="settings" current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />;
 }
