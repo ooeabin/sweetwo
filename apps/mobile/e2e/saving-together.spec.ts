@@ -232,7 +232,9 @@ test('묶음 달성(합계 기준): 두 사람 모두 W-12 한 번 → 다음엔
   await c.getByRole('button', { name: '다음' }).click();
   await expect(c.getByRole('heading', { name: '다음엔 뭘 같이 모을까요?' })).toBeVisible();
   // 결혼했어요 칩(19 이름 칩 표) + 직접 정할게요
-  await expect(c.getByRole('radio', { name: '내 집 마련' })).toBeVisible();
+  // 2026-11-23: 이미 모으는 중인 ‘내 집 마련’은 칩에서 뺌, ‘직접 정할게요’는 늘 있음
+  await expect(c.getByRole('radio', { name: '내 집 마련' })).toHaveCount(0);
+  await expect(c.getByRole('radio', { name: '여행' })).toBeVisible();
   await expect(c.getByRole('radio', { name: '직접 정할게요' })).toBeVisible();
   await axe(c);
   await c.getByRole('radio', { name: '여행' }).click();
