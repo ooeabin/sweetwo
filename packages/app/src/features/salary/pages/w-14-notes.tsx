@@ -118,6 +118,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
     }
   };
   const list = notes.data ?? [];
+  const emptyShown = !notes.isLoading && !(notes.isError && !notes.data) && !list.length;
   const today = todayKst();
   const body = (
     <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
@@ -195,9 +196,21 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
           ))}
         </div>
       ) : (
-        <EmptyState list page title={copy.notesEmpty} />
+        // 빈 상태: “+ 메모 추가”는 문구 바로 아래(2026-11-23, EmptyState action)
+        <EmptyState
+          list
+          page
+          title={copy.notesEmpty}
+          action={
+            t.canEdit ? (
+              <AddRow label={copy.noteAdd} onClick={() => nav(t.noteTo('new'))} />
+            ) : undefined
+          }
+        />
       )}
-      {t.canEdit && <AddRow label={copy.noteAdd} block onClick={() => nav(t.noteTo('new'))} />}
+      {t.canEdit && !emptyShown && (
+        <AddRow label={copy.noteAdd} block onClick={() => nav(t.noteTo('new'))} />
+      )}
       {/* 금액이 있으면 “모은 금액에서 {금액} 뺄까요?”, 없으면 금액 칸(시트, 닫으면 아무것도 안 바뀜) */}
       {paying && (
         <BottomSheet

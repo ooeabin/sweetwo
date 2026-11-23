@@ -845,6 +845,7 @@ export function W02PaydayConfirm() {
           from={shown.cycle_start}
           to={shown.cycle_end}
           masked={masked}
+          label={pastView ? copy.incomeCardLabelOf(Number(start.slice(5, 7))) : undefined}
           hideEmpty={partnerTab}
           onOpen={partnerTab ? undefined : () => nav(togetherPaths.moneyInList)}
           onAdd={pending || partnerTab || ago > 0 ? undefined : () => nav(togetherPaths.moneyIn)}

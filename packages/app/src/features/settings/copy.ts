@@ -309,8 +309,8 @@ export const copy = {
       assets: ['이름', '종류', '명의', '금액', '넣은 원금', '만기일', '공개 범위', '마지막 갱신일'],
       debts: ['이름', '종류', '명의', '잔액', '금리', '월 상환액', '만기일'],
       goals: ['이름', '목표 금액', '모은 금액', '기한', '상태', '월급 계획 저축·투자 금액'],
-      splits: ['사람', '줄 종류', '줄 이름', '금액'],
-      checklists: ['월', '사람', '줄', '금액', '상태', '체크한 사람', '체크한 날'],
+      splits: ['사람', '항목 종류', '항목 이름', '금액'],
+      checklists: ['월', '사람', '항목', '금액', '상태', '체크한 사람', '체크한 날'],
       care: ['날짜', '대상', '구분', '예산', '실제 금액', '낸 곳', '드린 것'],
     },
     // 저금 항목 상태(ADR 0007) [확인 필요]
@@ -602,9 +602,9 @@ export const copy = {
     `${name}님이 월급 관리를 ${me}님에게 맡기고 싶어 해요`, // [확인 필요] 기획서에 없는 경우
   styleChangesTitle: '이렇게 바뀌어요',
   styleChangeOne: '월급 계획이 하나로 합쳐져요',
-  styleChangeSend: (name: string) => `${name}님 줄은 보내기와 용돈이 돼요`,
+  styleChangeSend: (name: string) => `${name}님 항목은 보내기와 용돈이 돼요`,
   styleChangeMine: (me: string) => `${me}님이 월급 계획을 관리해요`, // [확인 필요]
-  styleChangeAllowance: '용돈은 사람마다 한 줄씩 남아요', // [확인 필요]
+  styleChangeAllowance: '용돈은 사람마다 한 항목씩 남아요', // [확인 필요]
   styleChangeBundle: '같이 모으기는 공동 저축·투자가 돼요',
   styleYes: '좋아요',
   styleNo: '지금처럼 할게요',

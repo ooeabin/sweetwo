@@ -86,7 +86,7 @@ export const copy = {
   legendFree: (n: number) => `미계획 ${n}%`,
   legendShort: (amount: string) => `미계획 ${amount}`,
   legendFreeName: '미계획', // 2026-11-19 요약 카드 ● 범례 셋째 줄 이름(막대 막대 범례 줄 이름은 짧게, 금액은 오른쪽)
-  /** W-01 요약 카드(2026-11-19 사용자 결정) [모두 확인 필요]: 굵은 한 문장 “월급의 40%를 모으고 있어요”(숫자만 brand-ink) */
+  /** W-01 요약 카드(2026-11-19 사용자 결정) [모두 확인 필요]: 굵은 한 문장 “월급의 40%를 모으고 있어요”(숫자만 accent-app-text) */
   summarySaving: ['월급의 ', '를 모으고 있어요'] as const,
   summaryPct: (n: number) => `${n}%`,
   summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요',
@@ -133,7 +133,7 @@ export const copy = {
   moved: (name: string, pos: number) => `${name}, ${pos}번째`,
   removeLabel: (name: string) => `${name} 지우기`,
   /** 금액 시트의 줄 지우기 화면 읽기 이름(키패드 ‘한 글자 지우기’와 구분, 2026-11-13 UX B M8) */
-  removeLineLabel: (name: string) => `${name} 줄 지우기`,
+  removeLineLabel: (name: string) => `${name} 항목 지우기`,
   locked: '보기만 할 수 있어요',
   lineChanged: (name: string, amount: string) => `${object(name)} ${amount}으로 바꿨어요`,
   lineAdded: (name: string) => `${object(name)} 추가했어요`,
@@ -152,7 +152,7 @@ export const copy = {
   prevMonth: '지난 달 보기', // [확인 필요]
   nextMonth: '다음 달 보기', // [확인 필요]
   partnerChangedSplit: (name: string) =>
-    `${name}님이 월급 계획을 바꿔서 확인 안 한 줄을 다시 계산했어요`, // 2026-11-13 UX B ‘체크’ → ‘확인’
+    `${name}님이 월급 계획을 바꿔서 확인 안 한 항목을 다시 계산했어요`, // 2026-11-13 UX B ‘체크’ → ‘확인’
   allDone: '모두 확인했어요',
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
@@ -197,7 +197,7 @@ export const copy = {
   closed: '지난 달 월급날 확인 목록은 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
-  emptyPlan: '월급 계획 템플릿에서 줄을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
+  emptyPlan: '월급 계획 템플릿에서 항목을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
   // W-02 템플릿 줄이 0개일 때 한 덩어리 안내(2026-11-20 사용자 결정, 20 W-02 0b) [모두 확인 필요]
   emptyLeadPay: (amount: string) => `${object(amount)} 나눠서`,
   emptyLeadNone: '월급을 적고',
@@ -235,11 +235,11 @@ export const copy = {
   changeMonthly: '매달 금액 바꾸기', // [확인 필요]
   setMonthly: '매달 모을 금액 정하기', // [확인 필요] 2026-11-16 r6 W-10 매달 0원이면 안내 줄 → W-01 금액 시트
   changeDeadline: '기한 바꾸기', // [확인 필요]
-  addLine: '+ 줄 추가',
-  addLineTitle: '줄 추가',
-  newLineName: '줄 이름', // [확인 필요]
+  addLine: '+ 항목 추가',
+  addLineTitle: '항목 추가',
+  newLineName: '항목 이름', // [확인 필요]
   newLinePlaceholder: '예: 부모님 용돈',
-  removeLine: '줄 지우기', // [확인 필요]
+  removeLine: '항목 지우기', // [확인 필요]
   lineAmount: (name: string) => `${name} 금액`,
   // W-01 월급 줄(2026-11-19 사용자 결정, 영수증 맨 위): 각자 “월급”, 합쳐서 “찬우 월급” / “예빈 월급”
   incomeRow: '월급',
@@ -399,6 +399,7 @@ export const copy = {
   // W-02 수입 카드(2026-11-19 사용자 결정, 20 W-02 6번) [확인 필요]
   incomeCardLabel: '이번 달 수입',
   incomePeriodLabel: '이번 기간 수입', // 날짜 없는 사람
+  incomeCardLabelOf: (month: number) => `${month}월 수입`, // [확인 필요] 2026-11-23 지난 달을 볼 때 수입 카드 이름표(“이번 달 수입” 대신)
   incomeDefaultOf: (name: string) => `${name}님 월급`, // 합쳐서에서 상대의 기본값 줄 이름(2026-11-20) [확인 필요]
   incomeEditLabel: '월급 금액 고치기', // 큰 금액·연필 버튼 이름(2026-11-20) [확인 필요]
   incomeEditTitle: '월급 금액', // 금액 시트 제목(2026-11-20) [확인 필요]

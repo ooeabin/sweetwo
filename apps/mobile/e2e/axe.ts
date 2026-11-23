@@ -15,6 +15,8 @@ const ORANGE_TEXT = [
   ':is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary', // 카드 안 보조 버튼의 오렌지 글자(‘초대 취소’, ‘링크 복사’ 등, 2026-11-11 사용자 결정, 14px 이상 700)
   '.hg-plan__block--soft, .hg-transfer__action--go', // 옅은 오렌지 판 위 버튼의 오렌지 글자(W-01 ‘월급 적기’, W-02 ‘확인’, 2026-11-19 사용자 결정, 14px 이상 700)
   '.hg-chip--sm.is-selected', // 고른 작은 칩의 오렌지 글자(S-20 묶음 칩, 기간·필터 칩, 2026-11-20 사용자 결정, 13px 600)
+  '.hg-plansum__title em', // W-01 요약 문장 “월급의 31%를 모으고 있어요”의 퍼센트(2026-11-23 사용자 결정, 20px 700)
+  '.hg-receipt__row.is-new', // W-01 새 항목 강조 2초 동안 이름·금액 글자(2026-11-23, 16px 600·700)
   '.hg-banner--line .hg-btn--secondary', // 공지 띠 안 흰 작은 버튼의 오렌지 글자(‘보기’). 홈 초대 띠는 2026-11-11부터 코코아 HubBand라 예외 없음
 ].join(', ');
 

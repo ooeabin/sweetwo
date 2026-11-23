@@ -58,6 +58,7 @@ export type IconName =
   | 'lock'
   | 'megaphone'
   | 'minus'
+  | 'minus-circle'
   | 'money'
   | 'moon'
   | 'moon-stars'

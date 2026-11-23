@@ -226,17 +226,16 @@ export function ReceiptRows({
                 </span>
               )}
               {edit && l.onDelete && (
-                <button
-                  type="button"
-                  className="hg-btn hg-btn--link hg-receipt__del"
-                  aria-label={labels.removeLabel(l.name)}
+                <IconButton
+                  icon="minus-circle"
+                  label={labels.removeLabel(l.name)}
+                  ghost
+                  className="hg-receipt__del"
                   onClick={() => {
                     setOpen(null);
                     l.onDelete?.();
                   }}
-                >
-                  {labels.remove}
-                </button>
+                />
               )}
             </li>
           );
