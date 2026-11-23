@@ -132,8 +132,8 @@ export function CheckLine({
   /** 자동 줄 알약 글자(2026-11-13 W-02 2번 “자동 26일”, “자동 확인”) */
   auto?: string;
   /**
-   * W-02 새 줄(2026-11-19): 주면 체크 원 대신 상태 버튼(남음 “확인” / 완료 “완료” / “건너뜀”)이고, 보조 줄은 이 글자 하나(종류)만.
-   * 남음 버튼 = 바로 ‘계획대로 했어요’, 완료·건너뜀 버튼 = 줄 시트(체크 풀기 포함)
+   * W-02 줄(2026-11-23 C안): 주면 체크 원 대신 상태 줄(할 일 점 + ›, 끝남 ✓, 건너뜀 –)이고, 보조 줄 기본은 이 글자(종류).
+   * 줄 전체가 버튼이고 누르면 늘 줄 시트(계획대로 했어요 / 다른 금액으로 했어요 / 건너뛸게요, 끝남은 체크 풀기 포함)
    */
   sub?: string;
 }) {
@@ -185,14 +185,41 @@ export function CheckLine({
       copy.checkedAt(when)
     )
   ) : undefined;
-  // ‘못 함’은 목표 금액 진행 글자보다 먼저(체크 안 한 줄처럼 보이므로 이유를 보여 줌)
+  // 상태 줄(W-02, 2026-11-23 C안): 할 일은 이름 앞 점 + ›, 끝남은 slate + ✓, 건너뜀은 취소선 + –, 때가 아니면 보통 글자
   const button = sub !== undefined;
-  const meta = button ? sub : skipped ? checkMeta : (progress ?? checkMeta);
+  // 자동 줄이 나가는 날 전이면 아직 때가 아님(점 없음, 보조 줄에 날짜)
+  const early = !!line.auto && !!line.auto_due && line.auto_due > todayKst();
+  const waiting = !shownDone && !skipped && (readOnly || early);
+  const tone = skipped ? 'skipped' : shownDone ? 'done' : waiting ? 'wait' : 'go';
+  const autoNote = early
+    ? copy.waitAuto(copy.payday(Number((line.auto_due ?? '').slice(8, 10))))
+    : undefined;
+  const statusMeta = viewOnly
+    ? skipped
+      ? copy.skippedMeta
+      : shownDone
+        ? sub
+        : copy.waitText
+    : skipped
+      ? copy.skippedMeta
+      : shownDone && line.auto && !line.checked_by
+        ? copy.autoSent
+        : (autoNote ?? sub);
+  const meta = button ? statusMeta : skipped ? checkMeta : (progress ?? checkMeta);
   // 자동 줄은 자동 확인된 뒤에도 시트에서 건너뜀·다른 금액으로 바꿈(20 W-02 5번, 2026-11-13)
   const open = (!done || !!line.auto) && !readOnly && !viewOnly;
-  // 상태 버튼 줄은 체크한 줄도 시트로 ‘체크 풀기’(2026-11-19)
+  // 상태 줄은 체크한 줄도 시트로 ‘체크 풀기’(2026-11-19)
   const unlockable = button && done && !readOnly && !viewOnly;
-  const canSheet = (open && (onOther || onSkip)) || !!onItem || unlockable;
+  const canSheet = !!((open && (onOther || onSkip || button)) || onItem || unlockable);
+  const stateLabel = viewOnly
+    ? copy.viewLabel(name, amount, line.state)
+    : tone === 'done'
+      ? copy.doneLabel(name, amount, canSheet)
+      : tone === 'skipped'
+        ? copy.skippedRowLabel(name, amount, canSheet)
+        : tone === 'wait' && autoNote
+          ? copy.waitLabel(name, amount, autoNote)
+          : copy.goLabel(name, amount);
   const pick = (f: () => void) => () => {
     setSheet(false);
     f();
@@ -206,38 +233,13 @@ export function CheckLine({
         busy={!!pending}
         checkLabel={
           viewOnly
-            ? copy.viewLabel(name, line.state)
+            ? copy.viewLabel(name, amount, line.state)
             : skipped && !pending
               ? copy.skippedLabel(name)
               : copy.checkLabel(name)
         }
         onToggle={readOnly || viewOnly ? undefined : () => void toggle()}
-        action={
-          button
-            ? {
-                label: skipped
-                  ? copy.skippedPill
-                  : shownDone
-                    ? copy.doneTag
-                    : viewOnly
-                      ? copy.waitText
-                      : copy.goTag,
-                tone: skipped ? 'skipped' : shownDone ? 'done' : 'go',
-                ariaLabel: viewOnly
-                  ? copy.viewLabel(name, line.state)
-                  : skipped
-                    ? copy.skippedLabel(name)
-                    : shownDone
-                      ? copy.doneLabel(name)
-                      : copy.checkLabel(name),
-                disabled: readOnly || viewOnly,
-                // 보기만 줄은 버튼 모양 없이 회색 상태 글자(대기 / 완료 / 건너뜀, 2026-11-23)
-                text: viewOnly,
-                busy: !!pending,
-                onClick: shownDone || skipped ? () => setSheet(true) : () => void toggle(),
-              }
-            : undefined
-        }
+        status={button ? { tone, ariaLabel: stateLabel, busy: !!pending } : undefined}
         disabled={readOnly}
         viewOnly={viewOnly}
         meta={meta}

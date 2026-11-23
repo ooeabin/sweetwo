@@ -85,11 +85,13 @@ test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → �
   await expect(page.getByRole('button', { name: '지난 달 보기', exact: true })).toHaveCount(0);
   const rows = page.locator('.hg-list--preview .hg-transfer');
   await expect(rows).toHaveCount(5);
-  // 줄: 이름 + 종류, 비활성 버튼 “23일”(누르면 아무 일 없음), 화면 읽기 “월급날에 확인해요”
-  const btn = rows.first().getByRole('button', { name: '청약, 월급날에 확인해요' });
-  await expect(btn).toBeDisabled();
-  await expect(btn).toHaveText('23일');
-  await expect(rows.first()).toContainText('저축·투자');
+  // 줄(2026-11-23 C안): 점·›·버튼 없이 보통 글자, 보조 줄 “23일에 확인해요”, 화면 읽기 “청약 44만 원, 월급날에 확인해요”
+  await expect(
+    rows.first().getByRole('group', { name: /^청약 .+, 월급날에 확인해요$/ }),
+  ).toBeVisible();
+  await expect(rows.first().getByRole('button')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
+  await expect(rows.first()).toContainText('23일에 확인해요');
   await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.getByRole('group', { name: '보기 고르기' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);

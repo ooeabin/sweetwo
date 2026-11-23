@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, type MemDb, mockOnboarding, mockRealtime, seed } from './mocks';
+import { checkRow, doneRow, goRow, skippedRow } from './w02-row';
 
 // QA 6구간(2026-11-12): W-02 다 끝난 달 한 줄(W-02 끝 없앰), 상대가 끝내도 이동 없음, 달성 되돌린 뒤 같은 화면 다시 축하,
 // W-02a Toast·되돌리기·뒤로, W-05 그 체크리스트만(옛 링크·기간 밖·끝난 사이클), W-05 Realtime 강조.
@@ -85,20 +86,19 @@ test('달성 되돌린 뒤 같은 화면에서 다시 체크하면 다시 W-12(�
   if (!home) throw new Error('seed');
   Object.assign(home, { target_amount: 950_000, deadline: null });
   await page.goto('/salary');
-  const box = page.getByRole('button', { name: '내 집 마련 확인', exact: true });
-  await box.click();
+  await checkRow(page, '내 집 마련');
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved\?from=checklist$/);
   // 축하 배경(2026-11-12 D5)
   await expect(page.locator('main.hg-qmain.hg-celebrate-bg')).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/salary$/);
   // 체크를 풀어 목표 금액 아래로 → 모으는 중(배지도 바로 사라짐)
-  await page.getByRole('button', { name: '내 집 마련 완료, 고치기', exact: true }).click();
+  await doneRow(page, '내 집 마련').click();
   await page.getByRole('dialog').getByRole('button', { name: '체크 풀기' }).click();
   await expect.poll(() => home.status).toBe('active');
-  await expect(box).toBeVisible();
+  await expect(goRow(page, '내 집 마련')).toBeVisible();
   // 새로 고치지 않고 다시 체크 → 다시 축하
-  await box.click();
+  await checkRow(page, '내 집 마련');
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved\?from=checklist$/);
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
@@ -149,7 +149,7 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.locator('.hg-toast')).toContainText('청약, 이번 달은 건너뛰었어요');
   await expect.poll(() => linesOf(db)[0]?.state).toBe('skipped');
-  await expect(page.getByRole('button', { name: '청약 건너뜀', exact: true })).toHaveText('건너뜀');
+  await expect(skippedRow(page, '청약')).toContainText('건너뜀');
 });
 
 test('W-05는 없앰(2026-11-15): 옛 알림 링크(/salary/review)는 기간 안이든 밖이든 월급 탭 W-02로', async ({

@@ -114,8 +114,8 @@ test('W-02 지난 달 보기(날짜 알약 시트)와 상대가 월급 계획을
   await expect(page.locator('.hg-datepill')).toHaveText('8월 25일 월급');
   await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toHaveCount(0);
   await expect(page.locator('.hg-transfer').first()).toBeVisible();
-  await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
-  for (const c of await page.locator('.hg-transfer__action').all()) await expect(c).toBeDisabled();
+  await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__open .hg-transfer__trail .hg-ico')).toHaveCount(0);
   await page.getByRole('button', { name: '월급날 고르기' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '9월 25일 월급' }).click();
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
@@ -194,11 +194,11 @@ test('W-02 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 체크한 줄
   const done = page.locator('.hg-transfer.is-done').first();
   await expect(done).toBeVisible();
   await expect(done.locator('.hg-transfer__label')).toHaveCSS('text-decoration-line', 'none');
-  // 보기만(2026-11-23): 버튼 모양 없이 회색 상태 글자(완료 줄은 “완료”, 대기 줄은 “대기”), 누를 것처럼 보이는 ‘확인’ 버튼 없음
-  await expect(page.locator('.hg-transfer__action')).toHaveCount(0);
-  await expect(done.locator('.hg-transfer__status')).toHaveText('완료');
-  await expect(page.locator('.hg-transfer__status', { hasText: '대기' }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /확인$/ })).toHaveCount(0);
+  // 보기만(2026-11-23 C안): 점·› 없이 상태만(완료 줄은 흐린 글자 + ✓, 대기 줄은 보조 줄 “대기”), 누를 것처럼 보이는 줄 없음
+  await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__open .hg-transfer__trail .hg-ico')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__meta', { hasText: '대기' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /확인할 것$/ })).toHaveCount(0);
   await axe(page);
   // 파트너 탭에는 추가 줄이 없음(W-02에는 내 탭에도 없음, 2026-11-18)
   await expect(page.getByRole('button', { name: /추가/ })).toHaveCount(0);

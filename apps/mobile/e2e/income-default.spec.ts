@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { emptyV22, mockOnboarding, mockSaving, newSavingDb, seed } from './mocks';
+import { checkRow } from './w02-row';
 
 // W-02 수입 카드 기본값(월급)과 빈 템플릿 안내(20 W-02 6번·0b, 07 4장, 2026-11-20 사용자 결정).
 // 기록 0건 → 월급 350만 원 + 연필 → 300만 원으로 고침 → 기록 1건 → 첫 확인 뒤에도 1건
@@ -38,7 +39,7 @@ test('기록 0건: 월급 350만 원 + 연필 → 300만 원으로 고침 → �
   expect(sv.moneyIns.filter((m) => m.source === 'payday_auto')).toHaveLength(1);
   expect(sv.moneyIns[0]).toMatchObject({ amount: 3_000_000, source: 'payday_auto' });
   // 첫 확인을 해도 한 줄, 금액 그대로
-  await page.getByRole('button', { name: '청약 확인' }).click();
+  await checkRow(page, '청약');
   await expect(page.getByText('5개 중 1개 확인')).toBeVisible();
   expect(sv.moneyIns.filter((m) => !m.deleted_at)).toHaveLength(1);
   expect(sv.moneyIns[0]?.amount).toBe(3_000_000);
@@ -49,7 +50,7 @@ test('기록 0건: 월급 350만 원 + 연필 → 300만 원으로 고침 → �
 
 test('손대지 않고 첫 확인 → 프로필 월급으로 자동 기록(그대로)', async ({ page }) => {
   const { sv } = await open(page);
-  await page.getByRole('button', { name: '청약 확인' }).click();
+  await checkRow(page, '청약');
   const income = page.getByRole('region', { name: '이번 달 수입' });
   await expect(income.locator('.hg-incomecard__sum')).toHaveText('350만 원');
   expect(sv.moneyIns[0]).toMatchObject({ amount: 3_500_000, source: 'payday_auto' });
@@ -63,7 +64,7 @@ test('0원으로 저장하면 기록 없이 닫고 다시 안 물음', async ({ 
   await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();
   await expect(income).toContainText('아직 적은 수입이 없어요');
   expect(sv.moneyIns).toHaveLength(0);
-  await page.getByRole('button', { name: '청약 확인' }).click();
+  await checkRow(page, '청약');
   await expect(page.getByText('5개 중 1개 확인')).toBeVisible();
   expect(sv.moneyIns).toHaveLength(0);
 });

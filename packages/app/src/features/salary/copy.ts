@@ -157,8 +157,8 @@ export const copy = {
   savingLine: (goal: string, amount: string) => `${goal}에 ${amount}`,
   spendLine: (name: string, amount: string) => `${name} ${amount}`,
   checkLabel: (name: string) => `${name} 확인`,
-  viewLabel: (name: string, state: string) =>
-    `${name} ${state === 'checked' ? '확인했어요' : state === 'skipped' ? '건너뜀' : '아직 확인 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), 2026-11-13 ‘못 함’ → ‘건너뜀’
+  viewLabel: (name: string, amount: string, state: string) =>
+    `${name} ${amount}, ${state === 'checked' ? '확인했어요' : state === 'skipped' ? '건너뜀' : '아직 확인 안 했어요'}`, // [확인 필요] 화면 읽기용(파트너 줄), 2026-11-13 ‘못 함’ → ‘건너뜀’
   // ‘못 함’ 줄 체크 칸 화면 읽기(2026-11-12 D2: 빈 원 + “이번 달은 못 했어요”) [확인 필요]
   skippedLabel: (name: string) => `${name} 건너뜀`, // 2026-11-13 ‘못 함’ → ‘건너뜀’
   otherAmount: '다른 금액으로 했어요', // 2026-11-13 W-02 5번
@@ -393,6 +393,7 @@ export const copy = {
   // W-02 0a 첫 월급날 전 미리 보기(2026-11-15 3차 검토) [확인 필요]
   previewTitle: '월급날에 확인할 것',
   previewAuto: '자동으로 나가요',
+  previewWhen: '월급날에 확인해요', // 미리 보기 줄 화면 읽기 이름 끝(금액 뒤)
   previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
   moneyInGo: '수입 적기',
   // W-02 새 구조(2026-11-19) [모두 확인 필요]
@@ -411,10 +412,17 @@ export const copy = {
   incomeAddButton: '수입 적기',
   periodRange: (start: string, end: string) => `${formatMonthDay(start)} ~ ${formatMonthDay(end)}`, // [확인 필요] 날짜 없는 사람 W-02 날짜 알약(30일 기간)
   planOf: (amount: string) => `월급 계획 ${amount} 중`, // [확인 필요] 날짜 없는 사람 W-02 보조 줄
-  goTag: '확인', // 남은 줄 상태 버튼(누르면 바로 계획대로 했어요)
-  doneTag: '완료', // 확인한 줄 상태 버튼(누르면 시트)
-  skippedPill: '건너뜀',
-  doneLabel: (name: string) => `${name} 완료, 고치기`, // 화면 읽기
+  // W-02 줄 화면 읽기 이름(2026-11-23 C안: 상태 버튼 없이 줄 전체가 버튼, 점은 그래픽이라 뜻을 글자로) [확인 필요]
+  goLabel: (name: string, amount: string) => `${name} ${amount}, 확인할 것`,
+  doneLabel: (name: string, amount: string, fix: boolean) =>
+    `${name} ${amount}, 완료${fix ? ', 고치기' : ''}`,
+  skippedRowLabel: (name: string, amount: string, fix: boolean) =>
+    `${name} ${amount}, 건너뜀${fix ? ', 고치기' : ''}`,
+  waitLabel: (name: string, amount: string, note: string) => `${name} ${amount}, ${note}`,
+  autoSent: '자동으로 나갔어요', // 자동 줄이 나가는 날 자동 확인된 보조 줄 [확인 필요]
+  waitManual: (day: string) => `${day}에 확인해요`, // 월급날 전 미리 보기 손 줄 보조 줄 [확인 필요]
+  waitAuto: (day: string) => `${day} 자동으로 나가요`, // 나가는 날 전 자동 줄 보조 줄 [확인 필요]
+  skippedMeta: '건너뜀', // 건너뜀 줄 보조 줄 [확인 필요]
   uncheck: '체크 풀기',
   kindSaving: '저축·투자',
   kindSpend: '지출',
@@ -426,7 +434,7 @@ export const copy = {
   heroTitleAllOf: (month: number) => `${month}월도 계획대로!`,
   heroTitleMixedOf: (month: number) => `${month}월 확인 끝`,
   // 보기만 줄의 상태 글자(파트너 탭, 관리하는 사람 줄, 2026-11-23) [확인 필요]
-  waitText: '대기',
+  waitText: '대기', // 보기만 대기 줄 보조 줄
   // 한 사람 관리형 관리하지 않는 쪽: 관리하는 사람 손 줄 묶음 머리(08 2장 문구)
   managerGroup: (name: string) => `${name}님이 확인해요`,
   // 파트너 탭에 보이는 줄이 하나도 없을 때(‘했어요만’ 공개 등) [확인 필요]
