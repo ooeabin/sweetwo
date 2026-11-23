@@ -36,5 +36,5 @@ export function S19About() {
       </div>
     </div>
   );
-  return <MainFrame sub="settings" current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />;
 }

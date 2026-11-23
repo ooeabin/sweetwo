@@ -383,7 +383,7 @@ export function S12Couple() {
   );
   return (
     <>
-      <MainFrame sub="settings" current={null} columns={[body]} />
+      <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />
       {askCancel && (
         <Modal
           title={copy.inviteCancelQ}

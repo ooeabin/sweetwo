@@ -914,8 +914,8 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await open(page, info.project.name === 'narrow');
   await page.getByRole('button', { name: /도움말/ }).click();
   await expect(page).toHaveURL(/\/settings\/help$/);
-  // 기본은 ‘자주 묻는 질문’ 대표 5개 + 묶음 칩 5개(2026-11-20)
-  await expect(page.getByRole('heading', { name: '자주 묻는 질문' })).toBeVisible();
+  // 기본은 ‘자주 묻는 질문’ 탭(대표 5개) + 묶음 탭 5개(2026-11-23 칩 → 밑줄 탭)
+  await expect(page.getByRole('tab', { name: '자주 묻는 질문', selected: true })).toBeVisible();
   await page.getByRole('button', { name: '통장을 연결하지 않나요?' }).click();
   await expect(page.getByText(/통장·카드 연동 없이 직접 입력해요/)).toBeVisible();
   await axe(page);

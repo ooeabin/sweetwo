@@ -222,5 +222,5 @@ export function S15Security() {
       </section>
     </div>
   );
-  return <MainFrame sub="settings" current={null} columns={[body]} />;
+  return <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />;
 }

@@ -2930,7 +2930,8 @@ button.hg-datepill { cursor: pointer; }
    회색 바탕 화면(`hg-frame--alt`): 흰 상자, 안쪽 옆 24. 회색 판(`hg-card--fill`)·색 판(`hg-card--tint`)·시트·모달 안은 그대로. */
 .hg-frame:not(.hg-frame--alt) :is(.hg-card, .hg-list, .hg-checklist):not(.hg-card--tint, .hg-card--fill, .hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border: 0; border-radius: 0; background: none; box-shadow: none; padding-inline: 0; max-width: none; }
 .hg-frame--alt :is(.hg-card, .hg-checklist):not(.hg-card--tint, .hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { padding-inline: var(--space-6); }
-.hg-frame--alt .hg-list .hg-listrow { padding-inline: var(--space-6); }
+/* 흰 상자(카드·시트·모달) 안 줄은 상자가 이미 옆 여백을 가짐 */
+.hg-frame--alt .hg-list:not(:is(.hg-card, .hg-sheet, .hg-modal) *) .hg-listrow { padding-inline: var(--space-6); }
 /* 밑줄 탭: 많으면 옆으로 밀기, 회색 바탕 화면(옆 여백 16)은 줄을 화면 끝까지 */
 .hg-linetabs { overflow-x: auto; scrollbar-width: none; }
 .hg-linetabs::-webkit-scrollbar { display: none; }
