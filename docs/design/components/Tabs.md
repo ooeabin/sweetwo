@@ -10,3 +10,4 @@
 - `role="tablist"` + `button role="tab"` + `aria-selected`. 세그먼트 칸 높이 36px 이상, 터치 좁은 창 44px.
 
 - 항목 앞 칸(`lead`, 선택): 사람 탭은 이름 앞에 작은 Avatar(22px).
+- 밑줄 탭(`LineTabs`, `hg-linetabs`, 바탕 기준 2026-11-23 사용자 결정): 목록 위 거르기. 15px, 고른 탭 700 `ink` + 아래 2px `ink` 밑줄, 나머지 `stone` 400, 숫자는 글자 옆 같은 굵기(`hg-linetab__n`), 전체 폭 `hairline` 한 줄이 아래. 탭 높이 44. `role="tablist"` + `role="tab"` + `aria-selected`, 소비자가 `label`(묶음 화면 읽기 이름)을 줌. 쓰는 곳: W-02 전체·남음·완료. **이번 PR은 W-02만**; 알약 `Tabs`를 쓰는 다른 곳(자산 묶음, 목표 분류, S-20 도움말 칩 등)은 다음 PR ‘바탕 정리 2’에서 필요하면 옮김.

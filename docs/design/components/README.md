@@ -10,7 +10,7 @@
 | [Drawer](Drawer.md) | Navigation | 좁은 창 홈 머리 ☰ 메뉴 서랍(2026-11-09 하단 탭 막대 대신) |
 | [HomeHub](HomeHub.md) | Layout | 홈 허브: 회색 바탕 위 상자, 할 일 띠, 타일(2026-11-09). 2026-11-13 H-10·H-11·H-12, 띠 글자 버튼 둘 |
 | [SaveTogether](SaveTogether.md) | Layout | 같이 모으기 상자(H-10, 묶음 카드, 퍼센트만 상태, 2026-11-13) |
-| [IncomeCard](IncomeCard.md) | Cards | W-02 수입 카드(이름표 + 큰 금액 + 최근 2건 + 수입 적기, 2026-11-19) |
+| [IncomeLine](IncomeLine.md) | Lists | W-02 수입 한 줄 “이번 달 수입 350만 원 ›”(2026-11-23, 예전 수입 카드 대체) → W-20b |
 | [PeriodBar](PeriodBar.md) | Charts | 날짜 없는 사람의 수입 / 월급 계획 막대(중립 색, 2026-11-13) |
 | [BarChart](BarChart.md) | Charts | 월별 저축이 계획보다 얼마나 많거나 적었는지 |
 | [GoalTile](GoalTile.md) | Cards | 없앰(2026-11-08 목표 탭 없음). 묶음 카드 `hg-goalbox`만 저금 항목 상세(W-10)에서 씀 |
