@@ -124,7 +124,7 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await expect(page.getByText('월급 알려 주기')).toHaveCount(0);
   await expect(box).toBeVisible();
   await expect(box.getByRole('button', { name: /^이번 달 월급 체크/ })).toBeVisible();
-  await expect(box.getByRole('button', { name: /^월급 계획 템플릿/ })).toContainText('미계획 금액');
+  await expect(box.getByRole('button', { name: /^월급 계획 템플릿/ })).toContainText('미계획 0원');
 
   // 0원 줄도 고칠 수 있음: 월급날이 없어서 금액이 0보다 크면 월급날 휠도 같이
   await page.goto('/salary/plan');

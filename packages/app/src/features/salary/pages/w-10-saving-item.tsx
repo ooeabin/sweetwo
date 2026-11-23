@@ -335,6 +335,8 @@ export function W10SavingItem() {
                   personName={nameOf}
                   meId={d.meId}
                   entry="w10"
+                  // W-02와 같은 상태 줄(2026-11-23 ‘바탕 정리 2’): 할 일은 오렌지 점 + ›, 끝남은 ✓. 줄을 누르면 줄 시트
+                  sub=""
                   // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
                   viewOnly={i.owner === 'partner' && !d.joint}
                 />
@@ -369,7 +371,9 @@ export function W10SavingItem() {
                     </span>
                   )}
                   {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
-                  {i.eta && <span className="hg-page__foldline">{copy.etaAt(formatYm(i.eta))}</span>}
+                  {i.eta && (
+                    <span className="hg-page__foldline">{copy.etaAt(formatYm(i.eta))}</span>
+                  )}
                   {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
                   {i.late !== null && showEdit && (
                     <button
