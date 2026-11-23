@@ -21,7 +21,7 @@
 - 묶음 카드 `hg-goalbox`: 머리(15px 600 + 오른쪽 글자 링크) → 막대 8px → 보조 줄(12px `slate`, 기한은 밑줄 버튼 `hg-goalbox__metabtn`). 사람별 줄 `hg-goalbox__person`(Avatar 24px + 이름 + 금액). 2026-11-12(QA 7구간): W-10 모은 금액은 누르는 버튼 `hg-goalbox__jump`(바탕·테두리 없음, 왼쪽 맞춤, 누르면 저금 내역으로, S7-10). `hg-goalbox__metabtn`·`hg-goalbox__jump`·`hg-foldrow`도 다른 버튼과 같은 잉크 포커스 링(2px, 2px 떨어짐, S7-14). 연결 해제 대기 중 `hg-goalbox__metabtn:disabled`는 밑줄 없음. 2026-11-16 4차 검토(W-10): 목표 금액 줄 아래 기한 줄 `hg-goalbox__due`(늘 보임, 13px `slate` “2027년 11월까지 300만 원 더 필요해요” + 오른쪽 글자 버튼 ‘기한 바꾸기’, 같은 날짜 한 번만), 그 아래 가벼운 글자 버튼 `hg-btn--link hg-goalbox__more` “자세히 보기 ⌄”(회색 판 `hg-foldrow` 대신, 펼칠 것이 있을 때만) → 월 필요액·예상·‘매달 금액 바꾸기’. 묶인 저금은 이 카드 없이 묶음 카드 하나(SaveTogether.md).
 - 영역 사이 32px.
 - 레퍼런스: ANZ Plus(사진 히어로), Monzo(묶음 카드).
-- 상태 배지(2026-11-03): 사진 위 왼쪽, 달성 `achieved`(옅은 오렌지 판 + `brand-ink` 글자, 2026-11-09), 보류 `temp`(2026-11-04 사용 완료 없앰). 막대 색은 `accent-app` 오렌지(바탕 `surface-alt`, 2026-11-09, 홈 GoalRow와 W-10 `hg-goalbox__bar`도 같음).
+- 상태 배지(2026-11-03): 사진 위 왼쪽, 달성 `achieved`(옅은 오렌지 판 + 오렌지 `accent-app-text` 글자, 2026-11-09, 2026-11-23 brand-ink에서 바꿈), 보류 `temp`(2026-11-04 사용 완료 없앰). 막대 색은 `accent-app` 오렌지(바탕 `surface-alt`, 2026-11-09, 홈 GoalRow와 W-10 `hg-goalbox__bar`도 같음).
 - 접힌 목록 펼치기 줄 `hg-foldrow`: `plate` 바탕 가득 찬 줄(48px) + 화살표.
 
 - 2026-11-08: 그림·아이콘 자리는 2D 플랫으로 다시 만들 때까지 빈 자리(회색 판 `hg-artslot`이나 빈 원·빈 칸). 이 문서의 3D·사진·Phosphor 그림 설명은 다시 만들 때의 주제(→ Illustrations ‘나중 과제’). (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)

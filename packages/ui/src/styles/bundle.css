@@ -22,7 +22,7 @@
 .hg-btn--secondary { background: var(--surface-alt); color: var(--ink); border-color: transparent; }
 /* 카드 안 보조 버튼은 옅은 오렌지 바탕 + 진한 오렌지 글자 */
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }  /* 2026-11-11 사용자 결정: 갈색(brand-ink) 글자가 어두워 보여 브랜드 오렌지 글자(당근 보조 버튼처럼). 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
-/* 2026-11-19 사용자 결정: 옅은 오렌지 판(brand-soft) 위의 버튼은 모두 오렌지 글자(accent-app-text) 700. 위 카드 안 보조 버튼과 같은 규칙. 배지·작은 칩(14px 미만)·축하 머리글·강조 숫자는 brand-ink 그대로. 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
+/* 2026-11-19 사용자 결정: 옅은 오렌지 판(brand-soft) 위의 버튼은 모두 오렌지 글자(accent-app-text) 700. 위 카드 안 보조 버튼과 같은 규칙. 배지·작은 칩·축하 머리글·강조 숫자도 오렌지 글자(accent-app-text, 2026-11-23 사용자 결정: brand-ink 글자는 사용처 없음). 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
 .hg-plan__block.hg-plan__block--soft {  /* 두 클래스로 뒤쪽 기본 버튼 규칙(.hg-plan__block)보다 앞섬 */
   background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
@@ -132,8 +132,8 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 /* Badge */
 .hg-badge { display: inline-flex; align-items: center; gap: var(--space-1); height: 24px; padding: 0 10px; border-radius: var(--radius-full); font: var(--text-micro); letter-spacing: 0.2px; white-space: nowrap; flex-shrink: 0; }
 .hg-badge--temp { background: var(--surface-alt); color: var(--slate); box-shadow: inset 0 0 0 1px var(--hairline); }
-.hg-badge--done { background: var(--accent-app-soft); color: var(--accent-app-ink); }  /* 2026-11-09 파랑 채움 대신 옅은 오렌지 판 + brand-ink(12px 글자라 AA 지킴) */
-.hg-badge--achieved { background: var(--accent-app-soft); color: var(--accent-app-ink); }  /* 2026-11-09 달성 배지는 옅은 오렌지 판 + brand-ink(파랑 없앰) */
+.hg-badge--done { background: var(--accent-app-soft); color: var(--accent-app-text); }  /* 2026-11-09 파랑 채움 대신 옅은 오렌지 판. 2026-11-23 사용자 결정: 글자는 brand-ink가 아니라 오렌지 accent-app-text(12px 600 대비 예외, axe 선택자 예외) */
+.hg-badge--achieved { background: var(--accent-app-soft); color: var(--accent-app-text); }  /* 2026-11-09 달성 배지는 옅은 오렌지 판(파랑 없앰). 2026-11-23 글자는 accent-app-text */
 .hg-badge--together { background: var(--together); color: var(--together-ink); }
 .hg-badge--family { background: var(--family); color: var(--family-ink); }
 .hg-badge--goal { background: var(--goal); color: var(--goal-ink); }
@@ -1782,7 +1782,7 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-celebrate__hero img.is-photo { width: 200px; height: 200px; object-fit: cover; border-radius: var(--radius-2xl); }
 .hg-celebrate__body { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-6) var(--space-6); }
 .hg-celebrate__body > * { margin: 0; }
-.hg-celebrate__eyebrow { font: var(--text-caption); font-weight: 600; color: var(--brand-ink); }
+.hg-celebrate__eyebrow { font: var(--text-caption); font-size: 14px; font-weight: 600; color: var(--accent-app-text); }  /* 2026-11-23 사용자 결정: brand-ink에서 accent-app-text로, 14px 600 짧은 말(대비 예외) */
 .hg-celebrate__title { font: var(--text-title-2); font-weight: 600; letter-spacing: -0.3px; }
 .hg-celebrate__value { font: var(--text-display); font-weight: 600; letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
 .hg-celebrate__story { margin: var(--space-1) 0 var(--space-5) !important; font: var(--text-body); color: var(--slate); }
@@ -2257,7 +2257,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-celebrate__photo { border-radius: 0; }
   .hg-celebrate__photo .hg-goaltile__photo { aspect-ratio: 1 / 1; }  /* 좁은 창은 정사각으로 위를 더 채움 */
 }
-.hg-badge--brand { background: var(--brand-soft); color: var(--brand-ink); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
+.hg-badge--brand { background: var(--brand-soft); color: var(--accent-app-text); }  /* 매달·매년 목표 배지(2026-11-04): 연한 브랜드 바탕 + 브랜드 글자 */
 /* 상세 화면 폭(2026-11-04 F-04): 넓은 창에서 본문을 720px 안으로(금액, 버튼이 한쪽에 몰리지 않게) */
 @media (min-width: 768px) { .hg-detail { width: 100%; max-width: 720px; } }
 /* RankRow 자산 순위 줄(2026-11-04 F-01·H-01, 대형 금융 앱 혜택 줄처럼): 원 44px(invest 바탕 + invest-ink 13px 800) + 제목 16px 600 + 오렌지 글자 14px 600(2026-11-09). 광고가 나오면 파란 글자 앞 작은 ‘광고’ 표시 */
@@ -2674,7 +2674,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-w02hero__meta { margin: 0; font: var(--text-body-sm); color: var(--slate); }
 .hg-w02hero__title { margin: var(--space-3) 0 0; font: 700 24px/32px var(--font-sans); letter-spacing: -0.3px; }
 .hg-w02hero__saved { display: inline-flex; gap: var(--space-1); margin-top: var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-1); font: var(--text-body-strong); }
-.hg-w02hero__saved b { color: var(--brand-ink); font-weight: 600; }
+.hg-w02hero__saved b { color: var(--accent-app-text); font-weight: 600; }  /* 2026-11-23 사용자 결정: brand-ink에서 accent-app-text로 */
 .hg-chip--fill.is-selected { border-color: var(--ink); box-shadow: none; background: var(--ink); color: var(--on-ink); }
 .hg-chip--fill b { font-weight: 600; opacity: 0.6; }
 /* W-02 줄(2026-11-23 사용자 결정 C안): 상태 버튼을 없애고 줄 전체가 버튼. 이름 앞 점(할 일) + 금액 + 맨 오른쪽 모양(› 할 일, ✓ 끝남, – 건너뜀) */
@@ -2683,15 +2683,15 @@ button.hg-datepill { cursor: pointer; }
 .hg-transfer--act .hg-transfer__label { font: 600 16px/22px var(--font-sans); }
 .hg-transfer--act .hg-transfer__amount { font: 700 16px/22px var(--font-sans); }
 .hg-transfer--act .hg-transfer__trail { display: grid; place-items: center; width: 20px; height: 20px; color: var(--slate); }
-.hg-transfer--act.is-go .hg-transfer__trail { color: var(--stone); }
+.hg-transfer--act.is-go .hg-transfer__trail, .hg-transfer--act.is-done .hg-transfer__trail { color: var(--stone); }
 /* 점 자리는 목록에 점이 하나라도 있을 때만 비워 둬 이름 줄이 맞음(점 없는 목록은 들여쓰지 않음) */
 .hg-transfer__dot { display: none; width: 8px; height: 8px; }
 .hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer--act > :is(.hg-transfer__open, .hg-transfer__body) { grid-template-columns: 8px minmax(0, 1fr) auto 20px; }
 .hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer__dot { display: block; }
 .hg-transfer__dot.is-on { border-radius: var(--radius-full); background: var(--brand); }  /* 그래픽일 뿐, 뜻은 화면 읽기 이름 “확인할 것”으로 */
-.hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount { color: var(--slate); text-decoration: none; }
+.hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount, .hg-transfer--act.is-done .hg-transfer__meta { color: var(--stone); font-weight: 500; text-decoration: none; }  /* 2026-11-23 사용자 결정: 끝난 줄은 확실히 흐리게. slate(#545557)는 ink와 거의 같아 보여 한 단계 옅은 stone(4.5:1 이상) + 500 */
 .hg-transfer--act.is-skipped .hg-transfer__label, .hg-transfer--act.is-skipped .hg-transfer__amount { color: var(--slate); text-decoration: line-through; text-decoration-thickness: 1.5px; }
-.hg-transfer--act.is-view.is-done .hg-transfer__label, .hg-transfer--act.is-view.is-done .hg-transfer__amount { color: var(--slate); }
+.hg-transfer--act.is-view.is-done .hg-transfer__label, .hg-transfer--act.is-view.is-done .hg-transfer__amount, .hg-transfer--act.is-view.is-done .hg-transfer__meta { color: var(--stone); }
 /* 빈 목록 안내(W-02 파트너 보기, 2026-11-23): 가운데 회색 글자 한 줄 */
 .hg-checklist__none { margin: 0; padding: var(--space-8) 0; text-align: center; font: var(--text-body); color: var(--slate); }
 /* W-02 수입 카드(IncomeCard, 2026-11-19 사용자 결정): 흰 카드 + 이름표 + 큰 금액 + 최근 2건 + 넓은 회색 버튼. 예전 한 줄 상자 hg-moneybox 대체 */
