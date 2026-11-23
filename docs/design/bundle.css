@@ -2750,7 +2750,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__amountbtn .hg-amount__value.is-empty { color: var(--stone); }
 .hg-form__amountbtn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-form__amountbtn.is-error { border-bottom-color: var(--danger); }
-.hg-seg--block { display: flex; width: 100%; align-self: stretch; }
+.hg-seg--block { box-sizing: border-box; display: flex; width: 100%; align-self: stretch; }
 .hg-seg--block .hg-seg__item { flex: 1 1 0; justify-content: center; padding: 0 var(--space-2); text-align: center; white-space: nowrap; }
 .hg-form__folds { position: relative; display: flex; flex-direction: column; margin-top: var(--space-2); padding-top: var(--space-4); }
 .hg-form__folds::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: var(--space-4); transform: translateX(-50%); background: var(--surface-alt); }

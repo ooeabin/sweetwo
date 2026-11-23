@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { fillAmount } from './form';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, seed } from './mocks';
 
@@ -151,8 +152,9 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
     .getByRole('dialog', { name: '무엇을 추가할까요?' })
     .getByRole('button', { name: '지출' })
     .click();
+  await page.getByRole('button', { name: '직접 정하기', exact: true }).click();
   await page.getByRole('textbox', { name: '항목 이름' }).fill('운동');
-  await page.getByRole('textbox', { name: '항목 이름' }).press('Enter');
+  await fillAmount(page, '매달 얼마씩?', 0);
   await page.getByRole('button', { name: '추가하기' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();
   await page.getByRole('dialog').getByLabel('항목 이름').fill('헬스');

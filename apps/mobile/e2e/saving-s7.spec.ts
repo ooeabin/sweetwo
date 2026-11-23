@@ -287,32 +287,31 @@ test('S7-13·S7-15: W-11b 미계획 금액은 금액 가리기를 따름, 해제
   page,
 }) => {
   await page.addInitScript(() => localStorage.setItem('sweetwo.masked', '1'));
-  await open(page, undefined, '/salary/items/new/a');
-  await page.getByRole('textbox').first().fill('여행');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByText('미계획 금액 •••')).toBeVisible();
+  await open(page, undefined, '/salary/items/new');
+  await page.getByRole('button', { name: '여행', exact: true }).click();
+  await expect(page.getByText(/미계획 금액 •••/).first()).toBeVisible();
 
   await open(
     page,
     (db) => {
       Object.assign(db.space ?? {}, { couple_state: 'unlink_pending', partner_nickname: '예빈' });
     },
-    '/salary/items/new/a',
+    '/salary/items/new',
   );
   await expect(page).toHaveURL(/\/salary$/);
   await expect(page.locator('.hg-toast')).toContainText(
     '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   );
 
-  // 월급 계획 템플릿이 없어도(월급 0원) 막지 않음(2026-11-19): 템플릿을 만들고 W-11a를 엶
+  // 월급 계획 템플릿이 없어도(월급 0원) 막지 않음(2026-11-19): 템플릿을 만들고 W-11을 엶
   const zero = await open(
     page,
     (db) => {
       db.splits.length = 0;
     },
-    '/salary/items/new/a',
+    '/salary/items/new',
   );
-  await expect(page.getByRole('heading', { name: '무엇을 위해 모을까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '저축·투자 추가' })).toBeVisible();
   await expect.poll(() => zero.splits.length).toBe(1);
 });
 

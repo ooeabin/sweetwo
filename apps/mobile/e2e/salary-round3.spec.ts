@@ -50,7 +50,7 @@ test('W-01 저축·투자 묶음(2026-11-18 옛 W-13 합침): W-02에는 저금 
   await expect(page.getByRole('heading', { name: '청약' })).toBeVisible();
   await page.goBack();
   await page.getByRole('button', { name: '+ 저축·투자 추가', exact: true }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=split$/);
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
 
   // 2026-11-18 홈 월급 상자는 줄 둘(저축·투자 줄 없앰)
   await page.goto('/');

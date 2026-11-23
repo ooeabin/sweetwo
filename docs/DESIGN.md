@@ -320,3 +320,4 @@ sweeTwo(스위투). “둘이 구워서 더 달콤한 자산파이.” 두 사�
 “Cute chunky 3D emoji-style icon of {물건}. Soft semi-gloss finish with gentle highlights, smooth rounded inflated shapes, minimal detail, natural real-world colors of the object, soft studio light from top-left, no outline, no text, centered with generous margins, transparent background.”
 
 이전(무광, 체리색 포인트) 틀은 다시 뽑기 전 그림을 고칠 때만 씀: “Use the reference image ONLY for its style: soft matte 3D, simplified chunky rounded shapes, smooth gentle gradients, minimal detail, clean modern app-icon illustration, pure white background, centered, generous margins. Subject (do not copy the reference object): {물건}, limited palette of 3 to 4 colors with cherry red (#c8102e) accent. No text.”
+- 입력 화면(2026-11-23): 온보딩 밖의 입력은 한 화면 입력(`FormScreen`, 요약 문장 + 질문 섹션 + 접힌 선택 줄 + 아래 고정 주 버튼, FormScreen.md). 단계형(진행 막대 + 한 화면 한 질문, `QuestionLayout`)은 온보딩·파트너 합류만. 요약 문장의 이름은 ink, 금액만 `accent-app-text`. 꼭 하나 고르는 2~3칸은 구간 선택(`SegChoice`).

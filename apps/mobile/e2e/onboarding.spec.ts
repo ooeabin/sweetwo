@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { fillAmount, foldAmount } from './form';
 import { axe as runAxe } from './axe';
 import { fakeBridge, fb } from './fake-bridge';
 import { chanwoo, type MemDb, mockOnboarding, SB } from './mocks';
@@ -22,7 +23,7 @@ const radio = (page: Page, name: string | RegExp) => page.getByRole('radio', { n
 const amount = (page: Page) => page.getByLabel('한 달 실수령액은 얼마예요?');
 const back = (page: Page) =>
   page
-    .getByRole('button', { name: /^(뒤로|이전)$/ })
+    .getByRole('button', { name: /^(뒤로|이전)(, 이전)?$/ })
     .first()
     .click();
 const NOW = new Date('2026-10-07T10:00:00+09:00');
@@ -135,35 +136,27 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   expect(db.checklists).toHaveLength(0);
   expect(db.rpc).not.toContain('start_checklist');
 
-  // 주 버튼 ‘첫 저금 만들기’ → W-11a(from=onboarding) → 저장 → 초대 시트(미합류) → 홈
+  // 주 버튼 ‘첫 저금 만들기’ → W-11(from=onboarding, 한 화면 입력) → 저장 → 초대 시트(미합류) → 홈
   await page.getByRole('button', { name: '모으기 시작하기' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
   expect(db.me.onboarding_done_at).toBeTruthy();
-  // W-11a 뒤로 → O-60 ‘준비 끝’(홈이 아님, 2026-11-17), 다시 ‘첫 저금 만들기’
+  // W-11 뒤로 → O-60 ‘준비 끝’(홈이 아님, 2026-11-17), 다시 ‘첫 저금 만들기’
   await back(page);
   await expect(page).toHaveURL(/\/onboarding\/o-60$/);
   await heading(page, '찬우님, 준비가 끝났어요');
   expect(await page.evaluate(() => localStorage.getItem('sweetwo.firstSavingAt'))).toBeNull();
   await page.getByRole('button', { name: '모으기 시작하기' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
-  await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
-  await next(page);
-  // W-11b 뒤로 → W-11a(이름 그대로)
-  await back(page);
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
-  await expect(page.getByLabel('무엇을 위해 모을까요?')).toHaveValue('내 집 마련');
-  await next(page);
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
-  await next(page);
-  // 여기서 앱을 닫았다 다시 열면(2026-11-13 실구동) 홈이 아니라 /onboarding/resume → 멈춘 단계(입력값 그대로)
-  await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
+  await page.getByRole('button', { name: '내 집 마련', exact: true }).click();
+  await fillAmount(page, '매달 얼마씩?', 950000);
+  // 여기서 앱을 닫았다 다시 열면(2026-11-13 실구동) 홈이 아니라 /onboarding/resume → 같은 화면(입력값 그대로)
   await page.goto('/');
-  await expect(page).toHaveURL(/\/salary\/items\/new\/e\?from=onboarding$/);
-  // W-11e 은행에서 자동으로 보내요?(2026-11-13)
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
-  await next(page);
-  await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    '내 집 마련에 매달 95만 원씩 모을까요?',
+  );
+  await foldAmount(page, '목표 금액', 150000000);
+  await page.getByRole('button', { name: '추가하기' }).click();
   const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
   await expect(sheet).toBeVisible();
   await expect(page).toHaveURL(/\/welcome$/);
@@ -605,7 +598,7 @@ test('Enter 키 = 주 버튼(S2-08): 선택 화면은 숫자 키, 휠·O-55·O-6
   await heading(page, '찬우님, 준비가 끝났어요');
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a/);
+  await expect(page).toHaveURL(/\/salary\/items\/new/);
 });
 
 test('이름: 보이는 글자로 셈(커플 이모지 = 1자, S2-19), 공백만이면 오류', async ({ page }) => {
@@ -703,21 +696,17 @@ test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열�
   await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-55
   await heading(page, '찬우님, 준비가 끝났어요');
   await page.getByRole('button', { name: '모으기 시작하기' }).click();
-  await page.getByLabel('무엇을 위해 모을까요?').fill('내 집 마련');
-  await next(page);
-  await expect(page).toHaveURL(/\/salary\/items\/new\/b\?from=onboarding$/);
+  await page.getByRole('button', { name: '내 집 마련', exact: true }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
   expect(db.me.onboarding_done_at).toBeTruthy();
   await page.waitForTimeout(3500); // 기기에 화면 데이터를 저장하는 3초 모으기(offline-cache)가 끝난 뒤 닫는 것처럼
-  // 앱을 닫았다 열기: A-06 대신 멈춘 단계(입력값 그대로)
+  // 앱을 닫았다 열기: A-06 대신 멈춘 화면(입력값 그대로)
   await page.goto('/');
-  await expect(page).toHaveURL(/\/salary\/items\/new\/b\?from=onboarding$/);
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
   await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('950000');
-  await next(page);
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('150000000');
-  await next(page);
-  await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await fillAmount(page, '매달 얼마씩?', 950000);
+  await foldAmount(page, '목표 금액', 150000000);
+  await page.getByRole('button', { name: '추가하기' }).click();
   const sheet = page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' });
   await expect(sheet).toBeVisible();
   expect(db.goals.map((g) => g.name)).toContain('내 집 마련');
@@ -738,7 +727,7 @@ test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열�
   await expect(page.getByRole('heading', { name: '앱 잠금을 켤까요?' })).toHaveCount(0);
 });
 
-test('O-60 → 첫 저금 만들기 → W-11a 뒤로 → O-60, ‘나중에 할게요’ → A-06 → 홈(2026-11-17)', async ({
+test('O-60 → 첫 저금 만들기 → W-11 뒤로 → O-60, ‘나중에 할게요’ → A-06 → 홈(2026-11-17)', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -751,7 +740,7 @@ test('O-60 → 첫 저금 만들기 → W-11a 뒤로 → O-60, ‘나중에 할�
   await page.getByRole('button', { name: '알림 받기' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
   await page.getByRole('button', { name: '모으기 시작하기' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=onboarding$/);
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
   await back(page);
   await heading(page, '찬우님, 준비가 끝났어요');
   await expect(page).toHaveURL(/\/onboarding\/o-60$/);

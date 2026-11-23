@@ -1,3 +1,4 @@
+import { fillAmount, foldAmount, pickName } from './form';
 import { setYearMonth } from './wheel';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
@@ -69,18 +70,20 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/salary/items/new');
-  await expect(page.getByRole('heading', { name: '무엇을 위해 모을까요?' })).toBeVisible();
-  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → 내 집 마련, 여행, 비상금, 차, 출산·육아, 노후. 누르면 이름을 채움
-  await page.getByRole('button', { name: '내 집 마련' }).click();
-  await expect(page.getByLabel('무엇을 위해 모을까요?')).toHaveValue('내 집 마련');
+  // 2026-11-23 한 화면 입력: 요약 문장이 고르는 대로 바뀜
+  const hero = page.getByRole('heading', { level: 2 });
+  await expect(hero).toHaveText('무엇을 매달 얼마씩 모을까요?');
+  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → 내 집 마련, 여행, 비상금, 차, 출산·육아, 노후 + ‘직접 정하기’. 누르면 이름을 고름
+  // 이미 모으는 중인 ‘내 집 마련’은 칩에서 빠져 있음(2026-11-23)
+  await expect(page.getByRole('button', { name: '내 집 마련', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '여행', exact: true }).click();
+  await expect(hero).toHaveText('여행에 매달 얼마씩 모을까요?');
   await axe(page);
-  await page.getByLabel('무엇을 위해 모을까요?').fill('제주 여행');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '매달 얼마씩 모을까요?' })).toBeVisible();
-  // 처음 값은 빈 칸(미계획 금액 전부를 채우지 않음, 2026-11-09), 보조는 지금 미계획 금액
-  await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('');
-  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await expect(page.getByText(/^미계획 금액/)).toBeVisible();
+  await pickName(page, '제주 여행');
+  await expect(hero).toHaveText('제주 여행에 매달 얼마씩 모을까요?');
+  // 처음 값은 빈 칸(미계획 금액 전부를 채우지 않음, 2026-11-09), 보조는 지금 미계획 금액, 필수가 비면 ‘추가하기’ 비활성
+  await expect(page.getByRole('button', { name: '추가하기' })).toBeDisabled();
+  await expect(page.getByText(/^미계획 금액/).first()).toBeVisible();
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
@@ -88,17 +91,20 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
     'aria-pressed',
     'true',
   );
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('200000');
-  await page.getByRole('button', { name: '다음' }).click();
-  // W-11e 은행에서 자동으로 보내요?(2026-11-13)
-  await expect(page.getByRole('heading', { name: '은행에서 자동으로 보내요?' })).toBeVisible();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await expect(
-    page.getByRole('heading', { name: '모으고 싶은 목표 금액이 있나요?' }),
-  ).toBeVisible();
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('2000000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '언제까지 모을까요?' })).toBeVisible();
+  await fillAmount(page, '매달 얼마씩?', 200000);
+  await expect(hero).toHaveText('제주 여행에 매달 20만 원씩 모을까요?');
+  await expect(page.getByRole('button', { name: '추가하기' })).toBeEnabled();
+  // 어떻게 챙겨요?: 처음 값 월급날 확인(저축·투자는 두 칸)
+  await expect(page.getByRole('radio', { name: '월급날 확인' })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(page.getByRole('radio')).toHaveCount(2);
+  await expect(page.getByText('자동으로 나가면 그날 앱이 알아서 완료로 바꿔요')).toBeVisible();
+  // 선택 항목은 접힌 줄: 목표 금액을 정해야 기한 줄이 나타남
+  await expect(page.getByRole('button', { name: /^기한,/ })).toHaveCount(0);
+  await foldAmount(page, '목표 금액', 2000000);
+  await page.getByRole('button', { name: /^기한,/ }).click();
   // 처음 값 = 1년 뒤(2027년 10월, 13개월) → 200만 ÷ 13 = 16만(올림), 매달 20만이면 늦지 않음
   await expect(page.getByText('기한까지 매달 16만 원이면 돼요')).toBeVisible();
   await expect(page.getByText(/지금 속도면/)).toHaveCount(0);
@@ -106,6 +112,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await setYearMonth(page, 2027, 6);
   await expect(page.getByText('기한까지 매달 23만 원이면 돼요')).toBeVisible();
   await expect(page.getByText('지금 속도면 2027년 7월에 다 모아요')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();
+  await expect(page.getByRole('button', { name: /^기한,/ })).toContainText('2027년 6월');
   await page.getByRole('button', { name: '추가하기' }).click();
   // 끝나면 미합류는 초대 시트(20 W-11 고친 점)
   // 2026-11-18: 만들면 W-01 월급 계획 템플릿 ‘저축·투자’ 묶음으로: 새 줄 강조 + Toast, 초대 물음은 거기서
@@ -142,27 +150,22 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   const lines = db.checklists[0]?.pay_check_line as Record<string, unknown>[];
   expect(lines.find((l) => l.goal_id === g?.id)?.planned).toBe(200_000);
 
-  // 목표 금액 없이 모을게요: 바로 저장
+  // 선택 줄을 안 정하면 목표 금액 없이 바로 저장
   await page.goto('/salary/items/new');
-  await page.getByLabel('무엇을 위해 모을까요?').fill('적금');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('100000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await pickName(page, '적금');
+  await fillAmount(page, '매달 얼마씩?', 100000);
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^적금/ })).toBeVisible();
   expect(db.goals.find((x) => x.name === '적금')?.target_amount).toBeNull();
 
-  // 휠을 건드리지 않고 추가하면 기한 = 1년 뒤(20 W-11d, 다음 달로 잡히던 것 고침)
+  // 휠을 건드리지 않고 기한 시트를 ‘확인’하면 기한 = 1년 뒤(20 W-11d, 다음 달로 잡히던 것 고침)
   await page.goto('/salary/items/new');
-  await page.getByLabel('무엇을 위해 모을까요?').fill('노트북');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickName(page, '노트북');
   await page.getByRole('button', { name: '50만 원' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('1500000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await foldAmount(page, '목표 금액', 1500000);
+  await page.getByRole('button', { name: /^기한,/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^노트북/ })).toBeVisible();
@@ -181,25 +184,27 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/salary/items/new');
-  await page.getByLabel('무엇을 위해 모을까요?').fill('결혼 비용');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickName(page, '결혼 비용');
   await page.getByRole('button', { name: '30만 원' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').fill('30000000');
-  const has = page.getByRole('checkbox', { name: '이미 모은 금액이 있어요' });
-  await expect(has).toHaveAttribute('aria-checked', 'false');
-  await has.click();
-  await page.getByLabel('이미 모은 금액').fill('30000000');
-  await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await page.getByLabel('이미 모은 금액').fill('20000000');
-  await expect(page.getByText('목표 금액보다 적게 넣어 주세요')).toHaveCount(0);
+  await foldAmount(page, '목표 금액', 30000000);
+  // 이미 모은 금액 접힌 줄: 목표 금액 이상이면 막음
+  await page.getByRole('button', { name: /^이미 모은 금액,/ }).click();
+  const dlg = page.getByRole('dialog', { name: '이미 모은 금액' });
+  await dlg.getByLabel('이미 모은 금액', { exact: true }).fill('30000000');
+  await expect(dlg.getByText('목표 금액보다 적게 넣어 주세요')).toBeVisible();
+  await expect(dlg.getByRole('button', { name: '확인' })).toBeDisabled();
+  await dlg.getByLabel('이미 모은 금액', { exact: true }).fill('20000000');
+  await expect(dlg.getByText('목표 금액보다 적게 넣어 주세요')).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
+  await dlg.getByRole('button', { name: '확인' }).click();
   // 월 필요액은 남은 1,000만 기준: 1년 뒤(13개월) → 77만(올림)
+  await page.getByRole('button', { name: /^기한,/ }).click();
   await expect(page.getByText('기한까지 매달 77만 원이면 돼요')).toBeVisible();
-  await page.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  // 시트를 ‘확인’ 없이 닫으면 기한은 안 정함
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^기한,/ })).toContainText('정하기');
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('button', { name: /^결혼 비용/ })).toBeVisible();
   await page.getByRole('button', { name: '나중에 할게요' }).click();
@@ -216,46 +221,37 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
 });
 
-test('W-11b 바꾸기 칩 고른 표시, W-11c 키패드는 하나로 맨 아래(2026-11-09 round 3)', async ({
+test('W-11 바꾸기 칩 고른 표시, 좁은 창은 금액 칸을 누르면 키패드 시트(2026-11-23)', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/salary/items/new');
-  await page.getByLabel('무엇을 위해 모을까요?').fill('여행');
-  await page.getByRole('button', { name: '다음' }).click();
+  await page.getByRole('button', { name: '여행', exact: true }).click();
   const chip = page.getByRole('button', { name: '30만 원' });
   await chip.click();
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
-  // 고른 칩은 잉크 테두리(안쪽 그림자)로 보임. 고르지 않은 칩은 없음
+  // 고른 칩은 오렌지 테두리(안쪽 그림자)로 보임. 고르지 않은 칩은 없음
   expect(await chip.evaluate((e) => getComputedStyle(e).boxShadow)).not.toBe('none');
   expect(
     await page
       .getByRole('button', { name: '10만 원' })
       .evaluate((e) => getComputedStyle(e).boxShadow),
   ).toBe('none');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
   if (info.project.name !== 'narrow') return;
-  // 좁은 창: 키패드로 목표 금액 → 체크 칸을 켜면 이미 모은 금액 칸이 활성, 키패드는 그 칸 아래
-  for (const k of ['5', '00', '00', '00'])
-    await page.getByRole('button', { name: k, exact: true }).click();
-  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
-  await page.getByRole('checkbox', { name: '이미 모은 금액이 있어요' }).click();
-  for (const k of ['1', '00', '00', '00'])
-    await page.getByRole('button', { name: k, exact: true }).click();
-  await expect(page.getByLabel('이미 모은 금액')).toHaveValue('1,000,000');
-  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('5,000,000');
-  const startBox = await page.getByLabel('이미 모은 금액').boundingBox();
-  const padBox = await page.getByLabel('숫자 키패드').boundingBox();
-  expect(startBox && padBox && padBox.y > startBox.y).toBe(true);
+  // 좁은 창: 화면 안에는 키패드가 없고, 금액 칸을 누르면 시트로 올라옴. 첫 숫자가 미리 채운 값을 덮어씀
+  await expect(page.getByLabel('숫자 키패드')).toHaveCount(0);
+  await page.getByRole('button', { name: /^매달 얼마씩\?,/ }).click();
   await expect(page.getByLabel('숫자 키패드')).toHaveCount(1);
-  // 목표 금액 칸을 누르면 키패드가 다시 그 칸에
-  await page.getByLabel('모으고 싶은 목표 금액이 있나요?').click();
-  await page.getByRole('button', { name: '한 글자 지우기' }).click();
-  await expect(page.getByLabel('모으고 싶은 목표 금액이 있나요?')).toHaveValue('500,000');
+  for (const k of ['5', '00', '00'])
+    await page.getByRole('button', { name: k, exact: true }).click();
+  await expect(page.getByRole('dialog').getByLabel('매달 얼마씩?')).toHaveValue('50,000');
   await axe(page);
+  await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    '여행에 매달 5만 원씩 모을까요?',
+  );
 });
 
 test('W-10a 고치기: 이름 바로 저장 + 되돌리기, 목표 금액 지우기, 지우기(휴지통) 되돌리기', async ({

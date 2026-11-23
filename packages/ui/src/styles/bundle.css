@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (35d580fe). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9572a52a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2751,7 +2751,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__amountbtn .hg-amount__value.is-empty { color: var(--stone); }
 .hg-form__amountbtn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-form__amountbtn.is-error { border-bottom-color: var(--danger); }
-.hg-seg--block { display: flex; width: 100%; align-self: stretch; }
+.hg-seg--block { box-sizing: border-box; display: flex; width: 100%; align-self: stretch; }
 .hg-seg--block .hg-seg__item { flex: 1 1 0; justify-content: center; padding: 0 var(--space-2); text-align: center; white-space: nowrap; }
 .hg-form__folds { position: relative; display: flex; flex-direction: column; margin-top: var(--space-2); padding-top: var(--space-4); }
 .hg-form__folds::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: var(--space-4); transform: translateX(-50%); background: var(--surface-alt); }

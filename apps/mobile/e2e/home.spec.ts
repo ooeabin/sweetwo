@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { fillAmount } from './form';
 import { axe as runAxe } from './axe';
 import { chanwoo, emptyV22, type MemDb, mockOnboarding, mockRealtime, seed } from './mocks';
 import { fakeBridge } from './fake-bridge';
@@ -149,7 +150,7 @@ test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관�
   await expect(page).toHaveURL(/\/salary\/plan$/);
 });
 
-test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11a 이름 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
+test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11 한 화면 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
   page,
 }) => {
   await open(page, (db) => {
@@ -212,16 +213,17 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await expect(sec.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
   await axe(page);
   await sec.getByRole('button', { name: '직접 정하기' }).click();
-  await expect(page.getByRole('textbox').first()).toHaveValue('');
+  // ‘직접 정하기’ 칩 → 이름 칸이 열린 빈 채로
+  await expect(page.getByLabel('이름', { exact: true })).toHaveValue('');
   await page.goBack();
   await sec.getByRole('button', { name: '신혼집' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\/a\?from=split$/);
-  await expect(page.getByRole('textbox').first()).toHaveValue('신혼집');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('300000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
+  // 칩으로 들어오면 그 이름을 미리 고름
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    '신혼집에 매달 얼마씩 모을까요?',
+  );
+  await fillAmount(page, '매달 얼마씩?', 300000);
+  await page.getByRole('button', { name: '추가하기' }).click();
   // 저장 → W-01로 돌아와 새 줄 강조(미리 보기 단계 W-11f는 없앰)
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('신혼집');
@@ -597,11 +599,13 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   const db = await open(page, undefined, NOW, '/salary/plan');
   await page.getByRole('button', { name: '고정지출 88만 원' }).click();
   const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
-  await expect(sheet.getByRole('switch', { name: '월급날 확인 목록에 넣기' })).toHaveAttribute(
+  // 2026-11-23: 스위치 둘 대신 ‘어떻게 챙겨요?’ 구간 선택(지출 줄은 세 칸)
+  await expect(sheet.getByRole('radio')).toHaveCount(3);
+  await expect(sheet.getByRole('radio', { name: '월급날 확인' })).toHaveAttribute(
     'aria-checked',
     'true',
   );
-  await sheet.getByRole('switch', { name: '은행에서 자동으로 보내요' }).click();
+  await sheet.getByRole('radio', { name: '자동으로 나가요' }).click();
   await sheet.getByRole('button', { name: '다음 날' }).click();
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
@@ -612,9 +616,11 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   await expect(page.locator('.hg-receipt__row', { hasText: '고정지출' })).toContainText(
     '26일 자동',
   );
-  // 저금 줄 시트에는 ‘체크리스트에 넣기’가 없음(늘 켬)
-  await page.getByRole('button', { name: /^청약/ }).click();
-  await expect(page.getByRole('switch', { name: '월급날 확인 목록에 넣기' })).toHaveCount(0);
+  // 저금 줄 시트에는 ‘확인 안 해요’가 없음(늘 목록에 넣음)
+  await page.goto('/salary/plan?line=goal-e'); // W-10 ‘매달 금액 바꾸기’로 그 저금 줄 시트를 엶
+  await expect(page.getByRole('dialog', { name: '청약 금액' })).toBeVisible();
+  await expect(page.getByRole('radio', { name: '확인 안 해요' })).toHaveCount(0);
+  await expect(page.getByRole('dialog').getByRole('radio')).toHaveCount(2);
 });
 
 // ---- 맨 위 띠, 오류, 자산, Realtime(2026-11-11 QA 4구간, v2.2에 맞춤) ----

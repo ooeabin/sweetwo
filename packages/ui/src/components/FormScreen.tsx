@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { Chip } from './Chip';
@@ -77,19 +77,22 @@ export interface HeroPart {
 
 /**
  * 맨 위 요약 문장(22px 700). lines = 줄마다 조각들(이름 자리 ink, 금액 자리만 accent). 고를 때마다 바뀌어 화면 읽기가 읽음(aria-live).
- * 줄 사이는 `<br>` 없이 블록 줄로 나눠 읽을 때 한 문장으로 이어짐
+ * 줄 사이는 `<br>` 없이 블록 줄 + 공백 글자로 나눠 화면 읽기가 한 문장으로 읽음
  */
-export function FormHero({ lines, label }: { lines: HeroPart[][]; label?: string }) {
+export function FormHero({ lines }: { lines: HeroPart[][] }) {
   return (
-    <h2 className="hg-form__hero" aria-live="polite" aria-label={label}>
+    <h2 className="hg-form__hero" aria-live="polite">
       {lines.map((line, i) => (
-        <span key={i} className="hg-form__heroline">
-          {line.map((p, j) => (
-            <span key={j} className={p.tone === 'accent' ? 'hg-form__val' : undefined}>
-              {p.text}
-            </span>
-          ))}
-        </span>
+        <Fragment key={i}>
+          {i > 0 && ' '}
+          <span className="hg-form__heroline">
+            {line.map((p, j) => (
+              <Fragment key={j}>
+                {p.tone === 'accent' ? <span className="hg-form__val">{p.text}</span> : p.text}
+              </Fragment>
+            ))}
+          </span>
+        </Fragment>
       ))}
     </h2>
   );
@@ -221,7 +224,12 @@ export function FormAmount({
       {quick && (
         <div className="hg-quick" role="group" aria-label={`${label} 빠른 금액`}>
           {quick.map((q) => (
-            <Chip key={q.label} small selected={value === q.value} onClick={() => onChange(q.value)}>
+            <Chip
+              key={q.label}
+              small
+              selected={value === q.value}
+              onClick={() => onChange(q.value)}
+            >
               {q.label}
             </Chip>
           ))}
