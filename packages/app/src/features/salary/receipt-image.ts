@@ -45,7 +45,7 @@ type Tokens = Record<
   | 'spend'
   | 'accent'
   | 'accentSoft'
-  | 'brandInk'
+  | 'accentText'
   | 'ink2'
   | 'barTrack'
   | 'danger'
@@ -77,7 +77,7 @@ function readTokens(): Tokens {
     spend: v('--spend'),
     accent: v('--accent-app'),
     accentSoft: v('--accent-app-soft'),
-    brandInk: v('--brand-ink'),
+    accentText: v('--accent-app-text'),
     ink2: v('--ink-2'),
     barTrack: v('--bar-track'),
     danger: v('--danger'),
@@ -337,7 +337,7 @@ export interface PlanImageModel {
   /** 카드 위 이름표 “월급” */
   label: string;
   amount: string;
-  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 brand-ink로 */
+  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 accent-app-text로 */
   sentence: { before: string; pct?: string; after: string };
   /** 막대·범례를 그림(월급 0원이면 false) */
   chart: boolean;
@@ -417,7 +417,7 @@ function layoutPlan(
     yy += 20 + 4;
     put(m.amount, left, yy + 19, { weight: 700, size: 30, color: t.ink });
     yy += 38 + 12;
-    // 굵은 한 문장(숫자만 brand-ink). 너무 길면 글자 크기를 줄임
+    // 굵은 한 문장(숫자만 accent-app-text). 너무 길면 글자 크기를 줄임
     const full = `${m.sentence.before}${m.sentence.pct ?? ''}${m.sentence.after}`;
     let size = 20;
     ctx.font = font(700, size);
@@ -429,7 +429,7 @@ function layoutPlan(
       let x = left;
       const parts: [string, string][] = [
         [m.sentence.before, t.ink],
-        ...(m.sentence.pct ? ([[m.sentence.pct, t.brandInk]] as [string, string][]) : []),
+        ...(m.sentence.pct ? ([[m.sentence.pct, t.accentText]] as [string, string][]) : []),
         [m.sentence.after, t.ink],
       ];
       for (const [str, c] of parts) {

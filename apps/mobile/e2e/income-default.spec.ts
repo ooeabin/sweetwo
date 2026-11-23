@@ -84,7 +84,7 @@ test('템플릿 줄 0개: 한 덩어리 안내 + 주 버튼 → 월급 계획 �
   await expect(page.getByText('350만 원을 나눠서')).toBeVisible();
   await expect(page.getByText('월급 계획 템플릿을 완성해 주세요')).toBeVisible();
   await expect(page.getByRole('region', { name: '이번 달 수입' })).toHaveCount(0);
-  await expect(page.getByText('월급 계획 템플릿에서 줄을 추가해 주세요')).toHaveCount(0);
+  await expect(page.getByText('월급 계획 템플릿에서 항목을 추가해 주세요')).toHaveCount(0);
   await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
 });

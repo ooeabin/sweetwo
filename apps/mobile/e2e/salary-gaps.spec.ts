@@ -99,7 +99,7 @@ test('W-02 지난 달 보기(날짜 알약 시트)와 상대가 월급 계획을
   await page.goto('/salary');
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(
-    page.getByText('예빈님이 월급 계획을 바꿔서 확인 안 한 줄을 다시 계산했어요'),
+    page.getByText('예빈님이 월급 계획을 바꿔서 확인 안 한 항목을 다시 계산했어요'),
   ).toBeVisible();
   await axe(page);
   // 지난 달이 있어 새 사이클 한 줄도 있음(2026-11-09): 안내마다 ×
@@ -151,11 +151,11 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
     .getByRole('dialog', { name: '무엇을 추가할까요?' })
     .getByRole('button', { name: '지출' })
     .click();
-  await page.getByRole('textbox', { name: '줄 이름' }).fill('운동');
-  await page.getByRole('textbox', { name: '줄 이름' }).press('Enter');
+  await page.getByRole('textbox', { name: '항목 이름' }).fill('운동');
+  await page.getByRole('textbox', { name: '항목 이름' }).press('Enter');
   await page.getByRole('button', { name: '추가하기' }).click();
   await page.getByRole('button', { name: /^운동/ }).click();
-  await page.getByRole('dialog').getByLabel('줄 이름').fill('헬스');
+  await page.getByRole('dialog').getByLabel('항목 이름').fill('헬스');
   await page.getByRole('button', { name: '확인', exact: true }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
   await page.getByRole('button', { name: '월급 350만 원, 금액 고치기' }).click();

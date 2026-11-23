@@ -70,7 +70,7 @@ test('관리 형태 요청 받음(S-11j): P-04 ‘보내요’ 문구 그대로 
   ).toBeVisible();
   await expect(page.getByText('찬우님이 관리하는 걸로 바꿀까요?')).toBeVisible();
   await expect(page.getByText('월급 계획이 하나로 합쳐져요')).toBeVisible();
-  await expect(page.getByText('예빈님 줄은 보내기와 용돈이 돼요')).toBeVisible();
+  await expect(page.getByText('예빈님 항목은 보내기와 용돈이 돼요')).toBeVisible();
   await expect(page.getByText('같이 모으기는 공동 저축·투자가 돼요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();

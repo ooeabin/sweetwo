@@ -163,7 +163,7 @@ test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await expect(sheet.getByText('미계획 금액 8만 원')).toBeVisible();
   // 기본 줄은 이름을 바꾸지 않음
-  await expect(sheet.getByLabel('줄 이름')).toHaveCount(0);
+  await expect(sheet.getByLabel('항목 이름')).toHaveCount(0);
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
   // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
@@ -194,13 +194,13 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   // 이미 있는 이름은 칩에서 숨김, 글자로 넣으면 막음
   await addSpend(page);
   await expect(chips.getByRole('button', { name: '관리비' })).toHaveCount(0);
-  await chips.getByRole('textbox', { name: '줄 이름' }).fill('관리비');
-  await chips.getByRole('textbox', { name: '줄 이름' }).press('Enter');
+  await chips.getByRole('textbox', { name: '항목 이름' }).fill('관리비');
+  await chips.getByRole('textbox', { name: '항목 이름' }).press('Enter');
   await expect(page.getByText('이미 있는 이름이에요')).toBeVisible();
   // 직접 추가 줄: 시트에서 이름 바꾸기
   await page.getByRole('button', { name: '관리비 10만 원' }).click();
   const s2 = page.getByRole('dialog', { name: '관리비 금액' });
-  await s2.getByLabel('줄 이름').fill('아파트 관리비');
+  await s2.getByLabel('항목 이름').fill('아파트 관리비');
   await s2.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('이름을 바꿨어요')).toBeVisible();
   await expect(page.getByRole('button', { name: '아파트 관리비 10만 원' })).toBeVisible();
@@ -214,7 +214,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await page.getByRole('button', { name: '고정지출 88만 원' }).click();
   await page
     .getByRole('dialog', { name: '고정지출 금액' })
-    .getByRole('button', { name: '고정지출 줄 지우기' })
+    .getByRole('button', { name: '고정지출 항목 지우기' })
     .click();
   await expect(page.getByText('고정지출을 지웠어요')).toBeVisible();
   expect(await names(page, '지출')).toEqual(['용돈', '생활비']);
@@ -230,7 +230,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await page.goto('/salary/plan?line=goal-e');
   await page
     .getByRole('dialog', { name: '청약 금액' })
-    .getByRole('button', { name: '청약 줄 지우기' })
+    .getByRole('button', { name: '청약 항목 지우기' })
     .click();
   const modal = page.getByRole('alertdialog', { name: '청약을 그만 모을까요?' });
   await expect(modal.getByText('월급 계획에서는 빠지지만 모은 내역은 남아요')).toBeVisible();
@@ -529,7 +529,7 @@ test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page 
   await page.goto('/salary/plan?line=goal-e');
   await page
     .getByRole('dialog', { name: '청약 금액' })
-    .getByRole('button', { name: '청약 줄 지우기' })
+    .getByRole('button', { name: '청약 항목 지우기' })
     .click();
   await page
     .getByRole('alertdialog', { name: '청약을 그만 모을까요?' })
@@ -611,7 +611,7 @@ test('빈 지출 카드: “직접 정하기” → 이름 칸', async ({ page }
   noSpend(db);
   await go();
   await page.getByRole('button', { name: '직접 정하기' }).last().click();
-  await expect(page.getByRole('textbox', { name: '줄 이름' })).toBeVisible();
+  await expect(page.getByRole('textbox', { name: '항목 이름' })).toBeVisible();
 });
 
 test('지출 줄이 있으면 빈 지출 카드 없음, 같이 쓰는 생활비 ‘아니요’면 “+ 같이 쓰는 통장” 대신 칩(R4)', async ({

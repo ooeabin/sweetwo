@@ -53,6 +53,7 @@ Phosphor 아이콘(MIT 라이선스) 91개(2026-11-13 `arrows-clockwise`, 2026-1
 | `hg-ico--loader-circle` | `circle-notch` |  |
 | `hg-ico--lock` | `lock` |  |
 | `hg-ico--minus` | `minus` |  |
+| `hg-ico--minus-circle` | `minus-circle` | W-01 편집 모드 항목 지우기(2026-11-23) |
 | `hg-ico--moon` | `moon` |  |
 | `hg-ico--paperclip` | `paperclip` | 파일 첨부(FileAttach) |
 | `hg-ico--pencil` | `pencil-simple` |  |
