@@ -1003,7 +1003,7 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   // 2026-11-23: 모든 기기에서 로그아웃은 판 없는 빨간 글자 버튼(15/400, 누르는 칸 44px 이상)
   const logoutAll = page.getByRole('button', { name: '모든 기기에서 로그아웃' });
   await expect(logoutAll).toHaveClass(/hg-btn--danger-plain/);
-  expect((await logoutAll.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect((await logoutAll.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
   await axe(page);
   await page.getByRole('button', { name: '로그아웃', exact: true }).click();
   await expect(page.getByText('그 기기에서 로그아웃했어요')).toBeVisible();
