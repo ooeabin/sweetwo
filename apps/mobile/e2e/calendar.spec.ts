@@ -201,9 +201,9 @@ test('캘린더 첫 화면은 달력(Y-04): 아래 ‘다가오는 일정’ 60�
   expect(all).not.toContain('자동차 기한');
   await axe(page);
 
-  await page.getByRole('button', { name: '경조사·기념일', exact: true }).click();
+  await page.getByRole('tab', { name: '경조사·기념일', exact: true }).click();
   await expect(money.locator('.hg-list').getByRole('button')).toHaveCount(0);
-  await page.getByRole('button', { name: '금융 일정', exact: true }).click();
+  await page.getByRole('tab', { name: '금융 일정', exact: true }).click();
   await expect(page.locator('.hg-empty')).toHaveCount(0);
   await money.getByRole('button', { name: /여행 기한/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/g-trip$/);
@@ -291,7 +291,7 @@ test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 �
     page.locator('.hg-cal__agenda').getByRole('button', { name: /여행 기한/ }),
   ).toBeVisible();
   // 경조사만 보면 금융 일정 점·띠 없음
-  await page.getByRole('button', { name: '경조사·기념일', exact: true }).click();
+  await page.getByRole('tab', { name: '경조사·기념일', exact: true }).click();
   await expect(page.getByRole('button', { name: '11월 30일' })).toBeVisible();
 });
 

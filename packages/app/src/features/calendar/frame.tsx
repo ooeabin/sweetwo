@@ -1,4 +1,4 @@
-import { AddRow, AddText, Button, Chip } from '@sweetwo/ui';
+import { AddRow, AddText, Button, LineTabs } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sharedCopy } from '../../shared/copy';
@@ -37,6 +37,7 @@ export function useCalFilter() {
   ] as const;
 }
 
+/** 보기 필터(12번): 밑줄 탭(2026-11-23 바탕 정리 2, 거르는 탭은 LineTabs) */
 export function FilterChips({
   value,
   onChange,
@@ -45,18 +46,17 @@ export function FilterChips({
   onChange: (f: CalFilter) => void;
 }) {
   return (
-    <div className="hg-cal__filter" role="group" aria-label={copy.filterLabel}>
-      {(['all', 'care', 'money'] as const).map((k) => (
-        <Chip key={k} small selected={value === k} onClick={() => onChange(k)}>
-          {copy.filters[k]}
-        </Chip>
-      ))}
-    </div>
+    <LineTabs<CalFilter>
+      label={copy.filterLabel}
+      value={value}
+      onChange={onChange}
+      items={(['all', 'care', 'money'] as const).map((k) => ({ value: k, label: copy.filters[k] }))}
+    />
   );
 }
 
 // 캘린더 메뉴 틀(24 Y-04 1~3번, 2026-11-17 첫 화면이 달력 Y-04, 예전 일정 목록 Y-01은 없앰).
-// 제목 “캘린더” + 오른쪽 ‘+ 일정 추가’(넓은 창만) + 보기 필터 칩과 오른쪽 ‘+ 일정 추가’ 글자 줄(좁은 창만) → Y-07.
+// 제목 “캘린더” + 오른쪽 ‘+ 일정 추가’(넓은 창만) + 보기 필터 밑줄 탭과 그 아래 ‘+ 일정 추가’ 줄(좁은 창만) → Y-07.
 // 예전 이번 주 띠(WeekStrip)와 ‘달력 ›’ 링크는 없앰(달력이 첫 화면이라 겹침)
 export function CalendarFrame({
   filter,

@@ -1927,8 +1927,8 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 @media (max-width: 1099px) { .hg-body:has(.hg-homecol) { row-gap: var(--space-6); } }  /* 2026-11-09 밀도: 영역 사이 24px */
 .hg-body__banner { grid-column: 1 / -1; }
 .hg-body__col { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
-/* 흰 바탕 위 맨 바깥 카드: hairline-soft 테두리 + 옅은 그림자(GCOO 느낌). 카드 안의 카드는 그대로 */
-.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(.hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border-color: var(--hairline-soft); box-shadow: var(--shadow-1); }
+/* 2026-11-23 바탕 정리 2: 맨 바깥 카드는 테두리·그림자 없음(흰 바탕은 본문 그대로, 회색 바탕은 흰 상자). 카드 안의 카드는 그대로 */
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-chart):not(.hg-card--tint):not(.hg-card--fill):not(.hg-list--plain):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { border: 0; box-shadow: none; }
 .hg-frame__mhead { display: none; }
 /* 2026-11-03 추가 입구 하나로: 넓은 창에만 보이는 동작(제목 줄 ‘+ 추가’). 좁은 창은 + 버튼 */
 /* 2026-11-12 좁은 창에서만 보이는 것(W-02 저금 묶음 끝 ‘+ 저금 추가’, 넓은 창은 제목 줄 버튼) */
@@ -2590,11 +2590,9 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-addrow--block { display: flex; width: 100%; padding: 0 var(--space-4); }
 .hg-sechead .hg-addrow { margin-left: auto; min-height: 32px; }
 .hg-checkgroup > .hg-addrow--block { padding-inline: 0; }  /* W-02 저금 묶음 끝: + 아이콘을 줄 앞 칸과 같은 선에 */
-/* 캘린더 도구 줄(2026-11-09): 왼쪽 보기 필터 칩, 오른쪽 글자 줄(2026-11-17부터 좁은 창 ‘+ 일정 추가’ AddRow, 예전 ‘달력 ›’ 링크) */
-.hg-cal__tools { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.hg-cal__tools > .hg-cal__filter { flex: 1; min-width: 0; flex-wrap: wrap; }
-.hg-cal__tools > .hg-sechead__more { flex: none; }
-.hg-cal__tools > .hg-addrow { flex: none; }  /* 2026-11-17 캘린더 첫 화면 Y-04: 필터 칩 오른쪽 ‘+ 일정 추가’(좁은 창) */
+/* 캘린더 도구(2026-11-23): 보기 필터는 밑줄 탭(LineTabs), 그 아래 좁은 창 ‘+ 일정 추가’ AddRow(예전 필터 칩 줄 오른쪽) */
+.hg-cal__tools { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.hg-cal__tools > .hg-addrow { align-self: flex-start; }
 
 /* 2026-11-10 뒤로 버튼 하나로(hg-back): 로그인(A-02), 앱 틀 ‹ 홈으로, PageHeader, 질문 화면, 알림 화면이 같은 모양.
    40px 누르는 자리, Phosphor chevron-left 24px ink, 좁은 창에서 아이콘 칸 왼쪽이 화면 왼쪽 16px(앱 틀 ‹ 홈으로와 같은 자리). */
