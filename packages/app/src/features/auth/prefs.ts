@@ -98,7 +98,7 @@ export const prefs = {
     const p = get('sweetwo.firstSavingAt');
     if (!p) return null;
     if (p === '/welcome') return p;
-    return p.startsWith('/salary/items/new/') && p.includes('from=onboarding') ? p : null;
+    return p.startsWith('/salary/items/new') && p.includes('from=onboarding') ? p : null;
   },
   setFirstSavingAt: (path: string | null) => set('sweetwo.firstSavingAt', path),
 };

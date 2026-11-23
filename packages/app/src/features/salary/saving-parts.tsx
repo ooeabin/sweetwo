@@ -126,7 +126,7 @@ export function FirstSavingRow({
           go(
             f.partnerGoal
               ? `/salary/bundles/new?goal=${encodeURIComponent(f.partnerGoal.id)}`
-              : `${savingPaths.add}/a?from=${from}`,
+              : `${savingPaths.add}?from=${from}`,
           )
         }
       />

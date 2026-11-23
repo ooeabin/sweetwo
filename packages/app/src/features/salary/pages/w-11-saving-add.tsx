@@ -22,15 +22,22 @@ import {
 } from '@sweetwo/core';
 import {
   AmountInput,
+  BottomSheet,
+  Button,
   Chip,
-  QuestionLayout,
+  FormAmount,
+  FormFold,
+  FormFolds,
+  FormHero,
+  FormScreen,
+  FormSection,
   QuestionSkeleton,
   ShortText,
   YearMonthInput,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
 import { carryToast, toast } from '../../../shared/toast';
 import { money, useMask } from '../../../shared/mask';
@@ -38,9 +45,11 @@ import { copy } from '../copy';
 import { useGoals, useMe, usePartner, useSpace, useSplits } from '../data';
 import { useEnsureSplit } from '../ensure-split';
 import { salaryPaths, savingPaths } from '../paths';
-import { trackSharedGoal } from '../saving';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
-import { W11eAutoAsk } from './w-11e-auto-ask';
+import { baseDayOf } from '../cycle';
+import { formHero, savingFormReady } from '../form-logic';
+import { LineModeBody } from '../receipt-parts';
+import { trackSharedGoal, useSavingItems } from '../saving';
 import { useHardwareBack } from '../../auth';
 import {
   AFTER_FIRST_SAVING_PATH,
@@ -49,14 +58,11 @@ import {
   ONBOARDING_READY_PATH,
 } from '../../onboarding';
 
-// W-11a~d 저금 항목 추가(20, ADR 0007). 한 화면 한 질문: 이름 → 매달 금액 → 목표 금액(건너뛰면 저장) → 기한(건너뛰어도 저장).
-// 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-10.
+// W-11 저금 항목 추가(20, ADR 0007, 2026-11-23 한 화면 입력 FormScreen). 예전 W-11a~e 단계(이름 → 매달 → 자동 → 목표 금액 → 기한)를 한 화면으로:
+// 맨 위 요약 문장(고르는 대로 바뀜) + “무엇을 모아요?” 칩 + “매달 얼마씩?” + “어떻게 챙겨요?” 구간 + 접힌 선택 줄(목표 금액, 기한, 이미 모은 금액) + 아래 “추가하기”.
+// 저장 = add_saving_item(내 월급 계획, 합쳐서면 공동 저금 묶음 맨 아래 + 이번 사이클 체크리스트) → W-01 저축·투자 묶음(새 줄 강조).
 // 입력값은 기기에 두고 다시 열면 이어서(20 W-11). 월급 계획이 없거나 해제 대기 중이면 추가할 수 없음.
-// W-11c 아래 선택 칸 ‘이미 모은 금액이 있어요’(2026-11-09): 만들 때만 넣는 시작값. 목표 금액보다 적어야 함.
-// v2.2(2026-11-13): W-11b 다음, W-11c 앞에 W-11e “은행에서 자동으로 나가요?”(주소 /e)
-const STEPS = ['a', 'b', 'e', 'c', 'd'] as const;
-type Step = (typeof STEPS)[number];
-type Draft = SavingDraft;
+// 이미 모은 금액은 만들 때만 넣는 시작값. 목표 금액보다 적어야 함. 기한은 목표 금액이 있을 때만.
 // 들어온 곳(32 saving_item_created entry, 2026-11-12 S7-16): home·salary = 첫 저금 빈 줄(홈·W-02), salary_row = W-02 저금 묶음
 // ‘+ 저금 추가’ 줄, salary_wide = W-02 넓은 창 제목 줄 버튼, split = W-01, list = W-13, add_menu = 홈 ‘추가’ 메뉴,
 // palette = 검색 ‘바로 하기’, shortcut = Ctrl(⌘)+N, onboarding = O-60 ‘첫 저금 만들기’(2026-11-13), 그 밖 direct
@@ -74,9 +80,10 @@ const ENTRIES = [
   'next',
 ] as const;
 type Entry = (typeof ENTRIES)[number] | 'direct';
+type Draft = SavingDraft;
+type Fold = 'target' | 'deadline' | 'start';
 
 export function W11SavingAdd() {
-  const { step = 'a' } = useParams();
   const [params] = useSearchParams();
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -85,6 +92,7 @@ export function W11SavingAdd() {
   const partner = usePartner();
   const splits = useSplits();
   const goals = useGoals();
+  const items = useSavingItems();
   // 월급 계획 템플릿이 아직 없으면(월급 0원 포함) 막지 않고 그 자리에서 만듦(2026-11-19 사용자 결정)
   const pendingLink = space.data?.couple_state === 'unlink_pending';
   useEnsureSplit({
@@ -104,41 +112,29 @@ export function W11SavingAdd() {
   });
   const [draft, setDraftState] = useState<Draft>(readDraft);
   const [saving, setSaving] = useState(false);
+  const [fold, setFold] = useState<Fold | null>(null);
   const { masked } = useMask();
   const setDraft = (d: Draft) => {
     setDraftState(d);
     writeDraft(d);
   };
-  const s = (STEPS as readonly string[]).includes(step) ? (step as Step) : 'a';
-  const now = STEPS.indexOf(s);
   const entry: Entry = (ENTRIES as readonly string[]).includes(params.get('from') ?? '')
     ? (params.get('from') as Entry)
     : 'direct';
-  const go = (to: Step) => nav(`${savingPaths.add}/${to}${params.size ? `?${params}` : ''}`);
-  // 첫 저금 흐름(O-60 뒤)이면 지금 단계를 남겨 둠: 앱을 닫았다 열면 /onboarding/resume → 여기로(2026-11-13 실구동)
+  // 첫 저금 흐름(O-60 뒤)이면 이어하기 주소를 남김: 앱을 닫았다 열면 /onboarding/resume → 여기로(2026-11-13 실구동)
   useEffect(() => {
-    if (entry === 'onboarding') markFirstSaving(`${savingPaths.add}/${s}?${params}`);
-  }, [entry, s, params]);
+    if (entry === 'onboarding') markFirstSaving(`${savingPaths.add}?${params}`);
+  }, [entry, params]);
   const back = () => {
     if (entry === 'onboarding') {
-      // 첫 저금 흐름(2026-11-17): W-11a 뒤로 = O-60 ‘준비 끝’(이어하기는 지움), 그다음 단계 뒤로 = 앞 단계. 기록이 없어도(이어하기로 열었을 때) 같게
-      if (s === 'a') {
-        clearFirstSaving();
-        return nav(ONBOARDING_READY_PATH, { replace: true, state: { backToReady: true } });
-      }
-      return nav(`${savingPaths.add}/${STEPS[Math.max(now - 1, 0)]}?${params}`, { replace: true });
+      // 첫 저금 흐름(2026-11-17): ‹ = O-60 ‘준비 끝’(이어하기는 지움)
+      clearFirstSaving();
+      return nav(ONBOARDING_READY_PATH, { replace: true, state: { backToReady: true } });
     }
     return window.history.length > 1 ? nav(-1) : nav(salaryPaths.checklist);
   };
   useHardwareBack(back, entry === 'onboarding'); // 안드로이드 뒤로도 ‹와 같게
-  const title = {
-    a: copy.addNameQ,
-    b: copy.addMonthlyQ,
-    e: copy.autoQ,
-    c: copy.addTargetQ,
-    d: copy.addDeadlineQ,
-  }[s];
-  if (!me.data || !space.data || !splits.data) return <QuestionSkeleton title={title} />;
+  if (!me.data || !space.data || !splits.data) return <QuestionSkeleton title={copy.formTitle} />;
   const joint = space.data.salary_mode === 'joint';
   const mine = splits.data.find((x) =>
     joint ? x.owner_user_id === null : x.owner_user_id === me.data?.id,
@@ -146,8 +142,8 @@ export function W11SavingAdd() {
   // 해제 대기 중이면 추가할 수 없음(20 W-11 예외): W-02로 + Toast(2026-11-12 S7-15). W-02가 회색 한 줄을 보여 줌.
   // 월급 0원·템플릿 없음은 막지 않음(2026-11-19): 템플릿을 만드는 동안 뼈대
   if (space.data.couple_state === 'unlink_pending') return <Blocked text={copy.addBlocked} />;
-  if (!mine) return <QuestionSkeleton title={title} />;
-  // 지금 여유 자금(W-11b 보조, 0원 아래면 0원)
+  if (!mine) return <QuestionSkeleton title={copy.formTitle} />;
+  // 지금 미계획 금액(보조, 0원 아래면 0원)
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
@@ -180,7 +176,7 @@ export function W11SavingAdd() {
         deadline: v.deadline ? ymToDate(v.deadline) : null,
         start: v.start,
       });
-      // W-11e ‘네, 자동이에요’: 새 저금 줄에 자동 줄 설정(나가는 날, null = 월급날)
+      // ‘자동으로 나가요’: 새 저금 줄에 자동 줄 설정(나가는 날, null = 월급날)
       if (d.auto) {
         const line = (await fetchSplits())
           .flatMap((x) => x.split_line)
@@ -190,6 +186,7 @@ export function W11SavingAdd() {
             () => undefined,
           );
       }
+      track('auto_pay_asked', { screen_id: 'W-11', answer: d.auto ? 'yes' : 'no' });
       track('saving_item_created', {
         entry,
         monthly_band: amountBand(v.monthly),
@@ -232,196 +229,341 @@ export function W11SavingAdd() {
       setSaving(false);
     }
   };
-  const steps = { total: STEPS.length, now };
 
-  if (s === 'a')
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.addNameQ}
-        onBack={back}
-        primary={{ label: copy.next, disabled: !draft.name.trim() }}
-        onSubmit={() => go('b')}
-      >
-        <ShortText
-          label={copy.addNameQ}
-          value={draft.name}
-          onChange={(v) => setDraft({ ...draft, name: v })}
-          max={20}
-          placeholder={copy.addNamePlaceholder}
-        />
-        {/* 이름 칩(19 ‘이름 칩 표’, 2026-11-18): 두 사람 사이마다 6개(‘직접 정하기’는 H-10 빈 상태에만). 누르면 이름을 채움 */}
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.addNameChips}
-          style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
-        >
-          {savingChips(space.data.marriage_status).map((c) => (
-            <Chip
-              key={c}
-              selected={draft.name === copy.chipNames[c]}
-              onClick={() => setDraft({ ...draft, name: copy.chipNames[c] })}
-            >
-              {copy.chipNames[c]}
-            </Chip>
-          ))}
-        </div>
-      </QuestionLayout>
-    );
-  if (!draft.name.trim()) return <Navigate to={`${savingPaths.add}/a`} replace />;
-  if (s === 'b') {
-    // 처음 값은 빈 칸(필수, 2026-11-09). 여유 자금 전부를 채우지 않음. 빠른 칩은 그 금액으로 바꿈
-    const v = draft.monthly;
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.addMonthlyQ}
-        help={copy.addMonthlyHelp(
-          money(Math.max(left, 0), masked),
-          allowance > 0 ? money(allowance, masked) : undefined,
-          left > 0,
-        )}
-        onBack={back}
-        primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}
-        onSubmit={() => go('e')}
-      >
-        <AmountInput
-          label={copy.addMonthlyQ}
-          value={v}
-          onChange={(x) => setDraft({ ...draft, monthly: x })}
-          quick={quickChips.monthly}
-          quickSet
-          monthly
-          allowZero
-        />
-        {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
-        {/* 매달 금액이 여유 자금보다 크면 사실 한 줄(막지 않음, 2026-11-14) */}
-        {v !== null && v > 0 && v > Math.max(left, 0) && (
-          <p className="hg-help" role="status">
-            {copy.monthlyOverLeft(money(Math.max(left, 0), masked))}
-          </p>
-        )}
-      </QuestionLayout>
-    );
-  }
-  if (draft.monthly === null) return <Navigate to={`${savingPaths.add}/b`} replace />;
-  if (s === 'e')
-    return (
-      <W11eAutoAsk
-        steps={steps}
-        value={draft.auto}
-        day={draft.autoDay}
-        payday={me.data.payday}
-        onBack={back}
-        onChange={(auto, autoDay) => setDraft({ ...draft, auto, autoDay })}
-        onNext={() => go('c')}
-      />
-    );
-  // 시작할 때 모은 금액(켰을 때만). 목표 금액 이상이면 막음(서버 bad_start와 같음)
+  // 이름 칩(19 ‘이름 칩 표’, 2026-11-18): 두 사람 사이마다 6개 + ‘직접 정하기’. 이미 모으는 중인 이름은 뺌(2026-11-23, W-12b와 같음)
+  const taken = new Set(
+    items.ready
+      ? items.live.filter((x) => x.state === 'saving').map((x) => x.goal.name.trim())
+      : [],
+  );
+  const chips = savingChips(space.data.marriage_status).filter(
+    (c) => !taken.has(copy.chipNames[c]),
+  );
+  const name = draft.name;
+  const isChip = chips.some((c) => copy.chipNames[c] === name);
+  // 이름 칸은 ‘직접 정하기’를 눌렀거나 칩에 없는 이름(이어하기·다른 화면에서 채워 온 이름)일 때
+  const customOpen = draft.custom || (name.trim() !== '' && !isChip);
+  const baseDay = baseDayOf(me.data, space.data);
+  const monthly = draft.monthly;
+  const unit = monthly !== null && monthly % 10_000 !== 0;
   const start = draft.hasStart ? (draft.start ?? 0) : 0;
-  const startOver = draft.target !== null && start >= draft.target;
-  if (s === 'c')
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.addTargetQ}
-        help={copy.addTargetHelp}
+  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
+  const ready = savingFormReady(name, monthly) && !(draft.target !== null && start >= draft.target);
+  const shown = (v: number) => money(v, masked);
+  const closeFold = () => setFold(null);
+
+  return (
+    <>
+      <FormScreen
+        title={copy.formTitle}
+        backLabel={copy.back}
         onBack={back}
-        primary={{ label: copy.next, disabled: !draft.target || startOver }}
-        onSubmit={() => go('d')}
-        later={{
-          label: copy.addNoTarget,
-          loading: saving,
-          onClick: () => void save({ ...draft, target: null, deadline: null }),
-        }}
+        hero={
+          <FormHero
+            lines={formHero({
+              name,
+              amount: monthly,
+              verb: copy.formVerbSave,
+              what: copy.formWhat,
+              money: shown,
+            })}
+          />
+        }
+        primary={{ label: copy.addDone, disabled: !ready, loading: saving }}
+        onSubmit={() => void save(draft)}
       >
-        <AmountInput
-          label={copy.addTargetQ}
+        <FormSection title={copy.formNameQ}>
+          <div className="hg-form__chips" role="group" aria-label={copy.addNameChips}>
+            {chips.map((c) => (
+              <Chip
+                key={c}
+                small
+                selected={!draft.custom && name === copy.chipNames[c]}
+                onClick={() => setDraft({ ...draft, custom: false, name: copy.chipNames[c] })}
+              >
+                {copy.chipNames[c]}
+              </Chip>
+            ))}
+            <Chip
+              small
+              selected={customOpen}
+              onClick={() => setDraft({ ...draft, custom: true, name: isChip ? '' : draft.name })}
+            >
+              {copy.savingEmptyCustom}
+            </Chip>
+          </div>
+          {customOpen && (
+            <ShortText
+              label={copy.formNameLabel}
+              value={name}
+              onChange={(v) => setDraft({ ...draft, name: v })}
+              max={20}
+              placeholder={copy.addNamePlaceholder}
+            />
+          )}
+        </FormSection>
+        <FormSection
+          title={copy.formMonthlyQ}
+          aside={left > 0 ? `${copy.leftoverLabel} ${shown(left)}` : undefined}
+        >
+          <FormAmount
+            label={copy.formMonthlyQ}
+            sheetTitle={copy.formMonthlyKeypad}
+            closeLabel={copy.close}
+            confirmLabel={copy.ok}
+            value={monthly}
+            onChange={(x) => setDraft({ ...draft, monthly: x })}
+            quick={quickChips.monthly}
+            invalid={unit}
+            below={
+              <>
+                {left <= 0 && (
+                  <p className="hg-help">
+                    {copy.addMonthlyHelp(
+                      shown(Math.max(left, 0)),
+                      allowance > 0 ? shown(allowance) : undefined,
+                      false,
+                    )}
+                  </p>
+                )}
+                {unit && <p className="hg-help is-error">{copy.tenThousandUnit}</p>}
+                {/* 매달 금액이 미계획 금액보다 크면 사실 한 줄(막지 않음, 2026-11-14) */}
+                {monthly !== null && monthly > 0 && monthly > Math.max(left, 0) && (
+                  <p className="hg-help" role="status">
+                    {copy.monthlyOverLeft(shown(Math.max(left, 0)))}
+                  </p>
+                )}
+              </>
+            }
+          />
+        </FormSection>
+        <FormSection title={copy.formHowQ}>
+          <LineModeBody
+            value={{
+              inChecklist: true,
+              autoPay: !!draft.auto,
+              autoDay: draft.autoDay,
+            }}
+            onChange={(v) => setDraft({ ...draft, auto: v.autoPay, autoDay: v.autoDay })}
+            allowOff={false}
+            payday={baseDay}
+          />
+        </FormSection>
+        <FormFolds>
+          <FormFold
+            label={copy.foldTarget}
+            value={draft.target !== null ? shown(draft.target) : undefined}
+            placeholder={copy.foldPick}
+            onClick={() => setFold('target')}
+          />
+          {draft.target !== null && (
+            <FormFold
+              label={copy.foldDeadline}
+              value={draft.deadline ? formatYm(ym) : undefined}
+              placeholder={copy.foldPick}
+              onClick={() => setFold('deadline')}
+            />
+          )}
+          <FormFold
+            label={copy.foldStart}
+            value={shown(start)}
+            placeholder={copy.foldPick}
+            onClick={() => setFold('start')}
+          />
+        </FormFolds>
+      </FormScreen>
+      {fold === 'target' && (
+        <AmountSheet
+          title={copy.foldTarget}
           value={draft.target}
-          onChange={(x) => setDraft({ ...draft, target: x && x > 0 ? x : null })}
-          extra={
+          clearLabel={draft.target !== null ? copy.foldClear(copy.foldTarget) : undefined}
+          error={(v) => (v !== null && start > 0 && start >= v ? copy.addStartOver : undefined)}
+          onClose={closeFold}
+          onDone={(v) =>
+            setDraft({
+              ...draft,
+              target: v && v > 0 ? v : null,
+              deadline: v && v > 0 ? draft.deadline : null,
+            })
+          }
+        />
+      )}
+      {fold === 'start' && (
+        <AmountSheet
+          title={copy.foldStart}
+          value={draft.hasStart ? (draft.start ?? 0) : 0}
+          allowZero
+          error={(v) =>
+            v !== null && draft.target !== null && v >= draft.target ? copy.addStartOver : undefined
+          }
+          onClose={closeFold}
+          onDone={(v) =>
+            setDraft({ ...draft, hasStart: !!v && v > 0, start: v && v > 0 ? v : null })
+          }
+        />
+      )}
+      {fold === 'deadline' && draft.target !== null && (
+        <DeadlineSheet
+          initial={ym}
+          has={draft.deadline !== null}
+          target={draft.target}
+          saved={start}
+          monthly={monthly ?? 0}
+          together={joint && space.data.couple_state === 'connected'}
+          onClose={closeFold}
+          onDone={(x) => setDraft({ ...draft, deadline: x })}
+        />
+      )}
+    </>
+  );
+}
+
+/** 금액 시트(목표 금액, 이미 모은 금액): 기존 키패드 + ‘확인’ + 값이 있으면 ‘… 지우기’ */
+function AmountSheet({
+  title,
+  value,
+  allowZero,
+  clearLabel,
+  error,
+  onClose,
+  onDone,
+}: {
+  title: string;
+  value: number | null;
+  allowZero?: boolean;
+  clearLabel?: string;
+  error: (v: number | null) => string | undefined;
+  onClose: () => void;
+  onDone: (v: number | null) => void;
+}) {
+  const [v, setV] = useState<number | null>(value);
+  const err = error(v);
+  return (
+    <BottomSheet
+      title={title}
+      closeLabel={copy.close}
+      onClose={onClose}
+      actions={
+        <>
+          <Button
+            variant="primary"
+            block
+            disabled={!!err || v === null}
+            onClick={() => {
+              onDone(v);
+              onClose();
+            }}
+          >
+            {copy.ok}
+          </Button>
+          {clearLabel && (
             <button
               type="button"
-              role="checkbox"
-              aria-checked={draft.hasStart}
-              className="hg-consent__check"
-              onClick={() => setDraft({ ...draft, hasStart: !draft.hasStart })}
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'center' }}
+              onClick={() => {
+                onDone(null);
+                onClose();
+              }}
             >
-              <span
-                className={draft.hasStart ? 'hg-checkbox is-on' : 'hg-checkbox'}
-                aria-hidden="true"
-              />
-              <span className="hg-consent__label">{copy.addHasStart}</span>
+              {clearLabel}
             </button>
-          }
-          // 이미 모은 금액 칸은 체크 칸 아래, 키패드는 하나로 화면 아래(2026-11-09 round 3, 칸 사이에 끼지 않게)
-          second={
-            draft.hasStart
-              ? {
-                  label: copy.addStart,
-                  value: draft.start,
-                  onChange: (x) => setDraft({ ...draft, start: x }),
-                  allowZero: true,
-                  error: startOver ? copy.addStartOver : undefined,
-                }
-              : undefined
-          }
-        />
-      </QuestionLayout>
-    );
-  if (!draft.target) return <Navigate to={`${savingPaths.add}/c`} replace />;
-  // 처음 값 = 1년 뒤(20 W-11d). 휠이 처음 값을 다시 올려도 같은 값
-  const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
-  const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
-  const plan = { target: draft.target, saved: start, deadline: ym };
-  const need = savingNeed(plan);
-  // 월 필요액 > 매달 금액이면 사실 한 줄(2026-11-09, 06 5-4)
-  const late = savingLate(plan, draft.monthly ?? 0);
-  // v2.2(2026-11-13): 늦어지면 판정 대신 사실 “지금 속도면 …에 다 모아요”
-  const eta = savingEta({ target: draft.target, saved: start }, draft.monthly ?? 0);
-  return (
-    <QuestionLayout
-      steps={steps}
-      title={copy.addDeadlineQ}
-      help={
-        need !== null ? (
-          <>
-            {/* 같이 계열(합쳐서 + 연결)은 둘이 같이 모으는 금액(2026-11-14) */}
-            {joint && space.data.couple_state === 'connected'
-              ? copy.needPerMonthTogether(
-                  money(need, masked),
-                  draft.monthly ? money(draft.monthly, masked) : undefined,
-                )
-              : copy.needPerMonth(
-                  money(need, masked),
-                  draft.monthly ? money(draft.monthly, masked) : undefined,
-                )}
-            {late !== null && eta && (
-              <>
-                <br />
-                {copy.etaAt(formatYm(eta))}
-              </>
-            )}
-          </>
-        ) : undefined
+          )}
+        </>
       }
-      onBack={back}
-      primary={{ label: copy.addDone, disabled: !!err, loading: saving }}
-      onSubmit={() => void save({ ...draft, deadline: ym })}
-      later={{
-        label: copy.addNoDeadline,
-        loading: saving,
-        onClick: () => void save({ ...draft, deadline: null }),
-      }}
+    >
+      <AmountInput label={title} value={v} onChange={setV} allowZero={allowZero} />
+      {err && (
+        <p className="hg-help is-error" role="alert">
+          {err}
+        </p>
+      )}
+    </BottomSheet>
+  );
+}
+
+/** 기한 시트: 연·월 휠(처음 값 1년 뒤) + 미리보기 “기한까지 매달 …이면 돼요”(늦으면 “지금 속도면 …에 다 모아요”) */
+function DeadlineSheet({
+  initial,
+  has,
+  target,
+  saved,
+  monthly,
+  together,
+  onClose,
+  onDone,
+}: {
+  initial: YearMonth;
+  has: boolean;
+  target: number;
+  saved: number;
+  monthly: number;
+  together: boolean;
+  onClose: () => void;
+  onDone: (v: string | null) => void;
+}) {
+  const [ym, setYm] = useState<YearMonth>(initial);
+  const { masked } = useMask();
+  const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
+  const need = savingNeed({ target, saved, deadline: ym });
+  const late = savingLate({ target, saved, deadline: ym }, monthly);
+  const eta = savingEta({ target, saved }, monthly);
+  const mm = (v: number) => money(v, masked);
+  return (
+    <BottomSheet
+      title={copy.foldDeadline}
+      closeLabel={copy.close}
+      onClose={onClose}
+      actions={
+        <>
+          <Button
+            variant="primary"
+            block
+            disabled={!!err}
+            onClick={() => {
+              onDone(ym);
+              onClose();
+            }}
+          >
+            {copy.ok}
+          </Button>
+          {has && (
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'center' }}
+              onClick={() => {
+                onDone(null);
+                onClose();
+              }}
+            >
+              {copy.foldClear(copy.foldDeadline)}
+            </button>
+          )}
+        </>
+      }
     >
       <YearMonthInput
-        label={copy.addDeadlineQ}
+        label={copy.foldDeadline}
         value={ym}
-        onChange={(x) => setDraft({ ...draft, deadline: x })}
+        onChange={(x) => x && setYm(x as YearMonth)}
         error={err}
       />
-    </QuestionLayout>
+      {need !== null && (
+        <p className="hg-help">
+          {/* 같이 계열(합쳐서 + 연결)은 둘이 같이 모으는 금액(2026-11-14) */}
+          {together
+            ? copy.needPerMonthTogether(mm(need), monthly ? mm(monthly) : undefined)
+            : copy.needPerMonth(mm(need), monthly ? mm(monthly) : undefined)}
+          {late !== null && eta && (
+            <>
+              <br />
+              {copy.etaAt(formatYm(eta))}
+            </>
+          )}
+        </p>
+      )}
+    </BottomSheet>
   );
 }
 

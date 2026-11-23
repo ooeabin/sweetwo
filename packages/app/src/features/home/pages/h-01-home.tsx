@@ -798,7 +798,7 @@ export function H01Home() {
               ? `/salary/bundles/${first.bundle.id}/notes`
               : first
                 ? `/salary/items/${first.goal.id}/notes`
-                : '/salary/items/new/a?from=home',
+                : '/salary/items/new?from=home',
           )
         }
       />

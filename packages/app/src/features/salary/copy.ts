@@ -355,6 +355,28 @@ export const copy = {
   addDeadlineQ: '언제까지 모을까요?',
   addNoDeadline: '기한 없이 모을게요', // [확인 필요]
   addDone: '추가하기', // [확인 필요]
+  // 한 화면 입력(FormScreen, 2026-11-23): W-11 저축·투자 추가, W-01 지출 추가, W-01 줄 시트가 같이 씀 [확인 필요]
+  formTitle: '저축·투자 추가',
+  formSpendTitle: '지출 추가',
+  formNameQ: '무엇을 모아요?',
+  formSpendNameQ: '어떤 지출이에요?',
+  formNameLabel: '이름',
+  formMonthlyQ: '매달 얼마씩?',
+  formMonthlyKeypad: '매달 금액',
+  formHowQ: '어떻게 챙겨요?',
+  formWhat: '무엇',
+  formVerbSave: '모을까요?',
+  formVerbSpend: '쓸까요?',
+  modeCheck: '월급날 확인',
+  modeAuto: '자동으로 나가요',
+  modeOff: '확인 안 해요',
+  modeDirect: '직접 보내요', // 월급날이 없는 사람은 확인 목록이 없어 첫 칸 이름이 이것
+  modeHint: '자동으로 나가면 그날 앱이 알아서 완료로 바꿔요',
+  foldTarget: '목표 금액',
+  foldDeadline: '기한',
+  foldStart: '이미 모은 금액',
+  foldPick: '정하기',
+  foldClear: (what: string) => `${what} 지우기`,
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
   addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',

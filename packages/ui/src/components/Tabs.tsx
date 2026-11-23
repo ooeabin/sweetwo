@@ -48,3 +48,36 @@ export function Tabs<T extends string>({
     </div>
   );
 }
+
+/**
+ * 구간 선택(`hg-seg hg-seg--block`, 2026-11-23): 2~3개 중 하나를 꼭 고르는 입력. 너비를 꽉 채움.
+ * 탭이 아니라 선택이라 `role="radiogroup"` + `role="radio"`(W-01·W-11 ‘어떻게 챙겨요?’)
+ */
+export function SegChoice<T extends string>({
+  items,
+  value,
+  onChange,
+  label,
+}: {
+  items: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+}) {
+  return (
+    <div className="hg-seg hg-seg--block" role="radiogroup" aria-label={label}>
+      {items.map((it) => (
+        <button
+          key={it.value}
+          type="button"
+          role="radio"
+          aria-checked={it.value === value}
+          className={cx('hg-seg__item', it.value === value && 'is-active')}
+          onClick={() => onChange(it.value)}
+        >
+          {it.label}
+        </button>
+      ))}
+    </div>
+  );
+}

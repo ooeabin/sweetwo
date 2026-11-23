@@ -9,7 +9,7 @@ import { firstPaydayLabel } from '../first-payday';
 import { secondsSinceStart, useStep } from '../step';
 
 /** O-60 ‘첫 저금 만들기’가 여는 W-11a(entry onboarding). 끝나면 미합류 초대 시트(O-07) → A-06 → 홈(/welcome) */
-export const FIRST_SAVING_PATH = '/salary/items/new/a?from=onboarding';
+export const FIRST_SAVING_PATH = '/salary/items/new?from=onboarding';
 
 /** W-11a 뒤로가 돌아오는 O-60(2026-11-17) */
 export const ONBOARDING_READY_PATH = '/onboarding/o-60';

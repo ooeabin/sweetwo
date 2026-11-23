@@ -1206,8 +1206,8 @@ export function W01Receipt() {
                         onClick={() => {
                           // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
                           if (offline()) return;
-                          writeDraft({ ...EMPTY_DRAFT, name });
-                          nav(`${savingPaths.add}/a?from=split`);
+                          writeDraft({ ...EMPTY_DRAFT, name, custom: c === 'custom' });
+                          nav(`${savingPaths.add}?from=split`);
                         }}
                       >
                         {c === 'custom' ? copy.savingEmptyCustom : name}
@@ -1221,7 +1221,7 @@ export function W01Receipt() {
                 <PlanAdd
                   onClick={() => {
                     // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
-                    if (!offline()) nav(`${savingPaths.add}/a?from=split`);
+                    if (!offline()) nav(`${savingPaths.add}?from=split`);
                   }}
                 >
                   {copy.addItemInReceipt}

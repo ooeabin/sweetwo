@@ -62,8 +62,12 @@ export function W12bNextSaving() {
       return;
     }
     // 칩이면 이름을 채워 W-11a(새 입력), 직접이면 빈 이름
-    writeDraft({ ...EMPTY_DRAFT, name: v === 'custom' ? '' : copy.chipNames[v] });
-    nav(`${savingPaths.add}/a?from=next`, { replace: true });
+    writeDraft({
+      ...EMPTY_DRAFT,
+      name: v === 'custom' ? '' : copy.chipNames[v],
+      custom: v === 'custom',
+    });
+    nav(`${savingPaths.add}?from=next`, { replace: true });
   };
   return (
     <QuestionLayout
