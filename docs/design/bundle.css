@@ -2762,3 +2762,5 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__hint { margin: 0; font: var(--text-body-sm); color: var(--slate); }
 @media (hover: none), (pointer: coarse) { .hg-seg--block .hg-seg__item { min-height: 44px; } }
 @media (prefers-reduced-motion: no-preference) { .hg-form__hero { transition: color var(--dur-fast) var(--ease-out); } }
+.hg-form__below { display: flex; flex-direction: column; gap: var(--space-1); }
+.hg-form__below > * { margin: 0; }

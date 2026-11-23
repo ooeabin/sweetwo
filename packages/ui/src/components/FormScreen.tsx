@@ -201,7 +201,7 @@ export function FormAmount({
           allowZero={allowZero}
           embedded
         />
-        {below}
+        {below && <div className="hg-form__below">{below}</div>}
       </>
     );
   return (
@@ -235,7 +235,7 @@ export function FormAmount({
           ))}
         </div>
       )}
-      {below}
+      {below && <div className="hg-form__below">{below}</div>}
       {open && (
         <BottomSheet
           title={sheetTitle}
