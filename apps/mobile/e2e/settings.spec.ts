@@ -137,9 +137,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   const partnerRow = page.locator('.hg-listrow', { hasText: '예빈님 월급' });
   await expect(partnerRow).toContainText('250만 원, 10일');
   await expect(partnerRow.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '각자 써요',
-  );
+  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 써요');
   await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toHaveCount(0);
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
   await page.getByRole('button', { name: /알림 이메일/ }).click();
@@ -281,9 +279,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await expect(page.getByText(/2026년 10월부터 380만 원/)).toHaveCount(0);
 
   // 관리 형태(S-11f): 세 질문, 각자 → 합쳐서는 예빈 ‘좋아요’가 필요(요청)
-  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '각자 써요',
-  );
+  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 써요');
   await page.getByRole('button', { name: /월급 관리 방식/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/style$/);
   await expect(page.getByRole('heading', { name: '같이 쓰는 생활비가 있어요?' })).toBeVisible();
@@ -1004,6 +1000,10 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await expect(page.getByText('10월 3일에 마지막으로 썼어요')).toBeVisible();
   // 웹은 기기 목록만(앱 잠금 없음)
   await expect(page.getByRole('switch', { name: '앱 잠금' })).toHaveCount(0);
+  // 2026-11-23: 모든 기기에서 로그아웃은 판 없는 빨간 글자 버튼(15/400, 누르는 칸 44px 이상)
+  const logoutAll = page.getByRole('button', { name: '모든 기기에서 로그아웃' });
+  await expect(logoutAll).toHaveClass(/hg-btn--danger-plain/);
+  expect((await logoutAll.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await axe(page);
   await page.getByRole('button', { name: '로그아웃', exact: true }).click();
   await expect(page.getByText('그 기기에서 로그아웃했어요')).toBeVisible();

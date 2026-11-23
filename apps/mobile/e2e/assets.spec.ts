@@ -341,6 +341,9 @@ test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범�
   seed(db);
 
   await page.goto('/assets/items');
+  // 2026-11-23: 하위 탭 한 줄 세 탭(요약 / 자산 / 부채)
+  await expect(page.getByRole('tablist')).toHaveCount(1);
+  await expect(page.getByRole('tab')).toHaveText(['요약', '자산', '부채']);
   await expect(page.getByRole('tab', { name: '자산', exact: true })).toHaveAttribute(
     'aria-selected',
     'true',

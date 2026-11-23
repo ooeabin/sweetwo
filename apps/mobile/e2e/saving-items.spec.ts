@@ -34,6 +34,11 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
 
   await page.goto('/salary/items/goal-h');
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
+  // 2026-11-23: 정보 ‘만든 날’ 아래 ‘만든 사람’(본인이면 “나”, 합류 전에도)
+  const info = page.getByRole('region', { name: '정보' });
+  await expect(info.locator('.hg-fdinfo').nth(0)).toContainText('만든 날');
+  await expect(info.locator('.hg-fdinfo').nth(1)).toContainText('만든 사람');
+  await expect(info.locator('.hg-fdinfo').nth(1)).toContainText('나');
   // 저금 한 카드(2026-11-15 3차 검토): 큰 숫자 + 막대 + 한 줄
   const target = page.getByRole('region', { name: '모은 금액' });
   await expect(target).toContainText('목표 금액 1억 5,000만 원의 0%');
