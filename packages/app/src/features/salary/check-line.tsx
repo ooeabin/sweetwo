@@ -215,7 +215,13 @@ export function CheckLine({
         action={
           button
             ? {
-                label: skipped ? copy.skippedPill : shownDone ? copy.doneTag : copy.goTag,
+                label: skipped
+                  ? copy.skippedPill
+                  : shownDone
+                    ? copy.doneTag
+                    : viewOnly
+                      ? copy.waitText
+                      : copy.goTag,
                 tone: skipped ? 'skipped' : shownDone ? 'done' : 'go',
                 ariaLabel: viewOnly
                   ? copy.viewLabel(name, line.state)
@@ -225,6 +231,8 @@ export function CheckLine({
                       ? copy.doneLabel(name)
                       : copy.checkLabel(name),
                 disabled: readOnly || viewOnly,
+                // 보기만 줄은 버튼 모양 없이 회색 상태 글자(대기 / 완료 / 건너뜀, 2026-11-23)
+                text: viewOnly,
                 busy: !!pending,
                 onClick: shownDone || skipped ? () => setSheet(true) : () => void toggle(),
               }

@@ -153,6 +153,8 @@ export function W10SavingItem() {
     const label = l.pay_checklist?.label ?? '';
     if (l.state === 'skipped') return copy.historySkipped(label);
     const v = l.actual ?? l.planned;
+    // 나가는 날 앱이 자동 확인한 줄(checked_by 없음)은 “자동으로 넣었어요 30만 원”(2026-11-23, 날짜 없는 사람 자동 넣기와 같은 말)
+    if (l.auto && l.state === 'checked' && !l.checked_by) return copy.historyAuto(m(v));
     return l.actual !== null && l.actual !== l.planned
       ? copy.historyOther(label, m(v))
       : copy.historyChecked(label, m(v));

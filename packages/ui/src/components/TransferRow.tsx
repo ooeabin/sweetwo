@@ -71,6 +71,8 @@ export function TransferRow({
     onClick?: () => void;
     disabled?: boolean;
     busy?: boolean;
+    /** 보기만(파트너 줄·관리하는 사람 줄, 2026-11-23): 버튼 모양 없이 회색 상태 글자 하나(`hg-transfer__status`) */
+    text?: boolean;
   };
 }) {
   // 그림이 없는 종류 자리는 그리지 않고 칸도 비우지 않음(2026-11-15 3차 검토)
@@ -134,7 +136,12 @@ export function TransferRow({
       ) : (
         body
       )}
-      {action && (
+      {action?.text && (
+        <span className="hg-transfer__status" role="img" aria-label={action.ariaLabel}>
+          {action.label}
+        </span>
+      )}
+      {action && !action.text && (
         <button
           type="button"
           className={cx('hg-transfer__action', `hg-transfer__action--${action.tone}`)}
