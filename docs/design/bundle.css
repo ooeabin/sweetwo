@@ -2932,3 +2932,7 @@ button.hg-datepill { cursor: pointer; }
   .hg-fd > .hg-stickybar { margin-top: auto; }
 }
 .hg-planstage .hg-btn--secondary, .hg-planstage .hg-receipt-actions .hg-btn { font: var(--text-value); }
+/* W-10 이번 달 줄: 한 일은 취소선 없이 stone (바탕 기준 2026-11-23) */
+.hg-fd--w10 .hg-transfer.is-done .hg-transfer__label { text-decoration: none; color: var(--stone); }
+/* W-01 ‘편집하기’: 표준 글자(15), 굵기 400, 테두리 없는 흰 상자 */
+.hg-planstage .hg-btn--outline { font: var(--text-value); font-weight: 400; border-color: transparent; }
