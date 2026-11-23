@@ -215,7 +215,8 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   await expect(page.getByText('이미 모은 금액', { exact: true })).toBeVisible();
   await expect(page.getByText('+2,000만 원')).toBeVisible();
   // 체크하면 시작값에 더해짐
-  await page.getByRole('checkbox', { name: /이번 달/ }).click();
+  await page.getByRole('button', { name: /^이번 달 .*확인할 것/ }).click();
+  await page.getByRole('button', { name: '계획대로 했어요' }).click();
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
 });
 

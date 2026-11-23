@@ -100,7 +100,7 @@ test('D1 합쳐서: 찬우가 주인인 저금을 예빈도 고치고, 찬우 �
   await expect(y.getByRole('button', { name: '더보기' }).first()).toBeVisible();
   await expect(y.getByRole('button', { name: '금액 정하기' })).toBeEnabled();
   // 이번 달 줄도 체크할 수 있음(공동 체크리스트)
-  await expect(y.getByRole('checkbox', { name: '이번 달 확인' })).toBeEnabled();
+  await expect(y.getByRole('button', { name: /^이번 달 .*확인할 것/ })).toBeEnabled();
   await axe(y);
 
   await y.goto('/salary/items/goal-e/edit/name');
@@ -184,7 +184,7 @@ test('S7-08·S7-09: 보기만·그만 모음·해제 대기는 머리 아래 회
   await expect(page.getByRole('button', { name: /^목표 금액/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^매달 모으는 금액/ })).toHaveCount(0);
   // 체크는 그대로
-  await expect(page.getByRole('checkbox', { name: '이번 달 확인' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /^이번 달 .*확인할 것/ })).toBeEnabled();
   await axe(page);
 });
 
@@ -203,7 +203,9 @@ test('S7-03·S7-10: 이번 달 줄을 체크하면 저금 내역이 바로 바�
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
   const history = page.getByRole('region', { name: '모은 내역' });
   await expect(history).toContainText('아직 기록이 없어요');
-  await page.getByRole('checkbox', { name: '이번 달 확인' }).click();
+  // 2026-11-23: W-10 이번 달 줄도 W-02 같은 상태 줄(줄을 누르면 줄 시트 → ‘계획대로 했어요’)
+  await page.getByRole('button', { name: /^이번 달 .*확인할 것/ }).click();
+  await page.getByRole('button', { name: '계획대로 했어요' }).click();
   await expect(history).toContainText('9월 월급');
   await expect(history).toContainText('+95만 원');
   await page.setViewportSize({ width: 390, height: 500 });
