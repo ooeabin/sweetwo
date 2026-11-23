@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3406b890). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (25371abc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -252,8 +252,12 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-sheet__close:not(:focus-visible) { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
 /* 앱 안 시트(BottomSheet 컴포넌트): 막 위 화면 아래에 붙음, 넓은 창은 가운데 카드 */
 .hg-scrim--sheet { position: fixed; inset: 0; z-index: 60; align-items: end; padding: 0; }
-.hg-scrim--sheet > .hg-sheet { width: 100%; max-height: 90dvh; overflow-y: auto; padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); outline: none; }
+.hg-scrim--sheet > .hg-sheet { width: 100%; max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top, 0px) - var(--space-4))); overflow: hidden; padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); outline: none; }
 .hg-sheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.hg-sheet__head, .hg-sheet__actions, .hg-sheet__handle { flex: none; }
+/* 2026-11-23: 시트가 화면보다 길면 본문(hg-sheet__body)만 스크롤하고 제목 줄과 아래 버튼(hg-sheet__actions)은 늘 보임 */
+.hg-sheet__body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: inherit; overflow-y: auto; overscroll-behavior: contain; margin-inline: calc(var(--space-1) * -1); padding-inline: var(--space-1); }
+.hg-sheet__body > * { margin: 0; }
 .hg-sheet__actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
 @media (prefers-reduced-motion: no-preference) { .hg-scrim--sheet > .hg-sheet { animation: hg-sheet-in var(--dur-base) var(--ease-out); } }
 @keyframes hg-sheet-in { from { transform: translateY(24px); } }
@@ -2575,8 +2579,9 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-receipt__prog { display: block; margin-top: var(--space-2); }  /* 2026-11-19 시안: 보조 줄 아래 4px 진행 막대 140px(그래픽, 뜻은 보조 줄 글자 “목표 금액의 23%”) */
 .hg-receipt__progbar { display: block; width: 140px; max-width: 100%; height: 4px; border-radius: var(--radius-full); background: var(--bar-track); overflow: hidden; }
 .hg-receipt__progbar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }
-@keyframes hg-receipt-flash { from { background: var(--brand-soft); } to { background: transparent; } }
-.hg-receipt__row.is-new { border-radius: var(--radius-md); animation: hg-receipt-flash calc(var(--dur-slow) * 6) var(--ease-out) 1; }  /* 2026-11-18 W-11로 만든 새 줄 잠깐 강조(‘동작 줄이기’면 없음, 아래 reduced-motion) */
+/* 2026-11-23: 새 줄은 옅은 오렌지(brand-soft)로 2초 머문 뒤 0.5초 동안 서서히 사라짐(화면이 2.5초 뒤 클래스를 뗌). ‘동작 줄이기’면 애니메이션 없이 2초 표시(화면이 2초 뒤 클래스를 뗌) */
+@keyframes hg-receipt-flash { 0%, 80% { background: var(--brand-soft); } 100% { background: transparent; } }
+.hg-receipt__row.is-new { border-radius: var(--radius-md); background: var(--brand-soft); animation: hg-receipt-flash 2.5s var(--ease-out) 1; }
 @media (prefers-reduced-motion: reduce) { .hg-receipt__row.is-new { animation: none; } }
 
 /* AddRow(+ 추가 줄): 2026-11-09 + 버튼(FAB) 대신 목록 끝이나 묶음 머리 오른쪽의 회색 글자 줄. hg-btn--link와 같은 ink-2 600 + Phosphor plus */

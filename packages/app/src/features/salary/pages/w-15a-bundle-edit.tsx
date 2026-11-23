@@ -1,5 +1,11 @@
 import { leaveBundle, setBundleVisibility, updateBundle } from '@sweetwo/api';
-import { defaultDeadline, formatYm, thisMonth, type YearMonth } from '@sweetwo/core';
+import {
+  bundleShownName,
+  defaultDeadline,
+  formatYm,
+  thisMonth,
+  type YearMonth,
+} from '@sweetwo/core';
 import {
   AmountInput,
   ListRow,
@@ -83,13 +89,13 @@ export function W15aBundleEdit() {
       <PageHeader
         title={copy.bundleEditTitle}
         backLabel={copy.back}
-        backTo={b.name}
+        backTo={bundleShownName(b.name)}
         onBack={back}
       />
       <div className="hg-list">
         <ListRow
           label={copy.bundleName}
-          value={b.name}
+          value={bundleShownName(b.name)}
           onClick={d.pending ? undefined : () => nav(togetherPaths.bundleField(id, 'name'))}
         />
         <ListRow
@@ -184,7 +190,7 @@ export function W15aBundleField() {
     }
   };
   if (f === 'name') {
-    const v = name ?? b.name;
+    const v = name ?? bundleShownName(b.name);
     return (
       <QuestionLayout
         title={copy.bundleNameQ}

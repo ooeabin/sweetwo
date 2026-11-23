@@ -36,7 +36,13 @@ export function W12bNextSaving() {
         todayKst(),
       ) ?? (params.get('why') === 'achieved' || i.state !== 'saving' ? 'achieved' : null))
     : null;
-  const opts = reason ? nextSavingOptions(reason, d.ready ? d.space.marriage_status : null) : [];
+  // 이미 진행 중인 저축·투자 이름(내 집 마련, 여행 …)은 칩에서 뺌(2026-11-23). ‘직접 정할게요’·기한 새로 정하기는 늘 남김
+  const taken = new Set(
+    d.ready ? d.live.filter((x) => x.state === 'saving').map((x) => x.goal.name.trim()) : [],
+  );
+  const opts = (
+    reason ? nextSavingOptions(reason, d.ready ? d.space.marriage_status : null) : []
+  ).filter((o) => o === 'redeadline' || o === 'custom' || !taken.has(copy.chipNames[o]));
   useEffect(() => {
     if (!reason || seen.current) return;
     seen.current = true;

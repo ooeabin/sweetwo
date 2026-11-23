@@ -74,7 +74,9 @@ export function BottomSheet({
             <Icon name="x" size={16} />
           </button>
         </div>
-        {children}
+        {children !== undefined && children !== null && children !== false && (
+          <div className="hg-sheet__body">{children}</div>
+        )}
         {actions && <div className="hg-sheet__actions">{actions}</div>}
       </div>
     </div>

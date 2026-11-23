@@ -135,6 +135,7 @@ export function W01Receipt() {
   const [openBundle, setOpenBundle] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
   const [askFor, setAskFor] = useState<{ ask: 'bundle' | 'invite'; id: string } | null>(null);
+  const [askLater, setAskLater] = useState<{ ask: 'bundle' | 'invite'; id: string } | null>(null);
   const newParam = params.get('new');
   const askParam = params.get('ask');
   const scrolled = useRef(false);
@@ -193,17 +194,31 @@ export function W01Receipt() {
     const l = split.split_line.find((x) => x.goal_id === newParam);
     if (!l) return;
     setFresh(l.id);
-    if (askParam === 'bundle' || askParam === 'invite') setAskFor({ ask: askParam, id: newParam });
+    // 같이 모을까요·초대 물음 시트는 강조가 끝난 뒤에(2026-11-23)
+    if (askParam === 'bundle' || askParam === 'invite')
+      setAskLater({ ask: askParam, id: newParam });
     const next = new URLSearchParams(params);
     next.delete('new');
     next.delete('ask');
     setParams(next, { replace: true });
   }, [newParam, askParam, split, params, setParams]);
+  // 새 줄 강조: 옅은 오렌지 2초 + 서서히 사라짐(0.5초). ‘동작 줄이기’면 애니메이션 없이 2초 표시. 화면 밖이면 그 줄로 스크롤
   useEffect(() => {
     if (!fresh) return;
-    const t = setTimeout(() => setFresh(null), 2000);
+    const reduce =
+      typeof window !== 'undefined' &&
+      !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    document
+      .querySelector<HTMLElement>(`[data-row-id="${fresh}"]`)
+      ?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+    const t = setTimeout(() => setFresh(null), reduce ? 2000 : 2500);
     return () => clearTimeout(t);
   }, [fresh]);
+  useEffect(() => {
+    if (fresh || !askLater) return;
+    setAskFor(askLater);
+    setAskLater(null);
+  }, [fresh, askLater]);
   const planReady = !!(me.data && space.data && goals.data && splits.data);
   // 월급 계획 템플릿이 아직 없으면(월급 0원 포함) 막는 카드 없이 그 자리에서 만듦(2026-11-19 사용자 결정)
   useEnsureSplit({

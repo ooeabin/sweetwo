@@ -12,7 +12,7 @@ import {
   AmountInput,
   Button,
   Chip,
-  DateInput,
+  DateWheelInput,
   QuestionLayout,
   QuestionSkeleton,
 } from '@sweetwo/ui';
@@ -141,9 +141,11 @@ export function W20MoneyIn() {
         ))}
       </div>
       {pickDate ? (
-        <DateInput
+        <DateWheelInput
           label={copy.moneyInDate}
           value={date}
+          today={todayKst()}
+          maxYear={Number(todayKst().slice(0, 4)) + 1}
           onChange={(v) => setDate(v)}
           error={future ? copy.moneyInFuture : undefined}
         />
@@ -185,6 +187,7 @@ export function W20aDistribute() {
   const { masked } = useMask();
   const ins = useQuery({ queryKey: qk.moneyIns, queryFn: () => fetchMoneyIns() });
   const [put, setPut] = useState<Record<string, number | null>>({});
+  const [focusId, setFocusId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const back = backOf(params);
   const hasBack = !!params.get('back');
@@ -254,17 +257,27 @@ export function W20aDistribute() {
         {goals.map((i) => {
           const cur = put[i.goal.id] ?? 0;
           return (
-            <div key={i.goal.id} className="hg-stack" style={{ gap: 'var(--space-1)' }}>
+            <div
+              key={i.goal.id}
+              className="hg-stack"
+              style={{ gap: 'var(--space-1)' }}
+              onFocus={() => setFocusId(i.goal.id)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+                  setFocusId((f) => (f === i.goal.id ? null : f));
+              }}
+            >
               <MoneyField
                 label={i.goal.name}
                 value={put[i.goal.id] ?? null}
                 placeholder="0"
                 onChange={(v) => setPut((p) => ({ ...p, [i.goal.id]: v }))}
               />
-              {/* 남은 돈을 이 저금에 전부(2026-11-14) */}
-              {left > 0 && (
+              {/* 남은 돈을 이 저금에 전부(2026-11-14). 입력 중인(포커스) 칸에만, 남은 금액이 0이면 숨김(2026-11-23) */}
+              {left > 0 && focusId === i.goal.id && (
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   className="hg-btn hg-btn--link"
                   style={{ alignSelf: 'flex-end' }}
                   aria-label={copy.moneyInAllLabel(i.goal.name)}

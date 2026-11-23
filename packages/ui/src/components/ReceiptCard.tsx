@@ -128,6 +128,7 @@ export function ReceiptRows({
           return (
             <li
               key={l.id}
+              data-row-id={l.id}
               className={cx(
                 'hg-receipt__row',
                 dragging && 'is-dragging',
@@ -227,7 +228,7 @@ export function ReceiptRows({
               {edit && l.onDelete && (
                 <button
                   type="button"
-                  className="hg-btn hg-btn--link hg-btn--danger-text hg-receipt__del"
+                  className="hg-btn hg-btn--link hg-receipt__del"
                   aria-label={labels.removeLabel(l.name)}
                   onClick={() => {
                     setOpen(null);

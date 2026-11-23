@@ -340,8 +340,11 @@ export const copy = {
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
-  addMonthlyHelp: (left: string, allowance?: string) =>
-    `미계획 금액 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`, // 2026-11-16 r6 용돈 빼고
+  // 2026-11-23: 미계획 금액이 있으면 “미계획 금액 55만 원 안에서 정해 보세요” [확인 필요], 0원 이하면 예전 문구(용돈 빼고, 2026-11-16 r6)
+  addMonthlyHelp: (left: string, allowance?: string, positive = false) =>
+    positive
+      ? `미계획 금액 ${left} 안에서 정해 보세요`
+      : `미계획 금액 ${left}${allowance ? `, 용돈 ${allowance} 빼고` : ''}`,
   addTargetQ: '모으고 싶은 목표 금액이 있나요?', // [확인 필요]
   addTargetHelp: '정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
   addNoTarget: '목표 금액 없이 모을게요', // [확인 필요]
