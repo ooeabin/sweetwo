@@ -4274,6 +4274,7 @@ export type Database = {
       }
       metric_ratio: { Args: { p_den: number; p_num: number }; Returns: Json }
       money_in_delete: { Args: { p_id: string }; Returns: undefined }
+      money_in_joint_auto: { Args: { p_source: string; p_space: string }; Returns: boolean }
       money_in_period: { Args: { p_today?: string; p_user?: string }; Returns: Json }
       money_in_restore: { Args: { p_id: string }; Returns: undefined }
       money_in_set: {
