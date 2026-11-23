@@ -335,6 +335,8 @@ export function W10SavingItem() {
                   personName={nameOf}
                   meId={d.meId}
                   entry="w10"
+                  // W-02와 같은 상태 줄(2026-11-23 ‘바탕 정리 2’): 할 일은 오렌지 점 + ›, 끝남은 ✓. 줄을 누르면 줄 시트
+                  sub=""
                   // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
                   viewOnly={i.owner === 'partner' && !d.joint}
                 />

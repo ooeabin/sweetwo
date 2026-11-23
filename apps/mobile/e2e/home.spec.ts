@@ -84,10 +84,10 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
     '9월 25일 월급에서 확인할 게 5개 남았어요',
     '같이 모을 사람을 초대해 보세요',
   ]);
-  // H-15 둘째 줄: 미계획 금액(350만 − 350만), “매달 25일”은 2026-11-23에 지움
+  // H-15 둘째 줄: 미계획(350만 − 350만), “매달 25일”은 2026-11-23에 지움
   await expect(planRow(page)).toContainText('월급 계획 템플릿');
   await expect(planRow(page)).not.toContainText('매달 25일');
-  await expect(planRow(page)).toContainText('미계획 금액 0원');
+  await expect(planRow(page)).toContainText('미계획 0원');
   // 2026-11-18: 월급 상자는 줄 둘(저축·투자 줄 없앰)
   await expect(page.locator('.hg-hubbox__row')).toHaveCount(2);
   // 결혼했어요라 H-12 없음
@@ -102,7 +102,7 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.getByText('자세히 보기')).toHaveCount(0);
   expect((await planRow(page).boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
   await expect(monthLine(page)).toHaveAccessibleName('이번 달 월급 체크, 5개 남음');
-  await expect(planRow(page)).toHaveAccessibleName('월급 계획 템플릿, 미계획 금액 0원');
+  await expect(planRow(page)).toHaveAccessibleName('월급 계획 템플릿, 미계획 0원');
   // 이번 달 월급 체크 → W-02 “모두 계획대로 됐어요” 한 번(confirm_payday)
   await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);

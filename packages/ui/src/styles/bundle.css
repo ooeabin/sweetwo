@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (fbcc870b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (336ae554). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2292,7 +2292,7 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 .hg-statblock__sub b { font-weight: var(--weight-semibold); color: var(--invest-ink); }
 
 /* 목록 줄만(2026-11-04 F-08): 테두리·바탕 없이 왼쪽 이름 + 오른쪽 값 */
-.hg-list--plain { border: 0; border-radius: 0; background: none; }
+.hg-list--plain { border: 0; border-radius: 0; background: none; overflow: visible; }  /* 할 일 점이 줄 왼쪽 여백에 걸림(W-10 이번 달) */
 .hg-listrow { column-gap: 0; padding: var(--space-3) 0; min-height: 56px; }
 .hg-listrow__value { padding-left: var(--space-3); }
 
@@ -2915,11 +2915,11 @@ button.hg-datepill { cursor: pointer; }
 .hg-stack:has(> .hg-page > .hg-stickybar) > .hg-page { flex: 1 1 auto; }
 .hg-page > .hg-stickybar { margin-top: auto; }
 }
-.hg-btn--secondary, .hg-receipt-actions .hg-btn { font: var(--text-value); }
+.hg-receipt-actions .hg-btn { font: var(--text-value); }
 /* W-10 이번 달 줄: 한 일은 취소선 없이 stone (바탕 기준 2026-11-23) */
 .hg-page--w10 .hg-transfer.is-done .hg-transfer__label { text-decoration: none; color: var(--stone); }
 /* W-01 ‘편집하기’: 표준 글자(15), 굵기 400, 테두리 없는 흰 상자 */
-.hg-btn--outline { font: var(--text-value); font-weight: 400; border-color: transparent; }
+.hg-receipt-actions .hg-btn--outline { font: var(--text-value); font-weight: 400; border-color: transparent; }
 /* 같이 모으기 사람 원(2026-11-23 사용자 지적): 원 32, 안 글자 12/700(3글자 11), 겹침 −8·뒤 원이 위·2px surface 고리 그대로.
    이름표(13) 아래 12 → 원 묶음과 이름 사이 8, 세로 가운데 → 이름 아래 금액까지 8 */
 .hg-together__people { gap: var(--space-2); min-height: 32px; align-items: center; }
@@ -2941,3 +2941,12 @@ button.hg-datepill { cursor: pointer; }
 @media (max-width: 767px) { .hg-frame--alt .hg-linetabs { margin-inline: calc(var(--space-4) * -1); padding-inline: var(--space-4); } }
 
 .hg-listrow > :is(.hg-lead, .hg-ico) { margin-right: var(--space-3); }  /* 앞 칸이 있을 때만(앞 칸이 없으면 빈 칸이라 간격 0) */
+
+/* ── 월급 탭 정리(2026-11-23 ‘바탕 정리 2’ B) ──
+   선택지 카드(`hg-option--card`, 질문·W-10b·W-12·W-15 등): 고르기 전엔 회색 판(`surface-alt`)에 테두리 없음, 고르면 흰 판 + ink 테두리. 회색 바탕 화면은 흰 판.
+   W-10 묶음 카드·달성 질문 상자(`hg-goalbox`): 흰 바탕 화면에서는 테두리·그림자·옆 여백 없이 본문 그대로. */
+.hg-option--card { border-color: transparent; background: var(--surface-alt); }
+.hg-option--card:hover { border-color: transparent; background: var(--hairline-soft); }
+.hg-option--card.is-on, .hg-option--card.is-on:hover { border-color: var(--ink); background: var(--surface); }
+.hg-frame--alt .hg-option--card { background: var(--surface); }
+.hg-frame:not(.hg-frame--alt) .hg-goalbox { padding-inline: 0; border-radius: 0; background: none; box-shadow: none; }
