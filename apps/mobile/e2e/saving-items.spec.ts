@@ -24,7 +24,9 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await page.goto('/salary');
   // 2026-11-19: W-02 줄에는 목표 금액 진행 보조 줄이 없음(종류 한 줄만). 시트 ‘저축·투자 보기’ → W-10
   await expect(page.getByText('0원 / 1억 5,000만 원')).toHaveCount(0);
-  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('저축·투자'); // 2026-11-23 종류 글자 없앰
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText(
+    '저축·투자',
+  ); // 2026-11-23 종류 글자 없앰
   await axe(page);
   await page.locator('.hg-transfer__open', { hasText: '내 집 마련' }).click();
   await page.getByRole('button', { name: '저축·투자 보기' }).click();
@@ -45,7 +47,9 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await page.getByRole('button', { name: '자세히 보기' }).click();
   await expect(page.getByRole('button', { name: '접기' })).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('#w-10-more')).toContainText('매달');
-  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText('95만 원');
+  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText(
+    '95만 원',
+  );
   await axe(page);
 
   // 목표 금액이 없는 항목: 진행 대신 ‘목표 금액 정하기’

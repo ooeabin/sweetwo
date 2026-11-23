@@ -371,7 +371,9 @@ export function W10SavingItem() {
                     </span>
                   )}
                   {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
-                  {i.eta && <span className="hg-page__foldline">{copy.etaAt(formatYm(i.eta))}</span>}
+                  {i.eta && (
+                    <span className="hg-page__foldline">{copy.etaAt(formatYm(i.eta))}</span>
+                  )}
                   {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
                   {i.late !== null && showEdit && (
                     <button
