@@ -618,7 +618,7 @@ test('빈 지출 카드(2026-11-19, 예전 첫 달 묻기): 칩 → 금액 직�
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect.poll(() => lineOf(db, 'living')?.amount).toBe(600_000);
   await expect(card.getByRole('button', { name: '월세', exact: true })).toHaveCount(0);
-  expect(await names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
+  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
   await axe(page);
   await page.reload();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
