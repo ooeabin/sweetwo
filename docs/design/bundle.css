@@ -2764,3 +2764,5 @@ button.hg-datepill { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) { .hg-form__hero { transition: color var(--dur-fast) var(--ease-out); } }
 .hg-form__below { display: flex; flex-direction: column; gap: var(--space-1); }
 .hg-form__below > * { margin: 0; }
+/* 2026-11-23 W-02 줄 시트: 아래 가운데 글자 버튼(‘이번 달은 건너뛸게요’ hg-btn--quiet, ‘저축·투자 보기’)은 가로 음수 margin 없이 가운데(누르는 칸 높이 44px은 그대로) */
+.hg-sheet__actions > .hg-btn--link.hg-btn--block:not(.hg-admin *, .hg-lock__assist > *) { margin-inline: 0; padding-inline: 0; }

@@ -110,7 +110,13 @@ test('줄 나머지를 누르면 줄 시트, 완료 버튼은 시트에서 체�
   const sheet = page.getByRole('dialog', { name: '생활비 88만 원' });
   await expect(sheet.getByRole('button', { name: '계획대로 했어요' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '다른 금액으로 했어요' })).toBeVisible();
-  await expect(sheet.getByRole('button', { name: '이번 달은 건너뛸게요' })).toBeVisible();
+  // 건너뛰기는 회색 채움이 아닌 글자 버튼(hg-btn--link hg-btn--quiet, 2026-11-23)
+  const skipBtn = sheet.getByRole('button', { name: '이번 달은 건너뛸게요' });
+  await expect(skipBtn).toBeVisible();
+  await expect(skipBtn).toHaveClass(/hg-btn--link/);
+  await expect(skipBtn).toHaveClass(/hg-btn--quiet/);
+  await expect(skipBtn).not.toHaveClass(/hg-btn--secondary/);
+  expect((await skipBtn.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
   await page.keyboard.press('Escape');
   // 완료 버튼 → 시트 → 체크 풀기
   await uncheckRow(page, '청약');

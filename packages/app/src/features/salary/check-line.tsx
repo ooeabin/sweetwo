@@ -83,7 +83,7 @@ export function checkToast(
  * 체크리스트 줄 하나(W-02, W-05, W-10). 디자인 시스템 TransferRow(체크 칸 + 이름 + 금액).
  * 체크 = 바로 완료, 저금이면 저금 항목 모은 금액에 더하고 Toast + 되돌리기. 다시 누르면 풀림.
  * ‘못 함’ 줄(2026-11-12 D2)은 빈 원·취소선 없음 + 보조 줄 “이번 달은 못 했어요”, 화면 읽기 “{이름} 못 함”. 체크 칸을 누르면 체크.
- * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 했어요’(W-02a) + W-05는 ‘이번 달은 못 했어요’
+ * 줄(이름·금액)을 누르면 시트: ‘보냈어요’(체크) + ‘다른 금액으로 했어요’(W-02a) + 글자 버튼 ‘이번 달은 건너뛸게요’(`hg-btn--quiet`, 2026-11-23)
  * + 저금 줄은 글자 버튼 ‘저금 보기’(W-10, 체크한 줄도). 줄마다 링크를 반복하지 않음(2026-11-03).
  * 목표 금액이 있는 저금 줄은 보조 줄에 “2,700만 / 1억 5,000만 원”(progress). 줄 앞 칸 없음(한 줄에 원 하나, 2026-11-15)
  */
@@ -270,7 +270,7 @@ export function CheckLine({
                 </Button>
               )}
               {open && !skipped && onSkip && (
-                <Button block variant="secondary" onClick={pick(onSkip)}>
+                <Button block variant="link" className="hg-btn--quiet" onClick={pick(onSkip)}>
                   {copy.skipThis}
                 </Button>
               )}
