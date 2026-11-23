@@ -4,7 +4,7 @@
 -- 달성 알림 링크(고칠 수 있는 사람 W-12, 파트너 W-10). 찬우(25일), 예빈(10일), 각자. 날짜는 2027년
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(14);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -119,19 +119,23 @@ select results_eq(
             ('22222222-2222-2222-2222-222222222222'::uuid, '/salary/items/' || (select id from public.goal where template = 'home')) $$,
   '고칠 수 있는 사람은 W-12, 파트너는 W-10');
 
--- 7. checklist_closed: 다음 기준일 0시에 찬우 3월 월급이 끝남(끝나기 전 ‘다 끝남’, 체크 1/2 = 50%, 못 한 저금 없음)
+-- 7. checklist_closed: 그다음 사이클 시작에 찬우 3월 월급이 끝남(2026-11-23 늦은 확인 기간 뒤)(끝나기 전 ‘다 끝남’, 체크 1/2 = 50%, 못 한 저금 없음)
 delete from public.server_event;
 select public.run_cycle_checklists('2027-04-25');
+select pg_temp.flush();
+select results_eq(
+  $$ select user_id, props->>'cycle_type' from public.server_event where name = 'checklist_generated' order by user_id $$,
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'regular'), ('22222222-2222-2222-2222-222222222222'::uuid, 'regular') $$,
+  '다음 달 체크리스트는 regular');
+-- 2026-11-23: 사이클이 넘어가도 목록은 닫히지 않고 다음 사이클 끝까지 늦게 확인(W-02 135). 닫힘 이벤트는 그 뒤 사이클 시작에
+select is((select count(*)::int from public.server_event where name = 'checklist_closed'), 0, '다음 기준일에는 아직 안 닫힘(늦은 확인 기간)');
+select public.run_cycle_checklists('2027-05-25');
 select pg_temp.flush();
 select results_eq(
   $$ select (props->>'done')::boolean, props->>'checked_ratio_band', (props->>'missed_saving_lines')::int, props->>'missed_saving_band'
      from public.server_event where name = 'checklist_closed' and user_id = '11111111-1111-1111-1111-111111111111' $$,
   $$ values (true, '50-99', 0, null::text) $$,
-  '체크리스트 끝남 이벤트');
-select results_eq(
-  $$ select user_id, props->>'cycle_type' from public.server_event where name = 'checklist_generated' order by user_id $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'regular'), ('22222222-2222-2222-2222-222222222222'::uuid, 'regular') $$,
-  '다음 달 체크리스트는 regular');
+  '체크리스트 끝남 이벤트(늦은 확인 기간이 끝난 뒤)');
 
 -- 8. 금액 구간(core amountBand와 같은 이름)
 select results_eq(

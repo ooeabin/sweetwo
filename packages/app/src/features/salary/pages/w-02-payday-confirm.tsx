@@ -261,7 +261,7 @@ export function W02PaydayConfirm() {
         <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
           {fromArchive ? (
             <PageHeader
-              title={copy.tabTitle}
+              title={copy.archiveTitle}
               backLabel={copy.back}
               backTo={copy.archiveTitle}
               onBack={() => nav(-1)}
@@ -485,6 +485,19 @@ export function W02PaydayConfirm() {
   // 지난 달은 읽기 전용, 늦은 확인 기간이면 남은 손 줄만 체크(07 4장)
   const readOnly = (ago > 0 || isPast(shown.cycle_end)) && !late;
   const lateIds = late ? new Set(lateLines(shown).map((l) => l.id)) : null;
+  // 한 사람 관리형(2026-11-13 UX B H2): 관리하지 않는 쪽은 자기 줄만 확인, 관리하는 사람 줄은 따로 보기만
+  const managerId = joint ? (sp.manager_user_id ?? null) : null;
+  const mineOpt = { joint, ownerId: owner, meId: meId ?? '', managerId };
+  const othersManual =
+    managerId && managerId !== meId && !partnerTab
+      ? ordered.filter((l) => isManual(l) && !lineIsMine(l, mineOpt))
+      : [];
+  const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
+  // 관리하지 않는 쪽은 관리하는 사람 줄을 뺀 내 줄로 칩·개수·다 확인 상태를 셈(그 줄은 아래 “{이름}님이 확인해요” 묶음, 2026-11-23)
+  const mineLines = shown.pay_check_line.filter((l) => !othersManual.includes(l));
+  // 관리하는 사람 줄이 아직 대기면 축하하지 않음(그 사람이 끝내야 이번 달이 끝남)
+  const finished =
+    late || othersManual.some((l) => l.state === 'wait') ? null : doneState(mineLines);
   // 제목과 기간 첫날은 같은 날(앞당기기 설정대로, 07 1장, 2026-11-13 UX B M2)
   const start = shownPayday(shown.cycle_start);
   // 상대가 이번 사이클에 월급 계획을 바꿨으면 안내(20 ‘바뀐 직후 W-02 맨 위 안내 한 줄’)
@@ -524,7 +537,9 @@ export function W02PaydayConfirm() {
       return false;
     }
   })();
-  const showMade = ago === 0 && !partnerTab && (past.data?.length ?? 0) > 0 && !madeSeen;
+  // 다 확인 상태에서는 숨김(2026-11-23): 축하 화면에 “만들었어요” 안내가 같이 남던 것
+  const showMade =
+    ago === 0 && !partnerTab && !finished && (past.data?.length ?? 0) > 0 && !madeSeen;
   const dismissMade = () => {
     setMadeHidden(list.id);
     try {
@@ -586,14 +601,6 @@ export function W02PaydayConfirm() {
       />
     );
   };
-  // 한 사람 관리형(2026-11-13 UX B H2): 관리하지 않는 쪽은 자기 줄만 확인, 관리하는 사람 줄은 따로 보기만
-  const managerId = joint ? (sp.manager_user_id ?? null) : null;
-  const mineOpt = { joint, ownerId: owner, meId: meId ?? '', managerId };
-  const othersManual =
-    managerId && managerId !== meId && !partnerTab
-      ? ordered.filter((l) => isManual(l) && !lineIsMine(l, mineOpt))
-      : [];
-  const manual = ordered.filter((l) => isManual(l) && !othersManual.includes(l));
   // “모두 계획대로 됐어요”(confirm_payday): 남은(미확인) 손 줄 중 내가 확인할 수 있는 것. 이번 달·지난 달(늦은 확인) 같은 기준,
   // 서버가 닫을 때 건너뜀으로 바꾼 줄만 남았으면 버튼 없음(2026-11-19). 건너뜀 줄은 줄 시트로 다시 확인
   const confirmable =
@@ -638,9 +645,8 @@ export function W02PaydayConfirm() {
     }
   };
   // 한 목록(2026-11-19 확정 시안): 칩 필터, 남은 줄 먼저 → 확인한 줄 아래. 줄이 자리를 옮기면 짧은 이동 애니메이션
-  const counts = chipCounts(shown.pay_check_line);
-  const finished = late ? null : doneState(shown.pay_check_line);
-  const { open: openLines, done: doneLines } = splitCheckLines(shown.pay_check_line, chip);
+  const counts = chipCounts(mineLines);
+  const { open: openLines, done: doneLines } = splitCheckLines(mineLines, chip);
   const cycles = [list, ...(past.data ?? [])];
   const pick = (i: number) => {
     setAgo(i);
@@ -676,7 +682,7 @@ export function W02PaydayConfirm() {
     whose: (joint ? 'joint' : partnerTab ? 'partner' : 'self') as 'joint' | 'partner' | 'self',
     screen: (readOnly || ago > 0 ? 'past' : 'checklist') as 'past' | 'checklist',
   };
-  const saved = savedSum(shown.pay_check_line);
+  const saved = savedSum(mineLines);
   const filters = (
     <div className="hg-row" role="group" aria-label={copy.manualGroupLabel}>
       {(
@@ -702,6 +708,8 @@ export function W02PaydayConfirm() {
     </div>
   );
   const finishedAll = finished === 'all';
+  // 지난 달 보기(‹ › 또는 W-21에서 연 화면)는 “이번 달” 대신 그 달 이름(2026-11-23)
+  const pastView = ago > 0;
 
   return frame(
     <>
@@ -728,12 +736,19 @@ export function W02PaydayConfirm() {
         render={(burst) => (
           <MonthHero
             pill={datePill}
-            amount={noLines ? undefined : planned}
-            meta={noLines ? undefined : heroMeta({ lines: shown.pay_check_line })}
+            // 파트너 탭은 월급 금액을 못 볼 때(‘저축·투자만’ 공개 등) “0원”을 큰 금액으로 두지 않고 줄 개수만(2026-11-23)
+            amount={noLines || (partnerTab && income <= 0) ? undefined : planned}
+            meta={noLines ? undefined : heroMeta({ lines: mineLines })}
             done={
               finished
                 ? {
-                    title: finishedAll ? copy.heroTitleAll : copy.heroTitleMixed,
+                    title: pastView
+                      ? (finishedAll ? copy.heroTitleAllOf : copy.heroTitleMixedOf)(
+                          Number(start.slice(5, 7)),
+                        )
+                      : finishedAll
+                        ? copy.heroTitleAll
+                        : copy.heroTitleMixed,
                     saved:
                       saved > 0 ? (
                         <>
@@ -790,7 +805,7 @@ export function W02PaydayConfirm() {
             aria-expanded={foldOpen}
             onClick={() => setFoldOpen((x) => !x)}
           >
-            <span>{foldText(shown.pay_check_line)}</span>
+            <span>{foldText(mineLines)}</span>
             <Icon name={foldOpen ? 'chevron-up' : 'chevron-down'} size={16} />
           </button>
           {foldOpen && rowsList}
@@ -799,6 +814,9 @@ export function W02PaydayConfirm() {
         // 템플릿 줄이 하나도 없으면 칩·목록 없이 안내(2026-11-19 회귀 수정). 내 이번 달은 한 덩어리 안내 + 주 버튼(2026-11-20)
         ownEmpty ? (
           emptyPlan(income)
+        ) : partnerTab ? (
+          // 상대 화면에 보이는 줄이 없을 때(‘했어요만’ 공개 등): 상대에게 줄을 추가하라는 안내가 아님(2026-11-23)
+          <p className="hg-checklist__none">{copy.partnerNone}</p>
         ) : (
           <section className="hg-card hg-card--fill hg-stack">
             <p className="hg-card__meta">{copy.emptyPlan}</p>
@@ -810,9 +828,20 @@ export function W02PaydayConfirm() {
           {rowsList}
         </>
       )}
+      {othersManual.length > 0 && managerId && (
+        <section
+          className="hg-checkgroup"
+          aria-label={copy.managerGroup(personName(managerId) ?? '')}
+        >
+          <SectionHeader variant="group" title={copy.managerGroup(personName(managerId) ?? '')} />
+          <div className="hg-checklist__list">{othersManual.map((l) => row(l))}</div>
+        </section>
+      )}
       {meId && !ownEmpty && (
         <IncomeCard
           ownerId={partnerTab ? tab : meId}
+          alsoOwnerIds={joint && partner.data ? [partner.data.id] : undefined}
+          otherName={partner.data?.nickname}
           from={shown.cycle_start}
           to={shown.cycle_end}
           masked={masked}

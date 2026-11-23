@@ -77,6 +77,14 @@ describe('W-02 다 확인 상태', () => {
   it('손 줄이 남았거나 없으면 null', () => {
     expect(doneState([L('checked', 1), L('wait', 2)])).toBeNull();
     expect(doneState([L('wait', 1, { auto: true })])).toBeNull();
+    expect(doneState([])).toBeNull();
+  });
+  it('자동 줄뿐인 달: 모두 확인됐으면 all, 건너뜀·다른 금액이면 mixed, 나가는 날 전이 있으면 null', () => {
+    const a = (state: string, o: object = {}) => L(state, 1, { auto: true, ...o });
+    expect(doneState([a('checked'), a('checked')])).toBe('all');
+    expect(doneState([a('checked'), a('skipped')])).toBe('mixed');
+    expect(doneState([a('checked', { actual: 50 })])).toBe('mixed');
+    expect(doneState([a('checked'), a('wait')])).toBeNull();
   });
   it('저축·투자 합 = 확인한 저축·투자 줄(다른 금액 반영, 건너뜀 0)', () => {
     const s = (state: string, extra: object = {}) => L(state, 1, { kind: 'saving', ...extra });

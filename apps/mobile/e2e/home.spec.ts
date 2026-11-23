@@ -862,11 +862,12 @@ test('한 사람 관리형(찬우 관리): 예빈 홈은 자동 문장, W-02는 
   await page.goto('/');
   await expect(monthLine(page)).toContainText('자동으로 정해져요');
   await page.goto('/salary');
-  // 2026-11-19 한 목록: 관리하는 사람(찬우)의 줄은 같은 목록에 보기만(버튼 비활성)
-  await expect(page.getByRole('region', { name: '찬우님이 확인해요' })).toHaveCount(0);
-  await expect(
-    page.locator('.hg-transfer', { hasText: '고정지출' }).locator('.hg-transfer__action'),
-  ).toBeDisabled();
+  // 2026-11-23: 관리하는 사람(찬우)의 손 줄은 “찬우님이 확인해요” 묶음에 보기만(버튼 모양 없는 회색 상태 글자)
+  const group = page.getByRole('region', { name: '찬우님이 확인해요' });
+  await expect(group).toBeVisible();
+  await expect(group.locator('.hg-transfer', { hasText: '고정지출' })).toBeVisible();
+  await expect(group.locator('.hg-transfer__status').first()).toBeVisible();
+  await expect(group.locator('.hg-transfer__action')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await axe(page);
 });

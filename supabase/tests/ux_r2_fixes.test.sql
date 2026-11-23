@@ -1,7 +1,7 @@
 -- pgTAP: 실구동 재테스트 2차(20261214090000). R1 한 사람 관리형 합류 완료, 40001 대신 P0001, R3 월급날 앞당기기
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(14);
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
   ('22222222-2222-2222-2222-222222222222', 'yebin@example.com');
@@ -62,9 +62,12 @@ select results_eq($$ select cycle_start, cycle_end from public.pay_checklist ord
   $$ values ('2026-12-10'::date, '2027-01-07'::date) $$, '12월 10일(목) ~ 앞당긴 1월 8일 전날');
 select public.make_checklist(s.id, null, '2027-01-08'::date)
   from public.couple_space s where s.created_by = '11111111-1111-1111-1111-111111111111';
-select results_eq($$ select cycle_start, cycle_end, label from public.pay_checklist where state <> 'closed' $$,
+select results_eq($$ select cycle_start, cycle_end, label from public.pay_checklist where cycle_start >= '2027-01-08' $$,
   $$ values ('2027-01-08'::date, '2027-02-04'::date, '1월 월급') $$,
   '주말이면 금요일에 생기고, 다음 월급날(2월 10일 공휴일, 그 앞 설 연휴)은 2월 5일이라 4일까지');
+-- 2026-11-23: 지난 12월 목록은 늦은 확인 기간(2월 4일까지)이라 닫지 않고 끝만 앞당긴 날 전날로
+select results_eq($$ select cycle_end, state::text from public.pay_checklist where cycle_start = '2026-12-10' $$,
+  $$ values ('2027-01-07'::date, 'open') $$, '지난 목록은 안 닫힘(늦은 확인), 끝은 겹치지 않게 1월 7일');
 select is((select public.late_check_until(id) from public.pay_checklist where cycle_start = '2026-12-10'),
   '2027-02-04'::date, '늦은 확인 마지막 날도 앞당긴 날 − 1일');
 -- 앞당기기 끄면 원래 날

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (25371abc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (358ea1eb). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2684,6 +2684,10 @@ button.hg-datepill { cursor: pointer; }
 .hg-transfer__action--done, .hg-transfer__action--skipped { background: var(--surface-alt); color: var(--slate); }
 .hg-transfer__action--wait { background: transparent; border-color: var(--surface-alt); color: var(--slate); cursor: default; }
 .hg-transfer__action:disabled { cursor: default; }
+/* 보기만 줄의 상태(2026-11-23): 버튼 모양 없이 회색 글자(대기·완료·건너뜀). 버튼 글자와 같은 자리(폭 68px, 가운데 맞춤) */
+.hg-transfer__status { grid-column: 2; order: 2; min-width: 68px; text-align: center; font: 600 14px/20px var(--font-sans); color: var(--slate); }
+/* 빈 목록 안내(W-02 파트너 보기, 2026-11-23): 가운데 회색 글자 한 줄 */
+.hg-checklist__none { margin: 0; padding: var(--space-8) 0; text-align: center; font: var(--text-body); color: var(--slate); }
 /* W-02 수입 카드(IncomeCard, 2026-11-19 사용자 결정): 흰 카드 + 이름표 + 큰 금액 + 최근 2건 + 넓은 회색 버튼. 예전 한 줄 상자 hg-moneybox 대체 */
 .hg-incomecard { margin-top: var(--space-4); padding: var(--space-5) var(--space-5) var(--space-5); border: 1px solid var(--surface-alt); border-radius: var(--radius-xl); background: var(--surface); }
 .hg-incomecard__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }

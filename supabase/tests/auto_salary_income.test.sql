@@ -2,7 +2,7 @@
 -- 혼자 쓰는 사람(4444, 월급날 1일, 350만 원)의 지난 달·이번 달 목록, 찬우·예빈(합쳐서)의 공동 목록. 날짜는 실제 오늘 기준 이번 달·지난 달
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(29);
+select plan(30);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -174,10 +174,13 @@ select public.confirm_payday(current_setting('test.jprev')::uuid);
 reset role;
 select is((select count(*)::int from public.money_in where source = 'payday_auto'
   and owner_user_id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')), 2, '합쳐서도 멱등(두 줄 그대로)');
--- RLS: 예빈은 찬우의 자동 기록을 못 봄(공개 ‘모두’가 아니면), 자기 것은 봄
+-- RLS: 합쳐서는 예빈이 찬우의 자동 월급 기록도 봄(직접 적은 기록은 공개 ‘모두’일 때만), 자기 것은 봄
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is((select count(*)::int from public.money_in where owner_user_id = '11111111-1111-1111-1111-111111111111'), 0, 'RLS: 파트너 기록은 공개 단계대로');
+select is((select count(*)::int from public.money_in where owner_user_id = '11111111-1111-1111-1111-111111111111'), 1,
+  'RLS: 합쳐서는 파트너의 자동 월급 기록이 보임(수입 = 두 사람 합, 2026-11-23)');
+select is((select count(*)::int from public.money_in where owner_user_id = '11111111-1111-1111-1111-111111111111' and source = 'manual'), 0,
+  'RLS: 직접 적은 기록은 공개 단계대로');
 select is((select count(*)::int from public.money_in where owner_user_id = auth.uid()), 1, '내 기록은 보임');
 reset role;
 -- 월급 0원인 사람은 안 넣음

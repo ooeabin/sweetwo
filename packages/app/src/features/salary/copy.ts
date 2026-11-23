@@ -421,6 +421,15 @@ export const copy = {
   cyclePick: '월급날 고르기',
   heroTitleAll: '이번 달도 계획대로!',
   heroTitleMixed: '이번 달 확인 끝',
+  // 지난 달 보기(W-21에서 연 W-02 등)는 그 달 이름(2026-11-23) [확인 필요]
+  heroTitleAllOf: (month: number) => `${month}월도 계획대로!`,
+  heroTitleMixedOf: (month: number) => `${month}월 확인 끝`,
+  // 보기만 줄의 상태 글자(파트너 탭, 관리하는 사람 줄, 2026-11-23) [확인 필요]
+  waitText: '대기',
+  // 한 사람 관리형 관리하지 않는 쪽: 관리하는 사람 손 줄 묶음 머리(08 2장 문구)
+  managerGroup: (name: string) => `${name}님이 확인해요`,
+  // 파트너 탭에 보이는 줄이 하나도 없을 때(‘했어요만’ 공개 등) [확인 필요]
+  partnerNone: '아직 확인한 게 없어요',
   savedBefore: '저축·투자', // 흰 알약 “저축·투자 139만 원 모았어요”(금액만 brand-ink)
   savedAfter: '모았어요',
   manualGroupLabel: '보기 고르기', // 칩 묶음 화면 읽기 이름

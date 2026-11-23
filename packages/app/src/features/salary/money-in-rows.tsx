@@ -77,6 +77,8 @@ export interface IncomeDefaults {
 
 export function IncomeCard({
   ownerId,
+  alsoOwnerIds,
+  otherName,
   from,
   to,
   masked,
@@ -89,6 +91,10 @@ export function IncomeCard({
   onEditAuto,
 }: {
   ownerId: string;
+  /** 합쳐서 엔진(2026-11-23): 같이 보는 다른 사람 기록도 한 카드에(수입 합 = 두 사람 합). 고치기는 ownerId 것만 */
+  alsoOwnerIds?: string[];
+  /** 다른 사람 기록 줄 앞에 붙일 이름(“예빈님 월급”) */
+  otherName?: string | null;
   from: string;
   to: string;
   masked: boolean;
@@ -107,8 +113,9 @@ export function IncomeCard({
   onEditAuto?: (id: string) => void;
 }) {
   const ins = useQuery({ queryKey: qk.moneyIns, queryFn: () => fetchMoneyIns() });
+  const owners = [ownerId, ...(alsoOwnerIds ?? [])];
   const rows = (ins.data ?? []).filter(
-    (r) => r.owner_user_id === ownerId && r.received_on >= from && r.received_on <= to,
+    (r) => owners.includes(r.owner_user_id) && r.received_on >= from && r.received_on <= to,
   );
   if (!rows.length && hideEmpty) return null;
   // 기록을 아직 못 읽었으면 기본값을 보이지 않음(기록이 있는데 깜빡 기본값이 보이는 것 방지)
@@ -181,7 +188,11 @@ export function IncomeCard({
               <>
                 <span className="hg-incomecard__date">{formatDot2(r.received_on)}</span>
                 <span className="hg-incomecard__name">
-                  {copy.moneyInKinds[r.kind]}
+                  {r.owner_user_id !== ownerId && otherName
+                    ? r.kind === 'salary'
+                      ? copy.incomeDefaultOf(otherName)
+                      : `${otherName}님 ${copy.moneyInKinds[r.kind]}`
+                    : copy.moneyInKinds[r.kind]}
                   {r.source === 'payday_auto' && (
                     <span className="hg-incomecard__auto">{copy.incomeAuto}</span>
                   )}
@@ -193,7 +204,7 @@ export function IncomeCard({
             );
             return (
               <li key={r.id} className="hg-incomecard__row">
-                {onEditAuto && r.source === 'payday_auto' ? (
+                {onEditAuto && r.source === 'payday_auto' && r.owner_user_id === ownerId ? (
                   <button
                     type="button"
                     className="hg-incomecard__rowbtn"
