@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (eb7e43bc). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e4d9327a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2679,18 +2679,17 @@ button.hg-datepill { cursor: pointer; }
 .hg-chip--fill b { font-weight: 600; opacity: 0.6; }
 /* W-02 줄(2026-11-23 사용자 결정 C안): 상태 버튼을 없애고 줄 전체가 버튼. 이름 앞 점(할 일) + 금액 + 맨 오른쪽 모양(› 할 일, ✓ 끝남, – 건너뜀) */
 .hg-transfer--act { display: block; padding: 0; }
-.hg-transfer--act > .hg-transfer__open, .hg-transfer--act > .hg-transfer__body { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; column-gap: var(--space-3); align-items: center; width: 100%; min-height: 68px; margin: 0; padding: var(--space-3) 0; box-sizing: border-box; }
-.hg-transfer--act .hg-transfer__label { font: 600 16px/22px var(--font-sans); }
-.hg-transfer--act .hg-transfer__amount { font: 700 16px/22px var(--font-sans); }
-.hg-transfer--act .hg-transfer__trail { display: grid; place-items: center; width: 20px; height: 20px; color: var(--slate); }
-.hg-transfer--act.is-go .hg-transfer__trail, .hg-transfer--act.is-done .hg-transfer__trail { color: var(--stone); }
-/* 점 자리는 목록에 점이 하나라도 있을 때만 비워 둬 이름 줄이 맞음(점 없는 목록은 들여쓰지 않음) */
-.hg-transfer__dot { display: none; width: 8px; height: 8px; }
-.hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer--act > :is(.hg-transfer__open, .hg-transfer__body) { grid-template-columns: 8px minmax(0, 1fr) auto 20px; }
-.hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer__dot { display: block; }
-.hg-transfer__dot.is-on { border-radius: var(--radius-full); background: var(--brand); }  /* 그래픽일 뿐, 뜻은 화면 읽기 이름 “확인할 것”으로 */
-.hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount, .hg-transfer--act.is-done .hg-transfer__meta { color: var(--stone); font-weight: 500; text-decoration: none; }  /* 2026-11-23 사용자 결정: 끝난 줄은 확실히 흐리게. slate(#545557)는 ink와 거의 같아 보여 한 단계 옅은 stone(4.5:1 이상) + 500 */
-.hg-transfer--act.is-skipped .hg-transfer__label, .hg-transfer--act.is-skipped .hg-transfer__amount { color: var(--slate); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+/* 2026-11-23 바탕 기준: 줄 최소 56, 위아래 12, 이름 17/400 + 보조 13/400 stone, 금액 17/700, 금액과 오른쪽 표시(› ✓ – 12px 칸) 사이 12. 점은 이름 왼쪽 여백에 떠 있음(이름 줄이 늘 같은 선) */
+.hg-transfer--act > .hg-transfer__open, .hg-transfer--act > .hg-transfer__body { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto 12px; column-gap: var(--space-3); align-items: center; width: 100%; min-height: 56px; margin: 0; padding: var(--space-3) 0; box-sizing: border-box; }
+.hg-transfer--act .hg-transfer__label { font: var(--text-name); }
+.hg-transfer--act .hg-transfer__amount { font: var(--text-amount); }
+.hg-transfer--act .hg-transfer__meta { font: var(--text-note); color: var(--stone); }
+.hg-transfer--act .hg-transfer__trail { display: flex; justify-content: flex-end; align-items: center; width: 12px; height: 20px; color: var(--stone); }
+.hg-transfer--act .hg-transfer__trail > svg { flex: none; width: 16px; height: 16px; margin-right: -3px; }
+.hg-transfer__dot { display: none; }
+.hg-transfer__dot.is-on { display: block; position: absolute; left: calc(var(--space-3) * -1 - 2px); top: calc(50% - 3px); width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--brand); }  /* 그래픽일 뿐, 뜻은 화면 읽기 이름 “확인할 것”으로. 흰 바탕 화면 양옆 24 안쪽 여백에 뜸 */
+.hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount, .hg-transfer--act.is-done .hg-transfer__meta { color: var(--stone); font-weight: 400; text-decoration: none; }  /* 2026-11-23 사용자 결정: 끝난 줄은 확실히 흐리게. slate(#545557)는 ink와 거의 같아 보여 한 단계 옅은 stone(4.5:1 이상). 이름·금액 400(바탕 기준) */
+.hg-transfer--act.is-skipped .hg-transfer__label, .hg-transfer--act.is-skipped .hg-transfer__amount { color: var(--slate); font-weight: 400; text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .hg-transfer--act.is-view.is-done .hg-transfer__label, .hg-transfer--act.is-view.is-done .hg-transfer__amount, .hg-transfer--act.is-view.is-done .hg-transfer__meta { color: var(--stone); }
 /* 빈 목록 안내(W-02 파트너 보기, 2026-11-23): 가운데 회색 글자 한 줄 */
 .hg-checklist__none { margin: 0; padding: var(--space-8) 0; text-align: center; font: var(--text-body); color: var(--slate); }
@@ -2767,3 +2766,181 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__below > * { margin: 0; }
 /* 2026-11-23 W-02 줄 시트: 아래 가운데 글자 버튼(‘이번 달은 건너뛸게요’ hg-btn--quiet, ‘저축·투자 보기’)은 가로 음수 margin 없이 가운데(누르는 칸 높이 44px은 그대로) */
 .hg-sheet__actions > .hg-btn--link.hg-btn--block:not(.hg-admin *, .hg-lock__assist > *) { margin-inline: 0; padding-inline: 0; }
+
+/* ═══ 바탕 기준 2026-11-23 (사용자 결정 “훨씬 낫네, 전체적으로 다 적용”, 카카오뱅크 통장 화면을 놓고 만든 시안) ═══
+   DESIGN.md ‘바탕 기준 2026-11-23’. 양옆 여백 24 하나(흰 바탕: 본문 `hg-fd` 안), 회색 바탕 + 흰 상자 화면은 상자 바깥 16 + 상자 안 24.
+   세로 간격은 8의 배수(항목 사이·탭 아래·구분선 위아래 12). 글자 34 / 22 / 17 / 15 / 13 다섯 단계, 굵기 400 / 700 두 가지.
+   이번 PR은 W-02·W-20b·H-01 홈·W-01·W-10에 적용(`hg-fd`, `.hg-hub`, `.hg-planstage` 안). 나머지 화면은 ‘바탕 정리 2’에서. */
+.hg-body:has(.hg-fd) { padding-inline: var(--space-6); }
+@media (max-width: 767px) {
+  .hg-body:has(.hg-fd) { padding-top: 0; }
+  .hg-body:has(.hg-fd) .hg-body__col, .hg-stack:has(> .hg-fd) { gap: 0; }
+}
+.hg-fd { display: flex; flex-direction: column; min-width: 0; }
+.hg-fd > * { margin-block: 0; }
+.hg-frame:has(.hg-fd) .hg-mhead__title, .hg-frame:has(.hg-fd) .hg-pagehead__title { font: var(--text-amount); letter-spacing: 0; }
+@media (max-width: 767px) { .hg-frame:has(.hg-fd) .hg-frame__mhead--back { min-height: 56px; padding-top: 0; padding-bottom: 0; } }
+/* 글자 버튼 hg-btn--link·건너뛰기는 400(500·600 없앰). 색은 그대로 회색(ink-2·slate)이라 대비 규칙 영향 없음. 어드민·웹사이트는 예전 그대로 */
+.hg-btn--link:not(.hg-admin *, .hg-adminauth *, .hg-site *), .hg-btn--link.hg-btn--quiet:not(.hg-admin *, .hg-adminauth *, .hg-site *) { font: var(--text-value); }
+/* 큰 금액 머리(`hg-fdhero`, W-10 모은 금액, W-20b 이번 달 수입): 이름표 13 + 34 금액 + 막대 + 15 한 줄 */
+.hg-fdhero { display: flex; flex-direction: column; align-items: stretch; padding: var(--space-4) 0 var(--space-6); }
+.hg-fdhero__jump { display: flex; flex-direction: column; align-items: flex-start; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
+.hg-fdhero__label { margin: 0; font: var(--text-note); color: var(--stone); }
+.hg-fdhero__amt { margin: 0; font: var(--text-amount-xl); letter-spacing: -0.5px; color: var(--ink); overflow-wrap: anywhere; }
+.hg-fdhero__edit { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin: 0; padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; color: inherit; text-align: left; cursor: pointer; }
+.hg-fdhero__edit > svg { flex: none; color: var(--slate); }
+.hg-fdhero__bar { height: 6px; margin-top: var(--space-4); border-radius: var(--radius-full); background: var(--bar-track); overflow: hidden; }
+.hg-fdhero__bar > i { display: block; height: 100%; border-radius: inherit; background: var(--accent-app); }  /* 저금 진행이라 오렌지(CLAUDE.md 색 규칙) */
+.hg-fdhero__line { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0 0; font: var(--text-value); color: var(--slate); }
+.hg-fdhero .hg-plan__block { margin-top: var(--space-4); }
+/* 8px 회색 띠(카드 테두리 대신 묶음 구분, 화면 끝까지) */
+.hg-fd__band { height: 8px; margin: var(--space-3) calc(var(--space-6) * -1) 0; background: var(--surface-alt); }
+/* 밑줄 탭(`LineTabs`): 목록 위 걸러 보기. 15px, 고른 것 700 ink + 2px ink 밑줄, 나머지 stone 400, 탭 줄 아래 화면 끝까지 hairline */
+.hg-linetabs { display: flex; gap: var(--space-6); margin: 0 calc(var(--space-6) * -1) var(--space-3); padding: 0 var(--space-6); border-bottom: 1px solid var(--hairline); }
+.hg-linetab { min-height: 44px; margin-bottom: -1px; padding: var(--space-3) 0 10px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--stone); font: var(--text-value); cursor: pointer; }
+.hg-linetab.is-active { border-bottom-color: var(--ink); color: var(--ink); font-weight: 700; }
+.hg-linetab:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (hover: hover) { .hg-linetab:not(.is-active):hover { color: var(--ink); } }
+/* W-02 머리: 월급날 칩(높이 28, 13px 400, surface-alt, ⌄) + 큰 금액 34 */
+.hg-fd .hg-w02hero { gap: 0; padding: var(--space-4) 0 var(--space-6); }
+.hg-fd .hg-datepill { height: 28px; padding: 0 10px; font: var(--text-note); color: var(--ink-2); }
+.hg-fd .hg-datepill > svg { width: 14px; height: 14px; }
+.hg-fd .hg-w02hero__amt { margin: var(--space-2) 0 0; font: var(--text-amount-xl); letter-spacing: -0.5px; }
+.hg-fd .hg-w02hero__meta { margin-top: var(--space-1); font: var(--text-value); color: var(--slate); }
+.hg-fd .hg-w02hero__bar { height: 6px; margin-top: var(--space-4); }
+.hg-fd .hg-w02hero__title { margin: var(--space-3) 0 0; font: var(--text-amount-lg); letter-spacing: -0.3px; }
+.hg-fd .hg-w02hero__saved { margin-top: var(--space-3); padding: var(--space-2) var(--space-4); box-shadow: none; font: var(--text-value); }
+.hg-fd .hg-w02hero__saved b { font-weight: 700; }
+.hg-fd .hg-q__help { margin: 0 0 var(--space-3); font: var(--text-note); color: var(--slate); }
+.hg-fd .hg-tabs { margin-bottom: var(--space-3); }
+/* 목록: 줄 사이 간격은 줄 안 위아래 12가 만듦. 선·카드 테두리 없음 */
+.hg-fd .hg-checklist__list { display: flex; flex-direction: column; }
+.hg-fd .hg-foldrow { min-height: 48px; margin-bottom: var(--space-3); padding: 0 var(--space-4); font: var(--text-value); color: var(--ink-2); }
+.hg-fd .hg-checkgroup { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.hg-fd .hg-sechead__title { font: var(--text-amount); }
+.hg-fd .hg-sechead { padding: var(--space-3) 0 0; }
+/* 수입 한 줄(W-02): 구분선 아래 “이번 달 수입 350만 원 ›” */
+.hg-fd .hg-incomeline { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
+.hg-fd .hg-incomeline .hg-listrow__label { color: var(--slate); }
+/* 항목 줄(ListRow·TransferRow 공통): 최소 56, 위아래 12, 이름 17/400 + 보조 13/400 stone(최대 한 줄), 금액 17/700, 금액과 오른쪽 표시 사이 12 */
+.hg-fd .hg-list--plain .hg-listrow { min-height: 56px; padding: var(--space-3) 0; column-gap: 0; }
+.hg-fd .hg-listrow__label { font: var(--text-name); }
+.hg-fd .hg-listrow__sub { font: var(--text-note); color: var(--stone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hg-fd .hg-list--plain .hg-listrow__value { padding-left: var(--space-3); font: var(--text-amount); }
+.hg-fd .hg-list--plain .hg-listrow__value.is-soft { font: var(--text-value); color: var(--slate); }
+.hg-fd .hg-listrow .hg-chevron { margin: 0 var(--space-1) 0 var(--space-3); }
+.hg-fd .hg-listrow:is(button, a):hover { background: none; }
+.hg-fd .hg-list--plain .hg-listrow:last-child { border-bottom: 0; }
+/* 체크 칸이 있는 줄(W-10 이번 달): 같은 줄 모양 */
+.hg-fd .hg-transfer:not(.hg-transfer--act) { box-sizing: border-box; grid-template-columns: minmax(0, 1fr) auto 28px; min-height: 56px; padding: var(--space-3) 0; }
+.hg-fd .hg-transfer:not(.hg-transfer--act) .hg-transfer__label { font: var(--text-name); }
+.hg-fd .hg-transfer:not(.hg-transfer--act) .hg-transfer__amount { font: var(--text-amount); }
+.hg-fd .hg-transfer:not(.hg-transfer--act) .hg-transfer__meta { font: var(--text-note); color: var(--stone); }
+.hg-fd .hg-transfer:not(.hg-transfer--act).is-done :is(.hg-transfer__label, .hg-transfer__amount) { font-weight: 400; }
+.hg-list--preview :is(.hg-listrow__label, .hg-transfer__label) { color: var(--slate); font-weight: 400; }
+.hg-list--preview :is(.hg-listrow__value, .hg-transfer__amount) { color: var(--slate); font-weight: 700; }
+/* 주 버튼 17/700 */
+.hg-fd .hg-stickybar .hg-btn--primary { font: var(--text-amount); }
+/* W-10: 정보 라벨-값, 접기 */
+.hg-fd__more { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-1); }
+.hg-fd__fold { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2) 0 var(--space-3); }
+.hg-fd__foldline { font: var(--text-note); color: var(--slate); }
+.hg-fd--w10 > .hg-fd__section { padding-top: var(--space-6); }
+.hg-fd--w10 .hg-fd__section > .hg-sechead { padding-top: 0; }
+.hg-fdinfo { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 48px; padding: var(--space-3) 0; font: var(--text-value); color: var(--ink-2); }
+.hg-fdinfo > span:first-child { color: var(--slate); }
+.hg-fd__menurow { gap: var(--space-2); padding-right: 0; }
+.hg-fd .hg-goalbox__jump:focus-visible, .hg-fdhero__jump:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ── 홈(H-01) 회색 바탕 + 흰 상자: 상자 바깥 16(본문 여백), 상자 안 24 ── */
+.hg-hub .hg-together { padding: var(--space-5) var(--space-6) var(--space-3); }
+.hg-hub .hg-together__title { font: var(--text-note); color: var(--stone); }
+.hg-hub .hg-together__track { margin-top: var(--space-3); }
+.hg-hub .hg-together__slide { padding: 0; gap: 0; }
+.hg-hub .hg-together__name { font: var(--text-name); color: var(--ink); }
+.hg-hub .hg-together__amount { margin-top: var(--space-2); font: var(--text-amount-lg); letter-spacing: -0.3px; }
+.hg-hub .hg-together__bar { height: 6px; margin-top: var(--space-3); border-radius: var(--radius-full); }
+.hg-hub .hg-together__line { margin-top: var(--space-2); font: var(--text-note); color: var(--stone); }
+.hg-hub .hg-together__line:first-of-type { margin-top: var(--space-2); }
+.hg-hub .hg-together__dots { margin-top: var(--space-3); }
+.hg-hub :is(.hg-hubbox__title, .hg-hubup__title) { min-height: 0; padding: var(--space-4) var(--space-6) var(--space-1); font: var(--text-amount); }
+.hg-hub .hg-hubbox, .hg-hub .hg-hubup { padding: 0 0 var(--space-2); }
+.hg-hub .hg-hubbox__row { padding: var(--space-3) var(--space-6); }
+.hg-hub .hg-hubbox__row + .hg-hubbox__row { border-top: 0; }
+.hg-hub .hg-hubbox__name { font: var(--text-name); }
+.hg-hub .hg-hubbox__main { font: var(--text-value); color: var(--slate); }
+.hg-hub .hg-hubbox__main--alert { font-weight: 700; color: var(--ink); }
+.hg-hub .hg-hubbox__sub { font: var(--text-note); color: var(--stone); }
+.hg-hub .hg-hubup__row { padding: var(--space-3) var(--space-6); }
+.hg-hub .hg-hubup__row + .hg-hubup__row { border-top: 0; }
+.hg-hub .hg-hubup__name { font: var(--text-name); }
+.hg-hub .hg-hubup__dday { font: var(--text-value); color: var(--slate); }
+.hg-hub .hg-hubtile { padding: var(--space-5); }
+.hg-hub .hg-hubtile__title { font: var(--text-amount); }
+.hg-hub .hg-hubtile__sub { margin-top: var(--space-2); font: var(--text-note); color: var(--stone); }
+.hg-hub .hg-hubtile--point .hg-hubtile__sub { color: var(--on-accent-app-sub); }
+.hg-hub .hg-hubtile__value { margin-top: 0; font: var(--text-amount); }
+.hg-hub .hg-hubtile__subrow > .hg-hubtile__sub { margin-top: 0; }
+.hg-hub .hg-hubline { padding: var(--space-3) var(--space-6); }
+.hg-hub .hg-hubline__main { font: var(--text-value); }
+.hg-hub .hg-hubline__sub { font: var(--text-note); color: var(--stone); }
+.hg-hub .hg-hubline__go { font: var(--text-value); }
+.hg-hubband__text { font: var(--text-value); }
+.hg-hubband__go { font: var(--text-value); }
+.hg-hubband__more { font: var(--text-note); }
+.hg-frame--alt .hg-banner--notice { font: var(--text-value); }
+.hg-frame--alt .hg-banner--notice .hg-banner__one { font: var(--text-value); }
+.hg-frame--alt .hg-banner--notice .hg-banner__sub { font: var(--text-note); }
+.hg-frame--alt .hg-banner--notice .hg-btn--sm { font: var(--text-note); font-weight: 700; }
+
+/* ── W-01 월급 계획 템플릿(회색 바탕 + radius 24 흰 카드 셋, 카드 안 24) ── */
+.hg-planstage .hg-plancard { padding: var(--space-6); }
+.hg-planstage .hg-plansum__label { font: var(--text-note); color: var(--stone); }
+.hg-planstage .hg-plansum__amt { font: var(--text-amount-xl); letter-spacing: -0.5px; }
+.hg-planstage .hg-plansum__title { margin-top: var(--space-1); font: var(--text-name); letter-spacing: 0; }
+.hg-planstage .hg-plansum__title em { font-weight: 700; }
+.hg-planstage .hg-plansum__bar { gap: var(--space-1); height: 8px; margin: var(--space-4) 0 var(--space-3); }
+.hg-planstage .hg-plansum__bar > i { min-width: 8px; border-radius: var(--radius-full); }
+.hg-planstage .hg-plansum__legend { gap: var(--space-1); }
+.hg-planstage .hg-plansum__legend li { font: var(--text-value); color: var(--slate); }
+.hg-planstage .hg-plansum__lname { color: var(--slate); }
+.hg-planstage .hg-plansum__lamt { font-weight: 400; }
+.hg-planstage .hg-plansum__pname, .hg-planstage .hg-plansum__person { font: var(--text-value); }
+.hg-planstage .hg-plansum__pamt { font-weight: 700; }
+.hg-planstage .hg-plansum__pnote { font: var(--text-note); }
+.hg-planstage .hg-plancard__head { min-height: 0; padding: 0 0 var(--space-1); }
+.hg-planstage .hg-plancard__title { font: var(--text-amount); letter-spacing: 0; }
+.hg-planstage .hg-plancard__sum { font: var(--text-value); color: var(--slate); }
+.hg-planstage .hg-plancard__hint { font: var(--text-value); }
+.hg-planstage .hg-receipt__row, .hg-planstage .hg-receipt__main { min-height: 56px; }
+.hg-planstage .hg-receipt__main { padding: var(--space-3) 0; }
+.hg-planstage .hg-receipt__name, .hg-fd .hg-receipt__name { font: var(--text-name); }
+.hg-planstage .hg-receipt__amt, .hg-fd .hg-receipt__amt { font: var(--text-amount); }
+.hg-planstage .hg-receipt__note, .hg-fd .hg-receipt__note { margin-top: 0; font: var(--text-note); color: var(--stone); }
+.hg-planstage .hg-receipt__prog, .hg-fd .hg-receipt__prog { margin-top: var(--space-2); }
+.hg-planstage .hg-receipt__progbar, .hg-fd .hg-receipt__progbar { width: 120px; height: 3px; }
+.hg-plan__block { height: 44px; margin-top: var(--space-1); border-radius: var(--radius-lg); font: var(--text-value); color: var(--ink-2); }
+.hg-plan__block--soft { margin-top: var(--space-4); }
+.hg-planstage .hg-foldrow { font: var(--text-value); }
+.hg-planstage .hg-receipt-actions .hg-btn--link { font: var(--text-value); }
+/* 주 버튼을 화면 아래에 고정(W-02, 내용이 짧아도 아래): 앱 틀 → 본문 → 열 → 스택 → hg-fd가 남는 높이를 채우고 주 버튼은 맨 아래 */
+@media (max-width: 767px) {
+  .hg-frame:has(.hg-fd > .hg-stickybar) { display: flex; flex-direction: column; align-items: stretch; }
+  .hg-frame:has(.hg-fd > .hg-stickybar) > .hg-frame__main { flex: 1 1 auto; display: flex; flex-direction: column; }
+  .hg-frame__main:has(.hg-fd > .hg-stickybar) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+  .hg-body:has(.hg-fd > .hg-stickybar) > .hg-body__col, .hg-body__col:has(.hg-fd > .hg-stickybar) > .hg-stack { flex: 1 1 auto; }
+  .hg-stack:has(> .hg-fd > .hg-stickybar) > .hg-fd { flex: 1 1 auto; }
+  .hg-fd > .hg-stickybar { margin-top: auto; }
+}
+.hg-planstage .hg-btn--secondary, .hg-planstage .hg-receipt-actions .hg-btn { font: var(--text-value); }
+/* W-10 이번 달 줄: 한 일은 취소선 없이 stone (바탕 기준 2026-11-23) */
+.hg-fd--w10 .hg-transfer.is-done .hg-transfer__label { text-decoration: none; color: var(--stone); }
+/* W-01 ‘편집하기’: 표준 글자(15), 굵기 400, 테두리 없는 흰 상자 */
+.hg-planstage .hg-btn--outline { font: var(--text-value); font-weight: 400; border-color: transparent; }
+/* 같이 모으기 사람 원(2026-11-23 사용자 지적): 원 32, 안 글자 12/700(3글자 11), 겹침 −8·뒤 원이 위·2px surface 고리 그대로.
+   이름표(13) 아래 12 → 원 묶음과 이름 사이 8, 세로 가운데 → 이름 아래 금액까지 8 */
+.hg-hub .hg-together__people { gap: var(--space-2); min-height: 32px; align-items: center; }
+.hg-hub .hg-together__people .hg-avatar { --avatar: 32px; font-size: 12px; font-weight: 700; }
+.hg-hub .hg-together__people .hg-avatar--n3 { font-size: 11px; }
+.hg-hub .hg-together__people .hg-avatars { flex: none; }
+.hg-hub .hg-together__amount { margin-top: var(--space-2); }

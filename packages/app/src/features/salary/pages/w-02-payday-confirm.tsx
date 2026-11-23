@@ -6,12 +6,10 @@ import {
   fetchMoneyIns,
   fetchPastChecklists,
   qk,
-  setPaydayIncome,
   type PayChecklist,
   type PayCheckLine,
 } from '@sweetwo/api';
 import {
-  amountBand,
   chipCounts,
   confirmableLines,
   doneState,
@@ -34,11 +32,11 @@ import {
   BottomSheet,
   Button,
   StickyBar,
-  Chip,
   Icon,
   Illustration,
   PageHeader,
   ReceiptRows,
+  LineTabs,
   SectionHeader,
   Tabs,
   TransferRow,
@@ -80,7 +78,7 @@ import {
 } from '../data';
 import { incomeOf, MonthHero, ShareLink } from '../month-parts';
 import { salaryPaths, savingListPath, savingPaths, togetherPaths } from '../paths';
-import { IncomeCard, PaydayIncomeSheet, type IncomeDefaults } from '../money-in-rows';
+import { IncomeLine } from '../money-in-rows';
 import { SalaryLoadError, SalaryLoading, useSalaryTitle } from '../salary-tab';
 import { useSavingItems } from '../saving';
 import { AchieveWatch } from '../saving-parts';
@@ -112,8 +110,6 @@ export function W02PaydayConfirm() {
   const [chip, setChip] = useState<CheckChip>('all');
   const [foldOpen, setFoldOpen] = useState(false);
   const [pickDate, setPickDate] = useState(false);
-  const [incomeSheet, setIncomeSheet] = useState(false);
-  const [incomeBusy, setIncomeBusy] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const cycleParam = params.get('cycle');
   // W-21 지난 달 모아보기에서 열었으면(2026-11-17): 머리는 ‹ 지난 달 모아보기(뒤로 = 모아보기), 구간 탭 없음
@@ -210,47 +206,14 @@ export function W02PaydayConfirm() {
       />
     );
 
-  const pending = sp.couple_state === 'unlink_pending';
-  // 수입 카드 기본값(2026-11-20): 기록 0건 + 자동 기록 전이면 프로필 월급을 보이고 바로 고침(set_payday_income, 07 4장)
+  // 수입 기본값(프로필 월급)은 W-20b 맨 위로 옮김(2026-11-23 바탕 기준). W-02는 한 줄 IncomeLine만
   const meIncome = me.data.monthly_income ?? 0;
-  const defaultLines = (date: string): IncomeDefaults['lines'] => [
-    ...(meIncome > 0
-      ? [{ key: 'me', date, name: copy.moneyInKinds.salary, amount: meIncome }]
-      : []),
-    ...(joint && partner.data && (partner.data.monthly_income ?? 0) > 0
-      ? [
-          {
-            key: 'partner',
-            date,
-            name: copy.incomeDefaultOf(partner.data.nickname ?? ''),
-            amount: partner.data.monthly_income ?? 0,
-          },
-        ]
-      : []),
-  ];
-  const saveIncome = async (checklist: string, amount: number) => {
-    if (incomeBusy) return;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false)
-      return toast(sharedCopy.needOnline);
-    setIncomeBusy(true);
-    try {
-      await setPaydayIncome(checklist, amount);
-      track('payday_income_set', { amount_band: amountBand(amount), zero: amount === 0 });
-      await refreshChecks(qc);
-      setIncomeSheet(false);
-    } catch {
-      toast(copy.failed);
-    } finally {
-      setIncomeBusy(false);
-    }
-  };
   const emptyPlan = (amount: number) => (
     <EmptyPlan
       lead={amount > 0 ? copy.emptyLeadPay(money(amount, masked)) : copy.emptyLeadNone}
       onFill={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
     />
   );
-  const kindText = (kind: string) => (kind === 'saving' ? copy.kindSaving : copy.kindSpend);
   const page = { title };
   const frame = (body: ReactNode) => (
     <MainFrame
@@ -267,7 +230,7 @@ export function W02PaydayConfirm() {
               onBack={() => nav(-1)}
             />
           ) : null}
-          {body}
+          <div className="hg-fd">{body}</div>
         </div>,
       ]}
     />
@@ -340,15 +303,13 @@ export function W02PaydayConfirm() {
           bar={needed > 0 ? (pct ?? 0) : undefined}
         />
         {meId && (
-          <IncomeCard
+          <IncomeLine
             ownerId={meId}
             from={from}
             to={to}
             masked={masked}
             label={copy.incomePeriodLabel}
-            hideSum
             onOpen={() => nav(togetherPaths.moneyInList)}
-            onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
           />
         )}
         {rows.length > 0 && (
@@ -414,7 +375,7 @@ export function W02PaydayConfirm() {
           : copy.previewAuto
         : firstDay
           ? copy.waitManual(copy.payday(Number(firstDay.slice(8, 10))))
-          : kindText(l.kind);
+          : undefined;
     return frame(
       <>
         <MonthHero
@@ -457,18 +418,14 @@ export function W02PaydayConfirm() {
           </div>
         )}
         {meId && (
-          <IncomeCard
+          <IncomeLine
             ownerId={meId}
             from={`${today.slice(0, 8)}01`}
             to={today}
             masked={masked}
-            // 첫 월급날 전: 아직 사이클이 서버에 없어 저장할 곳이 없으므로 보기만(연필 없음)
-            defaults={{
-              amount: meIncome,
-              lines: defaultLines(firstDay ?? today),
-            }}
+            // 첫 월급날 전: 기록이 없으면 프로필 월급을 값으로(저장은 첫 확인 때 자동 기록)
+            fallback={meIncome}
             onOpen={() => nav(togetherPaths.moneyInList)}
-            onAdd={pending ? undefined : () => nav(togetherPaths.moneyIn)}
           />
         )}
       </>,
@@ -592,7 +549,7 @@ export function W02PaydayConfirm() {
         meId={meId}
         readOnly={!lineOpen}
         viewOnly={partnerTab || othersManual.includes(l)}
-        sub={l.auto ? copy.previewAuto : kindText(l.kind)}
+        sub={l.auto ? copy.previewAuto : ''}
         onOther={
           partnerTab || !lineOpen
             ? undefined
@@ -691,19 +648,16 @@ export function W02PaydayConfirm() {
   };
   const saved = savedSum(mineLines);
   const filters = (
-    <div className="hg-row" role="group" aria-label={copy.manualGroupLabel}>
-      {(
-        [
-          ['all', copy.chipAll, counts.all],
-          ['left', copy.chipLeft, counts.left],
-          ['done', copy.chipDone, counts.done],
-        ] as const
-      ).map(([v, label, n]) => (
-        <Chip key={v} className="hg-chip--fill" selected={chip === v} onClick={() => setChip(v)}>
-          {label} <b>{n}</b>
-        </Chip>
-      ))}
-    </div>
+    <LineTabs
+      label={copy.manualGroupLabel}
+      value={chip}
+      onChange={setChip}
+      items={[
+        { value: 'all', label: copy.chipAll, count: counts.all },
+        { value: 'left', label: copy.chipLeft, count: counts.left },
+        { value: 'done', label: copy.chipDone, count: counts.done },
+      ]}
+    />
   );
   const rowsList = (
     <div className="hg-checklist__list" ref={listRef}>
@@ -745,7 +699,6 @@ export function W02PaydayConfirm() {
             pill={datePill}
             // 파트너 탭은 월급 금액을 못 볼 때(‘저축·투자만’ 공개 등) “0원”을 큰 금액으로 두지 않고 줄 개수만(2026-11-23)
             amount={noLines || (partnerTab && income <= 0) ? undefined : planned}
-            meta={noLines ? undefined : heroMeta({ lines: mineLines })}
             done={
               finished
                 ? {
@@ -845,39 +798,16 @@ export function W02PaydayConfirm() {
         </section>
       )}
       {meId && !ownEmpty && (
-        <IncomeCard
+        <IncomeLine
           ownerId={partnerTab ? tab : meId}
           alsoOwnerIds={joint && partner.data ? [partner.data.id] : undefined}
-          otherName={partner.data?.nickname}
           from={shown.cycle_start}
           to={shown.cycle_end}
           masked={masked}
           label={pastView ? copy.incomeCardLabelOf(Number(start.slice(5, 7))) : undefined}
+          fallback={incomeDefault ? meIncome : undefined}
           hideEmpty={partnerTab}
           onOpen={partnerTab ? undefined : () => nav(togetherPaths.moneyInList)}
-          onAdd={pending || partnerTab || ago > 0 ? undefined : () => nav(togetherPaths.moneyIn)}
-          defaults={
-            incomeDefault
-              ? {
-                  amount: meIncome,
-                  lines: defaultLines(list.cycle_start < today ? list.cycle_start : today),
-                  onEdit: pending ? undefined : () => setIncomeSheet(true),
-                }
-              : undefined
-          }
-          onEditAuto={
-            pending || partnerTab || ago > 0
-              ? undefined
-              : (id) => nav(`${togetherPaths.moneyIn}?edit=${id}`)
-          }
-        />
-      )}
-      {incomeSheet && incomeDefault && (
-        <PaydayIncomeSheet
-          initial={meIncome}
-          busy={incomeBusy}
-          onSave={(v) => void saveIncome(list.id, v)}
-          onClose={() => setIncomeSheet(false)}
         />
       )}
       {confirmable.length > 0 && (

@@ -19,13 +19,16 @@ export interface SavingNoteInput {
   bundled: boolean;
 }
 
-/** 저축·투자 줄 보조 줄 조각(모은 금액·목표 금액). 보일 말이 없으면 undefined. won = 금액 글자(가리기 포함) */
+/**
+ * 저축·투자 줄 보조 줄 조각(W-01 시안 2026-11-23): 모은 게 없으면 “목표 금액 300만 원”, 모은 게 있으면 진행만 “목표 금액의 14%”
+ * (모은 금액 문구는 없앰, 목표 금액이 없으면 보일 말 없음, 다 모았으면 “달성”). 보일 말이 없으면 undefined. won = 금액 글자(가리기 포함)
+ */
 export function savingLineNote(o: SavingNoteInput, won: (n: Won) => string): string | undefined {
   if (o.bundled) return o.saved > 0 ? `내 몫 ${won(o.saved)}` : undefined;
   if (o.saved <= 0)
     return o.target !== null && o.target > 0 ? `목표 금액 ${won(o.target)}` : undefined;
-  const tail = o.target === null ? null : o.achieved ? '달성' : `목표 금액의 ${o.pct ?? 0}%`;
-  return `모은 금액 ${won(o.saved)}${tail ? `, ${tail}` : ''}`;
+  if (o.target === null) return undefined;
+  return o.achieved ? '달성' : `목표 금액의 ${o.pct ?? 0}%`;
 }
 
 /** 나가는 날 짧은 글자 “25일 자동”(day = “25일”, “말일”, “월급날”) */

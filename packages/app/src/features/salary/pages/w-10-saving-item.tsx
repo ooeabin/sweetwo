@@ -140,30 +140,37 @@ export function W10SavingItem() {
       (a.pay_checklist?.cycle_start ?? '') < (b.pay_checklist?.cycle_start ?? '') ? 1 : -1,
     );
   // 돈 움직임(수입 적기, 자동 넣기, 바로잡기, 잔액 맞추기, 냈어요 −, 2026-11-13). 사유 글은 넣은 사람에게만(goal_move_reasons)
-  const moveText = (x: NonNullable<typeof moves.data>[number]) => {
+  // 모은 내역 줄(2026-11-23 바탕 기준): 이름 + 날짜, 오른쪽 “+30만 원”(빼기는 −)
+  const moveRow = (x: NonNullable<typeof moves.data>[number]) => {
     const sign = x.kind === 'in' ? '+' : '−';
-    const v = m(x.amount);
-    if (x.money_in_id) return copy.historyMoneyIn(v);
-    if (x.reason_code === 'auto') return copy.historyAuto(v);
-    if (x.reason_code === 'reconcile') return copy.historyReconcile(sign, v);
-    if (x.reason_code === 'note_paid') return copy.historyNotePaid(v);
-    return copy.historyAdjust(sign, v);
+    const name = x.money_in_id
+      ? copy.historyMoneyInName
+      : x.reason_code === 'auto'
+        ? copy.historyAutoName
+        : x.reason_code === 'reconcile'
+          ? copy.historyReconcileName
+          : x.reason_code === 'note_paid'
+            ? copy.historyNotePaidName
+            : copy.historyAdjustName;
+    return { label: name, value: `${sign}${m(x.amount)}` };
   };
-  const recordText = (l: (typeof records)[number]) => {
+  const recordRow = (l: (typeof records)[number]) => {
     const label = l.pay_checklist?.label ?? '';
-    if (l.state === 'skipped') return copy.historySkipped(label);
+    if (l.state === 'skipped') return { label: copy.historySkipped(label), value: undefined };
     const v = l.actual ?? l.planned;
-    // 나가는 날 앱이 자동 확인한 줄(checked_by 없음)은 “자동으로 넣었어요 30만 원”(2026-11-23, 날짜 없는 사람 자동 넣기와 같은 말)
-    if (l.auto && l.state === 'checked' && !l.checked_by) return copy.historyAuto(m(v));
-    return l.actual !== null && l.actual !== l.planned
-      ? copy.historyOther(label, m(v))
-      : copy.historyChecked(label, m(v));
+    // 나가는 날 앱이 자동 확인한 줄(checked_by 없음)은 “자동으로 넣었어요”(2026-11-23, 날짜 없는 사람 자동 넣기와 같은 말)
+    if (l.auto && l.state === 'checked' && !l.checked_by)
+      return { label: copy.historyAutoName, value: `+${m(v)}` };
+    return {
+      label: l.actual !== null && l.actual !== l.planned ? copy.historyOtherName(label) : label,
+      value: `+${m(v)}`,
+    };
   };
   const history = [
     ...records.map((l) => ({
       key: l.id,
       at: l.checked_at ?? `${l.pay_checklist?.cycle_start ?? ''}T00:00:00+09:00`,
-      label: recordText(l),
+      ...recordRow(l),
       to: undefined as string | undefined,
       sub:
         l.checked_at && d.joint && l.checked_by
@@ -177,7 +184,7 @@ export function W10SavingItem() {
       .map((x) => ({
         key: x.id,
         at: x.created_at,
-        label: moveText(x),
+        ...moveRow(x),
         sub: [formatDateFull(kstDay(x.created_at)), reasons.data?.[x.id]]
           .filter(Boolean)
           .join(', '),
@@ -187,7 +194,7 @@ export function W10SavingItem() {
   ].sort((a, b) => (a.at < b.at ? 1 : -1));
 
   const body = (
-    <div key="l" className="hg-stack hg-goaldetail" style={{ gap: 'var(--space-8)' }}>
+    <div key="l" className="hg-stack hg-goaldetail" style={{ gap: 0 }}>
       <AchieveWatch />
       <PageHeader
         title={g.name}
@@ -196,287 +203,277 @@ export function W10SavingItem() {
         onBack={back}
         action={i.canEdit ? <Menu label={copy.menu} actions={actions} /> : undefined}
       />
-      {/* 맨 위 회색 한 줄(W-01 파트너 탭과 같음, 2026-11-12 S7-08·S7-09) */}
-      {!i.mayEdit ? (
-        <p className="hg-q__help" style={{ margin: 0 }}>
-          {hideAmounts ? copy.partnerBundleItem(i.ownerName) : copy.partnerItem(i.ownerName)}
-        </p>
-      ) : closed ? (
-        <p className="hg-q__help" style={{ margin: 0 }}>
-          {copy.closedNote}
-        </p>
-      ) : (
-        locked && (
+      <div className="hg-fd hg-fd--w10">
+        {/* 맨 위 회색 한 줄(W-01 파트너 탭과 같음, 2026-11-12 S7-08·S7-09) */}
+        {!i.mayEdit ? (
           <p className="hg-q__help" style={{ margin: 0 }}>
-            {copy.itemPending}
+            {hideAmounts ? copy.partnerBundleItem(i.ownerName) : copy.partnerItem(i.ownerName)}
           </p>
-        )
-      )}
-      {/* 묶음 카드(20 W-10 0번): 합계, 각자 금액은 둘 다 켰을 때, 퍼센트만이면 %. ⋯ → W-15a */}
-      {bundle && (
-        <BundleCard
-          bundle={bundle}
-          masked={masked}
-          myName={d.myName}
-          partnerName={d.partnerName}
-          share={i.owner === 'mine' ? i.saved : null}
-          onClick={
-            bundle.goals.some((x) => x.mine)
-              ? () => nav(togetherPaths.bundleEdit(bundle.id))
-              : undefined
-          }
-        />
-      )}
-      {/* 아직 안 들어간 묶음(상대가 만듦): 들어가기(20 W-10 0c, 2026-11-14 H1) */}
-      {bundle && !bundle.goals.some((x) => x.mine) && !d.pending && (
-        <Button variant="secondary" block onClick={() => nav(togetherPaths.bundleJoin(bundle.id))}>
-          {copy.bundleJoinCta}
-        </Button>
-      )}
-      {/* 저금 한 카드(20 W-10, 2026-11-16 4차 검토): 모은 금액 큰 숫자 + 막대 + 한 줄(목표 금액의 %) + 기한 줄(늘 보임, 기한까지 남은
-          금액과 한 줄). 월 필요액·예상·‘매달 금액 바꾸기’만 가벼운 글자 버튼 ‘자세히 보기’ 아래. 목표 금액이 없으면 같은 카드 안에
-          ‘목표 금액 정하기’. 묶인 저금은 이 카드 없이 묶음 카드 한 장(합계 + ‘내 몫’ 한 줄, 2026-11-16) */}
-      {!hideAmounts && !g.bundle_id && (
-        <section className="hg-goalbox" aria-label={copy.savedLabel}>
-          {/* 누르면 아래 저금 내역으로(20 W-10 2번) */}
-          <button type="button" className="hg-goalbox__jump" onClick={toHistory}>
-            <span className="hg-card__label">{copy.savedLabel}</span>
-            <span className="hg-goalhero__amount">{m(i.saved)}</span>
-          </button>
-          {showTarget && i.target !== null && (
-            <>
-              {i.state !== 'achieved' && (
-                <div className="hg-goalbox__bar" role="img" aria-label={`${g.name} ${i.pct ?? 0}%`}>
-                  <i style={{ width: `${i.bar}%` }} />
-                </div>
-              )}
-              <div className="hg-goalbox__head">
-                <span>
+        ) : closed ? (
+          <p className="hg-q__help" style={{ margin: 0 }}>
+            {copy.closedNote}
+          </p>
+        ) : (
+          locked && (
+            <p className="hg-q__help" style={{ margin: 0 }}>
+              {copy.itemPending}
+            </p>
+          )
+        )}
+        {/* 묶음 카드(20 W-10 0번): 합계, 각자 금액은 둘 다 켰을 때, 퍼센트만이면 %. ⋯ → W-15a */}
+        {bundle && (
+          <BundleCard
+            bundle={bundle}
+            masked={masked}
+            myName={d.myName}
+            partnerName={d.partnerName}
+            share={i.owner === 'mine' ? i.saved : null}
+            onClick={
+              bundle.goals.some((x) => x.mine)
+                ? () => nav(togetherPaths.bundleEdit(bundle.id))
+                : undefined
+            }
+          />
+        )}
+        {/* 아직 안 들어간 묶음(상대가 만듦): 들어가기(20 W-10 0c, 2026-11-14 H1) */}
+        {bundle && !bundle.goals.some((x) => x.mine) && !d.pending && (
+          <Button
+            variant="secondary"
+            block
+            onClick={() => nav(togetherPaths.bundleJoin(bundle.id))}
+          >
+            {copy.bundleJoinCta}
+          </Button>
+        )}
+        {/* 저금 위쪽(20 W-10, 2026-11-23 바탕 기준): 이름표 + 큰 금액 + 막대 + 한 줄(목표 금액의 %). 아래 항목 줄(기한, 매달 모으는 금액,
+          목표 금액, 이번 달)은 줄마다 누르면 고치는 화면. 월 필요액·예상·‘매달 금액 바꾸기’만 ‘자세히 보기’ 아래. 묶인 저금은 이 위쪽 없이
+          묶음 카드 한 장(합계 + ‘내 몫’ 한 줄, 2026-11-16) */}
+        {!hideAmounts && !g.bundle_id && (
+          <section className="hg-fdhero" aria-label={copy.savedLabel}>
+            {/* 누르면 아래 모은 내역으로(20 W-10 2번) */}
+            <button type="button" className="hg-fdhero__jump" onClick={toHistory}>
+              <span className="hg-fdhero__label">{copy.savedLabel}</span>
+              <span className="hg-fdhero__amt">{m(i.saved)}</span>
+            </button>
+            {showTarget && i.target !== null && (
+              <>
+                {i.state !== 'achieved' && (
+                  <div
+                    className="hg-fdhero__bar"
+                    role="img"
+                    aria-label={`${g.name} ${i.pct ?? 0}%`}
+                  >
+                    <i style={{ width: `${i.bar}%` }} />
+                  </div>
+                )}
+                <p className="hg-fdhero__line">
                   {i.state === 'achieved'
                     ? copy.reachedAll(m(i.target))
                     : copy.targetOf(m(i.target), i.pct ?? 0)}
-                </span>
-                {i.state === 'achieved' ? (
-                  <Badge kind="achieved">{copy.achieved}</Badge>
-                ) : (
-                  showEdit && (
-                    <button
-                      type="button"
-                      className="hg-btn hg-btn--link"
-                      disabled={locked}
-                      onClick={() => nav(savingPaths.edit(id, 'amount'))}
-                    >
-                      {copy.edit}
-                    </button>
-                  )
-                )}
+                  {i.state === 'achieved' && <Badge kind="achieved">{copy.achieved}</Badge>}
+                </p>
+              </>
+            )}
+            {showTarget && i.target === null && <p className="hg-fdhero__line">{copy.noTarget}</p>}
+          </section>
+        )}
+        {!hideAmounts && !g.bundle_id && (
+          <div className="hg-list hg-list--plain">
+            {/* 기한: 있으면 날짜, 없으면 ‘정하기’. 아래 보조 줄 = 기한까지 남은 금액(같은 날짜를 두 번 쓰지 않음) */}
+            {showTarget &&
+              i.target !== null &&
+              i.state !== 'achieved' &&
+              (i.deadline || showEdit) && (
+                <ListRow
+                  label={copy.rowDeadline}
+                  sub={i.deadline && remain ? copy.remainMore(m(remain.remain)) : undefined}
+                  value={i.deadline ? formatYm(i.deadline) : copy.rowSet}
+                  soft
+                  onClick={
+                    showEdit && !locked ? () => nav(savingPaths.edit(id, 'deadline')) : undefined
+                  }
+                />
+              )}
+            {!closed && (i.monthly > 0 || i.owner !== 'partner' || d.joint) && (
+              <ListRow
+                label={copy.rowMonthly}
+                value={i.monthly === 0 && i.canEdit && !locked ? copy.rowSet : m(i.monthly)}
+                soft
+                onClick={
+                  showEdit && !locked
+                    ? () =>
+                        nav(
+                          i.monthly === 0 && i.canEdit ? splitTo : savingPaths.edit(id, 'monthly'),
+                        )
+                    : undefined
+                }
+              />
+            )}
+            {showTarget && (i.target !== null || showEdit) && (
+              <ListRow
+                label={copy.rowTarget}
+                value={i.target !== null ? m(i.target) : copy.rowSet}
+                soft
+                onClick={
+                  showEdit && !locked && i.state !== 'achieved'
+                    ? () =>
+                        nav(
+                          i.target === null
+                            ? `${savingPaths.edit(id, 'amount')}?first=1`
+                            : savingPaths.edit(id, 'amount'),
+                        )
+                    : undefined
+                }
+              />
+            )}
+            {!closed && i.thisMonth && (
+              <div className="hg-checklist__list">
+                <CheckLine
+                  line={i.thisMonth}
+                  goalName={g.name}
+                  name={copy.thisMonth}
+                  personName={nameOf}
+                  meId={d.meId}
+                  entry="w10"
+                  // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
+                  viewOnly={i.owner === 'partner' && !d.joint}
+                />
               </div>
-              {i.state !== 'achieved' && (i.deadline || showEdit) && (
-                // 기한 줄(늘 보임): “2027년 11월까지 300만 원 더 필요해요”(남은 금액이 없으면 “2027년 11월까지”) + ‘기한 바꾸기’.
-                // 기한이 없으면 ‘기한 정하기’ 하나. 같은 날짜를 두 번 쓰지 않음
-                <div className="hg-goalbox__due">
-                  {i.deadline ? (
-                    <span>
-                      {remain
-                        ? copy.remainUntil(formatYm(remain.deadline), m(remain.remain))
-                        : copy.until(formatYm(i.deadline))}
+            )}
+          </div>
+        )}
+        {!hideAmounts &&
+          !g.bundle_id &&
+          showTarget &&
+          i.target !== null &&
+          i.state !== 'achieved' &&
+          (i.need !== null || i.eta || (i.late !== null && showEdit)) && (
+            <>
+              <button
+                type="button"
+                className="hg-btn hg-btn--link hg-fd__more"
+                aria-expanded={more}
+                aria-controls="w-10-more"
+                onClick={() => setMore((x) => !x)}
+              >
+                {more ? copy.foldClose : copy.foldOpen}
+                <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
+              </button>
+              {more && (
+                <div id="w-10-more" className="hg-fd__fold">
+                  {i.need !== null && (
+                    <span className="hg-fd__foldline">
+                      {together
+                        ? copy.needPerMonthTogether(m(i.need), i.monthly ? m(i.monthly) : undefined)
+                        : copy.needPerMonth(m(i.need), i.monthly ? m(i.monthly) : undefined)}
                     </span>
-                  ) : null}
-                  {showEdit && (
+                  )}
+                  {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
+                  {i.eta && <span className="hg-fd__foldline">{copy.etaAt(formatYm(i.eta))}</span>}
+                  {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
+                  {i.late !== null && showEdit && (
                     <button
                       type="button"
                       className="hg-btn hg-btn--link"
+                      style={{ alignSelf: 'flex-start' }}
                       disabled={locked}
-                      onClick={() => nav(savingPaths.edit(id, 'deadline'))}
+                      onClick={() => nav(splitTo)}
                     >
-                      {i.deadline ? copy.changeDeadline : copy.setDeadline}
+                      {copy.changeMonthly}
                     </button>
                   )}
                 </div>
               )}
-              {i.state !== 'achieved' &&
-                (i.need !== null || i.eta || (i.late !== null && showEdit)) && (
-                  <>
-                    <button
-                      type="button"
-                      className="hg-btn hg-btn--link hg-goalbox__more"
-                      aria-expanded={more}
-                      aria-controls="w-10-more"
-                      onClick={() => setMore((x) => !x)}
-                    >
-                      {more ? copy.foldClose : copy.foldOpen}
-                      <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
-                    </button>
-                    {more && (
-                      <div id="w-10-more" className="hg-goalbox__fold">
-                        {i.need !== null && (
-                          <span className="hg-goalbox__sub">
-                            {together
-                              ? copy.needPerMonthTogether(
-                                  m(i.need),
-                                  i.monthly ? m(i.monthly) : undefined,
-                                )
-                              : copy.needPerMonth(m(i.need), i.monthly ? m(i.monthly) : undefined)}
-                          </span>
-                        )}
-                        {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
-                        {i.eta && (
-                          <span className="hg-goalbox__sub">{copy.etaAt(formatYm(i.eta))}</span>
-                        )}
-                        {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
-                        {i.late !== null && showEdit && (
-                          <button
-                            type="button"
-                            className="hg-btn hg-btn--link"
-                            style={{ alignSelf: 'flex-start' }}
-                            disabled={locked}
-                            onClick={() => nav(splitTo)}
-                          >
-                            {copy.changeMonthly}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
             </>
           )}
-          {showTarget && i.target === null && (
-            <>
-              <span className="hg-card__meta">{copy.noTarget}</span>
-              {showEdit && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={locked}
-                  onClick={() => nav(`${savingPaths.edit(id, 'amount')}?first=1`)}
-                >
-                  {copy.setTarget}
-                </Button>
-              )}
-            </>
-          )}
-        </section>
-      )}
-      {/* 매달 모을 금액이 0원인 내 저금(합류해서 같이 모으기에 든 저금 등): 안내 줄 → 그 저금 줄 금액 시트(2026-11-16 r6) */}
-      {!closed && !hideAmounts && i.monthly === 0 && i.canEdit && !locked && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => nav(splitTo)}
-        >
-          {copy.setMonthly}
-        </button>
-      )}
-      {!closed && !hideAmounts && (i.monthly > 0 || i.owner !== 'partner' || d.joint) && (
-        <section className="hg-goalbox" aria-label={copy.monthlyOf(m(i.monthly))}>
-          <div className="hg-goalbox__head">
-            <b>{copy.monthlyOf(m(i.monthly))}</b>
-            {showEdit && (
-              <button
-                type="button"
-                className="hg-btn hg-btn--link"
-                disabled={locked}
-                onClick={() => nav(savingPaths.edit(id, 'monthly'))}
-              >
-                {copy.change}
-              </button>
-            )}
-          </div>
-          {i.thisMonth && (
-            <div className="hg-checklist__list">
-              <CheckLine
-                line={i.thisMonth}
-                goalName={g.name}
-                name={copy.thisMonth}
-                personName={nameOf}
-                meId={d.meId}
-                entry="w10"
-                // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
-                viewOnly={i.owner === 'partner' && !d.joint}
+        {/* 달성했는데 아직 고르지 않았으면 W-12a와 같은 질문(20 W-10 5번) */}
+        {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
+        {!hideAmounts && <div className="hg-fd__band" aria-hidden="true" />}
+        {!hideAmounts && (
+          <section
+            ref={historyRef}
+            className="hg-fd__section"
+            aria-label={copy.history}
+            style={{ scrollMarginTop: 'var(--space-6)' }}
+          >
+            <SectionHeader title={copy.history} />
+            {/* 불러오는 중은 뼈대(빈 상태 문장이 먼저 보이지 않게, S7-03), 못 불러오면 다시 시도(S7-04) */}
+            {lines.isLoading ? (
+              <SkelRows
+                rows={[
+                  [120, 72],
+                  [96, 72],
+                ]}
               />
-            </div>
-          )}
-        </section>
-      )}
-      {/* 달성했는데 아직 고르지 않았으면 W-12a와 같은 질문(20 W-10 5번) */}
-      {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
-      {!hideAmounts && (
-        <section
-          ref={historyRef}
-          className="hg-stack"
-          aria-label={copy.history}
-          style={{ scrollMarginTop: 'var(--space-6)' }}
-        >
-          <SectionHeader title={copy.history} />
-          {/* 불러오는 중은 뼈대(빈 상태 문장이 먼저 보이지 않게, S7-03), 못 불러오면 다시 시도(S7-04) */}
-          {lines.isLoading ? (
-            <SkelRows
-              rows={[
-                [120, 72],
-                [96, 72],
-              ]}
-            />
-          ) : lines.isError && !lines.data ? (
-            <section className="hg-card hg-card--fill hg-stack" role="status">
-              <p className="hg-card__meta">{copy.loadFailed}</p>
+            ) : lines.isError && !lines.data ? (
+              <section className="hg-card hg-card--fill hg-stack" role="status">
+                <p className="hg-card__meta">{copy.loadFailed}</p>
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link"
+                  style={{ alignSelf: 'flex-start' }}
+                  onClick={() => void lines.refetch()}
+                >
+                  {copy.retry}
+                </button>
+              </section>
+            ) : history.length || g.start_saved > 0 ? (
+              <div className="hg-list hg-list--plain">
+                {(all ? history : history.slice(0, 12)).map((h) => (
+                  <ListRow
+                    key={h.key}
+                    label={h.label}
+                    sub={h.sub || undefined}
+                    value={h.value}
+                    onClick={h.to ? () => nav(h.to ?? '') : undefined}
+                  />
+                ))}
+                {/* 시작할 때 모은 금액(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
+                {g.start_saved > 0 && (
+                  <ListRow
+                    label={copy.historyStartName}
+                    sub={formatDateFull(kstDay(g.created_at))}
+                    value={`+${m(g.start_saved)}`}
+                  />
+                )}
+              </div>
+            ) : (
+              <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
+                {copy.noHistory}
+              </p>
+            )}
+            {!all && history.length > 12 && (
               <button
                 type="button"
                 className="hg-btn hg-btn--link"
                 style={{ alignSelf: 'flex-start' }}
-                onClick={() => void lines.refetch()}
+                onClick={() => setAll(true)}
               >
-                {copy.retry}
+                {copy.more}
               </button>
-            </section>
-          ) : history.length || g.start_saved > 0 ? (
-            <div className="hg-list">
-              {(all ? history : history.slice(0, 12)).map((h) => (
-                <ListRow
-                  key={h.key}
-                  label={h.label}
-                  sub={h.sub || undefined}
-                  onClick={h.to ? () => nav(h.to ?? '') : undefined}
-                />
-              ))}
-              {/* 시작할 때 모은 금액(2026-11-09): 기록의 처음이라 최근 것부터 보여 주는 목록 맨 아래, 더보기와 상관없이 늘 */}
-              {g.start_saved > 0 && (
-                <ListRow
-                  label={copy.historyStartV22(m(g.start_saved))}
-                  sub={formatDateFull(kstDay(g.created_at))}
-                />
-              )}
+            )}
+          </section>
+        )}
+        {/* 정보(2026-11-23 바탕 기준): 라벨-값 두 줄 */}
+        <div className="hg-fd__band" aria-hidden="true" />
+        <section className="hg-fd__info" aria-label={copy.info}>
+          <div className="hg-fdinfo">
+            <span>{copy.createdOnLabel}</span>
+            <span>{formatDateFull(kstDay(g.created_at))}</span>
+          </div>
+          {d.joined && g.created_by && (
+            <div className="hg-fdinfo">
+              <span>{copy.createdByLabel}</span>
+              <span>{nameOf(g.created_by)}</span>
             </div>
-          ) : (
-            <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
-              {copy.noHistory}
-            </p>
-          )}
-          {!all && history.length > 12 && (
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => setAll(true)}
-            >
-              {copy.more}
-            </button>
           )}
         </section>
-      )}
-      <section className="hg-stack" aria-label={copy.info}>
-        <SectionHeader title={copy.info} />
-        <div className="hg-list">
-          <ListRow label={copy.createdOn(formatDateFull(kstDay(g.created_at)))} />
-          {d.joined && g.created_by && <ListRow label={copy.createdBy(nameOf(g.created_by))} />}
-        </div>
-      </section>
-      <BundleAchieveWatch />
-      {/* W-11 끝(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”, 미합류면 초대 */}
-      {(ask === 'bundle' || ask === 'invite') && (
-        <SavingAskSheet ask={ask} goalId={id} partnerName={d.partnerName} onClose={closeAsk} />
-      )}
+        <BundleAchieveWatch />
+        {/* W-11 끝(20 W-11 고친 점): 각자 계열 연결이면 “{이름}님과 같이 모을까요?”, 미합류면 초대 */}
+        {(ask === 'bundle' || ask === 'invite') && (
+          <SavingAskSheet ask={ask} goalId={id} partnerName={d.partnerName} onClose={closeAsk} />
+        )}
+      </div>
     </div>
   );
   return <MainFrame sub="detail" current="salary" columns={[body]} />;

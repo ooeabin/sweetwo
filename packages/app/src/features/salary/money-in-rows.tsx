@@ -1,15 +1,5 @@
 import { fetchMoneyIns, qk } from '@sweetwo/api';
-import { formatDot2, formatMonthDay } from '@sweetwo/core';
-import {
-  AmountInput,
-  AddRow,
-  AddText,
-  BottomSheet,
-  Button,
-  Icon,
-  ListRow,
-  SectionHeader,
-} from '@sweetwo/ui';
+import { AmountInput, BottomSheet, Button, ListRow } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { money } from '../../shared/mask';
@@ -17,54 +7,8 @@ import { speakMasked } from '../../shared/masked-text';
 import { copy } from './copy';
 
 /**
- * W-02 ‘수입’ 묶음(20 W-20 고친 점, 2026-11-16 4차 검토 R4-7): 이번 달(from~to, KST 받은 날)에 내가 적은 수입 기록.
- * 줄 = 종류 + 받은 날, 오른쪽 금액. 누르면 W-20b 수입 기록(고치기·지우기). 기록이 없으면 아무것도 그리지 않음(onAdd가 있으면 머리 + “+ 수입 적기”만)
- */
-export function MoneyInRows({
-  meId,
-  from,
-  to,
-  masked,
-  onOpen,
-  onAdd,
-}: {
-  meId: string;
-  from: string;
-  to: string;
-  masked: boolean;
-  onOpen: () => void;
-  /** 있으면 묶음 맨 아래 “+ 수입 적기”(기록이 없어도 묶음을 그림, W-02 2026-11-18) */
-  onAdd?: () => void;
-}) {
-  const ins = useQuery({ queryKey: qk.moneyIns, queryFn: () => fetchMoneyIns() });
-  const rows = (ins.data ?? []).filter(
-    (r) => r.owner_user_id === meId && r.received_on >= from && r.received_on <= to,
-  );
-  if (!rows.length && !onAdd) return null;
-  return (
-    <section className="hg-checkgroup" aria-label={copy.moneyInGroup}>
-      <SectionHeader variant="group" title={copy.moneyInGroup} />
-      <div className="hg-list hg-list--plain">
-        {rows.map((r) => (
-          <ListRow
-            key={r.id}
-            label={copy.moneyInKinds[r.kind]}
-            sub={formatMonthDay(r.received_on)}
-            value={speakMasked(money(r.amount, masked))}
-            onClick={onOpen}
-          />
-        ))}
-      </div>
-      {onAdd && <AddRow block label={copy.moneyIn} onClick={onAdd} />}
-    </section>
-  );
-}
-
-/**
- * W-02 수입 카드(2026-11-19 사용자 결정 “수입카드 시안대로 진행”, 20 W-02 6번): 흰 카드 + 이름표 + 큰 금액(이번 사이클 수입 합)
- * + 최근 2건(날짜, 종류, +금액) + 넓은 “+ 수입 적기”. 기록이 있으면 “전체 ›”(W-20b). onAdd가 없으면 버튼 없음(파트너 탭·지난 달)
- * 기본값(2026-11-20 사용자 결정, 20 W-02 6번): 기록이 0건이고 자동 기록 전이면 “아직 적은 수입이 없어요” 대신 프로필 월급을 큰 금액 + 연필로,
- * 아래에 “11.25 월급 자동” 줄을 보임(저장 전). 큰 금액·연필을 누르면 금액 시트(onEdit, 없으면 보기만). 자동 월급 줄은 누르면 고치기(onEditAuto)
+ * 수입 기본값(2026-11-20 사용자 결정, 20 W-02 6번): 기록이 0건이고 자동 기록 전이면 프로필 월급을 큰 금액 + 연필로 보이고
+ * 아래에 “11.25 월급 자동” 줄(저장 전). 2026-11-23 바탕 기준: 이 카드는 W-20b 맨 위로 옮김(W-02는 한 줄 IncomeLine만)
  */
 export interface IncomeDefaults {
   /** 큰 금액(내 프로필 월급, 없으면 0) */
@@ -75,42 +19,35 @@ export interface IncomeDefaults {
   onEdit?: () => void;
 }
 
-export function IncomeCard({
+/**
+ * W-02 수입 한 줄(2026-11-23 바탕 기준, 20 W-02 6번): 구분선 아래 “이번 달 수입 350만 원 ›”. 누르면 W-20b 수입 기록
+ * (기본값 연필, ‘+ 수입 적기’, 기록 목록은 W-20b 맨 위로 옮김). 값 = 그 기간(from~to, KST 받은 날) 기록 합, 기록이 0건이면
+ * 기본값(프로필 월급, 있으면), 그것도 없으면 값 없이 이름만. onOpen이 없으면(파트너 탭) 누를 수 없음.
+ * 파트너 탭처럼 기록이 없으면 안 그릴 때는 hideEmpty
+ */
+export function IncomeLine({
   ownerId,
   alsoOwnerIds,
-  otherName,
   from,
   to,
   masked,
   label,
-  hideSum,
+  fallback,
   hideEmpty,
   onOpen,
-  onAdd,
-  defaults,
-  onEditAuto,
 }: {
   ownerId: string;
-  /** 합쳐서 엔진(2026-11-23): 같이 보는 다른 사람 기록도 한 카드에(수입 합 = 두 사람 합). 고치기는 ownerId 것만 */
+  /** 합쳐서 엔진: 같이 보는 다른 사람 기록도 합에(수입 합 = 두 사람 합) */
   alsoOwnerIds?: string[];
-  /** 다른 사람 기록 줄 앞에 붙일 이름(“예빈님 월급”) */
-  otherName?: string | null;
   from: string;
   to: string;
   masked: boolean;
-  /** 이름표(기본 “이번 달 수입”, 날짜 없는 사람 “이번 기간 수입”) */
+  /** 이름(기본 “이번 달 수입”, 날짜 없는 사람 “이번 기간 수입”, 지난 달 “{n}월 수입”) */
   label?: string;
-  /** 큰 금액 숨김(날짜 없는 사람은 화면 위 큰 금액이 이미 기간 수입) */
-  hideSum?: boolean;
-  /** 기록이 없으면 카드를 안 그림(파트너 탭: 안 보이는 기록과 “없음”을 구분할 수 없어서) */
+  /** 기록이 0건일 때 값(기본값 월급). 없으면 값 자리 비움 */
+  fallback?: number;
   hideEmpty?: boolean;
-  /** “전체 ›”(없으면 안 보임) */
   onOpen?: () => void;
-  onAdd?: () => void;
-  /** 기록 0건 + 자동 기록 전일 때 기본값(월급)을 보임 */
-  defaults?: IncomeDefaults;
-  /** 자동 월급 줄을 누르면 그 기록 고치기(W-20 `?edit=`) */
-  onEditAuto?: (id: string) => void;
 }) {
   const ins = useQuery({ queryKey: qk.moneyIns, queryFn: () => fetchMoneyIns() });
   const owners = [ownerId, ...(alsoOwnerIds ?? [])];
@@ -118,116 +55,42 @@ export function IncomeCard({
     (r) => owners.includes(r.owner_user_id) && r.received_on >= from && r.received_on <= to,
   );
   if (!rows.length && hideEmpty) return null;
-  // 기록을 아직 못 읽었으면 기본값을 보이지 않음(기록이 있는데 깜빡 기본값이 보이는 것 방지)
-  const base = defaults && !hideSum && !ins.isLoading && rows.length === 0 ? defaults : undefined;
   const name = label ?? copy.incomeCardLabel;
-  const sum = rows.reduce((s, r) => s + r.amount, 0);
-  const recent = rows.slice(0, 2);
+  const sum = rows.reduce((t, r) => t + r.amount, 0);
+  const shown = rows.length > 0 ? sum : ins.isLoading ? undefined : fallback;
   return (
-    <section className="hg-incomecard" aria-label={name}>
-      <div className="hg-incomecard__top">
-        <h2 className="hg-incomecard__label">{name}</h2>
-        {rows.length > 0 && onOpen && (
-          <button
-            type="button"
-            className="hg-incomecard__more"
-            aria-label={copy.incomeAllLabel}
-            onClick={onOpen}
-          >
-            {copy.incomeAll}
-          </button>
-        )}
-      </div>
-      {base && (
-        <p className="hg-incomecard__sum">
-          {base.onEdit ? (
-            <button
-              type="button"
-              className="hg-incomecard__edit"
-              aria-label={`${copy.incomeEditLabel}, ${money(base.amount, masked)}`}
-              onClick={base.onEdit}
-            >
-              <span>{speakMasked(money(base.amount, masked))}</span>
-              <Icon name="pencil" size={20} />
-            </button>
-          ) : (
-            speakMasked(money(base.amount, masked))
-          )}
-        </p>
-      )}
-      {!base &&
-        !hideSum &&
-        (rows.length > 0 ? (
-          <p className="hg-incomecard__sum">{speakMasked(money(sum, masked))}</p>
-        ) : (
-          <p className="hg-incomecard__sum hg-incomecard__sum--none">{copy.incomeNone}</p>
-        ))}
-      {!base && hideSum && rows.length === 0 && (
-        <p className="hg-incomecard__sum hg-incomecard__sum--none">{copy.incomeNone}</p>
-      )}
-      {base && base.lines.length > 0 && (
-        <ul className="hg-incomecard__list">
-          {base.lines.map((l) => (
-            <li key={l.key} className="hg-incomecard__row">
-              <span className="hg-incomecard__date">{formatDot2(l.date)}</span>
-              <span className="hg-incomecard__name">
-                {l.name}
-                <span className="hg-incomecard__auto">{copy.incomeAuto}</span>
-              </span>
-              <span className="hg-incomecard__amt">
-                {speakMasked(`+${money(l.amount, masked)}`)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {recent.length > 0 && (
-        <ul className="hg-incomecard__list">
-          {recent.map((r) => {
-            const body = (
-              <>
-                <span className="hg-incomecard__date">{formatDot2(r.received_on)}</span>
-                <span className="hg-incomecard__name">
-                  {r.owner_user_id !== ownerId && otherName
-                    ? r.kind === 'salary'
-                      ? copy.incomeDefaultOf(otherName)
-                      : `${otherName}님 ${copy.moneyInKinds[r.kind]}`
-                    : copy.moneyInKinds[r.kind]}
-                  {r.source === 'payday_auto' && (
-                    <span className="hg-incomecard__auto">{copy.incomeAuto}</span>
-                  )}
-                </span>
-                <span className="hg-incomecard__amt">
-                  {speakMasked(`+${money(r.amount, masked)}`)}
-                </span>
-              </>
-            );
-            return (
-              <li key={r.id} className="hg-incomecard__row">
-                {onEditAuto && r.source === 'payday_auto' && r.owner_user_id === ownerId ? (
-                  <button
-                    type="button"
-                    className="hg-incomecard__rowbtn"
-                    aria-label={copy.incomeRowEditLabel(money(r.amount, masked))}
-                    onClick={() => onEditAuto(r.id)}
-                  >
-                    {body}
-                  </button>
-                ) : (
-                  body
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      {onAdd && (
-        <Button variant="secondary" block className="hg-incomecard__add" onClick={onAdd}>
-          <AddText>{copy.incomeAddButton}</AddText>
-        </Button>
-      )}
-    </section>
+    <div className="hg-list hg-list--plain hg-incomeline" role="group" aria-label={name}>
+      <ListRow
+        label={name}
+        value={shown === undefined ? undefined : speakMasked(money(shown, masked))}
+        onClick={onOpen}
+      />
+    </div>
   );
+}
+
+/** 기본값 줄(프로필 월급): 합쳐서면 파트너 줄도. date = 기록될 날(사이클 시작이 지났으면 시작일, 아니면 오늘) */
+export function defaultIncomeLines(
+  me: { monthly_income: number | null },
+  partner: { nickname: string | null; monthly_income: number | null } | null | undefined,
+  joint: boolean,
+  date: string,
+): IncomeDefaults['lines'] {
+  const mine = me.monthly_income ?? 0;
+  const theirs = partner?.monthly_income ?? 0;
+  return [
+    ...(mine > 0 ? [{ key: 'me', date, name: copy.moneyInKinds.salary, amount: mine }] : []),
+    ...(joint && partner && theirs > 0
+      ? [
+          {
+            key: 'partner',
+            date,
+            name: copy.incomeDefaultOf(partner.nickname ?? ''),
+            amount: theirs,
+          },
+        ]
+      : []),
+  ];
 }
 
 /**

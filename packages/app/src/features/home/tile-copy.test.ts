@@ -3,10 +3,8 @@ import { copy } from './copy';
 
 // 홈 타일·카드 보조 줄 문구(19 H-04·H-08·H-10, 2026-11-20)
 describe('홈 보조 줄', () => {
-  it('H-04 값 아래 “자산 …, 부채 …”, 이름표 “순자산”', () => {
+  it('H-04 이름표 “순자산” + 값(2026-11-23 바탕 기준: 자산·부채 줄은 없앰)', () => {
     expect(copy.netLabel).toBe('순자산');
-    expect(copy.assetsDebts('4,200만 원', '7,330만 원')).toBe('자산 4,200만 원, 부채 7,330만 원');
-    expect(copy.assetsDebts('•••', '•••')).toBe('자산 •••, 부채 •••');
   });
   it('H-08 다음 일정 기준: “다음 일정 D-8”, 당일, 없음', () => {
     expect(copy.nextSchedule(8)).toBe('다음 일정 D-8');

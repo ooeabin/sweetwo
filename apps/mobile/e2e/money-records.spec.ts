@@ -40,7 +40,8 @@ test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘�
   page,
 }) => {
   const { s } = await open(page, '/salary');
-  await page.getByRole('button', { name: '수입 적기' }).click();
+  await page.getByRole('group', { name: '이번 달 수입' }).getByRole('button').click();
+  await page.getByRole('button', { name: /수입 적기/ }).click();
   await expect(page.getByRole('heading', { name: '얼마를 받았어요?' })).toBeVisible();
   // 칩은 미리 고른 값 없음, 받은 날은 오늘
   await expect(page.getByRole('button', { name: '상여' })).toHaveAttribute('aria-pressed', 'false');
@@ -60,36 +61,39 @@ test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘�
   await page.getByLabel('청약', { exact: true }).fill('');
   await axe(page);
   await page.getByRole('button', { name: '넣기', exact: true }).click();
-  // 입구가 월급 ‘이번 달’ W-02라 끝나면 W-02로 돌아옴(2026-11-15)
-  await expect(page).toHaveURL(/\/salary$/);
+  // 입구가 W-20b 맨 위 ‘+ 수입 적기’(2026-11-23)라 끝나면 W-20b로 돌아옴
+  await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
   await expect(page.getByText('저축·투자 1개에 100만 원 넣었어요')).toBeVisible();
   expect(s.moneyIns[0]).toMatchObject({ amount: 3_000_000, kind: 'family' });
   expect(s.moves).toMatchObject([
     { goal_id: 'goal-h', kind: 'in', amount: 1_000_000, money_in_id: 'in-1' },
   ]);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('수입에서 넣었어요 100만 원')).toBeVisible();
+  await expect(page.getByText('수입에서 넣었어요')).toBeVisible();
+  await expect(page.getByText('+100만 원')).toBeVisible();
   await expect(page.getByText('400만 원', { exact: true }).first()).toBeVisible();
 });
 
 test('W-20a ‘저금에 안 넣을게요’(R4-7): 기록만, W-02 수입 카드에 합으로 보임', async ({ page }) => {
   const { s } = await open(page, '/salary');
-  await page.getByRole('button', { name: '수입 적기' }).click();
+  await page.getByRole('group', { name: '이번 달 수입' }).getByRole('button').click();
+  await page.getByRole('button', { name: /수입 적기/ }).click();
   await page.getByLabel('얼마를 받았어요?').fill('1000000');
   await page.getByRole('button', { name: '상여' }).click();
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '저축·투자에 얼마씩 넣을까요?' })).toBeVisible();
   await page.getByLabel('내 집 마련', { exact: true }).fill('300000');
   await page.getByRole('button', { name: '저축·투자에 안 넣을게요' }).click();
-  await expect(page).toHaveURL(/\/salary$/);
+  await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
   await expect(page.getByText('수입을 적었어요')).toBeVisible();
+  await page.goto('/salary');
   expect(s.moneyIns[0]).toMatchObject({ amount: 1_000_000, kind: 'bonus' });
   expect(s.moves).toEqual([]);
-  const got = page.getByRole('region', { name: '이번 달 수입' });
-  // 2026-11-19 W-02 수입 카드: 합 + 최근 기록, “전체 ›”가 W-20b
-  await expect(got.locator('.hg-incomecard__sum')).toHaveText('100만 원');
+  const got = page.getByRole('group', { name: '이번 달 수입' });
+  // 2026-11-23 W-02 수입 한 줄: “이번 달 수입 100만 원 ›”가 W-20b
+  await expect(got).toContainText('100만 원');
   await axe(page);
-  await got.getByRole('button', { name: '수입 기록 전체 보기' }).click();
+  await got.getByRole('button').click();
   await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
 });
 
@@ -142,7 +146,7 @@ test('W-10b 바로잡기(묶음): 사유는 나만, 예빈에게는 사람·금�
     hide_from_summary: false,
   });
   // 찬우 내역: 사유가 보임
-  const row = c.getByText('바로잡기 −30만 원');
+  const row = c.locator('.hg-listrow', { hasText: '바로잡기' }).filter({ hasText: '−30만 원' });
   await expect(row).toBeVisible();
   await expect(c.getByText(/꺼내 썼어요/).first()).toBeVisible();
   // 예빈에게 간 한 줄: 사람·금액·사유 없음
@@ -255,7 +259,7 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 수입 기록: 고치기, 지�
   await page.getByRole('button', { name: '더보기' }).click();
   await page.getByRole('menuitem', { name: '수입 기록' }).click();
   await expect(page.getByRole('heading', { name: '수입 기록' })).toBeVisible();
-  await expect(page.getByText(/상여, 저축·투자에 50만 원 넣었어요/)).toBeVisible();
+  await expect(page.getByText(/저축·투자에 50만 원 넣었어요/)).toBeVisible();
   await axe(page);
   // 고치기: 넣은 금액보다 적게는 못 고침
   await page.getByRole('button', { name: '50만 원 기록 메뉴' }).click();
@@ -275,7 +279,7 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 수입 기록: 고치기, 지�
   await page.getByRole('menuitem', { name: '지우기' }).click();
   await expect(page.getByText('수입 기록과 저축·투자에 넣은 금액을 지웠어요')).toBeVisible();
   expect(s.moves.every((m) => m.deleted_at)).toBe(true);
-  await expect(page.getByText('아직 적은 수입이 없어요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '70만 원 기록 메뉴' })).toHaveCount(0);
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('button', { name: '70만 원 기록 메뉴' })).toBeVisible();
   expect(s.moneyIns[0]?.deleted_at).toBeNull();

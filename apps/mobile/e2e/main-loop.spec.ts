@@ -139,7 +139,8 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
 
   // 5. 예빈 수입 적기(월급 탭 W-02) → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
   await y.goto('/salary');
-  await y.getByRole('button', { name: '수입 적기' }).click();
+  await y.getByRole('group', { name: '이번 달 수입' }).getByRole('button').click();
+  await y.getByRole('button', { name: /수입 적기/ }).click();
   await y.getByLabel('얼마를 받았어요?').fill('1000000');
   await y.getByRole('button', { name: '가족이 보태 줬어요' }).click();
   await y.getByRole('button', { name: '다음' }).click();

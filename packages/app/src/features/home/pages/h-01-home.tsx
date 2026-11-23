@@ -732,29 +732,21 @@ export function H01Home() {
     />
   );
 
-  // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 매달 며칠 + 미계획 금액, 모자라면 “30만 원이 모자라요” ──
-  const dayOf = (u: { payday: number | null; payday_last: boolean }) =>
-    u.payday_last ? copy.paydayLast : u.payday ? copy.payday(u.payday) : null;
-  const jointDay = sp.joint_cycle_day;
-  const planDay = paydayNone
-    ? copy.noPaydayTile
-    : joint && jointDay !== null
-      ? copy.everyMonth(jointDay >= 31 ? copy.paydayLast : copy.payday(jointDay))
-      : dayOf(me.data)
-        ? copy.everyMonth(dayOf(me.data) ?? '')
-        : undefined;
+  // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 값은 한 줄만(2026-11-23 바탕 기준, “매달 25일” 삭제) —
+  // 미계획 금액, 모자라면 “30만 원이 모자라요” ──
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
   const left = mySplit ? leftover(income, mySplit.split_line) : null;
-  const plan =
+  const plan: { value?: string; sub?: string } =
     left !== null && left < 0
-      ? { value: copy.short(m(-left)), sub: planDay }
-      : {
-          // 월급 0원이고 월급날도 없으면 값 자리에 “월급 0원”(2026-11-19, 막는 ‘월급 알려 주기’ 줄 대신)
-          value: planDay ?? (income === 0 ? copy.zeroSalaryShort : undefined),
-          sub: left === null ? undefined : copy.leftover(m(left)),
-        };
+      ? { value: copy.short(m(-left)) }
+      : left !== null
+        ? { value: copy.leftover(m(left)) }
+        : {
+            // 월급 0원이면 값 자리에 “월급 0원”(2026-11-19, 막는 ‘월급 알려 주기’ 줄 대신), 날짜 없는 사람은 “월급날 없음”
+            value: income === 0 ? copy.zeroSalaryShort : paydayNone ? copy.noPaydayTile : undefined,
+          };
 
   // ── H-16 다가오는 날 상자(최대 2개, 없으면 안 그림) + H-08 캘린더 타일 보조 줄(같은 결과의 첫 항목, 2026-11-20) ──
   const calReady = !cal.loading && !cal.failed;
@@ -824,7 +816,6 @@ export function H01Home() {
           title={copy.assetsTile}
           sub={showNet ? copy.netLabel : tileSub}
           value={showNet && nw ? m(nw.nw.net) : undefined}
-          foot={showNet && nw ? copy.assetsDebts(m(nw.nw.assets), m(nw.nw.debts)) : undefined}
           badge={rankPct === null || !showNet ? undefined : copy.rankBadge(rankPct)}
           label={
             nw && showNet
