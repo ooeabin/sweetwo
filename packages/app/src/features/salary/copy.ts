@@ -298,15 +298,20 @@ export const copy = {
   monthlyOf: (amount: string) => `매달 ${amount}씩`,
   change: '바꾸기',
   history: '모은 내역', // [확인 필요]
-  historyChecked: (label: string, amount: string) => `${label} ${amount}`,
-  historyOther: (label: string, amount: string) => `${label} 다른 금액 ${amount}`,
+  // 모은 내역 줄(2026-11-23 바탕 기준): 이름(+ 날짜 보조 줄) + 오른쪽 “+30만 원”. 예전 한 문장 “… 30만 원”을 이름과 금액으로 나눔 [확인 필요]
+  historyOtherName: (label: string) => `${label} 다른 금액`,
   historySkipped: (label: string) => `${label} 건너뜀`,
-  historyStart: (amount: string) => `이미 모은 금액 ${amount}`, // 2026-11-09(2026-11-16 ‘시작할 때 모은 금액’에서)
+  historyStartName: '이미 모은 금액', // 2026-11-09(2026-11-16 ‘시작할 때 모은 금액’에서)
   noHistory: '아직 기록이 없어요', // [확인 필요]
   more: '더보기',
   info: '정보',
-  createdOn: (date: string) => `${date}에 만들었어요`, // [확인 필요]
-  createdBy: (name: string) => `만든 사람 ${name}`, // [확인 필요]
+  createdOnLabel: '만든 날', // [확인 필요] 2026-11-23 정보 라벨-값(값은 날짜)
+  createdByLabel: '만든 사람', // [확인 필요]
+  rowDeadline: '기한', // [확인 필요] 2026-11-23 W-10 항목 줄
+  rowMonthly: '매달 모으는 금액', // [확인 필요]
+  rowTarget: '목표 금액', // [확인 필요]
+  rowSet: '정하기', // [확인 필요] 값 자리(아직 정하지 않음)
+  remainMore: (amount: string) => `${amount} 더 필요해요`, // [확인 필요] 기한 줄 보조(날짜는 값 자리에 있음)
   closedNote: '그만 모으기로 했어요', // [확인 필요]
   partnerItem: (name: string) => `${name}님이 모으고 있어요. 보기만 할 수 있어요`, // [확인 필요] 2026-11-09
   itemPending: '연결 해제를 기다리는 동안에는 저축·투자를 고칠 수 없어요', // 2026-11-12 S7-09 W-10 맨 위 회색 한 줄
@@ -426,12 +431,7 @@ export const copy = {
   incomeDefaultOf: (name: string) => `${name}님 월급`, // 합쳐서에서 상대의 기본값 줄 이름(2026-11-20) [확인 필요]
   incomeEditLabel: '월급 금액 고치기', // 큰 금액·연필 버튼 이름(2026-11-20) [확인 필요]
   incomeEditTitle: '월급 금액', // 금액 시트 제목(2026-11-20) [확인 필요]
-  incomeRowEditLabel: (amount: string) => `월급 ${amount} 고치기`, // 자동 월급 줄 버튼 이름 [확인 필요]
   incomeAuto: '자동', // 월급날 확인으로 자동 기록한 수입 줄(W-02 수입 카드, W-20b) [확인 필요] 2026-11-20
-  incomeAll: '전체 ›', // 수입 기록(W-20b)
-  incomeAllLabel: '수입 기록 전체 보기',
-  incomeNone: '아직 적은 수입이 없어요',
-  incomeAddButton: '수입 적기',
   periodRange: (start: string, end: string) => `${formatMonthDay(start)} ~ ${formatMonthDay(end)}`, // [확인 필요] 날짜 없는 사람 W-02 날짜 알약(30일 기간)
   planOf: (amount: string) => `월급 계획 ${amount} 중`, // [확인 필요] 날짜 없는 사람 W-02 보조 줄
   // W-02 줄 화면 읽기 이름(2026-11-23 C안: 상태 버튼 없이 줄 전체가 버튼, 점은 그래픽이라 뜻을 글자로) [확인 필요]
@@ -446,8 +446,6 @@ export const copy = {
   waitAuto: (day: string) => `${day} 자동으로 나가요`, // 나가는 날 전 자동 줄 보조 줄 [확인 필요]
   skippedMeta: '건너뜀', // 건너뜀 줄 보조 줄 [확인 필요]
   uncheck: '체크 풀기',
-  kindSaving: '저축·투자',
-  kindSpend: '지출',
   dayTag: (day: number) => `${day}일`, // 월급날 전 비활성 버튼
   cyclePick: '월급날 고르기',
   heroTitleAll: '이번 달도 계획대로!',
@@ -507,12 +505,11 @@ export const copy = {
   etaAt: (ym: string) => `지금 속도면 ${ym}에 다 모아요`, // [확인 필요] 3a(‘기한보다 n개월 늦어요’ 대신)
   remainUntil: (ym: string, amount: string) => `${ym}까지 ${amount} 더 필요해요`, // [확인 필요] 3b G5
   remainUntilPct: (ym: string) => `${ym}까지`, // [확인 필요] 퍼센트만(SaveTogether.md)
-  historyStartV22: (amount: string) => `이미 모은 금액 ${amount}`, // [확인 필요] 6a
-  historyMoneyIn: (amount: string) => `수입에서 넣었어요 ${amount}`,
-  historyAuto: (amount: string) => `자동으로 넣었어요 ${amount}`, // [확인 필요] 날짜 없는 사람 자동 넣기
-  historyAdjust: (sign: '+' | '−', amount: string) => `바로잡기 ${sign}${amount}`, // [확인 필요]
-  historyReconcile: (sign: '+' | '−', amount: string) => `잔액 맞추기 ${sign}${amount}`, // [확인 필요]
-  historyNotePaid: (amount: string) => `쓸 곳 메모 −${amount}`, // [확인 필요]
+  historyMoneyInName: '수입에서 넣었어요', // 2026-11-23 이름과 금액을 나눔
+  historyAutoName: '자동으로 넣었어요', // [확인 필요] 날짜 없는 사람 자동 넣기
+  historyAdjustName: '바로잡기', // [확인 필요]
+  historyReconcileName: '잔액 맞추기', // [확인 필요]
+  historyNotePaidName: '쓸 곳 메모', // [확인 필요]
   moneyIn: '수입 적기', // AddRow 글자(+ 아이콘이 ‘+’를 대신)
   menuAdjust: '모은 금액 바로잡기', // [확인 필요]
   menuNotes: '쓸 곳 메모', // [확인 필요]
@@ -688,7 +685,6 @@ export const copy = {
   /** W-20a 적기만(2026-11-16 R4-7: 수입 적기가 저금 나누기로만 끝났음) [확인 필요] */
   moneyInSkip: '저축·투자에 안 넣을게요',
   /** W-02 ‘수입’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) */
-  moneyInGroup: '수입',
   moneyInRow: (date: string, kind: string) => `${date}, ${kind}`,
   moneyInNoSaving: '넣을 저축·투자가 없어요. 수입만 적어 둘게요',
   moneyInLogged: '수입을 적었어요',

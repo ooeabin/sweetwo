@@ -81,3 +81,37 @@ export function SegChoice<T extends string>({
     </div>
   );
 }
+
+/**
+ * 밑줄 탭(`hg-linetabs`, 바탕 기준 2026-11-23): 목록 위 걸러 보기. 글자 15px, 고른 탭만 700 ink + 2px ink 밑줄, 나머지 stone 400.
+ * 탭 줄 아래 화면 끝까지 hairline 한 줄. 탭 이름 뒤 숫자(count)는 같은 글자. `role="tablist"` + `role="tab"`
+ */
+export function LineTabs<T extends string>({
+  items,
+  value,
+  onChange,
+  label,
+}: {
+  items: { value: T; label: string; count?: number }[];
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+}) {
+  return (
+    <div className="hg-linetabs" role="tablist" aria-label={label}>
+      {items.map((it) => (
+        <button
+          key={it.value}
+          type="button"
+          role="tab"
+          aria-selected={it.value === value}
+          className={cx('hg-linetab', it.value === value && 'is-active')}
+          onClick={() => onChange(it.value)}
+        >
+          {it.label}
+          {it.count !== undefined && <span className="hg-linetab__n"> {it.count}</span>}
+        </button>
+      ))}
+    </div>
+  );
+}

@@ -114,7 +114,6 @@ export const copy = {
   // 띠 5b 월급날 확인(2026-11-17): 문장은 위 monthPayday·monthReview·lateLeft, 이동 글자는 goCheck
 
   // H-15 월급 상자 ‘월급 계획 템플릿’ 줄 값(예전 H-07 타일 내용), H-08 캘린더 타일
-  everyMonth: (day: string) => `매달 ${day}`,
   payday: (d: number) => `${d}일`,
   paydayLast: '말일',
   noPaydayTile: '수입이 들어올 때', // 2026-11-13 날짜 없음
@@ -144,7 +143,6 @@ export const copy = {
   assetsTile: '자산 관리',
   /** H-04 값 이름표와 값 아래 작은 줄(2026-11-20) [확인 필요] */
   netLabel: '순자산',
-  assetsDebts: (assets: string, debts: string) => `자산 ${assets}, 부채 ${debts}`,
   // 2026-11-18 빈 타일에서 자산을 적고 싶게(궁금함, 파트너 소식) [확인 필요]
   assetsAskTwo: '우리 둘 순자산, 또래 중 어디쯤일까요?',
   assetsAskMe: '내 순자산, 또래 중 어디쯤일까요?',

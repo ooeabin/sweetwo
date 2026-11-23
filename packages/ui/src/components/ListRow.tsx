@@ -14,6 +14,7 @@ export function ListRow({
   onClick,
   chevron = Boolean(onClick),
   locked = false,
+  soft = false,
 }: {
   icon?: IconName;
   lead?: ReactNode;
@@ -25,6 +26,8 @@ export function ListRow({
   chevron?: boolean;
   /** 고칠 수 없는 줄(각자 모드 파트너 월급 계획, 2026-11-09): 꺾쇠 자리에 자물쇠 */
   locked?: boolean;
+  /** 오른쪽 값을 조용하게(바탕 기준 2026-11-23: 값이 설정·상태일 때 15px 400 slate. 금액은 기본 17px 700) */
+  soft?: boolean;
 }) {
   const inner = (
     <>
@@ -34,7 +37,7 @@ export function ListRow({
         {sub && <span className="hg-listrow__sub">{sub}</span>}
       </span>
       {value !== undefined ? (
-        <span className="hg-listrow__value">
+        <span className={cx('hg-listrow__value', soft && 'is-soft')}>
           {value}
           {unit && <span className="hg-unit">{unit}</span>}
         </span>

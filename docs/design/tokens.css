@@ -192,6 +192,13 @@
   --text-label: 600 14px/20px var(--font-sans); /* 버튼·칩·탭 글자, 작은 이름표. 그대로(누르는 글자라 14 유지). 주 버튼(52px)은 16 700 예외. */
   --text-caption: 400 12px/17px var(--font-sans); /* 회색 도움말, 입력 아래 안내, 카드 메타. 정보 여럿은 hg-meta로 16px 띄움. 2026-11-09 13/18 → 12/17. */
   --text-micro: 600 12px/16px var(--font-sans); /* 배지·태그·숫자 알약·단축키 글자. 가장 작은 글자(12px 미만 금지). 그대로. */
+  /* 2026-11-23 바탕 기준(DESIGN.md ‘바탕 기준 2026-11-23’): 글자 다섯 단계 34 / 22 / 17 / 15 / 13, 굵기 400 / 700 두 가지. 위 단계는 이 기준으로 옮기는 화면부터 쓰지 않음(추가만, 지우기 없음). */
+  --text-amount-xl: 700 34px/44px var(--font-sans); /* 화면 위 큰 금액 하나(W-02·W-01 월급, W-10 모은 금액). letter-spacing -0.5px는 쓰는 곳에서. */
+  --text-amount-lg: 700 22px/30px var(--font-sans); /* 상자 안 큰 금액(홈 같이 모으기). */
+  --text-name: 400 17px/24px var(--font-sans); /* 항목 이름. 머리 제목·상자 제목은 같은 크기 700. */
+  --text-amount: 700 17px/24px var(--font-sans); /* 항목 금액, 상자 제목, 머리 제목, 주 버튼. */
+  --text-value: 400 15px/20px var(--font-sans); /* 본문, 탭, 오른쪽 값(slate). 고른 탭만 700. */
+  --text-note: 400 13px/18px var(--font-sans); /* 보조 줄(최대 한 줄), 이름표(stone 또는 slate). */
 }
 
 /* 2026-11-09 surface-alt를 사용자 앱에서 살짝 연하게 함(DESIGN.md ‘색’). 어드민(hg-admin, hg-adminauth)과 웹사이트(hg-site)는 예전 값 그대로.
