@@ -163,7 +163,7 @@ test('D1 합쳐서: 파트너 저금 달성도 축하(W-12 → W-12a), ‘금액
   // ‘금액만 보여 주기’ 파트너 저금은 합쳐서여도 보기만(맨 위 회색 한 줄)
   await page.goto('/salary/items/goal-s');
   await expect(page.getByRole('heading', { name: '개인 저축·투자' })).toBeVisible();
-  await expect(page.locator('.hg-fd--w10 > .hg-q__help')).toHaveText(
+  await expect(page.locator('.hg-page--w10 > .hg-q__help')).toHaveText(
     '예빈님이 모으고 있어요. 보기만 할 수 있어요',
   );
   await expect(page.getByRole('button', { name: '더보기' })).toHaveCount(0);
@@ -177,7 +177,7 @@ test('S7-08·S7-09: 보기만·그만 모음·해제 대기는 머리 아래 회
     db.partner = { ...YEBIN_PROFILE };
   });
   await expect(page.getByRole('heading', { name: '내 집 마련' })).toBeVisible();
-  const line = page.locator('.hg-fd--w10 > .hg-q__help');
+  const line = page.locator('.hg-page--w10 > .hg-q__help');
   await expect(line).toHaveText('연결 해제를 기다리는 동안에는 저축·투자를 고칠 수 없어요');
   await expect(page.getByRole('button', { name: '더보기' })).toHaveCount(0);
   // 2026-11-23: 항목 줄(목표 금액·매달 모으는 금액)은 고칠 수 없으면 눌리지 않는 줄
@@ -193,7 +193,7 @@ test('S7-08 그만 모은 저금: 맨 위 회색 한 줄', async ({ page }) => {
     const h = db.goals.find((g) => g.id === 'goal-h');
     if (h) h.closed_at = '2026-10-05T00:00:00Z';
   });
-  await expect(page.locator('.hg-fd--w10 > .hg-q__help')).toHaveText('그만 모으기로 했어요');
+  await expect(page.locator('.hg-page--w10 > .hg-q__help')).toHaveText('그만 모으기로 했어요');
 });
 
 test('S7-03·S7-10: 이번 달 줄을 체크하면 저금 내역이 바로 바뀜, 모은 금액을 누르면 저금 내역으로', async ({

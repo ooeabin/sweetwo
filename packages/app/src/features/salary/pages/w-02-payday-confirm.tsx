@@ -230,7 +230,7 @@ export function W02PaydayConfirm() {
               onBack={() => nav(-1)}
             />
           ) : null}
-          <div className="hg-fd">{body}</div>
+          <div className="hg-page">{body}</div>
         </div>,
       ]}
     />

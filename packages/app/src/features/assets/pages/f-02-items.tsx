@@ -17,10 +17,10 @@ import {
   Chip,
   EmptyState,
   Icon,
+  LineTabs,
   List,
   ListRow,
   SectionHeader,
-  Tabs,
 } from '@sweetwo/ui';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -189,8 +189,7 @@ export function F02Items() {
           {copy.partnerWrote(d.couple?.partnerName ?? '')}
         </p>
       )}
-      <Tabs<AssetSide>
-        variant="seg"
+      <LineTabs<AssetSide>
         label={copy.sideLabel}
         value={side}
         onChange={(s) => setParams({ side: s }, { replace: true })}

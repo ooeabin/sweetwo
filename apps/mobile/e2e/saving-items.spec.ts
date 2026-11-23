@@ -40,7 +40,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   const deadline = page.locator('.hg-listrow', { hasText: '기한' });
   await expect(deadline).toContainText('1억 5,000만 원 더 필요해요');
   await expect(deadline).toContainText('2031년 10월');
-  expect((await page.locator('.hg-fd--w10').innerText()).match(/2031년 10월/g)).toHaveLength(1);
+  expect((await page.locator('.hg-page--w10').innerText()).match(/2031년 10월/g)).toHaveLength(1);
   await expect(page.locator('#w-10-more')).toHaveCount(0);
   await page.getByRole('button', { name: '자세히 보기' }).click();
   await expect(page.getByRole('button', { name: '접기' })).toHaveAttribute('aria-expanded', 'true');
