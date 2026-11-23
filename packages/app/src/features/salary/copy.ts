@@ -307,6 +307,7 @@ export const copy = {
   info: '정보',
   createdOnLabel: '만든 날', // [확인 필요] 2026-11-23 정보 라벨-값(값은 날짜)
   createdByLabel: '만든 사람', // [확인 필요]
+  createdByMe: '나', // [확인 필요] 만든 사람이 본인일 때(2026-11-23)
   rowDeadline: '기한', // [확인 필요] 2026-11-23 W-10 항목 줄
   rowMonthly: '매달 모으는 금액', // [확인 필요]
   rowTarget: '목표 금액', // [확인 필요]

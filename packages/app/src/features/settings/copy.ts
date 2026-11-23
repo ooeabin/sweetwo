@@ -547,6 +547,15 @@ export const copy = {
     saving_only: '저축·투자만 같이 해요',
     separate: '월급은 각자 써요',
   } as Record<string, string>,
+  // S-11 ‘월급 관리 방식’ 줄 값(짧게, 2026-11-23 사용자 결정, 엔진 값만 봄) [확인 필요]
+  styleRowValue: (mode: 'joint' | 'separate', managerName: string | null | undefined) =>
+    mode === 'separate'
+      ? '각자 써요'
+      : managerName === undefined
+        ? '같이 써요'
+        : managerName
+          ? `${managerName}님이 관리해요`
+          : '파트너가 관리해요',
   // S-11c 예약 표시(S-11 월급 줄 아래 회색) [확인 필요]
   salaryScheduled: (y: number, m: number, amount: string) => `${y}년 ${m}월부터 ${amount}`,
   salaryScheduledUntil: (y: number, m: number) => `${y}년 ${m}월까지`,

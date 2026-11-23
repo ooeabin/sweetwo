@@ -215,7 +215,12 @@ export function S15Security() {
           ))}
         </div>
         <div className="hg-row">
-          <Button variant="secondary" loading={busy === 'all'} onClick={() => void logoutAll()}>
+          <Button
+            variant="link"
+            className="hg-btn--danger-plain"
+            loading={busy === 'all'}
+            onClick={() => void logoutAll()}
+          >
             {copy.logoutAll}
           </Button>
         </div>

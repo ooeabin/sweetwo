@@ -138,7 +138,7 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(partnerRow).toContainText('250만 원, 10일');
   await expect(partnerRow.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '월급은 각자 써요',
+    '각자 써요',
   );
   await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toHaveCount(0);
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
@@ -282,7 +282,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
 
   // 관리 형태(S-11f): 세 질문, 각자 → 합쳐서는 예빈 ‘좋아요’가 필요(요청)
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
-    '월급은 각자 써요',
+    '각자 써요',
   );
   await page.getByRole('button', { name: /월급 관리 방식/ }).click();
   await expect(page).toHaveURL(/\/settings\/couple\/style$/);

@@ -465,10 +465,10 @@ export function W10SavingItem() {
             <span>{copy.createdOnLabel}</span>
             <span>{formatDateFull(kstDay(g.created_at))}</span>
           </div>
-          {d.joined && g.created_by && (
+          {g.created_by && (
             <div className="hg-fdinfo">
               <span>{copy.createdByLabel}</span>
-              <span>{nameOf(g.created_by)}</span>
+              <span>{g.created_by === d.meId ? copy.createdByMe : nameOf(g.created_by)}</span>
             </div>
           )}
         </section>

@@ -17,7 +17,6 @@ import {
   Chip,
   EmptyState,
   Icon,
-  LineTabs,
   List,
   ListRow,
   SectionHeader,
@@ -71,7 +70,7 @@ const saveSort = (s: Sort) => {
 // 투자 묶음 줄 = “안 판 수익” + 손익(원금 있는 항목). 2026-11-04 투자 비중 줄은 뺌.
 export function F02Items() {
   const nav = useNavigate();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const side: AssetSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   const d = useAssetsData();
   const { reset: resetDraft, set: setDraft } = useAssetDraft();
@@ -133,7 +132,6 @@ export function F02Items() {
     });
     nav('/assets/new/amount');
   };
-  const total = (s: AssetSide) => (s === 'asset' ? d.nw.assets : d.nw.debts);
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 
   const row = (a: Asset) => {
@@ -189,16 +187,6 @@ export function F02Items() {
           {copy.partnerWrote(d.couple?.partnerName ?? '')}
         </p>
       )}
-      <LineTabs<AssetSide>
-        label={copy.sideLabel}
-        value={side}
-        onChange={(s) => setParams({ side: s }, { replace: true })}
-        items={[
-          // 불러오는 동안은 이름만(0원이 먼저 보였다가 바뀌지 않게, 2026-11-06)
-          { value: 'asset', label: !ready ? copy.assetsLabel : copy.assets(m(total('asset'))) },
-          { value: 'debt', label: !ready ? copy.debtsLabel : copy.debts(m(total('debt'))) },
-        ]}
-      />
       {/* 못 불러오면 F-01과 같은 오류 카드 + ‘다시 시도’, 불러오는 동안은 뼈대만(2026-11-12 QA 8구간 S8-04) */}
       {d.failed && (
         <div className="hg-card hg-stack">

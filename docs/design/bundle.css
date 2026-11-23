@@ -34,6 +34,7 @@
 .hg-btn--danger:active, .hg-btn--danger.is-pressed { background: color-mix(in srgb, var(--danger) 85%, var(--ink)); }
 .hg-btn--outline { background: var(--surface); color: var(--ink); border-color: var(--hairline); }  /* 2026-11-09 흰 테두리 보조 버튼: surface-alt 바탕 위(W-01 영수증 아래 ‘편집하기’) */
 .hg-btn--danger-text, .hg-btn--link.hg-btn--danger-text { background: none; border-color: transparent; color: var(--danger); font-weight: var(--weight-semibold); }  /* 2026-11-09 지우기 글자 버튼(채움 없음, W-01 금액 시트·편집 줄 ‘지우기’) */
+.hg-btn--link.hg-btn--danger-plain { color: var(--danger); font: var(--text-label); text-decoration: none; }  /* 2026-11-23 판 없는 빨간 글자 버튼(S-15 ‘모든 기기에서 로그아웃’): 15/400, 누르는 칸 44px는 hg-btn--link 그대로. 확인 대화상자가 따로 있는 되돌릴 수 없는 일에만 */
 /* 카카오 브랜드 버튼: 제공자 공식색 예외(토큰 아님). 라이트·다크 모두 노랑 유지 */
 .hg-btn--kakao { background: #fee500; color: rgba(0, 0, 0, 0.85); border-color: transparent; }
 .hg-btn--kakao:active, .hg-btn--kakao.is-pressed { background: #efd900; }

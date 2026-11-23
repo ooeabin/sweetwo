@@ -11,7 +11,7 @@ export const copy = {
   retry: '다시 시도',
   loadFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   back: '뒤로',
-  tabs: { overview: '요약', items: '자산·부채' },
+  tabs: { overview: '요약', items: '자산·부채', asset: '자산', debt: '부채' }, // 하위 탭 셋 요약/자산/부채 [확인 필요]
   tabsLabel: '자산 관리 보기', // [확인 필요] 화면 읽기용
 
   // 2026-11-03 F-01 다시 짬 [확인 필요]
@@ -21,8 +21,6 @@ export const copy = {
   shrank: '줄었어요',
   monthly: '달마다 순자산',
   gainIncl: (amount: string) => `안 판 수익 ${amount} 포함`,
-  assets: (amount: string) => `자산 ${amount}`,
-  debts: (amount: string) => `부채 ${amount}`,
   assetsLabel: '자산',
   debtsLabel: '부채',
   empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음, 칩이 안 보일 때만)
