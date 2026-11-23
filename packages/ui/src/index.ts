@@ -21,6 +21,7 @@ export * from './components/Ring';
 export * from './components/WeekStrip';
 export * from './components/Tabs';
 export * from './components/Toast';
+export * from './components/StickyBar';
 export * from './components/Illustration';
 export * from './components/Celebration';
 export * from './components/ImageCrop';

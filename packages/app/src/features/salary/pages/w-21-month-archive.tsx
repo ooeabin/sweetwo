@@ -1,6 +1,6 @@
 import { fetchMoneyIns, fetchPastChecklists, qk } from '@sweetwo/api';
 import { archiveRow, formatMonthDay, pastPeriods, todayKst } from '@sweetwo/core';
-import { ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
+import { EmptyState, ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -105,9 +105,7 @@ export function W21MonthArchive() {
           ]}
         />
       ) : rowCount === 0 ? (
-        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
-          {copy.archiveEmpty}
-        </p>
+        <EmptyState list page title={copy.archiveEmpty} />
       ) : periodMode ? (
         <div className="hg-list">
           {periods.map((p) =>

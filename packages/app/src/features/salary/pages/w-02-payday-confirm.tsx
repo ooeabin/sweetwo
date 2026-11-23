@@ -33,6 +33,7 @@ import {
 import {
   BottomSheet,
   Button,
+  StickyBar,
   Chip,
   Icon,
   Illustration,
@@ -843,11 +844,11 @@ export function W02PaydayConfirm() {
         />
       )}
       {confirmable.length > 0 && (
-        <div className="hg-stickybar">
+        <StickyBar>
           <Button variant="primary" block loading={busy} onClick={() => void confirm()}>
             {copy.confirmAll}
           </Button>
-        </div>
+        </StickyBar>
       )}
       {pickDate && (
         <BottomSheet title={copy.cyclePick} onClose={() => setPickDate(false)}>
@@ -910,11 +911,11 @@ function EmptyPlan({ lead, onFill }: { lead: string; onFill: () => void }) {
           <span>{copy.emptyTail}</span>
         </h2>
       </section>
-      <div className="hg-stickybar">
+      <StickyBar>
         <Button variant="primary" block onClick={onFill}>
           {copy.fillPlan}
         </Button>
-      </div>
+      </StickyBar>
     </>
   );
 }

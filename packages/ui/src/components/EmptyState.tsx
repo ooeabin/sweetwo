@@ -7,6 +7,7 @@ export function EmptyState({
   body,
   action,
   list,
+  page,
 }: {
   /** 없으면 그림 자리 + 행동만(2026-11-11 Y-01 경조사 빈 상태) */
   title?: string;
@@ -14,9 +15,11 @@ export function EmptyState({
   action?: ReactNode;
   /** 목록 자리의 빈 안내(공지·알림·내역 …): 한 줄 글자를 slate로(2026-11-20). 큰 그림 있는 상태 화면은 쓰지 않음 */
   list?: boolean;
+  /** 화면 전체가 빈 목록이면 가운데쯤에 둠(2026-11-23 W-21, W-14) */
+  page?: boolean;
 }) {
   return (
-    <div className={list ? 'hg-empty hg-empty--list' : 'hg-empty'}>
+    <div className={`hg-empty${list ? ' hg-empty--list' : ''}${page ? ' hg-empty--page' : ''}`}>
       <Illustration name="empty-plate" className="hg-empty__art" />
       {title && <p className="hg-empty__title">{title}</p>}
       {body && <p className="hg-empty__body">{body}</p>}
