@@ -24,7 +24,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await page.goto('/salary');
   // 2026-11-19: W-02 줄에는 목표 금액 진행 보조 줄이 없음(종류 한 줄만). 시트 ‘저축·투자 보기’ → W-10
   await expect(page.getByText('0원 / 1억 5,000만 원')).toHaveCount(0);
-  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText('저축·투자');
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('저축·투자'); // 2026-11-23 종류 글자 없앰
   await axe(page);
   await page.locator('.hg-transfer__open', { hasText: '내 집 마련' }).click();
   await page.getByRole('button', { name: '저축·투자 보기' }).click();
@@ -36,18 +36,16 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   const target = page.getByRole('region', { name: '모은 금액' });
   await expect(target).toContainText('목표 금액 1억 5,000만 원의 0%');
   // 2026-11-16 4차 검토: 기한 줄은 늘 보임(남은 금액과 한 줄, 같은 날짜 한 번), 월 필요액은 ‘자세히 보기’ 아래
-  await expect(target).toContainText('2031년 10월까지 1억 5,000만 원 더 필요해요');
-  await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
-  expect((await target.innerText()).match(/2031년 10월/g)).toHaveLength(1);
-  await expect(target).not.toContainText('매달');
-  await target.getByRole('button', { name: '자세히 보기' }).click();
-  await expect(target.getByRole('button', { name: '접기' })).toHaveAttribute(
-    'aria-expanded',
-    'true',
-  );
-  await expect(target).toContainText('매달');
-  expect((await target.innerText()).match(/2031년 10월/g)).toHaveLength(1);
-  await expect(page.getByText('매달 95만 원씩')).toBeVisible();
+  // 2026-11-23 바탕 기준: 기한은 항목 줄(값 = 날짜, 보조 = 남은 금액), 월 필요액은 ‘자세히 보기’ 아래
+  const deadline = page.locator('.hg-listrow', { hasText: '기한' });
+  await expect(deadline).toContainText('1억 5,000만 원 더 필요해요');
+  await expect(deadline).toContainText('2031년 10월');
+  expect((await page.locator('.hg-fd--w10').innerText()).match(/2031년 10월/g)).toHaveLength(1);
+  await expect(page.locator('#w-10-more')).toHaveCount(0);
+  await page.getByRole('button', { name: '자세히 보기' }).click();
+  await expect(page.getByRole('button', { name: '접기' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#w-10-more')).toContainText('매달');
+  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText('95만 원');
   await axe(page);
 
   // 목표 금액이 없는 항목: 진행 대신 ‘목표 금액 정하기’
@@ -129,11 +127,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(page).toHaveURL(/\/salary\/items\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { name: '제주 여행' })).toBeVisible();
   // W-10: 늦어지는 사실 한 줄 + 할 일(2026-11-09)
-  const target = page.getByRole('region', { name: '모은 금액' });
-  await target.getByRole('button', { name: '자세히 보기' }).click();
-  await expect(target).toContainText('지금 속도면 2027년 7월에 다 모아요');
-  await expect(target.getByRole('button', { name: '기한 바꾸기' })).toBeVisible();
-  await target.getByRole('button', { name: '매달 금액 바꾸기' }).click();
+  await page.getByRole('button', { name: '자세히 보기' }).click();
+  await expect(page.locator('#w-10-more')).toContainText('지금 속도면 2027년 7월에 다 모아요');
+  await expect(page.locator('.hg-listrow', { hasText: '기한' })).toBeVisible();
+  await page.getByRole('button', { name: '매달 금액 바꾸기' }).click();
   // 2026-11-09 영수증: W-01 ‘계획’에서 이 저금 줄 금액 시트를 연 채(미계획 금액을 같이 봄)
   await expect(page).toHaveURL(/\/salary\/plan$/);
   await expect(page.getByRole('dialog', { name: '제주 여행 금액' })).toBeVisible();
@@ -215,7 +212,8 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   expect(g).toMatchObject({ start_saved: 20_000_000, target_amount: 30_000_000 });
   await expect(page.getByText('2,000만 원', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('목표 금액 3,000만 원의 66%')).toBeVisible();
-  await expect(page.getByText('이미 모은 금액 2,000만 원')).toBeVisible();
+  await expect(page.getByText('이미 모은 금액', { exact: true })).toBeVisible();
+  await expect(page.getByText('+2,000만 원')).toBeVisible();
   // 체크하면 시작값에 더해짐
   await page.getByRole('checkbox', { name: /이번 달/ }).click();
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();

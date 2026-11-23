@@ -69,7 +69,8 @@ test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘�
     { goal_id: 'goal-h', kind: 'in', amount: 1_000_000, money_in_id: 'in-1' },
   ]);
   await page.goto('/salary/items/goal-h');
-  await expect(page.getByText('수입에서 넣었어요 100만 원')).toBeVisible();
+  await expect(page.getByText('수입에서 넣었어요')).toBeVisible();
+  await expect(page.getByText('+100만 원')).toBeVisible();
   await expect(page.getByText('400만 원', { exact: true }).first()).toBeVisible();
 });
 

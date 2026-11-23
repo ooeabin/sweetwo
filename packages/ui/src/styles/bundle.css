@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (419b4d07). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (e4d9327a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2937,3 +2937,10 @@ button.hg-datepill { cursor: pointer; }
 .hg-fd--w10 .hg-transfer.is-done .hg-transfer__label { text-decoration: none; color: var(--stone); }
 /* W-01 ‘편집하기’: 표준 글자(15), 굵기 400, 테두리 없는 흰 상자 */
 .hg-planstage .hg-btn--outline { font: var(--text-value); font-weight: 400; border-color: transparent; }
+/* 같이 모으기 사람 원(2026-11-23 사용자 지적): 원 32, 안 글자 12/700(3글자 11), 겹침 −8·뒤 원이 위·2px surface 고리 그대로.
+   이름표(13) 아래 12 → 원 묶음과 이름 사이 8, 세로 가운데 → 이름 아래 금액까지 8 */
+.hg-hub .hg-together__people { gap: var(--space-2); min-height: 32px; align-items: center; }
+.hg-hub .hg-together__people .hg-avatar { --avatar: 32px; font-size: 12px; font-weight: 700; }
+.hg-hub .hg-together__people .hg-avatar--n3 { font-size: 11px; }
+.hg-hub .hg-together__people .hg-avatars { flex: none; }
+.hg-hub .hg-together__amount { margin-top: var(--space-2); }

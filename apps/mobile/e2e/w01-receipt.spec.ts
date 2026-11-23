@@ -718,7 +718,7 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
     };
   });
   await go();
-  const note = '모은 금액 3,300만 원, 목표 금액의 22%';
+  const note = '목표 금액의 22%'; // 2026-11-23: “모은 금액 …, ”를 지움
   await expect(page.getByText(note)).toBeVisible();
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();

@@ -101,7 +101,7 @@ test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +95만 원
   await expect(slide.locator('.hg-together__bar')).toHaveCount(0);
 });
 
-test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대로, 값 아래 “자산 …, 부채 …”, 금액 가리기면 둘 다 가림', async ({
+test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대로, ‘자산 / 부채’ 줄은 없앰(2026-11-23), 금액 가리기면 값 가림', async ({
   page,
 }) => {
   await open(page, (d) => {
@@ -120,14 +120,14 @@ test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대�
   const tile = page.getByRole('button', { name: /^자산 관리/ });
   await expect(tile.locator('.hg-hubtile__sub')).toHaveText('순자산');
   await expect(tile.locator('.hg-hubtile__value')).toHaveText('−2,000만 원');
-  await expect(tile.locator('.hg-hubtile__foot')).toHaveText('자산 3,000만 원, 부채 5,000만 원');
+  await expect(tile.locator('.hg-hubtile__foot')).toHaveCount(0);
   await expect(tile).toHaveClass(/hg-hubtile--point/);
   await axe(page);
   await page.evaluate(() => localStorage.setItem('sweetwo.masked', '1'));
   await page.reload();
   const masked = page.getByRole('button', { name: /^자산 관리/ });
   await expect(masked.locator('.hg-hubtile__value')).toHaveText('•••');
-  await expect(masked.locator('.hg-hubtile__foot')).toHaveText('자산 •••, 부채 •••');
+  await expect(masked.locator('.hg-hubtile__foot')).toHaveCount(0);
 });
 
 test('H-04 자산 0개면 기존 동기 문구 그대로(이름표·작은 줄 없음)', async ({ page }) => {
