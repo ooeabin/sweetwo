@@ -187,7 +187,8 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
     const vw = page.viewportSize()?.width ?? 375;
     expect(Math.abs((box?.x ?? 0) + (box?.width ?? 0) / 2 - vw / 2)).toBeLessThanOrEqual(2);
     await expect(head.getByRole('heading', { level: 1 })).toHaveCSS('font-size', '17px');
-    expect((await head.boundingBox())?.height).toBe(64);
+    // 2026-11-23 바탕 기준: 흰 화면(W-02 `.hg-fd`)은 머리 56(시안), 나머지는 64
+    expect((await head.boundingBox())?.height).toBe(url === '/salary' ? 56 : 64);
     await head.getByRole('button', { name: '홈으로' }).click();
     await expect(page).toHaveURL(/\/$/);
   }
