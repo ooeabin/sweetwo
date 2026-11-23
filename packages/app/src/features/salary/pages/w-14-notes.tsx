@@ -5,7 +5,15 @@ import {
   todayKst,
   type SavingNoteRow,
 } from '@sweetwo/core';
-import { AddRow, BottomSheet, Button, ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
+import {
+  AddRow,
+  BottomSheet,
+  Button,
+  EmptyState,
+  ListRow,
+  PageHeader,
+  SkelRows,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -187,9 +195,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
           ))}
         </div>
       ) : (
-        <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
-          {copy.notesEmpty}
-        </p>
+        <EmptyState list page title={copy.notesEmpty} />
       )}
       {t.canEdit && <AddRow label={copy.noteAdd} block onClick={() => nav(t.noteTo('new'))} />}
       {/* 금액이 있으면 “모은 금액에서 {금액} 뺄까요?”, 없으면 금액 칸(시트, 닫으면 아무것도 안 바뀜) */}

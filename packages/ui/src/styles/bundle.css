@@ -208,7 +208,7 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-toast { animation: hg-toast-in var(--dur-base) var(--ease-out); }
 @keyframes hg-toast-in { from { transform: translateY(16px); } }  /* 투명도는 바꾸지 않음: 나타나는 동안에도 글자 대비 유지 */
 /* 토스트 자리: 화면 아래 가운데. 좁은 창에서 아래 탭 막대가 있으면 그 위 */
-.hg-toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
+.hg-toasts { position: fixed; left: 0; right: 0; bottom: max(calc(var(--space-8) + env(safe-area-inset-bottom, 0px)), calc(var(--hg-bottom-bar-h, 0px) + var(--space-4))); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
 /* 2026-11-09 좁은 창 하단 탭 막대와 + 버튼(FAB)을 없애 토스트는 늘 화면 아래(space-8 + 안전 영역) */
 /* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
@@ -530,6 +530,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-empty__title { font: var(--text-title-3); word-break: keep-all; }
 .hg-empty__art { display: block; width: 120px; height: 120px; object-fit: contain; }
 .hg-empty__body { font: var(--text-body-sm); color: var(--slate); max-width: 280px; }
+.hg-empty--page { min-height: 45dvh; justify-content: center; }  /* 2026-11-23 화면 전체가 빈 목록(W-21, W-14)이면 왼쪽 위에 붙지 않고 화면 가운데쯤 */
 .hg-empty--list .hg-empty__title { color: var(--slate); }  /* 2026-11-20 목록 자리의 빈 안내(공지 N-04, 휴지통, 문의, 선물 기록, 자산·부채 목록): 제목 글자를 slate로 */
 
 /* Skeleton */

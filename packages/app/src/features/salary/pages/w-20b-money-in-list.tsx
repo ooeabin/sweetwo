@@ -1,6 +1,6 @@
 import { deleteMoneyIn, fetchMoneyInPuts, fetchMoneyIns, qk, restoreMoneyIn } from '@sweetwo/api';
 import { formatDateFull } from '@sweetwo/core';
-import { Button, ListRow, Menu, PageHeader, SkelRows } from '@sweetwo/ui';
+import { Button, EmptyState, ListRow, Menu, PageHeader, SkelRows } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
@@ -101,14 +101,16 @@ export function W20bMoneyInList() {
           })}
         </div>
       ) : (
-        <section className="hg-stack" style={{ gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-          <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
-            {copy.moneyInListEmpty}
-          </p>
-          <Button variant="secondary" onClick={() => nav(togetherPaths.moneyIn)}>
-            {copy.moneyInGo}
-          </Button>
-        </section>
+        <EmptyState
+          list
+          page
+          title={copy.moneyInListEmpty}
+          action={
+            <Button variant="secondary" onClick={() => nav(togetherPaths.moneyIn)}>
+              {copy.moneyInGo}
+            </Button>
+          }
+        />
       )}
     </div>
   );
