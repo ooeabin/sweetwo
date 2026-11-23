@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (7a2035c6). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (35d580fe). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -23,7 +23,7 @@
 /* 카드 안 보조 버튼은 옅은 오렌지 바탕 + 진한 오렌지 글자 */
 :is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary { background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }  /* 2026-11-11 사용자 결정: 갈색(brand-ink) 글자가 어두워 보여 브랜드 오렌지 글자(당근 보조 버튼처럼). 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
 /* 2026-11-19 사용자 결정: 옅은 오렌지 판(brand-soft) 위의 버튼은 모두 오렌지 글자(accent-app-text) 700. 위 카드 안 보조 버튼과 같은 규칙. 배지·작은 칩(14px 미만)·축하 머리글·강조 숫자는 brand-ink 그대로. 대비 예외(14px 이상 700 짧은 말), axe 선택자 예외 */
-.hg-plan__block.hg-plan__block--soft, .hg-transfer__action.hg-transfer__action--go {  /* 두 클래스로 뒤쪽 기본 버튼 규칙(.hg-plan__block, .hg-transfer__action)보다 앞섬 */
+.hg-plan__block.hg-plan__block--soft {  /* 두 클래스로 뒤쪽 기본 버튼 규칙(.hg-plan__block)보다 앞섬 */
   background: var(--brand-soft); color: var(--accent-app-text); font-weight: 700; }
 .hg-btn--ghost { background: transparent; color: var(--ink); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-full); }
 .hg-btn--link { background: none; border: 0; height: auto; padding: 0; color: var(--link-sub, var(--ink-2)); font: var(--text-label); }  /* 2026-11-09 글자 버튼 기본은 진한 회색(ink-2 600): 고치기, 바꾸기, 월급 계획 고치기, 더 보기 */
@@ -2677,18 +2677,21 @@ button.hg-datepill { cursor: pointer; }
 .hg-w02hero__saved b { color: var(--brand-ink); font-weight: 600; }
 .hg-chip--fill.is-selected { border-color: var(--ink); box-shadow: none; background: var(--ink); color: var(--on-ink); }
 .hg-chip--fill b { font-weight: 600; opacity: 0.6; }
-.hg-transfer--act { grid-template-columns: minmax(0, 1fr) auto; min-height: 68px; padding-block: 0; }
-.hg-transfer--act > .hg-transfer__open, .hg-transfer--act > .hg-transfer__body { grid-column: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; margin: 0; padding-block: var(--space-3); }
+/* W-02 줄(2026-11-23 사용자 결정 C안): 상태 버튼을 없애고 줄 전체가 버튼. 이름 앞 점(할 일) + 금액 + 맨 오른쪽 모양(› 할 일, ✓ 끝남, – 건너뜀) */
+.hg-transfer--act { display: block; padding: 0; }
+.hg-transfer--act > .hg-transfer__open, .hg-transfer--act > .hg-transfer__body { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; column-gap: var(--space-3); align-items: center; width: 100%; min-height: 68px; margin: 0; padding: var(--space-3) 0; box-sizing: border-box; }
 .hg-transfer--act .hg-transfer__label { font: 600 16px/22px var(--font-sans); }
 .hg-transfer--act .hg-transfer__amount { font: 700 16px/22px var(--font-sans); }
+.hg-transfer--act .hg-transfer__trail { display: grid; place-items: center; width: 20px; height: 20px; color: var(--slate); }
+.hg-transfer--act.is-go .hg-transfer__trail { color: var(--stone); }
+/* 점 자리는 목록에 점이 하나라도 있을 때만 비워 둬 이름 줄이 맞음(점 없는 목록은 들여쓰지 않음) */
+.hg-transfer__dot { display: none; width: 8px; height: 8px; }
+.hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer--act > :is(.hg-transfer__open, .hg-transfer__body) { grid-template-columns: 8px minmax(0, 1fr) auto 20px; }
+.hg-checklist__list:has(.hg-transfer__dot.is-on) .hg-transfer__dot { display: block; }
+.hg-transfer__dot.is-on { border-radius: var(--radius-full); background: var(--brand); }  /* 그래픽일 뿐, 뜻은 화면 읽기 이름 “확인할 것”으로 */
 .hg-transfer--act.is-done .hg-transfer__label, .hg-transfer--act.is-done .hg-transfer__amount { color: var(--slate); text-decoration: none; }
-.hg-transfer__action { position: relative; grid-column: 2; order: 2; min-width: 68px; height: 34px; padding: 0 var(--space-3); text-align: center; border: 1px solid transparent; border-radius: var(--radius-md); font: 600 14px/20px var(--font-sans); cursor: pointer; }
-.hg-transfer__action::before { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
-.hg-transfer__action--done, .hg-transfer__action--skipped { background: var(--surface-alt); color: var(--slate); }
-.hg-transfer__action--wait { background: transparent; border-color: var(--surface-alt); color: var(--slate); cursor: default; }
-.hg-transfer__action:disabled { cursor: default; }
-/* 보기만 줄의 상태(2026-11-23): 버튼 모양 없이 회색 글자(대기·완료·건너뜀). 버튼 글자와 같은 자리(폭 68px, 가운데 맞춤) */
-.hg-transfer__status { grid-column: 2; order: 2; min-width: 68px; text-align: center; font: 600 14px/20px var(--font-sans); color: var(--slate); }
+.hg-transfer--act.is-skipped .hg-transfer__label, .hg-transfer--act.is-skipped .hg-transfer__amount { color: var(--slate); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.hg-transfer--act.is-view.is-done .hg-transfer__label, .hg-transfer--act.is-view.is-done .hg-transfer__amount { color: var(--slate); }
 /* 빈 목록 안내(W-02 파트너 보기, 2026-11-23): 가운데 회색 글자 한 줄 */
 .hg-checklist__none { margin: 0; padding: var(--space-8) 0; text-align: center; font: var(--text-body); color: var(--slate); }
 /* W-02 수입 카드(IncomeCard, 2026-11-19 사용자 결정): 흰 카드 + 이름표 + 큰 금액 + 최근 2건 + 넓은 회색 버튼. 예전 한 줄 상자 hg-moneybox 대체 */

@@ -80,10 +80,11 @@ test('파트너 보기만: 대기 줄은 회색 “대기” 글자(주황 ‘�
   yebinList(db, ['wait', 'checked']);
   await page.goto('/salary?who=yebin');
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
-  await expect(page.locator('.hg-transfer__status', { hasText: '대기' })).toHaveCount(1);
-  await expect(page.locator('.hg-transfer__status', { hasText: '완료' })).toHaveCount(1);
-  await expect(page.locator('.hg-transfer__action')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /확인$/ })).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__meta', { hasText: '대기' })).toHaveCount(1);
+  await expect(page.locator('.hg-transfer.is-done')).toHaveCount(1);
+  await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
+  await expect(page.locator('.hg-transfer__open')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /확인할 것$/ })).toHaveCount(0);
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);
   await expect(page.getByText('0원', { exact: true })).toHaveCount(0);
   await expect(page.getByText('2개 중 1개 확인')).toBeVisible();
@@ -168,8 +169,8 @@ test('한 사람 관리형 관리하지 않는 쪽: 관리하는 사람 손 줄�
   await page.goto('/salary');
   const group = page.getByRole('region', { name: '예빈님이 확인해요' });
   await expect(group).toBeVisible();
-  await expect(group.locator('.hg-transfer__status', { hasText: '대기' }).first()).toBeVisible();
-  await expect(group.locator('.hg-transfer__action')).toHaveCount(0);
+  await expect(group.locator('.hg-transfer__meta', { hasText: '대기' }).first()).toBeVisible();
+  await expect(group.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await axe(page);
 });

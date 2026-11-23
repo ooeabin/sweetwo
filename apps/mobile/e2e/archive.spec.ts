@@ -95,7 +95,7 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
   // 2026-11-23: 수입 카드 이름표도 그 달(“이번 달 수입” 아님)
   await expect(page.locator('.hg-incomecard')).toContainText('7월 수입');
   await expect(page.locator('.hg-incomecard')).not.toContainText('이번 달 수입');
-  for (const c of await page.locator('.hg-transfer__action').all()) await expect(c).toBeDisabled();
+  await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
   await page.getByRole('button', { name: '뒤로' }).locator('visible=true').first().click();
   await expect(page).toHaveURL(/\/salary\/archive/);
   await expect(page.locator('.hg-list .hg-listrow')).toHaveCount(3);

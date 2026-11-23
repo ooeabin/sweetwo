@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, seed } from './mocks';
 import { homeTask, homeTaskTexts } from './home-tasks';
+import { checkRow } from './w02-row';
 
 // 월급 탭 다음 개선(20 ‘다음 개선’ 2026-11-09 검토 → round 3에서 만듦). 찬우(시작), 각자.
 const axe = async (page: Page) => {
@@ -103,7 +104,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   if (!g) throw new Error('seed');
   Object.assign(g, { target_amount: 440_000, deadline: '2026-12-01' });
   await page.goto('/salary');
-  await page.getByRole('button', { name: '청약 확인', exact: true }).click();
+  await checkRow(page, '청약');
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/achieved(\?from=checklist)?$/);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '청약을 어떻게 할까요?' })).toBeVisible();
@@ -158,7 +159,8 @@ test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초�
   await axe(page);
   // 체크해도 홈에 순위 줄은 없음
   await page.goto('/salary');
-  await page.locator('.hg-transfer__action--go').first().click();
+  await page.locator('.hg-transfer__open').first().click();
+  await page.getByRole('dialog').getByRole('button', { name: '계획대로 했어요' }).click();
   await page.goto('/');
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await (await homeTask(page, '무엇을 같이 모을지 정해 볼까요?')).click();

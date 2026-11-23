@@ -4,6 +4,7 @@ import { chanwoo, emptyV22, type MemDb, mockOnboarding, mockRealtime, seed } fro
 import { fakeBridge } from './fake-bridge';
 import { events } from './analytics';
 import { homeTask, homeTaskTexts } from './home-tasks';
+import { doneRow } from './w02-row';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
 // H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿, 2026-11-17, 2026-11-18 저축·투자 줄 없앰), H-12 결혼 준비, H-04 자산 관리·H-08 캘린더 타일.
@@ -303,12 +304,11 @@ test('자동 줄뿐인 사람: 월급 상자 첫 줄 “자동으로 나가요�
   await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).toContainText(
     '자동으로 나가요',
   );
+  // 자동 확인된 줄은 “자동으로 나갔어요”(2026-11-23 C안)
   await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText(
-    '자동으로 나가요',
+    '자동으로 나갔어요',
   );
-  await expect(
-    page.getByRole('button', { name: '고정지출 완료, 고치기', exact: true }),
-  ).toBeVisible();
+  await expect(doneRow(page, '고정지출')).toBeVisible();
   await axe(page);
   // 자동 확인된 줄도 시트에서 건너뜀
   await page.locator('.hg-transfer__open', { hasText: '고정지출' }).click();
@@ -366,13 +366,15 @@ test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음�
   await axe(page);
   // 남은(미확인) 손 줄이 없고 서버가 닫은 건너뜀 줄만 남았으면 주 버튼 없음(2026-11-19)
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
-  const skippedBtns = page.getByRole('button', { name: /건너뜀$/ });
-  await expect(skippedBtns).toHaveCount(3);
-  // 서버가 닫은 건너뜀 줄: 상태 버튼 → 줄 시트(계획대로 했어요 / 다른 금액으로 했어요) → 완료로 바뀜
+  const skippedBtns = page.getByRole('button', { name: /건너뜀, 고치기$/ });
+  // 사람이 직접 건너뛴 줄 1개는 다시 고칠 수 없는 줄(누를 수 없음), 서버가 닫은 줄 2개만 줄 시트
+  await expect(page.locator('.hg-transfer--act.is-skipped')).toHaveCount(3);
+  await expect(skippedBtns).toHaveCount(2);
+  // 서버가 닫은 건너뜀 줄: 줄 → 줄 시트(계획대로 했어요 / 다른 금액으로 했어요) → 완료로 바뀜
   await skippedBtns.nth(1).click();
   await expect(page.getByRole('button', { name: '다른 금액으로 했어요' })).toBeVisible();
   await page.getByRole('button', { name: '계획대로 했어요', exact: true }).click();
-  await expect(skippedBtns).toHaveCount(2);
+  await expect(skippedBtns).toHaveCount(1);
   const prev = lines(db, 0);
   expect(prev.filter((l) => l.state === 'checked' && l.late)).toHaveLength(1);
   expect(db.v22?.calls.some((c) => c.fn === 'confirm_payday')).toBe(false);
@@ -862,12 +864,12 @@ test('한 사람 관리형(찬우 관리): 예빈 홈은 자동 문장, W-02는 
   await page.goto('/');
   await expect(monthLine(page)).toContainText('자동으로 정해져요');
   await page.goto('/salary');
-  // 2026-11-23: 관리하는 사람(찬우)의 손 줄은 “찬우님이 확인해요” 묶음에 보기만(버튼 모양 없는 회색 상태 글자)
+  // 2026-11-23: 관리하는 사람(찬우)의 손 줄은 “찬우님이 확인해요” 묶음에 보기만(점·› 없이 상태만, 보조 줄 “대기”)
   const group = page.getByRole('region', { name: '찬우님이 확인해요' });
   await expect(group).toBeVisible();
   await expect(group.locator('.hg-transfer', { hasText: '고정지출' })).toBeVisible();
-  await expect(group.locator('.hg-transfer__status').first()).toBeVisible();
-  await expect(group.locator('.hg-transfer__action')).toHaveCount(0);
+  await expect(group.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
+  await expect(group.getByText('대기').first()).toBeVisible();
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await axe(page);
 });

@@ -2,6 +2,7 @@ import { setYearMonth } from './wheel';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, mockOnboarding, seed } from './mocks';
+import { checkRow, doneRow } from './w02-row';
 
 // 저금 항목(20 W-10~W-12, ADR 0007): 목표 탭 없이 월급 탭 저금 줄이 목표 금액(+ 기한)을 가짐.
 // 모은 금액 = 체크한 저금 합. 달성하면 축하 1회 → ‘계속 모을게요’ / ‘그만할게요’.
@@ -343,7 +344,7 @@ test('달성: 체크로 목표 금액에 닿으면 W-12 축하 → W-12a ‘계�
   });
   db.goalStory = { months: 4, together: 0 };
   await page.goto('/salary');
-  await page.getByRole('button', { name: '가전 바꾸기 확인', exact: true }).click();
+  await checkRow(page, '가전 바꾸기');
   await expect(page).toHaveURL(/\/salary\/items\/goal-tv\/achieved(\?from=checklist)?$/);
   await expect(page.getByText('4개월 만에 모았어요')).toBeVisible();
   // 축하 화면 위에 체크 ‘되돌리기’ 토스트가 남지 않음(2026-11-09)
@@ -372,11 +373,11 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   // 목표 금액 95만: 이번 달 줄을 체크하면 달성
   Object.assign(home, { target_amount: 950_000, deadline: null });
   await page.goto('/salary');
-  await page.getByRole('button', { name: '내 집 마련 확인', exact: true }).click();
+  await checkRow(page, '내 집 마련');
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved(\?from=checklist)?$/);
   expect(home.status).toBe('achieved');
   await page.goto('/salary');
-  await page.getByRole('button', { name: '내 집 마련 완료, 고치기', exact: true }).click();
+  await doneRow(page, '내 집 마련').click();
   await page.getByRole('dialog').getByRole('button', { name: '체크 풀기' }).click();
   await expect.poll(() => home.status).toBe('active');
   expect(db.notifications.some((n) => n.kind === 'goal_achieved')).toBe(false);
@@ -385,7 +386,7 @@ test('달성 되돌리기: 고르기 전에 체크를 풀어 목표 금액 아�
   await expect(page.getByRole('region', { name: '모은 금액' }).getByText('달성')).toHaveCount(0);
   // 다시 체크하면 다시 축하
   await page.goto('/salary');
-  await page.getByRole('button', { name: '내 집 마련 확인', exact: true }).click();
+  await checkRow(page, '내 집 마련');
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/achieved(\?from=checklist)?$/);
 });
 

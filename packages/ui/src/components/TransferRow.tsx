@@ -32,7 +32,7 @@ export function TransferRow({
   busy = false,
   changed = false,
   auto,
-  action,
+  status,
 }: {
   label: ReactNode;
   /** 담당·월급일, 자동 줄이면 꺼내는 통장 */
@@ -60,19 +60,15 @@ export function TransferRow({
   /** 자동 줄 알약(2026-11-13 ListRow ‘자동 표시’, hg-autopill): “자동 26일”, “자동 확인”. 이름 아래 보조 줄 자리 */
   auto?: string;
   /**
-   * 체크 원 대신 상태 버튼(W-02, 2026-11-19): 남음 “확인”(go, 누르면 바로 확인), 완료 “완료”(done, 누르면 시트로 고치기),
-   * “건너뜀”(skipped), 월급날 전 “25일”(wait, 비활성). 보이는 크기 34px, 누르는 칸 44px
+   * 체크 원 대신 줄 상태(W-02, 2026-11-23 사용자 결정 C안): 줄 전체가 버튼(`onOpen`)이고 오른쪽은 금액 + 모양.
+   * go 할 일(이름 앞 오렌지 점 + ›), done 끝남(slate 흐림 + ✓), skipped 건너뜀(취소선 + slate + –),
+   * wait 아직 때가 아님(점·모양 없이 보통 글자). `viewOnly`면 점·›를 그리지 않고 상태만 흐리게.
    */
-  action?: {
-    label: string;
+  status?: {
     tone: 'go' | 'done' | 'skipped' | 'wait';
-    /** 화면 읽기 이름(“생활비 확인”) */
+    /** 화면 읽기 이름(“생활비 10만 원, 확인할 것”). 점은 그래픽이라 뜻을 늘 글자로도 전함 */
     ariaLabel: string;
-    onClick?: () => void;
-    disabled?: boolean;
     busy?: boolean;
-    /** 보기만(파트너 줄·관리하는 사람 줄, 2026-11-23): 버튼 모양 없이 회색 상태 글자 하나(`hg-transfer__status`) */
-    text?: boolean;
   };
 }) {
   // 그림이 없는 종류 자리는 그리지 않고 칸도 비우지 않음(2026-11-15 3차 검토)
@@ -99,6 +95,58 @@ export function TransferRow({
       <span className="hg-transfer__amount">{amount}</span>
     </>
   );
+  if (status) {
+    const tone = status.tone;
+    const dot = tone === 'go' && !viewOnly;
+    const trail =
+      tone === 'go' && onOpen && !viewOnly ? (
+        <Icon name="chevron-right" size={20} />
+      ) : tone === 'done' ? (
+        <Icon name="check" size={20} />
+      ) : tone === 'skipped' ? (
+        <Icon name="minus" size={20} />
+      ) : null;
+    const inner = (
+      <>
+        <span className={cx('hg-transfer__dot', dot && 'is-on')} aria-hidden="true" />
+        <span className="hg-stack" style={{ gap: 0 }}>
+          <span className="hg-transfer__label">{label}</span>
+          {meta && <span className="hg-transfer__meta">{meta}</span>}
+        </span>
+        <span className="hg-transfer__amount">{amount}</span>
+        <span className="hg-transfer__trail" aria-hidden="true">
+          {trail}
+        </span>
+      </>
+    );
+    return (
+      <div
+        className={cx(
+          'hg-transfer hg-transfer--act',
+          `is-${tone}`,
+          viewOnly && 'is-view',
+          changed && 'is-changed',
+        )}
+      >
+        {onOpen ? (
+          <button
+            type="button"
+            className="hg-transfer__open"
+            aria-haspopup="dialog"
+            aria-label={status.ariaLabel}
+            aria-busy={status.busy || undefined}
+            onClick={status.busy ? undefined : onOpen}
+          >
+            {inner}
+          </button>
+        ) : (
+          <div className="hg-transfer__body" role="group" aria-label={status.ariaLabel}>
+            {inner}
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       className={cx(
@@ -107,11 +155,10 @@ export function TransferRow({
         viewOnly && 'is-view',
         changed && 'is-changed',
         !!shown && 'hg-transfer--lead',
-        action && 'hg-transfer--act',
       )}
     >
       {shown}
-      {action ? null : viewOnly ? (
+      {viewOnly ? (
         <span className="hg-transfer__state" role="img" aria-label={checkLabel}>
           {done && <Icon name="check" size={20} />}
         </span>
@@ -131,27 +178,8 @@ export function TransferRow({
         <button type="button" className="hg-transfer__open" aria-haspopup="dialog" onClick={onOpen}>
           {body}
         </button>
-      ) : action ? (
-        <span className="hg-transfer__body">{body}</span>
       ) : (
         body
-      )}
-      {action?.text && (
-        <span className="hg-transfer__status" role="img" aria-label={action.ariaLabel}>
-          {action.label}
-        </span>
-      )}
-      {action && !action.text && (
-        <button
-          type="button"
-          className={cx('hg-transfer__action', `hg-transfer__action--${action.tone}`)}
-          aria-label={action.ariaLabel}
-          aria-busy={action.busy || undefined}
-          disabled={action.disabled}
-          onClick={action.busy ? undefined : action.onClick}
-        >
-          {action.label}
-        </button>
       )}
     </div>
   );

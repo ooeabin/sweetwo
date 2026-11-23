@@ -392,7 +392,6 @@ export function W02PaydayConfirm() {
       );
     // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
     const ordered = [...preview].sort((x, y) => x.sort - y.sort);
-    const dayTag = firstDay ? copy.dayTag(Number(firstDay.slice(8, 10))) : copy.goTag;
     // 템플릿 줄이 하나도 없으면(월급 0원 포함) 날짜 알약 + 한 덩어리 안내 + 주 버튼만(2026-11-20 사용자 결정)
     if (ordered.length === 0)
       return frame(
@@ -407,9 +406,15 @@ export function W02PaydayConfirm() {
           {emptyPlan(incomeOf(owner, me.data, partner.data))}
         </>,
       );
-    // 버튼 날짜 = 그 줄이 실제로 나가는 날(자동 줄은 나가는 날, 손 줄은 월급날, 2026-11-19)
-    const tagOf = (l: (typeof preview)[number]) =>
-      l.auto_pay && l.auto_day !== null ? autoDayText(l.auto_day) : dayTag;
+    // 보조 줄 날짜 = 그 줄이 실제로 나가는 날(자동 줄은 나가는 날, 손 줄은 월급날, 2026-11-23 C안)
+    const noteOf = (l: (typeof preview)[number]) =>
+      l.auto_pay
+        ? l.auto_day !== null
+          ? copy.waitAuto(autoDayText(l.auto_day))
+          : copy.previewAuto
+        : firstDay
+          ? copy.waitManual(copy.payday(Number(firstDay.slice(8, 10))))
+          : kindText(l.kind);
     return frame(
       <>
         <MonthHero
@@ -435,15 +440,17 @@ export function W02PaydayConfirm() {
               <TransferRow
                 key={l.id}
                 label={previewName(l)}
-                meta={l.auto_pay ? copy.previewAuto : kindText(l.kind)}
+                meta={noteOf(l)}
                 amount={money(l.amount, masked)}
                 done={false}
                 checkLabel={copy.previewCheck(previewName(l))}
-                action={{
-                  label: tagOf(l),
+                status={{
                   tone: 'wait',
-                  ariaLabel: copy.previewCheck(previewName(l)),
-                  disabled: true,
+                  ariaLabel: copy.waitLabel(
+                    previewName(l),
+                    money(l.amount, masked),
+                    copy.previewWhen,
+                  ),
                 }}
               />
             ))}
