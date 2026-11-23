@@ -13,6 +13,10 @@ async function open(page: Page, path: string) {
 }
 
 async function expectAboveBar(page: Page) {
+  // 올라오는 움직임이 끝난 뒤 잰다
+  await page
+    .locator('.hg-toast')
+    .evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const toast = await page.locator('.hg-toast').boundingBox();
   const bar = await page.locator('.hg-stickybar .hg-btn--primary').boundingBox();
   expect(toast).not.toBeNull();
