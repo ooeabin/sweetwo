@@ -27,7 +27,7 @@
 | 첫 월급날 확인률 | 손 줄이 있는 첫 확인 목록 중 7일 안 확인 끝 | 60% |
 | 자동 줄 설정률 | 첫 월급날 전 자동 줄 1개 이상 ÷ 월급 계획 있는 사람 | 비교만 |
 | 수입 적기 사용 | 월 1회 이상 쓴 사람 ÷ 월급 계획 있는 사람(날짜 있음 / 없음 따로). 직접 적은 기록만 셈(자동 월급 기록 `payday_auto`는 제외, 2026-11-20) | 비교만 |
-| 자동 줄 질문 응답 | W-11e·W-01d에서 ‘네’ 비율, 첫 월급날 손 줄 수 | 비교만 |
+| 자동 줄 질문 응답 | W-11 ‘자동으로 나가요’ 선택·W-01d에서 ‘네’ 비율, 첫 월급날 손 줄 수 | 비교만 |
 | 잔액 맞추기 | 띠를 본 사람 중 W-10c 완료, 맞춘 차이 금액 구간 | 50% |
 | 다음 저금 이어 가기 | W-12b를 본 사람 중 30일 안 새 저금 | 40% |
 | 순위 같이 보기 | 연결 커플 중 두 사람 모두 동의 | 비교만 |
@@ -90,7 +90,7 @@
 | `rank_badge_toggled` | on(F-08 ‘홈에 보여 주기’) |
 | `quick_assets_saved` | count(채운 칸 수), has_debt, total_band, share(`all` / `sum` / `private`) |
 | `asset_share_answered` | share(`all` / `sum` / `private`), count(바꾼 자산 수). F-03e 연결할 때(2026-11-16 5차 검토 B5) |
-| `auto_pay_asked` | screen_id(W-11e, W-01d, W-01 줄 추가), answer |
+| `auto_pay_asked` | screen_id(W-11, W-01d, W-01 줄 추가·줄 설정), answer |
 | `savings_reconciled` | count, diff_sign(`plus`/`minus`/`zero`, 맞춘 차이 합), diff_band(차이 없으면 null) |
 | `next_saving_prompt_viewed` / `_chosen` | from(achieved/deadline), chip_code(viewed는 null, chosen은 칩 코드·`redeadline`·`custom`·`later`) |
 | `bundle_percent_only_toggled`, `adjust_summary_hidden` | on |
@@ -113,7 +113,7 @@
 | `push_permission_asked` / `_answered` | O-55, P-11, H-06 띠 10번 | 됨. H-06 result unavailable·kinds_on 목록 맞춤(PR 14) |
 | `manage_answers_saved` | O-30c 끝(온보딩), S-11f | 됨. salary_mode `combined`로 맞춤(PR 14) |
 | `plan_share_changed`, `share_preview_viewed` | S-13, S-13p | 됨 |
-| `split_line_setting_changed`, `auto_pay_asked` | W-01 줄 설정, W-01d, W-11e | 됨 |
+| `split_line_setting_changed`, `auto_pay_asked` | W-01 줄 설정, W-01d, W-11 | 됨 |
 | `auto_line_confirmed` | 서버: 자동 줄 나가는 날 자동 확인(`pay_check_line` 트리거), 날짜 없는 자동 저금(`goal_move` auto 트리거) | 됨(PR 14) |
 | `payday_confirmed`, `pay_line_late_checked`, `auto_line_changed` | W-02 | 됨 |
 | `saving_adjusted`, `adjust_summary_hidden`, `savings_reconciled` | W-10b, W-10c, W-14 냈어요 | 됨 |

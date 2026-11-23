@@ -2731,3 +2731,36 @@ button.hg-datepill { cursor: pointer; }
 /* + 아이콘 규칙(2026-11-19): ‘+ … 추가’ 글자 앞 +는 아이콘 하나(AddText). 16px, bold, currentColor, 글자와 4px, 세로 가운데 */
 .hg-addtext { display: inline-flex; align-items: center; gap: var(--space-1); }
 .hg-addtext > .hg-plusic { width: 16px; height: 16px; flex: none; color: currentColor; }
+
+/* FormScreen: 한 화면 입력 틀(2026-11-23). 머리(PageHeader) + 요약 문장 + 질문 섹션 + 접힌 선택 줄 + 아래 고정 주 버튼 */
+.hg-formmain { overflow-x: clip; }
+.hg-form { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-6); width: 100%; max-width: 480px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: var(--space-2) 0 0; }
+.hg-form > .hg-stickybar { margin-top: auto; }
+.hg-form__hero { margin: var(--space-2) 0 var(--space-2); font: var(--text-title-1); letter-spacing: -0.3px; color: var(--ink); word-break: keep-all; }
+.hg-form__heroline { display: block; }
+.hg-form__val { color: var(--accent-app-text); }  /* 금액 자리만 오렌지 글자(22px 700, 대비 예외 14px 이상 700 짧은 말). 이름 자리는 ink */
+.hg-form__sec { display: flex; flex-direction: column; gap: var(--space-3); }
+.hg-form__sec > * { margin: 0; }
+.hg-form__q { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.hg-form__qtitle { margin: 0; font: 700 15px/22px var(--font-sans); color: var(--ink); }
+.hg-form__aside { font: var(--text-body-sm); color: var(--slate); text-align: right; }
+.hg-form__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.hg-form__amountbtn { box-sizing: border-box; width: 100%; margin: 0; border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; min-height: 48px; }
+.hg-form__amountbtn .hg-amount__value { flex: 1; min-width: 0; color: var(--ink); }
+.hg-form__amountbtn .hg-amount__value.is-empty { color: var(--stone); }
+.hg-form__amountbtn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-form__amountbtn.is-error { border-bottom-color: var(--danger); }
+.hg-seg--block { box-sizing: border-box; display: flex; width: 100%; align-self: stretch; }
+.hg-seg--block .hg-seg__item { flex: 1 1 0; justify-content: center; padding: 0 var(--space-2); text-align: center; white-space: nowrap; }
+.hg-form__folds { position: relative; display: flex; flex-direction: column; margin-top: var(--space-2); padding-top: var(--space-4); }
+.hg-form__folds::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: var(--space-4); transform: translateX(-50%); background: var(--surface-alt); }
+.hg-form__fold { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; min-height: 56px; margin: 0; padding: 0; border: 0; border-bottom: 1px solid var(--hairline-soft); background: none; color: var(--ink); font: var(--text-body); text-align: left; cursor: pointer; }
+.hg-form__fold:last-child { border-bottom: 0; }
+.hg-form__fold:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.hg-form__foldval { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--slate); }
+.hg-form__foldval.is-set { color: var(--ink); font-weight: 600; }
+.hg-form__hint { margin: 0; font: var(--text-body-sm); color: var(--slate); }
+@media (hover: none), (pointer: coarse) { .hg-seg--block .hg-seg__item { min-height: 44px; } }
+@media (prefers-reduced-motion: no-preference) { .hg-form__hero { transition: color var(--dur-fast) var(--ease-out); } }
+.hg-form__below { display: flex; flex-direction: column; gap: var(--space-1); }
+.hg-form__below > * { margin: 0; }

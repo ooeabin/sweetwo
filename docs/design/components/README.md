@@ -66,6 +66,7 @@
 | [LockScreen](LockScreen.md) | Layout | 앱 잠금 화면 |
 | [PageHeader](PageHeader.md) | Layout | 상세 화면 머리 |
 | [QuestionLayout](QuestionLayout.md) | Layout | 한 화면 한 질문 틀 |
+| [FormScreen](FormScreen.md) | Layout | 한 화면 입력 틀(요약 문장 + 질문 섹션 + 접힌 선택 줄, 온보딩 밖 입력) |
 | [SectionHeader](SectionHeader.md) | Layout | 본문 안 묶음 제목 |
 | [Status](Status.md) | Display | 어드민 표 상태 값(점 + 글자) |
 | [Ring](Ring.md) | Data | 묶음 진행 원(“2/4”) |

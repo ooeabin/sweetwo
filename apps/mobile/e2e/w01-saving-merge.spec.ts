@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { fillAmount, pickName } from './form';
 import { axe as runAxe } from './axe';
 import { mockOnboarding, seed } from './mocks';
 
@@ -88,17 +89,14 @@ test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫
   page,
 }) => {
   await open(page);
-  await page.goto('/salary/items/new/a?from=split');
+  await page.goto('/salary/items/new?from=split');
   // 2026-11-18: 첫 질문 안내 줄은 뺌(미리 보기 단계 W-11f도 없앰)
   await expect(
     page.getByText('매달 월급에서 이만큼 떼어 둬요. 월급 계획 템플릿에 들어가요'),
   ).toHaveCount(0);
-  await page.getByRole('textbox').first().fill('제주 여행');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('매달 얼마씩 모을까요?').fill('10000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: '아니요, 직접 보내요' }).click();
-  await page.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
+  await pickName(page, '제주 여행');
+  await fillAmount(page, '매달 얼마씩?', 10000);
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   // 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort), 넉넉하면 ‘월급 계획 템플릿에 넣었어요’
   await expect(page.locator('.hg-toasts')).toBeVisible();

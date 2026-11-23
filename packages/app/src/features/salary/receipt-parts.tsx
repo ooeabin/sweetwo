@@ -1,10 +1,19 @@
 import { readWon, type BaseDay } from '@sweetwo/core';
-import { AmountInput, BottomSheet, Button, Chip, DayWheel, ShortText, Toggle } from '@sweetwo/ui';
+import {
+  AmountInput,
+  BottomSheet,
+  Button,
+  Chip,
+  DayWheel,
+  SegChoice,
+  ShortText,
+} from '@sweetwo/ui';
 import { useState } from 'react';
 import { MASKED } from '../../shared/mask';
 import { speakMasked } from '../../shared/masked-text';
 import { copy } from './copy';
 import { nextDayOf } from './cycle';
+import { lineMode, modeSettings, type LineMode } from './form-logic';
 
 const NAME_MAX = 20;
 
@@ -67,9 +76,51 @@ export function AutoDayPick({
 }
 
 /**
- * 줄 설정 칸(W-01 금액 시트 아래): “체크리스트에 넣기”(지출 줄만) + “은행에서 자동으로 나가요” → 켜면 “나가는 날” 칩
- * ‘월급날’·‘다음 날’ + 휠(1~31, 말일). 처음 값 = 월급날(날짜 없음은 1일)
+ * ‘어떻게 챙겨요?’ 구간 선택 + 안내 한 줄 + (자동이면) 나가는 날(2026-11-23). 예전 스위치 둘(‘월급날 확인 목록에 넣기’, ‘은행에서 자동으로 보내요’)을 하나로 합침.
+ * 월급날 확인 = 목록에 넣음, 자동으로 나가요 = 나가는 날 앱이 확인, 확인 안 해요 = 목록에 안 넣음(지출 줄만, 월급날이 있을 때만).
+ * 월급날이 없는 사람은 확인 목록이 없어 첫 칸이 ‘직접 보내요’. 값은 split_line in_checklist/auto_pay/auto_day 그대로.
  */
+export function LineModeBody({
+  value,
+  onChange,
+  allowOff,
+  payday,
+}: {
+  value: LineSettings;
+  onChange: (v: LineSettings) => void;
+  /** ‘확인 안 해요’ 칸(지출 줄만, 월급날이 있을 때) */
+  allowOff: boolean;
+  /** 기준일(월급날). 없으면(날짜 없음) 1일 */
+  payday: BaseDay | null;
+}) {
+  const mode = lineMode(value);
+  const items: { value: LineMode; label: string }[] = [
+    { value: 'check', label: payday === null ? copy.modeDirect : copy.modeCheck },
+    { value: 'auto', label: copy.modeAuto },
+    ...(allowOff ? [{ value: 'off' as const, label: copy.modeOff }] : []),
+  ];
+  return (
+    <>
+      <SegChoice
+        label={copy.formHowQ}
+        items={items}
+        value={mode === 'off' && !allowOff ? 'check' : mode}
+        onChange={(m) => onChange({ ...value, ...modeSettings(m, value.autoDay) })}
+      />
+      {mode === 'auto' ? (
+        <AutoDayPick
+          value={value.autoDay}
+          payday={payday}
+          onChange={(autoDay) => onChange({ ...value, autoDay })}
+        />
+      ) : (
+        <p className="hg-form__hint">{copy.modeHint}</p>
+      )}
+    </>
+  );
+}
+
+/** 금액 시트 안 줄 설정: 작은 제목 + LineModeBody */
 export function LineSettingsFields({
   value,
   onChange,
@@ -78,31 +129,14 @@ export function LineSettingsFields({
 }: {
   value: LineSettings;
   onChange: (v: LineSettings) => void;
+  /** ‘확인 안 해요’를 보일 수 있는 줄(지출 줄, 월급날이 있을 때) */
   showInChecklist: boolean;
-  /** 기준일(월급날). 없으면(날짜 없음) 1일 */
   payday: BaseDay | null;
 }) {
   return (
-    <div className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-      {showInChecklist && (
-        <Toggle
-          label={copy.inChecklist}
-          checked={value.inChecklist}
-          onChange={(on) => onChange({ ...value, inChecklist: on })}
-        />
-      )}
-      <Toggle
-        label={copy.autoPay}
-        checked={value.autoPay}
-        onChange={(on) => onChange({ ...value, autoPay: on, autoDay: on ? value.autoDay : null })}
-      />
-      {value.autoPay && (
-        <AutoDayPick
-          value={value.autoDay}
-          payday={payday}
-          onChange={(autoDay) => onChange({ ...value, autoDay })}
-        />
-      )}
+    <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+      <p className="hg-form__qtitle">{copy.formHowQ}</p>
+      <LineModeBody value={value} onChange={onChange} allowOff={showInChecklist} payday={payday} />
     </div>
   );
 }

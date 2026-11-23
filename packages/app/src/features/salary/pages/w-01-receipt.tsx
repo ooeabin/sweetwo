@@ -76,7 +76,8 @@ import { BundleRow } from '../bundle-parts';
 import { savingPaths, togetherPaths } from '../paths';
 import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { sharePlan, type PlanImageModel } from '../receipt-image';
-import { IncomeSheet, PlanSheet, SpendChips, type LineSettings } from '../receipt-parts';
+import { IncomeSheet, PlanSheet, type LineSettings } from '../receipt-parts';
+import { W01eSpendAdd } from './w-01e-spend-add';
 import { useEnsureSplit } from '../ensure-split';
 import { SalaryLoadError, SalaryLoading } from '../salary-tab';
 import { SavingAskSheet, SavingGoalRow } from '../saving-parts';
@@ -87,11 +88,7 @@ import { keepOrder, recommendedDraft } from '../split-draft';
 import { toDraft } from '../split-editor';
 
 // from: W-10 ‘매달 금액 바꾸기’(?line=)로 연 시트(분석 entry saving_detail, 주소의 line은 열자마자 지움)
-type Sheet =
-  | { line: SplitLine; from?: 'saving_detail' }
-  | { add: string; chip: string | null; first?: boolean }
-  | { income: true }
-  | null;
+type Sheet = { line: SplitLine; from?: 'saving_detail' } | { income: true } | null;
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
 const MAX_CUSTOM = 10;
@@ -116,7 +113,20 @@ export function W01Receipt() {
   const [edit, setEdit] = useState(false);
   const [order, setOrder] = useState<string[] | null>(null);
   const [sheet, setSheet] = useState<Sheet>(null);
-  const [adding, setAdding] = useState(false);
+  // 지출 추가 한 화면(W-01e, 2026-11-23): 열려 있으면 W-01 대신 그리고, 닫으면 같은 자리로 돌아옴
+  const [spendForm, setSpendForm] = useState<{
+    name: string;
+    chip: string | null;
+    first: boolean;
+    custom: boolean;
+  } | null>(null);
+  const scrollAt = useRef(0);
+  useEffect(() => {
+    if (!spendForm && scrollAt.current) {
+      window.scrollTo(0, scrollAt.current);
+      scrollAt.current = 0;
+    }
+  }, [spendForm]);
   const [pick, setPick] = useState(false); // ‘+ 지출 추가’ 선택 시트(지출 / 같이 쓰는 통장)
   const [stop, setStop] = useState<SplitLine | null>(null);
   const [refill, setRefill] = useState(false);
@@ -358,6 +368,18 @@ export function W01Receipt() {
       setBusy(false);
     }
   };
+  // 지출 추가 한 화면 열기(W-01e): 지금 스크롤 자리를 기억해 닫으면 그 자리로
+  const openSpendForm = (o: {
+    name: string;
+    chip: string | null;
+    first: boolean;
+    custom?: boolean;
+  }) => {
+    scrollAt.current = window.scrollY;
+    setSpendForm({ ...o, custom: !!o.custom });
+    window.scrollTo(0, 0);
+  };
+  const closeSpendForm = () => setSpendForm(null);
   const bandOrShort = (v: number) => (v < 0 ? ('short' as const) : amountBand(v));
   // 32 4-6 둘이 같이 고치기(S5-07): 합쳐서 공동 월급 계획을 연결된 상대와 같이 쓰면(상대에게 알림이 감)
   const shared = joint && sp.couple_state === 'connected';
@@ -486,7 +508,13 @@ export function W01Receipt() {
       );
     });
 
-  const add = (name: string, chip: string | null, amount: number, first = false) =>
+  const add = (
+    name: string,
+    chip: string | null,
+    amount: number,
+    first = false,
+    set?: LineSettings,
+  ) =>
     run(async () => {
       if (!split) return;
       // 첫 달 묻기 ‘생활비’ 칩은 기본 생활비 줄(kind living, 이름 없음). 그 밖은 직접 추가 줄
@@ -497,8 +525,20 @@ export function W01Receipt() {
           living ? { kind: 'living', amount } : { kind: 'custom', name, amount },
         ),
       );
-      setSheet(null);
-      setAdding(false);
+      // ‘어떻게 챙겨요?’가 새 줄의 기본값(생활비 줄만 목록 끔)과 다르면 바로 설정(split_lines_configure)
+      if (set && (set.autoPay || set.inChecklist !== !living))
+        await write(() =>
+          configureSplitLines([
+            {
+              id,
+              inChecklist: set.inChecklist,
+              autoPay: set.autoPay,
+              autoDay: set.autoPay ? set.autoDay : null,
+            },
+          ]),
+        );
+      setSpendForm(null);
+      if (set?.autoPay) track('auto_pay_asked', { screen_id: 'W-01', answer: 'yes' });
       track('plan_line_added', {
         source: chip ? 'chip' : 'text',
         chip,
@@ -580,7 +620,6 @@ export function W01Receipt() {
       const before = serverLines.map((l) => l.id);
       const after = lines.map((l) => l.id);
       setEdit(false);
-      setAdding(false);
       setOrder(null);
       if (!split || before.join() === after.join()) return;
       await write(() => reorderSplit(split.id, after));
@@ -882,7 +921,6 @@ export function W01Receipt() {
     });
 
   const sheetLine = sheet && 'line' in sheet ? sheet.line : null;
-  const sheetAdd = sheet && 'add' in sheet ? sheet : null;
   const sheetIncome = !!sheet && 'income' in sheet;
   const sheetEl = sheetLine ? (
     <PlanSheet
@@ -921,18 +959,6 @@ export function W01Receipt() {
           ? () => nav(savingPaths.item(sheetLine.goal_id ?? ''))
           : undefined
       }
-    />
-  ) : sheetAdd ? (
-    <PlanSheet
-      title={copy.lineAmount(sheetAdd.add)}
-      amount={0}
-      left0={left}
-      masked={masked}
-      confirmLabel={copy.addDone}
-      busy={busy}
-      notify={copy.addMyShareHint}
-      onClose={() => setSheet(null)}
-      onConfirm={(v) => void add(sheetAdd.add, sheetAdd.chip, v, !!sheetAdd.first)}
     />
   ) : sheetIncome ? (
     <IncomeSheet
@@ -1206,8 +1232,8 @@ export function W01Receipt() {
                         onClick={() => {
                           // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
                           if (offline()) return;
-                          writeDraft({ ...EMPTY_DRAFT, name });
-                          nav(`${savingPaths.add}/a?from=split`);
+                          writeDraft({ ...EMPTY_DRAFT, name, custom: c === 'custom' });
+                          nav(`${savingPaths.add}?from=split`);
                         }}
                       >
                         {c === 'custom' ? copy.savingEmptyCustom : name}
@@ -1221,7 +1247,7 @@ export function W01Receipt() {
                 <PlanAdd
                   onClick={() => {
                     // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
-                    if (!offline()) nav(`${savingPaths.add}/a?from=split`);
+                    if (!offline()) nav(`${savingPaths.add}?from=split`);
                   }}
                 >
                   {copy.addItemInReceipt}
@@ -1280,7 +1306,8 @@ export function W01Receipt() {
                         key={c.code}
                         small
                         onClick={() => {
-                          if (!offline()) setSheet({ add: c.name, chip: c.code, first: true });
+                          if (!offline())
+                            openSpendForm({ name: c.name, chip: c.code, first: true });
                         }}
                       >
                         {c.name}
@@ -1289,7 +1316,8 @@ export function W01Receipt() {
                   <Chip
                     small
                     onClick={() => {
-                      if (!offline()) setAdding(true);
+                      if (!offline())
+                        openSpendForm({ name: '', chip: null, first: true, custom: true });
                     }}
                   >
                     {copy.spendEmpty.other}
@@ -1299,30 +1327,15 @@ export function W01Receipt() {
             )}
             {!spendEmpty && canEdit && customs < MAX_CUSTOM && (
               <PlanAdd
-                expanded={adding}
                 onClick={() => {
                   if (offline()) return;
                   // 같이 쓰는 통장을 쓸 수 있으면 먼저 작은 선택 시트(지출 / 같이 쓰는 통장), 아니면 바로 지출 추가
-                  if (sharedOn && !adding) setPick(true);
-                  else setAdding((x) => !x);
+                  if (sharedOn) setPick(true);
+                  else openSpendForm({ name: '', chip: null, first: false });
                 }}
               >
                 {copy.addSpend}
               </PlanAdd>
-            )}
-            {adding && canEdit && (
-              <SpendChips
-                more={
-                  sharedOn
-                    ? undefined
-                    : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
-                }
-                taken={spendLines.map((l) => nameOf(l))}
-                onPick={(name, chip) => {
-                  if (spendLines.some((l) => nameOf(l) === name)) return toast(copy.duplicateName);
-                  setSheet({ add: name, chip });
-                }}
-              />
             )}
           </PlanCard>
           {!edit && !planEmpty && (
@@ -1368,6 +1381,28 @@ export function W01Receipt() {
       <BundleAchieveWatch />
     </div>
   );
+  if (spendForm)
+    return (
+      <W01eSpendAdd
+        chips={spendForm.first ? copy.spendEmpty.chips : copy.spendChips}
+        taken={spendLines.map((l) => nameOf(l))}
+        initial={spendForm}
+        left0={left}
+        masked={masked}
+        baseDay={baseDay}
+        busy={busy}
+        more={
+          spendForm.first || sharedOn
+            ? undefined
+            : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
+        }
+        onBack={closeSpendForm}
+        onConfirm={(o) => {
+          if (spendLines.some((l) => nameOf(l) === o.name)) return toast(copy.duplicateName);
+          void add(o.name, o.chip, o.amount, spendForm.first && o.chip === 'living', o.settings);
+        }}
+      />
+    );
   return (
     <>
       <MainFrame
@@ -1386,7 +1421,7 @@ export function W01Receipt() {
               label={copy.addPick.spend}
               onClick={() => {
                 setPick(false);
-                setAdding(true);
+                openSpendForm({ name: '', chip: null, first: false });
               }}
             />
             <ListRow

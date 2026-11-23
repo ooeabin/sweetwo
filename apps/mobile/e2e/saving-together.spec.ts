@@ -238,8 +238,9 @@ test('묶음 달성(합계 기준): 두 사람 모두 W-12 한 번 → 다음엔
   await expect(c.getByRole('radio', { name: '직접 정할게요' })).toBeVisible();
   await axe(c);
   await c.getByRole('radio', { name: '여행' }).click();
-  await expect(c).toHaveURL(/\/salary\/items\/new\/a\?from=next$/);
-  await expect(c.getByLabel('무엇을 위해 모을까요?')).toHaveValue('여행');
+  await expect(c).toHaveURL(/\/salary\/items\/new\?from=next$/);
+  // 2026-11-23 한 화면 입력: 고른 이름이 미리 골라져 있음
+  await expect(c.getByRole('heading', { level: 2 })).toContainText('여행');
 
   // 예빈도 한 번(알림 링크)
   await y.goto('/salary/bundles/bundle-1');

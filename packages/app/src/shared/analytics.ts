@@ -572,7 +572,7 @@ export type AnalyticsEvent =
   | { name: 'auto_line_changed'; props: { to: 'skipped' | 'other_amount' } }
   | {
       name: 'auto_pay_asked';
-      props: { screen_id: 'W-11e' | 'W-01d' | 'W-01'; answer: 'yes' | 'no' };
+      props: { screen_id: 'W-11' | 'W-01d' | 'W-01'; answer: 'yes' | 'no' };
     }
   | { name: 'home_task_dismissed'; props: { task_key: string } }
   | {

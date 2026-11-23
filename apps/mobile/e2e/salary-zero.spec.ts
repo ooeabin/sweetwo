@@ -158,8 +158,8 @@ test('월급 계획 템플릿이 아직 없는 사람(월급 0원)이 W-01·W-11
 
   // W-11도 월급 0원이라고 돌려보내지 않음
   db.splits.length = 0;
-  await page.goto('/salary/items/new/a');
-  await heading(page, '무엇을 위해 모을까요?');
+  await page.goto('/salary/items/new');
+  await heading(page, '저축·투자 추가');
   await expect.poll(() => db.splits.length).toBe(1);
 });
 

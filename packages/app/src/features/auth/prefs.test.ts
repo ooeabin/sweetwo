@@ -37,14 +37,14 @@ describe('prefs.firstSavingAt', () => {
   beforeEach(() => mem.clear());
 
   it('첫 저금 흐름과 초대 시트 주소만 기억', () => {
-    prefs.setFirstSavingAt('/salary/items/new/c?from=onboarding');
-    expect(prefs.firstSavingAt()).toBe('/salary/items/new/c?from=onboarding');
+    prefs.setFirstSavingAt('/salary/items/new?from=onboarding');
+    expect(prefs.firstSavingAt()).toBe('/salary/items/new?from=onboarding');
     prefs.setFirstSavingAt('/welcome');
     expect(prefs.firstSavingAt()).toBe('/welcome');
   });
 
   it('다른 주소·온보딩 밖 W-11은 없음, 지우면 없음', () => {
-    mem.set('sweetwo.firstSavingAt', '/salary/items/new/a?from=salary');
+    mem.set('sweetwo.firstSavingAt', '/salary/items/new?from=salary');
     expect(prefs.firstSavingAt()).toBeNull();
     mem.set('sweetwo.firstSavingAt', '/assets');
     expect(prefs.firstSavingAt()).toBeNull();
