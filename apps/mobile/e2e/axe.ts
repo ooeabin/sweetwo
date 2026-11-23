@@ -18,6 +18,9 @@ const ORANGE_TEXT = [
   '.hg-chip--sm.is-selected', // 고른 작은 칩의 오렌지 글자(S-20 묶음 칩, 기간·필터 칩, 2026-11-20 사용자 결정, 13px 600)
   '.hg-plansum__title em', // W-01 요약 문장 “월급의 31%를 모으고 있어요”의 퍼센트(2026-11-23 사용자 결정, 20px 700)
   '.hg-receipt__row.is-new', // W-01 새 항목 강조 2초 동안 이름·금액 글자(2026-11-23, 16px 600·700)
+  '.hg-badge--brand, .hg-badge--done', // 옅은 오렌지 판 위 배지의 오렌지 글자(2026-11-23 사용자 결정, 12px 600. 달성 배지는 BRAND_FILL)
+  '.hg-celebrate__eyebrow', // 축하 머리글(W-12, O-60, P-10, 2026-11-23 사용자 결정, 14px 600)
+  '.hg-w02hero__saved b', // W-02 “저축·투자 n원 모았어요”의 금액(2026-11-23 사용자 결정, 600)
   '.hg-banner--line .hg-btn--secondary', // 공지 띠 안 흰 작은 버튼의 오렌지 글자(‘보기’). 홈 초대 띠는 2026-11-11부터 코코아 HubBand라 예외 없음
 ].join(', ');
 
