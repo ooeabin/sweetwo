@@ -14,7 +14,7 @@
 - 월급 전 확인 기간(다음 월급날 3일 전 ~ 전날): 칸마다 회색 판이 아니라 칸 아래 이어진 한 줄 띠 `hg-cal__band`(높이 14px `surface-alt`, 시작·끝 둥글게, 시작 칸에 “월급 전 확인” 9px 600 `slate`). 주가 바뀌면 그 줄에서 끊고 다음 줄에서 다시 시작.
 - 공휴일 `is-holiday`: 숫자 `holiday-ink`. 설·추석 연휴 `is-festive`: 칸 바탕 `family`(고른 날 흰 칸이 이김).
 - 달력 아래 굵은 회색 띠(Band) → 고른 날 일정 `hg-cal__agenda`: 날짜 “10월 20일 화요일”(13px `slate`) → 줄만 목록(`hg-list--plain`): 40px 종류 아이콘(Lead, 2026-11-09 영역 색 원 + Phosphor: ListRow ‘Lead 종류 표’의 `care`(생일 케이크, 기념일 하트, 명절 달과 별 등, 모두 `together`)와 `money`(월급날 지폐, 월급 전 확인 달력 체크, 기한 과녁, 만기 모래시계, 공휴일 깃발)) + 이름 15px 500(2026-11-09 밀도, 700에서. 글자 단계로 17px에서 15px) + 회색 보조 줄(금액 메모·D-day, 갈 화면). 없으면 “이 날은 일정이 없어요”. 오늘 이후면 맨 아래 점선 원 + ‘이 날에 경조사 추가’(15px `slate`, `hg-cal__add`).
-- 보기 필터 칩(“전체” “경조사” “금융 일정”)은 회색 알약(`surface-alt` + `slate`), 고르면 검정. 그 위에 자산 관리와 같은 탭 “목록” / “달력”.
+- 보기 필터(“전체” “경조사·기념일” “금융 일정”)는 밑줄 탭 `LineTabs`(2026-11-23 바탕 정리 2: 거르는 탭은 밑줄 탭, 예전 회색 알약 칩). 좁은 창 ‘+ 일정 추가’ 줄은 그 아래 한 줄.
 - 날짜 칸 `aria-label`에 날짜, 공휴일 이름, 일정 수. 고른 날 `aria-pressed`, 오늘 `aria-current="date"`.
 - React 래퍼 `Calendar`(packages/ui): `days`(`short`, `tone`, `band`, `holiday`, `festive`), `today`, `selected`, 이전·다음, `todayLabel`·`onToday`, `bandLabel`, `showYear`.
 - 달력 아래 ‘다가오는 일정’(Y-04, 예전 Y-01 목록)의 줄은 같은 종류 아이콘(Lead)과 오른쪽 D-day `hg-cal__dday`(7일 안 `is-near`). 기록할 날 띠 `hg-recband`.
