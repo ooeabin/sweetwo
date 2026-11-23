@@ -280,6 +280,7 @@ export function W11SavingAdd() {
         help={copy.addMonthlyHelp(
           money(Math.max(left, 0), masked),
           allowance > 0 ? money(allowance, masked) : undefined,
+          left > 0,
         )}
         onBack={back}
         primary={{ label: copy.next, disabled: v === null || v % 10_000 !== 0 }}

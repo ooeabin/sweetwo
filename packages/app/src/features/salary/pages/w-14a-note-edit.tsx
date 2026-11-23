@@ -1,6 +1,12 @@
 import { addSavingNote, updateSavingNote } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { AmountInput, DateInput, QuestionLayout, QuestionSkeleton, ShortText } from '@sweetwo/ui';
+import {
+  AmountInput,
+  DateWheelInput,
+  QuestionLayout,
+  QuestionSkeleton,
+  ShortText,
+} from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -141,7 +147,14 @@ export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
           : undefined
       }
     >
-      <DateInput label={copy.noteDateQ} value={v.date} onChange={(x) => setDate(x)} error={err} />
+      <DateWheelInput
+        label={copy.noteDateQ}
+        value={v.date}
+        onChange={(x) => setDate(x)}
+        error={err}
+        today={todayKst()}
+        minYear={Number(todayKst().slice(0, 4)) - 1}
+      />
     </QuestionLayout>
   );
 }

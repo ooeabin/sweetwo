@@ -165,3 +165,12 @@ export function savingsTotal(
     total: loose.reduce((t, i) => t + i.saved, 0) + bundleSum,
   };
 }
+
+/**
+ * 묶음 이름 표시(2026-11-23): 묶음 기본 이름은 저금 이름 그대로({이름}). 예전에 “{이름} 같이 모으기”로 만들어진 묶음은
+ * 데이터는 그대로 두고 표시만 끝의 “ 같이 모으기”를 뺌(‘같이 모으기’ 배지가 이미 말해 줌). 뺀 결과가 비면 원래 이름.
+ */
+export const bundleShownName = (name: string): string => {
+  const cut = name.replace(/\s+같이 모으기\s*$/, '').trim();
+  return cut.length > 0 ? cut : name;
+};

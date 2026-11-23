@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
+import { setWheel } from './wheel';
 import {
   chanwoo,
   type MemDb,
@@ -213,9 +214,8 @@ test('W-14 쓸 곳 메모: 추가 → ‘냈어요’ “모은 금액에서 250
   await page.getByRole('button', { name: '다음' }).click();
   await page.getByLabel('얼마쯤 들어요?').fill('2500000');
   await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('년', { exact: true }).fill('2026');
-  await page.getByLabel('월', { exact: true }).fill('12');
-  await page.getByLabel('일', { exact: true }).fill('3');
+  // 2026-11-23: 글자 칸 대신 W-11d 기한과 같은 연·월·일 휠
+  await setWheel(page, '언제 내요?', 2026, 12, 3);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/notes$/);
   await expect(page.getByText('12월 3일, 250만 원')).toBeVisible();
@@ -241,6 +241,9 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 수입 기록: 고치기, 지�
   await page.getByLabel('얼마를 받았어요?').fill('500000');
   await page.getByRole('button', { name: '상여' }).click();
   await page.getByRole('button', { name: '다음' }).click();
+  // 2026-11-23: ‘나머지 모두 넣기’는 입력 중인(포커스) 칸에만
+  await expect(page.getByRole('button', { name: '청약에 나머지 모두 넣기' })).toHaveCount(0);
+  await page.getByLabel('청약', { exact: true }).focus();
   await page.getByRole('button', { name: '청약에 나머지 모두 넣기' }).click();
   await expect(page.getByLabel('청약', { exact: true })).toHaveValue('500,000');
   await expect(page.getByText('수입 50만 원 중 아직 안 넣은 0원')).toBeVisible();

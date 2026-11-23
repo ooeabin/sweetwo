@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { AddText } from './AddText';
 import { Icon, type IconName } from './Icon';
 import { IconButton } from './IconButton';
@@ -42,6 +42,21 @@ export function Menu({
   const change = useRef(onOpenChange);
   change.current = onOpenChange;
   const items = useRef<(HTMLButtonElement | null)[]>([]);
+  const pop = useRef<HTMLDivElement>(null);
+  // 가장자리 보정(2026-11-23): 펼친 목록이 화면 왼쪽·오른쪽 밖으로 나가면 안쪽 8px에 맞춰 옮김
+  useLayoutEffect(() => {
+    const el = pop.current;
+    if (!open || !el) return;
+    el.style.translate = '';
+    const r = el.getBoundingClientRect();
+    const edge = 8;
+    const min = edge;
+    const max = document.documentElement.clientWidth - edge;
+    let dx = 0;
+    if (r.left < min) dx = min - r.left;
+    else if (r.right > max) dx = max - r.right;
+    if (dx) el.style.translate = `${Math.round(dx)}px 0`;
+  }, [open]);
   const plain = actions.filter((a) => !a.danger);
   const danger = actions.filter((a) => a.danger);
   const all = [...plain, ...danger];
@@ -118,6 +133,7 @@ export function Menu({
       )}
       {open && (
         <div
+          ref={pop}
           className="hg-menu hg-menu--actions"
           role="menu"
           aria-label={label}

@@ -1,4 +1,5 @@
 import { achieveBundle } from '@sweetwo/api';
+import { bundleShownName } from '@sweetwo/core';
 import { DoneMark, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useEffect, useRef } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -34,7 +35,7 @@ export function W12BundleAchieved() {
       center
       celebrate
       hero={<DoneMark art="celebrate" />}
-      title={<span className="hg-celebrate__title">{b.name}</span>}
+      title={<span className="hg-celebrate__title">{bundleShownName(b.name)}</span>}
       primary={{ label: copy.next }}
       onSubmit={() => {
         hideToast();

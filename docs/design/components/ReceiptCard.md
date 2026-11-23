@@ -10,3 +10,4 @@
 - `onOpen`이 있으면 줄 전체가 버튼(금액 시트, 저축·투자 줄은 W-10). 보기만이면 오른쪽 자물쇠(Phosphor `lock`, `stone`). `fresh`: 줄에 `is-new`, 배경 `brand-soft` → 투명, `dur-slow` × 6 한 번, ‘동작 줄이기’면 움직임 없음.
 - 편집 모드(`edit`): 줄 왼쪽 손잡이(Phosphor `dots-six-vertical`, 끌면 같은 목록 안에서 자리 바꿈, 끄는 줄은 `surface` + `shadow-1`), 줄에 포커스가 오면 보이는 위·아래 IconButton, 옮기면 숨은 `aria-live` 한 줄, 지우기는 `danger` 글자 버튼(늘 보임, 터치에서 줄을 왼쪽으로 미는 것도 그대로). 편집 중에는 보조 줄·막대를 숨김.
 - 카드 아래(`hg-receipt-actions`): 꽉 찬 `hg-btn--outline` ‘편집하기’ + 가운데 글자 버튼 줄(‘공유하기’ `hg-btn--link`, ‘추천값으로 다시 채우기’ `hg-btn--quiet`).
+- 새 줄 강조(2026-11-23): `is-new` 줄은 옅은 오렌지 `brand-soft` 바탕으로 2초 머문 뒤 0.5초 동안 서서히 사라짐(화면이 2.5초 뒤 클래스를 뗌). ‘동작 줄이기’면 애니메이션 없이 2초 표시. 줄마다 `data-row-id`가 있어 화면이 그 줄로 스크롤함. 편집 모드 ‘지우기’는 `hg-btn--link` 기본 회색(ink-2, 예전 `danger` 글자에서 바꿈).

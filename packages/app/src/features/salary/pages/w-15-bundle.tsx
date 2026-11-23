@@ -7,6 +7,7 @@ import {
   setBundleVisibility,
 } from '@sweetwo/api';
 import {
+  bundleShownName,
   bundleTargetDefault,
   canPercentOnly,
   defaultDeadline,
@@ -106,7 +107,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
         !d.live.some((i) => i.owner === 'mine' && !i.goal.bundle_id && i.state === 'saving')
       ) {
         setMineGoal(NEW);
-        setNewName(bundles.data?.find((b) => b.id === bundleId)?.name ?? '');
+        setNewName(bundleShownName(bundles.data?.find((b) => b.id === bundleId)?.name ?? ''));
         setNewMonthly(partnerMonthly(joinPartnerGoal()));
         return setStep('newName');
       }
@@ -226,8 +227,8 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
       <QuestionLayout
         title={
           openJoin
-            ? copy.bundleJoinQ(d.partnerName, open.name)
-            : copy.bundleWaitingQ(d.partnerName, open.name)
+            ? copy.bundleJoinQ(d.partnerName, bundleShownName(open.name))
+            : copy.bundleWaitingQ(d.partnerName, bundleShownName(open.name))
         }
         help={openJoin ? copy.bundleJoinHelp : copy.bundleWaitingHelp}
         onBack={back}
@@ -235,8 +236,8 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
         <ChoiceCards<string>
           label={
             openJoin
-              ? copy.bundleJoinQ(d.partnerName, open.name)
-              : copy.bundleWaitingQ(d.partnerName, open.name)
+              ? copy.bundleJoinQ(d.partnerName, bundleShownName(open.name))
+              : copy.bundleWaitingQ(d.partnerName, bundleShownName(open.name))
           }
           value={null}
           onChange={() => undefined}
@@ -294,7 +295,11 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
   if (step === 'mine')
     return (
       <QuestionLayout
-        title={join && bundle ? copy.bundleJoinQ(d.partnerName, bundle.name) : copy.bundleMineQ}
+        title={
+          join && bundle
+            ? copy.bundleJoinQ(d.partnerName, bundleShownName(bundle.name))
+            : copy.bundleMineQ
+        }
         help={join ? copy.bundleMineQ : undefined}
         onBack={prev}
       >
@@ -305,7 +310,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
           onPick={(v) => {
             if (v !== NEW) return afterMine();
             // 새 저금 이름 처음 값: 고른 상대 저금(또는 들어가는 묶음) 이름
-            setNewName(pg?.goal.name ?? bundle?.name ?? '');
+            setNewName(pg?.goal.name ?? bundleShownName(bundle?.name ?? ''));
             if (newMonthly === null)
               setNewMonthly(partnerMonthly(pg?.goal.id ?? joinPartnerGoal()));
             go('newName');

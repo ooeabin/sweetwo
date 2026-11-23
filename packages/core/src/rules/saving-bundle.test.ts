@@ -167,3 +167,13 @@ describe('묶음 하나씩(H1)과 홈 저금 합(M1)', () => {
     ).toEqual({ count: 1, total: 3_000_000 });
   });
 });
+
+describe('bundleShownName', () => {
+  it('끝의 “ 같이 모으기”만 표시에서 뺌', async () => {
+    const { bundleShownName } = await import('./saving-bundle');
+    expect(bundleShownName('여행 같이 모으기')).toBe('여행');
+    expect(bundleShownName('여행')).toBe('여행');
+    expect(bundleShownName('같이 모으기')).toBe('같이 모으기');
+    expect(bundleShownName('같이 모으기 여행')).toBe('같이 모으기 여행');
+  });
+});

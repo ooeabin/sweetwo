@@ -1,4 +1,11 @@
-import { formatYm, MAX_WON, savingBar, savingRemain, type BundleViewResponse } from '@sweetwo/core';
+import {
+  bundleShownName,
+  formatYm,
+  MAX_WON,
+  savingBar,
+  savingRemain,
+  type BundleViewResponse,
+} from '@sweetwo/core';
 import { Badge, Field, Icon, Lead, leadOf, SaveTogetherSlide } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { money } from '../../shared/mask';
@@ -75,14 +82,14 @@ export function BundleCard({
     <section className="hg-goalbox hg-together" aria-label={copy.together}>
       <SaveTogetherSlide
         people={people}
-        name={b.name}
+        name={bundleShownName(b.name)}
         amount={big}
         bar={bar === null ? null : done ? 100 : bar}
         lines={all}
         done={done ? copy.bundleDone : undefined}
         paused={b.paused}
         percentOnly={b.percent_only}
-        label={copy.bundleLabel(b.name, big, all.join(', '))}
+        label={copy.bundleLabel(bundleShownName(b.name), big, all.join(', '))}
         onClick={onClick ?? (() => undefined)}
       />
     </section>
@@ -150,12 +157,12 @@ export function BundleRow({
       type="button"
       className="hg-goalrow"
       aria-expanded={open}
-      aria-label={copy.bundleOpen(b.name)}
+      aria-label={copy.bundleOpen(bundleShownName(b.name))}
       onClick={onToggle}
     >
       <Lead {...leadOf('line', 'saving')} />
       <span className="hg-goalrow__name">
-        {b.name}
+        {bundleShownName(b.name)}
         <Badge kind="temp">{copy.together}</Badge>
         <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} />
       </span>

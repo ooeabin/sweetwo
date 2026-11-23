@@ -209,6 +209,50 @@ export function DateInput({
   );
 }
 
+/** 연·월·일 휠(2026-11-23, W-20 받은 날 바꾸기, W-14a 언제 내요): 글자 칸 대신 W-11d 기한과 같은 휠(DateWheel). 값이 없으면 오늘에서 시작하고 그 값을 바로 알려 줌 */
+export function DateWheelInput({
+  label,
+  value,
+  onChange,
+  error,
+  today,
+  minYear,
+  maxYear,
+}: {
+  label: string;
+  value: string | null; // 'YYYY-MM-DD'
+  onChange: (v: string | null) => void;
+  error?: string;
+  /** 처음 값(오늘, 'YYYY-MM-DD', KST는 부르는 쪽이 core todayKst로) */
+  today: string;
+  minYear?: number;
+  maxYear?: number;
+}) {
+  const ymd = (t: string) => ({
+    y: Number(t.slice(0, 4)),
+    m: Number(t.slice(5, 7)),
+    d: Number(t.slice(8, 10)),
+  });
+  const t = ymd(today);
+  return (
+    <div className="hg-field">
+      <DateWheel
+        label={label}
+        value={value ? ymd(value) : null}
+        initial={t}
+        minYear={minYear ?? t.y - 5}
+        maxYear={maxYear ?? t.y + 10}
+        onChange={(n) => onChange(`${n.y}-${pad(n.m)}-${pad(n.d)}`)}
+      />
+      {error && (
+        <span className="hg-help is-error" role="alert">
+          {error}
+        </span>
+      )}
+    </div>
+  );
+}
+
 /** 연·월(예정 연·월, 여행 가는 달, 기한). 연·월 2열 휠(2026-11-02, 카카오페이 월 고르기처럼).
  * 값이 없으면 다음 달에서 시작하고 그 값을 바로 알려 줌. 범위 밖은 소비자가 error로 알림 */
 export function YearMonthInput({
