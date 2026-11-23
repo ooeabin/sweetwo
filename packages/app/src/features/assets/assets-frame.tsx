@@ -1,4 +1,4 @@
-import { AddText, Button, Tabs } from '@sweetwo/ui';
+import { AddText, Button, LineTabs } from '@sweetwo/ui';
 import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainFrame, rememberAssetsTab, type AssetsTab } from '../frame';
@@ -46,7 +46,7 @@ export function AssetsFrame({
       }}
       columns={[
         <div key="c" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
-          <Tabs<Tab>
+          <LineTabs<Tab>
             label={copy.tabsLabel}
             value={tab}
             onChange={(t) => PATH[t] && nav(PATH[t])}

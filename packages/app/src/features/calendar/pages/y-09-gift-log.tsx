@@ -1,5 +1,5 @@
 import { formatDateFull, giftRepeated } from '@sweetwo/core';
-import { EmptyState, ListRow, PageHeader, SectionHeader, Tabs } from '@sweetwo/ui';
+import { EmptyState, LineTabs, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { fetchCarePhotos, qk } from '@sweetwo/api';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -62,8 +62,7 @@ export function Y09GiftLog() {
   const body = (
     <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
       <PageHeader title={copy.gifted} backLabel={copy.back} onBack={() => nav(-1)} />
-      <Tabs<View>
-        variant="seg"
+      <LineTabs<View>
         label={copy.giftedViewsLabel}
         value={view}
         onChange={(v) => {

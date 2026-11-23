@@ -143,7 +143,7 @@ export function W20bMoneyInList() {
         backTo={copy.listTitle}
         onBack={back}
       />
-      <div className="hg-fd">
+      <div className="hg-page">
         {summary}
         {ins.isLoading ? (
           <SkelRows
@@ -182,7 +182,7 @@ export function W20bMoneyInList() {
               if (r.source === 'payday_auto') sub.push(copy.incomeAuto);
               if (put > 0) sub.push(copy.moneyInPutOf(m(put)));
               return (
-                <div key={r.id} className="hg-row hg-fd__menurow">
+                <div key={r.id} className="hg-row hg-page__menurow">
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <ListRow
                       label={copy.moneyInKinds[r.kind]}

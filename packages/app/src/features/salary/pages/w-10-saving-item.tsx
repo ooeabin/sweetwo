@@ -203,7 +203,7 @@ export function W10SavingItem() {
         onBack={back}
         action={i.canEdit ? <Menu label={copy.menu} actions={actions} /> : undefined}
       />
-      <div className="hg-fd hg-fd--w10">
+      <div className="hg-page hg-page--w10">
         {/* 맨 위 회색 한 줄(W-01 파트너 탭과 같음, 2026-11-12 S7-08·S7-09) */}
         {!i.mayEdit ? (
           <p className="hg-q__help" style={{ margin: 0 }}>
@@ -351,7 +351,7 @@ export function W10SavingItem() {
             <>
               <button
                 type="button"
-                className="hg-btn hg-btn--link hg-fd__more"
+                className="hg-btn hg-btn--link hg-page__more"
                 aria-expanded={more}
                 aria-controls="w-10-more"
                 onClick={() => setMore((x) => !x)}
@@ -360,16 +360,16 @@ export function W10SavingItem() {
                 <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} />
               </button>
               {more && (
-                <div id="w-10-more" className="hg-fd__fold">
+                <div id="w-10-more" className="hg-page__fold">
                   {i.need !== null && (
-                    <span className="hg-fd__foldline">
+                    <span className="hg-page__foldline">
                       {together
                         ? copy.needPerMonthTogether(m(i.need), i.monthly ? m(i.monthly) : undefined)
                         : copy.needPerMonth(m(i.need), i.monthly ? m(i.monthly) : undefined)}
                     </span>
                   )}
                   {/* 예상(20 W-10 3a): “지금 속도면 …에 다 모아요” 한 번만 */}
-                  {i.eta && <span className="hg-fd__foldline">{copy.etaAt(formatYm(i.eta))}</span>}
+                  {i.eta && <span className="hg-page__foldline">{copy.etaAt(formatYm(i.eta))}</span>}
                   {/* 월 필요액 > 매달 금액이면 할 일(2026-11-09, 배지 아님). 기한 바꾸기는 위 기한 줄에 */}
                   {i.late !== null && showEdit && (
                     <button
@@ -388,11 +388,11 @@ export function W10SavingItem() {
           )}
         {/* 달성했는데 아직 고르지 않았으면 W-12a와 같은 질문(20 W-10 5번) */}
         {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
-        {!hideAmounts && <div className="hg-fd__band" aria-hidden="true" />}
+        {!hideAmounts && <div className="hg-page__band" aria-hidden="true" />}
         {!hideAmounts && (
           <section
             ref={historyRef}
-            className="hg-fd__section"
+            className="hg-page__section"
             aria-label={copy.history}
             style={{ scrollMarginTop: 'var(--space-6)' }}
           >
@@ -455,8 +455,8 @@ export function W10SavingItem() {
           </section>
         )}
         {/* 정보(2026-11-23 바탕 기준): 라벨-값 두 줄 */}
-        <div className="hg-fd__band" aria-hidden="true" />
-        <section className="hg-fd__info" aria-label={copy.info}>
+        <div className="hg-page__band" aria-hidden="true" />
+        <section className="hg-page__info" aria-label={copy.info}>
           <div className="hg-fdinfo">
             <span>{copy.createdOnLabel}</span>
             <span>{formatDateFull(kstDay(g.created_at))}</span>
