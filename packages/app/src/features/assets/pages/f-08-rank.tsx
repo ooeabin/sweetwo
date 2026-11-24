@@ -11,12 +11,14 @@ import {
 } from '@sweetwo/core';
 import {
   Band,
+  BottomSheet,
   Button,
   Distribution,
   ListRow,
   PageHeader,
   RankRow,
   StatBlock,
+  StickyBar,
   Toggle,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -56,6 +58,7 @@ export function F08Rank() {
   const nav0 = (loc.state as RankNavState | null) ?? null;
   const [first, setFirst] = useState<Pair | null>(null);
   const [busy, setBusy] = useState(false);
+  const [more, setMore] = useState(false);
   const recording = useRef(false);
   const tracked = useRef(false);
   const openReq = useQuery({ queryKey: qk.rankRequest, queryFn: fetchOpenRankRequest });
@@ -110,6 +113,26 @@ export function F08Rank() {
   if (!r || d.loading || needFirst) return <LoadingFrame sub="detail" current="assets" />;
   const header = <PageHeader title={copy.rankTitle} backLabel={copy.back} onBack={() => nav(-1)} />;
 
+  // 자산이 하나도 없으면 순위를 만들지 않음(2026-11-24, F-01 순위 줄과 같은 안내 + 자산 적으러 가기). 직접 주소로 열어도 같음
+  if (r.state.kind === 'empty' && r.pair.mode === 'pair') {
+    const body = (
+      <div key="r" className="hg-stack hg-detail" style={{ gap: 0 }}>
+        {header}
+        <div className="hg-page">
+          <p className="hg-help" style={{ margin: 0 }}>
+            {copy.rankEmptyLine}
+          </p>
+          <StickyBar>
+            <Button variant="primary" block onClick={() => nav('/assets/new')}>
+              {copy.rankEmptyCta}
+            </Button>
+          </StickyBar>
+        </div>
+      </div>
+    );
+    return <MainFrame sub="detail" current="assets" columns={[body]} />;
+  }
+
   // ───── (나) 순위 없음 ─────
   if (r.pair.mode === 'peer') {
     const p = r.pair;
@@ -118,46 +141,48 @@ export function F08Rank() {
     const fromPartner = req && req.from_user !== r.me.id;
     const partner = c?.partnerName || '';
     const body = (
-      <div key="r" className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
+      <div key="r" className="hg-stack hg-detail" style={{ gap: 0 }}>
         {header}
-        {p.median !== null && p.band ? (
-          <StatBlock
-            ariaLabel={copy.rankTitle}
-            title={copy.rankPeerLine(money(p.median, masked))}
-            sub={copy.rankPeerSub(
-              RANK_BASIS.label,
-              formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'),
-              copy.rankAge[p.band],
-            )}
-          />
-        ) : (
-          <div className="hg-list hg-list--plain">
-            <ListRow
-              label={copy.rankAskBirth}
-              sub={copy.rankAskBirthSub}
-              onClick={() => nav('/settings/me/birth-year?from=rank')}
+        <div className="hg-page" style={{ gap: 'var(--space-6)' }}>
+          {p.median !== null && p.band ? (
+            <StatBlock
+              ariaLabel={copy.rankTitle}
+              title={copy.rankPeerLine(money(p.median, masked))}
+              sub={copy.rankPeerSub(
+                RANK_BASIS.label,
+                formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'),
+                copy.rankAge[p.band],
+              )}
             />
-          </div>
-        )}
-        {c?.joined && (
-          <>
-            <Band />
-            {req && !fromPartner ? (
-              <p className="hg-help">{copy.rankAskWaiting(partner)}</p>
-            ) : (
-              <div>
-                <Button
-                  variant="link"
-                  onClick={() =>
-                    nav(fromPartner ? `/assets/rank/consent/${req.id}` : '/assets/rank/consent')
-                  }
-                >
-                  {fromPartner ? copy.rankAskAnswer(partner) : copy.rankAskPair(partner)}
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+          ) : (
+            <div className="hg-list hg-list--plain">
+              <ListRow
+                label={copy.rankAskBirth}
+                sub={copy.rankAskBirthSub}
+                onClick={() => nav('/settings/me/birth-year?from=rank')}
+              />
+            </div>
+          )}
+          {c?.joined && req && !fromPartner && (
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.rankAskWaiting(partner)}
+            </p>
+          )}
+          {/* 2026-11-24 ‘같이 순위 보기’는 글자 버튼 대신 아래 고정 주 버튼 */}
+          {c?.joined && !(req && !fromPartner) && (
+            <StickyBar>
+              <Button
+                variant="primary"
+                block
+                onClick={() =>
+                  nav(fromPartner ? `/assets/rank/consent/${req.id}` : '/assets/rank/consent')
+                }
+              >
+                {fromPartner ? copy.rankAskAnswer(partner) : copy.rankAskPair(partner)}
+              </Button>
+            </StickyBar>
+          )}
+        </div>
       </div>
     );
     return <MainFrame sub="detail" current="assets" columns={[body]} />;
@@ -179,11 +204,10 @@ export function F08Rank() {
   };
   const adRow = (
     <RankRow
-      badge={stale && shownNow ? `${shownNow.pct}%` : '?%'}
       title={
         stale && shownNow ? copy.rankStaleNote(Number(shownNow.month.slice(5, 7))) : copy.rankNotYet
       }
-      action={copy.rankRefreshAd}
+      action={stale ? copy.rankRefreshAd : copy.rankCheck}
       ad
       adLabel={copy.rankAd}
       onClick={() => void withAd()}
@@ -220,7 +244,7 @@ export function F08Rank() {
             </>
           }
           note={
-            change && prevMonth ? (
+            change && prevMonth && !stale ? (
               change.up === 0 ? (
                 copy.rankSame(prevMonth)
               ) : (
@@ -233,20 +257,18 @@ export function F08Rank() {
             ) : undefined
           }
           noteDown={!!change && change.up < 0}
-          sub={copy.rankBasis(RANK_BASIS.label, formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'))}
+          sub={copy.rankSource(RANK_BASIS.label)}
           percentile={100 - v.pct}
           axis={copy.rankAxis}
           youLabel={copy.rankYou}
           ariaLabel={copy.rankAria(v.pct)}
         />
       </section>
-      <p className="hg-help" style={{ textAlign: 'center', margin: 0 }}>
-        {copy.rankAxisHelp}
-        <br />
-        {copy.rankPairNote}
-        <br />
-        {copy.rankPairBasis(band)}
-      </p>
+      <div style={{ textAlign: 'center' }}>
+        <Button variant="link" onClick={() => setMore(true)}>
+          {copy.rankMore}
+        </Button>
+      </div>
       {next && (
         <>
           <Band />
@@ -283,6 +305,24 @@ export function F08Rank() {
           }}
         />
       </div>
+      {more && (
+        <BottomSheet title={copy.rankMoreTitle} onClose={() => setMore(false)}>
+          <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.rankAxisHelp}
+            </p>
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.rankPairNote}
+            </p>
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.rankPairBasis(band)}
+            </p>
+            <p className="hg-help" style={{ margin: 0 }}>
+              {copy.rankBasis(RANK_BASIS.label, formatYm(RANK_BASIS.asOf.slice(0, 8) + '01'))}
+            </p>
+          </div>
+        </BottomSheet>
+      )}
       {/* 우리 구간(접근성·테스트용): 분포 그림과 같은 값 */}
       <span className="hg-sr">{copy.rankBracket(rankBracket(v.net))}</span>
     </div>
