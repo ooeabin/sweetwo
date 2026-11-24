@@ -36,7 +36,9 @@ export function Toggle({
     >
       {/* 보조 글이 길어도 토글은 오른쪽 그대로(2026-11-04) */}
       <span className="hg-stack" style={{ gap: 'var(--space-1)', flex: 1, minWidth: 0 }}>
-        <span id={`${id}-l`}>{label}</span>
+        <span id={`${id}-l`} className="hg-toggle__label">
+          {label}
+        </span>
         {help && (
           <span id={`${id}-h`} className="hg-help">
             {help}

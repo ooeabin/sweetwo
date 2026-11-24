@@ -751,7 +751,9 @@ export function H01Home() {
   // ── H-16 다가오는 날 상자(최대 2개, 없으면 안 그림) + H-08 캘린더 타일 보조 줄(같은 결과의 첫 항목, 2026-11-20) ──
   const calReady = !cal.loading && !cal.failed;
   const upList = calReady ? upcomingSchedules(cal, 2) : [];
-  const nextDays = upList[0] ? daysBetween(today, upList[0].date) : null;
+  const nextUp = upList[0]
+    ? { name: upList[0].label, days: daysBetween(today, upList[0].date) }
+    : null;
   const upRows = upList.map((x, i) => ({
     key: `${i}:${x.date}`,
     name: x.label,
@@ -830,7 +832,7 @@ export function H01Home() {
         />
         <HubTile
           title={copy.calendarTile}
-          sub={calReady ? copy.nextSchedule(nextDays) : undefined}
+          sub={calReady ? copy.nextSchedule(nextUp) : undefined}
           onClick={() => go('calendar', '/calendar')}
         />
       </Fragment>

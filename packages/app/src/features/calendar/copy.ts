@@ -94,6 +94,7 @@ export const copy = {
   chips: {
     birthday: '생일',
     anniversary: '결혼기념일',
+    dating_anniversary: '사귄 날', // [확인 필요] 2026-11-13 v2.2(24 이름 칩), 연애 중·같이 살아요에서 맨 앞
     seollal: '설날',
     chuseok: '추석',
     parents_day: '어버이날',
@@ -107,8 +108,7 @@ export const copy = {
   leapMonth: '윤달',
   yearly: '매년 돌아와요', // [확인 필요]
   dateError: '날짜를 다시 확인해 주세요', // [확인 필요]
-  pastDate: '이미 지난 날이에요. 기록으로 남길까요?',
-  recordPast: '기록으로 남기기', // [확인 필요] 지난 날짜 → Y-08
+  pastDate: '이미 지난 날이에요', // [확인 필요] 2026-11-24 구역 4 B: 회색 안내 한 줄(예전 빨간 “…기록으로 남길까요?” + 글자 버튼). 주 버튼 글자가 “기록하기”로 바뀌어 → Y-08
   amountQ: '쓸 금액을 메모해 둘까요?',
   skip: '건너뛰기',
   sameDay: '같은 날이 있어요. 그래도 추가할까요?', // [확인 필요]
@@ -148,6 +148,7 @@ export const copy = {
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },
   giftName: '어떤 선물이에요?', // [확인 필요]
+  giftNamePlaceholder: '예: 안마기', // [확인 필요] 2026-11-24 구역 4
   giftAgain: '작년에도 드렸어요',
   rememberQ: '기억하고 싶은 게 있나요?',
   // Y-08c 사진(24 Y-08c). 올린 사진은 서버에 저장 시 암호화, 두 사람만 봄
@@ -178,6 +179,12 @@ export const copy = {
   photoConsentLater: '나중에 할게요', // [확인 필요]
   photoConsentOk: '동의할게요', // [확인 필요]
   recorded: '기록했어요', // [확인 필요]
+  // Y-05 기록을 마친 회차 요약(2026-11-24 구역 4) [모두 확인 필요]
+  recordSection: '기록',
+  recordSpent: '쓴 돈',
+  recordGifts: '드린 것',
+  recordEdit: '기록 고치기',
+  formTitleRecordEdit: '기록 고치기',
 
   // Y-09 선물 기록
   giftedViews: { care: '경조사별', year: '연도별' },
@@ -185,6 +192,8 @@ export const copy = {
   giftedEmpty: '아직 선물 기록이 없어요', // [확인 필요]
   giftedEmptyBody: '경조사에 ‘다녀왔어요’를 누르고 기록하면 여기에 모여요', // [확인 필요] 2026-11-04
   giftedYear: (y: number) => `${y}년`,
+  /** 경조사별 보기 줄 이름(묶음 머리가 경조사 이름이라 줄은 연도 + 드린 것, 띄운 가운데 점 없음, 2026-11-24 구역 4) [확인 필요] */
+  giftedYearWhat: (y: number, what: string) => (what ? `${y}년, ${what}` : `${y}년`),
   giftedWhat: (items: string[]) => items.join(', '),
   giftedSum: (total: string) => `모두 ${total}`, // [확인 필요]
 

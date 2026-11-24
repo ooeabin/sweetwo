@@ -25,6 +25,10 @@ const MONEY_SHORT: Record<MoneyKind, string> = {
 };
 let lastView: { today: string; ym: [number, number]; selected: string } | null = null;
 
+/** 공휴일 이름과 경조사 이름이 같은지(“설날” = “설날”, 공휴일 이름 뒤 괄호는 뺌) */
+const sameName = (care: string, holiday: string) =>
+  care.trim() === holiday.replace(/\(.*\)$/, '').trim();
+
 /** 경조사 이름의 마지막 낱말(“어머니 생신” → “생신”) */
 const careShort = (name: string) => name.trim().split(/\s+/).at(-1) ?? name;
 
@@ -93,12 +97,15 @@ export function Y04Calendar() {
     const ms = moneyOf(c.date).filter((x) => x.kind !== 'review');
     const [, cm, cd] = ymd(c.date);
     const hol = d.holidayOf(c.date);
+    // 같은 날 같은 이름 경조사가 있으면 공휴일 이름은 한 번만(경조사 쪽, 2026-11-24 구역 4)
+    const holDup = !!hol && cs.some((x) => sameName(x.care.name, hol.name));
     const names = [
       ...cs.map((x) => ({ s: careShort(x.care.name), t: 'care' as const })),
       ...ms.map((x) => ({ s: MONEY_SHORT[x.kind], t: 'money' as const })),
     ];
-    const head = hol ? { s: hol.name.replace(/\(.*\)$/, ''), t: 'holiday' as const } : names[0];
-    const more = names.length - (hol ? 0 : 1);
+    const head =
+      hol && !holDup ? { s: hol.name.replace(/\(.*\)$/, ''), t: 'holiday' as const } : names[0];
+    const more = names.length - (hol && !holDup ? 0 : 1);
     return {
       date: c.date,
       day: c.day,
@@ -127,7 +134,8 @@ export function Y04Calendar() {
     const ms = moneyOf(date).filter((x) => x.kind !== 'review');
     const cs = caresOn(date);
     const rows: ReactNode[] = [];
-    if (hol)
+    // 같은 날 같은 이름 경조사(설날 등)가 있으면 공휴일 줄은 숨김(경조사 줄이 같은 말을 함, 2026-11-24 구역 4)
+    if (hol && !cs.some((x) => sameName(x.care.name, hol.name)))
       rows.push(
         <ListRow
           key="hol"
@@ -166,7 +174,7 @@ export function Y04Calendar() {
           {/* 그날이 된 경조사는 달력에서도 ‘다녀왔어요’ → Y-08(24 Y-05 4번) */}
           {x.date <= d.today && !(x.care.status === 'done' && x.care.status_on === x.date) && (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               style={{ alignSelf: 'flex-start' }}
               onClick={() => nav(`/calendar/day/${x.care.id}/record/a?on=${x.date}`)}

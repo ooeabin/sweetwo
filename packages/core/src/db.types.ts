@@ -4828,6 +4828,16 @@ export type Database = {
       unlink_partner_name: { Args: Record<PropertyKey, never>; Returns: string }
       unpay_saving_note: { Args: { p_note: string }; Returns: undefined }
       unregister_push_device: { Args: { p_token: string }; Returns: undefined }
+      update_care_record: {
+        Args: {
+          p_amount: number
+          p_gift_name: string
+          p_gifts: string[]
+          p_memo: string
+          p_record: string
+        }
+        Returns: Json
+      }
       version_below: { Args: { p_min: string; p_version: string }; Returns: boolean }
       weekly_mail_body: {
         Args: { p_actor: string; p_receiver: string; p_today: string }

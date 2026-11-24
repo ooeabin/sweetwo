@@ -9,7 +9,7 @@
 - 날짜(2026-11-24): 폼에는 연·월·일 휠을 펼쳐 두지 않고 한 줄 `DateField`(회색 판 “2026년 11월 26일 (목)” + ›) → 누르면 달력 시트 `DateSheet`(`DateSheet.md`). 접힌 줄(FormFold)의 만기일 시트도 같은 달력 시트.
 - 질문 섹션(`FormSection`): 제목 15px 700 + 오른쪽 보조 글자(`body-sm` `slate`, 예 “미계획 금액 90만 원”) + 칩 묶음(`hg-form__chips`, 작은 칩 `Chip small`, 고르면 옅은 오렌지 판) 또는 입력. 섹션 사이 32px, 제목과 내용 사이 12px(2026-11-24 ‘영역 간격’, DESIGN.md).
 - 금액(`FormAmount`): 좁은 창(768px 미만)은 칸(`hg-form__amountbtn`, 32px 700 + 원)을 누르면 기존 키패드(AmountInput)가 `BottomSheet`로 올라오고 ‘확인’으로 반영(화면 안에 키패드를 두면 요약 문장과 주 버튼이 가려지고, 한 화면에 입력이 여럿이라 OS 자판도 같은 문제라서 시트). 첫 숫자가 미리 채운 값을 덮어쓰고 999억 상한 흔들림은 AmountInput 규칙 그대로. 넓은 창은 칸에 바로 입력(`AmountInput embedded`). 빠른 칩은 두 경우 모두 칸 아래(고른 표시 없이 늘 회색).
-- 글자 칸(`ShortText`, 2026-11-24 사용자 결정): FormScreen 안에서는 테두리 상자 없이 금액 칸처럼 아래 2px `ink` 밑줄 한 줄(`.hg-form input.hg-input`, 높이 48, 오류는 `danger` 밑줄). 이름 칸(F-03, Y-07, W-14a 등) 모두 같음.
+- 글자 칸(`ShortText`, 2026-11-24 사용자 결정): FormScreen 안에서는 테두리 상자 없이 금액 칸처럼 아래 2px `ink` 밑줄 한 줄(`.hg-form input.hg-input`, 높이 48, 오류는 `danger` 밑줄, 포커스는 사각 박스 없이 같은 밑줄 그대로, 2026-11-24 구역 4). 이름 칸(F-03, Y-07, W-14a 등) 모두 같음.
 - 빠른 금액 칩(`+10만`, `10만 원`, 2026-11-24): 누르면 더하거나 바꾸기만 하는 버튼이라 고른 표시(`is-selected`, 오렌지) 없이 늘 회색, `aria-pressed` 없음.
 - 구간 선택(`SegChoice`, Tabs.md): 2~3개 중 하나(‘어떻게 챙겨요?’). 너비 꽉 참, `role="radiogroup"`.
 - 선택 항목(`FormFolds` + `FormFold`): 회색(`surface-alt`) 8px 구분 띠(창 너비 꽉 참, 띠 위는 앞 섹션의 32, 띠 아래 첫 줄까지 12) 아래 접힌 줄 56px(이름 + 오른쪽 값 또는 “정하기 ›”). 누르면 기존 금액·휠 시트(`BottomSheet`). 값이 있으면 ink 600.

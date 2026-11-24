@@ -54,7 +54,7 @@
 | | 쓸 곳 메모(`note`, 2026-11-13 W-14 날짜) | `piggy-bank` | `goal` | 〃 |
 | | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
 | 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-04 |
-| | 기념일(`anniversary`) | `heart` | `together` | 〃 |
+| | 기념일(`anniversary`), 사귄 날(`dating_anniversary`, 2026-11-24 연애 중 칩) | `heart` | `together` | 〃 |
 | | 명절(`seollal`, `chuseok`) | `moon-stars` | `together` | 〃 |
 | | 어버이날(`parents_day`) | `flower-tulip` | `together` | 〃 |
 | | 양가 행사(`event`) | `confetti` | `together` | 〃 |

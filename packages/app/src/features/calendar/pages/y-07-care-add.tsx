@@ -23,11 +23,27 @@ import { onSessionReset } from '../../../shared/session-reset';
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
 // → c “언제예요?” 날짜 + 양력/음력 + “매년 돌아와요”(설날·추석·어버이날은 날짜를 채우고 건너뜀)
 // → d “쓸 금액을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-04.
-// 한 번인 지난 날짜는 “이미 지난 날이에요. 기록으로 남길까요?” → Y-08. 같은 이름·같은 날짜가 있으면 한 번 확인.
+// 한 번인 지난 날짜는 회색 안내 “이미 지난 날이에요” + 아래 주 버튼이 “기록하기”로 바뀌어 → Y-08(2026-11-24 구역 4). 같은 이름·같은 날짜가 있으면 한 번 확인.
 // 수정(Y-05 ‘수정’)은 같은 a → c 화면에서 이름·날짜만 고치고 ‘저장’.
 
 type ChipKey = keyof typeof copy.chips;
-const CHIPS = Object.keys(copy.chips) as ChipKey[];
+/**
+ * 이름 칩(24 ‘이름 칩 기본값’, 2026-11-24 구역 4): ‘결혼기념일’은 두 사람 사이가 결혼했어요·결혼 준비 중일 때만,
+ * 그 밖(연애 중이에요·같이 살아요·아직 안 정함)은 맨 앞에 ‘사귄 날’(kind `dating_anniversary`, 매년)
+ */
+const chipsFor = (marriage: string | null | undefined): ChipKey[] => {
+  const wed = marriage === 'married' || marriage === 'engaged';
+  return [
+    ...(wed ? [] : (['dating_anniversary'] as const)),
+    'birthday',
+    ...(wed ? (['anniversary'] as const) : []),
+    'seollal',
+    'chuseok',
+    'parents_day',
+    'event',
+    'custom',
+  ];
+};
 /** 칩 기본값(24 ‘이름 칩 기본값’): 날짜를 정하는 칩은 c를 건너뜀 */
 const FIXED: Partial<Record<ChipKey, { lunar: boolean; month: number; day: number }>> = {
   seollal: { lunar: true, month: 1, day: 1 },
@@ -88,6 +104,7 @@ export const startCareEdit = (c: CareDay, today: string) => {
 const KIND: Record<ChipKey, string> = {
   birthday: 'birthday',
   anniversary: 'anniversary',
+  dating_anniversary: 'dating_anniversary',
   seollal: 'seollal',
   chuseok: 'chuseok',
   parents_day: 'parents_day',
@@ -197,9 +214,12 @@ export function Y07CareAdd() {
     }
   };
 
-  const ok = !!name && (fixed ? true : !!rule && !!solar && !past);
+  // 지난 날짜(한 번)면 저장 대신 ‘기록하기’(경조사를 넣고 Y-08로). 고치는 중에는 지난 날로 못 바꿈
+  const recordMode = past && !editing;
+  const ok = !!name && (fixed ? true : !!rule && !!solar && (!past || recordMode));
   const submit = () => {
     if (!ok) return;
+    if (recordMode) return void save(0, true);
     if (dup && !asked) return setAsked(true);
     void save(editing ? 0 : (d.amount ?? 0));
   };
@@ -208,12 +228,11 @@ export function Y07CareAdd() {
     <FormScreen
       title={editing ? copy.formTitleEdit : copy.formTitle}
       onBack={() => nav(-1)}
-      later={
-        past && solar && !editing && name
-          ? { label: copy.recordPast, onClick: () => void save(0, true), loading: saving }
-          : undefined
-      }
-      primary={{ label: editing ? copy.save : copy.addOk, disabled: !ok, loading: saving }}
+      primary={{
+        label: recordMode ? copy.recordNow : editing ? copy.save : copy.addOk,
+        disabled: !ok,
+        loading: saving,
+      }}
       onSubmit={submit}
     >
       <FormSection title={copy.nameQ}>
@@ -227,7 +246,7 @@ export function Y07CareAdd() {
         />
         {!editing && (
           <div className="hg-form__chips" role="group" aria-label={copy.chipsLabel}>
-            {CHIPS.map((k) => (
+            {chipsFor(c.space?.marriage_status).map((k) => (
               <Chip
                 key={k}
                 small
@@ -260,15 +279,19 @@ export function Y07CareAdd() {
             maxYear={Number(todayKst().slice(0, 4)) + 10}
             calendar={{ lunar: d.lunar, leap: d.leap }}
             sub={d.lunar ? (d.leap ? `${copy.lunar} ${copy.leapMonth}` : copy.lunar) : copy.solar}
-            invalid={past || (!!d.date && !solar)}
+            invalid={!!d.date && !solar}
             onChange={(v, cal) => {
               setAsked(false);
               set({ date: v, lunar: cal?.lunar ?? d.lunar, leap: cal?.leap ?? false });
             }}
             below={
-              past || (d.date && !solar) ? (
+              d.date && !solar ? (
                 <p className="hg-help is-error" role="alert">
-                  {past ? copy.pastDate : copy.dateError}
+                  {copy.dateError}
+                </p>
+              ) : past ? (
+                <p className="hg-help" role="status">
+                  {copy.pastDate}
                 </p>
               ) : undefined
             }

@@ -1870,6 +1870,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         db.photos = [...(db.photos ?? []), { care_record_id: String(a.p_record), path, sort: n }];
         return json(route, `photo-${db.photos.length}`);
       }
+      if (fn === 'update_care_record') {
+        const a = body();
+        const rec = db.careRecords.find((r) => r.id === a.p_record);
+        if (!rec) return json(route, { message: 'not_member' }, 400);
+        Object.assign(rec, {
+          amount: a.p_amount,
+          gifts: a.p_gifts,
+          gift_name: a.p_gift_name || null,
+          memo: a.p_memo || null,
+        });
+        return json(route, { record: rec.id, line: 0 });
+      }
       if (fn === 'record_care') {
         const a = body();
         const care = db.cares.find((c) => c.id === a.p_care);

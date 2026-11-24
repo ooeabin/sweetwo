@@ -1,7 +1,7 @@
 -- pgTAP: 다녀온 뒤 기록(Y-08). 다녀왔어요, 기록만(목표·월급 계획은 안 건드림), 다른 커플 막힘
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(5);
+select plan(9);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -36,6 +36,16 @@ select results_eq(
 select is(
   (public.record_care(current_setting('test.s')::uuid, '2027-02-06', 400000, 'personal', '{cash}', null, '세뱃돈', 0))->>'line',
   '0', '개인 지출: 기록만');
+-- 기록 고치기(Y-05 ‘기록 고치기’, 2026-11-24)
+select set_config('test.r', (select id::text from public.care_record where care_day_id = current_setting('test.c')::uuid), true);
+select is(
+  (public.update_care_record(current_setting('test.r')::uuid, 250000, '{cash}', null, ' 같이 식사 '))->>'record',
+  current_setting('test.r'), '기록 고치기');
+select results_eq(
+  $$ select amount, gifts, gift_name, memo from public.care_record where id = current_setting('test.r')::uuid $$,
+  $$ values (250000::bigint, '{cash}'::text[], null::text, '같이 식사') $$, '쓴 돈·드린 것·메모가 바뀜(선물 이름은 비움)');
+select throws_ok(format($$ select public.update_care_record(%L, -1, '{}', null, null) $$, current_setting('test.r')),
+  '22023', null, '음수 금액은 막힘');
 reset role;
 
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');
@@ -43,6 +53,8 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select throws_ok(format($$ select public.record_care(%L, '2026-10-14', 1, 'personal', '{}', null, null, 0) $$,
   current_setting('test.c')), '42501', null, '다른 커플 경조사는 기록 못 함');
+select throws_ok(format($$ select public.update_care_record(%L, 1, '{}', null, null) $$, current_setting('test.r')),
+  '42501', null, '다른 커플 기록은 못 고침');
 reset role;
 
 select * from finish();

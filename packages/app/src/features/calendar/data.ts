@@ -255,7 +255,7 @@ export function moneyLine(d: MoneyDate, withWeekday = false) {
 export function careEventType(kind: string) {
   if (kind === 'birthday') return 'birthday' as const;
   if (kind === 'seollal' || kind === 'chuseok' || kind === 'parents_day') return 'holiday' as const;
-  if (kind === 'anniversary') return 'anniversary' as const;
+  if (kind === 'anniversary' || kind === 'dating_anniversary') return 'anniversary' as const;
   if (kind === 'event') return 'family_event' as const;
   return 'etc' as const;
 }

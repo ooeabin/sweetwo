@@ -89,6 +89,25 @@ export async function recordCare(a: {
   return { record: RecordCareResultSchema.parse(data).record };
 }
 
+/** Y-05 ‘기록 고치기’ → Y-08 고치기: 쓴 돈·드린 것·선물 이름·메모를 고침(서버 update_care_record, 2026-11-24 구역 4) */
+export async function updateCareRecord(a: {
+  recordId: string;
+  amount: number;
+  gifts: string[];
+  giftName: string | null;
+  memo: string | null;
+}): Promise<{ record: string }> {
+  const { data, error } = await supabase().rpc('update_care_record', {
+    p_record: a.recordId,
+    p_amount: a.amount,
+    p_gifts: a.gifts,
+    p_gift_name: a.giftName ?? '',
+    p_memo: a.memo ?? '',
+  });
+  fail(error);
+  return { record: RecordCareResultSchema.parse(data).record };
+}
+
 /**
  * 경조사·기록 변경 신호(Realtime care_day, care_record, 2026-11-12 QA 9구간 S9-03, 20261125090000 발행).
  * 읽기 권한은 select 정책 그대로라 볼 수 있는 행만 신호가 옴. 돌려준 함수로 끊음

@@ -1,18 +1,26 @@
-import { qk, restoreTrash, trashCareDay, updateCareDay, type CareDay } from '@sweetwo/api';
+import {
+  fetchCarePhotos,
+  qk,
+  restoreTrash,
+  trashCareDay,
+  updateCareDay,
+  type CareDay,
+} from '@sweetwo/api';
 import { dday, formatMonthDay, nextCareDate, quickChips, solarToLunar } from '@sweetwo/core';
 import {
   AmountInput,
   Button,
-  Chip,
   Field,
   ListRow,
   Menu,
   PageHeader,
   QuestionLayout,
+  SegChoice,
   StatBlock,
+  StickyBar,
   QuestionSkeleton,
 } from '@sweetwo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { money, useMask } from '../../../shared/mask';
@@ -32,6 +40,7 @@ const statusOf = (c: CareDay, date: string | null) =>
 // Y-05 경조사 상세(24 Y-05, 재기획): 제목(이름, 날짜, 음력이면 “(음력 8월 3일)”, D-day) + ‘수정’(이름·날짜 → Y-07 화면),
 // 금액 메모(수정 = Q3, 계산에 안 들어감), 반복, 준비 상황(아직 / 준비 중 / 다녀왔어요 → Y-08, 기록 없이 7일 지나면 ‘지남’ + ‘기록하기’),
 // 미리 알림 칩, 작년에는(지난 회차 기록), 메모(두 사람이 같이 봄), ⋯ → 지우기(휴지통 + ‘되돌리기’).
+// 2026-11-24 구역 4: 기록을 마친 회차는 준비 상황·‘다녀왔어요’ 없이 기록 요약 + ‘기록 고치기’(→ Y-08 고치기), ‘다녀왔어요’·‘기록하기’는 아래 고정 주 버튼 하나(StickyBar), 준비 상황은 SegChoice, 메모는 밑줄 입력.
 export function Y05CareDay() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -42,6 +51,7 @@ export function Y05CareDay() {
   const [memo, setMemo] = useState<string | null>(null);
   // 준비 상황 칩을 저장하는 동안 누른 칩을 바로 고른 것으로(2026-11-06)
   const [picking, setPicking] = useState<'todo' | 'preparing' | null>(null);
+  const photos = useQuery({ queryKey: qk.carePhotos, queryFn: fetchCarePhotos });
   // 못 불러오면 목록으로 튕기지 않고 오류 카드 + ‘다시 시도’(2026-11-12 S9-02)
   if (c.failed) return <CareDayError onBack={() => nav(-1)} onRetry={c.retry} />;
   if (c.loading) return <LoadingFrame sub="detail" current={'calendar'} />;
@@ -51,7 +61,22 @@ export function Y05CareDay() {
   const lunar = care.date_rule === 'lunar_yearly' && date ? solarToLunar(date) : null;
   const st = statusOf(care, date);
   const overdue = c.overdue.find((x) => x.care.id === care.id)?.date ?? null;
-  const record = (on?: string) => nav(`/calendar/day/${care.id}/record/a${on ? `?on=${on}` : ''}`);
+  const record = (on?: string, edit = false) =>
+    nav(`/calendar/day/${care.id}/record/a${on ? `?on=${on}${edit ? '&edit=1' : ''}` : ''}`);
+  // 이번 회차를 기록했는지(기록이 있거나 상태가 ‘다녀왔어요’): 했으면 준비 상황·‘다녀왔어요’ 대신 기록 요약
+  const rec = date
+    ? c.records.find((r) => r.care_day_id === care.id && r.occurs_on === date)
+    : undefined;
+  const recorded = !!rec || (st === 'done' && !overdue);
+  const needRecord = !recorded && (!!overdue || (!!date && date <= c.today));
+  const recPhotos = rec ? (photos.data ?? []).filter((p) => p.care_record_id === rec.id).length : 0;
+  const recGifts = rec
+    ? (['cash', 'gift', 'meal'] as const)
+        .filter((g) => rec.gifts.includes(g))
+        .map((g) => (g === 'gift' && rec.gift_name ? rec.gift_name : copy.gifts[g]))
+        .join(', ')
+    : '';
+  const recMemo = rec?.memo?.split('\n')[0]?.trim() ?? '';
   // 작년에는(6번): 지난 회차 기록
   const last = c.records.find((r) => r.care_day_id === care.id && (!date || r.occurs_on < date));
   const lastGift = last
@@ -90,29 +115,31 @@ export function Y05CareDay() {
     }
   };
 
-  const body = (
-    <div className="hg-stack">
-      <PageHeader
-        title={care.name}
-        backLabel={copy.back}
-        onBack={() => nav(-1)}
-        action={
-          <Menu
-            label={copy.menu}
-            actions={[
-              {
-                label: copy.edit,
-                icon: 'pencil',
-                onSelect: () => {
-                  startCareEdit(care, c.today);
-                  nav('/calendar/add/a');
-                },
+  const header = (
+    <PageHeader
+      title={care.name}
+      backLabel={copy.back}
+      onBack={() => nav(-1)}
+      action={
+        <Menu
+          label={copy.menu}
+          actions={[
+            {
+              label: copy.edit,
+              icon: 'pencil',
+              onSelect: () => {
+                startCareEdit(care, c.today);
+                nav('/calendar/add/a');
               },
-              { label: copy.remove, icon: 'trash-2', danger: true, onSelect: () => void remove() },
-            ]}
-          />
-        }
-      />
+            },
+            { label: copy.remove, icon: 'trash-2', danger: true, onSelect: () => void remove() },
+          ]}
+        />
+      }
+    />
+  );
+  const content = (
+    <div className="hg-stack">
       {/* 1 제목(2026-11-04): 이름은 머리에 있으니 카드는 큰 D-day + 날짜만 */}
       <section className="hg-card" aria-label={care.name}>
         <StatBlock
@@ -137,50 +164,59 @@ export function Y05CareDay() {
           value={care.date_rule === 'once' ? copy.repeatOnce : copy.repeatYearly}
         />
       </div>
-      <section className="hg-stack" aria-label={copy.status}>
-        <span className="hg-card__label">{copy.status}</span>
-        {overdue ? (
-          <div className="hg-row" style={{ gap: 'var(--space-3)', alignItems: 'center' }}>
-            <span className="hg-help">
+      {recorded ? (
+        // 기록을 마친 회차(2026-11-24 구역 4): 준비 상황·‘다녀왔어요’ 없이 기록 요약 + ‘기록 고치기’
+        rec && (
+          <section className="hg-stack" aria-label={copy.recordSection}>
+            <span className="hg-card__label">{copy.recordSection}</span>
+            <div className="hg-list">
+              <ListRow label={copy.recordSpent} value={m(rec.amount)} />
+              {recGifts && <ListRow label={copy.recordGifts} value={recGifts} />}
+              {recPhotos > 0 && (
+                <ListRow label={copy.photos} value={copy.giftedPhotos(recPhotos)} />
+              )}
+              {recMemo && <ListRow label={copy.memo} sub={recMemo} />}
+            </div>
+            <button
+              type="button"
+              className="hg-btn hg-btn--link"
+              style={{ alignSelf: 'flex-start' }}
+              onClick={() => record(date ?? undefined, true)}
+            >
+              {copy.recordEdit}
+            </button>
+          </section>
+        )
+      ) : (
+        <section className="hg-stack" aria-label={copy.status}>
+          <span className="hg-card__label">{copy.status}</span>
+          {overdue ? (
+            <p className="hg-help" style={{ margin: 0 }}>
               {copy.overdue}, {formatMonthDay(overdue)}
-            </span>
-            <Button variant="primary" size="sm" onClick={() => record(overdue)}>
-              {copy.recordNow}
-            </Button>
-          </div>
-        ) : (
-          <div
-            className="hg-row"
-            role="group"
-            aria-label={copy.status}
-            style={{ gap: 'var(--space-2)' }}
-          >
-            {/* 2026-11-04 칩은 ‘아직’ ‘준비 중’만. ‘다녀왔어요’는 그날부터 아래 주 버튼(누르면 기록 화면이라 칩과 다르게) */}
-            {(['todo', 'preparing'] as const).map((s) => (
-              <Chip
-                key={s}
-                small
-                selected={(picking ?? st) === s}
-                onClick={() => {
-                  if (picking) return;
-                  setPicking(s);
-                  void patch(
-                    { status: s, status_on: date },
-                    { status: care.status, status_on: care.status_on },
-                  ).finally(() => setPicking(null));
-                }}
-              >
-                {copy.statuses[s]}
-              </Chip>
-            ))}
-          </div>
-        )}
-        {!overdue && date && date <= c.today && st !== 'done' && (
-          <Button variant="primary" block onClick={() => record(date)}>
-            {copy.statuses.done}
-          </Button>
-        )}
-      </section>
+            </p>
+          ) : (
+            // 칩은 ‘아직’ ‘준비 중’만(2026-11-04). 고르기는 SegChoice(2026-11-24 구역 4). ‘다녀왔어요’는 그날부터 아래 고정 주 버튼
+            <SegChoice<'todo' | 'preparing'>
+              label={copy.status}
+              value={
+                (picking ?? (st === 'preparing' ? 'preparing' : 'todo')) as 'todo' | 'preparing'
+              }
+              items={(['todo', 'preparing'] as const).map((k) => ({
+                value: k,
+                label: copy.statuses[k],
+              }))}
+              onChange={(k) => {
+                if (picking) return;
+                setPicking(k);
+                void patch(
+                  { status: k, status_on: date },
+                  { status: care.status, status_on: care.status_on },
+                ).finally(() => setPicking(null));
+              }}
+            />
+          )}
+        </section>
+      )}
       <section className="hg-stack" aria-label={copy.alerts}>
         <span className="hg-card__label">{copy.alerts}</span>
         {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름, iOS 미리 알림·Rodeo처럼) */}
@@ -222,6 +258,7 @@ export function Y05CareDay() {
         </p>
       )}
       <Field
+        className="hg-input--line"
         label={copy.memo}
         placeholder={copy.dayMemoPlaceholder}
         value={memo ?? care.memo ?? ''}
@@ -232,6 +269,25 @@ export function Y05CareDay() {
           void patch({ memo: memo.trim() || null }, { memo: care.memo }).then(() => setMemo(null));
         }}
       />
+    </div>
+  );
+  // 아래 고정 주 버튼 하나: 그날부터 ‘다녀왔어요’, 지남은 ‘기록하기’(2026-11-24 구역 4, 예전 화면 중간 버튼)
+  const body = needRecord ? (
+    <div className="hg-stack hg-detail" style={{ gap: 0 }}>
+      {header}
+      <div className="hg-page">
+        {content}
+        <StickyBar>
+          <Button variant="primary" block onClick={() => record(overdue ?? date ?? undefined)}>
+            {overdue ? copy.recordNow : copy.statuses.done}
+          </Button>
+        </StickyBar>
+      </div>
+    </div>
+  ) : (
+    <div className="hg-stack">
+      {header}
+      {content}
     </div>
   );
   return <MainFrame sub="detail" current="calendar" columns={[body]} />;
@@ -292,7 +348,7 @@ function CareDayError({ onBack, onRetry }: { onBack: () => void; onRetry: () => 
       current="calendar"
       columns={[
         <div key="e" className="hg-stack">
-          <PageHeader title={copy.title} backLabel={copy.back} onBack={onBack} />
+          <PageHeader title={copy.monthTitle} backLabel={copy.back} onBack={onBack} />
           <CalendarLoadError onRetry={onRetry} />
         </div>,
       ]}
