@@ -4654,7 +4654,7 @@ export type Database = {
         Returns: string
       }
       sell_asset: {
-        Args: { p_asset: string; p_received: number; p_remain?: number; p_to: string }
+        Args: { p_asset: string; p_received: number; p_remain?: number; p_to?: string }
         Returns: number
       }
       send_desktop_link: { Args: Record<PropertyKey, never>; Returns: boolean }

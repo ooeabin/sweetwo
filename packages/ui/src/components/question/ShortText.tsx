@@ -30,6 +30,7 @@ export function ShortText({
   codeMax = max,
   placeholder,
   error,
+  autoFocus = true,
 }: {
   label: string;
   value: string;
@@ -40,11 +41,15 @@ export function ShortText({
   codeMax?: number;
   placeholder?: string;
   error?: string;
+  /** 처음 보일 때 칸에 커서(질문 화면 기본). 한 화면 입력(FormScreen)처럼 칸이 여럿이면 끔 */
+  autoFocus?: boolean;
 }) {
   const id = useId();
   const ref = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<string>();
-  useEffect(() => ref.current?.focus(), []);
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const chars = graphemes(value);
   return (
     <div className="hg-field">

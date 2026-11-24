@@ -1,6 +1,6 @@
 -- F-04b 팔았어요 한 화면(2026-11-24): ‘어느 통장에 들어왔어요?’에서 ‘안 적을게요’를 고르면 받은 통장 없이 판 것만 기록한다.
 -- sell_asset의 받은 통장(p_to)이 null이면 통장 금액은 건드리지 않고, 팔린 만큼만 줄이거나 ‘매도 완료’로 보관한다. 시그니처·반환값은 그대로(추가만).
-create or replace function public.sell_asset(p_asset uuid, p_received bigint, p_to uuid, p_remain bigint default null)
+create or replace function public.sell_asset(p_asset uuid, p_received bigint, p_to uuid default null, p_remain bigint default null)
 returns bigint
 language plpgsql
 volatile

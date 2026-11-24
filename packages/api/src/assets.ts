@@ -110,12 +110,12 @@ export const restoreAsset = (id: string) => updateAsset(id, { deleted_at: null }
 /** F-04b~d 팔았어요: 받은 금액을 고른 통장에(일부만이면 남은 평가금액). 판 수익(실현 손익, 원금 없으면 null) */
 export async function sellAsset(
   id: string,
-  o: { received: number; to: string; remain?: number | null },
+  o: { received: number; to: string | null; remain?: number | null },
 ): Promise<number | null> {
   const { data, error } = await supabase().rpc('sell_asset', {
     p_asset: id,
     p_received: o.received,
-    p_to: o.to,
+    ...(o.to ? { p_to: o.to } : {}),
     ...(o.remain !== undefined && o.remain !== null ? { p_remain: o.remain } : {}),
   });
   fail(error);
